@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.83 2002-02-13 15:10:46 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.84 2002-03-28 11:25:59 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -164,6 +164,11 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
 
     case WM_QUIT:
         winMsg->message = WINWM_QUIT;
+        if (fMsgRemoved && win32wnd && (ULONG)os2Msg->mp2 != 0) {
+            // mp2 != 0 -> sent by window list; be nice and close
+            // the window first
+            win32wnd->MsgClose();
+        }
         break;
 
     case WM_CLOSE:

@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.53 2002-02-26 11:12:25 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.54 2002-03-28 11:25:59 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -322,6 +322,15 @@ continuegetmsg:
 	        rc = WinGetMsg(teb->o.odin.hab, &os2msg, 0, filtermin, filtermax);
 	        if (os2msg.msg == WM_TIMER)
 	            eaten = TIMER_HandleTimer(&os2msg);
+                if (os2msg.msg == WM_QUIT && ((ULONG)os2msg.mp2 != 0) ) {
+                    // Don't return FALSE when the window list sends us
+                    // a WM_QUIT message, improper killing can lead to
+                    // application crashes.
+                    // In the WM_QUIT handler in pmwindow we send a WM_CLOSE
+                    // in this case. When the app calls PostQuitMessage (mp2 == 0),
+                    // then we handle it the normal way
+                    rc = 1; 
+                }
 	} while (eaten);
   }
   if(OS2ToWinMsgTranslate((PVOID)teb, &os2msg, pMsg, isUnicode, MSG_REMOVE) == FALSE) {
