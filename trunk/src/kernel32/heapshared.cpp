@@ -1,4 +1,4 @@
-/* $Id: heapshared.cpp,v 1.9 2002-07-15 14:28:51 sandervl Exp $ */
+/* $Id: heapshared.cpp,v 1.10 2002-07-21 09:17:28 sandervl Exp $ */
 /*
  * Shared heap functions for OS/2
  *
@@ -17,11 +17,17 @@
 #define INCL_BASE
 #define INCL_DOSMEMMGR
 #include <os2wrap.h>
-#include <misc.h>
+#include <string.h>
+#include <dbglog.h>
 #include <heapshared.h>
+#include "initterm.h"
 
 #define DBG_LOCALLOG	DBG_heapshared
 #include "dbglocal.h"
+
+#define MAX_HEAPSIZE            (2048*1024)
+#define MAX_HEAPPAGES		(MAX_HEAPSIZE/PAGE_SIZE)
+#define INCR_HEAPSIZE		(16*1024)
 
 //Global DLL Data
 #pragma data_seg(_GLOBALDATA)
@@ -31,34 +37,48 @@ static BYTE    pageBitmap[MAX_HEAPPAGES] = {0};
 static ULONG   refCount = 0;
 #pragma data_seg()
 
+static int     privateRefCount = 0;
+
 void * _LNK_CONV getmoreShared(Heap_t pHeap, size_t *size, int *clean);
 void _LNK_CONV releaseShared(Heap_t pHeap, void *block, size_t size);
 
 //******************************************************************************
 //******************************************************************************
-BOOL InitializeSharedHeap()
+BOOL SYSTEM InitializeSharedHeap()
 {
     APIRET rc;
+    ULONG  flAllocMem = 0, ulSysinfo;
+
+    //necessary until next WGSS update
+    if(++privateRefCount > 1) {
+        return TRUE;
+    }
+
+    rc = DosQuerySysInfo(QSV_VIRTUALADDRESSLIMIT, QSV_VIRTUALADDRESSLIMIT, &ulSysinfo, sizeof(ulSysinfo));
+    if (rc == 0 && ulSysinfo > 512)   //VirtualAddresslimit is in MB
+    {
+        flAllocMem = PAG_ANY;
+    }
 
     if(pSharedMem == NULL) {
-  	    rc = DosAllocSharedMem(&pSharedMem, NULL, MAX_HEAPSIZE, PAG_READ|PAG_WRITE|OBJ_GETTABLE);
+  	    rc = DosAllocSharedMem(&pSharedMem, NULL, MAX_HEAPSIZE, PAG_READ|PAG_WRITE|OBJ_GETTABLE|flAllocMem);
   	    if(rc != 0) {
     		dprintf(("InitializeSharedHeap: DosAllocSharedMem failed with %d", rc));
-		    return FALSE;
+            return FALSE;
 	    }
 	    rc = DosSetMem(pSharedMem, INCR_HEAPSIZE, PAG_READ|PAG_WRITE|PAG_COMMIT);
 	    if(rc != 0) {
     		DosFreeMem(pSharedMem);
-		    dprintf(("InitializeSharedHeap: DosSetMem failed with %d", rc));
-		    return FALSE;
+	        dprintf(("InitializeSharedHeap: DosSetMem failed with %d", rc));
+	        return FALSE;
 	    }
   	    sharedHeap = _ucreate(pSharedMem, INCR_HEAPSIZE, _BLOCK_CLEAN, _HEAP_REGULAR|_HEAP_SHARED,
                 	          getmoreShared, releaseShared);
 
   	    if(sharedHeap == NULL) {
     		DosFreeMem(pSharedMem);
-		    dprintf(("InitializeSharedHeap: _ucreate failed!"));
-		    return FALSE;
+	        dprintf(("InitializeSharedHeap: _ucreate failed!"));
+	        return FALSE;
 	    }
   	    dprintf(("KERNEL32: First InitializeSharedHeap %x %x", pSharedMem, sharedHeap));
 	    for(int i=0;i<INCR_HEAPSIZE/PAGE_SIZE;i++) {
@@ -81,9 +101,12 @@ BOOL InitializeSharedHeap()
 }
 //******************************************************************************
 //******************************************************************************
-void DestroySharedHeap()
+void SYSTEM DestroySharedHeap()
 {
     dprintf(("KERNEL32: DestroySharedHeap %d", refCount));
+    if(--privateRefCount > 0) {
+        return;
+    }
     if(--refCount == 0) {
   	    if(sharedHeap) {
     		_uclose(sharedHeap);
@@ -131,7 +154,8 @@ void * _LNK_CONV getmoreShared(Heap_t pHeap, size_t *size, int *clean)
     for(int i=0;i<MAX_HEAPPAGES;i++)
     {
     	int nrpagesfree = GetPageRangeFree(i);
-    	if(nrpagesfree >= *size/PAGE_SIZE) {
+    	if(nrpagesfree >= *size/PAGE_SIZE) 
+        {
   		    newblock = (PVOID)((ULONG)pSharedMem + i*PAGE_SIZE);
   		    rc = DosSetMem(newblock, *size, PAG_READ|PAG_WRITE|PAG_COMMIT);
   		    if(rc != 0) {
@@ -170,10 +194,21 @@ void _LNK_CONV releaseShared(Heap_t pHeap, void *block, size_t size)
 }
 //******************************************************************************
 //******************************************************************************
-DWORD  HeapGetSharedMemBase()
+void * SYSTEM _smalloc(int size)
 {
-    dprintf(("KERNEL32: HeapGetSharedMemBase()\n"));
-    return (DWORD) pSharedMem;
+    return _umalloc(sharedHeap, size);
+}
+//******************************************************************************
+//******************************************************************************
+void * SYSTEM _smallocfill(int size, int filler)
+{
+    void *chunk;
+
+    chunk =  _umalloc(sharedHeap, size);
+    if(chunk) {
+        memset(chunk, 0, size);
+    }
+    return chunk;
 }
 //******************************************************************************
 //******************************************************************************
