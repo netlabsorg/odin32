@@ -1,16 +1,16 @@
-# $Id: makefile,v 1.38 2001-07-29 18:59:41 sandervl Exp $
+# $Id: makefile,v 1.39 2001-09-30 08:56:17 bird Exp $
 
 #
 # Odin32 API
 #
 #       gdi32.dll makefile
 #
-WRC_PREFIX_RESOURCE=1
 
 
 #
 # Compiler, tools, and interference rules.
 #
+WRC_PREFIX_RESOURCE=1
 !include ../../makefile.inc
 
 
@@ -22,6 +22,7 @@ CDEFINES    = $(CDEFINES) -DINVERT
 !else
 CDEFINES   += -DINVERT
 !endif
+
 
 #
 # Object files. Prefix with OBJDIR and one space before the '\'.
