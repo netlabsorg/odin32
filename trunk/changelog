@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2081 2002-05-16 13:40:24 bird Exp $ */
+/* $Id: changelog,v 1.2082 2002-05-16 13:46:31 sandervl Exp $ */
 
  2002-05-16: knut st. osmundsen <bird@anduin.net>
     - MAKE:     o Merged in latest changes.
@@ -14,6 +14,10 @@
     - KERNEL32: o Export some functions for NTDLL
                 o Fixed creation of logfile for executables on readonly volumes
                 o RegQueryInfoKeyW fix
+                o TLS fix for pe2lx images
+    - USER32:   o Implemented SPI_SETSCREENSAVETIMEOUT/SPI_GETSCREENSAVETIMEOUT,
+                  SPI_GETSCREENSAVEACTIVE & SPI_SETSCREENSAVEACTIVE 
+                  SystemParametersInfoA parameters
 
  2002-05-15: Sander van Leeuwen <sandervl@xs4all.nl>
     - DINPUT:   o Made mouse code reentrant
