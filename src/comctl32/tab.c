@@ -20,10 +20,6 @@
 #include "comctl32.h"
 #include "debugtools.h"
 #include <math.h>
-#ifdef __WIN32OS2__
-#include "ccbase.h"
-#define COMCTL32_hPattern55AABrush GetPattern55AABitmap()
-#endif
 
 DEFAULT_DEBUG_CHANNEL(tab);
 
@@ -44,9 +40,6 @@ typedef struct
 
 typedef struct
 {
-#ifdef __WIN32OS2__
-  COMCTL32_HEADER header;
-#endif
   UINT       uNumItem;        /* number of tab items */
   UINT       uNumRows;	      /* number of tab rows */
   INT        tabHeight;       /* height of the tab row */
@@ -1167,9 +1160,8 @@ static void TAB_SetItemBounds (HWND hwnd)
       INT iIndexStart=0,iIndexEnd=0, iCount=0;
 
       /*
-       * Ok Microsoft trys to even out the rows. place the same
+       * Ok windows tries to even out the rows. place the same
        * number of tabs in each row. So lets give that a shot
-       *
        */
 
       tabPerRow = infoPtr->uNumItem / (infoPtr->uNumRows);
@@ -1225,7 +1217,7 @@ static void TAB_SetItemBounds (HWND hwnd)
  	       (infoPtr->items[iIndexEnd].rect.top ==
                 infoPtr->items[iIndexStart].rect.top) ;
             iIndexEnd++)
-        /* intentionaly blank */;
+        /* intentionally blank */;
 
         /* 
          * we need to justify these tabs so they fill the whole given
@@ -1860,11 +1852,12 @@ static void TAB_DrawItem(
     }
   
     /* This modifies r to be the text rectangle. */
-{
-    HFONT hOldFont = SelectObject(hdc, infoPtr->hFont);
-    TAB_DrawItemInterior(hwnd, hdc, iItem, &r);
-    SelectObject(hdc,hOldFont);
-}
+    {
+      HFONT hOldFont = SelectObject(hdc, infoPtr->hFont);
+      TAB_DrawItemInterior(hwnd, hdc, iItem, &r);
+      SelectObject(hdc,hOldFont);
+    }
+
     /* Draw the focus rectangle */
     if (((lStyle & TCS_FOCUSNEVER) == 0) &&
 	 (GetFocus() == hwnd) &&
@@ -2278,7 +2271,7 @@ TAB_InsertItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
   TAB_SetItemBounds(hwnd);
   TAB_InvalidateTabArea(hwnd, infoPtr);
   
-  TRACE("[%04x]: added item %d '%s'\n",
+  TRACE("[%04x]: added item %d %s\n",
 	hwnd, iItem, debugstr_w(infoPtr->items[iItem].pszText));
 
   return iItem;
@@ -2347,7 +2340,7 @@ TAB_InsertItemW (HWND hwnd, WPARAM wParam, LPARAM lParam)
   TAB_SetItemBounds(hwnd);
   TAB_InvalidateTabArea(hwnd, infoPtr);
   
-  TRACE("[%04x]: added item %d '%s'\n",
+  TRACE("[%04x]: added item %d %s\n",
 	hwnd, iItem, debugstr_w(infoPtr->items[iItem].pszText));
 
   return iItem;
@@ -2703,11 +2696,7 @@ TAB_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
   HFONT hOldFont;
   DWORD dwStyle;
 
-#ifdef __WIN32OS2__
-  infoPtr = (TAB_INFO*)initControl(hwnd,sizeof(TAB_INFO));
-#else
   infoPtr = (TAB_INFO *)COMCTL32_Alloc (sizeof(TAB_INFO));
-#endif
 
   SetWindowLongA(hwnd, 0, (DWORD)infoPtr);
    
@@ -2948,7 +2937,10 @@ TAB_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
       
     case WM_LBUTTONUP:
       return TAB_LButtonUp (hwnd, wParam, lParam);
-      
+     
+    case WM_NOTIFY:
+      return SendMessageA(GetParent(hwnd), WM_NOTIFY, wParam, lParam);
+ 
     case WM_RBUTTONDOWN:
       return TAB_RButtonDown (hwnd, wParam, lParam);
       
@@ -2988,11 +2980,7 @@ TAB_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
       if (uMsg >= WM_USER)
 	WARN("unknown msg %04x wp=%08x lp=%08lx\n",
 	     uMsg, wParam, lParam);
-#ifdef __WIN32OS2__
-      return defComCtl32ProcA (hwnd, uMsg, wParam, lParam);
-#else
-      return DefWindowProcA (hwnd, uMsg, wParam, lParam);
-#endif
+      return DefWindowProcA(hwnd, uMsg, wParam, lParam);
     }
 
     return 0;
