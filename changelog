@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1996 2002-02-20 15:08:04 sandervl Exp $ */
+/* $Id: changelog,v 1.1997 2002-02-21 17:02:55 sandervl Exp $ */
+
+ 2002-02-21: Platon Fomichev <platon@innotek.de>
+    - IPHLPAPI  o GetNetworkParams bugfixes
 
  2002-02-20: Platon Fomichev <platon@innotek.de>
     - IPHLPAPI  o Implemented GetAdaptersInfo & GetNetworkParams
