@@ -1,4 +1,4 @@
-/* $Id: windef.h,v 1.16 1999-11-30 19:38:23 sandervl Exp $ */
+/* $Id: windef.h,v 1.17 1999-11-30 20:19:02 sandervl Exp $ */
 
 /*
  * Basic types definitions
@@ -212,8 +212,7 @@ typedef LONG            LRESULT;
 typedef WORD            ATOM;
 typedef WORD            CATCHBUF[9];
 typedef WORD           *LPCATCHBUF;
-typedef DWORD           ACCESS_MASK;
-typedef ACCESS_MASK     REGSAM;
+typedef DWORD           REGSAM;
 typedef HANDLE          HHOOK;
 typedef HANDLE          HKEY;
 typedef HANDLE          HMONITOR;
