@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.25 2001-06-03 12:01:41 sandervl Exp $ */
+/* $Id: text.cpp,v 1.26 2001-07-21 15:57:17 sandervl Exp $ */
 
 /*
  * GDI32 text apis
@@ -723,6 +723,7 @@ BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR
         oldbrush = SelectObject(hdc, hbrush);
         FillRect(hdc, lprc, hbrush);
         SelectObject(hdc, oldbrush);
+        DeleteObject(hbrush);
         return TRUE;
 #endif
     }
