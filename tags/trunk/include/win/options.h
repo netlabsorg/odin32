@@ -1,4 +1,4 @@
-/* $Id: options.h,v 1.7 2001-03-20 23:18:55 mike Exp $ */
+/* $Id: options.h,v 1.8 2001-06-02 08:30:58 sandervl Exp $ */
 
 /*
  * Command-line options.
@@ -95,6 +95,8 @@ extern struct options Options;
 #define ODINCUSTOMIZATION  "CUSTOMIZATION"
 #define ODINSYSTEM_SECTION "ODINSYSTEM"
 #define HIGHMEM_KEY        "HIGHMEM"
+#define WINMM_SECTION      "WINMM"
+#define DEFVOL_KEY         "DefVolume"
 
 int WINAPI PROFILE_GetOdinIniString(LPCSTR section,LPCSTR key_name,LPCSTR def,LPSTR buffer,UINT len);
 int WINAPI PROFILE_SetOdinIniString(LPCSTR section,LPCSTR key_name,LPCSTR value);
