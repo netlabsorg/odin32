@@ -1,4 +1,4 @@
-/* $Id: OS2PALETTE.H,v 1.8 2001-03-18 21:44:43 mike Exp $ */
+/* $Id: palette.h,v 1.1 2002-12-04 10:35:01 sandervl Exp $ */
 
 /*
  * DX palette class definition
