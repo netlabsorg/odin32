@@ -1,4 +1,4 @@
-/* $Id: waveoutdart.cpp,v 1.7 2002-04-07 14:36:31 sandervl Exp $ */
+/* $Id: waveoutdart.cpp,v 1.8 2002-06-04 17:36:55 sandervl Exp $ */
 
 /*
  * Wave playback class (DART)
@@ -196,10 +196,16 @@ MMRESULT DartWaveOut::write(LPWAVEHDR pwh, UINT cbwh)
         int consumerate = getAvgBytesPerSecond();
         int minbufsize = consumerate/32;
 
-        ulBufSize = pwh->dwBufferLength/2;
-        if(ulBufSize > minbufsize) {
-            dprintf(("set buffer size to %d bytes (org size = %d)", minbufsize, pwh->dwBufferLength));
-            ulBufSize = minbufsize;
+        if(pwh->dwBufferLength > minbufsize) {
+            ulBufSize = pwh->dwBufferLength/2;
+            if(ulBufSize < minbufsize) {
+                dprintf(("set buffer size to %d bytes (org size = %d)", minbufsize, pwh->dwBufferLength));
+                ulBufSize = minbufsize;
+            }
+        }
+        else {
+            //assume application knows what it's doing and use the first buffersize
+            ulBufSize = pwh->dwBufferLength;
         }
 #else
         if(pwh->dwBufferLength >= 512 && pwh->dwBufferLength <= 1024)
@@ -260,13 +266,12 @@ MMRESULT DartWaveOut::write(LPWAVEHDR pwh, UINT cbwh)
 
         //write buffers to DART; starts playback
         // MCI_MIXSETUP_PARMS->pMixWrite does alter FS: selector!
-        USHORT selTIB = GetFS(); // save current FS selector
+        USHORT selTIB = RestoreOS2FS(); // save current FS selector
 
         MixSetupParms->pmixWrite(MixSetupParms->ulMixHandle,
                                  MixBuffer,
                                  PREFILLBUF_DART);
         SetFS(selTIB);           // switch back to the saved FS selector
-
         dprintf(("Dart playing\n"));
     }
     else
@@ -289,30 +294,21 @@ MMRESULT DartWaveOut::write(LPWAVEHDR pwh, UINT cbwh)
         }
 
         writeBuffer();  //must be called before (re)starting playback
+
+        State     = STATE_PLAYING;
+        fUnderrun = FALSE;
         wmutex.leave();
 
-        if(State == STATE_STOPPED) {//continue playback
-            restart();
-        }
-        else
-        if(fUnderrun) {
-            dprintf(("Resume playback after underrun"));
-            fUnderrun = FALSE;
-            State = STATE_PLAYING;
+        //write buffers to DART; starts playback
+        // MCI_MIXSETUP_PARMS->pMixWrite does alter FS: selector!
+        USHORT selTIB = RestoreOS2FS(); // save current FS selector
 
-            memset(&GenericParms, 0, sizeof(GenericParms));
+        MixSetupParms->pmixWrite(MixSetupParms->ulMixHandle,
+                                 MixBuffer,
+                                 PREFILLBUF_DART);
+        SetFS(selTIB);           // switch back to the saved FS selector
 
-            // Resume the playback.
-            mymciSendCommand(DeviceId, MCI_RESUME, MCI_WAIT, (PVOID)&GenericParms, 0);
-
-            //write buffers to DART; starts playback
-            // MCI_MIXSETUP_PARMS->pMixWrite does alter FS: selector!
-            USHORT selTIB = GetFS(); // save current FS selector
-
-            MixSetupParms->pmixWrite(MixSetupParms->ulMixHandle, &MixBuffer[curPlayBuf], 1);
-
-            SetFS(selTIB);           // switch back to the saved FS selector
-        }
+        dprintf(("Dart playing\n"));
     }
     return(MMSYSERR_NOERROR);
 }
@@ -320,7 +316,7 @@ MMRESULT DartWaveOut::write(LPWAVEHDR pwh, UINT cbwh)
 /******************************************************************************/
 MMRESULT DartWaveOut::pause()
 {
- MCI_GENERIC_PARMS Params;
+    MCI_GENERIC_PARMS Params;
 
     dprintf(("WINMM: DartWaveOut::pause"));
 
@@ -338,6 +334,30 @@ MMRESULT DartWaveOut::pause()
 
     // Pause the playback.
     mymciSendCommand(DeviceId, MCI_PAUSE, MCI_WAIT, (PVOID)&Params, 0);
+
+    return(MMSYSERR_NOERROR);
+}
+/******************************************************************************/
+/******************************************************************************/
+MMRESULT DartWaveOut::resume()
+{
+    MCI_GENERIC_PARMS Params;
+
+    dprintf(("DartWaveOut::resume"));
+    
+    wmutex.enter();
+    if(State != STATE_PAUSED) {
+        wmutex.leave();
+        return(MMSYSERR_NOERROR);
+    }
+
+    State = STATE_PLAYING;
+    wmutex.leave();
+
+    memset(&Params, 0, sizeof(Params));
+
+    // Resume the playback.
+    mymciSendCommand(DeviceId, MCI_RESUME, MCI_WAIT, (PVOID)&Params, 0);
 
     return(MMSYSERR_NOERROR);
 }
@@ -403,41 +423,6 @@ MMRESULT DartWaveOut::reset()
     queuedbuffers = 0;
 
     wmutex.leave();
-    return(MMSYSERR_NOERROR);
-}
-/******************************************************************************/
-/******************************************************************************/
-MMRESULT DartWaveOut::restart()
-{
-  int i, curbuf;
-
-    dprintf(("DartWaveOut::restart"));
-    if(State == STATE_PLAYING)
-        return(MMSYSERR_NOERROR);
-
-    //Only write buffers to dart if mixer has been initialized; if not, then
-    //the first buffer write will do this for us.
-    if(fMixerSetup == TRUE)
-    {
-        wmutex.enter();
-        State     = STATE_PLAYING;
-        fUnderrun = FALSE;
-        wmutex.leave();
-        curbuf = curPlayBuf;
-
-        // MCI_MIXSETUP_PARMS->pMixWrite does alter FS: selector!
-        USHORT selTIB = GetFS(); // save current FS selector
-
-        for(i=0;i<PREFILLBUF_DART;i++)
-        {
-            dprintf(("restart: write buffer at %x size %d", MixBuffer[curbuf].pBuffer, MixBuffer[curbuf].ulBufferLength));
-            MixSetupParms->pmixWrite(MixSetupParms->ulMixHandle, &MixBuffer[curbuf], 1);
-            if(++curbuf == PREFILLBUF_DART)
-                curbuf = 0;
-        }
-        SetFS(selTIB);           // switch back to the saved FS selector
-    }
-
     return(MMSYSERR_NOERROR);
 }
 /******************************************************************************/
@@ -611,7 +596,7 @@ sendbuffer:
 
     //Transfer buffer to DART
     // MCI_MIXSETUP_PARMS->pMixWrite does alter FS: selector!
-    USHORT selTIB = GetFS(); // save current FS selector
+    USHORT selTIB = RestoreOS2FS(); // save current FS selector
     MixSetupParms->pmixWrite(MixSetupParms->ulMixHandle, &MixBuffer[curPlayBuf], 1);
     SetFS(selTIB);           // switch back to the saved FS selector
 
@@ -677,8 +662,10 @@ LONG APIENTRY WaveOutHandler(ULONG ulStatus,
                              PMCI_MIX_BUFFER pBuffer,
                              ULONG ulFlags)
 {
- PTIB2 ptib2;
- DartWaveOut *dwave;
+    PTIB2 ptib2;
+    DartWaveOut *dwave;
+
+    dprintf2(("WaveOutHandler %x %x %x", ulStatus, pBuffer, ulFlags));
 
     ptib2 = (PTIB2)_getTIBvalue(offsetof(TIB, tib_ptib2));
     if(ptib2 && HIBYTE(ptib2->tib2_ulpri) != PRTYC_TIMECRITICAL) {

@@ -1,4 +1,4 @@
-/* $Id: initwinmm.cpp,v 1.8 2002-05-28 17:10:02 sandervl Exp $
+/* $Id: initwinmm.cpp,v 1.9 2002-06-04 17:36:55 sandervl Exp $
  *
  * WINMM DLL entry point
  *
@@ -242,7 +242,7 @@ DWORD APIENTRY mymciSendCommand(WORD   wDeviceID,
         DebugInt3();
         return MCIERR_CANNOT_LOAD_DRIVER;
     }
-    USHORT sel = GetFS();
+    USHORT sel = RestoreOS2FS();
     DWORD ret = pfnmciSendCommand(wDeviceID, wMessage, dwParam1, dwParam2, wUserParm);
     SetFS(sel);
     return ret;
@@ -257,7 +257,7 @@ DWORD APIENTRY mymciGetErrorString(DWORD   dwError,
         DebugInt3();
         return MCIERR_CANNOT_LOAD_DRIVER;
     }
-    USHORT sel = GetFS();
+    USHORT sel = RestoreOS2FS();
     DWORD ret = pfnmciGetErrorString(dwError, lpstrBuffer, wLength);
     SetFS(sel);
     return ret;
