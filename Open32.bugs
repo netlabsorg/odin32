@@ -33,6 +33,9 @@ A list of Open32 bugs (under construction):
   some messages (i.e. WM_CTLCOLOR*)
 - GetSystemMetrics far from complete
 - SystemParametersInfoA incomplete
+- GetWindowLong returns 0xffff for GWL_ID. This should be 0xffffffff.
+- Open32 doesn't send any WM_PARENTNOTIFY messages
+- Open32 doesn't send WM_SETCURSOR or WM_MOUSEACTIVATE to parent windows
 
 Limitations:
 - No support for COMCTL32 controls.
