@@ -1,9 +1,10 @@
-/* $Id: header.h,v 1.2 1999-10-02 13:55:45 cbratschi Exp $ */
+/* $Id: header.h,v 1.3 1999-10-04 16:01:30 cbratschi Exp $ */
 
 /*
  * Header window definitions
  *
  * Copyright 1998 Eric Kohl
+ * Copyright 1999 Christoph Bratschi
  *
  */
 
@@ -15,10 +16,13 @@ typedef struct
     INT     cxy;
     HBITMAP hbm;
     LPWSTR  pszText;
+    INT     cchTextMax;
     INT     fmt;
     LPARAM  lParam;
     INT     iImage;
     INT     iOrder;             /* see documentation of HD_ITEM */
+    UINT    type;
+    LPVOID  pvFilter;
 
     BOOL    bDown;              /* is item pressed? (used for drawing) */
     RECT    rect;               /* bounding rectangle of the item */
@@ -42,6 +46,7 @@ typedef struct
     INT       xOldTrack;        /* track offset (see above) after the last WM_MOUSEMOVE */
     INT       nOldWidth;        /* width of a sizing item after the last WM_MOUSEMOVE */
     INT       iHotItem; /* index of hot item (cursor is over this item) */
+    INT       xBmpMargin;
 
     HIMAGELIST  himl;           /* handle to a image list (may be 0) */
     HEADER_ITEM *items;         /* pointer to array of HEADER_ITEM's */
