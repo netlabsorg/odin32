@@ -1,4 +1,4 @@
-/* $Id: shresdef.h,v 1.1 1999-10-09 11:13:25 sandervl Exp $ */
+/* $Id: shresdef.h,v 1.2 2000-01-08 04:37:02 phaller Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -27,6 +27,7 @@
 #define IDS_SHV_COLUMN4		10
 #define IDS_SHV_COLUMN5		11
 #define IDS_SHV_COLUMN6		12
+#define IDS_SHV_COLUMN7		13
 
 #define IDS_DESKTOP		20
 #define IDS_MYCOMPUTER		21
