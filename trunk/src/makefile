@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 1999-08-10 12:43:22 phaller Exp $
+# $Id: makefile,v 1.6 1999-08-11 17:15:46 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -63,9 +63,9 @@ all:
         $(MAKE_CMD)
         cd ..\ddraw
         $(MAKE_CMD)
-        cd ..\dsound
-        $(MAKE_CMD)
         cd ..\ole32
+        $(MAKE_CMD)
+        cd ..\dsound
         $(MAKE_CMD)
 
 clean:
