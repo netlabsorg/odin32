@@ -1,4 +1,4 @@
-/* $Id: hmmmap.cpp,v 1.2 1999-08-25 08:55:18 phaller Exp $ */
+/* $Id: hmmmap.cpp,v 1.3 1999-08-25 10:23:34 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -53,7 +53,16 @@ DWORD HMDeviceMemMapClass::CreateFileMapping(PHMHANDLEDATA         pHMHandleData
                 		   	     DWORD size_low,  /* [in] Low-order 32 bits of object size */
                 		   	     LPCSTR name)     /* [in] Name of file-mapping object */
 {
- Win32MemMap *map;
+  Win32MemMap *map;
+
+  dprintf(("KERNEL32::HMDeviceMemMapClass::CreateFileMapping(%08xh,%08xh,%08xh,%08xh,%08xh,%08xh,%s)\n",
+           pHMHandleData,
+           hFile,
+           sa,
+           protect,
+           size_high,
+           size_low,
+           name));
 
   if((hFile == -1 && size_low == 0) || size_high ||
      protect & (PAGE_READONLY|PAGE_READWRITE|PAGE_WRITECOPY|SEC_COMMIT|SEC_IMAGE|SEC_RESERVE|SEC_NOCACHE) ||
@@ -87,8 +96,15 @@ DWORD HMDeviceMemMapClass::OpenFileMapping(PHMHANDLEDATA         pHMHandleData,
                 			   BOOL inherit,   /* [in] Inherit flag */
                 		           LPCSTR name )   /* [in] Name of file-mapping object */
 {
- Win32MemMap *map;
- DWORD        protflags;
+  Win32MemMap *map;
+  DWORD        protflags;
+
+  dprintf(("KERNEL32::HMDeviceMemMapClass::OpenFileMapping(%08xh,%08xh,%08xh,%08xh\n",
+           pHMHandleData,
+           access,
+           inherit,
+           name));
+
 
   if(name == NULL)
 	return ERROR_INVALID_PARAMETER;
@@ -181,9 +197,10 @@ DWORD HMDeviceMemMapClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
 {
  Win32MemMap *map;
 
-  if(pHMHandleData->dwUserData == NULL || pHMHandleData->dwInternalType != HMTYPE_MEMMAP) {
-	dprintf(("MapViewOfFileEx: invalid handle data!"));
-	return ERROR_INVALID_HANDLE;
+  if(pHMHandleData->dwUserData == NULL || pHMHandleData->dwInternalType != HMTYPE_MEMMAP) 
+  {      
+    dprintf(("KERNEL32: HMDeviceMemMapClass:MapViewOfFileEx: invalid handle data!"));
+    return ERROR_INVALID_HANDLE;
   }
   map = (Win32MemMap *)pHMHandleData->dwUserData;
   map->Release();
@@ -208,7 +225,7 @@ DWORD HMDeviceMemMapClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
 
 int HMDeviceMemMapClass::findByBaseAddress(LPVOID lpBaseAddress)
 {
-  dprintf(("KERNEL32: HandleManager::MemMap::findByBaseAddress(%08xh) not implemented\n",
+  dprintf(("KERNEL32: HMDeviceMemMapClass::findByBaseAddress(%08xh) not implemented\n",
            lpBaseAddress));
 
   return -1;
@@ -231,7 +248,7 @@ int HMDeviceMemMapClass::findByBaseAddress(LPVOID lpBaseAddress)
 BOOL HMDeviceMemMapClass::UnmapViewOfFile(PHMHANDLEDATA pHMHandleData,
                                           LPVOID        lpBaseAddress)
 {
-  dprintf(("KERNEL32: HandleManager::MemMap::UnmapViewOfFile(%08xh,%08xh) not implemented\n",
+  dprintf(("KERNEL32: HMDeviceMemMapClass::UnmapViewOfFile(%08xh,%08xh) not implemented\n",
            pHMHandleData->hHMHandle,
            lpBaseAddress));
 
@@ -257,7 +274,7 @@ BOOL HMDeviceMemMapClass::FlushViewOfFile(PHMHANDLEDATA pHMHandleData,
                                           LPVOID        lpBaseAddress,
                                           DWORD         dwNumberOfBytesToFlush)
 {
-  dprintf(("KERNEL32: HandleManager::MemMap::FlushViewOfFile(%08xh,%08xh,%08xh) not implemented\n",
+  dprintf(("KERNEL32: HMDeviceMemMapClass::FlushViewOfFile(%08xh,%08xh,%08xh) not implemented\n",
            pHMHandleData->hHMHandle,
            lpBaseAddress,
            dwNumberOfBytesToFlush));
