@@ -81,8 +81,6 @@ TekstEnd();
 
 
 /*
- * Start kso Wed 19.07.2000 0.38.35
- *
  * Select the odin32 database.
  * Select all groups under the WAI team.
  * Loop thru them displaying standard information.
@@ -112,7 +110,7 @@ else
 {
     while ($group = @mysql_fetch_array($result))
     {
-        Naslov($group["name"]." Group", $group["name"]);
+        Odin32DBNaslov($group["name"]." Group", $group["name"]);
 
         TekstBeg();
         echo $group["description"];
@@ -225,161 +223,154 @@ else
 }
 
 /*
- * End kso
+ * Summary
  */
 
+    Odin32DBNaslov("Summary", "summary");
+
+    TekstBeg();
+    echo "
+              For DLLs with no active maintaner, you can contact maintaners of
+              the root, include and library directories since they have write access
+              to all parts of the code.
+         ";
+    TekstEnd();
+
+    PodNaslov("Root, include and library code maintainers:");
+    TekstBeg();
+    echo "
+                  <ul>
+                       <li> Sander van Leeuwen
+                       <li> Knut St. Osmundsen
+                       <li> Patrick Haller
+                       <li> Achim Hasenmueller
+                  </ul>
+          ";
+    TekstEnd();
+
+    TekstBeg();
+    echo "
+            Lot of work stil has to be done, and it's expected
+            that some <i>unassigned</i> members of WAI Team will
+            jump in.
+         ";
+    TekstEnd();
 
 
-Naslov("Summary", "summary");
-
-        TekstBeg();
-        echo "
-                  For DLLs with no active maintaner, you can contact maintaners of
-                  the root, include and library directories since they have write access
-                  to all parts of the code.
-             ";
-        TekstEnd();
-
-        PodNaslov("Root, include and library code maintainers:");
-        TekstBeg();
-        echo "
-                      <ul>
-                           <li> Sander van Leeuwen
-                           <li> Knut St. Osmundsen
-                           <li> Patrick Haller
-                           <li> Achim Hasenmueller
-                      </ul>
-              ";
-        TekstEnd();
-
-        TekstBeg();
-        echo "
-                Lot of work stil has to be done, and it's expected
-                that some <i>unassigned</i> members of WAI Team will
-                jump in.
-             ";
-        TekstEnd();
+    PodNaslov("Unassigned members:");
+    $sql = "SELECT      a.name  AS name
+                FROM    author a,
+                        tgroupmember m
+                WHERE   m.tgroup            = 3999 AND
+                        a.refcode           = m.author ";
+    $result = mysql_query($sql, $db);
+    TekstBeg();
+    printf("<ul>\n");
+    if (@mysql_num_rows($result) > 0)
+    {
+        while ($member = @mysql_fetch_array($result))
+            printf("  <li> %s\n", $member["name"]);
+    }
+    else
+        printf("  <li> No unassigned members.");
+    echo " </ul>
+    For better overview of WAI Team status as a whole, grouped
+    status bars are presented below. Only those Odin32 API functions
+    that are actually implemented (work as their Win32 counterparts)
+    are counted.
+    ";
+    TekstEnd();
 
 
-        PodNaslov("Unassigned members:");
-        $sql = "SELECT      a.name  AS name
-                    FROM    author a,
-                            tgroupmember m
-                    WHERE   m.tgroup            = 3999 AND
-                            a.refcode           = m.author ";
-        $result = mysql_query($sql, $db);
-        TekstBeg();
-        printf("<ul>\n");
-        if (@mysql_num_rows($result) > 0)
-        {
-            while ($member = @mysql_fetch_array($result))
-                printf("  <li> %s\n", $member["name"]);
-        }
-        else
-            printf("  <li> No unassigned members.");
-        echo " </ul>
-        For better overview of WAI Team status as a whole, grouped
-        status bars are presented below. Only those Odin32 API functions
-        that are actually implemented (work as their Win32 counterparts)
-        are counted.
+
+    PodNaslov("Implementation Status All Dlls:");
+    $sql = "SELECT  name,
+                    refcode
+            FROM    dll
+            ORDER BY name";
+    $result = mysql_query($sql, $db);
+    TekstBeg();
+    if (@mysql_num_rows($result) > 0)
+    {
+        while ($dll = @mysql_fetch_array($result))
+            Odin32DBCompletionBarDll($dll["refcode"], $dll["name"],  $db);
+
+        Odin32DBCompletionBarDll(-1, "Total",  $db);
+    }
+    else
+        printf("<font color=ff0000> <b>NOBODY</b> </font>");
+    TekstEnd();
+
+
+    PodNaslov("Notes:");
+    TekstBeg();
+    echo "
+                <ul>
+                    <li> No application needs all API functions and most
+                         smaller programs use only a limited set of APIs,
+                         for example multimedia, Direct Draw or Winsock.
+                    <li> Some programs may work even if the entire
+                         set of API it would use is not implemented
+                         (printing or OLE, for example), if appropriate
+                         stub functions are provided - the application
+                         would think it has those APIs available, but
+                         nothing (or failure) will happen only if the user
+                         tries to actually use the feature that requires them.
+                </ul>
+          ";
+    TekstEnd();
+
+
+    TekstBeg();
+    echo "
+            To access root of Odin32 API on-line database, click
+         ";
+          LocLink("Odin32DB.phtml", "here");
+    echo ".";
+
+    TekstEnd();
+
+
+    Odin32DBNaslov("Joining the WAI Team", "joinwai");
+
+    TekstBeg();
+
+    echo "
+    WAI Team has a mailing list where team members discuss and coordinate. You can
+    join the list by filling the form provided below.<p>
+
+            <center>
+            <form method=GET action='http://www.egroups.com/subscribe'>
+             <input type=hidden name='listname' value='win32os2-wai'>
+             <input type=hidden name='SubmitAction' value='Subscribe'>
+             <table width=350 cellspacing=0 cellpadding=2 border=0 bgcolor=#f0f0f0>
+             <tr>
+              <td colspan=2 align=center>
+                <font size=-1>
+                <b>Click on logo to subscribe<br>to Odin's WAI Team mailing list:</b>
+                </font>
+              </td>
+             </tr><tr>
+              <td align=right>
+                <input type=text name='emailaddr' value='your e-mail' size=21>
+              </td><td align=left>
+                <input type=image border=0 alt='Click here to join WAI Team mailing list!'
+                name='Click here to join Odin mailing list!' SRC='odin-bann.jpg'>
+              </td>
+             </tr><tr>
+              <td colspan=2 align=center><font size=-1>
         ";
-        TekstEnd();
+          UrlLink('www.egroups.com/group/win32os2-wai/', 'Read mail-list archive on-line');
+     echo "
+                </font>
+              </td>
+             </tr>
+             </TABLE>
+             </form>
+            </center>
+          ";
 
-
-
-        PodNaslov("Implementation Status All Dlls:");
-        $sql = "SELECT  name,
-                        refcode
-                FROM    dll
-                ORDER BY name";
-        $result = mysql_query($sql, $db);
-        TekstBeg();
-        printf("<ul>\n");
-        if (@mysql_num_rows($result) > 0)
-        {
-            while ($dll = @mysql_fetch_array($result))
-                Odin32DBCompletionBarDll($dll["refcode"], $dll["name"],  $db);
-
-            Odin32DBCompletionBarDll(-1, "Total",  $db);
-        }
-        else
-            printf("  <li> <font color=ff0000> <b>NOBODY</b> </font>");
-        printf("</ul>\n");
-        TekstEnd();
-
-
-        PodNaslov("Notes:");
-        TekstBeg();
-        echo "
-                    <ul>
-                        <li> No application needs all API functions and most
-                             smaller programs use only a limited set of APIs,
-                             for example multimedia, Direct Draw or Winsock.
-                        <li> Some programs may work even if the entire
-                             set of API it would use is not implemented
-                             (printing or OLE, for example), if appropriate
-                             stub functions are provided - the application
-                             would think it has those APIs available, but
-                             nothing (or failure) will happen only if the user
-                             tries to actually use the feature that requires them.
-                    </ul>
-              ";
-        TekstEnd();
-
-
-        TekstBeg();
-        echo "
-                To access root of Odin32 API on-line database, click
-             ";
-              LocLink("Odin32DB.phtml", "here");
-        echo ".";
-
-        TekstEnd();
-
-
-        PodNaslov("Joining the WAI Team");
-
-        TekstBeg();
-
-        echo "
-        WAI Team has a mailing list where team members discuss and coordinate. You can
-        join the list by filling the form provided below.<p>
-
-                <center>
-                <form method=GET action='http://www.egroups.com/subscribe'>
-                 <input type=hidden name='listname' value='win32os2-wai'>
-                 <input type=hidden name='SubmitAction' value='Subscribe'>
-                 <table width=350 cellspacing=0 cellpadding=2 border=0 bgcolor=#f0f0f0>
-                 <tr>
-                  <td colspan=2 align=center>
-                    <font size=-1>
-                    <b>Click on logo to subscribe<br>to Odin's WAI Team mailing list:</b>
-                    </font>
-                  </td>
-                 </tr><tr>
-                  <td align=right>
-                    <input type=text name='emailaddr' value='your e-mail' size=21>
-                  </td><td align=left>
-                    <input type=image border=0 alt='Click here to join WAI Team mailing list!'
-                    name='Click here to join Odin mailing list!' SRC='odin-bann.jpg'>
-                  </td>
-                 </tr><tr>
-                  <td colspan=2 align=center><font size=-1>
-            ";
-              UrlLink('www.egroups.com/group/win32os2-wai/', 'Read mail-list archive on-line');
-         echo "
-                    </font>
-                  </td>
-                 </tr>
-                 </TABLE>
-                 </form>
-                </center>
-              ";
-
-        TekstEnd();
-
-
-
+    TekstEnd();
 
 
 
@@ -387,38 +378,8 @@ require "07-ColumnTwoFooter.php3";
 require "08-News.php3";
 require "09-ContentsTitle.php3";
 
-TocBeg();
-
-/*
- * Start kso Wed 19.07.2000 0.38.35
- */
-$sql="SELECT    g.name          AS name
-        FROM    team t,
-                tgroup g
-        WHERE   t.name = 'WAI' AND
-                t.refcode = g.team AND
-                g.refcode <> 3999
-       ORDER BY g.name";
-$result = @mysql_query($sql,$db);
-if (@mysql_num_rows($result) > 0)
-{
-    while ($group = @mysql_fetch_array($result))
-        AnchNaslov($group["name"]." Group", $group["name"], "");
-}
-/*
- * End kso Wed 19.07.2000 2:19am
- */
-    AnchNaslov("Summary", "summary", "");
-TocEnd();
-
-/*
- * Start kso Jul 20 2000 12:22am
- */
+Odin32DBWriteContents();
 Odin32DBStateLegend($db);
-/*
- * End kso Jul 20 2000 12:22am
- */
-
 
 require "10-EndOfContent.php3";
 require "11-NetlabsContact.php3";

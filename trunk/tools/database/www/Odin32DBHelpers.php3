@@ -2217,6 +2217,18 @@ function Odin32DBAPIGroupInfo($db, $iRefcode, $fFunctions, $fFiles, $fAuthors, $
 /* TEXT FORMATTING OVERLOADS */
 /* TEXT FORMATTING OVERLOADS */
 $aContent = array();
+$aaSubContent = array();
+$fNumberSections = 0;
+
+/**
+ * Call this to autogenerate section and subsection numbers.
+ */
+function ODin32DBNumberSections()
+{
+    global $fNumberSections;
+    $fNumberSections = 1;
+}
+
 
 /**
  * Makes the contents for this page.
@@ -2225,11 +2237,38 @@ $aContent = array();
 function Odin32DBWriteContents()
 {
     global $aContent;
+    global $aaSubContent;
 
-    TocBeg();
+    echo "\n",
+         "<tr><td>\n";
+
     for ($i = 0; $i < sizeof($aContent); $i += 2)
-        AnchNaslov($aContent[$i], $aContent[$i + 1], "");
-    TocEnd();
+    {
+        echo "<font size=-2 face=\"WarpSans, Helv, Helvetica, Arial\">".
+             "<a href=\"#".$aContent[$i+1]."\"><font color=000099>".
+             $aContent[$i]."</font></a><br>\n";
+
+        $aSubContent = $aaSubContent[$i/2];
+        echo "\n";
+        if (sizeof($aSubContent) > 0)
+        {
+            echo "<table>\n";
+            for ($j = 0; $j < sizeof($aSubContent); $j += 2)
+            {
+                echo "<tr><td width=10%>&nbsp;</td>\n",
+                     "    <td><font size=-2 face=\"WarpSans, Helv, Helvetica, Arial\">".
+                     "<font size=-2 face=\"WarpSans, Helv, Helvetica, Arial\">".
+                     "<a href=\"#".$aSubContent[$j+1]."\"><font color=000099>".
+                     $aSubContent[$j]."</font></a><br>\n";
+                echo "</td></tr>\n";
+            }
+            echo "</table>\n";
+        }
+        else
+            echo "<p>\n";
+    }
+
+    echo "</td></tr>\n";
 }
 
 /**
@@ -2238,13 +2277,62 @@ function Odin32DBWriteContents()
 function Odin32DBNaslov($sFull, $sShort)
 {
     global $aContent;
+    global $aaSubContent;
+    global $fNumberSections;
+
+    if ($fNumberSections)
+        $sFull = (sizeof($aContent)/2 + 1).". ".$sFull;
 
     $aContent[] = $sFull;
     $aContent[] = $sShort;
+    $aaSubContent[] = array();
     return Naslov($sFull, $sShort);
 }
 
 
+/**
+ * Forwarder which also maintains the contents array.
+ * Equal to Odin32DBNaslov, but have allows a different contents text.
+ */
+function Odin32DBNaslov2($sFull, $sFullContents, $sShort)
+{
+    global $aContent;
+    global $aaSubContent;
+    global $fNumberSections;
+
+    if ($fNumberSections)
+    {
+        $sFull = (sizeof($aContent)/2 + 1).". ".$sFull;
+        $sFullContents = (sizeof($aContent)/2 + 1).". ".$sFullContents;
+    }
+
+    $aContent[] = $sFullContents;
+    $aContent[] = $sShort;
+    $aaSubContent[] = array();
+    return Naslov($sFull, $sShort);
+}
+
+
+/**
+ * Sub title with contents entry.
+ */
+function Odin32DBPodNaslov($sFull, $sShort)
+{
+    global $aContent;
+    global $aaSubContent;
+    global $fNumberSections;
+
+    $j = (sizeof($aContent) / 2) - 1;
+    $aSubContent = $aaSubContent[$j];
+
+    if ($fNumberSections)
+        $sFull = (sizeof($aContent)/2).".".(sizeof($aSubContent)/2 + 1)." ".$sFull;
+
+    $aSubContent[] = $sFull;
+    $aSubContent[] = $sShort;
+    $aaSubContent[$j] = $aSubContent;
+    echo "<p><b><a name=\"".$sShort."\"><font size=+0 face=\"Helv, Arial\"><br>".$sFull."</font></b></a><p>";
+}
 
 ?>
 
