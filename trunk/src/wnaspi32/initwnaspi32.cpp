@@ -1,4 +1,4 @@
-/* $Id: initwnaspi32.cpp,v 1.1 2001-10-15 17:06:18 sandervl Exp $
+/* $Id: initwnaspi32.cpp,v 1.2 2001-10-20 09:49:01 achimha Exp $
  *
  * DLL entry point
  *
@@ -52,8 +52,10 @@ BOOL WINAPI Wnaspi32LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad
    case DLL_PROCESS_ATTACH:
        aspi = new scsiObj();
        if(aspi == NULL) {
-           dprintf(("WNASPI32: LibMain; can't allocate aspi object!"));
-           return FALSE;
+           dprintf(("WNASPI32: LibMain; can't allocate aspi object! APIs will not work!"));
+           // @@@AH 20011020 we shouldn't prevent DLL loading in this case
+           // just make sure that all API calls fail
+           return TRUE;
        }
        if(aspi->init(65535) == FALSE)
        {
