@@ -80,7 +80,7 @@ ULONG APIENTRY inittermGdi32(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermWsock32(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermRpcrt4(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermAvifil32(ULONG hModule, ULONG ulFlag);
-
+ULONG APIENTRY inittermQuartz(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY InitializeKernel32();
 
 #define ORDINALBASE_GDI32	0
