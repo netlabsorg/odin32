@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1580 2001-07-08 15:53:29 sandervl Exp $ */
+/* $Id: changelog,v 1.1581 2001-07-08 19:18:37 achimha Exp $ */
 
  2001-07-08: Achim Hasenmueller <achimha@innotek.de>
     - WSOCK32:  o error message to human readable text translation
@@ -6,6 +6,8 @@
                 o implemented IPPROTO_IP support for setsockopt
                   (not fully done)
                 o reset semaphore in WSAEnumNetworkEvents
+    - USER32:   o deleted user32\old. It is still in the CVS attic
+                  so in case you need it, you can get it from CVS
 
  2001-07-08: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Some icon fixes
