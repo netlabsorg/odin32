@@ -1,4 +1,4 @@
-# $Id: pdwin32.vac36.rel,v 1.1 1999-08-25 11:24:08 sandervl Exp $
+# $Id: pdwin32.vac36.rel,v 1.2 1999-08-29 14:57:51 sandervl Exp $
 # ODIN / win32os2 Project
 #
 # RELEASE makefile for the VAC 3.6.5 compiler environment
@@ -24,7 +24,7 @@ IMPLIB=implib
 CFLAGS           = -Q -Si -G5 -O+ -Oi+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLUDE)\Win -D__WIN32OS2__ -D__WINE__
 CXXFLAGS         = -Q -Si -G5 -O+ -Oi+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLUDE)\Win -D__WIN32OS2__ -D__WINE__
 CXXFLAGS_ODINCRT = -Q -Si -G5 -O+ -Oi+ -Ge- -Ss+ -W3 -Gm+ /Gn- -I$(PDWIN32_INCLUDE)\Win -D__WIN32OS2__ -D__WINE__
-ASFLAGS          = -Sc -Sv:M510
+ASFLAGS          = -Sc -Sv:ALP
 LDFLAGS          = -Q -Si -G5 -O+ -Ge- -Ss+ -W3 -Gm+ /B"/noe /NOD"
 LDFLAGS_ODINCRT  = -Q -Si -G5 -O+ -Ge- -Ss+ -W3 -Gm+ /B"/noe"
 IMPLIBFLAGS = /nologo

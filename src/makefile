@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.11 1999-08-28 07:44:29 sandervl Exp $
+# $Id: makefile,v 1.12 1999-08-29 14:55:39 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -72,6 +72,12 @@ all:
         $(MAKE_CMD)
         cd ..\olesvr32
         $(MAKE_CMD)
+        cd ..\olecli32
+        $(MAKE_CMD)
+        cd ..\imm32
+        $(MAKE_CMD)
+        cd ..\imagehlp
+        $(MAKE_CMD)
         cd ..\dsound
         $(MAKE_CMD)
 
@@ -97,6 +103,12 @@ clean:
         cd ..\oleaut32
         $(MAKE_CMD) clean
         cd ..\olesvr32
+        $(MAKE_CMD) clean
+        cd ..\olecli32
+        $(MAKE_CMD) clean
+        cd ..\imm32
+        $(MAKE_CMD) clean
+        cd ..\imagehlp
         $(MAKE_CMD) clean
         cd ..\capi2032
         $(MAKE_CMD) clean
