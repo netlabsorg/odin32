@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.125 2001-06-15 09:42:49 bird Exp $ */
+/* $Id: wprocess.cpp,v 1.126 2001-06-15 18:58:39 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -61,9 +61,11 @@ PCSTR   pszCmdLineA;                    /* ASCII/ANSII commandline. */
 PCWSTR  pszCmdLineW;                    /* Unicode commandline. */
 
 //Process database
-PDB     ProcessPDB = {0};
-USHORT  ProcessTIBSel = 0;
-DWORD  *TIBFlatPtr    = 0;
+PDB          ProcessPDB = {0};
+STARTUPINFOA StartupInfo = {0};
+CHAR         unknownPDBData[16] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 ,0 ,0};
+USHORT       ProcessTIBSel = 0;
+DWORD       *TIBFlatPtr    = 0;
 
 //list of thread database structures
 static TEB      *threadList = 0;
@@ -173,13 +175,19 @@ TEB * WIN32API InitializeTIB(BOOL fMainThread)
     winteb->process     = &ProcessPDB;             /* 30 owning process (used by NT3.51 applets)*/
 
     winteb->process         = &ProcessPDB;
-    winteb->exit_code       = 0x103; /* STILL_ACTIVE */
+////    winteb->exit_code       = 0x103; /* STILL_ACTIVE */
     winteb->teb_sel         = tibsel;
     winteb->o.odin.OrgTIBSel       = GetFS();
     winteb->o.odin.pWsockData      = NULL;
     winteb->o.odin.threadId        = GetCurrentThreadId();
     if(fMainThread) {
          winteb->o.odin.hThread     = hThreadMain;
+//         ProcessPDB.startup_info    = &StartupInfo;
+         ProcessPDB.unknown10       = (PVOID)&unknownPDBData[0];
+         StartupInfo.cb             = sizeof(StartupInfo);
+         StartupInfo.hStdInput      = GetStdHandle(STD_INPUT_HANDLE);
+         StartupInfo.hStdOutput     = GetStdHandle(STD_OUTPUT_HANDLE);
+         StartupInfo.hStdError      = GetStdHandle(STD_ERROR_HANDLE);
     }
     else winteb->o.odin.hThread    = GetCurrentThread();
     winteb->o.odin.lcid            = GetUserDefaultLCID();
@@ -235,7 +243,7 @@ TEB * WIN32API InitializeTIB(BOOL fMainThread)
         //todo: initialize TLS array if required
         //TLS in executable always TLS index 0?
         ProcessTIBSel = tibsel;
-        ProcessPDB.exit_code       = 0x103; /* STILL_ACTIVE */
+////        ProcessPDB.exit_code       = 0x103; /* STILL_ACTIVE */
         ProcessPDB.threads         = 1;
         ProcessPDB.running_threads = 1;
         ProcessPDB.ring0_threads   = 1;
