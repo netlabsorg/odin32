@@ -1,4 +1,4 @@
-# $Id: odin32.post.wat.mk,v 1.19 2002-02-09 17:26:36 sandervl Exp $
+# $Id: odin32.post.wat.mk,v 1.20 2002-06-09 15:07:00 bird Exp $
 
 #
 # Odin32 API
@@ -304,7 +304,7 @@ $(OBJDIR)\$^&.lst
 !ifndef NO_DEP_RULE
 dep: dep_internal $(ADDITIONAL_DEP) .SYMBOLIC
 dep_internal: .SYMBOLIC
-    $(DEPEND) $(CINCLUDES) *.c *.cpp *.h *.asm *.inc *.rc *.dlg -robj *.orc
+    $(DEPEND) $(CINCLUDES) -xdummy.c *.c *.cpp *.h *.asm *.inc *.rc *.dlg -robj *.orc
 !ifdef SUBDIRS
     @$(DODIRS) "$(SUBDIRS)"  $(MAKE_CMD) dep
 !endif
