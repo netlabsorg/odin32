@@ -1,9 +1,9 @@
-/* $Id: PreloadTools.cmd,v 1.1 2001-12-19 01:18:18 bird Exp $
+/* $Id: PreloadTools.cmd,v 1.2 2001-12-19 01:50:06 bird Exp $
  *
  * Preloads all the tools which we might turn into using.
  * Specify '-u' to unload the tools.
  */
-
+'@echo off'
 
 /*
  * Parse argument(s).
@@ -18,7 +18,7 @@ if (translate(substr(chUnload,1,1)) = 'U') then
 /*
  * Find the tools directory.
  */
-parse source sString;
+parse source sOS sCMD sSrc;
 sToolsDir = filespec('drive', sSrc) || filespec('path', sSrc); /* with slash */
 
 
