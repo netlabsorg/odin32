@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.440 1999-11-12 14:59:00 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.441 1999-11-12 17:15:59 cbratschi Exp $ */
+
+ 99-11-12: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32: fixed several edit bugs
 
  99-11-12: Sander van Leeuwen <sandervl@xs4all.nl>
 	- GDI32: Changes + fixes in DIBSection bitblt (fixes Quake 2)
