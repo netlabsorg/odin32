@@ -1,4 +1,4 @@
-/* $Id: crtdll.cpp,v 1.5 1999-09-23 09:38:03 sandervl Exp $ */
+/* $Id: crtdll.cpp,v 1.6 1999-09-28 13:26:34 sandervl Exp $ */
 
 /*
  * The C RunTime DLL
@@ -394,6 +394,18 @@ unsigned CDECL CRTDLL__control87(unsigned i1,unsigned i2)
 
 
 /*********************************************************************
+ *                  CRTDLL__controlfp    (CRTDLL.61)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL CRTDLL__controlfp(DWORD ret)
+{
+  dprintf(("CRTDLL: _controlfp not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
  *           CRTDLL__cwait   (CRTDLL.69)
  */
 int CDECL CRTDLL__cwait( int *status, int process_id, int action_code )
@@ -454,13 +466,14 @@ int * CDECL CRTDLL__errno(void)
 
 
 /*********************************************************************
- *                  _except_handler2    (CRTDLL.78)
- *	FIXME - Could not find anything about it
+ *                  _except_handler2  (CRTDLL.78)
  */
-INT CDECL CRTDLL__except_handler2(DWORD ret)
+INT CDECL CRTDLL__except_handler2 ( PEXCEPTION_RECORD rec,
+	PEXCEPTION_FRAME frame, PCONTEXT context, 
+	PEXCEPTION_FRAME  *dispatcher)
 {
         dprintf(("CRTDLL: _except_handler2\n"));
-	return 0;
+	return 1;
 }
 
 
@@ -2695,7 +2708,9 @@ DWORD CDECL CRTDLL_fwrite( LPVOID ptr, INT size, INT nmemb, CRTDLL_FILE *file )
     DWORD ret;
 
     dprintf(("CRTDLL: fwrite\n"));
-    WriteFile( file->handle, ptr, size * nmemb, &ret, NULL );
+    if (!WriteFile( file->handle, ptr, size * nmemb, &ret, NULL ))
+        dprintf((" failed!\n"));
+
     return ret / size;
 }
 
