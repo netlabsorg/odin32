@@ -1,10 +1,15 @@
- /* $Id: changelog,v 1.1107 2000-09-05 19:21:52 sandervl Exp $ */
+ /* $Id: changelog,v 1.1108 2000-09-05 20:34:53 sandervl Exp $ */
 
  2000-09-05: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   WM_PARENTNOTIFY during WM_CREATE was sent to the wrong window
                 WM_FOCUSCHANGE fix; set & kill focus was sent twice
                 Added more logging.
                 Activate window after resizing (WM_WINDOWPOSCHANGED in pmwindow.cpp)
+    - KERNEL32: Workaround for RegSetValueA; a call to this api in Netscape
+                fails with error 8 due to a 0 size of the key data
+                HMOpenFile fix; pHMHandleData->dwCreation must be set
+                to OPEN_EXISTING or else the memory map class will fail
+                to duplicate the handle.
 
  2000-09-04: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: GetDiskFreeSpaceExA: added support for 64 bits disk size
