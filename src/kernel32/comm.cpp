@@ -1,4 +1,4 @@
-/* $Id: comm.cpp,v 1.2 1999-06-10 20:47:54 phaller Exp $ */
+/* $Id: comm.cpp,v 1.3 1999-11-27 12:48:25 achimha Exp $ */
 
 /*
  * PE2LX dialog conversion code
@@ -14,6 +14,7 @@
  */
 #include <os2win.h>
 #include "unicode.h"
+#include "handlemanager.h"
 
 
 //------------------------------------------------------------------------------
@@ -108,8 +109,7 @@ BOOL WIN32API ClearCommBreak( HANDLE hFile )
 
 BOOL WIN32API SetupComm( HANDLE hFile, DWORD dwInQueue, DWORD dwOutQueue )
 {
-  dprintf(("SetupComm Not implemented (TRUE)\n"));
-  return(TRUE);
+  return HMSetupComm(hFile, dwInQueue, dwOutQueue);
 }
 
 //------------------------------------------------------------------------------
@@ -180,8 +180,7 @@ BOOL WIN32API GetCommTimeouts(INT hCommDev, LPCOMMTIMEOUTS lpctmo)
 
 BOOL WIN32API GetCommState(INT hCommDev, LPDCB lpdcb)
 {
-  dprintf(("OS2GetCommState Not implemented\n"));
-  return(FALSE);
+  return HMGetCommState(hCommDev, lpdcb);
 }
 
 //------------------------------------------------------------------------------

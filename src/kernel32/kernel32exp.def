@@ -590,6 +590,7 @@ EXPORTS
     _lstrcpyWtoA@8                            @784
     _lstrncmpA@12                             @785
     _lstrncmpW@12                             @786
+    _IsProcessorFeaturePresent@4              @880
     _GetFileAttributesExA@12                  @874
     _GetFileAttributesExW@12                  @875
     _lstrncmpiA@12                            @887
@@ -653,3 +654,4 @@ EXPORTS
     _PROFILE_SaveOdinIni@0                    @1270
     _smalloc__FUi                             @1271
     _wsnprintfA                               @2000
+    IsExeStarted__Fv                          @2001
