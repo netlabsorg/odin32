@@ -1,7 +1,20 @@
-/* $Id: changelog,v 1.2000 2002-02-23 16:39:31 sandervl Exp $ */
+/* $Id: changelog,v 1.2001 2002-02-23 23:52:30 bird Exp $ */
+
+ 2002-02-23: knut st. osmundsen <bird@anduin.net>
+    - MAKEFILES:
+                o Cleaned up some demangling mess in makefiles.
+                  Now both VAC308 and VAC365 builds works again.
+    - /Makefile:
+                o Added a cleanall rule to /makefile which will cleanup
+                  for every compiler and all tree build modes.
+                o Corrected problemous odin_library rules in /makefile.
+                  (didn't work on a clean tree)
+    - /src/Makefile:
+                o Corrected directory locking for lib module.
+                  (Can now build debug and release builds concurrently.)
 
  2002-02-23: Sander van Leeuwen <sandervl@xs4all.nl>
-    - WSOCK32:  o Don't send FD_CONNECT is socket was already connected 
+    - WSOCK32:  o Don't send FD_CONNECT is socket was already connected
                   (accept returns connected socket)
 
  2002-02-21: Sander van Leeuwen <sandervl@xs4all.nl>
@@ -30,7 +43,7 @@
     - SHELL32:  o compile fix for SHBrowseForFolderW (due to recent header changes)
 
  2002-02-18: Patrick Haller <patrick.haller@innotek.de>
-    - USER32:   o fixed structure size for 
+    - USER32:   o fixed structure size for
                   SystemParametersInfo(SPI_GETNONCLIENTMETRICSA)
                 o fixed GetModuleHandleW(NULL) string conversion
 
