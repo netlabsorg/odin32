@@ -30,14 +30,14 @@ int    WIN32API lstrcpynWtoA   (LPSTR ascii, LPWSTR unicode, int unilen);
 LPSTR  WIN32API lstrcpyWtoA    (LPSTR ascii, LPWSTR unicode);
 LPWSTR WIN32API lstrcpyAtoW    (LPWSTR unicode, LPSTR ascii);
 
-LPVOID          HEAP_xalloc    ( HANDLE heap, DWORD flags, DWORD size );
-LPVOID          HEAP_xrealloc  ( HANDLE heap, DWORD flags, LPVOID lpMem, DWORD size );
-LPVOID          HEAP_malloc    ( DWORD size );
-LPVOID          HEAP_realloc   ( LPVOID lpMem, DWORD size );
-VOID            HEAP_free      ( LPVOID lpMem );
+LPVOID WIN32API HEAP_xalloc    ( HANDLE heap, DWORD flags, DWORD size );
+LPVOID WIN32API HEAP_xrealloc  ( HANDLE heap, DWORD flags, LPVOID lpMem, DWORD size );
+LPVOID WIN32API HEAP_malloc    ( DWORD size );
+LPVOID WIN32API HEAP_realloc   ( LPVOID lpMem, DWORD size );
+VOID   WIN32API HEAP_free      ( LPVOID lpMem );
 
-LPSTR           HEAP_strdupA   ( HANDLE heap, DWORD flags, LPCSTR str );
-LPWSTR          HEAP_strdupW   ( HANDLE heap, DWORD flags, LPCWSTR str );
-LPWSTR          HEAP_strdupAtoW( HANDLE heap, DWORD flags, LPCSTR str );
-LPSTR           HEAP_strdupWtoA( HANDLE heap, DWORD flags, LPCWSTR str );
+LPSTR  WIN32API HEAP_strdupA   ( HANDLE heap, DWORD flags, LPCSTR str );
+LPWSTR WIN32API HEAP_strdupW   ( HANDLE heap, DWORD flags, LPCWSTR str );
+LPWSTR WIN32API HEAP_strdupAtoW( HANDLE heap, DWORD flags, LPCSTR str );
+LPSTR  WIN32API HEAP_strdupWtoA( HANDLE heap, DWORD flags, LPCWSTR str );
 

@@ -1,16 +1,14 @@
-/* $Id: heap.cpp,v 1.10 1999-08-09 22:10:08 phaller Exp $ */
+/* $Id: heap.cpp,v 1.11 1999-08-10 12:43:22 phaller Exp $ */
 
 /*
- *
  * Project Odin Software License can be found in LICENSE.TXT
  *
- */
-/*
  * Win32 heap API functions for OS/2
  *
  * Copyright 1998 Sander van Leeuwen
  *
  */
+
 #include <os2win.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,7 +16,7 @@
 #define  _WIN32
 #include "os2heap.h"
 #include <odincrt.h>
-#include "heap.h"
+#include <heap.h>
 
 static HANDLE processheap = NULL;
 OS2Heap *OS2ProcessHeap = NULL;
