@@ -1,4 +1,4 @@
-/* $Id: initterm.h,v 1.3 1999-11-18 09:20:09 bird Exp $ */
+/* $Id: initterm.h,v 1.4 1999-11-24 19:38:55 sandervl Exp $ */
 /*
  * KERNEL32 DLL entry point header
  *
@@ -21,6 +21,9 @@
     #define QSV_VIRTUALADDRESSLIMIT 30
 #endif
 
+#ifndef QSV_NUMPROCESSORS
+    #define QSV_NUMPROCESSORS 26
+#endif
 
 void CloseLogFile(); //misc.cpp
 
