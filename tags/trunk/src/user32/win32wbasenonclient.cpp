@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.33 2001-06-12 17:02:42 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.34 2001-06-13 10:29:46 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -887,7 +887,20 @@ VOID Win32BaseWindow::DrawCaption(HDC hdc,RECT *rect,BOOL active)
   HDC memDC;
   HBITMAP memBmp,oldBmp;
 
-  if(fOS2Look) return;
+  if(fOS2Look) {
+      if ((dwStyle & WS_SYSMENU) && !(dwExStyle & WS_EX_TOOLWINDOW))
+      {
+         int size = GetSystemMetrics(SM_CYCAPTION);
+   
+         r2 = r;
+         r2.right  = r2.left + size;
+         r2.bottom = r2.top + size;
+         FillRect(hdc, &r2, GetSysColorBrush(COLOR_MENU));
+
+         DrawSysButton(hdc,&r);
+      }
+      return;
+  }
 
   memDC = CreateCompatibleDC(hdc);
   r.right -= r.left;
