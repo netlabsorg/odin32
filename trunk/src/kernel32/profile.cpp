@@ -1,4 +1,4 @@
-/* $Id: profile.cpp,v 1.9 1999-08-17 16:35:10 phaller Exp $ */
+/* $Id: profile.cpp,v 1.10 1999-08-17 19:30:49 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -1402,11 +1402,12 @@ void WINAPI WriteOutProfiles(void)
     lastCurProfile = CurProfile;
     for(x = 1;x < N_CACHED_PROFILES;x++)
     {
-      if (MRUProfile[x]->filename)
-      {
-        CurProfile = MRUProfile[x];
-        PROFILE_FlushFile();
-      }
+      if (MRUProfile[x])
+        if (MRUProfile[x]->filename)
+        {
+          CurProfile = MRUProfile[x];
+          PROFILE_FlushFile();
+        }
     }
     CurProfile = lastCurProfile;
     LeaveCriticalSection(&PROFILE_CritSect);
