@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.2347 2002-10-28 19:59:13 sandervl Exp $ */
+/* $Id: changelog,v 1.2348 2002-10-29 12:16:35 sandervl Exp $ */
+
+ 2002-10-29: Sander van Leeuwen <sandervl@innotek   >
+    - COMCTL32: o Wine resync (header, comboex, flatsb, hotkey, imagelist,
+                  pager, propsheet, rebar, tab, toolbar, tooltips, trackbar, 
+                  treeview, updown)
 
  2002-10-28: Sander van Leeuwen <sandervl@innotek   >
     - GDI32:    o Workaround added for WGSS GetDIBits bug
