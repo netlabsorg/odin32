@@ -1,4 +1,4 @@
-# $Id: setup.os2debwat11.mk,v 1.5 2002-04-30 06:20:03 bird Exp $
+# $Id: setup.os2debwat11.mk,v 1.6 2002-04-30 19:47:35 bird Exp $
 
 # ---OS2, DEBUG, WAT11-------------------------
 ENV_NAME="OS/2, Debug, Watcom C/C++ v11.0c"
@@ -40,19 +40,17 @@ _AR_LNK1= "$(TARGET_OBJS: ="&^
 AR_LNK1= $(_AR_LNK1:""=)
 AR_LNK2= $(@R).lst
 
-_CC_FLAGS_OS = -bt=os2v2 -dOS2
-
-CC_FLAGS=$(_CC_FLAGS_OS) -zq -bm -ze -w4 -dDEBUG -d2 -hc -zc $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
+CC_FLAGS=-bt=os2v2 -dDEBUG -dOS2 -d__32BIT__ -d__i386__ -5r -zq -bm -ze -w4 -d2 -hc -zc $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
 CC_FLAGS_EXE=$(CC_FLAGS)
 CC_FLAGS_DLL=$(CC_FLAGS) -bd
-CC_FLAGS_SYS=$(CC_FLAGS)
+CC_FLAGS_SYS=$(CC_FLAGS) -s -zdp -zff -zgf
 CC_FLAGS_VDD=$(CC_FLAGS_SYS)
 CC_FLAGS_IFS=$(CC_FLAGS_SYS) -bd
 CC_OBJ_OUT=-fo=
 CC_LST_OUT=
-CXX_PC_2_STDOUT=-pc
+CC_PC_2_STDOUT=-pc
 
-CXX_FLAGS=$(_CC_FLAGS_OS) -zq -bm -ze -w4 -dDEBUG -d2 -hc -zc (_CXX_OPTIONAL)  $(CXX_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CXX_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
+CXX_FLAGS=-bt=os2v2 -dDEBUG -dOS2 -d__32BIT__ -d__i386__ -5r -zq -bm -ze -w4 -d2 -hc -zc (_CXX_OPTIONAL)  $(CXX_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CXX_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
 CXX_FLAGS_EXE=$(CXX_FLAGS)
 CXX_FLAGS_DLL=$(CXX_FLAGS) -bd
 CXX_FLAGS_SYS=$(CXX_FLAGS) -s -zdp -zff -zgf
