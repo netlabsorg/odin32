@@ -1,6 +1,13 @@
- /* $Id: ChangeLog,v 1.125 1999-08-23 13:07:56 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.126 1999-08-23 14:00:32 sandervl Exp $ */
 
- 99-08-20: Patrick Haller <phaller@gmx.net>
+ 99-08-23: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32\NEW: Added two dummy exports so comdlg32 will load
+          NOTE: This is a temporary hack and needs to be changed.
+	- USER32\NEW: Fix for OSLibWinCreateIcon (supports single icons now)
+	- KERNEL32: Logging change, now creates a unique logfile for each
+                    process. (multiple win32 apps active -> multiple logfiles)
+
+ 99-08-23: Patrick Haller <phaller@gmx.net>
         - USER32/NEW: partial (not compiling yet) port of DIALOG.C
         - USER32:     fix: Win32Proc constructor crash (GetClassInfoA(of a Systemclass))
 
