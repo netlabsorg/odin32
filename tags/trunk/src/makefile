@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.26 1999-10-16 11:03:49 sandervl Exp $
+# $Id: makefile,v 1.27 1999-10-23 12:35:36 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -94,8 +94,8 @@ all:
         $(MAKE_CMD)
         cd ..\wnaspi32
         $(MAKE_CMD)
-#        cd ..\dsound
-#        $(MAKE_CMD)
+        cd ..\dsound
+        $(MAKE_CMD)
 
 clean:
         cd odincrt
