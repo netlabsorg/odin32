@@ -1,4 +1,4 @@
-/* $Id: hmfile.cpp,v 1.34 2002-03-24 13:10:30 sandervl Exp $ */
+/* $Id: hmfile.cpp,v 1.35 2002-06-15 17:14:52 sandervl Exp $ */
 
 /*
  * File IO win32 apis
@@ -109,8 +109,9 @@ DWORD HMDeviceFileClass::CreateFile (LPCSTR        lpFileName,
 //*****************************************************************************
 void HMDeviceFileClass::ParsePath(LPCSTR lpszFileName, LPSTR lpszParsedFileName, DWORD length)
 {
+    int i=0;
 
-    while(*lpszFileName != 0) {
+    while(*lpszFileName != 0 && i < length-1) {
         *lpszParsedFileName++ = *lpszFileName;
         if(*lpszFileName == '\\') {
             while(*lpszFileName == '\\') {
@@ -120,6 +121,7 @@ void HMDeviceFileClass::ParsePath(LPCSTR lpszFileName, LPSTR lpszParsedFileName,
         else {
             lpszFileName++;
         }
+        i++;
     }
     *lpszParsedFileName = 0;
 }
