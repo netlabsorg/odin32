@@ -9,10 +9,12 @@
 
 #ifndef RC_INVOKED
 
+#include <stdarg.h>
 #if !defined(OS2_INCLUDED) && !defined(__WIN32TYPE_H__)
 #include <windef.h>
 #endif
 #include <winnls.h>
+
 
 #ifndef strncasecmp
 #define strncasecmp	lstrncmpiA
@@ -64,23 +66,31 @@ extern "C" {
 #define static
 #endif
 
-extern const union cptable *cp_get_table( unsigned int codepage );
-extern const union cptable *cp_enum_table( unsigned int index );
+#ifdef __EMX__ 
+#define _K32CONV _optlink
+#else
+#define _K32CONV
+#endif
 
-extern int cp_mbstowcs( const union cptable *table, int flags,
+extern _K32CONV const union cptable *cp_get_table( unsigned int codepage );
+extern _K32CONV const union cptable *cp_enum_table( unsigned int index );
+
+extern _K32CONV int cp_mbstowcs( const union cptable *table, int flags,
                         const char *src, int srclen,
                         WCHAR *dst, int dstlen );
-extern int cp_wcstombs( const union cptable *table, int flags,
+extern _K32CONV int cp_wcstombs( const union cptable *table, int flags,
                         const WCHAR *src, int srclen,
                         char *dst, int dstlen, const char *defchar, int *used );
-extern int utf8_wcstombs( const WCHAR *src, int srclen, char *dst, int dstlen );
-extern int utf8_mbstowcs( int flags, const char *src, int srclen, WCHAR *dst, int dstlen );
+extern _K32CONV int utf8_wcstombs( const WCHAR *src, int srclen, char *dst, int dstlen );
+extern _K32CONV int utf8_mbstowcs( int flags, const char *src, int srclen, WCHAR *dst, int dstlen );
 
-extern int strcmpiW( const WCHAR *str1, const WCHAR *str2 );
-extern int strncmpiW( const WCHAR *str1, const WCHAR *str2, int n );
-extern WCHAR *strstrW( const WCHAR *str, const WCHAR *sub );
-extern long int strtolW( const WCHAR *nptr, WCHAR **endptr, int base );
-extern unsigned long int strtoulW( const WCHAR *nptr, WCHAR **endptr, int base );
+extern _K32CONV int strcmpiW( const WCHAR *str1, const WCHAR *str2 );
+extern _K32CONV int strncmpiW( const WCHAR *str1, const WCHAR *str2, int n );
+extern _K32CONV WCHAR *strstrW( const WCHAR *str, const WCHAR *sub );
+extern _K32CONV long int strtolW( const WCHAR *nptr, WCHAR **endptr, int base );
+extern _K32CONV unsigned long int strtoulW( const WCHAR *nptr, WCHAR **endptr, int base );
+extern _K32CONV int snprintfW( WCHAR *str, unsigned int len, const WCHAR *format, ... );
+extern _K32CONV int vsnprintfW( WCHAR *str, unsigned int len, const WCHAR *format, va_list valist );
 
 static inline int is_dbcs_leadbyte( const union cptable *table, unsigned char ch )
 {
