@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2001-07-30 12:02:45 sandervl Exp $
+# $Id: makefile,v 1.4 2001-07-30 22:54:19 bird Exp $
 
 #
 # Odin32 API
@@ -28,7 +28,7 @@ OBJS = \
 $(OBJDIR)\initterm.obj \
 $(OBJDIR)\guid.obj \
 $(OBJDIR)\math64.obj \
-$(OBJDIR)\large_int.obj 
+$(OBJDIR)\large_int.obj
 
 #
 # Libraries. One space before the '\'.
@@ -44,12 +44,14 @@ $(ODIN32_LIB)/shlwapio.lib \
 $(ODIN32_LIB)/msvfw32o.lib \
 $(ODIN32_LIB)/wsock32o.lib \
 $(ODIN32_LIB)/winmmo.lib \
-$(ODIN32_LIB)/ole32o.lib \
+$(ODIN32_LIB)/ole32os2o.lib \
 $(ODIN32_LIB)/rpcrt4o.lib \
 $(ODIN32_LIB)/versiono.lib \
 $(ODIN32_LIB)/lz32o.lib \
-$(ODIN32_LIB)\LIBULS.LIB \
-$(ODIN32_LIB)\LIBCONV.LIB \
+$(ODIN32_LIB)/unicode.lib \
+$(ODIN32_LIB)/win32k.lib \
+$(ODIN32_LIB)/libuls.lib \
+$(ODIN32_LIB)/libconv.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
 $(ODIN32_LIB)/wgss50.lib \
 OS2386.LIB \
