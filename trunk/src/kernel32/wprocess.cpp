@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.9 1999-06-19 13:57:51 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.10 1999-06-19 17:58:33 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -37,9 +37,8 @@ BOOL      fFreeLibrary = FALSE;
 //Process database
 PDB       ProcessPDB = {0};  
 USHORT	  ProcessTIBSel = 0;
-USHORT	  OS2Selector   = 0;
+DWORD    *TIBFlatPtr    = 0;
 
-//#define WIN32_TIBSEL
 //******************************************************************************
 // Set up the TIB selector and memory for the current thread
 //******************************************************************************
@@ -51,6 +50,13 @@ void InitializeTIB(BOOL fMainThread)
 
   USHORT tibsel;
 
+   //Allocate one dword to store the flat address of our TEB
+   TIBFlatPtr = (DWORD *)OS2AllocThreadLocalMemory(1);
+   if(TIBFlatPtr == 0) {
+	dprintf(("InitializeTIB: local thread memory alloc failed!!"));
+	DebugInt3();
+	return;
+   }
    if(OS2AllocSel(PAGE_SIZE, &tibsel) == FALSE)
    {
 	dprintf(("InitializeTIB: selector alloc failed!!"));
@@ -65,7 +71,8 @@ void InitializeTIB(BOOL fMainThread)
 	return;
    }
    memset(winteb, 0, PAGE_SIZE);
-   thdb = (THDB *)(winteb+1);
+   thdb       = (THDB *)(winteb+1);
+   TIBFlatPtr = (DWORD)winteb;
 
    winteb->except      = (PVOID)-1;               /* 00 Head of exception handling chain */
    winteb->stack_top   = (PVOID)OS2GetTIB(TIB_STACKTOP); /* 04 Top of thread stack */
@@ -82,6 +89,7 @@ void InitializeTIB(BOOL fMainThread)
    thdb->process         = &ProcessPDB;
    thdb->exit_code       = 0x103; /* STILL_ACTIVE */
    thdb->teb_sel         = tibsel;
+   thdb->OrgTIBSel       = GetFS();
 
    if(OS2GetPIB(PIB_TASKTYPE) == TASKTYPE_PM) 
    {
@@ -95,7 +103,6 @@ void InitializeTIB(BOOL fMainThread)
         //todo: initialize TLS array if required
         //TLS in executable always TLS index 0?
 	ProcessTIBSel = tibsel;
-	OS2Selector   = GetFS();	//0x150b
    }
    SetFS(tibsel);
    dprintf(("InitializeTIB set up TEB with selector %x", tibsel));
@@ -107,9 +114,26 @@ void InitializeTIB(BOOL fMainThread)
 //******************************************************************************
 void DestroyTIB()
 {
-   dprintf(("DestroyTIB: FS = %x", GetFS()));
 #ifdef WIN32_TIBSEL
-   OS2FreeSel(ProcessTIBSel);
+ SHORT  orgtibsel;
+ TEB   *winteb;
+ THDB  *thdb;
+
+   dprintf(("DestroyTIB: FS = %x", GetFS()));
+
+   winteb = (TEB *)TIBFlatPtr;
+   if(winteb) {
+	thdb = (THDB *)(winteb+1);
+	orgtibsel = thdb->OrgTIBSel;
+
+	//Restore our original FS selector
+   	SetFS(orgtibsel);
+
+   	//And free our own
+   	OS2FreeSel(thdb->teb_sel);
+   }
+   else	DebugInt3();
+
    return;
 #endif
 }
@@ -253,7 +277,7 @@ VOID WIN32API ExitProcess(DWORD exitcode)
 
 #ifdef WIN32_TIBSEL
   //Restore original OS/2 TIB selector
-  SetFS(OS2Selector);
+  DestroyTIB();
 #endif
 
   //avoid crashes since win32 & OS/2 exception handler aren't identical

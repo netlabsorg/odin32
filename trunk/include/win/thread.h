@@ -1,4 +1,4 @@
-/* $Id: thread.h,v 1.2 1999-06-19 13:57:50 sandervl Exp $ */
+/* $Id: thread.h,v 1.3 1999-06-19 17:58:50 sandervl Exp $ */
 
 /*
  * Thread definitions
@@ -87,6 +87,9 @@ typedef struct _THDB
     void          *server_tid;     /* Server id for this thread */
     void         (*startup)(void); /* Thread startup routine */
     struct _THDB  *next;           /* Global thread list */
+#ifdef __WIN32OS2__
+    DWORD          OrgTIBSel;	   // Original OS/2 TIB selector (always the same, but let's not assume too much for future compatibility)
+#endif
 } THDB;
 
 /* The pseudo handle value returned by GetCurrentThread */
