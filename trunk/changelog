@@ -1,9 +1,9 @@
-/* $Id: changelog,v 1.1509 2001-06-13 12:19:38 sandervl Exp $ */
+/* $Id: changelog,v 1.1510 2001-06-13 13:28:08 bird Exp $ */
 
  2001-06-13: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Corrected position of PM titlebar control
                 o Added SetWindowAppearance function that can be used
-                  by Odin32 apps to override the appearance (win32 or OS/2) 
+                  by Odin32 apps to override the appearance (win32 or OS/2)
                   of windows.
                 o Changed menu font for OS/2 appearance (bold)
                 o Draw system menu icon ourselves (OS/2 appearance)
@@ -20,6 +20,8 @@
                    in the NT sdk distributed with Watcom v11 - %WATCOM\sdk.)
     - Win32k/Pe2Lx:
                 o Allowed loading of images using the NATIVE subsystem.
+    - DailyBuild:
+                o Moved Odin.ini to system32 in daily .zips.
 
  2001-06-12: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Partly fixed position of PM frame controls
