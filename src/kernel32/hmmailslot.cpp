@@ -1,4 +1,4 @@
-/* $Id: hmmailslot.cpp,v 1.2 2001-09-05 12:57:58 bird Exp $
+/* $Id: hmmailslot.cpp,v 1.3 2001-11-26 14:54:02 sandervl Exp $
  *
  * Win32 mailslot APIs
  *
@@ -175,7 +175,8 @@ BOOL HMMailslotClass::CreateMailslotA(PHMHANDLEDATA pHMHandleData,
  * Author    : SvL
  *****************************************************************************/
 
-DWORD HMMailslotClass::CreateFile (LPCSTR        lpFileName,
+DWORD HMMailslotClass::CreateFile (HANDLE        hHandle,
+                                   LPCSTR        lpFileName,
                                    PHMHANDLEDATA pHMHandleData,
                                    PVOID         lpSecurityAttributes,
                                    PHMHANDLEDATA pHMHandleDataTemplate)

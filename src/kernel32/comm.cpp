@@ -1,4 +1,4 @@
-/* $Id: comm.cpp,v 1.6 2000-09-21 20:14:39 sandervl Exp $ */
+/* $Id: comm.cpp,v 1.7 2001-11-26 14:53:57 sandervl Exp $ */
 
 /*
  * Comport functions
@@ -760,6 +760,7 @@ BOOL WIN32API WaitCommEvent( HANDLE hCommDev,
                              LPDWORD lpfdwEvtMask,
                              LPOVERLAPPED lpo)
 {
+  dprintf(("WaitCommEvent %x %x %x", hCommDev, lpfdwEvtMask, lpo));
   return HMCommWaitCommEvent(hCommDev, lpfdwEvtMask, lpo);
 }
 

@@ -1,4 +1,4 @@
-/* $Id: hmparport.h,v 1.3 2001-11-08 15:38:42 phaller Exp $ */
+/* $Id: hmparport.h,v 1.4 2001-11-26 14:54:03 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -22,7 +22,8 @@ class HMDeviceParPortClass : public HMDeviceHandler
   virtual BOOL FindDevice(LPCSTR lpClassDevName, LPCSTR lpDeviceName, int namelength);
 
   /* this is the handler method for calls to CreateFile() */
-  virtual DWORD  CreateFile (LPCSTR        lpFileName,
+  virtual DWORD  CreateFile (HANDLE        hHandle,
+                             LPCSTR        lpFileName,
                              PHMHANDLEDATA pHMHandleData,
                              PVOID         lpSecurityAttributes,
                              PHMHANDLEDATA pHMHandleDataTemplate);

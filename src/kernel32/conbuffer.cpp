@@ -1,4 +1,4 @@
-/* $Id: conbuffer.cpp,v 1.14 2000-10-23 19:35:09 sandervl Exp $ */
+/* $Id: conbuffer.cpp,v 1.15 2001-11-26 14:53:58 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -97,7 +97,8 @@
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-DWORD HMDeviceConsoleBufferClass::CreateFile (LPCSTR        lpFileName,
+DWORD HMDeviceConsoleBufferClass::CreateFile (HANDLE        hHandle,
+                                              LPCSTR        lpFileName,
                                               PHMHANDLEDATA pHMHandleData,
                                               PVOID         lpSecurityAttributes,
                                               PHMHANDLEDATA pHMHandleDataTemplate)

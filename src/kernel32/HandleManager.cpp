@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.75 2001-11-23 18:58:24 phaller Exp $ */
+/* $Id: HandleManager.cpp,v 1.76 2001-11-26 14:53:57 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -1048,7 +1048,7 @@ HFILE HMCreateFile(LPCSTR lpFileName,
          &HMHandleTemp,
          sizeof(HMHANDLEDATA));
 
-  rc = pDeviceHandler->CreateFile(lpFileName,     /* call the device handler */
+  rc = pDeviceHandler->CreateFile((HANDLE)iIndexNew, lpFileName,     /* call the device handler */
                                   &HMHandleTemp,
                                   lpSecurityAttributes,
                                   pHMHandleData);
@@ -1200,7 +1200,7 @@ HANDLE HMOpenFile(LPCSTR    lpFileName,
   TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = iIndexNew;
   TabWin32Handles[iIndexNew].pDeviceHandler         = pDeviceHandler;
 
-  rc = pDeviceHandler->OpenFile  (lpFileName,     /* call the device handler */
+  rc = pDeviceHandler->OpenFile  ((HANDLE)iIndexNew,  lpFileName,     /* call the device handler */
                                   &TabWin32Handles[iIndexNew].hmHandleData,
                                   pOFStruct,
                                   fuMode);
@@ -3202,9 +3202,36 @@ BOOL HMDeviceIoControl(HANDLE hDevice, DWORD dwIoControlCode,
 
   return (fResult);                                   /* deliver return code */
 }
+/*****************************************************************************
+ * Name      : HMCancelIo
+ * Purpose   : router function for CancelIo
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Sander van Leeuwen
+ *****************************************************************************/
+BOOL  HMCancelIo(HANDLE hDevice)
+{
+  int       iIndex;                           /* index into the handle table */
+  BOOL      fResult;       /* result from the device handler's CloseHandle() */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
 
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hDevice);                           /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return (FALSE);                                        /* signal failure */
+  }
 
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  fResult = pHMHandle->pDeviceHandler->CancelIo(&pHMHandle->hmHandleData);
 
+  return (fResult);                                   /* deliver return code */
+}
 /*****************************************************************************
  * Name      : HMCOMGetCommState
  * Purpose   : router function for GetCommState

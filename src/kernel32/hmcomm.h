@@ -1,4 +1,4 @@
-/* $Id: hmcomm.h,v 1.8 2001-04-26 13:22:44 sandervl Exp $ */
+/* $Id: hmcomm.h,v 1.9 2001-11-26 14:54:00 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -11,11 +11,108 @@
 
 #ifndef _HM_COMM_H_
 #define _HM_COMM_H_
+
+#define MAGIC_COM 0x12abcd34
+
 typedef struct
 {
   DWORD dwBaudRate;
   DWORD dwBaudFlag;
 }BAUDTABLEENTRY;
+
+#define IOCTL_ASYNC          0x01
+#define ASYNC_GETDCBINFO     0x73
+#define ASYNC_SETDCBINFO     0x53
+#define ASYNC_SETLINECTRL    0x42
+#define ASYNC_GETCOMMEVENT   0x72
+#define ASYNC_EXTGETBAUDRATE 0x63
+#define ASYNC_EXTSETBAUDRATE 0x43
+#define ASYNC_GETCOMMERROR   0x6D
+#define ASYNC_GETCOMMSTATUS  0x65
+#define ASYNC_GETINQUECOUNT  0x68
+#define ASYNC_GETOUTQUECOUNT 0x69
+#define ASYNC_GETMODEMINPUT  0x67
+#define ASYNC_TRANSMITIMM    0x44
+#define ASYNC_SETBREAKON     0x4B
+#define ASYNC_SETBREAKOFF    0x45
+#define ASYNC_SETMODEMCTRL   0x46
+#define ASYNC_STARTTRANSMIT  0x48
+#define ASYNC_STOPTRANSMIT   0x47
+#define ASYNC_GETMODEMOUTPUT 0x66
+
+
+#pragma pack(1)
+typedef struct _DCBINFO
+{
+  USHORT   usWriteTimeout;         /*  Time period used for Write Timeout processing. */
+  USHORT   usReadTimeout;          /*  Time period used for Read Timeout processing. */
+  BYTE     fbCtlHndShake;          /*  HandShake Control flag. */
+  BYTE     fbFlowReplace;          /*  Flow Control flag. */
+  BYTE     fbTimeOut;              /*  Timeout flag. */
+  BYTE     bErrorReplacementChar;  /*  Error Replacement Character. */
+  BYTE     bBreakReplacementChar;  /*  Break Replacement Character. */
+  BYTE     bXONChar;               /*  Character XON. */
+  BYTE     bXOFFChar;              /*  Character XOFF. */
+} DCBINFO;
+typedef DCBINFO *PDCBINFO;
+
+
+typedef struct _RXQUEUE
+{
+  USHORT   cch;  /*  Number of characters in the queue. */
+  USHORT   cb;   /*  Size of receive/transmit queue. */
+} RXQUEUE;
+
+typedef RXQUEUE *PRXQUEUE;
+
+
+typedef struct _MODEMSTATUS
+{
+  BYTE   fbModemOn;   /*  Modem Control Signals ON Mask. */
+  BYTE   fbModemOff;  /*  Modem Control Signals OFF Mask. */
+} MODEMSTATUS;
+
+typedef MODEMSTATUS *PMODEMSTATUS;
+
+
+#pragma pack()
+
+typedef struct _HMDEVCOMDATA
+{
+  ULONG ulMagic;
+  // Win32 Device Control Block
+  COMMCONFIG   CommCfg;
+  COMMTIMEOUTS CommTOuts;
+  DWORD dwInBuffer, dwOutBuffer;
+  DWORD dwEventMask;
+  //overlapped IO info
+  HANDLE     hThread;
+  HANDLE     hEventSem;
+  OVERLAPPED overlapped;
+  DWORD      dwLastError;
+  BOOL       fClosing;
+  BOOL       fCancelIo;
+  //OS/2 Device Control Block
+  DCBINFO dcbOS2;
+} HMDEVCOMDATA, *PHMDEVCOMDATA;
+
+#pragma pack(1)
+typedef struct
+{
+  ULONG ulCurrBaud;
+  UCHAR ucCurrFrac;
+  ULONG ulMinBaud;
+  UCHAR ucMinFrac;
+  ULONG ulMaxBaud;
+  UCHAR ucMaxFrac;
+} EXTBAUDGET, *PEXTBAUDGET;
+
+typedef struct
+{
+  ULONG ulBaud;
+  UCHAR ucFrac;
+} EXTBAUDSET, *PEXTBAUDSET;
+#pragma pack()
 
 class HMDeviceCommClass : public HMDeviceHandler
 {
@@ -27,7 +124,8 @@ class HMDeviceCommClass : public HMDeviceHandler
   virtual BOOL FindDevice(LPCSTR lpClassDevName, LPCSTR lpDeviceName, int namelength);
 
   /* this is the handler method for calls to CreateFile() */
-  virtual DWORD  CreateFile (LPCSTR        lpFileName,
+  virtual DWORD  CreateFile (HANDLE        hHandle,
+                             LPCSTR        lpFileName,
                              PHMHANDLEDATA pHMHandleData,
                              PVOID         lpSecurityAttributes,
                              PHMHANDLEDATA pHMHandleDataTemplate);
@@ -110,6 +208,14 @@ class HMDeviceCommClass : public HMDeviceHandler
                             DWORD        nNumberOfBytesToWrite,
                             LPOVERLAPPED lpOverlapped,
                             LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine);
+
+  virtual BOOL   CancelIo           (PHMHANDLEDATA pHMHandleData);
+
+                /* this is a handler method for calls to GetOverlappedResult */
+  virtual BOOL GetOverlappedResult(PHMHANDLEDATA pHMHandleData,
+                                   LPOVERLAPPED  arg2,
+                                   LPDWORD       arg3,
+                                   BOOL          arg4);
 
   private:
   APIRET SetLine( PHMHANDLEDATA pHMHandleData,
