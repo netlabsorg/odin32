@@ -1,4 +1,4 @@
-/* $Id: initwinmm.cpp,v 1.4 2001-10-24 22:47:41 sandervl Exp $
+/* $Id: initwinmm.cpp,v 1.5 2001-10-27 08:21:42 sandervl Exp $
  *
  * WINMM DLL entry point
  *
@@ -38,6 +38,7 @@
 #include <misc.h>       /*PLF Wed  98-03-18 23:19:26*/
 #include <odin.h>
 #include <win32type.h>
+#include <win32api.h>
 #include <winconst.h>
 #include <odinlx.h>
 #include <initdll.h>
@@ -46,6 +47,7 @@
 #include "waveoutbase.h"
 #include <win\options.h>
 #include "initwinmm.h"
+#include <custombuild.h>
 
 #define DBG_LOCALLOG    DBG_initterm
 #include "dbglocal.h"
@@ -80,6 +82,7 @@ BOOL WINAPI LibMainWinmm(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 {
   static BOOL bInitDone = FALSE;
   char   szError[CCHMAXPATH];
+  HKEY   hKey;
 
   switch (fdwReason)
     {
@@ -137,7 +140,26 @@ BOOL WINAPI LibMainWinmm(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
             dprintf(("mciSendCommand    %x", pfnmciSendCommand));
             dprintf(("mciGetErrorString %x", pfnmciGetErrorString));
         }
+        if(fMMPMAvailable && RegOpenKeyA(HKEY_LOCAL_MACHINE, CUSTOM_BUILD_OPTIONS_KEY, &hKey) == 0) 
+        {
+            DWORD dwSize, dwType;
+            DWORD dwFlag;
 
+            dwSize = sizeof(dwFlag);
+            LONG rc = RegQueryValueExA(hKey, DISABLE_AUDIO_KEY,
+                                       NULL, &dwType,
+                                       (LPBYTE)&dwFlag,
+                                       &dwSize);
+
+            if(rc == 0 && dwType == REG_DWORD) {
+                if(dwFlag) {
+                    fMMPMAvailable = FALSE;
+                    pfnmciGetErrorString = NULL;
+                    pfnmciSendCommand = NULL;
+                }
+            }
+            RegCloseKey(hKey);
+        }
         return TRUE;
    }
 
