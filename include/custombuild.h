@@ -88,12 +88,6 @@ void WIN32API DisableDragDrop(BOOL fDisabled);
 //Turn off wave audio in winmm
 void WIN32API DisableWaveAudio();
 
-//Call to tell winmm to expect simple fixed size buffers, so
-//it doesn't have to use very small DART buffers; this will
-//only work in very specific cases; it is not a good general
-//purpose solution)
-void WIN32API SetFixedWaveBufferSize();
-
 //Override shared semaphore name used to synchronize global window handle
 //array access (to avoid name clash with Odin)
 void WIN32API SetCustomWndHandleSemName(LPSTR pszSemName);
@@ -225,6 +219,32 @@ void WIN32API ODIN_SetTIBSwitch(BOOL fSwitchTIB);
 //
 //******************************************************************************
 void WIN32API ODIN_DisableFolderShellLink();
+
+//******************************************************************************
+// ODIN_waveOutSetFixedBuffers
+//
+// Tell WINMM to use DART buffers of the same size as the first buffer delivered
+// by waveOutWrite
+//
+// NOTE: This will only work in very specific cases; it is not a good general
+//       purpose solution.
+// 
+//******************************************************************************
+void WIN32API ODIN_waveOutSetFixedBuffers();
+
+#define SetFixedWaveBufferSize ODIN_waveOutSetFixedBuffers
+
+//******************************************************************************
+// ODIN_waveInSetFixedBuffers
+//
+// Tell WINMM to use DART buffers of the same size as the first buffer delivered
+// by waveInAddBuffer
+//
+// NOTE: This will only work in very specific cases; it is not a good general
+//       purpose solution.
+// 
+//******************************************************************************
+void WIN32API ODIN_waveInSetFixedBuffers();
 
 #endif  /*__CUSTOMBUILD_H__*/
 
