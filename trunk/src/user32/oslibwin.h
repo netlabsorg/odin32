@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.11 1999-10-08 14:57:17 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.12 1999-10-08 16:13:08 cbratschi Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -38,7 +38,7 @@ BOOL  OSLibWinSetParent(HWND hwnd, HWND hwndParent, ULONG fRedraw = TRUE);
 HWND  OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
                            char *pszName, HWND Owner, ULONG fHWND_BOTTOM, HWND *hwndFrame);
 
-BOOL  OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle, ULONG *OSFrameStyle);
+BOOL  OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle, ULONG *OSFrameStyle, ULONG *borderWidth, ULONG *borderHeight);
 void  OSLibSetWindowStyle(HWND hwnd, ULONG dwStyle);
 
 BOOL  OSLibWinSetWindowULong(HWND hwnd, ULONG offset, ULONG value);
@@ -56,6 +56,15 @@ ULONG OSLibSendMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam);
 BOOL OSLibWinAlarm(HWND hwndDeskTop,ULONG flStyle);
 ULONG OSLibDosBeep(ULONG freg,ULONG dur);
 HWND OSLibWinQueryFocus(HWND hwndDeskTop);
+
+#define OSLIB_FID_SYSMENU                0x8002
+#define OSLIB_FID_TITLEBAR               0x8003
+#define OSLIB_FID_MINMAX                 0x8004
+#define OSLIB_FID_MENU                   0x8005
+#define OSLIB_FID_VERTSCROLL             0x8006
+#define OSLIB_FID_HORZSCROLL             0x8007
+#define OSLIB_FID_CLIENT                 0x8008
+
 HWND OSLibWinWindowFromID(HWND hwndParent,ULONG id);
 BOOL OSLibWinSetFocus(HWND hwndDeskTop,HWND hwndNewFocus, BOOL activate);
 ULONG OSLibGetWindowHeight(HWND hwnd); //for point transformation
@@ -247,16 +256,16 @@ BOOL  OSLibWinMapWindowPoints (HWND hwndFrom, HWND hwndTo, OSLIBPOINT *pptl, ULO
 
 HWND  OSLibWinObjectWindowFromID(HWND hwndOwner, ULONG ID);
 
-#define OSLIB_HSCROLL 	0
-#define OSLIB_VSCROLL	1
+#define OSLIB_HSCROLL   0
+#define OSLIB_VSCROLL   1
 BOOL  OSLibWinEnableScrollBar(HWND hwndParent, int scrollBar, BOOL fEnable);
 BOOL  OSLibWinShowScrollBar(HWND hwndParent, HWND hwndScroll, int scrollBar, BOOL fShow);
 HWND  OSLibWinQueryScrollBarHandle(HWND hwndParent, int scrollBar);
 ULONG OSLibWinGetScrollPos(HWND hwndParent, HWND hwndScroll);
 ULONG OSLibWinSetScrollPos(HWND hwndParent, HWND hwndScroll, int pos, int fRedraw);
-BOOL  OSLibWinSetScrollRange(HWND hwndParent, HWND hwndScroll, int minpos, 
+BOOL  OSLibWinSetScrollRange(HWND hwndParent, HWND hwndScroll, int minpos,
                              int maxpos, int fRedraw);
-BOOL  OSLibWinSetScrollPageSize(HWND hwndParent, HWND hwndScroll, int pagesize, 
+BOOL  OSLibWinSetScrollPageSize(HWND hwndParent, HWND hwndScroll, int pagesize,
                                 int totalsize, int fRedraw);
 
 void  OSLibTranslateScrollCmdAndMsg(ULONG *msg, ULONG *scrollcmd);
