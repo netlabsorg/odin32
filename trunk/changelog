@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2605 2003-07-16 15:47:59 sandervl Exp $ */
+/* $Id: changelog,v 1.2606 2003-07-16 18:07:19 sandervl Exp $ */
 
  2003-07-16: KO Myung-Hun <komh@chollian    >
     - SHELL32:  o DragQueryFileW; allocate more for unicode conversion (DBCS)
@@ -10,6 +10,9 @@
     - GDI32:    o Fixed GetTextFaceW() to support unicode correctly. (DBCS)
                 o Fixed calcDimensions(). The width is one point - other point + 1
                   (code currently not active)
+    - KERNEL32: o Added functions to query length after ascii or unicode conversion
+                o Changed the destination length parameter name of lstrcpynWtoA() 
+                  and lstrcpynAtoW().
 
  2002-07-16: Yuri Dario <mc6530@mclink   >
     - INSTALL:  o Do not overwrite program files registry entry if it already
