@@ -1,4 +1,4 @@
-# $Id: makefile.icc,v 1.8 2000-05-13 16:04:44 bird Exp $
+# $Id: makefile.icc,v 1.9 2000-05-13 17:17:46 bird Exp $
 
 #
 # PD-Win32 API
@@ -8,22 +8,27 @@
 #
 
 
-#
-# Include common definitions
-#
-PDWIN32_TOOLS   = ..\bin
+# Directory macros.
 PDWIN32_INCLUDE = ..\..\include
-!include $(PDWIN32_INCLUDE)\pdwin32.mk
+PDWIN32_BIN     = ..\..\bin\$(OBJDIR)
+PDWIN32_LIB     = ..\..\lib
+PDWIN32_TOOLS   = ..\bin
+PDWIN32_TCOMMON = ..\common
 
-# Definitions for pdwin32.post
+
+# Defines for the pdwin32.post and pdwin32.mk
+EXETARGET   = 1
 LOCALCLEAN  = 1
 CLEANEXTRAS = commonicc.lib
 
-#
+
+# Compiler, tools, and interference rules.
+!include $(PDWIN32_INCLUDE)\pdwin32.mk
+
+
 # Addjust common definitions...
-#
-CFLAGS   = $(CFLAGS)   -Ge+ -Tx+ -Tm+ -I$(PDWIN32_INCLUDE)      -Wall+ppt-ppc-inl-cnv-gnr-vft-
-CXXFLAGS = $(CXXFLAGS) -Ge+ -Gx- -Tx+ -Tm+ -I$(PDWIN32_INCLUDE) -Wall+ppt-ppc-inl-cnv-gnr-vft-
+CFLAGS   = $(CFLAGS)   -Wall+ppt-ppc-inl-cnv-gnr-vft-
+CXXFLAGS = $(CXXFLAGS) -Wall+ppt-ppc-inl-cnv-gnr-vft-
 
 
 #
@@ -40,9 +45,7 @@ $(OBJDIR)\kFileLx.obj\
 $(OBJDIR)\kFileFormatBase.obj
 
 
-#
 # All rule.
-#
 all:    $(OBJDIR) \
         commonicc.lib
 
@@ -54,9 +57,8 @@ $(OBJDIR)\commonicc.lib: $(OBJS)
     $(RM) $@
     $(ILIB) $@ $(OBJS: = +), NUL;
 
-#
-# dependent rule. forward to main makefile.
-#
+
+# Dependent rule. Forward to main makefile.
 dep:
     @$(MAKE) /nologo -f makefile NODEP=1 dep
 
