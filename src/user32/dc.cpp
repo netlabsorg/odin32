@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.4 1999-09-25 14:15:36 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.5 1999-09-26 10:09:58 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -1286,7 +1286,67 @@ BOOL WIN32API InvalidateRgn (HWND hwnd, HRGN hrgn, BOOL erase)
    SetFS(sel);
    return (result);
 }
-
 //******************************************************************************
 //******************************************************************************
+BOOL WIN32API ScrollWindow(HWND hwnd, int dx, int dy, const RECT *pScroll, const RECT *pClip)
+{
+ Win32BaseWindow *window;
+ APIRET  rc;
+ RECTL   clientRect;
+ RECTL   scrollRect;
+ RECTL   clipRect;
+ PRECTL  pScrollRect = NULL;
+ PRECTL  pClipRect   = NULL;
+ ULONG   scrollFlags = 0;
 
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if(!window) {
+        dprintf(("ScrollWindow, window %x not found", hwnd));
+        return 0;
+    }
+    dprintf(("ScrollWindow %x %d %d\n", hwnd, dx, dy));
+    MapWin32ToOS2Rectl(window->getClientRect(), (PRECTLOS2)&clientRect);
+    if(pScroll) {
+    	 MapWin32ToOS2Rectl((RECT *)pScroll, (PRECTLOS2)&scrollRect);
+	 pScrollRect = &scrollRect;
+
+	 //Scroll rectangle relative to client area
+         pScrollRect->xLeft   += clientRect.xLeft;
+         pScrollRect->xRight  += clientRect.xLeft;
+         pScrollRect->yTop    += clientRect.yBottom;
+         pScrollRect->yBottom += clientRect.yBottom;
+         WinIntersectRect ((HAB) 0, pScrollRect, pScrollRect, &clientRect);
+    }
+    else scrollFlags |= SW_SCROLLCHILDREN;
+
+    if(pClip) {
+    	 MapWin32ToOS2Rectl((RECT *)pClip, (PRECTLOS2)&clipRect);
+	 pClipRect = &clipRect;
+
+	 //Clip rectangle relative to client area
+         pClipRect->xLeft     += clientRect.xLeft;
+         pClipRect->xRight    += clientRect.xLeft;
+         pClipRect->yTop      += clientRect.yBottom;
+         pClipRect->yBottom   += clientRect.yBottom;
+         WinIntersectRect ((HAB) 0, pClipRect, pClipRect, &clientRect);
+    }
+
+    dy = -dy; //always correct?
+
+    rc = WinScrollWindow(window->getOS2WindowHandle(), dx, dy,
+                         pScrollRect, pClipRect, NULLHANDLE,
+                         NULL, scrollFlags);
+
+    return (rc != RGN_ERROR);
+}
+//******************************************************************************
+//TODO: Implement this one
+//******************************************************************************
+INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, const RECT *pClip, 
+                            HRGN hrgnUpdate, PRECT pRectUpdate, UINT scrollFlag)
+{
+    dprintf(("USER32:  ScrollWindowEx NOT CORRECTLY IMPLEMENTED\n"));
+    return ScrollWindow(hwnd, dx, dy, pScroll, pClip);
+}
+//******************************************************************************
+//******************************************************************************

@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.21 1999-09-23 10:33:59 sandervl Exp $
+# $Id: Makefile,v 1.22 1999-09-26 10:09:59 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -32,7 +32,7 @@ OBJS =  user32.obj loadres.obj \
         controls.obj button.obj static.obj scroll.obj listbox.obj \
         combo.obj edit.obj clipboard.obj winicon.obj win32wmdiclient.obj \
         oslibutil.obj oslibmsg.obj dib.obj oslibdos.obj win32wmdichild.obj \
-        winprop.obj wingdi.obj oslibgdi.obj winaccel.obj winscrollbar.obj \
+        winprop.obj wingdi.obj oslibgdi.obj winaccel.obj \
         nativerc.obj oslibres.obj dummy.obj oslibmenu.obj dc.obj\
         windlgmsg.obj windlg.obj win32wdesktop.obj
 
@@ -81,7 +81,7 @@ spy.obj: spy.cpp $(PDWIN32_INCLUDE)\spy.h
 controls.obj: controls.cpp $(PDWIN32_INCLUDE)\win\controls.h win32wmdiclient.h win32dlg.h win32wdesktop.h
 button.obj: button.cpp $(PDWIN32_INCLUDE)\win\button.h
 static.obj: static.cpp $(PDWIN32_INCLUDE)\win\static.h
-scroll.obj: scroll.cpp $(PDWIN32_INCLUDE)\win\scroll.h
+scroll.obj: scroll.cpp $(PDWIN32_INCLUDE)\win\scroll.h win32wbase.h
 listbox.obj: listbox.cpp $(PDWIN32_INCLUDE)\win\combo.h
 combo.obj: combo.cpp $(PDWIN32_INCLUDE)\win\combo.h
 edit.obj: edit.cpp $(PDWIN32_INCLUDE)\win\combo.h
@@ -96,7 +96,6 @@ wingdi.obj:    wingdi.cpp win32wbase.h oslibgdi.h
 windowclass.obj: windowclass.cpp win32class.h win32wbase.h win32wndchild.h
 windowword.obj:  windowword.cpp win32class.h win32wbase.h win32dlg.h win32wndchild.h
 winaccel.obj:     winaccel.cpp  $(PDWIN32_INCLUDE)\winres.h win32wbase.h
-winscrollbar.obj: winscrollbar.cpp win32wbase.h
 winicon.obj:    winicon.cpp $(PDWIN32_INCLUDE)\winicon.h win32wbase.h
 windlg.obj:    windlg.cpp win32wbase.h win32dlg.h
 windlgmsg.obj: windlgmsg.cpp win32class.h win32wbase.h win32dlg.h win32wndchild.h

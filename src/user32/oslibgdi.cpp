@@ -1,4 +1,4 @@
-/* $Id: oslibgdi.cpp,v 1.1 1999-09-15 23:18:53 sandervl Exp $ */
+/* $Id: oslibgdi.cpp,v 1.2 1999-09-26 10:09:59 sandervl Exp $ */
 /*
  * Window GDI wrapper functions for OS/2
  *
@@ -126,7 +126,7 @@ BOOL MapOS2ToWin32Rectl(PRECTLOS2 rectOS2, PRECT rectWin32)
 //******************************************************************************
 BOOL MapWin32ToOS2Rectl(PRECT rectWin32, PRECTLOS2 rectOS2)
 {
- ULONG length = rectWin32->top - rectWin32->bottom;
+ ULONG length = rectWin32->bottom - rectWin32->top;
 
     rectOS2->yBottom = length - rectWin32->bottom;
     rectOS2->yTop    = length - rectWin32->top;

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.13 1999-09-25 16:49:30 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.14 1999-09-26 10:10:01 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -824,6 +824,14 @@ ULONG Win32BaseWindow::MsgTimer(ULONG TimerID)
 {
   // TODO: call TIMERPROC if not NULL
   return SendInternalMessageA(WM_TIMER, TimerID, 0);
+}
+//******************************************************************************
+//******************************************************************************
+ULONG Win32BaseWindow::MsgScroll(ULONG msg, ULONG scrollCode, ULONG scrollPos)
+{
+  //According to the SDK docs, the scrollbar handle (lParam) is 0 when the standard
+  //window scrollbars send these messages
+  return SendInternalMessageA(msg, MAKELONG(scrollCode, scrollPos), 0);
 }
 //******************************************************************************
 //******************************************************************************
