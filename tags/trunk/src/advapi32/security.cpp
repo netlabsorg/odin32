@@ -1,4 +1,4 @@
-/* $Id: security.cpp,v 1.6 2000-10-21 14:29:49 sandervl Exp $ */
+/* $Id: security.cpp,v 1.7 2000-10-26 17:26:59 sandervl Exp $ */
 /*
  * Win32 security API functions for OS/2
  *
@@ -168,6 +168,51 @@ GetTokenInformation( HANDLE token, TOKEN_INFORMATION_CLASS tokeninfoclass,
 	######	SID FUNCTIONS	######
 	##############################
 */
+
+/******************************************************************************
+ * AllocateAndInitializeSid [ADVAPI32.11]
+ *
+ * PARAMS
+ *   pIdentifierAuthority []
+ *   nSubAuthorityCount   []
+ *   nSubAuthority0       []
+ *   nSubAuthority1       []
+ *   nSubAuthority2       []
+ *   nSubAuthority3       []
+ *   nSubAuthority4       []
+ *   nSubAuthority5       []
+ *   nSubAuthority6       []
+ *   nSubAuthority7       []
+ *   pSid                 []
+ */
+BOOL WINAPI
+AllocateAndInitializeSid( PSID_IDENTIFIER_AUTHORITY pIdentifierAuthority,
+                          BYTE nSubAuthorityCount,
+                          DWORD nSubAuthority0, DWORD nSubAuthority1,
+                          DWORD nSubAuthority2, DWORD nSubAuthority3,
+                          DWORD nSubAuthority4, DWORD nSubAuthority5,
+                          DWORD nSubAuthority6, DWORD nSubAuthority7,
+                          PSID *pSid )
+{
+	return RtlAllocateAndInitializeSid(
+		pIdentifierAuthority, nSubAuthorityCount, 
+		nSubAuthority0, nSubAuthority1,	nSubAuthority2, nSubAuthority3,
+		nSubAuthority4, nSubAuthority5, nSubAuthority6, nSubAuthority7,
+		pSid );
+}
+
+/******************************************************************************
+ * FreeSid [ADVAPI32.42]
+ *
+ * PARAMS
+ *   pSid []
+ */
+PVOID WINAPI
+FreeSid( PSID pSid )
+{
+    	RtlFreeSid(pSid); 
+	return NULL; /* is documented like this */
+}
 
 /******************************************************************************
  * CopySid [ADVAPI32.24]
