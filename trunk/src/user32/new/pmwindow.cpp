@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.16 1999-07-25 17:47:24 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.17 1999-07-26 09:01:34 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -230,7 +230,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                 dprintf(("WM_SIZE: WinQueryWindowPos failed!"));
                 break;
         }
-        dprintf(("OS2: WM_SIZE %x %x (%d,%d) (%d,%d)", hwnd, swp.fl, swp.x, swp.y, swp.cx, swp.cy));
+        dprintf(("OS2: WM_SIZE %x %x (%d,%d) (%d,%d) (%d,%d)", hwnd, swp.fl, swp.x, swp.y, swp.cx, swp.cy, SHORT1FROMMP(mp2), SHORT2FROMMP(mp2)));
         if(win32wnd->MsgSize(SHORT1FROMMP(mp2), SHORT2FROMMP(mp2),
                                 (swp.fl & SWP_MINIMIZE) != 0,
                                 (swp.fl & SWP_MAXIMIZE) != 0))

@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.19 1999-07-24 14:01:44 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.20 1999-07-26 09:01:34 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -47,14 +47,19 @@ HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
   if(pszName && *pszName == 0) {
         pszName = NULL;
   }
-  if(hwndParent == 0) {
+  if(hwndParent == OSLIB_HWND_DESKTOP) {
         hwndParent = HWND_DESKTOP;
   }
+  if(Owner == OSLIB_HWND_DESKTOP) {
+        Owner = HWND_DESKTOP;
+  }
+
   if(dwFrameStyle) {
         dwWinStyle &= ~WS_CLIPCHILDREN; //invalid style according to docs
         if(pszName)
                 dwFrameStyle |= FCF_TITLEBAR;
 
+        dwFrameStyle |= FCF_TASKLIST;
         *hwndFrame = WinCreateStdWindow(hwndParent, dwWinStyle,
                                        &dwFrameStyle, WIN32_STDCLASS,
                                        "", 0, 0, 0, &hwndClient);
@@ -75,7 +80,7 @@ HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG *OSWinStyle, ULONG *OSFrameStyle)
+BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle, ULONG *OSFrameStyle)
 {
   *OSWinStyle   = 0;
   *OSFrameStyle = 0;
@@ -119,6 +124,9 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG *OSWinStyle, ULONG *OSFrameStyle)
         *OSFrameStyle |= FCF_MINBUTTON;
   if(dwStyle & WINWS_MAXIMIZEBOX)
         *OSFrameStyle |= FCF_MAXBUTTON;
+
+  if(dwExStyle & WINWS_EX_DLGMODALFRAME)
+        *OSFrameStyle |= FCF_DLGBORDER;
 
   return TRUE;
 }
@@ -216,8 +224,9 @@ BOOL OSLibWinSetWindowPos(HWND hwnd, HWND hwndInsertBehind, LONG x, LONG y, LONG
                           LONG cy, ULONG fl)
 {
  HWND hwndParent = hwndInsertBehind;
+ BOOL rc;
 
-  if(fl & SWP_MOVE) {
+    if(fl & SWP_MOVE) {
         switch(hwndParent)
         {
             case HWNDOS_TOP:
@@ -226,9 +235,10 @@ BOOL OSLibWinSetWindowPos(HWND hwnd, HWND hwndInsertBehind, LONG x, LONG y, LONG
                 break;
         }
         y = MapOS2ToWin32Y(hwndParent, cy, y);
-  }
-  dprintf(("WinSetWindowPos %x %x %d %d %d %d %x", hwnd, hwndInsertBehind, x, y, cx, cy, fl));
-  return WinSetWindowPos(hwnd, hwndInsertBehind, x, y, cx, cy, fl);
+    }
+    rc = WinSetWindowPos(hwnd, hwndInsertBehind, x, y, cx, cy, fl);
+    dprintf(("WinSetWindowPos %x %x %d %d %d %d %x returned %d (%x)", hwnd, hwndInsertBehind, x, y, cx, cy, fl, rc, WinGetLastError(GetThreadHAB())));
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
