@@ -298,7 +298,7 @@ class CVSFile
                         if (($sVal = trim($sVal)) != "")
                         {
                             if ($iColon = strpos($sVal, ":"))
-                                $asValue[substr($sVal, 0, $iColon-1)] = substr($sVal, $iColon+1);
+                                $asValue[substr($sVal, 0, $iColon)] = substr($sVal, $iColon+1);
                             else
                                 echo "\n<!-- error in symbols parsing -->\n";
                         }
@@ -405,7 +405,7 @@ class CVSFile
     /**
      * Prints the contents of the file to stdout.
      *
-     * Color coding is enabled. (TODO)
+     * Color coding is enabled.
      *
      * Currently only $sRevision == head revision is supported
      * @returns       Success indicator (true / false)
@@ -419,12 +419,6 @@ class CVSFile
         if (!isset($this->aasDeltas[$sRevision]))
         {
             $this->sError = "CVSFile::PrintRevision is called with an invalid revision number. ($sRevision)";
-            return 0;
-        }
-        /* to-be-removed - TODO - FIXME */
-        if ($sRevision != $this->aasKeys["head"][0])
-        {
-            $this->sError = "CVSFile::PrintRevision is called with an invalid revision number (not head).";
             return 0;
         }
 
@@ -510,33 +504,129 @@ class CVSFile
          * Write it!
          */
         $Timer = Odin32DBTimerStart("Write timer");
-        echo "<tr><td bgcolor=#020286><pre><font size=-0 face=\"System VIO, System Monospaced\" color=#02FEFE>\n";
-
-        for ($cLines = sizeof($this->aasDeltas[$sRevision]), $iLine = 0;
-             ($iLine < $cLines);
-             $iLine++)
+        echo "<tr><td bgcolor=#020286><pre><font size=-0 face=\"System VIO, System Monospaced\" color=#02FEFE>";
+        if ($sRevision == $this->aasKeys["head"][0])
         {
-            /*
-             * Preprocessing... Color coding
-             */
-            echo "<a name=$iLine>";
-            switch ($iColorEncoder)
+            //head revision
+            for ($cLines = sizeof($this->aasDeltas[$sRevision]), $iLine = 0;
+                 ($iLine < $cLines);
+                 $iLine++)
             {
-                case 1:
-                    echo  str_replace("\t", "    ", C_ColorEncode(htmlspecialchars($this->aasDeltas[$sRevision][$iLine]), $aVariables));
-                    break;
-                case 2:
-                    echo  str_replace("\t", "    ", ASM_ColorEncode(htmlspecialchars($this->aasDeltas[$sRevision][$iLine]), $aVariables));
-                    break;
-                case 3:
-                    echo  str_replace("\t", "    ", Make_ColorEncode(htmlspecialchars($this->aasDeltas[$sRevision][$iLine]), $aVariables));
-                    break;
-                default:
-                    echo  str_replace("\t", "    ", htmlspecialchars($this->aasDeltas[$sRevision][$iLine]));
+                /*
+                 * Preprocessing... Color coding
+                 */
+                echo "<a name=$iLine>";
+                switch ($iColorEncoder)
+                {
+                    case 1:
+                        echo  str_replace("\t", "    ", C_ColorEncode(htmlspecialchars($this->aasDeltas[$sRevision][$iLine]), $aVariables));
+                        break;
+                    case 2:
+                        echo  str_replace("\t", "    ", ASM_ColorEncode(htmlspecialchars($this->aasDeltas[$sRevision][$iLine]), $aVariables));
+                        break;
+                    case 3:
+                        echo  str_replace("\t", "    ", Make_ColorEncode(htmlspecialchars($this->aasDeltas[$sRevision][$iLine]), $aVariables));
+                        break;
+                    default:
+                        echo  str_replace("\t", "    ", htmlspecialchars($this->aasDeltas[$sRevision][$iLine]));
+                }
+                echo "</a>";
             }
-            echo "</a>";
         }
+        else
+        {
+            //build revision
+            $sRev = $this->aasKeys["head"][0];
+            $asText = $this->aasDeltas[$sRev];
+            $sBranch = substr($sRevision, 0, strrpos($sRevision, ".")+1);
+            //echo "<!-- \$sBranch=$sBranch -->";
+            do
+            {
+                /*
+                 * determin revision.
+                 * (hope this works ok...)
+                 */
+                reset($this->aaasRevs[$sRev]["branches"]);
+                while (list($sIgnore, $sB) = each($this->aaasRevs[$sRev]["branches"]))
+                {
+                    $sB = trim($sB);
+                    if ($f = (substr($sB, 0, strrpos($sB, ".")+1) == $sBranch))
+                    {
+                        $sRev = $sB;
+                        break;
+                    }
+                }
+                if (!$f)    $sRev = $this->aaasRevs[$sRev]["next"][0];
+                //echo "<!-- \$sRev=$sRev -->";
 
+
+                /*
+                 * Apply the delta.
+                 */
+                $asOrg  = $asText;
+                $asText = array();
+                $iOrg   = 0;
+                $cOrg   = sizeof($asOrg);
+                $iDelta = 0;
+                $cDelta = sizeof($this->aasDeltas[$sRev]);
+                $iText  = 0;
+                while ($cDelta > $iDelta)
+                {
+                    //get the next diff chunk
+                    $iDiff = (int)substr($this->aasDeltas[$sRev][$iDelta], 1, strpos($this->aasDeltas[$sRev], " ") - 1) - 1;
+
+                    //skip to it
+                    while ($iDiff > $iOrg && $iOrg < $cOrg)
+                        $asText[$iText++] = $asOrg[$iOrg++];
+
+                    //apply it
+                    $c = (int)substr($this->aasDeltas[$sRev][$iDelta],
+                                     strpos($this->aasDeltas[$sRev][$iDelta], " ") + 1);
+                    $iDelta++;
+                    if ($this->aasDeltas[$sRev][$iDelta][0] == 'a')
+                    {
+                        while ($iDelta < $cDelta && $c-- > 0)
+                            $asText[$iText++] = $this->aasDeltas[$sRev][$iDelta++];
+
+                        while ($c-- > 0)
+                            $asText[$iText++] = "";
+                    }
+                    else
+                        $iOrg += $c;
+                }
+
+                //copy remaining
+                while ($iOrg < $cOrg)
+                    $asText[$iText++] = $asOrg[$iOrg++];
+
+            } while ($sRev != "" && $sRev != $sRevision);
+
+            /*
+             * Print it
+             */
+            for ($cLines = sizeof($asText), $iLine = 0; $iLine < $cLines; $iLine++)
+            {
+                /*
+                 * Preprocessing... Color coding
+                 */
+                echo "<a name=$iLine>";
+                switch ($iColorEncoder)
+                {
+                    case 1:
+                        echo  str_replace("\t", "    ", C_ColorEncode(htmlspecialchars($asText[$iLine]), $aVariables));
+                        break;
+                    case 2:
+                        echo  str_replace("\t", "    ", ASM_ColorEncode(htmlspecialchars($asText[$iLine]), $aVariables));
+                        break;
+                    case 3:
+                        echo  str_replace("\t", "    ", Make_ColorEncode(htmlspecialchars($asText[$iLine]), $aVariables));
+                        break;
+                    default:
+                        echo  str_replace("\t", "    ", htmlspecialchars($asText[$iLine]));
+                }
+                echo "</a>";
+            }
+        }
         echo "                                                                               \n", //80-columns line
              "</pre></td></tr></table>\n";
         Odin32DBTimerStop($Timer);
