@@ -1,4 +1,4 @@
-# $Id: Extract.mak,v 1.2 2002-03-10 04:28:03 bird Exp $
+# $Id: Extract.mak,v 1.3 2002-03-10 04:49:50 bird Exp $
 
 #
 # kKrnlLib/krnl makefile.
@@ -11,6 +11,7 @@
 !include ..\..\makefile.inc
 PATH_ROOT = ..\..\..\..
 !include $(PATH_ROOT)\tools\make\setup.mak
+PATH_BIN   = $(PATH_TOOLS)
 
 
 #
