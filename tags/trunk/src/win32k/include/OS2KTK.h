@@ -1,4 +1,4 @@
-/* $Id: OS2KTK.h,v 1.1 2000-07-16 22:21:18 bird Exp $
+/* $Id: OS2KTK.h,v 1.2 2000-09-02 21:08:00 bird Exp $
  *
  * OS2KTK - OS/2 Kernel Task.
  *
@@ -20,36 +20,36 @@
 
 
 #define TKFuChar(pch, pchUsr) \
-            TKFuBuff((PVOID)pch, (PVOID)pchUsr, sizeof(char), TK_FUSU_FATAL);
+            TKFuBuff((PVOID)pch, (PVOID)pchUsr, sizeof(char), TK_FUSU_FATAL)
 #define TKSuChar(pchUsr, pch) \
-            TKSuBuff((PVOID)pchUsr, (PVOID)pch, sizeof(char), TK_FUSU_FATAL);
+            TKSuBuff((PVOID)pchUsr, (PVOID)pch, sizeof(char), TK_FUSU_FATAL)
 
 #define TKFuCharNF(pch, pchUsr) \
-            TKFuBuff((PVOID)pch, (PVOID)pchUsr, sizeof(char), TK_FUSU_NONFATAL);
+            TKFuBuff((PVOID)pch, (PVOID)pchUsr, sizeof(char), TK_FUSU_NONFATAL)
 #define TKSuCharNF(pchUsr, pch) \
-            TKSuBuff((PVOID)pchUsr, (PVOID)pch, sizeof(char), TK_FUSU_NONFATAL);
+            TKSuBuff((PVOID)pchUsr, (PVOID)pch, sizeof(char), TK_FUSU_NONFATAL)
 
 
 #define TKFuUShort(pus, pusUsr) \
-            TKFuBuff((PVOID)pus, (PVOID)pusUsr, sizeof(USHORT), TK_FUSU_FATAL);
+            TKFuBuff((PVOID)pus, (PVOID)pusUsr, sizeof(USHORT), TK_FUSU_FATAL)
 #define TKSuUShort(pusUsr, pus) \
-            TKSuBuff((PVOID)pusUsr, (PVOID)pus, sizeof(USHORT), TK_FUSU_FATAL);
+            TKSuBuff((PVOID)pusUsr, (PVOID)pus, sizeof(USHORT), TK_FUSU_FATAL)
 
 #define TKFuUShortNF(pus, pusUsr) \
-            TKFuBuff((PVOID)pus, (PVOID)pusUsr, sizeof(USHORT), TK_FUSU_NONFATAL);
+            TKFuBuff((PVOID)pus, (PVOID)pusUsr, sizeof(USHORT), TK_FUSU_NONFATAL)
 #define TKSuUShortNF(pusUsr, pus) \
-            TKSuBuff((PVOID)pusUsr, (PVOID)pus, sizeof(USHORT), TK_FUSU_NONFATAL);
+            TKSuBuff((PVOID)pusUsr, (PVOID)pus, sizeof(USHORT), TK_FUSU_NONFATAL)
 
 
 #define TKFuULong(pul, pulUsr) \
-            TKFuBuff((PVOID)pul, (PVOID)pulUsr, sizeof(ULONG), TK_FUSU_FATAL);
+            TKFuBuff((PVOID)pul, (PVOID)pulUsr, sizeof(ULONG), TK_FUSU_FATAL)
 #define TKSuULong(pulUsr, pul) \
-            TKSuBuff((PVOID)pulUsr, (PVOID)pul, sizeof(ULONG), TK_FUSU_FATAL);
+            TKSuBuff((PVOID)pulUsr, (PVOID)pul, sizeof(ULONG), TK_FUSU_FATAL)
 
 #define TKFuULongNF(pul, pulUsr) \
-            TKFuBuff((PVOID)pul, (PVOID)pulUsr, sizeof(ULONG), TK_FUSU_NONFATAL);
+            TKFuBuff((PVOID)pul, (PVOID)pulUsr, sizeof(ULONG), TK_FUSU_NONFATAL)
 #define TKSuULongNF(pulUsr, pul) \
-            TKSuBuff((PVOID)pulUsr, (PVOID)pul, sizeof(ULONG), TK_FUSU_NONFATAL);
+            TKSuBuff((PVOID)pulUsr, (PVOID)pul, sizeof(ULONG), TK_FUSU_NONFATAL)
 
 
 #define TKFuStrLen(pcch, pvUsr, cchMax) \

@@ -1,14 +1,14 @@
-/* $Id: ModuleBase.h,v 1.3 2000-02-27 02:16:43 bird Exp $
+/* $Id: ModuleBase.h,v 1.4 2000-09-02 21:07:59 bird Exp $
  *
  * ModuleBase - Declaration of the Basic module class.
  *
- * Copyright (c) 1999 knut st. osmundsen
+ * Copyright (c) 1999-2000 knut st. osmundsen
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
-#ifndef _MODULEBASE_H_
-#define _MODULEBASE_H_
+#ifndef _modulebase_h_
+#define _modulebase_h_
 
 
 /*******************************************************************************
@@ -72,18 +72,18 @@
  *           an amount of bytes, cbToRead.
  *           RING0: Map this to ldrRead with 0UL as flFlags.
  *           RING3: Implementes this function as a static function, ReadAt.
- *  ReadAtF: Same as ReadAt but two extra parameters; an additional flag and a pointer to an MTE.
- *           Used in the read method.
+ *  ReadAtF: Same as ReadAt but two extra parameters; an additional far pointer to the buffer and
+ *           a MTE pointer. Used in the read method.
  *           RING0: Map directly to ldrRead.
  *           RING3: Map to ReadAt, ignoring the two extra parameters.
  */
 #ifdef RING0
     #define ReadAt(hFile, ulOffset, pvBuffer, cbToRead) \
         ldrRead(hFile, ulOffset, pvBuffer, 0UL, cbToRead, NULL)
-    #define ReadAtF(hFile, ulOffset, pvBuffer, cbToRead, flFlags, pMTE) \
-        ldrRead(hFile, ulOffset, pvBuffer, flFlags, cbToRead, pMTE)
+    #define ReadAtF(hFile, ulOffset, pvBuffer, fpBuffer, cbToRead, pMTE) \
+        ldrRead(hFile, ulOffset, pvBuffer, fpBuffer, cbToRead, pMTE)
 #else
-    #define ReadAtF(hFile, ulOffset, pvBuffer, cbToRead, flFlags, pMTE) \
+    #define ReadAtF(hFile, ulOffset, pvBuffer, fpBuffer, cbToRead, pMTE) \
         ReadAt(hFile, ulOffset, pvBuffer, cbToRead)
 #endif
 
@@ -95,7 +95,12 @@
 APIRET ReadAt(SFN hFile, ULONG ulOffset, PVOID pvBuffer, ULONG cbToRead);
 #endif
 
-
+/*
+ * Make sure that pLdrLv is defined.
+ */
+#if !defined(RING0) && !defined(_ldrCalls_h_)
+typedef struct ldrlv_s  ldrlv_t;
+#endif
 
 /**
  * Base class for executable modules.
@@ -110,17 +115,20 @@ public:
     virtual ~ModuleBase();
 
     /** @cat Public Main methods */
-    virtual ULONG  init(PCSZ pszFilename);
-    virtual ULONG  read(ULONG offLXFile, PVOID pvBuffer, ULONG cbToRead, ULONG flFlags, PMTE pMTE) = 0;
-    virtual ULONG  applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID pvPage,
-                               ULONG ulPageAddress, PVOID pvPTDA); /*(ldrEnum32bitRelRecs)*/
+    virtual ULONG   init(PCSZ pszFilename);
+    virtual ULONG   read(ULONG offLXFile, PVOID pvBuffer, ULONG fpBuffer, ULONG cbToRead, PMTE pMTE) = 0;
+    virtual ULONG   applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID pvPage,
+                                ULONG ulPageAddress, PVOID pvPTDA); /*(ldrEnum32bitRelRecs)*/
+    virtual ULONG   openPath(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *pLdrLv, PULONG pful); /* (ldrOpenPath) */
     #ifndef RING0
-    virtual ULONG  writeFile(PCSZ pszLXFilename);
+    virtual ULONG   writeFile(PCSZ pszLXFilename);
     #endif
 
     /** @cat public Helper methods */
-    virtual VOID   dumpVirtualLxFile() = 0;
-    BOOL           queryIsModuleName(PCSZ pszFilename);
+    virtual VOID    dumpVirtualLxFile() = 0;
+    BOOL            queryIsModuleName(PCSZ pszFilename);
+    PCSZ            getFilename();
+    PCSZ            getModuleName();
 
     /** @cat static print method */
     static VOID     printf(PCSZ pszFormat, ...);
@@ -132,7 +140,7 @@ protected:
     #endif
     SFN         hFile;                  /* filehandle */
     PSZ         pszFilename;            /* fullpath */
-    PSZ         pszModuleName;          /* filename without extention. */
+    PSZ         pszModuleName;          /* filename without path and extention. */
 
     /** @cat public static data. */
 public:

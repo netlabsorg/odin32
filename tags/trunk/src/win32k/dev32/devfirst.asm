@@ -1,4 +1,4 @@
-; $Id: devfirst.asm,v 1.5 2000-02-25 18:15:03 bird Exp $
+; $Id: devfirst.asm,v 1.6 2000-09-02 21:07:58 bird Exp $
 ;
 ; DevFirst - entrypoint and segment definitions
 ;
@@ -18,10 +18,12 @@
 ; Exported symbols
 ;
     public CODE16START
+    public CODE16_INITSTART
     public DATA16START
     public DATA16START
     public DATA16_BSSSTART
     public DATA16_CONSTSTART
+    public DATA16_INITSTART
     public CODE16START
     public CODE32START
     public DATA32START
@@ -59,11 +61,13 @@ CODE16START label byte
     .286p
 ;$win32ki entry point
 _strategyAsm0:
+;    int 3
     push    0
     jmp     _strategyAsm
 
 ;$win32k entry point
 _strategyAsm1:
+;    int 3
     push    1
     jmp     _strategyAsm
 
@@ -100,7 +104,7 @@ _CallGetKernelInfo32 PROC NEAR
     push    word ptr [esp+6]            ; push low word.
     call    far ptr FLAT:GETKERNELINFO32
     pop     ds
-    retn
+    ret
 _CallGetKernelInfo32 ENDP
 
 
@@ -154,7 +158,7 @@ _CallWin32kIOCtl ENDP
 ; @status    completely  implemented.
 ; @author    knut st. osmundsen
 ; @remark    es is cs, not ds!
-_SSToDS_16a proc near
+_SSToDS_16a proc NEAR
     assume CS:CODE16, DS:DATA16, ES:NOTHING
     mov     edx, ds:_TKSSBase16         ; get pointer held by _TKSSBase16 (pointer to stack base)
     call    far ptr FLAT:far_getCS      ; get flat selector.
@@ -167,7 +171,7 @@ _SSToDS_16a proc near
     add     eax, edx                    ; 32-bit stack pointer in eax
     mov     edx, eax
     shr     edx, 16                     ; dx high 16-bit of 32-bit stack pointer.
-    ret
+    retn
 _SSToDS_16a endp
 
 CODE16 ends
@@ -217,6 +221,9 @@ GetOS2KrnlMTE ENDP
 
 CODE32 ends
 
+CODE16_INIT segment
+CODE16_INITSTART label byte
+CODE16_INIT ends
 
 DATA16 segment
 DATA16START label byte
@@ -229,6 +236,10 @@ DATA16_BSS ends
 DATA16_CONST segment
 DATA16_CONSTSTART label byte
 DATA16_CONST ends
+
+DATA16_INIT segment
+DATA16_INITSTART label byte
+DATA16_INIT ends
 
 DATA32 segment
 DATA32START label byte

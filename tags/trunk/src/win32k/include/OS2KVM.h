@@ -1,4 +1,4 @@
-/* $Id: OS2KVM.h,v 1.4 2000-04-17 01:56:49 bird Exp $
+/* $Id: OS2KVM.h,v 1.5 2000-09-02 21:08:00 bird Exp $
  *
  * OS/2 kernel VM functions.
  *
@@ -81,9 +81,6 @@ typedef struct _vmac
 } VMAC, *PVMAC;
 
 
-typedef USHORT HMTE, *PHMTE;
-typedef USHORT HPTDA, *PHPTDA;
-
 /*******************************************************************************
 *   Exported Functions                                                         *
 *******************************************************************************/
@@ -107,4 +104,6 @@ APIRET KRNLCALL VMObjHandleInfo(
     PULONG  pulAddr,
     PUSHORT pushPTDA);
 
+PMTE KRNLCALL VMPseudoHandleMap(
+    HMTE    hMTE);
 #endif

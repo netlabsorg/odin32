@@ -1,4 +1,4 @@
-/* $Id: elf2lx.cpp,v 1.3 2000-02-27 02:13:19 bird Exp $
+/* $Id: elf2lx.cpp,v 1.4 2000-09-02 21:07:58 bird Exp $
  *
  * Elf2Lx - implementation.
  *
@@ -27,6 +27,8 @@
 #include "types.h"                      /* Types used by the next two files. */
 #include <newexe.h>                     /* OS/2 NE structs and definitions. */
 #include <exe386.h>                     /* OS/2 LX structs and definitions. */
+
+#include "devSegDf.h"                   /* Win32k segment definitions. */
 
 #include "malloc.h"                     /* win32k malloc (resident). Not C library! */
 #include "smalloc.h"                    /* win32k swappable heap. */

@@ -1,4 +1,4 @@
-/* $Id: test.h,v 1.1 2000-07-16 22:17:13 bird Exp $
+/* $Id: test.h,v 1.2 2000-09-02 21:08:04 bird Exp $
  *
  * Definitions and declarations for test moduls.
  *
@@ -92,34 +92,50 @@ APIRET KRNLCALL fakeVMObjHandleInfo(
     USHORT  usHob,
     PULONG  pulAddr,
     PUSHORT pushPTDA);
-ULONG LDRCALL fakeldrOpenPath(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *plv, PULONG pful);
-ULONG LDRCALL fakeLDRClearSem(void);
-ULONG KRNLCALL fakeKSEMRequestMutex(HKMTX hkmtx, ULONG ulTimeout);
-extern HKMTX        fakeLDRSem;
-ULONG KRNLCALL   fakeTKFuBuff(PVOID pv, PVOID pvUsr, ULONG cb, ULONG fl);
-ULONG KRNLCALL   fakeTKSuBuff(PVOID pvUsr, PVOID pv, ULONG cb, ULONG fl);
-ULONG KRNLCALL   fakeTKFuBufLen(PLONG pcch, PVOID pvUsr, ULONG cchMax, ULONG fl, BOOL fDblNULL);
-PMTE LDRCALL  fakeldrValidateMteHandle(HMTE hMTE);
-void _Optlink fakeg_tkExecPgm(void);    /* Not callable! (fakea.asm) */
-void _Optlink fakef_FuStrLenZ(void);    /* Not callable! (fakea.asm) */
-void _Optlink fakef_FuStrLen(void);     /* Not callable! (fakea.asm) */
-void _Optlink fakef_FuBuff(void);       /* Not callable! (fakea.asm) */
+PMTE KRNLCALL fakeldrASMpMTEFromHandle(
+    HMTE  hMTE);
+ULONG LDRCALL   fakeldrOpenPath(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *plv, PULONG pful);
+ULONG LDRCALL   fakeLDRClearSem(void);
+ULONG LDRCALL   fakeldrFindModule(PCHAR pachFilename, USHORT cchFilename, USHORT usClass, PPMTE ppMTE);
+ULONG KRNLCALL  fakeKSEMRequestMutex(HKSEMMTX hkmtx, ULONG ulTimeout);
+ULONG KRNLCALL  fakeKSEMReleaseMutex(HKSEMMTX hkmtx);
+BOOL  KRNLCALL  fakeKSEMQueryMutex(HKSEMMTX hkmtx, PUSHORT pcusNest);
+VOID  KRNLCALL  fakeKSEMInit(PKSEM pksem, ULONG fulType, ULONG fulFlags);
+extern KSEMMTX  fakeLDRSem;
+extern char *   fakeLDRLibPath;
+ULONG KRNLCALL  fakeTKFuBuff(PVOID pv, PVOID pvUsr, ULONG cb, ULONG fl);
+ULONG KRNLCALL  fakeTKSuBuff(PVOID pvUsr, PVOID pv, ULONG cb, ULONG fl);
+ULONG KRNLCALL  fakeTKFuBufLen(PLONG pcch, PVOID pvUsr, ULONG cchMax, ULONG fl, BOOL fDblNULL);
+PMTE LDRCALL    fakeldrValidateMteHandle(HMTE hMTE);
+PSZ  SECCALL    fakeSecPathFromSFN(SFN hFile);
+void _Optlink   fakeg_tkExecPgm(void);    /* Not callable! (fakea.asm) */
+void _Optlink   fake_tkStartProcess(void);/* Not callable! (fakea.asm) */
+void _Optlink   fakef_FuStrLenZ(void);    /* Not callable! (fakea.asm) */
+void _Optlink   fakef_FuStrLen(void);     /* Not callable! (fakea.asm) */
+void _Optlink   fakef_FuBuff(void);       /* Not callable! (fakea.asm) */
 extern PTCB     fakepTCBCur;
 extern PPTDA    fakepPTDACur;
 extern char     fakeptda_start;
 extern USHORT   fakeptda_environ;
+extern KSEMMTX  fakeptda_ptdasem;
+extern HMTE     fakeptda_module;
+extern PSZ      fakeptda_pBeginLIBPATH;
+extern PSZ      fakeldrpFileNameBuf;
 
 #endif /* INCL_NO_FAKE */
 
 #ifdef INCL_16
-extern USHORT  usFakeVerMajor;          /* define in probkrnl.c */
-extern USHORT  usFakeVerMinor;          /* define in probkrnl.c */
+extern USHORT   usFakeVerMajor;         /* define in probkrnl.c */
+extern USHORT   usFakeVerMinor;         /* define in probkrnl.c */
 #else
-extern USHORT  _usFakeVerMajor;
-extern USHORT  _usFakeVerMinor;
+extern USHORT   _usFakeVerMajor;
+extern USHORT   _usFakeVerMinor;
 #endif
 
-extern const char *pszInternalRevision; /* defined in win32ktst.c */
+#ifdef _OS2Krnl_h_
+extern int      cObjectsFake;           /* defined in win32ktst.c */
+extern OTE      aKrnlOTE[24];           /* defined in win32ktst.c */
+#endif
 
 #ifdef __cplusplus
 }

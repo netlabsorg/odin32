@@ -1,4 +1,4 @@
-/* $Id: log.h,v 1.4 2000-02-25 18:15:04 bird Exp $
+/* $Id: log.h,v 1.5 2000-09-02 21:08:02 bird Exp $
  *
  * log - C-style logging - kprintf.
  * Dual mode, RING0 and RING3.
@@ -24,6 +24,8 @@ extern "C" {
  */
 #define OUTPUT_COM1 0x3f8
 #define OUTPUT_COM2 0x2f8
+#define OUTPUT_COM3 0x3e8
+#define OUTPUT_COM4 0x2e8
 
 
 /*
@@ -31,18 +33,19 @@ extern "C" {
  */
 #define dprintf kprintf
 #if defined(DEBUG) && !defined(NOLOGGING)
-    #ifndef INCL_16
+    #ifdef INCL_16
+        /* 16-bit */
+        #include "vprntf16.h"
+        #define kprintf(a)          printf16 a
+        #define printf this function is not used in 16-bit code! Use printf16!
+    #else
         /* 32-bit */
         #include <stdarg.h>
         #include "vprintf.h"
         #define kprintf(a)          printf a
-    #else
-        /* 16-bit */
-        #include "vprntf16.h"
-        #define kprintf(a)          printf16 a
     #endif
 #else
-    #define kprintf(a)              (void)0
+    #define kprintf(a)              ((void)0)
 #endif
 
 #ifdef __cplusplus

@@ -1,4 +1,4 @@
-/* $Id: dev1632.h,v 1.5 2000-04-05 18:40:41 bird Exp $
+/* $Id: dev1632.h,v 1.6 2000-09-02 21:08:00 bird Exp $
  * dev1632.h - Common header file for 16-bit and 32-bit C
  *
  * Copyright (c) 1999 knut st. osmundsen
@@ -49,10 +49,10 @@ typedef struct _RP32GENIOCTL
 #define MAXKRNLOBJECTS 24
 typedef struct _KRNLINFO
 {
+    unsigned long   ulBuild;
+    unsigned short  fKernel;
     unsigned char   cObjects;
-    unsigned char   fDebug;
-    unsigned char   fchType;             /* TYPE_SMP, TYPE_UNI, TYPE_W4 */
-    unsigned short  usBuild;
+    unsigned char   chPadding;
     OTE             aObjects[MAXKRNLOBJECTS];
 } KRNLINFO, FAR * PKRNLINFO;
 
@@ -63,4 +63,16 @@ typedef struct _KRNLINFO
 #endif
 
 #pragma pack()
+
+
+/*
+ * Global data...
+ */
+extern CHAR DATA16_GLOBAL   szBuildDate[];
+extern CHAR DATA16_GLOBAL   szBuildTime[];
+#if defined(__IBMC__) || defined(__IBMCPP__)
+    #pragma map( szBuildDate , "_szBuildDate" )
+    #pragma map( szBuildTime , "_szBuildTime" )
+#endif
+
 #endif

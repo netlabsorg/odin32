@@ -1,4 +1,4 @@
-; $Id: mytkExecPgm.asm,v 1.10 2000-02-23 16:53:04 bird Exp $
+; $Id: mytkExecPgm.asm,v 1.11 2000-09-02 21:08:10 bird Exp $
 ;
 ; mytkExecPgm - tkExecPgm overload
 ;
@@ -9,17 +9,22 @@
     .386p
 
 ;
+;   Defined Constants And Macros
+;
+CCHFILENAME     EQU 261                 ; The size of the filename buffer
+CCHARGUMENTS    EQU 1536                ; The size of the argument buffer
+CCHMAXPATH      EQU CCHFILENAME - 1     ; Max path length
+
+;
 ;   Include files
 ;
     include devsegdf.inc
 
+
 ;
-;   Imported Functions
+;   Imported Functions and variables.
 ;
     extrn  _g_tkExecPgm:PROC
-    extrn  AcquireBuffer:PROC
-    extrn  ReleaseBuffer:PROC
-    extrn  QueryBufferSegmentOffset:PROC
 
     ; Scans strings until empy-string is reached.
     ; input:  bx:di
@@ -44,17 +49,73 @@
     ;        failure CF set
     extrn  _f_FuBuff:PROC
 
+
+    ; 32-bit memcpy. (see OS2KTK.h)
+    extrn _TKFuBuff@16:PROC
+
+    ;
+    ; LDR semaphore
+    ;
+    extrn pLdrSem:DWORD
+    extrn _LDRClearSem@0:PROC
+    extrn _KSEMRequestMutex@8:PROC
+    extrn _KSEMQueryMutex@8:PROC
+
+    ;
+    ; Loader State
+    ;
+    extrn ulLDRState:DWORD
+
+    ;
+    ; Pointer to current executable module.
+    ;
+    extrn pExeModule:DWORD
+
+    ;
+    ; DevHlp32
+    ;
+    extrn D32Hlp_VirtToLin:PROC
+
+    ;
+    ; TKSSBase (32-bit)
+    ;
+    extrn pulTKSSBase32:DWORD
+
 ;
 ;   Exported symbols
 ;
     public mytkExecPgm
+    public tkExecPgmCopyEnv
 
+    public fTkExecPgm
+    public achTkExecPgmFilename
+    public achTkExecPgmArguments
+
+
+
+;
+; Global data
+;
+
+; Filename and arguments buffers + environment pointer
+; from the tkExecPgm call.
+;
+; This data is only valid at isLdrStateExecPgm time
+; (and you'll have to be behind the loader semaphore of course!)
+DATA16 SEGMENT
+fTkExecPgm              db 0            ; 0 - achTkExecPgmFilename and achTkExecPgmArguments is INVALID
+                                        ; 1 - achTkExecPgmFilename and achTkExecPgmArguments is VALID.
+achTkExecPgmFilename    db CCHFILENAME dup (0)  ; The filename  passed in to tkExecPgm if (fTkExec is TRUE)
+achTkExecPgmArguments   db CCHARGUMENTS dup (0) ; The arguments passed in to tkExecPgm if (fTkExec is TRUE)
+fpachTkExecPgmEnv       dd 0            ; Far pointer to environment passed in to tkExecPgm.
+                                        ; Valid at isLdrStateExecPgm time.
+                                        ; NOTE! User data, don't touch it directly!
+DATA16 ENDS
 
 
 CODE32 SEGMENT
-
 ;;
-;
+; New implementation.
 ; @returns   same as tkExecPgm: eax, edx and carry flag
 ; @param     ax     Exec flag
 ;            ds:dx  Filename address. (String)
@@ -64,432 +125,450 @@ CODE32 SEGMENT
 ; @sketch    Copy the filename and arguments into a buffer we
 ;            may modify later if this is a UNIX shellscript or
 ;            a PE-file started by pe.exe.
-; @status
+; @status    completely implemented.
 ; @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
-; @remark
 ;
-;   The buffer we are using is a C struct as follows.
-;   struct Buffer
-;   {
-;       char szFilename[261];  /* offset 0   */
-;       char achArg[1536-261]; /* offset 261 */
-;   };
 ;
 mytkExecPgm PROC FAR
-pBuffer     = dword ptr -04h
-SegBuffer   = -08h
-OffBuffer   = -0Ch
-cchFilename = dword ptr -10h
-cchArgs     = dword ptr -14h
-;usExecFlag  = -18h
-;SegFilename = -1ch
-;OffFilename = -1eh
-;SegEnv      = -20h
-;OffEnv      = -22h
-;SegArg      = -24h
-;OffArg      = -26h
-
-    ASSUME CS:CODE32, DS:NOTHING, SS:NOTHING
-;    int     3
-    push    ebp
-    mov     ebp, esp
-    lea     esp, [ebp + cchArgs]
-
-    push    eax
-    push    ecx
-    push    ds
-    push    es
-    push    edi
-
-    ; parameter validations
-    mov     ax, ds                      ; pointer to filename
-    cmp     ax, 4
-    jb      mytkExecPgm_CalltkExecPgm_X1
-
-    ;
-    ; filename length
-    ;
-    mov     ax, ds
-    mov     es, ax
-    pushad
-    push    es
-    push    ds
-    mov     bx, ds
-    mov     di, dx                      ; es:di is now filename address (ds:dx).
-    push    cs                          ; Problem calling far into the calltab segement.
-    call    near ptr FLAT:_f_FuStrLen
-    movzx   ecx, cx
-    mov     [ebp+cchFilename], ecx
-    pop     ds
-    pop     es
-    popad
-    jc      mytkExecPgm_CalltkExecPgm_X1; If the FuStrLen call failed we bail out!
-
-    ;
-    ; if filename length is more that CCHMAXPATH then we don't do anything!.
-    ;
-    cmp     [ebp+cchFilename], 260
-    jae     mytkExecPgm_CalltkExecPgm_X1; length >= 260
-
-    ;
-    ; args length
-    ; Note: the arguments are a series of ASCIIZs ended by an empty string (ie. '\0').
-    ;
-    pop     edi
-    push    edi
-    xor     ecx, ecx
-    cmp     di, 4                       ; The argument might me a invalid pointer...
-    jb      mytkExecPgm_CalltkExecPgm_1
-
-    pushad
-    push    es
-    push    ds
-    mov     bx, di                      ;
-    mov     di, si                      ; bx:di -> arguments
-    push    cs                          ; Problem calling far into the calltab segement.
-    call    near ptr FLAT:_f_FuStrLenZ
-    movzx   ecx, cx
-    mov     [ebp+cchArgs], ecx
-    pop     ds
-    pop     es
-    popad
-    jc      mytkExecPgm_CalltkExecPgm_X1
-
-mytkExecPgm_CalltkExecPgm_1:
-    mov     ecx, [ebp+cchArgs]
-    add     ecx, [ebp+cchFilename]      ; filename
-    add     ecx, 3 + 260                ;  260 = new argument from a scrip file or something.
-                                        ;    3 = two '\0's and a space after added argument.
-    cmp     ecx, 1536                   ; 1536 = Buffersize.  FIXME! Define this!!!
-    jae     mytkExecPgm_CalltkExecPgm_X1; jmp if argument + file + new file > buffer size
-
-    ;
-    ; Aquire a buffer
-    ;
-    call    AcquireBuffer
-    or      eax, eax
-    jz      mytkExecPgm_CalltkExecPgm_X1; Failed to get buffer.
-    mov     [ebp+pBuffer], eax
-
-    ;
-    ; Get Segment and offset for the buffer
-    ;
-    call    QueryBufferSegmentOffset
-    mov     cx, es
-    mov     [ebp+OffBuffer], ax
-    mov     [ebp+SegBuffer], es
-    test    eax, 000570000h
-    jnz     mytkExecPgm_CalltkExecPgm_X2
-
-    ;
-    ; Copy filename to pBuffer.
-    ;
-    pushad
-    push    es
-    push    ds
-    mov     di, ax                      ; es:di  pBuffer
-    mov     si, dx
-    mov     bx, ds                      ; bx:si  Filename pointer (input ds:dx)
-    mov     ecx, [ebp+cchFilename]
-    push    cs                          ; Problem calling far into the calltab segement.
-    call    near ptr FLAT:_f_FuBuff
-    pop     ds
-    pop     es
-    popad
-    jc      mytkExecPgm_CalltkExecPgm_X2
-
-    ;
-    ; Copy Args to pBuffer + 261
-    ;
-    ; stack: edi, es, ds, ecx, eax
-    pop     edi
-    push    edi
-    add     eax, 261                    ; we'll use eax in the branch
-    cmp     di, 4
-    jb      mytkExecPgm_CalltkExecPgm_2
-    pushad
-    push    es
-    push    ds
-    mov     ecx, [ebp+cchArgs]
-    mov     bx, di                      ; ds:si -> arguments
-    mov     di, ax                      ; es:di -> buffer + 261
-    push    cs                          ; Problem calling far into the calltab segement.
-    call    near ptr FLAT:_f_FuBuff
-    pop     ds
-    pop     es
-    popad
-    jc      mytkExecPgm_CalltkExecPgm_X2
-    jmp     mytkExecPgm_CalltkExecPgm_3
-
-mytkExecPgm_CalltkExecPgm_2:
-    mov     word ptr es:[eax], 0        ; Terminate the empty string!
-
-    ;
-    ; Restore variables pushed on the stack
-    ;
-    ; stack: edi, es, ds, ecx, eax
-mytkExecPgm_CalltkExecPgm_3:
-    pop     edi
-    pop     es
-    pop     ds
-    pop     ecx
-    pop     eax
-
-    ;
-    ; Set new input parameters (call _g_tkExecPgm)
-    ;
-    ; ds:dx is to become SegBuffer:OffBuffer
-    ; di:si is to become SegBuffer:OffBuffer+261
-    ;
-    ; The some of the old values are stored on the stack (for the time being)
-    push    ds
-    push    edi
-    push    esi
-
-    mov     di, [ebp+SegBuffer]
-    mov     ds, di
-    mov     si, [ebp+OffBuffer]
-    mov     dx, si                      ; ds:dx  SegBuffer:OffBuffer
-    add     si, 261                     ; di:si  SegBuffer:OffBuffer+261
-
-    ;
-    ; Call _g_tkExecPgm
-    ;
-    push    cs                          ; Problem calling far into the calltab segement.
-    call    near ptr FLAT:_g_tkExecPgm
-    pushfd
-
-    ;
-    ; Release buffer
-    ;
-    push    eax
-    mov     eax, [ebp + pBuffer]
-    call    ReleaseBuffer
-    mov     [ebp + pBuffer], 0
-    pop     eax
-
-    ;
-    ; Return
-    ;
-    popfd
-    pop     esi
-    pop     edi
-    pop     ds
-    leave
-    retf
-
-mytkExecPgm_CalltkExecPgm_X2:
-    ;
-    ; Release buffer
-    ;
-    mov     eax, [ebp + pBuffer]
-    call    ReleaseBuffer
-    mov     [ebp + pBuffer], 0
-
-mytkExecPgm_CalltkExecPgm_X1:
-    pop     edi
-    pop     es
-    pop     ds
-    pop     ecx
-    pop     eax
-
-mytkExecPgm_CalltkExecPgm:
-    push    cs
-    call    near ptr FLAT:_g_tkExecPgm
-    leave
-    retf
-mytkExecPgm ENDP
-
-
-
-CODE32 ENDS
-
-if 0 ; alternate implementation.
-mytkExecPgm PROC FAR
-pBuffer     = dword ptr -04h
-SegBuffer   = -08h
-OffBuffer   = -0Ch
-cchFilename = -10h
-cchArgs     = -14h
-usExecFlag  = -18h
-SegFilename = -1ch
-OffFilename = -1eh
-SegEnv      = -20h
-OffEnv      = -22h
-SegArg      = -24h
-OffArg      = -26h
+cchFilename = -4h
+cchArgs     = -08h
+usExecFlag  = -0ch
+SegFilename = -10h
+OffFilename = -12h
+SegEnv      = -14h
+OffEnv      = -16h
+SegArg      = -18h
+OffArg      = -1ah
 
     ASSUME CS:CODE32, DS:NOTHING, SS:NOTHING
     push    ebp
     mov     ebp, esp
     lea     esp, [ebp + OffArg]
 
-    ; save input parameters
+    ;
+    ; Save input parameters
+    ;
     mov     [ebp + usExecFlag], ax
     mov     ax, es
     mov     [ebp + SegEnv], ax
     mov     [ebp + OffEnv], bx
     mov     [ebp + SegArg], di
     mov     [ebp + OffArg], si
-    mov     ax, ds
-    mov     [ebp + SegFilename], ax
+    mov     bx, ds
+    mov     [ebp + SegFilename], bx
     mov     [ebp + OffFilename], dx
 
-    ; parameter validations
-    cmp     ax, 4                       ; pointer to filename
-    jb      mytkExecPgm_CalltkExecPgm_X1
+    ;
+    ; Parameter validations - if any of these fail we'll just pass on to
+    ; the real tkExecPgm without setting up any buffers stuff.
+    ; 1) validate the file pointer.
+    ; 2) validate the file name length < 260
+    ; 3) validate that the arguments aren't larger than the buffer.
+    ;
 
+    ; Validate filename pointer
     ;
-    ; filename length
+    cmp     bx, 4                       ; pointer to filename
+    jb      tkepgm_backout
+
+    ; Validate filename length
     ;
-    mov     bx, ax
     mov     di, dx                      ; bx:di is now filename address
     push    cs                          ; Problem calling far into the calltab segement.
     call    near ptr FLAT:_f_FuStrLen
-    jc      mytkExecPgm_CalltkExecPgm_X1; If the FuStrLen call failed we bail out!
+    jc      tkepgm_backout              ; If the FuStrLen call failed we bail out!
 
-    ;
     ; if filename length is more that CCHMAXPATH then we don't do anything!.
-    ;
-    cmp     cx, 260
-    jae     mytkExecPgm_CalltkExecPgm_X1; length >= 260
-    mov     [ebp+cchFilename], cx
+    cmp     cx, CCHMAXPATH
+    jae     tkepgm_backout              ; length >= CCHMAXPATH
+    mov     [ebp + cchFilename], cx
 
     ;
     ; args length
     ; Note: the arguments are a series of ASCIIZs ended by an empty string (ie. '\0').
     ;
-    mov     bx, [ebp+SegArg]
+    xor     cx, cx                      ; Set length to zero.
+    mov     bx, [ebp + SegArg]
     cmp     bx, 4                       ; The argument might me an NULL pointer
-    xor     cx, cx
-    jb      mytkExecPgm_CalltkExecPgm_1
+    jb      tkepgm1
 
-    mov     di, [ebp+OffArg]            ; bx:di -> arguments
+    mov     di, [ebp + OffArg]          ; bx:di -> arguments
     push    cs                          ; Problem calling far into the calltab segement.
     call    near ptr FLAT:_f_FuStrLenZ
-    mov     [ebp+cchArgs], cx
-    jc      mytkExecPgm_CalltkExecPgm_X1
+    jc      tkepgm_backout
 
-mytkExecPgm_CalltkExecPgm_1:
-    add     cx, [ebp+cchFilename]       ; filename length
-    add     cx, 3 + 260                 ;  260 = new argument from a scrip file or something.
+tkepgm1:
+    mov     [ebp + cchArgs], cx
+    add     cx, [ebp + cchFilename]     ; filename length
+    add     cx, 3 + 260                 ;  260 = additional arguments from a script file or something.
                                         ;    3 = two '\0's and a space after added argument.
-    cmp     ecx, 1536                   ; 1536 = Buffersize.  FIXME! Define this!!!
-    jae     mytkExecPgm_CalltkExecPgm_X1; jmp if argument + file + new file > buffer size
+    cmp     cx, CCHARGUMENTS            ; argument Buffersize.
+    jae     tkepgm_backout              ; jmp if argument + file + additional arguments >= buffer size
+
 
     ;
-    ; Aquire a buffer
+    ; Aquire the OS/2 loader semaphore
+    ;   Since parameters looks good, we're ready for getting the loader semaphore.
+    ;   We use the loader semaphore to serialize access to the win32k.sys loader
+    ;   subsystem.
+    ;   Before we can get the loader semaphore, we'll need to set ds and es to
+    ;   flat R0 context.
+    ;   The loader semaphore is later requested by the original tkExecPgm so
+    ;   this shouldn't break anything.
     ;
-    call    AcquireBuffer
-    mov     [ebp+pBuffer], eax
-    or      eax, eax
-    jz      mytkExecPgm_CalltkExecPgm_X1; Failed to get buffer.
+    mov     ax, seg FLAT:DATA32
+    mov     ds, ax
+    mov     es, ax
+    ASSUME  DS:FLAT, ES:FLAT
+
+    mov     eax, pLdrSem                ; Get pointer to the loader semaphore.
+    or      eax, eax                    ; Check if null. (paranoia)
+    jz      tkepgm_backout              ; Fail if null.
+
+    push    0ffffffffh                  ; Wait indefinitely.
+    push    eax                         ; Push LdrSem address (which is the handle).
+    call    near ptr FLAT:_KSEMRequestMutex@8
+    or      eax, eax                    ; Check if failed.
+    jnz     tkepgm_backout              ; Backout on failure.
+
 
     ;
-    ; Get Segment and offset for the buffer
+    ; From here on we won't backout to the tkepgm_backout lable but
+    ; the tkepgm_backout2 lable. (This will restore the parameters
+    ; and jump in at the call to tkExecPgm behind the Loader Sem.)
     ;
-    call    QueryBufferSegmentOffset
-    mov     cx, es
-    mov     [ebp+OffBuffer], ax
-    mov     [ebp+SegBuffer], es
-    test    eax, 000570000h
-    jnz     mytkExecPgm_CalltkExecPgm_X2
+
 
     ;
-    ; Copy filename to pBuffer.
+    ; Set global data:
+    ;   Zeros pointer to exemodule to NULL (a bit paranoia).
+    ;   Mark global data valid.
+    ;   Store Environment pointer.
+    ;   Set loader state.
     ;
-    mov     di, ax                      ; es:di  pBuffer
-    mov     si, dx
-    mov     bx, ds                      ; bx:si  Filename pointer (input ds:dx)
-    mov     cx, [ebp+cchFilename]       ; cx = length of area to copy
-    push    cs                          ; Problem calling far into the calltab segement.
-    call    near ptr FLAT:_f_FuBuff
-    jc      mytkExecPgm_CalltkExecPgm_X2
+    mov     pExeModule, 0               ; Sets the exemodule pointer to NULL.
+    mov     fTkExecPgm, 1               ; Optimistic, mark the global data valid.
+    mov     eax, [ebp + OffEnv]         ; Environment FAR pointer.
+    mov     fpachTkExecPgmEnv, eax      ; Store the Environment pointer. This will
+                                        ; later permit us to get the passed in
+                                        ; environment in for ex. ldrOpenPath.
+    mov     ulLDRState, 1               ; Set the loader state to LDRSTATE_TKEXECPGM!
+    ASSUME  DS:NOTHING, ES:NOTHING
+
 
     ;
-    ; Copy Args to pBuffer + 261
+    ; Copy filename to achBuffer.
     ;
-    mov     si, [ebp+SegArg]
-    cmp     si, 4
-    jb      mytkExecPgm_CalltkExecPgm_2
-    mov     ds, si
-    mov     si, [ebp+OffArg]            ; ds:si -> arguments
-    mov     di, [ebp+SegBuffer]
+    mov     di, seg achTkExecPgmFilename
     mov     es, di
-    mov     di, [ebp+OffBuffer]
-    add     di, 261                     ; es:di -> buffer + 261
-    mov     cx, [ebp+cchArgs]           ; cx = length of area to copy
+    mov     edi, offset achTkExecPgmFilename
+                                        ; es:(e)di -> &achTkExecPgmFilename[0]
+    mov     si, [ebp + OffFilename]
+    mov     bx, [ebp + SegFilename]     ; bx:si  Filename pointer (input ds:dx)
+    ASSUME DS:NOTHING
+    mov     cx, [ebp + cchFilename]     ; cx = length of area to copy
     push    cs                          ; Problem calling far into the calltab segement.
     call    near ptr FLAT:_f_FuBuff
-    jc      mytkExecPgm_CalltkExecPgm_X2
-    jmp     mytkExecPgm_CalltkExecPgm_3
+    jc      tkepgm_backout2             ; In case of error back (quite unlikely).
 
-mytkExecPgm_CalltkExecPgm_2:
-    mov     word ptr es:[eax], 0        ; Terminate the empty string!
 
     ;
-    ; Set new input parameters (call _g_tkExecPgm)
+    ; Copy Args to achTkExecPgmArguments
     ;
-    ; ds:dx is to become SegBuffer:OffBuffer
-    ; di:si is to become SegBuffer:OffBuffer+261
+    mov     di, seg achTkExecPgmArguments
+    mov     es, di
+    mov     edi, offset achTkExecPgmArguments
+                                        ; es:(e)di -> &achTkExecPgmArguments[0]
+    mov     word ptr es:[edi], 0        ; Terminate the argument string in case
+                                        ; there aren't any arguments.('\0\0')
+                                        ; (We're just about to find that out.)
+    mov     bx, [ebp + SegArg]
+    cmp     bx, 4                       ; Is the argument pointer a null-pointer?
+    jb      tkepgm_setup_parms          ; Skip copy if null pointer.
+                                        ; Argument string is '\0\0'.
+    mov     si, [ebp + OffArg]          ; bx:si -> arguments
+    mov     cx, [ebp + cchArgs]         ; cx = length of area to copy
+    push    cs                          ; Problem calling far into the calltab segement.
+    call    near ptr FLAT:_f_FuBuff
+    jc      tkepgm_backout2             ; In case of error back (quite unlikely).
+
+
     ;
-mytkExecPgm_CalltkExecPgm_3:
-    mov     di, [ebp+SegBuffer]
-    mov     ds, di
-    mov     si, [ebp+OffBuffer]
-    mov     dx, si                      ; ds:dx  SegBuffer:OffBuffer
-    add     si, 261                     ; di:si  SegBuffer:OffBuffer+261
-    mov     bx, [ebp+SegEnv]
+    ; Setup new input parameters (call _g_tkExecPgm)
+    ;
+    ; ds:dx is to become &achTkExecPgmFilename[0]
+    ; di:si is to become &achTkExecPgmArguments[0]
+    ;
+tkepgm_setup_parms:
+    mov     ax, [ebp + usExecFlag]
+    mov     di, seg achTkExecPgmArguments
+    mov     esi, offset achTkExecPgmArguments ; di:si  &achTkExecPgmArguments[0]
+    mov     ds, di                            ; Assumes same segment (which of course is true).
+    mov     edx, offset achTkExecPgmFilename  ; ds:dx  &achTkExecPgmFilename[0]
+    mov     bx, [ebp + SegEnv]
     mov     es, bx
-    mov     bx, [ebp+SegEnv]
+    mov     bx, [ebp + OffEnv]                ; es:bx  Environment
+
 
     ;
     ; Call _g_tkExecPgm
     ;
+tkepgm_callbehind:
     push    cs                          ; Problem calling far into the calltab segement.
     call    near ptr FLAT:_g_tkExecPgm
-    pushfd
+    pushfd                              ; preserve flags
+    push    eax                         ; preserve result.
+    push    ecx                         ; preserve ecx just in case
+    push    edx                         ; preserve edx just in case
+    mov     ax, seg FLAT:DATA32
+    mov     ds, ax
+    mov     es, ax
+    ASSUME  ds:FLAT, es:FLAT            ; both ds and es are now FLAT
+
 
     ;
-    ; Release buffer
+    ; Clear loader semaphore?
+    ; and clear loader state, current exe module and tkExecPgm global data flag.
     ;
-    push    eax
-    mov     eax, [ebp + pBuffer]
-    call    ReleaseBuffer
-    mov     [ebp + pBuffer], 0
-    pop     eax
+    push    0                           ; Usage count variable.
+    mov     eax, pulTKSSBase32          ; Get TKSSBase
+    mov     eax, [eax]
+    add     eax, esp                    ; Added TKSSBase to the usage count pointer
+    push    eax                         ; Push address of usage count pointer.
+    push    pLdrSem                     ; Push pointer to loader semaphore ( = handle).
+    call    near ptr FLAT:_KSEMQueryMutex@8
+    or      eax, eax                    ; Check return code. (1 = our / free; 0 = not our but take)
+    pop     eax                         ; Pops usage count.
+    je      tkepgm_callbehindret        ; jmp if not taken by us (rc=FALSE).
+    or      eax, eax                    ; Check usage count.
+    jz      tkepgm_callbehindret        ; jmp if 0 (=free).
+    mov     ulLDRState, 0               ; Clears loaderstate. (LDRSTATE_UNKNOWN)
+    mov     pExeModule, 0               ; Sets the exemodule pointer to NULL.
+    mov     fTkExecPgm, 0               ; Marks global data invalid.
+    call    near ptr FLAT:_LDRClearSem@0
 
     ;
-    ; Return
+    ; Restore ds and es (probably unecessary but...) and Return
     ;
-    push    [ebp + SegFilename]
+tkepgm_callbehindret:
+    push    dword ptr [ebp + SegFilename]
     pop     ds
-    push    [ebp + SegEnv]
+    push    dword ptr [ebp + SegEnv]
     pop     es
-    popfd
+    pop     edx                         ; restore edx
+    pop     ecx                         ; restore ecx
+    pop     eax                         ; restore result.
+    popfd                               ; restore flags
     leave
     retf
 
-mytkExecPgm_CalltkExecPgm_X2:
-    ;
-    ; Release buffer
-    ;
-    mov     eax, [ebp + pBuffer]
-    call    ReleaseBuffer
-    mov     [ebp + pBuffer], 0
 
-mytkExecPgm_CalltkExecPgm_X1:
-    pop     ds
+;
+; This is a backout were tkExecPgm probably will backout and we're
+; allready behind the loader semaphore.
+;
+tkepgm_backout2:
+    ;
+    ; Set Flat context and invalidate buffer.
+    ;
+    mov     ax, seg FLAT:DATA32
+    mov     ds, ax
+    ASSUME ds:FLAT
+    mov     fTkExecPgm, 0               ; Marks global data invalid.
+
+    ;
+    ; Restore parameters. and call the original tkExecPgm
+    ;
+    mov     ax, [ebp + usExecFlag]
+    mov     dx, [ebp + SegFilename]
+    mov     ds, dx
+    mov     dx, [ebp + OffFilename]
+    mov     bx, [ebp + SegEnv]
+    mov     es, bx
+    mov     bx, [ebp + OffEnv]
+    mov     di, [ebp + SegArg]
+    mov     si, [ebp + OffArg]
+    jmp     tkepgm_callbehind
+
+
+;
+; This is a backout were tkExecPgm too is exspected to back out.
+;
+tkepgm_backout:
+    ;
+    ; Restore parameters. and call the original tkExecPgm
+    ;
+    mov     ax, [ebp + usExecFlag]
+    mov     dx, [ebp + SegFilename]
+    mov     ds, dx
+    mov     dx, [ebp + OffFilename]
+    mov     bx, [ebp + SegEnv]
+    mov     es, bx
+    mov     bx, [ebp + OffEnv]
+    mov     di, [ebp + SegArg]
+    mov     si, [ebp + OffArg]
 
 mytkExecPgm_CalltkExecPgm:
-    push    cs
+    push    cs                          ; Problem calling far into the calltab segement.
     call    near ptr FLAT:_g_tkExecPgm
     leave
     retf
 mytkExecPgm ENDP
 
+
+
+;;
+; Function which copies the environment data passed into tkExecPgm
+; to a given buffer.
+; @cproto    ULONG _Optlink tkExecPgmCopyEnv(char *pachBuffer, unsigned cchBuffer);
+; @returns   OS/2 return code - NO_ERROR on success.
+;            0 on error or no data.
+; @param     pachBuffer     Pointer to buffer which the environment data is
+;                           to be copied to.
+;                           (eax)
+; @param     cchBuffer      Size of the buffer.
+;                           (edx)
+; @uses      eax, edx, ecx
+; @sketch
+; @status
+; @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+; @remark
+tkExecPgmCopyEnv PROC NEAR
+cchEnv  = -04h
+    ASSUME ds:FLAT, es:FLAT, ss:NOTHING
+    push    ebp
+    mov     ebp, esp
+    lea     esp, [ebp + cchEnv]
+
+    push    ebx
+    mov     ebx, eax                    ; ebx now holds the buffer pointer.
+
+    ;
+    ; Call tkExecPgmEnvLength to get length and check that pointer is valid.
+    ;
+    push    edx
+    call    tkExecPgmEnvLength
+    pop     ecx                         ; ecx now holds the buffer length.
+
+    cmp     eax, 0
+    ja      tkepce_ok1
+    mov     eax, 232                    ; ERROR_NO_DATA
+    jmp     tkepce_ret                  ; Fail if no data or any other error.
+
+tkepce_ok1:
+    cmp     eax, ecx                    ; (ecx is the buffer size.)
+    jbe     tkepce_ok2                  ; Fail if buffer too small.
+    mov     eax, 111                    ; ERROR_BUFFER_OVERFLOW
+    jmp     tkepce_ret
+
+tkepce_ok2:
+    mov     [ebp + cchEnv], eax         ; Save environment length.
+
+
+    ;
+    ; Thunk the environment 16-bit far pointer to 32-bit.
+    ;
+    mov     eax, fpachTkExecPgmEnv
+    call    D32Hlp_VirtToLin
+    or      eax, eax                    ; check if thunking were successful.
+    jnz     tkepce_ok3                  ; Jump if success.
+    mov     eax, edx                    ; A special feature for D32Hlp_VirtToLin is that edx
+                                        ; have the error code in case on failure.
+    jmp tkepce_ret
+
+tkepce_ok3:
+    ;
+    ; Copy the environment data.
+    ;
+    push    3                           ; Fatal if error.
+    push    dword ptr [ebp + cchEnv]    ; Number of bytes to copy
+    push    eax                         ; Source buffer pointer. (user)
+    push    ebx                         ; Target buffer pointer.
+    call    near ptr FLAT:_TKFuBuff@16
+
+tkepce_ret:
+    pop     ebx
+    leave
+    ret
+tkExecPgmCopyEnv ENDP
+
+
+
+;;
+; This function gets the length of the tkExecPgm environment data.
+; @cproto    ULONG _Optlink tkExecPgmEnvLength(void);
+; @returns   Environment data length in bytes.
+; @uses      eax, edx, ecx
+; @sketch
+; @status
+; @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+; @remark
+tkExecPgmEnvLength PROC NEAR
+    ASSUME ds:FLAT, es:FLAT, ss:NOTHING
+    push    ebp
+    mov     ebp, esp
+
+    ;
+    ; Push register which needs to be presered.
+    ;
+    push    es
+    push    ds
+    push    esi
+    push    edi
+    push    ebx
+
+
+    ;
+    ; Check that the data is valid.
+    ;
+    cmp     ulLDRState, 1               ; LDRSTATE_TKEXECPGM
+    jnz     tkepel_err_ret
+
+
+    ;
+    ; Check if the environment pointer is NULL.
+    ;
+    mov     ebx, fpachTkExecPgmEnv
+    ror     ebx, 16
+    cmp     bx, 4
+    jb      tkepel_err_ret
+
+
+tkepel1:
+    ;
+    ; Get the environment length
+    ;
+    mov     edi, ebx
+    ror     edi, 16                     ; bx:di -> [fpachTkExecPgmEnv]
+    xor     ecx, ecx
+    push    cs                          ; Problem calling far into the calltab segement.
+    call    near ptr FLAT:_f_FuStrLenZ
+    jc      tkepel_err_ret
+    movzx   eax, cx
+    jmp     tkepel_ret
+
+
+; Failure
+tkepel_err_ret:
+    xor     eax, eax
+
+
+; Return
+tkepel_ret:
+    pop     ebx                         ; restore registers
+    pop     edi
+    pop     esi
+    pop     ds
+    pop     es
+    leave
+    ret
+tkExecPgmEnvLength ENDP
+
+
+
+
+
 CODE32 ENDS
-endif
 
 
 END
