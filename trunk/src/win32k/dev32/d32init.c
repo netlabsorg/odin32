@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.29 2001-01-19 02:28:07 bird Exp $
+/* $Id: d32init.c,v 1.30 2001-01-20 23:53:27 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -385,6 +385,13 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
     if ((rc = importTabInit()) != NO_ERROR)
         return (USHORT)rc;
 
+    /* apis */
+    #if 0
+    if ((rc = APIInit()) != NO_ERROR)
+        return (USHORT)rc;
+    #endif
+
+
     /*
      * Lock the 32-bit objects/segments and 16-bit datasegment in memory
      */
@@ -406,7 +413,7 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
     if (rc != NO_ERROR)
         kprintf(("data segment lock failed with with rc=%d\n", rc));
 
-    /* 16-bit data segment - is this necessary? */
+    /* 16-bit data segment - is this really necessary? */
     memset(SSToDS(&lockhandle), 0, sizeof(lockhandle));
     rc = D32Hlp_VMLock2(&DATA16START,
                         &DATA16END - &DATA16START,
