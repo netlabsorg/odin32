@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.53 2004-08-01 03:25:25 bird Exp $
+/* $Id: buildenv.cmd,v 1.54 2004-10-14 06:21:09 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -26,7 +26,7 @@
     /*
      * Version
      */
-    sVersion = '1.1.2 [2004-08-01]';
+    sVersion = '1.1.3 [2004-10-14]';
 
     /*
      * Create argument array with lowercase arguments.
@@ -115,6 +115,7 @@
     aCfg.i.sId = 'gcc303';          aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'GCC3xx,''gcc303''';      aCfg.i.sDesc = 'GCC/EMX v3.0.3beta with binutils 2.11.2'; i = i + 1;
     aCfg.i.sId = 'gcc321';          aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'GCC3xx,''gcc321''';      aCfg.i.sDesc = 'GCC/EMX v3.2.1beta with binutils 2.11.2'; i = i + 1;
     aCfg.i.sId = 'gcc322';          aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'GCC322plus,''gcc322''';  aCfg.i.sDesc = 'Innotek GCC v3.2.2';        i = i + 1;
+    aCfg.i.sId = 'gcc334';          aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'GCC322plus,''gcc334''';  aCfg.i.sDesc = 'Innotek GCC v3.2.2';        i = i + 1;
     aCfg.i.sId = 'icatgam';         aCfg.i.sGrp = 'debugger';   aCfg.i.sSet = 'ICATGam';                aCfg.i.sDesc = 'ICAT for OS/2 latest';      i = i + 1;
     aCfg.i.sId = 'icatgam406rc1';   aCfg.i.sGrp = 'debugger';   aCfg.i.sSet = 'ICATGam406RC1';          aCfg.i.sDesc = 'ICAT for OS/2 v4.0.6 release candidate 1'; i = i + 1;
     aCfg.i.sId = 'icatpe';          aCfg.i.sGrp = 'debugger';   aCfg.i.sSet = 'ICATPe';                 aCfg.i.sDesc = 'ICAT for OS/2 with PE support (test version)'; i = i + 1;
