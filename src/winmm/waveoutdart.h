@@ -1,4 +1,4 @@
-/* $Id: waveoutdart.h,v 1.1 2001-03-23 16:23:46 sandervl Exp $ */
+/* $Id: waveoutdart.h,v 1.2 2001-04-01 12:31:01 sandervl Exp $ */
 
 /*
  * Wave playback class (DART)
@@ -12,7 +12,7 @@
 
 #include "waveoutbase.h"
 
-#define PREFILLBUF_DART 4
+#define PREFILLBUF_DART 8
 #define DART_BUFSIZE    4096
 
 #ifdef OS2_ONLY
