@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.41 1999-10-04 20:52:33 sandervl Exp $
+; $Id: KERNEL32.DEF,v 1.42 1999-10-14 01:37:55 bird Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -17,6 +17,7 @@ IMPORTS
    DosQueryModFromEIP          =  DOSCALLS.360
    DosAliasMem                 =  DOSCALLS.298
   _DosAliasMem                 =  DOSCALLS.298
+   DosQuerySysState            =  DOSCALLS.368
 
 
 EXPORTS
@@ -951,9 +952,9 @@ EXPORTS
     WriteLog                      = WriteLog                      @1202
     WriteLogError                 = WriteLogError                 @1214
 
-;Used by tibfix page in exe (change ordinal in lx.cpp too!!)
-    _RegisterPe2LxExe@48                                          @1203
-    _RegisterPe2LxDll@48                                          @1209
+;Used by tibfix page in exe (change ordinal in pe2lx.cpp too!!)
+    _RegisterPe2LxExe@12                                          @1203
+    _RegisterPe2LxDll@12                                          @1209
 
     _CreateWin32PeLdrExe@8                                        @1236
 

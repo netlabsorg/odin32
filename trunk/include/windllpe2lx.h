@@ -1,10 +1,10 @@
-/* $Id: windllpe2lx.h,v 1.1 1999-09-15 23:29:37 sandervl Exp $ */
+/* $Id: windllpe2lx.h,v 1.2 1999-10-14 01:39:12 bird Exp $ */
 
 /*
  * Win32 PE2LX Dll class
  *
  * Copyright 1999 Sander van Leeuwen (sandervl@xs4all.nl)
- *
+ * Copyright 1999 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -18,16 +18,16 @@
 class Win32Pe2LxDll : public Win32Pe2LxImage, public Win32DllBase
 {
 public:
-	Win32Pe2LxDll(HINSTANCE hinstance, int NameTableId, int Win32TableId, WIN32DLLENTRY DllEntryPoint);
-virtual ~Win32Pe2LxDll();
+    /** @cat Constructor/Destructor */
+    Win32Pe2LxDll(HINSTANCE hinstance, BOOL fWin32k) throw(ULONG);
+    virtual ~Win32Pe2LxDll();
 
-virtual	ULONG getApi(char *name);
-virtual ULONG getApi(int ordinal);
+    /** @cat Exports */
+    virtual ULONG getApi(char *name);
+    virtual ULONG getApi(int ordinal);
 
-virtual BOOL  isLxDll();
-
-protected:
-private:
+    /** @cat Query */
+    virtual BOOL  isLxDll();
 };
 
 #endif

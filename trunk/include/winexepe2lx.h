@@ -1,10 +1,10 @@
-/* $Id: winexepe2lx.h,v 1.1 1999-09-15 23:29:37 sandervl Exp $ */
+/* $Id: winexepe2lx.h,v 1.2 1999-10-14 01:39:13 bird Exp $ */
 
 /*
  * Win32 PE2LX Exe class
  *
  * Copyright 1999 Sander van Leeuwen (sandervl@xs4all.nl)
- *
+ * Copyright 1999 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -15,15 +15,20 @@
 #include <winexebase.h>
 #include <winimagepe2lx.h>
 
-//Class for executables converted by pe2lx or win32k
+
+/**
+ * Class for executables converted by pe2lx or win32k
+ * @shortdesc   Class for executables converted by pe2lx or win32k
+ * @author      Sander van Leeuwen, knut st. osmundsen
+ * @approval    -
+ */
 class Win32Pe2LxExe : public Win32Pe2LxImage, public Win32ExeBase
 {
 public:
-        Win32Pe2LxExe(HINSTANCE hinstance, int NameTableId, int Win32TableId);
-virtual ~Win32Pe2LxExe();
-
-protected:
-private:
+    /** @cat Constructor/Destructor */
+    Win32Pe2LxExe(HINSTANCE hinstance, BOOL fWin32k) throw(ULONG);
+    virtual ~Win32Pe2LxExe();
 };
+
 
 #endif //__WINEXEPE2LX_H__
