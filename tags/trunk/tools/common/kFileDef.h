@@ -60,7 +60,7 @@ typedef struct _DefExport
  * TODO: error handling.
  * @author      knut st. osmundsen
  */
-class kFileDef : public kFileFormatBase
+class kFileDef : public kExportI, public kFileFormatBase, public kModuleI
 {
     private:
         /**@cat pointers to different sections */
@@ -103,10 +103,19 @@ class kFileDef : public kFileFormatBase
         kFileDef(kFile *pFile) throw(int);
         virtual ~kFileDef();
 
+        /** @cat Module information methods. */
+        BOOL        moduleGetName(char *pszBuffer, int cchSize = 260);
+
+        /** @cat Export enumeration methods. */
+        BOOL        exportFindFirst(kExportEntry *pExport);
+        BOOL        exportFindNext(kExportEntry *pExport);
+        void        exportFindClose(kExportEntry *pExport);
+
+        /** @cat Export Lookup methods */
+        BOOL        exportLookup(unsigned long ulOrdinal, kExportEntry *pExport);
+        BOOL        exportLookup(const char *  pszName, kExportEntry *pExport);
+
         /**@cat queries... */
-        BOOL        queryModuleName(char *pszBuffer);
-        BOOL        findFirstExport(PEXPORTENTRY pExport);
-        BOOL        findNextExport(PEXPORTENTRY pExport);
         BOOL        isDef() const                { return TRUE;}
         char const *queryModuleName(void) const  { return pszModName;     }
         char const *queryType(void) const        { return pszType;        }
@@ -126,6 +135,5 @@ class kFileDef : public kFileFormatBase
 
         enum {fullscreen = 0, pmvio = 2, pm = 3, unknown = 255};
 };
-
 
 #endif

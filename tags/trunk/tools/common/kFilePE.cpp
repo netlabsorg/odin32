@@ -35,8 +35,15 @@
 #include <peexe.h>
 #include "kFile.h"
 #include "kFileFormatBase.h"
+#include "kInterfaces.h"
 #include "kFilePe.h"
 
+/*******************************************************************************
+*   Global Variables                                                           *
+*******************************************************************************/
+#if 0
+kFilePE kFilePE((kFile*)NULL);
+#endif
 
 /**
  * Constructs a kFilePE object for a file.
@@ -61,7 +68,7 @@ kFilePE::kFilePE(kFile *pFile) throw(int) : pvBase(NULL),
     IMAGE_DOS_HEADER doshdr;
 
     /* read dos-header - assumes there is one */
-    if (   pFile->readAt(&doshdr, sizeof(doshdr), 0) 
+    if (   pFile->readAt(&doshdr, sizeof(doshdr), 0)
         && doshdr.e_magic == IMAGE_DOS_SIGNATURE
         && doshdr.e_lfanew > sizeof(doshdr)
         )
@@ -100,8 +107,8 @@ kFilePE::kFilePE(kFile *pFile) throw(int) : pvBase(NULL),
 
                         cbSection = min(pSectionHdr->Misc.VirtualSize, pSectionHdr->SizeOfRawData);
                         if (    cbSection
-                            &&  !pFile->readAt((char*)pvBase + pSectionHdr->VirtualAddress, 
-                                               cbSection, 
+                            &&  !pFile->readAt((char*)pvBase + pSectionHdr->VirtualAddress,
+                                               cbSection,
                                                pSectionHdr->PointerToRawData)
                             )
                         {
@@ -168,13 +175,20 @@ kFilePE::~kFilePE()
 
 /**
  * Query for the module name.
- * @returns   Success indicator. TRUE / FALSE.
- * @param     pszBuffer  Pointer to buffer which to put the name into.
+ * @returns Success indicator. TRUE / FALSE.
+ * @param   pszBuffer   Pointer to buffer which to put the name into.
+ * @param   cchBuffer   Size of the buffer (defaults to 260 chars).
  */
-BOOL  kFilePE::queryModuleName(char *pszBuffer)
+BOOL  kFilePE::moduleGetName(char *pszBuffer, int cchSize/* = 260*/)
 {
     if (pExportDir && pExportDir->Name)
-        strcpy(pszBuffer, (char*)((int)pExportDir->Name + (int)pvBase));
+    {
+        char *psz = (char*)((int)pExportDir->Name + (int)pvBase);
+        int cch = strlen(psz) + 1;
+        if (cch > cchSize)
+            return FALSE;
+        memcpy(pszBuffer, psz, cch);
+    }
     else
         return FALSE;
 
@@ -188,13 +202,13 @@ BOOL  kFilePE::queryModuleName(char *pszBuffer)
  * @param     pExport  Pointer to export structure.
  * @remark
  */
-BOOL  kFilePE::findFirstExport(PEXPORTENTRY pExport)
+BOOL  kFilePE::exportFindFirst(kExportEntry *pExport)
 {
     if (pExportDir && pExportDir->NumberOfFunctions)
     {
-        memset(pExport, 0, sizeof(EXPORTENTRY));
+        memset(pExport, 0, sizeof(kExportEntry));
         pExport->ulOrdinal = pExportDir->Base - 1;
-        return findNextExport(pExport);
+        return exportFindNext(pExport);
     }
 
     return FALSE;
@@ -207,7 +221,7 @@ BOOL  kFilePE::findFirstExport(PEXPORTENTRY pExport)
  * @param     pExport  Pointer to export structure.
  * @remark
  */
-BOOL  kFilePE::findNextExport(PEXPORTENTRY pExport)
+BOOL  kFilePE::exportFindNext(kExportEntry *pExport)
 {
     if (pExportDir && pExportDir->NumberOfFunctions)
     {
@@ -240,9 +254,55 @@ BOOL  kFilePE::findNextExport(PEXPORTENTRY pExport)
     else
         return FALSE;
 
+    pExport->ulAddress = pExport->iObject = pExport->ulOffset = ~0UL; /* FIXME/TODO */
     pExport->achIntName[0] = '\0';
     pExport->pv = NULL;
     return TRUE;
+}
+
+
+/**
+ * Frees resources associated with the communicatin area.
+ * It's not necessary to call this when exportFindNext has return FALSE.
+ * (We don't allocate anything so it's not a problem ;-)
+ * @param   pExport     Communication area which has been successfully
+ *                      processed by findFirstExport.
+ */
+void kFilePE::exportFindClose(kExportEntry *pExport)
+{
+    pExport = pExport;
+    return;
+}
+
+
+/**
+ * Lookup information on a spesific export given by ordinal number.
+ * @returns Success indicator.
+ * @param   pExport     Communication area containing export information
+ *                      on successful return.
+ * @remark  stub
+ */
+BOOL kFilePE::exportLookup(unsigned long ulOrdinal, kExportEntry *pExport)
+{
+    assert(!"not implemented.");
+    ulOrdinal = ulOrdinal;
+    pExport = pExport;
+    return FALSE;
+}
+
+/**
+ * Lookup information on a spesific export given by name.
+ * @returns Success indicator.
+ * @param   pExport     Communication area containing export information
+ *                      on successful return.
+ * @remark  stub
+ */
+BOOL kFilePE::exportLookup(const char *  pszName, kExportEntry *pExport)
+{
+    assert(!"not implemented.");
+    pszName = pszName;
+    pExport = pExport;
+    return FALSE;
 }
 
 
@@ -326,14 +386,14 @@ BOOL  kFilePE::dump(kFile *pOut)
     {
         pOut->printf("Import Directory\n"
                      "----------------\n");
-        
+
         PIMAGE_IMPORT_DESCRIPTOR pCur = pImportDir;
         while (pCur->u.Characteristics != 0)
         {
             pOut->printf("%s\n", (char*)pvBase + pCur->Name);
             pCur++;
         }
-    }   
+    }
 
 
     /*

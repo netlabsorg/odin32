@@ -1,4 +1,4 @@
-/* $Id: kFileLX.cpp,v 1.4 2001-02-02 08:45:41 bird Exp $
+/* $Id: kFileLX.cpp,v 1.5 2001-04-17 00:26:11 bird Exp $
  *
  *
  *
@@ -63,7 +63,20 @@ typedef struct _export_state
 } EXPSTATE, *PEXPSTATE;
 
 
+/*******************************************************************************
+*   Global Variables                                                           *
+*******************************************************************************/
+#if 0
+static kFileLX tst((kFile*)NULL);
+#endif
 
+
+/**
+ * Internal worker which lookup the name corresponding to an ordinal.
+ * @returns Success indicator.
+ * @param   iOrdinal ( >= 0).
+ * @param   pszBuffer.
+ */
 BOOL kFileLX::queryExportName(int iOrdinal, char *pszBuffer)
 {
     PUSHORT pus;
@@ -118,7 +131,7 @@ kFileLX::kFileLX(const char *pszFilename)  throw (int)
     struct exe_hdr * pehdr;
 
     /* create filemapping */
-    pvBase = kFileFormatBase::readfile(pszFilename);
+    pvBase = kFile::readFile(pszFilename);
     if (pvBase == NULL)
         throw(1);
 
@@ -191,15 +204,26 @@ kFileLX::~kFileLX()
 
 
 
-BOOL kFileLX::queryModuleName(char *pszBuffer)
+/**
+ * Query for the module name.
+ * @returns Success indicator. TRUE / FALSE.
+ * @param   pszBuffer   Pointer to buffer which to put the name into.
+ * @param   cchBuffer   Size of the buffer (defaults to 260 chars).
+ */
+BOOL kFileLX::moduleGetName(char *pszBuffer, int cchBuffer/*= 260*/)
 {
     /* The module name is the 0 ordinal entry in resident name table */
+    assert(cchBuffer >= 255);
     return queryExportName(0, pszBuffer);
 }
 
 
-
-BOOL kFileLX::findFirstExport(PEXPORTENTRY pExport)
+/**
+ * Finds the first exports.
+ * @returns   Success indicator. TRUE / FALSE.
+ * @param     pExport  Pointer to export structure.
+ */
+BOOL kFileLX::exportFindFirst(kExportEntry *pExport)
 {
     struct b32_bundle * pBundle = (struct b32_bundle*)((char*)pvBase + pe32->e32_enttab + offLXHdr);
     struct e32_entry *  pEntry;
@@ -238,15 +262,15 @@ BOOL kFileLX::findFirstExport(PEXPORTENTRY pExport)
                 switch (pBundle->b32_type & ~TYPEINFO)
                 {
                     case ENTRY16:
-                        pExport->offset = pEntry->e32_variant.e32_offset.offset16;
+                        pExport->ulOffset = pEntry->e32_variant.e32_offset.offset16;
                         break;
 
                     case ENTRY32:
-                        pExport->offset = pEntry->e32_variant.e32_offset.offset32;
+                        pExport->ulOffset = pEntry->e32_variant.e32_offset.offset32;
                         break;
 
                     case GATE16:
-                        pExport->offset = pEntry->e32_variant.e32_callgate.offset;
+                        pExport->ulOffset = pEntry->e32_variant.e32_callgate.offset;
                         break;
                     default:
                         assert(!"ARG!!!! invalid bundle type!");
@@ -259,6 +283,7 @@ BOOL kFileLX::findFirstExport(PEXPORTENTRY pExport)
                 pExpState->iOrdinalBundle = iOrdinal;
                 pExpState->pe32     = pEntry;
                 pExpState->iOrdinal = iOrdinal;
+                pExport->ulAddress = ~0UL; /* TODO */
                 return TRUE;
             }
         }
@@ -269,8 +294,12 @@ BOOL kFileLX::findFirstExport(PEXPORTENTRY pExport)
 }
 
 
-
-BOOL kFileLX::findNextExport(PEXPORTENTRY pExport)
+/**
+ * Finds the next export.
+ * @returns   Success indicator. TRUE / FALSE.
+ * @param     pExport  Pointer to export structure.
+ */
+BOOL kFileLX::exportFindNext(kExportEntry *pExport)
 {
     static int      acbEntry[] =
     {
@@ -282,6 +311,7 @@ BOOL kFileLX::findNextExport(PEXPORTENTRY pExport)
     };
 
     PEXPSTATE pExpState = (PEXPSTATE)pExport->pv;
+    pExport->ulAddress = ~0UL; /* TODO */
 
     /*
      * Get more ordinals from the current bundle if any left.
@@ -302,19 +332,19 @@ BOOL kFileLX::findNextExport(PEXPORTENTRY pExport)
         if (!queryExportName(pExpState->iOrdinal, pExport->achName))
             pExport->achName[0] = '\0';
 
-        /* offset */
+        /* ulOffset */
         switch (pExpState->pb32->b32_type & ~TYPEINFO)
         {
             case ENTRY16:
-                pExport->offset = pExpState->pe32->e32_variant.e32_offset.offset16;
+                pExport->ulOffset = pExpState->pe32->e32_variant.e32_offset.offset16;
                 break;
 
             case ENTRY32:
-                pExport->offset = pExpState->pe32->e32_variant.e32_offset.offset32;
+                pExport->ulOffset = pExpState->pe32->e32_variant.e32_offset.offset32;
                 break;
 
             case GATE16:
-                pExport->offset = pExpState->pe32->e32_variant.e32_callgate.offset;
+                pExport->ulOffset = pExpState->pe32->e32_variant.e32_callgate.offset;
                 break;
         }
 
@@ -359,15 +389,15 @@ BOOL kFileLX::findNextExport(PEXPORTENTRY pExport)
             switch (pExpState->pb32->b32_type & ~TYPEINFO)
             {
                 case ENTRY16:
-                    pExport->offset = pExpState->pe32->e32_variant.e32_offset.offset16;
+                    pExport->ulOffset = pExpState->pe32->e32_variant.e32_offset.offset16;
                     break;
 
                 case ENTRY32:
-                    pExport->offset = pExpState->pe32->e32_variant.e32_offset.offset32;
+                    pExport->ulOffset = pExpState->pe32->e32_variant.e32_offset.offset32;
                     break;
 
                 case GATE16:
-                    pExport->offset = pExpState->pe32->e32_variant.e32_callgate.offset;
+                    pExport->ulOffset = pExpState->pe32->e32_variant.e32_callgate.offset;
                     break;
                 default:
                     assert(!"ARG!!!! invalid bundle type!");
@@ -383,6 +413,51 @@ BOOL kFileLX::findNextExport(PEXPORTENTRY pExport)
      */
     free(pExport->pv);
     pExport->pv = NULL;
+    return FALSE;
+}
+
+
+/**
+ * Frees resources associated with the communicatin area.
+ * It's not necessary to call this when exportFindNext has return FALSE.
+ * @param   pExport     Communication area which has been successfully
+ *                      processed by findFirstExport.
+ */
+void kFileLX::exportFindClose(kExportEntry *pExport)
+{
+    free(pExport->pv);
+    pExport->pv = NULL;
+    return;
+}
+
+
+/**
+ * Lookup information on a spesific export given by ordinal number.
+ * @returns Success indicator.
+ * @param   pExport     Communication area containing export information
+ *                      on successful return.
+ * @remark  stub
+ */
+BOOL kFileLX::exportLookup(unsigned long ulOrdinal, kExportEntry *pExport)
+{
+    assert(!"not implemented.");
+    ulOrdinal = ulOrdinal;
+    pExport = pExport;
+    return FALSE;
+}
+
+/**
+ * Lookup information on a spesific export given by name.
+ * @returns Success indicator.
+ * @param   pExport     Communication area containing export information
+ *                      on successful return.
+ * @remark  stub
+ */
+BOOL kFileLX::exportLookup(const char *  pszName, kExportEntry *pExport)
+{
+    assert(!"not implemented.");
+    pszName = pszName;
+    pExport = pExport;
     return FALSE;
 }
 
