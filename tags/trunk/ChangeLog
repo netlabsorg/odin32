@@ -1,9 +1,10 @@
-/* $Id: ChangeLog,v 1.1394 2001-05-03 18:14:32 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1395 2001-05-03 18:20:09 sandervl Exp $ */
 
  2000-05-03: Yuri Dario <mc6530@mclink.it>
     - USER32:   o SendNCCalcSize call bugfix (client rectangle parameter)
                 o Fix for groupbox WM_SETFONT handler. Must erase top part
                   if font is changed.
+    - OLEAUT32: o Fail for TLBMAGIC2 typelib type.
 
  2001-04-30: Sander van Leeuwen <sandervl@xs4all.nl>
     - DSOUND:   o DirectAudio interface updates
