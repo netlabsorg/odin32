@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.122 2001-08-09 08:45:06 sandervl Exp $
+; $Id: kernel32.def,v 1.123 2001-09-26 15:30:07 phaller Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -1193,3 +1193,7 @@ EXPORTS
     GetDisplayCodepage__Fv                                        @3000 NONAME
     GetWindowsCodepage__Fv                                        @3001 NONAME
 
+; ODIN debugging functions
+    _dbg_GetThreadCallDepth@0                                     @3100 NONAME
+    _dbg_IncThreadCallDepth@0                                     @3101 NONAME
+    _dbg_DecThreadCallDepth@0                                     @3102 NONAME
