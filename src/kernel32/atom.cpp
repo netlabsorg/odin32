@@ -1,4 +1,4 @@
-/* $Id: atom.cpp,v 1.9 2001-07-07 13:58:37 sandervl Exp $ */
+/* $Id: atom.cpp,v 1.10 2001-07-08 11:02:10 sandervl Exp $ */
 
 /*
  * Win32 ATOM api functions
@@ -30,6 +30,21 @@
 #define LOOKUP_NOCASE   0x80000000
 
 ATOM APIENTRY LookupAtom(HATOMTBL hAtomTbl, PSZ psz, ULONG actionMask);
+
+inline ATOM _LookupAtom(HATOMTBL hAtomTbl, PSZ psz, ULONG actionMask)
+{
+ ATOM yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = LookupAtom(hAtomTbl, psz, actionMask);
+    SetFS(sel);
+
+    return yyrc;
+}
+
+#undef  LookupAtom
+#define LookupAtom _LookupAtom
+
 
 HATOMTBL privateAtomTable = NULL;
 HATOMTBL systemAtomTable  = NULL;

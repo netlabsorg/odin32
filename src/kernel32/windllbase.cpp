@@ -1,4 +1,4 @@
-/* $Id: windllbase.cpp,v 1.26 2001-06-15 09:42:47 bird Exp $ */
+/* $Id: windllbase.cpp,v 1.27 2001-07-08 11:02:10 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
@@ -685,6 +685,12 @@ void Win32DllBase::setDefaultRenaming()
     {
         PROFILE_SetOdinIniString(DLLRENAMEWIN_SECTION, "MCICDA", "MCICDA.DLL");
         PROFILE_SetOdinIniString(DLLRENAMEOS2_SECTION, "MCICDA", "MCICDA.DRV");
+    }
+    if(PROFILE_GetOdinIniString(DLLRENAMEWIN_SECTION, "CRTDLL", "", renameddll,
+                                sizeof(renameddll)-1) <= 1)
+    {
+        PROFILE_SetOdinIniString(DLLRENAMEWIN_SECTION, "CRTDLL",   "CRTDLL32");
+        PROFILE_SetOdinIniString(DLLRENAMEOS2_SECTION, "CRTDLL32", "CRTDLL");
     }
 }
 //******************************************************************************
