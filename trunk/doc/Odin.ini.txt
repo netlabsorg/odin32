@@ -1,4 +1,4 @@
-/* $Id: Odin.ini.txt,v 1.5 2001-04-30 21:11:02 sandervl Exp $ */
+/* $Id: Odin.ini.txt,v 1.6 2001-05-10 17:14:16 sandervl Exp $ */
 
 Odin initialization file documentation
 
@@ -43,6 +43,7 @@ Fullscreen=[1|0]  Use/don't use fullscreen DirectDraw
 [WINMM]
 DirectAudio=[1|0] Use DirectAudio interface (if available) for wave playback
                   in WINMM and DSOUND. (default = 1)
+                  (NOTE: Only available in SB Live! audio driver)
 
 Odin.ini is stored in the directory where the environment string
 ODIN_INI points to. The default path is the directory of
