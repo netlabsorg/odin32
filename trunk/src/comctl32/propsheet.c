@@ -1,4 +1,4 @@
-/* $Id: propsheet.c,v 1.9 1999-09-26 11:01:10 achimha Exp $ */
+/* $Id: propsheet.c,v 1.10 1999-10-22 18:04:11 sandervl Exp $ */
 /*
  * Property Sheets
  *
@@ -16,7 +16,6 @@
 
 /* CB: Odin problems:
  - trap in PROPSHEET_DialogProc (tab control creation)
- - LockResource traps
 */
 
 #include <string.h>
@@ -214,7 +213,7 @@ BOOL PROPSHEET_CollectPageInfo(LPCPROPSHEETPAGEA lppsp,
                                     RT_DIALOGA);
     HGLOBAL hTemplate = LoadResource(lppsp->hInstance,
                                      hResource);
-    //pTemplate = (LPDLGTEMPLATEA)LockResource(hTemplate); //CB: trap, fix it
+     pTemplate = (LPDLGTEMPLATEA)LockResource(hTemplate);
   }
 
   /*
@@ -335,26 +334,6 @@ BOOL PROPSHEET_CreateDialog(PropSheetInfo* psInfo)
   if (psInfo->useCallback)
     (*(psInfo->ppshheader->pfnCallback))(0, PSCB_PRECREATE, (LPARAM)template);
 
-  //load OS/2 dialog
-
-  if (psInfo->ppshheader->dwFlags & PSH_MODELESS)
-    ret = NativeCreateDlgIP(COMCTL32_hModule,
-                         psInfo->ppshheader->hInstance,
-                         MAKEINTRESOURCEA(IDD_PROPSHEET),
-                         psInfo->ppshheader->hwndParent,
-                         (DLGPROC)PROPSHEET_DialogProc,
-                         (LPARAM)psInfo);
-  else
-    ret = NativeDlgBoxIP(COMCTL32_hModule,
-                         psInfo->ppshheader->hInstance,
-                         MAKEINTRESOURCEA(IDD_PROPSHEET),
-                         psInfo->ppshheader->hwndParent,
-                         (DLGPROC)PROPSHEET_DialogProc,
-                         (LPARAM)psInfo);
-
-  if (ret == (INT)-1) return FALSE;
-
-/* //CB: original WINE code
   if (!(hRes = FindResourceA(COMCTL32_hModule,
                             MAKEINTRESOURCEA(IDD_PROPSHEET),
                             RT_DIALOGA)))
@@ -378,7 +357,6 @@ BOOL PROPSHEET_CreateDialog(PropSheetInfo* psInfo)
                                   psInfo->ppshheader->hwndParent,
                                   (DLGPROC) PROPSHEET_DialogProc,
                                   (LPARAM)psInfo);
-*/
 
   return ret;
 }
