@@ -1,4 +1,4 @@
-/* $Id: combo.cpp,v 1.13 1999-11-17 17:04:52 cbratschi Exp $ */
+/* $Id: combo.cpp,v 1.14 1999-11-17 21:32:41 cbratschi Exp $ */
 /*
  * Combo controls
  *
@@ -1672,7 +1672,6 @@ static void COMBO_LButtonDown( LPHEADCOMBO lphc, LPARAM lParam )
        (bButton && (CB_GETTYPE(lphc) == CBS_DROPDOWN)) )
    {
        lphc->wState |= CBF_BUTTONDOWN;
-MessageBeep(MB_OK); //CB:
        if( lphc->wState & CBF_DROPPED )
        {
            /* got a click to cancel selection */
