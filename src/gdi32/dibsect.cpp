@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.20 2000-02-21 20:26:45 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.21 2000-03-21 19:46:47 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -22,18 +22,15 @@
 #define  OS2_ONLY
 #include "dibsect.h"
 #include <vmutex.h>
+#include <win32api.h>
 #include <winconst.h>
 #include <win32wnd.h>
+#include <cpuhlp.h>
 #include "oslibgpi.h"
+#include "rgbcvt.h"
 
 #define DBG_LOCALLOG	DBG_dibsect
 #include "dbglocal.h"
-
-//Win32 apis used:
-HWND WIN32API WindowFromDC(HDC hdc);
-BOOL   WINAPI UnmapViewOfFile(LPVOID addr);
-LPVOID WINAPI MapViewOfFile(HANDLE mapping, DWORD access, DWORD offset_high,
-                            DWORD offset_low, DWORD count);
 
 static VMutex dibMutex;
 
@@ -328,6 +325,7 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
  HPS    hps = (HPS)hdcDest;
  POINTL point[4];
  LONG   rc;
+ PVOID  bitmapBits = NULL;
 
   HWND hwndDest = WindowFromDC(hdcDest);
   hwndDest = Win32ToOS2Handle(hwndDest);
@@ -380,7 +378,19 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
   }
 #endif
 
-  rc = GpiDrawBits(hps, bmpBits, pOS2bmp, 4, &point[0], ROP_SRCCOPY, BBO_OR);
+  //SvL: Optimize this.. (don't convert entire bitmap if only a part will be blitted to the dc)
+  if(dibinfo.dsBitfields[1] == 0x3E0) {//RGB 555?
+       	dprintf(("DIBSection::BitBlt; convert rgb 555 to 565"));
+
+        bitmapBits = (WORD *)malloc(pOS2bmp->cbImage);
+	if(CPUFeatures & CPUID_MMX) {
+		RGB555to565MMX((WORD *)bitmapBits, (WORD *)bmpBits, pOS2bmp->cbImage/sizeof(WORD));
+	}
+	else   	RGB555to565((WORD *)bitmapBits, (WORD *)bmpBits, pOS2bmp->cbImage/sizeof(WORD));
+	rc = GpiDrawBits(hps, bitmapBits, pOS2bmp, 4, &point[0], ROP_SRCCOPY, BBO_OR);
+	free(bitmapBits);
+  }
+  else	rc = GpiDrawBits(hps, bmpBits, pOS2bmp, 4, &point[0], ROP_SRCCOPY, BBO_OR);
 
   if(hwndDest != 0)
   {
