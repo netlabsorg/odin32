@@ -1,100 +1,68 @@
-/* $Id: winimagelx.cpp,v 1.14 2002-02-03 13:16:22 sandervl Exp $ */
+/* $Id: winexedummy.cpp,v 1.1 2002-02-03 13:16:22 sandervl Exp $ */
 
 /*
- * Win32 LX Image base class
+ * Win32 Dummy Exe class
  *
- * Copyright 1999-2000 Sander van Leeuwen (sandervl@xs4all.nl)
+ * Copyright 2001 Sander van Leeuwen (sandervl@xs4all.nl)
  *
- * TODO: headers not complete
- * 
+ *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
-
 #define INCL_DOSFILEMGR          /* File Manager values      */
-#define INCL_DOSMODULEMGR
 #define INCL_DOSERRORS           /* DOS Error values         */
 #define INCL_DOSPROCESS          /* DOS Process values       */
 #define INCL_DOSMISC             /* DOS Miscellanous values  */
 #define INCL_WIN
-#define INCL_BASE
-#include <os2wrap.h>             //Odin32 OS/2 api wrappers
-
+#include <os2wrap.h>	//Odin32 OS/2 api wrappers
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
-#include <assert.h>
 #include <misc.h>
 #include <win32type.h>
-#include <winimagebase.h>
-#include <winimagelx.h>
-#include <windllbase.h>
-#include <winexebase.h>
-#include <winexelx.h>
-#include <windlllx.h>
-#include <pefile.h>
-#include <unicode.h>
-#include "oslibmisc.h"
-#include "initterm.h"
-#include <win\virtual.h>
-
-#define DBG_LOCALLOG	DBG_winimagelx
-#include "dbglocal.h"
-
-BYTE dosHeader[16*15] = {
- 0x4D, 0x5A, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x0B, 0x00,
- 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
- 0x6A, 0x72, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
- 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xF0, 0x00, 0x00, 0x00,
- 0xB4, 0x30, 0xCD, 0x21, 0x86, 0xC4, 0x3D, 0x0A, 0x14, 0x72, 0x42, 0xBE, 0x80, 0x00, 0x8A, 0x1C,
- 0x32, 0xFF, 0x46, 0x88, 0x38, 0x2E, 0x8C, 0x1E, 0x6E, 0x00, 0x8E, 0x06, 0x2C, 0x00, 0x33, 0xC0,
- 0x8B, 0xF8, 0xB9, 0x00, 0x80, 0xFC, 0xF2, 0xAE, 0x75, 0x23, 0x49, 0x78, 0x20, 0xAE, 0x75, 0xF6,
- 0x47, 0x47, 0x0E, 0x1F, 0x2E, 0x89, 0x3E, 0x68, 0x00, 0x2E, 0x8C, 0x06, 0x6A, 0x00, 0xBE, 0x5C,
- 0x00, 0xB9, 0x6C, 0x63, 0xBB, 0x25, 0x00, 0xB4, 0x64, 0xCD, 0x21, 0x73, 0x0B, 0xBA, 0x7C, 0x00,
- 0x0E, 0x1F, 0xB4, 0x09, 0xCD, 0x21, 0xB0, 0x01, 0xB4, 0x4C, 0xCD, 0x21, 0x20, 0x00, 0x01, 0x00,
- 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x81, 0x00, 0x00, 0x00,
- 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x54, 0x68, 0x69, 0x73,
- 0x20, 0x70, 0x72, 0x6F, 0x67, 0x72, 0x61, 0x6D, 0x20, 0x6D, 0x75, 0x73, 0x74, 0x20, 0x62, 0x65,
- 0x20, 0x72, 0x75, 0x6E, 0x20, 0x75, 0x6E, 0x64, 0x65, 0x72, 0x20, 0x57, 0x69, 0x6E, 0x33, 0x32,
- 0x2E, 0x0D, 0x0A, 0x24, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-};
+#include <winexedummy.h>
+#include <winconst.h>
+#include <win32api.h>
+#include <wprocess.h>
 
 //******************************************************************************
+//Create Dummy Exe object
 //******************************************************************************
-Win32LxImage::Win32LxImage(HINSTANCE hInstance, PVOID pResData)
-               : Win32ImageBase(hInstance), header(0)
+BOOL WIN32API RegisterDummyExe(LPSTR pszExeName)
 {
- APIRET rc;
- char  *name;
+  if(WinExe != NULL) //should never happen
+    	delete(WinExe);
 
-  szFileName[0] = 0;
+  Win32DummyExe *winexe;
 
-  if(lpszCustomDllName) {
-       name = lpszCustomDllName;
-       this->dwOrdinalBase = ::dwOrdinalBase;
+  winexe = new Win32DummyExe(pszExeName);
+
+  if(winexe) {
+        InitCommandLine(FALSE);
+   	winexe->start();
   }
   else {
-       name = OSLibGetDllName(hinstance);
-       this->dwOrdinalBase = 0;
+      	eprintf(("Win32DummyExe creation failed!\n"));
+      	DebugInt3();
+   	return FALSE;
   }
-
-  strcpy(szFileName, name);
-  strupr(szFileName);
-
-  setFullPath(szFileName);
-
-  //Pointer to PE resource tree generates by wrc (or NULL for system dlls)
-  pResRootDir = (PIMAGE_RESOURCE_DIRECTORY)pResData;
-
-  //ulRVAResourceSection contains the virtual address of the imagebase in the PE header
-  //for the resource section (images loaded by the pe.exe)
-  //For LX images, this is 0 as OffsetToData contains a relative offset
-  ulRVAResourceSection = 0;
+  return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
-Win32LxImage::~Win32LxImage()
+Win32DummyExe::Win32DummyExe(LPSTR pszExeName)
+                 : Win32ImageBase(-1),
+		   Win32ExeBase(-1), header(0)
+{
+  dprintf(("Win32DummyExe ctor: %s", pszExeName));
+  hinstance = (HINSTANCE)buildHeader(1, 0, IMAGE_SUBSYSTEM_WINDOWS_GUI);
+  strcpy(szModule, pszExeName);
+  strcpy(szFileName, pszExeName);
+  setFullPath(pszExeName);
+}
+//******************************************************************************
+//******************************************************************************
+Win32DummyExe::~Win32DummyExe()
 {
   if(header) {
 	DosFreeMem(header);
@@ -102,37 +70,26 @@ Win32LxImage::~Win32LxImage()
 }
 //******************************************************************************
 //******************************************************************************
-ULONG Win32LxImage::getApi(char *name)
+ULONG Win32DummyExe::start()
 {
-  APIRET      rc;
-  ULONG       apiaddr;
-
-  rc = DosQueryProcAddr(hinstanceOS2, 0, name, (PFN *)&apiaddr);
-  if(rc)
-  {
-	dprintf(("Win32LxImage::getApi %x %s -> rc = %d", hinstanceOS2, name, rc));
-	return(0);
-  }
-  return(apiaddr);
+    return 0;
 }
 //******************************************************************************
 //******************************************************************************
-ULONG Win32LxImage::getApi(int ordinal)
+ULONG Win32DummyExe::getApi(char *name)
 {
- APIRET      rc;
- ULONG       apiaddr;
-
-  rc = DosQueryProcAddr(hinstanceOS2, dwOrdinalBase+ordinal, NULL, (PFN *)&apiaddr);
-  if(rc) {
-	dprintf(("Win32LxImage::getApi %x %d -> rc = %d", hinstanceOS2, ordinal, rc));
-	return(0);
-  }
-  return(apiaddr);
+    return 0;
 }
 //******************************************************************************
 //******************************************************************************
-LPVOID Win32LxImage::buildHeader(DWORD MajorImageVersion, DWORD MinorImageVersion,
-                                 DWORD Subsystem) 
+ULONG Win32DummyExe::getApi(int ordinal)
+{
+    return 0;
+}
+//******************************************************************************
+//******************************************************************************
+LPVOID Win32DummyExe::buildHeader(DWORD MajorImageVersion, DWORD MinorImageVersion,
+                                  DWORD Subsystem) 
 {
  APIRET rc;
  IMAGE_DOS_HEADER *pdosheader;

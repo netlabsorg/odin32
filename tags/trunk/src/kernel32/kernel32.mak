@@ -1,4 +1,4 @@
-# $Id: kernel32.mak,v 1.20 2001-12-05 18:06:02 sandervl Exp $
+# $Id: kernel32.mak,v 1.21 2002-02-03 13:16:22 sandervl Exp $
 
 #
 # Odin32 API
@@ -95,6 +95,7 @@ $(OBJDIR)\windllpeldr.obj \
 $(OBJDIR)\winexepe2lx.obj \
 $(OBJDIR)\winexelx.obj \
 $(OBJDIR)\winexepeldr.obj \
+$(OBJDIR)\winexedummy.obj \
 $(OBJDIR)\critsection.obj \
 $(OBJDIR)\pefile.obj \
 $(OBJDIR)\winimgres.obj \
