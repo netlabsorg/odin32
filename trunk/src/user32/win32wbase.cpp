@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.353 2003-01-06 16:15:13 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.354 2003-02-06 20:28:42 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1101,6 +1101,11 @@ ULONG Win32BaseWindow::MsgSetFocus(HWND hwnd)
         return 0;
     }
 
+    // if in <= 8bpp mode, then we must send a WM_QUERYNEWPALETTE message here
+    // this gives the app the chance to realize its palette
+    if(ScreenBitsPerPel <= 8) {
+        SendMessageA(getWindowHandle(),WM_QUERYNEWPALETTE, 0, 0);
+    }
     return SendMessageA(getWindowHandle(),WM_SETFOCUS, hwnd, 0);
 }
 //******************************************************************************
@@ -3756,6 +3761,7 @@ LONG Win32BaseWindow::SetWindowLong(int index, ULONG value, BOOL fUnicode)
                          ShowWindow(SW_SHOWNOACTIVATE);
                     else ShowWindow(SW_HIDE);
                 }
+
 #ifdef DEBUG
                 PrintWindowStyle(ss.styleNew, 0);
 #endif

@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.194 2003-01-29 13:07:30 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.195 2003-02-06 20:28:39 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -256,7 +256,6 @@ BOOL InitPM()
     return TRUE;
 } /* End of main */
 //******************************************************************************
-#ifdef NEW_WGSS
 HBITMAP OPEN32API _O32_CreateBitmapFromPMHandle(HBITMAP hPMBitmap);
 
 inline HBITMAP O32_CreateBitmapFromPMHandle(HBITMAP hPMBitmap)
@@ -269,7 +268,6 @@ inline HBITMAP O32_CreateBitmapFromPMHandle(HBITMAP hPMBitmap)
 
     return yyrc;
 }
-#endif
 //******************************************************************************
 static void QueryPMMenuBitmaps()
 {
@@ -299,7 +297,6 @@ static void QueryPMMenuBitmaps()
         hbmFrameMenu[PMMENU_CLOSEBUTTON] = GpiLoadBitmap(hdc, hModDisplay, SBMP_CLOSE, 0, 0);
         hbmFrameMenu[PMMENU_CLOSEBUTTONDOWN] = GpiLoadBitmap(hdc, hModDisplay, SBMP_CLOSEDEP, 0, 0);
 
-#ifdef NEW_WGSS
         //Create win32 bitmap handles of the OS/2 min, max and restore buttons
         hBmpMinButton     = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_MINBUTTON]);
         hBmpMinButtonDown = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_MINBUTTONDOWN]);
@@ -309,7 +306,6 @@ static void QueryPMMenuBitmaps()
         hBmpRestoreButtonDown = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_RESTOREBUTTONDOWN]);
         hBmpCloseButton   = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_CLOSEBUTTON]);
         hBmpCloseButtonDown   = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_CLOSEBUTTONDOWN]);
-#endif
         DevCloseDC(hdc);
     }
 }
@@ -880,8 +876,9 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
     case WM_REALIZEPALETTE:
     {
-        dprintf(("OS2: WM_REALIZEPALETTE"));
-        goto RunDefWndProc;
+        dprintf(("OS2: WM_REALIZEPALETTE %x", win32wnd->getWindowHandle()));
+        win32wnd->DispatchMsgA(pWinMsg);
+        break;
     }
 
     case WM_HSCROLL:
@@ -1576,6 +1573,7 @@ adjustend:
                     //CB: redraw all children for now
                     //    -> problems with update region if we don't do it
                     //       todo: rewrite whole handling
+                    dprintf(("PMFRAME: WM_WINDOWPOSCHANGED invalidate all"));
                     WinInvalidateRect(hwnd,NULL,TRUE);
                 }
                 else
