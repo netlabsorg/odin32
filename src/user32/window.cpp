@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.39 1999-12-02 19:30:41 sandervl Exp $ */
+/* $Id: window.cpp,v 1.40 1999-12-05 00:31:49 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -1249,7 +1249,6 @@ HWND WIN32API WindowFromPoint( POINT point)
 {
     HWND  hwndOS2, hwnd;
     POINT wPoint;
-
 
     wPoint.x = point.x;
     wPoint.y = windowDesktop->getWindowHeight() - point.y;
