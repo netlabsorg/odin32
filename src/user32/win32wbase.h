@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.130 2001-10-09 05:18:04 phaller Exp $ */
+/* $Id: win32wbase.h,v 1.131 2001-10-17 14:30:10 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -37,6 +37,7 @@ class Win32BaseWindow;
 #define CheckMagicDword(a)      (a==WIN32PM_MAGIC)
 
 #define GW_HWNDNEXTCHILD          (0x10000 | GW_HWNDNEXT)
+#define GW_HWNDPREVCHILD          (0x10000 | GW_HWNDPREV)
 #define GW_HWNDFIRSTCHILD         (0x10000 | GW_CHILD)
 #define GW_HWNDLASTCHILD          (0x10000 | GW_HWNDLAST)
 
