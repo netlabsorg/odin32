@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.10 1999-06-12 18:29:37 hugh Exp $
+; $Id: kernel32.def,v 1.11 1999-06-17 22:06:10 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -677,7 +677,7 @@ EXPORTS
     ReadFileEx                 = _ReadFileEx@20              @578
 ;   ReadFileScatter            = _ReadFileScatter@??                    ;NT
     ReadProcessMemory          = _ReadProcessMemory@20       @579
-;   RegisterServiceProcess     = _RegisterServiceProcess@??  @580       ;W95
+    RegisterServiceProcess     = _RegisterServiceProcess@8   @580       ;W95
 ;   ReinitializeCriticalSection  = _ReinitializeCriticalSection@?? @581 ;W95
 ;   RegisterConsoleVDM         = _RegisterConsoleVDM@??                 ;NT
 ;   RegisterWaitForInputIdle   = _RegisterWaitForInputIdle@??           ;NT

@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.7 1999-06-17 18:25:22 phaller Exp $ */
+/* $Id: wprocess.cpp,v 1.8 1999-06-17 22:06:10 phaller Exp $ */
 
 /*
  *
@@ -581,3 +581,22 @@ ULONG SYSTEM GetVersionSize(char *modname)
 }
 //******************************************************************************
 //******************************************************************************
+
+
+/***********************************************************************
+ *           RegisterServiceProcess             (KERNEL, KERNEL32)
+ *
+ * A service process calls this function to ensure that it continues to run
+ * even after a user logged off.
+ */
+DWORD WIN32API RegisterServiceProcess(DWORD dwProcessId,
+                                      DWORD dwType)
+{
+  dprintf(("KERNEL32: RegisterServiceProcess(%08xh,%08xh) not implemented.\n",
+           dwProcessId,
+           dwType));
+
+  /* I don't think that Wine needs to do anything in that function */
+  return 1; /* success */
+}
+
