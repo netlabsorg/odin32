@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.49 2003-02-27 14:22:45 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.50 2003-02-28 09:56:00 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -1331,7 +1331,16 @@ LONG Win32BaseWindow::HandleSysCommand(WPARAM wParam,POINT *pt32)
 
     case SC_MAXIMIZE:
         if(dwStyle & WS_MAXIMIZEBOX)
-           ShowWindow(SW_MAXIMIZE);
+          if (fOS2Look && (getOldStyle() & WS_MINIMIZE))
+          {
+              //PF Yes this is bad we do things twice - first restore window
+              //from iconic state and then quickly maximize. What is good is that
+              //only frame rects are recalculated twice. I checked lots of other
+              //ways - seems only this one is 100% bug-safe. This happens on every
+              //minimize from icon to maximum routine so not so often at all.
+              OSLibWinRestoreWindow(getOS2FrameWindowHandle());
+          }
+          ShowWindow(SW_MAXIMIZE);
         break;
 
     case SC_RESTORE:
