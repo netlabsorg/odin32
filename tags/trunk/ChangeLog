@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.1665 2001-08-29 10:39:28 phaller Exp $ */
+/* $Id: ChangeLog,v 1.1666 2001-08-31 00:20:04 phaller Exp $ */
+
+ 2001-08-30: Patrick Haller <patrick.haller@innotek.de>
+    - SHLWAPI:  o Improvements on ordinal functions
 
  2001-08-29: Patrick Haller <patrick.haller@innotek.de>
     - USER32:   o BUTTON.CPP: don't draw invisible buttons
