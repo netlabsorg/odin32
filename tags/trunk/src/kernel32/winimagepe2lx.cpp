@@ -1,4 +1,4 @@
-/* $Id: winimagepe2lx.cpp,v 1.8 2000-02-16 14:22:12 sandervl Exp $ */
+/* $Id: winimagepe2lx.cpp,v 1.9 2000-04-19 20:19:13 bird Exp $ */
 
 /*
  * Win32 PE2LX Image base class
@@ -28,13 +28,14 @@
 #include <malloc.h>
 #include <process.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <win32type.h>
 #include <misc.h>
 #include <winimagebase.h>
 #include <winimagepe2lx.h>
 
-#define DBG_LOCALLOG	DBG_winimagepe2lx
+#define DBG_LOCALLOG    DBG_winimagepe2lx
 #include "dbglocal.h"
 
 /*******************************************************************************
@@ -98,6 +99,25 @@
            qsLObjrec_t FAR  *pObjInfo;      /* pointer to per object info if any */
            UCHAR     FAR    *pName;         /* -> name string following struc */
    } qsLrec_t;
+
+
+
+   /* Pointer Record Structure
+    *      This structure is the first in the user buffer.
+    *      It contains pointers to heads of record types that are loaded
+    *      into the buffer.
+    */
+
+   typedef struct qsPtrRec_s {   /* qsPRec */
+           qsGrec_t        *pGlobalRec;
+           void            *pProcRec;      /* ptr to head of process records */
+           void            *p16SemRec;     /* ptr to head of 16 bit sem recds */
+           void            *p32SemRec;     /* ptr to head of 32 bit sem recds */
+           void            *pMemRec;       /* ptr to head of shared mem recs */
+           qsLrec_t        *pLibRec;       /* ptr to head of mte records */
+           void            *pShrMemRec;    /* ptr to head of shared mem records */
+           void            *pFSRec;        /* ptr to head of file sys records */
+   } qsPtrRec_t;
 
 #endif
 
@@ -309,20 +329,20 @@ BOOL Win32Pe2LxImage::init()
 ULONG  Win32Pe2LxImage::getSections()
 {
     APIRET rc = NO_ERROR;
-    qsGrec_t ** pBuf;
-    ULONG       cbBuf = 65536;
+    qsPtrRec_t *    pPtrRec;
+    ULONG           cbBuf = 65536;
 
-    pBuf = (qsGrec_t **)malloc(cbBuf);
-    if (pBuf != NULL)
+    pPtrRec = (qsPtrRec_t *)malloc(cbBuf);
+    if (pPtrRec != NULL)
     {
-        rc = DosQuerySysState(QS_MTE, QS_MTE, getpid(), 0L, pBuf, cbBuf);
+        rc = DosQuerySysState(QS_MTE, QS_MTE, getpid(), 0L, pPtrRec, cbBuf);
         while (cbBuf < 1024*1024 && rc == ERROR_BUFFER_OVERFLOW)
         {
-            PVOID pv = pBuf;
+            PVOID pv = pPtrRec;
             cbBuf +=  65536;
-            pBuf = (qsGrec_t **)realloc(pv, cbBuf);
-            if (pBuf != NULL)
-                rc = DosQuerySysState(QS_MTE, QS_MTE, getpid(), 0L, pBuf, cbBuf);
+            pPtrRec = (qsPtrRec_t *)realloc(pv, cbBuf);
+            if (pPtrRec != NULL)
+                rc = DosQuerySysState(QS_MTE, QS_MTE, getpid(), 0L, pPtrRec, cbBuf);
             else
             {
                 rc = ERROR_NOT_ENOUGH_MEMORY;
@@ -332,10 +352,43 @@ ULONG  Win32Pe2LxImage::getSections()
 
         if (rc == NO_ERROR)
         {
-            qsGrec_t *  pGrec = *pBuf;
-            qsLrec_t *  pLrec = (qsLrec_t * )((ULONG)pGrec + sizeof(qsGrec_t));
-            while (pLrec != NULL && pLrec->hmte != hinstance)
+            qsLrec_t *  pLrec = pPtrRec->pLibRec;
+            while (pLrec != NULL)
+            {
+                /*
+                 * Bug detected in OS/2 FP13. Probably a problem which occurs
+                 * in _LDRSysMteInfo when qsCheckCache is calle before writing
+                 * object info. The result is that the cache flushed and the
+                 * attempt of updating the qsLrec_t next and object pointer is
+                 * not done. This used to work earlier and on Aurora AFAIK.
+                 *
+                 * The fix for this problem is to check if the pObjInfo is NULL
+                 * while the number of objects isn't 0 and correct this. pNextRec
+                 * will also be NULL at this time. This will be have to corrected
+                 * before we exit the loop or moves to the next record.
+                 * There is also a nasty alignment of the object info... Hope
+                 * I got it right. (This aligment seems new to FP13.)
+                 */
+                if (pLrec->pObjInfo == NULL /*&& pLrec->pNextRec == NULL*/ && pLrec->ctObj > 0)
+                    {
+                    pLrec->pObjInfo = (qsLObjrec_t*)(
+                        (char*)pLrec
+                        + ((sizeof(qsLrec_t)                     /* size of the lib record */
+                           + pLrec->ctImpMod * sizeof(short)    /* size of the array of imported modules */
+                           + strlen((char*)pLrec->pName) + 1    /* size of the filename */
+                           + 3) & ~3));                          /* the size is align on 4 bytes boundrary */
+                    pLrec->pNextRec = (qsLrec_t*)((char*)pLrec->pObjInfo
+                                                   + sizeof(qsLObjrec_t) * pLrec->ctObj);
+                    }
+                if (pLrec->hmte == hinstance)
+                    break;
+
+                /*
+                 * Next record
+                 */
                 pLrec = (qsLrec_t*)pLrec->pNextRec;
+            }
+
 
             if (pLrec)
             {
@@ -369,8 +422,8 @@ ULONG  Win32Pe2LxImage::getSections()
         else
             dprintf(("DosQuerySysState - failed with rc=%d (cbBuf=%d)\n", rc, cbBuf));
 
-        if (pBuf != NULL)
-            free(pBuf);
+        if (pPtrRec != NULL)
+            free(pPtrRec);
     }
     else
         rc = ERROR_NOT_ENOUGH_MEMORY;
