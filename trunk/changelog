@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2305 2002-09-14 13:49:06 sandervl Exp $ */
+/* $Id: changelog,v 1.2306 2002-09-15 16:51:17 sandervl Exp $ */
+
+ 2001-09-15: Dietrich Teickner <Dietrich_Teickner@t-online   >
+    - SHELL32:  o Wine resync for shfileop.c
 
  2002-09-14: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o WaitForSingleObject, (Msg)WaitForMultipleObjects:
