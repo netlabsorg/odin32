@@ -9,6 +9,9 @@
 #define DISABLE_AUDIO_KEY         "DisableAudio"
 #define DISABLE_ASPI_KEY          "DisableASPI"
 
+#define ODIN_WIN32_CDCLASS        "Win32CDWindowClass"
+#define ODIN_WIN32_STDCLASS       "Win32WindowClass"
+
 #define DUMMY_PREFIX 	          "DUMMY_"
 
 #define MAX_FONT_MAPPINGS	  8
