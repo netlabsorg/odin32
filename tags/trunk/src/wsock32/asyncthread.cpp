@@ -1,4 +1,4 @@
-/* $Id: asyncthread.cpp,v 1.3 2000-03-24 19:28:04 sandervl Exp $ */
+/* $Id: asyncthread.cpp,v 1.4 2000-04-15 09:23:36 sandervl Exp $ */
 
 /*
  * Async thread help functions
@@ -191,7 +191,8 @@ BOOL FindAndSetAsyncEvent(SOCKET s, HWND hwnd, int msg, ULONG lEvent)
    asyncThreadMutex.enter();
    pThreadInfo = FindAsyncEvent(s);
    if(pThreadInfo) {
-	pThreadInfo->u.asyncselect.lEvents = lEvent;
+	pThreadInfo->u.asyncselect.lEvents        = lEvent;
+        pThreadInfo->u.asyncselect.lEventsPending = lEvent;
 	pThreadInfo->hwnd                  = hwnd;
 	pThreadInfo->msg                   = msg;
 	//cancel pending select in async select thread (if any)
