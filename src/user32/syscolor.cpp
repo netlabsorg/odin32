@@ -1,4 +1,4 @@
-/* $Id: syscolor.cpp,v 1.18 2000-02-16 14:34:35 sandervl Exp $ */
+/* $Id: syscolor.cpp,v 1.19 2000-02-22 17:07:40 cbratschi Exp $ */
 
 /*
  * Win32 system color API functions for OS/2
@@ -12,6 +12,7 @@
  *
  * Copyright  David W. Metcalfe, 1993
  * Copyright  Alexandre Julliard, 1994
+ * Copyright 1997 Bertho A. Stultiens
  *
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -23,7 +24,7 @@
 #include "syscolor.h"
 #include "options.h"
 
-#define DBG_LOCALLOG	DBG_syscolor
+#define DBG_LOCALLOG    DBG_syscolor
 #include "dbglocal.h"
 
 //SvL: Open32 colors are much better than those in the table below
@@ -107,6 +108,15 @@ static BOOL   fColorInit = FALSE;
 
 #define MAKE_SOLID(color) \
        (PALETTEINDEX(GetNearestPaletteIndex(STOCK_DEFAULT_PALETTE,(color))))
+
+static const WORD wPattern55AA[] =
+{
+    0x5555, 0xaaaa, 0x5555, 0xaaaa,
+    0x5555, 0xaaaa, 0x5555, 0xaaaa
+};
+
+static HBRUSH  hPattern55AABrush = 0;
+static HBITMAP hPattern55AABitmap = 0;
 
 static void SYSCOLOR_SetColor( int index, COLORREF color )
 {
@@ -275,4 +285,22 @@ INT SYSCOLOR_GetNumColors(VOID)
 BOOL SYSCOLOR_GetUseWinColors(VOID)
 {
   return USEWINCOLORS;
+}
+/*********************************************************************
+ *	CACHE_GetPattern55AABrush
+ */
+HBRUSH CACHE_GetPattern55AABrush(void)
+{
+    if (!hPattern55AABrush)
+        hPattern55AABrush = CreatePatternBrush(CACHE_GetPattern55AABitmap());
+    return hPattern55AABrush;
+}
+/*********************************************************************
+ *	CACHE_GetPattern55AABitmap
+ */
+HBITMAP CACHE_GetPattern55AABitmap(void)
+{
+    if (!hPattern55AABitmap)
+        hPattern55AABitmap = CreateBitmap( 8, 8, 1, 1, wPattern55AA );
+    return hPattern55AABitmap;
 }

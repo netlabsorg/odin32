@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.13 2000-02-21 17:25:32 cbratschi Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.14 2000-02-22 17:07:43 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -47,16 +47,16 @@
 #define KEYDATA_PREVSTATE   0x4000
 
 static INT bitmapW = 16,bitmapH = 14;
-static HBITMAP hbitmapClose     = 0;
-static HBITMAP hbitmapCloseD    = 0;
-static HBITMAP hbitmapMinimize  = 0;
-static HBITMAP hbitmapMinimizeD = 0;
-static HBITMAP hbitmapMaximize  = 0;
-static HBITMAP hbitmapMaximizeD = 0;
-static HBITMAP hbitmapRestore   = 0;
-static HBITMAP hbitmapRestoreD  = 0;
-static HBITMAP hbitmapHelp      = 0;
-static HBITMAP hbitmapHelpD     = 0;
+static HBITMAP hbitmapClose        = 0;
+static HBITMAP hbitmapCloseD       = 0;
+static HBITMAP hbitmapMinimize     = 0;
+static HBITMAP hbitmapMinimizeD    = 0;
+static HBITMAP hbitmapMaximize     = 0;
+static HBITMAP hbitmapMaximizeD    = 0;
+static HBITMAP hbitmapRestore      = 0;
+static HBITMAP hbitmapRestoreD     = 0;
+static HBITMAP hbitmapContextHelp  = 0;
+static HBITMAP hbitmapContextHelpD = 0;
 
 BYTE lpGrayMask[] = { 0xAA, 0xA0,
                       0x55, 0x50,
@@ -95,7 +95,7 @@ LONG Win32BaseWindow::HandleNCActivate(WPARAM wParam)
 }
 //******************************************************************************
 //******************************************************************************
-VOID Win32BaseWindow::TrackMinMaxBox(WORD wParam)
+VOID Win32BaseWindow::TrackMinMaxHelpBox(WORD wParam)
 {
   MSG msg;
   HDC hdc;
@@ -109,20 +109,22 @@ VOID Win32BaseWindow::TrackMinMaxBox(WORD wParam)
       return;
     /* Check if the sysmenu item for minimize is there  */
     state = GetMenuState(hSysMenu,SC_MINIMIZE,MF_BYCOMMAND);
-  } else
+  } else if (wParam == HTMAXBUTTON)
   {
     /* If the style is not present, do nothing */
     if (!(dwStyle & WS_MAXIMIZEBOX))
       return;
     /* Check if the sysmenu item for maximize is there  */
     state = GetMenuState(hSysMenu, SC_MAXIMIZE, MF_BYCOMMAND);
-  }
+  } else state = 0;
   SetCapture(Win32Hwnd);
   hdc = GetWindowDC(Win32Hwnd);
   if (wParam == HTMINBUTTON)
     DrawMinButton(hdc,NULL,TRUE,FALSE);
-  else
+  else if (wParam == HTMAXBUTTON)
     DrawMaxButton(hdc,NULL,TRUE,FALSE);
+  else
+    DrawContextHelpButton(hdc,NULL,TRUE,FALSE);
   do
   {
     BOOL oldstate = pressed;
@@ -133,24 +135,31 @@ VOID Win32BaseWindow::TrackMinMaxBox(WORD wParam)
     {
       if (wParam == HTMINBUTTON)
         DrawMinButton(hdc,NULL,pressed,FALSE);
-      else
+      else if (wParam == HTMAXBUTTON)
         DrawMaxButton(hdc,NULL,pressed,FALSE);
+      else
+        DrawContextHelpButton(hdc,NULL,pressed,FALSE);
     }
   } while (msg.message != WM_LBUTTONUP);
   if (wParam == HTMINBUTTON)
     DrawMinButton(hdc,NULL,FALSE,FALSE);
-  else
+  else if (wParam == HTMAXBUTTON)
     DrawMaxButton(hdc,NULL,FALSE,FALSE);
+  else
+    DrawContextHelpButton(hdc,NULL,FALSE,FALSE);
   ReleaseCapture();
   ReleaseDC(Win32Hwnd,hdc);
   /* If the item minimize or maximize of the sysmenu are not there */
   /* or if the style is not present, do nothing */
   if ((!pressed) || (state == 0xFFFFFFFF))
     return;
+
   if (wParam == HTMINBUTTON)
     SendInternalMessageA(WM_SYSCOMMAND,SC_MINIMIZE,*(LPARAM*)&msg.pt);
-  else
+  else if (wParam == HTMAXBUTTON)
     SendInternalMessageA(WM_SYSCOMMAND,IsZoomed(Win32Hwnd) ? SC_RESTORE:SC_MAXIMIZE,*(LPARAM*)&msg.pt);
+  else
+    SendInternalMessageA(WM_SYSCOMMAND,SC_CONTEXTHELP,*(LPARAM*)&msg.pt);
 }
 //******************************************************************************
 //******************************************************************************
@@ -279,7 +288,8 @@ LONG Win32BaseWindow::HandleNCLButtonDown(WPARAM wParam,LPARAM lParam)
 
     case HTMINBUTTON:
     case HTMAXBUTTON:
-      TrackMinMaxBox(wParam);
+    case HTHELP:
+      TrackMinMaxHelpBox(wParam);
       break;
 
     case HTCLOSE:
@@ -716,9 +726,9 @@ VOID Win32BaseWindow::DrawCloseButton(HDC hdc,RECT *rect,BOOL down,BOOL bGrayed)
   /* A tool window has a smaller Close button */
   if (dwExStyle & WS_EX_TOOLWINDOW)
   {
-    RECT toolRect;	
+    RECT toolRect;
     INT iBmpHeight = 11; /* Windows does not use SM_CXSMSIZE and SM_CYSMSIZE   */
-    INT iBmpWidth = 11;  /* it uses 11x11 for  the close button in tool window */ 	  	
+    INT iBmpWidth = 11;  /* it uses 11x11 for  the close button in tool window */
     INT iCaptionHeight = GetSystemMetrics(SM_CYSMCAPTION);
 
 
@@ -825,7 +835,7 @@ VOID Win32BaseWindow::DrawMinButton(HDC hdc,RECT *rect,BOOL down,BOOL bGrayed)
 }
 //******************************************************************************
 //******************************************************************************
-VOID Win32BaseWindow::DrawHelpButton(HDC hdc,RECT *rect,BOOL down,BOOL bGrayed)
+VOID Win32BaseWindow::DrawContextHelpButton(HDC hdc,RECT *rect,BOOL down,BOOL bGrayed)
 {
   RECT r;
   HDC hdcMem;
@@ -836,7 +846,7 @@ VOID Win32BaseWindow::DrawHelpButton(HDC hdc,RECT *rect,BOOL down,BOOL bGrayed)
   else r = *rect;
 
   hdcMem = CreateCompatibleDC(hdc);
-  hBmp = down ? hbitmapHelpD : hbitmapHelp;
+  hBmp = down ? hbitmapContextHelpD : hbitmapContextHelp;
   hOldBmp = SelectObject(hdcMem,hBmp);
   GetObjectA(hBmp,sizeof(BITMAP),&bmp);
 
@@ -914,15 +924,15 @@ VOID Win32BaseWindow::DrawCaption(HDC hdc,RECT *rect,BOOL active)
   if (!hbitmapClose)
   {
     if (!(hbitmapClose = LoadBitmapA(0,MAKEINTRESOURCEA(OBM_CLOSE)))) return;
-    hbitmapCloseD    = LoadBitmapA(0,MAKEINTRESOURCEA(OBM_CLOSED));
-    hbitmapMinimize  = LoadBitmapA(0,MAKEINTRESOURCEA(OBM_REDUCE));
-    hbitmapMinimizeD = LoadBitmapA(0,MAKEINTRESOURCEA(OBM_REDUCED));
-    hbitmapMaximize  = LoadBitmapA(0,MAKEINTRESOURCEA(OBM_ZOOM));
-    hbitmapMaximizeD = LoadBitmapA(0,MAKEINTRESOURCEA(OBM_ZOOMD));
-    hbitmapRestore   = LoadBitmapA(0,MAKEINTRESOURCEA(OBM_RESTORE));
-    hbitmapRestoreD  = LoadBitmapA(0,MAKEINTRESOURCEA(OBM_RESTORED));
-    hbitmapHelp      = LoadBitmapA(0,MAKEINTRESOURCEA(OBM_HELP));
-    hbitmapHelpD     = LoadBitmapA(0,MAKEINTRESOURCEA(OBM_HELPD));
+    hbitmapCloseD       = LoadBitmapA(0,MAKEINTRESOURCEA(OBM_CLOSED));
+    hbitmapMinimize     = LoadBitmapA(0,MAKEINTRESOURCEA(OBM_REDUCE));
+    hbitmapMinimizeD    = LoadBitmapA(0,MAKEINTRESOURCEA(OBM_REDUCED));
+    hbitmapMaximize     = LoadBitmapA(0,MAKEINTRESOURCEA(OBM_ZOOM));
+    hbitmapMaximizeD    = LoadBitmapA(0,MAKEINTRESOURCEA(OBM_ZOOMD));
+    hbitmapRestore      = LoadBitmapA(0,MAKEINTRESOURCEA(OBM_RESTORE));
+    hbitmapRestoreD     = LoadBitmapA(0,MAKEINTRESOURCEA(OBM_RESTORED));
+    hbitmapContextHelp  = LoadBitmapA(0,MAKEINTRESOURCEA(OBM_CONTEXTHELP));
+    hbitmapContextHelpD = LoadBitmapA(0,MAKEINTRESOURCEA(OBM_CONTEXTHELPD));
   }
 
   if ((dwStyle & WS_SYSMENU) && !(dwExStyle & WS_EX_TOOLWINDOW))
@@ -945,8 +955,8 @@ VOID Win32BaseWindow::DrawCaption(HDC hdc,RECT *rect,BOOL active)
 
     if (dwExStyle & WS_EX_CONTEXTHELP)
     {
-      DrawHelpButton(memDC,&r2,FALSE,FALSE);
-      r.right -= GetSystemMetrics(SM_CXSIZE) + 1;
+      DrawContextHelpButton(memDC,&r2,FALSE,FALSE);
+      r.right -= GetSystemMetrics(SM_CXSIZE)+1;
     }
 
     if ((dwStyle & WS_MAXIMIZEBOX) || (dwStyle & WS_MINIMIZEBOX))
@@ -1082,6 +1092,8 @@ VOID Win32BaseWindow::DoNCPaint(HRGN clip,BOOL suppress_menupaint)
     r.left = r.right - GetSystemMetrics(SM_CXVSCROLL) + 1;
     r.top  = r.bottom - GetSystemMetrics(SM_CYHSCROLL) + 1;
     FillRect( hdc, &r,  GetSysColorBrush(COLOR_SCROLLBAR) );
+    //CB: todo: child window have sometimes a size grip (i.e. Notepad)
+    //    WS_SIZEBOX isn't set in these cases
     if (!(dwStyle & WS_CHILD))
     {
       POINT p1,p2;
@@ -1279,6 +1291,12 @@ LONG Win32BaseWindow::HandleSysCommand(WPARAM wParam,POINT *pt32)
     case SC_CLOSE:
         return SendInternalMessageA(WM_CLOSE,0,0);
 
+    case SC_CONTEXTHELP:
+        {
+          //CB: todo
+          break;
+        }
+
     case SC_VSCROLL:
     case SC_HSCROLL:
         TrackScrollBar(wParam,*pt32);
@@ -1335,79 +1353,37 @@ LONG Win32BaseWindow::HandleSysCommand(WPARAM wParam,POINT *pt32)
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
-
-BOOL WIN32API DrawCaption (HWND hwnd,
-                           HDC  hdc,
-                           const RECT *lprc,
-                           UINT wFlags)
+BOOL WIN32API DrawCaption (HWND hwnd,HDC  hdc,const RECT *lprc,UINT wFlags)
 {
-  dprintf(("USER32:DrawCaption (%08xh,%08xh,%08xh,%08xh) not implemented.\n",
-         hwnd,
-         hdc,
-         lprc,
-         wFlags));
+  dprintf(("USER32: DrawCaption"));
 
-  return FALSE;
+  return DrawCaptionTempA(hwnd,hdc,lprc,0,0,NULL,wFlags & 0x1F);
 }
-/***********************************************************************
- * DrawCaptionTemp32A [USER32.599]
- *
- * PARAMS
- *
- * RETURNS
- *     Success:
- *     Failure:
- */
-
-BOOL WIN32API DrawCaptionTempA(HWND       hwnd,
-                               HDC        hdc,
-                               const RECT *rect,
-                               HFONT      hFont,
-                               HICON      hIcon,
-                               LPCSTR     str,
-                               UINT       uFlags)
+//******************************************************************************
+// CB: this code is a subset of Win32BaseWindow::DrawCaption
+//     todo: move Win32BaseWindow:DrawCaption to this function
+//******************************************************************************
+BOOL WIN32API DrawCaptionTemp(HWND hwnd,HDC hdc,const RECT *rect,HFONT hFont,HICON hIcon,LPWSTR str,UINT uFlags,BOOL unicode)
 {
-  RECT   rc = *rect;
-
-  dprintf(("USER32: DrawCaptionTempA(%08xh,%08xh,%08xh,%08xh,%08xh,%08xh,%08xh)\n",
-           hwnd,
-           hdc,
-           rect,
-           hFont,
-           hIcon,
-           str,
-           uFlags));
+  RECT rc = *rect;
 
   /* drawing background */
   if (uFlags & DC_INBUTTON)
   {
-    O32_FillRect (hdc,
-                  &rc,
-                  GetSysColorBrush (COLOR_3DFACE));
+    FillRect (hdc, &rc, GetSysColorBrush (COLOR_3DFACE));
 
     if (uFlags & DC_ACTIVE)
     {
-      HBRUSH hbr = O32_SelectObject (hdc,
-                                     GetSysColorBrush (COLOR_ACTIVECAPTION));
-      O32_PatBlt (hdc,
-                  rc.left,
-                  rc.top,
-                  rc.right - rc.left,
-                  rc.bottom - rc.top,
-                  0xFA0089);
-
-      O32_SelectObject (hdc,
-                        hbr);
+      HBRUSH hbr = SelectObject (hdc, CACHE_GetPattern55AABrush ());
+      PatBlt (hdc, rc.left, rc.top,
+              rc.right-rc.left, rc.bottom-rc.top, 0xFA0089);
+      SelectObject (hdc, hbr);
     }
-  }
-  else
+  } else
   {
-    O32_FillRect (hdc,
-                  &rc,
-                  GetSysColorBrush ((uFlags & DC_ACTIVE) ?
-                    COLOR_ACTIVECAPTION : COLOR_INACTIVECAPTION));
+    FillRect (hdc, &rc, GetSysColorBrush ((uFlags & DC_ACTIVE) ?
+              COLOR_ACTIVECAPTION : COLOR_INACTIVECAPTION));
   }
-
 
   /* drawing icon */
   if ((uFlags & DC_ICON) && !(uFlags & DC_SMALLCAP))
@@ -1415,44 +1391,33 @@ BOOL WIN32API DrawCaptionTempA(HWND       hwnd,
     POINT pt;
 
     pt.x = rc.left + 2;
-    pt.y = (rc.bottom + rc.top - O32_GetSystemMetrics(SM_CYSMICON)) / 2;
+    pt.y = (rc.bottom + rc.top - GetSystemMetrics(SM_CYSMICON)) / 2;
 
     if (hIcon)
     {
-      DrawIconEx (hdc,
-                  pt.x,
-                  pt.y,
-                  hIcon,
-                  O32_GetSystemMetrics(SM_CXSMICON),
-                  O32_GetSystemMetrics(SM_CYSMICON),
-                  0,
-                  0,
-                  DI_NORMAL);
-    }
-    else
+      DrawIconEx (hdc, pt.x, pt.y, hIcon, GetSystemMetrics(SM_CXSMICON),
+                  GetSystemMetrics(SM_CYSMICON), 0, 0, DI_NORMAL);
+    } else
     {
-    /* @@@PH 1999/06/08 not ported yet, just don't draw any icon
-      WND *wndPtr = WIN_FindWndPtr(hwnd);
-      HICON hAppIcon = 0;
+      Win32BaseWindow *win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
 
-      if (wndPtr->class->hIconSm)
-        hAppIcon = wndPtr->class->hIconSm;
-      else
-        if (wndPtr->class->hIcon)
-          hAppIcon = wndPtr->class->hIcon;
+      if (!win32wnd) return 0;
 
-      DrawIconEx (hdc,
-                  pt.x,
-                  pt.y,
-                  hAppIcon,
-                  GetSystemMetrics(SM_CXSMICON),
-                  GetSystemMetrics(SM_CYSMICON),
-                  0,
-                  0,
-                  DI_NORMAL);
+      /* Get small icon. */
+      HICON hAppIcon = win32wnd->GetSmallIcon();
 
-      WIN_ReleaseWndPtr(wndPtr);
-      */
+      /* if no small icon and no large icon, use class small icon */
+      if (!hAppIcon && !win32wnd->GetIcon())
+        hAppIcon = (HICON) GetClassLongA(hwnd, GCL_HICONSM);
+
+      /* otherwise use the large icon it */
+      if (!hAppIcon) hAppIcon = win32wnd->GetIcon();
+
+      /* if all else fails, use the application icon. */
+      if(!hAppIcon) hAppIcon = (HICON) GetClassLongA(hwnd, GCL_HICON);
+
+      DrawIconEx (hdc, pt.x, pt.y, hAppIcon, GetSystemMetrics(SM_CXSMICON),
+                  GetSystemMetrics(SM_CYSMICON), 0, 0, DI_NORMAL);
     }
 
     rc.left += (rc.bottom - rc.top);
@@ -1464,75 +1429,70 @@ BOOL WIN32API DrawCaptionTempA(HWND       hwnd,
     HFONT hOldFont;
 
     if (uFlags & DC_INBUTTON)
-      O32_SetTextColor (hdc,
-                        O32_GetSysColor (COLOR_BTNTEXT));
+      SetTextColor (hdc, GetSysColor (COLOR_BTNTEXT));
+    else if (uFlags & DC_ACTIVE)
+      SetTextColor (hdc, GetSysColor (COLOR_CAPTIONTEXT));
     else
-      if (uFlags & DC_ACTIVE)
-        O32_SetTextColor (hdc,
-                          O32_GetSysColor (COLOR_CAPTIONTEXT));
-      else
-        O32_SetTextColor (hdc,
-                          O32_GetSysColor (COLOR_INACTIVECAPTIONTEXT));
+      SetTextColor (hdc, GetSysColor (COLOR_INACTIVECAPTIONTEXT));
 
-    O32_SetBkMode (hdc,
-                   TRANSPARENT);
+    SetBkMode (hdc, TRANSPARENT);
 
     if (hFont)
-      hOldFont = O32_SelectObject (hdc,
-                                   hFont);
+      hOldFont = SelectObject (hdc, hFont);
     else
     {
       NONCLIENTMETRICSA nclm;
-      HFONT             hNewFont;
+      HFONT hNewFont;
 
       nclm.cbSize = sizeof(NONCLIENTMETRICSA);
-      O32_SystemParametersInfo (SPI_GETNONCLIENTMETRICS,
-                                0,
-                                &nclm,
-                                0);
-      hNewFont = O32_CreateFontIndirect ((uFlags & DC_SMALLCAP) ?
-                                 &nclm.lfSmCaptionFont : &nclm.lfCaptionFont);
-      hOldFont = O32_SelectObject (hdc,
-                                   hNewFont);
+      SystemParametersInfoA (SPI_GETNONCLIENTMETRICS, 0, &nclm, 0);
+      hNewFont = CreateFontIndirectA ((uFlags & DC_SMALLCAP) ?
+        &nclm.lfSmCaptionFont : &nclm.lfCaptionFont);
+      hOldFont = SelectObject (hdc, hNewFont);
     }
 
     if (str)
-      DrawTextA (hdc,
-                    str,
-                    -1,
-                    &rc,
-                    DT_SINGLELINE | DT_VCENTER | DT_NOPREFIX | DT_LEFT);
-    else
+    {
+      if (unicode)
+        DrawTextW(hdc,str,-1,&rc,DT_SINGLELINE | DT_VCENTER | DT_NOPREFIX | DT_LEFT);
+      else
+        DrawTextA(hdc,(LPSTR)str,-1,&rc,DT_SINGLELINE | DT_VCENTER | DT_NOPREFIX | DT_LEFT);
+    } else
     {
       CHAR szText[128];
-      INT  nLen;
+      INT nLen;
 
-      nLen = O32_GetWindowText (Win32BaseWindow::Win32ToOS2FrameHandle(hwnd),
-                                szText,
-                                128);
-
-      DrawTextA (hdc,
-                    szText,
-                    nLen,
-                    &rc,
-                    DT_SINGLELINE | DT_VCENTER | DT_NOPREFIX | DT_LEFT);
+      nLen = GetWindowTextA (hwnd, szText, 128);
+      DrawTextA (hdc, szText, nLen, &rc,
+                 DT_SINGLELINE | DT_VCENTER | DT_NOPREFIX | DT_LEFT);
     }
 
     if (hFont)
-      O32_SelectObject (hdc,
-                        hOldFont);
+      SelectObject (hdc, hOldFont);
     else
-      O32_DeleteObject (O32_SelectObject (hdc,
-                                          hOldFont));
+      DeleteObject (SelectObject (hdc, hOldFont));
   }
 
   /* drawing focus ??? */
-  if (uFlags & 0x2000)
-  {
-    dprintf(("USER32: DrawCaptionTempA undocumented flag (0x2000)!\n"));
-  }
+  //if (uFlags & 0x2000)
+  //  FIXME("undocumented flag (0x2000)!\n");
 
   return 0;
+}
+/***********************************************************************
+ * DrawCaptionTemp32A [USER32.599]
+ *
+ * PARAMS
+ *
+ * RETURNS
+ *     Success:
+ *     Failure:
+ */
+BOOL WIN32API DrawCaptionTempA(HWND hwnd,HDC hdc,const RECT *rect,HFONT hFont,HICON hIcon,LPCSTR str,UINT uFlags)
+{
+  dprintf(("USER32: DrawCaptionTempA"));
+
+  return DrawCaptionTemp(hwnd,hdc,rect,hFont,hIcon,(LPWSTR)str,uFlags,FALSE);
 }
 /***********************************************************************
  * DrawCaptionTemp32W [USER32.602]
@@ -1543,27 +1503,10 @@ BOOL WIN32API DrawCaptionTempA(HWND       hwnd,
  *     Success:
  *     Failure:
  */
-
-BOOL WIN32API DrawCaptionTempW (HWND       hwnd,
-                                HDC        hdc,
-                                const RECT *rect,
-                                HFONT      hFont,
-                                HICON      hIcon,
-                                LPCWSTR    str,
-                                UINT       uFlags)
+BOOL WIN32API DrawCaptionTempW (HWND hwnd,HDC hdc,const RECT *rect,HFONT hFont,HICON hIcon,LPCWSTR str,UINT uFlags)
 {
-  LPSTR strAscii = UnicodeToAsciiString((LPWSTR)str);
+  dprintf(("USER32: DrawCaptionTempA"));
 
-  BOOL res = DrawCaptionTempA (hwnd,
-                               hdc,
-                               rect,
-                               hFont,
-                               hIcon,
-                               strAscii,
-                               uFlags);
-
-  FreeAsciiString(strAscii);
-
-  return res;
+  return DrawCaptionTemp(hwnd,hdc,rect,hFont,hIcon,(LPWSTR)str,uFlags,TRUE);
 }
 
