@@ -1,4 +1,4 @@
-/* $Id: mmsystem.h,v 1.4 2000-01-15 22:01:09 sandervl Exp $ */
+/* $Id: mmsystem.h,v 1.5 2000-01-26 23:17:48 sandervl Exp $ */
 /* 
  * MMSYSTEM - Multimedia Wine Extension ... :-)
  */
@@ -1779,6 +1779,8 @@ YIELDPROC	WINAPI	mciGetYieldProc(UINT,DWORD*);
 #define MCIERR_CREATEWINDOW             (MCIERR_BASE + 91)
 #define MCIERR_FILE_READ                (MCIERR_BASE + 92)
 #define MCIERR_FILE_WRITE               (MCIERR_BASE + 93)
+
+#define MCIERR_NO_IDENTITY              (MCIERR_BASE + 94)
 
 #define MCIERR_CUSTOM_DRIVER_BASE       (MCIERR_BASE + 256)
 

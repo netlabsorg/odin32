@@ -1,4 +1,4 @@
-/* $Id: windef.h,v 1.18 1999-12-01 18:36:47 sandervl Exp $ */
+/* $Id: windef.h,v 1.19 2000-01-26 23:17:49 sandervl Exp $ */
 
 /*
  * Basic types definitions
@@ -140,6 +140,7 @@ extern "C" {
   #define APIENTRY    WINAPI
 #endif
 
+#if (__IBMC__ < 400) && (__IBMCPP__ < 360)
 #ifndef __declspec
   #define __declspec(x)
 #endif
@@ -151,6 +152,7 @@ extern "C" {
 #ifndef dllexport
   #define dllexport
 #endif
+#endif // (__IBMC__ < 400) && (__IBMCPP__ < 360)
 
 #ifndef CONST
   #define CONST       const

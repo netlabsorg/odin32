@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.h,v 1.10 1999-12-27 21:21:33 sandervl Exp $ */
+/* $Id: winimagepeldr.h,v 1.11 2000-01-26 23:17:47 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -26,7 +26,7 @@
 
 //SvL: Amount of memory the peldr dll reserves for win32 exes without fixups
 //(most of them need to be loaded at 4 MB; except MS Office apps of course)
-#define PELDR_RESERVEDMEMSIZE	16*1024*1024
+#define PELDR_RESERVEDMEMSIZE	32*1024*1024
 
 #define ERROR_INTERNAL          1
 

@@ -1,4 +1,4 @@
-/* $Id: wingdi.h,v 1.8 1999-11-11 13:15:21 sandervl Exp $ */
+/* $Id: wingdi.h,v 1.9 2000-01-26 23:17:51 sandervl Exp $ */
 
 #ifndef __WINE_WINGDI_H
 #define __WINE_WINGDI_H
@@ -1300,6 +1300,13 @@ typedef struct tagEXTLOGPEN
 #define SIZEPALETTE       104
 #define NUMRESERVED       106
 #define COLORRES          108
+
+#define PHYSICALWIDTH     110 
+#define PHYSICALHEIGHT    111 
+#define PHYSICALOFFSETX   112 
+#define PHYSICALOFFSETY   113 
+#define SCALINGFACTORX    114 
+#define SCALINGFACTORY    115 
 
 /* TECHNOLOGY */
 #define DT_PLOTTER        0

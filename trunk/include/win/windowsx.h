@@ -1,4 +1,4 @@
-/* $Id: windowsx.h,v 1.6 1999-10-04 09:55:51 sandervl Exp $ */
+/* $Id: windowsx.h,v 1.7 2000-01-26 23:17:50 sandervl Exp $ */
 
 /* Copyright (C) 1999 Corel Corporation (Paul Quinn) */
 
@@ -933,6 +933,12 @@ extern "C" {
 #define FORWARD_WM_COMMNOTIFY(hwnd, cid, flags, fn) \
     (void)(fn)((hwnd), WM_COMMNOTIFY, (WPARAM)(cid), MAKELPARAM((flags), 0))
 #endif
+
+/* void Cls_OnContextMenu(HWND hwnd, HWND hwndContext, UINT xPos, UINT yPos) */
+#define HANDLE_WM_CONTEXTMENU(hwnd, wParam, lParam, fn) \
+    ((fn)((hwnd), (HWND)(wParam), (UINT)LOWORD(lParam), (UINT)HIWORD(lParam)), 0L)
+#define FORWARD_WM_CONTEXTMENU(hwnd, hwndContext, xPos, yPos, fn) \
+    (void)(fn)((hwnd), WM_CONTEXTMENU, (WPARAM)(HWND)(hwndContext), MAKELPARAM((UINT)(xPos), (UINT)(yPos)))
 
 /****** COMBOBOX control message APIs *****************************************/
 #define ComboBox_GetCount(hwndCtl)            \

@@ -1,4 +1,4 @@
-/* $Id: winuser.h,v 1.29 2000-01-15 14:16:32 cbratschi Exp $ */
+/* $Id: winuser.h,v 1.30 2000-01-26 23:17:52 sandervl Exp $ */
 
 #ifndef __INCLUDE_WINUSER_H
 #define __INCLUDE_WINUSER_H
@@ -1104,6 +1104,7 @@ typedef struct
 #define MSGF_SCROLLBAR      5
 #define MSGF_NEXTWINDOW     6
 #define MSGF_MAINLOOP       8
+#define MSGF_MAX            8
 #define MSGF_USER        4096
 
 typedef struct
@@ -3693,14 +3694,14 @@ DWORD     WINAPI WNetAddConnectionW(LPCWSTR,LPCWSTR,LPCWSTR);
 INT       WINAPIV wsnprintfA(LPSTR,UINT,LPCSTR,...);
 INT       WINAPIV wsnprintfW(LPWSTR,UINT,LPCWSTR,...);
 #define     wsnprintf WINELIB_NAME_AW(wsnprintf)
-INT       WINAPIV wsprintfA(LPSTR,LPCSTR,va_list);
-INT       WINAPIV wsprintfW(LPWSTR,LPCWSTR,va_list);
+INT       WINAPIV wsprintfA(LPSTR,LPCSTR,...);
+INT       WINAPIV wsprintfW(LPWSTR,LPCWSTR,...);
 #define     wsprintf WINELIB_NAME_AW(wsprintf)
-INT       WINAPI wvsnprintfA(LPSTR,UINT,LPCSTR,va_list);
-INT       WINAPI wvsnprintfW(LPWSTR,UINT,LPCWSTR,va_list);
+INT       WINAPI wvsnprintfA(LPSTR,UINT,LPCSTR,...);
+INT       WINAPI wvsnprintfW(LPWSTR,UINT,LPCWSTR,...);
 #define     wvsnprintf WINELIB_NAME_AW(wvsnprintf)
-INT       WINAPI wvsprintfA(LPSTR,LPCSTR,va_list);
-INT       WINAPI wvsprintfW(LPWSTR,LPCWSTR,va_list);
+INT       WINAPI wvsprintfA(LPSTR,LPCSTR,...);
+INT       WINAPI wvsprintfW(LPWSTR,LPCWSTR,...);
 #define     wvsprintf WINELIB_NAME_AW(wvsprintf)
 
 BOOL      WINAPI RegisterShellHook16(HWND16,UINT16);

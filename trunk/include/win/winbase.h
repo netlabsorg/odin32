@@ -1,4 +1,4 @@
-/* $Id: winbase.h,v 1.9 1999-12-21 00:29:30 sandervl Exp $ */
+/* $Id: winbase.h,v 1.10 2000-01-26 23:17:49 sandervl Exp $ */
 
 #ifndef __WINE_WINBASE_H
 #define __WINE_WINBASE_H
@@ -159,6 +159,9 @@ typedef struct
 /* GetTempFileName() Flags */
 #define TF_FORCEDRIVE	        0x80
 
+
+#define DRIVE_UNKNOWN              0
+#define DRIVE_NO_ROOT_DIR          1
 #define DRIVE_CANNOTDETERMINE      0
 #define DRIVE_DOESNOTEXIST         1
 #define DRIVE_REMOVABLE            2

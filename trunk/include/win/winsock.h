@@ -1,4 +1,4 @@
-/* $Id: winsock.h,v 1.2 1999-10-16 11:03:19 sandervl Exp $ */
+/* $Id: winsock.h,v 1.3 2000-01-26 23:17:52 sandervl Exp $ */
 
 /* WINSOCK.H--definitions to be used with the WINSOCK.DLL
  *
@@ -549,7 +549,7 @@ typedef struct	__ws	/* socket */
   int		fd;
   unsigned	flags;
   ws_select_op*	psop;
-} ws_socket;
+} _ws_socket;
 
 #define WS_MAX_SOCKETS_PER_PROCESS      16
 #define WS_MAX_UDP_DATAGRAM             1024
