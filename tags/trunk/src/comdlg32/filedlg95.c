@@ -1203,7 +1203,8 @@ BOOL FILEDLG95_OnOpen(HWND hwnd)
       {
           /* Browse to the right directory */
           COMDLG32_SHGetDesktopFolder(&psfDesktop);
-          if((browsePidl = GetPidlFromName(psfDesktop,lpstrPathSpec)))
+          browsePidl = GetPidlFromName(psfDesktop,lpstrPathSpec);
+          if(browsePidl)
           {
               /* Browse to directory */
               IShellBrowser_BrowseObject(fodInfos->Shell.FOIShellBrowser,
@@ -1292,7 +1293,8 @@ BOOL FILEDLG95_OnOpen(HWND hwnd)
           while(lpOrg)
          {
              int i;
-             if ((lpstrExt = strchr(lpOrg, ';')))
+             lpstrExt = strchr(lpOrg, ';');
+             if (lpstrExt)
              {
                  i = lpstrExt - lpOrg;
              }
@@ -1441,7 +1443,8 @@ BOOL FILEDLG95_OnOpen(HWND hwnd)
 
           if((LPSTR)-1 != lpstrTemp)
           {
-              if((lpstrExt = strchr(lpstrTemp,';')))
+              lpstrExt = strchr(lpstrTemp,';');
+              if(lpstrExt)
               {
                   int i = lpstrExt - lpstrTemp;
                   lpstrExt = MemAlloc(i);
@@ -1946,6 +1949,8 @@ static LRESULT FILEDLG95_LOOKIN_DrawItem(LPDRAWITEMSTRUCT pDIStruct)
   {
     SHFILEINFOA sfi;
     INT len;
+
+    //CB: skip A:,B: SHGFI_DISPLAYNAME for faster handling?
 
     tmpFolder->ilItemImage = (HIMAGELIST) COMDLG32_SHGetFileInfoA ((LPCSTR)tmpFolder->pidlItem,
                                                   0,

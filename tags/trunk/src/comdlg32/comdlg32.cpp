@@ -1,4 +1,4 @@
-/* $Id: comdlg32.cpp,v 1.23 2000-03-22 16:55:00 cbratschi Exp $ */
+/* $Id: comdlg32.cpp,v 1.24 2000-03-24 17:16:26 cbratschi Exp $ */
 
 /*
  * COMDLG32 implementation
@@ -25,7 +25,7 @@
 
 ODINDEBUGCHANNEL(COMDLG32-COMDLG32)
 
-BOOL useWinFileDlg = FALSE;
+BOOL useWinFileDlg = TRUE;
 
 #if 0
 #define COMDLG32_CHECKHOOK(a,b,c)           \

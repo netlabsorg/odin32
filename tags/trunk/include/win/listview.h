@@ -64,8 +64,11 @@ typedef struct tagLISTVIEW_INFO
     HFONT          hDefaultFont;
     HFONT          hFont;
     BOOL           bFocus;
+    DWORD          dwStyle;      //window style
+    UINT           uView;        //view
     DWORD          dwExStyle;    /* extended listview style */
     HDPA           hdpaItems;
+    HDPA           hdpaSelItems; //selected items (if not single sel mode)
     PFNLVCOMPARE   pfnCompare;
     LPARAM         lParamSort;
     HWND           hwndEdit;
