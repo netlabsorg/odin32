@@ -1,4 +1,4 @@
-/* $Id: console.cpp,v 1.13 1999-08-31 22:44:33 phaller Exp $ */
+/* $Id: console.cpp,v 1.14 1999-10-08 09:52:33 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -1494,8 +1494,7 @@ APIRET iConsoleInputEventPop(PINPUT_RECORD pInputRecord)
  * Author    : Patrick Haller [Tue, 1998/03/07 16:55]
  *****************************************************************************/
 
-#define TABVIRTUALKEYCODES 0x6D
-static tabVirtualKeyCodes[TABVIRTUALKEYCODES] =
+char tabVirtualKeyCodes[TABVIRTUALKEYCODES] =
 {
 /* --- PM key -- NT key --- */
    /*              0x00 */ 0,
