@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.1964 2002-02-08 11:24:11 achimha Exp $ */
+/* $Id: changelog,v 1.1965 2002-02-08 15:08:25 sandervl Exp $ */
+
+ 2002-02-08: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Implemented tracing of all exported functions
+                  (meant to replace ODINFUNCTION* macros; useful mainly
+                   to improve logging in Wine modules)
 
  2002-02-08: Platon Fomichev <platon@innotek.de>
     - USER32:   o Fixes for handling Shift-Enter & Alt-Enter
