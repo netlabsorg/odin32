@@ -1,4 +1,4 @@
-/* $Id: hmthread.cpp,v 1.21 2004-12-04 11:20:16 sao2l02 Exp $ */
+/* $Id: hmthread.cpp,v 1.22 2004-12-04 21:34:28 sao2l02 Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -47,17 +47,22 @@ typedef struct {
 
 #define GET_THREADHANDLE(hThread) (threadobj && threadobj->hDupThread) ? threadobj->hDupThread : hThread
 
-HANDLE CreateThreadErrorReturn(PHMHANDLEDATA pHMHandleData, DWORD eCase, Win32Thread *winthread) {
-    TEB *teb;
-        switch (eCase) {
-           case 4: teb = GetTEBFromThreadHandle(pHMHandleData->hHMHandle);
-                   DestroyTEB(teb);
-           case 3: free(winthread);
-           case 2: free((DWORD*)pHMHandleData->dwUserData);
-                   pHMHandleData->dwUserData = 0;
-           case 1: if (eCase != 4) SetLastError(ERROR_NOT_ENOUGH_MEMORY);
-        } /* endswitch */
-        return(0);
+HANDLE CreateThreadError1(DWORD eCase) {
+     if (eCase != 4) SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+     return(0);
+}
+HANDLE CreateThreadError2(DWORD eCase, PHMHANDLEDATA pHMHandleData, OBJ_THREAD *threadobj) {
+     free(threadobj);
+     pHMHandleData->dwUserData = 0;
+     return CreateThreadError1(eCase);
+}
+HANDLE CreateThreadError3(DWORD eCase, PHMHANDLEDATA pHMHandleData, OBJ_THREAD *threadobj,  Win32Thread *winthread) {
+     free(winthread);
+     return CreateThreadError2(eCase, pHMHandleData, threadobj);
+}
+HANDLE CreateThreadError4(DWORD eCase, PHMHANDLEDATA pHMHandleData, OBJ_THREAD *threadobj,  Win32Thread *winthread, TEB *teb) {
+     DestroyTEB(teb);
+     return CreateThreadError3(eCase, pHMHandleData, threadobj, winthread);
 }
 //******************************************************************************
 //******************************************************************************
@@ -81,7 +86,7 @@ HANDLE HMDeviceThreadClass::CreateThread(PHMHANDLEDATA          pHMHandleData,
     OBJ_THREAD *threadobj = (OBJ_THREAD *)malloc(sizeof(OBJ_THREAD));
     if(threadobj == 0) {
         DebugInt3();
-        return CreateThreadErrorReturn(pHMHandleData,1,0);
+        return CreateThreadError1(1);
     }
     threadobj->hDupThread = 0;	//not a duplicate
     threadobj->dwState = THREAD_ALIVE;
@@ -97,13 +102,13 @@ HANDLE HMDeviceThreadClass::CreateThread(PHMHANDLEDATA          pHMHandleData,
 
     if(winthread == 0) {
         DebugInt3();
-        return CreateThreadErrorReturn(pHMHandleData,2,0);
+        return CreateThreadError2(2, pHMHandleData, threadobj);
     }
 
     TEB *teb = GetTEBFromThreadHandle(hThread);
     if(teb == 0) {
         DebugInt3();
-        return CreateThreadErrorReturn(pHMHandleData,3,winthread);
+        return CreateThreadError3(3, pHMHandleData, threadobj, winthread);
     }
 
     // @@@PH Note: with debug code enabled, ODIN might request more stack space!
@@ -127,7 +132,7 @@ HANDLE HMDeviceThreadClass::CreateThread(PHMHANDLEDATA          pHMHandleData,
     if(pHMHandleData->hHMHandle == 0) {
         dprintf(("Thread creation failed!! hThread =%x, TEB = %x, LastError %d",hThread, teb, GetLastError()));
         DebugInt3();
-        return CreateThreadErrorReturn(pHMHandleData,4,winthread);
+        return CreateThreadError4(4, pHMHandleData, threadobj, winthread, teb);
        // DT, we need free for all resources, is that all ?
     }
 
