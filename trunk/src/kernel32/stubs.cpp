@@ -1696,10 +1696,21 @@ DWORD WIN32API ReadProcessMemory(HANDLE  hProcess,
            lpBuffer,
            cbRead,
            lpNumberOfBytesRead));
+
+  // do some (faked) access check
+  if (hProcess != GetCurrentProcess())
+  {
+    SetLastError(ERROR_ACCESS_DENIED);
+    return FALSE;
+  }
+
+  
   // FIXME: check this, if we ever run win32 binaries in different addressspaces
   //    ... and add a sizecheck
   memcpy(lpBuffer,lpBaseAddress,cbRead);
-  if (lpNumberOfBytesRead) *lpNumberOfBytesRead = cbRead;
+  if (lpNumberOfBytesRead) 
+    *lpNumberOfBytesRead = cbRead;
+  
   return TRUE;
 }
 
@@ -1721,11 +1732,11 @@ DWORD WIN32API ReadProcessMemory(HANDLE  hProcess,
  * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
  *****************************************************************************/
 
-DWORD WIN32API WriteProcessMemory(HANDLE  hProcess,
-                                     LPCVOID lpBaseAddress,
-                                     LPVOID  lpBuffer,
-                                     DWORD   cbWrite,
-                                     LPDWORD lpNumberOfBytesWritten)
+BOOL WIN32API WriteProcessMemory(HANDLE  hProcess,
+                                 LPCVOID lpBaseAddress,
+                                 LPVOID  lpBuffer,
+                                 DWORD   cbWrite,
+                                 LPDWORD lpNumberOfBytesWritten)
 {
   dprintf(("Kernel32: WriteProcessMemory(%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
            hProcess,
@@ -1733,11 +1744,20 @@ DWORD WIN32API WriteProcessMemory(HANDLE  hProcess,
            lpBuffer,
            cbWrite,
            lpNumberOfBytesWritten));
-
+  
+  // do some (faked) access check
+  if (hProcess != GetCurrentProcess())
+  {
+    SetLastError(ERROR_ACCESS_DENIED);
+    return FALSE;
+  }
+  
   // FIXME: check this, if we ever run win32 binaries in different addressspaces
   //    ... and add a sizecheck
   memcpy((void*)lpBaseAddress,lpBuffer,cbWrite);
-  if (lpNumberOfBytesWritten) *lpNumberOfBytesWritten = cbWrite;
+  if (lpNumberOfBytesWritten) 
+    *lpNumberOfBytesWritten = cbWrite;
+  
   return TRUE;
 }
 
