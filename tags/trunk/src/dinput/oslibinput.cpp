@@ -1,4 +1,4 @@
-/* $Id: oslibinput.cpp,v 1.2 1999-11-08 13:50:41 sandervl Exp $ */
+/* $Id: oslibinput.cpp,v 1.3 1999-12-21 23:19:14 hugh Exp $ */
 
 #define INCL_WIN
 #include <os2wrap.h>
@@ -29,13 +29,13 @@ BOOL OSLibGetDIState(DWORD len, LPVOID ptr)
 
   rc = WinSetKeyboardStateTable( HWND_DESKTOP, (PBYTE)&PMKeyState, FALSE );
 
-  if(rc == TRUE && len==256) 
+  if(rc == TRUE && len==256)
   {
-    	KeyTranslatePMToWinBuf((BYTE *)&PMKeyState, (BYTE *)&ptr, len);
-	for(int i=0;i<256;i++) {
-		winkeybuf[i] &= 0x80;	//only high bit
-	}
-    	return TRUE;
+      KeyTranslatePMToWinBuf((BYTE *)&PMKeyState, (BYTE *)&ptr, len);
+  for(int i=0;i<256;i++) {
+    winkeybuf[i] &= 0x80; //only high bit
+  }
+      return TRUE;
   }
   return FALSE;
 }
@@ -47,17 +47,21 @@ BOOL OSLibQueryMousePos(DWORD *rx, DWORD *ry, DWORD *state)
  BOOL   rc;
 
   rc = WinQueryPointerPos(HWND_DESKTOP, &point);
-  
+
   *rx = point.x;
   *ry = ScreenHeight - point.y;
 
   *state = 0;
-  if(WinGetKeyState(HWND_DESKTOP, VK_BUTTON1))
+  if(WinGetKeyState(HWND_DESKTOP, VK_BUTTON1) & 0x8000)
        *state |= MK_LBUTTON_W;
-  if(WinGetKeyState(HWND_DESKTOP, VK_BUTTON2))
+  if(WinGetKeyState(HWND_DESKTOP, VK_BUTTON2) & 0x8000)
        *state |= MK_RBUTTON_W;
-  if(WinGetKeyState(HWND_DESKTOP, VK_BUTTON3))
+  if(WinGetKeyState(HWND_DESKTOP, VK_BUTTON3) & 0x8000)
        *state |= MK_MBUTTON_W;
+  if(WinGetKeyState(HWND_DESKTOP, VK_SHIFT) & 0x8000)
+       *state |= MK_SHIFT_W;
+  if(WinGetKeyState(HWND_DESKTOP, VK_CTRL) & 0x8000)
+       *state |= MK_CONTROL_W;
 
   return rc;
 }
@@ -66,7 +70,7 @@ BOOL OSLibQueryMousePos(DWORD *rx, DWORD *ry, DWORD *state)
 BOOL OSLibMoveCursor(DWORD x, DWORD y)
 {
   y = ScreenHeight - y;
-   
+
   return WinSetPointerPos(HWND_DESKTOP, x, y);
 }
 //******************************************************************************
