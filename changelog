@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.45 1999-07-07 08:11:08 sandervl Exp $ */
+ /* $Id: changelog,v 1.46 1999-07-10 15:59:42 sandervl Exp $ */
+ 99-07-10: Edgar Buerkle <100566.557@compuserve.com>
+	- USER32: Fixes for CreateWindowExW and several unicode menu apis
+
  99-07-07: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32/PE2LX: Added support for TLS sections
 	- KERNEL32: Added thread attach/detach messages for dlls
