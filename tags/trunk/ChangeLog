@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.2631 2003-10-06 10:07:33 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2632 2003-10-13 09:15:18 sandervl Exp $ */
+
+ 2003-10-13: Platon Fomichev <stauff@innotek   >
+    - COMDLG32: o We should set/clear PD_PRINTTOFILE flag when we click on
+                  checkbox to change dialog print structure.
 
  2003-10-06: Platon Fomichev <stauff@innotek   >
     - USER32:   o Wrong class names (case) for Static, Scroller, Button.
