@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.33 2000-02-22 23:53:03 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.34 2000-03-04 19:52:36 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -35,7 +35,7 @@
 //use a different logfile
 #define PRIVATE_LOGGING
 #include <misc.h>
-#include <win32type.h>
+#include <win32api.h>
 #include <winimagebase.h>
 #include <winimagepeldr.h>
 #include <windllpeldr.h>
@@ -568,6 +568,9 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
  ULONG    ulNewPos, ulRead;
  APIRET   rc;
 
+  //Round down to nearest page boundary
+  virtAddress = virtAddress & ~0xFFF;
+  
   section = findSectionByOS2Addr(virtAddress);
   if(section == NULL) {
 	size        = 4096;
@@ -1407,7 +1410,6 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
 	            errorState = ERROR_INTERNAL;
 	            return(FALSE);
 	        }
-	    	WinDll->AddRef();
 	}
 	dprintf((LOG, "**********************************************************************" ));
 	dprintf((LOG, "**********************  Finished Loading Module  *********************" ));
@@ -1554,7 +1556,7 @@ ULONG MissingApi()
   while(r == MBID_RETRY); //giggle
 
   if( r != MBID_IGNORE )
-     exit(987);
+	ExitProcess(987);
 
   fIgnore = TRUE;
   return(0);
