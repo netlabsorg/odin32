@@ -21,8 +21,51 @@
 #  and value is a single-quote delimited value.
 # For example:
 #*.gif -k 'b'
+
+# binaries (should normally not be added to the archive )
 *.exe -k 'b'
 *.sys -k 'b'
 *.obj -k 'b'
+*.res -l 'b'
+
+# diverse others
 *.zip -k 'b'
 *.etc -k 'b'
+
+# icon and mouse pointer formats
+*.ico -k 'b'
+*.ptr -k 'b'
+*.cur -k 'b'
+*.ani -k 'b'
+*.and -k 'b'
+
+# font files
+*.ttf -k 'b'
+*.fnt -k 'b'
+
+# bitmap formats
+*.bmp -k 'b'
+*.gif -k 'b'
+*.jpg -k 'b'
+*.jpeg -k 'b'
+*.pcx -k 'b'
+*.tga -k 'b'
+*.tif -k 'b'
+*.tiff -k 'b'
+*.dib -k 'b'
+*.mng -k 'b'
+*.png -k 'b'
+*.xpm -k 'b'
+
+# presentation formats
+*.pdf -k 'b'
+*.ps -k 'b'
+
+
+# video and audio files
+*.mov -k 'b' 
+*.avi -k 'b' 
+*.mpg -k 'b' 
+*.mp2 -k 'b' 
+*.mp3 -k 'b' 
+
