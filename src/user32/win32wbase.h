@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.52 1999-12-09 00:53:38 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.53 1999-12-14 19:13:20 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -97,7 +97,7 @@ virtual  ULONG  MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd);
          ULONG  MsgGetTextLength();
          char  *MsgGetText();
          ULONG  MsgContextMenu(ULONG x,ULONG y);
-
+	 void   MsgInitMenu(HWND hMenu);
          VOID   updateWindowStyle(DWORD oldExStyle,DWORD oldStyle);
 
 virtual  LONG   SetWindowLongA(int index, ULONG value, BOOL fUnicode = FALSE);
@@ -120,6 +120,8 @@ virtual  WORD   GetWindowWord(int index);
          BOOL   isFrameWindow();
 virtual  BOOL   isMDIClient();
 virtual  BOOL   isMDIChild();
+
+	 BOOL   fHasParentDC()                  { return fParentDC; };
 
 Win32BaseWindow *getParent();
          void   setParent(Win32BaseWindow *pwindow) { ChildWindow::SetParent((ChildWindow *)pwindow); };
@@ -185,7 +187,7 @@ Win32BaseWindow *GetTopParent();
          BOOL   IsWindowEnabled();
          BOOL   IsWindowVisible();
 	 //Created with CreateWindowExA or ExW
-         BOOL   IsUnicode() 			{ return isUnicode; };
+//         BOOL   IsUnicode() 			{ return isUnicode; };
 	 //Window procedure type
          BOOL   IsWindowUnicode();	
 
@@ -305,6 +307,7 @@ protected:
         BOOL    fIsDestroyed;
         BOOL    fCreated;
 	BOOL    fTaskList;		//should be listed in PM tasklist or not
+	BOOL    fParentDC;
 
         PVOID   pOldFrameProc;
         ULONG   borderWidth;

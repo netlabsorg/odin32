@@ -1,4 +1,4 @@
-/* $Id: win32class.cpp,v 1.9 1999-12-09 11:00:02 sandervl Exp $ */
+/* $Id: win32class.cpp,v 1.10 1999-12-14 19:13:19 sandervl Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -106,6 +106,7 @@ Win32WndClass::Win32WndClass(WNDCLASSEXA *wndclass, BOOL fUnicode) : GenericObje
 
   windowStyle           = wndclass->style;
   WINPROC_SetProc((HWINDOWPROC *)&windowProc, wndclass->lpfnWndProc, (isUnicode) ? WIN_PROC_32W : WIN_PROC_32A, WIN_PROC_CLASS);
+  dprintf2(("Window class ptr %x", windowProc));
 
   //User data class words/longs
   if(nrExtraClassWords) {
@@ -391,6 +392,10 @@ ULONG Win32WndClass::setClassLongA(int index, LONG lNewVal, BOOL fUnicode)
 {
  ULONG rc;
 
+  if(classNameA) {
+  	dprintf2(("Win32WndClass::setClassLongA %s: %d %x", classNameA, index, lNewVal));
+  }
+  else	dprintf2(("Win32WndClass::setClassLongA %d: %d %x", classAtom, index, lNewVal));
   switch(index) {
         case GCL_CBCLSEXTRA: //TODO (doesn't affect allocated classes, so what does it do?)
                 rc = nrExtraClassWords;

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.109 1999-12-09 10:59:04 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.110 1999-12-14 19:13:19 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -146,6 +146,7 @@ void Win32BaseWindow::Init()
   fIsDestroyed     = FALSE;
   fCreated         = FALSE;
   fTaskList        = FALSE;
+  fParentDC        = FALSE;
 
   windowNameA      = NULL;
   windowNameW      = NULL;
@@ -269,6 +270,7 @@ BOOL Win32BaseWindow::isChild()
 //******************************************************************************
 BOOL Win32BaseWindow::IsWindowUnicode()
 {
+//    dprintf2(("IsWindowUnicode %x %d", getWindowHandle(), WINPROC_GetProcType(getWindowProc()) == WIN_PROC_32W));
     return (WINPROC_GetProcType(getWindowProc()) == WIN_PROC_32W);
 }
 //******************************************************************************
@@ -439,7 +441,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         }
   }
 
-  WINPROC_SetProc((HWINDOWPROC *)&win32wndproc, windowClass->getWindowProc(), (isUnicode) ? WIN_PROC_32W : WIN_PROC_32A, WIN_PROC_WINDOW);
+  WINPROC_SetProc((HWINDOWPROC *)&win32wndproc, windowClass->getWindowProc(), WINPROC_GetProcType(windowClass->getWindowProc()), WIN_PROC_WINDOW);
   hInstance = cs->hInstance;
   dwStyle   = cs->style & ~WS_VISIBLE;
   dwExStyle = cs->dwExStyle;
@@ -633,11 +635,12 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
   /* Get class or window DC if needed */
   if(windowClass->getStyle() & CS_OWNDC) {
     dprintf(("Class with CS_OWNDC style"));
-//  ownDC = GetWindowDC(getWindowHandle());
+//    ownDC = GetWindowDC(getWindowHandle());
   }
   else
   if (windowClass->getStyle() & CS_PARENTDC)  {
     dprintf(("ERROR: Class with CS_PARENTDC style -> NOT IMPLEMENTED!"));
+    fParentDC = TRUE;
     ownDC = 0;
   }
   else
@@ -1218,6 +1221,16 @@ ULONG Win32BaseWindow::MsgMouseMove(ULONG keystate, ULONG x, ULONG y)
             SendInternalMessageA(WM_NCMOUSEMOVE, lastHitTestVal, MAKELONG(x, y));
     }
     return  SendInternalMessageA(WM_MOUSEMOVE, winstate, MAKELONG(x, y));
+}
+//******************************************************************************
+//TODO: Depending on menu type, we should send WM_INITMENU or WM_INITPOPUPMENU
+//TODO: PM sends it for each submenu that gets activated; Windows only for the first
+//      submenu; once the menu bar is active, moving the cursor doesn't generate other
+//      WM_INITMENU msgs. Not really a problem, but might need to fix this later on.
+//******************************************************************************
+void Win32BaseWindow::MsgInitMenu(HWND hMenu)
+{
+    SendInternalMessageA(WM_INITMENU, (WPARAM)hMenu, 0);
 }
 //******************************************************************************
 //******************************************************************************
@@ -2222,9 +2235,9 @@ void Win32BaseWindow::NotifyParent(UINT Msg, WPARAM wParam, LPARAM lParam)
                 parentwindow = window->getParent();
                 if(parentwindow) {
                         if(Msg == WM_CREATE || Msg == WM_DESTROY) {
-                                parentwindow->SendMessageA(WM_PARENTNOTIFY, MAKEWPARAM(Msg, window->getWindowId()), (LPARAM)window->getWindowHandle());
+                                parentwindow->SendMessageA(WM_PARENTNOTIFY, MAKEWPARAM(Msg, getWindowId()), (LPARAM)getWindowHandle());
                         }
-                        else    parentwindow->SendMessageA(WM_PARENTNOTIFY, MAKEWPARAM(Msg, window->getWindowId()), lParam );
+                        else    parentwindow->SendMessageA(WM_PARENTNOTIFY, MAKEWPARAM(Msg, getWindowId()), lParam );
                 }
         }
         else    break;
@@ -2973,7 +2986,7 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value, BOOL fUnicode)
 {
  LONG oldval;
 
-    dprintf2(("SetWindowLongA %x %d %x", getWindowHandle(), index, value));
+    dprintf2(("SetWindowLong%c %x %d %x", (fUnicode) ? 'W' : 'A', getWindowHandle(), index, value));
     switch(index) {
         case GWL_EXSTYLE:
         {
