@@ -1,4 +1,4 @@
-/* $Id: OS2KLDR.h,v 1.3 2001-09-27 03:04:12 bird Exp $
+/* $Id: OS2KLDR.h,v 1.4 2002-04-01 10:03:52 bird Exp $
  *
  * OS/2 kernel Loader Stuff.
  *
@@ -34,7 +34,7 @@ typedef struct OTE
 
 
 /* ote_flags */
-#ifndef __EXE386__
+#if !defined(OBJREAD)
   #define OBJREAD       0x00000001L     /* Readable Object */
   #define OBJWRITE      0x00000002L     /* Writeable Object */
   #define OBJEXEC       0x00000004L     /* Executable Object */
@@ -45,7 +45,7 @@ typedef struct OTE
   #define OBJINVALID    0x00000080L     /* Object has invalid pages */
 #endif
 #define OBJZEROFIL      0x00000100L     /* Object has zero-filled pages */
-#ifndef __EXE386__
+#if !defined(OBJRESIDENT)
   #define OBJRESIDENT   0x00000200L     /* Object is resident */
   #define OBJCONTIG     0x00000300L     /* Object is resident and contiguous */
   #define OBJDYNAMIC    0x00000400L     /* Object is permanent and long locable */
