@@ -73,8 +73,10 @@ HRESULT     WINAPI OleSetContainedObject(LPUNKNOWN pUnknown, BOOL fContained);
 HRESULT     WINAPI OleQueryLinkFromData(IDataObject* pSrcDataObject);
 HRESULT     WINAPI OleQueryCreateFromData(LPDATAOBJECT pSrcDataObject);
 HRESULT     WINAPI OleRun(LPUNKNOWN pUnknown);
+HRESULT     WINAPI OleDraw (LPUNKNOWN pUnknown, DWORD dwAspect, HDC hdcDraw, LPCRECT lprcBounds);
 VOID        WINAPI ReleaseStgMedium(LPSTGMEDIUM);
 HRESULT     WINAPI OleGetClipboard(IDataObject** ppDataObj);
+HRESULT     WINAPI OleSetClipboard(LPDATAOBJECT pDataObj);
 HRESULT     WINAPI OleCreateStaticFromData(LPDATAOBJECT pSrcDataObj, REFIID iid,
                 DWORD renderopt, LPFORMATETC pFormatEtc, LPOLECLIENTSITE pClientSite, 
                 LPSTORAGE pStg, LPVOID* ppvObj);
@@ -92,6 +94,7 @@ HRESULT     WINAPI OleCreateLink(LPMONIKER pmkLinkSrc, REFIID riid, DWORD render
 HRESULT     WINAPI OleCreate(REFCLSID rclsid, REFIID riid, DWORD renderopt, LPFORMATETC pFormatEtc, LPOLECLIENTSITE pClientSite,
                 LPSTORAGE pStg, LPVOID* ppvObj);
 HRESULT     WINAPI OleFlushClipboard(void);
+HRESULT     WINAPI OleIsCurrentClipboard(LPDATAOBJECT pDataObj);
 HRESULT     WINAPI SetConvertStg(LPSTORAGE pStg, BOOL fConvert);
 BOOL        WINAPI IsAccelerator(HACCEL hAccel, int cAccelEntries, LPMSG lpMsg, WORD* lpwCmd);
 HRESULT     WINAPI OleCreateLinkToFile(LPCOLESTR lpszFileName, REFIID riid, DWORD renderopt, LPFORMATETC lpFormatEtc,
