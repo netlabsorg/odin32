@@ -1,4 +1,3 @@
-/* $Id: wingdi16.h,v 1.4 2002-06-02 10:10:33 sandervl Exp $ */
 #ifndef __WINE_WINE_WINGDI16_H
 #define __WINE_WINE_WINGDI16_H
 
