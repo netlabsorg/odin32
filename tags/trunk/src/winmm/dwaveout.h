@@ -1,4 +1,4 @@
-/* $Id: dwaveout.h,v 1.8 2000-02-27 20:29:47 sandervl Exp $ */
+/* $Id: dwaveout.h,v 1.9 2000-04-08 09:16:54 sandervl Exp $ */
 
 /*
  * Wave playback class
@@ -90,7 +90,8 @@ private:
     WAVEHDR  *wavehdr,
              *curhdr;
 
-    BOOL fMixerSetup;
+    BOOL      fMixerSetup;
+    BOOL      fUnderrun;
 
     VMutex *wmutex;
                               // Linked list management
