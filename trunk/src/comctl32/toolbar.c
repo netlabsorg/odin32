@@ -29,7 +29,6 @@
  *
  *
  * TODO:
- *   - A little bug in TOOLBAR_DrawMasked()
  *   - Button wrapping (under construction).
  *   - Messages.
  *   - Notifications (under construction).
@@ -96,6 +95,12 @@ typedef struct
 
 typedef struct
 {
+    HIMAGELIST himl;
+    INT id;
+} IMLENTRY, *PIMLENTRY;
+
+typedef struct
+{
     DWORD      dwStructSize;   /* size of TBBUTTON struct */
     INT      nHeight;        /* height of the toolbar */
     INT      nWidth;         /* width of the toolbar */
@@ -124,9 +129,12 @@ typedef struct
     HFONT    hDefaultFont;
     HFONT    hFont;           /* text font */
     HIMAGELIST himlInt;         /* image list created internally */
-    HIMAGELIST himlDef;         /* default image list */
-    HIMAGELIST himlHot;         /* hot image list */
-    HIMAGELIST himlDis;         /* disabled image list */
+    PIMLENTRY *himlDef;       /* default image list array */
+    INT       cimlDef;        /* default image list array count */
+    PIMLENTRY *himlHot;       /* hot image list array */
+    INT       cimlHot;        /* hot image list array count */
+    PIMLENTRY *himlDis;       /* disabled image list array */
+    INT       cimlDis;        /* disabled image list array count */
     HWND     hwndToolTip;     /* handle to tool tip control */
     HWND     hwndNotify;      /* handle to the window that gets notifications */
     HWND     hwndSelf;        /* my own handle */
@@ -163,7 +171,7 @@ typedef struct
     TBBUTTON btn;
     BOOL     bVirtual;
     BOOL     bRemovable;
-    CHAR     text[64];
+    WCHAR    text[64];
 } CUSTOMBUTTON, *PCUSTOMBUTTON;
 
 
@@ -181,6 +189,19 @@ typedef struct
                         TBSTYLE_EX_UNDOC1 | \
                         TBSTYLE_EX_MIXEDBUTTONS | \
                         TBSTYLE_EX_HIDECLIPPEDBUTTONS)
+
+#define GETIBITMAP(infoPtr, i) (infoPtr->iVersion >= 5 ? LOWORD(i) : i)
+#define GETHIMLID(infoPtr, i) (infoPtr->iVersion >= 5 ? HIWORD(i) : 0)
+#define GETDEFIMAGELIST(infoPtr, id) TOOLBAR_GetImageList(infoPtr->himlDef, infoPtr->cimlDef, id)
+#define GETHOTIMAGELIST(infoPtr, id) TOOLBAR_GetImageList(infoPtr->himlHot, infoPtr->cimlHot, id)
+#define GETDISIMAGELIST(infoPtr, id) TOOLBAR_GetImageList(infoPtr->himlDis, infoPtr->cimlDis, id)
+
+static BOOL TOOLBAR_GetButtonInfo(TOOLBAR_INFO *infoPtr, NMTOOLBARW *nmtb);
+static BOOL TOOLBAR_IsButtonRemovable(TOOLBAR_INFO *infoPtr, int iItem, PCUSTOMBUTTON btnInfo);
+static HIMAGELIST TOOLBAR_GetImageList(PIMLENTRY *pies, INT cies, INT id);
+static PIMLENTRY TOOLBAR_GetImageListEntry(PIMLENTRY *pies, INT cies, INT id);
+static VOID TOOLBAR_DeleteImageList(PIMLENTRY **pies, INT *cies);
+static HIMAGELIST TOOLBAR_InsertImageList(PIMLENTRY **pies, INT *cies, HIMAGELIST himl, INT id);
 
 static LRESULT
 TOOLBAR_NotifyFormat(TOOLBAR_INFO *infoPtr, WPARAM wParam, LPARAM lParam);
@@ -205,11 +226,11 @@ TOOLBAR_DumpButton(TOOLBAR_INFO *infoPtr, TBUTTON_INFO *bP, INT btn_num, BOOL in
 {
     if (TRACE_ON(toolbar)){
 	TRACE("button %d id %d, bitmap=%d, state=%02x, style=%02x, data=%08lx, stringid=0x%08x\n",
-	      btn_num, bP->idCommand,
-	      bP->iBitmap, bP->fsState, bP->fsStyle, bP->dwData, bP->iString);
+              btn_num, bP->idCommand, GETIBITMAP(infoPtr, bP->iBitmap), 
+              bP->fsState, bP->fsStyle, bP->dwData, bP->iString);
 	TRACE("string %s\n", debugstr_w(TOOLBAR_GetText(infoPtr,bP)));
 	if (internal)
-	    TRACE("button %d id %d, hot=%s, row=%d, rect=(%d,%d)-(%d,%d)\n",
+	    TRACE("button %d id %d, hot=%s, row=%d, rect=(%ld,%ld)-(%ld,%ld)\n",
 		  btn_num, bP->idCommand,
 		  (bP->bHot) ? "TRUE":"FALSE", bP->nRow,
 		  bP->rect.left, bP->rect.top,
@@ -308,6 +329,10 @@ TOOLBAR_GetBitmapIndex(TOOLBAR_INFO *infoPtr, TBUTTON_INFO *btnPtr)
 	TRACE("TBN_GETDISPINFOA returned bitmap id %d, mask=%08lx, nNumBitmaps=%d\n",
 	      ret, nmgd.dwMask, infoPtr->nNumBitmaps);
     }
+
+    if (ret != I_IMAGENONE)
+        ret = GETIBITMAP(infoPtr, ret);
+
     return ret;
 }
 
@@ -315,8 +340,13 @@ TOOLBAR_GetBitmapIndex(TOOLBAR_INFO *infoPtr, TBUTTON_INFO *btnPtr)
 static BOOL
 TOOLBAR_IsValidBitmapIndex(TOOLBAR_INFO *infoPtr, INT index)
 {
-    if (((index>=0) && (index <= infoPtr->nNumBitmaps)) ||
-	(index == I_IMAGECALLBACK))
+    HIMAGELIST himl;
+    INT id = GETHIMLID(infoPtr, index);
+    INT iBitmap = GETIBITMAP(infoPtr, index);
+
+    if (((himl = GETDEFIMAGELIST(infoPtr, id)) &&
+        iBitmap >= 0 && iBitmap < ImageList_GetImageCount(himl)) ||
+        (index == I_IMAGECALLBACK))
       return TRUE;
     else
       return FALSE;
@@ -443,7 +473,7 @@ TOOLBAR_DrawDDFlatSeparator (LPRECT lpRect, HDC hdc, TBUTTON_INFO *btnPtr, TOOLB
 
     InflateRect (&myrect, -2, 0);
 
-    TRACE("rect=(%d,%d)-(%d,%d)\n",
+    TRACE("rect=(%ld,%ld)-(%ld,%ld)\n",
 	  myrect.left, myrect.top, myrect.right, myrect.bottom);
 
     newcolor = (infoPtr->clrBtnShadow == CLR_DEFAULT) ?
@@ -499,7 +529,7 @@ TOOLBAR_DrawString (TOOLBAR_INFO *infoPtr, TBUTTON_INFO *btnPtr,
 
     /* draw text */
     if (lpText) {
-	TRACE("string rect=(%d,%d)-(%d,%d)\n",
+	TRACE("string rect=(%ld,%ld)-(%ld,%ld)\n",
 	      rcText->left, rcText->top, rcText->right, rcText->bottom);
 
 	hOldFont = SelectObject (hdc, infoPtr->hFont);
@@ -542,44 +572,35 @@ static void
 TOOLBAR_DrawMasked (TOOLBAR_INFO *infoPtr, TBUTTON_INFO *btnPtr,
 		    HDC hdc, INT x, INT y)
 {
-    /* FIXME: this function is a hack since it uses image list
-	      internals directly */
-
-    HIMAGELIST himl = infoPtr->himlDef;
+    HIMAGELIST himl = GETDEFIMAGELIST(infoPtr, 0);
+    INT cx, cy;
     HBITMAP hbmMask;
-    HDC hdcImageList;
     HDC hdcMask;
 
     if (!himl)
 	return;
 
+    ImageList_GetIconSize(himl, &cx, &cy);
+
     /* create new dc's */
-    hdcImageList = CreateCompatibleDC (0);
     hdcMask = CreateCompatibleDC (0);
 
     /* create new bitmap */
-    hbmMask = CreateBitmap (himl->cx, himl->cy, 1, 1, NULL);
+    hbmMask = CreateBitmap (cx, cy, 1, 1, NULL);
     SelectObject (hdcMask, hbmMask);
 
     /* copy the mask bitmap */
-    SelectObject (hdcImageList, himl->hbmMask);
-    SetBkColor (hdcImageList, RGB(255, 255, 255));
-    SetTextColor (hdcImageList, RGB(0, 0, 0));
-    BitBlt (hdcMask, 0, 0, himl->cx, himl->cy,
-	      hdcImageList, himl->cx * btnPtr->iBitmap, 0, SRCCOPY);
+    ImageList_DrawEx(himl, btnPtr->iBitmap, hdcMask, 0, 0, 0, 0, RGB(255, 255, 255), RGB(0, 0, 0), ILD_MASK);
 
     /* draw the new mask */
     SelectObject (hdc, GetSysColorBrush (COLOR_3DHILIGHT));
-    BitBlt (hdc, x+1, y+1, himl->cx, himl->cy,
-	      hdcMask, 0, 0, 0xB8074A);
+    BitBlt (hdc, x+1, y+1, cx, cy, hdcMask, 0, 0, 0xB8074A);
 
     SelectObject (hdc, GetSysColorBrush (COLOR_3DSHADOW));
-    BitBlt (hdc, x, y, himl->cx, himl->cy,
-	      hdcMask, 0, 0, 0xB8074A);
+    BitBlt (hdc, x, y, cx, cy, hdcMask, 0, 0, 0xB8074A);
 
     DeleteObject (hbmMask);
     DeleteDC (hdcMask);
-    DeleteDC (hdcImageList);
 }
 
 
@@ -612,6 +633,7 @@ TOOLBAR_DrawButton (HWND hwnd, TBUTTON_INFO *btnPtr, HDC hdc)
     NMTBCUSTOMDRAW tbcd;
     DWORD ntfret;
     INT offset;
+    HIMAGELIST himlDef;
 
     if (btnPtr->fsState & TBSTATE_HIDDEN)
 	return;
@@ -645,7 +667,7 @@ TOOLBAR_DrawButton (HWND hwnd, TBUTTON_INFO *btnPtr, HDC hdc)
     else
         rcBitmap.top+=(infoPtr->nButtonHeight - infoPtr->nBitmapHeight) / 2;
 
-    TRACE("iBitmap: %d, start=(%d,%d) w=%d, h=%d\n",
+    TRACE("iBitmap: %d, start=(%ld,%ld) w=%d, h=%d\n",
 	  btnPtr->iBitmap, rcBitmap.left, rcBitmap.top,
 	  infoPtr->nBitmapWidth, infoPtr->nBitmapHeight);
     TRACE ("iString: %x\n", btnPtr->iString);
@@ -656,7 +678,7 @@ TOOLBAR_DrawButton (HWND hwnd, TBUTTON_INFO *btnPtr, HDC hdc)
 
 	InflateRect (&rcText, -3, -3);
 
-	if (infoPtr->himlDef &&
+	if (GETDEFIMAGELIST(infoPtr, 0) &&
             TOOLBAR_IsValidBitmapIndex(infoPtr,btnPtr->iBitmap)) {
 	        /* The following test looked like this before
 		 * I changed it. IE4 "Links" toolbar would not
@@ -755,8 +777,12 @@ TOOLBAR_DrawButton (HWND hwnd, TBUTTON_INFO *btnPtr, HDC hdc)
 	goto FINALNOTIFY;
     }
 
+    /* Determine index of image list */
+    himlDef = GETDEFIMAGELIST(infoPtr, GETHIMLID(infoPtr, btnPtr->iBitmap));
+
     /* disabled */
     if (!(btnPtr->fsState & TBSTATE_ENABLED)) {
+	HIMAGELIST himlDis = GETDISIMAGELIST(infoPtr, GETHIMLID(infoPtr, btnPtr->iBitmap));
 	if (!(dwStyle & TBSTYLE_FLAT) && !(infoPtr->dwItemCDFlag & TBCDRF_NOEDGES))
 	{
 	    DrawEdge (hdc, &rc, EDGE_RAISED,
@@ -772,7 +798,7 @@ TOOLBAR_DrawButton (HWND hwnd, TBUTTON_INFO *btnPtr, HDC hdc)
 	    TOOLBAR_DrawArrow(hdc, rcArrow.left, rcArrow.top, COLOR_3DSHADOW);
 	}
 
-	if (!TOOLBAR_DrawImageList (infoPtr, btnPtr, infoPtr->himlDis,
+	if (!TOOLBAR_DrawImageList (infoPtr, btnPtr, himlDis,
 				   hdc, rcBitmap.left, rcBitmap.top,
 				   ILD_NORMAL))
 	    TOOLBAR_DrawMasked (infoPtr, btnPtr, hdc, rcBitmap.left, rcBitmap.top);
@@ -803,7 +829,7 @@ TOOLBAR_DrawButton (HWND hwnd, TBUTTON_INFO *btnPtr, HDC hdc)
         if (hasDropDownArrow)
 	    TOOLBAR_DrawArrow(hdc, rcArrow.left, rcArrow.top, COLOR_WINDOWFRAME);
 
-	TOOLBAR_DrawImageList (infoPtr, btnPtr, infoPtr->himlDef,
+	TOOLBAR_DrawImageList (infoPtr, btnPtr, himlDef,
 			       hdc, rcBitmap.left+offset, rcBitmap.top+offset,
 			       ILD_NORMAL);
 
@@ -826,7 +852,7 @@ TOOLBAR_DrawButton (HWND hwnd, TBUTTON_INFO *btnPtr, HDC hdc)
 
 	TOOLBAR_DrawPattern (hdc, &rc);
 
-	TOOLBAR_DrawImageList (infoPtr, btnPtr, infoPtr->himlDef,
+	TOOLBAR_DrawImageList (infoPtr, btnPtr, himlDef,
 			       hdc, rcBitmap.left+1, rcBitmap.top+1,
 			       ILD_NORMAL);
 
@@ -887,17 +913,19 @@ TOOLBAR_DrawButton (HWND hwnd, TBUTTON_INFO *btnPtr, HDC hdc)
 	    TOOLBAR_DrawArrow(hdc, rcArrow.left+1, rcArrow.top, COLOR_WINDOWFRAME);
 
 	if (btnPtr->bHot) {
+            HIMAGELIST himlHot = GETHOTIMAGELIST(infoPtr, 
+                GETHIMLID(infoPtr, btnPtr->iBitmap));
 	    /* if hot, attempt to draw with himlHot, if fails, use himlDef */
 	    if (!TOOLBAR_DrawImageList (infoPtr, btnPtr,
-					infoPtr->himlHot,
+					himlHot,
 					hdc, rcBitmap.left,
 					rcBitmap.top, ILD_NORMAL))
-		TOOLBAR_DrawImageList (infoPtr, btnPtr, infoPtr->himlDef,
+		TOOLBAR_DrawImageList (infoPtr, btnPtr, himlDef,
 				       hdc, rcBitmap.left, rcBitmap.top,
 				       ILD_NORMAL);
 	}
 	else
-	    TOOLBAR_DrawImageList (infoPtr, btnPtr, infoPtr->himlDef,
+	    TOOLBAR_DrawImageList (infoPtr, btnPtr, himlDef,
 				   hdc, rcBitmap.left, rcBitmap.top,
 				   ILD_NORMAL);
     }
@@ -915,7 +943,7 @@ TOOLBAR_DrawButton (HWND hwnd, TBUTTON_INFO *btnPtr, HDC hdc)
 	    TOOLBAR_DrawArrow(hdc, rcArrow.left, rcArrow.top, COLOR_WINDOWFRAME);
 	}
 
-	TOOLBAR_DrawImageList (infoPtr, btnPtr, infoPtr->himlDef,
+	TOOLBAR_DrawImageList (infoPtr, btnPtr, himlDef,
 			       hdc, rcBitmap.left, rcBitmap.top,
 			       ILD_NORMAL);}
 
@@ -952,8 +980,12 @@ TOOLBAR_Refresh (HWND hwnd, HDC hdc, PAINTSTRUCT* ps)
 
     /* if imagelist belongs to the app, it can be changed
        by the app after setting it */
-    if (infoPtr->himlDef != infoPtr->himlInt)
-        infoPtr->nNumBitmaps = ImageList_GetImageCount(infoPtr->himlDef);
+    if (GETDEFIMAGELIST(infoPtr, 0) != infoPtr->himlInt)
+    {
+        infoPtr->nNumBitmaps = 0;
+        for (i = 0; i < infoPtr->cimlDef; i++)
+            infoPtr->nNumBitmaps += ImageList_GetImageCount(infoPtr->himlDef[i]->himl);
+    }
 
     TOOLBAR_DumpToolbar (infoPtr, __LINE__);
 
@@ -1407,7 +1439,7 @@ TOOLBAR_CalcToolbar (HWND hwnd)
 	      /* toolbars with native control (v4.71).  -  GA 8/01    */
               cx = sz.cx + 6 + 5 + 5;
 	      if ((dwStyle & TBSTYLE_LIST) &&
-		  (TOOLBAR_TestImageExist (infoPtr, btnPtr, infoPtr->himlDef)))
+		  (TOOLBAR_TestImageExist (infoPtr, btnPtr, GETDEFIMAGELIST(infoPtr,0))))
 		  cx += infoPtr->nBitmapWidth;
             }
             else
@@ -1645,7 +1677,7 @@ TOOLBAR_CustomizeDialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	    if (custInfo)
 	    {
-		char Buffer[256];
+		WCHAR Buffer[256];
 		int i = 0;
 		int index;
 
@@ -1657,20 +1689,24 @@ TOOLBAR_CustomizeDialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		if (!TOOLBAR_SendNotify ((NMHDR *) &nmtb, infoPtr, TBN_QUERYINSERT))
 		    return FALSE;
 
+		/* Send TBN_INITCUSTOMIZE notification */
+		if (TOOLBAR_SendNotify ((NMHDR *) &nmtb, infoPtr, TBN_INITCUSTOMIZE) ==
+                    TBNRF_HIDEHELP)
+                {
+                    FIXME("TBNRF_HIDEHELP not supported\n");
+                }
+
 		/* add items to 'toolbar buttons' list and check if removable */
 		for (i = 0; i < custInfo->tbInfo->nNumButtons; i++)
-		{
+                {
 		    btnInfo = (PCUSTOMBUTTON)COMCTL32_Alloc(sizeof(CUSTOMBUTTON));
-		    memset (&btnInfo->btn, 0, sizeof(TBBUTTON));
-		    btnInfo->btn.fsStyle = TBSTYLE_SEP;
-		    btnInfo->bVirtual = FALSE;
-		    LoadStringA (COMCTL32_hModule, IDS_SEPARATOR, btnInfo->text, 64);
+                    memset (&btnInfo->btn, 0, sizeof(TBBUTTON));
+                    btnInfo->btn.fsStyle = TBSTYLE_SEP;
+                    btnInfo->bVirtual = FALSE;
+		    LoadStringW (COMCTL32_hModule, IDS_SEPARATOR, btnInfo->text, 64);
 
 		    /* send TBN_QUERYDELETE notification */
-		    nmtb.iItem = i;
-		    btnInfo->bRemovable = TOOLBAR_SendNotify ((NMHDR *) &nmtb,
-						      infoPtr,
-						      TBN_QUERYDELETE);
+                    btnInfo->bRemovable = TOOLBAR_IsButtonRemovable(infoPtr, i, btnInfo);
 
 		    index = (int)SendDlgItemMessageA (hwnd, IDC_TOOLBARBTN_LBOX, LB_ADDSTRING, 0, 0);
 		    SendDlgItemMessageA (hwnd, IDC_TOOLBARBTN_LBOX, LB_SETITEMDATA, index, (LPARAM)btnInfo);
@@ -1682,7 +1718,7 @@ TOOLBAR_CustomizeDialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		btnInfo->btn.fsStyle = TBSTYLE_SEP;
 		btnInfo->bVirtual = FALSE;
 		btnInfo->bRemovable = TRUE;
-		LoadStringA (COMCTL32_hModule, IDS_SEPARATOR, btnInfo->text, 64);
+		LoadStringW (COMCTL32_hModule, IDS_SEPARATOR, btnInfo->text, 64);
 		index = (int)SendDlgItemMessageA (hwnd, IDC_AVAILBTN_LBOX, LB_ADDSTRING, 0, (LPARAM)btnInfo);
 		SendDlgItemMessageA (hwnd, IDC_AVAILBTN_LBOX, LB_SETITEMDATA, index, (LPARAM)btnInfo);
 
@@ -1690,37 +1726,53 @@ TOOLBAR_CustomizeDialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		for (i = 0;; i++)
 		{
 		    /* send TBN_GETBUTTONINFO notification */
+                    NMTOOLBARW nmtb;
 		    nmtb.iItem = i;
 		    nmtb.pszText = Buffer;
 		    nmtb.cchText = 256;
 
-		    if (!TOOLBAR_SendNotify ((NMHDR *) &nmtb, infoPtr, TBN_GETBUTTONINFOA))
+                    /* Clear previous button's text */
+                    ZeroMemory(nmtb.pszText, nmtb.cchText * sizeof(WCHAR));
+
+                    if (!TOOLBAR_GetButtonInfo(infoPtr, &nmtb))
 			break;
 
-		    TRACE("style: %x\n", nmtb.tbButton.fsStyle);
+		    TRACE("WM_INITDIALOG style: %x iItem(%d) idCommand(%d) iString(%d) %s\n", 
+                        nmtb.tbButton.fsStyle, i, 
+                        nmtb.tbButton.idCommand,
+                        nmtb.tbButton.iString,
+                        nmtb.tbButton.iString >= 0 ? debugstr_w(infoPtr->strings[nmtb.tbButton.iString])
+                        : "");
 
 		    /* insert button into the apropriate list */
 		    index = TOOLBAR_GetButtonIndex (custInfo->tbInfo, nmtb.tbButton.idCommand, FALSE);
 		    if (index == -1)
 		    {
 			btnInfo = (PCUSTOMBUTTON)COMCTL32_Alloc(sizeof(CUSTOMBUTTON));
-			memcpy (&btnInfo->btn, &nmtb.tbButton, sizeof(TBBUTTON));
 			btnInfo->bVirtual = FALSE;
 			btnInfo->bRemovable = TRUE;
-			if (!(nmtb.tbButton.fsStyle & TBSTYLE_SEP))
-			    strcpy (btnInfo->text, nmtb.pszText);
 
 			index = SendDlgItemMessageA (hwnd, IDC_AVAILBTN_LBOX, LB_ADDSTRING, 0, 0);
-			SendDlgItemMessageA (hwnd, IDC_AVAILBTN_LBOX, LB_SETITEMDATA, index, (LPARAM)btnInfo);
+			SendDlgItemMessageA (hwnd, IDC_AVAILBTN_LBOX, 
+				LB_SETITEMDATA, index, (LPARAM)btnInfo);
 		    }
 		    else
 		    {
-			btnInfo = (PCUSTOMBUTTON)SendDlgItemMessageA (hwnd, IDC_TOOLBARBTN_LBOX, LB_GETITEMDATA, index, 0);
-			memcpy (&btnInfo->btn, &nmtb.tbButton, sizeof(TBBUTTON));
-			if (!(nmtb.tbButton.fsStyle & TBSTYLE_SEP))
-			    strcpy (btnInfo->text, nmtb.pszText);
+                        btnInfo = (PCUSTOMBUTTON)SendDlgItemMessageA (hwnd, 
+                            IDC_TOOLBARBTN_LBOX, LB_GETITEMDATA, index, 0);
+                    }
 
-			SendDlgItemMessageA (hwnd, IDC_TOOLBARBTN_LBOX, LB_SETITEMDATA, index, (LPARAM)btnInfo);
+                    memcpy (&btnInfo->btn, &nmtb.tbButton, sizeof(TBBUTTON));
+                    if (!(nmtb.tbButton.fsStyle & TBSTYLE_SEP))
+                    {
+                        if (lstrlenW(nmtb.pszText))
+                            lstrcpyW(btnInfo->text, nmtb.pszText);
+                        else if (nmtb.tbButton.iString >= 0 && 
+                            nmtb.tbButton.iString < infoPtr->nNumStrings)
+                        {
+                            lstrcpyW(btnInfo->text, 
+                                infoPtr->strings[nmtb.tbButton.iString]);
+                        }
 		    }
 		}
 
@@ -1733,7 +1785,7 @@ TOOLBAR_CustomizeDialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		btnInfo->btn.fsStyle = TBSTYLE_SEP;
 		btnInfo->bVirtual = TRUE;
 		btnInfo->bRemovable = FALSE;
-		LoadStringA (COMCTL32_hModule, IDS_SEPARATOR, btnInfo->text, 64);
+		LoadStringW (COMCTL32_hModule, IDS_SEPARATOR, btnInfo->text, 64);
 		index = (int)SendDlgItemMessageA (hwnd, IDC_TOOLBARBTN_LBOX, LB_ADDSTRING, 0, (LPARAM)btnInfo);
 		SendDlgItemMessageA (hwnd, IDC_TOOLBARBTN_LBOX, LB_SETITEMDATA, index, (LPARAM)btnInfo);
 
@@ -1881,12 +1933,17 @@ TOOLBAR_CustomizeDialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			int index;
 
 			index = SendDlgItemMessageA (hwnd, IDC_TOOLBARBTN_LBOX, LB_GETCURSEL, 0, 0);
+
+			if (LB_ERR == index)
+				break;
+
 			TRACE("Remove: index %d\n", index);
 
+			btnInfo = (PCUSTOMBUTTON)SendDlgItemMessageA (hwnd, IDC_TOOLBARBTN_LBOX, 
+				LB_GETITEMDATA, index, 0);
+
 			/* send TBN_QUERYDELETE notification */
-			nmtb.iItem = index;
-		        if (TOOLBAR_SendNotify ((NMHDR *) &nmtb, infoPtr,
-					    TBN_QUERYDELETE))
+			if (TOOLBAR_IsButtonRemovable(infoPtr, index, btnInfo))
 			{
 			    btnInfo = (PCUSTOMBUTTON)SendDlgItemMessageA (hwnd, IDC_TOOLBARBTN_LBOX, LB_GETITEMDATA, index, 0);
 			    SendDlgItemMessageA (hwnd, IDC_TOOLBARBTN_LBOX, LB_DELETESTRING, index, 0);
@@ -1989,6 +2046,7 @@ TOOLBAR_CustomizeDialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	    if (wParam == IDC_AVAILBTN_LBOX || wParam == IDC_TOOLBARBTN_LBOX)
 	    {
 		LPDRAWITEMSTRUCT lpdis = (LPDRAWITEMSTRUCT)lParam;
+    	DWORD dwStyle = GetWindowLongA (infoPtr->hwndSelf, GWL_STYLE);
 		RECT rcButton;
 		RECT rcText;
 		HPEN hPen, hOldPen;
@@ -2031,13 +2089,17 @@ TOOLBAR_CustomizeDialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		    DrawFocusRect (lpdis->hDC, &lpdis->rcItem);
 
 		/* draw button */
+		if (!(dwStyle & TBSTYLE_FLAT))
 		DrawEdge (lpdis->hDC, &rcButton, EDGE_RAISED, BF_RECT|BF_MIDDLE|BF_SOFT);
 
 		/* draw image and text */
-		if ((btnInfo->btn.fsStyle & TBSTYLE_SEP) == 0)
-		    ImageList_Draw (custInfo->tbInfo->himlDef, btnInfo->btn.iBitmap, lpdis->hDC,
-				    rcButton.left+3, rcButton.top+3, ILD_NORMAL);
-		DrawTextA (lpdis->hDC,  btnInfo->text, -1, &rcText,
+		if ((btnInfo->btn.fsStyle & TBSTYLE_SEP) == 0) {
+			HIMAGELIST himl = GETDEFIMAGELIST(infoPtr, GETHIMLID(infoPtr, 
+				btnInfo->btn.iBitmap));
+		    ImageList_Draw (himl, GETIBITMAP(infoPtr, btnInfo->btn.iBitmap), 
+				lpdis->hDC, rcButton.left+3, rcButton.top+3, ILD_NORMAL);
+		}
+		DrawTextW (lpdis->hDC,  btnInfo->text, -1, &rcText,
 			       DT_LEFT | DT_VCENTER | DT_SINGLELINE);
 
 		/* delete objects and reset colors */
@@ -2081,6 +2143,7 @@ TOOLBAR_AddBitmap (HWND hwnd, WPARAM wParam, LPARAM lParam)
     LPTBADDBITMAP lpAddBmp = (LPTBADDBITMAP)lParam;
     INT nIndex = 0, nButtons, nCount;
     HBITMAP hbmLoad;
+    HIMAGELIST himlDef;
 
     TRACE("hwnd=%p wParam=%x lParam=%lx\n", hwnd, wParam, lParam);
     if (!lpAddBmp)
@@ -2131,24 +2194,57 @@ TOOLBAR_AddBitmap (HWND hwnd, WPARAM wParam, LPARAM lParam)
 	TRACE ("adding %d bitmaps!\n", nButtons);
     }
 
-    if (!(infoPtr->himlDef)) {
+    if (!infoPtr->cimlDef) {
 	/* create new default image list */
 	TRACE ("creating default image list!\n");
 
-	infoPtr->himlDef =
-	    ImageList_Create (infoPtr->nBitmapWidth, infoPtr->nBitmapHeight,
-			      ILC_COLOR | ILC_MASK, nButtons, 2);
-	infoPtr->himlInt = infoPtr->himlDef;
+    himlDef = ImageList_Create (infoPtr->nBitmapWidth, infoPtr->nBitmapHeight, 
+		ILC_COLOR | ILC_MASK, nButtons, 2);
+	TOOLBAR_InsertImageList(&infoPtr->himlDef, &infoPtr->cimlDef, himlDef, 0);
+    infoPtr->himlInt = himlDef;
+    }
+    else {
+        himlDef = GETDEFIMAGELIST(infoPtr, 0);
     }
 
-    nCount = ImageList_GetImageCount(infoPtr->himlDef);
+    if (!himlDef) {
+        WARN("No default image list available\n");
+        return -1;
+    }
+
+    nCount = ImageList_GetImageCount(himlDef);
 
     /* Add bitmaps to the default image list */
-    if (lpAddBmp->hInst == (HINSTANCE)0)
+    if (lpAddBmp->hInst == NULL)
     {
-	nIndex =
-	    ImageList_AddMasked (infoPtr->himlDef, (HBITMAP)lpAddBmp->nID,
-				 CLR_DEFAULT);
+       BITMAP  bmp;
+       HBITMAP hOldBitmapBitmap, hOldBitmapLoad;
+       HDC     hdcImage, hdcBitmap;
+
+       /* copy the bitmap before adding it so that the user's bitmap
+        * doesn't get modified.
+        */
+       GetObjectA ((HBITMAP)lpAddBmp->nID, sizeof(BITMAP), (LPVOID)&bmp);
+
+       hdcImage  = CreateCompatibleDC(0);
+       hdcBitmap = CreateCompatibleDC(0);
+
+       /* create new bitmap */
+       hbmLoad = CreateBitmap (bmp.bmWidth, bmp.bmHeight, bmp.bmPlanes, bmp.bmBitsPixel, NULL);
+       hOldBitmapBitmap = SelectObject(hdcBitmap, (HBITMAP)lpAddBmp->nID);
+       hOldBitmapLoad = SelectObject(hdcImage, hbmLoad);
+
+       /* Copy the user's image */
+       BitBlt (hdcImage, 0, 0, bmp.bmWidth, bmp.bmHeight,
+               hdcBitmap, 0, 0, SRCCOPY);
+
+       SelectObject (hdcImage, hOldBitmapLoad);
+       SelectObject (hdcBitmap, hOldBitmapBitmap);
+       DeleteDC (hdcImage);
+       DeleteDC (hdcBitmap);
+
+       nIndex = ImageList_AddMasked (himlDef, hbmLoad, CLR_DEFAULT);
+       DeleteObject (hbmLoad);
     }
     else if (lpAddBmp->hInst == HINST_COMMCTRL)
     {
@@ -2158,7 +2254,7 @@ TOOLBAR_AddBitmap (HWND hwnd, WPARAM wParam, LPARAM lParam)
 	    case IDB_STD_SMALL_COLOR:
 		hbmLoad = LoadBitmapA (COMCTL32_hModule,
 				       MAKEINTRESOURCEA(IDB_STD_SMALL));
-		nIndex = ImageList_AddMasked (infoPtr->himlDef,
+		nIndex = ImageList_AddMasked (himlDef,
 					      hbmLoad, CLR_DEFAULT);
 		DeleteObject (hbmLoad);
 		break;
@@ -2166,7 +2262,7 @@ TOOLBAR_AddBitmap (HWND hwnd, WPARAM wParam, LPARAM lParam)
 	    case IDB_STD_LARGE_COLOR:
 		hbmLoad = LoadBitmapA (COMCTL32_hModule,
 				       MAKEINTRESOURCEA(IDB_STD_LARGE));
-		nIndex = ImageList_AddMasked (infoPtr->himlDef,
+		nIndex = ImageList_AddMasked (himlDef,
 					      hbmLoad, CLR_DEFAULT);
 		DeleteObject (hbmLoad);
 		break;
@@ -2174,7 +2270,7 @@ TOOLBAR_AddBitmap (HWND hwnd, WPARAM wParam, LPARAM lParam)
 	    case IDB_VIEW_SMALL_COLOR:
 		hbmLoad = LoadBitmapA (COMCTL32_hModule,
 				       MAKEINTRESOURCEA(IDB_VIEW_SMALL));
-		nIndex = ImageList_AddMasked (infoPtr->himlDef,
+		nIndex = ImageList_AddMasked (himlDef,
 					      hbmLoad, CLR_DEFAULT);
 		DeleteObject (hbmLoad);
 		break;
@@ -2182,7 +2278,7 @@ TOOLBAR_AddBitmap (HWND hwnd, WPARAM wParam, LPARAM lParam)
 	    case IDB_VIEW_LARGE_COLOR:
 		hbmLoad = LoadBitmapA (COMCTL32_hModule,
 				       MAKEINTRESOURCEA(IDB_VIEW_LARGE));
-		nIndex = ImageList_AddMasked (infoPtr->himlDef,
+		nIndex = ImageList_AddMasked (himlDef,
 					      hbmLoad, CLR_DEFAULT);
 		DeleteObject (hbmLoad);
 		break;
@@ -2190,7 +2286,7 @@ TOOLBAR_AddBitmap (HWND hwnd, WPARAM wParam, LPARAM lParam)
 	    case IDB_HIST_SMALL_COLOR:
 		hbmLoad = LoadBitmapA (COMCTL32_hModule,
 				       MAKEINTRESOURCEA(IDB_HIST_SMALL));
-		nIndex = ImageList_AddMasked (infoPtr->himlDef,
+		nIndex = ImageList_AddMasked (himlDef,
 					      hbmLoad, CLR_DEFAULT);
 		DeleteObject (hbmLoad);
 		break;
@@ -2198,13 +2294,13 @@ TOOLBAR_AddBitmap (HWND hwnd, WPARAM wParam, LPARAM lParam)
 	    case IDB_HIST_LARGE_COLOR:
 		hbmLoad = LoadBitmapA (COMCTL32_hModule,
 				       MAKEINTRESOURCEA(IDB_HIST_LARGE));
-		nIndex = ImageList_AddMasked (infoPtr->himlDef,
+		nIndex = ImageList_AddMasked (himlDef,
 					      hbmLoad, CLR_DEFAULT);
 		DeleteObject (hbmLoad);
 		break;
 
 	    default:
-	nIndex = ImageList_GetImageCount (infoPtr->himlDef);
+	nIndex = ImageList_GetImageCount (himlDef);
 		ERR ("invalid imagelist!\n");
 		break;
 	}
@@ -2212,7 +2308,7 @@ TOOLBAR_AddBitmap (HWND hwnd, WPARAM wParam, LPARAM lParam)
     else
     {
 	hbmLoad = LoadBitmapA (lpAddBmp->hInst, (LPSTR)lpAddBmp->nID);
-	nIndex = ImageList_AddMasked (infoPtr->himlDef, hbmLoad, CLR_DEFAULT);
+	nIndex = ImageList_AddMasked (himlDef, hbmLoad, CLR_DEFAULT);
 	DeleteObject (hbmLoad);
     }
 
@@ -2238,7 +2334,7 @@ TOOLBAR_AddBitmap (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     if (nIndex != -1)
     {
-       INT imagecount = ImageList_GetImageCount(infoPtr->himlDef);
+       INT imagecount = ImageList_GetImageCount(himlDef);
 
        if (infoPtr->nNumBitmaps + nButtons != imagecount)
        {
@@ -2920,6 +3016,8 @@ TOOLBAR_GetButton (HWND hwnd, WPARAM wParam, LPARAM lParam)
     lpTbb->idCommand = btnPtr->idCommand;
     lpTbb->fsState   = btnPtr->fsState;
     lpTbb->fsStyle   = btnPtr->fsStyle;
+    lpTbb->bReserved[0] = 0;
+    lpTbb->bReserved[1] = 0;
     lpTbb->dwData    = btnPtr->dwData;
     lpTbb->iString   = btnPtr->iString;
 
@@ -3074,9 +3172,7 @@ TOOLBAR_GetButtonTextW (HWND hwnd, WPARAM wParam, LPARAM lParam)
 static LRESULT
 TOOLBAR_GetDisabledImageList (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
-    TOOLBAR_INFO *infoPtr = TOOLBAR_GetInfoPtr (hwnd);
-
-    return (LRESULT)infoPtr->himlDis;
+    return (LRESULT)GETDISIMAGELIST(TOOLBAR_GetInfoPtr (hwnd), 0);
 }
 
 
@@ -3092,9 +3188,7 @@ TOOLBAR_GetExtendedStyle (HWND hwnd)
 static LRESULT
 TOOLBAR_GetHotImageList (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
-    TOOLBAR_INFO *infoPtr = TOOLBAR_GetInfoPtr (hwnd);
-
-    return (LRESULT)infoPtr->himlHot;
+    return (LRESULT)GETHOTIMAGELIST(TOOLBAR_GetInfoPtr (hwnd), 0);
 }
 
 
@@ -3114,11 +3208,9 @@ TOOLBAR_GetHotItem (HWND hwnd)
 
 
 static LRESULT
-TOOLBAR_GetImageList (HWND hwnd, WPARAM wParam, LPARAM lParam)
+TOOLBAR_GetDefImageList (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
-    TOOLBAR_INFO *infoPtr = TOOLBAR_GetInfoPtr (hwnd);
-
-    return (LRESULT)infoPtr->himlDef;
+    return (LRESULT) GETDEFIMAGELIST(TOOLBAR_GetInfoPtr(hwnd), 0);
 }
 
 
@@ -3167,7 +3259,7 @@ TOOLBAR_GetMaxSize (HWND hwnd, WPARAM wParam, LPARAM lParam)
     lpSize->cx = infoPtr->rcBound.right - infoPtr->rcBound.left;
     lpSize->cy = infoPtr->rcBound.bottom - infoPtr->rcBound.top;
 
-    TRACE("maximum size %d x %d\n",
+    TRACE("maximum size %ld x %ld\n",
 	   infoPtr->rcBound.right - infoPtr->rcBound.left,
 	   infoPtr->rcBound.bottom - infoPtr->rcBound.top);
 
@@ -3679,6 +3771,7 @@ TOOLBAR_ReplaceBitmap (HWND hwnd, WPARAM wParam, LPARAM lParam)
     LPTBREPLACEBITMAP lpReplace = (LPTBREPLACEBITMAP) lParam;
     HBITMAP hBitmap;
     int i = 0, nOldButtons = 0, pos = 0;
+    HIMAGELIST himlDef = 0;
 
     TRACE("hInstOld %p nIDOld %x hInstNew %p nIDNew %x nButtons %x\n",
           lpReplace->hInstOld, lpReplace->nIDOld, lpReplace->hInstNew, lpReplace->nIDNew,
@@ -3724,14 +3817,44 @@ TOOLBAR_ReplaceBitmap (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     infoPtr->nNumBitmaps = infoPtr->nNumBitmaps - nOldButtons + lpReplace->nButtons;
 
-    /* ImageList_Replace(infoPtr->himlDef, pos, hBitmap, NULL); */
+    /* ImageList_Replace(GETDEFIMAGELIST(), pos, hBitmap, NULL); */
 
 
+    himlDef = GETDEFIMAGELIST(infoPtr, 0);
     for (i = pos + nOldButtons - 1; i >= pos; i--) {
-        ImageList_Remove(infoPtr->himlDef, i);
+        ImageList_Remove(himlDef, i);
     }
 
-    ImageList_AddMasked(infoPtr->himlDef, hBitmap, CLR_DEFAULT);
+    {
+       BITMAP  bmp;
+       HBITMAP hOldBitmapBitmap, hOldBitmapLoad, hbmLoad;
+       HDC     hdcImage, hdcBitmap;
+
+       /* copy the bitmap before adding it so that the user's bitmap
+        * doesn't get modified.
+        */
+       GetObjectA (hBitmap, sizeof(BITMAP), (LPVOID)&bmp);
+
+       hdcImage  = CreateCompatibleDC(0);
+       hdcBitmap = CreateCompatibleDC(0);
+
+       /* create new bitmap */
+       hbmLoad = CreateBitmap (bmp.bmWidth, bmp.bmHeight, bmp.bmPlanes, bmp.bmBitsPixel, NULL);
+       hOldBitmapBitmap = SelectObject(hdcBitmap, hBitmap);
+       hOldBitmapLoad = SelectObject(hdcImage, hbmLoad);
+
+       /* Copy the user's image */
+       BitBlt (hdcImage, 0, 0, bmp.bmWidth, bmp.bmHeight,
+               hdcBitmap, 0, 0, SRCCOPY);
+
+       SelectObject (hdcImage, hOldBitmapLoad);
+       SelectObject (hdcBitmap, hOldBitmapBitmap);
+       DeleteDC (hdcImage);
+       DeleteDC (hdcBitmap);
+
+       ImageList_AddMasked (himlDef, hbmLoad, CLR_DEFAULT);
+       DeleteObject (hbmLoad);
+    }
 
     InvalidateRect(hwnd, NULL, FALSE);
 
@@ -3815,6 +3938,7 @@ static LRESULT
 TOOLBAR_SetBitmapSize (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
     TOOLBAR_INFO *infoPtr = TOOLBAR_GetInfoPtr (hwnd);
+    HIMAGELIST himlDef = GETDEFIMAGELIST(infoPtr, 0);
 
     if ((LOWORD(lParam) <= 0) || (HIWORD(lParam)<=0))
 	return FALSE;
@@ -3828,10 +3952,11 @@ TOOLBAR_SetBitmapSize (HWND hwnd, WPARAM wParam, LPARAM lParam)
     infoPtr->nBitmapWidth = (INT)LOWORD(lParam);
     infoPtr->nBitmapHeight = (INT)HIWORD(lParam);
 
+
     /* uses image list internals directly */
-    if (infoPtr->himlDef) {
-        infoPtr->himlDef->cx = infoPtr->nBitmapWidth;
-        infoPtr->himlDef->cy = infoPtr->nBitmapHeight;
+    if (himlDef) {
+        himlDef->cx = infoPtr->nBitmapWidth;
+        himlDef->cy = infoPtr->nBitmapHeight;
     }
 
     return TRUE;
@@ -4019,16 +4144,15 @@ static LRESULT
 TOOLBAR_SetDisabledImageList (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
     TOOLBAR_INFO *infoPtr = TOOLBAR_GetInfoPtr (hwnd);
+    HIMAGELIST himl = (HIMAGELIST)lParam;
     HIMAGELIST himlTemp;
+    INT id = 0;
 
+    if (infoPtr->iVersion >= 5)
+        id = wParam;
 
-    if (wParam != 0) {
-	FIXME("no support for multiple image lists\n");
-	return 0;
-    }
-
-    himlTemp = infoPtr->himlDis;
-    infoPtr->himlDis = (HIMAGELIST)lParam;
+    himlTemp = TOOLBAR_InsertImageList(&infoPtr->himlDis, 
+        &infoPtr->cimlDis, himl, id);
 
     /* FIXME: redraw ? */
 
@@ -4080,14 +4204,14 @@ TOOLBAR_SetHotImageList (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
     TOOLBAR_INFO *infoPtr = TOOLBAR_GetInfoPtr(hwnd);
     HIMAGELIST himlTemp;
+    HIMAGELIST himl = (HIMAGELIST)lParam;
+    INT id = 0;
 
-    if (wParam != 0) {
-	FIXME("no support for multiple image lists\n");
-	return 0;
-    }
+    if (infoPtr->iVersion >= 5)
+        id = wParam;
 
-    himlTemp = infoPtr->himlHot;
-    infoPtr->himlHot = (HIMAGELIST)lParam;
+    himlTemp = TOOLBAR_InsertImageList(&infoPtr->himlHot, 
+        &infoPtr->cimlHot, himl, id);
 
     /* FIXME: redraw ? */
 
@@ -4137,18 +4261,20 @@ TOOLBAR_SetImageList (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
     TOOLBAR_INFO *infoPtr = TOOLBAR_GetInfoPtr (hwnd);
     HIMAGELIST himlTemp;
+    HIMAGELIST himl = (HIMAGELIST)lParam;
+    INT i, id = 0;
 
-    if (wParam != 0) {
-	FIXME("no support for multiple image lists\n");
-	return 0;
-    }
+    if (infoPtr->iVersion >= 5)
+        id = wParam;
 
-    himlTemp = infoPtr->himlDef;
-    infoPtr->himlDef = (HIMAGELIST)lParam;
+    himlTemp = TOOLBAR_InsertImageList(&infoPtr->himlDef, 
+        &infoPtr->cimlDef, himl, id);
 
-    infoPtr->nNumBitmaps = ImageList_GetImageCount(infoPtr->himlDef);
+    infoPtr->nNumBitmaps = 0;
+    for (i = 0; i < infoPtr->cimlDef; i++)
+        infoPtr->nNumBitmaps += ImageList_GetImageCount(infoPtr->himlDef[i]->himl);
 
-    ImageList_GetIconSize(infoPtr->himlDef, &infoPtr->nBitmapWidth,
+    ImageList_GetIconSize(himl, &infoPtr->nBitmapWidth,
 			  &infoPtr->nBitmapHeight);
     TRACE("hwnd %p, new himl=%08x, count=%d, bitmap w=%d, h=%d\n",
 	  hwnd, (INT)infoPtr->himlDef, infoPtr->nNumBitmaps,
@@ -4407,6 +4533,9 @@ TOOLBAR_SetVersion (HWND hwnd, INT iVersion)
 
     infoPtr->iVersion = iVersion;
 
+    if (infoPtr->iVersion >= 5)
+        TOOLBAR_SetUnicodeFormat(hwnd, (WPARAM)TRUE, (LPARAM)0);
+
     return iOldVersion;
 }
 
@@ -4496,7 +4625,7 @@ TOOLBAR_Unkwn463 (HWND hwnd, WPARAM wParam, LPARAM lParam)
 	    InvalidateRect(hwnd, 0, 1);
 	    GetWindowRect(hwnd, &rc);
 	    MapWindowPoints(0, hwndParent, (LPPOINT)&rc, 2);
-	    TRACE("mapped to (%d,%d)-(%d,%d)\n",
+	    TRACE("mapped to (%ld,%ld)-(%ld,%ld)\n",
 		rc.left, rc.top, rc.right, rc.bottom);
 	    lpsize->cx = max(rc.right-rc.left,
 			     infoPtr->rcBound.right - infoPtr->rcBound.left);
@@ -4616,6 +4745,10 @@ TOOLBAR_Destroy (HWND hwnd, WPARAM wParam, LPARAM lParam)
     /* destroy internal image list */
     if (infoPtr->himlInt)
 	ImageList_Destroy (infoPtr->himlInt);
+
+	TOOLBAR_DeleteImageList(&infoPtr->himlDef, &infoPtr->cimlDef);
+	TOOLBAR_DeleteImageList(&infoPtr->himlDis, &infoPtr->cimlDis);
+	TOOLBAR_DeleteImageList(&infoPtr->himlHot, &infoPtr->cimlHot);
 
     /* delete default font */
     if (infoPtr->hFont)
@@ -5311,7 +5444,7 @@ TOOLBAR_Paint (HWND hwnd, WPARAM wParam)
 
     hdc = wParam==0 ? BeginPaint(hwnd, &ps) : (HDC)wParam;
 
-    TRACE("psrect=(%d,%d)-(%d,%d)\n",
+    TRACE("psrect=(%ld,%ld)-(%ld,%ld)\n",
 	  ps.rcPaint.left, ps.rcPaint.top,
 	  ps.rcPaint.right, ps.rcPaint.bottom);
 
@@ -5567,7 +5700,7 @@ ToolbarWindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	    return TOOLBAR_GetHotItem (hwnd);
 
 	case TB_GETIMAGELIST:
-	    return TOOLBAR_GetImageList (hwnd, wParam, lParam);
+	    return TOOLBAR_GetDefImageList (hwnd, wParam, lParam);
 
 /*	case TB_GETINSERTMARK:			*/ /* 4.71 */
 /*	case TB_GETINSERTMARKCOLOR:		*/ /* 4.71 */
@@ -5873,5 +6006,127 @@ TOOLBAR_Register (void)
 VOID
 TOOLBAR_Unregister (void)
 {
-    UnregisterClassA (TOOLBARCLASSNAMEA, (HINSTANCE)NULL);
+    UnregisterClassA (TOOLBARCLASSNAMEA, NULL);
+}
+
+static HIMAGELIST TOOLBAR_InsertImageList(PIMLENTRY **pies, INT *cies, HIMAGELIST himl, INT id)
+{
+    HIMAGELIST himlold;
+    PIMLENTRY c = NULL;
+
+    /* Check if the entry already exists */
+    c = TOOLBAR_GetImageListEntry(*pies, *cies, id);
+
+    /* If this is a new entry we must create it and insert into the array */
+    if (!c)
+    {
+        PIMLENTRY *pnies;
+
+	c = (PIMLENTRY) COMCTL32_Alloc(sizeof(IMLENTRY));
+	c->id = id;
+
+	pnies = COMCTL32_Alloc((*cies + 1) * sizeof(PIMLENTRY));
+	memcpy(pnies, *pies, ((*cies) * sizeof(PIMLENTRY)));
+	pnies[*cies] = c;
+	(*cies)++;
+
+	COMCTL32_Free(*pies);
+	*pies = pnies;
+    }
+
+    himlold = c->himl;
+    c->himl = himl;
+
+    return himlold;
+}
+
+
+static VOID TOOLBAR_DeleteImageList(PIMLENTRY **pies, INT *cies)
+{
+    int i;
+
+    for (i = 0; i < *cies; i++)
+	COMCTL32_Free((*pies)[i]);
+
+    COMCTL32_Free(*pies);
+
+    *cies = 0;
+    *pies = NULL;
+}
+
+
+static PIMLENTRY TOOLBAR_GetImageListEntry(PIMLENTRY *pies, INT cies, INT id)
+{
+    PIMLENTRY c = NULL;
+
+    if (pies != NULL)
+    {
+	int i;
+
+        for (i = 0; i < cies; i++)
+        {
+            if (pies[i]->id == id)
+            {
+                c = pies[i];
+                break;
+            }
+        }
+    }
+
+    return c;
+}
+
+
+static HIMAGELIST TOOLBAR_GetImageList(PIMLENTRY *pies, INT cies, INT id)
+{
+    HIMAGELIST himlDef = 0;
+    PIMLENTRY pie = TOOLBAR_GetImageListEntry(pies, cies, id);
+
+    if (pie)
+        himlDef = pie->himl;
+
+    return himlDef;
+}
+
+
+static BOOL TOOLBAR_GetButtonInfo(TOOLBAR_INFO *infoPtr, NMTOOLBARW *nmtb)
+{
+    if (infoPtr->bUnicode)
+        return TOOLBAR_SendNotify ((NMHDR *) nmtb, infoPtr, TBN_GETBUTTONINFOW);
+    else
+    {
+        CHAR Buffer[256];
+        NMTOOLBARA nmtba;
+        BOOL bRet = FALSE;
+
+        nmtba.iItem = nmtb->iItem;
+        nmtba.pszText = Buffer;
+        nmtba.cchText = 256;
+        ZeroMemory(nmtba.pszText, nmtba.cchText);
+
+        if (TOOLBAR_SendNotify ((NMHDR *) &nmtba, infoPtr, TBN_GETBUTTONINFOA))
+        {
+            int ccht = strlen(nmtba.pszText);
+            if (ccht)
+               MultiByteToWideChar(CP_ACP, 0, (LPCSTR)nmtba.pszText, -1, 
+                  nmtb->pszText, nmtb->cchText);
+
+            memcpy(&nmtb->tbButton, &nmtba.tbButton, sizeof(TBBUTTON));
+            bRet = TRUE;
+        }
+
+        return bRet;
+    }
+}
+
+
+static BOOL TOOLBAR_IsButtonRemovable(TOOLBAR_INFO *infoPtr,
+	int iItem, PCUSTOMBUTTON btnInfo)
+{
+    NMTOOLBARA nmtb;
+
+    nmtb.iItem = iItem;
+    memcpy(&nmtb.tbButton, &btnInfo->btn, sizeof(TBBUTTON));
+
+    return TOOLBAR_SendNotify ((NMHDR *) &nmtb, infoPtr, TBN_QUERYDELETE);
 }

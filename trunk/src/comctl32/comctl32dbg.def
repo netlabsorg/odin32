@@ -1,4 +1,4 @@
-; $Id: comctl32dbg.def,v 1.4 2003-04-09 11:58:40 sandervl Exp $
+; $Id: comctl32dbg.def,v 1.5 2003-05-15 14:26:27 sandervl Exp $
 LIBRARY COMCTL32 INITINSTANCE
 DESCRIPTION 'Odin32 System DLL - ComCtl32 - Common Controls Library'
 DATA MULTIPLE NONSHARED
@@ -102,7 +102,6 @@ EXPORTS
 
 
   CreateMRUListA      = _DbgCreateMRUListA@4          @151
-; ordinals????
   FreeMRUList         = _DbgFreeMRUList@4             @152
   AddMRUStringA       = _DbgAddMRUStringA@8           @153
   EnumMRUListA        = _DbgEnumMRUListA@16           @154
@@ -156,7 +155,7 @@ EXPORTS
   StrCmpNW            = _DbgCOMCTL32_StrCmpNW@12      @360
   StrCmpNIW           = _DbgCOMCTL32_StrCmpNIW@12     @361
   StrStrW             = _DbgCOMCTL32_StrStrW@8        @362
-;StrStrIW @363
+  StrStrIW            = _DbgCOMCTL32_StrStrIW@8       @363
   StrSpnW             = _DbgCOMCTL32_StrSpnW@8        @364
   StrToIntW           = _DbgCOMCTL32_StrToIntW@4      @365
 ;366 stub StrChrIA
@@ -187,17 +186,13 @@ EXPORTS
   EnumMRUListW        = _DbgEnumMRUListW@16           @403
   CreateMRUListLazyW  = _DbgCreateMRUListLazyW@16     @404
 
-                        _COMCTL32_410@16           @410 NONAME
-                        _COMCTL32_411@12           @411 NONAME
-                        _COMCTL32_412@12           @412 NONAME
-                        _COMCTL32_413@16           @413 NONAME
+; These are only available in comctrl 6
+  DefSubclassProc      = _DefSubclassProc@16       @410
+  GetWindowSubclass    = _GetWindowSubclass@16     @411
+  RemoveWindowSubclass = _RemoveWindowSubclass@12  @412
+  SetWindowSubclass    = _SetWindowSubclass@16     @413
                         _COMCTL32_415@20           @415 NONAME
 
                         _COMCTL32_417@32           @417 NONAME
                         _COMCTL32_419@16           @419 NONAME
 
-; These are only available in comctrl 6
-  DefSubclassProc      = _DefSubclassProc@16        @500
-  GetWindowSubclass    = _GetWindowSubclass@16      @501
-  RemoveWindowSubclass = _RemoveWindowSubclass@12   @502
-  SetWindowSubclass    = _SetWindowSubclass@16      @503
