@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.73 1999-12-29 14:37:16 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.74 1999-12-29 22:54:02 cbratschi Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -64,7 +64,7 @@ BOOL InitPM()
         UINT error;
         //CB: only fail on real error
         error = WinGetLastError(hab) & 0xFFFF; //error code
-        if (!hab || error != PMERR_MSG_QUEUE_ALREADY_EXISTS)
+        if (!hab || (error != PMERR_MSG_QUEUE_ALREADY_EXISTS))
         {
             dprintf(("WinInitialize or WinCreateMsgQueue failed %x %x", hab, hmq));
             dprintf((" Error = %x",error));

@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.30 1999-12-26 17:30:16 cbratschi Exp $ */
+/* $Id: pmframe.cpp,v 1.31 1999-12-29 22:54:01 cbratschi Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -102,7 +102,7 @@ VOID DrawFrame(HPS hps,RECTL *rect,Win32BaseWindow *win32wnd)
 //******************************************************************************
 BOOL CanDrawSizeBox(Win32BaseWindow *win32wnd)
 {
-  return (win32wnd->getStyle() & WS_SIZEBOX_W && WinQueryWindowULong(win32wnd->getOS2FrameWindowHandle(),QWL_STYLE) & FS_SIZEBORDER
+  return ((win32wnd->getStyle() & WS_SIZEBOX_W) && (WinQueryWindowULong(win32wnd->getOS2FrameWindowHandle(),QWL_STYLE) & FS_SIZEBORDER)
           && win32wnd->getVertScrollHandle() && WinQueryWindow(win32wnd->getVertScrollHandle(),QW_PARENT) == win32wnd->getOS2FrameWindowHandle()
           && win32wnd->getHorzScrollHandle() && WinQueryWindow(win32wnd->getHorzScrollHandle(),QW_PARENT) == win32wnd->getOS2FrameWindowHandle());
 }
@@ -346,9 +346,9 @@ PosChangedEnd:
       {
         DWORD dwStyle = win32wnd->getWindowClass()->getClassLongA(GCL_STYLE_W);
 
-        if (dwStyle & CS_HREDRAW_W && newRect->xRight-newRect->xLeft != oldRect->xRight-oldRect->xLeft)
+        if ((dwStyle & CS_HREDRAW_W) && (newRect->xRight-newRect->xLeft != oldRect->xRight-oldRect->xLeft))
           res |= CVR_REDRAW;
-        else if (dwStyle & CS_VREDRAW_W && newRect->yTop-newRect->yBottom != oldRect->yTop-oldRect->yBottom)
+        else if ((dwStyle & CS_VREDRAW_W) && (newRect->yTop-newRect->yBottom != oldRect->yTop-oldRect->yBottom))
           res |= CVR_REDRAW;
       } else res |= CVR_REDRAW;
 
@@ -513,7 +513,7 @@ VOID FrameSetBorderSize(Win32BaseWindow *win32wnd,BOOL resize)
 
   FrameGetBorderSize(win32wnd,&point);
   WinSendMsg(win32wnd->getOS2FrameWindowHandle(),WM_SETBORDERSIZE,(MPARAM)win32wnd->getBorderWidth(),(MPARAM)win32wnd->getBorderHeight());
-  if (point.x != win32wnd->getBorderWidth() || point.y != win32wnd->getBorderHeight())
+  if ((point.x != win32wnd->getBorderWidth()) || (point.y != win32wnd->getBorderHeight()))
   {
     INT xDiff = win32wnd->getBorderWidth()-point.x;
     INT yDiff = win32wnd->getBorderHeight()-point.y;
@@ -581,7 +581,7 @@ BOOL FrameShowScrollBars(Win32BaseWindow *win32wnd,BOOL changeHorz,BOOL changeVe
   {
     HWND hwndCurPar = WinQueryWindow(win32wnd->getHorzScrollHandle(),QW_PARENT);
 
-    if ((fShow && hwndCurPar == hwndObj) || (!fShow && hwndCurPar != hwndObj))
+    if ((fShow && (hwndCurPar == hwndObj)) || (!fShow && (hwndCurPar != hwndObj)))
     {
       WinSetParent(win32wnd->getHorzScrollHandle(),fShow ? win32wnd->getOS2FrameWindowHandle():HWND_OBJECT,FALSE);
       updateFlags |= FCF_HORZSCROLL;
@@ -592,7 +592,7 @@ BOOL FrameShowScrollBars(Win32BaseWindow *win32wnd,BOOL changeHorz,BOOL changeVe
   {
     HWND hwndCurPar = WinQueryWindow(win32wnd->getVertScrollHandle(),QW_PARENT);
 
-    if ((fShow && hwndCurPar == hwndObj) || (!fShow && hwndCurPar != hwndObj))
+    if ((fShow && (hwndCurPar == hwndObj)) || (!fShow && (hwndCurPar != hwndObj)))
     {
       WinSetParent(win32wnd->getVertScrollHandle(),fShow ? win32wnd->getOS2FrameWindowHandle():HWND_OBJECT,FALSE);
       updateFlags |= FCF_VERTSCROLL;
@@ -618,7 +618,7 @@ DWORD FrameHitTest(Win32BaseWindow *win32wnd,INT x,INT y)
   if (hwnd == win32wnd->getOS2WindowHandle()) return HTCLIENT_W;
   if (win32wnd->getOS2WindowHandle() == WinQueryCapture(HWND_DESKTOP)) return HTCLIENT_W;
   point.x = x;
-  point.y = WinQuerySysValue(HWND_DESKTOP,SV_CYSCREEN)-y-1;
+  point.y = mapScreenY(y);
   WinMapWindowPoints(HWND_DESKTOP,hwnd,&point,1);
   child = WinWindowFromPoint(hwnd,&point,FALSE);
 

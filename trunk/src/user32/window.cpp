@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.45 1999-12-27 17:08:09 cbratschi Exp $ */
+/* $Id: window.cpp,v 1.46 1999-12-29 22:54:04 cbratschi Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -846,10 +846,12 @@ int WIN32API MapWindowPoints(HWND hwndFrom, HWND hwndTo, LPPOINT lpPoints,
 
     dprintf(("USER32: MapWindowPoints %x to %x (%d,%d) (%d)", hwndFrom, hwndTo, lpPoints->x, lpPoints->y, cPoints));
     point.x = lpPoints->x;
-    point.y = wndfrom->getWindowHeight()-1-lpPoints->y;
-
-    OSLibWinMapWindowPoints(wndfrom->getOS2WindowHandle(), wndto->getOS2WindowHandle(), &point, 1);
-    point.y = wndto->getWindowHeight()-1-point.y;
+    point.y = lpPoints->y;
+    if (!mapWin32Point(wndfrom,wndto,&point))
+    {
+      SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+      return 0;
+    }
 
     short int xinc = point.x - lpPoints->x;
     short int yinc = point.y - lpPoints->y;
@@ -874,13 +876,7 @@ BOOL WIN32API ScreenToClient (HWND hwnd, LPPOINT pt)
     if (!hwnd) return (TRUE);
     wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
     if (!wnd) return (TRUE);
-
-    rcl   = wnd->getClientRect();
-    pt->y = ScreenHeight - pt->y;
-    OSLibWinMapWindowPoints (OSLIB_HWND_DESKTOP, wnd->getOS2WindowHandle(), (OSLIBPOINT *)pt, 1);
-    pt->y = (rcl->bottom - rcl->top) - pt->y;
-    dprintf(("ScreenToClient %x returned (%d,%d)\n", hwnd, pt->x, pt->y));
-    return (TRUE);
+    return mapWin32Point(OSLIB_HWND_DESKTOP,wnd->getOS2WindowHandle(),(OSLIBPOINT*)pt);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1003,13 +999,7 @@ BOOL WIN32API ClientToScreen (HWND hwnd, PPOINT pt)
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return (FALSE);
     }
-
-    rcl  = wnd->getClientRect();
-    pt->y = (rcl->bottom - rcl->top) - pt->y;
-    OSLibWinMapWindowPoints (wnd->getOS2WindowHandle(), OSLIB_HWND_DESKTOP, (OSLIBPOINT *)pt, 1);
-    pt->y = ScreenHeight - pt->y;
-    dprintf(("ClientToScreen returned (%d,%d)\n", pt->x, pt->y));
-    return (TRUE);
+    return mapWin32Point(wnd->getOS2WindowHandle(),OSLIB_HWND_DESKTOP,(OSLIBPOINT*)pt);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1262,7 +1252,7 @@ HWND WIN32API WindowFromPoint( POINT point)
     POINT wPoint;
 
     wPoint.x = point.x;
-    wPoint.y = windowDesktop->getWindowHeight() - point.y;
+    wPoint.y = mapScreenY(point.y);
 
     hwndOS2 = OSLibWinWindowFromPoint(OSLIB_HWND_DESKTOP, (PVOID)&wPoint);
     if(hwndOS2)

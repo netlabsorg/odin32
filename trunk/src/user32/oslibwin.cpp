@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.55 1999-12-29 12:39:44 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.56 1999-12-29 22:54:01 cbratschi Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -324,28 +324,6 @@ HWND OSLibWinQueryWindow(HWND hwnd, ULONG lCode)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibWinSetWindowPos(HWND hwnd, HWND hwndInsertBehind, LONG x, LONG y, LONG cx,
-                          LONG cy, ULONG fl)
-{
- HWND hwndParent = hwndInsertBehind;
- BOOL rc;
-
-    if(fl & SWP_MOVE) {
-        switch(hwndParent)
-        {
-            case HWNDOS_TOP:
-            case HWNDOS_BOTTOM:
-                hwndParent = HWND_DESKTOP;
-                break;
-        }
-        y = MapOS2ToWin32Y(hwndParent, cy, y);
-    }
-    rc = WinSetWindowPos(hwnd, hwndInsertBehind, x, y, cx, cy, fl);
-    dprintf(("WinSetWindowPos %x %x %d %d %d %d %x returned %d (%x)", hwnd, hwndInsertBehind, x, y, cx, cy, fl, rc, WinGetLastError(GetThreadHAB())));
-    return rc;
-}
-//******************************************************************************
-//******************************************************************************
 BOOL OSLibWinSetMultWindowPos(PSWP pswp, ULONG num)
 {
     return WinSetMultWindowPos(GetThreadHAB(), pswp, num);
@@ -382,9 +360,9 @@ BOOL OSLibWinQueryWindowRect(HWND hwnd, PRECT pRect, int RelativeTo)
   rc = WinQueryWindowRect(hwnd, (PRECTL)&rectl);
   if(rc) {
         if(RelativeTo == RELATIVE_TO_SCREEN) {
-                MapOS2ToWin32Rectl(OSLIB_HWND_DESKTOP, hwnd, &rectl, pRect);
+                mapOS2ToWin32Rect(hwnd,OSLIB_HWND_DESKTOP,&rectl,pRect);
         }
-        else    MapOS2ToWin32WindowRect(&rectl, pRect);
+        else    mapOS2ToWin32Rect(hwnd,&rectl,pRect);
   }
   else  memset(pRect, 0, sizeof(RECT));
   return rc;
@@ -555,7 +533,7 @@ void OSLibMapSWPtoWINDOWPOS(PSWP pswp, PWINDOWPOS pwpos, PSWP pswpOld, HWND hPar
         {
                 WinMapWindowPoints(hParent, HWND_DESKTOP, &point, 1);
         }
-        point.y = OSLibQueryScreenHeight() - point.y - swpFrame.cy;
+        point.y = ScreenHeight-point.y-swpFrame.cy;
 
         cy = swpFrame.cy;
         cx = swpFrame.cx;
@@ -578,7 +556,7 @@ void OSLibMapSWPtoWINDOWPOS(PSWP pswp, PWINDOWPOS pwpos, PSWP pswpOld, HWND hPar
     }
 
     pswpOld->x  = pswp->x;
-    pswpOld->y  = swpFrame.cy - pswp->y - pswp->cy;
+    pswpOld->y  = swpFrame.cy-pswp->y-pswp->cy;
     pswpOld->cx = pswp->cx;
     pswpOld->cy = pswp->cy;
 
@@ -642,7 +620,7 @@ void OSLibMapSWPtoWINDOWPOSFrame(PSWP pswp, struct tagWINDOWPOS *pwpos, PSWP psw
         {
                 WinMapWindowPoints(hParent, HWND_DESKTOP, &point, 1);
         }
-        point.y = OSLibQueryScreenHeight() - point.y - cy;
+        point.y = ScreenHeight-point.y-cy;
 
         x  = point.x;
         y  = point.y;
@@ -663,7 +641,7 @@ void OSLibMapSWPtoWINDOWPOSFrame(PSWP pswp, struct tagWINDOWPOS *pwpos, PSWP psw
     }
 
     pswpOld->x  = swpClient.x;
-    pswpOld->y  = pswp->cy - swpClient.y - swpClient.cy;
+    pswpOld->y  = pswp->cy-swpClient.y-swpClient.cy;
     pswpOld->cx = swpClient.cx;
     pswpOld->cy = swpClient.cy;
 
@@ -733,7 +711,7 @@ void OSLibMapWINDOWPOStoSWP(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, HWND hPar
 
          if (!((y == 0) && (pswpOld->cy == 0)))
          {
-            y = parentHeight - y - pswpOld->cy;
+            y = parentHeight-y-pswpOld->cy;
          }
       }
 
@@ -747,7 +725,7 @@ void OSLibMapWINDOWPOStoSWP(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, HWND hPar
          cx = pswpOld->cx;
          cy = pswpOld->cy;
       }
-      y  = parentHeight - y - cy;
+      y  = parentHeight-y-cy;
 
 
        if ((pswpOld->x == x) && (pswpOld->y == y))
@@ -818,9 +796,9 @@ void OSLibMapWINDOWPOStoSWPFrame(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, HWND
       if(hParent) {
             parentHeight = OSLibGetWindowHeight(hParent);
 
-            point.y = ScreenHeight - point.y - cy;
+            point.y = ScreenHeight-point.y-cy;
             WinMapWindowPoints(HWND_DESKTOP, hParent, &point, 1);
-            point.y = parentHeight - point.y - cy;
+            point.y = parentHeight-point.y-cy;
       }
       else  parentHeight = ScreenHeight;
 
@@ -837,7 +815,7 @@ void OSLibMapWINDOWPOStoSWPFrame(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, HWND
          cx = pswpOld->cx;
          cy = pswpOld->cy;
       }
-      y  = parentHeight - y - cy;
+      y  = parentHeight-y-cy;
 
 
        if ((pswpOld->x == x) && (pswpOld->y == y))

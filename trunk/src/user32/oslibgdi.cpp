@@ -1,10 +1,10 @@
-/* $Id: oslibgdi.cpp,v 1.6 1999-12-28 17:04:23 cbratschi Exp $ */
+/* $Id: oslibgdi.cpp,v 1.7 1999-12-29 22:54:00 cbratschi Exp $ */
 /*
  * Window GDI wrapper functions for OS/2
  *
  *
  * Copyright 1999 Sander van Leeuwen (sandervl@xs4all.nl)
- *
+ * Copyright 1999 Christoph Bratschi (cbratschi@datacomm.ch)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -20,247 +20,251 @@
 #include <oslibwin.h>
 #include "win32wbase.h"
 
-//CB: new mapping infrastructure to avoid transformation bugs -> available soon
-
 /*
-All mapScreen/Window can be used to transform from Win32 to OS/2 and vice versa
 First letter is lower case to avoid conflicts with Win32 API names
+All transformations are for screen or client windows, for frame windows use OS/2 API's
 
 Single y mapping:
  mapScreenY()
- mapClientY()
- mapChildY()
+ mapY()
+ mapOS2ToWin32Y()
+ mapWin32ToOS2Y()
+ mapWin32Y()
 
 Single point mapping:
  mapScreenPoint()
- mapClientPoint()
- mapChildPoint()
+ mapPoint()
+ mapOS2ToWin32Point()
+ mapWin32ToOS2Point()
+ mapWin32Point()
 
 Single rect mapping:
- mapScreenRect()
- mapClientRect()
+ mapOS2ToWin32ScreenRect()
+ mapWin32ToOS2ScreenRect()
+ mapOS2ToWin32Rect()
+ mapWin32ToOS2Rect()
+ mapWin32Rect()
 
 Rect transformation:
- copyOS2Rect()
- copyWin32Rect()
+ copyOS2ToWin32Rect()
+ copyWin32ToOS2Rect()
+
+Child origin:
+ mapOS2ToWin32ChildOrigin()
 */
 
+//******************************************************************************
+// To translation between OS/2 <-> Win32
+//******************************************************************************
 INT mapScreenY(INT screenPosY)
 {
-  return WinQuerySysValue(HWND_DESKTOP,SV_CYSCREEN)-1-screenPosY;
+  return ScreenHeight-1-screenPosY;
 }
 //******************************************************************************
+// To translation between OS/2 <-> Win32
 //******************************************************************************
 INT mapScreenY(INT screenH,INT screenPosY)
 {
   return screenH-1-screenPosY;
 }
 //******************************************************************************
+// To translation between OS/2 <-> Win32
 //******************************************************************************
-INT mapClientY(INT clientH,INT clientPosY)
-{
-  return clientH-1-clientPosY;
-}
-//******************************************************************************
-//******************************************************************************
-INT mapClientY(HWND os2Client,INT clientPosY)
+INT mapY(HWND os2Client,INT clientPosY)
 {
   RECTL rect;
 
   if (os2Client == OSLIB_HWND_DESKTOP) os2Client = HWND_DESKTOP; //client shouldn't be desktop
   if (!WinQueryWindowRect(os2Client,&rect)) return 0;
+
   return rect.yTop-1-clientPosY;
 }
 //******************************************************************************
+// To translation between OS/2 <-> Win32
 //******************************************************************************
-INT mapClientY(Win32BaseWindow *win32wnd,INT clientPosY)
+INT mapY(Win32BaseWindow *win32wnd,INT clientPosY)
 {
-  return win32wnd->getWindowHeight()-1-clientPosY;
+  if (!win32wnd) return 0;
+
+  return win32wnd->getClientHeight()-1-clientPosY;
 }
 //******************************************************************************
 //******************************************************************************
-INT mapChildY(INT parentH,INT childY,INT childPosY)
+INT mapOS2ToWin32Y(HWND os2From,HWND os2To,INT fromPosY)
 {
-  return parentH-1-childY-childPosY;
-}
-//******************************************************************************
-//******************************************************************************
-INT mapChildY(HWND os2Parent,INT childY,INT childPosY)
-{
+  POINTL pt;
   RECTL rect;
 
-  if (os2Parent == OSLIB_HWND_DESKTOP) os2Parent = HWND_DESKTOP;
-  if (!WinQueryWindowRect(os2Parent,&rect)) return 0;
-  return rect.yTop-1-childY-childPosY;
-}
-//******************************************************************************
-//******************************************************************************
-INT mapChildY(HWND os2Parent,HWND os2Child,INT childPosY)
-{
-  RECTL rect;
-  SWP swp;
+  if (os2From == OSLIB_HWND_DESKTOP) os2From = HWND_DESKTOP;
+  if (os2To == OSLIB_HWND_DESKTOP) os2To = HWND_DESKTOP;
+  if (os2From != os2To)
+  {
+    pt.x = 0;
+    pt.y = fromPosY;
+    if (!WinMapWindowPoints(os2From,os2To,&pt,1)) return 0;
+  } else pt.y = fromPosY;
+  if (!WinQueryWindowRect(os2To,&rect)) return 0;
 
-  if (os2Parent == OSLIB_HWND_DESKTOP) os2Parent = HWND_DESKTOP;
-  if (!WinQueryWindowRect(os2Parent,&rect)) return 0;
-  if (!WinQueryWindowPos(os2Child,&swp)) return 0;
-  return rect.yTop-1-swp.y-childPosY;
+  return rect.yTop-1-pt.y;
 }
 //******************************************************************************
+//******************************************************************************
+INT mapOS2ToWin32Y(Win32BaseWindow *wndFrom,Win32BaseWindow *wndTo,INT fromPosY)
+{
+  POINTL pt;
+
+  if (!wndFrom || !wndTo) return 0;
+  if (wndFrom != wndTo)
+  {
+    pt.x = 0;
+    pt.y = fromPosY;
+    if (!WinMapWindowPoints(wndFrom->getOS2WindowHandle(),wndTo->getOS2WindowHandle(),&pt,1)) return 0;
+  } else pt.y = fromPosY;
+
+  return wndTo->getClientHeight()-1-pt.y;
+}
+//******************************************************************************
+//******************************************************************************
+INT mapWin32Y(HWND os2From,HWND os2To,INT fromPosY)
+{
+  POINTL pt;
+  RECTL rect;
+
+  if (os2From == OSLIB_HWND_DESKTOP) os2From = HWND_DESKTOP;
+  if (os2To == OSLIB_HWND_DESKTOP) os2To = HWND_DESKTOP;
+  if (os2From == os2To) return fromPosY;
+  if (!WinQueryWindowRect(os2From,&rect)) return 0;
+  pt.y = rect.yTop-1-fromPosY;
+  pt.x = 0;
+  if (!WinMapWindowPoints(os2From,os2To,&pt,1)) return 0;
+  if (!WinQueryWindowRect(os2To,&rect)) return 0;
+
+  return rect.yTop-1-pt.y;
+}
+//******************************************************************************
+//******************************************************************************
+INT mapWin32Y(Win32BaseWindow *wndFrom,Win32BaseWindow *wndTo,INT fromPosY)
+{
+  POINTL pt;
+
+  if (!wndFrom || !wndTo) return 0;
+  if (wndFrom == wndTo) return fromPosY;
+  pt.y = wndFrom->getClientHeight()-1-fromPosY;
+  pt.x = 0;
+  if (!WinMapWindowPoints(wndFrom->getOS2WindowHandle(),wndTo->getOS2WindowHandle(),&pt,1)) return 0;
+
+  return wndTo->getClientHeight()-1-pt.y;
+}
+//******************************************************************************
+// To translation between OS/2 <-> Win32
 //******************************************************************************
 BOOL mapScreenPoint(OSLIBPOINT *screenPt)
 {
   if(!screenPt) return FALSE;
-  screenPt->y = WinQuerySysValue(HWND_DESKTOP,SV_CYSCREEN)-1-screenPt->y;
+  screenPt->y = ScreenHeight-1-screenPt->y;
+
   return TRUE;
 }
 //******************************************************************************
+// To translation between OS/2 <-> Win32
 //******************************************************************************
-INT mapScreenY(INT screenH,OSLIBPOINT *screenPt)
+BOOL mapScreenPoint(INT screenH,OSLIBPOINT *screenPt)
 {
   if (!screenPt) return FALSE;
   screenPt->y = screenH-1-screenPt->y;
+
   return TRUE;
 }
-
-//old mapping functions
-
 //******************************************************************************
+// To translation between OS/2 <-> Win32
 //******************************************************************************
-inline ULONG MAPWIN32POINT(RECTLOS2 *parent, ULONG cy, ULONG y)
+BOOL mapPoint(HWND os2Client,OSLIBPOINT *clientPt)
 {
-    return (parent->yTop - parent->yBottom - cy - y);
+  RECTL rect;
+
+  if (!clientPt) return FALSE;
+  if (os2Client == OSLIB_HWND_DESKTOP) os2Client = HWND_DESKTOP; //client shouldn't be desktop
+  if (!WinQueryWindowRect(os2Client,&rect)) return 0;
+  clientPt->y = rect.yTop-1-clientPt->y;
+
+  return TRUE;
 }
 //******************************************************************************
-//Map win32 y coordinate (in parent window coordinates) to OS/2 y coord. (in parent window coordinates)
+// To translation between OS/2 <-> Win32
 //******************************************************************************
-ULONG MapOS2ToWin32Y(HWND hwndParent, ULONG cy, ULONG y)
+BOOL mapPoint(Win32BaseWindow *win32wnd,OSLIBPOINT *clientPt)
 {
- RECTLOS2 rectParent = {0};
+  if (!win32wnd || !clientPt) return FALSE;
+  clientPt->y = win32wnd->getClientHeight()-1-clientPt->y;
 
-    if(hwndParent == OSLIB_HWND_DESKTOP) {
-        hwndParent = HWND_DESKTOP;
-    }
-    WinQueryWindowRect(hwndParent, (PRECTL)&rectParent);
-    return MAPWIN32POINT(&rectParent, cy, y);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL MapOS2ToWin32Point(HWND hwndParent, HWND hwndChild, OSLIBPOINT *point)
-{
- RECTLOS2 rectParent = {0};
-
-    if(hwndParent == OSLIB_HWND_DESKTOP) {
-        hwndParent = HWND_DESKTOP;
-    }
-    if(WinMapWindowPoints(hwndChild, hwndParent, (POINTL *)point, 1) != TRUE) {
-        dprintf(("MapOS2ToWin32Point:WinMapWindowPoint %x %x returned false", hwndParent, hwndChild));
-        return FALSE;
-    }
-    WinQueryWindowRect(hwndParent, (PRECTL)&rectParent);
-    point->y = rectParent.yTop - point->y - 1;
-    return TRUE;
-}
-//******************************************************************************
-// MapOS2ToWin32Rect
-//   Map os/2 rectangle to screen coordinates and convert to win32 rect
-//
-// Parameters:
-//   hwndParent: Parent window handle
-//   hwndChild:  Child window handle
-//   rectOS2:    OS/2 child window RECTL
-//   rectWin32:  Win32 Child window RECT   (IN)
-//
-// Returns:
-//   TRUE:      Success
-//   FALSE:     Failures
-//******************************************************************************
-BOOL MapOS2ToWin32Rectl(HWND hwndParent, HWND hwndChild, PRECTLOS2 rectOS2, PRECT rectWin32)
-{
- RECTLOS2 rectParent = {0};
- Win32BaseWindow *window;
- LONG height;
-
-    if(hwndParent == OSLIB_HWND_DESKTOP) {
-        hwndParent = HWND_DESKTOP;
-    }
-    if(WinMapWindowPoints(hwndChild, hwndParent, (PPOINTL)rectOS2, 2) != TRUE) {
-        dprintf(("MapOS2ToWin32Rect:WinMapWindowPoint %x %x returned false", hwndParent, hwndChild));
-        return FALSE;
-    }
-
-    if(hwndParent != HWND_DESKTOP)
-    {
-         window = Win32BaseWindow::GetWindowFromOS2FrameHandle(hwndParent);
-         if(window == NULL)
-                return FALSE;
-         height = window->getWindowHeight();
-    }
-    else height = OSLibQueryScreenHeight();
-
-    rectWin32->bottom = height - rectOS2->yBottom;
-    rectWin32->top    = height - rectOS2->yTop;
-    rectWin32->left   = rectOS2->xLeft;
-    rectWin32->right  = rectOS2->xRight;
-
-    return TRUE;
-}
-//******************************************************************************
-// MapOS2ToWin32Rectl
-//   Convert OS/2 to Win32 RECTL structure
-//
-// Parameters:
-//   hwnd:       OS/2 window handle
-//   rectOS2:    OS/2 child window RECTL
-//   rectWin32:  Win32 Child window RECT   (IN)
-//
-// Returns:
-//   TRUE:      Success
-//   FALSE:     Failures
-//******************************************************************************
-BOOL MapOS2ToWin32Rectl(HWND hwnd,PRECTLOS2 rectOS2, PRECT rectWin32)
-{
-   RECTL rect;
-
-   if (!WinQueryWindowRect(hwnd,&rect)) return FALSE;
-
-   rectWin32->bottom = rect.yTop-rectOS2->yBottom;
-   rectWin32->top    = rect.yTop-rectOS2->yTop;
-   rectWin32->left   = rectOS2->xLeft;
-   rectWin32->right  = rectOS2->xRight;
-
-   return TRUE;
-}
-//******************************************************************************
-// MapWin32ToOS2Rectl
-//   Convert Win32 to OS/2 RECTL structure
-//
-// Parameters:
-//   hwnd:       OS/2 window handle
-//   rectWin32:  Win32 Child window RECT   (IN)
-//   rectOS2:    OS/2  Child window RECTL  (OUT)
-// Returns:
-//   TRUE:       Success
-//   FALSE:      Failures
-//******************************************************************************
-BOOL MapWin32ToOS2Rectl(HWND hwnd,PRECT rectWin32, PRECTLOS2 rectOS2)
-{
-    RECTL rect;
-
-    if (!WinQueryWindowRect(hwnd,&rect)) return FALSE;
-
-    rectOS2->yBottom = rect.yTop-rectWin32->bottom;
-    rectOS2->yTop    = rect.yTop-rectWin32->top;
-    rectOS2->xLeft   = rectWin32->left;
-    rectOS2->xRight  = rectWin32->right;
-
-    return TRUE;
+  return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
-BOOL MapOS2ToWin32WindowRect(PRECTLOS2 rectOS2,PRECT rectWin32)
+BOOL mapOS2ToWin32Point(HWND os2From,HWND os2To,OSLIBPOINT *fromPt)
 {
-  rectWin32->bottom = rectOS2->yTop;
-  rectWin32->top    = rectOS2->yBottom;
+  RECTL rect;
+
+  if (os2From == OSLIB_HWND_DESKTOP) os2From = HWND_DESKTOP;
+  if (os2To == OSLIB_HWND_DESKTOP) os2To = HWND_DESKTOP;
+  if (os2From != os2To)
+  {
+    if (!WinMapWindowPoints(os2From,os2To,(PPOINTL)fromPt,1)) return FALSE;
+  }
+  if (!WinQueryWindowRect(os2To,&rect)) return FALSE;
+  fromPt->y = rect.yTop-1-fromPt->y;
+
+  return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL mapOS2ToWin32Point(Win32BaseWindow *wndFrom,Win32BaseWindow *wndTo,OSLIBPOINT *fromPt)
+{
+  if (!wndFrom || !wndTo) return 0;
+  if (wndFrom != wndTo)
+  {
+    if (!WinMapWindowPoints(wndFrom->getOS2WindowHandle(),wndTo->getOS2WindowHandle(),(PPOINTL)fromPt,1)) return FALSE;
+  }
+  fromPt->y = wndTo->getClientHeight()-1-fromPt->y;
+
+  return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL mapWin32Point(HWND os2From,HWND os2To,OSLIBPOINT *fromPt)
+{
+  RECTL rect;
+
+  if (os2From == OSLIB_HWND_DESKTOP) os2From = HWND_DESKTOP;
+  if (os2To == OSLIB_HWND_DESKTOP) os2To = HWND_DESKTOP;
+  if (os2From == os2To) return TRUE;
+  if (!WinQueryWindowRect(os2From,&rect)) return 0;
+  fromPt->y = rect.yTop-1-fromPt->y;
+  if (!WinMapWindowPoints(os2From,os2To,(PPOINTL)fromPt,1)) return 0;
+  if (!WinQueryWindowRect(os2To,&rect)) return 0;
+  fromPt->y = rect.yTop-1-fromPt->y;
+
+  return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL mapWin32Point(Win32BaseWindow *wndFrom,Win32BaseWindow *wndTo,OSLIBPOINT *fromPt)
+{
+  if (!wndFrom || !wndTo) return FALSE;
+  if (wndFrom == wndTo) return TRUE;
+  fromPt->y = wndFrom->getClientHeight()-1-fromPt->y;
+  if (!WinMapWindowPoints(wndFrom->getOS2WindowHandle(),wndTo->getOS2WindowHandle(),(PPOINTL)fromPt,1)) return 0;
+  fromPt->y = wndTo->getClientHeight()-1-fromPt->y;
+
+  return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL mapOS2ToWin32ScreenRect(PRECTLOS2 rectOS2,PRECT rectWin32)
+{
+  if (!rectOS2 || !rectWin32) return FALSE;
+  rectWin32->bottom = ScreenHeight-rectOS2->yBottom;
+  rectWin32->top    = ScreenHeight-rectOS2->yTop;
   rectWin32->left   = rectOS2->xLeft;
   rectWin32->right  = rectOS2->xRight;
 
@@ -268,14 +272,188 @@ BOOL MapOS2ToWin32WindowRect(PRECTLOS2 rectOS2,PRECT rectWin32)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL MapWin32ToOS2WindowRect(PRECT rectWin32,PRECTLOS2 rectOS2)
+BOOL mapWin32ToOS2ScreenRect(PRECT rectWin32,PRECTLOS2 rectOS2)
 {
-  rectOS2->yBottom = rectWin32->top;
-  rectOS2->yTop    = rectWin32->bottom;
+  if (!rectOS2 || !rectWin32) return FALSE;
+  rectOS2->yBottom = ScreenHeight-rectWin32->bottom;
+  rectOS2->yTop    = ScreenHeight-rectWin32->top;
   rectOS2->xLeft   = rectWin32->left;
   rectOS2->xRight  = rectWin32->right;
 
   return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL mapOS2ToWin32Rect(HWND os2Client,PRECTLOS2 rectOS2,PRECT rectWin32)
+{
+  RECTL rect;
+
+  if (!rectOS2 || !rectWin32) return FALSE;
+  if (os2Client == OSLIB_HWND_DESKTOP) os2Client = HWND_DESKTOP; //shouldn't be the case
+  if (!WinQueryWindowRect(os2Client,&rect)) return FALSE;
+  rectWin32->bottom = rect.yTop-rectOS2->yBottom;
+  rectWin32->top    = rect.yTop-rectOS2->yTop;
+  rectWin32->left   = rectOS2->xLeft;
+  rectWin32->right  = rectOS2->xRight;
+
+  return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL mapOS2ToWin32Rect(Win32BaseWindow *win32wnd,PRECTLOS2 rectOS2,PRECT rectWin32)
+{
+  INT windowH;
+
+  if (!win32wnd || !rectOS2 || !rectWin32) return FALSE;
+  windowH = win32wnd->getClientHeight();
+  rectWin32->bottom = windowH-rectOS2->yBottom;
+  rectWin32->top    = windowH-rectOS2->yTop;
+  rectWin32->left   = rectOS2->xLeft;
+  rectWin32->right  = rectOS2->xRight;
+
+  return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL mapOS2ToWin32Rect(HWND os2From,HWND os2To,PRECTLOS2 rectOS2,PRECT rectWin32)
+{
+  RECTL rect,temp;
+
+  if (!rectOS2 || !rectWin32) return FALSE;
+  if (os2From == OSLIB_HWND_DESKTOP) os2From = HWND_DESKTOP;
+  if (os2To == OSLIB_HWND_DESKTOP) os2To = HWND_DESKTOP;
+  temp = *((PRECTL)rectOS2);
+  if (os2From != os2To)
+  {
+    if (!WinMapWindowPoints(os2From,os2To,(PPOINTL)&temp,2)) return FALSE;
+  }
+  if (!WinQueryWindowRect(os2To,&rect)) return FALSE;
+  rectWin32->bottom = rect.yTop-temp.yBottom;
+  rectWin32->top    = rect.yTop-temp.yTop;
+  rectWin32->left   = temp.xLeft;
+  rectWin32->right  = temp.xRight;
+
+  return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL mapOS2ToWin32Rect(Win32BaseWindow *wndFrom,Win32BaseWindow *wndTo,PRECTLOS2 rectOS2,PRECT rectWin32)
+{
+  RECTL temp;
+  INT windowH;
+
+  if (!wndFrom || !wndTo || !rectOS2 || !rectWin32) return FALSE;
+  temp = *((PRECTL)rectOS2);
+  if (wndFrom != wndTo)
+  {
+    if (!WinMapWindowPoints(wndFrom->getOS2WindowHandle(),wndTo->getOS2WindowHandle(),(PPOINTL)&temp,2)) return FALSE;
+  }
+  windowH = wndTo->getClientHeight();
+  rectWin32->bottom = windowH-temp.yBottom;
+  rectWin32->top    = windowH-temp.yTop;
+  rectWin32->left   = temp.xLeft;
+  rectWin32->right  = temp.xRight;
+
+  return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL mapWin32ToOS2Rect(HWND os2Client,PRECT rectWin32,PRECTLOS2 rectOS2)
+{
+  RECTL rect;
+
+  if (!rectOS2 || !rectWin32) return FALSE;
+  if (os2Client == OSLIB_HWND_DESKTOP) os2Client = HWND_DESKTOP; //shouldn't be the case
+  if (!WinQueryWindowRect(os2Client,&rect)) return FALSE;
+  rectOS2->yBottom = rect.yTop-rectWin32->bottom;
+  rectOS2->yTop    = rect.yTop-rectWin32->top;
+  rectOS2->xLeft   = rectWin32->left;
+  rectOS2->xRight  = rectWin32->right;
+
+  return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL mapWin32ToOS2Rect(Win32BaseWindow *win32wnd,PRECT rectWin32,PRECTLOS2 rectOS2)
+{
+  INT windowH;
+
+  if (!win32wnd || !rectOS2 || !rectWin32) return FALSE;
+  windowH = win32wnd->getClientHeight();
+  rectOS2->yBottom = windowH-rectWin32->bottom;
+  rectOS2->yTop    = windowH-rectWin32->top;
+  rectOS2->xLeft   = rectWin32->left;
+  rectOS2->xRight  = rectWin32->right;
+
+  return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL mapWin32ToOS2Rect(HWND os2From,HWND os2To,PRECT rectWin32,PRECTLOS2 rectOS2)
+{
+  RECTL rect;
+
+  if (!rectOS2 || !rectWin32) return FALSE;
+  if (os2From == OSLIB_HWND_DESKTOP) os2From = HWND_DESKTOP;
+  if (os2To == OSLIB_HWND_DESKTOP) os2To = HWND_DESKTOP;
+  if (!WinQueryWindowRect(os2From,&rect)) return FALSE;
+  rectOS2->yBottom = rect.yTop-rectWin32->bottom;
+  rectOS2->yTop    = rect.yTop-rectWin32->top;
+  rectOS2->xLeft   = rectWin32->left;
+  rectOS2->xRight  = rectWin32->right;
+  if (os2From != os2To)
+  {
+    if (!WinMapWindowPoints(os2From,os2To,(PPOINTL)rectOS2,2)) return FALSE;
+  }
+
+  return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL mapWin32ToOS2Rect(Win32BaseWindow *wndFrom,Win32BaseWindow *wndTo,PRECT rectWin32,PRECTLOS2 rectOS2)
+{
+  INT windowH;
+
+  if (!wndFrom || !wndTo || !rectOS2 || !rectWin32) return FALSE;
+  windowH = wndFrom->getClientHeight();
+  rectOS2->yBottom = windowH-rectWin32->bottom;
+  rectOS2->yTop    = windowH-rectWin32->top;
+  rectOS2->xLeft   = rectWin32->left;
+  rectOS2->xRight  = rectWin32->right;
+  if (wndFrom != wndTo)
+  {
+    if (!WinMapWindowPoints(wndFrom->getOS2WindowHandle(),wndTo->getOS2WindowHandle(),(PPOINTL)rectOS2,2)) return FALSE;
+  }
+
+  return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL copyOS2ToWin32Rect(PRECTLOS2 rectOS2,PRECT rectWin32)
+{
+  rectWin32->bottom = rectOS2->yBottom;
+  rectWin32->top    = rectOS2->yTop;
+  rectWin32->left   = rectOS2->xLeft;
+  rectWin32->right  = rectOS2->xRight;
+
+  return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL copyWin32ToOS2WindowRect(PRECT rectWin32,PRECTLOS2 rectOS2)
+{
+  rectOS2->yBottom = rectWin32->bottom;
+  rectOS2->yTop    = rectWin32->top;
+  rectOS2->xLeft   = rectWin32->left;
+  rectOS2->xRight  = rectWin32->right;
+
+  return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+INT mapOS2ToWin32ChildOrigin(INT parentH,INT parentPosY,INT childH)
+{
+  return parentH-parentPosY-childH;//Does: parentH-1-parentPosY-(childH-1)
 }
 //******************************************************************************
 //******************************************************************************
@@ -288,7 +466,7 @@ HDC OSLibWinBeginPaint(HWND hwnd, RECT *rectWin32)
         dprintf(("BeginPaint, NO update rectl"));
         return 0;
     }
-    MapOS2ToWin32Rectl(hwnd,(RECTLOS2 *)&rectl, rectWin32);
+    mapOS2ToWin32Rect(hwnd,(RECTLOS2 *)&rectl, rectWin32);
     return WinBeginPaint(hwnd, NULLHANDLE, &rectl);
 }
 //******************************************************************************
@@ -319,7 +497,7 @@ BOOL OSLibWinInvalidateRect(HWND hwnd, PRECT pRect, BOOL fIncludeChildren)
  RECTLOS2 rectl;
 
     if(pRect) {
-        MapWin32ToOS2Rectl(hwnd,pRect, &rectl);
+        mapWin32ToOS2Rect(hwnd,pRect, &rectl);
         return WinInvalidateRect(hwnd, (PRECTL)&rectl, fIncludeChildren);
     }
     return WinInvalidateRect(hwnd, NULL, fIncludeChildren);
@@ -334,7 +512,7 @@ BOOL OSLibWinQueryUpdateRect(HWND hwnd, PRECT pRect)
 
   rc = WinQueryUpdateRect(hwnd, (PRECTL)&rectl);
   if(rc) {
-        MapOS2ToWin32Rectl(hwnd,&rectl, pRect);
+        mapOS2ToWin32Rect(hwnd,&rectl, pRect);
   }
   else  memset(pRect, 0, sizeof(RECT));
   return rc;
