@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.39 2001-06-14 01:13:34 bird Exp $
+/* $Id: d32init.c,v 1.40 2001-07-08 02:56:27 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -532,6 +532,8 @@ USHORT _loadds _Far32 _Pascal GetKernelInfo32(PKRNLINFO pKrnlInfo)
                 pKrnlOTE = pKrnlSMTE->smte_objtab;
                 if (pKrnlOTE != NULL)
                 {
+                    BOOL    fKrnlTypeOk;
+
                     /*
                      * Thats all?
                      */
@@ -552,8 +554,10 @@ USHORT _loadds _Far32 _Pascal GetKernelInfo32(PKRNLINFO pKrnlInfo)
                     usRc = 0;
 
                     /*
-                     * Search for internal revision stuff in the two first objects.
+                     * Search for internal revision stuff AND 'SAB KNL?' signature in the two first objects.
                      */
+                    fKrnlTypeOk = FALSE;
+                    pKrnlInfo->fKernel = 0;
                     pKrnlInfo->ulBuild = 0;
                     for (i = 0; i < 2 && pKrnlInfo->ulBuild == 0; i++)
                     {
@@ -591,10 +595,9 @@ USHORT _loadds _Far32 _Pascal GetKernelInfo32(PKRNLINFO pKrnlInfo)
                                 }
 
                                 /* Check for any revision flag */
-                                pKrnlInfo->fKernel = 0;
                                 if ((*psz >= 'A' && *psz <= 'Z') || (*psz >= 'a' && *psz <= 'z'))
                                 {
-                                    pKrnlInfo->fKernel = (USHORT)((*psz - (*psz >= 'a' ? 'a'-1 : 'A'-1)) << KF_REV_SHIFT);
+                                    pKrnlInfo->fKernel |= (USHORT)((*psz - (*psz >= 'a' ? 'a'-1 : 'A'-1)) << KF_REV_SHIFT);
                                     psz++;
                                 }
                                 if (*psz == ',') /* This is ignored! */
@@ -615,21 +618,24 @@ USHORT _loadds _Far32 _Pascal GetKernelInfo32(PKRNLINFO pKrnlInfo)
 
 
                                 /* Check if its a debug kernel (look for DEBUG at start of object 3-5) */
-                                j = 3;
-                                while (j < 5)
+                                if (!fKrnlTypeOk)
                                 {
-                                    /* There should be no iopl object preceding the debugger data object. */
-                                    if ((pKrnlOTE[j].ote_flags & OBJIOPL) != 0)
-                                        break;
-                                    /* Is this is? */
-                                    if ((pKrnlOTE[j].ote_flags & OBJINVALID) == 0
-                                        && (pKrnlOTE[j].ote_flags & (OBJREAD | OBJWRITE)) == (OBJREAD | OBJWRITE)
-                                        && strncmp((char*)pKrnlOTE[j].ote_base, "DEBUG", 5) == 0)
+                                    j = 3;
+                                    while (j < 5)
                                     {
-                                        pKrnlInfo->fKernel |= KF_DEBUG;
-                                        break;
+                                        /* There should be no iopl object preceding the debugger data object. */
+                                        if ((pKrnlOTE[j].ote_flags & OBJIOPL) != 0)
+                                            break;
+                                        /* Is this is? */
+                                        if ((pKrnlOTE[j].ote_flags & OBJINVALID) == 0
+                                            && (pKrnlOTE[j].ote_flags & (OBJREAD | OBJWRITE)) == (OBJREAD | OBJWRITE)
+                                            && strncmp((char*)pKrnlOTE[j].ote_base, "DEBUG", 5) == 0)
+                                        {
+                                            pKrnlInfo->fKernel |= KF_DEBUG;
+                                            break;
+                                        }
+                                        j++;
                                     }
-                                    j++;
                                 }
 
                                 /* Display info */
@@ -638,6 +644,22 @@ USHORT _loadds _Far32 _Pascal GetKernelInfo32(PKRNLINFO pKrnlInfo)
 
                                 /* Break out */
                                 break;
+                            }
+
+                            /*
+                             * Look for the SAB KNL? signature to check which kernel type we're
+                             * dealing with. This could also be reached thru the selector found
+                             * in the first element for the SAS_tables_area array.
+                             */
+                            if (!fKrnlTypeOk && strncmp(psz, "SAB KNL", 7) == 0)
+                            {
+                                fKrnlTypeOk = TRUE;
+                                if (psz[7] == 'D')
+                                    pKrnlInfo->fKernel |= KF_ALLSTRICT;
+                                else if (psz[7] == 'B')
+                                    pKrnlInfo->fKernel |= KF_HALFSTRICT;
+                                else if (psz[7] != 'R')
+                                    fKrnlTypeOk = FALSE;
                             }
 
                             /* next */
