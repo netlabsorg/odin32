@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2135 2002-06-08 00:28:38 bird Exp $ */
+/* $Id: changelog,v 1.2136 2002-06-08 07:13:33 sandervl Exp $ */
+
+ 2002-06-07: Sander van Leeuwen <sandervl@innotek.de>
+    - SHLWAPI:  o Resync with latest Wine & added LGPL license
+    - SHELL32:  o Some updates for upcoming resync
 
  2002-06-06: knut st. osmundsen <bird@anduin.net>
     - KERNEL32: o Made winimagepe2lx.cpp compilable with toolkit 4.5.0.
