@@ -1,4 +1,4 @@
-/* $Id: win32wbasepos.cpp,v 1.16 2000-10-04 19:35:31 sandervl Exp $ */
+/* $Id: win32wbasepos.cpp,v 1.17 2000-10-08 14:03:49 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (nonclient/position methods)
  *
@@ -74,6 +74,10 @@ void Win32BaseWindow::GetMinMaxInfo(POINT *maxSize, POINT *maxPos,
             xinc += GetSystemMetrics(SM_CXFRAME);
             yinc += GetSystemMetrics(SM_CYFRAME);
         }
+	//SvL: Wine has no 'else', but I'm seeing different behaviour in NT
+        //     and it doesn't make much sense either as a window can have
+        //     only one kind of border (see drawing code)
+	else
         if (dwStyle & WS_BORDER)
         {
             xinc += GetSystemMetrics(SM_CXBORDER);
