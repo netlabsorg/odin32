@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.21 1999-12-02 16:34:43 cbratschi Exp $ */
+/* $Id: edit.cpp,v 1.22 1999-12-03 17:30:15 cbratschi Exp $ */
 /*
  *      Edit control
  *
@@ -16,7 +16,6 @@
 
 /* CB: todo
   - EN_ALIGN_LTR_EC, EN_ALIGN_RTL_EC -> undocumented notifications
-  - EM_SETIMESTATUS, EM_GETITEMSTATUS -> undocumented messages
   - text alignment for single and multi line (ES_LEFT, ES_RIGHT, ES_CENTER)
     new in Win98, Win2k: for single line too
   - WinNT/Win2k: higher size limits (single: 0x7FFFFFFE, multi: none)
@@ -225,8 +224,8 @@ static void     EDIT_EM_SetSel(HWND hwnd, EDITSTATE *es, UINT start, UINT end, B
 static BOOL     EDIT_EM_SetTabStops(HWND hwnd, EDITSTATE *es, INT count, LPINT tabs);
 static void     EDIT_EM_SetWordBreakProc(HWND hwnd, EDITSTATE *es, EDITWORDBREAKPROCA wbp);
 static BOOL     EDIT_EM_Undo(HWND hwnd, EDITSTATE *es);
-static LRESULT  EDIT_EM_SetImeStatus(HWND hwnd,EDITSTATE *es,WPARAM wParam,LPARAM lParam);
-static LRESULT  EDIT_EM_GetImeStatus(HWND hwnd,EDITSTATE *es,WPARAM wParam,LPARAM lParam);
+static LRESULT  EDIT_EM_SetIMEStatus(HWND hwnd,EDITSTATE *es,WPARAM wParam,LPARAM lParam);
+static LRESULT  EDIT_EM_GetIMEStatus(HWND hwnd,EDITSTATE *es,WPARAM wParam,LPARAM lParam);
 /*
  *      WM_XXX message handlers
  */
@@ -575,11 +574,11 @@ LRESULT WINAPI EditWndProc( HWND hwnd, UINT msg,
                 break;
 
         case EM_SETIMESTATUS:
-                result = EDIT_EM_SetImeStatus(hwnd,es,wParam,lParam);
+                result = EDIT_EM_SetIMEStatus(hwnd,es,wParam,lParam);
                 break;
 
         case EM_GETIMESTATUS:
-                result = EDIT_EM_GetImeStatus(hwnd,es,wParam,lParam);
+                result = EDIT_EM_GetIMEStatus(hwnd,es,wParam,lParam);
                 break;
 
         case WM_GETDLGCODE:
@@ -2788,18 +2787,21 @@ static BOOL EDIT_EM_Undo(HWND hwnd, EDITSTATE *es)
         return TRUE;
 }
 
-static LRESULT EDIT_EM_SetImeStatus(HWND hwnd,EDITSTATE *es,WPARAM wParam,LPARAM lParam)
+static LRESULT EDIT_EM_SetIMEStatus(HWND hwnd,EDITSTATE *es,WPARAM wParam,LPARAM lParam)
 {
-  //CB: undocumented!
+  if (wParam == EMSIS_COMPOSITIONSTRING)
+  {
+    //CB: todo
+  }
 
   return 0;
 }
 
-static LRESULT EDIT_EM_GetImeStatus(HWND hwnd,EDITSTATE *es,WPARAM wParam,LPARAM lParam)
+static LRESULT EDIT_EM_GetIMEStatus(HWND hwnd,EDITSTATE *es,WPARAM wParam,LPARAM lParam)
 {
-  //CB: undocumented!
+  //CB: todo
 
-  return 0;
+  return 0; //default
 }
 
 /*********************************************************************
