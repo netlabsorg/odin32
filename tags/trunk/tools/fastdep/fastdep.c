@@ -1,8 +1,10 @@
-/* $Id: fastdep.c,v 1.24 2000-11-26 11:26:40 bird Exp $
+/* $Id: fastdep.c,v 1.25 2001-03-02 11:23:24 phaller Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
  * Copyright (c) 1999-2000 knut st. osmundsen
+ *
+ * PH 2001-03-01 added optional support for a super-dependency
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -99,6 +101,7 @@ typedef struct _Options
     BOOL            fCheckCyclic;       /* allways check for cylic dependency before inserting an dependent. */
     BOOL            fCacheSearchDirs;   /* cache entire search dirs. */
     const char *    pszExcludeFiles;    /* List of excluded files. */
+    const char *    pszSuperDependency; /* name for super dependency */
 } OPTIONS, *POPTIONS;
 
 
@@ -199,7 +202,7 @@ static char *textbufferGetNextLine(void *pvBuffer, void **ppv, char *pszLineBuff
 
 /* depend workers */
 static BOOL  depReadFile(const char *pszFilename, POPTIONS pOptions);
-static BOOL  depWriteFile(const char *pszFilename);
+static BOOL  depWriteFile(const char *pszFilename, POPTIONS pOptions);
 static void  depRemoveAll(void);
 static void *depAddRule(const char *pszRulePath, const char *pszName, const char *pszExt);
 static BOOL  depAddDepend(void *pvRule, const char *pszDep, BOOL fCheckCyclic);
@@ -331,7 +334,8 @@ int main(int argc, char **argv)
         FALSE,           /* fAppend */
         TRUE,            /* fCheckCyclic */
         TRUE,            /* fCacheSearchDirs */
-        szExcludeFiles   /* pszExcludeFiles */
+        szExcludeFiles,  /* pszExcludeFiles */
+        NULL             /* pszSuperDependency */
     };
 
     szObjectDir[0] = '\0';
@@ -416,7 +420,7 @@ int main(int argc, char **argv)
                     /* if dependencies are generated we'll flush them to the old filename */
                     if (pdepTree != NULL && pszOld != pszDepFile)
                     {
-                        if (!depWriteFile(pszOld))
+                        if (!depWriteFile(pszOld, &options))
                             fprintf(stderr, "error: failed to write (flush) dependencies.\n");
                         depRemoveAll();
                     }
@@ -626,6 +630,25 @@ int main(int argc, char **argv)
                     }
                     break;
 
+                case 's': /* insert super-dependency on top of tree */
+                case 'S': /* -s <name for super-dependency>" */
+                    {
+                        if (strlen(argv[argi]) > 2)
+                            /* syntax was /s:name */
+                            options.pszSuperDependency = &argv[argi][2];
+                        else
+                        {
+                            argi++;
+                            if (argi < argc)
+                                /* take next parameter */
+                                options.pszSuperDependency = argv[argi];
+                            else
+                                /* take default */
+                                options.pszSuperDependency = "alltargets";
+                        }
+                    }
+                    break;
+
                 case 'h':
                 case 'H':
                 case '?':
@@ -775,7 +798,7 @@ int main(int argc, char **argv)
     }
 
     /* Write the depend file! */
-    if (!depWriteFile(pszDepFile))
+    if (!depWriteFile(pszDepFile, &options))
         fprintf(stderr, "error: failed to write dependencies file!\n");
     #if 0
     printf("cfcNodes=%d\n", cfcNodes);
@@ -793,7 +816,7 @@ int main(int argc, char **argv)
 static void syntax(void)
 {
     printf(
-        "FastDep v0.3\n"
+        "FastDep v0.31\n"
         "Dependency scanner. Creates a makefile readable depend file.\n"
         " - was quick and dirty, now it's just quick -\n"
         "\n"
@@ -826,6 +849,7 @@ static void syntax(void)
         "   -obr<[+]|->     -obr+: Object rule.\n"
         "                   -obr-: No object rule, rule for source filename is generated.\n"
         "   -obj[ ]<objext> Object extention.           Default: obj\n"
+        "   -s <name>       Insert super-dependency on top of tree, Default: alltargets:\n"
         "   -r[ ]<rsrcext>  Resource binary extention.  Default: res\n"
         "   -x[ ]<f1[;f2]>  Files to exclude. Only exact filenames.\n"
         "   <files>         Files to scan. Wildchars are allowed.\n"
@@ -2540,7 +2564,7 @@ static BOOL  depReadFile(const char *pszFilename, POPTIONS pOptions)
  * @returns   Success indicator.
  * @params    pszFilename  Pointer to name of the output file.
  */
-static BOOL  depWriteFile(const char *pszFilename)
+static BOOL  depWriteFile(const char *pszFilename, POPTIONS options)
 {
     FILE *phFile;
     phFile = fopen(pszFilename, "w");
@@ -2552,6 +2576,54 @@ static BOOL  depWriteFile(const char *pszFilename)
         int         iBuffer = 0;
         int         cch;
 
+        /* PH Note: might not be CRLF on other platforms */
+        int iCRLF = strlen("\n");
+
+
+        /* @@@PH 2001-03-01
+         * If option is selected to generate a parent
+         * "super" dependency, enter this scope.
+         */
+        if (options->pszSuperDependency != NULL)
+        {
+            iBuffer = sprintf(szBuffer,
+                              "%s:",
+                              options->pszSuperDependency);
+
+            pdep = (PDEPRULE)(void*)AVLBeginEnumTree((PPAVLNODECORE)(void*)&pdepTree, &EnumData, TRUE);
+            while (pdep != NULL)
+            {
+                char *psz = pdep->pszRule;
+
+                /* flush buffer? */
+                if (iBuffer + strlen(psz) + 20 >= sizeof(szBuffer))
+                {
+                    fwrite(szBuffer, iBuffer, 1, phFile);
+                    iBuffer = 0;
+                }
+
+                /* write rule title as dependant */
+                iBuffer += sprintf(szBuffer + iBuffer,
+                                   " \\\n    %s",psz);
+
+                /* next rule */
+                pdep = (PDEPRULE)(void*)AVLGetNextNode(&EnumData);
+            }
+
+            /* Add two new lines. Flush buffer first if necessary. */
+            if (iBuffer + iCRLF + iCRLF >= sizeof(szBuffer))
+            {
+                fwrite(szBuffer, iBuffer, 1, phFile);
+                iBuffer = 0;
+            }
+
+            /* add 2 linefeeds */
+            strcpy(szBuffer + iBuffer, "\n\n");
+            iBuffer += iCRLF + iCRLF;
+        }
+
+
+        /* normal dependency output */
         pdep = (PDEPRULE)(void*)AVLBeginEnumTree((PPAVLNODECORE)(void*)&pdepTree, &EnumData, TRUE);
         while (pdep != NULL)
         {
@@ -2586,17 +2658,20 @@ static BOOL  depWriteFile(const char *pszFilename)
             }
 
             /* Add two new lines. Flush buffer first if necessary. */
-            if (iBuffer + 2 >= sizeof(szBuffer))
+            if (iBuffer + iCRLF + iCRLF >= sizeof(szBuffer))
             {
                 fwrite(szBuffer, iBuffer, 1, phFile);
                 iBuffer = 0;
             }
+
+            /* add 2 linefeeds */
             strcpy(szBuffer + iBuffer, "\n\n");
-            iBuffer += 2;
+            iBuffer += iCRLF + iCRLF;
 
             /* next rule */
             pdep = (PDEPRULE)(void*)AVLGetNextNode(&EnumData);
         }
+
 
         /* flush buffer. */
         fwrite(szBuffer, iBuffer, 1, phFile);
