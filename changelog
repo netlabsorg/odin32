@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1712 2001-09-30 22:25:43 sandervl Exp $ */
+/* $Id: changelog,v 1.1713 2001-10-01 01:47:52 bird Exp $ */
 
  2001-09-30: Sander van Leeuwen <sandervl@xs4all.nl>
     - INCLUDE:  o Hook constants added to winconst.h
@@ -24,6 +24,13 @@
                   This will speedup the 'dep' rule somewhat.
                 o Autostart CmdQd with 7 workers if not started and MULTIJOBS are defined.
                 o Profile builds uses ./bin/Profile.* subdir for output, not ./bin/Debug.*.
+                o PROFILE mode (PROFILE=1) overrides DEBUG and RELEASE modes.
+                o NMAKE version of the Watcom support since WMAKE sucks big time :-(
+                  These are the the odin32.*.watn.mk files. This caused introduction
+                  of the MKFILE macro for the compiler specific filename part.
+                  (Set CCENV=WAT and use NMAKE just like with VAC3.)
+                o Enabled Watcom (NMAKE version) support in mostly all makefiles.
+                  (I.e. places we do compiler specific tweaks.)
     - Fastdep:  o Corrected processing of C/C++ #include "someheader.h" to
                   start the search in the source code directory.
                 o Corrected handling of deleted files.
@@ -38,6 +45,24 @@
                   rule in the main makefile for this, so remember to make the
                   libraries in /lib first.
                 o Removed all the obsolete *lib.mak files.
+    - Watcom:   o ccollection.h: Include odin.h to get min/max.
+                o odin.h:       C INLINE/inline support.
+                o odinwrap.h:   Watcom has problems with the GetCurrentThreadId
+                                redeclaration. (DWORD != unsigned long int)
+                                Exclude prototype if watcomc. (workaround)
+                o windef.h:     __max and __min is defined in stdlib.h, undef before
+                                redefining them.
+                o unicode.h:    static inline workaround (just like VAC).
+                o src/makefile: Temporarily ignore return codes from subdirs.
+                o kernel32/console2.h:
+                                Don't include calling convetion for thread
+                                function. The default is the correct one usually.
+                o kernel32/conbuffervio.cpp:
+                                Alloca is defines in malloc.h for watcom. VAC defines
+                                this in both malloc and stdlib.h.
+                o kernel32/console.cpp:
+                                _beginthread is defined in process.h not stdlib.h as
+                                for VAC.
 
  2001-09-29: Sander van Leeuwen <sandervl@xs4all.nl>
     - WGSS50:   o WGSS update
