@@ -2494,6 +2494,11 @@ typedef struct tagNMTVGETINFOTIPW
 #define LVSIL_SMALL             1
 #define LVSIL_STATE             2
 
+/* following 2 flags only for LVS_OWNERDATA listviews */
+/* and only in report or list mode */
+#define LVSICF_NOINVALIDATEALL  0x0001
+#define LVSICF_NOSCROLL         0x0002
+
 #define LVFI_PARAM              0X0001
 #define LVFI_STRING             0X0002
 #define LVFI_PARTIAL            0X0008
