@@ -2045,6 +2045,9 @@ static void OLEDD_TrackMouseMove(
    */
   if (hr==DRAGDROP_S_USEDEFAULTCURSORS)
   {
+#ifndef __WIN32OS2__
+    //SvL: This needs to be changed. Causes mouse cursor changes when
+    //     e.g. clicking on an item in the file open dialog
     if (*trackerInfo->pdwEffect & DROPEFFECT_MOVE)
     {
       SetCursor(LoadCursorA(OLE32_hInstance, MAKEINTRESOURCEA(1)));
@@ -2061,6 +2064,7 @@ static void OLEDD_TrackMouseMove(
     {
       SetCursor(LoadCursorA(OLE32_hInstance, MAKEINTRESOURCEA(0)));
     }
+#endif
   }  
 }
 
