@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.378 2003-10-06 09:49:38 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.379 2003-10-20 17:17:23 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -504,7 +504,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
                                    dwOSWinStyle,
                                    dwOSFrameStyle,
                                    (char *)windowNameA,
-                                   (owner) ? owner->getOS2WindowHandle() : hwndOS2Frame,
+                                   (owner) ? owner->getOS2WindowHandle() : 0,
                                    (hwndLinkAfter == HWND_BOTTOM) ? TRUE : FALSE,
                                    0,
                                    fTaskList,
