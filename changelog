@@ -1,4 +1,12 @@
- /* $Id: changelog,v 1.644 2000-01-13 20:10:15 sandervl Exp $ */
+ /* $Id: changelog,v 1.645 2000-01-14 13:18:41 sandervl Exp $ */
+
+ 2000-01-14: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32\NEW: Fixed min/max bug for mdi child windows
+                      Fixed DrawMenuBar (invalidate frame rectangle in 
+                      FrameUpdateClient if client rectangle wasn't changed)
+                      Fixed bugs in MsgFormatFrame & SendNCCalcSize
+                      Fixed WM_WINDOWPOSCHANGED translation for frame window (not done yet)
+                      (Winamp works now; still some problems with winhlp32)
 
  2000-01-13: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: WM_ACTIVATEAPP should be sent when another process' window
