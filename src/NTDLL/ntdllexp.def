@@ -5,7 +5,7 @@ EXPORTS
     _RtlMoveMemory@12                         @589
     RtlUnwindAsm                              @590
     _RtlZeroMemory@8                          @591
-    _RtlLargeIntegerToChar@16                 @425
+    _RtlLargeIntegerToChar@12                 @425
     _NtAlertThread@8                          @57
     _ZwAlertThread@8                          @700
     _NtAllocateUuids@16                       @59
