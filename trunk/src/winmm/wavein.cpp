@@ -1,4 +1,4 @@
-/* $Id: wavein.cpp,v 1.11 2002-05-22 15:50:26 sandervl Exp $ */
+/* $Id: wavein.cpp,v 1.12 2002-05-28 14:09:24 sandervl Exp $ */
 
 /*
  * Wave in MM apis
@@ -46,7 +46,8 @@ MMRESULT WINAPI waveInOpen(LPHWAVEIN phwi, UINT uDeviceID, const LPWAVEFORMATEX 
     if(pwfx == NULL)
         return(WAVERR_BADFORMAT);
 
-    if(fdwOpen == WAVE_FORMAT_QUERY) {
+    if(fdwOpen & WAVE_FORMAT_QUERY) 
+    {
         if(DartWaveIn::queryFormat(pwfx->wFormatTag, pwfx->nChannels, pwfx->nSamplesPerSec,
                                    pwfx->wBitsPerSample) == TRUE) 
         {

@@ -1,4 +1,4 @@
-/* $Id: mixer.cpp,v 1.21 2002-05-28 13:35:02 sandervl Exp $ */
+/* $Id: mixer.cpp,v 1.22 2002-05-28 14:09:24 sandervl Exp $ */
 
 /*
  * Mixer functions
@@ -211,6 +211,7 @@ MMRESULT WINAPI mixerGetControlDetailsA(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS 
             MIXERCONTROLDETAILS_UNSIGNED *pDetails = (MIXERCONTROLDETAILS_UNSIGNED *)lpmcd->paDetails;
             DWORD dwLevelL;
 
+#ifdef DEBUG
             switch(fdwDetails & MIXER_GETCONTROLDETAILSF_QUERYMASK) {
             case MIXERCONTROL_CONTROLTYPE_TREBLE:
                 dprintf(("MIXERCONTROL_CONTROLTYPE_TREBLE"));
@@ -219,6 +220,7 @@ MMRESULT WINAPI mixerGetControlDetailsA(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS 
                 dprintf(("MIXERCONTROL_CONTROLTYPE_BASS"));
                 break;
             }
+#endif
 
             if(OSLibMixGetVolume(mixerControls[lpmcd->dwControlID].id, &dwLevelL, NULL) == FALSE) {
                 dprintf(("OSLibMixGetVolume failed!!"));

@@ -1,4 +1,4 @@
-/* $Id: waveindart.cpp,v 1.3 2002-04-07 14:36:31 sandervl Exp $ */
+/* $Id: waveindart.cpp,v 1.4 2002-05-28 14:09:25 sandervl Exp $ */
 
 /*
  * Wave record class
@@ -372,8 +372,8 @@ MMRESULT DartWaveIn::addBuffer(LPWAVEHDR pwh, UINT cbwh)
 /******************************************************************************/
 ULONG DartWaveIn::getPosition()
 {
- MCI_STATUS_PARMS mciStatus = {0};
- ULONG rc, nrbytes;
+    MCI_STATUS_PARMS mciStatus = {0};
+    ULONG rc, nrbytes;
 
     mciStatus.ulItem = MCI_STATUS_POSITION;
     rc = mymciSendCommand(DeviceId, MCI_STATUS, MCI_STATUS_ITEM|MCI_WAIT, (PVOID)&mciStatus, 0);
@@ -388,9 +388,9 @@ ULONG DartWaveIn::getPosition()
 /******************************************************************************/
 int DartWaveIn::getNumDevices()
 {
- MCI_GENERIC_PARMS  GenericParms;
- MCI_AMP_OPEN_PARMS AmpOpenParms;
- APIRET rc;
+    MCI_GENERIC_PARMS  GenericParms;
+    MCI_AMP_OPEN_PARMS AmpOpenParms;
+    APIRET rc;
 
    // Setup the open structure, pass the playlist and tell MCI_OPEN to use it
    memset(&AmpOpenParms,0,sizeof(AmpOpenParms));
@@ -420,55 +420,55 @@ int DartWaveIn::getNumDevices()
 BOOL DartWaveIn::queryFormat(ULONG formatTag, ULONG nChannels,
                              ULONG nSamplesPerSec, ULONG wBitsPerSample)
 {
- MCI_WAVE_GETDEVCAPS_PARMS mciAudioCaps;
- MCI_GENERIC_PARMS    GenericParms;
- MCI_OPEN_PARMS       mciOpenParms;         /* open parms for MCI_OPEN             */
- int i, freqbits = 0;
- ULONG rc, DeviceId;
- BOOL winrc;
+    MCI_WAVE_GETDEVCAPS_PARMS mciAudioCaps;
+    MCI_GENERIC_PARMS    GenericParms;
+    MCI_OPEN_PARMS       mciOpenParms;         /* open parms for MCI_OPEN             */
+    int i, freqbits = 0;
+    ULONG rc, DeviceId;
+    BOOL winrc;
 
-  dprintf(("DartWaveIn::queryFormat %x srate=%d, nchan=%d, bps=%d", formatTag, nSamplesPerSec, nChannels, wBitsPerSample));
+    dprintf(("DartWaveIn::queryFormat %x srate=%d, nchan=%d, bps=%d", formatTag, nSamplesPerSec, nChannels, wBitsPerSample));
 
-  memset(&mciOpenParms,            /* Object to fill with zeros.       */
-         0,                        /* Value to place into the object.  */
-         sizeof( mciOpenParms ) ); /* How many zero's to use.          */
+    memset(&mciOpenParms,            /* Object to fill with zeros.       */
+           0,                        /* Value to place into the object.  */
+           sizeof( mciOpenParms ) ); /* How many zero's to use.          */
 
-  mciOpenParms.pszDeviceType = (PSZ)MCI_DEVTYPE_WAVEFORM_AUDIO;
+    mciOpenParms.pszDeviceType = (PSZ)MCI_DEVTYPE_WAVEFORM_AUDIO;
 
-  rc = mymciSendCommand( (USHORT) 0,
-                       MCI_OPEN,
-                       MCI_WAIT | MCI_OPEN_TYPE_ID,
-                       (PVOID) &mciOpenParms,
-                       0);
-  if((rc & 0xFFFF) != MCIERR_SUCCESS) {
+    rc = mymciSendCommand( (USHORT) 0,
+                          MCI_OPEN,
+                          MCI_WAIT | MCI_OPEN_TYPE_ID,
+                          (PVOID) &mciOpenParms,
+                          0);
+    if((rc & 0xFFFF) != MCIERR_SUCCESS) {
         mciError(rc);
         return(FALSE);
-  }
-  DeviceId = mciOpenParms.usDeviceID;
+    }
+    DeviceId = mciOpenParms.usDeviceID;
 
-  memset( &mciAudioCaps , 0, sizeof(MCI_WAVE_GETDEVCAPS_PARMS));
+    memset( &mciAudioCaps , 0, sizeof(MCI_WAVE_GETDEVCAPS_PARMS));
 
-  mciAudioCaps.ulBitsPerSample = wBitsPerSample;
-  mciAudioCaps.ulFormatTag     = DATATYPE_WAVEFORM;
-  mciAudioCaps.ulSamplesPerSec = nSamplesPerSec;
-  mciAudioCaps.ulChannels      = nChannels;
-  mciAudioCaps.ulFormatMode    = MCI_RECORD;
-  mciAudioCaps.ulItem          = MCI_GETDEVCAPS_WAVE_FORMAT;
+    mciAudioCaps.ulBitsPerSample = wBitsPerSample;
+    mciAudioCaps.ulFormatTag     = DATATYPE_WAVEFORM;
+    mciAudioCaps.ulSamplesPerSec = nSamplesPerSec;
+    mciAudioCaps.ulChannels      = nChannels;
+    mciAudioCaps.ulFormatMode    = MCI_RECORD;
+    mciAudioCaps.ulItem          = MCI_GETDEVCAPS_WAVE_FORMAT;
 
-  rc = mymciSendCommand(DeviceId,   /* Device ID    */
-                      MCI_GETDEVCAPS,
-                      MCI_WAIT | MCI_GETDEVCAPS_EXTENDED | MCI_GETDEVCAPS_ITEM,
-                      (PVOID) &mciAudioCaps,
-                      0);
-  if((rc & 0xFFFF) != MCIERR_SUCCESS) {
+    rc = mymciSendCommand(DeviceId,   /* Device ID    */
+                          MCI_GETDEVCAPS,
+                          MCI_WAIT | MCI_GETDEVCAPS_EXTENDED | MCI_GETDEVCAPS_ITEM,
+                          (PVOID) &mciAudioCaps,
+                          0);
+    if((rc & 0xFFFF) != MCIERR_SUCCESS) {
         mciError(rc);
         winrc = FALSE;
-  }
-  else  winrc = TRUE;
+    }
+    else  winrc = TRUE;
 
-  // Close the device
-  mymciSendCommand(DeviceId,MCI_CLOSE,MCI_WAIT,(PVOID)&GenericParms,0);
-  return(winrc);
+    // Close the device
+    mymciSendCommand(DeviceId,MCI_CLOSE,MCI_WAIT,(PVOID)&GenericParms,0);
+    return(winrc);
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -488,8 +488,7 @@ void DartWaveIn::mciError(ULONG ulError)
 /******************************************************************************/
 void DartWaveIn::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags)
 {
- ULONG    buflength, bufpos, bytestocopy;
- WAVEHDR *whdr, *prevhdr = NULL;
+    ULONG    buflength, bufpos, bytestocopy;
 
     dprintf2(("WINMM: DartWaveIn handler %x\n", pBuffer));
     if(ulFlags == MIX_STREAM_ERROR) {
@@ -506,8 +505,7 @@ void DartWaveIn::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags)
     }
     wmutex.enter();
 
-    whdr = wavehdr;
-    if(whdr == NULL) {
+    if(wavehdr == NULL) {
         wmutex.leave();
         //last buffer recorded -> no new ones -> overrun
         //Windows doesn't care -> just continue
@@ -519,6 +517,7 @@ void DartWaveIn::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags)
     bufpos    = 0;
     while(buflength) {
         if(wavehdr) {
+            dprintf2(("WINMM: DartWaveIn handler: bytes recorded %d, buffer length %d, room %d", buflength, wavehdr->dwBufferLength, wavehdr->dwBytesRecorded));
             bytestocopy = min(buflength, wavehdr->dwBufferLength - wavehdr->dwBytesRecorded);
             if(bytestocopy) {
                  memcpy(wavehdr->lpData + wavehdr->dwBytesRecorded, (char *)pBuffer->pBuffer + bufpos, bytestocopy);
@@ -531,6 +530,8 @@ void DartWaveIn::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags)
 
             if(wavehdr->dwBytesRecorded == wavehdr->dwBufferLength)
             {
+                WAVEHDR *whdr = wavehdr;
+
                 dprintf2(("WINMM: DartWaveIn handler buf %X done\n", whdr));
                 whdr->dwFlags |= WHDR_DONE;
                 whdr->dwFlags &= ~WHDR_INQUEUE;
@@ -551,7 +552,7 @@ void DartWaveIn::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags)
     //Transfer buffer to DART
     // MCI_MIXSETUP_PARMS->pMixWrite does alter FS: selector!
     USHORT selTIB = GetFS(); // save current FS selector
-    MixSetupParms->pmixWrite(MixSetupParms->ulMixHandle, pBuffer, 1);
+    MixSetupParms->pmixRead(MixSetupParms->ulMixHandle, pBuffer, 1);
     SetFS(selTIB);           // switch back to the saved FS selector
 }
 /******************************************************************************/
