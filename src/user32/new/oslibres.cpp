@@ -1,4 +1,4 @@
-/* $Id: oslibres.cpp,v 1.1 1999-07-20 15:46:53 sandervl Exp $ */
+/* $Id: oslibres.cpp,v 1.2 1999-07-20 17:50:39 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -62,7 +62,7 @@ HANDLE OSLibWinSetIcon(HWND hwnd, HANDLE hIcon, PVOID iconbitmap)
 
     if(hIcon == 0) {
 	    //skip xor/and mask
-	    bfh = (BITMAPFILEHEADER2 *)((char *)&bafh->bfh2 + sizeof(RGB)*2 + sizeof(BITMAPFILEHEADER2));
+	    bfh = (BITMAPFILEHEADER2 *)((char *)&bafh->bfh2 + sizeof(RGB2)*2 + sizeof(BITMAPFILEHEADER2));
 	    hps = WinGetPS(hwnd);
 	    hbmColor = GpiCreateBitmap(hps, &bfh->bmp2, CBM_INIT, 
 		     	               (char *)bafh + bfh->offBits,
@@ -95,9 +95,6 @@ HANDLE OSLibWinSetIcon(HWND hwnd, HANDLE hIcon, PVOID iconbitmap)
 	    }
     }
     WinSendMsg(hwnd, WM_SETICON, (MPARAM)hIcon, 0);
-//    if(WinSetPointer(hwnd, hIcon) == FALSE) {
-//	dprintf(("WinSetPointer %x %x failed with error %x!", hwnd, hIcon, WinGetLastError(GetThreadHAB())));
-//  }
     WinReleasePS(hps);
     return hIcon;
 }
