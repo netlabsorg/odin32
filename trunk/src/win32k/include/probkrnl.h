@@ -1,4 +1,4 @@
-/* $Id: probkrnl.h,v 1.21 2001-02-23 02:57:54 bird Exp $
+/* $Id: probkrnl.h,v 1.22 2001-07-10 05:22:15 bird Exp $
  *
  * Include file for ProbKrnl.
  *
@@ -15,7 +15,7 @@
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
 *******************************************************************************/
-#define NBR_OF_KRNLIMPORTS      81      /* When this is changed make sure to   */
+#define NBR_OF_KRNLIMPORTS      91      /* When this is changed make sure to   */
                                         /* update the aImportTab in probkrnl.c */
                                         /* and make test faker in test.h and   */
                                         /* the appropriate fake.c or fakea.asm.*/
@@ -23,9 +23,10 @@
 
 /* Entry-Point Type flag */
 #define EPT_PROC                0x00    /* procedure - overload procedure*/
-#define EPT_PROCIMPORT          0x01    /* procedure 32bit - import only */
-#define EPT_VARIMPORT           0x02    /* variable/non-procedure 32bit */
-#define EPT_NOT_REQ             0x04    /* Not required flag. */
+#define EPT_PROCIMPORT          0x01    /* procedure - import only */
+#define EPT_PROCIMPORTH         0x02    /* procedure hybrid - import only */
+#define EPT_VARIMPORT           0x04    /* variable/non-procedure 32bit */
+#define EPT_NOT_REQ             0x08    /* Not required flag. */
 #define EPTNotReq(a)            (((a).fType & (EPT_NOT_REQ)) == EPT_NOT_REQ)
 #define EPT_WRAPPED             0x40    /* Wrapped due - differs between builds */
 #define EPTWrapped(a)           (((a).fType & (EPT_WRAPPED)) == EPT_WRAPPED)
@@ -34,6 +35,7 @@
 #define EPT_BIT_MASK            0x80    /* Mask bit entry-point */
 #define EPT16BitEntry(a)        (((a).fType & EPT_BIT_MASK) == EPT_16BIT)
 #define EPT32BitEntry(a)        (((a).fType & EPT_BIT_MASK) == EPT_32BIT)
+#define EPTProcImportHybrid(a)  (((a).fType & ~(EPT_BIT_MASK | EPT_WRAPPED | EPT_NOT_REQ)) == EPT_PROCIMPORTH)
 
 /* 32bit types */
 #define EPT_PROC32              (EPT_PROC | EPT_32BIT)
@@ -51,11 +53,15 @@
 #define EPT_PROC16              (EPT_PROC | EPT_16BIT)
 #define EPT_PROCIMPORT16        (EPT_PROCIMPORT | EPT_16BIT)  /* far proc in calltab with a far jmp. */
 #define EPT_PROCIMPORTNR16      (EPT_PROCIMPORT | EPT_16BIT | EPT_NOT_REQ)
+#define EPT_PROCIMPORTH16       (EPT_PROCIMPORTH | EPT_16BIT)  /* far proc in 16-bit calltab with a far jmp. */
+#define EPT_PROCIMPORTHNR16     (EPT_PROCIMPORTH | EPT_16BIT | EPT_NOT_REQ)
 #define EPT_VARIMPORT16         (EPT_VARIMPORT | EPT_16BIT)
 #define EPT_VARIMPORTNR16       (EPT_VARIMPORT | EPT_16BIT | EPT_NOT_REQ)
 #define EPT16Proc(a)            (((a).fType & ~(EPT_WRAPPED)) == EPT_PROC16)
 #define EPT16ProcImport(a)      (((a).fType & ~(EPT_WRAPPED)) == EPT_PROCIMPORT16)
 #define EPT16ProcImportNR(a)    (((a).fType & ~(EPT_WRAPPED)) == EPT_PROCIMPORTNR16)
+#define EPT16ProcImportH(a)     (((a).fType & ~(EPT_WRAPPED)) == EPT_PROCIMPORTH16)
+#define EPT16ProcImportHNR(a)   (((a).fType & ~(EPT_WRAPPED)) == EPT_PROCIMPORTHNR16)
 #define EPT16VarImport(a)       (((a).fType & ~(EPT_WRAPPED)) == EPT_VARIMPORT16)
 #define EPT16VarImportNR(a)     (((a).fType & ~(EPT_WRAPPED)) == EPT_VARIMPORTNR16)
 
