@@ -1,0 +1,25 @@
+; $Id: psapi.DEF,v 1.1 1999-09-04 09:09:03 sandervl Exp $
+
+;Created by BLAST for IBM's compiler
+LIBRARY PSAPI INITINSTANCE
+DATA MULTIPLE NONSHARED
+
+EXPORTS
+    EmptyWorking		= _EmptyWorkingSet@4  			@1  
+    EnumDeviceDrivers		= _EnumDeviceDrivers@12  		@2  
+    EnumProcessModules		= _EnumProcessModules@16  		@3  
+    EnumProcesses		= _EnumProcesses@12  			@4  
+    GetDeviceDriverBaseNameA	= _GetDeviceDriverBaseNameA@12  	@5  
+    GetDeviceDriverBaseNameW	= _GetDeviceDriverBaseNameW@12  	@6  
+    GetDeviceDriverFileNameA	= _GetDeviceDriverFileNameA@12  	@7  
+    GetDeviceDriverFileNameW	= _GetDeviceDriverFileNameW@12  	@8  
+    GetMappedFileNameA		= _GetMappedFileNameA@16  		@9  
+    GetMappedFileNameW		= _GetMappedFileNameW@16 		@10  
+    GetModuleBaseNameA		= _GetModuleBaseNameA@16 		@11  
+    GetModuleBaseNameW		= _GetModuleBaseNameW@16 		@12  
+    GetModuleFileNameExA	= _GetModuleFileNameExA@16 		@13  
+    GetModuleFileNameExW	= _GetModuleFileNameExW@16 		@14  
+    GetModuleInformation	= _GetModuleInformation@16  		@15
+    GetProcessMemoryInfo	= _GetProcessMemoryInfo@12		@16  
+    GetWsChanges		= _GetWsChanges@12			@17  
+    InitializeProcessForWsWatch	= _InitializeProcessForWsWatch@4	@18  
