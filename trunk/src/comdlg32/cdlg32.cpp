@@ -1,4 +1,4 @@
-/* $Id: cdlg32.cpp,v 1.3 1999-11-03 19:34:40 sandervl Exp $ */
+/* $Id: cdlg32.cpp,v 1.4 1999-11-20 16:00:14 achimha Exp $ */
 /*
  *  Common Dialog Boxes interface (32 bit)
  *  Find/Replace
@@ -85,7 +85,7 @@ BOOL WINAPI COMDLG32_DllEntryPoint(HINSTANCE hInstance, DWORD Reason, LPVOID Res
 		COMDLG32_Attach++;
 		if(COMDLG32_hInstance)
 		{
-			ERR("comdlg32.dll instantiated twice in one address space!\n");
+			dprintf(("comdlg32.dll instantiated twice in one address space!\n"));
 			/*
 			 * We should return FALSE here, but that will break
 			 * most apps that use CreateProcess because we do
@@ -99,7 +99,7 @@ BOOL WINAPI COMDLG32_DllEntryPoint(HINSTANCE hInstance, DWORD Reason, LPVOID Res
 
 		if((COMDLG32_TlsIndex = TlsAlloc()) == 0xffffffff)
 		{
-			ERR("No space for COMDLG32 TLS\n");
+			dprintf(("No space for COMDLG32 TLS\n"));
 			return FALSE;
 		}
 
@@ -109,7 +109,7 @@ BOOL WINAPI COMDLG32_DllEntryPoint(HINSTANCE hInstance, DWORD Reason, LPVOID Res
 		
 		if (!COMCTL32_hInstance || !SHELL32_hInstance || !SHLWAPI_hInstance)
 		{
-			ERR("loading of comctl32 or shell32 or shlwapi failed\n");
+			dprintf(("loading of comctl32 or shell32 or shlwapi failed\n"));
 			return FALSE;
 		}
 		/* DPA */
