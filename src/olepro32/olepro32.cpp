@@ -1,3 +1,4 @@
+/* $Id: olepro32.cpp,v 1.2 2000-08-02 16:29:41 bird Exp $ */
 /*
  * OlePro32 Stubs
  *
@@ -30,13 +31,13 @@ HRESULT WINAPI OleCreatePropertyFrameIndirect( LPOCPFIPARAMS lpParams)
 	dprintf(("(%p), not implemented (olepro32.dll)\n",lpParams));
 	return S_OK;
 }
- 
+
 /*****************************************************
  * OleCreatePropertyFrame
  */
 HRESULT WINAPI OleCreatePropertyFrame( HWND hwndOwner, UINT x, UINT y,
 			LPCOLESTR lpszCaption,ULONG cObjects, LPUNKNOWN* ppUnk,
-			ULONG cPages, LPCLSID pPageClsID, LCID lcid, 
+			ULONG cPages, LPCLSID pPageClsID, LCID lcid,
 			DWORD dwReserved, LPVOID pvReserved )
 {
 	dprintf(("(%x,%d,%d,%p,%ld,%p,%ld,%p,%x,%ld,%p), not implemented (olepro32.dll)\n",
@@ -44,7 +45,7 @@ HRESULT WINAPI OleCreatePropertyFrame( HWND hwndOwner, UINT x, UINT y,
 		(int)lcid,dwReserved,pvReserved));
 	return S_OK;
 }
- 
+
 /*****************************************************
  * OleLoadPicture
  */
@@ -56,7 +57,7 @@ HRESULT WINAPI OleLoadPicture( LPSTREAM lpstream, LONG lSize, BOOL fRunmode,
 	));
 	return S_OK;
 }
- 
+
 HRESULT WINAPI DllUnregisterServer()
 {
 	dprintf(("not implemented (olepro32.dll) \n"));

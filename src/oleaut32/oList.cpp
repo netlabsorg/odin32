@@ -1,3 +1,4 @@
+/* $Id: oList.cpp,v 1.2 2000-08-02 16:28:19 bird Exp $ */
 /*
  * oList.cpp
  * ---------
