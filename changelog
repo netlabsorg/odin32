@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2359 2002-11-18 15:45:18 sandervl Exp $ */
+/* $Id: changelog,v 1.2360 2002-11-20 12:58:18 sandervl Exp $ */
+
+ 2002-11-20: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Ignore size changes when a window is minimized; save them
+                  for restore.
 
  2002-11-18: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Added support for renaming of exported functions.
