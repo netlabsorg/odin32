@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.79 2000-05-03 18:35:52 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.80 2000-05-03 22:33:36 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -905,7 +905,7 @@ BOOL WIN32API SystemParametersInfoA(UINT uiAction, UINT uiParam, PVOID pvParam, 
         lpLogFont->lfHeight = -GetProfileIntA("Desktop","MenuFontSize", 12);
         lpLogFont->lfWidth = 0;
         lpLogFont->lfEscapement = lpLogFont->lfOrientation = 0;
-        lpLogFont->lfWeight = FW_BOLD;
+        lpLogFont->lfWeight = FW_NORMAL;
         lpLogFont->lfItalic = FALSE;
         lpLogFont->lfStrikeOut = FALSE;
         lpLogFont->lfUnderline = FALSE;
