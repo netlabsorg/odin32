@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.88 2002-06-04 10:11:58 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.89 2002-06-18 09:32:26 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -436,7 +436,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
 
         HWND hwnd;
 
-        dprintf2(("WM_NCMOUSEMOVE (%d,%d)", winMsg->pt.x, winMsg->pt.y));
+        dprintf2(("WM_MOUSEMOVE (%d,%d)", winMsg->pt.x, winMsg->pt.y));
         DisableLogging();
         if(GetCapture() != winMsg->hwnd)
         {
