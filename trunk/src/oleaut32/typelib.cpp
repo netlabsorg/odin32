@@ -1,4 +1,4 @@
-/* $Id: typelib.cpp,v 1.17 2001-01-18 18:12:38 sandervl Exp $ */
+/* $Id: typelib.cpp,v 1.18 2001-04-26 19:24:56 sandervl Exp $ */
 /* 
  * ITypelib interface
  * 
@@ -1700,7 +1700,7 @@ HRESULT TypeLibExtract::Load(char * szFile)
 	// Failed to open file - Check to see if this is a request for a given resource
 	HRSRC			hRsrc;
 	HGLOBAL			hData;
-	char *			szLibName = HEAP_strdupA(m_hHeap, 0, szFile);
+	char *       		szLibName = HEAP_strdupA(m_hHeap, 0, szFile);
 	char *			p = strrchr(szLibName, '\\');
 	ULONG			lResId;
 
@@ -1708,8 +1708,11 @@ HRESULT TypeLibExtract::Load(char * szFile)
 	{
 	    // Filename of form {drive:}{\\path\\}file\\resid
 	    *p = 0;
-	    lResId = atoi(p + 1);
-	    hInst = CoLoadLibrary(szLibName, TRUE);
+	    lResId = atoi((p + 1));
+
+            LPOLESTR libnameW = (LPOLESTR)HEAP_strdupAtoW(m_hHeap, 0, szLibName);
+	    hInst = CoLoadLibrary(libnameW, TRUE);
+	    HeapFree(m_hHeap, 0, libnameW);
 	    HeapFree(m_hHeap, 0, szLibName);
 	    if (hInst != 0)
 	    {
@@ -1729,7 +1732,9 @@ HRESULT TypeLibExtract::Load(char * szFile)
     }
 
     // Check to see if this is a module...
-    hInst = CoLoadLibrary(szFile, TRUE);
+    LPOLESTR libnameW = (LPOLESTR)HEAP_strdupAtoW(m_hHeap, 0, szFile);
+    hInst = CoLoadLibrary(libnameW, TRUE);
+    HeapFree(m_hHeap, 0, libnameW);
     if (hInst)
     {
 	loadData.cLibs = 1;
