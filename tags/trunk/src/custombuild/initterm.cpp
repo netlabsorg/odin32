@@ -132,68 +132,72 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
          SetRegistryRootKey(HKEY_LOCAL_MACHINE, hKeyLocalMachine);
          SetRegistryRootKey(HKEY_USERS, hKeyUsers);
 
-         SetCustomBuildName("NTDLL.DLL");
+         SetCustomBuildName("NTDLL.DLL", 0);
          if(RegisterLxDll(hModule, NULL, (PVOID)NULL) == 0)
             return 0UL;
 
-         SetCustomBuildName("KERNEL32.DLL");
+         SetCustomBuildName("KERNEL32.DLL", ORDINALBASE_KERNEL32);
          rc = inittermKernel32(hModule, ulFlag);
          if(rc == 0) 
              return 0UL;
 
-         SetCustomBuildName("USER32.DLL");
+         SetCustomBuildName("USER32.DLL", ORDINALBASE_USER32);
          rc = inittermUser32(hModule, ulFlag);
          if(rc == 0) 
                 return 0UL;
 
-         SetCustomBuildName("GDI32.DLL");
+         SetCustomBuildName("GDI32.DLL", ORDINALBASE_GDI32);
          if(RegisterLxDll(hModule, NULL, (PVOID)NULL) == 0)
             return 0UL;
 
-         SetCustomBuildName("ADVAPI32.DLL");
+         SetCustomBuildName("ADVAPI32.DLL", 0);
          if(RegisterLxDll(hModule, NULL, (PVOID)NULL) == 0)
             return 0UL;
 
-         SetCustomBuildName("VERSION.DLL");        
+         SetCustomBuildName("VERSION.DLL", 0);        
          if(RegisterLxDll(hModule, NULL, (PVOID)NULL) == 0)
             return 0UL;
 
-         SetCustomBuildName("WSOCK32.DLL");
+         SetCustomBuildName("WSOCK32.DLL", ORDINALBASE_WSOCK32);
          rc = inittermWsock32(hModule, ulFlag);
          if(rc == 0) 
                 return 0UL;
 
-         SetCustomBuildName("WINMM.DLL");
+         SetCustomBuildName("WINMM.DLL", 0);
          rc = inittermWinmm(hModule, ulFlag);
          if(rc == 0) 
                 return 0UL;
 
-         SetCustomBuildName("RPCRT4.DLL");
+         SetCustomBuildName("RPCRT4.DLL", 0);
          rc = inittermRpcrt4(hModule, ulFlag);
          if(rc == 0) 
                 return 0UL;
 
-         SetCustomBuildName("OLE32.DLL");
+         SetCustomBuildName("OLE32.DLL", ORDINALBASE_OLE32);
          rc = inittermOle32(hModule, ulFlag);
          if(rc == 0) 
                 return 0UL;
 
-         SetCustomBuildName("COMCTL32.DLL");
+         SetCustomBuildName("COMCTL32.DLL", ORDINALBASE_COMCTL32);
          rc = inittermComctl32(hModule, ulFlag);
          if(rc == 0) 
                 return 0UL;
 
-         SetCustomBuildName("SHELL32.DLL");
+         SetCustomBuildName("SHLWAPI.DLL", ORDINALBASE_SHLWAPI);
+         if(RegisterLxDll(hModule, NULL, (PVOID)NULL) == 0)
+            return 0UL;
+
+         SetCustomBuildName("SHELL32.DLL", ORDINALBASE_SHELL32);
          rc = inittermShell32(hModule, ulFlag);
          if(rc == 0) 
                 return 0UL;
 
-         SetCustomBuildName("COMDLG32.DLL");
+         SetCustomBuildName("COMDLG32.DLL", 0);
          rc = inittermComdlg32(hModule, ulFlag);
          if(rc == 0) 
                 return 0UL;
 
-         SetCustomBuildName(NULL);
+         SetCustomBuildName(NULL, 0);
          break;
       }
 
