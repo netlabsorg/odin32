@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1352 2001-04-05 19:05:37 sandervl Exp $ */
+/* $Id: changelog,v 1.1353 2001-04-06 14:36:59 sandervl Exp $ */
+
+ 2001-04-06: Sander van Leeuwen <sandervl@xs4all.nl>   
+    - WINMM:    o Clean up DirectAudio thread properly.
 
  2001-04-05: Sofiya (sofiya@din.or.jp)
     - KERNEL32: o WideCharToMultiByte/MultiByteToWideChar changes
