@@ -1,4 +1,4 @@
-; $Id: USER32.DEF,v 1.64 2001-08-07 21:35:35 sandervl Exp $
+; $Id: USER32.DEF,v 1.65 2001-08-08 10:07:18 sandervl Exp $
 
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
 DESCRIPTION 'Odin32 System Dll - User32'
@@ -702,3 +702,4 @@ EXPORTS
     _SetWindowAppearance@4                                       @2030 NONAME
 
     _OSLibWinCreateObject@32                                     @2031 NONAME
+    _ConvertIconGroup@12                                         @2032 NONAME

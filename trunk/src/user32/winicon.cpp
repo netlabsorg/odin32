@@ -1,4 +1,4 @@
-/* $Id: winicon.cpp,v 1.27 2001-07-08 07:15:10 sandervl Exp $ */
+/* $Id: winicon.cpp,v 1.28 2001-08-08 10:07:19 sandervl Exp $ */
 /*
  * Win32 Icon Code for OS/2
  *
@@ -835,8 +835,7 @@ static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, DWORD dwResGr
     hotspot.x = ICON_HOTSPOT;
     hotspot.y = ICON_HOTSPOT;
 
-//testestest
-    dprintf(("CURSORICON_CreateFromResource %x %x %x %x %d", hInstance, dwResGroupId, hObj, bits, cbSize));
+    dprintf2(("CURSORICON_CreateFromResource %x %x %x %x %d", hInstance, dwResGroupId, hObj, bits, cbSize));
 
     if (dwVersion == 0x00020000)
     {
