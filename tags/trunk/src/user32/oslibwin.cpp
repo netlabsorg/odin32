@@ -1,11 +1,11 @@
-/* $Id: oslibwin.cpp,v 1.144 2003-10-20 17:17:22 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.145 2003-10-22 12:43:13 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
  *
  * Copyright 1999 Sander van Leeuwen (sandervl@xs4all.nl)
  * Copyright 1999 Daniela Engert (dani@ngrt.de)
- *
+ * Copyright 2002-2003 Innotek Systemberatung GmbH
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -36,6 +36,9 @@
 //Undocumented PM WS_TOPMOST style; similar to WS_EX_TOPMOST in Windows
 #define WS_TOPMOST                 0x00200000L
 
+//pmwindow.cpp
+MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
+
 //******************************************************************************
 //******************************************************************************
 BOOL OSLibWinSetParent(HWND hwnd, HWND hwndParent, ULONG fRedraw)
@@ -63,8 +66,8 @@ HWND OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle, ULONG dwOSFrameStyle
                           ULONG id, BOOL fTaskList,BOOL fShellPosition,
                           DWORD classStyle, HWND *hwndFrame)
 {
- HWND  hwndClient;
- ULONG dwFrameStyle = 0;
+    HWND  hwndClient;
+    ULONG dwFrameStyle = 0;
 
     if(pszName && *pszName == 0) {
         pszName = NULL;
@@ -97,11 +100,17 @@ HWND OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle, ULONG dwOSFrameStyle
     //Eg: dialog parent, groupbox; invalidate part of groupbox -> painting algorithm stops when it finds
     //    a window with WS_CLIPCHILDREN -> result: dialog window won't update groupbox background as groupbox only draws the border
     *hwndFrame = WinCreateWindow(hwndParent,
-                           WIN32_STDFRAMECLASS,
+                           WC_FRAME,
                            pszName, (dwWinStyle & ~WS_CLIPCHILDREN), 0, 0, 0, 0,
                            Owner, (fHWND_BOTTOM) ? HWND_BOTTOM : HWND_TOP,
                            id, (PVOID)&FCData, NULL);
 
+    //We no longer register our own frame window class as there is code in PM
+    //that makes assumptions about frame window class names.
+    //Instead we subclass the frame window right after creating it.
+    if(*hwndFrame) {
+        WinSubclassWindow(*hwndFrame, Win32FrameWindowProc);
+    }
     if(fOS2Look && *hwndFrame) {
         FCData.flCreateFlags = dwOSFrameStyle;
         WinCreateFrameControls(*hwndFrame, &FCData, NULL);
@@ -117,7 +126,6 @@ HWND OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle, ULONG dwOSFrameStyle
     //to show IBM wheel driver that we need WM_VSCROLL messages
     if (hwndParent == HWND_DESKTOP && *hwndFrame)
        OSLibWinCreateInvisibleScroller(*hwndFrame, SBS_VERT);
-
 
     if(hwndClient == 0) {
         dprintf(("Client window creation failed!! OS LastError %0x", WinGetLastError(0)));
