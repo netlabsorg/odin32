@@ -1,11 +1,7 @@
-/* $Id: misc.cpp,v 1.3 1999-06-19 10:54:42 sandervl Exp $ */
+/* $Id: misc.cpp,v 1.4 1999-08-06 09:03:04 phaller Exp $ */
 
 /*
- *
  * Project Odin Software License can be found in LICENSE.TXT
- *
- */
-/*
  * Logging procedures
  *
  * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
@@ -13,11 +9,17 @@
  * Copyright 1998 Peter FitzSimmons
  *
  */
+
+
+/*****************************************************************************
+ * Includes                                                                  *
+ *****************************************************************************/
+
 #define INCL_BASE
 #define INCL_WIN
 #define INCL_WINERRORS
 #define INCL_DOSFILEMGR
-#include <os2wrap.h>	//Odin32 OS/2 api wrappers
+#include <os2wrap.h>                     //Odin32 OS/2 api wrappers
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -26,7 +28,10 @@
 #include "misc.h"
 
 
-//#define PMPRINTF
+/*****************************************************************************
+ * PMPRINTF Version                                                          *
+ *****************************************************************************/
+
 #ifdef PMPRINTF
 
 /* ----- Customization variables ----- */
@@ -46,6 +51,11 @@ extern ULONG flAllocMem;    /*Tue 03.03.1998: knut */
 #define PRINTFIDSIZE sizeof(PRINTFID)
 #define PRINTFMAXBUF PRINTFIDSIZE+PRINTFLINELEN
 
+
+/*****************************************************************************
+ * Structures                                                                *
+ *****************************************************************************/
+
 /* ----- Per-thread output buffer and current indices into line ---- */
 struct perthread {
   LONG   lineindex;                /* where next char */
@@ -62,6 +72,7 @@ static struct perthread *tps[PRINTFTHREADS+1]; /* -> per-thread data */
 
 /* ----- Local subroutine ----- */
 static int printf_(struct perthread *);
+
 
 /* ----------------------------------------------------------------- */
 /* The "printf" function.  Note this has a variable number of        */
@@ -219,8 +230,13 @@ int printf_(struct perthread *tp)  /* pointer to per-thread data */
   tp->bell     =FALSE;             /* true if line has bell */
   return 0;                        /* success! */
   } /* printf_ */
-#else
+#endif
 
+
+
+/*****************************************************************************
+ * Standard Version                                                          *
+ *****************************************************************************/
 
 #if 1   /*PLF Mon  97-09-08 20:04:28*/
 static FILE *flog = NULL;   /*PLF Mon  97-09-08 20:00:15*/
@@ -229,41 +245,56 @@ static BOOL fLogging = TRUE;
 
 int SYSTEM EXPORT WriteLog(char *tekst, ...)
 {
-    va_list argptr;
-    if(!init){
-        init = TRUE;
-        if(!getenv("NOWIN32LOG")) {
-             flog = fopen("win32os2.log", "w");
-    }
-    else fLogging = FALSE;
-    }
+  USHORT  sel = RestoreOS2FS();
+  va_list argptr;
 
-    if(fLogging && flog){
-        va_start(argptr, tekst);
-        vfprintf(flog, tekst, argptr);
-        va_end(argptr);
+  if(!init)
+  {
+    init = TRUE;
+
+    if(!getenv("NOWIN32LOG"))
+      flog = fopen("win32os2.log", "w");
+    else
+      fLogging = FALSE;
+  }
+
+  if(fLogging && flog)
+  {
+    va_start(argptr, tekst);
+    vfprintf(flog, tekst, argptr);
+    va_end(argptr);
+
     if(tekst[strlen(tekst)-1] != '\n')
-        fprintf(flog, "\n");
-    }
-    return 1;
+      fprintf(flog, "\n");
+  }
+
+  SetFS(sel);
+  return 1;
 }
 
 int SYSTEM EXPORT WriteLogError(char *tekst, ...)
 {
-    va_list argptr;
+  USHORT  sel = RestoreOS2FS();
+  va_list argptr;
 
-    va_start(argptr, tekst);
-    printf("ERROR: ");
-    vprintf(tekst, argptr);
-    va_end(argptr);
-    if(tekst[strlen(tekst)-1] != '\n') {
+  va_start(argptr, tekst);
+  printf("ERROR: ");
+  vprintf(tekst, argptr);
+  va_end(argptr);
+  if(tekst[strlen(tekst)-1] != '\n')
     printf("\n");
-    }
 
-    return 1;
+  SetFS(sel);
+  return 1;
 }
+#endif
 
-#else   /*PLF Mon  97-09-08 20:04:26*/
+
+/*****************************************************************************
+ * Modified Standard Version                                                 *
+ *****************************************************************************/
+
+#if 0   /*PLF Mon  97-09-08 20:04:26*/
 /******************************************************************************/
 static BOOL init = FALSE;
 static BOOL fLog = TRUE;
@@ -309,8 +340,4 @@ ULONG openFlags = OPEN_ACTION_CREATE_IF_NEW;
  return(TRUE);
 }
 #endif  /*PLF Mon  97-09-08 20:04:23*/
-/******************************************************************************/
-/******************************************************************************/
 
-
-#endif
