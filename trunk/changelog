@@ -1,6 +1,11 @@
-/* $Id: changelog,v 1.2284 2002-08-23 03:55:23 bird Exp $ */
+/* $Id: changelog,v 1.2285 2002-08-23 15:05:22 sandervl Exp $ */
 
- 2002-08-21: knut st. osmundsen <bird@anduin   >
+ 2002-08-23: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Ugly hack added to work around crash in PM when child window
+                  calls DestroyWindow for parent or owner in WM_DESTROY handler
+                  (solution: postpone DestroyWindow for parent/owner)
+
+ 2002-08-23: knut st. osmundsen <bird@anduin   >
     - TOOLS:    o Added a rm.exe binary from the OS2Tools tree.
                   The new build system uses this. Then clean will
                   work everywhere!
