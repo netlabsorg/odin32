@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.12 2002-06-21 15:02:51 bird Exp $
+/* $Id: buildenv.cmd,v 1.13 2002-06-22 15:46:59 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -114,12 +114,13 @@
          *
          */
         ch = substr(sEnv.i, length(sEnv.i), 1);
-        if (ch = '-' | ch = '+' | ch = '*' | ch = '!' | ch = '?') then
+        if (ch = '-' | ch = '+' | ch = '*' | ch = '!' | ch = '?' | ch = '@') then
             sEnv.i = substr(sEnv.i, 1, length(sEnv.i) - 1);
         fRM = (ch = '-');
         fCfg = (ch = '*');
         fForcedCfg = (ch = '!');
-        fVerify = (ch = '?')
+        fVerify = (ch = '@')
+        fQuery = (ch = '?')
 
         /*
          * do the switch.
@@ -235,6 +236,13 @@
                             rc = CfgConfigure(j, fForcedCfg);
                         else if (fVerify) then
                             rc = CfgVerify(j, 0, 1);
+                        else if (fQuery) then
+                        do
+                            /*rc = CfgVerify(j, 1, 1);*/
+                            rc = 0;
+                            if (\CfgIsConfigured(j)) then
+                                return 3;
+                        end
                         else
                             rc = CfgInstallUninstall(j, fRM);
                         leave;
@@ -499,7 +507,8 @@ return iRc;
 
 /**
  * Verifies a configuration.
- * @returns Return code from the environment procedure.
+ * @returns True if configured.
+ *          False if not configured.
  * @param   iTool   The tool index in aCfg.
  * @param   fQuiet  If set we'll to a quiet verify.
  */
