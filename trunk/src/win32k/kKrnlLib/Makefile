@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.7 2001-09-17 01:47:35 bird Exp $
+# $Id: Makefile,v 1.8 2001-09-17 02:27:54 bird Exp $
 
 #
 # kKrnlLib.sys makefile.
@@ -153,7 +153,7 @@ TSTOBJS =\
     $(WIN32KOBJ)\d32globals.obj \
     $(WIN32KOBJ)\d16globl.obj \
     $(WIN32KOBJ)\calltaba.obj \
-    $(WIN32KOBJ)\krnlInit.obj \
+    $(WIN32KOBJ)\krnlInit.obj_tst. \
     $(WIN32KOBJ)\krnlLockedWrite.obj \
     $(WIN32KOBJ)\krnlOverloading.obj \
     $(WIN32KOBJ)\krnlPrologs.obj \
@@ -246,7 +246,8 @@ $(ODIN32_LIB)\$(NAME).lib: $(WIN32KBIN)\MkCallTab.exe
 
 # List of object files in the converted devhelp library.
 DHLPOBJS =  +$(WIN32KOBJ)\dhcall5b.obj +$(WIN32KOBJ)\dhcal11a.obj \
-            +$(WIN32KOBJ)\dhcal11g.obj +$(WIN32KOBJ)\dhret.obj
+            +$(WIN32KOBJ)\dhcal11g.obj +$(WIN32KOBJ)\dhret.obj \
+            +$(WIN32KOBJ)\dhcall2e.obj
 
 # Make corrected devhelp library with only the required object files.
 $(WIN32KOBJ)\devhelp.lib: $(DDKPATH)\lib\dhcalls.lib $(WIN32KBIN)\libconv.exe $(DHLPOBJS:+=)

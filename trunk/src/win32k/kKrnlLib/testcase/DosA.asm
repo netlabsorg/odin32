@@ -1,4 +1,4 @@
-; $Id: DosA.asm,v 1.1 2001-09-17 01:41:12 bird Exp $
+; $Id: DosA.asm,v 1.2 2001-09-17 02:27:56 bird Exp $
 ;
 ; 16-bits Dos calls overloader
 ;
@@ -13,6 +13,7 @@
 ; Include files
 ;
     include devsegdf.inc
+    INCL_DOSERRORS EQU 1
     include os2.inc
     include devsym.inc
 
@@ -104,7 +105,7 @@ DOS16OPEN PROC FAR
     mov     eax, ds:[ebx+8]
     cmp     eax, 'lHln'                 ; 'nlHl'
     jnz     do_notkKrnlHlp
-    mov     eax, ds:[ebx+8]
+    mov     eax, ds:[ebx+0ch]
     cmp     ax, 'p'                     ; 'p\0'
     jnz     do_notkKrnlHlp
 
@@ -140,6 +141,7 @@ do_notkKrnlHlp:
     call far ptr _DOS16OPEN
     pop     bx
     pop     ds
+    mov     ax, ERROR_FILE_NOT_FOUND
     leave
     ret     01ah
 DOS16OPEN ENDP

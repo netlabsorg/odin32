@@ -1,4 +1,4 @@
-; $Id: DH.asm,v 1.1 2001-09-17 01:41:12 bird Exp $
+; $Id: DH.asm,v 1.2 2001-09-17 02:27:55 bird Exp $
 ;
 ; Device Helper Router.
 ; Stack Thunker.
@@ -109,6 +109,12 @@ dhr5:
     jmp     dhr_ret
 
 dhr6:
+    cmp     dl, DevHlp_VerifyAccess
+    jne     dhr7
+    call    dh_VerifyAccess
+    jmp     dhr_ret
+
+dhr7:
 
 dhr_notimplemented:
     stc
@@ -498,6 +504,20 @@ dh_VMUnlock PROC NEAR
     clc
     ret
 dh_VMUnlock ENDP
+
+
+;;
+; VerifyAccess stub.
+; @returns  NO_ERROR. (0)
+; @param    ignored.
+; @uses     eax
+; @status   stub.
+; @author   knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+dh_VerifyAccess PROC NEAR
+    xor     eax, eax
+    clc
+    ret
+dh_VerifyAccess ENDP
 
 
 CODE16 ENDS
