@@ -12,31 +12,6 @@
 
 #define ODINFONTSECTION "Font Mapping"
 
-#define DDRAW_CLASSID           "{D7B70EE0-4340-11CF-B063-0020AFC2CD35}"
-#define DDRAW_DEFAULT           "DirectDraw Object"
-#define DDRAW_CLIPPER_CLASSID   "{593817A0-7DB3-11CF-A2DE-00AA00B93356}"
-#define DDRAW_CLIPPER_DEFAULT   "DirectDraw Clipper Object"
-#define DDRAW_DLL               "ddraw.dll"
-#define DSOUND_CLASSID          "{47D4D946-62E8-11cf-93BC-444553540000}"
-#define DSOUND_DEFAULT          "DirectSound Object"
-#define DSOUND_DLL              "dsound.dll"
-#define DPLAYX_CLASSID          "{D1EB6D20-8923-11d0-9D97-00A0C90A43CB}"
-#define DPLAYX_DEFAULT          "DirectPlay Object"
-#define DPLAYX_DLL              "dplayx.dll"
-#define DPLAYX_LOBBY_CLASSID    "{2FE8F810-B2A5-11d0-A787-0000F803ABFC}"
-#define DPLAYX_LOBBY_DEFAULT    "DirectPlayLobby Object"
-#define DPLAYX_LOBBY_DLL        DPLAYX_DLL
-
-#define QUARTZ_DLL              "quartz.dll"
-#define QUARTZ_FILTER_CLASSID   "{CDA42200-BD88-11d0-BD4E-00A0C911CE86}"
-#define QUARTZ_FILTER_DEFAULT   "Filter Mapper2"
-#define QUARTZ_MEDIAPROP_CLASSID "{CDBD8D00-C193-11D0-BD4E-00A0C911CE86}"
-#define QUARTZ_MEDIAPROP_DEFAULT "CMediaPropertyBag"
-#define QUARTZ_DSOUNDREND_CLASSID "{79376820-07D0-11CF-A24D-0020AFD79767}"
-#define QUARTZ_DSOUNDREND_DEFAULT "DirectSound Audio Renderer"
-#define QUARTZ_FILTERGRAPHDIST_CLASSID "{e436ebb4-524f-11ce-9f53-0020af0ba770}"
-#define QUARTZ_FILTERGRAPHDIST_DEFAULT "Filter Graph Control Plug In Distributor"
-
 #define CLASS_DESKTOP           "Desktop"
 #define CLASS_SHORTCUT          "Shortcut"
 #define CLASS_SHELL32DLL        "shell32.dll"
