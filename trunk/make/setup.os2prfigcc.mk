@@ -1,7 +1,7 @@
-# $Id: setup.os2debigcc.mk,v 1.2 2004-03-09 15:23:12 bird Exp $
+# $Id: setup.os2prfigcc.mk,v 1.1 2004-03-09 15:23:22 bird Exp $
 
 # ---OS2, DEBUG, EMX----------------------------
-ENV_NAME="OS/2, Debug, Innotek GCC Compiler"
+ENV_NAME="OS/2, Profile, Innotek GCC Compiler"
 ENV_STATUS=OK
 !if "$(ENV_ENVS)" == ""
 ENV_ENVS=vac308 gcc322
@@ -35,7 +35,7 @@ CXX=g++.exe
 #
 # The flags
 #
-CC_FLAGS=-c -DDEBUG -DOS2 -D__32BIT__ -DMODEL=FLAT -Zomf -mcpu=i586 -g \
+CC_FLAGS=-c -DDEBUG -DOS2 -D__32BIT__ -DMODEL=FLAT -Zomf -mcpu=i586 -g -pg \
 		 -pedantic -Wall -Wconversion -Wpointer-arith -Wcast-align -Woverloaded-virtual -Wsynth -Wno-long-long -Wshadow \
          -Wstrict-prototypes -Wno-trigraphs -Wmissing-prototypes -Wwrite-strings -Winline -Wdisabled-optimization \
 		 $(_CC_OPTIONAL) \
@@ -52,7 +52,7 @@ CC_PC_2_STRIPPED_STDOUT=-E -P
 CC_AS_2_FILE=-S -o$(SPACE:_= )
 
 
-CXX_FLAGS=-c -DDEBUG -DOS2 -D__32BIT__ -DMODEL=FLAT -Zomf -Wall -mcpu=i586 -g \
+CXX_FLAGS=-c -DDEBUG -DOS2 -D__32BIT__ -DMODEL=FLAT -Zomf -Wall -mcpu=i586 -g -pg \
 		 -pedantic -Wall -Wconversion -Wpointer-arith -Wcast-align -Woverloaded-virtual -Wsynth -Wno-long-long -Wshadow \
          -Wstrict-prototypes -Wno-trigraphs -Wmissing-prototypes -Wwrite-strings -Winline -Wdisabled-optimization \
 		 $(_CXX_OPTIONAL) \

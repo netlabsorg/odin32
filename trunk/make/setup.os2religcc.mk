@@ -1,7 +1,7 @@
-# $Id: setup.os2debigcc.mk,v 1.2 2004-03-09 15:23:12 bird Exp $
+# $Id: setup.os2religcc.mk,v 1.1 2004-03-09 15:23:22 bird Exp $
 
 # ---OS2, DEBUG, EMX----------------------------
-ENV_NAME="OS/2, Debug, Innotek GCC Compiler"
+ENV_NAME="OS/2, Release, Innotek GCC Compiler"
 ENV_STATUS=OK
 !if "$(ENV_ENVS)" == ""
 ENV_ENVS=vac308 gcc322
@@ -35,10 +35,10 @@ CXX=g++.exe
 #
 # The flags
 #
-CC_FLAGS=-c -DDEBUG -DOS2 -D__32BIT__ -DMODEL=FLAT -Zomf -mcpu=i586 -g \
-		 -pedantic -Wall -Wconversion -Wpointer-arith -Wcast-align -Woverloaded-virtual -Wsynth -Wno-long-long -Wshadow \
+CC_FLAGS=-c -DOS2 -D__32BIT__ -DMODEL=FLAT -Zomf -mprobe -mcpu=i586 -O3 -g \
+         -Wall -Wconversion -Wpointer-arith -Wcast-align -Woverloaded-virtual -Wsynth -Wno-long-long -Wshadow \
          -Wstrict-prototypes -Wno-trigraphs -Wmissing-prototypes -Wwrite-strings -Winline -Wdisabled-optimization \
-		 $(_CC_OPTIONAL) \
+		 -pedantic -mcpu=i586 -O3 -g $(_CC_OPTIONAL) \
          $(CC_DEFINES:/D=-D) $(ALL_DEFINES:/D=-D) $(BUILD_DEFINES:/D=-D) $(CC_INCLUDES:^;= -I) $(ALL_INCLUDES:^;= -I) -I$(PATH_INCLUDES:^;= -I)
 CC_FLAGS_EXE=$(CC_FLAGS:  = ) -Zexe
 CC_FLAGS_DLL=$(CC_FLAGS:  = ) -Zdll
@@ -52,10 +52,10 @@ CC_PC_2_STRIPPED_STDOUT=-E -P
 CC_AS_2_FILE=-S -o$(SPACE:_= )
 
 
-CXX_FLAGS=-c -DDEBUG -DOS2 -D__32BIT__ -DMODEL=FLAT -Zomf -Wall -mcpu=i586 -g \
-		 -pedantic -Wall -Wconversion -Wpointer-arith -Wcast-align -Woverloaded-virtual -Wsynth -Wno-long-long -Wshadow \
+CXX_FLAGS=-c -DOS2 -D__32BIT__ -DMODEL=FLAT -Zomf -mprobe -mcpu=i586 -O3 -g \
+         -Wall -Wconversion -Wpointer-arith -Wcast-align -Woverloaded-virtual -Wsynth -Wno-long-long -Wshadow \
          -Wstrict-prototypes -Wno-trigraphs -Wmissing-prototypes -Wwrite-strings -Winline -Wdisabled-optimization \
-		 $(_CXX_OPTIONAL) \
+         $(_CXX_OPTIONAL) \
          $(CXX_DEFINES:/D=-D) $(ALL_DEFINES:/D=-D) $(BUILD_DEFINES:/D=-D) $(CXX_INCLUDES:^;= -I) $(ALL_INCLUDES:^;= -I) -I$(PATH_INCLUDES:^;= -I)
 CXX_FLAGS_EXE=$(CXX_FLAGS:  = ) -Zexe
 CXX_FLAGS_DLL=$(CXX_FLAGS:  = ) -Zdll
