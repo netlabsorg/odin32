@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.72 2001-05-28 14:43:34 phaller Exp $ */
+/* $Id: gdi32.cpp,v 1.73 2001-07-07 19:05:21 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -1456,9 +1456,9 @@ BOOL WIN32API CombineTransform(LPXFORM lLPXFORMResult,
            lLPXFORM2));
 
   XFORM xfrm;
-  if( O32_IsBadWritePtr( (void*)lLPXFORMResult, sizeof(XFORM)) ||
-      O32_IsBadReadPtr(  (void*)lLPXFORM1, sizeof(XFORM)) ||
-      O32_IsBadWritePtr( (void*)lLPXFORM2, sizeof(XFORM)) )
+  if( IsBadWritePtr( (void*)lLPXFORMResult, sizeof(XFORM)) ||
+      IsBadReadPtr(  (void*)lLPXFORM1, sizeof(XFORM)) ||
+      IsBadWritePtr( (void*)lLPXFORM2, sizeof(XFORM)) )
   return (FALSE);
 
   // Add the translations
