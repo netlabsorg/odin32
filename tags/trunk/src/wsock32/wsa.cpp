@@ -1,4 +1,4 @@
-/* $Id: wsa.cpp,v 1.8 2002-02-20 10:02:30 sandervl Exp $ */
+/* $Id: wsa.cpp,v 1.9 2002-03-18 10:03:49 sandervl Exp $ */
 
 /*
  *
@@ -38,7 +38,7 @@ BOOL WINAPI QueryPerformanceCounter(LARGE_INTEGER *p);
 
 #ifndef winsockcleanupsockets
 // Exported by SO32DLL.  Used to close all open sockets.
-void _System winsockcleanupsockets(void);
+void SYSTEM winsockcleanupsockets(void);
 #endif
 
 static void WSASetBlocking(BOOL fBlock);
@@ -80,6 +80,7 @@ ODINFUNCTION2(int, WSAStartup,
     /* return winsock information */
     memcpy(lpWSAData, &WINSOCK_data, sizeof(WINSOCK_data));
 
+    lpWSAData->wVersion = wVersionRequested;
     return 0;
 }
 //******************************************************************************
