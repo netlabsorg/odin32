@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1925 2001-12-26 14:48:22 achimha Exp $ */
+/* $Id: changelog,v 1.1926 2001-12-26 18:52:06 sandervl Exp $ */
 
  2001-12-26: Achim Hasenmueller <achimha@innotek.de>
     - USER32:   o use correct size for WarpSans as menu font in OS2Look=1 mode
@@ -12,6 +12,7 @@
                 o RedrawWindow change: call UpdateWindow if window has invalid
                   rectangle and RDW_UPDATENOW flag set
     - GDI32:    o Removed InternalDrawTextExA/W
+    - ODINBUG:  o Update by Herwig Bauernfeind (0.5.5)
 
  2001-12-23: Sander van Leeuwen <sandervl@xs4all.nl>
     - WINMM:    o DisableWaveAudio function added to disable wave audio (custom build)
