@@ -1,22 +1,27 @@
- /* $Id: changelog,v 1.988 2000-06-14 02:28:43 phaller Exp $ */
+ /* $Id: changelog,v 1.989 2000-06-14 13:19:02 sandervl Exp $ */
+
+ 2000-06-14: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:       Rewrote ExcludeUpdateRgn & GetUpdateRgn
+    - GDI32:        Put back region apis
+                    Rewrote region functions
 
  2000-06-14: Patrick Haller <phaller@gmx.net>
-    - KERNEL32:     - altered calling of dllEntryPoint() depending on
-                      static or dynamic loading if library according
-                      to the Win32 documentation. (StarCraft)
+    - KERNEL32:     Altered calling of dllEntryPoint() depending on
+                    static or dynamic loading if library according
+                    to the Win32 documentation. (StarCraft)
 
  2000-06-13: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:       Check if class already exists in RegisterClass(Ex)A/W
                     and return 0 (ERROR_CLASS_ALREADY_EXISTS) if true
 
  2000-06-12: Patrick Haller <phaller@gmx.net>
-    - LZ32:         - updated to current WINE level (minor changes)
+    - LZ32:         Updated to current WINE level (minor changes)
 
  2000-06-11: Patrick Haller <phaller@gmx.net>
-    - KERNEL32:     - moved GetNumberFormat to different source file and enhanced
-                      it a little (WinRAR shows file sizes)
-                    - creating an existing directory does not return an error ?!
-                    - updated GetStringTypeA/W and GetStringTypeExA/W
+    - KERNEL32:     Moved GetNumberFormat to different source file and enhanced
+                    it a little (WinRAR shows file sizes)
+                    Creating an existing directory does not return an error ?!
+                    Updated GetStringTypeA/W and GetStringTypeExA/W
 
     - SHLWAPI:      Added a whole lot of missing functions, forwarders, stubs
                     Only 50 more to go for IE4 ...
@@ -39,21 +44,20 @@
                     Call MsgNCPaint in RedrawWindow (WM_NCPAINT is not posted
                     if update region doesn't include (part of) the nonclient area.
                     -> fixes RealPlayer 7 titlebar, borders & menu
-                    GetTopWindow fix. (should work properly now)
-    - GDI32:        Moved clip & update region/rect functions into user32
+                    GetTopWindow fix. (should work properly now)                  
 
  2000-08-03: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
-    - tools/install: Added a stram 'close' on the changelog.
-                     (4OS2 can't copy files which are opened for write(?).
-                     The changelog has to be closed after copying it into
-                     the odininst.wis file.)
+    - tools/install:Added a stram 'close' on the changelog.
+                    (4OS2 can't copy files which are opened for write(?).
+                    The changelog has to be closed after copying it into
+                    the odininst.wis file.)
     - tools/DailyBuild:
-                     - Creates .WPI releases too.
-                       (odin32pack.cmd and odin32ftp2.cmd)
-                     - WarpIn is added to the build environment variables
-                       (odin32env.cmd).
-                     - WarpIn is added to the build environment variables
-                       (odin32env.cmd).
+                    Creates .WPI releases too.
+                    (odin32pack.cmd and odin32ftp2.cmd)
+                    WarpIn is added to the build environment variables
+                    (odin32env.cmd).
+                    WarpIn is added to the build environment variables
+                    (odin32env.cmd).
 
  2000-06-07: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:       Fixed wrong dispatch of WM_NCHITTEST
