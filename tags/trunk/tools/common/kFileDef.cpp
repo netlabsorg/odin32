@@ -1,4 +1,4 @@
-/* $Id: kFileDef.cpp,v 1.10 2002-08-25 22:35:46 bird Exp $
+/* $Id: kFileDef.cpp,v 1.11 2002-08-25 23:24:57 bird Exp $
  *
  * kFileDef - Definition files.
  *
@@ -202,7 +202,7 @@ void kFileDef::read(kFile *pFile)
             if (!setModuleName())
                 throw (kError(kError::DEF_BAD_LIBRARY_STATEMENT));
             fInitInstance = stristr(pszType, "INITINSTANCE") != NULL;
-            fInitGlobal   = stristr(pszType, "INITGLOBAL")   != NULL || !fInitInstance;
+            fInitGlobal   = stristr(pszType, "INITGLOBAL")   != NULL;
             fTermInstance = stristr(pszType, "TERMINSTANCE") != NULL;
             fTermGlobal   = stristr(pszType, "TERMGLOBAL")   != NULL || !fTermInstance;
         }
@@ -680,8 +680,14 @@ KBOOL kFileDef::makeWatcomLinkFileAddtion(kFile *pOut, int enmOS)
                                                                  : "PMCOMPATIBLE"))
                             : (fVirtualDevice                    ? "VIRTDEVICE"
                                                                  : "PHYSDEVICE" )),
-                          fLibrary ? (fInitGlobal ? "INITGLOBAL" : "INITINSTANCE") : "",
-                          fLibrary ? (fTermGlobal ? "TERMGLOBAL" : "TERMINSTANCE") : "");
+                          fLibrary ? (fInitGlobal || (!fInitInstance && !fTermInstance)
+                                                                 ? "INITGLOBAL"
+                                                                 : "INITINSTANCE")
+                                                                 : "",
+                          fLibrary ? (fTermGlobal || (!fTermInstance && !fInitInstance)
+                                                                 ? "TERMGLOBAL"
+                                                                 : "TERMINSTANCE")
+                                                                 : "");
             break;
 
         case kFileDef::os2v1:
@@ -692,8 +698,12 @@ KBOOL kFileDef::makeWatcomLinkFileAddtion(kFile *pOut, int enmOS)
                                                                  : "PMCOMPATIBLE"))
                             : (fVirtualDevice                    ? "VIRTDEVICE"
                                                                  : "PHYSDEVICE" )),
-                          fLibrary ? (fInitGlobal ? "INITGLOBAL" : "INITINSTANCE") : "",
-                          fLibrary ? (fTermGlobal ? "TERMGLOBAL" : "TERMINSTANCE") : "");
+                          fLibrary ? (fInitGlobal || fTermGlobal ? "INITGLOBAL" /* Not sure how correct these things are! */
+                                                                 : "")
+                                                                 : "",
+                          /*fLibrary ? (fTermGlobal || fInitGlobal ? "TERMGLOBAL"
+                                                                 : "")
+                                                                 :*/ "");
             break;
 
         case kFileDef::win32:
