@@ -1,4 +1,4 @@
-/* $Id: loadres.cpp,v 1.37 2001-05-25 10:04:59 sandervl Exp $ */
+/* $Id: loadres.cpp,v 1.38 2001-07-16 19:32:55 sandervl Exp $ */
 
 /*
  * Win32 resource API functions for OS/2
@@ -50,7 +50,7 @@ INT WIN32API LoadStringA(HINSTANCE instance, UINT resource_id,
             retval = lstrlenA( buffer );
         }
         else
-            *buffer = 0;
+            *buffer = 0; //NT4, SP6 clears first character
         HeapFree( GetProcessHeap(), 0, buffer2 );
     }
     return retval;
@@ -68,8 +68,8 @@ int WIN32API LoadStringW(HINSTANCE hinst, UINT wID, LPWSTR lpBuffer, int cchBuff
      * 20 - 31. */
     hRes = FindResourceW(hinst, (LPWSTR)(((wID>>4)&0xffff)+1), RT_STRINGW);
     if(hRes == NULL) {
-        dprintf(("LoadStringW NOT FOUND from %X, id %d buffersize %d\n", hinst, wID, cchBuffer));
-        *lpBuffer = 0;
+        dprintf(("LoadStringW NOT FOUND from %X, id %d buffersize %d\n", hinst, wID, cchBuffer)); 
+        *lpBuffer = 0;  //NT4, SP6 clears first character
         return 0;
     }
 
@@ -87,7 +87,7 @@ int WIN32API LoadStringW(HINSTANCE hinst, UINT wID, LPWSTR lpBuffer, int cchBuff
         }
         else {
                 if (cchBuffer > 1) {
-                        lpBuffer[0] = (WCHAR) 0;
+                        lpBuffer[0] = (WCHAR) 0;  //NT4, SP6 clears first character
                         return 0;
                 }
         }

@@ -1,4 +1,4 @@
-/* $Id: oslibres.cpp,v 1.15 2001-07-04 09:55:17 sandervl Exp $ */
+/* $Id: oslibres.cpp,v 1.16 2001-07-16 19:32:55 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -245,7 +245,9 @@ HANDLE OSLibWinCreatePointer(CURSORICONINFO *pInfo, char *pAndBits, BITMAP_W *pA
  char        *dest, *src;
 
     hps = WinGetScreenPS(HWND_DESKTOP);
-    masksize = sizeof(BITMAPINFO2) + (pAndBmp->bmHeight * 2 * pAndBmp->bmWidthBytes) + 2*sizeof(RGB2);
+    //SvL: 2*sizeof(RGB2) is enough, but GpiCreateBitmap seems to touch more
+    //     memory. (Adobe Photoshop 6 running in the debugger)
+    masksize = sizeof(BITMAPINFO2) + (pAndBmp->bmHeight * 2 * pAndBmp->bmWidthBytes) + 16*sizeof(RGB2);
     pBmpMask = (BITMAPINFO2 *)malloc(masksize);
     if(pBmpMask == NULL) {
         DebugInt3();
