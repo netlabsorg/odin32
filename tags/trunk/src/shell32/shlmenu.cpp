@@ -1,4 +1,4 @@
-/* $Id: shlmenu.cpp,v 1.3 1999-10-27 09:33:48 phaller Exp $ */
+/* $Id: shlmenu.cpp,v 1.4 1999-11-02 20:38:47 phaller Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -59,8 +59,9 @@ BOOL WINAPI FileMenu_DeleteAllItems (HMENU hMenu);
 BOOL WINAPI FileMenu_AppendItemA(HMENU hMenu, LPCSTR lpText, UINT uID, int icon, HMENU hMenuPopup, int nItemHeight);
 
 typedef struct
-{  BOOL     bInitialized;
-   BOOL     bIsMagic;
+{
+   BOOL     bInitialized;
+   BOOL     bFixedItems;
 
    /* create */
    COLORREF crBorderColor;
@@ -164,8 +165,11 @@ static int FM_InitMenuPopup(HMENU hmenu, LPITEMIDLIST pAlternatePidl)
    if (menudata->bInitialized)
      return 0;
 
-   uID = menudata->uID;
    pidl = ((pAlternatePidl) ? pAlternatePidl : menudata->pidl);
+   if (!pidl)
+      return 0;
+
+   uID = menudata->uID;
    uFlags = menudata->uFlags;
    uEnumFlags = menudata->uEnumFlags;
    lpfnCallback = menudata->lpfnCallback;
@@ -263,7 +267,6 @@ ODINFUNCTION5(HMENU, FileMenu_Create,
    crBorderColor, nBorderWidth, hBorderBmp, nSelHeight, uFlags, hMenu);
 
    menudata = (LPFMINFO)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(FMINFO));
-   menudata->bIsMagic = TRUE;
    menudata->crBorderColor = crBorderColor;
    menudata->nBorderWidth = nBorderWidth;
    menudata->hBorderBmp = hBorderBmp;
@@ -316,6 +319,8 @@ ODINFUNCTION6(BOOL, FileMenu_AppendItemA,
    LPSTR lpszText = (LPSTR)lpText;
    MENUITEMINFOA  mii;
    LPFMITEM myItem;
+   LPFMINFO menudata;
+   MENUINFO MenuInfo;
 
    TRACE("0x%08x %s 0x%08x 0x%08x 0x%08x 0x%08x\n",
    hMenu, (lpszText!=FM_SEPARATOR) ? lpText: NULL,
@@ -355,6 +360,18 @@ ODINFUNCTION6(BOOL, FileMenu_AppendItemA,
    mii.wID = uID;
 
    InsertMenuItemA (hMenu, (UINT)-1, TRUE, &mii);
+
+   /* set bFixedItems to true */
+   MenuInfo.cbSize = sizeof(MENUINFO);
+   MenuInfo.fMask = MIM_MENUDATA;
+
+   if (! GetMenuInfo(hMenu, &MenuInfo))
+     return FALSE;
+
+   menudata = (LPFMINFO)MenuInfo.dwMenuData;
+   assert ((menudata != 0) && (MenuInfo.cbSize == sizeof(MENUINFO)));
+   menudata->bFixedItems = TRUE;
+   SetMenuInfo(hMenu, &MenuInfo);
 
    return TRUE;
 
@@ -548,7 +565,7 @@ ODINFUNCTION2(LRESULT, FileMenu_MeasureItem,
 
    /* add the menubitmap */
    menuinfo = FM_GetMenuInfo(pMyItem->hMenu);
-   if (menuinfo->bIsMagic)
+   if (menuinfo->nBorderWidth)
      lpmis->itemWidth += menuinfo->nBorderWidth;
 
    TRACE("-- 0x%04x 0x%04x\n", lpmis->itemWidth, lpmis->itemHeight);
@@ -586,7 +603,7 @@ ODINFUNCTION2(LRESULT, FileMenu_DrawItem,
 
    /* add the menubitmap */
    menuinfo = FM_GetMenuInfo(pMyItem->hMenu);
-   if (menuinfo->bIsMagic)
+   if (menuinfo->nBorderWidth)
      TextRect.left += menuinfo->nBorderWidth;
 
    BorderRect.right = menuinfo->nBorderWidth;
@@ -977,5 +994,4 @@ ODINFUNCTION6(HRESULT, Shell_MergeMenus,
    }
    return(uIDMax);
 }
-
 
