@@ -1,4 +1,4 @@
-# $Id: odin32.post.mk,v 1.6 2001-11-22 10:46:07 phaller Exp $
+# $Id: odin32.post.mk,v 1.7 2002-02-23 23:51:49 bird Exp $
 
 #
 # Odin32 API
@@ -61,7 +61,7 @@ $(SOMLIB) \
 $(RTLLIB) \
 $(RTLLIB_O) \
 $(RTLLIB_NRE) \
-$(DEMANGLLIB) \
+$(LIB_DEMANGLE) \
     :
 
 

@@ -1,4 +1,4 @@
-# $Id: odin32.rel.vac36.mk,v 1.6 2001-10-19 01:36:23 bird Exp $
+# $Id: odin32.rel.vac36.mk,v 1.7 2002-02-23 23:51:50 bird Exp $
 
 #
 # Odin32 API
@@ -16,12 +16,7 @@ RTLLIB_O    = cpprmo36.lib
 RTLLIB_NRE  = cpprni36.lib
 DLLENTRY    = $(ODIN32_LIB)\dllentry.obj
 ODINCRT     = odincrt
-
-
-#
-# Object directory.
-#
-OBJDIR   = .\bin\release.vac36
+LIB_DEMANGLE = cpprds36.lib
 
 
 #
