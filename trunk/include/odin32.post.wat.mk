@@ -1,4 +1,4 @@
-# $Id: odin32.post.wat.mk,v 1.8 2000-12-16 23:40:54 bird Exp $
+# $Id: odin32.post.wat.mk,v 1.9 2001-01-08 22:53:03 bird Exp $
 
 #
 # Odin32 API
@@ -124,6 +124,9 @@ $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS) $(OS2RES) $(OBJDIR)\$(TARGET).l
 !ifdef OS2RES
     $(OS2RC) $(OS2RCLFLAGS) $(OS2RES) $@
 !endif
+!ifndef DEBUG
+    $(LXLITE) $@
+!endif
 !endif
 
 
@@ -178,6 +181,9 @@ $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS) $(OS2RES) $(OBJDIR)\$(TARGET).l
     $(LD2) @$(OBJDIR)\$(TARGET).lrf
 !ifdef OS2RES
     $(OS2RC) $(OS2RCLFLAGS) $(OS2RES) $@
+!endif
+!ifndef DEBUG
+    $(LXLITE) $@
 !endif
 !endif
 
