@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.5 1999-06-17 18:21:36 phaller Exp $ */
+/* $Id: KERNEL32.CPP,v 1.6 1999-06-17 21:52:00 phaller Exp $ */
 
 /*
  *
@@ -45,50 +45,6 @@
 
 
 /*****************************************************************************
- * Name      : BOOL WIN32API CreateEventA
- * Purpose   : forward call to Open32
- * Parameters:
- * Variables :
- * Result    :
- * Remark    :
- * Status    :
- *
- * Author    : Patrick Haller [Fri, 1998/06/12 03:44]
- *****************************************************************************/
-
-HANDLE WIN32API CreateEventA(LPSECURITY_ATTRIBUTES lpsa,
-                                BOOL                  fManualReset,
-                                BOOL                  fInitialState,
-                                LPCTSTR               lpszEventName)
-{
-  ULONG  rc;                                               /* API returncode */
-  HANDLE hOS2;                                         /* 32-bit OS/2 handle */
-  HANDLE hWindows;                                  /* 16-bit Windows handle */
-
-  dprintf(("KERNEL32::CreateEventA(%08xh, %08xh, %08xh, %s)\n",
-           lpsa,
-           fManualReset,
-           fInitialState,
-           lpszEventName));
-
-  hOS2 = O32_CreateEvent(lpsa,                         /* create event semaphore */
-                     fManualReset,
-                     fInitialState,
-                     lpszEventName);
-  if (hOS2 != 0)                                             /* check handle */
-  {
-    rc = HMHandleAllocate(&hWindows,                      /* allocate handle */
-                          hOS2);
-    if (rc == NO_ERROR)                                  /* check for errors */
-      return (hWindows);                         /* return translated handle */
-    else
-      return (0);                                   /* raise error condition */
-  }
-
-  return (hOS2);                 /* should have the correct error value here */
-}
-
-/*****************************************************************************
  * Name      : BOOL WIN32API CloseHandle
  * Purpose   : forward call to Open32
  * Parameters:
@@ -108,76 +64,6 @@ BOOL WIN32API CloseHandle(HANDLE hHandle)
 }
 
 
-/*****************************************************************************
- * Name      : BOOL WIN32API CreateEventW
- * Purpose   : forward call to Open32
- * Parameters:
- * Variables :
- * Result    :
- * Remark    : handle translation is done in CreateEventA
- * Status    :
- *
- * Author    : Patrick Haller [Fri, 1998/06/12 03:44]
- *****************************************************************************/
-
-HANDLE WIN32API CreateEventW(PSECURITY_ATTRIBUTES arg1,
-                             BOOL                 arg2,
-                             BOOL                 arg3,
-                             LPCWSTR               arg4)
-{
-  HANDLE rc;
-  char  *astring;
-
-  dprintf(("KERNEL32::CreateEventW>(%08xh, %08xh, %08xh, %s)\n",
-           arg1,
-           arg2,
-           arg3,
-           arg4));
-
-  astring = UnicodeToAsciiString((LPWSTR)arg4);
-
-  rc = O32_CreateEvent(arg1,
-                   arg2,
-                   arg3,
-                   astring);
-
-  FreeAsciiString(astring);
-
-  return(rc);
-}
-///@@@PH handlemanager
-//******************************************************************************
-//******************************************************************************
-HANDLE WIN32API CreateMutexA(LPSECURITY_ATTRIBUTES lpsa,
-                                BOOL                  fInitialOwner,
-                                LPCTSTR               lpszMutexName)
-{
-  dprintf(("KERNEL32:  CreateMutex\n"));
-
-  return(O32_CreateMutex(lpsa,
-                     fInitialOwner,
-                     lpszMutexName));
-}
-//******************************************************************************
-//******************************************************************************
-HANDLE WIN32API CreateMutexW(PSECURITY_ATTRIBUTES arg1,
-                             BOOL                 arg2,
-                             LPCWSTR              arg3)
-{
- HANDLE rc;
- char  *astring;
-
-  dprintf(("KERNEL32:  OS2CreateMutexW\n"));
-
-  astring = UnicodeToAsciiString((LPWSTR)arg3);
-  rc = O32_CreateMutex(arg1,
-                   arg2,
-                   astring);
-  FreeAsciiString(astring);
-
-  return(rc);
-}
-//******************************************************************************
 //******************************************************************************
 HANDLE WIN32API GetModuleHandleA(LPCTSTR lpszModule)
 {
@@ -214,20 +100,6 @@ HANDLE WIN32API GetStdHandle(DWORD fdwDevice)
   /* handle = GetStdHandle(fdwDevice); */
   dprintf(("KERNEL32:  GetStdHandle for device %X returned %X\n", fdwDevice, handle));
   return(handle);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API ReleaseMutex(HANDLE mutex)
-{
-  dprintf(("KERNEL32:  ReleaseMutex\n"));
-  return(O32_ReleaseMutex(mutex));
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SetEvent(HANDLE hEvent)
-{
-  dprintf(("KERNEL32:  SetEvent\n"));
-  return(O32_SetEvent(hEvent));
 }
 //******************************************************************************
 //******************************************************************************
@@ -272,53 +144,6 @@ BOOL WIN32API TlsSetValue(DWORD index, LPVOID val)
 //  dprintf(("KERNEL32:  TlsSetValue\n"));
   return(O32_TlsSetValue(index, val));
 }
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API WaitForSingleObject(HANDLE hObject,
-                                      DWORD  timeout)
-{
-  dprintf(("KERNEL32:  WaitForSingleObject (%08xh, %08xh)\n",
-           hObject,
-           timeout));
-
-  return(O32_WaitForSingleObject(hObject,
-                             timeout));
-}
-//******************************************************************************
-
-
-/*****************************************************************************
- * Name      : DWORD OS2WaitForSingleObjectEx
- * Purpose   : The WaitForSingleObjectEx function is an extended wait function
- *             that can be used to perform an alertable wait. This enables the
- *             function to return when the system queues an I/O completion
- *             routine to be executed by the calling thread. The function also
- *             returns when the specified object is in the signaled state or
- *             when the time-out interval elapses.
- * Parameters: HANDLE hObject     handle of object to wait for
- *             DWORD  dwTimeout   time-out interval in milliseconds
- *             BOOL   fAlertable  alertable wait flag
- * Variables :
- * Result    : 0xFFFFFFFF in case of error
- * Remark    : only really required for async I/O
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-
-DWORD WIN32API WaitForSingleObjectEx(HANDLE hObject,
-                                        DWORD        dwTimeout,
-                                        BOOL         fAlertable)
-{
-  dprintf(("Kernel32: WaitForSingleObjectEx(%08xh,%08xh,%08xh) not implemented correctly.\n",
-           hObject,
-           dwTimeout,
-           fAlertable));
-
-  return(O32_WaitForSingleObject(hObject,
-                             dwTimeout));
-}
-
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API IsBadWritePtr(LPVOID lpvPtr, UINT cbBytes)
@@ -403,13 +228,6 @@ UINT WIN32API GetACP(VOID)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API FlushFileBuffers(HANDLE hFile)
-{
-  dprintf(("KERNEL32:  FlushFileBuffers\n"));
-  return(O32_FlushFileBuffers(hFile));
-}
-//******************************************************************************
-//******************************************************************************
 LONG WIN32API InterlockedDecrement(LPLONG lplVal)
 {
   dprintf(("KERNEL32:  InterlockedDecrement\n"));
@@ -428,13 +246,6 @@ LONG WIN32API InterlockedExchange( PLONG arg1, LONG  arg2)
 {
     dprintf(("KERNEL32:  InterlockedExchange\n"));
     return O32_InterlockedExchange(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-UINT WIN32API SetHandleCount(UINT cHandles)
-{
-  dprintf(("KERNEL32:  GetHandleCount\n"));
-  return(O32_SetHandleCount(cHandles));
 }
 //******************************************************************************
 //******************************************************************************
@@ -761,58 +572,11 @@ VOID WIN32API DeleteCriticalSection( CRITICAL_SECTION * arg1)
     O32_DeleteCriticalSection(arg1);
 }
 //******************************************************************************
-//SvL: 24-6-'97 - Added
-//SvL: 28-6-'97: Fix for timeSetEvent in Red Alert Map Editor
-//******************************************************************************
-BOOL WIN32API DuplicateHandle(HANDLE srcprocess, HANDLE srchandle, HANDLE destprocess,
-                                 PHANDLE desthandle, DWORD arg5, BOOL arg6, DWORD  arg7)
-{
- BOOL rc;
-
-#if 0
-    //SvL:
-    //If source & destination process are identical, just copy handle
-    //(if target pointer != NULL)
-    //timeSetEvent's timer handler expects to be called from another process,
-    //but we just create a separate timer thread inside the client process
-    if(srcprocess == destprocess) {
-        if(desthandle != NULL)
-                *desthandle = srchandle;
-        return(TRUE);
-    }
-#endif
-    rc = O32_DuplicateHandle(srcprocess, srchandle, destprocess, desthandle, arg5, arg6, arg7);
-////    dprintf(("KERNEL32:  OS2DuplicateHandle returned %d\n", rc));
-    return(rc);
-}
-//******************************************************************************
 //******************************************************************************
 BOOL WIN32API Beep( DWORD arg1, DWORD  arg2)
 {
     dprintf(("KERNEL32:  OS2Beep\n"));
     return O32_Beep(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-HANDLE WIN32API CreateSemaphoreA(PSECURITY_ATTRIBUTES arg1, LONG arg2, LONG arg3, LPCSTR arg4)
-{
-    dprintf(("KERNEL32:  OS2CreateSemaphoreA\n"));
-    return O32_CreateSemaphore(arg1, arg2, arg3, (LPSTR)arg4);
-}
-//******************************************************************************
-//******************************************************************************
-HANDLE WIN32API CreateSemaphoreW(PSECURITY_ATTRIBUTES arg1,
-                                 LONG arg2, LONG arg3,
-                                 LPCWSTR arg4)
-{
- HANDLE rc;
- char   *astring;
-
-    dprintf(("KERNEL32:  OS2CreateSemaphoreW"));
-    astring = UnicodeToAsciiString((LPWSTR)arg4);
-    rc = O32_CreateSemaphore(arg1, arg2, arg3, astring);
-    FreeAsciiString(astring);
-    return(rc);
 }
 //******************************************************************************
 //******************************************************************************
@@ -866,13 +630,6 @@ LPSTR WIN32API GetEnvironmentStringsA(void)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GetOverlappedResult(HANDLE arg1, LPOVERLAPPED arg2, LPDWORD arg3, BOOL  arg4)
-{
-    dprintf(("KERNEL32:  OS2GetOverlappedResult\n"));
-    return O32_GetOverlappedResult(arg1, arg2, arg3, arg4);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API IsBadHugeReadPtr( const void * arg1, UINT  arg2)
 {
     dprintf(("KERNEL32:  OS2IsBadHugeReadPtr\n"));
@@ -908,145 +665,10 @@ int WIN32API MulDiv(int arg1, int arg2, int  arg3)
 }
 //******************************************************************************
 //******************************************************************************
-HANDLE WIN32API OpenEventA( DWORD arg1, BOOL arg2, LPCSTR  arg3)
-{
-    dprintf(("KERNEL32:  OS2OpenEventA\n"));
-    return O32_OpenEvent(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-HANDLE WIN32API OpenEventW(DWORD dwDesiredAccess, BOOL bInheritHandle,
-                           LPCWSTR lpName)
-{
- char  *asciiname;
- HANDLE rc;
-
-    dprintf(("KERNEL32:  OS2OpenEventW\n"));
-    asciiname = UnicodeToAsciiString((LPWSTR)lpName);
-    rc = O32_OpenEvent(dwDesiredAccess, bInheritHandle, asciiname);
-    FreeAsciiString(asciiname);
-    return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-HANDLE WIN32API OpenMutexA( DWORD arg1, BOOL arg2, LPCSTR  arg3)
-{
-    dprintf(("KERNEL32:  OS2OpenMutexA\n"));
-    return O32_OpenMutex(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-HANDLE WIN32API OpenMutexW(DWORD dwDesiredAccess, BOOL bInheritHandle,
-                           LPCWSTR lpName)
-{
- char  *asciiname;
- HANDLE rc;
-
-    dprintf(("KERNEL32:  OS2OpenMutexW\n"));
-    asciiname = UnicodeToAsciiString((LPWSTR)lpName);
-    rc = O32_OpenMutex(dwDesiredAccess, bInheritHandle, asciiname);
-    FreeAsciiString(asciiname);
-    return(rc);
-}
-//******************************************************************************
-//******************************************************************************
 HANDLE WIN32API OpenProcess(DWORD arg1, BOOL arg2, DWORD arg3)
 {
     dprintf(("KERNEL32:  OS2OpenProcess\n"));
     return O32_OpenProcess(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-HANDLE WIN32API OpenSemaphoreA( DWORD arg1, BOOL arg2, LPCSTR  arg3)
-{
-    dprintf(("KERNEL32:  OS2OpenSemaphoreA"));
-    return O32_OpenSemaphore(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-HANDLE WIN32API OpenSemaphoreW(DWORD dwDesiredAccess, BOOL bInheritHandle,
-                               LPCWSTR lpName)
-{
- char  *asciiname;
- HANDLE rc;
-
-    dprintf(("KERNEL32:  OS2OpenSemaphoreW"));
-    asciiname = UnicodeToAsciiString((LPWSTR)lpName);
-    rc = O32_OpenSemaphore(dwDesiredAccess, bInheritHandle, asciiname);
-    FreeAsciiString(asciiname);
-    return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API PulseEvent( HANDLE arg1)
-{
-    dprintf(("KERNEL32:  OS2PulseEvent\n"));
-    return O32_PulseEvent(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API ReleaseSemaphore( HANDLE arg1, LONG arg2, PLONG  arg3)
-{
-    dprintf(("KERNEL32:  OS2ReleaseSemaphore"));
-    return O32_ReleaseSemaphore(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API ResetEvent(HANDLE arg1)
-{
-  dprintf(("KERNEL32: ResetEvent(%08xh)\n",
-           arg1));
-
-  return O32_ResetEvent(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API WaitForMultipleObjects( DWORD arg1, const HANDLE * arg2, BOOL arg3, DWORD  arg4)
-{
-    dprintf(("KERNEL32:  OS2WaitForMultipleObjects"));
-    return O32_WaitForMultipleObjects(arg1, arg2, arg3, arg4);
-}
-
-
-/*****************************************************************************
- * Name      : DWORD OS2WaitForMultipleObjectsEx
- * Purpose   : The WaitForMultipleObjectsEx function is an extended wait
- *             function that can be used to perform an alertable wait. This
- *             enables the function to return when the system queues an I/O
- *             completion routine to be executed by the calling thread. The
- *             function also returns either when any one or when all of the
- *             specified objects are in the signaled state, or when the
- *             time-out interval elapses.
- * Parameters: DWORD  cObjects    number of handles in handle array
- *             HANDLE *lphObjects address of object-handle array
- *             BOOL   fWaitAll    wait flag
- *             DWORD  dwTimeout   time-out interval in milliseconds
- *             BOOL   fAlertable  alertable wait flag
- * Variables :
- * Result    : 0xFFFFFFFF in case of error
- * Remark    : only really required for async I/O
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-
-DWORD WIN32API WaitForMultipleObjectsEx(DWORD        cObjects,
-                                           CONST HANDLE *lphObjects,
-                                           BOOL         fWaitAll,
-                                           DWORD        dwTimeout,
-                                           BOOL         fAlertable)
-{
-  dprintf(("Kernel32: WaitForMultipleObjectsEx(%08xh,%08xh,%08xh,%08xh,%08xh) not implemented correctly.\n",
-           cObjects,
-           lphObjects,
-           fWaitAll,
-           dwTimeout,
-           fAlertable));
-
-  return(O32_WaitForMultipleObjects(cObjects,
-                                   lphObjects,
-                                   fWaitAll,
-                                   dwTimeout));
 }
 //******************************************************************************
 //******************************************************************************
@@ -1455,13 +1077,6 @@ int WIN32API GetNumberFormatW(LCID     Locale,
            cchNumber));
 
   return 0;
-}
-
-HANDLE WIN32API ConvertToGlobalHandle(HANDLE hHandle)
-//HANDLE WIN32API ConvertToGlobalHandle(HANDLE hHandle,
-//                                      BOOL   fInherit)
-{
-  return (hHandle);
 }
 
 BOOL WIN32API FindCloseChangeNotification(HANDLE hChange)
