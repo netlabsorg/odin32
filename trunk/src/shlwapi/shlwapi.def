@@ -1,4 +1,4 @@
-; $Id: shlwapi.def,v 1.22 2001-05-19 09:13:12 sandervl Exp $
+; $Id: shlwapi.def,v 1.23 2001-05-19 11:14:01 sandervl Exp $
 
 ; updated export ordinals to NT4 SP6 version of SHLWAPI.DLL
 ; Note: W95/W98 has DIFFERENT export ordinals
@@ -233,7 +233,7 @@ EXPORTS
                              _GetNumberFormatW@24                 @339 NONAME
                              _MessageBoxW@16                      @340 NONAME
                              _FindNextFileW@8                     @341 NONAME
-                             _SHLWAPI_342@16                      @342 NONAME
+  _SHLWAPI_342@12 = _InterlockedCompareExchange@12                @342 NONAME
                              _SHLWAPI_346@12                      @346 NONAME
                              _RegDeleteValueW@8                   @347 NONAME
 

@@ -747,6 +747,7 @@ HICON WINAPI SHLWAPI_337(LPCWSTR lpszFile, INT nIconIndex, HICON *phiconLarge,
   return pfnFunc(lpszFile, nIconIndex, phiconLarge, phiconSmall, nIcons);
 }
 #ifndef __WIN32OS2__
+//Bugbug: is forwarder for InterlockedCompareExchange
 /*************************************************************************
  *      SHLWAPI_342	[SHLWAPI.342]
  *
