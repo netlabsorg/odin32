@@ -1,4 +1,4 @@
-/* $Id: typelib.cpp,v 1.8 2000-01-05 18:29:54 davidr Exp $ */
+/* $Id: typelib.cpp,v 1.9 2000-01-05 19:44:34 sandervl Exp $ */
 /* 
  * ITypelib interface
  * 
@@ -981,6 +981,9 @@ void TypeLibExtract::ParseValue(int offset, VARIANT * pVar)
 
 	    // Allocate BSTR container and then convert directly into it...
 //???A Fix
+	    //SvL: *pStringLen == -1 in MS Office 2k install
+            if(*pStringLen == -1)
+		*pStringLen = 0;
 	    V_UNION(pVar, bstrVal) = SysAllocStringLen(NULL, *pStringLen);
 	    AsciiToUnicodeN(pString, V_UNION(pVar, bstrVal), *pStringLen);
 	    return;
