@@ -1,4 +1,4 @@
-/* $Id: changenotify.c,v 1.3 2002-06-09 12:41:20 sandervl Exp $ */
+/* $Id: changenotify.c,v 1.4 2002-06-25 07:11:58 sandervl Exp $ */
 /*
  *	shell change notification
  *
@@ -25,7 +25,7 @@ static CRITICAL_SECTION SHELL32_ChangenotifyCS = CRITICAL_SECTION_INIT;
 typedef struct _NOTIFICATIONLIST
 {
 	struct _NOTIFICATIONLIST *next;
-	struct _NOTIFICATIONLIST *prev; 
+	struct _NOTIFICATIONLIST *prev;
 	HWND hwnd;		/* window to notify */
 	DWORD uMsg;		/* message to send */
 	LPNOTIFYREGISTER apidl; /* array of entries to watch*/
@@ -54,13 +54,13 @@ void FreeChangeNotifications()
 	ptr = head.next;
 
 	while(ptr != &tail)
-	{ 
+	{
 	  int i;
 	  item = ptr;
 	  ptr = ptr->next;
 
 	  TRACE("item=%p\n", item);
-	  
+	
 	  /* free the item */
 	  for (i=0; i<item->cidl;i++) SHFree(item->apidl[i].pidlPath);
 	  SHFree(item->apidl);
@@ -105,14 +105,18 @@ static BOOL DeleteNode(LPNOTIFICATIONLIST item)
 	EnterCriticalSection(&SHELL32_ChangenotifyCS);
 
 	ptr = head.next;
+#ifdef __WIN32OS2__
+	while((ptr != &tail)/* && (ret == FALSE) see the rant below */)
+#else
 	while((ptr != &tail) && (ret == FALSE))
-	{ 
+#endif
+	{
 	  TRACE("ptr=%p\n", ptr);
-	  
+	
 	  if (ptr == item)
 	  {
 	    int i;
-	    
+	
 	    TRACE("item=%p prev=%p next=%p\n", item, item->prev, item->next);
 
 	    /* remove item from list */
@@ -123,7 +127,19 @@ static BOOL DeleteNode(LPNOTIFICATIONLIST item)
 	    for (i=0; i<item->cidl;i++) SHFree(item->apidl[i].pidlPath);
 	    SHFree(item->apidl);
 	    SHFree(item);
-	    ret = TRUE;
+#ifdef __WIN32OS2__
+	    /* ret = TRUE;
+             * <rant> HEY! Have you guys ever heard about the break keyword?
+             * And please don't test if ret == FALSE. Test !ret!!! </rant>
+             * Anyway, ptr == item, we free item hence the memory shouldn't be
+             * accessed by us any longer. We have to break here so we do NOT do
+             * the next operation below!
+             * -bird-
+             */
+            break;
+#else
+            ret = TRUE;
+#endif
 	  }
 	  ptr = ptr->next;
 	}
@@ -221,7 +237,7 @@ void WINAPI SHChangeNotifyW (LONG wEventId, UINT  uFlags, LPCVOID dwItem1, LPCVO
 	while(ptr != &tail)
 	{
 	  TRACE("trying %p\n", ptr);
-	  
+	
 	  if(wEventId & ptr->wEventMask)
 	  {
 	    TRACE("notifying\n");
@@ -267,7 +283,7 @@ void WINAPI SHChangeNotifyA (LONG wEventId, UINT  uFlags, LPCVOID dwItem1, LPCVO
 	while(ptr != &tail)
 	{
 	  TRACE("trying %p\n", ptr);
-	  
+	
 	  if(wEventId & ptr->wEventMask)
 	  {
 	    TRACE("notifying\n");
