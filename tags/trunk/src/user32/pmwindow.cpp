@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.17 1999-10-07 10:51:47 achimha Exp $ */
+/* $Id: pmwindow.cpp,v 1.18 1999-10-07 13:02:16 achimha Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -57,8 +57,8 @@ USHORT virtualKeyTable [66] = {
                0x14,    // VK_CAPSLOCK      VK_CAPITAL
                0x1B,    // VK_ESC           VK_ESCAPE
                0x20,    // VK_SPACE         VK_SPACE
-               0x22,    // VK_PAGEUP        VK_NEXT
-               0x21,    // VK_PAGEDOWN      VK_PRIOR
+               0x21,    // VK_PAGEUP        VK_PRIOR
+               0x22,    // VK_PAGEDOWN      VK_NEXT
                0x23,    // VK_END           VK_END
                0x24,    // VK_HOME          VK_HOME
                0x25,    // VK_LEFT          VK_LEFT
