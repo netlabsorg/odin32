@@ -1,4 +1,4 @@
-; $Id: devfirst.asm,v 1.3 2000-02-15 23:39:19 bird Exp $
+; $Id: devfirst.asm,v 1.4 2000-02-21 04:45:46 bird Exp $
 ;
 ; DevFirst - entrypoint and segment definitions
 ;
@@ -238,5 +238,14 @@ BSS32 ends
 CONST32_RO segment
 CONST32_ROSTART label byte
 CONST32_RO ends
+
+_VFT segment
+_VFTSTART LABEL BYTE
+_VFT ends
+
+EH_DATA segment
+EH_DATASTART LABEL BYTE
+EH_DATA ends
+
 END
 

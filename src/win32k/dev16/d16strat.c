@@ -1,4 +1,4 @@
-/* $Id: d16strat.c,v 1.5 2000-02-20 04:27:22 bird Exp $
+/* $Id: d16strat.c,v 1.6 2000-02-21 04:45:45 bird Exp $
  *
  * d16strat.c - 16-bit strategy routine, device headers, device_helper (ptr)
  *              and 16-bit IOClts.
@@ -144,6 +144,8 @@ USHORT dev0GenIOCtl(PRP_GENIOCTL pRp)
             case D16_IOCTL_GETKRNLOTES:
             {
                 ULONG ulLin;
+                if (fInitTime && TKSSBase16 == 0)
+                    initGetDosTableData();
                 if (DevHelp_VirtToLin(SELECTOROF(pRp->DataPacket), OFFSETOF(pRp->DataPacket),
                                       &ulLin) != NO_ERROR)
                     return STATUS_DONE | STERR | ERROR_I24_INVALID_PARAMETER;
@@ -152,7 +154,11 @@ USHORT dev0GenIOCtl(PRP_GENIOCTL pRp)
 
             case D16_IOCTL_VERIFYPROCTAB:
                 if (fInitTime)
+                {
+                    if (TKSSBase16 == 0)
+                        initGetDosTableData();
                     return CallVerifyImportTab32();
+                }
                 break;
         }
     }
