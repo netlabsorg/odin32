@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.279 1999-10-07 11:03:09 achimha Exp $ */
+ /* $Id: ChangeLog,v 1.280 1999-10-07 13:03:08 achimha Exp $ */
+
+ 99-10-07: Achim Hasenmueller <achimha@innotek.de>
+        - USER32: Corrected pageup/pagedown behavior
 
  99-10-07: Rene Pronk <R.Pronk@twi.tudelft.nl>
         - USER32: Fixed WM_WINDOWPOSCHANGED behavior so that
