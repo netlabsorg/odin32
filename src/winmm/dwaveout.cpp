@@ -1,4 +1,4 @@
-/* $Id: dwaveout.cpp,v 1.15 2000-02-27 20:29:46 sandervl Exp $ */
+/* $Id: dwaveout.cpp,v 1.16 2000-03-02 14:51:15 sandervl Exp $ */
 
 /*
  * Wave playback class
@@ -144,6 +144,7 @@ void DartWaveOut::Init(LPWAVEFORMATEX pwfx)
    this->nChannels = pwfx->nChannels;
    ulBufSize       = DART_BUFSIZE;
 
+   dprintf(("waveOutOpen: samplerate %d, numChan %d bps %d, format %x", SampleRate, nChannels, BitsPerSample, pwfx->wFormatTag));
    // Setup the open structure, pass the playlist and tell MCI_OPEN to use it
    memset(&AmpOpenParms,0,sizeof(AmpOpenParms));
 
@@ -530,7 +531,7 @@ ULONG DartWaveOut::getPosition()
     mciStatus.ulItem = MCI_STATUS_POSITION;
     rc = mciSendCommand(DeviceId, MCI_STATUS, MCI_STATUS_ITEM|MCI_WAIT, (PVOID)&mciStatus, 0);
     if((rc & 0xFFFF) == MCIERR_SUCCESS) {
-        nrbytes = (mciStatus.ulReturn * getAvgBytesPerSecond())/1000;
+        nrbytes = (mciStatus.ulReturn * (getAvgBytesPerSecond()/1000));
         return nrbytes;;
     }
     mciError(rc);
