@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.16 1999-09-26 22:24:29 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.17 1999-09-27 19:43:04 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1346,6 +1346,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
     case WM_NCHITTEST: //TODO: Calculate position of
         return HTCLIENT;
 
+#if 0
     case WM_SYSKEYDOWN:
 	    if(HIWORD(lParam) & KEYDATA_ALT)
 	    {
@@ -1358,6 +1359,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
     	    }
     	}
     	return 0;
+#endif
 
     default:
         return 1;
