@@ -1,4 +1,4 @@
-/* $Id: winimage.cpp,v 1.13 1999-08-22 14:24:35 sandervl Exp $ */
+/* $Id: winimage.cpp,v 1.14 1999-08-23 13:54:43 sandervl Exp $ */
 
 /*
  * Win32 PE Image class
@@ -34,6 +34,7 @@
 #include "unicode.h"
 #include "winres.h"
 #include "os2util.h"
+#include "initterm.h"
 
 char szErrorTitle[]     = "Win32 for OS/2";
 char szMemErrorMsg[]    = "Memory allocation failure";
@@ -70,10 +71,6 @@ Win32Image::Win32Image(char *szFileName) :
   //RegisterDll is called
   fNativePEImage = TRUE;
 
-  if(foutInit == FALSE) {
-    fout.open("pe.log", ios::out | ios::trunc);
-    foutInit = TRUE;
-  }
   strcpy(this->szFileName, szFileName);
 
   strcpy(szModule, StripPath(szFileName));
@@ -86,6 +83,14 @@ Win32Image::Win32Image(char *szFileName) :
   }
   if(dot)
 	*dot = 0;
+
+  if(foutInit == FALSE) {
+    char logname[32];
+	sprintf(logname, "pe_%d.log", loadNr);
+    	fout.open(logname, ios::out | ios::trunc);
+	dprintf(("PE LOGFILE for %s: %s (rc=%d)", szModule, logname));
+    	foutInit = TRUE;
+  }
 
 #ifdef DEBUG
   magic = MAGIC_WINIMAGE;
