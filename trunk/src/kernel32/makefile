@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.63 1999-11-26 08:17:40 achimha Exp $
+# $Id: makefile,v 1.64 1999-11-29 00:04:05 bird Exp $
 
 #
 # PD-Win32 API
@@ -69,10 +69,10 @@ $(TARGET).dll: $(OBJS) $(TARGET).def $(TARGET).lrf
 $(TARGET).lrf: makefile
         @echo Creating file <<$(@B).lrf
 $(OBJS)
+$(PDWIN32_LIB)\odincrt.lib
 $(PDWIN32_LIB)\PMWINX.LIB
 $(PDWIN32_LIB)\LIBULS.LIB
 $(PDWIN32_LIB)\LIBCONV.LIB
-$(PDWIN32_LIB)\odincrt.lib
 OS2386.LIB
 $(RTLLIB_O)
 $(TARGET).def
