@@ -1,4 +1,4 @@
-/* $Id: codepage.cpp,v 1.5 2000-10-02 18:39:33 sandervl Exp $
+/* $Id: codepage.cpp,v 1.6 2000-10-02 21:40:57 phaller Exp $
 **
 ** Module   :CODEPAGE.CPP
 ** Abstract :
@@ -13,7 +13,8 @@
 #include <odinwrap.h>
 #include <os2win.h>
 #include "oslibdos.h"
-#include "profile.h"
+//#include "profile.h"
+#include <options.h>
 #include "codepage.h"
 
 #define DBG_LOCALLOG	DBG_codepage
