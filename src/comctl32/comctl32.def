@@ -1,4 +1,4 @@
-; $Id: comctl32.def,v 1.8 1999-06-12 18:19:14 achimha Exp $
+; $Id: comctl32.def,v 1.9 1999-06-13 11:14:38 achimha Exp $
 LIBRARY COMCTL32 INITINSTANCE
 DESCRIPTION 'COMCTL32 Common Controls Library'
 DATA MULTIPLE NONSHARED
@@ -67,7 +67,7 @@ EXPORTS
   CreatePropertySheetPageW     = _CreatePropertySheetPageW@4         @20
   DestroyPropertySheetPage     = _DestroyPropertySheetPage@4         @24
 
-  MakeDragList                 = _MakeDragList@4                     @4
+  MakeDragList                 = _MakeDragList@4                     @13
   DrawInsert                   = _DrawInsert@12                      @15
   LBItemFromPt                 = _LBItemFromPt@16                    @14
 
