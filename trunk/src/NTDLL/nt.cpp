@@ -1,4 +1,4 @@
-/* $Id: nt.cpp,v 1.5 2000-01-05 19:37:29 sandervl Exp $ */
+/* $Id: nt.cpp,v 1.6 2000-02-09 23:35:12 sandervl Exp $ */
 
 
 /*
@@ -132,6 +132,13 @@ NTSTATUS WINAPI NtQueryInformationProcess(HANDLE           ProcessHandle,
            ProcessInformation,
            ProcessInformationLength,
            ReturnLength));
+
+  // fake application, no debugger is running :)
+  if(ProcessInformationClass == ProcessDebugPort)
+  {
+    memset(ProcessInformation, 0, ProcessInformationLength);
+    return TRUE;
+  }
 
   return 0;
 }
