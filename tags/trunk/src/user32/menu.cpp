@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.28 2000-12-05 13:05:50 sandervl Exp $*/
+/* $Id: menu.cpp,v 1.29 2001-01-01 11:48:10 sandervl Exp $*/
 /*
  * Menu functions
  *
@@ -1825,7 +1825,12 @@ static BOOL MENU_SetItemData( MENUITEM *item, UINT flags, UINT id,
         }
     }
     else if (IS_BITMAP_ITEM(flags))
+#ifdef __WIN32OS2__
+        //SvL: Our bitmap handles are 32 bits!
+        item->text = (LPSTR)str;
+#else
         item->text = (LPSTR)(HBITMAP)LOWORD(str);
+#endif
     else item->text = NULL;
 
     if (flags & MF_OWNERDRAW)
@@ -3716,7 +3721,7 @@ BOOL WINAPI InsertMenuW( HMENU hMenu, UINT pos, UINT flags,
 BOOL WINAPI AppendMenuA( HMENU hMenu, UINT flags,
                              UINT id, LPCSTR data )
 {
-    dprintf(("USER32: AppendMenuA"));
+    dprintf(("USER32: AppendMenuA %x %x %d %x", hMenu, flags, id, data));
 
     return InsertMenuA( hMenu, -1, flags | MF_BYPOSITION, id, data );
 }
