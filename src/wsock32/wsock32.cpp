@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.8 1999-10-20 20:10:58 phaller Exp $ */
+/* $Id: wsock32.cpp,v 1.9 1999-10-20 20:41:54 phaller Exp $ */
 
 /*
  *
@@ -66,15 +66,6 @@ ODINDEBUGCHANNEL(WSOCK32-WSOCK32)
  * Defines                                                                   *
  *****************************************************************************/
 
-#define GETSERVBYNAME    1
-#define GETSERVBYPORT    2
-#define GETPROTOBYNAME   3
-#define GETPROTOBYNUMBER 4
-#define GETHOSTBYNAME    5
-#define GETHOSTBYADDR    6
-
-#define BLOCKING 0
-#define NONBLOCKING 1
 
 #ifdef FD_CLR
 #undef FD_CLR
@@ -88,30 +79,14 @@ ODINDEBUGCHANNEL(WSOCK32-WSOCK32)
 #endif
 
 
+// forwarder prototypes
+void _System SetLastError(int iError);
+int  _System GetLastError(void);
+
+
 /*****************************************************************************
  * Structures                                                                *
  *****************************************************************************/
-
-typedef struct WSAStruct
-{
-  int CallingWhat;
-  HWND hw;
-  u_int msg;
-  char *carg1;
-  char *carg2;
-  int iarg1;
-  int iarg2;
-  char *buf;
-  int buflen;
-} WSAStruct;
-
-typedef struct PipeStruct
-{
-  AsyncStatus as;
-  int MsgLoop;
-  HFILE rcv;
-  HFILE snd;
-} PipeStruct;
 
 typedef struct sockaddr* PSOCKADDR;
 
@@ -135,301 +110,15 @@ typedef struct sockaddr* PSOCKADDR;
  * Prototypes                                                                *
  *****************************************************************************/
 
-void _System AsyncLoop             (ULONG);
-void         CheckThreads          (AsyncStatus *);
-void         NotifyApp             (int,AsyncStatus *);
-int          Notify                (AsyncStatus *,int);
-int          NotifyWSA             (HWND hw,u_int msg,UINT wp,LONG lp);
-void _System WSAFunct              (ULONG); // for the wsa database calls
-void         SetErrForDatabaseCalls(void);
-
 
 /*****************************************************************************
  * Local variables                                                           *
  *****************************************************************************/
 
+// @@@PH not reentrancy proof
 static WHOSTENT whsnt;
 static WSERVENT wsvnt;
 static WPROTOENT wptnt;
-size_t nSize;
-int *pArray;
-
-int MsgSent;
-int LocalErrorNumber = 0;
-
-TID tidAsyncLoop = 0;     /* ID of AsyncSelect (AsyncLoop) thread */
-
-PipeStruct PS;
-
-AsyncStatus *TopASY = 0;
-
-
-/*
-typedef struct AsyncStatus {
-    HWND hwnd;     // owner's hwindow
-    u_int msg;     // message to send when event occurs
-    long event;    // event that may occur
-    SOCKET socket; // the socket
-    int status;    // blocking yes/no
-    TID threadID;  // Thread ID for async
-    int MsgStat;   // has message been sent yet?
-    struct AsyncStatus *Next; // pointer to next AsyncStatus in the list
-    struct AsyncStatus *Prev; // pointer to previous AsyncStatus in the list
-} AsyncStatus;
-*/
-
-
-/*****************************************************************************
- * Name      :
- * Purpose   :
- * Parameters:
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-void _System AsyncLoop(ULONG ASP)
-{
-  int socks[1],r,w,e,rc,ii;
-  AsyncStatus *as;
-
-  as = (AsyncStatus *)ASP;
-
-  r = w = e = 0;
-  if(as->event & FD_READ) r = 1;
-  if(as->event & FD_WRITE) w = 1;
-  if(as->event & FD_OOB) e = 1;
-
-  socks[0] = (int)as->socket;
-
-  if((r+w+e) == 0)
-  {
-    dprintf(("WSOCK32: Turning off async\n"));
-
-    ii = 0;
-    rc = ioctl(socks[0],FIONBIO,(char *)&ii,sizeof(ii));
-    as->threadID = 0;
-    as->hwnd = 0;
-    as->msg = 0;
-    as->event = 0;
-    as->status = BLOCKING;
-    return;
-  } // end if
-  else
-  {
-    dprintf(("WSOCK32: Setting up non-blocking sockets\n"));
-    ii = 1;
-    rc = ioctl(socks[0],FIONBIO,(char *)&ii,sizeof(ii));
-    if(rc != 0)
-    {
-      dprintf(("WSOCK32: ioctl failed trying to non-block.\n"));
-      return;
-    }
-    as->status = NONBLOCKING;
-  } // end else
-
-  do
-  {
-    rc = select(socks[0],(fd_set*)&r,0,0,0); // ioctl may be better for this.
-    if(rc > 0)
-    {
-      rc = ioctl(socks[0],FIONREAD,(char *)&ii,sizeof(ii));
-      if(rc == 0 && ii > 0)
-      {
-        /* data is ready */
-        NotifyApp(FD_READ,as);
-      }
-    }
-
-    if(rc < 0)
-    {
-      rc = sock_errno();
-      /* something ain't right */
-      if(rc == 10038)
-      { // Connection closed
-        NotifyApp(FD_CLOSE,as);
-        DosSleep(500);
-        return;
-      }
-
-      dprintf(("WSOCK32: Select error: %d\n",
-               rc));
-    } // end if
-    DosSleep(50);
-  }
-  while(1);
-}
-
-
-/*****************************************************************************
- * Name      :
- * Purpose   :
- * Parameters:
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-void CheckThreads(AsyncStatus *as)
-{
-  AsyncStatus *asy;
-
-  if(as != NULL)
-    if(as->threadID != 0) DosKillThread(as->threadID);
-
-  for(asy = TopASY; asy; asy = asy->Next)
-    if(asy->threadID != 0)
-      DosKillThread(asy->threadID);
-}
-
-
-/*****************************************************************************
- * Name      :
- * Purpose   :
- * Parameters:
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-void NotifyApp(int xx,AsyncStatus *as)
-{
-  BOOL    fResult;        /* message-posted indicator             */
-  unsigned long ii;
-
-
-//#ifdef DEBUG
-//    WriteLog("WSOCK32: Notifying the caller.  rc = %d\n",xx);
-//#endif
-
-  if(as->MsgStat == 0)
-  {
-   fResult = Notify(as,xx);
-   dprintf(("WSOCK32: Notify returns: %d\n",
-            fResult));
-  } // end if
-
-  if(as->MsgStat == 2)
-    as->MsgStat = 0;
-  else
-    as->MsgStat = 1;
-}
-
-
-/*****************************************************************************
- * Name      :
- * Purpose   :
- * Parameters:
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-void _System WSAFunct(ULONG xx)
-{
-  WSAStruct *wsa;
-  WSERVENT *ooo;
-  char *yy;
-  int ii;
-  size_t ss;
-  UINT wp;
-  LONG lp;
-  int id = *_threadid;
-
-  wsa = (WSAStruct *)xx;
-
-  dprintf(("WSOCK32: WSAFunct: xx = %p, hwnd = %p\n",
-           xx,
-           wsa->hw));
-
-  dprintf(("WSOCK32: WSAFunct info carg1 = %s, carg2 = %s\n",
-           wsa->carg1,
-           wsa->carg2));
-
-  dprintf(("WSOCK32: WSAFunct info buf = %p, %d\n",
-           wsa->buf,
-           wsa->buflen));
-
-  switch (wsa->CallingWhat)
-  {
-    case GETSERVBYNAME:
-      yy = (char *)OS2getservbyname(wsa->carg1,wsa->carg2);
-      ss = sizeof(WSERVENT);
-      break;
-    case GETSERVBYPORT:
-      yy = (char *)OS2getservbyport(wsa->iarg1,wsa->carg1);
-      break;
-    case GETPROTOBYNUMBER:
-      yy = (char *)OS2getprotobynumber(wsa->iarg1);
-      break;
-    case GETPROTOBYNAME:
-      yy = (char *)OS2getprotobyname(wsa->carg1);
-      break;
-    case GETHOSTBYNAME:
-      yy = (char *)OS2gethostbyname(wsa->carg1);
-      break;
-    case GETHOSTBYADDR:
-      yy = (char *)OS2gethostbyaddr(wsa->carg1,wsa->iarg1,wsa->iarg2);
-      break;
-    default:
-      yy = (char *)NULL;
-      OS2WSASetLastError(-5000);
-      break;
-  } // end switch
-
-#ifdef DEBUG
-  if(yy)
-  {
-    ooo = (WSERVENT *)yy;
-    dprintf(("WSOCK32: WSAFunct service name = %s, port = %d\n",
-             ooo->s_name,
-             (int)ooo->s_port));
-  }
-#endif
-
-  wp = id;
-
-  if(yy == (char *)NULL)
-  {
-    dprintf(("WSOCK32: WSAFunct error carg1 = %s, carg2 = %s\n",
-             wsa->carg1,
-             wsa->carg2));
-
-   ii = OS2WSAGetLastError();
-   lp = OS2WSAMAKEASYNCREPLY(0,ii);
-  } // end if
-  else
-  {
-    if(wsa->buflen < ss)
-      ii = WSAENOBUFS;
-    else
-      ii = 0;
-
-    lp = OS2WSAMAKEASYNCREPLY(ss,ii);
-    if(ii == 0)
-      memmove(wsa->buf,yy,ss);
-  }
-
-  do
-  {
-    if(WinQueryAnchorBlock(wsa->hw))
-          ii = NotifyWSA(wsa->hw,wsa->msg,wp,lp);
-  } while(ii != TRUE);
-
-  free(wsa);
-}
 
 
 /*****************************************************************************
@@ -466,30 +155,6 @@ void SetErrForDatabaseCalls(void)
                h_errno));
       break;
   }
-}
-
-
-/*****************************************************************************
- * Name      :
- * Purpose   :
- * Parameters:
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-AsyncStatus * FindASY(SOCKET s)
-{
-  AsyncStatus *as;
-
-  for(as = TopASY; as; as = as->Next)
-    if(as->socket == s)
-      return as;
-
-  return NULL;
 }
 
 
@@ -572,22 +237,6 @@ ODINFUNCTION3(int,OS2bind,SOCKET,          s,
 
 ODINFUNCTION1(int,OS2closesocket,SOCKET,s)
 {
-  AsyncStatus *as;
-
-  as = FindASY(s);
-  if(as == NULL)
-  {
-    LocalErrorNumber = 10038;
-    return -1;
-  }
-
-  CheckThreads(as);
-
-  if(as->Prev && as->Next)
-    as->Prev->Prev = as->Next->Next; // I SURE HOPE THIS IS RIGHT!!!!!!!!
-
-  free(as);
-
   return soclose((int)s);
 }
 
@@ -840,22 +489,7 @@ ODINFUNCTION4(int,OS2recv,SOCKET,s,
                           int,   len,
                           int,   flags)
 {
-  unsigned long ii;
-  int           xx,
-                yy;
-  char          buff[200];
-  AsyncStatus   *as;
-
-  PS.MsgLoop = 0;
-
-  as = FindASY(s);
-
-  if(as != NULL)
-    as->MsgStat = 2;
-
-  xx = recv(s,buf,len,flags);
-
-  return xx;
+  return recv(s,buf,len,flags);
 }
 
 
@@ -1028,38 +662,7 @@ ODINFUNCTION3(SOCKET,OS2socket,int,af,
                                int,type,
                                int,protocol)
 {
-  SOCKET s;
-  AsyncStatus *as;
-
-  s = (SOCKET)socket(af,type,protocol);
-  if(s > 0)
-  {
-    as = (AsyncStatus *)malloc(sizeof(AsyncStatus));
-    if(as != NULL)
-    {
-      as->hwnd = (HWND)0;
-      as->msg = 0;
-      as->event = 0L;
-      as->socket = s;
-      as->status = BLOCKING;
-      as->threadID = 0;
-      as->MsgStat = 0;
-      as->Next = TopASY;
-      as->Prev = NULL;
-
-      if(TopASY)
-        TopASY->Prev = as;
-
-      TopASY = as;
-    }
-    else
-    {
-      soclose(s);
-      return -1;
-    }
-  }
-
-  return s;
+  return (SOCKET)socket(af,type,protocol);
 }
 
 
@@ -1321,8 +924,6 @@ ODINFUNCTION2(int,OS2WSAStartup,USHORT,   wVersionRequired,
   lpWsaData->iMaxSockets = 2048;
   strcpy(lpWsaData->szSystemStatus,"No Status");
 
-  LocalErrorNumber = 0;
-
   if(sock_init() == 0)
   {
 #ifdef DEBUG
@@ -1351,8 +952,6 @@ ODINFUNCTION2(int,OS2WSAStartup,USHORT,   wVersionRequired,
 
 ODINFUNCTION0(int,OS2WSACleanup)
 {
-  CheckThreads((AsyncStatus *)NULL);
-
   return 0;
 }
 
@@ -1371,7 +970,7 @@ ODINFUNCTION0(int,OS2WSACleanup)
 
 ODINPROCEDURE1(OS2WSASetLastError,int,iError)
 {
-  LocalErrorNumber = iError;
+  SetLastError(iError);
 }
 
 
@@ -1389,17 +988,7 @@ ODINPROCEDURE1(OS2WSASetLastError,int,iError)
 
 ODINFUNCTION0(int,OS2WSAGetLastError)
 {
-  int ii;
-
-  if(LocalErrorNumber == 0)
-  {
-    ii = sock_errno(); // WSAGetLastError();
-    return ii;
-  }
-  else
-  {
-    return LocalErrorNumber;
-  }
+  return GetLastError();
 }
 
 
