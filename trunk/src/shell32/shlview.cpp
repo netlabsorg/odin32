@@ -1,4 +1,4 @@
-/* $Id: shlview.cpp,v 1.7 2000-03-22 16:55:52 cbratschi Exp $ */
+/* $Id: shlview.cpp,v 1.8 2000-03-24 17:17:28 cbratschi Exp $ */
 /*
  * ShellView
  *
@@ -13,7 +13,7 @@
  * The shellview is not supposed to know much about the colums
  * appearing in the view. To fix this it should use the IShellFolder2
  * interface when possible to get the informations dynamically
- * this will take a lot of work to implemet and wont likely not
+ * this will take a lot of work to implement and wont likely not
  * be done in near future
  * Please considder this when code new features. Mail me if you
  * are in doubt how to do things. (jsch 25/10/99)
@@ -104,6 +104,7 @@ extern struct ICOM_VTABLE(IViewObject) vovt;
 #define LISTVIEW_COLUMN_TYPE 2
 #define LISTVIEW_COLUMN_TIME 3
 #define LISTVIEW_COLUMN_ATTRIB 4
+//CB: todo: drive view!
 
 /*menu items */
 #define IDM_VIEW_FILES  (FCIDM_SHVIEWFIRST + 0x500)
@@ -327,7 +328,7 @@ static BOOL ShellView_InitList(IShellViewImpl * This)
           break;
         lvColumn.fmt = sd.fmt;
         lvColumn.cx = sd.cxChar*8; /* chars->pixel */
-         StrRetToStrNA( szTemp, 50, &sd.str, NULL);
+        StrRetToStrNA( szTemp, 50, &sd.str, NULL);
         ListView_InsertColumnA(This->hWndList, i, &lvColumn);
       }
    }
@@ -474,11 +475,16 @@ static HRESULT ShellView_FillList(IShellViewImpl * This)
    DWORD    dwFetched;
    UINT     i;
    LVITEMA  lvItem;
-   HRESULT     hRes;
+   HRESULT  hRes;
    HDPA     hdpa;
 
+//CB: really slow, even without debug information
+   //DecreaseLogCount();
    TRACE("%p\n",This);
 
+//CB: FindFirstFileA, many calls to FindNextFileA in this block
+//    OS/2's APIs can read more than one file per call -> much faster
+//    -> add a new API for faster handling
    /* get the itemlist from the shfolder*/
    hRes = IShellFolder_EnumObjects(This->pSFParent,This->hWnd, SHCONTF_NONFOLDERS | SHCONTF_FOLDERS, &pEnumIDList);
    if (hRes != S_OK)
@@ -488,8 +494,9 @@ static HRESULT ShellView_FillList(IShellViewImpl * This)
      return(hRes);
    }
 
+//CB: ILClone calls
    /* create a pointer array */
-   hdpa = pDPA_Create(16);
+   hdpa = pDPA_Create(64);
    if (!hdpa)
    {
      return(E_OUTOFMEMORY);
@@ -504,23 +511,26 @@ static HRESULT ShellView_FillList(IShellViewImpl * This)
      }
    }
 
+//CB: only Get* calls
    /*sort the array*/
    pDPA_Sort(hdpa, (PFNDPACOMPARE)ShellView_CompareItems, (LPARAM)This->pSFParent);
 
    /*turn the listview's redrawing off*/
    SendMessageA(This->hWndList, WM_SETREDRAW, FALSE, 0);
 
-   for (i=0; i < DPA_GetPtrCount(hdpa); ++i)   /* DPA_GetPtrCount is a macro*/
+   ZeroMemory(&lvItem, sizeof(lvItem));                   /* create the listviewitem*/
+   lvItem.mask = LVIF_TEXT | LVIF_IMAGE | LVIF_PARAM;     /*set the mask*/
+   lvItem.pszText = LPSTR_TEXTCALLBACKA;                  /*get text on a callback basis*/
+   lvItem.iImage = I_IMAGECALLBACK;                       /*get the image on a callback basis*/
+
+   for (i = 0; i < DPA_GetPtrCount(hdpa); ++i)   /* DPA_GetPtrCount is a macro*/
    {
      pidl = (LPITEMIDLIST)DPA_GetPtr(hdpa, i);
+
      if (IncludeObject(This, pidl) == S_OK) /* in a commdlg This works as a filemask*/
      {
-       ZeroMemory(&lvItem, sizeof(lvItem)); /* create the listviewitem*/
-       lvItem.mask = LVIF_TEXT | LVIF_IMAGE | LVIF_PARAM;     /*set the mask*/
-       lvItem.iItem = i;  /*add the item to the end of the list*/
-       lvItem.lParam = (LPARAM) pidl;             /*set the item's data*/
-       lvItem.pszText = LPSTR_TEXTCALLBACKA;         /*get text on a callback basis*/
-       lvItem.iImage = I_IMAGECALLBACK;           /*get the image on a callback basis*/
+       lvItem.iItem = i;                                      /*add the item to the end of the list*/
+       lvItem.lParam = (LPARAM)pidl;                         /*set the item's data*/
        ListView_InsertItemA(This->hWndList, &lvItem);
      }
      else
@@ -534,6 +544,7 @@ static HRESULT ShellView_FillList(IShellViewImpl * This)
 
    IEnumIDList_Release(pEnumIDList); /* destroy the list*/
    pDPA_Destroy(hdpa);
+   //IncreaseLogCount();
 
    return S_OK;
 }
@@ -1077,6 +1088,7 @@ static LRESULT ShellView_OnNotify(IShellViewImpl * This, UINT CtlID, LPNMHDR lpn
               if (This->pSF2Parent)
               {
                 SHELLDETAILS sd;
+
                 IShellFolder2_GetDetailsOf(This->pSF2Parent, pidl, lpdi->item.iSubItem, &sd);
                 StrRetToStrNA( lpdi->item.pszText, lpdi->item.cchTextMax, &sd.str, NULL);
                 TRACE("-- text=%s\n",lpdi->item.pszText);

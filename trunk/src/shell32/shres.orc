@@ -1,4 +1,4 @@
-/* $Id: shres.orc,v 1.1 2000-03-06 23:39:08 bird Exp $ */
+/* $Id: shres.orc,v 1.2 2000-03-24 17:17:29 cbratschi Exp $ */
 /*
  * Top level resource file for Common Dialogs
  *
@@ -27,60 +27,60 @@ LANGUAGE 0,0
 
 MENU_001 MENU DISCARDABLE
 BEGIN
-	MENUITEM "Lar&ge Icons",	FCIDM_SHVIEW_BIGICON
-	MENUITEM "S&mall Icons",	FCIDM_SHVIEW_SMALLICON
-	MENUITEM "&List",		FCIDM_SHVIEW_LISTVIEW
-	MENUITEM "&Details",		FCIDM_SHVIEW_REPORTVIEW
+        MENUITEM "Lar&ge Icons",        FCIDM_SHVIEW_BIGICON
+        MENUITEM "S&mall Icons",        FCIDM_SHVIEW_SMALLICON
+        MENUITEM "&List",               FCIDM_SHVIEW_LISTVIEW
+        MENUITEM "&Details",            FCIDM_SHVIEW_REPORTVIEW
 END
 
 MENU_002 MENU DISCARDABLE
 BEGIN
-	POPUP""
-	BEGIN
-	  POPUP "&View"
-	  BEGIN
-	    MENUITEM "Lar&ge Icons",	FCIDM_SHVIEW_BIGICON
-	    MENUITEM "S&mall Icons",	FCIDM_SHVIEW_SMALLICON
-	    MENUITEM "&List",		FCIDM_SHVIEW_LISTVIEW
-	    MENUITEM "&Details",	FCIDM_SHVIEW_REPORTVIEW
-	  END
-	  MENUITEM SEPARATOR
-	  POPUP "Arrange &Icons"
-	  BEGIN
-	    MENUITEM "By &Name",	0x30	/* column 0 */
-	    MENUITEM "By &Type",	0x32	/* column 2 */
-	    MENUITEM "By &Size",	0x31	/* ... */
-	    MENUITEM "By &Date",	0x33
-	    MENUITEM SEPARATOR
-	    MENUITEM "&Auto Arrange",	FCIDM_SHVIEW_AUTOARRANGE
-	  END
-	  MENUITEM "Line up Icons",	FCIDM_SHVIEW_SNAPTOGRID
-	  MENUITEM SEPARATOR
-	  MENUITEM "Paste",		FCIDM_SHVIEW_INSERT
-	  MENUITEM "Paste as Link",	FCIDM_SHVIEW_INSERTLINK
-	  POPUP "New"
-	  BEGIN
-	    MENUITEM "New &Folder",	0x7053
-	    MENUITEM "New &Link",	0x7052
-	    MENUITEM SEPARATOR
-	  END
-	  MENUITEM "Propertys",		FCIDM_SHVIEW_PROPERTIES
-	END
+        POPUP""
+        BEGIN
+          POPUP "&View"
+          BEGIN
+            MENUITEM "Lar&ge Icons",    FCIDM_SHVIEW_BIGICON
+            MENUITEM "S&mall Icons",    FCIDM_SHVIEW_SMALLICON
+            MENUITEM "&List",           FCIDM_SHVIEW_LISTVIEW
+            MENUITEM "&Details",        FCIDM_SHVIEW_REPORTVIEW
+          END
+          MENUITEM SEPARATOR
+          POPUP "Arrange &Icons"
+          BEGIN
+            MENUITEM "By &Name",        0x30    /* column 0 */
+            MENUITEM "By &Type",        0x32    /* column 2 */
+            MENUITEM "By &Size",        0x31    /* ... */
+            MENUITEM "By &Date",        0x33
+            MENUITEM SEPARATOR
+            MENUITEM "&Auto Arrange",   FCIDM_SHVIEW_AUTOARRANGE
+          END
+          MENUITEM "Line up Icons",     FCIDM_SHVIEW_SNAPTOGRID
+          MENUITEM SEPARATOR
+          MENUITEM "Paste",             FCIDM_SHVIEW_INSERT
+          MENUITEM "Paste as Link",     FCIDM_SHVIEW_INSERTLINK
+          POPUP "New"
+          BEGIN
+            MENUITEM "New &Folder",     0x7053
+            MENUITEM "New &Link",       0x7052
+            MENUITEM SEPARATOR
+          END
+          MENUITEM "Properties",        FCIDM_SHVIEW_PROPERTIES
+        END
 END
 
 MENU_SHV_FILE MENU DISCARDABLE
 BEGIN
-	POPUP""
-	BEGIN
-	  MENUITEM "C&ut",		FCIDM_SHVIEW_CUT
-	  MENUITEM "&Copy",	FCIDM_SHVIEW_COPY
-	  MENUITEM SEPARATOR
-	  MENUITEM "&Link",	0x7051
-	  MENUITEM "&Delete",	FCIDM_SHVIEW_DELETE
-	  MENUITEM "&Rename",	0x7050
-	  MENUITEM SEPARATOR
-	  MENUITEM "&Propertys",	FCIDM_SHVIEW_PROPERTIES
-	END
+        POPUP""
+        BEGIN
+          MENUITEM "C&ut",              FCIDM_SHVIEW_CUT
+          MENUITEM "&Copy",             FCIDM_SHVIEW_COPY
+          MENUITEM SEPARATOR
+          MENUITEM "&Link",             0x7051
+          MENUITEM "&Delete",           FCIDM_SHVIEW_DELETE
+          MENUITEM "&Rename",           0x7050
+          MENUITEM SEPARATOR
+          MENUITEM "&Properties",       FCIDM_SHVIEW_PROPERTIES
+        END
 END
 SHBRSFORFOLDER_MSGBOX DIALOG 15, 40, 128, 152
 STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
@@ -90,44 +90,45 @@ FONT 8, "Helv"
  DEFPUSHBUTTON "OK", 1, 4, 132, 50, 12
  PUSHBUTTON "Cancel", 2, 58, 132, 50, 12
  CONTROL "Tree1",99,"SysTreeView32",
- 	TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT |
-	WS_BORDER | WS_TABSTOP,
-	4, 4, 120, 120
+        TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT |
+        WS_BORDER | WS_TABSTOP,
+        4, 4, 120, 120
 }
 
 /*
-	columns in the shellview
+        columns in the shellview
 */
 STRINGTABLE DISCARDABLE
 {
-	IDS_SHV_COLUMN1		"File"
-	IDS_SHV_COLUMN2		"Size"
-	IDS_SHV_COLUMN3		"Type"
-	IDS_SHV_COLUMN4		"Modifyed"
-	IDS_SHV_COLUMN5		"Size"		/* drive view */
-	IDS_SHV_COLUMN6		"Size avaiable"	/* drive view */
+        IDS_SHV_COLUMN1         "File"
+        IDS_SHV_COLUMN2         "Size"
+        IDS_SHV_COLUMN3         "Type"
+        IDS_SHV_COLUMN4         "Modified"
+        IDS_SHV_COLUMN5         "Attrs"
+        IDS_SHV_COLUMN3DV       "Size"           /* drive view */
+        IDS_SHV_COLUMN4DV       "Size available" /* drive view */
 }
 
 /*
-	special folders
+        special folders
 */
 STRINGTABLE DISCARDABLE
 {
-	IDS_DESKTOP		"Desktop"
-	IDS_MYCOMPUTER		"My Computer"
+        IDS_DESKTOP             "Desktop"
+        IDS_MYCOMPUTER          "My Computer"
 }
 
 /*
-	context menus
+        context menus
 */
 STRINGTABLE DISCARDABLE
 {
-	IDS_VIEW_LARGE		"Lar&ge Icons"
-	IDS_VIEW_SMALL		"S&mall Icons"
-	IDS_VIEW_LIST		"&List"
-	IDS_VIEW_DETAILS	"&Details"
-	IDS_SELECT		"Select"
-	IDS_OPEN		"Open"
+        IDS_VIEW_LARGE          "Lar&ge Icons"
+        IDS_VIEW_SMALL          "S&mall Icons"
+        IDS_VIEW_LIST           "&List"
+        IDS_VIEW_DETAILS        "&Details"
+        IDS_SELECT              "Select"
+        IDS_OPEN                "Open"
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -162,12 +163,12 @@ BEGIN
     END
     BLOCK "VarFileInfo"
     BEGIN
-	VALUE "Translation", 0x409, 0x04E4
+        VALUE "Translation", 0x409, 0x04E4
     END
 END
 
 /* document */
-0	ICON
+0       ICON
 {'
 00 00 01 00 04 00 10 10 10 00 00 00 00 00 28 01
 00 00 46 00 00 00 10 10 00 00 00 00 00 00 68 05
@@ -467,7 +468,7 @@ ac ac ac ac ac ac 00 00 00 00 00 00 00 00 00 00
 '}
 
 /* folder */
-3	ICON
+3       ICON
 {'
 00 00 01 00 04 00 10 10 10 00 00 00 00 00 28 01
 00 00 46 00 00 00 10 10 00 00 00 00 00 00 68 05
@@ -767,7 +768,7 @@ ff 00 c0 c0 c0 00 a4 a0 a0 00 58 58 58 00 30 30
 '}
 
 /* drive */
-8	ICON
+8       ICON
 {'
 00 00 01 00 04 00 10 10 10 00 00 00 00 00 28 01
 00 00 46 00 00 00 10 10 00 00 00 00 00 00 68 05
@@ -1067,7 +1068,7 @@ ff 00 dc c0 b2 00 00 00 00 00 00 00 00 00 00 00
 '}
 
 /* mycomputer */
-15	ICON
+15      ICON
 {'
 00 00 01 00 02 00 10 10 10 00 00 00 00 00 28 01
 00 00 26 00 00 00 20 20 10 00 00 00 00 00 e8 02
@@ -1140,7 +1141,7 @@ ff ff ff ff ff ff 00 00 00 00 00 00 00 00 00 00
 '}
 
 /* desktop */
-34	ICON
+34      ICON
 {'
 00 00 01 00 02 00 10 10 10 00 00 00 00 00 28 01
 00 00 26 00 00 00 20 20 10 00 00 00 00 00 e8 02
