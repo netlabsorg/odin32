@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.606 2000-01-03 21:35:33 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.607 2000-01-04 19:50:11 sandervl Exp $ */
+
+ 2000-01-04: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: InsertMenu bugfix (RealPlayer calls InsertMenu with flag 0 & pos -1)
+                  Delete old region in SetWindowRegion
 
  2000-01-03: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
 	- KERNEL32: Named pipe updates & bugfixes
