@@ -396,11 +396,17 @@ static int ExtractFromEXEDLL(const char *szFileName, int nIndex, const char *szX
             hResInfo = FindResourceA(hModule, MAKEINTRESOURCEA(nIndex), RT_ICONA);        
             if(hResInfo) {
                 GRPICONDIR icondir = {0};
+                BITMAPINFO *bmi;
+
+     	        bmi = (BITMAPINFO *)LockResource(LoadResource(hModule, hResInfo));
 
                 icondir.idReserved = 0;
                 icondir.idType     = 1;
                 icondir.idCount    = 1;
                 icondir.idEntries[0].nID = nIndex;
+                icondir.idEntries[0].bHeight = bmi->bmiHeader.biHeight/2;
+                icondir.idEntries[0].bWidth  = bmi->bmiHeader.biWidth;
+                icondir.idEntries[0].wBitCount = bmi->bmiHeader.biBitCount;
 
                 if(!SaveIconResAsOS2ICO(&icondir, hModule, szXPMFileName))
                 {
