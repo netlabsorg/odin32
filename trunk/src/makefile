@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 1999-06-07 20:57:55 sandervl Exp $ 
+# $Id: makefile,v 1.4 1999-08-09 12:43:44 phaller Exp $
 
 #
 # PD-Win32 API
@@ -20,7 +20,9 @@ MAKE_CMD = nmake -nologo
 !endif
 
 all:
-        cd kernel32
+        cd odincrt
+        $(MAKE_CMD)
+        cd ..\kernel32
         $(MAKE_CMD)
         cd ..\gdi32
         $(MAKE_CMD)
@@ -65,7 +67,9 @@ all:
         $(MAKE_CMD)
 
 clean:
-        cd pe2lx
+        cd odincrt
+        $(MAKE_CMD) clean
+        cd ..\pe2lx
         $(MAKE_CMD) clean
         cd ..\kernel32
         $(MAKE_CMD) clean
