@@ -1,4 +1,4 @@
-/* $Id: db.cpp,v 1.21 2000-08-02 20:20:36 bird Exp $ *
+/* $Id: db.cpp,v 1.22 2001-09-05 09:27:27 bird Exp $ *
  *
  * DB - contains all database routines.
  *
@@ -1193,7 +1193,7 @@ BOOL            _System dbAddDesignNote(signed long lDll,
      */
     if (lSeqNbr == 0)
     {
-        sprintf(&szQuery[0], "SELECT MAX(lSeqNbr) + 1 FROM designnote WHERE dll = %ld'", lDll);
+        sprintf(&szQuery[0], "SELECT MAX(seqnbr) + 1 FROM designnote WHERE dll = %ld", lDll);
         if (mysql_query(pmysql, &szQuery[0]) >= 0)
         {
             pres = mysql_store_result(pmysql);
