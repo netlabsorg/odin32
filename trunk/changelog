@@ -1,8 +1,8 @@
- /* $Id: changelog,v 1.776 2000-03-04 12:31:18 sandervl Exp $ */
+ /* $Id: changelog,v 1.777 2000-03-04 12:51:56 achimha Exp $ */
 
  2000-03-04: Sander van Leeuwen <sandervl@xs4all.nl>
-	- WINMM: Fixed bug in setsockopt for SO_LINGER (options size wasn't 
-                 adjusted)
+	- WSOCK32: Fixed bug in setsockopt for SO_LINGER (options size wasn't 
+	           adjusted)
 
  2000-03-03: Markus Montkowski <mmontkowski@gmx.de>
         - DDRAW:  Fixed bug in CreateSurface and QueryInterface
