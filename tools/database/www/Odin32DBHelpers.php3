@@ -1067,7 +1067,8 @@ function Odin32DBFunctionInfo($db, $iRefcode)
         Odin32DBInfoRow1("Ordinal", $array, "ordinal","","","not available","");
         if (isset($array["apigroupname"]))
             Odin32DBInfoRow1("API Group", $array, "apigroupname", "apigrouprefcode", "apigrouprefcode","","");
-        Odin32DBInfoRow1("File", $array, "filename", "filerefcode", "filerefcode","not available","");
+        Odin32DBInfoRow1("File", $array, "filename", "filerefcode", "filerefcode", "not available",
+                         " (<a href=\"cvs.phtml#".$array["line"]."?sFile=./src/".$array["dllname"]."/".$array["filename"].",v&sRevision=\">cvs</a>)");
         if ($array["line"] > 0)
             Odin32DBInfoRow1("Line", $array, "line", "", "","","");
         else
@@ -1551,7 +1552,8 @@ function Odin32DBFileInfo($db, $iRefcode, $fFunctions, $fAPIGroups, $fAuthors, $
          */
         Odin32DBNaslov("General", "general");
         echo "\n<table width=100% border=3 cellpadding=0>\n";
-        Odin32DBInfoRow1("Name", $array, "name","","","","");
+        Odin32DBInfoRow1("Name", $array, "name","","","",
+                         " (<a href=\"cvs.phtml?sFile=./src/".$array["dllname"]."/".$array["name"].",v&sRevision=\">cvs</a>)");
         Odin32DBInfoRow1("Revision", $array, "revision","","","","");
         Odin32DBInfoRow1("Changed", $array, "lastdatetime","","","","");
         Odin32DBInfoRow1("Last Author", $array, "lastauthorname","lastauthorrefcode","authorrefcode","","");
