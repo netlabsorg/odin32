@@ -1,4 +1,4 @@
-/* $Id: rectangle.h,v 1.5 2001-03-18 21:44:46 mike Exp $ */
+/* $Id: rectangle.h,v 1.6 2001-03-20 23:18:56 mike Exp $ */
 
 /*
  * Rectangle class used to keep track of locked rects in surfaces
@@ -29,8 +29,8 @@ public:
 
 /*------------------------------- Comparisons --------------------------------*/
 BOOL
-  operator == ( const DDRectangle& rectangle ) const,
-  operator != ( const DDRectangle& rectangle ) const;
+  operator == ( const DDRectangle &rectangle ) const,
+  operator != ( const DDRectangle &rectangle ) const;
 
 /*--------------------------------- Testing ----------------------------------*/
 BOOL
