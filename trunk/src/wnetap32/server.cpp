@@ -1,4 +1,4 @@
-/* $Id: server.cpp,v 1.3 2001-09-06 23:14:53 phaller Exp $ */
+/* $Id: server.cpp,v 1.4 2004-02-27 20:15:44 sandervl Exp $ */
 
 /*
  *
@@ -181,6 +181,9 @@ ODINFUNCTION9(NET_API_STATUS, OS2NetServerEnum,
               LPDWORD,        resume_handle)
 
 {
+#ifndef NETBIOS_ENABLED
+  return NERR_BASE;
+#else
   // convert information modes!
   ULONG ulOS2Level = dwLevel;     // can be 100 and 101
   switch (dwLevel)
@@ -398,6 +401,7 @@ ODINFUNCTION9(NET_API_STATUS, OS2NetServerEnum,
   }
   
   return (rc);
+#endif
 }
 
 

@@ -1,4 +1,4 @@
-/* $Id: wksta.cpp,v 1.1 2001-09-06 22:23:41 phaller Exp $ */
+/* $Id: wksta.cpp,v 1.2 2004-02-27 20:15:45 sandervl Exp $ */
 
 /*
  *
@@ -64,6 +64,9 @@ ODINFUNCTION3(NET_API_STATUS, OS2NetWkstaGetInfo,
               LPBYTE *, bufptr)
 
 {
+#ifndef NETBIOS_ENABLED
+  return NERR_BASE;
+#else
   dprintf(("NETAPI32: NetWkstaGetInfo(%s, %d, %08x)\n"
            ,servername, level, *bufptr
          ));
@@ -260,6 +263,7 @@ ODINFUNCTION3(NET_API_STATUS, OS2NetWkstaGetInfo,
   
   // @@@PH convert return code to NT code
   return (rc);
+#endif
 }
 
 

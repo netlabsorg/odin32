@@ -1,4 +1,4 @@
-/* $Id: wnetap32.cpp,v 1.17 2002-03-08 11:37:10 sandervl Exp $ */
+/* $Id: wnetap32.cpp,v 1.18 2004-02-27 20:15:45 sandervl Exp $ */
 
 /*
  *
@@ -1426,6 +1426,10 @@ ODINFUNCTION5(NET_API_STATUS,OS2NetStatisticsGet,LPWSTR,  lpServerName,
                                                  DWORD,   dwOptions,
                                                  LPBYTE*, bufptr)
 {
+#ifndef NETBIOS_ENABLED
+  dprintf(("NetStatisticsGet not implemented!"));
+  return (NERR_BASE);
+#else
   // Note: as we use the static addresses of the strings
   // for a faster comparsion, the compiler may NOT
   // merge duplicate static const strings.
@@ -1596,6 +1600,7 @@ ODINFUNCTION5(NET_API_STATUS,OS2NetStatisticsGet,LPWSTR,  lpServerName,
   }
   
   return (rc);
+#endif
 }
 
 
