@@ -5277,15 +5277,8 @@ static LRESULT LISTVIEW_GetItemA(HWND hwnd, LPLVITEMA lpLVItem, BOOL internal)
     return FALSE;
 
   lpItem = (LISTVIEW_ITEM *)DPA_GetPtr(hdpaSubItems, 0);
-#ifdef __WIN32OS2__
-  if (lpItem == NULL || lpItem == -1) {
-    dprintf(("WARNING: lpItem (%x) INVALID", lpItem));
-    return FALSE;
-  }
-#else
   if (lpItem == NULL)
     return FALSE;
-#endif
 
   ZeroMemory(&dispInfo, sizeof(NMLVDISPINFOA));
   if (lpLVItem->iSubItem == 0)
@@ -5357,11 +5350,24 @@ static LRESULT LISTVIEW_GetItemA(HWND hwnd, LPLVITEMA lpLVItem, BOOL internal)
     lpLVItem->lParam = lpItem->lParam;
   }
 
+#ifdef __WIN32OS2__
+      if ((UINT)*ppszText != -1) {
+        dprintf(("LISTVIEW_GetItemA lpLVItem->mask (%x), dispInfo.item.mask (%x);", lpLVItem->mask, dispInfo.item.mask));
+      }
+#endif
+
   if (dispInfo.item.mask & LVIF_TEXT)
   {
     if ((dispInfo.item.mask & LVIF_DI_SETITEM) && (ppszText != NULL))
     {
+#ifdef __WIN32OS2__
+      dprintf(("LISTVIEW_GetItemA *ppszText (%x), dispInfo.item.pszText (%x);", *ppszText, dispInfo.item.pszText));
+      if ((UINT)*ppszText != -1) {
+        Str_SetPtrA(ppszText, dispInfo.item.pszText);
+      } /* endif */
+#else
       Str_SetPtrA(ppszText, dispInfo.item.pszText);
+#endif
     }
     /* If lpLVItem->pszText==dispInfo.item.pszText a copy is unnecessary, but */
     /* some apps give a new pointer in ListView_Notify so we can't be sure.  */
@@ -10923,3 +10929,5 @@ HWND CreateEditLabel(LPCSTR text, DWORD style, INT x, INT y,
 
     return hedit;
 }
+
+
