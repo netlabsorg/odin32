@@ -1,10 +1,14 @@
- /* $Id: changelog,v 1.855 2000-04-01 11:34:01 cbratschi Exp $ */
+ /* $Id: changelog,v 1.856 2000-04-01 15:07:10 sandervl Exp $ */
+
+ 2000-04-01: Sander van Leeuwen <sandervl@xs4all.nl>
+	- GDI32: Fixed dibsection bitblits. (wrong updates of realplayer 7
+                 videos)
 
  2000-04-01: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: added WYSIWYGOFOA interface
 
  2000-04-01: Edgar Buerkle <Edgar.Buerkle@gmx.net>
-        - USER32: Fixed track frame width & height (now you can see actually
+        - USER32: Fixed track frame width & height (now you can actually
                   see the tracking frame when moving a window)
 
  2000-03-31: Christoph Bratschi <cbratschi@datacomm.ch>
