@@ -1,4 +1,4 @@
-/* $Id: HOOK.CPP,v 1.23 2001-09-19 15:39:47 sandervl Exp $ */
+/* $Id: HOOK.CPP,v 1.24 2001-09-28 14:08:17 phaller Exp $ */
 
 /*
  * Windows hook functions
@@ -803,4 +803,38 @@ BOOL ProcessKbdHook(LPMSG msg, BOOL remove )
     return (HOOK_CallHooksA( WH_KEYBOARD, remove ? HC_ACTION : HC_NOREMOVE,
                              LOWORD (msg->wParam), msg->lParam )
                              ? TRUE : FALSE);
+}
+
+
+
+/***
+ * ProcessKbdHookLL
+ * this is a low-level version of the keyboard hook
+ * present under NT/2000/XP.
+ * It is supposed to be called for any keyboard event of the
+ * system-input queue AFAIK.
+ */
+BOOL ProcessKbdHookLL(LPMSG msg, BOOL remove )
+{
+  // @@@PH
+  // format KBDLLHOOKSTRUCT and pass it in as msg->lParam
+  KBDLLHOOKSTRUCT kbhs;
+  
+  // check if alt is currently pressed
+  BOOL fAltDown = GetKeyState(VK_LMENU);
+  
+  kbhs.vkCode      = msg->wParam;
+  kbhs.scanCode    = ( (msg->lParam & 0x00ff0000) >> 16);
+  kbhs.flags       = ( (msg->lParam & (1 << 24)) ? LLKHF_EXTENDED : 0 ) |
+                     // LLKHF_INJECTED currently not supported (SendInput)
+                     fAltDown ? LLKHF_ALTDOWN : 0 |
+                     ( (msg->lParam & (1 << 31)) ? LLKHF_UP : 0);
+  kbhs.time        = msg->time;
+  kbhs.dwExtraInfo = 0; // @@@PH not supported?
+  
+  return (HOOK_CallHooksA(WH_KEYBOARD_LL,
+                          remove ? HC_ACTION : HC_NOREMOVE,
+                          msg->message,
+                          (LPARAM)&kbhs )
+                          ? TRUE : FALSE);
 }
