@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.103 2001-07-03 13:23:31 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.104 2001-07-03 18:33:26 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -826,13 +826,6 @@ BOOL OSLibWinSetKeyboardStateTable(unsigned char *PMKeyState)
 }
 //******************************************************************************
 //******************************************************************************
-#define TC_CHARTOSCANCODE          0
-#define TC_SCANCODETOCHAR          1
-#define TC_VIRTUALKEYTOSCANCODE    2
-#define TC_SCANCODETOVIRTUALKEY    3
-#define TC_SCANTOOEMSCAN           4
-#define TC_OEMSCANTOSCAN           5
-
 USHORT APIENTRY WinTranslateChar2( USHORT  /* Codepage (currently ignored) */
                                  , PUSHORT /* Ptr to char to translate     */
                                  , PULONG  /* Ptr to deadkey save info     */
@@ -841,12 +834,9 @@ USHORT APIENTRY WinTranslateChar2( USHORT  /* Codepage (currently ignored) */
                                  );
 //******************************************************************************
 //******************************************************************************
-USHORT OSLibWinTranslateChar(USHORT usScanCode)
+USHORT OSLibWinTranslateChar(USHORT usScanCode, ULONG type, USHORT shiftstate)
 {
-  USHORT fsShift = 0;
-
-  WinTranslateChar2(0, &usScanCode, NULL, TC_SCANCODETOVIRTUALKEY,
-                    &fsShift);
+  WinTranslateChar2(0, &usScanCode, NULL, type, &shiftstate);
   return usScanCode;
 }
 //******************************************************************************

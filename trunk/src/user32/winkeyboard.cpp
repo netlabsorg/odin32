@@ -1,4 +1,4 @@
-/* $Id: winkeyboard.cpp,v 1.9 2001-07-03 13:23:32 sandervl Exp $ */
+/* $Id: winkeyboard.cpp,v 1.10 2001-07-03 18:33:28 sandervl Exp $ */
 /*
  * Win32 <-> PM key translation
  *
@@ -562,7 +562,7 @@ void WIN32API KeyTranslatePMToWinBuf(BYTE *pmkey, BYTE *winkey, int nrkeys)
 {
    for(int i=1;i<nrkeys;i++) {
        if(abWinVKeyToPMScan[i]) {
-            winkey[i] = pmkey[OSLibWinTranslateChar(abWinVKeyToPMScan[i])];
+            winkey[i] = pmkey[OSLibWinTranslateChar(abWinVKeyToPMScan[i], TC_SCANCODETOVIRTUALKEY, 0)];
        }
    }
    winkey[VK_SHIFT]   = winkey[VK_LSHIFT] | winkey[VK_RSHIFT];
@@ -715,7 +715,7 @@ INT WINAPI GetKeyboardLayoutList(INT nBuff,HKL *layouts)
  * Remark    :
  * Status    : UNTESTED STUB
  *
- * Author    : Based on Wine code (windows\x11drv\keyboard.c
+ * Author    : Partly based on Wine code (windows\x11drv\keyboard.c
  * Copyright 1993 Bob Amstadt
  * Copyright 1996 Albrecht Kleine 
  * Copyright 1997 David Faure
@@ -746,18 +746,7 @@ int WIN32API ToAscii(UINT   uVirtKey,
         dprintf2(("Key UP, doing nothing"));
         return 0;
   }
-#if 0
-  /* We have a special case to handle : Shift + arrow, shift + home, ...
-     X returns a char for it, but Windows doesn't. Let's eat it. */
-  if(!(lpbKeyState[VK_NUMLOCK] & 0x01)  /* NumLock is off */
-       && (lpbKeyState[VK_SHIFT] & 0x80) /* Shift is pressed */
-       && (uVirtKey >= VK_0) && (uVirtKey >= VK_9))
-  {
-        *(char*)lpwTransKey = 0;
-        ret = 0;
-  }
-  else        
-#endif
+
   /* We have another special case for delete key (XK_Delete) on an
      extended keyboard. X returns a char for it, but Windows doesn't */
   if (uVirtKey == VK_DELETE)
@@ -766,10 +755,21 @@ int WIN32API ToAscii(UINT   uVirtKey,
        ret = 0;
   }
   else {
-       if(uVirtKey >= VK_A && uVirtKey <= VK_Z && !(lpbKeyState[VK_SHIFT] & 0x80)) {
-             *(char*)lpwTransKey = uVirtKey + 32; //translate to lower case
-       }
-       else  *(char*)lpwTransKey = uVirtKey;
+       ULONG shiftstate = 0;
+
+       //TODO: multiple characters returned (DBCS??)
+
+       if(lpbKeyState[VK_LSHIFT]   & 0x80) shiftstate |= TCF_LSHIFT;
+       if(lpbKeyState[VK_RSHIFT]   & 0x80) shiftstate |= TCF_RSHIFT;
+       if(lpbKeyState[VK_LCONTROL] & 0x80) shiftstate |= TCF_LCONTROL;
+       if(lpbKeyState[VK_RCONTROL] & 0x80) shiftstate |= TCF_RCONTROL;
+       if(lpbKeyState[VK_LMENU]    & 0x80) shiftstate |= TCF_ALT;
+       if(lpbKeyState[VK_RMENU]    & 0x80) shiftstate |= TCF_ALTGR;
+       if(lpbKeyState[VK_CAPITAL]  & 1)    shiftstate |= TCF_CAPSLOCK;
+       if(lpbKeyState[VK_NUMLOCK]  & 1)    shiftstate |= TCF_NUMLOCK;
+
+       *(char*)lpwTransKey = OSLibWinTranslateChar(uScanCode, TC_SCANCODETOCHAR, shiftstate);
+
        ret = 1;
   }
   return ret;
@@ -811,6 +811,56 @@ int WIN32API ToAsciiEx(UINT   uVirtKey,
          lpwTransKey,
          fuState,
          hkl));
+
+  return (0);
+}
+/*****************************************************************************
+ * Name      : int WIN32API ToUnicode
+ * Purpose   : The ToUnicode function translates the specified virtual-key code
+ *             and keyboard state to the corresponding Unicode character or characters.
+ * Parameters: UINT   wVirtKey   virtual-key code
+ *             UINT   wScanCode  scan code
+ *             PBYTE  lpKeyState address of key-state array
+ *             LPWSTR pwszBuff   buffer for translated key
+ *             int    cchBuff    size of translated key buffer
+ *             UINT   wFlags     set of function-conditioning flags
+ * Variables :
+ * Result    : - 1 The specified virtual key is a dead-key character (accent or
+ *                 diacritic). This value is returned regardless of the keyboard
+ *                 layout, even if several characters have been typed and are
+ *                 stored in the keyboard state. If possible, even with Unicode
+ *                 keyboard layouts, the function has written a spacing version of
+ *                 the dead-key character to the buffer specified by pwszBuffer.
+ *                 For example, the function writes the character SPACING ACUTE
+ *                 (0x00B4), rather than the character NON_SPACING ACUTE (0x0301).
+ *               0 The specified virtual key has no translation for the current
+ *                 state of the keyboard. Nothing was written to the buffer
+ *                 specified by pwszBuffer.
+ *               1 One character was written to the buffer specified by pwszBuffer.
+ *       2 or more Two or more characters were written to the buffer specified by
+ *                 pwszBuff. The most common cause for this is that a dead-key
+ *                 character (accent or diacritic) stored in the keyboard layout
+ *                 could not be combined with the specified virtual key to form a
+ *                 single character.
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+int WIN32API ToUnicode(UINT   uVirtKey,
+                          UINT   uScanCode,
+                          PBYTE  lpKeyState,
+                          LPWSTR pwszBuff,
+                          int    cchBuff,
+                          UINT   wFlags)
+{
+  dprintf(("USER32:ToUnicode (%u,%u,%08xh,%08xh,%u,%08x) not implemented.\n",
+         uVirtKey,
+         uScanCode,
+         lpKeyState,
+         pwszBuff,
+         cchBuff,
+         wFlags));
 
   return (0);
 }
