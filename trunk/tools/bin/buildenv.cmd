@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.28 2002-09-03 18:41:28 bird Exp $
+/* $Id: buildenv.cmd,v 1.29 2002-09-04 15:31:14 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -26,7 +26,7 @@
     /*
      * Version
      */
-    sVersion = '1.0.6 [2002-09-03]';
+    sVersion = '1.0.7 [2002-09-04]';
 
     /*
      * Create argument array with lowercase arguments.
@@ -2234,13 +2234,20 @@ return 0;
  */
 Mode: procedure expose aCfg. aPath. sPathFile
     parse arg sToolId,sOperation,fRM,fQuiet,cols,rows
-    if ((pos('uninstall', sOperation) > 0) | \fRM) then
+
+    if (pos('install', sOperation) > 0) then
     do
+        say "ok!"
+        Address CMD 'mode' cols','rows
+    end
+    /* TODO
+    else if ((pos('uninstall', sOperation) > 0) | \fRM) then
+    do
+        say 'Huh?'
         cols = 80;
         rows = 25;
     end
-    else if (pos('install', sOperation) > 0) then
-        Address CMD 'mode' cols','rows
+    */
 return 0;
 
 
