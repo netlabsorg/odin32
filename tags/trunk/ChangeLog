@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.16 1999-06-21 17:47:48 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.17 1999-06-22 20:00:03 achimha Exp $ */
+ 99-21-06: Achim Hasenmueller
+        - ported latest WINE DrawEdge code and moved everything to the
+          new file src/user32/uitools.cpp
+
  99-21-06: Sander van Leeuwen
 	- include\os2wrap.h, removed calling convention
 
