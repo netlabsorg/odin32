@@ -148,26 +148,26 @@ MSVCRT(FILE)*        MSVCRT(__p__iob)(void);
 
 #ifndef MSVCRT_STDIO_DEFINED
 #define MSVCRT_STDIO_DEFINED
-int         _fcloseall(void);
-MSVCRT(FILE)* _fdopen(int,const char*);
-int         _fgetchar(void);
+int         MSVCRT(_fcloseall)(void);
+MSVCRT(FILE)* MSVCRT(_fdopen)(int,const char*);
+int         MSVCRT(_fgetchar)(void);
 int         _filbuf(MSVCRT(FILE*));
 int         _fileno(MSVCRT(FILE)*);
 int         _flsbuf(int,MSVCRT(FILE)*);
 int         _flushall(void);
 int         _fputchar(int);
-MSVCRT(FILE)* _fsopen(const char*,const char*,int);
+MSVCRT(FILE)* MSVCRT(_fsopen)(const char*,const char*,int);
 int         _getmaxstdio(void);
-int         _getw(MSVCRT(FILE)*);
-int         _pclose(MSVCRT(FILE)*);
-MSVCRT(FILE)* _popen(const char*,const char*);
-int         _putw(int,MSVCRT(FILE)*);
+int         MSVCRT(_getw)(MSVCRT(FILE)*);
+int         MSVCRT(_pclose)(MSVCRT(FILE)*);
+MSVCRT(FILE)* MSVCRT(_popen)(const char*,const char*);
+int         MSVCRT(_putw)(int,MSVCRT(FILE)*);
 int         _rmtmp(void);
 int         _setmaxstdio(int);
-int         _snprintf(char*,MSVCRT(size_t),const char*,...);
+int         MSVCRT(_snprintf)(char*,MSVCRT(size_t),const char*,...);
 char*       _tempnam(const char*,const char*);
 int         _unlink(const char*);
-int         _vsnprintf(char*,MSVCRT(size_t),const char*,va_list);
+int         MSVCRT(_vsnprintf)(char*,MSVCRT(size_t),const char*,va_list);
 
 void        MSVCRT(clearerr)(MSVCRT(FILE)*);
 int         MSVCRT(fclose)(MSVCRT(FILE)*);
