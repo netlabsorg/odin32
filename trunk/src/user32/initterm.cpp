@@ -68,8 +68,7 @@ DWORD hInstanceUser32 = 0;
 /* linkage convention MUST be used because the operating system loader is   */
 /* calling this function.                                                   */
 /****************************************************************************/
-unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
-                                    ulFlag)
+ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
 {
    size_t i;
    APIRET rc;
