@@ -1,4 +1,4 @@
-/* $Id: rmalloc_avl.c,v 1.3 2000-01-24 01:45:20 bird Exp $
+/* $Id: rmalloc_avl.c,v 1.4 2000-01-24 03:05:14 bird Exp $
  *
  * Resident Heap - AVL.
  *
@@ -120,7 +120,7 @@ typedef struct _Allocated_Callback_param
 *  Global data
 ******************************************************************************/
 static PHEAPANCHOR  phaFirst;           /* Pointer to the first anchor block.*/
-static PHEAPANCHOR  phaLast;            /* Pointer to the first anchor block.*/
+static PHEAPANCHOR  phaLast;            /* Pointer to the last anchor block.*/
 static unsigned     cbResHeapMax;       /* Maximum amount of memory used by the heap. */
 
 #ifndef RING0
