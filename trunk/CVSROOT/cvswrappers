@@ -31,6 +31,9 @@
 # diverse others
 *.zip -k 'b'
 *.etc -k 'b'
+*.pch -k 'b'
+*.err -k 'b'
+*.map -k 'b'
 
 # icon and mouse pointer formats
 *.ico -k 'b'
@@ -63,9 +66,9 @@
 
 
 # video and audio files
-*.mov -k 'b' 
-*.avi -k 'b' 
-*.mpg -k 'b' 
-*.mp2 -k 'b' 
-*.mp3 -k 'b' 
+*.mov -k 'b'
+*.avi -k 'b'
+*.mpg -k 'b'
+*.mp2 -k 'b'
+*.mp3 -k 'b'
 
