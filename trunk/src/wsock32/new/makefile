@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 1999-12-01 01:10:54 phaller Exp $
+# $Id: makefile,v 1.6 1999-12-02 07:47:26 phaller Exp $
 
 #
 # PD-Win32 API
@@ -27,7 +27,7 @@ all: $(TARGET).dll $(TARGET).lib
 
 $(TARGET).dll: $(OBJS) $(TARGET).def
 	$(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
-              dapwsock.lib $(PDWIN32_LIB)\kernel32.lib \
+              pmwsock.lib $(PDWIN32_LIB)\kernel32.lib \
               $(PDWIN32_LIB)\user32.lib \
               $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
 	$(CP) $@ $(PDWIN32_BIN)
