@@ -1,4 +1,4 @@
-/* $Id: APIImport.cpp,v 1.9 2001-04-17 00:24:46 bird Exp $ */
+/* $Id: APIImport.cpp,v 1.10 2001-06-22 17:07:18 bird Exp $ */
 /*
  *
  * APIImport - imports a DLL or Dll-.def with functions into the Odin32 database.
@@ -247,7 +247,7 @@ static long processFile(const char *pszFilename, const POPTIONS pOptions, long &
     /* try open file */
     try
     {
-        kFile InFile(pszFilename);
+        kFile * pInFile = new kFile(pszFilename);
 
         try
         {
@@ -261,7 +261,7 @@ static long processFile(const char *pszFilename, const POPTIONS pOptions, long &
             /* try create file objects */
             try
             {
-                kFilePE *pFile = new kFilePE(&InFile);
+                kFilePE *pFile = new kFilePE(pInFile);
                 pExportFile = pFile;
                 pModuleFile = pFile;
                 pFileBase = pFile;
@@ -269,7 +269,7 @@ static long processFile(const char *pszFilename, const POPTIONS pOptions, long &
             catch (int i)
             {
                 i = i;
-                kFileDef *pFile = new kFileDef(&InFile);
+                kFileDef *pFile = new kFileDef(pInFile);
                 pExportFile = pFile;
                 pModuleFile = pFile;
                 pFileBase = pFile;
@@ -370,7 +370,8 @@ static long processFile(const char *pszFilename, const POPTIONS pOptions, long &
             else
                 fprintf(phLog, "%s: error - could not get module name.\n", pszFilename);
 
-            delete(pFileBase);
+            if (pFileBase)
+                delete(pFileBase);
         }
         catch (int err)
         {
