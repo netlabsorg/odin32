@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2260 2002-08-13 10:04:08 sandervl Exp $ */
+/* $Id: changelog,v 1.2261 2002-08-13 14:45:07 sandervl Exp $ */
+
+ 2002-08-13: Sander van Leeuwen <sandervl@innotek   >
+    - GDI32:    o SelectObject bugfix for region handles. (fixes crash in
+                  Freecell)
 
  2002-08-13: Yuri Dario <mc6530@mclink   >
     - USER32:   o Resync WM_RBUTTONUP & WM_CONTEXTMENU default window handlers
