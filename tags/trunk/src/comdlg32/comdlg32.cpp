@@ -1,4 +1,4 @@
-/* $Id: comdlg32.cpp,v 1.10 1999-09-23 16:45:00 sandervl Exp $ */
+/* $Id: comdlg32.cpp,v 1.11 1999-10-09 09:38:45 sandervl Exp $ */
 
 /*
  * COMDLG32 implementation
@@ -512,7 +512,7 @@ ODINFUNCTION1(BOOL, GetOpenFileNameW,
   ofn.lpstrFileTitle    = szFileTitle;
   ofn.lpstrCustomFilter = szCustFilter;
 
-  COMDLG32_CHECKHOOK(lpofn, OFN_ENABLEHOOK, WNDPROC)
+  COMDLG32_CHECKHOOK((&ofn), OFN_ENABLEHOOK, WNDPROC)
 
   bResult =  O32_GetOpenFileName(&ofn);
 
