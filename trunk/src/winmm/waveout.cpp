@@ -1,4 +1,4 @@
-/* $Id: waveout.cpp,v 1.20 2001-03-23 16:23:45 sandervl Exp $ */
+/* $Id: waveout.cpp,v 1.21 2001-03-24 15:40:04 sandervl Exp $ */
 //#undef DEBUG
 /*
  * Wave out MM apis
@@ -27,6 +27,7 @@
 #include <unicode.h>
 
 #include "waveoutdart.h"
+#include "waveoutdaud.h"
 #include "misc.h"
 #include "winmm.h"
 
@@ -52,32 +53,36 @@ ODINFUNCTION6(MMRESULT, waveOutOpen,
 {
   MMRESULT rc;
 
-  if(pwfx == NULL)
+    if(pwfx == NULL)
         return(WAVERR_BADFORMAT);
 
-  if(fdwOpen == WAVE_FORMAT_QUERY) {
+    if(fdwOpen == WAVE_FORMAT_QUERY)
+    {
         if(DartWaveOut::queryFormat(pwfx->wFormatTag, pwfx->nChannels, pwfx->nSamplesPerSec,
                                     pwfx->wBitsPerSample) == TRUE) {
                 return(MMSYSERR_NOERROR);
         }
         else    return(WAVERR_BADFORMAT);
-  }
+    }
 
-  if(phwo == NULL)
+    if(phwo == NULL)
         return(MMSYSERR_INVALPARAM);
 
-  *phwo = (HWAVEOUT)new DartWaveOut(pwfx, fdwOpen, dwCallback, dwInstance);
+    if(DAudioWaveOut::isDirectAudioAvailable()) {
+         *phwo = (HWAVEOUT)new DAudioWaveOut(pwfx, fdwOpen, dwCallback, dwInstance);
+    }
+    else *phwo = (HWAVEOUT)new DartWaveOut(pwfx, fdwOpen, dwCallback, dwInstance);
 
-  if(*phwo == NULL) {
+    if(*phwo == NULL) {
         return(MMSYSERR_NODRIVER);
-  }
+    }
 
-  rc = ((WaveOut *)*phwo)->getError();
-  if(rc != MMSYSERR_NOERROR) {
+    rc = ((WaveOut *)*phwo)->getError();
+    if(rc != MMSYSERR_NOERROR) {
         delete (WaveOut *)*phwo;
         return(rc);
-  }
-  return(MMSYSERR_NOERROR);
+    }
+    return(MMSYSERR_NOERROR);
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -86,10 +91,10 @@ ODINFUNCTION3(MMRESULT, waveOutWrite,
               LPWAVEHDR, pwh,
               UINT, cbwh)
 {
-  WaveOut *dwave = (WaveOut *)hwo;
+    WaveOut *dwave = (WaveOut *)hwo;
 
-  if(WaveOut::find(dwave) == TRUE)
-  {
+    if(WaveOut::find(dwave) == TRUE)
+    {
         if(!(pwh->dwFlags & WHDR_PREPARED) || pwh->lpData == NULL)
             return WAVERR_UNPREPARED;
 
@@ -101,8 +106,8 @@ ODINFUNCTION3(MMRESULT, waveOutWrite,
 
         dprintf(("waveOutWrite ptr %x size %d %x %x %x %x %x %x", pwh->lpData, pwh->dwBufferLength, pwh->dwBytesRecorded, pwh->dwUser, pwh->dwFlags, pwh->dwLoops, pwh->lpNext, pwh->reserved));
         return(dwave->write(pwh, cbwh));
-  }
-  else  return(MMSYSERR_INVALHANDLE);
+    }
+    else  return(MMSYSERR_INVALHANDLE);
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -120,51 +125,51 @@ ODINFUNCTION1(MMRESULT, waveOutReset,
 ODINFUNCTION1(MMRESULT, waveOutBreakLoop,
               HWAVEOUT, hwaveout)
 {
-  WaveOut *dwave = (WaveOut *)hwaveout;
+    WaveOut *dwave = (WaveOut *)hwaveout;
 
-  dprintf(("WINMM:waveOutBreakLoop (implemented as reset) %X\n", hwaveout));
-  if(WaveOut::find(dwave) == TRUE)
-        return(dwave->reset());
-  else  return(MMSYSERR_INVALHANDLE);
+    dprintf(("WINMM:waveOutBreakLoop (implemented as reset) %X\n", hwaveout));
+    if(WaveOut::find(dwave) == TRUE)
+         return(dwave->reset());
+    else return(MMSYSERR_INVALHANDLE);
 }
 /******************************************************************************/
 /******************************************************************************/
 ODINFUNCTION1(MMRESULT, waveOutClose,
               HWAVEOUT, hwaveout)
 {
-  WaveOut *dwave = (WaveOut *)hwaveout;
+    WaveOut *dwave = (WaveOut *)hwaveout;
 
-  if(WaveOut::find(dwave) == TRUE)
-  {
+    if(WaveOut::find(dwave) == TRUE)
+    {
         if(dwave->getState() == STATE_PLAYING)
             return(WAVERR_STILLPLAYING);
 
         delete dwave;
         return(MMSYSERR_NOERROR);
-  }
-  else  return(MMSYSERR_INVALHANDLE);
+    }
+    else  return(MMSYSERR_INVALHANDLE);
 }
 /******************************************************************************/
 /******************************************************************************/
 ODINFUNCTION1(MMRESULT, waveOutPause,
               HWAVEOUT, hwaveout)
 {
-  WaveOut *dwave = (WaveOut *)hwaveout;
+    WaveOut *dwave = (WaveOut *)hwaveout;
 
-  if(WaveOut::find(dwave) == TRUE)
+    if(WaveOut::find(dwave) == TRUE)
         return(dwave->pause());
-  else  return(MMSYSERR_INVALHANDLE);
+    else  return(MMSYSERR_INVALHANDLE);
 }
 /******************************************************************************/
 /******************************************************************************/
 ODINFUNCTION1(MMRESULT, waveOutRestart,
               HWAVEOUT, hwaveout)
 {
-  WaveOut *dwave = (WaveOut *)hwaveout;
+    WaveOut *dwave = (WaveOut *)hwaveout;
 
-  if(WaveOut::find(dwave) == TRUE)
-        return(dwave->restart());
-  else  return(MMSYSERR_INVALHANDLE);
+    if(WaveOut::find(dwave) == TRUE)
+         return(dwave->restart());
+    else return(MMSYSERR_INVALHANDLE);
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -173,10 +178,10 @@ ODINFUNCTION3(MMRESULT, waveOutPrepareHeader,
               LPWAVEHDR, pwh,
               UINT, cbwh)
 {
-  WaveOut *dwave = (WaveOut *)hwo;
+    WaveOut *dwave = (WaveOut *)hwo;
 
-  if(WaveOut::find(dwave) == TRUE)
-  {
+    if(WaveOut::find(dwave) == TRUE)
+    {
         if(pwh->dwFlags & WHDR_INQUEUE)
             return WAVERR_STILLPLAYING;
 
@@ -184,8 +189,8 @@ ODINFUNCTION3(MMRESULT, waveOutPrepareHeader,
         pwh->dwFlags &= ~WHDR_DONE;
         pwh->lpNext   = NULL;
         return(MMSYSERR_NOERROR);
-  }
-  else  return(MMSYSERR_INVALHANDLE);
+    }
+    else  return(MMSYSERR_INVALHANDLE);
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -194,18 +199,18 @@ ODINFUNCTION3(MMRESULT, waveOutUnprepareHeader,
               LPWAVEHDR, pwh,
               UINT, cbwh)
 {
-  WaveOut *dwave = (WaveOut *)hwo;
+    WaveOut *dwave = (WaveOut *)hwo;
 
-  if(WaveOut::find(dwave) == TRUE)
-  {
+    if(WaveOut::find(dwave) == TRUE)
+    {
         if(pwh->dwFlags & WHDR_INQUEUE)
             return WAVERR_STILLPLAYING;
 
         pwh->dwFlags &= ~WHDR_PREPARED;
         pwh->dwFlags |= WHDR_DONE;
         return(MMSYSERR_NOERROR);
-  }
-  else  return(MMSYSERR_INVALHANDLE);
+    }
+    else  return(MMSYSERR_INVALHANDLE);
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -216,12 +221,12 @@ ODINFUNCTION3(MMRESULT, waveOutGetPosition,
 {
   WaveOut *dwave = (WaveOut *)hwo;
 
-  if(pmmt == NULL)
+    if(pmmt == NULL)
         return MMSYSERR_INVALPARAM;
 
-  if(WaveOut::find(dwave) == TRUE)
-  {
-   ULONG position;
+    if(WaveOut::find(dwave) == TRUE)
+    {
+        ULONG position;
 
         position = dwave->getPosition();
         if(position == -1) {
@@ -259,8 +264,8 @@ ODINFUNCTION3(MMRESULT, waveOutGetPosition,
             break;
         }
         return MMSYSERR_NOERROR;
-  }
-  else  return(MMSYSERR_INVALHANDLE);
+    }
+    else  return(MMSYSERR_INVALHANDLE);
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -269,28 +274,28 @@ ODINFUNCTION3(MMRESULT, waveOutGetDevCapsA,
               LPWAVEOUTCAPSA, pwoc,
               UINT, cbwoc)
 {
-  if(WaveOut::getNumDevices() == 0) {
+    if(WaveOut::getNumDevices() == 0) {
         memset(pwoc, 0, sizeof(*pwoc));
         return MMSYSERR_NODRIVER;
-  }
+    }
 
-  // we have to fill in this thing
-  pwoc->wMid = 0;                  /* manufacturer ID */
-  pwoc->wPid = 0;                  /* product ID */
-  pwoc->vDriverVersion = 0x0001;        /* version of the driver */
-  strcpy( pwoc->szPname, "OS/2 DART Wave Out" ); /* product name */
-  pwoc->dwFormats = WAVE_FORMAT_1M08 | WAVE_FORMAT_1S08 |
-                    WAVE_FORMAT_1M16 | WAVE_FORMAT_1S16 |
-                    WAVE_FORMAT_2M08 | WAVE_FORMAT_2S08 |
-                    WAVE_FORMAT_2M16 | WAVE_FORMAT_2S16 |
-                    WAVE_FORMAT_4M08 | WAVE_FORMAT_4S08 |
-                    WAVE_FORMAT_4M16 | WAVE_FORMAT_4S16;
+    // we have to fill in this thing
+    pwoc->wMid = 0;                  /* manufacturer ID */
+    pwoc->wPid = 0;                  /* product ID */
+    pwoc->vDriverVersion = 0x0001;        /* version of the driver */
+    strcpy( pwoc->szPname, "OS/2 DART Wave Out" ); /* product name */
+    pwoc->dwFormats = WAVE_FORMAT_1M08 | WAVE_FORMAT_1S08 |
+                      WAVE_FORMAT_1M16 | WAVE_FORMAT_1S16 |
+                      WAVE_FORMAT_2M08 | WAVE_FORMAT_2S08 |
+                      WAVE_FORMAT_2M16 | WAVE_FORMAT_2S16 |
+                      WAVE_FORMAT_4M08 | WAVE_FORMAT_4S08 |
+                      WAVE_FORMAT_4M16 | WAVE_FORMAT_4S16;
 
-  pwoc->wChannels  = 2;             /* number of sources supported */
-  pwoc->wReserved1 = 0;             /* packing */
-  pwoc->dwSupport  = WAVECAPS_LRVOLUME | WAVECAPS_VOLUME;
+    pwoc->wChannels  = 2;             /* number of sources supported */
+    pwoc->wReserved1 = 0;             /* packing */
+    pwoc->dwSupport  = WAVECAPS_LRVOLUME | WAVECAPS_VOLUME;
 
-  return MMSYSERR_NOERROR;
+    return MMSYSERR_NOERROR;
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -299,27 +304,27 @@ ODINFUNCTION3(MMRESULT, waveOutGetDevCapsW,
               LPWAVEOUTCAPSW, pwoc,
               UINT, cbwoc)
 {
-  if(WaveOut::getNumDevices() == 0) {
+    if(WaveOut::getNumDevices() == 0) {
         memset(pwoc, 0, sizeof(*pwoc));
         return MMSYSERR_NODRIVER;
-  }
-  // we have to fill in this thing
-  pwoc->wMid = 0;                  /* manufacturer ID */
-  pwoc->wPid = 0;                  /* product ID */
-  pwoc->vDriverVersion = 0x0001;        /* version of the driver */
-  lstrcpyW(pwoc->szPname, (LPCWSTR)L"OS/2 DART Wave Out"); /* product name */
-  pwoc->dwFormats = WAVE_FORMAT_1M08 | WAVE_FORMAT_1S08 |
-                    WAVE_FORMAT_1M16 | WAVE_FORMAT_1S16 |
-                    WAVE_FORMAT_2M08 | WAVE_FORMAT_2S08 |
-                    WAVE_FORMAT_2M16 | WAVE_FORMAT_2S16 |
-                    WAVE_FORMAT_4M08 | WAVE_FORMAT_4S08 |
-                    WAVE_FORMAT_4M16 | WAVE_FORMAT_4S16;
+    }
+    // we have to fill in this thing
+    pwoc->wMid = 0;                  /* manufacturer ID */
+    pwoc->wPid = 0;                  /* product ID */
+    pwoc->vDriverVersion = 0x0001;        /* version of the driver */
+    lstrcpyW(pwoc->szPname, (LPCWSTR)L"OS/2 DART Wave Out"); /* product name */
+    pwoc->dwFormats = WAVE_FORMAT_1M08 | WAVE_FORMAT_1S08 |
+                      WAVE_FORMAT_1M16 | WAVE_FORMAT_1S16 |
+                      WAVE_FORMAT_2M08 | WAVE_FORMAT_2S08 |
+                      WAVE_FORMAT_2M16 | WAVE_FORMAT_2S16 |
+                      WAVE_FORMAT_4M08 | WAVE_FORMAT_4S08 |
+                      WAVE_FORMAT_4M16 | WAVE_FORMAT_4S16;
 
-  pwoc->wChannels  = 2;             /* number of sources supported */
-  pwoc->wReserved1 = 0;             /* packing */
-  pwoc->dwSupport  = WAVECAPS_LRVOLUME | WAVECAPS_VOLUME;
+    pwoc->wChannels  = 2;             /* number of sources supported */
+    pwoc->wReserved1 = 0;             /* packing */
+    pwoc->dwSupport  = WAVECAPS_LRVOLUME | WAVECAPS_VOLUME;
 
-  return MMSYSERR_NOERROR;
+    return MMSYSERR_NOERROR;
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -334,17 +339,17 @@ ODINFUNCTION3(MMRESULT, waveOutGetErrorTextA,
               LPSTR, lpText,
               UINT, cchText)
 {
-  char * theMsg = getWinmmMsg( wError );
-  if(theMsg) {
+    char * theMsg = getWinmmMsg( wError );
+    if(theMsg) {
         strncpy( lpText, theMsg, cchText );
-  }
-  else
-  {
+    }
+    else
+    {
         char errMsg[100];
         sprintf( errMsg, "Unknown error number %d", wError );
         strncpy( lpText, errMsg, cchText );
-  }
-  return MMSYSERR_NOERROR;
+    }
+    return MMSYSERR_NOERROR;
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -353,17 +358,17 @@ ODINFUNCTION3(MMRESULT, waveOutGetErrorTextW,
               LPWSTR, lpText,
               UINT, cchText)
 {
-  char * theMsg = getWinmmMsg( wError );
-  if(theMsg) {
+    char * theMsg = getWinmmMsg( wError );
+    if(theMsg) {
         AsciiToUnicode( theMsg, lpText );
-  }
-  else
-  {
+    }
+    else
+    {
         char errMsg[100];
         sprintf( errMsg, "Unknown error number %d", wError );
         AsciiToUnicode( errMsg, lpText );
-  }
-  return MMSYSERR_NOERROR;
+    }
+    return MMSYSERR_NOERROR;
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -371,13 +376,13 @@ ODINFUNCTION2(MMRESULT, waveOutGetID,
               HWAVEOUT, hwo,
               LPUINT, puDeviceID)
 {
-  WaveOut *dwave = (WaveOut *)hwo;
-  if(WaveOut::find(dwave) == TRUE)
-  {
+    WaveOut *dwave = (WaveOut *)hwo;
+    if(WaveOut::find(dwave) == TRUE)
+    {
         *puDeviceID = 1;
         return MMSYSERR_NOERROR;
-  }
-  else  return(MMSYSERR_INVALHANDLE);
+    }
+    else  return(MMSYSERR_INVALHANDLE);
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -396,10 +401,10 @@ ODINFUNCTION2(MMRESULT, waveOutSetPitch,
               HWAVEOUT, hwo,
               DWORD, dwPitch)
 {
-  WaveOut *dwave = (WaveOut *)hwo;
-  if(WaveOut::find(dwave) == TRUE)
-        return MMSYSERR_NOTSUPPORTED;
-  else  return(MMSYSERR_INVALHANDLE);
+    WaveOut *dwave = (WaveOut *)hwo;
+    if(WaveOut::find(dwave) == TRUE)
+         return MMSYSERR_NOTSUPPORTED;
+    else return(MMSYSERR_INVALHANDLE);
 }
 /******************************************************************************/
 /******************************************************************************/
