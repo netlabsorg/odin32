@@ -1,4 +1,4 @@
-/* $Id: winkeyboard.cpp,v 1.27 2001-12-11 17:34:53 sandervl Exp $ */
+/* $Id: winkeyboard.cpp,v 1.28 2001-12-12 12:51:09 sandervl Exp $ */
 /*
  * Win32 <-> PM key translation
  *
@@ -707,11 +707,11 @@ BYTE abPMScanToWinScan[256][2] =
 /* 0x6A PMSCAN_F23          */ , WINSCAN_F23                ,FALSE
 /* 0x6B PMSCAN_F24          */ , WINSCAN_F24                ,FALSE
 /* 0x6C PMSCAN_SYSMEM       */ , 0x00                       ,FALSE
-/* 0x6D PMSCAN_ERASEEOF     */ , 0x00                       ,FALSE
-/* 0x6E PMSCAN_BREAK        */ , 0x00                       ,TRUE
+/* 0x6D PMSCAN_ERASEEOF     */ , WINSCAN_ERASEEOF           ,FALSE
+/* 0x6E PMSCAN_BREAK        */ , WINSCAN_BREAK              ,TRUE
 /* 0x6F PMSCAN_MOVEWIN      */ , 0x00                       ,FALSE
 /* 0x70 PMSCAN_NLS3         */ , WINSCAN_NLS3               ,FALSE
-/* 0x71 PMSCAN_HELP         */ , 0x00                       ,FALSE
+/* 0x71 PMSCAN_HELP         */ , WINSCAN_HELP               ,FALSE
 /* 0x72 PMSCAN_TASKMAN      */ , 0x00                       ,FALSE
 /* 0x73 PMSCAN_B11          */ , WINSCAN_B11                ,FALSE
 /* 0x74 PMSCAN_JUMP         */ , 0x00                       ,FALSE
@@ -722,11 +722,11 @@ BYTE abPMScanToWinScan[256][2] =
 /* 0x79 PMSCAN_NLS2         */ , WINSCAN_NLS2	            ,FALSE
 /* 0x7a PMSCAN_SIZE         */ , 0x00                       ,FALSE
 /* 0x7b PMSCAN_NLS1         */ , WINSCAN_NLS1               ,FALSE
-/* 0x7c PMSCAN_APPLICATION  */ , WINSCAN_WINAPPLICATION     ,TRUE
+/* 0x7c PMSCAN_APPLICATION  */ , WINSCAN_APPLICATION        ,TRUE
 /* 0x7d PMSCAN_E13          */ , WINSCAN_YEN                ,FALSE
-/* 0x7e PMSCAN              */ , WINSCAN_ABNT_C2            ,TRUE
-/* 0x7f PMSCAN              */ , 0x00                       ,TRUE
-/* 0x80 PMSCAN_PA1          */ , 0x00                       ,FALSE
+/* 0x7e PMSCAN              */ , WINSCAN_WINLEFT            ,TRUE
+/* 0x7f PMSCAN              */ , WINSCAN_WINRIGHT           ,TRUE
+/* 0x80 PMSCAN_PA1          */ , WINSCAN_PA1                ,FALSE
 /* 0x81 PMSCAN_F13          */ , WINSCAN_F13                ,FALSE
 /* 0x82 PMSCAN_F14          */ , WINSCAN_F14                ,FALSE
 /* 0x83 PMSCAN_F15          */ , WINSCAN_F15                ,FALSE
@@ -735,13 +735,13 @@ BYTE abPMScanToWinScan[256][2] =
 /* 0x86 PMSCAN_SPACEBREAK   */ , 0x00                       ,FALSE
 /* 0x87 PMSCAN_TABRIGHT     */ , 0x00                       ,FALSE
 /* 0x88 PMSCAN_NOOP         */ , 0x00                       ,FALSE
-/* 0x89 PMSCAN_F16          */ , 0x00                       ,FALSE
-/* 0x8a PMSCAN_F17          */ , 0x00                       ,FALSE
-/* 0x8b PMSCAN_F18          */ , 0x00                       ,FALSE
-/* 0x8c PMSCAN_F19          */ , 0x00                       ,FALSE
-/* 0x8d PMSCAN_F20          */ , WINSCAN_NUMPADEQUALS       ,FALSE
-/* 0x8e PMSCAN_F21          */ , 0x00                       ,FALSE
-/* 0x8f PMSCAN_F22          */ , 0x00                       ,FALSE
+/* 0x89 PMSCAN_F16          */ , WINSCAN_F16                ,FALSE
+/* 0x8a PMSCAN_F17          */ , WINSCAN_F17                ,FALSE
+/* 0x8b PMSCAN_F18          */ , WINSCAN_F18                ,FALSE
+/* 0x8c PMSCAN_F19          */ , WINSCAN_F19                ,FALSE
+/* 0x8d PMSCAN_F20          */ , WINSCAN_F20                ,FALSE
+/* 0x8e PMSCAN_F21          */ , WINSCAN_F21                ,FALSE
+/* 0x8f PMSCAN_F22          */ , WINSCAN_F22                ,FALSE
 /* 0x90                     */ , WINSCAN_PREVTRACK          ,FALSE
 /* 0x91                     */ , WINSCAN_AT                 ,FALSE
 /* 0x92                     */ , WINSCAN_COLON              ,FALSE
