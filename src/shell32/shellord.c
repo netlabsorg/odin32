@@ -904,7 +904,7 @@ typedef struct tagCREATEMRULIST
             if (uFlags == SHARD_PIDL)
 		hres = IShellLinkA_SetIDList(psl, (LPCITEMIDLIST) pv);
 	    else 
-             if (uFlags == SHARD_PIDL)
+             if (uFlags == SHARD_PATHW)
 	    	hres = IShellLinkW_SetPath(psl, (LPCWSTR) pv);
              else 
 	    	hres = IShellLinkA_SetPath(psl, (LPCWSTR) pv);
