@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2378 2002-12-05 09:23:33 sandervl Exp $ */
+/* $Id: changelog,v 1.2379 2002-12-05 09:37:01 sandervl Exp $ */
+
+ 2002-12-05: Sander van Leeuwen <sandervl@innotek   >
+    - COMCTL32: o Put back old tab height calculation code. Fixes the tabs
+                  in certain applications.
 
  2002-12-05: Platon Fomichev <platon@innotek   >
     - USER32:   o Changed system menu in OS/2 GUI mode
