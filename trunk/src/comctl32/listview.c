@@ -975,6 +975,7 @@ static INT LISTVIEW_GetItemWidth(HWND hwnd)
   }
   else if (uView == LVS_REPORT)
   {
+    RECT rect;
     /* calculate width of header */
     nHeaderItemCount = Header_GetItemCount(infoPtr->hwndHeader);
     for (i = 0; i < nHeaderItemCount; i++)
@@ -984,6 +985,11 @@ static INT LISTVIEW_GetItemWidth(HWND hwnd)
         nItemWidth += (rcHeaderItem.right - rcHeaderItem.left);
       }
     }
+#ifdef __WIN32OS2__
+    //SvL: An item can never be bigger than the client area
+    GetClientRect(hwnd, &rect);
+    nItemWidth = MIN(rect.left - rect.right, nItemWidth);
+#endif
   }
   else
   {
