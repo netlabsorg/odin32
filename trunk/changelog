@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1993 2002-02-20 10:02:54 sandervl Exp $ */
+/* $Id: changelog,v 1.1994 2002-02-20 11:58:04 sandervl Exp $ */
+
+ 2002-02-20: Platon Fomichev <platon@innotek.de>
+    - IPHLPAPI  o Implemented GetAdaptersInfo & GetNetworkParams
 
  2002-02-20: Sander van Leeuwen <sandervl@xs4all.nl>
     - WSOCK32:  o Changed reported winsock version to 2.0 (from 1.1)
