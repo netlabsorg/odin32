@@ -1,4 +1,4 @@
-# $Id: process.mak,v 1.29 2002-09-12 03:11:34 bird Exp $
+# $Id: process.mak,v 1.30 2002-09-12 03:22:37 bird Exp $
 
 #
 # Unix-like tools for OS/2
@@ -706,6 +706,7 @@ _build_new_dependencies_: \
         _build_banner_miscellaneous miscellaneous \
         _build_banner_publish       publish
 
+
 # Banners for rebuild and build.
 _build_banner_clean:
     @$(ECHO)$(CLRMAK)[Start Pass 0 - Make Clean] $(CLRRST)
@@ -742,6 +743,33 @@ rebuild: \
 !else
     @$(ECHO)$(CLRMAK)[Rebuilt Everything! (Ignore option specified)] $(CLRRST)
 !endif
+
+
+
+# -----------------------------------------------------------------------------
+# A number of shortcuts for lazy programmers.
+# -----------------------------------------------------------------------------
+pass1:  build
+
+pass2:  _build_new_dependencies_
+
+pass3:  _build_banner_lib           lib \
+        _build_banner_executable    executable \
+        _build_banner_miscellaneous miscellaneous \
+        _build_banner_publish       publish
+
+pass4:  _build_banner_executable    executable \
+        _build_banner_miscellaneous miscellaneous \
+        _build_banner_publish       publish
+
+pass5:  _build_banner_miscellaneous miscellaneous \
+        _build_banner_publish       publish
+
+pass6:  _build_banner_publish       publish
+
+quick:  _build_banner_lib           lib \
+        _build_banner_executable    executable \
+        _build_banner_publish       publish
 
 
 
