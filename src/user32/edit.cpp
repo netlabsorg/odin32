@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.16 1999-11-21 14:04:11 achimha Exp $ */
+/* $Id: edit.cpp,v 1.17 1999-11-24 18:21:36 cbratschi Exp $ */
 /*
  *      Edit control
  *
@@ -9,6 +9,9 @@
  *      Copyright  1999 Christoph Bratschi
  *
  * WINE version: 991031
+ *
+ * Status:  in progress
+ * Version: ?.??
  */
 
 /*
@@ -21,6 +24,8 @@
   - EN_HSCROLL/EN_VSCROLL: send before update
   - still problems with caret
   - WS_BORDER -> bug in Win32BaseWindow::SetWindowLong
+  - clipping bug(s)
+  - many messages, styles, notifications
 */
 
 #include <os2win.h>

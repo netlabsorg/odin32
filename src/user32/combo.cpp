@@ -1,4 +1,4 @@
-/* $Id: combo.cpp,v 1.18 1999-11-21 17:34:10 achimha Exp $ */
+/* $Id: combo.cpp,v 1.19 1999-11-24 18:21:35 cbratschi Exp $ */
 /*
  * Combo controls
  *
@@ -8,6 +8,9 @@
  * FIXME: roll up in Netscape 3.01.
  *
  * WINE version: 991031
+ *
+ * Status:  in progress
+ * Version: ?.??
  */
 
 /* CB: bugs
