@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.88 2001-02-18 17:59:04 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.89 2001-02-19 10:15:49 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -427,7 +427,7 @@ void selectClientArea(Win32BaseWindow *window, pDCData pHps)
 
    hrgnRect = GreCreateRectRegion(pHps->hps, &rcl, 1);
 #if 0
-   if(window->getParent()) 
+   if(window->getParent())
    {
      HRGN hrgnParentClip;
 
@@ -1739,9 +1739,9 @@ INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, cons
                 if(!pRectUpdate || IntersectRect(&rectChild, &rectChild, &rc))
                 {
                      dprintf(("ScrollWindowEx: Scroll child window %x", hwndChild));
-		     SetWindowPos(hwndChild, 0, rectChild.left + dx,
-  		  	          rectChild.top + orgdy, 0, 0, SWP_NOZORDER_W |
-			          SWP_NOSIZE_W | SWP_NOACTIVATE_W | SWP_NOREDRAW);
+                     SetWindowPos(hwndChild, 0, rectChild.left + dx,
+                                  rectChild.top + orgdy, 0, 0, SWP_NOZORDER_W |
+                                  SWP_NOSIZE_W | SWP_NOACTIVATE_W | SWP_NOREDRAW);
                 }
                 hwndChild = GetWindow(hwndChild, GW_HWNDNEXT_W);
             }
@@ -1842,7 +1842,7 @@ void dprintfOrigin(HDC hdc)
     pDCData  pHps = (pDCData)GpiQueryDCData((HPS)hdc);
     if(!pHps)
     {
-	return;
+    return;
     }
 
     GreGetDCOrigin(pHps->hps, &point);
