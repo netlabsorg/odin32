@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.63 2001-10-23 06:00:45 phaller Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.64 2001-10-23 08:36:20 phaller Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -33,6 +33,7 @@
 #include "oslibwin.h"
 #include "winmouse.h"
 #include <pmkbdhk.h>
+#include <pmscan.h>
 
 #define DBG_LOCALLOG    DBG_oslibmsgtranslate
 #include "dbglocal.h"
