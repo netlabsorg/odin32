@@ -1,4 +1,4 @@
-/* $Id: lang.cpp,v 1.7 1999-06-28 16:15:47 phaller Exp $ */
+/* $Id: lang.cpp,v 1.8 1999-06-29 12:06:46 sandervl Exp $ */
 
 /*
  * Win32 language API functions for OS/2
@@ -67,9 +67,6 @@ int WIN32API GetLocaleInfoA(LCID lcid, LCTYPE LCType, LPSTR buf, int len)
     SetLastError(ERROR_INSUFFICIENT_BUFFER);
     return 0;
   }
-
-  if(!buf) // @@@PH: which result does make sense without a buffer ?
-    return 0; // nevertheless, OPERA.EXE calls it with NULL ?!
 
   // Only standard. TODO: Use os2.ini PM_National section
   DosQueryCtryInfo(sizeof(CtryInfo), &Country, &CtryInfo, &ulInfoLen);
