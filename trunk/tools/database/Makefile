@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.2 1999-12-06 18:11:50 bird Exp $
+# $Id: Makefile,v 1.3 1999-12-06 23:52:43 bird Exp $
 
 #
 # Common makefile for database utils - EMX/GCC version
@@ -146,7 +146,7 @@ gd/gdgcc.$(A): force
 #
 Odin32: CreateTables.sql States.sql Authors.sql
    -mysqladmin refresh
-   mysqladmin DROP Odin32
+   -mysqladmin DROP Odin32
    mysql < CreateTables.sql
    mysql < States.sql
    mysql < Authors.sql
@@ -178,4 +178,4 @@ clean:
    @nmake /nologo clean
 
 force:
-    @$(ECHO) -
+    @$(ECHO) ...
