@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.1049 2000-08-04 21:17:11 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1050 2000-08-06 09:31:22 sandervl Exp $ */
+
+ 2000-08-06: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
+    - COMCTL32: Updated toolbar to Wine 20000801
 
  2000-08-04: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: Temporary workaround for differences in share mode between
