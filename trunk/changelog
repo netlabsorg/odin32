@@ -1,4 +1,10 @@
- /* $Id: changelog,v 1.833 2000-03-23 23:08:03 sandervl Exp $ */
+ /* $Id: changelog,v 1.834 2000-03-24 17:10:32 cbratschi Exp $ */
+
+ 2000-03-24: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32: fixed GetClipboardFormatNameW
+		  fixed scrollbar memory leak
+	- SHELL32: fixed IDataObject_fnGetData return value (file dialog
+		   is now usable)
 
  2000-03-23: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Fixed shared global mutex

@@ -1,6 +1,5 @@
 /*
  *  Implementation of IShellBrowser for the File Open common dialog
- * 
  *
  */
 
@@ -89,7 +88,7 @@ LPITEMIDLIST GetSelectedPidl(IShellView *ppshv);
 /**************************************************************************
 *   External Prototypes
 */
-extern const char *FileOpenDlgInfosStr; 
+extern const char *FileOpenDlgInfosStr;
 
 extern HRESULT          GetName(LPSHELLFOLDER lpsf, LPITEMIDLIST pidl,DWORD dwFlags,LPSTR lpstrFileName);
 extern HRESULT          GetFileName(HWND hwnd, LPITEMIDLIST pidl, LPSTR lpstrFileName);
@@ -148,7 +147,7 @@ IShellBrowser * IShellBrowserImpl_Construct(HWND hwndOwner)
 *  IShellBrowserImpl_QueryInterface
 */
 HRESULT WINAPI IShellBrowserImpl_QueryInterface(IShellBrowser *iface,
-                                            REFIID riid, 
+                                            REFIID riid,
                                             LPVOID *ppvObj)
 {
     ICOM_THIS(IShellBrowserImpl, iface);
@@ -158,7 +157,7 @@ HRESULT WINAPI IShellBrowserImpl_QueryInterface(IShellBrowser *iface,
     *ppvObj = NULL;
 
     if(IsEqualIID(riid, &IID_IUnknown))          /*IUnknown*/
-    { *ppvObj = This; 
+    { *ppvObj = This;
     }
     else if(IsEqualIID(riid, &IID_IOleWindow))  /*IOleWindow*/
     { *ppvObj = (IOleWindow*)This;
@@ -200,8 +199,8 @@ ULONG WINAPI IShellBrowserImpl_Release(IShellBrowser * iface)
 
     TRACE("(%p)\n", This);
 
-    if (!--(This->ref)) 
-    { 
+    if (!--(This->ref))
+    {
       COMDLG32_SHFree(This);
       return 0;
     }
@@ -220,9 +219,9 @@ ULONG WINAPI IShellBrowserImpl_Release(IShellBrowser * iface)
 *  See Windows documentation for more details
 *
 *  Note : We will never be window less in the File Open dialog
-*  
+*
 */
-HRESULT WINAPI IShellBrowserImpl_GetWindow(IShellBrowser * iface,  
+HRESULT WINAPI IShellBrowserImpl_GetWindow(IShellBrowser * iface,
                                            HWND * phwnd)
 {
     ICOM_THIS(IShellBrowserImpl, iface);
@@ -234,7 +233,7 @@ HRESULT WINAPI IShellBrowserImpl_GetWindow(IShellBrowser * iface,
 
     *phwnd = This->hwndOwner;
 
-    return (*phwnd) ? S_OK : E_UNEXPECTED; 
+    return (*phwnd) ? S_OK : E_UNEXPECTED;
 
 }
 
@@ -261,11 +260,11 @@ HRESULT WINAPI IShellBrowserImpl_ContextSensitiveHelp(IShellBrowser * iface,
 *
 *  See Windows documentation on IShellBrowser::BrowseObject for more details
 *
-*  This function will override user specified flags and will always 
-*  use SBSP_DEFBROWSER and SBSP_DEFMODE.  
+*  This function will override user specified flags and will always
+*  use SBSP_DEFBROWSER and SBSP_DEFMODE.
 */
-HRESULT WINAPI IShellBrowserImpl_BrowseObject(IShellBrowser *iface, 
-                                              LPCITEMIDLIST pidl, 
+HRESULT WINAPI IShellBrowserImpl_BrowseObject(IShellBrowser *iface,
+                                              LPCITEMIDLIST pidl,
                                               UINT wFlags)
 {
     HRESULT hRes;
@@ -283,7 +282,7 @@ HRESULT WINAPI IShellBrowserImpl_BrowseObject(IShellBrowser *iface,
     /* Format the pidl according to its parameter's category */
     if(wFlags & SBSP_RELATIVE)
     {
-        
+
         /* SBSP_RELATIVE  A relative pidl (relative from the current folder) */
         hRes = IShellFolder_BindToObject(fodInfos->Shell.FOIShellFolder,
                                      pidl,
@@ -297,12 +296,12 @@ HRESULT WINAPI IShellBrowserImpl_BrowseObject(IShellBrowser *iface,
         /* create an absolute pidl */
         pidlTmp = COMDLG32_PIDL_ILCombine(fodInfos->ShellInfos.pidlAbsCurrent,
                                                         (LPITEMIDLIST)pidl);
-        
+
     }
     else if(wFlags & SBSP_PARENT)
     {
         /* Browse the parent folder (ignores the pidl) */
-        
+
         pidlTmp = GetParentPidl(fodInfos->ShellInfos.pidlAbsCurrent);
         psfTmp = GetShellFolderFromPidl(pidlTmp);
 
@@ -314,17 +313,17 @@ HRESULT WINAPI IShellBrowserImpl_BrowseObject(IShellBrowser *iface,
         psfTmp = GetShellFolderFromPidl(pidlTmp);
     }
 
-    
+
     /* Retrieve the IShellFolder interface of the pidl specified folder */
     if(!psfTmp)
         return E_FAIL;
 
-    /* If the pidl to browse to is equal to the actual pidl ... 
+    /* If the pidl to browse to is equal to the actual pidl ...
        do nothing and pretend you did it*/
     if(COMDLG32_PIDL_ILIsEqual(pidlTmp,fodInfos->ShellInfos.pidlAbsCurrent))
     {
         IShellFolder_Release(psfTmp);
-	COMDLG32_SHFree(pidlTmp);
+        COMDLG32_SHFree(pidlTmp);
         return NOERROR;
     }
 
@@ -341,8 +340,8 @@ HRESULT WINAPI IShellBrowserImpl_BrowseObject(IShellBrowser *iface,
         HWND hwndView;
         /* Get the foldersettings from the old view */
         if(fodInfos->Shell.FOIShellView)
-        { 
-          IShellView_GetCurrentInfo(fodInfos->Shell.FOIShellView, 
+        {
+          IShellView_GetCurrentInfo(fodInfos->Shell.FOIShellView,
                                   &fodInfos->ShellInfos.folderSettings);
         }
 
@@ -363,7 +362,7 @@ HRESULT WINAPI IShellBrowserImpl_BrowseObject(IShellBrowser *iface,
                        FALSE);
 
             /* Select the new folder in the Look In combo box of the Open file dialog */
-            
+
             FILEDLG95_LOOKIN_SelectItem(fodInfos->DlgInfos.hwndLookInCB,pidlTmp);
 
             /* Release old pidlAbsCurrent memory and update its value */
@@ -382,21 +381,21 @@ HRESULT WINAPI IShellBrowserImpl_BrowseObject(IShellBrowser *iface,
             fodInfos->Shell.FOIShellView = psvTmp;
 
             fodInfos->ShellInfos.hwndView = hwndView;
-            
+
             return NOERROR;
         }
     }
 
     FILEDLG95_LOOKIN_SelectItem(fodInfos->DlgInfos.hwndLookInCB,fodInfos->ShellInfos.pidlAbsCurrent);
-    return hRes; 
+    return hRes;
 }
 
 /**************************************************************************
 *  IShellBrowserImpl_EnableModelessSB
 */
-HRESULT WINAPI IShellBrowserImpl_EnableModelessSB(IShellBrowser *iface,    
+HRESULT WINAPI IShellBrowserImpl_EnableModelessSB(IShellBrowser *iface,
                                               BOOL fEnable)
-                                              
+
 {
     ICOM_THIS(IShellBrowserImpl, iface);
 
@@ -409,10 +408,10 @@ HRESULT WINAPI IShellBrowserImpl_EnableModelessSB(IShellBrowser *iface,
 /**************************************************************************
 *  IShellBrowserImpl_GetControlWindow
 */
-HRESULT WINAPI IShellBrowserImpl_GetControlWindow(IShellBrowser *iface,    
-                                              UINT id,    
+HRESULT WINAPI IShellBrowserImpl_GetControlWindow(IShellBrowser *iface,
+                                              UINT id,
                                               HWND *lphwnd)
-                                              
+
 {
     ICOM_THIS(IShellBrowserImpl, iface);
 
@@ -425,9 +424,9 @@ HRESULT WINAPI IShellBrowserImpl_GetControlWindow(IShellBrowser *iface,
 *  IShellBrowserImpl_GetViewStateStream
 */
 HRESULT WINAPI IShellBrowserImpl_GetViewStateStream(IShellBrowser *iface,
-                                                DWORD grfMode,    
+                                                DWORD grfMode,
                                                 LPSTREAM *ppStrm)
-                                              
+
 {
     ICOM_THIS(IShellBrowserImpl, iface);
 
@@ -435,14 +434,14 @@ HRESULT WINAPI IShellBrowserImpl_GetViewStateStream(IShellBrowser *iface,
 
     /* Feature not implemented */
     return E_NOTIMPL;
-}       
+}
 /**************************************************************************
 *  IShellBrowserImpl_InsertMenusSB
 */
 HRESULT WINAPI IShellBrowserImpl_InsertMenusSB(IShellBrowser *iface,
                                            HMENU hmenuShared,
                                            LPOLEMENUGROUPWIDTHS lpMenuWidths)
-                                              
+
 {
     ICOM_THIS(IShellBrowserImpl, iface);
 
@@ -456,7 +455,7 @@ HRESULT WINAPI IShellBrowserImpl_InsertMenusSB(IShellBrowser *iface,
 */
 HRESULT WINAPI IShellBrowserImpl_OnViewWindowActive(IShellBrowser *iface,
                                                 IShellView *ppshv)
-                                              
+
 {
     ICOM_THIS(IShellBrowserImpl, iface);
 
@@ -464,13 +463,13 @@ HRESULT WINAPI IShellBrowserImpl_OnViewWindowActive(IShellBrowser *iface,
 
     /* Feature not implemented */
     return E_NOTIMPL;
-}   
+}
 /**************************************************************************
 *  IShellBrowserImpl_QueryActiveShellView
 */
 HRESULT WINAPI IShellBrowserImpl_QueryActiveShellView(IShellBrowser *iface,
                                                   IShellView **ppshv)
-                                              
+
 {
     ICOM_THIS(IShellBrowserImpl, iface);
 
@@ -486,13 +485,13 @@ HRESULT WINAPI IShellBrowserImpl_QueryActiveShellView(IShellBrowser *iface,
     }
     IShellView_AddRef(fodInfos->Shell.FOIShellView);
     return NOERROR;
-}   
+}
 /**************************************************************************
 *  IShellBrowserImpl_RemoveMenusSB
 */
 HRESULT WINAPI IShellBrowserImpl_RemoveMenusSB(IShellBrowser *iface,
                                            HMENU hmenuShared)
-                                              
+
 {
     ICOM_THIS(IShellBrowserImpl, iface);
 
@@ -500,28 +499,28 @@ HRESULT WINAPI IShellBrowserImpl_RemoveMenusSB(IShellBrowser *iface,
 
     /* Feature not implemented */
     return E_NOTIMPL;
-}   
+}
 /**************************************************************************
 *  IShellBrowserImpl_SendControlMsg
 */
-HRESULT WINAPI IShellBrowserImpl_SendControlMsg(IShellBrowser *iface,    
-                                            UINT id,    
-                                            UINT uMsg,    
-                                            WPARAM wParam,    
+HRESULT WINAPI IShellBrowserImpl_SendControlMsg(IShellBrowser *iface,
+                                            UINT id,
+                                            UINT uMsg,
+                                            WPARAM wParam,
                                             LPARAM lParam,
                                             LRESULT *pret)
-                                              
+
 {
     ICOM_THIS(IShellBrowserImpl, iface);
     LRESULT lres;
-    
+
     TRACE("(%p)->(0x%08x 0x%08x 0x%08x 0x%08lx %p)\n", This, id, uMsg, wParam, lParam, pret);
 
     switch (id)
     {
       case FCW_TOOLBAR:
         lres = SendDlgItemMessageA( This->hwndOwner, IDC_TOOLBAR, uMsg, wParam, lParam);
-	break;
+        break;
       default:
         FIXME("ctrl id: %x\n", id);
         return E_NOTIMPL;
@@ -533,10 +532,10 @@ HRESULT WINAPI IShellBrowserImpl_SendControlMsg(IShellBrowser *iface,
 *  IShellBrowserImpl_SetMenuSB
 */
 HRESULT WINAPI IShellBrowserImpl_SetMenuSB(IShellBrowser *iface,
-                                       HMENU hmenuShared,    
+                                       HMENU hmenuShared,
                                        HOLEMENU holemenuReserved,
                                        HWND hwndActiveObject)
-                                              
+
 {
     ICOM_THIS(IShellBrowserImpl, iface);
 
@@ -544,13 +543,13 @@ HRESULT WINAPI IShellBrowserImpl_SetMenuSB(IShellBrowser *iface,
 
     /* Feature not implemented */
     return E_NOTIMPL;
-}   
+}
 /**************************************************************************
 *  IShellBrowserImpl_SetStatusTextSB
 */
 HRESULT WINAPI IShellBrowserImpl_SetStatusTextSB(IShellBrowser *iface,
                                              LPCOLESTR lpszStatusText)
-                                              
+
 {
     ICOM_THIS(IShellBrowserImpl, iface);
 
@@ -558,15 +557,15 @@ HRESULT WINAPI IShellBrowserImpl_SetStatusTextSB(IShellBrowser *iface,
 
     /* Feature not implemented */
     return E_NOTIMPL;
-}   
+}
 /**************************************************************************
 *  IShellBrowserImpl_SetToolbarItems
 */
 HRESULT WINAPI IShellBrowserImpl_SetToolbarItems(IShellBrowser *iface,
-                                             LPTBBUTTON lpButtons,    
-                                             UINT nButtons,    
+                                             LPTBBUTTON lpButtons,
+                                             UINT nButtons,
                                              UINT uFlags)
-                                              
+
 {
     ICOM_THIS(IShellBrowserImpl, iface);
 
@@ -574,14 +573,14 @@ HRESULT WINAPI IShellBrowserImpl_SetToolbarItems(IShellBrowser *iface,
 
     /* Feature not implemented */
     return E_NOTIMPL;
-}   
+}
 /**************************************************************************
 *  IShellBrowserImpl_TranslateAcceleratorSB
 */
 HRESULT WINAPI IShellBrowserImpl_TranslateAcceleratorSB(IShellBrowser *iface,
-                                                    LPMSG lpmsg,    
+                                                    LPMSG lpmsg,
                                                     WORD wID)
-                                              
+
 {
     ICOM_THIS(IShellBrowserImpl, iface);
 
@@ -599,7 +598,7 @@ HRESULT WINAPI IShellBrowserImpl_TranslateAcceleratorSB(IShellBrowser *iface,
 *  IShellBrowserImpl_ICommDlgBrowser_QueryInterface
 */
 HRESULT WINAPI IShellBrowserImpl_ICommDlgBrowser_QueryInterface(ICommDlgBrowser *iface,
-                                            REFIID riid, 
+                                            REFIID riid,
                                             LPVOID *ppvObj)
 {
     _ICOM_THIS_FromICommDlgBrowser(IShellBrowser,iface);
@@ -647,22 +646,23 @@ HRESULT WINAPI IShellBrowserImpl_ICommDlgBrowser_OnDefaultCommand(ICommDlgBrowse
 
     TRACE("(%p)\n", This);
 
-    fodInfos = (FileOpenDlgInfos *) GetPropA(This->hwndOwner,FileOpenDlgInfosStr);  
-    
+    fodInfos = (FileOpenDlgInfos *) GetPropA(This->hwndOwner,FileOpenDlgInfosStr);
+
     /* If the selected object is not a folder, send a IDOK command to parent window */
-    if((pidl = GetSelectedPidl(ppshv)))
+    pidl = GetSelectedPidl(ppshv);
+    if (pidl)
     {
         HRESULT hRes;
 
         ULONG  ulAttr = SFGAO_FOLDER | SFGAO_HASSUBFOLDER;
         IShellFolder_GetAttributesOf(fodInfos->Shell.FOIShellFolder, 1, &pidl, &ulAttr);
-	if (ulAttr)
+        if (ulAttr)
             hRes = IShellBrowser_BrowseObject((IShellBrowser *)This,pidl,SBSP_RELATIVE);
         /* Tell the dialog that the user selected a file */
         else
-	{
+        {
             hRes = FILEDLG95_OnOpen(This->hwndOwner);
-	}
+        }
 
         /* Free memory used by pidl */
         COMDLG32_SHFree((LPVOID)pidl);
@@ -689,11 +689,11 @@ HRESULT WINAPI IShellBrowserImpl_ICommDlgBrowser_OnStateChange(ICommDlgBrowser *
     {
         case CDBOSC_SETFOCUS:
             break;
-        case CDBOSC_KILLFOCUS: 
-	    {
-		FileOpenDlgInfos *fodInfos = (FileOpenDlgInfos *) GetPropA(This->hwndOwner,FileOpenDlgInfosStr);
-		if(fodInfos->DlgInfos.dwDlgProp & FODPROP_SAVEDLG)
-		    SetDlgItemTextA(fodInfos->ShellInfos.hwndOwner,IDOK,"&Save");
+        case CDBOSC_KILLFOCUS:
+            {
+                FileOpenDlgInfos *fodInfos = (FileOpenDlgInfos *) GetPropA(This->hwndOwner,FileOpenDlgInfosStr);
+                if(fodInfos->DlgInfos.dwDlgProp & FODPROP_SAVEDLG)
+                    SetDlgItemTextA(fodInfos->ShellInfos.hwndOwner,IDOK,"&Save");
             }
             break;
         case CDBOSC_SELCHANGE:
@@ -702,12 +702,12 @@ HRESULT WINAPI IShellBrowserImpl_ICommDlgBrowser_OnStateChange(ICommDlgBrowser *
             break;
     }
 
-    return NOERROR;     
+    return NOERROR;
 }
 /**************************************************************************
 *  IShellBrowserImpl_ICommDlgBrowser_IncludeObject
 */
-HRESULT WINAPI IShellBrowserImpl_ICommDlgBrowser_IncludeObject(ICommDlgBrowser *iface, 
+HRESULT WINAPI IShellBrowserImpl_ICommDlgBrowser_IncludeObject(ICommDlgBrowser *iface,
                                                                IShellView * ppshv,
                                                                LPCITEMIDLIST pidl)
 {
@@ -724,13 +724,13 @@ HRESULT WINAPI IShellBrowserImpl_ICommDlgBrowser_IncludeObject(ICommDlgBrowser *
 
     ulAttr = SFGAO_HIDDEN | SFGAO_FOLDER | SFGAO_FILESYSTEM | SFGAO_FILESYSANCESTOR | SFGAO_LINK;
     IShellFolder_GetAttributesOf(fodInfos->Shell.FOIShellFolder, 1, &pidl, &ulAttr);
-    
 
-    if( (ulAttr & SFGAO_HIDDEN)						/* hidden */
-      | !(ulAttr & (SFGAO_FILESYSTEM | SFGAO_FILESYSANCESTOR)))	/* special folder */
+
+    if( (ulAttr & SFGAO_HIDDEN)                                         /* hidden */
+      | !(ulAttr & (SFGAO_FILESYSTEM | SFGAO_FILESYSANCESTOR))) /* special folder */
         return S_FALSE;
     /* always include directorys and links */
-    if(ulAttr & (SFGAO_FOLDER | SFGAO_LINK)) 
+    if(ulAttr & (SFGAO_FOLDER | SFGAO_LINK))
         return S_OK;
     /* Check if there is a mask to apply if not */
     if(!fodInfos->ShellInfos.lpstrCurrentFilter ||
@@ -740,7 +740,7 @@ HRESULT WINAPI IShellBrowserImpl_ICommDlgBrowser_IncludeObject(ICommDlgBrowser *
     if (SUCCEEDED(IShellFolder_GetDisplayNameOf(fodInfos->Shell.FOIShellFolder, pidl, SHGDN_FORPARSING, &str)))
     { if (SUCCEEDED(StrRetToBufW(&str, pidl,szPathW, MAX_PATH)))
       {
-	  if (COMDLG32_PathMatchSpecW(szPathW, fodInfos->ShellInfos.lpstrCurrentFilter))
+          if (COMDLG32_PathMatchSpecW(szPathW, fodInfos->ShellInfos.lpstrCurrentFilter))
           return S_OK;
       }
     }
@@ -750,7 +750,7 @@ HRESULT WINAPI IShellBrowserImpl_ICommDlgBrowser_IncludeObject(ICommDlgBrowser *
 
 /**************************************************************************
 *  IShellBrowserImpl_ICommDlgBrowser_OnSelChange
-*/  
+*/
 HRESULT IShellBrowserImpl_ICommDlgBrowser_OnSelChange(ICommDlgBrowser *iface, IShellView *ppshv)
 {
     LPITEMIDLIST pidl;
@@ -760,31 +760,32 @@ HRESULT IShellBrowserImpl_ICommDlgBrowser_OnSelChange(ICommDlgBrowser *iface, IS
     fodInfos = (FileOpenDlgInfos *) GetPropA(This->hwndOwner,FileOpenDlgInfosStr);
     TRACE("(%p)\n", This);
 
-    if((pidl = GetSelectedPidl(ppshv)))
+    pidl = GetSelectedPidl(ppshv);
+    if (pidl)
     {
         HRESULT hRes = E_FAIL;
         char lpstrFileName[MAX_PATH];
-    
         ULONG  ulAttr = SFGAO_FOLDER | SFGAO_HASSUBFOLDER;
+
         IShellFolder_GetAttributesOf(fodInfos->Shell.FOIShellFolder, 1, &pidl, &ulAttr);
         if (!ulAttr)
         {
             if(SUCCEEDED(hRes = GetName(fodInfos->Shell.FOIShellFolder,pidl,SHGDN_NORMAL,lpstrFileName)))
                 SetWindowTextA(fodInfos->DlgInfos.hwndFileName,lpstrFileName);
-	    if(fodInfos->DlgInfos.dwDlgProp & FODPROP_SAVEDLG)
-		    SetDlgItemTextA(fodInfos->ShellInfos.hwndOwner,IDOK,"&Save");
+            if(fodInfos->DlgInfos.dwDlgProp & FODPROP_SAVEDLG)
+                    SetDlgItemTextA(fodInfos->ShellInfos.hwndOwner,IDOK,"&Save");
         }
-	else
-	    SetDlgItemTextA(fodInfos->ShellInfos.hwndOwner,IDOK,"&Open");
+        else
+            SetDlgItemTextA(fodInfos->ShellInfos.hwndOwner,IDOK,"&Open");
 
-	fodInfos->DlgInfos.dwDlgProp |= FODPROP_USEVIEW;
+        fodInfos->DlgInfos.dwDlgProp |= FODPROP_USEVIEW;
 
         COMDLG32_SHFree((LPVOID)pidl);
         SendCustomDlgNotificationMessage(This->hwndOwner, CDN_SELCHANGE);
         return hRes;
     }
     if(fodInfos->DlgInfos.dwDlgProp & FODPROP_SAVEDLG)
-	SetDlgItemTextA(fodInfos->ShellInfos.hwndOwner,IDOK,"&Save");
+        SetDlgItemTextA(fodInfos->ShellInfos.hwndOwner,IDOK,"&Save");
 
     fodInfos->DlgInfos.dwDlgProp &= ~FODPROP_USEVIEW;
     return E_FAIL;
@@ -811,7 +812,7 @@ LPITEMIDLIST GetSelectedPidl(IShellView *ppshv)
     {
         STGMEDIUM medium;
         FORMATETC formatetc;
-        
+
         /* Set the FORMATETC structure*/
         SETDefFormatEtc(formatetc,
                         RegisterClipboardFormatA(CFSTR_SHELLIDLIST),
@@ -821,16 +822,16 @@ LPITEMIDLIST GetSelectedPidl(IShellView *ppshv)
         if(SUCCEEDED(IDataObject_GetData(doSelected,&formatetc,&medium)))
         {
             LPIDA cida = GlobalLock(medium.u.hGlobal);
-	    TRACE("cida=%p\n", cida);
+            TRACE("cida=%p\n", cida);
             pidlSelected =  COMDLG32_PIDL_ILClone((LPITEMIDLIST)(&((LPBYTE)cida)[cida->aoffset[1]]));
 
             if(medium.pUnkForRelease)
                 IUnknown_Release(medium.pUnkForRelease);
             else
-	    {
-	      GlobalUnlock(medium.u.hGlobal);
-	      GlobalFree(medium.u.hGlobal);
-	    }
+            {
+              GlobalUnlock(medium.u.hGlobal);
+              GlobalFree(medium.u.hGlobal);
+            }
         }
         IDataObject_Release(doSelected);
         return pidlSelected;
