@@ -1,4 +1,4 @@
-/* $Id: win32wmdiclient.cpp,v 1.11 1999-10-28 12:00:36 sandervl Exp $ */
+/* $Id: win32wmdiclient.cpp,v 1.12 1999-10-30 09:19:46 sandervl Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -364,7 +364,7 @@ LONG Win32MDIClientWindow::childActivate(Win32MDIChildWindow *child)
         }
     }
 
-    dprintf(("childActivate: %x %x", this, child->getWindowHandle()));
+    dprintf(("childActivate: %x %x", this, (child) ? child->getWindowHandle() : 0));
     activeChild = child;
 
     /* check if we have any children left */

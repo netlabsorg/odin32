@@ -1,4 +1,4 @@
-/* $Id: win32wmdichild.cpp,v 1.8 1999-10-28 12:00:36 sandervl Exp $ */
+/* $Id: win32wmdichild.cpp,v 1.9 1999-10-30 09:19:46 sandervl Exp $ */
 /*
  * Win32 MDI Child Window Class for OS/2
  *
@@ -114,7 +114,7 @@ LRESULT Win32MDIChildWindow::DefMDIChildProcA(UINT Msg, WPARAM wParam, LPARAM lP
         return 0x00010000L;
 
     case WM_CLOSE:
-        client->SendMessageA(WM_MDIDESTROY,(WPARAM16)getWindowHandle(), 0L);
+        client->SendMessageA(WM_MDIDESTROY,(WPARAM)getWindowHandle(), 0L);
         return 0;
 
     case WM_SETFOCUS:
