@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.93 1999-11-24 19:32:22 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.94 1999-11-24 20:28:20 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -414,7 +414,6 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   }
   else
   {
-        SetParent(windowDesktop->getWindowHandle());
         if (!cs->hwndParent || cs->hwndParent == windowDesktop->getWindowHandle()) {
             owner = NULL;
         }
