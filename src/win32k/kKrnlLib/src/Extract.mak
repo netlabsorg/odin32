@@ -1,8 +1,11 @@
-# $Id: Extract.mak,v 1.6 2002-08-20 04:37:59 bird Exp $
+# $Id: Extract.mak,v 1.7 2002-08-20 05:04:42 bird Exp $
 
 #
 # kKrnlLib/krnl makefile.
 #
+# Copyright (c) 1999-2002 knut st. osmundsen (bird@anduin.net)
+#
+# GPL
 #
 
 #

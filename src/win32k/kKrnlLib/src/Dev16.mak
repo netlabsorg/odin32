@@ -1,8 +1,11 @@
-# $Id: Dev16.mak,v 1.5 2002-08-20 04:37:58 bird Exp $
+# $Id: Dev16.mak,v 1.6 2002-08-20 05:04:42 bird Exp $
 
 #
 # kKrnlLib/dev16
 #
+# Copyright (c) 1998-2002 knut st. osmundsen (bird@anduin.net)
+#
+# GPL
 #
 
 
@@ -15,7 +18,6 @@ BUILD_ENV  = MSCV6
 PATH_ROOT  = ..\..\..\..
 !include $(PATH_ROOT)\make\setup.mak
 !include ..\..\makefile.inc
-
 
 
 #
