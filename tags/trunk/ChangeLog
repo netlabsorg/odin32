@@ -1,4 +1,11 @@
- /* $Id: ChangeLog,v 1.441 1999-11-12 17:15:59 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.442 1999-11-13 14:23:28 sandervl Exp $ */
+
+ 99-11-13: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: Fixed problem with ReadFile & aliased memory
+                    (DosRead doesn't like writing to memory addresses
+                     returned by DosAliasMem -> search for original
+                     memory mapped pointer and use that one)
+                    -> fixes problems in Lotus Notes 5.0
 
  99-11-12: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: fixed several edit bugs
