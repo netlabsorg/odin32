@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.101 2002-05-09 13:55:34 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.102 2002-05-10 14:55:12 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -243,6 +243,9 @@ DWORD error2WinError(APIRET rc,DWORD defaultCode)
 
     case ERROR_CRC: //23
         return ERROR_CRC_W;
+
+    case ERROR_SEEK:
+        return ERROR_SEEK_W;
 
     case ERROR_NOT_DOS_DISK: //26
         return ERROR_NOT_DOS_DISK_W;
@@ -1122,7 +1125,7 @@ DWORD OSLibDosCreateFile(CHAR *lpszFile,
 #endif
 
    if(strlen(lpszFile) == 2 && lpszFile[1] == ':') {
-        //app tries to open physical disk
+        //app tries to open logical volume/partition
         openMode |= OPEN_FLAGS_DASD;
    }
    int retry = 0;

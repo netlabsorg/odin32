@@ -1,4 +1,4 @@
-/* $Id: disk.cpp,v 1.35 2002-05-09 13:55:33 sandervl Exp $ */
+/* $Id: disk.cpp,v 1.36 2002-05-10 14:55:10 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -23,7 +23,7 @@
 #include "unicode.h"
 #include "oslibdos.h"
 #include "osliblvm.h"
-#include "exceptutil.h"
+#include "asmutil.h"
 #include "profile.h"
 #include "hmdisk.h"
 
@@ -239,10 +239,8 @@ UINT WIN32API GetDriveTypeA(LPCSTR lpszDrive)
             length = strlen(lpszDrive);
             pszVolume = (char *)alloca(length);
 
-            strcpy(pszVolume, &lpszDrive[sizeof(VOLUME_NAME_PREFIX)-1+1]);  //-zero term + starting '{'
-            length -= sizeof(VOLUME_NAME_PREFIX)-1+1;
-            if(pszVolume[length-2] == '}') {
-                pszVolume[length-2] = 0;
+            if(OSLibLVMStripVolumeName(lpszDrive, pszVolume, length)) 
+            {
                 rc = OSLibLVMGetDriveType(pszVolume);
                 dprintf(("KERNEL32:  GetDriveType %s = %d (LVM)", lpszDrive, rc));
                 return rc;
@@ -313,9 +311,9 @@ BOOL WIN32API GetVolumeInformationA(LPCSTR  lpRootPathName,
             length = strlen(lpRootPathName);
             pszVolume = (char *)alloca(length);
 
-            strcpy(pszVolume, &lpRootPathName[sizeof(VOLUME_NAME_PREFIX)-1]);
-            length -= sizeof(VOLUME_NAME_PREFIX)-1;
-            if(pszVolume[length-1] == '}') {
+            if(OSLibLVMStripVolumeName(lpRootPathName, pszVolume, length)) 
+            {
+                pszVolume[length-2] = 0;
                 fVolumeName = TRUE;
                 goto proceed;
             }
@@ -360,7 +358,9 @@ proceed:
             }
             else
             if(!strcmp(lpFileSystemNameBuffer, "CDFS") ||
-               !strcmp(lpFileSystemNameBuffer, "UDF"))
+               !strcmp(lpFileSystemNameBuffer, "UDF") ||
+               !strcmp(lpFileSystemNameBuffer, "NTFS") ||
+               !strcmp(lpFileSystemNameBuffer, "FAT32"))
             {
                 //do nothing
             }
@@ -737,18 +737,34 @@ BOOL WIN32API GetVolumeNameForVolumeMountPointA(LPCSTR lpszVolumeMountPoint,
                                                 LPSTR lpszVolumeName,
                                                 DWORD cchBufferLength)
 {
+    LPSTR pszvol;
+
+    pszvol = (char *)alloca(cchBufferLength);
+    if(pszvol == NULL) {
+        DebugInt3();
+        return FALSE;
+    }
+
     if(!VERSION_IS_WIN2000_OR_HIGHER()) {
         SetLastError(ERROR_NOT_SUPPORTED);
         return FALSE;
     }
 
-    dprintf(("GetVolumeNameForVolumeMountPointA: %s", lpszVolumeMountPoint));
-    if(OSLibLVMGetVolumeNameForVolumeMountPoint(lpszVolumeMountPoint, lpszVolumeName, 
+    if(OSLibLVMGetVolumeNameForVolumeMountPoint(lpszVolumeMountPoint, pszvol, 
                                                 cchBufferLength) == TRUE) 
     {
+        int length = strlen(pszvol);
+        if(length + sizeof(VOLUME_NAME_PREFIX) - 1 + 3 > cchBufferLength) {
+            SetLastError(ERROR_INSUFFICIENT_BUFFER);
+            return FALSE;
+        }
+        sprintf(lpszVolumeName, VOLUME_NAME_PREFIX"{%s}\\", pszvol);
+
+        dprintf(("GetVolumeNameForVolumeMountPointA %s returned %s", lpszVolumeMountPoint, lpszVolumeName));
         SetLastError(ERROR_SUCCESS);
         return TRUE;
     }
+    dprintf(("GetVolumeNameForVolumeMountPointA: %s not found!!", lpszVolumeMountPoint));
     SetLastError(ERROR_FILE_NOT_FOUND);
     return FALSE;
 }

@@ -1,4 +1,4 @@
-/* $Id: hmdevice.cpp,v 1.31 2001-12-05 14:15:59 sandervl Exp $ */
+/* $Id: hmdevice.cpp,v 1.32 2002-05-10 14:55:11 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -425,7 +425,7 @@ DWORD HMDeviceHandler::GetFileSize(PHMHANDLEDATA pHMHandleData,
            pHMHandleData,
            pSize));
 
-  return(ERROR_INVALID_FUNCTION);
+  return -1; //INVALID_SET_FILE_POINTER
 }
 
 
