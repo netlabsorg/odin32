@@ -1,4 +1,10 @@
-; $Id: cppopa4.asm,v 1.2 2002-04-18 01:35:24 bird Exp $
+; $Id: cppopa4.asm,v 1.3 2002-04-19 00:09:12 bird Exp $
+;
+
+;
+; Copyright 1990-1998 IBM Corp.
+;
+
 ;
 ; File Name         : G:\fun\cpppan40.obj\cpppan40.obj
 ; Format            : Object Module Format (OMF/IBM)
@@ -11,7 +17,29 @@
         .586
         .MODEL FLAT
 
-    large EQU
+;
+;   Defined Constants And Macros
+;
+
+;
+; FS selector fixes.
+;
+;FS_FIXES_1      EQU     1               ; Level 1 - Load correct fs when ever it's accessed
+                                        ;           And save it before calling Dos* and initAddr.
+;FS_FIXES_2      EQU     1               ; Level 2 - Save and load correct fs before every
+                                        ;           indirect call.
+FS_FIXES_3      EQU     1               ; Level 3 - Save and load correct fs upon entry.
+                                        ;
+ifdef FS_FIXES_3
+FS_FIXES_STACK  EQU     4
+else
+FS_FIXES_STACK  EQU     0
+endif
+
+
+large           EQU                     ; workaround for IDA code.
+
+
 
 ;
 ;   Segment definitionas.
@@ -37,6 +65,13 @@ CODE32          ends
                 extrn DosLoadModule:near
                 extrn DosQueryProcAddr:near
                 extrn DosUnwindException:near
+ifdef FS_FIXES_1
+                extrn Dos32TIB:abs
+elseifdef FS_FIXES_2
+                extrn Dos32TIB:abs
+elseifdef FS_FIXES_3
+                extrn Dos32TIB:abs
+endif
 
 
 ;
@@ -77,7 +112,17 @@ PROSEG          struc
     proseg_logBufMax        dd ?
     proseg_logBufNext       dd ?
     proseg_logBufWrap       dd ?
+if 0
     proseg_procAddrs        dd 7 dup(?)
+else
+    proseg_pfnINIT_PROSEG   dd ?        ; 00h + proseg_procAddrs
+    proseg_pfnINIT_IDT      dd ?        ; 04h + proseg_procAddrs
+    proseg_pfnINIT_ID4T     dd ?        ; 08h + proseg_procAddrs
+    proseg_pfnINIT_ID44     dd ?        ; 0ch + proseg_procAddrs
+    proseg_pfnINIT_ID44T    dd ?        ; 10h + proseg_procAddrs
+    proseg_pfnUnknown1      dd ?        ; 14h + proseg_procAddrs
+    proseg_pfnUnknown2      dd ?        ; 18h + proseg_procAddrs
+endif
     proseg_maxTid           dd ?
     proseg_ptrCurTid        dd ?
     proseg_maxSuffixBytes   dd ?
@@ -158,8 +203,6 @@ CODE32          segment
                 assume es:nothing, ss:nothing, ds:FLAT, fs:nothing, gs:nothing
 
 ; €€€€€€€€€€€€€€€ S U B R O U T I N E €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
-
-
                 public _ProfileHook32
 _ProfileHook32  proc near               ; CODE XREF: $$PROFSETJMPp longjmpp
                                         ; DATA XREF: ...
@@ -181,7 +224,13 @@ arg_0           = dword ptr  4
                 push    esi
                 push    edx
                 push    eax
+ifdef FS_FIXES_3
+                push    fs
+                push    Dos32TIB
+                pop     fs
+endif
                 mov     esi, $$PROSEGPTR32
+                ASSUME  esi:ptr PROSEG
                 or      esi, esi
                 jnz     short loc_6_4E
                 nop
@@ -198,50 +247,58 @@ arg_0           = dword ptr  4
                 jz      loc_6_FD
 
 loc_6_4E:                               ; CODE XREF: $$PROFCALL32+Dj
-                mov     ebx, large fs:0Ch
-                test    dword ptr [esi], 10h
+ifdef FS_FIXES_1
+                push    fs
+                push    Dos32TIB
+                pop     fs
+                mov     ebx, fs:tib_s.tib_ptib2
+                pop     fs
+else
+                mov     ebx, fs:tib_s.tib_ptib2
+endif
+                test    dword ptr [esi.proseg_flags], 10h
                 jnz     loc_6_FD
                 movzx   ebx, word ptr [ebx]
                 dec     ebx
-                cmp     ebx, [esi+64h]
+                cmp     ebx, [esi.proseg_maxTid]
                 jnb     loc_6_FD
-                mov     eax, [esi+164h]
+                mov     eax, [esi.conditionalExit]
                 mov     dword ptr [eax+ebx*4], 0FFFFFFFFh
-                mov     eax, [esi+160h]
+                mov     eax, [esi.proseg_tidTrigger]
                 cmp     dword ptr [eax+ebx*4], 0
-                jz      short loc_6_FD
+                jz      loc_6_FD
                 nop
                 nop
                 nop
                 nop
-                mov     eax, [esi+158h]
+                mov     eax, [esi.proseg_tidDecNest]
                 dec     dword ptr [eax+ebx*4]
-                js      short loc_6_104
+                js      loc_6_104
                 nop
                 nop
                 nop
                 nop
                 push    edi
-                lea     eax, [esp+18h]
+                lea     eax, [esp+18h + FS_FIXES_STACK]
                 call    verifyStackFrame
                 or      eax, eax
                 jnz     short loc_6_103
-                mov     eax, offset _ProfileHook32+0FFh
-                xchg    eax, [esp+18h+arg_0]
+                mov     eax, offset $$PROFRET32
+                xchg    eax, [esp+18h+arg_0 + FS_FIXES_STACK]
                 mov     edi, ebx
                 shl     edi, 0Ch
-                add     edi, [esi+154h]
+                add     edi, [esi.proseg_retStacks]
                 push    eax
-                lea     eax, [esp+1Ch]
+                lea     eax, [esp+1Ch + FS_FIXES_STACK]
                 call    checkForUnwindAtCall
                 pop     eax
                 add     dword ptr [edi], 8
                 add     edi, [edi]
                 mov     [edi], eax
-                lea     eax, [esp+18h]
+                lea     eax, [esp+18h + FS_FIXES_STACK]
                 mov     [edi+4], eax
                 mov     eax, [eax]
-                test    dword ptr [esi], 20h
+                test    dword ptr [esi.proseg_flags], 20h
                 jz      short loc_6_F4
                 nop
                 nop
@@ -249,8 +306,16 @@ loc_6_4E:                               ; CODE XREF: $$PROFCALL32+Dj
                 nop
                 shl     ebx, 10h
                 mov     bl, 1
-                mov     edx, [esp+18h+var_14]
-                call    dword ptr [esi+58h]
+                mov     edx, [esp+18h+var_14 + FS_FIXES_STACK]
+ifdef FS_FIXES_2
+                push    fs
+                push    Dos32TIB
+                pop     fs
+                call    dword ptr [esi.proseg_pfnINIT_ID44T]
+                pop     fs
+else
+                call    dword ptr [esi.proseg_pfnINIT_ID44T]
+endif
                 jmp     short loc_6_FC
 ; ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
 ;                align 4
@@ -261,13 +326,24 @@ loc_6_4E:                               ; CODE XREF: $$PROFCALL32+Dj
 loc_6_F4:                               ; CODE XREF: $$PROFCALL32+CCj
                 shl     ebx, 10h
                 mov     bl, 40h ; '@'
-                call    dword ptr [esi+50h]
+ifdef FS_FIXES_2
+                push    fs
+                push    Dos32TIB
+                pop     fs
+                call    dword ptr [esi.proseg_pfnINIT_ID4T]
+                pop     fs
+else
+                call    dword ptr [esi.proseg_pfnINIT_ID4T]
+endif
 
 loc_6_FC:                               ; CODE XREF: $$PROFCALL32+DEj
                 pop     edi
 
 loc_6_FD:                               ; CODE XREF: $$PROFCALL32+1Aj
                                         ; $$PROFCALL32+37j ...
+ifdef FS_FIXES_3
+                pop     fs
+endif
                 pop     eax
                 pop     edx
                 pop     esi
@@ -280,7 +356,7 @@ loc_6_103:                              ; CODE XREF: $$PROFCALL32+95j
                 pop     edi
 
 loc_6_104:                              ; CODE XREF: $$PROFCALL32+83j
-                mov     eax, [esi+158h]
+                mov     eax, [esi.proseg_tidDecNest]
                 inc     dword ptr [eax+ebx*4]
                 jmp     short loc_6_FD
 $$PROFCALL32    endp
@@ -292,6 +368,7 @@ $$PROFCALL32    endp
 
                 public $$PROFRET32
 $$PROFRET32     proc near
+;                assume esi:nothing
 
 ;var_8          = byte ptr -8
 var_8           = dword ptr -8
@@ -303,26 +380,50 @@ var_4           = dword ptr -4
                 push    ebx
                 push    esi
                 push    edi
-                mov     ebx, large fs:0Ch
+ifdef FS_FIXES_3
+                push    fs
+                push    Dos32TIB
+                pop     fs
+endif
+ifdef FS_FIXES_1
+                push    fs
+                push    Dos32TIB
+                pop     fs
+                mov     ebx, fs:tib_s.tib_ptib2
+                pop     fs
+else
+                mov     ebx, fs:tib_s.tib_ptib2
+endif
                 mov     esi, $$PROSEGPTR32
                 movzx   ebx, word ptr [ebx]
                 dec     ebx
-                mov     eax, [esi+158h]
+                mov     eax, [esi].proseg_tidDecNest
                 inc     dword ptr [eax+ebx*4]
                 mov     edi, ebx
                 shl     edi, 0Ch
-                add     edi, [esi+154h]
+                add     edi, [esi].proseg_retStacks
                 push    eax
-                lea     eax, [esp+18h+var_4]
+                lea     eax, [esp+18h+var_4 + FS_FIXES_STACK]
                 call    checkForUnwindAtReturn
                 pop     eax
                 sub     dword ptr [edi], 8
                 add     edi, [edi]
                 mov     eax, [edi+8]
-                mov     [esp+14h], eax
+                mov     [esp+14h + FS_FIXES_STACK], eax
                 shl     ebx, 10h
                 mov     bl, 0
-                call    dword ptr [esi+4Ch]
+ifdef FS_FIXES_2
+                push    fs
+                push    Dos32TIB
+                pop     fs
+                call    dword ptr [esi.proseg_pfnINIT_IDT]
+                pop     fs
+else
+                call    dword ptr [esi.proseg_pfnINIT_IDT]
+endif
+ifdef FS_FIXES_3
+                pop     fs
+endif
                 pop     edi
                 pop     esi
                 pop     ebx
@@ -347,6 +448,11 @@ arg_0           = dword ptr  4
                 push    esi
                 push    edx
                 push    eax
+ifdef FS_FIXES_3
+                push    fs
+                push    Dos32TIB
+                pop     fs
+endif
                 mov     esi, $$PROSEGPTR32
                 or      esi, esi
                 jnz     short loc_6_19F
@@ -364,43 +470,51 @@ arg_0           = dword ptr  4
                 jz      loc_6_24A
 
 loc_6_19F:                              ; CODE XREF: $$PROFTRIG32+Dj
-                test    dword ptr [esi], 10h
+                test    dword ptr [esi].proseg_flags, 10h
                 jnz     loc_6_24A
-                mov     ebx, large fs:0Ch
+ifdef FS_FIXES_1
+                push    fs
+                push    Dos32TIB
+                pop     fs
+                mov     ebx, fs:tib_s.tib_ptib2
+                pop     fs
+else
+                mov     ebx, fs:tib_s.tib_ptib2
+endif
                 movzx   ebx, word ptr [ebx]
                 dec     ebx
-                cmp     ebx, [esi+64h]
+                cmp     ebx, [esi].proseg_maxTid
                 jnb     loc_6_24A
-                mov     eax, [esi+164h]
+                mov     eax, [esi].conditionalExit
                 mov     dword ptr [eax+ebx*4], 0FFFFFFFFh
-                mov     eax, [esi+158h]
+                mov     eax, [esi].proseg_tidDecNest
                 dec     dword ptr [eax+ebx*4]
-                js      short loc_6_251
+                js      loc_6_251
                 push    edi
-                lea     eax, [esp+18h]
+                lea     eax, [esp+18h + FS_FIXES_STACK]
                 call    verifyStackFrame
                 or      eax, eax
-                jnz     short loc_6_250
-                mov     eax, offset _ProfileHook32+24Ch
-                xchg    eax, [esp+18h+arg_0]
-                cmp     eax, offset _ProfileHook32+24Ch
+                jnz     loc_6_250
+                mov     eax, offset $$PROFTRIGRET32
+                xchg    eax, [esp+18h+arg_0 + FS_FIXES_STACK]
+                cmp     eax, offset $$PROFTRIGRET32
                 jz      short loc_6_250
-                mov     edi, [esi+160h]
+                mov     edi, [esi].proseg_tidTrigger
                 inc     dword ptr [edi+ebx*4]
                 mov     edi, ebx
                 shl     edi, 0Ch
-                add     edi, [esi+154h]
+                add     edi, [esi].proseg_retStacks
                 push    eax
-                lea     eax, [esp+1Ch]
+                lea     eax, [esp+1Ch + FS_FIXES_STACK]
                 call    checkForUnwindAtCall
                 pop     eax
                 add     dword ptr [edi], 8
                 add     edi, [edi]
                 mov     [edi], eax
-                lea     eax, [esp+18h]
+                lea     eax, [esp+18h + FS_FIXES_STACK]
                 mov     [edi+4], eax
                 mov     eax, [eax]
-                test    dword ptr [esi], 20h
+                test    dword ptr [esi].proseg_flags, 20h
                 jz      short loc_6_241
                 nop
                 nop
@@ -408,8 +522,16 @@ loc_6_19F:                              ; CODE XREF: $$PROFTRIG32+Dj
                 nop
                 shl     ebx, 10h
                 mov     bl, 1
-                mov     edx, [esp+18h+var_14]
-                call    dword ptr [esi+58h]
+                mov     edx, [esp+18h+var_14 + FS_FIXES_STACK]
+ifdef FS_FIXES_2
+                push    fs
+                push    Dos32TIB
+                pop     fs
+                call    dword ptr [esi.proseg_pfnINIT_ID44T]
+                pop     fs
+else
+                call    dword ptr [esi.proseg_pfnINIT_ID44T]
+endif
                 jmp     short loc_6_249
 ; ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
                 ; align 4 ??
@@ -422,13 +544,24 @@ loc_6_19F:                              ; CODE XREF: $$PROFTRIG32+Dj
 loc_6_241:                              ; CODE XREF: $$PROFTRIG32+C8j
                 shl     ebx, 10h
                 mov     bl, 40h ; '@'
-                call    dword ptr [esi+50h]
+ifdef FS_FIXES_2
+                push    fs
+                push    Dos32TIB
+                pop     fs
+                call    dword ptr [esi.proseg_pfnINIT_ID4T]
+                pop     fs
+else
+                call    dword ptr [esi.proseg_pfnINIT_ID4T]
+endif
 
 loc_6_249:                              ; CODE XREF: $$PROFTRIG32+DAj
                 pop     edi
 
 loc_6_24A:                              ; CODE XREF: $$PROFTRIG32+1Aj
                                         ; $$PROFTRIG32+37j ...
+ifdef FS_FIXES_3
+                pop     fs
+endif
                 pop     eax
                 pop     edx
                 pop     esi
@@ -442,7 +575,7 @@ loc_6_250:                              ; CODE XREF: $$PROFTRIG32+81j
                 pop     edi
 
 loc_6_251:                              ; CODE XREF: $$PROFTRIG32+73j
-                mov     eax, [esi+158h]
+                mov     eax, [esi].proseg_tidDecNest
                 inc     dword ptr [eax+ebx*4]
                 jmp     short loc_6_24A
 $$PROFTRIG32    endp
@@ -465,27 +598,51 @@ var_4           = dword ptr -4
                 push    ebx
                 push    esi
                 push    edi
-                mov     ebx, large fs:0Ch
+ifdef FS_FIXES_3
+                push    fs
+                push    Dos32TIB
+                pop     fs
+endif
+ifdef FS_FIXES_1
+                push    fs
+                push    Dos32TIB
+                pop     fs
+                mov     ebx, fs:tib_s.tib_ptib2
+                pop     fs
+else
+                mov     ebx, fs:tib_s.tib_ptib2
+endif
                 mov     esi, $$PROSEGPTR32
                 movzx   ebx, word ptr [ebx]
                 dec     ebx
-                mov     eax, [esi+158h]
+                mov     eax, [esi].proseg_tidDecNest
                 inc     dword ptr [eax+ebx*4]
                 mov     edi, ebx
                 shl     edi, 0Ch
-                add     edi, [esi+154h]
+                add     edi, [esi].proseg_retStacks
                 push    eax
-                lea     eax, [esp+1Ch+var_8]
+                lea     eax, [esp+1Ch+var_8 + FS_FIXES_STACK]
                 call    checkForUnwindAtReturn
                 pop     eax
                 sub     dword ptr [edi], 8
                 add     edi, [edi]
                 mov     eax, [edi+8]
-                mov     [esp+18h+var_4], eax
-                mov     eax, [esi+160h]
+                mov     [esp+18h+var_4 + FS_FIXES_STACK], eax
+                mov     eax, [esi].proseg_tidTrigger
                 dec     dword ptr [eax+ebx*4]
                 shl     ebx, 10h
-                call    dword ptr [esi+4Ch]
+ifdef FS_FIXES_2
+                push    fs
+                push    Dos32TIB
+                pop     fs
+                call    dword ptr [esi.proseg_pfnINIT_IDT]
+                pop     fs
+else
+                call    dword ptr [esi.proseg_pfnINIT_IDT]
+endif
+ifdef FS_FIXES_3
+                pop     fs
+endif
                 pop     edi
                 pop     esi
                 pop     ebx
@@ -523,6 +680,11 @@ arg_4           = dword ptr  8
                 push    esi
                 push    edx
                 push    eax
+ifdef FS_FIXES_3
+                push    fs
+                push    Dos32TIB
+                pop     fs
+endif
                 mov     esi, $$PROSEGPTR32
                 or      esi, esi
                 jnz     short loc_6_2F4
@@ -540,50 +702,58 @@ arg_4           = dword ptr  8
                 jz      loc_6_40B
 
 loc_6_2F4:                              ; CODE XREF: $$PROFEYEC32+Dj
-                test    dword ptr [esi], 10h
+                test    dword ptr [esi].proseg_flags, 10h
                 jnz     loc_6_40B
-                mov     ebx, large fs:0Ch
+ifdef FS_FIXES_1
+                push    fs
+                push    Dos32TIB
+                pop     fs
+                mov     ebx, fs:tib_s.tib_ptib2
+                pop     fs
+else
+                mov     ebx, fs:tib_s.tib_ptib2
+endif
                 movzx   ebx, word ptr [ebx]
                 dec     ebx
-                cmp     ebx, [esi+64h]
+                cmp     ebx, [esi].proseg_maxTid
                 jnb     loc_6_40B
-                mov     eax, [esi+160h]
+                mov     eax, [esi].proseg_tidTrigger
                 cmp     dword ptr [eax+ebx*4], 0
                 jz      loc_6_40B
-                mov     eax, [esi+158h]
+                mov     eax, [esi].proseg_tidDecNest
                 dec     dword ptr [eax+ebx*4]
                 js      loc_6_412
                 push    edi
-                lea     eax, [esp+18h]
+                lea     eax, [esp+18h + FS_FIXES_STACK]
                 call    verifyStackFrame
                 or      eax, eax
                 jnz     loc_6_411
-                mov     eax, offset _ProfileHook32+0FFh
-                xchg    eax, [esp+18h+arg_0]
-                cmp     eax, offset _ProfileHook32+0FFh
+                mov     eax, offset $$PROFRET32
+                xchg    eax, [esp+18h+arg_0 + FS_FIXES_STACK]
+                cmp     eax, offset $$PROFRET32
                 jnz     short loc_6_36A
                 mov     eax, 0FFFFFFFDh
                 call    PERF
-                inc     dword ptr [esi+134h]
+                inc     dword ptr [esi._counterArray+14h]
                 jmp     loc_6_411
 ; ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
 
 loc_6_36A:                              ; CODE XREF: $$PROFEYEC32+9Cj
                 mov     edi, ebx
                 shl     edi, 0Ch
-                add     edi, [esi+154h]
+                add     edi, [esi].proseg_retStacks
                 push    eax
-                lea     eax, [esp+1Ch]
+                lea     eax, [esp+1Ch + FS_FIXES_STACK]
                 call    checkForUnwindAtCall
                 pop     eax
                 add     dword ptr [edi], 8
                 add     edi, [edi]
                 mov     [edi], eax
-                lea     eax, [esp+18h]
+                lea     eax, [esp+18h + FS_FIXES_STACK]
                 mov     [edi+4], eax
                 mov     eax, [eax]
                 push    dword ptr [edi]
-                test    dword ptr [esi], 20h
+                test    dword ptr [esi].proseg_flags, 20h
                 jz      short loc_6_3AF
                 nop
                 nop
@@ -591,8 +761,16 @@ loc_6_36A:                              ; CODE XREF: $$PROFEYEC32+9Cj
                 nop
                 shl     ebx, 10h
                 mov     bl, 1
-                mov     edx, [esp+1Ch+var_10]
-                call    dword ptr [esi+58h]
+                mov     edx, [esp+1Ch+var_10 + FS_FIXES_STACK]
+ifdef FS_FIXES_2
+                push    fs
+                push    Dos32TIB
+                pop     fs
+                call    dword ptr [esi.proseg_pfnINIT_ID44T]
+                pop     fs
+else
+                call    dword ptr [esi.proseg_pfnINIT_ID44T]
+endif
                 jmp     short loc_6_3B7
 ; ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
                 ; align 4 ??
@@ -604,7 +782,15 @@ loc_6_36A:                              ; CODE XREF: $$PROFEYEC32+9Cj
 loc_6_3AF:                              ; CODE XREF: $$PROFEYEC32+E1j
                 shl     ebx, 10h
                 mov     bl, 40h ; '@'
-                call    dword ptr [esi+50h]
+ifdef FS_FIXES_2
+                push    fs
+                push    Dos32TIB
+                pop     fs
+                call    dword ptr [esi.proseg_pfnINIT_ID4T]
+                pop     fs
+else
+                call    dword ptr [esi.proseg_pfnINIT_ID4T]
+endif
 
 loc_6_3B7:                              ; CODE XREF: $$PROFEYEC32+F3j
                 pop     ebx
@@ -612,9 +798,9 @@ loc_6_3B7:                              ; CODE XREF: $$PROFEYEC32+F3j
                 cmp     bl, 0A9h ; '©'
                 jnz     short loc_6_40A
                 xor     bl, bl
-                lea     edi, [esp+18h+arg_4]
-                mov     eax, [esp+18h+var_14]
-                mov     esi, offset _ProfileHook32+3E1h
+                lea     edi, [esp+18h+arg_4 + FS_FIXES_STACK]
+                mov     eax, [esp+18h+var_14 + FS_FIXES_STACK]
+                mov     esi, offset jmpback_1
 
 loc_6_3CE:                              ; CODE XREF: $$PROFEYEC32+124j
                                         ; $$PROFEYEC32+12Fj ...
@@ -644,14 +830,17 @@ loc_6_3E8:                              ; CODE XREF: $$PROFEYEC32+128j
 loc_6_3EF:                              ; CODE XREF: $$PROFEYEC32+120j
                 jmp     esi
 ; ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
-                mov     esi, offset _ProfileHook32+3EBh
+jmpback_1:
+                mov     esi, offset jmpback_2
                 mov     [edi-4], eax
                 jmp     short loc_6_3CE
 ; ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
-                mov     esi, offset _ProfileHook32+3F5h
+jmpback_2:
+                mov     esi, offset jmpback_3
                 mov     [edi-4], edx
                 jmp     short loc_6_3CE
 ; ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
+jmpback_3:
                 mov     [edi-4], ecx
                 jmp     short loc_6_3CE
 ; ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
@@ -662,6 +851,9 @@ loc_6_40A:                              ; CODE XREF: $$PROFEYEC32+106j
 
 loc_6_40B:                              ; CODE XREF: $$PROFEYEC32+1Aj
                                         ; $$PROFEYEC32+37j ...
+ifdef FS_FIXES_3
+                pop     fs
+endif
                 pop     eax
                 pop     edx
                 pop     esi
@@ -675,7 +867,7 @@ loc_6_411:                              ; CODE XREF: $$PROFEYEC32+88j
                 pop     edi
 
 loc_6_412:                              ; CODE XREF: $$PROFEYEC32+76j
-                mov     eax, [esi+158h]
+                mov     eax, [esi].proseg_tidDecNest
                 inc     dword ptr [eax+ebx*4]
                 jmp     short loc_6_40B
 $$PROFEYEC32    endp
@@ -704,6 +896,11 @@ PROFITCAL       label near ; CODE XREF: uCal+17p uCal+1Cp
                 push    esi
                 push    ecx
                 push    edx
+ifdef FS_FIXES_3
+                push    fs
+                push    Dos32TIB
+                pop     fs
+endif
                 mov     esi, $$PROSEGPTR32
                 or      esi, esi
                 jnz     short loc_6_45A
@@ -729,30 +926,49 @@ PROFITCAL       label near ; CODE XREF: uCal+17p uCal+1Cp
                 nop
 
 loc_6_45A:                              ; CODE XREF: PROFITCAL+Cj
-                test    dword ptr [esi], 10h
+                test    dword ptr [esi].proseg_flags, 10h
                 jnz     short loc_6_494
                 nop
                 nop
                 nop
                 nop
-                mov     ebx, large fs:0Ch
+ifdef FS_FIXES_1
+                push    fs
+                push    Dos32TIB
+                pop     fs
+                mov     ebx, fs:tib_s.tib_ptib2
+                pop     fs
+else
+                mov     ebx, fs:tib_s.tib_ptib2
+endif
                 movzx   ebx, word ptr [ebx]
                 dec     ebx
-                cmp     ebx, [esi+64h]
+                cmp     ebx, [esi].proseg_maxTid
                 jnb     short loc_6_494
-                mov     edx, [esi+158h]
+                mov     edx, [esi].proseg_tidDecNest
                 mov     edx, [edx+ebx*4]
-                mov     ecx, [esi+15Ch]
+                mov     ecx, [esi].proseg_tidMaxNest
                 cmp     edx, [ecx+ebx*4]
                 jz      short loc_6_494
                 push    edi
                 shl     ebx, 10h
                 mov     bl, 20h ; ' '
-                call    dword ptr [esi+50h]
+ifdef FS_FIXES_2
+                push    fs
+                push    Dos32TIB
+                pop     fs
+                call    dword ptr [esi.proseg_pfnINIT_ID4T]
+                pop     fs
+else
+                call    dword ptr [esi.proseg_pfnINIT_ID4T]
+endif
                 pop     edi
 
 loc_6_494:                              ; CODE XREF: PROFITCAL+19j
                                         ; PROFITCAL+36j ...
+ifdef FS_FIXES_3
+                pop     fs
+endif
                 pop     edx
                 pop     ecx
                 pop     esi
@@ -780,11 +996,11 @@ PerfStart       proc near
                 nop
                 xor     ecx, ecx
                 xor     edx, edx
-                mov     dx, [esi]
+                mov     dx, [esi].proseg_flags
                 mov     cx, dx
                 and     dx, 10h
                 xor     cx, dx
-                mov     [esi], cx
+                mov     [esi].proseg_flags, cx
                 mov     eax, 0FFFFFFFEh
                 call    PERF
 
@@ -818,9 +1034,9 @@ PerfStop        proc near
                 call    PERF
                 xor     ecx, ecx
                 xor     edx, edx
-                mov     cx, [esi]
+                mov     cx, [esi].proseg_flags
                 or      cx, 10h
-                mov     [esi], cx
+                mov     [esi].proseg_flags, cx
 
 loc_6_4F8:                              ; CODE XREF: PerfStop+Cj
                 pop     edx
@@ -847,6 +1063,11 @@ arg_0           = dword ptr  4
 $$PROFSETJMP label near
 
                 call    _ProfileHook32
+ifdef FS_FIXES_3
+                push    fs
+                push    Dos32TIB
+                pop     fs
+endif
                 mov     [eax+4], ecx
                 mov     [eax+0Ch], ebx
                 mov     [eax+14h], esi
@@ -854,12 +1075,22 @@ $$PROFSETJMP label near
                 mov     [eax], ebp
                 lea     edx, [esp+arg_0]
                 mov     [eax+8], edx
-                mov     edx, large fs:0
+ifdef FS_FIXES_1
+                push    fs
+                push    Dos32TIB
+                pop     fs
+                mov     edx, fs:tib_s.tib_pexchain
+                pop     fs
+else
+                mov     edx, fs:tib_s.tib_pexchain
+endif
                 mov     [eax+18h], edx
                 fstcw   word ptr [eax+1Ch]
                 xor     eax, eax
+ifdef FS_FIXES_3
+                pop     fs
+endif
                 retn
-;$$PROFSETJMP   endp
 setjmp          endp
 
 ; Type idx: 513
@@ -870,26 +1101,52 @@ setjmp          endp
                 public longjmp
 longjmp         proc near
                 call    _ProfileHook32
+ifdef FS_FIXES_3
+                push    fs
+                push    Dos32TIB
+                pop     fs
+endif
                 push    eax
                 push    edx
+ifdef FS_FIXES_1
+                push    fs
+endif
                 push    0
-                push    offset _ProfileHook32+53Bh
+                push    offset unwind_callback
                 push    dword ptr [eax+18h]
                 call    DosUnwindException
                 mov     edx, 0FCCCh
                 jmp     CrashAndBurn
 
 ; ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
+unwind_callback:
                 add     esp, 0Ch
+ifdef FS_FIXES_1
+                pop     fs
+endif
                 pop     edx
                 pop     eax
+ifdef FS_FIXES_1
                 mov     ecx, $$PROSEGPTR32
-                jecxz   short loc_6_5C2
-                mov     ebx, large fs:0Ch
+                jecxz   @@jump
+                jmp     @@ok
+@@jump:
+                jmp     loc_6_5C2
+@@ok:
+                push    fs
+                push    Dos32TIB
+                pop     fs
+                mov     ebx, fs:tib_s.tib_ptib2
+                pop     fs
+else
+                mov     ecx, $$PROSEGPTR32
+                jecxz   loc_6_5C2
+                mov     ebx, fs:tib_s.tib_ptib2
+endif
                 mov     esi, ecx
                 movzx   ebx, word ptr [ebx]
                 dec     ebx
-                cmp     ebx, [esi+64h]
+                cmp     ebx, [esi].proseg_maxTid
                 jnb     short loc_6_5C2
                 push    eax
                 push    edx
@@ -897,7 +1154,7 @@ longjmp         proc near
                 xor     ecx, ecx
                 mov     edi, ebx
                 shl     edi, 0Ch
-                add     edi, [esi+154h]
+                add     edi, [esi].proseg_retStacks
 
 loc_6_57C:                              ; CODE XREF: CODE32:000005B0j
                 mov     edx, [edi]
@@ -907,16 +1164,16 @@ loc_6_57C:                              ; CODE XREF: CODE32:000005B0j
                 jbe     short loc_6_5B2
                 mov     edx, [edi+edx+4]
                 mov     edx, [edx+4]
-                cmp     edx, offset _ProfileHook32+24Ch
+                cmp     edx, offset $$PROFTRIGRET32
                 jnz     short loc_6_5A2
                 push    eax
-                mov     eax, [esi+160h]
+                mov     eax, [esi].proseg_tidTrigger
                 dec     dword ptr [eax+ebx*4]
                 pop     eax
 
 loc_6_5A2:                              ; CODE XREF: CODE32:00000595j
                 push    eax
-                mov     eax, [esi+158h]
+                mov     eax, [esi].proseg_tidDecNest
                 inc     dword ptr [eax+ebx*4]
                 pop     eax
                 sub     dword ptr [edi], 8
@@ -925,11 +1182,19 @@ loc_6_5A2:                              ; CODE XREF: CODE32:00000595j
 loc_6_5B2:                              ; CODE XREF: CODE32:00000580j
                                         ; CODE32:00000586j
                 neg     ecx
-                jz      short loc_6_5DD
+                jz      short bailout2
                 mov     eax, ecx
                 shl     ebx, 10h
                 mov     bl, 10h
-                call    dword ptr [esi+50h]
+ifdef FS_FIXES_2
+                push    fs
+                push    Dos32TIB
+                pop     fs
+                call    dword ptr [esi.proseg_pfnINIT_ID4T]
+                pop     fs
+else
+                call    dword ptr [esi.proseg_pfnINIT_ID4T]
+endif
                 pop     edx
                 pop     eax
 
@@ -939,18 +1204,28 @@ loc_6_5C2:                              ; CODE XREF: CODE32:00000556j
                 finit
                 wait
                 fldcw   word ptr [edx+1Ch]
+ifdef FS_FIXES_3
+                pop     fs
+endif
                 mov     ebx, [edx+0Ch]
                 mov     esi, [edx+14h]
                 mov     edi, [edx+10h]
                 mov     ebp, [edx]
                 mov     esp, [edx+8]
                 or      eax, eax
-                jnz     short loc_6_5DD
+                jnz     short bailout1
                 inc     eax
 
-loc_6_5DD:                              ; CODE XREF: CODE32:000005B4j
+bailout1:                               ; CODE XREF: CODE32:000005B4j
                                         ; CODE32:000005DAj
                 jmp     dword ptr [edx+4]
+
+bailout2:
+ifdef FS_FIXES_3
+                pop     fs
+endif
+                jmp     dword ptr [edx+4]
+
 longjmp         endp
 ; ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
 ExceptionThrownString   db 'C++ exception thrown here:',0
@@ -962,7 +1237,7 @@ ExceptionThrownString   db 'C++ exception thrown here:',0
                 public _ProfileThrow32
 _ProfileThrow32 proc near
                 push    eax
-                mov     eax, offset _ProfileHook32+5D0h
+                mov     eax, offset ExceptionThrownString
                 call    PERF
                 pop     eax
                 jmp     PERF
@@ -978,18 +1253,32 @@ _ProfileUnwind32 proc near
                 push    ebx
                 push    esi
                 push    edi
+ifdef FS_FIXES_3
+                push    fs
+                push    Dos32TIB
+                pop     fs
+endif
+
                 mov     esi, $$PROSEGPTR32
                 or      esi, esi
                 jz      short loc_6_67A
-                mov     ebx, large fs:0Ch
+ifdef FS_FIXES_1
+                push    fs
+                push    Dos32TIB
+                pop     fs
+                mov     ebx, fs:tib_s.tib_ptib2
+                pop     fs
+else
+                mov     ebx, fs:tib_s.tib_ptib2
+endif
                 movzx   ebx, word ptr [ebx]
                 dec     ebx
-                cmp     ebx, [esi+64h]
+                cmp     ebx, [esi].proseg_maxTid
                 jnb     short loc_6_67A
                 xor     ecx, ecx
                 mov     edi, ebx
                 shl     edi, 0Ch
-                add     edi, [esi+154h]
+                add     edi, [esi].proseg_retStacks
 
 loc_6_636:                              ; CODE XREF: _ProfileUnwind32+5Ej
                 mov     edx, [edi]
@@ -999,16 +1288,16 @@ loc_6_636:                              ; CODE XREF: _ProfileUnwind32+5Ej
                 jbe     short loc_6_66C
                 mov     edx, [edi+edx+4]
                 mov     edx, [edx+4]
-                cmp     edx, offset _ProfileHook32+24Ch
+                cmp     edx, offset $$PROFTRIGRET32
                 jnz     short loc_6_65C
                 push    eax
-                mov     eax, [esi+160h]
+                mov     eax, [esi].proseg_tidTrigger
                 dec     dword ptr [eax+ebx*4]
                 pop     eax
 
 loc_6_65C:                              ; CODE XREF: _ProfileUnwind32+43j
                 push    eax
-                mov     eax, [esi+158h]
+                mov     eax, [esi].proseg_tidDecNest
                 inc     dword ptr [eax+ebx*4]
                 pop     eax
                 sub     dword ptr [edi], 8
@@ -1021,10 +1310,21 @@ loc_6_66C:                              ; CODE XREF: _ProfileUnwind32+2Ej
                 mov     eax, ecx
                 shl     ebx, 10h
                 mov     bl, 10h
-                call    dword ptr [esi+50h]
+ifdef FS_FIXES_2
+                push    fs
+                push    Dos32TIB
+                pop     fs
+                call    dword ptr [esi.proseg_pfnINIT_ID4T]
+                pop     fs
+else
+                call    dword ptr [esi.proseg_pfnINIT_ID4T]
+endif
 
 loc_6_67A:                              ; CODE XREF: _ProfileUnwind32+Bj
                                         ; _ProfileUnwind32+1Bj ...
+ifdef FS_FIXES_3
+                pop     fs
+endif
                 pop     edi
                 pop     esi
                 pop     ebx
@@ -1040,28 +1340,30 @@ _ProfileUnwind32 endp
 eCal            proc near
                 push    esi
                 mov     esi, $$PROSEGPTR32
-                mov     ecx, [esi+158h]
+                mov     ecx, [esi].proseg_tidDecNest
                 dec     dword ptr [ecx]
                 mov     ecx, 8
 
 loc_6_692:                              ; CODE XREF: CODE32:000006A7j
-                push    offset _ProfileHook32+696h
-                push    offset _ProfileHook32+697h
-                push    offset _ProfileHook32+1
+                push    offset eCal_arg2
+                push    offset eCal_arg1
+                push    offset $$PROFCALL32
                 jmp     $$PROFCALL32
 
 ; ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
+eCal_arg2:
                 retn
 ; ƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒƒ
+eCal_arg1:
                 loop    loc_6_692
                 push    eax
-                mov     eax, [esi+158h]
+                mov     eax, [esi].proseg_tidDecNest
                 inc     dword ptr [eax]
                 pop     eax
                 pop     esi
                 retn
-; Type idx: 513
 eCal            endp
+; Type idx: 513
 
 ; €€€€€€€€€€€€€€€ S U B R O U T I N E €€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€€
 
@@ -1091,8 +1393,8 @@ uCal            endp
 
                 public CrashAndBurn
 CrashAndBurn    proc near               ; CODE XREF: longjmp+1Bj DoInit+1Fj ...
-                mov     [esi+4], edx
-                mov     [esi+8], eax
+                mov     [esi].proseg_rc, edx
+                mov     [esi].proseg_rcSys, eax
                 push    eax
                 push    1
                 call    DosExit
@@ -1109,9 +1411,17 @@ public  DoInit
 DoInit  proc near               ; CODE XREF: $$PROFCALL32+20p
                                         ; $$PROFTRIG32+20p ...
                 pushad
+ifdef FS_FIXES_3
+                push    fs
+                push    Dos32TIB
+                pop     fs
+endif
                 xor     ebx, ebx
                 push    ebx
                 mov     eax, esp
+ifdef FS_FIXES_1
+                push    fs
+endif
                 push    eax
                 lea     eax, logDllName ; "CPPPAN40"
                 push    eax
@@ -1119,11 +1429,18 @@ DoInit  proc near               ; CODE XREF: $$PROFCALL32+20p
                 push    ebx
                 call    DosLoadModule
                 add     esp, 10h
+ifdef FS_FIXES_1
+                pop     fs
+endif
                 mov     edx, 0FAD8h
                 or      eax, eax
                 jnz     short CrashAndBurn
                 pop     edx
                 mov     ecx, 7
+ifdef FS_FIXES_1
+                push    fs
+endif
+
                 lea     edi, initAdr
                 push    edi
                 lea     ebx, initName ; "INIT_PROSEG"
@@ -1132,24 +1449,37 @@ DoInit  proc near               ; CODE XREF: $$PROFCALL32+20p
                 push    edx
                 call    DosQueryProcAddr
                 add     esp, 10h
+ifdef FS_FIXES_1
+                pop     fs
+endif
                 mov     edx, 0FB3Ch
                 or      eax, eax
                 jnz     short CrashAndBurn
                 xor     ebx, ebx
+
                 push    ebx
                 push    ebx
                 mov     eax, esp
-                mov     edx, offset _ProfileHook32+66Eh
-                mov     ecx, offset _ProfileHook32+6A5h
+                mov     edx, offset eCal
+                mov     ecx, offset uCal
+ifdef FS_FIXES_1
+                push    fs
+endif
                 lea     esi, $$PROSEGPTR32
                 push    esi
                 sub     esp, 0Ch
                 call    initAdr
                 add     esp, 10h
+ifdef FS_FIXES_1
+                pop     fs
+endif
                 or      eax, eax
                 pop     edx
                 pop     eax
                 jnz     CrashAndBurn
+ifdef FS_FIXES_3
+                pop     fs
+endif
                 popad
                 mov     esi, $$PROSEGPTR32
                 retn
@@ -1163,9 +1493,14 @@ DoInit  endp
                 public checkForUnwindAtCall
 checkForUnwindAtCall proc near          ; CODE XREF: $$PROFCALL32+B0p
                                         ; $$PROFTRIG32+ACp ...
-                test    word ptr [esi], 40h
+ifdef FS_FIXES_3
+                push    fs
+                push    Dos32TIB
+                pop     fs
+endif
+                test    word ptr [esi].proseg_flags, 40h
                 jz      short locret_6_7D0
-                test    word ptr [esi], 80h
+                test    word ptr [esi].proseg_flags, 80h
                 jz      short locret_6_7D0
                 push    edx
                 push    ecx
@@ -1196,7 +1531,15 @@ loc_6_7AB:                              ; CODE XREF: checkForUnwindAtCall+18j
                 shl     ebx, 10h
                 mov     bl, 10h
                 mov     eax, ecx
-                call    dword ptr [esi+50h]
+ifdef FS_FIXES_2
+                push    fs
+                push    Dos32TIB
+                pop     fs
+                call    dword ptr [esi.proseg_pfnINIT_ID4T]
+                pop     fs
+else
+                call    dword ptr [esi.proseg_pfnINIT_ID4T]
+endif
                 pop     edi
                 pop     ebx
 
@@ -1206,6 +1549,9 @@ loc_6_7CE:                              ; CODE XREF: checkForUnwindAtCall+31j
 
 locret_6_7D0:                           ; CODE XREF: checkForUnwindAtCall+5j
                                         ; checkForUnwindAtCall+Cj
+ifdef FS_FIXES_3
+                pop     fs
+endif
                 retn
 checkForUnwindAtCall endp
 
@@ -1217,9 +1563,14 @@ checkForUnwindAtCall endp
                 public checkForUnwindAtReturn
 checkForUnwindAtReturn proc near        ; CODE XREF: $$PROFRET32+33p
                                         ; $$PROFTRIGRET32+33p
-                test    word ptr [esi], 40h
+ifdef FS_FIXES_3
+                push    fs
+                push    Dos32TIB
+                pop     fs
+endif
+                test    word ptr [esi].proseg_flags, 40h
                 jz      short locret_6_82F
-                test    word ptr [esi], 80h
+                test    word ptr [esi].proseg_flags, 80h
                 jz      short locret_6_82F
                 cmp     dword ptr [edi], 10h
                 jb      short locret_6_82F
@@ -1254,7 +1605,15 @@ loc_6_80A:                              ; CODE XREF: checkForUnwindAtReturn+1Ej
                 shl     ebx, 10h
                 mov     bl, 10h
                 mov     eax, ecx
-                call    dword ptr [esi+50h]
+ifdef FS_FIXES_2
+                push    fs
+                push    Dos32TIB
+                pop     fs
+                call    dword ptr [esi.proseg_pfnINIT_ID4T]
+                pop     fs
+else
+                call    dword ptr [esi.proseg_pfnINIT_ID4T]
+endif
                 pop     edi
                 pop     ebx
 
@@ -1264,6 +1623,9 @@ loc_6_82D:                              ; CODE XREF: checkForUnwindAtReturn+3Bj
 
 locret_6_82F:                           ; CODE XREF: checkForUnwindAtReturn+5j
                                         ; checkForUnwindAtReturn+Cj ...
+ifdef FS_FIXES_3
+                pop     fs
+endif
                 retn
 checkForUnwindAtReturn endp
 
@@ -1275,14 +1637,19 @@ checkForUnwindAtReturn endp
                 public verifyStackFrame
 verifyStackFrame proc near              ; CODE XREF: $$PROFCALL32+8Ep
                                         ; $$PROFTRIG32+7Ap ...
+ifdef FS_FIXES_3
+                push    fs
+                push    Dos32TIB
+                pop     fs
+endif
                 push    edi
-                test    word ptr [esi], 40h
+                test    word ptr [esi].proseg_flags, 40h
                 jz      short loc_6_85F
-                test    word ptr [esi], 80h
+                test    word ptr [esi].proseg_flags, 80h
                 jz      short loc_6_85F
                 mov     edi, ebx
                 shl     edi, 0Ch
-                add     edi, [esi+154h]
+                add     edi, [esi].proseg_retStacks
                 cmp     dword ptr [edi], 0
                 jz      short loc_6_85F
                 nop
@@ -1315,6 +1682,9 @@ loc_6_86F:                              ; CODE XREF: verifyStackFrame+38j
 
 loc_6_879:                              ; CODE XREF: verifyStackFrame+31j
                 pop     edi
+ifdef FS_FIXES_3
+                pop     fs
+endif
                 retn
 verifyStackFrame endp
 
@@ -1329,30 +1699,43 @@ _ProfileEnterParagraph32 proc near
                 push    ebp
                 mov     ebp, esp
                 pushfd
+ifdef FS_FIXES_3
+                push    fs
+                push    Dos32TIB
+                pop     fs
+endif
                 push    esi
                 mov     esi, $$PROSEGPTR32
                 or      esi, esi
+                jz      loc_6_8EE
+                test    word ptr [esi].proseg_flags, 2
                 jz      short loc_6_8EE
-                test    word ptr [esi], 2
-                jz      short loc_6_8EE
-                test    word ptr [esi], 10h
+                test    word ptr [esi].proseg_flags, 10h
                 jnz     short loc_6_8EE
                 push    edi
                 push    ebx
                 push    ecx
-                mov     ebx, large fs:0Ch
+ifdef FS_FIXES_1
+                push    fs
+                push    Dos32TIB
+                pop     fs
+                mov     ebx, fs:tib_s.tib_ptib2
+                pop     fs
+else
+                mov     ebx, fs:tib_s.tib_ptib2
+endif
                 mov     ebx, [ebx]
-                cmp     ebx, [esi+64h]
+                cmp     ebx, [esi].proseg_maxTid
                 ja      short loc_6_8EB
                 dec     ebx
-                mov     eax, [esi+160h]
+                mov     eax, [esi].proseg_tidTrigger
                 cmp     dword ptr [eax+ebx*4], 0
                 jz      short loc_6_8EB
                 mov     edi, ebx
                 shl     ebx, 10h
                 mov     eax, [ebp+4]
                 push    edx
-                mov     ecx, [esi+164h]
+                mov     ecx, [esi].conditionalExit
                 mov     edx, [ecx+edi*4]
                 cmp     edx, 0FFFFFFFFh
                 jz      short loc_6_8E5
@@ -1360,17 +1743,33 @@ _ProfileEnterParagraph32 proc near
                 push    eax
                 push    ebx
                 push    edi
-                call    dword ptr [esi+58h]
+ifdef FS_FIXES_2
+                push    fs
+                push    Dos32TIB
+                pop     fs
+                call    dword ptr [esi.proseg_pfnINIT_ID44T]
+                pop     fs
+else
+                call    dword ptr [esi.proseg_pfnINIT_ID44T]
+endif
                 pop     edi
                 pop     ebx
                 pop     eax
-                mov     ecx, [esi+164h]
+                mov     ecx, [esi].conditionalExit
                 mov     dword ptr [ecx+edi*4], 0FFFFFFFFh
 
 loc_6_8E5:                              ; CODE XREF: _ProfileEnterParagraph32+50j
                 mov     bl, 4
                 pop     edx
-                call    dword ptr [esi+58h]
+ifdef FS_FIXES_2
+                push    fs
+                push    Dos32TIB
+                pop     fs
+                call    dword ptr [esi.proseg_pfnINIT_ID44T]
+                pop     fs
+else
+                call    dword ptr [esi.proseg_pfnINIT_ID44T]
+endif
 
 loc_6_8EB:                              ; CODE XREF: _ProfileEnterParagraph32+2Cj
                                         ; _ProfileEnterParagraph32+39j
@@ -1381,6 +1780,9 @@ loc_6_8EB:                              ; CODE XREF: _ProfileEnterParagraph32+2C
 loc_6_8EE:                              ; CODE XREF: _ProfileEnterParagraph32+Dj
                                         ; _ProfileEnterParagraph32+14j ...
                 pop     esi
+ifdef FS_FIXES_3
+                pop     fs
+endif
                 popfd
                 pop     ebp
                 retn
@@ -1397,28 +1799,49 @@ _ProfileExitParagraph32 proc near
                 push    ebp
                 mov     ebp, esp
                 pushfd
+ifdef FS_FIXES_3
+                push    fs
+                push    Dos32TIB
+                pop     fs
+endif
                 push    esi
                 mov     esi, $$PROSEGPTR32
                 or      esi, esi
                 jz      short loc_6_939
-                test    word ptr [esi], 2
+                test    word ptr [esi].proseg_flags, 2
                 jz      short loc_6_939
-                test    word ptr [esi], 10h
+                test    word ptr [esi].proseg_flags, 10h
                 jnz     short loc_6_939
                 push    ebx
-                mov     ebx, large fs:0Ch
+ifdef FS_FIXES_1
+                push    fs
+                push    Dos32TIB
+                pop     fs
+                mov     ebx, fs:tib_s.tib_ptib2
+                pop     fs
+else
+                mov     ebx, fs:tib_s.tib_ptib2
+endif
                 mov     ebx, [ebx]
-                cmp     ebx, [esi+64h]
+                cmp     ebx, [esi].proseg_maxTid
                 ja      short loc_6_938
                 dec     ebx
-                mov     edx, [esi+160h]
+                mov     edx, [esi].proseg_tidTrigger
                 cmp     dword ptr [edx+ebx*4], 0
                 jz      short loc_6_938
                 mov     edx, eax
                 mov     eax, [ebp+4]
                 shl     ebx, 10h
                 mov     bl, 5
-                call    dword ptr [esi+58h]
+ifdef FS_FIXES_2
+                push    fs
+                push    Dos32TIB
+                pop     fs
+                call    dword ptr [esi.proseg_pfnINIT_ID44T]
+                pop     fs
+else
+                call    dword ptr [esi.proseg_pfnINIT_ID44T]
+endif
 
 loc_6_938:                              ; CODE XREF: _ProfileExitParagraph32+2Aj
                                         ; _ProfileExitParagraph32+37j
@@ -1427,6 +1850,9 @@ loc_6_938:                              ; CODE XREF: _ProfileExitParagraph32+2A
 loc_6_939:                              ; CODE XREF: _ProfileExitParagraph32+Dj
                                         ; _ProfileExitParagraph32+14j ...
                 pop     esi
+ifdef FS_FIXES_3
+                pop     fs
+endif
                 popfd
                 pop     ebp
                 retn
@@ -1440,22 +1866,35 @@ _ProfileExitParagraph32 endp
                 public _ProfileConditionalExit32
 _ProfileConditionalExit32 proc near
                 pushfd
+ifdef FS_FIXES_3
+                push    fs
+                push    Dos32TIB
+                pop     fs
+endif
                 push    esi
                 mov     esi, $$PROSEGPTR32
                 or      esi, esi
                 jz      short loc_6_973
-                test    word ptr [esi], 2
+                test    word ptr [esi].proseg_flags, 2
                 jz      short loc_6_973
-                test    word ptr [esi], 10h
+                test    word ptr [esi].proseg_flags, 10h
                 jnz     short loc_6_973
                 push    ebx
                 push    ecx
-                mov     ebx, large fs:0Ch
+ifdef FS_FIXES_1
+                push    fs
+                push    Dos32TIB
+                pop     fs
+                mov     ebx, fs:tib_s.tib_ptib2
+                pop     fs
+else
+                mov     ebx, fs:tib_s.tib_ptib2
+endif
                 mov     ebx, [ebx]
-                cmp     ebx, [esi+64h]
+                cmp     ebx, [esi].proseg_maxTid
                 ja      short loc_6_971
                 dec     ebx
-                mov     ecx, [esi+164h]
+                mov     ecx, [esi].conditionalExit
                 mov     [ecx+ebx*4], eax
 
 loc_6_971:                              ; CODE XREF: _ProfileConditionalExit32+28j
@@ -1465,6 +1904,9 @@ loc_6_971:                              ; CODE XREF: _ProfileConditionalExit32+2
 loc_6_973:                              ; CODE XREF: _ProfileConditionalExit32+Aj
                                         ; _ProfileConditionalExit32+11j ...
                 pop     esi
+ifdef FS_FIXES_3
+                pop     fs
+endif
                 popfd
                 retn
 _ProfileConditionalExit32 endp
@@ -1477,22 +1919,35 @@ _ProfileConditionalExit32 endp
                 public _ProfileCancelExit32
 _ProfileCancelExit32 proc near
                 pushfd
+ifdef FS_FIXES_3
+                push    fs
+                push    Dos32TIB
+                pop     fs
+endif
                 push    esi
                 mov     esi, $$PROSEGPTR32
                 or      esi, esi
                 jz      short loc_6_9B0
-                test    word ptr [esi], 2
+                test    word ptr [esi].proseg_flags, 2
                 jz      short loc_6_9B0
-                test    word ptr [esi], 10h
+                test    word ptr [esi].proseg_flags, 10h
                 jnz     short loc_6_9B0
                 push    ebx
                 push    ecx
-                mov     ebx, large fs:0Ch
+ifdef FS_FIXES_1
+                push    fs
+                push    Dos32TIB
+                pop     fs
+                mov     ebx, fs:tib_s.tib_ptib2
+                pop     fs
+else
+                mov     ebx, fs:tib_s.tib_ptib2
+endif
                 mov     ebx, [ebx]
-                cmp     ebx, [esi+64h]
+                cmp     ebx, [esi].proseg_maxTid
                 ja      short loc_6_9AE
                 dec     ebx
-                mov     ecx, [esi+164h]
+                mov     ecx, [esi].conditionalExit
                 mov     dword ptr [ecx+ebx*4], 0FFFFFFFFh
 
 loc_6_9AE:                              ; CODE XREF: _ProfileCancelExit32+28j
@@ -1502,6 +1957,9 @@ loc_6_9AE:                              ; CODE XREF: _ProfileCancelExit32+28j
 loc_6_9B0:                              ; CODE XREF: _ProfileCancelExit32+Aj
                                         ; _ProfileCancelExit32+11j ...
                 pop     esi
+ifdef FS_FIXES_3
+                pop     fs
+endif
                 popfd
                 retn
 _ProfileCancelExit32 endp
@@ -1517,29 +1975,42 @@ _ProfileNameString32 proc near
                 push    ebp
                 mov     ebp, esp
                 pushfd
+ifdef FS_FIXES_3
+                push    fs
+                push    Dos32TIB
+                pop     fs
+endif
                 push    esi
                 mov     esi, $$PROSEGPTR32
                 or      esi, esi
                 jz      short loc_6_A11
-                test    word ptr [esi], 2
+                test    word ptr [esi].proseg_flags, 2
                 jz      short loc_6_A11
-                test    word ptr [esi], 10h
+                test    word ptr [esi].proseg_flags, 10h
                 jnz     short loc_6_A11
                 push    ebx
                 push    ecx
-                mov     ebx, large fs:0Ch
+ifdef FS_FIXES_1
+                push    fs
+                push    Dos32TIB
+                pop     fs
+                mov     ebx, fs:tib_s.tib_ptib2
+                pop     fs
+else
+                mov     ebx, fs:tib_s.tib_ptib2
+endif
                 mov     ebx, [ebx]
-                cmp     ebx, [esi+64h]
+                cmp     ebx, [esi].proseg_maxTid
                 ja      short loc_6_A0F
                 dec     ebx
-                mov     ecx, [esi+160h]
+                mov     ecx, [esi].proseg_tidTrigger
                 cmp     dword ptr [ecx+ebx*4], 0
                 jz      short loc_6_A0F
                 mov     ecx, [ebp+4]
-                mov     [esi+148h], ecx
-                mov     [esi+14Ch], eax
-                mov     [esi+150h], edx
-                mov     dword ptr [esi+144h], 2
+                mov     [esi._parm   ], ecx
+                mov     [esi._parm+4h], eax
+                mov     [esi._parm+8h], edx
+                mov     dword ptr [esi]._command, 2
                 int     3               ; Trap to Debugger
                 wait
                 int     3               ; Trap to Debugger
@@ -1552,6 +2023,9 @@ loc_6_A0F:                              ; CODE XREF: _ProfileNameString32+2Bj
 loc_6_A11:                              ; CODE XREF: _ProfileNameString32+Dj
                                         ; _ProfileNameString32+14j ...
                 pop     esi
+ifdef FS_FIXES_3
+                pop     fs
+endif
                 popfd
                 pop     ebp
                 retn
