@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.2448 2003-01-16 17:42:43 sandervl Exp $ */
+/* $Id: changelog,v 1.2449 2003-01-18 20:11:35 sandervl Exp $ */
+
+ 2003-01-18: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o FindFirstFile must return ERROR_FILE_NOT_FOUND when
+                  the specified file or directory isn't present.
+                  (OS/2 returns ERROR_NO_MORE_FILES)
 
  2003-01-16: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Fixed heap corruption in CreateProcess (with current dir)
