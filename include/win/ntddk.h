@@ -798,13 +798,8 @@ typedef struct _TIME_FIELDS
 
 typedef TIME_FIELDS *PTIME_FIELDS;
 
-VOID WINAPI RtlSystemTimeToLocalTime(
-	IN  PLARGE_INTEGER SystemTime,
-	OUT PLARGE_INTEGER LocalTime);
-
-VOID WINAPI RtlTimeToTimeFields(
-	PLARGE_INTEGER liTime,
-	PTIME_FIELDS TimeFields);
+void      WINAPI RtlSystemTimeToLocalTime(PLARGE_INTEGER,PLARGE_INTEGER);
+void      WINAPI RtlTimeToTimeFields(const LARGE_INTEGER*,PTIME_FIELDS);
 
 BOOLEAN WINAPI RtlTimeFieldsToTime(
 	PTIME_FIELDS tfTimeFields,
@@ -813,13 +808,13 @@ BOOLEAN WINAPI RtlTimeFieldsToTime(
 VOID WINAPI RtlTimeToElapsedTimeFields(
 	PLARGE_INTEGER liTime,
 	PTIME_FIELDS TimeFields);
-	
-void    WINAPI NtQuerySystemTime( LARGE_INTEGER *time );
 
-BOOLEAN WINAPI RtlTimeToSecondsSince1980( const FILETIME *time, LPDWORD res );
-BOOLEAN WINAPI RtlTimeToSecondsSince1970( const FILETIME *time, LPDWORD res );
-void    WINAPI RtlSecondsSince1970ToTime( DWORD time, FILETIME *res );
-void    WINAPI RtlSecondsSince1980ToTime( DWORD time, FILETIME *res );
+NTSTATUS  WINAPI NtQuerySystemTime(PLARGE_INTEGER);	
+
+void      WINAPI RtlSecondsSince1970ToTime(DWORD,LARGE_INTEGER *);
+void      WINAPI RtlSecondsSince1980ToTime(DWORD,LARGE_INTEGER *);
+BOOLEAN   WINAPI RtlTimeToSecondsSince1970(const LARGE_INTEGER *,PULONG);
+BOOLEAN   WINAPI RtlTimeToSecondsSince1980(const LARGE_INTEGER *,LPDWORD);
 
 typedef struct tagRTL_BITMAP {
     ULONG  SizeOfBitMap; /* Number of bits in the bitmap */
@@ -1093,6 +1088,8 @@ NtAccessCheck(
 	OUT PULONG ReturnLength,
 	OUT PULONG GrantedAccess,
 	OUT PBOOLEAN AccessStatus);
+
+NTSTATUS  WINAPI RtlQueryTimeZoneInformation(LPTIME_ZONE_INFORMATION);
 
 #ifdef __cplusplus
 }
