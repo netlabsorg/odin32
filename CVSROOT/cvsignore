@@ -20,3 +20,4 @@ bin
 *.sym
 *.err
 *.*obj
+makefile.inc
