@@ -1,4 +1,4 @@
-/* $Id: kFileDef.cpp,v 1.12 2002-08-29 07:55:43 bird Exp $
+/* $Id: kFileDef.cpp,v 1.13 2002-08-29 07:59:24 bird Exp $
  *
  * kFileDef - Definition files.
  *
@@ -807,9 +807,9 @@ KBOOL kFileDef::makeWatcomLinkFileAddtion(kFile *pOut, int enmOS)
     while (pSeg != NULL)
     {
         if (pSeg->pszName)
-            pOut->printf("SEGMENT %s %s\n", pSeg->pszName, pSeg->pszAttr ? pSeg->pszAttr : "");
+            pOut->printf("SEGMENT '%s' %s\n", pSeg->pszName, pSeg->pszAttr ? pSeg->pszAttr : "");
         if (pSeg->pszClass)
-            pOut->printf("SEGMENT CLASS %s %s\n", pSeg->pszClass, pSeg->pszAttr ? pSeg->pszAttr : "");
+            pOut->printf("SEGMENT CLASS '%s' %s\n", pSeg->pszClass, pSeg->pszAttr ? pSeg->pszAttr : "");
         pSeg = pSeg->pNext;
     }
 
