@@ -1,5 +1,5 @@
 ##############################################################################
-# $Id: makefile,v 1.6 1999-11-10 01:45:37 bird Exp $
+# $Id: makefile,v 1.7 1999-11-16 18:38:36 sandervl Exp $
 #
 # PD-Win32 API
 #
@@ -38,7 +38,9 @@ LD         = ilink
 LDFLAGS    = /nologo /NOI /A:16 /NOE /O:$@ /packcode /packdata \
              /MAP:$(PE2LXLIST)\$(@B).map /pmtype:vio /Stack:4096 \
 !ifdef DEBUG
+!ifndef NODEBUGINFO
     /debug /dbgpack
+!endif
 !else
     /exepack:2
 !endif
