@@ -1,4 +1,4 @@
-/* $Id: winbase.h,v 1.16 2000-08-20 15:16:21 phaller Exp $ */
+/* $Id: winbase.h,v 1.17 2000-09-21 17:00:10 hugh Exp $ */
 
 #ifndef __WINE_WINBASE_H
 #define __WINE_WINBASE_H
@@ -252,6 +252,97 @@ typedef struct
 #define INVALID_HANDLE_VALUE  ((HANDLE) -1)
 
 /* comm */
+
+/*
+ Serial provider type
+ */
+#define SP_SERIALCOMM ((DWORD)0x00000001)
+/*
+ Provider SubTypes
+ */
+#define PST_UNSPECIFIED     ((DWORD)0x00000000)
+#define PST_RS232           ((DWORD)0x00000001)
+#define PST_PARALLELPORT    ((DWORD)0x00000002)
+#define PST_RS422           ((DWORD)0x00000003)
+#define PST_RS423           ((DWORD)0x00000004)
+#define PST_RS449           ((DWORD)0x00000005)
+#define PST_MODEM           ((DWORD)0x00000006)
+#define PST_FAX             ((DWORD)0x00000021)
+#define PST_SCANNER         ((DWORD)0x00000022)
+#define PST_NETWORK_BRIDGE  ((DWORD)0x00000100)
+#define PST_LAT             ((DWORD)0x00000101)
+#define PST_TCPIP_TELNET    ((DWORD)0x00000102)
+#define PST_X25             ((DWORD)0x00000103)
+/*
+ Provider Caps
+ */
+#define PCF_DTRDSR          ((DWORD)0x00000001)
+#define PCF_RTSCTS          ((DWORD)0x00000002)
+#define PCF_RLSD            ((DWORD)0x00000004)
+#define PCF_PARITY_CHECK    ((DWORD)0x00000008)
+#define PCF_XONXOFF         ((DWORD)0x00000010)
+#define PCF_SETXCHAR        ((DWORD)0x00000020)
+#define PCF_TOTALTIMEOUTS   ((DWORD)0x00000040)
+#define PCF_INITTIMEOUTS    ((DWORD)0x00000080)
+#define PCF_SPECIALCHARS    ((DWORD)0x00000100)
+#define PCF_16BITMODE       ((DWORD)0x00000200)
+
+/*
+ Provider setable parameters
+ */
+#define SP_PARITY          ((DWORD)0x00000001)
+#define SP_BAUD            ((DWORD)0x00000002)
+#define SP_DATABITS        ((DWORD)0x00000004)
+#define SP_STOPBIT         ((DWORD)0x00000008)
+#define SP_HANDSHAKEING    ((DWORD)0x00000010)
+#define SP_PARITY_CHECK    ((DWORD)0x00000020)
+#define SP_RLSD            ((DWORD)0x00000040)
+/*
+ Settable baudrates in the provider
+*/
+#define BAUD_075           ((DWORD)0x00000001)
+#define BAUD_110           ((DWORD)0x00000002)
+#define BAUD_134_5         ((DWORD)0x00000004)
+#define BAUD_150           ((DWORD)0x00000008)
+#define BAUD_300           ((DWORD)0x00000010)
+#define BAUD_600           ((DWORD)0x00000020)
+#define BAUD_1200          ((DWORD)0x00000040)
+#define BAUD_1800          ((DWORD)0x00000080)
+#define BAUD_2400          ((DWORD)0x00000100)
+#define BAUD_4800          ((DWORD)0x00000200)
+#define BAUD_7200          ((DWORD)0x00000400)
+#define BAUD_9600          ((DWORD)0x00000800)
+#define BAUD_14400         ((DWORD)0x00001000)
+#define BAUD_19200         ((DWORD)0x00002000)
+#define BAUD_38400         ((DWORD)0x00004000)
+#define BAUD_56K           ((DWORD)0x00008000)
+#define BAUD_128K          ((DWORD)0x00010000)
+#define BAUD_115200        ((DWORD)0x00020000)
+#define BAUD_57600         ((DWORD)0x00040000)
+#define BAUD_USER          ((DWORD)0x10000000)
+
+/*
+ Setable Databits
+ */
+#define DATABITS_5         ((DWORD)0x00000001)
+#define DATABITS_6         ((DWORD)0x00000002)
+#define DATABITS_7         ((DWORD)0x00000004)
+#define DATABITS_8         ((DWORD)0x00000008)
+#define DATABITS_16        ((DWORD)0x00000010)
+#define DATABITS_16X       ((DWORD)0x00000020)
+
+/*
+ Setable Stop and Parity Bits
+ */
+
+#define STOPBITS_10       ((DWORD)0x00000001)
+#define STOPBITS_15       ((DWORD)0x00000002)
+#define STOPBITS_20       ((DWORD)0x00000004)
+#define PARITY_NONE       ((DWORD)0x00000100)
+#define PARITY_ODD        ((DWORD)0x00000200)
+#define PARITY_EVEN       ((DWORD)0x00000400)
+#define PARITY_MARK       ((DWORD)0x00000800)
+#define PARITY_SPACE      ((DWORD)0x00001000)
 
 #define CBR_110 0xFF10
 #define CBR_300 0xFF11
@@ -1138,7 +1229,15 @@ typedef struct _COMMPROP {
 
 typedef struct tagCOMSTAT
 {
-    DWORD status;
+    // DWORD status; // maybe make this a union ??
+    unsigned fCtsHold:1;
+    unsigned fDsrHold:1;
+    unsigned fRlsdHold:1;
+    unsigned fXoffHold:1;
+    unsigned fXoffSend:1;
+    unsigned fEof:1;
+    unsigned fTxim:1;
+    unsigned fReserved:25;
     DWORD cbInQue;
     DWORD cbOutQue;
 } COMSTAT,*LPCOMSTAT;
@@ -1199,18 +1298,18 @@ typedef struct _COMMCONFIG {
 
 typedef VOID (* CALLBACK PAPCFUNC)(ULONG_PTR);
 
-BOOL      WINAPI ClearCommError(INT,LPDWORD,LPCOMSTAT);
+BOOL      WINAPI ClearCommError(HANDLE,LPDWORD,LPCOMSTAT);
 BOOL      WINAPI BuildCommDCBA(LPCSTR,LPDCB);
 BOOL      WINAPI BuildCommDCBW(LPCWSTR,LPDCB);
 #define     BuildCommDCB WINELIB_NAME_AW(BuildCommDCB)
 BOOL      WINAPI BuildCommDCBAndTimeoutsA(LPCSTR,LPDCB,LPCOMMTIMEOUTS);
 BOOL      WINAPI BuildCommDCBAndTimeoutsW(LPCWSTR,LPDCB,LPCOMMTIMEOUTS);
 #define     BuildCommDCBAndTimeouts WINELIB_NAME_AW(BuildCommDCBAndTimeouts)
-BOOL      WINAPI GetCommTimeouts(INT,LPCOMMTIMEOUTS);
-BOOL      WINAPI SetCommTimeouts(INT,LPCOMMTIMEOUTS);
-BOOL      WINAPI GetCommState(INT,LPDCB);
-BOOL      WINAPI SetCommState(INT,LPDCB);
-BOOL      WINAPI TransmitCommChar(INT,CHAR);
+BOOL      WINAPI GetCommTimeouts(HANDLE,LPCOMMTIMEOUTS);
+BOOL      WINAPI SetCommTimeouts(HANDLE,LPCOMMTIMEOUTS);
+BOOL      WINAPI GetCommState(HANDLE,LPDCB);
+BOOL      WINAPI SetCommState(HANDLE,LPDCB);
+BOOL      WINAPI TransmitCommChar(HANDLE,CHAR);
 
 
 /*DWORD WINAPI GetVersion( void );*/
@@ -1563,7 +1662,7 @@ BOOL        WINAPI RevertToSelf(void);
 DWORD       WINAPI SearchPathA(LPCSTR,LPCSTR,LPCSTR,DWORD,LPSTR,LPSTR*);
 DWORD       WINAPI SearchPathW(LPCWSTR,LPCWSTR,LPCWSTR,DWORD,LPWSTR,LPWSTR*);
 #define     SearchPath WINELIB_NAME_AW(SearchPath)
-BOOL      WINAPI SetCommMask(INT,DWORD);
+BOOL      WINAPI SetCommMask(HANDLE,DWORD);
 BOOL      WINAPI SetComputerNameA(LPCSTR);
 BOOL      WINAPI SetComputerNameW(LPCWSTR);
 #define     SetComputerName WINELIB_NAME_AW(SetComputerName)
