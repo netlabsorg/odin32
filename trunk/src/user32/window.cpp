@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.125 2002-07-08 10:51:01 sandervl Exp $ */
+/* $Id: window.cpp,v 1.126 2002-07-30 17:46:33 achimha Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -84,6 +84,8 @@ HWND WIN32API CreateWindowExA(DWORD exStyle,
        return 0;
     }
 
+    // if the pointer to the classname string has the high word cleared,
+    // then it's not a pointer but a number for one of the builtin classes
     if (!HIWORD(className))
     {
       sprintf(tmpClass,"#%d", (int) className);
