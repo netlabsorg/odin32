@@ -1,10 +1,12 @@
- /* $Id: changelog,v 1.202 1999-09-15 15:39:50 phaller Exp $ */
+ /* $Id: changelog,v 1.203 1999-09-15 16:08:31 phaller Exp $ */
 
  99-09-14: Patrick Haller <phaller@gmx.net>
         - AVIFIL32:   ported AVIFIL32 from WINE
         - DPLAY:      ported DPLAY from WINE
                       Note: DPLAYX is required and NOT ported yet.
                             Furthermore, DPLAY has still stubs.
+        - DPLAYX:     ported DPLAY from WINE (incomplete)
+                      Note: still problem with COM-inheritance-macro XCAST()
         - WNASPI32:   ported WNASPI32 from WINE
                       Note: someone should adapt it to OS/2's R3 ASPI router
 
