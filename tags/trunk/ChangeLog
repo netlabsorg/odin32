@@ -1,4 +1,17 @@
- /* $Id: ChangeLog,v 1.1035 2000-07-17 00:40:55 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.1036 2000-07-18 17:45:14 bird Exp $ */
+
+ 2000-07-18: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - KERNEL32: APIs are to be placed should have ordinal less than 1200
+                - even if they don't belong in the dll but just happend to be
+                implemented there. The reason is for humans and for
+                documentation tools to be able to tell which exports are APIs
+                and which are internal Odin32 function/APIs.
+    - div:      Added some missing $Id keywords.
+    - database: Trying to make the database more useful. Extracting more
+                data from the source files.
+                According to the doc\ToDo file we're to write structured
+                and well documented code. This database is indetended to
+                make the documentation (++) browsable. (PHP)
 
  2000-07-17: Patrick Haller <phaller@gmx.net>
     - KERNEL32: fixed ReadFile/WriteFile bugfix
