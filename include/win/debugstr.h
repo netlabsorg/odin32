@@ -1,3 +1,4 @@
+/* $Id: debugstr.h,v 1.2 1999-08-22 22:47:17 sandervl Exp $ */
 #ifndef __WINE_DEBUGSTR_H
 #define __WINE_DEBUGSTR_H
 
