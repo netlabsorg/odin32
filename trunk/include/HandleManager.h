@@ -150,6 +150,13 @@ HANDLE HMOpenMutex                  (DWORD                      fdwAccess,
                                      BOOL                       fInherit,
                                      LPCSTR                    lpName);
 
+BOOL   HMSetHandleInformation       (HANDLE hObject, 
+                                     DWORD  dwMask,
+                                     DWORD  dwFlags);
+
+BOOL   HMGetHandleInformation       (HANDLE  hObject,
+                                     LPDWORD lpdwFlags);
+
 BOOL   HMCloseHandle                (HANDLE                     hObject);
 
 BOOL   HMReadFile                   (HANDLE                     hFile,
