@@ -1,4 +1,4 @@
-/* $Id: oleauto.h,v 1.2 1999-08-22 22:15:15 sandervl Exp $ */
+/* $Id: oleauto.h,v 1.3 2000-07-18 18:30:35 sandervl Exp $ */
 
 #ifndef __WINE_OLEAUTO_H
 #define __WINE_OLEAUTO_H
@@ -24,6 +24,20 @@ int WINAPI SysReAllocStringLen16(BSTR16*, const char*,  int);
 int WINAPI SysReAllocStringLen(BSTR*, const OLECHAR*, UINT);
 int WINAPI SysStringLen16(BSTR16);
 int WINAPI SysStringLen(BSTR);
+
+ /*****************************************************************
+ *  Time API
+ */
+
+INT WINAPI DosDateTimeToVariantTime(USHORT wDosDate, USHORT wDosTime, DOUBLE * pvtime);
+
+INT WINAPI VariantTimeToDosDateTime(DOUBLE vtime, USHORT * pwDosDate, USHORT * pwDosTime);
+
+#ifdef _WIN32
+INT WINAPI SystemTimeToVariantTime(LPSYSTEMTIME lpSystemTime, DOUBLE *pvtime);
+INT WINAPI VariantTimeToSystemTime(DOUBLE vtime, LPSYSTEMTIME lpSystemTime);
+#endif
+
 
 /*****************************************************************
  *  SafeArray API
