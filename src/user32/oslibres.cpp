@@ -1,4 +1,4 @@
-/* $Id: oslibres.cpp,v 1.19 2001-08-25 10:54:19 sandervl Exp $ */
+/* $Id: oslibres.cpp,v 1.20 2001-08-26 14:23:33 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -24,6 +24,7 @@
 #include "oslibgdi.h"
 #include "oslibres.h"
 #include "pmwindow.h"
+#include <wingdi32.h>
 
 #define DBG_LOCALLOG    DBG_oslibres
 #include "dbglocal.h"
@@ -306,17 +307,17 @@ HANDLE OSLibWinCreatePointer(CURSORICONINFO *pInfo, char *pAndBits, BITMAP_W *pA
         pBmpColor->ulCompression    = BCA_UNCOMP;
         pBmpColor->ulColorEncoding  = BCE_RGB;
 
-  	    os2rgb                      = &pBmpColor->argbColor[0];
-  	    rgb                         = (RGBQUAD *)(pXorBits);
+        os2rgb                      = &pBmpColor->argbColor[0];
+        rgb                         = (RGBQUAD *)(pXorBits);
 
-  	    if(pXorBmp->bmBitsPixel <= 8) {
-    	        for(i=0;i<(1<<pXorBmp->bmBitsPixel);i++) {
-    	                os2rgb->bRed   = rgb->rgbRed;
-    	                os2rgb->bBlue  = rgb->rgbBlue;
-    	                os2rgb->bGreen = rgb->rgbGreen;
-    	                os2rgb++;
-    	                rgb++;
-    	        }
+        if(pXorBmp->bmBitsPixel <= 8) {
+            for(i=0;i<(1<<pXorBmp->bmBitsPixel);i++) {
+                    os2rgb->bRed   = rgb->rgbRed;
+                    os2rgb->bBlue  = rgb->rgbBlue;
+                    os2rgb->bGreen = rgb->rgbGreen;
+                    os2rgb++;
+                    rgb++;
+            }
     	}
 
         if(pXorBmp->bmBitsPixel == 1) {
@@ -328,6 +329,10 @@ HANDLE OSLibWinCreatePointer(CURSORICONINFO *pInfo, char *pAndBits, BITMAP_W *pA
                     dest -= pXorBmp->bmWidthBytes;
                     src  += pXorBmp->bmWidthBytes;
                 }
+        }
+        else    
+        if(pXorBmp->bmBitsPixel == 16) {
+                ConvertRGB555to565(os2rgb, rgb, pXorBmp->bmHeight * pXorBmp->bmWidthBytes);
         }
         else    memcpy(os2rgb, rgb, pXorBmp->bmHeight * pXorBmp->bmWidthBytes);
 
