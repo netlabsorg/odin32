@@ -12,21 +12,21 @@ PDWIN32_BIN = ..\..\bin
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 ASFLAGS = -Sc -Sv:ALP
 
-CFLAGS = $(CFLAGS) -Ft+ -I$(PDWIN32_INCLUDE);
-CXXFLAGS = $(CXXFLAGS) -Ft+ -I$(PDWIN32_INCLUDE);
+CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE);
+CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE);
 
 TARGET = ddraw
 
 OBJS =  ddraw.obj os2ddraw.obj os2clipper.obj os2d3d.obj iccio1.obj asmutil.obj\
-        os2surface.obj os2palette.obj os2palset.obj misc.obj initterm.obj
+        os2surface.obj os2palette.obj os2palset.obj misc.obj rectangle.obj initterm.obj
 
-LIBS =  ($PDWIN32_LIB)\pmwinx.lib mmpm2.lib CPPOOC3.lib CPPOM30.lib
+LIBS =  ..\..\lib\pmwinx.lib mmpm2.lib ..\..\lib\comctl32.lib
 
 all: $(TARGET).dll $(TARGET).lib
 
 
 $(TARGET).dll: $(OBJS) $(TARGET).def
-        $(LD) $(LDFLAGS) -Tdp -Fm -Fe$@ $(OBJS) $(TARGET).def $(LIBS)
+        $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def $(LIBS)
   $(CP) $@ $(PDWIN32_BIN)
 
 
@@ -46,8 +46,11 @@ os2ddraw.obj: os2ddraw.cpp  \
     os2ddraw.h\
     $(PDWIN32_INCLUDE)\win\ddraw.h \
     $(PDWIN32_INCLUDE)\win\d3d.h
+
 os2d3d.obj: os2d3d.cpp \
-    os2ddraw.h
+    os2ddraw.h\
+    $(PDWIN32_INCLUDE)\win\ddraw.h \
+    $(PDWIN32_INCLUDE)\win\d3d.h
 
 misc.obj: misc.cpp
 
@@ -65,14 +68,19 @@ os2clipper.obj: os2clipper.cpp  \
     os2palette.h \
     os2clipper.h \
     os2surface.h \
-    os2ddraw.h
+    os2ddraw.h\
+    $(PDWIN32_INCLUDE)\win\ddraw.h \
+    $(PDWIN32_INCLUDE)\win\d3d.h
 
 os2surface.obj: os2surface.cpp  \
     os2palette.h \
     os2clipper.h \
     os2surface.h \
-    os2ddraw.h
+    os2ddraw.h\
+    $(PDWIN32_INCLUDE)\win\ddraw.h \
+    $(PDWIN32_INCLUDE)\win\d3d.h
 
+rectangle.obj: rectangle.cpp
 
 initterm.obj: initterm.cpp
 

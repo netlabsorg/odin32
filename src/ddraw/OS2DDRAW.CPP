@@ -8,6 +8,7 @@
 #define _OS2WIN_H
 #define FAR
 #include "misc.h"
+#include <string.h>
 #include <winreg.h>
 #include <winuser.h>
 #include <winerror.h>
@@ -29,7 +30,7 @@ FOURCC  SupportedFourCCs[] = {FOURCC_LUT8,FOURCC_R565,FOURCC_RGB3,FOURCC_RGB4};
 OS2IDirectDraw::OS2IDirectDraw(GUID *lpGUID) :
      Referenced(0), lastError(DD_OK),
      pFrameBuffer(NULL), hwndClient(0), screenwidth(640),
-     screenheight(480), screenbpp(8),PrimaryExists(false)
+     screenheight(480), screenbpp(8),PrimaryExists(FALSE)
 
 {
   HKEY  hkDirectDraw2;

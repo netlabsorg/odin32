@@ -6,8 +6,7 @@
 #include "os2clipper.h"
 #include "os2palette.h"
 #include <dive.h>
-#include <iseq.h>
-#include "rectangle.h"
+#include <commctrl.h>
 
 #define FAR
 #undef THIS
@@ -85,7 +84,8 @@ class OS2IDirectDrawSurface
              // DDraw internal vars
 
         DWORD                  dwUniqueValue;
-        ISequence<PSURFPRIVATEDATA> SurfaceSequencePrivateData;
+        HDPA DPA_SurfacePrivateData;
+
         BOOL                   fOverlayValid;
         LONG                   lOverlayX;
         LONG                   lOverlayY;
@@ -95,12 +95,10 @@ class OS2IDirectDrawSurface
         OS2IDirectDrawSurface*  BackBuffer;  // Backbuffer goes in here
         OS2IDirectDrawSurface*  FrontBuffer; // NULL if the real frontbuffer of a Flipchain otherwise  the prev. Backbuffer
         OS2IDirectDrawSurface*  NextFlip;    // Only valid in a frontbuffer
-        ISequence <OS2IDirectDrawSurface*> SurfaceSequenceMipMap;    // MipMaps go in this one
-        ISequence <OS2IDirectDrawSurface*> SurfaceSequenceAttached;  // Other attached go in this one
-        ISequence <OS2IDirectDrawSurface*>::Cursor *SurfaceCursorMipMap;    // Iterator for MipMaps
-        ISequence <OS2IDirectDrawSurface*>::Cursor *SurfaceCursorAttached;  // Iterator for other attached surfaces
 
-        ISequence <DDRectangle*> LockedRectSequence;            // List for locked rectangles
+        HDPA DPA_SurfaceMipMaps;
+        HDPA DPA_SurfaceAttached;
+        HDPA DPA_LockedRects;
 
     friend    HRESULT __stdcall SurfQueryInterface(THIS, REFIID riid, LPVOID FAR * ppvObj);
     friend    ULONG   __stdcall SurfAddRef(THIS);
