@@ -87,6 +87,8 @@ void WIN32API DisableDragDrop(BOOL fDisabled);
 
 //Turn off wave audio in winmm
 void WIN32API DisableWaveAudio();
+//Turn off usage of the Uniaud DirectAudio interface
+void WIN32API DisableDirectAudio();
 
 //Override shared semaphore name used to synchronize global window handle
 //array access (to avoid name clash with Odin)
