@@ -1,4 +1,4 @@
-/* $Id: APIImport.cpp,v 1.5 2000-02-15 13:31:05 bird Exp $ */
+/* $Id: APIImport.cpp,v 1.6 2000-07-21 21:09:42 bird Exp $ */
 /*
  *
  * APIImport - imports a DLL or Dll-.def with functions into the Odin32 database.
@@ -65,6 +65,7 @@ int main(int argc, char **argv)
     *           -p:<passwd>   Password
     *           -u:<user>     Userid
     *           -h:<host>     Hostname/IP-address
+    *           -e[+|-]       Erase functions which wasn't found.
     **************************************************************************/
     if (argc == 1)
         syntax();
@@ -81,6 +82,11 @@ int main(int argc, char **argv)
                         pszDatabase = &argv[argi][3];
                     else
                         fprintf(stderr, "warning: option '-d:' requires database name.\n");
+                    break;
+
+                case 'e': /* erase */
+                case 'E':
+                    options.fErase = argv[argi][2] != '-';
                     break;
 
                 case 'h':
@@ -176,6 +182,8 @@ static void syntax()
            "    -u:<username> Username on the server.       default: root\n"
            "    -p:<password> Password.                     default: <empty>\n"
            "    -d:<database> Database to use.              default: Odin32\n"
+           "    -e[+|-]       Erase functions which wasn't found.\n"
+           "                                                default: -e-\n"
            "    dll/defnames  List of DLL/Defs to process.\n"
            "\n"
            "Note. Options may be switched on and off between dlls.\n"
@@ -187,11 +195,8 @@ static void syntax()
            "\t1) module name\n"
            "\t2) function name\n"
            "\t3) function ordinal (If not option 'o-' is specified.)\n"
-           "This utililty is not destructive but additive. That is, it would not remove any\n"
-           "rows in the database, only add or update them. On existing functions the\n"
-           "ordinal value will be updated when 'o+' is specified.\n"
            "\n"
-           "Copyright (c) 1999 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)",
+           "Copyright (c) 1999-2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)",
            MAJOR_VER, MINOR_VER
            );
 }
@@ -247,7 +252,7 @@ static long processFile(const char *pszFilename, const POPTIONS pOptions, long &
         {
             char    achDataBuffer[0x200];
             char   *pszModuleName = &achDataBuffer[0];
-            signed short  sDll;
+            signed long  lDll;
 
             /* try create file objects */
             try
@@ -270,10 +275,15 @@ static long processFile(const char *pszFilename, const POPTIONS pOptions, long &
                 fprintf(phLog, "%s: modulename = %s\n", pszFilename, pszModuleName);
 
                 /* find or insert module name */
-                if ((sDll = dbCheckInsertDll(pszModuleName)) >= 0)
+                if ((lDll = dbCheckInsertDll(pszModuleName, DLL_ODIN32_API)) >= 0)
                 {
-                    BOOL   fOk;
+                    BOOL    fClearUpdateOk = FALSE;
+                    BOOL    fOk;
                     EXPORTENTRY export;
+
+                    /* Clear the update flag for all functions in this DLL. */
+                    if (pOptions->fErase)
+                        fClearUpdateOk = dbClearUpdateFlagFunction(lDll, FALSE);
 
                     lRc = 0;
                     fOk = pFile->findFirstExport(&export);
@@ -312,28 +322,37 @@ static long processFile(const char *pszFilename, const POPTIONS pOptions, long &
                                 lRc++;
                             }
                             else
-                            {
-                                fOk = dbInsertUpdateFunction(sDll,
+                            {   /* Update Database */
+                                fOk = dbInsertUpdateFunction(lDll,
                                                              &szName[0],
                                                              &szIntName[0],
                                                              export.ulOrdinal,
-                                                             pOptions->fIgnoreOrdinals && export.ulOrdinal != 0xffffffffUL);
+                                                             pOptions->fIgnoreOrdinals && export.ulOrdinal != 0xffffffffUL,
+                                                             FUNCTION_ODIN32_API
+                                                             );
                                 if (fOk)
                                     cFunctions++;
+                                else
+                                {
+                                    fprintf(phLog, "%s: error - dbInsertUpdateFunction failed.\n\terror description: %s \n",
+                                            pszFilename, dbGetLastErrorDesc());
+                                    lRc++;
+                                }
                             }
-                        }
-
-                        if (!fOk)
-                        {
-                            fprintf(phLog, "%s: error - dbInsertUpdateFunction failed.\n\terror description: %s \n",
-                                    pszFilename, dbGetLastErrorDesc());
-                            lRc = 1;
                         }
 
                         /* next */
                         fOk = pFile->findNextExport(&export);
                     }
 
+                    /* Clear the update flag for all functions in this DLL. */
+                    if (fClearUpdateOk && pOptions->fErase)
+                        if (!dbDeleteNotUpdatedFunctions(lDll, FALSE))
+                        {
+                            fprintf(phLog, "%s: error - dbDeleteNotUpdatedFunctions failed.\n\terror description: %s\n",
+                                    pszFilename, dbGetLastErrorDesc());
+                            lRc += 1;
+                        }
                 }
                 else
                     fprintf(phLog, "%s: error - could not find/insert module name (%s).\n", pszFilename, pszModuleName);

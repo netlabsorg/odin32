@@ -1,4 +1,4 @@
-/* $Id: StateUpd.cpp,v 1.25 2000-07-18 17:56:50 bird Exp $
+/* $Id: StateUpd.cpp,v 1.26 2000-07-21 21:09:43 bird Exp $
  *
  * StateUpd - Scans source files for API functions and imports data on them.
  *
@@ -309,7 +309,8 @@ int main(int argc, char **argv)
             else
             {   /* failed to find dll - concidered nearly fatal. */
                 fprintf(phSignal, "-,-: failed to find dll (%s)!\n\t%s\n",
-                        options.pszDLLName ? options.pszDLLName : "<NULL>");
+                        options.pszDLLName ? options.pszDLLName : "<NULL>",
+                        dbGetLastErrorDesc());
                 ulRc++;
             }
         }
@@ -322,7 +323,7 @@ int main(int argc, char **argv)
             cNotAliased = dbCountFunctionInDll(options.lDllRefcode, TRUE);
             if (cNotAliased > cUpdated)
             {
-                fprintf(phSignal, "%d functions where not found (found=%d, total=%d).\n", 
+                fprintf(phSignal, "%d functions where not found (found=%d, total=%d).\n",
                         cNotAliased- cUpdated, cUpdated, cNotAliased);
                 ulRc += 0x00010000;
             }
@@ -696,7 +697,7 @@ static unsigned long processModuleHeader(char **papszLines, int i, int &iRet, co
             strncpy(&szId[0], psz, psz2 - psz);
             szId[psz2 - psz] = '\0';
             iRet = i;
-    
+
             /* parse it! */
             psz = strstr(szId+4, ",v ");
             if (psz != NULL)
