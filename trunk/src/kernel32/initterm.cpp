@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.8 1999-08-16 16:28:02 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.9 1999-08-16 16:55:32 sandervl Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -44,6 +44,11 @@
 static void APIENTRY cleanup(ULONG reason);
 extern void APIENTRY Win32DllExitList(ULONG reason);
 
+extern "C" {
+void CDECL _ctordtorInit( void );
+void CDECL _ctordtorTerm( void );
+}
+
 /* Tue 03.03.1998: knut */
 /* flag to optimize DosAllocMem to use all the memory on SMP machines */
 ULONG flAllocMem;
@@ -81,6 +86,8 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
     {
         case 0 :
             dprintf(("kernel32 init\n"));
+            _ctordtorInit();
+
             CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
             /*******************************************************************/
             /* A DosExitList routine must be used to clean up if runtime calls */
@@ -119,6 +126,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 static void APIENTRY cleanup(ULONG ulReason)
 {
     dprintf(("kernel32 exit %d\n", ulReason));
+    _ctordtorTerm();
     DestroyTIB();
     DosExitList(EXLST_EXIT, cleanup);
     return ;

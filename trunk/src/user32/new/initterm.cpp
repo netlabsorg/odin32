@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.4 1999-08-16 16:28:04 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.5 1999-08-16 16:55:33 sandervl Exp $ */
 
 /*
  * USER32 DLL entry point
@@ -45,6 +45,10 @@
 static void APIENTRY cleanup(ULONG reason);
 static void APIENTRY cleanupQueue(ULONG ulReason);
 
+extern "C" {
+void CDECL _ctordtorInit( void );
+void CDECL _ctordtorTerm( void );
+}
 
 
 /****************************************************************************/
@@ -69,6 +73,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
    switch (ulFlag) {
       case 0 :
+         _ctordtorInit();
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
          /*******************************************************************/
@@ -119,6 +124,7 @@ static void APIENTRY cleanup(ULONG ulReason)
 {
    dprintf(("user32 exit\n"));
    UnregisterSystemClasses();
+   _ctordtorTerm();
    dprintf(("user32 exit done\n"));
    DosExitList(EXLST_EXIT, cleanup);
    return ;
