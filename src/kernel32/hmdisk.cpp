@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.19 2001-10-26 13:03:04 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.20 2001-10-26 14:48:37 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -588,7 +588,11 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
         if(lpBytesReturned)
             *lpBytesReturned = 0;
 
-        if(nOutBufferSize < 4 || !pTOC) {
+        if(!pTOC) {
+            SetLastError(ERROR_INVALID_PARAMETER);
+            return FALSE;
+        }
+        if(nOutBufferSize < sizeof(CDROM_TOC)) {
             SetLastError(ERROR_INSUFFICIENT_BUFFER);
             return FALSE;
         }
@@ -604,8 +608,12 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
         pTOC->FirstTrack = diskinfo.ucFirstTrack;
         pTOC->LastTrack  = diskinfo.ucLastTrack;
         numtracks = pTOC->LastTrack - pTOC->FirstTrack + 1;
-        *(WORD *)&pTOC->Length = 4 + numtracks*sizeof(TRACK_DATA);
         dprintf(("first %d, last %d, num %d", pTOC->FirstTrack, pTOC->LastTrack, numtracks));
+
+        int len = 4 + numtracks*sizeof(TRACK_DATA) - 2; //minus length itself;
+        //big endian format
+        pTOC->Length[0] = HIBYTE(len);
+        pTOC->Length[1] = LOBYTE(len);
 
         if(nOutBufferSize < 4+numtracks*sizeof(TRACK_DATA)) {
             SetLastError(ERROR_INSUFFICIENT_BUFFER);
@@ -632,7 +640,11 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
             pTOC->TrackData[i].Control     = trackinfo.ucTrackControl >> 4;
             pTOC->TrackData[i].Adr         = trackinfo.ucTrackControl & 0xF;
             pTOC->TrackData[i].Reserved1   = 0;
-            *(DWORD *)&pTOC->TrackData[i].Address = trackinfo.ulTrackAddr;
+            //big endian format
+            pTOC->TrackData[i].Address[0]  = HIWORD(HIBYTE(trackinfo.ulTrackAddr));
+            pTOC->TrackData[i].Address[1]  = HIWORD(LOBYTE(trackinfo.ulTrackAddr));
+            pTOC->TrackData[i].Address[2]  = LOWORD(HIBYTE(trackinfo.ulTrackAddr));
+            pTOC->TrackData[i].Address[3]  = LOWORD(LOBYTE(trackinfo.ulTrackAddr));
         }        
         if(lpBytesReturned)
             *lpBytesReturned = 4 + numtracks*sizeof(TRACK_DATA);
