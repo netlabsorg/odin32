@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2329 2002-10-01 11:36:24 sandervl Exp $ */
+/* $Id: changelog,v 1.2330 2002-10-03 10:35:26 sandervl Exp $ */
+
+ 2002-10-03: Platon Fomichev <platon@innotek   >
+    - KERNEL32: o Implemented IOCTL_CDROM_RAW_READ
 
  2002-10-01: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Be careful with stack usage in exception handler during
