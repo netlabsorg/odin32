@@ -1,9 +1,13 @@
-/* $Id: changelog,v 1.1693 2001-09-24 16:25:28 phaller Exp $ */
+/* $Id: changelog,v 1.1694 2001-09-24 18:39:36 sandervl Exp $ */
+
+ 2001-09-24: Sander van Leeuwen <sandervl@xs4all.nl>
+    - DDRAW:    o Set screen resolution + bpp of primary surface to those
+                  of the PM desktop. (used to default to 640x480x8bpp)
 
  2001-09-24: Patrick Haller <patrick.haller@innotek.de>
     - USER32:   o added ODINWRAP debug tracing support to WINKEYBOARD.CPP
 
- 2001-09-22: Sander van Leeuwen <sandervl@xs4all.nl>
+ 2001-09-23: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o MDI bugfix: set active child to 0 when last one is destroyed
                   (fixes crash when closing mdi window in odinapp)
     - GDI32:    o DIB Section sync bugfix; GpiQueryBitmapBits fails 
@@ -11,7 +15,7 @@
                   This used to work. Maybe related to new SDD version.
                   (CoolEdit 2000 hits breakpoint in debug build)
 
- 2001-09-22: Dietrich Teickner <Dietrich_Teickner@t-online.de>
+ 2001-09-23: Dietrich Teickner <Dietrich_Teickner@t-online.de>
     - SHELL32:  o Small update for shfileop.c
 
  2001-09-21: Sander van Leeuwen <sandervl@xs4all.nl>
