@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.66 2001-10-24 15:41:54 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.67 2001-10-25 13:16:57 phaller Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -139,7 +139,7 @@ USHORT pmscan2winkey [][2] = {
     0x0D, 0x11C,    // 0x5A Enter Pad
     0x11, 0x11D,    // 0x5B RCtrl
     0x6F, 0x135,    // 0x5C / Pad
-    0x2D, 0x152,    // 0x5D PrtSc
+    VK_SNAPSHOT_W, 0x137,    // 0x5D PrtSc
     0x12, 0x5E,     // 0x5E RAlt
     0x13, 0x45,     // 0x5F Pause
     VK_HOME_W,   0x60,           // 0x60
@@ -658,7 +658,15 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
           case PMSCAN_ESC:
             // Note: ESC generates a WM_CHAR under Windows, not under PM
             // so we've got to post it to ourself here!
-            // WM_CHAR(0x0000001bh, 000010001h)
+            // WM_CHAR(0x0000001bh, 00010001h)
+            // @@@PH
+            break;
+          
+          case PMSCAN_PRINT:
+            // Note: PRINT generates a WM_KEYUP under Windows
+            // also only call the standard kbd hook for the WM_KEYUP msg,
+            // the low-level hook is called twice
+            // WM_CHAR(0x0000002ch, c1370001h)
             // @@@PH
             break;
           
