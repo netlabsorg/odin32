@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.25 2002-09-14 08:31:53 sandervl Exp $
+# $Id: makefile,v 1.26 2003-08-08 15:52:15 sandervl Exp $
 
 #
 # Odin32 API
@@ -40,6 +40,7 @@ $(OBJDIR)\dsoundrsrc.obj
 LIBS = \
 $(ODIN32_LIB)/kernel32.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
+$(ODIN32_LIB)/libwrap.lib \
 $(ODIN32_LIB)/ole32.lib \
 OS2386.LIB \
 $(RTLLIB_O)

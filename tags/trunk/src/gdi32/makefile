@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.42 2002-11-26 10:53:10 sandervl Exp $
+# $Id: makefile,v 1.43 2003-08-08 15:52:26 sandervl Exp $
 
 #
 # Odin32 API
@@ -43,6 +43,7 @@ $(OBJDIR)\initterm.obj \
 $(OBJDIR)\initgdi32.obj \
 $(OBJDIR)\oslibgdi.obj \
 $(OBJDIR)\font.obj \
+$(OBJDIR)\fontres.obj \
 $(OBJDIR)\text.obj \
 $(OBJDIR)\palette.obj \
 $(OBJDIR)\line.obj \
@@ -69,6 +70,7 @@ $(OBJDIR)\gdi32rsrc.obj
 LIBS = \
 $(ODIN32_LIB)/kernel32.lib \
 $(ODIN32_LIB)/user32.lib \
+$(ODIN32_LIB)/libwrap.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
 $(ODIN32_LIB)/wgss50.lib \
 OS2386.LIB \

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.34 2002-07-22 09:53:47 sandervl Exp $
+# $Id: makefile,v 1.35 2003-08-08 15:55:34 sandervl Exp $
 
 #
 # Odin32 API
@@ -44,6 +44,8 @@ $(OBJDIR)\wsock2.obj
 LIBS = \
 $(ODIN32_LIB)/kernel32.lib \
 $(ODIN32_LIB)/user32.lib \
+$(ODIN32_LIB)/libwrap.lib \
+$(ODIN32_LIB)/iphlpapi.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
 so32dll.lib \
 tcp32dll.lib \
