@@ -1614,6 +1614,7 @@ BOOL        WINAPI IsValidSid(PSID);
 BOOL        WINAPI ImpersonateSelf(SECURITY_IMPERSONATION_LEVEL);
 LONG        WINAPI InterlockedDecrement(LPLONG);
 LONG        WINAPI InterlockedExchange(LPLONG,LONG);
+LONG        WINAPI InterlockedExchangeAdd( PLONG dest, LONG incr );
 LONG        WINAPI InterlockedIncrement(LPLONG);
 BOOL      WINAPI IsDBCSLeadByteEx(UINT,BYTE);
 BOOL      WINAPI IsProcessorFeaturePresent(DWORD);

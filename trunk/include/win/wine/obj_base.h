@@ -361,6 +361,38 @@ inline BOOL operator!=(const GUID& guidOne, const GUID& guidOther)
      public: virtual ret (CALLBACK xfn)(ta a,tb b,tc c,td d,te e,tf f,tg g,th h,ti i) = 0;
 #define ICOM_METHOD10(ret,xfn,ta,na,tb,nb,tc,nc,td,nd,te,ne,tf,nf,tg,ng,th,nh,ti,ni,tj,nj) \
      public: virtual ret (CALLBACK xfn)(ta a,tb b,tc c,td d,te e,tf f,tg g,th h,ti i,tj j) = 0;
+#define ICOM_METHOD11(ret,xfn,ta,na,tb,nb,tc,nc,td,nd,te,ne,tf,nf,tg,ng,th,nh,ti,ni,tj,nj,tk,nk) \
+     public: virtual ret CALLBACK (xfn)(ta a,tb b,tc c,td d,te e,tf f,tg g,th h,ti i,tj j,tk k) = 0;
+#define ICOM_METHOD12(ret,xfn,ta,na,tb,nb,tc,nc,td,nd,te,ne,tf,nf,tg,ng,th,nh,ti,ni,tj,nj,tk,nk,tl,nl) \
+    public: virtual ret CALLBACK (xfn)(ta a,tb b,tc c,td d,te e,tf f,tg g,th h,ti i,tj j,tk k,tl l) = 0;
+#define ICOM_METHOD13(ret,xfn,ta,na,tb,nb,tc,nc,td,nd,te,ne,tf,nf,tg,ng,th,nh,ti,ni,tj,nj,tk,nk,tl,nl,tm,nm) \
+    public: virtual ret CALLBACK (xfn)(ta a,tb b,tc c,td d,te e,tf f,tg g,th h,ti i,tj j,tk k,tl l,tm m) = 0;
+#define ICOM_METHOD14(ret,xfn,ta,na,tb,nb,tc,nc,td,nd,te,ne,tf,nf,tg,ng,th,nh,ti,ni,tj,nj,tk,nk,tl,nl,tm,nm,tn,nn) \
+    public: virtual ret CALLBACK (xfn)(ta a,tb b,tc c,td d,te e,tf f,tg g,th h,ti i,tj j,tk k,tl l,tm m,tn n) = 0;
+#define ICOM_METHOD15(ret,xfn,ta,na,tb,nb,tc,nc,td,nd,te,ne,tf,nf,tg,ng,th,nh,ti,ni,tj,nj,tk,nk,tl,nl,tm,nm,tn,nn,to,no) \
+    public: virtual ret CALLBACK (xfn)(ta a,tb b,tc c,td d,te e,tf f,tg g,th h,ti i,tj j,tk k,tl l,tm m,tn n,to o) = 0;
+#define ICOM_METHOD16(ret,xfn,ta,na,tb,nb,tc,nc,td,nd,te,ne,tf,nf,tg,ng,th,nh,ti,ni,tj,nj,tk,nk,tl,nl,tm,nm,tn,nn,to,no,tp,np) \
+    public: virtual ret CALLBACK (xfn)(ta a,tb b,tc c,td d,te e,tf f,tg g,th h,ti i,tj j,tk k,tl l,tm m,tn n,to o,tp p) = 0;
+#define ICOM_METHOD17(ret,xfn,ta,na,tb,nb,tc,nc,td,nd,te,ne,tf,nf,tg,ng,th,nh,ti,ni,tj,nj,tk,nk,tl,nl,tm,nm,tn,nn,to,no,tp,np,tq,nq) \
+    public: virtual ret CALLBACK (xfn)(ta a,tb b,tc c,td d,te e,tf f,tg g,th h,ti i,tj j,tk k,tl l,tm m,tn n,to o,tp p,tq q) = 0;
+#define ICOM_METHOD18(ret,xfn,ta,na,tb,nb,tc,nc,td,nd,te,ne,tf,nf,tg,ng,th,nh,ti,ni,tj,nj,tk,nk,tl,nl,tm,nm,tn,nn,to,no,tp,np,tq,nq,tr,nr) \
+    public: virtual ret CALLBACK (xfn)(ta a,tb b,tc c,td d,te e,tf f,tg g,th h,ti i,tj j,tk k,tl l,tm m,tn n,to o,tp p,tq q,tr r) = 0;
+#define ICOM_METHOD19(ret,xfn,ta,na,tb,nb,tc,nc,td,nd,te,ne,tf,nf,tg,ng,th,nh,ti,ni,tj,nj,tk,nk,tl,nl,tm,nm,tn,nn,to,no,tp,np,tq,nq,tr,nr,ts,ns) \
+    public: virtual ret CALLBACK (xfn)(ta a,tb b,tc c,td d,te e,tf f,tg g,th h,ti i,tj j,tk k,tl l,tm m,tn n,to o,tp p,tq q,tr r,ts s) = 0;
+#define ICOM_METHOD20(ret,xfn,ta,na,tb,nb,tc,nc,td,nd,te,ne,tf,nf,tg,ng,th,nh,ti,ni,tj,nj,tk,nk,tl,nl,tm,nm,tn,nn,to,no,tp,np,tq,nq,tr,nr,ts,ns,tt,nt) \
+    public: virtual ret CALLBACK (xfn)(ta a,tb b,tc c,td d,te e,tf f,tg g,th h,ti i,tj j,tk k,tl l,tm m,tn n,to o,tp p,tq q,tr r,ts s,tt t) = 0;
+#define ICOM_METHOD21(ret,xfn,ta,na,tb,nb,tc,nc,td,nd,te,ne,tf,nf,tg,ng,th,nh,ti,ni,tj,nj,tk,nk,tl,nl,tm,nm,tn,nn,to,no,tp,np,tq,nq,tr,nr,ts,ns,tt,nt,tu,nu) \
+    public: virtual ret CALLBACK (xfn)(ta a,tb b,tc c,td d,te e,tf f,tg g,th h,ti i,tj j,tk k,tl l,tm m,tn n,to o,tp p,tq q,tr r,ts s,tt t,tu u) = 0;
+#define ICOM_METHOD22(ret,xfn,ta,na,tb,nb,tc,nc,td,nd,te,ne,tf,nf,tg,ng,th,nh,ti,ni,tj,nj,tk,nk,tl,nl,tm,nm,tn,nn,to,no,tp,np,tq,nq,tr,nr,ts,ns,tt,nt,tu,nu,tv,nv) \
+    public: virtual ret CALLBACK (xfn)(ta a,tb b,tc c,td d,te e,tf f,tg g,th h,ti i,tj j,tk k,tl l,tm m,tn n,to o,tp p,tq q,tr r,ts s,tt t,tu u,tv v) = 0;
+#define ICOM_METHOD23(ret,xfn,ta,na,tb,nb,tc,nc,td,nd,te,ne,tf,nf,tg,ng,th,nh,ti,ni,tj,nj,tk,nk,tl,nl,tm,nm,tn,nn,to,no,tp,np,tq,nq,tr,nr,ts,ns,tt,nt,tu,nu,tv,nv,tw,nw) \
+    public: virtual ret CALLBACK (xfn)(ta a,tb b,tc c,td d,te e,tf f,tg g,th h,ti i,tj j,tk k,tl l,tm m,tn n,to o,tp p,tq q,tr r,ts s,tt t,tu u,tv v,tw w) = 0;
+#define ICOM_METHOD24(ret,xfn,ta,na,tb,nb,tc,nc,td,nd,te,ne,tf,nf,tg,ng,th,nh,ti,ni,tj,nj,tk,nk,tl,nl,tm,nm,tn,nn,to,no,tp,np,tq,nq,tr,nr,ts,ns,tt,nt,tu,nu,tv,nv,tw,nw,tx,nx) \
+    public: virtual ret CALLBACK (xfn)(ta a,tb b,tc c,td d,te e,tf f,tg g,th h,ti i,tj j,tk k,tl l,tm m,tn n,to o,tp p,tq q,tr r,ts s,tt t,tu u,tv v,tw w,tx x) = 0;
+#define ICOM_METHOD25(ret,xfn,ta,na,tb,nb,tc,nc,td,nd,te,ne,tf,nf,tg,ng,th,nh,ti,ni,tj,nj,tk,nk,tl,nl,tm,nm,tn,nn,to,no,tp,np,tq,nq,tr,nr,ts,ns,tt,nt,tu,nu,tv,nv,tw,nw,tx,nx,ty,ny) \
+    public: virtual ret CALLBACK (xfn)(ta a,tb b,tc c,td d,te e,tf f,tg g,th h,ti i,tj j,tk k,tl l,tm m,tn n,to o,tp p,tq q,tr r,ts s,tt t,tu u,tv v,tw w,tx x,ty y) = 0;
+#define ICOM_METHOD26(ret,xfn,ta,na,tb,nb,tc,nc,td,nd,te,ne,tf,nf,tg,ng,th,nh,ti,ni,tj,nj,tk,nk,tl,nl,tm,nm,tn,nn,to,no,tp,np,tq,nq,tr,nr,ts,ns,tt,nt,tu,nu,tv,nv,tw,nw,tx,nx,ty,ny,tz,nz) \
+    public: virtual ret CALLBACK (xfn)(ta a,tb b,tc c,td d,te e,tf f,tg g,th h,ti i,tj j,tk k,tl l,tm m,tn n,to o,tp p,tq q,tr r,ts s,tt t,tu u,tv v,tw w,tx x,ty y,tz z) = 0;
 
 
 #define ICOM_CMETHOD(ret,xfn) \
@@ -477,6 +509,38 @@ inline BOOL operator!=(const GUID& guidOne, const GUID& guidOther)
     ret (* CALLBACK fn##xfn)(ICOM_INTERFACE* me,ta a,tb b,tc c,td d,te e,tf f,tg g,th h,ti i);
 #define ICOM_METHOD10(ret,xfn,ta,na,tb,nb,tc,nc,td,nd,te,ne,tf,nf,tg,ng,th,nh,ti,ni,tj,nj) \
     ret (* CALLBACK fn##xfn)(ICOM_INTERFACE* me,ta a,tb b,tc c,td d,te e,tf f,tg g,th h,ti i,tj j);
+#define ICOM_METHOD11(ret,xfn,ta,na,tb,nb,tc,nc,td,nd,te,ne,tf,nf,tg,ng,th,nh,ti,ni,tj,nj,tk,nk) \
+    ret (* CALLBACK fn##xfn)(ICOM_INTERFACE* me,ta a,tb b,tc c,td d,te e,tf f,tg g,th h,ti i,tj j,tk k);
+#define ICOM_METHOD12(ret,xfn,ta,na,tb,nb,tc,nc,td,nd,te,ne,tf,nf,tg,ng,th,nh,ti,ni,tj,nj,tk,nk,tl,nl) \
+    ret (* CALLBACK fn##xfn)(ICOM_INTERFACE* me,ta a,tb b,tc c,td d,te e,tf f,tg g,th h,ti i,tj j,tk k,tl l);
+#define ICOM_METHOD13(ret,xfn,ta,na,tb,nb,tc,nc,td,nd,te,ne,tf,nf,tg,ng,th,nh,ti,ni,tj,nj,tk,nk,tl,nl,tm,nm) \
+    ret (* CALLBACK fn##xfn)(ICOM_INTERFACE* me,ta a,tb b,tc c,td d,te e,tf f,tg g,th h,ti i,tj j,tk k,tl l,tm m);
+#define ICOM_METHOD14(ret,xfn,ta,na,tb,nb,tc,nc,td,nd,te,ne,tf,nf,tg,ng,th,nh,ti,ni,tj,nj,tk,nk,tl,nl,tm,nm,tn,nn) \
+    ret (* CALLBACK fn##xfn)(ICOM_INTERFACE* me,ta a,tb b,tc c,td d,te e,tf f,tg g,th h,ti i,tj j,tk k,tl l,tm m,tn n);
+#define ICOM_METHOD15(ret,xfn,ta,na,tb,nb,tc,nc,td,nd,te,ne,tf,nf,tg,ng,th,nh,ti,ni,tj,nj,tk,nk,tl,nl,tm,nm,tn,nn,to,no) \
+    ret (* CALLBACK fn##xfn)(ICOM_INTERFACE* me,ta a,tb b,tc c,td d,te e,tf f,tg g,th h,ti i,tj j,tk k,tl l,tm m,tn n,to o);
+#define ICOM_METHOD16(ret,xfn,ta,na,tb,nb,tc,nc,td,nd,te,ne,tf,nf,tg,ng,th,nh,ti,ni,tj,nj,tk,nk,tl,nl,tm,nm,tn,nn,to,no,tp,np) \
+    ret (* CALLBACK fn##xfn)(ICOM_INTERFACE* me,ta a,tb b,tc c,td d,te e,tf f,tg g,th h,ti i,tj j,tk k,tl l,tm m,tn n,to o,tp p);
+#define ICOM_METHOD17(ret,xfn,ta,na,tb,nb,tc,nc,td,nd,te,ne,tf,nf,tg,ng,th,nh,ti,ni,tj,nj,tk,nk,tl,nl,tm,nm,tn,nn,to,no,tp,np,tq,nq) \
+    ret (* CALLBACK fn##xfn)(ICOM_INTERFACE* me,ta a,tb b,tc c,td d,te e,tf f,tg g,th h,ti i,tj j,tk k,tl l,tm m,tn n,to o,tp p,tq q);
+#define ICOM_METHOD18(ret,xfn,ta,na,tb,nb,tc,nc,td,nd,te,ne,tf,nf,tg,ng,th,nh,ti,ni,tj,nj,tk,nk,tl,nl,tm,nm,tn,nn,to,no,tp,np,tq,nq,tr,nr) \
+    ret (* CALLBACK fn##xfn)(ICOM_INTERFACE* me,ta a,tb b,tc c,td d,te e,tf f,tg g,th h,ti i,tj j,tk k,tl l,tm m,tn n,to o,tp p,tq q,tr r);
+#define ICOM_METHOD19(ret,xfn,ta,na,tb,nb,tc,nc,td,nd,te,ne,tf,nf,tg,ng,th,nh,ti,ni,tj,nj,tk,nk,tl,nl,tm,nm,tn,nn,to,no,tp,np,tq,nq,tr,nr,ts,ns) \
+    ret (* CALLBACK fn##xfn)(ICOM_INTERFACE* me,ta a,tb b,tc c,td d,te e,tf f,tg g,th h,ti i,tj j,tk k,tl l,tm m,tn n,to o,tp p,tq q,tr r,ts s);
+#define ICOM_METHOD20(ret,xfn,ta,na,tb,nb,tc,nc,td,nd,te,ne,tf,nf,tg,ng,th,nh,ti,ni,tj,nj,tk,nk,tl,nl,tm,nm,tn,nn,to,no,tp,np,tq,nq,tr,nr,ts,ns,tt,nt) \
+    ret (* CALLBACK fn##xfn)(ICOM_INTERFACE* me,ta a,tb b,tc c,td d,te e,tf f,tg g,th h,ti i,tj j,tk k,tl l,tm m,tn n,to o,tp p,tq q,tr r,ts s,tt t);
+#define ICOM_METHOD21(ret,xfn,ta,na,tb,nb,tc,nc,td,nd,te,ne,tf,nf,tg,ng,th,nh,ti,ni,tj,nj,tk,nk,tl,nl,tm,nm,tn,nn,to,no,tp,np,tq,nq,tr,nr,ts,ns,tt,nt,tu,nu) \
+    ret (* CALLBACK fn##xfn)(ICOM_INTERFACE* me,ta a,tb b,tc c,td d,te e,tf f,tg g,th h,ti i,tj j,tk k,tl l,tm m,tn n,to o,tp p,tq q,tr r,ts s,tt t,tu u);
+#define ICOM_METHOD22(ret,xfn,ta,na,tb,nb,tc,nc,td,nd,te,ne,tf,nf,tg,ng,th,nh,ti,ni,tj,nj,tk,nk,tl,nl,tm,nm,tn,nn,to,no,tp,np,tq,nq,tr,nr,ts,ns,tt,nt,tu,nu,tv,nv) \
+    ret (* CALLBACK fn##xfn)(ICOM_INTERFACE* me,ta a,tb b,tc c,td d,te e,tf f,tg g,th h,ti i,tj j,tk k,tl l,tm m,tn n,to o,tp p,tq q,tr r,ts s,tt t,tu u,tv v);
+#define ICOM_METHOD23(ret,xfn,ta,na,tb,nb,tc,nc,td,nd,te,ne,tf,nf,tg,ng,th,nh,ti,ni,tj,nj,tk,nk,tl,nl,tm,nm,tn,nn,to,no,tp,np,tq,nq,tr,nr,ts,ns,tt,nt,tu,nu,tv,nv,tw,nw) \
+    ret (* CALLBACK fn##xfn)(ICOM_INTERFACE* me,ta a,tb b,tc c,td d,te e,tf f,tg g,th h,ti i,tj j,tk k,tl l,tm m,tn n,to o,tp p,tq q,tr r,ts s,tt t,tu u,tv v,tw w);
+#define ICOM_METHOD24(ret,xfn,ta,na,tb,nb,tc,nc,td,nd,te,ne,tf,nf,tg,ng,th,nh,ti,ni,tj,nj,tk,nk,tl,nl,tm,nm,tn,nn,to,no,tp,np,tq,nq,tr,nr,ts,ns,tt,nt,tu,nu,tv,nv,tw,nw,tx,nx) \
+    ret (* CALLBACK fn##xfn)(ICOM_INTERFACE* me,ta a,tb b,tc c,td d,te e,tf f,tg g,th h,ti i,tj j,tk k,tl l,tm m,tn n,to o,tp p,tq q,tr r,ts s,tt t,tu u,tv v,tw w,tx x);
+#define ICOM_METHOD25(ret,xfn,ta,na,tb,nb,tc,nc,td,nd,te,ne,tf,nf,tg,ng,th,nh,ti,ni,tj,nj,tk,nk,tl,nl,tm,nm,tn,nn,to,no,tp,np,tq,nq,tr,nr,ts,ns,tt,nt,tu,nu,tv,nv,tw,nw,tx,nx,ty,ny) \
+    ret (* CALLBACK fn##xfn)(ICOM_INTERFACE* me,ta a,tb b,tc c,td d,te e,tf f,tg g,th h,ti i,tj j,tk k,tl l,tm m,tn n,to o,tp p,tq q,tr r,ts s,tt t,tu u,tv v,tw w,tx x,ty y);
+#define ICOM_METHOD26(ret,xfn,ta,na,tb,nb,tc,nc,td,nd,te,ne,tf,nf,tg,ng,th,nh,ti,ni,tj,nj,tk,nk,tl,nl,tm,nm,tn,nn,to,no,tp,np,tq,nq,tr,nr,ts,ns,tt,nt,tu,nu,tv,nv,tw,nw,tx,nx,ty,ny,tz,nz) \
+    ret (* CALLBACK fn##xfn)(ICOM_INTERFACE* me,ta a,tb b,tc c,td d,te e,tf f,tg g,th h,ti i,tj j,tk k,tl l,tm m,tn n,to o,tp p,tq q,tr r,ts s,tt t,tu u,tv v,tw w,tx x,ty y,tz z);
 
 #define ICOM_CMETHOD(ret,xfn) \
         ret (* CALLBACK fn##xfn)(const ICOM_INTERFACE* me);
