@@ -1,4 +1,4 @@
-/* $Id: dwaveout.cpp,v 1.18 2000-03-04 19:55:06 sandervl Exp $ */
+/* $Id: dwaveout.cpp,v 1.19 2000-04-05 18:39:23 sandervl Exp $ */
 
 /*
  * Wave playback class
@@ -334,6 +334,10 @@ MMRESULT DartWaveOut::write(LPWAVEHDR pwh, UINT cbwh)
 
 #if 1
         ulBufSize = pwh->dwBufferLength/2;
+	if(ulBufSize < 128) {
+		dprintf(("set buffer size to 128 bytes (org size = %d)", pwh->dwBufferLength));
+		ulBufSize = 128;
+	}
 #else
         if(pwh->dwBufferLength >= 512 && pwh->dwBufferLength <= 1024)
                 ulBufSize = pwh->dwBufferLength;
@@ -475,11 +479,11 @@ MMRESULT DartWaveOut::reset()
     wavehdr->dwFlags |= WHDR_DONE;
     wmutex->leave();
     if(mthdCallback) {
-        callback((ULONG)this, WOM_DONE, dwInstance, wavehdr->dwUser, (ULONG)wavehdr);
+        callback((ULONG)this, WOM_DONE, dwInstance, (ULONG)wavehdr, 0);
     }
     else {
         if(hwndCallback)
-            PostMessageA(hwndCallback, WOM_DONE, wavehdr->dwUser, (ULONG)wavehdr);
+            PostMessageA(hwndCallback, WOM_DONE, (ULONG)wavehdr, 0);
     }
     wmutex->enter(VMUTEX_WAIT_FOREVER);
     wavehdr = wavehdr->lpNext;
@@ -641,11 +645,11 @@ void DartWaveOut::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags
         wmutex->leave();
 
         if(mthdCallback) {
-            callback((ULONG)this, WOM_DONE, dwInstance, whdr->dwUser, (ULONG)whdr);
+            callback((ULONG)this, WOM_DONE, dwInstance, (ULONG)whdr, 0);
         }
         else
             if(hwndCallback)
-            PostMessageA(hwndCallback, WOM_DONE, whdr->dwUser, (ULONG)whdr);
+            	PostMessageA(hwndCallback, WOM_DONE, (ULONG)whdr, 0);
 
         wmutex->enter(VMUTEX_WAIT_FOREVER);
     }
