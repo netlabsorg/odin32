@@ -325,6 +325,8 @@ GetSidSubAuthorityCount (PSID pSid)
 DWORD WINAPI
 GetLengthSid (PSID pSid)
 {
+        if(!IsValidSid(pSid)) return 0;
+
 	return RtlLengthSid(pSid);
 }
 
