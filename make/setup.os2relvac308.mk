@@ -1,4 +1,4 @@
-# $Id: setup.os2relvac308.mk,v 1.16 2002-08-28 03:42:46 bird Exp $
+# $Id: setup.os2relvac308.mk,v 1.17 2002-08-28 05:02:22 bird Exp $
 
 # ---OS2, RELEASE, VAC308-------------------------
 ENV_NAME="OS/2, Release, IBM VisualAge for C++ 3.08"
@@ -18,32 +18,20 @@ ENV_ENVS_FORCE=vac308
 !include $(PATH_MAKE)\setup.os2relrc.mk
 !include $(PATH_MAKE)\setup.os2relwrc.mk
 !include $(PATH_MAKE)\setup.os2relilink.mk
+!include $(PATH_MAKE)\setup.os2allilib.mk
 !include $(PATH_MAKE)\setup.optional.vac3xx.mk
 
 
 #
 # The tools
 #
-AR=ilib.exe
 CC=icc.exe
 CXX=icc.exe
-IMPLIB=implib.exe
 
 
 #
 # The flags
 #
-AR_FLAGS=/nologo /noignorecase
-AR_CMD=$(AR) $(AR_FLAGS) @"$(TARGET_LNK)"
-AR_LNK1= "$(@R).$(EXT_LIB)"
-AR_LNK2=y
-_AR_LNK3= +"$(TARGET_OBJS: ="&^
- +")"
-AR_LNK3= $(_AR_LNK3:+""&^
-=)
-AR_LNK4= "$(@R).lst";
-
-
 CC_FLAGS=/Q /DOS2 /D__32BIT__ /D__i386__ /DMODEL=FLAT /Ti+ /O+ /Oi+ /G5 /Ss+ /C+ $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES) $(ALL_INCLUDES) /I$(PATH_INCLUDES)
 CC_FLAGS_EXE=$(CC_FLAGS) /Gm+ /Ge+
 CC_FLAGS_DLL=$(CC_FLAGS) /Gm+ /Ge-
@@ -85,8 +73,6 @@ CXX_FLAGS_SYS=$(CC_FLAGS_SYS) /Tdc
 CXX_FLAGS_VDD=$(CC_FLAGS_VDD) /Tdc
 CXX_FLAGS_IFS=$(CC_FLAGS_IFS) /Tdc
 !endif
-
-IMPLIB_FLAGS=/NOI /Nologo
 
 
 #
