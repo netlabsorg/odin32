@@ -83,7 +83,7 @@ BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
         MULTIMEDIA_DeleteIData();
         auxOS2Close(); /* SvL: Close aux device if necessary */
    	IRTMidiShutdown;  /* JT: Shutdown RT Midi subsystem, if running. */
-	__ctordtorTerm();
+	ctordtorTerm();
 	return TRUE;
    }
    return FALSE;
@@ -110,7 +110,7 @@ unsigned long _System _DLL_InitTerm(unsigned long hModule, unsigned long
 
    switch (ulFlag) {
       case 0 :
-         __ctordtorInit();
+         ctordtorInit();
 
          ParseLogStatus();
 

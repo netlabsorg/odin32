@@ -58,7 +58,7 @@ BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 
    case DLL_PROCESS_DETACH:
 	CRTDLL_Init(hinstDLL, fdwReason, fImpLoad);
-	__ctordtorTerm();
+	ctordtorTerm();
 	return TRUE;
    }
    return FALSE;
@@ -85,7 +85,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
    switch (ulFlag) {
       case 0 :
-         __ctordtorInit();
+         ctordtorInit();
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 

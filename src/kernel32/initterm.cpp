@@ -116,7 +116,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
             char *endofpath = strrchr(kernel32Path, '\\');
             *(endofpath+1) = 0;
             dprintf(("kernel32 init %s %s", __DATE__, __TIME__));
-            __ctordtorInit();
+            ctordtorInit();
 
             CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
@@ -214,7 +214,7 @@ static void APIENTRY cleanup(ULONG ulReason)
     DestroyTIB();
     DestroySharedHeap();
     DestroyCodeHeap();
-    __ctordtorTerm();
+    ctordtorTerm();
 
     //NOTE: Must be done after DestroyTIB
     ClosePrivateLogFiles();

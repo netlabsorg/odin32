@@ -65,7 +65,7 @@ BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 	return TRUE;
 
    case DLL_PROCESS_DETACH:
-   	__ctordtorTerm();
+   	ctordtorTerm();
    	ClosePrivateLogFiles();
 	return TRUE;
    }
@@ -100,7 +100,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 	 char *endofpath = strrchr(oleaut32Path, '\\');
 	 *(endofpath+1) = 0;
 
-         __ctordtorInit();
+         ctordtorInit();
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
