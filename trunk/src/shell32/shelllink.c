@@ -262,6 +262,41 @@ static HRESULT WINAPI IPersistFile_fnLoad(IPersistFile* iface, LPCOLESTR pszFile
 
 
 #ifdef __WIN32OS2__
+static BOOL SaveIconFileAsOS2ICO(char *szFileName, char *szXPMFileName)
+{
+    FILE *fXPMFile = NULL, *fICOFile = NULL;
+    void *lpOS2Icon = NULL, *lpWinIcon = NULL;
+    DWORD ressize, filesize;
+    BOOL  ret = FALSE;
+
+    if (!(fICOFile = fopen(szFileName, "r")))
+        goto failure;
+    fseek(fICOFile, 0, SEEK_END);
+    filesize = ftell(fICOFile);
+    fseek(fICOFile, 0, SEEK_SET);
+
+    lpWinIcon = malloc(filesize);
+    if(lpWinIcon == NULL) goto failure;
+    if (fread(lpWinIcon, filesize, 1, fICOFile) != 1) 
+        goto failure;
+
+    if (!(fXPMFile = fopen(szXPMFileName, "wb")))
+        goto failure;
+
+    lpOS2Icon = ConvertIconGroupIndirect(lpWinIcon, filesize, &ressize);
+    if(lpOS2Icon) {
+        fwrite(lpOS2Icon, 1, ressize, fXPMFile);
+    }
+    ret = TRUE;
+
+failure:
+    if(fICOFile) fclose(fICOFile);
+    if(fXPMFile) fclose(fXPMFile);
+    if(lpWinIcon) free(lpWinIcon);
+    if(lpOS2Icon) free(lpOS2Icon);
+    return ret;
+}
+
 static BOOL SaveIconResAsOS2ICO(GRPICONDIR *pIconDir, HINSTANCE hInstance, 
                                 const char *szXPMFileName)
 {
@@ -532,6 +567,14 @@ done:
 
 static int ExtractFromICO(const char *szFileName, const char *szXPMFileName)
 {
+#ifdef __WIN32OS2__
+    if(!SaveIconFileAsOS2ICO(szFileName, szXPMFileName))
+    {
+        TRACE("Failed saving icon as XPM, error %ld\n", GetLastError());
+        return 0;
+    }
+    return 1;
+#else
     FILE *fICOFile;
     ICONDIR iconDir;
     ICONDIRENTRY *pIconDirEntry;
@@ -539,18 +582,9 @@ static int ExtractFromICO(const char *szFileName, const char *szXPMFileName)
     int nIndex = 0;
     void *pIcon;
     int i;
-#ifdef __WIN32OS2__
-    int size;
-#endif
 
     if (!(fICOFile = fopen(szFileName, "r")))
         goto error1;
-
-#ifdef __WIN32OS2__
-     //TODO:
-    dprintf(("TODO: Icon file conversion not yet supported!!"));
-    goto error2;
-#else
 
     if (fread(&iconDir, sizeof (ICONDIR), 1, fICOFile) != 1)
         goto error2;
@@ -578,7 +612,6 @@ static int ExtractFromICO(const char *szFileName, const char *szXPMFileName)
     if(!SaveIconResAsXPM(pIcon, szXPMFileName))
         goto error4;
 
-#endif
     free(pIcon);
     free(pIconDirEntry);
     fclose(fICOFile);
@@ -593,6 +626,7 @@ static int ExtractFromICO(const char *szFileName, const char *szXPMFileName)
     fclose(fICOFile);
  error1:
     return 0;
+#endif
 }
 
 #ifndef __WIN32OS2__
@@ -654,7 +688,7 @@ static HRESULT WINAPI IPersistFile_fnSave(IPersistFile* iface, LPCOLESTR pszFile
     BOOL bDesktop;
     HKEY hkey;
 #ifdef __WIN32OS2__
-    char *tmp;
+    char *tmp, szAppName[MAX_PATH];
 #endif
 
     _ICOM_THIS_From_IPersistFile(IShellLinkImpl, iface);
@@ -663,11 +697,6 @@ static HRESULT WINAPI IPersistFile_fnSave(IPersistFile* iface, LPCOLESTR pszFile
 
     if (!pszFileName || !This->sPath)
         return ERROR_UNKNOWN;
-
-    /* check for .exe extension */
-    if (!(p = strrchr( This->sPath, '.' ))) return NOERROR;
-    if (strchr( p, '\\' ) || strchr( p, '/' )) return NOERROR;
-    if (strcasecmp( p, ".exe" )) return NOERROR;
 
     /* check if ShellLinker configured */
 #ifdef __WIN32OS2__
@@ -722,7 +751,13 @@ static HRESULT WINAPI IPersistFile_fnSave(IPersistFile* iface, LPCOLESTR pszFile
                        This->sIcoPath : This->sPath,
                        icon_name, This->iIcoNdx)) goto done;
 
-    if(OSLibWinCreateObject(This->sPath, This->sArgs, This->sWorkDir, filename,
+    if(SearchPathA( NULL, This->sPath, ".exe", sizeof(szAppName), szAppName, NULL) == NULL) 
+    {
+        ret = E_INVALIDARG;
+        goto done;
+    }
+
+    if(OSLibWinCreateObject(szAppName, This->sArgs, This->sWorkDir, filename,
                             This->sDescription, icon_name,
                             This->iIcoNdx, bDesktop) == FALSE) 
     {
@@ -738,6 +773,12 @@ static HRESULT WINAPI IPersistFile_fnSave(IPersistFile* iface, LPCOLESTR pszFile
     return ret;
 
 #else
+
+    /* check for .exe extension */
+    if (!(p = strrchr( This->sPath, '.' ))) return NOERROR;
+    if (strchr( p, '\\' ) || strchr( p, '/' )) return NOERROR;
+    if (strcasecmp( p, ".exe" )) return NOERROR;
+
     buffer[0] = 0;
     if (!RegOpenKeyExA( HKEY_LOCAL_MACHINE, "Software\\Wine\\Wine\\Config\\Wine",
                         0, KEY_ALL_ACCESS, &hkey ))
