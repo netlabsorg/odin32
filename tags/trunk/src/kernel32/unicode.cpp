@@ -1,13 +1,8 @@
 /*
- *
  * Project Odin Software License can be found in LICENSE.TXT
- *
- */
-/*
  * Unicode functions
- *
  * Copyright 1998 Joel Troster
- *
+ * Copyright 1999 Patrick haller
  */
 #include <os2win.h>
 #include <winnls.h>
@@ -135,12 +130,12 @@ int WIN32API UnicodeToAsciiN(WCHAR *ustring, char *astring, int unilen)
 //    dprintf(("KERNEL32: UnicodeToAsciiN(%d) '%s'\n", rc, astring ));
   }
   else
-  {
-   for(i = 0; i < unilen; i++) {
-        astring[i] = (char)ustring[i];
-   }
-   astring[unilen] = 0;
-  }
+   /* idiots unicode conversion :) */
+   for(i = 0; i < unilen; i++)
+     astring[i] = (char)ustring[i];
+
+  astring[unilen] = 0; // @@@PH: 1999/06/09 fix - always terminate string
+
   return(unilen);
 }
 //******************************************************************************
@@ -216,6 +211,8 @@ void WIN32API AsciiToUnicodeN(char *ascii, WCHAR *unicode, int asciilen)
   }
 
   unicode[asciilen] = 0;
+//SvL: Messes up the heap
+//  unicode[len+1] = 0; /* @@@PH 98/06/07 */
 }
 //******************************************************************************
 //******************************************************************************
