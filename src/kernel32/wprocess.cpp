@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.28 1999-08-25 10:28:41 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.29 1999-08-26 12:55:38 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -23,7 +23,7 @@
 #endif
 
 #include "exceptutil.h"
-#include "os2util.h"
+#include "oslibmisc.h"
 
 #include "console.h"
 #include "cio.h"
@@ -74,19 +74,19 @@ TEB *InitializeTIB(BOOL fMainThread)
   USHORT tibsel;
 
    //Allocate one dword to store the flat address of our TEB
-   TIBFlatPtr = (DWORD *)OS2AllocThreadLocalMemory(1);
+   TIBFlatPtr = (DWORD *)OSLibAllocThreadLocalMemory(1);
    if(TIBFlatPtr == 0) {
    	dprintf(("InitializeTIB: local thread memory alloc failed!!"));
    	DebugInt3();
    	return NULL;
    }
-   if(OS2AllocSel(PAGE_SIZE, &tibsel) == FALSE)
+   if(OSLibAllocSel(PAGE_SIZE, &tibsel) == FALSE)
    {
    	dprintf(("InitializeTIB: selector alloc failed!!"));
    	DebugInt3();
    	return NULL;
    }
-   winteb = (TEB *)OS2SelToFlat(tibsel);
+   winteb = (TEB *)OSLibSelToFlat(tibsel);
    if(winteb == NULL)
    {
    	dprintf(("InitializeTIB: DosSelToFlat failed!!"));
@@ -98,9 +98,9 @@ TEB *InitializeTIB(BOOL fMainThread)
    *TIBFlatPtr = (DWORD)winteb;
 
    winteb->except      = (PVOID)-1;               /* 00 Head of exception handling chain */
-   winteb->stack_top   = (PVOID)OS2GetTIB(TIB_STACKTOP); /* 04 Top of thread stack */
-   winteb->stack_low   = (PVOID)OS2GetTIB(TIB_STACKLOW); /* 08 Stack low-water mark */
-   winteb->htask16     = (USHORT)OS2GetPIB(PIB_TASKHNDL); /* 0c Win16 task handle */
+   winteb->stack_top   = (PVOID)OSLibGetTIB(TIB_STACKTOP); /* 04 Top of thread stack */
+   winteb->stack_low   = (PVOID)OSLibGetTIB(TIB_STACKLOW); /* 08 Stack low-water mark */
+   winteb->htask16     = (USHORT)OSLibGetPIB(PIB_TASKHNDL); /* 0c Win16 task handle */
    winteb->stack_sel   = getSS();                 /* 0e 16-bit stack selector */
    winteb->self        = winteb;                  /* 18 Pointer to this structure */
    winteb->flags       = TEBF_WIN32;              /* 1c Flags */
@@ -114,7 +114,7 @@ TEB *InitializeTIB(BOOL fMainThread)
    thdb->teb_sel         = tibsel;
    thdb->OrgTIBSel       = GetFS();
 
-   if(OS2GetPIB(PIB_TASKTYPE) == TASKTYPE_PM)
+   if(OSLibGetPIB(PIB_TASKTYPE) == TASKTYPE_PM)
    {
    	thdb->flags      = 0;  //todo gui
    }
@@ -152,7 +152,7 @@ void DestroyTIB()
       	SetFS(orgtibsel);
 
       	//And free our own
-      	OS2FreeSel(thdb->teb_sel);
+      	OSLibFreeSel(thdb->teb_sel);
    }
    else dprintf(("Already destroyed TIB"));
 
@@ -209,7 +209,7 @@ void WIN32API RegisterExe(WIN32EXEENTRY EntryPoint, PIMAGE_TLS_CALLBACK *TlsCall
   if(WinExe != NULL) //should never happen
     	delete(WinExe);
 
-  CheckVersion(Pe2lxVersion, OS2GetDllName(hinstance));
+  CheckVersion(Pe2lxVersion, OSLibGetDllName(hinstance));
 
   if(getenv("WIN32_IOPL2")) {
     io_init1();
@@ -264,7 +264,7 @@ ULONG WIN32API RegisterDll(WIN32DLLENTRY pfnDllEntry, PIMAGE_TLS_CALLBACK *TlsCa
    	if(getenv("WIN32_IOPL2")) {
          	io_init1();
    	}
-   	name = OS2GetDllName(hinstance);
+   	name = OSLibGetDllName(hinstance);
    	CheckVersion(Pe2lxVersion, name);
 
    	dprintf(("RegisterDll %X %s reason %d\n", hinstance, name, dwAttachType));
@@ -361,7 +361,7 @@ BOOL WIN32API FreeLibrary(HINSTANCE hinstance)
     winmod->Release();
     return(TRUE);
   }
-  dprintf(("KERNEL32: FreeLibrary %s %X\n", OS2GetDllName(hinstance), hinstance));
+  dprintf(("KERNEL32: FreeLibrary %s %X\n", OSLibGetDllName(hinstance), hinstance));
 
   //TODO: Not thread safe
   fFreeLibrary  = TRUE; //ditch dll
@@ -434,10 +434,10 @@ HINSTANCE WIN32API LoadLibraryA(LPCTSTR lpszLibFile)
   hDll = iLoadLibraryA(lpszLibFile);
   if (hDll == 0)
   {
-    PSZ pszName;
+    char * pszName;
 
     // remove path from the image name
-    pszName = strrchr((PSZ)lpszLibFile,
+    pszName = strrchr((char *)lpszLibFile,
                       '\\');
     if (pszName != NULL)
     {
@@ -601,7 +601,7 @@ DWORD WIN32API GetModuleFileNameW(HMODULE hModule, LPWSTR lpFileName, DWORD nSiz
  char *asciifilename = (char *)malloc(nSize+1);
  DWORD rc;
 
-    dprintf(("KERNEL32:  OS2GetModuleFileNameW\n"));
+    dprintf(("KERNEL32:  OSLibGetModuleFileNameW\n"));
     rc = GetModuleFileNameA(hModule, asciifilename, nSize);
     if(rc)      AsciiToUnicode(asciifilename, lpFileName);
     free(asciifilename);
@@ -622,7 +622,7 @@ HANDLE WIN32API GetModuleHandleA(LPCTSTR lpszModule)
 	hMod = WinExe->getInstanceHandle();
   }
   else {
-  	strcpy(szModule, StripPath((char *)lpszModule));
+  	strcpy(szModule, OSLibStripPath((char *)lpszModule));
   	strupr(szModule);
 	if(strstr(szModule, ".DLL")) {
 		fDllModule = TRUE;
@@ -646,7 +646,7 @@ HANDLE WIN32API GetModuleHandleA(LPCTSTR lpszModule)
 		if(windll) {
 			hMod = windll->getInstanceHandle();
 		}
-		else    hMod = OS2iGetModuleHandleA( (PSZ) lpszModule);
+		else    hMod = OSLibiGetModuleHandleA((char *)lpszModule);
 	}
   }
 
@@ -753,7 +753,7 @@ BOOL SYSTEM GetVersionStruct(char *modname, char *verstruct, ULONG bufLength)
  Win32Image *winimage;
 
   dprintf(("GetVersionStruct"));
-  hinstance = OS2QueryModuleHandle(modname);
+  hinstance = OSLibQueryModuleHandle(modname);
   if(hinstance == 0) {
     	dprintf(("GetVersionStruct can't find handle for %s\n", modname));
     	return(FALSE);
@@ -772,7 +772,7 @@ BOOL SYSTEM GetVersionStruct(char *modname, char *verstruct, ULONG bufLength)
     dprintf(("GetVersionStruct: %s has no version resource!\n", modname));
     return(FALSE);
   }
-  return OS2GetResource(hinstance, winimage->getVersionId(), verstruct, bufLength);
+  return OSLibGetResource(hinstance, winimage->getVersionId(), verstruct, bufLength);
 }
 //******************************************************************************
 //******************************************************************************
@@ -782,7 +782,7 @@ ULONG SYSTEM GetVersionSize(char *modname)
  Win32Image *winimage;
 
   dprintf(("GetVersionSize of %s\n", modname));
-  hinstance = OS2QueryModuleHandle(modname);
+  hinstance = OSLibQueryModuleHandle(modname);
   if(hinstance == 0) {
     dprintf(("GetVersionSize can't find handle for %s\n", modname));
     return(FALSE);
@@ -802,7 +802,7 @@ ULONG SYSTEM GetVersionSize(char *modname)
     	dprintf(("GetVersionSize: %s has no version resource!\n", modname));
     	return(FALSE);
   }
-  ULONG size = OS2GetResourceSize(hinstance, winimage->getVersionId());
+  ULONG size = OSLibGetResourceSize(hinstance, winimage->getVersionId());
 
   dprintf(("Version resource size = %d, id %d\n", size, winimage->getVersionId()));
   return(size);

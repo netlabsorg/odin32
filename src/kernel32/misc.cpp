@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.9 1999-08-23 13:54:43 sandervl Exp $ */
+/* $Id: misc.cpp,v 1.10 1999-08-26 12:55:36 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -25,8 +25,7 @@
 #include <string.h>
 #include <stdarg.h>
 #include <win32type.h>
-#include "misc.h"
-#include "os2util.h"
+#include <misc.h>
 #include "initterm.h"
 
 /*****************************************************************************
@@ -239,7 +238,6 @@ int printf_(struct perthread *tp)  /* pointer to per-thread data */
  * Standard Version                                                          *
  *****************************************************************************/
 
-#if 1   /*PLF Mon  97-09-08 20:04:28*/
 static FILE *flog = NULL;   /*PLF Mon  97-09-08 20:00:15*/
 static BOOL init = FALSE;
 static BOOL fLogging = TRUE;
@@ -276,16 +274,17 @@ int SYSTEM EXPORT WriteLog(char *tekst, ...)
   SetFS(sel);
   return 1;
 }
-
+//******************************************************************************
 //NOTE: No need to save/restore FS, as our FS selectors have already been
 //      destroyed and FS == 0x150B.
+//******************************************************************************
 void CloseLogFile()
 {
   fclose(flog);
   flog = 0;
 }
-
-
+//******************************************************************************
+//******************************************************************************
 int SYSTEM EXPORT WriteLogError(char *tekst, ...)
 {
   USHORT  sel = RestoreOS2FS();
@@ -301,57 +300,48 @@ int SYSTEM EXPORT WriteLogError(char *tekst, ...)
   SetFS(sel);
   return 1;
 }
-#endif
-
-
-/*****************************************************************************
- * Modified Standard Version                                                 *
- *****************************************************************************/
-
-#if 0   /*PLF Mon  97-09-08 20:04:26*/
-/******************************************************************************/
-static BOOL init = FALSE;
-static BOOL fLog = TRUE;
-/******************************************************************************/
-int SYSTEM EXPORT WriteLog(char *tekst, ...)
+//******************************************************************************
+//******************************************************************************
+void SYSTEM CheckVersion(ULONG version, char *modname)
 {
-ULONG Action, Wrote;
-HFILE log;
-APIRET rc;
-char message[4096];
-va_list argptr;
-ULONG openFlags = OPEN_ACTION_CREATE_IF_NEW;
-
- if(fLog == FALSE)
-    return(FALSE);
-
- if(!init) {
-    init       = TRUE;
-    openFlags |= OPEN_ACTION_REPLACE_IF_EXISTS;
-        if(getenv("NOWIN32LOG"))
-            fLog = FALSE;
- }
- else   openFlags |= OPEN_ACTION_OPEN_IF_EXISTS;
-
- rc = DosOpen(
-              "win32os2.log",
-              &log,           /* file handle returned */
-              &Action,
-              0L,
-              FILE_NORMAL,
-              openFlags,
-              OPEN_ACCESS_READWRITE | OPEN_SHARE_DENYWRITE,
-              (PEAOP2)NULL);
-
- rc = DosSetFilePtr(log, 0, FILE_END, &Wrote);
- va_start(argptr, tekst);
- vsprintf(message, tekst, argptr);
- va_end(argptr);
-
- rc = DosWrite(log, message, strlen(message), &Wrote);
-
- DosClose(log);   /*PLF Mon  97-09-08 20:01:43*/
- return(TRUE);
+    dprintf(("CheckVersion of %s, %d\n", modname, version));
+    if(version != PE2LX_VERSION){
+        static char msg[300];
+        int r;
+        dprintf(("Version mismatch! %d, %d: %s\n", version, PE2LX_VERSION, modname));
+        sprintf(msg, "%s is intended for use with a different release of PE2LX.\n", modname);
+        do{
+            r = WinMessageBox(HWND_DESKTOP, NULLHANDLE, msg, "Version Mismatch!", 0, MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION | MB_MOVEABLE);
+        }while(r == MBID_RETRY);   // giggle
+        if( r != MBID_IGNORE )
+            exit(987);
+    }
 }
-#endif  /*PLF Mon  97-09-08 20:04:23*/
+//******************************************************************************
+//******************************************************************************
+void SYSTEM CheckVersionFromHMOD(ULONG version, HMODULE hModule)
+{
+    char name[_MAX_PATH];
 
+    // query name of dll.
+    if(!DosQueryModuleName(hModule, sizeof(name), name))
+        CheckVersion(version, name);
+}
+//******************************************************************************
+//******************************************************************************
+#ifdef __WATCOMC__  /*PLF Sat  97-06-21 17:12:36*/
+    extern void interrupt3( void );
+    #pragma aux interrupt3= \
+              "int 3"
+#endif
+void WIN32API DebugBreak()
+{
+  dprintf(("DebugBreak\n"));
+#ifdef __WATCOMC__
+  interrupt3();
+#else
+  _interrupt(3);
+#endif
+}
+//******************************************************************************
+//******************************************************************************

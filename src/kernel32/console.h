@@ -1,4 +1,4 @@
-/* $Id: console.h,v 1.1 1999-06-17 18:21:41 phaller Exp $ */
+/* $Id: console.h,v 1.2 1999-08-26 12:55:36 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -32,7 +32,7 @@ void  iConsoleWaitClose(void);      /* wait for user to close console */
 
 BOOL  iConsoleIsActive(void);  /* returns TRUE if console window open */
 
-APIRET iConsoleTerminate(void);/* termination of the console subsystem */
+ULONG iConsoleTerminate(void);/* termination of the console subsystem */
 
 #ifdef __cplusplus
   }

@@ -1,4 +1,4 @@
-/* $Id: windll.cpp,v 1.15 1999-08-23 18:06:26 sandervl Exp $ */
+/* $Id: windll.cpp,v 1.16 1999-08-26 12:55:37 sandervl Exp $ */
 
 /*
  * Win32 DLL class
@@ -22,7 +22,6 @@
 #include <iostream.h>
 #include <fstream.h>
 #include <misc.h>
-#include <nameid.h>
 #include <win32type.h>
 #include <pefile.h>
 #include <windll.h>
@@ -31,6 +30,7 @@
 #include "exceptutil.h"
 #include "cio.h"
 #include "vmutex.h"
+#include "oslibmisc.h"
 
 VMutex dlllistmutex;   //protects linked lists of heaps
 
@@ -491,7 +491,7 @@ Win32Dll *Win32Dll::findModule(char *dllname)
 
   dprintf(("findModule %s", dllname));
 
-  strcpy(szDllName, StripPath(dllname));
+  strcpy(szDllName, OSLibStripPath(dllname));
   strupr(szDllName);
   dot = strstr(szDllName, ".");
   if(dot)

@@ -1,4 +1,4 @@
-/* $Id: winimage.cpp,v 1.16 1999-08-25 15:27:20 sandervl Exp $ */
+/* $Id: winimage.cpp,v 1.17 1999-08-26 12:55:37 sandervl Exp $ */
 
 /*
  * Win32 PE Image class
@@ -33,7 +33,7 @@
 #include "pefile.h"
 #include "unicode.h"
 #include "winres.h"
-#include "os2util.h"
+#include "oslibmisc.h"
 #include "initterm.h"
 #include <win\virtual.h>
 
@@ -74,7 +74,7 @@ Win32Image::Win32Image(char *szFileName) :
 
   strcpy(this->szFileName, szFileName);
 
-  strcpy(szModule, StripPath(szFileName));
+  strcpy(szModule, OSLibStripPath(szFileName));
   strupr(szModule);
   char *dot = strstr(szModule, ".");
   while(dot) {
@@ -114,7 +114,7 @@ Win32Image::Win32Image(HINSTANCE hinstance, int NameTableId, int Win32TableId) :
 
   szFileName[0] = 0;
 
-  char *name = OS2GetDllName(hinstance);
+  char *name = OSLibGetDllName(hinstance);
   strcpy(szModule, name);
   strupr(szModule);
   char *dot = strstr(szModule, ".");
