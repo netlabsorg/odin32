@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.6 2000-02-16 19:48:52 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.7 2000-04-02 10:12:53 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -68,11 +68,11 @@ BOOL WIN32API BitBlt(HDC hdcDest, int arg2, int arg3, int arg4, int arg5, HDC hd
                         if(dest) {
                                 dprintf(("Sync dest DIB section"));
                                 bmpinfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-                                GetDIBits(hdcDest, dest->GetBitmapHandle(), 0, 300, 0, &bmpinfo, dest->GetRGBUsage());
+                                GetDIBits(hdcDest, dest->GetBitmapHandle(), 0, 0, 0, &bmpinfo, dest->GetRGBUsage());
                                 dprintf(("height        %d", bmpinfo.bmiHeader.biHeight));
                                 dprintf(("width         %d", bmpinfo.bmiHeader.biWidth));
                                 dprintf(("biBitCount    %d", bmpinfo.bmiHeader.biBitCount));
-                                GetDIBits(hdcDest, dest->GetBitmapHandle(), 0, 300, dest->GetDIBObject(), &bmpinfo, dest->GetRGBUsage());
+                                GetDIBits(hdcDest, dest->GetBitmapHandle(), 0, bmpinfo.bmiHeader.biHeight, dest->GetDIBObject(), &bmpinfo, dest->GetRGBUsage());
                         }
                 }
                 return rc;
