@@ -1,4 +1,4 @@
-/* $Id: ole32.h,v 1.15 2001-04-04 09:02:15 sandervl Exp $ */
+/* $Id: ole32.h,v 1.16 2001-06-06 17:17:21 bird Exp $ */
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -14,7 +14,10 @@
 #ifndef __OLE32_H__
 #define __OLE32_H__
 
+#ifndef NONAMELESSUNION
 #define NONAMELESSUNION
+#endif
+
 // ><DJR 17.05.99 Force to use C-interfaces for now to prevent CALLBACK definition compiler error
 #define CINTERFACE 1
 
