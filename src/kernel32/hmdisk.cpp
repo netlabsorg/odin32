@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.1 2000-09-13 21:10:58 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.2 2000-09-13 21:14:18 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -134,6 +134,7 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
 			SetLastError(ERROR_INSUFFICIENT_BUFFER_W);  //todo: right error?
 	            	return(FALSE);
 		}
+                //TODO: Not finished yet (need to query id + lun of drive)
 		SCSI_ADDRESS *addr = (SCSI_ADDRESS *)lpOutBuffer;
 		addr->Length = sizeof(SCSI_ADDRESS);
 		addr->PortNumber = 0;
