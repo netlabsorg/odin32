@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.31 2000-01-11 10:38:34 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.32 2000-01-11 13:06:26 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -653,12 +653,12 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
   if ((dwStyle & (WS_CAPTION | WS_CHILD)) == WS_CAPTION )
   {
         if (cs->hMenu) {
-            SetMenu(cs->hMenu);
+            ::SetMenu(getWindowHandle(), cs->hMenu);
         }
         else {
                 if (windowClass->getMenuNameA()) {
                         cs->hMenu = LoadMenuA(cs->hInstance, windowClass->getMenuNameA());
-                        if (cs->hMenu) SetMenu(cs->hMenu );
+                        if (cs->hMenu) ::SetMenu(getWindowHandle(), cs->hMenu );
                 }
         }
   }
@@ -1672,10 +1672,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         return 0; //comctl32 controls expect this
 
     default:
-        if(Msg > WM_USER) {
-            return 0;
-        }
-        return 1; //CB: shouldn't this be 0?
+        return 0;
     }
 }
 //******************************************************************************
