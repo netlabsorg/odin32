@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.721 2000-02-10 18:48:04 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.722 2000-02-11 11:24:01 bird Exp $ */
+
+ 2000-02-10: Knut Stange Osmundsen (knut.stange.osmundsen@pmsc.no)
+        - /tools/database/ + /src/makefile: Odin32 API DB.
 
  2000-02-10: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: added some stubs
