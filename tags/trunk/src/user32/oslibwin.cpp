@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.41 1999-11-01 19:11:40 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.42 1999-11-03 19:51:42 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -49,7 +49,7 @@ BOOL OSLibWinSetOwner(HWND hwnd, HWND hwndOwner)
 //******************************************************************************
 //******************************************************************************
 HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
-                          char *pszName, HWND Owner, ULONG fBottom, HWND *hwndFrame,
+                          char *pszName, HWND Owner, ULONG fHWND_BOTTOM, HWND *hwndFrame,
                           ULONG id)
 {
  HWND  hwndClient;
@@ -65,10 +65,13 @@ HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
   if(Owner == OSLIB_HWND_DESKTOP) {
         Owner = HWND_DESKTOP;
   }
-
   ULONG dwClientStyle;
+#if 1
 
   BOOL TopLevel = hwndParent == HWND_DESKTOP;
+//  if(dwFrameStyle & FCF_TITLEBAR)
+//	TopLevel = TRUE;
+
   FRAMECDATA FCData = {sizeof (FRAMECDATA), 0, 0, 0};
 
   dwClientStyle = dwWinStyle & ~(WS_TABSTOP | WS_GROUP | WS_CLIPSIBLINGS);
@@ -97,6 +100,27 @@ HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
   }
   dprintf(("OSLibWinCreateWindow: (FRAME) WinCreateStdWindow failed (%x)", WinGetLastError(GetThreadHAB())));
   return 0;
+#else
+        dwClientStyle = dwWinStyle & ~(WS_TABSTOP | WS_GROUP);
+
+        dwFrameStyle |= FCF_NOBYTEALIGN;
+        if (hwndParent == HWND_DESKTOP && dwFrameStyle & FCF_TITLEBAR)
+                dwFrameStyle |= FCF_TASKLIST | FCF_NOMOVEWITHOWNER;
+
+        dwWinStyle   &= ~WS_CLIPCHILDREN;
+
+        *hwndFrame = WinCreateStdWindow(hwndParent, dwWinStyle,
+                                       &dwFrameStyle, WIN32_STDCLASS,
+                                       "", dwClientStyle, 0, id, &hwndClient);
+        if(*hwndFrame) {
+                if(pszName) {
+                        WinSetWindowText(*hwndFrame, pszName);
+                }
+                return hwndClient;
+        }
+        dprintf(("OSLibWinCreateWindow: (FRAME) WinCreateStdWindow failed (%x)", WinGetLastError(GetThreadHAB())));
+        return 0;
+#endif
 }
 //******************************************************************************
 //******************************************************************************
@@ -1050,7 +1074,8 @@ void OSLibSetWindowStyle(HWND hwnd, ULONG dwStyle)
 
   OSLibWinConvertStyle(dwStyle, &dwExStyle, &OSWinStyle, &OSFrameStyle, &borderWidth, &borderHeight);
 
-  OSWinStyle = OSWinStyle & ~(WS_TABSTOP | WS_GROUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
+//  OSWinStyle = OSWinStyle & ~(WS_TABSTOP | WS_GROUP | WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
+  OSWinStyle = OSWinStyle & ~(WS_TABSTOP | WS_GROUP | WS_CLIPCHILDREN);
 
   WinSetWindowULong(hwnd, QWL_STYLE,
                     (WinQueryWindowULong(hwnd, QWL_STYLE) & ~0xffff0000) |

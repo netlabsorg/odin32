@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.73 1999-11-03 18:00:27 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.74 1999-11-03 19:51:43 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1027,7 +1027,6 @@ ULONG Win32BaseWindow::MsgKillFocus(HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
-//******************************************************************************
 ULONG Win32BaseWindow::MsgButton(ULONG msg, ULONG ncx, ULONG ncy, ULONG clx, ULONG cly)
 {
  ULONG win32msg;
@@ -1101,11 +1100,21 @@ ULONG Win32BaseWindow::MsgButton(ULONG msg, ULONG ncx, ULONG ncy, ULONG clx, ULO
                 return 1;
     }
 
-    if(fClick) {
-        /* Activate the window if needed */
-        HWND hwndTop = (getTopParent()) ? getTopParent()->getWindowHandle() : 0;
+    if(fClick) 
+    {
+     HWND hwndTop;
 
-        if (getWindowHandle() != GetActiveWindow())
+        /* Activate the window if needed */
+	if(isSubclassedOS2Wnd()) {
+		Win32BaseWindow *parentwnd = GetWindowFromOS2FrameHandle(OSLibWinQueryWindow(OS2Hwnd, QWOS_PARENT));
+		if(parentwnd) {
+			hwndTop = (parentwnd->GetTopParent()) ? parentwnd->GetTopParent()->getWindowHandle() : 0;
+		}
+		else	hwndTop = 0;
+	}
+	else	hwndTop = (GetTopParent()) ? GetTopParent()->getWindowHandle() : 0;
+
+        if (hwndTop && getWindowHandle() != GetActiveWindow())
         {
                 LONG ret = SendMessageA(WM_MOUSEACTIVATE, hwndTop,
                                         MAKELONG( HTCLIENT, win32msg ) );
@@ -1863,18 +1872,6 @@ void Win32BaseWindow::NotifyParent(UINT Msg, WPARAM wParam, LPARAM lParam)
 
         window = parentwindow;
    }
-}
-//******************************************************************************
-//******************************************************************************
-Win32BaseWindow *Win32BaseWindow::getTopParent()
-{
- Win32BaseWindow *tmpWnd = this;
-
-    while( tmpWnd && (tmpWnd->getStyle() & WS_CHILD))
-    {
-        tmpWnd = tmpWnd->getParent();
-    }
-    return tmpWnd;
 }
 //******************************************************************************
 //******************************************************************************
