@@ -1,4 +1,4 @@
-/* $Id: disk.cpp,v 1.24 2000-12-12 23:57:15 sandervl Exp $ */
+/* $Id: disk.cpp,v 1.25 2001-09-07 10:51:38 phaller Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -185,15 +185,15 @@ ODINFUNCTION4(BOOL,GetDiskFreeSpaceExA,
     {
         if(lpFreeBytesAvailableToCaller!=NULL) {
             Mul32x32to64(lpFreeBytesAvailableToCaller, dwNumberOfFreeClusters, (dwSectorsPerCluster*dwBytesPerSector));
-            dprintf(("lpFreeBytesAvailableToCaller %x%x", lpFreeBytesAvailableToCaller->LowPart, lpFreeBytesAvailableToCaller->HighPart));
+            dprintf(("lpFreeBytesAvailableToCaller %x%x", lpFreeBytesAvailableToCaller->HighPart, lpFreeBytesAvailableToCaller->LowPart));
         }
         if(lpTotalNumberOfBytes!=NULL) {
             Mul32x32to64(lpTotalNumberOfBytes, dwTotalNumberOfClusters, (dwSectorsPerCluster*dwBytesPerSector));
-            dprintf(("lpTotalNumberOfBytes %x%x", lpTotalNumberOfBytes->LowPart, lpTotalNumberOfBytes->HighPart));
+            dprintf(("lpTotalNumberOfBytes %x%x", lpTotalNumberOfBytes->HighPart, lpTotalNumberOfBytes->LowPart));
         }
         if(lpTotalNumberOfFreeBytes!=NULL) {
             memcpy(lpTotalNumberOfFreeBytes, lpFreeBytesAvailableToCaller, sizeof(*lpFreeBytesAvailableToCaller));
-            dprintf(("lpTotalNumberOfFreeBytes %x%x", lpTotalNumberOfFreeBytes->LowPart, lpTotalNumberOfFreeBytes->HighPart));
+            dprintf(("lpTotalNumberOfFreeBytes %x%x", lpTotalNumberOfFreeBytes->HighPart, lpTotalNumberOfFreeBytes->LowPart));
         }
     }
     return rc;
