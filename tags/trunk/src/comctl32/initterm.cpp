@@ -1,3 +1,4 @@
+/* $Id: initterm.cpp,v 1.2 1999-06-10 16:21:59 achimha Exp $ */
 /*
  * COMDLG32 DLL entry point
  *

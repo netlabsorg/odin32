@@ -1,3 +1,4 @@
+/* $Id: obj_enumidlist.h,v 1.3 1999-06-10 16:21:54 achimha Exp $ */
 /*
  * Defines the COM interfaces and APIs related to EnumIDList
  *

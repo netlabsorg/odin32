@@ -1,3 +1,4 @@
+# $Id: makefile,v 1.4 1999-06-10 16:22:00 achimha Exp $
 #
 # PD-Win32 API 
 #

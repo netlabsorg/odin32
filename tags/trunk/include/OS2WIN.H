@@ -1,3 +1,4 @@
+/* $Id: OS2WIN.H,v 1.6 1999-06-10 16:21:47 achimha Exp $ */
 #ifndef _OS2WIN_H
 #define _OS2WIN_H
 
