@@ -1,8 +1,11 @@
-# $Id: Extract16.mak,v 1.1 2002-03-10 04:28:03 bird Exp $
+# $Id: Extract16.mak,v 1.2 2002-03-10 04:50:13 bird Exp $
 
 #
-# kKrnlLib/dev16
+# Extract16 - 16-bit part of the kernel extract routine.
 #
+# Copyright (c) 1999-2002 knut st. osmundsen (bird@anduin.net)
+#
+# Project Odin Software License can be found in LICENSE.TXT
 #
 
 
