@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.160 2004-01-11 11:59:02 sandervl Exp $
+; $Id: KERNEL32.DEF,v 1.161 2004-01-11 12:12:32 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -1166,6 +1166,8 @@ EXPORTS
 ;fast file API's
     FindFirstFileMultiA        = _FindFirstFileMultiA@12          @1290 NONAME
     FindNextFileMultiA         = _FindNextFileMultiA@12           @1291 NONAME
+
+    _GetProcModuleFileNameA@12                                    @1295 NONAME
 
 ;Build number
     _Odin32GetBuildNumber@0                                       @1293 NONAME
