@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.150 2001-10-02 17:14:09 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.151 2001-10-03 13:50:36 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -354,6 +354,10 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
     case WM_VRNENABLED:
         dprintf(("OS2: WM_VRNENABLED %x %x %x", win32wnd->getWindowHandle(), mp1, mp2));
+        //Always call handler; even if mp1 is 0. If we don't do this, the
+        //DivX 4 player will never be allowed to draw after putting another window
+        //on top of it.
+        win32wnd->callVisibleRgnNotifyProc(TRUE);
         if(!win32wnd->isComingToTop() && ((win32wnd->getExStyle() & WS_EX_TOPMOST_W) == WS_EX_TOPMOST_W))
         {
             HWND hwndrelated;
@@ -372,9 +376,6 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
             win32wnd->setComingToTop(FALSE);
             break;
-        }
-        if(mp1) {//visible region has been altered
-            win32wnd->callVisibleRgnNotifyProc(TRUE);
         }
         goto RunDefWndProc;
 
