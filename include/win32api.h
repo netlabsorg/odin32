@@ -1,4 +1,4 @@
-/* $Id: win32api.h,v 1.21 2000-11-05 18:47:11 sandervl Exp $ */
+/* $Id: win32api.h,v 1.22 2001-02-16 17:47:01 sandervl Exp $ */
 
 /*
  *
@@ -126,5 +126,7 @@ UINT    WIN32API GetCurrentDirectoryA(UINT nBufferLength, LPSTR lpBuffer);
 
 HANDLE  WIN32API GetStdHandle(DWORD a);
 DWORD   WIN32API GetFileType(HANDLE hFile);
+
+BOOL    WIN32API SetWindowPos(HWND,HWND,INT,INT,INT,INT,UINT);
 
 #endif
