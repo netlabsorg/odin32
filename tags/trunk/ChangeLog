@@ -1,7 +1,8 @@
- /* $Id: ChangeLog,v 1.1174 2000-10-05 18:36:11 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1175 2000-10-05 19:39:51 sandervl Exp $ */
 
  2000-10-05: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: Don't print FS warnings for OS/2 Odin applications
+                EnumResourceNamesA fix (zero terminate resource name)
     - USER32:   GetWindow GW_CHILD & GW_HWNDFIRST fixes
                 EnumDisplaySettingsA; always set refresh rate to 70hz
                 Z-order bugs fixed; GetWindow returns windows in correct order now
