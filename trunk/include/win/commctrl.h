@@ -1,4 +1,4 @@
-/* $Id: commctrl.h,v 1.25 2000-03-21 17:28:19 cbratschi Exp $ */
+/* $Id: commctrl.h,v 1.26 2000-03-26 16:29:38 cbratschi Exp $ */
 /*
  * Common controls definitions
  */
@@ -2878,8 +2878,11 @@ typedef struct tagNMLVCACHEHINT
 #define ListView_Arrange(hwndLV, code) \
     (BOOL)SendMessageA((hwndLV), LVM_ARRANGE, (WPARAM)(UINT)(code), 0L)
 
-#define ListView_EditLabel(hwndLV, i) \
-    (HWND)SendMessageA((hwndLV), LVM_EDITLABEL, (WPARAM)(int)(i), 0L)
+#define ListView_EditLabelA(hwndLV, i) \
+    (HWND)SendMessageA((hwndLV), LVM_EDITLABELA, (WPARAM)(int)(i), 0L)
+
+#define ListView_EditLabelW(hwndLV, i) \
+    (HWND)SendMessageA((hwndLV), LVM_EDITLABELW, (WPARAM)(int)(i), 0L)
 
 #define ListView_GetEditControl(hwndLV) \
     (HWND)SendMessageA((hwndLV), LVM_GETEDITCONTROL, 0, 0L)
