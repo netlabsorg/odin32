@@ -1,4 +1,4 @@
-# $Id: kernel32.mak,v 1.18 2001-11-29 00:20:48 phaller Exp $
+# $Id: kernel32.mak,v 1.19 2001-11-29 10:31:07 phaller Exp $
 
 #
 # Odin32 API
@@ -110,6 +110,7 @@ $(OBJDIR)\oslibexcept.obj \
 $(OBJDIR)\cpu.obj \
 $(OBJDIR)\process.obj \
 $(OBJDIR)\stubs.obj \
+$(OBJDIR)\dosdevice.obj \
 $(OBJDIR)\ordinals.obj \
 $(OBJDIR)\interlock.obj \
 $(OBJDIR)\toolhelp.obj \
