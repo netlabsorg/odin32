@@ -1,4 +1,12 @@
- /* $Id: changelog,v 1.212 1999-09-19 08:24:02 sandervl Exp $ */
+ /* $Id: changelog,v 1.213 1999-09-19 18:34:25 sandervl Exp $ */
+
+ 99-09-19: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Increased font pointsize for dialog (multiplied by two)
+                  (probably not the right way to do things, but it works for the
+                   dialogs in Solitaire)
+                  Activated MsgEraseBackground method again (pmwindow.cpp)
+                  Dialogs don't receive those otherwise.
+                  (may need to be changed back again)
 
  99-09-19: David Raison <djr@lemur.co.uk>
 	- USER32: Partially implemented MessageBoxIndirectA/W (forwarded to MessageBox)
