@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.53 2001-06-04 21:18:39 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.54 2001-07-03 13:17:42 bird Exp $ */
 
 /*
  * Win32 Exception functions for OS/2
@@ -64,6 +64,10 @@
 #include <wprocess.h>
 #include "oslibexcept.h"
 #include "exceptstackdump.h"
+
+#include "WinImageBase.h"
+#include "WinDllBase.h"
+#include "WinExeBase.h"
 
 #define DBG_LOCALLOG    DBG_exceptions
 #include "dbglocal.h"
@@ -523,9 +527,14 @@ int _Pascal OS2RtlUnwind(PWINEXCEPTION_FRAME  pEndFrame,
 
 LONG WIN32API UnhandledExceptionFilter(PWINEXCEPTION_POINTERS lpexpExceptionInfo)
 {
-  char  message[72];
-  DWORD rc;
+  char      szModName[16];
+  char      message[128];
+  ULONG     iObj;
+  ULONG     offObj;
+  HMODULE   hmod;
+  DWORD     rc;
 
+#if 0 //not in use...
   // @@@PH: experimental change to have more control over exception handling
 #pragma pack(4)
   typedef struct
@@ -549,6 +558,7 @@ LONG WIN32API UnhandledExceptionFilter(PWINEXCEPTION_POINTERS lpexpExceptionInfo
                                       {"execute ~handler",    102, BS_PUSHBUTTON | BS_TEXT | BS_AUTOSIZE | BS_DEFAULT},
                                       {"~terminate process",  103, BS_PUSHBUTTON | BS_TEXT | BS_AUTOSIZE} }
                                   };
+#endif
 
   dprintf(("KERNEL32: Default UnhandledExceptionFilter, CurrentErrorMode=%X", CurrentErrorMode));
 
@@ -562,10 +572,35 @@ LONG WIN32API UnhandledExceptionFilter(PWINEXCEPTION_POINTERS lpexpExceptionInfo
       return rc;
   }
 
-  sprintf(message,
-          "Unhandled exception 0x%08lx at address 0x%08lx.",
-          lpexpExceptionInfo->ExceptionRecord->ExceptionCode,
-          lpexpExceptionInfo->ExceptionRecord->ExceptionAddress);
+
+  if (DosQueryModFromEIP(&hmod, &iObj, sizeof(szModName), szModName, &offObj, (ULONG)lpexpExceptionInfo->ExceptionRecord->ExceptionAddress))
+      sprintf(message,
+              "Unhandled exception 0x%08lx at address 0x%08lx. (DQMFEIP rc=%d)",
+              lpexpExceptionInfo->ExceptionRecord->ExceptionCode,
+              lpexpExceptionInfo->ExceptionRecord->ExceptionAddress);
+  else
+  {
+      if (iObj == -1)
+      {   /* fault in DosAllocMem allocated memory, hence PE loader.. */
+          Win32ImageBase * pMod;
+          if (WinExe && WinExe->insideModule((ULONG)lpexpExceptionInfo->ExceptionRecord->ExceptionAddress))
+              pMod = WinExe;
+          else
+              pMod = Win32DllBase::findModuleByAddr((ULONG)lpexpExceptionInfo->ExceptionRecord->ExceptionAddress);
+          if (pMod != NULL)
+          {
+              szModName[0] = '\0';
+              strncat(szModName, pMod->getModuleName(), sizeof(szModName) - 1);
+          }
+      }
+      sprintf(message,
+              "Unhandled exception 0x%08lx at address 0x%08lx.\r"
+              "Mod: %s obj: 0x%2lx off:0x%08lx",
+              lpexpExceptionInfo->ExceptionRecord->ExceptionCode,
+              lpexpExceptionInfo->ExceptionRecord->ExceptionAddress,
+              szModName, iObj, offObj);
+  }
+
 /*
   rc = WinMessageBox2(HWND_DESKTOP,
                      HWND_DESKTOP,
