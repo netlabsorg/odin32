@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.1546 2001-06-24 16:40:19 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1547 2001-06-25 20:51:22 sandervl Exp $ */
+
+ 2001-06-26: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Minor WM_TIMER translation fix (weird check removed)
 
  2001-06-24: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Rewrote CopyFile & MoveFile (just call DosCopy/Move)
