@@ -1,4 +1,4 @@
-/* $Id: oslibgpi.cpp,v 1.1 2001-09-30 22:23:46 sandervl Exp $ */
+/* $Id: oslibgpi.cpp,v 1.2 2001-10-01 07:06:10 sandervl Exp $ */
 
 /*
  * GPI interface code
@@ -25,10 +25,10 @@
 //******************************************************************************
 LPRGNDATA OSLibQueryVisibleRegion(HWND hwnd, DWORD screenHeight)
 {
-    HRGN hrgnVis;
+    HRGN hrgnVis = 0;
     RECTL rcl = {0,0,1,1};
-    LPRGNDATA lpRgnData;
-    HPS hps;
+    LPRGNDATA lpRgnData = 0;
+    HPS hps = 0;
     LONG temp, i;
     ULONG bufSizeNeeded;
     PRECTL pRectl;
@@ -90,7 +90,9 @@ LPRGNDATA OSLibQueryVisibleRegion(HWND hwnd, DWORD screenHeight)
     return lpRgnData;
 
 failure:
-    WinReleasePS(hps);
+    if(lpRgnData) free(lpRgnData);
+    if(hrgnVis)   GreDestroyRegion(hps, hrgnVis);
+    if(hps)       WinReleasePS(hps);
     return 0;
 }
 //******************************************************************************
