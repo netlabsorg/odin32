@@ -1,7 +1,7 @@
-/* $Id: changelog,v 1.2159 2002-06-15 10:40:17 sandervl Exp $ */
+/* $Id: changelog,v 1.2160 2002-06-15 10:55:24 sandervl Exp $ */
 
  2002-06-15: Sander van Leeuwen <sandervl@innotek.de>
-    - SETUPAPI: o Wine resync
+    - SETUPAPI: o Wine resync + added debug wrappers
     - KERNEL32: o Added strtolW & strtoulW from Wine (for setupapi)
 
  2002-06-13: Sander van Leeuwen <sandervl@innotek.de>
