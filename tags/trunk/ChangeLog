@@ -1,4 +1,10 @@
-/* $Id: ChangeLog,v 1.1366 2001-04-18 08:28:37 bird Exp $ */
+/* $Id: ChangeLog,v 1.1367 2001-04-19 08:31:51 sandervl Exp $ */
+
+ 2001-04-19: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Fail properly when a dll can't be found or loaded.
+    - SHELL32:  o Ported latest shlfileop.c from Wine. (include functional
+                  SHFileOperation). 
+                  TODO: Merge the rest.
 
  2001-04-18: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - dailybuild:
