@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2405 2002-12-30 15:48:45 sandervl Exp $ */
+/* $Id: changelog,v 1.2406 2002-12-30 19:04:34 sandervl Exp $ */
+
+ 2000-12-20: Achim Hasenmueller <achimha@innotek   >
+    - COMDLG32: o Added string check to PRINTDLG_SetUpPrinterListComboA 
 
  2002-12-30: Yuri Dario <mc6530@mclink   >
     - USER32:   o Fixed regression in Set/GetClassLong. (default must be ascii;
@@ -10,6 +13,7 @@
                   with GetDIBits/SetDIBits alignment (aligned at dword boundary)
                 o Use GetDIBits & SetDIBits with negative height. Origin must
                   be top left.
+    - PELDR:    o Statically link CRT library. (to remove dependency on odincrt)
 
  2002-12-29: Sander van Leeuwen <sandervl@innotek   >
     - DDRAW:    o Cleanup
