@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.20 2000-03-24 19:20:33 sandervl Exp $*/
+/* $Id: menu.cpp,v 1.21 2000-05-09 18:56:56 sandervl Exp $*/
 /*
  * Menu functions
  *
@@ -1598,6 +1598,7 @@ static BOOL MENU_ShowPopup( HWND hwndOwner, HMENU hmenu, UINT id,
                                           (LPVOID)hmenu );
             if (!pTopPopupWnd)
             {
+ 	        DebugInt3();
                 return FALSE;
             }
             menu->hWnd = pTopPopupWnd;
@@ -1614,6 +1615,7 @@ static BOOL MENU_ShowPopup( HWND hwndOwner, HMENU hmenu, UINT id,
                                           (LPVOID)hmenu );
                 if( !menu->hWnd )
                 {
+		    DebugInt3();
                     return FALSE;
                 }
             }
@@ -2182,8 +2184,11 @@ static HMENU MENU_PtMenu(HMENU hMenu,POINT pt,BOOL inMenuBar)
    if( !ht )    /* check the current window (avoiding WM_HITTEST) */
    {
         Win32BaseWindow *win32wnd = Win32BaseWindow::GetWindowFromHandle(menu->hWnd);
-        if(win32wnd==NULL)
-                DebugInt3();
+        if(win32wnd==NULL) {
+            //SvL: This happens in Moraff's YourJongg 2.0, return here
+	    //TODO: Check if this is supposed to happen at all...
+            return (HMENU)0;
+	}
 
         ht = win32wnd->HandleNCHitTest(pt);
         if( menu->wFlags & MF_POPUP )

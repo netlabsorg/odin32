@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.65 2000-05-05 11:32:38 sandervl Exp $ */
+/* $Id: window.cpp,v 1.66 2000-05-09 18:56:59 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -316,7 +316,6 @@ BOOL WIN32API DestroyWindow(HWND hwnd)
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
-    dprintf(("DestroyWindow %x", hwnd));
     return window->DestroyWindow();
 }
 //******************************************************************************
@@ -811,6 +810,9 @@ BOOL WIN32API AdjustWindowRectEx( PRECT rect, DWORD style, BOOL menu, DWORD exSt
 {
     dprintf(("AdjustWindowRectEx %x %x %d (%d,%d)(%d,%d)\n", style, exStyle, menu, rect->left, rect->top, rect->right, rect->bottom));
 
+    if(style == 0 && menu == FALSE && exStyle == 0) {
+	return TRUE;	//nothing needs to be changed (VERIFIED in NT 4)
+    }
     /* Correct the window style */
     if (!(style & (WS_POPUP | WS_CHILD)))  /* Overlapped window */
     	style |= WS_CAPTION;
@@ -1025,7 +1027,8 @@ HWND WIN32API FindWindowExW(HWND    hwndParent,
 BOOL WIN32API FlashWindow(HWND hwnd, BOOL fFlash)
 {
     dprintf(("FlashWindow %x %d\n", hwnd, fFlash));
-    return OSLibWinFlashWindow(Win32BaseWindow::Win32ToOS2Handle(hwnd), fFlash);
+//    return OSLibWinFlashWindow(Win32BaseWindow::Win32ToOS2Handle(hwnd), fFlash);
+    return 1;
 }
 //******************************************************************************
 //******************************************************************************

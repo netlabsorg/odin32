@@ -1,4 +1,4 @@
-/* $Id: winexepeldr.cpp,v 1.8 2000-04-14 22:35:28 sandervl Exp $ */
+/* $Id: winexepeldr.cpp,v 1.9 2000-05-09 18:56:09 sandervl Exp $ */
 
 /*
  * Win32 PE loader Exe class
@@ -66,8 +66,13 @@ BOOL WIN32API CreateWin32PeLdrExe(char *szFileName, char *szCmdLine, ULONG reser
         return FALSE;
   }
 
-  szFullCmdLine = (char *)malloc(strlen(szFileName) + 1 + strlen(szCmdLine) + 1);
-  strcpy(szFullCmdLine, szFileName);
+  //exe length + space + (possibly) 2x'"' + cmd line length + 0 terminator
+  szFullCmdLine = (char *)malloc(strlen(szFileName) + 3 + strlen(szCmdLine) + 1);
+  //Enclose executable name in quotes if it (or it's directory) contains spaces
+  if(strchr(szFileName, ' ') != NULL) {
+	sprintf(szFullCmdLine, "\"%s\"", szFileName);
+  }
+  else 	strcpy(szFullCmdLine, szFileName);
   strcat(szFullCmdLine, " ");
   strcat(szFullCmdLine, szCmdLine);
   WinExe->setCommandLine(szFullCmdLine);
