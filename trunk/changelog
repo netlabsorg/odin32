@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.684 2000-02-01 12:56:33 sandervl Exp $ */
+ /* $Id: changelog,v 1.685 2000-02-01 19:43:25 sandervl Exp $ */
+
+ 2000-02-01: Jeroen van den Horn <J.vandenHorn@fibre.a2000.nl>
+	- OPENGL: Ported SGI GLUT sources + Opengl update
 
  2000-02-01: Sander van Leeuwen <sandervl@xs4all.nl>
 	- GDI32: Cleaned up
@@ -9,7 +12,7 @@
  2000-02-01: Knut Stange Osmundse <knut.stange.osmundsen>
         - Pe2Lx: Makefile should be working again.
         - KERNEL32: RegisterPe2LxDll - no detach is done for Pe2Lx/Win32k DLLs.
-                  This is a temporary fix.
+                    This is a temporary fix.
 
  2000-02-01: Patrick Haller <phaller@gmx.net>
         - SHELL32: Added PathSkipRootAW
