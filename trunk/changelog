@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2132 2002-06-06 11:28:38 sandervl Exp $ */
+/* $Id: changelog,v 1.2133 2002-06-06 15:08:14 sandervl Exp $ */
+
+ 2002-06-06: Mark Paulus <mark.paulus@wcom.com>
+    - KERNEL32: o OSLibDosCreateFile:  Fix a SYS0005 (Access Denied) when 
+                  opening an existing file
 
  2002-06-06: Sander van Leeuwen <sandervl@innotek.de>
     - KERNEL32: o Use aspi interface in os2cdrom.dmd for SCSI ioctls
