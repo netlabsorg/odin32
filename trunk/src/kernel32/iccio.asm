@@ -1,4 +1,4 @@
-; $Id: iccio.asm,v 1.3 1999-06-10 20:47:59 phaller Exp $
+; $Id: iccio.asm,v 1.4 1999-11-05 17:42:12 achimha Exp $
 
 ; **********************************************************************
 ; Copyright (C) 1995 by Holger Veit (Holger.Veit@gmd.de)
@@ -14,14 +14,16 @@
     .387
 
 DATA32  SEGMENT DWORD PUBLIC USE32 'DATA'
-        ASSUME  CS:FLAT ,DS:FLAT,SS:FLAT
+;        ASSUME  CS:FLAT ,DS:FLAT,SS:FLAT
+        ASSUME  DS:FLAT,SS:FLAT
     EXTRN   ioentry:DWORD
     EXTRN   gdt:WORD
     EXTRN   devname:BYTE
 DATA32  ENDS
 
 CODE32  SEGMENT DWORD PUBLIC USE32 'CODE'
-        ASSUME  CS:FLAT ,DS:FLAT,SS:FLAT
+;        ASSUME  CS:FLAT ,DS:FLAT,SS:FLAT
+        ASSUME DS:FLAT,SS:FLAT
 
     ALIGN 04H
 
