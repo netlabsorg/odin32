@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.740 2000-02-21 16:11:44 bird Exp $ */
+ /* $Id: ChangeLog,v 1.741 2000-02-21 17:17:35 cbratschi Exp $ */
+
+ 2000-02-21: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32: merged controls and nc code with Corel WINE 20000212
+		  added WS_EX_CONTEXTHELP button
 
  2000-02-21: knut st. osmundsen <knut.stange.osmundse@pmsc.no>
         - WIN32K: *Initial support for UNIX-styled scripts

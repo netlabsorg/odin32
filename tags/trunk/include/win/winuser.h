@@ -1,4 +1,4 @@
-/* $Id: winuser.h,v 1.35 2000-02-20 18:26:08 cbratschi Exp $ */
+/* $Id: winuser.h,v 1.36 2000-02-21 17:21:03 cbratschi Exp $ */
 
 #ifndef __INCLUDE_WINUSER_H
 #define __INCLUDE_WINUSER_H
@@ -1040,6 +1040,9 @@ typedef struct
 #define SC_MONITORPOWER 0xF170
 #define SC_CONTEXTHELP  0xF180
 #define SC_SEPARATOR    0xF00F
+
+#define SC_ABOUTODIN            (SC_SCREENSAVE+1) /* This value has been used in sysres_EN.rc */
+#define SC_PUTMARK              (SC_SCREENSAVE+2)
 
 #define CS_VREDRAW          0x0001
 #define CS_HREDRAW          0x0002
