@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1874 2001-12-01 20:44:57 sandervl Exp $ */
+/* $Id: changelog,v 1.1875 2001-12-01 23:07:57 bird Exp $ */
+
+ 2001-12-01: knut st. osmundsen <kosmunds@csc.com>
+    - CRTDLL:   o Include ctype.h from dir.c and string.c. (Noted by Ye][ow.)
 
  2001-12-01: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Fixed GetThreadTEB macro & GetCurrentThreadId
@@ -22,7 +25,7 @@
     - USER32:   o Changed menu hilite background to the color used by PM
                   (OS/2 look)
                 o DIALOG_IsAccelerator resync (Wine)
-    - KERNEL32: o Partly implemented PurgeComm 
+    - KERNEL32: o Partly implemented PurgeComm
     - *         o Removed all the TRACE, FIXME & WARN redefinitions
                   (temporary hack for better logging; didn't affect the release
                    build anyway)
