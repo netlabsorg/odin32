@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.96 2000-06-29 12:26:00 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.97 2000-07-01 09:51:52 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -338,7 +338,9 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         {
         	if(pswp->fl & SWP_ACTIVATE)
         	{
-             		WinSendMsg(hwnd, WM_ACTIVATE, (MPARAM)TRUE, (MPARAM)hwnd);
+             		if(!(WinQueryWindowUShort(hwnd,QWS_FLAGS) & FF_ACTIVE)) {
+             			WinSendMsg(hwnd, WM_ACTIVATE, (MPARAM)TRUE, (MPARAM)hwnd);
+	     		}
         	}
                 goto RunDefWndProc;
         }
@@ -363,7 +365,9 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
         if(pswp->fl & SWP_ACTIVATE)
         {
-             WinSendMsg(hwnd, WM_ACTIVATE, (MPARAM)TRUE, (MPARAM)hwnd);
+             if(!(WinQueryWindowUShort(hwnd,QWS_FLAGS) & FF_ACTIVE)) {
+             	WinSendMsg(hwnd, WM_ACTIVATE, (MPARAM)TRUE, (MPARAM)hwnd);
+	     }
         }
 
         if((pswp->fl & (SWP_MOVE | SWP_SIZE)) && !(win32wnd->getStyle() & WS_MINIMIZE_W))
@@ -689,7 +693,7 @@ PosChangedEnd:
       BOOL  rc;
 
    	rc = WinQueryUpdateRect(hwnd, &rectl);
-        dprintf(("OS2: WM_PAINT (%d,%d) (%d,%d)", rectl.xLeft, rectl.yBottom, rectl.xRight, rectl.yTop));
+        dprintf(("OS2: WM_PAINT %x (%d,%d) (%d,%d)", win32wnd->getWindowHandle(), rectl.xLeft, rectl.yBottom, rectl.xRight, rectl.yTop));
         if(rc && win32wnd->IsWindowCreated() && (rectl.xLeft != rectl.xRight &&
            rectl.yBottom != rectl.yTop)) 
 	{
