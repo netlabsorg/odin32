@@ -1,4 +1,4 @@
-/* $Id: hmdevice.cpp,v 1.19 2000-05-22 19:07:54 sandervl Exp $ */
+/* $Id: hmdevice.cpp,v 1.20 2000-06-01 11:28:45 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -125,7 +125,7 @@ BOOL HMDeviceHandler::DuplicateHandle(PHMHANDLEDATA pHMHandleData, HANDLE  srcpr
            pHMHandleData,
            srcprocess, pHMSrcHandle, destprocess, desthandle));
 
-  return(ERROR_INVALID_FUNCTION);
+  return FALSE;
 }
 
 /*****************************************************************************
@@ -207,7 +207,7 @@ BOOL HMDeviceHandler::ReadFile(PHMHANDLEDATA pHMHandleData,
 {
   dprintf(("KERNEL32:HandleManager::ReadFile %s(%08x,%08x,%08x,%08x,%08x) - stub?\n",
            lpHMDeviceName,
-           pHMHandleData,
+           pHMHandleData->hHMHandle,
            lpBuffer,
            nNumberOfBytesToRead,
            lpNumberOfBytesRead,
@@ -217,6 +217,45 @@ BOOL HMDeviceHandler::ReadFile(PHMHANDLEDATA pHMHandleData,
   return FALSE;
 }
 
+/*****************************************************************************
+ * Name      : BOOL ReadFileEx
+ * Purpose   : The ReadFileEx function reads data from a file asynchronously.
+ *             It is designed solely for asynchronous operation, unlike the
+ *             ReadFile function, which is designed for both synchronous and
+ *             asynchronous operation. ReadFileEx lets an application perform
+ *             other processing during a file read operation.
+ *             The ReadFileEx function reports its completion status asynchronously,
+ *             calling a specified completion routine when reading is completed
+ *             and the calling thread is in an alertable wait state.
+ * Parameters: HANDLE       hFile                handle of file to read
+ *             LPVOID       lpBuffer             address of buffer
+ *             DWORD        nNumberOfBytesToRead number of bytes to read
+ *             LPOVERLAPPED lpOverlapped         address of offset
+ *             LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine address of completion routine
+ * Variables :
+ * Result    : TRUE / FALSE
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
+ *****************************************************************************/
+BOOL HMDeviceHandler::ReadFileEx(PHMHANDLEDATA pHMHandleData,
+                           LPVOID       lpBuffer,
+                           DWORD        nNumberOfBytesToRead,
+                           LPOVERLAPPED lpOverlapped,
+                           LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
+{
+  dprintf(("ERROR: ReadFileEx %s (%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
+           lpHMDeviceName,
+           pHMHandleData->hHMHandle,
+           lpBuffer,
+           nNumberOfBytesToRead,
+           lpOverlapped,
+           lpCompletionRoutine));
+
+  SetLastError(ERROR_INVALID_FUNCTION);
+  return FALSE;
+}
 
 /*****************************************************************************
  * Name      : BOOL HMDeviceHandler::WriteFile
@@ -242,7 +281,7 @@ BOOL HMDeviceHandler::WriteFile(PHMHANDLEDATA pHMHandleData,
 {
   dprintf(("KERNEL32:HandleManager::WriteFile %s(%08x,%08x,%08x,%08x,%08x) - stub?\n",
            lpHMDeviceName,
-           pHMHandleData,
+           pHMHandleData->hHMHandle,
            lpBuffer,
            nNumberOfBytesToWrite,
            lpNumberOfBytesWritten,
@@ -252,6 +291,45 @@ BOOL HMDeviceHandler::WriteFile(PHMHANDLEDATA pHMHandleData,
   return FALSE;
 }
 
+
+/*****************************************************************************
+ * Name      : BOOL WriteFileEx
+ * Purpose   : The WriteFileEx function writes data to a file. It is designed
+ *             solely for asynchronous operation, unlike WriteFile, which is
+ *             designed for both synchronous and asynchronous operation.
+ *             WriteFileEx reports its completion status asynchronously,
+ *             calling a specified completion routine when writing is completed
+ *             and the calling thread is in an alertable wait state.
+ * Parameters: HANDLE       hFile                handle of file to write
+ *             LPVOID       lpBuffer             address of buffer
+ *             DWORD        nNumberOfBytesToRead number of bytes to write
+ *             LPOVERLAPPED lpOverlapped         address of offset
+ *             LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine address of completion routine
+ * Variables :
+ * Result    : TRUE / FALSE
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
+ *****************************************************************************/
+
+BOOL HMDeviceHandler::WriteFileEx(PHMHANDLEDATA pHMHandleData,
+                           LPVOID       lpBuffer,
+                           DWORD        nNumberOfBytesToWrite,
+                           LPOVERLAPPED lpOverlapped,
+                           LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
+{
+  dprintf(("ERROR: WriteFileEx %s (%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
+           lpHMDeviceName,
+           pHMHandleData->hHMHandle,
+           lpBuffer,
+           nNumberOfBytesToWrite,
+           lpOverlapped,
+           lpCompletionRoutine));
+
+  SetLastError(ERROR_INVALID_FUNCTION);
+  return FALSE;
+}
 
 /*****************************************************************************
  * Name      : DWORD HMDeviceHandler::GetFileType
@@ -578,7 +656,6 @@ DWORD HMDeviceHandler::UnlockFile(PHMHANDLEDATA pHMHandleData,
  * Name      : DWORD HMDeviceHandler::UnlockFileEx
  * Purpose   : file locking
  * Parameters: PHMHANDLEDATA pHMHandleData
- *             DWORD dwFlags
  *             DWORD dwReserved
  *             DWORD nNumberOfBytesToLockLow
  *             DWORD nNumberOfBytesToLockHigh
@@ -592,16 +669,14 @@ DWORD HMDeviceHandler::UnlockFile(PHMHANDLEDATA pHMHandleData,
  *****************************************************************************/
 
 DWORD HMDeviceHandler::UnlockFileEx(PHMHANDLEDATA pHMHandleData,
-                                        DWORD         dwFlags,
                                         DWORD         dwReserved,
                                         DWORD         nNumberOfBytesToLockLow,
                                         DWORD         nNumberOfBytesToLockHigh,
                                         LPOVERLAPPED  lpOverlapped)
 {
-  dprintf(("KERNEL32: HandleManager::DeviceHandler::UnlockFileEx %s(%08xh,%08xh,%08xh,%08xh,%08xh,%08xh)\n",
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::UnlockFileEx %s,%08xh,%08xh,%08xh,%08xh,%08xh)\n",
            lpHMDeviceName,
            pHMHandleData,
-           dwFlags,
            dwReserved,
            nNumberOfBytesToLockLow,
            nNumberOfBytesToLockHigh,
