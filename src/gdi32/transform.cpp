@@ -1,4 +1,4 @@
-/* $Id: transform.cpp,v 1.8 2002-11-26 10:53:12 sandervl Exp $ */
+/* $Id: transform.cpp,v 1.9 2004-01-11 11:42:23 sandervl Exp $ */
 
 /*
  * GDI32 coordinate & transformation code

@@ -1,4 +1,4 @@
-/* $Id: palette.cpp,v 1.11 2003-02-06 19:20:03 sandervl Exp $ */
+/* $Id: palette.cpp,v 1.12 2004-01-11 11:42:20 sandervl Exp $ */
 
 /*
  * GDI32 palette apis
@@ -57,13 +57,9 @@ UINT WIN32API RealizePalette( HDC hdc)
 
     rc = O32_RealizePalette(hdc);
     dprintf(("GDI32: RealizePalette %x returned %d", hdc, rc));
-    if(rc && DIBSection::getSection() != NULL)
+    if(rc)
     {
-        DIBSection *dsect = DIBSection::findHDC(hdc);
-        if(dsect)
-        {
-            dsect->sync(hdc, 0, dsect->GetHeight());
-        }
+        DIBSECTION_MARK_INVALID(hdc);
     }
     return rc;
 }

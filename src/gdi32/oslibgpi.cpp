@@ -1,4 +1,4 @@
-/* $Id: oslibgpi.cpp,v 1.16 2004-01-08 11:11:55 sandervl Exp $ */
+/* $Id: oslibgpi.cpp,v 1.17 2004-01-11 11:42:19 sandervl Exp $ */
 
 /*
  * GPI interface code
@@ -10,6 +10,7 @@
  */
 
 #define  INCL_GPI
+#define  INCL_GPIERRORS
 #define  INCL_WIN
 #include <os2wrap.h>    //Odin32 OS/2 api wrappers
 #include <stdlib.h>
@@ -255,7 +256,7 @@ VOID calcDimensions(POINTLOS2 box[],PPOINTLOS2 point)
 {
   ULONG    cx;
   ULONG    cy;
-
+ 
   //ignore underhang (just like GetTextExtentPoint does in Windows)
   if (box[TXTBOX_BOTTOMLEFT].x < 0) {
       dprintf(("WARNING: Ignoring underhang!!"));
@@ -319,9 +320,13 @@ BOOL OSLibGpiMove(PVOID pHps,PPOINTLOS2 pptlPoint)
   return GpiMove(GetDCData(pHps)->hps,(PPOINTL)pptlPoint);
 }
 
-LONG OSLibGpiLine(PVOID pHps,PPOINTLOS2 pptlEndPoint)
-{
-  return GpiLine(GetDCData(pHps)->hps,(PPOINTL)pptlEndPoint);
+BOOL OSLibGpiLine(PVOID pHps,PPOINTLOS2 pptlEndPoint)
+{ 
+  LONG ret = GpiLine(GetDCData(pHps)->hps,(PPOINTL)pptlEndPoint);
+  if(ret != GPI_OK) {
+      dprintf(("GpiLine failed with error %x", WinGetLastError(0)));
+  }
+  return (ret == GPI_OK);
 }
 
 #define FSP_ENDPATH   0x00000010
@@ -387,7 +392,20 @@ BOOL drawLinePoint(PVOID pHps,PPOINTLOS2 pt,LONG color)
   LONG defaults = GpiQueryAttrs(GetDCData(pHps)->hps, PRIM_LINE, LBB_COLOR, &lbOld);
 
   lbNew.lColor = color;
-  BOOL rc = GpiSetAttrs(GetDCData(pHps)->hps,PRIM_LINE,LBB_COLOR,0,&lbNew) && GpiSetPel(GetDCData(pHps)->hps,(PPOINTL)pt) != GPI_ERROR;
+  BOOL rc = GpiSetAttrs(GetDCData(pHps)->hps,PRIM_LINE,LBB_COLOR,0,&lbNew);
+  if(rc == FALSE) {
+      dprintf(("GpiSetAttrs/GpiSetPel failed with %x", WinGetLastError(0)));
+  }
+  else {
+      rc = GpiSetPel(GetDCData(pHps)->hps,(PPOINTL)pt) != GPI_ERROR;
+      if(rc == FALSE && LOWORD(WinGetLastError(0)) == PMERR_INV_IN_PATH) {
+          dprintf(("WARNING: GpiSetPel invalid in path; retrying with GpiLine"));
+          rc = GpiLine(GetDCData(pHps)->hps,(PPOINTL)pt) != GPI_ERROR;
+      }
+  }
+  if(rc == FALSE) {
+      dprintf(("GpiSetPel/GpiLine failed with %x", WinGetLastError(0)));
+  }
 
   GpiSetAttrs(GetDCData(pHps)->hps,PRIM_LINE,LBB_COLOR,defaults,&lbOld);
 
@@ -447,7 +465,84 @@ BOOL OSLibDevQueryCaps(pDCData pHps, LONG lStart, LONG lCount, LONG *alArray)
 //******************************************************************************
 BOOL OSLibGpiLoadFonts(LPSTR lpszFontFile)
 {
-   return GpiLoadFonts(0, lpszFontFile);
+   BOOL ret;
+
+   //We must use GpiLoadPublicFonts here. GpiLoadFonts cannot be used for
+   //queued printer device contexts
+   //-> NOTE: this is no longer the case as we spool printer specific data now (not metafiles)
+   ret = GpiLoadFonts(0, lpszFontFile);
+   if(ret == FALSE) {
+       dprintf(("GpiLoadPublicFonts %s failed with %x", lpszFontFile, WinGetLastError(0)));
+   }
+   return ret;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibGpiUnloadFonts(LPSTR lpszFontFile)
+{
+   return GpiUnloadFonts(0, lpszFontFile);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibGpiQueryFontName(LPSTR lpszFileName, LPSTR lpszFamily, LPSTR lpszFace, int cbString)
+{
+    LONG     cFonts = 0, cRemFonts;
+    PFFDESCS pffd = NULL;
+    ULONG    cb;
+
+    cRemFonts = GpiQueryFontFileDescriptions(0, lpszFileName, &cFonts, NULL);
+    if(cRemFonts == GPI_ALTERROR) {
+        DebugInt3();
+        return FALSE;
+    }
+
+    cFonts = max(cFonts, cRemFonts);
+    cb = cFonts * sizeof(FFDESCS) + 100; // must allocate extra
+    pffd = (PFFDESCS)malloc(cb); 
+    if(pffd == NULL) {
+        DebugInt3();
+        return FALSE;
+    }
+
+    memset(pffd, 0, cb);
+
+    //assuming one font for now
+    cFonts = 1;
+    if(GpiQueryFontFileDescriptions(0, lpszFileName, &cFonts, pffd) == 0) 
+    {
+        strncpy(lpszFamily, (char *)pffd, cbString);
+        strncpy(lpszFace, (char *)pffd + FACESIZE, cbString);
+    }
+    free(pffd);
+    return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL ReallySetCharAttrs(PVOID lpHps)
+{
+  BOOL bRet = FALSE;
+  pDCData pHps = (pDCData)lpHps;
+
+  if(pHps)
+  {
+     if(!pHps->bAttrSet)
+     {
+        if (!pHps->bFirstSet) {
+           pHps->bFirstSet = TRUE;
+        }
+        if (pHps->ulCharMask) {
+           bRet = GpiSetAttrs(pHps->hps, PRIM_CHAR, pHps->ulCharMask, 0, &pHps->CBundle);
+        } else {
+           bRet = TRUE;
+        }
+        if(bRet == TRUE) {
+            pHps->CSetBundle = pHps->CBundle;
+            pHps->ulCharMask = 0;
+            pHps->bAttrSet = TRUE;
+        }
+     }
+  }
+  return(bRet);
 }
 //******************************************************************************
 //******************************************************************************

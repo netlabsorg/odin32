@@ -1,5 +1,16 @@
+/*
+ * GDI object statistics
+ *
+ *
+ * Copyright 2002-2003 Innotek Systemberatung GmbH (sandervl@innotek.de)
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
+ */
+
 #include <os2win.h>
 #include <stats.h>
+#include <objhandle.h>
 
 #ifdef DEBUG
 
@@ -299,6 +310,7 @@ void STATS_DumpStatsGDI32()
     dprintf(("*************  ********************** *****************"));
     dprintf(("Leaked bitmap objects %d", nrbitmapscreated));
     STAT_PrintLeakedObjects("Leaked Bitmap", createdbitmap);
+    ObjDumpObjects();
     dprintf(("*************  GDI32 STATISTICS END   *****************"));
 }
 //******************************************************************************

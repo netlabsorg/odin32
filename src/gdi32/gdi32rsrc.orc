@@ -1,8 +1,10 @@
-/* $Id: gdi32rsrc.orc,v 1.4 2001-01-05 23:25:30 sandervl Exp $ */
+/* $Id: gdi32rsrc.orc,v 1.5 2004-01-11 11:42:16 sandervl Exp $ */
 
 #include "winuser.h"
 #include "odinrsrc.h"
 
+
+TESTFONT RCDATA "testfont.fot"
 
 /////////////////////////////////////////////////////////////////////////////
 //
