@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.913 2000-04-27 12:03:37 bird Exp $ */
+ /* $Id: ChangeLog,v 1.914 2000-04-27 18:24:26 sandervl Exp $ */
 
  2000-04-27: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - tools/DailyBuild: Checked in the scripts used for the daily build.
@@ -8,7 +8,7 @@
 	  header files, old one breaks comdlg32
 	  TODO: find bug in new wrc and really fix it
 
- 2000-04-25: David Raison <djr@lemur.co.uk>
+ 2000-04-26: David Raison <djr@lemur.co.uk>
         - INCLUDE/WIN: Added RPC_E_* codes to winerror.h
         - OLE32: Fixed StringFromGUID2
 
@@ -24,7 +24,7 @@
 	- WSOCK32: Don't send FD_CLOSE message when select returns
                    and there's no data available (recv in another thread
                    might have taken that data before the ioctl call in
-                   the WSAAsyncSelect thread)
+                   the WSAAsyncSelect thread is executed)
                    -> fixes lost connections in RealPlayer 7
 
  2000-04-19: Patrick Haller <phaller@gmx.net>
