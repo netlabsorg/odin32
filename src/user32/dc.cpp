@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.18 1999-10-30 18:40:43 cbratschi Exp $ */
+/* $Id: dc.cpp,v 1.19 1999-11-02 19:13:00 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -18,7 +18,7 @@
 #define INCL_GREALL
 #define INCL_DEV
 #include <os2wrap.h>
-#include <pmddi.h>
+//#include <pmddi.h>
 #include <stdlib.h>
 
 #include "win32type.h"

@@ -1,4 +1,4 @@
-/* $Id: combo.cpp,v 1.10 1999-10-24 22:56:01 sandervl Exp $ */
+/* $Id: combo.cpp,v 1.11 1999-11-02 19:12:59 sandervl Exp $ */
 /*
  * Combo controls
  *
@@ -61,9 +61,7 @@ static BOOL COMBO_Init()
   {
     BOOL      bRet = FALSE;
 
-//SvL: Combo bitmap is invalid
-    hComboBmp = LoadBitmapA(0, MAKEINTRESOURCEA(OBM_COMBO));
-//    hComboBmp = LoadBitmapA(hInstanceUser32, MAKEINTRESOURCEA(OBM_COMBO));
+    hComboBmp = LoadBitmapA(hInstanceUser32, MAKEINTRESOURCEA(OBM_COMBO));
     if(hComboBmp)
     {
       BITMAP      bm;
