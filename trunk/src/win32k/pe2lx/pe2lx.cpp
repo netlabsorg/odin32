@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.11 1999-11-16 18:07:55 bird Exp $
+/* $Id: pe2lx.cpp,v 1.12 1999-11-29 00:33:38 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -1707,6 +1707,7 @@ ULONG Pe2Lx::makeObjectPageTable()
  *            IF forwarders present and exports not made THEN makeExports!
  *            Check and read directories for imports and relocations.
  *            Create necessary Buffered RVA Readers.
+ *            Make sure kernel32 is the first imported module.
  *            Initiate the import variables (if any imports):
  *                Loop thru the import descriptiors looking for the lowest FirstThunk RVA. (ulRVAOrgFirstThunk and ulRVAFirstThunk)
  *                When found read the module name and add it. (ulModuleOrdinal)
@@ -1869,6 +1870,10 @@ ULONG Pe2Lx::makeFixups()
         return rc;
     }
 
+    /* Make sure kernel32 is the first imported module */
+    if (rc == NO_ERROR)
+        rc = addModule("KERNEL32.DLL", (PULONG)SSToDS(&ul));
+
     /* initiate the import variables */
     if (fImports && rc == NO_ERROR)
     {
@@ -1905,8 +1910,9 @@ ULONG Pe2Lx::makeFixups()
     }
 
     /* read start of the first basereloc chunk */
-    if (fBaseRelocs)
+    if (fBaseRelocs && rc == NO_ERROR)
         rc = pRelocReader->readAtRVA(ulRVABaseReloc, SSToDS(&BaseReloc), sizeof(BaseReloc));
+
 
     /*
      *  The Loop! Iterate thru all pages for all objects.
@@ -3492,6 +3498,7 @@ ULONG  Pe2Lx::addEntry(ULONG ulOrdinal, ULONG ulRVA)
  *            Validate input. (ulOrdinal and pointers)
  *            IF no enough memory THEN (try) allocate more.
  *            IF Function ordinal THEN convert it to an ordinal number.
+ *            Make sure kernel32 is the first imported module.
  *            Add module name.
  *            IF not forwarder to ordinal THEN Add name to imported procedure table.
  *            IF last ordinal + 1 != new ordinal THEN
@@ -3605,6 +3612,14 @@ ULONG  Pe2Lx::addForwarderEntry(ULONG ulOrdinal, PCSZ pszDllName, PCSZ pszFnName
         ulFnOrdinal |= 0x80000000UL; /* ordinal flag */
     else
         ulFnOrdinal = 0; /* not ordinal! */
+
+    /* Make sure kernel32 is the first imported module */
+    if (offCurImpModuleName == 0)
+    {
+        rc = addModule("KERNEL32.DLL", (PULONG)SSToDS(&ulModuleOrdinal));
+        if (rc != NO_ERROR)
+            return rc;
+    }
 
     /* Add module name. */
     rc = addModule(pszDllName, (PULONG)SSToDS(&ulModuleOrdinal));
