@@ -1,4 +1,4 @@
-/* $Id: windlg.cpp,v 1.20 2001-02-05 18:49:30 sandervl Exp $ */
+/* $Id: windlg.cpp,v 1.21 2001-02-17 14:49:26 sandervl Exp $ */
 /*
  * Win32 dialog apis for OS/2
  *
@@ -240,6 +240,95 @@ BOOL WIN32API IsDlgButtonChecked( HWND hwnd, UINT id)
 
     return (BOOL)SendDlgItemMessageA(hwnd, id,BM_GETCHECK,0,0);
 }
+/***********************************************************************
+ *           DIALOG_GetNextTabItem
+ *
+ * Helper for GetNextDlgTabItem
+ */
+static HWND DIALOG_GetNextTabItem( HWND hwndMain, HWND hwndDlg, HWND hwndCtrl, BOOL fPrevious )
+{
+    LONG dsStyle;
+    LONG exStyle;
+    UINT wndSearch = fPrevious ? GW_HWNDPREV : GW_HWNDNEXT;
+    HWND retWnd = 0;
+    HWND hChildFirst = 0;
+
+    if(!hwndCtrl) 
+    {
+        hChildFirst = GetWindow(hwndDlg,GW_CHILD);
+        if(fPrevious) hChildFirst = GetWindow(hChildFirst,GW_HWNDLAST);
+    }
+    else
+    {
+        HWND hParent = GetParent(hwndCtrl);
+        BOOL bValid = FALSE;
+        while( hParent)
+        {
+            if(hParent == hwndMain)
+            {
+                bValid = TRUE;
+                break;
+            }
+            hParent = GetParent(hParent);
+        }
+        if(bValid)
+        {
+            hChildFirst = GetWindow(hwndCtrl,wndSearch);
+            if(!hChildFirst)
+            {
+                if(GetParent(hwndCtrl) != hwndMain)
+                    hChildFirst = GetWindow(GetParent(hwndCtrl),wndSearch);
+                else
+                {
+                    if(fPrevious)
+                        hChildFirst = GetWindow(hwndCtrl,GW_HWNDLAST);
+                    else
+                        hChildFirst = GetWindow(hwndCtrl,GW_HWNDFIRST);
+                }
+            }
+        }	
+    }
+    while(hChildFirst)
+    {
+        BOOL bCtrl = FALSE;
+        while(hChildFirst)
+        {
+            dsStyle = GetWindowLongA(hChildFirst,GWL_STYLE);
+            exStyle = GetWindowLongA(hChildFirst,GWL_EXSTYLE);
+            if( (dsStyle & DS_CONTROL || exStyle & WS_EX_CONTROLPARENT) && (dsStyle & WS_VISIBLE) && !(dsStyle & WS_DISABLED))
+            {
+                bCtrl=TRUE;
+                break;
+            }
+            else if( (dsStyle & WS_TABSTOP) && (dsStyle & WS_VISIBLE) && !(dsStyle & WS_DISABLED))
+                break;
+            hChildFirst = GetWindow(hChildFirst,wndSearch);
+        }
+        if(hChildFirst)
+        {
+            if(bCtrl)
+                retWnd = DIALOG_GetNextTabItem(hwndMain,hChildFirst,(HWND)NULL,fPrevious );
+            else
+                retWnd = hChildFirst;
+        }
+        if(retWnd) break;
+        hChildFirst = GetWindow(hChildFirst,wndSearch);
+    }
+    if(!retWnd && hwndCtrl)
+    {
+        HWND hParent = GetParent(hwndCtrl);
+        while(hParent)
+	{
+            if(hParent == hwndMain) break;
+            retWnd = DIALOG_GetNextTabItem(hwndMain,GetParent(hParent),hParent,fPrevious );
+            if(retWnd) break;
+            hParent = GetParent(hParent);
+	}
+        if(!retWnd)
+            retWnd = DIALOG_GetNextTabItem(hwndMain,hwndMain,(HWND)NULL,fPrevious );
+    }
+    return retWnd;
+}
 //******************************************************************************
 //******************************************************************************
 HWND WIN32API GetNextDlgTabItem(HWND hwndDlg, HWND hwndCtrl, BOOL fPrevious)
@@ -252,8 +341,8 @@ HWND WIN32API GetNextDlgTabItem(HWND hwndDlg, HWND hwndCtrl, BOOL fPrevious)
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
-    dprintf(("USER32:  GetNextDlgTabItem\n"));
-    return window->getNextDlgTabItem(hwndCtrl, fPrevious);
+    dprintf(("USER32: GetNextDlgTabItem %x %x %d", hwndDlg,hwndCtrl,fPrevious));
+    return DIALOG_GetNextTabItem(hwndDlg,hwndDlg,hwndCtrl,fPrevious); 
 }
 //******************************************************************************
 //Can be used for any parent-child pair
