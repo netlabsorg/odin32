@@ -1,4 +1,4 @@
-/* $Id: shell32_odin.cpp,v 1.1 2000-08-30 13:52:54 sandervl Exp $ */
+/* $Id: shell32_odin.cpp,v 1.2 2000-10-28 14:36:48 sandervl Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -92,8 +92,9 @@ static BOOL __get_dropline( HWND hWnd, LPRECT lprect )
 /*************************************************************************
  * AboutDlgProc32                           (internal)
  */
-#define IDC_ODINLOGO 2001
-#define IDB_ODINLOGO 5555
+#define IDC_ODINLOGO    2001
+#define IDC_ODINBUILDNR 2002
+#define IDB_ODINLOGO    5555
 
 BOOL WINAPI AboutDlgProc( HWND hWnd, UINT msg, WPARAM wParam,
                               LPARAM lParam )
@@ -116,6 +117,8 @@ BOOL WINAPI AboutDlgProc( HWND hWnd, UINT msg, WPARAM wParam,
             SetWindowTextA( hWnd, AppTitle );
             SetWindowTextA( GetDlgItem(hWnd, IDC_STATIC_TEXT), info->szOtherStuff );
 
+            sprintf( AppTitle, "(%s)", __DATE__);
+            SetWindowTextA( GetDlgItem(hWnd, IDC_ODINBUILDNR), AppTitle);
             HWND hwndOdinLogo = GetDlgItem(hWnd, IDC_ODINLOGO);
             if(hwndOdinLogo) {
                         HBITMAP hBitmap = LoadBitmapA(shell32_hInstance, MAKEINTRESOURCEA(IDB_ODINLOGO));
