@@ -1,4 +1,4 @@
-/* $Id: initwnaspi32.cpp,v 1.2 2001-10-20 09:49:01 achimha Exp $
+/* $Id: initwnaspi32.cpp,v 1.3 2001-10-26 19:50:06 achimha Exp $
  *
  * DLL entry point
  *
@@ -62,7 +62,9 @@ BOOL WINAPI Wnaspi32LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad
            delete aspi;
            aspi = NULL;
            dprintf(("WNASPI32: LibMain; can't init aspi object!"));
-           return FALSE;
+           // @@@20011026 and also in this case we shouldn't prevent DLL loading...
+           return TRUE;
+           // return FALSE;
        }
        dprintf(("WNASPI32: LibMain; aspi object created successfully"));
        return TRUE;
