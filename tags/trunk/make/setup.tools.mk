@@ -1,4 +1,4 @@
-# $Id: setup.tools.mk,v 1.1 2002-04-06 20:25:06 bird Exp $
+# $Id: setup.tools.mk,v 1.2 2002-04-07 22:43:27 bird Exp $
 
 #
 # Standard tools - may be overridden by compiler specific setupfiles.
@@ -44,6 +44,20 @@ ECHO=@echo $(CLRTXT)
 
 
 #
+# Default Extensions.
+# 
+EXT_OBJ = obj
+EXT_LIB = lib
+EXT_ILIB= lib
+EXT_EXE = exe
+EXT_DLL = dll
+EXT_RES = res
+EXT_SYS = sys
+EXT_IFS = ifs
+EXT_RES = res
+
+
+#
 # Depreciated (kso don't like these)
 #
 RM=$(TOOLS_RM)
@@ -51,4 +65,5 @@ TOOLS_DEL=@del      # use TOOLS_RM!
 CD=cd
 CD_ENTER=cd
 CD_LEAVE=cd ..
+
 
