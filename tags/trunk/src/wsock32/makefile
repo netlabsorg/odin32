@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 1999-06-10 16:11:08 phaller Exp $
+# $Id: makefile,v 1.4 1999-07-07 12:18:04 phaller Exp $
 
 #
 # PD-Win32 API
@@ -20,7 +20,7 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 TARGET = wsock32
 
-OBJS =  wsock32.obj notify.obj initterm.obj
+OBJS =  wsock32.obj notify.obj initterm.obj unknown.obj
 
 all: $(TARGET).dll $(TARGET).lib
 
@@ -38,6 +38,7 @@ $(TARGET).lib: $(TARGET).dll
 
 wsock32.obj: wsock32.cpp wsock32.h
 notify.obj:  notify.cpp wsock32.h
+unknown.obj: unknown.cpp wsock32.h
 initterm.obj: initterm.cpp
 
 clean:
