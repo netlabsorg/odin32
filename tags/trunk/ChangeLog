@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1342 2001-04-02 18:24:56 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1343 2001-04-02 22:51:21 sandervl Exp $ */
 
  2001-04-02: Sander van Leeuwen <sandervl@xs4all.nl>   
     - USER32:   o Mouse message translation fix (check capture)
@@ -22,7 +22,8 @@
                   isn't set.
                   Size of lpSurfaceDesc can be sizeof(DDSURFACEDESC2).
                   (fix for WinDVD)
-
+    - KERNEL32: o Check executable type (VIO/GUI) in CreateProcess and launch
+                  correct version of the pe loader (PE/PEC)
 
  2001-04-02: Michal Necasek <michalnec@volny.cz>
     - KERNEL32: o Fix for importing from executable
