@@ -1,4 +1,4 @@
-/* $Id: commctrl.h,v 1.12 1999-09-02 10:10:10 phaller Exp $ */
+/* $Id: commctrl.h,v 1.13 1999-10-04 16:01:29 cbratschi Exp $ */
 /*
  * Common controls definitions
  */
@@ -543,6 +543,12 @@ HRESULT WINAPI UninitializeFlatSB(HWND);
 #define HDS_HIDDEN              0x0008
 #define HDS_DRAGDROP            0x0040
 #define HDS_FULLDRAG            0x0080
+#define HDS_FILTERBAR           0x0100
+
+#define HDFT_ISSTRING       0x0000      // HD_ITEM.pvFilter points to a HD_TEXTFILTER
+#define HDFT_ISNUMBER       0x0001      // HD_ITEM.pvFilter points to a INT
+
+#define HDFT_HASNOVALUE     0x8000      // clear the filter, by setting this bit
 
 #define HDI_WIDTH               0x0001
 #define HDI_HEIGHT              HDI_WIDTH
@@ -553,11 +559,13 @@ HRESULT WINAPI UninitializeFlatSB(HWND);
 #define HDI_IMAGE               0x0020
 #define HDI_DI_SETITEM          0x0040
 #define HDI_ORDER               0x0080
+#define HDI_FILTER              0x0100
 
 #define HDF_LEFT                0x0000
 #define HDF_RIGHT               0x0001
 #define HDF_CENTER              0x0002
 #define HDF_JUSTIFYMASK         0x0003
+#define HDF_RTLREADING          0x0004
 
 #define HDF_IMAGE               0x0800
 #define HDF_BITMAP_ON_RIGHT     0x1000
@@ -569,36 +577,43 @@ HRESULT WINAPI UninitializeFlatSB(HWND);
 #define HHT_ONHEADER            0x0002
 #define HHT_ONDIVIDER           0x0004
 #define HHT_ONDIVOPEN           0x0008
+#define HHT_ONFILTER            0x0010
+#define HHT_ONFILTERBUTTON      0x0020
 #define HHT_ABOVE               0x0100
 #define HHT_BELOW               0x0200
 #define HHT_TORIGHT             0x0400
 #define HHT_TOLEFT              0x0800
 
-#define HDM_FIRST               0x1200
-#define HDM_GETITEMCOUNT        (HDM_FIRST+0)
-#define HDM_INSERTITEMA       (HDM_FIRST+1)
-#define HDM_INSERTITEMW       (HDM_FIRST+10)
-#define HDM_INSERTITEM          WINELIB_NAME_AW(HDM_INSERTITEM)
-#define HDM_DELETEITEM          (HDM_FIRST+2)
-#define HDM_GETITEMA          (HDM_FIRST+3)
-#define HDM_GETITEMW          (HDM_FIRST+11)
-#define HDM_GETITEM             WINELIB_NAME_AW(HDM_GETITEM)
-#define HDM_SETITEMA          (HDM_FIRST+4)
-#define HDM_SETITEMW          (HDM_FIRST+12)
-#define HDM_SETITEM             WINELIB_NAME_AW(HDM_SETITEM)
-#define HDM_LAYOUT              (HDM_FIRST+5)
-#define HDM_HITTEST             (HDM_FIRST+6)
-#define HDM_GETITEMRECT         (HDM_FIRST+7)
-#define HDM_SETIMAGELIST        (HDM_FIRST+8)
-#define HDM_GETIMAGELIST        (HDM_FIRST+9)
+#define HDM_FIRST                  0x1200
+#define HDM_GETITEMCOUNT           (HDM_FIRST+0)
+#define HDM_INSERTITEMA            (HDM_FIRST+1)
+#define HDM_INSERTITEMW            (HDM_FIRST+10)
+#define HDM_INSERTITEM             WINELIB_NAME_AW(HDM_INSERTITEM)
+#define HDM_DELETEITEM             (HDM_FIRST+2)
+#define HDM_GETITEMA               (HDM_FIRST+3)
+#define HDM_GETITEMW               (HDM_FIRST+11)
+#define HDM_GETITEM                WINELIB_NAME_AW(HDM_GETITEM)
+#define HDM_SETITEMA               (HDM_FIRST+4)
+#define HDM_SETITEMW               (HDM_FIRST+12)
+#define HDM_SETITEM                WINELIB_NAME_AW(HDM_SETITEM)
+#define HDM_LAYOUT                 (HDM_FIRST+5)
+#define HDM_HITTEST                (HDM_FIRST+6)
+#define HDM_GETITEMRECT            (HDM_FIRST+7)
+#define HDM_SETIMAGELIST           (HDM_FIRST+8)
+#define HDM_GETIMAGELIST           (HDM_FIRST+9)
 
-#define HDM_ORDERTOINDEX        (HDM_FIRST+15)
-#define HDM_CREATEDRAGIMAGE     (HDM_FIRST+16)
-#define HDM_GETORDERARRAY       (HDM_FIRST+17)
-#define HDM_SETORDERARRAY       (HDM_FIRST+18)
-#define HDM_SETHOTDIVIDER       (HDM_FIRST+19)
-#define HDM_GETUNICODEFORMAT    CCM_GETUNICODEFORMAT
-#define HDM_SETUNICODEFORMAT    CCM_SETUNICODEFORMAT
+#define HDM_ORDERTOINDEX           (HDM_FIRST+15)
+#define HDM_CREATEDRAGIMAGE        (HDM_FIRST+16)
+#define HDM_GETORDERARRAY          (HDM_FIRST+17)
+#define HDM_SETORDERARRAY          (HDM_FIRST+18)
+#define HDM_SETHOTDIVIDER          (HDM_FIRST+19)
+#define HDM_SETBITMAPMARGIN        (HDM_FIRST+20)
+#define HDM_GETBITMAPMARGIN        (HDM_FIRST+21)
+#define HDM_GETUNICODEFORMAT       CCM_GETUNICODEFORMAT
+#define HDM_SETUNICODEFORMAT       CCM_SETUNICODEFORMAT
+#define HDM_SETFILTERCHANGETIMEOUT (HDM_FIRST+22)
+#define HDM_EDITFILTER             (HDM_FIRST+23)
+#define HDM_CLEARFILTER            (HDM_FIRST+24)
 
 #define HDN_FIRST               (0U-300U)
 #define HDN_LAST                (0U-399U)
@@ -631,6 +646,22 @@ HRESULT WINAPI UninitializeFlatSB(HWND);
 #define HDN_GETDISPINFO WINELIB_NAME_AW(HDN_GETDISPINFO)
 #define HDN_BEGINDRACK          (HDN_FIRST-10)
 #define HDN_ENDDRACK            (HDN_FIRST-11)
+#define HDN_FILTERCHANGE        (HDN_FIRST-12)
+#define HDN_FILTERBTNCLICK      (HDN_FIRST-13)
+
+typedef struct _HD_TEXTFILTERA
+{
+    LPSTR pszText;                      // [in] pointer to the buffer containing the filter (ANSI)
+    INT cchTextMax;                     // [in] max size of buffer/edit control buffer
+} HD_TEXTFILTERA, *LPHD_TEXTFILTERA;
+
+typedef struct _HD_TEXTFILTERW
+{
+    LPWSTR pszText;                     // [in] pointer to the buffer contiaining the filter (UNICODE)
+    INT cchTextMax;                     // [in] max size of buffer/edit control buffer
+} HD_TEXTFILTERW, *LPHD_TEXTFILTERW;
+
+#define HD_TEXTFILTER WINELIB_NAME_AW(HD_TEXTFILTER)
 
 typedef struct _HD_LAYOUT
 {
@@ -644,26 +675,33 @@ typedef struct _HD_ITEMA
 {
     UINT    mask;
     INT     cxy;
-    LPSTR     pszText;
+    LPSTR   pszText;
     HBITMAP hbm;
     INT     cchTextMax;
     INT     fmt;
-    LPARAM    lParam;
+    LPARAM  lParam;
     INT     iImage;
     INT     iOrder;
+    UINT    type;           // [in] filter type (defined what pvFilter is a pointer to)
+    LPVOID  pvFilter;       // [in] fillter data see above
 } HDITEMA, *LPHDITEMA;
+
+#define HDITEMA_V1_SIZE CCSIZEOF_STRUCT(HDITEMA, lParam)
+#define HDITEMW_V1_SIZE CCSIZEOF_STRUCT(HDITEMW, lParam)
 
 typedef struct _HD_ITEMW
 {
     UINT    mask;
     INT     cxy;
-    LPWSTR    pszText;
+    LPWSTR  pszText;
     HBITMAP hbm;
     INT     cchTextMax;
     INT     fmt;
-    LPARAM    lParam;
+    LPARAM  lParam;
     INT     iImage;
     INT     iOrder;
+    UINT    type;           // [in] filter type (defined what pvFilter is a pointer to)
+    LPVOID  pvFilter;       // [in] fillter data see above
 } HDITEMW, *LPHDITEMW;
 
 #define HDITEM   WINELIB_NAME_AW(HDITEM)
@@ -685,7 +723,7 @@ typedef struct _HD_HITTESTINFO
 
 typedef struct tagNMHEADERA
 {
-    NMHDR     hdr;
+    NMHDR   hdr;
     INT     iItem;
     INT     iButton;
     HDITEMA *pitem;
@@ -693,7 +731,7 @@ typedef struct tagNMHEADERA
 
 typedef struct tagNMHEADERW
 {
-    NMHDR     hdr;
+    NMHDR   hdr;
     INT     iItem;
     INT     iButton;
     HDITEMW *pitem;
@@ -705,28 +743,36 @@ typedef struct tagNMHEADERW
 
 typedef struct tagNMHDDISPINFOA
 {
-    NMHDR     hdr;
+    NMHDR   hdr;
     INT     iItem;
     UINT    mask;
-    LPSTR     pszText;
+    LPSTR   pszText;
     INT     cchTextMax;
     INT     iImage;
-    LPARAM    lParam;
+    LPARAM  lParam;
 } NMHDDISPINFOA, *LPNMHDDISPINFOA;
 
 typedef struct tagNMHDDISPINFOW
 {
-    NMHDR     hdr;
+    NMHDR   hdr;
     INT     iItem;
     UINT    mask;
-    LPWSTR    pszText;
+    LPWSTR  pszText;
     INT     cchTextMax;
     INT     iImage;
-    LPARAM    lParam;
+    LPARAM  lParam;
 } NMHDDISPINFOW, *LPNMHDDISPINFOW;
 
 #define NMHDDISPINFO            WINELIB_NAME_AW(NMHDDISPINFO)
 #define LPNMHDDISPINFO          WINELIB_NAME_AW(LPNMHDDISPINFO)
+
+typedef struct tagNMHDFILTERBTNCLICK
+{
+  NMHDR hdr;
+  INT   iItem;
+  RECT  rc;
+} NMHDFILTERBTNCLICK, *LPNMHDFILTERBTNCLICK;
+
 
 #define Header_GetItemCount(hwndHD) \
   (INT)SendMessageA((hwndHD),HDM_GETITEMCOUNT,0,0L)
@@ -765,11 +811,22 @@ typedef struct tagNMHDDISPINFOW
   (BOOL)SendMessageA((hwnd),HDM_SETORDERARRAY,(WPARAM)iCount,(LPARAM)lpi)
 #define Header_SetHotDivider(hwnd,fPos,dw) \
   (INT)SendMessageA((hwnd),HDM_SETHOTDIVIDER,(WPARAM)fPos,(LPARAM)dw)
+#define Header_SetBitmapMargin(hwnd,iWidth) \
+  (INT)SendMessageA((hwnd),HDM_SETBITMAPMARGIN,(WPARAM)iWidth,0)
+#define Header_GetBitmapMargin(hwnd) \
+  (INT)SendMessageA((hwnd),HDM_GETBITMAPMARGIN,0,0)
 #define Header_SetUnicodeFormat(hwnd,fUnicode) \
   (BOOL)SendMessageA((hwnd),HDM_SETUNICODEFORMAT,(WPARAM)(fUnicode),0)
 #define Header_GetUnicodeFormat(hwnd) \
   (BOOL)SendMessageA((hwnd),HDM_GETUNICODEFORMAT,0,0)
-
+#define Header_SetFilterChangeTimeout(hwnd,i) \
+  (INT)SendMessageA((hwnd),HDM_SETFILTERCHANGETIMEOUT,0,(LPARAM)(i))
+#define Header_EditFilter(hwnd,i,fDiscardChanges) \
+  (INT)SendMessageA((hwnd),HDM_EDITFILTER,(WPARAM)i,MAKELPARAM(fDiscardChanges,0))
+#define Header_ClearFilter(hwnd, i) \
+  (INT)SendMessageA((hwnd),HDM_CLEARFILTER,(WPARAM)i,0)
+#define Header_ClearAllFilters(hwnd) \
+  (INT)SendMessageA((hwnd),HDM_CLEARFILTER,(WPARAM)-1,0)
 
 /* Toolbar */
 
@@ -3248,11 +3305,11 @@ typedef struct tagNMDATETIMEFORMATQUERYW
 #define GDTR_MAX     0x0002
 
 #define DateTime_GetSystemtime(hdp, pst)   \
-  (DWORD)SendMessageA (hdp, DTM_GETSYSTEMTIME , 0, (LPARAM)(pst)) 
+  (DWORD)SendMessageA (hdp, DTM_GETSYSTEMTIME , 0, (LPARAM)(pst))
 #define DateTime_SetSystemtime(hdp, gd, pst)   \
   (BOOL)SendMessageA (hdp, DTM_SETSYSTEMTIME, (LPARAM)(gd), (LPARAM)(pst))
 #define DateTime_GetRange(hdp, rgst)  \
-  (DWORD)SendMessageA (hdp, DTM_GETRANGE, 0, (LPARAM)(rgst)) 
+  (DWORD)SendMessageA (hdp, DTM_GETRANGE, 0, (LPARAM)(rgst))
 #define DateTime_SetRange(hdp, gd, rgst) \
    (BOOL)SendMessageA (hdp, DTM_SETRANGE, (WPARAM)(gd), (LPARAM)(rgst))
 #define DateTime_SetFormat WINELIB_NAME_AW(DateTime_SetFormat)
