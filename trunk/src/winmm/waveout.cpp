@@ -1,4 +1,4 @@
-/* $Id: waveout.cpp,v 1.12 2000-03-02 14:51:16 sandervl Exp $ */
+/* $Id: waveout.cpp,v 1.13 2000-03-03 19:18:47 sandervl Exp $ */
 //#undef DEBUG
 /*
  * Wave out MM apis
@@ -59,8 +59,8 @@ ODINFUNCTION6FS(MMRESULT, waveOutOpen,
         return(MMSYSERR_INVALPARAM);
 
   if(fdwOpen == WAVE_FORMAT_QUERY) {
-        if(DartWaveOut::queryFormat(pwfx->wFormatTag, pwfx->nChannels,
-                                    pwfx->nSamplesPerSec, pwfx->nBlockAlign) == TRUE) {
+        if(DartWaveOut::queryFormat(pwfx->wFormatTag, pwfx->nChannels, pwfx->nSamplesPerSec,
+                                    pwfx->wBitsPerSample) == TRUE) {
                 return(MMSYSERR_NOERROR);
         }
         else    return(WAVERR_BADFORMAT);
