@@ -1,4 +1,4 @@
-/* $Id: uitools.cpp,v 1.27 2000-05-02 20:50:49 sandervl Exp $ */
+/* $Id: uitools.cpp,v 1.28 2001-01-11 18:04:19 sandervl Exp $ */
 /*
  * User Interface Functions
  *
@@ -1712,7 +1712,7 @@ BOOL WIN32API DrawIconEx(HDC hdc, int xLeft, int yTop, HICON hIcon,
   if (hbrFlickerFreeDraw)
   {
     HDC hBmpDC = CreateCompatibleDC(hdc);
-    HBITMAP memBmp,oldMemBmp = CreateCompatibleBitmap(hdc,cxWidth,cyWidth);
+    HBITMAP oldMemBmp, memBmp = CreateCompatibleBitmap(hdc,cxWidth,cyWidth);
     RECT rect;
 
     oldMemBmp = SelectObject(hBmpDC,memBmp);
