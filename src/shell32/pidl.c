@@ -485,9 +485,9 @@ ODINFUNCTION2(BOOL, ILIsEqual,
 	
 	while (pidl1->mkid.cb && pidl2->mkid.cb)
         {
-          // compare lengths first
-          if (pidl1->mkid.cb != pidl2->mkid.cb)
-            return FALSE;
+            // compare lengths first
+            if (pidl1->mkid.cb != pidl2->mkid.cb)
+              return FALSE;
           
 //	    _ILSimpleGetText(pidltemp1, szData1, MAX_PATH);
 //	    _ILSimpleGetText(pidltemp2, szData2, MAX_PATH);
