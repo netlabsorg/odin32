@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.617 2000-01-07 17:36:05 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.618 2000-01-08 02:46:02 phaller Exp $ */
+
+ 2000-01-08: Patrick Haller <phaller@gmx.net>
+	- SHELL32:	Update: to WINE level 2000/01/08
+			*Build broken due to header file changes?*
 
  2000-01-06: Christoph Bratschi <cbratschi@datacomm.ch>
 	- GDI32: added PatBlt support for negative width/height
