@@ -1,4 +1,10 @@
-/* $Id: ChangeLog,v 1.1410 2001-05-13 19:31:31 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1411 2001-05-15 07:37:15 sandervl Exp $ */
+
+ 2001-05-15: Dietrich Teickner <Dietrich_Teickner@t-online.de>
+    - KERNEL32: o Added LOCALE_IFIRSTDAYOFWEEK case for GetLocaleInfoW
+    - COMCTL32: o Commented out TRACE call in DATETIME_ParentNotify.
+                  Wrong assumption about lParam as it's not always a pointer
+                  (WM_CREATE WM_PARENTNOTIFY lParam == hwnd -> crash)
 
  2001-05-13: Dietrich Teickner <Dietrich_Teickner@t-online.de>
     - COMCTL32: o Fixed wrong return values for datetime control
