@@ -1,4 +1,4 @@
-# $Id: setup.mak,v 1.25 2003-06-30 13:19:09 bird Exp $
+# $Id: setup.mak,v 1.26 2003-12-12 11:54:11 bird Exp $
 #
 #   The common build setup.
 #
@@ -125,7 +125,9 @@ SHT_BLDENVFRC=$(SHT_BLDENV)
 # -----------------------------------------------------------------------------
 
 # Postfix which we append for special builds.
+!ifndef _PATH_EXTRA
 _PATH_EXTRA     =
+!endif
 
 # current directory.
 PATH_CURRENT    = $(MAKEDIR)
