@@ -1,4 +1,4 @@
-/* $Id: debug.cpp,v 1.2 2000-02-16 14:25:38 sandervl Exp $ */
+/* $Id: debug.cpp,v 1.3 2000-07-03 11:20:52 bird Exp $ */
 
 /*
  * Win32 debug Subsystem for OS/2
@@ -75,3 +75,19 @@ BOOL WIN32API ContinueDebugEvent( DWORD dwProcessId, DWORD dwThreadId,
 }
 //******************************************************************************
 //******************************************************************************
+
+/**
+ * Query if the calling process is running under the context of a debugger.
+ * @returns     TRUE (non-zero)     Debugged.
+ *              FALSE               Not debugged.
+ * @status      STUB
+ * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @remark      An application could use this API to determin whether or not it is
+ *              being debugged, so that it can change behaviour and for example
+ *              provide more debug information using functions like OutputDebugString.
+ */
+BOOL WIN32API IsDebuggerPresent(VOID)
+{
+    dprintf(("KERNEL32:  IsDebuggerPresent() -> FALSE\n"));
+    return FALSE;
+}
