@@ -1,4 +1,3 @@
-/* $Id: storage.h,v 1.3 2000-09-17 10:29:44 davidr Exp $ */
 /*
  * Compound Storage (32 bit version)
  *
@@ -18,7 +17,12 @@
 
 #include "wtypes.h"
 #include "winnt.h"
+#include "wine/obj_base.h"
 #include "wine/obj_storage.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /*
  * Definitions for the file format offsets.
@@ -168,6 +172,13 @@ void*          BIGBLOCKFILE_GetROBigBlock(LPBIGBLOCKFILE This, ULONG index);
 void           BIGBLOCKFILE_ReleaseBigBlock(LPBIGBLOCKFILE This, void *pBlock);
 void           BIGBLOCKFILE_SetSize(LPBIGBLOCKFILE This, ULARGE_INTEGER newSize);
 ULARGE_INTEGER BIGBLOCKFILE_GetSize(LPBIGBLOCKFILE This);
+
+/*************************************************************************
+ * Ole Convert support
+ */
+
+void OLECONVERT_CreateOleStream(LPSTORAGE pStorage);
+HRESULT OLECONVERT_CreateCompObjStream(LPSTORAGE pStorage, LPCSTR strOleTypeName);
 
 /****************************************************************************
  * Storage32BaseImpl definitions.
@@ -321,13 +332,6 @@ struct StorageImpl
    * Pointer to the big block file abstraction
    */
   BigBlockFile* bigBlockFile; 
-
-  /*****************************************************************************************/
-  /* warning: this is a temp fix for bugs related to save file to mounted network drive    */
-  /* TBD: these lines should be removed when we will get the final fix                     */
-  /*****************************************************************************************/
-  WCHAR* srcDestFiles[2];
-  /*****************************************************************************************/
 };
 
 /*
@@ -640,7 +644,6 @@ struct StgStreamImpl
    */
   BlockChainStream*      bigBlockChain;
   SmallBlockChainStream* smallBlockChain;
-  
 };
 
 /*
@@ -735,8 +738,6 @@ void StorageUtl_ReadWord(void* buffer, ULONG offset, WORD* value);
 void StorageUtl_WriteWord(void* buffer, ULONG offset, WORD value);
 void StorageUtl_ReadDWord(void* buffer, ULONG offset, DWORD* value);
 void StorageUtl_WriteDWord(void* buffer, ULONG offset, DWORD value);
-void StorageUtl_ReadDWords(void *buffer, ULONG offset, DWORD *values,
-			   ULONG len);
 void StorageUtl_ReadGUID(void* buffer, ULONG offset, GUID* value);
 void StorageUtl_WriteGUID(void* buffer, ULONG offset, GUID* value);
 void StorageUtl_CopyPropertyToSTATSTG(STATSTG*     destination,
@@ -758,7 +759,6 @@ struct BlockChainStream
   ULONG        lastBlockNoInSequenceIndex;
   ULONG        tailIndex;
   ULONG        numBlocks;
-  BOOL         lazyInitComplete;
 };
 
 /*
@@ -864,10 +864,10 @@ ULARGE_INTEGER SmallBlockChainStream_GetSize(
 ULONG SmallBlockChainStream_GetCount(
          SmallBlockChainStream* This);
 
-// Temp
-void OLECONVERT_CreateEmbeddedOleStream(LPSTORAGE pStorage);
-HRESULT OLECONVERT_CreateCompObjStream(LPSTORAGE pStorage, LPCSTR strOleTypeName);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __STORAGE32_H__ */
 

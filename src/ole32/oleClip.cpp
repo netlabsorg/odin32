@@ -1,4 +1,4 @@
-/* $Id: oleClip.cpp,v 1.5 2000-11-24 10:29:40 sandervl Exp $ */
+/* $Id: oleClip.cpp,v 1.6 2001-01-25 20:17:23 sandervl Exp $ */
 /* 
  * 
  * Project Odin Software License can be found in LICENSE.TXT
@@ -59,7 +59,7 @@
 #include "commctrl.h"
 #include "oString.h"
 #include "heapstring.h"
-#include "storage.h"
+#include "storage32.h"
 #include <assert.h>
 
 // ======================================================================
@@ -1009,7 +1009,7 @@ static HRESULT OLEClipbrd_RenderFormat(IDataObject *pIDataObject, LPFORMATETC pF
         ProgIDFromCLSID(&clsID, &strProgID);
 
         lstrcpyWtoA(strOleTypeName, strProgID);
-        OLECONVERT_CreateEmbeddedOleStream(std.u.pstg);
+        OLECONVERT_CreateOleStream(std.u.pstg);
         OLECONVERT_CreateCompObjStream(std.u.pstg, strOleTypeName);
       }
     }

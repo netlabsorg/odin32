@@ -1,4 +1,4 @@
-/* $Id: ole32.h,v 1.13 2000-12-24 14:41:15 sandervl Exp $ */
+/* $Id: ole32.h,v 1.14 2001-01-25 20:17:23 sandervl Exp $ */
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -32,7 +32,9 @@
 //#include <uconv.h>
 #undef CALLCONV
 
+#ifdef __cplusplus
 #include <os2win.h>
+#endif
 #include <ole2ver.h>
 #include <ole.h>
 #include <ole2.h>
