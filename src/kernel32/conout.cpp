@@ -1,4 +1,4 @@
-/* $Id: conout.cpp,v 1.3 1999-06-21 18:53:51 phaller Exp $ */
+/* $Id: conout.cpp,v 1.4 1999-10-27 18:36:35 phaller Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -12,8 +12,8 @@
 #define DEBUG_LOCAL2
 #endif
 
-#undef DEBUG_LOCAL
-#undef DEBUG_LOCAL2
+//#undef DEBUG_LOCAL
+//#undef DEBUG_LOCAL2
 
 
 /*****************************************************************************
@@ -82,6 +82,7 @@
 extern "C"
 {
   void   _System _O32_SetLastError(DWORD  dwError);
+  int    _System _O32_GetLastError(void);
 }
 
 inline void SetLastError(DWORD a)
@@ -92,6 +93,15 @@ inline void SetLastError(DWORD a)
     SetFS(sel);
 }
 
+inline int GetLastError(void)
+{
+  USHORT sel = GetFS();
+  int    rc;
+
+  rc = _O32_GetLastError();
+  SetFS(sel);
+  return rc;
+}
 
 
 /*****************************************************************************
