@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.66 2000-01-06 20:07:10 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.67 2000-02-09 13:42:13 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -850,13 +850,20 @@ HINSTANCE WIN32API WinExec(LPCSTR lpCmdLine, UINT nCmdShow)
 {
  STARTUPINFOA        startinfo = {0};
  PROCESS_INFORMATION procinfo;
+ DWORD               rc;
 
     dprintf(("KERNEL32: WinExec %s\n", lpCmdLine));
     startinfo.dwFlags = nCmdShow;
     if(CreateProcessA(NULL, (LPSTR)lpCmdLine, NULL, NULL, FALSE, 0, NULL, NULL,
                       &startinfo, &procinfo) == FALSE)
     {
-    return 0;
+    	return 0;
+    }
+    //block until the launched app waits for input (or a timeout of 15 seconds)
+    //TODO: Shouldn't call Open32, but the api in user32..
+    rc = O32_WaitForInputIdle(procinfo.hProcess, 15000);
+    if(rc != 0) {
+	dprintf(("WinExec: WaitForInputIdle %x returned %x", procinfo.hProcess, rc));
     }
     return procinfo.hProcess; //correct?
 }
