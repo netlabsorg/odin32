@@ -1,4 +1,4 @@
-/* $Id: region.cpp,v 1.13 2000-10-02 16:01:57 phaller Exp $ */
+/* $Id: region.cpp,v 1.14 2000-10-02 17:43:32 sandervl Exp $ */
 
 /*
  * GDI32 region code
@@ -14,7 +14,7 @@
  */
 #define  INCL_GPI
 #define  INCL_WIN
-#include <os2.h> //no wrappers required here!
+#include <os2wrap.h> //need odin wrappers
 
 #include <win32type.h>
 #include <win32api.h>
