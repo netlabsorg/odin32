@@ -1,4 +1,4 @@
-/* $Id: windlgmsg.cpp,v 1.15 2002-07-01 11:33:09 sandervl Exp $ */
+/* $Id: windlgmsg.cpp,v 1.16 2002-08-08 12:34:37 sandervl Exp $ */
 /*
  * Win32 dialog message APIs for OS/2
  *
@@ -275,17 +275,28 @@ static BOOL DIALOG_IsDialogMessage( HWND hwndDlg, BOOL *translate, BOOL *dispatc
                 DWORD dw = SendMessageA( hwndDlg, DM_GETDEFID, 0, 0 );
                 if (HIWORD(dw) == DC_HASDEFID)
                 {
-                  //@PF If DEFID button is disabled do not press it!    
                   if (IsWindowEnabled(GetDlgItem(hwndDlg, LOWORD(dw)))) 
+                  {
                        SendMessageA( hwndDlg, WM_COMMAND,
                                      MAKEWPARAM( LOWORD(dw), BN_CLICKED ),
                                     (LPARAM)GetDlgItem(hwndDlg, LOWORD(dw)));
+                  }
                 }
                 else
                 {
-                    SendMessageA( hwndDlg, WM_COMMAND, IDOK,
+                    // @@PF Win2k here behaves this way: checks focus and then
+                    // if it is button clicks it, I also added enabled check
+                    HWND hwndCtrl = GetFocus();
+                    if (SendMessageA(hwndCtrl, WM_GETDLGCODE, 0, 0) & DLGC_UNDEFPUSHBUTTON)
+                    {
+                       if (IsWindowEnabled(hwndCtrl))
+                         SendMessageA( hwndDlg, WM_COMMAND,
+                                       MAKEWPARAM( GetDlgCtrlID(hwndCtrl), BN_CLICKED ),
+                                       (LPARAM)hwndCtrl);
+                    }
+                    else
+                       SendMessageA( hwndDlg, WM_COMMAND, IDOK,
                                     (LPARAM)GetDlgItem( hwndDlg, IDOK ) );
-
                 }
 
                 return TRUE;
