@@ -1,4 +1,4 @@
-; $Id: cppopa4.asm,v 1.3 2002-04-19 00:09:12 bird Exp $
+; $Id: cppopa4.asm,v 1.4 2002-05-02 23:15:38 bird Exp $
 ;
 
 ;
@@ -1523,7 +1523,7 @@ loc_6_7AB:                              ; CODE XREF: checkForUnwindAtCall+18j
                                         ; checkForUnwindAtCall+1Dj
                 neg     ecx
                 jz      short loc_6_7CE
-                add     [esi+ebx*4+158h], ecx
+                add     dword ptr [esi+ebx*4+158h], ecx
                 mov     eax, 0FFFFFFFCh
                 call    PERF
                 push    ebx
@@ -1597,7 +1597,7 @@ loc_6_80A:                              ; CODE XREF: checkForUnwindAtReturn+1Ej
                                         ; checkForUnwindAtReturn+25j ...
                 neg     ecx
                 jz      short loc_6_82D
-                add     [esi+ebx*4+158h], ecx
+                add     dword ptr [esi+ebx*4+158h], ecx
                 mov     eax, 0FFFFFFFBh
                 call    PERF
                 push    ebx
