@@ -1,4 +1,4 @@
-; $Id: wnetap32.def,v 1.3 1999-08-18 23:27:26 phaller Exp $
+; $Id: wnetap32.def,v 1.4 1999-08-18 23:32:03 phaller Exp $
 
 LIBRARY WNETAP32 INITINSTANCE
 DATA MULTIPLE NONSHARED
@@ -184,7 +184,7 @@ EXPORTS
   NetShareEnumSticky           = _OS2NetShareEnumSticky@28             @177
   NetShareGetInfo              = _OS2NetShareGetInfo@16                @178    ;stubonly
   NetShareSetInfo              = _OS2NetShareSetInfo@20                @179    ;stubonly
-;  NetStatisticsGet2           = _OS2NetStatisticsGet2@20              @    ;stubonly NOT in DLL but in SDK doc
+  NetStatisticsGet             = _OS2NetStatisticsGet@20               @180    ;stubonly
   NetUseAdd                    = _OS2NetUseAdd@16                      @181
   NetUseDel                    = _OS2NetUseDel@12                      @182
   NetUseEnum                   = _OS2NetUseEnum@28                     @183

@@ -1,4 +1,4 @@
-/* $Id: wnetap32.cpp,v 1.4 1999-08-18 23:27:25 phaller Exp $ */
+/* $Id: wnetap32.cpp,v 1.5 1999-08-18 23:32:02 phaller Exp $ */
 
 /*
  *
@@ -4282,6 +4282,34 @@ ODINFUNCTION4(NET_API_STATUS,OS2NetUseGetInfo,LPWSTR,  lpServerName,
 {
 
   dprintf(("NETAPI32: NetUseGetInfo not implemented\n"));
+
+  return (NERR_BASE);
+}
+
+
+/*****************************************************************************
+ * Name      : NET_API_STATUS NetStatisticsGet
+ * Purpose   : retrieves operating statistics for a service
+ * Parameters: LPWSTR  lpServerName
+ *             LPWSTR  lpService
+ *             DWORD   dwLevel
+ *             DWORD   dwOptions
+ *             LPBYTE* bufptr
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1999/08/18 00:15]
+ *****************************************************************************/
+
+ODINFUNCTION5(NET_API_STATUS,OS2NetStatisticsGet,LPWSTR,  lpServerName,
+                                                 LPWSTR,  lpService,
+                                                 DWORD,   dwLevel,
+                                                 DWORD,   dwOptions,
+                                                 LPBYTE*, bufptr)
+{
+  dprintf(("NETAPI32: NetUseStatisticsGet not implemented\n"));
 
   return (NERR_BASE);
 }
