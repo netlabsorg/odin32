@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.22 2000-12-24 14:39:54 sandervl Exp $
+# $Id: makefile,v 1.23 2001-01-18 18:12:21 sandervl Exp $
 
 #
 # Odin32 API
@@ -11,7 +11,6 @@
 # Compiler, tools, and interference rules.
 #
 !include ../../makefile.inc
-
 
 #
 # Object files. Prefix with OBJDIR and one space before the '\'.
@@ -33,9 +32,9 @@ $(OBJDIR)\olepicture.obj \
 #$(OBJDIR)\iPictureIcon.obj \
 #$(OBJDIR)\iPictureEmf.obj \
 $(OBJDIR)\typelib.obj \
-#$(OBJDIR)\itypelib.obj \
-#$(OBJDIR)\itypecomp.obj \
-#$(OBJDIR)\itypeinfo.obj \
+$(OBJDIR)\itypelib.obj \
+$(OBJDIR)\itypecomp.obj \
+$(OBJDIR)\itypeinfo.obj \
 $(OBJDIR)\hash.obj \
 $(OBJDIR)\safearray.obj \
 $(OBJDIR)\connpt.obj \
