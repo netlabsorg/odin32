@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 1999-09-11 23:45:36 bird Exp $
+# $Id: makefile,v 1.3 1999-09-13 14:29:48 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -31,7 +31,7 @@ all:
         cd ..\impdef
         $(MAKE_CMD)
         cd ..\wrc
-        $(MAKE_CMD)
+        $(MAKE_CMD) -f makefile.os2
         cd ..
 
 # compile tools needed to compile rest of the tree.
@@ -50,8 +50,8 @@ clean:
         cd ..\impdef
         $(MAKE_CMD) clean
         cd ..\wrc
-        $(MAKE_CMD) clean
+        $(MAKE_CMD) -f makefile.os2 clean
         cd ..\bin
         -$(RM) *.exe *.dll
-        cd ..
+        cd ..\..
 
