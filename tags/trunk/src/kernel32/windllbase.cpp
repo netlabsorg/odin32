@@ -1,4 +1,4 @@
-/* $Id: windllbase.cpp,v 1.25 2001-05-22 14:25:34 sandervl Exp $ */
+/* $Id: windllbase.cpp,v 1.26 2001-06-15 09:42:47 bird Exp $ */
 
 /*
  * Win32 Dll base class
@@ -31,6 +31,10 @@
 #include <win32api.h>
 #include <pefile.h>
 #include <windllbase.h>
+#include <winimagepe2lx.h>
+#include <windllpe2lx.h>
+#include <winimagelx.h>
+#include <windlllx.h>
 #include <wprocess.h>
 #include "exceptions.h"
 #include "exceptutil.h"
@@ -818,6 +822,35 @@ Win32DllBase *Win32DllBase::findModuleByAddr(ULONG address)
         }
         mod = mod->next;
     }
+    dlllistmutex.leave();
+    return(NULL);
+}
+//******************************************************************************
+//******************************************************************************
+Win32DllBase *Win32DllBase::findModuleByOS2Handle(HINSTANCE hinstance)
+{
+    dlllistmutex.enter();
+
+    for (Win32DllBase *pMod = Win32DllBase::getFirst(); pMod; pMod = pMod->getNext())
+    {
+        if (pMod->isLxDll())
+        {
+            if (((Win32LxDll *)pMod)->getHMOD() == hinstance)
+            {
+                dlllistmutex.leave();
+                return(pMod);
+            }
+        }
+        else if (pMod->isPe2LxDll())
+        {
+            if (((Win32Pe2LxDll *)pMod)->getHMOD() == hinstance)
+            {
+                dlllistmutex.leave();
+                return(pMod);
+            }
+        }
+    }
+
     dlllistmutex.leave();
     return(NULL);
 }

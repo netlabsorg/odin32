@@ -1,4 +1,4 @@
-/* $Id: windlllx.h,v 1.3 2001-02-09 18:31:05 sandervl Exp $ */
+/* $Id: windlllx.h,v 1.4 2001-06-15 09:42:48 bird Exp $ */
 
 /*
  * Win32 LX Dll class (compiled in OS/2 using Odin32 api)
@@ -18,24 +18,25 @@
 class Win32LxDll : public Win32LxImage, public Win32DllBase
 {
 public:
-	Win32LxDll(HINSTANCE hInstance, WIN32DLLENTRY DllEntryPoint, PVOID pResData,
+    Win32LxDll(HINSTANCE hInstance, WIN32DLLENTRY DllEntryPoint, PVOID pResData,
                    DWORD MajorImageVersion, DWORD MinorImageVersion,
                    DWORD Subsystem);
 virtual ~Win32LxDll();
 
 #ifdef DEBUG
-virtual	ULONG     AddRef(char *parentname = NULL);
+virtual ULONG     AddRef(char *parentname = NULL);
 #else
 virtual ULONG     AddRef();
 #endif
-virtual	ULONG     Release();
+virtual ULONG     Release();
 
         void      setDllHandleOS2(HINSTANCE hInstanceOS2);
 
-virtual BOOL      isLxDll();
+virtual BOOL      isPe2LxDll() const;
+virtual BOOL      isLxDll() const;
 
 static  Win32LxDll *findModuleByOS2Handle(HINSTANCE hinstance);
-    
+
 protected:
         DWORD     MajorImageVersion;
         DWORD     MinorImageVersion;

@@ -1,4 +1,4 @@
-/* $Id: windllpe2lx.cpp,v 1.8 2000-08-11 10:56:19 sandervl Exp $ */
+/* $Id: windllpe2lx.cpp,v 1.9 2001-06-15 09:42:48 bird Exp $ */
 
 /*
  * Win32 PE2LX Dll class
@@ -34,7 +34,7 @@
 #include "conwin.h"         // Windows Header for console only
 #include "console.h"
 
-#define DBG_LOCALLOG	DBG_windllpe2lx
+#define DBG_LOCALLOG    DBG_windllpe2lx
 #include "dbglocal.h"
 
 
@@ -172,6 +172,19 @@ BOOL Win32Pe2LxDll::init()
     return TRUE;
 }
 
+
+/**
+ * Simple question: Pe2Lx DLL? Yes!
+ * @returns   TRUE.
+ * @status    completely implemented.
+ * @author    knut st. osmundsen
+ */
+BOOL Win32Pe2LxDll::isPe2LxDll() const
+{
+    return TRUE;
+}
+
+
 /**
  * Simple question: -Native LX dll?
  *                  -No!
@@ -179,8 +192,10 @@ BOOL Win32Pe2LxDll::init()
  * @status    completely implemented.
  * @author    Sander van Leeuwen
  */
-BOOL Win32Pe2LxDll::isLxDll()
+BOOL Win32Pe2LxDll::isLxDll() const
 {
     return FALSE;
 }
+
+
 
