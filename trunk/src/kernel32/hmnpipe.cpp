@@ -1,4 +1,4 @@
-/* $Id: hmnpipe.cpp,v 1.8 2002-02-15 19:14:51 sandervl Exp $ */
+/* $Id: hmnpipe.cpp,v 1.9 2002-02-15 20:15:55 sandervl Exp $ */
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -181,6 +181,7 @@ BOOL HMDeviceNamedPipeClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
 {
   dprintf(("KERNEL32: HMDeviceNamedPipeClass::CloseHandle(%08x)", pHMHandleData->hHMHandle));
 
+  OSLibDosDisconnectNamedPipe(pHMHandleData->hHMHandle);
   return OSLibDosClose(pHMHandleData->hHMHandle);
 }
 //******************************************************************************
@@ -371,13 +372,13 @@ BOOL HMDeviceNamedPipeClass::ReadFile(PHMHANDLEDATA pHMHandleData,
     dprintf(("ERROR: Overlapped IO not yet implememented!!"));
   }
 
-  bRC = HMDeviceFileClass::WriteFile(pHMHandleData,
-                                     lpBuffer,
-                                     nNumberOfBytesToRead,
-                                     lpNumberOfBytesRead,
-                                     lpOverlapped, lpCompletionRoutine);
+  bRC = HMDeviceFileClass::ReadFile(pHMHandleData,
+                                    lpBuffer,
+                                    nNumberOfBytesToRead,
+                                    lpNumberOfBytesRead,
+                                    lpOverlapped, lpCompletionRoutine);
 
-  dprintf(("KERNEL32: HMDeviceNamedPipeClass::ReadFile returned %08xh; bytes written %d",
+  dprintf(("KERNEL32: HMDeviceNamedPipeClass::ReadFile returned %08xh; bytes read %d",
            bRC, *lpNumberOfBytesRead));
 
   return bRC;
