@@ -1,4 +1,4 @@
-/* $Id: heapstring.h,v 1.6 1999-10-04 20:51:52 sandervl Exp $ */
+/* $Id: heapstring.h,v 1.7 1999-12-05 10:02:01 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -30,10 +30,10 @@ LPSTR  WIN32API lstrcpynA      (LPSTR arg1, LPCSTR  arg2, int arg3);
 LPWSTR WIN32API lstrcpynW      (LPWSTR dest, LPCWSTR src, int arg3);
 int    WIN32API lstrcmpiA      (LPCSTR arg1, LPCSTR  arg2);
 int    WIN32API lstrcmpiW      (LPCWSTR arg1, LPCWSTR arg2);
-int    WIN32API lstrcpynAtoW   (LPWSTR unicode, LPSTR ascii, int asciilen);
-int    WIN32API lstrcpynWtoA   (LPSTR ascii, LPWSTR unicode, int unilen);
-LPSTR  WIN32API lstrcpyWtoA    (LPSTR ascii, LPWSTR unicode);
-LPWSTR WIN32API lstrcpyAtoW    (LPWSTR unicode, LPSTR ascii);
+int    WIN32API lstrcpynAtoW   (LPWSTR unicode, LPCSTR ascii, int asciilen);
+int    WIN32API lstrcpynWtoA   (LPSTR ascii, LPCWSTR unicode, int unilen);
+LPSTR  WIN32API lstrcpyWtoA    (LPSTR ascii, LPCWSTR unicode);
+LPWSTR WIN32API lstrcpyAtoW    (LPWSTR unicode, LPCSTR ascii);
 
 LPVOID WIN32API HEAP_xalloc    ( HANDLE heap, DWORD flags, DWORD size );
 LPVOID WIN32API HEAP_xrealloc  ( HANDLE heap, DWORD flags, LPVOID lpMem, DWORD size );
