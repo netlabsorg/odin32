@@ -1,4 +1,4 @@
-/* $Id: progress.c,v 1.11 1999-10-24 22:49:46 sandervl Exp $ */
+/* $Id: progress.c,v 1.12 2000-01-26 18:04:29 cbratschi Exp $ */
 /*
  * Progress control
  *
@@ -20,7 +20,7 @@
 /* Control configuration constants */
 
 #define LED_GAP      2
-#define BORDER_WIDTH 3
+#define BORDER_WIDTH 1
 
 /* Work constants */
 
@@ -63,21 +63,7 @@ PROGRESS_Draw (HWND hwnd, HDC hdc, INT lastVal, BOOL inUpdate)
   GetClientRect (hwnd, &rect);
 
   /* draw the background */
-  if (!inUpdate)
-  {
-    FillRect(hdc, &rect, hbrBk);
-    //Border
-    hbrLight = GetSysColorPen(COLOR_BTNHILIGHT);
-    hbrShadow = GetSysColorPen(COLOR_BTNSHADOW);
-    MoveToEx(hdc,rect.left,rect.bottom-1,NULL);
-    hbrOld = SelectObject(hdc,hbrShadow);
-    LineTo(hdc,rect.left,rect.top);
-    LineTo(hdc,rect.right-1,rect.top);
-    SelectObject(hdc,hbrLight);
-    LineTo(hdc,rect.right-1,rect.bottom-1);
-    LineTo(hdc,rect.left,rect.bottom-1);
-    SelectObject(hdc,hbrOld);
-  }
+  if (!inUpdate) FillRect(hdc, &rect, hbrBk);
 
   rect.left += BORDER_WIDTH;
   rect.right -= BORDER_WIDTH;
