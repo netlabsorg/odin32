@@ -1,4 +1,4 @@
-/* $Id*/
+/* $Id: handlenames.cpp,v 1.4 2002-04-08 11:22:47 phaller Exp $ */
 
 /*
  * Win32 Handle Manager Object Namespace for OS/2
