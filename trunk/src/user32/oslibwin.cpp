@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.79 2000-06-07 14:51:26 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.80 2000-06-14 13:15:24 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -808,6 +808,18 @@ BOOL OSLibWinChangeTaskList(HANDLE hTaskList, HWND hwndFrame, char *title, BOOL 
 	swctrl.uchVisibility    = SWL_INVISIBLE;
   }
   return (WinChangeSwitchEntry(hTaskList, &swctrl)) ? FALSE : TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+ULONG OSLibGetScreenHeight()
+{
+  return ScreenHeight;
+}
+//******************************************************************************
+//******************************************************************************
+ULONG OSLibGetScreenWidth()
+{
+  return ScreenWidth;
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.50 2000-06-08 18:07:06 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.51 2000-06-14 13:17:50 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -84,57 +84,6 @@ HGDIOBJ WIN32API GetStockObject(int arg1)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API GetObjectA( HGDIOBJ hObject, int size, void *lpBuffer)
-{
- int rc;
-
-  if(size == 0 || lpBuffer == NULL) {
-        SetLastError(ERROR_INVALID_PARAMETER);
-        return 0;
-  }
-
-  if(DIBSection::getSection() != NULL)
-  {
-        DIBSection *dsect = DIBSection::find(hObject);
-        if(dsect)
-        {
-                rc = dsect->GetDIBSection(size, lpBuffer);
-                if(rc == 0) {
-                        SetLastError(ERROR_INVALID_PARAMETER);
-                        return 0;
-                }
-                SetLastError(ERROR_SUCCESS);
-                return rc;
-        }
-  }
-
-  dprintf(("GDI32: GetObject %X %X %X\n", hObject, size, lpBuffer));
-  return O32_GetObject(hObject, size, lpBuffer);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API GetObjectW( HGDIOBJ arg1, int arg2, void *  arg3)
-{
-    dprintf(("GDI32: GetObjectW %X, %d %X not complete!", arg1, arg2, arg3));
-    return GetObjectA(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API GetObjectType( HGDIOBJ arg1)
-{
-    dprintf2(("GDI32: GetObjectType\n"));
-    return O32_GetObjectType(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API DeleteObject(HANDLE hObj)
-{
-    dprintf(("GDI32: DeleteObject %x", hObj));
-    DIBSection::deleteSection((DWORD)hObj);
-    return O32_DeleteObject(hObj);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API DeleteDC( HDC hdc)
 {
     dprintf(("GDI32: DeleteDC %x", hdc));
@@ -204,41 +153,6 @@ BOOL WIN32API StrokePath( HDC arg1)
 {
     dprintf(("GDI32: StrokePath\n"));
     return O32_StrokePath(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-HGDIOBJ WIN32API SelectObject(HDC hdc, HGDIOBJ hObj)
-{
- HGDIOBJ rc;
-
-    dprintf2(("GDI32: SelectObject %x %x", hdc, hObj));
-
-    if(DIBSection::getSection() != NULL)
-    {
-      DIBSection *dsect;
-
-      dsect = DIBSection::find(hdc);
-      if(dsect)
-      {
-        //remove previously selected dibsection
-        dsect->UnSelectDIBObject();
-      }
-      dsect = DIBSection::find((DWORD)hObj);
-      if(dsect)
-      {
-        dsect->SelectDIBObject(hdc);
-      }
-    }
-    rc = O32_SelectObject(hdc, hObj);
-    if(rc != 0 && DIBSection::getSection != NULL)
-    {
-      DIBSection *dsect = DIBSection::find((DWORD)rc);
-      if(dsect)
-      {
-        dsect->UnSelectDIBObject();
-      }
-    }
-    return(rc);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1484,13 +1398,6 @@ DWORD WIN32API GetGlyphOutlineW(HDC hdc, UINT uChar, UINT uFormat, LPGLYPHMETRIC
 }
 //******************************************************************************
 
-//******************************************************************************
-BOOL WIN32API SetObjectOwner( HGDIOBJ arg1, int arg2 )
-{
-  // Here is a guess for a undocumented entry
-  dprintf(("GDI32: SetObjectOwner - stub (TRUE)\n"));
-  return TRUE;
-}
 //******************************************************************************
 
 

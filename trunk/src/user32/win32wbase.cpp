@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.200 2000-06-08 18:10:11 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.201 2000-06-14 13:15:25 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2052,7 +2052,9 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
  RECT  newPos = {0, 0, 0, 0};
 
     dprintf(("ShowWindow %x %x", getWindowHandle(), nCmdShow));
-
+    if(getWindowHandle() == 0x68000030 && nCmdShow == 0) {
+	rc = 0;
+    }
     wasVisible = (getStyle() & WS_VISIBLE) != 0;
 
     switch(nCmdShow)
@@ -2385,7 +2387,6 @@ BOOL Win32BaseWindow::DestroyWindow()
         }
         else DebugInt3();
     }
-
     /* Hide the window */
     if(IsWindowVisible())
     {

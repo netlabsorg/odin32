@@ -1,4 +1,4 @@
-/* $Id: dbglocal.cpp,v 1.2 2000-02-22 19:11:48 sandervl Exp $ */
+/* $Id: dbglocal.cpp,v 1.3 2000-06-14 13:17:49 sandervl Exp $ */
 
 /*
  * debug logging functions for OS/2
@@ -34,7 +34,8 @@ char  *DbgFileNames[DBG_MAXFILES] =
 "metafile",
 "dibitmap",
 "blit",
-"rgbcvt"
+"rgbcvt",
+"objhandle"
 };
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: oslibgpi.cpp,v 1.4 2000-02-16 14:18:11 sandervl Exp $ */
+/* $Id: oslibgpi.cpp,v 1.5 2000-06-14 13:17:51 sandervl Exp $ */
 
 /*
  * GPI interface code
@@ -16,6 +16,7 @@
 #include <string.h>
 #include <math.h>
 #include "win32type.h"
+#include <winconst.h>
 #include "oslibgpi.h"
 #include "dcdata.h"
 
@@ -115,6 +116,42 @@ BOOL excludeBottomRightPoint(PVOID pHps,PPOINTLOS2 pptl)
   sortAscending(pptl[0], pptl[1]);
 
   return TRUE;
+}
+
+BOOL includeBottomRightPoint(PVOID pHps,PPOINTLOS2 pptl)
+{
+    if(GetDCData(pHps)->graphicsMode != GM_COMPATIBLE_W)
+    {
+        return TRUE;  // already inclusive/inclusive
+    }
+
+    if(pptl[0].x == pptl[1].x || pptl[0].y == pptl[1].y)
+    {
+        return FALSE; // empty rectangle
+    }
+
+    if(GetDCData(pHps)->isLeftLeft)
+    {
+        pptl[1].x += abs(GetDCData(pHps)->worldXDeltaFor1Pixel);
+        sortAscending(pptl[0].x, pptl[1].x);
+    }
+    else
+    {
+        pptl[0].x -= abs(GetDCData(pHps)->worldXDeltaFor1Pixel);
+        sortAscending(pptl[1].x, pptl[0].x);
+    }
+
+    if(GetDCData(pHps)->isTopTop)
+    {
+        pptl[1].y += abs(GetDCData(pHps)->worldYDeltaFor1Pixel);
+        sortAscending(pptl[1].y, pptl[0].y);
+    }
+    else
+    {
+        pptl[0].y -= abs(GetDCData(pHps)->worldYDeltaFor1Pixel);
+        sortAscending(pptl[0].y, pptl[1].y);
+    }
+    return TRUE;
 }
 
 BOOL getAlignUpdateCP(PVOID pHps)
@@ -349,4 +386,5 @@ BOOL OSLibGpiSetCp(HDC hdc, ULONG codepage)
 {
   return GpiSetCp(hdc, codepage);
 }
+
 
