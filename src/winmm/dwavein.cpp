@@ -1,4 +1,4 @@
-/* $Id: dwavein.cpp,v 1.1 2001-02-27 21:13:59 sandervl Exp $ */
+/* $Id: dwavein.cpp,v 1.2 2001-03-19 19:28:38 sandervl Exp $ */
 
 /*
  * Wave record class
@@ -53,12 +53,11 @@ DartWaveIn::DartWaveIn(LPWAVEFORMATEX pwfx)
 }
 /******************************************************************************/
 /******************************************************************************/
-DartWaveIn::DartWaveIn(LPWAVEFORMATEX pwfx, ULONG nCallback, ULONG dwInstance, USHORT usSel)
+DartWaveIn::DartWaveIn(LPWAVEFORMATEX pwfx, ULONG nCallback, ULONG dwInstance)
 {
    Init(pwfx);
 
    mthdCallback     = (LPDRVCALLBACK)nCallback; // callback function
-   selCallback      = usSel;                    // callback win32 tib selector
    this->dwInstance = dwInstance;
    fOverrun        = FALSE;
 
@@ -81,19 +80,27 @@ DartWaveIn::DartWaveIn(LPWAVEFORMATEX pwfx, HWND hwndCallback)
 void DartWaveIn::callback(HDRVR h, UINT uMessage, DWORD dwUser, DWORD dw1, DWORD dw2)
 {
   USHORT selTIB = GetFS(); // save current FS selector
+  USHORT selCallback;
 
     dprintf(("WINMM:DartWaveIn::callback(HDRVR h=%08xh, UINT uMessage=%08xh, DWORD dwUser=%08xh, DWORD dw1=%08xh, DWORD dw2=%08xh)\n",
               h, uMessage, dwUser, dw1, dw2));
 
-    if (selCallback != 0)
-        SetFS(selCallback);      // switch to callback win32 tib selector (stored in waveInOpen)
-    else
-        dprintf(("WINMM:DartWaveIn::callback - selCallback is invalid"));
+    selCallback = GetProcessTIBSel();
 
-    //@@@PH 1999/12/28 Shockwave Flashes seem to make assumptions on a
-    // specific stack layout. Do we have the correct calling convention here?
-    mthdCallback(h,uMessage,dwUser,dw1,dw2);
-    SetFS(selTIB);           // switch back to the saved FS selector
+    //TODO: may not be very safe. perhaps we should allocate a new TIB for the DART thread or let another thread do the actual callback
+    if(selCallback)
+    {
+        SetFS(selCallback);      // switch to callback win32 tib selector (stored in waveOutOpen)
+
+        //@@@PH 1999/12/28 Shockwave Flashes seem to make assumptions on a
+        // specific stack layout. Do we have the correct calling convention here?
+        mthdCallback(h,uMessage,dwUser,dw1,dw2);
+        SetFS(selTIB);           // switch back to the saved FS selector
+    }
+    else {
+        dprintf(("WARNING: no valid selector of main thread available (process exiting); skipping waveout notify"));
+    }
+    dprintf(("WINMM:DartWaveOut::callback returned"));
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -108,10 +115,8 @@ void DartWaveIn::Init(LPWAVEFORMATEX pwfx)
    wavehdr       = NULL;
    mthdCallback  = NULL;
    hwndCallback  = 0;
-   selCallback   = 0;
    dwInstance    = 0;
    ulError       = 0;
-   selCallback   = 0;
    State         = STATE_STOPPED;
 
    MixBuffer     = (MCI_MIX_BUFFER *)malloc(PREFILLBUF_DART_REC*sizeof(MCI_MIX_BUFFER));
@@ -449,43 +454,45 @@ MMRESULT DartWaveIn::stop()
 MMRESULT DartWaveIn::reset()
 {
  MCI_GENERIC_PARMS Params;
+ LPWAVEHDR tmpwavehdr;
 
-  dprintf(("DartWaveIn::reset %s", (State == STATE_RECORDING) ? "recording" : "stopped"));
-  if(State != STATE_RECORDING)
+    dprintf(("DartWaveIn::reset %s", (State == STATE_RECORDING) ? "recording" : "stopped"));
+    if(State != STATE_RECORDING)
         return(MMSYSERR_HANDLEBUSY);
 
-  memset(&Params, 0, sizeof(Params));
+    memset(&Params, 0, sizeof(Params));
 
-  // Stop recording
-  mciSendCommand(DeviceId, MCI_STOP, MCI_WAIT, (PVOID)&Params, 0);
+    // Stop recording
+    mciSendCommand(DeviceId, MCI_STOP, MCI_WAIT, (PVOID)&Params, 0);
 
-  dprintf(("Nr of threads blocked on mutex = %d\n", wmutex->getNrBlocked()));
+    dprintf(("Nr of threads blocked on mutex = %d\n", wmutex->getNrBlocked()));
 
-  wmutex->enter(VMUTEX_WAIT_FOREVER);
-  while(wavehdr)
-  {
+    wmutex->enter(VMUTEX_WAIT_FOREVER);
+    while(wavehdr)
+    {
         wavehdr->dwFlags |= WHDR_DONE;
         wavehdr->dwFlags &= ~WHDR_INQUEUE;
-        wavehdr = wavehdr->lpNext;
-        wavehdr->lpNext = NULL;
+        tmpwavehdr         = wavehdr;
+        wavehdr            = wavehdr->lpNext;
+        tmpwavehdr->lpNext = NULL;
 
         wmutex->leave();
         if(mthdCallback) {
-            callback((ULONG)this, WIM_DATA, dwInstance, (ULONG)wavehdr, 0);
+            callback((ULONG)this, WIM_DATA, dwInstance, (ULONG)tmpwavehdr, 0);
         }
         else
         if(hwndCallback) {
             dprintf(("Callback (msg) for buffer %x", wavehdr));
-            PostMessageA(hwndCallback, WIM_DATA, (WPARAM)this, (ULONG)wavehdr);
+            PostMessageA(hwndCallback, WIM_DATA, (WPARAM)this, (ULONG)tmpwavehdr);
         }
         wmutex->enter(VMUTEX_WAIT_FOREVER);
-  }
-  wavehdr   = NULL;
-  State     = STATE_STOPPED;
-  fOverrun = FALSE;
+    }
+    wavehdr   = NULL;
+    State     = STATE_STOPPED;
+    fOverrun = FALSE;
 
-  wmutex->leave();
-  return(MMSYSERR_NOERROR);
+    wmutex->leave();
+    return(MMSYSERR_NOERROR);
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -494,7 +501,7 @@ MMRESULT DartWaveIn::addBuffer(LPWAVEHDR pwh, UINT cbwh)
  int i;
 
     wmutex->enter(VMUTEX_WAIT_FOREVER);
-    pwh->lpNext   = NULL;
+    pwh->lpNext          = NULL;
     pwh->dwBytesRecorded = 0;
     if(wavehdr) {
         WAVEHDR *chdr = wavehdr;
@@ -584,29 +591,27 @@ BOOL DartWaveIn::queryFormat(ULONG formatTag, ULONG nChannels,
 void DartWaveIn::mciError(ULONG ulError)
 {
 #ifdef DEBUG
- char szError[256] = "";
+    char szError[256] = "";
 
-  mciGetErrorString(ulError, szError, sizeof(szError));
-  dprintf(("WINMM: DartWaveIn: %s\n", szError));
+    mciGetErrorString(ulError, szError, sizeof(szError));
+    dprintf(("WINMM: DartWaveIn: %s\n", szError));
 #endif
 }
 //******************************************************************************
 //******************************************************************************
 BOOL DartWaveIn::find(DartWaveIn *dwave)
 {
- DartWaveIn *curwave = wavein;
+    DartWaveIn *curwave = wavein;
 
-  while(curwave) {
-    if(dwave == curwave) {
-        return(TRUE);
+    while(curwave) {
+        if(dwave == curwave) {
+            return(TRUE);
+        }
+        curwave = curwave->next;
     }
-    curwave = curwave->next;
-  }
 
-#ifdef DEBUG
-//  WriteLog("WINMM:DartWaveIn not found!\n");
-#endif
-  return(FALSE);
+    dprintf2(("WINMM:DartWaveIn not found!"));
+    return(FALSE);
 }
 /******************************************************************************/
 //Simple implementation of recording. We fill up buffers queued by the application
@@ -618,15 +623,13 @@ void DartWaveIn::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags)
  ULONG    buflength, bufpos, bytestocopy;
  WAVEHDR *whdr, *prevhdr = NULL;
 
-#ifdef DEBUG1
-    dprintf(("WINMM: DartWaveIn handler %x\n", pBuffer));
-#endif
+    dprintf2(("WINMM: DartWaveIn handler %x\n", pBuffer));
     if(ulFlags == MIX_STREAM_ERROR) {
         if(ulStatus == ERROR_DEVICE_OVERRUN) {
             dprintf(("WINMM: ERROR: WaveIn handler ERROR_DEVICE_OVERRUN!\n"));
             if(State == STATE_RECORDING) {
                 fOverrun = TRUE;
-                stop();    //out of buffers, so pause playback
+                stop();    //out of buffers, so stop playback
             }
             return;
         }
@@ -644,10 +647,6 @@ void DartWaveIn::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags)
         return;
     }
 
-#ifdef DEBUG1
-    dprintf(("WINMM: DartWaveIn handler cur (%d,%d), fill (%d,%d)\n", curPlayBuf, curPlayPos, curFillBuf, curFillPos));
-#endif
-
     buflength = pBuffer->ulBufferLength;
     bufpos    = 0;
     while(buflength) {
@@ -662,10 +661,9 @@ void DartWaveIn::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags)
             wavehdr->dwBytesRecorded += bytestocopy;
             buflength                -= bytestocopy;
 
-            if(wavehdr->dwBytesRecorded == wavehdr->dwBufferLength) {
-#ifdef DEBUG1
-                dprintf(("WINMM: DartWaveIn handler buf %X done\n", whdr));
-#endif
+            if(wavehdr->dwBytesRecorded == wavehdr->dwBufferLength)
+            {
+                dprintf2(("WINMM: DartWaveIn handler buf %X done\n", whdr));
                 whdr->dwFlags |= WHDR_DONE;
                 whdr->dwFlags &= ~WHDR_INQUEUE;
 
@@ -674,13 +672,13 @@ void DartWaveIn::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags)
                 wmutex->leave();
 
                 if(mthdCallback) {
-                    callback((ULONG)this, WIM_DATA, dwInstance, (ULONG)whdr, 0);
+                    callback((ULONG)this, WIM_DATA, dwInstance, (ULONG)whdr, whdr->dwBytesRecorded);
                 }
                 else
                 if(hwndCallback) {
-    		        dprintf(("Callback (msg) for buffer %x", whdr));
-    	            PostMessageA(hwndCallback, WIM_DATA, (WPARAM)this, (ULONG)whdr);
-    	        }
+                    dprintf(("Callback (msg) for buffer %x", whdr));
+                    PostMessageA(hwndCallback, WIM_DATA, (WPARAM)this, (ULONG)whdr);
+                }
                 wmutex->enter(VMUTEX_WAIT_FOREVER);
             }
         }
@@ -700,11 +698,6 @@ LONG APIENTRY WaveInHandler(ULONG ulStatus,
                             PMCI_MIX_BUFFER pBuffer,
                             ULONG ulFlags)
 {
-    // PTIB ptib;
-    // PPIB ppib;
-    // DosGetInfoBlocks(&ptib, &ppib);
-    // dprintf(("WaveInHandler: thread %d prio %X", ptib->tib_ptib2->tib2_ultid, ptib->tib_ptib2->tib2_ulpri));
-
     DartWaveIn *dwave;
 
     if(pBuffer && pBuffer->ulUserParm)

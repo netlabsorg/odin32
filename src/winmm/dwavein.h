@@ -1,4 +1,4 @@
-/* $Id: dwavein.h,v 1.1 2001-02-27 21:13:59 sandervl Exp $ */
+/* $Id: dwavein.h,v 1.2 2001-03-19 19:28:38 sandervl Exp $ */
 
 /*
  * Wave playback class
@@ -30,7 +30,7 @@
 class DartWaveIn
 {
 public:
-              DartWaveIn(LPWAVEFORMATEX pwfx, ULONG nCallback, ULONG dwInstance, USHORT usSel);
+              DartWaveIn(LPWAVEFORMATEX pwfx, ULONG nCallback, ULONG dwInstance);
               DartWaveIn(LPWAVEFORMATEX pwfx, HWND hwndCallback);
               DartWaveIn(LPWAVEFORMATEX pwfx);
              ~DartWaveIn();
@@ -76,7 +76,6 @@ private:
 
     // callback interface
     LPDRVCALLBACK mthdCallback; // pointer to win32 routine for the callback
-    USHORT        selCallback;  // the win32 tib selector for the callback (saved at waveOutOpen)
     void          callback(HDRVR h, UINT uMessage, DWORD dwUser, DWORD dw1, DWORD dw2);
     HWND          hwndCallback;
     DWORD         dwInstance;

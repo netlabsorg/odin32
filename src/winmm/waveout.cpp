@@ -1,4 +1,4 @@
-/* $Id: waveout.cpp,v 1.17 2001-02-27 21:14:00 sandervl Exp $ */
+/* $Id: waveout.cpp,v 1.18 2001-03-19 19:28:39 sandervl Exp $ */
 //#undef DEBUG
 /*
  * Wave out MM apis
@@ -72,8 +72,7 @@ ODINFUNCTION6(MMRESULT, waveOutOpen,
   else
   if(fdwOpen == CALLBACK_FUNCTION)
   {
-        //@@@PH 1999/12/28 save valid FS: to win32 TIB
-        *phwo = (HWAVEOUT)new DartWaveOut(pwfx, dwCallback, dwInstance, GetFS());
+        *phwo = (HWAVEOUT)new DartWaveOut(pwfx, dwCallback, dwInstance);
   }
   else  *phwo = (HWAVEOUT)new DartWaveOut(pwfx);
 
@@ -239,9 +238,11 @@ ODINFUNCTION3(MMRESULT, waveOutGetPosition,
         switch (pmmt->wType) {
         case TIME_BYTES:
             pmmt->u.cb = position;
+            dprintf2(("WINMM:waveOutGetPosition: TIME_BYTES %d (%x)", position, GetCurrentTime()));
             break;
         case TIME_SAMPLES:
             pmmt->u.sample = position * 8 / dwave->getBitsPerSample();
+            dprintf2(("WINMM:waveOutGetPosition: TIME_SAMPLES %d", pmmt->u.sample));
             break;
         case TIME_SMPTE:
         {
@@ -254,6 +255,7 @@ ODINFUNCTION3(MMRESULT, waveOutGetPosition,
             timeval -= pmmt->u.smpte.sec * 30;
             pmmt->u.smpte.frame = timeval;
             pmmt->u.smpte.fps = 30;
+            dprintf2(("WINMM:waveOutGetPosition: TIME_SAMPLES %d", position));
             break;
         }
         default:
@@ -261,7 +263,7 @@ ODINFUNCTION3(MMRESULT, waveOutGetPosition,
             pmmt->wType = TIME_MS;
         case TIME_MS:
             pmmt->u.ms = position / (dwave->getAvgBytesPerSecond() / 1000);
-            dprintf(("WINMM:waveOutGetPosition: TIME_MS pos=%d ms=%d time=%d", position, pmmt->u.ms, GetCurrentTime()));
+            dprintf2(("WINMM:waveOutGetPosition: TIME_MS pos=%d ms=%d time=%d", position, pmmt->u.ms, GetCurrentTime()));
             break;
         }
         return MMSYSERR_NOERROR;
