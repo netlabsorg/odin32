@@ -1,4 +1,4 @@
-/* $Id: shellapi.h,v 1.9 2000-08-30 13:56:38 sandervl Exp $ */
+/* $Id: shellapi.h,v 1.10 2000-11-24 13:15:55 sandervl Exp $ */
 
 #ifndef _WINE_SHELLAPI_H
 #define _WINE_SHELLAPI_H
@@ -312,9 +312,20 @@ HICON	WINAPI ExtractIconW(HINSTANCE,LPCWSTR,UINT);
 HICON     WINAPI ExtractAssociatedIconA(HINSTANCE,LPSTR,LPWORD);
 HICON     WINAPI ExtractAssociatedIconW(HINSTANCE,LPWSTR,LPWORD);
 
+#ifdef __WIN32OS2__
+
+UINT WINAPI ExtractIconExA( LPCSTR, INT, HICON *, HICON *, UINT );
+UINT WINAPI ExtractIconExW( LPCWSTR, INT, HICON *, HICON *, UINT );
+UINT WINAPI ExtractIconExAW(LPCVOID, INT, HICON *, HICON *, UINT );
+
+#else /* __WIN32OS2__ */
+
+/* Return types are wrong according to SDK docs. */
 HICON WINAPI ExtractIconExA( LPCSTR, INT, HICON *, HICON *, UINT );
 HICON WINAPI ExtractIconExW( LPCWSTR, INT, HICON *, HICON *, UINT );
 HICON WINAPI ExtractIconExAW(LPCVOID, INT, HICON *, HICON *, UINT );
+
+#endif /* __WIN32OS2__ */
 
 HINSTANCE WINAPI FindExecutableA(LPCSTR,LPCSTR,LPSTR);
 HINSTANCE WINAPI FindExecutableW(LPCWSTR,LPCWSTR,LPWSTR);
