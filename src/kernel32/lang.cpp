@@ -1,4 +1,4 @@
-/* $Id: lang.cpp,v 1.25 2000-07-07 19:05:10 sandervl Exp $ */
+/* $Id: lang.cpp,v 1.26 2000-08-19 18:36:41 sandervl Exp $ */
 /*
  * Win32 language API functions for OS/2
  *
@@ -150,28 +150,28 @@ BOOL WIN32API IsValidCodePage(UINT CodePage)
 //******************************************************************************
 LCID WIN32API GetUserDefaultLCID(void)
 {
-  dprintf(("KERNEL32:  OS2GetUserDefaultLCID: returns %x", MAKELCID(GetLanguageId(), SORT_DEFAULT)));
+  dprintf2(("KERNEL32: GetUserDefaultLCID: returns %x", MAKELCID(GetLanguageId(), SORT_DEFAULT)));
   return(MAKELCID(GetLanguageId(), SORT_DEFAULT));
 }
 //******************************************************************************
 //******************************************************************************
 LCID WIN32API GetSystemDefaultLCID(void)
 {
-  dprintf(("KERNEL32:  OS2GetSystemDefaultLCID: returns %x", MAKELCID(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US), SORT_DEFAULT)));
+  dprintf2(("KERNEL32: GetSystemDefaultLCID: returns %x", MAKELCID(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US), SORT_DEFAULT)));
   return(MAKELCID(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US), SORT_DEFAULT));        //US English
 }
 //******************************************************************************
 //******************************************************************************
 LANGID WIN32API GetUserDefaultLangID()
 {
-  dprintf2(("KERNEL32:  GetUserDefaultLangID, returns %x", GetLanguageId()));
+  dprintf2(("KERNEL32: GetUserDefaultLangID, returns %x", GetLanguageId()));
   return(GetLanguageId());
 }
 //******************************************************************************
 //******************************************************************************
 LANGID WIN32API GetSystemDefaultLangID(void)
 {
-  dprintf2(("KERNEL32:  GetSystemDefaultLangID returns %x", MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US)));
+  dprintf2(("KERNEL32: GetSystemDefaultLangID returns %x", MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US)));
   return(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US));
 }
 
