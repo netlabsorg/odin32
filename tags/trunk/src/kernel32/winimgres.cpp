@@ -1,4 +1,4 @@
-/* $Id: winimgres.cpp,v 1.53 2001-08-03 17:45:27 sandervl Exp $ */
+/* $Id: winimgres.cpp,v 1.54 2004-02-19 13:03:07 sandervl Exp $ */
 
 /*
  * Win32 PE Image class (resource methods)
@@ -10,7 +10,7 @@
  * + find_entry_by_id & find_entry_by_name
  * Copyright 1995 Thomas Sandford
  * Copyright 1996 Martin von Loewis
- * 
+ *
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -31,7 +31,7 @@
 #include "pefile.h"
 #include "oslibmisc.h"
 
-#define DBG_LOCALLOG	DBG_winimgres
+#define DBG_LOCALLOG    DBG_winimgres
 #include "dbglocal.h"
 
 #define MAX_RES 17
@@ -41,8 +41,8 @@ typedef struct {
 } STD_RESTYPE;
 
 STD_RESTYPE ResType[MAX_RES] =
-      { {NULL,          0}, 
-        {"CURSOR",      6}, 
+      { {NULL,          0},
+        {"CURSOR",      6},
         {"BITMAP",      6},
         {"ICON",        4},
         {"MENU",        4},
@@ -68,7 +68,7 @@ STD_RESTYPE ResType[MAX_RES] =
 ULONG Win32ImageBase::getResourceSizeA(LPSTR lpszName, LPSTR lpszType, ULONG lang)
 {
  PIMAGE_RESOURCE_DATA_ENTRY pData = NULL;
-   
+
     pData = (PIMAGE_RESOURCE_DATA_ENTRY)findResourceA(lpszName, lpszType, lang);
     if(pData == NULL) {
         dprintf(("Win32ImageBase::getPEResourceSizeA: couldn't find resource %x (type %x, lang %x)", lpszName, lpszType, lang));
@@ -81,7 +81,7 @@ ULONG Win32ImageBase::getResourceSizeA(LPSTR lpszName, LPSTR lpszType, ULONG lan
 ULONG Win32ImageBase::getResourceSizeW(LPWSTR lpszName, LPWSTR lpszType, ULONG lang)
 {
  PIMAGE_RESOURCE_DATA_ENTRY pData = NULL;
-   
+
     pData = (PIMAGE_RESOURCE_DATA_ENTRY)findResourceW(lpszName, lpszType, lang);
     if(pData == NULL) {
         dprintf(("Win32ImageBase::getResourceSizeW: couldn't find resource %x (type %x, lang %x)", lpszName, lpszType, lang));
@@ -97,8 +97,8 @@ char *Win32ImageBase::getResourceAddr(HRSRC hResource)
  PIMAGE_RESOURCE_DATA_ENTRY pData = (PIMAGE_RESOURCE_DATA_ENTRY)hResource;
 
   if(pData == NULL) {
-	DebugInt3();
-	return NULL;
+    DebugInt3();
+    return NULL;
   }
   //ulRVAResourceSection contains the relative virtual address (relative to the start of the image)
   //for the resource section (images loaded by the pe.exe and pe2lx/win32k)
@@ -112,8 +112,8 @@ ULONG Win32ImageBase::getResourceSize(HRSRC hResource)
  PIMAGE_RESOURCE_DATA_ENTRY pData = (PIMAGE_RESOURCE_DATA_ENTRY)hResource;
 
   if(pData == NULL) {
-	DebugInt3();
-	return NULL;
+    DebugInt3();
+    return NULL;
   }
   return pData->Size;
 }
@@ -126,12 +126,12 @@ HRSRC Win32ImageBase::findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang)
  int                       typelen;
  HRSRC                     hRes;
 
-    if(HIWORD(lpszType) != 0) 
+    if(HIWORD(lpszType) != 0)
     {
-	typelen = strlen(lpszType);
+    typelen = strlen(lpszType);
 
         for(int i=0;i<MAX_RES;i++) {
-            if(ResType[i].namelen && 
+            if(ResType[i].namelen &&
                ResType[i].namelen == typelen &&
                stricmp(lpszType, ResType[i].typename) == 0)
                     break;
@@ -143,14 +143,14 @@ HRSRC Win32ImageBase::findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang)
     pResDirRet = getResSubDirA(pResRootDir, lpszType);
     if(!pResDirRet) {
         dprintf2(("FindResourceA %s: resource %x (type %x, lang %x) TYPE NOT FOUND", szModule, lpszName, lpszType, lang));
-	SetLastError(ERROR_RESOURCE_TYPE_NOT_FOUND);
-	return NULL;
+    SetLastError(ERROR_RESOURCE_TYPE_NOT_FOUND);
+    return NULL;
     }
     pResDirRet = getResSubDirA(pResDirRet, lpszName);
     if(!pResDirRet) {
         dprintf2(("FindResourceA %s: resource %x (type %x, lang %x) NAME NOT FOUND", szModule, lpszName, lpszType, lang));
-	SetLastError(ERROR_RESOURCE_NAME_NOT_FOUND);
-	return NULL;
+    SetLastError(ERROR_RESOURCE_NAME_NOT_FOUND);
+    return NULL;
     }
 
     /* Here is the real difference between FindResource and FindResourceEx */
@@ -159,7 +159,7 @@ HRSRC Win32ImageBase::findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang)
        lang == MAKELANGID(LANG_NEUTRAL, SUBLANG_SYS_DEFAULT) ||
        lang == MAKELANGID(LANG_NEUTRAL, 3)) /* FIXME: real name? */
     {
-      	 hRes = getResourceLang(pResDirRet);
+         hRes = getResourceLang(pResDirRet);
     }
     else hRes = getResourceLangEx(pResDirRet, lang);
 
@@ -180,13 +180,13 @@ HRSRC Win32ImageBase::findResourceW(LPWSTR lpszName, LPWSTR lpszType, ULONG lang
  int                       typelen;
  HRSRC                     hRes;
 
-    if(HIWORD(lpszType) != 0 && lpszType[0] != (WCHAR)'#') 
+    if(HIWORD(lpszType) != 0 && lpszType[0] != (WCHAR)'#')
     {
         astring1 = UnicodeToAsciiString(lpszType);
-	typelen = strlen(astring1);
+    typelen = strlen(astring1);
 
         for(int i=0;i<MAX_RES;i++) {
-            if(ResType[i].namelen && 
+            if(ResType[i].namelen &&
                ResType[i].namelen == typelen &&
                stricmp(astring1, ResType[i].typename) == 0)
                     break;
@@ -194,19 +194,19 @@ HRSRC Win32ImageBase::findResourceW(LPWSTR lpszName, LPWSTR lpszType, ULONG lang
         if(i != MAX_RES) {//standard res type
              lpszType = (LPWSTR)i;
         }
-	FreeAsciiString(astring1);
+    FreeAsciiString(astring1);
     }
     pResDirRet = getResSubDirW(pResRootDir, lpszType);
     if(!pResDirRet) {
         dprintf2(("FindResourceW %s: resource %x (type %x, lang %x) TYPE NOT FOUND", szModule, lpszName, lpszType, lang));
-	SetLastError(ERROR_RESOURCE_TYPE_NOT_FOUND);
-	return NULL;
+    SetLastError(ERROR_RESOURCE_TYPE_NOT_FOUND);
+    return NULL;
     }
     pResDirRet = getResSubDirW(pResDirRet, lpszName);
     if(!pResDirRet) {
         dprintf2(("FindResourceW %s: resource %x (type %x, lang %x) NAME NOT FOUND", szModule, lpszName, lpszType, lang));
-	SetLastError(ERROR_RESOURCE_NAME_NOT_FOUND);
-	return NULL;
+    SetLastError(ERROR_RESOURCE_NAME_NOT_FOUND);
+    return NULL;
     }
 
     /* Here is the real difference between FindResource and FindResourceEx */
@@ -215,7 +215,7 @@ HRSRC Win32ImageBase::findResourceW(LPWSTR lpszName, LPWSTR lpszType, ULONG lang
        lang == MAKELANGID(LANG_NEUTRAL, SUBLANG_SYS_DEFAULT) ||
        lang == MAKELANGID(LANG_NEUTRAL, 3)) /* FIXME: real name? */
     {
-      	 hRes = getResourceLang(pResDirRet);
+         hRes = getResourceLang(pResDirRet);
     }
     else hRes = getResourceLangEx(pResDirRet, lang);
 
@@ -247,27 +247,27 @@ HRSRC Win32ImageBase::getResourceLang(PIMAGE_RESOURCE_DIRECTORY pResDirToSearch)
     lang = MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL);
     hRes = (HRSRC)getResDataLang(pResDirToSearch, lang);
     if(!hRes) {
-	/* 2. Neutral language with default sublanguage */
-	lang = MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT);
+    /* 2. Neutral language with default sublanguage */
+    lang = MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT);
         hRes = (HRSRC)getResDataLang(pResDirToSearch, lang);
     }
     if(!hRes) {
-	/* 3. Current locale lang id */
-	lang = LANGIDFROMLCID(GetUserDefaultLCID());
+    /* 3. Current locale lang id */
+    lang = LANGIDFROMLCID(GetUserDefaultLCID());
         hRes = (HRSRC)getResDataLang(pResDirToSearch, lang);
     }
     if(!hRes) {
-	/* 4. Current locale lang id with neutral sublanguage */
-	lang = MAKELANGID(PRIMARYLANGID(lang), SUBLANG_NEUTRAL);
+    /* 4. Current locale lang id with neutral sublanguage */
+    lang = MAKELANGID(PRIMARYLANGID(lang), SUBLANG_NEUTRAL);
         hRes = (HRSRC)getResDataLang(pResDirToSearch, lang);
     }
     if(!hRes) {
-	/* 5. (!) LANG_ENGLISH, SUBLANG_DEFAULT */
-	lang = MAKELANGID(LANG_ENGLISH, SUBLANG_DEFAULT);
+    /* 5. (!) LANG_ENGLISH, SUBLANG_DEFAULT */
+    lang = MAKELANGID(LANG_ENGLISH, SUBLANG_DEFAULT);
         hRes = (HRSRC)getResDataLang(pResDirToSearch, lang);
     }
     if(!hRes) {
-	/* 6. Return first in the list */
+    /* 6. Return first in the list */
         hRes = (HRSRC)getResDataLang(pResDirToSearch, lang, TRUE);
     }
     return hRes;
@@ -289,18 +289,18 @@ HRSRC Win32ImageBase::getResourceLangEx(PIMAGE_RESOURCE_DIRECTORY pResDirToSearc
     /* 1. Exact specified language */
     hRes = (HRSRC)getResDataLang(pResDirToSearch, lang);
     if(!hRes) {
-	/* 2. Language with neutral sublanguage */
+    /* 2. Language with neutral sublanguage */
         lang = MAKELANGID(PRIMARYLANGID(lang), SUBLANG_NEUTRAL);
         hRes = (HRSRC)getResDataLang(pResDirToSearch, lang);
     }
     if(!hRes) {
-	/* 3. Neutral language with neutral sublanguage */
+    /* 3. Neutral language with neutral sublanguage */
         lang = MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL);
         hRes = (HRSRC)getResDataLang(pResDirToSearch, lang);
     }
     if(!hRes) {
-	/* 4. Current locale lang id with neutral sublanguage */
-	lang = MAKELANGID(PRIMARYLANGID(lang), SUBLANG_NEUTRAL);
+    /* 4. Current locale lang id with neutral sublanguage */
+    lang = MAKELANGID(PRIMARYLANGID(lang), SUBLANG_NEUTRAL);
         hRes = (HRSRC)getResDataLang(pResDirToSearch, lang);
     }
     return hRes;
@@ -323,7 +323,7 @@ BOOL Win32ImageBase::getVersionStruct(char *verstruct, ULONG bufLength)
     }
     hRes = findResourceW((LPWSTR)ID_GETFIRST, (LPWSTR)NTRT_VERSION, MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL));
     if(hRes == NULL) {
-	//last error already set by findResourceW
+    //last error already set by findResourceW
         dprintf(("Win32PeLdrImage::getVersionStruct: couldn't find version resource!"));
         return 0;
     }
@@ -396,7 +396,7 @@ IMAGE_RESOURCE_DIRECTORY *find_entry_by_nameW( const IMAGE_RESOURCE_DIRECTORY *d
  * @status    completely implemented
  * @author    knut st. osmundsen
  */
-PIMAGE_RESOURCE_DIRECTORY Win32ImageBase::getResSubDirW(PIMAGE_RESOURCE_DIRECTORY pResDirToSearch, 
+PIMAGE_RESOURCE_DIRECTORY Win32ImageBase::getResSubDirW(PIMAGE_RESOURCE_DIRECTORY pResDirToSearch,
                                                         LPCWSTR lpszName)
 {
     PIMAGE_RESOURCE_DIRECTORY_ENTRY paResDirEntries;
@@ -404,11 +404,11 @@ PIMAGE_RESOURCE_DIRECTORY Win32ImageBase::getResSubDirW(PIMAGE_RESOURCE_DIRECTOR
     int     idName = -1;
 
     if(pResDirToSearch == NULL) {
-	return NULL;
+    return NULL;
     }
 
     if((ULONG)lpszName == -1) {//check for nonsense values
-	return NULL;
+    return NULL;
     }
 
     /* lpszName */
@@ -459,7 +459,7 @@ PIMAGE_RESOURCE_DIRECTORY Win32ImageBase::getResSubDirW(PIMAGE_RESOURCE_DIRECTOR
             PIMAGE_RESOURCE_DIR_STRING_U pResDirStr =
                 (PIMAGE_RESOURCE_DIR_STRING_U)(paResDirEntries[i].u1.s.NameOffset + (ULONG)pResRootDir /*?*/);
 
-	    //SvL: Must do case insensitive string compare here
+        //SvL: Must do case insensitive string compare here
             if (pResDirStr->Length == cusName
                 && lstrncmpiW(pResDirStr->NameString, lpszName, cusName) == 0)
             {
@@ -484,18 +484,18 @@ PIMAGE_RESOURCE_DIRECTORY Win32ImageBase::getResSubDirW(PIMAGE_RESOURCE_DIRECTOR
  * @status    completely implemented
  * @author    knut st. osmundsen
  */
-PIMAGE_RESOURCE_DIRECTORY Win32ImageBase::getResSubDirA(PIMAGE_RESOURCE_DIRECTORY pResDirToSearch, 
+PIMAGE_RESOURCE_DIRECTORY Win32ImageBase::getResSubDirA(PIMAGE_RESOURCE_DIRECTORY pResDirToSearch,
                                                         LPCTSTR lpszName)
 {
     PIMAGE_RESOURCE_DIRECTORY   pResDirRet;
     LPCWSTR                     lpszwName;
 
     if(pResDirToSearch == NULL) {
-	return NULL;
+    return NULL;
     }
 
     if((ULONG)lpszName == -1) {//check for nonsense values
-	return NULL;
+    return NULL;
     }
 
     /* lpszName */
@@ -527,7 +527,7 @@ PIMAGE_RESOURCE_DIRECTORY Win32ImageBase::getResSubDirA(PIMAGE_RESOURCE_DIRECTOR
  * @author    Sander van Leeuwen
  */
 //******************************************************************************
-PIMAGE_RESOURCE_DATA_ENTRY 
+PIMAGE_RESOURCE_DATA_ENTRY
      Win32ImageBase::getResDataLang(PIMAGE_RESOURCE_DIRECTORY pResDirToSearch,
                                     ULONG language, BOOL fGetDefault)
 {
@@ -535,33 +535,33 @@ PIMAGE_RESOURCE_DATA_ENTRY
     int     i;
 
     if(pResDirToSearch == NULL) {
-	return NULL;
+    return NULL;
     }
 
     paResDirEntries = (PIMAGE_RESOURCE_DIRECTORY_ENTRY)((ULONG)pResDirToSearch + sizeof(*pResDirToSearch));
 
     if(pResDirToSearch->NumberOfNamedEntries) {
-	DebugInt3();
+    DebugInt3();
     }
     paResDirEntries += pResDirToSearch->NumberOfNamedEntries;
 
     for (i = 0; i < pResDirToSearch->NumberOfIdEntries; i++) {
-    	if (paResDirEntries[i].u1.Id == language) 
+        if (paResDirEntries[i].u1.Id == language)
         {
-               	return (PIMAGE_RESOURCE_DATA_ENTRY) (paResDirEntries[i].u2.s.OffsetToDirectory + (ULONG)pResRootDir);
-	}
+                return (PIMAGE_RESOURCE_DATA_ENTRY) (paResDirEntries[i].u2.s.OffsetToDirectory + (ULONG)pResRootDir);
+    }
     }
 
     // if nothing found and fGetDefault is true, return first entry
     if(fGetDefault)
     {
-    	return (PIMAGE_RESOURCE_DATA_ENTRY) (paResDirEntries[0].u2.s.OffsetToDirectory + (ULONG)pResRootDir);
+        return (PIMAGE_RESOURCE_DATA_ENTRY) (paResDirEntries[0].u2.s.OffsetToDirectory + (ULONG)pResRootDir);
     }
     return NULL;
 }
 //******************************************************************************
 //******************************************************************************
-BOOL Win32ImageBase::enumResourceTypesA(HMODULE hmod, ENUMRESTYPEPROCA lpEnumFunc, 
+BOOL Win32ImageBase::enumResourceTypesA(HMODULE hmod, ENUMRESTYPEPROCA lpEnumFunc,
                                         LONG lParam)
 {
  PIMAGE_RESOURCE_DIRECTORY       prdType;
@@ -590,27 +590,28 @@ BOOL Win32ImageBase::enumResourceTypesA(HMODULE hmod, ENUMRESTYPEPROCA lpEnumFun
     /* set pointer to first resource type entry */
     prde = (PIMAGE_RESOURCE_DIRECTORY_ENTRY)((ULONG)pResRootDir + sizeof(IMAGE_RESOURCE_DIRECTORY));
 
-    for (i=0; i<pResRootDir->NumberOfNamedEntries+pResRootDir->NumberOfIdEntries && fRet; i++) 
+    for (i=0; i<pResRootDir->NumberOfNamedEntries+pResRootDir->NumberOfIdEntries && fRet; i++)
     {
-      	/* locate directory or each resource type */
-    	prdType = (PIMAGE_RESOURCE_DIRECTORY)((int)pResRootDir + (int)prde->u2.OffsetToData);
+        /* locate directory or each resource type */
+        prdType = (PIMAGE_RESOURCE_DIRECTORY)((int)pResRootDir + (int)prde->u2.OffsetToData);
 
         if (prde->u1.s.NameIsString)
-    	{//name or id entry?
-	        //SvL: 30-10-'97, high bit is set, so clear to get real offset
-	        nameOffset = prde->u1.Name & ~0x80000000;
-	
-	        pstring = (PIMAGE_RESOURCE_DIR_STRING_U)((ULONG)pResRootDir + nameOffset);
-	        char *typename = (char *)malloc(pstring->Length+1);
-	        lstrcpynWtoA(typename, pstring->NameString, pstring->Length+1);
-	        typename[pstring->Length] = 0;
+        {//name or id entry?
+            //SvL: 30-10-'97, high bit is set, so clear to get real offset
+            nameOffset = prde->u1.Name & ~0x80000000;
 
-		fRet = lpEnumFunc(hmod, typename, lParam);
-        	free(typename);
-    	}
-    	else {
-		fRet = lpEnumFunc(hmod, (LPSTR)prde->u1.Id, lParam);
-	}
+            pstring = (PIMAGE_RESOURCE_DIR_STRING_U)((ULONG)pResRootDir + nameOffset);
+            int len = lstrlenWtoA( pstring->NameString, pstring->Length );
+            char *typename = (char *)malloc( len + 1 );
+            lstrcpynWtoA(typename, pstring->NameString, len + 1 );
+            typename[len] = 0;
+
+        fRet = lpEnumFunc(hmod, typename, lParam);
+            free(typename);
+        }
+        else {
+        fRet = lpEnumFunc(hmod, (LPSTR)prde->u1.Id, lParam);
+    }
 
         /* increment to next entry */
         prde++;
@@ -619,7 +620,7 @@ BOOL Win32ImageBase::enumResourceTypesA(HMODULE hmod, ENUMRESTYPEPROCA lpEnumFun
 }
 //******************************************************************************
 //******************************************************************************
-BOOL Win32ImageBase::enumResourceTypesW(HMODULE hmod, ENUMRESTYPEPROCW lpEnumFunc, 
+BOOL Win32ImageBase::enumResourceTypesW(HMODULE hmod, ENUMRESTYPEPROCW lpEnumFunc,
                                         LONG lParam)
 {
  PIMAGE_RESOURCE_DIRECTORY       prdType;
@@ -649,27 +650,27 @@ BOOL Win32ImageBase::enumResourceTypesW(HMODULE hmod, ENUMRESTYPEPROCW lpEnumFun
     /* set pointer to first resource type entry */
     prde = (PIMAGE_RESOURCE_DIRECTORY_ENTRY)((ULONG)pResRootDir + sizeof(IMAGE_RESOURCE_DIRECTORY));
 
-    for (i=0; i<pResRootDir->NumberOfNamedEntries+pResRootDir->NumberOfIdEntries && fRet; i++) 
+    for (i=0; i<pResRootDir->NumberOfNamedEntries+pResRootDir->NumberOfIdEntries && fRet; i++)
     {
-      	/* locate directory or each resource type */
-    	prdType = (PIMAGE_RESOURCE_DIRECTORY)((int)pResRootDir + (int)prde->u2.OffsetToData);
+        /* locate directory or each resource type */
+        prdType = (PIMAGE_RESOURCE_DIRECTORY)((int)pResRootDir + (int)prde->u2.OffsetToData);
 
         if (prde->u1.s.NameIsString)
-    	{//name or id entry?
-	        //SvL: 30-10-'97, high bit is set, so clear to get real offset
-	        nameOffset = prde->u1.Name & ~0x80000000;
-	
-	        pstring = (PIMAGE_RESOURCE_DIR_STRING_U)((ULONG)pResRootDir + nameOffset);
+        {//name or id entry?
+            //SvL: 30-10-'97, high bit is set, so clear to get real offset
+            nameOffset = prde->u1.Name & ~0x80000000;
 
-		lpszType = (LPWSTR)malloc((pstring->Length+1) * sizeof(WCHAR));
+            pstring = (PIMAGE_RESOURCE_DIR_STRING_U)((ULONG)pResRootDir + nameOffset);
+
+        lpszType = (LPWSTR)malloc((pstring->Length+1) * sizeof(WCHAR));
                 memcpy(lpszType, pstring->NameString, pstring->Length * sizeof(WCHAR));
                 lpszType[pstring->Length] = 0;
 
-		fRet = lpEnumFunc(hmod, pstring->NameString, lParam);
+        fRet = lpEnumFunc(hmod, pstring->NameString, lParam);
 
-		free(lpszType);
-    	}
-    	else 	fRet = lpEnumFunc(hmod, (LPWSTR)prde->u1.Id, lParam);
+        free(lpszType);
+        }
+        else    fRet = lpEnumFunc(hmod, (LPWSTR)prde->u1.Id, lParam);
 
         /* increment to next entry */
         prde++;
@@ -775,8 +776,10 @@ BOOL Win32ImageBase::enumResourceNamesA(HMODULE hmod,
                     }
                     pszASCII = (char*)pszTmp;
                 }
-		lstrcpynWtoA(pszASCII, pResDirString->NameString, pResDirString->Length+1);
-		pszASCII[pResDirString->Length] = 0;
+
+                int len = lstrlenWtoA( pResDirString->NameString, pResDirString->Length );
+                lstrcpynWtoA(pszASCII, pResDirString->NameString, len + 1);
+                pszASCII[len] = 0;
                 lpszName = pszASCII;
             }
             else
@@ -878,17 +881,17 @@ BOOL Win32ImageBase::enumResourceNamesW(HMODULE hmod,
         {
             LPWSTR lpszName, lpszResName;
 
-            if(paResDirEntries[i].u1.s.NameIsString) 
+            if(paResDirEntries[i].u1.s.NameIsString)
             {
                 lpszName = (LPWSTR)(paResDirEntries[i].u1.s.NameOffset + (ULONG)pResRootDir + 2);
                 length   = (int)*(LPWSTR)(paResDirEntries[i].u1.s.NameOffset + (ULONG)pResRootDir);
 
-       		lpszResName = (LPWSTR)malloc((length+1) * sizeof(WCHAR));
+            lpszResName = (LPWSTR)malloc((length+1) * sizeof(WCHAR));
                 memcpy(lpszResName, lpszName, length * sizeof(WCHAR));
                 lpszResName[length] = 0;
 
                 fRet = lpEnumFunc(hmod, lpszType, lpszResName, lParam);
-		free(lpszResName);
+        free(lpszResName);
             }
             else {
                 lpszName = (LPWSTR)paResDirEntries[i].u1.Id;
@@ -906,9 +909,9 @@ BOOL Win32ImageBase::enumResourceNamesW(HMODULE hmod,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL Win32ImageBase::enumResourceLanguagesA(HMODULE hmod, LPCSTR lpszType, 
-                                            LPCSTR lpszName, 
-                                            ENUMRESLANGPROCA lpEnumFunc, 
+BOOL Win32ImageBase::enumResourceLanguagesA(HMODULE hmod, LPCSTR lpszType,
+                                            LPCSTR lpszName,
+                                            ENUMRESLANGPROCA lpEnumFunc,
                                             LONG lParam)
 {
  PIMAGE_RESOURCE_DIRECTORY pResDirRet;
@@ -929,34 +932,34 @@ BOOL Win32ImageBase::enumResourceLanguagesA(HMODULE hmod, LPCSTR lpszType,
 
     pResDirRet = getResSubDirA(pResRootDir, lpszType);
     if(!pResDirRet) {
-	SetLastError(ERROR_RESOURCE_TYPE_NOT_FOUND);
-	return FALSE;
+    SetLastError(ERROR_RESOURCE_TYPE_NOT_FOUND);
+    return FALSE;
     }
     pResDirRet = getResSubDirA(pResDirRet, lpszName);
     if(!pResDirRet) {
-	SetLastError(ERROR_RESOURCE_NAME_NOT_FOUND);
-	return FALSE;
+    SetLastError(ERROR_RESOURCE_NAME_NOT_FOUND);
+    return FALSE;
     }
 
     paResDirEntries = (PIMAGE_RESOURCE_DIRECTORY_ENTRY)((ULONG)pResDirRet + sizeof(*pResDirRet));
     if(pResDirRet->NumberOfNamedEntries) {
-	DebugInt3();
+    DebugInt3();
     }
     paResDirEntries += pResDirRet->NumberOfNamedEntries;
 
-    for(int i = 0;i < pResDirRet->NumberOfIdEntries;i++) 
+    for(int i = 0;i < pResDirRet->NumberOfIdEntries;i++)
     {
-	fRet = lpEnumFunc(hmod, lpszType, lpszName, paResDirEntries[i].u1.Id, lParam);
-	if(!fRet)
-		break;
+    fRet = lpEnumFunc(hmod, lpszType, lpszName, paResDirEntries[i].u1.Id, lParam);
+    if(!fRet)
+        break;
     }
     return fRet;
 }
 //******************************************************************************
 //******************************************************************************
-BOOL Win32ImageBase::enumResourceLanguagesW(HMODULE hmod, LPCWSTR lpszType, 
-                                            LPCWSTR lpszName, 
-                                            ENUMRESLANGPROCW lpEnumFunc, 
+BOOL Win32ImageBase::enumResourceLanguagesW(HMODULE hmod, LPCWSTR lpszType,
+                                            LPCWSTR lpszName,
+                                            ENUMRESLANGPROCW lpEnumFunc,
                                             LONG lParam)
 {
  PIMAGE_RESOURCE_DIRECTORY pResDirRet;
@@ -977,26 +980,26 @@ BOOL Win32ImageBase::enumResourceLanguagesW(HMODULE hmod, LPCWSTR lpszType,
 
     pResDirRet = getResSubDirW(pResRootDir, lpszType);
     if(!pResDirRet) {
-	SetLastError(ERROR_RESOURCE_TYPE_NOT_FOUND);
-	return FALSE;
+    SetLastError(ERROR_RESOURCE_TYPE_NOT_FOUND);
+    return FALSE;
     }
     pResDirRet = getResSubDirW(pResDirRet, lpszName);
     if(!pResDirRet) {
-	SetLastError(ERROR_RESOURCE_NAME_NOT_FOUND);
-	return FALSE;
+    SetLastError(ERROR_RESOURCE_NAME_NOT_FOUND);
+    return FALSE;
     }
 
     paResDirEntries = (PIMAGE_RESOURCE_DIRECTORY_ENTRY)((ULONG)pResDirRet + sizeof(*pResDirRet));
     if(pResDirRet->NumberOfNamedEntries) {
-	DebugInt3();
+    DebugInt3();
     }
     paResDirEntries += pResDirRet->NumberOfNamedEntries;
 
-    for(int i = 0;i < pResDirRet->NumberOfIdEntries;i++) 
+    for(int i = 0;i < pResDirRet->NumberOfIdEntries;i++)
     {
-	fRet = lpEnumFunc(hmod, lpszType, lpszName, paResDirEntries[i].u1.Id, lParam);
-	if(!fRet)
-		break;
+    fRet = lpEnumFunc(hmod, lpszType, lpszName, paResDirEntries[i].u1.Id, lParam);
+    if(!fRet)
+        break;
     }
     return fRet;
 }
