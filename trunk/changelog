@@ -1,4 +1,13 @@
-/* $Id: changelog,v 1.1619 2001-07-28 18:47:51 sandervl Exp $ */
+/* $Id: changelog,v 1.1620 2001-07-29 18:58:09 sandervl Exp $ */
+
+ 2001-07-29: Sander van Leeuwen <sandervl@xs4all.nl>
+    - COMCTL32/COMDLG32/GDI32/KERNEL32/MSVFW32/USER32/SHELL32/WSOCK32/WINMM
+      RPCRT4:
+                o Updates for custom build (different resource table names)
+    - KERNEL32: o Added exports to change the root keys of the registry
+                  and to change the name of dlls to be loaded next
+    - CUSTOMBUILD:
+                o Updates
 
  2001-07-28: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Set/GetWindowWord changes (must handle GWW_ID, GWW_HINSTANCE 
