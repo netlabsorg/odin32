@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.64 2001-05-24 08:19:17 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.65 2001-06-19 10:50:23 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -2222,6 +2222,15 @@ HANDLE HMCreateEvent(LPSECURITY_ATTRIBUTES lpsa,
   DWORD           rc;                                     /* API return code */
 
 
+  if(lpName) { //check if shared event semaphore already exists
+      //TODO: No inheritance??
+      HANDLE handle = HMOpenEvent(EVENT_ALL_ACCESS, FALSE, lpName);
+      if(handle) {
+          dprintf(("CreateEvent: return handle of existing event semaphore %x", handle));
+          return handle;
+      }
+  }
+
   pDeviceHandler = HMGlobals.pHMEvent;               /* device is predefined */
 
   iIndexNew = _HMHandleGetFree();                         /* get free handle */
@@ -2231,25 +2240,23 @@ HANDLE HMCreateEvent(LPSECURITY_ATTRIBUTES lpsa,
     return 0;                           /* signal error */
   }
 
-
-                           /* initialize the complete HMHANDLEDATA structure */
+  /* Initialize the complete HMHANDLEDATA structure */
   pHMHandleData = &TabWin32Handles[iIndexNew].hmHandleData;
   pHMHandleData->dwType     = FILE_TYPE_UNKNOWN;      /* unknown handle type */
   pHMHandleData->dwAccess   = 0;
   pHMHandleData->dwShare    = 0;
   pHMHandleData->dwCreation = 0;
-  pHMHandleData->dwFlags    = 0;
+  pHMHandleData->dwFlags    = 0;    
   pHMHandleData->lpHandlerData = NULL;
 
+  /* we've got to mark the handle as occupied here, since another device */
+  /* could be created within the device handler -> deadlock */
 
-      /* we've got to mark the handle as occupied here, since another device */
-                   /* could be created within the device handler -> deadlock */
-
-          /* write appropriate entry into the handle table if open succeeded */
+  /* write appropriate entry into the handle table if open succeeded */
   TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = iIndexNew;
   TabWin32Handles[iIndexNew].pDeviceHandler         = pDeviceHandler;
 
-                                                  /* call the device handler */
+  /* call the device handler */
   rc = pDeviceHandler->CreateEvent(&TabWin32Handles[iIndexNew].hmHandleData,
                                    lpsa,
                                    bManualReset,
@@ -2290,6 +2297,15 @@ HANDLE HMCreateMutex(LPSECURITY_ATTRIBUTES lpsa,
   PHMHANDLEDATA   pHMHandleData;
   DWORD           rc;                                     /* API return code */
 
+
+  if(lpName) { //check if shared mutex semaphore already exists
+      //TODO: No inheritance??
+      HANDLE handle = HMOpenMutex(MUTEX_ALL_ACCESS, FALSE, lpName);
+      if(handle) {
+          dprintf(("CreateMutex: return handle of existing mutex semaphore %x", handle));
+          return handle;
+      }
+  }
 
   pDeviceHandler = HMGlobals.pHMMutex;               /* device is predefined */
 
@@ -2493,7 +2509,15 @@ HANDLE HMCreateSemaphore(LPSECURITY_ATTRIBUTES lpsa,
   PHMHANDLEDATA   pHMHandleData;
   DWORD           rc;                                     /* API return code */
 
-
+  if(lpName) { //check if shared event semaphore already exists
+      //TODO: No inheritance??
+      HANDLE handle = HMOpenSemaphore(SEMAPHORE_ALL_ACCESS, FALSE, lpName);
+      if(handle) {
+          dprintf(("CreateSemaphore: return handle of existing semaphore %x", handle));
+          return handle;
+      }
+  }
+  
   pDeviceHandler = HMGlobals.pHMSemaphore;               /* device is predefined */
 
   iIndexNew = _HMHandleGetFree();                         /* get free handle */
@@ -2983,6 +3007,7 @@ DWORD  HMMsgWaitForMultipleObjects  (DWORD      nCount,
     rc = HMHandleTranslateToOS2 (*pLoop1, // translate handle
                                  pLoop2);
 
+    dprintf2(("MsgWaitForMultipleObjects handle %x->%x", *pLoop1, *pLoop2));
     // SvL: We still use Open32 handles for threads & processes -> don't fail here!
     if (rc != NO_ERROR)
     {
