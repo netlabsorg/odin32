@@ -104,6 +104,7 @@ BOOL    WIN32API SetWindowExtEx(HDC hdc, int nXExtent, int nYExtent, LPSIZE lpSi
 int     WIN32API GetDeviceCaps(HDC hdc, int nIndex);
 int     WIN32API GetMapMode(HDC hdc);
 BOOL    WIN32API DPtoLP(HDC,LPPOINT,INT);
+BOOL    WIN32API LPtoDP(HDC,LPPOINT,INT);
 BOOL    WIN32API RedrawWindow(HWND,const RECT*,HRGN, DWORD);
 HGDIOBJ WIN32API SelectObject(HDC,HGDIOBJ);
 BOOL    WIN32API DeleteObject(HANDLE hObj);
