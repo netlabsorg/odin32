@@ -1240,3 +1240,4 @@ DPA_CreateEx (INT nGrow, HANDLE hHeap)
 
     return hdpa;
 }
+
