@@ -1,4 +1,12 @@
- /* $Id: changelog,v 1.826 2000-03-21 17:27:40 cbratschi Exp $ */
+ /* $Id: changelog,v 1.827 2000-03-21 19:52:40 sandervl Exp $ */
+
+ 2000-03-21: Sander van Leeuwen <sandervl@xs4all.nl>
+	- GDI32: Added RGB 555 to 565 conversion in dibsection blit.
+                 (fixes wrong colors in RealPlayer 7 Update 1 (rm videos
+                  only))
+
+ 2000-03-21: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+        - MSVCRT: Adding logging statement to _EH_prolog
 
  2000-03-21: Christoph Bratschi <cbratschi@datacomm.ch>
 	- COMCTL32: optimized header/treeview for AMD cpuid
