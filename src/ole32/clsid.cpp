@@ -32,7 +32,7 @@ HRESULT WIN32API CLSIDFromProgID(
 
     LONG		lDataLen = 80;
     oStringW		szKey(lpszProgID);
-    oStringW		szCLSID(lDataLen);
+    oStringW		szCLSID(lDataLen, 1);
     HKEY		hKey;
     HRESULT		rc;
 
@@ -155,6 +155,39 @@ HRESULT WIN32API CoCreateGuid(GUID *pguid)
 }
 
 // ----------------------------------------------------------------------
+// WINE_StringFromCLSID
+// ----------------------------------------------------------------------
+HRESULT WINE_StringFromCLSID(const CLSID *rclsid, LPSTR idstr)
+{
+    dprintf(("OLE32: WINE_StringFromCLSID"));
+
+    if (rclsid == NULL)
+    {
+	dprintf(("       clsid: (NULL)"));
+	*idstr = 0;
+	return E_FAIL;
+    }
+
+    // Setup new string...
+    sprintf(idstr, "{%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X}",
+	    rclsid->Data1,
+	    rclsid->Data2,
+	    rclsid->Data3,
+	    rclsid->Data4[0],
+	    rclsid->Data4[1],
+	    rclsid->Data4[2],
+	    rclsid->Data4[3],
+	    rclsid->Data4[4],
+	    rclsid->Data4[5],
+	    rclsid->Data4[6],
+	    rclsid->Data4[7]);
+
+    dprintf(("       clsid: %s", idstr));
+
+    return OLE_OK;
+}
+
+// ----------------------------------------------------------------------
 // StringFromCLSID
 // Memory allocated here on behalf of application should be freed using CoTaskMemFree()
 // ----------------------------------------------------------------------
@@ -167,18 +200,9 @@ HRESULT WIN32API StringFromCLSID(REFCLSID rclsid, LPOLESTR *ppsz)
     dprintf(("OLE32: StringFromCLSID"));
 
     // Setup new string...
-    strLen  = sprintf(tmp, "{%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X}",
-	    rclsid->Data1,
-	    rclsid->Data2,
-	    rclsid->Data3,
-	    rclsid->Data4[0],
-	    rclsid->Data4[1],
-	    rclsid->Data4[2],
-	    rclsid->Data4[3],
-	    rclsid->Data4[4],
-	    rclsid->Data4[5],
-	    rclsid->Data4[6],
-	    rclsid->Data4[7]);
+    WINE_StringFromCLSID(rclsid, tmp);
+
+    strLen = strlen(tmp);
 
     // Grab buffer for string...
     szclsid = (LPWSTR)CoTaskMemAlloc((strLen + 1) * sizeof(WCHAR));
@@ -203,18 +227,9 @@ HRESULT WIN32API StringFromIID(REFIID riid, LPOLESTR *ppsz)
     dprintf(("OLE32: StringFromIID"));
 
     // Setup new string...
-    strLen  = sprintf(tmp, "{%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X}",
-	    riid->Data1,
-	    riid->Data2,
-	    riid->Data3,
-	    riid->Data4[0],
-	    riid->Data4[1],
-	    riid->Data4[2],
-	    riid->Data4[3],
-	    riid->Data4[4],
-	    riid->Data4[5],
-	    riid->Data4[6],
-	    riid->Data4[7]);
+    WINE_StringFromCLSID(riid, tmp);
+
+    strLen = strlen(tmp);
 
     // Grab buffer for string...
     sziid = (LPWSTR)CoTaskMemAlloc((strLen + 1) * sizeof(WCHAR));
@@ -231,24 +246,15 @@ HRESULT WIN32API StringFromIID(REFIID riid, LPOLESTR *ppsz)
 // ----------------------------------------------------------------------
 int WIN32API StringFromGUID2(REFGUID rguid, LPOLESTR lpsz, int cbMax)
 {
-    char 	tmp[64];
+    char 	tmp[50];
     size_t	strLen;
 
     dprintf(("OLE32: StringFromGUID2"));
 
     // Setup new string...
-    strLen  = sprintf(tmp, "{%08X-%04X-%04X-%02X%02X-%02X%02X%02X%02X%02X%02X}",
-	    rguid->Data1,
-	    rguid->Data2,
-	    rguid->Data3,
-	    rguid->Data4[0],
-	    rguid->Data4[1],
-	    rguid->Data4[2],
-	    rguid->Data4[3],
-	    rguid->Data4[4],
-	    rguid->Data4[5],
-	    rguid->Data4[6],
-	    rguid->Data4[7]);
+    WINE_StringFromCLSID(rguid, tmp);
+
+    strLen = strlen(tmp);
 
     if(cbMax < (strLen * 2 + 1))
 	return 0;
