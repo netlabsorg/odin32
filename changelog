@@ -1,7 +1,8 @@
-/* $Id: changelog,v 1.2097 2002-05-25 08:13:53 sandervl Exp $ */
+/* $Id: changelog,v 1.2098 2002-05-25 17:17:24 sandervl Exp $ */
 
  2002-05-25: Sander van Leeuwen <sandervl@innotek.de>
     - WINMM:    o Fix for soundcards without ioctl90 mixer support
+                o Many mixer updates
 
  2002-05-24: Sander van Leeuwen <sandervl@innotek.de>
     - WINMM:    o More mixer updates (not yet finished)
