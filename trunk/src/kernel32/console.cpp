@@ -1,4 +1,4 @@
-/* $Id: console.cpp,v 1.29 2001-11-29 00:20:46 phaller Exp $ */
+/* $Id: console.cpp,v 1.30 2002-06-26 07:13:00 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -415,12 +415,12 @@ APIRET iConsoleDevicesRegister(void)
   if (rc != NO_ERROR)                                  /* check for errors */
       dprintf(("KERNEL32:ConsoleDevicesRegister: registering CONOUT$ failed with %u.\n",
                rc));
-  
+
   // add standard symbolic links
   HandleNamesAddSymbolicLink("CON",        "CONOUT$");
   HandleNamesAddSymbolicLink("CON:",       "CONOUT$");
   HandleNamesAddSymbolicLink("\\\\.\\CON", "CONOUT$");
-  
+
   if(flVioConsole == TRUE)
   {
         pHMDeviceConsoleBuffer = (HMDeviceConsoleBufferClass *)new HMDeviceConsoleVioBufferClass("CONBUFFER$",
@@ -2592,31 +2592,6 @@ BOOL WIN32API FreeConsole( VOID )
  * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
  *****************************************************************************/
 
-BOOL WIN32API GenerateConsoleCtrlEvent(DWORD dwCtrlEvent,
-                                       DWORD dwProcessGroupId)
-{
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2GenerateConsoleCtrlEvent(%08x,%08x) not implemented.\n",
-           dwCtrlEvent,
-           dwProcessGroupId);
-#endif
-
-  return TRUE;
-}
-
-
-/*****************************************************************************
- * Name      :
- * Purpose   :
- * Parameters:
- * Variables :
- * Result    :
- * Remark    :
- * Status    :
- *
- * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
- *****************************************************************************/
-
 UINT WIN32API GetConsoleCP(VOID)
 {
 #ifdef DEBUG_LOCAL2
@@ -3484,31 +3459,6 @@ BOOL WIN32API SetConsoleCP(UINT IDCodePage)
 #ifdef DEBUG_LOCAL2
   WriteLog("KERNEL32/CONSOLE: OS2SetConsoleCP(%08x) not implemented.\n",
            IDCodePage);
-#endif
-
-  return TRUE;
-}
-
-
-/*****************************************************************************
- * Name      :
- * Purpose   :
- * Parameters:
- * Variables :
- * Result    :
- * Remark    :
- * Status    :
- *
- * Author    : Patrick Haller [Tue, 1998/02/10 01:55]
- *****************************************************************************/
-
-BOOL WIN32API SetConsoleCtrlHandler(PHANDLER_ROUTINE pHandlerRoutine,
-                                       BOOL             fAdd)
-{
-#ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2SetConsoleCtrlHandler(%08x,%08x) not implemented.\n",
-           pHandlerRoutine,
-           fAdd);
 #endif
 
   return TRUE;

@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.155 2002-06-16 08:20:36 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.156 2002-06-26 07:13:00 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -40,6 +40,7 @@
 #include "hmcomm.h"
 
 #include "console.h"
+#include "wincon.h"
 #include "cio.h"
 #include "versionos2.h"    /*PLF Wed  98-03-18 02:36:51*/
 #include <wprocess.h>
@@ -71,6 +72,8 @@ PCWSTR  pszCmdLineW;                    /* Unicode commandline. */
 
 //Process database
 PDB          ProcessPDB = {0};
+ENVDB        ProcessENVDB = {0};
+CONCTRLDATA  ProcessConCtrlData = {0};
 STARTUPINFOA StartupInfo = {0};
 CHAR         unknownPDBData[16] = {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0 ,0 ,0};
 USHORT       ProcessTIBSel = 0;
@@ -192,7 +195,7 @@ TEB *WIN32API CreateTEB(HANDLE hThread, DWORD dwThreadId)
     return winteb;
 }
 //******************************************************************************
-// Set up the TIB selector and memory for the main thread 
+// Set up the TIB selector and memory for the main thread
 //******************************************************************************
 TEB *WIN32API InitializeMainThread()
 {
@@ -239,17 +242,31 @@ TEB *WIN32API InitializeMainThread()
     ProcessPDB.tls_bits[0]     = 0; //all tls slots are free
     ProcessPDB.tls_bits[1]     = 0;
 
-    GetSystemTime(&ProcessPDB.creationTime) ;
+    GetSystemTime(&ProcessPDB.creationTime);
 
     /* Initialize the critical section */
-    InitializeCriticalSection( &ProcessPDB.crit_section );
+    InitializeCriticalSection(&ProcessPDB.crit_section );
+
+    //initialize the environment db entry.
+    ProcessPDB.env_db          = &ProcessENVDB;
+    ProcessENVDB.startup_info  = &StartupInfo;
+    ProcessENVDB.environ       = GetEnvironmentStringsA();
+    ProcessENVDB.cmd_line      = (CHAR*)(void*)pszCmdLineA;
+    ProcessENVDB.cmd_lineW     = (WCHAR*)(void*)pszCmdLineW;
+    ProcessENVDB.break_handlers = &ProcessConCtrlData;
+    ProcessConCtrlData.fIgnoreCtrlC = FALSE; /* TODO! Should be inherited from parent. */
+    ProcessConCtrlData.pHead = ProcessConCtrlData.pTail = (PCONCTRL)malloc(sizeof(CONCTRL));
+    ProcessConCtrlData.pHead->pfnHandler = (void*)DefaultConsoleCtrlHandler;
+    ProcessConCtrlData.pHead->pNext = ProcessConCtrlData.pHead->pPrev = NULL;
+    ProcessConCtrlData.pHead->flFlags = ODIN32_CONCTRL_FLAGS_INIT;
+    InitializeCriticalSection(&ProcessENVDB.section);
 
 //         ProcessPDB.startup_info    = &StartupInfo;
     ProcessPDB.unknown10       = (PVOID)&unknownPDBData[0];
     StartupInfo.cb             = sizeof(StartupInfo);
-    StartupInfo.hStdInput      = GetStdHandle(STD_INPUT_HANDLE);
-    StartupInfo.hStdOutput     = GetStdHandle(STD_OUTPUT_HANDLE);
-    StartupInfo.hStdError      = GetStdHandle(STD_ERROR_HANDLE);
+    ProcessENVDB.hStdin  = StartupInfo.hStdInput  = GetStdHandle(STD_INPUT_HANDLE);
+    ProcessENVDB.hStdout = StartupInfo.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+    ProcessENVDB.hStderr = StartupInfo.hStdError  = GetStdHandle(STD_ERROR_HANDLE);
 
     return teb;
 }
@@ -294,7 +311,7 @@ BOOL WIN32API InitializeThread(TEB *winteb, BOOL fMainThread)
     }
     SID_IDENTIFIER_AUTHORITY sidIdAuth = {0};
     winteb->o.odin.threadinfo.dwType = SECTYPE_PROCESS | SECTYPE_INITIALIZED;
-  
+
     if (NULL != RtlAllocateAndInitializeSid) {
         RtlAllocateAndInitializeSid(&sidIdAuth, 1, 0, 0, 0, 0, 0, 0, 0, 0, &winteb->o.odin.threadinfo.SidUser.User.Sid);
     }
@@ -304,12 +321,12 @@ BOOL WIN32API InitializeThread(TEB *winteb, BOOL fMainThread)
 
     winteb->o.odin.threadinfo.pTokenGroups = (TOKEN_GROUPS*)malloc(sizeof(TOKEN_GROUPS));
     winteb->o.odin.threadinfo.pTokenGroups->GroupCount = 1;
-  
+
     if (NULL != RtlAllocateAndInitializeSid) {
          RtlAllocateAndInitializeSid(&sidIdAuth, 1, 0, 0, 0, 0, 0, 0, 0, 0, &winteb->o.odin.threadinfo.PrimaryGroup.PrimaryGroup);
     }
     else DebugInt3();
-  
+
     winteb->o.odin.threadinfo.pTokenGroups->Groups[0].Sid = winteb->o.odin.threadinfo.PrimaryGroup.PrimaryGroup;
     winteb->o.odin.threadinfo.pTokenGroups->Groups[0].Attributes = 0; //????
 //        pPrivilegeSet   = NULL;
@@ -474,8 +491,8 @@ VOID WIN32API ExitProcess(DWORD exitcode)
         teb = teb->o.odin.next;
     }
     threadListMutex.leave();
-  
-  
+
+
 #ifdef PROFILE
     // Note: after this point we do not expect any more Win32-API calls,
     // so this is probably the best time to dump the gathered profiling
@@ -484,7 +501,7 @@ VOID WIN32API ExitProcess(DWORD exitcode)
     ProfilerWrite();
     ProfilerTerminate();
 #endif /* PROFILE */
-  
+
     //Restore original OS/2 TIB selector
     teb = GetThreadTEB();
     if(teb) DestroyTEB(teb);
@@ -1222,7 +1239,7 @@ ULONG InitCommandLine(const char *pszPeExe)
          *  Add arguments.
          */
         cch = strlen(pszPeExe)+1;
-      
+
         // PH 2002-04-11
         // Note: intentional memory leak, pszCmdLineW will not be freed
         // or allocated after process startup
@@ -1465,7 +1482,7 @@ DWORD WIN32API GetModuleFileNameA(HMODULE hModule, LPTSTR lpszPath, DWORD cchPat
 {
     Win32ImageBase *    pMod;           /* Pointer to the module object. */
     DWORD               cch = 0;        /* Length of the  */
-  
+
     // PH 2002-04-24 Note:
     // WIN2k just crashes in NTDLL if lpszPath is invalid!
     if (!VALID_PSZ(lpszPath))
@@ -1489,7 +1506,7 @@ DWORD WIN32API GetModuleFileNameA(HMODULE hModule, LPTSTR lpszPath, DWORD cchPat
               // if there is sufficient room for the zero termination,
               // write it additionally, uncounted
               lpszPath[cch] = '\0';
-              
+
             memcpy(lpszPath, pszFn, cch);
         }
         else
@@ -1611,7 +1628,7 @@ HANDLE WIN32API GetModuleHandleA(LPCTSTR lpszModule)
     {
         if(WinExe)
                 hMod = WinExe->getInstanceHandle();
-        else    
+        else
         {
           // // Just fail this API
           // hMod = 0;
@@ -1658,13 +1675,13 @@ HMODULE WIN32API GetModuleHandleW(LPCWSTR lpwszModuleName)
 
   if (NULL != lpwszModuleName)
     astring = UnicodeToAsciiString((LPWSTR)lpwszModuleName);
-  
+
   rc = GetModuleHandleA(astring);
   dprintf(("KERNEL32:  OS2GetModuleHandleW %s returned %X\n", astring, rc));
-  
+
   if (NULL != astring)
     FreeAsciiString(astring);
-  
+
   return(rc);
 }
 //******************************************************************************
@@ -1843,14 +1860,14 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
 
       // calculate base length for the new command line
       iNewCommandLineLength = strlen(szAppName) + strlen(lpCommandLine);
-      
+
       if(SubSystem == IMAGE_SUBSYSTEM_WINDOWS_CUI)
         lpszExecutable = "PEC.EXE";
       else
         lpszExecutable = "PE.EXE";
-      
+
       lpszPE = lpszExecutable;
-      
+
       // 2002-04-24 PH
       // set the ODIN32.DEBUG_CHILD environment variable to start new PE processes
       // under a new instance of the (IPMD) debugger.
@@ -1863,16 +1880,16 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
         strcpy(debug_szPE, debug_pszOS2Debugger);
         strcat(debug_szPE, " ");
         strcat(debug_szPE, lpszExecutable);
-        
+
         // we require more space in the new command line
         iNewCommandLineLength += strlen( debug_szPE );
-        
+
         // only launch the specified executable (ICSDEBUG.EXE)
         lpszPE = debug_szPE;
         lpszExecutable = debug_pszOS2Debugger;
       }
 #endif
-      
+
         //SvL: Allright. Before we call O32_CreateProcess, we must take care of
         //     lpCurrentDirectory ourselves. (Open32 ignores it!)
         if(lpCurrentDirectory) {
@@ -1891,11 +1908,11 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
             free(cmdline);
             cmdline = newcmdline;
         }
-      
+
         dprintf(("KERNEL32: CreateProcess starting [%s],[%s]",
                  lpszExecutable,
                  cmdline));
-      
+
         rc = O32_CreateProcess(lpszExecutable, (LPCSTR)cmdline,lpProcessAttributes,
                                lpThreadAttributes, bInheritHandles, dwCreationFlags,
                                lpEnvironment, lpCurrentDirectory, lpStartupInfo,
@@ -1943,7 +1960,7 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
     if(cmdline)
         free(cmdline);
 
-    if(lpProcessInfo) 
+    if(lpProcessInfo)
     {
         lpProcessInfo->dwThreadId = MAKE_THREADID(lpProcessInfo->dwProcessId, lpProcessInfo->dwThreadId);
         dprintf(("KERNEL32:  CreateProcess returned %d hPro:%x hThr:%x pid:%x tid:%x\n",
@@ -2041,7 +2058,7 @@ DWORD WIN32API WaitForInputIdle(HANDLE hProcess, DWORD dwTimeOut)
 
   if(fVersionWarp3) {
         Sleep(1000);
-        return 0;        
+        return 0;
   }
   else  return O32_WaitForInputIdle(hProcess, dwTimeOut);
 }
