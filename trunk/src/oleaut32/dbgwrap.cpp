@@ -2,14 +2,6 @@
 #include <odinwrap.h>
 #include <os2sel.h>
 
-#include <os2win.h>
-#include <winreg.h>
-#include <winnt.h>
-#include <wincon.h>
-#include <winthunk.h>
-#include <winnls.h>
-#include <ntddk.h>
-#include <heapstring.h>
 #include "oleaut32.h"
 #include "wine/obj_errorinfo.h"
 #include "wine/obj_oleaut.h"

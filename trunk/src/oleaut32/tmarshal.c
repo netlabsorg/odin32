@@ -2,13 +2,21 @@
  *	TYPELIB Marshaler
  *
  *	Copyright 2002	Marcus Meissner
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#ifdef __WIN32OS2__
-#define HAVE_FLOAT_H
-#define WINE_LARGE_INTEGER
-#include "oleaut32.h"
-
-#endif
 
 #include "config.h"
 
@@ -31,13 +39,13 @@
 #include "heap.h"
 #include "ole2disp.h"
 #include "typelib.h"
-#include "debugtools.h"
+#include "wine/debug.h"
 #include "ntddk.h"
 
 static const WCHAR riidW[5] = {'r','i','i','d',0};
 
-DEFAULT_DEBUG_CHANNEL(ole);
-DECLARE_DEBUG_CHANNEL(olerelay);
+WINE_DEFAULT_DEBUG_CHANNEL(ole);
+WINE_DECLARE_DEBUG_CHANNEL(olerelay);
 
 typedef struct _marshal_state {
     LPBYTE	base;
@@ -369,10 +377,17 @@ marshall_param(
     case VT_NULL:
 	return S_OK;
     case VT_BSTR: {	/* DWORD size, string data */
-	    DWORD *bstr = ((DWORD*)(*arg))-1;
 
-	    if (relaydeb) MESSAGE("%s",debugstr_w((LPWSTR)(bstr+1)));
-	    return xbuf_add(buf,(LPBYTE)bstr,bstr[0]+4);
+	    if (*arg) {
+		DWORD *bstr = ((DWORD*)(*arg))-1;
+
+		if (relaydeb) MESSAGE("%s",debugstr_w((LPWSTR)(bstr+1)));
+		return xbuf_add(buf,(LPBYTE)bstr,bstr[0]+4);
+	    } else {
+		DWORD xnull = 0;
+
+		return xbuf_add(buf,(LPBYTE)&xnull,sizeof(xnull));
+	    }
 	}
     case VT_BOOL:
     case VT_I4:

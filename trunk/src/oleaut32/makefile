@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.33 2002-05-16 19:35:14 sandervl Exp $
+# $Id: makefile,v 1.34 2002-05-17 10:16:58 sandervl Exp $
 
 #
 # Odin32 API
@@ -21,27 +21,15 @@ ORGDEFFILE = oleaut32.def
 # Object files. Prefix with OBJDIR and one space before the '\'.
 #
 OBJS = \
-$(OBJDIR)\oleaut32.obj \
 $(OBJDIR)\oleaut.obj \
-$(OBJDIR)\oList.obj \
-$(OBJDIR)\initterm.obj \
 $(OBJDIR)\olefont.obj \
 $(OBJDIR)\variant.obj \
 $(OBJDIR)\ole2disp.obj \
 $(OBJDIR)\parsedt.obj \
 $(OBJDIR)\olepicture.obj \
 $(OBJDIR)\asmutil.obj \
-#$(OBJDIR)\iPicture.obj \
-#$(OBJDIR)\iPictureNone.obj \
-#$(OBJDIR)\iPictureBmp.obj \
-#$(OBJDIR)\iPictureMeta.obj \
-#$(OBJDIR)\iPictureIcon.obj \
-#$(OBJDIR)\iPictureEmf.obj \
 $(OBJDIR)\typelib.obj \
 $(OBJDIR)\tmarshal.obj \
-#$(OBJDIR)\itypelib.obj \
-#$(OBJDIR)\itypecomp.obj \
-#$(OBJDIR)\itypeinfo.obj \
 $(OBJDIR)\hash.obj \
 $(OBJDIR)\safearray.obj \
 $(OBJDIR)\connpt.obj \
@@ -50,6 +38,7 @@ $(OBJDIR)\stubs.obj \
 !if "$(DEBUG)" == "1"
 $(OBJDIR)\dbgwrap.obj \
 !endif
+$(DLLENTRY) \
 $(OBJDIR)\oleaut32rsrc.obj
 
 
@@ -65,7 +54,6 @@ $(ODIN32_LIB)/comctl32.lib \
 $(ODIN32_LIB)/gdi32.lib \
 $(ODIN32_LIB)/guidlib.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
-$(ODIN32_LIB)/pmwinx.lib \
 OS2386.LIB \
 $(RTLLIB_O)
 

@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.14 2002-05-16 19:35:15 sandervl Exp $ */
+/* $Id: stubs.cpp,v 1.15 2002-05-17 10:17:00 sandervl Exp $ */
 /* 
  * Win32 COM/OLE stubs for OS/2
  * 
@@ -703,3 +703,40 @@ HRESULT WINAPI OleCreatePropertyFrame(
         dprintf(("not implemented"));
 	return S_OK;
 }
+
+#ifdef __WIN32OS2__
+
+// ----------------------------------------------------------------------
+// OleLoadPictureFile
+// ----------------------------------------------------------------------
+HRESULT WIN32API OleLoadPictureFile(VARIANT varFileName, LPDISPATCH* lplpdispPicture)
+{
+    dprintf(("OLEAUT32: OleLoadPictureFile - stub"));
+    return S_OK;
+}
+
+// ----------------------------------------------------------------------
+// OleSavePictureFile
+// ----------------------------------------------------------------------
+HRESULT WIN32API OleSavePictureFile(LPDISPATCH lpdispPicture,
+    BSTR bstrFileName)
+{
+    dprintf(("OLEAUT32: OleSavePictureFile - stub"));
+    return S_OK;
+}
+
+// ----------------------------------------------------------------------
+// OleLoadPicturePath
+// ----------------------------------------------------------------------
+HRESULT WIN32API OleLoadPicturePath
+   (LPOLESTR  		szURLorPath,
+    LPUNKNOWN 		punkCaller,
+    DWORD     		dwReserved,
+    OLE_COLOR 		clrReserved,
+    REFIID    		riid,
+    LPVOID *  		ppvRet )
+{
+    dprintf(("OLEAUT32: OleLoadPicturePath - stub"));
+    return S_OK;
+}
+#endif
