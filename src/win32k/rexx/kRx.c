@@ -1,6 +1,8 @@
-/* $Id: kRx.c,v 1.1 2000-05-10 16:04:30 bird Exp $
+/* $Id: kRx.c,v 1.2 2000-06-03 03:50:45 bird Exp $
  *
  * kRx - Small rexx script interpreter.
+ *
+ * Will be re-written in assembly later!!!
  *
  * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
  *
@@ -16,6 +18,8 @@
 #define INCL_REXXSAA
 #define INCL_DOSERRORS
 
+#undef DEBUGOUT
+
 /*******************************************************************************
 *   Internal Functions                                                         *
 *******************************************************************************/
@@ -24,7 +28,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <malloc.h>
+/*#include <malloc.h> */
 
 /**
  * Main function.
@@ -50,7 +54,7 @@ int main(int argc, char **argv)
     int         iScriptName;            /* Argument index of the script name. */
     int         argi;                   /* Argument index loop variable. */
     APIRET      rc;                     /* Return code from RexxStart. */
-
+    ULONG       ul;                     /* Dummy used by DosWrite. */
 
     /*
      * Find Rexx script filename.
@@ -67,7 +71,7 @@ int main(int argc, char **argv)
      */
     if (iScriptName >= argc)
     {
-        fprintf(stderr, "Invalid parameters, script filename is missing\n");
+        DosWrite(2, "Invalid parameters, script filename is missing.\r\n", 47, &ul);
         return -10000;
     }
 
@@ -119,6 +123,7 @@ int main(int argc, char **argv)
     /*
      * Debug display result.
      */
+    #ifdef DEBUGOUT
     printf(
         "Interpreter rc:    %d\n"
         "Function    rc:    %d\n"
@@ -126,7 +131,7 @@ int main(int argc, char **argv)
         rc,
         sRexxRc,
         rxstrRexxRc.strptr);
-
+    #endif
 
     DosFreeMem(rxstrRexxRc.strptr);     /* Release storage from RexxStart. */
 
