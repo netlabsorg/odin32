@@ -1,4 +1,20 @@
- /* $Id: ChangeLog,v 1.1009 2000-06-27 18:20:44 mike Exp $ */
+ /* $Id: ChangeLog,v 1.1010 2000-06-28 18:07:46 sandervl Exp $ */
+
+ 2000-06-28: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32:    Cleaned up resource handling (findResourceA/W); much
+                   more efficient now (searching for different languages)
+                   Sets proper error code when failing to find type or name
+                   Search for language in following order:
+                   - specified language (user default if LANG_GETFIRST)
+                   - primary specified language with default sublanguage
+                   - language neutral 
+                   - first available language
+                   Changed return type of HMDeviceFileClass file locking
+                   methods (DWORD -> BOOL; not a bugfix)
+
+ 2000-06-28: Michal Necasek <mike@mendelu.cz>
+    - USER32:      BeginDeferWindowPos accepts count 0 as valid parameter
+                   (verified in NT; negative count is illegal)
 
  2000-06-27: Michal Necasek <michalnec@volny.cz>
     - DINPUT:      Fixed some key values, MS uses mostly raw scan
