@@ -1,7 +1,7 @@
- /* $Id: changelog,v 1.1067 2000-08-14 15:52:08 cbratschi Exp $ */
+ /* $Id: changelog,v 1.1068 2000-08-14 18:29:39 sandervl Exp $ */
 
  2000-08-14: Sander van Leeuwen <sandervl@xs4all.nl>
-    - KERNEL32: Fixed sharing violations errors in OSLibDosCreateFile
+    - KERNEL32: Fixed sharing violation errors in OSLibDosCreateFile
                 (FILE_SHARE_DELETE now included in share flag var)
                 (fixes error messages when playing files in RealPlayer 7)
 
