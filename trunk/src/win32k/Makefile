@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.65 2000-12-16 23:07:25 bird Exp $
+# $Id: Makefile,v 1.66 2001-02-21 14:11:49 bird Exp $
 
 #
 # Win32k makefile.
@@ -19,7 +19,7 @@
 !   endif
 !endif
 !if [Check.cmd $(MAKE) -nologo -q -f Check.mk makefile.inc] != 0
-!   error makefile.inc is older than configure.cmd. Re-run configure.cmd!
+!   error makefile.inc is older than configure.cmd. Re-run /src/win32k/configure.cmd!
 !endif
 
 
