@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.2 2000-03-01 18:49:30 jeroen Exp $ */
+/* $Id: initterm.cpp,v 1.3 2000-03-11 17:06:34 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -32,12 +32,16 @@
 #include <string.h>
 #include <odin.h>
 #include <win32type.h>
+#include <winconst.h>
 #include <odinlx.h>
 #include <misc.h>                      /* PLF Wed  98-03-18 23:18:15       */
 
 extern "C" {
 void CDECL _ctordtorInit( void );
 void CDECL _ctordtorTerm( void );
+
+ //Win32 resource table (produced by wrc)
+ extern DWORD _Resource_PEResTab;
 }
 
 #ifdef DIVE
@@ -45,14 +49,24 @@ void _System DiveGlobalInitialize(void);
 void _System DiveGlobalTerminate(void);
 #endif
 
-/*-------------------------------------------------------------------*/
-/* A clean up routine registered with DosExitList must be used if    */
-/* runtime calls are required and the runtime is dynamically linked. */
-/* This will guarantee that this clean up routine is run before the  */
-/* library DLL is terminated.                                        */
-/*-------------------------------------------------------------------*/
-static void APIENTRY cleanup(ULONG reason);
+//* ******************************************************************************/
+//* ******************************************************************************/
+BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
+{
+   switch (fdwReason)
+   {
+     case DLL_PROCESS_ATTACH:
+     case DLL_THREAD_ATTACH:
+     case DLL_THREAD_DETACH:
+       return TRUE;
 
+     case DLL_PROCESS_DETACH:
+       DiveGlobalTerminate();
+       _ctordtorTerm();
+       return TRUE;
+   }
+   return FALSE;
+}
 
 /****************************************************************************/
 /* _DLL_InitTerm is the function that gets called by the operating system   */
@@ -85,11 +99,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          /* are required and the runtime is dynamically linked.             */
          /*******************************************************************/
 
-         if(RegisterLxDll(hModule, 0, 0) == FALSE)
-                return 0UL;
-
-         rc = DosExitList(0x0000F000|EXLST_ADD, cleanup);
-         if(rc)
+         if(RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab) == FALSE)
                 return 0UL;
 
 #ifdef DIVE
@@ -112,14 +122,3 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
    return 1UL;
 }
 
-
-static void APIENTRY cleanup(ULONG ulReason)
-{
-   DiveGlobalTerminate();
-
-   _ctordtorTerm();
-
-   DosExitList(EXLST_EXIT, cleanup);
-
-   return ;
-}

@@ -1,4 +1,4 @@
-/* $Id: win32_menu.c,v 1.5 2000-03-11 15:07:48 sandervl Exp $ */
+/* $Id: win32_menu.c,v 1.6 2000-03-11 17:07:46 sandervl Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1994, 1997, 1998. */
 /* Copyright (c) Nate Robins, 1997. */
 
@@ -18,7 +18,7 @@
 
 #include "glutint.h"
 
-void (* GLCALLBACK __glutMenuStatusFunc) (int, int, int);
+void (* GLUTCALLBACK __glutMenuStatusFunc) (int, int, int);
 extern GLUTmenu *__glutMappedMenu;
 extern GLUTwindow *__glutMenuWindow;
 GLUTmenuItem *__glutItemSelected;
