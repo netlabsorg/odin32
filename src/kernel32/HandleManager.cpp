@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.89 2002-07-15 14:40:15 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.90 2002-08-01 16:02:40 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -2945,7 +2945,7 @@ DWORD HMWaitForMultipleObjects (DWORD   cObjects,
   if (pArrayOfHandles == NULL)
   {
     dprintf(("ERROR: HMWaitForMultipleObjects: alloca failed to allocate %d handles", cObjects));
-    O32_SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+    SetLastError(ERROR_NOT_ENOUGH_MEMORY);
     return WAIT_FAILED;
   }
   else
@@ -2976,7 +2976,7 @@ DWORD HMWaitForMultipleObjects (DWORD   cObjects,
                *pLoop1));
 
     *pLoop2 = *pLoop1;
-////      O32_SetLastError(ERROR_INVALID_HANDLE);
+////      SetLastError(ERROR_INVALID_HANDLE);
 ////      return (WAIT_FAILED);
     }
   }
@@ -3080,7 +3080,7 @@ DWORD  HMMsgWaitForMultipleObjects  (DWORD      cObjects,
   if (pArrayOfHandles == NULL)
   {
       dprintf(("ERROR: HMMsgWaitForMultipleObjects: alloca failed to allocate %d handles", cObjects));
-      O32_SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+      SetLastError(ERROR_NOT_ENOUGH_MEMORY);
       return WAIT_FAILED;
   }
   else
@@ -3106,7 +3106,7 @@ DWORD  HMMsgWaitForMultipleObjects  (DWORD      cObjects,
                *pLoop1));
 
     *pLoop2 = *pLoop1;
-////      O32_SetLastError(ERROR_INVALID_HANDLE);
+////      SetLastError(ERROR_INVALID_HANDLE);
 ////      return (WAIT_FAILED);
     }
   }
