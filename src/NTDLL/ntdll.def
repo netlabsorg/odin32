@@ -1,4 +1,4 @@
-; $Id: ntdll.def,v 1.16 1999-08-19 02:12:17 phaller Exp $
+; $Id: ntdll.def,v 1.17 1999-08-19 20:43:19 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is NT4.0's NTDLL.DLL
@@ -294,6 +294,7 @@ EXPORTS
     RtlRaiseException             = ___regs_RtlRaiseException@8
     DebugBreak                    = ___regs_DebugBreak@4
     RtlRaiseStatus                = _RtlRaiseStatus@4
+    RtlRandom                     = _RtlRandom@4                      @466
 
     RtlAcquirePebLock             = _RtlAcquirePebLock@0
     RtlReleasePebLock             = _RtlReleasePebLock@0
@@ -361,10 +362,13 @@ EXPORTS
     strrchr                       = _OS2strrchr                       @924
     strspn                        = _OS2strspn                        @925
     strstr                        = _OS2strstr                        @926
+    swprintf                      = _OS2swprintf                      @927
+    tan                           = _OS2tan                           @928
     toupper                       = _OS2toupper                       @929
     tolower                       = _OS2tolower                       @930
     towlower                      = _OS2towlower                      @931
     towupper                      = _OS2towupper                      @932
+
 
     wcscat                        = _OS2wcscat                        @934
     wcschr                        = _OS2wcschr                        @935
