@@ -1,4 +1,4 @@
-/* $Id: commctrl.h,v 1.15 1999-10-25 20:16:03 sandervl Exp $ */
+/* $Id: commctrl.h,v 1.16 1999-12-18 20:05:39 achimha Exp $ */
 /*
  * Common controls definitions
  */
@@ -46,6 +46,8 @@ typedef struct tagINITCOMMONCONTROLSEX {
 
 BOOL WINAPI InitCommonControlsEx (LPINITCOMMONCONTROLSEX);
 
+#define COMCTL32_VERSION                5  /* dll version */
+
 #define ICC_LISTVIEW_CLASSES   0x00000001  /* listview, header */
 #define ICC_TREEVIEW_CLASSES   0x00000002  /* treeview, tooltips */
 #define ICC_BAR_CLASSES        0x00000004  /* toolbar, statusbar, trackbar, tooltips */
@@ -86,7 +88,9 @@ BOOL WINAPI InitCommonControlsEx (LPINITCOMMONCONTROLSEX);
 #define CCM_GETDROPTARGET    (CCM_FIRST+4)
 #define CCM_SETUNICODEFORMAT (CCM_FIRST+5)
 #define CCM_GETUNICODEFORMAT (CCM_FIRST+6)
-
+#define CCM_SETVERSION       (CCM_FIRST+7)
+#define CCM_GETVERSION       (CCM_FIRST+8)
+#define CCM_SETNOTIFYWINDOW  (CCM_FIRST+9)     /* wParam = hwndParent */
 
 /* common notification codes (WM_NOTIFY)*/
 #define NM_FIRST                (0U-  0U)
@@ -401,6 +405,7 @@ typedef struct _IMAGELIST *HIMAGELIST;
 #define ILD_BLEND        ILD_BLEND50
 
 #define INDEXTOOVERLAYMASK(i)  ((i)<<8)
+#define INDEXTOSTATEIMAGEMASK(i) ((i)<<12)
 
 #define ILCF_MOVE        (0x00000000)
 #define ILCF_SWAP        (0x00000001)
@@ -1150,6 +1155,29 @@ typedef struct tagNMTBGETINFOTIPW
 #define NMTBGETINFOTIP   WINELIB_NAME_AW(NMTBGETINFOFTIP)
 #define LPNMTBGETINFOTIP WINELIB_NAME_AW(LPNMTBGETINFOTIP)
 
+typedef struct tagNMTOOLBARA
+{
+    NMHDR    hdr;
+    INT      iItem;
+    TBBUTTON tbButton;
+    INT      cchText;
+    LPSTR    pszText;
+    RECT     rcButton; /* Version 5.80 */
+} NMTOOLBARA, *LPNMTOOLBARA;
+
+typedef struct tagNMTOOLBARW
+{
+    NMHDR    hdr;
+    INT      iItem;
+    TBBUTTON tbButton;
+    INT      cchText;
+    LPWSTR   pszText;
+    RECT     rcButton; /* Version 5.80 */
+} NMTOOLBARW, *LPNMTOOLBARW;
+
+#define NMTOOLBAR   WINELIB_NAME_AW(NMTOOLBAR)
+#define LPNMTOOLBAR WINELIB_NAME_AW(LPNMTOOLBAR)
+
 typedef struct
 {
         HINSTANCE hInstOld;
@@ -1770,28 +1798,6 @@ typedef struct
 #define TVM_SETUNICODEFORMAT    CCM_SETUNICODEFORMAT
 #define TVM_GETUNICODEFORMAT    CCM_GETUNICODEFORMAT
 
-#define TreeView_GetItemState(hwndTV, hti, mask) \
-   (UINT)SendMessageA((hwndTV), TVM_GETITEMSTATE, (WPARAM)(hti), (LPARAM)(mask))
-#define TreeView_GetCheckState(hwndTV, hti) \
-   ((((UINT)(SendMessageA((hwndTV), TVM_GETITEMSTATE, (WPARAM)(hti),  \
-                     TVIS_STATEIMAGEMASK))) >> 12) -1)
-#define TreeView_SetLineColor(hwnd, clr) \
-    (COLORREF)SendMessageA((hwnd), TVM_SETLINECOLOR, 0, (LPARAM)(clr))
-#define TreeView_GetLineColor(hwnd) \
-    (COLORREF)SendMessageA((hwnd), TVM_GETLINECOLOR, 0, 0)
-#define TreeView_SetItemState(hwndTV, hti, data, _mask) \
-{ TVITEM _TVi; \
-  _TVi.mask = TVIF_STATE; \
-  _TVi.hItem = hti; \
-  _TVi.stateMask = _mask; \
-  _TVi.state = data; \
-  SendMessageA((hwndTV), TVM_SETITEM, 0, (LPARAM)(TV_ITEM *)&_TVi); \
-}
-
-
-
-
-
 #define TVN_FIRST               (0U-400U)
 #define TVN_LAST                (0U-499U)
 
@@ -1880,6 +1886,7 @@ typedef struct
 #define TVS_FULLROWSELECT         0x1000
 #define TVS_NOSCROLL              0x2000
 #define TVS_NONEVENHEIGHT         0x4000
+#define TVS_NOHSCROLL             0x8000
 
 #define TVS_SHAREDIMAGELISTS  0x0000
 #define TVS_PRIVATEIMAGELISTS 0x0400
@@ -2159,16 +2166,18 @@ typedef struct tagNMTVGETINFOTIPW
                 TreeView_Select(hwnd, hitem, TVGN_CARET)
 #define TreeView_SelectDropTarget(hwnd, hitem) \
                 TreeView_Select(hwnd, hitem, TVGN_DROPHILITE)
-/* FIXME
 #define TreeView_SelectSetFirstVisible(hwnd, hitem)  \
                 TreeView_Select(hwnd, hitem, TVGN_FIRSTVISIBLE)
-*/
 
 #define TreeView_GetItemA(hwnd, pitem) \
  (BOOL)SendMessageA((hwnd), TVM_GETITEMA, 0, (LPARAM) (TVITEMA *)(pitem))
+#define TreeView_GetItemW(hwnd, pitem) \
+ (BOOL)SendMessageW((hwnd), TVM_GETITEMA, 0, (LPARAM) (TVITEMA *)(pitem))
 
 #define TreeView_SetItemA(hwnd, pitem) \
  (BOOL)SendMessageA((hwnd), TVM_SETITEMA, 0, (LPARAM)(const TVITEMA *)(pitem))
+#define TreeView_SetItemW(hwnd, pitem) \
+ (BOOL)SendMessageW((hwnd), TVM_SETITEMA, 0, (LPARAM)(const TVITEMA *)(pitem)) 
 
 #define TreeView_EditLabel(hwnd, hitem) \
     (HWND)SendMessageA((hwnd), TVM_EDITLABEL, 0, (LPARAM)(HTREEITEM)(hitem))
@@ -2202,9 +2211,15 @@ typedef struct tagNMTVGETINFOTIPW
 #define TreeView_EndEditLabelNow(hwnd, fCancel) \
     (BOOL)SendMessageA((hwnd), TVM_ENDEDITLABELNOW, (WPARAM)fCancel, 0)
 
-#define TreeView_GetISearchString(hwndTV, lpsz) \
-    (BOOL)SendMessageA((hwndTV), TVM_GETISEARCHSTRING, 0, \
-                                                        (LPARAM)(LPTSTR)lpsz)
+#define TreeView_GetISearchString(hwnd, lpsz) \
+    (BOOL)SendMessageA((hwnd), TVM_GETISEARCHSTRING, 0, \
+							(LPARAM)(LPTSTR)lpsz)
+
+#define TreeView_SetToolTips(hwnd,  hwndTT) \
+    (BOOL)SendMessageA((hwnd), TVM_SETTOOLTIPS, (WPARAM)(hwndTT), 0)
+
+#define TreeView_GetToolTips(hwnd) \
+    (BOOL)SendMessageA((hwnd), TVM_GETTOOLTIPS, 0, 0)
 
 #define TreeView_SetItemHeight(hwnd,  iHeight) \
     (INT)SendMessageA((hwnd), TVM_SETITEMHEIGHT, (WPARAM)iHeight, 0)
@@ -2229,14 +2244,36 @@ typedef struct tagNMTVGETINFOTIPW
 #define TreeView_GetScrollTime(hwnd) \
     (UINT)SendMessageA((hwnd), TVM_GETSCROLLTIME, 0, 0)
 
+#define TreeView_SetInsertMark(hwnd, hItem, fAfter) \
+    (BOOL)SendMessageA((hwnd), TVM_SETINSERTMARK, (WPARAM)(fAfter), \
+                       (LPARAM) (hItem))
+
 #define TreeView_SetInsertMarkColor(hwnd, clr) \
     (COLORREF)SendMessageA((hwnd), TVM_SETINSERTMARKCOLOR, 0, (LPARAM)clr)
+
 #define TreeView_GetInsertMarkColor(hwnd) \
     (COLORREF)SendMessageA((hwnd), TVM_GETINSERTMARKCOLOR, 0, 0)
 
+#define TreeView_GetItemState(hwndTV, hti, mask) \
+   (UINT)SendMessageA((hwndTV), TVM_GETITEMSTATE, (WPARAM)(hti), (LPARAM)(mask))
+#define TreeView_GetCheckState(hwndTV, hti) \
+   ((((UINT)(SendMessageA((hwndTV), TVM_GETITEMSTATE, (WPARAM)(hti),  \
+                     TVIS_STATEIMAGEMASK))) >> 12) -1)
 
+#define TreeView_SetLineColor(hwnd, clr) \
+    (COLORREF)SendMessageA((hwnd), TVM_SETLINECOLOR, 0, (LPARAM)(clr))
 
+#define TreeView_GetLineColor(hwnd) \
+    (COLORREF)SendMessageA((hwnd), TVM_GETLINECOLOR, 0, 0)
 
+#define TreeView_SetItemState(hwndTV, hti, data, _mask) \
+{ TVITEM _TVi; \
+  _TVi.mask = TVIF_STATE; \
+  _TVi.hItem = hti; \
+  _TVi.stateMask = _mask; \
+  _TVi.state = data; \
+  SendMessageA((hwndTV), TVM_SETITEM, 0, (LPARAM)(TV_ITEM *)&_TVi); \
+}
 
 
 
@@ -2464,18 +2501,19 @@ typedef struct tagNMTVGETINFOTIPW
 #define LVN_BEGINDRAG           (LVN_FIRST-9)
 #define LVN_BEGINRDRAG          (LVN_FIRST-11)
 #define LVN_ODCACHEHINT         (LVN_FIRST-13)
-#define LVN_ODFINDITEMA       (LVN_FIRST-52)
-#define LVN_ODFINDITEMW       (LVN_FIRST-79)
-#define LVN_ODFINDITEM WINELIB_NAME_AW(LVN_ODFINDITEM)
 #define LVN_ITEMACTIVATE        (LVN_FIRST-14)
 #define LVN_ODSTATECHANGED      (LVN_FIRST-15)
 #define LVN_HOTTRACK            (LVN_FIRST-21)
+#define LVN_ODFINDITEMA         (LVN_FIRST-52)
+#define LVN_ODFINDITEMW         (LVN_FIRST-79)
+#define LVN_ODFINDITEM WINELIB_NAME_AW(LVN_ODFINDITEM)
 #define LVN_GETDISPINFOA      (LVN_FIRST-50)
 #define LVN_GETDISPINFOW      (LVN_FIRST-77)
 #define LVN_GETDISPINFO WINELIB_NAME_AW(LVN_GETDISPINFO)
 #define LVN_SETDISPINFOA      (LVN_FIRST-51)
 #define LVN_SETDISPINFOW      (LVN_FIRST-78)
 #define LVN_SETDISPINFO WINELIB_NAME_AW(LVN_SETDISPINFO)
+#define LVN_KEYDOWN             (LVN_FIRST-55)
 
 #define LVA_ALIGNLEFT           0x0000
 #define LVA_DEFAULT             0x0001
@@ -2586,8 +2624,6 @@ typedef struct tagLVDISPINFOW
 
 #define LV_DISPINFO     NMLVDISPINFO
 
-#define LVN_KEYDOWN     (LVN_FIRST-55)
-
 typedef struct tagLVKEYDOWN
 {
   NMHDR hdr;
@@ -2629,7 +2665,17 @@ typedef struct tagTCHITTESTINFO
 #define TC_HITTESTINFO TCHITTESTINFO
 
 typedef INT (* CALLBACK PFNLVCOMPARE)(LPARAM, LPARAM, LPARAM);
-//typedef INT (*PFNLVCOMPARE)(LPARAM, LPARAM, LPARAM);
+
+typedef struct tagNMLVCACHEHINT
+{
+	NMHDR	hdr;
+	INT	iFrom;
+	INT	iTo;
+} NMLVCACHEHINT, *LPNMLVCACHEHINT;
+
+#define LPNM_CACHEHINT LPNMLVCACHEHINT
+#define PNM_CACHEHINT  LPNMLVCACHEHINT
+#define NM_CACHEHINT   NMLVCACHEHINT
 
 #define ListView_GetNextItem(hwnd,nItem,flags) \
     (INT)SendMessageA((hwnd),LVM_GETNEXTITEM,(WPARAM)(INT)(nItem),(LPARAM)(MAKELPARAM(flags,0)))
