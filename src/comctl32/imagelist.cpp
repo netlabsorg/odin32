@@ -1,4 +1,4 @@
-/* $Id: imagelist.cpp,v 1.1 2000-02-23 17:09:42 cbratschi Exp $ */
+/* $Id: imagelist.cpp,v 1.2 2000-11-09 18:13:32 sandervl Exp $ */
 /*
  *  ImageList implementation
  *
@@ -542,7 +542,7 @@ ImageList_Add (HIMAGELIST himl, HBITMAP hbmImage, HBITMAP hbmMask)
 INT WINAPI
 ImageList_AddIcon (HIMAGELIST himl, HICON hIcon)
 {
-    dprintf(("COMCTL32: ImageList_AddIcon"));
+    dprintf(("COMCTL32: ImageList_AddIcon %x %x", himl, hIcon));
 
     return ImageList_ReplaceIcon (himl, -1, hIcon);
 }
@@ -574,7 +574,7 @@ ImageList_AddMasked (HIMAGELIST himl, HBITMAP hBitmap, COLORREF clrMask)
     HBITMAP hMaskBitmap=0;
     COLORREF bkColor;
 
-    dprintf(("COMCTL32: ImageList_AddMasked"));
+    dprintf(("COMCTL32: ImageList_AddMasked %x %x %x", himl, hBitmap, clrMask));
 
     if (himl == NULL)
         return -1;
@@ -2292,7 +2292,7 @@ ImageList_Replace (HIMAGELIST himl, INT i, HBITMAP hbmImage,
     HDC hdcImageList, hdcImage;
     BITMAP bmp;
 
-    dprintf(("COMCTL32: ImageList_Replace"));
+    dprintf(("COMCTL32: ImageList_Replace %x %d %x %x", himl, i, hbmImage, hbmMask));
 
     if (himl == NULL) {
 //        ERR (imagelist, "Invalid image list handle!\n");
