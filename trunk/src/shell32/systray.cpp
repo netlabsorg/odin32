@@ -1,4 +1,4 @@
-/* $Id: systray.cpp,v 1.1 2000-03-26 16:34:57 cbratschi Exp $ */
+/* $Id: systray.cpp,v 1.2 2000-05-09 19:01:51 sandervl Exp $ */
 /*
  *      Systray
  *
@@ -264,12 +264,12 @@ void SYSTRAY_SetTip(SystrayData *ptrayItem,WCHAR* szTip,BOOL unicode)
   TTTOOLINFOW ti;
 
   if (unicode)
-    lstrcpynW(ptrayItem->notifyIcon.szTip, szTip, sizeof(ptrayItem->notifyIcon.szTip));
+    lstrcpynW(ptrayItem->notifyIcon.szTip, szTip, sizeof(ptrayItem->notifyIcon.szTip)/sizeof(WCHAR));
   else
-   lstrcpynAtoW(ptrayItem->notifyIcon.szTip,(LPSTR)szTip,sizeof(ptrayItem->notifyIcon.szTip));
-  ptrayItem->notifyIcon.szTip[sizeof(ptrayItem->notifyIcon.szTip)-1]=0;
+   lstrcpynAtoW(ptrayItem->notifyIcon.szTip,(LPSTR)szTip,sizeof(ptrayItem->notifyIcon.szTip)/sizeof(WCHAR));
+  ptrayItem->notifyIcon.szTip[sizeof(ptrayItem->notifyIcon.szTip)/sizeof(WCHAR)-1]=0;
 
-  ti.cbSize = sizeof(TTTOOLINFOA);
+  ti.cbSize = sizeof(TTTOOLINFOW);
   ti.uFlags = 0;
   ti.hwnd = ptrayItem->hWnd;
   ti.hinst = 0;
@@ -288,12 +288,12 @@ static void SYSTRAY_ModifyTip(SystrayData *ptrayItem,WCHAR* szTip,BOOL unicode)
   TTTOOLINFOW ti;
 
   if (unicode)
-    lstrcpynW(ptrayItem->notifyIcon.szTip, szTip, sizeof(ptrayItem->notifyIcon.szTip));
+    lstrcpynW(ptrayItem->notifyIcon.szTip, szTip, sizeof(ptrayItem->notifyIcon.szTip)/sizeof(WCHAR));
   else
-    lstrcpynAtoW(ptrayItem->notifyIcon.szTip,(LPSTR)szTip,sizeof(ptrayItem->notifyIcon.szTip));
-  ptrayItem->notifyIcon.szTip[sizeof(ptrayItem->notifyIcon.szTip)-1]=0;
+    lstrcpynAtoW(ptrayItem->notifyIcon.szTip,(LPSTR)szTip,sizeof(ptrayItem->notifyIcon.szTip)/sizeof(WCHAR));
+  ptrayItem->notifyIcon.szTip[sizeof(ptrayItem->notifyIcon.szTip)/sizeof(WCHAR)-1]=0;
 
-  ti.cbSize = sizeof(TTTOOLINFOA);
+  ti.cbSize = sizeof(TTTOOLINFOW);
   ti.uFlags = 0;
   ti.hwnd = ptrayItem->hWnd;
   ti.hinst = 0;
