@@ -1,4 +1,4 @@
-/* $Id: Win32kCC.c,v 1.5 2000-11-29 04:36:27 bird Exp $
+/* $Id: Win32kCC.c,v 1.6 2000-12-03 22:00:30 bird Exp $
  *
  * Win32CC - Win32k Control Center.
  *
@@ -854,8 +854,9 @@ int GetFixpackDesc(ULONG ulBuild, ULONG flKernel, PSZ pszBuffer)
         strcpy(pszBuffer, "WS4eB GA");
     else if (ulBuild == 14040)
         strcpy(pszBuffer, flKernel & KF_W4 ? "Warp 4 FP13" : "WS4eB FP1");
-    else if (ulBuild >= 14041 && ulBuild <= 14046)
+    else if (ulBuild >= 14041 /*&& ulBuild <= 1406x*/)
         strcpy(pszBuffer, "Warp 4 FP14");
+    /*
     else if (ulBuild >= 14048)
     {
         if (flKernel & KF_W4)
@@ -863,6 +864,7 @@ int GetFixpackDesc(ULONG ulBuild, ULONG flKernel, PSZ pszBuffer)
         else
             sprintf(pszBuffer, "WS4eB FP%d", ulBuild - 14048 + 2); //???
     }
+    */
     else if (ulBuild >= 8255 && ulBuild <= 8270)
         sprintf(pszBuffer, "Warp 3 FP%d", ulBuild - 8255 + 32);
     else
