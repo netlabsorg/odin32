@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.227 2000-12-27 23:07:19 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.228 2000-12-29 18:39:59 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -29,7 +29,8 @@
 #include <assert.h>
 #include <misc.h>
 #include <heapstring.h>
-#include <win32wbase.h>
+#include <winuser32.h>
+#include "win32wbase.h"
 #include "wndmsg.h"
 #include "oslibwin.h"
 #include "oslibmsg.h"
@@ -3407,31 +3408,6 @@ Win32BaseWindow *Win32BaseWindow::GetWindowFromOS2Handle(HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
-HWND Win32BaseWindow::Win32ToOS2Handle(HWND hwnd)
-{
-    Win32BaseWindow *window = GetWindowFromHandle(hwnd);
-
-    if(window) {
-            return window->getOS2WindowHandle();
-    }
-//    dprintf2(("Win32BaseWindow::Win32ToOS2Handle: not a win32 window %x", hwnd));
-    return hwnd;
-}
-//******************************************************************************
-//******************************************************************************
-HWND Win32BaseWindow::OS2ToWin32Handle(HWND hwnd)
-{
-    Win32BaseWindow *window = GetWindowFromOS2Handle(hwnd);
-
-    if(window) {
-            return window->getWindowHandle();
-    }
-//    dprintf2(("Win32BaseWindow::OS2ToWin32Handle: not a win32 window %x", hwnd));
-    return 0;
-//    else    return hwnd;    //OS/2 window handle
-}
-//******************************************************************************
-//******************************************************************************
 HWND Win32BaseWindow::getNextDlgTabItem(HWND hwndCtrl, BOOL fPrevious)
 {
  Win32BaseWindow *child, *nextchild, *lastchild;
@@ -3677,6 +3653,31 @@ void PrintWindowStyle(DWORD dwStyle, DWORD dwExStyle)
     dprintf(("Window exStyle: %x %s", dwExStyle, exstyle));
 }
 #endif
+//******************************************************************************
+//******************************************************************************
+HWND WIN32API Win32ToOS2Handle(HWND hwnd)
+{
+    Win32BaseWindow *window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+
+    if(window) {
+            return window->getOS2WindowHandle();
+    }
+//    dprintf2(("Win32BaseWindow::Win32ToOS2Handle: not a win32 window %x", hwnd));
+    return hwnd;
+}
+//******************************************************************************
+//******************************************************************************
+HWND WIN32API OS2ToWin32Handle(HWND hwnd)
+{
+    Win32BaseWindow *window = Win32BaseWindow::GetWindowFromOS2Handle(hwnd);
+
+    if(window) {
+            return window->getWindowHandle();
+    }
+//    dprintf2(("Win32BaseWindow::OS2ToWin32Handle: not a win32 window %x", hwnd));
+    return 0;
+//    else    return hwnd;    //OS/2 window handle
+}
 //******************************************************************************
 //******************************************************************************
 

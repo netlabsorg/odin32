@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.34 2000-11-21 11:36:08 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.35 2000-12-29 18:39:58 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -25,7 +25,7 @@
 #include "oslibmsg.h"
 #include <winconst.h>
 #include <win32api.h>
-#include <win32wnd.h>
+#include <winuser32.h>
 #include "oslibutil.h"
 #include "timer.h"
 #include <thread.h>
@@ -101,7 +101,7 @@ MSGTRANSTAB MsgTransTab[] = {
 void WinToOS2MsgTranslate(MSG *winMsg, QMSG *os2Msg, BOOL isUnicode)
 {
 //  memcpy(os2Msg, winMsg, sizeof(MSG));
-//  os2Msg->hwnd = Win32Window::Win32ToOS2Handle(winMsg->hwnd);
+//  os2Msg->hwnd = Win32ToOS2Handle(winMsg->hwnd);
 //  os2Msg->reserved = 0;
 }
 //******************************************************************************
@@ -194,7 +194,7 @@ BOOL OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMa
  ULONG filtermin, filtermax;
 
   if(hwnd) {
-  	hwndOS2 = Win32BaseWindow::Win32ToOS2Handle(hwnd);
+  	hwndOS2 = Win32ToOS2Handle(hwnd);
 	if(hwndOS2 == NULL) {
 		memset(pMsg, 0, sizeof(MSG));
 		dprintf(("GetMsg: window %x NOT FOUND!", hwnd));
@@ -291,7 +291,7 @@ BOOL OSLibWinPeekMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterM
  HWND  hwndOS2 = 0;
 
   if(hwnd && hwnd != -1) {
-  	hwndOS2 = Win32BaseWindow::Win32ToOS2Handle(hwnd);
+  	hwndOS2 = Win32ToOS2Handle(hwnd);
 	if(hwndOS2 == NULL) {
 		dprintf(("PeekMsg: window %x NOT FOUND!", hwnd));
 		SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);

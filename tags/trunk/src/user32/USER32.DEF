@@ -1,4 +1,4 @@
-; $Id: USER32.DEF,v 1.45 2000-12-16 23:24:36 bird Exp $
+; $Id: USER32.DEF,v 1.46 2000-12-29 18:39:58 sandervl Exp $
 
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
 DESCRIPTION 'Odin32 System Dll - User32'
@@ -640,9 +640,8 @@ EXPORTS
     GetPattern55AABrush         = _GetPattern55AABrush@0         @2003
     GetPattern55AABitmap        = _GetPattern55AABitmap@0        @2004
 
-    Win32ToOS2Handle__FUl      = Win32ToOS2Handle__15Win32BaseWindowFUl @2006
-    OS2ToWin32Handle__FUl      = OS2ToWin32Handle__15Win32BaseWindowFUl @2012
-;    IsOS2FrameWindowHandle__FUlUl = IsOS2FrameWindowHandle__15Win32BaseWindowFUlUl @2013
+    _Win32ToOS2Handle@4                                          @2006
+    _OS2ToWin32Handle@4                                          @2012
 
     _MOUSE_Enable@4                                              @2007
     _KeyTranslatePMToWin@4                                       @2008
