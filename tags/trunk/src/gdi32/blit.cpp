@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.9 2000-04-07 17:07:16 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.10 2000-04-18 11:11:52 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -43,7 +43,6 @@ BOOL WIN32API StretchBlt(HDC hdcDest, int nXOriginDest, int nYOriginDest,
     DIBSection *dsect = DIBSection::findHDC(hdcSrc);
     if(dsect)
     {
-        dprintf((" Do stretched DIB Blt\n"));
         rc  = dsect->BitBlt( hdcDest,
                              nXOriginDest, nYOriginDest, nWidthDest, nHeightDest,
                              nXOriginSrc, nYOriginSrc, nWidthSrc, nHeightSrc,
@@ -191,7 +190,14 @@ BOOL WIN32API PatBlt(HDC hdc,int nXLeft,int nYLeft,int nWidth,int nHeight,DWORD 
     nHeight = -nHeight;
   }
   rc = O32_PatBlt(hdc,nXLeft,nYLeft,nWidth,nHeight,dwRop);
-  dprintf(("GDI32: PatBlt (%d,%d) (%d,%d) returned %d\n",nXLeft,nYLeft,nWidth,nHeight,rc));
+  if(rc) {
+  	DIBSection *destdib = DIBSection::findHDC(hdc);
+  	if(destdib) {
+		destdib->sync(hdc, nYLeft, nHeight);
+  	}
+  }
+
+  dprintf(("GDI32: PatBlt hdc %x (%d,%d) (%d,%d) returned %d\n",hdc, nXLeft,nYLeft,nWidth,nHeight,rc));
   return(rc);
 }
 //******************************************************************************
