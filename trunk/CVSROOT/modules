@@ -25,3 +25,5 @@
 # can be useful for creating a module that consists of many directories
 # spread out over the entire source repository.
 DailyBuild          tools/DailyBuild
+win32k              src/win32k
+include             include
