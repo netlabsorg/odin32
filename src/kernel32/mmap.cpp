@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.55 2002-04-07 15:44:11 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.56 2002-05-20 13:47:59 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -104,7 +104,7 @@ Win32MemMap::Win32MemMap(Win32PeLdrImage *pImage, ULONG baseAddress, ULONG size)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL Win32MemMap::Init()
+BOOL Win32MemMap::Init(DWORD aMSize)
 {
     mapMutex.enter();
     if(hMemFile != -1)
@@ -133,12 +133,23 @@ BOOL Win32MemMap::Init()
             dprintf(("Win32MemMap::init: SetFilePointer failed to set pos end"));
             goto fail;
         }
+        if (mSize < aMSize)
+        {
+            dprintf(("Win32MemMap::init: file size %d, memory map size %d", mSize, aMSize));
+            //Froloff: Need to check if exist the possibility of file to memory
+            //         mapping not from the beginning of file
+            mSize = SetFilePointer(hMemFile, aMSize, NULL, FILE_BEGIN);
+            // Commit filesize changes onto disk
+            SetEndOfFile(hMemFile);
+        }
+#if 0
         //SvL: Temporary limitation of size (Warp Server Advanced doesn't allow
         //     one to reserve more than 450 MB (unless you override the virtual
         //     memory max limit) of continuous memory; (Warp 4 much less))
         if(mSize > 64*1024*1024) {
             mSize = 64*1024*1024;
         }
+#endif
     }
 
     dprintf(("CreateFileMappingA for file %x, prot %x size %d, name %s", hMemFile, mProtFlags, mSize, lpszMapName));
@@ -610,7 +621,7 @@ Win32MemMapView::Win32MemMapView(Win32MemMap *map, ULONG offset, ULONG size,
     }
     //Named file mappings from other processes are always shared;
     //map into our address space
-    if(map->getMemName() != NULL && map->getProcessId() != mProcessId) 
+    if(map->getMemName() != NULL && map->getProcessId() != mProcessId)
     {
         //shared memory map, so map it into our address space
         if(OSLibDosGetNamedSharedMem((LPVOID *)&viewaddr, map->getMemName()) != OSLIB_NOERROR) {
@@ -755,7 +766,7 @@ Win32MemMap *Win32MemMapView::findMapByView(ULONG address,
       }
     }
     while(view);
-  
+
     //failure if we get here
     view = NULL;
   }
