@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.162 2001-10-29 14:20:11 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.163 2001-10-29 13:54:39 achimha Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -298,7 +298,8 @@ MRESULT EXPENTRY Win32CDWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
            }
            drive[0]++;
         }
-        WinStartTimer(hab, hwnd, 17, 32*3);
+        WinStartTimer(hab, hwnd, 17, 32*60);
+////        WinStartTimer(hab, hwnd, 17, 32*3);
 ////        WinStartTimer(hab, hwnd, 17, 5000);
         rc = (MRESULT)FALSE;
         break;
