@@ -1,4 +1,4 @@
-/* $Id: shresdef.h,v 1.10 2002-03-08 11:01:03 sandervl Exp $ */
+/* $Id: shresdef.h,v 1.11 2003-11-12 14:05:14 sandervl Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -52,6 +52,9 @@
 #ifdef __WIN32OS2__
 #define	IDS_OVERWRITEFILE_TEXT 36
 #define	IDS_OVERWRITEFILE_CAPTION 37
+#endif
+#ifdef __WIN32OS2__
+#define	IDS_COPY_X_OF_TEXT  200
 #endif
 
 #define IDS_SHV_INVALID_FILENAME_TITLE 28

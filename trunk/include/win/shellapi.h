@@ -165,6 +165,13 @@ typedef WORD FILEOP_FLAGS;
 
 typedef WORD PRINTEROP_FLAGS;
 
+typedef struct _SHNAMEMAPPINGW { 
+    LPWSTR pszOldPath; 
+    LPWSTR pszNewPath; 
+    int   cchOldPath; 
+    int   cchNewPath; 
+} SHNAMEMAPPINGW, *LPSHNAMEMAPPINGW; 
+
 typedef struct _SHFILEOPSTRUCTA
 { HWND          hwnd;
   UINT          wFunc;

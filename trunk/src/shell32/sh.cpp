@@ -1,4 +1,4 @@
-/* $Id: sh.cpp,v 1.15 2002-06-07 08:21:43 sandervl Exp $ */
+/* $Id: sh.cpp,v 1.16 2003-11-12 14:05:13 sandervl Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -125,26 +125,6 @@ DWORD WIN32API SHEmptyRecycleBinW(DWORD x1, DWORD x2, DWORD x3)
 DWORD WIN32API SHFormatDrive(DWORD x1, DWORD x2, DWORD x3, DWORD x4)
 {
   dprintf(("SHELL32: SHFormatDrive not implemented.\n"));
-
-  return 0;
-}
-
-
-/*****************************************************************************
- * Name      : DWORD SHFreeNameMappings
- * Purpose   :
- * Parameters:
- * Variables :
- * Result    :
- * Remark    : SHELL32.246
- * Status    : UNTESTED STUB UNKNOWN
- *
- * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
- *****************************************************************************/
-
-DWORD WIN32API SHFreeNameMappings(DWORD x1)
-{
-  dprintf(("SHELL32: SHFreeNameMappings not implemented.\n"));
 
   return 0;
 }
