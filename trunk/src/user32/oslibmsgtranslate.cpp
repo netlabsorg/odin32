@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.81 2002-02-11 13:48:40 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.82 2002-02-12 18:36:41 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -39,7 +39,6 @@
 
 #define DBG_LOCALLOG    DBG_oslibmsgtranslate
 #include "dbglocal.h"
-
 
 static BOOL fGenerateDoubleClick = FALSE;
 static MSG  doubleClickMsg = {0};
@@ -716,25 +715,11 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
           //
           if (flags & KC_KEYUP)
           {
-            // as in NT4 we will send currently fake WM_SYSKEYDOWN with
-            // ALT key held
-            // ?? fMsgRemoved care - it seems we can only push one message?		
-            if(fMsgRemoved && !(teb->o.odin.fTranslated))
-            {                    
-
-              MSG extramsg;
-              memcpy(&extramsg, winMsg, sizeof(MSG));
-    
-              extramsg.message = WINWM_SYSKEYUP;
-              extramsg.lParam |= WIN_KEY_PREVSTATE;            
-              extramsg.lParam |= WIN_KEY_ALTHELD;            
-              extramsg.lParam |= 1 << 31;                              // bit 31, transition state, always 1 for WM_KEYUP 
-
-              // insert message into the queue
-              setThreadQueueExtraCharMessage(teb, &extramsg);
-              winMsg->message = WINWM_SYSKEYDOWN;
-              winMsg->lParam |= WIN_KEY_ALTHELD;;
-            }   
+             //@@PF Note that without pmkbdhook there will not be correct message for Alt-Enter
+              winMsg->message = WINWM_SYSKEYUP;
+              winMsg->lParam |= WIN_KEY_PREVSTATE;            
+	      winMsg->lParam |= WIN_KEY_ALTHELD;            
+	      winMsg->lParam |= 1 << 31;                              // bit 31, transition state, always 1 for WM_KEYUP 
           }
           else 
           {
