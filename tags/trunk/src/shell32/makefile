@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.41 2003-08-08 15:53:55 sandervl Exp $
+# $Id: makefile,v 1.42 2004-05-26 08:45:41 sandervl Exp $
 
 #
 # Odin32 API
@@ -66,6 +66,7 @@ $(OBJDIR)\she.obj \
 $(OBJDIR)\sh.obj \
 $(OBJDIR)\shpolicy.obj \
 $(OBJDIR)\systray.obj \
+$(OBJDIR)\systray_os2.obj \
 !if "$(DEBUG)" == "1"
 $(OBJDIR)\dbgwrap.obj \
 !endif
