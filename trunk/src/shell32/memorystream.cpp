@@ -1,17 +1,31 @@
-/* $Id: memorystream.cpp,v 1.2 1999-10-09 11:17:00 sandervl Exp $ */
+/* $Id: memorystream.cpp,v 1.3 1999-10-22 12:18:46 phaller Exp $ */
+
 /*
- *	this class implements a pure IStream object
- *	and can be used for many purposes
+ * Win32 SHELL32 for OS/2
  *
- *	the main reason for implementing this was
- *	a cleaner implementation of IShellLink which
- *	needs to be able to load lnk's from a IStream
- *	interface so it was obvious to capsule the file
- *	access in a IStream to.
+ * Copyright 1999 Patrick Haller (haller@zebra.fh-weingarten.de)
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
+ * this class implements a pure IStream object
+ * and can be used for many purposes
+ *
+ * the main reason for implementing this was
+ * a cleaner implementation of IShellLink which
+ * needs to be able to load lnk's from a IStream
+ * interface so it was obvious to capsule the file
+ * access in a IStream to.
  */
 
-#include <string.h>
+
+/*****************************************************************************
+ * Includes                                                                  *
+ *****************************************************************************/
+
 #include <odin.h>
+#include <odinwrap.h>
+#include <os2sel.h>
+
+#include <string.h>
 
 #define ICOM_CINTERFACE 1
 #define CINTERFACE 1
@@ -24,7 +38,13 @@
 
 #include <misc.h>
 
-DEFAULT_DEBUG_CHANNEL(shell)
+
+ODINDEBUGCHANNEL(SHELL32-MEMORYSTREAM)
+
+
+/*****************************************************************************
+ * Local Prototypes                                                          *
+ *****************************************************************************/
 
 static HRESULT WINAPI IStream_fnQueryInterface(IStream *iface, REFIID riid, LPVOID *ppvObj);
 static ULONG WINAPI IStream_fnAddRef(IStream *iface);
@@ -42,32 +62,32 @@ static HRESULT WINAPI IStream_fnStat (IStream * iface, STATSTG*   pstatstg, DWOR
 static HRESULT WINAPI IStream_fnClone (IStream * iface, IStream** ppstm);
 
 static ICOM_VTABLE(IStream) stvt =
-{	
-	ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
-	IStream_fnQueryInterface,
-	IStream_fnAddRef,
-	IStream_fnRelease,
-	IStream_fnRead,
-	IStream_fnWrite,
-	IStream_fnSeek,
-	IStream_fnSetSize,
-	IStream_fnCopyTo,
-	IStream_fnCommit,
-	IStream_fnRevert,
-	IStream_fnLockRegion,
-	IStream_fnUnlockRegion,
-	IStream_fnStat,
-	IStream_fnClone
-	
+{
+   ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
+   IStream_fnQueryInterface,
+   IStream_fnAddRef,
+   IStream_fnRelease,
+   IStream_fnRead,
+   IStream_fnWrite,
+   IStream_fnSeek,
+   IStream_fnSetSize,
+   IStream_fnCopyTo,
+   IStream_fnCommit,
+   IStream_fnRevert,
+   IStream_fnLockRegion,
+   IStream_fnUnlockRegion,
+   IStream_fnStat,
+   IStream_fnClone
+
 };
 
 typedef struct
-{	ICOM_VTABLE(IStream)	*lpvtst;
-	DWORD		ref;
-	LPBYTE		pImage;
-	HANDLE		hMapping;
-	DWORD		dwLength;
-	DWORD		dwPos;
+{  ICOM_VTABLE(IStream)                  *lpvtst;
+   DWORD    ref;
+   LPBYTE      pImage;
+   HANDLE      hMapping;
+   DWORD    dwLength;
+   DWORD    dwPos;
 } ISHFileStream;
 
 /**************************************************************************
@@ -77,40 +97,44 @@ typedef struct
  */
 HRESULT CreateStreamOnFile (LPCSTR pszFilename, IStream ** ppstm)
 {
-	ISHFileStream*	fstr;
-	OFSTRUCT	ofs;
-	HFILE		hFile = OpenFile( pszFilename, &ofs, OF_READ );
-	HRESULT		ret = E_FAIL;
-	
-	fstr = (ISHFileStream*)HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,sizeof(ISHFileStream));
-	fstr->lpvtst=&stvt;
-	fstr->ref = 1;
-	fstr->dwLength = GetFileSize (hFile, NULL);
+   ISHFileStream* fstr;
+   OFSTRUCT ofs;
+   HFILE    hFile = OpenFile( pszFilename, &ofs, OF_READ );
+   HRESULT     ret = E_FAIL;
 
-	shell32_ObjCount++;
+   dprintf(("SHELL32:MemoryStream CreateStreamOnFile(%s,%08xh)\n",
+            pszFilename,
+            ppstm));
 
-	if (!(fstr->hMapping = CreateFileMappingA(hFile,NULL,PAGE_READONLY|SEC_COMMIT,0,0,NULL)))
-	{
-	  WARN("failed to create filemap.\n");
-	  goto end_2;
-	}
+   fstr = (ISHFileStream*)HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,sizeof(ISHFileStream));
+   fstr->lpvtst=&stvt;
+   fstr->ref = 1;
+   fstr->dwLength = GetFileSize (hFile, NULL);
 
-	if (!(fstr->pImage = (BYTE*)MapViewOfFile(fstr->hMapping,FILE_MAP_READ,0,0,0)))
-	{
-	  WARN("failed to mmap filemap.\n");
-	  goto end_3;
-	}
+   shell32_ObjCount++;
 
-	ret = S_OK;
-	goto end_1;
-	
-end_3:	CloseHandle(fstr->hMapping);
-end_2:	HeapFree(GetProcessHeap(), 0, fstr);
-	fstr = NULL;
+   if (!(fstr->hMapping = CreateFileMappingA(hFile,NULL,PAGE_READONLY|SEC_COMMIT,0,0,NULL)))
+   {
+     dprintf(("failed to create filemap.\n"));
+     goto end_2;
+   }
 
-end_1:	_lclose(hFile);
-	(*ppstm) = (IStream*)fstr;
-	return ret;
+   if (!(fstr->pImage = (BYTE*)MapViewOfFile(fstr->hMapping,FILE_MAP_READ,0,0,0)))
+   {
+     dprintf(("failed to mmap filemap.\n"));
+     goto end_3;
+   }
+
+   ret = S_OK;
+   goto end_1;
+
+end_3:   CloseHandle(fstr->hMapping);
+end_2:   HeapFree(GetProcessHeap(), 0, fstr);
+   fstr = NULL;
+
+end_1:   _lclose(hFile);
+   (*ppstm) = (IStream*)fstr;
+   return ret;
 }
 
 /**************************************************************************
@@ -118,29 +142,30 @@ end_1:	_lclose(hFile);
 */
 static HRESULT WINAPI IStream_fnQueryInterface(IStream *iface, REFIID riid, LPVOID *ppvObj)
 {
-	ICOM_THIS(ISHFileStream, iface);
+   ICOM_THIS(ISHFileStream, iface);
 
-	char    xriid[50];
-	WINE_StringFromCLSID((LPCLSID)riid,xriid);
+   char    xriid[50];
+   WINE_StringFromCLSID((LPCLSID)riid,xriid);
 
-	TRACE("(%p)->(\n\tIID:\t%s,%p)\n",This,xriid,ppvObj);
+   dprintf(("SHELL32:MemoryStream IStream_fnQueryInterface(%p)->(\n\tIID:\t%s,%p)\n",
+            This,xriid,ppvObj));
 
-	*ppvObj = NULL;
+   *ppvObj = NULL;
 
-	if(IsEqualIID(riid, &IID_IUnknown) ||
-	   IsEqualIID(riid, &IID_IStream))
-	{
-	  *ppvObj = This;
-	}
+   if(IsEqualIID(riid, &IID_IUnknown) ||
+      IsEqualIID(riid, &IID_IStream))
+   {
+     *ppvObj = This;
+   }
 
-	if(*ppvObj)
-	{
-	  IStream_AddRef((IStream*)*ppvObj);
-	  TRACE("-- Interface: (%p)->(%p)\n",ppvObj,*ppvObj);
-	  return S_OK;
-	}
-	TRACE("-- Interface: E_NOINTERFACE\n");
-	return E_NOINTERFACE;
+   if(*ppvObj)
+   {
+     IStream_AddRef((IStream*)*ppvObj);
+     dprintf(("Interface: (%p)->(%p)\n",ppvObj,*ppvObj));
+     return S_OK;
+   }
+   dprintf(("-- Interface: E_NOINTERFACE\n"));
+   return E_NOINTERFACE;
 }
 
 /**************************************************************************
@@ -148,12 +173,13 @@ static HRESULT WINAPI IStream_fnQueryInterface(IStream *iface, REFIID riid, LPVO
 */
 static ULONG WINAPI IStream_fnAddRef(IStream *iface)
 {
-	ICOM_THIS(ISHFileStream, iface);
+   ICOM_THIS(ISHFileStream, iface);
 
-	TRACE("(%p)->(count=%lu)\n",This, This->ref);
+   dprintf(("SHELL32:MemoryStream IStream_fnAddRef (%p)->(count=%lu)\n",
+            This, This->ref));
 
-	shell32_ObjCount++;
-	return ++(This->ref);
+   shell32_ObjCount++;
+   return ++(This->ref);
 }
 
 /**************************************************************************
@@ -161,128 +187,130 @@ static ULONG WINAPI IStream_fnAddRef(IStream *iface)
 */
 static ULONG WINAPI IStream_fnRelease(IStream *iface)
 {
-	ICOM_THIS(ISHFileStream, iface);
+   ICOM_THIS(ISHFileStream, iface);
 
-	TRACE("(%p)->()\n",This);
+   dprintf(("SHELL32:MemoryStream IStream_fnRelease(%p)->()\n",
+            This));
 
-	shell32_ObjCount--;
+   shell32_ObjCount--;
 
-	if (!--(This->ref))
-	{ TRACE(" destroying SHFileStream (%p)\n",This);
+   if (!--(This->ref))
+   { dprintf((" destroying SHFileStream (%p)\n",This));
 
-	  UnmapViewOfFile(This->pImage);
-	  CloseHandle(This->hMapping);
+     UnmapViewOfFile(This->pImage);
+     CloseHandle(This->hMapping);
 
-	  HeapFree(GetProcessHeap(),0,This);
-	  return 0;
-	}
-	return This->ref;
+     HeapFree(GetProcessHeap(),0,This);
+     return 0;
+   }
+   return This->ref;
 }
 
 static HRESULT WINAPI IStream_fnRead (IStream * iface, void* pv, ULONG cb, ULONG* pcbRead)
 {
-	ICOM_THIS(ISHFileStream, iface);
+   DWORD dwBytesToRead, dwBytesLeft;
 
-	DWORD dwBytesToRead, dwBytesLeft;
-	
-	TRACE("(%p)->(%p,0x%08lx,%p)\n",This, pv, cb, pcbRead);
-	
-	if ( !pv )
-	  return STG_E_INVALIDPOINTER;
+   ICOM_THIS(ISHFileStream, iface);
 
-	dwBytesLeft = This->dwLength - This->dwPos;
+   dprintf(("SHELL32:MemoryStream IStream_fnRead(%p)->(%p,%p,%p)\n",
+            This, pv, cb, pcbRead));
 
-	if ( 0 >= dwBytesLeft )						/* end of buffer */
-	  return S_FALSE;
-	
-	dwBytesToRead = ( cb > dwBytesLeft) ? dwBytesLeft : cb;
+   if ( !pv )
+     return STG_E_INVALIDPOINTER;
 
-	memmove ( pv, (This->pImage) + (This->dwPos), dwBytesToRead);
-	
-	This->dwPos += dwBytesToRead;					/* adjust pointer */
+   dwBytesLeft = This->dwLength - This->dwPos;
 
-	if (pcbRead)
-	  *pcbRead = dwBytesToRead;
+   if ( 0 >= dwBytesLeft )                              /* end of buffer */
+     return S_FALSE;
 
-	return S_OK;
+   dwBytesToRead = ( cb > dwBytesLeft) ? dwBytesLeft : cb;
+
+   memmove ( pv, (This->pImage) + (This->dwPos), dwBytesToRead);
+
+   This->dwPos += dwBytesToRead;                     /* adjust pointer */
+
+   if (pcbRead)
+     *pcbRead = dwBytesToRead;
+
+   return S_OK;
 }
 static HRESULT WINAPI IStream_fnWrite (IStream * iface, const void* pv, ULONG cb, ULONG* pcbWritten)
 {
-	ICOM_THIS(ISHFileStream, iface);
+   ICOM_THIS(ISHFileStream, iface);
 
-	TRACE("(%p)\n",This);
+   dprintf(("SHELL32:MemoryStream IStream_fnWrite (%p) not implemented\n",This));
 
-	return E_NOTIMPL;
+   return E_NOTIMPL;
 }
 static HRESULT WINAPI IStream_fnSeek (IStream * iface, LARGE_INTEGER dlibMove, DWORD dwOrigin, ULARGE_INTEGER* plibNewPosition)
 {
-	ICOM_THIS(ISHFileStream, iface);
+   ICOM_THIS(ISHFileStream, iface);
 
-	TRACE("(%p)\n",This);
+   dprintf(("SHELL32:MemoryStream IStream_fnSeek (%p) not implemented\n",This));
 
-	return E_NOTIMPL;
+   return E_NOTIMPL;
 }
 static HRESULT WINAPI IStream_fnSetSize (IStream * iface, ULARGE_INTEGER libNewSize)
 {
-	ICOM_THIS(ISHFileStream, iface);
+   ICOM_THIS(ISHFileStream, iface);
 
-	TRACE("(%p)\n",This);
+   dprintf(("SHELL32:MemoryStream IStream_fnSetSize (%p) not implemented\n",This));
 
-	return E_NOTIMPL;
+   return E_NOTIMPL;
 }
 static HRESULT WINAPI IStream_fnCopyTo (IStream * iface, IStream* pstm, ULARGE_INTEGER cb, ULARGE_INTEGER* pcbRead, ULARGE_INTEGER* pcbWritten)
 {
-	ICOM_THIS(ISHFileStream, iface);
+   ICOM_THIS(ISHFileStream, iface);
 
-	TRACE("(%p)\n",This);
+   dprintf(("SHELL32:MemoryStream IStream_fnCopyTo (%p) not implemented\n",This));
 
-	return E_NOTIMPL;
+   return E_NOTIMPL;
 }
 static HRESULT WINAPI IStream_fnCommit (IStream * iface, DWORD grfCommitFlags)
 {
-	ICOM_THIS(ISHFileStream, iface);
+   ICOM_THIS(ISHFileStream, iface);
 
-	TRACE("(%p)\n",This);
+   dprintf(("SHELL32:MemoryStream IStream_fnCommit (%p) not implemented\n",This));
 
-	return E_NOTIMPL;
+   return E_NOTIMPL;
 }
 static HRESULT WINAPI IStream_fnRevert (IStream * iface)
 {
-	ICOM_THIS(ISHFileStream, iface);
+   ICOM_THIS(ISHFileStream, iface);
 
-	TRACE("(%p)\n",This);
+   dprintf(("SHELL32:MemoryStream IStream_fnRevert (%p) not implemented\n",This));
 
-	return E_NOTIMPL;
+   return E_NOTIMPL;
 }
 static HRESULT WINAPI IStream_fnLockRegion (IStream * iface, ULARGE_INTEGER libOffset, ULARGE_INTEGER cb, DWORD dwLockType)
 {
-	ICOM_THIS(ISHFileStream, iface);
+   ICOM_THIS(ISHFileStream, iface);
 
-	TRACE("(%p)\n",This);
+   dprintf(("SHELL32:MemoryStream IStream_fnLockRegion (%p) not implemented\n",This));
 
-	return E_NOTIMPL;
+   return E_NOTIMPL;
 }
 static HRESULT WINAPI IStream_fnUnlockRegion (IStream * iface, ULARGE_INTEGER libOffset, ULARGE_INTEGER cb, DWORD dwLockType)
 {
-	ICOM_THIS(ISHFileStream, iface);
+   ICOM_THIS(ISHFileStream, iface);
 
-	TRACE("(%p)\n",This);
+   dprintf(("SHELL32:MemoryStream IStream_fnUnlockRegoin (%p) not implemented.\n",This));
 
-	return E_NOTIMPL;
+   return E_NOTIMPL;
 }
 static HRESULT WINAPI IStream_fnStat (IStream * iface, STATSTG*   pstatstg, DWORD grfStatFlag)
 {
-	ICOM_THIS(ISHFileStream, iface);
+   ICOM_THIS(ISHFileStream, iface);
 
-	TRACE("(%p)\n",This);
+   dprintf(("SHELL32:MemoryStream IStream_fnStat (%p) not implemented.\n",This));
 
-	return E_NOTIMPL;
+   return E_NOTIMPL;
 }
 static HRESULT WINAPI IStream_fnClone (IStream * iface, IStream** ppstm)
 {
-	ICOM_THIS(ISHFileStream, iface);
+   ICOM_THIS(ISHFileStream, iface);
 
-	TRACE("(%p)\n",This);
+   dprintf(("SHELL32:MemoryStream IStream_fnClone (%p) not implemented.\n",This));
 
-	return E_NOTIMPL;
+   return E_NOTIMPL;
 }
