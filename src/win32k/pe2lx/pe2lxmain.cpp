@@ -1,4 +1,4 @@
-/* $Id: pe2lxmain.cpp,v 1.5 2000-02-27 02:18:42 bird Exp $
+/* $Id: pe2lxmain.cpp,v 1.6 2001-02-02 08:35:54 bird Exp $
  *
  * Pe2Lx main program. (Ring 3 only!)
  *
@@ -16,6 +16,8 @@
 #define INCL_DOSFILEMGR
 #define INCL_DOSERRORS
 
+#define DATA16_GLOBAL
+#define OUTPUT_COM2     0x2f8
 
 /*******************************************************************************
 *   Header Files                                                               *
@@ -31,6 +33,7 @@
 #include "OS2Krnl.h"
 #include "modulebase.h"
 #include "pe2lx.h"
+#include "options.h"
 #include <stdio.h>
 #include <versionos2.h>
 
@@ -39,7 +42,7 @@
 *   Global Variables                                                           *
 *******************************************************************************/
 char szBackupWin32Filename[CCHMAXPATH]; /* too save stack/heap */
-
+struct options options = DEFAULT_OPTION_ASSIGMENTS;
 
 /*******************************************************************************
 *   Internal Functions                                                         *
@@ -81,6 +84,16 @@ int main(int argc, char **argv)
         {   /* option */
             switch (argv[argi][1])
             {
+                case '1':   /* All-In-One-Object fix - temporary...- -1<-|+|*> */
+                    if (argv[argi][2] == '-')
+                        options.fPEOneObject = FLAGS_PEOO_DISABLED;
+                    else if (argv[argi][2] == '+')
+                        options.fPEOneObject = FLAGS_PEOO_ENABLED;
+                    else
+                        options.fPEOneObject = FLAGS_PEOO_FORCED;
+                    break;
+
+
                 case 'h': /* syntax help */
                 case 'H':
                 case '?':
@@ -231,7 +244,7 @@ int main(int argc, char **argv)
  */
 static void syntax()
 {
-    printf("Syntax: pe2lx.exe -W<0|1|2|3> <Win32File> [Odin32File]\n"
+    printf("Syntax: pe2lx.exe [-W<0|1|2|3>] [-1<+|-|[*]>] <Win32File> [Odin32File]\n"
            "\n"
            "  -W<0|1|2|3|4> Message filter level.\n"
            "                   -W0: Output only severe and unrecoverable error messages.\n"
@@ -241,6 +254,11 @@ static void syntax()
            "                   -W3: Output nearly all messages.\n"
            "                   -W4: Output absolutely all messages.\n"
            "                Default: -W3\n"
+           "  -1<+|-|[*]>   All-in-one-object fix.\n"
+           "                     +: Fix applied when necessary.\n"
+           "                     -: Disabled. Never applied.\n"
+           "                     *: Forced. Applied every time.\n"
+           "                Default: -1*\n"
            "  Win32File     Input Win32 Exe, Dll or other Win32 PE file.\n"
            "  Odin32File    Output Odin32-file. If not specified the Win32-file is\n"
            "                renamed and the Odin32-file will use the original name\n"
