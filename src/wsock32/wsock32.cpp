@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.24 2000-03-24 19:28:09 sandervl Exp $ */
+/* $Id: wsock32.cpp,v 1.25 2000-03-24 23:14:29 sandervl Exp $ */
 
 /*
  *
@@ -1086,7 +1086,7 @@ ODINFUNCTION2(struct ws_servent *,OS2getservbyport,
     if( pwsi )
     {
 	struct servent* serv;
-	if( (serv = getservbyport(port, pwsi->buffer)) != NULL ) {
+	if( (serv = getservbyport(port, (char *)proto)) != NULL ) {
 		if( WS_dup_se(pwsi, serv) ) {
 			WSASetLastError(NO_ERROR);
 		    	return pwsi->se;
@@ -1108,8 +1108,8 @@ ODINFUNCTION2(struct ws_servent *,OS2getservbyname,
 
     if( pwsi )
     {
-	struct servent*     serv;
-	if( (serv = getservbyname(pwsi->buffer, pwsi->buffer)) != NULL ) {
+	struct servent *serv;
+	if( (serv = getservbyname((char *)name, (char *)proto)) != NULL ) {
 		if( WS_dup_se(pwsi, serv) ) {
 			WSASetLastError(NO_ERROR);
 		    	return pwsi->se;
