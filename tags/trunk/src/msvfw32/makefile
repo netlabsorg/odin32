@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2001-07-21 17:39:44 sandervl Exp $
+# $Id: makefile,v 1.13 2002-08-27 08:31:48 sandervl Exp $
 
 #
 # Odin32 API
@@ -20,6 +20,7 @@ OBJS = \
 $(OBJDIR)\msvfw32.obj \
 $(OBJDIR)\drawdib.obj \
 $(OBJDIR)\msvideo_main.obj \
+$(OBJDIR)\mciwnd.obj \
 $(OBJDIR)\msvfw32rsrc.obj \
 $(DLLENTRY)
 
@@ -30,6 +31,7 @@ $(DLLENTRY)
 LIBS = \
 $(ODIN32_LIB)/kernel32.lib \
 $(ODIN32_LIB)/user32.lib \
+$(ODIN32_LIB)/comctl32.lib \
 $(ODIN32_LIB)/version.lib \
 $(ODIN32_LIB)/gdi32.lib \
 $(ODIN32_LIB)/winmm.lib \

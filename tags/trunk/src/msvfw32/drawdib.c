@@ -1,7 +1,21 @@
-/* 
+/*
  * Copyright 2000 Bradley Baetz
  *
- * Fixme: Some flags are ignored
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * FIXME: Some flags are ignored
  *
  * Handle palettes
  */
@@ -12,12 +26,12 @@
 #include "wingdi.h"
 #include "winuser.h"
 #include "wine/winbase16.h"
-#include "debugtools.h"
+#include "wine/debug.h"
 #include "vfw.h"
 #include "vfw16.h"
 #include "windef.h"
 
-DEFAULT_DEBUG_CHANNEL(msvideo);
+WINE_DEFAULT_DEBUG_CHANNEL(msvideo);
 
 typedef struct {
 	HDC hdc;
@@ -36,15 +50,14 @@ typedef struct {
 	LPVOID lpvbits;				/* Buffer for holding decompressed dib */
 } WINE_HDD;
 
-#ifdef __WIN32OS2__
-#include <heapstring.h>
-
-#define GlobalAlloc16 GlobalAlloc
-#define GlobalLock16 GlobalLock
-#define GlobalUnlock16 GlobalUnlock
-#define GlobalFree16 GlobalFree
-
-#endif
+int num_colours(LPBITMAPINFOHEADER lpbi)
+{
+	if(lpbi->biClrUsed)
+		return lpbi->biClrUsed;
+	if(lpbi->biBitCount<=8)
+		return 1<<lpbi->biBitCount;
+	return 0;
+}
 
 /***********************************************************************
  *		DrawDibOpen		[MSVFW32.@]
@@ -56,13 +69,6 @@ HDRAWDIB VFWAPI DrawDibOpen(void) {
 	hdd = GlobalAlloc16(GHND,sizeof(WINE_HDD));
 	TRACE("=> %d\n",hdd);
 	return hdd;
-}
-
-/***********************************************************************
- *		DrawDibOpen		[MSVIDEO.102]
- */
-HDRAWDIB16 VFWAPI DrawDibOpen16(void) {
-	return (HDRAWDIB16)DrawDibOpen();
 }
 
 /***********************************************************************
@@ -85,19 +91,12 @@ BOOL VFWAPI DrawDibClose(HDRAWDIB hdd) {
 }
 
 /***********************************************************************
- *		DrawDibClose		[MSVIDEO.103]
- */
-BOOL16 VFWAPI DrawDibClose16(HDRAWDIB16 hdd) {
-	return DrawDibClose(hdd);
-}
-
-/***********************************************************************
  *		DrawDibEnd		[MSVFW32.@]
  */
 BOOL VFWAPI DrawDibEnd(HDRAWDIB hdd) {
 	BOOL ret = TRUE;
 	WINE_HDD *whdd = GlobalLock16(hdd);
-	
+
 	TRACE("(0x%08lx)\n",(DWORD)hdd);
 
 	whdd->hpal = 0; /* Do not free this */
@@ -123,7 +122,7 @@ BOOL VFWAPI DrawDibEnd(HDRAWDIB hdd) {
 
 	if (whdd->hDib)
 		DeleteObject(whdd->hDib);
-	
+
 	if (whdd->hic) {
 		ICDecompressEnd(whdd->hic);
 		ICClose(whdd->hic);
@@ -133,13 +132,6 @@ BOOL VFWAPI DrawDibEnd(HDRAWDIB hdd) {
 
 	GlobalUnlock16(hdd);
 	return ret;
-}
-
-/***********************************************************************
- *		DrawDibEnd		[MSVIDEO.105]
- */
-BOOL16 VFWAPI DrawDibEnd16(HDRAWDIB16 hdd) {
-	return DrawDibEnd(hdd);
 }
 
 /***********************************************************************
@@ -160,9 +152,9 @@ BOOL VFWAPI DrawDibBegin(HDRAWDIB hdd,
 		hdd,(DWORD)hdc,dxDst,dyDst,lpbi,dxSrc,dySrc,(DWORD)wFlags
 	);
 	TRACE("lpbi: %ld,%ld/%ld,%d,%d,%ld,%ld,%ld,%ld,%ld,%ld\n",
-		  lpbi->biSize, lpbi->biWidth, lpbi->biHeight, lpbi->biPlanes, 
-		  lpbi->biBitCount, lpbi->biCompression, lpbi->biSizeImage, 
-		  lpbi->biXPelsPerMeter, lpbi->biYPelsPerMeter, lpbi->biClrUsed, 
+		  lpbi->biSize, lpbi->biWidth, lpbi->biHeight, lpbi->biPlanes,
+		  lpbi->biBitCount, lpbi->biCompression, lpbi->biSizeImage,
+		  lpbi->biXPelsPerMeter, lpbi->biYPelsPerMeter, lpbi->biClrUsed,
 		  lpbi->biClrImportant);
 
 	if (wFlags & ~(DDF_BUFFER))
@@ -211,14 +203,14 @@ BOOL VFWAPI DrawDibBegin(HDRAWDIB hdd,
 		DWORD dwSize;
 		/* No compression */
 		TRACE("Not compressed!\n");
-		dwSize = lpbi->biSize + lpbi->biClrUsed*sizeof(RGBQUAD);
+		dwSize = lpbi->biSize + num_colours(lpbi)*sizeof(RGBQUAD);
 		whdd->lpbiOut = HeapAlloc(GetProcessHeap(),0,dwSize);
 		memcpy(whdd->lpbiOut,lpbi,dwSize);
 	}
 
 	if (ret) {
 		/*whdd->lpvbuf = HeapAlloc(GetProcessHeap(),0,whdd->lpbiOut->biSizeImage);*/
-		
+
 		whdd->hMemDC = CreateCompatibleDC(hdc);
 		TRACE("Creating: %ld,%p\n",whdd->lpbiOut->biSize,whdd->lpvbits);
 		whdd->hDib = CreateDIBSection(whdd->hMemDC,(BITMAPINFO *)whdd->lpbiOut,DIB_RGB_COLORS,&(whdd->lpvbits),0,0);
@@ -253,20 +245,6 @@ BOOL VFWAPI DrawDibBegin(HDRAWDIB hdd,
 	return ret;
 }
 
-/************************************************************************
- *		DrawDibBegin		[MSVIDEO.104]
- */
-BOOL16 VFWAPI DrawDibBegin16(HDRAWDIB16 hdd,
-						   HDC16      hdc,
-						   INT16      dxDst,
-						   INT16      dyDst,
-						   LPBITMAPINFOHEADER lpbi,
-						   INT16      dxSrc,
-						   INT16      dySrc,
-						   UINT16     wFlags) {
-	return DrawDibBegin(hdd,hdc,dxDst,dyDst,lpbi,dxSrc,dySrc,wFlags);
-}
-
 /**********************************************************************
  *		DrawDibDraw		[MSVFW32.@]
  */
@@ -284,13 +262,13 @@ BOOL VFWAPI DrawDibDraw(HDRAWDIB hdd, HDC hdc,
 		  hdd,(DWORD)hdc,xDst,yDst,dxDst,dyDst,lpbi,lpBits,xSrc,ySrc,dxSrc,dySrc,(DWORD)wFlags
 	);
 
-	if (wFlags & ~(DDF_SAME_HDC | DDF_SAME_DRAW | DDF_NOTKEYFRAME | 
+	if (wFlags & ~(DDF_SAME_HDC | DDF_SAME_DRAW | DDF_NOTKEYFRAME |
 				   DDF_UPDATE | DDF_DONTDRAW))
 		FIXME("wFlags == 0x%08lx not handled\n",(DWORD)wFlags);
 
 	if (!lpBits) {
 		/* Undocumented? */
-		lpBits = (LPSTR)lpbi + (WORD)(lpbi->biSize) + (WORD)(lpbi->biClrUsed*sizeof(RGBQUAD));
+		lpBits = (LPSTR)lpbi + (WORD)(lpbi->biSize) + (WORD)(num_colours(lpbi)*sizeof(RGBQUAD));
 	}
 
 	whdd = GlobalLock16(hdd);
@@ -317,16 +295,16 @@ BOOL VFWAPI DrawDibDraw(HDRAWDIB hdd, HDC hdc,
 
 		if (lpbi->biCompression) {
 		    DWORD flags = 0;
-		
+
 			TRACE("Compression == 0x%08lx\n",lpbi->biCompression);
-		
+
 			if (wFlags & DDF_NOTKEYFRAME)
 			    flags |= ICDECOMPRESS_NOTKEYFRAME;
-		
+
 			ICDecompress(whdd->hic,flags,lpbi,lpBits,whdd->lpbiOut,whdd->lpvbits);
 		} else {
 		    memcpy(whdd->lpvbits,lpBits,lpbi->biSizeImage);
-		}	
+		}
 	}
 	if (!(wFlags & DDF_DONTDRAW) && whdd->hpal)
 	    SelectPalette(hdc,whdd->hpal,FALSE);
@@ -338,25 +316,6 @@ BOOL VFWAPI DrawDibDraw(HDRAWDIB hdd, HDC hdc,
 	return ret;
 }
 
-/**********************************************************************
- *		DrawDibDraw		[MSVIDEO.106]
- */
-BOOL16 VFWAPI DrawDibDraw16(HDRAWDIB16 hdd,             
-						  HDC16 hdc,
-						  INT16 xDst,
-						  INT16 yDst,
-						  INT16 dxDst,
-						  INT16 dyDst,
-						  LPBITMAPINFOHEADER lpbi,
-						  LPVOID lpBits,
-						  INT16 xSrc,
-						  INT16 ySrc,
-						  INT16 dxSrc,
-						  INT16 dySrc,
-						  UINT16 wFlags) {
-	return DrawDibDraw(hdd,hdc,xDst,yDst,dxDst,dyDst,lpbi,lpBits,xSrc,ySrc,dxSrc,dySrc,wFlags);
-}
-
 /*************************************************************************
  *		DrawDibStart		[MSVFW32.@]
  */
@@ -366,25 +325,11 @@ BOOL VFWAPI DrawDibStart(HDRAWDIB hdd, DWORD rate) {
 }
 
 /*************************************************************************
- *		DrawDibStart		[MSVIDEO.118]
- */
-BOOL16 VFWAPI DrawDibStart16(HDRAWDIB16 hdd, DWORD rate) {
-	return DrawDibStart(hdd,rate);
-}
-
-/*************************************************************************
  *		DrawDibStop		[MSVFW32.@]
  */
 BOOL VFWAPI DrawDibStop(HDRAWDIB hdd) {
 	FIXME("(0x%08lx), stub\n",(DWORD)hdd);
 	return TRUE;
-}
-
-/*************************************************************************
- *		DrawDibStop		[MSVIDEO.119]
- */
-BOOL16 DrawDibStop16(HDRAWDIB16 hdd) {
-	return DrawDibStop(hdd);
 }
 
 /***********************************************************************
@@ -397,20 +342,13 @@ BOOL VFWAPI DrawDibSetPalette(HDRAWDIB hdd, HPALETTE hpal) {
 
 	whdd = GlobalLock16(hdd);
 	whdd->hpal = hpal;
-	
+
 	if (whdd->begun) {
 		SelectPalette(whdd->hdc,hpal,0);
 		RealizePalette(whdd->hdc);
 	}
 	GlobalUnlock16(hdd);
 	return TRUE;
-}
-
-/***********************************************************************
- *              DrawDibSetPalette       [MSVIDEO.110]
- */
-BOOL16 VFWAPI DrawDibSetPalette16(HDRAWDIB16 hdd, HPALETTE16 hpal) {
-	return DrawDibSetPalette(hdd,hpal);
 }
 
 /***********************************************************************
@@ -429,13 +367,6 @@ HPALETTE VFWAPI DrawDibGetPalette(HDRAWDIB hdd) {
 }
 
 /***********************************************************************
- *              DrawDibGetPalette       [MSVIDEO.108]
- */
-HPALETTE16 VFWAPI DrawDibGetPalette16(HDRAWDIB16 hdd) {
-	return (HPALETTE16)DrawDibGetPalette(hdd);
-}
-
-/***********************************************************************
  *              DrawDibRealize          [MSVFW32.@]
  */
 UINT VFWAPI DrawDibRealize(HDRAWDIB hdd, HDC hdc, BOOL fBackground) {
@@ -444,30 +375,23 @@ UINT VFWAPI DrawDibRealize(HDRAWDIB hdd, HDC hdc, BOOL fBackground) {
 	UINT ret = 0;
 
 	FIXME("(%d,0x%08lx,%d), stub\n",hdd,(DWORD)hdc,fBackground);
-	
+
 	whdd = GlobalLock16(hdd);
 
 	if (!whdd || !(whdd->begun)) {
 		ret = 0;
 		goto out;
 	}
-	
+
 	if (!whdd->hpal)
 		whdd->hpal = CreateHalftonePalette(hdc);
 
 	oldPal = SelectPalette(hdc,whdd->hpal,fBackground);
 	ret = RealizePalette(hdc);
-	
+
  out:
 	GlobalUnlock16(hdd);
 
 	TRACE("=> %u\n",ret);
 	return ret;
-}
-
-/***********************************************************************
- *              DrawDibRealize          [MSVIDEO.112]
- */
-UINT16 VFWAPI DrawDibRealize16(HDRAWDIB16 hdd, HDC16 hdc, BOOL16 fBackground) {
-	return (UINT16)DrawDibRealize(hdd,hdc,fBackground);
 }
