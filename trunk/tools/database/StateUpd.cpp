@@ -1,4 +1,4 @@
-/* $Id: StateUpd.cpp,v 1.6 2000-02-10 22:10:38 bird Exp $
+/* $Id: StateUpd.cpp,v 1.7 2000-02-10 23:37:52 bird Exp $
  *
  * StateUpd - Scans source files for API functions and imports data on them.
  *
@@ -340,7 +340,15 @@ static void closeLogs(void)
     if (phLog != stderr && phLog != NULL)
         fclose(phLog);
     if (phSignal != stdout && phSignal != NULL)
-        fclose(phSignal);
+    {
+        if (ftell(phSignal) > 0)
+            fclose(phSignal);
+        else
+        {
+            fclose(phSignal);
+            unlink("Signals.log");
+        }
+    }
 }
 
 
