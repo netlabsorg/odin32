@@ -1,4 +1,8 @@
- /* $Id: changelog,v 1.597 1999-12-31 10:48:51 sandervl Exp $ */
+ /* $Id: changelog,v 1.598 1999-12-31 13:54:45 sandervl Exp $ */
+
+ 1999-12-31: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
+	- WINMM: Implemented waveOutGet/SetVolume
+	- KERNEL32: Fixed bugs in iccio.asm (OFFSET FLAT:devname)
 
  1999-12-31: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- KERNEL32: Started with implementation of debug apis & support
