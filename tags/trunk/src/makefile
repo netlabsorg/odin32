@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.35 1999-11-08 22:59:06 phaller Exp $
+# $Id: makefile,v 1.36 1999-12-20 11:08:54 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -104,8 +104,8 @@ all: libs
         $(MAKE_CMD)
         cd ..\crtdll
         $(MAKE_CMD)
-#        cd ..\msvcrt
-#        $(MAKE_CMD)
+        cd ..\msvcrt
+        $(MAKE_CMD)
         cd ..\msacm32
         $(MAKE_CMD)
         cd ..\imagehlp
