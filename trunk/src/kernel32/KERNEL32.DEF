@@ -943,6 +943,8 @@ EXPORTS
    UnicodeToAscii       = _UnicodeToAscii@8                        @1211
    FreeAsciiString      = _FreeAsciiString@4                       @1212
    AsciiToUnicode       = _AsciiToUnicode@8                        @1213
+   UnicodeToAsciiN      = _UnicodeToAsciiN@12                      @1254
+   AsciiToUnicodeN      = _AsciiToUnicodeN@12                      @1216
 
 ;Win32Exe constructor
    __ct__8Win32ExeFPc                                              @1220
