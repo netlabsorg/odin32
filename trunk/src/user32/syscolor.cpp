@@ -1,4 +1,4 @@
-/* $Id: syscolor.cpp,v 1.24 2000-11-22 13:44:50 sandervl Exp $ */
+/* $Id: syscolor.cpp,v 1.25 2000-12-30 13:27:55 sandervl Exp $ */
 
 /*
  * Win32 system color API functions for OS/2
@@ -322,6 +322,28 @@ HBRUSH WIN32API GetControlBrush(HWND hwnd, HDC hdc, DWORD ctlType)
              bkgBrush = DefWindowProcA(hwnd, WM_CTLCOLORMSGBOX + ctlType, hdc, ctlType);
     }
     return bkgBrush;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API IsSystemPen(HPEN hPen)
+{
+    for(int i=0;i<NUM_SYS_COLORS;i++) {
+        if(SysColorPens[i] == hPen) {
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API IsSystemBrush(HBRUSH hBrush)
+{
+    for(int i=0;i<NUM_SYS_COLORS;i++) {
+        if(SysColorBrushes[i] == hBrush) {
+            return TRUE;
+        }
+    }
+    return FALSE;
 }
 //******************************************************************************
 //******************************************************************************
