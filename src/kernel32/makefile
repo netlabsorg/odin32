@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.16 1999-08-10 12:43:24 phaller Exp $
+# $Id: makefile,v 1.17 1999-08-12 14:20:29 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -285,7 +285,7 @@ winres.OBJ: \
     $(PDWIN32_INCLUDE)\misc.h
 
 winmod.OBJ: \
-    .\winres.cpp \
+    .\winmod.cpp \
     $(PDWIN32_INCLUDE)\winimage.h \
     $(PDWIN32_INCLUDE)\winexe.h \
     $(PDWIN32_INCLUDE)\windll.h \
