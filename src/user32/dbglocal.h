@@ -1,4 +1,4 @@
-/* $Id: dbglocal.h,v 1.10 2002-06-02 10:07:57 sandervl Exp $ */
+/* $Id: dbglocal.h,v 1.11 2002-09-03 12:34:01 sandervl Exp $ */
 
 /*
  * debug logging functions for OS/2
@@ -93,7 +93,8 @@ void ParseLogStatusUSER32();
 #define DBG_rect                 71
 #define DBG_paint                72
 #define DBG_dragdrop             73
-#define DBG_MAXFILES             74
+#define DBG_oslibclip            74
+#define DBG_MAXFILES             75
 
 extern USHORT DbgEnabledUSER32[DBG_MAXFILES];
 extern USHORT DbgEnabledLvl2USER32[DBG_MAXFILES];
