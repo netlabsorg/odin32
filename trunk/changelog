@@ -1,4 +1,11 @@
-/* $Id: changelog,v 1.2515 2003-03-05 16:44:59 sandervl Exp $ */
+/* $Id: changelog,v 1.2516 2003-03-06 10:21:11 sandervl Exp $ */
+
+ 2003-03-06: knut st. osmundsen <Knut.Osmundsen@innotek   >
+    - KERNEL32: o The WIN32LOG_FILEBASE env.var. can be used to point the logfile
+                  elsewhere. "%d.log" is added to the value.
+                o Print szLineExceptionType too in exception dump.
+                o Custombuild apis for entering and leaving Odin thread context.
+                o Added functions to quickly get the PID & TID
 
  2003-03-05: knut st. osmundsen <bird-odin-spam@anduin   >
     - MAKE:     o Experimental OTHERS variable.
