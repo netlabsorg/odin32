@@ -1,4 +1,4 @@
-/* $Id: winexepeldr.cpp,v 1.3 1999-10-14 09:57:34 sandervl Exp $ */
+/* $Id: winexepeldr.cpp,v 1.4 1999-11-13 15:41:10 sandervl Exp $ */
 
 /*
  * Win32 PE loader Exe class
@@ -33,6 +33,10 @@
 #include "exceptutil.h"
 
 #include "cio.h"
+#include "oslibmisc.h"
+
+extern char szErrorTitle[];
+extern char szErrorModule[];
 
 //******************************************************************************
 //Called by ring 3 pe loader to create win32 executable
@@ -67,6 +71,12 @@ BOOL WIN32API CreateWin32PeLdrExe(char *szFileName, ULONG reservedMem)
 
   OS2SetExceptionHandler(&exceptFrame);
   if(WinExe->init(reservedMem) == FALSE) {
+	if(szErrorModule[0] != 0) {
+	  char szErrorMsg[128];
+
+		sprintf(szErrorMsg, "Can't execute %s due to bad or missing %s", OSLibStripPath(szFileName), szErrorModule);
+        	WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
+	}
         delete WinExe;
         return FALSE;
   }
