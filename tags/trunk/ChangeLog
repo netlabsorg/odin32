@@ -1,8 +1,9 @@
- /* $Id: ChangeLog,v 1.159 1999-08-31 22:24:10 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.160 1999-08-31 22:45:08 phaller Exp $ */
 
  99-08-31: Patrick Haller <phaller@gmx.net>
-	- WINMM:    revision of timer services (C&C RA)
-	- KERNEL32: temporary fix for DuplicateHandle for non-HandleManager handles
+	- WINMM:    	revision of timer services (C&C RA)
+	- KERNEL32: 	temporary fix for DuplicateHandle for non-HandleManager handles
+			little improvement in console properties
 
  99-08-31: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: Finished MDI class, but it's not working yet.

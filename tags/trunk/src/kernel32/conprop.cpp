@@ -1,4 +1,4 @@
-/* $Id: conprop.cpp,v 1.7 1999-06-19 10:54:40 sandervl Exp $ */
+/* $Id: conprop.cpp,v 1.8 1999-08-31 22:44:33 phaller Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -1890,6 +1890,70 @@ static APIRET ConPropPage5Set(HWND             hwndDlg,
 }
 
 
+
+
+
+/*****************************************************************************
+ * Name      : APIRET EXPENTRY ConsolePropertyLoad
+ * Funktion  : load properties from registry
+ * Parameter : PICONSOLEOPTIONS pConsoleOptions
+ * Variablen :
+ * Ergebnis  : APIRET
+ * Bemerkung :
+ *
+ * Autor     : Patrick Haller [1998/06/13 23:20]
+ *****************************************************************************/
+
+APIRET EXPENTRY ConsolePropertyLoad(PICONSOLEOPTIONS pConsoleOptions)
+{
+  dprintf (("KERNEL32: Console:ConsolePropertyLoad(%08xh) not implemented.\n",
+            pConsoleOptions));
+
+  // HKEY_CURRENT_USER/SOFTWARE/ODIN/<process name>/<option name>
+
+  return (NO_ERROR);
+}
+
+
+
+/*****************************************************************************
+ * Name      : APIRET EXPENTRY ConsolePropertySave
+ * Funktion  : save properties from registry
+ * Parameter : PICONSOLEOPTIONS pConsoleOptions
+ * Variablen :
+ * Ergebnis  : APIRET
+ * Bemerkung :
+ *
+ * Autor     : Patrick Haller [1998/06/13 23:20]
+ *****************************************************************************/
+
+APIRET EXPENTRY ConsolePropertySave(PICONSOLEOPTIONS pConsoleOptions)
+{
+  dprintf (("KERNEL32: Console:ConsolePropertySave(%08xh) not implemented.\n",
+            pConsoleOptions));
+
+  return (NO_ERROR);
+}
+
+
+/*****************************************************************************
+ * Name      : APIRET EXPENTRY ConsolePropertyApply
+ * Funktion  : apply properties in memory to the console window
+ * Parameter : PICONSOLEOPTIONS pConsoleOptions
+ * Variablen :
+ * Ergebnis  : APIRET
+ * Bemerkung :
+ *
+ * Autor     : Patrick Haller [1998/06/13 23:20]
+ *****************************************************************************/
+
+APIRET EXPENTRY ConsolePropertyApply(PICONSOLEOPTIONS pConsoleOptions)
+{
+  dprintf (("KERNEL32: Console:ConsolePropertyApply(%08xh) not implemented.\n",
+            pConsoleOptions));
+
+  return (NO_ERROR);
+}
 
 
 
