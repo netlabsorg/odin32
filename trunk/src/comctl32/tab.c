@@ -1,4 +1,4 @@
-/* $Id: tab.c,v 1.16 1999-11-02 21:44:03 achimha Exp $ */
+/* $Id: tab.c,v 1.17 1999-11-05 13:01:33 achimha Exp $ */
 /*
  * Tab control
  *
@@ -395,9 +395,9 @@ TAB_LButtonDown (HWND hwnd, WPARAM wParam, LPARAM lParam)
   pt.x = (INT)LOWORD(lParam);
   pt.y = (INT)HIWORD(lParam);
   
-  newItem=TAB_InternalHitTest (hwnd, infoPtr,pt,&dummy);
+  newItem = TAB_InternalHitTest (hwnd, infoPtr, pt, (unsigned int*)&dummy);
   
-  TRACE("On Tab, item %d\n", newItem);
+//  TRACE("On Tab, item %d\n", newItem);
     
   if ( (newItem!=-1) &&
        (infoPtr->iSelected != newItem) )
@@ -1496,7 +1496,7 @@ TAB_SetItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
    len=lstrlenA (tabItem->pszText);
    if (len>wineItem->cchTextMax) 
      wineItem->pszText= COMCTL32_ReAlloc (wineItem->pszText, len+1);
-   lstrcpyA (wineItem->pszText, tabItem->pszText);
+   lstrcpyA ((unsigned char*)wineItem->pszText, tabItem->pszText);
   }
 
   /*

@@ -1,4 +1,4 @@
-/* $Id: comctl32.h,v 1.8 1999-09-26 11:01:08 achimha Exp $ */
+/* $Id: comctl32.h,v 1.9 1999-11-05 13:01:32 achimha Exp $ */
 /*
  * Win32 common controls implementation
  *
@@ -23,6 +23,13 @@
 #include "unicode.h"
 #include "wineuni.h"
 
+#define TRACE(x)
+#define FIXME(x)
+#define WARN(x)
+
+#define _OS2WIN_H
+#define NO_ULONG
+#include <misc.h>
 
 #ifdef __cplusplus
 extern "C" {
