@@ -3,6 +3,7 @@
  * Unicode functions
  * Copyright 1998 Joel Troster
  * Copyright 1999 Patrick haller
+ * Copyright 1999 Achim Hasenmueller
  */
 #include <os2win.h>
 #include <winnls.h>
