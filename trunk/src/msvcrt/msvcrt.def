@@ -1,4 +1,4 @@
-; $Id: msvcrt.def,v 1.4 1999-10-28 15:25:36 sandervl Exp $
+; $Id: msvcrt.def,v 1.5 1999-10-30 09:20:59 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY MSVCRT INITINSTANCE TERMINSTANCE
@@ -102,6 +102,7 @@ IMPORTS
 	NTDLL_wcstoul		= NTDLL.wcstoul
 
 ; Forwarded APIs - CRTDLL
+	CRTDLL___mb_cur_max_dll	= CRTDLL.__mb_cur_max_dll
 	CRTDLL___dllonexit	= CRTDLL.__dllonexit
 	CRTDLL___doserrno	= CRTDLL.__doserrno
 	CRTDLL___fpecode	= CRTDLL.__fpecode
@@ -109,9 +110,14 @@ IMPORTS
 	CRTDLL___isascii	= CRTDLL.__isascii
 	CRTDLL___iscsym		= CRTDLL.__iscsym
 	CRTDLL___iscsymf	= CRTDLL.__iscsymf
-	CRTDLL___mb_cur_max_dll = CRTDLL.___mb_cur_max_dll
 	CRTDLL___threadhandle	= CRTDLL.__threadhandle
 	CRTDLL___threadid	= CRTDLL.__threadid
+
+	CRTDLL__fmode_dll 	= CRTDLL._fmode_dll
+	CRTDLL__acmdln_dll	= CRTDLL._acmdln_dll
+	CRTDLL__aexit_rtn_dll	= CRTDLL._aexit_rtn_dll
+	CRTDLL__commode_dll	= CRTDLL._commode_dll
+	CRTDLL__pctype_dll	= CRTDLL._pctype_dll
 	CRTDLL__CIacos		= CRTDLL._CIacos
 	CRTDLL__CIasin		= CRTDLL._CIasin
 	CRTDLL__CIatan		= CRTDLL._CIatan
@@ -129,8 +135,6 @@ IMPORTS
         CRTDLL__CItanh		= CRTDLL._CItanh
 	CRTDLL__abnormal_termination = CRTDLL._abnormal_termination
 	CRTDLL__access		= CRTDLL._access
-	CRTDLL__acmdln_dll	= CRTDLL._acmdln_dll
-	CRTDLL__aexit_rtn_dll	= CRTDLL._aexit_rtn_dll
 	CRTDLL__amsg_exit	= CRTDLL._amsg_exit
 	CRTDLL__argc_dll  	= CRTDLL._argc_dll
 	CRTDLL__argv_dll  	= CRTDLL._argv_dll
@@ -149,7 +153,6 @@ IMPORTS
 	CRTDLL__clearfp		= CRTDLL._clearfp
 	CRTDLL__close		= CRTDLL._close
 	CRTDLL__commit		= CRTDLL._commit
-	CRTDLL__commode_dll	= CRTDLL._commode_dll
 	CRTDLL__control87	= CRTDLL._control87
 	CRTDLL__controlfp	= CRTDLL._controlfp
 	CRTDLL__copysign	= CRTDLL._copysign
@@ -192,7 +195,6 @@ IMPORTS
 	CRTDLL__finite		= CRTDLL._finite
 	CRTDLL__flsbuf		= CRTDLL._flsbuf
 	CRTDLL__flushall	= CRTDLL._flushall
-	CRTDLL__fmode_dll  	= CRTDLL._fmode_dll
 	CRTDLL__fpclass		= CRTDLL._fpclass
 	CRTDLL__fpieee_flt	= CRTDLL._fpieee_flt
 	CRTDLL__fpreset		= CRTDLL._fpreset
@@ -321,7 +323,6 @@ IMPORTS
 	CRTDLL__open		= CRTDLL._open
 	CRTDLL__open_osfhandle	= CRTDLL._open_osfhandle
 	CRTDLL__pclose		= CRTDLL._pclose
-	CRTDLL__pctype_dll	= CRTDLL._pctype_dll
 	CRTDLL__pipe		= CRTDLL._pipe
 	CRTDLL__popen		= CRTDLL._popen
 	CRTDLL__purecall	= CRTDLL._purecall
@@ -515,6 +516,13 @@ IMPORTS
 	CRTDLL_wprintf		= CRTDLL.wprintf
 	CRTDLL_wscanf		= CRTDLL.wscanf
 
+; Imported APIs - CRTDLL
+	_fmode_dll  		= CRTDLL._fmode_dll
+	_acmdln_dll		= CRTDLL._acmdln_dll
+	_aexit_rtn_dll		= CRTDLL._aexit_rtn_dll
+	_commode_dll		= CRTDLL._commode_dll
+	_pctype_dll		= CRTDLL._pctype_dll
+	__mb_cur_max_dll 	= CRTDLL.__mb_cur_max_dll
 
 EXPORTS
 ;   ??0__non_rtti_object@@QAE@ABV0@@Z				@1
