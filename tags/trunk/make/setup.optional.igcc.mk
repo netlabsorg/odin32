@@ -1,4 +1,4 @@
-# $Id: setup.optional.igcc.mk,v 1.1 2004-03-08 19:56:43 bird Exp $
+# $Id: setup.optional.igcc.mk,v 1.2 2004-03-09 15:23:12 bird Exp $
 
 #
 #  Helper file for all the optional stuff which is common for
@@ -82,6 +82,6 @@ _CXX_XCPT         = -fno-exceptions
 ! endif
 !endif
 
-_CXX_OPTIONAL = $(_CXX_SEG_TEXT) $(_CXX_SEG_DATA) $(_CXX_SEG_XCPT) $(_CXX_DEFAULT_LIBS) $(_CXX_PACK) $(_CXX_XCPT) $(_CXX_MODEL)
+_CXX_OPTIONAL = $(_CXX_SEG_TEXT) $(_CXX_SEG_DATA) $(_CXX_SEG_XCPT) $(_CXX_DEFAULT_LIBS) $(_CXX_PACK) $(_CXX_XCPT) $(_CXX_MODEL) $(_CXX_RIIT)
 
 
