@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.623 2000-01-08 14:14:10 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.624 2000-01-09 14:12:37 cbratschi Exp $ */
+
+ 2000-01-09: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32/NEW: implemented scrollbar nc handling
+		      windows without menus work now fine
 
  2000-01-08: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: ModifyMenuA bugfix (changing menu ids didn't work)
