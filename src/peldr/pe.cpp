@@ -1,4 +1,4 @@
-/* $Id: pe.cpp,v 1.28 2001-06-10 22:00:04 sandervl Exp $ */
+/* $Id: pe.cpp,v 1.29 2001-07-06 13:47:40 sandervl Exp $ */
 
 /*
  * PELDR main exe loader code
@@ -36,6 +36,7 @@
 char INFO_BANNER[]      = "Usage: PE winexe commandline";
 char szErrorTitle[]     = "Odin";
 char szLoadErrorMsg[]   = "Can't load executable";
+char szFileNotFound[]   = "File not found.";
 char szFileErrorMsg[]   = "File IO error";
 char szPEErrorMsg[]     = "Not a valid win32 exe. (perhaps 16 bits windows)";
 char szCPUErrorMsg[]    = "Executable doesn't run on x86 machines";
@@ -130,6 +131,10 @@ tryagain:
 					while(*p == ' ' && *p != 0) p++;
 				}
 			}
+                        if(nrTries && *p == 0) {
+                            pszErrorMsg = szFileNotFound;
+                            goto failerror;
+                        }
 		}
 		*p = 0;
 		strupr(exeName);
@@ -163,7 +168,6 @@ tryagain:
 		}
 	}
 	else {//should never happen!
-filenotfound:
                 pszErrorMsg = szDosInfoBlocks;
                 goto failerror;
 	}
@@ -172,12 +176,14 @@ filenotfound:
             STARTDATA sdata = {0};
             ULONG idSession;
             PID   pid;
+
             sdata.Length    = sizeof(sdata);
             sdata.PgmName   = "w16odin.exe";
             strcpy(fullpath, exeName);
             strcat(fullpath, " ");
             strcat(fullpath, win32cmdline);
             sdata.PgmInputs = fullpath;
+            sdata.FgBg      = SSF_FGBG_FORE;
             sdata.SessionType = SSF_TYPE_WINDOWEDVDM;
             rc = DosStartSession(&sdata, &idSession, &pid);
             if(rc) {
