@@ -1,4 +1,4 @@
-/* $Id: odin32pack.cmd,v 1.4 2000-06-11 14:10:03 bird Exp $
+/* $Id: odin32pack.cmd,v 1.5 2000-07-10 17:42:16 bird Exp $
  *
  * Make the two zip files.
  *
@@ -43,7 +43,7 @@ parse arg sDir, sType;
     'del /Q /Y /Z /X .\glide\Voodoo1\CVS > nul 2>&1'
     'del /Q /Y /Z /X .\glide\Voodoo2\CVS > nul 2>&1'
     call copy '..\odin.ini'
-    call copy '..\..\odin.ini.txt', '.\odin_ini.txt'
+    call copy '..\..\doc\odin.ini.txt'
     call copy '..\Glide\readme.txt', 'Glide\readme.txt'
     call copy '..\Glide\Voodoo1\readme.txt', 'Glide\Voodoo1\readme.txt'
     call copy '..\Glide\Voodoo2\readme.txt', 'Glide\Voodoo2\readme.txt'
@@ -58,9 +58,9 @@ parse arg sDir, sType;
 
     /* Copy root files into the pack directory. */
     call copy '..\..\license.txt';
-    call copy '..\..\readme.txt';
-    call copy '..\..\logging.txt';
     call copy '..\..\ChangeLog';
+    call copy '..\..\doc\readme.txt';
+    call copy '..\..\doc\logging.txt';
 
     /*
      * Move (=rename) the /bin/<release|debug> dir into /pack/system32
