@@ -1,4 +1,4 @@
-/* $Id: winimagepe2lx.cpp,v 1.12 2000-08-19 17:22:52 bird Exp $ */
+/* $Id: winimagepe2lx.cpp,v 1.13 2000-08-27 03:20:37 bird Exp $ */
 
 /*
  * Win32 PE2LX Image base class
@@ -259,36 +259,45 @@ BOOL Win32Pe2LxImage::init()
     {
         ulRVAResourceSection = pNtHdrs->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress;
         pResRootDir = (PIMAGE_RESOURCE_DIRECTORY)getPointerFromRVA(ulRVAResourceSection);
-
-        /*
-         * Temporary fix.
-         * Make resource section writable.
-         * Make 64 KB before the resource section present.
+        /* _temporary_ fix:
+         *  We'll have to make the resource section writable.
+         *  And we'll have to make the pages before it readable.
          */
-        int iSection;
-        if (pResRootDir != NULL && (iSection = getSectionIndexFromRVA(ulRVAResourceSection)) != -1)
+        ULONG iSection = getSectionIndexFromRVA(ulRVAResourceSection);
+        if (iSection >= 0)
         {
-            ULONG ulAddr = paSections[iSection].ulAddress;
-            rc = DosSetMem((PVOID)ulAddr, paSections[iSection].cbVirtual, PAG_WRITE | PAG_READ);
-            ulAddr -= 0x10000;
+            rc = DosSetMem((PVOID)paSections[iSection].ulAddress, paSections[iSection].cbVirtual, PAG_WRITE | PAG_READ);
+
+            ULONG ulAddr = paSections[iSection].ulAddress - 0x10000; //64KB
             while (ulAddr < paSections[iSection].ulAddress)
             {
-                ULONG   fl = ~0UL;
-                ULONG   cb = ~0UL;
-                if ((rc = DosQueryMem((PVOID)ulAddr, &cb, &fl)) == NO_ERROR)
+                ULONG fl = ~0UL;
+                ULONG cb = ~0UL;
+                rc = DosQueryMem((PVOID)ulAddr, &cb, &fl);
+                if (rc == NO_ERROR)
                 {
-                    if ((fl & PAG_COMMIT) == 0)
-                    {
-                        fl &= PAG_WRITE & PAG_READ & PAG_GUARD;
-                        if ((fl & PAG_READ) == 0)
-                            fl |= PAG_READ;
-                        rc = DosSetMem((PVOID)ulAddr, cb, fl | PAG_COMMIT);
-                    }
-
-                    ulAddr += cb;
+                    if (fl & PAG_GUARD)
+                        rc = -1;
+                    else if (fl & PAG_COMMIT)
+                        fl &= ~(PAG_COMMIT);
+                    else
+                        fl |= PAG_COMMIT;
+                    cb = (cb + 0xfffUL) & ~0xfffUL;
                 }
+                else
+                {
+                    fl = PAG_COMMIT;
+                    cb = 0x1000;
+                }
+                fl &= PAG_READ | PAG_COMMIT | PAG_WRITE | PAG_GUARD;
+                fl |= PAG_READ;
+                if (cb > paSections[iSection].ulAddress - ulAddr)
+                    cb = paSections[iSection].ulAddress - ulAddr;
+                if (rc == NO_ERROR)
+                    rc = DosSetMem((PVOID)ulAddr, cb, fl);
+
+                ulAddr += cb;
             }
-            rc = NO_ERROR;
         }
     }
 
@@ -335,14 +344,17 @@ BOOL Win32Pe2LxImage::init()
                 return FALSE;
             }
             setTLSIndexAddr((LPDWORD)pv);
-            pv = getPointerFromRVA((ULONG)pTLSDir->AddressOfCallBacks - ulBorlandRVAFix);
-            if (pv == NULL)
+            if (pTLSDir->AddressOfCallBacks != 0)
             {
-                eprintf(("Win32Pe2LxImage::init: invalid RVA to TLS AddressOffIndex - %#8x.\n",
-                         pTLSDir->AddressOfIndex));
-                return FALSE;
+                pv = getPointerFromRVA((ULONG)pTLSDir->AddressOfCallBacks - ulBorlandRVAFix);
+                if (pv == NULL)
+                {
+                    eprintf(("Win32Pe2LxImage::init: invalid RVA to TLS AddressOffIndex - %#8x.\n",
+                             pTLSDir->AddressOfIndex));
+                    return FALSE;
+                }
+                setTLSCallBackAddr((PIMAGE_TLS_CALLBACK*)pv);
             }
-            setTLSCallBackAddr((PIMAGE_TLS_CALLBACK*)pv);
         }
         else
         {
@@ -586,7 +598,7 @@ VOID  Win32Pe2LxImage::cleanup()
 
 
 /**
- * Converts a RVA to an pointer.
+ * Converts a RVA into a pointer.
  * @returns   Pointer matching the given RVA, NULL on error.
  * @param     ulRVA  An address relative to the imagebase of the original PE image.
  *                   If this is 0UL NULL is returned.
@@ -625,41 +637,38 @@ PVOID  Win32Pe2LxImage::getPointerFromRVA(ULONG ulRVA)
 
 
 /**
- * Gets the (0-based) index into paSection of the section holding the
- * given ulRVA.
- * @returns     Section index (0 based).
+ * Converts a RVA into a paSections index.
+ * @returns     Index into paSections for the section containing the RVA.
  *              -1 on error.
- * @param       ulRVA       Relative Virtual Address.
- * @sketch      DEBUG: validate state, paSections != NULL
- *              IF ulRVA is 0 THEN return NULL
- *              LOOP while more section left and ulRVA is not within section
- *                  next section
- *              IF section matching ulRVA is not found THEN fail.
- *              The index.
- * @status
- * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
- * @remark
+ * @param       ulRVA   An address relative to the imagebase of the original PE image.
+ *                      If this is 0UL -1 is returned.
+ * @sketch    DEBUG: validate state, paSections != NULL
+ *            IF ulRVA is 0 THEN return -1
+ *            LOOP while more section left and ulRVA is not within section
+ *                next section
+ *            IF section matching ulRVA is found THEN return index ELSE fail.
+ * @status    completely implemented.
+ * @author    knut st. osmundsen
+ * @remark    Should not be called until getSections has returned successfully.
+ *            RVA == 0 is ignored.
  */
-LONG Win32Pe2LxImage::getSectionIndexFromRVA(ULONG ulRVA)
+ULONG Win32Pe2LxImage::getSectionIndexFromRVA(ULONG ulRVA)
 {
     int i;
     #ifdef DEBUG
         if (paSections == NULL)
-            return NULL;
+            return -1;
     #endif
 
     if (ulRVA == 0UL)
-        return NULL;
+        return -1;
 
     i = 0;
     while (i < cSections &&
            !(paSections[i].ulRVA <= ulRVA && paSections[i].ulRVA + paSections[i].cbVirtual > ulRVA)) /* ALIGN on page too? */
         i++;
 
-    if (i >= cSections)
-        return -1;
-
-    return i;
+    return i < cSections ? i : -1;
 }
 
 

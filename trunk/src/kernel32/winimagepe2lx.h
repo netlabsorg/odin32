@@ -1,4 +1,4 @@
-/* $Id: winimagepe2lx.h,v 1.2 2000-08-19 17:22:52 bird Exp $ */
+/* $Id: winimagepe2lx.h,v 1.3 2000-08-27 03:20:37 bird Exp $ */
 
 /*
  * Win32 PE2LX Image base class
@@ -54,9 +54,9 @@ private:
 
 protected:
     /** @cat RVA -> pointer */
-    /* this should be moved to winimagebase some day... */
-    PVOID   getPointerFromRVA(ULONG ulRVA);
-    LONG    getSectionIndexFromRVA(ULONG ulRVA);
+    /* these should be moved to winimagebase some day... */
+    PVOID    getPointerFromRVA(ULONG ulRVA);
+    ULONG    getSectionIndexFromRVA(ULONG ulRVA);
 
     PSECTION            paSections; /* Used by getPointerFromRVA and created by getSections and
                                      * setSectionRVAs. */
