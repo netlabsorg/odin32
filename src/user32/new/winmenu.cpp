@@ -1,4 +1,4 @@
-/* $Id: winmenu.cpp,v 1.9 2000-01-04 19:53:45 sandervl Exp $ */
+/* $Id: winmenu.cpp,v 1.10 2000-01-07 00:24:34 sandervl Exp $ */
 
 /*
  * Win32 menu API functions for OS/2
@@ -414,18 +414,27 @@ ODINFUNCTION3(UINT,  GetMenuState,
 //******************************************************************************
 ODINFUNCTION5(int,   GetMenuStringA,
               HMENU, hMenu,
-              UINT,  arg2,
-              LPSTR, arg3,
-              int,   arg4,
-              UINT,  arg5)
+              UINT,  idItem,
+              LPSTR, lpsz,
+              int,   cchMax,
+              UINT,  fuFlags)
 {
+ int rc, nritems;
+
     if(hMenu == 0)
     {
         SetLastError(ERROR_INVALID_PARAMETER);
         return 0;
     }
-
-    return O32_GetMenuString(hMenu, arg2, arg3, arg4, arg5);
+    if(!lpsz || !cchMax) {//determine menu string length
+	char menustr[256];
+	rc = O32_GetMenuString(hMenu, idItem, menustr, sizeof(menustr), fuFlags);
+        //SvL: Open32 returns the wrong error
+	return (rc == -1) ? 0 : rc;
+    }
+    rc = O32_GetMenuString(hMenu, idItem, lpsz, cchMax, fuFlags);
+    //SvL: Open32 returns the wrong error
+    return (rc == -1) ? 0 : rc;
 }
 //******************************************************************************
 //******************************************************************************
