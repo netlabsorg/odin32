@@ -1,10 +1,16 @@
- /* $Id: changelog,v 1.156 1999-08-31 10:36:48 sandervl Exp $ */
+ /* $Id: changelog,v 1.157 1999-08-31 14:39:40 sandervl Exp $ */
 
  99-08-31: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: Finished MDI class, but it's not working yet.
+	- USER32\NEW: Fixed menu apis
+	- KERNEL32\NEW: Changed makefile to generate response file (linker
+                        cmd line too long)
+                        Created resource class for menus (Win32MenuRes)
+        - INC:        Changed debug makefiles to include /dbgpack linker option
+                      (compresses debug info)
 
  99-08-31: Rene Pronk <R.Pronk@twi.tudelft.nl>
-	- USER32: Implemented ChildWindowFromPointEx
+	- USER32,USER32\NEW: Implemented ChildWindowFromPointEx
 
  99-08-30: Jens Wiessner <wiessnej@rfi.de>
 	- OLEDLG: Created stub dll

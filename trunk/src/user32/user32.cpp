@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.21 1999-08-19 12:53:55 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.22 1999-08-31 14:37:27 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -1265,14 +1265,85 @@ HWND WIN32API ChildWindowFromPoint( HWND arg1, POINT  arg2)
 #endif
     return O32_ChildWindowFromPoint(arg1, arg2);
 }
-//******************************************************************************
-//******************************************************************************
-HWND WIN32API ChildWindowFromPointEx(HWND arg1, POINT arg2, UINT uFlags)
+/*****************************************************************************
+ * Name      : HWND WIN32API ChildWindowFromPointEx
+ * Purpose   : The GetWindowRect function retrieves the dimensions of the
+ *             bounding rectangle of the specified window. The dimensions are
+ *             given in screen coordinates that are relative to the upper-left
+ *             corner of the screen.
+ * Parameters:
+ * Variables :
+ * Result    : If the function succeeds, the return value is the window handle.
+ *             If the function fails, the return value is zero
+ * Remark    :
+ * Status    : FULLY IMPLEMENTED AND TESTED
+ *
+ * Author    : Rene Pronk [Sun, 1999/08/08 23:30]
+ *****************************************************************************/
+
+
+HWND WIN32API ChildWindowFromPointEx (HWND hwndParent, POINT pt, UINT uFlags) 
 {
-#ifdef DEBUG
-    WriteLog("USER32:  ChildWindowFromPointEx, not completely supported!\n");
-#endif
-    return O32_ChildWindowFromPoint(arg1, arg2);
+        RECT rect;
+        HWND hWnd;
+        POINT absolutePt;
+
+        dprintf(("USER32: ChildWindowFromPointEx(%08xh,%08xh,%08xh).\n",
+                 hwndParent, pt, uFlags));
+
+        if (GetWindowRect (hwndParent, &rect) == 0) {
+                // oops, invalid handle
+                return NULL;
+        }
+
+        // absolutePt has its top in the upper-left corner of the screen
+        absolutePt = pt;
+        ClientToScreen (hwndParent, &absolutePt);
+
+        // make rect the size of the parent window
+        GetWindowRect (hwndParent, &rect);
+        rect.right = rect.right - rect.left;
+        rect.bottom = rect.bottom - rect.top;
+        rect.left = 0;
+        rect.top = 0;
+
+        if (PtInRect (&rect, pt) == 0) {
+                // point is outside window
+                return NULL;
+        }
+
+        // get first child
+        hWnd = GetWindow (hwndParent, GW_CHILD);
+
+        while (hWnd != NULL) {
+
+                // do I need to skip this window?
+                if (((uFlags & CWP_SKIPINVISIBLE) &&
+                     (IsWindowVisible (hWnd) == FALSE)) ||
+                    ((uFlags & CWP_SKIPDISABLED) &&
+                     (IsWindowEnabled (hWnd) == FALSE)) ||
+                    ((uFlags & CWP_SKIPTRANSPARENT) &&
+                     (GetWindowLongA (hWnd, GWL_EXSTYLE) & WS_EX_TRANSPARENT)))
+
+                {
+                        hWnd = GetWindow (hWnd, GW_HWNDNEXT);
+                        continue;
+                }
+
+                // is the point in this window's rect?
+                GetWindowRect (hWnd, &rect);
+                if (PtInRect (&rect, absolutePt) == FALSE) {
+                        hWnd = GetWindow (hWnd, GW_HWNDNEXT);
+                        continue;
+                }
+
+                // found it!
+                return hWnd;
+        }
+
+        // the point is in the parentwindow but the parentwindow has no child
+        // at this coordinate
+        return hwndParent;
 }
 //******************************************************************************
 //******************************************************************************
