@@ -17,7 +17,7 @@ released under this license; (3) all copyrights of the original
 work are included; (4) the modifications are a direct advantage
 for the functionality and completeness of the product or improve
 interoperability of the product with another product and do not
-interfere with the goal of an open-source and free emulation
+interfere with the goal of an open source and free emulation
 product.
 
 You may NOT use the work as base of another work that is
@@ -39,6 +39,22 @@ team. Such a custom license might only limit the above terms
 if the changes cause a direct advantage for the functionality
 or completeness of the product and do not interfere with the
 goal of an open-source and free emulation product.
+
+Parts of the work may be governed by a license other than
+this one, if the source directory of the part contains a
+license file called "LICENSE.TXT" of its own. If a different
+license exists, it supercedes this license. Removing the
+the part specific license will automatically put back the
+part under the terms of this license. Only the Odin management
+team is allowed to put parts of the work under a different
+license and remove the part specific licenses. The purpose
+of using different licenses is solely for allowing code
+sharing of certain parts of the work with other project that
+have incompatible licenses. These parts should either have
+this license in a version that makes it compatible with the
+license of the second project, or the license of the second
+project as long as it conforms to the goals of an open source
+and free emulation software.
 
 Warranty
 
