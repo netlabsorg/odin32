@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.39 1999-10-30 15:16:58 dengert Exp $ */
+/* $Id: oslibwin.cpp,v 1.40 1999-10-30 18:08:19 dengert Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -100,7 +100,7 @@ HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
     dwFrameStyle |= FCF_TASKLIST | FCF_NOMOVEWITHOWNER;
   }
 
-  dwWinStyle &= ~(WS_CLIPCHILDREN | WS_CLIPSIBLINGS);
+  dwWinStyle &= ~WS_CLIPCHILDREN;
   FCData.flCreateFlags = dwFrameStyle;
 
   *hwndFrame = WinCreateWindow (hwndParent,
