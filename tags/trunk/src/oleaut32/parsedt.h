@@ -1,3 +1,4 @@
+/* $Id: parsedt.h,v 1.2 1999-08-22 22:08:48 sandervl Exp $ */
 /*
 PostgreSQL Data Base Management System (formerly known as Postgres, then
 as Postgres95).
@@ -31,7 +32,7 @@ PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
  *
  * Copyright (c) 1994, Regents of the University of California
  *
- * $Id: parsedt.h,v 1.1 1999-08-22 22:07:37 sandervl Exp $
+ * $Id: parsedt.h,v 1.2 1999-08-22 22:08:48 sandervl Exp $
  *
  *-------------------------------------------------------------------------
  */

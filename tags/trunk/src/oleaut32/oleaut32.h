@@ -1,3 +1,4 @@
+/* $Id: oleaut32.h,v 1.2 1999-08-22 22:08:48 sandervl Exp $ */
 /*
  * Win32 OLE stubs for OS/2
  *
