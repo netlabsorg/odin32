@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.2 1999-10-30 09:19:47 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.3 1999-10-30 13:21:56 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -964,8 +964,8 @@ LRESULT WIN32API CallWindowProcA(
         return 0;
     }
    
-    dprintf(("CallWindowProcA(wndproc=%p,hwnd=%08x,msg=%08x,wp=%08x,lp=%08lx)",
-                   func, hwnd, msg, wParam, lParam ));
+//    dprintf(("CallWindowProcA(wndproc=%p,hwnd=%08x,msg=%08x,wp=%08x,lp=%08lx)",
+  //                 func, hwnd, msg, wParam, lParam ));
 
 #if testing
     return func( hwnd, msg, wParam, lParam );
@@ -991,8 +991,8 @@ LRESULT WIN32API CallWindowProcW( WNDPROC func, HWND hwnd, UINT msg,
         return 0;
     }
    
-    dprintf(("CallWindowProcW(wndproc=%p,hwnd=%08x,msg=%08x,wp=%08x,lp=%08lx)",
-             func, hwnd, msg, wParam, lParam ));
+//    dprintf(("CallWindowProcW(wndproc=%p,hwnd=%08x,msg=%08x,wp=%08x,lp=%08lx)",
+//             func, hwnd, msg, wParam, lParam ));
 
 #if testing
     return func( hwnd, msg, wParam, lParam );
