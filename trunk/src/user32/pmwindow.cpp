@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.221 2003-10-20 17:18:14 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.222 2003-10-22 12:43:14 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -80,9 +80,8 @@ BOOL    fForceMonoCursor = FALSE;
 BOOL    fDragDropActive = FALSE;
 BOOL    fDragDropDisabled = FALSE;
 
-char WIN32_CDCLASS[255]       = "Win32CDWindowClass";
-char WIN32_STDCLASS[255]      = "Win32WindowClass";
-char WIN32_STDFRAMECLASS[255] = "Win32FrameClass";
+const char WIN32_CDCLASS[]       = "Win32CDWindowClass";
+      char WIN32_STDCLASS[255]   = "Win32WindowClass";
 
 #define PMMENU_MINBUTTON           0
 #define PMMENU_MAXBUTTON           1
@@ -105,7 +104,7 @@ HBITMAP hBmpMaxButtonDown     = 0;
 HBITMAP hBmpRestoreButtonDown = 0;
 HBITMAP hBmpCloseButtonDown   = 0;
 
-static PFNWP pfnFrameWndProc = NULL;
+       PFNWP pfnFrameWndProc = NULL;
 static HWND  hwndFocusChange = 0;
        HWND  hwndCD = 0;
 
@@ -214,6 +213,9 @@ BOOL InitPM()
             return(FALSE);
     }
 
+    //We no longer register our own frame window class as there is code in PM
+    //that makes assumptions about frame window class names.
+    //Instead we subclass the frame window right after creating it.
     CLASSINFO FrameClassInfo;
     if(!WinQueryClassInfo (hab, WC_FRAME, &FrameClassInfo)) {
         dprintf (("WinQueryClassInfo WC_FRAME failed"));
@@ -222,18 +224,6 @@ BOOL InitPM()
     pfnFrameWndProc = FrameClassInfo.pfnWindowProc;
 
     dprintf(("WC_FRAME style %x", FrameClassInfo.flClassStyle));
-
-    // this is our OS/2 window class for frame windows
-    if(!WinRegisterClass(                 /* Register window class        */
-        hab,                               /* Anchor block handle          */
-        (PSZ)WIN32_STDFRAMECLASS,          /* Window class name            */
-        (PFNWP)Win32FrameWindowProc,       /* Address of window procedure  */
-        CS_FRAME,
-        FrameClassInfo.cbWindowData))
-    {
-        dprintf(("WinRegisterClass Win32BaseWindow failed %x", WinGetLastError(hab)));
-        return(FALSE);
-    }
 
     // get the screen dimensions and store them
     WinQueryWindowRect(HWND_DESKTOP, &desktopRectl);
@@ -505,7 +495,9 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
  MRESULT          rc = 0;
  POSTMSG_PACKET  *postmsg;
  OSLIBPOINT       point, ClientPoint;
+ EXCEPTIONREGISTRATIONRECORD exceptRegRec = {0,0};
 
+    ODIN_SetExceptionHandler(&exceptRegRec);
     // restore our FS selector
     SetWin32TIB();
 
@@ -582,6 +574,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         }
         RELEASE_WNDOBJ(win32wnd);
         RestoreOS2TIB();
+        ODIN_UnsetExceptionHandler(&exceptRegRec);
 
 #ifdef DEBUG
         dbg_ThreadPopCall();
@@ -1154,6 +1147,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     }
     if(win32wnd) RELEASE_WNDOBJ(win32wnd);
     RestoreOS2TIB();
+    ODIN_UnsetExceptionHandler(&exceptRegRec);
 
 #ifdef DEBUG
     dbg_ThreadPopCall();
@@ -1165,6 +1159,7 @@ RunDefWndProc:
     if(win32wnd) RELEASE_WNDOBJ(win32wnd);
 
     RestoreOS2TIB();
+    ODIN_UnsetExceptionHandler(&exceptRegRec);
 
 #ifdef DEBUG
     dbg_ThreadPopCall();
@@ -1181,11 +1176,13 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
  TEB             *teb;
  MRESULT          rc = 0;
  MSG              winMsg, *pWinMsg;
+ EXCEPTIONREGISTRATIONRECORD exceptRegRec = {0,0};
 
 #ifdef DEBUG
     dbg_ThreadPushCall("Win32FrameWindowProc");
 #endif
 
+    ODIN_SetExceptionHandler(&exceptRegRec);
     //Restore our FS selector
     SetWin32TIB();
 
@@ -2171,6 +2168,7 @@ PosChangedEnd:
     }
     if(win32wnd) RELEASE_WNDOBJ(win32wnd);
     RestoreOS2TIB();
+    ODIN_UnsetExceptionHandler(&exceptRegRec);
 
 #ifdef DEBUG
     dbg_ThreadPopCall();
@@ -2181,6 +2179,7 @@ RunDefFrameWndProc:
     dprintf2(("RunDefFrameWndProc"));
     if(win32wnd) RELEASE_WNDOBJ(win32wnd);
     RestoreOS2TIB();
+    ODIN_UnsetExceptionHandler(&exceptRegRec);
 
 #ifdef DEBUG
     dbg_ThreadPopCall();
@@ -2191,6 +2190,7 @@ RunDefWndProc:
     dprintf2(("RunDefWndProc"));
     if(win32wnd) RELEASE_WNDOBJ(win32wnd);
     RestoreOS2TIB();
+    ODIN_UnsetExceptionHandler(&exceptRegRec);
 
     //calling WinDefWindowProc here breaks Opera hotlist window (WM_ADJUSTWINDOWPOS)
 //    return pfnFrameWndProc(hwnd, msg, mp1, mp2);
@@ -2228,6 +2228,7 @@ MRESULT EXPENTRY Win32FakeWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp
     RestoreOS2TIB();
     rc = pfnOldWindowProc(hwnd, msg, mp1, mp2);
 
+    ODIN_SetExceptionHandler(&exceptRegRec);
     SetWin32TIB();
     switch(msg) {
     case WM_WINDOWPOSCHANGED:
@@ -2249,6 +2250,7 @@ MRESULT EXPENTRY Win32FakeWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp
     }
     if(win32wnd) RELEASE_WNDOBJ(win32wnd);
     RestoreOS2TIB();
+    ODIN_UnsetExceptionHandler(&exceptRegRec);
     return rc;
 
 RunDefWndProc:
@@ -2463,24 +2465,12 @@ failure:
     return FALSE;
 }
 
-// @@PF Three funcs to override std class names we use in Odin
 //******************************************************************************
-//******************************************************************************
-void WIN32API SetCustomCDClassName(LPSTR pszCDClassName)
-{
-   strcpy(WIN32_CDCLASS, pszCDClassName);
-}
-//******************************************************************************
+// Override std class names we use in Odin (necessary for keyboard hook)
 //******************************************************************************
 void WIN32API SetCustomStdClassName(LPSTR pszStdClassName)
 {
    strcpy(WIN32_STDCLASS, pszStdClassName);
-}
-//******************************************************************************
-//******************************************************************************
-void WIN32API SetCustomStdFrameClassName(LPSTR pszStdFrameClassName)
-{
-   strcpy(WIN32_STDFRAMECLASS, pszStdFrameClassName);
 }
 //******************************************************************************
 //******************************************************************************
