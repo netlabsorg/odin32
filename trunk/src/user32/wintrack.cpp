@@ -21,6 +21,7 @@
 
 #include "win32wbase.h"
 #include "hook.h"
+#include "pmwindow.h"
 
 #define ON_LEFT_BORDER(hit) \
  (((hit) == HTLEFT) || ((hit) == HTTOPLEFT) || ((hit) == HTBOTTOMLEFT))
@@ -440,6 +441,7 @@ void Frame_SysCommandSizeMove(Win32BaseWindow *win32wnd, WPARAM wParam )
     BOOL    moved = FALSE;
     DWORD     dwPoint = GetMessagePos ();
     BOOL DragFullWindows = FALSE;
+    BOOL fControl = FALSE;
     BOOL grab;
     int iWndsLocks;
 
@@ -453,6 +455,14 @@ void Frame_SysCommandSizeMove(Win32BaseWindow *win32wnd, WPARAM wParam )
 
 //    if (IsZoomed(hwnd) || !IsWindowVisible(hwnd) || (exstyle & WS_EX_MANAGED)) return;
     if (IsZoomed(hwnd) || !IsWindowVisible(hwnd)) return;
+
+    if(fOS2Look) {
+        fControl = GetAsyncKeyState(VK_CONTROL);
+        if(DragFullWindows && !fControl) {
+            //Bring window to top and activate it
+            SetWindowPos(hwnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+        }
+    }
 
     if ((wParam & 0xfff0) == SC_MOVE)
     {
@@ -644,7 +654,8 @@ void Frame_SysCommandSizeMove(Win32BaseWindow *win32wnd, WPARAM wParam )
                         SetWindowPos( hwnd, 0, newRect.left, newRect.top,
                                       newRect.right - newRect.left,
                                       newRect.bottom - newRect.top,
-                                      ( hittest == HTCAPTION ) ? SWP_NOSIZE : 0 );
+                                      ((hittest == HTCAPTION ) ? SWP_NOSIZE : 0 ) | 
+                                      ((fControl) ? (SWP_NOACTIVATE|SWP_NOZORDER) : 0));
 //                        WIN_RestoreWndsLock(iWndsLocks);
                     }
                 }
@@ -704,10 +715,12 @@ void Frame_SysCommandSizeMove(Win32BaseWindow *win32wnd, WPARAM wParam )
                 SetWindowPos( hwnd, 0, lastsizingRect.left, lastsizingRect.top,
                               lastsizingRect.right - lastsizingRect.left,
                               lastsizingRect.bottom - lastsizingRect.top,
-                              ( hittest == HTCAPTION ) ? SWP_NOSIZE : 0 );
+                              ((hittest == HTCAPTION ) ? SWP_NOSIZE : 0 ) | 
+                              ((fControl) ? (SWP_NOACTIVATE|SWP_NOZORDER) : 0));
         }
         else
         { /* restore previous size/position */
+            //SvL: TODO: should really restore z-order & activation here
             if(DragFullWindows)
                 SetWindowPos( hwnd, 0, origRect.left, origRect.top,
                               origRect.right - origRect.left,
@@ -716,6 +729,16 @@ void Frame_SysCommandSizeMove(Win32BaseWindow *win32wnd, WPARAM wParam )
         }
 
 //        WIN_RestoreWndsLock(iWndsLocks);
+    }
+    else
+    if (!((msg.message == WM_KEYDOWN) && (msg.wParam == VK_ESCAPE)) ) {
+        //if action wasn't cancelled, ctrl wasn't pressed and we didn't
+        //activate the window before (!DragFullWindows), then activate
+        //and bring it to the top now
+        if(!fControl && !DragFullWindows) {
+            //Bring window to top and activate it
+            SetWindowPos(hwnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
+        }
     }
 
     if (IsIconic(hwnd))
