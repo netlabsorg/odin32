@@ -1,4 +1,4 @@
-/* $Id: Odin.ini.txt,v 1.4 2000-01-05 23:29:27 sandervl Exp $ */
+/* $Id: Odin_ini.txt,v 1.1 2000-01-05 23:29:27 sandervl Exp $ */
 
 Odin initialization file documentation
 
