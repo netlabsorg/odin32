@@ -1,4 +1,4 @@
-/* $Id: MPR.CPP,v 1.4 1999-08-19 16:52:23 phaller Exp $ */
+/* $Id: MPR.CPP,v 1.5 1999-11-04 10:32:35 phaller Exp $ */
 
 /*
  *
@@ -22,13 +22,11 @@
 #include <odinwrap.h>
 #include <heapstring.h>
 #include <misc.h>
-#include "mpr.h"
+#include <winnetwk.h>
 
 // Undocumented Stuff
 // MPR.DLL of Windows NT
 
-// MultinetGetConnectionPerformanceA
-// MultinetGetConnectionPerformanceW
 // MultinetGetErrorTextA
 // MultinetGetErrorTextW
 // RestoreConnectionA0
@@ -67,11 +65,7 @@
 // WNetRestoreConnectionW
 // WNetSetConnectionA
 // WNetSetConnectionW
-// WNetSetLastErrorA      PH: implemented
-// WNetSetLastErrorW      PH: implemented
 // WNetSupportGlobalEnum
-// WNetUseConnectionA
-// WNetUseConnectionW
 
 
 ODINDEBUGCHANNEL(MPR)
@@ -85,6 +79,51 @@ static struct _MPRGlobals
   DWORD dwLastError;   /* most recent extended error code set by a net func */
 } MPRGLOBALS;
 
+
+/*****************************************************************************
+ * Purpose:    The MultinetGetConnectionPerformance finctuion returns information
+ *             about the expected performance of a connection used to access a
+ *             network resource.
+ * Parameters: LPNETRESOURCEA            lpNetResource
+ *             LPNETCONNECTIONINFOSTRUCT lpNetConnectInfoStruct
+ * Variables :
+ * Result    : API-Returncode
+ * Remark    : not documented
+ * Status    : UNTESTED
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/04 19:55]
+ *****************************************************************************/
+
+ODINFUNCTION2(DWORD,                  MultinetGetConnectionPerformanceA,
+              LPNETRESOURCEA,         lpNetResource,
+              LPNETCONNECTINFOSTRUCT, lpNetConnectInfoStruct)
+{
+  dprintf(("MPR:MultinetGetConnectionPerformanceA not implemented.\n"));
+  return (ERROR_NO_NETWORK);
+}
+
+
+/*****************************************************************************
+ * Purpose:    The MultinetGetConnectionPerformance finctuion returns information
+ *             about the expected performance of a connection used to access a
+ *             network resource.
+ * Parameters: LPNETRESOURCEW            lpNetResource
+ *             LPNETCONNECTIONINFOSTRUCT lpNetConnectInfoStruct
+ * Variables :
+ * Result    : API-Returncode
+ * Remark    : not documented
+ * Status    : UNTESTED
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/04 19:55]
+ *****************************************************************************/
+
+ODINFUNCTION2(DWORD,                  MultinetGetConnectionPerformanceW,
+              LPNETRESOURCEW,         lpNetResource,
+              LPNETCONNECTINFOSTRUCT, lpNetConnectInfoStruct)
+{
+  dprintf(("MPR:MultinetGetConnectionPerformanceW not implemented.\n"));
+  return (ERROR_NO_NETWORK);
+}
 
 
 /*****************************************************************************
@@ -105,7 +144,7 @@ static struct _MPRGlobals
  * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
  *****************************************************************************/
 
-ODINFUNCTION4(DWORD, OS2WNetAddConnection2A,
+ODINFUNCTION4(DWORD, WNetAddConnection2A,
               LPNETRESOURCEA, lpNetResource,
               LPCSTR, lpPassword,
               LPCSTR, lpUsername,
@@ -134,7 +173,7 @@ ODINFUNCTION4(DWORD, OS2WNetAddConnection2A,
  * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
  *****************************************************************************/
 
-ODINFUNCTION4(DWORD, OS2WNetAddConnection2W,
+ODINFUNCTION4(DWORD, WNetAddConnection2W,
               LPNETRESOURCEW, lpNetResource,
               LPCWSTR, lpPassword,
               LPCWSTR, lpUsername,
@@ -165,7 +204,7 @@ ODINFUNCTION4(DWORD, OS2WNetAddConnection2W,
  * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
  *****************************************************************************/
 
-ODINFUNCTION5(DWORD, OS2WNetAddConnection3A,
+ODINFUNCTION5(DWORD, WNetAddConnection3A,
               HWND, hwndOwner,
               LPNETRESOURCEA, lpNetResource,
               LPCSTR, lpPassword,
@@ -196,7 +235,7 @@ ODINFUNCTION5(DWORD, OS2WNetAddConnection3A,
  * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
  *****************************************************************************/
 
-ODINFUNCTION5(DWORD, OS2WNetAddConnection3W,
+ODINFUNCTION5(DWORD, WNetAddConnection3W,
               HWND, hwndOwner,
               LPNETRESOURCEW, lpNetResource,
               LPCWSTR, lpPassword,
@@ -223,7 +262,7 @@ ODINFUNCTION5(DWORD, OS2WNetAddConnection3W,
  * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
  *****************************************************************************/
 
-ODINFUNCTION3(DWORD, OS2WNetAddConnectionA,
+ODINFUNCTION3(DWORD, WNetAddConnectionA,
               LPCSTR, lpRemoteName,
               LPCSTR, lpPassword,
               LPCSTR, lpUsername)
@@ -248,7 +287,7 @@ ODINFUNCTION3(DWORD, OS2WNetAddConnectionA,
  * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
  *****************************************************************************/
 
-ODINFUNCTION3(DWORD, OS2WNetAddConnectionW,
+ODINFUNCTION3(DWORD, WNetAddConnectionW,
               LPCWSTR, lpRemoteName,
               LPCWSTR, lpPassword,
               LPCWSTR, lpUsername)
@@ -274,7 +313,7 @@ ODINFUNCTION3(DWORD, OS2WNetAddConnectionW,
  * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
  *****************************************************************************/
 
-ODINFUNCTION3(DWORD, OS2WNetCancelConnection2A,
+ODINFUNCTION3(DWORD, WNetCancelConnection2A,
               LPTSTR, lpszName,
               DWORD, fdwConnection,
               BOOL, fForce)
@@ -300,7 +339,7 @@ ODINFUNCTION3(DWORD, OS2WNetCancelConnection2A,
  * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
  *****************************************************************************/
 
-ODINFUNCTION3(DWORD, OS2WNetCancelConnection2W,
+ODINFUNCTION3(DWORD, WNetCancelConnection2W,
               LPWSTR, lpszName,
               DWORD, fdwConnection,
               BOOL, fForce)
@@ -323,7 +362,7 @@ ODINFUNCTION3(DWORD, OS2WNetCancelConnection2W,
  * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
  *****************************************************************************/
 
-ODINFUNCTION2(DWORD, OS2WNetCancelConnectionA,
+ODINFUNCTION2(DWORD, WNetCancelConnectionA,
               LPTSTR, lpszName,
               BOOL, fForce)
 {
@@ -345,7 +384,7 @@ ODINFUNCTION2(DWORD, OS2WNetCancelConnectionA,
  * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
  *****************************************************************************/
 
-ODINFUNCTION2(DWORD, OS2WNetCancelConnectionW,
+ODINFUNCTION2(DWORD, WNetCancelConnectionW,
               LPWSTR, lpszName,
               BOOL, fForce)
 {
@@ -367,7 +406,7 @@ ODINFUNCTION2(DWORD, OS2WNetCancelConnectionW,
  * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
  *****************************************************************************/
 
-ODINFUNCTION1(DWORD, OS2WNetCloseEnum,
+ODINFUNCTION1(DWORD, WNetCloseEnum,
               HANDLE, hEnum)
 {
   dprintf(("MPR:WNetCloseEnum not implemented.\n"));
@@ -388,7 +427,7 @@ ODINFUNCTION1(DWORD, OS2WNetCloseEnum,
  * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
  *****************************************************************************/
 
-ODINFUNCTION2(DWORD, OS2WNetConnectionDialog,
+ODINFUNCTION2(DWORD, WNetConnectionDialog,
               HWND, hwnd,
               DWORD, fdwResourceType)
 {
@@ -410,7 +449,7 @@ ODINFUNCTION2(DWORD, OS2WNetConnectionDialog,
  * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
  *****************************************************************************/
 
-ODINFUNCTION2(DWORD, OS2WNetDisconnectDialog,
+ODINFUNCTION2(DWORD, WNetDisconnectDialog,
               HWND, hwnd,
               DWORD, fdwResourceType)
 {
@@ -434,7 +473,7 @@ ODINFUNCTION2(DWORD, OS2WNetDisconnectDialog,
  * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
  *****************************************************************************/
 
-ODINFUNCTION4(DWORD, OS2WNetEnumResourceA,
+ODINFUNCTION4(DWORD, WNetEnumResourceA,
               HANDLE, hEnum,
               LPDWORD, lpcEntries,
               LPVOID, lpvBuffer,
@@ -460,7 +499,7 @@ ODINFUNCTION4(DWORD, OS2WNetEnumResourceA,
  * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
  *****************************************************************************/
 
-ODINFUNCTION4(DWORD, OS2WNetEnumResourceW,
+ODINFUNCTION4(DWORD, WNetEnumResourceW,
               HANDLE, hEnum,
               LPDWORD, lpcEntries,
               LPVOID, lpvBuffer,
@@ -485,7 +524,7 @@ ODINFUNCTION4(DWORD, OS2WNetEnumResourceW,
  * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
  *****************************************************************************/
 
-ODINFUNCTION3(DWORD, OS2WNetGetConnectionA,
+ODINFUNCTION3(DWORD, WNetGetConnectionA,
               LPTSTR, lpszLocalName,
               LPTSTR, lpszRemoteName,
               LPDWORD, lpcchBuffer)
@@ -509,7 +548,7 @@ ODINFUNCTION3(DWORD, OS2WNetGetConnectionA,
  * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
  *****************************************************************************/
 
-ODINFUNCTION3(DWORD, OS2WNetGetConnectionW,
+ODINFUNCTION3(DWORD, WNetGetConnectionW,
               LPWSTR, lpszLocalName,
               LPWSTR, lpszRemoteName,
               LPDWORD, lpcchBuffer)
@@ -535,7 +574,7 @@ ODINFUNCTION3(DWORD, OS2WNetGetConnectionW,
  * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
  *****************************************************************************/
 
-ODINFUNCTION5(DWORD, OS2WNetGetLastErrorA,
+ODINFUNCTION5(DWORD, WNetGetLastErrorA,
               LPDWORD, lpdwErrorCode,
               LPTSTR, lpszDescription,
               DWORD, cchDescription,
@@ -579,7 +618,7 @@ ODINFUNCTION5(DWORD, OS2WNetGetLastErrorA,
  * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
  *****************************************************************************/
 
-ODINFUNCTION5(DWORD, OS2WNetGetLastErrorW,
+ODINFUNCTION5(DWORD, WNetGetLastErrorW,
               LPDWORD, lpdwErrorCode,
               LPWSTR, lpszDescription,
               DWORD, cchDescription,
@@ -629,7 +668,7 @@ ODINFUNCTION5(DWORD, OS2WNetGetLastErrorW,
  * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
  *****************************************************************************/
 
-ODINFUNCTION4(DWORD, OS2WNetGetResourceInformationA,
+ODINFUNCTION4(DWORD, WNetGetResourceInformationA,
               LPNETRESOURCEA, lpNetResource,
               LPVOID, lpBuffer,
               LPDWORD, cbBuffer,
@@ -663,7 +702,7 @@ ODINFUNCTION4(DWORD, OS2WNetGetResourceInformationA,
  * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
  *****************************************************************************/
 
-ODINFUNCTION4(DWORD, OS2WNetGetResourceInformationW,
+ODINFUNCTION4(DWORD, WNetGetResourceInformationW,
               LPNETRESOURCEW, lpNetResource,
               LPVOID, lpBuffer,
               LPDWORD, cbBuffer,
@@ -695,7 +734,7 @@ ODINFUNCTION4(DWORD, OS2WNetGetResourceInformationW,
  * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
  *****************************************************************************/
 
-ODINFUNCTION3(DWORD, OS2WNetGetResourceParentA,
+ODINFUNCTION3(DWORD, WNetGetResourceParentA,
               LPNETRESOURCEA, lpNetResource,
               LPVOID, lpBuffer,
               LPDWORD, lpBufferSize)
@@ -721,7 +760,7 @@ ODINFUNCTION3(DWORD, OS2WNetGetResourceParentA,
  * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
  *****************************************************************************/
 
-ODINFUNCTION3(DWORD, OS2WNetGetResourceParentW,
+ODINFUNCTION3(DWORD, WNetGetResourceParentW,
               LPNETRESOURCEW, lpNetResource,
               LPVOID, lpBuffer,
               LPDWORD, lpBufferSize)
@@ -747,7 +786,7 @@ ODINFUNCTION3(DWORD, OS2WNetGetResourceParentW,
  * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
  *****************************************************************************/
 
-ODINFUNCTION4(DWORD, OS2WNetGetUniversalNameA,
+ODINFUNCTION4(DWORD, WNetGetUniversalNameA,
               LPCSTR, lpLocalPath,
               DWORD, dwInfoLevel,
               LPVOID, lpBuffer,
@@ -774,7 +813,7 @@ ODINFUNCTION4(DWORD, OS2WNetGetUniversalNameA,
  * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
  *****************************************************************************/
 
-ODINFUNCTION4(DWORD, OS2WNetGetUniversalNameW,
+ODINFUNCTION4(DWORD, WNetGetUniversalNameW,
               LPCWSTR, lpLocalPath,
               DWORD, dwInfoLevel,
               LPVOID, lpBuffer,
@@ -799,7 +838,7 @@ ODINFUNCTION4(DWORD, OS2WNetGetUniversalNameW,
  * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
  *****************************************************************************/
 
-ODINFUNCTION3(DWORD, OS2WNetGetUserA,
+ODINFUNCTION3(DWORD, WNetGetUserA,
               LPTSTR, lpszLocalName,
               LPTSTR, lpszUserName,
               LPDWORD, lpcchBuffer)
@@ -823,7 +862,7 @@ ODINFUNCTION3(DWORD, OS2WNetGetUserA,
  * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
  *****************************************************************************/
 
-ODINFUNCTION3(DWORD, OS2WNetGetUserW,
+ODINFUNCTION3(DWORD, WNetGetUserW,
               LPWSTR, lpszLocalName,
               LPWSTR, lpszUserName,
               LPDWORD, lpcchBuffer)
@@ -849,7 +888,7 @@ ODINFUNCTION3(DWORD, OS2WNetGetUserW,
  * Author    : Patrick Haller [Fri, 1998/02/27 14:41]
  *****************************************************************************/
 
-ODINFUNCTION5(DWORD, OS2WNetOpenEnumA,
+ODINFUNCTION5(DWORD, WNetOpenEnumA,
               DWORD, fdwScope,
               DWORD, fdwType,
               DWORD, fdwUsage,
@@ -877,7 +916,7 @@ ODINFUNCTION5(DWORD, OS2WNetOpenEnumA,
  * Author    : Patrick Haller [Fri, 1998/02/27 14:41]
  *****************************************************************************/
 
-ODINFUNCTION5(DWORD, OS2WNetOpenEnumW,
+ODINFUNCTION5(DWORD, WNetOpenEnumW,
               DWORD, fdwScope,
               DWORD, fdwType,
               DWORD, fdwUsage,
@@ -903,7 +942,7 @@ ODINFUNCTION5(DWORD, OS2WNetOpenEnumW,
  * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
  *****************************************************************************/
 
-ODINFUNCTION3(DWORD, OS2WNetSetLastErrorA,
+ODINFUNCTION3(DWORD, WNetSetLastErrorA,
               DWORD, dwErrorCode,
               LPTSTR, lpszDescription,
               LPTSTR, lpszName)
@@ -929,7 +968,7 @@ ODINFUNCTION3(DWORD, OS2WNetSetLastErrorA,
  * Author    : Patrick Haller [Fri, 1998/02/27 11:55]
  *****************************************************************************/
 
-ODINFUNCTION3(DWORD, OS2WNetSetLastErrorW,
+ODINFUNCTION3(DWORD, WNetSetLastErrorW,
               DWORD, dwErrorCode,
               LPWSTR, lpszDescription,
               LPWSTR, lpszName)
@@ -939,4 +978,73 @@ ODINFUNCTION3(DWORD, OS2WNetSetLastErrorW,
   return (NO_ERROR);
 }
 
+
+/*****************************************************************************
+ * Purpose:    The WNetUSeConnectionA function is used to establish a connection
+ *             to a network object, especially for browsing. The function may
+ *             optionally prompt the user for login or authentification.
+ * Parameters: HWND           hwndOwner
+ *             LPNETRESOURCEA lpNetResource
+ *             LPSTR          lpPassword
+ *             LPSTR          lpUserID
+ *             DWORD          dwFlags
+ *             LPSTR          lpAccessName
+ *             LPDWORD        lpBufferSize
+ *             LPDWORD        lpResult
+ * Variables :
+ * Result    : API-Returncode
+ * Remark    : not documented
+ * Status    : UNTESTED
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/04 19:55]
+ *****************************************************************************/
+
+ODINFUNCTION8(DWORD,         WNetUseConnectionA,
+              HWND,          hwndOwner,
+              LPNETRESOURCEA,lpNetResource,
+              LPSTR,         lpPassword,
+              LPSTR,         lpUserID,
+              DWORD,         dwFlags,
+              LPSTR,         lpAccessName,
+              LPDWORD,       lpBufferSize,
+              LPDWORD,       lpResult)
+{
+  dprintf(("MPR:WNetUseConnectionA not implemented.\n"));
+  return (ERROR_NO_NETWORK);
+}
+
+
+/*****************************************************************************
+ * Purpose:    The WNetUSeConnectionW function is used to establish a connection
+ *             to a network object, especially for browsing. The function may
+ *             optionally prompt the user for login or authentification.
+ * Parameters: HWND           hwndOwner
+ *             LPNETRESOURCEW lpNetResource
+ *             LPWSTR         lpPassword
+ *             LPWSTR         lpUserID
+ *             DWORD          dwFlags
+ *             LPWSTR         lpAccessName
+ *             LPDWORD        lpBufferSize
+ *             LPDWORD        lpResult
+ * Variables :
+ * Result    : API-Returncode
+ * Remark    : not documented
+ * Status    : UNTESTED
+ *
+ * Author    : Patrick Haller [Thu, 1999/11/04 19:55]
+ *****************************************************************************/
+
+ODINFUNCTION8(DWORD,         WNetUseConnectionW,
+              HWND,          hwndOwner,
+              LPNETRESOURCEW,lpNetResource,
+              LPWSTR,        lpPassword,
+              LPWSTR,        lpUserID,
+              DWORD,         dwFlags  ,
+              LPWSTR,        lpAccessName,
+              LPDWORD,       lpBufferSize,
+              LPDWORD,       lpResult)
+{
+  dprintf(("MPR:WNetUseConnectionW not implemented.\n"));
+  return (ERROR_NO_NETWORK);
+}
 
