@@ -1,4 +1,4 @@
-/* $Id: ole2nls.cpp,v 1.8 2001-02-17 19:44:59 sandervl Exp $ */
+/* $Id: ole2nls.cpp,v 1.9 2001-04-03 14:10:48 sandervl Exp $ */
 
 /*
  *	National Language Support library
@@ -1344,72 +1344,6 @@ BOOL WINAPI GetStringTypeExA(LCID locale,DWORD dwInfoType,LPCSTR src,
 	  return FALSE;
 	}
 }
-
-
-ODINFUNCTION5(BOOL,    GetStringTypeExW,
-              LCID,    locale,
-              DWORD,   dwInfoType,
-              LPCWSTR, lpSrcStr,
-              int,     cchSrc,
-              LPWORD,  lpCharType)
-{
-  int i;
-
-  dprintf(("KERNEL32:  GetStringTypeW, not properly implemented\n"));
-  if((DWORD)lpSrcStr == (DWORD)lpCharType ||
-     !lpSrcStr ||
-     !lpCharType)
-  {
-    SetLastError(ERROR_INVALID_PARAMETER);
-    return(FALSE);
-  }
-
-  if(cchSrc == -1)
-    cchSrc = lstrlenW(lpSrcStr);
-
-  switch(dwInfoType)
-  {
-    case CT_CTYPE1:
-      for(i=0;i<cchSrc;i++)
-      {
-        lpCharType[i] = 0;
-        if (isdigit(lpSrcStr[i])) lpCharType[i]|=C1_DIGIT;
-        if (isalpha(lpSrcStr[i])) lpCharType[i]|=C1_ALPHA;
-        if (islower(lpSrcStr[i])) lpCharType[i]|=C1_LOWER;
-        if (isupper(lpSrcStr[i])) lpCharType[i]|=C1_UPPER;
-        if (isspace(lpSrcStr[i])) lpCharType[i]|=C1_SPACE;
-        if (ispunct(lpSrcStr[i])) lpCharType[i]|=C1_PUNCT;
-        if (iscntrl(lpSrcStr[i])) lpCharType[i]|=C1_CNTRL;
-        if ( (lpSrcStr[i] == ' ') ||
-             (lpSrcStr[i] == '\t') )
-           lpCharType[i]|=C1_BLANK;
-      }
-      return TRUE;
-      break;
-
-    case CT_CTYPE2:
-    case CT_CTYPE3: //not supported right now
-      return FALSE;
-      break;
-  }
-
-  return FALSE;
-}
-
-ODINFUNCTION4(BOOL,    GetStringTypeW,
-              DWORD,   dwInfoType,
-              LPCWSTR, lpSrcStr,
-              int,     cchSrc,
-              LPWORD,  lpCharType)
-{
-  return CALL_ODINFUNC(GetStringTypeExW)(0,
-                          dwInfoType,
-                          lpSrcStr,
-                          cchSrc,
-                          lpCharType);
-}
-
-
 
 /***********************************************************************
  *           VerLanguageNameA              [KERNEL32.709][VERSION.9]
