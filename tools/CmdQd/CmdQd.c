@@ -1,4 +1,4 @@
-/* $Id: CmdQd.c,v 1.1 2001-08-16 04:06:01 bird Exp $
+/* $Id: CmdQd.c,v 1.2 2001-08-16 04:27:44 bird Exp $
  *
  * Command Queue Daemon / Client.
  *
@@ -99,7 +99,7 @@
 *******************************************************************************/
 #define SHARED_MEM_NAME     "\\SHAREMEM\\CmdQd"
 #define SHARED_MEM_SIZE     65536
-#define IDLE_TIMEOUT_MS     (60*1000*3)
+#define IDLE_TIMEOUT_MS     -1 //(60*1000*3)
 #define OUTPUT_CHUNK        (8192-8)
 
 #define HF_STDIN    0
