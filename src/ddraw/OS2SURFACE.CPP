@@ -1,3 +1,14 @@
+/* $Id: OS2SURFACE.CPP,v 1.21 1999-12-21 01:28:16 hugh Exp $ */
+
+/*
+ * Direct/X Surface class implementaion
+ *
+ * Copyright 1999 Markus Montkowski
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
+ */
+
 #include <stdlib.h>
 #include <string.h>
 #include <memory.h>
@@ -16,6 +27,8 @@
 #include <misc.h>
 #include "asmutil.h"
 #include "bltFunc.h"
+#include "colorconv.h"
+#include "fillfunc.h"
 #include <winerror.h>
 #include <os2win.h>
 #ifndef __WATCOMC__
@@ -283,6 +296,7 @@ BYTE DefaultPalette[] = { 0x00,0x00,0x00,   // 0
                           0xFF,0xFF,0xFF};
 
 WORD wDefaultPalete16[256];
+DWORD dwDefaultPalete24[256];
 BOOL fPalInit=FALSE;
 
 #define CBM_CREATEDIB   0x02L   /* create DIB bitmap */
@@ -729,89 +743,131 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
       switch(lpDraw->dCaps.ulDepth)
       {
         case 8:
-          BltSolid = &BltSolid8to8;
+          BltSolid  = &BltSolid8to8;
+          ColorConv = NULL;
+          ColorFill = &Fill8on8;
           break;
         case 16:
-          BltSolid = &BltSolid8to16;
+          BltSolid  = &BltSolid8to16;
+          ColorConv = &Conv8to16;
+          ColorFill = &Fill8on16;
           break;
         case 24:
-          BltSolid = &BltSolid8to24;
+          BltSolid  = &BltSolid8to24;
+          ColorConv = &Conv8to24;
+          ColorFill = &Fill8on24;
           break;
         case 32:
-          BltSolid = &BltSolid8to32;
+          BltSolid  = &BltSolid8to32;
+          ColorConv = &Conv8to32;
+          ColorFill = &Fill8on32;
           break;
         default:
           dprintf(("DDRAW: Unsupported System ColorDeapth %d",lpDraw->dCaps.ulDepth));
-          BltSolid = NULL;
+          BltSolid  = NULL;
+          ColorConv = NULL;
+          ColorFill = NULL;
           break;
       }
       break;
-    case16:
+    case 16:
       switch(lpDraw->dCaps.ulDepth)
       {
         case 8:
           BltSolid = &BltSolid16to8;
+          ColorConv = &Conv16to8;
+          ColorFill = &Fill16on8;
           break;
         case 16:
-          BltSolid = &BltSolid16to16;
+          BltSolid  = &BltSolid16to16;
+          ColorConv = NULL;
+          ColorFill = &Fill16on16;
           break;
         case 24:
-          BltSolid = &BltSolid16to24;
+          BltSolid  = &BltSolid16to24;
+          ColorConv = &Conv16to24;
+          ColorFill = &Fill16on24;
           break;
         case 32:
-          BltSolid = &BltSolid16to32;
+          BltSolid  = &BltSolid16to32;
+          ColorConv = &Conv16to32;
+          ColorFill = &Fill16on32;
           break;
         default:
           dprintf(("DDRAW: Unsupported System ColorDeapth %d",lpDraw->dCaps.ulDepth));
-          BltSolid = NULL;
+          BltSolid  = NULL;
+          ColorConv = NULL;
+          ColorFill = NULL;
           break;
       }
       break;
-    case24:
+    case 24:
       switch(lpDraw->dCaps.ulDepth)
       {
         case 8:
-          BltSolid = &BltSolid24to8;
+          BltSolid  = &BltSolid24to8;
+          ColorConv = &Conv24to8;
+          ColorFill = &Fill24on8;
           break;
         case 16:
-          BltSolid = &BltSolid24to16;
+          BltSolid  = &BltSolid24to16;
+          ColorConv = &Conv24to16;
+          ColorFill = &Fill24on16;
           break;
         case 24:
-          BltSolid = &BltSolid24to24;
+          BltSolid  = &BltSolid24to24;
+          ColorConv = NULL;
+          ColorFill = &Fill24on24;
           break;
         case 32:
-          BltSolid = &BltSolid24to32;
+          BltSolid  = &BltSolid24to32;
+          ColorConv = &Conv24to32;
+          ColorFill = &Fill24on32;
           break;
         default:
           dprintf(("DDRAW: Unsupported System ColorDeapth %d",lpDraw->dCaps.ulDepth));
-          BltSolid = NULL;
+          BltSolid  = NULL;
+          ColorConv = NULL;
+          ColorFill = NULL;
           break;
       }
       break;
-    case32:
+    case 32:
       switch(lpDraw->dCaps.ulDepth)
       {
         case 8:
-          BltSolid = &BltSolid32to8;
+          BltSolid  = &BltSolid32to8;
+          ColorConv = &Conv32to8;
+          ColorFill = &Fill32on8;
           break;
         case 16:
-          BltSolid = &BltSolid32to16;
+          BltSolid  = &BltSolid32to16;
+          ColorConv = &Conv32to16;
+          ColorFill = &Fill32on16;
           break;
         case 24:
-          BltSolid = &BltSolid32to24;
+          BltSolid  = &BltSolid32to24;
+          ColorConv = &Conv32to24;
+          ColorFill = &Fill32on24;
           break;
         case 32:
-          BltSolid = &BltSolid32to32;
+          BltSolid  = &BltSolid32to32;
+          ColorConv = NULL;
+          ColorFill = &Fill32on32;
           break;
         default:
           dprintf(("DDRAW: Unsupported System ColorDeapth %d",lpDraw->dCaps.ulDepth));
-          BltSolid = NULL;
+          BltSolid  = NULL;
+          ColorConv = NULL;
+          ColorFill = NULL;
           break;
       }
       break;
     default:
       dprintf(("DDRAW: Unsupported DX ColorDeapth %d",lpDraw->GetScreenBpp()));
-      BltSolid = NULL;
+      BltSolid  = NULL;
+      ColorConv = NULL;
+      ColorFill = NULL;
       break;
   }
   if( lpDDSurfaceDesc->dwFlags & DDSD_CAPS )
@@ -1401,13 +1457,13 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT OS2IDirectDrawSurface::ColorFill(LPRECT lpDestRect,DWORD dwFillColor)
+HRESULT OS2IDirectDrawSurface::DoColorFill(LPRECT lpDestRect,DWORD dwFillColor)
 {
 
-  int i,j, FillWidth, FillHeight;
-  char *pLine, *pFillPos;
+  int i, FillWidth, FillHeight, Top, Left;
+  //char *pLine, *pFillPos;
 
-  DWORD *pColor, dwColor,y;
+  //DWORD *pColor, dwColor,y;
   DWORD *pPal24;
   WORD  *pPal16;
   #ifdef DEBUG
@@ -1420,18 +1476,19 @@ HRESULT OS2IDirectDrawSurface::ColorFill(LPRECT lpDestRect,DWORD dwFillColor)
              lpDestRect->right, lpDestRect->bottom));
     FillWidth  = lpDestRect->right - lpDestRect->left;
     FillHeight = lpDestRect->bottom - lpDestRect->top -1;
-    pLine = pDiveBuffer +
-            (lpDestRect->top*dwPitchDB) +
-            (lpDestRect->left*dwBytesPPDive);
+    Top = lpDestRect->top;
+    Left = lpDestRect->left;
   }
   else
   {
     dprintf(("DDRAW: Fill all at addr "));
+    Top = 0;
+    Left = 0;
     FillWidth  = width;
     FillHeight = height -1;
-    pLine = pDiveBuffer;
+    //pLine = pDiveBuffer;
   }
-  dprintf(("DDRAW: 0x%08X (%d/%d) at\n", pLine,FillWidth,FillHeight));
+  //dprintf(("DDRAW: 0x%08X (%d/%d) at\n", pLine,FillWidth,FillHeight));
 
   // Better safe then sorry
   if(FillHeight<=0)
@@ -1449,6 +1506,9 @@ HRESULT OS2IDirectDrawSurface::ColorFill(LPRECT lpDestRect,DWORD dwFillColor)
           wDefaultPalete16[i] = (DefaultPalette[i*3+2]>>3) +
                                 ((DefaultPalette[i*3+1]>>2) <<5) +
                                 ((DefaultPalette[i*3]>>3) << 11);
+          dwDefaultPalete24[i]= ((DefaultPalette[i*3+2]>>3) <<8)+
+                                ((DefaultPalette[i*3+1]>>2) <<16) +
+                                ((DefaultPalette[i*3]>>3) << 24);
           dprintf(( " # %d : RGB=%02X/%02X/%02X => %04X\n",
                     i,
                     DefaultPalette[i*3],
@@ -1462,6 +1522,7 @@ HRESULT OS2IDirectDrawSurface::ColorFill(LPRECT lpDestRect,DWORD dwFillColor)
         fPalInit = TRUE;
       }
       pPal16 = &wDefaultPalete16[0];
+      pPal24 = &dwDefaultPalete24[0];
     }
     else
     {
@@ -1470,6 +1531,15 @@ HRESULT OS2IDirectDrawSurface::ColorFill(LPRECT lpDestRect,DWORD dwFillColor)
     }
   }
 
+  if(NULL!=ColorFill)
+    ColorFill( pDiveBuffer, pFrameBuffer, Top, Left,
+              FillWidth, FillHeight, dwPitchDB,dwPitchFB,
+              dwFillColor,(16==lpDraw->dCaps.ulDepth)?(VOID*)pPal16:(VOID*)pPal24);
+  else
+  {
+    dprintf(("DDRAW: ColorFill function is NULL!!"));
+  }
+/*
   switch(dwBytesPPDive)
   {
     case 1:
@@ -1633,14 +1703,14 @@ HRESULT OS2IDirectDrawSurface::ColorFill(LPRECT lpDestRect,DWORD dwFillColor)
       #endif
     }
   }
-
+*/
   return(DD_OK);
 }
 //******************************************************************************
 //******************************************************************************
 void OS2IDirectDrawSurface::ColorConversion(LPRECT lpRect)
 {
-  char *pSrc,*pDst,*pSLine,*pDLine;
+  //char *pSrc,*pDst,*pSLine,*pDLine;
   DWORD CCwidth,CCheight,x,y;
   DWORD *pPal24;
   WORD  *pPal16;
@@ -1655,6 +1725,9 @@ void OS2IDirectDrawSurface::ColorConversion(LPRECT lpRect)
           wDefaultPalete16[i] = (DefaultPalette[i*3+2]>>3) +
                                 ((DefaultPalette[i*3+1]>>2) <<5) +
                                 ((DefaultPalette[i*3]>>3) << 11);
+          dwDefaultPalete24[i]= ((DefaultPalette[i*3+2]>>3) <<8)+
+                                ((DefaultPalette[i*3+1]>>2) <<16) +
+                                ((DefaultPalette[i*3]>>3) << 24);
         dprintf(( " # %d : RGB=%02X/%02X/%02X => %04X\n",
                   i,
                   DefaultPalette[i*3],
@@ -1668,6 +1741,7 @@ void OS2IDirectDrawSurface::ColorConversion(LPRECT lpRect)
       fPalInit = TRUE;
     }
     pPal16 = &wDefaultPalete16[0];
+    pPal24 = &dwDefaultPalete24[0];
   }
   else
   {
@@ -1677,10 +1751,12 @@ void OS2IDirectDrawSurface::ColorConversion(LPRECT lpRect)
 
   if(NULL==lpRect)
   {
-    pSrc = pFrameBuffer;
-    pDst = pDiveBuffer;
+    //pSrc = pFrameBuffer;
+    //pDst = pDiveBuffer;
     CCwidth  = width;
     CCheight = height;
+    x = 0;
+    y = 0;
   }
   else
   {
@@ -1690,20 +1766,33 @@ void OS2IDirectDrawSurface::ColorConversion(LPRECT lpRect)
     lpRect->top = lpRect->bottom;
     lpRect->bottom = y;
     // end of hack
+  #if 0
     pSrc = pFrameBuffer +
            (lpRect->top * dwPitchFB) +
            (lpRect->left* (lpDraw->dCaps.ulDepth/8));
     pDst = pDiveBuffer +
            (lpRect->top * dwPitchDB) +
            (lpRect->left* dwBytesPPDive);
+  #endif
+    y = lpRect->top;
+    x = lpRect->left;
     CCwidth  = lpRect->right - lpRect->left;
     CCheight = lpRect->bottom - lpRect->top;
 
   }
 
-  dprintf( ("H: %d W: %d\n SRC @ %08X\n DST @ %08X\n",
-            CCheight, CCwidth, pSrc,pDst));
+//  dprintf( ("H: %d W: %d\n SRC @ %08X\n DST @ %08X\n",
+//            CCheight, CCwidth, pSrc,pDst));
+  if(NULL!=ColorConv)
+    ColorConv( pDiveBuffer, pFrameBuffer, y, x,
+               CCwidth, CCheight, dwPitchDB,dwPitchFB,
+               16==lpDraw->dCaps.ulDepth?(VOID*)pPal16:(VOID*)pPal24);
+  else
+  {
+    dprintf(("DDRAW: ColorConv function is NULL!!"));
+  }
 
+/*
   pSLine = pSrc;
   pDLine = pDst;
 
@@ -1738,6 +1827,17 @@ void OS2IDirectDrawSurface::ColorConversion(LPRECT lpRect)
       if(8==lpDraw->GetScreenBpp())
       {
         dprintf(("DDRAW: 8->24Bit CC"));
+        for(y=0;CCheight;CCheight--,y++)
+        {
+          char *pIter;
+          for(x=0,pIter=pDLine;x<width;x++,pIter=pDLine)
+          {
+            *((DWORD*)pIter) = pPal24[pSLine[x]];
+            pIter+=3;
+          }
+          pSLine += dwPitchFB;
+          pDLine += dwPitchDB;
+        }
       }
       else
       {
@@ -1748,6 +1848,16 @@ void OS2IDirectDrawSurface::ColorConversion(LPRECT lpRect)
       if(8==lpDraw->GetScreenBpp())
       {
         dprintf(("DDRAW: 8->32Bit CC"));
+        for(y=0;CCheight;CCheight--,y++)
+        {
+          for(x=0;x<width;x++)
+          {
+            *(((DWORD*)pDLine)+x) = pPal24[pSLine[x]];
+
+          }
+          pSLine += dwPitchFB;
+          pDLine += dwPitchDB;
+        }
       }
       else
       {
@@ -1761,77 +1871,6 @@ void OS2IDirectDrawSurface::ColorConversion(LPRECT lpRect)
       #endif
       break;
   }
-
-/*
-  SETUP_BLITTER sBlt;
-  ULONG ulDN1, ulDN2;
-  ULONG rc;
-  ulDN1 = ulDN2 = 0;
-
-  memset(&sBlt,0,sizeof(sBlt));
-  sBlt.ulStructLen = sizeof(sBlt);
-  sBlt.fccSrcColorFormat = (FOURCC) DDSurfaceDesc.ddpfPixelFormat.dwFourCC;
-  if (NULL!=lpRect)
-  {
-    sBlt.ulSrcWidth        = lpRect->right - lpRect->left;
-    sBlt.ulSrcHeight       = lpRect->top   - lpRect->bottom;
-    sBlt.ulSrcPosX         = lpRect->left;
-    sBlt.ulSrcPosY         = height - lpRect->top;
-  }
-  else
-  {
-    sBlt.ulSrcWidth        = width;
-    sBlt.ulSrcHeight       = height;
-    sBlt.ulSrcPosX         = 0;
-    sBlt.ulSrcPosY         = 0;
-  }
-  sBlt.fccDstColorFormat = FOURCC_SCRN;
-  sBlt.ulDstWidth        = sBlt.ulSrcWidth;
-  sBlt.ulDstHeight       = sBlt.ulSrcHeight;
-  sBlt.lDstPosX          = sBlt.ulSrcPosX;
-  sBlt.lDstPosY          = sBlt.ulSrcPosY;
-  sBlt.ulNumDstRects     = DIVE_FULLY_VISIBLE;
-
-  dprintf( ("Colorconversion:\n FCC SRC %08X\n FCC DST %08X\n",
-            sBlt.fccSrcColorFormat,
-            sBlt.fccDstColorFormat ));
-
-  rc = DiveAllocImageBuffer( hDiveCC,
-                             &ulDN1,
-                             sBlt.fccSrcColorFormat,
-                             width,
-                             height,
-                             dwPitchFB,
-                             (PBYTE)pFrameBuffer);
-  dprintf("AllocDiveSrc Buffer rc= 0x%08X\n",rc);
-
-  rc = DiveAllocImageBuffer( hDiveCC,
-                             &ulDN2,
-                             sBlt.fccDstColorFormat,
-                             width,
-                             height,
-                             dwPitchDB,
-                             (PBYTE)pDiveBuffer);
-  dprintf(("DDRAW: AllocDiveDst Buffer rc= 0x%08X\n",rc));
-
-  rc = DiveSetupBlitter( hDiveCC,
-                         &sBlt);
-  dprintf(("DDRAW: SetupBlitter rc= %X\n",rc));
-
-  rc = DiveBlitImage( hDiveCC,
-                      ulDN1,
-                      ulDN2);
-
-  dprintf(("DDRAW: Blit rc= %X\n",rc));
-
-  rc = DiveFreeImageBuffer( hDiveCC,
-                            ulDN1);
-  dprintf(("DDRAW: Free Src rc= %X\n",rc));
-
-  rc = DiveFreeImageBuffer( hDiveCC,
-                            ulDN2);
-
-  dprintf(("DDRAW: Free dst rc= %X\n",rc));
 */
 }
 //******************************************************************************
@@ -2487,10 +2526,7 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
     if((NULL==lpDDBltFx)||(lpDDBltFx->dwSize!=sizeof(DDBLTFX)) )
       return DDERR_INVALIDPARAMS;
 
-    // ToDo : as we fill the DiveBuffer check if we need to convert the
-    // specified color
-
-    dest->ColorFill(lpDestRect,lpDDBltFx->dwFillColor);
+    dest->DoColorFill(lpDestRect,lpDDBltFx->dwFillColor);
 
     return(DD_OK); // according to the M$ DDK only one flag shall/can be set.
   } // end of colorfill
@@ -2529,10 +2565,10 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
         if(1==dest->dwBytesPPDive)
         {
           // ToDo: Realy implement code to get the correct index for black in 8 Bitmode
-          dest->ColorFill(lpDestRect, 0 );
+          dest->DoColorFill(lpDestRect, 0 );
         }
         else
-          dest->ColorFill(lpDestRect, 0);
+          dest->DoColorFill(lpDestRect, 0);
         return DD_OK;
       }
 
@@ -2540,12 +2576,12 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
       {
         if(1==dest->dwBytesPPDive)
         {
-          // ToDo: Realy implement code to get the correct index for black in 8 Bitmode
-          dest->ColorFill(lpDestRect, 0xFFFFFFFF );
+          // ToDo: Realy implement code to get the correct index for white in 8 Bitmode
+          dest->DoColorFill(lpDestRect, 0xFFFFFFFF );
         }
         else
-          dest->ColorFill(lpDestRect, 0xFFFFFFFF);
-        return DD_OK;
+          dest->DoColorFill(lpDestRect, 0xFFFFFFFF);
+        return (DD_OK);
       }
 
       return DDERR_NORASTEROPHW;

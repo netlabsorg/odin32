@@ -1,3 +1,13 @@
+/* $Id: OS2PALSET.CPP,v 1.7 1999-12-21 01:28:16 hugh Exp $ */
+
+/*
+ * Functions used to Set the Physical Palette in OS/2 when in 8 Bit mode
+ *
+ * Copyright 1998 Sander va Leeuwen
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
+ */
 #define INCL_GREALL
 #define INCL_GPI
 #include <os2wrap.h>
@@ -17,7 +27,7 @@ void OS2SetPhysPalette(void *pal)
  RGB2 os2rgb[256];
  int  i;
 
-  
+
 
   hps = WinGetPS(HWND_DESKTOP);
   hdc = GpiQueryDevice(hps);
@@ -44,7 +54,7 @@ void OS2SetPhysPalette(void *pal)
                      TRUE);
   WinReleasePS(hps);
 
-  
+
 
 }
 //******************************************************************************
@@ -54,7 +64,7 @@ void OS2ResetPhysPalette()
  HPS hps;
  HDC hdc;
 
-  
+
 
   hps = WinGetPS( HWND_DESKTOP);
 
@@ -70,7 +80,7 @@ void OS2ResetPhysPalette()
 
   WinReleasePS(hps);
 
-  
+
 
 }
 //******************************************************************************

@@ -1,3 +1,15 @@
+/* $Id: OS2PALETTE.CPP,v 1.12 1999-12-21 01:28:16 hugh Exp $ */
+
+/*
+ * DX palette class implementation
+ *
+ * Copyright 1998 Sander va Leeuwen
+ * Copyright 1999 Markus Montkowski
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

@@ -1,3 +1,15 @@
+/* $Id: os2DDWindow.cpp,v 1.4 1999-12-21 01:28:16 hugh Exp $ */
+
+/*
+ * Functions to subclass the games windowproc to be used for
+ * fullscreen switching
+ *
+ * Copyright 1999 Markus Montkowski
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
+ */
+
 #define INCL_WIN
 #include <os2wrap.h>
 #include <odinwrap.h>
@@ -8,7 +20,7 @@ PFNWP pfnOrgClientProc = NULL;
 MRESULT EXPENTRY DDOS2WindowProc(HWND hwnd, ULONG ulMsg, MPARAM mp1, MPARAM mp2);
 extern VOID SwitchDisplay(HWND hwnd);
 
-ODINFUNCTION1(BOOL , OS2DdSubClassWindow ,HWND, hwndClient)
+ODINFUNCTION1(BOOL , OS2DDSubClassWindow ,HWND, hwndClient)
 {
   HWND hwndParent;
 

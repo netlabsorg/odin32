@@ -1,3 +1,14 @@
+/* $Id: bltFunc.cpp,v 1.2 1999-12-21 01:28:15 hugh Exp $ */
+
+/*
+ * Blitting functions
+ *
+ * Copyright 1999 Markus Montkowski
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
+ */
+
 #include <memory.h>
 #include <misc.h>
 #include "bltFunc.h"
