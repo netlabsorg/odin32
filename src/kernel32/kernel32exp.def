@@ -651,3 +651,5 @@ EXPORTS
     _PROFILE_GetOdinIniBool@12                @1268
     _PROFILE_SetOdinIniBool@12                @1269
     _PROFILE_SaveOdinIni@0                    @1270
+    _smalloc__FUi                             @1271
+    _wsnprintfA                               @2000
