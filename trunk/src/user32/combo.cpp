@@ -1,4 +1,4 @@
-/* $Id: combo.cpp,v 1.7 1999-10-20 22:35:52 sandervl Exp $ */
+/* $Id: combo.cpp,v 1.8 1999-10-21 12:19:26 sandervl Exp $ */
 /*
  * Combo controls
  *
@@ -165,6 +165,9 @@ static void CBForceDummyResize(
 {
   RECT windowRect;
 
+  //SvL: Doesn't work for us
+  return;
+
   GetWindowRect(CB_HWND(lphc), &windowRect);
 
   /*
@@ -180,7 +183,7 @@ static void CBForceDummyResize(
                 0, 0,
                 windowRect.right  - windowRect.left,
                 windowRect.bottom - windowRect.top +
-                  lphc->droppedRect.bottom - lphc->droppedRect.top,
+                lphc->droppedRect.bottom - lphc->droppedRect.top,
                 SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE );
 }
 
@@ -430,6 +433,8 @@ static LRESULT COMBO_WindowPosChanging(
   LPHEADCOMBO lphc,
   WINDOWPOS*  posChanging)
 {
+  dprintf(("COMBO_WindowPosChanging"));
+
   /*
    * We need to override the WM_WINDOWPOSCHANGING method to handle all
    * the non-simple comboboxes. The problem is that those controls are
@@ -473,13 +478,8 @@ static LRESULT COMBO_Create( LPHEADCOMBO lphc, HWND hwnd, LPARAM lParam)
 
   LPCREATESTRUCTA  lpcs = (CREATESTRUCTA*)lParam;
 
-//testestest
-#if 1
-  lphc->dwStyle |= CBS_SIMPLE;
-#else
   if( !CB_GETTYPE(lphc) ) lphc->dwStyle |= CBS_SIMPLE;
   else if( CB_GETTYPE(lphc) != CBS_DROPDOWNLIST ) lphc->wState |= CBF_EDIT;
-#endif
 
   lphc->hwndself  = hwnd;
   lphc->owner = lpcs->hwndParent;
