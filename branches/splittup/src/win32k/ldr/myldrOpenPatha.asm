@@ -1,8 +1,8 @@
-; $Id: myldrOpenPatha.asm,v 1.5 2001-02-23 02:57:54 bird Exp $
+; $Id: myldrOpenPatha.asm,v 1.5.2.1 2001-09-27 03:08:27 bird Exp $
 ;
 ; myldrOpenPatha - assembly helpers for myldrOpenPath.
 ;
-; Copyright (c) 2000 knut st. osmundsen
+; Copyright (c) 2000-2001 knut st. osmundsen (kosmunds@csc.com)
 ;
 ; Project Odin Software License can be found in LICENSE.TXT
 ;
@@ -12,7 +12,6 @@
 ; Include files
 ;
     include devsegdf.inc
-    include options.inc
 
 ;
 ; Exported symbols
@@ -23,7 +22,7 @@
 ; Externs
 ;
     extrn _ldrOpenPath_wrapped:PROC            ; calltab entry
-    extrn _options:options
+    extrn ulKernelBuild:ABS
 
 
 CODE32 segment
@@ -36,8 +35,9 @@ CODE32START label byte
 ; @author    knut st. osmundsen
 _ldrOpenPath@20 PROC NEAR
     ASSUME ds:FLAT
-    cmp     FLAT:DATA16:_options.ulBuild, 14053
-    jge      new
+    mov     eax, ulKernelBuild
+    cmp     eax, 14053
+    jge     new
 
 if 0
     ;
@@ -72,15 +72,14 @@ endif
     ; debug - clear the stack.
     ;
 if 0
-    extrn   pulTKSSBase32:DWORD
+    extrn   _TKSSBase:DWORD
     push    ecx
     push    edi
     push    es
     push    ds
     pop     es
 
-    mov     edi, pulTKSSBase32
-    mov     edi, [edi]
+    mov     edi, _TKSSBase
     add     edi, esp
     mov     ecx, esp
     and     ecx, 0fffh

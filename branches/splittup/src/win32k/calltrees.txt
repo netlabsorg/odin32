@@ -1,3 +1,5 @@
+OBSOLETE! (Sep 27 2001 2:01am)
+
 A overview of the win32k device driver.
 ----------------------------------------
 

@@ -1,4 +1,4 @@
-/* $Id: fake.c,v 1.9 2001-07-10 05:26:51 bird Exp $
+/* $Id: fake.c,v 1.9.4.1 2001-09-27 03:08:35 bird Exp $
  *
  * Fake stubs for the ldr and kernel functions we imports or overloads.
  *
@@ -2096,6 +2096,20 @@ ULONG KRNLCALL  fakeTKPidToPTDA(PID pid, PPPTDA ppPTDA)
 {
     DUMMY();
     printf("fakeTKPidToPTDA:                       - not implemented - pid = 0x%04x, ppPTDA=%p\n", pid, ppPTDA);
+    return ERROR_NOT_SUPPORTED;
+}
+
+/**
+ *
+ * @returns     OS/2 return code.
+ * @param       pid     Process Identifier.
+ * @param       ppPTDA  Pointer to the PTDA-pointer variabel which is to receive
+ *                      the PTDA pointer on successful return.
+ */
+ULONG KRNLCALL   fakeTKScanTasks(ULONG flFlags, ULONG id, PTKSCANTASKWORKER pfnWorker, ULONG ulArg);
+{
+    DUMMY();
+    printf("fakeTKScanTasks:                       - not implemented\n");
     return ERROR_NOT_SUPPORTED;
 }
 

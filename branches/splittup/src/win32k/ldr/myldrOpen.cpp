@@ -1,4 +1,4 @@
-/* $Id: myldrOpen.cpp,v 1.16 2001-06-14 12:19:41 bird Exp $
+/* $Id: myldrOpen.cpp,v 1.16.2.1 2001-09-27 03:08:27 bird Exp $
  *
  * myldrOpen - ldrOpen.
  *
@@ -20,25 +20,26 @@
 #define INCL_OS2KRNL_SEM
 #define INCL_OS2KRNL_SEC
 #define INCL_OS2KRNL_LDR
+#define INCL_KKL_LOG
+#define INCL_KKL_AVL
+#define INCL_KKL_HEAP
 
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>
+#include <peexe.h>
+#include <exe386.h>
+#include <OS2Krnl.h>
+#include <kKrnlLib.h>
 
 #include "devSegDf.h"                   /* Win32k segment definitions. */
-#include "rmalloc.h"
-#include "malloc.h"
 #include <memory.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
 
-#include "log.h"
-#include "avl.h"
 #include "options.h"
-#include <peexe.h>
-#include <exe386.h>
 #include "elf.h"
 #include "OS2Krnl.h"
 #include "dev32.h"
@@ -46,8 +47,7 @@
 #include "ModuleBase.h"
 #include "pe2lx.h"
 #include "myExecPgm.h"
-#include "env.h"
-#include "vprintf.h"                    /* Make 100% sure we have va_start.  */
+#include "env.h"                        /* TODO */
 
 
 

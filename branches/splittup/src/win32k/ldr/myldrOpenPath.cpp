@@ -1,9 +1,9 @@
-/* $Id: myldrOpenPath.cpp,v 1.5 2001-02-10 11:11:46 bird Exp $
+/* $Id: myldrOpenPath.cpp,v 1.5.2.1 2001-09-27 03:08:27 bird Exp $
  *
  * myldrOpenPath - ldrOpenPath used to open executables we'll override
  * this to altern the search path for DLLs.
  *
- * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 2000-2001 knut st. osmundsen (kosmunds@csc.com)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -17,23 +17,24 @@
 #define INCL_OS2KRNL_TCB
 #define INCL_OS2KRNL_PTDA
 #define INCL_OS2KRNL_LDR
+#define INCL_KKL_LOG
+#define INCL_KKL_AVL
 
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>
+#include <peexe.h>
+#include <exe386.h>
+#include <OS2Krnl.h>
+#include <kKrnlLib.h>
 
 #include <memory.h>
 #include <stdlib.h>
 
 #include "devSegDf.h"                   /* Win32k segment definitions. */
-#include "log.h"
 #include "dev32.h"
 #include "dev32hlp.h"
-#include <peexe.h>
-#include <exe386.h>
-#include "OS2Krnl.h"
-#include "avl.h"
 #include "ldr.h"
 #include "ModuleBase.h"
 #include "options.h"

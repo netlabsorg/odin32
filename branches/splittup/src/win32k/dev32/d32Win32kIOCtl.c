@@ -1,4 +1,4 @@
-/* $Id: d32Win32kIOCtl.c,v 1.7 2001-02-21 07:44:57 bird Exp $
+/* $Id: d32Win32kIOCtl.c,v 1.7.2.1 2001-09-27 03:08:13 bird Exp $
  *
  * Win32k driver IOCtl handler function.
  *
@@ -23,15 +23,14 @@
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>
+#include <OS2Krnl.h>
+#include <kKrnlLib.h>
 
 #include "devSegDf.h"
 #include "dev1632.h"
 #include "dev32.h"
-#include "OS2Krnl.h"
 #include "Win32k.h"
 #include "k32.h"
-#include "log.h"
-#include "asmutils.h"
 
 
 /*******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: k32SetOptions.cpp,v 1.7 2001-02-11 23:43:00 bird Exp $
+/* $Id: k32SetOptions.cpp,v 1.7.2.1 2001-09-27 03:08:23 bird Exp $
  *
  * k32SetOptions - Sets the changable options of win32k.sys the options.
  *
@@ -19,8 +19,9 @@
 #define INCL_OS2KRNL_TK
 #define INCL_OS2KRNL_SEM
 #define INCL_OS2KRNL_LDR
-
 #define NO_WIN32K_LIB_FUNCTIONS
+#define INCL_KKL_LOG
+#define INCL_KKL_AVL
 
 /*******************************************************************************
 *   Header Files                                                               *
@@ -30,32 +31,25 @@
 #include <neexe.h>                      /* Wine NE structs and definitions. */
 #include <newexe.h>                     /* OS/2 NE structs and definitions. */
 #include <exe386.h>                     /* OS/2 LX structs and definitions. */
+#include <OS2Krnl.h>
+#include <kKrnlLib.h>
 
 #include "devSegDf.h"                   /* Win32k segment definitions. */
-
-#include "malloc.h"                     /* win32k malloc (resident). Not C library! */
-#include "smalloc.h"                    /* win32k swappable heap. */
-#include "rmalloc.h"                    /* win32k resident heap. */
 
 #include <string.h>                     /* C library string.h. */
 #include <stdlib.h>                     /* C library stdlib.h. */
 #include <stddef.h>                     /* C library stddef.h. */
 #include <stdarg.h>                     /* C library stdarg.h. */
 
-#include "vprintf.h"                    /* win32k printf and vprintf. Not C library! */
 #include "dev1632.h"                    /* Common 16- and 32-bit parts */
 #include "dev32.h"                      /* 32-Bit part of the device driver. (SSToDS) */
-#include "OS2Krnl.h"                    /* kernel structs.  (SFN) */
-#include "log.h"                        /* Logging. */
-#include "avl.h"                        /* AVL tree. (ldr.h need it) */
 #include "ldr.h"                        /* ldr helpers. (ldrGetExePath) */
-#include "env.h"                        /* Environment helpers. */
+#include "env.h" //todo                       /* Environment helpers. */
 #include "modulebase.h"                 /* ModuleBase class definitions, ++. */
 #include "pe2lx.h"                      /* Pe2Lx class definitions, ++. */
 #include <versionos2.h>                 /* Pe2Lx version. */
 #include "options.h"                    /* Win32k options. */
 
-#include "ProbKrnl.h"                   /* ProbKrnl variables and definitions. */
 #include "win32k.h"                     /* Win32k API structures.  */
 #include "k32.h"                        /* Internal Win32k API structures.  */
 
@@ -102,11 +96,13 @@ APIRET k32SetOptions(PK32OPTIONS pOptions)
         /*
          * Validate contents.
          */
+        #if 0
         if (    TmpOptions.usCom != OUTPUT_COM1
             &&  TmpOptions.usCom != OUTPUT_COM2
             &&  TmpOptions.usCom != OUTPUT_COM3
             &&  TmpOptions.usCom != OUTPUT_COM4)
             return ERROR_INVALID_PARAMETER;
+        #endif
         if (TmpOptions.fLogging > 1)
             return ERROR_INVALID_PARAMETER;
         if (TmpOptions.fPE > 4)
@@ -135,10 +131,12 @@ APIRET k32SetOptions(PK32OPTIONS pOptions)
             return ERROR_INVALID_PARAMETER;
         if (TmpOptions.fApiEnh > 1)
             return ERROR_INVALID_PARAMETER;
+        #if 0
         if (TmpOptions.cbSwpHeapMax > (32768*1024) || TmpOptions.cbSwpHeapMax < options.cbSwpHeapInit)
             return ERROR_INVALID_PARAMETER;
         if (TmpOptions.cbResHeapMax > (32768*1024) || TmpOptions.cbResHeapMax < options.cbResHeapInit)
             return ERROR_INVALID_PARAMETER;
+        #endif
 
         /*
          * Take loader semaphore. (We might accessing LDR structures.)
@@ -154,7 +152,9 @@ APIRET k32SetOptions(PK32OPTIONS pOptions)
         /*
          * Apply changes
          */
+        #if 0
         options.usCom       = TmpOptions.usCom;         /* Output port no. */
+        #endif
         options.fLogging    = (USHORT)TmpOptions.fLogging;/* Logging. */
         options.fPE         = TmpOptions.fPE;           /* Flags set the type of conversion. */
         options.fPEOneObject= TmpOptions.fPEOneObject;  /* All in One Object Forces fix. */
@@ -169,10 +169,12 @@ APIRET k32SetOptions(PK32OPTIONS pOptions)
         options.fForcePreload=TmpOptions.fForcePreload; /* Forces the loader to preload executable images. Handy for ICAT Ring-3 debugging. */
         options.fApiEnh     = TmpOptions.fApiEnh;       /* Enables the API enhancements */
 
+        #if 0
         options.cbSwpHeapMax = TmpOptions.cbSwpHeapMax; /* Maximum heapsize. */
         cbSwpHeapMax = (unsigned)options.cbSwpHeapMax;
         options.cbResHeapMax = TmpOptions.cbResHeapMax; /* Maxiumem residentheapsize. */
         cbResHeapMax = (unsigned)options.cbResHeapMax;
+        #endif
 
         /*
          * Release loader semaphore and return

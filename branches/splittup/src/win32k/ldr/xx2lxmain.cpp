@@ -1,4 +1,4 @@
-/* $Id: xx2lxmain.cpp,v 1.1 2001-03-11 16:37:17 bird Exp $
+/* $Id: xx2lxmain.cpp,v 1.1.2.1 2001-09-27 03:08:29 bird Exp $
  *
  * Xx2Lx main program. (Ring 3 only!)
  *
@@ -45,7 +45,7 @@
 *   Global Variables                                                           *
 *******************************************************************************/
 char            szBackupXxFilename[CCHMAXPATH];        /* too save stack/heap */
-struct options  options = DEFAULT_OPTION_ASSIGMENTS;
+struct Win32kOptions  options = DEFAULT_OPTION_ASSIGMENTS;
 
 /*******************************************************************************
 *   Internal Functions                                                         *

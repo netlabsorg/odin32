@@ -1,8 +1,8 @@
-/* $Id: myldrClose.cpp,v 1.7 2001-02-10 11:11:46 bird Exp $
+/* $Id: myldrClose.cpp,v 1.7.2.1 2001-09-27 03:08:26 bird Exp $
  *
  * myldrClose - ldrClose
  *
- * Copyright (c) 1998-1999 knut st. osmundsen
+ * Copyright (c) 1998-2001 knut st. osmundsen (kosmunds@csc.com)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -14,21 +14,22 @@
 #define INCL_DOSERRORS
 #define INCL_NOPMAPI
 #define INCL_OS2KRNL_LDR
+#define INCL_KKL_LOG
+#define INCL_KKL_AVL
 
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>
+#include <peexe.h>
+#include <exe386.h>
+#include <OS2Krnl.h>
+#include <kKrnlLib.h>
 
 #include <memory.h>
 #include <stdlib.h>
 
 #include "devSegDf.h"                   /* Win32k segment definitions. */
-#include "log.h"
-#include "avl.h"
-#include <peexe.h>
-#include <exe386.h>
-#include "OS2Krnl.h"
 #include "ldr.h"
 #include "ModuleBase.h"
 #include "Pe2Lx.h"

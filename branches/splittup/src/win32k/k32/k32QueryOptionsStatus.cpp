@@ -1,4 +1,4 @@
-/* $Id: k32QueryOptionsStatus.cpp,v 1.7 2001-02-11 23:43:00 bird Exp $
+/* $Id: k32QueryOptionsStatus.cpp,v 1.7.2.1 2001-09-27 03:08:23 bird Exp $
  *
  * k32QueryOptionsStatus  - Queries the options and/or the status of
  *                          Win32k.sys driver.
@@ -20,8 +20,10 @@
 #define INCL_OS2KRNL_TK
 #define INCL_OS2KRNL_SEM
 #define INCL_OS2KRNL_LDR
-
 #define NO_WIN32K_LIB_FUNCTIONS
+#define INCL_KKL_LOG
+#define INCL_KKL_HEAP
+#define INCL_KKL_AVL
 
 /*******************************************************************************
 *   Header Files                                                               *
@@ -31,32 +33,25 @@
 #include <neexe.h>                      /* Wine NE structs and definitions. */
 #include <newexe.h>                     /* OS/2 NE structs and definitions. */
 #include <exe386.h>                     /* OS/2 LX structs and definitions. */
+#include <OS2Krnl.h>
+#include <kKrnlLib.h>
 
 #include "devSegDf.h"                   /* Win32k segment definitions. */
-
-#include "malloc.h"                     /* win32k malloc (resident). Not C library! */
-#include "smalloc.h"                    /* win32k swappable heap. */
-#include "rmalloc.h"                    /* win32k resident heap. */
 
 #include <string.h>                     /* C library string.h. */
 #include <stdlib.h>                     /* C library stdlib.h. */
 #include <stddef.h>                     /* C library stddef.h. */
 #include <stdarg.h>                     /* C library stdarg.h. */
 
-#include "vprintf.h"                    /* win32k printf and vprintf. Not C library! */
 #include "dev1632.h"                    /* Common 16- and 32-bit parts */
 #include "dev32.h"                      /* 32-Bit part of the device driver. (SSToDS) */
-#include "OS2Krnl.h"                    /* kernel structs.  (SFN) */
-#include "log.h"                        /* Logging. */
-#include "avl.h"                        /* AVL tree. (ldr.h need it) */
 #include "ldr.h"                        /* ldr helpers. (ldrGetExePath) */
-#include "env.h"                        /* Environment helpers. */
+#include "env.h" //todo                       /* Environment helpers. */
 #include "modulebase.h"                 /* ModuleBase class definitions, ++. */
 #include "pe2lx.h"                      /* Pe2Lx class definitions, ++. */
 #include <versionos2.h>                 /* Pe2Lx version. */
 #include "options.h"                    /* Win32k options. */
 
-#include "ProbKrnl.h"                   /* ProbKrnl variables and definitions. */
 #include "win32k.h"                     /* Win32k API structures.  */
 #include "k32.h"                        /* Internal Win32k API structures.  */
 
@@ -125,7 +120,9 @@ APIRET k32QueryOptionsStatus(PK32OPTIONS pOptions, PK32STATUS pStatus)
         K32OPTIONS  TmpOptions;
 
         TmpOptions.cb           = sizeof(K32OPTIONS);
+        #if 0
         TmpOptions.usCom        = options.usCom;
+        #endif
         TmpOptions.fLogging     = options.fLogging;
         TmpOptions.fPE          = options.fPE;
         TmpOptions.fPEOneObject = options.fPEOneObject;
@@ -139,8 +136,10 @@ APIRET k32QueryOptionsStatus(PK32OPTIONS pOptions, PK32STATUS pStatus)
         TmpOptions.fExeFixes    = options.fExeFixes;
         TmpOptions.fForcePreload= options.fForcePreload;
         TmpOptions.fApiEnh      = options.fApiEnh;
+        #if 0
         TmpOptions.cbSwpHeapMax = options.cbSwpHeapMax;
         TmpOptions.cbResHeapMax = options.cbResHeapMax;
+        #endif
 
         rc = TKSuBuff(pOptions, SSToDS(&TmpOptions), sizeof(K32OPTIONS), TK_FUSU_NONFATAL);
         if (rc != NO_ERROR) /* retry once if we fail. (For some reason it seems to work.) */
@@ -161,15 +160,19 @@ APIRET k32QueryOptionsStatus(PK32OPTIONS pOptions, PK32STATUS pStatus)
 
         /* options */
         TmpStatus.fQuiet            = options.fQuiet;
+        #if 0 //todo
         TmpStatus.fKernel           = options.fKernel;              /* Smp or uni kernel. */
         TmpStatus.ulBuild           = options.ulBuild;              /* Kernel build. */
         TmpStatus.usVerMajor        = options.usVerMajor;           /* OS/2 major ver - 20 */
         TmpStatus.usVerMinor        = options.usVerMinor;           /* OS/2 minor ver - 30,40 */
+        #endif
 
         /* swappable heap */
         if (_swp_state((PHEAPSTATE)SSToDS(&HeapState)) == 0)
         {
+            #if 0
             TmpStatus.cbSwpHeapInit  = options.cbSwpHeapInit;       /* Initial heapsize. */
+            #endif
             TmpStatus.cbSwpHeapFree  = HeapState.cbHeapFree;        /* Amount of used space. */
             TmpStatus.cbSwpHeapUsed  = HeapState.cbHeapUsed;        /* Amount of free space reserved. */
             TmpStatus.cbSwpHeapSize  = HeapState.cbHeapSize;        /* Amount of memory used by the heap free and used++. */
@@ -180,7 +183,9 @@ APIRET k32QueryOptionsStatus(PK32OPTIONS pOptions, PK32STATUS pStatus)
         /* resident heap */
         if (_res_state((PHEAPSTATE)SSToDS(&HeapState)) == 0)
         {
+            #if 0
             TmpStatus.cbResHeapInit  = options.cbResHeapInit;       /* Initial heapsize. */
+            #endif
             TmpStatus.cbResHeapFree  = HeapState.cbHeapFree;        /* Amount of used space. */
             TmpStatus.cbResHeapUsed  = HeapState.cbHeapUsed;        /* Amount of free space reserved. */
             TmpStatus.cbResHeapSize  = HeapState.cbHeapSize;        /* Amount of memory used by the heap free and used++. */
@@ -192,7 +197,9 @@ APIRET k32QueryOptionsStatus(PK32OPTIONS pOptions, PK32STATUS pStatus)
         strcpy((char*)SSToDS(TmpStatus.szBuildDate), szBuildDate);  /* Date of the win32k build. */
         strcpy((char*)SSToDS(TmpStatus.szBuildTime), szBuildTime);  /* Time of the win32k build. */
         TmpStatus.ulVersion         = PE2LX_VERSION;                /* Win32k version */
+        #if 0
         strcpy((char*)SSToDS(TmpStatus.szSymFile), szSymbolFile);   /* The name of the symbol file or sym database. */
+        #endif
 
         /* Module counts */
         TmpStatus.cPe2LxModules     = Pe2Lx::getLoadedModuleCount();/* Number of Pe2Lx modules currently loaded. */

@@ -1,4 +1,4 @@
-/* $Id: k32QuerySystemMemInfo.cpp,v 1.2 2001-03-07 21:55:30 bird Exp $
+/* $Id: k32QuerySystemMemInfo.cpp,v 1.2.2.1 2001-09-27 03:08:23 bird Exp $
  *
  * k32QuerySystemMemInfo - Collects more or less useful information on the
  *                         memory state of the system.
@@ -23,8 +23,8 @@
 #define INCL_OS2KRNL_TK
 #define INCL_OS2KRNL_SEM
 #define INCL_OS2KRNL_LDR
-
 #define NO_WIN32K_LIB_FUNCTIONS
+#define INCL_KKL_LOG
 
 /*******************************************************************************
 *   Header Files                                                               *
@@ -34,26 +34,19 @@
 #include <neexe.h>                      /* Wine NE structs and definitions. */
 #include <newexe.h>                     /* OS/2 NE structs and definitions. */
 #include <exe386.h>                     /* OS/2 LX structs and definitions. */
+#include <OS2Krnl.h>
+#include <kKrnlLib.h>
 
 #include "devSegDf.h"                   /* Win32k segment definitions. */
-
-#include "malloc.h"                     /* win32k malloc (resident). Not C library! */
-#include "smalloc.h"                    /* win32k swappable heap. */
-#include "rmalloc.h"                    /* win32k resident heap. */
 
 #include <string.h>                     /* C library string.h. */
 #include <stdlib.h>                     /* C library stdlib.h. */
 #include <stddef.h>                     /* C library stddef.h. */
-#include <stdarg.h>                     /* C library stdarg.h. */
 
-#include "vprintf.h"                    /* win32k printf and vprintf. Not C library! */
 #include "dev1632.h"                    /* Common 16- and 32-bit parts */
 #include "dev32.h"                      /* 32-Bit part of the device driver. (SSToDS) */
-#include "OS2Krnl.h"                    /* kernel structs.  (SFN) */
-#include "log.h"                        /* Logging. */
 #include "options.h"                    /* Win32k options. */
 
-#include "ProbKrnl.h"                   /* ProbKrnl variables and definitions. */
 #include "win32k.h"                     /* Win32k API structures.  */
 #include "k32.h"                        /* Internal Win32k API structures.  */
 
@@ -146,14 +139,14 @@ APIRET k32QuerySystemMemInfo(PK32SYSTEMMEMINFO pMemInfo)
     {
         MemInfo.ulAddressLimit          = VirtualAddressLimit;
         vmRecalcShrBound(VMRSBF_ARENASHR, (PULONG)SSToDS(&MemInfo.ulVMArenaPrivMax));
-        MemInfo.ulVMArenaSharedMin      = pahvmShr->ah_laddrMin;
-        MemInfo.ulVMArenaSharedMax      = pahvmShr->ah_laddrMax;
-        MemInfo.ulVMArenaSystemMin      = pahvmSys->ah_laddrMin;
-        MemInfo.ulVMArenaSystemMax      = pahvmSys->ah_laddrMax;
-        if (pahvmhShr && VirtualAddressLimit > 0x20000000) /* Not valid if less or equal to 512MB user memory */
+        MemInfo.ulVMArenaSharedMin      = ahvmShr.ah_laddrMin;
+        MemInfo.ulVMArenaSharedMax      = ahvmShr.ah_laddrMax;
+        MemInfo.ulVMArenaSystemMin      = ahvmSys.ah_laddrMin;
+        MemInfo.ulVMArenaSystemMax      = ahvmSys.ah_laddrMax;
+        if (&ahvmhShr && VirtualAddressLimit > 0x20000000) /* Not valid if less or equal to 512MB user memory */
         {
-            MemInfo.ulVMArenaHighSharedMin  = pahvmhShr->ah_laddrMin;
-            MemInfo.ulVMArenaHighSharedMax  = pahvmhShr->ah_laddrMax;
+            MemInfo.ulVMArenaHighSharedMin  = ahvmhShr.ah_laddrMin;
+            MemInfo.ulVMArenaHighSharedMax  = ahvmhShr.ah_laddrMax;
             vmRecalcShrBound(VMRSBF_ARENAHIGH, (PULONG)SSToDS(&MemInfo.ulVMArenaHighPrivMax));
         }
         else

@@ -1,4 +1,4 @@
-/* $Id: test.h,v 1.10 2001-07-10 05:24:18 bird Exp $
+/* $Id: test.h,v 1.10.2.1 2001-09-27 03:08:20 bird Exp $
  *
  * Definitions and declarations for test moduls.
  *
@@ -157,6 +157,7 @@ ULONG KRNLCALL  fakeTKSuBuff(PVOID pvUsr, PVOID pv, ULONG cb, ULONG fl);
 ULONG KRNLCALL  fakeTKFuBufLen(PLONG pcch, PVOID pvUsr, ULONG cchMax, ULONG fl, BOOL fDblNULL);
 ULONG KRNLCALL  fakeTKSuFuBuff(PVOID pvUsr, PVOID pv, ULONG cb, ULONG fl);
 ULONG KRNLCALL  fakeTKPidToPTDA(PID pid, PPPTDA ppPTDA);
+ULONG KRNLCALL  fakeTKScanTasks(ULONG flFlags, ULONG id, PTKSCANTASKWORKER pfnWorker, ULONG ulArg);
 void KRNLCALL   fakeTKForceThread(ULONG flFlag, PTCB pTCB);
 void KRNLCALL   fakeTKForceTask(ULONG flFlag, PPTDA pPTDA, BOOL fForce);
 ULONG KRNLCALL  fakeTKGetPriority(PTCB pTCB);

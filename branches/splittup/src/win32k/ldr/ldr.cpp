@@ -1,4 +1,4 @@
-/* $Id: ldr.cpp,v 1.10 2001-02-10 11:11:45 bird Exp $
+/* $Id: ldr.cpp,v 1.10.2.1 2001-09-27 03:08:24 bird Exp $
  *
  * ldr.cpp - Loader helpers.
  *
@@ -16,25 +16,25 @@
 #define INCL_OS2KRNL_SEM
 #define INCL_OS2KRNL_PTDA
 #define INCL_OS2KRNL_LDR
+#define INCL_KKL_LOG
+#define INCL_KKL_AVL
+#define INCL_KKL_HEAP
 
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>
+#include <peexe.h>
+#include <exe386.h>
+#include <OS2Krnl.h>
+#include <kKrnlLib.h>
 
 #include "devSegDf.h"
-#include "malloc.h"
-#include "new.h"
 #include <memory.h>
 #include <stdlib.h>
 #include <stddef.h>
 #include <string.h>
 
-#include "log.h"
-#include "avl.h"
-#include <peexe.h>
-#include <exe386.h>
-#include "OS2Krnl.h"
 #include "ldr.h"
 #include "ModuleBase.h"
 #include "pe2lx.h"
@@ -44,8 +44,8 @@
 /*******************************************************************************
 *   Global Variables                                                           *
 *******************************************************************************/
-static PAVLNODECORE    pSFNRoot = NULL;
-static PAVLNODECORE    pMTERoot = NULL;
+static PAVLULNODECORE   pSFNRoot = NULL;
+static PAVLULNODECORE   pMTERoot = NULL;
 
 
 /*
@@ -80,13 +80,13 @@ unsigned char   achHandleStates[MAX_FILE_HANDLES/8];
  * Gets a module by the give hFile.
  * @returns   Pointer to module node. If not found NULL.
  * @param     hFile  File handle of the module to be found.
- * @sketch    return a AVLGet on the pSFNRoot-tree.
+ * @sketch    return a AVLULGet on the pSFNRoot-tree.
  * @status    completely implemented.
  * @author    knut st. osmundsen
  */
 PMODULE     getModuleBySFN(SFN hFile)
 {
-    return (PMODULE)AVLGet(&pSFNRoot, (AVLKEY)hFile);
+    return (PMODULE)AVLULGet(&pSFNRoot, (AVLULKEY)hFile);
 }
 
 
@@ -114,7 +114,7 @@ PMODULE     getModuleByMTE(PMTE pMTE)
 {
     #if 0
         /* Not 100% sure that this will work correctly! */
-        PMODULE pMod = (PMODULE)AVLGet(&pMTERoot, (AVLKEY)pMTE);
+        PMODULE pMod = (PMODULE)AVLULGet(&pMTERoot, (AVLULKEY)pMTE);
         if (pMod == NULL)
         {
             #ifdef DEBUG
@@ -124,12 +124,12 @@ PMODULE     getModuleByMTE(PMTE pMTE)
                     return NULL;
                 }
             #endif
-            pMod = (PMODULE)AVLGet(&pSFNRoot, (AVLKEY)pMTE->mte_sfn);
+            pMod = (PMODULE)AVLULGet(&pSFNRoot, (AVLULKEY)pMTE->mte_sfn);
             if (pMod != NULL)
             {
-                pMod->coreMTE.Key = (AVLKEY)pMTE;
+                pMod->coreMTE.Key = (AVLULKEY)pMTE;
                 pMod->fFlags |= MOD_FLAGS_IN_MTETREE;
-                AVLInsert(&pMTERoot, (PAVLNODECORE)((unsigned)pMod + offsetof(MODULE, coreMTE)));
+                AVLInsert(&pMTERoot, (PAVLULNODECORE)((unsigned)pMod + offsetof(MODULE, coreMTE)));
             }
         }
         else
@@ -145,7 +145,7 @@ PMODULE     getModuleByMTE(PMTE pMTE)
             }
         #endif
         if (GetState(pMTE->mte_sfn) == HSTATE_OUR)
-            return (PMODULE)AVLGet(&pSFNRoot, (AVLKEY)pMTE->mte_sfn);
+            return (PMODULE)AVLULGet(&pSFNRoot, (AVLULKEY)pMTE->mte_sfn);
 
         return NULL;
     #endif
@@ -208,7 +208,7 @@ ULONG       addModule(SFN hFile, PMTE pMTE, ULONG fFlags, ModuleBase *pModObj)
 {
     PMODULE pMod;
     #ifdef DEBUG
-        if (AVLGet(&pSFNRoot, (AVLKEY)hFile) != NULL)
+        if (AVLULGet(&pSFNRoot, (AVLULKEY)hFile) != NULL)
             kprintf(("addModule: Module allready present in the SFN-tree!\n"));
         if (hFile == 0)
         {
@@ -231,19 +231,19 @@ ULONG       addModule(SFN hFile, PMTE pMTE, ULONG fFlags, ModuleBase *pModObj)
     }
 
     /* fill in the module node. */
-    pMod->coreKey.Key = (AVLKEY)hFile;
+    pMod->coreKey.Key = (AVLULKEY)hFile;
     pMod->hFile = hFile;
     pMod->pMTE = pMTE;
     pMod->fFlags = fFlags;
     pMod->Data.pModule = pModObj;
 
     /* insert the module node into the tree(s) */
-    AVLInsert(&pSFNRoot, (PAVLNODECORE)pMod);
+    AVLULInsert(&pSFNRoot, (PAVLULNODECORE)pMod);
     if (pMTE != NULL)
     {
-        pMod->coreMTE.Key = (AVLKEY)pMTE;
+        pMod->coreMTE.Key = (AVLULKEY)pMTE;
         pMod->fFlags |= MOD_FLAGS_IN_MTETREE;
-        AVLInsert(&pMTERoot, (PAVLNODECORE)((unsigned)pMod + offsetof(MODULE, coreMTE)));
+        AVLULInsert(&pMTERoot, (PAVLULNODECORE)((unsigned)pMod + offsetof(MODULE, coreMTE)));
     }
 
     return NO_ERROR;
@@ -264,7 +264,7 @@ ULONG       addModule(SFN hFile, PMTE pMTE, ULONG fFlags, ModuleBase *pModObj)
  */
 ULONG      removeModule(SFN hFile)
 {
-    PMODULE pMod = (PMODULE)AVLRemove(&pSFNRoot, (AVLKEY)hFile);
+    PMODULE pMod = (PMODULE)AVLULRemove(&pSFNRoot, (AVLULKEY)hFile);
     if (pMod == NULL)
     {
         kprintf(("removeModule: Module not found! hFile=%#4x\n", hFile));
@@ -274,9 +274,9 @@ ULONG      removeModule(SFN hFile)
     /* In MTE-tree too? */
     if (pMod->fFlags & MOD_FLAGS_IN_MTETREE)
     {
-        if (AVLRemove(&pMTERoot, (AVLKEY)pMod->pMTE) == NULL)
+        if (AVLULRemove(&pMTERoot, (AVLULKEY)pMod->pMTE) == NULL)
         {
-            kprintf(("removeModule: MOD_FLAGS_IN_MTETREE set but AVLRemove returns NULL\n"));
+            kprintf(("removeModule: MOD_FLAGS_IN_MTETREE set but AVLULRemove returns NULL\n"));
         }
     }
 
@@ -332,7 +332,7 @@ PSZ ldrGetExePath(PSZ pszPath, BOOL fExecChild)
          * Get the hMTE for the executable using the pPTDAExecChild
          * Then get the pMTE, and access the smte_path to get a pointer to the executable path.
          */
-        PPTDA   pPTDACur;               /* Pointer to the current (system context) PTDA */
+        PPTDA   pPTDA1;                 /* Pointer to the current (system context) PTDA */
         PPTDA   pPTDA;                  /* PTDA in question. */
         HMTE    hMTE = NULLHANDLE;      /* Modulehandle of the executable module. */
         PMTE    pMTE;                   /* Pointer to ModuleTableEntry of the executable module. */
@@ -342,14 +342,14 @@ PSZ ldrGetExePath(PSZ pszPath, BOOL fExecChild)
          *  IF pPTDAExecChild isn't NULL THEN get hMTE for that.
          *  IF no pPTDAExecChild THEN  get hMte for the current PTDA.
          */
-        pPTDACur = ptdaGetCur();
-        if (pPTDACur != NULL)
+        pPTDA1 = ptdaGetCur();
+        if (pPTDA1 != NULL)
         {
-            pPTDA = ptdaGet_pPTDAExecChild(pPTDACur);
+            pPTDA = ptdaGet_pPTDAExecChild(pPTDA1);
             if (pPTDA != NULL && fExecChild)
                 hMTE = ptdaGet_ptda_module(pPTDA);
             if (hMTE == NULLHANDLE)
-                hMTE = ptdaGet_ptda_module(pPTDACur);
+                hMTE = ptdaGet_ptda_module(pPTDA1);
         }
         else
         {   /* Not called at task time? No current task! */

@@ -1,4 +1,4 @@
-/* $Id: k32HandleSystemEvent.cpp,v 1.1 2001-02-18 15:26:38 bird Exp $
+/* $Id: k32HandleSystemEvent.cpp,v 1.1.2.1 2001-09-27 03:08:22 bird Exp $
  *
  * k32HandleSystemEvent - Override system events like Ctrl-Alt-Delete
  *          and Ctrl-Alt-2xNumLock.
@@ -18,20 +18,21 @@
 
 #define INCL_OS2KRNL_TK
 #define INCL_OS2KRNL_SEM
-
 #define NO_WIN32K_LIB_FUNCTIONS
+#define INCL_KKL_LOG
 
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>
+#include <OS2Krnl.h>
+#include <kKrnlLib.h>
+
 #include "devSegDf.h"                   /* Win32k segment definitions. */
-#include "OS2Krnl.h"
 #include "win32k.h"
 #include "k32.h"
 #include "options.h"
 #include "dev32.h"
-#include "log.h"
 
 
 /*******************************************************************************

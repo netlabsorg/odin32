@@ -1,8 +1,8 @@
-/* $Id: d32globals.c,v 1.6 2001-02-21 07:44:57 bird Exp $
+/* $Id: d32globals.c,v 1.6.2.1 2001-09-27 03:08:13 bird Exp $
  *
  * d32globals - global data (32-bit)
  *
- * Copyright (c) 1999 knut st. osmundsen
+ * Copyright (c) 1999-2001 knut st. osmundsen (kosmunds@csc.com)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -21,10 +21,5 @@
 /*******************************************************************************
 *   Global Variables                                                           *
 *******************************************************************************/
-/*
- * This is the pointer to the TK(TasK)SS(Stack Segment) FLAT Base address variable.
- * It is used by the SSToDS macro to convert stack based addresses to FLAT ds
- * based addressed.
- */
-PULONG          pulTKSSBase32;
+/* currently there is nothing here! */
 

@@ -1,4 +1,4 @@
-/* $Id: configure.cmd,v 1.21 2001-06-10 01:43:36 bird Exp $
+/* $Id: configure.cmd,v 1.21.2.1 2001-09-27 03:08:06 bird Exp $
  *
  * Configuration script.
  * Generates makefile.inc and an empty .depend file.
@@ -36,7 +36,7 @@
                     fWin32k = 0;
                 when (ch = '?' | ch = 'H' | substr(sArg, 1, 2) = '-H') then
                 do
-                    say 'Odin32 Configure.cmd. $Revision: 1.21 $.'
+                    say 'Odin32 Configure.cmd. $Revision: 1.21.2.1 $.'
                     say 'syntax: Configure.cmd [-n] [-w]'
                     say '  -n   Noninteractive.'
                     say '  -w   Don''t build Win32k.'
@@ -73,6 +73,7 @@
         call lineout sIncFile, 'WIN32KDEV32      =' sWin32kBase'\dev32'
         call lineout sIncFile, 'WIN32KELF2LX     =' sWin32kBase'\elf2lx'
         call lineout sIncFile, 'WIN32KINCLUDE    =' sWin32kBase'\include'
+        call lineout sIncFile, 'KKRNLLIBINCLUDE =' sWin32kBase'\kKrnlLib\include'
         call lineout sIncFile, 'WIN32KK32        =' sWin32kBase'\k32'
         call lineout sIncFile, 'WIN32KLDR        =' sWin32kBase'\ldr'
         call lineout sIncFile, 'WIN32KLIB        =' sWin32kBase'\lib'

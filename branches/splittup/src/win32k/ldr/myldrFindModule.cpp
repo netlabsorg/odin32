@@ -1,9 +1,9 @@
-/* $Id: myldrFindModule.cpp,v 1.3 2001-07-07 04:39:11 bird Exp $
+/* $Id: myldrFindModule.cpp,v 1.3.2.1 2001-09-27 03:08:26 bird Exp $
  *
  * ldrFindModule - ldrFindModule replacement with support for long DLL names
  *                  and .DLL-extention dependency.
  *
- * Copyright (c) 1999-2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 1999-2001 knut st. osmundsen (kosmunds@csc.com)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -15,37 +15,27 @@
 #define INCL_DOSERRORS
 #define INCL_NOPMAPI
 #define INCL_OS2KRNL_LDR
+#define INCL_KKL_LOG
+#define INCL_KKL_AVL
 
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>
+#include <peexe.h>
+#include <exe386.h>
+#include <OS2Krnl.h>
+#include <kKrnlLib.h>
 
 #include <memory.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "devSegDf.h"                   /* Win32k segment definitions. */
-#include "log.h"
-#include "avl.h"
-#include <peexe.h>
-#include <exe386.h>
-#include "OS2Krnl.h"
 #include "dev32.h"
 #include "ldr.h"
 #include "ModuleBase.h"
 #include "options.h"
-
-/*******************************************************************************
-*   Global Variables                                                           *
-*******************************************************************************/
-extern  PPMTE pmte_h;
-extern  PPMTE pprogram_h;
-extern  PPMTE pprogram_l;
-extern  PPMTE pglobal_h;
-extern  PPMTE pglobal_l;
-extern  PPMTE pspecific_h;
-extern  PPMTE pspecific_l;
 
 /*******************************************************************************
 *   Internal Functions                                                         *
@@ -105,12 +95,12 @@ ULONG LDRCALL myldrFindModule(PCHAR pachFilename, USHORT cchFilename, USHORT usC
     /* Static variables */
     static PMTE  pmteNULL = NULL;
     static PPMTE ppmteNULL = &pmteNULL;
-    static PPMTE * apppmteHeadTail[] =
+    static PMTE  apmteHeadTail[] =
     {/* head           tail */
-        &pmte_h,        &ppmteNULL,     /* CLASS_ALL        0x00000000 */
-        &pprogram_h,    &pprogram_l,    /* CLASS_PROGRAM    0x00000040 */
-        &pglobal_h,     &pglobal_l,     /* CLASS_GLOBAL     0x00000080 */
-        &pspecific_h,   &pspecific_l,   /* CLASS_SPECIFIC   0x000000c0 */
+        mte_h,        pmteNULL,         /* CLASS_ALL        0x00000000 */
+        program_h,    program_l,        /* CLASS_PROGRAM    0x00000040 */
+        global_h,     global_l,         /* CLASS_GLOBAL     0x00000080 */
+        specific_h,   specific_l,       /* CLASS_SPECIFIC   0x000000c0 */
     };
 
     /* Local variables */
@@ -156,8 +146,8 @@ ULONG LDRCALL myldrFindModule(PCHAR pachFilename, USHORT cchFilename, USHORT usC
     /*
      * Find start and end mte node
      */
-    pmte = **apppmteHeadTail[usClass >> 5];
-    pmteEnd = **apppmteHeadTail[(usClass >> 5) + 1];
+    pmte = apmteHeadTail[usClass >> 5];
+    pmteEnd = apmteHeadTail[(usClass >> 5) + 1];
     if (pmteEnd != NULL)                /* Advance one node - see loop condition. */
         pmteEnd = pmteEnd->mte_link;
 

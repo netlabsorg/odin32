@@ -1,4 +1,4 @@
-; $Id: d32CallGate.asm,v 1.5 2001-07-10 05:19:33 bird Exp $
+; $Id: d32CallGate.asm,v 1.5.2.1 2001-09-27 03:08:12 bird Exp $
 ;
 ; 32-bit CallGate used to communitcate fast between Ring-3 and Ring-0.
 ; This module contains all assembly workers for this.
@@ -38,7 +38,7 @@
 ; External symbols
 ;
     extrn  _Device_Help:dword
-    extrn  pulTKSSBase32:dword
+    extrn  _TKSSBase:dword
 
     extrn  KMEnterKmodeSEF:near
     extrn  KMExitKmodeSEF8:near
@@ -315,8 +315,7 @@ APIR_ValidFunction:
     mov     [ebp+8], eax                ; Save eax on the stack (reserved by caller according to _Optlink)
     mov     ecx, acbK32Params[eax*4]    ; ecx <- size of parameter packet.
     sub     esp, ecx                    ; Reserve stack space for the parameter packet.
-    mov     eax, [pulTKSSBase32]        ; Calculate the FLAT address of esp.
-    mov     eax, [eax]
+    mov     eax, _TKSSBase              ; Calculate the FLAT address of esp.
     add     eax, esp                    ; eax <- flat address of ss:esp
     push    ecx                         ; Save the size.
     ; TKFuBuff(pv, pvParam, acbParams[ulFunction], TK_FUSU_NONFATAL);

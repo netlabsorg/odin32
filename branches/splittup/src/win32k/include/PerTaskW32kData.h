@@ -1,4 +1,4 @@
-/* $Id: PerTaskW32kData.h,v 1.2 2001-07-10 16:41:10 bird Exp $
+/* $Id: PerTaskW32kData.h,v 1.2.2.1 2001-09-27 03:08:17 bird Exp $
  *
  * Per Task (Win32k) Data.
  *
@@ -17,7 +17,7 @@
 *******************************************************************************/
 typedef struct _PerTaskData
 {
-    AVLNODECORE     core;
+    AVLPVNODECORE   core;
     ULONG           cUsage;             /* Usage counter. */
     PPTDA           pPTDA;              /* Also in core.Key */
     PSZ             pszzOdin32Env;      /* Pointer to environment block. */

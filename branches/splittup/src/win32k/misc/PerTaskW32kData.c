@@ -1,4 +1,4 @@
-/* $Id: PerTaskW32kData.c,v 1.2 2001-07-10 16:39:19 bird Exp $
+/* $Id: PerTaskW32kData.c,v 1.2.2.1 2001-09-27 03:08:30 bird Exp $
  *
  * Per Task (Win32k) Data.
  *
@@ -17,28 +17,28 @@
 #define INCL_OS2KRNL_VM                 /* OS2KRNL: Virtual Memory Management */
 #define INCL_OS2KRNL_TK                 /* OS2KRNL: Task Stuff */
 #define INCL_OS2KRNL_PTDA
+#define INCL_KKL_AVL
+#define INCL_KKL_LOG
+#define INCL_KKL_HEAP
 
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>
+#include <OS2Krnl.h>
+#include <kKrnlLib.h>
 
 #include "devSegDf.h"                   /* Win32k segment definitions. */
 #include "dev32.h"
 #include "dev32hlp.h"
-#include "log.h"
-#include "OS2Krnl.h"
 #include <string.h>
-#include "macros.h"
-#include "avl.h"
 #include "PerTaskW32kData.h"
-#include "rmalloc.h"
 
 
 /*******************************************************************************
 *   Global Variables                                                           *
 *******************************************************************************/
-/*static*/ PAVLNODECORE pPTDTree;       /* Pointer to PTD tree */
+/*static*/ PAVLPVNODECORE pPTDTree;     /* Pointer to PTD tree */
                                         /* Currently assumed protected by ldrSem. */
 
 
@@ -64,7 +64,7 @@ PPTD    GetTaskData(PPTDA pPTDA, BOOL fCreate)
     PPTD    pptd;
     if (pPTDA == 0)
         pPTDA = ptdaGetCur();
-    pptd = (PPTD)(void*)AVLGet(&pPTDTree, (AVLKEY)pPTDA);
+    pptd = (PPTD)(void*)AVLPVGet(&pPTDTree, pPTDA);
     if (!pptd && fCreate)
     {
         pptd = rmalloc(sizeof(*pptd));
@@ -74,8 +74,8 @@ PPTD    GetTaskData(PPTDA pPTDA, BOOL fCreate)
             return NULL;
         }
         memset(pptd, 0, sizeof(*pptd));
-        pptd->core.Key = (AVLKEY)pPTDA;
-        AVLInsert(&pPTDTree, &pptd->core);
+        pptd->core.Key = pPTDA;
+        AVLPVInsert(&pPTDTree, &pptd->core);
     }
     return pptd;
 }
@@ -92,7 +92,7 @@ void    RemoveTaskData(PPTDA pPTDA)
     PPTD  pptd;
     if (pPTDA == 0)
         pPTDA = ptdaGetCur();
-    pptd = (PPTD)(void*)AVLRemove(&pPTDTree, (AVLKEY)pPTDA);
+    pptd = (PPTD)(void*)AVLPVRemove(&pPTDTree, pPTDA);
     if (pptd)
     {
         /* perhaps free data here... */

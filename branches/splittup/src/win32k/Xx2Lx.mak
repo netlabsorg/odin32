@@ -1,4 +1,4 @@
-# $Id: Xx2Lx.mak,v 1.1 2001-03-11 16:37:17 bird Exp $
+# $Id: Xx2Lx.mak,v 1.1.2.1 2001-09-27 03:08:06 bird Exp $
 
 #
 # Odin32 API
@@ -32,7 +32,7 @@ EXETARGET=1
 #
 # Tools and Flags Addjustments
 #
-CINCLUDES   = -I$(WIN32KINCLUDE) $(CINCLUDES)
+CINCLUDES   = -I$(WIN32KINCLUDE) -I$(KKRNLLIBINCLUDE) $(CINCLUDES)
 CDEFINES    = $(CDEFINES) -DRING3 -DXX2LX
 !if "$(VAC3)" == "1" || "$(VAC36)" == "1"
 CFLAGS      = $(CFLAGS)   -Ge+ -Gm- -Gn- -Ti+ -Rn     -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext-
