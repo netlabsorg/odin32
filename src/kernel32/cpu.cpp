@@ -1,4 +1,4 @@
-/* $Id: cpu.cpp,v 1.9 2000-06-23 19:02:37 sandervl Exp $ */
+/* $Id: cpu.cpp,v 1.10 2000-08-23 18:03:33 sandervl Exp $ */
 /*
  * Odin win32 CPU apis
  *
@@ -85,7 +85,7 @@ VOID WINAPI GetSystemInfo(LPSYSTEM_INFO si)	/* [out] system information */
 	cachedsi.dwPageSize 			= 4096;
 
 	/* FIXME: better values for the two entries below... */
-	cachedsi.lpMinimumApplicationAddress	= (void *)0x40000000;
+	cachedsi.lpMinimumApplicationAddress	= (void *)0x00400000;
 	cachedsi.lpMaximumApplicationAddress	= (void *)0x7FFFFFFF;
 	cachedsi.dwActiveProcessorMask		= 1;
 	cachedsi.dwNumberOfProcessors		= nrCPUs;
