@@ -1,4 +1,4 @@
-/* $Id: libDosAllocMemEx.c,v 1.1 2000-02-18 19:27:31 bird Exp $
+/* $Id: libDosAllocMemEx.c,v 1.2 2000-02-26 17:48:22 bird Exp $
  *
  * DosAllocMemEx - Extened Edition of DosAllocMem.
  *                 Allows you to suggest an address of the memory.
@@ -13,7 +13,7 @@
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
-#define INCL_DOSERROR
+#define INCL_DOSERRORS
 #define INCL_DOSFILEMGR
 #define INCL_DOSDEVICES
 #define INCL_WIN32K_LIB
@@ -29,8 +29,8 @@
 /*******************************************************************************
 *   Global Variables                                                           *
 *******************************************************************************/
-static BOOL fInited = FALSE;
-HFILE       hWin32k = NULLHANDLE;
+extern BOOL     fInited = FALSE;
+extern HFILE    hWin32k = NULLHANDLE;
 
 
 
@@ -42,14 +42,15 @@ APIRET APIENTRY  DosAllocMemEx(PPVOID ppv, ULONG cb, ULONG flag)
     if (fInited)
     {
         K32ALLOCMEMEX Param;
+        ULONG         cbParam = sizeof(Param);
+        ULONG         cbData = 0UL;
         Param.pv = *ppv;
         Param.cb = cb;
         Param.flFlags = flag;
         Param.rc = 0;
-        Param.ulCS = ;
-        Param.ulEIP = ;
+        Param.ulCS = -1;
+        Param.ulEIP = -1;
 
-        param.pRpInitIn = pRpIn;
         rc = DosDevIOCtl(hWin32k,
                          IOCTL_W32K_K32,
                          K32_ALLOCMEMEX,
