@@ -1,4 +1,4 @@
-/* $Id: OS2PALETTE.CPP,v 1.13 2001-03-09 22:48:46 mike Exp $ */
+/* $Id: OS2PALETTE.CPP,v 1.14 2001-03-18 21:44:42 mike Exp $ */
 
 /*
  * DX palette class implementation
@@ -23,6 +23,7 @@
 #define FAR
 #include <misc.h>
 #include "os2palset.h"
+#include "os2fsdd.h"
 #include <winerror.h>
 
 #undef THIS
@@ -90,7 +91,7 @@ OS2IDirectDrawPalette::~OS2IDirectDrawPalette()
 //******************************************************************************
 HRESULT __stdcall PalQueryInterface(THIS This, REFIID riid, LPVOID FAR * ppvObj)
 {
-  dprintf(("DDRAW: OS2IDirectDrawPalette::PalQueryInterface\n"));
+  dprintf(("DDRAW: OS2IDirectDrawPalette::PalQueryInterface"));
 
   *ppvObj = NULL;
 
@@ -109,7 +110,7 @@ ULONG __stdcall PalAddRef(THIS This)
 {
   OS2IDirectDrawPalette *me = (OS2IDirectDrawPalette *)This;
 
-  dprintf(("DDRAW: OS2IDirectDrawPalette::PalAddRef %d\n", me->Referenced+1));
+  dprintf(("DDRAW: OS2IDirectDrawPalette::PalAddRef %d", me->Referenced+1));
 
   return (++me->Referenced);
 }
@@ -119,9 +120,7 @@ ULONG __stdcall PalRelease(THIS This)
 {
   OS2IDirectDrawPalette *me = (OS2IDirectDrawPalette *)This;
 
-  #ifdef DEBUG
-    dprintf(("DDRAW: OS2IDirectDrawPalette::PalRelease %d\n", me->Referenced-1));
-  #endif
+  dprintf(("DDRAW: OS2IDirectDrawPalette::PalRelease %d", me->Referenced-1));
 
   if(me->Referenced)
   {
@@ -143,9 +142,7 @@ HRESULT __stdcall PalGetCaps(THIS This, LPDWORD lpdwCaps)
 {
   OS2IDirectDrawPalette *me = (OS2IDirectDrawPalette *)This;
 
-  #ifdef DEBUG
-    dprintf(("DDRAW: OS2IDirectDrawPalette::GetCaps\n"));
-  #endif
+  dprintf(("DDRAW: OS2IDirectDrawPalette::GetCaps"));
 
   if(NULL== lpdwCaps)
     return(DDERR_INVALIDPARAMS);
@@ -157,6 +154,7 @@ HRESULT __stdcall PalGetCaps(THIS This, LPDWORD lpdwCaps)
 
   return(DD_OK);
 }
+
 //******************************************************************************
 //******************************************************************************
 HRESULT __stdcall PalGetEntries(THIS This, DWORD dwFlags,
@@ -166,11 +164,11 @@ HRESULT __stdcall PalGetEntries(THIS This, DWORD dwFlags,
 {
  OS2IDirectDrawPalette *me = (OS2IDirectDrawPalette *)This;
 
-  dprintf(("DDRAW: OS2IDirectDrawPalette::PalGetEntries\n"));
+  dprintf(("DDRAW: OS2IDirectDrawPalette::PalGetEntries"));
 
-  if ((NULL == lpEntries) || (0 != dwFlags) || (dwBase > 65536)
-      || ((dwBase + dwNumEntries) > me->dwSize))
-    return(DDERR_INVALIDPARAMS);
+  if ((NULL == lpEntries) || (0 != dwFlags) || (dwBase > 0xFFFF) ||
+	 ((dwBase + dwNumEntries) > me->dwSize))
+	return(DDERR_INVALIDPARAMS);
 
   memcpy( (char *)lpEntries,
           (char *)(me->os2pal + dwBase),
@@ -178,11 +176,12 @@ HRESULT __stdcall PalGetEntries(THIS This, DWORD dwFlags,
 
   return(DD_OK);
 }
+
 //******************************************************************************
 //******************************************************************************
 HRESULT __stdcall PalInitialize(THIS, LPDIRECTDRAW, DWORD, LPPALETTEENTRY)
 {
-  dprintf(("DDRAW: OS2IDirectDrawPalette::PalInitialize\n"));
+  dprintf(("DDRAW: OS2IDirectDrawPalette::PalInitialize"));
   return(DDERR_ALREADYINITIALIZED);
 }
 //******************************************************************************
@@ -195,9 +194,8 @@ HRESULT __stdcall PalSetEntries(THIS This, DWORD dwFlags,
  OS2IDirectDrawPalette *me = (OS2IDirectDrawPalette *)This;
 
   dprintf(("DDRAW: OS2IDirectDrawPalette::PalSetEntries\n"));
-
-  if ((NULL== lpNewEntries) || (0 != dwFlags) || (dwBase > 65536)
-      || ((dwBase + dwNumEntries) > me->dwSize))
+  if ((NULL == lpNewEntries) || (0 != dwFlags) || (dwBase > 0xFFFF) ||
+      ((dwBase + dwNumEntries) > me->dwSize))
     return(DDERR_INVALIDPARAMS);
 
   memcpy((char *)(me->os2pal + dwBase),
@@ -221,7 +219,7 @@ HRESULT __stdcall PalSetEntries(THIS This, DWORD dwFlags,
                            (lpNewEntries[i].peRed<<24);
   }
 
-  if(8==((OS2IDirectDraw*)me->lpDraw)->dCaps.ulDepth)
+  if (8==((OS2IDirectDraw*)me->lpDraw)->dCaps.ulDepth)
   {
     if(me->fAttachedToPrimary)
       me->SetPhysPalette();
@@ -237,7 +235,11 @@ HRESULT __stdcall PalSetEntries(THIS This, DWORD dwFlags,
 //******************************************************************************
 void OS2IDirectDrawPalette::SetPhysPalette()
 {
-  OS2SetPhysPalette(os2pal);
+	// Run appropriate code depening on whether FS DDraw is enabled
+	if (bUseFSDD)
+		SetSVGAPalette(os2pal);	
+	else	
+		OS2SetPhysPalette(os2pal);
 }
 //******************************************************************************
 //******************************************************************************

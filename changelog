@@ -1,4 +1,17 @@
-/* $Id: changelog,v 1.1306 2001-03-15 20:12:21 bird Exp $ */
+/* $Id: changelog,v 1.1307 2001-03-18 21:44:41 mike Exp $ */
+
+ 2001-03-18: Michal Necasek <michalnec@volny.cz>
+    - DDRAW:    o Finally merged DDRAW and DDRAW\NEW. A new key in ODIN.INI
+                  controls which version to use:
+
+                  [DirectDraw]
+                  Fullscreen=[True|False|0|1]
+
+                  Don't blame me if your machine goes up in smoke after you've
+                  turned fullscreen on ;-)
+                  Note: It seems that fullscreen currently doesn't work right
+                  with newer SDD releases for 8bpp apps, though 16/24/32bpp
+                  should be OK (palette setting problems)
 
  2001-03-15: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - tools/dailbuild:
@@ -47,11 +60,6 @@
     - Configure.cmd:
                 o Changed to configure Win32k as well. Re-run Configure.cmd!!!
 
- 2001-03-09: Michal Necasek <michalnec@volny.cz>
-    - DDRAW:    o Watcomized (not complete) and cleaned up a bit.
-                  Also synced DDRAW\NEW with the main directory.
-    - DSOUND:   o Implemented DuplicateSoundBuffer (finally!). That
-                  fixed missing sound in The Corporate Machine.
 
  2001-03-07: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Win32k:   o Fixed trap in k32QuerySystemMemInfo when

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.26 2000-12-02 23:38:54 bird Exp $
+# $Id: makefile,v 1.27 2001-03-18 21:44:45 mike Exp $
 
 #
 # Odin32 API
@@ -8,7 +8,7 @@
 
 
 #
-# Compiler, tools, and interference rules.
+# Compiler, tools, and inference rules.
 #
 !include ../../makefile.inc
 
@@ -26,6 +26,7 @@ $(OBJDIR)\asmutil.obj \
 $(OBJDIR)\os2surface.obj \
 $(OBJDIR)\os2palette.obj \
 $(OBJDIR)\os2palset.obj \
+$(OBJDIR)\os2fsdd.obj \
 $(OBJDIR)\rectangle.obj \
 $(OBJDIR)\initterm.obj \
 $(OBJDIR)\os2util.obj \
@@ -47,12 +48,12 @@ $(ODIN32_LIB)/kernel32.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
 $(ODIN32_LIB)/user32.lib \
 mmpm2.lib \
-os2386.lib \
+OS2386.LIB \
 $(RTLLIB_O)
 
 
 #
-# Target name - name of the dll without extention and path.
+# Target name - name of the dll without extension and path.
 #
 TARGET = ddraw
 

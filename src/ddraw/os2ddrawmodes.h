@@ -1,4 +1,4 @@
-/* $Id: os2ddrawmodes.h,v 1.3 2000-02-04 19:31:25 hugh Exp $ */
+/* $Id: os2ddrawmodes.h,v 1.4 2001-03-18 21:44:46 mike Exp $ */
 
 /*
  * Defintions of common videomodes we report back

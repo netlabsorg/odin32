@@ -1,4 +1,4 @@
-; $Id: asmutil.asm,v 1.7 2000-09-25 18:53:45 mike Exp $
+; $Id: asmutil.asm,v 1.8 2001-03-18 21:44:44 mike Exp $
 
 ;
 ; asmutil.asm Color key bit blitting for DirectDraw

@@ -1,4 +1,4 @@
-/* $Id: bltFunc.cpp,v 1.2 1999-12-21 01:28:15 hugh Exp $ */
+/* $Id: bltFunc.cpp,v 1.3 2001-03-18 21:44:44 mike Exp $ */
 
 /*
  * Blitting functions

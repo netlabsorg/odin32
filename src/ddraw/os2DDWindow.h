@@ -1,4 +1,4 @@
-/* $Id: os2DDWindow.h,v 1.2 1999-12-21 01:28:19 hugh Exp $ */
+/* $Id: os2DDWindow.h,v 1.3 2001-03-18 21:44:45 mike Exp $ */
 
 /*
  * Windwo subclass definitions

@@ -1,4 +1,4 @@
-/* $Id: OS2UTIL.H,v 1.5 2000-02-04 19:31:25 hugh Exp $ */
+/* $Id: OS2UTIL.H,v 1.6 2001-03-18 21:44:43 mike Exp $ */
 
 /*
  * OS/2 Utility functions

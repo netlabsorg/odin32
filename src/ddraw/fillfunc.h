@@ -1,4 +1,4 @@
-/* $Id: fillfunc.h,v 1.1 1999-12-21 01:28:18 hugh Exp $ */
+/* $Id: fillfunc.h,v 1.2 2001-03-18 21:44:45 mike Exp $ */
 
 /*
  * Colorfill function definitions

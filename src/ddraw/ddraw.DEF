@@ -1,4 +1,4 @@
-; $Id: ddraw.DEF,v 1.7 2001-03-09 22:48:47 mike Exp $
+; $Id: ddraw.DEF,v 1.8 2001-03-18 21:44:44 mike Exp $
 
 ;
 ; Based on Windows 98 DirectX7: DDRAW.DLL
@@ -11,14 +11,14 @@ IMPORTS
     _GpiEnableYInversion       = PMGPI.723
 
 EXPORTS
-; AcquireDDThreadLock           @1
-; D3DParseUnknownCommand          @2
-; DDGetAttachedSurfaceLcl         @3
- DDHAL32_VidMemFree = _DDHAL32_VidMemFree@4                     @4
- DDHAL32_VidMemAlloc    = _DDHAL32_VidMemAlloc@4                @5
+; AcquireDDThreadLock       @1
+; D3DParseUnknownCommand    @2
+; DDGetAttachedSurfaceLcl   @3
+ DDHAL32_VidMemFree  = _DDHAL32_VidMemFree@4                    @4
+ DDHAL32_VidMemAlloc = _DDHAL32_VidMemAlloc@4                   @5
 ; DDInternalLock            @6
-; DDInternalUnlock            @7
-; DSoundHelp              @8
+; DDInternalUnlock          @7
+; DSoundHelp                @8
  DirectDrawCreate         = _OS2DirectDrawCreate@12             @9
 ; DirectDrawCreateClipper         @10
  DirectDrawCreateEx       = _DirectDrawCreateEx@16              @11
@@ -28,22 +28,22 @@ EXPORTS
 ; DirectDrawEnumerateW            @15
 DllCanUnloadNow   = _DllCanUnloadNow@0                          @16
 DllGetClassObject = _DllGetClassObject@12                       @17
-; GetAliasedVidMem            @18
-; GetDDSurfaceLocal           @19
+; GetAliasedVidMem          @18
+; GetDDSurfaceLocal         @19
 ; GetNextMipMap             @20
 ; GetOLEThunkData           @21
-; GetSurfaceFromDC            @22
-; HeapVidMemAllocAligned          @23
+; GetSurfaceFromDC          @22
+; HeapVidMemAllocAligned    @23
 ; InternalLock              @24
 ; InternalUnlock            @25
-; LateAllocateSurfaceMem          @26
-; RegisterSpecialCase           @27
-; ReleaseDDThreadLock           @28
-; VidMemAlloc             @29
-; VidMemAmountFree            @30
-; VidMemFini              @31
-; VidMemFree              @32
-; VidMemInit              @33
-; VidMemLargestFree           @34
-; thk1632_ThunkData32           @35
-; thk3216_ThunkData32           @36
+; LateAllocateSurfaceMem    @26
+; RegisterSpecialCase       @27
+; ReleaseDDThreadLock       @28
+; VidMemAlloc               @29
+; VidMemAmountFree          @30
+; VidMemFini                @31
+; VidMemFree                @32
+; VidMemInit                @33
+; VidMemLargestFree         @34
+; thk1632_ThunkData32       @35
+; thk3216_ThunkData32       @36

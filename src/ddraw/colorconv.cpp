@@ -1,4 +1,4 @@
-/* $Id: colorconv.cpp,v 1.4 2001-03-09 22:48:47 mike Exp $ */
+/* $Id: colorconv.cpp,v 1.5 2001-03-18 21:44:44 mike Exp $ */
 
 /*
  * ColorConversion routines
@@ -26,14 +26,14 @@
 {
   char *pSrcLine, *pDstLine;
 
-  dprintf(("DDRAW: Conv8to16(%d,%d ,%d,%d)\n",dwTop,dwLeft,dwWidth,dwHeight));
+  dprintf(("DDRAW: Conv8to16(%d,%d ,%d,%d)",dwTop,dwLeft,dwWidth,dwHeight));
 
   pSrcLine = pFB + (dwTop*dwPitchDB) + dwLeft;
   pDstLine = pDB + (dwTop*dwPitchFB) + (dwLeft*2);
 
-  for(;dwHeight;dwHeight--)
+  for ( ; dwHeight; dwHeight--)
   {
-    for(int x=0;x<dwWidth;x++)
+    for (int x=0; x<dwWidth; x++)
     {
       *(((WORD*)pDstLine)+x) = ((WORD*)pPalette)[pSrcLine[x]];
 
@@ -56,16 +56,16 @@
 {
   char *pSrcLine, *pDstLine;
 
-  dprintf(("DDRAW: Conv8to24\n"));
+  dprintf(("DDRAW: Conv8to24"));
 
   pSrcLine = pFB + (dwTop*dwPitchDB) + dwLeft;
   pDstLine = pDB + (dwTop*dwPitchFB) + (dwLeft*3);
 
-  for(;dwHeight;dwHeight--)
+  for (;dwHeight;dwHeight--)
   {
     char *pIter;
     pIter=pDstLine;
-    for(int x=0;x<dwWidth;x++)
+    for (int x=0;x<dwWidth;x++)
     {
       *((DWORD*)pIter) = ((DWORD*)pPalette)[pSrcLine[x]];
       pIter+=3;
@@ -87,7 +87,7 @@
 {
   char *pSrcLine, *pDstLine;
 
-  dprintf(("DDRAW: Conv8to32\n"));
+  dprintf(("DDRAW: Conv8to32"));
 
   pSrcLine = pFB + (dwTop*dwPitchDB) + dwLeft;
   pDstLine = pDB + (dwTop*dwPitchFB) + (dwLeft*4);
@@ -115,7 +115,7 @@
                          VOID  *pPalette
                         )
 {
-  dprintf(("DDRAW: Conv16to8 Not Implemented\n"));
+  dprintf(("DDRAW: Conv16to8 Not Implemented"));
 }
 
  void __cdecl Conv16to24( char *pDB,
@@ -132,7 +132,7 @@
   WORD *pSrcLine;
   char *pDstLine;
 
-  dprintf(("DDRAW: Conv16to24 (assuming R565) \n"));
+  dprintf(("DDRAW: Conv16to24 (assuming R565)"));
 
   pSrcLine = (WORD*)(pFB + (dwTop*dwPitchDB) + (dwLeft*2));
   pDstLine = pDB + (dwTop*dwPitchFB) + (dwLeft*3);
@@ -167,7 +167,7 @@
   WORD *pSrcLine;
   char *pDstLine;
 
-  dprintf(("DDRAW: Conv16to32 (assuming R565) \n"));
+  dprintf(("DDRAW: Conv16to32 (assuming R565)"));
 
   pSrcLine = (WORD*)(pFB + (dwTop*dwPitchDB) + (dwLeft*2));
   pDstLine = pDB + (dwTop*dwPitchFB) + (dwLeft*4);
@@ -197,7 +197,7 @@
                          VOID  *pPalette
                         )
 {
-  dprintf(("DDRAW: Conv24to8 Not Implmented\n"));
+  dprintf(("DDRAW: Conv24to8 Not Implmented"));
 }
  void __cdecl Conv24to16( char *pDB,
                           char *pFB,
@@ -213,7 +213,7 @@
   char *pSrcLine;
   char *pDstLine;
 
-  dprintf(("DDRAW: Conv24to16 (assuming R565) \n"));
+  dprintf(("DDRAW: Conv24to16 (assuming R565)"));
 
   pSrcLine = pFB + (dwTop*dwPitchDB) + (dwLeft*3);
   pDstLine = pDB + (dwTop*dwPitchFB) + (dwLeft*2);
@@ -247,7 +247,7 @@
   char *pDstLine;
 
 
-  dprintf(("DDRAW: Conv24to32 Assuming RGBA \n"));
+  dprintf(("DDRAW: Conv24to32 Assuming RGBA"));
 
   pSrcLine = pFB + (dwTop*dwPitchDB) + (dwLeft*3);;
   pDstLine = pDB + (dwTop*dwPitchFB) + (dwLeft*4);
@@ -278,7 +278,7 @@
                          VOID  *pPalette
                         )
 {
-  dprintf(("DDRAW: Conv32to8 Not Implemented\n"));
+  dprintf(("DDRAW: Conv32to8 Not Implemented"));
 }
  void __cdecl Conv32to16( char *pDB,
                           char *pFB,
@@ -330,7 +330,7 @@
   char *pDstLine;
 
 
-  dprintf(("DDRAW: Conv32to24 Assuming RGBA \n"));
+  dprintf(("DDRAW: Conv32to24 Assuming RGBA"));
 
   pSrcLine = pFB + (dwTop*dwPitchDB) + (dwLeft*3);
   pDstLine = pDB + (dwTop*dwPitchFB) + (dwLeft*4);
