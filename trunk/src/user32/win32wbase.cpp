@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.49 1999-10-17 15:46:09 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.50 1999-10-17 16:42:39 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -725,6 +725,7 @@ ULONG Win32BaseWindow::MsgDestroy()
 
     if (isSubclassedOS2Wnd) OSLibWinSubclassWindow(OS2Hwnd,pOldWndProc);
 
+    fIsDestroyed = TRUE;
     //According to the SDK, WM_PARENTNOTIFY messages are sent to the parent (this window)
     //before any window destruction has begun
     child = (Win32BaseWindow *)getFirstChild();
@@ -738,7 +739,6 @@ ULONG Win32BaseWindow::MsgDestroy()
     if (hwndHorzScroll && OSLibWinQueryWindow(hwndHorzScroll,QWOS_PARENT) == OSLIB_HWND_OBJECT) OSLibWinDestroyWindow(hwndHorzScroll);
     if (hwndVertScroll && OSLibWinQueryWindow(hwndVertScroll,QWOS_PARENT) == OSLIB_HWND_OBJECT) OSLibWinDestroyWindow(hwndVertScroll);
 
-    fIsDestroyed = TRUE;
     if(getFirstChild() == NULL) {
         delete this;
     }
@@ -845,12 +845,15 @@ ULONG Win32BaseWindow::MsgSize(ULONG width, ULONG height, BOOL fMinimize, BOOL f
 {
  WORD fwSizeType = 0;
 
+    dwStyle &= ~(WS_MINIMIZE|WS_MAXIMIZE);
     if(fMinimize) {
             fwSizeType = SIZE_MINIMIZED;
+            dwStyle |= WS_MINIMIZE;
     }
     else
     if(fMaximize) {
             fwSizeType = SIZE_MAXIMIZED;
+            dwStyle |= WS_MAXIMIZE;
     }
     else    fwSizeType = SIZE_RESTORED;
 
@@ -1004,7 +1007,7 @@ ULONG Win32BaseWindow::MsgSysKeyDown (ULONG repeatCount, ULONG scancode, ULONG v
     lParam |= (scancode & 0x0FF) << 16;             // bit 16-23, scancode
                                                     // bit 24, 1=extended key
                                                     // bit 25-28, reserved
-                                            // bit 29, key is released, always 1 for WM_SYSKEYUP ?? <- conflict according to the MS docs
+                                                    // bit 29, key is released, always 1 for WM_SYSKEYUP ?? <- conflict according to the MS docs
     if (keyWasPressed)
         lParam |= 1 << 30;                          // bit 30, previous state, 1 means key was pressed
                                                     // bit 31, transition state, always 0 for WM_KEYDOWN
@@ -1883,15 +1886,15 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
     if (flags & WIN_NEED_SIZE)
     {
         /* should happen only in CreateWindowEx() */
-    	int wParam = SIZE_RESTORED;
+        int wParam = SIZE_RESTORED;
 
-	    flags &= ~WIN_NEED_SIZE;
-	    if (dwStyle & WS_MAXIMIZE)
-	        wParam = SIZE_MAXIMIZED;
-	    else
-	    if (dwStyle & WS_MINIMIZE)
-	        wParam = SIZE_MINIMIZED;
-	
+        flags &= ~WIN_NEED_SIZE;
+        if (dwStyle & WS_MAXIMIZE)
+            wParam = SIZE_MAXIMIZED;
+        else
+        if (dwStyle & WS_MINIMIZE)
+            wParam = SIZE_MINIMIZED;
+
         SendMessageA(WM_SIZE, wParam,
                      MAKELONG(rectClient.right-rectClient.left,
                               rectClient.bottom-rectClient.top));
@@ -2042,6 +2045,27 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
     }
 
     return (rc);
+}
+//******************************************************************************
+//TODO: WPF_RESTOREMAXIMIZED
+//******************************************************************************
+BOOL Win32BaseWindow::SetWindowPlacement(WINDOWPLACEMENT *winpos)
+{
+   if(isFrameWindow())
+   {
+      // Set the minimized position
+      if (winpos->flags & WPF_SETMINPOSITION)
+      {
+         OSLibSetWindowMinPos(OS2HwndFrame, winpos->ptMinPosition.x, winpos->ptMinPosition.y);
+      }
+
+      //TODO: Max position
+
+      // Set the new restore position.
+      OSLibSetWindowRestoreRect(OS2HwndFrame, &winpos->rcNormalPosition);
+   }
+
+   return ShowWindow(winpos->showCmd);
 }
 //******************************************************************************
 //Also destroys all the child windows (destroy parent, destroy children)
@@ -2246,7 +2270,7 @@ HWND Win32BaseWindow::GetWindow(UINT uCmd)
             hwndRelated = window->getWindowHandle();
         }
         break;
-	
+
     case GW_HWNDLAST:
         if(getParent())
         {
@@ -2260,14 +2284,14 @@ HWND Win32BaseWindow::GetWindow(UINT uCmd)
         }
         hwndRelated = window->getWindowHandle();
         break;
-	
+
     case GW_HWNDNEXT:
         window = (Win32BaseWindow *)getNextChild();
         if(window) {
             hwndRelated = window->getWindowHandle();
         }
         break;
-	
+
     case GW_HWNDPREV:
         if(!getParent())
         {
@@ -2289,7 +2313,7 @@ HWND Win32BaseWindow::GetWindow(UINT uCmd)
             window = (Win32BaseWindow *)window->getNextChild();
         }
         break;
-        	
+
     case GW_OWNER:
         if(getOwner()) {
             hwndRelated = getOwner()->getWindowHandle();
@@ -2445,7 +2469,7 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value)
 
                 ss.styleOld = dwExStyle;
                 ss.styleNew = value;
-        dprintf(("SetWindowLong GWL_EXSTYLE %x new style %x", getWindowHandle(), value));
+                dprintf(("SetWindowLong GWL_EXSTYLE %x new style %x", getWindowHandle(), value));
                 SendMessageA(WM_STYLECHANGING,GWL_EXSTYLE,(LPARAM)&ss);
                 setExStyle(ss.styleNew);
                 SendMessageA(WM_STYLECHANGED,GWL_EXSTYLE,(LPARAM)&ss);
@@ -2457,10 +2481,11 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value)
 
                 ss.styleOld = dwStyle;
                 ss.styleNew = value;
-        dprintf(("SetWindowLong GWL_STYLE %x new style %x", getWindowHandle(), value));
+                dprintf(("SetWindowLong GWL_STYLE %x new style %x", getWindowHandle(), value));
                 SendMessageA(WM_STYLECHANGING,GWL_STYLE,(LPARAM)&ss);
                 setStyle(ss.styleNew);
-                OSLibSetWindowStyle(OS2HwndFrame, dwStyle);
+                if(!IsWindowDestroyed())
+                    OSLibSetWindowStyle(OS2HwndFrame, dwStyle);
                 SendMessageA(WM_STYLECHANGED,GWL_STYLE,(LPARAM)&ss);
                 return ss.styleOld;
         }

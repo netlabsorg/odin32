@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.27 1999-10-17 15:46:10 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.28 1999-10-17 16:42:40 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -147,6 +147,7 @@ Win32BaseWindow *getParent()                    { return (Win32BaseWindow *)Chil
 
          BOOL   ShowWindow(ULONG nCmdShow);
          BOOL   SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, int cy, UINT fuFlags);
+	 BOOL   SetWindowPlacement(WINDOWPLACEMENT *winpos);
          BOOL   DestroyWindow();
          HWND   SetActiveWindow();
          HWND   GetParent();

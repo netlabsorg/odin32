@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.17 1999-10-17 15:46:10 sandervl Exp $ */
+/* $Id: window.cpp,v 1.18 1999-10-17 16:42:40 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -146,7 +146,7 @@ HWND WIN32API CreateWindowExW(DWORD exStyle, LPCWSTR className,
         if (!HIWORD(className))
         {
           sprintf(tmpClassA,"#%d", (int) className);
-      	  AsciiToUnicode(tmpClassA, tmpClassW);
+          AsciiToUnicode(tmpClassA, tmpClassW);
           classAtom = GlobalFindAtomW(tmpClassW);
           className = (LPCWSTR)tmpClassW;
         }
@@ -462,7 +462,7 @@ BOOL WIN32API SetWindowPos(HWND hwnd, HWND hwndInsertAfter, int x, int y, int cx
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("SetWindowPos, window %x not found", hwnd));
-    SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("SetWindowPos %x %x x=%d y=%d cx=%d cy=%d %x", hwnd, hwndInsertAfter, x, y, cx, cy, fuFlags));
@@ -470,19 +470,24 @@ BOOL WIN32API SetWindowPos(HWND hwnd, HWND hwndInsertAfter, int x, int y, int cx
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetWindowPlacement( HWND arg1, const WINDOWPLACEMENT *  arg2)
+BOOL WIN32API SetWindowPlacement(HWND hwnd, const WINDOWPLACEMENT *winpos)
 {
-    dprintf(("USER32:  SetWindowPlacement\n"));
-    return O32_SetWindowPlacement(arg1, arg2);
+  Win32BaseWindow *window;
+
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if(!window) {
+        dprintf(("SetWindowPlacement, window %x not found", hwnd));
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        return 0;
+    }
+    return window->SetWindowPlacement((WINDOWPLACEMENT *)winpos);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GetWindowPlacement( HWND arg1, LPWINDOWPLACEMENT arg2)
+BOOL WIN32API GetWindowPlacement(HWND hwnd, LPWINDOWPLACEMENT arg2)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  GetWindowPlacement\n");
-#endif
-    return O32_GetWindowPlacement(arg1, arg2);
+    dprintf(("USER32:  GetWindowPlacement\n"));
+    return O32_GetWindowPlacement(Win32BaseWindow::Win32ToOS2FrameHandle(hwnd), arg2);
 }
 //******************************************************************************
 //******************************************************************************
