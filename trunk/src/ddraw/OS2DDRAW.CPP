@@ -139,9 +139,15 @@ OS2IDirectDraw::OS2IDirectDraw(GUID *lpGUID) :
   else
   {
     WriteLog("DiveOpen OK\n");
-    rc = DiveQueryCaps( &dCaps,
-                        DIVE_BUFFER_SCREEN);
   }
+  memset( &dCaps,
+          0,
+          sizeof(DIVE_CAPS) );
+  dCaps.ulStructLen = sizeof(DIVE_CAPS);
+
+  rc = DiveQueryCaps( &dCaps,
+                      DIVE_BUFFER_SCREEN);
+
 
   // Shall we run in FS mode ?
   if(ERROR_SUCCESS==RegOpenKeyA(HKEY_LOCAL_MACHINE,KEY_DIRECT2DRAW,&hkDirectDraw2))
@@ -693,7 +699,7 @@ HRESULT __stdcall DrawEnumDisplayModes(THIS This, DWORD dwFlags, LPDDSURFACEDESC
 
   }
 
-  
+
 
   return(DD_OK);
 }
@@ -762,9 +768,9 @@ HRESULT __stdcall DrawGetCaps(THIS, LPDDCAPS lpDDDriverCaps, LPDDCAPS lpDDHELCap
 
     // Clear structure so we only have to set the supported flags
 
-    
+
     memset(lpDDDriverCaps,0,sizeof(DDCAPS));
-    
+
 
     // Reset the size
     lpDDDriverCaps->dwSize = sizeof(DDCAPS);
@@ -1136,7 +1142,7 @@ HRESULT __stdcall DrawGetMonitorFrequency(THIS This, LPDWORD lpdwFreq)
   if(NULL==lpdwFreq)
     return(DDERR_INVALIDPARAMS);
 
-  
+
 
   if(DD_OK==DrawWaitForVerticalBlank(This, dwFlags, 0))
   {
@@ -1159,7 +1165,7 @@ HRESULT __stdcall DrawGetMonitorFrequency(THIS This, LPDWORD lpdwFreq)
     *lpdwFreq = 70;
   }
 
-  
+
 
   return(DD_OK);
 }
@@ -1198,16 +1204,16 @@ HRESULT __stdcall DrawGetVerticalBlankStatus(THIS , LPBOOL lpbIsInVB)
   if(NULL==lpbIsInVB)
     return(DDERR_INVALIDPARAMS);
 
-  
+
     rc = io_init1();
-  
+
 
   if(0==rc)  // try to get IOPL for the thread
   {
     *lpbIsInVB = (c_inb1(0x3da)&0x08)!=0;
-    
+
       io_exit1(); // reset IOPL
-    
+
     return(DD_OK);
   }
 
@@ -1316,9 +1322,9 @@ HRESULT __stdcall DrawWaitForVerticalBlank(THIS, DWORD dwFlags, HANDLE hEvent)
   if(DDWAITVB_BLOCKBEGINEVENT == dwFlags) // This parameter isn't support in DX
     return (DDERR_UNSUPPORTED);
 
-  
+
     rci = io_init1();
-  
+
 
   if(rci)  // try to get IOPL for the thread
     return (DDERR_UNSUPPORTED);  // we failed so return error that we don't support this
@@ -1349,9 +1355,9 @@ HRESULT __stdcall DrawWaitForVerticalBlank(THIS, DWORD dwFlags, HANDLE hEvent)
 
   }
 
-  
+
     io_exit1();
-  
+
 
   return (rc);
 
@@ -1448,7 +1454,7 @@ HRESULT __stdcall DrawGetDeviceIdentifier( THIS, LPDDDEVICEIDENTIFIER lpdddi,
   if(NULL==lpdddi)
     return DDERR_INVALIDPARAMS;
 
-  
+
 
   memset( lpdddi,
           0,
@@ -1459,7 +1465,7 @@ HRESULT __stdcall DrawGetDeviceIdentifier( THIS, LPDDDEVICEIDENTIFIER lpdddi,
   strcpy( lpdddi->szDescription,
           "ODIN DD Emulation Driver");
 
-  
+
 
   return(DD_OK);
 }
@@ -1470,7 +1476,7 @@ VOID OS2IDirectDraw::SwitchDisplay(HWND hwnd)
   DWORD dwVType, dwVSize;
   HKEY hkDirectDraw2;
 
-  
+
 
   if (bScale)
   {
@@ -1486,7 +1492,7 @@ VOID OS2IDirectDraw::SwitchDisplay(HWND hwnd)
       bScale = FALSE;
   }
 
-  
+
 }
 //******************************************************************************
 //******************************************************************************
