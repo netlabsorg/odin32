@@ -1,4 +1,4 @@
-/* $Id: font.cpp,v 1.11 2000-05-16 07:13:19 jeroen Exp $ */
+/* $Id: font.cpp,v 1.12 2000-07-06 21:17:26 sandervl Exp $ */
 
 /*
  * GDI32 font apis
@@ -114,6 +114,7 @@ static void iFontRename(LPCSTR lpstrFaceOriginal,
      return;
 
   strncpy(lpstrFaceTemp, lpstrFaceOriginal, LF_FACESIZE);
+  lpstrFaceTemp[LF_FACESIZE-1] = 0;
   strupr(lpstrFaceTemp);
 
   //lookup table
