@@ -1,4 +1,4 @@
-/* $Id: kobjects.cpp,v 1.11 2000-03-28 17:11:49 sandervl Exp $ */
+/* $Id: kobjects.cpp,v 1.12 2001-03-19 19:27:13 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -253,7 +253,7 @@ ODINFUNCTION2(DWORD, WaitForSingleObject,
 
 
 /*****************************************************************************
- * Name      : DWORD OS2WaitForSingleObjectEx
+ * Name      : DWORD WaitForSingleObjectEx
  * Purpose   : The WaitForSingleObjectEx function is an extended wait function
  *             that can be used to perform an alertable wait. This enables the
  *             function to return when the system queues an I/O completion

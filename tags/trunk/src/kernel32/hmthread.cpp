@@ -1,4 +1,4 @@
-/* $Id: hmthread.cpp,v 1.5 2000-11-17 14:34:06 sandervl Exp $ */
+/* $Id: hmthread.cpp,v 1.6 2001-03-19 19:27:13 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -83,8 +83,7 @@ HANDLE HMDeviceThreadClass::CreateThread(PHMHANDLEDATA          pHMHandleData,
 //******************************************************************************
 INT HMDeviceThreadClass::GetThreadPriority(PHMHANDLEDATA pHMHandleData)
 {
-    dprintf(("OS2GetThreadPriority(%08xh)\n",
-             pHMHandleData->hHMHandle));
+    dprintf(("GetThreadPriority(%08xh)\n", pHMHandleData->hHMHandle));
 
     return O32_GetThreadPriority(pHMHandleData->hHMHandle);
 }
@@ -92,8 +91,7 @@ INT HMDeviceThreadClass::GetThreadPriority(PHMHANDLEDATA pHMHandleData)
 //******************************************************************************
 DWORD HMDeviceThreadClass::SuspendThread(PHMHANDLEDATA pHMHandleData)
 {
-    dprintf(("OS2SuspendThread %08xh)\n",
-             pHMHandleData->hHMHandle));
+    dprintf(("SuspendThread %08xh)\n", pHMHandleData->hHMHandle));
 
     return O32_SuspendThread(pHMHandleData->hHMHandle);
 }
@@ -101,7 +99,7 @@ DWORD HMDeviceThreadClass::SuspendThread(PHMHANDLEDATA pHMHandleData)
 //******************************************************************************
 BOOL HMDeviceThreadClass::SetThreadPriority(PHMHANDLEDATA pHMHandleData, int priority)
 {
-    dprintf(("OS2SetThreadPriority (%08xh,%08xh)\n",
+    dprintf(("SetThreadPriority (%08xh,%08xh)\n",
              pHMHandleData->hHMHandle,
              priority));
 

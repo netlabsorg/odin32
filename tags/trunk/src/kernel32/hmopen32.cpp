@@ -1,4 +1,4 @@
-/* $Id: hmopen32.cpp,v 1.27 2000-10-03 17:28:30 sandervl Exp $ */
+/* $Id: hmopen32.cpp,v 1.28 2001-03-19 19:27:13 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -198,22 +198,29 @@ DWORD HMDeviceOpen32Class::GetFileInformationByHandle(PHMHANDLEDATA             
 DWORD HMDeviceOpen32Class::WaitForSingleObject(PHMHANDLEDATA pHMHandleData,
                                                DWORD         dwTimeout)
 {
- DWORD rc, starttime, endtime;
+ DWORD rc;
+#ifdef DEBUG
+ DWORD starttime, endtime;
+#endif
 
-  dprintfl(("KERNEL32: HandleManager::Open32::WaitForSingleObject(%08xh,%08h)\n",
+  dprintfl(("KERNEL32: HandleManager::Open32::WaitForSingleObject(%08xh %08xh)\n",
             pHMHandleData->hHMHandle,
             dwTimeout));
 
+#ifdef DEBUG
   if(dwTimeout) {
-    starttime = O32_GetCurrentTime();
+       starttime = O32_GetCurrentTime();
   }
+#endif
   rc =  (O32_WaitForSingleObject(pHMHandleData->hHMHandle,
                                  dwTimeout));
+#ifdef DEBUG
   if(dwTimeout) {
-    endtime = O32_GetCurrentTime();
-    dprintf(("KERNEL32: HandleManager::WaitForSingleObject %x delta = %x (rc=%x)", pHMHandleData->hHMHandle, endtime - starttime, rc));
+       endtime = O32_GetCurrentTime();
+       dprintf2(("KERNEL32: HandleManager::WaitForSingleObject %x %x delta = %x (rc=%x)", pHMHandleData->hHMHandle, dwTimeout, endtime - starttime, rc));
   }
-  else dprintf(("KERNEL32: HandleManager::WaitForSingleObject %x rc=%x", pHMHandleData->hHMHandle, rc));
+  else dprintf2(("KERNEL32: HandleManager::WaitForSingleObject %x 0 rc=%x", pHMHandleData->hHMHandle, rc));
+#endif
   return rc;
 }
 

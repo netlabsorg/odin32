@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.97 2001-02-09 18:31:05 sandervl Exp $
+; $Id: kernel32.def,v 1.98 2001-03-19 19:27:13 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -1149,7 +1149,10 @@ EXPORTS
     _ConvertCursorToOS2@4                                         @2008 NONAME
     _FreeOS2Resource@4                                            @2009 NONAME
 
+    _InitializeTIB@4                                              @2010 NONAME
+    _DestroyTIB@0                                                 @2011 NONAME
+    _GetProcessTIBSel@0                                           @2012 NONAME
+
     GetDisplayCodepage__Fv                                        @3000 NONAME
     GetWindowsCodepage__Fv                                        @3001 NONAME
-
 

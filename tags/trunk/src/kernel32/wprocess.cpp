@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.114 2001-03-13 18:45:35 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.115 2001-03-19 19:27:14 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -127,7 +127,7 @@ TEB *WIN32API GetTEBFromThreadHandle(HANDLE hThread)
 //******************************************************************************
 // Set up the TIB selector and memory for the current thread
 //******************************************************************************
-TEB *InitializeTIB(BOOL fMainThread)
+TEB * WIN32API InitializeTIB(BOOL fMainThread)
 {
   TEB   *winteb;
   ULONG  hThreadMain;
@@ -260,9 +260,18 @@ TEB *InitializeTIB(BOOL fMainThread)
     return winteb;
 }
 //******************************************************************************
+//******************************************************************************
+ULONG WIN32API GetProcessTIBSel()
+{
+    if(fExitProcess) {
+        return 0;
+    }
+    return ProcessTIBSel;
+}
+//******************************************************************************
 // Destroy the TIB selector and memory for the current thread
 //******************************************************************************
-void DestroyTIB()
+void WIN32API DestroyTIB()
 {
  SHORT  orgtibsel;
  TEB   *winteb;

@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.31 2001-02-22 18:12:06 sandervl Exp $ */
+/* $Id: misc.cpp,v 1.32 2001-03-19 19:27:13 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -256,6 +256,11 @@ int checkOdinHeap = 1;
 #define ODIN_HEAPCHECK()
 #endif
 
+//#define LOG_TIME
+#ifdef LOG_TIME
+DWORD WIN32API GetTickCount(void);
+#endif
+
 int SYSTEM WriteLog(char *tekst, ...)
 {
   USHORT  sel = RestoreOS2FS();
@@ -293,10 +298,17 @@ int SYSTEM WriteLog(char *tekst, ...)
     va_start(argptr, tekst);
     if(teb) {
         teb->o.odin.logfile = (DWORD)flog;
+#ifdef LOG_TIME
         if(sel == 0x150b && !fIsOS2Image) {
-        fprintf(flog, "t%d: (FS=150B) ", teb->o.odin.threadId);
-    }
-    else    fprintf(flog, "t%d: ", teb->o.odin.threadId);
+             fprintf(flog, "t%d: (%x) (FS=150B) ", teb->o.odin.threadId, GetTickCount());
+        }
+        else fprintf(flog, "t%d: (%x) ", teb->o.odin.threadId, GetTickCount());
+#else
+        if(sel == 0x150b && !fIsOS2Image) {
+             fprintf(flog, "t%d: (FS=150B) ", teb->o.odin.threadId);
+        }
+        else fprintf(flog, "t%d: ", teb->o.odin.threadId);
+#endif
     }
     vfprintf(flog, tekst, argptr);
     if(teb) teb->o.odin.logfile = 0;
