@@ -1,4 +1,4 @@
-/* $Id: dwaveout.cpp,v 1.22 2000-04-07 10:01:59 sandervl Exp $ */
+/* $Id: dwaveout.cpp,v 1.23 2000-04-08 09:16:53 sandervl Exp $ */
 
 /*
  * Wave playback class
@@ -56,9 +56,10 @@ DartWaveOut::DartWaveOut(LPWAVEFORMATEX pwfx, ULONG nCallback, ULONG dwInstance,
 {
    Init(pwfx);
 
-   mthdCallback         = (LPDRVCALLBACK)nCallback; // callback function
-   selCallback          = usSel;                    // callback win32 tib selector
+   mthdCallback     = (LPDRVCALLBACK)nCallback; // callback function
+   selCallback      = usSel;                    // callback win32 tib selector
    this->dwInstance = dwInstance;
+   fUnderrun        = FALSE;
 
    if(!ulError)
     callback((ULONG)this, WOM_OPEN, dwInstance, 0, 0);
@@ -381,6 +382,11 @@ MMRESULT DartWaveOut::write(LPWAVEHDR pwh, UINT cbwh)
         curhdr      = pwh;
         pwh->lpNext = NULL;
 
+        if(State != STATE_STOPPED) {//don't start playback if paused
+        	wmutex->leave();
+  		return(MMSYSERR_NOERROR);
+	}
+
         while(TRUE) {
             buflength = min((ULONG)MixBuffer[curFillBuf].ulBufferLength - curPlayPos,
                             (ULONG)wavehdr->dwBufferLength - curFillPos);
@@ -409,7 +415,8 @@ MMRESULT DartWaveOut::write(LPWAVEHDR pwh, UINT cbwh)
                 break;
         }
         dprintf(("MixSetupParms = %X\n", MixSetupParms));
-        State = STATE_PLAYING;
+        State     = STATE_PLAYING;
+        fUnderrun = FALSE;
         wmutex->leave();
 
         MixSetupParms->pmixWrite(MixSetupParms->ulMixHandle,
@@ -430,7 +437,7 @@ MMRESULT DartWaveOut::write(LPWAVEHDR pwh, UINT cbwh)
         }
         else    wavehdr = pwh;
         wmutex->leave();
-        if(State != STATE_PLAYING) {//continue playback
+        if(State == STATE_STOPPED) {//continue playback
             restart();
         }
   }
@@ -443,10 +450,13 @@ MMRESULT DartWaveOut::pause()
 {
  MCI_GENERIC_PARMS Params;
 
-  if(State != STATE_PLAYING)
-        return(MMSYSERR_NOERROR);
-
   wmutex->enter(VMUTEX_WAIT_FOREVER);
+  if(State != STATE_PLAYING) {
+  	State = STATE_PAUSED;
+  	wmutex->leave();
+        return(MMSYSERR_NOERROR);
+  }
+
   State = STATE_PAUSED;
   wmutex->leave();
 
@@ -489,8 +499,9 @@ MMRESULT DartWaveOut::reset()
     	wmutex->enter(VMUTEX_WAIT_FOREVER);
     	wavehdr = wavehdr->lpNext;
   }
-  wavehdr = NULL;
-  State = STATE_STOPPED;
+  wavehdr   = NULL;
+  State     = STATE_STOPPED;
+  fUnderrun = FALSE;
 
   wmutex->leave();
   return(MMSYSERR_NOERROR);
@@ -506,7 +517,8 @@ MMRESULT DartWaveOut::restart()
 	return(MMSYSERR_NOERROR);
     }
     wmutex->enter(VMUTEX_WAIT_FOREVER);
-    State = STATE_PLAYING;
+    State     = STATE_PLAYING;
+    fUnderrun = FALSE;
     wmutex->leave();
     curbuf = curPlayBuf;
     for(i=0;i<PREFILLBUF_DART;i++) {
@@ -624,7 +636,7 @@ BOOL DartWaveOut::find(DartWaveOut *dwave)
 void DartWaveOut::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags)
 {
  ULONG    buflength;
- WAVEHDR *whdr = wavehdr, *prevhdr = NULL;
+ WAVEHDR *whdr, *prevhdr = NULL;
 
 #ifdef DEBUG1
   dprintf(("WINMM: handler %d\n", curPlayBuf));
@@ -632,6 +644,7 @@ void DartWaveOut::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags
   if(ulFlags == MIX_STREAM_ERROR) {
     if(ulStatus == ERROR_DEVICE_UNDERRUN) {
         dprintf(("WINMM: WaveOut handler UNDERRUN!\n"));
+        fUnderrun = TRUE;
         pause();    //out of buffers, so pause playback
         return;
     }
@@ -640,6 +653,15 @@ void DartWaveOut::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags
   }
   wmutex->enter(VMUTEX_WAIT_FOREVER);
 
+  whdr = wavehdr;
+  if(whdr == NULL) {
+        wmutex->leave();
+	//last buffer played -> no new ones -> underrun; pause playback
+        dprintf(("WINMM: WaveOut handler UNDERRUN!\n"));
+        fUnderrun = TRUE;
+        pause();    //out of buffers, so pause playback
+        return;
+  }
   while(whdr) {
     if(whdr->dwFlags & WHDR_DONE) {
 #ifdef DEBUG1
@@ -648,7 +670,7 @@ void DartWaveOut::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags
         whdr->dwFlags &= ~WHDR_INQUEUE;
 
         if(prevhdr == NULL)
-            wavehdr = whdr->lpNext;
+            	wavehdr = whdr->lpNext;
         else    prevhdr->lpNext = whdr->lpNext;
 
         whdr->lpNext = NULL;
