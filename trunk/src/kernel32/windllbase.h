@@ -1,4 +1,4 @@
-/* $Id: windllbase.h,v 1.3 2000-06-14 02:27:33 phaller Exp $ */
+/* $Id: windllbase.h,v 1.4 2000-07-18 18:37:29 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
@@ -49,7 +49,9 @@ virtual ULONG     AddRef();
 virtual	ULONG     Release();
 
 	char     *getName()          { return szModule; };
-	void      setNoEntryCalls()  { fSkipEntryCalls = TRUE; };
+
+        //do not call the ATTACH_THREAD, DETACH_THREAD functions
+	void      disableThreadLibraryCalls()  { fSkipThreadEntryCalls = TRUE; };
 
 	Win32DllBase *getNext()  { return next; };
 static 	Win32DllBase *getFirst();
@@ -70,9 +72,6 @@ static  void      tlsDetachThreadFromAllDlls();
 	BOOL      detachProcess();
 	BOOL      attachThread();
 	BOOL      detachThread();
-
-	// enable / disable thread attach/detach calls
-	void      setThreadLibraryCalls(BOOL fEnable);
 
 	//This counter is incremented when the dll has been loaded with LoadLibrary(Ex)
         //(== not loaded on behalf of another dll or the main exe)
@@ -125,7 +124,7 @@ protected:
 	void          printDependencies(char *parent);
 #endif
 
-	BOOL          fSkipEntryCalls, fUnloaded, fAttachedToProcess;
+	BOOL          fSkipThreadEntryCalls, fUnloaded, fAttachedToProcess;
 
 	WIN32DLLENTRY dllEntryPoint;
 

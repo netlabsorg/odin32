@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.83 2000-07-06 21:18:45 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.84 2000-07-18 18:37:30 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -830,7 +830,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
          */
         if (dwFlags & (DONT_RESOLVE_DLL_REFERENCES | LOAD_LIBRARY_AS_DATAFILE))
         {
-            peldrDll->setNoEntryCalls();
+            peldrDll->disableThreadLibraryCalls();
             //peldrDll->setDontProcessImports(); not implemented?
         }
         if (dwFlags & LOAD_WITH_ALTERED_SEARCH_PATH)
@@ -865,10 +865,18 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
          */
         if (peldrDll->init(0))
         {
-            peldrDll->incDynamicLib();
             peldrDll->AddRef();
-            if (peldrDll->attachProcess())
+            if (peldrDll->attachProcess()) {
                 hDll = peldrDll->getInstanceHandle();
+   	        //Must be called *after* attachprocess, since attachprocess may also
+                //trigger LoadLibrary calls
+                //Those dlls must not be put in front of this dll in the dynamic
+                //dll list; or else the unload order is wrong:
+                //i.e. RPAP3260 loads PNRS3260 in DLL_PROCESS_ATTACH
+                //     this means that in ExitProcess, PNRS3260 needs to be removed
+                //     first since RPAP3260 depends on it
+                peldrDll->incDynamicLib();
+            }
             else
             {
                 dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): attachProcess call to Win32PeLdrDll instance failed. returns NULL.",
@@ -1479,7 +1487,7 @@ ODINFUNCTION1(BOOL,DisableThreadLibraryCalls,HMODULE,hModule)
   if(winmod)
   {
     // don't call ATTACH/DETACH thread functions in DLL
-    winmod->setThreadLibraryCalls(FALSE);
+    winmod->disableThreadLibraryCalls();
     return TRUE;
   }
   else

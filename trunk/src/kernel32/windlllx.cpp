@@ -1,4 +1,4 @@
-/* $Id: windlllx.cpp,v 1.10 2000-04-14 22:35:27 sandervl Exp $ */
+/* $Id: windlllx.cpp,v 1.11 2000-07-18 18:37:29 sandervl Exp $ */
 
 /*
  * Win32 LX Dll class (compiled in OS/2 using Odin32 api)
@@ -142,7 +142,7 @@ Win32LxDll::Win32LxDll(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint, PVOID pRes
                   Win32DllBase(hInstance, EntryPoint)
 {
   if(EntryPoint == NULL) {
-  	fSkipEntryCalls    = TRUE;
+  	fSkipThreadEntryCalls    = TRUE;
   	fAttachedToProcess = TRUE;
   }
 }

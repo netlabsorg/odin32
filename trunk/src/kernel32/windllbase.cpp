@@ -1,4 +1,4 @@
-/* $Id: windllbase.cpp,v 1.14 2000-06-14 02:27:33 phaller Exp $ */
+/* $Id: windllbase.cpp,v 1.15 2000-07-18 18:37:29 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
@@ -50,7 +50,7 @@ VMutex dlllistmutex;   //protects linked lists of heaps
 Win32DllBase::Win32DllBase(HINSTANCE hinstance, WIN32DLLENTRY DllEntryPoint, 
                            Win32ImageBase *parent)
                  : Win32ImageBase(hinstance),
-  	           referenced(0), fSkipEntryCalls(FALSE), next(NULL), fInserted(FALSE),
+  	           referenced(0), fSkipThreadEntryCalls(FALSE), next(NULL), fInserted(FALSE),
                    fAttachedToProcess(FALSE), fUnloaded(FALSE), 
                    nrDynamicLibRef(0), fLoadLibrary(FALSE), fDisableUnload(FALSE)
 {
@@ -100,6 +100,15 @@ void Win32DllBase::loadLibrary()
 void Win32DllBase::incDynamicLib()
 { 
   if(nrDynamicLibRef == 0) {
+        //NOTE:
+        //Must be called *after* attachprocess, since attachprocess may also
+        //trigger LoadLibrary calls
+        //Those dlls must not be put in front of this dll in the dynamic
+        //dll list; or else the unload order is wrong:
+        //i.e. RPAP3260 loads PNRS3260 in DLL_PROCESS_ATTACH
+        //     this means that in ExitProcess, PNRS3260 needs to be removed
+        //     first since RPAP3260 depends on it
+
   	dlllistmutex.enter();
 	loadLibDlls.Push((ULONG)this);
 	dlllistmutex.leave();
@@ -410,7 +419,7 @@ BOOL Win32DllBase::attachProcess()
   tlsAlloc();
   tlsAttachThread();	//setup TLS (main thread)
 
-  if(fSkipEntryCalls || dllEntryPoint == NULL) {
+  if(dllEntryPoint == NULL) {
         dprintf(("attachProcess not required for dll %s", szModule));
   	if(fSetExceptionHandler) {
   		SetFS(sel);
@@ -457,7 +466,7 @@ BOOL Win32DllBase::detachProcess()
  USHORT sel;
  BOOL rc;
 
-  if(fSkipEntryCalls || dllEntryPoint == NULL) {
+  if(dllEntryPoint == NULL) {
         tlsDetachThread();	//destroy TLS (main thread)
 	fUnloaded = TRUE;
 	return(TRUE);
@@ -500,7 +509,7 @@ BOOL Win32DllBase::attachThread()
  WINEXCEPTION_FRAME exceptFrame;
  BOOL               rc;
 
-  if(fSkipEntryCalls || dllEntryPoint == NULL)
+  if(fSkipThreadEntryCalls || dllEntryPoint == NULL)
 	return(TRUE);
 
   dprintf(("attachThread to dll %s", szModule));
@@ -518,7 +527,7 @@ BOOL Win32DllBase::detachThread()
  WINEXCEPTION_FRAME exceptFrame;
  BOOL               rc;
 
-  if(fSkipEntryCalls || dllEntryPoint == NULL)
+  if(fSkipThreadEntryCalls || dllEntryPoint == NULL)
 	return(TRUE);
 
   dprintf(("detachThread from dll %s", szModule));
@@ -629,6 +638,7 @@ void Win32DllBase::deleteDynamicLibs()
   }
 
   dlllistmutex.leave();
+  dprintf(("Win32DllBase::deleteDynamicLibs end"));
 }
 //******************************************************************************
 //******************************************************************************
@@ -797,15 +807,6 @@ BOOL Win32DllBase::isDll()
 {
   return TRUE;
 }
-//******************************************************************************
-//******************************************************************************
-void Win32DllBase::setThreadLibraryCalls(BOOL fEnable)
-{
-  // if fEnable == true, do call the ATTACH_THREAD, DETACH_THREAD functions
-  // if fEnable == false, do not call the ATTACH_THREAD, DETACH_THREAD functions
-  fSkipEntryCalls = !fEnable;
-}
-
 //******************************************************************************
 //******************************************************************************
 Win32DllBase *Win32DllBase::head = NULL;
