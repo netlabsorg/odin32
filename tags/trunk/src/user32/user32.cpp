@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.57 1999-11-27 00:10:21 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.58 1999-12-03 20:40:09 phaller Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -27,7 +27,7 @@
 #include <os2sel.h>
 
 #include <os2win.h>
-#include "misc.h"
+#include <misc.h>
 
 #include "user32.h"
 #include <winicon.h>
