@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.44 2000-05-28 16:45:13 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.45 2000-05-29 22:32:09 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -9,6 +9,7 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  * TODO: Check psh[i].Characteristics for more than only the code section
+ * TODO: Make resource section readonly when GDI32 is fixed
  *
  * NOTE: RSRC_LOAD is a special flag to only load the resource directory
  *       of a PE image. Processing imports, sections etc is not done.
@@ -843,8 +844,15 @@ BOOL Win32PeLdrImage::setMemFlags()
         case SECTION_IMPORT: //TODO: read only?
             	section[i].pageflags = PAG_WRITE | PAG_READ;
             	break;
-        case SECTION_READONLYDATA:
+
         case SECTION_RESOURCE:
+		//TODO: GDI32 changes some bitmap structures to avoid problems in Open32
+                //      -> causes crashes if resource section is readonly
+                //      -> make it readonly again when gdi32 has been rewritten
+            	section[i].pageflags = PAG_WRITE | PAG_READ;
+		break;
+
+        case SECTION_READONLYDATA:
 	case SECTION_TLS:
         default:
             	section[i].pageflags = PAG_READ;
