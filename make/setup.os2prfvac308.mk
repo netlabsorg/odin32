@@ -1,4 +1,4 @@
-# $Id: setup.os2prfvac308.mk,v 1.3 2002-04-13 04:40:00 bird Exp $
+# $Id: setup.os2prfvac308.mk,v 1.4 2002-04-22 00:30:10 bird Exp $
 
 # ---OS2, PROFILE, VAC308-------------------------
 ENV_NAME="OS/2, Profile, IBM VisualAge for C++ 3.08"
@@ -36,6 +36,7 @@ CC_FLAGS_EXE=$(CC_FLAGS) /Gm+ /Ge+ /Gn+
 CC_FLAGS_DLL=$(CC_FLAGS) /Gm+ /Ge- /Gn-
 CC_FLAGS_CRT=$(CC_FLAGS) /Gm+ /Ge-
 CC_FLAGS_SYS=$(CC_FLAGS) /Rn  /Ge+ /Gn+ /DRING0 /Gr+ /Gs- -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext-
+CC_FLAGS_VDD=$(CC_FLAGS_SYS)
 CC_FLAGS_IFS=$(CC_FLAGS_SYS)
 CC_OBJ_OUT=/Fo
 CC_LST_OUT=/Fa
@@ -46,6 +47,7 @@ CXX_FLAGS_EXE=$(CXX_FLAGS) /Gm+ /Ge+ /Gn+
 CXX_FLAGS_DLL=$(CXX_FLAGS) /Gm+ /Ge- /Gn-
 CXX_FLAGS_CRT=$(CXX_FLAGS) /Gm+ /Ge-
 CXX_FLAGS_SYS=$(CXX_FLAGS) /Rn  /Ge+ /Gn+ /DRING0 /Gr+ /Gs- /Gx+ /Tm- -Wall+ppt-ppc-inl-cnv-gnr-vft-
+CXX_FLAGS_VDD=$(CXX_FLAGS_SYS)
 CXX_FLAGS_IFS=$(CXX_FLAGS_SYS)
 CXX_OBJ_OUT=/Fo
 CXX_LST_OUT=/Fa
@@ -57,20 +59,13 @@ LINK_FLAGS=/nofree /nologo /de /map /NOE /NOD /Optfunc /PACKCODE /PACKDATA
 LINK_FLAGS_EXE=$(LINK_FLAGS) /EXECutable /STACK:$(TARGET_STACKSIZE)
 LINK_FLAGS_DLL=$(LINK_FLAGS) /DLL
 LINK_FLAGS_SYS=$(LINK_FLAGS) /PDD /Align:16 /NOIgnorecase
+LINK_FLAGS_VDD=$(LINK_FLAGS) /VDD /Align:16 /NOIgnorecase
 LINK_FLAGS_IFS=$(LINK_FLAGS_DLL)
 LINK_CMD_EXE=$(LINK) $(LINK_FLAGS_EXE) @$(TARGET_LNK)
 LINK_CMD_DLL=$(LINK) $(LINK_FLAGS_DLL) @$(TARGET_LNK)
 LINK_CMD_SYS=$(LINK) $(LINK_FLAGS_SYS) @$(TARGET_LNK)
+LINK_CMD_VDD=$(LINK) $(LINK_FLAGS_VDD) @$(TARGET_LNK)
 LINK_CMD_IFS=$(LINK) $(LINK_FLAGS_IFS) @$(TARGET_LNK)
-!if 0 # nofree works better for me (kso) when working with my drivers...
-LINK_LNK1=$(TARGET_OBJS: =^
-)
-LINK_LNK2=/OUT:$(TARGET)
-LINK_LNK3=/MAP:$(TARGET_MAP)
-LINK_LNK4=$(TARGET_LIBS: =^
-)
-LINK_LNK5=$(TARGET_DEF)
-!else
 LINK_LNK1=$(TARGET_OBJS: =+^
 ),
 LINK_LNK2=$(TARGET),
@@ -78,7 +73,6 @@ LINK_LNK3=$(TARGET_MAP),
 LINK_LNK4=$(TARGET_LIBS: =+^
 ),
 LINK_LNK5=$(TARGET_DEF)
-!endif
 
 RC_FLAGS=-r -n -i $(PATH_INCLUDES:;= -i ) $(RC_DEFINES) $(RC_INCLUDES)
 RL_FLAGS=-x2 -n
