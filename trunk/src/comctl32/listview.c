@@ -5351,7 +5351,7 @@ static LRESULT LISTVIEW_GetItemA(HWND hwnd, LPLVITEMA lpLVItem, BOOL internal)
   }
 
 #ifdef __WIN32OS2__
-      if ((UINT)*ppszText != -1) {
+      if (ppszText && (UINT)*ppszText != -1) {
         dprintf(("LISTVIEW_GetItemA lpLVItem->mask (%x), dispInfo.item.mask (%x);", lpLVItem->mask, dispInfo.item.mask));
       }
 #endif
@@ -5362,7 +5362,7 @@ static LRESULT LISTVIEW_GetItemA(HWND hwnd, LPLVITEMA lpLVItem, BOOL internal)
     {
 #ifdef __WIN32OS2__
       dprintf(("LISTVIEW_GetItemA *ppszText (%x), dispInfo.item.pszText (%x);", *ppszText, dispInfo.item.pszText));
-      if ((UINT)*ppszText != -1) {
+      if (ppszText && (UINT)*ppszText != -1) {
         Str_SetPtrA(ppszText, dispInfo.item.pszText);
       } /* endif */
 #else
