@@ -1,7 +1,16 @@
- /* $Id: changelog,v 1.1188 2000-10-09 22:50:48 sandervl Exp $ */
+ /* $Id: changelog,v 1.1189 2000-10-10 17:14:49 sandervl Exp $ */
+
+ 2000-10-10: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: Print date and time of build during init (log)
+                Create system32\drivers directory during install
+                Implemented LOAD_LIBRARY_AS_DATAFILE & DONT_RESOLVE_DLL_REFERENCES
+                LoadLibraryExA/W features. Removed fake image class; put
+                it in the pe loader class instead.
+                LoadLibraryExA now also works for executables (implies LOAD_LIBRARY_AS_DATAFILE & DONT_RESOLVE_DLL_REFERENCES)
+                Rewrote GetVersionSize/Struct to use LoadLibraryExA.
 
  2000-10-09: Yuri Dario <mc6530@mclink.it>
-    - USER32: Corrected background brush for MDI windows
+    - USER32:   Corrected background brush for MDI windows
 
  2000-10-09: Patrick Haller <phaller@gmx.net>
     - KERNEL32: Fixed console bug (left offset) reported by Michal
