@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.105 2001-05-23 08:35:57 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.106 2001-05-30 08:00:29 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -1213,11 +1213,16 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
 
     if (redraw & RDW_INVALIDATE_W)
     {
-        //TODO: SvL: pingpong.exe doesn't have RDW_NOERASE, but doesn't want WM_ERASEBKGND msgs
+        //TODO: SvL: pingpong.exe doesn't have RDW_NOERASE, but doesn't want WM_ERASEBKGND msgs        
         if (redraw & RDW_ERASE_W) {
-             wnd->setEraseBkgnd(TRUE);
+            wnd->setEraseBkgnd(TRUE);
         }
-        else wnd->setEraseBkgnd(FALSE);
+        else 
+        //Don't clear erase background flag if the window is 
+        //already (partly) invalidated
+        if (!WinQueryUpdateRect (hwnd, NULL)) {
+            wnd->setEraseBkgnd(FALSE);
+        }
 
         if (!pRect && !hrgn)
             success = WinInvalidateRect (hwnd, NULL, IncludeChildren);
