@@ -1,4 +1,4 @@
-/* $Id: OS2SURFACE.CPP,v 1.42 2002-06-08 14:20:06 sandervl Exp $ */
+/* $Id: OS2SURFACE.CPP,v 1.43 2002-07-01 16:02:04 sandervl Exp $ */
 
 /*
  * DirectDraw Surface class implementaion
@@ -1501,12 +1501,20 @@ HRESULT OS2IDirectDrawSurface::DoColorFill(LPRECT lpDestRect,DWORD dwFillColor)
 
   if(NULL!=lpDestRect)
   {
-    dprintf(("DDRAW: Fill only Rect(%d,%d)(%d,%d)\n", lpDestRect->left, lpDestRect->top,
-             lpDestRect->right, lpDestRect->bottom));
-    FillWidth  = lpDestRect->right - lpDestRect->left;
-    FillHeight = lpDestRect->bottom - lpDestRect->top -1;
-    Top = lpDestRect->top;
-    Left = lpDestRect->left;
+    dprintf(("DDRAW: Fill only Rect(%d,%d)(%d,%d) (%d,%d)", lpDestRect->left, lpDestRect->top,
+             lpDestRect->right, lpDestRect->bottom, width, height));
+    FillWidth  = RECT_WIDTH(lpDestRect);
+    FillHeight = RECT_HEIGHT(lpDestRect);
+    Top        = lpDestRect->top;
+    Left       = lpDestRect->left;
+    if(Top + FillHeight > height) {
+        FillHeight = height - Top;
+        dprintf(("correcting FillHeight to %d", FillHeight));
+    }
+    if(Left + FillWidth > width) {
+        FillWidth = width - Left;
+        dprintf(("correcting FillWidth to %d", FillWidth));
+    }
   }
   else
   {
@@ -1514,7 +1522,7 @@ HRESULT OS2IDirectDrawSurface::DoColorFill(LPRECT lpDestRect,DWORD dwFillColor)
     Top = 0;
     Left = 0;
     FillWidth  = width;
-    FillHeight = height -1;
+    FillHeight = height;
     //pLine = pDiveBuffer;
   }
   //dprintf(("DDRAW: 0x%08X (%d/%d) at\n", pLine,FillWidth,FillHeight));
@@ -2710,7 +2718,7 @@ HRESULT WIN32API SurfDoBlt(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
   {
     dprintf(("DDRAW: Blitting with scaling\n Not supported.\n"));
 
-//    return DDERR_NOSTRETCHHW;
+    return DDERR_NOSTRETCHHW;
   }
 
   if( ( RECT_WIDTH(lpDestRect)  != RECT_WIDTH(lpSrcRect) ) ||
@@ -4439,7 +4447,6 @@ HRESULT WIN32API SurfGetDC(THIS This, HDC FAR *hdc)
               LockedSurfaceDesc.dwHeight,
               LockedSurfaceDesc.ddpfPixelFormat.dwRGBBitCount
             ));
-    #if 1
     memset(&BitmapInfo, 0, sizeof(BitmapInfo));
     BitmapInfo.bmiHead.biSize     = sizeof(BITMAPINFOHEADER);
     BitmapInfo.bmiHead.biWidth    = LockedSurfaceDesc.dwWidth;
@@ -4452,14 +4459,7 @@ HRESULT WIN32API SurfGetDC(THIS This, HDC FAR *hdc)
     bmihHdr.biHeight   = LockedSurfaceDesc.dwHeight;
     bmihHdr.biPlanes   = 1;
     bmihHdr.biBitCount = (WORD)LockedSurfaceDesc.ddpfPixelFormat.dwRGBBitCount;
-    #else
-    bmpSurface.bmType       = 0;
-    bmpSurface.bmWidth      = LockedSurfaceDesc.dwWidth;
-    bmpSurface.bmHeight     = LockedSurfaceDesc.dwHeight;
-    bmpSurface.bmWidthBytes = LockedSurfaceDesc.lPitch;
-    bmpSurface.bmPlanes     = 1;
-    bmpSurface.bmBits       = LockedSurfaceDesc.lpSurface;
-    #endif
+
     switch(LockedSurfaceDesc.ddpfPixelFormat.dwRGBBitCount)
     {
       case 1:
@@ -4467,7 +4467,6 @@ HRESULT WIN32API SurfGetDC(THIS This, HDC FAR *hdc)
         dprintf(("DDRAW: 1/4 Bit Not yet supported\n"));
         break;
       case 8:
-        #if 1
         BitmapInfo.bmiHead.biCompression = BI_RGB;
         if (me->lpPalette != NULL)
            ddpal = me->lpPalette;
@@ -4492,29 +4491,24 @@ HRESULT WIN32API SurfGetDC(THIS This, HDC FAR *hdc)
                                        LockedSurfaceDesc.lpSurface,
                                        (PBITMAPINFO)&BitmapInfo,
                                        DIB_RGB_COLORS);
-        #else
-        bmpSurface.bmBitsPixel  = 8;
-        me->hbmImage = CreateBitmapIndirect( &bmpSurface);
-        #endif
         break;
+
       case 16:
-      case 32:
-        dprintf(("DDRAW: 16/32 Bit not supported by OS/2"));
-        break;
       case 24:
-        #if 0
-        BitmapInfo.bmiHead.biCompression = BI_RGB;
+      case 32:
+        BitmapInfo.bmiHead.biCompression = BI_BITFIELDS;
+        BitmapInfo.bmiHead.biClrUsed     = 3;
+        *((DWORD *) &(BitmapInfo.bmiCols[0])) = me->DDSurfaceDesc.ddpfPixelFormat.dwRBitMask;
+        *((DWORD *) &(BitmapInfo.bmiCols[1])) = me->DDSurfaceDesc.ddpfPixelFormat.dwGBitMask;
+        *((DWORD *) &(BitmapInfo.bmiCols[2])) = me->DDSurfaceDesc.ddpfPixelFormat.dwBBitMask;
         me->hbmImage = CreateDIBitmap( me->hdcImage,
-                                       NULL,
-                                       CBM_CREATEDIB,
+                                       &bmihHdr,
+                                       CBM_INIT,
                                        LockedSurfaceDesc.lpSurface,
                                        (PBITMAPINFO)&BitmapInfo,
                                        DIB_RGB_COLORS );
-        #else
-        bmpSurface.bmBitsPixel  = 24;
-        me->hbmImage = CreateBitmapIndirect( &bmpSurface);
-        #endif
         break;
+
       default:
         dprintf( ("Unexpected BitCount %d \n",
                     LockedSurfaceDesc.ddpfPixelFormat.dwRGBBitCount));
