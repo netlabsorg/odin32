@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.28 2000-04-15 15:11:13 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.29 2000-05-02 20:50:49 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -193,6 +193,7 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
 		if(win32wnd->getParent()) {
 			win32wnd = win32wnd->getParent();
 		}
+		dprintf(("Rerouting mouse messages to parent %x of disabled window %x", win32wnd->getWindowHandle(), winMsg->hwnd));
 		fWasDisabled = TRUE;
 	}
 
@@ -245,6 +246,7 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
 		if(win32wnd->getParent()) {
 			win32wnd = win32wnd->getParent();
 		}
+		dprintf(("Rerouting mouse messages to parent %x of disabled window %x", win32wnd->getWindowHandle(), winMsg->hwnd));
 		fWasDisabled = TRUE;
 	}
         if (IsNCMouseMsg(win32wnd))
@@ -635,7 +637,7 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
         keyWasPressed = ((SHORT1FROMMP (os2Msg->mp1) & KC_PREVDOWN) == KC_PREVDOWN);
 
         dprintf(("PM: WM_CHAR: %x %x %d %x", SHORT1FROMMP(os2Msg->mp2), SHORT2FROMMP(os2Msg->mp2), repeatCount, scanCode));
-        dprintf(("PM: WM_CHAR: %x", flags));
+        dprintf(("PM: WM_CHAR: hwnd %x flags %x", win32wnd->getWindowHandle(), flags));
 
         // vitali add begin
         if ( ( SHORT1FROMMP(os2Msg->mp2) & 0x0FF ) == 0x0E0 )

@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.62 2000-04-29 18:28:41 sandervl Exp $ */
+/* $Id: window.cpp,v 1.63 2000-05-02 20:50:53 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -464,7 +464,6 @@ BOOL WIN32API ShowWindow(HWND hwnd, int nCmdShow)
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
-    dprintf(("ShowWindow %x", hwnd));
     return window->ShowWindow(nCmdShow);
 }
 /*****************************************************************************
@@ -867,6 +866,7 @@ int WIN32API MapWindowPoints(HWND hwndFrom, HWND hwndTo, LPPOINT lpPoints,
  int retval = 0;
  OSLIBPOINT point;
 
+    SetLastError(0);
     if(lpPoints == NULL || cPoints == 0) {
         SetLastError(ERROR_INVALID_PARAMETER);
         return 0;
@@ -901,8 +901,8 @@ int WIN32API MapWindowPoints(HWND hwndFrom, HWND hwndTo, LPPOINT lpPoints,
     point.y = lpPoints->y;
     if (!mapWin32Point(wndfrom,wndto,&point))
     {
-      SetLastError(ERROR_INVALID_WINDOW_HANDLE);
-      return 0;
+      	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+      	return 0;
     }
 
     short int xinc = point.x - lpPoints->x;
@@ -918,7 +918,7 @@ int WIN32API MapWindowPoints(HWND hwndFrom, HWND hwndTo, LPPOINT lpPoints,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API ScreenToClient (HWND hwnd, LPPOINT pt)
+BOOL WIN32API ScreenToClient(HWND hwnd, LPPOINT pt)
 {
     Win32BaseWindow *wnd;
     PRECT rcl;
@@ -928,8 +928,10 @@ BOOL WIN32API ScreenToClient (HWND hwnd, LPPOINT pt)
     wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
     if (!wnd) {
         dprintf(("warning: ScreenToClient: window %x not found!", hwnd));
-        return (TRUE);
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        return FALSE;
     }
+    SetLastError(0);
 #ifdef DEBUG
     POINT tmp = *pt;
 #endif
