@@ -1,4 +1,4 @@
-/* $Id: waveout.cpp,v 1.9 1999-12-31 13:55:51 sandervl Exp $ */
+/* $Id: waveout.cpp,v 1.10 2000-02-17 14:09:33 sandervl Exp $ */
 //#undef DEBUG
 /*
  * Wave out MM apis
@@ -27,6 +27,9 @@
 #include "dwaveout.h"
 #include "misc.h"
 #include "winmm.h"
+
+#define DBG_LOCALLOG	DBG_waveout
+#include "dbglocal.h"
 
 ODINDEBUGCHANNEL(WINMM-WAVEOUT)
 
@@ -385,7 +388,8 @@ ODINFUNCTION2(MMRESULT, waveOutGetVolume,
     return MMSYSERR_NOERROR;    
   }
   else
-    return(MMSYSERR_INVALHANDLE);
+      return MMSYSERR_NOERROR;
+//    return(MMSYSERR_INVALHANDLE);
 }
 
 ODINFUNCTION2(MMRESULT, waveOutSetVolume,
@@ -398,7 +402,8 @@ ODINFUNCTION2(MMRESULT, waveOutSetVolume,
     return(dwave->setVolume(dwVolume));
   }
   else
-    return(MMSYSERR_INVALHANDLE);
+      return MMSYSERR_NOERROR;
+//    return(MMSYSERR_INVALHANDLE);
 }
 
 ODINFUNCTION2(MMRESULT, waveOutGetPlaybackRate,

@@ -1,4 +1,4 @@
-/* $Id: wavein.cpp,v 1.4 1999-08-19 18:46:05 phaller Exp $ */
+/* $Id: wavein.cpp,v 1.5 2000-02-17 14:09:32 sandervl Exp $ */
 
 /*
  * Wave in stubs
@@ -24,6 +24,9 @@
 #include <unicode.h>
 
 #include "winmm.h"
+
+#define DBG_LOCALLOG	DBG_wavein
+#include "dbglocal.h"
 
 
 ODINDEBUGCHANNEL(WINMM-WAVEIN)

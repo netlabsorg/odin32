@@ -1,4 +1,4 @@
-/* $Id: driver.cpp,v 1.4 1999-08-19 18:46:04 phaller Exp $ */
+/* $Id: driver.cpp,v 1.5 2000-02-17 14:09:30 sandervl Exp $ */
 
 /*
  * Driver multimedia apis
@@ -24,6 +24,9 @@
 
 #include "winmm.h"
 #include "os2timer.h"
+
+#define DBG_LOCALLOG	DBG_driver
+#include "dbglocal.h"
 
 ODINDEBUGCHANNEL(WINMM-DRIVER)
 

@@ -1,4 +1,4 @@
-/* $Id: auxos2.cpp,v 1.7 1999-12-29 10:44:16 sandervl Exp $ */
+/* $Id: auxos2.cpp,v 1.8 2000-02-17 14:09:30 sandervl Exp $ */
 
 /*
  * Auxilary multimedia OS/2 implementation
@@ -27,6 +27,9 @@
 #include "unicode.h"
 
 #include "auxiliary.h"
+
+#define DBG_LOCALLOG	DBG_auxos2
+#include "dbglocal.h"
 
 ULONG auxDeviceId = -1;
 

@@ -1,4 +1,4 @@
-/* $Id: joyos2.cpp,v 1.3 1999-08-19 18:46:04 phaller Exp $ */
+/* $Id: joyos2.cpp,v 1.4 2000-02-17 14:09:30 sandervl Exp $ */
 /*
  * OS/2 Joystick apis
  *
@@ -19,6 +19,8 @@
 #include <misc.h>
 #include "joyos2.h"
 
+#define DBG_LOCALLOG	DBG_joyos2
+#include "dbglocal.h"
 
 #define GAMEPDDNAME     "GAME$"
 

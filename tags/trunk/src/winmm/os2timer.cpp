@@ -1,4 +1,4 @@
-/* $Id: os2timer.cpp,v 1.13 1999-12-29 08:33:56 phaller Exp $ */
+/* $Id: os2timer.cpp,v 1.14 2000-02-17 14:09:32 sandervl Exp $ */
 
 /*
  * OS/2 Timer class
@@ -27,6 +27,8 @@
 #include "time.h"
 #include "os2timer.h"
 
+#define DBG_LOCALLOG	DBG_os2timer
+#include "dbglocal.h"
 
 
 /****************************************************************************
