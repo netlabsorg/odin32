@@ -1,4 +1,4 @@
-/* $Id: win32wnd.cpp,v 1.21 1999-07-25 09:19:22 sandervl Exp $ */
+/* $Id: win32wnd.cpp,v 1.22 1999-07-25 15:51:56 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -30,6 +30,7 @@
 #include <oslibgdi.h>
 #include <oslibres.h>
 #include <winres.h>
+#include "syscolor.h"
 
 #define HAS_DLGFRAME(style,exStyle) \
     (((exStyle) & WS_EX_DLGMODALFRAME) || \
@@ -59,12 +60,11 @@ Win32Window::Win32Window(CREATESTRUCTA *lpCreateStructA, ATOM classAtom, BOOL is
 void Win32Window::Init()
 {
   isUnicode        = FALSE;
+  fCreated         = FALSE;
 
-  windowName       = NULL;
+  memset(windowNameA, 0, MAX_WINDOW_NAMELENGTH);
+  memset(windowNameW, 0, MAX_WINDOW_NAMELENGTH*sizeof(WCHAR));
   wndNameLength    = 0;
-
-  windowText       = NULL;;
-  wndTextLength    = 0;
 
   userWindowLong   = NULL;;
   nrUserWindowLong = 0;
@@ -114,10 +114,6 @@ Win32Window::~Win32Window()
 
   if(Win32Hwnd)
         HMHandleFree(Win32Hwnd & 0xFFFF);
-  if(windowName)
-        free(windowName);
-  if(windowText)
-        free(windowText);
   if(userWindowLong)
         free(userWindowLong);
 }
@@ -247,21 +243,21 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 
   if ((cs->style & WS_CHILD) && cs->hwndParent)
   {
-    SetParent(cs->hwndParent);
+        SetParent(cs->hwndParent);
   }
   else
   {
         if (!cs->hwndParent) {
-                owner = NULL;
+            owner = NULL;
         }
         else
         {
-        owner = GetWindowFromHandle(cs->hwndParent);
-                if(owner == NULL)
-                {
-                        dprintf(("HMHandleTranslateToOS2 couldn't find owner window %x!!!", cs->hwndParent));
-                        return FALSE;
-                }
+            owner = GetWindowFromHandle(cs->hwndParent);
+            if(owner == NULL)
+            {
+                dprintf(("HMHandleTranslateToOS2 couldn't find owner window %x!!!", cs->hwndParent));
+                return FALSE;
+            }
         }
   }
 
@@ -360,6 +356,7 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         dprintf(("Window creation failed!!"));
         return FALSE;
   }
+
   if(OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32WNDPTR, (ULONG)this) == FALSE) {
         dprintf(("WM_CREATE: WinSetWindowULong %X failed!!", OS2Hwnd));
         return FALSE;
@@ -411,11 +408,16 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         dprintf(("Sending WM_CREATE"));
         if( (SendInternalMessage(WM_CREATE, 0, (LPARAM)cs )) != -1 )
         {
+            if(!(flags & WIN_NEED_SIZE)) {
+                SendMessageA(WM_SIZE, SIZE_RESTORED,
+                                MAKELONG(rectClient.right-rectClient.left,
+                                         rectClient.bottom-rectClient.top));
+                SendMessageA(WM_MOVE, 0, MAKELONG( rectClient.left, rectClient.top ) );
+            }
             SetWindowPos(HWND_TOP, rectClient.left, rectClient.top,
                          rectClient.right-rectClient.left,
                          rectClient.bottom-rectClient.top,
                          SWP_NOACTIVATE);
-
             if (cs->style & WS_VISIBLE) ShowWindow( sw );
 
 #if 0
@@ -424,6 +426,7 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
             if (!(dwStyle & WS_CHILD) && !owner)
                 HOOK_CallHooks16( WH_SHELL, HSHELL_WINDOWCREATED, hwnd, 0 );
 #endif
+            fCreated = TRUE;
             SetLastError(0);
             return TRUE;
         }
@@ -605,10 +608,10 @@ void Win32Window::GetMinMaxInfo(POINT *maxSize, POINT *maxPos,
     MinMax.ptMaxTrackSize.y = MAX( MinMax.ptMaxTrackSize.y,
                                    MinMax.ptMinTrackSize.y );
 
-    if (maxSize) *maxSize = MinMax.ptMaxSize;
-    if (maxPos) *maxPos = MinMax.ptMaxPosition;
-    if (minTrack) *minTrack = MinMax.ptMinTrackSize;
-    if (maxTrack) *maxTrack = MinMax.ptMaxTrackSize;
+    if (maxSize)    *maxSize  = MinMax.ptMaxSize;
+    if (maxPos)     *maxPos   = MinMax.ptMaxPosition;
+    if (minTrack)   *minTrack = MinMax.ptMinTrackSize;
+    if (maxTrack)   *maxTrack = MinMax.ptMaxTrackSize;
 }
 /***********************************************************************
  *           WINPOS_SendNCCalcSize
@@ -618,10 +621,9 @@ void Win32Window::GetMinMaxInfo(POINT *maxSize, POINT *maxPos,
  * oldWindowRect, oldClientRect and winpos must be non-NULL only
  * when calcValidRect is TRUE.
  */
-LONG Win32Window::SendNCCalcSize(BOOL calcValidRect,
-                            RECT *newWindowRect, RECT *oldWindowRect,
-                            RECT *oldClientRect, WINDOWPOS *winpos,
-                            RECT *newClientRect )
+LONG Win32Window::SendNCCalcSize(BOOL calcValidRect, RECT *newWindowRect, RECT *oldWindowRect,
+                                 RECT *oldClientRect, WINDOWPOS *winpos,
+                                 RECT *newClientRect )
 {
    NCCALCSIZE_PARAMS params;
    WINDOWPOS winposCopy;
@@ -631,9 +633,9 @@ LONG Win32Window::SendNCCalcSize(BOOL calcValidRect,
    if (calcValidRect)
    {
         winposCopy = *winpos;
-    params.rgrc[1] = *oldWindowRect;
-    params.rgrc[2] = *oldClientRect;
-    params.lppos = &winposCopy;
+        params.rgrc[1] = *oldWindowRect;
+        params.rgrc[2] = *oldClientRect;
+        params.lppos = &winposCopy;
    }
    result = SendInternalMessageA(WM_NCCALCSIZE, calcValidRect,
                                  (LPARAM)&params );
@@ -722,6 +724,10 @@ ULONG Win32Window::MsgSize(ULONG width, ULONG height, BOOL fMinimize, BOOL fMaxi
 {
  WORD fwSizeType = 0;
 
+    if(fCreated == FALSE) {//Solitaire crashes if it receives a WM_SIZE during CreateWindowEx (normal or our fault?)
+        return 1;
+    }
+
     if(fMinimize) {
             fwSizeType = SIZE_MINIMIZED;
     }
@@ -746,7 +752,7 @@ ULONG Win32Window::MsgSysCommand(ULONG win32sc, ULONG x, ULONG y)
     return SendInternalMessageA(WM_SYSCOMMAND, win32sc, MAKELONG((USHORT)x, (USHORT)y));
 }
 //******************************************************************************
-//TODO: virtual key translation & extended keyboard bit
+//TODO: virtual key & (possibly) scancode translation, extended keyboard bit & Unicode
 //******************************************************************************
 ULONG Win32Window::MsgChar(ULONG cmd, ULONG repeatcnt, ULONG scancode, ULONG vkey, ULONG keyflags)
 {
@@ -760,8 +766,14 @@ ULONG Win32Window::MsgChar(ULONG cmd, ULONG repeatcnt, ULONG scancode, ULONG vke
         lParam |= (1<<30);
     if(keyflags & KEY_UP)
         lParam |= (1<<31);
-    dprintf(("WM_CHAR: %x %x %08x", OS2Hwnd, cmd, lParam));
-    return SendInternalMessageA(WM_CHAR, cmd, lParam);
+    if(keyflags & KEY_DEADKEY) {
+        dprintf(("WM_DEADCHAR: %x %x %08x", OS2Hwnd, cmd, lParam));
+        return SendInternalMessageA(WM_DEADCHAR, cmd, lParam);
+    }
+    else {
+        dprintf(("WM_CHAR: %x %x %08x", OS2Hwnd, cmd, lParam));
+        return SendInternalMessageA(WM_CHAR, cmd, lParam);
+    }
 }
 //******************************************************************************
 //******************************************************************************
@@ -831,26 +843,26 @@ ULONG Win32Window::MsgButton(ULONG msg, ULONG x, ULONG y)
 //******************************************************************************
 ULONG Win32Window::MsgMouseMove(ULONG keystate, ULONG x, ULONG y)
 {
-ULONG winstate = 0;
+ ULONG winstate = 0;
 
-  if(keystate & WMMOVE_LBUTTON)
-    winstate |= MK_LBUTTON;
-  if(keystate & WMMOVE_RBUTTON)
-    winstate |= MK_RBUTTON;
-  if(keystate & WMMOVE_MBUTTON)
-    winstate |= MK_MBUTTON;
-  if(keystate & WMMOVE_SHIFT)
-    winstate |= MK_SHIFT;
-  if(keystate & WMMOVE_CTRL)
-    winstate |= MK_CONTROL;
+    if(keystate & WMMOVE_LBUTTON)
+        winstate |= MK_LBUTTON;
+    if(keystate & WMMOVE_RBUTTON)
+        winstate |= MK_RBUTTON;
+    if(keystate & WMMOVE_MBUTTON)
+        winstate |= MK_MBUTTON;
+    if(keystate & WMMOVE_SHIFT)
+        winstate |= MK_SHIFT;
+    if(keystate & WMMOVE_CTRL)
+        winstate |= MK_CONTROL;
 
-   return SendInternalMessageA(WM_MOUSEMOVE, keystate, MAKELONG(x, y));
+    return SendInternalMessageA(WM_MOUSEMOVE, keystate, MAKELONG(x, y));
 }
 //******************************************************************************
 //******************************************************************************
 ULONG Win32Window::MsgPaint(ULONG tmp1, ULONG tmp2)
 {
-  return SendInternalMessageA(WM_PAINT, 0, 0);
+    return SendInternalMessageA(WM_PAINT, 0, 0);
 }
 //******************************************************************************
 //******************************************************************************
@@ -865,10 +877,139 @@ ULONG Win32Window::MsgEraseBackGround(ULONG hps)
 //******************************************************************************
 ULONG Win32Window::MsgSetText(LPSTR lpsz, LONG cch)
 {
-  if(isUnicode) {
-        return SendInternalMessageW(WM_SETTEXT, 0, (LPARAM)lpsz);
-  }
-  else  return SendInternalMessageA(WM_SETTEXT, 0, (LPARAM)lpsz);
+    if(isUnicode) {
+            return SendInternalMessageW(WM_SETTEXT, 0, (LPARAM)lpsz);
+    }
+    else    return SendInternalMessageA(WM_SETTEXT, 0, (LPARAM)lpsz);
+}
+//******************************************************************************
+//TODO: in- or excluding terminating 0?
+//******************************************************************************
+ULONG Win32Window::MsgGetTextLength()
+{
+    return SendInternalMessageA(WM_GETTEXTLENGTH, 0, 0);
+}
+//******************************************************************************
+//******************************************************************************
+char *Win32Window::MsgGetText()
+{
+    if(isUnicode) {
+        SendInternalMessageW(WM_GETTEXT, MAX_WINDOW_NAMELENGTH, (LPARAM)windowNameW);
+    }
+    else {
+        SendInternalMessageA(WM_GETTEXT, MAX_WINDOW_NAMELENGTH, (LPARAM)windowNameA);
+    }
+    return windowNameA;
+}
+//******************************************************************************
+//******************************************************************************
+LRESULT Win32Window::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
+{
+    switch(Msg)
+    {
+    case WM_GETTEXTLENGTH:
+        return wndNameLength;
+
+    case WM_GETTEXT:   //TODO: SS_ICON controls
+        strncpy((LPSTR)lParam, windowNameA, wParam);
+        return min(wndNameLength, wParam);
+
+    case WM_SETTEXT:
+        return 0;
+
+    case WM_SETREDRAW:
+        if(wParam)
+                SetWindowLongA (GWL_STYLE, GetWindowLongA (GWL_STYLE) | WS_VISIBLE);
+        else    SetWindowLongA (GWL_STYLE, GetWindowLongA (GWL_STYLE) & ~WS_VISIBLE);
+
+        return 0; //TODO
+
+    case WM_NCCREATE:
+        return(TRUE);
+
+    case WM_CTLCOLORMSGBOX:
+    case WM_CTLCOLOREDIT:
+    case WM_CTLCOLORLISTBOX:
+    case WM_CTLCOLORBTN:
+    case WM_CTLCOLORDLG:
+    case WM_CTLCOLORSTATIC:
+    case WM_CTLCOLORSCROLLBAR:
+         SetBkColor((HDC)wParam, GetSysColor(COLOR_WINDOW));
+         SetTextColor((HDC)wParam, GetSysColor(COLOR_WINDOWTEXT));
+         return GetSysColorBrush(COLOR_BTNFACE);
+
+    case WM_PARENTNOTIFY:
+        return 0;
+
+    case WM_MOUSEACTIVATE:
+    {
+        DWORD dwStyle = GetWindowLongA(GWL_STYLE);
+        DWORD dwExStyle = GetWindowLongA(GWL_EXSTYLE);
+        dprintf(("DefWndProc: WM_MOUSEACTIVATE for %x Msg %s", Win32Hwnd, GetMsgText(HIWORD(lParam))));
+        if(dwStyle & WS_CHILD && !(dwExStyle & WS_EX_NOPARENTNOTIFY) )
+        {
+            if(getParent()) {
+                LRESULT rc = getParent()->SendMessageA(WM_MOUSEACTIVATE, wParam, lParam );
+                if(rc)  return rc;
+            }
+        }
+        return (LOWORD(lParam) == HTCAPTION) ? MA_NOACTIVATE : MA_ACTIVATE;
+    }
+    case WM_SETCURSOR:
+    {
+        DWORD dwStyle = GetWindowLongA(GWL_STYLE);
+        DWORD dwExStyle = GetWindowLongA(GWL_EXSTYLE);
+        dprintf(("DefWndProc: WM_SETCURSOR for %x Msg %s", Win32Hwnd, GetMsgText(HIWORD(lParam))));
+        if(dwStyle & WS_CHILD && !(dwExStyle & WS_EX_NOPARENTNOTIFY) )
+        {
+            if(getParent()) {
+                LRESULT rc = getParent()->SendMessageA(WM_SETCURSOR, wParam, lParam);
+                if(rc)  return rc;
+            }
+        }
+        return 1;
+    }
+    case WM_MOUSEMOVE:
+        return 0;
+
+    case WM_ERASEBKGND:
+    case WM_ICONERASEBKGND:
+        return 0;
+
+    case WM_NCLBUTTONDOWN:
+    case WM_NCLBUTTONUP:
+    case WM_NCLBUTTONDBLCLK:
+    case WM_NCRBUTTONUP:
+    case WM_NCRBUTTONDOWN:
+    case WM_NCRBUTTONDBLCLK:
+    case WM_NCMBUTTONDOWN:
+    case WM_NCMBUTTONUP:
+    case WM_NCMBUTTONDBLCLK:
+        return 0;           //TODO: Send WM_SYSCOMMAND if required
+
+    case WM_NCHITTEST: //TODO:
+        return 0;
+
+    default:
+        return 1;
+    }
+}
+//******************************************************************************
+//******************************************************************************
+LRESULT Win32Window::DefWindowProcW(UINT Msg, WPARAM wParam, LPARAM lParam)
+{
+    switch(Msg)
+    {
+    case WM_GETTEXTLENGTH:
+        return wndNameLength;
+
+    case WM_GETTEXT:   //TODO: SS_ICON controls
+        lstrcpynW((LPWSTR)lParam, windowNameW, wParam);
+        return min(wndNameLength, wParam);
+
+    default:
+        return DefWindowProcA(Msg, wParam, lParam);
+    }
 }
 //******************************************************************************
 //******************************************************************************
@@ -896,6 +1037,9 @@ LRESULT Win32Window::SendMessageA(ULONG Msg, WPARAM wParam, LPARAM lParam)
 
                 return(0);
         }
+        case WM_SETTEXT: //TODO: Nothing happens if passed to DefWindowProc
+                return win32wndproc(getWindowHandle(), WM_SETTEXT, wParam, lParam);
+
         case WM_LBUTTONDOWN:
         case WM_MBUTTONDOWN:
         case WM_RBUTTONDOWN:
@@ -936,6 +1080,9 @@ LRESULT Win32Window::SendMessageW(ULONG Msg, WPARAM wParam, LPARAM lParam)
 
                 return(1);
         }
+        case WM_SETTEXT: //TODO: Nothing happens if passed to DefWindowProc
+                return win32wndproc(getWindowHandle(), WM_SETTEXT, wParam, lParam);
+
         case WM_LBUTTONDOWN:
         case WM_MBUTTONDOWN:
         case WM_RBUTTONDOWN:
@@ -1099,9 +1246,10 @@ BOOL Win32Window::SetMenu(HMENU hMenu)
  PVOID          menutemplate;
  Win32Resource *winres = (Win32Resource *)hMenu;
 
+    dprintf(("SetMenu %x", hMenu));
     if(HIWORD(winres) == 0) {
         dprintf(("Win32Window:: Win32Resource *winres == 0"));
-    SetLastError(ERROR_INVALID_PARAMETER);
+        SetLastError(ERROR_INVALID_PARAMETER);
         return FALSE;
     }
     menutemplate = winres->lockOS2Resource();

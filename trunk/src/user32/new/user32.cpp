@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.10 1999-07-25 09:19:21 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.11 1999-07-25 15:51:56 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -257,7 +257,10 @@ BOOL WIN32API OffsetRect( PRECT lprc, int x, int  y)
 BOOL WIN32API CopyRect( PRECT lprcDst, const RECT * lprcSrc)
 {
 //    ddprintf(("USER32:  CopyRect\n"));
-    if (!lprcDst || !lprcSrc) return FALSE;
+    if (!lprcDst || !lprcSrc) {
+	SetLastError(ERROR_INVALID_PARAMETER);
+	return FALSE;
+    }
 
     memcpy(lprcDst,lprcSrc,sizeof(RECT));
 

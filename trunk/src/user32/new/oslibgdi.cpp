@@ -1,4 +1,4 @@
-/* $Id: oslibgdi.cpp,v 1.6 1999-07-25 08:19:05 sandervl Exp $ */
+/* $Id: oslibgdi.cpp,v 1.7 1999-07-25 15:51:55 sandervl Exp $ */
 /*
  * Window GDI wrapper functions for OS/2
  *
@@ -158,6 +158,9 @@ BOOL OSLibWinEndPaint(HDC hdc)
 //******************************************************************************
 HDC OSLibWinGetPS(HWND hwnd)
 {
+  if(hwnd == OSLIB_HWND_DESKTOP)
+	hwnd = HWND_DESKTOP;
+
   return (HDC)WinGetPS(hwnd);
 }
 //******************************************************************************
