@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.28 1999-12-28 17:04:22 cbratschi Exp $ */
+/* $Id: edit.cpp,v 1.29 1999-12-29 22:53:59 cbratschi Exp $ */
 /*
  *      Edit control
  *
@@ -19,9 +19,7 @@
   - text alignment for single and multi line (ES_LEFT, ES_RIGHT, ES_CENTER)
     new in Win98, Win2k: for single line too
   - WinNT/Win2k: higher size limits (single: 0x7FFFFFFE, multi: none)
-  - too many GetDC/ReleaseDC calls -> GetDC is very slow!
-    EM_REPLACESEL: calls more than 10 times GetDC/ReleaseDC!
-    add HDC parameter
+  - too many redraws and recalculations!
 */
 
 #include <os2win.h>
@@ -153,7 +151,7 @@ static inline void      EDIT_WM_Cut(HWND hwnd, EDITSTATE *es);
 /*
  *      Helper functions only valid for one type of control
  */
-static void     EDIT_BuildLineDefs_ML(HWND hwnd, EDITSTATE *es);
+static void     EDIT_BuildLineDefs_ML(HWND hwnd,EDITSTATE *es);
 static LPSTR    EDIT_GetPasswordPointer_SL(HWND hwnd, EDITSTATE *es);
 static void     EDIT_MoveDown_ML(HWND hwnd, EDITSTATE *es, BOOL extend);
 static void     EDIT_MovePageDown_ML(HWND hwnd, EDITSTATE *es, BOOL extend);
@@ -166,7 +164,7 @@ static VOID     EDIT_UpdateScrollBars(HWND hwnd,EDITSTATE *es,BOOL updateHorz,BO
 static INT      EDIT_CallWordBreakProc(HWND hwnd, EDITSTATE *es, INT start, INT index, INT count, INT action);
 static INT      EDIT_CharFromPos(HWND hwnd, EDITSTATE *es, INT x, INT y, LPBOOL after_wrap);
 static void     EDIT_ConfinePoint(HWND hwnd, EDITSTATE *es, LPINT x, LPINT y);
-static void     EDIT_GetLineRect(HWND hwnd, EDITSTATE *es, INT line, INT scol, INT ecol, LPRECT rc);
+static void     EDIT_GetLineRect(HWND hwnd,HDC dc,EDITSTATE *es, INT line, INT scol, INT ecol, LPRECT rc);
 static void     EDIT_InvalidateText(HWND hwnd, EDITSTATE *es, INT start, INT end);
 static void     EDIT_LockBuffer(HWND hwnd, EDITSTATE *es);
 static BOOL     EDIT_MakeFit(HWND hwnd, EDITSTATE *es, INT size);
@@ -207,7 +205,7 @@ static INT      EDIT_EM_LineFromChar(HWND hwnd, EDITSTATE *es, INT index);
 static INT      EDIT_EM_LineIndex(HWND hwnd, EDITSTATE *es, INT line);
 static INT      EDIT_EM_LineLength(HWND hwnd, EDITSTATE *es, INT index);
 static BOOL     EDIT_EM_LineScroll(HWND hwnd, EDITSTATE *es, INT dx, INT dy);
-static LRESULT  EDIT_EM_PosFromChar(HWND hwnd, EDITSTATE *es, INT index, BOOL after_wrap);
+static LRESULT  EDIT_EM_PosFromChar(HWND hwnd,HDC dc, EDITSTATE *es, INT index, BOOL after_wrap);
 static void     EDIT_EM_ReplaceSel(HWND hwnd, EDITSTATE *es, BOOL can_undo, LPCSTR lpsz_replace);
 static LRESULT  EDIT_EM_Scroll(HWND hwnd, EDITSTATE *es, INT action);
 static void     EDIT_EM_ScrollCaret(HWND hwnd, EDITSTATE *es);
@@ -564,7 +562,7 @@ LRESULT WINAPI EditWndProc( HWND hwnd, UINT msg,
 
         case EM_POSFROMCHAR:
                 //DPRINTF_EDIT_MSG32("EM_POSFROMCHAR");
-                result = EDIT_EM_PosFromChar(hwnd, es, (INT)wParam, FALSE);
+                result = EDIT_EM_PosFromChar(hwnd,0, es, (INT)wParam, FALSE);
                 break;
 
         case EM_CHARFROMPOS:
@@ -767,9 +765,9 @@ LRESULT WINAPI EditWndProc( HWND hwnd, UINT msg,
  *      a soft return '\r\r\n' or a hard return '\r\n'
  *
  */
-static void EDIT_BuildLineDefs_ML(HWND hwnd, EDITSTATE *es)
+static void EDIT_BuildLineDefs_ML(HWND hwnd,EDITSTATE *es)
 {
-        HDC dc = 0;
+        HDC hdc = 0;
         HFONT old_font = 0;
         LPSTR start, cp;
         INT fw;
@@ -808,14 +806,14 @@ static void EDIT_BuildLineDefs_ML(HWND hwnd, EDITSTATE *es)
                         current_def->net_length = cp - start;
                 }
 
-                if (!dc)
+                if (!hdc)
                 {
-                  dc = GetDC(hwnd);
+                  hdc = GetDC(hwnd);
                   if (es->font)
-                    old_font = SelectObject(dc, es->font);
+                    old_font = SelectObject(hdc, es->font);
                 }
 
-                current_def->width = (INT)LOWORD(GetTabbedTextExtentA(dc,
+                current_def->width = (INT)LOWORD(GetTabbedTextExtentA(hdc,
                                         start, current_def->net_length,
                                         es->tabs_count, es->tabs));
                 /* FIXME: check here for lines that are too wide even in AUTOHSCROLL (> 32767 ???) */
@@ -826,7 +824,7 @@ static void EDIT_BuildLineDefs_ML(HWND hwnd, EDITSTATE *es)
                                 prev = next;
                                 next = EDIT_CallWordBreakProc(hwnd, es, start - es->text,
                                                 prev + 1, current_def->net_length, WB_RIGHT);
-                                current_def->width = (INT)LOWORD(GetTabbedTextExtentA(dc,
+                                current_def->width = (INT)LOWORD(GetTabbedTextExtentA(hdc,
                                                         start, next, es->tabs_count, es->tabs));
                         } while (current_def->width <= fw);
                         if (!prev) {
@@ -834,7 +832,7 @@ static void EDIT_BuildLineDefs_ML(HWND hwnd, EDITSTATE *es)
                                 do {
                                         prev = next;
                                         next++;
-                                        current_def->width = (INT)LOWORD(GetTabbedTextExtentA(dc,
+                                        current_def->width = (INT)LOWORD(GetTabbedTextExtentA(hdc,
                                                                 start, next, es->tabs_count, es->tabs));
                                 } while (current_def->width <= fw);
                                 if (!prev)
@@ -842,7 +840,7 @@ static void EDIT_BuildLineDefs_ML(HWND hwnd, EDITSTATE *es)
                         }
                         current_def->net_length = prev;
                         current_def->ending = END_WRAP;
-                        current_def->width = (INT)LOWORD(GetTabbedTextExtentA(dc, start,
+                        current_def->width = (INT)LOWORD(GetTabbedTextExtentA(hdc, start,
                                                 current_def->net_length, es->tabs_count, es->tabs));
                 }
                 switch (current_def->ending) {
@@ -863,11 +861,11 @@ static void EDIT_BuildLineDefs_ML(HWND hwnd, EDITSTATE *es)
                 previous_next = &current_def->next;
                 es->line_count++;
         } while (current_def->ending != END_0);
-        if (dc)
+        if (hdc)
         {
           if (es->font)
-                  SelectObject(dc, old_font);
-          ReleaseDC(hwnd, dc);
+                  SelectObject(hdc, old_font);
+          ReleaseDC(hwnd, hdc);
         }
         EDIT_UpdateScrollBars(hwnd,es,TRUE,TRUE);
 }
@@ -1057,7 +1055,7 @@ static void EDIT_ConfinePoint(HWND hwnd, EDITSTATE *es, LPINT x, LPINT y)
  *      column to an ending column.
  *
  */
-static void EDIT_GetLineRect(HWND hwnd, EDITSTATE *es, INT line, INT scol, INT ecol, LPRECT rc)
+static void EDIT_GetLineRect(HWND hwnd,HDC dc,EDITSTATE *es, INT line, INT scol, INT ecol, LPRECT rc)
 {
         INT line_index =  EDIT_EM_LineIndex(hwnd, es, line);
 
@@ -1067,8 +1065,8 @@ static void EDIT_GetLineRect(HWND hwnd, EDITSTATE *es, INT line, INT scol, INT e
                 rc->top = es->format_rect.top;
         rc->bottom = rc->top + es->line_height;
 
-        rc->left = (scol == 0) ? es->format_rect.left : SLOWORD(EDIT_EM_PosFromChar(hwnd, es, line_index + scol, TRUE));
-        rc->right = (ecol == -1) ? es->format_rect.right : SLOWORD(EDIT_EM_PosFromChar(hwnd, es, line_index + ecol, TRUE))+1;
+        rc->left = (scol == 0) ? es->format_rect.left : SLOWORD(EDIT_EM_PosFromChar(hwnd,dc, es, line_index + scol, TRUE));
+        rc->right = (ecol == -1) ? es->format_rect.right : SLOWORD(EDIT_EM_PosFromChar(hwnd,dc, es, line_index + ecol, TRUE))+1;
 }
 
 
@@ -1133,7 +1131,7 @@ static void EDIT_SL_InvalidateText(HWND hwnd, EDITSTATE *es, INT start, INT end)
         RECT line_rect;
         RECT rc;
 
-        EDIT_GetLineRect(hwnd, es, 0, start, end, &line_rect);
+        EDIT_GetLineRect(hwnd,0, es, 0, start, end, &line_rect);
 
         if (IntersectRect(&rc, &line_rect, &es->format_rect))
         {
@@ -1182,26 +1180,26 @@ static void EDIT_ML_InvalidateText(HWND hwnd, EDITSTATE *es, INT start, INT end)
         IntersectRect(&rcWnd, &rc1, &es->format_rect);
         HideCaret(hwnd);
         if (sl == el) {
-                EDIT_GetLineRect(hwnd, es, sl, sc, ec, &rcLine);
+                EDIT_GetLineRect(hwnd,0, es, sl, sc, ec, &rcLine);
 
                 if (IntersectRect(&rcUpdate, &rcWnd, &rcLine))
                         InvalidateRect(hwnd, &rcUpdate, TRUE);
         } else {
-                EDIT_GetLineRect(hwnd, es, sl, sc,
+                EDIT_GetLineRect(hwnd,0, es, sl, sc,
                                 EDIT_EM_LineLength(hwnd, es,
                                         EDIT_EM_LineIndex(hwnd, es, sl)),
                                 &rcLine);
                 if (IntersectRect(&rcUpdate, &rcWnd, &rcLine))
                         InvalidateRect(hwnd, &rcUpdate, TRUE);
                 for (l = sl + 1 ; l < el ; l++) {
-                        EDIT_GetLineRect(hwnd, es, l, 0,
+                        EDIT_GetLineRect(hwnd,0, es, l, 0,
                                 EDIT_EM_LineLength(hwnd, es,
                                         EDIT_EM_LineIndex(hwnd, es, l)),
                                 &rcLine);
                         if (IntersectRect(&rcUpdate, &rcWnd, &rcLine))
                                 InvalidateRect(hwnd, &rcUpdate, TRUE);
                 }
-                EDIT_GetLineRect(hwnd, es, el, 0, ec, &rcLine);
+                EDIT_GetLineRect(hwnd,0, es, el, 0, ec, &rcLine);
                 if (IntersectRect(&rcUpdate, &rcWnd, &rcLine))
                         InvalidateRect(hwnd, &rcUpdate, TRUE);
         }
@@ -1352,7 +1350,7 @@ static void EDIT_MoveDown_ML(HWND hwnd, EDITSTATE *es, BOOL extend)
         INT s = es->selection_start;
         INT e = es->selection_end;
         BOOL after_wrap = (es->flags & EF_AFTER_WRAP);
-        LRESULT pos = EDIT_EM_PosFromChar(hwnd, es, e, after_wrap);
+        LRESULT pos = EDIT_EM_PosFromChar(hwnd,0, es, e, after_wrap);
         INT x = SLOWORD(pos);
         INT y = SHIWORD(pos);
 
@@ -1377,7 +1375,7 @@ static void EDIT_MoveEnd(HWND hwnd, EDITSTATE *es, BOOL extend)
         /* Pass a high value in x to make sure of receiving the en of the line */
         if (es->style & ES_MULTILINE)
                 e = EDIT_CharFromPos(hwnd, es, 0x3fffffff,
-                        HIWORD(EDIT_EM_PosFromChar(hwnd, es, es->selection_end, es->flags & EF_AFTER_WRAP)), &after_wrap);
+                        HIWORD(EDIT_EM_PosFromChar(hwnd,0, es, es->selection_end, es->flags & EF_AFTER_WRAP)), &after_wrap);
         else
                 e = lstrlenA(es->text);
         EDIT_EM_SetSel(hwnd, es, extend ? es->selection_start : e, e, after_wrap);
@@ -1422,7 +1420,7 @@ static void EDIT_MoveHome(HWND hwnd, EDITSTATE *es, BOOL extend)
         /* Pass the x_offset in x to make sure of receiving the first position of the line */
         if (es->style & ES_MULTILINE)
                 e = EDIT_CharFromPos(hwnd, es, -es->x_offset,
-                        HIWORD(EDIT_EM_PosFromChar(hwnd, es, es->selection_end, es->flags & EF_AFTER_WRAP)), NULL);
+                        HIWORD(EDIT_EM_PosFromChar(hwnd,0, es, es->selection_end, es->flags & EF_AFTER_WRAP)), NULL);
         else
                 e = 0;
         EDIT_EM_SetSel(hwnd, es, extend ? es->selection_start : e, e, FALSE);
@@ -1444,7 +1442,7 @@ static void EDIT_MovePageDown_ML(HWND hwnd, EDITSTATE *es, BOOL extend)
         INT s = es->selection_start;
         INT e = es->selection_end;
         BOOL after_wrap = (es->flags & EF_AFTER_WRAP);
-        LRESULT pos = EDIT_EM_PosFromChar(hwnd, es, e, after_wrap);
+        LRESULT pos = EDIT_EM_PosFromChar(hwnd,0, es, e, after_wrap);
         INT x = SLOWORD(pos);
         INT y = SHIWORD(pos);
 
@@ -1472,7 +1470,7 @@ static void EDIT_MovePageUp_ML(HWND hwnd, EDITSTATE *es, BOOL extend)
         INT s = es->selection_start;
         INT e = es->selection_end;
         BOOL after_wrap = (es->flags & EF_AFTER_WRAP);
-        LRESULT pos = EDIT_EM_PosFromChar(hwnd, es, e, after_wrap);
+        LRESULT pos = EDIT_EM_PosFromChar(hwnd,0, es, e, after_wrap);
         INT x = SLOWORD(pos);
         INT y = SHIWORD(pos);
 
@@ -1500,7 +1498,7 @@ static void EDIT_MoveUp_ML(HWND hwnd, EDITSTATE *es, BOOL extend)
         INT s = es->selection_start;
         INT e = es->selection_end;
         BOOL after_wrap = (es->flags & EF_AFTER_WRAP);
-        LRESULT pos = EDIT_EM_PosFromChar(hwnd, es, e, after_wrap);
+        LRESULT pos = EDIT_EM_PosFromChar(hwnd,0, es, e, after_wrap);
         INT x = SLOWORD(pos);
         INT y = SHIWORD(pos);
 
@@ -1598,7 +1596,7 @@ static void EDIT_PaintLine(HWND hwnd, EDITSTATE *es, HDC dc, INT line, BOOL rev)
 
         //TRACE_(edit)("line=%d\n", line);
 
-        pos = EDIT_EM_PosFromChar(hwnd, es, EDIT_EM_LineIndex(hwnd, es, line), FALSE);
+        pos = EDIT_EM_PosFromChar(hwnd,dc, es, EDIT_EM_LineIndex(hwnd, es, line), FALSE);
         x = SLOWORD(pos);
         y = SHIWORD(pos);
         li = EDIT_EM_LineIndex(hwnd, es, line);
@@ -1717,7 +1715,7 @@ static VOID EDIT_PaintText(HWND hwnd, EDITSTATE *es, HDC dc, INT x, INT y, INT l
 static void EDIT_SetCaretPos(HWND hwnd, EDITSTATE *es, INT pos,
                              BOOL after_wrap)
 {
-        LRESULT res = EDIT_EM_PosFromChar(hwnd, es, pos, after_wrap);
+        LRESULT res = EDIT_EM_PosFromChar(hwnd,0, es, pos, after_wrap);
         INT x = SLOWORD(res);
         INT y = SHIWORD(res);
 
@@ -1763,7 +1761,7 @@ static void EDIT_SetRectNP(HWND hwnd, EDITSTATE *es, LPRECT rc)
         else
                 es->format_rect.bottom = es->format_rect.top + es->line_height;
         if ((es->style & ES_MULTILINE) && !(es->style & ES_AUTOHSCROLL))
-                EDIT_BuildLineDefs_ML(hwnd, es);
+                EDIT_BuildLineDefs_ML(hwnd,es);
         EDIT_UpdateScrollBars(hwnd,es,TRUE,TRUE);
 }
 
@@ -2225,8 +2223,7 @@ static BOOL EDIT_EM_LineScroll(HWND hwnd, EDITSTATE *es, INT dx, INT dy)
                 GetClientRect(hwnd, &rc1);
                 IntersectRect(&rc, &rc1, &es->format_rect);
 
-                ScrollWindowEx(hwnd, -dx, dy,
-                                NULL, &rc, (HRGN)NULL, NULL, SW_INVALIDATE);
+                ScrollWindowEx(hwnd,-dx,dy,NULL,&rc,(HRGN)NULL,NULL,SW_INVALIDATE);
                 es->y_offset = nyoff;
                 es->x_offset += dx;
                 EDIT_UpdateScrollBars(hwnd,es,dx,dy);
@@ -2241,14 +2238,14 @@ static BOOL EDIT_EM_LineScroll(HWND hwnd, EDITSTATE *es, INT dx, INT dy)
  *      EM_POSFROMCHAR
  *
  */
-static LRESULT EDIT_EM_PosFromChar(HWND hwnd, EDITSTATE *es, INT index, BOOL after_wrap)
+static LRESULT EDIT_EM_PosFromChar(HWND hwnd,HDC dc, EDITSTATE *es, INT index, BOOL after_wrap)
 {
         INT len = lstrlenA(es->text);
         INT l;
         INT li;
         INT x;
         INT y = 0;
-        HDC dc = 0;
+        BOOL createdDC = FALSE;
         HFONT old_font = 0;
         SIZE size;
 
@@ -2258,6 +2255,7 @@ static LRESULT EDIT_EM_PosFromChar(HWND hwnd, EDITSTATE *es, INT index, BOOL aft
           dc = GetDC(hwnd);
           if (es->font)
             old_font = SelectObject(dc, es->font);
+          createdDC = TRUE;
         }
         if (es->style & ES_MULTILINE) {
                 l = EDIT_EM_LineFromChar(hwnd, es, index);
@@ -2295,9 +2293,12 @@ static LRESULT EDIT_EM_PosFromChar(HWND hwnd, EDITSTATE *es, INT index, BOOL aft
         }
         x += es->format_rect.left;
         y += es->format_rect.top;
-        if (es->font)
-                SelectObject(dc, old_font);
-        ReleaseDC(hwnd, dc);
+        if (createdDC)
+        {
+          if (es->font)
+            SelectObject(dc, old_font);
+          ReleaseDC(hwnd, dc);
+        }
         return MAKELONG((INT16)x, (INT16)y);
 }
 
@@ -2423,7 +2424,7 @@ static void EDIT_EM_ReplaceSel(HWND hwnd, EDITSTATE *es, BOOL can_undo, LPCSTR l
         }
         /* FIXME: really inefficient */
         if (es->style & ES_MULTILINE)
-                EDIT_BuildLineDefs_ML(hwnd, es);
+                EDIT_BuildLineDefs_ML(hwnd,es);
 
         EDIT_EM_SetSel(hwnd, es, s, s, FALSE);
 
@@ -2497,7 +2498,7 @@ static void EDIT_EM_ScrollCaret(HWND hwnd, EDITSTATE *es)
 
                 l = EDIT_EM_LineFromChar(hwnd, es, es->selection_end);
                 li = EDIT_EM_LineIndex(hwnd, es, l);
-                x = SLOWORD(EDIT_EM_PosFromChar(hwnd, es, es->selection_end, es->flags & EF_AFTER_WRAP));
+                x = SLOWORD(EDIT_EM_PosFromChar(hwnd,0, es, es->selection_end, es->flags & EF_AFTER_WRAP));
                 vlc = (es->format_rect.bottom - es->format_rect.top) / es->line_height;
                 if (l >= es->y_offset + vlc)
                         dy = l - vlc + 1 - es->y_offset;
@@ -2518,14 +2519,14 @@ static void EDIT_EM_ScrollCaret(HWND hwnd, EDITSTATE *es)
                 if (!(es->style & ES_AUTOHSCROLL))
                         return;
 
-                x = SLOWORD(EDIT_EM_PosFromChar(hwnd, es, es->selection_end, FALSE));
+                x = SLOWORD(EDIT_EM_PosFromChar(hwnd,0, es, es->selection_end, FALSE));
                 format_width = es->format_rect.right - es->format_rect.left;
                 if (x < es->format_rect.left)
                 {
                         goal = es->format_rect.left + format_width / HSCROLL_FRACTION;
                         do {
                                 es->x_offset--;
-                                x = SLOWORD(EDIT_EM_PosFromChar(hwnd, es, es->selection_end, FALSE));
+                                x = SLOWORD(EDIT_EM_PosFromChar(hwnd,0, es, es->selection_end, FALSE));
                         } while ((x < goal) && es->x_offset);
                         /* FIXME: use ScrollWindow() somehow to improve performance */
                         EDIT_Refresh(hwnd,es,TRUE);
@@ -2537,8 +2538,8 @@ static void EDIT_EM_ScrollCaret(HWND hwnd, EDITSTATE *es)
                         goal = es->format_rect.right - format_width / HSCROLL_FRACTION;
                         do {
                                 es->x_offset++;
-                                x = SLOWORD(EDIT_EM_PosFromChar(hwnd, es, es->selection_end, FALSE));
-                                x_last = SLOWORD(EDIT_EM_PosFromChar(hwnd, es, len, FALSE));
+                                x = SLOWORD(EDIT_EM_PosFromChar(hwnd,0, es, es->selection_end, FALSE));
+                                x_last = SLOWORD(EDIT_EM_PosFromChar(hwnd,0, es, len, FALSE));
                         } while ((x > goal) && (x_last > es->format_rect.right));
                         /* FIXME: use ScrollWindow() somehow to improve performance */
                         EDIT_Refresh(hwnd,es,TRUE);
@@ -2605,7 +2606,7 @@ static void EDIT_EM_SetHandle(HWND hwnd, EDITSTATE *es, HLOCAL hloc)
         EDIT_EM_EmptyUndoBuffer(hwnd, es);
         es->flags &= ~EF_MODIFIED;
         es->flags &= ~EF_UPDATE;
-        EDIT_BuildLineDefs_ML(hwnd, es);
+        EDIT_BuildLineDefs_ML(hwnd,es);
         EDIT_Refresh(hwnd,es,FALSE);
         EDIT_EM_ScrollCaret(hwnd, es);
         EDIT_UpdateScrollBars(hwnd,es,TRUE,TRUE);
@@ -2670,7 +2671,7 @@ static void EDIT_EM_SetMargins(HWND hwnd, EDITSTATE *es, INT action,
           GetClientRect(hwnd, &r);
           EDIT_SetRectNP(hwnd, es, &r);
           if (es->style & ES_MULTILINE)
-                  EDIT_BuildLineDefs_ML(hwnd, es);
+                  EDIT_BuildLineDefs_ML(hwnd,es);
 
           EDIT_Refresh(hwnd,es,FALSE);
           if (es->flags & EF_FOCUSED) {
@@ -2839,7 +2840,7 @@ static void EDIT_EM_SetWordBreakProc(HWND hwnd, EDITSTATE *es, EDITWORDBREAKPROC
 
         es->word_break_procA = wbp;
         if ((es->style & ES_MULTILINE) && !(es->style & ES_AUTOHSCROLL)) {
-                EDIT_BuildLineDefs_ML(hwnd, es);
+                EDIT_BuildLineDefs_ML(hwnd,es);
                 EDIT_Refresh(hwnd,es,FALSE);
         }
 }
@@ -3738,13 +3739,13 @@ static VOID EDIT_Draw(HWND hwnd,EDITSTATE *es,HDC hdc,BOOL eraseBkGnd)
 
     for (i = es->y_offset ; i <= MIN(es->y_offset + vlc, es->y_offset + es->line_count - 1) ; i++)
     {
-      EDIT_GetLineRect(hwnd, es, i, 0, -1, &rcLine);
+      EDIT_GetLineRect(hwnd,hdc, es, i, 0, -1, &rcLine);
       if (IntersectRect(&rc, &rcRgn, &rcLine))
         EDIT_PaintLine(hwnd, es, hdc, i, rev);
     }
   } else
   {
-    EDIT_GetLineRect(hwnd, es, 0, 0, -1, &rcLine);
+    EDIT_GetLineRect(hwnd,hdc, es, 0, 0, -1, &rcLine);
     if (IntersectRect(&rc, &rcRgn, &rcLine))
       EDIT_PaintLine(hwnd, es, hdc, 0, rev);
   }
@@ -3889,7 +3890,7 @@ static void EDIT_WM_SetFont(HWND hwnd, EDITSTATE *es, HFONT font, BOOL redraw)
         GetClientRect(hwnd, &r);
         EDIT_SetRectNP(hwnd, es, &r);
         if (es->style & ES_MULTILINE)
-                EDIT_BuildLineDefs_ML(hwnd, es);
+                EDIT_BuildLineDefs_ML(hwnd,es);
 
         if (redraw)
                 EDIT_Refresh(hwnd,es,FALSE);

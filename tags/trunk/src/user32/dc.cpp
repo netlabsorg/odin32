@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.30 1999-12-24 21:44:03 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.31 1999-12-29 22:53:59 cbratschi Exp $ */
 
 /*
  * DC functions for USER32
@@ -301,7 +301,7 @@ LONG clientHeight(Win32BaseWindow *wnd, HWND hwnd, pDCData pHps)
    if ((hwnd != 0) || (pHps == 0))
    {
       if (wnd)
-         return (wnd->getWindowHeight());
+         return (wnd->getClientHeight());
       else
          return OSLibQueryScreenHeight();
    }
@@ -436,22 +436,22 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
    }
 
    if(hWnd == 0x6800003a) {
-	hwnd = 0x6800003a; 
+        hwnd = 0x6800003a;
    }
    Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
 
    if ((hwnd != HWND_DESKTOP) && wnd->isOwnDC())
    {
-      	hPS_ownDC = wnd->getOwnDC();
-	//SvL: Hack for memory.exe (doesn't get repainted properly otherwise)
-	if(hPS_ownDC) {
-      		pHps = (pDCData)GpiQueryDCData(hPS_ownDC);
-	      	if (!pHps)
-	      	{
-	         	O32_SetLastError (ERROR_INVALID_PARAMETER);
-	         	return (HDC)NULLHANDLE;
-	      	}
-	}
+        hPS_ownDC = wnd->getOwnDC();
+        //SvL: Hack for memory.exe (doesn't get repainted properly otherwise)
+        if(hPS_ownDC) {
+                pHps = (pDCData)GpiQueryDCData(hPS_ownDC);
+                if (!pHps)
+                {
+                        O32_SetLastError (ERROR_INVALID_PARAMETER);
+                        return (HDC)NULLHANDLE;
+                }
+        }
    }
 
    HWND hwndClient = wnd->getOS2WindowHandle();
@@ -472,14 +472,14 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
    lpps->hdc = (HDC)hps;
 
    if(!wnd->isSuppressErase()) {
-   	wnd->setSuppressErase(TRUE);
+        wnd->setSuppressErase(TRUE);
         wnd->setEraseBkgnd (FALSE, !wnd->MsgEraseBackGround(lpps->hdc));
    }
    lpps->fErase = wnd->isPSErase();
 
    if (!hPS_ownDC)
    {
-      long height  = wnd->getWindowHeight();
+      long height  = wnd->getClientHeight();
       rect.yTop    = height - rect.yTop;
       rect.yBottom = height - rect.yBottom;
    }
@@ -530,7 +530,7 @@ exit:
 
 BOOL WIN32API GetUpdateRect (HWND hwnd, LPRECT pRect, BOOL erase)
 {
-   if (hwnd)
+   if (!hwnd)
    {
       O32_SetLastError (ERROR_INVALID_HANDLE);
       return FALSE;
@@ -539,7 +539,13 @@ BOOL WIN32API GetUpdateRect (HWND hwnd, LPRECT pRect, BOOL erase)
    RECTL rectl;
    Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
 
-   BOOL updateRegionExists = WinQueryUpdateRect (hwnd, pRect ? &rectl : NULL);
+   if (!wnd)
+   {
+      O32_SetLastError (ERROR_INVALID_HANDLE);
+      return FALSE;
+   }
+
+   BOOL updateRegionExists = WinQueryUpdateRect (wnd->getOS2WindowHandle(), pRect ? &rectl : NULL);
    if (!pRect) {
       return (updateRegionExists);
    }
@@ -561,7 +567,7 @@ BOOL WIN32API GetUpdateRect (HWND hwnd, LPRECT pRect, BOOL erase)
       }
       else
       {
-         long height   = wnd->getWindowHeight();
+         long height   = wnd->getClientHeight();
          rectl.yTop    = height - rectl.yTop;
          rectl.yBottom = height - rectl.yBottom;
       }
@@ -585,11 +591,16 @@ int WIN32API GetUpdateRgn (HWND hwnd, HRGN hrgn, BOOL erase)
 {
    LONG Complexity;
 
-   Complexity = O32_GetUpdateRgn (hwnd, hrgn, FALSE);
-   if (erase && (Complexity > NULLREGION_W)) {
-       Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
-       sendEraseBkgnd (wnd);
+   Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
+
+   if (!wnd)
+   {
+      O32_SetLastError (ERROR_INVALID_HANDLE);
+      return ERROR_W;
    }
+
+   Complexity = O32_GetUpdateRgn (wnd->getOS2WindowHandle(), hrgn, FALSE);
+   if (erase && (Complexity > NULLREGION_W)) sendEraseBkgnd (wnd);
 
    return Complexity;
 }
@@ -614,22 +625,22 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
 
    if (hwnd)
    {
-      	wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
-	if(wnd == NULL) {
-   		dprintf (("ERROR: User32: GetDCEx bad window handle %X!!!!!", hwnd));
-		O32_SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
-		return 0;
-	}
+        wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
+        if(wnd == NULL) {
+                dprintf (("ERROR: User32: GetDCEx bad window handle %X!!!!!", hwnd));
+                O32_SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
+                return 0;
+        }
 //SvL: Experimental change (doesn't work right)
 #if 0
-	if(wnd->fHasParentDC() && wnd->getParent()) {
-		wnd = wnd->getParent();
-	}
+        if(wnd->fHasParentDC() && wnd->getParent()) {
+                wnd = wnd->getParent();
+        }
 #endif
-      	if (flags & DCX_WINDOW_W)
-         	hWindow = wnd->getOS2FrameWindowHandle();
-      	else
-         	hWindow = wnd->getOS2WindowHandle();
+        if (flags & DCX_WINDOW_W)
+                hWindow = wnd->getOS2FrameWindowHandle();
+        else
+                hWindow = wnd->getOS2WindowHandle();
    }
    else
       hWindow = HWND_DESKTOP;
@@ -905,7 +916,7 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
       PRGNDATA_W RgnData;
       PRECTL pr;
       int i;
-      LONG height = wnd ? wnd->getWindowHeight() : OSLibQueryScreenHeight();
+      LONG height = wnd ? wnd->getClientHeight() : OSLibQueryScreenHeight();
 
       if (!hrgn)
          goto error;
@@ -929,7 +940,7 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
    }
    else if (pRect)
    {
-      LONG height = wnd ? wnd->getWindowHeight() : OSLibQueryScreenHeight();
+      LONG height = wnd ? wnd->getClientHeight() : OSLibQueryScreenHeight();
 
       PMRECT_FROM_WINRECT (rectl, *pRect);
       rectl.yTop    = height - rectl.yTop;
@@ -1196,7 +1207,7 @@ BOOL WIN32API ScrollDC (HDC hDC, int dx, int dy, const RECT *pScroll,
    }
 
    RECT winRectUpdate;
-   LONG height = wnd->getWindowHeight();
+   LONG height = wnd->getClientHeight();
 
    winRectUpdate.left   = rectlUpdate.xLeft;
    winRectUpdate.right  = rectlUpdate.xRight;
@@ -1231,7 +1242,7 @@ BOOL WIN32API ScrollWindow(HWND hwnd, int dx, int dy, const RECT *pScroll, const
         return 0;
     }
     dprintf(("ScrollWindow %x %d %d %x %x", hwnd, dx, dy, pScroll, pClip));
-    MapWin32ToOS2Rectl(window->getOS2WindowHandle(),window->getClientRect(), (PRECTLOS2)&clientRect);
+    mapWin32ToOS2Rect(window,window->getClientRect(), (PRECTLOS2)&clientRect);
     //Rectangle could be relative to parent window, so fix this
     if(clientRect.yBottom != 0) {
         clientRect.yTop   -= clientRect.yBottom;
@@ -1242,7 +1253,7 @@ BOOL WIN32API ScrollWindow(HWND hwnd, int dx, int dy, const RECT *pScroll, const
         clientRect.xLeft   = 0;
     }
     if(pScroll) {
-         MapWin32ToOS2Rectl(window->getOS2WindowHandle(),(RECT *)pScroll, (PRECTLOS2)&scrollRect);
+         mapWin32ToOS2Rect(window,(RECT *)pScroll, (PRECTLOS2)&scrollRect);
          pScrollRect = &scrollRect;
 
          //Scroll rectangle relative to client area
@@ -1255,7 +1266,7 @@ BOOL WIN32API ScrollWindow(HWND hwnd, int dx, int dy, const RECT *pScroll, const
     else scrollFlags |= SW_SCROLLCHILDREN;
 
     if(pClip) {
-         MapWin32ToOS2Rectl(window->getOS2WindowHandle(),(RECT *)pClip, (PRECTLOS2)&clipRect);
+         mapWin32ToOS2Rect(window,(RECT *)pClip, (PRECTLOS2)&clipRect);
          pClipRect = &clipRect;
 
          //Clip rectangle relative to client area
@@ -1299,8 +1310,8 @@ INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, cons
     if (scrollFlag & SW_INVALIDATE_W)      scrollFlags |= SW_INVALIDATERGN;
     if (scrollFlag & SW_SCROLLCHILDREN_W)  scrollFlags |= SW_SCROLLCHILDREN;
 
-    if(pScroll) MapWin32ToOS2Rectl(window->getOS2WindowHandle(),(RECT *)pScroll, (PRECTLOS2)&scrollRect);
-    if(pClip)   MapWin32ToOS2Rectl(window->getOS2WindowHandle(),(RECT *)pClip, (PRECTLOS2)&clipRect);
+    if(pScroll) mapWin32ToOS2Rect(window,(RECT *)pScroll, (PRECTLOS2)&scrollRect);
+    if(pClip)   mapWin32ToOS2Rect(window,(RECT *)pClip, (PRECTLOS2)&clipRect);
 
     RECTL rectlUpdate;
     HRGN  hrgn;
@@ -1323,7 +1334,7 @@ INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, cons
     }
 
     RECT winRectUpdate;
-    LONG height = window->getWindowHeight();
+    LONG height = window->getClientHeight();
 
     winRectUpdate.left   = rectlUpdate.xLeft;
     winRectUpdate.right  = rectlUpdate.xRight;
@@ -1390,10 +1401,10 @@ INT WIN32API ExcludeUpdateRgn( HDC hDC, HWND  hWnd)
 BOOL WIN32API ValidateRect( HWND hwnd, const RECT * lprc)
 {
     if(lprc) {
-    	 dprintf(("USER32: ValidateRect %x (%d,%d)(%d,%d)", hwnd, lprc->left, lprc->top, lprc->right, lprc->bottom));
-    } 
-    else dprintf(("USER32: ValidateRect %x", hwnd)); 
-   
+         dprintf(("USER32: ValidateRect %x (%d,%d)(%d,%d)", hwnd, lprc->left, lprc->top, lprc->right, lprc->bottom));
+    }
+    else dprintf(("USER32: ValidateRect %x", hwnd));
+
     return RedrawWindow( hwnd, lprc, 0, RDW_VALIDATE_W | RDW_NOCHILDREN_W | (hwnd==0 ? RDW_UPDATENOW_W : 0));
 }
 //******************************************************************************

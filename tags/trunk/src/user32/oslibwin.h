@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.30 1999-12-29 12:39:44 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.31 1999-12-29 22:54:01 cbratschi Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -200,7 +200,6 @@ BOOL OSLibWinQueryPointerPos(HWND hwndDeskTop,PPOINT pptlPoint); //pptlPoint == 
 #define HWNDOS_TOP                      (HWND)3
 #define HWNDOS_BOTTOM                   (HWND)4
 
-BOOL  OSLibWinSetWindowPos(HWND hwnd, HWND hwndInsertBehind, LONG x, LONG y, LONG cx, LONG cy, ULONG fl);
 BOOL  OSLibWinSetMultWindowPos(struct _SWP *pswp, ULONG num);
 BOOL  OSLibWinShowWindow(HWND hwnd, ULONG fl);
 

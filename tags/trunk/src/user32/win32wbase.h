@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.59 1999-12-29 14:37:18 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.60 1999-12-29 22:54:03 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -79,11 +79,11 @@ virtual  ULONG  MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd);
          ULONG  MsgMouseMove(MSG *msg);
          ULONG  MsgPaint(ULONG tmp1, BOOL select = TRUE);
          ULONG  MsgEraseBackGround(HDC hdc);
-	 ULONG  MsgInitMenu(MSG *msg);
-	 ULONG  MsgHitTest(MSG *msg);
+         ULONG  MsgInitMenu(MSG *msg);
+         ULONG  MsgHitTest(MSG *msg);
          ULONG  MsgNCPaint();
-	 ULONG  DispatchMsgA(MSG *msg);
-	 ULONG  DispatchMsgW(MSG *msg);
+         ULONG  DispatchMsgA(MSG *msg);
+         ULONG  DispatchMsgW(MSG *msg);
 
          ULONG  MsgSetText(LPSTR lpsz, LONG cch);
          ULONG  MsgGetTextLength();
@@ -123,8 +123,10 @@ Win32BaseWindow *getParent();
          void   setWindowProc(WNDPROC newproc)  { win32wndproc = newproc; };
         DWORD   getWindowId()                   { return windowId; };
          void   setWindowId(DWORD id);
-         ULONG  getWindowHeight()               { return rectClient.bottom - rectClient.top; };
-         ULONG  getWindowWidth()                { return rectClient.right - rectClient.left; };
+         ULONG  getWindowHeight()               { return rectWindow.bottom - rectWindow.top; };
+         ULONG  getWindowWidth()                { return rectWindow.right - rectWindow.left; };
+         ULONG  getClientHeight()               { return rectClient.bottom - rectClient.top; };
+         ULONG  getClientWidth()                { return rectClient.right - rectClient.left; };
          BOOL   isChild();
          PRECT  getClientRect()                 { return &rectClient; };
          void   setClientRect(PRECT rect)       { rectClient = *rect; };
