@@ -1,8 +1,10 @@
-/* $Id: changelog,v 1.2474 2003-02-07 13:57:55 sandervl Exp $ */
+/* $Id: changelog,v 1.2475 2003-02-07 15:34:30 sandervl Exp $ */
 
  2003-02-07: Sander van Leeuwen <sandervl@innotek   >
     - DDRAW/NTDLL:
                 o Rename resource directory
+    - USER32:   o Don't save position (for restore) in SetWindowPos if window 
+                  is minimized .
 
  2002-02-06: Dietrich Teickner <Dietrich_Teickner@t-online   >
     - USER32:   o Edit control: fixed heap corruption in undo buffer
