@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.1880 2001-12-04 00:07:59 phaller Exp $ */
+/* $Id: changelog,v 1.1881 2001-12-04 11:26:01 sandervl Exp $ */
+
+ 2001-12-04: Sander van Leeuwen <sandervl@xs4all.nl>
+    - COMCTL32: o Hack added for proper resizing of wizard property sheet in
+                  CVP. Not sure if it's always correct or whether it has a
+                  bad effect on other apps (none found so far).
 
  2001-12-03: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o put in correct ioctl identifiers for parport support
