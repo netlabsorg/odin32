@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1861 2001-11-29 00:23:01 phaller Exp $ */
+/* $Id: changelog,v 1.1862 2001-11-29 10:31:48 phaller Exp $ */
+
+ 2001-11-29: Patrick Haller <patrick.haller@innotek.de>
+    - KERNEL32: o Split dosdevice.cpp from stubs.cpp
+                  (DefineDosDevice, QueryDosDevice)
 
  2001-11-28: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o fixes in ::CreateFile calls (return codes must be Win32)
