@@ -1,15 +1,13 @@
-/* $Id: resource.cpp,v 1.6 1999-06-10 20:48:01 phaller Exp $ */
+/* $Id: resource.cpp,v 1.7 1999-07-21 11:45:21 sandervl Exp $ */
 
-/*
- *
- * Project Odin Software License can be found in LICENSE.TXT
- *
- */
 /*
  * Misc resource procedures
  *
  * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
  * Copyright 1998 Patrick Haller
+ *
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #include <os2win.h>
@@ -64,21 +62,23 @@ HRSRC WIN32API FindResourceW(HINSTANCE hModule, LPCWSTR lpszName,
 //******************************************************************************
 PVOID WIN32API LockResource(HGLOBAL hRes)
 {
-  Win32Resource *res = (Win32Resource *)hRes;
-
-  dprintf(("LockResource %X\n", hRes));
-
-  /* @@@PH */
-  if (res == NULL)
-    return (NULL);
-  else
-    return res->lockResource();
+    return (PVOID)hRes;
 }
 //******************************************************************************
+//hRes == returned by FindResource(Ex)
 //******************************************************************************
 HGLOBAL WIN32API LoadResource(HINSTANCE hModule, HRSRC hRes)
 {
-    return (HGLOBAL)hRes;
+  Win32Resource *res = (Win32Resource *)hRes;
+
+  dprintf(("LoadResource %x %X\n", hModule, hRes));
+
+  /* @@@PH */
+  if (HIWORD(res) == NULL) {
+	dprintf(("LoadResource %x: invalid hRes %x", hModule, hRes));
+	return 0;
+  }
+  else  return (HGLOBAL)res->lockResource();
 }
 //******************************************************************************
 //hRes == returned by FindResource(Ex)
