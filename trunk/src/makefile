@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.57 2000-04-02 22:04:28 davidr Exp $
+# $Id: makefile,v 1.58 2000-04-19 18:52:23 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -100,6 +100,8 @@ all: libs
     cd ..\olesvr32
     $(MAKE_CMD)
     cd ..\olecli32
+    $(MAKE_CMD)
+    cd ..\olepro32
     $(MAKE_CMD)
     cd ..\oledlg
     $(MAKE_CMD)
