@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2000-05-13 15:40:34 bird Exp $
+# $Id: makefile,v 1.5 2000-05-13 16:04:43 bird Exp $
 
 #
 # PD-Win32 API
@@ -18,14 +18,14 @@
 #
 
 PDWIN32_INCLUDE = ..\..\include
-PDWIN32_TOOLS = ..\bin
+PDWIN32_TOOLS   = ..\bin
 !include $(PDWIN32_INCLUDE)\pdwin32.mk
 
 
 !ifdef DEBUG
-MAKE_CMD = nmake -nologo DEBUG=1
+MAKE_CMD = $(MAKE) -nologo DEBUG=1
 !else
-MAKE_CMD = nmake -nologo
+MAKE_CMD = $(MAKE) -nologo
 !endif
 
 
