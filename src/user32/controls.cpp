@@ -1,4 +1,4 @@
-/* $Id: controls.cpp,v 1.9 2000-01-31 22:30:51 sandervl Exp $ */
+/* $Id: controls.cpp,v 1.10 2000-02-16 14:34:08 sandervl Exp $ */
 /* File: controls.cpp -- Win32 common controls
  *
  * Copyright (c) 1999 Christoph Bratschi
@@ -20,6 +20,9 @@
 #include "icontitle.h"
 #include "menu.h"
 #include "controls.h"
+
+#define DBG_LOCALLOG	DBG_controls
+#include "dbglocal.h"
 
 ATOM  controlAtoms[MAX_CONTROLS] = {0};
 

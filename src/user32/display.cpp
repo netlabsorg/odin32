@@ -1,4 +1,4 @@
-/* $Id: display.cpp,v 1.4 2000-01-18 20:10:35 sandervl Exp $ */
+/* $Id: display.cpp,v 1.5 2000-02-16 14:34:16 sandervl Exp $ */
 /*
  * Display/Monitor Win32 apis
  *
@@ -19,6 +19,9 @@
 #include "pmwindow.h"
 #include "monitor.h"
 #include "windef.h"
+
+#define DBG_LOCALLOG	DBG_display
+#include "dbglocal.h"
 
 #define NRMODES 5
 #define NRDEPTHS 4

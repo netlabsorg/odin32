@@ -1,4 +1,4 @@
-/* $Id: icontitle.cpp,v 1.4 2000-01-18 20:10:36 sandervl Exp $ */
+/* $Id: icontitle.cpp,v 1.5 2000-02-16 14:34:20 sandervl Exp $ */
 /*
  * Icontitle window class.
  *
@@ -13,6 +13,9 @@
 #include <heapstring.h>
 #include "controls.h"
 #include "icontitle.h"
+
+#define DBG_LOCALLOG	DBG_icontitle
+#include "dbglocal.h"
 
 static  LPCSTR  emptyTitleText = "<...>";
 

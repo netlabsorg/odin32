@@ -1,4 +1,4 @@
-/* $Id: syscolor.cpp,v 1.17 2000-02-10 18:49:51 cbratschi Exp $ */
+/* $Id: syscolor.cpp,v 1.18 2000-02-16 14:34:35 sandervl Exp $ */
 
 /*
  * Win32 system color API functions for OS/2
@@ -22,6 +22,9 @@
 #include "user32.h"
 #include "syscolor.h"
 #include "options.h"
+
+#define DBG_LOCALLOG	DBG_syscolor
+#include "dbglocal.h"
 
 //SvL: Open32 colors are much better than those in the table below
 #define NUM_OPEN32_SYSCOLORS 21
@@ -207,9 +210,7 @@ BOOL WIN32API SetSysColors(INT nChanges, const INT *lpSysColor,
       fColorInit = TRUE;
     }
 
-#ifdef DEBUG
-    WriteLog("OS2SetSysColors\n");
-#endif
+    dprintf(("SetSysColors\n"));
 
     O32_SetSysColors(nChanges, lpSysColor, lpColorValues);
 
@@ -233,9 +234,7 @@ BOOL WIN32API SetSysColors(INT nChanges, const INT *lpSysColor,
 //******************************************************************************
 HBRUSH WIN32API GetSysColorBrush(int nIndex)
 {
-#ifdef DEBUG
-  WriteLog("OS2GetSysColorBrush %d returned", nIndex);
-#endif
+  dprintf(("GetSysColorBrush %d returned", nIndex));
   if (!fColorInit)
   {
     SYSCOLOR_Init();

@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.3 2000-01-18 20:10:39 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.4 2000-02-16 14:34:25 sandervl Exp $ */
 /*
  * Dos* api wrappers for OS/2
  *
@@ -17,6 +17,9 @@
 #include <win32type.h>
 #include <misc.h>
 #include "oslibdos.h"
+
+#define DBG_LOCALLOG	DBG_oslibdos
+#include "dbglocal.h"
 
 //******************************************************************************
 //Map shared memory into our address space

@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.33 2000-02-03 17:13:01 cbratschi Exp $ */
+/* $Id: scroll.cpp,v 1.34 2000-02-16 14:34:32 sandervl Exp $ */
 /*
  * Scrollbar control
  *
@@ -21,6 +21,9 @@
 #include "oslibwin.h"
 #include "initterm.h"
 #include "pmframe.h"
+
+#define DBG_LOCALLOG	DBG_scroll
+#include "dbglocal.h"
 
 #define SCROLL_MIN_RECT  4 /* Minimum size of the rectangle between the arrows */
 #define SCROLL_MIN_THUMB 6 /* Minimum size of the thumb in pixels */

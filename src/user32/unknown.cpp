@@ -1,4 +1,4 @@
-/* $Id: unknown.cpp,v 1.7 2000-01-18 20:10:47 sandervl Exp $ */
+/* $Id: unknown.cpp,v 1.8 2000-02-16 14:34:38 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -10,6 +10,9 @@
  *****************************************************************************/
 
 #include <os2win.h>
+
+#define DBG_LOCALLOG	DBG_unknown
+#include "dbglocal.h"
 
 /*****************************************************************************
  * Defines                                                                   *

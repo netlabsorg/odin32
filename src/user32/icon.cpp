@@ -1,4 +1,4 @@
-/* $Id: icon.cpp,v 1.9 2000-01-18 20:10:36 sandervl Exp $ */
+/* $Id: icon.cpp,v 1.10 2000-02-16 14:34:19 sandervl Exp $ */
 
 /*
  * Win32 icon conversion functions for OS/2
@@ -27,6 +27,9 @@
 
 #include <winicon.h>
 #include <misc.h>
+
+#define DBG_LOCALLOG	DBG_icon
+#include "dbglocal.h"
 
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: HOOK.CPP,v 1.10 2000-02-12 18:09:49 cbratschi Exp $ */
+/* $Id: HOOK.CPP,v 1.11 2000-02-16 14:34:02 sandervl Exp $ */
 
 /*
  * Windows hook functions
@@ -34,6 +34,9 @@
 #include <heapstring.h>
 #include <vmutex.h>
 #include <wprocess.h>
+
+#define DBG_LOCALLOG	DBG_hook
+#include "dbglocal.h"
 
 DEFAULT_DEBUG_CHANNEL(hook)
 

@@ -1,4 +1,4 @@
-/* $Id: msgbox.c,v 1.1 2000-01-18 20:10:39 sandervl Exp $ */
+/* $Id: msgbox.c,v 1.2 2000-02-16 14:34:24 sandervl Exp $ */
 /*
  * Message boxes (based on Wine code)
  *
@@ -12,6 +12,9 @@
 #include <dlgs.h>
 #include <misc.h>
 #include <heapstring.h>
+
+#define DBG_LOCALLOG	DBG_msgbox
+#include "dbglocal.h"
 
 #define MSGBOX_IDICON 1088
 #define MSGBOX_IDTEXT 100

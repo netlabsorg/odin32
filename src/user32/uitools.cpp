@@ -1,4 +1,4 @@
-/* $Id: uitools.cpp,v 1.22 2000-01-29 14:23:33 sandervl Exp $ */
+/* $Id: uitools.cpp,v 1.23 2000-02-16 14:34:37 sandervl Exp $ */
 /*
  * User Interface Functions
  *
@@ -14,6 +14,9 @@
 #include "winuser.h"
 #include "user32.h"
 #include "win32wbase.h"
+
+#define DBG_LOCALLOG	DBG_uitools
+#include "dbglocal.h"
 
 static const WORD wPattern_AA55[8] = { 0xaaaa, 0x5555, 0xaaaa, 0x5555,
                                        0xaaaa, 0x5555, 0xaaaa, 0x5555 };

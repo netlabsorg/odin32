@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.72 2000-02-12 18:09:49 cbratschi Exp $ */
+/* $Id: user32.cpp,v 1.73 2000-02-16 14:34:39 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -40,6 +40,9 @@
 #include <oslibwin.h>
 #include <win32wnd.h>
 #include <winuser.h>
+
+#define DBG_LOCALLOG	DBG_user32
+#include "dbglocal.h"
 
 //undocumented stuff
 // WIN32API CalcChildScroll
