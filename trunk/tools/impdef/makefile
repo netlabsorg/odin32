@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2000-05-13 17:18:39 bird Exp $
+# $Id: makefile,v 1.5 2000-10-05 07:28:39 bird Exp $
 
 #
 # PD-Win32 API
@@ -31,7 +31,7 @@ EXETARGET   = 1
 # Flag overloads and local macros.
 CINCLUDES= -I$(PDWIN32_TCOMMON) -I$(PDWIN32_INCLUDE) -I$(PDWIN32_INCLUDE)\Win
 CFLAGS   = $(CFLAGS)   $(CINCLUDES) -Wall+ppt-ppc-inl-cnv-gnr-vft-
-CXXFLAGS = $(CXXFLAGS) $(CINCLUDES) -Wall+ppt-ppc-inl-cnv-gnr-vft-
+CXXFLAGS = $(CXXFLAGS) $(CINCLUDES) -Wall+ppt-ppc-inl-cnv-gnr-vft- -Gx-
 
 
 # Object files. All objects should be prefixed with $(OBJDIR)!
@@ -44,10 +44,10 @@ all:    $(OBJDIR) \
         $(PDWIN32_TOOLS)\ImpDef.exe
 
 
-ImpDef.exe: $(OBJS) $(COMMONLIB)
+$(OBJDIR)\ImpDef.exe: $(OBJS) $(COMMONLIB)
    $(LD) $(LDFLAGS) -Fe$@ $** $(RTLLIB) os2386.lib
 
-$(PDWIN32_TOOLS)\ImpDef.exe: ImpDef.exe
+$(PDWIN32_TOOLS)\ImpDef.exe: $(OBJDIR)\ImpDef.exe
    $(CP) $** $@
 
 
