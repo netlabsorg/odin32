@@ -1,4 +1,4 @@
-/* $Id: caret.cpp,v 1.14 2000-12-17 15:04:09 sandervl Exp $ */
+/* $Id: caret.cpp,v 1.15 2000-12-29 18:39:58 sandervl Exp $ */
 
 /*
  * Caret functions for USER32
@@ -19,6 +19,7 @@
 #include <win32type.h>
 #include <win32api.h>
 #include <winconst.h>
+#include <winuser32.h>
 #include <wprocess.h>
 #include <misc.h>
 #include <win32wbase.h>
@@ -229,7 +230,7 @@ BOOL WIN32API ShowCaret (HWND hwnd)
 
    CaretIsVisible++;
    if (CaretIsVisible == 1)
-     rc = _ShowCaret (Win32BaseWindow::Win32ToOS2Handle (hwnd));
+     rc = _ShowCaret (Win32ToOS2Handle (hwnd));
    else
      rc = TRUE;
 
@@ -244,7 +245,7 @@ BOOL WIN32API HideCaret (HWND hwnd)
 
    CaretIsVisible--;
    if (CaretIsVisible == 0)
-     rc = _HideCaret (Win32BaseWindow::Win32ToOS2Handle (hwnd));
+     rc = _HideCaret (Win32ToOS2Handle (hwnd));
    else
      rc = TRUE;
 
@@ -264,6 +265,6 @@ void recreateCaret (HWND hwndFocus)
       CreateCaret (hwndCaret, hbmCaret, CaretWidth, CaretHeight);
       SetCaretPos (CaretPosX, CaretPosY);
       if (CaretIsVisible > 0)
-        _ShowCaret(Win32BaseWindow::Win32ToOS2Handle(hwndCaret));
+        _ShowCaret(Win32ToOS2Handle(hwndCaret));
    }
 }

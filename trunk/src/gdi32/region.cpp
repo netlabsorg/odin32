@@ -1,4 +1,4 @@
-/* $Id: region.cpp,v 1.18 2000-12-05 13:04:07 sandervl Exp $ */
+/* $Id: region.cpp,v 1.19 2000-12-29 18:40:44 sandervl Exp $ */
 
 /*
  * GDI32 region code
@@ -27,7 +27,6 @@
 #include <objhandle.h>
 #include <dcdata.h>
 #include <winuser32.h>
-#include <win32wnd.h>
 #include "oslibgpi.h"
 
 #define DBG_LOCALLOG    DBG_region

@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.110 2000-12-24 14:54:07 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.111 2000-12-29 18:39:58 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -21,6 +21,7 @@
 #include <string.h>
 #include <win32type.h>
 #include <winconst.h>
+#include <winuser32.h>
 #include <wprocess.h>
 #include <misc.h>
 #include <win32wbase.h>
@@ -580,18 +581,18 @@ PosChangedEnd:
     {
       HWND hwndFocus = (HWND)mp1;
 
-        dprintf(("OS2: WM_SETFOCUS %x %x (%x) %d", win32wnd->getWindowHandle(), mp1, Win32BaseWindow::OS2ToWin32Handle(hwndFocus), mp2));
+        dprintf(("OS2: WM_SETFOCUS %x %x (%x) %d", win32wnd->getWindowHandle(), mp1, OS2ToWin32Handle(hwndFocus), mp2));
         if(WinQueryWindowULong(hwndFocus, OFFSET_WIN32PM_MAGIC) != WIN32PM_MAGIC) {
                 //another (non-win32) application's window
                 //set to NULL (allowed according to win32 SDK) to avoid problems
                 hwndFocus = NULL;
         }
         if((ULONG)mp2 == TRUE) {
-                HWND hwndFocusWin32 = Win32BaseWindow::OS2ToWin32Handle(hwndFocus);
+                HWND hwndFocusWin32 = OS2ToWin32Handle(hwndFocus);
                 recreateCaret (hwndFocusWin32);
                 win32wnd->MsgSetFocus(hwndFocusWin32);
         }
-        else win32wnd->MsgKillFocus(Win32BaseWindow::OS2ToWin32Handle(hwndFocus));
+        else win32wnd->MsgKillFocus(OS2ToWin32Handle(hwndFocus));
         break;
     }
 

@@ -1,4 +1,4 @@
-/* $Id: winuser32.h,v 1.5 2000-11-15 20:38:09 sandervl Exp $ */
+/* $Id: winuser32.h,v 1.6 2000-12-29 18:41:23 sandervl Exp $ */
 
 /*
  * Internal functions exported by user32
@@ -25,5 +25,8 @@ int  WIN32API setMapMode(pDCData pHps, int mode);
 
 int  WIN32API DIB_GetDIBWidthBytes( int width, int depth );
 int  WIN32API BITMAP_GetWidthBytes( INT width, INT depth );
+
+HWND WIN32API Win32ToOS2Handle(HWND hwndWin32);
+HWND WIN32API OS2ToWin32Handle(HWND hwnd);
 
 #endif //__WINUSER32_H__

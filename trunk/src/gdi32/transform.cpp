@@ -1,4 +1,4 @@
-/* $Id: transform.cpp,v 1.1 2000-11-05 18:48:22 sandervl Exp $ */
+/* $Id: transform.cpp,v 1.2 2000-12-29 18:40:44 sandervl Exp $ */
 
 /*
  * GDI32 coordinate & translformation code
@@ -26,7 +26,6 @@
 #include <objhandle.h>
 #include <dcdata.h>
 #include <winuser32.h>
-#include <win32wnd.h>
 #include "oslibgpi.h"
 
 #define DBG_LOCALLOG    DBG_transform

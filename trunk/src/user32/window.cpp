@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.85 2000-12-17 15:04:13 sandervl Exp $ */
+/* $Id: window.cpp,v 1.86 2000-12-29 18:40:00 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -36,6 +36,7 @@
 #include <win\winpos.h>
 #include <win\win.h>
 #include <heapstring.h>
+#include <winuser32.h>
 
 #define DBG_LOCALLOG    DBG_window
 #include "dbglocal.h"
@@ -668,10 +669,10 @@ HWND WIN32API SetFocus (HWND hwnd)
     HWND lastFocus, lastFocus_W, hwnd_O;
     BOOL activate;
 
-    hwnd_O    = Win32BaseWindow::Win32ToOS2Handle (hwnd);
+    hwnd_O    = Win32ToOS2Handle (hwnd);
     lastFocus = OSLibWinQueryFocus (OSLIB_HWND_DESKTOP);
     activate  = ((hwnd_O == lastFocus) || OSLibWinIsChild (lastFocus, hwnd_O));
-    lastFocus_W = Win32BaseWindow::OS2ToWin32Handle (lastFocus);
+    lastFocus_W = OS2ToWin32Handle (lastFocus);
 
     dprintf(("SetFocus %x (%x) -> %x (%x)\n", lastFocus_W, lastFocus, hwnd, hwnd_O));
 
@@ -684,7 +685,7 @@ HWND WIN32API GetFocus(void)
     HWND hwnd;
 
     hwnd = OSLibWinQueryFocus(OSLIB_HWND_DESKTOP);
-    hwnd = Win32BaseWindow::OS2ToWin32Handle(hwnd);
+    hwnd = OS2ToWin32Handle(hwnd);
     dprintf(("USER32: GetFocus %x\n", hwnd));
     return hwnd;
 }
@@ -704,7 +705,7 @@ BOOL WIN32API IsZoomed(HWND hwnd)
 BOOL WIN32API LockWindowUpdate(HWND hwnd)
 {
     dprintf(("USER32: LockWindowUpdate %x", hwnd));
-    return OSLibWinLockWindowUpdate(Win32BaseWindow::Win32ToOS2Handle(hwnd));
+    return OSLibWinLockWindowUpdate(Win32ToOS2Handle(hwnd));
 }
 //******************************************************************************
 //******************************************************************************
@@ -1147,7 +1148,7 @@ HWND WIN32API FindWindowExW(HWND    hwndParent,
 BOOL WIN32API FlashWindow(HWND hwnd, BOOL fFlash)
 {
     dprintf(("FlashWindow %x %d\n", hwnd, fFlash));
-//    return OSLibWinFlashWindow(Win32BaseWindow::Win32ToOS2Handle(hwnd), fFlash);
+//    return OSLibWinFlashWindow(Win32ToOS2Handle(hwnd), fFlash);
     return 1;
 }
 //******************************************************************************
@@ -1520,7 +1521,7 @@ HWND WIN32API WindowFromPoint( POINT point)
     hwndOS2 = OSLibWinWindowFromPoint(OSLIB_HWND_DESKTOP, (PVOID)&wPoint);
     if(hwndOS2)
     {
-      hwnd = Win32BaseWindow::OS2ToWin32Handle(hwndOS2);
+      hwnd = OS2ToWin32Handle(hwndOS2);
       if(hwnd) {
               dprintf(("WindowFromPoint (%d,%d) %x->%x\n", point.x, point.y, hwndOS2, hwnd));
               return hwnd;
@@ -1590,7 +1591,7 @@ BOOL WIN32API EnumWindows(WNDENUMPROC lpfn, LPARAM lParam)
 UINT WIN32API ArrangeIconicWindows( HWND hwnd)
 {
     dprintf(("USER32:  ArrangeIconicWindows %x", hwnd));
-    return O32_ArrangeIconicWindows(Win32BaseWindow::Win32ToOS2Handle(hwnd));
+    return O32_ArrangeIconicWindows(Win32ToOS2Handle(hwnd));
 }
 //******************************************************************************
 //restores iconized window to previous size/position
@@ -1665,7 +1666,7 @@ HWND WIN32API GetForegroundWindow(void)
 {
  HWND hwnd;
 
-    hwnd = Win32BaseWindow::OS2ToWin32Handle(OSLibWinQueryActiveWindow());
+    hwnd = OS2ToWin32Handle(OSLibWinQueryActiveWindow());
     dprintf(("USER32: GetForegroundWindow returned %x", hwnd));
     return hwnd;
 }
@@ -1675,8 +1676,8 @@ HWND WIN32API GetLastActivePopup( HWND hWnd)
 {
  HWND hwnd;
 
-    hwnd = Win32BaseWindow::Win32ToOS2Handle(hWnd);
-    hwnd = Win32BaseWindow::OS2ToWin32Handle(O32_GetLastActivePopup(hwnd));
+    hwnd = Win32ToOS2Handle(hWnd);
+    hwnd = OS2ToWin32Handle(O32_GetLastActivePopup(hwnd));
 
     dprintf(("GetLastActivePopup %x returned %x NOT CORRECTLY IMPLEMENTED", hWnd, hwnd));
     return hwnd;
@@ -1686,7 +1687,7 @@ HWND WIN32API GetLastActivePopup( HWND hWnd)
 DWORD WIN32API GetWindowThreadProcessId(HWND hWnd, PDWORD  lpdwProcessId)
 {
     dprintf2(("USER32:  GetWindowThreadProcessId"));
-    hWnd = Win32BaseWindow::Win32ToOS2Handle(hWnd);
+    hWnd = Win32ToOS2Handle(hWnd);
 
     return O32_GetWindowThreadProcessId(hWnd,lpdwProcessId);
 }
