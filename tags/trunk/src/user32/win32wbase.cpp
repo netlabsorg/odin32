@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.226 2000-12-24 14:54:07 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.227 2000-12-27 23:07:19 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2223,9 +2223,15 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
        ~(SWP_NOSIZE     | SWP_NOMOVE     | SWP_NOZORDER     |
          SWP_NOREDRAW   | SWP_NOACTIVATE | SWP_FRAMECHANGED |
          SWP_SHOWWINDOW | SWP_HIDEWINDOW | SWP_NOCOPYBITS   |
-         SWP_NOOWNERZORDER))
+         SWP_NOOWNERZORDER | SWP_NOSENDCHANGING | SWP_DEFERERASE |
+         SWP_NOCLIENTSIZE | SWP_NOCLIENTMOVE))
     {
+        dprintf(("ERROR: SetWindowPos; UNKNOWN flag"));
         return FALSE;
+    }
+
+    if( fuFlags & (SWP_DEFERERASE | SWP_NOCLIENTSIZE | SWP_NOCLIENTMOVE)) {
+        dprintf(("WARNING: SetWindowPos; unsupported flag"));
     }
 
     if(IsWindowDestroyed()) {
