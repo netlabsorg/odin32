@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.3 1999-07-15 18:03:02 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.4 1999-07-16 11:32:08 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -130,4 +130,15 @@ BOOL OSLibPostMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam)
 }
 //******************************************************************************
 //******************************************************************************
-
+HWND OSLibWinCreateMenu(HWND hwndParent, PVOID menutemplate)
+{
+  return WinCreateMenu(hwndParent, menutemplate);
+}
+//******************************************************************************
+//******************************************************************************
+HWND OSLibWinQueryTopMostChildWindow(HWND hwndParent)
+{
+  return WinQueryWindow(hwndParent, QW_TOP);
+}
+//******************************************************************************
+//******************************************************************************

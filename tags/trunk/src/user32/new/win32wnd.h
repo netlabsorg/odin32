@@ -1,4 +1,4 @@
-/* $Id: win32wnd.h,v 1.3 1999-07-15 18:03:03 sandervl Exp $ */
+/* $Id: win32wnd.h,v 1.4 1999-07-16 11:32:09 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -16,11 +16,9 @@
 
 #include <win32class.h>
 #include <gen_object.h>
+#include <win32wndchild.h>
 
 class Win32Window;
-
-#define WIN2OS2HWND(a)	(Win32Window*)(a^a)
-#define OS22WINHWND(a)	(a^a)
 
 #define OFFSET_WIN32WNDPTR	0
 #define OFFSET_WIN32PM_MAGIC	4
@@ -43,7 +41,7 @@ typedef struct
 #define WM_WIN32_POSTMESSAGEA	0x4000
 #define WM_WIN32_POSTMESSAGEW	0x4001
 
-class Win32Window : public GenericObject
+class Win32Window : private GenericObject, private ChildWindow
 {
 public:
 	DWORD	magic;
@@ -76,8 +74,8 @@ virtual	 WORD   GetWindowWord(int index);
 	 DWORD  getExStyle()			{ return dwExStyle; };
 	 HWND   getWindowHandle() 		{ return Win32Hwnd; };
 	 HWND   getOS2WindowHandle() 		{ return OS2Hwnd; };
-   Win32Window *getParent()			{ return parent; };
-	 void   setParent(Win32Window *pwindow) { parent = pwindow; };
+   Win32Window *getParent()			{ return (Win32Window *)ChildWindow::GetParent(); };
+	 void   setParent(Win32Window *pwindow) { ChildWindow::SetParent((ChildWindow *)pwindow); };
        WNDPROC  getWindowProc()                 { return win32wndproc; };
          void   setWindowProc(WNDPROC newproc)  { win32wndproc = newproc; };
         DWORD   getWindowId()                   { return windowId; };
@@ -86,10 +84,22 @@ virtual	 WORD   GetWindowWord(int index);
 	 DWORD  getFlags()			{ return flags; };
 	 void   setFlags(DWORD newflags)	{ flags = newflags; };
 
+	 BOOL   SetMenu(ULONG hMenu);
+	 BOOL   ShowWindow(ULONG nCmdShow);
+	 BOOL   SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, int cy, UINT fuFlags);
+	 BOOL   DestroyWindow();
+	 HWND   SetActiveWindow();
+	 HWND   GetParent();
+	 HWND   SetParent(HWND hwndNewParent);
+	 BOOL   IsChild(HWND hwndParent);
+	 HWND   GetTopWindow();
+	 BOOL   UpdateWindow();
+	 BOOL   IsIconic();
+
        LRESULT  SendMessageA(ULONG msg, WPARAM wParam, LPARAM lParam);
        LRESULT  SendMessageW(ULONG msg, WPARAM wParam, LPARAM lParam);
-       LRESULT  PostMessageA(ULONG msg, WPARAM wParam, LPARAM lParam);
-       LRESULT  PostMessageW(ULONG msg, WPARAM wParam, LPARAM lParam);
+       BOOL     PostMessageA(ULONG msg, WPARAM wParam, LPARAM lParam);
+       BOOL     PostMessageW(ULONG msg, WPARAM wParam, LPARAM lParam);
        LRESULT  DefWindowProcA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
        LRESULT  DefWindowProcW(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
@@ -97,11 +107,13 @@ virtual	 WORD   GetWindowWord(int index);
 
 Win32WndClass  *getClass()  { return windowClass; };
 
+static Win32Window *GetWindowFromHandle(HWND hwnd);
+
 protected:
 	void    Init();
 
-
 	HWND	OS2Hwnd;
+	HWND    OS2HwndMenu;
 	HWND	Win32Hwnd;
 	BOOL    isUnicode;
 
@@ -112,7 +124,8 @@ protected:
 	ULONG	dwStyle;		//GWL_STYLE
       WNDPROC   win32wndproc;		//GWL_WNDPROC
 	ULONG   hInstance;		//GWL_HINSTANCE
-   Win32Window *parent;			//GWL_HWNDPARENT
+//Moved in ChildWindow class
+/////   Win32Window *parent;			//GWL_HWNDPARENT
 	ULONG	windowId;		//GWL_ID
 	ULONG	userData;		//GWL_USERDATA
 
@@ -130,14 +143,31 @@ protected:
 	ULONG  *userWindowLong;
 	ULONG	nrUserWindowLong;
 
+	RECT    rectWindow;
+	RECT    rectClient;
+
 Win32WndClass  *windowClass;
 
 static GenericObject *windows;
 
 private:
+#ifndef OS2_INCLUDED
 	BOOL  CreateWindowExA(CREATESTRUCTA *lpCreateStruct, ATOM classAtom);
 
 	void  GetMinMaxInfo(POINT *maxSize, POINT *maxPos, POINT *minTrack, POINT *maxTrack );
+
+	LONG  SendNCCalcSize(BOOL calcValidRect,
+                             RECT *newWindowRect, RECT *oldWindowRect,
+                             RECT *oldClientRect, WINDOWPOS *winpos,
+                             RECT *newClientRect );
+
+     LRESULT  sendMessage(ULONG msg, WPARAM wParam, LPARAM lParam)
+     {
+	if(isUnicode)
+		return SendMessageW(msg, wParam, lParam);
+	else	return SendMessageA(msg, wParam, lParam);
+     }
+#endif
 };
 
 

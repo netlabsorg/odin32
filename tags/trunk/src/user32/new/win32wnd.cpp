@@ -1,4 +1,4 @@
-/* $Id: win32wnd.cpp,v 1.3 1999-07-15 18:03:02 sandervl Exp $ */
+/* $Id: win32wnd.cpp,v 1.4 1999-07-16 11:32:09 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -44,7 +44,7 @@ Win32Window::Win32Window(DWORD objType) : GenericObject(&windows, objType)
 //******************************************************************************
 //******************************************************************************
 Win32Window::Win32Window(CREATESTRUCTA *lpCreateStructA, ATOM classAtom, BOOL isUnicode)
-                        : GenericObject(&windows, OBJTYPE_WINDOW)
+                        : GenericObject(&windows, OBJTYPE_WINDOW), ChildWindow()
 {
   Init();
   this->isUnicode = isUnicode;
@@ -67,6 +67,7 @@ void Win32Window::Init()
 
   magic            = WIN32PM_MAGIC;
   OS2Hwnd          = 0;
+  OS2HwndMenu      = 0;
   Win32Hwnd        = 0;
 
   //CB: what does this code? Win32Hwnd is always 0!
@@ -75,6 +76,9 @@ void Win32Window::Init()
         dprintf(("Win32Window::Init HMHandleAllocate failed!!"));
         DebugInt3();
   }
+  Win32Hwnd       &= 0xFFFF;
+  Win32Hwnd       |= 0x68000000;
+
   posx = posy      = 0;
   width = height   = 0;
 
@@ -82,7 +86,6 @@ void Win32Window::Init()
   dwStyle          = 0;
   win32wndproc     = 0;
   hInstance        = 0;
-  parent           = 0;
   windowId         = 0xFFFFFFFF;        //default = -1
   userData         = 0;
 
@@ -109,7 +112,6 @@ Win32Window::~Win32Window()
 BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 {
  char  buffer[256];
- DWORD tmp;
  INT   sw = SW_SHOW;
  POINT maxSize, maxPos, minTrack, maxTrack;
 
@@ -219,27 +221,21 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 
   if ((cs->style & WS_CHILD) && cs->hwndParent)
   {
-        if(HMHandleTranslateToOS2(cs->hwndParent, &tmp) != NO_ERROR)
-        {
-                dprintf(("HMHandleTranslateToOS2 couldn't find parent window %x!!!", cs->hwndParent));
-                return FALSE;
-        }
-        parent = (Win32Window *)tmp;
+	SetParent(cs->hwndParent);
   }
   else
   {
-        parent = NULL;  //desktop
         if (!cs->hwndParent) {
                 owner = NULL;
         }
         else
         {
-                if(HMHandleTranslateToOS2(cs->hwndParent, &tmp) != NO_ERROR)
+		owner = GetWindowFromHandle(cs->hwndParent);
+                if(owner == NULL)
                 {
                         dprintf(("HMHandleTranslateToOS2 couldn't find owner window %x!!!", cs->hwndParent));
                         return FALSE;
                 }
-                owner = (Win32Window *)tmp;
         }
   }
 
@@ -250,6 +246,29 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 
   hwndLinkAfter = ((cs->style & (WS_CHILD|WS_MAXIMIZE)) == WS_CHILD)
                   ? HWND_BOTTOM : HWND_TOP;
+
+#if 0
+//TODO
+    /* Call the WH_CBT hook */
+
+    if (HOOK_IsHooked( WH_CBT ))
+    {
+	CBT_CREATEWNDA cbtc;
+        LRESULT ret;
+
+	cbtc.lpcs = cs;
+	cbtc.hwndInsertAfter = hwndLinkAfter;
+        ret = unicode ? HOOK_CallHooksW(WH_CBT, HCBT_CREATEWND, Win32Hwnd, (LPARAM)&cbtc)
+                      : HOOK_CallHooksA(WH_CBT, HCBT_CREATEWND, Win32Hwnd, (LPARAM)&cbtc);
+        if (ret)
+	{
+	    TRACE_(win)("CBT-hook returned 0\n");
+	    wndPtr->pDriver->pFinalize(wndPtr);
+            retvalue =  0;
+            goto end;
+	}
+    }
+#endif
 
   /* Increment class window counter */
   windowClass->IncreaseWindowCount();
@@ -295,25 +314,17 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         if (cs->cy <= 0) cs->cy = 1;
   }
 
-  /* Set the window menu */
-  if ((dwStyle & (WS_CAPTION | WS_CHILD)) == WS_CAPTION )
-  {
-        if (cs->hMenu) SetMenu(getWindowHandle(), cs->hMenu);
-        else
-        {
-                if (windowClass->getMenuNameA()) {
-                        cs->hMenu = LoadMenuA(cs->hInstance, windowClass->getMenuNameA());
-                        if (cs->hMenu) SetMenu( getWindowHandle(), cs->hMenu );
-                }
-        }
-  }
-  else  windowId = (UINT)cs->hMenu;
+  rectWindow.left   = cs->x;
+  rectWindow.top    = cs->y;
+  rectWindow.right  = cs->x + cs->cx;
+  rectWindow.bottom = cs->y + cs->cy;
+  rectClient        = rectWindow;
 
   DWORD dwOSWinStyle, dwOSFrameStyle;
 
   OSLibWinConvertStyle(cs->style, &dwOSWinStyle, &dwOSFrameStyle);
 
-  OS2Hwnd = OSLibWinCreateWindow((parent) ? parent->getOS2WindowHandle() : 0,
+  OS2Hwnd = OSLibWinCreateWindow((getParent()) ? getParent()->getOS2WindowHandle() : 0,
                                  dwOSWinStyle, dwOSFrameStyle, (char *)cs->lpszName,
                                  cs->x, cs->y, cs->cx, cs->cy,
                                  (owner) ? owner->getOS2WindowHandle() : 0,
@@ -332,8 +343,201 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         return FALSE;
   }
 
-  return TRUE;
+  /* Set the window menu */
+  if ((dwStyle & (WS_CAPTION | WS_CHILD)) == WS_CAPTION )
+  {
+        if (cs->hMenu) SetMenu(cs->hMenu);
+        else
+        {
+                if (windowClass->getMenuNameA()) {
+                        cs->hMenu = LoadMenuA(cs->hInstance, windowClass->getMenuNameA());
+                        if (cs->hMenu) SetMenu(cs->hMenu );
+                }
+        }
+  }
+  else  windowId = (UINT)cs->hMenu;
+
+  /* Send the WM_CREATE message 
+   * Perhaps we shouldn't allow width/height changes as well. 
+   * See p327 in "Internals". 
+   */
+  maxPos.x = rectWindow.left; maxPos.y = rectWindow.top;
+
+  if(sendMessage(WM_NCCREATE, 0, (LPARAM)cs) )
+  {
+        SendNCCalcSize(FALSE, &rectWindow, NULL, NULL, 0, &rectClient );
+        OffsetRect(&rectWindow, maxPos.x - rectWindow.left,
+                                          maxPos.y - rectWindow.top);
+	dprintf(("Sending WM_CREATE"));
+        if( (sendMessage(WM_CREATE, 0, (LPARAM)cs )) != -1 )
+        {
+            /* Send the size messages */
+	    dprintf(("Sent WM_CREATE"));
+
+            if (!(flags & WIN_NEED_SIZE))
+            {
+                /* send it anyway */
+	        if (((rectClient.right-rectClient.left) <0)
+		    ||((rectClient.bottom-rectClient.top)<0))
+		  dprintf(("sending bogus WM_SIZE message 0x%08lx\n",
+			MAKELONG(rectClient.right-rectClient.left,
+				 rectClient.bottom-rectClient.top)));
+                SendMessageA(WM_SIZE, SIZE_RESTORED,
+                                MAKELONG(rectClient.right-rectClient.left,
+                                         rectClient.bottom-rectClient.top));
+                SendMessageA(WM_MOVE, 0,
+                                MAKELONG( rectClient.left,
+                                          rectClient.top ) );
+            }
+
+#if 0
+            /* Show the window, maximizing or minimizing if needed */
+
+            if (dwStyle & (WS_MINIMIZE | WS_MAXIMIZE))
+            {
+		RECT16 newPos;
+		UINT16 swFlag = (dwStyle & WS_MINIMIZE) ? SW_MINIMIZE : SW_MAXIMIZE;
+                dwStyle &= ~(WS_MAXIMIZE | WS_MINIMIZE);
+		WINPOS_MinMaximize(swFlag, &newPos );
+                swFlag = ((dwStyle & WS_CHILD) || GetActiveWindow())
+                    ? SWP_NOACTIVATE | SWP_NOZORDER | SWP_FRAMECHANGED
+                    : SWP_NOZORDER | SWP_FRAMECHANGED;
+                SetWindowPos(0, newPos.left, newPos.top,
+                             newPos.right, newPos.bottom, swFlag );
+            }
+#endif
+
+	    if( dwStyle & WS_CHILD && !(dwExStyle & WS_EX_NOPARENTNOTIFY) )
+	    {
+		/* Notify the parent window only */
+
+		NotifyParent(WM_CREATE, 0, 0);
+                if( !IsWindow(Win32Hwnd) )
+                {
+                    return FALSE;
+	        }
+	    }
+
+            if (cs->style & WS_VISIBLE) ShowWindow( sw );
+
+#if 0
+            /* Call WH_SHELL hook */
+
+            if (!(dwStyle & WS_CHILD) && !owner)
+                HOOK_CallHooks16( WH_SHELL, HSHELL_WINDOWCREATED, hwnd, 0 );
+#endif
+	    return TRUE;
+        }
+  }
+  return FALSE;
 }
+#if 0
+/***********************************************************************
+ *           WINPOS_MinMaximize
+ *
+ * Fill in lpRect and return additional flags to be used with SetWindowPos().
+ * This function assumes that 'cmd' is different from the current window
+ * state.
+ */
+UINT Win32Window::MinMaximize(UINT16 cmd, LPRECT16 lpRect )
+{
+    UINT swpFlags = 0;
+    POINT pt, size;
+    LPINTERNALPOS lpPos;
+
+    size.x = rectWindow.left; size.y = rectWindow.top;
+    lpPos = WINPOS_InitInternalPos( wndPtr, size, &rectWindow );
+
+    if (lpPos && !HOOK_CallHooks16(WH_CBT, HCBT_MINMAX, hwndSelf, cmd))
+    {
+	if( dwStyle & WS_MINIMIZE )
+	{
+	    if( !SendMessageA(WM_QUERYOPEN, 0, 0L ) )
+		return (SWP_NOSIZE | SWP_NOMOVE);
+	    swpFlags |= SWP_NOCOPYBITS;
+	}
+	switch( cmd )
+	{
+	    case SW_MINIMIZE:
+		 if( dwStyle & WS_MAXIMIZE)
+		 {
+		     flags |= WIN_RESTORE_MAX;
+		     dwStyle &= ~WS_MAXIMIZE;
+                 }
+                 else
+		     flags &= ~WIN_RESTORE_MAX;
+		 dwStyle |= WS_MINIMIZE;
+
+#if 0
+		 if( flags & WIN_NATIVE )
+		     if( pDriver->pSetHostAttr( wndPtr, HAK_ICONICSTATE, TRUE ) )
+			 swpFlags |= MINMAX_NOSWP;
+#endif
+
+		 lpPos->ptIconPos = WINPOS_FindIconPos( wndPtr, lpPos->ptIconPos );
+
+		 SetRect(lpRect, lpPos->ptIconPos.x, lpPos->ptIconPos.y,
+			 GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON) );
+		 swpFlags |= SWP_NOCOPYBITS;
+		 break;
+
+	    case SW_MAXIMIZE:
+                CONV_POINT16TO32( &lpPos->ptMaxPos, &pt );
+                WINPOS_GetMinMaxInfo( wndPtr, &size, &pt, NULL, NULL );
+                CONV_POINT32TO16( &pt, &lpPos->ptMaxPos );
+
+		 if( dwStyle & WS_MINIMIZE )
+		 {
+		     if( flags & WIN_NATIVE )
+			 if( pDriver->pSetHostAttr( wndPtr, HAK_ICONICSTATE, FALSE ) )
+			     swpFlags |= MINMAX_NOSWP;
+
+		     WINPOS_ShowIconTitle( wndPtr, FALSE );
+		     dwStyle &= ~WS_MINIMIZE;
+		 }
+                 dwStyle |= WS_MAXIMIZE;
+
+		 SetRect16( lpRect, lpPos->ptMaxPos.x, lpPos->ptMaxPos.y,
+				    size.x, size.y );
+		 break;
+
+	    case SW_RESTORE:
+		 if( dwStyle & WS_MINIMIZE )
+		 {
+		     if( flags & WIN_NATIVE )
+			 if( pDriver->pSetHostAttr( wndPtr, HAK_ICONICSTATE, FALSE ) )
+			     swpFlags |= MINMAX_NOSWP;
+
+		     dwStyle &= ~WS_MINIMIZE;
+		     WINPOS_ShowIconTitle( wndPtr, FALSE );
+
+		     if( flags & WIN_RESTORE_MAX)
+		     {
+			 /* Restore to maximized position */
+                         CONV_POINT16TO32( &lpPos->ptMaxPos, &pt );
+                         WINPOS_GetMinMaxInfo( wndPtr, &size, &pt, NULL, NULL);
+                         CONV_POINT32TO16( &pt, &lpPos->ptMaxPos );
+			 dwStyle |= WS_MAXIMIZE;
+			 SetRect16( lpRect, lpPos->ptMaxPos.x, lpPos->ptMaxPos.y, size.x, size.y );
+			 break;
+		     }
+		 } 
+		 else 
+		     if( !(dwStyle & WS_MAXIMIZE) ) return (UINT16)(-1);
+ 		     else dwStyle &= ~WS_MAXIMIZE;
+
+		 /* Restore to normal position */
+
+		*lpRect = lpPos->rectNormal; 
+		 lpRect->right -= lpRect->left; 
+		 lpRect->bottom -= lpRect->top;
+
+		 break;
+	}
+    } else swpFlags |= SWP_NOSIZE | SWP_NOMOVE;
+    return swpFlags;
+}
+#endif
 /*******************************************************************
  *           GetMinMaxInfo
  *
@@ -378,7 +582,7 @@ void Win32Window::GetMinMaxInfo(POINT *maxSize, POINT *maxPos,
     MinMax.ptMaxSize.y += 2 * yinc;
 
 #if 0
-    lpPos = (LPINTERNALPOS)GetPropA( wndPtr->hwndSelf, atomInternalPos );
+    lpPos = (LPINTERNALPOS)GetPropA( hwndSelf, atomInternalPos );
     if( lpPos && !EMPTYPOINT(lpPos->ptMaxPos) )
         CONV_POINT16TO32( &lpPos->ptMaxPos, &MinMax.ptMaxPosition );
     else
@@ -406,6 +610,36 @@ void Win32Window::GetMinMaxInfo(POINT *maxSize, POINT *maxPos,
     if (maxPos) *maxPos = MinMax.ptMaxPosition;
     if (minTrack) *minTrack = MinMax.ptMinTrackSize;
     if (maxTrack) *maxTrack = MinMax.ptMaxTrackSize;
+}
+/***********************************************************************
+ *           WINPOS_SendNCCalcSize
+ *
+ * Send a WM_NCCALCSIZE message to a window.
+ * All parameters are read-only except newClientRect.
+ * oldWindowRect, oldClientRect and winpos must be non-NULL only
+ * when calcValidRect is TRUE.
+ */
+LONG Win32Window::SendNCCalcSize(BOOL calcValidRect,
+                            RECT *newWindowRect, RECT *oldWindowRect,
+                            RECT *oldClientRect, WINDOWPOS *winpos,
+                            RECT *newClientRect )
+{
+   NCCALCSIZE_PARAMS params;
+   WINDOWPOS winposCopy;
+   LONG result;
+
+   params.rgrc[0] = *newWindowRect;
+   if (calcValidRect)
+   {
+        winposCopy = *winpos;
+	params.rgrc[1] = *oldWindowRect;
+	params.rgrc[2] = *oldClientRect;
+	params.lppos = &winposCopy;
+   }
+   result = SendMessageA(WM_NCCALCSIZE, calcValidRect,
+                          (LPARAM)&params );
+   *newClientRect = params.rgrc[0];
+   return result;
 }
 //******************************************************************************
 //******************************************************************************
@@ -612,13 +846,14 @@ LRESULT Win32Window::SendMessageW(ULONG Msg, WPARAM wParam, LPARAM lParam)
 }
 //******************************************************************************
 //******************************************************************************
-LRESULT Win32Window::PostMessageA(ULONG msg, WPARAM wParam, LPARAM lParam)
+BOOL Win32Window::PostMessageA(ULONG msg, WPARAM wParam, LPARAM lParam)
 {
  POSTMSG_PACKET *postmsg;
 
   postmsg = (POSTMSG_PACKET *)malloc(sizeof(POSTMSG_PACKET));
   if(postmsg == NULL) {
 	dprintf(("Win32Window::PostMessageA: malloc returned NULL!!"));
+	return 0;
   }
   postmsg->Msg    = msg;
   postmsg->wParam = wParam;
@@ -627,13 +862,14 @@ LRESULT Win32Window::PostMessageA(ULONG msg, WPARAM wParam, LPARAM lParam)
 }
 //******************************************************************************
 //******************************************************************************
-LRESULT Win32Window::PostMessageW(ULONG msg, WPARAM wParam, LPARAM lParam)
+BOOL Win32Window::PostMessageW(ULONG msg, WPARAM wParam, LPARAM lParam)
 {
  POSTMSG_PACKET *postmsg;
 
   postmsg = (POSTMSG_PACKET *)malloc(sizeof(POSTMSG_PACKET));
   if(postmsg == NULL) {
 	dprintf(("Win32Window::PostMessageW: malloc returned NULL!!"));
+	return 0;
   }
   postmsg->Msg    = msg;
   postmsg->wParam = wParam;
@@ -641,6 +877,7 @@ LRESULT Win32Window::PostMessageW(ULONG msg, WPARAM wParam, LPARAM lParam)
   return OSLibPostMessage(OS2Hwnd, WM_WIN32_POSTMESSAGEW, (ULONG)postmsg, 0);
 }
 //******************************************************************************
+//TODO: do we need to inform the parent of the parent (etc) of the child window?
 //******************************************************************************
 void Win32Window::NotifyParent(UINT Msg, WPARAM wParam, LPARAM lParam)
 {
@@ -667,6 +904,139 @@ void Win32Window::NotifyParent(UINT Msg, WPARAM wParam, LPARAM lParam)
 }
 //******************************************************************************
 //******************************************************************************
+BOOL Win32Window::SetMenu(ULONG hMenu)
+{
+ PVOID menutemplate;
+
+   if(HMHandleTranslateToOS2(hMenu, (PULONG)&menutemplate) == NO_ERROR) 
+   {
+	OS2HwndMenu = OSLibWinCreateMenu(OS2Hwnd, menutemplate);
+	if(OS2HwndMenu == 0) {
+		dprintf(("Win32Window::SetMenu OS2HwndMenu == 0"));
+		return FALSE;
+	}
+   }
+   dprintf(("Win32Window::SetMenu unknown hMenu (%x)", hMenu));
+   return FALSE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32Window::ShowWindow(ULONG nCmdShow)
+{
+  return O32_ShowWindow(OS2Hwnd, nCmdShow);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32Window::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, int cy, UINT fuFlags)
+{
+ Win32Window *window;
+
+  switch(hwndInsertAfter) {
+  	case HWND_BOTTOM:
+  	case HWND_TOP:
+	case HWND_TOPMOST:
+	case HWND_NOTOPMOST:
+		break;
+	default:
+		window = GetWindowFromHandle(hwndInsertAfter);
+		if(window) {
+			hwndInsertAfter = window->getOS2WindowHandle();
+		}
+		else {
+			dprintf(("Win32Window::SetWindowPos, unknown hwndInsertAfter %x", hwndInsertAfter));
+			hwndInsertAfter = 0;
+		}
+		break;
+		
+  }
+  return O32_SetWindowPos(OS2Hwnd, hwndInsertAfter, x, y, cx, cy, fuFlags);
+}
+//******************************************************************************
+BOOL Win32Window::DestroyWindow()
+{
+  return TRUE;
+}
+//******************************************************************************
+//TODO:
+//******************************************************************************
+HWND Win32Window::SetActiveWindow()
+{
+  return O32_SetActiveWindow(OS2Hwnd);
+}
+//******************************************************************************
+//******************************************************************************
+HWND Win32Window::GetParent()
+{
+  if(getParent()) {
+	return getParent()->getWindowHandle();
+  }
+  else	return 0;
+}
+//******************************************************************************
+//******************************************************************************
+HWND Win32Window::SetParent(HWND hwndNewParent)
+{
+ HWND oldhwnd;
+ Win32Window *newparent;
+
+   if(getParent()) {
+    	oldhwnd = getParent()->getWindowHandle();
+   }
+   else oldhwnd = 0;
+
+   if(hwndNewParent == 0) {//desktop window = parent
+ 	setParent(NULL);
+        OSLibWinSetParent(getOS2WindowHandle(), OSLIB_HWND_DESKTOP);
+        return oldhwnd;
+   }
+   newparent = GetWindowFromHandle(hwndNewParent);
+   if(newparent)
+   {
+        setParent(newparent);
+        OSLibWinSetParent(getOS2WindowHandle(), getParent()->getOS2WindowHandle());
+        return oldhwnd;
+   }
+   SetLastError(ERROR_INVALID_PARAMETER);
+   return 0;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32Window::IsChild(HWND hwndParent)
+{
+  if(getParent()) {
+	return getParent()->getWindowHandle() == hwndParent;
+  }
+  else 	return 0;
+}
+//******************************************************************************
+//******************************************************************************
+HWND Win32Window::GetTopWindow()
+{
+ HWND topchild;
+
+  topchild = OSLibWinQueryTopMostChildWindow(OS2Hwnd);
+  if(topchild)
+  {//TODO
+	return topchild;
+  }
+  else	return 0;
+}
+//******************************************************************************
+//TODO
+//******************************************************************************
+BOOL Win32Window::UpdateWindow()
+{  
+  return TRUE;
+}
+//******************************************************************************
+//TODO
+//******************************************************************************
+BOOL Win32Window::IsIconic()
+{
+  return FALSE;
+}
+//******************************************************************************
+//******************************************************************************
 LONG Win32Window::SetWindowLongA(int index, ULONG value)
 {
  LONG oldval;
@@ -689,28 +1059,8 @@ LONG Win32Window::SetWindowLongA(int index, ULONG value)
                 hInstance = value;
                 return oldval;
         case GWL_HWNDPARENT:
-        {
-         ULONG tmp;
+		return SetParent((HWND)value);
 
-                if(getParent()) {
-                        oldval = getParent()->getWindowHandle();
-                }
-                else    oldval = 0;
-
-                if(value == 0) {//desktop window = parent
-                        setParent(NULL);
-                        OSLibWinSetParent(getOS2WindowHandle(), OSLIB_HWND_DESKTOP);
-                        return oldval;
-                }
-                if(HMHandleTranslateToOS2(value, &tmp) == NO_ERROR)
-                {
-                        setParent((Win32Window *)tmp);
-                        OSLibWinSetParent(getOS2WindowHandle(), getParent()->getOS2WindowHandle());
-                        return oldval;
-                }
-                SetLastError(ERROR_INVALID_PARAMETER);
-                return 0;
-        }
         case GWL_ID:
                 oldval = getWindowId();
                 setWindowId(value);
@@ -786,6 +1136,20 @@ WORD Win32Window::GetWindowWord(int index)
    }
    SetLastError(ERROR_INVALID_PARAMETER);
    return 0;
+}
+//******************************************************************************
+//******************************************************************************
+Win32Window *Win32Window::GetWindowFromHandle(HWND hwnd)
+{
+ Win32Window *window;
+
+   if(HIWORD(hwnd) != 0x6800)
+	return NULL;
+
+   if(HMHandleTranslateToOS2(LOWORD(hwnd), (PULONG)&window) == NO_ERROR) {
+	return window;
+   }
+   else return NULL;
 }
 //******************************************************************************
 //******************************************************************************

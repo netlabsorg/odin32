@@ -1,4 +1,4 @@
-/* $Id: windowclass.cpp,v 1.4 1999-07-15 18:54:55 sandervl Exp $ */
+/* $Id: windowclass.cpp,v 1.5 1999-07-16 11:32:09 sandervl Exp $ */
 /*
  * Win32 Window Class Code for OS/2
  *
@@ -18,7 +18,6 @@
 #include <misc.h>
 #include <win32class.h>
 #include <win32wnd.h>
-#include <handlemanager.h>
 
 //******************************************************************************
 //******************************************************************************
@@ -260,7 +259,8 @@ int WIN32API GetClassNameA(HWND hwnd, LPSTR lpszClassName, int cchClassName)
  Win32Window *wnd;
 
     dprintf(("USER32: GetClassNameA\n"));
-    if(HMHandleTranslateToOS2(hwnd, (PULONG)&wnd) != NO_ERROR) {
+    wnd = Win32Window::GetWindowFromHandle(hwnd);
+    if(!wnd) {
         dprintf(("GetClassNameA wnd == NULL"));
         return(0);
     }
@@ -273,7 +273,8 @@ int WIN32API GetClassNameW(HWND hwnd, LPWSTR lpszClassName, int cchClassName)
  Win32Window *wnd;
 
     dprintf(("USER32: GetClassNameW\n"));
-    if(HMHandleTranslateToOS2(hwnd, (PULONG)&wnd) != NO_ERROR) {
+    wnd = Win32Window::GetWindowFromHandle(hwnd);
+    if(!wnd) {
         dprintf(("GetClassNameA wnd == NULL"));
         return(0);
     }
@@ -286,7 +287,8 @@ LONG WIN32API SetClassLongA(HWND hwnd, int nIndex, LONG lNewVal)
  Win32Window *wnd;
 
     dprintf(("USER32: SetClassLongA\n"));
-    if(HMHandleTranslateToOS2(hwnd, (PULONG)&wnd) != NO_ERROR) {
+    wnd = Win32Window::GetWindowFromHandle(hwnd);
+    if(!wnd) {
         dprintf(("SetClassLongA wnd == NULL"));
         return(0);
     }
@@ -299,7 +301,8 @@ LONG WIN32API SetClassLongW(HWND hwnd, int nIndex, LONG lNewVal)
  Win32Window *wnd;
 
     dprintf(("USER32: SetClassLongW\n"));
-    if(HMHandleTranslateToOS2(hwnd, (PULONG)&wnd) != NO_ERROR) {
+    wnd = Win32Window::GetWindowFromHandle(hwnd);
+    if(!wnd) {
         dprintf(("SetClassLongW wnd == NULL"));
         return(0);
     }
@@ -312,7 +315,8 @@ WORD WIN32API SetClassWord(HWND hwnd, int nIndex, WORD  wNewVal)
  Win32Window *wnd;
 
     dprintf(("USER32: SetClassWordA\n"));
-    if(HMHandleTranslateToOS2(hwnd, (PULONG)&wnd) != NO_ERROR) {
+    wnd = Win32Window::GetWindowFromHandle(hwnd);
+    if(!wnd) {
         dprintf(("SetClassWordA wnd == NULL"));
         return(0);
     }
@@ -325,7 +329,8 @@ WORD WIN32API GetClassWord(HWND hwnd, int nIndex)
  Win32Window *wnd;
 
     dprintf(("USER32: GetClassWordA\n"));
-    if(HMHandleTranslateToOS2(hwnd, (PULONG)&wnd) != NO_ERROR) {
+    wnd = Win32Window::GetWindowFromHandle(hwnd);
+    if(!wnd) {
         dprintf(("GetClassWordA wnd == NULL"));
         return(0);
     }
@@ -338,7 +343,8 @@ LONG WIN32API GetClassLongA(HWND hwnd, int nIndex)
  Win32Window *wnd;
 
     dprintf(("USER32: GetClassLongA\n"));
-    if(HMHandleTranslateToOS2(hwnd, (PULONG)&wnd) != NO_ERROR) {
+    wnd = Win32Window::GetWindowFromHandle(hwnd);
+    if(!wnd) {
         dprintf(("GetClassLongA wnd == NULL"));
         return(0);
     }
@@ -351,7 +357,8 @@ LONG WIN32API GetClassLongW(HWND hwnd, int nIndex)
  Win32Window *wnd;
 
     dprintf(("USER32: GetClassLongW\n"));
-    if(HMHandleTranslateToOS2(hwnd, (PULONG)&wnd) != NO_ERROR) {
+    wnd = Win32Window::GetWindowFromHandle(hwnd);
+    if(!wnd) {
         dprintf(("GetClassLongW wnd == NULL"));
         return(0);
     }
