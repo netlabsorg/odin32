@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.628 2000-01-09 17:12:57 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.629 2000-01-09 18:01:16 sandervl Exp $ */
 
  2000-01-09: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Added border size for top-level windows in OSLibWinConvertStyle 
@@ -9,6 +9,7 @@
                   parent position change -> rectWindow (in screen coord.) not updated)
                   Fixed LoadBitmap for system bitmaps
                   Fixes for win32 titlebar + added win32 system menu
+                  System menu commands now work
 
  2000-01-09: David Raison <djr@lemur.co.uk>
         - OLEAUT32: Typelib - Updated TKIND_ALIAS handling.
