@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.52 2000-02-26 18:23:34 bird Exp $
+# $Id: makefile,v 1.53 2000-02-27 12:31:23 bird Exp $
 
 #
 # PD-Win32 API
@@ -165,16 +165,12 @@ clean:
 # Odin32 API DB Management
 #
 APIImport:
-    $(DOWITHDIRS) -e$(NOTWIN32DLLS) -ewnetap32 -cp \
+    $(DOWITHDIRS) -e$(NOTWIN32DLLS) -cp \
         ..\..\tools\bin\APIImport.cmd
-    cd wnetap32
-    echo LIBRARY NETAPI32 > APIImport.def
-    grep -v "LIBRARY WNETAP32" netapi32.def >> APIImport.def
-    ..\..\tools\bin\APIImport.exe APIImport.def
 
 StateUpd:
     ..\tools\bin\StateUpd.exe -io+
-    -$(DOWITHDIRS) -e$(NOTWIN32DLLS) -ewnetap32 -cp -i \
+    -$(DOWITHDIRS) -e$(NOTWIN32DLLS) -cp -i \
         ..\..\tools\bin\StateUpd.exe -ie- -ib-
     ..\tools\bin\StateUpd.exe -io+
 
