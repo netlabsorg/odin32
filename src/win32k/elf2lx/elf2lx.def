@@ -1,4 +1,0 @@
-;$Id: elf2lx.def,v 1.1 2000-12-16 21:54:20 bird Exp $
-NAME elf2lx WINDOWCOMPAT
-DESCRIPTION 'Win32k - Elf2Lx - Test ELF converter.'
-
