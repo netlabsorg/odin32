@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.75 2001-11-09 01:26:15 phaller Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.76 2001-11-09 02:09:27 phaller Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -669,6 +669,7 @@ VirtualKeyFound:
             // the correct states
             KeySetOverlayKeyState(VK_LMENU_W, KEYOVERLAYSTATE_DONTCARE);
             KeySetOverlayKeyState(VK_LCONTROL_W, KEYOVERLAYSTATE_DONTCARE);
+            KeySetOverlayKeyState(VK_CONTROL_W, KEYOVERLAYSTATE_DONTCARE);
             KeySetOverlayKeyState(VK_RMENU_W, KEYOVERLAYSTATE_DONTCARE);
           }
           else
@@ -683,6 +684,7 @@ VirtualKeyFound:
             // the correct states
             KeySetOverlayKeyState(VK_LMENU_W, KEYOVERLAYSTATE_DOWN);
             KeySetOverlayKeyState(VK_LCONTROL_W, KEYOVERLAYSTATE_DOWN);
+            KeySetOverlayKeyState(VK_CONTROL_W, KEYOVERLAYSTATE_DOWN);
             KeySetOverlayKeyState(VK_RMENU_W, KEYOVERLAYSTATE_DOWN);
           }
           
