@@ -1,4 +1,4 @@
-/* $Id: directory.cpp,v 1.37 2001-06-24 14:13:04 sandervl Exp $ */
+/* $Id: directory.cpp,v 1.38 2001-06-24 16:40:44 sandervl Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
@@ -254,8 +254,7 @@ ODINFUNCTION2(BOOL,                CreateDirectoryA,
     lpstrDirectory = lpTemp;
   }
   
-  dprintf(("CreateDirectoryA %s", 
-            lpstrDirectory));
+  dprintf(("CreateDirectoryA %s", lpstrDirectory));
   
   // PH Note 2000/06/12:
   // Creation of an existing directory is NO ERROR it seems.
@@ -267,8 +266,7 @@ ODINFUNCTION2(BOOL,                CreateDirectoryA,
       return TRUE;
     }
   
-  return(O32_CreateDirectory(lpstrDirectory,
-                             arg2));
+  return(OSLibDosCreateDirectory(lpstrDirectory));
 }
 
 /*****************************************************************************
@@ -290,7 +288,7 @@ ODINFUNCTION2(BOOL,CreateDirectoryW,LPCWSTR,             arg1,
   char *astring;
 
   astring = UnicodeToAsciiString((LPWSTR)arg1);
-  rc = CreateDirectoryA(astring, arg2);
+  rc = CALL_ODINFUNC(CreateDirectoryA)(astring, arg2);
   FreeAsciiString(astring);
   return(rc);
 }

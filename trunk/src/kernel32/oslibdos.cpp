@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.70 2001-06-24 14:13:04 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.71 2001-06-24 16:40:44 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -550,6 +550,16 @@ BOOL OSLibDosRemoveDir(LPCSTR lpszDir)
  APIRET rc;
 
   rc = DosDeleteDir((PSZ)lpszDir);
+  SetLastError(error2WinError(rc));
+  return (rc == NO_ERROR);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibDosCreateDirectory(LPCSTR lpszDir)
+{
+ APIRET rc;
+
+  rc = DosCreateDir((PSZ)lpszDir, NULL);
   SetLastError(error2WinError(rc));
   return (rc == NO_ERROR);
 }
