@@ -1,4 +1,4 @@
-/* $Id: win32wmdichild.cpp,v 1.5 1999-10-16 14:51:43 sandervl Exp $ */
+/* $Id: win32wmdichild.cpp,v 1.6 1999-10-24 12:30:28 sandervl Exp $ */
 /*
  * Win32 MDI Child Window Class for OS/2
  *
@@ -44,8 +44,10 @@
 //******************************************************************************
 //******************************************************************************
 Win32MDIChildWindow::Win32MDIChildWindow(CREATESTRUCTA *lpCreateStructA, ATOM classAtom, BOOL isUnicode)
-                    : Win32BaseWindow(lpCreateStructA, classAtom, isUnicode)
+                    : Win32BaseWindow(OBJTYPE_WINDOW)
 {
+    this->isUnicode = isUnicode;
+    CreateWindowExA(lpCreateStructA, classAtom);
 }
 //******************************************************************************
 //******************************************************************************
@@ -171,10 +173,8 @@ LRESULT Win32MDIChildWindow::DefMDIChildProcA(UINT Msg, WPARAM wParam, LPARAM lP
         /* do not change */
         if( client->getActiveChild() == this && wParam != SIZE_MAXIMIZED )
         {
-            client->setActiveChild(NULL);
-#if 0
-            MDI_RestoreFrameMenu( clientWnd->parent, hwnd);
-#endif
+            client->setMaximizedChild(NULL);
+            client->restoreFrameMenu(this);
             client->updateFrameText(MDI_REPAINTFRAME, NULL );
         }
 
@@ -187,9 +187,7 @@ LRESULT Win32MDIChildWindow::DefMDIChildProcA(UINT Msg, WPARAM wParam, LPARAM lP
             if( maxChild)
             {
                 maxChild->SendMessageA(WM_SETREDRAW, FALSE, 0L );
-#if 0
-                MDI_RestoreFrameMenu( clientWnd->parent, hMaxChild);
-#endif
+                client->restoreFrameMenu(maxChild);
                 maxChild->ShowWindow(SW_SHOWNOACTIVATE);
 
                 maxChild->SendMessageA(WM_SETREDRAW, TRUE, 0L );
