@@ -1,4 +1,4 @@
-/* $Id: odin32get.cmd,v 1.1 2000-04-27 11:32:25 bird Exp $
+/* $Id: odin32get.cmd,v 1.2 2000-07-18 11:18:14 bird Exp $
  *
  * Gets the CVS tree from netlabs.
  *
@@ -7,8 +7,7 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
-    'cd ..\tree'
-    if (RC <> 0) then call failure rc, 'Change Dir ..\tree failed';
+
     'cvs checkout .'
     if (RC <> 0) then call failure rc, 'CVS checkout . failed';
     exit(0);
