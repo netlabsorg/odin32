@@ -1,4 +1,4 @@
-/* $Id: myldrCheckInternalName.cpp,v 1.4 2001-07-06 19:22:35 bird Exp $
+/* $Id: myldrCheckInternalName.cpp,v 1.5 2001-07-07 04:39:57 bird Exp $
  *
  * ldrCheckInternalName - ldrCheckInternalName replacement with support for
  *                  long DLL names and no .DLL-extention dependency.
@@ -65,7 +65,7 @@ ULONG LDRCALL myldrCheckInternalName(PMTE pMTE)
     {
         #ifdef DEBUG
         APIRET  rc = ldrCheckInternalName(pMTE);
-        kprintf(("ldrCheckInternalName: pMTE=0x%08x intname=%.*s path=%s rc=%d (original)\n",
+        kprintf(("myldrCheckInternalName: pMTE=0x%08x intname=%.*s path=%s rc=%d\n", /* (original)\",*/
                  pMTE, *(PCHAR)pMTE->mte_swapmte->smte_restab, (PCHAR)pMTE->mte_swapmte->smte_restab + 1, ldrpFileNameBuf, rc));
         return rc;
         #else
@@ -104,7 +104,7 @@ ULONG LDRCALL myldrCheckInternalName(PMTE pMTE)
      */
     if (   (cchName > 8 && *pachResName > 8)
         || (   (pMTE->mte_flags1 & CLASS_MASK) == CLASS_GLOBAL
-            && (cchExt != 3 || strcmp(pachExt, "DLL"))  /* Extention != DLL. */
+            && (cchExt != 3 || memcmp(pachExt, "DLL", 3))  /* Extention != DLL. */
             )
         )
     {   /*
