@@ -1,4 +1,4 @@
-/* $Id: comctl32.h,v 1.19 2001-03-31 13:25:26 sandervl Exp $ */
+/* $Id: comctl32.h,v 1.20 2001-04-29 10:30:56 sandervl Exp $ */
 /*
  * Win32 common controls implementation
  *
@@ -206,6 +206,10 @@ void TREEVIEW_Register(void);
 void TREEVIEW_Unregister(void);
 void UPDOWN_Register(void);
 void UPDOWN_Unregister(void);
+
+
+INT  Str_GetPtrWtoA (LPCWSTR lpSrc, LPSTR lpDest, INT nMaxLen);
+BOOL Str_SetPtrAtoW (LPWSTR *lppDest, LPCSTR lpSrc);
 
 #ifdef __cplusplus
 }

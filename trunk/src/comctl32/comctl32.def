@@ -1,4 +1,4 @@
-; $Id: comctl32.def,v 1.21 2001-03-31 13:25:26 sandervl Exp $
+; $Id: comctl32.def,v 1.22 2001-04-29 10:30:56 sandervl Exp $
 LIBRARY COMCTL32 INITINSTANCE
 DESCRIPTION 'Odin32 System DLL - ComCtl32 - Common Controls Library'
 DATA MULTIPLE NONSHARED
@@ -102,9 +102,14 @@ EXPORTS
   CreateMRUListA      = _CreateMRUListA@4          @151
 ; ordinals????
   FreeMRUListA        = _FreeMRUListA@4            @152
-  AddMRUData          = _AddMRUData@12             @153
-  FindMRUData         = _FindMRUData@16            @154
-  CreateMRUListLazyA  = _CreateMRUListLazyA@16     @155
+  AddMRUStringA       = _AddMRUStringA@8           @153
+  EnumMRUListA        = _EnumMRUListA@16           @154
+  FindMRUStringA      = _FindMRUStringA@12         @155
+  DelMRUString        = _DelMRUString@8            @156
+  CreateMRUListLazyA  = _CreateMRUListLazyA@16     @157
+
+  AddMRUData          = _AddMRUData@12             @167
+  FindMRUData         = _FindMRUData@16            @169
 
   Str_GetPtrA         = _Str_GetPtrA@12            @233
   Str_SetPtrA         = _Str_SetPtrA@8             @234
@@ -163,7 +168,8 @@ EXPORTS
   StrStrW             = _COMCTL32_StrStrW@8        @362
   StrSpnW             = _COMCTL32_StrSpnW@8        @364
 
-  comctl32_410        = _comctl32_410@16           @410
-  comctl32_411        = _comctl32_411@12           @411
-  comctl32_412        = _comctl32_412@12           @412
-  comctl32_413        = _comctl32_413@16           @413
+                        _comctl32_410@16           @410 NONAME
+                        _comctl32_411@12           @411 NONAME
+                        _comctl32_412@12           @412 NONAME
+                        _comctl32_413@16           @413 NONAME
+                        _COMCTL32_415@20           @415 NONAME
