@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.89 2003-11-14 17:31:47 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.90 2003-12-01 13:27:38 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -1222,70 +1222,6 @@ DWORD WIN32API GetGlyphOutlineW(HDC hdc, UINT uChar, UINT uFormat, LPGLYPHMETRIC
 //******************************************************************************
 
 //******************************************************************************
-
-
-/* Office 97 stubs - KSO Thu 21.05.1998*/
-//******************************************************************************
-BOOL WIN32API GetTextExtentExPointA(/*KSO Thu 21.05.1998*/
-        HDC     hdc,
-        LPCSTR  str,
-        int     count,
-        int     maxExt,
-        LPINT   lpnFit,
-        LPINT   alpDx,
-        LPSIZE  size)
-{
-    int index, nFit, extent;
-    SIZE tSize;
-
-    dprintf(("GDI32: GetTextExtendExPointA\n"));
-
-    size->cx = size->cy = nFit = extent = 0;
-    for(index = 0; index < count; index++)
-    {
-      if(!O32_GetTextExtentPoint( hdc, str, 1, &tSize )) return FALSE;
-      if( extent+tSize.cx < maxExt )
-      {
-        extent+=tSize.cx;
-        nFit++;
-        str++;
-        if( alpDx )
-          alpDx[index] = extent;
-        if( tSize.cy > size->cy ) size->cy = tSize.cy;
-      }
-      else break;
-    }
-    size->cx = extent;
-
-    if (lpnFit != NULL)  // check if result is desired
-      *lpnFit = nFit;
-
-    dprintf(("GDI32: GetTextExtendExPointA(%08x '%.*s' %d) returning %d %d %d\n",
-             hdc,count,str,maxExt,nFit, size->cx,size->cy));
-    return TRUE;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetTextExtentExPointW(                                 /*KSO Thu 21.05.1998*/
-        HDC     arg1,
-        LPCWSTR arg2,
-        int     arg3,
-        int             arg4,
-        LPINT   arg5,
-        LPINT   arg6,
-        LPSIZE  arg7
-        )
-{
-  char *astring = UnicodeToAsciiString((LPWSTR)arg2);
-  BOOL  rc;
-
-  dprintf(("GDI32: GetTextExtendExPointW\n"));
-  rc = GetTextExtentExPointA(arg1, astring, arg3, arg4, arg5, arg6, arg7);
-  FreeAsciiString(astring);
-  return rc;
-}
-//******************************************************************************
-
 
 /*****************************************************************************
  * Name      : BOOL CancelDC

@@ -1,4 +1,4 @@
-/* $Id: font.cpp,v 1.31 2003-08-13 09:11:42 sandervl Exp $ */
+/* $Id: font.cpp,v 1.32 2003-12-01 13:27:37 sandervl Exp $ */
 
 /*
  * GDI32 font apis
@@ -144,6 +144,79 @@ static void iFontRename(LPCSTR lpstrFaceOriginal,
                                   lpstrFaceOriginal,
                                   lpstrFaceTemp,
                                   LF_FACESIZE);
+}
+/***********************************************************************
+ *           FONT_mbtowc
+ *
+ * Returns a '\0' terminated Unicode translation of str using the
+ * charset of the currently selected font in hdc.  If count is -1 then
+ * str is assumed to be '\0' terminated, otherwise it contains the
+ * number of bytes to convert.  If plenW is non-NULL, on return it
+ * will point to the number of WCHARs (excluding the '\0') that have
+ * been written.  If pCP is non-NULL, on return it will point to the
+ * codepage used in the conversion (NB, this may be CP_SYMBOL so watch
+ * out).  The caller should free the returned LPWSTR from the process
+ * heap itself.
+ */
+LPWSTR FONT_mbtowc(HDC hdc, LPCSTR str, INT count, INT *plenW, UINT *pCP)
+{
+    UINT cp = CP_ACP;
+    INT lenW, i;
+    LPWSTR strW;
+    CHARSETINFO csi;
+    int charset = GetTextCharset(hdc);
+
+    /* Hmm, nicely designed api this one! */
+    if(TranslateCharsetInfo((DWORD*)charset, &csi, TCI_SRCCHARSET))
+        cp = csi.ciACP;
+    else {
+        switch(charset) {
+	case OEM_CHARSET:
+	    cp = GetOEMCP();
+	    break;
+	case DEFAULT_CHARSET:
+	    cp = GetACP();
+	    break;
+
+	case VISCII_CHARSET:
+	case TCVN_CHARSET:
+	case KOI8_CHARSET:
+	case ISO3_CHARSET:
+	case ISO4_CHARSET:
+	  /* FIXME: These have no place here, but because x11drv
+	     enumerates fonts with these (made up) charsets some apps
+	     might use them and then the FIXME below would become
+	     annoying.  Now we could pick the intended codepage for
+	     each of these, but since it's broken anyway we'll just
+	     use CP_ACP and hope it'll go away...
+	  */
+	    cp = CP_ACP;
+	    break;
+
+
+	default:
+	    dprintf(("Can't find codepage for charset %d\n", charset));
+	    break;
+	}
+    }
+
+    dprintf(("cp == %d\n", cp));
+
+    if(count == -1) count = strlen(str);
+    if(cp != CP_SYMBOL) {
+        lenW = MultiByteToWideChar(cp, 0, str, count, NULL, 0);
+	strW = (WCHAR*)HeapAlloc(GetProcessHeap(), 0, (lenW + 1) * sizeof(WCHAR));
+	MultiByteToWideChar(cp, 0, str, count, strW, lenW);
+    } else {
+        lenW = count;
+	strW = (WCHAR*)HeapAlloc(GetProcessHeap(), 0, (lenW + 1) * sizeof(WCHAR));
+	for(i = 0; i < count; i++) strW[i] = (BYTE)str[i];
+    }
+    strW[lenW] = '\0';
+    dprintf(("mapped %s -> %ls\n", str, strW));
+    if(plenW) *plenW = lenW;
+    if(pCP) *pCP = cp;
+    return strW;
 }
 //******************************************************************************
 //******************************************************************************
