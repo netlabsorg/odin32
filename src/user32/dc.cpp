@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.94 2001-03-13 18:44:38 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.95 2001-03-14 15:55:43 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -861,7 +861,7 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
 
    if(wnd->needsEraseBkgnd() && lComplexity != RGN_NULL) {
         wnd->setEraseBkgnd(FALSE);
-        lpps->fErase = (wnd->MsgEraseBackGround(pHps->hps) != 0);
+        lpps->fErase = (wnd->MsgEraseBackGround(pHps->hps) == 0);
    }
    else lpps->fErase = TRUE;
 
