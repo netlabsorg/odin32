@@ -902,8 +902,14 @@ DATETIME_ParentNotify (HWND hwnd, WPARAM wParam, LPARAM lParam)
  DATETIME_INFO *infoPtr = DATETIME_GetInfoPtr (hwnd);	
  LPNMHDR lpnmh = (LPNMHDR) lParam;
 
+#ifdef __WIN32OS2__
+//DT: if lParam a pointer or a handle
+//    if the index forgotten or is it zero
+ TRACE ("DATETIME_ParentNotify %x,%lx\n",wParam, lParam);
+#else
  TRACE ("%x,%lx\n",wParam, lParam);
  TRACE ("Got notification %x from %x\n", lpnmh->code, lpnmh->hwndFrom);
+#endif
  TRACE ("info: %x %x %x\n",hwnd,infoPtr->hMonthCal,infoPtr->hUpdown);
  return 0;
 }
