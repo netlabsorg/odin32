@@ -1,4 +1,4 @@
-/* $Id: win32wbasepos.cpp,v 1.15 2000-06-07 14:51:32 sandervl Exp $ */
+/* $Id: win32wbasepos.cpp,v 1.16 2000-10-04 19:35:31 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (nonclient/position methods)
  *
@@ -138,10 +138,10 @@ LONG Win32BaseWindow::SendNCCalcSize(BOOL calcValidRect, RECT *newWindowRect,
    	{
         	winposCopy = *winpos;
 	        params.rgrc[1] = *oldWindowRect;
-	        //client rectangel must be in parent coordinates
-	        OffsetRect(oldClientRect, rectWindow.left, rectWindow.top);
-
 	        params.rgrc[2] = *oldClientRect;
+	        //client rectangel must be in parent coordinates
+	        OffsetRect(&params.rgrc[2], rectWindow.left, rectWindow.top);
+
 	        params.lppos = &winposCopy;
    	}
    	result = SendInternalMessageA(WM_NCCALCSIZE, calcValidRect, (LPARAM)&params );

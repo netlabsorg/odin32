@@ -1,4 +1,4 @@
-/* $Id: loadres.cpp,v 1.29 2000-05-28 16:43:45 sandervl Exp $ */
+/* $Id: loadres.cpp,v 1.30 2000-10-04 19:35:30 sandervl Exp $ */
 
 /*
  * Win32 resource API functions for OS/2
@@ -409,7 +409,11 @@ HANDLE LoadBitmapA(HINSTANCE hinst, LPCSTR lpszName, int cxDesired, int cyDesire
     else
     {
         hMapping = VIRTUAL_MapFileA( lpszName, (LPVOID *)&ptr, TRUE);
-        if (hMapping == INVALID_HANDLE_VALUE) return 0;
+        if (hMapping == INVALID_HANDLE_VALUE) {
+		//TODO: last err set to ERROR_OPEN_FAILED if file not found; correct??
+		dprintf(("LoadBitmapA: failed to load file %s (lasterr=%x)", lpszName, GetLastError()));
+		return 0;
+	}
         info = (BITMAPINFO *)(ptr + sizeof(BITMAPFILEHEADER));
     }
 
