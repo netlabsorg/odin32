@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.1189 2000-10-10 17:14:49 sandervl Exp $ */
+ /* $Id: changelog,v 1.1190 2000-10-10 18:00:18 sandervl Exp $ */
 
  2000-10-10: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: Print date and time of build during init (log)
@@ -8,6 +8,9 @@
                 it in the pe loader class instead.
                 LoadLibraryExA now also works for executables (implies LOAD_LIBRARY_AS_DATAFILE & DONT_RESOLVE_DLL_REFERENCES)
                 Rewrote GetVersionSize/Struct to use LoadLibraryExA.
+    - MSVCRT:   Put WriteLog call in util.asm in IFDEF DEBUG statement
+    - INCLUDE\makefiles
+                Add -D:DEBUG to alp command line for debug build
 
  2000-10-09: Yuri Dario <mc6530@mclink.it>
     - USER32:   Corrected background brush for MDI windows
