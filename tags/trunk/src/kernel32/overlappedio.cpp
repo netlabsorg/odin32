@@ -1,4 +1,4 @@
-/* $Id: overlappedio.cpp,v 1.2 2001-12-05 18:06:02 sandervl Exp $ */
+/* $Id: overlappedio.cpp,v 1.3 2001-12-05 18:06:57 sandervl Exp $ */
 
 /*
  * Win32 overlapped IO class
@@ -85,7 +85,7 @@ outofmem:
     errcode = OutOfMemory;
     //fall through
 failed:
-    //SvL: NOTE: We might not failed gracefully when threads have already been 
+    //SvL: NOTE: We might not fail gracefully when threads have already been 
     //           created. (thread accessing memory that has been freed)
     //           Don't feel like wasting time to fix this as this should never
     //           happen anyway.

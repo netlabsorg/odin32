@@ -1,4 +1,4 @@
-/* $Id: overlappedio.h,v 1.1 2001-12-05 14:16:38 sandervl Exp $ */
+/* $Id: overlappedio.h,v 1.2 2001-12-05 18:06:03 sandervl Exp $ */
 
 /*
  * Win32 overlapped IO class
@@ -12,11 +12,32 @@
 #ifndef __OVERLAPPEDIO_H__
 #define __OVERLAPPEDIO_H__
 
+#define EVENT_READ		1
+#define EVENT_WRITE		2
+#define EVENT_READWRITE		(EVENT_WRITE|EVENT_READ)
+#define EVENT_POLL		4
+
+//forward decl
+class OverlappedIOHandler;
+
+typedef struct {
+    DWORD                fEvent;
+    OverlappedIOHandler *lpOverlappedObj;
+} OVERLAPPED_THREAD_PARAM, *LPOVERLAPPED_THREAD_PARAM;
+
+typedef DWORD (* SYSTEM LPOVERLAPPED_HANDLER)(DWORD dwUserData, LPOVERLAPPED lpOverlapped);
+
+enum OverlappedIOError {
+  OutOfMemory, EventCreationFailed, ThreadCreationFailed
+};
 
 class OverlappedIOHandler
 {
 public:
-     OverlappedIOHandler(
+     OverlappedIOHandler(LPOVERLAPPED_HANDLER lpReadHandler, 
+                         LPOVERLAPPED_HANDLER lpWriteHandler, 
+                         LPOVERLAPPED_HANDLER lpPollHandler = NULL);
+    ~OverlappedIOHandler();
 
      BOOL   WriteFile(HANDLE        hOS2Handle,
                       LPCVOID       lpBuffer,
@@ -37,13 +58,15 @@ public:
      BOOL   GetOverlappedResult(HANDLE        hOS2Handle,
                                 LPOVERLAPPED  lpoOverlapped,
                                 LPDWORD       lpcbTransfer,
-                                DWORD         dwTimeout)
+                                DWORD         dwTimeout);
 
 protected:
 
 private:
 
-     HANDLE       hThreadEvent;
+     DWORD        threadHandler(DWORD fEvent);
+
+     HANDLE       hThreadPoll;
      HANDLE       hThreadRead;
      HANDLE       hThreadWrite;
      HANDLE       hEventExit;
@@ -51,9 +74,17 @@ private:
      HANDLE       hEventRead;
      HANDLE       hEventWrite;
 
+     LPOVERLAPPED_HANDLER lpReadHandler;
+     LPOVERLAPPED_HANDLER lpWriteHandler;
+     LPOVERLAPPED_HANDLER lpPollHandler;
+
+     CRITICAL_SECTION     critsect;
+
      //linked list of pending operations
      LPOVERLAPPED pending;
 
+
+     friend       DWORD CALLBACK OverlappedIOThread(LPVOID lpThreadParam);
 };
 
 
