@@ -254,7 +254,7 @@ DWORD WINAPI SHGetFileInfoA(LPCSTR path,DWORD dwFileAttributes,
 	  }
 	  else
 	  {
-	    if (!(PidlToSicIndex(psfParent, pidlLast, (flags && SHGFI_LARGEICON), &(psfi->iIcon))))
+	    if (!(PidlToSicIndex(psfParent, pidlLast, (flags && SHGFI_LARGEICON), (PUINT)&(psfi->iIcon))))
 	    {
 	      ret = FALSE;
 	    }
@@ -456,6 +456,8 @@ DWORD WINAPI SHLoadInProc (DWORD dwArg1)
     return 0;
 }
 
+
+
 /*************************************************************************
  * ShellExecuteA			[SHELL32.245]
  */
@@ -489,6 +491,7 @@ ShellExecuteW(
 /*************************************************************************
  * AboutDlgProc32			(internal)
  */
+
 BOOL WINAPI AboutDlgProc( HWND hWnd, UINT msg, WPARAM wParam,
                               LPARAM lParam )
 {   HWND hWndCtl;
@@ -620,16 +623,17 @@ BOOL WINAPI AboutDlgProc( HWND hWnd, UINT msg, WPARAM wParam,
 /*************************************************************************
  * ShellAboutA				[SHELL32.243]
  */
-BOOL WINAPI ShellAboutA( HWND hWnd, LPCSTR szApp, LPCSTR szOtherStuff,
+INT WINAPI ShellAboutA( HWND hWnd, LPCSTR szApp, LPCSTR szOtherStuff,
                              HICON hIcon )
 {   ABOUT_INFO info;
     HRSRC hRes;
-    LPVOID template;
+    LPVOID dlgTemplate;
+
     TRACE_(shell)("\n");
 
     if(!(hRes = FindResourceA(shell32_hInstance, "SHELL_ABOUT_MSGBOX", RT_DIALOGA)))
         return FALSE;
-    if(!(template = (LPVOID)LoadResource(shell32_hInstance, hRes)))
+    if(!(dlgTemplate = (LPVOID)LoadResource(shell32_hInstance, hRes)))
         return FALSE;
 
     info.szApp        = szApp;
@@ -637,25 +641,25 @@ BOOL WINAPI ShellAboutA( HWND hWnd, LPCSTR szApp, LPCSTR szOtherStuff,
     info.hIcon        = hIcon;
     if (!hIcon) info.hIcon = LoadIcon16( 0, MAKEINTRESOURCE16(OIC_WINEICON) );
     return DialogBoxIndirectParamA( GetWindowLongA( hWnd, GWL_HINSTANCE ),
-                                      template, hWnd, AboutDlgProc, (LPARAM)&info );
+                                    (DLGTEMPLATE*)dlgTemplate , hWnd, AboutDlgProc, (LPARAM)&info );
 }
 
 
 /*************************************************************************
  * ShellAboutW				[SHELL32.244]
  */
-BOOL WINAPI ShellAboutW( HWND hWnd, LPCWSTR szApp, LPCWSTR szOtherStuff,
+INT WINAPI ShellAboutW( HWND hWnd, LPCWSTR szApp, LPCWSTR szOtherStuff,
                              HICON hIcon )
-{   BOOL ret;
+{   INT ret;
     ABOUT_INFO info;
     HRSRC hRes;
-    LPVOID template;
+    LPVOID dlgTemplate;
 
     TRACE_(shell)("\n");
 
     if(!(hRes = FindResourceA(shell32_hInstance, "SHELL_ABOUT_MSGBOX", RT_DIALOGA)))
         return FALSE;
-    if(!(template = (LPVOID)LoadResource(shell32_hInstance, hRes)))
+    if(!(dlgTemplate = (LPVOID)LoadResource(shell32_hInstance, hRes)))
         return FALSE;
 
     info.szApp        = HEAP_strdupWtoA( GetProcessHeap(), 0, szApp );
@@ -663,7 +667,7 @@ BOOL WINAPI ShellAboutW( HWND hWnd, LPCWSTR szApp, LPCWSTR szOtherStuff,
     info.hIcon        = hIcon;
     if (!hIcon) info.hIcon = LoadIcon16( 0, MAKEINTRESOURCE16(OIC_WINEICON) );
     ret = DialogBoxIndirectParamA( GetWindowLongA( hWnd, GWL_HINSTANCE ),
-                                   template, hWnd, AboutDlgProc, (LPARAM)&info );
+                                   (DLGTEMPLATE*)dlgTemplate, hWnd, AboutDlgProc, (LPARAM)&info );
     HeapFree( GetProcessHeap(), 0, (LPSTR)info.szApp );
     HeapFree( GetProcessHeap(), 0, (LPSTR)info.szOtherStuff );
     return ret;
@@ -784,6 +788,14 @@ HIMAGELIST	ShellBigIconList = 0;
  *  calling oleinitialize here breaks sone apps.
  */
 
+static void Shell32ProcLoadHelper(LPVOID* pAddr,
+                                  HANDLE hModule,
+                                  LPCSTR lpstrName)
+{
+  *pAddr = (void*)GetProcAddress(hModule,lpstrName);
+}
+
+
 BOOL WINAPI Shell32LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 {
 	HMODULE	hUser32;
@@ -812,32 +824,32 @@ BOOL WINAPI Shell32LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 	    }
 
 	    /* comctl32 */
-	    pDLLInitComctl=(void*)GetProcAddress(hComctl32,"InitCommonControlsEx");
-	    pImageList_Create=(void*)GetProcAddress(hComctl32,"ImageList_Create");
-	    pImageList_AddIcon=(void*)GetProcAddress(hComctl32,"ImageList_AddIcon");
-	    pImageList_ReplaceIcon=(void*)GetProcAddress(hComctl32,"ImageList_ReplaceIcon");
-	    pImageList_GetIcon=(void*)GetProcAddress(hComctl32,"ImageList_GetIcon");
-	    pImageList_GetImageCount=(void*)GetProcAddress(hComctl32,"ImageList_GetImageCount");
-	    pImageList_Draw=(void*)GetProcAddress(hComctl32,"ImageList_Draw");
-	    pImageList_SetBkColor=(void*)GetProcAddress(hComctl32,"ImageList_SetBkColor");
-	    pCOMCTL32_Alloc=(void*)GetProcAddress(hComctl32, (LPCSTR)71L);
-	    pCOMCTL32_Free=(void*)GetProcAddress(hComctl32, (LPCSTR)73L);
-	    pDPA_Create=(void*)GetProcAddress(hComctl32, (LPCSTR)328L);
-	    pDPA_Destroy=(void*)GetProcAddress(hComctl32, (LPCSTR)329L);
-	    pDPA_GetPtr=(void*)GetProcAddress(hComctl32, (LPCSTR)332L);
-	    pDPA_InsertPtr=(void*)GetProcAddress(hComctl32, (LPCSTR)334L);
-	    pDPA_DeletePtr=(void*)GetProcAddress(hComctl32, (LPCSTR)336L);
-	    pDPA_Sort=(void*)GetProcAddress(hComctl32, (LPCSTR)338L);
-	    pDPA_Search=(void*)GetProcAddress(hComctl32, (LPCSTR)339L);
+	    Shell32ProcLoadHelper((LPVOID*)&pDLLInitComctl,hComctl32,"InitCommonControlsEx");
+	    Shell32ProcLoadHelper((LPVOID*)&pImageList_Create,hComctl32,"ImageList_Create");
+	    Shell32ProcLoadHelper((LPVOID*)&pImageList_AddIcon,hComctl32,"ImageList_AddIcon");
+	    Shell32ProcLoadHelper((LPVOID*)&pImageList_ReplaceIcon,hComctl32,"ImageList_ReplaceIcon");
+	    Shell32ProcLoadHelper((LPVOID*)&pImageList_GetIcon,hComctl32,"ImageList_GetIcon");
+	    Shell32ProcLoadHelper((LPVOID*)&pImageList_GetImageCount,hComctl32,"ImageList_GetImageCount");
+	    Shell32ProcLoadHelper((LPVOID*)&pImageList_Draw,hComctl32,"ImageList_Draw");
+	    Shell32ProcLoadHelper((LPVOID*)&pImageList_SetBkColor,hComctl32,"ImageList_SetBkColor");
+	    Shell32ProcLoadHelper((LPVOID*)&pCOMCTL32_Alloc,hComctl32, (LPCSTR)71L);
+	    Shell32ProcLoadHelper((LPVOID*)&pCOMCTL32_Free,hComctl32, (LPCSTR)73L);
+	    Shell32ProcLoadHelper((LPVOID*)&pDPA_Create,hComctl32, (LPCSTR)328L);
+	    Shell32ProcLoadHelper((LPVOID*)&pDPA_Destroy,hComctl32, (LPCSTR)329L);
+	    Shell32ProcLoadHelper((LPVOID*)&pDPA_GetPtr,hComctl32, (LPCSTR)332L);
+	    Shell32ProcLoadHelper((LPVOID*)&pDPA_InsertPtr,hComctl32, (LPCSTR)334L);
+	    Shell32ProcLoadHelper((LPVOID*)&pDPA_DeletePtr,hComctl32, (LPCSTR)336L);
+	    Shell32ProcLoadHelper((LPVOID*)&pDPA_Sort,hComctl32, (LPCSTR)338L);
+	    Shell32ProcLoadHelper((LPVOID*)&pDPA_Search,hComctl32, (LPCSTR)339L);
 	    /* user32 */
-	    pLookupIconIdFromDirectoryEx=(void*)GetProcAddress(hUser32,"LookupIconIdFromDirectoryEx");
-	    pCreateIconFromResourceEx=(void*)GetProcAddress(hUser32,"CreateIconFromResourceEx");
+	    Shell32ProcLoadHelper((LPVOID*)&pLookupIconIdFromDirectoryEx,hUser32,"LookupIconIdFromDirectoryEx");
+	    Shell32ProcLoadHelper((LPVOID*)&pCreateIconFromResourceEx,hUser32,"CreateIconFromResourceEx");
 	    /* ole2 */
-	    pOleInitialize=(void*)GetProcAddress(hOle32,"OleInitialize");
-	    pOleUninitialize=(void*)GetProcAddress(hOle32,"OleUninitialize");
-	    pDoDragDrop=(void*)GetProcAddress(hOle32,"DoDragDrop");
-	    pRegisterDragDrop=(void*)GetProcAddress(hOle32,"RegisterDragDrop");
-	    pRevokeDragDrop=(void*)GetProcAddress(hOle32,"RevokeDragDrop");
+	    Shell32ProcLoadHelper((LPVOID*)&pOleInitialize,hOle32,"OleInitialize");
+	    Shell32ProcLoadHelper((LPVOID*)&pOleUninitialize,hOle32,"OleUninitialize");
+	    Shell32ProcLoadHelper((LPVOID*)&pDoDragDrop,hOle32,"DoDragDrop");
+	    Shell32ProcLoadHelper((LPVOID*)&pRegisterDragDrop,hOle32,"RegisterDragDrop");
+	    Shell32ProcLoadHelper((LPVOID*)&pRevokeDragDrop,hOle32,"RevokeDragDrop");
 
 	    /* initialize the common controls */
 	    if (pDLLInitComctl)
