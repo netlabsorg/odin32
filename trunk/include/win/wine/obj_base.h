@@ -740,6 +740,9 @@ inline BOOL operator!=(const GUID& guidOne, const GUID& guidOther)
 #define ICOM_THIS(impl,iface)          impl* const This=(impl*)iface
 #define ICOM_CTHIS(impl,iface)         const impl* const This=(const impl*)iface
 
+#define ICOM_THIS_MULTI(impl,field,iface)  impl* const This=(impl*)((char*)(iface) - offsetof(impl,field))
+#define ICOM_CTHIS_MULTI(impl,field,iface) const impl* const This=(const impl*)((char*)(iface) - offsetof(impl,field))
+
 #endif
 
 
