@@ -1,4 +1,4 @@
-/* $Id: configure.cmd,v 1.9 2000-02-27 02:11:44 bird Exp $
+/* $Id: configure.cmd,v 1.10 2000-03-08 09:23:04 bird Exp $
  *
  * Configuration script.
  * Generates makefile.inc and an empty .depend file.
@@ -48,16 +48,27 @@
         call lineout sIncFile, 'WIN32KK32        =' sWin32kBase'\k32'
         call lineout sIncFile, 'WIN32KLDR        =' sWin32kBase'\ldr'
         call lineout sIncFile, 'WIN32KLIB        =' sWin32kBase'\lib'
-        call lineout sIncFile, 'WIN32KLIST       =' sWin32kBase'\list'
         call lineout sIncFile, 'WIN32KMISC       =' sWin32kBase'\misc'
         call lineout sIncFile, 'WIN32KPE2LX      =' sWin32kBase'\pe2lx'
-        call lineout sIncFile, 'WIN32KOBJ        =' sWin32kBase'\object'
+        call lineout sIncFile, '!ifdef DEBUG'
+        call lineout sIncFile, 'WIN32KBIN        =' sWin32kBase'\bin\debug'
+        call lineout sIncFile, 'WIN32KLIST       =' sWin32kBase'\list\debug'
+        call lineout sIncFile, 'WIN32KOBJ        =' sWin32kBase'\object\debug'
+        call lineout sIncFile, '!else'
+        call lineout sIncFile, 'WIN32KBIN        =' sWin32kBase'\bin\release'
+        call lineout sIncFile, 'WIN32KLIST       =' sWin32kBase'\list\release'
+        call lineout sIncFile, 'WIN32KOBJ        =' sWin32kBase'\object\release'
+        call lineout sIncFile, '!endif'
         call lineout sIncFile, 'WIN32KOBJECT     = $(WIN32KOBJ)'
         sPDWin32Base = substr(sWin32kBase, 1, lastpos('\', sWin32kBase, lastpos('\', sWin32kBase)-1)-1);
         call lineout sIncFile, 'PDWIN32BASE      =' sPDWin32Base
         call lineout sIncFile, 'PDWIN32_INCLUDE  =' sPDWin32Base'\include'
-        call lineout sIncFile, 'PDWIN32_BIN      =' sPDWin32Base'\bin'
         call lineout sIncFile, 'PDWIN32_LIB      =' sPDWin32Base'\lib'
+        call lineout sIncFile, '!ifdef DEBUG'
+        call lineout sIncFile, 'PDWIN32_BIN      =' sPDWin32Base'\bin\debug'
+        call lineout sIncFile, '!else'
+        call lineout sIncFile, 'PDWIN32_BIN      =' sPDWin32Base'\bin\release'
+        call lineout sIncFile, '!endif'
         call lineout sIncFile, 'PDWIN32_TOOLS    =' sPDWin32Base'\tools\bin'
         call lineout sIncFile, ''
 
