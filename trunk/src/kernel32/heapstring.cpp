@@ -1,4 +1,4 @@
-/* $Id: heapstring.cpp,v 1.20 1999-12-05 10:02:30 sandervl Exp $ */
+/* $Id: heapstring.cpp,v 1.21 1999-12-06 20:39:38 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -275,10 +275,8 @@ int WIN32API lstrncmpiW(LPCWSTR str1, LPCWSTR str2, int n)
 
 int WIN32API lstrcmpW(LPCWSTR arg1, LPCWSTR arg2)
 {
-    dprintf2(("KERNEL32: lstrcmpW (%08xh-%ls, %08xh-%ls)\n",
+    dprintf2(("KERNEL32: lstrcmpW (%08xh, %08xh)\n",
              arg1,
-             arg1,
-             arg2,
              arg2));
 
     if(arg1 == NULL)
