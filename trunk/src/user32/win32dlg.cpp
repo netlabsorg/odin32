@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.8 1999-10-08 18:39:34 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.9 1999-10-10 08:59:41 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -198,7 +198,7 @@ Win32Dialog::Win32Dialog(HINSTANCE hInst, LPCSTR dlgTemplate, HWND owner,
         /* Send initialisation messages and set focus */
         hwndFocus = GetNextDlgTabItem( getWindowHandle(), 0, FALSE );
 
-	if (SendMessageA(WM_INITDIALOG, (WPARAM)hwndFocus, param ))
+    if (SendMessageA(WM_INITDIALOG, (WPARAM)hwndFocus, param ))
              SetFocus(hwndFocus);
 
         if (dlgInfo.style & WS_VISIBLE && !(getStyle() & WS_VISIBLE))
@@ -206,7 +206,7 @@ Win32Dialog::Win32Dialog(HINSTANCE hInst, LPCSTR dlgTemplate, HWND owner,
             ShowWindow( SW_SHOWNORMAL );    /* SW_SHOW doesn't always work */
             ::UpdateWindow( getWindowHandle() );
         }
-	SetLastError(0);
+    SetLastError(0);
         dprintf(("********* DIALOG CREATED ************"));
         return;
     }
@@ -232,7 +232,7 @@ INT Win32Dialog::doDialogBox()
 
     /* Owner must be a top-level window */
     if(getOwner() == NULL) {
-	 topOwner = windowDesktop;
+     topOwner = windowDesktop;
     }
     else topOwner = getOwner()->getTopParent();
 
@@ -979,16 +979,93 @@ HWND Win32Dialog::getNextDlgTabItem(HWND hwndCtrl, BOOL fPrevious)
 
         if (child == nextchild) break;
 
-	    if ((nextchild->getStyle() & WS_TABSTOP) && (nextchild->getStyle() & WS_VISIBLE) &&
+        if ((nextchild->getStyle() & WS_TABSTOP) && (nextchild->getStyle() & WS_VISIBLE) &&
             !(nextchild->getStyle() & WS_DISABLED))
-	    {
-	        lastchild = nextchild;
-	        if (!fPrevious) break;
-	    }
-	    nextchild = (Win32BaseWindow *)nextchild->getNextChild();
+        {
+            lastchild = nextchild;
+            if (!fPrevious) break;
+        }
+        nextchild = (Win32BaseWindow *)nextchild->getNextChild();
     }
     retvalue = lastchild->getWindowHandle();
 
+END:
+    return retvalue;
+}
+//******************************************************************************
+//******************************************************************************
+HWND Win32Dialog::getNextDlgGroupItem(HWND hwndCtrl, BOOL fPrevious)
+{
+ Win32BaseWindow *child, *nextchild, *lastchild;
+ HWND retvalue;
+
+    if (hwndCtrl)
+    {
+        child = GetWindowFromHandle(hwndCtrl);
+        if (!child)
+        {
+            retvalue = 0;
+            goto END;
+        }
+        /* Make sure hwndCtrl is a top-level child */
+        while ((child->getStyle() & WS_CHILD) && (child->getParent() != this))
+        {
+            child = child->getParent();
+            if(child == NULL) break;
+        }
+
+        if (!child || child->getParent() != this)
+        {
+            retvalue = 0;
+            goto END;
+        }
+    }
+    else
+    {
+        /* No ctrl specified -> start from the beginning */
+        child = (Win32BaseWindow *)getFirstChild();
+        if (!child)
+        {
+            retvalue = 0;
+            goto END;
+        }
+
+        if (fPrevious)
+        {
+            while (child->getNextChild())
+            {
+                child = (Win32BaseWindow *)child->getNextChild();
+            }
+        }
+    }
+
+    lastchild = child;
+    nextchild = (Win32BaseWindow *)child->getNextChild();
+    while (TRUE)
+    {
+        if (!nextchild || nextchild->getStyle() & WS_GROUP)
+        {
+            /* Wrap-around to the beginning of the group */
+            Win32BaseWindow *pWndTemp;
+
+            nextchild = (Win32BaseWindow *)getFirstChild();
+
+            for(pWndTemp = nextchild;pWndTemp;pWndTemp = (Win32BaseWindow *)pWndTemp->getNextChild())
+            {
+                if (pWndTemp->getStyle() & WS_GROUP) nextchild = pWndTemp;
+                if (pWndTemp == child) break;
+            }
+
+        }
+        if (nextchild == child) break;
+
+	    if ((nextchild->getStyle() & WS_VISIBLE) && !(nextchild->getStyle() & WS_DISABLED))
+	    {
+	        lastchild = nextchild;
+    	    if (!fPrevious) break;
+    	}
+    }
+    retvalue = lastchild->getWindowHandle();
 END:
     return retvalue;
 }

@@ -1,4 +1,4 @@
-/* $Id: msgbox.cpp,v 1.3 1999-10-01 10:15:23 sandervl Exp $ */
+/* $Id: msgbox.cpp,v 1.4 1999-10-10 08:59:40 sandervl Exp $ */
 /*
  * Win32 message box function for OS/2
  *
@@ -148,7 +148,7 @@ int WIN32API MessageBoxA(HWND hwndOwner, LPCTSTR lpszText, LPCTSTR lpszTitle, UI
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API MessageBoxW(HWND arg1, LPCWSTR arg2, LPCWSTR arg3, UINT arg4)
+int WIN32API MessageBoxW(HWND hwndOwner, LPCWSTR arg2, LPCWSTR arg3, UINT arg4)
 {
  char *astring1, *astring2;
  int   rc;
@@ -158,7 +158,8 @@ int WIN32API MessageBoxW(HWND arg1, LPCWSTR arg2, LPCWSTR arg3, UINT arg4)
 #ifdef DEBUG
     WriteLog("USER32:  MessageBoxW %s %s\n", astring1, astring2);
 #endif
-    rc = O32_MessageBox(arg1, astring1, astring2, arg4);
+    hwndOwner = Win32Window::Win32ToOS2Handle(hwndOwner);
+    rc = O32_MessageBox(hwndOwner, astring1, astring2, arg4);
     FreeAsciiString(astring1);
     FreeAsciiString(astring2);
     return(rc);

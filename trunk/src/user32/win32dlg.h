@@ -1,4 +1,4 @@
-/* $Id: win32dlg.h,v 1.1 1999-09-15 23:19:00 sandervl Exp $ */
+/* $Id: win32dlg.h,v 1.2 1999-10-10 08:59:41 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -69,6 +69,7 @@ virtual ~Win32Dialog();
 Win32BaseWindow *getDlgItem(int id);
 
          HWND   getNextDlgTabItem(HWND hwndCtrl, BOOL fPrevious);
+         HWND   getNextDlgGroupItem(HWND hwndCtrl, BOOL fPrevious);
          BOOL   endDialog(int retval);
 
 virtual  ULONG  MsgOS2Create(HWND hwndOS2, ULONG initParam);
