@@ -1110,6 +1110,19 @@ DWORD WINAPI EnumPrinterDataExW(HANDLE hPrinter, LPCWSTR pKeyName,
 				LPDWORD pcbEnumValues, LPDWORD pnEnumValues);
 #define EnumPrinterDataEx WINELIB_NAME_AW(EnumPrinterDataEx)
 
+DWORD WIN32API DeletePrinterDataA(HANDLE hPrinter, LPSTR pValueName);
+DWORD WIN32API DeletePrinterDataW(HANDLE hPrinter, LPWSTR pValueName);
+#define DeletePrinterData WINELIB_NAME_AW(DeletePrinterData)
+
+DWORD WIN32API EnumPrinterDataA(HANDLE hPrinter, DWORD dwIndex, LPSTR pValueName,
+                                DWORD cbValueName, LPDWORD pcbValueName,
+                                LPDWORD  pType, LPBYTE pData,
+                                DWORD cbData, LPDWORD pcbData);
+DWORD WIN32API EnumPrinterDataW(HANDLE hPrinter, DWORD dwIndex, LPWSTR pValueName,
+                                DWORD cbValueName, LPDWORD pcbValueName,
+                                LPDWORD  pType, LPBYTE pData,
+                                DWORD cbData, LPDWORD pcbData);
+#define EnumPrinterData WINELIB_NAME_AW(EnumPrinterData)
 
 
 #ifdef __cplusplus
