@@ -1,4 +1,4 @@
-/* $Id: static.cpp,v 1.4 1999-10-08 21:26:08 cbratschi Exp $ */
+/* $Id: static.cpp,v 1.5 1999-10-17 19:32:04 cbratschi Exp $ */
 /*
  * Static control
  *
@@ -62,7 +62,8 @@ static HICON STATIC_SetIcon( HWND hwnd, HICON hicon )
     HICON prevIcon;
     STATICINFO *infoPtr = (STATICINFO *)GetInfoPtr(hwnd);
     DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
-    INT cx,cy;
+    ICONINFO ii;
+    BITMAP bmp;
 
     if ((dwStyle & SS_TYPEMASK) != SS_ICON) return 0;
 
@@ -70,10 +71,10 @@ static HICON STATIC_SetIcon( HWND hwnd, HICON hicon )
     prevIcon = infoPtr->hIcon;
     infoPtr->hIcon = hicon;
 
-    cx = GetSystemMetrics(SM_CXICON);
-    cy = GetSystemMetrics(SM_CYICON);
+    GetIconInfo(hicon,&ii);
+    GetObjectA(ii.hbmColor,sizeof(BITMAP),(LPVOID)&bmp);
 
-    SetWindowPos(hwnd,0,0,0,cx,cy,SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOZORDER );
+    SetWindowPos(hwnd,0,0,0,bmp.bmWidth,bmp.bmHeight,SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOZORDER );
 
     return prevIcon;
 }
@@ -103,18 +104,6 @@ static HBITMAP STATIC_SetBitmap( HWND hwnd, HBITMAP hBitmap )
         GetObjectA(hBitmap, sizeof(bm), &bm);
         SetWindowPos( hwnd, 0, 0, 0, bm.bmWidth, bm.bmHeight,
                       SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOZORDER );
-/* CB: alternative code, if necessary
-      HDC hdc = GetDC(hwnd);
-      BITMAPINFO info;
-
-      ZeroMemory(&info,sizeof(info));
-      if (GetDIBits(hdc,hbitmap,0,0,NULL,&info,0) != 0)
-      {
-        SetWindowPos(hwnd,0,0,0,info.bmiHeader.biWidth,info.bmiHeader.biHeight,SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOZORDER);
-      }
-      ReleaseDC(hwnd,hdc);
-*/
-
     }
     return hOldBitmap;
 }
