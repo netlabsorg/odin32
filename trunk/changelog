@@ -1,7 +1,10 @@
-/* $Id: changelog,v 1.2079 2002-05-16 12:12:51 sandervl Exp $ */
+/* $Id: changelog,v 1.2080 2002-05-16 12:52:50 sandervl Exp $ */
 
  2002-05-16: Sander van Leeuwen <sandervl@xs4all.nl>
     - NTDLL:    o Partial resync with Wine
+    - KERNEL32: o Export some functions for NTDLL
+                o Fixed creation of logfile for executables on readonly volumes
+                o RegQueryInfoKeyW fix
 
  2002-05-15: Sander van Leeuwen <sandervl@xs4all.nl>
     - DINPUT:   o Made mouse code reentrant
