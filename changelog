@@ -1,4 +1,9 @@
- /* $Id: changelog,v 1.354 1999-10-22 19:46:33 dengert Exp $ */
+ /* $Id: changelog,v 1.355 1999-10-23 10:24:36 sandervl Exp $ */
+
+ 99-10-23: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Put back WM_ADJUSTWINDOWPOS/WINDOWPOSCHANGED into pmwindow.cpp
+                  Put message logging procedure in wndmsg.cpp.
+                  Don't log WM_KICKIDLE & WM_NCHITTEST messages. (sent too often)
 
  99-10-22: Daniela Engert <dani@ngrt.de>
 	- KERNEL32: fixed bad icon masks
