@@ -1,4 +1,4 @@
-/* $Id: winkeyboard.cpp,v 1.25 2001-10-26 15:54:04 phaller Exp $ */
+/* $Id: winkeyboard.cpp,v 1.26 2001-11-09 01:26:15 phaller Exp $ */
 /*
  * Win32 <-> PM key translation
  *
@@ -31,6 +31,19 @@
 
 ODINDEBUGCHANNEL(USER32-WINKBD)
 
+
+/****************************************************************************
+ * module local variables
+ ****************************************************************************/
+
+static char arrchOverlayKeyState[256] = {0};
+
+
+
+
+/****************************************************************************
+ * implementation
+ ****************************************************************************/
 
 BOOL OPEN32API _O32_GetKeyboardState( PBYTE lpKeyState );
 
@@ -972,7 +985,11 @@ ODINFUNCTION1(BOOL,  GetKeyboardState,
 ////  rc = O32_GetKeyboardState(lpKeyState);
   if(rc == TRUE)
   {
-        KeyTranslatePMToWinBuf((BYTE *)&PMKeyState[0], lpKeyState, 256);
+    KeyTranslatePMToWinBuf((BYTE *)&PMKeyState[0], lpKeyState, 256);
+    
+    // @@@PH
+    // Note: we'd have to check the key state overlay array here, too!
+    
 #ifdef DEBUG
         for(int i=0;i<256;i++) {
             if(PMKeyState[i] & 0x80) {
@@ -1388,6 +1405,22 @@ ODINFUNCTION3(int,    GetKeyNameTextW,
 ODINFUNCTION1(SHORT, GetKeyState,
               int,   nVirtKey)
 {
+  // check overlay array first
+  char nState = arrchOverlayKeyState[nVirtKey & 0xff];
+  switch (nState)
+  {
+    case KEYOVERLAYSTATE_DONTCARE:
+      // forward processing ...
+      break;
+    
+    // @@@PH Note: key-toggle is not handled correctpy
+    case KEYOVERLAYSTATE_DOWN:
+      return 0x8000;
+      
+    case KEYOVERLAYSTATE_UP:
+      return 0x0000;
+  }
+    
   return O32_GetKeyState(nVirtKey);
 }
 //******************************************************************************
@@ -1395,6 +1428,22 @@ ODINFUNCTION1(SHORT, GetKeyState,
 ODINFUNCTION1(WORD,  GetAsyncKeyState,
               INT,   nVirtKey)
 {
+  // check overlay array first
+  char nState = arrchOverlayKeyState[nVirtKey & 0xff];
+  switch (nState)
+  {
+    case KEYOVERLAYSTATE_DONTCARE:
+      // forward processing ...
+      break;
+    
+    // @@@PH Note: key-toggle is not handled correctpy
+    case KEYOVERLAYSTATE_DOWN:
+      return 0x8000;
+      
+    case KEYOVERLAYSTATE_UP:
+      return 0x0000;
+  }
+  
   if(fVersionWarp3) 
   {
     dprintf(("WARNING: not correctly implemented for Warp 3"));
@@ -1740,3 +1789,13 @@ ODINFUNCTION1(BOOL, UnloadKeyboardLayout,
 }
 //******************************************************************************
 //******************************************************************************
+
+// this is an internal function to emulate Alt-Gr behaviour
+ODINPROCEDURE2(KeySetOverlayKeyState,
+               int, nVirtKey,
+               char, nState)
+{
+  // setup overlay array
+  arrchOverlayKeyState[nVirtKey & 0xff] = nState;
+}
+

@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.74 2001-10-27 09:06:02 phaller Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.75 2001-11-09 01:26:15 phaller Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -660,9 +660,16 @@ VirtualKeyFound:
           if (flags & KC_KEYUP)
           {
             winMsg->message = WINWM_SYSKEYUP;
-//            winMsg->lParam |= 1 << 29;                              // bit 29, alt was pressed
+            winMsg->lParam |= 1 << 29;                              // bit 29, alt was pressed
             winMsg->lParam |= 1 << 30;                              // bit 30, previous state, always 1 for a WM_KEYUP message
             winMsg->lParam |= 1 << 31;                              // bit 31, transition state, always 1 for WM_KEYUP
+            
+            // Note: altgr affects the alt-key state in windows!
+            // The overlay causes GetKeyState/GetAsyncKeyState to return
+            // the correct states
+            KeySetOverlayKeyState(VK_LMENU_W, KEYOVERLAYSTATE_DONTCARE);
+            KeySetOverlayKeyState(VK_LCONTROL_W, KEYOVERLAYSTATE_DONTCARE);
+            KeySetOverlayKeyState(VK_RMENU_W, KEYOVERLAYSTATE_DONTCARE);
           }
           else
           {
@@ -670,6 +677,13 @@ VirtualKeyFound:
             if (keyWasPressed)
               winMsg->lParam |= 1 << 30;                          // bit 30, previous state, 1 means key was pressed
             winMsg->message = WINWM_KEYDOWN;
+            
+            // Note: altgr affects the alt-key state in windows!
+            // The overlay causes GetKeyState/GetAsyncKeyState to return
+            // the correct states
+            KeySetOverlayKeyState(VK_LMENU_W, KEYOVERLAYSTATE_DOWN);
+            KeySetOverlayKeyState(VK_LCONTROL_W, KEYOVERLAYSTATE_DOWN);
+            KeySetOverlayKeyState(VK_RMENU_W, KEYOVERLAYSTATE_DOWN);
           }
           
           break;
