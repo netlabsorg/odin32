@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.146 1999-08-28 07:44:45 sandervl Exp $ */
+ /* $Id: changelog,v 1.147 1999-08-28 09:25:55 achimha Exp $ */
+
+ 99-08-28: Achim Hasenmueller <achimha@innotek.de>
+        - COMCTL32: Merged with latest WINE updates (990815)
 
  99-08-28: Yuri Dario <mc6530@mclink.it>
 	- INCLUDE\WIN: Added macros to windowsx.h
