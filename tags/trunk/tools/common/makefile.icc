@@ -1,4 +1,4 @@
-# $Id: makefile.icc,v 1.12 2000-10-03 05:42:40 bird Exp $
+# $Id: makefile.icc,v 1.13 2000-10-05 07:27:57 bird Exp $
 
 #
 # PD-Win32 API
@@ -53,7 +53,7 @@ commonicc.lib: $(OBJDIR)\commonicc.lib
 
 $(OBJDIR)\commonicc.lib: $(OBJS)
     $(RM) $@
-    $(ILIB) /nobackup $@ $(OBJS: = +), NUL;
+    $(ILIB)/quiet /nobackup $@ $(OBJS: = +), NUL;
 
 # kDump
 kDump.exe $(PDWIN32_TOOLS)\kDump.exe: $(OBJDIR)\kDump.exe

@@ -1,4 +1,4 @@
-/* $Id: kFile.cpp,v 1.6 2000-10-03 05:42:38 bird Exp $
+/* $Id: kFile.cpp,v 1.7 2000-10-05 07:27:56 bird Exp $
  *
  * kFile - Simple (for the time being) file class.
  *
@@ -83,9 +83,132 @@ BOOL    kFile::position()
         }
         offReal = offVirtual;
     }
+    else
+        rc = NO_ERROR;
 
     return TRUE;
 }
+
+
+/**
+ * Reads data from the file into the buffer from the given file offset.
+ * @returns Success indicator.
+ * @param   offFile     File offset to read from.
+ *                      (If readonly and beyond end of file the offset used
+ *                       may be addjusted.)
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ */
+BOOL kFile::bufferRead(ULONG offFile) throw (int)
+{
+    ULONG   cbRead;
+
+    /* refresh file status (cbFile) */
+    if (!refreshFileStatus())
+        return FALSE;
+
+    /* check that the request is valid */
+    if (offFile > filestatus.cbFile)
+        return FALSE;
+
+    /* commit dirty buffer */
+    if (fBufferDirty)
+    {
+        if (!bufferCommit())
+            return TRUE;
+
+        /* refresh file status (cbFile) */
+        if (!refreshFileStatus())
+            return FALSE;
+    }
+
+    /* If readonly file optimize end of file */
+    if (fReadOnly && cbBuffer + offFile > filestatus.cbFile)
+        offFile = filestatus.cbFile > cbBuffer ? filestatus.cbFile - cbBuffer : 0UL;
+
+    /* need to change file ptr? */
+    if (offFile != offReal)
+    {
+        ULONG ul;
+        rc = DosSetFilePtr(hFile, offFile, FILE_BEGIN, &ul);
+        if (rc != NO_ERROR)
+        {
+            if (fThrowErrors)
+                throw ((int)rc);
+            return FALSE;
+        }
+        offReal = offFile;
+    }
+
+    /* read from the file */
+    cbRead = min(filestatus.cbFile - offFile, cbBuffer);
+    rc = DosRead(hFile, pachBuffer, cbRead, &cbRead);
+    if (rc == NO_ERROR)
+    {
+        cbBufferValid   = cbRead;
+        offBuffer       = offFile;
+        offReal         = offFile + cbRead;
+        fBufferDirty    = FALSE;
+    }
+    else
+    {
+        cbBufferValid   = 0;
+        offBuffer       = ~0UL;
+        fBufferDirty    = FALSE;
+        if (fThrowErrors)
+            throw ((int)rc);
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+
+/**
+ * Commits the data in the buffer.
+ * @returns Success indicator.
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ */
+BOOL kFile::bufferCommit(void) throw (int)
+{
+    ULONG   cbWrote;
+    ULONG   ul;
+
+    /* don't commit clean buffers! */
+    if (!fBufferDirty)
+        return TRUE;
+
+    /* need to change file ptr? */
+    if (offBuffer != offReal)
+    {
+        rc = DosSetFilePtr(hFile, offBuffer, FILE_BEGIN, &ul);
+        if (rc != NO_ERROR)
+        {
+            if (fThrowErrors)
+                throw ((int)rc);
+            return FALSE;
+        }
+        offReal = offBuffer;
+    }
+
+    /* write to the file */
+    rc = DosWrite(hFile, pachBuffer, cbBufferValid, &cbWrote);
+    fStatusClean = FALSE;
+    if (rc == NO_ERROR)
+    {
+        fBufferDirty = FALSE;
+        offReal += cbWrote;
+    }
+    else
+    {
+        DosSetFilePtr(hFile, offReal, FILE_BEGIN, &ul);
+        if (fThrowErrors)
+            throw ((int)rc);
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
 
 /**
  * Creates a kFile object for a file that is opened allready.
@@ -106,7 +229,11 @@ kFile::kFile(HFILE hFile, BOOL fReadOnly)
     offReal(0),
     pszFilename(NULL),
     hFile(hFile),
-    fStdDev(TRUE)
+    fStdDev(TRUE),
+    pachBuffer(NULL),
+    cbBufferValid(0UL),
+    offBuffer(~0UL),
+    fBufferDirty(FALSE)
 {
     if (!refreshFileStatus())
         throw ((int)rc);
@@ -131,7 +258,11 @@ kFile::kFile(const char *pszFilename, BOOL fReadOnly/*=TRUE*/)
     offVirtual(0),
     offReal(0),
     pszFilename(NULL),
-    fStdDev(FALSE)
+    fStdDev(FALSE),
+    pachBuffer(NULL),
+    cbBufferValid(0UL),
+    offBuffer(~0UL),
+    fBufferDirty(FALSE)
 {
     ULONG   fulOpenFlags;
     ULONG   fulOpenMode;
@@ -165,6 +296,17 @@ kFile::kFile(const char *pszFilename, BOOL fReadOnly/*=TRUE*/)
     this->pszFilename = strdup(szFullName);
     if (this->pszFilename == NULL)
         throw (ERROR_NOT_ENOUGH_MEMORY);
+
+    /* Buffering */
+    cbBuffer   = (fReadOnly && filestatus.cbFile < 32768) ? filestatus.cbFile : 8192;
+    pachBuffer = new char[cbBuffer];
+    if (pachBuffer == NULL)
+        throw (ERROR_NOT_ENOUGH_MEMORY);
+    if (fReadOnly && filestatus.cbFile < 32768)
+    {
+        if (!bufferRead(0))
+            throw ((int)rc);
+    }
 }
 
 
@@ -173,6 +315,10 @@ kFile::kFile(const char *pszFilename, BOOL fReadOnly/*=TRUE*/)
  */
 kFile::~kFile()
 {
+    if (fBufferDirty)
+        bufferCommit();
+    if (pachBuffer)
+        delete pachBuffer;
     DosClose(hFile);
 }
 
@@ -185,20 +331,93 @@ kFile::~kFile()
  */
 BOOL            kFile::read(void *pvBuffer, long cbBuffer)
 {
-    if (position())
+    ULONG   cbRead;
+
+    /* Validate parameters */
+    if (cbBuffer == 0)
+        return TRUE;
+    if (cbBuffer < 0)
     {
-        ULONG   cbRead;
-        rc = DosRead(hFile, pvBuffer, cbBuffer, &cbRead);
-        if (rc == NO_ERROR)
-        {
-            offVirtual = offReal += cbRead;
-            return TRUE;
-        }
+        rc = ERROR_INVALID_PARAMETER;
+        if (fThrowErrors)
+            throw ((int)rc);
+        return FALSE;
     }
 
-    if (fThrowErrors)
-        throw ((int)rc);
-    return FALSE;
+    /* refresh file status (cbFile) */
+    if (!refreshFileStatus())
+        return FALSE;
+
+    /* check if valid request */
+    if (    offVirtual > filestatus.cbFile
+        ||  offVirtual + cbBuffer > filestatus.cbFile
+        )
+    {   /* invalid request */
+        rc = ERROR_NO_DATA;
+    }
+    else if (this->cbBufferValid == filestatus.cbFile && offBuffer == 0)
+    {
+        /*
+         * The entire file is buffered
+         *      Complete the request.
+         */
+        memcpy(pvBuffer, &pachBuffer[offVirtual], (size_t)cbBuffer);
+        offVirtual += cbBuffer;
+        rc = NO_ERROR;
+    }
+    else if (pachBuffer && cbBuffer <= this->cbBuffer)
+    {   /*
+         * Buffered read. (request not bigger than the buffer!)
+         *      Update status (filesize).
+         *      Check if the request is with the bounds of the file.
+         *      Not in buffer?
+         *          Then read more data into buffer.
+         *      In buffer?
+         *          Then complete the request.
+         *
+         */
+        while (cbBuffer > 0)
+        {
+            /* Part or all in buffer? */
+            if (pachBuffer != NULL &&
+                offVirtual >= offBuffer &&
+                offVirtual < offBuffer + cbBufferValid
+                )
+            {   /* copy data from buffer */
+                cbRead = cbBufferValid - offVirtual + offBuffer;
+                cbRead = min(cbRead, cbBuffer);
+                memcpy(pvBuffer, &pachBuffer[offVirtual - offBuffer], (size_t)cbRead);
+                offVirtual += cbRead;
+                pvBuffer = (char*)pvBuffer + cbRead;
+                cbBuffer -= cbRead;
+            }
+            else
+            {
+                /* read into buffer */
+                if (!bufferRead(offVirtual))
+                    return FALSE;
+            }
+        }
+
+        rc = NO_ERROR;
+    }
+    else if (position())
+    {   /*
+         * unbuffered read.
+         */
+        rc = DosRead(hFile, pvBuffer, cbBuffer, &cbRead);
+        if (rc == NO_ERROR)
+            offVirtual = offReal += cbRead;
+    }
+
+    /* check for error and return accordingly */
+    if (rc)
+    {
+        if (fThrowErrors)
+            throw ((int)rc);
+        return FALSE;
+    }
+    return TRUE;
 }
 
 
@@ -254,40 +473,76 @@ void *          kFile::readFile() throw(int)
  * @sketch
  * @status  partially implemented.
  * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
- * @remark  Should implemented buffered read ASAP!
  */
 BOOL            kFile::readln(char *pszBuffer, long cchBuffer) throw (int)
 {
-    char    *psz;
-    long    cbRead = min(max((long)filestatus.cbFile - (long)offVirtual, 0), cchBuffer-1);
+    long    cbRead;
 
-    /*
-     * Read full buffer length or remining part of file into the buffer.
-     * Look for line end.
-     * Found lineend: cut buffer there and rewind file back to that point (but skipping the newline).
-     */
-    if (cbRead == 0 || !read(pszBuffer, cbRead) )
+    /* refresh file status (cbFile) */
+    if (!refreshFileStatus())
         return FALSE;
 
-    pszBuffer[cbRead] = '\0';
+    /*
+     * Buffered read.
+     *      Calc max read size.
+     *      Loop buffer by buffer looking for a newline.
+     */
+    cbRead = min(max((long)filestatus.cbFile - (long)offVirtual, 0), cchBuffer-1);
+    if (cbRead == 0)
+        return FALSE;
 
-    psz = strpbrk(pszBuffer, "\r\n");
-    if (psz != NULL)
+    while (cbRead > 0)
     {
-        cbRead -= psz - pszBuffer;
-        if (*psz == '\r')
+        char *pszNewLine;
+        char *pszReturn;
+        char *pszEnd;
+        unsigned long cch;
+
+        /* read more buffer ? */
+        if (offVirtual >= offBuffer + cbBufferValid || offVirtual < offBuffer)
+            if (!bufferRead(offVirtual))
+                return FALSE;
+
+        /* Scan buffer for new line */
+        pszNewLine = (char*)memchr(&pachBuffer[offVirtual - offBuffer], '\r', (size_t)(cbBufferValid - offVirtual + offBuffer));
+        pszReturn  = (char*)memchr(&pachBuffer[offVirtual - offBuffer], '\n', (size_t)(cbBufferValid - offVirtual + offBuffer));
+        if (pszNewLine != NULL || pszReturn != NULL)
         {
-            if (psz[1] == '\n')
-                cbRead -= 2;
-            else
-                cbRead--;
+            pszEnd = pszReturn != NULL && (pszNewLine == NULL || pszReturn < pszNewLine) ?
+                    pszReturn : pszNewLine;
+            cch = pszEnd - &pachBuffer[offVirtual - offBuffer];
         }
-        else if (*psz == '\n')
-            cbRead--;
+        else
+        {
+            pszEnd = NULL;
+            cch = cbBufferValid - offVirtual + offBuffer;
+        }
 
-        *psz = '\0';
+        /* copy into result buffer */
+        memcpy(pszBuffer, &pachBuffer[offVirtual - offBuffer], (size_t)cch);
+        cbRead -= cch;
+        offVirtual += cch;
+        pszBuffer += cch;
+        *pszBuffer = '\0';
 
-        return move(-cbRead);
+        /* check for completion */
+        if (pszEnd != NULL)
+        {   /* skip newline */
+            if (pszEnd[0] == '\r')
+            {
+                if (cch + 1 > cbBufferValid)
+                {
+                    if (bufferRead(offBuffer + cbBufferValid))
+                        pszEnd = pachBuffer;
+                }
+                else
+                    pszEnd++;
+                offVirtual += pszEnd != NULL && *pszEnd == '\n'  ? 2 : 1;
+            }
+            else
+                offVirtual++;
+            return TRUE;
+        }
     }
 
     return TRUE;
@@ -306,14 +561,99 @@ BOOL            kFile::write(void *pvBuffer, long cbBuffer)
         rc = ERROR_ACCESS_DENIED;
     else
     {
-        if (position())
-        {
+        ULONG cbWrite;
+        ULONG cbAddPost = 0;
+
+        /* buffered writes? */
+        if (pachBuffer != NULL)
+        {   /* Buffered write!
+             *      Init buffer if necessary.
+             *      Check if all fits into current buffer.
+             *          Update buffer and return.
+             *      Check if some fits into the current buffer
+             *          Start - update valid part of the buffer. Commit buffer.
+             *          End   - update buffer. no write
+             *          Not   - commit buffer.
+             */
+            if (offBuffer == ~0UL)
+            {   /* Empty buffer at current virtual offset */
+                cbBufferValid = offVirtual;
+                offBuffer = 0;
+            }
+
+            if (    offBuffer <= offVirtual
+                &&  offBuffer + this->cbBuffer > offVirtual + cbBuffer
+                )
+            {   /* all fits into the buffer */
+                memcpy(&pachBuffer[offVirtual - offBuffer], pvBuffer, (size_t)cbBuffer);
+                fBufferDirty = TRUE;
+                if (cbBufferValid < offVirtual - offBuffer + cbBuffer)
+                    cbBufferValid = offVirtual - offBuffer + cbBuffer;
+                offVirtual += cbBuffer;
+                return TRUE;
+            }
+            else if (   offBuffer <= offVirtual
+                     && offBuffer + this->cbBufferValid > offVirtual
+                     )
+            {   /* start fits into the valid part of the buffer */
+                cbWrite = this->cbBuffer - (offVirtual - offBuffer);
+                memcpy(&pachBuffer[offVirtual - offBuffer], pvBuffer, (size_t)cbWrite);
+                fBufferDirty = TRUE;
+                if (cbBufferValid < offVirtual - offBuffer + cbWrite)
+                    cbBufferValid = offVirtual - offBuffer + cbWrite;
+                pvBuffer = (char*)pvBuffer + cbWrite;
+                cbBuffer -= cbWrite;
+                offVirtual += cbWrite;
+                if (!bufferCommit())
+                    return FALSE;
+            }
+            else if (   offBuffer < offVirtual + cbBuffer
+                     && offBuffer + this->cbBuffer >= offVirtual + cbBuffer
+                     )
+            {   /* end fits into the buffer */
+                cbWrite = offVirtual + cbBuffer - offBuffer;
+                memcpy(pachBuffer, &((char*)pvBuffer)[offBuffer - offVirtual], (size_t)cbWrite);
+                fBufferDirty = TRUE;
+                if (cbBufferValid < cbWrite)
+                    cbBufferValid = cbWrite;
+                cbBuffer -= cbWrite;
+                cbAddPost = cbWrite;
+            }
+            else if (   offVirtual + cbBuffer <= offBuffer
+                     || offVirtual >= offBuffer + this->cbBufferValid
+                     )
+            {   /* don't fit into the buffer at all */
+                if (!bufferCommit())
+                    return FALSE;
+            }
+
+            /* Set filepointer. */
+            if (!position())
+                return FALSE;
+
+            /* Write. */
+            rc = DosWrite(hFile, pvBuffer, cbBuffer, &cbWrite);
+            if (rc == NO_ERROR)
+            {
+                offVirtual = offReal += cbWrite;
+                if (cbAddPost == 0)
+                {   /* no post add; start empty buffer at current virtual offset .*/
+                    offBuffer = offVirtual;
+                    cbBufferValid = 0;
+                    fBufferDirty = FALSE;
+                }
+                else
+                    offVirtual += cbAddPost;
+                return TRUE;
+            }
+        }
+        else if (position())
+        {   /* non-buffered write! */
             ULONG   cbWrote;
 
             rc = DosWrite(hFile, pvBuffer, cbBuffer, &cbWrote);
             if (rc == NO_ERROR)
             {
-                fStatusClean = FALSE;
                 offVirtual = offReal += cbWrote;
                 return TRUE;
             }
@@ -357,14 +697,14 @@ int             kFile::printf(const char *pszFormat, ...) throw (int)
 
     /* !QUICK AND DIRTY! */
     char *  psz, * pszEnd;
-    char *  pszBuffer = (char*)malloc(1024*64); //64KB should normally be enough...
+    static char    szBuffer[1024*64];   //64KB should normally be enough for anyone...
 
     va_start(arg, pszFormat);
-    pszEnd = vsprintf(pszBuffer, pszFormat, arg) + pszBuffer;
+    pszEnd = vsprintf(szBuffer, pszFormat, arg) + szBuffer;
     va_end(arg);
 
     psz = pszEnd;
-    while (psz > pszBuffer)
+    while (psz > szBuffer)
     {
         if (*psz-- == '\n' && *psz != '\r')
         {
@@ -374,8 +714,7 @@ int             kFile::printf(const char *pszFormat, ...) throw (int)
         }
     }
 
-    write(pszBuffer, pszEnd - pszBuffer);
-    free(pszBuffer);
+    write(szBuffer, pszEnd - szBuffer);
 
     return (int)(getPos() - offStart);
 }
@@ -398,7 +737,6 @@ BOOL            kFile::setSize(unsigned long cbFile/*= ~0UL*/)
 
     return rc == NO_ERROR;
 }
-
 
 
 /**
@@ -436,7 +774,6 @@ kFile &         kFile::operator+=(kFile &AppendFile)
 
     return *this;
 }
-
 
 
 /**
@@ -500,7 +837,13 @@ BOOL            kFile::end()
 {
     if (!refreshFileStatus())
         return FALSE;
-    offVirtual = filestatus.cbFile; //?? or +1
+
+    if (!fReadOnly && pachBuffer && offBuffer != ~0UL && offBuffer + cbBufferValid > filestatus.cbFile)
+        /* a writable file with buffer might have uncommited data in the buffer. */
+        offVirtual = offBuffer + cbBufferValid;
+    else
+        offVirtual = filestatus.cbFile;
+
     rc = NO_ERROR;
     return TRUE;
 }
