@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.18 1999-10-07 13:02:16 achimha Exp $ */
+/* $Id: pmwindow.cpp,v 1.19 1999-10-07 18:24:53 achimha Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -295,7 +295,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         }
         classStyle = win32wnd->getClass()->getStyle();
 
-        if ((yDelta != 0) && (pswp->cx != pswpo->cx))
+        if ((yDelta != 0) || (pswp->cx != pswpo->cx)) 
         {
             HENUM henum = WinBeginEnumWindows(pswp->hwnd);
             SWP swp[10];
