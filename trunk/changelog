@@ -1,6 +1,6 @@
-/* $Id: changelog,v 1.2006 2002-02-26 11:15:03 sandervl Exp $ */
+/* $Id: changelog,v 1.2007 2002-02-26 12:55:09 sandervl Exp $ */
 
- 2002-02-25: Sander van Leeuwen <sandervl@xs4all.nl>
+ 2002-02-26: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Rewrote GetWindowThreadProcessId (no longer uses WGSS)
                 o WindowFromPoint change; enumerate z-order, not parent-children
     - KERNEL32: o Changed GetCurrentThreadId to return unique global thread id
@@ -29,7 +29,7 @@
                   (The thing you do when you're supposed to do something else.. ;) )
 
  2002-02-23: Sander van Leeuwen <sandervl@xs4all.nl>
-    - WSOCK32:  o Don't send FD_CONNECT is socket was already connected
+    - WSOCK32:  o Don't send FD_CONNECT if socket was already connected
                   (accept returns connected socket)
 
  2002-02-21: Sander van Leeuwen <sandervl@xs4all.nl>
