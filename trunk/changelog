@@ -1,8 +1,10 @@
-/* $Id: changelog,v 1.1491 2001-06-10 01:17:31 bird Exp $ */
+/* $Id: changelog,v 1.1492 2001-06-10 01:21:51 bird Exp $ */
 
  2001-06-09: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Win32API.h:
                 o Added APIs required to compile user32.
+    - src/makefile:
+                o Relaxed the locks a little.
 
  2001-06-09: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Keep reference count for window and class objects.
