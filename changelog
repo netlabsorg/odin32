@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1444 2001-05-25 10:06:02 sandervl Exp $ */
+/* $Id: changelog,v 1.1445 2001-05-25 16:58:44 sandervl Exp $ */
 
  2001-05-25: Sander van Leeuwen <sandervl@xs4all.nl>
     - Odin.ini: o Removed MS Shell Dlg font mapping
@@ -6,6 +6,8 @@
                   (fixes wrong colors for some bitmaps)
                 o Update bitmap and synchronize DIB Section in SetDIBits
                 o Update color table during DIB sync too
+    - USER32:   o Dialog control x & y coordinates in dialog template are signed 
+                  words. (fixes dailog controls with negative offset)
 
  2001-05-24: Sander van Leeuwen <sandervl@xs4all.nl>
     - GDI32:    o Commented out recent changes (color conversion) in
