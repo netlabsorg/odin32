@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.41 2002-11-26 10:53:06 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.42 2002-12-28 14:01:37 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -250,7 +250,10 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
     char *newBits = NULL;
 
     //If upside down, reverse scanlines and call SetDIBitsToDevice again
-    if(info->bmiHeader.biHeight < 0 && info->bmiHeader.biBitCount != 8 && info->bmiHeader.biCompression == 0) {
+//    if(info->bmiHeader.biHeight < 0 && info->bmiHeader.biBitCount != 8 && info->bmiHeader.biCompression == 0) {
+    if(info->bmiHeader.biHeight < 0 && (info->bmiHeader.biCompression == BI_RGB ||
+       info->bmiHeader.biCompression == BI_BITFIELDS)) 
+    {
         // upside down
         INT rc = -1;
         BITMAPINFO newInfo;
@@ -261,14 +264,15 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
 
         char *newBits = (char *)malloc( lLineByte * lHeight );
         if(newBits) {
-            unsigned char *pbSrc = (unsigned char *)bits + lLineByte * (lHeight - 1);
+            unsigned char *pbSrc = (unsigned char *)bits + xSrc + lLineByte * (ySrc + lHeight - 1);
             unsigned char *pbDst = (unsigned char *)newBits;
             for(int y = 0; y < lHeight; y++) {
                 memcpy( pbDst, pbSrc, lLineByte );
                 pbDst += lLineByte;
                 pbSrc -= lLineByte;
             }
-            rc = SetDIBitsToDevice( hdc, xDest, yDest, cx, cy, xSrc, ySrc, startscan, lines, (void *)newBits, &newInfo, coloruse );
+            //We only convert the necessary data so xSrc & ySrc are now 0
+            rc = SetDIBitsToDevice( hdc, xDest, yDest, cx, cy, 0, 0, startscan, lines, (void *)newBits, &newInfo, coloruse );
             free( newBits );
         }
         else DebugInt3();
