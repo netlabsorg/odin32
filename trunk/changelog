@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2574 2003-05-07 16:14:08 sandervl Exp $ */
+/* $Id: changelog,v 1.2575 2003-05-12 15:29:36 sandervl Exp $ */
+
+ 2003-05-12: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o _lopen: wrong parsing of mode parameter
+                  (only found now due to CreateFile changed with dwDesiredAccess)
 
  2003-05-07: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Added more members to the TEB structure
