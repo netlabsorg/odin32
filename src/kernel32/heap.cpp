@@ -1,4 +1,4 @@
-/* $Id: heap.cpp,v 1.15 1999-11-09 19:22:32 sandervl Exp $ */
+/* $Id: heap.cpp,v 1.16 1999-11-13 14:21:30 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -27,12 +27,14 @@ ODINFUNCTIONNODBG3(LPVOID, HeapAlloc, HANDLE, hHeap, DWORD, dwFlags,
                    DWORD, dwBytes)
 {
  OS2Heap *curheap = OS2Heap::find(hHeap);
+ LPVOID   rc;
 
-  dprintf2(("HeapAlloc %X bytes", dwBytes));
   if(curheap == NULL)
         return(NULL);
 
-  return(curheap->Alloc(dwFlags, dwBytes));
+  rc = curheap->Alloc(dwFlags, dwBytes);
+  dprintf2(("HeapAlloc %X bytes -> %x", dwBytes, rc));
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -156,7 +158,7 @@ ODINFUNCTIONNODBG0(HANDLE, GetProcessHeap)
 {
  HANDLE hHeap;
 
-    dprintf2(("KERNEL32: GetProcessHeap\n"));
+//    dprintf2(("KERNEL32: GetProcessHeap\n"));
     //SvL: Only one process heap per process
     if(processheap == NULL) {
       //TODO: I haven't thought real hard about this.  I added it just to make "hdr.exe" happy.
