@@ -1,4 +1,4 @@
-/* $Id: kHll.h,v 1.7 2000-04-07 02:47:01 bird Exp $
+/* $Id: kHll.h,v 1.8 2000-05-27 02:15:42 bird Exp $
  *
  * kHll - Declarations of the class kHll.
  *        That class is used to create HLL debuginfo.
@@ -37,6 +37,14 @@ public:
      */
     virtual int     write(FILE *phFile) = 0;
     static int      writeList(FILE *phFile, kHllBaseEntry *pEntry);
+
+    /**
+     * Dumps the HLL entry to ph in a human readable fashion.
+     * @param       ph          Output file handle the dump is to be written to.
+     * @param       cchIndent   Number of char to indents the output dump.
+     */
+    virtual void    dump(FILE *ph, int cchIndent) = 0;
+    static  void    dumpList(FILE *ph, int cchIndent, kHllBaseEntry *pEntry);
 };
 
 
@@ -61,6 +69,7 @@ public:
     ~kHllPubSymEntry();
 
     int             write(FILE *phFile);
+    void            dump(FILE *ph, int cchIndent);
 };
 
 
@@ -89,6 +98,8 @@ public:
                         );
 
     int             write(FILE *phFile);
+    void            dump(FILE *ph, int cchIndent);
+
     int             getSeg()    { return FirstEntry.hll04.iSeg; }
 };
 
@@ -125,6 +136,7 @@ public:
                         int                 cchFilename
                         );
     int             write(FILE *phFile);
+    void            dump(FILE *ph, int cchIndent);
 };
 
 
@@ -211,8 +223,14 @@ public:
     /** @cat
      * Output.
      */
-    int         write(FILE *phFile, unsigned long off);
-    int         writeDirEntries(FILE *phFile, unsigned short iMod);
+    int             write(FILE *phFile, unsigned long off);
+    int             writeDirEntries(FILE *phFile, unsigned short iMod);
+
+
+    /** @cat
+     * Debug dump function.
+     */
+    void            dump(FILE *ph);
 };
 
 
@@ -244,6 +262,7 @@ public:
      * Constructors and Destructors.
      */
     kHll();
+    kHll(kFile *pFile) throw (int);
     ~kHll();
 
     /** @cat
@@ -274,7 +293,17 @@ public:
                             const char *pszFilename
                             );
 
+    /** @cat
+     * Static read function(s).
+     */
+    static kHll *       readLX(
+                            const char *pszFilename
+                            );
 
+    /** @cat
+     * Debug dump function.
+     */
+    void                dump();
 };
 
 
