@@ -1,4 +1,4 @@
-/* $Id: pmkbdhk.cpp,v 1.4 2003-02-16 18:29:05 sandervl Exp $ */
+/* $Id: pmkbdhk.cpp,v 1.5 2003-07-07 12:26:08 sandervl Exp $ */
 /*
  * OS/2 native Presentation Manager hooks
  *
@@ -450,6 +450,11 @@ BOOL EXPENTRY hookPreAccelHook(HAB hab, PQMSG pqmsg, ULONG option)
             default:
               return FALSE;
             
+            case PMSCAN_SHIFTLEFT:
+            case PMSCAN_SHIFTRIGHT:
+                if( SHORT1FROMMP(pqmsg->mp1) & KC_ALT )
+                    // Let PM process CP switching msg
+                    return FALSE;
             // Intercept PM Window Hotkeys such as 
             // Alt-F7 do enable window moving by keyboard.
             case PMSCAN_F1:
@@ -476,8 +481,6 @@ BOOL EXPENTRY hookPreAccelHook(HAB hab, PQMSG pqmsg, ULONG option)
             case PMSCAN_ENTER:
             case PMSCAN_PADENTER:
             case PMSCAN_CAPSLOCK:
-            case PMSCAN_SHIFTLEFT:
-            case PMSCAN_SHIFTRIGHT:
               // OK, as we've got a special key here, we've got
               // to rewrite the message so PM will ignore the key
               // and won't translate the message to anything else.
