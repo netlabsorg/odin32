@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.71 2000-03-17 17:12:08 cbratschi Exp $ */
+/* $Id: oslibwin.cpp,v 1.72 2000-03-27 15:06:29 cbratschi Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -198,9 +198,9 @@ ULONG OSLibGetWindowHeight(HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
-LONG OSLibWinQuerySysValue(HWND hwndDeskTop,LONG iSysValue)
+LONG OSLibWinQuerySysValue(LONG iSysValue)
 {
-  return WinQuerySysValue(hwndDeskTop,iSysValue);
+  return WinQuerySysValue(HWND_DESKTOP,iSysValue);
 }
 //******************************************************************************
 //******************************************************************************
@@ -216,9 +216,9 @@ BOOL OSLibWinSetDlgItemText(HWND hwndDlg,ULONG idItem,char* pszText)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibWinQueryPointerPos(HWND hwndDeskTop,PPOINT pptlPoint)
+BOOL OSLibWinQueryPointerPos(PPOINT pptlPoint)
 {
-  return WinQueryPointerPos(hwndDeskTop,(PPOINTL)pptlPoint);
+  return WinQueryPointerPos(HWND_DESKTOP,(PPOINTL)pptlPoint);
 }
 //******************************************************************************
 //******************************************************************************

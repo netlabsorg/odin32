@@ -1,4 +1,4 @@
-/* $Id: shlfolder.cpp,v 1.9 2000-03-26 16:34:52 cbratschi Exp $ */
+/* $Id: shlfolder.cpp,v 1.10 2000-03-27 15:09:21 cbratschi Exp $ */
 /*
  * Shell Folder stuff
  *
@@ -2096,7 +2096,14 @@ static HRESULT WINAPI ISF_MyComputer_fnGetDisplayNameOf(
      {
        DWORD dwVolumeSerialNumber,dwMaximumComponetLength,dwFileSystemFlags;
 
-       GetVolumeInformationA(szPath,szDrive,12,&dwVolumeSerialNumber,&dwMaximumComponetLength,&dwFileSystemFlags,NULL,0);
+       if ((szPath[0] == 'A') || (szPath[0] == 'a') || (szPath[0] == 'B') || (szPath[0] == 'b'))
+       {
+//CB: todo: move to resource, German name is "3,5-Diskette" -> English "3.5-Disk"?
+         strcpy(szDrive,"Floppy drive");
+       } else
+       {
+         GetVolumeInformationA(szPath,szDrive,12,&dwVolumeSerialNumber,&dwMaximumComponetLength,&dwFileSystemFlags,NULL,0);
+       }
        strcat (szDrive," (");
        strncat (szDrive, szPath, 2);
        strcat (szDrive,")");

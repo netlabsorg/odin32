@@ -1,4 +1,4 @@
-/* $Id: filedlg95.c,v 1.4 2000-03-26 16:31:41 cbratschi Exp $*/
+/* $Id: filedlg95.c,v 1.5 2000-03-27 15:07:22 cbratschi Exp $*/
 /*
  * COMMDLG - File Open Dialogs Win95 look and feel
  *
@@ -859,20 +859,20 @@ dprintf(("CB: FILEDLG95_SHELL_Init"));
 count = GetTickCount();
   /* Initialise shell objects */
   FILEDLG95_SHELL_Init(hwnd);
-dprintf(("CB: FILEDLG95_InitUI %d ms",GetTickCount()-count));
-count = GetTickCount();
+//dprintf(("CB: FILEDLG95_InitUI %d ms",GetTickCount()-count));
+//count = GetTickCount();
   /* Initialise dialog UI */
   FILEDLG95_InitUI(hwnd);
-dprintf(("CB: FILEDLG95_LOOKIN_Init %d",GetTickCount()-count));
-count = GetTickCount();
+//dprintf(("CB: FILEDLG95_LOOKIN_Init %d",GetTickCount()-count));
+//count = GetTickCount();
   /* Initialize the Look In combo box*/
   FILEDLG95_LOOKIN_Init(fodInfos->DlgInfos.hwndLookInCB);
-dprintf(("CB: FILEDLG95_FILETYPE_Init %d",GetTickCount()-count));
-count = GetTickCount();
+//dprintf(("CB: FILEDLG95_FILETYPE_Init %d",GetTickCount()-count));
+//count = GetTickCount();
   /* Initialize the filter combo box */
   FILEDLG95_FILETYPE_Init(hwnd);
-dprintf(("CB: FILEDLG95_FILETYPE_Init done %d",GetTickCount()-count));
-count = GetTickCount();
+//dprintf(("CB: FILEDLG95_FILETYPE_Init done %d",GetTickCount()-count));
+//count = GetTickCount();
   /* Get the initial directory pidl */
 
   if(!(pidlItemId = GetPidlFromName(fodInfos->Shell.FOIShellFolder,fodInfos->ofnInfos->lpstrInitialDir)))
@@ -886,6 +886,7 @@ count = GetTickCount();
   }
 dprintf(("CB: IShellBrowser_BrowseObject %d",GetTickCount()-count));
 count = GetTickCount();
+//CB: slowest part
   /* Browse to the initial directory */
   IShellBrowser_BrowseObject(fodInfos->Shell.FOIShellBrowser,pidlItemId,SBSP_RELATIVE);
 dprintf(("CB: done WM_INITDIALOG %d",GetTickCount()-count));
