@@ -1,9 +1,13 @@
- /* $Id: changelog,v 1.140 1999-08-26 12:56:35 sandervl Exp $ */
+ /* $Id: changelog,v 1.141 1999-08-26 17:56:50 sandervl Exp $ */
 
  99-08-26: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Cleaned up. (removed os2native.cpp & os2util.cpp and
                     replaced them with oslibdos.* & oslibmisc.*; put 
                     Virtual* win32 apis in virtual.cpp)
+	- KERNEL32: Added workaround for (what seems to be) an OS/2 bug.
+                    Fixes crashes when reading from the memory mapped file.
+                    (see comments in kernel32\mmap.cpp)
+                    Bugfixes for VirtualProtect & VirtualQuery
 
  99-08-25: Jens Wiessner <wiessnej@rfi.de>
 	- OLESVR32: Created stub dll
