@@ -1,4 +1,4 @@
-/* $Id: wprocess.h,v 1.18 2000-11-21 11:33:59 sandervl Exp $ */
+/* $Id: wprocess.h,v 1.19 2001-03-19 19:30:15 sandervl Exp $ */
 /*
  * Process help functions
  *
@@ -21,8 +21,9 @@ typedef ULONG PDB;
 #endif
 #include <thread.h>
 
-TEB *InitializeTIB(BOOL fMainThread = FALSE);
-void DestroyTIB();
+TEB *  WIN32API InitializeTIB(BOOL fMainThread = FALSE);
+void   WIN32API DestroyTIB();
+ULONG  WIN32API GetProcessTIBSel();
 
 void   WIN32API RestoreOS2TIB();
 USHORT WIN32API SetWin32TIB();
