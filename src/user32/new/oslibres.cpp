@@ -1,4 +1,4 @@
-/* $Id: oslibres.cpp,v 1.7 1999-08-31 14:38:08 sandervl Exp $ */
+/* $Id: oslibres.cpp,v 1.8 1999-09-04 19:42:28 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -44,7 +44,6 @@ HANDLE OSLibWinSetAccelTable(HWND hwnd, HANDLE hAccel, PVOID acceltemplate)
     else    return 0;
 }
 //******************************************************************************
-//TODO: handle single icons
 //******************************************************************************
 HANDLE OSLibWinCreateIcon(PVOID iconbitmap)
 {
@@ -69,7 +68,8 @@ HANDLE OSLibWinCreateIcon(PVOID iconbitmap)
     	bfhColor = (BITMAPFILEHEADER2 *)((char *)bfhBW + sizeof(RGB2)*2 + sizeof(BITMAPFILEHEADER2));
 	bafh     = (BITMAPARRAYFILEHEADER2 *)bfhBW; //for calculation bitmap offset
     }
-    hps = WinGetPS(HWND_DESKTOP);
+    hps = WinGetScreenPS(HWND_DESKTOP);
+
     hbmColor = GpiCreateBitmap(hps, &bfhColor->bmp2, CBM_INIT, 
 	     	               (char *)bafh + bfhColor->offBits,
                                (BITMAPINFO2 *)&bfhColor->bmp2);
@@ -117,7 +117,7 @@ HANDLE OSLibWinCreatePointer(PVOID cursorbitmap)
 	return 0;
     }
     //skip xor/and mask
-    hps = WinGetPS(HWND_DESKTOP);
+    hps = WinGetScreenPS(HWND_DESKTOP);
     hbmColor = GpiCreateBitmap(hps, &bfh->bmp2, CBM_INIT, 
 	     	               (char *)bfh + bfh->offBits,
                                (BITMAPINFO2 *)&bfh->bmp2);

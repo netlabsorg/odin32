@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.4 1999-09-04 17:56:41 dengert Exp $ */
+/* $Id: win32wbase.h,v 1.5 1999-09-04 19:42:29 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -147,14 +147,15 @@ Win32BaseWindow *getParent()                    { return (Win32BaseWindow *)Chil
          BOOL   EnableWindow(BOOL fEnable);
          BOOL   CloseWindow();
   static HWND   GetActiveWindow();
-         BOOL   IsWindow();
+	 //Window handle has already been verified, so just return true
+         BOOL   IsWindow()                    { return TRUE; };
          BOOL   IsWindowEnabled();
          BOOL   IsWindowVisible();
          BOOL   IsUnicode()  { return isUnicode; };
 
          BOOL   GetWindowRect(PRECT pRect);
-         int    GetWindowTextLengthA();
-         int    GetWindowTextA(LPSTR lpsz, int cch);
+         int    GetWindowTextLength();
+         int    GetWindowText(LPSTR lpsz, int cch);
          BOOL   SetWindowText(LPSTR lpsz);
           BOOL  hasWindowName(LPSTR wndname, BOOL fUnicode = 0);
 Win32WndClass  *getClass()  { return windowClass; };
@@ -197,6 +198,9 @@ static Win32BaseWindow *GetWindowFromHandle(HWND hwnd);
 static Win32BaseWindow *GetWindowFromOS2Handle(HWND hwnd);
 
 protected:
+#ifndef OS2_INCLUDED
+        BOOL  CreateWindowExA(CREATESTRUCTA *lpCreateStruct, ATOM classAtom);
+#endif
        LRESULT  SendInternalMessageA(ULONG msg, WPARAM wParam, LPARAM lParam);
        LRESULT  SendInternalMessageW(ULONG msg, WPARAM wParam, LPARAM lParam);
         void    Init();
@@ -226,6 +230,7 @@ protected:
         BOOL    isIcon;
         BOOL    fCreated;
         BOOL    fFirstShow;
+	BOOL    fIsDialog;
 
    Win32BaseWindow *owner;
 
@@ -249,8 +254,6 @@ static GenericObject *windows;
 
 private:
 #ifndef OS2_INCLUDED
-        BOOL  CreateWindowExA(CREATESTRUCTA *lpCreateStruct, ATOM classAtom);
-
         void  GetMinMaxInfo(POINT *maxSize, POINT *maxPos, POINT *minTrack, POINT *maxTrack );
 
         LONG  SendNCCalcSize(BOOL calcValidRect,
