@@ -1,4 +1,4 @@
-/* $Id: uitools.cpp,v 1.17 1999-11-19 17:59:35 cbratschi Exp $ */
+/* $Id: uitools.cpp,v 1.18 1999-12-16 16:53:57 cbratschi Exp $ */
 /*
  * User Interface Functions
  *
@@ -1357,127 +1357,6 @@ BOOL WIN32API DrawFrameControl(HDC hdc, LPRECT rc, UINT uType,
     }
     return FALSE;
 }
-
-
-/*****************************************************************************
- * Name      : int WIN32API DrawTextExA
- * Purpose   : The DrawTextEx function draw the text in the rectangle
- * Parameters:
- * Variables :
- * Result    : If the function succeeds, the return value is the height of the
- *             text, otherwise zero.
- * Remark    : TODO: Returned number of characters is always the entire string
- *             since there is no way to know the real answer this way.
- * Status    : PARTIALLY IMPLEMENTED AND TESTED
- *
- * Author    : Rene Pronk [Thu, 1999/07/29 15:03]
- *             Christoph Bratschi: implemented DT_END_ELLIPSIS (Header control)
- *****************************************************************************/
-
-int WIN32API DrawTextExA (HDC hdc, LPCSTR lpchText, int cchText, LPRECT lprc,
-                          UINT dwDTFormat, LPDRAWTEXTPARAMS lpDTParams) {
-
-   int result;
-   UINT oldDTFormat;
-
-   dprintf(("USER32:DrawTextExA (%08xh,%s,%08xh,%08xh,%08xh,%08xh).\n",
-            hdc, lpchText, cchText, lprc, dwDTFormat, lpDTParams));
-
-   if (lpDTParams != NULL) {
-           // 'create' margins
-           lprc->left += lpDTParams->iLeftMargin;
-           lprc->right -= lpDTParams->iRightMargin;
-
-           // just assume all the text has been drawn
-           if (cchText != -1)
-                   lpDTParams->uiLengthDrawn = cchText;
-           else {
-                   // determine string length
-                   int size = 0;
-                   while ((BYTE) *(lpchText + size) != 0)
-                           size ++;
-                   lpDTParams->uiLengthDrawn = size;
-           }
-   }
-
-   oldDTFormat = dwDTFormat & ~(DT_END_ELLIPSIS | DT_PATH_ELLIPSIS | DT_MODIFYSTRING | DT_EXPANDTABS);
-   if (dwDTFormat & DT_END_ELLIPSIS && lpchText && (cchText != 0))
-   {
-     int textWidth,width;
-     RECT rect;
-
-     if (cchText == -1) cchText = lstrlenA(lpchText);
-     SetRectEmpty(&rect);
-     DrawTextA(hdc,lpchText,cchText,&rect,oldDTFormat | DT_CALCRECT);
-     width = lprc->right-lprc->left;
-     textWidth = rect.right-rect.left;
-     if (textWidth > width && width > 0)
-     {
-       char* newText;
-       int endWidth,newTextLen;
-
-       DrawTextA(hdc,"...",3,&rect,DT_CALCRECT | DT_SINGLELINE | DT_LEFT);
-       endWidth = rect.right-rect.left;
-       newText = (char*)malloc(cchText+3);
-       lstrcpyA(newText,lpchText);
-       newTextLen = cchText+1;
-       do
-       {
-         newTextLen--;
-         DrawTextA(hdc,newText,newTextLen,&rect,oldDTFormat | DT_CALCRECT);
-         textWidth = rect.right-rect.left;
-       } while (textWidth+endWidth > width && newTextLen > 1);
-
-       lstrcpyA(&newText[newTextLen],"...");
-       result = DrawTextA(hdc,newText,-1,lprc,oldDTFormat);;
-
-       if (dwDTFormat & DT_MODIFYSTRING) lstrcpynA((LPSTR)lpchText,newText,cchText);
-       free(newText);
-     } else result = DrawTextA(hdc,lpchText,cchText,lprc,oldDTFormat);
-   } else
-     result = DrawTextA (hdc, lpchText, cchText, lprc, oldDTFormat);
-
-   if (lpDTParams != NULL) {
-           // don't forget to restore the margins
-           lprc->left -= lpDTParams->iLeftMargin;
-           lprc->right += lpDTParams->iRightMargin;
-   }
-
-   return result;
-}
-
-
-
-/*****************************************************************************
- * Name      : int WIN32API DrawTextExW
- * Purpose   : The DrawTextEx function draw the text in the rectangle
- * Parameters:
- * Variables :
- * Result    : If the function succeeds, the return value is the height of the
- *             text, otherwise zero.
- * Remark    : TODO: Returned number of characters is always the entire string
- *             since there is no way to know the real answer this way.
- * Status    : PARTIALLY IMPLEMENTED AND TESTED
- *
- * Author    : Rene Pronk [Thu, 1999/07/29 15:03]
- *****************************************************************************/
-
-int WIN32API DrawTextExW (HDC hdc, LPWSTR lpchText, int cchText, LPRECT lprc,
-                          UINT dwDTFormat, LPDRAWTEXTPARAMS lpDTParams) {
-
-   char *astring = UnicodeToAsciiString((LPWSTR)lpchText);
-   int   rc;
-
-   dprintf(("USER32:DrawTextExW (%08xh,%s,%08xh,%08xh,%08xh,%08xh).\n",
-            hdc, astring, cchText, lprc, dwDTFormat, lpDTParams));
-
-   rc = DrawTextExA (hdc, astring, cchText, lprc, dwDTFormat, lpDTParams);
-   if (dwDTFormat & DT_MODIFYSTRING) AsciiToUnicode(astring,lpchText);
-   FreeAsciiString(astring);
-   return(rc);
-}
-
-
 /******************************************************************************
  *
  * This function is used by Paint_DrawState which is inturn used by both
@@ -1898,29 +1777,6 @@ BOOL WIN32API DrawMenuBar(HWND hwnd)
     }
     dprintf(("DrawMenuBar %x", hwnd));
     return O32_DrawMenuBar(window->getOS2FrameWindowHandle());
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API DrawTextW( HDC hDC, LPCWSTR lpString, int nCount, PRECT lpRect, UINT nFormat)
-{
- char *astring = UnicodeToAsciiString((LPWSTR)lpString);
- int   rc;
-
-#ifdef DEBUG
-    WriteLog("USER32:  DrawTextW %s\n", astring);
-#endif
-    rc = O32_DrawText(hDC,astring,nCount,lpRect,nFormat);
-    FreeAsciiString(astring);
-    return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API DrawTextA(HDC hDC, LPCSTR lpString, int nCount, PRECT lpRect, UINT nFormat)
-{
-#ifdef DEBUG
-    WriteLog("USER32: DrawTextA %s %d", lpString,nCount);
-#endif
-    return O32_DrawText(hDC,lpString,nCount,lpRect,nFormat);
 }
 /*****************************************************************************
  * Name      : BOOL WIN32API DrawAnimatedRects

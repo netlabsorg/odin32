@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.27 1999-12-03 17:30:17 cbratschi Exp $ */
+/* $Id: scroll.cpp,v 1.28 1999-12-16 16:53:57 cbratschi Exp $ */
 /*
  * Scrollbar control
  *
@@ -637,7 +637,8 @@ static void SCROLL_RefreshScrollBar( HWND hwnd, INT nBar,
   Win32BaseWindow *window;
   HDC hdc;
 
-    hdc = GetDCEx( hwnd, 0, DCX_CACHE | ((nBar == SB_CTL) ? 0 : DCX_WINDOW));
+
+    hdc = GetDC(hwnd);
 
     if (!hdc) return;
 
@@ -809,7 +810,7 @@ LRESULT SCROLL_HandleScrollEvent(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar,
         timerRunning = FALSE;
         if (SCROLL_FocusWin == hwnd && SCROLL_Highlighted)
         {
-          hdc = GetDCEx(hwnd,0,DCX_CACHE);
+          hdc = GetDC(hwnd);
           SCROLL_DrawScrollBar(hwnd,hdc,nBar,FALSE,TRUE);
           ReleaseDC(hwnd,hdc);
         }
@@ -865,7 +866,7 @@ LRESULT SCROLL_HandleScrollEvent(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar,
           if (SCROLL_Highlighted)
           {
             SCROLL_Highlighted = FALSE;
-            hdc = GetDCEx(hwnd,0,DCX_CACHE);
+            hdc = GetDC(hwnd);
             SCROLL_DrawScrollBar(hwnd,hdc,nBar,FALSE,TRUE);
             ReleaseDC(hwnd,hdc);
           }
@@ -884,7 +885,7 @@ LRESULT SCROLL_HandleScrollEvent(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar,
           SCROLL_Highlighted = ~SCROLL_Highlighted;
           if (!SCROLL_Scrolling)
           {
-            hdc = GetDCEx(hwnd,0,DCX_CACHE);
+            hdc = GetDC(hwnd);
             SCROLL_DrawScrollBar(hwnd,hdc,nBar,FALSE,TRUE);
             ReleaseDC(hwnd,hdc);
           }
@@ -895,7 +896,7 @@ LRESULT SCROLL_HandleScrollEvent(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar,
         return res;  /* Should never happen */
     }
 
-    hdc = GetDCEx(hwnd,0,DCX_CACHE | ((nBar == SB_CTL) ? 0:DCX_WINDOW));
+    hdc = GetDC(hwnd);
 
     switch(SCROLL_trackHitTest)
     {
