@@ -1,4 +1,4 @@
-/* $Id: thread.h,v 1.3 1999-06-19 17:58:50 sandervl Exp $ */
+/* $Id: thread.h,v 1.4 1999-07-07 08:11:09 sandervl Exp $ */
 
 /*
  * Thread definitions
@@ -12,6 +12,10 @@
 #include "config.h"
 #include "winbase.h"
 //#include "selectors.h"  /* for SET_FS */
+
+#ifdef __WIN32OS2__
+#define TLS_MINIMUM_AVAILABLE 	64
+#endif
 
 struct _PDB;
 
@@ -70,7 +74,11 @@ typedef struct _THDB
     void          *ss_table;       /*  90 Pointer to info about 16-bit stack */
     WORD           thunk_ss;       /*  94 Yet another 16-bit stack selector */
     WORD           pad3;           /*  96 */
+#ifdef __WIN32OS2__
+    LPVOID         tls_array[TLS_MINIMUM_AVAILABLE];  /*  98 Thread local storage */
+#else
     LPVOID         tls_array[64];  /*  98 Thread local storage */
+#endif
     DWORD          delta_priority; /* 198 Priority delta */
     DWORD          unknown4[7];    /* 19c Unknown */
     void          *create_data;    /* 1b8 Pointer to creation structure */

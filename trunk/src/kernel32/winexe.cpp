@@ -1,4 +1,4 @@
-/* $Id: winexe.cpp,v 1.7 1999-06-20 10:55:36 sandervl Exp $ */
+/* $Id: winexe.cpp,v 1.8 1999-07-07 08:11:10 sandervl Exp $ */
 
 /*
  * Win32 exe class
@@ -86,6 +86,11 @@ ULONG Win32Exe::start()
   dprintf(("Start executable %X\n", WinExe));
 
   fExeStarted  = TRUE;
+
+  //Allocate TLS index for this module
+  tlsAlloc();
+  tlsAttachThread();	//setup TLS (main thread)
+
   SetWin32TIB();
   rc = ((WIN32EXEENTRY)entryPoint)();
   RestoreOS2TIB();

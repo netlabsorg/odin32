@@ -1,4 +1,12 @@
- /* $Id: changelog,v 1.44 1999-07-06 15:55:03 phaller Exp $ */
+ /* $Id: changelog,v 1.45 1999-07-07 08:11:08 sandervl Exp $ */
+ 99-07-07: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32/PE2LX: Added support for TLS sections
+	- KERNEL32: Added thread attach/detach messages for dlls
+	 	    Fixed some bugs, cleaned up code
+	  NOTE: THIS CHANGE BREAKS ALL PREVIOUSLY CONVERTED APPLICATIONS
+	        RECOMPILE ALL DLLS AND CONVERT EVERYTHING AGAIN!!!!!!!!!
+		THIS CHANGE ALSO BREAKS WIN32K!
+
  99-07-06: Patrick Haller <phaller@gmx.net>
 	- KERNEL32: major enhancement of handlemanager
 

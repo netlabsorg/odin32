@@ -1,4 +1,4 @@
-/* $Id: wprocess.h,v 1.4 1999-06-20 12:46:34 sandervl Exp $ */
+/* $Id: wprocess.h,v 1.5 1999-07-07 08:11:09 sandervl Exp $ */
 /*
  * Process help functions
  *
@@ -23,9 +23,12 @@ typedef DWORD TEB;
 TEB *InitializeTIB(BOOL fMainThread = FALSE);
 void DestroyTIB();
 
-void WIN32API RestoreOS2TIB();
-void WIN32API SetWin32TIB();
+void   WIN32API RestoreOS2TIB();
+USHORT WIN32API SetWin32TIB();
 
 extern BOOL fExeStarted;
+
+//Flat pointer to thread TIB structure
+extern DWORD  *TIBFlatPtr;
 
 #endif 
