@@ -1,4 +1,4 @@
-/* $Id: winproc.cpp,v 1.5 2000-09-04 18:23:58 sandervl Exp $ */
+/* $Id: winproc.cpp,v 1.6 2000-09-05 19:20:38 sandervl Exp $ */
 /*
  * Window procedure callbacks
  *
@@ -301,6 +301,11 @@ LRESULT WINAPI CallWindowProcA(
 ) {
     WINDOWPROC *proc = WINPROC_GetPtr( func );
 
+    if(proc) {
+          dprintf2(("CallWindowProcA %x %x %x %x %x -> proc %x, type %d, org func %x", func, hwnd, msg, wParam, lParam, proc, proc->type, WINPROC_THUNKPROC(proc)));
+    }
+    else  dprintf2(("CallWindowProcA %x %x %x %x %x (unknown proc)", func, hwnd, msg, wParam, lParam));
+   
     Win32BaseWindow *window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("CallWindowProcA, window %x not found", hwnd));
@@ -309,11 +314,6 @@ LRESULT WINAPI CallWindowProcA(
     }
 
     if (!proc) return func(hwnd, msg, wParam, lParam );
-
-#if testing
-    func = WINPROC_GetProc( (HWINDOWPROC)proc, WIN_PROC_32A );
-    return WINPROC_CallWndProc( func, hwnd, msg, wParam, lParam );
-#endif
 
     switch(proc->type)
     {
@@ -336,6 +336,11 @@ LRESULT WINAPI CallWindowProcW( WNDPROC func, HWND hwnd, UINT msg,
 {
     WINDOWPROC *proc = WINPROC_GetPtr( func );
 
+    if(proc) {
+          dprintf2(("CallWindowProcW %x %x %x %x %x -> proc %x, type %d, org func %x", func, hwnd, msg, wParam, lParam, proc, proc->type, WINPROC_THUNKPROC(proc)));
+    }
+    else  dprintf2(("CallWindowProcW %x %x %x %x %x (unknown proc)", func, hwnd, msg, wParam, lParam));
+
     Win32BaseWindow *window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("CallWindowProcW, window %x not found", hwnd));
@@ -344,11 +349,6 @@ LRESULT WINAPI CallWindowProcW( WNDPROC func, HWND hwnd, UINT msg,
     }
 
     if (!proc) return func( hwnd, msg, wParam, lParam );
-
-#if testing
-    func = WINPROC_GetProc( (HWINDOWPROC)proc, WIN_PROC_32W );
-    return WINPROC_CallWndProc( func, hwnd, msg, wParam, lParam );
-#endif
 
     switch(proc->type)
     {

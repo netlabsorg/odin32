@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.210 2000-09-04 18:23:56 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.211 2000-09-05 19:20:36 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -665,7 +665,8 @@ if (!cs->hMenu) cs->hMenu = LoadMenuA(windowClass->getInstance(),"MYAPP");
   	hTaskList = OSLibWinAddToTaskList(OS2Hwnd, windowNameA, (cs->style & WS_VISIBLE) ? 1 : 0);
   }
 
-  if (SendInternalMessageA(WM_NCCREATE,0,(LPARAM)cs))
+  //cs is ascii version of create structure. so use SendInternalMessageA
+  if(SendInternalMessageA(WM_NCCREATE,0,(LPARAM)cs))
   {
         RECT tmpRect;
 
@@ -704,11 +705,13 @@ if (!cs->hMenu) cs->hMenu = LoadMenuA(windowClass->getInstance(),"MYAPP");
 
                 SendInternalMessageA(WM_MOVE,0,MAKELONG(rectClient.left,rectClient.top));
             }
-
             if( (getStyle() & WS_CHILD) && !(getExStyle() & WS_EX_NOPARENTNOTIFY) )
             {
                 /* Notify the parent window only */
-                SendInternalMessageA(WM_PARENTNOTIFY, MAKEWPARAM(WM_CREATE, getWindowId()), (LPARAM)getWindowHandle());
+                if(getParent() && getParent()->IsWindowDestroyed() == FALSE)
+                {
+                	getParent()->SendInternalMessageA(WM_PARENTNOTIFY, MAKEWPARAM(WM_CREATE, getWindowId()), (LPARAM)getWindowHandle());
+		}
                 if(!::IsWindow(getWindowHandle()))
                 {
                     dprintf(("Createwindow: WM_PARENTNOTIFY destroyed window"));
@@ -3012,22 +3015,23 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value, BOOL fUnicode)
 {
  LONG oldval;
 
-    dprintf2(("SetWindowLong%c %x %d %x", (fUnicode) ? 'W' : 'A', getWindowHandle(), index, value));
     switch(index) {
         case GWL_EXSTYLE:
         {
            STYLESTRUCT ss;
 
-                if(dwExStyle == value)
-                    return value;
-
+                if(dwExStyle == value) {
+			oldval = value;
+                	break;
+		}
                 ss.styleOld = dwExStyle;
                 ss.styleNew = value;
                 dprintf(("SetWindowLong GWL_EXSTYLE %x old %x new style %x", getWindowHandle(), dwExStyle, value));
                 SendInternalMessageA(WM_STYLECHANGING,GWL_EXSTYLE,(LPARAM)&ss);
                 setExStyle(ss.styleNew);
                 SendInternalMessageA(WM_STYLECHANGED,GWL_EXSTYLE,(LPARAM)&ss);
-                return ss.styleOld;
+                oldval = ss.styleOld;
+		break;
         }
         case GWL_STYLE:
         {
@@ -3035,9 +3039,10 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value, BOOL fUnicode)
 
                 //SvL: TODO: Can you change minimize or maximize status here too?
 
-                if(dwStyle == value)
-                    return value;
-
+                if(dwStyle == value) {
+			oldval = value;
+                	break;
+                }
                 value &= ~(WS_CHILD|WS_VISIBLE);      /* Some bits can't be changed this way (WINE) */
                 ss.styleOld = getStyle();
                 ss.styleNew = value | (ss.styleOld & (WS_CHILD|WS_VISIBLE));
@@ -3050,7 +3055,8 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value, BOOL fUnicode)
 #ifdef DEBUG
                 PrintWindowStyle(ss.styleNew, 0);
 #endif
-                return ss.styleOld;
+                oldval = ss.styleOld;
+                break;
         }
         case GWL_WNDPROC:
         {
@@ -3064,36 +3070,41 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value, BOOL fUnicode)
 		}
 	        oldval = (LONG)WINPROC_GetProc(win32wndproc, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A);
                 WINPROC_SetProc((HWINDOWPROC *)&win32wndproc, (WNDPROC)value, type, WIN_PROC_WINDOW);
-                return oldval;
+                break;
         }
         case GWL_HINSTANCE:
                 oldval = hInstance;
                 hInstance = value;
-                return oldval;
+                break;
 
         case GWL_HWNDPARENT:
-                return SetParent((HWND)value);
+                oldval = SetParent((HWND)value);
+                break;
 
         case GWL_ID:
                 oldval = getWindowId();
                 setWindowId(value);
-                return oldval;
+                break;
 
         case GWL_USERDATA:
                 oldval = userData;
                 userData = value;
-                return oldval;
+                break;
 
         default:
                 if(index >= 0 && index/4 < nrUserWindowLong)
                 {
                         oldval = userWindowLong[index/4];
                         userWindowLong[index/4] = value;
-                        return oldval;
+	                break;
                 }
+    		dprintf(("WARNING: SetWindowLong%c %x %d %x returned %x INVALID index!", (fUnicode) ? 'W' : 'A', getWindowHandle(), index, value));
                 SetLastError(ERROR_INVALID_PARAMETER);
                 return 0;
     }
+    SetLastError(ERROR_SUCCESS);
+    dprintf2(("SetWindowLong%c %x %d %x returned %x", (fUnicode) ? 'W' : 'A', getWindowHandle(), index, value, oldval));
+    return oldval;
 }
 //******************************************************************************
 //******************************************************************************
