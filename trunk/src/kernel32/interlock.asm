@@ -1,4 +1,4 @@
-; $Id: interlock.asm,v 1.7 1999-12-16 00:59:21 sandervl Exp $
+; $Id: interlock.asm,v 1.8 2001-05-19 11:14:38 sandervl Exp $
 
 ;/*
 ; * Interlocked apis
@@ -92,8 +92,6 @@ _InterlockedExchange@8 endp
 ; * Atomically compares Destination and Comperand, and if found equal exchanges
 ; * the value of Destination with Exchange
 ; *
-; * RETURNS
-; *	Prior value of value pointed to by Destination
 ; */
 _InterlockedCompareExchange@12 proc near
 	push	ebp
@@ -102,11 +100,9 @@ _InterlockedCompareExchange@12 proc near
 	push	ebx
 
 	mov	ebx, dword ptr [ebp+8]  ;PVOID *Destination, /* Address of 32-bit value to exchange */
-	push	dword ptr [ebx]		;save old *Destination
 	mov	eax, [ebp+16]		;PVOID Comperand      /* value to compare, 32 bits */
 	mov	edx, [ebp+12]   	;PVOID Exchange,      /* change value, 32 bits */
 	lock	cmpxchg dword ptr [ebx],edx
-	pop	eax
 
 	pop	ebx
 	pop	edx
