@@ -1,10 +1,12 @@
- /* $Id: ChangeLog,v 1.1042 2000-07-22 09:34:27 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1043 2000-07-22 12:51:33 sandervl Exp $ */
 
- 2000-07-21: Sander van Leeuwen <sandervl@xs4all.nl>
+ 2000-07-22: Sander van Leeuwen <sandervl@xs4all.nl>
     - DOC\ReportingBugs.txt
                 Added file that tells users how to report bugs
     - TOOLS\install: 
                 Added ReportingBugs.txt to WarpIN script
+    - USER32:   Fixed BeginPaint; set clip region to update region; not update
+                rectangle -> fixes invisible buttons in winzip install
    
  2000-07-21: Sander van Leeuwen <sandervl@xs4all.nl>
     - SHLWAPI:  SHGetSpecialFolderPathA: StartMenu changed in 'Start Menu'
