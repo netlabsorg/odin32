@@ -1,10 +1,13 @@
- /* $Id: ChangeLog,v 1.380 1999-10-28 19:09:48 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.381 1999-10-28 22:40:03 sandervl Exp $ */
 
  99-10-28: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- USER32: LoadBitmapW fix
                   ModifyMenuW/InsertMenuW fixes.
                   Call CallWindowProcA/W in Send(Internal)MessageA/W
                   (in preparation of Wine unicode msg translation port)
+                  Always call default window handler for WM_PAINT. Apparently
+                  there are apps that return 0, but don't call BeginPaint.
+                  Added extra messages for msg translation.
 
  99-10-28: Sander van Leeuwen <sandervl@xs4all.nl>
 	- ADVAPI32: Fixed dprintf bugs in OpenSCManagerA/W (%s instead of %d)
