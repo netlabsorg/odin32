@@ -1,4 +1,4 @@
-/* $Id: OS2KVM.h,v 1.9 2001-02-10 11:11:43 bird Exp $
+/* $Id: OS2KVM.h,v 1.10 2001-02-11 15:02:27 bird Exp $
  *
  * OS/2 kernel VM functions.
  *
@@ -135,16 +135,108 @@
 #define VMMDA_READONLY      1           /* Create readonly alias */
 
 
+/*
+ * vmRecalcShrBound flags.
+ */
+#define VMRSBF_ARENASHR     0           /* Queries for the Shared Arena. */
+#define VMRSBF_ARENAHIGH    4           /* Queries for the High Shared Arena. */
+#define VMRSBF_UPDATE       1           /* Seems to update the Sentinel Arena Record. */
+
+
+/*
+ * Arena Header flags as defined in SG24-4640-00.
+ */
+#define VMAH_BITMAP_BYPASS 0x00000001   /* Worth bypassing bitmap */
+#define VMAH_NO_HASH_WRAP  0x00000002   /* No hash table wraparound yet */
+#define VMAH_GROW_DOWN     0x00000004   /* Arena grows down */
+
 
 /*******************************************************************************
 *   Structures and Typedefs                                                    *
 *******************************************************************************/
+
+/*
+ * Handle to Memory Object.
+ */
+typedef USHORT  VMHOB;
+
+/*
+ * Handle to Arena Record.
+ */
+typedef VMHOB  VMHAR;
+
+
+/*
+ * VMAllocMem struct - found in SDFs.
+ */
 typedef struct _vmac
 {
     ULONG       ac_va;                  /* off=0 cb=4 Virtual Address. */
     USHORT      ac_sel;                 /* off=4 cb=2 Selector. */
     USHORT      ac_hob;                 /* off=6 cb=2 Object handle. */
 } VMAC, *PVMAC;
+
+
+/*
+ * Dummy structs we need pointers for.
+ */
+typedef PVOID   PVMAR;
+typedef PVOID   PVMBM;
+typedef PVOID   PVMHAR;
+typedef PVOID   PVMAT;
+
+
+/*
+ * Arena Header structure as defined in SG24-4640-00 and all SDF files.
+ */
+typedef struct vmah_s
+{
+    struct vmah_s *         ah_pahNext; /* Link to next arena. */
+    struct vmah_s *         ah_pahPrev; /* Link to previous arena. */
+    PVMAR                   ah_parSen;  /* Pointer to the arena sentinel. */
+    PVMAR                   ah_parFree; /* Hint of 1st free block in arena. */
+    PVMBM                   ah_papbm;   /* Pointer to bitmap directory. */
+    PVMHAR                  ah_paharHash;/*Hash table pointer. */
+    PVMAT                   ah_pat;     /* Pointer to per-type info. */
+    ULONG                   ah_fl;      /* Flags. */
+    ULONG                   ah_laddrMin;/* Minimum address currently mapped. */
+    ULONG                   ah_laddrMax;/* Maximum address currently mapped. */
+    ULONG                   ah_car;     /* Count of arena entries. */
+    ULONG                   ah_carBitmap;/*Max entry count to need bitmap. */
+    ULONG                   ah_lbmNumbMax;  /* Max bitmap number */
+    ULONG                   ah_lbmeNumbMax; /* Max bitmap entry number */
+    ULONG                   ah_lHashNumbMax;/* Max hash table index. */
+    VMHOB                   ah_hob;     /* Arena header pseudo-handle. */
+    USHORT                  ah_filler;  /* Filler to 4-byte align struct. */
+} VMAH, *PVMAH;
+
+
+/*******************************************************************************
+*   Global Variables                                                           *
+*******************************************************************************/
+/**
+ * Virtual Address Limit - this pointer might be NULL!
+ */
+extern ULONG *pVirtualAddressLimit;
+#define VirtualAddressLimit (pVirtualAddressLimit ? *pVirtualAddressLimit : 0x20000000)
+
+/**
+ * System arena header.
+ */
+extern PVMAH pahvmSys;
+#define ahvmSys (*pahvmSys)
+
+/**
+ * Shared arena header.
+ */
+extern PVMAH pahvmShr;
+#define ahvmShr (*pahvmShr)
+
+/**
+ * High Shread arena header - only aurora and Warp Server Advanced SMP.
+ */
+extern PVMAH pahvmhShr;
+#define ahvmhShr (*pahvmhShr)
 
 
 /*******************************************************************************
@@ -186,5 +278,21 @@ APIRET KRNLCALL VMObjHandleInfo(
 PMTE KRNLCALL VMPseudoHandleMap(
     HMTE    hMTE);
 #endif
+
+/**
+ * This function seems to find the top of the private arena.
+ * And for high arena kernels (AURORA and W3SMP?) it is modified
+ * to calc the top of the high private arena, given flFlag = 4.
+ * --
+ * This function is really intented for resizing / recaling the size of
+ * the shared arena(s). But, it's useful for finding the highest used
+ * private arena(s).
+ * @param   flFlags             VMRSBF_* flags.
+ * @param   pulSentinelAddress  Pointer to return variable (optional).
+ */
+VOID    KRNLCALL vmRecalcShrBound(
+    ULONG   flFlags,
+    PULONG  pulSentinelAddress);
+
 
 #endif
