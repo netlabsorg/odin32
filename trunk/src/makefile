@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.87 2003-02-28 10:32:01 sandervl Exp $
+# $Id: makefile,v 1.88 2003-04-14 23:08:52 bird Exp $
 
 #
 # Odin32 API
@@ -26,7 +26,7 @@
 #
 # Exclude lists which is to be passed in to DOWITHDIRS
 #
-NOTTOBEMADE = CVS;pe2lx;odin32api;odinwps;spy;odinldr;ws2help;win16ldr;oslib;custombuild;opengl;programs;ntdll;crtdll;msvcrt   # generally not made
+NOTTOBEMADE = CVS;pe2lx;odin32api;odinwps;spy;odinldr;ws2help;win16ldr;oslib;custombuild;opengl;programs;crtdll;msvcrt   # generally not made
 NOTDLLS     = $(NOTTOBEMADE);peldr;dllentry;guidlib     # not dlls
 NOTHAVELIBS = $(NOTTOBEMADE);peldr                      # don't generate libs
 NOTWIN32DLLS= $(NOTDLLS);win32k;odincrt;dllentry        # not win32 dlls.
