@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.160 2002-12-02 09:34:46 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.161 2002-12-03 11:39:40 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -1749,6 +1749,24 @@ HMODULE WIN32API GetModuleHandleW(LPCWSTR lpwszModuleName)
 }
 //******************************************************************************
 //******************************************************************************
+const char *szPECmdLoader = "PEC.EXE";
+const char *szPEGUILoader = "PE.EXE";
+const char *szNELoader    = "w16odin.exe";
+//******************************************************************************
+//Override loader names (PEC, PE, W16ODIN)
+//NOTE: String must be resident
+//******************************************************************************
+BOOL WIN32API ODIN_SetLoaders(LPCSTR pszPECmdLoader, LPCSTR pszPEGUILoader,
+                              LPCSTR pszNELoader)
+{
+    if(pszPECmdLoader)   szPECmdLoader = pszPECmdLoader;
+    if(pszPEGUILoader)   szPEGUILoader = pszPEGUILoader;
+    if(pszNELoader)      szNELoader = pszNELoader;
+
+    return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
 BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
                             LPSECURITY_ATTRIBUTES lpProcessAttributes,
                             LPSECURITY_ATTRIBUTES lpThreadAttributes,
@@ -1925,9 +1943,9 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
       iNewCommandLineLength = strlen(szAppName) + strlen(lpCommandLine);
 
       if(SubSystem == IMAGE_SUBSYSTEM_WINDOWS_CUI)
-        lpszExecutable = "PEC.EXE";
+        lpszExecutable = (LPSTR)szPECmdLoader;
       else
-        lpszExecutable = "PE.EXE";
+        lpszExecutable = (LPSTR)szPEGUILoader;
 
       lpszPE = lpszExecutable;
 
@@ -1986,12 +2004,12 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
         char *newcmdline;
 
         newcmdline = (char *)malloc(strlen(szAppName) + strlen(cmdline) + 16);
-        sprintf(newcmdline, "w16odin.exe %s", szAppName, lpCommandLine);
+        sprintf(newcmdline, "%s %s", szNELoader, szAppName, lpCommandLine);
         free(cmdline);
         cmdline = newcmdline;
         //Force Open32 to use DosStartSession (DosExecPgm won't do)
         dwCreationFlags |= CREATE_NEW_PROCESS_GROUP;
-        rc = O32_CreateProcess("w16odin.exe", (LPCSTR)cmdline, lpProcessAttributes,
+        rc = O32_CreateProcess(szNELoader, (LPCSTR)cmdline, lpProcessAttributes,
                                lpThreadAttributes, bInheritHandles, dwCreationFlags,
                                lpEnvironment, lpCurrentDirectory, lpStartupInfo,
                                lpProcessInfo);
