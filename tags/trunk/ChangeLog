@@ -1,4 +1,11 @@
- /* $Id: ChangeLog,v 1.575 1999-12-27 09:49:08 achimha Exp $ */
+ /* $Id: ChangeLog,v 1.576 1999-12-27 14:45:11 sandervl Exp $ */
+
+ 99-12-27: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Fixed GetActiveWindow (also fixes problem with mouse messages
+                  in FreeCell)
+                  Fixed PeekMessageW (used old way of calling OSLibWinPeekMsg)
+                  Changed translation of message filters (still not 100% correct)
+                  Fixed bugs in OSLibPeekMessage
 
  99-12-26: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: implemented WM_NCHITTEST, added WM_SYSCOMMAND handling
