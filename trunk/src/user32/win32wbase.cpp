@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.211 2000-09-05 19:20:36 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.212 2000-09-07 18:14:34 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2188,6 +2188,9 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
    HWND hParent = 0;
    RECT oldClientRect = rectClient;
 
+    if(getWindowHandle() == 0x68000004) {
+	rc = FALSE;
+    }
     if (fuFlags &
        ~(SWP_NOSIZE     | SWP_NOMOVE     | SWP_NOZORDER     |
          SWP_NOREDRAW   | SWP_NOACTIVATE | SWP_FRAMECHANGED |
@@ -2760,6 +2763,58 @@ HWND Win32BaseWindow::GetWindow(UINT uCmd)
  HWND hwndRelated = 0;
  Win32BaseWindow *window;
 
+#if 1
+    switch(uCmd)
+    {
+    case GW_HWNDFIRST:
+    	hwndRelated = OSLibWinQueryWindow(getOS2WindowHandle(), QWOS_TOP);
+	window = GetWindowFromOS2Handle(hwndRelated);
+	if(window) {
+             hwndRelated = window->getWindowHandle();
+        }
+	else hwndRelated = 0;
+        break;
+
+    case GW_HWNDLAST:
+    	hwndRelated = OSLibWinQueryWindow(getOS2WindowHandle(), QWOS_BOTTOM);
+	window = GetWindowFromOS2Handle(hwndRelated);
+	if(window) {
+             hwndRelated = window->getWindowHandle();
+        }
+	else hwndRelated = 0;
+        break;
+
+    case GW_HWNDNEXT:
+    	hwndRelated = OSLibWinQueryWindow(getOS2WindowHandle(), QWOS_NEXT);
+	window = GetWindowFromOS2Handle(hwndRelated);
+	if(window) {
+             hwndRelated = window->getWindowHandle();
+        }
+	else hwndRelated = 0;
+        break;
+
+    case GW_HWNDPREV:
+    	hwndRelated = OSLibWinQueryWindow(getOS2WindowHandle(), QWOS_PREV);
+	window = GetWindowFromOS2Handle(hwndRelated);
+	if(window) {
+             hwndRelated = window->getWindowHandle();
+        }
+	else hwndRelated = 0;
+        break;
+
+    case GW_OWNER:
+        if(getOwner()) {
+            hwndRelated = getOwner()->getWindowHandle();
+        }
+        break;
+
+    case GW_CHILD:
+        if(getFirstChild()) {
+            hwndRelated = ((Win32BaseWindow *)getFirstChild())->getWindowHandle();
+        }
+        break;
+    }
+#else
     switch(uCmd)
     {
     case GW_HWNDFIRST:
@@ -2824,6 +2879,7 @@ HWND Win32BaseWindow::GetWindow(UINT uCmd)
         }
         break;
     }
+#endif
 end:
     dprintf(("GetWindow %x %d returned %x", getWindowHandle(), uCmd, hwndRelated));
     return hwndRelated;
@@ -3480,7 +3536,7 @@ void PrintWindowStyle(DWORD dwStyle, DWORD dwExStyle)
         strcat(exstyle, "WS_EX_APPWINDOW ");
 
     dprintf(("Window style:   %x %s", dwStyle, style));
-    dprintf(("Window exStyle: %x %s (FS = %x)", dwExStyle, exstyle, GetFS()));
+    dprintf(("Window exStyle: %x %s", dwExStyle, exstyle));
 }
 #endif
 //******************************************************************************

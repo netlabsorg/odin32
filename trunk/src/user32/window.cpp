@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.74 2000-09-04 18:23:58 sandervl Exp $ */
+/* $Id: window.cpp,v 1.75 2000-09-07 18:14:35 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -398,6 +398,7 @@ BOOL WIN32API IsChild( HWND hwndParent, HWND hwnd)
 HWND WIN32API GetTopWindow( HWND hwnd)
 {
   Win32BaseWindow *window;
+  HWND hwndTop;
 
     if(hwnd == HWND_DESKTOP) {
 	window = windowDesktop;
@@ -410,7 +411,9 @@ HWND WIN32API GetTopWindow( HWND hwnd)
         	return 0;
 	}
     }
-    return window->GetTopWindow();
+    hwndTop = window->GetTopWindow();
+    dprintf2(("GetTopWindow %x returned %x", hwnd, hwndTop));
+    return hwndTop;
 }
 //******************************************************************************
 //******************************************************************************
@@ -637,7 +640,7 @@ BOOL WIN32API IsWindow( HWND hwnd)
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return FALSE;
     }
-    dprintf(("IsWindow %x", hwnd));
+    dprintf2(("IsWindow %x", hwnd));
     return window->IsWindow();
 }
 //******************************************************************************
