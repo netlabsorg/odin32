@@ -1,4 +1,4 @@
-/* $Id: StateUpd.cpp,v 1.1 1999-09-05 02:53:05 bird Exp $ */
+/* $Id: StateUpd.cpp,v 1.2 1999-12-02 12:05:47 bird Exp $ */
 /*
  * StateUpd - Scans source files for API functions and imports data on them.
  *
@@ -950,6 +950,9 @@ static unsigned long analyseFnHdr(PFNDESC pFnDesc, char **papszLines, int i, con
                 pFnDesc->lStatus = 2; /* STUB */
             else
                 pFnDesc->lStatus = 3; /* STUB */
+            if (stristr(pFnDesc->pszStatus, "Open32") != NULL
+                || *pFnDesc->pszStatus == '5' || *pFnDesc->pszStatus == '7')
+                pFnDesc->lStatus += 4;
         }
         else if (stristr(pFnDesc->pszStatus, "Completely") != NULL || *pFnDesc->pszStatus == '4' || *pFnDesc->pszStatus == '5')
         {
@@ -957,6 +960,9 @@ static unsigned long analyseFnHdr(PFNDESC pFnDesc, char **papszLines, int i, con
                 pFnDesc->lStatus = 4; /* STUB */
             else
                 pFnDesc->lStatus = 5; /* STUB */
+            if (stristr(pFnDesc->pszStatus, "Open32") != NULL
+                || *pFnDesc->pszStatus == '8' || *pFnDesc->pszStatus == '9')
+                pFnDesc->lStatus += 4;
         }
         else
         {
