@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.31 2000-01-16 18:17:12 cbratschi Exp $ */
+/* $Id: win32wbase.h,v 1.32 2000-01-17 17:19:21 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -111,6 +111,7 @@ virtual  ULONG  MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd, HWND hwn
          ULONG  MsgScroll(ULONG msg, ULONG scrollCode, ULONG scrollPos);
          ULONG  MsgButton(MSG *msg);
          ULONG  MsgMouseMove(MSG *msg);
+         ULONG  MsgChar(MSG *msg);
          ULONG  MsgPaint(ULONG tmp1, BOOL select = TRUE);
          ULONG  MsgEraseBackGround(HDC hdc);
          ULONG  MsgHitTest(ULONG x, ULONG y);

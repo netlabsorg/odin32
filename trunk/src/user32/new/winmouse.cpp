@@ -1,4 +1,4 @@
-/* $Id: winmouse.cpp,v 1.1 2000-01-01 14:57:38 cbratschi Exp $ */
+/* $Id: winmouse.cpp,v 1.2 2000-01-17 17:19:21 sandervl Exp $ */
 /*
  * Mouse handler for DINPUT
  *
@@ -16,6 +16,7 @@
 #include "pmwindow.h"
 
 LPMOUSE_EVENT_PROC mouseHandler = NULL;
+WNDPROC            keyboardHandler = NULL;
 
 //******************************************************************************
 //******************************************************************************
@@ -26,6 +27,19 @@ VOID WIN32API MOUSE_Enable(LPMOUSE_EVENT_PROC lpMouseEventProc)
 	mouseHandler = NULL;
   }
   else	mouseHandler = lpMouseEventProc;
+}
+//******************************************************************************
+//******************************************************************************
+VOID WIN32API KEYBOARD_Enable(WNDPROC handler)
+{
+  keyboardHandler = handler;
+}
+//******************************************************************************
+//******************************************************************************
+void DInputKeyBoardHandler(MSG *msg)
+{
+  if(keyboardHandler)
+  	keyboardHandler(msg->hwnd, msg->message, msg->wParam, msg->lParam);
 }
 //******************************************************************************
 //******************************************************************************

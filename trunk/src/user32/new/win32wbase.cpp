@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.44 2000-01-16 18:17:12 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.45 2000-01-17 17:19:20 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1002,6 +1002,16 @@ ULONG Win32BaseWindow::MsgMouseMove(MSG *msg)
 
     //translated message == WM_(NC)MOUSEMOVE
     return SendInternalMessageA(msg->message, msg->wParam, msg->lParam);
+}
+//******************************************************************************
+//******************************************************************************
+ULONG Win32BaseWindow::MsgChar(MSG *msg)
+{
+    if(ISKDB_CAPTURED())
+    {
+        DInputKeyBoardHandler(msg);
+    }
+    return DispatchMsgA(msg);
 }
 //******************************************************************************
 //******************************************************************************

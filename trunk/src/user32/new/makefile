@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.58 2000-01-13 13:54:51 sandervl Exp $
+# $Id: makefile,v 1.59 2000-01-17 17:19:20 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -40,7 +40,7 @@ OBJS =  user32.obj loadres.obj \
         combo.obj edit.obj winswitch.obj icontitle.obj clipboard.obj winicon.obj \
         win32wmdiclient.obj oslibutil.obj oslibmsg.obj dib.obj oslibdos.obj \
         win32wmdichild.obj winprop.obj wingdi.obj oslibgdi.obj winaccel.obj \
-        win32wbasepos.obj oslibres.obj dummy.obj dc.obj timer.obj \
+        win32wbasepos.obj oslibres.obj dc.obj timer.obj \
         caret.obj resource.obj winproc.obj text.obj oslibmsgtranslate.obj \
         windlgmsg.obj windlg.obj win32wdesktop.obj win32wbasenonclient.obj
 
@@ -88,7 +88,7 @@ resource.obj: resource.asm
 
 user32.obj: user32.cpp $(PDWIN32_INCLUDE)\wndproc.h \
             $(PDWIN32_INCLUDE)\winicon.h syscolor.h pmwindow.h
-dummy.obj: dummy.cpp
+
 char.obj: char.cpp user32.h
 loadres.obj: loadres.cpp user32.h dib.h
 icon.obj: icon.cpp $(PDWIN32_INCLUDE)\winicon.h
