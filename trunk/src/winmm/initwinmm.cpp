@@ -1,4 +1,4 @@
-/* $Id: initwinmm.cpp,v 1.6 2001-12-23 09:43:12 sandervl Exp $
+/* $Id: initwinmm.cpp,v 1.7 2002-05-22 20:19:11 sandervl Exp $
  *
  * WINMM DLL entry point
  *
@@ -48,6 +48,7 @@
 #include <win\options.h>
 #include "initwinmm.h"
 #include <custombuild.h>
+#include "mixer.h"
 
 #define DBG_LOCALLOG    DBG_initterm
 #include "dbglocal.h"
@@ -168,6 +169,7 @@ BOOL WINAPI LibMainWinmm(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
             }
             RegCloseKey(hKey);
         }
+        mixerInit();
         return TRUE;
    }
 
@@ -180,6 +182,7 @@ BOOL WINAPI LibMainWinmm(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
         auxOS2Close(); /* SvL: Close aux device if necessary */
         IRTMidiShutdown;  /* JT: Shutdown RT Midi subsystem, if running. */
 
+        mixerExit();
         if(MMPMLibraryHandle) DosFreeModule(MMPMLibraryHandle);
         return TRUE;
    }
