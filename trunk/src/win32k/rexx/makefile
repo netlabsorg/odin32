@@ -1,5 +1,5 @@
 ##############################################################################
-# $Id: makefile,v 1.1 2000-05-10 16:04:31 bird Exp $
+# $Id: makefile,v 1.2 2000-06-03 03:50:46 bird Exp $
 #
 # PD-Win32 API
 #
@@ -25,7 +25,7 @@ CXXFLAGS   = $(CINCLUDES) $(CXXFLAGS) \
              -Ge+ -Wall+ppt-ppc-inl-cnv-gnr-vft- -Gm- -Gn- -Ti+ -Gx -Rn
 
 LD         = ilink
-LDFLAGS    = /nologo /NOI /A:16 /NOE /packcode /packdata /pmtype:vio /Stack:4096 \
+LDFLAGS    = /nologo /NOI /A:16 /NOE /packcode /packdata /pmtype:vio /Stack:0x10000 \
 !ifdef DEBUG
 !ifndef NODEBUGINFO
     /debug /dbgpack
@@ -46,6 +46,10 @@ LDFLAGS    = /nologo /NOI /A:16 /NOE /packcode /packdata /pmtype:vio /Stack:4096
     @echo compiling: $(@B).cpp
     @$(CXX) $(CXXFLAGS) -c -Fa$(WIN32KLIST)\$(@B).asm -Fo$(@) $<
 
+.asm{$(OBJDIR)}.obj:
+    @$(ECHO) assembling:      $<
+    @$(AS) $(ASFLAGS) $(ADEFINES) $(AINCLUDES) $< -Fo:$@ -Fl:$(WIN32KLIST)\$(*B).lst
+
 #
 # Visual slick edit!
 #
@@ -63,16 +67,23 @@ LDFLAGS    = /nologo /NOI /A:16 /NOE /packcode /packdata /pmtype:vio /Stack:4096
 ##############################################################################
 TARGET   = kRx
 
-OBJS     =  $(OBJDIR)\kRx.obj
+OBJS     =  $(OBJDIR)\kRxa.obj
 
 
-all:      $(OBJDIR) $(OBJDIR)\$(TARGET).exe
+all:        $(OBJDIR) \
+            $(OBJDIR)\$(TARGET).exe
 
 
 $(OBJDIR)\$(TARGET).exe: $(OBJS) $(TARGET).def
     @echo linking $@
-    $(LD2) $(LD2FLAGS) /OUT:$@ /MAP:$*.map $** OS2386.lib $(RTLLIB) REXX.LIB
+    -4 $(LD) $(LDFLAGS) /BASE:0x10000 /OUT:$@ /MAP:$*.map $** OS2386.lib REXX.lib
     $(CP) $@ $(PDWIN32_BIN)
+
+$(OBJDIR)\$(TARGET)c.exe: $(OBJDIR)\kRx.obj $(TARGET).def
+    @echo linking $@
+    $(LD) $(LDFLAGS) /BASE:0x10000 /OUT:$@ /MAP:$*.map $** OS2386.lib REXX.lib
+    $(CP) $@ $(PDWIN32_BIN)
+
 
 
 ##############################################################################
