@@ -365,7 +365,7 @@ typedef struct
 
 
 /* ImageList */
-#if !defined(__WINE__) || !defined(__WINE_IMAGELIST_C)
+#if !defined(__WINE_IMAGELIST_C)
 struct _IMAGELIST;
 typedef struct _IMAGELIST *HIMAGELIST;
 #endif /* __WINE__ */
