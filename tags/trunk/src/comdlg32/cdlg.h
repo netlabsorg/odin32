@@ -1,4 +1,4 @@
-/* $Id: cdlg.h,v 1.5 2000-05-16 20:00:13 sandervl Exp $ */
+/* $Id: cdlg.h,v 1.6 2000-05-19 19:27:19 sandervl Exp $ */
 /*
  *  Common Dialog Boxes interface (32 bit)
  *
@@ -133,7 +133,7 @@ BOOL  WINAPI PathMatchSpecW(LPCWSTR name, LPCWSTR mask);
 
 /* PATH */
 #define COMDLG32_PathIsRootA		PathIsRootA
-#define COMDLG32_PathFindFilenameA	PathFindFilenameA
+#define COMDLG32_PathFindFilenameA	PathFindFileNameA
 #define COMDLG32_PathRemoveFileSpecA	PathRemoveFileSpecA
 #define COMDLG32_PathMatchSpecW		PathMatchSpecW
 #define COMDLG32_PathAddBackslashA	PathAddBackslashA
