@@ -1,9 +1,9 @@
-# $Id: odin32.tools.emx.mk,v 1.2 2000-12-09 16:04:21 phaller Exp $
+# $Id: odin32.tools.emx.mk,v 1.3 2001-06-25 23:41:25 bird Exp $
 
 #
 # Odin32 API
 #
-#       GNU EMX tools and interference rules.
+#       GNU EMX tools and inference rules.
 #
 
 
@@ -34,13 +34,51 @@ MAKE_CMD    = $(MAKE_CMD) NODEP=1
 #
 # Interference rules.
 #
-.SUFFIXES: .orc_asm .orc
+.SUFFIXES: .orc_asm .orc .pre-c .pre-cpp
 
 .c{$(OBJDIR)}.obj:
-    $(CC)  $(CFLAGS)   $(CINCLUDES) $(CDEFINES) -o$(OBJDIR)\$(@B).obj -c $<
+!ifdef USERAPP
+    $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES_WIN32APP) -o$(OBJDIR)\$(@B).obj -c $<
+!else
+    $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES) -o$(OBJDIR)\$(@B).obj -c $<
+!endif
+
+.c.obj:
+!ifdef USERAPP
+    $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES_WIN32APP) -o$(OBJDIR)\$(@B).obj -c $<
+!else
+    $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES) -o$(OBJDIR)\$(@B).obj -c $<
+!endif
+
+.c.pre-c:
+!ifdef USERAPP
+    $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES_WIN32APP) -E -c $< > $@
+!else
+    $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES) -E -c $< > $@
+!endif
+
 
 .cpp{$(OBJDIR)}.obj:
+!ifdef USERAPP
+    $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES_WIN32APP) -o$(OBJDIR)\$(@B).obj -c $<
+!else
     $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -o$(OBJDIR)\$(@B).obj -c $<
+!endif
+
+.cpp.obj:
+!ifdef USERAPP
+    $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES_WIN32APP) -o$(OBJDIR)\$(@B).obj -c $<
+!else
+    $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -o$(OBJDIR)\$(@B).obj -c $<
+!endif
+
+.cpp.pre-cpp:
+!ifdef USERAPP
+    $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES_WIN32APP) -E -c $< > $@
+!else
+    $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -E -c $< > $@
+!endif
+
 
 .asm{$(OBJDIR)}.obj:
     $(AS) $(ASFLAGS) -Fdo:$(OBJDIR) $<
