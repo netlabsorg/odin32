@@ -42,7 +42,7 @@
  *   LISTVIEW_Update : not completed
  */
 
-/* WINE 991031 level */
+/* WINE 991114 level */
 
 #include <string.h>
 #include "winbase.h"
