@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.183 2003-02-28 11:32:28 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.184 2003-02-28 16:20:57 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -509,8 +509,6 @@ VOID WIN32API ExitProcess(DWORD exitcode)
 
     fExitProcess = TRUE;
 
-    SetOS2ExceptionChain(-1);
-
     HMDeviceCommClass::CloseOverlappedIOHandlers();
 
     //detach all dlls (LIFO order) before really unloading them; this
@@ -585,7 +583,7 @@ BOOL WIN32API FreeLibrary(HINSTANCE hinstance)
  BOOL rc;
 
     SetLastError(ERROR_SUCCESS);
-    //SvL: Ignore FreeLibary for executable
+    //Ignore FreeLibary for executable
     if(WinExe && hinstance == WinExe->getInstanceHandle()) {
         return TRUE;
     }
