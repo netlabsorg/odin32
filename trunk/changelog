@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.2086 2002-05-17 16:45:39 sandervl Exp $ */
+/* $Id: changelog,v 1.2087 2002-05-20 13:47:15 sandervl Exp $ */
+
+ 2002-05-20: Dmitry Froloff <froloff@os2.ru>
+    - KERNEL32: o Removed 64 MB memory mapped file limit
+                o Fix for opening memory mapped file with size larger than
+                  the file size
 
  2002-05-17: Platon Fomichev <platon@innotek.de>
     - USER23:   o Experimental DIALOG_IsAccelerator fix; return FALSE
