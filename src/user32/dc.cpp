@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.57 2000-05-12 18:09:39 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.58 2000-06-01 11:27:56 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -684,6 +684,23 @@ exit:
    return TRUE;
 }
 #endif
+//******************************************************************************
+//******************************************************************************
+int WIN32API GetClipBox( HDC arg1, PRECT  arg2)
+{
+ int rc;
+
+  rc = O32_GetClipBox(arg1, arg2);
+  dprintf(("GDI32: GetClipBox of %X returned %d\n", arg1, rc));
+  return(rc);
+}
+//******************************************************************************
+//******************************************************************************
+int WIN32API GetClipRgn( HDC hdc, HRGN hRgn)
+{
+    dprintf(("GDI32: GetClipRgn"));
+    return O32_GetClipRgn(hdc, hRgn);
+}
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API GetUpdateRect (HWND hwnd, LPRECT pRect, BOOL erase)

@@ -1,4 +1,4 @@
-/* $Id: dc.h,v 1.11 2000-01-31 22:30:51 sandervl Exp $ */
+/* $Id: dc.h,v 1.12 2000-06-01 11:27:57 sandervl Exp $ */
 /*
  * public dc functions
  *
@@ -436,6 +436,32 @@ inline BOOL APIENTRY _ShowCaret (HWND hwnd)
     return yyrc;
 }
 
+
+int       APIENTRY _O32_GetClipRgn( HDC, HRGN );
+
+inline int O32_GetClipRgn(HDC a, HRGN b)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = _O32_GetClipRgn(a, b);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+int       OPEN32API _O32_GetClipBox( HDC, PRECT );
+
+inline int O32_GetClipBox(HDC a, PRECT b)
+{
+ int yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = _O32_GetClipBox(a, b);
+    SetFS(sel);
+
+    return yyrc;
+} 
 
    // from pmddi.h:
    /* CopyClipRegion */
