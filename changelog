@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1613 2001-07-21 15:57:41 sandervl Exp $ */
+/* $Id: changelog,v 1.1614 2001-07-21 17:40:03 sandervl Exp $ */
 
  2001-07-21: Sander van Leeuwen <sandervl@xs4all.nl>
     - DINPUT, DPLAYX, ICMP, IMAGEHLP, IMM32, LZ32, 
@@ -10,9 +10,11 @@
                 o Replaced Wine license with updated version
     - COMCTL32: o Resync with Wine (20010720); comboex, comctl32undoc, rebar,
                   imagelist, toolbar, pager
+    - MSVFW32:  o Resync with Wine (20010720); all
+    - AVIFIL32: o Resync with Wine (20010720); all
     - GDI32:    o Fixed brush leak in InternalTextOutA
                   (fixes Macromedia Flash 5 error messages)
-
+    
  2001-07-20: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Moved wsnprintf to user32
     - USER32:   o Removed FatalAppExitA/W (already in kernel32)
