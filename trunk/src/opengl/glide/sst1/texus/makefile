@@ -1,19 +1,10 @@
-# $Id: makefile,v 1.3 2000-11-19 08:58:12 bird Exp $
+# $Id: makefile,v 1.4 2000-12-03 00:26:13 bird Exp $
 
 #
 # Odin32 API
 #
 #       sst1/Texus makefile
 #
-
-
-#
-# Directory macros.
-#
-PDWIN32_INCLUDE = ..\..\..\..\..\include
-PDWIN32_LIB     = ..\..\..\..\..\lib
-PDWIN32_BIN     = ..\..\..\..\..\$(OBJDIR)
-PDWIN32_TOOLS   = ..\..\..\..\..\tools\bin
 
 
 #
@@ -26,8 +17,8 @@ ADDITIONAL_DEP = mydep
 #
 # Compiler, tools, and interference rules.
 #
-!include $(PDWIN32_INCLUDE)/pdwin32.mk
-!include ..\3dfx.mak
+!include ../../../../../makefile.inc
+!include ../3dfx.mak
 
 
 #
@@ -70,7 +61,7 @@ TARGET  = texus
 #
 # Includes the common rules.
 #
-!include $(PDWIN32_INCLUDE)/pdwin32.post
+!include $(ODIN32_POST_INC)
 
 
 #

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.18 2000-11-19 08:58:10 bird Exp $
+# $Id: makefile,v 1.19 2000-12-03 00:26:11 bird Exp $
 #
 # Odin32 API
 #
@@ -7,7 +7,7 @@
 
 
 # Common tools macros. (MAKE_CMD)
-!include ../../include/pdwin32.mk
+!include ../../makefile.inc
 
 
 # dummy all rule - invoking nmake withtout target caused it to do all of the targets below..
@@ -22,7 +22,8 @@ SUBDIRS = \
 .\glide \
 .\mesa\3dfx
 
-# All, Lib, Clean and Dep rules.
-clean dep all lib:
+# All the common rules like all, lib, clean and dep.
+$(COMMONRULES):
     $(DODIRS) "$(SUBDIRS)" $(MAKE_CMD) $@
+
 
