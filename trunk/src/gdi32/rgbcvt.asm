@@ -1,4 +1,4 @@
-; $Id: rgbcvt.asm,v 1.4 2000-08-18 18:14:58 sandervl Exp $
+; $Id: rgbcvt.asm,v 1.5 2001-07-09 18:07:39 sandervl Exp $
 ; Copyright 2000 Daniela Engert (dani@ngrt.de)
 
 	.586p
@@ -72,6 +72,9 @@ RGB565to555 PROC NEAR
 	push	esi
 	push	edi
 	cld
+
+	cmp	ecx, 0
+	jz	done
 
 	mov	edi, eax		; _Optlink arg1 = EAX
 	mov	esi, edx		; _Optlink arg2 = EDX
