@@ -1,4 +1,4 @@
-/* $Id: crtinc.h,v 1.2 1999-09-13 09:05:13 sandervl Exp $ */
+/* $Id: crtinc.h,v 1.3 1999-09-23 09:38:04 sandervl Exp $ */
 
 /* Definitions for the CRTDLL library (CRTDLL.DLL)
  *
@@ -6,8 +6,12 @@
  */
 
 
-#define CRTDLL_RAND_MAX         0x7fff 
 #define MB_LEN_MAX	2
+#ifndef MAX_PATHNAME_LEN 
+#define MAX_PATHNAME_LEN 260 
+#endif 
+
+#define DOSFS_GetFullName(a,b,c) strcpy(c,a) 
 
 #if defined(__GNUC__) && defined(__i386__)
 #define USING_REAL_FPU
@@ -20,6 +24,16 @@ typedef struct
     HANDLE handle;
     int      pad[7];
 } CRTDLL_FILE, *PCRTDLL_FILE;
+
+
+/* Definition of a full DOS file name */
+typedef struct
+{
+    char  long_name[MAX_PATHNAME_LEN];  /* Long pathname in Unix format */
+    char  short_name[MAX_PATHNAME_LEN]; /* Short pathname in DOS 8.3 format */
+    int   drive;
+} DOS_FULL_NAME;
+
 
 typedef VOID (*new_handler_type)(VOID);
 typedef void (*_INITTERMFUN)();
@@ -51,4 +65,8 @@ UINT CRTDLL_osversion_dll;    /* CRTDLL.245 */
 UINT CRTDLL_winmajor_dll;     /* CRTDLL.329 */
 UINT CRTDLL_winminor_dll;     /* CRTDLL.330 */
 UINT CRTDLL_winver_dll;       /* CRTDLL.331 */
+
+INT CDECL NTDLL__wcsicmp( LPCWSTR str1, LPCWSTR str2 );
+INT CDECL CRTDLL_vfprintf( CRTDLL_FILE *file, LPSTR format, va_list args );
+VOID* CDECL CRTDLL_malloc(DWORD size);
 

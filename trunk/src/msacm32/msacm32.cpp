@@ -1,4 +1,4 @@
-/* $Id: msacm32.cpp,v 1.1 1999-09-01 18:50:32 sandervl Exp $ */
+/* $Id: msacm32.cpp,v 1.2 1999-09-23 09:38:04 sandervl Exp $ */
 /*
  *      MSACM32 library
  *
@@ -10,6 +10,7 @@
 #include <winerror.h>
 #include <windef.h>
 #include <winuser.h>
+#include <misc.h>
 #include <odinwrap.h>
 #include "msacm.h"
 #include "msacmdrv.h"
@@ -73,6 +74,9 @@ MMRESULT WINAPI acmDriverAddA(
   PHACMDRIVERID phadid, HINSTANCE hinstModule,
   LPARAM lParam, DWORD dwPriority, DWORD fdwAdd)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmDriverAddA\n"));
+#endif
   PWINE_ACMLOCALDRIVER pld;
   if(!phadid)
     return MMSYSERR_INVALPARAM;
@@ -107,6 +111,9 @@ MMRESULT WINAPI acmDriverAddW(
   PHACMDRIVERID phadid, HINSTANCE hinstModule,
   LPARAM lParam, DWORD dwPriority, DWORD fdwAdd)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmDriverAddW not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return MMSYSERR_ERROR;
 }
@@ -117,6 +124,9 @@ MMRESULT WINAPI acmDriverAddW(
 MMRESULT WINAPI acmDriverClose(
   HACMDRIVER had, DWORD fdwClose)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmDriverClose\n"));
+#endif
   PWINE_ACMDRIVER p;
 
   if(fdwClose)
@@ -142,6 +152,9 @@ MMRESULT WINAPI acmDriverClose(
 MMRESULT WINAPI acmDriverDetailsA(
   HACMDRIVERID hadid, PACMDRIVERDETAILSA padd, DWORD fdwDetails)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmDriverDetailsA\n"));
+#endif
   PWINE_ACMDRIVERID p;
   MMRESULT mmr;
   BOOL bOpenTemporary;
@@ -185,6 +198,9 @@ MMRESULT WINAPI acmDriverDetailsA(
 MMRESULT WINAPI acmDriverDetailsW(
   HACMDRIVERID hadid, PACMDRIVERDETAILSW padd, DWORD fdwDetails)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmDriverDetailsW not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return MMSYSERR_ERROR;
 }
@@ -195,6 +211,9 @@ MMRESULT WINAPI acmDriverDetailsW(
 MMRESULT WINAPI acmDriverEnum(
   ACMDRIVERENUMCB fnCallback, DWORD dwInstance, DWORD fdwEnum)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmDriverEnum\n"));
+#endif
   PWINE_ACMDRIVERID p;
 
   if(!fnCallback)
@@ -223,6 +242,9 @@ MMRESULT WINAPI acmDriverEnum(
 MMRESULT WINAPI acmDriverID(
   HACMOBJ hao, PHACMDRIVERID phadid, DWORD fdwDriverID)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmDriverID\n"));
+#endif
   PWINE_ACMOBJ pao;
 
   pao = MSACM_GetObj(hao);
@@ -248,6 +270,9 @@ MMRESULT WINAPI acmDriverID(
 LRESULT WINAPI acmDriverMessage(
   HACMDRIVER had, UINT uMsg, LPARAM lParam1, LPARAM lParam2)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmDriverMessage not implemented\n"));
+#endif
   PWINE_ACMDRIVER pad = MSACM_GetDriver(had);
   if(!pad)
     return MMSYSERR_INVALPARAM;
@@ -267,6 +292,9 @@ LRESULT WINAPI acmDriverMessage(
 MMRESULT WINAPI acmDriverOpen(
   PHACMDRIVER phad, HACMDRIVERID hadid, DWORD fdwOpen)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmDriverOpen\n"));
+#endif
   PWINE_ACMDRIVERID padid;
 
   if(!phad)
@@ -315,6 +343,9 @@ MMRESULT WINAPI acmDriverOpen(
 MMRESULT WINAPI acmDriverPriority(
   HACMDRIVERID hadid, DWORD dwPriority, DWORD fdwPriority)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmDriverPriority\n"));
+#endif
   PWINE_ACMDRIVERID padid;
   CHAR szSubKey[17];
   CHAR szBuffer[256];
@@ -375,6 +406,9 @@ MMRESULT WINAPI acmDriverPriority(
 MMRESULT WINAPI acmDriverRemove(
   HACMDRIVERID hadid, DWORD fdwRemove)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmDriverRemove\n"));
+#endif
   PWINE_ACMDRIVERID padid;
 
   padid = MSACM_GetDriverID(hadid);
@@ -395,6 +429,9 @@ MMRESULT WINAPI acmDriverRemove(
 MMRESULT WINAPI acmFilterChooseA(
   PACMFILTERCHOOSEA pafltrc)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmDriverChooseA not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return MMSYSERR_ERROR;
 }
@@ -405,6 +442,9 @@ MMRESULT WINAPI acmFilterChooseA(
 MMRESULT WINAPI acmFilterChooseW(
   PACMFILTERCHOOSEW pafltrc)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmDriverChooseW not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return MMSYSERR_ERROR;
 }
@@ -415,6 +455,9 @@ MMRESULT WINAPI acmFilterChooseW(
 MMRESULT WINAPI acmFilterDetailsA(
   HACMDRIVER had, PACMFILTERDETAILSA pafd, DWORD fdwDetails)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmFilterDetailsA\n"));
+#endif
   if(fdwDetails & ~(ACM_FILTERDETAILSF_FILTER))
     return MMSYSERR_INVALFLAG;
 
@@ -435,6 +478,9 @@ MMRESULT WINAPI acmFilterDetailsA(
 MMRESULT WINAPI acmFilterDetailsW(
   HACMDRIVER had, PACMFILTERDETAILSW pafd, DWORD fdwDetails)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmFilterDetailsW not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return MMSYSERR_ERROR;
 }
@@ -446,6 +492,9 @@ MMRESULT WINAPI acmFilterEnumA(
   HACMDRIVER had, PACMFILTERDETAILSA pafd, 
   ACMFILTERENUMCBA fnCallback, DWORD dwInstance, DWORD fdwEnum)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmFilterEnumA not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return MMSYSERR_ERROR;
 }
@@ -457,6 +506,9 @@ MMRESULT WINAPI acmFilterEnumW(
   HACMDRIVER had, PACMFILTERDETAILSW pafd, 
   ACMFILTERENUMCBW fnCallback, DWORD dwInstance, DWORD fdwEnum)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmFilterEnumW not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return MMSYSERR_ERROR;
 }
@@ -467,6 +519,9 @@ MMRESULT WINAPI acmFilterEnumW(
 MMRESULT WINAPI acmFilterTagDetailsA(
   HACMDRIVER had, PACMFILTERTAGDETAILSA paftd, DWORD fdwDetails)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmFilterTagDetailsA\n"));
+#endif
   if(fdwDetails & 
      ~(ACM_FILTERTAGDETAILSF_FILTERTAG|
        ACM_FILTERTAGDETAILSF_LARGESTSIZE))
@@ -489,6 +544,9 @@ MMRESULT WINAPI acmFilterTagDetailsA(
 MMRESULT WINAPI acmFilterTagDetailsW(
   HACMDRIVER had, PACMFILTERTAGDETAILSW paftd, DWORD fdwDetails)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmFilterTagDetailsW not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return MMSYSERR_ERROR;
 }
@@ -500,6 +558,9 @@ MMRESULT WINAPI acmFilterTagEnumA(
   HACMDRIVER had, PACMFILTERTAGDETAILSA  paftd,
   ACMFILTERTAGENUMCBA fnCallback, DWORD dwInstance, DWORD fdwEnum)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmFilterTagEnumA not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return MMSYSERR_ERROR;
 }
@@ -511,6 +572,9 @@ MMRESULT WINAPI acmFilterTagEnumW(
   HACMDRIVER had, PACMFILTERTAGDETAILSW paftd,
   ACMFILTERTAGENUMCBW fnCallback, DWORD dwInstance, DWORD fdwEnum)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmFilterTagEnumW not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return MMSYSERR_ERROR;
 }
@@ -521,6 +585,9 @@ MMRESULT WINAPI acmFilterTagEnumW(
 MMRESULT WINAPI acmFormatChooseA(
   PACMFORMATCHOOSEA pafmtc)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmFormatChooseA not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return MMSYSERR_ERROR;
 }
@@ -531,6 +598,9 @@ MMRESULT WINAPI acmFormatChooseA(
 MMRESULT WINAPI acmFormatChooseW(
   PACMFORMATCHOOSEW pafmtc)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmFormatChooseW not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return MMSYSERR_ERROR;
 }
@@ -541,6 +611,9 @@ MMRESULT WINAPI acmFormatChooseW(
 MMRESULT WINAPI acmFormatDetailsA(
   HACMDRIVER had, PACMFORMATDETAILSA pafd, DWORD fdwDetails)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmFormatDetailsA\n"));
+#endif
   if(fdwDetails & ~(ACM_FORMATDETAILSF_FORMAT))
     return MMSYSERR_INVALFLAG;
 
@@ -561,6 +634,9 @@ MMRESULT WINAPI acmFormatDetailsA(
 MMRESULT WINAPI acmFormatDetailsW(
   HACMDRIVER had, PACMFORMATDETAILSW pafd, DWORD fdwDetails)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmFormatDetailsW not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return MMSYSERR_ERROR;
 }
@@ -572,6 +648,9 @@ MMRESULT WINAPI acmFormatEnumA(
   HACMDRIVER had, PACMFORMATDETAILSA pafd,
   ACMFORMATENUMCBA fnCallback, DWORD dwInstance, DWORD fdwEnum)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmFormatEnumA not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return MMSYSERR_ERROR;
 }
@@ -583,6 +662,9 @@ MMRESULT WINAPI acmFormatEnumW(
   HACMDRIVER had, PACMFORMATDETAILSW pafd,
   ACMFORMATENUMCBW fnCallback, DWORD dwInstance,  DWORD fdwEnum)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmFormatEnumW not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return MMSYSERR_ERROR;
 }
@@ -594,6 +676,9 @@ MMRESULT WINAPI acmFormatSuggest(
   HACMDRIVER had, PWAVEFORMATEX pwfxSrc, PWAVEFORMATEX pwfxDst,
   DWORD cbwfxDst, DWORD fdwSuggest)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmFormatSuggest not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return MMSYSERR_ERROR;
 }
@@ -604,6 +689,9 @@ MMRESULT WINAPI acmFormatSuggest(
 MMRESULT WINAPI acmFormatTagDetailsA(
   HACMDRIVER had, PACMFORMATTAGDETAILSA paftd, DWORD fdwDetails)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmFormatTagDetailsA\n"));
+#endif
   if(fdwDetails & 
      ~(ACM_FORMATTAGDETAILSF_FORMATTAG|ACM_FORMATTAGDETAILSF_LARGESTSIZE))
     return MMSYSERR_INVALFLAG;
@@ -625,6 +713,9 @@ MMRESULT WINAPI acmFormatTagDetailsA(
 MMRESULT WINAPI acmFormatTagDetailsW(
   HACMDRIVER had, PACMFORMATTAGDETAILSW paftd, DWORD fdwDetails)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmFormatTagDetailsW not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return MMSYSERR_ERROR;
 }
@@ -636,6 +727,9 @@ MMRESULT WINAPI acmFormatTagEnumA(
   HACMDRIVER had, PACMFORMATTAGDETAILSA paftd,
   ACMFORMATTAGENUMCBA fnCallback, DWORD dwInstance, DWORD fdwEnum)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmFormatTagEnumA not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return MMSYSERR_ERROR;
 }
@@ -647,15 +741,21 @@ MMRESULT WINAPI acmFormatTagEnumW(
   HACMDRIVER had, PACMFORMATTAGDETAILSW paftd,
   ACMFORMATTAGENUMCBW fnCallback, DWORD dwInstance, DWORD fdwEnum)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmFormatTagEnumW not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return MMSYSERR_ERROR;
 }
 
 /***********************************************************************
- *           acmGetVersion32 (MSACM32.34)
+ *           acmGetVersion (MSACM32.34)
  */
 DWORD WINAPI acmGetVersion()
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmGetVersion\n"));
+#endif
   switch(GetVersion()) 
     {
     default: 
@@ -668,7 +768,7 @@ DWORD WINAPI acmGetVersion()
 }
 
 /***********************************************************************
- *           acmMessage32 (MSACM32.35)
+ *           acmMessage (MSACM32.35)
  * FIXME
  *   No documentation found.
  */
@@ -679,6 +779,9 @@ DWORD WINAPI acmGetVersion()
 MMRESULT WINAPI acmMetrics(
   HACMOBJ hao, UINT uMetric, LPVOID  pMetric)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmMetrics\n"));
+#endif
   PWINE_ACMOBJ pao = MSACM_GetObj(hao);
   BOOL bLocal = TRUE;
 
@@ -727,6 +830,9 @@ MMRESULT WINAPI acmMetrics(
 MMRESULT WINAPI acmStreamClose(
   HACMSTREAM has, DWORD fdwClose)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmStreamClose not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return MMSYSERR_ERROR;
 }
@@ -737,6 +843,9 @@ MMRESULT WINAPI acmStreamClose(
 MMRESULT WINAPI acmStreamConvert(
   HACMSTREAM has, PACMSTREAMHEADER pash, DWORD fdwConvert)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmStreamConvert not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return MMSYSERR_ERROR;
 }
@@ -747,6 +856,9 @@ MMRESULT WINAPI acmStreamConvert(
 MMRESULT WINAPI acmStreamMessage(
   HACMSTREAM has, UINT uMsg, LPARAM lParam1, LPARAM lParam2)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmStreamMessage not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return MMSYSERR_ERROR;
 }
@@ -759,6 +871,9 @@ MMRESULT WINAPI acmStreamOpen(
   PWAVEFORMATEX pwfxDst, PWAVEFILTER pwfltr, DWORD dwCallback,
   DWORD dwInstance, DWORD fdwOpen)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmStreamOpen not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return MMSYSERR_ERROR;
 }
@@ -770,6 +885,9 @@ MMRESULT WINAPI acmStreamOpen(
 MMRESULT WINAPI acmStreamPrepareHeader(
   HACMSTREAM has, PACMSTREAMHEADER pash, DWORD fdwPrepare)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmStreamPrepareHeader not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return MMSYSERR_ERROR;
 }
@@ -780,6 +898,9 @@ MMRESULT WINAPI acmStreamPrepareHeader(
 MMRESULT WINAPI acmStreamReset(
   HACMSTREAM has, DWORD fdwReset)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmStreamReset not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return MMSYSERR_ERROR;
 }
@@ -791,6 +912,9 @@ MMRESULT WINAPI acmStreamSize(
   HACMSTREAM has, DWORD cbInput, 
   LPDWORD pdwOutputBytes, DWORD fdwSize)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmStreamSize not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return MMSYSERR_ERROR;
 }
@@ -801,6 +925,9 @@ MMRESULT WINAPI acmStreamSize(
 MMRESULT WINAPI acmStreamUnprepareHeader(
   HACMSTREAM has, PACMSTREAMHEADER pash, DWORD fdwUnprepare)
 {
+#ifdef DEBUG
+  dprintf(("MSACM32: acmStreamUnprepareHeader not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return MMSYSERR_ERROR;
 }
