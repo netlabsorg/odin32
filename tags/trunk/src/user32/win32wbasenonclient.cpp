@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.11 2000-02-16 14:28:23 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.12 2000-02-20 18:28:35 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -38,7 +38,7 @@
 #include "controls.h"
 #include <menu.h>
 
-#define DBG_LOCALLOG	DBG_win32wbasenonclient
+#define DBG_LOCALLOG    DBG_win32wbasenonclient
 #include "dbglocal.h"
 
 #define SC_ABOUTODIN            (SC_SCREENSAVE+1)
@@ -48,14 +48,17 @@
 #define KEYDATA_ALT         0x2000
 #define KEYDATA_PREVSTATE   0x4000
 
-static HBITMAP hbitmapClose = 0;
-static HBITMAP hbitmapCloseD = 0;
-static HBITMAP hbitmapMinimize = 0;
+static INT bitmapW = 16,bitmapH = 14; //CB: todo: use these values
+static HBITMAP hbitmapClose     = 0;
+static HBITMAP hbitmapCloseD    = 0;
+static HBITMAP hbitmapMinimize  = 0;
 static HBITMAP hbitmapMinimizeD = 0;
-static HBITMAP hbitmapMaximize = 0;
+static HBITMAP hbitmapMaximize  = 0;
 static HBITMAP hbitmapMaximizeD = 0;
-static HBITMAP hbitmapRestore = 0;
-static HBITMAP hbitmapRestoreD = 0;
+static HBITMAP hbitmapRestore   = 0;
+static HBITMAP hbitmapRestoreD  = 0;
+static HBITMAP hbitmapHelp      = 0;
+static HBITMAP hbitmapHelpD     = 0;
 
 BYTE lpGrayMask[] = { 0xAA, 0xA0,
                       0x55, 0x50,
@@ -605,10 +608,10 @@ VOID Win32BaseWindow::DrawFrame(HDC hdc,RECT *rect,BOOL dlgFrame,BOOL active)
   oldBrush = SelectObject(hdc,GetSysColorBrush(active ? COLOR_ACTIVEBORDER:COLOR_INACTIVEBORDER));
 
   /* Draw frame */
-  PatBlt(hdc,rect->left,   rect->top,      rect->right-rect->left, height,PATCOPY);
-  PatBlt(hdc,rect->left,   rect->top,      width,                  rect->bottom-rect->top,PATCOPY);
-  PatBlt(hdc,rect->left,   rect->bottom-1, rect->right-rect->left,-height,PATCOPY);
-  PatBlt(hdc,rect->right-1,rect->top,     -width,                  rect->bottom-rect->top,PATCOPY);
+  PatBlt(hdc,rect->left,   rect->top,      rect->right-rect->left, height,PATCOPY); //top
+  PatBlt(hdc,rect->left,   rect->top,      width,                  rect->bottom-rect->top,PATCOPY); //left
+  PatBlt(hdc,rect->left,   rect->bottom-1, rect->right-rect->left,-height,PATCOPY); //bottom
+  PatBlt(hdc,rect->right-1,rect->top,     -width,                  rect->bottom-rect->top,PATCOPY); //right
   SelectObject(hdc,oldBrush);
 
   InflateRect(rect,-width,-height);
@@ -728,7 +731,7 @@ VOID Win32BaseWindow::DrawMaxButton(HDC hdc,RECT *rect,BOOL down,BOOL bGrayed)
   hBmp = IsZoomed(Win32Hwnd) ?
           (down ? hbitmapRestoreD : hbitmapRestore ) :
           (down ? hbitmapMaximizeD: hbitmapMaximize);
-  hOldBmp=SelectObject( hdcMem, hBmp );
+  hOldBmp = SelectObject( hdcMem, hBmp );
   GetObjectA (hBmp, sizeof(BITMAP), &bmp);
 
   if (dwStyle & WS_SYSMENU)
@@ -884,6 +887,8 @@ VOID Win32BaseWindow::DrawCaption(HDC hdc,RECT *rect,BOOL active)
     hbitmapMaximizeD = LoadBitmapA(0,MAKEINTRESOURCEA(OBM_ZOOMD));
     hbitmapRestore   = LoadBitmapA(0,MAKEINTRESOURCEA(OBM_RESTORE));
     hbitmapRestoreD  = LoadBitmapA(0,MAKEINTRESOURCEA(OBM_RESTORED));
+    hbitmapHelp      = LoadBitmapA(0,MAKEINTRESOURCEA(OBM_HELP));
+    hbitmapHelpD     = LoadBitmapA(0,MAKEINTRESOURCEA(OBM_HELPD));
   }
 
   if ((dwStyle & WS_SYSMENU) && !(dwExStyle & WS_EX_TOOLWINDOW))
@@ -891,8 +896,6 @@ VOID Win32BaseWindow::DrawCaption(HDC hdc,RECT *rect,BOOL active)
     if (DrawSysButton(memDC,&r))
       r.left += GetSystemMetrics(SM_CYCAPTION) - 1;
   }
-
-  //CB: todo: integrate help button
 
   if (dwStyle & WS_SYSMENU)
   {
@@ -904,7 +907,15 @@ VOID Win32BaseWindow::DrawCaption(HDC hdc,RECT *rect,BOOL active)
     /* Draw a grayed close button if disabled and a normal one if SC_CLOSE is not there */
     DrawCloseButton(memDC,&r2,FALSE,
                     ((((state & MF_DISABLED) || (state & MF_GRAYED))) && (state != 0xFFFFFFFF)));
-    r.right -= GetSystemMetrics(SM_CYCAPTION) - 1;
+    r.right -= GetSystemMetrics(SM_CYCAPTION)-1;
+
+    if (dwExStyle & WS_EX_CONTEXTHELP)
+    {
+#if 0      //CB: todo: integrate help button
+      DrawHelpButton(memDC,&r2,FALSE);
+      r.right -= bitmapW;
+#endif
+    }
 
     if ((dwStyle & WS_MAXIMIZEBOX) || (dwStyle & WS_MINIMIZEBOX))
     {
