@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1476 2001-06-02 17:52:22 bird Exp $ */
+/* $Id: changelog,v 1.1477 2001-06-02 18:52:11 achimha Exp $ */
 
  2001-06-02: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Win32k/configure.cmd:
@@ -15,6 +15,11 @@
     - KERNEL32: o log both error and no error conditions for GetLastError
                   with default error level. Sometimes, we don't set an error
                   where we should so this logging information is important
+                o set last error to 2 (ERROR_FILE_NOT_FOUND) when using
+                  CreateFileA to open a non existing file.
+                  DosOpen returned 110 (ERROR_OPEN_FAILED) in this case.
+                  Verified with Windows 2000 SP2
+                  (makes Acrobat Distiller 5.0 startup and work!) 
 
  2001-06-02: Sander van Leeuwen <sandervl@xs4all.nl>
     - WINMM:    o Default waveout volume can be controlled by a key in odin.ini:
