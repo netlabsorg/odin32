@@ -1,3 +1,4 @@
+/* $Id: undocshell.h,v 1.2 1999-08-22 22:52:11 sandervl Exp $ */
 #ifndef __WINE_UNDOCSHELL_H
 #define __WINE_UNDOCSHELL_H
 

@@ -1,3 +1,4 @@
+/* $Id: winnet16.h,v 1.2 1999-08-22 22:52:12 sandervl Exp $ */
 /* 
  * Definitions for windows network service
  *

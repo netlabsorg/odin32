@@ -1,3 +1,4 @@
+/* $Id: obj_dragdrop.h,v 1.5 1999-08-22 22:52:07 sandervl Exp $ */
 /*
  * Defines the COM interfaces and APIs related to OLE Drag and Drop.
  */

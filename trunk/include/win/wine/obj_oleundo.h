@@ -1,3 +1,4 @@
+/* $Id: obj_oleundo.h,v 1.5 1999-08-22 22:52:09 sandervl Exp $ */
 /*
  * Defines the COM interfaces and APIs from ocidl.h which pertain to Undo/Redo
  *

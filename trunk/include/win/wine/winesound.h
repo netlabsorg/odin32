@@ -1,3 +1,4 @@
+/* $Id: winesound.h,v 1.5 1999-08-22 22:52:12 sandervl Exp $ */
 #ifndef __WINE_WINE_WINESOUND_H
 #define __WINE_WINE_WINESOUND_H
 
