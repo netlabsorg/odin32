@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.43.4.10 2000-08-30 04:45:57 bird Exp $
+# $Id: Makefile,v 1.43.4.11 2000-09-01 15:40:15 bird Exp $
 #
 # Win32k makefile.
 #
@@ -677,22 +677,4 @@ dep:
 !   if [$(ECHO) .depend doesn't exist]
 !   endif
 !endif
-
-
-################################################################################
-# Create output directories.
-################################################################################
-!if [mkdir bin > nul 2>&1]
-!endif
-!if [mkdir $(WIN32KBIN) > nul 2>&1]
-!endif
-!if [mkdir list > nul 2>&1]
-!endif
-!if [mkdir $(WIN32KLIST) > nul 2>&1]
-!endif
-!if [mkdir object > nul 2>&1]
-!endif
-!if [mkdir $(WIN32KOBJ) > nul 2>&1]
-!endif
-
 
