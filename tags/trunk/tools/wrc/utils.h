@@ -18,19 +18,20 @@ void *xmalloc(size_t);
 void *xrealloc(void *, size_t);
 char *xstrdup(const char *str);
 
-int yyerror(const char *s, ...);
-int yywarning(const char *s, ...);
-void internal_error(const char *file, int line, const char *s, ...);
-void error(const char *s, ...);
-void warning(const char *s, ...);
-void chat(const char *s, ...);
+int pperror(const char *s, ...) __attribute__((format (printf, 1, 2)));
+int ppwarning(const char *s, ...) __attribute__((format (printf, 1, 2)));
+int yyerror(const char *s, ...) __attribute__((format (printf, 1, 2)));
+int yywarning(const char *s, ...) __attribute__((format (printf, 1, 2)));
+void internal_error(const char *file, int line, const char *s, ...) __attribute__((format (printf, 3, 4)));
+void error(const char *s, ...) __attribute__((format (printf, 1, 2)));
+void warning(const char *s, ...) __attribute__((format (printf, 1, 2)));
+void chat(const char *s, ...) __attribute__((format (printf, 1, 2)));
 
 char *dup_basename(const char *name, const char *ext);
-int string_compare(const string_t *s1, const string_t *s2);
-int wstrlen(const short *s);
-short *wstrcpy(short *dst, const short *src);
-int wstricmp(const short *s1, const short *s2);
 char *dupwstr2cstr(const short *str);
 short *dupcstr2wstr(const char *str);
+int compare_name_id(name_id_t *n1, name_id_t *n2);
+string_t *convert_string(const string_t *str, enum str_e type);
+void set_language(unsigned short lang, unsigned short sublang);
 
 #endif
