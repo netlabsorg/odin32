@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.101 2003-02-13 10:34:48 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.102 2003-02-16 18:29:26 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -601,12 +601,22 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         winMsg->lParam = MAKELONG((USHORT)x, (USHORT)y);
         break;
     }
+
+    case WM_CHAR_SPECIAL_ALTGRCONTROL:
+    {
+        // special char message from the keyboard hook
+        dprintf(("PM: WM_CHAR_SPECIAL_ALTGRCONTROL"));
+        
+      // NO BREAK! FALLTHRU CASE!
+    }
       
     case WM_CHAR_SPECIAL:
     {
         // @@@PH
         // special char message from the keyboard hook
-        dprintf(("PM: WM_CHAR_SPECIAL\n"));
+        if(os2Msg->msg == WM_CHAR_SPECIAL) {
+            dprintf(("PM: WM_CHAR_SPECIAL"));
+        }
         
       // NO BREAK! FALLTHRU CASE!
     }
@@ -688,8 +698,9 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
           if (flags & KC_KEYUP)
           {
             // check for a lonesome ALT key ...
+            // SvL: Only Left Alt; AltGr generates a WM_KEYUP when released
             if ( (flags & KC_LONEKEY) &&
-                ((winMsg->wParam == VK_LMENU_W) || (winMsg->wParam == VK_RMENU_W)) )
+                (winMsg->wParam == VK_LMENU_W) )
             {
               winMsg->message = WINWM_SYSKEYUP;
               // held ALT-key when current key is released
@@ -750,7 +761,10 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             }
           }
           // if right alt is down, then we need to set the alt down bit too
-          if (WinGetKeyState(HWND_DESKTOP, VK_ALTGRAF) & 0x8000) {
+          // except for the fake Ctrl WM_CHAR sent for AltGr emulation
+          if (os2Msg->msg != WM_CHAR_SPECIAL_ALTGRCONTROL && 
+              (WinGetKeyState(HWND_DESKTOP, VK_ALTGRAF) & 0x8000)) 
+          {
               winMsg->lParam |= WIN_KEY_ALTHELD;            
           }
         }
@@ -780,6 +794,43 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             winMsg->lParam |= WIN_KEY_ALTHELD;
           }
         }
+#if 0
+        //
+        // AltGr needs special handling
+        //
+        // AltGr -> WM_KEYDOWN (VK_CONTROL), WM_KEYDOWN (VK_MENU) 
+        //          WM_SYSKEYUP (VK_CONTROL)
+        //          WM_KEYUP (VK_MENU)
+        //
+        // Ctrl+AltGr -> WM_KEYDOWN (VK_CONTROL), WM_KEYUP (VK_CONTROL) 
+        //               WM_KEYDOWN (VK_MENU) 
+        //               WM_KEYUP (VK_MENU)
+        //               WM_KEYUP (VK_CONTROL) 
+        //
+        // AltGr+Ctrl -> WM_KEYDOWN (VK_CONTROL), WM_KEYDOWN (VK_MENU) 
+        //               WM_KEYDOWN (VK_CONTROL) 
+        //               WM_SYSKEYUP (VK_CONTROL) 
+        //               WM_SYSKEYUP (VK_CONTROL) 
+        //               WM_KEYUP (VK_MENU)
+        //
+        // AltGr down -> if Ctrl down, send WM_KEYUP (VK_CONTROL)
+        //               endif
+        //               Send WM_KEYDOWN (VK_CONTROL)
+        //               Send WM_KEYDOWN (VK_MENU)
+        // AltGr up ->   if !(Ctrl down before AltGr was pressed || Ctrl up)
+        //                   Send WM_SYSKEYUP (VK_CONTROL)
+        //               endif
+        //               Send WM_KEYDOWN (VK_MENU)
+        // 
+        if(winMsg->wParam == VK_MENU_W && (winMsg->lParam & WIN_KEY_EXTENDED)) 
+        {//AltGr
+            if(GetKeyState(VK_CONTROL_W) & 0x8000) 
+            {//Ctrl key pressed, send WM_KEYUP
+            
+            }
+        }
+#endif
+
         //After SetFocus(0), all keystrokes are converted in WM_SYS*
         if(fIgnoreKeystrokes) {
             if(winMsg->message == WINWM_KEYDOWN) {
