@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.228 2004-02-27 14:38:03 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.229 2004-03-12 18:19:50 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -2346,6 +2346,9 @@ void FrameSetFocus(HWND hwnd)
         WinSetWindowULong(hwnd, QWL_HWNDFOCUSSAVE, hwndFocusSave);
     }
     dprintf(("FrameSetFocus: hwndFocusSave %x %x", OS2ToWin32Handle(hwndFocusSave), hwndFocusSave));
+    dprintf(("FrameSetFocus: cur focus=%x (%x) cur active=%x (%x)\n",
+             WinQueryFocus(HWND_DESKTOP),        OS2ToWin32Handle(WinQueryFocus(HWND_DESKTOP)),
+             WinQueryActiveWindow(HWND_DESKTOP), OS2ToWin32Handle(WinQueryActiveWindow(HWND_DESKTOP))));
     WinSetFocus(HWND_DESKTOP, hwndFocusSave);
 
     ULONG ulFrameFlags  = WinQueryWindowUShort(hwnd, QWS_FLAGS);
@@ -2401,7 +2404,7 @@ void RecalcVisibleRegion(Win32BaseWindow *win32wnd)
 
         if(win32wnd->queryOpenDCs(hdcWindow, MAX_OPENDCS, &nrdcs))
         {
-            for(int i=0;i<nrdcs;i++) 
+            for(int i=0;i<nrdcs;i++)
             {
                 dprintf(("Recalc visible region of DC %x for window %x", hdcWindow[i], win32wnd->getWindowHandle()));
 
