@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.21 2000-02-09 23:40:54 bird Exp $
+# $Id: Makefile,v 1.22 2000-02-10 01:21:34 bird Exp $
 #
 # Copyright 1998-1999 knut st. osmundsen
 #
@@ -262,13 +262,12 @@ win32k.vpj:
 # Cleanup
 ################################################################################
 clean:
-   @$(ECHO) cleaning....
-   @$(ECHO) #do nmake depend > .depend
-   $(RM) $(NAME).sys *.lib *.obj *.exe *.sym *.map
-   $(RM) $(WIN32KOBJ)\*.obj $(WIN32KOBJ)\*.pe_obj
-   $(RM) $(WIN32KLIST)\*.s $(WIN32KLIST)\*.asm $(WIN32KLIST)\*.map \
-   $(RM) $(WIN32KLIST)\*.lst
-   $(RM) $(PDWIN32_BIN)\$(NAME).sys
+    @$(ECHO) cleaning....
+    $(RM) $(NAME).sys *.lib *.obj *.exe *.sym *.map \
+        $(WIN32KOBJ)\*.obj $(WIN32KOBJ)\*.pe_obj \
+        $(WIN32KLIST)\*.s $(WIN32KLIST)\*.asm $(WIN32KLIST)\*.map \
+        $(WIN32KLIST)\*.lst \
+        $(PDWIN32_BIN)\$(NAME).sys
 
 
 ################################################################################
@@ -285,5 +284,5 @@ object\devfirst.obj:            dev32\devfirst.asm    include\devsegdf.inc
 object\devlast.obj:             dev32\devlast.asm     include\devsegdf.inc
 
 !ifndef NODEP
-!include .dep
+!include .depend
 !endif
