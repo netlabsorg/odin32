@@ -1,4 +1,4 @@
-/* $Id: winimgres.cpp,v 1.39 2000-06-16 21:23:40 sandervl Exp $ */
+/* $Id: winimgres.cpp,v 1.40 2000-06-17 09:03:37 sandervl Exp $ */
 
 /*
  * Win32 PE Image class (resource methods)
@@ -64,7 +64,7 @@ PIMAGE_RESOURCE_DATA_ENTRY
   if (pResDir == NULL)
     return NULL;
 
-  if(HIWORD(id)) {
+  if(HIWORD(id) && id != IDLANG_GETFIRST) {
     	char *lpszName = (char *)id;
 	//"#102" really means numeric id 102
 	if(lpszName[0] == '#') {
@@ -447,7 +447,7 @@ BOOL Win32ImageBase::getVersionStruct(char *verstruct, ULONG bufLength)
         SetLastError(ERROR_INVALID_PARAMETER);
         return FALSE;
     }
-    pData = getPEResourceEntry(ID_GETFIRST, NTRT_VERSION, IDLANG_GETFIRST, &error);
+    pData = getPEResourceEntry(IDLANG_GETFIRST, NTRT_VERSION, IDLANG_GETFIRST, &error);
     if(pData == NULL) {
         dprintf(("Win32PeLdrImage::getVersionStruct: couldn't find version resource!"));
         SetLastError(ERROR_RESOURCE_DATA_NOT_FOUND);

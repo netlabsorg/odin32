@@ -1,4 +1,4 @@
-/* $Id: winimagebase.h,v 1.11 2000-06-08 18:08:57 sandervl Exp $ */
+/* $Id: winimagebase.h,v 1.12 2000-06-17 09:03:36 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -22,7 +22,6 @@
 #endif
 
 #define LANG_GETFIRST           0x80000000
-#define ID_GETFIRST             LANG_GETFIRST
 #define IDLANG_GETFIRST         LANG_GETFIRST
 
 #ifndef ENUMRESNAMEPROC
