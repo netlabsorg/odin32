@@ -1,4 +1,4 @@
-/* $Id: waveinoutbase.cpp,v 1.4 2002-04-07 14:36:31 sandervl Exp $ */
+/* $Id: waveinoutbase.cpp,v 1.5 2003-01-14 19:38:38 sandervl Exp $ */
 
 /*
  * Wave playback class (DART)
@@ -34,6 +34,7 @@
 #define DBG_LOCALLOG    DBG_waveinoutbase
 #include "dbglocal.h"
 
+VMutex wavemutex;
 
 /******************************************************************************/
 /******************************************************************************/
@@ -54,20 +55,20 @@ WaveInOut::WaveInOut(LPWAVEFORMATEX pwfx, ULONG fdwOpen, ULONG nCallback, ULONG 
 
     State    = STATE_STOPPED;
 
-    wmutex.enter();
+    wavemutex.enter();
 
-    if(wave == NULL) {
-        wave = this;
+    if(head == NULL) {
+        head = this;
     }
     else {
-        WaveInOut *dwave = wave;
+        WaveInOut *dwave = head;
 
         while(dwave->next) {
             dwave = dwave->next;
         }
         dwave->next = this;
     }
-    wmutex.leave();
+    wavemutex.leave();
 
     this->fdwOpen = fdwOpen;
     dwCallback    = nCallback;
@@ -77,22 +78,22 @@ WaveInOut::WaveInOut(LPWAVEFORMATEX pwfx, ULONG fdwOpen, ULONG nCallback, ULONG 
 /******************************************************************************/
 WaveInOut::~WaveInOut()
 {
-    wmutex.enter();
+    wavemutex.enter();
 
     State = STATE_STOPPED;
 
-    if(wave == this) {
-        wave = this->next;
+    if(head == this) {
+        head = this->next;
     }
     else {
-        WaveInOut *dwave = wave;
+        WaveInOut *dwave = head;
 
         while(dwave->next != this) {
             dwave = dwave->next;
         }
         dwave->next = this->next;
     }
-    wmutex.leave();
+    wavemutex.leave();
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -145,22 +146,39 @@ void WaveInOut::callback(UINT uMessage, DWORD dw1, DWORD dw2)
     dprintf2(("WINMM:WaveInOut::callback returned"));
 }
 /******************************************************************************/
+//Delete all active wave objects
+/******************************************************************************/
+void WaveInOut::shutdown()
+{
+    dprintf(("WaveInOut::shutdown"));
+    wavemutex.enter();
+    while(head) {
+        delete head;
+    }
+    wavemutex.leave();
+    dprintf(("WaveInOut::shutdown end"));
+}
+/******************************************************************************/
 /******************************************************************************/
 BOOL WaveInOut::find(WaveInOut *dwave)
 {
- WaveInOut *curwave = wave;
+    wavemutex.enter();
+
+    WaveInOut *curwave = head;
 
     while(curwave) {
         if(dwave == curwave) {
+            wavemutex.leave();
             return(TRUE);
         }
         curwave = curwave->next;
     }
+    wavemutex.leave();
 
     dprintf2(("WINMM:WaveInOut not found!\n"));
     return(FALSE);
 }
 /******************************************************************************/
 /******************************************************************************/
-WaveInOut *WaveInOut::wave = NULL;
+WaveInOut *WaveInOut::head = NULL;
 

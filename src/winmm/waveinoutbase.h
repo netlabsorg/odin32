@@ -1,4 +1,4 @@
-/* $Id: waveinoutbase.h,v 1.2 2002-06-05 11:05:56 sandervl Exp $ */
+/* $Id: waveinoutbase.h,v 1.3 2003-01-14 19:38:38 sandervl Exp $ */
 
 /*
  * Wave playback & recording base class
@@ -35,6 +35,7 @@ public:
               ULONG    getAvgBytesPerSecond()   { return (BitsPerSample/8) * nChannels * SampleRate; };
 
   static BOOL find(WaveInOut *wave);
+  static void shutdown();
 
 protected:
 
@@ -56,13 +57,12 @@ protected:
     WAVEHDR    *wavehdr,
                *curhdr;
 
-    VMutex      wmutex;
-                                          // Linked list management
-                WaveInOut *next;          // Next wave class
-    static      WaveInOut *wave;          // List of wave classes
+         VMutex wmutex;
 
 private:
-
+                                          // Linked list management
+                WaveInOut *next;          // Next wave class
+    static      WaveInOut *head;          // List of wave classes 
 };
 
 #endif
