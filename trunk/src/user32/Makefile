@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.73 2000-07-19 19:05:24 sandervl Exp $
+# $Id: Makefile,v 1.74 2000-11-04 16:28:24 sandervl Exp $
 
 #
 # Odin32 API
@@ -20,9 +20,13 @@ PDWIN32_TOOLS   = ..\..\tools\bin
 # Flag overloads and local macros.
 CLEANEXTRAS = user32rsrc.asm
 
+CFLAGS   = $(CFLAGS) -DINVERT
+CXXFLAGS = $(CXXFLAGS) -DINVERT
 
 # Object files. All objects should be prefixed with $(OBJDIR)!
 OBJS = \
+$(OBJDIR)\dc.obj \
+$(OBJDIR)\dcrgn.obj \
 $(OBJDIR)\user32.obj \
 $(OBJDIR)\loadres.obj \
 $(OBJDIR)\dde.obj \
@@ -77,8 +81,6 @@ $(OBJDIR)\winaccel.obj \
 $(OBJDIR)\win32wbasepos.obj \
 $(OBJDIR)\win32wbaseprop.obj \
 $(OBJDIR)\oslibres.obj \
-$(OBJDIR)\dc.obj \
-$(OBJDIR)\dcrgn.obj \
 $(OBJDIR)\timer.obj \
 $(OBJDIR)\dbglocal.obj \
 $(OBJDIR)\caret.obj \
@@ -118,8 +120,8 @@ $(OBJDIR)\$(TARGET).lrf: makefile
 /OUT:$(OBJDIR)\$(TARGET).dll
 /MAP:$(OBJDIR)\$(TARGET).map
 $(OBJS)
-$(PDWIN32_LIB)/pmwinx.lib
 $(PDWIN32_LIB)/gdi32.lib
+$(PDWIN32_LIB)/pmwinx.lib
 $(PDWIN32_LIB)/kernel32.lib
 $(PDWIN32_LIB)/libuls.lib
 $(PDWIN32_LIB)/$(ODINCRT).lib
