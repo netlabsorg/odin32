@@ -7,6 +7,7 @@ require "Odin32DBhelpers.php3";
  */
 $sCVSROOT = ".";
 $sCVSROOT = "d:/odin32/cvs/cvsroot";
+$sCVSROOT = "g:/cvsroot";
 
 
 /**
@@ -95,7 +96,9 @@ class CVSFile
         /*
          * Parse the file.
          */
+        $Timer = Odin32DBTimerStart("CVS Parse");
         $this->fOk = $this->ParseFile2($hFile, 0);// $fNoDeltas);
+        Odin32DBTimerStop($Timer);
 
         fclose($hFile);
 
@@ -288,7 +291,7 @@ class CVSFile
              */
             if ($sRev == "")
             {   /* Base keys */
-                if (sizeof($this->aaKeys) <= 0 //sanity check! head must come first and have a value!
+                if (sizeof($this->aasKeys) <= 0 //sanity check! head must come first and have a value!
                     && ($sKey != "head" || sizeof($asValue) <= 0 || $asValue[0] == ""))
                 {
                     $this->sError = "Invalid file format.";
@@ -497,12 +500,12 @@ class CVSFile
              */
             if ($sRev == "")
             {   /* Base keys */
-                if (sizeof($this->aaKeys) <= 0 //sanity check! head must come first and have a value!
+                if (sizeof($this->aasKeys) <= 0 //sanity check! head must come first and have a value!
                     && ($sKey != "head" || sizeof($asValue) <= 0 || $asValue[0] == ""))
                 {
                     $this->sError = "Invalid file format.";
                     fclose($hFile);
-                    return 1;
+                    return 0;
                 }
                 $this->aasKeys[$sKey] = $asValue;
             }
@@ -610,7 +613,7 @@ class CVSFile
         /*
          * Initiate the color encoder.
          */
-        switch ($this->sExt)
+        switch (strtolower($this->sExt))
         {
             case 'c':
             case 'cpp':
@@ -620,7 +623,27 @@ class CVSFile
                 C_ColorInit($aVariables);
                 $iColorEncoder = 1;
                 break;
+
+            case 'asm':
+            case 'inc':
+            case 's':
+                ASM_ColorInit($aVariables);
+                $iColorEncoder = 2;
+                break;
+
+            case 'mk':
+            case 'mak':
+                Make_ColorInit($aVariables);
+                $iColorEncoder = 3;
+                break;
+
             default:
+                if (strtolower($this->sName) == "makefile");
+                {
+                    Make_ColorInit($aVariables);
+                    $iColorEncoder = 3;
+                    break;
+                }
                 $iColorEncoder = 0;
         }
 
@@ -629,6 +652,7 @@ class CVSFile
         /*
          * Write it!
          */
+        $Timer = Odin32DBTimerStart("Write timer");
         echo "<table><tr><td bgcolor=#020286><pre><font size=-0 face=\"System VIO, System Monospaced\" color=#02FEFE>\n";
 
         for ($cLines = sizeof($this->aasDeltas[$sRevision]), $iLine = 0;
@@ -638,21 +662,27 @@ class CVSFile
             /*
              * Preprocessing... Color coding
              */
+            echo "<a name=$iLine>";
             switch ($iColorEncoder)
             {
                 case 1:
-                    echo "<a name=$iLine>";
-                    echo  C_ColorEncode(htmlspecialchars($this->aasDeltas[$sRevision][$iLine]), $aVariables);
-                    //C_ColorEncode2(htmlspecialchars($this->aasDeltas[$sRevision][$iLine]), $aVariables);
-                    echo "</a>";
+                    echo  str_replace("\t", "    ", C_ColorEncode(htmlspecialchars($this->aasDeltas[$sRevision][$iLine]), $aVariables));
                     break;
-
+                case 2:
+                    echo  str_replace("\t", "    ", ASM_ColorEncode(htmlspecialchars($this->aasDeltas[$sRevision][$iLine]), $aVariables));
+                    break;
+                case 3:
+                    echo  str_replace("\t", "    ", Make_ColorEncode(htmlspecialchars($this->aasDeltas[$sRevision][$iLine]), $aVariables));
+                    break;
                 default:
-                    echo  "<a name=$iLine>",htmlspecialchars($this->aasDeltas[$sRevision][$iLine]),"</a>";
+                    echo  htmlspecialchars($this->aasDeltas[$sRevision][$iLine]);
             }
+            echo "</a>";
         }
 
-        echo "</pre></td></tr></table>\n";
+        echo "                                                                               \n", //80-columns line
+             "</pre></td></tr></table>\n";
+        Odin32DBTimerStop($Timer);
 
         return 1;
     }
@@ -791,6 +821,33 @@ class CVSFile
        return "$iSeconds seconds";
     }
 
+    /**
+     * Get the workfile extention.
+     * @returns     The workfile extention (without '.').
+     */
+    function getWorkfileExt()
+    {
+        return $this->sExt;
+    }
+
+
+    /**
+     * Get the workfile extention.
+     * @returns     The workfile name (with extention)
+     */
+    function getWorkfileName()
+    {
+        return $this->sName;
+    }
+
+    /**
+     * Is this a binary file? We'll simply check for the expand keyword.
+     * @returns     True (1) if binary, false (0) if not.
+     */
+    function isBinary()
+    {
+        return isset($this->aasKeys["expand"]);
+    }
 }
 
 
@@ -861,11 +918,46 @@ function ListDirectory($sDir, $iSortColumn)
     /*
      * Get CVS data.
      */
+    $aExtIcons = array(
+            "c"     => "c.gif",
+            "cpp"   => "c.gif",
+            "cxx"   => "c.gif",
+            "h"     => "c.gif",
+            "hpp"   => "c.gif",
+            "c"     => "c.gif",
+            /* these are caught by the isBinary test.
+            "exe"   => "binary.gif",
+            "dll"   => "binary.gif",
+            "lib"   => "binary.gif",
+            "obj"   => "binary.gif",
+            "a"     => "binary.gif",
+            */
+            "bmp"   => "image1.gif",
+            "gif"   => "image1.gif",
+            "ico"   => "image1.gif",
+            "jpg"   => "image1.gif",
+            "pal"   => "image1.gif",
+            "png"   => "image1.gif",
+            "asm"   => "text.gif",
+            "def"   => "text.gif",
+            "doc"   => "text.gif",
+            "inc"   => "text.gif",
+            "lib"   => "text.gif",
+            "mak"   => "text.gif",
+            "mk"    => "text.gif",
+            "txt"   => "text.gif",
+            ""      => "text.gif",
+            "bat"   => "script.gif",
+            "cmd"   => "script.gif",
+            "perl"  => "script.gif",
+            "sh"    => "script.gif"
+            );
     $cvstimer = Odin32DBTimerStart("Get CVS Data");
     $asRev      = array();
     $asAge      = array();
     $asAuthor   = array();
     $asLog      = array();
+    $asIcon     = array();
     for ($i = 0; list($sKey, $sFile) = each($asFiles); $i++)
     {
         $obj = new CVSFile($sDir.'/'.$sFile, 1);
@@ -887,6 +979,9 @@ function ListDirectory($sDir, $iSortColumn)
             }
             $asLog[$sFile] = $sLog;
             $sLog = "";
+            $asIcon[$sFile] = isset($aExtIcons[strtolower($obj->getWorkfileExt())])
+                              ? $aExtIcons[strtolower($obj->getWorkfileExt())] :
+                              ($obj->isBinary() ? "binary.gif" : "unknown.gif");
         }
         else
             $asLog[$sFile]    = $obj->sError;
@@ -912,7 +1007,7 @@ function ListDirectory($sDir, $iSortColumn)
     /*
      * Present data
      */
-    $aColumnColors = array("#cccccc","#cccccc","#cccccc","#cccccc", "#88ff88","#cccccc","#cccccc","#cccccc","#cccccc");
+    $aColumnColors = array("#d0dce0","#d0dce0","#d0dce0","#d0dce0", "#d0dcff","#d0dce0","#d0dce0","#d0dce0","#d0dce0");
     echo "<table border=0 width=100% cellspacing=1 cellpadding=2>\n",
          "  <hr NOSHADE>\n",
          "    <th bgcolor=",$aColumnColors[4+0-$iSortColumn],"><font size=-1><b><a href=cvs.phtml?sDir=$sDir&iSortColumn=0>Filename</a></b></font></th>\n",
@@ -925,14 +1020,14 @@ function ListDirectory($sDir, $iSortColumn)
     /* directories */
     if ($sDir != "." && $sDir != "")
     {
-        if (($j = strrpos($sDir, '/')) > 0)
-            $sParentDir = substr($sDir, 0, $j - 1);
+        if (($j = strrpos($sDir, "/")) > 0)
+            $sParentDir = substr($sDir, 0, $j);
         else
-            $sParentDir = "";
-        $sBgColor = ($i++ % 2) ? "" : " bgcolor=#ccccee";
+            $sParentDir = ".";
+        $sBgColor = ($i++ % 2) ? "" : " bgcolor=#f0f0f0";
         echo "<tr>\n",
              " <td", $sBgColor , ">",
-               "<font size=-1><a href=\"cvs.phtml?sDir=",$sParentDir,"\"><img src=\"cvsicons/parent.gif\" border=0> Parent Directory</a></font></td>\n",
+               "<font size=-1><a href=\"cvs.phtml?sDir=",$sParentDir,"\"><img src=\"/icons/back.gif\" border=0> Parent Directory</a></font></td>\n",
              " <td$sBgColor>&nbsp;</td>\n",
              " <td$sBgColor>&nbsp;</td>\n",
              " <td$sBgColor>&nbsp;</td>\n",
@@ -941,9 +1036,9 @@ function ListDirectory($sDir, $iSortColumn)
     }
     while (list($sKey, $sVal) = each($asSubDirs))
     {
-        $sBgColor = ($i++ % 2) ? "" : " bgcolor=#ccccee";
+        $sBgColor = ($i++ % 2) ? "" : " bgcolor=#f0f0f0";
         echo "<tr>\n",
-             " <td$sBgColor><font size=-1><a href=\"cvs.phtml?sDir=$sDir/$sVal\"><img src=\"cvsicons/dir.gif\" border=0> $sVal</a></font></td>\n",
+             " <td$sBgColor><font size=-1><a href=\"cvs.phtml?sDir=$sDir/$sVal\"><img src=\"/icons/dir.gif\" border=0> $sVal</a></font></td>\n",
              " <td$sBgColor>&nbsp;</td>\n",
              " <td$sBgColor>&nbsp;</td>\n",
              " <td$sBgColor>&nbsp;</td>\n",
@@ -954,16 +1049,17 @@ function ListDirectory($sDir, $iSortColumn)
     /* files */
     while (list($sKey, $sVal) = each($asSorted))
     {
-        $sBgColor = ($i++ % 2) ? "" : " bgcolor=#ccccee";
+        $sBgColor = ($i++ % 2) ? "" : " bgcolor=#f0f0f0";
         $sRev   = isset($asRev[$sKey])  ? $asRev[$sKey]     : "<i> error </i>";
         $sAge   = isset($asAge[$sKey])  ? $asAge[$sKey]     : "<i> error </i>";
         $sAuthor= isset($asAuthor[$sKey])?$asAuthor[$sKey]  : "<i> error </i>";
-        $sLog   = isset($asLog[$sKey])  ?$asLog[$sKey]      : "<i> error </i>";
+        $sLog   = isset($asLog[$sKey])  ? $asLog[$sKey]     : "<i> error </i>";
+        $sIcon  = isset($asIcon[$sKey]) ? $asIcon[$sKey]    : "<i> error </i>";
         echo "<tr>\n",
-             " <td$sBgColor><font size=-1><a href=\"cvs.phtml?sFile=$sDir/$sKey\"><img src=\"cvsicons/file.gif\" border=0>",substr($sKey, 0, -2),"</a></font></td>\n",
-             " <td$sBgColor><font size=-2><a href=\"cvs.phtml?sFile=$sDir/$sKey?sRev=$sRev\">$sRev</a></font></td>\n",
-             " <td$sBgColor><font size=-2>$sAge</font></td>\n",
-             " <td$sBgColor><font size=-2>$sAuthor</font></td>\n",
+             " <td$sBgColor><font size=-1><a href=\"cvs.phtml?sFile=$sDir/$sKey\"><img src=\"/icons/$sIcon\" border=0>",substr($sKey, 0, -2),"</a></font></td>\n",
+             " <td$sBgColor><font size=-1><a href=\"cvs.phtml?sFile=$sDir/$sKey?sRev=$sRev\">$sRev</a></font></td>\n",
+             " <td$sBgColor><font size=-1>$sAge</font></td>\n",
+             " <td$sBgColor><font size=-1>$sAuthor</font></td>\n",
              " <td$sBgColor><font size=-2>$sLog</font></td>\n",
              "</tr>\n";
     }
@@ -1252,7 +1348,7 @@ function C_ColorEncode($sLine, &$aVariables)
         if ($fFirstNonBlank && $ch == "#")
         {
             $j = $i + 1;
-            while ($j < $cchLine && ($sLine[$j] == ' ' || $sLine[$j] == '\t'))
+            while ($j < $cchLine && ($sLine[$j] == " " || $sLine[$j] == "\t"))
                 $j++;
             $j += C_WordLen($sLine, $cchLine, $j);
             $sRet .= "<font color=#CECECE>" . substr($sLine, $i, $j - $i) . "</font>";
@@ -1264,7 +1360,7 @@ function C_ColorEncode($sLine, &$aVariables)
         /*
          * If non-blank, lets check if we're at the start of a word...
          */
-        $fBlank = ($ch == ' ' || $ch == '\t'); //TODO more "blanks"?
+        $fBlank = ($ch == " " || $ch == "\t" || $ch == "\n");
         if ($fFirstNonBlank)    $fFirstNonBlank = $fBlank;
         $cchWord = !$fBlank ? C_WordLen($sLine, $cchLine, $i) : 0;
 
@@ -1273,7 +1369,7 @@ function C_ColorEncode($sLine, &$aVariables)
             /*
              * Check for keyword or number.
              */
-            if ($cchWord > 0 && (isset($aC_Keywords[substr($sLine, $i, $cchWord)]) || ($ch >= '0' && $ch <= '9')))
+            if (isset($aC_Keywords[substr($sLine, $i, $cchWord)]) || ($ch >= '0' && $ch <= '9'))
                 $sRet .= "<font color=#FF0202>" . substr($sLine, $i, $cchWord) . "</font>";
 
             /*
@@ -1431,7 +1527,7 @@ function C_ColorEncode2($sLine, &$aVariables)
         if ($fFirstNonBlank && $ch == "#")
         {
             $j = $i + 1;
-            while ($j < $cchLine && ($sLine[$j] == ' ' || $sLine[$j] == '\t'))
+            while ($j < $cchLine && ($sLine[$j] == ' ' || $sLine[$j] == "\t"))
                 $j++;
             $j += C_WordLen($sLine, $cchLine, $j);
             echo "<font color=#CECECE>" . substr($sLine, $i, $j - $i) . "</font>";
@@ -1443,7 +1539,7 @@ function C_ColorEncode2($sLine, &$aVariables)
         /*
          * If non-blank, lets check if we're at the start of a word...
          */
-        $fBlank = ($ch == ' ' || $ch == '\t'); //TODO more "blanks"?
+        $fBlank = ($ch == ' ' || $ch == "\t"); //TODO more "blanks"?
         if ($fFirstNonBlank)    $fFirstNonBlank = $fBlank;
         $cchWord = !$fBlank ? C_WordLen($sLine, $cchLine, $i) : 0;
 
@@ -1452,7 +1548,7 @@ function C_ColorEncode2($sLine, &$aVariables)
             /*
              * Check for keyword or number.
              */
-            if ($cchWord > 0 && (isset($aC_Keywords[substr($sLine, $i, $cchWord)]) || ($ch >= '0' && $ch <= '9')))
+            if (isset($aC_Keywords[substr($sLine, $i, $cchWord)]) || ($ch >= '0' && $ch <= '9'))
                 echo "<font color=#FF0202>" . substr($sLine, $i, $cchWord) . "</font>";
 
             /*
@@ -1471,17 +1567,6 @@ function C_ColorEncode2($sLine, &$aVariables)
         $cchWord = 1;
         if ($ch == '&')
         {
-            /*
-            while ($cchWord < 8 && $sLine[$i+$cchWord] != ';' &&
-                    (   ($sLine[$i+$cchWord] >= 'a' && $sLine[$i+$cchWord] <= 'z')
-                     || ($sLine[$i+$cchWord] >= 'A' && $sLine[$i+$cchWord] <= 'Z')
-                    )
-                   )
-                   $cchWord++;
-
-            if ($sLine[$i + $cchWord++] != ';')
-                $cchWord = 1;
-            */
             if (substr($sLine, $i, 5) == "&amp;")
                 $cchWord = 5;
             else if (substr($sLine, $i, 4) == "&gt;" || substr($sLine, $i, 4) == "&lt;")
@@ -1552,6 +1637,892 @@ function C_WordLen($sLine, $cchLine, $i)
         $ch = @$sLine[++$i];
     return $i - $j;
 }
+
+
+/*
+ *
+ */
+
+/*
+ * ASM color encoding.
+ */
+$aASM_Keywords = array(
+    "aaa" => 1,
+    "aad" => 1,
+    "aam" => 1,
+    "aas" => 1,
+    "adc" => 1,
+    "add" => 1,
+    "and" => 1,
+    "arpl" => 1,
+    "bound" => 1,
+    "bsf" => 1,
+    "bsr" => 1,
+    "bswap" => 1,
+    "bt" => 1,
+    "btc" => 1,
+    "btr" => 1,
+    "bts" => 1,
+    "call" => 1,
+    "cbw" => 1,
+    "cdq" => 1,
+    "clc" => 1,
+    "cld" => 1,
+    "cli" => 1,
+    "clts" => 1,
+    "cmc" => 1,
+    "cmp" => 1,
+    "cmps" => 1,
+    "cmpxchg" => 1,
+    "cwd" => 1,
+    "cwde" => 1,
+    "daa" => 1,
+    "das" => 1,
+    "dec" => 1,
+    "div" => 1,
+    "enter" => 1,
+    "hlt" => 1,
+    "idiv" => 1,
+    "imul" => 1,
+    "in" => 1,
+    "inc" => 1,
+    "ins" => 1,
+    "int" => 1,
+    "into" => 1,
+    "invd" => 1,
+    "invlpg" => 1,
+    "iret" => 1,
+    "ja" => 1,
+    "jae" => 1,
+    "jb" => 1,
+    "jbe" => 1,
+    "jc" => 1,
+    "jcxz" => 1,
+    "jecxz" => 1,
+    "je" => 1,
+    "jg" => 1,
+    "jge" => 1,
+    "jl" => 1,
+    "jle" => 1,
+    "jna" => 1,
+    "jnae" => 1,
+    "jnb" => 1,
+    "jnbe" => 1,
+    "jnc" => 1,
+    "jne" => 1,
+    "jng" => 1,
+    "jnge" => 1,
+    "jnl" => 1,
+    "jnle" => 1,
+    "jno" => 1,
+    "jnp" => 1,
+    "jns" => 1,
+    "jnz" => 1,
+    "jo" => 1,
+    "jp" => 1,
+    "jpe" => 1,
+    "jpo" => 1,
+    "js" => 1,
+    "jz" => 1,
+    "jmp" => 1,
+    "lahf" => 1,
+    "lar" => 1,
+    "lea" => 1,
+    "leave" => 1,
+    "lgdt" => 1,
+    "lidt" => 1,
+    "lldt" => 1,
+    "lmsw" => 1,
+    "lock" => 1,
+    "lods" => 1,
+    "loop" => 1,
+    "loopz" => 1,
+    "loopnz" => 1,
+    "loope" => 1,
+    "loopne" => 1,
+    "lds" => 1,
+    "les" => 1,
+    "lfs" => 1,
+    "lgs" => 1,
+    "lss" => 1,
+    "lsl" => 1,
+    "ltr" => 1,
+    "mov" => 1,
+    "movs" => 1,
+    "movsx" => 1,
+    "movzx" => 1,
+    "mul" => 1,
+    "neg" => 1,
+    "nop" => 1,
+    "not" => 1,
+    "or" => 1,
+    "out" => 1,
+    "outs" => 1,
+    "pop" => 1,
+    "popa" => 1,
+    "popad" => 1,
+    "popf" => 1,
+    "popfd" => 1,
+    "push" => 1,
+    "pusha" => 1,
+    "pushad" => 1,
+    "pushf" => 1,
+    "pushfd" => 1,
+    "rcl" => 1,
+    "rcr" => 1,
+    "rep" => 1,
+    "ret" => 1,
+    "retf" => 1,
+    "rol" => 1,
+    "ror" => 1,
+    "sahf" => 1,
+    "sal" => 1,
+    "sar" => 1,
+    "sbb" => 1,
+    "scas" => 1,
+    "seta" => 1,
+    "setae" => 1,
+    "setb" => 1,
+    "setbe" => 1,
+    "setc" => 1,
+    "sete" => 1,
+    "setg" => 1,
+    "setge" => 1,
+    "setl" => 1,
+    "setle" => 1,
+    "setna" => 1,
+    "setnae" => 1,
+    "setnb" => 1,
+    "setnbe" => 1,
+    "setnc" => 1,
+    "setne" => 1,
+    "setng" => 1,
+    "setnge" => 1,
+    "setnl" => 1,
+    "setnle" => 1,
+    "setno" => 1,
+    "setnp" => 1,
+    "setns" => 1,
+    "setnz" => 1,
+    "seto" => 1,
+    "setp" => 1,
+    "setpe" => 1,
+    "setpo" => 1,
+    "sets" => 1,
+    "setz" => 1,
+    "sgdt" => 1,
+    "shl" => 1,
+    "shld" => 1,
+    "shr" => 1,
+    "shrd" => 1,
+    "sidt" => 1,
+    "sldt" => 1,
+    "smsw" => 1,
+    "stc" => 1,
+    "std" => 1,
+    "sti" => 1,
+    "stos" => 1,
+    "str" => 1,
+    "sub" => 1,
+    "test" => 1,
+    "verr" => 1,
+    "verw" => 1,
+    "wait" => 1,
+    "wbinvd" => 1,
+    "xadd" => 1,
+    "xchg" => 1,
+    "xlatb" => 1,
+    "xor" => 1,
+    "fabs" => 1,
+    "fadd" => 1,
+    "fbld" => 1,
+    "fbstp" => 1,
+    "fchs" => 1,
+    "fclex" => 1,
+    "fcom" => 1,
+    "fcos" => 1,
+    "fdecstp" => 1,
+    "fdiv" => 1,
+    "fdivr" => 1,
+    "ffree" => 1,
+    "fiadd" => 1,
+    "ficom" => 1,
+    "fidiv" => 1,
+    "fidivr" => 1,
+    "fild" => 1,
+    "fimul" => 1,
+    "fincstp" => 1,
+    "finit" => 1,
+    "fist" => 1,
+    "fisub" => 1,
+    "fisubr" => 1,
+    "fld" => 1,
+    "fld1" => 1,
+    "fldl2e" => 1,
+    "fldl2t" => 1,
+    "fldlg2" => 1,
+    "fldln2" => 1,
+    "fldpi" => 1,
+    "fldz" => 1,
+    "fldcw" => 1,
+    "fldenv" => 1,
+    "fmul" => 1,
+    "fnop" => 1,
+    "fpatan" => 1,
+    "fprem" => 1,
+    "fprem1" => 1,
+    "fptan" => 1,
+    "frndint" => 1,
+    "frstor" => 1,
+    "fsave" => 1,
+    "fscale" => 1,
+    "fsetpm" => 1,
+    "fsin" => 1,
+    "fsincos" => 1,
+    "fsqrt" => 1,
+    "fst" => 1,
+    "fstcw" => 1,
+    "fstenv" => 1,
+    "fstsw" => 1,
+    "fsub" => 1,
+    "fsubr" => 1,
+    "ftst" => 1,
+    "fucom" => 1,
+    "fwait" => 1,
+    "fxam" => 1,
+    "fxch" => 1,
+    "fxtract" => 1,
+    "fyl2x" => 1,
+    "fyl2xp1" => 1,
+    "f2xm1" => 1
+    );
+
+$aASM_PPKeywords = array(
+    ".align" => 1,
+    ".alpha" => 1,
+    "and" => 1,
+    "assume" => 1,
+    "byte" => 1,
+    "code" => 1,
+    ".code" => 1,
+    "comm" => 1,
+    "comment" => 1,
+    ".const" => 1,
+    ".cref" => 1,
+    ".data" => 1,
+    ".data?" => 1,
+    "db" => 1,
+    "dd" => 1,
+    "df" => 1,
+    "dosseg" => 1,
+    "dq" => 1,
+    "dt" => 1,
+    "dw" => 1,
+    "dword" => 1,
+    "else" => 1,
+    "end" => 1,
+    "endif" => 1,
+    "endm" => 1,
+    "endp" => 1,
+    "ends" => 1,
+    "eq" => 1,
+    "equ" => 1,
+    ".err" => 1,
+    ".err1" => 1,
+    ".err2" => 1,
+    ".errb" => 1,
+    ".errdef" => 1,
+    ".errdif" => 1,
+    ".erre" => 1,
+    ".erridn" => 1,
+    ".errnb" => 1,
+    ".errndef" => 1,
+    ".errnz" => 1,
+    "event" => 1,
+    "exitm" => 1,
+    "extrn" => 1,
+    "far" => 1,
+    ".fardata" => 1,
+    ".fardata?" => 1,
+    "fword" => 1,
+    "ge" => 1,
+    "group" => 1,
+    "gt" => 1,
+    "high" => 1,
+    "if" => 1,
+    "if1" => 1,
+    "if2" => 1,
+    "ifb" => 1,
+    "ifdef" => 1,
+    "ifdif" => 1,
+    "ife" => 1,
+    "ifidn" => 1,
+    "ifnb" => 1,
+    "ifndef" => 1,
+    "include" => 1,
+    "includelib" => 1,
+    "irp" => 1,
+    "irpc" => 1,
+    "label" => 1,
+    ".lall" => 1,
+    "le" => 1,
+    "length" => 1,
+    ".lfcond" => 1,
+    ".list" => 1,
+    "local" => 1,
+    "low" => 1,
+    "lt" => 1,
+    "macro" => 1,
+    "mask" => 1,
+    "mod" => 1,
+    ".model" => 1,
+    "name" => 1,
+    "ne" => 1,
+    "near" => 1,
+    "not" => 1,
+    "offset" => 1,
+    "or" => 1,
+    "org" => 1,
+    "%out" => 1,
+    "page" => 1,
+    "proc" => 1,
+    "ptr" => 1,
+    "public" => 1,
+    "purge" => 1,
+    "qword" => 1,
+    ".radix" => 1,
+    "record" => 1,
+    "rept" => 1,
+    ".sall" => 1,
+    "seg" => 1,
+    "segment" => 1,
+    ".seq" => 1,
+    ".sfcond" => 1,
+    "short" => 1,
+    "size" => 1,
+    ".stack" => 1,
+    "struc" => 1,
+    "subttl" => 1,
+    "tbyte" => 1,
+    ".tfcond" => 1,
+    "this" => 1,
+    "title" => 1,
+    "type" => 1,
+    ".type" => 1,
+    "width" => 1,
+    "word" => 1,
+    ".xall" => 1,
+    ".xcref" => 1,
+    ".xlist" => 1,
+    "xor" => 1
+    );
+
+$aASM_Symbols = array(
+    "{" => 1,
+    "}" => 1,
+    "!" => 1,
+    "%" => 1,
+    "&amp;" => 1,
+    "*" => 1,
+    "-" => 1,
+    "=" => 1,
+    "+" => 1,
+    "&lt;" => 1,
+    "&gt;" => 1,
+    "/" => 1,
+    "|" => 1,
+    "~" => 1,
+    "*" => 1);
+
+/**
+ * Initiate the variable array used by the C Color encoder.
+ * @param       $aVaraibles     Variable array. (output)
+ */
+function ASM_ColorInit(&$aVariables)
+{
+    global $aASM_Keywords;
+    global $aASM_PPKeywords;
+    global $aASM_Symbols;
+
+    ksort($aASM_Keywords);
+    ksort($aASM_PPKeywords);
+    ksort($aASM_Symbols);
+}
+
+
+/**
+ * Encode a line of C code.
+ * @param       $sLine          Line string to encode.
+ * @param       $aVariables     Variable array.
+ * @returns     Color encoded line string.
+ */
+function ASM_ColorEncode($sLine, &$aVariables)
+{
+    global $aASM_Keywords;
+    global $aASM_PPKeywords;
+    global $aASM_Symbols;
+
+    $sRet = "";
+    $cchLine = strlen($sLine);
+    $i = 0;
+    $fFirstNonBlank = 1;
+
+    /*
+     * Loop thru the (remainings) of the line.
+     */
+    while ($i < $cchLine)
+    {
+        $ch = $sLine[$i];
+
+        /* comment check */
+        if ($ch == ';')
+        {
+            return $sRet . "<font color=#02FE02>" . substr($sLine, $i) . "</font>";
+        }
+
+        /*
+         * Check for string.
+         */
+        if ((($fDbl = (substr($sLine, $i, 6) == "&quot;")) || $sLine[$i] == "'")
+             && ($i == 0 || $sLine[$i-1] != '\\'))
+        {   /* start of a string */
+
+            $j = $i + 1;
+            if ($fDbl)
+            {
+                while ($j < $cchLine && ($sLine[$j] != '&' || substr($sLine, $j, 6) != "&quot;"))
+                    $j += ($sLine[$j] == '\\') ? 2 : 1;
+                if ($j < $cchLine)
+                    $j += 5;
+            }
+            else
+                while ($j < $cchLine && $sLine[$j] != "'")
+                    $j += ($sLine[$j] == '\\') ? 2 : 1;
+            $j++;
+            $sRet .= "<font color=#FEFE02>".substr($sLine, $i, $j - $i)."</font>";
+            $i = $j;
+            $fFirstNonBlank = 0;
+            continue;
+        }
+
+        /*
+         * If non-blank, lets check if we're at the start of a word...
+         */
+        $fBlank = ($ch == " " || $ch == "\t" || $ch == "\n");
+        $cchWord = !$fBlank ? ASM_WordLen($sLine, $cchLine, $i) : 0;
+
+        if ($cchWord > 0)
+        {
+            $sWord = strtolower(substr($sLine, $i, $cchWord));
+
+            /*
+             * Check for number.
+             */
+            if (($ch >= '0' && $ch <= '9'))
+                $sRet .= "<font color=#FF0202>" . substr($sLine, $i, $cchWord) . "</font>";
+            else
+            {
+                if ($fFirstNonBlank)
+                {
+                    /*
+                     * Check for asm keyword.
+                     */
+                    if (isset($aASM_Keywords[$sWord]))
+                        $sRet .= "<font color=#FF0202>" . substr($sLine, $i, $cchWord) . "</font>";
+                    /*
+                     * Check for preprocessor directive.
+                     */
+                    else if (($f = isset($aASM_PPKeywords[$sWord]))
+                             ||
+                             ($i > 0 && $sLine[$i-1] == '.' && isset($aASM_PPKeywords[".".$sWord]))
+                             )
+                    {
+                        if ($f)
+                            $sRet .= "<font color=#CECECE>" . substr($sLine, $i, $cchWord) . "</font>";
+                        else
+                            $sRet =  substr($sRet, 0, -1) . "<font color=#CECECE>." . substr($sLine, $i, $cchWord) . "</font>";
+                    }
+                    /*
+                     * Skip word.
+                     */
+                    else
+                        $sRet .= substr($sLine, $i, $cchWord);
+                }
+                else
+                {
+                    /*
+                     * Check for preprocessor directive.
+                     */
+                    if (($f = isset($aASM_PPKeywords[$sWord]))
+                             ||
+                             ($i > 0 && $sLine[$i-1] == '.' && isset($aASM_PPKeywords[".".$sWord]))
+                             )
+                    {
+                        if ($f)
+                            $sRet .= "<font color=#CECECE>" . substr($sLine, $i, $cchWord) . "</font>";
+                        else
+                            $sRet =  substr($sRet, 0, -1) . "<font color=#CECECE>." . substr($sLine, $i, $cchWord) . "</font>";
+                    }
+                    /*
+                     * Check for asm keyword.
+                     */
+                    else if (isset($aASM_Keywords[$sWord]))
+                        $sRet .= "<font color=#FF0202>" . substr($sLine, $i, $cchWord) . "</font>";
+                    /*
+                     * Skip word.
+                     */
+                    else
+                        $sRet .= substr($sLine, $i, $cchWord);
+                }
+            }
+
+            $i += $cchWord;
+            $fFirstNonBlank = 0;
+            continue;
+        }
+
+        /*
+         * Prepare for symbol check. (we'll have to check for HTML stuff like &amp;).
+         */
+        $cchWord = 1;
+        if ($ch == '&')
+        {
+            if (substr($sLine, $i, 5) == "&amp;")
+                $cchWord = 5;
+            else if (substr($sLine, $i, 4) == "&gt;" || substr($sLine, $i, 4) == "&lt;")
+                $cchWord = 4;
+        }
+
+        /*
+         * Check for Symbol.
+         */
+        if (isset($aASM_Symbols[substr($sLine, $i, $cchWord)]))
+        {
+            $sRet .= "<font color=#CECECE>" . substr($sLine, $i, $cchWord) . "</font>";
+            $i += $cchWord;
+            $fFirstNonBlank = 0;
+            continue;
+        }
+
+
+        /*
+         * Copy char
+         */
+        $sRet .= $sLine[$i];
+        $i++;
+        if ($fFirstNonBlank && !$fBlank)
+            $fFirstNonBlank = 0;
+    }
+
+    return $sRet;
+}
+
+/**
+ * Calculates the lenght of the word which eventually starts at [$i].
+ * @param       $sLine      Line.
+ * @param       $cchLine    Line length.
+ * @param       $i          Line index.
+ * @returns     Word length.
+ */
+function ASM_WordLen($sLine, $cchLine, $i)
+{
+
+    /*
+     * Check that previous letter wasen't a possible
+     * word part.
+     */
+    if ($i > 0)
+    {
+        $ch = $sLine[$i - 1];
+        if (    ($ch >= 'a' && $ch <= 'z')
+             || ($ch >= 'A' && $ch <= 'Z')
+             || ($ch >= '0' && $ch <= '9')
+             || ($ch == '_')
+             || ($ch == '@')
+             || ($ch == '?')
+             || ($ch == '$')
+            )
+            return 0;
+    }
+
+    /*
+     * Count letters in the word
+     */
+    $j = $i;
+    $ch = $sLine[$i];
+    while ($i < $cchLine &&
+           (   ($ch >= 'a' && $ch <= 'z')
+            || ($ch >= 'A' && $ch <= 'Z')
+            || ($ch >= '0' && $ch <= '9')
+            || ($ch == '_')
+            || ($ch == '@')
+            || ($ch == '?')
+            || ($ch == '$')
+            )
+           )
+        $ch = @$sLine[++$i];
+    return $i - $j;
+}
+
+
+
+/*
+ *
+ */
+/* hardcoded
+$aMake_Keywords = array(
+    "\$&amp;" => 1,
+    "\$**" => 1,
+    "\$*" => 1,
+    "\$." => 1,
+    "\$:" => 1,
+    "\$&lt;" => 1,
+    "\$?" => 1,
+    "\$@" => 1,
+    "\$d" => 1);
+*/
+$aMake_Symbols = array(
+    "@" => 1,
+    "(" => 1,
+    ")" => 1,
+    "." => 1,
+    "=" => 1,
+    "*" => 1,
+    "+" => 1,
+    "-" => 1,
+    "/" => 1,
+    "" => 1,
+    "[" => 1,
+    "]" => 1,
+    "," => 1,
+    "&lt;" => 1,
+    "&gt;" => 1,
+    ":" => 1,
+    ";" => 1);
+/**
+ * Initiate the variable array used by the C Color encoder.
+ * @param       $aVaraibles     Variable array. (output)
+ */
+function Make_ColorInit(&$aVariables)
+{
+    //global $aMake_Keywords;
+    global $aMake_Symbols;
+    //$aVariables = array("fInline" => 0)
+    //ksort($aMake_Keywords);
+    ksort($aMake_Symbols);
+}
+
+
+/**
+ * Encode a line of C code.
+ * @param       $sLine          Line string to encode.
+ * @param       $aVariables     Variable array.
+ * @returns     Color encoded line string.
+ */
+function Make_ColorEncode($sLine, &$aVariables)
+{
+    global $aMake_Keywords;
+    global $aMake_Symbols;
+
+    $sRet = "";
+    $cchLine = strlen($sLine);
+    $i = 0;
+    $fFirstNonBlank = 1;
+
+    /*
+     * Loop thru the (remainings) of the line.
+     */
+    while ($i < $cchLine)
+    {
+        $ch = $sLine[$i];
+
+        /* comment check */
+        if ($ch == '#')
+        {
+            return $sRet . "<font color=#02FE02>" . substr($sLine, $i) . "</font>";
+        }
+
+
+        /*
+         * Check for string.
+         */
+        if ((($fDbl = (substr($sLine, $i, 6) == "&quot;")) || $sLine[$i] == "'")
+             && ($i == 0 || $sLine[$i-1] != '\\'))
+        {   /* start of a string */
+
+            $j = $i + 1;
+            if ($fDbl)
+            {
+                while ($j < $cchLine && ($sLine[$j] != '&' || substr($sLine, $j, 6) != "&quot;"))
+                    $j += ($sLine[$j] == '\\') ? 2 : 1;
+                if ($j < $cchLine)
+                    $j += 5;
+            }
+            else
+                while ($j < $cchLine && $sLine[$j] != "'")
+                    $j += ($sLine[$j] == '\\') ? 2 : 1;
+            $j++;
+            $sRet .= "<font color=#FEFE02>".substr($sLine, $i, $j - $i)."</font>";
+            $i = $j;
+            $fFirstNonBlank = 0;
+            continue;
+        }
+
+        /*
+         * Check for ! or % words
+         */
+        if (($fFirstNonBlank && ($ch == "#" || $ch == "!")))
+        {
+            $j = $i + 1;
+            while ($j < $cchLine && ($sLine[$j] == ' ' || $sLine[$j] == "\t"))
+                $j++;
+            $j += Make_WordLen($sLine, $cchLine, $j);
+            echo "<font color=#CECECE>" . substr($sLine, $i, $j - $i) . "</font>";
+            $i = $j;
+            $fFirstNonBlank = 0;
+            continue;
+        }
+
+        /*
+         * Check for keyword
+         */
+        /* don't work
+        if ($ch == "$" && $i + 1 < $cchLine)
+        {
+            $cch = 0;
+            $sWord = substr($sLine, $i+1, 1);
+            if (   $sWord == "*"
+                || $sWord == "."
+                || $sWord == ":"
+                || $sWord == "?"
+                || $sWord == "@"
+                || $sWord == "d")
+                $cch = 2;
+            else if ($i + 2 < $cchLine && ($sWord = substr($sLine, $i+1, 2)) == "**")
+                $cch = 3;
+            else if ($i + 4 < $cchLine && ($sWord = substr($sLine, $i+1, 5)) == "&amp;")
+                $cch = 6;
+            else if ($i + 5 < $cchLine && ($sWord = substr($sLine, $i+1, 4)) == "&lt;")
+                $cch = 5;
+            if ($cch > 0)
+            {
+                echo "<font color=#CECECE>$" . $sWord . "</font>";
+                $i += $cch;
+                $fFirstNonBlank = 0;
+                continue;
+            }
+        } */
+
+        /*
+         * If non-blank, lets check if we're at the start of a word...
+         */
+        $fBlank = ($ch == " " || $ch == "\t" || $ch == "\n");
+        $cchWord = !$fBlank ? Make_WordLen($sLine, $cchLine, $i) : 0;
+
+        if ($cchWord > 0)
+        {
+            $sWord = strtolower(substr($sLine, $i, $cchWord));
+
+            /*
+             * Check for keywords.
+             */
+            if ($f = isset($aMake_Keywords[$sWord]))
+                $sRet .= "<font color=#FF0202>" . substr($sLine, $i, $cchWord) . "</font>";
+
+            /*
+             * Check for number.
+             */
+            else if (($ch >= '0' && $ch <= '9'))
+                $sRet .= "<font color=#FF0202>" . substr($sLine, $i, $cchWord) . "</font>";
+
+            /*
+             * Skip word.
+             */
+            else
+                $sRet .= substr($sLine, $i, $cchWord);
+
+            $i += $cchWord;
+            $fFirstNonBlank = 0;
+            continue;
+        }
+
+        /*
+         * Prepare for symbol check. (we'll have to check for HTML stuff like &amp;).
+         */
+        $cchWord = 1;
+        if ($ch == '&')
+        {
+            if (substr($sLine, $i, 5) == "&amp;")
+                $cchWord = 5;
+            else if (substr($sLine, $i, 4) == "&gt;" || substr($sLine, $i, 4) == "&lt;")
+                $cchWord = 4;
+        }
+
+        /*
+         * Check for Symbol.
+         */
+        if (isset($aMake_Symbols[substr($sLine, $i, $cchWord)]))
+        {
+            $sRet .= "<font color=#CECECE>" . substr($sLine, $i, $cchWord) . "</font>";
+            $i += $cchWord;
+            $fFirstNonBlank = 0;
+            continue;
+        }
+
+
+        /*
+         * Copy char
+         */
+        $sRet .= $sLine[$i];
+        $i++;
+        if ($fFirstNonBlank && !$fBlank)
+            $fFirstNonBlank = 0;
+    }
+
+    return $sRet;
+}
+
+/**
+ * Calculates the lenght of the word which eventually starts at [$i].
+ * @param       $sLine      Line.
+ * @param       $cchLine    Line length.
+ * @param       $i          Line index.
+ * @returns     Word length.
+ */
+function Make_WordLen($sLine, $cchLine, $i)
+{
+
+    /*
+     * Check that previous letter wasen't a possible
+     * word part.
+     */
+    if ($i > 0)
+    {
+        $ch = $sLine[$i - 1];
+        if (    ($ch >= 'a' && $ch <= 'z')
+             || ($ch >= 'A' && $ch <= 'Z')
+             || ($ch >= '0' && $ch <= '9')
+             || ($ch == '_')
+            )
+            return 0;
+    }
+
+    /*
+     * Count letters in the word
+     */
+    $j = $i;
+    $ch = $sLine[$i];
+    while ($i < $cchLine &&
+           (   ($ch >= 'a' && $ch <= 'z')
+            || ($ch >= 'A' && $ch <= 'Z')
+            || ($ch >= '0' && $ch <= '9')
+            || ($ch == '_')
+            )
+           )
+        $ch = @$sLine[++$i];
+    return $i - $j;
+}
+
 
 ?>
 
