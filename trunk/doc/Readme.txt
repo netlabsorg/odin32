@@ -78,7 +78,6 @@ run well and to make much more visible progress.
 - Full source code available
 
 
-
 2.0 Installing Odin (UPDATED)
 -----------------------------
 
@@ -90,10 +89,21 @@ Odin daily builds are now also distributed as WarpIn archives.
 WarpIn is a generic OS/2 installation application that can be
 downloaded from warpin.netlabs.org.
 
+Requirements for installing Odin:
+- You must install Odin on a partition that supports long filenames (e.g.
+  HPFS/JFS). Odin will not work on FAT!
+- OS/2 Warp 4, eComStation or Warp Server for e-Business (WSeB)
+  When using Warp 4, we recommend you apply fixpack 13 or higher.
+  * Warp 3 is not officially supported, but is reported to work by using
+    Warp 4 open32 dlls and patching them.
+
 Manual installation without WarpIn is not recommended. If you don't use WarpIn,
 then you *must* execute odininst.exe in the Odin system32 directory. (the first 
 time Odin is installed or when the ChangeLog mentions fixes/changes in the 
 installer)
+
+NOTE: You must install Odin on a partition that supports long filenames (e.g.
+      HPFS/JFS). Odin will not work on FAT!
 
 To install Odin, run warpin.exe with the name of the daily build archive
 as parameter.
@@ -131,6 +141,7 @@ To enable logging set the environment variable WIN32LOG_ENABLED:
 
 To disable logging again, you must clear this variable:
    SET WIN32LOG_ENABLED=
+
 
 2.1 Using Odin to run your Windows applications
 -----------------------------------------------
