@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.43 2001-10-11 15:16:44 sandervl Exp $ */
+/* $Id: scroll.cpp,v 1.44 2001-10-11 17:05:02 sandervl Exp $ */
 /*
  * Scrollbar control
  *
@@ -1179,6 +1179,12 @@ LRESULT WINAPI ScrollBarWndProc( HWND hwnd, UINT message, WPARAM wParam,
 #ifdef __WIN32OS2__
     case WM_ENABLE:
       return SCROLL_Enable(hwnd, wParam);
+
+    case WM_SYSCOMMAND:
+      //Not entirely sure this is 100% correct, but it seems the logical thing to do
+      //(for scrollbar control windows with the size grip style)
+      //Might need to send it to top parent
+      return SendMessageA(GetParent(hwnd), message, wParam, lParam);
 #endif
 
     case WM_ERASEBKGND:
