@@ -1,4 +1,4 @@
-# $Id: odin32.mk,v 1.7 2001-10-01 01:27:54 bird Exp $
+# $Id: odin32.mk,v 1.8 2002-04-11 21:45:09 bird Exp $
 
 #
 # Odin32 API
@@ -11,7 +11,7 @@
 #
 # defines
 #    DEBUG - build a debug version instead of release version
-#    PROFILE - build a profile debug version instead of release version
+#    PROFILE - build a profile release version instead of release version
 #    CCENV:
 #      VAC3  - use IBM VisualAge for C++ 3 compiler environment (default).
 #      VAC36 - use IBM VisualAge for C++ 3.6.5 compiler environment.
