@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.135 2003-06-03 11:58:38 sandervl Exp $ */
+/* $Id: window.cpp,v 1.136 2003-06-25 17:02:04 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -36,6 +36,7 @@
 #include <oslibgdi.h>
 #include "user32.h"
 #include "winicon.h"
+#include "pmwindow.h"
 #include "oslibmsg.h"
 #include <win\winpos.h>
 #include <win\win.h>
@@ -518,7 +519,18 @@ BOOL WIN32API ShowWindow(HWND hwnd, INT nCmdShow)
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
-    ret = window->ShowWindow(nCmdShow);
+
+    //PF Start PM restoration routine first if we restore from icon
+    //so all internal PM logic will work - this routine will always
+    //lead to ShowWindow(SW_RESTORE)
+
+    if ((nCmdShow == SW_RESTORE) && (window->getStyle() & WS_MINIMIZE) && fOS2Look )
+    {
+        dprintf(("ShowWindow: Initiating OS/2 PM restore"));          
+        ret = OSLibWinRestoreWindow(window->getOS2FrameWindowHandle());
+    }
+    else   
+        ret = window->ShowWindow(nCmdShow);
     RELEASE_WNDOBJ(window);
     return ret;
 }
