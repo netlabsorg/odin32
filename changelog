@@ -1,4 +1,14 @@
-/* $Id: changelog,v 1.1379 2001-04-25 20:52:18 sandervl Exp $ */
+/* $Id: changelog,v 1.1380 2001-04-26 13:25:12 sandervl Exp $ */
+
+ 2001-04-26: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Implemented FreeLibraryAndExitThread
+                o Create HandleManager class for mailslots + partial implementation
+                  for mailslot APIs (using named pipes)
+                o Fixed wrong return values for some CloseHandle methods
+                o Fixed CreateNamedPipe; must not call DosCreateNPipe for existing pipe
+                  (at least according to SDK docs; must verify this in NT!)
+                o Implemented CreateFile and CloseHandle for named pipe class
+                o Implemented SetNamedPipeHandleState
 
  2001-04-25: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Check visibility of parents in IsWindowVisible
