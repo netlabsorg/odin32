@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2413 2003-01-02 13:04:30 sandervl Exp $ */
+/* $Id: changelog,v 1.2414 2003-01-02 15:21:25 sandervl Exp $ */
 
  2003-01-02: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Set the codepage of the message queue for each new thread
@@ -7,6 +7,10 @@
                   (e.g. ^ on german keyboards)
                 o SystemParametersInfoA fix for SPI_GETNONCLIENTMETRICS in
                   OS/2 L&F (font height must be negative)
+                o Deactivate window when hiding it to force PM to switch focus.
+                  (Note: might cause regressions!)
+                o Fixed behaviour of SetFocus(NULL); should return the current
+                  focus window.
 
  2003-01-01: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Fixes for windows with an iconless class and WS_EX_DLGMODALFRAME
