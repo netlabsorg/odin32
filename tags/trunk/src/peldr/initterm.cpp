@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.2 1999-08-18 12:24:32 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.3 1999-09-15 23:26:08 sandervl Exp $ */
 
 /*
  * PELDR DLL entry point
@@ -31,7 +31,7 @@
 #include <string.h>
 #include <odin.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
-#include <winimage.h>
+#include <winimagepeldr.h>
 
 /*-------------------------------------------------------------------*/
 /* A clean up routine registered with DosExitList must be used if    */

@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.1 1999-08-29 14:54:54 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.2 1999-09-15 23:26:07 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -32,7 +32,8 @@
 #include <string.h>
 #include <odin.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
-#include <winconst.h>
+#include <win32type.h>
+#include <odinlx.h>
 
 extern "C" {
 void CDECL _ctordtorInit( void );
@@ -81,15 +82,16 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          /* are required and the runtime is dynamically linked.             */
          /*******************************************************************/
 
+	 if(RegisterLxDll(hModule, IMAGEHLP_LibMain, 0) == FALSE) 
+		return 0UL;
+
          rc = DosExitList(0x0000F000|EXLST_ADD, cleanup);
          if(rc)
                 return 0UL;
 
-	 IMAGEHLP_LibMain(hModule, DLL_PROCESS_ATTACH, 0);
-
          break;
       case 1 :
-	 IMAGEHLP_LibMain(hModule, DLL_PROCESS_DETACH, 0);
+	 UnregisterLxDll(hModule);
          break;
 
       default  :

@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.1 1999-09-07 20:41:45 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.2 1999-09-15 23:26:06 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -32,14 +32,15 @@
 #include <string.h>
 #include <odin.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
-#include <winconst.h>
+#include <win32type.h>
+#include <odinlx.h>
 
 extern "C" {
 void CDECL _ctordtorInit( void );
 void CDECL _ctordtorTerm( void );
 }
 
-BOOL WINAPI CRTDLL_Init(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved);
+BOOL WIN32API CRTDLL_Init(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved);
 
 /*-------------------------------------------------------------------*/
 /* A clean up routine registered with DosExitList must be used if    */
@@ -85,11 +86,12 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          if(rc)
                 return 0UL;
 
-	 CRTDLL_Init(hModule, DLL_PROCESS_ATTACH, 0);
+	 if(RegisterLxDll(hModule, CRTDLL_Init, 0) == FALSE) 
+		return 0UL;
 
          break;
       case 1 :
-	 CRTDLL_Init(hModule, DLL_PROCESS_DETACH, 0);
+	 UnregisterLxDll(hModule);
          break;
 
       default  :

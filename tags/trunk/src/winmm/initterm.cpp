@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.5 1999-08-16 16:55:33 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.6 1999-09-15 23:26:10 sandervl Exp $ */
 
 /*
  * WINMM DLL entry point
@@ -33,6 +33,8 @@
 #include <builtin.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:19:26*/
 #include <odin.h>
+#include <win32type.h>
+#include <odinlx.h>
 #include "aux.h"
 
 
@@ -78,6 +80,9 @@ unsigned long _System _DLL_InitTerm(unsigned long hModule, unsigned long
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
+	 if(RegisterLxDll(hModule, 0, 0) == FALSE) 
+		return 0UL;
+
          /*******************************************************************/
          /* A DosExitList routine must be used to clean up if runtime calls */
          /* are required and the runtime is dynamically linked.             */
@@ -90,6 +95,7 @@ unsigned long _System _DLL_InitTerm(unsigned long hModule, unsigned long
          break;
       case 1 :
          auxOS2Close(); /* SvL: Close aux device if necessary */
+	 UnregisterLxDll(hModule);
          break;
       default  :
          return 0UL;

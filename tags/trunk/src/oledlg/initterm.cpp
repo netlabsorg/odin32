@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.1 1999-08-30 22:16:48 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.2 1999-09-15 23:26:08 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -31,6 +31,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <odin.h>
+#include <win32type.h>
+#include <odinlx.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
 
 extern "C" {
@@ -78,12 +80,16 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          /* are required and the runtime is dynamically linked.             */
          /*******************************************************************/
 
+	 if(RegisterLxDll(hModule, 0, 0) == FALSE) 
+		return 0UL;
+
          rc = DosExitList(0x0000F000|EXLST_ADD, cleanup);
          if(rc)
                 return 0UL;
 
          break;
       case 1 :
+	 UnregisterLxDll(hModule);
          break;
       default  :
          return 0UL;
