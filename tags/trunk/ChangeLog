@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.1287 2001-02-23 14:51:26 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1288 2001-02-24 12:58:46 sandervl Exp $ */
+
+ 2001-02-24: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Set fExitProcess flag in WinExe destructor to prevent reloading
+                  dlls after loading of exe failed.
 
  2001-02-23: Sander van Leeuwen <sandervl@xs4all.nl>
     - GDI32:    o Removed old workaround for SetDIBitsToDevice. Incorrect for
