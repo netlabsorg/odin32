@@ -1,4 +1,4 @@
-/* $Id: syscolor.cpp,v 1.34 2002-11-29 15:46:34 sandervl Exp $ */
+/* $Id: syscolor.cpp,v 1.35 2003-01-03 21:43:16 sandervl Exp $ */
 
 /*
  * Win32 system color API functions for OS/2
@@ -290,6 +290,17 @@ HBRUSH WIN32API GetOS2ColorBrush(int nIndex)
   OS2SysColorBrush[nIndex] = CreateSolidBrush(color);
 
   return OS2SysColorBrush[nIndex];
+}
+//******************************************************************************
+//******************************************************************************
+COLORREF WIN32API GetOS2Color(int nIndex) 
+{
+  nIndex += PMSYSCLR_BASE;
+  if( ((nIndex < 0) || (nIndex >= PMSYSCLR_CSYSCOLORS))  ) {
+      DebugInt3();
+      return 0;
+  }
+  return OSLibWinQuerySysColor(nIndex-PMSYSCLR_BASE);
 }
 /***********************************************************************
  * This function is new to the Wine lib -- it does not exist in
