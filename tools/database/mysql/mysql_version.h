@@ -3,6 +3,6 @@
 
 /* Version numbers for protocol & mysqld */
 
-#define MYSQL_SERVER_VERSION		"3.21.33b"
+#define MYSQL_SERVER_VERSION		"3.22.26a"
 #define FRM_VER		        6
-#define MYSQL_VERSION_ID	32133
+#define MYSQL_VERSION_ID	32226
