@@ -6,6 +6,7 @@
                   ( (DWORD)(BYTE)(ch2) << 16 ) | ( (DWORD)(BYTE)(ch3) << 24 ) )
 #include <fourcc.h>
 #include "os2surface.h"
+#include "rectangle.h"
 #define _OS2WIN_H
 #define FAR
 #include "misc.h"
@@ -240,6 +241,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
   DIVE_CAPS dCaps;
   DDSURFACEDESC2 ComplexSurfaceDesc;
   OS2IDirectDrawSurface *AttachedSurface;
+  OS2IDirectDrawSurface *MipMapSurface;
 
   lpVtbl                     = &Vtbl;
   Vtbl.AddRef                = SurfAddRef;
@@ -307,6 +309,48 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
     dwBytesPPDive = 2; // 2 bytes for 15Bit
 
   // Setting up Cursors for handling attached Surfaces
+
+  DPA_SurfaceMipMaps = DPA_Create(8);
+  if(NULL==DPA_SurfaceMipMaps)
+  {
+    #ifdef DEBUG
+      WriteLog("Internal : Error creating DPA for MipMaps\n");
+    #endif
+    lastError = DDERR_OUTOFMEMORY ;
+    return;
+  }
+
+  DPA_SurfaceAttached = DPA_Create(8);
+  if(NULL==DPA_SurfaceAttached)
+  {
+    #ifdef DEBUG
+      WriteLog("Internal : Error creating DPA for attached surfaces\n");
+    #endif
+    lastError = DDERR_OUTOFMEMORY ;
+    return;
+  }
+
+  DPA_LockedRects = DPA_Create(8);
+  if(NULL==DPA_LockedRects)
+  {
+    #ifdef DEBUG
+      WriteLog("Internal : Error creating DPA for Locked Rectangles\n");
+    #endif
+    lastError = DDERR_OUTOFMEMORY ;
+    return;
+  }
+
+  DPA_SurfacePrivateData = DPA_Create(8);
+  if(NULL==DPA_SurfacePrivateData)
+  {
+    #ifdef DEBUG
+      WriteLog("Internal : Error creating DPA for priva surface Data\n");
+    #endif
+    lastError = DDERR_OUTOFMEMORY ;
+    return;
+  }
+
+  /*
   try
   {
     SurfaceCursorMipMap = SurfaceSequenceMipMap.newCursor();
@@ -332,7 +376,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
     lastError = DDERR_OUTOFMEMORY ;
     return;
   }
-
+  */
   if( lpDDSurfaceDesc->dwFlags & DDSD_CAPS )
   {
     // First check if we want to create a primary surface while the ddraw object already has one
@@ -765,50 +809,21 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
             // Mpmaps shirnk by 2
             ComplexSurfaceDesc.dwWidth  /= 2;
             ComplexSurfaceDesc.dwHeight /= 2;
-            try
-            {
-              SurfaceSequenceMipMap.addAsLast(new OS2IDirectDrawSurface(lpDraw, &ComplexSurfaceDesc, TRUE),
-                                      *SurfaceCursorMipMap);
-            }
-            catch(IOutOfMemory)
-            {
-              #ifdef DEBUG
-                WriteLog("Internal : ISet.add OutOfMemory\n");
-              #endif
-              lastError = DDERR_OUTOFMEMORY;
-              return;
-            }
-            catch(ICursorInvalidException)
-            {
-              #ifdef DEBUG
-                WriteLog("Internal: Invalid Cursor\n");
-              #endif
-              lastError = DDERR_OUTOFMEMORY;
-              return;
-            }
 
-            if( !SurfaceCursorMipMap->isValid() )
+            MipMapSurface = new OS2IDirectDrawSurface(lpDraw, &ComplexSurfaceDesc, TRUE);
+
+            DPA_InsertPtr( DPA_SurfaceMipMaps,
+                           DPA_GetPtrCount(DPA_SurfaceMipMaps),
+                           MipMapSurface);
+
+            if(MipMapSurface->GetLastError() != DD_OK)
             {
-              // We shouldn't get in here as add sould have raised IOutOfMemory
-              // If it couldn't create the surface
+              lastError = AttachedSurface->GetLastError();
               #ifdef DEBUG
-                WriteLog("Internal : Cursor is Invalid => OutOfMemory\n");
+                WriteLog("Attached surface creation returned error %d\n",lastError);
               #endif
-              lastError = DDERR_OUTOFMEMORY;
               return;
-            }
-            else
-            {
-              AttachedSurface = SurfaceCursorMipMap->element();
-              if(AttachedSurface->GetLastError() != DD_OK)
-              {
-                lastError = AttachedSurface->GetLastError();
-                #ifdef DEBUG
-                  WriteLog("Attached surface creation returned error %d\n",lastError);
-                #endif
-                return;
-              } // Endif Errorcheck
-            } //Endif Cursorcheck
+            } // Endif Errorcheck
           } //End for(i =0; i < lpDDSurfaceDesc->dwMipMapCount; i++)
         } // End of MipMaps
 
@@ -1128,6 +1143,23 @@ void OS2IDirectDrawSurface::ColorConversion(LPRECT lpRect)
 }
 //******************************************************************************
 //******************************************************************************
+// Internal callbacks uses by destructor
+int  DestroyRects(LPVOID lpItem, DWORD dwRes)
+{
+  delete (DDRectangle*) lpItem;
+  return 1;
+}
+
+int ReleaseSurfaces(LPVOID lpItem, DWORD dwRes)
+{
+  OS2IDirectDrawSurface *pSurf;
+  pSurf = (OS2IDirectDrawSurface *)lpItem;
+  pSurf->Vtbl.Release(pSurf);
+  return 1;
+}
+//******************************************************************************
+//******************************************************************************
+
 OS2IDirectDrawSurface::~OS2IDirectDrawSurface()
 {
   OS2IDirectDrawSurface  *AttachedSurface;
@@ -1163,8 +1195,12 @@ OS2IDirectDrawSurface::~OS2IDirectDrawSurface()
     free(pDiveBuffer);
 
   // Clear the list of locked rectangles
-  if (!LockedRectSequence.isEmpty())
-    LockedRectSequence.removeAll();
+  if (DPA_GetPtrCount(DPA_LockedRects)>0)
+  {
+    DPA_DestroyCallback( DPA_LockedRects,
+                         (DPAENUMPROC)DestroyRects,
+                         0);
+  }
 
   if(lpClipper)
   {
@@ -1187,36 +1223,18 @@ OS2IDirectDrawSurface::~OS2IDirectDrawSurface()
   if (NULL!=BackBuffer)
     BackBuffer->Vtbl.Release(AttachedSurface);
 
-  while( !SurfaceSequenceMipMap.isEmpty())
+  if (DPA_GetPtrCount(DPA_SurfaceMipMaps)>0)
   {
-    try
-    {
-      AttachedSurface = SurfaceSequenceMipMap.firstElement();
-      AttachedSurface->Vtbl.Release(AttachedSurface);
-      SurfaceSequenceMipMap.removeFirst();
-    }
-    catch(...)
-    {
-      #ifdef DEBUG
-        WriteLog("Internal : Error deleting MipMap Surfaces\n");
-      #endif
-    }
+    DPA_DestroyCallback( DPA_SurfaceMipMaps,
+                         (DPAENUMPROC)ReleaseSurfaces,
+                         0);
   }
 
-  while( !SurfaceSequenceAttached.isEmpty())
+  if (DPA_GetPtrCount(DPA_SurfaceAttached)>0)
   {
-    try
-    {
-      AttachedSurface = SurfaceSequenceAttached.firstElement();
-      AttachedSurface->Vtbl.Release(AttachedSurface);
-      SurfaceSequenceAttached.removeFirst();
-    }
-    catch(...)
-    {
-      #ifdef DEBUG
-        WriteLog("Internal : Error deleting other attached\n");
-      #endif
-    }
+    DPA_DestroyCallback( DPA_SurfaceAttached,
+                         (DPAENUMPROC)ReleaseSurfaces,
+                         0);
   }
 
   lpDraw->Vtbl.Release(lpDraw);
@@ -1369,17 +1387,16 @@ HRESULT __stdcall SurfAddAttachedSurface4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSu
     {
       if(me->DDSurfaceDesc.ddsCaps.dwCaps & DDSCAPS_MIPMAP)
       {
-        try
+        if( DPA_InsertPtr( me->DPA_SurfaceMipMaps,
+                           DPA_GetPtrCount(me->DPA_SurfaceMipMaps),
+                           AttachedSurface) >=0)
         {
-          me->SurfaceSequenceMipMap.addAsLast(AttachedSurface);
-          me->SurfaceCursorMipMap->setToFirst();
-
           me->DDSurfaceDesc.dwFlags |= DDSD_MIPMAPCOUNT;
           me->DDSurfaceDesc.dwMipMapCount++;
 
           AttachedSurface->Vtbl.AddRef(AttachedSurface);
         }
-        catch(...)
+        else
         {
           #ifdef DEBUG
             WriteLog("Internal : Error attaching to MipMap\n");
@@ -1397,15 +1414,13 @@ HRESULT __stdcall SurfAddAttachedSurface4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSu
     }
     else
     {
-      try
+      if( DPA_InsertPtr( me->DPA_SurfaceAttached,
+                         DPA_GetPtrCount(me->DPA_SurfaceAttached),
+                         AttachedSurface) >=0)
       {
-        me->SurfaceSequenceAttached.addAsLast(AttachedSurface);
-        // add made the last cursor invalid so start from the begining
-        me->SurfaceCursorAttached->setToFirst();
-
         AttachedSurface->Vtbl.AddRef(AttachedSurface);
       }
-      catch(...)
+      else
       {
         #ifdef DEBUG
           WriteLog("Internal : Error attaching to general Set\n");
@@ -1480,23 +1495,22 @@ HRESULT __stdcall SurfAddAttachedSurface4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSu
         {
           if(me->DDSurfaceDesc.ddsCaps.dwCaps & DDSCAPS_MIPMAP)
           {
-            try
+            if( DPA_InsertPtr( me->DPA_SurfaceMipMaps,
+                               DPA_GetPtrCount(me->DPA_SurfaceMipMaps),
+                               AttachedSurface) >=0)
             {
-              me->SurfaceSequenceMipMap.addAsLast(AttachedSurface);
-              me->SurfaceCursorMipMap->setToFirst();
-
               me->DDSurfaceDesc.dwFlags |= DDSD_MIPMAPCOUNT;
               me->DDSurfaceDesc.dwMipMapCount++;
               me->DDSurfaceDesc.ddsCaps.dwCaps |= DDSCAPS_FRONTBUFFER;
 
               AttachedSurface->Vtbl.AddRef(AttachedSurface);
             }
-            catch(...)
+            else
             {
               #ifdef DEBUG
                 WriteLog("Internal : Error attaching to MipMap\n");
               #endif
-             return(DDERR_CANNOTATTACHSURFACE);
+              return(DDERR_CANNOTATTACHSURFACE);
             }
           }
           else
@@ -1509,20 +1523,18 @@ HRESULT __stdcall SurfAddAttachedSurface4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSu
         }
         else
         {
-          try
+          if( DPA_InsertPtr( me->DPA_SurfaceAttached,
+                             DPA_GetPtrCount(me->DPA_SurfaceAttached),
+                             AttachedSurface) >=0)
           {
-            me->SurfaceSequenceAttached.addAsLast(AttachedSurface);
-            // add made the last cursor invalid so start from the begining
-            me->SurfaceCursorAttached->setToFirst();
-
             AttachedSurface->Vtbl.AddRef(AttachedSurface);
           }
-          catch(...)
+          else
           {
             #ifdef DEBUG
               WriteLog("Internal : Error attaching to general Set\n");
             #endif
-           return(DDERR_CANNOTATTACHSURFACE);
+            return(DDERR_CANNOTATTACHSURFACE);
           }
         }
       }// End if not DDSCAPS_BACKBUFFER
@@ -1572,7 +1584,6 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
 
  OS2IDirectDrawSurface *dest = (OS2IDirectDrawSurface *)This;
  OS2IDirectDrawSurface *src  = (OS2IDirectDrawSurface *)lpDDSrcSurface;
- ISequence<DDRectangle*>::Cursor *EnumCursor;
 
  HRESULT                rc;
  ULONG                  ulColor, *pColor;
@@ -1625,18 +1636,14 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
       // If the dest Rectangle intersects with any of the locked rectangles
       // we can't blit to it
 
-      EnumCursor = dest->LockedRectSequence.newCursor();
-      EnumCursor->setToFirst();
       Found = FALSE;
-
-      while((EnumCursor->isValid() ) && !Found)
+      i=0;
+      while( (i<DPA_GetPtrCount(dest->DPA_LockedRects))  && !Found)
       {
-        pIRectTest = EnumCursor->element();
+        pIRectTest = (DDRectangle*) DPA_FastGetPtr(dest->DPA_LockedRects,i);
         Found = pIRectDest->intersects(*pIRectTest);
-        EnumCursor->setToNext();
+        i++;
       }
-
-      delete EnumCursor;
 
     }
 
@@ -1764,18 +1771,15 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
       // If the src Rectangle intersects with any of the locked rectangles of the
       // source surface we can't blit from it
 
-      EnumCursor = src->LockedRectSequence.newCursor();
-      EnumCursor->setToFirst();
       Found = FALSE;
+      i=0;
 
-      while((EnumCursor->isValid() ) && !Found)
+      while((i<DPA_GetPtrCount(src->DPA_LockedRects) ) && !Found)
       {
-        pIRectTest = EnumCursor->element();
-        Found = pIRectSrc->intersects(*pIRectTest);
-        EnumCursor->setToNext();
+        pIRectTest = (DDRectangle*) DPA_FastGetPtr(src->DPA_LockedRects,i);
+        Found = pIRectDest->intersects(*pIRectTest);
+        i++;
       }
-
-      delete EnumCursor;
 
     }
 
@@ -2451,6 +2455,8 @@ HRESULT __stdcall SurfBltFast4( THIS This,
     SrcRect.right  = src->width;
   }
 
+  // Todo: Test for locked src/dest
+
   pBltPos = (char*) dest->pDiveBuffer + (dwY * dest->dwPitchDB) +
             (dwX * dest->dwBytesPPDive);
 
@@ -2755,8 +2761,8 @@ HRESULT __stdcall SurfDeleteAttachedSurface4(THIS This, DWORD dwFlags , LPDIRECT
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
   OS2IDirectDrawSurface *AttachedSurface;
   OS2IDirectDrawSurface *SurfaceCursor;
+  int i;
 
-  ISequence<OS2IDirectDrawSurface*>::Cursor *EnumCursor;
   BOOL Found = FALSE;
   #ifdef DEBUG
     WriteLog("SurfDeleteAttachedSurface\n");
@@ -2856,15 +2862,13 @@ HRESULT __stdcall SurfDeleteAttachedSurface4(THIS This, DWORD dwFlags , LPDIRECT
   if ( (!Found) && (AttachedSurface->DDSurfaceDesc.ddsCaps.dwCaps &  DDSCAPS_MIPMAP ) )
   {
     // Surface seams to be a mipmap
-    EnumCursor = me->SurfaceSequenceMipMap.newCursor();
-    EnumCursor->setToFirst();
-    while((EnumCursor->isValid() ) && !Found)
+    i = 0;
+    while((DPA_GetPtrCount(me->DPA_SurfaceMipMaps)>i ) && !Found)
     {
-      if (EnumCursor->element() == AttachedSurface)
+      if (DPA_FastGetPtr(me->DPA_SurfaceMipMaps,i) == AttachedSurface)
       {
         Found = TRUE;
-        me->SurfaceSequenceMipMap.removeAt(*EnumCursor);
-        me->SurfaceCursorMipMap->setToFirst();
+        DPA_DeletePtr(me->DPA_SurfaceMipMaps,i);
         AttachedSurface->lpVtbl->Release(AttachedSurface);
         // adjust our info
         me->DDSurfaceDesc.dwMipMapCount-- ;
@@ -2873,26 +2877,24 @@ HRESULT __stdcall SurfDeleteAttachedSurface4(THIS This, DWORD dwFlags , LPDIRECT
           me->DDSurfaceDesc.dwFlags &= ~DDSD_MIPMAPCOUNT;
         }
       }
+      i++;
     }
-    delete EnumCursor;
   }
 
   if(!Found)
   {
-    // Surface seams to be a mipmap
-    EnumCursor = me->SurfaceSequenceAttached.newCursor();
-    EnumCursor->setToFirst();
-    while((EnumCursor->isValid() ) && !Found)
+    // Surface seams to be an attached one
+    i = 0;
+    while((DPA_GetPtrCount(me->DPA_SurfaceAttached)>i ) && !Found)
     {
-      if (EnumCursor->element() == AttachedSurface)
+      if (DPA_FastGetPtr(me->DPA_SurfaceAttached,i) == AttachedSurface)
       {
         Found = TRUE;
-        me->SurfaceSequenceAttached.removeAt(*EnumCursor);
-        me->SurfaceCursorAttached->setToFirst();
+        DPA_DeletePtr(me->DPA_SurfaceAttached,i);
         AttachedSurface->lpVtbl->Release(AttachedSurface);
       }
+      i++;
     }
-    delete EnumCursor;
   }
 
   return(Found?DD_OK:DDERR_SURFACENOTATTACHED);
@@ -2915,8 +2917,7 @@ HRESULT __stdcall SurfEnumAttachedSurfaces4(THIS This, LPVOID lpContext ,LPDDENU
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
   OS2IDirectDrawSurface *EnumSurface;
   DDSURFACEDESC2         EnumDesc;
-
-  ISequence<OS2IDirectDrawSurface*>::Cursor *EnumCursor;
+  int i;
   HRESULT rc;
 
   #ifdef DEBUG
@@ -2933,32 +2934,28 @@ HRESULT __stdcall SurfEnumAttachedSurfaces4(THIS This, LPVOID lpContext ,LPDDENU
     rc = lpCallBack((LPDIRECTDRAWSURFACE4)me->BackBuffer,&EnumDesc,lpContext);
   }
 
-  if(!me->SurfaceSequenceMipMap.isEmpty())
+  if(DPA_GetPtrCount(me->DPA_SurfaceMipMaps)>0)
   {
-    EnumCursor = me->SurfaceSequenceMipMap.newCursor();
-    EnumCursor->setToFirst();
-    while( (DDENUMRET_OK == rc) && EnumCursor->isValid() )
+    i=0;
+    while( (DDENUMRET_OK == rc) && i<DPA_GetPtrCount(me->DPA_SurfaceMipMaps) )
     {
-      EnumSurface = EnumCursor->element();
+      EnumSurface = (OS2IDirectDrawSurface*) DPA_FastGetPtr(me->DPA_SurfaceMipMaps,i);
       memcpy(&EnumDesc,&(EnumSurface->DDSurfaceDesc),sizeof(DDSURFACEDESC2));
       rc = lpCallBack((LPDIRECTDRAWSURFACE4)EnumSurface,&EnumDesc,lpContext);
-      EnumCursor->setToNext();
+      i++;
     }
-    delete EnumCursor;
   }
 
-  if(!me->SurfaceSequenceAttached.isEmpty())
+  if(DPA_GetPtrCount(me->DPA_SurfaceAttached)>0)
   {
-    EnumCursor = me->SurfaceSequenceAttached.newCursor();
-    EnumCursor->setToFirst();
-    while( (DDENUMRET_OK == rc) && EnumCursor->isValid() )
+    i=0;
+    while( (DDENUMRET_OK == rc) && i<DPA_GetPtrCount(me->DPA_SurfaceAttached) )
     {
-      EnumSurface = EnumCursor->element();
+      EnumSurface = (OS2IDirectDrawSurface*) DPA_FastGetPtr(me->DPA_SurfaceAttached,i);
       memcpy(&EnumDesc,&(EnumSurface->DDSurfaceDesc),sizeof(DDSURFACEDESC2));
       rc = lpCallBack((LPDIRECTDRAWSURFACE4)EnumSurface,&EnumDesc,lpContext);
-      EnumCursor->setToNext();
+      i++;
     }
-    delete EnumCursor;
   }
 
   return(DD_OK);
@@ -3128,7 +3125,8 @@ HRESULT __stdcall SurfGetAttachedSurface4(THIS This, LPDDSCAPS2 lpDDCaps,
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
   OS2IDirectDrawSurface *EnumSurface = NULL;
   OS2IDirectDrawSurface *AttachedSurface = NULL;
-  ISequence<OS2IDirectDrawSurface*>::Cursor *EnumCursor;
+  int i;
+
   #ifdef DEBUG
     WriteLog("SurfGetAttachedSurface4\n>Requested Caps: ");
     _dump_DDSCAPS(lpDDCaps->dwCaps);
@@ -3147,13 +3145,12 @@ HRESULT __stdcall SurfGetAttachedSurface4(THIS This, LPDDSCAPS2 lpDDCaps,
     AttachedSurface = me->BackBuffer;
   }
 
-  if(!me->SurfaceSequenceMipMap.isEmpty())
+  if(DPA_GetPtrCount(me->DPA_SurfaceMipMaps)>0)
   {
-    EnumCursor = me->SurfaceSequenceMipMap.newCursor();
-    EnumCursor->setToFirst();
-    while( EnumCursor->isValid() )
+    i=0;
+    while( i<DPA_GetPtrCount(me->DPA_SurfaceMipMaps) )
     {
-      EnumSurface = EnumCursor->element();
+      EnumSurface = (OS2IDirectDrawSurface*) DPA_FastGetPtr(me->DPA_SurfaceMipMaps,i);
       if(EnumSurface->DDSurfaceDesc.ddsCaps.dwCaps == lpDDCaps->dwCaps)
       {
         if(NULL==AttachedSurface)
@@ -3163,18 +3160,16 @@ HRESULT __stdcall SurfGetAttachedSurface4(THIS This, LPDDSCAPS2 lpDDCaps,
                                   // but function must fail if more then one surface fits
 
       }
-      EnumCursor->setToNext();
+      i++;
     }
-    delete EnumCursor;
   }
 
-  if(!me->SurfaceSequenceAttached.isEmpty())
+  if(DPA_GetPtrCount(me->DPA_SurfaceAttached)>0)
   {
-    EnumCursor = me->SurfaceSequenceAttached.newCursor();
-    EnumCursor->setToFirst();
-    while( EnumCursor->isValid() )
+    i=0;
+    while( i<DPA_GetPtrCount(me->DPA_SurfaceAttached) )
     {
-      EnumSurface = EnumCursor->element();
+      EnumSurface = (OS2IDirectDrawSurface*) DPA_FastGetPtr(me->DPA_SurfaceAttached,i);
       if(EnumSurface->DDSurfaceDesc.ddsCaps.dwCaps == lpDDCaps->dwCaps)
       {
         if(NULL==AttachedSurface)
@@ -3184,9 +3179,8 @@ HRESULT __stdcall SurfGetAttachedSurface4(THIS This, LPDDSCAPS2 lpDDCaps,
                                   // but function must fail if more then one surface fits
 
       }
-      EnumCursor->setToNext();
+      i++;
     }
-    delete EnumCursor;
   }
 
   if(NULL!=AttachedSurface)
@@ -3637,7 +3631,7 @@ HRESULT __stdcall SurfLock4(THIS This, LPRECT lpRect, LPDDSURFACEDESC2 lpSurface
 {
 
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
-  ISequence<DDRectangle*>::Cursor *EnumCursor;
+  int i;
 
   BOOL Found;
   ULONG  nrScanLines, rc;
@@ -3673,18 +3667,15 @@ HRESULT __stdcall SurfLock4(THIS This, LPRECT lpRect, LPDDSURFACEDESC2 lpSurface
       // If the new Rectangle intersects with any of the already locked rectangles it can't
       // be locked so check for this
 
-      EnumCursor = me->LockedRectSequence.newCursor();
-      EnumCursor->setToFirst();
+      i=0;
       Found = FALSE;
 
-      while((EnumCursor->isValid() ) && !Found)
+      while(i<DPA_GetPtrCount(me->DPA_LockedRects) && !Found)
       {
-        pIRectCurrent = EnumCursor->element();
+        pIRectCurrent = (DDRectangle*) DPA_FastGetPtr(me->DPA_LockedRects,i);
         Found = pIRectCurrent->intersects(*pIRectNew);
-        EnumCursor->setToNext();
+        i++;
       }
-
-      delete EnumCursor;
 
     }
 
@@ -3717,7 +3708,9 @@ HRESULT __stdcall SurfLock4(THIS This, LPRECT lpRect, LPDDSURFACEDESC2 lpSurface
   }
   // Add the rectangle to the list of locked rectangles
 
-  me->LockedRectSequence.addAsLast(pIRectNew);
+  DPA_InsertPtr( me->DPA_LockedRects,
+                 DPA_GetPtrCount(me->DPA_LockedRects),
+                 pIRectNew);
 
   me->fLocked = TRUE;
 
@@ -3966,7 +3959,7 @@ HRESULT __stdcall SurfUnlock(THIS This, LPRECT lpSurfaceRect)
 
 
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
-  ISequence<DDRectangle*>::Cursor *EnumCursor;
+  int i;
   DDRectangle *pIRectUnlock;
   BOOL Found = FALSE;
 
@@ -3986,9 +3979,9 @@ HRESULT __stdcall SurfUnlock(THIS This, LPRECT lpSurfaceRect)
   {
     WriteLog("Unlock rectangle\n");
     pIRectUnlock = new DDRectangle( lpSurfaceRect->top,
-                                   lpSurfaceRect->left,
-                                   lpSurfaceRect->bottom,
-                                   lpSurfaceRect->right);
+                                    lpSurfaceRect->left,
+                                    lpSurfaceRect->bottom,
+                                    lpSurfaceRect->right);
   }
   else
   {
@@ -4000,17 +3993,16 @@ HRESULT __stdcall SurfUnlock(THIS This, LPRECT lpSurfaceRect)
     WriteLog("StartEmuneration of Locked Rects\n");
   #endif
 
-  EnumCursor = me->LockedRectSequence.newCursor();
-  EnumCursor->setToFirst();
-  while(EnumCursor->isValid() && !Found)
+  i=0;
+  while(i<DPA_GetPtrCount(me->DPA_LockedRects) && !Found)
   {
-    Found = (*(EnumCursor->element()) == *pIRectUnlock);
+    Found = (*((DDRectangle*)DPA_FastGetPtr(me->DPA_LockedRects,i)) == *pIRectUnlock);
     if(!Found)
     {
       #ifdef DEBUG
         WriteLog("Not Found, try Next rect\n");
       #endif
-      EnumCursor->setToNext();
+      i++;
     }
     #ifdef DEBUG
     else
@@ -4032,9 +4024,9 @@ HRESULT __stdcall SurfUnlock(THIS This, LPRECT lpSurfaceRect)
     WriteLog("Remove Rect from Seq.\n");
   #endif
 
-  me->LockedRectSequence.removeAt(*EnumCursor);
+  DPA_DeletePtr(me->DPA_LockedRects,i);
 
-  if(me->LockedRectSequence.isEmpty())  // Do we have unlocked last rectangle
+  if(0==DPA_GetPtrCount(me->DPA_LockedRects))  // Do we have unlocked last rectangle
   {
     #ifdef DEBUG
       WriteLog("No Locked Rects left for surface\n");
@@ -4209,7 +4201,7 @@ HRESULT __stdcall SurfSetPrivateData(THIS This, REFGUID refGUID, LPVOID lpData,
                                      DWORD dwDataSize, DWORD dwFlags)
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
-  ISequence<PSURFPRIVATEDATA>::Cursor * EnumCursor;
+  int i;
   PSURFPRIVATEDATA pSData;
   void *pBuffer;
   BOOL bFound = FALSE;
@@ -4226,20 +4218,18 @@ HRESULT __stdcall SurfSetPrivateData(THIS This, REFGUID refGUID, LPVOID lpData,
     return(DDERR_INVALIDPARAMS);
 
   // first check if the refGUID is stored as then the content will be updated
-  if(! me->SurfaceSequencePrivateData.isEmpty() )
+  if( DPA_GetPtrCount(me->DPA_SurfacePrivateData)>0 )
   {
-    EnumCursor = me->SurfaceSequencePrivateData.newCursor();
-    EnumCursor->setToFirst();
-    while(EnumCursor->isValid() && !bFound)
+    i=0;
+    while(i<DPA_GetPtrCount(me->DPA_SurfacePrivateData) && !bFound)
     {
-      pSData = EnumCursor->element();
+      pSData = (PSURFPRIVATEDATA) DPA_FastGetPtr(me->DPA_SurfacePrivateData,i);
 
       if (IsEqualGUID(pSData->guidTag,refGUID))
         bFound = TRUE;
 
-      EnumCursor->setToNext();
+      i++;
     }
-    delete EnumCursor;
   }
 
   if(bFound)
@@ -4373,6 +4363,15 @@ HRESULT __stdcall SurfSetPrivateData(THIS This, REFGUID refGUID, LPVOID lpData,
           return (DDERR_OUTOFMEMORY);
         }
       }
+
+      if( DPA_InsertPtr( me->DPA_SurfacePrivateData,
+                         DPA_GetPtrCount(me->DPA_SurfacePrivateData),
+                         pSData) <0)
+      {
+        delete pSData;
+        return (DDERR_OUTOFMEMORY);
+      }
+
     }
     else
       return (DDERR_OUTOFMEMORY);
@@ -4384,32 +4383,32 @@ HRESULT __stdcall SurfSetPrivateData(THIS This, REFGUID refGUID, LPVOID lpData,
 HRESULT __stdcall SurfGetPrivateData(THIS This, REFGUID refGUID, LPVOID lpData, LPDWORD lpDataSize)
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
-  ISequence<PSURFPRIVATEDATA>::Cursor * EnumCursor;
+  int i;
   PSURFPRIVATEDATA pSData;
   BOOL bFound = FALSE;
+
   #ifdef DEBUG
     WriteLog("SurfGetPrivateData\n");
   #endif
+
   if(NULL==me)
     return(DDERR_INVALIDOBJECT);
 
   if((NULL==lpData)||(NULL==lpDataSize))
     return(DDERR_INVALIDPARAMS);
 
-  if(! me->SurfaceSequencePrivateData.isEmpty() )
+  if(DPA_GetPtrCount(me->DPA_SurfacePrivateData)>0)
   {
-    EnumCursor = me->SurfaceSequencePrivateData.newCursor();
-    EnumCursor->setToFirst();
-    while(EnumCursor->isValid() && !bFound)
+    i=0;
+    while(i<DPA_GetPtrCount(me->DPA_SurfacePrivateData) && !bFound)
     {
-      pSData = EnumCursor->element();
+      pSData = (PSURFPRIVATEDATA) DPA_FastGetPtr(me->DPA_SurfacePrivateData,i);
 
       if (IsEqualGUID(pSData->guidTag,refGUID))
         bFound = TRUE;
 
-      EnumCursor->setToNext();
+      i++;
     }
-    delete EnumCursor;
   }
 
   if(bFound)
@@ -4435,22 +4434,23 @@ HRESULT __stdcall SurfGetPrivateData(THIS This, REFGUID refGUID, LPVOID lpData, 
 HRESULT __stdcall SurfFreePrivateData(THIS This, REFGUID refGUID)
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
-  ISequence<PSURFPRIVATEDATA>::Cursor * EnumCursor;
+  int i;
   PSURFPRIVATEDATA pSData;
   BOOL bFound = FALSE;
+
   #ifdef DEBUG
     WriteLog("SurfFreePrivateData\n");
   #endif
+
   if(NULL==me)
     return(DDERR_INVALIDOBJECT);
 
-  if(! me->SurfaceSequencePrivateData.isEmpty() )
+  if(DPA_GetPtrCount(me->DPA_SurfacePrivateData)>0)
   {
-    EnumCursor = me->SurfaceSequencePrivateData.newCursor();
-    EnumCursor->setToFirst();
-    while(EnumCursor->isValid() && !bFound)
+    i=0;
+    while(i<DPA_GetPtrCount(me->DPA_SurfacePrivateData) && !bFound)
     {
-      pSData = EnumCursor->element();
+      pSData = (PSURFPRIVATEDATA) DPA_FastGetPtr(me->DPA_SurfacePrivateData,i);
 
       if (IsEqualGUID(pSData->guidTag,refGUID))
       {
@@ -4471,12 +4471,10 @@ HRESULT __stdcall SurfFreePrivateData(THIS This, REFGUID refGUID)
           }
         }
         // Now remove the entry from the list
-        me->SurfaceSequencePrivateData.removeAt(*EnumCursor);
-        delete pSData; // free alocated Data
+        DPA_DeletePtr(me->DPA_SurfacePrivateData,i);
       }
-      EnumCursor->setToNext();
+      i++;
     }
-    delete EnumCursor;
   }
   return (bFound?DD_OK:DDERR_NOTFOUND);
 }
@@ -4499,7 +4497,7 @@ HRESULT __stdcall SurfGetUniquenessValue(THIS This, LPDWORD lpValue)
 HRESULT __stdcall SurfChangeUniquenessValue(THIS This)
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
-  ISequence<PSURFPRIVATEDATA>::Cursor * EnumCursor;
+  int i;
   PSURFPRIVATEDATA pSData;
 
   #ifdef DEBUG
@@ -4507,13 +4505,12 @@ HRESULT __stdcall SurfChangeUniquenessValue(THIS This)
   #endif
   me->dwUniqueValue++;
 
-  if(! me->SurfaceSequencePrivateData.isEmpty() )
+  if(DPA_GetPtrCount(me->DPA_SurfacePrivateData)>0)
   {
-    EnumCursor = me->SurfaceSequencePrivateData.newCursor();
-    EnumCursor->setToFirst();
-    while(EnumCursor->isValid())
+    i=0;
+    while(i<DPA_GetPtrCount(me->DPA_SurfacePrivateData))
     {
-      pSData = EnumCursor->element();
+      pSData = (PSURFPRIVATEDATA) DPA_FastGetPtr(me->DPA_SurfacePrivateData,i);
       if (pSData->dwFlags & DDSPD_VOLATILE)
       {
         // Data becomes unvalid after a Surface change
@@ -4530,9 +4527,8 @@ HRESULT __stdcall SurfChangeUniquenessValue(THIS This)
         pSData->pData = NULL;
         pSData->isValid = FALSE; // set flag to invalid
       }
-      EnumCursor->setToNext();
+      i++;
     }
-    delete EnumCursor;
   }
 
   return (DD_OK);
@@ -4540,7 +4536,7 @@ HRESULT __stdcall SurfChangeUniquenessValue(THIS This)
 
 //******************************************************************************
 //
-//  Pupose function copies one part of the bitmap inside the same bitmap
+//  Purpose function copies one part of the bitmap inside the same bitmap
 //
 //******************************************************************************
 
