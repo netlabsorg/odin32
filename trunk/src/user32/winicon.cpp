@@ -1,4 +1,4 @@
-/* $Id: winicon.cpp,v 1.14 2000-11-18 14:08:54 sandervl Exp $ */
+/* $Id: winicon.cpp,v 1.15 2000-11-20 20:28:16 sandervl Exp $ */
 /*
  * Win32 Icon Code for OS/2
  *
@@ -819,14 +819,14 @@ static HGLOBAL CURSORICON_Copy(HGLOBAL handle)
  *
  */
 HGLOBAL CURSORICON_ExtCopy(HGLOBAL Handle, UINT nType,
-             			   INT iDesiredCX, INT iDesiredCY,
-			               UINT nFlags)
+                           INT iDesiredCX, INT iDesiredCY,
+                           UINT nFlags)
 {
     HGLOBAL hNew=0;
 
     if(Handle == 0)
     {
-	    return 0;
+        return 0;
     }
     /* Best Fit or Monochrome */
     if( (nFlags & LR_COPYFROMRESOURCE
@@ -912,11 +912,11 @@ HGLOBAL CURSORICON_ExtCopy(HGLOBAL Handle, UINT nType,
 
             pBits = (LPBYTE)LockResource( hMem );
 
-	        if(nFlags & LR_DEFAULTSIZE)
-	        {
-	            iTargetCY = GetSystemMetrics(SM_CYICON);
+            if(nFlags & LR_DEFAULTSIZE)
+            {
+                iTargetCY = GetSystemMetrics(SM_CYICON);
                 iTargetCX = GetSystemMetrics(SM_CXICON);
-	        }
+            }
 
             /* Create a New Icon with the proper dimension
             */
@@ -973,7 +973,11 @@ static CURSORICONDIRENTRY *CURSORICON_FindBestIcon( CURSORICONDIR *dir, int widt
         if(abs(width - entry->ResInfo.icon.bWidth) == iXDiff &&
             abs(height - entry->ResInfo.icon.bHeight) == iYDiff)
         {
+#ifdef __WIN32OS2__
+            iTempColorDiff = abs(colors - (1 << entry->wBitCount));
+#else
             iTempColorDiff = abs(colors - entry->ResInfo.icon.bColorCount);
+#endif
             if(iColorDiff > iTempColorDiff)
         {
             bestEntry = entry;
