@@ -1,4 +1,4 @@
-/* $Id: comdlg32.cpp,v 1.14 1999-10-23 16:43:50 cbratschi Exp $ */
+/* $Id: comdlg32.cpp,v 1.15 1999-10-23 17:29:30 cbratschi Exp $ */
 
 /*
  * COMDLG32 implementation
@@ -271,21 +271,15 @@ ODINFUNCTION1(BOOL, ChooseFontW,
     if((int)asciicf.lpTemplateName >> 16 != 0)
       asciicf.lpTemplateName = UnicodeToAsciiString((LPWSTR)lpcf->lpTemplateName);
 
+  //CB: NT's clock.exe traps here!
   if (lpcf->lpszStyle)
   {
-    //CB: NT's clock.exe sets this pointer, don't know why
-    //    it's not a pointer to a string!
-    if ((UINT)lpcf->lpszStyle == 0xAAAAAAAA)
-      asciicf.lpszStyle = NULL;
-    else
-    {
-      UnicodeToAsciiN(lpcf->lpszStyle,
-                      szAsciiStyle,
-                      sizeof(szAsciiStyle));
+    UnicodeToAsciiN(lpcf->lpszStyle,
+                    szAsciiStyle,
+                    sizeof(szAsciiStyle));
 
-      asciicf.lpszStyle = szAsciiStyle;
-    }
-  };
+    asciicf.lpszStyle = szAsciiStyle;
+  }
 
   UnicodeToAsciiN(lpcf->lpLogFont->lfFaceName,
                   asciilf.lfFaceName,
