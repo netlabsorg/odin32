@@ -1,4 +1,4 @@
-/* $Id: windlg.cpp,v 1.36 2002-12-17 14:16:47 sandervl Exp $ */
+/* $Id: windlg.cpp,v 1.37 2004-01-30 22:10:25 bird Exp $ */
 /*
  * Win32 dialog apis for OS/2
  *
@@ -241,7 +241,7 @@ BOOL WIN32API MapDialogRect(HWND hwndDlg, LPRECT rect)
 {
   Win32Dialog *dialog;
   BOOL rc;
-#ifdef DEBUG
+#ifdef DEBUG_LOGGING
   RECT dlgRect = *rect;
 #endif
 
@@ -278,7 +278,7 @@ static HWND DIALOG_GetNextTabItem( HWND hwndMain, HWND hwndDlg, HWND hwndCtrl, B
     HWND retWnd = 0;
     HWND hChildFirst = 0;
 
-    if(!hwndCtrl) 
+    if(!hwndCtrl)
     {
         hChildFirst = GetWindow(hwndDlg,GW_CHILD);
         if(fPrevious) hChildFirst = GetWindow(hChildFirst,GW_HWNDLAST);
@@ -383,7 +383,7 @@ HWND WIN32API GetNextDlgTabItem(HWND hwndDlg, HWND hwndCtrl, BOOL fPrevious)
         return 0;
     }
     dprintf(("USER32: GetNextDlgTabItem %x %x %d", hwndDlg,hwndCtrl,fPrevious));
-    return DIALOG_GetNextTabItem(hwndDlg,hwndDlg,hwndCtrl,fPrevious); 
+    return DIALOG_GetNextTabItem(hwndDlg,hwndDlg,hwndCtrl,fPrevious);
 }
 //******************************************************************************
 //Can be used for any parent-child pair

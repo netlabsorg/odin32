@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.226 2004-01-11 12:03:16 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.227 2004-01-30 22:10:26 bird Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -134,7 +134,7 @@ void FrameSetFocus(HWND hwnd);
 
 VOID APIENTRY DspInitSystemDriverName(PSZ pszDriverName, ULONG lenDriverName);
 
-#ifdef DEBUG
+#ifdef DEBUG_LOGGING
 static char *DbgGetStringSWPFlags(ULONG flags);
 static char *DbgPrintQFCFlags(ULONG flags);
 #endif
@@ -188,7 +188,7 @@ BOOL InitPM()
     dprintf(("InitPM: hmq = %x", hmq));
     SetThreadMessageQueue(hmq);
 
-    //initialize keyboard hook for first thread  
+    //initialize keyboard hook for first thread
     hookInit(hab);
 
     BOOL rc = WinSetCp(hmq, GetDisplayCodepage());
@@ -258,7 +258,7 @@ BOOL InitPM()
     DevQueryCaps(hdc, CAPS_GRAPHICS_CHAR_HEIGHT, 1, (PLONG)&CapsCharHeight);
     dprintf(("CAPS_GRAPHICS_CHAR_HEIGHT = %d", CapsCharHeight));
     if(CapsCharHeight > 16) {
-       CapsCharHeight = 16; 
+       CapsCharHeight = 16;
     }
 
 #ifdef DEBUG
@@ -371,8 +371,8 @@ void WIN32API DisableDragDrop(BOOL fDisabled)
     fDragDropDisabled = fDisabled;
 }
 //******************************************************************************
-// Turn on CD Polling (window with 2 second timer to check CD disk presence) 
-// 
+// Turn on CD Polling (window with 2 second timer to check CD disk presence)
+//
 // NOTE: This can cause PM hangs when executing a program for a very long time
 //       (block in IOCtl)
 //******************************************************************************
@@ -552,7 +552,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     //   a USER32 window object for this window handle
     // - thread must not be suspended in WaitMessage
     if(!teb || (msg != WM_CREATE && win32wnd == NULL) || teb->o.odin.fWaitMessageSuspend) {
-        if(teb && teb->o.odin.fWaitMessageSuspend) 
+        if(teb && teb->o.odin.fWaitMessageSuspend)
              dprintf(("OS2: fWaitMessageSuspend window %x msg %x -> run default frame proc", hwnd, msg));
         else dprintf(("OS2: Invalid win32wnd pointer for window %x msg %x", hwnd, msg));
         goto RunDefWndProc;
@@ -672,11 +672,11 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     {
         dprintf(("OS2: WM_SHOW %x %d", hwnd, mp1));
         win32wnd->MsgShow((ULONG)mp1);
- 
-        //if a child window is hidden, then the update region of the 
+
+        //if a child window is hidden, then the update region of the
         //parent changes and a WM_ERASEBKGND is required during the next
         //BeginPaint call.
-        if((ULONG)mp1 == FALSE) 
+        if((ULONG)mp1 == FALSE)
         {
             Win32BaseWindow *parent = win32wnd->getParent();
             if(parent) {
@@ -728,7 +728,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         int  nrdcs = 0;
         HDC  hdcWindow[MAX_OPENDCS];
 
-        if(win32wnd->queryOpenDCs(hdcWindow, MAX_OPENDCS, &nrdcs)) 
+        if(win32wnd->queryOpenDCs(hdcWindow, MAX_OPENDCS, &nrdcs))
         {
             RECTL rcl = {0,0,1,1};
             HRGN hrgnRect;
@@ -791,7 +791,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         OSLibSetWindowStyle(win32wnd->getOS2FrameWindowHandle(), win32wnd->getOS2WindowHandle(), (ULONG)mp1, win32wnd->getExStyle(), (ULONG)mp2);
         break;
     }
-   
+
 #ifdef DEBUG
     case WM_SETFOCUS:
     {
@@ -1245,7 +1245,7 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
     //   a USER32 window object for this window handle
     // - thread must not be suspended in WaitMessage
     if(!teb || (msg != WM_CREATE && win32wnd == NULL) || teb->o.odin.fWaitMessageSuspend) {
-        if(teb && teb->o.odin.fWaitMessageSuspend) 
+        if(teb && teb->o.odin.fWaitMessageSuspend)
              dprintf(("PMFRAME: fWaitMessageSuspend window %x msg %x -> run default frame proc", hwnd, msg));
         else dprintf(("PMFRAME: Invalid win32wnd pointer for window %x msg %x", hwnd, msg));
         goto RunDefFrameWndProc;
@@ -1436,10 +1436,10 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
             break;
 
         }
-      
+
         //PF Pure flags should not cause any subsequent messages to win32 windows
         //we should route them to DefFrameWndProc and check highlight.
- 
+
         if ((pswp->fl == SWP_FOCUSACTIVATE) || (pswp->fl == SWP_FOCUSDEACTIVATE))
         {
            if (fOS2Look)
@@ -2540,7 +2540,7 @@ char *WIN32API QueryCustomStdClassName()
 //******************************************************************************
 //******************************************************************************
 
-#ifdef DEBUG
+#ifdef DEBUG_LOGGING
 static char *DbgGetStringSWPFlags(ULONG flags)
 {
     static char szSWPFlags[512];
