@@ -1,4 +1,4 @@
-/* $Id: controls.cpp,v 1.9 1999-08-30 14:21:24 sandervl Exp $ */
+/* $Id: controls.cpp,v 1.10 1999-08-31 17:14:51 sandervl Exp $ */
 /* File: controls.cpp -- Win32 common controls
  *
  * Copyright (c) 1999 Christoph Bratschi
@@ -38,7 +38,7 @@ void CONTROLS_Register()
   if(atom) GlobalDeleteAtom(atom);
   atom = GlobalFindAtomA(EDITCLASSNAME);
   if(atom) GlobalDeleteAtom(atom);
-  atom = GlobalFindAtomA(MDICLIENTCLASSNAME);
+  atom = GlobalFindAtomA(MDICLIENTCLASSNAMEA);
   if(atom) GlobalDeleteAtom(atom);
   //END to be removed code
 
