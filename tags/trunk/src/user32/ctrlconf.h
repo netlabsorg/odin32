@@ -1,4 +1,4 @@
-/* $Id: ctrlconf.h,v 1.2 2003-01-03 16:35:51 sandervl Exp $ */
+/* $Id: ctrlconf.h,v 1.3 2003-05-27 09:46:30 sandervl Exp $ */
 /*
  * Win32 common controls
  *
@@ -20,6 +20,9 @@
 
 #define  WIN_SuspendWndsLock()		0
 #define  WIN_RestoreWndsLock(ipreviousLock)
+
+//Set the style of a window without sending WM_STYLECHANGING/ED messages
+void WIN_SetStyle(HWND hwnd, DWORD dwStyle);
 
 //WIN31 look only -> we don't use it
 #define NC_DrawSysButton(hwnd, hdc, state)
