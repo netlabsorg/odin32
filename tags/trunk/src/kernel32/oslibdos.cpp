@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.107 2002-07-13 15:58:20 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.108 2002-08-22 14:21:26 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -2271,7 +2271,7 @@ BOOL  OSLibDosFindNextMulti(DWORD hFindFile,WIN32_FIND_DATAA *lpFindFileData,DWO
 }
 //******************************************************************************
 //******************************************************************************
-BOOL  OSLibDosFindClose(DWORD hFindFile)
+BOOL OSLibDosFindClose(DWORD hFindFile)
 {
   APIRET rc = DosFindClose((HDIR)hFindFile);
   if (rc)
@@ -2282,6 +2282,67 @@ BOOL  OSLibDosFindClose(DWORD hFindFile)
 
   SetLastError(ERROR_SUCCESS_W);
   return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+DWORD OSLibGetFileAttributes(LPSTR lpFileName)
+{
+   FILESTATUS3 statusBuf;
+   char        lOemFileName[CCHMAXPATH];
+   char       *lpszBackslash, *lpszColon;
+   APIRET      rc;
+
+   //Convert file name from Windows to OS/2 codepage
+   CharToOemA(lpFileName, lOemFileName);
+   lpszBackslash = CharPrevA(lOemFileName, lOemFileName + strlen(lOemFileName));
+   if(lpszBackslash)
+   {
+       if(*lpszBackslash == '\\')
+       {
+           lpszColon = CharPrevA(lOemFileName, lpszBackslash);
+           if(lpszColon && *lpszColon != ':') 
+           {//only rootdir is allowed to have terminating backslash
+               *lpszBackslash = 0;
+           }
+       }
+       else
+       if(*lpszBackslash == ':')
+       {//root dir must end with backslash
+           strcat(lOemFileName, "\\");
+       }
+   }
+
+   rc = DosQueryPathInfo(lOemFileName, FIL_STANDARD, &statusBuf, sizeof(statusBuf));
+   if(rc == ERROR_TOO_MANY_OPEN_FILES)
+   {
+       LONG  reqCount = 2;
+       ULONG maxFiles;
+
+       if(DosSetRelMaxFH(&reqCount, &maxFiles) == NO_ERROR)
+           rc = DosQueryPathInfo(lOemFileName, FIL_STANDARD, &statusBuf, sizeof(statusBuf));
+   }
+
+   if(rc == NO_ERROR)
+   {
+      DWORD status = 0;
+      if(!(statusBuf.attrFile & NOT_NORMAL))
+          status |= FILE_ATTRIBUTE_NORMAL_W;
+      if(statusBuf.attrFile & FILE_READONLY)
+          status |= FILE_ATTRIBUTE_READONLY_W;
+      if(statusBuf.attrFile & FILE_HIDDEN)
+          status |= FILE_ATTRIBUTE_HIDDEN_W;
+      if(statusBuf.attrFile & FILE_SYSTEM)
+          status |= FILE_ATTRIBUTE_SYSTEM_W;
+      if(statusBuf.attrFile & FILE_DIRECTORY)
+          status |= FILE_ATTRIBUTE_DIRECTORY_W;
+      if(statusBuf.attrFile & FILE_ARCHIVED)
+          status |= FILE_ATTRIBUTE_ARCHIVE_W;
+
+      SetLastError(ERROR_SUCCESS_W);
+      return status;
+   }
+   SetLastError(error2WinError(rc));
+   return -1;
 }
 //******************************************************************************
 #define FSATTACH_SIZE 256
