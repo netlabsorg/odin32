@@ -1,4 +1,4 @@
-/* $Id: oslibdos.h,v 1.51 2003-01-10 12:57:14 sandervl Exp $ */
+/* $Id: oslibdos.h,v 1.52 2003-03-27 14:00:53 sandervl Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -355,9 +355,6 @@ BOOL  OSLibDosQueryAffinity(DWORD fMaskType, DWORD *pdwThreadAffinityMask);
 
 DWORD OSLibDosDevConfig(PVOID pdevinfo, ULONG item);
 void  OSLibDosSleep(ULONG msecs);
-void  OSLibDosExitThread(ULONG retcode);
-
-DWORD OSLibDosSetPriority(ULONG tid, int priority);
 
 //functions for physical disk & partition information
 DWORD OSLibDosGetNumPhysDrives();

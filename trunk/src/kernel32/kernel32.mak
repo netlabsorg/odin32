@@ -1,4 +1,4 @@
-# $Id: kernel32.mak,v 1.42 2003-03-06 10:44:33 sandervl Exp $
+# $Id: kernel32.mak,v 1.43 2003-03-27 14:00:52 sandervl Exp $
 
 #
 # Odin32 API
@@ -99,6 +99,8 @@ $(OBJDIR)\windllbase.obj \
 $(OBJDIR)\winexebase.obj \
 $(OBJDIR)\time.obj \
 $(OBJDIR)\mmap.obj \
+$(OBJDIR)\mmapview.obj \
+$(OBJDIR)\mmapdup.obj \
 $(OBJDIR)\winimagepe2lx.obj \
 $(OBJDIR)\winimagepeldr.obj \
 $(OBJDIR)\windllpe2lx.obj \
@@ -137,6 +139,7 @@ $(OBJDIR)\dbglocal.obj \
 $(OBJDIR)\registry.obj \
 $(OBJDIR)\queue.obj \
 $(OBJDIR)\hmthread.obj \
+$(OBJDIR)\oslibthread.obj \
 $(OBJDIR)\hmnpipe.obj \
 $(OBJDIR)\hmdisk.obj \
 $(OBJDIR)\oslibcdio.obj \

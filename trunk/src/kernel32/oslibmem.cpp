@@ -1,4 +1,4 @@
-/* $Id: oslibmem.cpp,v 1.6 2003-03-06 10:44:34 sandervl Exp $ */
+/* $Id: oslibmem.cpp,v 1.7 2003-03-27 14:00:53 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -43,6 +43,7 @@
 
 //******************************************************************************
 //TODO: Check if this works for code aliases...
+//NOTE: DosAliasMem fails if the address isn't page aligned
 //******************************************************************************
 DWORD OSLibDosAliasMem(LPVOID pb, ULONG cb, LPVOID *ppbAlias, ULONG fl)
 {
