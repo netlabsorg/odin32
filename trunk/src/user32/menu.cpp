@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.41 2001-11-24 13:55:13 sandervl Exp $*/
+/* $Id: menu.cpp,v 1.42 2001-11-30 13:53:49 sandervl Exp $*/
 /*
  * Menu functions
  *
@@ -35,6 +35,8 @@
 #include "pmwindow.h"
 #include "win32wmisc.h"
 #include "oslibmsg.h"
+#include "oslibwin.h"
+#include "syscolor.h"
 
 #define DBG_LOCALLOG    DBG_menu
 #include "dbglocal.h"
@@ -1149,7 +1151,13 @@ static void MENU_DrawMenuItem( HWND hwnd, HMENU hmenu, HWND hwndOwner, HDC hdc, 
     //CB: todo: does Win98 use DrawEdge for menubars?
 
     if ((lpitem->fState & MF_HILITE) && !(IS_BITMAP_ITEM(lpitem->fType)))
+#ifdef __WIN32OS2__
+            if(fOS2Look) 
+                 FillRect( hdc, &rect, GetOS2ColorBrush(PMSYSCLR_MENUHILITEBGND) );
+            else FillRect( hdc, &rect, GetSysColorBrush(COLOR_HIGHLIGHT) );
+#else
             FillRect( hdc, &rect, GetSysColorBrush(COLOR_HIGHLIGHT) );
+#endif
     else {
         //SvL: TODO: Bug in GDI32; draws black rectangle instead of menu color
         ///          for everything except the 1st menu item
