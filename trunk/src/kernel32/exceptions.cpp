@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.28 1999-11-03 21:01:14 phaller Exp $ */
+/* $Id: exceptions.cpp,v 1.29 1999-11-14 17:25:04 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -521,7 +521,6 @@ void KillWin32Process(void)
   excptnr   = getEAX();
   excptaddr = getEBX();
 
-  dprintf(("KERNEL32: KillWin32Process: Do you feel lucky, punk? (FS=%d)!\n", GetFS()));
   //Restore original OS/2 TIB selector
   RestoreOS2FS();
 
@@ -946,7 +945,7 @@ ULONG APIENTRY OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
   case XCPT_FLOAT_DENORMAL_OPERAND:
   case XCPT_FLOAT_DIVIDE_BY_ZERO:
   case XCPT_FLOAT_INEXACT_RESULT:
-  case XCPT_FLOAT_INVALID_OPERATION:
+//  case XCPT_FLOAT_INVALID_OPERATION:
   case XCPT_FLOAT_OVERFLOW:
   case XCPT_FLOAT_STACK_CHECK:
   case XCPT_FLOAT_UNDERFLOW:
