@@ -1,4 +1,4 @@
-# $Id: libconv.mak,v 1.2 2002-04-07 22:40:16 bird Exp $
+# $Id: libconv.mak,v 1.3 2002-08-22 02:09:44 bird Exp $
 
 #
 # Makefile for the libconv tool.
@@ -6,24 +6,23 @@
 # Copyright (c) 2002 knut st. osmundsen (bird@anduin.net)
 #
 
-
 #
-# Setup.
+# Setup config
 #
 PATH_ROOT = ..\..\..\..
-!include $(PATH_ROOT)\make\setup.mak
-
-
-#
-# Config.
-#
-TARGET_NAME = libconv
-MAKEFILE    = $(TARGET_NAME).mak
-ALL_INCLUDES= -I../include/kLib -I../include
-PATH_BIN    = $(PATH_TOOLS)
+!include $(PATH_ROOT)\$(BUILD_SETUP_MAK)
 
 #
-# Process
+# Target config
+#
+TARGET_NAME     = libconv
+TARGET_PUBNAME  = $(PATH_TOOLS)\$(TARGET_NAME).$(TARGET_EXT)
+TARGET_NEEDED   = 1
+ALL_INCLUDES    = -I../include
+MAKEFILE        = $(TARGET_NAME).mak
+
+#
+# Rules config
 #
 !include $(MAKE_INCLUDE_PROCESS)
 
