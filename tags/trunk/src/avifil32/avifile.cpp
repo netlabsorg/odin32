@@ -1,30 +1,24 @@
-/* $Id: avifile.cpp,v 1.7 2000-11-19 13:12:09 sandervl Exp $ */
 /*				   
  * Copyright 1999 Marcus Meissner
  */
-#include <string.h>
-#include <stdio.h>
-#include <assert.h>
-
+#ifdef __WIN32OS2__
 #include <os2win.h>
 #define CINTERFACE
 #define ICOM_CINTERFACE 1
 #define INITGUID
+#endif
+#include <string.h>
+#include <stdio.h>
+#include <assert.h>
 
 #include "winbase.h"
-#include "vfw.h"
-#include "wine/winestring.h"
-////#include "driver.h"
+#include "winnls.h"
 #include "mmsystem.h"
 #include "winerror.h"
-#include "debugstr.h"
+#include "vfw.h"
 #include "debugtools.h"
 
-#include <misc.h>
-
-DECLARE_DEBUG_CHANNEL(avifile)
-//DECLARE_DEBUG_CHANNEL(msvideo)
-//DECLARE_DEBUG_CHANNEL(relay)
+DEFAULT_DEBUG_CHANNEL(avifile);
 
 static HRESULT WINAPI IAVIFile_fnQueryInterface(IAVIFile* iface,REFIID refiid,LPVOID *obj);
 static ULONG WINAPI IAVIFile_fnAddRef(IAVIFile* iface);
@@ -110,6 +104,9 @@ typedef struct IAVIStreamImpl {
 	    LPVOID	lpPrevFormat; /* pointer to decompressed info later */
 } IAVIStreamImpl;
 
+/***********************************************************************
+ *		AVIFileInit
+ */
 void WINAPI
 AVIFileInit(void) {
 	FIXME("(),stub!\n");
@@ -124,10 +121,8 @@ typedef struct IAVIFileImpl {
 
 static HRESULT WINAPI IAVIFile_fnQueryInterface(IAVIFile* iface,REFIID refiid,LPVOID *obj) {
 	ICOM_THIS(IAVIFileImpl,iface);
-	char    xrefiid[50];
 
-	WINE_StringFromCLSID((LPCLSID)refiid,xrefiid);
-	TRACE_(relay)("(%p)->QueryInterface(%s,%p)\n",This,xrefiid,obj);
+	TRACE("(%p)->QueryInterface(%s,%p)\n",This,debugstr_guid(refiid),obj);
 	if (	!memcmp(&IID_IUnknown,refiid,sizeof(IID_IUnknown)) ||
 		!memcmp(&IID_IAVIFile,refiid,sizeof(IID_IAVIFile))
 	) {
@@ -140,14 +135,14 @@ static HRESULT WINAPI IAVIFile_fnQueryInterface(IAVIFile* iface,REFIID refiid,LP
 static ULONG WINAPI IAVIFile_fnAddRef(IAVIFile* iface) {
 	ICOM_THIS(IAVIFileImpl,iface);
 	
-	FIXME_(relay)("(%p)->AddRef()\n",iface);
+	FIXME("(%p)->AddRef()\n",iface);
 	return ++(This->ref);
 }
 
 static ULONG WINAPI IAVIFile_fnRelease(IAVIFile* iface) {
 	ICOM_THIS(IAVIFileImpl,iface);
 	
-	FIXME_(relay)("(%p)->Release()\n",iface);
+	FIXME("(%p)->Release()\n",iface);
 	if (!--(This->ref)) {
 		HeapFree(GetProcessHeap(),0,iface);
 		return 0;
@@ -215,32 +210,30 @@ static HRESULT WINAPI IAVIFile_fnDeleteStream(IAVIFile*iface,DWORD fccType,LONG 
 	return E_FAIL;
 }
 
+/***********************************************************************
+ *		AVIFileOpenA
+ */
 HRESULT WINAPI AVIFileOpenA(
 	PAVIFILE * ppfile,LPCSTR szFile,UINT uMode,LPCLSID lpHandler
 ) {
-	char	buf[80];
 	IAVIFileImpl	*iavi;
 
-
-	if (HIWORD(lpHandler))
-		WINE_StringFromCLSID(lpHandler,buf);
-	else
-		sprintf(buf,"<clsid-0x%04lx>",(DWORD)lpHandler);
-
-	FIXME("(%p,%s,0x%08lx,%s),stub!\n",ppfile,szFile,(DWORD)uMode,buf);
+	FIXME("(%p,%s,0x%08lx,%s),stub!\n",ppfile,szFile,(DWORD)uMode,debugstr_guid(lpHandler));
 	iavi = (IAVIFileImpl*)HeapAlloc(GetProcessHeap(),HEAP_ZERO_MEMORY,sizeof(IAVIFileImpl));
 	iavi->ref = 1;
 	ICOM_VTBL(iavi) = &iavift;
-        *ppfile = (PAVIFILE)iavi;
+#ifdef __WIN32OS2__
+	*ppfile = (PAVIFILE)iavi;
+#else
+	*ppfile = (LPVOID)iavi;
+#endif
 	return S_OK;
 }
 
 static HRESULT WINAPI IAVIStream_fnQueryInterface(IAVIStream*iface,REFIID refiid,LPVOID *obj) {
 	ICOM_THIS(IAVIStreamImpl,iface);
-	char    xrefiid[50];
 
-	WINE_StringFromCLSID((LPCLSID)refiid,xrefiid);
-	TRACE_(relay)("(%p)->QueryInterface(%s,%p)\n",This,xrefiid,obj);
+	TRACE("(%p)->QueryInterface(%s,%p)\n",This,debugstr_guid(refiid),obj);
 	if (	!memcmp(&IID_IUnknown,refiid,sizeof(IID_IUnknown)) ||
 		!memcmp(&IID_IAVIStream,refiid,sizeof(IID_IAVIStream))
 	) {
@@ -254,14 +247,14 @@ static HRESULT WINAPI IAVIStream_fnQueryInterface(IAVIStream*iface,REFIID refiid
 static ULONG WINAPI IAVIStream_fnAddRef(IAVIStream*iface) {
 	ICOM_THIS(IAVIStreamImpl,iface);
 	
-	FIXME_(relay)("(%p)->AddRef()\n",iface);
+	FIXME("(%p)->AddRef()\n",iface);
 	return ++(This->ref);
 }
 
 static ULONG WINAPI IAVIStream_fnRelease(IAVIStream* iface) {
 	ICOM_THIS(IAVIStreamImpl,iface);
 	
-	FIXME_(relay)("(%p)->Release()\n",iface);
+	FIXME("(%p)->Release()\n",iface);
 	if (!--(This->ref)) {
 		HeapFree(GetProcessHeap(),0,This);
 		return 0;
@@ -289,8 +282,8 @@ static HRESULT WINAPI IAVIStream_fnReadFormat(IAVIStream*iface,LONG pos,LPVOID f
 	return E_FAIL;
 }
 
-/*****************************************************************************
- *						[IAVIStream::SetFormat]
+/***********************************************************************
+ *		IAVIStream::SetFormat
  */
 static HRESULT WINAPI IAVIStream_fnSetFormat(IAVIStream*iface,LONG pos,LPVOID format,LONG formatsize) {
 	IAVIStreamImpl	*as = (IAVIStreamImpl*)iface;
@@ -338,22 +331,37 @@ static HRESULT WINAPI IAVIStream_fnWrite(IAVIStream*iface,LONG start,LONG sample
 	FIXME("(%p)->Write(%ld,%ld,%p,%ld,0x%08lx,%p,%p)\n",iface,start,samples,buffer,buffersize,flags,sampwritten,byteswritten);
 
 	ICCompress(
-                as->hic,flags,
-                (LPBITMAPINFOHEADER)as->lpCompressFormat,
-                as->compbuffer,
-                (LPBITMAPINFOHEADER)as->lpInputFormat,
-                buffer,
-                &ckid,&xflags,
-                as->curframe,0xffffff/*framesize*/,as->aco.dwQuality,
-                (LPBITMAPINFOHEADER)as->lpPrevFormat,as->lpPrev
+		as->hic,flags,
+#ifdef __WIN32OS2__
+                (LPBITMAPINFOHEADER)
+#endif
+		as->lpCompressFormat,
+		as->compbuffer,
+#ifdef __WIN32OS2__
+                (LPBITMAPINFOHEADER)
+#endif
+		as->lpInputFormat,buffer,
+		&ckid,&xflags,
+		as->curframe,0xffffff/*framesize*/,as->aco.dwQuality,
+#ifdef __WIN32OS2__
+		(LPBITMAPINFOHEADER)as->lpPrevFormat,as->lpPrev
+#else
+		as->lpPrevFormat,as->lpPrev
+#endif
 	);
 	ICDecompress(
-                as->hic,
-                flags,  /* FIXME: check */
-                (LPBITMAPINFOHEADER)as->lpCompressFormat,
-                as->compbuffer,
-                (LPBITMAPINFOHEADER)as->decompformat,
-                as->decompbuffer
+		as->hic,
+		flags,	/* FIXME: check */
+#ifdef __WIN32OS2__
+                (LPBITMAPINFOHEADER)
+#endif
+		as->lpCompressFormat,
+		as->compbuffer,
+#ifdef __WIN32OS2__
+                (LPBITMAPINFOHEADER)
+#endif
+		as->decompformat,
+		as->decompbuffer
 	);
 	/* We now have a prev format for the next compress ... */
 	as->lpPrevFormat = as->decompformat;
@@ -380,24 +388,37 @@ static HRESULT WINAPI IAVIStream_fnSetInfo(IAVIStream*iface,AVISTREAMINFOW*info,
 	return E_FAIL;
 }
 
+/***********************************************************************
+ *		AVIFileCreateStreamA
+ */
 HRESULT WINAPI AVIFileCreateStreamA(PAVIFILE iface,PAVISTREAM *ppavi,AVISTREAMINFOA * psi) {
 	AVISTREAMINFOW	psiw;
 	
 	/* Only the szName at the end is different */
 	memcpy(&psiw,psi,sizeof(*psi)-sizeof(psi->szName));
-	lstrcpynAtoW(psiw.szName,psi->szName,sizeof(psi->szName));
+        MultiByteToWideChar( CP_ACP, 0, psi->szName, -1,
+                             psiw.szName, sizeof(psiw.szName) / sizeof(WCHAR) );
 	return IAVIFile_CreateStream(iface,ppavi,&psiw);
 }
 
+/***********************************************************************
+ *		AVIFileCreateStreamW
+ */
 HRESULT WINAPI AVIFileCreateStreamW(IAVIFile*iface,PAVISTREAM*avis,AVISTREAMINFOW*asi) {
 	return IAVIFile_CreateStream(iface,avis,asi);
 }
 
 
+/***********************************************************************
+ *		AVIFileGetStream
+ */
 HRESULT WINAPI AVIFileGetStream(IAVIFile*iface,PAVISTREAM*avis,DWORD fccType,LONG lParam) {
 	return IAVIFile_GetStream(iface,avis,fccType,lParam);
 }
 
+/***********************************************************************
+ *		AVIFileInfoA
+ */
 HRESULT WINAPI AVIFileInfoA(PAVIFILE iface,LPAVIFILEINFOA afi,LONG size) {
 	AVIFILEINFOW	afiw;
 	HRESULT		hres;
@@ -406,15 +427,23 @@ HRESULT WINAPI AVIFileInfoA(PAVIFILE iface,LPAVIFILEINFOA afi,LONG size) {
 		return AVIERR_BADSIZE;
 	hres = IAVIFile_Info(iface,&afiw,sizeof(afiw));
 	memcpy(afi,&afiw,sizeof(*afi)-sizeof(afi->szFileType));
-	lstrcpynWtoA(afi->szFileType,afiw.szFileType,sizeof(afi->szFileType));
+        WideCharToMultiByte( CP_ACP, 0, afiw.szFileType, -1,
+                             afi->szFileType, sizeof(afi->szFileType), NULL, NULL );
+        afi->szFileType[sizeof(afi->szFileType)-1] = 0;
 	return hres;
 }
 
+/***********************************************************************
+ *		AVIStreamInfoW
+ */
 HRESULT WINAPI AVIStreamInfoW(PAVISTREAM iface,AVISTREAMINFOW *asi,LONG
  size) {
  	return IAVIFile_Info(iface,asi,size);
 }
 
+/***********************************************************************
+ *		AVIStreamInfoA
+ */
 HRESULT WINAPI AVIStreamInfoA(PAVISTREAM iface,AVISTREAMINFOA *asi,LONG
  size) {
  	AVISTREAMINFOW	asiw;
@@ -424,14 +453,22 @@ HRESULT WINAPI AVIStreamInfoA(PAVISTREAM iface,AVISTREAMINFOA *asi,LONG
 		return AVIERR_BADSIZE;
  	hres = IAVIFile_Info(iface,&asiw,sizeof(asiw));
 	memcpy(asi,&asiw,sizeof(asiw)-sizeof(asiw.szName));
-	lstrcpynWtoA(asi->szName,asiw.szName,sizeof(asi->szName));
+        WideCharToMultiByte( CP_ACP, 0, asiw.szName, -1,
+                             asi->szName, sizeof(asi->szName), NULL, NULL );
+        asi->szName[sizeof(asi->szName)-1] = 0;
 	return hres;
 }
 
+/***********************************************************************
+ *		AVIFileInfoW
+ */
 HRESULT WINAPI AVIFileInfoW(PAVIFILE iface,LPAVIFILEINFOW afi,LONG size) {
 	return IAVIFile_Info(iface,afi,size);
 }
 
+/***********************************************************************
+ *		AVIMakeCompressedStream
+ */
 HRESULT WINAPI AVIMakeCompressedStream(PAVISTREAM *ppsCompressed,PAVISTREAM ppsSource,AVICOMPRESSOPTIONS *aco,CLSID *pclsidHandler) {
 	char			fcc[5];
 	IAVIStreamImpl	*as;
@@ -468,37 +505,63 @@ HRESULT WINAPI AVIMakeCompressedStream(PAVISTREAM *ppsCompressed,PAVISTREAM ppsS
 		icf.lQuality 	= aco->dwQuality;
 		icf.lKeyRate 	= aco->dwKeyFrameEvery;
 
-                icf.GetData = (LONG (_stdcall *)(LPARAM,LONG,LPVOID,LONG)) 0xdead4242;
-                icf.PutData = (LONG (_stdcall *)(LPARAM,LONG,LPVOID,LONG)) 0xdead4243;
+#ifdef __WIN32OS2__
+		*(DWORD *)&icf.GetData = 0xdead4242;
+		*(DWORD *)&icf.PutData = 0xdead4243;
+#else
+		icf.GetData = (void *)0xdead4242;
+		icf.PutData = (void *)0xdead4243;
+#endif
 		ICSendMessage(as->hic,ICM_COMPRESS_FRAMES_INFO,(LPARAM)&icf,sizeof(icf));
 	}
 	return S_OK;
 }
 
+/***********************************************************************
+ *		AVIStreamSetFormat
+ */
 HRESULT WINAPI AVIStreamSetFormat(PAVISTREAM iface,LONG pos,LPVOID format,LONG formatsize) {
 	return IAVIStream_SetFormat(iface,pos,format,formatsize);
 }
 
+/***********************************************************************
+ *		AVIStreamReadFormat
+ */
 HRESULT WINAPI AVIStreamReadFormat(PAVISTREAM iface,LONG pos,LPVOID format,LONG *formatsize) {
 	return IAVIStream_ReadFormat(iface,pos,format,formatsize);
 }
 
+/***********************************************************************
+ *		AVIStreamWrite(
+ */
 HRESULT WINAPI AVIStreamWrite(PAVISTREAM iface,LONG start,LONG samples,LPVOID buffer,LONG buffersize,DWORD flags,LONG *sampwritten,LONG *byteswritten) {
 	return IAVIStream_Write(iface,start,samples,buffer,buffersize,flags,sampwritten,byteswritten);
 }
 
+/***********************************************************************
+ *		AVIStreamRead
+ */
 HRESULT WINAPI AVIStreamRead(PAVISTREAM iface,LONG start,LONG samples,LPVOID buffer,LONG buffersize,LONG *bytesread,LONG *samplesread) {
 	return IAVIStream_Read(iface,start,samples,buffer,buffersize,bytesread,samplesread);
 }
 
+/***********************************************************************
+ *		AVIStreamWriteData
+ */
 HRESULT WINAPI AVIStreamWriteData(PAVISTREAM iface,DWORD fcc,LPVOID lp,LONG size) {
 	return IAVIStream_WriteData(iface,fcc,lp,size);
 }
 
+/***********************************************************************
+ *		AVIStreamReadData
+ */
 HRESULT WINAPI AVIStreamReadData(PAVISTREAM iface,DWORD fcc,LPVOID lp,LONG *lpread) {
 	return IAVIStream_ReadData(iface,fcc,lp,lpread);
 }
 
+/***********************************************************************
+ *		AVIStreamStart
+ */
 LONG WINAPI AVIStreamStart(PAVISTREAM iface) {
 	AVISTREAMINFOW	si;
 
@@ -506,6 +569,9 @@ LONG WINAPI AVIStreamStart(PAVISTREAM iface) {
 	return si.dwStart;
 }
 
+/***********************************************************************
+ *		AVIStreamLength
+ */
 LONG WINAPI AVIStreamLength(PAVISTREAM iface) {
 	AVISTREAMINFOW	si;
 	HRESULT			ret;
@@ -516,28 +582,58 @@ LONG WINAPI AVIStreamLength(PAVISTREAM iface) {
 	return si.dwLength;
 }
 
+/***********************************************************************
+ *		AVIStreamRelease
+ */
 ULONG WINAPI AVIStreamRelease(PAVISTREAM iface) {
 	return IAVIStream_Release(iface);
 }
 
+/***********************************************************************
+ *		AVIStreamGetFrameOpen
+ */
 PGETFRAME WINAPI AVIStreamGetFrameOpen(PAVISTREAM iface,LPBITMAPINFOHEADER bmi) {
-	FIXME_(msvideo)("(%p)->(%p),stub!\n",iface,bmi);
+	FIXME("(%p)->(%p),stub!\n",iface,bmi);
 	return NULL;
 }
 
+/***********************************************************************
+ *		AVIStreamGetFrame
+ */
 LPVOID WINAPI AVIStreamGetFrame(PGETFRAME pg,LONG pos) {
 	return IGetFrame_GetFrame(pg,pos);
 }
 
+/***********************************************************************
+ *		AVIStreamGetFrameClose
+ */
 HRESULT WINAPI AVIStreamGetFrameClose(PGETFRAME pg) {
 	if (pg) IGetFrame_Release(pg);
 	return 0;
 }
 
+/***********************************************************************
+ *		AVIFileRelease
+ */
 ULONG WINAPI AVIFileRelease(PAVIFILE iface) {
 	return IAVIFile_Release(iface);
 }
 
+/***********************************************************************
+ *		AVIFileExit
+ */
 void WINAPI AVIFileExit(void) {
 	FIXME("(), stub.\n");
 }
+
+#ifdef __WIN32OS2__
+LONG WINAPI AVIStreamTimeToSample (PAVISTREAM pavi, LONG lTime)
+{
+    return 0;
+}
+
+LONG WINAPI AVIStreamSampleToTime (PAVISTREAM pavi, LONG lSample)
+{
+    return 0;
+}
+#endif
