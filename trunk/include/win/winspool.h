@@ -1,5 +1,4 @@
-/* $Id: winspool.h,v 1.1 1999-05-24 20:19:23 ktk Exp $ */
-
+/* $Id: winspool.h,v 1.2 1999-11-02 19:06:43 sandervl Exp $ */
 /* Definitions for printing
  *
  * Copyright 1998 Huw Davies, Andreas Mohr
@@ -19,8 +18,6 @@ extern "C" {
 #endif
 
 /* DEFINES */
-#define INT_PD_DEFAULT_DEVMODE  1
-#define INT_PD_DEFAULT_MODEL    2
 
 #define PRINTER_ATTRIBUTE_QUEUED         0x00000001
 #define PRINTER_ATTRIBUTE_DIRECT         0x00000002
@@ -58,6 +55,34 @@ extern "C" {
 #define PRINTER_ENUM_ICON6       0x00200000
 #define PRINTER_ENUM_ICON7       0x00400000
 #define PRINTER_ENUM_ICON8       0x00800000
+
+
+/* various printer statuses */
+#define PRINTER_STATUS_PAUSED            0x00000001
+#define PRINTER_STATUS_ERROR             0x00000002
+#define PRINTER_STATUS_PENDING_DELETION  0x00000004
+#define PRINTER_STATUS_PAPER_JAM         0x00000008
+#define PRINTER_STATUS_PAPER_OUT         0x00000010
+#define PRINTER_STATUS_MANUAL_FEED       0x00000020
+#define PRINTER_STATUS_PAPER_PROBLEM     0x00000040
+#define PRINTER_STATUS_OFFLINE           0x00000080
+#define PRINTER_STATUS_IO_ACTIVE         0x00000100
+#define PRINTER_STATUS_BUSY              0x00000200
+#define PRINTER_STATUS_PRINTING          0x00000400
+#define PRINTER_STATUS_OUTPUT_BIN_FULL   0x00000800
+#define PRINTER_STATUS_NOT_AVAILABLE     0x00001000
+#define PRINTER_STATUS_WAITING           0x00002000
+#define PRINTER_STATUS_PROCESSING        0x00004000
+#define PRINTER_STATUS_INITIALIZING      0x00008000
+#define PRINTER_STATUS_WARMING_UP        0x00010000
+#define PRINTER_STATUS_TONER_LOW         0x00020000
+#define PRINTER_STATUS_NO_TONER          0x00040000
+#define PRINTER_STATUS_PAGE_PUNT         0x00080000
+#define PRINTER_STATUS_USER_INTERVENTION 0x00100000
+#define PRINTER_STATUS_OUT_OF_MEMORY     0x00200000
+#define PRINTER_STATUS_DOOR_OPEN         0x00400000
+#define PRINTER_STATUS_SERVER_UNKNOWN    0x00800000
+#define PRINTER_STATUS_POWER_SAVE        0x01000000
 
 /* TYPES */
 typedef struct _PRINTER_DEFAULTSA {
@@ -108,6 +133,36 @@ typedef struct _DRIVER_INFO_2W {
 DECL_WINELIB_TYPE_AW(DRIVER_INFO_2)
 DECL_WINELIB_TYPE_AW(PDRIVER_INFO_2)
 DECL_WINELIB_TYPE_AW(LPDRIVER_INFO_2)
+
+typedef struct _DRIVER_INFO_3A {
+  DWORD cVersion;
+  LPSTR pName;
+  LPSTR pEnvironment;
+  LPSTR pDriverPath;
+  LPSTR pDataFile;
+  LPSTR pConfigFile;
+  LPSTR pHelpFile;
+  LPSTR pDependentFiles;
+  LPSTR pMonitorName;
+  LPSTR pDefaultDataType;
+} DRIVER_INFO_3A, *PDRIVER_INFO_3A, *LPDRIVER_INFO_3A;
+
+typedef struct _DRIVER_INFO_3W {
+  DWORD cVersion;
+  LPWSTR pName;
+  LPWSTR pEnvironment;
+  LPWSTR pDriverPath;
+  LPWSTR pDataFile;
+  LPWSTR pConfigFile;
+  LPWSTR pHelpFile;
+  LPWSTR pDependentFiles;
+  LPWSTR pMonitorName;
+  LPWSTR pDefaultDataType;
+} DRIVER_INFO_3W, *PDRIVER_INFO_3W, *LPDRIVER_INFO_3W;
+
+DECL_WINELIB_TYPE_AW(DRIVER_INFO_3)
+DECL_WINELIB_TYPE_AW(PDRIVER_INFO_3)
+DECL_WINELIB_TYPE_AW(LPDRIVER_INFO_3)
 
 typedef struct _PRINTER_INFO_1A {
   DWORD   Flags;
@@ -220,6 +275,97 @@ DECL_WINELIB_TYPE_AW(PRINTER_INFO_5)
 DECL_WINELIB_TYPE_AW(PPRINTER_INFO_5)
 DECL_WINELIB_TYPE_AW(LPPRINTER_INFO_5)
 
+typedef struct _JOB_INFO_1A {
+  DWORD JobID;
+  LPSTR pPrinterName;
+  LPSTR pMachineName;
+  LPSTR pUserName;
+  LPSTR pDocument;
+  LPSTR pDatatype;
+  LPSTR pStatus;
+  DWORD Status;
+  DWORD Priority;
+  DWORD Position;
+  DWORD TotalPages;
+  DWORD PagesPrinted;
+  SYSTEMTIME Submitted;
+} JOB_INFO_1A, *PJOB_INFO_1A, *LPJOB_INFO_1A;
+
+typedef struct _JOB_INFO_1W {
+  DWORD JobID;
+  LPWSTR pPrinterName;
+  LPWSTR pMachineName;
+  LPWSTR pUserName;
+  LPWSTR pDocument;
+  LPWSTR pDatatype;
+  LPWSTR pStatus;
+  DWORD Status;
+  DWORD Priority;
+  DWORD Position;
+  DWORD TotalPages;
+  DWORD PagesPrinted;
+  SYSTEMTIME Submitted;
+} JOB_INFO_1W, *PJOB_INFO_1W, *LPJOB_INFO_1W;
+
+DECL_WINELIB_TYPE_AW(JOB_INFO_1)
+DECL_WINELIB_TYPE_AW(PJOB_INFO_1)
+DECL_WINELIB_TYPE_AW(LPJOB_INFO_1)
+
+typedef struct _JOB_INFO_2A {
+  DWORD JobID;
+  LPSTR pPrinterName;
+  LPSTR pMachineName;
+  LPSTR pUserName;
+  LPSTR pDocument;
+  LPSTR pNotifyName;
+  LPSTR pDatatype;
+  LPSTR pPrintProcessor;
+  LPSTR pParameters;
+  LPSTR pDriverName;
+  LPDEVMODEA pDevMode;
+  LPSTR pStatus;
+  PSECURITY_DESCRIPTOR pSecurityDescriptor;
+  DWORD Status;
+  DWORD Priority;
+  DWORD Position;
+  DWORD StartTime;
+  DWORD UntilTime;
+  DWORD TotalPages;
+  DWORD Size;
+  SYSTEMTIME Submitted;
+  DWORD Time;
+  DWORD PagesPrinted;
+} JOB_INFO_2A, *PJOB_INFO_2A, *LPJOB_INFO_2A;
+  
+typedef struct _JOB_INFO_2W {
+  DWORD JobID;
+  LPWSTR pPrinterName;
+  LPWSTR pMachineName;
+  LPWSTR pUserName;
+  LPWSTR pDocument;
+  LPWSTR pNotifyName;
+  LPWSTR pDatatype;
+  LPWSTR pPrintProcessor;
+  LPWSTR pParameters;
+  LPWSTR pDriverName;
+  LPDEVMODEW pDevMode;
+  LPWSTR pStatus;
+  PSECURITY_DESCRIPTOR pSecurityDescriptor;
+  DWORD Status;
+  DWORD Priority;
+  DWORD Position;
+  DWORD StartTime;
+  DWORD UntilTime;
+  DWORD TotalPages;
+  DWORD Size;
+  SYSTEMTIME Submitted;
+  DWORD Time;
+  DWORD PagesPrinted;
+} JOB_INFO_2W, *PJOB_INFO_2W, *LPJOB_INFO_2W;
+  
+DECL_WINELIB_TYPE_AW(JOB_INFO_2)
+DECL_WINELIB_TYPE_AW(PJOB_INFO_2)
+DECL_WINELIB_TYPE_AW(LPJOB_INFO_2)
 typedef struct _PRINTER_NOTIFY_INFO_DATA {
     WORD Type;
     WORD Field;
@@ -242,27 +388,17 @@ typedef struct _PRINTER_NOTIFY_INFO {
     PRINTER_NOTIFY_INFO_DATA aData[1];
 } PRINTER_NOTIFY_INFO, *PPRINTER_NOTIFY_INFO, *LPPRINTER_NOTIFY_INFO;
 
+
 #endif /* Status */
 
-/* DECLARATIONS */
-DWORD WINAPI DrvGetPrinterData16(LPSTR lpPrinter, LPSTR lpProfile,
-	  LPDWORD lpType, LPBYTE lpPrinterData, int cbData, LPDWORD lpNeeded);
-DWORD WINAPI DrvSetPrinterData16(LPSTR lpPrinter, LPSTR lpProfile,
-          DWORD lpType, LPBYTE lpPrinterData, DWORD dwSize);
-HANDLE16 WINAPI OpenJob16(LPSTR lpOutput, LPSTR lpTitle, HDC16 hDC);
-int WINAPI CloseJob16(HANDLE16 hJob);
-int WINAPI WriteSpool16(HANDLE16 hJob, LPSTR lpData, WORD cch);
-int WINAPI DeleteJob16(HANDLE16 hJob, WORD wNotUsed);
-int WINAPI StartSpoolPage16(HANDLE16 hJob);
-int WINAPI EndSpoolPage16(HANDLE16 hJob);
-DWORD WINAPI GetSpoolJob16(int nOption, LONG param);
-int WINAPI WriteDialog16(HANDLE16 hJob, LPSTR lpMsg, WORD cchMsg);
+  
 
-INT WINAPI DeviceCapabilitiesA(LPCSTR printer,LPCSTR target,WORD z,
-                                   LPSTR a,LPDEVMODEA b);
+/* DECLARATIONS */
+INT WINAPI DeviceCapabilitiesA(LPCSTR pDevice,LPCSTR pPort,WORD fwCapability,
+			       LPSTR pOutput, LPDEVMODEA pDevMode);
 INT WINAPI DeviceCapabilitiesW(LPCWSTR pDevice, LPCWSTR pPort,
-                                   WORD fwCapability, LPWSTR pOutput,
-                                   const DEVMODEW *pDevMode);
+			       WORD fwCapability, LPWSTR pOutput,
+			       const DEVMODEW *pDevMode);
 
 #define DeviceCapabilities WINELIB_NAME_AW(DeviceCapabilities)
 
@@ -285,6 +421,14 @@ BOOL WINAPI OpenPrinterW(LPWSTR lpPrinterName,HANDLE *phPrinter,
 
 BOOL WINAPI ClosePrinter (HANDLE phPrinter);
 
+BOOL WINAPI EnumJobsA(HANDLE hPrinter, DWORD FirstJob, DWORD NoJobs,
+		      DWORD Level, LPBYTE pJob, DWORD cbBuf, LPDWORD pcbNeeded,
+		      LPDWORD pcReturned);
+BOOL WINAPI EnumJobsW(HANDLE hPrinter, DWORD FirstJob, DWORD NoJobs,
+		      DWORD Level, LPBYTE pJob, DWORD cbBuf, LPDWORD pcbNeeded,
+		      LPDWORD pcReturned);
+#define EnumJobs WINELIB_NAME_AW(EnumJobs)
+
 BOOL  WINAPI EnumPrintersA(DWORD dwType, LPSTR lpszName,
 			       DWORD dwLevel, LPBYTE lpbPrinters,
 			       DWORD cbBuf, LPDWORD lpdwNeeded,
@@ -296,6 +440,18 @@ BOOL  WINAPI EnumPrintersW(DWORD dwType, LPWSTR lpszName,
 #define EnumPrinters WINELIB_NAME_AW(EnumPrinters)
 
 BOOL WINAPI PrinterProperties(HWND hWnd, HANDLE hPrinter);
+
+BOOL WINAPI GetPrinterDriverDirectoryA(LPSTR,LPSTR,DWORD,LPBYTE,DWORD,LPDWORD);
+BOOL WINAPI GetPrinterDriverDirectoryW(LPWSTR,LPWSTR,DWORD,LPBYTE,DWORD,LPDWORD);
+#define GetPrinterDriverDirectory WINELIB_NAME_AW(GetPrinterDriverDirectory)
+
+BOOL WINAPI GetPrinterDriverA(HANDLE hPrinter, LPSTR pEnvironment,
+			      DWORD Level, LPBYTE pDriverInfo,
+			      DWORD cbBuf, LPDWORD pcbNeeded);
+BOOL WINAPI GetPrinterDriverW(HANDLE hPrinter, LPWSTR pEnvironment,
+			      DWORD Level, LPBYTE pDriverInfo,
+			      DWORD cbBuf, LPDWORD pcbNeeded);
+#define GetPrinterDriver WINELIB_NAME_AW(GetPrinterDriver)
 
 #ifdef __cplusplus
 } /* extern "C" */
