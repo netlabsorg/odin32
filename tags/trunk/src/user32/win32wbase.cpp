@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.349 2003-01-01 14:29:44 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.350 2003-01-02 17:02:05 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2578,6 +2578,29 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx,
         }
     }
     swp.hwnd = OS2HwndFrame;
+
+    //SvL: Must also deactivate the window when hiding it or else focus won't
+    //     change. (NOTE: make sure this doesn't cause regressions (01-02-2003)
+    if((swp.fl & (SWPOS_HIDE|SWPOS_DEACTIVATE)) == (SWPOS_HIDE|SWPOS_DEACTIVATE)) 
+    {
+        //we must make sure the owner is not disabled or else the focus will
+        //be switched to the wrong window
+        Win32BaseWindow *topOwner;
+
+        if(getOwner() == NULL) {
+             windowDesktop->addRef();
+             topOwner = windowDesktop;
+        }
+        else topOwner = GetWindowFromHandle(getOwner()->GetTopParent());
+
+        if(topOwner != NULL) {
+             DWORD dwStyle = topOwner->GetWindowLong(GWL_STYLE, FALSE);
+             if(dwStyle & WS_DISABLED) {
+                 swp.fl &= ~SWPOS_DEACTIVATE;
+             }
+        }
+        else DebugInt3();
+    }
 
     if(fuFlags & SWP_SHOWWINDOW && !IsWindowVisible(getWindowHandle())) {
         setStyle(getStyle() | WS_VISIBLE);
