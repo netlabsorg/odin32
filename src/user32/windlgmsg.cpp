@@ -1,4 +1,4 @@
-/* $Id: windlgmsg.cpp,v 1.12 2002-05-17 13:12:02 sandervl Exp $ */
+/* $Id: windlgmsg.cpp,v 1.13 2002-05-28 09:40:30 sandervl Exp $ */
 /*
  * Win32 dialog message APIs for OS/2
  *
@@ -268,8 +268,10 @@ static BOOL DIALOG_IsDialogMessage( HWND hwndDlg, BOOL *translate, BOOL *dispatc
                 DWORD dw = SendMessageA( hwndDlg, DM_GETDEFID, 0, 0 );
                 if (HIWORD(dw) == DC_HASDEFID)
                 {
-                    SendMessageA( hwndDlg, WM_COMMAND,
-                                    MAKEWPARAM( LOWORD(dw), BN_CLICKED ),
+                  //@PF If DEFID button is disabled do not press it!    
+                  if (IsWindowEnabled(GetDlgItem(hwndDlg, LOWORD(dw)))) 
+                       SendMessageA( hwndDlg, WM_COMMAND,
+                                     MAKEWPARAM( LOWORD(dw), BN_CLICKED ),
                                     (LPARAM)GetDlgItem(hwndDlg, LOWORD(dw)));
                 }
                 else
