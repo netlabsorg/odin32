@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2001-05-24 17:35:35 sandervl Exp $
+# $Id: makefile,v 1.2 2001-10-10 16:22:20 phaller Exp $
 
 #
 # Odin32 API
@@ -18,6 +18,7 @@
 #
 OBJS = \
 $(OBJDIR)\iphlpapi.obj \
+$(OBJDIR)\oslibioctl.obj \
 $(OBJDIR)\iphlpapirsrc.obj \
 $(DLLENTRY)
 
