@@ -204,22 +204,22 @@ EXPORTS
    _O32_FreeDDElParam                    @830
    _O32_UnpackDDElParam                  @831
 
-   _O32_ChangeClipboardChain             @840
-   _O32_CloseClipboard                   @841
-   _O32_CountClipboardFormats            @842
-   _O32_EmptyClipboard                   @843
-   _O32_EnumClipboardFormats             @844
-   _O32_GetClipboardData                 @845
-   _O32_GetClipboardFormatName           @846
-   _O32_GetClipboardOwner                @847
-   _O32_GetClipboardViewer               @848
-   _O32_GetOpenClipboardWindow           @849
-   _O32_GetPriorityClipboardFormat       @850
-   _O32_IsClipboardFormatAvailable       @851
-   _O32_OpenClipboard                    @852
-   _O32_RegisterClipboardFormat          @853
-   _O32_SetClipboardData                 @854
-   _O32_SetClipboardViewer               @855
+;;   _O32_ChangeClipboardChain             @840
+;;   _O32_CloseClipboard                   @841
+;;   _O32_CountClipboardFormats            @842
+;;   _O32_EmptyClipboard                   @843
+;;   _O32_EnumClipboardFormats             @844
+;;   _O32_GetClipboardData                 @845
+;;   _O32_GetClipboardFormatName           @846
+;;   _O32_GetClipboardOwner                @847
+;;   _O32_GetClipboardViewer               @848
+;;   _O32_GetOpenClipboardWindow           @849
+;;   _O32_GetPriorityClipboardFormat       @850
+;;   _O32_IsClipboardFormatAvailable       @851
+;;   _O32_OpenClipboard                    @852
+;;   _O32_RegisterClipboardFormat          @853
+;;   _O32_SetClipboardData                 @854
+;;   _O32_SetClipboardViewer               @855
 
    _O32_MapVirtualKey                    @860
    _O32_GetAsyncKeyState                 @861
@@ -343,3 +343,7 @@ EXPORTS
    _GpiQueryDCData @ 7000
    _O32_CreateBitmapFromPMHandle         @7001
    _O32_GetStartupInfo                   @7002
+
+   _O32_CreatePaletteFromPMHandle        @7003
+   _O32_GetPMHandleFromGDIHandle         @7004
+

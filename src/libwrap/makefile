@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2004-04-13 14:15:54 sandervl Exp $
+# $Id: makefile,v 1.4 2004-04-14 11:04:43 sandervl Exp $
 
 #
 # Odin32 API
@@ -44,7 +44,7 @@ $(OBJDIR)\O32_BringWindowToTop.obj \
 $(OBJDIR)\O32_CallMsgFilter.obj \
 $(OBJDIR)\O32_CallNextHookEx.obj \
 $(OBJDIR)\O32_CallWindowProc.obj \
-$(OBJDIR)\O32_ChangeClipboardChain.obj \
+##$(OBJDIR)\O32_ChangeClipboardChain.obj \
 $(OBJDIR)\O32_CharLower.obj \
 $(OBJDIR)\O32_CharLowerBuff.obj \
 $(OBJDIR)\O32_CharNext.obj \
@@ -59,7 +59,7 @@ $(OBJDIR)\O32_ChooseFont.obj \
 $(OBJDIR)\O32_Chord.obj \
 $(OBJDIR)\O32_ClientToScreen.obj \
 $(OBJDIR)\O32_ClipCursor.obj \
-$(OBJDIR)\O32_CloseClipboard.obj \
+##$(OBJDIR)\O32_CloseClipboard.obj \
 $(OBJDIR)\O32_CloseEnhMetaFile.obj \
 $(OBJDIR)\O32_CloseFigure.obj \
 $(OBJDIR)\O32_CloseHandle.obj \
@@ -73,7 +73,7 @@ $(OBJDIR)\O32_CopyFile.obj \
 $(OBJDIR)\O32_CopyIcon.obj \
 $(OBJDIR)\O32_CopyMetaFile.obj \
 $(OBJDIR)\O32_CopyRect.obj \
-$(OBJDIR)\O32_CountClipboardFormats.obj \
+##$(OBJDIR)\O32_CountClipboardFormats.obj \
 $(OBJDIR)\O32_CreateAcceleratorTable.obj \
 $(OBJDIR)\O32_CreateBitmap.obj \
 $(OBJDIR)\O32_CreateBitmapIndirect.obj \
@@ -173,7 +173,7 @@ $(OBJDIR)\O32_DrawIcon.obj \
 $(OBJDIR)\O32_DrawText.obj \
 $(OBJDIR)\O32_DuplicateHandle.obj \
 $(OBJDIR)\O32_Ellipse.obj \
-$(OBJDIR)\O32_EmptyClipboard.obj \
+##$(OBJDIR)\O32_EmptyClipboard.obj \
 $(OBJDIR)\O32_EnableWindow.obj \
 $(OBJDIR)\O32_EndDeferWindowPos.obj \
 $(OBJDIR)\O32_EndDialog.obj \
@@ -183,7 +183,7 @@ $(OBJDIR)\O32_EndPaint.obj \
 $(OBJDIR)\O32_EndPath.obj \
 $(OBJDIR)\O32_EnterCriticalSection.obj \
 $(OBJDIR)\O32_EnumChildWindows.obj \
-$(OBJDIR)\O32_EnumClipboardFormats.obj \
+##$(OBJDIR)\O32_EnumClipboardFormats.obj \
 $(OBJDIR)\O32_EnumEnhMetaFile.obj \
 $(OBJDIR)\O32_EnumFontFamilies.obj \
 $(OBJDIR)\O32_EnumFonts.obj \
@@ -251,10 +251,10 @@ $(OBJDIR)\O32_GetClassLong.obj \
 $(OBJDIR)\O32_GetClassName.obj \
 $(OBJDIR)\O32_GetClassWord.obj \
 $(OBJDIR)\O32_GetClientRect.obj \
-$(OBJDIR)\O32_GetClipboardData.obj \
-$(OBJDIR)\O32_GetClipboardFormatName.obj \
-$(OBJDIR)\O32_GetClipboardOwner.obj \
-$(OBJDIR)\O32_GetClipboardViewer.obj \
+##$(OBJDIR)\O32_GetClipboardData.obj \
+##$(OBJDIR)\O32_GetClipboardFormatName.obj \
+##$(OBJDIR)\O32_GetClipboardOwner.obj \
+##$(OBJDIR)\O32_GetClipboardViewer.obj \
 $(OBJDIR)\O32_GetClipBox.obj \
 $(OBJDIR)\O32_GetClipCursor.obj \
 $(OBJDIR)\O32_GetClipRgn.obj \
@@ -328,7 +328,7 @@ $(OBJDIR)\O32_GetNextWindow.obj \
 $(OBJDIR)\O32_GetObject.obj \
 $(OBJDIR)\O32_GetObjectType.obj \
 $(OBJDIR)\O32_GetOEMCP.obj \
-$(OBJDIR)\O32_GetOpenClipboardWindow.obj \
+##$(OBJDIR)\O32_GetOpenClipboardWindow.obj \
 $(OBJDIR)\O32_GetOpenFileName.obj \
 $(OBJDIR)\O32_GetOutlineTextMetrics.obj \
 $(OBJDIR)\O32_GetOverlappedResult.obj \
@@ -338,7 +338,7 @@ $(OBJDIR)\O32_GetPath.obj \
 $(OBJDIR)\O32_GetPixel.obj \
 $(OBJDIR)\O32_GetPolyFillMode.obj \
 $(OBJDIR)\O32_GetPriorityClass.obj \
-$(OBJDIR)\O32_GetPriorityClipboardFormat.obj \
+##$(OBJDIR)\O32_GetPriorityClipboardFormat.obj \
 $(OBJDIR)\O32_GetPrivateProfileInt.obj \
 $(OBJDIR)\O32_GetPrivateProfileString.obj \
 $(OBJDIR)\O32_GetProcAddress.obj \
@@ -409,7 +409,7 @@ $(OBJDIR)\O32_IsCharAlphaNumeric.obj \
 $(OBJDIR)\O32_IsCharLower.obj \
 $(OBJDIR)\O32_IsCharUpper.obj \
 $(OBJDIR)\O32_IsChild.obj \
-$(OBJDIR)\O32_IsClipboardFormatAvailable.obj \
+##$(OBJDIR)\O32_IsClipboardFormatAvailable.obj \
 $(OBJDIR)\O32_IsDBCSLeadByte.obj \
 $(OBJDIR)\O32_IsDialogMessage.obj \
 $(OBJDIR)\O32_IsDlgButtonChecked.obj \
@@ -473,7 +473,7 @@ $(OBJDIR)\O32_OffsetRect.obj \
 $(OBJDIR)\O32_OffsetRgn.obj \
 $(OBJDIR)\O32_OffsetViewportOrgEx.obj \
 $(OBJDIR)\O32_OffsetWindowOrgEx.obj \
-$(OBJDIR)\O32_OpenClipboard.obj \
+##$(OBJDIR)\O32_OpenClipboard.obj \
 $(OBJDIR)\O32_OpenEvent.obj \
 $(OBJDIR)\O32_OpenFile.obj \
 $(OBJDIR)\O32_OpenMutex.obj \
@@ -520,7 +520,7 @@ $(OBJDIR)\O32_RegEnumKey.obj \
 $(OBJDIR)\O32_RegEnumKeyEx.obj \
 $(OBJDIR)\O32_RegEnumValue.obj \
 $(OBJDIR)\O32_RegisterClass.obj \
-$(OBJDIR)\O32_RegisterClipboardFormat.obj \
+##$(OBJDIR)\O32_RegisterClipboardFormat.obj \
 $(OBJDIR)\O32_RegisterWindowMessage.obj \
 $(OBJDIR)\O32_RegOpenKey.obj \
 $(OBJDIR)\O32_RegOpenKeyEx.obj \
@@ -572,8 +572,8 @@ $(OBJDIR)\O32_SetCaretBlinkTime.obj \
 $(OBJDIR)\O32_SetCaretPos.obj \
 $(OBJDIR)\O32_SetClassLong.obj \
 $(OBJDIR)\O32_SetClassWord.obj \
-$(OBJDIR)\O32_SetClipboardData.obj \
-$(OBJDIR)\O32_SetClipboardViewer.obj \
+##$(OBJDIR)\O32_SetClipboardData.obj \
+##$(OBJDIR)\O32_SetClipboardViewer.obj \
 $(OBJDIR)\O32_SetCurrentDirectory.obj \
 $(OBJDIR)\O32_SetCursor.obj \
 $(OBJDIR)\O32_SetCursorPos.obj \
