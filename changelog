@@ -1,7 +1,11 @@
-/* $Id: changelog,v 1.2457 2003-01-23 13:49:58 sandervl Exp $ */
+/* $Id: changelog,v 1.2458 2003-01-23 13:52:14 bird Exp $ */
+
+ 2003-01-23: knut st. osmundsen <bird-odin-spam@anduin.net>
+    - TOOLS\COMMON, TOOLS\WRC\U:
+                o Define STATIC_CRT so wrapper headers doesn't kick in.
 
  2003-01-23: Sander van Leeuwen <sandervl@innotek   >
-    - INCLUDE\*.mk: 
+    - INCLUDE\*.mk:
                 o Don't use include\incl_vac for statically linked targets
                   (e.g. tools)
     - ODINCRT:  o Added wrappers for new & delete operators
@@ -60,7 +64,7 @@
  2003-01-13: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Don't allocate selectors anymore. Allocate tiled memory
                   and call Dos32FlatToSel.
-                o Get default stack size from PE header. 
+                o Get default stack size from PE header.
                 o Thread handles not closed properly.
 
  2003-01-12: Sander van Leeuwen <sandervl@xs4all   >
@@ -78,7 +82,7 @@
                               processes by default
                               Only enable inheritance if specified in security struct
                 o Create(Named)Pipe: default = not inherited by child processes
-                                     Only enable inheritance if specified in security 
+                                     Only enable inheritance if specified in security
                                      struct.
                 o DuplicateHandle; set inheritance flag with SetHandleInformation
                 o CreateProcess: support for setting stdin/out/err handles
@@ -138,7 +142,7 @@
 
  2002-01-05: Dietrich Teickner <Dietrich_Teickner@t-online   >
     - USER32:   o Return MA_NOACTIVATE in listbox WM_MOUSEACTIVATE handler.
-                  (apparently not necessary anymore in Wine; so probably 
+                  (apparently not necessary anymore in Wine; so probably
                    caused by something else)
 
  2003-01-04: Sander van Leeuwen <sandervl@innotek   >
@@ -162,7 +166,7 @@
  2003-01-02: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Set the codepage of the message queue for each new thread
                   that is created. (done for the main thread in user32)
-    - USER32:   o Fix for composite keyboard character translation 
+    - USER32:   o Fix for composite keyboard character translation
                   (e.g. ^ on german keyboards)
                 o SystemParametersInfoA fix for SPI_GETNONCLIENTMETRICS in
                   OS/2 L&F (font height must be negative)
@@ -184,7 +188,7 @@
     - USER32:   o Removed wrong cx & cy check during window creation
 
  2000-12-30: Achim Hasenmueller <achimha@innotek   >
-    - COMDLG32: o Added string check to PRINTDLG_SetUpPrinterListComboA 
+    - COMDLG32: o Added string check to PRINTDLG_SetUpPrinterListComboA
 
  2002-12-30: Yuri Dario <mc6530@mclink   >
     - USER32:   o Fixed regression in Set/GetClassLong. (default must be ascii;
