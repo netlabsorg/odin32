@@ -1,4 +1,4 @@
-# $Id: win32k.mak,v 1.1 2000-12-02 23:32:38 bird Exp $
+# $Id: win32k.mak,v 1.2 2000-12-11 06:28:44 bird Exp $
 
 #
 # Win32k.sys makefile.
@@ -61,6 +61,9 @@ OBJS  =\
     $(WIN32KOBJ)\myldrEnum32bitRelRecs.obj \
     $(WIN32KOBJ)\myldrOpenPath.obj \
     $(WIN32KOBJ)\myldrOpenPatha.obj \
+    $(WIN32KOBJ)\myldrFindModule.obj \
+    $(WIN32KOBJ)\myldrCheckInternalName.obj \
+    $(WIN32KOBJ)\myldrGetFileName.obj \
     $(WIN32KOBJ)\OS2KTCB.obj \
     $(WIN32KOBJ)\OS2KPTDA.obj \
     $(WIN32KOBJ)\pe2lx.obj \
@@ -102,14 +105,30 @@ $(WIN32KBIN)\$(NAME).sys:   clfix.exe \
                             $(WIN32KOBJ)\$(NAME)new.def \
                             $(LASTOBJ) \
                             $(LIBSINIT) \
+                            $(WIN32KOBJ)\$(@B).lnk \
                             win32k.mak makefile.inc ..\..\makefile.inc
     -@$(ECHO) recompiling d16globl to get correct build time and date:
     $(CC16) -c $(CFLAGS16) $(CDEFINES16) $(CINCLUDES16) -Fo$(WIN32KOBJ)\d16globl.obj \
         -Fa$(WIN32KLIST)\d16globl.s dev16\d16globl.c
     -@$(ECHO) linking: $@
-    -4 $(LD) $(LFLAGS) @<<$(WIN32KOBJ)\$(@B).lnk
-/OUT:$@
-/MAP:$(WIN32KBIN)\$(@B).map
+!ifdef GREP
+    -4 $(LD) $(LFLAGS) @$(WIN32KOBJ)\$(@B).lnk | $(GREP) -v LNK4001 | $(GREP) -v LNK4031
+!else
+    -4 $(LD) $(LFLAGS) @$(WIN32KOBJ)\$(@B).lnk
+!endif
+    cd $(WIN32KBIN)
+    @mapsym $(*B).map > nul
+    cd $(WIN32KBASE)
+    if not exist $(ODIN32_BIN) $(CREATEPATH) $(ODIN32_BIN)
+    $(CP) $@ $(ODIN32_BIN)
+    $(CP) $*.sym $(ODIN32_BIN)
+    $(CP) $(WIN32KBASE)\$(*B).ddp $(ODIN32_BIN)
+
+# Linker file.
+$(WIN32KOBJ)\$(NAME).lnk: win32k.mak makefile.inc ..\..\makefile.inc
+    echo @<<$(WIN32KOBJ)\$(NAME).lnk
+/OUT:$(WIN32KBIN)\$(NAME).sys
+/MAP:$(WIN32KBIN)\$(NAME).map
 $(OBJS:  =^
 )
 /IG
@@ -118,13 +137,6 @@ $(LIBS:  =^
 $(LASTOBJ)
 $(WIN32KOBJ)\$(NAME)new.def
 <<KEEP
-    cd $(WIN32KBIN)
-    @mapsym $(*B).map > nul
-    cd $(WIN32KBASE)
-    if not exist $(ODIN32_BIN) $(CREATEPATH) $(ODIN32_BIN)
-    $(CP) $@ $(ODIN32_BIN)
-    $(CP) $*.sym $(ODIN32_BIN)
-    $(CP) $(WIN32KBASE)\$(*B).ddp $(ODIN32_BIN)
 
 # Add bldlevel signature to win32k.def - creates temporary win32knew.def.
 $(WIN32KOBJ)\$(NAME)new.def: $(NAME).def makefile MakeDesc.cmd
@@ -174,6 +186,9 @@ TSTOBJS =\
     $(WIN32KOBJ)\myldrEnum32bitRelRecs.obj \
     $(WIN32KOBJ)\myldrOpenPath.obj \
     $(WIN32KOBJ)\myldrOpenPatha.obj \
+    $(WIN32KOBJ)\myldrFindModule.obj \
+    $(WIN32KOBJ)\myldrCheckInternalName.obj \
+    $(WIN32KOBJ)\myldrGetFileName.obj \
     $(WIN32KOBJ)\OS2KTCB.obj \
     $(WIN32KOBJ)\OS2KPTDA.obj \
     $(WIN32KOBJ)\pe2lx.obj \
@@ -303,14 +318,16 @@ $(WIN32KOBJ)\last.lib: $(WIN32KOBJ)\devlast.obj
 #
 # Generate calltaba.asm
 #
-ldr\calltaba.asm: dev16\probkrnl.c $(WIN32KBIN)\mkcalltab.exe
+ldr\calltaba.asm \
+$(WIN32KBASE)\ldr\calltaba.asm : dev16\probkrnl.c $(WIN32KBIN)\mkcalltab.exe
     $(WIN32KBIN)\mkcalltab.exe calltab > $@
 
 
 #
 # Generate TstFakers.c
 #
-test\TstFakers.c: dev16\probkrnl.c include\probkrnl.h $(WIN32KBIN)\mkcalltab.exe
+test\TstFakers.c \
+$(WIN32KBASE)\test\TstFakers.c: dev16\probkrnl.c include\probkrnl.h $(WIN32KBIN)\mkcalltab.exe
     $(WIN32KBIN)\mkcalltab.exe tstfakers > $@
 
 
