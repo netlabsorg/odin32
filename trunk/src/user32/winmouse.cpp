@@ -1,4 +1,4 @@
-/* $Id: winmouse.cpp,v 1.1 1999-11-08 13:44:40 sandervl Exp $ */
+/* $Id: winmouse.cpp,v 1.2 1999-12-24 18:51:55 sandervl Exp $ */
 /*
  * Mouse handler for DINPUT
  *
@@ -29,7 +29,7 @@ VOID WIN32API MOUSE_Enable(LPMOUSE_EVENT_PROC lpMouseEventProc)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL DInputMouseHandler(HWND hwnd, ULONG msg, ULONG x, ULONG y, ULONG info)
+BOOL DInputMouseHandler(HWND hwnd, ULONG msg, ULONG x, ULONG y)
 {
  WINE_MOUSEEVENT mouseEvent;
  DWORD dwFlags = MOUSEEVENTF_ABSOLUTE;
@@ -43,24 +43,24 @@ BOOL DInputMouseHandler(HWND hwnd, ULONG msg, ULONG x, ULONG y, ULONG info)
   mouseEvent.keyState = 0; //not used in dinput right now
   if(msg == MOUSEMSG_BUTTON) 
   {
-	switch(info) 
+	switch(msg) 
         {
-        case BUTTON_LEFTDOWN:
+        case WM_LBUTTONDOWN:
 		dwFlags |= MOUSEEVENTF_LEFTDOWN;
                 break;
-        case BUTTON_LEFTUP:
+        case WM_LBUTTONUP:
 		dwFlags |= MOUSEEVENTF_LEFTUP;
                 break;
-        case BUTTON_RIGHTUP:
+        case WM_RBUTTONUP:
 		dwFlags |= MOUSEEVENTF_RIGHTUP;
                 break;
-        case BUTTON_RIGHTDOWN:
+        case WM_RBUTTONDOWN:
 		dwFlags |= MOUSEEVENTF_RIGHTDOWN;
                 break;
-        case BUTTON_MIDDLEUP:
+        case WM_MBUTTONUP:
 		dwFlags |= MOUSEEVENTF_MIDDLEUP;
                 break;
-        case BUTTON_MIDDLEDOWN:
+        case WM_MBUTTONDOWN:
 		dwFlags |= MOUSEEVENTF_MIDDLEDOWN;
                 break;
 	}

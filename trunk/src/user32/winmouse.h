@@ -1,4 +1,4 @@
-/* $Id: winmouse.h,v 1.1 1999-11-08 13:44:41 sandervl Exp $ */
+/* $Id: winmouse.h,v 1.2 1999-12-24 18:51:55 sandervl Exp $ */
 /*
  * Mouse handler for DINPUT
  *
@@ -20,6 +20,6 @@ extern LPMOUSE_EVENT_PROC mouseHandler;
 #define MOUSEMSG_BUTTON	0
 #define MOUSEMSG_MOVE   1
 
-BOOL DInputMouseHandler(HWND hwnd, ULONG msg, ULONG x, ULONG y, ULONG info);
+BOOL DInputMouseHandler(HWND hwnd, ULONG msg, ULONG x, ULONG y);
 
 #endif //__WINMOUSE_H__
