@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.24 1999-11-12 14:57:15 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.25 1999-11-18 09:20:08 bird Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -65,8 +65,8 @@ int globLoadNr = 0;
 #pragma data_seg()
 
 /* Tue 03.03.1998: knut */
-/* flag to optimize DosAllocMem to use all the memory on SMP machines */
-ULONG flAllocMem = 0;
+ULONG flAllocMem = 0;    /* flag to optimize DosAllocMem to use all the memory on SMP machines */
+ULONG ulMaxAddr = 0x20000000; /* end of user address space. */
 int   loadNr = 0;
 char  kernel32Path[CCHMAXPATH] = "";
 
@@ -83,7 +83,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 {
     size_t i;
     APIRET rc;
-    ULONG sysinfo;
+    ULONG  ulSysinfo;
 
     /*-------------------------------------------------------------------------*/
     /* If ulFlag is zero then the DLL is being loaded so initialization should */
@@ -122,11 +122,14 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
                 return 0UL;
 
             /* knut: check for high memory support */
-            rc = DosQuerySysInfo(QSV_VIRTUALADDRESSLIMIT, QSV_VIRTUALADDRESSLIMIT, &sysinfo, sizeof(sysinfo));
-
-            if ( rc == 0 && sysinfo > 512 )   //VirtualAddresslimit is in MB
-                   flAllocMem = PAG_ANY;      // high memory support. Let's use it!
-            else   flAllocMem = 0;        // no high memory support
+            rc = DosQuerySysInfo(QSV_VIRTUALADDRESSLIMIT, QSV_VIRTUALADDRESSLIMIT, &ulSysinfo, sizeof(ulSysinfo));
+            if (rc == 0 && ulSysinfo > 512)   //VirtualAddresslimit is in MB
+            {
+                flAllocMem = PAG_ANY;      // high memory support. Let's use it!
+                ulMaxAddr = ulSysinfo * (1024*1024);
+            }
+            else
+                flAllocMem = 0;        // no high memory support
 
             InitializeTIB(TRUE);
             //SvL: Do it here instead of during the exe object creation
