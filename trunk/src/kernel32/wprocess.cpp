@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.38 1999-10-14 09:57:38 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.39 1999-10-22 18:07:24 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -50,9 +50,6 @@ BOOL      fIsOS2Image = FALSE;	//TRUE  -> Odin32 OS/2 application (not converted
 PDB       ProcessPDB = {0};
 USHORT    ProcessTIBSel = 0;
 DWORD    *TIBFlatPtr    = 0;
-
-extern "C" ULONG QueryExceptionChain();
-
 
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.25 1999-10-14 12:30:01 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.26 1999-10-22 18:07:18 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -70,7 +70,6 @@ static LPTOP_LEVEL_EXCEPTION_FILTER CurrentUnhExceptionFlt = NULL;
 static UINT                         CurrentErrorMode = 0;
 static PEXCEPTION_HANDLER           StartupCodeHandler = NULL;
 
-extern "C" PWINEXCEPTION_FRAME QueryExceptionChain();
 extern "C" PWINEXCEPTION_FRAME GetExceptionRecord(ULONG offset, ULONG segment);
 
 LONG WIN32API UnhandledExceptionFilter(PWINEXCEPTION_POINTERS lpexpExceptionInfo);
@@ -1024,6 +1023,8 @@ CrashAndBurn:
 		      	return (XCPT_CONTINUE_EXECUTION);
 		}
 	}
+	else	return XCPT_CONTINUE_SEARCH; //pass on to OS/2 RTL or app exception handler
+
     	dprintf(("KERNEL32: OS2ExceptionHandler: Continue and kill\n"));
     	pCtxRec->ctx_RegEip = (ULONG)KillWin32Process;
     	pCtxRec->ctx_RegEsp = pCtxRec->ctx_RegEsp + 0x10;
@@ -1072,6 +1073,7 @@ void OS2SetExceptionHandler(void *exceptframe)
 //  DosError(FERR_DISABLEEXCEPTION | FERR_DISABLEHARDERR);
 
   DosSetExceptionHandler(pExceptRec);
+  dprintf(("OS2SetExceptionHandler: exception chain %x (old %x)", pExceptRec, pExceptRec->prev_structure));
 }
 
 /*****************************************************************************
@@ -1126,7 +1128,7 @@ void ReplaceExceptionHandler()
   if(fExeStarted == FALSE)
     return;
 
-  orgframe = QueryExceptionChain();
+  orgframe = (PWINEXCEPTION_FRAME)QueryExceptionChain();
   if((int)orgframe == 0 ||
      (int)orgframe == -1)
     return;
