@@ -1,0 +1,14 @@
+LIBRARY DPLAY INITINSTANCE TERMINSTANCE
+
+PROTMODE
+DATA MULTIPLE NONSHARED READWRITE LOADONCALL
+CODE LOADONCALL
+
+IMPORTS
+; XDirectPlayCreate          = DPLAYX.DirectPlayCreate
+; XDirectPlayEnumerate       = DPLAYX.DirectPlayEnumerate
+
+EXPORTS
+  DirectPlayCreate           = _DirectPlayCreate@12            @1
+  DirectPlayEnumerateA       = _DirectPlayEnumerateA@8         @2
+  DirectPlayEnumerateW       = _DirectPlayEnumerateW@8         @3
