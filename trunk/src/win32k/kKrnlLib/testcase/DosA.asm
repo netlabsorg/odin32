@@ -1,4 +1,4 @@
-; $Id: DosA.asm,v 1.2 2001-09-17 02:27:56 bird Exp $
+; $Id: DosA.asm,v 1.3 2001-11-15 04:21:22 bird Exp $
 ;
 ; 16-bits Dos calls overloader
 ;
@@ -141,7 +141,6 @@ do_notkKrnlHlp:
     call far ptr _DOS16OPEN
     pop     bx
     pop     ds
-    mov     ax, ERROR_FILE_NOT_FOUND
     leave
     ret     01ah
 DOS16OPEN ENDP
