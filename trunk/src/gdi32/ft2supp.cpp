@@ -190,6 +190,7 @@ PFN CFT2Module::QueryProcAddress(char * procname)
 DWORD CFT2Module::Ft2GetGlyphIndices(HPS hps, LPCWSTR str, int c, LPWORD pgi, DWORD fl)
 {
     //no fallback
+    SetLastError(ERROR_CALL_NOT_IMPLEMENTED_W);
     return GDI_ERROR;
 }
 //******************************************************************************
@@ -208,35 +209,73 @@ DWORD CFT2Module::Ft2GetGlyphOutline(HPS hps, UINT glyph, UINT format, LPGLYPHME
 // The fallback case is not accurate!! (but the same as our old code)
 //
 //******************************************************************************
-BOOL CFT2Module::Ft2GetTextExtentW(HPS hps, LONG lCount1,LPCWSTR pchString,LONG lCount2,PPOINTLOS2 aptlPoints)
+BOOL CFT2Module::Ft2GetTextExtentW(HPS hps, LONG lCount1,LPCWSTR pchString, PPOINTLOS2 pwidthHeight)
 {
-    DWORD  ret; 
-    USHORT sel;
+    DWORD      ret;
+    USHORT     sel;
+    POINTLOS2  aptlPoints[TXTBOX_COUNT];
 
-    // All FreeType calls should be wrapped for saving FS 
-    if(pfnFt2GetTextExtentW) 
+    // All FreeType calls should be wrapped for saving FS
+    if(pfnFt2GetTextExtentW)
     {
         sel  = RestoreOS2FS();
-        ret  = pfnFt2GetTextExtentW(hps, lCount1, pchString, lCount2, aptlPoints);
+        ret  = pfnFt2GetTextExtentW(hps, lCount1, pchString, TXTBOX_COUNT, aptlPoints);
         SetFS(sel);
         if(ret || (ret == FALSE && ERRORIDERROR(WinGetLastError(0)) != PMERR_FUNCTION_NOT_SUPPORTED))
         {
             //No need for scaling for printer DCs here
-            return ret; 
-        } 
+            calcDimensions(aptlPoints, pwidthHeight);
+            return ret;
+        }
     }
     //else fall back to GPI
-    int   len;
-    LPSTR astring;
+    INT lenA;
+    LPSTR strA;
+    POINTLOS2 start = { 0, 0 };
+    PPOINTLOS2 pplos2;
+    INT cx;
+    INT cy;
 
     pDCData pHps = (pDCData)OSLibGpiQueryDCData(hps);
 
-    len = WideCharToMultiByte( CP_ACP, 0, pchString, lCount1, 0, 0, NULL, NULL );
-    astring = (char *)malloc( len + 1 );
-    lstrcpynWtoA(astring, pchString, len + 1 );
+    lenA = WideCharToMultiByte( CP_ACP, 0, pchString, lCount1, 0, 0, 0, 0 );
+    strA = ( LPSTR )malloc( lenA + 1 );
+    lstrcpynWtoA( strA, pchString, lenA + 1 );
+    pplos2 = ( PPOINTLOS2 )malloc(( lenA + 1 ) * sizeof( POINTLOS2 ));
 
-    ret = OSLibGpiQueryTextBox(pHps, lCount1, astring, lCount2, aptlPoints);
-    free(astring);
+    ret = OSLibGpiQueryCharStringPosAt( pHps, &start, 0, lenA, strA, NULL, pplos2 );
+
+    cx = labs( pplos2[ lenA ].x - pplos2[ 0 ].x );
+    cy = labs( pplos2[ lenA ].y - pplos2[ 0 ].y );
+
+    if( ret )
+    {
+        aptlPoints[ TXTBOX_BOTTOMLEFT ].x = 0;
+        aptlPoints[ TXTBOX_BOTTOMLEFT ].y = 0;
+        aptlPoints[ TXTBOX_BOTTOMRIGHT ].x = cx;
+        aptlPoints[ TXTBOX_BOTTOMRIGHT ].y = cy;
+        aptlPoints[ TXTBOX_TOPLEFT ].x = 0;
+        aptlPoints[ TXTBOX_TOPLEFT ].y = 0;
+        aptlPoints[ TXTBOX_TOPRIGHT ].x = cx;
+        aptlPoints[ TXTBOX_TOPRIGHT ].y = cy;
+        aptlPoints[ TXTBOX_CONCAT ].x = cx;
+        aptlPoints[ TXTBOX_CONCAT ].y = cy;
+    }
+
+    calcDimensions(aptlPoints, pwidthHeight);
+
+    TEXTMETRICW tmW;
+    if(GetTextMetricsW( hps, &tmW ) == TRUE) 
+    {
+        pwidthHeight->y = tmW.tmHeight;    // *Must* use the maximum height of the font
+    }
+#ifdef DEBUG
+    else DebugInt3();
+#endif
+
+    free( pplos2 );
+    free( strA );
+
     return ret;
 }
 //******************************************************************************
@@ -285,7 +324,7 @@ BOOL CFT2Module::Ft2CharStringPosAtW(HPS hps, PPOINTLOS2 ptl,PRECTLOS2 rct,ULONG
     astring = (char *)malloc( len + 1 );
     lstrcpynWtoA(astring, pchString, len + 1 );
 
-    ret = OSLibGpiCharStringPosAt(pHps,ptl,rct,flOptions,lCount,astring,alAdx);
+    ret = OSLibGpiCharStringPosAt(pHps,ptl,rct,flOptions,len,astring,alAdx);
     free(astring);
     return ret;
 }
