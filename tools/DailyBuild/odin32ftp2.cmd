@@ -1,4 +1,4 @@
-/* $Id: odin32ftp2.cmd,v 1.8 2001-01-18 14:47:06 bird Exp $
+/* $Id: odin32ftp2.cmd,v 1.9 2001-01-20 18:00:43 bird Exp $
  *
  * Uploads the relase and debug builds to the FTP sites.
  *
@@ -71,16 +71,19 @@ do i = 1 to 5 /* (Retries 5 times) */
         rc = deletefunction(             '/daily/'sDeleteDbg,      '/odinftp/daily/'sDeleteRel,      'netlabs-delete', 'ftp.netlabs.org');
 /*      rc = deletefunction('/odinftp/daily/'sDeleteGlideDbg, '/odinftp/daily/'sDeleteGlideRel,'netlabs-delete-glide', 'ftp.netlabs.org'); */
         rc = deletefunction(          '/daily/'sDeleteDbgWPI,   '/odinftp/daily/'sDeleteRelWPI,  'netlabs-delete-wpi', 'ftp.netlabs.org');
-        if 1 then do
-        /*              (sFile,      sFileRemote,           sLockFile,             sSite); */
-        rc = putfunction(sFileDbg,      '/daily',     'netlabs-debug', 'ftp.netlabs.org');
-/*      rc = putfunction(sFileGlideDbg, '/daily',     'netlabs-debug', 'ftp.netlabs.org'); */
-        rc = putfunction(sFileRel,      '/daily',   'netlabs-release', 'ftp.netlabs.org');
-/*      rc = putfunction(sFileGlideRel, '/daily',   'netlabs-release', 'ftp.netlabs.org'); */
-        rc = putfunction(sFileDbgWPI,   '/daily',     'netlabs-debug', 'ftp.netlabs.org');
-        rc = putfunction(sFileRelWPI,   '/daily',   'netlabs-release', 'ftp.netlabs.org');
-        rc = putfunction('ChangeLog',   '/daily', 'netlabs-ChangeLog', 'ftp.netlabs.org');
-        end else do
+        if 1 then
+        do
+        /*              (sFile,      sFileRemote,              sLockFile,             sSite); */
+        rc = putfunction(sFileDbg,      '/daily',        'netlabs-debug', 'ftp.netlabs.org');
+/*      rc = putfunction(sFileGlideDbg, '/daily',  'netlabs-glide-debug', 'ftp.netlabs.org'); */
+        rc = putfunction(sFileRel,      '/daily',      'netlabs-release', 'ftp.netlabs.org');
+/*      rc = putfunction(sFileGlideRel, '/daily','netlabs-glide-release', 'ftp.netlabs.org'); */
+        rc = putfunction(sFileDbgWPI,   '/daily',    'netlabs-debug-wpi', 'ftp.netlabs.org');
+        rc = putfunction(sFileRelWPI,   '/daily',  'netlabs-release-wpi', 'ftp.netlabs.org');
+        rc = putfunction('ChangeLog',   '/daily',    'netlabs-ChangeLog', 'ftp.netlabs.org');
+        end
+        else
+        do
         /*            (sFile,                  sLockFile,  sRemoteDir,             sSite); */
         rc = forwardSF(sFileDbg,         'netlabs-debug',    '/daily', 'ftp.netlabs.org');
 /*      rc = forwardSF(sFileGlideDbg,    'netlabs-debug',    '/daily', 'ftp.netlabs.org'); */
