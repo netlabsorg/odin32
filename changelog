@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.2093 2002-05-23 07:12:37 sandervl Exp $ */
+/* $Id: changelog,v 1.2094 2002-05-23 13:49:15 sandervl Exp $ */
+
+ 2002-05-23: Yuri Dario <mc6530@mclink.it>
+    - USER32:   o Don't beep when unable to find menu item when alt key pressed
+
+ 2002-05-22: Sander van Leeuwen <sandervl@xs4all.nl>
+    - WINMM:    o Mixer updates (not yet finished)
 
  2002-05-23: Platon Fomichev <platon@innotek.de>
     - USER32:   o Keyboard fixes for right alt & right shift
