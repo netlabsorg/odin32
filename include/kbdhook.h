@@ -9,6 +9,16 @@
 #ifndef __KBDHOOK_H
 #define __KBDHOOK_H
 
+
+/*
+ * HK_PREACCEL:
+ *      additional undocumented PM hook type
+ */
+
+#ifndef HK_PREACCEL
+#define HK_PREACCEL             17
+#endif
+
 /**************************************************************/
 /* Try to load the Presentation Manager Keyboard Hook module. */
 /* If this fails, some hotkeys may not arrive properly at the */
@@ -19,9 +29,11 @@
 #define PMKBDHK_HOOK_TERM   "_hookKill@0"
 
 
-typedef BOOL  (* WIN32API PFN_HOOKINIT)(HAB hab, char *lpszWindowClass);
+typedef BOOL  (* WIN32API PFN_HOOKINIT)(ULONG hab, char *lpszWindowClass);
 typedef BOOL  (* WIN32API PFN_HOOKTERM)(void);
 
+BOOL WIN32API hookInit(ULONG hab);
+BOOL WIN32API hookKill(ULONG hab);
 
 #endif  // __KBDHOOK_H
 
