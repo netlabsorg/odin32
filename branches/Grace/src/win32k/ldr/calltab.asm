@@ -1,4 +1,4 @@
-; $Id: calltab.asm,v 1.12.4.8 2000-08-28 22:44:23 bird Exp $
+; $Id: calltab.asm,v 1.12.4.9 2000-08-30 04:11:31 bird Exp $
 ;
 ; callTab - Call back again table - table with entry for each function or
 ;           variable which is overrided.
@@ -104,6 +104,8 @@
     public pldrpFileNameBuf_offObject
     public _fpldrpFileNameBuf
     public pldrpFileNameBuf_sel
+
+    public SecPathFromSFN
 
 
 ;
@@ -350,6 +352,12 @@ pldrpFileNameBuf_offObject    dd  0
 _fpldrpFileNameBuf            dd  0
 pldrpFileNameBuf_sel          dw  0
     db (MAXSIZE_PROLOG - 14) dup(0cch)
+
+; 41
+SecPathFromSFN PROC NEAR
+    db MAXSIZE_PROLOG dup(0cch)
+SecPathFromSFN ENDP
+
 
 CALLTAB ENDS
 

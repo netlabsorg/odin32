@@ -1,4 +1,4 @@
-/* $Id: myldrOpen.cpp,v 1.10.4.10 2000-08-29 22:52:36 bird Exp $
+/* $Id: myldrOpen.cpp,v 1.10.4.11 2000-08-30 04:11:31 bird Exp $
  *
  * myldrOpen - ldrOpen.
  *
@@ -18,6 +18,7 @@
 #define INCL_OS2KRNL_IO
 #define INCL_OS2KRNL_TCB
 #define INCL_OS2KRNL_SEM
+#define INCL_OS2KRNL_SEC
 
 /*******************************************************************************
 *   Header Files                                                               *
@@ -294,10 +295,10 @@ ULONG LDRCALL myldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl)
                         kprintf(("myldrOpen-%d: pe.exe - %s\n", cNesting, u1.pach));
                         if (isLdrStateExecPgm() && fTkExecPgm)
                         {
-                            rc = AddArgsToFront(2, u1.pach, achTkExecPgmFilename);
+                            rc = AddArgsToFront(2, ldrpFileNameBuf, achTkExecPgmFilename);
                             if (rc == NO_ERROR)
                             {
-                                rc = SetExecName(u1.pach);
+                                rc = SetExecName(ldrpFileNameBuf);
                                 if (rc != NO_ERROR)
                                     kprintf(("myldrOpen-%d: pe.exe - failed to set pe.exe as execname. rc=%d\n", cNesting));
                             }
@@ -357,14 +358,27 @@ ULONG LDRCALL myldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl)
 
                 if (isLdrStateExecPgm() && fTkExecPgm)
                 {
-                    cchName = strlen(ldrpFileNameBuf);
+                    /* Ooops we had to get the file name from the MFT. ldrpFileNameBuf is allways uppercased... */
+                    /* MFT seems to hold uppercased filenames! ARG! But (by pure luck?) achTkExecPgmArguments is
+                     * not uppercased (yet). Nothing could be simpler!
+                     */
+                    #if 1
+                    psz3 = achTkExecPgmArguments;
+                    #elif 0
+                    psz3 = SecPathFromSFN(*phFile);
+                    if (psz3 == NULL)
+                        psz3 = ldrpFileNameBuf;
+                    #else
+                    psz3 = ldrpFileNameBuf;
+                    #endif
+                    cchName = strlen(psz3);
                     pszName = (char*)rmalloc(cchName + 2);
                     if (pszName == NULL)
                     {
                         rc = ERROR_NOT_ENOUGH_MEMORY;
                         goto cleanup;
                     }
-                    memcpy(pszName, ldrpFileNameBuf, cchName+1);
+                    memcpy(pszName, psz3, cchName+1);
 
                     psz = pszName + strlen(pszName) - 1;
                     while (psz > pszName && *psz != '.' && *psz != '\\' && *psz != '/')
@@ -379,11 +393,14 @@ ULONG LDRCALL myldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl)
                         /* check for root and evt. make room for an extra slash. */
                         if (psz - pszName == 2)
                         {
-                            memmove(psz + 1, psz, cchName - 2);
+                            memmove(psz + 1, psz, cchName - 1);
                             *psz++ = '\\';
                         }
                     }
-                    *psz = ' ';              //assume fully qualified path...
+                    /* check if no path */
+                    if (psz == pszName)
+                        memmove(pszName + 1, pszName, cchName + 1);
+                    *psz = ' ';
                 }
 
                 ldrClose(*phFile);
@@ -436,6 +453,8 @@ ULONG LDRCALL myldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl)
 
                         /*
                          * Add the class directory (as the last classpath entry) and the class name.
+                         * (Note. I may happen that there is no directory, but that don't matter
+                         *        a space is allways preceding the class name.)
                          */
                         *psz++ = ';';
                         strcpy(psz, pszName);
@@ -668,10 +687,10 @@ ULONG LDRCALL myldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl)
              */
             kprintf(("myldrOpen-%d: Found REXX script\n", cNesting));
             ldrClose(*phFile);
-            strcpy(u1.pach, "KRX.EXE");
-            rc = ldrOpen(phFile, u1.pach, pfl);
+            psz = "KRX.EXE";
+            rc = ldrOpen(phFile, psz, pfl);
             if (rc != NO_ERROR)
-                rc = OpenPATH(phFile, u1.pach, pfl);
+                rc = OpenPATH(phFile, psz, pfl);
 
             /** @sketch
              *  IF tkExecPgm THEN
@@ -682,13 +701,13 @@ ULONG LDRCALL myldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl)
              */
              if (rc == NO_ERROR && isLdrStateExecPgm())
              {
-                 rc = AddArgsToFront(2, u1.pach, achTkExecPgmFilename);
+                 rc = AddArgsToFront(2, ldrpFileNameBuf, achTkExecPgmFilename);
                  if (rc != NO_ERROR)
                  {
                      kprintf(("myldrOpen-%d: AddArgsToFront failed with rc=%d\n", cNesting));
                      goto cleanup_noerror;
                  }
-                 rc = SetExecName(u1.pach);
+                 rc = SetExecName(ldrpFileNameBuf);
                  if (rc != NO_ERROR)
                      kprintf(("myldrOpen-%d: SetExecName failed with rc=%d\n", cNesting));
 

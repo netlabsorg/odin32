@@ -1,4 +1,4 @@
-/* $Id: d16init.c,v 1.6.4.3 2000-08-14 08:57:03 bird Exp $
+/* $Id: d16init.c,v 1.6.4.4 2000-08-30 04:11:26 bird Exp $
  *
  * d16init - init routines for both drivers.
  *
@@ -144,8 +144,11 @@ USHORT NEAR dev1Init(PRPINITIN pRpIn, PRPINITOUT pRpOut)
     if (npszErrMsg)
     {
         printf16(npszErrMsg, rc);
-        return pRpOut->Status = pRpOut->rph.Status = STATUS_DONE | STERR | ERROR_I24_QUIET_INIT_FAIL;
+        pRpOut->Status = pRpOut->rph.Status = STATUS_DONE | STERR | ERROR_I24_QUIET_INIT_FAIL;
     }
+
+    /* Init is completed. */
+    fInitTime = FALSE;
 
     /* successful return */
     return pRpOut->rph.Status;

@@ -1,4 +1,4 @@
-/* $Id: OS2Krnl.h,v 1.7.4.2 2000-08-28 22:44:22 bird Exp $
+/* $Id: OS2Krnl.h,v 1.7.4.3 2000-08-30 04:11:30 bird Exp $
  *
  * OS/2 kernel structures, typedefs and macros.
  *
@@ -229,6 +229,11 @@ typedef USHORT HPTDA, *PHPTDA;
 #define KRNLCALL __stdcall
 
 /*
+ * Calling convention for Security Helpers.
+ */
+#define SECCALL  _System
+
+/*
  *
  * Other Kernel Parts
  *
@@ -240,6 +245,7 @@ typedef USHORT HPTDA, *PHPTDA;
     #define INCL_OS2KRNL_TK
     #define INCL_OS2KRNL_PTDA
     #define INCL_OS2KRNL_TCB
+    #define INCL_OS2KRNL_SEC
 #endif
 
 #if defined(INCL_OS2KRNL_PTDA) && !defined(INCL_OS2KRNL_SEM)
@@ -268,6 +274,10 @@ typedef USHORT HPTDA, *PHPTDA;
 
 #ifdef INCL_OS2KRNL_TCB
     #include <OS2KTCB.h>
+#endif
+
+#ifdef INCL_OS2KRNL_SEC
+    #include <OS2KSEC.h>
 #endif
 
 #endif

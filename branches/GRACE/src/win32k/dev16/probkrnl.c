@@ -1,4 +1,4 @@
-/* $Id: probkrnl.c,v 1.20.4.11 2000-08-28 22:44:19 bird Exp $
+/* $Id: probkrnl.c,v 1.20.4.12 2000-08-30 04:11:27 bird Exp $
  *
  * Description:   Autoprobes the os2krnl file and os2krnl[*].sym files.
  *                Another Hack!
@@ -129,6 +129,7 @@ IMPORTKRNLSYM aImportTab[NBR_OF_KRNLIMPORTS] =
     {FALSE, -1, 11, "ptda_module",          -1,  -1,  -1,  -1, EPT_VARIMPORT16},   /* 38 */
     {FALSE, -1, 18, "ptda_pBeginLIBPATH",   -1,  -1,  -1,  -1, EPT_VARIMPORT16},   /* 39 */
     {FALSE, -1, 16, "_ldrpFileNameBuf",     -1,  -1,  -1,  -1, EPT_VARIMPORT32},   /* 40 */
+    {FALSE, -1, 14, "SecPathFromSFN",       -1,  -1,  -1,  -1, EPT_PROCIMPORTNR32},/* 41 */
 
 };
 
@@ -615,7 +616,7 @@ static int LookupKrnlEntry(unsigned short usBuild, unsigned short fKernel, unsig
                 aImportTab[j].ulAddress  = paKrnlOTEs[pEntry->aSyms[j].iObject].ote_base
                                            + pEntry->aSyms[j].offObject;
                 aImportTab[j].usSel      = paKrnlOTEs[pEntry->aSyms[j].iObject].ote_sel;
-                aImportTab[j].fFound     = TRUE;
+                aImportTab[j].fFound     = (char)((aImportTab[j].offObject == 0xFFFFFFFFUL) ? 1 : 0);
                 dprintf(("  %-3d addr=0x%08lx off=0x%08lx  %s\n",
                          j, aImportTab[j].ulAddress, aImportTab[j].offObject,
                          aImportTab[j].achName));
@@ -657,8 +658,17 @@ static int VerifyPrologs(void)
     {
         rc = DosDevIOCtl("", "", D16_IOCTL_VERIFYIMPORTTAB, D16_IOCTL_CAT, hDev0);
         DosClose(hDev0);
-        if (rc >= ERROR_D32_VERIFYIMPORTTAB_FIRST  && rc < ERROR_D32_VERIFYIMPORTTAB_LAST)
-            rc += ERROR_PROB_SYM_VERIFY_FIRST - ERROR_D32_VERIFYIMPORTTAB_FIRST;
+        if (rc != NO_ERROR)
+        {
+            register APIRET rc2 = rc & STECODE;
+            if (rc2 >= ERROR_D32_VERIFYIMPORTTAB_FIRST && rc2 <= ERROR_D32_VERIFYIMPORTTAB_LAST)
+                rc = rc2 + ERROR_PROB_SYM_VERIFY_FIRST - ERROR_D32_VERIFYIMPORTTAB_FIRST;
+        }
+    }
+    else
+    {
+        dprintf(("DosOpen Failed with rc=%d\n", rc));
+        DosSleep(2000);
     }
 
     return rc;
@@ -921,8 +931,9 @@ static int ProbeSymFile(const char * pszFilename)
     /*
      * If not all procedures were found fail.
      */
-    if (cLeftToFind != 0)
-        return ERROR_PROB_SYM_IMPORTS_NOTFOUND;
+    for (i = 0; i < NBR_OF_KRNLIMPORTS; i++)
+        if (!aImportTab[i].fFound && !(aImportTab[i].fType & EPT_NOT_REQ))
+            return ERROR_PROB_SYM_IMPORTS_NOTFOUND;
 
     /*
      * Verify function prologs and return.
@@ -1064,15 +1075,18 @@ static void ShowResult(int rc, int iSym)
         /*
          * function listing
          */
-        for (i = 0; i < NBR_OF_KRNLIMPORTS; i++)
+        if (options.fLogging || rc != NO_ERROR)
         {
-            printf16("  %-21s at ",aImportTab[i].achName);
-            if (aImportTab[i].fFound)
-                printf16("0x%08lx%s", aImportTab[i].ulAddress, (i % 2) == 0 ? "" : "\n");
-            else
-                printf16("failed!%s", (i % 2) == 0 ? "   " : "\n");
+            for (i = 0; i < NBR_OF_KRNLIMPORTS; i++)
+            {
+                printf16("  %-21s at ", aImportTab[i].achName);
+                if (aImportTab[i].fFound)
+                    printf16("0x%08lx%s", aImportTab[i].ulAddress, (i % 2) == 0 ? "" : "\n");
+                else
+                    printf16("not found!%s", (i % 2) == 0 ? "" : "\n");
+            }
+            if (i % 2) printf16("\n");
         }
-        if (i % 2) printf16("\n");
 
         /*
          * Display error code.
@@ -1222,12 +1236,17 @@ int ProbeKernel(PRPINITIN pReqPack)
                 )
             {
                 #ifndef R3TST
+                APIRET rc2;
                 /* search on disk */
                 i = 0;
                 while (apszSym[i] != NULL
-                       && (rc = ProbeSymFile(apszSym[i])) != NO_ERROR
+                       && (rc2 = ProbeSymFile(apszSym[i])) != NO_ERROR
                        )
+                {
                     i++;
+                    if (rc2 >= ERROR_PROB_SYM_VERIFY_FIRST)
+                        rc = rc2;
+                }
                 #endif
             }
         }
@@ -1540,6 +1559,7 @@ static int processFile(const char *pszFilename)
     int      cch = kstrlen(pszFilename);
 
     DosWrite(2, (char*)pszFilename, cch, &rc);
+    DosWrite(2, "\r\n", 2, &rc);
 
     /* Filename check */
     if (cch < 10 || cch > 11
@@ -1603,7 +1623,7 @@ static int processFile(const char *pszFilename)
             char *psz = aImportTab[i].achName;
             printf16("            {%-2d, 0x%08lx}, /* %s */\n",
                      aImportTab[i].iObject,
-                     aImportTab[i].offObject,
+                     aImportTab[i].fFound ? aImportTab[i].offObject : 0xFFFFFFFFUL,
                      (char *)&aImportTab[i].achName[0]
                      );
         }
@@ -1677,7 +1697,7 @@ int main(int argc, char **argv)
         FILEFINDBUF ffb;
         int         i;
 
-        printf16("/* $Id: probkrnl.c,v 1.20.4.11 2000-08-28 22:44:19 bird Exp $\n"
+        printf16("/* $Id: probkrnl.c,v 1.20.4.12 2000-08-30 04:11:27 bird Exp $\n"
                  "*\n"
                  "* Autogenerated kernel symbol database.\n"
                  "*\n"

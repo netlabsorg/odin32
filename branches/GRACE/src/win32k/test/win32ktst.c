@@ -1,4 +1,4 @@
-/* $Id: win32ktst.c,v 1.1.4.6 2000-08-25 04:47:28 bird Exp $
+/* $Id: win32ktst.c,v 1.1.4.7 2000-08-30 04:11:33 bird Exp $
  *
  * Win32k test module.
  *
@@ -329,9 +329,9 @@ int main(int argc, char **argv)
 void    syntax(void)
 {
     printf(
-        "Win32kTst.exe v%d.%d.%d - Ring 3 testing of win32k.sys\n"
-        "syntax: Win32kTst.exe <testcase number> [optional arguments]\n",
-        0,0,4
+           "Win32kTst.exe v%d.%d.%d - Ring 3 testing of win32k.sys\n"
+           "syntax: Win32kTst.exe <testcase number> [optional arguments]\n",
+           0,0,4
            );
 }
 
@@ -674,7 +674,7 @@ int TestCase2(void)
 {
     int         rc = 1;
     RP32INIT    rpinit;
-    char *      pszInitArgs = "-C1 -L:E -Verbose -Quiet -Elf:Yes -Pe:Mixed -Script:Yes -W4 -Heap:512000 -ResHeap:0256000 -HeapMax:4096000 -ResHeapMax:0x100000";
+    char *      pszInitArgs = "-C1 -L:E -Verbose -Elf:Yes -Pe:Mixed -Script:Yes -W4 -Heap:512000 -ResHeap:0256000 -HeapMax:4096000 -ResHeapMax:0x100000";
 
     options.fLogging = TRUE;
 
@@ -698,7 +698,7 @@ int TestCase2(void)
             opt.fElf            = TRUE;
             opt.fUNIXScript     = TRUE;
             opt.fPE             = FLAGS_PE_MIXED;
-            opt.fQuiet          = TRUE;
+            opt.fQuiet          = FALSE;
             opt.fLogging        = TRUE;
             opt.usCom           = OUTPUT_COM1;
             opt.ulInfoLevel     = INFOLEVEL_INFOALL;
@@ -885,13 +885,13 @@ int TestCaseExeLoad2(void)
 
     if (rc == NO_ERROR)
     {
-        psz = "REXX\\TST.CMD\0OriginalArgument1 OriginalArgument2\0OriginalArgument3\0";
-        printf("--- TestcaseExeLoad2 - loading rexx\\tst.cmd (REXX script) ----\n");
-        rc = CalltkExecPgm(EXEC_LOAD, psz, NULL, "rexx\\tst.cmd");
+        psz = "REXX\\TST.RX\0OriginalArgument1 OriginalArgument2\0OriginalArgument3\0";
+        printf("--- TestcaseExeLoad2 - loading rexx\\tst.rx (REXX script) ----\n");
+        rc = CalltkExecPgm(EXEC_LOAD, psz, NULL, "rexx\\tst.rx");
         if (rc == NO_ERROR)
         {
             /* check result */
-            psz = "REXX\\TST.CMD OriginalArgument1 OriginalArgument2\0OriginalArgument3\0";
+            psz = "REXX\\TST.RX OriginalArgument1 OriginalArgument2\0OriginalArgument3\0";
             cch = strlen(psz);
             if (memcmp(achTkExecPgmArguments + strlen(achTkExecPgmArguments) + 1, psz, cch) != 0)
             {

@@ -1,4 +1,4 @@
-/* $Id: d16strat.c,v 1.8.4.1 2000-08-29 19:47:00 bird Exp $
+/* $Id: d16strat.c,v 1.8.4.2 2000-08-30 04:11:26 bird Exp $
  *
  * d16strat.c - 16-bit strategy routine, device headers, device_helper (ptr)
  *              and 16-bit IOClts.
@@ -136,7 +136,6 @@ USHORT dev0GenIOCtl(PRP_GENIOCTL pRp)
                 if (fInitTime)
                 {
                     rc = R0Init16(pRp);
-                    fInitTime = FALSE;
                     return rc;
                 }
                 break;
