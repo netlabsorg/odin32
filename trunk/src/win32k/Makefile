@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.59 2000-10-27 09:55:52 bird Exp $
+# $Id: Makefile,v 1.60 2000-11-19 09:02:05 bird Exp $
 #
 # Win32k makefile.
 #
@@ -711,12 +711,15 @@ clean:
     $(MAKE_CMD) clean
     cd ..\lib
     $(MAKE_CMD) clean
+    cd ..\rexx
+    $(MAKE_CMD) clean
+    cd ..\utils
+    $(MAKE_CMD) clean
     cd ..
 
 
 ################################################################################
-# DEPENDENCIES - c and c++ deps are autogenereated.
-#                asm deps must be updated by hand
+# DEPENDENCIES - all deps are autogenereated.
 ################################################################################
 dep:
     $(PDWIN32_TOOLS)\fastdep @<<
@@ -745,6 +748,8 @@ dep:
     $(MAKE_CMD) dep
     cd ..\lib
     $(MAKE_CMD) dep
+    cd ..\rexx
+    $(MAKE_CMD) clean
     cd ..\utils
     $(MAKE_CMD) dep
     cd ..

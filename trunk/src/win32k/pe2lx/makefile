@@ -1,5 +1,5 @@
 ##############################################################################
-# $Id: makefile,v 1.23 2000-10-17 12:07:23 bird Exp $
+# $Id: makefile,v 1.24 2000-11-19 09:02:05 bird Exp $
 #
 # PD-Win32 API
 #
@@ -12,6 +12,7 @@
 ##############################################################################
 NOCLEAN=1
 EXETARGET=1
+OLD_STYLE=1
 !include ..\makefile.inc
 !include $(PDWIN32_INCLUDE)\pdwin32.mk
 
@@ -24,13 +25,10 @@ OBJEXT          = pe_obj
 # Tools and Flags Addjustments
 ##############################################################################
 OBJDIR     = $(WIN32KOBJ)
-CINCLUDES  = -I$(WIN32KINCLUDE)
-
-CFLAGS     = $(CINCLUDES) $(CFLAGS) -DRING3 -DPE2LX \
-             -Ge+ -Gm- -Gn- -Ti+ -Rn -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext-
-CXXFLAGS   = $(CINCLUDES) $(CXXFLAGS) -DRING3 -DPE2LX \
-             -Ge+ -Gm- -Gn- -Ti+ -Rn -Gx -Wall+ppt-ppc-inl-cnv-gnr-vft-
-
+CINCLUDES  = -I$(WIN32KINCLUDE) $(CINCLUDES)
+CDEFINES   = $(CDEFINES) -DRING3 -DPE2LX
+CFLAGS     = $(CFLAGS)   -Ge+ -Gm- -Gn- -Ti+ -Rn -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext-
+CXXFLAGS   = $(CXXFLAGS) -Ge+ -Gm- -Gn- -Ti+ -Rn -Gx -Wall+ppt-ppc-inl-cnv-gnr-vft-
 LD2FLAGS   = /nologo /NOI /A:16 /NOE /NOD /packcode /packdata /pmtype:vio /Stack:4096 \
 !ifdef DEBUG
 !ifndef NODEBUGINFO
@@ -46,19 +44,19 @@ LD2FLAGS   = /nologo /NOI /A:16 /NOE /NOD /packcode /packdata /pmtype:vio /Stack
 ##############################################################################
 {$(WIN32KMISC)}.c{$(OBJDIR)}.$(OBJEXT):
     @echo compiling: $(@B).c
-    @$(CC) $(CFLAGS) -c -Fa$(WIN32KLIST)\$(@B)_pe.asm -Fo$@ $<
+    @$(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES) -c -Fa$(WIN32KLIST)\$(@B)_pe.asm -Fo$@ $<
 
 {$(WIN32KMISC)}.cpp{$(OBJDIR)}.$(OBJEXT):
     @echo compiling: $(@B).cpp
-    @$(CXX) $(CXXFLAGS) -c -Fa$(WIN32KLIST)\$(@B)_pe.asm -Fo$@ $<
+    @$(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -c -Fa$(WIN32KLIST)\$(@B)_pe.asm -Fo$@ $<
 
 {$(WIN32KLDR)}.cpp{$(OBJDIR)}.$(OBJEXT):
     @echo compiling: $(@B).cpp
-    @$(CXX) $(CXXFLAGS) -c -Fa$(WIN32KLIST)\$(@B)_pe.asm -Fo$@ $<
+    @$(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -c -Fa$(WIN32KLIST)\$(@B)_pe.asm -Fo$@ $<
 
 .cpp{$(OBJDIR)}.$(OBJEXT):
     @echo compiling: $(@B).cpp
-    @$(CXX) $(CXXFLAGS) -c -Fa$(WIN32KLIST)\$(@B)_pe.asm -Fo$@ $<
+    @$(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -c -Fa$(WIN32KLIST)\$(@B)_pe.asm -Fo$@ $<
 
 
 #
@@ -66,19 +64,19 @@ LD2FLAGS   = /nologo /NOI /A:16 /NOE /NOD /packcode /packdata /pmtype:vio /Stack
 #
 {$(WIN32KMISC)}.c.obj:
     @echo compiling: $(@B).c
-    @$(CC) $(CFLAGS) -c -Fa$(WIN32KLIST)\$(@B)_pe.asm -Fo$(OBJDIR)\$(@B).$(OBJEXT) $<
+    @$(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES) -c -Fa$(WIN32KLIST)\$(@B)_pe.asm -Fo$(OBJDIR)\$(@B).$(OBJEXT) $<
 
 {$(WIN32KMISC)}.cpp.obj:
     @echo compiling: $(@B).cpp
-    @$(CXX) $(CXXFLAGS) -c -Fa$(WIN32KLIST)\$(@B)_pe.asm -Fo$(OBJDIR)\$(@B).$(OBJEXT) $<
+    @$(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -c -Fa$(WIN32KLIST)\$(@B)_pe.asm -Fo$(OBJDIR)\$(@B).$(OBJEXT) $<
 
 {$(WIN32KLDR)}.cpp.obj:
     @echo compiling: $(@B).cpp
-    @$(CXX) $(CXXFLAGS) -c -Fa$(WIN32KLIST)\$(@B)_pe.asm -Fo$(OBJDIR)\$(@B).$(OBJEXT) $<
+    @$(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -c -Fa$(WIN32KLIST)\$(@B)_pe.asm -Fo$(OBJDIR)\$(@B).$(OBJEXT) $<
 
 .cpp.obj:
     @echo compiling: $(@B).cpp
-    @$(CXX) $(CXXFLAGS) -c -Fa$(WIN32KLIST)\$(@B)_pe.asm -Fo$(OBJDIR)\$(@B).$(OBJEXT) $<
+    @$(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -c -Fa$(WIN32KLIST)\$(@B)_pe.asm -Fo$(OBJDIR)\$(@B).$(OBJEXT) $<
 
 
 ##############################################################################
