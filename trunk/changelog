@@ -1,8 +1,12 @@
-/* $Id: changelog,v 1.2195 2002-06-28 12:35:40 sandervl Exp $ */
+/* $Id: changelog,v 1.2196 2002-06-28 19:43:32 sandervl Exp $ */
 
  2002-06-28: Sander van Leeuwen <sandervl@innotek.de>
     - USER32:   o Removed focus fix from 2001-11-20; controls of child
                   dialogs can receive input focus (CVP wizard dialogs)
+                o Only call ProcessKbdHook from PeekMessage if PM_REMOVE
+                  flag is set (otherwise the hook will be called twice)
+                o Call message filter hook in IsDialogMessageA/W
+    - DOC:      o Odin.ini.txt -> Version=NT40 for Windows NT 4 (not NT4)
 
  2002-06-27: Platon Fomichev <platon@innotek.de>
     - SHELL32:  o Enable OK button before sending BFFM_SELCHANGED (apparently
