@@ -1,3 +1,4 @@
+/* $Id: odinexe.cpp,v 1.2 1999-09-18 17:46:47 sandervl Exp $ */
 /*
  * Win32 Odin32 Application executable entrypoint
  *
