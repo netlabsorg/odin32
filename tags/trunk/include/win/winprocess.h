@@ -24,15 +24,35 @@ struct _UTINFO;
  * This is GUESS WORK. I've not spend too much time
  * figuring out how this really is. But this at least make some sense.
  */
-/* The linked list node for one handler */
+/* The doubly linked list node for one handler */
 typedef struct _ConCtrl
 {
     void *              pfnHandler;     /* Pointer to the handler. (PHANDLER_ROUTINE) */
-    DWORD               cReference;     /* Number of installs of this handler. */
     struct _ConCtrl *   pNext;          /* Pointer to the next in the chain. */
+    struct _ConCtrl *   pPrev;          /* Pointer to the prev in the chain. */
+    ULONG               flFlags;        /* Internal flags for prevent crash during
+                                         * GenerateConsoleCtrlEvent(). Initially 0.
+                                         */
 } CONCTRL, *PCONCTRL;
-#endif
 
+/* flFlags in CONCTRL */
+#define ODIN32_CONCTRL_FLAGS_INIT       0x00000000
+#define ODIN32_CONCTRL_FLAGS_USED       0x00000001
+#define ODIN32_CONCTRL_FLAGS_REMOVED    0x00000002
+
+/*
+ * Console Handler Data struct.
+ * GUESS WORK!
+ * Insert at head. Remove from tail.
+ */
+typedef struct _ConCtrlData
+{
+    PCONCTRL    pHead;                  /* Head of handler list. */
+    PCONCTRL    pTail;                  /* Tail of handler list. */
+    BOOL        fIgnoreCtrlC;           /* If set we should ignore Ctrl-C. */
+                                        /* Initially false / inherited. */
+} CONCTRLDATA, *PCONCTRLDATA;
+#endif
 
 /* Win32 process environment database */
 typedef struct
