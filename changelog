@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.578 1999-12-27 18:47:40 sandervl Exp $ */
+ /* $Id: changelog,v 1.579 1999-12-27 21:21:51 sandervl Exp $ */
 
  99-12-27: Jens Wiessner <wiessnej@rfi.de>
 	- WINSPOOL: Added stubs
@@ -18,6 +18,8 @@
                   Fixed PeekMessageW (used old way of calling OSLibWinPeekMsg)
                   Changed translation of message filters (still not 100% correct)
                   Fixed bugs in OSLibPeekMessage
+	- KERNEL32: Enable write access for code sections which have this flag
+                    set in the PE image (fixes crash in WinDVD)
 
  99-12-26: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: implemented WM_NCHITTEST, added WM_SYSCOMMAND handling
