@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.128 2001-05-11 20:40:39 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.129 2001-05-12 08:25:56 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -305,6 +305,21 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         dprintf(("OS2: WM_VRNDISABLED %x %x %x", win32wnd->getWindowHandle(), mp1, mp2));
         goto RunDefWndProc;
 
+    case WIN32APP_SETFOCUSMSG:
+        //PM doesn't allow SetFocus calls during WM_SETFOCUS message processing;
+        //must delay this function call
+        //mp1 = win32 window handle
+        //mp2 = activate flag
+        dprintf(("USER32: Delayed SetFocus %x %x call!", teb->o.odin.hwndFocus, mp1));
+        if(teb->o.odin.hwndFocus) {
+            win32wnd = Win32BaseWindow::GetWindowFromHandle(teb->o.odin.hwndFocus);
+            if(win32wnd) {
+                 WinFocusChange(HWND_DESKTOP, win32wnd->getOS2WindowHandle(), (mp2) ? FC_NOLOSEACTIVE : 0);
+            }
+            else DebugInt3();
+        }
+        break;
+
     case WM_SETFOCUS:
     {
       HWND hwndFocus = (HWND)mp1;
@@ -316,7 +331,8 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
         teb->o.odin.fWM_SETFOCUS = TRUE;
         teb->o.odin.hwndFocus    = 0;
-        if(WinQueryWindowULong(hwndFocus, OFFSET_WIN32PM_MAGIC) != WIN32PM_MAGIC) {
+        if(WinQueryWindowULong(hwndFocus, OFFSET_WIN32PM_MAGIC) != WIN32PM_MAGIC)
+        {
                 //another (non-win32) application's window
                 //set to NULL (allowed according to win32 SDK) to avoid problems
                 hwndFocus = NULL;
@@ -563,22 +579,6 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
         //WM_CREATE handled during client window creation
         goto RunDefFrameWndProc;
     }
-
-    case WIN32APP_SETFOCUSMSG:
-        //PM doesn't allow SetFocus calls during WM_SETFOCUS message processing;
-        //must delay this function call
-        //mp1 = win32 window handle
-        //mp2 = activate flag
-        dprintf(("USER32: Delayed SetFocus %x %x call!", teb->o.odin.hwndFocus, mp1));
-        if(teb->o.odin.hwndFocus) {
-            win32wnd = Win32BaseWindow::GetWindowFromHandle(teb->o.odin.hwndFocus);
-            teb->o.odin.hwndFocus = 0;
-            if(win32wnd) {
-                 WinFocusChange(HWND_DESKTOP, win32wnd->getOS2FrameWindowHandle(), (mp2) ? FC_NOLOSEACTIVE : 0);
-            }
-            else DebugInt3();
-        }
-        break;
 
     case WM_PAINT:
     {
@@ -1350,8 +1350,8 @@ RunDefFrameWndProc:
 RunDefWndProc:
     RestoreOS2TIB();
     //calling WinDefWindowProc here break Opera hotlist window (WM_ADJUSTWINDOWPOS)
-    return pfnFrameWndProc(hwnd, msg, mp1, mp2);
-//    return WinDefWindowProc( hwnd, msg, mp1, mp2 );
+//    return pfnFrameWndProc(hwnd, msg, mp1, mp2);
+    return WinDefWindowProc( hwnd, msg, mp1, mp2 );
 }
 //******************************************************************************
 //TODO: Quickly moving a window two times doesn't force a repaint (1st time)
