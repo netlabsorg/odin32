@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.331 2002-07-30 18:55:42 achimha Exp $ */
+/* $Id: win32wbase.cpp,v 1.332 2002-07-30 19:55:35 achimha Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -481,22 +481,27 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         memset(userWindowBytes, 0, nrUserWindowBytes);
     }
 
+    // check if it's the standard child window case
     if ((cs->style & WS_CHILD) && cs->hwndParent)
     {
         SetParent(cs->hwndParent);
-        owner = 0;
+        owner = NULL;
         //SvL: Shell positioning shouldn't be done for child windows! (breaks Notes)
         fXDefault = fCXDefault = FALSE;
     }
     else
     {
+        // either no child window or a popup window
+
         SetParent(0);
         if (!cs->hwndParent || (cs->hwndParent == windowDesktop->getWindowHandle())) {
             owner = NULL;
         }
         else
         {
-            Win32BaseWindow *wndparent = GetWindowFromHandle(cs->hwndParent); 
+            // we're a popup window
+
+            Win32BaseWindow *wndparent = GetWindowFromHandle(cs->hwndParent);
             if(wndparent) {
                  owner = GetWindowFromHandle(wndparent->GetTopParent());
                  RELEASE_WNDOBJ(wndparent);
@@ -554,11 +559,19 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
     DWORD dwOSWinStyle, dwOSFrameStyle;
     OSLibWinConvertStyle(dwStyle,dwExStyle,&dwOSWinStyle, &dwOSFrameStyle);
 
-    OS2Hwnd = OSLibWinCreateWindow((getParent()) ? getParent()->getOS2WindowHandle() : OSLIB_HWND_DESKTOP,
-                                   dwOSWinStyle, dwOSFrameStyle, (char *)windowNameA,
-                                   (owner) ? owner->getOS2WindowHandle() : ((getParent()) ? getParent()->getOS2WindowHandle() : OSLIB_HWND_DESKTOP),
+    // create PM windows - frame and client window
+    HWND hwndOS2Frame = (getParent()) ? getParent()->getOS2WindowHandle() : OSLIB_HWND_DESKTOP;
+    OS2Hwnd = OSLibWinCreateWindow(hwndOS2Frame,
+                                   dwOSWinStyle,
+                                   dwOSFrameStyle,
+                                   (char *)windowNameA,
+                                   (owner) ? owner->getOS2WindowHandle() : hwndOS2Frame,
                                    (hwndLinkAfter == HWND_BOTTOM) ? TRUE : FALSE,
-                                   0, fTaskList,fXDefault | fCXDefault,windowClass->getStyle(), &OS2HwndFrame);
+                                   0,
+                                   fTaskList,
+                                   fXDefault | fCXDefault,
+                                   windowClass->getStyle(),
+                                   &OS2HwndFrame);
     if(OS2Hwnd == 0) {
         dprintf(("Window creation failed!! OS LastError %0x", OSLibWinGetLastError()));
         SetLastError(ERROR_OUTOFMEMORY); //TODO: Better error
