@@ -163,6 +163,7 @@ BOOL    WIN32API IsWindowEnabled(HWND);
 HWND    WIN32API SetActiveWindow( HWND hwnd);
 BOOL    WIN32API IsWindowVisible(HWND);
 HWND    WIN32API GetParent(HWND);
+BOOL    WIN32API ShowWindow(HWND hwnd, INT nCmdShow);
 
 HMODULE WIN32API LoadLibraryA(LPCSTR);
 BOOL    WIN32API FreeLibrary(HMODULE);
