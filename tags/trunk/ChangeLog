@@ -1,8 +1,9 @@
-/* $Id: ChangeLog,v 1.2478 2003-02-11 14:19:35 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2479 2003-02-11 14:35:43 sandervl Exp $ */
 
  2003-02-11: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o When a window is activated by a mouse click, we must set
                   focus to the client window (and not the frame!).
+                o GetSysColor: always return cached colors
 
  2003-02-10: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Touch all stack pages we skip in the out of stack workaround for
