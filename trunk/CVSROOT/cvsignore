@@ -13,3 +13,4 @@
 .depend
 *exp.def
 resource.asm
+*.lrf
