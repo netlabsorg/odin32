@@ -57,11 +57,11 @@ a few simple tasks must be completed:
 
 2.0.1 Log files
 ---------------
-The alpha 5 binaries and daily build zipfiles can generate logfiles to show 
+The alpha 5 binaries and daily build zipfiles can generate logfiles to show
 what a win32 application is doing. This can be very useful to determine
 why certain applications don't run correctly.
 
-The major disadvantage of loggging is the overhead. Therefor it has been 
+The major disadvantage of loggging is the overhead. Therefor it has been
 disabled by default in the alpha 5 release and daily builds.
 To enable logging set the environment variable WIN32LOG_ENABLED:
    SET WIN32LOG_ENABLED=1
@@ -121,8 +121,8 @@ to fall under this category are Microsoft Office (also the
 Office viewers) and other mainly Microsoft programs.
 
 
-2.3 The Ring0 conversion utility driver (WIN32K.SYS)
-----------------------------------------------------
+2.3.0 Win32k.sys - native OS/2 PE-"loader"
+----------------------------------------
 
 The win32k.sys driver makes PE (Win32) executables equal to native OS/2
 executables by implementing a Ring 0 on-the-fly converter. The converter is
@@ -147,7 +147,7 @@ For example, if you fancy playing windows solitaire.
 2.3.1 WARNING
 -------------
 
-The Win32k.sys is alpha software and any bugs which haven't been found
+The Win32k.sys is quite alpha software and any bugs which haven't been found
 yet may crash and/or corrupt you entire system! Make sure you have backed up
 important stuff first!
 
@@ -163,58 +163,10 @@ works; for example TEDIT.EXE.
 ------------------
 
 Win32k should work on any Warp 4 or Warp Server for e-business installations
-which Odin32 works on. It requires only one thing, a kernel symbol file. The
-kernel symbol is looked for in \OS2\PDPSI\PMDF\WARP4 and
-\OS2\PDPSI\PMDF\WARP45_U/S. All warp 4 and WE4eB installations should have
-those direcotries (we hope). It is updated when you install a new fixpack - so
-there is really nothing to worry about for the common user.
-
-For those playing with debug-kernels, make sure that OS2KRNL.SYM is matching
-the running kernel, while this file too is investigated. (The complete list
-is found in src\Win32k\dev16\probkrnl.c,apszSym[] - odin32 source tree.)
-
-
-2.3.2.1 Warp 3
---------------
-
-Win32k is not tested with Warp 3. It is supposed to work with Warp 3 provided
-that the os2krnl.sym file is present. Warp Server 4 has this, common Warp 3
-doesn't.
-
-
-2.3.3 Installation
-------------------
-
-To use Win32k.sys you have to add the following line into your config.sys:
-    device=<d:\path\>win32k.sys
-
-Where <d:\path\> is the path to the win32k.sys, i.e. the odin32 executables
-directory.
-
-After doing this, you'll have to reboot your machine to load the driver. During
-the boot process you will on a successful installation see some lines of
-technical info and finally a line saying:
-    'Win32k.sys succesfully initiated!'
-
-If you don't see the line above something is wrong.
-
-
-2.3.4 Win32k parameters
------------------------
-
-There are some useful parameters for Win32k:
--Q             Quiet driver initiation. (Default is verbose (-V) initiation.)
--V             Verbose driver initiation. Default.
--S:<filename>  Full path to the current OS/2 kernel symbol file.
--K:<filename>  Full path to the running OS/2 kernel.
-
-
-2.3.5 Rings - Ring 0 / Ring 3
------------------------------
-
-FYI. Ring 0 is the most priveleged level of execution in OS/2. The OS/2 kernel
-and device drivers execute at this level, while user applications execute in
-Ring 3, the least priveleged executing level.
+which Odin32 works on. It no longer requires a kernel file for non-debug
+kernels. Win32k does now contain a "database" for the most recent retail
+kernels. Currently this is:
+    Warp 4 fp#5 -> fp#12
 
 
 2.4 The Ring3 conversion utility (PE2LX.EXE)
@@ -261,10 +213,10 @@ Project Odin Source Code Notes
 1.0 Introduction
 ----------------
 
-This readme is intended for making people more familiar with ODIN and to 
-describe various aspects of the project such as accessing latest sources via 
-cvs, building the binaries, running win32 applications, how to identify and 
-report problems and bugs, as well as how to participate in this very 
+This readme is intended for making people more familiar with ODIN and to
+describe various aspects of the project such as accessing latest sources via
+cvs, building the binaries, running win32 applications, how to identify and
+report problems and bugs, as well as how to participate in this very
 promising project.
 
 
@@ -275,7 +227,7 @@ Required compilers/tools:
 	- IBM VisualAge 3.0 (CTx8 fixpack applied)
 	  (version 3.6 might also work, but version 4 is not
  	   recommended)
-	- OS/2 Warp 4 Toolkit (project apparently doesn't compile with 
+	- OS/2 Warp 4 Toolkit (project apparently doesn't compile with
 	  VAC's OS/2 headers)
 	  Might also work with EMX headers. (haven't tried this!)
 	- ALP 4.0 (IBM Assembly Language Processor)
@@ -284,10 +236,10 @@ Required compilers/tools:
 	- Unix-like rm.exe (nmake clean)
 
 Changes from last source code release:
-	- Uses Wine headers and a stripped down version of os2win.h (Open32 
+	- Uses Wine headers and a stripped down version of os2win.h (Open32
           header)
 	- All Open32 apis have the 'O32_' prefix.
-	- All Open32 declarations are appended with '_O32' (mostly due to 
+	- All Open32 declarations are appended with '_O32' (mostly due to
           calling convention differences)
 	- nmake DEBUG=1 builds the debug version
           nmake         builds the release version
@@ -310,7 +262,7 @@ Coding conventions:
           and restore the selector in FS. (some OS/2 apis set it back to the
  	  default value (150b))
 	- Use the correct Win32 api when there are two version (ascii & unicode)
-	  Calling the standard one (SendMessage) causes a error during 
+	  Calling the standard one (SendMessage) causes a error during
           compilation.
 	  Use SendMessageA instead.
 	- Source code style will be decided on in the near future.
@@ -319,13 +271,13 @@ Coding conventions:
 2.0 Accessing ODIN source code via CVS
 --------------------------------------
 
-Please check out http://www.netlabs.org/ and http://www.netlabs.org/odin. 
+Please check out http://www.netlabs.org/ and http://www.netlabs.org/odin.
 
 
 3.0 Building the binaries
 -------------------------
 
-Basically, if your system setup meets above stated requirements, everything you 
+Basically, if your system setup meets above stated requirements, everything you
 need to do for a binary build is:
 
   nmake DEBUG=1
@@ -334,13 +286,13 @@ or alternatively
 
   nmake release (not working right now!)
 
-As the current state of the project is still known to be alpha level, one should 
-expect some functions not to work properly. Therefore, we recommend the use of 
-the debug-version which creates long logfiles for problem determination purpose 
+As the current state of the project is still known to be alpha level, one should
+expect some functions not to work properly. Therefore, we recommend the use of
+the debug-version which creates long logfiles for problem determination purpose
 and to allow active debugging with debuggers such as IPMD, ICAT, KDB, etc.
 
-Please note if you do not want to suffer from the performance loss of writing 
-logfiles, you can disable logging even with the debug binaries of ODIN by 
+Please note if you do not want to suffer from the performance loss of writing
+logfiles, you can disable logging even with the debug binaries of ODIN by
 setting:
 
   SET NOWIN32LOG=YES
@@ -355,11 +307,11 @@ in the nodebuginfo build and not present in the release build.
 3.1 Build problems
 ------------------
 
-ODIN is moving at a fast pace. Sometimes side effects of source dependencies may 
+ODIN is moving at a fast pace. Sometimes side effects of source dependencies may
 require you to do a full rebuild of the binaries instead of an incremental build.
 
-However, rarely it also happens the sources contained in the CVS repository do 
-not build completely due to erroneous source code. Usually, this is fixed within 
+However, rarely it also happens the sources contained in the CVS repository do
+not build completely due to erroneous source code. Usually, this is fixed within
 two days at maximum.
 In such event, one can normally stick with the previous version of the particular
 module to further test win32 applications on ODIN.
@@ -370,22 +322,22 @@ Please report such build problems through the appropriate channel.
 3.2 Downloading daily built binaries
 ------------------------------------
 
-http://www.os2.org/ has setup an ftp server that hosts the automatically 
-built binaries on daily basis. For people that do not have a suitable 
+http://www.os2.org/ has setup an ftp server that hosts the automatically
+built binaries on daily basis. For people that do not have a suitable
 development setup for ODIN, we provide the latest binary code that way.
 
 
 4.0 Project participation
 -------------------------
 
-As ODIN became an open source project, everybody is kindly invited to 
+As ODIN became an open source project, everybody is kindly invited to
 contribute his/her share to the progress of the project. May it be
-active coding, fixing bugs or just providing detailed information about 
+active coding, fixing bugs or just providing detailed information about
 examined problems.
 
 We suggest you subscribe to win32os2-wai and the corresponsing mailing lists
 on http://www.egroups.com.
-In case you are interested in participating, every member of the project will 
-be happy to give you direction to the right places and to give a personal 
+In case you are interested in participating, every member of the project will
+be happy to give you direction to the right places and to give a personal
 introduction to further development of the particular modules.
 
