@@ -1,4 +1,4 @@
-/* $Id: atom.cpp,v 1.10 2001-07-08 11:02:10 sandervl Exp $ */
+/* $Id: atom.cpp,v 1.11 2001-07-12 16:23:52 sandervl Exp $ */
 
 /*
  * Win32 ATOM api functions
@@ -91,8 +91,8 @@ ATOM WIN32API FindAtomA( LPCSTR atomName)
 
     if(atomTable != NULL) {
         atom = LookupAtom(atomTable, HIWORD(atomName) ? 
-                          (PSZ) atomName : (PSZ) LOWORD(atomName),
-                          LOOKUP_ADD | LOOKUP_NOCASE);
+                          (PSZ) atomName : (PSZ) (LOWORD(atomName) | 0xFFFF0000),
+                          LOOKUP_FIND | LOOKUP_NOCASE);
     }
     dprintf(("FindAtomA returned %x", atom));
 
@@ -130,7 +130,7 @@ ATOM WIN32API AddAtomA(LPCSTR atomName)
     if(atomTable != NULL)
     {
         atom = LookupAtom(atomTable, HIWORD(atomName) ? 
-                          (PSZ) atomName : (PSZ) LOWORD(atomName),
+                          (PSZ) atomName : (PSZ) (LOWORD(atomName) | 0xFFFF0000),
                           LOOKUP_ADD | LOOKUP_NOCASE);
     }
 
@@ -236,7 +236,7 @@ ATOM WIN32API GlobalAddAtomA(LPCSTR atomName)
     if(atomTable != NULL)
     {
         atom = LookupAtom(atomTable, HIWORD(atomName) ? 
-                          (PSZ) atomName : (PSZ) LOWORD(atomName),
+                          (PSZ) atomName : (PSZ) (LOWORD(atomName) | 0xFFFF0000),
                           LOOKUP_ADD | LOOKUP_NOCASE);
     }
 
@@ -283,8 +283,8 @@ ATOM WIN32API GlobalFindAtomA( LPCSTR atomName)
     else dprintf(("GlobalFindAtomA %x", atomName));
 
     atom = LookupAtom(atomTable, HIWORD(atomName) ? 
-                      (PSZ) atomName : (PSZ) LOWORD(atomName),
-                      LOOKUP_ADD | LOOKUP_NOCASE);
+                      (PSZ) atomName : (PSZ) (LOWORD(atomName) | 0xFFFF0000),
+                      LOOKUP_FIND | LOOKUP_NOCASE);
     dprintf(("GlobalFindAtomA returned %x", atom));
 
     if(!atom) {
