@@ -1,8 +1,4 @@
-/* $Id: changelog,v 1.2525 2003-03-25 12:16:43 sandervl Exp $ */
-
- 2003-03-25: Platon Fomichev <platon@innotek   >
-    - USER32:   o Generate console even when receiving special keyboard hook
-                  message for Ctrl-Break
+/* $Id: changelog,v 1.2526 2003-03-25 12:26:23 sandervl Exp $ */
 
  2003-03-22: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o If an application doesn't validate the update region 
