@@ -1,4 +1,4 @@
-/* $Id: dwaveout.cpp,v 1.8 1999-10-22 18:09:15 sandervl Exp $ */
+/* $Id: dwaveout.cpp,v 1.9 1999-10-26 22:44:15 phaller Exp $ */
 
 /*
  * Wave playback class
@@ -219,7 +219,7 @@ DartWaveOut::~DartWaveOut()
     wmutex->leave();
 
    if(!ulError) {
-   	if(callback) {
+   	if(mthdCallback) {
     		callback((ULONG)this, WOM_CLOSE, dwInstance, 0, 0);
    	}
    	else
@@ -271,7 +271,7 @@ int DartWaveOut::getNumDevices()
 
    // Close the device
    mciSendCommand(AmpOpenParms.usDeviceID, MCI_CLOSE, MCI_WAIT, (PVOID)&GenericParms, 0);
-   
+
    return 1;
 }
 /******************************************************************************/
@@ -478,7 +478,7 @@ MMRESULT DartWaveOut::reset()
   while(wavehdr) {
     wavehdr->dwFlags |= WHDR_DONE;
     wmutex->leave();
-    if(callback) {
+    if(mthdCallback) {
         callback((ULONG)this, WOM_DONE, dwInstance, wavehdr->dwUser, (ULONG)wavehdr);
     }
     else
@@ -633,7 +633,9 @@ void DartWaveOut::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags
         whdr->lpNext = NULL;
         wmutex->leave();
 
-        if(callback) {
+        dprintf(("WINMM:DartWaveOut::handler callback=%08xh\n",
+                 callback));
+        if(mthdCallback) {
             callback((ULONG)this, WOM_DONE, dwInstance, whdr->dwUser, (ULONG)whdr);
         }
         else
