@@ -1,4 +1,4 @@
-;/* $Id: kKrnlLibTst.def,v 1.6 2001-11-19 02:57:54 bird Exp $
+;/* $Id: kKrnlLibTst.def,v 1.7 2002-01-09 00:51:47 bird Exp $
 ; *
 ; * Definition file for the Ring-3 test program.
 ; *
@@ -26,7 +26,9 @@ SEGMENTS
     CODE16_IOSEG        class 'CODE'
     CODE16_INIT         class 'CODE'
 
-    CODE32              class 'CODE'
+    LOGDATA_16BIT       class 'LOGDATA_16BIT'
+
+    CALLTAB16           class 'CALLTAB16_DATA'
 
     DATA32              class 'DATA'
     c_common            class 'DATA'
@@ -41,11 +43,9 @@ SEGMENTS
 
     BSS32               class 'BSS'
 
-    CALLTAB16           class 'CALLTAB16_DATA'
-
-    LOGDATA_16BIT       class 'LOGDATA_16BIT'
-
     SYMBOLDB32          class 'SYMBOLDB32'
+
+    CODE32              class 'CODE'
 
     STACK32             class 'STACK' STACK
 
