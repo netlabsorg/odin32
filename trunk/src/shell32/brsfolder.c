@@ -1,3 +1,23 @@
+/* $Id: brsfolder.c,v 1.6 2001-10-10 22:56:08 phaller Exp $ */
+
+/*
+ * Win32 compatibility SHELL32 BRSFOLDER for OS/2
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
+ */
+
+
+/****************************************************************************
+ * includes
+ ****************************************************************************/
+
+#include <odin.h>
+#include <os2sel.h>
+#include <odinwrap.h>
+
+ODINDEBUGCHANNEL(SHELL32-BRSFOLDER)
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -317,7 +337,8 @@ static BOOL WINAPI BrsFolderDlgProc( HWND hWnd, UINT msg, WPARAM wParam,
  * SHBrowseForFolderA [SHELL32.209]
  *
  */
-LPITEMIDLIST WINAPI SHBrowseForFolderA (LPBROWSEINFOA lpbi)
+ODINFUNCTION1(LPITEMIDLIST, SHBrowseForFolderA,
+              LPBROWSEINFOA, lpbi)
 {
 	TRACE("(%p{lpszTitle=%s,owner=%i})\n", 
 	      lpbi, debugstr_a(lpbi->lpszTitle), lpbi->hwndOwner);
