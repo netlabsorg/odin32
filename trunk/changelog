@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.2177 2002-06-20 02:37:14 bird Exp $ */
+/* $Id: changelog,v 1.2178 2002-06-20 14:12:46 sandervl Exp $ */
+
+ 2002-06-20: Sander van Leeuwen <sandervl@innotek.de>
+    - OLE32:    o Drag 'n drop fix
+    - USER32:   o Drag 'n drop fix
+                o Enabled drag 'n drop again
+                o Added SetDragDrop to disable drag 'n drop
 
  2002-06-20: knut st. osmundsen <bird@anduin.net>
     - INSTALL:  o Corrected quoting typos. ('User's Guide' -> 'User''s Guide')
