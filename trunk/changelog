@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2710 2004-03-18 11:14:28 sandervl Exp $ */
+/* $Id: changelog,v 1.2711 2004-03-18 15:39:42 sandervl Exp $ */
+
+ 2004-03-18: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o RedrawWindow: ignore if window is not visible
+                o Dialog: use CallWindowProcA/W for calling the dialog procedure
 
  2004-02-17: knut st. osmundsen <bird-changelog@innotek    >
     - KERNEL32: o Fixed HEAP_strdupW.
