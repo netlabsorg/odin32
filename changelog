@@ -1,10 +1,11 @@
-/* $Id: changelog,v 1.1802 2001-10-28 11:09:52 sandervl Exp $ */
+/* $Id: changelog,v 1.1803 2001-10-28 12:52:31 sandervl Exp $ */
 
  2001-10-28: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMCTL32: o LISTVIEW_GetItemWidth bugfix: item can never be bigger
                   than the client area
     - USER32:   o Fixes for Set/GetWindowLong for dialogs. (unicode flag not
                   passed to parent class methods)
+    - KERNEL32: o Added RegisterCustomDriver
 
  2001-10-27: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o IOCTL_SCSI_GET_ADDRESS: fail if wnaspi32 not loaded
