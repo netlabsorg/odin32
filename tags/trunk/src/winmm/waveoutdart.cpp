@@ -1,9 +1,9 @@
-/* $Id: dwaveout.cpp,v 1.33 2001-03-21 12:33:22 sandervl Exp $ */
+/* $Id: waveoutdart.cpp,v 1.1 2001-03-23 16:23:46 sandervl Exp $ */
 
 /*
- * Wave playback class
+ * Wave playback class (DART)
  *
- * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
+ * Copyright 1998-2001 Sander van Leeuwen (sandervl@xs4all.nl)
  *
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -31,9 +31,9 @@
 #include <wprocess.h>
 
 #include "misc.h"
-#include "dwaveout.h"
+#include "waveoutdart.h"
 
-#define DBG_LOCALLOG    DBG_dwaveout
+#define DBG_LOCALLOG    DBG_waveoutdart
 #include "dbglocal.h"
 
 #ifndef min
@@ -49,98 +49,28 @@ LONG APIENTRY WaveOutHandler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFl
 //TODO: mulaw, alaw & adpcm
 /******************************************************************************/
 /******************************************************************************/
-DartWaveOut::DartWaveOut(LPWAVEFORMATEX pwfx)
-{
-   Init(pwfx);
-}
-/******************************************************************************/
-/******************************************************************************/
-DartWaveOut::DartWaveOut(LPWAVEFORMATEX pwfx, ULONG nCallback, ULONG dwInstance)
-{
-   Init(pwfx);
-
-   mthdCallback     = (LPDRVCALLBACK)nCallback;   // callback function
-   this->dwInstance = dwInstance;
-   fUnderrun        = FALSE;
-
-   if(!ulError)
-        callback((ULONG)this, WOM_OPEN, dwInstance, 0, 0);
-}
-/******************************************************************************/
-/******************************************************************************/
-DartWaveOut::DartWaveOut(LPWAVEFORMATEX pwfx, HWND hwndCallback)
-{
-   Init(pwfx);
-
-   this->hwndCallback = hwndCallback;
-
-   if(!ulError)
-        PostMessageA(hwndCallback, WOM_OPEN, 0, 0);
-}
-/******************************************************************************/
-/******************************************************************************/
-void DartWaveOut::callback(HDRVR h, UINT uMessage, DWORD dwUser, DWORD dw1, DWORD dw2)
-{
-    USHORT selTIB = GetFS(); // save current FS selector
-    USHORT selCallback;
-
-    dprintf(("WINMM:DartWaveOut::callback(HDRVR h=%08xh, UINT uMessage=%08xh, DWORD dwUser=%08xh, DWORD dw1=%08xh, DWORD dw2=%08xh)\n",
-           h,
-           uMessage,
-           dwUser,
-           dw1,
-           dw2));
-
-    selCallback = GetProcessTIBSel();
-
-    //TODO: may not be very safe. perhaps we should allocate a new TIB for the DART thread or let another thread do the actual callback
-    if(selCallback)
-    {
-        SetFS(selCallback);      // switch to callback win32 tib selector (stored in waveOutOpen)
-
-        //@@@PH 1999/12/28 Shockwave Flashes seem to make assumptions on a
-        // specific stack layout. Do we have the correct calling convention here?
-        mthdCallback(h,uMessage,dwUser,dw1,dw2);
-        SetFS(selTIB);           // switch back to the saved FS selector
-    }
-    else {
-        dprintf(("WARNING: no valid selector of main thread available (process exiting); skipping waveout notify"));
-    }
-    dprintf(("WINMM:DartWaveOut::callback returned"));
-}
-/******************************************************************************/
-/******************************************************************************/
-void DartWaveOut::Init(LPWAVEFORMATEX pwfx)
+DartWaveOut::DartWaveOut(LPWAVEFORMATEX pwfx, ULONG fdwOpen, ULONG nCallback, ULONG dwInstance)
+                  : WaveOut(pwfx, fdwOpen, nCallback, dwInstance)
 {
     MCI_GENERIC_PARMS  GenericParms;
     MCI_AMP_OPEN_PARMS AmpOpenParms;
     APIRET rc;
 
     curPlayBuf = curFillBuf = curFillPos = curPlayPos = 0;
-    bytesPlayed = bytesCopied = bytesReturned = 0;
-
     fMixerSetup   = FALSE;
-    next          = NULL;
-    wavehdr       = NULL;
-    curhdr        = NULL;
-    mthdCallback  = NULL;
-    hwndCallback  = 0;
-    dwInstance    = 0;
-    ulError       = 0;
-    volume        = defvolume;
-    State         = STATE_STOPPED;
-    queuedbuffers = 0;
+    fUnderrun     = FALSE;
+
+    ulBufSize     = DART_BUFSIZE;
 
     MixBuffer     = (MCI_MIX_BUFFER *)malloc(PREFILLBUF_DART*sizeof(MCI_MIX_BUFFER));
     MixSetupParms = (MCI_MIXSETUP_PARMS *)malloc(sizeof(MCI_MIXSETUP_PARMS));
     BufferParms   = (MCI_BUFFER_PARMS *)malloc(sizeof(MCI_BUFFER_PARMS));
+    if(!MixBuffer || !MixSetupParms || !BufferParms) {
+        dprintf(("ERROR: malloc failed!!"));
+        ulError = MMSYSERR_NOMEM;
+        return;
+    }
 
-    BitsPerSample   = pwfx->wBitsPerSample;
-    SampleRate      = pwfx->nSamplesPerSec;
-    this->nChannels = pwfx->nChannels;
-    ulBufSize       = DART_BUFSIZE;
-
-    dprintf(("waveOutOpen: samplerate %d, numChan %d bps %d (%d), format %x", SampleRate, nChannels, BitsPerSample, pwfx->nBlockAlign, pwfx->wFormatTag));
     // Setup the open structure, pass the playlist and tell MCI_OPEN to use it
     memset(&AmpOpenParms,0,sizeof(AmpOpenParms));
 
@@ -167,38 +97,18 @@ void DartWaveOut::Init(LPWAVEFORMATEX pwfx)
             ulError = MMSYSERR_NOTENABLED;
         }
     }
-    State    = STATE_STOPPED;
-
     setVolume(volume);
 
-    wmutex   = new VMutex();
-    if(wmutex == NULL) {
-        DebugInt3();
-        ulError = MMSYSERR_NOTSUPPORTED;
-    }
-    if(wmutex)
-        wmutex->enter(VMUTEX_WAIT_FOREVER);
-
-    if(waveout == NULL) {
-        waveout = this;
-    }
-    else {
-        DartWaveOut *dwave = waveout;
-
-        while(dwave->next) {
-            dwave = dwave->next;
-        }
-        dwave->next = this;
-    }
-
-    if(wmutex)
-        wmutex->leave();
+    if(!ulError)
+        callback(WOM_OPEN, 0, 0);
 }
 /******************************************************************************/
 /******************************************************************************/
 DartWaveOut::~DartWaveOut()
 {
-   MCI_GENERIC_PARMS    GenericParms;
+    MCI_GENERIC_PARMS GenericParms;
+
+    State = STATE_STOPPED;
 
     if(!ulError) {
         // Generic parameters
@@ -218,36 +128,10 @@ DartWaveOut::~DartWaveOut()
         mciSendCommand(DeviceId, MCI_CLOSE, MCI_WAIT, (PVOID)&GenericParms, 0);
     }
 
-    if(wmutex)
-        wmutex->enter(VMUTEX_WAIT_FOREVER);
-
-    State = STATE_STOPPED;
-
-    if(waveout == this) {
-        waveout = this->next;
+    if(!ulError)
+    {
+        callback(WOM_CLOSE, 0, 0);
     }
-    else {
-        DartWaveOut *dwave = waveout;
-
-        while(dwave->next != this) {
-            dwave = dwave->next;
-        }
-        dwave->next = this->next;
-    }
-    if(wmutex)
-        wmutex->leave();
-
-    if(!ulError) {
-        if(mthdCallback) {
-            callback((ULONG)this, WOM_CLOSE, dwInstance, 0, 0);
-        }
-        else
-        if(hwndCallback)
-            PostMessageA(hwndCallback, WOM_CLOSE, 0, 0);
-    }
-
-    if(wmutex)
-        delete wmutex;
 
     if(MixBuffer)
         free(MixBuffer);
@@ -255,43 +139,6 @@ DartWaveOut::~DartWaveOut()
         free(MixSetupParms);
     if(BufferParms)
         free(BufferParms);
-}
-/******************************************************************************/
-/******************************************************************************/
-MMRESULT DartWaveOut::getError()
-{
-    return(ulError);
-}
-/******************************************************************************/
-/******************************************************************************/
-int DartWaveOut::getNumDevices()
-{
- MCI_GENERIC_PARMS  GenericParms;
- MCI_AMP_OPEN_PARMS AmpOpenParms;
- APIRET rc;
-
-   // Setup the open structure, pass the playlist and tell MCI_OPEN to use it
-   memset(&AmpOpenParms,0,sizeof(AmpOpenParms));
-
-   AmpOpenParms.usDeviceID = ( USHORT ) 0;
-   AmpOpenParms.pszDeviceType = ( PSZ ) MCI_DEVTYPE_AUDIO_AMPMIX;
-
-   rc = mciSendCommand(0, MCI_OPEN,
-                       MCI_WAIT | MCI_OPEN_TYPE_ID | MCI_OPEN_SHAREABLE,
-                       (PVOID) &AmpOpenParms,
-                       0);
-
-   if(rc) {
-        return 0; //no devices present
-   }
-
-   // Generic parameters
-   GenericParms.hwndCallback = 0;   //hwndFrame
-
-   // Close the device
-   mciSendCommand(AmpOpenParms.usDeviceID, MCI_CLOSE, MCI_WAIT, (PVOID)&GenericParms, 0);
-
-   return 1;
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -380,7 +227,7 @@ MMRESULT DartWaveOut::write(LPWAVEHDR pwh, UINT cbwh)
             return(MMSYSERR_NOTSUPPORTED);
         }
 
-        wmutex->enter(VMUTEX_WAIT_FOREVER);
+        wmutex.enter(VMUTEX_WAIT_FOREVER);
         fMixerSetup = TRUE;
 
         curPlayBuf = curFillBuf = curFillPos = curPlayPos = 0;
@@ -397,7 +244,7 @@ MMRESULT DartWaveOut::write(LPWAVEHDR pwh, UINT cbwh)
         pwh->reserved = 0;
 
         if(State != STATE_STOPPED) {//don't start playback if paused
-            wmutex->leave();
+            wmutex.leave();
             return(MMSYSERR_NOERROR);
         }
 
@@ -406,7 +253,7 @@ MMRESULT DartWaveOut::write(LPWAVEHDR pwh, UINT cbwh)
         dprintf(("MixSetupParms = %X\n", MixSetupParms));
         State     = STATE_PLAYING;
         fUnderrun = FALSE;
-        wmutex->leave();
+        wmutex.leave();
 
         //write buffers to DART; starts playback
         // MCI_MIXSETUP_PARMS->pMixWrite does alter FS: selector!
@@ -423,7 +270,7 @@ MMRESULT DartWaveOut::write(LPWAVEHDR pwh, UINT cbwh)
     {
         pwh->lpNext   = NULL;
         pwh->reserved = 0;
-        wmutex->enter(VMUTEX_WAIT_FOREVER);
+        wmutex.enter(VMUTEX_WAIT_FOREVER);
         if(wavehdr) {
             WAVEHDR *chdr = wavehdr;
             while(chdr->lpNext) {
@@ -434,7 +281,7 @@ MMRESULT DartWaveOut::write(LPWAVEHDR pwh, UINT cbwh)
         else wavehdr = pwh;
 
         writeBuffer();  //must be called before (re)starting playback
-        wmutex->leave();
+        wmutex.leave();
 
         if(State == STATE_STOPPED) {//continue playback
             restart();
@@ -469,15 +316,15 @@ MMRESULT DartWaveOut::pause()
 
     dprintf(("WINMM: DartWaveOut::pause"));
 
-    wmutex->enter(VMUTEX_WAIT_FOREVER);
+    wmutex.enter(VMUTEX_WAIT_FOREVER);
     if(State != STATE_PLAYING) {
         State = STATE_PAUSED;
-        wmutex->leave();
+        wmutex.leave();
         return(MMSYSERR_NOERROR);
     }
 
     State = STATE_PAUSED;
-    wmutex->leave();
+    wmutex.leave();
 
     memset(&Params, 0, sizeof(Params));
 
@@ -525,9 +372,9 @@ MMRESULT DartWaveOut::reset()
     // Stop the playback.
     mciSendCommand(DeviceId, MCI_STOP, MCI_WAIT, (PVOID)&Params, 0);
 
-    dprintf(("Nr of threads blocked on mutex = %d\n", wmutex->getNrBlocked()));
+    dprintf(("Nr of threads blocked on mutex = %d\n", wmutex.getNrBlocked()));
 
-    wmutex->enter(VMUTEX_WAIT_FOREVER);
+    wmutex.enter(VMUTEX_WAIT_FOREVER);
     while(wavehdr)
     {
         wavehdr->dwFlags  |= WHDR_DONE;
@@ -536,17 +383,10 @@ MMRESULT DartWaveOut::reset()
         tmpwavehdr         = wavehdr;
         wavehdr            = wavehdr->lpNext;
         tmpwavehdr->lpNext = NULL;
-        wmutex->leave();
+        wmutex.leave();
 
-        if(mthdCallback) {
-            callback((ULONG)this, WOM_DONE, dwInstance, (ULONG)tmpwavehdr, 0);
-        }
-        else
-        if(hwndCallback) {
-            dprintf(("Callback (msg) for buffer %x", tmpwavehdr));
-            PostMessageA(hwndCallback, WOM_DONE, (WPARAM)this, (ULONG)tmpwavehdr);
-        }
-        wmutex->enter(VMUTEX_WAIT_FOREVER);
+        callback(WOM_DONE, (ULONG)tmpwavehdr, 0);
+        wmutex.enter(VMUTEX_WAIT_FOREVER);
     }
     wavehdr   = NULL;
     State     = STATE_STOPPED;
@@ -556,7 +396,7 @@ MMRESULT DartWaveOut::reset()
     bytesPlayed = bytesCopied = bytesReturned = 0;
     queuedbuffers = 0;
 
-    wmutex->leave();
+    wmutex.leave();
     return(MMSYSERR_NOERROR);
 }
 /******************************************************************************/
@@ -573,10 +413,10 @@ MMRESULT DartWaveOut::restart()
     //the first buffer write will do this for us.
     if(fMixerSetup == TRUE)
     {
-        wmutex->enter(VMUTEX_WAIT_FOREVER);
+        wmutex.enter(VMUTEX_WAIT_FOREVER);
         State     = STATE_PLAYING;
         fUnderrun = FALSE;
-        wmutex->leave();
+        wmutex.leave();
         curbuf = curPlayBuf;
 
         // MCI_MIXSETUP_PARMS->pMixWrite does alter FS: selector!
@@ -678,22 +518,6 @@ void DartWaveOut::mciError(ULONG ulError)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL DartWaveOut::find(DartWaveOut *dwave)
-{
- DartWaveOut *curwave = waveout;
-
-    while(curwave) {
-        if(dwave == curwave) {
-            return(TRUE);
-        }
-        curwave = curwave->next;
-    }
-
-    dprintf2(("WINMM:DartWaveOut not found!\n"));
-    return(FALSE);
-}
-/******************************************************************************/
-/******************************************************************************/
 void DartWaveOut::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags)
 {
  ULONG    buflength;
@@ -716,7 +540,7 @@ void DartWaveOut::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags
         return;
     }
 
-    wmutex->enter(VMUTEX_WAIT_FOREVER);
+    wmutex.enter(VMUTEX_WAIT_FOREVER);
 
     bytesPlayed += MixBuffer[curPlayBuf].ulBufferLength;
 
@@ -749,18 +573,11 @@ void DartWaveOut::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags
             whdr->lpNext = NULL;
 
             bytesReturned += whdr->dwBufferLength;
-            wmutex->leave();
+            wmutex.leave();
 
-            if(mthdCallback) {
-                callback((ULONG)this, WOM_DONE, dwInstance, (ULONG)whdr, 0);
-            }
-            else
-            if(hwndCallback) {
-                dprintf(("Callback (msg) for buffer %x", whdr));
-                PostMessageA(hwndCallback, WOM_DONE, (WPARAM)this, (ULONG)whdr);
-            }
+            callback(WOM_DONE, (ULONG)whdr, 0);
 
-            wmutex->enter(VMUTEX_WAIT_FOREVER);
+            wmutex.enter(VMUTEX_WAIT_FOREVER);
         }
         else break;
 
@@ -777,14 +594,14 @@ void DartWaveOut::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags
 ////            memset(MixBuffer[curPlayBuf].pBuffer, 0, MixBuffer[curPlayBuf].ulBufferLength);
 ////            goto sendbuffer;
         }
-        wmutex->leave();
+        wmutex.leave();
         return;
     }
 
     writeBuffer();
 
 sendbuffer:
-    wmutex->leave();
+    wmutex.leave();
 
     //Transfer buffer to DART
     // MCI_MIXSETUP_PARMS->pMixWrite does alter FS: selector!
@@ -907,16 +724,5 @@ MMRESULT DartWaveOut::setVolume(ULONG ulVol)
   return 0;
 }
 /******************************************************************************/
-//Called if waveOutSetVolume is called by the application with waveout handle NULL
-//Sets the default volume of each waveout stream (until it's volume is changed
-//with an appropriate waveOutSetVolume call)
 /******************************************************************************/
-void DartWaveOut::setDefaultVolume(ULONG volume)
-{
-  defvolume = volume;
-}
-/******************************************************************************/
-/******************************************************************************/
-DartWaveOut *DartWaveOut::waveout = NULL;
-ULONG DartWaveOut::defvolume = 0xFFFFFFFF;
 

@@ -1,4 +1,4 @@
-/* $Id: waveout.cpp,v 1.19 2001-03-21 12:33:22 sandervl Exp $ */
+/* $Id: waveout.cpp,v 1.20 2001-03-23 16:23:45 sandervl Exp $ */
 //#undef DEBUG
 /*
  * Wave out MM apis
@@ -26,7 +26,7 @@
 #include <string.h>
 #include <unicode.h>
 
-#include "dwaveout.h"
+#include "waveoutdart.h"
 #include "misc.h"
 #include "winmm.h"
 
@@ -66,23 +66,15 @@ ODINFUNCTION6(MMRESULT, waveOutOpen,
   if(phwo == NULL)
         return(MMSYSERR_INVALPARAM);
 
-  if(fdwOpen == CALLBACK_WINDOW) {
-        *phwo = (HWAVEOUT)new DartWaveOut(pwfx, (HWND)dwCallback);
-  }
-  else
-  if(fdwOpen == CALLBACK_FUNCTION)
-  {
-        *phwo = (HWAVEOUT)new DartWaveOut(pwfx, dwCallback, dwInstance);
-  }
-  else  *phwo = (HWAVEOUT)new DartWaveOut(pwfx);
+  *phwo = (HWAVEOUT)new DartWaveOut(pwfx, fdwOpen, dwCallback, dwInstance);
 
   if(*phwo == NULL) {
         return(MMSYSERR_NODRIVER);
   }
 
-  rc = ((DartWaveOut *)*phwo)->getError();
+  rc = ((WaveOut *)*phwo)->getError();
   if(rc != MMSYSERR_NOERROR) {
-        delete (DartWaveOut *)*phwo;
+        delete (WaveOut *)*phwo;
         return(rc);
   }
   return(MMSYSERR_NOERROR);
@@ -94,9 +86,9 @@ ODINFUNCTION3(MMRESULT, waveOutWrite,
               LPWAVEHDR, pwh,
               UINT, cbwh)
 {
-  DartWaveOut *dwave = (DartWaveOut *)hwo;
+  WaveOut *dwave = (WaveOut *)hwo;
 
-  if(DartWaveOut::find(dwave) == TRUE)
+  if(WaveOut::find(dwave) == TRUE)
   {
         if(!(pwh->dwFlags & WHDR_PREPARED) || pwh->lpData == NULL)
             return WAVERR_UNPREPARED;
@@ -117,9 +109,9 @@ ODINFUNCTION3(MMRESULT, waveOutWrite,
 ODINFUNCTION1(MMRESULT, waveOutReset,
               HWAVEOUT, hwaveout)
 {
-  DartWaveOut *dwave = (DartWaveOut *)hwaveout;
+  WaveOut *dwave = (WaveOut *)hwaveout;
 
-  if(DartWaveOut::find(dwave) == TRUE)
+  if(WaveOut::find(dwave) == TRUE)
         return(dwave->reset());
   else  return(MMSYSERR_INVALHANDLE);
 }
@@ -128,10 +120,10 @@ ODINFUNCTION1(MMRESULT, waveOutReset,
 ODINFUNCTION1(MMRESULT, waveOutBreakLoop,
               HWAVEOUT, hwaveout)
 {
-  DartWaveOut *dwave = (DartWaveOut *)hwaveout;
+  WaveOut *dwave = (WaveOut *)hwaveout;
 
   dprintf(("WINMM:waveOutBreakLoop (implemented as reset) %X\n", hwaveout));
-  if(DartWaveOut::find(dwave) == TRUE)
+  if(WaveOut::find(dwave) == TRUE)
         return(dwave->reset());
   else  return(MMSYSERR_INVALHANDLE);
 }
@@ -140,9 +132,9 @@ ODINFUNCTION1(MMRESULT, waveOutBreakLoop,
 ODINFUNCTION1(MMRESULT, waveOutClose,
               HWAVEOUT, hwaveout)
 {
-  DartWaveOut *dwave = (DartWaveOut *)hwaveout;
+  WaveOut *dwave = (WaveOut *)hwaveout;
 
-  if(DartWaveOut::find(dwave) == TRUE)
+  if(WaveOut::find(dwave) == TRUE)
   {
         if(dwave->getState() == STATE_PLAYING)
             return(WAVERR_STILLPLAYING);
@@ -157,9 +149,9 @@ ODINFUNCTION1(MMRESULT, waveOutClose,
 ODINFUNCTION1(MMRESULT, waveOutPause,
               HWAVEOUT, hwaveout)
 {
-  DartWaveOut *dwave = (DartWaveOut *)hwaveout;
+  WaveOut *dwave = (WaveOut *)hwaveout;
 
-  if(DartWaveOut::find(dwave) == TRUE)
+  if(WaveOut::find(dwave) == TRUE)
         return(dwave->pause());
   else  return(MMSYSERR_INVALHANDLE);
 }
@@ -168,9 +160,9 @@ ODINFUNCTION1(MMRESULT, waveOutPause,
 ODINFUNCTION1(MMRESULT, waveOutRestart,
               HWAVEOUT, hwaveout)
 {
-  DartWaveOut *dwave = (DartWaveOut *)hwaveout;
+  WaveOut *dwave = (WaveOut *)hwaveout;
 
-  if(DartWaveOut::find(dwave) == TRUE)
+  if(WaveOut::find(dwave) == TRUE)
         return(dwave->restart());
   else  return(MMSYSERR_INVALHANDLE);
 }
@@ -181,9 +173,9 @@ ODINFUNCTION3(MMRESULT, waveOutPrepareHeader,
               LPWAVEHDR, pwh,
               UINT, cbwh)
 {
-  DartWaveOut *dwave = (DartWaveOut *)hwo;
+  WaveOut *dwave = (WaveOut *)hwo;
 
-  if(DartWaveOut::find(dwave) == TRUE)
+  if(WaveOut::find(dwave) == TRUE)
   {
         if(pwh->dwFlags & WHDR_INQUEUE)
             return WAVERR_STILLPLAYING;
@@ -202,9 +194,9 @@ ODINFUNCTION3(MMRESULT, waveOutUnprepareHeader,
               LPWAVEHDR, pwh,
               UINT, cbwh)
 {
-  DartWaveOut *dwave = (DartWaveOut *)hwo;
+  WaveOut *dwave = (WaveOut *)hwo;
 
-  if(DartWaveOut::find(dwave) == TRUE)
+  if(WaveOut::find(dwave) == TRUE)
   {
         if(pwh->dwFlags & WHDR_INQUEUE)
             return WAVERR_STILLPLAYING;
@@ -222,12 +214,12 @@ ODINFUNCTION3(MMRESULT, waveOutGetPosition,
               LPMMTIME, pmmt,
               UINT, cbmmt)
 {
-  DartWaveOut *dwave = (DartWaveOut *)hwo;
+  WaveOut *dwave = (WaveOut *)hwo;
 
   if(pmmt == NULL)
         return MMSYSERR_INVALPARAM;
 
-  if(DartWaveOut::find(dwave) == TRUE)
+  if(WaveOut::find(dwave) == TRUE)
   {
    ULONG position;
 
@@ -277,7 +269,7 @@ ODINFUNCTION3(MMRESULT, waveOutGetDevCapsA,
               LPWAVEOUTCAPSA, pwoc,
               UINT, cbwoc)
 {
-  if(DartWaveOut::getNumDevices() == 0) {
+  if(WaveOut::getNumDevices() == 0) {
         memset(pwoc, 0, sizeof(*pwoc));
         return MMSYSERR_NODRIVER;
   }
@@ -307,7 +299,7 @@ ODINFUNCTION3(MMRESULT, waveOutGetDevCapsW,
               LPWAVEOUTCAPSW, pwoc,
               UINT, cbwoc)
 {
-  if(DartWaveOut::getNumDevices() == 0) {
+  if(WaveOut::getNumDevices() == 0) {
         memset(pwoc, 0, sizeof(*pwoc));
         return MMSYSERR_NODRIVER;
   }
@@ -333,7 +325,7 @@ ODINFUNCTION3(MMRESULT, waveOutGetDevCapsW,
 /******************************************************************************/
 ODINFUNCTION0(UINT, waveOutGetNumDevs)
 {
-  return DartWaveOut::getNumDevices();
+  return WaveOut::getNumDevices();
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -379,8 +371,8 @@ ODINFUNCTION2(MMRESULT, waveOutGetID,
               HWAVEOUT, hwo,
               LPUINT, puDeviceID)
 {
-  DartWaveOut *dwave = (DartWaveOut *)hwo;
-  if(DartWaveOut::find(dwave) == TRUE)
+  WaveOut *dwave = (WaveOut *)hwo;
+  if(WaveOut::find(dwave) == TRUE)
   {
         *puDeviceID = 1;
         return MMSYSERR_NOERROR;
@@ -393,8 +385,8 @@ ODINFUNCTION2(MMRESULT, waveOutGetPitch,
               HWAVEOUT, hwo,
               LPDWORD, pdwPitch)
 {
-  DartWaveOut *dwave = (DartWaveOut *)hwo;
-  if(DartWaveOut::find(dwave) == TRUE)
+  WaveOut *dwave = (WaveOut *)hwo;
+  if(WaveOut::find(dwave) == TRUE)
         return MMSYSERR_NOTSUPPORTED;
   else  return(MMSYSERR_INVALHANDLE);
 }
@@ -404,8 +396,8 @@ ODINFUNCTION2(MMRESULT, waveOutSetPitch,
               HWAVEOUT, hwo,
               DWORD, dwPitch)
 {
-  DartWaveOut *dwave = (DartWaveOut *)hwo;
-  if(DartWaveOut::find(dwave) == TRUE)
+  WaveOut *dwave = (WaveOut *)hwo;
+  if(WaveOut::find(dwave) == TRUE)
         return MMSYSERR_NOTSUPPORTED;
   else  return(MMSYSERR_INVALHANDLE);
 }
@@ -415,8 +407,8 @@ ODINFUNCTION2(MMRESULT, waveOutGetVolume,
               HWAVEOUT, hwo,
               LPDWORD, pdwVolume)
 {
-  DartWaveOut *dwave = (DartWaveOut *)hwo;
-  if(DartWaveOut::find(dwave) == TRUE)
+  WaveOut *dwave = (WaveOut *)hwo;
+  if(WaveOut::find(dwave) == TRUE)
   {
         if(pdwVolume!=NULL)
             *pdwVolume=dwave->getVolume();
@@ -432,13 +424,13 @@ ODINFUNCTION2(MMRESULT, waveOutSetVolume,
               HWAVEOUT, hwo,
               DWORD, dwVolume)
 {
-  DartWaveOut *dwave = (DartWaveOut *)hwo;
-  if(DartWaveOut::find(dwave) == TRUE)
+  WaveOut *dwave = (WaveOut *)hwo;
+  if(WaveOut::find(dwave) == TRUE)
   {
     return(dwave->setVolume(dwVolume));
   }
   if(hwo == NULL) {
-    DartWaveOut::setDefaultVolume(dwVolume);
+      WaveOut::setDefaultVolume(dwVolume);
   }
   return MMSYSERR_NOERROR;
 //    return(MMSYSERR_INVALHANDLE);
@@ -449,8 +441,8 @@ ODINFUNCTION2(MMRESULT, waveOutGetPlaybackRate,
               HWAVEOUT, hwo,
               LPDWORD, pdwRate)
 {
-  DartWaveOut *dwave = (DartWaveOut *)hwo;
-  if(DartWaveOut::find(dwave) == TRUE)
+  WaveOut *dwave = (WaveOut *)hwo;
+  if(WaveOut::find(dwave) == TRUE)
   {
         return MMSYSERR_NOTSUPPORTED;
   }
@@ -462,8 +454,8 @@ ODINFUNCTION2(MMRESULT, waveOutSetPlaybackRate,
               HWAVEOUT, hwo,
               DWORD, dwRate)
 {
-  DartWaveOut *dwave = (DartWaveOut *)hwo;
-  if(DartWaveOut::find(dwave) == TRUE)
+  WaveOut *dwave = (WaveOut *)hwo;
+  if(WaveOut::find(dwave) == TRUE)
   {
         return MMSYSERR_NOTSUPPORTED;
   }
@@ -477,8 +469,8 @@ ODINFUNCTION4(MMRESULT, waveOutMessage,
               DWORD, dw1,
               DWORD, dw2)
 {
-  DartWaveOut *dwave = (DartWaveOut *)hwo;
-  if(DartWaveOut::find(dwave) == TRUE)
+  WaveOut *dwave = (WaveOut *)hwo;
+  if(WaveOut::find(dwave) == TRUE)
   {
     return MMSYSERR_NOTSUPPORTED;
   }
