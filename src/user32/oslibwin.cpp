@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.77 2000-05-20 14:57:19 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.78 2000-05-26 18:43:34 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -12,6 +12,7 @@
  */
 #define  INCL_WIN
 #define  INCL_PM
+#define  INCL_WINSWITCHLIST
 #include <os2wrap.h>
 #include <stdlib.h>
 #include <string.h>
@@ -83,7 +84,7 @@ HWND OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle,
   dwFrameStyle |= FCF_NOBYTEALIGN;
   if(fTaskList)
   {
-    dwFrameStyle |= FCF_TASKLIST | FCF_NOMOVEWITHOWNER;
+    	dwFrameStyle |= FCF_NOMOVEWITHOWNER;
   }
   if (fShellPosition) dwFrameStyle |= FCF_SHELLPOSITION;
 
@@ -951,6 +952,60 @@ HWND OSLibWinQueryCapture()
 BOOL OSLibWinSetCapture(HWND hwnd)
 {
   return WinSetCapture(HWND_DESKTOP, hwnd);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinRemoveFromTasklist(HANDLE hTaskList)
+{
+  return (WinRemoveSwitchEntry(hTaskList)) ? FALSE : TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+HANDLE OSLibWinAddToTaskList(HWND hwndFrame, char *title, BOOL fVisible)
+{
+ SWCNTRL swctrl;
+ ULONG   tid;
+
+  swctrl.hwnd          = hwndFrame;
+  swctrl.hwndIcon      = 0;
+  swctrl.hprog         = 0;
+  WinQueryWindowProcess(hwndFrame, (PPID)&swctrl.idProcess, (PTID)&tid);
+  swctrl.idSession     = 0;
+  swctrl.uchVisibility = (fVisible) ? SWL_VISIBLE : SWL_INVISIBLE;
+  swctrl.fbJump        = SWL_JUMPABLE;
+  swctrl.bProgType     = PROG_PM;
+  if(title) {
+	strncpy(swctrl.szSwtitle, title, MAXNAMEL+4);
+  }
+  else {
+	swctrl.szSwtitle[0] = 0;
+	swctrl.uchVisibility    = SWL_INVISIBLE;
+  }
+  return WinAddSwitchEntry(&swctrl);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinChangeTaskList(HANDLE hTaskList, HWND hwndFrame, char *title, BOOL fVisible)
+{
+ SWCNTRL swctrl;
+ ULONG   tid;
+ 
+  swctrl.hwnd          = hwndFrame;
+  swctrl.hwndIcon      = 0;
+  swctrl.hprog         = 0;
+  WinQueryWindowProcess(hwndFrame, (PPID)&swctrl.idProcess, (PTID)&tid);
+  swctrl.idSession     = 0;
+  swctrl.uchVisibility = (fVisible) ? SWL_VISIBLE : SWL_INVISIBLE;
+  swctrl.fbJump        = SWL_JUMPABLE;
+  swctrl.bProgType     = PROG_PM;
+  if(title) {
+	strncpy(swctrl.szSwtitle, title, MAXNAMEL+4);
+  }
+  else {
+	swctrl.szSwtitle[0] = 0;
+	swctrl.uchVisibility    = SWL_INVISIBLE;
+  }
+  return (WinChangeSwitchEntry(hTaskList, &swctrl)) ? FALSE : TRUE;
 }
 //******************************************************************************
 //******************************************************************************
