@@ -1,6 +1,6 @@
-/* $Id: msvcrt.h,v 1.1 1999-11-30 14:17:28 sandervl Exp $ */
+/* $Id: msvcrt.h,v 1.2 1999-11-30 19:44:04 sandervl Exp $ */
 
-/* Definitions for the MS Visual C-Runtime library (MSVCRT.DLL)
+/* Definitions for the MS Visual C-Runtime library (MSVCRT/MSVCRT20/MSVCRT40)
  *
  * Copyright 1999 Jens Wiessner
  */

@@ -1,7 +1,7 @@
-/* $Id: msvcrt.cpp,v 1.7 1999-11-30 14:17:08 sandervl Exp $ */
+/* $Id: msvcrt.cpp,v 1.8 1999-11-30 19:44:04 sandervl Exp $ */
 
 /*
- * The Visual C RunTime DLL
+ * The Visual C RunTime DLL (MSVCRT/MSVCRT20/MSVCRT40)
  * 
  * Implements Visual C run-time functionality
  *
