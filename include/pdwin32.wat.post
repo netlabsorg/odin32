@@ -1,4 +1,4 @@
-# $Id: pdwin32.wat.post,v 1.1 2000-08-23 18:05:55 sandervl Exp $
+# $Id: pdwin32.wat.post,v 1.2 2000-09-21 11:17:28 bird Exp $
 #
 # Odin32 API
 #
@@ -10,6 +10,7 @@
 # Define EXETARGET to make an executable. (This also applies to pdwin32.mk.)
 # Define LOCALCLEAN if only the local directory is to be clean.
 # Define CLEAN2 to invoke a second clean rule named 'clean2'.
+# Define NOCLEAN to exclude the clean rule. (Remember to make your own!)
 #
 
 
@@ -67,6 +68,7 @@ $(OBJDIR): .SYMBOLIC
 #
 # General clean rule. To clean more add it to CLEANEXTRAS!
 #
+!ifndef NOCLEAN
 !ifndef CLEAN2
 clean: .SYMBOLIC
 !else
@@ -86,6 +88,7 @@ clean:  clean2
         $(CLEANEXTRAS)
 !else
         $(CLEANEXTRAS)
+!endif
 !endif
 
 
