@@ -1,4 +1,4 @@
-/* $Id: odin32pack.cmd,v 1.7 2001-01-08 19:54:22 bird Exp $
+/* $Id: odin32pack.cmd,v 1.8 2001-01-09 18:43:19 bird Exp $
  *
  * Make the two zip files.
  *
@@ -23,12 +23,15 @@
     if (RC <> 0) then call failure rc, 'failed to move the *.wpi ->' sStartDir;
     call ChDir '..\..';
 
+
     /*
      * Make .ZIP files.
      */
     call ChDir 'bin';
     call packdir 'debug', 'debug'
+    call packdir3dx 'debug', 'debug'
     call packdir 'release', 'release'
+    call packdir3dx 'release', 'release'
     call ChDir '..';
 
     /* return successfully */
@@ -49,6 +52,12 @@ parse arg sDir, sType;
     'del /Q /Y /Z /X .\glide\CVS > nul 2>&1'
     'del /Q /Y /Z /X .\glide\Voodoo1\CVS > nul 2>&1'
     'del /Q /Y /Z /X .\glide\Voodoo2\CVS > nul 2>&1'
+    'del /Q /Y /Z /X .\Voodoo1\CVS > nul 2>&1'
+    'del /Q /Y /Z /X .\Voodoo1 > nul 2>&1'
+    'del /Q /Y /Z /X .\Voodoo2\CVS > nul 2>&1'
+    'del /Q /Y /Z /X .\Voodoo2 > nul 2>&1'
+    'rmdir .\Voodoo2 > nul 2>&1'
+    'rmdir .\Voodoo1 > nul 2>&1'
     call copy '..\odin.ini'
     call copy '..\..\doc\odin.ini.txt'
 
@@ -75,21 +84,48 @@ parse arg sDir, sType;
      */
     'ren ..\'||sDir '.\system32'
     if (RC <> 0) then call failure rc, 'renaming' sDir'->system32 failed';
+    'ren .\system32\glide ..\glide_tmp'
+    if (RC <> 0) then
+    do
+        'ren .\system32 ..\'||sDir
+        call failure rc, 'renaming system32\glide -> ..\glide_tmp failed';
+    end
 
     say 'zip -9 -R' sZipFile '* -xCVS';
     'zip -9 -R' sZipFile '* -xCVS';
     if (RC <> 0) then
     do
         rc2 = rc;
+        'ren ..\glide_tmp .\system32\glide'
         'ren .\system32 ..\'||sDir
         call failure rc2, 'zip...';
     end
+    'ren ..\glide_tmp .\system32\glide'
+    if (RC <> 0) then call failure rc, 'renaming glide_tmp failed';
     'ren .\system32 ..\'||sDir
     if (RC <> 0) then call failure rc, 'renaming' sDir'->system32 failed';
 
     /* restore directory */
     call ChDir '..';
     return;
+
+/*
+ * Pack the 3dx dlls.
+ */
+packdir3dx: procedure expose sStartDir;
+parse arg sDir, sType;
+    sZipFile = filespec('path', directory())||'odin32bin-' || DATE(S) || '-glide-' || sType || '.zip';
+    sDir = directory();
+
+    call ChDir sDir
+    say 'zip -9 -R' sZipFile 'glide\* -xCVS';
+    'zip -9 -R' sZipFile 'glide\* -xCVS';
+    if (rc <> 0) then call failure rc, 'zip...';
+
+    /* restore directory */
+    call directory(sDir);
+    return;
+
 
 /*
  * Changes the directory.
