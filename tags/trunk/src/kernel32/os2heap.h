@@ -1,4 +1,4 @@
-/* $Id: os2heap.h,v 1.7 2001-07-28 18:03:38 sandervl Exp $ */
+/* $Id: os2heap.h,v 1.8 2001-10-06 18:53:11 sandervl Exp $ */
 
 /*
  *
@@ -22,12 +22,8 @@
 typedef struct _tagHEAPELEM {
   DWORD  magic;     //magic number
   LPVOID lpMem;     //pointer returned by malloc
-  struct _tagHEAPELEM *prev;
-  struct _tagHEAPELEM *next;
 } HEAPELEM;
 
-//extra overhead needed for quake 2 or 3 (a long time ago...)
-//#define HEAP_OVERHEAD (sizeof(HEAPELEM)+60)
 //+8 to make sure we can align the pointer at 8 byte boundary
 #define HEAP_OVERHEAD (sizeof(HEAPELEM)+8)
 
@@ -53,8 +49,6 @@ public:
 
 private:
 protected:
-
-    VMutex *hmutex;
 
     DWORD     dwMaximumSize, dwInitialSize, flOptions, totalAlloc, nrHeaps;
     HANDLE    hPrimaryHeap;
