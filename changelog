@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.944 2000-05-18 18:05:09 sandervl Exp $ */
+ /* $Id: changelog,v 1.945 2000-05-18 20:37:06 mike Exp $ */
+
+ 2000-05-18: Michal Necasek <mike@mendelu.cz>
+    - DSOUND: An updated version, hopefully not too many bugs were introduced
 
  2000-05-18: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: EnumResourceNamesA bugfix (wrong length in UnicodeToAsciiN call)

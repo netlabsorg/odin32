@@ -1,4 +1,4 @@
-/* $Id: OS2SNDBUFFER.H,v 1.6 2000-03-13 12:47:48 sandervl Exp $ */
+/* $Id: OS2SNDBUFFER.H,v 1.7 2000-05-18 20:37:09 mike Exp $ */
 
 /*
  * DirectSound SoundBuffer class
@@ -20,6 +20,7 @@
 // a forward declaration of some classes is needed here!
 class OS2IDirectSoundNotify;
 class OS2IDirectSound3DBuffer;
+class OS2IDirectSound;
 
 class OS2IDirectSoundBuffer
 {
