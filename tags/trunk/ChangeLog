@@ -1,4 +1,12 @@
-/* $Id: ChangeLog,v 1.1241 2001-02-05 18:49:02 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1242 2001-02-08 10:23:14 sandervl Exp $ */
+
+ 2001-02-08: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Standard in/out/error handle fix. Disable change during
+                  console init.
+                  (fixes output of console applications; input doesn't work well yet)
+
+ 2001-02-08: Michal Necasek <michalnec@volny.cz>
+    - KERNEL32: o RtlUnwind bugfix
 
  2001-02-04: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Wrong error set in GetDlgItem. Must be ERROR_CONTROL_ID_NOT_FOUND.
