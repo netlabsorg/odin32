@@ -1,4 +1,4 @@
-/* $Id: odin32ftp2.cmd,v 1.6 2001-01-09 18:44:07 bird Exp $
+/* $Id: odin32ftp2.cmd,v 1.7 2001-01-10 13:51:18 bird Exp $
  *
  * Uploads the relase and debug builds to the FTP sites.
  *
@@ -55,9 +55,9 @@ do i = 1 to 5 /* (Retries 5 times) */
         rc = deletefunction(   '/daily/'sDeleteDbg,    '/daily/'sDeleteRel,     'os2-delete', 'www.os2.org');
         rc = deletefunction('/daily/'sDeleteDbgWPI, '/daily/'sDeleteRelWPI, 'os2-delete-wpi', 'www.os2.org');
         rc = forwardSF(sFileDbg,              'os2-debug', '/daily', 'www.os2.org');
-        rc = forwardSF(sFileGlideDbg,   'os2-glide-debug', '/daily', 'www.os2.org');
+/*        rc = forwardSF(sFileGlideDbg,   'os2-glide-debug', '/daily', 'www.os2.org'); */
         rc = forwardSF(sFileRel,            'os2-release', '/daily', 'www.os2.org');
-        rc = forwardSF(sFileGlideRel, 'os2-glide-release', '/daily', 'www.os2.org');
+/*        rc = forwardSF(sFileGlideRel, 'os2-glide-release', '/daily', 'www.os2.org'); */
         rc = forwardSF(sFileDbgWPI,       'os2-debug-wpi', '/daily', 'www.os2.org');
         rc = forwardSF(sFileRelWPI,     'os2-release-wpi', '/daily', 'www.os2.org');
         rc = forwardSF(sChangeLog,        'os2-ChangeLog', '/daily', 'www.os2.org');
@@ -72,9 +72,9 @@ do i = 1 to 5 /* (Retries 5 times) */
         rc = deletefunction(  '/odinftp/daily/'sDeleteDbgWPI,   '/odinftp/daily/'sDeleteRelWPI,  'netlabs-delete-wpi', 'ftp.netlabs.org');
         /*              (sFile,              sFileRemote,           sLockFile,             sSite); */
         rc = putfunction(sFileDbg,      '/odinftp/daily',     'netlabs-debug', 'ftp.netlabs.org');
-        rc = putfunction(sFileGlideDbg, '/odinftp/daily',     'netlabs-debug', 'ftp.netlabs.org');
+/*        rc = putfunction(sFileGlideDbg, '/odinftp/daily',     'netlabs-debug', 'ftp.netlabs.org'); */
         rc = putfunction(sFileRel,      '/odinftp/daily',   'netlabs-release', 'ftp.netlabs.org');
-        rc = putfunction(sFileGlideRel, '/odinftp/daily',   'netlabs-release', 'ftp.netlabs.org');
+/*        rc = putfunction(sFileGlideRel, '/odinftp/daily',   'netlabs-release', 'ftp.netlabs.org'); */
         rc = putfunction(sFileDbgWPI,   '/odinftp/daily',     'netlabs-debug', 'ftp.netlabs.org');
         rc = putfunction(sFileRelWPI,   '/odinftp/daily',   'netlabs-release', 'ftp.netlabs.org');
         rc = putfunction('ChangeLog',   '/odinftp/daily', 'netlabs-ChangeLog', 'ftp.netlabs.org');
