@@ -1,4 +1,4 @@
-/* $Id: disk.cpp,v 1.21 2000-12-03 22:20:31 sandervl Exp $ */
+/* $Id: disk.cpp,v 1.22 2000-12-04 12:42:22 bird Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -21,6 +21,7 @@
 #include "unicode.h"
 #include "oslibdos.h"
 #include "exceptutil.h"
+#include "profile.h"
 
 #define DBG_LOCALLOG  DBG_disk
 #include "dbglocal.h"
@@ -55,18 +56,18 @@ BOOL WIN32API SetVolumeLabelW(LPCWSTR lpRootPathName, LPCWSTR lpVolumeName)
 //SvL: 24-6-'97 - Added
 //******************************************************************************
 ODINFUNCTION5(BOOL, GetDiskFreeSpaceA,
-              LPCSTR, arg1, 
+              LPCSTR, arg1,
               PDWORD, arg2,
               PDWORD, arg3,
               PDWORD, arg4,
               PDWORD, arg5)
 {
   BOOL rc;
-  DWORD dwSectorsPerCluster;	// address of sectors per cluster ter
-  DWORD dwBytesPerSector;	// address of bytes per sector
-  DWORD dwNumberOfFreeClusters;	// address of number of free clusters
-  DWORD dwTotalNumberOfClusters; 	// address of total number of clusters
-  
+  DWORD dwSectorsPerCluster;    // address of sectors per cluster ter
+  DWORD dwBytesPerSector;   // address of bytes per sector
+  DWORD dwNumberOfFreeClusters; // address of number of free clusters
+  DWORD dwTotalNumberOfClusters;    // address of total number of clusters
+
   dprintf(("KERNEL32:  GetDiskFreeSpaceA %s, 0x%08X, 0x%08X, 0x%08X, 0x%08X,\n",
              arg1!=NULL?arg1:"NULL", arg2,arg3,arg4,arg5));
 
@@ -86,7 +87,7 @@ ODINFUNCTION5(BOOL, GetDiskFreeSpaceA,
     /* CW: Windows Media Player setup complains about wrong clustersize when odin is installed on
        a TVFS drive. This fakes the clustersizes to 32. The following
        entry must be present in ODIN.INI:
-       
+
        [DRIVESPACE]
        TVFSTOHPFS = 1
        */
@@ -102,7 +103,7 @@ ODINFUNCTION5(BOOL, GetDiskFreeSpaceA,
     }
 
   }
-  
+
   return rc;
 }
 //******************************************************************************
@@ -173,27 +174,27 @@ ODINFUNCTION4(BOOL,GetDiskFreeSpaceExA,
               PULARGE_INTEGER, lpTotalNumberOfFreeBytes )
 {
     BOOL rc;
-    DWORD dwSectorsPerCluster;	// address of sectors per cluster ter
-    DWORD dwBytesPerSector;	// address of bytes per sector
-    DWORD dwNumberOfFreeClusters;	// address of number of free clusters
-    DWORD dwTotalNumberOfClusters; 	// address of total number of clusters
+    DWORD dwSectorsPerCluster;  // address of sectors per cluster ter
+    DWORD dwBytesPerSector; // address of bytes per sector
+    DWORD dwNumberOfFreeClusters;   // address of number of free clusters
+    DWORD dwTotalNumberOfClusters;  // address of total number of clusters
 
     rc = GetDiskFreeSpaceA(lpDirectoryName, &dwSectorsPerCluster, &dwBytesPerSector,
                            &dwNumberOfFreeClusters, &dwTotalNumberOfClusters);
     if(rc)
     {
-      	if(lpFreeBytesAvailableToCaller!=NULL) {
-		Mul32x32to64(lpFreeBytesAvailableToCaller, dwNumberOfFreeClusters, (dwSectorsPerCluster*dwBytesPerSector));
-		dprintf(("lpFreeBytesAvailableToCaller %x%x", lpFreeBytesAvailableToCaller->LowPart, lpFreeBytesAvailableToCaller->HighPart));
-	}
-      	if(lpTotalNumberOfBytes!=NULL) {
-		Mul32x32to64(lpTotalNumberOfBytes, dwTotalNumberOfClusters, (dwSectorsPerCluster*dwBytesPerSector));
-		dprintf(("lpTotalNumberOfBytes %x%x", lpTotalNumberOfBytes->LowPart, lpTotalNumberOfBytes->HighPart));
-	}
-      	if(lpTotalNumberOfFreeBytes!=NULL) {
-		memcpy(lpTotalNumberOfFreeBytes, lpFreeBytesAvailableToCaller, sizeof(*lpFreeBytesAvailableToCaller));
-		dprintf(("lpTotalNumberOfFreeBytes %x%x", lpTotalNumberOfFreeBytes->LowPart, lpTotalNumberOfFreeBytes->HighPart));
-	}
+        if(lpFreeBytesAvailableToCaller!=NULL) {
+        Mul32x32to64(lpFreeBytesAvailableToCaller, dwNumberOfFreeClusters, (dwSectorsPerCluster*dwBytesPerSector));
+        dprintf(("lpFreeBytesAvailableToCaller %x%x", lpFreeBytesAvailableToCaller->LowPart, lpFreeBytesAvailableToCaller->HighPart));
+    }
+        if(lpTotalNumberOfBytes!=NULL) {
+        Mul32x32to64(lpTotalNumberOfBytes, dwTotalNumberOfClusters, (dwSectorsPerCluster*dwBytesPerSector));
+        dprintf(("lpTotalNumberOfBytes %x%x", lpTotalNumberOfBytes->LowPart, lpTotalNumberOfBytes->HighPart));
+    }
+        if(lpTotalNumberOfFreeBytes!=NULL) {
+        memcpy(lpTotalNumberOfFreeBytes, lpFreeBytesAvailableToCaller, sizeof(*lpFreeBytesAvailableToCaller));
+        dprintf(("lpTotalNumberOfFreeBytes %x%x", lpTotalNumberOfFreeBytes->LowPart, lpTotalNumberOfFreeBytes->HighPart));
+    }
     }
     return rc;
 }
@@ -234,7 +235,7 @@ UINT WIN32API GetDriveTypeW(LPCWSTR lpszDrive)
  char *astring;
 
     if(lpszDrive == (LPCWSTR)-1) {
-	return DRIVE_CANNOTDETERMINE;	//NT 4, SP6 returns this (VERIFIED)
+    return DRIVE_CANNOTDETERMINE;   //NT 4, SP6 returns this (VERIFIED)
     }
     astring = UnicodeToAsciiString((LPWSTR)lpszDrive);
     dprintf(("KERNEL32:  OS2GetDriveTypeW %s", astring));
@@ -261,67 +262,67 @@ ODINFUNCTION8(BOOL,    GetVolumeInformationA,
    dprintf(("GetVolumeInformationA %s", lpRootPathName));
 
    if(lpRootPathName == NULL) {
-	GetCurrentDirectoryA(sizeof(tmpstring), tmpstring);
-	lpRootPathName = tmpstring;
+    GetCurrentDirectoryA(sizeof(tmpstring), tmpstring);
+    lpRootPathName = tmpstring;
    }
 
    if('A' <= *lpRootPathName && *lpRootPathName <= 'Z') {
-      	drive = *lpRootPathName - 'A' + 1;
+        drive = *lpRootPathName - 'A' + 1;
    }
-   else 
+   else
    if('a' <= *lpRootPathName && *lpRootPathName <= 'z') {
-      	drive = *lpRootPathName - 'a' + 1;
+        drive = *lpRootPathName - 'a' + 1;
    }
    else {
-	SetLastError(ERROR_INVALID_PARAMETER);
-	return FALSE;
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
    }
 
    if(lpVolumeSerialNumber || lpVolumeNameBuffer) {
-   	rc = OSLibDosQueryVolumeSerialAndName(drive, lpVolumeSerialNumber, lpVolumeNameBuffer, nVolumeNameSize);
+    rc = OSLibDosQueryVolumeSerialAndName(drive, lpVolumeSerialNumber, lpVolumeNameBuffer, nVolumeNameSize);
         if(lpVolumeSerialNumber) {
-		dprintf2(("Volume serial number: %x", *lpVolumeSerialNumber));
-	}
+        dprintf2(("Volume serial number: %x", *lpVolumeSerialNumber));
+    }
         if(lpVolumeNameBuffer) {
-		dprintf2(("Volume name: %s", lpVolumeNameBuffer));
-	}
+        dprintf2(("Volume name: %s", lpVolumeNameBuffer));
+    }
    }
    if(lpFileSystemNameBuffer || lpMaximumComponentLength) {
-	if(!lpFileSystemNameBuffer) {
-		lpFileSystemNameBuffer = tmpstring;
-		nFileSystemNameSize    = sizeof(tmpstring);
-	}
-	rc = OSLibDosQueryVolumeFS(drive, lpFileSystemNameBuffer, nFileSystemNameSize);
+    if(!lpFileSystemNameBuffer) {
+        lpFileSystemNameBuffer = tmpstring;
+        nFileSystemNameSize    = sizeof(tmpstring);
+    }
+    rc = OSLibDosQueryVolumeFS(drive, lpFileSystemNameBuffer, nFileSystemNameSize);
         if(lpFileSystemNameBuffer) {
-		dprintf2(("File system name: %s", lpFileSystemNameBuffer));
-	}
+        dprintf2(("File system name: %s", lpFileSystemNameBuffer));
+    }
    }
    if(lpMaximumComponentLength) {
-	if(!strcmp(lpFileSystemNameBuffer, "FAT")) {
-		*lpMaximumComponentLength = 12;
-	}
-	else	*lpMaximumComponentLength = 255; //TODO: Always correct? (CDFS?)
+    if(!strcmp(lpFileSystemNameBuffer, "FAT")) {
+        *lpMaximumComponentLength = 12;
+    }
+    else    *lpMaximumComponentLength = 255; //TODO: Always correct? (CDFS?)
    }
    if(lpFileSystemFlags) {
-	if(strcmp(lpFileSystemNameBuffer, "FAT")) {
-		*lpFileSystemFlags = FS_CASE_IS_PRESERVED;
-	}
-	else
-	if(!strcmp(lpFileSystemNameBuffer, "CDFS")) {
-		*lpFileSystemFlags = FS_CASE_SENSITIVE; //NT4 returns this
-	}
-	else
-	if(!strcmp(lpFileSystemNameBuffer, "UDF")) {//TODO: correct?
-		*lpFileSystemFlags = FS_CASE_SENSITIVE | FS_UNICODE_STORED_ON_DISK;
-	}
-	else	*lpFileSystemFlags = 0;
+    if(strcmp(lpFileSystemNameBuffer, "FAT")) {
+        *lpFileSystemFlags = FS_CASE_IS_PRESERVED;
+    }
+    else
+    if(!strcmp(lpFileSystemNameBuffer, "CDFS")) {
+        *lpFileSystemFlags = FS_CASE_SENSITIVE; //NT4 returns this
+    }
+    else
+    if(!strcmp(lpFileSystemNameBuffer, "UDF")) {//TODO: correct?
+        *lpFileSystemFlags = FS_CASE_SENSITIVE | FS_UNICODE_STORED_ON_DISK;
+    }
+    else    *lpFileSystemFlags = 0;
 
-	dprintf2(("File system flags: %x", lpFileSystemFlags));
+    dprintf2(("File system flags: %x", lpFileSystemFlags));
    }
 
    if(rc) {
-	SetLastError(rc);
-	return FALSE;
+    SetLastError(rc);
+    return FALSE;
    }
    SetLastError(ERROR_SUCCESS);
    return TRUE;
