@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.266 2001-06-13 10:29:46 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.267 2001-06-13 12:19:09 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1461,9 +1461,9 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
             HandleNCPaint((HRGN)1);
             if(hTaskList) {
                 OSLibWinChangeTaskList(hTaskList, OS2HwndFrame, getWindowNameA(), (getStyle() & WS_VISIBLE) ? 1 : 0);
-                if(fOS2Look) {
-                    OSLibWinSetTitleBarText(OS2HwndFrame, getWindowNameA());
-                }
+            }
+            if(fOS2Look) {
+                OSLibWinSetTitleBarText(OS2HwndFrame, getWindowNameA());
             }
         }
 
@@ -1954,9 +1954,9 @@ LRESULT Win32BaseWindow::DefWindowProcW(UINT Msg, WPARAM wParam, LPARAM lParam)
             HandleNCPaint((HRGN)1);
             if(hTaskList) {
                 OSLibWinChangeTaskList(hTaskList, OS2HwndFrame, getWindowNameA(), (getStyle() & WS_VISIBLE) ? 1 : 0);
-                if(fOS2Look) {
-                    OSLibWinSetTitleBarText(OS2HwndFrame, getWindowNameA());
-                }
+            }
+            if(fOS2Look) {
+                OSLibWinSetTitleBarText(OS2HwndFrame, getWindowNameA());
             }
         }
 
