@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.48 2000-02-10 23:43:35 bird Exp $
+# $Id: makefile,v 1.49 2000-02-10 23:52:27 bird Exp $
 
 #
 # PD-Win32 API
@@ -179,7 +179,7 @@ ReadSignals:
 
 ReadStateUpdLogs:
     -$(DOWITHDIRS) -e$(NOTWIN32DLLS) -ewnetap32 -cp -i \
-        IF EXIST signals.log list signals.log
+        IF EXIST stateupd.log list stateupd.log
 
 ReadAPIImportLogs:
     -$(DOWITHDIRS) -e$(NOTWIN32DLLS) -ewnetap32 -cp -i \
