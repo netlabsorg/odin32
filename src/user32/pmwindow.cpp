@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.15 1999-10-06 10:36:39 dengert Exp $ */
+/* $Id: pmwindow.cpp,v 1.16 1999-10-07 09:28:01 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -775,11 +775,17 @@ VirtualKeyFound:
      ULONG textlen;
      PSZ   wintext;
 
-        if(wndpars->fsStatus & (WPM_CCHTEXT | WPM_TEXT)) {
+        if(wndpars->fsStatus & (WPM_CCHTEXT | WPM_TEXT)) 
+        {
             if(wndpars->fsStatus & WPM_CCHTEXT)
                 wndpars->cchText = win32wnd->MsgGetTextLength();
             if(wndpars->fsStatus & WPM_TEXT)
                 wndpars->pszText = win32wnd->MsgGetText();
+
+            wndpars->fsStatus = 0;
+            wndpars->cbCtlData = 0;
+            wndpars->cbPresParams = 0;
+            RestoreOS2TIB();
             return (MRESULT)TRUE;
         }
         goto RunDefWndProc;

@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.10 1999-09-26 14:44:58 sandervl Exp $ */
+/* $Id: window.cpp,v 1.11 1999-10-07 09:28:02 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -173,7 +173,7 @@ HWND WIN32API CreateWindowExA(DWORD exStyle, LPCSTR className,
 
     //TODO: According to the docs className can be a 16 bits atom
     //      Wine seems to assume it's a string though...
-    if(!stricmp(className, MDICLIENTCLASSNAMEA)) {
+    if(!strcmpi(className, MDICLIENTCLASSNAMEA)) {
         window = (Win32BaseWindow *) new Win32MDIClientWindow(&cs, classAtom, FALSE);
     }
     else {
@@ -237,7 +237,7 @@ HWND WIN32API CreateWindowExW(DWORD exStyle, LPCWSTR className,
 
     //TODO: According to the docs className can be a 16 bits atom
     //      Wine seems to assume it's a string though...
-    if(!lstrcmpW(className, (LPWSTR)MDICLIENTCLASSNAMEW)) {
+    if(!lstrcmpiW(className, (LPWSTR)MDICLIENTCLASSNAMEW)) {
         window = (Win32BaseWindow *) new Win32MDIClientWindow(&cs, classAtom, TRUE);
     }
     else {
@@ -783,10 +783,24 @@ BOOL WIN32API GetClientRect( HWND hwnd, PRECT pRect)
 {
  BOOL rc;
 
+#if 1
     hwnd = Win32BaseWindow::Win32ToOS2Handle(hwnd);
     rc = OSLibWinQueryWindowRect(hwnd, pRect);
     dprintf(("USER32:  GetClientRect of %X returned (%d,%d) (%d,%d)\n", hwnd, pRect->left, pRect->top, pRect->right, pRect->bottom));
     return rc;
+#else
+   Win32BaseWindow *window;
+
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if(!window) {
+        dprintf(("GetClientRect, window %x not found", hwnd));
+	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        return 0;
+    }
+    *pRect = *window->getClientRect();
+    dprintf(("GetClientRect of %X returned (%d,%d) (%d,%d)\n", hwnd, pRect->left, pRect->top, pRect->right, pRect->bottom));
+    return TRUE;
+#endif
 }
 //******************************************************************************
 //******************************************************************************
