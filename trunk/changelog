@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2054 2002-04-29 17:05:58 sandervl Exp $ */
+/* $Id: changelog,v 1.2055 2002-04-30 09:21:12 sandervl Exp $ */
+
+ 2002-04-30: Platon Fomichev <platon@innotek.de>
+    - KERNEL32: o FileTimeToSystemTime, DosDateTimeToFileTime & 
+                  SystemTimeToFileTime bugfixes
 
  2002-04-29: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Export RegisterCustomDriver
