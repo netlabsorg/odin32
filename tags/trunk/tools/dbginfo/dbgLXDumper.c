@@ -1,4 +1,4 @@
-/* $Id: dbgLXDumper.c,v 1.1 2000-03-24 18:13:44 bird Exp $
+/* $Id: dbgLXDumper.c,v 1.2 2000-03-25 21:09:58 bird Exp $
  *
  * dbgLXDumper - reads and interprets the debuginfo found in an LX executable.
  *
@@ -14,8 +14,8 @@
 #define INCL_TYPES
 #define INCL_DOSERRORS
 #define FOR_EXEHDR          1           /* exe386.h flag */
-#define DWORD ULONG
-#define WORD USHORT
+#define DWORD               ULONG       /* Used by exe386.h / newexe.h */
+#define WORD                USHORT      /* Used by exe386.h / newexe.h */
 
 /*******************************************************************************
 *   Header Files                                                               *
@@ -23,9 +23,11 @@
 #include <os2.h>
 #include <newexe.h>
 #include <exe386.h>
+
+#include <malloc.h>
 #include <string.h>
 #include <stdio.h>
-#include <malloc.h>
+#include <stddef.h>
 #include <ctype.h>
 
 #include "hll.h"
@@ -35,15 +37,19 @@
 /*******************************************************************************
 *   Internal Functions                                                         *
 *******************************************************************************/
-static int          dbgLXDump(void *pvFile);
-static int          dumpHLL(FILE *phOut, PBYTE pb, int cb);
-static void         dumpHex(FILE *phOut, PBYTE pb, int cb);
-static void *       readfile(const char *pszFilename);
-static signed long  fsize(FILE *phFile);
+int          dbgLXDump(void *pvFile);
+int          dumpHLL(FILE *phOut, PBYTE pb, int cb);
+void         dumpHex(FILE *phOut, PBYTE pb, int cb);
+void *       readfile(const char *pszFilename);
+signed long  fsize(FILE *phFile);
 
 
 
-
+/*******************************************************************************
+*   Global Variables                                                           *
+*******************************************************************************/
+static char achBufferDummy64[0x10000] = {0};
+char achBufferDummy128[0x20000] = {0};
 
 int main(int argc, char **argv)
 {
@@ -73,7 +79,7 @@ int main(int argc, char **argv)
  * @param     pvFile  Pointer to filemapping.
  * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
  */
-static int dbgLXDump(void *pvFile)
+int dbgLXDump(void *pvFile)
 {
     struct exe_hdr * pehdr = (struct exe_hdr *) pvFile;
     struct e32_exe * pe32;
@@ -132,7 +138,7 @@ static int dbgLXDump(void *pvFile)
 
                 case '4':
                     printf("Found 32-bit OS/2 PM Debugger format (HLL)\n");
-                    return dumpHLL(stdout, pbDbg + 4, pe32->e32_debuglen - 4);
+                    return dumpHLL(stdout, pbDbg, pe32->e32_debuglen);
 
                 default:
                     printf("Invalid debug type, %c (%d)\n", pbDbg[3], pbDbg[3]);
@@ -161,7 +167,7 @@ static int dbgLXDump(void *pvFile)
 /**
  * Dumps binary data to file handle.
  * @param     phOut  Output file handle.
- * @param     pb     Pointer to debug data.
+ * @param     pb     Pointer to debug data. (Starts with signature ('NB04').)
  * @param     cb     Size of debug data.
  *
  *  HLL:
@@ -170,28 +176,49 @@ static int dbgLXDump(void *pvFile)
  *
  *
  */
-static int dumpHLL(FILE *phOut, PBYTE pb, int cb)
+int dumpHLL(FILE *phOut, PBYTE pb, int cb)
 {
     PHLLDIR     pDir;
-    ULONG       offDir;
     int         i;
+    PHLLHDR     pHdr = (PHLLHDR)pb;
 
     /*
-     * Get number of entries.
+     * Dump header.
      */
-    offDir = *(PULONG)pb;
-    if (offDir + 4 >= cb)
+    fprintf(phOut,
+            "- HLL header -\n"
+            "    Signature          %.4s\n"
+            "    Directory offset   0x%08x (%d)\n"
+            "    reserved           0x%08x (%d)\n"
+            "\n",
+            pHdr->achSignature,
+            pHdr->offDirectory,
+            pHdr->offDirectory,
+            pHdr->ulReserved,
+            pHdr->ulReserved);
+
+
+    /*
+     * Get and Dump directory
+     */
+    if (pHdr->offDirectory + sizeof(HLLDIR) >= cb)
     {
         fprintf(phOut, "error: offcEntries is incorrect!\n");
         return ERROR_INVALID_DATA;
     }
-    pDir = (PHLLDIR)(pb + offDir);
-    fprintf(phOut, "Directory offset=0x%08x  cEntries=%d(0x%x)\n",
-            offDir, pDir->cEntries, pDir->cEntries);
+    pDir = (PHLLDIR)(pb + pHdr->offDirectory);
+    fprintf(phOut,
+            "- HLL Directory -\n"
+            "    Reserved           0x%08x (%d)\n"
+            "    Number of entries  0x%08x (%d)\n",
+            pDir->ulReserved,
+            pDir->ulReserved,
+            pDir->cEntries,
+            pDir->cEntries);
 
 
     /*
-     * Directory sanity check.
+     * Directory sanity check - check that it's not too big
      */
     if ((PBYTE)&pDir->aEntries[pDir->cEntries] - pb >= cb)
     {
@@ -206,13 +233,40 @@ static int dumpHLL(FILE *phOut, PBYTE pb, int cb)
      */
     for (i = 0; i < pDir->cEntries; i++)
     {
-        fprintf(phOut, "Directory Entry %d (0x%x):\n", i, i);
-        fprintf(phOut, "    usType  0x%08x (%d)\n"
+        /*
+         * Directory entry type descriptions.
+         */
+        static const char * apsz[] =
+        {
+            "HLL_DE_MODULES",
+            "HLL_DE_PUBLICS",
+            "HLL_DE_TYPES",
+            "HLL_DE_SYMBOLS",
+            "HLL_DE_SRCLINES",
+            "HLL_DE_LIBRARIES",
+            "unknown",
+            "unknown",
+            "HLL_DE_SRCLNSEG",
+            "unknown",
+            "HLL_DE_IBMSRC"
+        };
+        const char *pszType = pDir->aEntries[i].usType >= HLL_DE_MODULES
+                              && pDir->aEntries[i].usType <= HLL_DE_IBMSRC
+                              ? apsz[pDir->aEntries[i].usType - HLL_DE_MODULES]
+                              : "unknown";
+
+        /*
+         * Dump directroy info.
+         */
+        fprintf(phOut, "\n"
+                       "- HLL Directory Entry %d (0x%x): -\n", i, i);
+        fprintf(phOut, "    usType  0x%08x (%d) %s\n"
                        "    iMod    0x%08x (%d)\n"
                        "    off     0x%08x (%d)\n"
                        "    cb      0x%08x (%d)\n",
                        pDir->aEntries[i].usType,
                        pDir->aEntries[i].usType,
+                       pszType,
                        pDir->aEntries[i].iMod,
                        pDir->aEntries[i].iMod,
                        pDir->aEntries[i].off,
@@ -221,17 +275,100 @@ static int dumpHLL(FILE *phOut, PBYTE pb, int cb)
                        pDir->aEntries[i].cb
                 );
 
+
+
+        /*
+         * Switch between the different entry types to do individual
+         * processing.
+         */
         switch (pDir->aEntries[i].usType)
         {
-            case HLL_DE_MODULES:        /* Filename */
-                printf("    Modulename:     %*.s\n",
-                       pDir->aEntries[i].cb,
-                       pDir->aEntries[i].off + pb);
-                dumpHex(phOut, pDir->aEntries[i].off + pb, pDir->aEntries[i].cb);
+            /*
+             * Module - debuginfo on an object/source module.
+             */
+            case HLL_DE_MODULES:
+            {
+                PHLLMODULE  pModule = (PHLLMODULE)(pDir->aEntries[i].off + pb);
+                PHLLOBJECT  paObjects;
+                int         j, c;
+
+                /*
+                 * Dump module entry data.
+                 */
+                fprintf(phOut,
+                        "    Modulename:   %.*s\n"
+                        "    overlay       %d\n"
+                        "    ilib          %d\n"
+                        "    pad           %d\n"
+                        "    usDebugStyle  %#04x %c%c\n"
+                        "    HLL Version   %d.%d\n"
+                        "    cchName       %d\n"
+                        ,
+                        pModule->cchName,
+                        &pModule->achName[0],
+                        pModule->overlay,
+                        pModule->iLib,
+                        pModule->pad,
+                        pModule->usDebugStyle,
+                        pModule->usDebugStyle & 0xFF,
+                        pModule->usDebugStyle >> 8,
+                        pModule->chVerMajor,
+                        pModule->chVerMinor,
+                        pModule->cchName
+                        );
+
+
+                /*
+                 * Dump object data
+                 */
+                fprintf(phOut,
+                        "    Object %d\n"
+                        "      iObj %#x\n"
+                        "      off  %#x\n"
+                        "      cb   %#x\n",
+                        0,
+                        pModule->Object.iObj,
+                        pModule->Object.off,
+                        pModule->Object.cb);
+
+                c = pModule->cObjects > 0 ? pModule->cObjects : 0;
+                paObjects = (PHLLOBJECT)((void*)&pModule->achName[pModule->cchName]);
+                for (j = 0; j < c; j++)
+                {
+                    fprintf(phOut,
+                        "    Object %d\n"
+                        "      iObj %#x\n"
+                        "      off  %#x\n"
+                        "      cb   %#x\n",
+                        j + 1,
+                        paObjects[j].iObj,
+                        paObjects[j].off,
+                        paObjects[j].cb);
+                }
                 break;
+            }
+
 
             case HLL_DE_PUBLICS:        /* Public symbols */
+            {
+                PHLLPUBLICSYM   pPubSym = (PHLLPUBLICSYM)(pDir->aEntries[i].off + pb);
+
+                while ((char *)pPubSym - pb - pDir->aEntries[i].off < pDir->aEntries[i].cb)
+                {
+                    fprintf(phOut,
+                            "    %#03x:%#08x iType=%#2x  name=%.*s\n",
+                            pPubSym->iObj,
+                            pPubSym->off,
+                            pPubSym->iType,
+                            pPubSym->cchName,
+                            pPubSym->achName);
+
+                    /* next */
+                    pPubSym = (PHLLPUBLICSYM)&pPubSym->achName[pPubSym->cchName];
+                }
                 break;
+            }
+
 
             case HLL_DE_TYPES:          /* Types */
                 break;
@@ -273,7 +410,7 @@ static int dumpHLL(FILE *phOut, PBYTE pb, int cb)
  * @param     pb     Pointer to data.
  * @param     cb     Count of bytes to dump.
  */
-static void dumpHex(FILE *phOut, PBYTE pb, int cb)
+void dumpHex(FILE *phOut, PBYTE pb, int cb)
 {
     int i;
 
@@ -323,7 +460,7 @@ static void dumpHex(FILE *phOut, PBYTE pb, int cb)
  * @remark    This function is the one using most of the execution
  *            time (DosRead + DosOpen) - about 70% of the execution time!
  */
-static void *readfile(const char *pszFilename)
+void *readfile(const char *pszFilename)
 {
     void *pvFile = NULL;
     FILE *phFile;
@@ -359,7 +496,7 @@ static void *readfile(const char *pszFilename)
  * @returns   Size of file. -1 on error.
  * @param     phFile  File handle.
  */
-static signed long fsize(FILE *phFile)
+signed long fsize(FILE *phFile)
 {
     int ipos;
     signed long cb;
