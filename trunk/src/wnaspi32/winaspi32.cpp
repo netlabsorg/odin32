@@ -1,4 +1,4 @@
-/* $Id: winaspi32.cpp,v 1.7 2000-09-13 21:00:51 sandervl Exp $ */
+/* $Id: winaspi32.cpp,v 1.8 2000-09-14 19:09:17 sandervl Exp $ */
 /*
  * WNASPI routines
  *
@@ -262,7 +262,7 @@ ODINFUNCTION0(DWORD, GetASPI32SupportInfo)
 
   bNumDrv = 0;
 
-  aspi= new scsiObj();
+  aspi = new scsiObj();
 
   if( fGainDrvAccess( FALSE, &hmtxDriver) ) // Do nonblocking call for info
   {
@@ -286,9 +286,7 @@ ODINFUNCTION0(DWORD, GetASPI32SupportInfo)
                           sizeof(DWORD));
           RegCloseKey( hkeyDrvInfo);
         }
-
-      aspi->close();
-      delete aspi;
+        aspi->close();
     }
     else
       brc = SS_FAILED_INIT;
@@ -325,6 +323,7 @@ ODINFUNCTION0(DWORD, GetASPI32SupportInfo)
       brc = SS_COMP;
     }
   }
+  delete aspi;
 
   return ((brc << 8) | bNumDrv); /* FIXME: get # of host adapters installed */
 }
@@ -346,8 +345,6 @@ DWORD SendASPICommand(LPSRB lpSRB)
 
     dprintf(("SendASPI32Command %x %d", lpSRB, lpSRB->common.SRB_Cmd));
 
-    aspi = new scsiObj();
-
     // test first for a valid command
     if( (SC_HA_INQUIRY!=lpSRB->common.SRB_Cmd) &&
         (SC_GET_DEV_TYPE!=lpSRB->common.SRB_Cmd) &&
@@ -358,6 +355,8 @@ DWORD SendASPICommand(LPSRB lpSRB)
 	dprintf(("Invalid command!"));
      	return SS_INVALID_SRB; // shoud be invalid command
     }
+
+    aspi = new scsiObj();
 
     dwRC = SS_ERR;
 
@@ -423,12 +422,12 @@ DWORD SendASPICommand(LPSRB lpSRB)
       }
 
       fReleaseDrvAccess( hmtxDriver);
+      aspi->close();
     }
     else
     {
       dwRC = SS_NO_ASPI;
     }
-    aspi->close();
     delete aspi;
 
     return dwRC;

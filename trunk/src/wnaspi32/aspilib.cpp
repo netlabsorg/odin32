@@ -1,4 +1,4 @@
-/* $Id: aspilib.cpp,v 1.3 2000-07-18 17:12:04 bird Exp $ */
+/* $Id: aspilib.cpp,v 1.4 2000-09-14 19:09:16 sandervl Exp $ */
 /*
  *  ASPI Router Library
  *  for Odin WNASPI32.DLL
@@ -29,8 +29,10 @@
 //*  Standard constructor                                                   *
 //*                                                                         *
 //***************************************************************************
-scsiObj::scsiObj()
+scsiObj::scsiObj() : buffer(NULL)
 {
+   memset(&SRBlock, 0, sizeof(SRBlock));
+   memset(&AbortSRB, 0, sizeof(AbortSRB));
 }
 
 
