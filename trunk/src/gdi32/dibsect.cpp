@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.21 2000-03-21 19:46:47 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.22 2000-03-24 19:24:47 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -72,6 +72,10 @@ DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DW
         case 32:
                 bmpsize *= 4;
                 break;
+	default:
+		dprintf(("Unsupported nr of bits %d", pbmi->biBitCount));
+		DebugInt3();
+		break;
    }
 
    this->hSection = hSection;
@@ -129,10 +133,34 @@ DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DW
    dibinfo.dshSection       = handle;
    dibinfo.dsOffset         = 0; // TODO: put the correct value here (if createdibsection with file handle)
 
-   if(pbmi->biCompression == BI_BITFIELDS) {
-    	dibinfo.dsBitfields[0] = *((DWORD *)pColors);
-    	dibinfo.dsBitfields[1] = *((DWORD *)pColors+1);
-    	dibinfo.dsBitfields[2] = *((DWORD *)pColors+2);
+   if(iUsage == DIB_PAL_COLORS || pbmi->biBitCount <= 8)
+   {
+        dibinfo.dsBitfields[0] = dibinfo.dsBitfields[1] = dibinfo.dsBitfields[2] = 0;
+   }
+   else {
+	switch(pbmi->biBitCount)
+   	{
+           case 16:
+               	dibinfo.dsBitfields[0] = (pbmi->biCompression == BI_BITFIELDS) ? *(DWORD *)pColors : 0x7c00;
+               	dibinfo.dsBitfields[1] = (pbmi->biCompression == BI_BITFIELDS) ? *((DWORD *)pColors + 1) : 0x03e0;
+               	dibinfo.dsBitfields[2] = (pbmi->biCompression == BI_BITFIELDS) ? *((DWORD *)pColors + 2) : 0x001f;
+               	break;
+
+           case 24:
+               	dibinfo.dsBitfields[0] = 0xff;
+               	dibinfo.dsBitfields[1] = 0xff00;
+               	dibinfo.dsBitfields[2] = 0xff0000;
+               	break;
+
+           case 32:
+               	dibinfo.dsBitfields[0] = (pbmi->biCompression == BI_BITFIELDS) ? *(DWORD *)pColors : 0xff;
+               	dibinfo.dsBitfields[1] = (pbmi->biCompression == BI_BITFIELDS) ? *((DWORD *)pColors + 1) : 0xff00;
+               	dibinfo.dsBitfields[2] = (pbmi->biCompression == BI_BITFIELDS) ? *((DWORD *)pColors + 2) : 0xff0000;
+		if(dibinfo.dsBitfields[0] != 0xff && dibinfo.dsBitfields[1] != 0xff00 && dibinfo.dsBitfields[2] != 0xff0000) {
+			dprintf(("DIBSection: unsupported bitfields for 32 bits bitmap!!"));
+		}
+               	break;
+       	}
 	dprintf(("BI_BITFIELDS %x %x %x", dibinfo.dsBitfields[0], dibinfo.dsBitfields[1], dibinfo.dsBitfields[2]));
    }
 

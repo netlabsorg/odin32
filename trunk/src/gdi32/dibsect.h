@@ -1,4 +1,4 @@
-/* $Id: dibsect.h,v 1.12 2000-02-10 00:36:10 sandervl Exp $ */
+/* $Id: dibsect.h,v 1.13 2000-03-24 19:24:48 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -49,6 +49,9 @@ typedef struct
 } BITMAP_W, *LPBITMAP_W;
 
 #ifdef OS2_ONLY
+#define DIB_RGB_COLORS   0
+#define DIB_PAL_COLORS   1
+
 typedef struct
 {
   BITMAP_W   dsBm;
