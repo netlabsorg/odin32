@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.49 2000-05-03 18:35:53 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.50 2000-06-07 14:51:29 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -211,13 +211,13 @@ Win32Dialog::~Win32Dialog()
 }
 //******************************************************************************
 //******************************************************************************
-ULONG Win32Dialog::MsgCreate(HWND hwndFrame, HWND hwndClient)
+ULONG Win32Dialog::MsgCreate(HWND hwndOS2)
 {
  CREATESTRUCTA  *cs = tmpcs;  //pointer to CREATESTRUCT used in CreateWindowExA method
  LPARAM       param = tmpParam;
  LPSTR  dlgTemplate = tmpDlgTemplate;
 
-    Win32BaseWindow::MsgCreate(hwndFrame, hwndClient);
+    Win32BaseWindow::MsgCreate(hwndOS2);
 
     if(!isUnicode) {
         if(cs->lpszName) FreeAsciiString((LPSTR)cs->lpszName);
@@ -302,7 +302,7 @@ INT Win32Dialog::doDialogBox()
         bOldOwner = topOwner->IsModalDialogOwner();
         topOwner->setModalDialogOwner(TRUE);
         hwndOldDialog = topOwner->getOS2HwndModalDialog();
-        topOwner->setOS2HwndModalDialog(OS2HwndFrame);
+        topOwner->setOS2HwndModalDialog(OS2Hwnd);
         ShowWindow(SW_SHOW);
 
         //CB: 100% CPU usage, need a better solution with OSLibWinGetMsg

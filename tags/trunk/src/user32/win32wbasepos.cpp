@@ -1,4 +1,4 @@
-/* $Id: win32wbasepos.cpp,v 1.14 2000-05-28 16:43:47 sandervl Exp $ */
+/* $Id: win32wbasepos.cpp,v 1.15 2000-06-07 14:51:32 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (nonclient/position methods)
  *
@@ -36,6 +36,7 @@
 #include "dc.h"
 #include "pmframe.h"
 #include "win32wdesktop.h"
+#include <win\hook.h>
 
 #define DBG_LOCALLOG	DBG_win32wbasepos
 #include "dbglocal.h"
@@ -129,30 +130,44 @@ LONG Win32BaseWindow::SendNCCalcSize(BOOL calcValidRect, RECT *newWindowRect,
    WINDOWPOS winposCopy;
    LONG result;
 
-   params.rgrc[0] = *newWindowRect;
-   if (calcValidRect)
-   {
-        winposCopy = *winpos;
-        params.rgrc[1] = *oldWindowRect;
-        if(getParent()) {//in parent coordinates
-            MapWindowPoints(getWindowHandle(), getParent()->getWindowHandle(), (POINT *)oldClientRect, 2);
-        }
-        else {//in screen coordinates (just add window rectangle origin (already in screen coordinates))
-            OffsetRect(oldClientRect, rectWindow.left, rectWindow.top);
-        }
-        params.rgrc[2] = *oldClientRect;
-        params.lppos = &winposCopy;
-   }
-   result = SendInternalMessageA(WM_NCCALCSIZE, calcValidRect, (LPARAM)&params );
+   /* Send WM_NCCALCSIZE message to get new client area */
+//   if((winpos->flags & (SWP_FRAMECHANGED | SWP_NOSIZE)) != SWP_NOSIZE )
+//   {
+   	params.rgrc[0] = *newWindowRect;
+   	if(calcValidRect)
+   	{
+        	winposCopy = *winpos;
+	        params.rgrc[1] = *oldWindowRect;
+	        //client rectangel must be in parent coordinates
+	        OffsetRect(oldClientRect, rectWindow.left, rectWindow.top);
 
-   /* If the application send back garbage, ignore it */
-   if (params.rgrc[0].left <= params.rgrc[0].right && params.rgrc[0].top <= params.rgrc[0].bottom)
-   {
-        *newClientRect = params.rgrc[0];
-        //client rectangle now in screen coordinates; convert to 'frame' coordinates
-        OffsetRect(newClientRect, -rectWindow.left, -rectWindow.top);
-   }
+	        params.rgrc[2] = *oldClientRect;
+	        params.lppos = &winposCopy;
+   	}
+   	result = SendInternalMessageA(WM_NCCALCSIZE, calcValidRect, (LPARAM)&params );
 
+   	/* If the application send back garbage, ignore it */
+   	if(params.rgrc[0].left <= params.rgrc[0].right && params.rgrc[0].top <= params.rgrc[0].bottom)
+   	{
+        	*newClientRect = params.rgrc[0];
+	        //client rectangle now in parent coordinates; convert to 'frame' coordinates
+	        OffsetRect(newClientRect, -rectWindow.left, -rectWindow.top);
+   	}
+
+        /* FIXME: WVR_ALIGNxxx */
+        if(newClientRect->left != rectClient.left || newClientRect->top  != rectClient.top)
+           winpos->flags &= ~SWP_NOCLIENTMOVE;
+
+        if((newClientRect->right - newClientRect->left != rectClient.right - rectClient.left) ||
+           (newClientRect->bottom - newClientRect->top != rectClient.bottom - rectClient.top))
+             winpos->flags &= ~SWP_NOCLIENTSIZE;
+
+//   }
+//   else
+//   if(!(winpos->flags & SWP_NOMOVE) && 
+//       (newClientRect->left != rectClient.left || newClientRect->top != rectClient.top)) {
+//            winpos->flags &= ~SWP_NOCLIENTMOVE;
+//   }
    return result;
 }
 /***********************************************************************
@@ -174,6 +189,90 @@ LONG Win32BaseWindow::HandleWindowPosChanging(WINDOWPOS *winpos)
     }
     return 0;
 }
-//******************************************************************************
-//******************************************************************************
+/******************************************************************************
+ *           WINPOS_MinMaximize
+ *
+ * Fill in lpRect and return additional flags to be used with SetWindowPos().
+ * This function assumes that 'cmd' is different from the current window
+ * state.
+ */
+UINT Win32BaseWindow::MinMaximize(UINT cmd, LPRECT lpRect)
+{
+    UINT swpFlags = 0;
+    POINT size;
 
+    size.x = rectWindow.left; 
+    size.y = rectWindow.top;
+
+    if(IsRectEmpty(&windowpos.rcNormalPosition)) {
+	CopyRect(&windowpos.rcNormalPosition, &rectWindow);
+    }
+    if(!HOOK_CallHooksA(WH_CBT, HCBT_MINMAX, getWindowHandle(), cmd))
+    {
+	if(getStyle() & WS_MINIMIZE )
+	{
+	    if(!SendInternalMessageA(WM_QUERYOPEN, 0, 0L))
+		return (SWP_NOSIZE | SWP_NOMOVE);
+	}
+	switch( cmd )
+	{
+	    case SW_MINIMIZE:
+		if( getStyle() & WS_MAXIMIZE)
+		{
+		     	setFlags(getFlags() | WIN_RESTORE_MAX);
+		     	setStyle(getStyle() & ~WS_MAXIMIZE);
+                }
+                else	setFlags(getFlags() & ~WIN_RESTORE_MAX);
+
+		setStyle(getStyle() | WS_MINIMIZE);
+
+		SetRect(lpRect, windowpos.ptMinPosition.x, windowpos.ptMinPosition.y,
+		        GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON) );
+		break;
+
+	    case SW_MAXIMIZE:
+                GetMinMaxInfo(&size, &windowpos.ptMaxPosition, NULL, NULL );
+
+		if(getStyle() & WS_MINIMIZE )
+		{
+		     setStyle(getStyle() & ~WS_MINIMIZE);
+		}
+                setStyle(getStyle() | WS_MAXIMIZE);
+
+		SetRect(lpRect, windowpos.ptMaxPosition.x, windowpos.ptMaxPosition.y,
+		        size.x, size.y );
+		break;
+
+	    case SW_RESTORE:
+		if(getStyle() & WS_MINIMIZE)
+		{
+		     	setStyle(getStyle() & ~WS_MINIMIZE);
+
+		     	if( getFlags() & WIN_RESTORE_MAX)
+		     	{
+			 	/* Restore to maximized position */
+                         	GetMinMaxInfo(&size, &windowpos.ptMaxPosition, NULL, NULL);
+			 	setStyle(getStyle() | WS_MAXIMIZE);
+			 	SetRect(lpRect, windowpos.ptMaxPosition.x, windowpos.ptMaxPosition.y, size.x, size.y);
+			 	break;
+		     	}
+		} 
+		else 
+	        if( !(getStyle() & WS_MAXIMIZE) ) 
+			return 0;
+ 	        else 	setStyle(getStyle() & ~WS_MAXIMIZE);
+
+		/* Restore to normal position */
+
+		*lpRect = windowpos.rcNormalPosition;
+		lpRect->right -= lpRect->left; 
+		lpRect->bottom -= lpRect->top;
+		break;
+	}
+    } 
+    else swpFlags |= SWP_NOSIZE | SWP_NOMOVE;
+
+    return swpFlags;
+}
+//******************************************************************************
+//******************************************************************************

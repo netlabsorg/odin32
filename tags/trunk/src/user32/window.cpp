@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.67 2000-05-10 13:14:44 sandervl Exp $ */
+/* $Id: window.cpp,v 1.68 2000-06-07 14:51:33 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -6,9 +6,10 @@
  * Copyright 1999 Daniela Engert (dani@ngrt.de)
  * Copyright 2000 Christoph Bratschi (cbratschi@datacomm.ch)
  *
- * Parts based on Wine Windows code (windows\win.c, windows\property.c)
+ * Parts based on Wine Windows code (windows\win.c, windows\property.c, windows\winpos.c)
  *
- * Copyright 1993, 1994 Alexandre Julliard
+ * Copyright 1993, 1994, 1995 Alexandre Julliard
+ *           1995, 1996, 1999 Alex Korobka
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -445,6 +446,62 @@ BOOL WIN32API BringWindowToTop(HWND hwnd)
 {
     return SetWindowPos( hwnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE|SWP_NOSIZE );
 }
+/***********************************************************************
+ *           SetInternalWindowPos   (USER32.483)
+ */
+void WIN32API SetInternalWindowPos(HWND    hwnd,
+                                   UINT    showCmd,
+                                   LPRECT  lpRect,
+                                   LPPOINT lpPoint )
+{
+    dprintf(("USER32: SetInternalWindowPos(%08xh,%08xh,%08xh,%08xh)",
+           hwnd, showCmd, lpRect, lpPoint));
+
+    if( IsWindow(hwnd) )
+    {
+	WINDOWPLACEMENT wndpl;
+	UINT flags;
+
+        GetWindowPlacement(hwnd, &wndpl);
+	wndpl.length  = sizeof(wndpl);
+	wndpl.showCmd = showCmd;
+	wndpl.flags = 0;
+
+	if(lpPoint)
+	{
+            wndpl.flags |= WPF_SETMINPOSITION;
+	    wndpl.ptMinPosition = *lpPoint;
+	}
+	if(lpRect)
+	{
+            wndpl.rcNormalPosition = *lpRect;
+	}
+        SetWindowPlacement( hwnd, &wndpl);
+    }
+
+}
+/***********************************************************************
+ *           GetInternalWindowPos   (USER32.245)
+ */
+UINT WIN32API GetInternalWindowPos(HWND    hwnd,
+                                   LPRECT  rectWnd,
+                                   LPPOINT ptIcon )
+{
+    WINDOWPLACEMENT wndpl;
+
+    dprintf(("USER32: GetInternalWindowPos(%08xh,%08xh,%08xh)\n",
+             hwnd,
+             rectWnd,
+             ptIcon));
+
+    if(GetWindowPlacement( hwnd, &wndpl ))
+    {
+        if (rectWnd) *rectWnd = wndpl.rcNormalPosition;
+        if (ptIcon)  *ptIcon = wndpl.ptMinPosition;
+        return wndpl.showCmd;
+    }
+    return 0;
+}
 //******************************************************************************
 //******************************************************************************
 HWND WIN32API GetActiveWindow()
@@ -518,16 +575,35 @@ BOOL WIN32API SetWindowPlacement(HWND hwnd, const WINDOWPLACEMENT *winpos)
     if(!window) {
         dprintf(("SetWindowPlacement, window %x not found", hwnd));
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
-        return 0;
+        return FALSE;
     }
+    if(!winpos) {
+        dprintf(("SetWindowPlacement %x invalid parameter", hwnd));
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return FALSE;
+    }
+    dprintf(("USER32: SetWindowPlacement %x %x", hwnd, winpos));
     return window->SetWindowPlacement((WINDOWPLACEMENT *)winpos);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GetWindowPlacement(HWND hwnd, LPWINDOWPLACEMENT arg2)
+BOOL WIN32API GetWindowPlacement(HWND hwnd, LPWINDOWPLACEMENT winpos)
 {
-    dprintf(("USER32:  GetWindowPlacement\n"));
-    return O32_GetWindowPlacement(Win32BaseWindow::Win32ToOS2FrameHandle(hwnd), arg2);
+  Win32BaseWindow *window;
+
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if(!window) {
+        dprintf(("GetWindowPlacement, window %x not found", hwnd));
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        return FALSE;
+    }
+    if(!winpos) {
+        dprintf(("GetWindowPlacement %x invalid parameter", hwnd));
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return FALSE;
+    }
+    dprintf(("USER32: GetWindowPlacement %x %x", hwnd, winpos));
+    return window->GetWindowPlacement(winpos);
 }
 //******************************************************************************
 //******************************************************************************
@@ -608,41 +684,17 @@ HWND WIN32API GetFocus(void)
 }
 //******************************************************************************
 //******************************************************************************
-/***********************************************************************
- *           GetInternalWindowPos   (USER32.245)
- */
-UINT WIN32API GetInternalWindowPos(HWND    hwnd,
-                                   LPRECT  rectWnd,
-                                   LPPOINT ptIcon )
-{
-    WINDOWPLACEMENT wndpl;
-
-    dprintf(("USER32: GetInternalWindowPos(%08xh,%08xh,%08xh)\n",
-             hwnd,
-             rectWnd,
-             ptIcon));
-
-    if (GetWindowPlacement( hwnd, &wndpl ))
-    {
-        if (rectWnd) *rectWnd = wndpl.rcNormalPosition;
-        if (ptIcon)  *ptIcon = wndpl.ptMinPosition;
-        return wndpl.showCmd;
-    }
-    return 0;
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API IsZoomed(HWND hwnd)
 {
     dprintf(("USER32:  IsZoomed\n"));
-    return O32_IsZoomed(Win32BaseWindow::Win32ToOS2FrameHandle(hwnd));
+    return O32_IsZoomed(Win32BaseWindow::Win32ToOS2Handle(hwnd));
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API LockWindowUpdate(HWND hwnd)
 {
     dprintf(("USER32:  LockWindowUpdate\n"));
-    return O32_LockWindowUpdate(Win32BaseWindow::Win32ToOS2FrameHandle(hwnd));
+    return O32_LockWindowUpdate(Win32BaseWindow::Win32ToOS2Handle(hwnd));
 }
 //******************************************************************************
 //******************************************************************************
@@ -664,7 +716,12 @@ BOOL WIN32API GetWindowRect( HWND hwnd, PRECT pRect)
         SetLastError(ERROR_INVALID_PARAMETER);
         return FALSE;
     }
-    *pRect = *window->getWindowRect(); //always in screen coordinates
+    *pRect = *window->getWindowRect();
+
+    //convert from parent coordinates to screen (if necessary)
+    if(window->getParent()) {
+    	 MapWindowPoints(window->getParent()->getWindowHandle(), 0, (PPOINT)pRect, 2);
+    }
 
     dprintf(("GetWindowRect %x (%d,%d) (%d,%d)", hwnd, pRect->left, pRect->top, pRect->right, pRect->bottom));
     return TRUE;
@@ -861,12 +918,51 @@ BOOL WIN32API AdjustWindowRectEx( PRECT rect, DWORD style, BOOL menu, DWORD exSt
 //******************************************************************************
 /* Coordinate Space and Transformation Functions */
 //******************************************************************************
+/*******************************************************************
+ *         WINPOS_GetWinOffset
+ *
+ * Calculate the offset between the origin of the two windows. Used
+ * to implement MapWindowPoints.
+ */
+static void WINPOS_GetWinOffset( Win32BaseWindow *wndFrom, Win32BaseWindow *wndTo,
+                                 POINT *offset )
+{
+ Win32BaseWindow *window;
+
+    offset->x = offset->y = 0;
+
+    /* Translate source window origin to screen coords */
+    if(wndFrom != windowDesktop)
+    {
+	window = wndFrom;
+        while(window)
+        {
+            offset->x += window->getClientRectPtr()->left + window->getWindowRect()->left;
+            offset->y += window->getClientRectPtr()->top + window->getWindowRect()->top;
+            window = window->getParent();
+        }
+    }
+
+    /* Translate origin to destination window coords */
+    if(wndTo != windowDesktop)
+    {
+	window = wndTo;
+        while(window)
+        {
+            offset->x -= window->getClientRectPtr()->left + window->getWindowRect()->left;
+            offset->y -= window->getClientRectPtr()->top + window->getWindowRect()->top;
+            window = window->getParent();
+        }
+    }
+}
+//******************************************************************************
+//******************************************************************************
 int WIN32API MapWindowPoints(HWND hwndFrom, HWND hwndTo, LPPOINT lpPoints,
                              UINT cPoints)
 {
  Win32BaseWindow *wndfrom, *wndto;
  int retval = 0;
- OSLIBPOINT point;
+ POINT offset;
 
     SetLastError(0);
     if(lpPoints == NULL || cPoints == 0) {
@@ -898,24 +994,15 @@ int WIN32API MapWindowPoints(HWND hwndFrom, HWND hwndTo, LPPOINT lpPoints,
     if(wndto == wndfrom)
         return 0; //nothing to do
 
-    dprintf(("USER32: MapWindowPoints %x to %x (%d,%d) (%d)", hwndFrom, hwndTo, lpPoints->x, lpPoints->y, cPoints));
-    point.x = lpPoints->x;
-    point.y = lpPoints->y;
-    if (!mapWin32Point(wndfrom,wndto,&point))
-    {
-      	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
-      	return 0;
-    }
-
-    short int xinc = point.x - lpPoints->x;
-    short int yinc = point.y - lpPoints->y;
+    dprintf2(("USER32: MapWindowPoints %x to %x (%d,%d) (%d)", hwndFrom, hwndTo, lpPoints->x, lpPoints->y, cPoints));
+    WINPOS_GetWinOffset(wndfrom, wndto, &offset);
 
     for(int i=0;i<cPoints;i++)
     {
-        lpPoints[i].x += xinc;
-        lpPoints[i].y += yinc;
+        lpPoints[i].x += offset.x;
+        lpPoints[i].y += offset.y;
     }
-    retval = ((LONG)yinc << 16) | xinc;
+    retval = ((LONG)offset.y << 16) | offset.x;
     return retval;
 }
 //******************************************************************************
@@ -926,7 +1013,9 @@ BOOL WIN32API ScreenToClient(HWND hwnd, LPPOINT pt)
     PRECT rcl;
     BOOL rc;
 
-    if (!hwnd) return (TRUE);
+    if(!hwnd) {
+	return (TRUE);
+    }
     wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
     if (!wnd) {
         dprintf(("warning: ScreenToClient: window %x not found!", hwnd));
@@ -937,9 +1026,9 @@ BOOL WIN32API ScreenToClient(HWND hwnd, LPPOINT pt)
 #ifdef DEBUG
     POINT tmp = *pt;
 #endif
-    rc = mapWin32Point(OSLIB_HWND_DESKTOP, wnd->getOS2WindowHandle(), (OSLIBPOINT*)pt);
-    dprintf(("ScreenToClient %x (%d,%d) -> (%d,%d)", hwnd, tmp.x, tmp.y, pt->x, pt->y));
-    return rc;
+    MapWindowPoints(0, hwnd, pt, 1);
+    dprintf2(("ScreenToClient %x (%d,%d) -> (%d,%d)", hwnd, tmp.x, tmp.y, pt->x, pt->y));
+    return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1048,7 +1137,6 @@ BOOL WIN32API ClientToScreen (HWND hwnd, PPOINT pt)
 {
     Win32BaseWindow *wnd;
     PRECT rcl;
-    BOOL rc;
 
     if (!hwnd) {
         SetLastError(ERROR_INVALID_PARAMETER);
@@ -1063,10 +1151,10 @@ BOOL WIN32API ClientToScreen (HWND hwnd, PPOINT pt)
 #ifdef DEBUG
     POINT tmp = *pt;
 #endif
-    rc = mapWin32Point(wnd->getOS2WindowHandle(),OSLIB_HWND_DESKTOP,(OSLIBPOINT*)pt);
-    dprintf(("ClientToScreen %x (%d,%d) -> (%d,%d)", hwnd, tmp.x, tmp.y, pt->x, pt->y));
+    MapWindowPoints(hwnd, 0, pt, 1);
+    dprintf2(("ClientToScreen %x (%d,%d) -> (%d,%d)", hwnd, tmp.x, tmp.y, pt->x, pt->y));
 
-    return rc;
+    return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1396,7 +1484,7 @@ BOOL WIN32API EnumWindows(WNDENUMPROC lpfn, LPARAM lParam)
 UINT WIN32API ArrangeIconicWindows( HWND hwnd)
 {
     dprintf(("USER32:  ArrangeIconicWindows %x", hwnd));
-    return O32_ArrangeIconicWindows(Win32BaseWindow::Win32ToOS2FrameHandle(hwnd));
+    return O32_ArrangeIconicWindows(Win32BaseWindow::Win32ToOS2Handle(hwnd));
 }
 //******************************************************************************
 //restores iconized window to previous size/position
@@ -1415,7 +1503,7 @@ BOOL WIN32API OpenIcon(HWND hwnd)
 BOOL WIN32API ShowOwnedPopups( HWND hwnd, BOOL  arg2)
 {
     dprintf(("USER32:  ShowOwnedPopups (OPEN32: todo) %x", hwnd));
-    return O32_ShowOwnedPopups(Win32BaseWindow::Win32ToOS2FrameHandle(hwnd), arg2);
+    return O32_ShowOwnedPopups(Win32BaseWindow::Win32ToOS2Handle(hwnd), arg2);
 }
 //******************************************************************************
 //******************************************************************************

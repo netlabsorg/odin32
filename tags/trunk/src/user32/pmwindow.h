@@ -1,4 +1,4 @@
-/* $Id: pmwindow.h,v 1.8 2000-01-18 20:08:13 sandervl Exp $ */
+/* $Id: pmwindow.h,v 1.9 2000-06-07 14:51:27 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -8,13 +8,10 @@
 #ifndef __PMWINDOW_H__
 #define __PMWINDOW_H__
 
-#define WIN32_STDCLASS   "Win32WindowClass"
-#define WIN32_STDCLASS2  "Win32WindowClass2"
-#define WIN32_INNERFRAME "Win32InnerFrameClass"
+#define WIN32_STDCLASS      "Win32WindowClass"
+#define WIN32_STDFRAMECLASS "Win32FrameClass"
 
 BOOL InitPM();
-
-PVOID SubclassWithDefHandler(HWND hwnd);
 
 void RegisterSystemClasses(ULONG hModule);
 void UnregisterSystemClasses();

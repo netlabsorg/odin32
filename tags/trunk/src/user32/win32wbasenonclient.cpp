@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.23 2000-05-28 16:43:47 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.24 2000-06-07 14:51:32 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -210,9 +210,11 @@ VOID Win32BaseWindow::TrackScrollBar(WPARAM wParam,POINT pt)
     scrollbar = SB_VERT;
   }
 
-  pt.x -= rectWindow.left;
-  pt.y -= rectWindow.top;
-  SCROLL_HandleScrollEvent(Win32Hwnd,0,MAKELONG(pt.x,pt.y),scrollbar,WM_LBUTTONDOWN);
+  ScreenToClient(getWindowHandle(), &pt);
+  pt.x += rectClient.left;
+  pt.y += rectClient.top;
+
+  SCROLL_HandleScrollEvent(getWindowHandle(),0,MAKELONG(pt.x,pt.y),scrollbar,WM_LBUTTONDOWN);
   if (GetCapture() != Win32Hwnd) return;
   do
   {
@@ -223,8 +225,11 @@ VOID Win32BaseWindow::TrackScrollBar(WPARAM wParam,POINT pt)
         {
         case WM_LBUTTONUP:
         case WM_MOUSEMOVE:
-            pt.x = msg.pt.x-rectWindow.left;
-            pt.y = msg.pt.y-rectWindow.top;
+            pt.x = msg.pt.x;
+            pt.y = msg.pt.y;
+            ScreenToClient(getWindowHandle(), &pt);
+  	    pt.x += rectClient.left;
+  	    pt.y += rectClient.top;
             msg.lParam = MAKELONG(pt.x,pt.y);
 
         case WM_SYSTIMER:
@@ -261,11 +266,13 @@ LONG Win32BaseWindow::HandleNCLButtonDown(WPARAM wParam,LPARAM lParam)
         if (GetActiveWindow() != topparent->getWindowHandle())
         {
             //SvL: Calling topparent->SetActiveWindow() causes focus problems
-            OSLibWinSetFocus(topparent->getOS2FrameWindowHandle());
+//	    topparent->SetActiveWindow();
+            OSLibWinSetFocus(topparent->getOS2WindowHandle());
         }
 
         if (GetActiveWindow() == topparent->getWindowHandle())
             SendInternalMessageA(WM_SYSCOMMAND,SC_MOVE+HTCAPTION,lParam);
+        else dprintf(("ACtive window (%x) != toplevel wnd %x", OSLibWinQueryActiveWindow(), topparent->getWindowHandle()));
         break;
     }
 
@@ -424,9 +431,11 @@ LONG Win32BaseWindow::HandleNCCalcSize(BOOL calcValidRects,RECT *winRect)
 //******************************************************************************
 LONG Win32BaseWindow::HandleNCHitTest(POINT pt)
 {
-  RECT rect = rectWindow;
+  RECT rect;
 
   if (dwStyle & WS_MINIMIZE) return HTCAPTION;
+
+  GetWindowRect(getWindowHandle(), &rect);
 
   if (!PtInRect(&rect,pt)) return HTNOWHERE;
 
@@ -1006,6 +1015,7 @@ VOID Win32BaseWindow::DoNCPaint(HRGN clip,BOOL suppress_menupaint)
   {
     //only redraw caption
     GetRgnBox(clip,&rectClip);
+#if 1
     //SvL: I'm getting paint problems when clipping a dc created in GetDCEx
     //     with a region that covers the entire window (RealPlayer 7 Update 1)
     //     As we don't need to clip anything when that occurs, this workaround
@@ -1015,6 +1025,7 @@ VOID Win32BaseWindow::DoNCPaint(HRGN clip,BOOL suppress_menupaint)
         clip = 0;
         rectClip = rect;
     }
+#endif
   }
   else
   {
@@ -1121,7 +1132,7 @@ VOID Win32BaseWindow::DoNCPaint(HRGN clip,BOOL suppress_menupaint)
     }
   }
 
-  ReleaseDC(Win32Hwnd,hdc);
+  ReleaseDC(getWindowHandle(),hdc);
   IncreaseLogCount();
   dprintf(("**DoNCPaint %x DONE", getWindowHandle()));
 }
@@ -1304,7 +1315,7 @@ LONG Win32BaseWindow::HandleSysCommand(WPARAM wParam,POINT *pt32)
         break;
 
     case SC_TASKLIST:
-        OSLibWinShowTaskList(getOS2FrameWindowHandle());
+        OSLibWinShowTaskList(getOS2WindowHandle());
         break;
 
     case SC_SCREENSAVE:
