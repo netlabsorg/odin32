@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.46 2002-02-26 17:01:23 sandervl Exp $ */
+/* $Id: misc.cpp,v 1.47 2002-06-02 12:42:09 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -494,11 +494,12 @@ int SYSTEM WritePrivateLog(void *logfile, char *tekst, ...)
 //handler; if an exception occurs inside a dprintf, using dprintf in the exception
 //handler will hang the process
 //******************************************************************************
-void LogException(int state)
+int LogException(int state, int prevlock)
 {
     TEB *teb = GetThreadTEB();
+    int  ret = 0;
 
-    if (!teb) return;
+    if (!teb) return 0;
 
 #if !defined(__EMX__)
     if (teb->o.odin.logfile)
@@ -513,13 +514,14 @@ void LogException(int state)
 #error Check the offset of the lock count word in the file stream structure for this compiler revision!!!!!
 #endif
 #endif
+        ret = (*lock);
         if (state == ENTER_EXCEPTION)
         {
-            (*lock)--;
+            if((*lock) > 0) (*lock)--;
         }
         else
         { //LEAVE_EXCEPTION
-            (*lock)++;
+            if(prevlock) (*lock)++;
         }
     }
 #else
@@ -527,6 +529,7 @@ void LogException(int state)
 // we maybe should do something with the _more->rsem (_rmutex) structure but
 // I wanna have this compile, so we'll address problems later.
 #endif
+    return ret;
 }
 //******************************************************************************
 //Check if the exception occurred inside a fprintf (logging THDB member set)
