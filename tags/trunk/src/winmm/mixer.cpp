@@ -1,4 +1,4 @@
-/* $Id: mixer.cpp,v 1.10 2001-06-07 12:47:39 sandervl Exp $ */
+/* $Id: mixer.cpp,v 1.11 2002-05-22 15:50:25 sandervl Exp $ */
 
 /*
  * Mixer stubs
@@ -36,8 +36,6 @@
 #define DBG_LOCALLOG	DBG_mixer
 #include "dbglocal.h"
 
-
-ODINDEBUGCHANNEL(WINMM-MIXER)
 
 #define WINMM_MIXERSTRING_A	"OS/2 WINMM Mixer"
 #define WINMM_MIXERSTRING_W	(LPWSTR)L"OS/2 WINMM Mixer"
@@ -119,10 +117,7 @@ static void MIX_DoGetLineControls(LPMIXERCONTROLA mc, DWORD lineID, DWORD dwType
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, mixerGetControlDetailsA,
-              HMIXEROBJ, hmxobj,
-              LPMIXERCONTROLDETAILS, lpmcd,
-              DWORD, fdwDetails)
+MMRESULT WINAPI mixerGetControlDetailsA(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS lpmcd, DWORD fdwDetails)
 {
     DWORD	ret = MMSYSERR_NOTSUPPORTED;
     DWORD	lineID, controlType;
@@ -186,20 +181,14 @@ ODINFUNCTION3(MMRESULT, mixerGetControlDetailsA,
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, mixerGetControlDetailsW,
-              HMIXEROBJ, hmxobj,
-              LPMIXERCONTROLDETAILS, pmxcd,
-              DWORD, fdwDetails)
+MMRESULT WINAPI mixerGetControlDetailsW(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS pmxcd, DWORD fdwDetails)
 {
-  dprintf(("WINMM:mixerGetControlDetailsW - stub\n" ));
-  return MIXERR_INVALCONTROL;
+    dprintf(("WINMM:mixerGetControlDetailsW - stub\n" ));
+    return MIXERR_INVALCONTROL;
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, mixerSetControlDetails,
-              HMIXEROBJ, hmxobj,
-              LPMIXERCONTROLDETAILS, lpmcd,
-              DWORD, fdwDetails)
+MMRESULT WINAPI mixerSetControlDetails(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS lpmcd, DWORD fdwDetails)
 {
     DWORD	ret = MMSYSERR_NOTSUPPORTED;
     DWORD	lineID, controlType;
@@ -260,10 +249,7 @@ ODINFUNCTION3(MMRESULT, mixerSetControlDetails,
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, mixerGetLineControlsA,
-              HMIXEROBJ, hmxobj,
-              LPMIXERLINECONTROLSA, lpMlc,
-              DWORD, fdwControls)
+MMRESULT WINAPI mixerGetLineControlsA(HMIXEROBJ  hmxobj, LPMIXERLINECONTROLSA lpMlc, DWORD fdwControls)
 {
  DWORD dwRet = MMSYSERR_NOERROR;
  DWORD lineID, controlType;
@@ -276,119 +262,104 @@ ODINFUNCTION3(MMRESULT, mixerGetLineControlsA,
     switch(fdwControls & MIXER_GETLINECONTROLSF_QUERYMASK) 
     {
     case MIXER_GETLINECONTROLSF_ALL:
-	if (lpMlc->cControls != 2) {
-	    dwRet = MMSYSERR_INVALPARAM;
-	} 
+	    if (lpMlc->cControls != 2) {
+    	    dwRet = MMSYSERR_INVALPARAM;
+    	} 
         else {
-	    MIX_DoGetLineControls(&lpMlc->pamxctrl[0], lpMlc->dwLineID, MIXERCONTROL_CONTROLTYPE_VOLUME);
-	    MIX_DoGetLineControls(&lpMlc->pamxctrl[1], lpMlc->dwLineID, MIXERCONTROL_CONTROLTYPE_MUTE);
-	}
-	break;
+	        MIX_DoGetLineControls(&lpMlc->pamxctrl[0], lpMlc->dwLineID, MIXERCONTROL_CONTROLTYPE_VOLUME);
+	        MIX_DoGetLineControls(&lpMlc->pamxctrl[1], lpMlc->dwLineID, MIXERCONTROL_CONTROLTYPE_MUTE);
+	    }
+	    break;
     case MIXER_GETLINECONTROLSF_ONEBYID:
-	if (MIX_SplitControlID(lpMlc->u.dwControlID, &lineID, &controlType))
-	    MIX_DoGetLineControls(&lpMlc->pamxctrl[0], lineID, controlType);
-	else 
-	    dwRet = MMSYSERR_INVALPARAM;
-	break;
+	    if (MIX_SplitControlID(lpMlc->u.dwControlID, &lineID, &controlType))
+	        MIX_DoGetLineControls(&lpMlc->pamxctrl[0], lineID, controlType);
+	    else 
+	        dwRet = MMSYSERR_INVALPARAM;
+	    break;
     case MIXER_GETLINECONTROLSF_ONEBYTYPE:
-	switch (lpMlc->u.dwControlType & MIXERCONTROL_CT_CLASS_MASK) {
-	case MIXERCONTROL_CT_CLASS_FADER:
-	    MIX_DoGetLineControls(&lpMlc->pamxctrl[0], lpMlc->dwLineID, MIXERCONTROL_CONTROLTYPE_VOLUME);
-	    break;
-	case MIXERCONTROL_CT_CLASS_SWITCH:
-	    MIX_DoGetLineControls(&lpMlc->pamxctrl[0], lpMlc->dwLineID, MIXERCONTROL_CONTROLTYPE_MUTE);
-	    break;
-	default:
-	    dwRet = MMSYSERR_INVALPARAM;
-	}
-	break;
+	    switch (lpMlc->u.dwControlType & MIXERCONTROL_CT_CLASS_MASK) {
+	    case MIXERCONTROL_CT_CLASS_FADER:
+    	    MIX_DoGetLineControls(&lpMlc->pamxctrl[0], lpMlc->dwLineID, MIXERCONTROL_CONTROLTYPE_VOLUME);
+	        break;
+	    case MIXERCONTROL_CT_CLASS_SWITCH:
+    	    MIX_DoGetLineControls(&lpMlc->pamxctrl[0], lpMlc->dwLineID, MIXERCONTROL_CONTROLTYPE_MUTE);
+	        break;
+	    default:
+    	    dwRet = MMSYSERR_INVALPARAM;
+    	}
+    	break;
     default:
-	dprintf(("Unknown flag %08lx\n", fdwControls & MIXER_GETLINECONTROLSF_QUERYMASK));
-	dwRet = MMSYSERR_INVALPARAM;
+	    dprintf(("Unknown flag %08lx\n", fdwControls & MIXER_GETLINECONTROLSF_QUERYMASK));
+	    dwRet = MMSYSERR_INVALPARAM;
     }
 
     return dwRet;
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, mixerGetLineControlsW,
-              HMIXEROBJ, hmxobj,
-              LPMIXERLINECONTROLSW, pmxlc,
-              DWORD, fdwControls)
+MMRESULT WINAPI mixerGetLineControlsW(HMIXEROBJ hmxobj, LPMIXERLINECONTROLSW pmxlc, DWORD fdwControls)
 {
-  dprintf(("WINMM:mixerGetGetLineControlsW - stub\n" ));
-  return MIXERR_INVALLINE;
+    dprintf(("WINMM:mixerGetGetLineControlsW - stub\n" ));
+    return MIXERR_INVALLINE;
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, mixerGetDevCapsA,
-              UINT, uMxId,
-              LPMIXERCAPSA, pmxcaps,
-              UINT, cbmxcaps)
+MMRESULT WINAPI mixerGetDevCapsA(UINT uMxId, LPMIXERCAPSA pmxcaps, UINT cbmxcaps)
 {
-  if(DartWaveOut::getNumDevices() == 0) {
+    if(DartWaveOut::getNumDevices() == 0) {
         memset(pmxcaps, 0, sizeof(*pmxcaps));
         return MMSYSERR_NODRIVER;
-  }
+    }
 
-  // we have to fill in this thing
-  pmxcaps->wMid = 0;                  /* manufacturer ID */
-  pmxcaps->wPid = 0;                  /* product ID */
-  pmxcaps->vDriverVersion = 0x0001;        /* version of the driver */
-  strcpy( pmxcaps->szPname, WINMM_MIXERSTRING_A); /* product name */
+    // we have to fill in this thing
+    pmxcaps->wMid = 0;                  /* manufacturer ID */
+    pmxcaps->wPid = 0;                  /* product ID */
+    pmxcaps->vDriverVersion = 0x0001;        /* version of the driver */
+    strcpy( pmxcaps->szPname, WINMM_MIXERSTRING_A); /* product name */
 
-  pmxcaps->fdwSupport = 0;
-  pmxcaps->cDestinations = 1;
+    pmxcaps->fdwSupport = 0;
+    pmxcaps->cDestinations = 1;
 
-  return MMSYSERR_NOERROR;
+    return MMSYSERR_NOERROR;
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, mixerGetDevCapsW,
-              UINT, uMxId,
-              LPMIXERCAPSW, pmxcaps,
-              UINT, cbmxcaps)
+MMRESULT WINAPI mixerGetDevCapsW(UINT uMxId, LPMIXERCAPSW pmxcaps, UINT cbmxcaps)
 {
-  if(DartWaveOut::getNumDevices() == 0) {
+    if(DartWaveOut::getNumDevices() == 0) {
         memset(pmxcaps, 0, sizeof(*pmxcaps));
         return MMSYSERR_NODRIVER;
-  }
+    }
 
-  // we have to fill in this thing
-  pmxcaps->wMid = 0;                  /* manufacturer ID */
-  pmxcaps->wPid = 0;                  /* product ID */
-  pmxcaps->vDriverVersion = 0x0001;        /* version of the driver */
-  lstrcpyW( pmxcaps->szPname, WINMM_MIXERSTRING_W ); /* product name */
+    // we have to fill in this thing
+    pmxcaps->wMid = 0;                  /* manufacturer ID */
+    pmxcaps->wPid = 0;                  /* product ID */
+    pmxcaps->vDriverVersion = 0x0001;        /* version of the driver */
+    lstrcpyW( pmxcaps->szPname, WINMM_MIXERSTRING_W ); /* product name */
 
-  pmxcaps->fdwSupport = 0;
-  pmxcaps->cDestinations = 1;
+    pmxcaps->fdwSupport = 0;
+    pmxcaps->cDestinations = 1;
 
-  return MMSYSERR_NOERROR;
+    return MMSYSERR_NOERROR;
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, mixerGetID,
-              HMIXEROBJ, hmxobj,
-              UINT *, puMxId,
-              DWORD, fdwId)
+MMRESULT WINAPI mixerGetID(HMIXEROBJ hmxobj, UINT * puMxId, DWORD fdwId)
 {
- DEVICE_STRUCT *pMixInfo = (DEVICE_STRUCT *)hmxobj;
+    DEVICE_STRUCT *pMixInfo = (DEVICE_STRUCT *)hmxobj;
 
-  if(pMixInfo && puMxId) {
-       *puMxId = pMixInfo->uDeviceID;
-  }
-  else *puMxId = 0;
-  return MMSYSERR_NOERROR;
+    if(pMixInfo && puMxId) {
+        *puMxId = pMixInfo->uDeviceID;
+    }
+    else *puMxId = 0;
+    return MMSYSERR_NOERROR;
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, mixerGetLineInfoA,
-              HMIXEROBJ, hmxobj,
-              LPMIXERLINEA, lpMl,
-              DWORD, fdwInfo)
+MMRESULT WINAPI mixerGetLineInfoA(HMIXEROBJ hmxobj, LPMIXERLINEA lpMl, DWORD fdwInfo)
 {
     if (lpMl == NULL || lpMl->cbStruct != sizeof(*lpMl)) 
-	return MMSYSERR_INVALPARAM;
+	    return MMSYSERR_INVALPARAM;
     
     /* FIXME: set all the variables correctly... the lines below
      * are very wrong...
@@ -502,28 +473,21 @@ ODINFUNCTION3(MMRESULT, mixerGetLineInfoA,
 }
 
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, mixerGetLineInfoW,
-              HMIXEROBJ, hmxobj,
-              LPMIXERLINEW, pmxl,
-              DWORD, fdwInfo)
+MMRESULT WINAPI mixerGetLineInfoW(HMIXEROBJ hmxobj, LPMIXERLINEW pmxl, DWORD fdwInfo)
 {
-  dprintf(("WINMM:mixerGetLineInfoW - stub\n" ));
-  return MIXERR_INVALLINE;
+    dprintf(("WINMM:mixerGetLineInfoW - stub\n" ));
+    return MIXERR_INVALLINE;
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION4(MMRESULT, mixerMessage,
-              HMIXER, hmx,
-              UINT, uMsg,
-              DWORD, dwParam1,
-              DWORD, dwParam2)
+MMRESULT WINAPI mixerMessage(HMIXER hmx, UINT uMsg, DWORD dwParam1, DWORD dwParam2)
 {
-  dprintf(("WINMM:mixerMessage - stub\n" ));
-  return 0;
+    dprintf(("WINMM:mixerMessage - stub\n" ));
+    return 0;
 }
-
 /******************************************************************************/
-ODINFUNCTION0(UINT, mixerGetNumDevs)
+/******************************************************************************/
+UINT WINAPI mixerGetNumDevs()
 {
   if(DartWaveOut::getNumDevices() == 0) {
         return 0;
@@ -532,41 +496,36 @@ ODINFUNCTION0(UINT, mixerGetNumDevs)
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION5(MMRESULT, mixerOpen,
-              LPHMIXER, phmx,
-              UINT, uMxId,
-              DWORD, dwCallback,
-              DWORD, dwInstance,
-              DWORD, fdwOpen)
+MMRESULT WINAPI mixerOpen(LPHMIXER phmx, UINT uMxId, DWORD dwCallback, DWORD dwInstance,
+                          DWORD fdwOpen)
 {
- DEVICE_STRUCT *pMixInfo;
+    DEVICE_STRUCT *pMixInfo;
 
-  if(DartWaveOut::getNumDevices() == 0) {
-        if(phmx) *phmx = 0;
+    if(DartWaveOut::getNumDevices() == 0) {
+            if(phmx) *phmx = 0;
+            return MMSYSERR_NODRIVER;
+    }
+      pMixInfo = (DEVICE_STRUCT *)malloc(sizeof(DEVICE_STRUCT));
+    if(pMixInfo == NULL) {
         return MMSYSERR_NODRIVER;
-  }
-  pMixInfo = (DEVICE_STRUCT *)malloc(sizeof(DEVICE_STRUCT));
-  if(pMixInfo == NULL) {
-        return MMSYSERR_NODRIVER;
-  }
-  pMixInfo->dwCallback = dwCallback;
-  pMixInfo->dwDriverInstance = dwInstance;
-  pMixInfo->dwFlags    = fdwOpen;
-  pMixInfo->uDeviceID  = uMxId;
-  pMixInfo->type       = WINMM_MIXER;
-  if(phmx)
-	*phmx = (HMIXER)pMixInfo;
-  return MMSYSERR_NOERROR;
+    }
+    pMixInfo->dwCallback = dwCallback;
+    pMixInfo->dwDriverInstance = dwInstance;
+    pMixInfo->dwFlags    = fdwOpen;
+    pMixInfo->uDeviceID  = uMxId;
+    pMixInfo->type       = WINMM_MIXER;
+    if(phmx)
+    	*phmx = (HMIXER)pMixInfo;
+    return MMSYSERR_NOERROR;
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION1(MMRESULT, mixerClose,
-              HMIXER, hmx)
+MMRESULT WINAPI mixerClose(HMIXER hmx)
 {
-  if(hmx) {
-	free((void *)hmx);
-  }
-  return MMSYSERR_NOERROR;
+    if(hmx) {
+    	free((void *)hmx);
+    }
+    return MMSYSERR_NOERROR;
 }
 /******************************************************************************/
 /******************************************************************************/

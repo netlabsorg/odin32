@@ -1,4 +1,4 @@
-/* $Id: midi.cpp,v 1.9 2001-02-27 21:13:59 sandervl Exp $ */
+/* $Id: midi.cpp,v 1.10 2002-05-22 15:50:24 sandervl Exp $ */
 
 /*
  * RTMIDI code
@@ -29,11 +29,6 @@
 
 #define DBG_LOCALLOG	DBG_midi
 #include "dbglocal.h"
-
-ODINDEBUGCHANNEL(WINMM-MIDI)
-
-//SvL: 23/09/99: WinPostMsg no longer works, as win32 window handles are no longer PM handles
-BOOL WIN32API PostMessageA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 /*
    Work to do:
@@ -118,10 +113,7 @@ char * getWinmmMsg( MMRESULT result )
 }
 
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, midiConnect,
-              HMIDI, hMidiIn,
-              HMIDIOUT, hMidiOut,
-              LPVOID, pReserved)
+MMRESULT WINAPI midiConnect(HMIDI hMidiIn, HMIDIOUT hMidiOut, LPVOID pReserved)
 {
   // TODO: Implement using instance connections
   dprintf(("WINMM:midiConnect -- not Implemented\n" ));
@@ -141,10 +133,7 @@ ODINFUNCTION3(MMRESULT, midiConnect,
 }
 
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, midiDisconnect,
-              HMIDI, hMidiIn,
-              HMIDIOUT, hMidiOut,
-              LPVOID, pReserved)
+MMRESULT WINAPI midiDisconnect(HMIDI hMidiIn, HMIDIOUT hMidiOut, LPVOID pReserved)
 {
   // TODO: Implement using instance connections
   dprintf(("WINMM:midiDisconnect -- not Implemented\n" ));
@@ -164,10 +153,7 @@ ODINFUNCTION3(MMRESULT, midiDisconnect,
 }
 
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, midiInAddBuffer,
-              HMIDIIN, hMidiIn,
-              LPMIDIHDR, lpMidiInHdr,
-              UINT, cbMidiInHdr)
+MMRESULT WINAPI midiInAddBuffer(HMIDIIN hMidiIn, LPMIDIHDR lpMidiInHdr, UINT cbMidiInHdr)
 {
   dprintf(("WINMM:midiInAddBuffer -- not Implemented\n" ));
   MMRESULT rc;
@@ -182,8 +168,7 @@ ODINFUNCTION3(MMRESULT, midiInAddBuffer,
 }
 
 /******************************************************************************/
-ODINFUNCTION1(MMRESULT, midiInClose,
-              HMIDIIN, hMidiIn)
+MMRESULT WINAPI midiInClose(HMIDIIN hMidiIn)
 {
   dprintf(("WINMM:midiInClose -- partially Implemented\n" ));
   MMRESULT rc;
@@ -199,10 +184,8 @@ ODINFUNCTION1(MMRESULT, midiInClose,
 }
 
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, midiInGetDevCapsA,
-              UINT, uDeviceId,
-              LPMIDIINCAPSA, midiInCaps,
-              UINT,  sMidiInCaps)
+MMRESULT WINAPI midiInGetDevCapsA(UINT uDeviceId, LPMIDIINCAPSA midiInCaps,
+                                  UINT sMidiInCaps)
 {
   dprintf(("WINMM:midiInGetDevCapsA(%u)\n", uDeviceId ));
   MMRESULT rc;
@@ -228,10 +211,8 @@ ODINFUNCTION3(MMRESULT, midiInGetDevCapsA,
 
 
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, midiInGetDevCapsW,
-              UINT, uDeviceId,
-              LPMIDIINCAPSW, midiInCaps,
-              UINT,  sMidiInCaps )
+MMRESULT WINAPI midiInGetDevCapsW(UINT uDeviceId, LPMIDIINCAPSW midiInCaps,
+                                  UINT sMidiInCaps )
 {
   dprintf(("WINMM:midiInGetDevCapsA(%u)\n", uDeviceId ));
   MMRESULT rc;
@@ -258,10 +239,7 @@ ODINFUNCTION3(MMRESULT, midiInGetDevCapsW,
 }
 
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, midiInGetErrorTextA,
-              MMRESULT, wError,
-              LPSTR, lpText,
-              UINT, cchText)
+MMRESULT WINAPI midiInGetErrorTextA(MMRESULT wError, LPSTR lpText, UINT cchText)
 {
   dprintf(("WINMM:midiInGetErrorTextA(%d)\n", wError ));
   char * theMsg = getWinmmMsg( wError );
@@ -277,10 +255,8 @@ ODINFUNCTION3(MMRESULT, midiInGetErrorTextA,
 }
 
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, midiInGetErrorTextW,
-              MMRESULT, wError,
-              LPWSTR, lpText,
-              UINT, cchText)
+MMRESULT WINAPI midiInGetErrorTextW(MMRESULT wError, LPWSTR lpText,
+                                    UINT cchText)
 {
   dprintf(("WINMM:midiInGetErrorTextW(%d)\n", wError ));
   char * theMsg = getWinmmMsg( wError );
@@ -296,9 +272,7 @@ ODINFUNCTION3(MMRESULT, midiInGetErrorTextW,
 }
 
 /******************************************************************************/
-ODINFUNCTION2(MMRESULT, midiInGetID,
-              HMIDIIN, hMidiIn,
-              LPUINT, puDeviceID)
+MMRESULT WINAPI midiInGetID(HMIDIIN hMidiIn, LPUINT puDeviceID)
 {
   dprintf(("WINMM:midiInGetID\n" ));
   MMRESULT rc;
@@ -315,30 +289,22 @@ ODINFUNCTION2(MMRESULT, midiInGetID,
 }
 
 /******************************************************************************/
-ODINFUNCTION4(UINT, midiInMessage,
-              HMIDIIN, hmi,
-              UINT, msg,
-              DWORD, dw1,
-              DWORD, dw2)
+UINT WINAPI midiInMessage(HMIDIIN hmi, UINT msg, DWORD dw1, DWORD dw2)
 {
   dprintf(("WINMM:midiInMessage -- not Implemented\n" ));
   return 0;
 }
 
 /******************************************************************************/
-ODINFUNCTION0(UINT, midiInGetNumDevs)
+UINT WINAPI midiInGetNumDevs()
 {
   UINT i = IRTMIDI->numInInstances();
   return i;
 }
 
 /******************************************************************************/
-ODINFUNCTION5(MMRESULT, midiInOpen,
-              LPHMIDIIN, lphMidiIn,
-              UINT, uDeviceId,
-              DWORD, dwCallback,
-              DWORD, dwCallbackInstance,
-              DWORD, dwflags)
+MMRESULT WINAPI midiInOpen(LPHMIDIIN lphMidiIn, UINT uDeviceId, DWORD dwCallback,
+                           DWORD dwCallbackInstance, DWORD dwflags)
 {
   dprintf(("WINMM:midiInOpen(%d) --  partial Implementation\n", uDeviceId ));
   dprintf(("      dwflags(%lx)\n", dwflags ));
@@ -359,10 +325,8 @@ ODINFUNCTION5(MMRESULT, midiInOpen,
 }
 
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, midiInPrepareHeader,
-              HMIDIIN, hMidiIn,
-              LPMIDIHDR, lpMidiInHdr,
-              UINT, cbMidiInHdr)
+MMRESULT WINAPI midiInPrepareHeader(HMIDIIN hMidiIn, LPMIDIHDR lpMidiInHdr,
+                                    UINT cbMidiInHdr)
 {
   dprintf(("WINMM:midiInPrepareHeader -- not Implemented\n" ));
   MMRESULT rc;
@@ -378,8 +342,7 @@ ODINFUNCTION3(MMRESULT, midiInPrepareHeader,
 }
 
 /******************************************************************************/
-ODINFUNCTION1(MMRESULT, midiInReset,
-              HMIDIIN, hMidiIn)
+MMRESULT WINAPI midiInReset(HMIDIIN hMidiIn)
 {
   dprintf(("WINMM:midiInReset -- not Implemented\n" ));
   MMRESULT rc;
@@ -394,8 +357,7 @@ ODINFUNCTION1(MMRESULT, midiInReset,
 }
 
 /******************************************************************************/
-ODINFUNCTION1(MMRESULT, midiInStart,
-              HMIDIIN, hMidiIn)
+MMRESULT WINAPI midiInStart(HMIDIIN hMidiIn)
 {
   dprintf(("WINMM:midiInStart\n" ));
   MMRESULT rc;
@@ -410,8 +372,7 @@ ODINFUNCTION1(MMRESULT, midiInStart,
 }
 
 /******************************************************************************/
-ODINFUNCTION1(MMRESULT, midiInStop,
-              HMIDIIN, hMidiIn)
+MMRESULT WINAPI midiInStop(HMIDIIN hMidiIn)
 {
   dprintf(("WINMM:midiInStop\n" ));
   MMRESULT rc;
@@ -426,10 +387,9 @@ ODINFUNCTION1(MMRESULT, midiInStop,
 }
 
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, midiInUnprepareHeader,
-              HMIDIIN, hMidiIn,
-              LPMIDIHDR, lpMidiInHdr,
-              UINT, cbMidiInHdr)
+MMRESULT WINAPI midiInUnprepareHeader(HMIDIIN hMidiIn,
+                                      LPMIDIHDR lpMidiInHdr,
+                                      UINT cbMidiInHdr)
 {
   dprintf(("WINMM:midiInUnPrepareHeader -- not Implemented\n" ));
   MMRESULT rc;
@@ -444,11 +404,10 @@ ODINFUNCTION3(MMRESULT, midiInUnprepareHeader,
 }
 
 /******************************************************************************/
-ODINFUNCTION4(MMRESULT, midiOutCacheDrumPatches,
-              HMIDIOUT, hMidiOut,
-              UINT, wPatch,
-              WORD *, lpKeyArray,
-              UINT, wFlags)
+MMRESULT WINAPI midiOutCacheDrumPatches(HMIDIOUT hMidiOut,
+                                        UINT wPatch,
+                                        WORD *lpKeyArray,
+                                        UINT wFlags)
 {
   // Valid only for an Internal synth.  So we won't do it for now.
   dprintf(("WINMM:midiOutCacheDrumPatches\n" ));
@@ -464,11 +423,10 @@ ODINFUNCTION4(MMRESULT, midiOutCacheDrumPatches,
 }
 
 /******************************************************************************/
-ODINFUNCTION4(MMRESULT, midiOutCachePatches,
-              HMIDIOUT, hMidiOut,
-              UINT, wBank,
-              WORD *, lpPatchArray,
-              UINT, wFlags)
+MMRESULT WINAPI midiOutCachePatches(HMIDIOUT hMidiOut,
+                                    UINT wBank,
+                                    WORD *lpPatchArray,
+                                    UINT wFlags)
 {
   // Valid only for an Internal synth.  So we won't do it for now.
   dprintf(("WINMM:midiOutCachePatches\n" ));
@@ -484,8 +442,7 @@ ODINFUNCTION4(MMRESULT, midiOutCachePatches,
 }
 
 /******************************************************************************/
-ODINFUNCTION1(MMRESULT, midiOutClose,
-              HMIDIOUT, hMidiOut)
+MMRESULT WINAPI midiOutClose(HMIDIOUT hMidiOut)
 {
   dprintf(("WINMM:midiOutClose - partially implemented\n" ));
   // TODO: Check if buffers are still playing and return MIDIERR_STILLPLAYING
@@ -502,10 +459,8 @@ ODINFUNCTION1(MMRESULT, midiOutClose,
 }
 
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, midiOutGetDevCapsA,
-              UINT, uDeviceId,
-              LPMIDIOUTCAPSA, midiOutCaps,
-              UINT,  sMidiOutCaps )
+MMRESULT WINAPI midiOutGetDevCapsA(UINT uDeviceId, LPMIDIOUTCAPSA midiOutCaps,
+                                   UINT sMidiOutCaps )
 {
   // TODO: Actually fill in the important fields
   dprintf(("WINMM:midiOutGetDevCapsA(%u)\n", uDeviceId ));
@@ -553,10 +508,8 @@ ODINFUNCTION3(MMRESULT, midiOutGetDevCapsA,
 }
 
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, midiOutGetDevCapsW,
-              UINT, uDeviceId,
-              LPMIDIOUTCAPSW, midiOutCaps,
-              UINT,  sMidiOutCaps )
+MMRESULT WINAPI midiOutGetDevCapsW(UINT uDeviceId, LPMIDIOUTCAPSW midiOutCaps,
+                                   UINT sMidiOutCaps )
 {
   // TODO: Actually fill in the important fields
   dprintf(("WINMM:midiOutGetDevCapsW(%u)- partially implemented\n", uDeviceId ));
@@ -606,10 +559,7 @@ ODINFUNCTION3(MMRESULT, midiOutGetDevCapsW,
 }
 
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, midiOutGetErrorTextA,
-              MMRESULT, wError,
-              LPSTR, lpText,
-              UINT, cchText)
+MMRESULT WINAPI midiOutGetErrorTextA(MMRESULT wError, LPSTR lpText, UINT cchText)
 {
   dprintf(("WINMM:midiOutGetErrorTextA(%d)\n", wError ));
   char * theMsg = getWinmmMsg( wError );
@@ -625,10 +575,7 @@ ODINFUNCTION3(MMRESULT, midiOutGetErrorTextA,
 }
 
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, midiOutGetErrorTextW,
-              MMRESULT, wError,
-              LPWSTR, lpText,
-              UINT, cchText)
+MMRESULT WINAPI midiOutGetErrorTextW(MMRESULT wError, LPWSTR lpText, UINT cchText)
 {
   dprintf(("WINMM:midiOutGetErrorTextW(%d) - need to translate\n", wError ));
   char * theMsg = getWinmmMsg( wError );
@@ -644,9 +591,7 @@ ODINFUNCTION3(MMRESULT, midiOutGetErrorTextW,
 }
 
 /******************************************************************************/
-ODINFUNCTION2(MMRESULT, midiOutGetID,
-              HMIDIOUT, hMidiOut,
-              LPUINT, puDeviceID)
+MMRESULT WINAPI midiOutGetID(HMIDIOUT hMidiOut,LPUINT puDeviceID)
 {
   dprintf(("WINMM:midiOutGetID\n" ));
   MMRESULT rc;
@@ -662,16 +607,14 @@ ODINFUNCTION2(MMRESULT, midiOutGetID,
 }
 
 /******************************************************************************/
-ODINFUNCTION0(UINT, midiOutGetNumDevs)
+UINT WINAPI midiOutGetNumDevs()
 {
   UINT i = IRTMIDI->numOutInstances();
   return i;
 }
 
 /******************************************************************************/
-ODINFUNCTION2(MMRESULT, midiOutGetVolume,
-              HMIDIOUT, hMidiOut,
-              LPDWORD, lpdwVolume)
+MMRESULT WINAPI midiOutGetVolume(HMIDIOUT hMidiOut, LPDWORD lpdwVolume)
 {
   MMRESULT rc;
   MidiOut * midiOut = MidiOut::find( hMidiOut );
@@ -686,10 +629,8 @@ ODINFUNCTION2(MMRESULT, midiOutGetVolume,
 }
 
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, midiOutLongMsg,
-              HMIDIOUT, hMidiOut,
-              LPMIDIHDR, lpMidiOutHdr,
-              UINT, cbMidiOutHdr)
+MMRESULT WINAPI midiOutLongMsg(HMIDIOUT hMidiOut, LPMIDIHDR lpMidiOutHdr,
+                               UINT cbMidiOutHdr)
 {
   // TODO: Implement this
   // - Buffer must be "prepared" first.
@@ -707,11 +648,7 @@ ODINFUNCTION3(MMRESULT, midiOutLongMsg,
 }
 
 /******************************************************************************/
-ODINFUNCTION4(UINT, midiOutMessage,
-              HMIDIOUT, hMidiOut,
-              UINT, msg,
-              DWORD, dw1,
-              DWORD, dw2)
+UINT WINAPI midiOutMessage(HMIDIOUT hMidiOut, UINT msg, DWORD dw1, DWORD dw2)
 {
   // TODO: Need to find out wha drivers actually return.
   dprintf(("WINMM:midiOutMessage -- not Implemented\n" ));
@@ -719,12 +656,9 @@ ODINFUNCTION4(UINT, midiOutMessage,
 }
 
 /******************************************************************************/
-ODINFUNCTION5(MMRESULT, midiOutOpen,
-              LPHMIDIOUT, lphMidiOut,
-              UINT, uDeviceId,
-              DWORD, dwCallback,
-              DWORD, dwCallbackInstance,
-              DWORD, dwflags)
+MMRESULT WINAPI midiOutOpen(LPHMIDIOUT lphMidiOut, UINT uDeviceId,
+                            DWORD dwCallback, DWORD dwCallbackInstance,
+                            DWORD dwflags)
 {
   // TODO: - Handle thread callback, if any program really needs it
   // Note uDeviceId of MIDIMAPPER is special ID for MIDI Mapper
@@ -760,10 +694,8 @@ ODINFUNCTION5(MMRESULT, midiOutOpen,
 }
 
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, midiOutPrepareHeader,
-              HMIDIOUT, hMidiOut,
-              LPMIDIHDR, lpMidiOutHdr,
-              UINT, cbMidiOutHdr)
+MMRESULT WINAPI midiOutPrepareHeader(HMIDIOUT hMidiOut, LPMIDIHDR lpMidiOutHdr,
+                                     UINT cbMidiOutHdr)
 {
   // TODO: Either implement or treat as a NOOP as we may not need to "prepare"
   //       for RTMIDI.
@@ -780,8 +712,7 @@ ODINFUNCTION3(MMRESULT, midiOutPrepareHeader,
 }
 
 /******************************************************************************/
-ODINFUNCTION1(MMRESULT, midiOutReset,
-              HMIDIOUT, hMidiOut)
+MMRESULT WINAPI midiOutReset(HMIDIOUT hMidiOut)
 {
   // TODO: - return pending output buffers to callback
   //       - Send a note off for each note on each channel
@@ -799,9 +730,7 @@ ODINFUNCTION1(MMRESULT, midiOutReset,
 }
 
 /******************************************************************************/
-ODINFUNCTION2(MMRESULT, midiOutSetVolume,
-              HMIDIOUT, hMidiOut,
-              DWORD, dwVolume)
+MMRESULT WINAPI midiOutSetVolume(HMIDIOUT hMidiOut, DWORD dwVolume)
 {
   dprintf(("WINMM:midiOutSetVolume\n" ));
   MMRESULT rc;
@@ -817,9 +746,7 @@ ODINFUNCTION2(MMRESULT, midiOutSetVolume,
 }
 
 /******************************************************************************/
-ODINFUNCTION2(MMRESULT, midiOutShortMsg,
-              HMIDIOUT, hMidiOut,
-              DWORD, dwMsg)
+MMRESULT WINAPI midiOutShortMsg(HMIDIOUT hMidiOut, DWORD dwMsg)
 {
   dprintf(("WINMM:midiOutShortMsg(%X)\n", dwMsg ));
   MMRESULT rc;
@@ -835,10 +762,8 @@ ODINFUNCTION2(MMRESULT, midiOutShortMsg,
 }
 
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, midiOutUnprepareHeader,
-              HMIDIOUT, hMidiOut,
-              LPMIDIHDR, lpMidiOutHdr,
-              UINT, cbMidiOutHdr)
+MMRESULT WINAPI midiOutUnprepareHeader(HMIDIOUT hMidiOut, LPMIDIHDR lpMidiOutHdr,
+                                       UINT cbMidiOutHdr)
 {
   // TODO: - return MIDIERR_STILLPLAYING if buffer is playing
   //       - otherwise there is no need to unprepare

@@ -1,4 +1,4 @@
-/* $Id: time.cpp,v 1.15 2001-11-22 15:40:46 phaller Exp $ */
+/* $Id: time.cpp,v 1.16 2002-05-22 15:50:26 sandervl Exp $ */
 
 /*
  * Timer MM apis
@@ -25,8 +25,6 @@
 #define DBG_LOCALLOG	DBG_time
 #include "dbglocal.h"
 
-ODINDEBUGCHANNEL(WINMM-TIME)
-
 
 /*****************************************************************************
  * Name      : mmsystemGetVersion
@@ -41,7 +39,7 @@ ODINDEBUGCHANNEL(WINMM-TIME)
  *****************************************************************************/
 
 
-ODINFUNCTION0(UINT, mmsystemGetVersion)
+UINT WINAPI mmsystemGetVersion()
 {
   //Returned by winmm.dll from NT4, SP6
   return 0x030A;
@@ -59,9 +57,7 @@ ODINFUNCTION0(UINT, mmsystemGetVersion)
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION2(MMRESULT,   timeGetDevCaps,
-              LPTIMECAPS, ptc,
-              UINT,       cbtc)
+MMRESULT WINAPI timeGetDevCaps(LPTIMECAPS ptc, UINT cbtc)
 {
   dprintf(("WINMM:timeGetDevCaps Not really Implemented\n"));
   
@@ -88,8 +84,7 @@ ODINFUNCTION2(MMRESULT,   timeGetDevCaps,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION1(MMRESULT, timeBeginPeriod,
-              UINT,     cMilliseconds)
+MMRESULT WINAPI timeBeginPeriod(UINT cMilliseconds)
 {
   if (TRUE == OS2TimerResolution::enterResolutionScope(cMilliseconds))
     return TIMERR_NOERROR;
@@ -110,8 +105,7 @@ ODINFUNCTION1(MMRESULT, timeBeginPeriod,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION1(MMRESULT, timeEndPeriod,
-              UINT,     cMilliseconds)
+MMRESULT WINAPI timeEndPeriod(UINT cMilliseconds)
 {
   if (TRUE == OS2TimerResolution::leaveResolutionScope(cMilliseconds))
     return TIMERR_NOERROR;
@@ -135,8 +129,7 @@ ODINFUNCTION1(MMRESULT, timeEndPeriod,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION1(MMRESULT, timeKillEvent,
-              UINT,     IDEvent)
+MMRESULT WINAPI timeKillEvent(UINT IDEvent)
 {
   OS2Timer *os2timer = NULL;
 
@@ -164,12 +157,9 @@ ODINFUNCTION1(MMRESULT, timeKillEvent,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION5(MMRESULT,       timeSetEvent,
-              UINT,           wDelay,
-              UINT,           wResolution,
-              LPTIMECALLBACK, lptc,
-              DWORD,          dwUser,
-              UINT,           fuEvent)
+MMRESULT WINAPI timeSetEvent(UINT wDelay, UINT wResolution,
+                             LPTIMECALLBACK lptc, DWORD dwUser,
+                             UINT fuEvent)
 {
   OS2Timer *timer;
   ULONG     timerID = 0;
@@ -258,9 +248,7 @@ ULONG OPEN32API WinGetCurrentTime(ULONG hab);
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION2(MMRESULT, timeGetSystemTime,
-              LPMMTIME, pTime,
-              UINT,     cbTime)
+MMRESULT WINAPI timeGetSystemTime(LPMMTIME pTime, UINT cbTime)
 {
   dprintf2(("timeGetSystemTime %x %d", pTime, cbTime));
 
