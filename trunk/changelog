@@ -1,38 +1,48 @@
- /* $Id: changelog,v 1.892 2000-04-15 16:30:23 sandervl Exp $ */
+ /* $Id: changelog,v 1.893 2000-04-15 21:13:51 bird Exp $ */
+
+ 2000-04-15: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
+        - KERNEL32: Before reading Sanders last message I had rewritten most of
+                    the findDll function. So, as my implementation seems a bit
+                    more flexible I decided to commit it.
+                    Currently it's searching the three LIBPATH paths too. If
+                    this causes any real trouble we'll disable this.
+
+                    findDll now returns TRUE if a file were found. Callers are
+                    corrected to test for this.
 
  2000-04-15: Christoph Bratschi <cbratschi@datacomm.ch>
-	- COMCTL32: rewrote listview item handling: sort bug fix,
-		    allows >= 4.70 support
-		    implemented several new messages
+        - COMCTL32: rewrote listview item handling: sort bug fix,
+                    allows >= 4.70 support
+                    implemented several new messages
 
  2000-04-15: Sander van Leeuwen <sandervl@xs4all.nl>
-	- WSOCK32:  Async select fix (VPBuddy can connect again)
-	- KERNEL32: Remove terminating backslash in FindFirstFileA (if present)
+        - WSOCK32:  Async select fix (VPBuddy can connect again)
+        - KERNEL32: Remove terminating backslash in FindFirstFileA (if present)
                     (otherwise DosFindFirst fails)
                     Fixed flushing of file maps (wrong VirtualQuery parameter)
                     Path search fix for dlls
                     Dll search order:
-  		    1) exe dir
-		    2) current dir
-		    3) windows system dir (kernel32 path)
-		    4) windows dir
-		    5) path environment variable
+                    1) exe dir
+                    2) current dir
+                    3) windows system dir (kernel32 path)
+                    4) windows dir
+                    5) path environment variable
 
-	- ODINCRT:  Added checks for failing mallocs
-	- USER32:   Corrected return value of EnableWindow
+        - ODINCRT:  Added checks for failing mallocs
+        - USER32:   Corrected return value of EnableWindow
                     Send WM_CANCELMODE message when disabling window
                     (return true if previous state was disabled, else false (sdk docs))
                     Don't send mouse messages to disabled windows; reroute
                     them to their parent windows (if any)
 
  2000-04-14: Sander van Leeuwen <sandervl@xs4all.nl>
-	- KERNEL32: Hardcoded system & windows dir
-		    system dir  = kernel32 dir
-		    windows dir = kernel32 dir\win
+        - KERNEL32: Hardcoded system & windows dir
+                    system dir  = kernel32 dir
+                    windows dir = kernel32 dir\win
                     Fixed dll attach for pe2lx/win32k & lx Odin executables
                     Command line fixes (now starts with full path of exe)
                     Search for dlls in:
-		    1) current dir
+                    1) current dir
                     2) win32 exe dir
                     3) windows system dir
                     4) path
@@ -41,51 +51,51 @@
         - PELDR/KERNEL32: Fixed starting of executable with spaces in name
                           (might not be 100% complete yet)
                           Fixes for relative path of executable
-	- ODIN.INI.TXT: Removed DIRECTORIES section
+        - ODIN.INI.TXT: Removed DIRECTORIES section
 
  2000-04-13: Sander van Leeuwen <sandervl@xs4all.nl>
         - USER32: Zero thread message structure before dispatching it
                   Prevents app from sending the same posted message twice
                   (causing problems when freeing the postmsg struct)
                   (fixes RealPlayer 7 Update service)
-	- CRTDLL: Fixed div (result must be returned in edx:eax)
-	- PE:     Check PATH for executable file
+        - CRTDLL: Fixed div (result must be returned in edx:eax)
+        - PE:     Check PATH for executable file
 
  2000-04-12: Christoph Bratschi <cbratschi@datacomm.ch>
-	- COMCTL32: listview: completed most version 4 features
+        - COMCTL32: listview: completed most version 4 features
 
  2000-04-10: Sander van Leeuwen <sandervl@xs4all.nl>
         - USER32: Added support for topmost windows
 
  2000-04-10: David Raison <djr@lemur.co.uk>
-	- COMDLG32: fixed wrong lParam in file dialog
+        - COMDLG32: fixed wrong lParam in file dialog
 
  2000-04-09: Sander van Leeuwen <sandervl@xs4all.nl>
         - GDI32: Y inversion fix for dib sections blits
-	- WINMM: GetPosition fix (don't return 0 when stream not active)
-	- KERNEL32: Fixed OSLibDosFindFirst. Return error if First DosFirstFirst
+        - WINMM: GetPosition fix (don't return 0 when stream not active)
+        - KERNEL32: Fixed OSLibDosFindFirst. Return error if First DosFirstFirst
                     fails. (fixes RealPlayer 7 install)
 
  2000-04-09: Yuri Dario <mc6530@mclink.it>
-	- INCLUDE(\WIN): 
-		- odin.h: define NONAMELESSUNION only for VA3.0 (now works with VA4);
-		          remove buildin.h when invoked from resource compiler.
-		- commctrl.h: new macros
-		- mmsystem.h: define DUMMYUNIONNAME with same code used in other
-		              headers to avoid precompiling errors.
-		- shlguid.h: missing ID
-		- shlobj.h: missing shlguid.h include
-		- windows.h: define CINTERFACE only for C compilers or VA3.x
-		- windowsx.h: macros
-		- wingdi.h: few AW defines
-		- winuser.h: new macros
+        - INCLUDE(\WIN):
+                - odin.h: define NONAMELESSUNION only for VA3.0 (now works with VA4);
+                          remove buildin.h when invoked from resource compiler.
+                - commctrl.h: new macros
+                - mmsystem.h: define DUMMYUNIONNAME with same code used in other
+                              headers to avoid precompiling errors.
+                - shlguid.h: missing ID
+                - shlobj.h: missing shlguid.h include
+                - windows.h: define CINTERFACE only for C compilers or VA3.x
+                - windowsx.h: macros
+                - wingdi.h: few AW defines
+                - winuser.h: new macros
 
  2000-04-08: Christoph Bratschi <cbratschi@datacomm.ch>
-	- COMCTL32: added new styles and functionality, bug fixes
+        - COMCTL32: added new styles and functionality, bug fixes
 
  2000-04-08: Sander van Leeuwen <sandervl@xs4all.nl>
         - WINMM:    Restart, pause & underrun fixes
-	- KERNEL32: Fixed bug in CompareStringW. Unicode conversion was
+        - KERNEL32: Fixed bug in CompareStringW. Unicode conversion was
                     causing heap corruption. (RealPlayer 7 crashes)
 
  2000-04-07: Michal Necasek <mike@mendelu.cz>
@@ -108,7 +118,7 @@
                   is not compressed. (fixes crash during startup in Excel)
                   NOTE: Open32 doesn't implement compression type conversion
                         correctly. (black splash screen for RLE8 bitmap)
-	- KERNEL32: Return length of windows or system directory when
+        - KERNEL32: Return length of windows or system directory when
                     GetWindowsDirectory/GetSystemDirectory is called with
                     a NULL pointer
 
