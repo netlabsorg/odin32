@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.13 1999-12-27 14:41:43 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.14 1999-12-29 12:39:45 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -225,14 +225,12 @@ BOOL WIN32API ReplyMessage(LRESULT result)
 //******************************************************************************
 BOOL WIN32API PostThreadMessageA( DWORD threadid, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-    dprintf(("USER32:  PostThreadMessageA\n"));
     return Win32BaseWindow::PostThreadMessageA(threadid, msg, wParam, lParam);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API PostThreadMessageW( DWORD threadid, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-    dprintf(("USER32:  PostThreadMessageW\n"));
     return Win32BaseWindow::PostThreadMessageW(threadid, msg, wParam, lParam);
 }
 //******************************************************************************

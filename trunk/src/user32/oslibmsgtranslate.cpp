@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.3 1999-12-27 14:41:42 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.4 1999-12-29 12:39:44 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -111,7 +111,8 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
 
   memset(winMsg, 0, sizeof(MSG));
   win32wnd = Win32BaseWindow::GetWindowFromOS2Handle(os2Msg->hwnd);
-  if((win32wnd == 0 && os2Msg->msg != WM_CREATE))
+  //PostThreadMessage posts WIN32APP_POSTMSG msg without window handle
+  if((win32wnd == 0 && os2Msg->msg != WM_CREATE && os2Msg->msg != WIN32APP_POSTMSG))
   {
         goto dummymessage; //not a win32 client window
   }
@@ -130,6 +131,9 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
             winMsg->message = packet->Msg;
             winMsg->wParam  = packet->wParam;
             winMsg->lParam  = packet->lParam;
+            if(win32wnd == NULL) {
+                free(packet); //messages posted by PostThreadMessage are never dispatched, so free the memory here
+            }
             break;
         }
         goto dummymessage;

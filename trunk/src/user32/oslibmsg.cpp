@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.16 1999-12-27 14:41:41 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.17 1999-12-29 12:39:44 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -365,3 +365,35 @@ BOOL OSLibWinReplyMessage(ULONG result)
 }
 //******************************************************************************
 //******************************************************************************
+BOOL OSLibPostMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam)
+{
+  return WinPostMsg(hwnd, msg, (MPARAM)wParam, (MPARAM)lParam);
+}
+//******************************************************************************
+//******************************************************************************
+ULONG OSLibSendMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam)
+{
+  return (ULONG)WinSendMsg(hwnd, msg, (MPARAM)wParam, (MPARAM)lParam);
+}
+//******************************************************************************
+//******************************************************************************
+ULONG OSLibWinBroadcastMsg(ULONG msg, ULONG wParam, ULONG lParam, BOOL fSend)
+{
+  return WinBroadcastMsg(HWND_DESKTOP, msg, (MPARAM)wParam, (MPARAM)lParam,
+                         (fSend) ? BMSG_SEND : BMSG_POST);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibPostThreadMessage(ULONG threadid, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+ THDB *thdb = GetTHDBFromThreadId(threadid);
+
+    if(thdb == NULL) {
+        dprintf(("OSLibPostThreadMessage: thread %x not found!", threadid));
+        return FALSE;
+    }
+    return WinPostQueueMsg(thdb->hmq, msg, (MPARAM)wParam, (MPARAM)lParam);
+}
+//******************************************************************************
+//******************************************************************************
+
