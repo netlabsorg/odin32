@@ -1,4 +1,4 @@
-; $Id: wsock32.def,v 1.13 1999-11-04 01:13:42 phaller Exp $
+; $Id: wsock32.def,v 1.14 1999-11-10 16:36:16 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY WSOCK32 INITINSTANCE
@@ -6,13 +6,10 @@ DATA MULTIPLE NONSHARED
 
 IMPORTS
     PostMessageA           = USER32.416
-    SetLastError           = KERNEL32.654
-    GetLastError           = KERNEL32.340
     bsd_select             = SO32DLL.32
     os2_select             = SO32DLL.12
 
 EXPORTS
-;   _WSAFDIsSet =       _OS2_WSAFDIsSet@8
 ;   Arecv = _OS2Arecv
 ;   Asend = _OS2Asend
 ;   EnumProtocolsA = _OS2EnumProtocolsA
@@ -73,8 +70,8 @@ EXPORTS
 
    WSASetBlockingHook =      _OS2WSASetBlockingHook@4                  @109
    WSAUnhookBlockingHook =   _OS2WSAUnhookBlockingHook@0       @110
-   WSAGetLastError =           _OS2WSAGetLastError@0                   @111
-   WSASetLastError =           _OS2WSASetLastError@4                   @112
+   WSAGetLastError =           _WSAGetLastError@0                   @111
+   WSASetLastError =           _WSASetLastError@4                   @112
    WSACancelBlockingCall =   _OS2WSACancelBlockingCall@0       @113
 
    WSAIsBlocking               = _WSAIsBlocking@0                      @114
