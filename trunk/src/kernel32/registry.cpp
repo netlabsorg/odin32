@@ -1,4 +1,4 @@
-/* $Id: registry.cpp,v 1.17 2002-06-16 08:20:16 sandervl Exp $ */
+/* $Id: registry.cpp,v 1.18 2002-06-25 10:27:00 sandervl Exp $ */
 
 /*
  * Win32 registry API functions for OS/2
@@ -869,14 +869,50 @@ LONG WIN32API RegQueryValueExA(HKEY   hkey,
                                LPBYTE  lpbData,
                                LPDWORD lpcbData)
 {
+  LONG ret;
+  DWORD dwType = 0;
+
   dprintf(("ADVAPI32:Registry key=%s", lpszValueName));
 
-  return O32_RegQueryValueEx(ConvertKey(hkey),
+  if(lpdwType == NULL) {
+      lpdwType = &dwType;
+  }
+  ret = O32_RegQueryValueEx(ConvertKey(hkey),
                              lpszValueName,
                              lpdwReserved,
                              lpdwType,
                              lpbData,
                              lpcbData);
+
+  if(ret == 0) {
+      if(lpdwType)  dprintf(("key type:   %x", *lpdwType));
+      if(lpcbData)  dprintf(("key length: %d", *lpcbData));
+  }
+  if(ret == 0 || ret == ERROR_MORE_DATA) {
+      //TODO:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      // Probably the same bug for some other key types (binary, multi_sz, REG_EXPAND_SZ)
+      if(*lpdwType == REG_SZ && (lpbData == NULL || ret == ERROR_MORE_DATA) && lpcbData) {
+          dprintf(("Get the real size of the string key data"));
+          //Get the real size of the string key data
+          //not a nice fix; hope this is enough (there is no clear connection
+          //between returned length and real string length (not linear for different
+          //string sizes))
+          *lpcbData = 4096;
+          lpbData   = (LPBYTE)malloc(*lpcbData);
+          if(lpcbData) {
+              //don't overwrite return value (in case it was ERROR_MODE_DATA)
+              O32_RegQueryValueEx(ConvertKey(hkey),
+                                  lpszValueName,
+                                  lpdwReserved,
+                                  lpdwType,
+                                  lpbData,
+                                  lpcbData);
+              if(lpcbData)  dprintf(("real key length: %d", *lpcbData));
+              free(lpbData);
+          }
+      }
+  }
+  return ret;
 }
 
 
