@@ -1,10 +1,10 @@
-/* $Id: winimagepe2lx.h,v 1.1 1999-09-15 23:29:37 sandervl Exp $ */
+/* $Id: winimagepe2lx.h,v 1.2 1999-10-14 01:39:13 bird Exp $ */
 
 /*
  * Win32 PE2LX Image base class
  *
  * Copyright 1999 Sander van Leeuwen (sandervl@xs4all.nl)
- *
+ * Copyright 1999 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -14,49 +14,54 @@
 
 #include <winimagebase.h>
 
-#define NO_NAMETABLE            0x77777777
-#define NO_LOOKUPTABLE          0x888888
-#define GET_CONSOLE(a)          (a >> 24)
-#define SET_CONSOLE(a)          (a << 24)
 
-#define RESID_CONVERTEDNAMES    63*1024
+/**
+ * Section struct - used to translate RVAs to pointers.
+ */
+typedef struct _Section
+{
+    ULONG ulRVA;            /* RVA of section. If not a PE section ~0UL. */
+    ULONG cbVirtual;        /* Virtual size (the larger of the physical and virtual) of the section. */
+    ULONG ulAddress;        /* Current load address of the section. */
+} SECTION, *PSECTION;
 
-#pragma pack(1)
-typedef struct {
-  int    id;
-  char   name[1];
-} NameId;
-#pragma pack()
 
+
+/**
+ * Base class for Pe2lx (and Win32k) dlls. There is currently no difference between
+ * Pe2Lx and Win32k images, though the image on disk is different...
+ * @shortdesc   Pe2Lx and Win32k base image class.
+ * @author      knut st. osmundsen, Sander van Leeuwen
+ * @approval    -
+ */
 class Win32Pe2LxImage : public virtual Win32ImageBase
 {
 public:
-         Win32Pe2LxImage(HINSTANCE hinstance, int NameTableId, int Win32TableId);
-virtual ~Win32Pe2LxImage();
-
-virtual HRSRC findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang = LANG_GETFIRST);
-virtual ULONG getResourceSizeA(LPCSTR lpszName, LPSTR lpszType, ULONG lang = LANG_GETFIRST);
-
-        void  setVersionId(int id) { VersionId = id;   };
-
-virtual ULONG getVersionSize();
-virtual BOOL  getVersionStruct(char *verstruct, ULONG bufLength);
-
-protected:
-        int   getWin32ResourceId(int id);
-        int   convertNameId(char *lpszName);
-
-        int   getVersionId()       { return VersionId; };
-
-        int                   NameTableId;
-        int                   Win32TableId;
-        int                   VersionId;
-
-        ULONG                *Win32Table;
-        NameId               *NameTable;
+    /** @cat constructor and destructor */
+    Win32Pe2LxImage(HINSTANCE hinstance, BOOL fWin32k) throw(ULONG);
+    virtual ~Win32Pe2LxImage();
 
 private:
+    /** @cat constructor helpers */
+    ULONG    getSections();
+    ULONG    setSectionRVAs();
+    VOID     cleanup();
+
+protected:
+    /** @cat RVA -> pointer */
+    /* this should be moved to winimagebase some day... */
+    PVOID    getPointerFromRVA(ULONG ulRVA);
+
+    PSECTION            paSections; /* Used by getPointerFromRVA and created by getSections and
+                                     * setSectionRVAs. */
+    WORD                cSections;  /* Count of entires in the section array (paSection) */
+
+    /** @cat Misc */
+    PIMAGE_NT_HEADERS   pNtHdrs;    /* Pointer to NT headers. */
+    BOOL                fWin32k;    /* flag which indicates wether this is a Win32k loaded
+                                     * module (TRUE) or and Pe2Lx module (FALSE). */
 };
+
 
 #endif //__WINIMAGEPE2LX_H__
 
