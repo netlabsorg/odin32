@@ -1,69 +1,69 @@
-; $Id: rasapi32.DEF,v 1.1 1999-09-01 07:28:46 sandervl Exp $
+; $Id: rasapi32.DEF,v 1.2 1999-10-19 12:55:05 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY RASAPI32 INITINSTANCE
 DATA MULTIPLE NONSHARED
 
 EXPORTS
-   ;RnaEngineRequest@500
-   ;DialEngineRequest@501
-   ;SuprvRequest@502
-   ;DialInMessage@503
-   ;RnaEnumConnEntries@504
-   ;RnaGetConnEntry@505
-   ;RnaFreeConnEntry@506
-   ;RnaSaveConnEntry@507
-   ;RnaDeleteConnEntry@508
-   ;RnaRenameConnEntry@509
-   ;RnaValidateEntryName@510
-   ;RnaEnumDevices@511
-   ;RnaGetDeviceInfo@512
-   ;RnaGetDefaultDevConfig@513
-   ;RnaBuildDevConfig@514
-   ;RnaDevConfigDlg@515
-   ;RnaFreeDevConfig@516
-   ;RnaActivateEngine@517
-   ;RnaDeactivateEngine@518
-   ;SuprvEnumAccessInfo@519
-   ;SuprvGetAccessInfo@520
-   ;SuprvSetAccessInfo@521
-   ;SuprvGetAdminConfig@522
-   ;SuprvInitialize@523
-   ;SuprvDeInitialize@524
-   ;RnaUIDial@525
-   ;RnaImplicitDial@526
-   ;RasDial16@527
-   ;RnaSMMInfoDialog@528
-   ;RnaEnumerateMacNames@529
-   ;RnaEnumCountryInfo@530
-   ;RnaGetAreaCodeList@531
-   ;RnaFindDriver@532
-   ;RnaInstallDriver@533
-   ;RnaGetDialSettings@534
-   ;RnaSetDialSettings@535
-   ;RnaGetIPInfo@536
-   ;RnaSetIPInfo@537
-   ;RnaGetCurrentCountry@538
-   ;RnaEnumerateSMMNames@539
-   ;RnaGetDefaultSMMInfo@540
-   ;ClAdvDevDlgProc@541
-   ;RnaExportEntry@542
-   ;RnaImportEntry@543
-   ;RnaValidateImportEntry@544
-   ;RnaGetMultiLinkInfo@545
-   ;RnaSetMultiLinkInfo@546
-   ;RnaGetSubEntry@547
-   ;RnaSetSubEntry@548
-   ;RnaGetDeviceChannel@549
+   ;RnaEngineRequest						@500
+   ;DialEngineRequest						@501
+   ;SuprvRequest						@502
+   ;DialInMessage						@503
+   ;RnaEnumConnEntries						@504
+   ;RnaGetConnEntry						@505
+   ;RnaFreeConnEntry						@506
+   ;RnaSaveConnEntry						@507
+   ;RnaDeleteConnEntry						@508
+   ;RnaRenameConnEntry						@509
+   ;RnaValidateEntryName					@510
+   ;RnaEnumDevices						@511
+   ;RnaGetDeviceInfo						@512
+   ;RnaGetDefaultDevConfig					@513
+   ;RnaBuildDevConfig						@514
+   ;RnaDevConfigDlg						@515
+   ;RnaFreeDevConfig						@516
+   ;RnaActivateEngine						@517
+   ;RnaDeactivateEngine						@518
+   ;SuprvEnumAccessInfo						@519
+   ;SuprvGetAccessInfo						@520
+   ;SuprvSetAccessInfo						@521
+   ;SuprvGetAdminConfig						@522
+   ;SuprvInitialize						@523
+   ;SuprvDeInitialize						@524
+   ;RnaUIDial							@525
+   ;RnaImplicitDial						@526
+   ;RasDial16							@527
+   ;RnaSMMInfoDialog						@528
+   ;RnaEnumerateMacNames					@529
+   ;RnaEnumCountryInfo						@530
+   ;RnaGetAreaCodeList						@531
+   ;RnaFindDriver						@532
+   ;RnaInstallDriver						@533
+   ;RnaGetDialSettings						@534
+   ;RnaSetDialSettings						@535
+   ;RnaGetIPInfo						@536
+   ;RnaSetIPInfo						@537
+   ;RnaGetCurrentCountry					@538
+   ;RnaEnumerateSMMNames					@539
+   ;RnaGetDefaultSMMInfo					@540
+   ;ClAdvDevDlgProc						@541
+   ;RnaExportEntry						@542
+   ;RnaImportEntry						@543
+   ;RnaValidateImportEntry					@544
+   ;RnaGetMultiLinkInfo						@545
+   ;RnaSetMultiLinkInfo						@546
+   ;RnaGetSubEntry						@547
+   ;RnaSetSubEntry						@548
+   ;RnaGetDeviceChannel						@549
    RasConnectionNotificationA	= _RasConnectionNotificationA@12	@550
    RasConnectionNotificationW	= _RasConnectionNotificationW@12	@551
-   ;RasValidateEntryName@552
-   ;RasRenameEntry@553
-   ;RasDeleteEntry@554
-   ;RasGetEntryProperties@555
-   ;RasSetEntryProperties@556
-   ;RasEnumDevices@557
-   ;RasGetCountryInfo@558
+   RasValidateEntryName		= _RasValidateEntryName@8	@552
+   RasRenameEntry		= _RasRenameEntry@12		@553
+   RasDeleteEntry		= _RasDeleteEntry@8		@554
+   RasGetEntryProperties	= _RasGetEntryProperties@24	@555
+   RasSetEntryProperties	= _RasSetEntryProperties@24	@556
+   RasEnumDevices		= _RasEnumDevices@12		@557
+   RasGetCountryInfo		= _RasGetCountryInfo@8		@558
    RasCreatePhonebookEntryA	= _RasCreatePhonebookEntryA@8	@559
    RasCreatePhonebookEntryW	= _RasCreatePhonebookEntryW@8	@560
    RasDialA			= _RasDialA@24			@561
@@ -86,17 +86,17 @@ EXPORTS
    RasHangUpW			= _RasHangUpW@4			@578
    RasSetEntryDialParamsA	= _RasSetEntryDialParamsA@12	@579
    RasSetEntryDialParamsW	= _RasSetEntryDialParamsW@12	@580
-   ;RnaCloseMac@581
-   ;RnaComplete@582
-   ;RnaGetDevicePort@583
-   ;RnaGetOverlaidSMM@584
-   ;RnaGetUserProfile@585
-   ;RnaOpenMac@586
-   ;RnaSessInitialize@587
-   ;RnaStartCallback@588
-   ;RnaTerminate@589
-   ;RnaUICallbackDialog@590
-   ;RnaUIUsernamePassword@591
+   RnaCloseMac			= _RnaCloseMac@4		@581
+;   RnaComplete			= _RnaComplete			@582
+;   RnaGetDevicePort		= _RnaGetDevicePort		@583
+   ;RnaGetOverlaidSMM						@584
+;   RnaGetUserProfile		= _RnaGetUserProfile		@585
+;   RnaOpenMac			= _RnaOpenMac			@586
+;   RnaSessInitialize		= _RnaSessInitialize		@587
+   RnaStartCallback		= _RnaStartCallback@8		@588
+   RnaTerminate			= _RnaTerminate@8		@589
+   RnaUICallbackDialog		= _RnaUICallbackDialog@28	@590
+   RnaUIUsernamePassword	= _RnaUIUsernamePassword@28	@591
 
    RasValidateEntryNameA	= _RasValidateEntryNameA@8	@612
    RasRenameEntryA		= _RasRenameEntryA@12		@613
@@ -106,6 +106,6 @@ EXPORTS
    RasEnumDevicesA		= _RasEnumDevicesA@12		@617
    RasGetCountryInfoA		= _RasGetCountryInfoA@8		@618
 
-   ;RnaStartServer@700
-   ;RnaStopServer@701
-   ;RnaConfigureServer@702
+   ;RnaStartServer						@700
+   ;RnaStopServer						@701
+   ;RnaConfigureServer						@702

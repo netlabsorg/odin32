@@ -1,4 +1,4 @@
-/* $Id: rasapi32.cpp,v 1.2 1999-09-23 09:38:06 sandervl Exp $ */
+/* $Id: rasapi32.cpp,v 1.3 1999-10-19 12:55:05 sandervl Exp $ */
 /*
  * RASAPI32
  * 
@@ -38,6 +38,95 @@ DWORD APIENTRY RasConnectionNotificationW( HRASCONN hras, HANDLE handle, DWORD d
 {
 #ifdef DEBUG
   dprintf(("RASAPI32: RasConnectionNotificationA not implemented\n"));
+#endif
+	return 0;
+}
+
+
+/**************************************************************************
+ *                 RasValidateEntryName		[RASAPI32.552]
+ */
+DWORD APIENTRY RasValidateEntryName(LPCTSTR lpszPhonebook, LPCTSTR lpszEntry)
+{
+#ifdef DEBUG
+  dprintf(("RASAPI32: RasValidateEntryName not implemented\n"));
+#endif
+	return 0;
+}
+
+
+/**************************************************************************
+ *                 RasRenameEntry		[RASAPI32.553]
+ */
+DWORD APIENTRY RasRenameEntry(LPCTSTR lpszPhonebook, LPCTSTR lpszOldEntry, LPCTSTR lpszNewEntry)
+{
+#ifdef DEBUG
+  dprintf(("RASAPI32: RasRenameEntry not implemented\n"));
+#endif
+	return 0;
+}
+
+
+/**************************************************************************
+ *                 RasDeleteEntry		[RASAPI32.554]
+ */
+DWORD APIENTRY RasDeleteEntry(LPCTSTR lpszPhonebook, LPCTSTR lpszEntry)
+{
+#ifdef DEBUG
+  dprintf(("RASAPI32: RasDeleteEntry not implemented\n"));
+#endif
+	return 0;
+}
+
+
+/**************************************************************************
+ *                 RasGetEntryProperties		[RASAPI32.555]
+ */
+DWORD APIENTRY RasGetEntryProperties(LPCTSTR lpszPhonebook, LPCTSTR lpszEntry, 
+	  LPRASENTRY lpRasEntry, LPDWORD lpdwEntryInfoSize,
+	  LPBYTE lpbDeviceInfo, LPDWORD lpdwDeviceInfoSize)
+{
+#ifdef DEBUG
+  dprintf(("RASAPI32: RasGetEntryProperties not implemented\n"));
+#endif
+	return 0;
+}
+
+
+/**************************************************************************
+ *                 RasSetEntryProperties		[RASAPI32.556]
+ */
+DWORD APIENTRY RasSetEntryProperties(LPCTSTR lpszPhonebook, LPCTSTR lpszEntry, 
+	  LPRASENTRY lpRasEntry, DWORD dwEntryInfoSize,
+	  LPBYTE lpbDeviceInfo, DWORD dwDeviceInfoSize)
+{
+#ifdef DEBUG
+  dprintf(("RASAPI32: RasSetEntryProperties not implemented\n"));
+#endif
+	return 0;
+}
+
+
+/**************************************************************************
+ *                 RasEnumDevices		[RASAPI32.557]
+ */
+DWORD APIENTRY RasEnumDevices(LPRASDEVINFO lpRasDevInfo,
+		  LPDWORD lpcb, LPDWORD lpcDevices)
+{
+#ifdef DEBUG
+  dprintf(("RASAPI32: RasEnumDevices not implemented\n"));
+#endif
+	return 0;
+}
+
+
+/**************************************************************************
+ *                 RasGetCountryInfo		[RASAPI32.558]
+ */
+DWORD APIENTRY RasGetCountryInfo( LPRASCTRYINFO lpRasCtryInfo, LPDWORD lpdwSize)
+{
+#ifdef DEBUG
+  dprintf(("RASAPI32: RasGetCountryInfo not implemented\n"));
 #endif
 	return 0;
 }
@@ -306,6 +395,126 @@ DWORD APIENTRY RasSetEntryDialParamsW( LPWSTR str, LPRASDIALPARAMSW rasdp, BOOL 
 {
 #ifdef DEBUG
   dprintf(("RASAPI32: RasSetEntryDialParamsW not implemented\n"));
+#endif
+	return 0;
+}
+
+
+/**************************************************************************
+ *                 RnaCloseMac			[RASAPI32.581]
+ */
+DWORD WINAPI RnaCloseMac(HANDLE hConn)
+{
+#ifdef DEBUG
+  dprintf(("RASAPI32: RnaCloseMac not implemented\n"));
+#endif
+	return 0;
+}
+
+
+/**************************************************************************
+ *                 RnaComplete			[RASAPI32.582]
+ */
+/* DWORD APIENTRY RnaComplete(HANDLE hConn, LPCOMPLETE_INFO lpci, LPPROJECTION_INFO lppi, DWORD cEntries)
+{
+#ifdef DEBUG
+  dprintf(("RASAPI32: RnaComplete not implemented\n"));
+#endif
+	return 0;
+} */
+
+
+/**************************************************************************
+ *                 RnaGetDevicePort		[RASAPI32.583]
+ */
+/* DWORD WINAPI RnaGetDevicePort(HANDLE hConn, LPDEVICE_PORT_INFO lpdpi)
+{
+#ifdef DEBUG
+  dprintf(("RASAPI32: RnaGetDevicePort not implemented\n"));
+#endif
+	return 0;
+} */
+
+
+/**************************************************************************
+ *                 RnaGetUserProfile		[RASAPI32.585]
+ */
+/* DWORD WINAPI RnaGetUserProfile(HANDLE hConn, LPUSER_PROFILE lpUserProfile)
+{
+#ifdef DEBUG
+  dprintf(("RASAPI32: RnaGetUserProfile not implemented\n"));
+#endif
+	return 0;
+} */
+
+
+/**************************************************************************
+ *                 RnaOpenMac			[RASAPI32.586]
+ */
+/* DWORD WINAPI RnaOpenMac(HANDLE hConn, HANDLE * lphMAC, LPMAC_OPEN lpmo, DWORD dwSize, HANDLE hEvent)
+{
+#ifdef DEBUG
+  dprintf(("RASAPI32: RnaOpenMac not implemented\n"));
+#endif
+	return 0;
+} */
+
+
+/**************************************************************************
+ *                 RnaSessInitialize		[RASAPI32.587]
+ */
+/* DWORD APIENTRY RnaSessInitialize(LPSTR lpszType, LPRNA_FUNCS lpRnaFuncs)
+{
+#ifdef DEBUG
+  dprintf(("RASAPI32: RnaSessInitialize not implemented\n"));
+#endif
+	return 0;
+} */
+
+
+/**************************************************************************
+ *                 RnaStartCallback		[RASAPI32.588]
+ */
+DWORD APIENTRY RnaStartCallback(HANDLE hConn, HANDLE hEvent)
+{
+#ifdef DEBUG
+  dprintf(("RASAPI32: RnaStartCallback not implemented\n"));
+#endif
+	return 0;
+}
+
+
+/**************************************************************************
+ *                 RnaTerminate			[RASAPI32.589]
+ */
+DWORD APIENTRY RnaTerminate(HANDLE hConn, HANDLE hThread)
+{
+#ifdef DEBUG
+  dprintf(("RASAPI32: RnaTerminate not implemented\n"));
+#endif
+	return 0;
+}
+
+
+/**************************************************************************
+ *                 RnaUICallbackDialog			[RASAPI32.590]
+ */
+DWORD WINAPI RnaUICallbackDialog(HANDLE hConn, LPSTR lpszLocList, DWORD dwType, BOOL fOptional, LPINT lpuIndex, LPSTR lpszSelectLocation, UINT cbBuff)
+{
+#ifdef DEBUG
+  dprintf(("RASAPI32: RnaUICallbackDialog not implemented\n"));
+#endif
+	return 0;
+}
+
+
+/**************************************************************************
+ *                 RnaUIUsernamePassword			[RASAPI32.591]
+ */
+DWORD WINAPI RnaUIUsernamePassword(HANDLE hConn, LPSTR lpszUsername, UINT cbUsername, LPSTR lpszPassword, UINT cbPassword, LPSTR lpszDomain, UINT cbDomain)
+{
+#ifdef DEBUG
+  dprintf(("RASAPI32: RnaUIUsernamePassword not implemented\n"));
 #endif
 	return 0;
 }
