@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.367 2003-04-23 18:00:59 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.368 2003-04-24 13:59:14 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -47,6 +47,7 @@
 #include <winuser32.h>
 #include <custombuild.h>
 #include "win32wbase.h"
+#include "win32wfake.h"
 #include "wndmsg.h"
 #include "oslibwin.h"
 #include "oslibmsg.h"
@@ -1142,7 +1143,7 @@ ULONG Win32BaseWindow::MsgButton(MSG *msg)
                 LONG ret = SendMessageA(getWindowHandle(),WM_MOUSEACTIVATE, hwndTop,
                                         MAKELONG( lastHitTestVal, msg->message) );
 
-                dprintf2(("WM_MOUSEACTIVATE returned %d", ret));
+                dprintf2(("WM_MOUSEACTIVATE returned %d foreground %x top %x", ret, GetForegroundWindow(), hwndTop));
 #if 0
                 if ((ret == MA_ACTIVATEANDEAT) || (ret == MA_NOACTIVATEANDEAT))
                          eatMsg = TRUE;
@@ -1156,7 +1157,7 @@ ULONG Win32BaseWindow::MsgButton(MSG *msg)
                     Win32BaseWindow *win32top = Win32BaseWindow::GetWindowFromHandle(hwndTop);
 
                     //SvL: Calling OSLibSetActiveWindow(hwndTop); causes focus problems
-                    if (win32top && !win32top->isFakeWindow()) {
+                    if (win32top) {
                         //Must use client window handle (not frame!!)
                         SetFocus(win32top->getWindowHandle());
                         RELEASE_WNDOBJ(win32top);
@@ -2624,7 +2625,7 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx,
         {
             NotifyFrameChanged(&wpos, &oldClientRect);
         }
-        if(!fShowWindow && !(getStyle() & WS_MINIMIZE) && !(fuFlags & (SWP_NOSIZE | SWP_NOMOVE)))
+        if(!fShowWindow && !(getStyle() & (WS_MINIMIZE|WS_MAXIMIZE)) && !(fuFlags & (SWP_NOSIZE | SWP_NOMOVE)))
         {
             //Restore position always changes when the window position is changed
             dprintf(("Save new restore position %x (%d,%d)(%d,%d)", getWindowHandle(), rectWindow.left, rectWindow.top, rectWindow.right, rectWindow.bottom));
@@ -2699,7 +2700,7 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx,
     {
         NotifyFrameChanged(&wpos, &oldClientRect);
     }
-    if(!fShowWindow && !(getStyle() & WS_MINIMIZE))
+    if(!fShowWindow && !(getStyle() & (WS_MINIMIZE|WS_MAXIMIZE)))
     {
         //Restore position always changes when the window position is changed
         dprintf(("Save new restore position %x (%d,%d)(%d,%d)", getWindowHandle(), rectWindow.left, rectWindow.top, rectWindow.right, rectWindow.bottom));
@@ -3616,7 +3617,7 @@ BOOL Win32BaseWindow::DeactivateChildWindow()
     return FALSE;
 }
 //******************************************************************************
-//WM_ENABLE is sent to hwnd, but not to it's children (as it should be)
+//WM_ENABLE is sent to hwnd, but not to its children (as it should be)
 //******************************************************************************
 BOOL Win32BaseWindow::EnableWindow(BOOL fEnable)
 {
@@ -4114,6 +4115,12 @@ Win32BaseWindow *Win32BaseWindow::GetWindowFromOS2Handle(HWND hwndOS2)
         return GetWindowFromHandle(hwnd);
     }
 //  dprintf2(("Win32BaseWindow::GetWindowFromOS2Handle: not an Odin os2 window %x", hwndOS2));
+
+    //Now check if it's a fake window 
+    Win32FakeWindow *window = Win32FakeWindow::GetWindowFromOS2Handle(hwndOS2);
+    if(window) {
+        return window;
+    }
     return 0;
 }
 //******************************************************************************

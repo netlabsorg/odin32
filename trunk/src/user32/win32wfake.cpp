@@ -1,4 +1,4 @@
-/* $Id: win32wfake.cpp,v 1.3 2003-04-23 18:01:01 sandervl Exp $ */
+/* $Id: win32wfake.cpp,v 1.4 2003-04-24 13:59:15 sandervl Exp $ */
 /*
  * Win32 Fake Window Class for OS/2
  *
@@ -250,7 +250,7 @@ Win32FakeWindow *Win32FakeWindow::GetWindowFromOS2Handle(HWND hwndOS2)
             return (Win32FakeWindow*)pWindow;
         DebugInt3();
     }
-    dprintf(("Win32FakeWindow::GetWindowFromOS2Handle(%x) -> null", hwndOS2));
+    dprintf2(("Win32FakeWindow::GetWindowFromOS2Handle(%x) -> null", hwndOS2));
     return NULL;
 }
 
