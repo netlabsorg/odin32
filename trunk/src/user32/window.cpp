@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.18 1999-10-17 16:42:40 sandervl Exp $ */
+/* $Id: window.cpp,v 1.19 1999-10-17 16:59:58 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -366,22 +366,6 @@ HWND WIN32API GetTopWindow( HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
-#if 0
-BOOL WIN32API UpdateWindow(HWND hwnd)
-{
-  Win32BaseWindow *window;
-
-    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
-    if(!window) {
-        dprintf(("UpdateWindow, window %x not found", hwnd));
-        return 0;
-    }
-    dprintf(("UpdateWindow %x", hwnd));
-    return window->UpdateWindow();
-}
-#endif
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API IsIconic( HWND hwnd)
 {
   Win32BaseWindow *window;
@@ -585,40 +569,18 @@ UINT WIN32API GetInternalWindowPos(HWND    hwnd,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API IsZoomed( HWND arg1)
+BOOL WIN32API IsZoomed(HWND hwnd)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  IsZoomed\n");
-#endif
-    return O32_IsZoomed(arg1);
+    dprintf(("USER32:  IsZoomed\n"));
+    return O32_IsZoomed(Win32BaseWindow::Win32ToOS2FrameHandle(hwnd));
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API LockWindowUpdate( HWND arg1)
+BOOL WIN32API LockWindowUpdate(HWND hwnd)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  LockWindowUpdate\n");
-#endif
-    return O32_LockWindowUpdate(arg1);
+    dprintf(("USER32:  LockWindowUpdate\n"));
+    return O32_LockWindowUpdate(Win32BaseWindow::Win32ToOS2FrameHandle(hwnd));
 }
-//******************************************************************************
-//******************************************************************************
-
-#if 0
-BOOL WIN32API RedrawWindow( HWND arg1, const RECT * arg2, HRGN arg3, UINT arg4)
-{
- BOOL rc;
-
-  rc = O32_RedrawWindow(arg1, arg2, arg3, arg4);
-#ifdef DEBUG
-  WriteLog("USER32:  RedrawWindow %X , %X, %X, %X returned %d\n", arg1, arg2, arg3, arg4, rc);
-#endif
-  InvalidateRect(arg1, arg2, TRUE);
-  UpdateWindow(arg1);
-  SendMessageA(arg1, WM_PAINT, 0, 0);
-  return(rc);
-}
-#endif
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API GetWindowRect( HWND hwnd, PRECT pRect)
@@ -629,7 +591,7 @@ BOOL WIN32API GetWindowRect( HWND hwnd, PRECT pRect)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("GetWindowRect, window %x not found", hwnd));
-    SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     rc = window->GetWindowRect(pRect);
@@ -645,7 +607,7 @@ int WIN32API GetWindowTextLengthA( HWND hwnd)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("GetWindowTextLength, window %x not found", hwnd));
-    SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("GetWindowTextLength %x", hwnd));
@@ -661,7 +623,7 @@ int WIN32API GetWindowTextA( HWND hwnd, LPSTR lpsz, int cch)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("GetWindowTextA, window %x not found", hwnd));
-    SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     rc = window->GetWindowTextA(lpsz, cch);
@@ -684,7 +646,7 @@ int WIN32API GetWindowTextW(HWND hwnd, LPWSTR lpsz, int cch)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("GetWindowTextW, window %x not found", hwnd));
-    SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("GetWindowTextW %x", hwnd));
@@ -699,7 +661,7 @@ BOOL WIN32API SetWindowTextA(HWND hwnd, LPCSTR lpsz)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("SetWindowTextA, window %x not found", hwnd));
-    SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("SetWindowTextA %x %s", hwnd, lpsz));
@@ -714,7 +676,7 @@ BOOL WIN32API SetWindowTextW( HWND hwnd, LPCWSTR lpsz)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("SetWindowTextA, window %x not found", hwnd));
-    SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("SetWindowTextW %x", hwnd));
@@ -756,7 +718,7 @@ BOOL WIN32API GetClientRect( HWND hwnd, PRECT pRect)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("GetClientRect, window %x not found", hwnd));
-    SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     *pRect = *window->getClientRect();
@@ -908,20 +870,18 @@ BOOL WIN32API MoveWindow( HWND hwnd, INT x, INT y, INT cx, INT cy,
 //******************************************************************************
 BOOL WIN32API ClientToScreen (HWND hwnd, PPOINT pt)
 {
-#ifdef DEBUG
-   WriteLog("USER32:  ClientToScreen\n");
-#endif
     Win32BaseWindow *wnd;
     PRECT rcl;
 
+    dprintf(("USER32:  ClientToScreen\n"));
     if (!hwnd) {
-    SetLastError(ERROR_INVALID_PARAMETER);
-    return (FALSE);
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return (FALSE);
     }
     wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
     if (!wnd) {
-    SetLastError(ERROR_INVALID_WINDOW_HANDLE);
-    return (FALSE);
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        return (FALSE);
     }
 
     rcl  = wnd->getClientRect();
@@ -1116,7 +1076,7 @@ HWND WIN32API ChildWindowFromPointEx (HWND hwndParent, POINT pt, UINT uFlags)
 
         if (GetWindowRect (hwndParent, &rect) == 0) {
                 // oops, invalid handle
-        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+                SetLastError(ERROR_INVALID_WINDOW_HANDLE);
                 return NULL;
         }
 
@@ -1161,14 +1121,14 @@ HWND WIN32API ChildWindowFromPointEx (HWND hwndParent, POINT pt, UINT uFlags)
                         continue;
                 }
 
-        dprintf(("ChildWindowFromPointEx returned %x", hWnd));
+                dprintf(("ChildWindowFromPointEx returned %x", hWnd));
                 // found it!
                 return hWnd;
         }
 
         // the point is in the parentwindow but the parentwindow has no child
         // at this coordinate
-    dprintf(("ChildWindowFromPointEx returned parent %x", hwndParent));
+            dprintf(("ChildWindowFromPointEx returned parent %x", hwndParent));
         return hwndParent;
 }
 //******************************************************************************
@@ -1180,7 +1140,7 @@ BOOL WIN32API CloseWindow(HWND hwnd)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("CloseWindow, window %x not found", hwnd));
-    SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("CloseWindow %x\n", hwnd));
@@ -1209,7 +1169,7 @@ BOOL WIN32API IsWindowUnicode(HWND hwnd)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("IsWindowUnicode, window %x not found", hwnd));
-    SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     return window->IsUnicode();
@@ -1290,10 +1250,13 @@ BOOL WIN32API EnumThreadWindows(DWORD dwThreadId, WNDENUMPROC lpfn, LPARAM lPara
         if(!(curpid == pid && dwThreadId == tid))
                 continue;
 
-        window = Win32BaseWindow::GetWindowFromHandle(hwndNext);
+        window = Win32BaseWindow::GetWindowFromOS2Handle(hwndNext);
         if(window == NULL) {
-                //OS/2 window or non-frame window, so skip it
-                continue;
+                window = Win32BaseWindow::GetWindowFromOS2FrameHandle(hwndNext);
+                if(!window) {
+                        //OS/2 window or non-frame window, so skip it
+                        continue;
+                }
         }
         if((rc = lpfn(window->getWindowHandle(), lParam)) == FALSE)
                 break;
@@ -1315,17 +1278,20 @@ BOOL WIN32API EnumChildWindows(HWND hwnd, WNDENUMPROC lpfn, LPARAM lParam)
   parentwindow = Win32BaseWindow::GetWindowFromHandle(hwnd);
   if(!parentwindow) {
         dprintf(("EnumChildWindows, window %x not found", hwnd));
-    SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return FALSE;
   }
 
   henum = OSLibWinBeginEnumWindows(OSLIB_HWND_DESKTOP);
   while ((hwndNext = OSLibWinGetNextWindow(henum)) != 0)
   {
-        window = Win32BaseWindow::GetWindowFromHandle(hwndNext);
+        window = Win32BaseWindow::GetWindowFromOS2Handle(hwndNext);
         if(window == NULL) {
-                //OS/2 window or non-frame window, so skip it
-                continue;
+                window = Win32BaseWindow::GetWindowFromOS2FrameHandle(hwndNext);
+                if(!window) {
+                        //OS/2 window or non-frame window, so skip it
+                        continue;
+                }
         }
         if((rc = lpfn(window->getWindowHandle(), lParam)) == FALSE)
         {
@@ -1351,10 +1317,13 @@ BOOL WIN32API EnumWindows(WNDENUMPROC lpfn, LPARAM lParam)
         henum = OSLibWinBeginEnumWindows(hwndParent);
         while ((hwndNext = OSLibWinGetNextWindow(henum)) != 0)
         {
-                window = Win32BaseWindow::GetWindowFromHandle(hwndNext);
+                window = Win32BaseWindow::GetWindowFromOS2Handle(hwndNext);
                 if(window == NULL) {
-                        //OS/2 window or non-frame window, so skip it
-                        continue;
+                        window = Win32BaseWindow::GetWindowFromOS2FrameHandle(hwndNext);
+                        if(!window) {
+                            //OS/2 window or non-frame window, so skip it
+                            continue;
+                        }
                 }
                 if((rc = lpfn(window->getWindowHandle(), lParam)) == FALSE) {
                         goto Abort;
@@ -1371,37 +1340,6 @@ Abort:
   OSLibWinEndEnumWindows(henum);
   return TRUE;
 }
-//******************************************************************************
-//******************************************************************************
-#if 0
-BOOL WIN32API GetUpdateRect( HWND hwnd, PRECT lpRect, BOOL  bErase)
-{
-    dprintf(("GetUpdateRect %x %d\n", hwnd, bErase));
-    if (!lpRect) return FALSE;
-
-    return OSLibWinQueryUpdateRect(Win32BaseWindow::Win32ToOS2Handle(hwnd), lpRect);
-}
-#endif
-//******************************************************************************
-//******************************************************************************
-#if 0
-BOOL WIN32API InvalidateRect(HWND hWnd, const RECT *lpRect, BOOL bErase)
-{
-#ifdef DEBUG
-    if(lpRect)
-         WriteLog("USER32:  InvalidateRect for window %X (%d,%d)(%d,%d) %d\n", hWnd, lpRect->left, lpRect->top, lpRect->right, lpRect->bottom, bErase);
-    else WriteLog("USER32:  InvalidateRect for window %X NULL, %d\n", hWnd, bErase);
-#endif
-
-    //CB: bErase no quite the same
-    hWnd = Win32BaseWindow::Win32ToOS2Handle(hWnd);
-    if (lpRect)
-    {
-         return OSLibWinInvalidateRect(hWnd, (PRECT)lpRect, bErase);
-    }
-    else return OSLibWinInvalidateRect(hWnd,NULL,bErase);
-}
-#endif
 //******************************************************************************
 //******************************************************************************
 UINT WIN32API ArrangeIconicWindows( HWND arg1)

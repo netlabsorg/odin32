@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.50 1999-10-17 16:42:39 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.51 1999-10-17 16:59:58 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2231,6 +2231,7 @@ HWND Win32BaseWindow::FindWindowEx(HWND hwndParent, HWND hwndChildAfter, LPSTR l
             if(wnd == NULL) {
                 hwnd = OSLibWinQueryClientWindow(hwnd);
                 if(hwnd)  wnd = GetWindowFromOS2Handle(hwnd);
+                if(!hwnd) wnd = GetWindowFromOS2FrameHandle(hwnd);
             }
 
             if(wnd) {
