@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.40 2000-01-29 20:46:52 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.41 2000-01-31 22:30:51 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -67,6 +67,8 @@ const MATRIXLF matrixlfIdentity = { 0x10000, 0, 0, 0, 0x10000, 0, 0, 0, 0};
 BOOL setPageXForm(Win32BaseWindow *wnd, pDCData pHps);
 BOOL changePageXForm(Win32BaseWindow *wnd, pDCData pHps, PPOINTL pValue, int x, int y, PPOINTL pPrev);
 LONG clientHeight(Win32BaseWindow *wnd, HWND hwnd, pDCData pHps);
+
+HWND WIN32API GetDesktopWindow(void);
 
 //******************************************************************************
 //******************************************************************************
@@ -663,6 +665,12 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
    BOOL     creatingOwnDC = FALSE;
    PS_Type  psType;
 
+   if(hwnd == 0) {
+	dprintf(("error: GetDCEx window %x not found", hwnd));
+	O32_SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+	return 0;
+   }
+
    if (hwnd)
    {
         wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
@@ -682,8 +690,6 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
         else
                 hWindow = wnd->getOS2WindowHandle();
    }
-   else
-      hWindow = HWND_DESKTOP;
 
    //SvL: Hack for memory.exe (doesn't get repainted properly otherwise)
 //   isWindowOwnDC = (((hWindow == HWND_DESKTOP) ? FALSE : (wnd->isOwnDC() && wnd->getOwnDC()))
@@ -808,13 +814,16 @@ error:
 //******************************************************************************
 HDC WIN32API GetDC (HWND hwnd)
 {
+  if(!hwnd)
+       return GetDCEx( GetDesktopWindow(), 0, DCX_CACHE_W | DCX_WINDOW_W );
   return GetDCEx (hwnd, NULL, 0);
 }
 //******************************************************************************
 //******************************************************************************
 HDC WIN32API GetWindowDC (HWND hwnd)
 {
-  return GetDCEx (hwnd, NULL, DCX_WINDOW_W);
+  if (!hwnd) hwnd = GetDesktopWindow();
+  return GetDCEx (hwnd, NULL, DCX_USESTYLE_W | DCX_WINDOW_W);
 }
 //******************************************************************************
 //******************************************************************************

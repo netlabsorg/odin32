@@ -1,4 +1,4 @@
-/* $Id: dc.h,v 1.10 2000-01-18 20:08:09 sandervl Exp $ */
+/* $Id: dc.h,v 1.11 2000-01-31 22:30:51 sandervl Exp $ */
 /*
  * public dc functions
  *
@@ -94,6 +94,7 @@ typedef struct _penobject
 #define DCX_EXCLUDEUPDATE_W             0x00000100L
 #define DCX_INTERSECTUPDATE_W           0x00000200L
 #define DCX_LOCKWINDOWUPDATE_W          0x00000400L
+#define DCX_USESTYLE_W                  0x00010000L
 #define DCX_VALIDATE_W                  0x00200000L
 
 #define RDW_INVALIDATE_W       0x0001

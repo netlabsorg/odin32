@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.35 2000-01-18 20:08:12 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.36 2000-01-31 22:30:52 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -29,6 +29,7 @@ typedef struct _SWP    /* swp */
 } SWP, *PSWP;
 #endif
 
+//SvL: Must be the same as HWND_DESKTOP/OBJECT in pmwin.h!
 #define OSLIB_HWND_DESKTOP      1
 #define OSLIB_HWND_OBJECT       2
 

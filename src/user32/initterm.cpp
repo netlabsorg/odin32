@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.18 2000-01-18 20:10:36 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.19 2000-01-31 22:30:51 sandervl Exp $ */
 
 /*
  * USER32 DLL entry point
@@ -113,11 +113,6 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
          //CB: initialize PM monitor driver
          MONITOR_Initialize(&MONITOR_PrimaryMonitor);
-
-         //SvL: Create Desktop Window
-         if(CreateWin32Desktop() == FALSE) {
-                return 0UL;
-         }
 
          break;
       case 1 :
