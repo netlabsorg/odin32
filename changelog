@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2499 2003-02-24 17:01:16 sandervl Exp $ */
+/* $Id: changelog,v 1.2500 2003-02-25 11:00:56 sandervl Exp $ */
+
+ 2003-02-25: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Bugfix for WPS object creation
 
  2003-02-24: Sander van Leeuwen <sandervl@innotek   >
     - WS2_32:   o Implemented non-overlapped WSARecv & WSASend.
