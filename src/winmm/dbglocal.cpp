@@ -1,4 +1,4 @@
-/* $Id: dbglocal.cpp,v 1.2 2000-02-22 19:12:16 sandervl Exp $ */
+/* $Id: dbglocal.cpp,v 1.3 2001-02-27 21:13:59 sandervl Exp $ */
 
 /*
  * debug logging functions for OS/2
@@ -36,7 +36,8 @@ char  *DbgFileNames[DBG_MAXFILES] =
 "driver",
 "playsound",
 "joyos2",
-"resource"
+"resource",
+"dwavein"
 };
 //******************************************************************************
 //******************************************************************************

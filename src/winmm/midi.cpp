@@ -1,4 +1,4 @@
-/* $Id: midi.cpp,v 1.8 2000-02-17 14:09:31 sandervl Exp $ */
+/* $Id: midi.cpp,v 1.9 2001-02-27 21:13:59 sandervl Exp $ */
 
 /*
  * RTMIDI code
@@ -1023,18 +1023,18 @@ MMRESULT MidiIn::stop()
    iRunning = FALSE;
 
    MINSTANCE stopper;
-   (*IRTMIDI->MidiCreateInstance)( IRTMIDI->applicationClass(), &stopper, "stopper", 0 );
-   (*IRTMIDI->MidiEnableInstance)( stopper, MIDI_ENABLE_SEND );
-   (*IRTMIDI->MidiAddLink)( stopper, iAppInstance->instance(), 0, 0 );
+   IRTMIDI->MidiCreateInstance( IRTMIDI->applicationClass(), &stopper, "stopper", 0 );
+   IRTMIDI->MidiEnableInstance( stopper, MIDI_ENABLE_SEND );
+   IRTMIDI->MidiAddLink( stopper, iAppInstance->instance(), 0, 0 );
    MESSAGE msg;
    msg.ulSourceInstance = stopper;
    msg.ulTime           = 0;
    msg.ulTrack          = 0;
    msg.msg.ulMessage    = 0xf7fffff0;
-   (*IRTMIDI->MidiSendMessages)( &msg, 1, 0 );
-   (*IRTMIDI->MidiRemoveLink)( stopper, iAppInstance->instance(), 0, 0 );
-   (*IRTMIDI->MidiDisableInstance)( stopper, MIDI_DISABLE_SEND );
-   (*IRTMIDI->MidiDeleteInstance)( stopper, 0 );
+   IRTMIDI->MidiSendMessages( &msg, 1, 0 );
+   IRTMIDI->MidiRemoveLink( stopper, iAppInstance->instance(), 0, 0 );
+   IRTMIDI->MidiDisableInstance( stopper, MIDI_DISABLE_SEND );
+   IRTMIDI->MidiDeleteInstance( stopper, 0 );
 
    // Sleep to let it stop
    DosSleep( 10l );

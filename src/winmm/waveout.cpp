@@ -1,4 +1,4 @@
-/* $Id: waveout.cpp,v 1.16 2000-10-02 18:55:41 sandervl Exp $ */
+/* $Id: waveout.cpp,v 1.17 2001-02-27 21:14:00 sandervl Exp $ */
 //#undef DEBUG
 /*
  * Wave out MM apis
@@ -108,7 +108,7 @@ ODINFUNCTION3(MMRESULT, waveOutWrite,
         pwh->dwFlags |= WHDR_INQUEUE;
         pwh->dwFlags &= ~WHDR_DONE;
 
-	 dprintf(("waveOutWrite %x %d %x", pwh->lpData, pwh->dwBufferLength, pwh->dwFlags));
+        dprintf(("waveOutWrite %x %d %x", pwh->lpData, pwh->dwBufferLength, pwh->dwFlags));
         return(dwave->write(pwh, cbwh));
   }
   else  return(MMSYSERR_INVALHANDLE);
@@ -225,7 +225,7 @@ ODINFUNCTION3(MMRESULT, waveOutGetPosition,
 {
   DartWaveOut *dwave = (DartWaveOut *)hwo;
 
-  if(pmmt == NULL)	
+  if(pmmt == NULL)
         return MMSYSERR_INVALPARAM;
 
   if(DartWaveOut::find(dwave) == TRUE)
@@ -238,31 +238,31 @@ ODINFUNCTION3(MMRESULT, waveOutGetPosition,
         }
         switch (pmmt->wType) {
         case TIME_BYTES:
-	        pmmt->u.cb = position;
-	        break;
+            pmmt->u.cb = position;
+            break;
         case TIME_SAMPLES:
-	        pmmt->u.sample = position * 8 / dwave->getBitsPerSample();
-	        break;
+            pmmt->u.sample = position * 8 / dwave->getBitsPerSample();
+            break;
         case TIME_SMPTE:
         {
-	        ULONG timeval = position / (dwave->getAvgBytesPerSecond() / 1000);
-	        pmmt->u.smpte.hour = timeval / 108000;
-	        timeval -= pmmt->u.smpte.hour * 108000;
-	        pmmt->u.smpte.min = timeval / 1800;
-	        timeval -= pmmt->u.smpte.min * 1800;
-	        pmmt->u.smpte.sec = timeval / 30;
-	        timeval -= pmmt->u.smpte.sec * 30;
-	        pmmt->u.smpte.frame = timeval;
-	        pmmt->u.smpte.fps = 30;
-	        break;
-	    }
+            ULONG timeval = position / (dwave->getAvgBytesPerSecond() / 1000);
+            pmmt->u.smpte.hour = timeval / 108000;
+            timeval -= pmmt->u.smpte.hour * 108000;
+            pmmt->u.smpte.min = timeval / 1800;
+            timeval -= pmmt->u.smpte.min * 1800;
+            pmmt->u.smpte.sec = timeval / 30;
+            timeval -= pmmt->u.smpte.sec * 30;
+            pmmt->u.smpte.frame = timeval;
+            pmmt->u.smpte.fps = 30;
+            break;
+        }
         default:
-	        dprintf(("waveOutGetPosition: Format %d not supported ! use TIME_MS !\n", pmmt->wType));
-	        pmmt->wType = TIME_MS;
+            dprintf(("waveOutGetPosition: Format %d not supported ! use TIME_MS !\n", pmmt->wType));
+            pmmt->wType = TIME_MS;
         case TIME_MS:
-	        pmmt->u.ms = position / (dwave->getAvgBytesPerSecond() / 1000);
-	        dprintf(("WINMM:waveOutGetPosition: TIME_MS pos=%d ms=%d time=%d", position, pmmt->u.ms, GetCurrentTime()));
-	        break;
+            pmmt->u.ms = position / (dwave->getAvgBytesPerSecond() / 1000);
+            dprintf(("WINMM:waveOutGetPosition: TIME_MS pos=%d ms=%d time=%d", position, pmmt->u.ms, GetCurrentTime()));
+            break;
         }
         return MMSYSERR_NOERROR;
   }
@@ -305,8 +305,6 @@ ODINFUNCTION3(MMRESULT, waveOutGetDevCapsW,
               LPWAVEOUTCAPSW, pwoc,
               UINT, cbwoc)
 {
-  dprintf(("WINMM:waveOutGetDevCapsW"));
-
   if(DartWaveOut::getNumDevices() == 0) {
         memset(pwoc, 0, sizeof(*pwoc));
         return MMSYSERR_NODRIVER;
@@ -315,7 +313,7 @@ ODINFUNCTION3(MMRESULT, waveOutGetDevCapsW,
   pwoc->wMid = 0;                  /* manufacturer ID */
   pwoc->wPid = 0;                  /* product ID */
   pwoc->vDriverVersion = 0x0001;        /* version of the driver */
-  AsciiToUnicode( "OS/2 DART Wave Out", pwoc->szPname ); /* product name */
+  lstrcpyW(pwoc->szPname, (LPCWSTR)L"OS/2 DART Wave Out"); /* product name */
   pwoc->dwFormats = WAVE_FORMAT_1M08 | WAVE_FORMAT_1S08 |
                     WAVE_FORMAT_1M16 | WAVE_FORMAT_1S16 |
                     WAVE_FORMAT_2M08 | WAVE_FORMAT_2S08 |
@@ -438,7 +436,7 @@ ODINFUNCTION2(MMRESULT, waveOutSetVolume,
     return(dwave->setVolume(dwVolume));
   }
   if(hwo == NULL) {
-	DartWaveOut::setDefaultVolume(dwVolume);
+    DartWaveOut::setDefaultVolume(dwVolume);
   }
   return MMSYSERR_NOERROR;
 //    return(MMSYSERR_INVALHANDLE);
