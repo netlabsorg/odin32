@@ -1,4 +1,4 @@
-/* $Id: oslibgpi.cpp,v 1.9 2000-11-16 16:34:49 sandervl Exp $ */
+/* $Id: oslibgpi.cpp,v 1.10 2001-02-18 14:19:08 sandervl Exp $ */
 
 /*
  * GPI interface code
@@ -431,7 +431,7 @@ void dprintfOrigin(HDC hdc)
     }
 
     GreGetDCOrigin(pHps->hps, &point);
-    dprintf2(("HDC origin (%d,%d) org (%d,%d)", point.x, point.y, pHps->ptlOrigin.x, pHps->ptlOrigin.y));
+    dprintf2(("HDC %x origin (%d,%d) org (%d,%d)", hdc, point.x, point.y, pHps->ptlOrigin.x, pHps->ptlOrigin.y));
 }
 #endif
 
