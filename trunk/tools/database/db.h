@@ -1,4 +1,4 @@
-/* $Id: db.h,v 1.16 2001-09-07 10:31:44 bird Exp $ */
+/* $Id: db.h,v 1.17 2002-02-24 02:58:29 bird Exp $ */
 /*
  * DB - contains all database routines
  *
@@ -100,32 +100,32 @@ extern "C" {
 *******************************************************************************/
     char *           _System dbGetLastErrorDesc(void);
 
-    BOOL             _System dbConnect(const char *pszHost,
+    KBOOL            _System dbConnect(const char *pszHost,
                                        const char *pszUser,
                                        const char *pszPassword,
                                        const char *pszDatabase);
-    BOOL             _System dbDisconnect();
+    KBOOL            _System dbDisconnect();
     signed long      _System dbGetDll(const char *pszDllName);
     signed long      _System dbCountFunctionInDll(signed long ulDll,
-                                                  BOOL fNotAliases);
+                                                  KBOOL fNotAliases);
     signed long      _System dbCheckInsertDll(const char *pszDll, char fchType);
     unsigned short   _System dbGet(const char *pszTable,
                                    const char *pszGetColumn,
                                    const char *pszMatch1,
                                    const char *pszMatchValue1);
-    BOOL             _System dbInsertUpdateFunction(signed long lDll,
+    KBOOL            _System dbInsertUpdateFunction(signed long lDll,
                                                     const char *pszFunction,
                                                     const char *pszIntFunction,
                                                     unsigned long ulOrdinal,
-                                                    BOOL fIgnoreOrdinal,
+                                                    KBOOL fIgnoreOrdinal,
                                                     char fchType);
-    BOOL             _System dbInsertUpdateFile(signed long lDll,
+    KBOOL            _System dbInsertUpdateFile(signed long lDll,
                                                 const char *pszFilename,
                                                 const char *pszDescription,
                                                 const char *pszLastDateTime,
                                                 signed long lLastAuthor,
                                                 const char *pszRevision);
-    BOOL             _System dbFindFunction(const char *pszFunctionName,
+    KBOOL            _System dbFindFunction(const char *pszFunctionName,
                                             PFNFINDBUF pFnFindBuf,
                                             signed long lDll);
     signed long      _System dbFindFile(signed long lDll, const char *pszFilename);
@@ -134,8 +134,8 @@ extern "C" {
     unsigned long    _System dbUpdateFunction(PFNDESC pFnDesc,
                                               signed long lDll,
                                               char *pszError);
-    BOOL             _System dbRemoveDesignNotes(signed long lFile);
-    BOOL             _System dbAddDesignNote(signed long lDll,
+    KBOOL            _System dbRemoveDesignNotes(signed long lFile);
+    KBOOL            _System dbAddDesignNote(signed long lDll,
                                              signed long lFile,
                                              const char *pszTitle,
                                              const char *pszText,
@@ -143,7 +143,7 @@ extern "C" {
                                              signed long lSeqNbr,
                                              signed long lSeqNbrNote,
                                              signed long lLine,
-                                             BOOL        fSubSection,
+                                             KBOOL       fSubSection,
                                              signed long *plRefCode);
     unsigned long    _System dbCreateHistory(char *pszError);
     unsigned long    _System dbCheckIntegrity(char *pszError);
@@ -151,23 +151,23 @@ extern "C" {
     /* kHtml stuff */
     void *           _System dbExecuteQuery(const char *pszQuery);
     signed long      _System dbQueryResultRows(void *pres);
-    BOOL             _System dbFreeResult(void *pres);
-    BOOL             _System dbFetch(void *pres,
+    KBOOL            _System dbFreeResult(void *pres);
+    KBOOL            _System dbFetch(void *pres,
                                      DBCALLBACKFETCH dbFetchCallBack,
                                      void *pvUser);
     signed long      _System dbDateToDaysAfterChrist(const char *pszDate);
-    BOOL             _System dbDaysAfterChristToDate(signed long ulDays,
+    KBOOL            _System dbDaysAfterChristToDate(signed long ulDays,
                                                     char *pszDate);
     /* StateUpd stuff */
-    BOOL             _System dbGetNotUpdatedFunction(signed long lDll,
+    KBOOL            _System dbGetNotUpdatedFunction(signed long lDll,
                                                      DBCALLBACKFETCH dbFetchCallBack);
     signed long      _System dbGetNumberOfUpdatedFunction(signed long lDll);
 
     /* APIImport stuff */
-    BOOL             _System dbClearUpdateFlagFile(signed long lDll);
-    BOOL             _System dbClearUpdateFlagFunction(signed long lDll, BOOL fAll);
-    BOOL             _System dbDeleteNotUpdatedFiles(signed long lDll);
-    BOOL             _System dbDeleteNotUpdatedFunctions(signed long lDll, BOOL fAll);
+    KBOOL            _System dbClearUpdateFlagFile(signed long lDll);
+    KBOOL            _System dbClearUpdateFlagFunction(signed long lDll, KBOOL fAll);
+    KBOOL            _System dbDeleteNotUpdatedFiles(signed long lDll);
+    KBOOL            _System dbDeleteNotUpdatedFunctions(signed long lDll, KBOOL fAll);
 
 #ifdef __cplusplus
 }

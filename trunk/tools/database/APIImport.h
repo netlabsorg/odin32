@@ -1,4 +1,4 @@
-/* $Id: APIImport.h,v 1.3 2000-07-21 21:09:43 bird Exp $ */
+/* $Id: APIImport.h,v 1.4 2002-02-24 02:58:27 bird Exp $ */
 /*
  * APIImportPE - imports a DLL with functions into the Odin32 database. Header.
  *
@@ -19,8 +19,8 @@
 ******************************************************************************/
 typedef struct _options
 {
-    BOOL    fIgnoreOrdinals;            /* Don't update ordinals. */
-    BOOL    fErase;                     /* Erase functions which wasn't found. */
+    KBOOL   fIgnoreOrdinals;            /* Don't update ordinals. */
+    KBOOL   fErase;                     /* Erase functions which wasn't found. */
 } OPTIONS, *POPTIONS;
 
 #endif

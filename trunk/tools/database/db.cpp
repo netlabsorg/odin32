@@ -1,4 +1,4 @@
-/* $Id: db.cpp,v 1.28 2002-02-15 14:09:56 bird Exp $ *
+/* $Id: db.cpp,v 1.29 2002-02-24 02:58:29 bird Exp $ *
  *
  * DB - contains all database routines.
  *
@@ -63,6 +63,7 @@
 #include <limits.h>
 #include <mysql.h>
 
+#include "kTypes.h"
 #include "db.h"
 
 
