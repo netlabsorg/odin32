@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.93 2000-09-12 22:47:58 bird Exp $ */
+/* $Id: wprocess.cpp,v 1.94 2000-09-13 21:11:00 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -1118,6 +1118,7 @@ ULONG InitCommandLine(const char *pszPeExe)
             pszArg2 = psz2 += psz - psz2 + 1;   /* + 1: space or quote. */
             while (*psz2 == ' ')            /* skip blanks after argv[1]. */
                 psz2++;
+            pszArg2 = psz2;  //SvL: bugfix -> fixes heap corruption
         }
         else
             pszArg2 = psz2 += strlen(psz2) + 1; /* no arguments, skip to next string. */

@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.41 2000-09-12 04:27:44 bird Exp $ */
+/* $Id: oslibdos.cpp,v 1.42 2000-09-13 21:11:00 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -797,6 +797,10 @@ DWORD OSLibDosCreateFile(CHAR *lpszFile,
    }
 #endif
 
+   if(strlen(lpszFile) == 2 && lpszFile[1] == ':') {
+	//app tries to open physical disk
+	openMode |= OPEN_FLAGS_DASD;
+   }
    int retry = 0;
    while(retry < 2)
    {
