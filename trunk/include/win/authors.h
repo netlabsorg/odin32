@@ -1,10 +1,11 @@
-/* $Id: authors.h,v 1.10 2000-10-20 22:29:16 sandervl Exp $ */
+/* $Id: authors.h,v 1.11 2000-10-28 14:19:30 sandervl Exp $ */
 #ifndef __WINE_AUTHORS_H
 #define __WINE_AUTHORS_H
 
 static const char * const SHELL_People[] =
 {
     "Christoph Bratschi",
+    "Oliver Braun",
     "Edgar Buerkle",
     "Yuri Dario",
     "Przemyslaw Dobrowolski",
