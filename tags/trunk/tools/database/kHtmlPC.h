@@ -1,4 +1,4 @@
-/* $Id: kHtmlPC.h,v 1.1 1999-09-05 02:53:06 bird Exp $ */
+/* $Id: kHtmlPC.h,v 1.2 2000-02-18 12:42:08 bird Exp $ */
 /*
  * kHtmlPC - Special-purpose HTML/SQL preprocessor.
  *
@@ -16,7 +16,7 @@
 
     typedef struct _options
     {
-        BOOL fDummy;
+        char *pszBaseDir;
     } OPTIONS, *POPTIONS;
 
 
@@ -427,7 +427,7 @@
             int         clrAxis;
 
             /**@cat internal function */
-            void    analyseTag(const kTag &tag)     throw(kError::enmErrors);
+            void    analyseTag(const kTag &tag, const char *pszBaseDir)     throw(kError::enmErrors);
             void    fetchData(const char *pszSql)   throw(kError::enmErrors);
             kGraphDataSet *findOrCreateDataSet(const char *pszLegend) throw(kError::enmErrors);
 
@@ -449,7 +449,7 @@
             void    setColors(void);
 
         public:
-            kGraph(const kTag &tag) throw(kError::enmErrors);
+            kGraph(const kTag &tag, const char *pszBaseDir) throw(kError::enmErrors);
             ~kGraph(void);
 
             kError::enmErrors   save(void);
