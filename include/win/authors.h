@@ -1,4 +1,4 @@
-/* $Id: authors.h,v 1.13 2000-12-02 11:39:35 sandervl Exp $ */
+/* $Id: authors.h,v 1.14 2001-04-01 10:31:09 sandervl Exp $ */
 #ifndef __WINE_AUTHORS_H
 #define __WINE_AUTHORS_H
 
@@ -28,6 +28,8 @@ static const char * const SHELL_People[] =
     "Vitali E. Pelenyov",
     "Rene Pronk",
     "David Raison",
+    "J”rg Sievers",
+    "J”rg Skottke",
     "Kai Sommerfeld",
     "Carsten Tenbrink",
     "Vit Timchishin",
