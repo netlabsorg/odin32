@@ -1,4 +1,4 @@
-/* $Id: objhandle.cpp,v 1.6 2000-11-15 13:56:45 sandervl Exp $ */
+/* $Id: objhandle.cpp,v 1.7 2000-12-05 13:04:06 sandervl Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
@@ -29,89 +29,78 @@
 
 //******************************************************************************
 
-static ULONG  objHandleTable[MAX_OBJECT_HANDLES] = {0};
-static ULONG  lowestFreeIndex = 0;
-static VMutex objTableMutex;
+typedef struct {
+  ULONG      dwUserData;
+  ObjectType type;
+} GdiObject;
+
+static GdiObject objHandleTable[MAX_OBJECT_HANDLES] = {0};
+static ULONG     lowestFreeIndex = 0;
+static VMutex    objTableMutex;
 
 //******************************************************************************
 //******************************************************************************
 BOOL ObjAllocateHandle(HANDLE *hObject, DWORD dwUserData, ObjectType type)
 {
-  objTableMutex.enter(VMUTEX_WAIT_FOREVER);
-  if(lowestFreeIndex == -1) {
-    //oops, out of handles
-    dprintf(("ERROR: GDI: HwAllocateWindowHandle OUT OF GDI OBJECT HANDLES!!"));
-    objTableMutex.leave();
-    DebugInt3();
-    return FALSE;
-  }
-  *hObject  = lowestFreeIndex;
-  *hObject |= MAKE_HANDLE(type);
-  objHandleTable[lowestFreeIndex] = dwUserData;
-
-  lowestFreeIndex = -1;
-
-  //find next free handle
-  for(int i=0;i<MAX_OBJECT_HANDLES;i++) {
-    if(objHandleTable[i] == 0) {
-        lowestFreeIndex = i;
-        break;
+    objTableMutex.enter(VMUTEX_WAIT_FOREVER);
+    if(lowestFreeIndex == -1) {
+        //oops, out of handles
+        objTableMutex.leave();
+        dprintf(("ERROR: GDI: HwAllocateWindowHandle OUT OF GDI OBJECT HANDLES!!"));
+        DebugInt3();
+        return FALSE;
     }
-  }
-  objTableMutex.leave();
-  return TRUE;
+    *hObject  = lowestFreeIndex;
+    *hObject |= MAKE_HANDLE(type);
+    objHandleTable[lowestFreeIndex].dwUserData = dwUserData;
+    objHandleTable[lowestFreeIndex].type       = type;
+
+    lowestFreeIndex = -1;
+
+    //find next free handle
+    for(int i=0;i<MAX_OBJECT_HANDLES;i++) {
+        if(objHandleTable[i].dwUserData == 0) {
+            lowestFreeIndex = i;
+            break;
+        }
+    }
+    objTableMutex.leave();
+    return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
 void ObjFreeHandle(HANDLE hObject)
 {
-  hObject &= OBJHANDLE_MAGIC_MASK;
-  if(hObject < MAX_OBJECT_HANDLES) {
-    objTableMutex.enter(VMUTEX_WAIT_FOREVER);
-    objHandleTable[hObject] = 0;
-    if(lowestFreeIndex == -1 || hObject < lowestFreeIndex)
-        lowestFreeIndex = hObject;
+    hObject &= OBJHANDLE_MAGIC_MASK;
+    if(hObject < MAX_OBJECT_HANDLES) {
+        objTableMutex.enter(VMUTEX_WAIT_FOREVER);
+        objHandleTable[hObject].dwUserData = 0;
+        objHandleTable[hObject].type = GDIOBJ_NONE;
+        if(lowestFreeIndex == -1 || hObject < lowestFreeIndex)
+            lowestFreeIndex = hObject;
 
-    objTableMutex.leave();
-  }
+        objTableMutex.leave();
+    }
 }
 //******************************************************************************
 //******************************************************************************
-DWORD ObjGetHandleData(HANDLE hObject)
+DWORD ObjGetHandleData(HANDLE hObject, ObjectType type)
 {
-  switch(GET_OBJTYPE(hObject))
-  {
-  case GDIOBJ_REGION:
-    break;
-  //case GDIOBJ_BITMAP
-  //case GDIOBJ_BRUSH
-  //case GDIOBJ_PALETTE
-  //case GDIOBJ_FONT
-  default:
+    hObject &= OBJHANDLE_MAGIC_MASK;
+    if(hObject < MAX_OBJECT_HANDLES && type == objHandleTable[hObject].type) {
+        return objHandleTable[hObject].dwUserData;
+    }
     return HANDLE_OBJ_ERROR;
-  }
-
-  hObject &= OBJHANDLE_MAGIC_MASK;
-  if(hObject < MAX_OBJECT_HANDLES) {
-    return objHandleTable[hObject];
-  }
-  return HANDLE_OBJ_ERROR;
 }
 //******************************************************************************
 //******************************************************************************
 ObjectType ObjGetHandleType(HANDLE hObject)
 {
-  switch(GET_OBJTYPE(hObject))
-  {
-  case GDIOBJ_REGION:
-    return GDIOBJ_REGION;
-  //case GDIOBJ_BITMAP
-  //case GDIOBJ_BRUSH
-  //case GDIOBJ_PALETTE
-  //case GDIOBJ_FONT
-  default:
-    return GDIOBJ_ERROR;
-  }
+    hObject &= OBJHANDLE_MAGIC_MASK;
+    if(hObject < MAX_OBJECT_HANDLES && objHandleTable[hObject].dwUserData != 0) {
+        return objHandleTable[hObject].type;
+    }
+    return GDIOBJ_NONE;
 }
 //******************************************************************************
 //******************************************************************************
@@ -225,36 +214,36 @@ HGDIOBJ WIN32API SelectObject(HDC hdc, HGDIOBJ hObj)
 
     if(DIBSection::getSection() != NULL)
     {
-      DIBSection *dsect;
+        DIBSection *dsect;
 
-      dsect = DIBSection::find(hdc);
-      if(dsect)
-      {
-        //remove previously selected dibsection
-        dsect->UnSelectDIBObject();
-      }
-      dsect = DIBSection::find((DWORD)hObj);
-      if(dsect)
-      {
-        dsect->SelectDIBObject(hdc);
-      }
+        dsect = DIBSection::find(hdc);
+        if(dsect)
+        {
+            //remove previously selected dibsection
+            dsect->UnSelectDIBObject();
+        }
+        dsect = DIBSection::find((DWORD)hObj);
+        if(dsect)
+        {
+            dsect->SelectDIBObject(hdc);
+        }
     }
     rc = O32_SelectObject(hdc, hObj);
     if(rc != 0 && DIBSection::getSection != NULL)
     {
-      DIBSection *dsect = DIBSection::find((DWORD)rc);
-      if(dsect)
-      {
-        dsect->UnSelectDIBObject();
-      }
+        DIBSection *dsect = DIBSection::find((DWORD)rc);
+        if(dsect)
+        {
+            dsect->UnSelectDIBObject();
+        }
     }
 #ifdef USING_OPEN32
-    if(O32_GetObjectType(hObj) == OBJ_BITMAP) 
+    if(O32_GetObjectType(hObj) == OBJ_BITMAP)
     {
-	//SvL: Open32 messes up the height of the hdc (for windows)
+        //SvL: Open32 messes up the height of the hdc (for windows)
         pDCData  pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
         if(pHps && pHps->hwnd) {
-      	      dprintf2(("change back origin"));
+              dprintf2(("change back origin"));
               selectClientArea(pHps);
               setPageXForm(pHps);
         }
@@ -268,34 +257,34 @@ HGDIOBJ WIN32API SelectObject(HDC hdc, HGDIOBJ hObj)
 //******************************************************************************
 DWORD WIN32API GetObjectType( HGDIOBJ hObj)
 {
-  dprintf2(("GDI32: GetObjectType\n"));
-  if(ObjGetHandleType(hObj) == GDIOBJ_REGION) {
+    dprintf2(("GDI32: GetObjectType\n"));
+    if(ObjGetHandleType(hObj) == GDIOBJ_REGION) {
         SetLastError(ERROR_SUCCESS);
-    return OBJ_REGION;
-  }
-  return O32_GetObjectType(hObj);
+        return OBJ_REGION;
+    }
+    return O32_GetObjectType(hObj);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API DeleteObject(HANDLE hObj)
 {
-  dprintf(("GDI32: DeleteObject %x", hObj));
-  if(ObjGetHandleType(hObj) == GDIOBJ_REGION) {
-    OSLibDeleteRegion(ObjGetHandleData(hObj));
-    ObjFreeHandle(hObj);
+    dprintf(("GDI32: DeleteObject %x", hObj));
+    if(ObjGetHandleType(hObj) == GDIOBJ_REGION) {
+        OSLibDeleteRegion(ObjGetHandleData(hObj, GDIOBJ_REGION));
+        ObjFreeHandle(hObj);
         SetLastError(ERROR_SUCCESS);
-    return OBJ_REGION;
-  }
-  DIBSection::deleteSection((DWORD)hObj);
-  return O32_DeleteObject(hObj);
+        return OBJ_REGION;
+    }
+    DIBSection::deleteSection((DWORD)hObj);
+    return O32_DeleteObject(hObj);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API SetObjectOwner( HGDIOBJ arg1, int arg2 )
 {
-  // Here is a guess for a undocumented entry
-  dprintf(("WARNING: GDI32: SetObjectOwner - stub (TRUE)\n"));
-  return TRUE;
+    // Here is a guess for a undocumented entry
+    dprintf(("WARNING: GDI32: SetObjectOwner - stub (TRUE)\n"));
+    return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
