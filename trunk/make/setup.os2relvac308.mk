@@ -1,4 +1,4 @@
-# $Id: setup.os2relvac308.mk,v 1.20 2002-09-02 17:15:42 bird Exp $
+# $Id: setup.os2relvac308.mk,v 1.21 2002-09-20 04:10:05 bird Exp $
 
 # ---OS2, RELEASE, VAC308-------------------------
 ENV_NAME="OS/2, Release, IBM VisualAge for C++ 3.08"
@@ -19,6 +19,7 @@ ENV_ENVS_FORCE=vac308
 !include $(PATH_MAKE)\setup.os2allwrc.mk
 !include $(PATH_MAKE)\setup.os2ld.mk
 !include $(PATH_MAKE)\setup.os2ar.mk
+!include $(PATH_MAKE)\setup.os2allipfc.mk
 !include $(PATH_MAKE)\setup.optional.vac3xx.mk
 
 
@@ -40,7 +41,8 @@ CC_FLAGS_VDD=$(CC_FLAGS_SYS)
 CC_FLAGS_IFS=$(CC_FLAGS_SYS) /Ge-
 CC_OBJ_OUT=/Fo
 #CC_LST_OUT=/Fa - dont use this in release unless you're debugging as it may cause nops to disappear.
-CC_PC_2_STDOUT=/Pd+ /P+
+CC_PC_2_STDOUT=/Pd+ /P+ /Pc+
+CC_PC_2_STRIPPED_STDOUT=/Pd+ /P+ /Pc- /Pe+
 
 CXX_FLAGS=/Q /DOS2 /D__i386__ /DMODEL=FLAT /Ti+ /O+ /Oi+ /G5 /Ss+ /C+ $(_CXX_OPTIONAL) $(CXX_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CXX_INCLUDES) $(ALL_INCLUDES) /I$(PATH_INCLUDES)
 CXX_FLAGS_EXE=$(CXX_FLAGS) /Gm+ /Ge+
@@ -50,7 +52,8 @@ CXX_FLAGS_VDD=$(CXX_FLAGS_SYS)
 CXX_FLAGS_IFS=$(CXX_FLAGS_SYS) /Ge-
 CXX_OBJ_OUT=/Fo
 #CXX_LST_OUT=/Fa - dont use this in release unless you're debugging as it may cause nops to disappear.
-CXX_PC_2_STDOUT=/Pd+ /P+
+CXX_PC_2_STDOUT=/Pd+ /P+ /Pc+
+CXX_PC_2_STRIPPED_STDOUT=/Pd+ /P+ /Pc- /Pe+
 
 !if "$(CC_AS_CXX)" != ""
 ! if "$(CXX_AS_CC)" != ""

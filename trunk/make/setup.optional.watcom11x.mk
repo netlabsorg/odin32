@@ -1,4 +1,4 @@
-# $Id: setup.optional.watcom11x.mk,v 1.9 2002-09-14 23:31:28 bird Exp $
+# $Id: setup.optional.watcom11x.mk,v 1.10 2002-09-20 04:10:02 bird Exp $
 
 #
 #  Helper file for all the optional stuff which is common for
@@ -371,4 +371,18 @@ _CXX_CPU     = -$(CXX_CPU)r
 
 _CXX_OPTIONAL = $(_CXX_SEG_TEXT) $(_CXX_SEG_DATA) $(_CXX_SEG_XCPT) $(_CXX_SEG_TEXT_CLASS) $(_CXX_DEFAULT_LIBS) \
                 $(_CXX_PACK) $(_CXX_XCPT) $(_CXX_MODEL) -d$(_CXX_DEF_MODEL) $(_CXX_OPT_R) $(_CXX_CPU) $(_CXX_OPTIM)
+
+
+#
+# Macros common for all watcom compilers including this file
+#
+CC_PC_2_STRIPPED_STDOUT =-p
+CC_PC_2_STDOUT  = -pcl
+CC_OBJ_OUT      = -fo=
+CC_LST_OUT      =
+
+CXX_PC_2_STRIPPED_STDOUT=-p
+CXX_PC_2_STDOUT = -pcl
+CXX_OBJ_OUT     = -fo=
+CXX_LST_OUT     =
 
