@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.562 1999-12-20 16:44:18 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.563 1999-12-20 19:57:56 cbratschi Exp $ */
+
+ 99-12-20  Markus Montkowski <mmontkowski@gmx.de>
+	- USER32: Fixed Coordinate conversion in WM_HITTEST (don't use handles as a coordinates)
 
  99-12-20: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: changed icon title font size in SystemParametersInfo to 12
