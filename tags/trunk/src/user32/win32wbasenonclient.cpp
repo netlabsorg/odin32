@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.43 2002-08-15 15:45:46 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.44 2002-10-15 09:18:12 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -1239,7 +1239,7 @@ LONG Win32BaseWindow::HandleNCLButtonDblClk(WPARAM wParam,LPARAM lParam)
       break;
 
     case HTSYSMENU:
-      if (!(GetClassWord(Win32Hwnd,GCW_STYLE) & CS_NOCLOSE))
+      if (!(GetClassLongA(getWindowHandle(),GCL_STYLE) & CS_NOCLOSE))
         SendMessageA(getWindowHandle(), WM_SYSCOMMAND,SC_CLOSE,lParam);
       break;
 

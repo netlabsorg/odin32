@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.49 2002-07-15 10:16:28 sandervl Exp $*/
+/* $Id: menu.cpp,v 1.50 2002-10-15 09:18:09 sandervl Exp $*/
 /*
  * Menu functions
  *
@@ -2888,7 +2888,8 @@ static INT MENU_TrackMenu(HMENU hmenu,UINT wFlags,INT x,INT y,HWND hwnd,BOOL inM
                     {
 #ifdef __WIN32OS2__
                         //double click on system menu -> close application
-                        PostMessageA(hwnd, WM_SYSCOMMAND,SC_CLOSE, msg.lParam);
+                        if (!(GetClassLongA(hwnd, GCL_STYLE) & CS_NOCLOSE))
+                          PostMessageA(hwnd, WM_SYSCOMMAND, SC_CLOSE, msg.lParam);
 #endif
                         fEndMenu = TRUE;
                         break;

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.341 2002-10-11 14:58:36 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.342 2002-10-15 09:18:10 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1359,6 +1359,10 @@ ULONG Win32BaseWindow::MsgFormatFrame(WINDOWPOS *lpWndPos)
   if(fOS2Look && ((dwStyle & WS_CAPTION) == WS_CAPTION))
   {
       RECT rect = {0};
+      BOOL fCloseButton;
+
+      fCloseButton = !(windowClass && (windowClass->getClassLongA(GCL_STYLE) & CS_NOCLOSE));
+
       int  height  = getWindowHeight();
       RECTLOS2 rectOS2;
 
@@ -1372,7 +1376,12 @@ ULONG Win32BaseWindow::MsgFormatFrame(WINDOWPOS *lpWndPos)
       rectOS2.xRight  = rect.right;
       rectOS2.yBottom = height - rect.top;
       rectOS2.yTop    = height - rect.bottom;
-      OSLibWinPositionFrameControls(getOS2FrameWindowHandle(), &rectOS2, dwStyle, dwExStyle, IconForWindow(ICON_SMALL));
+
+      //@@PF Disable close button as well when needed by application 
+      OSLibChangeCloseButtonState(getOS2FrameWindowHandle(), fCloseButton);
+      OSLibWinPositionFrameControls(getOS2FrameWindowHandle(), &rectOS2,
+                                    dwStyle, dwExStyle, IconForWindow(ICON_SMALL),
+				    fCloseButton);
   }
   return rc;
 }
