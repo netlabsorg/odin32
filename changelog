@@ -1,10 +1,16 @@
- /* $Id: changelog,v 1.1077 2000-08-19 12:59:39 sandervl Exp $ */
+ /* $Id: changelog,v 1.1078 2000-08-19 18:35:22 sandervl Exp $ */
 
  2000-08-19: Sander van Leeuwen <sandervl@xs4all.nl>
     - GDI32:    Changed File and Product version to 0x0400, 0x0565012A (NT4, SP6)
     - KERNEL32: Changed File and Product version to 0x0400, 0x0565012C (NT4, SP6)
+                Logging level 2 for GetUserDefaultLCID & GetSystemDefaultLCID
     - USER32:   Changed File and Product version to 0x0400, 0x05650136 (NT4, SP6)
     - ADVAPI32: Changed File and Product version to 0x0400, 0x05650119 (NT4, SP6)
+    - COMCTL32: Changed File    version to 0x0551, 0x0B6718A0 (NT4, SP6, IE 5.01) (VERSIONINFO)
+                Changed Product version to 0x0500, 0x0B6718A0 (NT4, SP6, IE 5.01) (VERSIONINFO)
+                Changed "FileVersion"    to 5.81 (NT4, SP6, IE 5.01)
+                Changed "ProductVersion" to 5.00.2919.6304 (NT4, SP6, IE 5.01)
+    - COMDLG32: Changed File and Product version to 0x0400 0x0565013F (NT4, SP6)
 
  2000-08-18: Sander van Leeuwen <sandervl@xs4all.nl>
     - GDI32:    Added support for level 2 debug logging
