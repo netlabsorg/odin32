@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.2715 2004-03-23 16:50:36 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2716 2004-03-24 09:24:05 sandervl Exp $ */
+
+ 2004-03-24: Vitali Pelenyov <sunlover@innotek   >
+    - KERNEL32: o GetVolumeInformation: check for file system buffer size
 
  2004-03-23: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o MapVirtualKeyA: must convert return value from PM to windows
