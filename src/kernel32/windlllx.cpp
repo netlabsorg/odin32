@@ -1,4 +1,4 @@
-/* $Id: windlllx.cpp,v 1.3 1999-10-21 12:18:47 sandervl Exp $ */
+/* $Id: windlllx.cpp,v 1.4 1999-10-23 23:02:17 sandervl Exp $ */
 
 /*
  * Win32 LX Dll class (compiled in OS/2 using Odin32 api)
@@ -34,9 +34,10 @@
 //******************************************************************************
 //Create LX Dll object and send process attach message
 //System dlls set EntryPoint to 0
+//Returns: Odin32 module handle
 //******************************************************************************
-BOOL WIN32API RegisterLxDll(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint, 
-                            PVOID pResData)
+DWORD WIN32API RegisterLxDll(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint, 
+                             PVOID pResData)
 {
  Win32LxDll *windll;
 
@@ -52,7 +53,10 @@ BOOL WIN32API RegisterLxDll(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint,
 	return FALSE;
    }
    windll->AddRef();
-   return windll->attachProcess();
+   if(windll->attachProcess() == 0)
+	return 0;
+
+   return windll->getInstanceHandle();
 }
 //******************************************************************************
 //Destroy LX Dll object
