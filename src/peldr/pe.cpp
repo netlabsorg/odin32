@@ -1,4 +1,4 @@
-/* $Id: pe.cpp,v 1.25 2001-01-23 11:59:01 sandervl Exp $ */
+/* $Id: pe.cpp,v 1.26 2001-02-14 12:56:55 sandervl Exp $ */
 
 /*
  * PELDR main exe loader code
@@ -101,7 +101,9 @@ tryagain:
 			if(newcmdline) {
 				cmdline = newcmdline+1;
 			}
-			else 	DebugInt3();	//should not happen!
+#ifdef DEBUG
+			else 	_interrupt(3);	//should not happen!
+#endif
 		}		
 		while(*cmdline == ' ')	cmdline++; //skip leading space
 		if(*cmdline == '"') {
@@ -158,7 +160,6 @@ tryagain:
 	}
 	else {//should never happen!
 filenotfound:
-		DebugInt3();
   		rc = DosLoadModule(exeName, sizeof(exeName), "PMWIN.DLL", &hmodPMWin);
   		rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32MESSAGEBOX, NULL, (PFN *)&MyWinMessageBox);
 		MyWinMessageBox(HWND_DESKTOP, NULL, szDosInfoBlocks, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
