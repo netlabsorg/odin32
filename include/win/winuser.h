@@ -1,4 +1,4 @@
-/* $Id: winuser.h,v 1.26 2000-01-07 17:37:02 cbratschi Exp $ */
+/* $Id: winuser.h,v 1.27 2000-01-09 14:13:13 cbratschi Exp $ */
 
 #ifndef __INCLUDE_WINUSER_H
 #define __INCLUDE_WINUSER_H
@@ -370,7 +370,7 @@ typedef struct
 #define OIC_NOTE            32516
 #define OIC_PORTRAIT        32517
 #define OIC_LANDSCAPE       32518
-#define OIC_WINEICON        32519
+#define OIC_ODINICON        32519
 #define OIC_FOLDER          32520
 #define OIC_FOLDER2         32521
 #define OIC_FLOPPY          32522
