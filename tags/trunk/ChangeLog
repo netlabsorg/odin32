@@ -1,4 +1,9 @@
- /* $Id: ChangeLog,v 1.952 2000-05-19 19:54:49 jeroen Exp $ */
+ /* $Id: ChangeLog,v 1.953 2000-05-20 13:29:38 sandervl Exp $ */
+
+ 2000-05-20: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   BroadcastMessageA/W bugfix
+    - KERNEL32: Partly implemented GetDiskFreeSpaceExA/W; need to add support  
+                for 64 bits values!
 
  2000-05-19: Jeroen van den Horn <J.vandenHorn@fibre.a2000.nl>
     - ICMP: Initial release of ICMP.DLL and header files
