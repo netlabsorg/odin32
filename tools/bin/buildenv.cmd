@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.29 2002-09-04 15:31:14 bird Exp $
+/* $Id: buildenv.cmd,v 1.30 2002-09-05 01:18:31 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -850,13 +850,13 @@ PathSetDefault: procedure expose aCfg. aPath. sPathFile
         aPath.i.sPId = 'netqos2';                   aPath.i.sPath = 'f:\netqos2';                   i = i + 1;
         aPath.i.sPId = 'perl';                      aPath.i.sPath = 'f:\perllib';                   i = i + 1;
         aPath.i.sPId = 'python';                    aPath.i.sPath = 'f:\python';                    i = i + 1;
-        aPath.i.sPId = 'toolkit40';                 aPath.i.sPath = 'f:\toolkit';                   i = i + 1;
-        aPath.i.sPId = 'toolkit45';                 aPath.i.sPath = 'f:\toolkit45';                 i = i + 1;
-        aPath.i.sPId = 'toolkit451';                aPath.i.sPath = 'f:\toolkit451';                i = i + 1;
-      /*aPath.i.sPId = 'toolkit452';                aPath.i.sPath = 'f:\toolkit452';                i = i + 1;*/
+        aPath.i.sPId = 'toolkit40';                 aPath.i.sPath = 'f:\toolkit\v40csd4';           i = i + 1;
+        aPath.i.sPId = 'toolkit45';                 aPath.i.sPath = 'f:\toolkit\v45';               i = i + 1;
+        aPath.i.sPId = 'toolkit451';                aPath.i.sPath = 'f:\toolkit\v451';              i = i + 1;
+        aPath.i.sPId = 'toolkit452';                aPath.i.sPath = 'f:\toolkit\v452';              i = i + 1;
         aPath.i.sPId = 'unixroot';                  aPath.i.sPath = 'e:\unix';                      i = i + 1;
         aPath.i.sPId = 'xfree86';                   aPath.i.sPath = 'e:\xfree86';                   i = i + 1;
-        aPath.i.sPId = 'vac308';                    aPath.i.sPath = 'f:\ibmcpp';                    i = i + 1;
+        aPath.i.sPId = 'vac308';                    aPath.i.sPath = 'f:\vacpp\v308';                    i = i + 1;
         aPath.i.sPId = 'vac365';                    aPath.i.sPath = 'f:\ibmcxxo';                   i = i + 1;
         aPath.i.sPId = 'vac40';                     aPath.i.sPath = 'f:\ibmcpp40';                  i = i + 1;
         aPath.i.sPId = 'warpin';                    aPath.i.sPath = 'f:\warpin';                    i = i + 1;
