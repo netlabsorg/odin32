@@ -1,4 +1,4 @@
-/* $Id: shell32_En.orc,v 1.3 2000-03-28 15:28:46 cbratschi Exp $ */
+/* $Id: shell32_En.orc,v 1.4 2000-10-28 14:36:45 sandervl Exp $ */
 LANGUAGE LANG_ENGLISH, SUBLANG_DEFAULT
 
 #if 1
@@ -11,7 +11,8 @@ FONT 10, "System"
  LISTBOX 99, 8, 85, 137, 82, LBS_NOTIFY | WS_VSCROLL | WS_BORDER
  ICON "", 1088, 189, 50, 14, 16
  LTEXT "", 100, 8, 50, 137, 33
- LTEXT "Odin was brought to you by:", 98, 8, 75, 137, 10
+ LTEXT "Odin was brought to you by:", 98, 8, 75, 90, 10
+ LTEXT "", 2002, 100, 75, 90, 10
  CONTROL "",2001,"Static",SS_BITMAP,8,2,148,26
 }
 #else
