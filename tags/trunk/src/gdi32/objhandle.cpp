@@ -1,4 +1,4 @@
-/* $Id: objhandle.cpp,v 1.14 2001-07-04 08:03:55 sandervl Exp $ */
+/* $Id: objhandle.cpp,v 1.15 2001-07-08 10:59:23 sandervl Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
@@ -250,14 +250,13 @@ HGDIOBJ WIN32API SelectObject(HDC hdc, HGDIOBJ hObj)
  HGDIOBJ rc;
  DWORD   handleType;
 
-    dprintf2(("GDI32: SelectObject %x %x type %x", hdc, hObj, handleType));
-
     //TODO: must use 16 bits gdi object handles
     if(HIWORD(hObj) == 0) {
         hObj |= GDIOBJ_PREFIX;
     }
 
     handleType = GetObjectType(hObj);
+    dprintf2(("GDI32: SelectObject %x %x type %x", hdc, hObj, handleType));
     if(handleType == GDIOBJ_REGION) {
         //Return complexity here; not previously selected clip region
         return (HGDIOBJ)SelectClipRgn(hdc, hObj);
