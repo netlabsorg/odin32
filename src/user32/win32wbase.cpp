@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.43 1999-10-14 19:31:32 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.44 1999-10-15 10:03:15 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2257,9 +2257,10 @@ HWND Win32BaseWindow::GetWindow(UINT uCmd)
  Win32BaseWindow  *win32wnd;
  ULONG         magic;
  ULONG         getcmd = 0;
- HWND          hwndRelated;
+ HWND          hwndRelated, hwnd;
 
     dprintf(("GetWindow %x %d NOT COMPLETE", getWindowHandle(), uCmd));
+    hwnd = OS2Hwnd;
     switch(uCmd)
     {
         case GW_CHILD:
@@ -2267,12 +2268,14 @@ HWND Win32BaseWindow::GetWindow(UINT uCmd)
             break;
         case GW_HWNDFIRST:
             if(getParent()) {
+                    hwnd = getParent()->getOS2WindowHandle();
                     getcmd = QWOS_TOP; //top of child windows
             }
             else    getcmd = QWOS_TOP; //TODO
             break;
         case GW_HWNDLAST:
             if(getParent()) {
+                    hwnd = getParent()->getOS2WindowHandle();
                     getcmd = QWOS_BOTTOM; //bottom of child windows
             }
             else    getcmd = QWOS_BOTTOM; //TODO
@@ -2289,9 +2292,17 @@ HWND Win32BaseWindow::GetWindow(UINT uCmd)
             }
             else    return 0;
     }
-    hwndRelated = OSLibWinQueryWindow(OS2Hwnd, getcmd);
+    hwndRelated = OSLibWinQueryWindow(hwnd, getcmd);
     if(hwndRelated)
     {
+        win32wnd = (Win32BaseWindow *)OSLibWinGetWindowULong(hwndRelated, OFFSET_WIN32WNDPTR);
+        magic    = OSLibWinGetWindowULong(hwndRelated, OFFSET_WIN32PM_MAGIC);
+        if(CheckMagicDword(magic) && win32wnd)
+        {
+            return win32wnd->getWindowHandle();
+        }
+
+    hwndRelated = OSLibWinWindowFromID(hwndRelated, OSLIB_FID_CLIENT);
         win32wnd = (Win32BaseWindow *)OSLibWinGetWindowULong(hwndRelated, OFFSET_WIN32WNDPTR);
         magic    = OSLibWinGetWindowULong(hwndRelated, OFFSET_WIN32PM_MAGIC);
         if(CheckMagicDword(magic) && win32wnd)
