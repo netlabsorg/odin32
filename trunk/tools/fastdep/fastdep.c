@@ -1,4 +1,4 @@
-/* $Id: fastdep.c,v 1.42 2002-09-05 02:20:37 bird Exp $
+/* $Id: fastdep.c,v 1.43 2002-09-05 02:21:23 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
@@ -860,7 +860,7 @@ int main(int argc, char **argv)
 void syntax(void)
 {
     printf(
-        "FastDep v0.45 (build %d)\n"
+        "FastDep v0.46 (build %d)\n"
         "Dependency scanner. Creates a makefile readable depend file.\n"
         " - was quick and dirty, now it's just quick -\n"
         "\n"
