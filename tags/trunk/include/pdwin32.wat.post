@@ -1,4 +1,4 @@
-# $Id: pdwin32.wat.post,v 1.4 2000-10-03 05:39:51 bird Exp $
+# $Id: pdwin32.wat.post,v 1.5 2000-11-01 01:34:19 bird Exp $
 #
 # Odin32 API
 #
@@ -22,6 +22,14 @@
 # Define NO_CLEAN_RULE to not make clean rule (same as NOCLEAN - use this!).
 #
 
+!ifndef TARGET_EXTENSION
+!ifdef EXETARGET
+TARGET_EXTENSION=exe
+!else
+TARGET_EXTENSION=dll
+!endif
+!endif
+
 
 !ifdef NEW_STYLE
 !ifndef EXETARGET
@@ -30,8 +38,8 @@
 # All rule - build objs, target dll, copies target to bin and makes libs.
 !ifndef NO_ALL_RULE
 all:    $(OBJDIR) \
-        $(OBJDIR)\$(TARGET).dll \
-        $(PDWIN32_BIN)\$(TARGET).dll \
+        $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION) \
+        $(PDWIN32_BIN)\$(TARGET).$(TARGET_EXTENSION) \
         lib
 !endif
 
@@ -44,7 +52,7 @@ lib:    $(TARGET).lib $(PDWIN32_LIB)\$(TARGET).lib
 
 # Dll rule - builds the target dll.
 !ifndef NO_DLL_RULE
-$(OBJDIR)\$(TARGET).dll: $(OBJS) $(OBJDIR)\$(TARGET).lnk
+$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS) $(OBJDIR)\$(TARGET).lnk
     $(LD2) @$(OBJDIR)\$(TARGET).lnk
 !endif
 
@@ -55,7 +63,7 @@ $(OBJDIR)\$(TARGET).lnk: makefile $(TARGET).def $(PDWIN32_INCLUDE)\pdwin32.wat.p
     $(RM) $(OBJDIR)\$(TARGET).lnk2 $@
     $(KDEF2WAT) $(TARGET).def $@ <<$(OBJDIR)\$(TARGET).lnk2
 $(LD2FLAGS)
-name $(OBJDIR)\$(TARGET).dll
+name $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
 option map=$(OBJDIR)\$(TARGET).map
 file    {$(OBJS)}
 library {$(LIBS)}
@@ -76,8 +84,8 @@ dep:
 # All rule - build objs, target exe, copies target to bin.
 !ifndef NO_ALL_RULE
 all:    $(OBJDIR) \
-        $(OBJDIR)\$(TARGET).exe \
-        $(PDWIN32_BIN)\$(TARGET).exe
+        $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION) \
+        $(PDWIN32_BIN)\$(TARGET).$(TARGET_EXTENSION)
 !endif
 
 
@@ -89,7 +97,7 @@ lib:
 
 # Exe rule - builds the target exe.
 !ifndef NO_EXE_RULE
-$(OBJDIR)\$(TARGET).exe: $(OBJSNOOBJDIR) $(TARGET).def $(OBJDIR)\$(TARGET).lnk
+$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJSNOOBJDIR) $(TARGET).def $(OBJDIR)\$(TARGET).lnk
     $(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lnk
 !endif
 
@@ -100,7 +108,7 @@ $(OBJDIR)\$(TARGET).lnk: makefile  $(PDWIN32_INCLUDE)\pdwin32.wat.post
     $(RM) $(OBJDIR)\$(TARGET).lnk2 $@
     $(KDEF2WAT) $(TARGET).def $@ <<$(OBJDIR)\$(TARGET).lnk2
 $(LD2FLAGS)
-name $(OBJDIR)\$(TARGET).dll
+name $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
 option map=$(OBJDIR)\$(TARGET).map
 file    {$(OBJS)}
 library {$(LIBS)}
@@ -132,11 +140,7 @@ $(PDWIN32_LIB)\$(ORGTARGET).lib: $(ORGTARGET).lib
 
 
 # Copy dll rule.
-!ifndef EXETARGET
-$(PDWIN32_BIN)\$(TARGET).dll: $(OBJDIR)\$(TARGET).dll
-!else
-$(PDWIN32_BIN)\$(TARGET).exe: $(OBJDIR)\$(TARGET).exe
-!endif
+$(PDWIN32_BIN)\$(TARGET).$(TARGET_EXTENSION): $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
     cd $(OBJDIR)
     $(MAPSYM) $(TARGET).map
     cd ..\..
@@ -189,11 +193,9 @@ clean:  clean2
 !endif
 !ifndef LOCALCLEAN
         $(PDWIN32_LIB)\$(TARGET).LIB \
-!ifndef EXETARGET
-        $(PDWIN32_BIN)\$(TARGET).dll $(TARGET)exp.def *.dll \
-!else
-        $(PDWIN32_BIN)\$(TARGET).exe *.exe \
-!endif
+        $(TARGET)exp.def \
+        $(PDWIN32_BIN)\$(TARGET).$(TARGET_EXTENSION) *.$(TARGET_EXTENSION) \
+        $(PDWIN32_BIN)\$(TARGET).sym *.sym \
         $(CLEANEXTRAS)
 !else
         $(CLEANEXTRAS)
