@@ -1,4 +1,4 @@
-/* $Id: mmapview.cpp,v 1.3 2003-12-12 11:18:04 sandervl Exp $ */
+/* $Id: mmapview.cpp,v 1.4 2003-12-29 12:29:20 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -55,7 +55,6 @@ Win32MemMapView::Win32MemMapView(Win32MemMap *map, ULONG offset, ULONG size,
 {
  LPVOID           viewaddr = (LPVOID)((ULONG)map->getMappingAddr()+offset);
  ULONG            accessAttr = 0;
- Win32MemMapView *tmpview  = mapviews;
 
     errorState      = 0;
     mParentMap      = map;
@@ -124,6 +123,8 @@ Win32MemMapView::Win32MemMapView(Win32MemMap *map, ULONG offset, ULONG size,
     mParentMap->AddView();
 
     DosEnterCriticalSection(&globalmapcritsect);
+    Win32MemMapView *tmpview = mapviews;
+
     if(tmpview == NULL || tmpview->getViewAddr() > pMapView) {
         next     = mapviews;
         mapviews = this;
