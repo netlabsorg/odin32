@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2001-11-22 20:50:52 bird Exp $
+# $Id: makefile,v 1.6 2002-03-08 11:36:11 sandervl Exp $
 
 #
 # Odin32 API
@@ -25,6 +25,7 @@ CXXFLAGS = $(CXXFLAGS)
 OBJS = \
 $(OBJDIR)\initterm.obj \
 $(OBJDIR)\socket.obj \
+$(OBJDIR)\protocol.obj \
 $(OBJDIR)\socketodin.obj \
 $(OBJDIR)\ioctl.obj \
 $(OBJDIR)\ws2_32rsrc.obj \
