@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.91 1999-11-22 18:06:46 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.92 1999-11-22 21:42:06 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -146,7 +146,7 @@ void Win32BaseWindow::Init()
 
   windowNameA      = NULL;
   windowNameW      = NULL;
-  wndNameLength    = 1; //CB: right?
+  wndNameLength    = 0;
 
   userWindowLong   = NULL;;
   nrUserWindowLong = 0;
@@ -520,18 +520,18 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   {
     if (!isUnicode)
     {
-      windowNameA = (LPSTR)_smalloc(strlen(cs->lpszName)+1);
+      wndNameLength = strlen(cs->lpszName);
+      windowNameA = (LPSTR)_smalloc(wndNameLength+1);
       strcpy(windowNameA,cs->lpszName);
-      windowNameW = (LPWSTR)_smalloc((strlen(cs->lpszName)+1)*sizeof(WCHAR));
+      windowNameW = (LPWSTR)_smalloc((wndNameLength+1)*sizeof(WCHAR));
       lstrcpyAtoW(windowNameW,windowNameA);
-      wndNameLength = strlen(windowNameA)+1; //including 0 terminator
     } else
     {
-      windowNameA = (LPSTR)_smalloc(lstrlenW((LPWSTR)cs->lpszName)+1);
+      wndNameLength = lstrlenW((LPWSTR)cs->lpszName);
+      windowNameA = (LPSTR)_smalloc(wndNameLength+1);
       lstrcpyWtoA(windowNameA,(LPWSTR)cs->lpszName);
-      windowNameW = (LPWSTR)_smalloc((lstrlenW((LPWSTR)cs->lpszName)+1)*sizeof(WCHAR));
+      windowNameW = (LPWSTR)_smalloc((wndNameLength+1)*sizeof(WCHAR));
       lstrcpyW(windowNameW,(LPWSTR)cs->lpszName);
-      wndNameLength = strlen(windowNameA)+1; //including 0 terminator
     }
   }
 
@@ -1510,8 +1510,9 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         return wndNameLength;
 
     case WM_GETTEXT:
-        if (!lParam) return 0;
-        strncpy((LPSTR)lParam, windowNameA, wParam);
+        if (!lParam || !wParam) return 0;
+        if (!windowNameA) ((LPSTR)lParam)[0] = 0;
+        else strncpy((LPSTR)lParam, windowNameA, wParam);
         return min(wndNameLength, wParam);
 
     case WM_SETTEXT:
@@ -1523,18 +1524,18 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 
         if (lParam)
         {
-          windowNameA = (LPSTR)_smalloc(strlen(lpsz)+1);
+          wndNameLength = strlen(lpsz);
+          windowNameA = (LPSTR)_smalloc(wndNameLength+1);
           strcpy(windowNameA, lpsz);
-          windowNameW = (LPWSTR)_smalloc((strlen(lpsz)+1)*sizeof(WCHAR));
+          windowNameW = (LPWSTR)_smalloc((wndNameLength+1)*sizeof(WCHAR));
           lstrcpyAtoW(windowNameW, windowNameA);
-          wndNameLength = strlen(windowNameA)+1; //including 0 terminator
-          dprintf(("WM_SETTEXT of %d to %s\n", Win32Hwnd, lParam));
         } else
         {
           windowNameA = NULL;
           windowNameW = NULL;
-          wndNameLength = 1;
+          wndNameLength = 0;
         }
+        dprintf(("WM_SETTEXT of %d to %s\n", Win32Hwnd, lParam));
 
         if(OS2HwndFrame && (dwStyle & WS_CAPTION) == WS_CAPTION)
           return OSLibWinSetWindowText(OS2HwndFrame,(LPSTR)windowNameA);
@@ -1760,8 +1761,9 @@ LRESULT Win32BaseWindow::DefWindowProcW(UINT Msg, WPARAM wParam, LPARAM lParam)
         return wndNameLength;
 
     case WM_GETTEXT:
-        if (!lParam) return 0;
-        lstrcpynW((LPWSTR)lParam,windowNameW,wParam);
+        if (!lParam || !wParam) return 0;
+        if (!windowNameW) ((LPWSTR)lParam)[0] = 0;
+        else lstrcpynW((LPWSTR)lParam,windowNameW,wParam);
         return min(wndNameLength,wParam);
 
     case WM_SETTEXT:
@@ -1773,16 +1775,16 @@ LRESULT Win32BaseWindow::DefWindowProcW(UINT Msg, WPARAM wParam, LPARAM lParam)
 
         if (lParam)
         {
-          windowNameA = (LPSTR)_smalloc(lstrlenW(lpsz)+1);
+          wndNameLength = lstrlenW(lpsz);
+          windowNameA = (LPSTR)_smalloc(wndNameLength+1);
           lstrcpyWtoA(windowNameA,lpsz);
-          windowNameW = (LPWSTR)_smalloc((lstrlenW(lpsz)+1)*sizeof(WCHAR));
+          windowNameW = (LPWSTR)_smalloc((wndNameLength+1)*sizeof(WCHAR));
           lstrcpyW(windowNameW,lpsz);
-          wndNameLength = strlen(windowNameA)+1; //including 0 terminator
         } else
         {
           windowNameA = NULL;
           windowNameW = NULL;
-          wndNameLength = 1;
+          wndNameLength = 0;
         }
 
         if(OS2HwndFrame && (dwStyle & WS_CAPTION) == WS_CAPTION)
