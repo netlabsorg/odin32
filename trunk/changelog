@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2170 2002-06-16 08:32:54 sandervl Exp $ */
+/* $Id: changelog,v 1.2171 2002-06-16 16:40:44 sandervl Exp $ */
 
  2002-06-16: Sander van Leeuwen <sandervl@innotek.de>
     - KERNEL32: o Expand string when converting REG_EXPAND_SZ to REG_SZ
@@ -7,6 +7,7 @@
     - INSTALL:  o Create object for Odin User's Manual + fixed object
                   creation for OdinBug Manual
                 o Include OdinBug.HLP & OdinUser.INF
+    - SHELL32:  o Fixed desktop object creation during win32 app install
 
  2002-06-15: Sander van Leeuwen <sandervl@innotek.de>
     - SETUPAPI: o Wine resync + added debug wrappers
