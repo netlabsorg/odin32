@@ -1,4 +1,4 @@
-/* $Id: job.cmd,v 1.1 2000-04-27 11:32:24 bird Exp $
+/* $Id: job.cmd,v 1.2 2000-07-18 11:18:13 bird Exp $
  *
  * Main job for building OS/2.
  *
@@ -13,12 +13,14 @@
     call SysloadFuncs;
 
     sLogFile = '..\logs\' || Date(S) || '.log';
+    sTree    = 'tree' || Date(S);
 
     /*
      * Clean tree, get it and build it.
      */
-    'cd ..\tree'
-    if (rc <> 0) then call failure rc, 'cd ..\tree failed.';
+    'mkdir ..\'||sTree
+    'cd ..\'||sTree
+    if (rc <> 0) then call failure rc, 'cd ..\'sTree 'failed.';
     'call ..\scripts\odin32env.cmd'
     if (rc <> 0) then call failure rc, 'Env failed.';
     'call ..\scripts\odin32clean.cmd'
