@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.59 2002-06-02 12:42:09 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.60 2002-06-26 07:14:18 sandervl Exp $ */
 
 /*
  * Win32 Exception functions for OS/2
@@ -68,6 +68,12 @@
 #include "WinImageBase.h"
 #include "WinDllBase.h"
 #include "WinExeBase.h"
+
+/* Really lazy! But, including wincon.h means lot's of missing COORD. */
+#define CTRL_C_EVENT     0     //#include <wincon.h>
+#define CTRL_BREAK_EVENT 1     //#include <wincon.h>
+#include "console.h"
+
 
 #define DBG_LOCALLOG    DBG_exceptions
 #include "dbglocal.h"
@@ -1314,11 +1320,29 @@ CrashAndBurn:
         //dprintf(("KERNEL32: OS2ExceptionHandler: trying to grow stack (continue search)"));
         goto continuesearch;
 
-  case XCPT_SIGNAL:
-        if(pERepRec->ExceptionInfo[0] == XCPT_SIGNAL_KILLPROC)          /* resolve signal information */
+
+    /*
+     * In OS/2 VIO Ctrl-C and Ctrl-Break is special stuff which comes in
+     * thru the exception handler. In Win32 CUI they are handled by a
+     * ControlCtrlEvent procedure. So, if we receive one of those signals
+     * we assume that this is a VIO program and let the handlers handle this.
+     * (If they want to.)
+     */
+    case XCPT_SIGNAL:
+        switch (pERepRec->ExceptionInfo[0])
         {
-            SetExceptionChain((ULONG)-1);
-            goto continuesearch;
+            case XCPT_SIGNAL_BREAK:
+                if (InternalGenerateConsoleCtrlEvent(CTRL_BREAK_EVENT, 0))
+                    goto continueexecution;
+                goto continuesearch;
+            case XCPT_SIGNAL_INTR:
+                if (InternalGenerateConsoleCtrlEvent(CTRL_C_EVENT, 0))
+                    goto continueexecution;
+                goto continuesearch;
+
+            case XCPT_SIGNAL_KILLPROC:  /* resolve signal information */
+                SetExceptionChain((ULONG)-1);
+                goto continuesearch;
         }
         goto CrashAndBurn;
 
