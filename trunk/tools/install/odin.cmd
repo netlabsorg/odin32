@@ -244,8 +244,8 @@ call directory doc
 call directory ".."
 
 call directory dlldir;
-"wic.exe "curdir"\"installarchive" -a 2 *.dll pe.exe regsvr32.exe *.ini win32k.sys win32k.ddp";
-rem "wic.exe "curdir"\"installarchive" -a 2 *.dll pe.exe regsvr32.exe odin.ini";
+"wic.exe "curdir"\"installarchive" -a 2 *.dll pe.exe odininst.exe regsvr32.exe *.ini win32k.sys win32k.ddp";
+rem "wic.exe "curdir"\"installarchive" -a 2 *.dll pe.exe odininst.exe regsvr32.exe odin.ini";
 
 call directory "Glide"
 "wic.exe "curdir"\"installarchive" -a 3 *.dll";
@@ -255,9 +255,6 @@ call directory "Voodoo1"
 
 call directory "..\Voodoo2"
 "wic.exe "curdir"\"installarchive" -a 5 *.dll";
-
-call directory "..\..\..\..\tools\bin"
-"wic.exe "curdir"\"installarchive" -a 2 odininst.exe";
 
 call directory curdir;
 
