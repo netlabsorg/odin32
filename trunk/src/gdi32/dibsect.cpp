@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.23 2000-03-25 12:19:07 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.24 2000-04-01 15:05:30 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -402,12 +402,13 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
           handle, hdcDest, hps, hwndDest, nXdest, nYdest, nDestWidth, nDestHeight,
           nXsrc, nYsrc, nSrcWidth, nSrcHeight, Rop, fFlip));
 
+  //win32 coordinates are of the left top, OS/2 expects left bottom
   point[0].x = nXdest;
-  point[0].y = nYdest;
+  point[0].y = pOS2bmp->cy - nYdest - nDestHeight;
   point[1].x = nXdest + nDestWidth - 1;
-  point[1].y = nYdest + nDestHeight - 1;
+  point[1].y = pOS2bmp->cy - nYdest - 1;
   point[2].x = nXsrc;
-  point[2].y = nYsrc;
+  point[2].y = pOS2bmp->cy - nYsrc - nSrcHeight;
   if(nXsrc + nSrcWidth > pOS2bmp->cx)
   {
     point[3].x = pOS2bmp->cx;
@@ -420,7 +421,8 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
     point[3].y = pOS2bmp->cy;
   }
   else
-    point[3].y = nYsrc + nSrcHeight;
+    point[3].y = pOS2bmp->cy - nYsrc;
+
 
 #if 1
   if(fFlip & FLIP_VERT)
