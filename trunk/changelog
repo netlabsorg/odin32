@@ -1,8 +1,7 @@
- /* $Id: changelog,v 1.551 1999-12-18 21:48:25 sandervl Exp $ */
+ /* $Id: changelog,v 1.552 1999-12-19 10:37:34 achimha Exp $ */
 
  99-12-18: Achim Hasenmueller <achimha@innotek.de>
         - COMCTL32: Merged with latest WINE 991212 code
-                    Treeview still to do                    
 
  99-12-18: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- KERNEL32: Partially implemented GetThreadContext, Read/WriteProcessMemory
