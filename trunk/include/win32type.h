@@ -1,4 +1,4 @@
-/* $Id: win32type.h,v 1.2 1999-05-27 15:17:59 phaller Exp $ */
+/* $Id: win32type.h,v 1.3 1999-05-31 22:08:08 phaller Exp $ */
 
 #ifndef __WIN32TYPE_H__
 #define __WIN32TYPE_H__
@@ -6,6 +6,37 @@
 #define NEAR
 #define FAR
 #define UNALIGNED
+
+
+#ifndef VOID
+#  define VOID void
+#endif
+
+#ifndef LONG
+#  define LONG long
+#endif
+
+#ifndef ULONG
+#  define ULONG unsigned long
+#endif
+
+#ifndef SHORT
+#  define SHORT short
+#endif
+
+#ifndef USHORT
+#  define USHORT unsigned short
+#endif
+
+#ifndef CHAR
+#  define CHAR char
+#endif
+
+#ifndef UCHAR
+#  define UCHAR unsigned char
+#endif
+
+
 
 #define LPVOID  VOID *
 #define LPCVOID const VOID *

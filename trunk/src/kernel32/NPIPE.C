@@ -1,4 +1,4 @@
-/* $Id: NPIPE.C,v 1.1 1999-05-24 20:19:42 ktk Exp $ */
+/* $Id: NPIPE.C,v 1.2 1999-05-31 22:08:09 phaller Exp $ */
 
 /*
  *
@@ -11,7 +11,9 @@
  * Copyright 1998 Sander van Leeuwen
  *
  */
+
 #include <os2win.h>
+#include "misc.h"
 
 //TODO: Not done!!
 
