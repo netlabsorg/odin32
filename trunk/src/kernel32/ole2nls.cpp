@@ -1,4 +1,4 @@
-/* $Id: ole2nls.cpp,v 1.1 2000-09-03 18:05:40 phaller Exp $ */
+/* $Id: ole2nls.cpp,v 1.2 2000-09-08 04:28:47 phaller Exp $ */
 
 /*
  *	National Language Support library
@@ -177,21 +177,6 @@ static const struct tagLOCALE_NAME2ID {
 
 static char *GetLocaleSubkeyName( DWORD lctype );
 
-/***********************************************************************
- *           GetUserDefaultLCID       [KERNEL32.425]
- */
-LCID WINAPI GetUserDefaultLCID(void)
-{
-	return MAKELCID( GetUserDefaultLangID() , SORT_DEFAULT );
-}
-
-/***********************************************************************
- *         GetSystemDefaultLCID       [KERNEL32.400]
- */
-LCID WINAPI GetSystemDefaultLCID(void)
-{
-	return GetUserDefaultLCID();
-}
 
 #define NLS_MAX_LANGUAGES 20
 typedef struct {
@@ -365,6 +350,8 @@ END:
 /***********************************************************************
  *         GetUserDefaultLangID       [KERNEL32.426]
  */
+#if 0
+// PH Note: this is better implemented in lang.cpp
 LANGID WINAPI GetUserDefaultLangID(void)
 {
 	/* caching result, if defined from environment, which should (?) not change during a WINE session */
@@ -409,15 +396,7 @@ LANGID WINAPI GetUserDefaultLangID(void)
 	}
 	return userLCID;
 }
-
-/***********************************************************************
- *         GetSystemDefaultLangID     [KERNEL32.401]
- */
-LANGID WINAPI GetSystemDefaultLangID(void)
-{
-	return GetUserDefaultLangID();
-}
-
+#endif
 
 /*****************************************************************************
  * Name      : LCID WIN32API ConvertDefaultLocale

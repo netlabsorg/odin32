@@ -1,4 +1,4 @@
-/* $Id: lang.cpp,v 1.27 2000-09-03 18:04:55 phaller Exp $ */
+/* $Id: lang.cpp,v 1.28 2000-09-08 04:28:47 phaller Exp $ */
 /*
  * Win32 language API functions for OS/2
  *
@@ -148,8 +148,6 @@ BOOL WIN32API IsValidCodePage(UINT CodePage)
 }
 //******************************************************************************
 //******************************************************************************
-#if 0
-PHS: disabled for ole2nls.cpp
 LCID WIN32API GetUserDefaultLCID(void)
 {
   dprintf2(("KERNEL32: GetUserDefaultLCID: returns %x", MAKELCID(GetLanguageId(), SORT_DEFAULT)));
@@ -176,7 +174,6 @@ LANGID WIN32API GetSystemDefaultLangID(void)
   dprintf2(("KERNEL32: GetSystemDefaultLangID returns %x", MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US)));
   return(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US));
 }
-#endif
 
 //******************************************************************************
 //******************************************************************************
