@@ -1,9 +1,6 @@
-/* $Id: winerror.h,v 1.10 2001-04-26 19:23:33 sandervl Exp $ */
 #ifndef __WINE_WINERROR_H
 #define __WINE_WINERROR_H
 
-
-extern int WIN32_LastError;
 
 #define FACILITY_NULL      0
 #define FACILITY_RPC       1
