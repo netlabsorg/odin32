@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.34 1999-08-26 12:55:36 sandervl Exp $
+# $Id: makefile,v 1.35 1999-08-26 15:05:14 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -188,14 +188,17 @@ console.OBJ: \
 
 conin.OBJ: \
     .\conin.h \
+    .\hmdevice.h \
     .\conin.cpp
 
 conout.OBJ: \
     .\conout.h \
+    .\hmdevice.h \
     .\conout.cpp
 
 conbuffer.OBJ: \
     .\conbuffer.h \
+    .\hmdevice.h \
     .\conbuffer.cpp
 
 lfile.OBJ: \
@@ -264,11 +267,13 @@ hmdevice.OBJ: \
 
 hmopen32.OBJ: \
         .\hmopen32.cpp \
+        .\hmdevice.h \
         .\hmopen32.h \
         $(PDWIN32_INCLUDE)\handlemanager.h
 
 hmobjects.obj: \
         .\hmobjects.cpp \
+        .\hmdevice.h \
         .\hmobjects.h \
         $(PDWIN32_INCLUDE)\handlemanager.h
 
@@ -303,7 +308,7 @@ async.OBJ: \
         $(PDWIN32_INCLUDE)\unicode.h
 
 virtual.obj:   virtual.cpp $(PDWIN32_INCLUDE)\win\virtual.h $(PDWIN32_INCLUDE)\handlemanager.h mmap.h
-mmap.obj:      mmap.cpp mmap.h $(PDWIN32_INCLUDE)\vmutex.h oslibdos.h
+mmap.obj:      mmap.cpp mmap.h $(PDWIN32_INCLUDE)\vmutex.h oslibdos.h 
 
 pefile.OBJ:    pefile.cpp $(PDWIN32_INCLUDE)\pefile.h
 winimage.OBJ:  winimage.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h $(PDWIN32_INCLUDE)\pefile.h $(PDWIN32_INCLUDE)\winres.h initterm.h $(PDWIN32_INCLUDE)\win\virtual.h oslibmisc.h

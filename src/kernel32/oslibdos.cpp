@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.1 1999-08-26 12:56:02 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.2 1999-08-26 15:05:14 sandervl Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -19,13 +19,14 @@
 #include <string.h>
 #include <win32type.h>
 #include <misc.h>
-#include <initterm.h>
+#include "initterm.h"
 #include "oslibdos.h"
 
 //******************************************************************************
 //******************************************************************************
 DWORD OSLibDosAllocMem(LPVOID *lplpMemAddr, DWORD size, DWORD flags)
 {
+//  return DosAllocMem(lplpMemAddr, size, flags | flAllocMem);
   return DosAllocMem(lplpMemAddr, size, flags);
 }
 //******************************************************************************
@@ -55,6 +56,102 @@ DWORD OSLibDosSetMem(LPVOID lpMemAddr, DWORD size, DWORD flags)
   	default:
   		return rc;
   }
+}
+//******************************************************************************
+//******************************************************************************
+DWORD OSLibDosOpen(char *lpszFileName, DWORD flags)
+{
+ APIRET rc;
+ HFILE  hFile;
+ ULONG  ulAction;
+ DWORD  os2flags = OPEN_FLAGS_NOINHERIT;
+
+
+  if(flags & OSLIB_ACCESS_READONLY)
+	os2flags |= OPEN_ACCESS_READONLY;
+  else
+  if(flags & OSLIB_ACCESS_READWRITE)
+	os2flags |= OPEN_ACCESS_READWRITE;
+
+  if(flags & OSLIB_ACCESS_SHAREDENYNONE)
+	os2flags |= OPEN_SHARE_DENYNONE;
+  else
+  if(flags & OSLIB_ACCESS_SHAREDENYREAD)
+	os2flags |= OPEN_SHARE_DENYREAD;
+  else
+  if(flags & OSLIB_ACCESS_SHAREDENYWRITE)
+	os2flags |= OPEN_SHARE_DENYWRITE;
+
+  rc = DosOpen(lpszFileName,                     /* File path name */
+               &hFile,                   /* File handle */
+               &ulAction,                      /* Action taken */
+               0L,                             /* File primary allocation */
+               0L,                     /* File attribute */
+               OPEN_ACTION_FAIL_IF_NEW |
+               OPEN_ACTION_OPEN_IF_EXISTS,     /* Open function type */
+               os2flags,
+               0L);                            /* No extended attribute */
+
+  if(rc) {
+	return 0;
+  }
+  else	return hFile;
+}
+//******************************************************************************
+//******************************************************************************
+DWORD OSLibDosClose(DWORD hFile)
+{
+  return DosClose(hFile);
+}
+//******************************************************************************
+//******************************************************************************
+DWORD OSLibDosGetFileSize(DWORD hFile)
+{
+ ULONG  ulLocal, filesize = 0;
+
+  DosSetFilePtr(hFile, 0L, FILE_BEGIN, &ulLocal);
+  DosSetFilePtr(hFile, 0L, FILE_END, &filesize);
+  DosSetFilePtr(hFile, 0L, FILE_BEGIN, &ulLocal);
+  return filesize;
+}
+//******************************************************************************
+//******************************************************************************
+DWORD OSLibDosRead(DWORD hFile, LPVOID lpBuffer, DWORD size, DWORD *nrBytesRead)
+{
+  return DosRead(hFile, lpBuffer, size, nrBytesRead);
+}
+//******************************************************************************
+//******************************************************************************
+DWORD OSLibDosWrite(DWORD hFile, LPVOID lpBuffer, DWORD size, DWORD *nrBytesWritten)
+{
+  return DosWrite(hFile, lpBuffer, size, nrBytesWritten);
+}
+//******************************************************************************
+//******************************************************************************
+DWORD OSLibDosSetFilePtr(DWORD hFile, DWORD offset, DWORD method)
+{
+ DWORD  os2method;
+ DWORD  newoffset;
+ APIRET rc;
+
+  switch(method) {
+  case OSLIB_SETPTR_FILE_CURRENT:
+	os2method = FILE_CURRENT;
+	break;
+  case OSLIB_SETPTR_FILE_BEGIN:
+	os2method = FILE_BEGIN	;
+	break;
+  case OSLIB_SETPTR_FILE_END:
+	os2method = FILE_END;
+	break;
+  default:
+	return OSLIB_ERROR_INVALID_PARAMETER;
+  }
+  rc = DosSetFilePtr(hFile, offset, os2method, &newoffset);
+  if(rc) {
+	return -1;
+  }
+  else	return newoffset;
 }
 //******************************************************************************
 //******************************************************************************
