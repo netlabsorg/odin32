@@ -1,10 +1,14 @@
- /* $Id: ChangeLog,v 1.926 2000-05-03 21:00:28 achimha Exp $ */
+ /* $Id: ChangeLog,v 1.927 2000-05-03 22:34:01 sandervl Exp $ */
 
  2000-05-04: Achim Hasenmueller <achimha@innotek.de>
 	- USER32: Applied fix to GetDCEx where the check to see if
 	          the window has its own DC was applying invalid
 	          style flags due to missing parantheses
 	          (reported by Oliver Braun)
+
+ 2000-05-04: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32:   Menu font from bold to normal again. Bold fonts are too
+                    big (rp7 menu split in two parts).
 
  2000-05-03: Sander van Leeuwen <sandervl@xs4all.nl>
 	- WSOCK32:  Fixed WSAEFAULT errors in setsockopt (16 bits TCP/IP stack
