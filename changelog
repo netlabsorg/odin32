@@ -1,8 +1,12 @@
-/* $Id: changelog,v 1.1957 2002-02-06 16:32:08 sandervl Exp $ */
+/* $Id: changelog,v 1.1958 2002-02-06 16:36:40 sandervl Exp $ */
 
  2002-02-06: Sander van Leeuwen <sandervl@xs4all.nl>
     - WSOCK32:  o minor recv update for error handling
     - USER32:   o Ported TrackMouseEvent (Wine 20020122)
+    - KERNEL32: o SetWin32TIB update (switch to force switch to win32 FS selector)
+                o Force switch to win32 FS selector when calling PE image
+                  entrypoints (necessary for Odin32 applications that use
+                  PE dlls (like Opera))
 
  2002-02-05: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Ported SendMessageCallbackA/W, SendMessageTimeoutA/W,
