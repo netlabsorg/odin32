@@ -1,4 +1,4 @@
-/* $Id: dinput.cpp,v 1.5 2000-03-19 09:16:58 mike Exp $ */
+/* $Id: dinput.cpp,v 1.6 2000-05-09 18:58:40 sandervl Exp $ */
 /*              DirectInput
  *
  * Copyright 1998 Marcus Meissner
@@ -994,8 +994,8 @@ static HRESULT WINAPI SysMouseAImpl_SetDataFormat(
 
 
 /* Our private mouse event handler */
-static void WINAPI dinput_mouse_event( DWORD dwFlags, DWORD dx, DWORD dy,
-                                      DWORD cButtons, DWORD dwExtraInfo )
+static BOOL WINAPI dinput_mouse_event( DWORD dwFlags, DWORD dx, DWORD dy,
+                                       DWORD cButtons, DWORD dwExtraInfo )
 {
   DWORD posX, posY, keyState, xtime, extra;
   SysMouseAImpl* This = (SysMouseAImpl*) current_lock;
@@ -1012,16 +1012,20 @@ static void WINAPI dinput_mouse_event( DWORD dwFlags, DWORD dx, DWORD dy,
     xtime = wme->time;
     extra = (DWORD)wme->hWnd;
 
+    if(This->win && This->win != wme->hWnd) {
+	return FALSE;
+    }
+
     assert( dwFlags & MOUSEEVENTF_ABSOLUTE );
     posX = (dx * GetSystemMetrics(SM_CXSCREEN)) >> 16;
     posY = (dy * GetSystemMetrics(SM_CYSCREEN)) >> 16;
   } else {
     ERR("Mouse event not supported...\n");
     LeaveCriticalSection(&(This->crit));
-    return ;
+    return FALSE;
   }
 
-  TRACE("DINPUT-SMAI: event %ld, %ld", posX, posY);
+  TRACE("DINPUT-SMAI: event %x %ld, %ld", dwFlags, posX, posY);
 
   if ( dwFlags & MOUSEEVENTF_MOVE ) {
     if (This->absolute) {
@@ -1093,6 +1097,8 @@ static void WINAPI dinput_mouse_event( DWORD dwFlags, DWORD dx, DWORD dy,
   This->prevX = posX;
   This->prevY = posY;
   LeaveCriticalSection(&(This->crit));
+
+  return TRUE;
 }
 
 
@@ -1104,7 +1110,7 @@ static HRESULT WINAPI SysMouseAImpl_Acquire(LPDIRECTINPUTDEVICE2A iface)
   ICOM_THIS(SysMouseAImpl,iface);
   RECT  rect;
 
-  TRACE("(this=%p)\n",This);
+  TRACE("SysMouseAImpl_Acquire: (this=%p)\n",This);
 
   if (This->acquired == 0) {
     POINT       point;
@@ -1150,7 +1156,7 @@ static HRESULT WINAPI SysMouseAImpl_Unacquire(LPDIRECTINPUTDEVICE2A iface)
 {
   ICOM_THIS(SysMouseAImpl,iface);
 
-  TRACE("(this=%p)\n",This);
+  TRACE("SysMouseAImpl_Unacquire: (this=%p)\n",This);
 
   /* Reinstall previous mouse event handler */
   MOUSE_Enable(This->prev_handler);
