@@ -1,4 +1,4 @@
-/* $Id: Fake.c,v 1.1 2001-09-17 01:41:13 bird Exp $
+/* $Id: Fake.c,v 1.2 2001-09-26 03:58:37 bird Exp $
  *
  * Fake stubs for the ldr and kernel functions we imports or overloads.
  *
@@ -152,6 +152,7 @@ APIRET APIENTRY DosQueryHeaderInfo(HMODULE hmod,
 /*******************************************************************************
 *   Internal Functions                                                         *
 *******************************************************************************/
+#pragma info(nopar)
 ULONG LDRCALL   fakeLDRLoadExe(PSZ pszFilename, ldrrei_t *pEI);
 ULONG LDRCALL   fakeldrGetModule(PSZ pszFilename, ULONG ul);
 ULONG LDRCALL   fakeldrGetMte(PCHAR pachFilename, USHORT cchFilename, UCHAR fchType, UCHAR fchClass, PPMTE ppmte);
@@ -2209,7 +2210,7 @@ PTCB  KRNLCALL fakeTKQueryWakeup(ULONG ulSleepId, ULONG flWakeupType)
 {
     DUMMY();
     printf("fakeTKQueryWakeup:                     - not implemented\n");
-    return ERROR_NOT_SUPPORTED;
+    return NULL;
 }
 
 /**
@@ -2272,4 +2273,126 @@ VOID    KRNLCALL fakevmRecalcShrBound(
     return;
 }
 
+
+/**
+ * Resolves the ordinal number of an name export.
+ * @returns OS2 return code. (I.e. ON_ERROR on success)
+ * @param   pMTE            Pointer to the module table entry for the
+ *                          module.
+ * @param   pszExportName   Name to resolve. This is case sensitive.
+ * @param   pusOrdinal      Pointer to variable which on success will hold
+ *                          the ordinal value found for the name export.
+ */
+ULONG LDRCALL   fakeldrGetOrdNum(PMTE pMTE, PSZ pszExportName, PUSHORT pusOrdinal)
+{
+    DUMMY();
+    printf("fakeldrGetOrdNum:                      - not implemented\n");
+    return ERROR_NOT_SUPPORTED;
+}
+
+
+/**
+ * Checks if a module was loaded using DosLoadModule.
+ * This is called from LDRGetProcAddr and LDRFreeModule.
+ * @returns NO_ERROR if the module was LoadModuled or executable.
+ *          ERROR_INVALID_HANDLE if not LoadModuled.
+ * @param   hmte    MTE handle.
+ * @param   pptda   Pointer to the PTDA of the process calling. (current)
+ * @param   pcUsage Pointer to usage variable. (output)
+ *                  The usage count is returned.
+ * @sketch
+ */
+ULONG LDRCALL   fakeldrWasLoadModuled(HMTE hmte, PPTDA pptda, PULONG pcUsage)
+{
+    DUMMY();
+    printf("fakeldrWasLoadModuled:                 - not implemented\n");
+    return ERROR_NOT_SUPPORTED;
+}
+
+/**
+ * LDRGetProcAddr gets address and proctype for a entry point to a module.
+ * @returns NO_ERROR if the module was LoadModuled.
+ *          ERROR_INVALID_HANDLE if not LoadModuled.
+ * @param   hmte            Handle of module.
+ * @param   ulOrdinal       Procedure ordinal.
+ * @param   pszName         Pointer to procedure name.
+ *                          NULL is allowed. Ignored if ulOrdinal is not zero.
+ * @param   pulAddress      Pointer to address variable. (output)
+ * @param   fFlat           TRUE if a flat 0:32 address is to be returned.
+ *                          FALSE if a far 16:16 address is to be returned.
+ * @param   pulProcType     Pointer to procedure type variable. (output)
+ *                          NULL is allowed. (DosQueryProcAddr uses NULL)
+ *                          In user space.
+ * @sketch
+ */
+ULONG LDRCALL fakeLDRGetProcAddr(HMTE hmte, ULONG ulOrdinal, PCSZ pszName, PULONG pulAddress, BOOL fFlat, PULONG pulProcType)
+{
+    DUMMY();
+    printf("fakeLDRGetProcAddr:                    - not implemented\n");
+    return ERROR_NOT_SUPPORTED;
+}
+
+
+/**
+ * Frees a task.
+ * @param   pPTDA   Pointer to per task data area of the task to be freed.
+ */
+void KRNLCALL fakeLDRFreeTask(PPTDA pPTDA)
+{
+    DUMMY();
+    printf("fakeLDRFreeTask:                       - not implemented\n");
+}
+
+/**
+ * Converts 16:32 address to FLAT 32-bits address.
+ * @returns Flat 32-bits address.
+ *          -1 on error.
+ * @param   ulOffset    Offset.
+ * @param   usSel       Selector.
+ */
+PVOID KRNLCALL   fakeSELVirtToLin(ULONG ulOffset, USHORT usSel)
+{
+    DUMMY();
+    printf("fakeSELVirtToLin:                      - not implemented\n");
+    return (void*)-1;
+}
+
+/**
+ * Converts selector to linar address.
+ * @returns Flat 32-bits address.
+ *          -1 on error.
+ * @param   usSel       Selector.
+ */
+PVOID KRNLCALL   fakeSELConvertToLinear(USHORT usSel, PPTDA pPTDA)
+{
+    DUMMY();
+    printf("fakeSELConvertToLinear:                - not implemented\n");
+    return (void*)-1;
+}
+
+/**
+ * Converts a 32-bit flat pointer to an selector if possible.
+ * @returns Selector (eax), offset (edx).
+ * @param   pv      Flat 32-bit address.
+ * @param   ulRPL   Requested privilege level of the selector.
+ * @param   hPTDA   PTDA handle. NULLHANDLE means current PTDA.
+ */
+USHORT KRNLCALL  fakeSELConvertToSelector(PVOID pv, ULONG ulRPL, HPTDA hPTDA)
+{
+    DUMMY();
+    printf("fakeSELConvertToSelector:              - not implemented\n");
+    return ERROR_NOT_SUPPORTED;
+}
+
+/**
+ * Allocates a GDT selector.
+ * @returns OS2 return code. (I.e. NO_ERROR on success.)
+ * @param   pusSel  Where to put the selector on successful return.
+ */
+ULONG  KRNLCALL  fakeSELAllocGDT(PUSHORT pusSel)
+{
+    DUMMY();
+    printf("fakeSELAllocGDT:                       - not implemented\n");
+    return ERROR_NOT_SUPPORTED;
+}
 
