@@ -1,7 +1,11 @@
-/* $Id: ChangeLog,v 1.2688 2004-02-27 14:37:31 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2689 2004-02-27 18:56:37 sandervl Exp $ */
 
  2004-02-27: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Re-assert DC transformation and y-inversion after SetWindowPos
+    - GDI32:    o SetDIBitsToDevice: fixed bugs when dealing with negative height
+                o StretchDIBits: If biClrUsed equals 0, set it to (1<<bitcount)
+                                 Disabled DIB_PAL_COLORS workaround
+                o SetDIBitsToDevice: removed Matrix driver bug workaround; 
 
  2003-02-24: Dietrich Teickner <Dietrich_Teickner@t-online   >
     - KERNEL32: o CreateProcess fix
