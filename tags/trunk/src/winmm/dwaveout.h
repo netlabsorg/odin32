@@ -1,4 +1,4 @@
-/* $Id: dwaveout.h,v 1.4 1999-08-24 21:21:11 phaller Exp $ */
+/* $Id: dwaveout.h,v 1.5 1999-10-22 18:09:16 sandervl Exp $ */
 
 /*
  * Wave playback class
@@ -47,6 +47,7 @@ public:
               ULONG nSamplesPerSec, ULONG sampleSize);
 
   static BOOL find(DartWaveOut *dwave);
+  static int  getNumDevices();
 
 protected:
   static void mciError(ULONG ulError);

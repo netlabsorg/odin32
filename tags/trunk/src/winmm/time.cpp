@@ -1,4 +1,4 @@
-/* $Id: time.cpp,v 1.4 1999-08-31 20:25:17 phaller Exp $ */
+/* $Id: time.cpp,v 1.5 1999-10-22 18:09:16 sandervl Exp $ */
 
 /*
  * Timer MM apis
@@ -14,7 +14,6 @@
 /****************************************************************************
  * Includes                                                                 *
  ****************************************************************************/
-
 #include <os2win.h>
 #include <odinwrap.h>
 #include <misc.h>
@@ -220,7 +219,7 @@ ODINFUNCTION2(MMRESULT, timeGetSystemTime,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION0(DWORD, timeGetTime)
+DWORD WIN32API timeGetTime()
 {
   return O32_timeGetTime();
 }
