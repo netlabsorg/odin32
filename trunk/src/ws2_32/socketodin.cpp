@@ -1,4 +1,4 @@
-/* $Id: socketodin.cpp,v 1.2 2001-10-11 19:24:38 sandervl Exp $ */
+/* $Id: socketodin.cpp,v 1.3 2002-07-03 09:47:37 sandervl Exp $ */
 
 #include <odin.h>
 #include <winsock2.h>
@@ -77,6 +77,14 @@ ODINFUNCTION5(int,WS2getsockopt,
    }
    ret = getsockopt(s, level, optname, (char *)optval, optlen);
    return ret;
+}
+//******************************************************************************
+//******************************************************************************
+int WIN32API WSASendDisconnect(SOCKET s, LPWSABUF lpOutboundDisconnectData)
+{
+   dprintf(("WSASendDisconnect %x %x STUB", s, lpOutboundDisconnectData));
+   WSASetLastError(NO_ERROR);
+   return NO_ERROR;
 }
 //******************************************************************************
 //******************************************************************************
