@@ -545,7 +545,7 @@ EXPORTS
      HeapReAlloc                = _HeapReAlloc@16             @465
 ;    HeapQueryTagsW             = _HeapQueryTagsW@??                    ;NT
 ;    HeapSetFlags               = _HeapSetFlags@??            @466
-;    HeapSize                   = _HeapSize@12                @467      ; reserved linker word
+     "HeapSize"                   = _HeapSize@12                @467      ; reserved linker word
      HeapUnlock                 = _HeapUnlock@4               @468
 ;    HeapUsage                  = _HeapUsage@??                         ;NT
      HeapValidate               = _HeapValidate@12            @469

@@ -1,4 +1,4 @@
-/* $Id: heap.cpp,v 1.2 1999-05-31 22:08:08 phaller Exp $ */
+/* $Id: heap.cpp,v 1.3 1999-05-31 23:13:12 phaller Exp $ */
 
 /*
  *
@@ -94,10 +94,8 @@ BOOL WIN32API HeapDestroy(HANDLE hHeap)
   return(TRUE);
 }
 //******************************************************************************
-//SvL: Heapsize is a reserved word, so the linker chokes on it if present in the .def file
 //******************************************************************************
 DWORD WIN32API HeapSize(HANDLE hHeap, DWORD arg2, PVOID  arg3)
-#pragma export(OS2HeapSize, "HeapSize", 467)
 {
  OS2Heap *curheap = OS2Heap::find(hHeap);
 
