@@ -1,4 +1,4 @@
-/* $Id: shlview.cpp,v 1.5 1999-11-10 22:13:10 phaller Exp $ */
+/* $Id: shlview.cpp,v 1.6 2000-01-08 02:24:13 phaller Exp $ */
 /*
  * ShellView
  *
@@ -67,6 +67,7 @@ typedef struct
    ICOM_VTABLE(IDropSource)*             lpvtblDropSource;
    ICOM_VTABLE(IViewObject)*             lpvtblViewObject;
    IShellFolder*  pSFParent;
+   IShellFolder2*  pSF2Parent;
    IShellBrowser* pShellBrowser;
    ICommDlgBrowser*                      pCommDlgBrowser;
    HWND     hWnd;
@@ -158,9 +159,8 @@ IShellView * IShellView_Constructor( IShellFolder * pFolder)
    sv->lpvtblViewObject=&vovt;
 
    sv->pSFParent  = pFolder;
-
-   if(pFolder)
-     IShellFolder_AddRef(pFolder);
+   if(pFolder) IShellFolder_AddRef(pFolder);
+   IShellFolder_QueryInterface(sv->pSFParent, &IID_IShellFolder2, (LPVOID*)&sv->pSF2Parent);
 
    TRACE("(%p)->(%p)\n",sv, pFolder);
    shell32_ObjCount++;
@@ -226,14 +226,17 @@ static void CheckToolbar(IShellViewImpl * This)
 
    TRACE("\n");
 
-   IShellBrowser_SendControlMsg(This->pShellBrowser, FCW_TOOLBAR, TB_CHECKBUTTON,
-      FCIDM_TB_SMALLICON, (This->FolderSettings.ViewMode==FVM_LIST)? TRUE : FALSE, &result);
-   IShellBrowser_SendControlMsg(This->pShellBrowser, FCW_TOOLBAR, TB_CHECKBUTTON,
-      FCIDM_TB_REPORTVIEW, (This->FolderSettings.ViewMode==FVM_DETAILS)? TRUE : FALSE, &result);
-   IShellBrowser_SendControlMsg(This->pShellBrowser, FCW_TOOLBAR, TB_ENABLEBUTTON,
-      FCIDM_TB_SMALLICON, TRUE, &result);
-   IShellBrowser_SendControlMsg(This->pShellBrowser, FCW_TOOLBAR, TB_ENABLEBUTTON,
-      FCIDM_TB_REPORTVIEW, TRUE, &result);
+   if (IsInCommDlg(This))
+   {
+     IShellBrowser_SendControlMsg(This->pShellBrowser, FCW_TOOLBAR, TB_CHECKBUTTON,
+        FCIDM_TB_SMALLICON, (This->FolderSettings.ViewMode==FVM_LIST)? TRUE : FALSE, &result);
+     IShellBrowser_SendControlMsg(This->pShellBrowser, FCW_TOOLBAR, TB_CHECKBUTTON,
+        FCIDM_TB_REPORTVIEW, (This->FolderSettings.ViewMode==FVM_DETAILS)? TRUE : FALSE, &result);
+     IShellBrowser_SendControlMsg(This->pShellBrowser, FCW_TOOLBAR, TB_ENABLEBUTTON,
+        FCIDM_TB_SMALLICON, TRUE, &result);
+     IShellBrowser_SendControlMsg(This->pShellBrowser, FCW_TOOLBAR, TB_ENABLEBUTTON,
+        FCIDM_TB_REPORTVIEW, TRUE, &result);
+  }
 }
 
 /**********************************************************
@@ -305,32 +308,33 @@ static BOOL ShellView_CreateList (IShellViewImpl * This)
 static BOOL ShellView_InitList(IShellViewImpl * This)
 {
    LVCOLUMNA lvColumn;
-   CHAR        szString[50];
+   SHELLDETAILS	sd;
+   int	i;
+   char	szTemp[50];
 
    TRACE("%p\n",This);
 
    ListView_DeleteAllItems(This->hWndList);
 
-   /*initialize the columns */
-   lvColumn.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT;   /*  |  LVCF_SUBITEM;*/
-   lvColumn.fmt = LVCFMT_LEFT;
-   lvColumn.pszText = szString;
+   lvColumn.mask = LVCF_FMT | LVCF_WIDTH | LVCF_TEXT;
+   lvColumn.pszText = szTemp;
 
-   lvColumn.cx = 120;
-   LoadStringA(shell32_hInstance, IDS_SHV_COLUMN1, szString, sizeof(szString));
-   ListView_InsertColumnA(This->hWndList, 0, &lvColumn);
-
-   lvColumn.cx = 60;
-   LoadStringA(shell32_hInstance, IDS_SHV_COLUMN2, szString, sizeof(szString));
-   ListView_InsertColumnA(This->hWndList, 1, &lvColumn);
-
-   lvColumn.cx = 120;
-   LoadStringA(shell32_hInstance, IDS_SHV_COLUMN3, szString, sizeof(szString));
-   ListView_InsertColumnA(This->hWndList, 2, &lvColumn);
-
-   lvColumn.cx = 60;
-   LoadStringA(shell32_hInstance, IDS_SHV_COLUMN4, szString, sizeof(szString));
-   ListView_InsertColumnA(This->hWndList, 3, &lvColumn);
+   if (This->pSF2Parent)
+   {
+      for (i=0; 1; i++)
+      { 
+        if (!SUCCEEDED(IShellFolder2_GetDetailsOf(This->pSF2Parent, NULL, i, &sd)))
+	  break;
+	lvColumn.fmt = sd.fmt;
+	lvColumn.cx = sd.cxChar*8; /* chars->pixel */
+	 StrRetToStrNA( szTemp, 50, &sd.str, NULL);
+	ListView_InsertColumnA(This->hWndList, i, &lvColumn);
+      }
+   }
+   else
+   {
+      FIXME("no SF2\n");
+   }
 
    ListView_SetImageList(This->hWndList, ShellSmallIconList, LVSIL_SMALL);
    ListView_SetImageList(This->hWndList, ShellBigIconList, LVSIL_NORMAL);
@@ -355,7 +359,6 @@ static INT CALLBACK ShellView_CompareItems(LPVOID lParam1, LPVOID lParam2, LPARA
    return ret;
 }
 
-
 /*************************************************************************
  * ShellView_ListViewCompareItems
  *
@@ -379,7 +382,6 @@ static INT CALLBACK ShellView_CompareItems(LPVOID lParam1, LPVOID lParam2, LPARA
  * make LISTVIEW_SORT_INFO obsolete
  * the way this function works is only usable if we had only
  * filesystemfolders  (25/10/99 jsch)
- *
  */
 static INT CALLBACK ShellView_ListViewCompareItems(LPVOID lParam1, LPVOID lParam2, LPARAM lpData)
 {
@@ -655,6 +657,8 @@ static void ShellView_MergeViewMenu(IShellViewImpl * This, HMENU hSubMenu)
 
 /**********************************************************
 *   ShellView_GetSelections()
+*
+* - fills the this->apidl list with the selected objects
 *
 * RETURNS
 *  number of selected items
@@ -969,21 +973,25 @@ static LRESULT ShellView_OnCommand(IShellViewImpl * This,DWORD dwCmdID, DWORD dw
      case FCIDM_SHVIEW_SMALLICON:
        This->FolderSettings.ViewMode = FVM_SMALLICON;
        SetStyle (This, LVS_SMALLICON, LVS_TYPEMASK);
+       CheckToolbar(This);
        break;
 
      case FCIDM_SHVIEW_BIGICON:
        This->FolderSettings.ViewMode = FVM_ICON;
        SetStyle (This, LVS_ICON, LVS_TYPEMASK);
+       CheckToolbar(This);
        break;
 
      case FCIDM_SHVIEW_LISTVIEW:
        This->FolderSettings.ViewMode = FVM_LIST;
        SetStyle (This, LVS_LIST, LVS_TYPEMASK);
+       CheckToolbar(This);
        break;
 
      case FCIDM_SHVIEW_REPORTVIEW:
        This->FolderSettings.ViewMode = FVM_DETAILS;
        SetStyle (This, LVS_REPORT, LVS_TYPEMASK);
+       CheckToolbar(This);
        break;
 
      /* the menu-ID's for sorting are 0x30... see shrec.rc */
@@ -995,7 +1003,6 @@ static LRESULT ShellView_OnCommand(IShellViewImpl * This,DWORD dwCmdID, DWORD dw
        This->ListViewSortInfo.bIsAscending = TRUE;
        This->ListViewSortInfo.nLastHeaderID = This->ListViewSortInfo.nHeaderID;
        ListView_SortItems(This->hWndList, ShellView_ListViewCompareItems, (LPARAM) (&(This->ListViewSortInfo)));
-       CheckToolbar(This);
        break;
 
      default:
@@ -1012,7 +1019,6 @@ static LRESULT ShellView_OnNotify(IShellViewImpl * This, UINT CtlID, LPNMHDR lpn
 {  LPNMLISTVIEW  lpnmlv = (LPNMLISTVIEW)lpnmh;
    NMLVDISPINFOA *lpdi = (NMLVDISPINFOA *)lpnmh;
    LPITEMIDLIST pidl;
-   STRRET   str;
 
    TRACE("%p CtlID=%u lpnmh->code=%x\n",This,CtlID,lpnmh->code);
 
@@ -1066,65 +1072,24 @@ static LRESULT ShellView_OnNotify(IShellViewImpl * This, UINT CtlID, LPNMHDR lpn
        TRACE("-- LVN_GETDISPINFOA %p\n",This);
        pidl = (LPITEMIDLIST)lpdi->item.lParam;
 
-
-       if(lpdi->item.iSubItem)                /*is the sub-item information being requested?*/
-       { if(lpdi->item.mask & LVIF_TEXT)  /*is the text being requested?*/
-         { if(_ILIsValue(pidl))          /*is This a value or a folder?*/
-           { switch (lpdi->item.iSubItem)
-        { case 1: /* size */
-            _ILGetFileSize (pidl, lpdi->item.pszText, lpdi->item.cchTextMax);
-            break;
-          case 2: /* extension */
-            {  char sTemp[64];
-              if (_ILGetExtension (pidl, sTemp, 64))
-         { if (!( HCR_MapTypeToValue(sTemp, sTemp, 64, TRUE)
-                  && HCR_MapTypeToValue(sTemp, lpdi->item.pszText, lpdi->item.cchTextMax, FALSE )))
-           { lstrcpynA (lpdi->item.pszText, sTemp, lpdi->item.cchTextMax);
-             strncat (lpdi->item.pszText, "-file", lpdi->item.cchTextMax);
-           }
-         }
-         else  /* no extension found */
-         { lpdi->item.pszText[0]=0x00;
-         }
-            }
-            break;
-          case 3: /* date */
-            _ILGetFileDate (pidl, lpdi->item.pszText, lpdi->item.cchTextMax);
-            break;
-        }
-           }
-           else  /*its a folder*/
-           { switch (lpdi->item.iSubItem)
-        { case 1:
-            strcpy(lpdi->item.pszText, "");
-            break;
-               case 2:
-            lstrcpynA (lpdi->item.pszText, "Folder", lpdi->item.cchTextMax);
-            break;
-          case 3:
-            _ILGetFileDate (pidl, lpdi->item.pszText, lpdi->item.cchTextMax);
-            break;
-        }
-           }
-           TRACE("-- text=%s\n",lpdi->item.pszText);
-         }
-       }
-       else    /*the item text is being requested*/
-       {
-         if(lpdi->item.mask & LVIF_TEXT)    /*is the text being requested?*/
-         {
-           if(SUCCEEDED(IShellFolder_GetDisplayNameOf(This->pSFParent,pidl, SHGDN_NORMAL | SHGDN_INFOLDER, &str)))
-           {
-        StrRetToStrNA(lpdi->item.pszText, lpdi->item.cchTextMax, &str, pidl);
-           }
-           TRACE("-- text=%s\n",lpdi->item.pszText);
-         }
-
-         if(lpdi->item.mask & LVIF_IMAGE)      /*is the image being requested?*/
+	    if(lpdi->item.mask & LVIF_TEXT)	/* text requested */
+	    {
+	      if (This->pSF2Parent)
+	      {
+	        SHELLDETAILS sd;
+	        IShellFolder2_GetDetailsOf(This->pSF2Parent, pidl, lpdi->item.iSubItem, &sd);
+	        StrRetToStrNA( lpdi->item.pszText, lpdi->item.cchTextMax, &sd.str, NULL);
+	        TRACE("-- text=%s\n",lpdi->item.pszText);		
+	      }
+	      else
+	      {
+	        FIXME("no SF2\n");
+	      }
+	    }
+	    if(lpdi->item.mask & LVIF_IMAGE)	/* image requested */
          {
            lpdi->item.iImage = SHMapPIDLToSystemImageListIndex(This->pSFParent, pidl, 0);
-         }
-       }
+         }       
        break;
 
      case LVN_ITEMCHANGED:
@@ -1304,6 +1269,9 @@ static ULONG WINAPI IShellView_fnRelease(IShellView * iface)
 
      if(This->pSFParent)
        IShellFolder_Release(This->pSFParent);
+
+     if(This->pSF2Parent)
+       IShellFolder2_Release(This->pSF2Parent);
 
      if (This->apidl)
        SHFree(This->apidl);
