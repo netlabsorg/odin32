@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.97 2001-05-12 08:25:57 sandervl Exp $ */
+/* $Id: window.cpp,v 1.98 2001-05-15 14:31:40 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -38,6 +38,7 @@
 #include <win\win.h>
 #include <heapstring.h>
 #include <winuser32.h>
+#include "hook.h"
 
 #define DBG_LOCALLOG    DBG_window
 #include "dbglocal.h"
@@ -714,7 +715,8 @@ end:
 //******************************************************************************
 HWND WIN32API SetFocus(HWND hwnd)
 {
- Win32BaseWindow *window;
+ Win32BaseWindow *window, *topparent;
+ Win32BaseWindow *oldfocuswnd;
  HWND lastFocus, lastFocus_W, hwnd_O;
  BOOL activate;
  TEB *teb;
@@ -738,10 +740,23 @@ HWND WIN32API SetFocus(HWND hwnd)
     }
     else lastFocus = OSLibWinQueryFocus (OSLIB_HWND_DESKTOP);
 
-    activate  = ((hwnd_O == lastFocus) || OSLibWinIsChild (lastFocus, hwnd_O));
+    topparent = window->GetTopParent();
+    activate = FALSE;
     lastFocus_W = OS2ToWin32Handle (lastFocus);
+    if(lastFocus_W) {
+         oldfocuswnd = Win32BaseWindow::GetWindowFromHandle(lastFocus_W);
+         if(lastFocus_W != hwnd && topparent != oldfocuswnd->GetTopParent()) {
+            activate = TRUE;
+         }
+    }
+    else activate = TRUE;
 
-    dprintf(("SetFocus %x (%x) -> %x (%x)\n", lastFocus_W, lastFocus, hwnd, hwnd_O));
+    dprintf(("SetFocus %x (%x) -> %x (%x) act %d", lastFocus_W, lastFocus, hwnd, hwnd_O, activate));
+
+    if(HOOK_CallHooksA(WH_CBT, HCBT_SETFOCUS, hwnd, (LPARAM)lastFocus_W)) {
+        dprintf(("hook cancelled SetFocus call!"));
+        return 0;
+    }
 
     //PM doesn't allow SetFocus calls during WM_SETFOCUS message processing;
     //must delay this function call
@@ -749,12 +764,17 @@ HWND WIN32API SetFocus(HWND hwnd)
         dprintf(("USER32: Delay SetFocus call!"));
         teb->o.odin.hwndFocus = hwnd;
         //mp1 = win32 window handle
-        //mp2 = activate flag
-        OSLibPostMessageDirect(hwnd_O, WIN32APP_SETFOCUSMSG, hwnd, activate);
+        //mp2 = top parent if activation required
+        OSLibPostMessageDirect(hwnd_O, WIN32APP_SETFOCUSMSG, hwnd, (activate) ? topparent->getWindowHandle() : 0);
         return lastFocus_W;
     }
     teb->o.odin.hwndFocus = 0;
-    return (OSLibWinSetFocus (OSLIB_HWND_DESKTOP, hwnd_O, activate)) ? lastFocus_W : 0;
+    if(activate) {
+        SetActiveWindow(topparent->getWindowHandle());
+    }
+    if(!IsWindow(hwnd)) return FALSE;       //abort if window destroyed
+
+    return (OSLibWinSetFocus(OSLIB_HWND_DESKTOP, hwnd_O, 0)) ? lastFocus_W : 0;
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.50 2001-05-11 08:39:43 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.51 2001-05-15 14:31:38 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -191,12 +191,16 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
   POSTMSG_PACKET  *packet;
   TEB             *teb = (TEB *)pTeb;
   BOOL             fWasDisabled = FALSE;
+  BOOL             fIsFrame = FALSE;
   int i;
 
     memset(winMsg, 0, sizeof(MSG));
     win32wnd = Win32BaseWindow::GetWindowFromOS2Handle(os2Msg->hwnd);
     if(!win32wnd) {
         win32wnd = Win32BaseWindow::GetWindowFromOS2FrameHandle(os2Msg->hwnd);
+        if(win32wnd) {
+            fIsFrame = TRUE;
+        }
     }
 
     //PostThreadMessage posts WIN32APP_POSTMSG msg without window handle
@@ -275,6 +279,8 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
       LONG      yDelta = pswp->cy - swpOld.cy;
       LONG      xDelta = pswp->cx - swpOld.cx;
 
+        if(!fIsFrame) goto dummymessage;
+
         if ((pswp->fl & (SWP_SIZE | SWP_MOVE | SWP_ZORDER)) == 0) goto dummymessage;
 
         if(pswp->fl & (SWP_MOVE | SWP_SIZE)) {
@@ -293,10 +299,8 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
 
         if (!win32wnd->CanReceiveSizeMsgs())    goto dummymessage;
 
-        if(pswp->fl & (SWP_MOVE | SWP_SIZE)) {
-/////                dprintf(("Set client rectangle to (%d,%d)(%d,%d)", swpOld.x, swpOld.y, swpOld.x + swpOld.cx, swpOld.y + swpOld.cy));
-/////                win32wnd->setClientRect(swpOld.x, swpOld.y, swpOld.x + swpOld.cx, swpOld.y + swpOld.cy);
-
+        if(pswp->fl & (SWP_MOVE | SWP_SIZE))
+        {
                 teb->o.odin.wp.hwnd = win32wnd->getWindowHandle();
                 if ((pswp->fl & SWP_ZORDER) && (pswp->hwndInsertBehind > HWND_BOTTOM))
                 {
