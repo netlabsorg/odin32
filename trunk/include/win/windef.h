@@ -213,7 +213,7 @@ typedef short           INT16;
 typedef unsigned short  UINT16;
 typedef int             INT;
 typedef unsigned int    UINT;
-typedef unsigned int    INT32;
+typedef signed int      INT32;
 typedef UINT *          UINT_PTR;
 typedef unsigned short  WORD;
 typedef unsigned long   DWORD;
