@@ -115,7 +115,7 @@ Loader parameters:
 
 -Java:<Y|N>     Enable / disable JAVA loading.
 
--PE:<MIXED|PE2LX|PE|NOT>
+-Pe:<MIXED|PE2LX|PE|NOT>
                 Enabled / disable and set mode of the PE loading.
                     MIXED:  Mix of Pe2Lx and Pe.exe. It uses Pe2Lx when
                             possible and backs out to pe.exe if the executables
