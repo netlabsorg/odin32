@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.4 1999-06-12 18:29:37 hugh Exp $ */
+/* $Id: KERNEL32.CPP,v 1.5 1999-06-17 18:21:36 phaller Exp $ */
 
 /*
  *
@@ -43,61 +43,6 @@
 //#define DEBUG_LOCAL 1
 
 
-/*****************************************************************************
- * Name      : BOOL WIN32API CloseHandle
- * Purpose   : forward call to Open32
- * Parameters:
- * Variables :
- * Result    :
- * Remark    : better error checking required
- * Status    :
- * Mod       : 980618PH: fixed mixed-up handles
- *
- * Author    : Patrick Haller [Fri, 1998/06/12 03:44]
- *****************************************************************************/
-
-BOOL WIN32API CloseHandle(HANDLE hObject)
-{
-  ULONG  rc;                                               /* API returncode */
-  HANDLE hOS2;                                         /* 32-bit OS/2 handle */
-
-  dprintf(("KERNEL32::CloseHandle(%08xh)\n",
-            hObject));
-
-  rc = HMHandleTranslateToOS2(hObject,               /* translate the handle */
-                              &hOS2);
-  if (rc == NO_ERROR)                                    /* check for errors */
-  {
-    /* @@@PH 1998/02/12 Handle Manager support */
-    if (IS_HM_HANDLE(hOS2))
-      rc = HMCloseHandle(hOS2);
-    else
-      rc=O32_CloseHandle(hOS2);
-
-    /* @@@PH we should check rc here */
-    HMHandleFree(hObject);  /* free 16-bit handle from the translation table */
-
-    return (rc);                                                       /* OK */
-  }
-  else
-  {
-    dprintf(("KERNEL32::CloseHandle(%08xh) HMHandleTranslateToOS2 returned %d\n"
-             "                                 trying untranslated handle instead.\n",
-             hObject,
-             rc));
-    /* @@@PH 1998/02/12 Handle Manager support */
-    if (IS_HM_HANDLE(hObject))
-      rc = HMCloseHandle(hObject);
-    else
-      rc=O32_CloseHandle(hObject);
-
-    return (rc);                                                       /* OK */
-  }
-
-  /* @@@PH SetLastError ? */
-  return (FALSE);                                   /* raise error condition */
-}
-
 
 /*****************************************************************************
  * Name      : BOOL WIN32API CreateEventA
@@ -141,6 +86,25 @@ HANDLE WIN32API CreateEventA(LPSECURITY_ATTRIBUTES lpsa,
   }
 
   return (hOS2);                 /* should have the correct error value here */
+}
+
+/*****************************************************************************
+ * Name      : BOOL WIN32API CloseHandle
+ * Purpose   : forward call to Open32
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Fri, 1998/06/12 03:44]
+ *****************************************************************************/
+BOOL WIN32API CloseHandle(HANDLE hHandle)
+{
+  dprintf(("KERNEL32: CloseHandle(%08xh)\n",
+           hHandle));
+
+  return HMCloseHandle(hHandle);
 }
 
 

@@ -1,4 +1,4 @@
-/* $Id: HandleManager.h,v 1.3 1999-06-10 19:11:30 phaller Exp $ */
+/* $Id: HandleManager.h,v 1.4 1999-06-17 18:21:36 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -54,7 +54,7 @@ typedef struct {
 #define HM_HANDLE_MASK 0x0000FFFF
 
 
-#define IS_HM_HANDLE(hHandle) ( (hHandle & ~HM_HANDLE_MASK) == HM_HANDLE_ID )
+//#define IS_HM_HANDLE(hHandle) ( (hHandle & ~HM_HANDLE_MASK) == HM_HANDLE_ID )
 
 
                                      /* 1998/02/12 PH Correction of os2win.h */
@@ -73,6 +73,9 @@ typedef struct {
 #undef FILE_TYPE_REMOTE
 #define FILE_TYPE_REMOTE    0x8000
 
+#ifndef INVALID_HANDLE_ERROR
+#define INVALID_HANDLE_ERROR (-1)
+#endif
 
 
 /*****************************************************************************
@@ -81,7 +84,8 @@ typedef struct {
 
 typedef struct _HMHANDLEDATA
 {
-  HANDLE          hHandle;                           /* a copy of the handle */
+  HANDLE          hHMHandle;                         /* a copy of the handle */
+  HANDLE          hWinHandle;                /* a copy of the windows handle */
 
   DWORD           dwType;                          /* handle type identifier */
 
@@ -94,63 +98,6 @@ typedef struct _HMHANDLEDATA
 } HMHANDLEDATA, *PHMHANDLEDATA;
 
 
-#ifdef __cplusplus
-class HMDeviceHandler
-{
-  /***************************************************************************
-   * The following methods are called by the handle manager request router.  *
-   * They are exact replacements for the corresponding Win32 calls.          *
-   ***************************************************************************/
-
-public:
-  LPCSTR lpHMDeviceName;                   /* a reference to the device name */
-
-  HMDeviceHandler(LPCSTR lpDeviceName);      /* constructor with device name */
-
-
-  /***********************************
-   * handle generic standard methods *
-   ***********************************/
-
-  /* this is a special internal method to handle non-standard requests       */
-  /* such as GetConsoleMode() for console devices                            */
-  virtual DWORD  _DeviceRequest (PHMHANDLEDATA pHMHandleData,
-                                 ULONG         ulRequestCode,
-                                 ULONG         arg1,
-                                 ULONG         arg2,
-                                 ULONG         arg3,
-                                 ULONG         arg4);
-
-                       /* this is a handler method for calls to CreateFile() */
-  virtual DWORD  CreateFile (LPCSTR        lpFileName,
-                             PHMHANDLEDATA pHMHandleData,
-                             PVOID         lpSecurityAttributes,
-                             PHMHANDLEDATA pHMHandleDataTemplate);
-
-                      /* this is a handler method for calls to CloseHandle() */
-  virtual DWORD  CloseHandle(PHMHANDLEDATA pHMHandleData);
-
-                           /* this is a handler method for calls to ReadFile() */
-  virtual DWORD  ReadFile   (PHMHANDLEDATA pHMHandleData,
-                             LPCVOID       lpBuffer,
-                             DWORD         nNumberOfBytesToRead,
-                             LPDWORD       lpNumberOfBytesRead,
-                             LPOVERLAPPED  lpOverlapped);
-
-                        /* this is a handler method for calls to WriteFile() */
-  virtual DWORD  WriteFile  (PHMHANDLEDATA pHMHandleData,
-                             LPCVOID       lpBuffer,
-                             DWORD         nNumberOfBytesToWrite,
-                             LPDWORD       lpNumberOfBytesWritten,
-                             LPOVERLAPPED  lpOverlapped);
-
-                      /* this is a handler method for calls to GetFileType() */
-  virtual DWORD GetFileType (PHMHANDLEDATA pHMHandleData);
-};
-
-#endif
-
-
 /*****************************************************************************
  * Prototypes                                                                *
  *****************************************************************************/
@@ -160,56 +107,12 @@ DWORD  HMInitialize(void);          /* initialize the HandleManager */
 DWORD  HMTerminate(void);            /* terminate the HandleManager */
 
 
-#ifdef __cplusplus
-                            /* register a new device with the handle manager */
-DWORD  HMDeviceRegister(PSZ pszDeviceName, HMDeviceHandler *pDeviceHandler);
-#endif
-
-
-
  /* handle manager version of GetStdHandle, Open32 can't really help us here */
 HANDLE  HMGetStdHandle(DWORD nStdHandle);
 
  /* handle manager version of GetStdHandle, Open32 can't really help us here */
 BOOL    HMSetStdHandle(DWORD  nStdHandle,
                                HANDLE hHandle);
-
-                       /* this is a handler method for calls to CreateFile() */
-HANDLE  HMCreateFile (LPCSTR       lpFileName,
-                              DWORD        dwDesiredAccess,
-                              DWORD        dwShareMode,
-                              PVOID        lpSecurityAttributes,
-                              DWORD        dwCreationDisposition,
-                              DWORD        dwFlagsAndAttributes,
-                              HANDLE       hTemplateFile);
-
-                      /* this is a handler method for calls to CloseHandle() */
-BOOL    HMCloseHandle(HANDLE       hObject);
-
-                         /* this is a handler method for calls to ReadFile() */
-BOOL    HMReadFile   (HANDLE       hFile,
-                              LPCVOID      lpBuffer,
-                              DWORD        nNumberOfBytesToRead,
-                              LPDWORD      lpNumberOfBytesRead,
-                              LPOVERLAPPED lpOverlapped);
-
-                        /* this is a handler method for calls to WriteFile() */
-BOOL    HMWriteFile  (HANDLE       hFile,
-                              LPCVOID      lpBuffer,
-                              DWORD        nNumberOfBytesToWrite,
-                              LPDWORD      lpNumberOfBytesWritten,
-                              LPOVERLAPPED lpOverlapped);
-
-                      /* this is a handler method for calls to GetFileType() */
-DWORD   HMGetFileType(HANDLE       hFile);
-
-                              /* this is for special non-standard device I/O */
-DWORD   HMDeviceRequest (HANDLE hFile,
-                                 ULONG  ulRequestCode,
-                                 ULONG  arg1,
-                                 ULONG  arg2,
-                                 ULONG  arg3,
-                                 ULONG  arg4);
 
 
 /*****************************************************************************/
@@ -241,5 +144,93 @@ DWORD  HMHandleTranslateToOS2i(ULONG  hHandle16);
  * Forwarders                                                                *
  *****************************************************************************/
 
+// enable C linkage to avoid parameter mangling
+#ifdef __cplusplus__
+extern "C" {
+#endif
+
+HFILE HMCreateFile(LPCSTR lpFileName,
+                   DWORD  dwDesiredAccess,
+                   DWORD  dwShareMode,
+                   LPSECURITY_ATTRIBUTES lpSecurityAttributes,
+                   DWORD  dwCreationDisposition,
+                   DWORD  dwFlagsAndAttributes,
+                   HANDLE hTemplateFile);
+
+HANDLE HMOpenFile(LPCSTR    lpFileName,
+                  OFSTRUCT* pOFStruct,
+                  UINT      fuMode);
+
+BOOL HMCloseHandle(HANDLE hObject);
+
+BOOL HMReadFile(HANDLE       hFile,
+                LPVOID       lpBuffer,
+                DWORD        nNumberOfBytesToRead,
+                LPDWORD      lpNumberOfBytesRead,
+                LPOVERLAPPED lpOverlapped);
+
+BOOL HMWriteFile(HANDLE       hFile,
+                 LPCVOID      lpBuffer,
+                 DWORD        nNumberOfBytesToWrite,
+                 LPDWORD      lpNumberOfBytesWritten,
+                 LPOVERLAPPED lpOverlapped);
+
+DWORD HMGetFileType(HANDLE hFile);
+
+DWORD   HMDeviceRequest (HANDLE hFile,
+                         ULONG  ulRequestCode,
+                         ULONG  arg1,
+                         ULONG  arg2,
+                         ULONG  arg3,
+                         ULONG  arg4);
+
+DWORD HMGetFileInformationByHandle (HANDLE                     hFile,
+                                    BY_HANDLE_FILE_INFORMATION *pHFI);
+
+BOOL HMSetEndOfFile (HANDLE hFile);
+
+BOOL HMSetFileTime (HANDLE         hFile,
+                    const FILETIME *pFT1,
+                    const FILETIME *pFT2,
+                    const FILETIME *pFT3);
+
+DWORD HMGetFileSize (HANDLE hFile,
+                     PDWORD pSize);
+
+DWORD HMSetFilePointer (HANDLE hFile,
+                        LONG   lDistanceToMove,
+                        PLONG  lpDistanceToMoveHigh,
+                        DWORD  dwMoveMethod);
+
+BOOL HMLockFile (HFILE         hFile,
+                 DWORD         arg2,
+                 DWORD         arg3,
+                 DWORD         arg4,
+                 DWORD         arg5);
+
+DWORD HMLockFileEx(HANDLE        hFile,
+                   DWORD         dwFlags,
+                   DWORD         dwReserved,
+                   DWORD         nNumberOfBytesToLockLow,
+                   DWORD         nNumberOfBytesToLockHigh,
+                   LPOVERLAPPED  lpOverlapped);
+
+BOOL HMUnlockFile (HFILE         hFile,
+                   DWORD         arg2,
+                   DWORD         arg3,
+                   DWORD         arg4,
+                   DWORD         arg5);
+
+BOOL HMUnlockFileEx(HANDLE        hFile,
+                    DWORD         dwFlags,
+                    DWORD         dwReserved,
+                    DWORD         nNumberOfBytesToLockLow,
+                    DWORD         nNumberOfBytesToLockHigh,
+                    LPOVERLAPPED  lpOverlapped);
+
+
+#ifdef __cplusplus__
+  }
+#endif
 
 #endif /* _HANDLEMANAGER_H_ */

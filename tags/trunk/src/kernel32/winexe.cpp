@@ -1,4 +1,4 @@
-/* $Id: winexe.cpp,v 1.3 1999-06-10 19:09:04 phaller Exp $ */
+/* $Id: winexe.cpp,v 1.4 1999-06-17 18:21:43 phaller Exp $ */
 
 /*
  *
@@ -29,14 +29,23 @@
 #include "wprocess.h"
 #include "pefile.h"
 #include "cio.h"
-#include "console2.h"
+
+
+// PH: to soothe the compiler
+#define BY_HANDLE_FILE_INFORMATION void
+#define LPFILETIME void*
+#define OFSTRUCT void
+
+#include "console.h"
+#include "handlemanager.h"
+
 
 Win32Exe *WinExe = NULL;
 
 //******************************************************************************
 //******************************************************************************
-Win32Exe::Win32Exe(char *szFileName) : Win32Image(szFileName), fConsoleApp(FALSE), 
-				       cmdline(NULL), OS2InstanceHandle(-1)
+Win32Exe::Win32Exe(char *szFileName) : Win32Image(szFileName), fConsoleApp(FALSE),
+                   cmdline(NULL), OS2InstanceHandle(-1)
 {
   fConsoleApp = (oh.Subsystem == IMAGE_SUBSYSTEM_WINDOWS_CUI);
   WinExe = this;
@@ -44,31 +53,31 @@ Win32Exe::Win32Exe(char *szFileName) : Win32Image(szFileName), fConsoleApp(FALSE
   dprintf(("Win32Exe ctor: %s", szFileName));
 
   HMInitialize();             /* store standard handles within HandleManager */
-  dprintf(("KERNEL32/WINEXE: HandleManager Initialized.\n")); 
+  dprintf(("KERNEL32/WINEXE: HandleManager Initialized.\n"));
   if(fConsoleApp) {
-	dprintf(("Console application!\n"));
+   dprintf(("Console application!\n"));
 
-	APIRET rc = ConsoleInit();                      /* initialize console subsystem */
-	if (rc != NO_ERROR)                                  /* check for errors */
-      		dprintf(("KERNEL32:Win32Image:Init ConsoleInit failed with %u.\n", rc));
+   APIRET rc = iConsoleInit();                     /* initialize console subsystem */
+   if (rc != NO_ERROR)                                  /* check for errors */
+            dprintf(("KERNEL32:Win32Image:Init ConsoleInit failed with %u.\n", rc));
   }
 }
 //******************************************************************************
 //******************************************************************************
 Win32Exe::Win32Exe(HINSTANCE hinstance, int NameTableId, int Win32TableId) :
-			Win32Image(hinstance, NameTableId, Win32TableId),
-			fConsoleApp(FALSE), cmdline(NULL), OS2InstanceHandle(-1)
+         Win32Image(hinstance, NameTableId, Win32TableId),
+         fConsoleApp(FALSE), cmdline(NULL), OS2InstanceHandle(-1)
 {
   HMInitialize();             /* store standard handles within HandleManager */
-  dprintf(("KERNEL32/WINEXE: HandleManager Initialized.\n")); 
+  dprintf(("KERNEL32/WINEXE: HandleManager Initialized.\n"));
 
   if(GET_CONSOLE(Win32TableId) == 1) {//console app
-	dprintf(("Console application!\n"));
+   dprintf(("Console application!\n"));
 
-	fConsoleApp = TRUE;
-	APIRET rc = ConsoleInit();                      /* initialize console subsystem */
-	if (rc != NO_ERROR)                                  /* check for errors */
-      		dprintf(("KERNEL32:Win32Image:Init ConsoleInit failed with %u.\n", rc));
+   fConsoleApp = TRUE;
+   APIRET rc = iConsoleInit();                     /* initialize console subsystem */
+   if (rc != NO_ERROR)                                  /* check for errors */
+            dprintf(("KERNEL32:Win32Image:Init ConsoleInit failed with %u.\n", rc));
   }
   WinExe = this;
 }
@@ -84,7 +93,7 @@ Win32Exe::~Win32Exe()
 ULONG Win32Exe::start()
 {
   if(getenv("WIN32_IOPL2")) {
-	io_init1();
+   io_init1();
   }
   dprintf(("Start executable %X\n", WinExe));
 
