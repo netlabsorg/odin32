@@ -1,4 +1,4 @@
-/* $Id: glut_event.c,v 1.4 2000-03-04 19:33:43 jeroen Exp $ */
+/* $Id: glut_event.c,v 1.5 2000-03-05 10:19:38 jeroen Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1994, 1995, 1996, 1997, 1998. */
 
 /* This program is freely distributable without licensing fees
@@ -160,7 +160,7 @@ handleTimeouts(void)
   GETTIMEOFDAY(&now);
   while (IS_AT_OR_AFTER(__glutTimerList->timeout, now)) {
     timer = __glutTimerList;
-    timer->func(timer->value);
+    ((GLUTtimerCB)(timer->func))(timer->value);
     __glutTimerList = timer->next;
     timer->next = freeTimerList;
     freeTimerList = timer;
@@ -244,7 +244,7 @@ markWindowHidden(GLUTwindow * window)
     if (window->windowStatus) {
       window->visState = GLUT_HIDDEN;
       __glutSetWindow(window);
-      window->windowStatus(GLUT_HIDDEN);
+      ((GLUTwindowStatusCB)(window->windowStatus))(GLUT_HIDDEN);
     }
     /* An unmap is only reported on a single window; its
        descendents need to know they are no longer visible. */
@@ -374,7 +374,7 @@ processEventsAndTimeouts(void)
             /* Do not execute OpenGL out of sequence with
                respect to the XResizeWindow request! */
             glXWaitX();
-            window->reshape(width, height);
+            ((GLUTreshapeCB)(window->reshape))(width, height);
             window->forceReshape = False;
             /* A reshape should be considered like posting a
                repair; this is necessary for the "Mesa
@@ -448,7 +448,7 @@ processEventsAndTimeouts(void)
             } else if (window->mouse) {
               __glutSetWindow(window);
               __glutModifierMask = event.xbutton.state;
-              window->mouse(event.xbutton.button - 1,
+              ((GLUTmouseCB)(window->mouse))(event.xbutton.button - 1,
                 event.type == ButtonRelease ?
                 GLUT_UP : GLUT_DOWN,
                 event.xbutton.x, event.xbutton.y);
@@ -471,7 +471,7 @@ processEventsAndTimeouts(void)
             if (window->motion && event.xmotion.state &
               (Button1Mask | Button2Mask | Button3Mask)) {
               __glutSetWindow(window);
-              window->motion(event.xmotion.x, event.xmotion.y);
+              ((GLUTmotionCB)(window->motion))(event.xmotion.x, event.xmotion.y);
             }
             /* If passive motion function registered _and_
                buttons not held down, call passive motion
@@ -481,7 +481,7 @@ processEventsAndTimeouts(void)
                     (Button1Mask | Button2Mask | Button3Mask)) ==
                 0)) {
               __glutSetWindow(window);
-              window->passive(event.xmotion.x,
+              ((GLUTpassiveCB)(window->passive))(event.xmotion.x,
                 event.xmotion.y);
             }
           }
@@ -531,7 +531,7 @@ processEventsAndTimeouts(void)
           if (rc) {
             __glutSetWindow(window);
             __glutModifierMask = event.xkey.state;
-            keyboard(tmp[0],
+            ((GLUTkeyboardCB)(keyboard))(tmp[0],
               event.xkey.x, event.xkey.y);
             __glutModifierMask = ~0;
             break;
@@ -643,7 +643,7 @@ processEventsAndTimeouts(void)
           case XK_KP_Delete: /* Introduced in X11R6. */
             /* The Delete character is really an ASCII key. */
             __glutSetWindow(window);
-            keyboard(127,  /* ASCII Delete character. */
+            ((GLUTkeyboardCB)(keyboard))(127,  /* ASCII Delete character. */
               event.xkey.x, event.xkey.y);
             goto skip;
           default:
@@ -699,7 +699,7 @@ processEventsAndTimeouts(void)
 
                 window->entryState = EnterNotify;
                 __glutSetWindow(window);
-                window->entry(GLUT_ENTERED);
+                ((GLUTentryCB)(window->entry))(GLUT_ENTERED);
 
                 if (__glutMappedMenu) {
 
@@ -718,7 +718,7 @@ processEventsAndTimeouts(void)
                   window = __glutWindowList[num];
                   if (window && window->passive && window->win == xid) {
                     __glutSetWindow(window);
-                    window->passive(event.xcrossing.x, event.xcrossing.y);
+                    ((GLUTpassiveCB)(window->passive))(event.xcrossing.x, event.xcrossing.y);
                   }
                 }
               }
@@ -747,12 +747,12 @@ processEventsAndTimeouts(void)
                 }
                 window->entryState = LeaveNotify;
                 __glutSetWindow(window);
-                window->entry(GLUT_LEFT);
+                ((GLUTentryCB)(window->entry))(GLUT_LEFT);
               }
             }
           } else if (window->passive) {
             __glutSetWindow(window);
-            window->passive(event.xcrossing.x, event.xcrossing.y);
+            ((GLUTpassiveCB)(window->passive))(event.xcrossing.x, event.xcrossing.y);
           }
         }
         break;
@@ -788,7 +788,7 @@ processEventsAndTimeouts(void)
             if (window->windowStatus) {
               window->visState = visState;
               __glutSetWindow(window);
-              window->windowStatus(visState);
+              ((GLUTwindowStatusCB)(window->windowStatus))(visState);
             }
           }
         }
@@ -949,7 +949,7 @@ idleWait(void)
   }
   /* Make sure idle func still exists! */
   if (__glutIdleFunc) {
-    __glutIdleFunc();
+    ((GLUTidleCB)(__glutIdleFunc))();
   }
 }
 
@@ -958,6 +958,8 @@ static GLUTwindow **beforeEnd;
 static GLUTwindow *
 processWindowWorkList(GLUTwindow * window)
 {
+//_interrupt(3);
+
   int workMask;
 
   if (window->prevWorkWin) {
@@ -1204,10 +1206,6 @@ processWindowWorkList(GLUTwindow * window)
 
       __glutSetWindow(window);
 
-      /* JvdH: DO NOT REMPVE THE EXPLICIT TYPECAST TO THIS GLAPIENTRY   */
-      /* FUNCTION, OR THE COMPILER WILL NUKE THE STACK WHEN OPTIMIZING! */
-      /* VACPP obviously has a bug, and will adjust the ESP after the   */
-      /* call, but the callee has already done so!!!!                   */
       ((GLUTreshapeCB)(window->reshape))(window->width, window->height);
       window->forceReshape = False;
 
@@ -1261,7 +1259,7 @@ processWindowWorkList(GLUTwindow * window)
         __glutWindowDamaged = (workMask & GLUT_REPAIR_WORK);
         __glutSetWindow(window);
         window->usedSwapBuffers = 0;
-        window->display();
+        ((GLUTdisplayCB)(window->display))();
         __glutWindowDamaged = 0;
 
       skippedDisplayCallback1:;
@@ -1280,7 +1278,7 @@ processWindowWorkList(GLUTwindow * window)
           window->renderCtx = window->overlay->ctx;
           __glutWindowDamaged = (workMask & GLUT_OVERLAY_REPAIR_WORK);
           __glutSetWindow(window);
-          window->overlay->display();
+          ((GLUTdisplayCB)(window->overlay->display))();
           __glutWindowDamaged = 0;
         } else {
           /* Overlay may have since been destroyed or the
@@ -1303,7 +1301,7 @@ processWindowWorkList(GLUTwindow * window)
       __glutWindowDamaged = (workMask & (GLUT_OVERLAY_REPAIR_WORK | GLUT_REPAIR_WORK));
       __glutSetWindow(window);
       window->usedSwapBuffers = 0;
-      window->display();
+      ((GLUTdisplayCB)(window->display))();
       __glutWindowDamaged = 0;
 
     skippedDisplayCallback2:;

@@ -1,4 +1,4 @@
-/* $Id: win32_winproc.c,v 1.3 2000-03-04 19:10:17 jeroen Exp $ */
+/* $Id: win32_winproc.c,v 1.4 2000-03-05 10:19:39 jeroen Exp $ */
 /* Copyright (c) Nate Robins, 1997. */
 /* portions Copyright (c) Mark Kilgard, 1997, 1998. */
 
@@ -40,7 +40,7 @@ updateWindowState(GLUTwindow *window, int visState)
     if (window->windowStatus) {
       window->visState = visState;
       __glutSetWindow(window);
-      window->windowStatus(visState);
+      ((GLUTwindowStatusCB)(window->windowStatus))(visState);
     }
   }
   /* Since Win32 only sends an activate for the toplevel window,
@@ -156,7 +156,7 @@ __glutWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
       case VK_DELETE:
         /* Delete is an ASCII character. */
         if (window->keyboardUp) {
-          window->keyboardUp((unsigned char) 127, point.x, point.y);
+          ((GLUTkeyboardCB)(window->keyboardUp))((unsigned char) 127, point.x, point.y);
         }
         return 0;
       /* *INDENT-ON* */
@@ -175,7 +175,7 @@ __glutWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
             if (!(__glutModifierMask & ShiftMask))
               key = tolower(key);
-            window->keyboardUp((unsigned char) key, point.x, point.y);
+            ((GLUTkeyboardCB)(window->keyboardUp))((unsigned char) key, point.x, point.y);
           }
         }
         __glutModifierMask = (unsigned int) ~0;
@@ -221,7 +221,7 @@ __glutWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         __glutModifierMask |= ControlMask;
       if (GetKeyState(VK_MENU) < 0)
         __glutModifierMask |= Mod1Mask;
-      window->keyboard((unsigned char)wParam, point.x, point.y);
+      ((GLUTkeyboardCB)(window->keyboard))((unsigned char)wParam, point.x, point.y);
       __glutModifierMask = (unsigned int) ~0;
     }
     return 0;
@@ -364,7 +364,7 @@ __glutWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             __glutModifierMask |= ControlMask;
           if (GetKeyState(VK_MENU) < 0)
             __glutModifierMask |= Mod1Mask;
-          window->keyboard(key, point.x, point.y);
+          ((GLUTkeyboardCB)(window->keyboard))(key, point.x, point.y);
           __glutModifierMask = (unsigned int) ~0;
 
           return 0;
@@ -427,7 +427,7 @@ __glutWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
           __glutModifierMask |= ControlMask;
         if (GetKeyState(VK_MENU) < 0)
           __glutModifierMask |= Mod1Mask;
-        window->mouse(button, GLUT_DOWN, x, y);
+        ((GLUTmouseCB)(window->mouse))(button, GLUT_DOWN, x, y);
         __glutModifierMask = (unsigned int)~0;
       } else {
         /* Stray mouse events.  Ignore. */
@@ -492,7 +492,7 @@ __glutWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         __glutModifierMask |= ControlMask;
       if (GetKeyState(VK_MENU) < 0)
         __glutModifierMask |= Mod1Mask;
-      window->mouse(button, GLUT_UP, x, y);
+      ((GLUTmouseCB)(window->mouse))(button, GLUT_UP, x, y);
       __glutModifierMask = (unsigned int)~0;
     } else {
       /* Window might have been destroyed and all the
@@ -527,7 +527,7 @@ __glutWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
        doesn't update, so you get this weird jerkiness. */
 #if 0
      if (__glutIdleFunc)
-       __glutIdleFunc();
+       ((GLUTidleCB)(__glutIdleFunc))();
 #endif
     if (__glutTimerList)
       handleTimeouts();
@@ -575,7 +575,7 @@ __glutWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         if (window->motion && wParam &
             (MK_LBUTTON | MK_MBUTTON | MK_RBUTTON)) {
           __glutSetWindow(window);
-          window->motion(x, y);
+          ((GLUTmotionCB)(window->motion))(x, y);
         }
         /* If passive motion function registered _and_
            buttons not held down, call passive motion
@@ -585,7 +585,7 @@ __glutWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                    (MK_LBUTTON | MK_MBUTTON | MK_RBUTTON)) ==
                   0)) {
           __glutSetWindow(window);
-          window->passive(x, y);
+          ((GLUTpassiveCB)(window->passive))(x, y);
         }
       }
     } else {
@@ -658,7 +658,7 @@ __glutWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
       window->entryState = WM_SETFOCUS;
       if (window->entry) {
         __glutSetWindow(window);
-        window->entry(GLUT_ENTERED);
+        ((GLUTentryCB)(window->entry))(GLUT_ENTERED);
         /* XXX Generation of fake passive notify?  See how much
            work the X11 code does to support fake passive notify
            callbacks. */
@@ -688,7 +688,7 @@ __glutWindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
       window->entryState = WM_KILLFOCUS;
       if (window->entry) {
         __glutSetWindow(window);
-        window->entry(GLUT_LEFT);
+        ((GLUTentryCB)(window->entry))(GLUT_LEFT);
       }
       if (window->joystick && __glutCurrentWindow) {
         if (__glutCurrentWindow->joyPollInterval > 0) {
