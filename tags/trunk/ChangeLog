@@ -1,4 +1,9 @@
-/* $Id: ChangeLog,v 1.1265 2001-02-17 20:27:16 bird Exp $ */
+/* $Id: ChangeLog,v 1.1266 2001-02-18 14:21:28 sandervl Exp $ */
+
+ 2001-02-18: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Restore window origin in SetWindowPos for parent window with
+                  CS_OWNDC style.
+                  (fixes paint offset problems in Opera windows)
 
  2000-02-17: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Win32kCC: o Rewrote to notebook. (fixes size problem)
