@@ -1,4 +1,10 @@
- /* $Id: ChangeLog,v 1.925 2000-05-03 18:33:38 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.926 2000-05-03 21:00:28 achimha Exp $ */
+
+ 2000-05-04: Achim Hasenmueller <achimha@innotek.de>
+	- USER32: Applied fix to GetDCEx where the check to see if
+	          the window has its own DC was applying invalid
+	          style flags due to missing parantheses
+	          (reported by Oliver Braun)
 
  2000-05-03: Sander van Leeuwen <sandervl@xs4all.nl>
 	- WSOCK32:  Fixed WSAEFAULT errors in setsockopt (16 bits TCP/IP stack
