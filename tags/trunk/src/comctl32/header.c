@@ -1,4 +1,4 @@
-/* $Id: header.c,v 1.12 1999-10-04 16:02:07 cbratschi Exp $ */
+/* $Id: header.c,v 1.13 1999-10-05 16:05:16 cbratschi Exp $ */
 /*
  *  Header control
  *
@@ -7,14 +7,11 @@
  *  Copyright 1999 Christoph Bratschi
  *
  *  TODO:
- *   - Imagelist support (partially).
- *   - Callback items (under construction).
  *   - Order list support.
  *   - Control specific cursors (over dividers).
  *   - Hottrack support (partially).
  *   - Custom draw support (including Notifications).
  *   - Drag and Drop support (including Notifications).
- *   - Unicode support.
  *
  *
  * Status: Development in progress, a lot to do :)
@@ -498,114 +495,130 @@ HEADER_InternalHitTest (HWND hwnd, LPPOINT lpPt, UINT *pFlags, INT *pItem)
 {
     HEADER_INFO *infoPtr = HEADER_GetInfoPtr (hwnd);
     RECT rect, rcTest;
-    INT  iCount, width;
+    INT  iCount, width,widthCount = 0;
     BOOL bNoWidth;
 
     GetClientRect (hwnd, &rect);
 
     *pFlags = 0;
     bNoWidth = FALSE;
-    if (PtInRect (&rect, *lpPt))
+    if (PtInRect(&rect,*lpPt))
     {
-        if (infoPtr->uNumItem == 0) {
-            *pFlags |= HHT_NOWHERE;
-            *pItem = 1;
+      if (infoPtr->uNumItem == 0)
+      {
+        *pFlags |= HHT_NOWHERE;
+        *pItem = 1;
 //          TRACE (header, "NOWHERE\n");
-            return;
-        }
-        else {
-            /* somewhere inside */
-            for (iCount = 0; iCount < infoPtr->uNumItem; iCount++) {
-                rect = infoPtr->items[iCount].rect;
-                width = rect.right - rect.left;
-                if (width == 0) {
-                    bNoWidth = TRUE;
-                    continue;
-                }
-                if (PtInRect (&rect, *lpPt)) {
-                    if (width <= 2 * DIVIDER_WIDTH) {
-                        *pFlags |= HHT_ONHEADER;
-                        *pItem = iCount;
+        return;
+      } else
+      {
+        /* somewhere inside */
+        for (iCount = 0; iCount < infoPtr->uNumItem; iCount++)
+        {
+          rect = infoPtr->items[iCount].rect;
+          width = rect.right - rect.left;
+          if (width == 0)
+          {
+            bNoWidth = TRUE;
+            widthCount = 0;
+            continue;
+          } else widthCount++;
+          if (widthCount > 1) bNoWidth = FALSE;
+          if (PtInRect(&rect,*lpPt))
+          {
+            if (width <= 2 * DIVIDER_WIDTH)
+            {
+              *pFlags |= HHT_ONHEADER;
+              *pItem = iCount;
 //                      TRACE (header, "ON HEADER %d\n", iCount);
-                        return;
-                    }
-                    if (iCount > 0) {
-                        rcTest = rect;
-                        rcTest.right = rcTest.left + DIVIDER_WIDTH;
-                        if (PtInRect (&rcTest, *lpPt)) {
-                            if (bNoWidth) {
-                                *pFlags |= HHT_ONDIVOPEN;
-                                *pItem = iCount - 1;
+              return;
+            }
+            if (iCount > 0)
+            {
+              rcTest = rect;
+              rcTest.right = rcTest.left + DIVIDER_WIDTH;
+              if (PtInRect (&rcTest, *lpPt))
+              {
+                if (bNoWidth)
+                {
+                  *pFlags |= HHT_ONDIVOPEN;
+                  *pItem = iCount - 1;
 //                              TRACE (header, "ON DIVOPEN %d\n", *pItem);
-                                return;
-                            }
-                            else {
-                                *pFlags |= HHT_ONDIVIDER;
-                                *pItem = iCount - 1;
+                  return;
+                } else
+                {
+                  *pFlags |= HHT_ONDIVIDER;
+                  *pItem = iCount - 1;
 //                              TRACE (header, "ON DIVIDER %d\n", *pItem);
-                                return;
-                            }
-                        }
-                    }
-                    rcTest = rect;
-                    rcTest.left = rcTest.right - DIVIDER_WIDTH;
-                    if (PtInRect (&rcTest, *lpPt)) {
-                        *pFlags |= HHT_ONDIVIDER;
-                        *pItem = iCount;
+                  return;
+                }
+              }
+            }
+            rcTest = rect;
+            rcTest.left = rcTest.right - DIVIDER_WIDTH;
+            if (PtInRect (&rcTest, *lpPt))
+            {
+              *pFlags |= HHT_ONDIVIDER;
+              *pItem = iCount;
 //                      TRACE (header, "ON DIVIDER %d\n", *pItem);
-                        return;
-                    }
+              return;
+            }
 
-                    *pFlags |= HHT_ONHEADER;
-                    *pItem = iCount;
+            *pFlags |= HHT_ONHEADER;
+            *pItem = iCount;
 //                  TRACE (header, "ON HEADER %d\n", iCount);
-                    return;
-                }
-            }
-
-            /* check for last divider part (on nowhere) */
-            rect = infoPtr->items[infoPtr->uNumItem-1].rect;
-            rect.left = rect.right;
-            rect.right += DIVIDER_WIDTH;
-            if (PtInRect (&rect, *lpPt)) {
-                if (bNoWidth) {
-                    *pFlags |= HHT_ONDIVOPEN;
-                    *pItem = infoPtr->uNumItem - 1;
-//                  TRACE (header, "ON DIVOPEN %d\n", *pItem);
-                    return;
-                }
-                else {
-                    *pFlags |= HHT_ONDIVIDER;
-                    *pItem = infoPtr->uNumItem-1;
-//                  TRACE (header, "ON DIVIDER %d\n", *pItem);
-                    return;
-                }
-            }
-
-            *pFlags |= HHT_NOWHERE;
-            *pItem = 1;
-//          TRACE (header, "NOWHERE\n");
             return;
-        }
-    }
-    else {
-        if (lpPt->x < rect.left) {
-//         TRACE (header, "TO LEFT\n");
-           *pFlags |= HHT_TOLEFT;
-        }
-        else if (lpPt->x > rect.right) {
-//          TRACE (header, "TO LEFT\n");
-            *pFlags |= HHT_TORIGHT;
+          }
         }
 
-        if (lpPt->y < rect.top) {
+        /* check for last divider part (on nowhere) */
+        rect = infoPtr->items[infoPtr->uNumItem-1].rect;
+        rect.left = rect.right;
+        rect.right += DIVIDER_WIDTH;
+        if (widthCount > 0) bNoWidth = FALSE;
+        if (PtInRect (&rect, *lpPt))
+        {
+          if (bNoWidth)
+          {
+            *pFlags |= HHT_ONDIVOPEN;
+            *pItem = infoPtr->uNumItem - 1;
+//                  TRACE (header, "ON DIVOPEN %d\n", *pItem);
+            return;
+          } else
+          {
+            *pFlags |= HHT_ONDIVIDER;
+            *pItem = infoPtr->uNumItem-1;
+//                  TRACE (header, "ON DIVIDER %d\n", *pItem);
+            return;
+          }
+        }
+
+        *pFlags |= HHT_NOWHERE;
+        *pItem = 1;
+//          TRACE (header, "NOWHERE\n");
+        return;
+      }
+    } else
+    {
+      if (lpPt->x < rect.left)
+      {
+//         TRACE (header, "TO LEFT\n");
+        *pFlags |= HHT_TOLEFT;
+      } else if (lpPt->x > rect.right)
+      {
+//          TRACE (header, "TO LEFT\n");
+        *pFlags |= HHT_TORIGHT;
+      }
+
+      if (lpPt->y < rect.top)
+      {
 //          TRACE (header, "ABOVE\n");
-            *pFlags |= HHT_ABOVE;
-        }
-        else if (lpPt->y > rect.bottom) {
+        *pFlags |= HHT_ABOVE;
+      } else if (lpPt->y > rect.bottom)
+      {
 //          TRACE (header, "BELOW\n");
-            *pFlags |= HHT_BELOW;
-        }
+        *pFlags |= HHT_BELOW;
+      }
     }
 
     *pItem = 1;
@@ -1521,10 +1534,11 @@ HEADER_LButtonDown (HWND hwnd, WPARAM wParam, LPARAM lParam)
         if (!(HEADER_SendHeaderNotify (hwnd, HDN_BEGINTRACKA, nItem)))
         {
             SetCapture (hwnd);
-            infoPtr->bCaptured = TRUE;
-            infoPtr->bTracking = TRUE;
-            infoPtr->iMoveItem = nItem;
-            infoPtr->nOldWidth = infoPtr->items[nItem].cxy;
+            infoPtr->bCaptured  = TRUE;
+            infoPtr->bTracking  = TRUE;
+            infoPtr->bTrackOpen = flags == HHT_ONDIVOPEN;
+            infoPtr->iMoveItem  = nItem;
+            infoPtr->nOldWidth  = infoPtr->items[nItem].cxy;
             infoPtr->xTrackOffset = infoPtr->items[nItem].rect.right - pt.x;
 
             if (!(dwStyle & HDS_FULLDRAG))
@@ -1623,11 +1637,11 @@ HEADER_MouseMove (HWND hwnd, WPARAM wParam, LPARAM lParam)
     INT   nItem, nWidth;
     HDC   hdc;
 
-    pt.x = (INT)LOWORD(lParam);
-    pt.y = (INT)HIWORD(lParam);
+    pt.x = (SHORT)LOWORD(lParam);
+    pt.y = (SHORT)HIWORD(lParam);
     HEADER_InternalHitTest (hwnd, &pt, &flags, &nItem);
 
-    if ((dwStyle & HDS_BUTTONS) && (dwStyle & HDS_HOTTRACK))
+    if ((dwStyle & HDS_BUTTONS) && (dwStyle & HDS_HOTTRACK) &&!infoPtr->bCaptured)
     {
         INT newItem;
 
@@ -1667,32 +1681,31 @@ HEADER_MouseMove (HWND hwnd, WPARAM wParam, LPARAM lParam)
         {
           if (dwStyle & HDS_FULLDRAG)
           {
-                if (HEADER_SendHeaderNotify (hwnd, HDN_ITEMCHANGINGA, infoPtr->iMoveItem))
-                    infoPtr->items[infoPtr->iMoveItem].cxy = infoPtr->nOldWidth;
-                else {
-                    nWidth = pt.x - infoPtr->items[infoPtr->iMoveItem].rect.left + infoPtr->xTrackOffset;
-                    if (nWidth < MIN_ITEMWIDTH)
-                        nWidth = MIN_ITEMWIDTH;
-                    infoPtr->items[infoPtr->iMoveItem].cxy = nWidth;
-                    HEADER_SendHeaderNotify (hwnd, HDN_ITEMCHANGEDA,
-                                             infoPtr->iMoveItem);
-                }
-                HEADER_SetItemBounds (hwnd,infoPtr->iMoveItem);
-                HEADER_Refresh(hwnd);
+            if (HEADER_SendHeaderNotify (hwnd, HDN_ITEMCHANGINGA, infoPtr->iMoveItem))
+              infoPtr->items[infoPtr->iMoveItem].cxy = infoPtr->nOldWidth;
+            else
+            {
+              nWidth = pt.x - infoPtr->items[infoPtr->iMoveItem].rect.left + infoPtr->xTrackOffset;
+              if (nWidth < MIN_ITEMWIDTH) nWidth = MIN_ITEMWIDTH;
+              infoPtr->items[infoPtr->iMoveItem].cxy = nWidth;
+              HEADER_SendHeaderNotify(hwnd,HDN_ITEMCHANGEDA,infoPtr->iMoveItem);
             }
-            else {
-                hdc = GetDC (hwnd);
-                HEADER_DrawTrackLine (hwnd, hdc, infoPtr->xOldTrack);
-                infoPtr->xOldTrack = pt.x + infoPtr->xTrackOffset;
-                if (infoPtr->xOldTrack < infoPtr->items[infoPtr->iMoveItem].rect.left)
-                    infoPtr->xOldTrack = infoPtr->items[infoPtr->iMoveItem].rect.left;
-                infoPtr->items[infoPtr->iMoveItem].cxy =
-                    infoPtr->xOldTrack - infoPtr->items[infoPtr->iMoveItem].rect.left;
-                HEADER_DrawTrackLine (hwnd, hdc, infoPtr->xOldTrack);
-                ReleaseDC (hwnd, hdc);
-            }
+            HEADER_SetItemBounds (hwnd,infoPtr->iMoveItem);
+            HEADER_Refresh(hwnd);
+          } else
+          {
+            hdc = GetDC (hwnd);
+            HEADER_DrawTrackLine (hwnd, hdc, infoPtr->xOldTrack);
+            infoPtr->xOldTrack = pt.x + infoPtr->xTrackOffset;
+            if (infoPtr->xOldTrack < infoPtr->items[infoPtr->iMoveItem].rect.left+MIN_ITEMWIDTH)
+              infoPtr->xOldTrack = infoPtr->items[infoPtr->iMoveItem].rect.left+MIN_ITEMWIDTH;
+            infoPtr->items[infoPtr->iMoveItem].cxy =
+              infoPtr->xOldTrack-infoPtr->items[infoPtr->iMoveItem].rect.left;
+            HEADER_DrawTrackLine (hwnd, hdc, infoPtr->xOldTrack);
+            ReleaseDC (hwnd, hdc);
+          }
 
-            HEADER_SendHeaderNotify (hwnd, HDN_TRACKA, infoPtr->iMoveItem);
+          HEADER_SendHeaderNotify (hwnd, HDN_TRACKA, infoPtr->iMoveItem);
 //          TRACE (header, "Tracking item %d!\n", infoPtr->iMoveItem);
         }
     }
@@ -1700,6 +1713,36 @@ HEADER_MouseMove (HWND hwnd, WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
+static LRESULT
+HEADER_KeyDown(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  HEADER_INFO *infoPtr = HEADER_GetInfoPtr(hwnd);
+  DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
+  HDC hdc;
+
+  if (wParam == VK_ESCAPE && infoPtr->bCaptured && infoPtr->bTracking)
+  {
+    infoPtr->bTracking = FALSE;
+
+    HEADER_SendHeaderNotify(hwnd,HDN_ENDTRACKA,infoPtr->iMoveItem);
+    hdc = GetDC(hwnd);
+    HEADER_DrawTrackLine(hwnd,hdc,infoPtr->xOldTrack);
+    ReleaseDC(hwnd,hdc);
+    if (dwStyle & HDS_FULLDRAG)
+    {
+      infoPtr->items[infoPtr->iMoveItem].cxy = infoPtr->nOldWidth;
+      HEADER_Refresh(hwnd);
+    }
+
+    infoPtr->bCaptured = FALSE;
+    ReleaseCapture();
+    HEADER_SendSimpleNotify(hwnd,NM_RELEASEDCAPTURE);
+
+    return TRUE;
+  }
+
+  return DefWindowProcA(WM_KEYDOWN,hwnd,wParam,lParam);
+}
 
 static LRESULT
 HEADER_Paint (HWND hwnd, WPARAM wParam)
@@ -1737,6 +1780,17 @@ HEADER_SetCursor (HWND hwnd, WPARAM wParam, LPARAM lParam)
     ScreenToClient (hwnd, &pt);
 
     HEADER_InternalHitTest (hwnd, &pt, &flags, &nItem);
+
+    if (infoPtr->bCaptured)
+    {
+      if (infoPtr->bTracking)
+      {
+        if (infoPtr->bTrackOpen) SetCursor(infoPtr->hcurDivopen);
+        else SetCursor(infoPtr->hcurDivider);
+      } else SetCursor(infoPtr->hcurArrow);
+
+      return 0;
+    }
 
     if (flags == HHT_ONDIVIDER)
         SetCursor (infoPtr->hcurDivider);
@@ -1871,6 +1925,9 @@ HEADER_WindowProc (HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
         case WM_GETFONT:
             return HEADER_GetFont (hwnd);
+
+        case WM_KEYDOWN:
+            return HEADER_KeyDown(hwnd,wParam,lParam);
 
         case WM_LBUTTONDBLCLK:
             return HEADER_LButtonDblClk (hwnd, wParam, lParam);

@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.271 1999-10-05 14:28:06 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.272 1999-10-05 16:01:42 cbratschi Exp $ */
+
+ 99-10-05: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32: rewrote color management
 
  99-10-05: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Set fs:0 to -1 in OS2UnsetExceptionHandler. 
