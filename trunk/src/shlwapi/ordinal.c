@@ -67,14 +67,18 @@ extern HMODULE SHLWAPI_hmlang;
  *      SHLWAPI_1	[SHLWAPI.1]
  */
 DWORD WINAPI SHLWAPI_1 (
-	LPSTR lpString1,
-	LPSTR lpString2)
+	LPSTR   lpURL,
+	LPDWORD lpdwFlags)
 {
-  if (lpString1 == NULL)
-    return 0;
+  if (lpURL == NULL)
+    return E_INVALIDARG;
   
-  if (lpString2 == NULL)
-    return 0;
+  if (lpdwFlags == NULL)
+    return E_INVALIDARG;
+  
+  // verify flags
+  if (*lpdwFlags != 0x18)   // some unknown flag
+    return E_INVALIDARG;      // some unknown error condition
   
   FIXME("(%p %s %p %s)\n",lpStr, debugstr_a(lpStr),x, debugstr_a(x));
   return 0;
