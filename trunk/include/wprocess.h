@@ -1,4 +1,4 @@
-/* $Id: wprocess.h,v 1.3 1999-06-20 10:58:16 sandervl Exp $ */
+/* $Id: wprocess.h,v 1.4 1999-06-20 12:46:34 sandervl Exp $ */
 /*
  * Process help functions
  *
@@ -11,7 +11,7 @@
 #ifndef _WPROCESS_H__
 #define _WPROCESS_H__
 
-//#define WIN32_TIBSEL
+#define WIN32_TIBSEL
 
 #ifdef OS2_INCLUDED
 typedef DWORD TEB;
