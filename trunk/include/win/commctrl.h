@@ -1,4 +1,4 @@
-/* $Id: commctrl.h,v 1.30 2000-04-16 18:25:05 cbratschi Exp $ */
+/* $Id: commctrl.h,v 1.31 2000-05-22 17:18:49 cbratschi Exp $ */
 /*
  * Common controls definitions
  */
@@ -3937,7 +3937,6 @@ BOOL WINAPI DPA_DestroyCallback (const HDPA, DPAENUMPROC, LPARAM);
 #define DPA_GetPtrCount(hdpa)  (*(INT*)(hdpa))
 #define DPA_GetPtrPtr(hdpa)    (*((LPVOID**)((BYTE*)(hdpa)+sizeof(INT))))
 #define DPA_FastGetPtr(hdpa,i) (DPA_GetPtrPtr(hdpa)[i])
-
 
 /* notification helper functions */
 

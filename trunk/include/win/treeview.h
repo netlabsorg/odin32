@@ -1,4 +1,4 @@
-/* $Id: treeview.h,v 1.18 2000-04-16 18:25:06 cbratschi Exp $ */
+/* $Id: treeview.h,v 1.19 2000-05-22 17:18:59 cbratschi Exp $ */
 /*
  * Treeview class extra info
  *
@@ -10,7 +10,6 @@
 #ifndef __WINE_TREEVIEW_H
 #define __WINE_TREEVIEW_H
 
-#define MINIMUM_INDENT        10
 #define ITEM_VSPACE            2
 #define TV_REFRESH_DELAY     100     /* 100 ms delay between two refreshes */
 #define TV_DEFAULTITEMHEIGHT  16
@@ -21,10 +20,9 @@
 
 /* internal structures */
 
-typedef struct
+typedef struct _TREEITEM    /* HTREEITEM is a _TREEINFO *. */
 {
-  UINT      mask;
-  HTREEITEM hItem;
+  UINT      callbackMask;
   UINT      state;
   UINT      stateMask;
   LPWSTR    pszText;
@@ -33,67 +31,83 @@ typedef struct
   int       iSelectedImage;
   int       cChildren;
   LPARAM    lParam;
-  int       iIntegral;
+  int       iIntegral;      /* item height multiplier (1 is normal) */
   int       iLevel;         /* indentation level:0=root level */
-  COLORREF  clrText;
   HTREEITEM parent;         /* handle to parent or 0 if at root*/
   HTREEITEM firstChild;     /* handle to first child or 0 if no child*/
-  HTREEITEM sibling;        /* handle to next item in list, 0 if last */
-  HTREEITEM upsibling;      /* handle to previous item in list, 0 if first */
-  int       visible;
+  HTREEITEM lastChild;
+  HTREEITEM prevSibling;    /* handle to prev item in list, 0 if first */
+  HTREEITEM nextSibling;    /* handle to next item in list, 0 if last */
   RECT      rect;
-  RECT      text;
-  RECT      expandBox;      /* expand box (+/-) coordinate */
-  RECT      bitmap;
-  RECT      statebitmap;
-  BOOL      calculated;
+  LONG      linesOffset;
+  LONG      stateOffset;
+  LONG      imageOffset;
+  LONG      textOffset;
+  LONG      textWidth;      /* horizontal text extent for pszText */
+  LONG      textHeight;
+  BOOL      inclient;       // displayed in client rect
+  BOOL      displayed;      // item is displayed
+  int       displayOrder;   /* display ordering, 0 is first display item */
+
+  BOOL      calculated;     //rect is valid
 } TREEVIEW_ITEM, *LPTREEVIEW_ITEM;
 
 typedef struct tagTREEVIEW_INFO
 {
   COMCTL32_HEADER header;
-  UINT            uInternalStatus;
-  INT             Timer;
-  UINT            uNumItems;      /* number of valid TREEVIEW_ITEMs */
-  UINT            uNumPtrsAlloced;
-  HTREEITEM       uMaxHandle;     /* needed for delete_item */
-  HTREEITEM       TopRootItem;    /* handle to first item in treeview */
-  INT             cdmode;         /* last custom draw setting */
-  UINT            uScrollTime;    /* max. time for scrolling in milliseconds*/
-  UINT            uItemHeight;    /* item height, -1 for default item height */
-  UINT            uRealItemHeight;// current item height in pixels
-  UINT            uVScrollStep;   // scroll step in pixels
-  UINT            uVisibleHeight; /* visible height of treeview in pixels */
-  UINT            uTotalHeight;   /* total height of treeview in pixels */
-  UINT            uVisibleWidth;
-  UINT            uTotalWidth;
-  UINT            uIndent;        /* indentation in pixels */
-  HTREEITEM       selectedItem;   /* handle to selected item or 0 if none */
-  HTREEITEM       hotItem;        /* handle currently under cursor, 0 if none */
+
+  HWND          hwnd;
+  DWORD         dwStyle;
+  HTREEITEM     root;
+  UINT          uInternalStatus;
+  INT           Timer;
+  UINT          uNumItems;      /* number of valid TREEVIEW_ITEMs */
+  INT           cdmode;         /* last custom draw setting */
+  UINT          uScrollTime;    /* max. time for scrolling in milliseconds*/
+
+  UINT          uItemHeight;    /* item height */
+  BOOL          bHeightSet;
+
+  LONG          clientWidth;    /* width of control window */
+  LONG          clientHeight;   /* height of control window */
+
+  LONG          treeWidth;      /* width of displayed tree items */
+  LONG          treeHeight;     /* height of displayed tree items */
+
+  UINT          uIndent;        /* indentation in pixels */
+  HTREEITEM     selectedItem;   /* handle to selected item or 0 if none */
+  HTREEITEM     focusItem;      /* handle to item that has focus, 0 if none */
+  HTREEITEM     hotItem;        /* handle currently under cursor, 0 if none */
+  HTREEITEM     firstVisible;   /* handle to first visible item */
+  int           maxDisplayOrder;
+  HTREEITEM     dropItem;       /* handle to item selected by drag cursor */
+  HTREEITEM     insertMarkItem; /* item after which insertion mark is placed */
+  BOOL          insertBeforeorAfter; /* flag used by TVM_SETINSERTMARK */
+  HIMAGELIST    dragList;       /* Bitmap of dragged item */
+  COLORREF      clrBk;
+  COLORREF      clrText;
+  COLORREF      clrLine;
+  COLORREF      clrInsertMark;
+  HFONT         hFont;
+  HFONT         hBoldFont;
+  HWND          hwndToolTip;
+
+  HWND          hwndEdit;
+  WNDPROC       wpEditOrig;     /* orig window proc for subclassing edit */
+  BOOL          bIgnoreEditKillFocus;
+  BOOL          bLabelChanged;
+
+  HIMAGELIST    himlNormal;
+  int           normalImageHeight;
+  int           normalImageWidth;
+  HIMAGELIST    himlState;
+  int           stateImageHeight;
+  int           stateImageWidth;
+  HDPA          items;
+
   HTREEITEM       tipItem;        // item with tooltip
-  HTREEITEM       editItem;       /* handle to item currently editted, 0 if none */
-  HTREEITEM       firstVisible;   /* handle to first visible item */
-  HTREEITEM       dropItem;       /* handle to item selected by drag cursor */
-  HTREEITEM       insertMarkItem; /* item after which insertion mark is placed */
-  BOOL            insertBeforeorAfter; /* flag used by TVM_SETINSERTMARK */
-  HIMAGELIST      dragList;       /* Bitmap of dragged item */
   POINT           lefttop;        //in pixels
-  COLORREF        clrBk;
-  COLORREF        clrText;
-  COLORREF        clrLine;
-  COLORREF        clrInsertMark;
-  HFONT           hFont;
-  HFONT           hBoldFont;
-  HWND            hwndToolTip;
-  HWND            hwndEdit;
-  WNDPROC         wpEditOrig;     /* needed for subclassing edit control */
-  HIMAGELIST      himlNormal;
-  HIMAGELIST      himlState;
-  LPTVSORTCB      pCallBackSort; /* ptr to TVSORTCB struct for callback sorting */
-  TREEVIEW_ITEM   *items;        /* itemlist */
-  INT             *freeList;     /* bitmap indicating which elements are valid */
-                                 /* 1=valid, 0=free;   */
-                                 /* size of list= uNumPtrsAlloced/32 */
+
   LPWSTR          pszISearch;
   UINT            uISearchLen;
   DWORD           dwISearchTime;
