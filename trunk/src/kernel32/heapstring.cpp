@@ -1,3 +1,4 @@
+/* $Id: heapstring.cpp,v 1.47 2001-10-15 17:15:30 sandervl Exp $ */
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  *
