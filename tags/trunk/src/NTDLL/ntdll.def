@@ -1,4 +1,4 @@
-; $Id: ntdll.def,v 1.51 2003-04-08 12:47:06 sandervl Exp $
+; $Id: ntdll.def,v 1.52 2005-02-11 19:26:27 sao2l02 Exp $
 
 ;
 ; Based on NT 4.0 SP6: NTDLL.DLL
@@ -9,6 +9,7 @@ DATA MULTIPLE NONSHARED
 
 IMPORTS 
     _RtlInitializeCriticalSection@4      = KERNEL32.InitializeCriticalSection
+    _RtlInitializeCriticalSectionAndSpinCount@8      = KERNEL32.InitializeCriticalSectionAndSpinCount
     _RtlLeaveCriticalSection@4           = KERNEL32.LeaveCriticalSection
     _RtlEnterCriticalSection@4           = KERNEL32.EnterCriticalSection
     _RtlDeleteCriticalSection@4          = KERNEL32.DeleteCriticalSection
@@ -465,7 +466,7 @@ EXPORTS
     RtlInitializeBitMap           = _RtlInitializeBitMap@12         	@442
 ;   RtlInitializeContext                        			@443
     RtlInitializeCriticalSection  = _InitializeCriticalSection@4        @444
-;   RtlInitializeCriticalSectionAndSpinCount                		@445
+    RtlInitializeCriticalSectionAndSpinCount  = _InitializeCriticalSectionAndSpinCount@8	@445
     RtlInitializeGenericTable     = _RtlInitializeGenericTable@0        @446
 ;   RtlInitializeHandleTable                        			@447
 ;   RtlInitializeRXact                          			@448
