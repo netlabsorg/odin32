@@ -1,4 +1,11 @@
-/* $Id: changelog,v 1.2379 2002-12-05 09:37:01 sandervl Exp $ */
+/* $Id: changelog,v 1.2380 2002-12-06 03:07:38 bird Exp $ */
+
+ 2002-12-05: Knut St. Osmundsen <bird@anduin   >
+    - WIN32K:   o Finially got around fixing the bug.
+                  (Was d32init.c, pach <= 0x10000, where compiler did signed
+                  comparision instead of unsigned. (pach is > 0xfff00000))
+                o Recreate the symbol database. Had to remove some kernels
+                  because of size problems.
 
  2002-12-05: Sander van Leeuwen <sandervl@innotek   >
     - COMCTL32: o Put back old tab height calculation code. Fixes the tabs
@@ -39,7 +46,7 @@
  2002-11-28: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Make sure the stack is properly aligned
                   We're asking for problems if our stack start near a 64kb
-                  boundary. Some OS/2 thunking procedures can choke on misaligned 
+                  boundary. Some OS/2 thunking procedures can choke on misaligned
                   stack addresses. (workaround; not a real fix)
 
  2002-11-27: Sander van Leeuwen <sandervl@innotek   >
@@ -71,12 +78,12 @@
                   for spotting this bug)
 
  2002-11-13: Sander van Leeuwen <sandervl@innotek   >
-    - SETUPAPI, RICHED32: 
+    - SETUPAPI, RICHED32:
                 o Wine resync
 
  2002-11-12: Sander van Leeuwen <sandervl@innotek   >
     - COMCTL32: o Wine resync (toolbar, propsheet, imagelist)
-    - OLE32, OLEAUT32: 
+    - OLE32, OLEAUT32:
                 o Wine resync
 
  2001-11-12: Dietrich Teickner <Dietrich_Teickner@t-online   >
@@ -115,7 +122,7 @@
                   with SC_NOCLOSE class style
 
  2002-10-11: Sander van Leeuwen <sandervl@innotek   >
-    - USER32:   o SetParent bugfix; don't clear window id if parent is set to 
+    - USER32:   o SetParent bugfix; don't clear window id if parent is set to
                   0.
 
  2002-10-10: Sander van Leeuwen <sandervl@innotek   >
@@ -145,7 +152,7 @@
 
  2002-10-01: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Be careful with stack usage in exception handler during
-                  XCPT_GUARD_PAGE_VIOLATION. 
+                  XCPT_GUARD_PAGE_VIOLATION.
 
  2002-09-30: Sander van Leeuwen <sandervl@innotek   >
     - SHELL32:  o Fixed crash when deleting a file in the file dialog
@@ -157,7 +164,7 @@
 
  2002-09-27: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o GetFileSize must fail for drives
-                o Disable physical disk & volume access by default; 
+                o Disable physical disk & volume access by default;
                   call EnablePhysicalDiskAccess to enable it (custom build)
                 o FindFirst/NextVolumeA fixes for ignoring LVM volumes
 
