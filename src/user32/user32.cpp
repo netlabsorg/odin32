@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.30 1999-09-25 09:27:08 dengert Exp $ */
+/* $Id: user32.cpp,v 1.31 1999-09-25 14:18:11 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -676,10 +676,11 @@ HCURSOR WIN32API LoadCursorFromFileW(LPCWSTR lpFileName)
 //******************************************************************************
 HCURSOR WIN32API SetCursor( HCURSOR hcur)
 {
-#ifdef DEBUG
-    WriteLog("USER32: SetCursor %x\n", hcur);
-#endif
-    return O32_SetCursor(hcur);
+ HCURSOR rc;
+
+    rc = O32_SetCursor(hcur);
+    dprintf(("USER32: SetCursor %x (prev %x (%x))\n", hcur, rc, O32_GetCursor()));
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************

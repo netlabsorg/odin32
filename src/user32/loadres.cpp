@@ -1,4 +1,4 @@
-/* $Id: loadres.cpp,v 1.6 1999-09-15 23:18:52 sandervl Exp $ */
+/* $Id: loadres.cpp,v 1.7 1999-09-25 14:15:54 sandervl Exp $ */
 
 /*
  * Win32 resource API functions for OS/2
@@ -137,7 +137,10 @@ HCURSOR WIN32API LoadCursorA(HINSTANCE hinst, LPCSTR lpszCursor)
 		delete winres;
 	}
     }
-    dprintf(("LoadCursorA (%X) returned %x\n", hinst, hCursor));
+    if(HIWORD(lpszCursor)) {
+    	 dprintf(("LoadCursorA %s from %x returned %x\n", lpszCursor, hinst, hCursor));
+    }
+    else dprintf(("LoadCursorA %x from %x returned %x\n", lpszCursor, hinst, hCursor));
 
     return(hCursor);
 }

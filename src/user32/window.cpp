@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.8 1999-09-25 09:27:08 dengert Exp $ */
+/* $Id: window.cpp,v 1.9 1999-09-25 14:18:12 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -28,6 +28,100 @@
 
 //******************************************************************************
 //******************************************************************************
+#ifdef DEBUG
+void PrintWindowStyle(DWORD dwStyle, DWORD dwExStyle)
+{
+ char style[256] = "";
+ char exstyle[256] = "";
+
+  /* Window styles */
+  if(dwStyle & WS_CHILD)
+        strcat(style, "WS_CHILD ");
+  if(dwStyle & WS_POPUP)
+        strcat(style, "WS_POPUP ");
+  if(dwStyle & WS_VISIBLE)
+        strcat(style, "WS_VISIBLE ");
+  if(dwStyle & WS_DISABLED)
+        strcat(style, "WS_DISABLED ");
+  if(dwStyle & WS_CLIPSIBLINGS)
+        strcat(style, "WS_CLIPSIBLINGS ");
+  if(dwStyle & WS_CLIPCHILDREN)
+        strcat(style, "WS_CLIPCHILDREN ");
+  if(dwStyle & WS_MAXIMIZE)
+        strcat(style, "WS_MAXIMIZE ");
+  if(dwStyle & WS_MINIMIZE)
+        strcat(style, "WS_MINIMIZE ");
+  if(dwStyle & WS_GROUP)
+        strcat(style, "WS_GROUP ");
+  if(dwStyle & WS_TABSTOP)
+        strcat(style, "WS_TABSTOP ");
+
+  if(dwStyle & WS_CAPTION)
+        strcat(style, "WS_CAPTION ");
+  if(dwStyle & WS_DLGFRAME)
+        strcat(style, "WS_DLGFRAME ");
+  if(dwStyle & WS_BORDER)
+        strcat(style, "WS_BORDER ");
+
+  if(dwStyle & WS_VSCROLL)
+        strcat(style, "WS_VSCROLL ");
+  if(dwStyle & WS_HSCROLL)
+        strcat(style, "WS_HSCROLL ");
+  if(dwStyle & WS_SYSMENU)
+        strcat(style, "WS_SYSMENU ");
+  if(dwStyle & WS_THICKFRAME)
+        strcat(style, "WS_THICKFRAME ");
+  if(dwStyle & WS_MINIMIZEBOX)
+        strcat(style, "WS_MINIMIZEBOX ");
+  if(dwStyle & WS_MAXIMIZEBOX)
+        strcat(style, "WS_MAXIMIZEBOX ");
+
+  if(dwExStyle & WS_EX_DLGMODALFRAME)
+        strcat(exstyle, "WS_EX_DLGMODALFRAME ");
+  if(dwExStyle & WS_EX_ACCEPTFILES)
+        strcat(exstyle, "WS_EX_ACCEPTFILES ");
+  if(dwExStyle & WS_EX_NOPARENTNOTIFY)
+        strcat(exstyle, "WS_EX_NOPARENTNOTIFY ");
+  if(dwExStyle & WS_EX_TOPMOST)
+        strcat(exstyle, "WS_EX_TOPMOST ");
+  if(dwExStyle & WS_EX_TRANSPARENT)
+        strcat(exstyle, "WS_EX_TRANSPARENT ");
+
+  if(dwExStyle & WS_EX_MDICHILD)
+        strcat(exstyle, "WS_EX_MDICHILD ");
+  if(dwExStyle & WS_EX_TOOLWINDOW)
+        strcat(exstyle, "WS_EX_TOOLWINDOW ");
+  if(dwExStyle & WS_EX_WINDOWEDGE)
+        strcat(exstyle, "WS_EX_WINDOWEDGE ");
+  if(dwExStyle & WS_EX_CLIENTEDGE)
+        strcat(exstyle, "WS_EX_CLIENTEDGE ");
+  if(dwExStyle & WS_EX_CONTEXTHELP)
+        strcat(exstyle, "WS_EX_CONTEXTHELP ");
+  if(dwExStyle & WS_EX_RIGHT)
+        strcat(exstyle, "WS_EX_RIGHT ");
+  if(dwExStyle & WS_EX_LEFT)
+        strcat(exstyle, "WS_EX_LEFT ");
+  if(dwExStyle & WS_EX_RTLREADING)
+        strcat(exstyle, "WS_EX_RTLREADING ");
+  if(dwExStyle & WS_EX_LTRREADING)
+        strcat(exstyle, "WS_EX_LTRREADING ");
+  if(dwExStyle & WS_EX_LEFTSCROLLBAR)
+        strcat(exstyle, "WS_EX_LEFTSCROLLBAR ");
+  if(dwExStyle & WS_EX_RIGHTSCROLLBAR)
+        strcat(exstyle, "WS_EX_RIGHTSCROLLBAR ");
+  if(dwExStyle & WS_EX_CONTROLPARENT)
+        strcat(exstyle, "WS_EX_CONTROLPARENT ");
+  if(dwExStyle & WS_EX_STATICEDGE)
+        strcat(exstyle, "WS_EX_STATICEDGE ");
+  if(dwExStyle & WS_EX_APPWINDOW)
+        strcat(exstyle, "WS_EX_APPWINDOW ");
+
+  dprintf(("Window style:   %x %s", dwStyle, style));
+  dprintf(("Window exStyle: %x %s", dwExStyle, exstyle));
+}
+#endif
+//******************************************************************************
+//******************************************************************************
 HWND WIN32API CreateWindowExA(DWORD exStyle, LPCSTR className,
                               LPCSTR windowName, DWORD style, INT x,
                               INT y, INT width, INT height,
@@ -37,6 +131,10 @@ HWND WIN32API CreateWindowExA(DWORD exStyle, LPCSTR className,
   Win32BaseWindow *window;
   ATOM classAtom;
   CREATESTRUCTA cs;
+
+#ifdef DEBUG
+    PrintWindowStyle(style, exStyle);
+#endif
 
     if(exStyle & WS_EX_MDICHILD)
         return CreateMDIWindowA(className, windowName, style, x, y, width, height, parent, instance, (LPARAM)data);
@@ -68,7 +166,10 @@ HWND WIN32API CreateWindowExA(DWORD exStyle, LPCSTR className,
     cs.lpszName       = windowName;
     cs.lpszClass      = className;
     cs.dwExStyle      = exStyle;
-    dprintf(("CreateWindowExA: parent %x (%d,%d) (%d,%d), %x %x", parent, x, y, width, height, style, exStyle));
+    if(HIWORD(className)) {
+    	 dprintf(("CreateWindowExA: class %s parent %x (%d,%d) (%d,%d), %x %x", className, parent, x, y, width, height, style, exStyle));
+    }
+    else dprintf(("CreateWindowExA: class %d parent %x (%d,%d) (%d,%d), %x %x", className, parent, x, y, width, height, style, exStyle));
 
     //TODO: According to the docs className can be a 16 bits atom
     //      Wine seems to assume it's a string though...
@@ -816,12 +917,11 @@ HDWP WIN32API DeferWindowPos( HDWP arg1, HWND arg2, HWND  arg3, int arg4, int ar
 }
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API ChildWindowFromPoint( HWND arg1, POINT  arg2)
+HWND WIN32API ChildWindowFromPoint( HWND hwnd, POINT pt)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  ChildWindowFromPoint\n");
-#endif
-    return O32_ChildWindowFromPoint(arg1, arg2);
+    dprintf(("USER32:  ChildWindowFromPoint\n"));
+//    return O32_ChildWindowFromPoint(arg1, arg2);
+    return ChildWindowFromPointEx(hwnd, pt, 0);
 }
 //******************************************************************************
 //******************************************************************************
@@ -847,7 +947,7 @@ HWND WIN32API ChildWindowFromPointEx (HWND hwndParent, POINT pt, UINT uFlags)
         HWND hWnd;
         POINT absolutePt;
 
-        dprintf(("USER32: ChildWindowFromPointEx(%08xh,%08xh,%08xh).\n",
+        dprintf(("ChildWindowFromPointEx(%08xh,%08xh,%08xh).\n",
                  hwndParent, pt, uFlags));
 
         if (GetWindowRect (hwndParent, &rect) == 0) {
@@ -896,12 +996,14 @@ HWND WIN32API ChildWindowFromPointEx (HWND hwndParent, POINT pt, UINT uFlags)
                         continue;
                 }
 
+		dprintf(("ChildWindowFromPointEx returned %x", hWnd));
                 // found it!
                 return hWnd;
         }
 
         // the point is in the parentwindow but the parentwindow has no child
         // at this coordinate
+	dprintf(("ChildWindowFromPointEx returned parent %x", hwndParent));
         return hwndParent;
 }
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.3 1999-09-21 17:03:29 dengert Exp $ */
+/* $Id: dc.cpp,v 1.4 1999-09-25 14:15:36 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -1052,6 +1052,7 @@ int WIN32API ReleaseDC (HWND hwnd, HDC hdc)
       rc = _O32_ReleaseDC (0, hdc);
 
    SetFS(sel);
+   dprintf(("ReleaseDC %x %x", hwnd, hdc));
    return (rc);
 }
 
@@ -1099,7 +1100,7 @@ BOOL WIN32API RedrawWindow (HWND hwnd, const RECT *pRect, HRGN hrgn, DWORD redra
 
    if (hwnd == NULLHANDLE) {
       hwnd = HWND_DESKTOP;
-      wnd  = NULL;
+      wnd  = Win32BaseWindow::GetWindowFromOS2Handle(OSLIB_HWND_DESKTOP);
    }
    else
    {
