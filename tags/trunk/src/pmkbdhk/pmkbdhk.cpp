@@ -1,4 +1,4 @@
-/* $Id: pmkbdhk.cpp,v 1.9 2003-10-22 15:56:07 sandervl Exp $ */
+/* $Id: pmkbdhk.cpp,v 1.10 2003-10-22 16:10:59 sandervl Exp $ */
 /*
  * OS/2 native Presentation Manager hooks
  *
@@ -27,7 +27,6 @@
 
 #include <pmkbdhk.h>
 #include "pmkbdhkp.h"
-#include "dosqss.h"
 
 
 /*
