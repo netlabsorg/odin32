@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.87 2000-11-09 18:15:18 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.88 2000-11-11 18:39:29 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -564,7 +564,7 @@ BOOL WIN32API MessageBeep( UINT uType)
 //******************************************************************************
 VOID WIN32API SetLastErrorEx(DWORD dwErrCode, DWORD dwType)
 {
-  dprintf(("USER32:  SetLastErrorEx\n"));
+  dprintf(("USER32: SetLastErrorEx %x %x", dwErrCode, dwType));
   SetLastError(dwErrCode);
 }
 
@@ -2658,3 +2658,24 @@ DWORD WIN32API SetLogonNotifyWindow(HWINSTA hwinsta,HWND hwnd)
   return 1;
 }
 
+
+DWORD WIN32API NotifyWinEvent(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4)
+{
+  dprintf(("USER32: NotifyWinEvent %x %x %x %x - empty stub!!", arg1, arg2, arg3, arg4));
+
+  return 0;
+}
+
+DWORD WIN32API UnhookWinEvent(DWORD arg1)
+{
+  dprintf(("USER32: UnhookWinEvent %x - empty stub!!", arg1));
+
+  return 0;
+}
+
+DWORD WIN32API SetWinEventHook(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5, DWORD arg6, DWORD arg7)
+{
+  dprintf(("USER32: SetWinEventHook %x %x %x %x %x %x %x - empty stub!!", arg1, arg2, arg3, arg4, arg5, arg6, arg7));
+
+  return 0;
+}
