@@ -1,4 +1,4 @@
-/* $Id: waveoutdaud.cpp,v 1.1 2001-04-27 17:39:49 sandervl Exp $ */
+/* $Id: waveoutdaud.cpp,v 1.2 2001-04-30 21:06:37 sandervl Exp $ */
 
 /*
  * Wave playback class (DirectAudio)
@@ -31,14 +31,15 @@
 
 #include "misc.h"
 #include "waveoutdaud.h"
-
+#include <options.h>
 
 DWORD WIN32API DAudioThreadHandler(LPVOID pUserData);
 
 //TODO: mulaw, alaw & adpcm
 /******************************************************************************/
 /******************************************************************************/
-DAudioWaveOut::DAudioWaveOut(LPWAVEFORMATEX pwfx) : ulError(0), hDAudioDrv(0)
+DAudioWaveOut::DAudioWaveOut(LPWAVEFORMATEX pwfx) : 
+        ulError(0), hDAudioDrv(0), fUnderrun(FALSE), State(STATE_STOPPED)
 {
     APIRET          rc;
     ULONG           action;
@@ -46,8 +47,6 @@ DAudioWaveOut::DAudioWaveOut(LPWAVEFORMATEX pwfx) : ulError(0), hDAudioDrv(0)
     MCI_AUDIO_INIT  init = {0};
     DAUDIO_CMD      cmd;
     ULONG           ParmLength = 0, DataLength;
-
-    fUnderrun = FALSE;
 
     rc = DosOpen("DAUDIO1$", &hDAudioDrv, &action, 0,
                  FILE_NORMAL, FILE_OPEN, OPEN_ACCESS_READWRITE |
@@ -90,6 +89,9 @@ DAudioWaveOut::~DAudioWaveOut()
 {
     DAUDIO_CMD cmd;
 
+    if(State != STATE_STOPPED) {
+        stop();
+    }
     if(hDAudioDrv) {
         sendIOCTL(DAUDIO_CLOSE, &cmd);
         DosClose(hDAudioDrv);
@@ -98,29 +100,17 @@ DAudioWaveOut::~DAudioWaveOut()
 }
 /******************************************************************************/
 /******************************************************************************/
-MMRESULT DAudioWaveOut::write(LPWAVEHDR pwh, UINT cbwh)
+MMRESULT DAudioWaveOut::write(LPVOID lpBuffer, UINT ulSize)
 {
     DAUDIO_CMD cmd;
 
-    cmd.Buffer.lpBuffer       = (ULONG)pwh->lpData;
-    cmd.Buffer.ulBufferLength = pwh->dwBufferLength;
+    cmd.Buffer.lpBuffer       = (ULONG)lpBuffer;
+    cmd.Buffer.ulBufferLength = ulSize;
     if(sendIOCTL(DAUDIO_ADDBUFFER, &cmd)) {
         dprintf(("Unable to add buffer!!!!!"));
         return MMSYSERR_ERROR;
     }
 
-    if(State == STATE_STOPPED) {//continue playback
-        restart();
-    }
-    else
-    if(fUnderrun) {
-        dprintf(("Resume playback after underrun"));
-        fUnderrun = FALSE;
-        State = STATE_PLAYING;
-
-        // Resume the playback.
-        resume();
-    }
     return(MMSYSERR_NOERROR);
 }
 /******************************************************************************/
@@ -186,7 +176,30 @@ MMRESULT DAudioWaveOut::restart()
 }
 /******************************************************************************/
 /******************************************************************************/
-ULONG DAudioWaveOut::getPosition()
+MMRESULT DAudioWaveOut::setProperty(int type, ULONG value)
+{
+    DAUDIO_CMD cmd;
+
+    dprintf(("DAudioWaveOut::setProperty %d %x", type, value));
+
+    cmd.SetProperty.type  = type;
+    cmd.SetProperty.value = type;
+    return sendIOCTL(DAUDIO_SETPROPERTY, &cmd);
+}
+/******************************************************************************/
+/******************************************************************************/
+MMRESULT DAudioWaveOut::setVolume(ULONG ulVol)
+{
+    DAUDIO_CMD cmd;
+
+    //Scale down from 0-64k-1 -> 0-100
+    cmd.Vol.VolumeR = (((ulVol & 0xFFFF0000) >> 16)*100)/0xFFFF;
+    cmd.Vol.VolumeL =  ((ulVol & 0x0000FFFF)       *100)/0xFFFF;
+    return sendIOCTL(DAUDIO_SETVOLUME, &cmd);
+}
+/******************************************************************************/
+/******************************************************************************/
+ULONG DAudioWaveOut::getPosition(PULONG pulWritePos)
 {
     DAUDIO_CMD cmd;
     MMRESULT   rc;
@@ -195,6 +208,7 @@ ULONG DAudioWaveOut::getPosition()
     if(rc) {
         return 0xFFFFFFFF;
     }
+    *pulWritePos = cmd.Pos.ulWritePos;
     return cmd.Pos.ulCurrentPos;
 }
 /******************************************************************************/
@@ -252,7 +266,12 @@ BOOL DAudioWaveOut::isDirectAudioAvailable()
     ULONG           action;
     HFILE           hDriver;
 
+
     if(!fTested) {
+        if(PROFILE_GetOdinIniInt(SECTION_WINMM, KEY_DIRECTAUDIO, 1) == 0) {
+            fTested = TRUE;
+            return FALSE;
+        }
         rc = DosOpen("DAUDIO1$", &hDriver, &action, 0,
                      FILE_NORMAL, FILE_OPEN, OPEN_ACCESS_READWRITE |
                      OPEN_SHARE_DENYNONE | OPEN_FLAGS_WRITE_THROUGH,
@@ -266,17 +285,6 @@ BOOL DAudioWaveOut::isDirectAudioAvailable()
     }
     return fAvailable;
 
-}
-/******************************************************************************/
-/******************************************************************************/
-MMRESULT DAudioWaveOut::setVolume(ULONG ulVol)
-{
-    DAUDIO_CMD cmd;
-
-    //Scale down from 0-64k-1 -> 0-100
-    cmd.Vol.VolumeR = (((ulVol & 0xFFFF0000) >> 16)*100)/0xFFFF;
-    cmd.Vol.VolumeL =  ((ulVol & 0x0000FFFF)       *100)/0xFFFF;
-    return sendIOCTL(DAUDIO_SETVOLUME, &cmd);
 }
 /******************************************************************************/
 /******************************************************************************/

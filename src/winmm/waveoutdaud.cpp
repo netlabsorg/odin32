@@ -1,4 +1,4 @@
-/* $Id: waveoutdaud.cpp,v 1.4 2001-04-06 14:36:43 sandervl Exp $ */
+/* $Id: waveoutdaud.cpp,v 1.5 2001-04-30 21:06:56 sandervl Exp $ */
 
 /*
  * Wave playback class (DirectAudio)
@@ -28,6 +28,7 @@
 #include <wprocess.h>
 #include <audio.h>
 #include <daudio.h>
+#include <options.h>
 
 #include "misc.h"
 #include "waveoutdaud.h"
@@ -348,6 +349,10 @@ BOOL DAudioWaveOut::isDirectAudioAvailable()
     HFILE           hDriver;
 
     if(!fTested) {
+        if(PROFILE_GetOdinIniInt(SECTION_WINMM, KEY_DIRECTAUDIO, 1) == 0) {
+            fTested = TRUE;
+            return FALSE;
+        }
         rc = DosOpen("DAUDIO1$", &hDriver, &action, 0,
                      FILE_NORMAL, FILE_OPEN, OPEN_ACCESS_READWRITE |
                      OPEN_SHARE_DENYNONE | OPEN_FLAGS_WRITE_THROUGH,
