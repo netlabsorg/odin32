@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1419 2001-05-17 11:26:45 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1420 2001-05-17 18:33:19 sandervl Exp $ */
 
  2001-05-17: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Destroy menu windows when they are no longer used.
@@ -9,10 +9,6 @@
                 o Check if another app changed mouse cursor (Get/SetCursor)
                   (previously mouse cursor did not change back if another
                    app modified it)
-    - TOOLS\install:
-                o Add serial com key to registry:
-                  [HKEY_LOCAL_MACHINE\HARDWARE\DEVICEMAP\SERIALCOMM]
-                  "Serial1"="COM2"
 
  2001-05-16: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o WM_SETREDRAW fix; must call WinEnableWindowUpdate for
