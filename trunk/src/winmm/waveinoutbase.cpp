@@ -1,4 +1,4 @@
-/* $Id: waveinoutbase.cpp,v 1.3 2002-01-29 20:13:52 sandervl Exp $ */
+/* $Id: waveinoutbase.cpp,v 1.4 2002-04-07 14:36:31 sandervl Exp $ */
 
 /*
  * Wave playback class (DART)
@@ -54,7 +54,7 @@ WaveInOut::WaveInOut(LPWAVEFORMATEX pwfx, ULONG fdwOpen, ULONG nCallback, ULONG 
 
     State    = STATE_STOPPED;
 
-    wmutex.enter(VMUTEX_WAIT_FOREVER);
+    wmutex.enter();
 
     if(wave == NULL) {
         wave = this;
@@ -77,7 +77,7 @@ WaveInOut::WaveInOut(LPWAVEFORMATEX pwfx, ULONG fdwOpen, ULONG nCallback, ULONG 
 /******************************************************************************/
 WaveInOut::~WaveInOut()
 {
-    wmutex.enter(VMUTEX_WAIT_FOREVER);
+    wmutex.enter();
 
     State = STATE_STOPPED;
 

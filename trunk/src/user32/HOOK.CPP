@@ -1,4 +1,4 @@
-/* $Id: HOOK.CPP,v 1.36 2002-03-28 16:20:06 sandervl Exp $ */
+/* $Id: HOOK.CPP,v 1.37 2002-04-07 14:36:59 sandervl Exp $ */
 
 /*
  * Windows hook functions
@@ -79,11 +79,6 @@ typedef struct
 #define HOOK_MAGIC ((HOOK_MAGIC1<<16)|HOOK_MAGIC1) // 'HKHK'
 
 #define CHECK_MAGIC(a) ((a != 0) && (((HOOKDATA *)a)->magic == HOOK_MAGIC))
-
-//NOTE: This must be in the local data segment -> if a shared semaphore was
-//      created by a different process, the handle returned by DosOpenMutexSem
-//      will be returned in hGlobalHookMutex
-static HMTX hGlobalHookMutex = 0;
 
 //Global DLL Data
 //SvL: Disabled global system hooks for now

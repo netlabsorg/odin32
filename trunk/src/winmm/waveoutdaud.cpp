@@ -1,4 +1,4 @@
-/* $Id: waveoutdaud.cpp,v 1.6 2001-06-16 11:35:22 sandervl Exp $ */
+/* $Id: waveoutdaud.cpp,v 1.7 2002-04-07 14:36:32 sandervl Exp $ */
 
 /*
  * Wave playback class (DirectAudio)
@@ -140,7 +140,7 @@ MMRESULT DAudioWaveOut::write(LPWAVEHDR pwh, UINT cbwh)
     queuedbuffers++;
     pwh->lpNext   = NULL;
     pwh->reserved = 0;
-    wmutex.enter(VMUTEX_WAIT_FOREVER);
+    wmutex.enter();
     if(wavehdr) {
         WAVEHDR *chdr = wavehdr;
         while(chdr->lpNext) {
@@ -184,7 +184,7 @@ MMRESULT DAudioWaveOut::pause()
     // Pause the playback.
     sendIOCTL(DAUDIO_PAUSE, &cmd);
 
-    wmutex.enter(VMUTEX_WAIT_FOREVER);
+    wmutex.enter();
     if(State != STATE_PLAYING) {
         State = STATE_PAUSED;
         wmutex.leave();
@@ -239,7 +239,7 @@ MMRESULT DAudioWaveOut::reset()
     // Stop the playback.
     sendIOCTL(DAUDIO_STOP, &cmd);
 
-    wmutex.enter(VMUTEX_WAIT_FOREVER);
+    wmutex.enter();
     while(wavehdr)
     {
         wavehdr->dwFlags  |= WHDR_DONE;
@@ -251,7 +251,7 @@ MMRESULT DAudioWaveOut::reset()
         wmutex.leave();
 
         callback(WOM_DONE, (ULONG)tmpwavehdr, 0);
-        wmutex.enter(VMUTEX_WAIT_FOREVER);
+        wmutex.enter();
     }
     wavehdr   = NULL;
     State     = STATE_STOPPED;
@@ -273,7 +273,7 @@ MMRESULT DAudioWaveOut::restart()
     if(State == STATE_PLAYING)
         return(MMSYSERR_NOERROR);
 
-    wmutex.enter(VMUTEX_WAIT_FOREVER);
+    wmutex.enter();
     State     = STATE_PLAYING;
     fUnderrun = FALSE;
     wmutex.leave();

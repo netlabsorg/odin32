@@ -1,4 +1,4 @@
-/* $Id: win32wndhandle.cpp,v 1.10 2001-10-17 15:16:58 phaller Exp $ */
+/* $Id: win32wndhandle.cpp,v 1.11 2002-04-07 14:37:00 sandervl Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
@@ -24,23 +24,30 @@
 
 //******************************************************************************
 
-//NOTE: This must be in the local data segment -> if a shared semaphore was
-//      created by a different process, the handle returned by DosOpenMutexSem
-//      will be returned in hGlobalTableMutex
-HMTX hGlobalTableMutex = 0;
-
 //Global DLL Data
 #pragma data_seg(_GLOBALDATA)
-ULONG  WindowHandleTable[MAX_WINDOW_HANDLES] = {0};
-VMutex tableMutex(VMUTEX_SHARED, &hGlobalTableMutex);
+ULONG                WindowHandleTable[MAX_WINDOW_HANDLES] = {0};
+CRITICAL_SECTION_OS2 globalwhandlecritsect = {0};
 ULONG  lastIndex = 0;
 #pragma data_seg()
 
 //******************************************************************************
 //******************************************************************************
+void InitializeWindowHandles()
+{
+    if(globalwhandlecritsect.hmtxLock == 0) {
+         DosInitializeCriticalSection(&globalwhandlecritsect, WINHANDLE_CRITSECTION_NAME);
+    }
+    else {
+         dprintf(("InitializeWindowHandles -> access shared critical section"));
+         DosAccessCriticalSection(&globalwhandlecritsect, WINHANDLE_CRITSECTION_NAME);
+    }
+}
+//******************************************************************************
+//******************************************************************************
 BOOL HwAllocateWindowHandle(HWND *hwnd, DWORD dwUserData)
 {
-  tableMutex.enter(VMUTEX_WAIT_FOREVER, &hGlobalTableMutex);
+  DosEnterCriticalSection(&globalwhandlecritsect);
 
   //find next free handle
   if(lastIndex >= MAX_WINDOW_HANDLES-1) {
@@ -54,7 +61,7 @@ BOOL HwAllocateWindowHandle(HWND *hwnd, DWORD dwUserData)
   }
   if(i == MAX_WINDOW_HANDLES) {
 	//oops, out of handles
-	tableMutex.leave(&hGlobalTableMutex);
+	DosLeaveCriticalSection(&globalwhandlecritsect);
 	dprintf(("ERROR: USER32: HwAllocateWindowHandle OUT OF WINDOW HANDLES!!"));
 	DebugInt3();
 	return FALSE;
@@ -64,7 +71,7 @@ BOOL HwAllocateWindowHandle(HWND *hwnd, DWORD dwUserData)
   WindowHandleTable[lastIndex] = dwUserData;
 
   lastIndex++;
-  tableMutex.leave(&hGlobalTableMutex);
+  DosLeaveCriticalSection(&globalwhandlecritsect);
   return TRUE;
 }
 //******************************************************************************
@@ -73,9 +80,9 @@ void HwFreeWindowHandle(HWND hwnd)
 {
   hwnd &= WNDHANDLE_MAGIC_MASK;
   if(hwnd < MAX_WINDOW_HANDLES) {
-	tableMutex.enter(VMUTEX_WAIT_FOREVER, &hGlobalTableMutex);
+	DosEnterCriticalSection(&globalwhandlecritsect);
 	WindowHandleTable[hwnd] = 0;
-	tableMutex.leave(&hGlobalTableMutex);
+	DosLeaveCriticalSection(&globalwhandlecritsect);
   }
 }
 //******************************************************************************
