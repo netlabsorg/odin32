@@ -1,4 +1,4 @@
-/* $Id: ntdll.h,v 1.4 1999-08-18 18:43:54 phaller Exp $ */
+/* $Id: ntdll.h,v 1.5 1999-08-18 18:49:18 phaller Exp $ */
 
 /*
    this file defines interfaces mainly exposed to device drivers and
@@ -569,6 +569,10 @@ BOOLEAN WINAPI RtlTimeToSecondsSince1980(
 BOOLEAN WINAPI RtlTimeToSecondsSince1970(
    LPFILETIME ft,
    LPDWORD timeret);
+
+BOOLEAN WINAPI RtlSecondsSince1970ToTime(LPSYSTEMTIME st,
+                                         LPDWORD      timeret);
+
 
 /*
    heap functions
