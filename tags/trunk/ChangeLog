@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.157 1999-08-31 14:39:40 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.158 1999-08-31 15:06:17 phaller Exp $ */
+
+ 99-08-31: Patrick Haller <phaller@gmx.net>
+	- WINMM:    revision of timer services (C&C RA)
 
  99-08-31: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: Finished MDI class, but it's not working yet.
