@@ -1,4 +1,4 @@
-/* $Id: win32class.cpp,v 1.4 1999-07-15 18:54:55 sandervl Exp $ */
+/* $Id: win32class.cpp,v 1.5 1999-07-23 15:55:46 cbratschi Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -105,6 +105,7 @@ Win32WndClass::Win32WndClass(WNDCLASSEXA *wndclass, BOOL isUnicode) : GenericObj
 //******************************************************************************
 Win32WndClass::~Win32WndClass()
 {
+  if (classNameA) GlobalDeleteAtom(classAtom);
   if(userClassLong)     free(userClassLong);
   if(classNameA)        free(classNameA);
   if(classNameW)        free(classNameW);
@@ -123,6 +124,7 @@ Win32WndClass *Win32WndClass::FindClass(HINSTANCE hInstance, LPSTR id)
   if(wndclass == NULL)  return(NULL);
 
   if(HIWORD(id) != 0) {
+//CB: read comment below!
         if(stricmp(wndclass->classNameA, id) == 0 && wndclass->hInstance == hInstance) {
                 return(wndclass);
         }
@@ -137,13 +139,15 @@ Win32WndClass *Win32WndClass::FindClass(HINSTANCE hInstance, LPSTR id)
         }
   }
   else {
-        if(wndclass->classAtom == (DWORD)id && wndclass->hInstance == hInstance) {
+//CB: without HInstance check, test program finds class
+//CB: need more code to compare instance; convert 0 to exe module handle
+        if(wndclass->classAtom == (DWORD)id /*&& wndclass->hInstance == hInstance*/) {
                 return(wndclass);
         }
         else {
                 wndclass = (Win32WndClass *)wndclass->GetNext();
                 while(wndclass != NULL) {
-                        if(wndclass->classAtom == (DWORD)id && wndclass->hInstance == hInstance) {
+                        if(wndclass->classAtom == (DWORD)id/* && wndclass->hInstance == hInstance*/) {
                                 return(wndclass);
                         }
                         wndclass = (Win32WndClass *)wndclass->GetNext();

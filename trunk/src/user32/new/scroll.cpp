@@ -1493,24 +1493,24 @@ BOOL SCROLLBAR_Register()
 {
     WNDCLASSA wndClass;
 
-    if (GlobalFindAtomA (ODINSCROLLBARCLASSNAME)) return FALSE;
+    if (GlobalFindAtomA(SCROLLBARCLASSNAME)) return FALSE;
 
-    ZeroMemory (&wndClass, sizeof(WNDCLASSA));
+    ZeroMemory(&wndClass,sizeof(WNDCLASSA));
     wndClass.style         = CS_GLOBALCLASS | CS_HREDRAW | CS_VREDRAW | CS_PARENTDC;
     wndClass.lpfnWndProc   = (WNDPROC)ScrollBarWndProc;
     wndClass.cbClsExtra    = 0;
     wndClass.cbWndExtra    = sizeof(SCROLLBAR_INFO);
-    wndClass.hCursor       = LoadCursorA (0, IDC_ARROWA);
-    wndClass.hbrBackground = (HBRUSH)(COLOR_3DFACE + 1);
-    wndClass.lpszClassName = ODINSCROLLBARCLASSNAME;
+    wndClass.hCursor       = LoadCursorA(0,IDC_ARROWA);
+    wndClass.hbrBackground = (HBRUSH)(COLOR_3DFACE+1);
+    wndClass.lpszClassName = SCROLLBARCLASSNAME;
 
-    return RegisterClassA (&wndClass);
+    return RegisterClassA(&wndClass);
 }
 
 
 BOOL SCROLLBAR_Unregister()
 {
-    if (GlobalFindAtomA (ODINSCROLLBARCLASSNAME))
-        UnregisterClassA (ODINSCROLLBARCLASSNAME, (HINSTANCE)NULL);
-    return TRUE; //always TRUE
+    if (GlobalFindAtomA(SCROLLBARCLASSNAME))
+        return UnregisterClassA(SCROLLBARCLASSNAME,(HINSTANCE)NULL);
+    else return FALSE;
 }
