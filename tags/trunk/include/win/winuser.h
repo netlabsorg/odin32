@@ -1,5 +1,3 @@
-/* $Id: winuser.h,v 1.44 2001-03-30 11:13:35 sandervl Exp $ */
-
 #ifndef __INCLUDE_WINUSER_H
 #define __INCLUDE_WINUSER_H
 
@@ -8,9 +6,6 @@
 #endif
 #include "windef.h"
 #include "wingdi.h"
-#ifndef __WIN32OS2__
-#include "wine/winestring.h"
-#endif
 
 #ifdef __cplusplus
 extern "C" {

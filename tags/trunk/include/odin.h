@@ -72,6 +72,8 @@
   #define SYSTEM    __stdcall
   #define PASCAL    __stdcall
   #define UNALIGNED
+  #define NONAMELESSUNION
+  #define NONAMELESSSTRUCT
 #else
 
 /* ---------- VAC ---------- */
@@ -86,8 +88,11 @@
   #define __inline__ inline
 
 #ifndef RC_INVOKED
-  #if (__IBMCPP__ == 300) || (__IBMC__ == 300)
+  #if (__IBMC__ == 300)
   #define NONAMELESSUNION
+  #endif
+  #if (__IBMCPP__ == 300) | (__IBMC__ == 300)
+  #define NONAMELESSSTRUCT
   #endif
 #endif
 
@@ -96,8 +101,20 @@
 #endif
 
 #else
-
-#ifndef RC_INVOKED
+#ifdef RC_INVOKED
+  //SvL: wrc chokes on calling conventions....
+  #define CDECL     
+  #define EXPORT    
+  #define WIN32API  
+  #define WINAPI    
+  #define CALLBACK    
+  #define SYSTEM    
+  #define PASCAL    
+  #define UNALIGNED
+  #define __cdecl
+  #define _System
+  #define __inline__ 
+#else
 /* ---------- ??? ---------- */
 #error No known compiler.
 #endif

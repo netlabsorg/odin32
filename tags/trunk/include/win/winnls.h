@@ -1,4 +1,4 @@
-/* $Id: winnls.h,v 1.5 2001-04-03 14:11:53 sandervl Exp $ */
+/* $Id: winnls.h,v 1.6 2001-04-16 17:02:54 sandervl Exp $ */
 
 #ifndef __WINE_WINNLS_H
 #define __WINE_WINNLS_H
@@ -271,6 +271,9 @@
 /* non standard; keep the number high enough (but < 0xff) */
 #define LANG_ESPERANTO                          0x8f
 #define LANG_WALON                              0x90
+#define LANG_CORNISH                            0x91
+#define LANG_WELSH                              0x92
+#define LANG_BRETON                             0x93
 
 /* Sublanguage definitions */
 #define SUBLANG_NEUTRAL                  0x00    /* language neutral */
