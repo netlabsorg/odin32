@@ -1,4 +1,4 @@
-; $Id: mytkStartProcess.asm,v 1.1.2.4 2000-08-24 01:36:26 bird Exp $
+; $Id: mytkStartProcess.asm,v 1.1.2.5 2000-08-28 18:31:04 bird Exp $
 ;
 ; tkStartProcess overloader. Needed to clear the loader semaphore
 ; when a process is being started syncronously.
@@ -96,8 +96,8 @@ mytkStartProcess PROC NEAR
     mov     ulLDRState, 0               ; Clears loaderstate. (LDRSTATE_UNKNOWN)
     mov     pExeModule, 0               ; Sets the exemodule pointer to NULL.
     mov     fTkExecPgm, 0               ; Marks global data invalid.
-    cmp     eax, 1                      ; If usage count > 1 then issue a release. (should not happen here)
-    je      mtksp_ret                   ; jmp if usage count < 2. (tkStartProcess or tkExecPgm will free the last usage).
+    cmp     eax, 2                      ; If usage count > 1 then issue a release. (should not happen here)
+    jl      mtksp_ret                   ; jmp if usage count < 2. (tkStartProcess or tkExecPgm will free the last usage).
     call    near ptr FLAT:_LDRClearSem@0
 
 mtksp_ret:
