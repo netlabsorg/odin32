@@ -1,4 +1,4 @@
-/* $Id: obj_base.h,v 1.15 2000-02-03 13:26:23 sandervl Exp $ */
+/* $Id: obj_base.h,v 1.16 2000-03-18 17:00:47 davidr Exp $ */
 /*
  * This file defines the macros and types necessary to define COM interfaces,
  * and the three most basic COM interfaces: IUnknown, IMalloc and IClassFactory.
@@ -63,6 +63,8 @@ HRESULT WINAPI CLSIDFromStringA(LPCSTR, CLSID *);
 
 HRESULT WINAPI CLSIDFromProgID16(LPCOLESTR16 progid, LPCLSID riid);
 HRESULT WINAPI CLSIDFromProgID(LPCOLESTR progid, LPCLSID riid);
+
+HRESULT WINAPI ProgIDFromCLSID(REFCLSID clsid, LPOLESTR *lplpszProgID);
 
 INT WINAPI StringFromGUID2(REFGUID id, LPOLESTR str, INT cmax);
 
