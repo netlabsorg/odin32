@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.19 1999-10-11 20:57:08 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.20 1999-10-12 14:47:24 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -151,6 +151,7 @@ Win32BaseWindow *getParent()                    { return (Win32BaseWindow *)Chil
          HWND   SetParent(HWND hwndNewParent);
          BOOL   IsChild(HWND hwndParent);
          HWND   GetTopWindow();
+Win32BaseWindow *GetTopParent();
          BOOL   UpdateWindow();
          BOOL   IsIconic();
          HWND   GetWindow(UINT uCmd);
@@ -196,6 +197,7 @@ Win32BaseWindow *getTopParent();
                              BOOL fUnicode = 0);
 
     static HWND Win32ToOS2Handle(HWND hwnd);
+    static HWND Win32ToOS2FrameHandle(HWND hwnd);
     static HWND OS2ToWin32Handle(HWND hwnd);
 
 static Win32BaseWindow *GetWindowFromHandle(HWND hwnd);
@@ -276,6 +278,7 @@ static GenericObject *windows;
 private:
 #ifndef OS2_INCLUDED
         void  GetMinMaxInfo(POINT *maxSize, POINT *maxPos, POINT *minTrack, POINT *maxTrack );
+	LONG  HandleSysCommand(WPARAM wParam, POINT *pt32);
 
         LONG  SendNCCalcSize(BOOL calcValidRect,
                              RECT *newWindowRect, RECT *oldWindowRect,

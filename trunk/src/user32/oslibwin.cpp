@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.21 1999-10-11 20:54:24 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.22 1999-10-12 14:47:22 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -47,7 +47,9 @@ HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
 {
  HWND  hwndClient;
 
-  dprintf(("WinCreateWindow %x %x %x %s", hwndParent, dwWinStyle, dwFrameStyle, pszName));
+  if(dwFrameStyle)
+  	dprintf(("FRAME:    WinCreateWindow %x %x %x %s", hwndParent, dwWinStyle, dwFrameStyle, pszName));
+  else  dprintf(("WinCreateWindow %x %x %x %s", hwndParent, dwWinStyle, dwFrameStyle, pszName));
 
   if(pszName && *pszName == 0) {
         pszName = NULL;
@@ -79,7 +81,7 @@ HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
                 }
                 return hwndClient;
         }
-        dprintf(("OSLibWinCreateWindow: WinCreateStdWindow failed (%x)", WinGetLastError(GetThreadHAB())));
+        dprintf(("OSLibWinCreateWindow: (FRAME) WinCreateStdWindow failed (%x)", WinGetLastError(GetThreadHAB())));
         return 0;
   }
   hwndClient = WinCreateWindow(hwndParent, WIN32_STDCLASS, pszName, dwWinStyle, 0, 0, 0, 0,

@@ -1,4 +1,4 @@
-/* $Id: win32wmdichild.cpp,v 1.3 1999-10-07 09:28:02 sandervl Exp $ */
+/* $Id: win32wmdichild.cpp,v 1.4 1999-10-12 14:47:24 sandervl Exp $ */
 /*
  * Win32 MDI Child Window Class for OS/2
  *
@@ -354,7 +354,8 @@ HWND Win32MDIChildWindow::createChild(Win32MDIClientWindow *client, LPMDICREATES
             /* clear visible flag, otherwise SetWindoPos32 ignores
              * the SWP_SHOWWINDOW command.
              */
-            newchild->SetWindowLongA(GWL_STYLE, showflag & ~WS_VISIBLE);
+//SvL: Not here. This causes problems in OS/2
+//            newchild->SetWindowLongA(GWL_STYLE, showflag & ~WS_VISIBLE);
             if(showflag){
                 newchild->SetWindowPos(0, 0, 0, 0, 0, SWP_SHOWWINDOW | SWP_NOSIZE | SWP_NOMOVE );
 
