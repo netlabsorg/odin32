@@ -19,7 +19,7 @@
 /src/NTDLL                                 sandervl phaller achimha
 /src/ole32                                 sandervl davidr achimha
 /src/oleaut32                              sandervl davidr
-/src/olesrv32                              sandervl davidr
+/src/olesvr32                              sandervl davidr
 /src/odincrt                               sandervl phaller achimha hugh$
 /src/OMFDUMP                               sandervl phaller achimha bird
 /src/pe2lx                                 sandervl bird achimha
