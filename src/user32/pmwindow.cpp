@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.47 1999-10-28 22:41:01 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.48 1999-10-30 15:16:57 dengert Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -116,6 +116,8 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
 //******************************************************************************
 BOOL InitPM()
 {
+  CLASSINFO FrameClassInfo;
+
   hab = WinInitialize(0);
   dprintf(("Winitialize returned %x", hab));
   hmq = WinCreateMsgQueue(hab, 0);
@@ -151,10 +153,23 @@ BOOL InitPM()
      (PSZ)WIN32_STDCLASS,               /* Window class name            */
      (PFNWP)Win32WindowProc,            /* Address of window procedure  */
 //     CS_SIZEREDRAW | CS_HITTEST | CS_MOVENOTIFY,
-     CS_SIZEREDRAW | CS_HITTEST,
+     CS_SIZEREDRAW | CS_HITTEST | CS_SYNCPAINT,
      NROF_WIN32WNDBYTES)) {
         dprintf(("WinRegisterClass Win32BaseWindow failed"));
         return(FALSE);
+   }
+   if (!WinQueryClassInfo (hab, WC_FRAME, &FrameClassInfo)) {
+     dprintf (("WinQueryClassInfo WC_FRAME failed"));
+     return (FALSE);
+   }
+   FrameClassInfo.flClassStyle &= ~(CS_PUBLIC | CS_CLIPSIBLINGS);
+   if (!WinRegisterClass (hab,
+                          WIN32_INNERFRAME,
+                          FrameClassInfo.pfnWindowProc,
+                          FrameClassInfo.flClassStyle,
+                          FrameClassInfo.cbWindowData)) {
+     dprintf (("WinRegisterClass Win32InnerFrame failed"));
+     return (FALSE);
    }
 
    WinQueryWindowRect(HWND_DESKTOP, &desktopRectl);
@@ -663,7 +678,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         scanCode = CHAR4FROMMP(mp1);
         keyWasPressed = ((SHORT1FROMMP (mp1) & KC_PREVDOWN) == KC_PREVDOWN);
 
-	dprintf(("PM: WM_CHAR: %x %x %d %x", SHORT1FROMMP(mp2), SHORT2FROMMP(mp2), repeatCount, scanCode));
+        dprintf(("PM: WM_CHAR: %x %x %d %x", SHORT1FROMMP(mp2), SHORT2FROMMP(mp2), repeatCount, scanCode));
         // both WM_KEYUP & WM_KEYDOWN want a virtual key, find the right Win32 virtual key
         // given the OS/2 virtual key and OS/2 character
 
@@ -737,18 +752,18 @@ VirtualKeyFound:
         if(fTranslated && !((flags & KC_KEYUP) == KC_KEYUP)) {//TranslatedMessage was called before DispatchMessage, so send WM_CHAR messages
             ULONG keyflags = 0, vkey = 0;
             ULONG fl = SHORT1FROMMP(mp1);
-	    ULONG chCode = SHORT1FROMMP(mp2);
+            ULONG chCode = SHORT1FROMMP(mp2);
 
             if(!(fl & KC_CHAR)) {
 //SvL: Test
-		break;
+                break;
 //                goto RunDefWndProc;
             }
             if(fl & KC_VIRTUALKEY) {
-		if(virtualKey)
-			vkey = virtualKey;
-	        else    vkey = SHORT2FROMMP(mp2);
-		chCode = vkey;
+                if(virtualKey)
+                        vkey = virtualKey;
+                else    vkey = SHORT2FROMMP(mp2);
+                chCode = vkey;
             }
             if(fl & KC_KEYUP) {
                 keyflags |= KEY_UP;
@@ -785,7 +800,7 @@ VirtualKeyFound:
           BOOL sys;
           ULONG id;
 
-	  dprintf(("OS2: WM_TIMER %x %d", hwnd, mp1));
+          dprintf(("OS2: WM_TIMER %x %d", hwnd, mp1));
           if (TIMER_GetTimerInfo(hwnd,(ULONG)mp1,&sys,&id))
           {
             if (sys)
@@ -855,7 +870,7 @@ VirtualKeyFound:
         if(win32wnd->MsgPaint(0, 0)) {
                 goto RunDefWndProc;
         }
-	//Apparently there are apps that return 0, but don't do anything during WM_PAINT
+        //Apparently there are apps that return 0, but don't do anything during WM_PAINT
         goto RunDefWndProc;
 
     case WM_HITTEST:

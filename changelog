@@ -1,11 +1,14 @@
- /* $Id: changelog,v 1.386 1999-10-30 10:56:51 sandervl Exp $ */
+ /* $Id: changelog,v 1.387 1999-10-30 15:16:55 dengert Exp $ */
+
+ 99-10-30: Daniela Engert <dani@ngrt.de>
+	- USER32: Fixed missing repaints for transparent windows (VPBuddy!)
 
  99-10-30: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Ported Wine MapDialogRect -> fixes Calc dialogs
 
  99-10-30: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- USER32: Port Wine ascii <-> unicode message conversion for user32 controls
-                  (Wine controls only support ascii msgs)
+		  (Wine controls only support ascii msgs)
 
  99-10-30: Jens Wiessner <wiessnej@rfi.de>
 	- MSVCRT: Fixed .def file
@@ -15,51 +18,51 @@
 
  99-10-29: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Changed font size multiply factor, negated it and fixed
-                  default dialog unit bug.
-                  Fixed MDI destroy bug
-                  WM_SETICON bugfix.
+		  default dialog unit bug.
+		  Fixed MDI destroy bug
+		  WM_SETICON bugfix.
 
  99-10-29: Sander van Leeuwen <sandervl@xs4all.nl>
-           Rene Pronk<R.Pronk@twi.tudelft.nl>
+	   Rene Pronk<R.Pronk@twi.tudelft.nl>
 	- USER32: Focus fixes. Activate a window when it receives a button click message.
 
  99-10-29  Markus Montkowski <mmontkowski@gmx.de>
-        - DDRAW: Changed logging, loginfo now in odin32_x.log for the first time...
- 
+	- DDRAW: Changed logging, loginfo now in odin32_x.log for the first time...
+
  99-10-28: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- USER32: LoadBitmapW fix
-                  ModifyMenuW/InsertMenuW fixes.
-                  Call CallWindowProcA/W in Send(Internal)MessageA/W
-                  (in preparation of Wine unicode msg translation port)
-                  Always call default window handler for WM_PAINT. Apparently
-                  there are apps that return 0, but don't call BeginPaint.
-                  Added extra messages for msg translation.
+		  ModifyMenuW/InsertMenuW fixes.
+		  Call CallWindowProcA/W in Send(Internal)MessageA/W
+		  (in preparation of Wine unicode msg translation port)
+		  Always call default window handler for WM_PAINT. Apparently
+		  there are apps that return 0, but don't call BeginPaint.
+		  Added extra messages for msg translation.
 
  99-10-28: Sander van Leeuwen <sandervl@xs4all.nl>
 	- ADVAPI32: Fixed dprintf bugs in OpenSCManagerA/W (%s instead of %d)
 
 	- makefiles: Added nodebuginfo build option to build debug binaries
-                     without debug information. (for upcoming alpha release)
-                    
+		     without debug information. (for upcoming alpha release)
+
 	- KERNEL32: GetVersion fix. Low byte = major version, high byte = minor version
-                    Destroyed shared heap on dll unload (refcount == 0)
-                    Shared heap fixes.
-                    GetWindowsDirectory & GetSystemDirectory return string that don't end with
-                    a backslash.                    
-                    Fixed loading of dlls without .dll extension.
-                    Fixed OSLibStripPath.
+		    Destroyed shared heap on dll unload (refcount == 0)
+		    Shared heap fixes.
+		    GetWindowsDirectory & GetSystemDirectory return string that don't end with
+		    a backslash.
+		    Fixed loading of dlls without .dll extension.
+		    Fixed OSLibStripPath.
 
 	- USER32: Fixed style conversion (use dwStyle, not cs->style, same for dwExStyle)
-                  -> title bar in prof. minesweeper
-                  Fixed bug in pmframe WM_WINDOWPOSCHANGED handler (didn't restore OS/2
-                  selector before returning)
-                  Don't delete global window classes.
+		  -> title bar in prof. minesweeper
+		  Fixed bug in pmframe WM_WINDOWPOSCHANGED handler (didn't restore OS/2
+		  selector before returning)
+		  Don't delete global window classes.
 		  Removed shared heap, use the one in kernel32 instead.
-                  Fixed OSLibSetStyle & SetWindowLong for GWL_STYLE (wrong style used)
+		  Fixed OSLibSetStyle & SetWindowLong for GWL_STYLE (wrong style used)
 		  Fixed win32 to OS/2 style conversion (DLG frame)
-                  Fix for timer messages in apps that use PeekMessage/DispatchMessage
-                  instead of GetMessage/DispatchMessage.
-                  Translation of extra messages.
+		  Fix for timer messages in apps that use PeekMessage/DispatchMessage
+		  instead of GetMessage/DispatchMessage.
+		  Translation of extra messages.
 
  99-10-28: Jens Wiessner <wiessnej@rfi.de>
 	- MSVCRT: Added stubs
@@ -69,40 +72,40 @@
 			WARNING! lstrcpynAtoW has been modified, PLEASE VERIFY!
 
  99-10-27: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
-        - WIN32K: It's working! At least on my testmachine running
-                  the WSeB astrict UNI kernel and the Warp 4 astrict kernel.
+	- WIN32K: It's working! At least on my testmachine running
+		  the WSeB astrict UNI kernel and the Warp 4 astrict kernel.
 
  99-10-27: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: If dll can't be found, look in directory of kernel32 (PE loader)
-                    Fixed iLoadLibrary (added .dll if it couldn't find this string in
-                    the module name; now only does that if it can't find a '.')
-                    Implemented WinExec using CreateProcessA.
-                    Fixed file mapping view lookup bug. Views are now again stored
-                    in per-process data segment.
-                    Delete process memory maps in exitlist too.
+		    Fixed iLoadLibrary (added .dll if it couldn't find this string in
+		    the module name; now only does that if it can't find a '.')
+		    Implemented WinExec using CreateProcessA.
+		    Fixed file mapping view lookup bug. Views are now again stored
+		    in per-process data segment.
+		    Delete process memory maps in exitlist too.
 	- KERNEL32: Fixed bug in icon conversion (rgb only for <= 8bpp)
-                    Added support for color cursors (needs more testing but seems to work)
-     	- USER32: Added support for color cursors
-                  Fix for class lookup in CreateWindowExA/W
+		    Added support for color cursors (needs more testing but seems to work)
+	- USER32: Added support for color cursors
+		  Fix for class lookup in CreateWindowExA/W
 
  99-10-26: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Fixed bugs in menu apis (Append/InsertMenuA/W)
-                  Fixed InsertMenuItemA/W.
-                  Finished up Patrick's work -> regedit menus now correct
-                  In winmenu call only ODIN_* menu apis; decreases amount of
-                  logging and increases speed.
+		  Fixed InsertMenuItemA/W.
+		  Finished up Patrick's work -> regedit menus now correct
+		  In winmenu call only ODIN_* menu apis; decreases amount of
+		  logging and increases speed.
 
 	- KERNEL32: Removed menu resource + non-used resource methods
-                    Fixed FS selector corruption in GetLocaleInfoA/W (use
-                    ODINFUNCTION wrapper as it calls a OS/2 unicode api that has no
-                    FS wrapper)
+		    Fixed FS selector corruption in GetLocaleInfoA/W (use
+		    ODINFUNCTION wrapper as it calls a OS/2 unicode api that has no
+		    FS wrapper)
 
 	- PELDR:  Increased stack from 192k to 640k (Quake 2 ran out of stack)
 	- DSOUND/DDRAW: Fixed FS selector corruption in logging procedures
-          ---> Quake 2 works again (Yeah! :) )
-          NOTE: Quake 2 3.20 only starts the first time. Seems to change something
-                in the config.cfg file that crashes it the next time you run it.
-                (workaround: save original config.sys and restore it afterwards)
+	  ---> Quake 2 works again (Yeah! :) )
+	  NOTE: Quake 2 3.20 only starts the first time. Seems to change something
+		in the config.cfg file that crashes it the next time you run it.
+		(workaround: save original config.sys and restore it afterwards)
 
  99-10-26: Patrick Haller <phaller@gmx.net>
 	- USER32: Add: Ported Wine menu(ex) parser and integrated it into menu code
@@ -110,27 +113,27 @@
 
  99-10-25: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Removed SetFocus call in Edit control (WM_LBUTTONDOWN)
-                  Virtual key translation table change (VK_RETURN (PM) -> 0x0A
-                  VK_ENTER (PM_ -> 0x0A (VK_RETURN))
-                  (fixes problems in edit control, but might not be a good fix)
-                  Never call default window handler (PM) after WM_CHAR ->
-                  PM sends the WM_CHAR to the owner window -> focus changes
-                  in notepad.
+		  Virtual key translation table change (VK_RETURN (PM) -> 0x0A
+		  VK_ENTER (PM_ -> 0x0A (VK_RETURN))
+		  (fixes problems in edit control, but might not be a good fix)
+		  Never call default window handler (PM) after WM_CHAR ->
+		  PM sends the WM_CHAR to the owner window -> focus changes
+		  in notepad.
 	- USER32: (menus)
-                  Rewrote LoadMenuIndirectA/W to use OS/2 apis
-                  Implemented GetMenuInfo & SetMenuInfo (just store new info; nothing else done)
+		  Rewrote LoadMenuIndirectA/W to use OS/2 apis
+		  Implemented GetMenuInfo & SetMenuInfo (just store new info; nothing else done)
 		  Implemented GetMenuContextHelpId/SetMenuContextHelpId
 		  (based on Wine build 990815)
-                  Partially implemented GetMenuItemInfo.
-                  NOTE: Needs a complete rewrite.
+		  Partially implemented GetMenuItemInfo.
+		  NOTE: Needs a complete rewrite.
 
 	- INCLUDE\win\commctrl.h:
 		  Changed back calling convention of callback handlers to CALLBACK.
-                  -> fixes crashes in SHELL32 (DPASearch calls)
+		  -> fixes crashes in SHELL32 (DPASearch calls)
 
  99-10-25: Achim Hasenmueller <achimha@innotek.de>
-        - KERNEL32: Added ReinitializeCriticalSection, ported WINE code
-                    for this function and UninitializeCriticalSection
+	- KERNEL32: Added ReinitializeCriticalSection, ported WINE code
+		    for this function and UninitializeCriticalSection
 
  99-10-25: Patrick Haller <phaller@gmx.net>
 	- ODINWRAP: Fix: Bugfix + Heap Check embracing every wrapper function
@@ -139,30 +142,30 @@
 	- WSOCK32:  Fix: invalid structure alignment for asynchronous operations
 
  99-10-25: Markus Montkowski <mmontkowski@gmx.de>
-        - DDRAW:  Fixed bug in Color conversion of surfaces DDEX1.EXE now works,
-                  Get/ReleaseDC functions are working, but problem
-                  with Bitmap orientation DDRAW surfaces are TopDown DCs Bmps are BottomUp
-                  this neeeds to be solved (any way to create a TopDown DC Bmp?)
+	- DDRAW:  Fixed bug in Color conversion of surfaces DDEX1.EXE now works,
+		  Get/ReleaseDC functions are working, but problem
+		  with Bitmap orientation DDRAW surfaces are TopDown DCs Bmps are BottomUp
+		  this neeeds to be solved (any way to create a TopDown DC Bmp?)
 
  99-10-24: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: MDI window fixes (mdi children correctly activated; menus inserted)
-                  Bugfix in WM_GETTEXT of Edit control (wrong string length)
+		  Bugfix in WM_GETTEXT of Edit control (wrong string length)
 		  Only create global classes when CS_GLOBALCLASS flag specified
-	          Create system classes only every first time user32 is loaded
-                  and only unregister them when the last win32 app quits.
-                  Converted all OS/2 bitmaps to windows format and put them in user32.rc
-                  (deleted all bmp files)
+		  Create system classes only every first time user32 is loaded
+		  and only unregister them when the last win32 app quits.
+		  Converted all OS/2 bitmaps to windows format and put them in user32.rc
+		  (deleted all bmp files)
 	- USER32,
-          COMCTL32,
-          SHELL32: Don't check if control atom already exists, always register
-                   control.
-             NOTE: Global classes have a global atom, but the class objects
-                   are NOT shared! (so you must recreate them for every app)
+	  COMCTL32,
+	  SHELL32: Don't check if control atom already exists, always register
+		   control.
+	     NOTE: Global classes have a global atom, but the class objects
+		   are NOT shared! (so you must recreate them for every app)
 
 	- KERNEL32: Implemented shared memory mapped files (SDK memory sample
-                    works for shared memory; haven't tested files and it requires
-                    more testing!)
-                    Added shared heap code for memory mapped objects
+		    works for shared memory; haven't tested files and it requires
+		    more testing!)
+		    Added shared heap code for memory mapped objects
 
  99-10-24: Daniela Engert <dani@ngrt.de>
 	- KERNEL32: Fixed cursor in VPBuddy (invalid size)
@@ -174,18 +177,18 @@
 
  99-10-23: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Put back WM_ADJUSTWINDOWPOS/WINDOWPOSCHANGED into pmwindow.cpp
-                  Put message logging procedure in wndmsg.cpp.
-                  Don't log WM_KICKIDLE & WM_NCHITTEST messages. (sent too often)
-                  Don't set capture to listbox window in comboboxes (after lbuttonup)
-                  Use wrc to compile USER32 resources + added version resource
-                  Fixed PMFRAME window position handlers and put them back.
-                  (comboboxes now displayed properly)
+		  Put message logging procedure in wndmsg.cpp.
+		  Don't log WM_KICKIDLE & WM_NCHITTEST messages. (sent too often)
+		  Don't set capture to listbox window in comboboxes (after lbuttonup)
+		  Use wrc to compile USER32 resources + added version resource
+		  Fixed PMFRAME window position handlers and put them back.
+		  (comboboxes now displayed properly)
 
 	- KERNEL32: Write logfiles to directory of kernel32 if executable is on
-                    readonly device.
-                    Fixed CreateProcess.
-                    Added support for GetVersionSize/GetVersionStruct for images
-                    that aren't loaded. (LX or PE; PE not tested!)
+		    readonly device.
+		    Fixed CreateProcess.
+		    Added support for GetVersionSize/GetVersionStruct for images
+		    that aren't loaded. (LX or PE; PE not tested!)
 	- DSOUND: Made it compile again. (always pretends there's no soundcard in the system)
 	- SHELL32/COMCTL32: Changed file description in version resource
 
