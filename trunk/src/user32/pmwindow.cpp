@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.204 2003-03-28 11:49:02 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.205 2003-03-28 13:56:59 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
