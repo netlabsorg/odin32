@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.117 2001-02-19 10:15:52 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.118 2001-02-20 17:22:05 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -285,11 +285,6 @@ MRESULT ProcessPMMessage(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2, Win32Base
 
         dprintf(("OS2: WM_ADJUSTWINDOWPOS %x %x %x (%d,%d) (%d,%d)", win32wnd->getWindowHandle(), pswp->hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
 
-        if(win32wnd->getParent() && win32wnd->getParent()->isOwnDC()) {
-            dprintfOrigin(win32wnd->getParent()->getOwnDC());
-            selectClientArea(win32wnd->getParent(), win32wnd->getParent()->getOwnDC());
-        }
-
         if(pswp->fl & SWP_NOADJUST) {
             //ignore weird messages (TODO: why are they sent?)
             break;
@@ -386,7 +381,7 @@ MRESULT ProcessPMMessage(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2, Win32Base
       SWP       swpOld = *(pswp + 1);
       WINDOWPOS wp;
       HWND      hParent = NULLHANDLE;
-      RECTL rect;
+      RECTL     rect;
 
         dprintf(("OS2: WM_WINDOWPOSCHANGED (%x) %x %x (%d,%d) (%d,%d)", mp2, win32wnd->getWindowHandle(), pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
 
@@ -395,9 +390,18 @@ MRESULT ProcessPMMessage(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2, Win32Base
             if(pswp->fl & SWP_ACTIVATE)
             {
                 //Only send PM WM_ACTIVATE to top-level windows (frame windows)
-                if(!(WinQueryWindowULong(hwnd, OFFSET_WIN32FLAGS) & FF_ACTIVE))
+                if(!(WinQueryWindowULong(hwnd, OFFSET_WIN32FLAGS) & WINDOWFLAG_ACTIVE))
                 {
                         WinSendMsg(hwnd, WM_ACTIVATE, (MPARAM)TRUE, (MPARAM)hwnd);
+                }
+            }
+            else
+            if(pswp->fl & SWP_DEACTIVATE)
+            {
+                //Only send PM WM_ACTIVATE to top-level windows (frame windows)
+                if(WinQueryWindowULong(hwnd, OFFSET_WIN32FLAGS) & WINDOWFLAG_ACTIVE)
+                {
+                        WinSendMsg(hwnd, WM_ACTIVATE, (MPARAM)FALSE, (MPARAM)hwnd);
                 }
             }
             goto RunDefWndProc;
@@ -416,113 +420,118 @@ MRESULT ProcessPMMessage(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2, Win32Base
 
 
         if(win32wnd->getParent()) {
-          OSLibMapSWPtoWINDOWPOS(pswp, &wp, &swpOld, win32wnd->getParent()->getWindowHeight(),
-                                     win32wnd->getParent()->getClientRectPtr()->left,
-                                     win32wnd->getParent()->getClientRectPtr()->top,
-                                     hwnd);
+             OSLibMapSWPtoWINDOWPOS(pswp, &wp, &swpOld, win32wnd->getParent()->getWindowHeight(),
+                                    win32wnd->getParent()->getClientRectPtr()->left,
+                                    win32wnd->getParent()->getClientRectPtr()->top,
+                                    hwnd);
         }
-        else  OSLibMapSWPtoWINDOWPOS(pswp, &wp, &swpOld, OSLibQueryScreenHeight(), 0, 0, hwnd);
+        else OSLibMapSWPtoWINDOWPOS(pswp, &wp, &swpOld, OSLibQueryScreenHeight(), 0, 0, hwnd);
 
         wp.hwnd = win32wnd->getWindowHandle();
         if ((pswp->fl & SWP_ZORDER) && (pswp->hwndInsertBehind > HWND_BOTTOM))
         {
-           Win32BaseWindow *wndAfter = Win32BaseWindow::GetWindowFromOS2Handle(pswp->hwndInsertBehind);
-           if(wndAfter) {
-                wp.hwndInsertAfter = wndAfter->getWindowHandle();
-           }
-           else wp.hwndInsertAfter = HWND_TOP_W;
+            Win32BaseWindow *wndAfter = Win32BaseWindow::GetWindowFromOS2Handle(pswp->hwndInsertBehind);
+            if(wndAfter) {
+                 wp.hwndInsertAfter = wndAfter->getWindowHandle();
+            }
+            else wp.hwndInsertAfter = HWND_TOP_W;
         }
 
         if((pswp->fl & (SWP_MOVE | SWP_SIZE)) && !(win32wnd->getStyle() & WS_MINIMIZE_W))
         {
-          //CB: todo: use result for WM_CALCVALIDRECTS
-          //Get old client rectangle (for invalidation of frame window parts later on)
-          //Use new window height to calculate the client area
-          mapWin32ToOS2Rect(pswp->cy, win32wnd->getClientRectPtr(), (PRECTLOS2)&rect);
+            //CB: todo: use result for WM_CALCVALIDRECTS
+            //Get old client rectangle (for invalidation of frame window parts later on)
+            //Use new window height to calculate the client area
+            mapWin32ToOS2Rect(pswp->cy, win32wnd->getClientRectPtr(), (PRECTLOS2)&rect);
 
-          //Note: Also updates the new window rectangle
-          win32wnd->MsgFormatFrame(&wp);
+            //Note: Also updates the new window rectangle
+            win32wnd->MsgFormatFrame(&wp);
 
-          if(win32wnd->CanReceiveSizeMsgs())
-            win32wnd->MsgPosChanged((LPARAM)&wp);
+            if(win32wnd->CanReceiveSizeMsgs())
+                win32wnd->MsgPosChanged((LPARAM)&wp);
 
-          if((pswp->fl & SWP_SIZE) && ((pswp->cx != pswpOld->cx) || (pswp->cy != pswpOld->cy)))
-          {
-            //redraw the frame (to prevent unnecessary client updates)
-            BOOL redrawAll = FALSE;
-
-            if (win32wnd->getWindowClass())
+            if((pswp->fl & SWP_SIZE) && ((pswp->cx != pswpOld->cx) || (pswp->cy != pswpOld->cy)))
             {
-              DWORD dwStyle = win32wnd->getWindowClass()->getClassLongA(GCL_STYLE_W);
+                //redraw the frame (to prevent unnecessary client updates)
+                BOOL redrawAll = FALSE;
 
-              if ((dwStyle & CS_HREDRAW_W) && (pswp->cx != pswpOld->cx))
-                redrawAll = TRUE;
-              else if ((dwStyle & CS_VREDRAW_W) && (pswp->cy != pswpOld->cy))
-                redrawAll = TRUE;
-            } else redrawAll = TRUE;
+                if (win32wnd->getWindowClass())
+                {
+                    DWORD dwStyle = win32wnd->getWindowClass()->getClassLongA(GCL_STYLE_W);
 
-            if (redrawAll)
-            {
-              //CB: redraw all children for now
-              //    -> problems with update region if we don't do it
-              //       todo: rewrite whole handling
-              WinInvalidateRect(hwnd,NULL,TRUE);
+                    if ((dwStyle & CS_HREDRAW_W) && (pswp->cx != pswpOld->cx))
+                        redrawAll = TRUE;
+                    else
+                    if ((dwStyle & CS_VREDRAW_W) && (pswp->cy != pswpOld->cy))
+                        redrawAll = TRUE;
+                }
+                else redrawAll = TRUE;
+
+                if (redrawAll)
+                {
+                    //CB: redraw all children for now
+                    //    -> problems with update region if we don't do it
+                    //       todo: rewrite whole handling
+                    WinInvalidateRect(hwnd,NULL,TRUE);
+                }
+                else
+                {
+                    HPS hps = WinGetPS(hwnd);
+                    RECTL frame,client,arcl[4];
+
+                    WinQueryWindowRect(hwnd,&frame);
+
+                    //top
+                    arcl[0].xLeft = 0;
+                    arcl[0].xRight = frame.xRight;
+                    arcl[0].yBottom = rect.yTop;
+                    arcl[0].yTop = frame.yTop;
+                    //right
+                    arcl[1].xLeft = rect.xRight;
+                    arcl[1].xRight = frame.xRight;
+                    arcl[1].yBottom = 0;
+                    arcl[1].yTop = frame.yTop;
+                    //left
+                    arcl[2].xLeft = 0;
+                    arcl[2].xRight = rect.xLeft;
+                    arcl[2].yBottom = 0;
+                    arcl[2].yTop = frame.yTop;
+                    //bottom
+                    arcl[3].xLeft = 0;
+                    arcl[3].xRight = frame.xRight;
+                    arcl[3].yBottom = 0;
+                    arcl[3].yTop = rect.yBottom;
+
+                    HRGN hrgn = GpiCreateRegion(hps,4,(PRECTL)&arcl);
+
+                    WinInvalidateRegion(hwnd,hrgn,FALSE);
+                    GpiDestroyRegion(hps,hrgn);
+                    WinReleasePS(hps);
+                }
             }
-            else
-            {
-              HPS hps = WinGetPS(hwnd);
-              RECTL frame,client,arcl[4];
-
-              WinQueryWindowRect(hwnd,&frame);
-
-               //top
-              arcl[0].xLeft = 0;
-              arcl[0].xRight = frame.xRight;
-              arcl[0].yBottom = rect.yTop;
-              arcl[0].yTop = frame.yTop;
-               //right
-              arcl[1].xLeft = rect.xRight;
-              arcl[1].xRight = frame.xRight;
-              arcl[1].yBottom = 0;
-              arcl[1].yTop = frame.yTop;
-               //left
-              arcl[2].xLeft = 0;
-              arcl[2].xRight = rect.xLeft;
-              arcl[2].yBottom = 0;
-              arcl[2].yTop = frame.yTop;
-               //bottom
-              arcl[3].xLeft = 0;
-              arcl[3].xRight = frame.xRight;
-              arcl[3].yBottom = 0;
-              arcl[3].yTop = rect.yBottom;
-
-              HRGN hrgn = GpiCreateRegion(hps,4,(PRECTL)&arcl);
-
-              WinInvalidateRegion(hwnd,hrgn,FALSE);
-              GpiDestroyRegion(hps,hrgn);
-              WinReleasePS(hps);
-            }
-          }
         }
         else
         {
-          if(win32wnd->CanReceiveSizeMsgs())
-            win32wnd->MsgPosChanged((LPARAM)&wp);
+            if(win32wnd->CanReceiveSizeMsgs())
+                win32wnd->MsgPosChanged((LPARAM)&wp);
         }
 
         if(pswp->fl & SWP_ACTIVATE)
         {
              //Only send PM WM_ACTIVATE to top-level windows (frame windows)
-             if(!(WinQueryWindowULong(hwnd, OFFSET_WIN32FLAGS) & FF_ACTIVE))
+             if(!(WinQueryWindowULong(hwnd, OFFSET_WIN32FLAGS) & WINDOWFLAG_ACTIVE))
              {
-                if(isFrame) {
-                     WinSendMsg(hwnd, WM_ACTIVATE, (MPARAM)TRUE, (MPARAM)hwnd);
-                }
-                else
-                if(win32wnd->IsWindowCreated()) {
-                    win32wnd->MsgActivate(1, 0, win32wnd->getWindowHandle(), hwnd);
-                }
+                WinSendMsg(hwnd, WM_ACTIVATE, (MPARAM)TRUE, (MPARAM)hwnd);
              }
+        }
+        else
+        if(pswp->fl & SWP_DEACTIVATE)
+        {
+            //Only send PM WM_ACTIVATE to top-level windows (frame windows)
+            if(WinQueryWindowULong(hwnd, OFFSET_WIN32FLAGS) & WINDOWFLAG_ACTIVE)
+            {
+                    WinSendMsg(hwnd, WM_ACTIVATE, (MPARAM)FALSE, (MPARAM)hwnd);
+            }
         }
 
 PosChangedEnd:
@@ -531,11 +540,11 @@ PosChangedEnd:
 
     case WM_ACTIVATE:
     {
-        USHORT flags = WinQueryWindowULong(hwnd, OFFSET_WIN32FLAGS);
+        ULONG flags = WinQueryWindowULong(hwnd, OFFSET_WIN32FLAGS);
 
         dprintf(("OS2: WM_ACTIVATE %x %x %x", hwnd, mp1, mp2));
 
-        WinSetWindowULong(hwnd, OFFSET_WIN32FLAGS, SHORT1FROMMP(mp1) ? (flags | FF_ACTIVE):(flags & ~FF_ACTIVE));
+        WinSetWindowULong(hwnd, OFFSET_WIN32FLAGS, SHORT1FROMMP(mp1) ? (flags | WINDOWFLAG_ACTIVE):(flags & ~WINDOWFLAG_ACTIVE));
         if(win32wnd->IsWindowCreated())
         {
             win32wnd->MsgActivate((LOWORD(pWinMsg->wParam) == WA_ACTIVE_W) ? 1 : 0, HIWORD(pWinMsg->wParam), pWinMsg->lParam, (HWND)mp2);
@@ -603,12 +612,12 @@ PosChangedEnd:
                 win32wnd->setComingToTop(FALSE);
                 break;
         }
-//test
+        //Restore window origin of window with CS_OWNDC style
+        //(fixes paint offset problems in Opera windows)
         if(win32wnd->isOwnDC()) {
                 dprintfOrigin(win32wnd->getOwnDC());
                 selectClientArea(win32wnd, win32wnd->getOwnDC());
         }
-//test
         goto RunDefWndProc;
 
     case WM_VRNDISABLED:

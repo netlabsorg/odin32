@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.27 2001-02-20 15:40:23 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.28 2001-02-20 17:22:06 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -334,47 +334,47 @@ LONG Win32BaseWindow::HandleNCLButtonDown(WPARAM wParam,LPARAM lParam)
 //******************************************************************************
 VOID Win32BaseWindow::AdjustMaximizedRect(LPRECT rect)
 {
-  if (HAS_THICKFRAME(dwStyle,dwExStyle ))
-    InflateRect( rect, GetSystemMetrics(SM_CXFRAME), GetSystemMetrics(SM_CYFRAME) );
-  else
-    if (HAS_DLGFRAME( dwStyle, dwExStyle ))
-      InflateRect(rect, GetSystemMetrics(SM_CXDLGFRAME), GetSystemMetrics(SM_CYDLGFRAME) );
+    if (HAS_THICKFRAME(dwStyle,dwExStyle ))
+        InflateRect( rect, GetSystemMetrics(SM_CXFRAME), GetSystemMetrics(SM_CYFRAME) );
     else
-      if (HAS_THINFRAME( dwStyle ))
+    if (HAS_DLGFRAME( dwStyle, dwExStyle ))
+        InflateRect(rect, GetSystemMetrics(SM_CXDLGFRAME), GetSystemMetrics(SM_CYDLGFRAME) );
+    else
+    if (HAS_THINFRAME( dwStyle ))
         InflateRect( rect, GetSystemMetrics(SM_CXBORDER), GetSystemMetrics(SM_CYBORDER));
 }
 //******************************************************************************
 //******************************************************************************
 VOID Win32BaseWindow::AdjustTrackInfo(PPOINT minTrackSize,PPOINT maxTrackSize)
 {
-  if ((dwStyle & WS_THICKFRAME) || !(dwStyle & (WS_POPUP | WS_CHILD)))
-    GetMinMaxInfo(NULL,NULL,minTrackSize,maxTrackSize);
+    if ((dwStyle & WS_THICKFRAME) || !(dwStyle & (WS_POPUP | WS_CHILD)))
+        GetMinMaxInfo(NULL,NULL,minTrackSize,maxTrackSize);
 }
 //******************************************************************************
 //******************************************************************************
 VOID Win32BaseWindow::AdjustRectOuter(LPRECT rect,BOOL menu)
 {
-  if(dwStyle & WS_ICONIC) return;
+    if(dwStyle & WS_ICONIC) return;
 
-  if (HAS_THICKFRAME(dwStyle,dwExStyle ))
-    InflateRect( rect, GetSystemMetrics(SM_CXFRAME), GetSystemMetrics(SM_CYFRAME) );
-  else
-    if (HAS_DLGFRAME( dwStyle, dwExStyle ))
-      InflateRect(rect, GetSystemMetrics(SM_CXDLGFRAME), GetSystemMetrics(SM_CYDLGFRAME) );
+    if (HAS_THICKFRAME(dwStyle,dwExStyle ))
+        InflateRect( rect, GetSystemMetrics(SM_CXFRAME), GetSystemMetrics(SM_CYFRAME) );
     else
-      if (HAS_THINFRAME( dwStyle ))
+    if (HAS_DLGFRAME( dwStyle, dwExStyle ))
+        InflateRect(rect, GetSystemMetrics(SM_CXDLGFRAME), GetSystemMetrics(SM_CYDLGFRAME) );
+    else
+    if (HAS_THINFRAME( dwStyle ))
         InflateRect( rect, GetSystemMetrics(SM_CXBORDER), GetSystemMetrics(SM_CYBORDER));
 
-  if ((dwStyle & WS_CAPTION) == WS_CAPTION)
-  {
-    if (dwExStyle & WS_EX_TOOLWINDOW)
-      rect->top -= GetSystemMetrics(SM_CYSMCAPTION);
-    else
-      rect->top -= GetSystemMetrics(SM_CYCAPTION);
-  }
+    if ((dwStyle & WS_CAPTION) == WS_CAPTION)
+    {
+        if (dwExStyle & WS_EX_TOOLWINDOW)
+            rect->top -= GetSystemMetrics(SM_CYSMCAPTION);
+        else
+            rect->top -= GetSystemMetrics(SM_CYCAPTION);
+    }
 
-  if (menu)
-    rect->top -= GetSystemMetrics(SM_CYMENU);
+    if (menu)
+        rect->top -= GetSystemMetrics(SM_CYMENU);
 }
 //******************************************************************************
 //******************************************************************************
@@ -684,8 +684,8 @@ BOOL Win32BaseWindow::GetSysPopupPos(RECT* rect)
         {
             GetInsideRect(rect );
             OffsetRect( rect, rectWindow.left, rectWindow.top);
-  	        if(getStyle() & WS_CHILD)
-     	        ClientToScreen(getParent()->getWindowHandle(), (POINT *)rect);
+            if(getStyle() & WS_CHILD)
+                ClientToScreen(getParent()->getWindowHandle(), (POINT *)rect);
 
             rect->right = rect->left + GetSystemMetrics(SM_CYCAPTION) - 1;
             rect->bottom = rect->top + GetSystemMetrics(SM_CYCAPTION) - 1;

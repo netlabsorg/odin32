@@ -1,4 +1,4 @@
-/* $Id: win32wmdiclient.cpp,v 1.32 2000-12-24 14:54:07 sandervl Exp $ */
+/* $Id: win32wmdiclient.cpp,v 1.33 2001-02-20 17:22:06 sandervl Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -345,6 +345,7 @@ LONG Win32MDIClientWindow::childActivate(Win32MDIChildWindow *child)
     if( prevActive )
     {
         prevActive->setStyle(prevActive->getStyle() | WS_SYSMENU);
+        prevActive->DeactivateChildWindow();
         prevActive->SendInternalMessageA( WM_NCACTIVATE, FALSE, 0L );
         prevActive->SendInternalMessageA( WM_MDIACTIVATE, (WPARAM)prevActive->getWindowHandle(), (LPARAM)(child) ? child->getWindowHandle() : 0);
 
