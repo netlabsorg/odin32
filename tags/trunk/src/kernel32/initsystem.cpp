@@ -1,4 +1,4 @@
-/* $Id: initsystem.cpp,v 1.12 2000-08-18 18:16:33 sandervl Exp $ */
+/* $Id: initsystem.cpp,v 1.13 2000-08-25 09:02:54 sandervl Exp $ */
 /*
  * Odin system initialization (registry, directories & environment)
  *
@@ -70,6 +70,11 @@
 #define HARDWARE_VIDEO_VGA      "\\REGISTRY\\Machine\\System\\CurrentControlSet\\Services\\VgaSave\\Device0"
 #define HARDWARE_VIDEO_VGA_DESCRIPTION   "OS/2 VGA Display driver"
 #define HARDWARE_VIDEO_COMPATIBLE "\\Device\\Video1"
+#define DIRECTX_RC              "0"
+#define DIRECTX_VERSION         "4.04.1381.276"
+#define DIRECTX_INSTALLED_VERSION 0x0004
+#define ODIN_WINMM_PLAYBACK 	"OS/2 Dart Audio Playback"
+#define ODIN_WINMM_RECORD	"OS/2 Dart Audio Record"
 
 //******************************************************************************
 //******************************************************************************
@@ -373,7 +378,51 @@ BOOL InitSystemAndRegistry()
    }
    RegSetValueExA(hkey,"Device Description", 0, REG_SZ, (LPBYTE)HARDWARE_VIDEO_VGA_DESCRIPTION, sizeof(HARDWARE_VIDEO_VGA_DESCRIPTION));
    RegCloseKey(hkey);
-  
+
+   //Software\Microsoft\Multimedia\Sound Mapper
+   if(RegCreateKeyA(HKEY_CURRENT_USER,"Software\\Microsoft\\Multimedia\\Sound Mapper",&hkey)!=ERROR_SUCCESS) {
+   	goto initreg_error;
+   }
+   RegSetValueExA(hkey,"Playback", 0, REG_SZ, (LPBYTE)ODIN_WINMM_PLAYBACK, sizeof(ODIN_WINMM_PLAYBACK));
+   RegSetValueExA(hkey,"Record", 0, REG_SZ, (LPBYTE)ODIN_WINMM_RECORD, sizeof(ODIN_WINMM_RECORD));
+   RegCloseKey(hkey);
+
+   //Software\Microsoft\DirectX  
+   if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"Software\\Microsoft\\DirectX",&hkey)!=ERROR_SUCCESS) {
+   	goto initreg_error;
+   }
+   RegSetValueExA(hkey,"",0,REG_SZ, (LPBYTE)"", 0);
+   RegSetValueExA(hkey, "RC", 0,REG_SZ, (LPBYTE)DIRECTX_RC, sizeof(DIRECTX_RC));
+   RegSetValueExA(hkey, "Version", 0,REG_SZ, (LPBYTE)DIRECTX_VERSION, sizeof(DIRECTX_VERSION));
+   val = DIRECTX_INSTALLED_VERSION;
+   RegSetValueExA(hkey, "InstalledVersion", 0,REG_BINARY, (LPBYTE)&val, sizeof(DWORD));
+   RegCloseKey(hkey);
+
+   if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"Software\\Microsoft\\DirectDraw",&hkey)!=ERROR_SUCCESS) {
+   	goto initreg_error;
+   }
+   //todo
+   RegCloseKey(hkey);
+
+   if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"Software\\Microsoft\\Direct3D",&hkey)!=ERROR_SUCCESS) {
+   	goto initreg_error;
+   }
+   //todo
+   RegCloseKey(hkey);
+
+   if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"Software\\Microsoft\\DirectPlay",&hkey)!=ERROR_SUCCESS) {
+   	goto initreg_error;
+   }
+   //todo
+   RegCloseKey(hkey);
+
+#if 0
+   if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"Software\\Microsoft\\DirectMusic",&hkey)!=ERROR_SUCCESS) {
+   	goto initreg_error;
+   }
+   //todo
+   RegCloseKey(hkey);
+#endif
    return TRUE;
 
 initreg_error:
