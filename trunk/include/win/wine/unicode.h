@@ -52,7 +52,7 @@ union cptable
 extern "C" {
 #endif
 
-#if defined(__IBMC__) || defined(__IBMCPP__)
+#if defined(__IBMC__) || defined(__IBMCPP__) || defined(__WATCOMC__) || defined(__WATCOM_CPLUSPLUS__)
 #define static
 #endif
 
@@ -134,7 +134,11 @@ static inline int strncmpW( const WCHAR *str1, const WCHAR *str2, int n )
 static inline WCHAR *strncpyW( WCHAR *str1, const WCHAR *str2, int n )
 {
     WCHAR *ret = str1;
+    #ifdef __WATCOMC__ /* kso: it's so noisy and I don't find the right pragma... */
+    while (n-- > 0) if ((*str1++ = *str2++) != 0) break;
+    #else
     while (n-- > 0) if (!(*str1++ = *str2++)) break;
+    #endif
     while (n-- > 0) *str1++ = 0;
     return ret;
 }
@@ -184,7 +188,7 @@ extern WCHAR *strstrW( const WCHAR *str, const WCHAR *sub );
 extern unsigned short get_char_typeW( WCHAR ch );
 
 
-#if defined(__IBMC__) || defined(__IBMCPP__)
+#if defined(__IBMC__) || defined(__IBMCPP__) || defined(__WATCOMC__) || defined(__WATCOM_CPLUSPLUS__)
 #undef static
 #endif
 
