@@ -1,4 +1,4 @@
-/* $Id: rtlstr.cpp,v 1.5 1999-08-18 18:43:54 phaller Exp $ */
+/* $Id: rtlstr.cpp,v 1.6 1999-08-18 18:44:27 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -476,12 +476,11 @@ DWORD WINAPI RtlUpcaseUnicodeString(PUNICODE_STRING dest,
   t=src->Buffer;
 
   /* len is in bytes */
-#if 0
   for (i = 0;
        i < len/2;
        i++)
     s[i] = towupper(t[i]);
-#endif
+
   return STATUS_SUCCESS;
 }
 
