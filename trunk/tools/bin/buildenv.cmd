@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.15 2002-08-18 13:48:54 bird Exp $
+/* $Id: buildenv.cmd,v 1.16 2002-08-24 04:37:22 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -12,13 +12,13 @@
  *     - LANG is set to en_US by both VAC36 and TOOLKIT45. When unsetting
  *       those the original value, for example of no_NO, is not restored.
  *     - Same goes for some other stuff, we have no stack of previous values.
- *             
+ *
  * Copyright (c) 1999-2002 knut st. osmundsen (bird@anduin.net)
  *
  * GPL v2
  *
  */
-    
+
     Address CMD '@echo off';
 
     signal on novalue name NoValueHandler
@@ -27,7 +27,7 @@
      * Version
      */
     sVersion = '1.0.2 [2002-08-18]';
-    
+
     /*
      * Create argument array with lowercase arguments.
      */
@@ -43,7 +43,7 @@
     /*
      * Syntax
      */
-    if (sEnv.0 = 0) then 
+    if (sEnv.0 = 0) then
     do
         say 'BuildEnv v'||sVersion
         say '-------------------------------'
@@ -58,6 +58,7 @@
         say '   +   Install tool in environment. Default action.'
         say '   ~   Install tool in environment if it''s configured.'
         say '   -   Remove tool from environment.'
+        say '   õ   Remove tool from environment if it''s configured.'
         say '   *   Configure tool if needed.'
         say '   !   Forced tool configuretion.'
         say '   @   Verify tool configuration.'
@@ -160,16 +161,16 @@
          *
          */
         ch = substr(sEnv.i, length(sEnv.i), 1);
-        if (ch = '-' | ch = '+' | ch = '*' | ch = '!' | ch = '?' | ch = '@' | ch = '~') then
+        if (pos(ch, '+~-õ*!?@') > 0) then
             sEnv.i = substr(sEnv.i, 1, length(sEnv.i) - 1);
         else
             ch = '+';
-        fRM = (ch = '-');
+        fRM = (ch = '-' | ch = 'õ');
+        fOptional = (ch = '~' | ch = 'õ')
         fCfg = (ch = '*');
         fForcedCfg = (ch = '!');
         fVerify = (ch = '@')
         fQuery = (ch = '?')
-        fOptional = (ch = '~')
 
         /*
          * do the switch.
@@ -337,7 +338,7 @@ exit(0);
  */
 NoValueHandler:
     say 'NoValueHandler: line 'SIGL;
-return;
+return 0;
 
 
 /**
@@ -2273,7 +2274,7 @@ Python: procedure expose aCfg. aPath. sPathFile
     rc = CheckCmdOutput('echo print "hello world" | python', 0, fQuiet, 'hello world');
 return rc;
 
- 
+
 
 /*
  * OS/2 Programmers Toolkit v4.0 (CSD1/4)
@@ -2538,9 +2539,9 @@ Toolkit451: procedure expose aCfg. aPath. sPathFile
     if (rc = 0) then
         rc = CheckCmdOutput('ipfc', 0, fQuiet, 'Version 4.00.007 Oct 02 2000');
     if (rc = 0) then
-        rc = CheckCmdOutput('nmake', 2, fQuiet, 'Version 4.00.000 Oct 20 2000');
+        rc = CheckCmdOutput('nmake -?', 0, fQuiet, 'Version 4.00.000 Oct 20 2000');
     if (rc = 0) then
-        rc = CheckCmdOutput('nmake32', 0, fQuiet, 'Version 5.00.003 Oct 20 2000');
+        rc = CheckCmdOutput('nmake32 -?', 0, fQuiet, 'Version 5.00.003 Oct 20 2000');
 return rc;
 
 
