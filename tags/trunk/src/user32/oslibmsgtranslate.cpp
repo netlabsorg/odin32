@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.80 2002-02-08 09:58:42 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.81 2002-02-11 13:48:40 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -666,10 +666,16 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             }
             winMsg->lParam |= WIN_KEY_PREVSTATE;                    // bit 30, previous state, always 1 for a WM_KEYUP message
             winMsg->lParam |= 1 << 31;                              // bit 31, transition state, always 1 for WM_KEYUP
-
+          }
+          else 
+          { // send WM_KEYDOWN message
+            winMsg->message = WINWM_KEYDOWN;
+            if (keyWasPressed)
+              winMsg->lParam |= WIN_KEY_PREVSTATE;                  // bit 30, previous state, 1 means key was pressed
+             
             //Shift-Enter and possibly others need to have special handling
-             if (flags & KC_SHIFT)
-             {
+            if (flags & KC_SHIFT)
+            {
                 if(fMsgRemoved && !(teb->o.odin.fTranslated))
                 {                    
                   dprintf(("PM: KC_SHIFT: %x",winMsg->wParam));
@@ -679,23 +685,28 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
                     memcpy(&extramsg, winMsg, sizeof(MSG));
     
                     extramsg.message = WINWM_CHAR;
-                    extramsg.lParam |= 1 << 31;                              // bit 31, transition state, always 1 for WM_KEYUP 
 
                     // insert message into the queue
                     setThreadQueueExtraCharMessage(teb, &extramsg);
-
-                    winMsg->message = WINWM_KEYDOWN;
                     winMsg->lParam &= 0x3FFFFFFF;
                   }
                } // else ???
             } // KC_SHIFT
-          }
-          else 
-          {
-            // send WM_KEYDOWN message
-            winMsg->message = WINWM_KEYDOWN;
-            if (keyWasPressed)
-              winMsg->lParam |= WIN_KEY_PREVSTATE;                  // bit 30, previous state, 1 means key was pressed
+            else
+            {
+              // in case we handle Enter directly through PMKBDHOOK
+              if ((os2Msg->msg == WM_CHAR_SPECIAL) && (winMsg->wParam == VK_RETURN_W)
+                   && (fMsgRemoved && !(teb->o.odin.fTranslated)))
+              {
+                    MSG extramsg;
+                    memcpy(&extramsg, winMsg, sizeof(MSG));
+    
+                    extramsg.message = WINWM_CHAR;
+
+                    // insert message into the queue
+                    setThreadQueueExtraCharMessage(teb, &extramsg);
+              }
+            }
           }
         }
         else 

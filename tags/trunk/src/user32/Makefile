@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.99 2002-02-05 17:58:58 sandervl Exp $
+# $Id: Makefile,v 1.100 2002-02-11 13:48:39 sandervl Exp $
 
 #
 # Odin32 API
@@ -10,6 +10,11 @@
 #
 # Compiler, tools, and interference rules.
 #
+!if "$(DEBUG)" == "1"
+DEFFILE    = user32dbg.def
+ORGDEFFILE = user32.def
+!endif
+
 WRC_PREFIX_RESOURCE=1
 !include ../../makefile.inc
 
@@ -102,6 +107,9 @@ $(OBJDIR)\wintrack.obj \
 $(OBJDIR)\oldnls32.obj \
 $(OBJDIR)\user32rsrc.obj \
 $(OBJDIR)\oslibprf.obj \
+!ifdef DEBUG
+$(OBJDIR)\dbgwrap.obj \
+!endif
 $(OBJDIR)\stats.obj
 
 
