@@ -1,4 +1,4 @@
-/* $Id: winaspi32.cpp,v 1.10 2000-09-18 19:27:10 sandervl Exp $ */
+/* $Id: winaspi32.cpp,v 1.11 2000-10-02 19:03:19 sandervl Exp $ */
 /*
  * WNASPI routines
  *
@@ -127,7 +127,7 @@ ASPI_DebugPrintResult(SRB_ExecSCSICmd *prb)
 }
 
 
-static WORD ASPI_ExecScsiCmd( scsiObj *aspi, SRB_ExecSCSICmd *lpPRB, USHORT sel)
+static WORD ASPI_ExecScsiCmd( scsiObj *aspi, SRB_ExecSCSICmd *lpPRB)
 {
   int   status;
   int   error_code = 0;
@@ -280,10 +280,7 @@ static WORD ASPI_ExecScsiCmd( scsiObj *aspi, SRB_ExecSCSICmd *lpPRB, USHORT sel)
         if(ASPI_POSTING(lpPRB))
         {
           dprintf(("Post Routine (%lx) called\n", (DWORD) lpPRB->SRB_PostProc));
-          //SvL: Restore win32 FS selector
-          SetFS(sel);
           (*lpPRB->SRB_PostProc)();
-          RestoreOS2FS();
         }
         else
         if (lpPRB->SRB_Flags & SRB_EVENT_NOTIFY)
@@ -387,7 +384,7 @@ ODINFUNCTION0(DWORD, GetASPI32SupportInfo)
 /***********************************************************************
  *             SendASPI32Command32 (WNASPI32.1)
  */
-DWORD SendASPICommand(LPSRB lpSRB, USHORT sel)
+DWORD CDECL SendASPI32Command(LPSRB lpSRB)
 {
     DWORD dwRC;
     ULONG ulParam, ulReturn;
@@ -437,7 +434,7 @@ DWORD SendASPICommand(LPSRB lpSRB, USHORT sel)
             break;
 
           case SC_EXEC_SCSI_CMD:
-            dwRC = ASPI_ExecScsiCmd( aspi, &lpSRB->cmd, sel);
+            dwRC = ASPI_ExecScsiCmd( aspi, &lpSRB->cmd);
             break;
 
           case SC_ABORT_SRB:
@@ -473,18 +470,6 @@ DWORD SendASPICommand(LPSRB lpSRB, USHORT sel)
 
     return dwRC;
 }
-
-DWORD CDECL SendASPI32Command(LPSRB lpSRB)
-{
- DWORD yyrc;
- USHORT sel = RestoreOS2FS();
-
-    yyrc = SendASPICommand(lpSRB, sel);
-    SetFS(sel);
-
-    return yyrc;
-}
-
 
 /***********************************************************************
  *             GetASPI32DLLVersion32   (WNASPI32.3)
