@@ -1,4 +1,4 @@
-/* $Id: os2heap.cpp,v 1.14 2000-02-16 14:25:43 sandervl Exp $ */
+/* $Id: os2heap.cpp,v 1.15 2000-04-30 16:31:47 sandervl Exp $ */
 
 /*
  * Heap class for OS/2
@@ -26,6 +26,7 @@
 #include "misc.h"
 #include "vmutex.h"
 #include "initterm.h"
+#include <odin32validate.h>
 
 #define DBG_LOCALLOG	DBG_os2heap
 #include "dbglocal.h"
@@ -180,13 +181,19 @@ BOOL OS2Heap::Lock(LPVOID lpMem)
 {
  HEAPELEM *helem = (HEAPELEM *)((char *)lpMem - sizeof(HEAPELEM));
 
+  if((ULONG)lpMem > ADDRESS_SPACE_LIMIT) {
+	//SvL: Some apps lock and unlock gdi handles; just ignore this here
+	dprintf(("Lock: invalid address %x", lpMem));
+	return FALSE;
+  }
+
   if(lpMem == NULL)
-    return(FALSE);
+    	return(FALSE);
 
   if(helem->magic != MAGIC_NR_HEAP)
   {
-    dprintf(("OS2Heap::Lock ERROR BAD HEAP POINTER:%X\n", lpMem));
-    return FALSE;
+    	dprintf(("OS2Heap::Lock ERROR BAD HEAP POINTER:%X\n", lpMem));
+    	return FALSE;
   }
 
   helem->lockCnt++;
@@ -198,6 +205,12 @@ BOOL OS2Heap::Lock(LPVOID lpMem)
 BOOL OS2Heap::Unlock(LPVOID lpMem)
 {
  HEAPELEM *helem = (HEAPELEM *)((char *)lpMem - sizeof(HEAPELEM));
+
+  if((ULONG)lpMem > ADDRESS_SPACE_LIMIT) {
+	//SvL: Some apps lock and unlock gdi handles; just ignore this here
+	dprintf(("Unlock: invalid address %x", lpMem));
+	return FALSE;
+  }
 
   if(lpMem == NULL)
     return(FALSE);
@@ -222,15 +235,15 @@ DWORD OS2Heap::GetFlags(LPVOID lpMem)
  HEAPELEM *helem = (HEAPELEM *)((char *)lpMem - sizeof(HEAPELEM));
 
   if(lpMem == NULL)
-    return(FALSE);
+    return(0);
 
   if(helem->magic != MAGIC_NR_HEAP)
   {
     dprintf(("OS2Heap::GetFlags ERROR BAD HEAP POINTER:%X\n", lpMem));
-    return FALSE;
+    return 0;
   }
 
-  return(helem->flags);
+  return(helem->lockCnt | (helem->flags << 8));
 }
 //******************************************************************************
 //******************************************************************************
@@ -238,13 +251,19 @@ int OS2Heap::GetLockCnt(LPVOID lpMem)
 {
  HEAPELEM *helem = (HEAPELEM *)((char *)lpMem - sizeof(HEAPELEM));
 
+  if((ULONG)lpMem > ADDRESS_SPACE_LIMIT) {
+	//SvL: Some apps lock and unlock gdi handles; just ignore this here
+	dprintf(("GetLockCnt: invalid address %x", lpMem));
+	return FALSE;
+  }
+
   if(lpMem == NULL)
-    return(666);
+    	return(0);
 
   if(helem->magic != MAGIC_NR_HEAP)
   {
-    dprintf(("OS2Heap::GetLockCnt ERROR BAD HEAP POINTER:%X\n", lpMem));
-    return FALSE;
+    	dprintf(("OS2Heap::GetLockCnt ERROR BAD HEAP POINTER:%X\n", lpMem));
+    	return 0;
   }
 
   return(helem->lockCnt);
@@ -301,20 +320,20 @@ BOOL OS2Heap::Free(DWORD dwFlags, LPVOID lpMem)
  HEAPELEM *helem = (HEAPELEM *)((char *)lpMem - sizeof(HEAPELEM));
 
   if(lpMem == NULL) {
-    dprintf(("OS2Heap::Free lpMem == NULL\n"));
-    return(FALSE);
+    	dprintf(("OS2Heap::Free lpMem == NULL\n"));
+    	return(FALSE);
   }
   /* verify lpMem address */
   if (lpMem >= (LPVOID)ulMaxAddr || lpMem < (LPVOID)0x10000)
   {
-    dprintf(("OS2Heap::Free ERROR BAD HEAP POINTER:%X\n", lpMem));
-    return FALSE;
+    	dprintf(("OS2Heap::Free ERROR BAD HEAP POINTER:%X\n", lpMem));
+    	return FALSE;
   }
 
   if(helem->magic != MAGIC_NR_HEAP)
   {
-    dprintf(("OS2Heap::Free ERROR BAD HEAP POINTER:%X\n", lpMem));
-    return FALSE;
+    	dprintf(("OS2Heap::Free ERROR BAD HEAP POINTER:%X\n", lpMem));
+    	return FALSE;
   }
 
 #ifdef DEBUG1
@@ -326,14 +345,14 @@ BOOL OS2Heap::Free(DWORD dwFlags, LPVOID lpMem)
     hmutex->enter();
 
   if(helem->prev)
-    helem->prev->next = helem->next;
+    	helem->prev->next = helem->next;
   if(helem->next)
-    helem->next->prev = helem->prev;
+    	helem->next->prev = helem->prev;
   if(heapelem == helem)
-    heapelem = heapelem->next;
+    	heapelem = heapelem->next;
 
   if(hmutex) {
-    hmutex->leave();
+    	hmutex->leave();
   }
 
   free((void *)helem);
