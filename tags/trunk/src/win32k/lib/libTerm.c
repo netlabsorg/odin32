@@ -1,4 +1,4 @@
-/* $Id: libTerm.c,v 1.1 2000-02-19 16:52:38 bird Exp $
+/* $Id: libTerm.c,v 1.2 2000-02-26 17:48:23 bird Exp $
  *
  * Terminates the Win32k library functions.
  *
@@ -12,7 +12,7 @@
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
-#define INCL_DOSERROR
+#define INCL_DOSERRORS
 #define INCL_DOSFILEMGR
 #define INCL_DOSDEVICES
 
@@ -26,7 +26,7 @@
 /*******************************************************************************
 *   Global Variables                                                           *
 *******************************************************************************/
-extern static BOOL fInited;
+extern BOOL        fInited;
 extern HFILE       hWin32k;
 
 
@@ -38,11 +38,17 @@ extern HFILE       hWin32k;
  */
 APIRET APIENTRY  libWin32kTerm(void)
 {
+    APIRET rc = NO_ERROR;
+
     if (fInited)
-        DosClose(hWin32k);
-    hWin32k = NULLHANDLE;
-    fInited = FALSE;
-    return NO_ERROR;
+        rc = DosClose(hWin32k);
+
+    if (rc == NO_ERROR)
+    {
+        hWin32k = NULLHANDLE;
+        fInited = FALSE;
+    }
+    return rc;
 }
 
 

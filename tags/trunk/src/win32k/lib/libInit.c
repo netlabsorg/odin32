@@ -1,4 +1,4 @@
-/* $Id: libInit.c,v 1.1 2000-02-18 19:27:31 bird Exp $
+/* $Id: libInit.c,v 1.2 2000-02-26 17:48:22 bird Exp $
  *
  * Inits the Win32k library functions.
  *
@@ -12,7 +12,7 @@
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
-#define INCL_DOSERROR
+#define INCL_DOSERRORS
 #define INCL_DOSFILEMGR
 #define INCL_DOSDEVICES
 
@@ -26,8 +26,8 @@
 /*******************************************************************************
 *   Global Variables                                                           *
 *******************************************************************************/
-static BOOL fInited = FALSE;
-HFILE       hWin32k = NULLHANDLE;
+BOOL    fInited = FALSE;
+HFILE   hWin32k = NULLHANDLE;
 
 
 /**
