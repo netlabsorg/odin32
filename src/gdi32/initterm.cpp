@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.10 2000-02-16 14:18:10 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.11 2000-06-14 13:17:50 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -37,6 +37,7 @@
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
 #define DBG_LOCALLOG	DBG_initterm
 #include "dbglocal.h"
+#include "region.h"
 
 extern "C" {
 void CDECL _ctordtorInit( void );
@@ -96,6 +97,9 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          /* are required and the runtime is dynamically linked.             */
          /*******************************************************************/
 
+	 if(InitRegionSpace() == FALSE) {
+		return 0UL;
+	 }
 	 if(RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab) == FALSE) 
 		return 0UL;
 

@@ -1,4 +1,4 @@
-/* $Id: dcrgn.cpp,v 1.1 2000-06-08 18:10:10 sandervl Exp $ */
+/* $Id: dcrgn.cpp,v 1.2 2000-06-14 13:15:24 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -32,6 +32,8 @@
 #include "oslibwin.h"
 #include "oslibmsg.h"
 #include <dcdata.h>
+#include <objhandle.h>
+#include <wingdi32.h>
 
 #define INCLUDED_BY_DC
 #include "dc.h"
@@ -41,115 +43,7 @@
 
 //******************************************************************************
 //******************************************************************************
-int WIN32API GetClipBox( HDC hdc, PRECT lpRect)
-{
- pDCData  pHps = (pDCData)GpiQueryDCData((HPS)hdc);
- RECTL    rectl;
- LONG     lComplexity;
- int      rc;
-
-    if(!hdc || !lpRect || !pHps) {
-    	dprintf(("GDI32: GetClipBox %x %x ERROR_INVALID_PARAMETER", hdc, lpRect));
-	SetLastError(ERROR_INVALID_PARAMETER_W);
-	return ERROR_W;
-    }
-    if(pHps->isPrinter)
-    {
-        lpRect->left   = 0;
-        lpRect->top    = 0;
-        lpRect->right  = GetDeviceCaps( hdc, HORZRES_W);
-        lpRect->bottom = GetDeviceCaps( hdc, VERTRES_W);
-
-        rc = SIMPLEREGION_W;
-    }
-    else {
-    	lComplexity = GpiQueryClipBox(pHps->hps, &rectl);
-    	if(lComplexity == RGN_ERROR) 
-    	{
-		rc = ERROR_W;
-    	}
-    	else
-	if(lComplexity == RGN_NULL) 
-    	{
-		memset(lpRect, 0, sizeof(*lpRect));
-		rc = NULLREGION_W;
-	}
-	else {
-		lpRect->left   = rectl.xLeft;
-		lpRect->right  = rectl.xRight;
-#if 0
-		lpRect->top    = pHps->height - rectl.yTop;
-		lpRect->bottom = pHps->height - rectl.yBottom;
-#else
-		//No conversion required as GpiQueryClipBox is affected by
-                //the y-inversion of the window
-		lpRect->top    = rectl.yBottom;
-		lpRect->bottom = rectl.yTop;
-#endif
-		//Convert including/including to including/excluding
-		if(lpRect->left != lpRect->right) {
-			lpRect->right++;
-		}
-		if(lpRect->top != lpRect->bottom) {
-			lpRect->bottom++;
-		}
-		rc = (lComplexity == RGN_RECT) ? SIMPLEREGION_W : COMPLEXREGION_W;
-    	}
-    }
-    dprintf(("GDI32: GetClipBox of %X returned %d\n", hdc, rc));
-    return rc;
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API GetClipRgn( HDC hdc, HRGN hRgn)
-{
- int rc;
-
-    rc = O32_GetClipRgn(hdc, hRgn);
-    dprintf(("GDI32: GetClipRgn %x %x returned %x", hdc, hRgn, rc));
-    return rc;
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API ExcludeClipRect( HDC arg1, int arg2, int arg3, int arg4, int  arg5)
-{
-    dprintf(("GDI32: ExcludeClipRect"));
-    return O32_ExcludeClipRect(arg1, arg2, arg3, arg4, arg5);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API IntersectClipRect(HDC arg1, int arg2, int arg3, int arg4, int  arg5)
-{
- int rc;
-
-  rc = O32_IntersectClipRect(arg1, arg2, arg3, arg4, arg5);
-  dprintf(("GDI32: IntersectClipRect returned %d\n", rc));
-  return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API ExtSelectClipRgn( HDC arg1, HRGN arg2, int  arg3)
-{
-    dprintf(("GDI32: ExtSelectClipRgn"));
-    return O32_ExtSelectClipRgn(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API OffsetClipRgn( HDC arg1, int arg2, int  arg3)
-{
-    dprintf(("GDI32: OffsetClipRgn"));
-    return O32_OffsetClipRgn(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API SelectClipRgn( HDC hdc, HRGN hRgn)
-{
-    dprintf(("GDI32: SelectClipRgn %x %x", hdc, hRgn));
-    return O32_SelectClipRgn(hdc, hRgn);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetUpdateRect (HWND hwnd, LPRECT pRect, BOOL erase)
+BOOL WIN32API GetUpdateRect(HWND hwnd, LPRECT pRect, BOOL erase)
 {
    if (!hwnd)
    {
@@ -227,31 +121,62 @@ BOOL GetOS2UpdateRect(Win32BaseWindow *window, LPRECT pRect)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API GetUpdateRgn (HWND hwnd, HRGN hrgn, BOOL erase)
+int WIN32API GetUpdateRgn(HWND hwnd, HRGN hrgn, BOOL erase)
 {
-   LONG Complexity;
-
+   LONG lComplexity;
    Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
 
-   if (!wnd)
+   hrgn = ObjWinToOS2Region(hrgn);
+   if(!wnd || !hrgn)
    {
-      SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
-      return ERROR_W;
+	dprintf(("WARNING: GetUpdateRgn %x %x %d; invalid handle", hwnd, hrgn, erase));
+      	SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
+      	return ERROR_W;
+   }
+   lComplexity = WinQueryUpdateRegion(wnd->getOS2WindowHandle(), hrgn);
+   if(lComplexity == RGN_ERROR) {
+	dprintf(("WARNING: GetUpdateRgn %x %x %d; RGN_ERROR", hwnd, hrgn, erase));
+      	SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
+      	return ERROR_W;
    }
 
-   Complexity = O32_GetUpdateRgn (wnd->getOS2WindowHandle(), hrgn, FALSE);
-   if (erase && (Complexity > NULLREGION_W)) sendEraseBkgnd(wnd);
+   if(lComplexity != RGN_NULL)
+   {
+      	if(!setWinDeviceRegionFromPMDeviceRegion(hrgn, hrgn, NULL, wnd->getOS2WindowHandle()))
+      	{
+		dprintf(("WARNING: GetUpdateRgn %x %x %d; setWinDeviceRegionFromPMDeviceRegion failed!", hwnd, hrgn, erase));
+      		SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
+      		return ERROR_W;
+      	}
 
-   return Complexity;
+        if(erase) sendEraseBkgnd(wnd);
+   }
+
+   return lComplexity;
 }
 //******************************************************************************
+//TODO: Check
 //******************************************************************************
-INT WIN32API ExcludeUpdateRgn( HDC hDC, HWND  hWnd)
+INT WIN32API ExcludeUpdateRgn(HDC hdc, HWND hwnd)
 {
-    dprintf(("USER32:  ExcludeUpdateRgn\n"));
-    hWnd = Win32BaseWindow::Win32ToOS2Handle(hWnd);
+   Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
+   pDCData          pHps = (pDCData)GpiQueryDCData((HPS)hdc);
+   LONG             lComplexity;
 
-    return O32_ExcludeUpdateRgn(hDC,hWnd);
+   if(!wnd || !pHps)
+   {
+	dprintf(("WARNING: ExcludeUpdateRgn %x %x; invalid handle", hdc, hwnd));
+      	SetLastError(ERROR_INVALID_WINDOW_HANDLE_W);
+      	return ERROR_W;
+   }
+   dprintf(("USER32: ExcludeUpdateRgn %x %x", hdc, hwnd));
+
+   lComplexity = WinExcludeUpdateRegion(pHps->hps, wnd->getOS2WindowHandle());
+   if(lComplexity == RGN_ERROR) {
+	SetLastError(ERROR_INVALID_HANDLE_W); //todo: correct error
+   }
+   else	SetLastError(ERROR_SUCCESS_W); 
+   return lComplexity;      // windows and PM values are identical
 }
 /*****************************************************************************
  * Name      : int WIN32API GetWindowRgn
