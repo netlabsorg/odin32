@@ -1,4 +1,4 @@
-/* $Id: crtinc.h,v 1.1 1999-09-07 20:41:45 sandervl Exp $ */
+/* $Id: crtinc.h,v 1.2 1999-09-13 09:05:13 sandervl Exp $ */
 
 /* Definitions for the CRTDLL library (CRTDLL.DLL)
  *
@@ -51,6 +51,4 @@ UINT CRTDLL_osversion_dll;    /* CRTDLL.245 */
 UINT CRTDLL_winmajor_dll;     /* CRTDLL.329 */
 UINT CRTDLL_winminor_dll;     /* CRTDLL.330 */
 UINT CRTDLL_winver_dll;       /* CRTDLL.331 */
-
-INT         WINAPI lstrncmpiA(LPCSTR,LPCSTR,INT);
 
