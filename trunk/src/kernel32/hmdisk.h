@@ -1,4 +1,4 @@
-/* $Id: hmdisk.h,v 1.2 2000-11-14 14:27:04 sandervl Exp $ */
+/* $Id: hmdisk.h,v 1.3 2001-04-26 13:22:45 sandervl Exp $ */
 
 #ifndef __HMDISK_H__
 #define __HMDISK_H__
@@ -29,7 +29,7 @@ public:
                              PVOID         lpSecurityAttributes,
                              PHMHANDLEDATA pHMHandleDataTemplate);
 
-  virtual DWORD  CloseHandle(PHMHANDLEDATA pHMHandleData);
+  virtual BOOL   CloseHandle(PHMHANDLEDATA pHMHandleData);
 
   /* this is a handler method for calls to DeviceIoControl() */
   virtual BOOL   DeviceIoControl    (PHMHANDLEDATA pHMHandleData, DWORD dwIoControlCode,

@@ -1,4 +1,4 @@
-/* $Id: hmnpipe.cpp,v 1.1 2000-07-12 18:21:43 sandervl Exp $ */
+/* $Id: hmnpipe.cpp,v 1.2 2001-04-26 13:22:46 sandervl Exp $ */
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -83,7 +83,58 @@ DWORD HMDeviceNamedPipeClass::CreateNamedPipe(PHMHANDLEDATA pHMHandleData,
 
   return (pHMHandleData->hHMHandle);
 }
+/*****************************************************************************
+ * Name      : DWORD HMDeviceNamedPipeClass::CreateFile
+ * Purpose   : this is called from the handle manager if a CreateFile() is
+ *             performed on a handle
+ * Parameters: LPCSTR        lpFileName            name of the file / device
+ *             PHMHANDLEDATA pHMHandleData         data of the NEW handle
+ *             PVOID         lpSecurityAttributes  ignored
+ *             PHMHANDLEDATA pHMHandleDataTemplate data of the template handle
+ * Variables :
+ * Result    :
+ * Remark    : 
+ * Status    : NO_ERROR - API succeeded
+ *             other    - what is to be set in SetLastError
+ *
+ * Author    : SvL
+ *****************************************************************************/
 
+DWORD HMDeviceNamedPipeClass::CreateFile (LPCSTR        lpFileName,
+                                          PHMHANDLEDATA pHMHandleData,
+                                          PVOID         lpSecurityAttributes,
+                                          PHMHANDLEDATA pHMHandleDataTemplate)
+{
+   pHMHandleData->hHMHandle = OSLibDosOpenPipe(lpFileName, 
+                                               pHMHandleData->dwAccess,
+                                               pHMHandleData->dwShare,
+                                               (LPSECURITY_ATTRIBUTES)lpSecurityAttributes,
+                                               pHMHandleData->dwCreation,
+                                               pHMHandleData->dwFlags);
+   if(pHMHandleData->hHMHandle == -1) {
+      return GetLastError();
+   }
+   return ERROR_SUCCESS;
+}
+
+/*****************************************************************************
+ * Name      : DWORD HMDeviceNamedPipeClass::CloseHandle
+ * Purpose   : close the handle
+ * Parameters: PHMHANDLEDATA pHMHandleData
+ * Variables :
+ * Result    : API returncode
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+
+BOOL HMDeviceNamedPipeClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
+{
+  dprintf(("KERNEL32: HMDeviceNamedPipeClass::CloseHandle(%08x)", pHMHandleData->hHMHandle));
+
+  return OSLibDosClose(pHMHandleData->hHMHandle);
+}
 //******************************************************************************
 //******************************************************************************
 BOOL HMDeviceNamedPipeClass::CreatePipe(PHMHANDLEDATA pHMHandleDataRead,
@@ -196,10 +247,18 @@ BOOL HMDeviceNamedPipeClass::SetNamedPipeHandleState(PHMHANDLEDATA pHMHandleData
                                                 LPDWORD lpcbMaxCollect,
                                                 LPDWORD lpdwCollectDataTimeout)
 {
-  dprintf(("KERNEL32: HMDeviceNamedPipeClass::SetNamedPipeInfo (%s) (%08xh,%08xh,%08xh) NIY\n",
+  BOOL ret;
+
+  dprintf(("KERNEL32: HMDeviceNamedPipeClass::SetNamedPipeInfo (%s) (%08xh,%08xh,%08xh)",
            lpdwMode,lpcbMaxCollect,lpdwCollectDataTimeout));
 
-  return (FALSE);
+  if(lpdwMode) {
+     ret = OSLibSetNamedPipeState(pHMHandleData->hHMHandle, *lpdwMode);
+  }
+  if(lpcbMaxCollect || lpdwCollectDataTimeout) {
+     dprintf(("WARNING: Not supported -> lpcbMaxCollect & lpdwCollectDataTimeout"));
+  }
+  return ret;
 }
 
 

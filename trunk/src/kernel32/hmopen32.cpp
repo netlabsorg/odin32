@@ -1,4 +1,4 @@
-/* $Id: hmopen32.cpp,v 1.28 2001-03-19 19:27:13 sandervl Exp $ */
+/* $Id: hmopen32.cpp,v 1.29 2001-04-26 13:22:47 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -82,7 +82,7 @@ DWORD  HMDeviceOpen32Class::_DeviceRequest (PHMHANDLEDATA pHMHandleData,
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-DWORD HMDeviceOpen32Class::CloseHandle(PHMHANDLEDATA pHMHandleData)
+BOOL HMDeviceOpen32Class::CloseHandle(PHMHANDLEDATA pHMHandleData)
 {
   BOOL bRC;
 
@@ -94,7 +94,7 @@ DWORD HMDeviceOpen32Class::CloseHandle(PHMHANDLEDATA pHMHandleData)
   dprintfl(("KERNEL32: HandleManager::Open32::CloseHandle returned %08xh\n",
            bRC));
 
-  return (DWORD)bRC;
+  return bRC;
 }
 
 /*****************************************************************************

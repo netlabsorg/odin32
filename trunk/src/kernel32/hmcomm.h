@@ -1,4 +1,4 @@
-/* $Id: hmcomm.h,v 1.7 2000-12-31 12:28:54 sandervl Exp $ */
+/* $Id: hmcomm.h,v 1.8 2001-04-26 13:22:44 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -33,7 +33,7 @@ class HMDeviceCommClass : public HMDeviceHandler
                              PHMHANDLEDATA pHMHandleDataTemplate);
 
   /* this is the handler method for calls to CloseHandle() */
-  virtual DWORD  CloseHandle(PHMHANDLEDATA pHMHandleData);
+  virtual BOOL CloseHandle(PHMHANDLEDATA pHMHandleData);
 
   /* this is the handler method for SetComm() */
   virtual BOOL WaitCommEvent( PHMHANDLEDATA pHMHandleData,

@@ -1,4 +1,4 @@
-/* $Id: hmthread.h,v 1.2 2000-03-17 16:08:40 sandervl Exp $ */
+/* $Id: hmthread.h,v 1.3 2001-04-26 13:22:47 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -53,7 +53,7 @@ public:
   virtual BOOL   GetExitCodeThread(PHMHANDLEDATA pHMHandleData, LPDWORD lpExitCode);
   virtual BOOL   SetThreadTerminated(PHMHANDLEDATA pHMHandleData);
 
-  virtual DWORD  CloseHandle(PHMHANDLEDATA pHMHandleData);
+  virtual BOOL CloseHandle(PHMHANDLEDATA pHMHandleData);
 };
 
 

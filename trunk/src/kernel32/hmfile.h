@@ -1,4 +1,4 @@
-/* $Id: hmfile.h,v 1.4 2000-11-23 19:23:50 sandervl Exp $ */
+/* $Id: hmfile.h,v 1.5 2001-04-26 13:22:45 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -65,7 +65,7 @@ public:
                                DWORD   fdwOdinOptions);
 
                       /* this is a handler method for calls to CloseHandle() */
-  virtual DWORD  CloseHandle(PHMHANDLEDATA pHMHandleData);
+  virtual BOOL   CloseHandle(PHMHANDLEDATA pHMHandleData);
 
                            /* this is a handler method for calls to ReadFile() */
   virtual BOOL   ReadFile   (PHMHANDLEDATA pHMHandleData,

@@ -1,4 +1,4 @@
-/* $Id: hmdevice.cpp,v 1.25 2001-01-22 18:26:50 sandervl Exp $ */
+/* $Id: hmdevice.cpp,v 1.26 2001-04-26 13:22:44 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -196,7 +196,7 @@ DWORD HMDeviceHandler::CreateFile (LPCSTR        lpFileName,
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-DWORD HMDeviceHandler::CloseHandle(PHMHANDLEDATA pHMHandleData)
+BOOL HMDeviceHandler::CloseHandle(PHMHANDLEDATA pHMHandleData)
 {
   dprintf(("KERNEL32:HandleManager::CloseHandle %s(%08x) - stub?\n",
            lpHMDeviceName,
@@ -1849,6 +1849,45 @@ BOOL HMDeviceHandler::CreatePipe(PHMHANDLEDATA pHMHandleDataRead,
 {
   dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::CreatePipe (%08x,%08x)\n",
            pHMHandleDataRead->hHMHandle,pHMHandleDataWrite->hHMHandle));
+
+    return(FALSE);
+}
+/*****************************************************************************
+ * Name      : BOOL HMDeviceHandler::GetMailslotInfo
+ * Purpose   :
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+BOOL HMDeviceHandler::GetMailslotInfo(PHMHANDLEDATA pHMHandleData,
+                                      LPDWORD lpMaxMessageSize,
+                                      LPDWORD lpNextSize,
+                                      LPDWORD lpMessageCount,
+                                      LPDWORD lpReadTimeout)
+{
+    dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::GetMailslotInfo %08x",
+              pHMHandleData->hHMHandle));
+
+    return(FALSE);
+}
+/*****************************************************************************
+ * Name      : BOOL HMDeviceHandler::SetMailslotInfo
+ * Purpose   :
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+BOOL HMDeviceHandler::SetMailslotInfo(PHMHANDLEDATA pHMHandleData,
+                                      DWORD  dwReadTimeout)
+{
+    dprintf(("KERNEL32: ERROR: HandleManager::DeviceHandler::SetMailslotInfo %08x %x",
+              pHMHandleData->hHMHandle, dwReadTimeout));
 
     return(FALSE);
 }

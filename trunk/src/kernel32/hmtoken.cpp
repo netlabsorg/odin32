@@ -1,4 +1,4 @@
-/* $Id: hmtoken.cpp,v 1.4 2000-11-21 11:35:08 sandervl Exp $ */
+/* $Id: hmtoken.cpp,v 1.5 2001-04-26 13:22:47 sandervl Exp $ */
 
 /*
  * Win32 process/thread token handle manager class
@@ -93,7 +93,7 @@ DWORD HMDeviceTokenClass::OpenProcessToken(PHMHANDLEDATA pHMHandleData,
  *
  * Author    : SvL
  *****************************************************************************/
-DWORD HMDeviceTokenClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
+BOOL HMDeviceTokenClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
 {
-  return STATUS_SUCCESS;
+  return TRUE;
 }

@@ -1,4 +1,4 @@
-/* $Id: hmopen32.h,v 1.7 2000-08-04 21:12:08 sandervl Exp $ */
+/* $Id: hmopen32.h,v 1.8 2001-04-26 13:22:47 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -51,7 +51,7 @@ public:
                                DWORD   fdwOdinOptions);
 
                       /* this is a handler method for calls to CloseHandle() */
-  virtual DWORD  CloseHandle(PHMHANDLEDATA pHMHandleData);
+  virtual BOOL   CloseHandle(PHMHANDLEDATA pHMHandleData);
 
                       /* this is a handler method for calls to GetFileType() */
   virtual DWORD GetFileType (PHMHANDLEDATA pHMHandleData);

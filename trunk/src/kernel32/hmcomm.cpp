@@ -1,4 +1,4 @@
-/* $Id: hmcomm.cpp,v 1.9 2001-01-29 23:42:25 sandervl Exp $ */
+/* $Id: hmcomm.cpp,v 1.10 2001-04-26 13:22:43 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -246,7 +246,7 @@ DWORD HMDeviceCommClass::CreateFile(LPCSTR lpFileName,
 
 
                       /* this is a handler method for calls to CloseHandle() */
-DWORD HMDeviceCommClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
+BOOL HMDeviceCommClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
 {
   dprintf(("HMComm: Serial communication port close request\n"));
   delete pHMHandleData->lpHandlerData;

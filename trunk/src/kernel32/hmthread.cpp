@@ -1,4 +1,4 @@
-/* $Id: hmthread.cpp,v 1.6 2001-03-19 19:27:13 sandervl Exp $ */
+/* $Id: hmthread.cpp,v 1.7 2001-04-26 13:22:47 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -177,9 +177,9 @@ BOOL HMDeviceThreadClass::GetExitCodeThread(PHMHANDLEDATA pHMHandleData, LPDWORD
 }
 //******************************************************************************
 //******************************************************************************
-DWORD HMDeviceThreadClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
+BOOL HMDeviceThreadClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
 {
-  return STATUS_SUCCESS;
+  return TRUE;
 }
 //******************************************************************************
 //******************************************************************************

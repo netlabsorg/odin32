@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.48 2001-04-21 11:33:40 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.49 2001-04-26 13:22:42 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -564,13 +564,13 @@ ODINFUNCTION5(BOOL, WriteFile,
 
 ODINFUNCTION5(BOOL,         WriteFileEx,
               HANDLE,       hFile,
-              LPVOID,       lpBuffer,
+              LPCVOID,      lpBuffer,
               DWORD,        nNumberOfBytesToWrite,
               LPOVERLAPPED, lpOverlapped,
               LPOVERLAPPED_COMPLETION_ROUTINE,  lpCompletionRoutine)
 {
   return (HMWriteFileEx(hFile,
-                        lpBuffer,
+                        (LPVOID)lpBuffer,
                         nNumberOfBytesToWrite,
                         lpOverlapped, lpCompletionRoutine));
 }
