@@ -1,4 +1,4 @@
-/* $Id: objhandle.cpp,v 1.26 2002-07-22 13:18:11 sandervl Exp $ */
+/* $Id: objhandle.cpp,v 1.27 2002-08-13 14:45:37 sandervl Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
@@ -373,7 +373,7 @@ HGDIOBJ WIN32API SelectObject(HDC hdc, HGDIOBJ hObj)
 
     handleType = GetObjectType(hObj);
     dprintf2(("GDI32: SelectObject %x %x type %s", hdc, hObj, DbgGetGDITypeName(handleType)));
-    if(handleType == HNDL_REGION) {
+    if(handleType == OBJ_REGION) {
         //Return complexity here; not previously selected clip region
         return (HGDIOBJ)SelectClipRgn(hdc, hObj);
     }
