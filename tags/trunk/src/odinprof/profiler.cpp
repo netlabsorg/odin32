@@ -1,4 +1,4 @@
-/* $Id: profiler.cpp,v 1.2 2001-11-22 11:34:43 phaller Exp $ */
+/* $Id: profiler.cpp,v 1.3 2001-11-22 13:35:42 phaller Exp $ */
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  * Execution Trace Profiler
@@ -709,7 +709,6 @@ void _Optlink Profiler_DumpProfile(FILE *file)
       i++)
   {
     PPROFILEENTRY p = (PPROFILEENTRY)arrEntries[i].pObject;
-    if (p->ulCalls > 1)
     fprintf(file,
             "%10d %10d %10d %10d %10d %s(%s)\n",
             p->ulTimeTotal,
@@ -737,7 +736,6 @@ void _Optlink Profiler_DumpProfile(FILE *file)
       i++)
   {
     PPROFILEENTRY p = (PPROFILEENTRY)arrEntries[i].pObject;
-    if (p->ulCalls > 1)
     fprintf(file,
             "%10d %10d %10d %s(%s)\n",
             p->ulTimeTotal,
@@ -763,7 +761,6 @@ void _Optlink Profiler_DumpProfile(FILE *file)
       i++)
   {
     PPROFILEENTRY p = (PPROFILEENTRY)arrEntries[i].pObject;
-    if (p->ulCalls > 1)
     fprintf(file,
             "%10d %10d %10d %s(%s)\n",
             p->ulCalls,
@@ -789,7 +786,6 @@ void _Optlink Profiler_DumpProfile(FILE *file)
       i++)
   {
     PPROFILEENTRY p = (PPROFILEENTRY)arrEntries[i].pObject;
-    if (p->ulCalls > 1)
     fprintf(file,
             "%10d %10d %10d %s(%s)\n",
             p->ulTimeTotal / p->ulCalls,
@@ -809,14 +805,13 @@ void _Optlink Profiler_DumpProfile(FILE *file)
   
   // write to file
   fprintf(file,
-          "Functions / symbols sorted by address\n"
+          "\nFunctions / symbols sorted by address\n"
           "Address ----- Function / Symbol -------------------------------------------\n");
   for(i = 0;
       i < iEntries;
       i++)
   {
     PPROFILEENTRY p = (PPROFILEENTRY)arrEntries[i].pObject;
-    if (p->ulCalls > 1)
     fprintf(file,
             "#%08xh %-9s %s\n",
             p->EIP,
@@ -824,6 +819,8 @@ void _Optlink Profiler_DumpProfile(FILE *file)
             p->pszFunction);
   }
   
+  // at last print the sym map
+  pSymPool->printSYMs(file);
 
   ProfilerEnable(flagLock);
 }

@@ -1,4 +1,4 @@
-/* $Id: symfile.h,v 1.2 2001-11-22 11:34:44 phaller Exp $ */
+/* $Id: symfile.h,v 1.3 2001-11-22 13:35:42 phaller Exp $ */
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  * Execution Trace Profiler
@@ -163,6 +163,7 @@ class SymbolFilePool
                          PSZ    pszNameBuffer,
                          ULONG  ulNameBufferLength,
                          PULONG pulSymbolOffset);
+    void   printSYMs(FILE *file);
 
   protected:
     CHashtableLookup*  pHashModules;

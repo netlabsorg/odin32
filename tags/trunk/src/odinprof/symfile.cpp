@@ -1,4 +1,4 @@
-/* $Id: symfile.cpp,v 1.2 2001-11-22 11:34:43 phaller Exp $ */
+/* $Id: symfile.cpp,v 1.3 2001-11-22 13:35:42 phaller Exp $ */
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  * Execution Trace Profiler
@@ -394,22 +394,32 @@ BOOL   SymbolFilePool::getSymbolName(PSZ    pszModule,
   LXSymbolFile* pSym = (LXSymbolFile*)pHashModules->getElement(pszModule);
   if (NULL == pSym)
   {
-    CHAR szFilename[260];
+    DosEnterCritSec();
     
-    // 1 - locate the file
-    APIRET rc = searchModule(pszModule, szFilename, sizeof(szFilename));
+    // try again since someone else could have loaded the map already
+    pSym = (LXSymbolFile*)pHashModules->getElement(pszModule);
+    if (NULL == pSym)
+    {
+      CHAR szFilename[260];
+      
+      // 1 - locate the file
+      APIRET rc = searchModule(pszModule, szFilename, sizeof(szFilename));
+      
+      // create new entry
+      pSym = new LXSymbolFile(pszModule, szFilename);
+      
+      // parse the file
+      if (rc == NO_ERROR)
+        pSym->parseFile();
+      else
+        pSym->setErrorMessage("file not found");
+      
+      // add to the hashtable
+      PSZ pszCopyOfModuleName = strdup(pszModule);
+      pHashModules->addElement(pszCopyOfModuleName, pSym);
+    }
     
-    // create new entry
-    pSym = new LXSymbolFile(pszModule, szFilename);
-    
-    // parse the file
-    if (rc == NO_ERROR)
-      pSym->parseFile();
-    else
-      pSym->setErrorMessage("file not found");
-    
-    // add to the hashtable
-    pHashModules->addElement(pszModule, pSym);
+    DosExitCritSec();
   }
   
   BOOL rc;
@@ -456,3 +466,49 @@ BOOL   SymbolFilePool::getSymbolName(PSZ    pszModule,
   return rc;
 }
 
+
+static int _Optlink sortHashtableSYMs(const void *arg1,const void *arg2)
+{
+  PHASHTABLEENTRY pHTE1 = (PHASHTABLEENTRY)arg1;
+  PHASHTABLEENTRY pHTE2 = (PHASHTABLEENTRY)arg2;
+  
+  LXSymbolFile* p1 = (LXSymbolFile*)pHTE1->pObject;
+  LXSymbolFile* p2 = (LXSymbolFile*)pHTE2->pObject;
+  
+  return stricmp(p1->getName(), p2->getName());
+}
+
+
+void SymbolFilePool::printSYMs(FILE *file)
+{
+  int iEntries = pHashModules->getNumberOfElements();
+  
+  // get a list of all entries of the hashtable
+  PHASHTABLEENTRY arrEntries = (PHASHTABLEENTRY)malloc( iEntries * sizeof(HASHTABLEENTRY) );
+  iEntries = pHashModules->getElementMap(arrEntries);
+  
+  fprintf(file,
+          "\nSymbolic debug information maps (%d maps)\n",
+          iEntries);
+  
+  // sort the list by name
+  qsort(arrEntries,
+        iEntries,
+        sizeof( HASHTABLEENTRY ),
+        sortHashtableSYMs);
+  
+  // write to file
+  fprintf(file,
+          "Module ---- Status --------------------------------------------------------\n");
+  for(int i = 0;
+      i < iEntries;
+      i++)
+  {
+    LXSymbolFile* p = (LXSymbolFile*)arrEntries[i].pObject;
+    fprintf(file,
+            "%-10s %s (%s)\n",
+            p->getName(),
+            p->getFileName(),
+            (p->getErrorMessage() != NULL) ? p->getErrorMessage() : "");
+  }
+}
