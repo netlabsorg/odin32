@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.998 2000-06-18 12:54:09 phaller Exp $ */
+ /* $Id: changelog,v 1.999 2000-06-20 18:40:30 sandervl Exp $ */
+
+ 2000-06-18: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
+    - KERNEL32:    Added language support for Poland
 
  2000-06-148 Patrick Haller <phaller@gmx.net>
     - KERNEL32:    - fixed potential memory leak in GetLocaleInfoA
