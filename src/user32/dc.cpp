@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.123 2004-01-11 12:03:13 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.124 2004-02-16 12:00:25 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -610,6 +610,7 @@ HDC sendEraseBkgnd (Win32BaseWindow *wnd)
 
    erased = wnd->MsgEraseBackGround (hdc);
 
+   //hrgnUpdate is destroyed in DeleteHDC
    DeleteHDC (hdc);
    WinReleasePS (hps);
 
@@ -813,8 +814,14 @@ BOOL WIN32API EndPaint (HWND hWnd, const PAINTSTRUCT_W *pPaint)
     if (pHps && (pHps->hdcType == TYPE_3))
     {
         //restore previous visible and clip regions
-        pHps->hrgnWin32Clip = NULLHANDLE;
-        pHps->hrgnWinVis    = NULLHANDLE;
+        if(pHps->hrgnWinVis) {
+            GreDestroyRegion(pHps->hps, pHps->hrgnWinVis);
+            pHps->hrgnWinVis = NULLHANDLE;
+        }
+        if(pHps->hrgnWin32Clip) {
+            GreDestroyRegion(pHps->hps, pHps->hrgnWin32Clip);
+            pHps->hrgnWin32Clip = NULLHANDLE;
+        }
 
         GdiSetVisRgn(pHps, wnd->GetVisRegion());
         GdiCombineVisRgnClipRgn(pHps, wnd->GetClipRegion(), RGN_AND_W);
