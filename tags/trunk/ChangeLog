@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.1481 2001-06-05 08:38:53 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1482 2001-06-05 16:46:01 phaller Exp $ */
+
+ 2001-06-05: Patrick Haller <patrick.haller@innotek.de>
+    - KERNEL32: o Fixed ordinal export resolving for PE executables
+                  (SO52 complained about missing exports)
 
  2001-06-05: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMCTL32: o Listview: Don't repaint subitem if changed text is the same as old one.
