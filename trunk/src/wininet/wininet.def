@@ -1,4 +1,4 @@
-; $Id: wininet.def,v 1.2 2000-12-16 22:53:47 bird Exp $
+; $Id: wininet.def,v 1.3 2001-04-01 10:30:32 sandervl Exp $
 
 ;
 ; Based on NT 4.0 SP3: WININET.DLL
@@ -23,7 +23,7 @@ EXPORTS
 ;  DeleteUrlCacheContainerW          = _DeleteUrlCacheContainerW@                    @12
   DeleteUrlCacheEntry               = _DeleteUrlCacheEntry@4                 @13
 ;  DeleteUrlCacheGroup               = _DeleteUrlCacheGroup@                 @14
-;  DllInstall                       = _DllInstall@                  @15
+  DllInstall                       = _WININET_DllInstall@8                   @15
   FindCloseUrlCache                 = _FindCloseUrlCache@4                   @16
 ;  FindFirstUrlCacheContainerA       = _FindFirstUrlCacheContainerA@                 @17
 ;  FindFirstUrlCacheContainerW       = _FindFirstUrlCacheContainerW@                 @18
@@ -84,40 +84,40 @@ EXPORTS
   HttpOpenRequestW                  = _HttpOpenRequestW@32                    @73
   HttpQueryInfoA                    = _HttpQueryInfoA@20                  @74
   HttpQueryInfoW                    = _HttpQueryInfoW@20                  @75
-  HttpSendRequestA                  = _HttpSendRequestA@20                    @76
-;  HttpSendRequestExA                = _HttpSendRequestExA@                  @77
-;  HttpSendRequestExW                = _HttpSendRequestExW@                  @78
-  HttpSendRequestW                  = _HttpSendRequestW@20                    @79
-;  IncrementUrlCacheHeaderData       = _IncrementUrlCacheHeaderData@                 @80
-;  InternetAttemptConnect            = _InternetAttemptConnect@                  @81
-;  InternetAutodial                  = _InternetAutodial@                    @82
-;  InternetAutodialCallback          = _InternetAutodialCallback@                    @83
-;  InternetAutodialHangup            = _InternetAutodialHangup@                  @84
-  InternetCanonicalizeUrlA          = _InternetCanonicalizeUrlA@16                    @85
-  InternetCanonicalizeUrlW          = _InternetCanonicalizeUrlW@16                    @86
-;  InternetCheckConnectionA          = _InternetCheckConnectionA@                    @87
-;  InternetCheckConnectionW          = _InternetCheckConnectionW@                    @88
-  InternetCloseHandle               = _InternetCloseHandle@4                 @89
-  InternetCombineUrlA               = _InternetCombineUrlA@20                 @90
-  InternetCombineUrlW               = _InternetCombineUrlW@20                 @91
-  InternetConfirmZoneCrossing       = _InternetConfirmZoneCrossing@16                 @92
-  InternetConnectA                  = _InternetConnectA@32                    @93
-  InternetConnectW                  = _InternetConnectW@32                    @94
-  InternetCrackUrlA                 = _InternetCrackUrlA@16                   @95
-  InternetCrackUrlW                 = _InternetCrackUrlW@16                   @96
-  InternetCreateUrlA                = _InternetCreateUrlA@16                  @97
-  InternetCreateUrlW                = _InternetCreateUrlW@16                  @98
-;  InternetDebugGetLocalTime         = _InternetDebugGetLocalTime@                   @99
-;  InternetDial                      = _InternetDial@                    @100
-  InternetErrorDlg                  = _InternetErrorDlg@20                    @101
+  HttpSendRequestA                  = _HttpSendRequestA@20                @76
+  HttpSendRequestExA                = _HttpSendRequestExA@20              @77
+;  HttpSendRequestExW                = _HttpSendRequestExW@                @78
+  HttpSendRequestW                  = _HttpSendRequestW@20                @79
+;  IncrementUrlCacheHeaderData       = _IncrementUrlCacheHeaderData@              @80
+  InternetAttemptConnect            = _InternetAttemptConnect@4                  @81
+;  InternetAutodial                  = _InternetAutodial@                         @82
+;  InternetAutodialCallback          = _InternetAutodialCallback@                 @83
+;  InternetAutodialHangup            = _InternetAutodialHangup@                   @84
+  InternetCanonicalizeUrlA          = _InternetCanonicalizeUrlA@16               @85
+  InternetCanonicalizeUrlW          = _InternetCanonicalizeUrlW@16               @86
+  InternetCheckConnectionA          = _InternetCheckConnectionA@12               @87
+;  InternetCheckConnectionW          = _InternetCheckConnectionW@                 @88
+  InternetCloseHandle               = _InternetCloseHandle@4                     @89
+  InternetCombineUrlA               = _InternetCombineUrlA@20                    @90
+  InternetCombineUrlW               = _InternetCombineUrlW@20                    @91
+  InternetConfirmZoneCrossing       = _InternetConfirmZoneCrossing@16            @92
+  InternetConnectA                  = _InternetConnectA@32                       @93
+  InternetConnectW                  = _InternetConnectW@32                       @94
+  InternetCrackUrlA                 = _InternetCrackUrlA@16                      @95
+  InternetCrackUrlW                 = _InternetCrackUrlW@16                      @96
+  InternetCreateUrlA                = _InternetCreateUrlA@16                     @97
+  InternetCreateUrlW                = _InternetCreateUrlW@16                     @98
+;  InternetDebugGetLocalTime         = _InternetDebugGetLocalTime@                @99
+;  InternetDial                      = _InternetDial@                             @100
+  InternetErrorDlg                  = _InternetErrorDlg@20                       @101
   InternetFindNextFileA             = _InternetFindNextFileA@8                   @102
   InternetFindNextFileW             = _InternetFindNextFileW@8                   @103
 ;  InternetGetCertByURL              = _InternetGetCertByURL@                    @104
-;  InternetGetConnectedState         = _InternetGetConnectedState@                   @105
-  InternetGetCookieA                = _InternetGetCookieA@16                  @106
-  InternetGetCookieW                = _InternetGetCookieW@16                  @107
-  InternetGetLastResponseInfoA      = _InternetGetLastResponseInfoA@12                    @108
-  InternetGetLastResponseInfoW      = _InternetGetLastResponseInfoW@12                    @109
+  InternetGetConnectedState         = _InternetGetConnectedState@8               @105
+  InternetGetCookieA                = _InternetGetCookieA@16                     @106
+  InternetGetCookieW                = _InternetGetCookieW@16                     @107
+  InternetGetLastResponseInfoA      = _InternetGetLastResponseInfoA@12           @108
+  InternetGetLastResponseInfoW      = _InternetGetLastResponseInfoW@12           @109
 ;  InternetGoOnline                  = _InternetGoOnline@                    @110
 ;  InternetHangUp                    = _InternetHangUp@                  @111
 ;  InternetLockRequestFile           = _InternetLockRequestFile@                 @112
