@@ -1,4 +1,4 @@
-/* $Id: winimgres.cpp,v 1.3 1999-06-10 19:09:04 phaller Exp $ */
+/* $Id: winimgres.cpp,v 1.4 1999-06-23 19:36:24 phaller Exp $ */
 
 /*
  *
@@ -28,6 +28,25 @@ char *ResTypes[MAX_RES] =
       {"niks", "CURSOR", "BITMAP", "ICON", "MENU", "DIALOG", "STRING",
        "FONTDIR", "FONT", "ACCELERATOR", "RCDATA",  "MESSAGETABLE",
        "GROUP_CURSOR", "niks", "GROUP_ICON", "niks", "VERSION"};
+
+
+//******************************************************************************
+//TODO: use OS/2 unicode stuff
+//******************************************************************************
+char *extremelyuglyUnicodeToAscii(int length, WCHAR *NameString)
+{
+static char asciistring[256];
+int i;
+
+  if(length >= 255) length = 255;
+  for(i=0;i<length;i++) {
+    asciistring[i] = NameString[i] & 0xFF;
+  }
+  asciistring[length] = 0;
+  return(asciistring);
+}
+//******************************************************************************
+//******************************************************************************
 
 //******************************************************************************
 //Assuming names are case insensitive
@@ -93,7 +112,7 @@ Win32Resource *Win32Image::getPEResource(ULONG id, ULONG type, ULONG lang)
     if(i < prdType->NumberOfNamedEntries) {//name or id entry?
         //SvL: 30-10-'97, high bit is set, so clear to get real offset
         prde->u1.Name &= ~0x80000000;
-        char *resname = UnicodeToAscii(*(WCHAR *)((ULONG)pResDir + (ULONG)prde->u1.Name), (WCHAR *)((ULONG)pResDir + (ULONG)prde->u1.Name + sizeof(WCHAR)));  // first word = string length
+        char *resname = extremelyuglyUnicodeToAscii(*(WCHAR *)((ULONG)pResDir + (ULONG)prde->u1.Name), (WCHAR *)((ULONG)pResDir + (ULONG)prde->u1.Name + sizeof(WCHAR)));  // first word = string length
         if(!fNumId) {
             if(stricmp(resname, (char *)type) == 0) {
                 fFound = TRUE;
@@ -185,33 +204,33 @@ PIMAGE_RESOURCE_DATA_ENTRY
 
     if(!fNumId) {//name or id entry?
         if(prde->u1.s.NameIsString) //unicode directory string /*PLF Sat  97-06-21 22:30:35*/
-            	prde->u1.Name &= ~0x80000000;
-	        pstring = (PIMAGE_RESOURCE_DIR_STRING_U)((ULONG)pResDir + (ULONG)prde->u1.Name);
-        	resname = UnicodeToAscii(pstring->Length, pstring->NameString);
-        	if(stricmp(resname, (char *)*nodeData) == 0) {
-            		fFound = TRUE;
-        	}
-    	}
-    	else {
-        	if(*nodeData == prde->u1.Id)
-	            	fFound = TRUE;
-    	}
-    	if(*nodeData == LANG_GETFIRST)
-        	fFound = TRUE;
+               prde->u1.Name &= ~0x80000000;
+           pstring = (PIMAGE_RESOURCE_DIR_STRING_U)((ULONG)pResDir + (ULONG)prde->u1.Name);
+         resname = extremelyuglyUnicodeToAscii(pstring->Length, pstring->NameString);
+         if(stricmp(resname, (char *)*nodeData) == 0) {
+                  fFound = TRUE;
+         }
+      }
+      else {
+         if(*nodeData == prde->u1.Id)
+                  fFound = TRUE;
+      }
+      if(*nodeData == LANG_GETFIRST)
+         fFound = TRUE;
 
-	if(fFound) {
-        	if((ULONG)prdType2 & 0x80000000) {//subdirectory?
-	            ProcessResSubDir(prdType2, nodeData+1);
-	        }
-	        else {
-        	    pData = (PIMAGE_RESOURCE_DATA_ENTRY)prdType2;
-	            if(pData->Size) {//winamp17 winzip archive has resource with size 0
-        	        return(pData);
-	            }
-        	    else    return(NULL);
-        	}
-    	}
-    	prde++;
+   if(fFound) {
+         if((ULONG)prdType2 & 0x80000000) {//subdirectory?
+               ProcessResSubDir(prdType2, nodeData+1);
+           }
+           else {
+             pData = (PIMAGE_RESOURCE_DATA_ENTRY)prdType2;
+               if(pData->Size) {//winamp17 winzip archive has resource with size 0
+                 return(pData);
+               }
+             else    return(NULL);
+         }
+      }
+      prde++;
   }
   return(NULL);
 }
@@ -236,7 +255,7 @@ HRSRC Win32Image::findResourceA(LPCSTR lpszName, LPSTR lpszType)
         }
         if(i == MAX_RES) {//custom resource type, stored as rcdata
                 dprintf(("FindResourceA custom type %s\n", lpszType));
-            	lpszType = (LPSTR)NTRT_RCDATA;
+               lpszType = (LPSTR)NTRT_RCDATA;
         }
         else    lpszType = (LPSTR)i;
 
@@ -270,24 +289,24 @@ HRSRC Win32Image::findResourceA(LPCSTR lpszName, LPSTR lpszType)
 
     if((int)lpszName >> 16 != 0) {//convert string name identifier to numeric id
         dprintf(("FindResource %s\n", lpszName));
-     	if(lpszName[0] == '#') {// #344
-          	lpszName = (LPCSTR)atoi(&lpszName[1]);
-     	}
-     	else 	lpszName = (LPCSTR)ConvertNameId(hinstance, (char *)lpszName);
+      if(lpszName[0] == '#') {// #344
+            lpszName = (LPCSTR)atoi(&lpszName[1]);
+      }
+      else  lpszName = (LPCSTR)ConvertNameId(hinstance, (char *)lpszName);
     }
     else dprintf(("FindResource %d\n", (int)lpszName));
 
     hres = O32_FindResource(hinstance, lpszName, szType);
     if(hres) {
-    	res = new Win32Resource(this, hres, (ULONG)lpszName, (ULONG)szType);
+      res = new Win32Resource(this, hres, (ULONG)lpszName, (ULONG)szType);
     }
 
     if(hres == NULL && (int)lpszName >> 16 == 0 && (int)szType == NTRT_STRING) {
-    	hres = O32_FindResource(hinstance, (LPCSTR)(((int)lpszName - 1)*16), (LPCSTR)NTRT_RCDATA);
-    	if(hres) {
-        	res = new Win32Resource(this, hres, (ULONG)lpszName, (ULONG)szType);
-    	}
-    	else    dprintf(("FindResourceA can't find string %d\n", (int)lpszName));
+      hres = O32_FindResource(hinstance, (LPCSTR)(((int)lpszName - 1)*16), (LPCSTR)NTRT_RCDATA);
+      if(hres) {
+         res = new Win32Resource(this, hres, (ULONG)lpszName, (ULONG)szType);
+      }
+      else    dprintf(("FindResourceA can't find string %d\n", (int)lpszName));
     }
     dprintf(("FindResourceA returned %X (%X)\n", hres, GetLastError()));
 
@@ -363,26 +382,26 @@ HRSRC Win32Image::findResourceW(LPWSTR lpszName, LPWSTR lpszType)
     dprintf(("FindResourceW type %d\n", szType));
 
     if((int)lpszName >> 16 != 0) {//convert string name identifier to numeric id
-     	astring1 = UnicodeToAsciiString(lpszName);
+      astring1 = UnicodeToAsciiString(lpszName);
         dprintf(("FindResourceW %X %s\n", hinstance, astring1));
-     	if(astring1[0] == '#') {// #344
-          	lpszName = (LPWSTR)atoi(&astring1[1]);
-     	}
-     	else 	lpszName = (LPWSTR)ConvertNameId(hinstance, (char *)astring1);
+      if(astring1[0] == '#') {// #344
+            lpszName = (LPWSTR)atoi(&astring1[1]);
+      }
+      else  lpszName = (LPWSTR)ConvertNameId(hinstance, (char *)astring1);
     }
     else dprintf(("FindResourceW %X %d\n", hinstance, (int)lpszName));
 
     hres = O32_FindResource(hinstance, (LPCSTR)lpszName, (LPCSTR)szType);
     if(hres) {
-    	res = new Win32Resource(this, hres, (ULONG)lpszName, (ULONG)szType);
+      res = new Win32Resource(this, hres, (ULONG)lpszName, (ULONG)szType);
     }
 
     if(hres == NULL && (int)lpszName >> 16 == 0 && (int)szType == NTRT_STRING) {
-    	hres = O32_FindResource(hinstance, (LPCSTR)(((ULONG)lpszName - 1)*16), (LPCSTR)NTRT_RCDATA);
-    	if(hres) {
-        	res = new Win32Resource(this, hres, (ULONG)lpszName, (ULONG)szType);
-    	}
-    	else    dprintf(("FindResourceW can't find string %d\n", (int)lpszName));
+      hres = O32_FindResource(hinstance, (LPCSTR)(((ULONG)lpszName - 1)*16), (LPCSTR)NTRT_RCDATA);
+      if(hres) {
+         res = new Win32Resource(this, hres, (ULONG)lpszName, (ULONG)szType);
+      }
+      else    dprintf(("FindResourceW can't find string %d\n", (int)lpszName));
     }
     if(astring1)    FreeAsciiString(astring1);
 

@@ -1,4 +1,4 @@
-/* $Id: unicode.cpp,v 1.7 1999-06-10 20:47:54 phaller Exp $ */
+/* $Id: unicode.cpp,v 1.8 1999-06-23 19:36:24 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -229,20 +229,4 @@ void WIN32API AsciiToUnicode(char *ascii, WCHAR *unicode)
   /* forward to call with length parameter */
   AsciiToUnicodeN(ascii, unicode, strlen(ascii));
 }
-//******************************************************************************
-//TODO: use OS/2 unicode stuff
-//******************************************************************************
-char *UnicodeToAscii(int length, WCHAR *NameString)
-{
-static char asciistring[256];
-int i;
 
-  if(length >= 255) length = 255;
-  for(i=0;i<length;i++) {
-    asciistring[i] = NameString[i] & 0xFF;
-  }
-  asciistring[length] = 0;
-  return(asciistring);
-}
-//******************************************************************************
-//******************************************************************************
