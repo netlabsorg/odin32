@@ -1,4 +1,11 @@
- /* $Id: changelog,v 1.1122 2000-09-12 22:52:20 bird Exp $ */
+ /* $Id: changelog,v 1.1123 2000-09-13 20:59:32 sandervl Exp $ */
+
+ 2000-09-12: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: InitCommandLine corrupted the heap
+                Created HandleManager class for physical disks
+    - GDI32:    StretchDIBits: Open32 always returns height of bitmap (regardless of how many 
+                scanlines were copied); now corrected
+    - WNASPI32: Fixed FS corruption
 
  2000-09-13: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - KERNEL32: Added method matchModName to Win32ImageBase.
@@ -26,9 +33,9 @@
                 ExitProcess. (fixes endless loop of exception handler calls
                 in RealPlayer 7)
                 Create more registry keys during installation:
-                HKEY_LOCAL_MACHINE\CurrentVersion\RunOnce
                 HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager
-                HKEY_LOCAL_MACHINE\Software\\Microsoft\\Windows\\CurrentVersion\\App Paths\\iexplore.exe
+                HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\RunOnce
+                HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\App Paths\iexplore.exe
                 GetFileAttributesA trashes the stack (EBX register corrupted after return)
                 If CreateFile fails to duplicate the handle, then try DosDupHandle
                 (DuplicateHandle for memory mapped files in IE5)
@@ -75,7 +82,7 @@
 
  2000-09-05: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   WM_PARENTNOTIFY during WM_CREATE was sent to the wrong window
-                WM_FOCUSCHANGE fix; set & kill focus was sent twice
+                WM_FOCUSCHANGE fix; set & kill focus were sent twice
                 Added more logging.
                 Activate window after resizing (WM_WINDOWPOSCHANGED in pmwindow.cpp)
     - KERNEL32: Workaround for RegSetValueA; a call to this api in Netscape
