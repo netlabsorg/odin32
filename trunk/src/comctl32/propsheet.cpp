@@ -1,4 +1,4 @@
-/* $Id: propsheet.cpp,v 1.7 2000-08-13 17:12:39 cbratschi Exp $ */
+/* $Id: propsheet.cpp,v 1.8 2000-08-17 17:08:15 cbratschi Exp $ */
 /*
  * Property Sheets
  *
@@ -10,6 +10,7 @@
  * TODO:
  *   - Tab order
  *   - Unicode property sheets
+ *   - Wizard bugs
  */
 
 /*
@@ -132,7 +133,7 @@ static BOOL PROPSHEET_RemovePage(HWND hwndDlg,
 static void PROPSHEET_CleanUp();
 static int PROPSHEET_GetPageIndex(HPROPSHEETPAGE hpage, PropSheetInfo* psInfo);
 static void PROPSHEET_SetWizButtons(HWND hwndDlg, DWORD dwFlags);
-static PADDING_INFO PROPSHEET_GetPaddingInfoWizard(HWND hwndDlg);
+static PADDING_INFO PROPSHEET_GetPaddingInfoWizard(HWND hwndDlg,PropSheetInfo* psInfo);
 static BOOL PROPSHEET_IsDialogMessage(HWND hwnd, LPMSG lpMsg);
 static INT PROPSHEET_DoDialogBox( HWND hwnd, HWND owner);
 
@@ -550,7 +551,7 @@ static BOOL PROPSHEET_IsTooSmallWizard(HWND hwndDlg, PropSheetInfo* psInfo)
 {
   RECT rcSheetRect, rcPage, rcLine, rcSheetClient;
   HWND hwndLine = GetDlgItem(hwndDlg, IDC_SUNKEN_LINE);
-  PADDING_INFO padding = PROPSHEET_GetPaddingInfoWizard(hwndDlg);
+  PADDING_INFO padding = PROPSHEET_GetPaddingInfoWizard(hwndDlg,psInfo);
 
   GetClientRect(hwndDlg, &rcSheetClient);
   GetWindowRect(hwndDlg, &rcSheetRect);
@@ -652,7 +653,7 @@ static BOOL PROPSHEET_AdjustSizeWizard(HWND hwndDlg, PropSheetInfo* psInfo)
   HWND hwndLine = GetDlgItem(hwndDlg, IDC_SUNKEN_LINE);
   RECT rc;
   int buttonHeight, lineHeight;
-  PADDING_INFO padding = PROPSHEET_GetPaddingInfoWizard(hwndDlg);
+  PADDING_INFO padding = PROPSHEET_GetPaddingInfoWizard(hwndDlg,psInfo);
 
   /* Get the height of buttons */
   GetClientRect(hwndButton, &rc);
@@ -795,7 +796,7 @@ static BOOL PROPSHEET_AdjustButtonsWizard(HWND hwndParent,
   int x, y;
   int num_buttons = 3;
   int buttonWidth, buttonHeight, lineHeight, lineWidth;
-  PADDING_INFO padding = PROPSHEET_GetPaddingInfoWizard(hwndParent);
+  PADDING_INFO padding = PROPSHEET_GetPaddingInfoWizard(hwndParent,psInfo);
 
   if (psInfo->hasHelp)
     num_buttons++;
@@ -919,7 +920,7 @@ static PADDING_INFO PROPSHEET_GetPaddingInfo(HWND hwndDlg)
  * Horizontal spacing is the distance between the Cancel and Help buttons.
  * Vertical spacing is the distance between the line and the buttons.
  */
-static PADDING_INFO PROPSHEET_GetPaddingInfoWizard(HWND hwndDlg)
+static PADDING_INFO PROPSHEET_GetPaddingInfoWizard(HWND hwndDlg,PropSheetInfo* psInfo)
 {
   PADDING_INFO padding;
   RECT rc;
@@ -955,6 +956,13 @@ static PADDING_INFO PROPSHEET_GetPaddingInfoWizard(HWND hwndDlg)
 
   padding.x = ptHelp.x - ptCancel.x;
   padding.y = ptHelp.y - ptLine.y;
+
+//CB: BUG: psInfo->hasHelp not checked -> negative values
+//    add better wizard handling, fix button placement bugs FIXME
+//
+//    workaround for now:
+if (padding.x < 0) padding.x = 0;
+if (padding.y < 0) padding.y = 0;
 
   return padding;
 }
@@ -1174,7 +1182,7 @@ static int PROPSHEET_ShowPage(HWND hwndDlg, int index, PropSheetInfo * psInfo)
   pageHeight = rc.bottom - rc.top;
 
   if (psInfo->ppshheader->dwFlags & PSH_WIZARD)
-    padding = PROPSHEET_GetPaddingInfoWizard(hwndDlg);
+    padding = PROPSHEET_GetPaddingInfoWizard(hwndDlg,psInfo);
   else
   {
     /*
@@ -1186,10 +1194,7 @@ static int PROPSHEET_ShowPage(HWND hwndDlg, int index, PropSheetInfo * psInfo)
     padding = PROPSHEET_GetPaddingInfo(hwndDlg);
   }
 
-  SetWindowPos(psInfo->proppage[index].hwndPage, HWND_TOP,
-               rc.left + padding.x,
-               rc.top + padding.y,
-               pageWidth, pageHeight, SWP_SHOWWINDOW);
+  SetWindowPos(psInfo->proppage[index].hwndPage,HWND_TOP,rc.left+padding.x,rc.top+padding.y,pageWidth,pageHeight,SWP_SHOWWINDOW);
 
   if (!(psInfo->ppshheader->dwFlags & PSH_WIZARD))
   {
