@@ -1,4 +1,13 @@
- /* $Id: changelog,v 1.539 1999-12-16 16:51:21 cbratschi Exp $ */
+ /* $Id: changelog,v 1.540 1999-12-17 16:55:57 sandervl Exp $ */
+
+ 99-12-17: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: Delete thread's THDB structure when it quits
+	- USER32: Hook removal bugfix
+
+ 99-12-17: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+	- INCLUDE\winconst.h/wintypes.h/win\winbase.h: Added definitions
+	- KERNEL32: Set DEBUG_PROCESS flag for DEBUG_ONLY_THIS_PROCESS flag
+                    in CreateProcess (open32 doesn't support the latter flag)
 
  99-12-16: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: fixed 'dancing characters' in edit control
