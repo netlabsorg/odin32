@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.10 1999-09-09 18:08:19 dengert Exp $ */
+/* $Id: win32wbase.h,v 1.11 1999-09-15 18:03:46 dengert Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -78,7 +78,7 @@ virtual  ULONG  MsgCreate(HWND hwndOS2, ULONG initParam);
          ULONG  MsgChar(ULONG cmd, ULONG repeatcnt, ULONG scancode, ULONG vkey, ULONG keyflags);
          ULONG  MsgButton(ULONG msg, ULONG ncx, ULONG ncy, ULONG clx, ULONG cly);
          ULONG  MsgMouseMove(ULONG keystate, ULONG x, ULONG y);
-         ULONG  MsgPaint(ULONG tmp1, ULONG tmp2);
+         ULONG  MsgPaint(ULONG tmp1, BOOL select = TRUE);
          ULONG  MsgEraseBackGround(HDC hdc);
          ULONG  MsgSetText(LPSTR lpsz, LONG cch);
          ULONG  MsgGetTextLength();
