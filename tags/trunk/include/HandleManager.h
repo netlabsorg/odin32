@@ -1,4 +1,4 @@
-/* $Id: HandleManager.h,v 1.13 1999-11-27 12:47:07 achimha Exp $ */
+/* $Id: HandleManager.h,v 1.14 1999-12-18 21:46:19 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -143,6 +143,8 @@ DWORD  HMHandleAllocate       (PULONG phHandle16,
 
 DWORD  HMHandleFree           (ULONG  hHandle16);
 
+DWORD  HMHandleGetUserData    (ULONG  hHandle16);
+
 DWORD  HMHandleValidate       (ULONG  hHandle16);
 
 DWORD  HMHandleTranslateToWin (ULONG  hHandle32,
@@ -277,6 +279,12 @@ DWORD  HMWaitForMultipleObjectsEx   (DWORD                      cObjects,
                                      DWORD                      dwTimeout,
                                      BOOL                       fAlertable);
 
+DWORD  HMMsgWaitForMultipleObjects  (DWORD 			nCount, 
+                                     HANDLE 		       *pHandles, 
+                                     BOOL 			fWaitAll,
+                                     DWORD 			dwMilliseconds, 
+                                     DWORD 			dwWakeMask);
+
 BOOL   HMFlushFileBuffers           (HANDLE                     hObject);
 
 BOOL   HMGetOverlappedResult        (HANDLE                     hObject,
@@ -333,6 +341,17 @@ BOOL HMDuplicateHandle(HANDLE  srcprocess,
                        DWORD   fdwAccess,
                        BOOL    fInherit,
                        DWORD   fdwOptions);
+
+DWORD HMOpenThreadToken(HANDLE  ThreadHandle,
+                        DWORD   DesiredAccess,
+                        BOOL    OpenAsSelf,
+                        DWORD   dwUserData,
+                        HANDLE *TokenHandle);
+
+DWORD HMOpenProcessToken(HANDLE  ProcessHandle,
+                         DWORD   DesiredAccess,
+                         DWORD   dwUserData,
+                         HANDLE *TokenHandle);
 
 BOOL HMSetupComm(HANDLE hFile, DWORD dwInQueue, DWORD dwOutQueue);
 

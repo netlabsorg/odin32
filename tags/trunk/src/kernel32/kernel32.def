@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.58 1999-12-16 00:12:54 sandervl Exp $
+; $Id: kernel32.def,v 1.59 1999-12-18 21:45:53 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -1014,6 +1014,10 @@ EXPORTS
    HMHandleAllocate__FPUlUl                                       @1231
    HMHandleFree__FUl                                              @1232
    HMHandleTranslateToOS2__FUlPUl                                 @1233
+   HMMsgWaitForMultipleObjects__FUlPUlN31                         @1260
+   HMOpenThreadToken__FUlT1UcT1PUl                                @1261
+   HMOpenProcessToken__FUlN21PUl                                  @1262
+   HMHandleGetUserData__FUl                                       @1263
 
    _GetThreadTEB@0                         			  @1234
    _GetThreadTHDB@0                        			  @1235

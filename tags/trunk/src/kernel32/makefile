@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.70 1999-12-10 14:06:12 sandervl Exp $
+# $Id: makefile,v 1.71 1999-12-18 21:45:55 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -40,7 +40,7 @@ hmsemaphore.obj wprocess.OBJ conprop.OBJ conprop2.obj winimagelx.obj \
 winimagebase.OBJ windllbase.OBJ winexebase.OBJ time.obj mmap.obj \
 winimagepe2lx.obj winimagepeldr.obj windllpe2lx.obj windlllx.obj windllpeldr.obj \
 winexepe2lx.obj winexelx.obj winexepeldr.obj WINRES.OBJ critsection.obj \
-pefile.OBJ winimgres.OBJ wintls.obj async.OBJ fileio.obj \
+pefile.OBJ winimgres.OBJ wintls.obj async.OBJ fileio.obj hmtoken.obj \
 atom.obj disk.obj directory.obj cvtbitmap.obj hmmmap.obj winfakepeldr.obj \
 cvtaccel.obj cvticon.obj cvticongrp.obj oslibexcept.obj cpu.obj process.obj \
 cvtcursor.obj cvtcursorgrp.obj stubs.obj interlock.obj toolhelp.obj
@@ -292,7 +292,13 @@ handlemanager.OBJ: \
         .\hmopen32.h \
         .\hmsemaphore.h \
         .\hmmmap.h \
+	.\hmtoken.h \
         $(PDWIN32_INCLUDE)\winconst.h \
+        $(PDWIN32_INCLUDE)\handlemanager.h
+
+hmtoken.obj: hmtoken.cpp \
+	.\hmtoken.h \
+        .\hmdevice.h \
         $(PDWIN32_INCLUDE)\handlemanager.h
 
 hmcomm.obj: \
