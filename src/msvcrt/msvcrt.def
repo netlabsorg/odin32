@@ -1,4 +1,4 @@
-; $Id: msvcrt.def,v 1.6 1999-11-12 11:38:41 sandervl Exp $
+; $Id: msvcrt.def,v 1.7 1999-11-27 19:52:21 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY MSVCRT INITINSTANCE TERMINSTANCE
@@ -665,7 +665,7 @@ EXPORTS
 ;   __unDName							@136
 ;   __unDNameEx							@137
 ;   __unguarded_readlc_active					@138
-;   __wargv							@139
+    __wargv							@139
 ;   __wgetmainargs						@140
 ;   __winitenv							@141
     _abnormal_termination	= CRTDLL__abnormal_termination	@142
@@ -689,7 +689,7 @@ EXPORTS
     _amsg_exit     		= CRTDLL__amsg_exit		@160
     _assert			= CRTDLL__assert		@161
 ;   _atodbl							@162
-;   _atoi64							@163
+    _atoi64			= _MSVCRT__atoi64		@163
 ;   _atoldbl							@164
     _beep			= CRTDLL__beep			@165
     _beginthread		= CRTDLL__beginthread		@166
@@ -783,21 +783,21 @@ EXPORTS
 ;   _getdllprocaddr						@253
     _getdrive			= CRTDLL__getdrive		@254
     _getdrives			= CRTDLL__getdrives		@255
-;   _getmaxstdio						@256
+    _getmaxstdio		= _MSVCRT__getmaxstdio		@256
     _getmbcp			= _MSVCRT__getmbcp		@257
     _getpid			= CRTDLL__getpid		@258
     _getsystime			= CRTDLL__getsystime		@259
     _getw			= CRTDLL__getw			@260
     _getws			= CRTDLL__getws			@261
     _global_unwind2		= CRTDLL__global_unwind2	@262
-;   _heapadd							@263
+    _heapadd			= _MSVCRT__heapadd		@263
     _heapchk			= CRTDLL__heapchk		@264
     _heapmin			= CRTDLL__heapmin		@265
     _heapset			= CRTDLL__heapset		@266
     _heapwalk			= CRTDLL__heapwalk		@268
     _hypot			= CRTDLL__hypot			@269
-;   _i64toa							@270
-;   _i64tow							@271
+    _i64toa			= _MSVCRT__i64toa		@270
+    _i64tow			= _MSVCRT__i64tow		@271
     _initterm			= _DLL_InitTerm			@272
     _inp			= _MSVCRT__inp			@273
     _inpd			= _MSVCRT__inpd			@274
@@ -956,7 +956,7 @@ EXPORTS
     _seterrormode		= CRTDLL__seterrormode		@423
     _setjmp			= CRTDLL__setjmp		@424
     _setjmp3			= CRTDLL__setjmp		@425 ; Not correct
-;   _setmaxstdio						@426
+    _setmaxstdio		= _MSVCRT__setmaxstdio		@426
 ;   _setmbcp							@427
     _setmode							@428
     _setsystime			= CRTDLL__setsystime		@429
@@ -1002,8 +1002,8 @@ EXPORTS
     _toupper			= CRTDLL__toupper		@469
     _tzname			= CRTDLL__tzname    		@470
     _tzset			= CRTDLL__tzset			@471
-;   _ui64toa							@472
-;   _ui64tow							@473
+;    _ui64toa			= _MSVCRT_ui64toa		@472
+;    _ui64tow			= _MSVCRT_ui64tow		@473				@473
     _ultoa			= NTDLL__ultoa			@474
     _ultow			= _MSVCRT__ultow		@475
     _umask			= _MSVCRT__umask		@476
@@ -1034,7 +1034,7 @@ EXPORTS
 
     _wcsupr			= NTDLL__wcsupr			@500
     _wctime			= _MSVCRT__wctime		@501
-;   _wenviron							@502
+    _wenviron							@502
     _wexecl			= _MSVCRT__wexecl		@503
     _wexecle			= _MSVCRT__wexecle		@504
     _wexeclp			= _MSVCRT__wexeclp		@505
@@ -1047,7 +1047,7 @@ EXPORTS
     _wfindfirst			= _MSVCRT__wfindfirst		@512
 ;   _wfindfirsti64						@513
     _wfindnext			= _MSVCRT__wfindnext		@514
-;   _wfindnexti64						@515
+;    _wfindnexti64		= _MSVCRT__wfindnexti64		@515
     _wfopen			= _MSVCRT__wfopen		@516
     _wfreopen			= _MSVCRT__wfreopen		@517
     _wfsopen			= _MSVCRT__wfsopen		@518
@@ -1063,7 +1063,7 @@ EXPORTS
     _wmktemp			= _MSVCRT__wmktemp		@528
     _wopen			= _MSVCRT__wopen		@529
     _wperror			= _MSVCRT__wperror		@530
-;   _wpgmptr							@531
+    _wpgmptr							@531
     _wpopen			= _MSVCRT__wpopen		@532
     _wputenv			= _MSVCRT__wputenv		@533
     _wremove			= _MSVCRT__wremove		@534
@@ -1083,14 +1083,14 @@ EXPORTS
     _wspawnvpe			= _MSVCRT__wspawnvpe		@548
     _wsplitpath			= _MSVCRT__wsplitpath		@549
     _wstat			= _MSVCRT__wstat		@550
-;   _wstati64							@551
+    _wstati64			= _MSVCRT__wstati64		@551
     _wstrdate			= _MSVCRT__wstrdate		@552
     _wstrtime			= _MSVCRT__wstrtime		@553
     _wsystem			= _MSVCRT__wsystem		@554
     _wtempnam			= _MSVCRT__wtempnam		@555
     _wtmpnam			= _MSVCRT__wtmpnam		@556
     _wtoi			= NTDLL__wtoi			@557
-;   _wtoi64							@558
+    _wtoi64			= _MSVCRT__wtoi64		@558
     _wtol			= NTDLL__wtol			@559
     _wunlink			= _MSVCRT__wunlink 		@560
     _wutime			= _MSVCRT__wutime		@561
