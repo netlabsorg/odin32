@@ -1,4 +1,4 @@
-/* $Id: wsock32.h,v 1.19 2001-10-11 19:24:07 sandervl Exp $ */
+/* $Id: wsock32.h,v 1.20 2001-11-16 16:55:20 sandervl Exp $ */
 
 /* WSOCK32.H--definitions & conversions for Odin's wsock32.dll.
  * Unused/unneeded Microsoft declarations removed.
@@ -15,12 +15,7 @@
 #ifndef _WINSOCK32CONST_
 #define _WINSOCK32CONST_
 
-#include <sys\socket.h>
-#include <sys\ioctl.h>
-#include <netdb.h>
-#include <netinet\in.h>
-#include <netinet\tcp.h>
-#include <nerrno.h>
+#include "socketwrap.h"
 #include <sys\time.h>
 
 #include <odinwrap.h>
