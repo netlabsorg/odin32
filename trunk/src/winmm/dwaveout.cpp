@@ -1,4 +1,4 @@
-/* $Id: dwaveout.cpp,v 1.17 2000-03-03 19:18:46 sandervl Exp $ */
+/* $Id: dwaveout.cpp,v 1.18 2000-03-04 19:55:06 sandervl Exp $ */
 
 /*
  * Wave playback class
@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 #define  OS2_ONLY
-#include "win32type.h"
+#include <win32api.h>
 #include <wprocess.h>
 
 #include "misc.h"
@@ -40,9 +40,6 @@
 #ifndef max
 #define max(a, b) ((a > b) ? a : b)
 #endif
-
-//SvL: 23/09/99: WinPostMsg no longer works, as win32 window handles are no longer PM handles
-BOOL WIN32API PostMessageA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 LONG APIENTRY WaveOutHandler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags);
 

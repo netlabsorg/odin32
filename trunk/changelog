@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.779 2000-03-04 19:37:40 jeroen Exp $ */
+ /* $Id: changelog,v 1.780 2000-03-04 19:50:51 sandervl Exp $ */
 
  2000-03-04: Jeroen van den Horn <J.vandenHorn@fibre.a2000.nl>
         - GLUT32: Added logic to escape from optimizer bug in VACPP
@@ -14,6 +14,19 @@
                  compiler and linker flags, this is allready done!
 
  2000-03-04: Sander van Leeuwen <sandervl@xs4all.nl>
+	- WINMM: Fixed bug in setsockopt for SO_LINGER (options size wasn't 
+                 adjusted)
+	- KERNEL32: Fixed shell dirs (now all created in odin\bin dir)
+                    Partially fixed destruction of loaded dlls in ExitProcess
+                    (TODO: dependencies are not yet right; needs new design)
+		    Added check and fix for DosOpen (ERROR_TOO_MANY_OPEN_FILES)
+                    to hmdevio.cpp
+	- USER32: Pass on keyboard messages if dinput handler returns TRUE
+                  Also send non-client mouse messages to dinput
+                  (TODO: always returns true after calling dinput handler)
+	- OPENGL\GLIDE:
+  	          Added check and fix for DosOpen (ERROR_TOO_MANY_OPEN_FILES)
+                  to hmdevio.cpp (reported by Michal Necasek)
         - WSOCK32: Fixed bug in setsockopt for SO_LINGER (options size wasn't
                    adjusted)
 
