@@ -1,4 +1,4 @@
-/* $Id: wsock32.h,v 1.3 1999-06-10 16:11:08 phaller Exp $ */
+/* $Id: wsock32.h,v 1.4 1999-08-16 20:18:40 phaller Exp $ */
 
 /* WSOCK32.H--definitions & conversions for Odin's wsock32.dll.
  * Unused/unneeded Microsoft declarations removed.
@@ -15,31 +15,29 @@
 #ifndef _WINSOCKAPI_
 #define _WINSOCKAPI_
 
-#define FAR
-
-#ifndef IN
-#define IN
-#endif
-
 
 #ifdef MAKELONG
-#undef MAKELONG
+#  undef MAKELONG
 #endif
+
 #ifdef MAKEWORD
-#undef MAKEWORD
+#  undef MAKEWORD
 #endif
 
 #ifdef LOBYTE
-#undef LOBYTE
+#  undef LOBYTE
 #endif
+
 #ifdef LOWORD
-#undef LOWORD
+#  undef LOWORD
 #endif
+
 #ifdef HIBYTE
-#undef HIBYTE
+#  undef HIBYTE
 #endif
+
 #ifdef HIWORD
-#undef HIWORD
+#  undef HIWORD
 #endif
 
 #define MAKEWORD(a, b)      ((WORD)(((BYTE)(a)) | ((WORD)((BYTE)(b))) << 8))
@@ -60,9 +58,9 @@ typedef unsigned char   u_char;
 typedef unsigned short  u_short;
 typedef unsigned int    u_int;
 typedef unsigned long   u_long;
-//typedef int (FAR WINAPI *FARPROC)();
+  typedef int ( WIN32API *PROC)();
 #else
-//typedef int (* FAR WINAPI FARPROC)();
+  typedef int (*  WIN32API PROC)();
 #endif
 
 //typedef unsigned short  WORD;
@@ -112,40 +110,43 @@ typedef struct Wfd_set {
         SOCKET  fd_array[FD_SETSIZE];   /* an array of SOCKETs */
 } Wfd_set;
 
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-extern int PASCAL FAR __WSAFDIsSet(SOCKET, Wfd_set FAR *);
+extern int PASCAL  __WSAFDIsSet(SOCKET, Wfd_set  *);
 
 #ifdef __cplusplus
 }
 #endif
 
-
+/*
 #define FD_CLR(fd, set) do { \
     u_int __i; \
-    for (__i = 0; __i < ((Wfd_set FAR *)(set))->fd_count ; __i++) { \
-        if (((Wfd_set FAR *)(set))->fd_array[__i] == fd) { \
-            while (__i < ((Wfd_set FAR *)(set))->fd_count-1) { \
-                ((Wfd_set FAR *)(set))->fd_array[__i] = \
-                    ((Wfd_set FAR *)(set))->fd_array[__i+1]; \
+    for (__i = 0; __i < ((Wfd_set  *)(set))->fd_count ; __i++) { \
+        if (((Wfd_set  *)(set))->fd_array[__i] == fd) { \
+            while (__i < ((Wfd_set  *)(set))->fd_count-1) { \
+                ((Wfd_set  *)(set))->fd_array[__i] = \
+                    ((Wfd_set  *)(set))->fd_array[__i+1]; \
                 __i++; \
             } \
-            ((Wfd_set FAR *)(set))->fd_count--; \
+            ((Wfd_set  *)(set))->fd_count--; \
             break; \
         } \
     } \
 } while(0)
 
 #define FD_SET(fd, set) do { \
-    if (((Wfd_set FAR *)(set))->fd_count < FD_SETSIZE) \
-        ((Wfd_set FAR *)(set))->fd_array[((Wfd_set FAR *)(set))->fd_count++]=(fd);\
+    if (((Wfd_set  *)(set))->fd_count < FD_SETSIZE) \
+        ((Wfd_set  *)(set))->fd_array[((Wfd_set  *)(set))->fd_count++]=(fd);\
 } while(0)
 
-#define FD_ZERO(set) (((Wfd_set FAR *)(set))->fd_count=0)
+#define FD_ZERO(set) (((Wfd_set  *)(set))->fd_count=0)
 
-#define FD_ISSET(fd, set) __WSAFDIsSet((SOCKET)(fd), (Wfd_set FAR *)(set))
+#define FD_ISSET(fd, set) __WSAFDIsSet((SOCKET)(fd), (Wfd_set  *)(set))
+*/
 
 /*
  * Structure used in select() call, taken from the BSD file sys/time.h.
@@ -207,11 +208,11 @@ struct Wtimeval {
  */
 
 struct  Whostent {
-        char    FAR * h_name;           /* official name of host */
-        char    FAR * FAR * h_aliases;  /* alias list */
+        char     * h_name;           /* official name of host */
+        char     *  * h_aliases;  /* alias list */
         short   h_addrtype;             /* host address type */
         short   h_length;               /* length of address */
-        char    FAR * FAR * h_addr_list; /* list of addresses */
+        char     *  * h_addr_list; /* list of addresses */
 #define h_addr  h_addr_list[0]          /* address, for backward compat */
 };
 
@@ -220,22 +221,22 @@ struct  Whostent {
  * fits in 32 bits.
  */
 struct  Wnetent {
-        char    FAR * n_name;           /* official name of net */
-        char    FAR * FAR * n_aliases;  /* alias list */
+        char     * n_name;           /* official name of net */
+        char     *  * n_aliases;  /* alias list */
         short   n_addrtype;             /* net address type */
         u_long  n_net;                  /* network # */
 };
 
 struct  Wservent {
-        char    FAR * s_name;           /* official service name */
-        char    FAR * FAR * s_aliases;  /* alias list */
+        char     * s_name;           /* official service name */
+        char     *  * s_aliases;  /* alias list */
         short   s_port;                 /* port # */
-        char    FAR * s_proto;          /* protocol to use */
+        char     * s_proto;          /* protocol to use */
 };
 
 struct  Wprotoent {
-        char    FAR * p_name;           /* official protocol name */
-        char    FAR * FAR * p_aliases;  /* alias list */
+        char     * p_name;           /* official protocol name */
+        char     *  * p_aliases;  /* alias list */
         short   p_proto;                /* protocol # */
 };
 
@@ -383,10 +384,10 @@ typedef struct WSAData {
         char                    szSystemStatus[WSASYS_STATUS_LEN+1];
         unsigned short          iMaxSockets;
         unsigned short          iMaxUdpDg;
-        char FAR *              lpVendorInfo;
+        char  *              lpVendorInfo;
 } WSADATA;
 
-typedef WSADATA FAR *LPWSADATA;
+typedef WSADATA  *LPWSADATA;
 
 /*
  * Options for use with [gs]etsockopt at the IP level.
@@ -665,127 +666,59 @@ struct  Wlinger {
 extern "C" {
 #endif
 
-SOCKET WIN32API FAR OS2accept (SOCKET s, struct sockaddr *addr,
-                          int *addrlen);
-
-int WIN32API FAR OS2bind (SOCKET s, const struct sockaddr FAR *addr, int namelen);
-
-int WIN32API FAR OS2closesocket (SOCKET s);
-
-int WIN32API FAR OS2connect (SOCKET s, const struct sockaddr FAR *name, int namelen);
-
-int WIN32API FAR OS2ioctlsocket (SOCKET s, long cmd, u_long FAR *argp);
-
-int WIN32API FAR OS2getpeername (SOCKET s, struct sockaddr FAR *name,
-                            int FAR * namelen);
-
-int WIN32API FAR OS2getsockname (SOCKET s, struct sockaddr FAR *name,
-                            int FAR * namelen);
-
-int WIN32API FAR OS2getsockopt (SOCKET s, int level, int optname,
-                           char FAR * optval, int FAR *optlen);
-
-u_long WIN32API FAR OS2htonl (u_long hostlong);
-
-u_short WIN32API FAR OS2htons (u_short hostshort);
-
-unsigned long WIN32API FAR OS2inet_addr (const char FAR * cp);
-
-char FAR * WIN32API FAR OS2inet_ntoa (struct in_addr in);
-
-int WIN32API FAR OS2listen (SOCKET s, int backlog);
-
-u_long WIN32API FAR OS2ntohl (u_long netlong);
-
-u_short WIN32API FAR OS2ntohs (u_short netshort);
-
-int WIN32API FAR OS2recv (SOCKET s, char FAR * buf, int len, int flags);
-
-int WIN32API FAR OS2recvfrom (SOCKET s, char FAR * buf, int len, int flags,
-                         struct sockaddr FAR *from, int FAR * fromlen);
-
-int WIN32API FAR OS2select (int nfds, Wfd_set FAR *readfds, Wfd_set FAR *writefds,
-                       Wfd_set FAR *exceptfds, const struct Wtimeval FAR *timeout);
-
-int WIN32API FAR OS2send (SOCKET s, const char FAR * buf, int len, int flags);
-
-int WIN32API FAR OS2sendto (SOCKET s, const char FAR * buf, int len, int flags,
-                       const struct sockaddr FAR *to, int tolen);
-
-int WIN32API FAR OS2setsockopt (SOCKET s, int level, int optname,
-                           const char FAR * optval, int optlen);
-
-int WIN32API FAR OS2shutdown (SOCKET s, int how);
-
-SOCKET WIN32API FAR OS2socket (int af, int type, int protocol);
+SOCKET  WIN32API  OS2accept (SOCKET s, struct sockaddr *addr, int *addrlen);
+int     WIN32API  OS2bind (SOCKET s, const struct sockaddr  *addr, int namelen);
+int     WIN32API  OS2closesocket (SOCKET s);
+int     WIN32API  OS2connect (SOCKET s, const struct sockaddr  *name, int namelen);
+int     WIN32API  OS2ioctlsocket (SOCKET s, long cmd, u_long  *argp);
+int     WIN32API  OS2getpeername (SOCKET s, struct sockaddr  *name,  int  * namelen);
+int     WIN32API  OS2getsockname (SOCKET s, struct sockaddr  *name, int  * namelen);
+int     WIN32API  OS2getsockopt (SOCKET s, int level, int optname, char  * optval, int  *optlen);
+u_long  WIN32API  OS2htonl (u_long hostlong);
+u_short WIN32API  OS2htons (u_short hostshort);
+u_long  WIN32API  OS2inet_addr (const char  * cp);
+char  * WIN32API  OS2inet_ntoa (struct in_addr in);
+int     WIN32API  OS2listen (SOCKET s, int backlog);
+u_long  WIN32API  OS2ntohl (u_long netlong);
+u_short WIN32API  OS2ntohs (u_short netshort);
+int     WIN32API  OS2recv (SOCKET s, char  * buf, int len, int flags);
+int     WIN32API  OS2recvfrom (SOCKET s, char  * buf, int len, int flags, struct sockaddr  *from, int  * fromlen);
+int     WIN32API  OS2select (int nfds, Wfd_set  *readfds, Wfd_set  *writefds, Wfd_set  *exceptfds, const struct Wtimeval  *timeout);
+int     WIN32API  OS2send (SOCKET s, const char  * buf, int len, int flags);
+int     WIN32API  OS2sendto (SOCKET s, const char  * buf, int len, int flags, const struct sockaddr  *to, int tolen);
+int     WIN32API  OS2setsockopt (SOCKET s, int level, int optname, const char  * optval, int optlen);
+int     WIN32API  OS2shutdown (SOCKET s, int how);
+SOCKET  WIN32API  OS2socket (int af, int type, int protocol);
 
 /* Database function prototypes */
-
-struct Whostent FAR * WIN32API FAR OS2gethostbyaddr(const char FAR * addr,
-                                              int len, int type);
-
-struct Whostent FAR * WIN32API FAR OS2gethostbyname(const char FAR * name);
-
-int WIN32API FAR OS2gethostname (char FAR * name, int namelen);
-
-struct Wservent FAR * WIN32API FAR OS2getservbyport(int port, const char FAR * proto);
-
-struct Wservent FAR * WIN32API FAR OS2getservbyname(const char FAR * name,
-                                              const char FAR * proto);
-
-struct Wprotoent FAR * WIN32API FAR OS2getprotobynumber(int proto);
-
-struct Wprotoent FAR * WIN32API FAR OS2getprotobyname(const char FAR * name);
+struct Whostent  *  WIN32API OS2gethostbyaddr(const char  * addr, int len, int type);
+struct Whostent  *  WIN32API OS2gethostbyname(const char  * name);
+int                 WIN32API OS2gethostname (char  * name, int namelen);
+struct Wservent  *  WIN32API OS2getservbyport(int port, const char  * proto);
+struct Wservent  *  WIN32API OS2getservbyname(const char  * name, const char  * proto);
+struct Wprotoent  * WIN32API OS2getprotobynumber(int proto);
+struct Wprotoent  * WIN32API OS2getprotobyname(const char  * name);
 
 /* Microsoft Windows Extension function prototypes */
+int    WIN32API  OS2WSAStartup(WORD wVersionRequired, LPWSADATA lpWSAData);
+int    WIN32API  OS2WSACleanup(void);
+void   WIN32API  OS2WSASetLastError(int iError);
+int    WIN32API  OS2WSAGetLastError(void);
+BOOL   WIN32API  OS2WSAIsBlocking(void);
+int    WIN32API  OS2WSAUnhookBlockingHook(void);
+PROC   WIN32API  OS2WSASetBlockingHook(PROC lpBlockFunc);
+int    WIN32API  OS2WSACancelBlockingCall(void);
+HANDLE WIN32API  OS2WSAAsyncGetServByName(HWND hWnd, u_int wMsg, const char  * name, const char  * proto, char  * buf, int buflen);
+HANDLE WIN32API  OS2WSAAsyncGetServByPort(HWND hWnd, u_int wMsg, int port, const char  * proto, char  * buf, int buflen);
+HANDLE WIN32API  OS2WSAAsyncGetProtoByName(HWND hWnd, u_int wMsg, const char  * name, char  * buf, int buflen);
+HANDLE WIN32API  OS2WSAAsyncGetProtoByNumber(HWND hWnd, u_int wMsg, int number, char  * buf, int buflen);
+HANDLE WIN32API  OS2WSAAsyncGetHostByName(HWND hWnd, u_int wMsg, const char  * name, char  * buf, int buflen);
+HANDLE WIN32API  OS2WSAAsyncGetHostByAddr(HWND hWnd, u_int wMsg, const char  * addr, int len, int type, char  * buf, int buflen);
+int    WIN32API  OS2WSACancelAsyncRequest(HANDLE hAsyncTaskHandle);
+int    WIN32API  OS2WSAAsyncSelect(SOCKET s, HWND hWnd, u_int wMsg, long lEvent);
+int    WIN32API  OS2WSARecvEx (SOCKET s, char  * buf, int len, int  *flags);
 
-int WIN32API FAR OS2WSAStartup(WORD wVersionRequired, LPWSADATA lpWSAData);
 
-int WIN32API FAR OS2WSACleanup(void);
-
-void WIN32API FAR OS2WSASetLastError(int iError);
-
-int WIN32API FAR OS2WSAGetLastError(void);
-
-BOOL WIN32API FAR OS2WSAIsBlocking(void);
-
-int WIN32API FAR OS2WSAUnhookBlockingHook(void);
-
-FARPROC WIN32API FAR OS2WSASetBlockingHook(FARPROC lpBlockFunc);
-
-int WIN32API FAR OS2WSACancelBlockingCall(void);
-
-HANDLE WIN32API FAR OS2WSAAsyncGetServByName(HWND hWnd, u_int wMsg,
-                                        const char FAR * name,
-                                        const char FAR * proto,
-                                        char FAR * buf, int buflen);
-
-HANDLE WIN32API FAR OS2WSAAsyncGetServByPort(HWND hWnd, u_int wMsg, int port,
-                                        const char FAR * proto, char FAR * buf,
-                                        int buflen);
-
-HANDLE WIN32API FAR OS2WSAAsyncGetProtoByName(HWND hWnd, u_int wMsg,
-                                         const char FAR * name, char FAR * buf,
-                                         int buflen);
-
-HANDLE WIN32API FAR OS2WSAAsyncGetProtoByNumber(HWND hWnd, u_int wMsg,
-                                           int number, char FAR * buf,
-                                           int buflen);
-
-HANDLE WIN32API FAR OS2WSAAsyncGetHostByName(HWND hWnd, u_int wMsg,
-                                        const char FAR * name, char FAR * buf,
-                                        int buflen);
-
-HANDLE WIN32API FAR OS2WSAAsyncGetHostByAddr(HWND hWnd, u_int wMsg,
-                                        const char FAR * addr, int len, int type,
-                                        char FAR * buf, int buflen);
-
-int WIN32API FAR OS2WSACancelAsyncRequest(HANDLE hAsyncTaskHandle);
-
-int WIN32API FAR OS2WSAAsyncSelect(SOCKET s, HWND hWnd, u_int wMsg,
-                               long lEvent);
-
-int WIN32API FAR OS2WSARecvEx (SOCKET s, char FAR * buf, int len, int FAR *flags);
 
 typedef struct _TRANSMIT_FILE_BUFFERS {
     PVOID Head;
@@ -803,18 +736,13 @@ typedef struct _OVERLAPPED {
 } OVERLAPPED, *LPOVERLAPPED;
 
 
-
-BOOL
-WIN32API FAR
-OS2TransmitFile (
-    IN SOCKET hSocket,
-    IN HANDLE hFile,
-    IN DWORD nNumberOfBytesToWrite,
-    IN DWORD nNumberOfBytesPerSend,
-    IN LPOVERLAPPED lpOverlapped,
-    IN LPTRANSMIT_FILE_BUFFERS lpTransmitBuffers,
-    IN DWORD dwReserved
-    );
+BOOL WIN32API OS2TransmitFile (SOCKET                  hSocket,
+                               HANDLE                  hFile,
+                               DWORD                   nNumberOfBytesToWrite,
+                               DWORD                   nNumberOfBytesPerSend,
+                               LPOVERLAPPED            lpOverlapped,
+                               LPTRANSMIT_FILE_BUFFERS lpTransmitBuffers,
+                               DWORD                   dwReserved);
 
 #ifdef __cplusplus
 }
@@ -822,39 +750,39 @@ OS2TransmitFile (
 
 typedef struct sockaddr SOCKADDR;
 typedef struct sockaddr *PSOCKADDR;
-typedef struct sockaddr FAR *LPSOCKADDR;
+typedef struct sockaddr *LPSOCKADDR;
 
 typedef struct sockaddr_in SOCKADDR_IN;
 typedef struct sockaddr_in *PSOCKADDR_IN;
-typedef struct sockaddr_in FAR *LPSOCKADDR_IN;
+typedef struct sockaddr_in *LPSOCKADDR_IN;
 
 typedef struct linger LINGER;
 typedef struct linger *PLINGER;
-typedef struct linger FAR *LPLINGER;
+typedef struct linger *LPLINGER;
 
 typedef struct in_addr IN_ADDR;
 typedef struct in_addr *PIN_ADDR;
-typedef struct in_addr FAR *LPIN_ADDR;
+typedef struct in_addr *LPIN_ADDR;
 
 typedef struct Wfd_set WFD_SET;
 typedef struct Wfd_set *PWFD_SET;
-typedef struct Wfd_set FAR *LPWFD_SET;
+typedef struct Wfd_set *LPWFD_SET;
 
 typedef struct Whostent WHOSTENT;
 typedef struct Whostent *PWHOSTENT;
-typedef struct Whostent FAR *LPWHOSTENT;
+typedef struct Whostent *LPWHOSTENT;
 
 typedef struct Wservent WSERVENT;
 typedef struct Wservent *PWSERVENT;
-typedef struct Wservent FAR *LPWSERVENT;
+typedef struct Wservent *LPWSERVENT;
 
 typedef struct Wprotoent WPROTOENT;
 typedef struct Wprotoent *PWPROTOENT;
-typedef struct Wprotoent FAR *LPWPROTOENT;
+typedef struct Wprotoent *LPWPROTOENT;
 
 typedef struct Wtimeval WTIMEVAL;
 typedef struct Wtimeval *PWTIMEVAL;
-typedef struct Wtimeval FAR *LPWTIMEVAL;
+typedef struct Wtimeval *LPWTIMEVAL;
 
 /*
  * Windows message parameter composition and decomposition

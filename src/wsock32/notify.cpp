@@ -1,11 +1,9 @@
-/* $Id: notify.cpp,v 1.2 1999-06-10 16:11:08 phaller Exp $ */
+/* $Id: notify.cpp,v 1.3 1999-08-16 20:18:39 phaller Exp $ */
 
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
- */
-/*
  * Winsock code
  *
  * Copyright 1998 Vince Vielhaber
@@ -13,9 +11,19 @@
  */
 
 
+/*****************************************************************************
+ * Includes                                                                  *
+ *****************************************************************************/
+
 #include <os2win.h>
 //#include <wsock32.h>
-#include "misc.h"
+#include <misc.h>
+#include <odinwrap.h>
+
+
+/*****************************************************************************
+ * Structures                                                                *
+ *****************************************************************************/
 
 typedef unsigned int    u_int;
 typedef u_int           SOCKET;
@@ -36,10 +44,15 @@ typedef struct AsyncStatus {
 
 
 
+/*****************************************************************************
+ * Macros                                                                    *
+ *****************************************************************************/
+
 /*
  * WSAMAKESELECTREPLY is intended for use by the Windows Sockets implementation
  * when constructing the response to WSAAsyncSelect().
  */
+
 //#define OS2WSAMAKESELECTREPLY(event,error)     MAKELONG(event,error)
 #ifdef MAKELONG
 #undef MAKELONG
@@ -47,10 +60,13 @@ typedef struct AsyncStatus {
 #define MAKELONG(a, b)      ((LONG)(((WORD)(a)) | ((DWORD)((WORD)(b))) << 16))
 #define OS2WSAMAKESELECTREPLY(event,error)     MAKELONG(event,error)
 
+
+
+
 int Notify(AsyncStatus *as, int event)
 {
-int rc;
-    
+  int rc;
+
 #ifdef DEBUG
     WriteLog("WSOCK32: Open32 Notifying %x, %x, %d\n",
          (HWND)as->hwnd,as->msg,(int)as->socket);
@@ -77,5 +93,6 @@ int rc;
 return rc;
 
 }
+
 
 
