@@ -78,6 +78,11 @@ extern WCHAR WINAPI toupperW( WCHAR ch );
 
 extern unsigned short get_char_typeW( WCHAR ch );
 
+static inline int is_dbcs_leadbyte( const union cptable *table, unsigned char ch )
+{
+    return (table->info.char_size == 2) && (table->dbcs.cp2uni_leadbytes[ch]);
+}
+
 inline static int isdigitW( WCHAR wc )
 {
     return get_char_typeW(wc) & C1_DIGIT;
