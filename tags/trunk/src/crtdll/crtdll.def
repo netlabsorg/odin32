@@ -1,4 +1,4 @@
-; $Id: crtdll32.def,v 1.1 2001-07-08 11:00:28 sandervl Exp $
+; $Id: crtdll.def,v 1.19 2001-07-09 08:08:00 bird Exp $
 
 ;
 ; Based on Windows 98 (Build 2222): CRTDLL.DLL
