@@ -1,4 +1,4 @@
-/* $Id: win32wnd.cpp,v 1.6 1999-07-17 11:52:23 sandervl Exp $ */
+/* $Id: win32wnd.cpp,v 1.7 1999-07-17 15:23:38 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -71,7 +71,6 @@ void Win32Window::Init()
   OS2HwndMenu      = 0;
   Win32Hwnd        = 0;
 
-  //CB: what does this code? Win32Hwnd is always 0!
   if(HMHandleAllocate(&Win32Hwnd, (ULONG)this) != 0)
   {
         dprintf(("Win32Window::Init HMHandleAllocate failed!!"));
@@ -334,9 +333,9 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 
   OS2Hwnd = OSLibWinCreateWindow((getParent()) ? getParent()->getOS2WindowHandle() : 0,
                                  dwOSWinStyle, dwOSFrameStyle, (char *)cs->lpszName,
-                                 cs->x, cs->y, cs->cx, cs->cy,
                                  (owner) ? owner->getOS2WindowHandle() : 0,
-                                 (hwndLinkAfter == HWND_BOTTOM) ? TRUE : FALSE, &OS2HwndFrame);
+				 (hwndLinkAfter == HWND_BOTTOM) ? TRUE : FALSE,
+                                 &OS2HwndFrame);
 
   if(OS2Hwnd == 0) {
         dprintf(("Window creation failed!!"));
@@ -350,6 +349,7 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         dprintf(("WM_CREATE: WinSetWindowULong2 %X failed!!", OS2Hwnd));
         return FALSE;
   }
+#if 0
   if(OS2Hwnd != OS2HwndFrame) {
   	if(OSLibWinSetWindowULong(OS2HwndFrame, OFFSET_WIN32WNDPTR, (ULONG)this) == FALSE) {
         	dprintf(("WM_CREATE: WinSetWindowULong %X failed!!", OS2HwndFrame));
@@ -360,6 +360,7 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         	return FALSE;
   	}
   }
+#endif
   /* Set the window menu */
   if ((dwStyle & (WS_CAPTION | WS_CHILD)) == WS_CAPTION )
   {
@@ -388,52 +389,10 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 	dprintf(("Sending WM_CREATE"));
         if( (sendMessage(WM_CREATE, 0, (LPARAM)cs )) != -1 )
         {
-            /* Send the size messages */
-	    dprintf(("Sent WM_CREATE"));
-
-            if (!(flags & WIN_NEED_SIZE))
-            {
-                /* send it anyway */
-	        if (((rectClient.right-rectClient.left) <0)
-		    ||((rectClient.bottom-rectClient.top)<0))
-		  dprintf(("sending bogus WM_SIZE message 0x%08lx\n",
-			MAKELONG(rectClient.right-rectClient.left,
-				 rectClient.bottom-rectClient.top)));
-                SendMessageA(WM_SIZE, SIZE_RESTORED,
-                                MAKELONG(rectClient.right-rectClient.left,
-                                         rectClient.bottom-rectClient.top));
-                SendMessageA(WM_MOVE, 0,
-                                MAKELONG( rectClient.left,
-                                          rectClient.top ) );
-            }
-
-#if 0
-            /* Show the window, maximizing or minimizing if needed */
-
-            if (dwStyle & (WS_MINIMIZE | WS_MAXIMIZE))
-            {
-		RECT16 newPos;
-		UINT16 swFlag = (dwStyle & WS_MINIMIZE) ? SW_MINIMIZE : SW_MAXIMIZE;
-                dwStyle &= ~(WS_MAXIMIZE | WS_MINIMIZE);
-		WINPOS_MinMaximize(swFlag, &newPos );
-                swFlag = ((dwStyle & WS_CHILD) || GetActiveWindow())
-                    ? SWP_NOACTIVATE | SWP_NOZORDER | SWP_FRAMECHANGED
-                    : SWP_NOZORDER | SWP_FRAMECHANGED;
-                SetWindowPos(0, newPos.left, newPos.top,
-                             newPos.right, newPos.bottom, swFlag );
-            }
-#endif
-
-	    if( dwStyle & WS_CHILD && !(dwExStyle & WS_EX_NOPARENTNOTIFY) )
-	    {
-		/* Notify the parent window only */
-
-		NotifyParent(WM_CREATE, 0, 0);
-                if( !IsWindow() )
-                {
-                    return FALSE;
-	        }
-	    }
+            SetWindowPos(HWND_TOP, rectClient.left, rectClient.top,
+			 rectClient.right-rectClient.left, 
+			 rectClient.bottom-rectClient.top,
+			 SWP_NOACTIVATE);
 
             if (cs->style & WS_VISIBLE) ShowWindow( sw );
 
@@ -801,15 +760,15 @@ LRESULT Win32Window::SendMessageA(ULONG Msg, WPARAM wParam, LPARAM lParam)
         {
                 if(win32wndproc(getWindowHandle(), WM_NCCREATE, 0, lParam) == 0) {
                         dprintf(("WM_NCCREATE returned FALSE\n"));
-                        return(0); //don't create window
+                        return(-1); //don't create window
                 }
-                if(win32wndproc(getWindowHandle(), WM_CREATE, 0, lParam) == 0) {
-                        dprintf(("WM_CREATE returned FALSE\n"));
-                        return(0); //don't create window
+                if(win32wndproc(getWindowHandle(), WM_CREATE, 0, lParam) == -1) {
+                        dprintf(("WM_CREATE returned -1\n"));
+                        return(-1); //don't create window
                 }
                 NotifyParent(Msg, wParam, lParam);
 
-                return(1);
+                return(0);
         }
         case WM_LBUTTONDOWN:
         case WM_MBUTTONDOWN:
@@ -951,34 +910,37 @@ BOOL Win32Window::ShowWindow(ULONG nCmdShow)
   {
 	case SW_SHOW:
 	case SW_SHOWDEFAULT: //todo
-		showstate = SWPOS_SHOW;
+		showstate = SWPOS_SHOW | SWPOS_ACTIVATE;
 		break;
 	case SW_HIDE:
 		showstate = SWPOS_HIDE;
+		break;
+	case SW_RESTORE:
+		showstate = SWPOS_RESTORE | SWPOS_SHOW | SWPOS_ACTIVATE;
 		break;
 	case SW_MINIMIZE:
 		showstate = SWPOS_MINIMIZE;
 		break;
 	case SW_SHOWMAXIMIZED:
-		showstate = SWPOS_MAXIMIZE | SWPOS_SHOW;
+		showstate = SWPOS_MAXIMIZE | SWPOS_SHOW | SWPOS_ACTIVATE;
 		break;
 	case SW_SHOWMINIMIZED:
+		showstate = SWPOS_MINIMIZE | SWPOS_SHOW | SWPOS_ACTIVATE;
+		break;
+	case SW_SHOWMINNOACTIVE:
 		showstate = SWPOS_MINIMIZE | SWPOS_SHOW;
 		break;
-	case SW_SHOWMINNOACTIVE:  //TODO
-		showstate = SWPOS_MINIMIZE | SWPOS_SHOW;
-		break;
-	case SW_SHOWNA: //TODO
+	case SW_SHOWNA:
 		showstate = SWPOS_SHOW;
 		break;
-	case SW_SHOWNOACTIVATE:  //TODO
+	case SW_SHOWNOACTIVATE:
 		showstate = SWPOS_SHOW;
 		break;
 	case SW_SHOWNORMAL:
-		showstate = SWPOS_RESTORE;
+		showstate = SWPOS_RESTORE | SWPOS_ACTIVATE | SWPOS_SHOW;
 		break;
   }
-  return OSLibWinShowWindow(OS2HwndFrame, showstate);
+  return OSLibWinShowWindow(OS2Hwnd, showstate);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1030,7 +992,7 @@ BOOL Win32Window::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, int c
   if(fuFlags & SWP_SHOWWINDOW)
 	setstate |= SWPOS_SHOW;
 
-  return OSLibWinSetWindowPos(OS2HwndFrame, hwndInsertAfter, x, y, cx, cy, setstate);
+  return OSLibWinSetWindowPos(OS2Hwnd, hwndInsertAfter, x, y, cx, cy, setstate);
 }
 //******************************************************************************
 //Also destroys all the child windows (destroy parent, destroy children)
@@ -1109,7 +1071,7 @@ BOOL Win32Window::UpdateWindow()
 //******************************************************************************
 BOOL Win32Window::IsIconic()
 {
-  return OSLibWinIsIconic(OS2HwndFrame);
+  return OSLibWinIsIconic(OS2Hwnd);
 }
 //******************************************************************************
 //TODO: not complete nor correct (distinction between top-level, top-most & child windows)
@@ -1151,7 +1113,7 @@ HWND Win32Window::GetWindow(UINT uCmd)
 		}
 		else 	return 0;
   }
-  hwndRelated = OSLibWinQueryWindow(OS2HwndFrame, getcmd);
+  hwndRelated = OSLibWinQueryWindow(OS2Hwnd, getcmd);
   if(hwndRelated) 
   {
 	win32wnd = (Win32Window *)OSLibWinGetWindowULong(hwndRelated, OFFSET_WIN32WNDPTR);
@@ -1167,14 +1129,14 @@ HWND Win32Window::GetWindow(UINT uCmd)
 //******************************************************************************
 HWND Win32Window::SetActiveWindow()
 {
-  return OSLibWinSetActiveWindow(OS2HwndFrame);
+  return OSLibWinSetActiveWindow(OS2Hwnd);
 }
 //******************************************************************************
 //WM_ENABLE is sent to hwnd, but not to it's children (as it should be)
 //******************************************************************************
 BOOL Win32Window::EnableWindow(BOOL fEnable)
 {
-  return OSLibWinEnableWindow(OS2HwndFrame, fEnable);
+  return OSLibWinEnableWindow(OS2Hwnd, fEnable);
 }
 //******************************************************************************
 //******************************************************************************
