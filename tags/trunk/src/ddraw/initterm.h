@@ -1,4 +1,4 @@
-/* $Id: initterm.h,v 1.1 1999-10-26 17:52:32 sandervl Exp $ */
+/* $Id: initterm.h,v 1.2 2001-03-18 21:44:45 mike Exp $ */
 /*
  * KERNEL32 DLL entry point header
  *

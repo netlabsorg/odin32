@@ -1,4 +1,4 @@
-/* $Id: OS2DDRAW.H,v 1.13 2000-08-31 17:57:10 sandervl Exp $ */
+/* $Id: OS2DDRAW.H,v 1.14 2001-03-18 21:44:42 mike Exp $ */
 
 /*
  * DX Draw base class definition
@@ -25,8 +25,14 @@
 #undef THIS
 #define THIS VOID*
 
-#define MAX_FOURCC_CODES	3
+#define MAX_FOURCC_CODES        3
 
+#define ODINDDRAW_SECTION       "DirectDraw"
+
+// This variable is global, mixing windowed and FS DDraw doesn't
+// make much sense	
+extern BOOL bUseFSDD;
+					
 class OS2IDirectDraw
 {
   public:
@@ -90,6 +96,9 @@ class OS2IDirectDraw
     int     screenwidth, screenheight, screenbpp;
     BOOL    PrimaryExists;
     BOOL    bScale;
+    int     oldwidth, oldheight, oldbpp, oldscanlines;
+    BOOL    bInFullScreen;
+
 
    // Linked list management
               OS2IDirectDraw* next;                   // Next OS2IDirectDraw
@@ -145,7 +154,7 @@ class OS2IDirectDraw
 
 };
 
-#define OFFSET_D3DVTABLE	(LONG)(&((OS2IDirectDraw *)NULL)->lpVtbl3D)
+#define OFFSET_D3DVTABLE        (LONG)(&((OS2IDirectDraw *)NULL)->lpVtbl3D)
 #define DDraw3D_GetThisPtr(a)   (OS2IDirectDraw *)((ULONG)a-OFFSET_D3DVTABLE)
 
 //******************************************************************************

@@ -1,9 +1,9 @@
-/* $Id: ddraw.CPP,v 1.16 2001-03-09 22:48:47 mike Exp $ */
+/* $Id: ddraw.CPP,v 1.17 2001-03-18 21:44:44 mike Exp $ */
 
 /*
  * DXDraw DLL implementaion
  *
- * Copyright 1998 Sander va Leeuwen
+ * Copyright 1998 Sander van Leeuwen
  * Copyright 1999 Markus Montkowski
  *
  * WARNING: DirectDrawCreate defaults to ddraw v4 if lpGUID == NULL!!
@@ -15,7 +15,6 @@
 
 #include <memory.h>
 #include <stdio.h>
-
 #define INITGUID
 #define ICOM_CINTERFACE 1
 #define CINTERFACE
@@ -28,8 +27,6 @@
 
 #include <misc.h>
 
-extern "C" {
-
 //******************************************************************************
 //******************************************************************************
 HRESULT WIN32API OS2DirectDrawCreate( GUID FAR *lpGUID,
@@ -39,7 +36,7 @@ HRESULT WIN32API OS2DirectDrawCreate( GUID FAR *lpGUID,
   OS2IDirectDraw *newdraw;
   HRESULT         rc;
 
-  dprintf(("DDRAW: DirectDrawCreate %X %X %X\n", lpGUID, lplpDD, pUnkOuter));
+  dprintf(("DDRAW: DirectDrawCreate %X %X %X", lpGUID, lplpDD, pUnkOuter));
 
   newdraw = new OS2IDirectDraw(lpGUID);
 
@@ -54,11 +51,12 @@ HRESULT WIN32API OS2DirectDrawCreate( GUID FAR *lpGUID,
     rc = newdraw->GetLastError();
     if(rc != DD_OK)
     {
-         *lplpDD = NULL;
+      *lplpDD = NULL;
 
-         delete newdraw;
+      delete newdraw;
     }
-    else *lplpDD = (LPDIRECTDRAW)newdraw;
+    else
+      *lplpDD = (LPDIRECTDRAW)newdraw;
   }
   return(rc);
 }
@@ -72,29 +70,29 @@ HRESULT WIN32API DirectDrawCreateEx(LPGUID lpGUID, LPVOID* lplpDD, REFIID iid, L
 }
 
 //******************************************************************************
-//typedef BOOL (FAR PASCAL * LPDDENUMCALLBACKA)(GUID FAR *, LPSTR, LPSTR, LPVOID);
+typedef BOOL (FAR PASCAL * LPDDENUMCALLBACKA)(GUID FAR *, LPSTR, LPSTR, LPVOID);
 //******************************************************************************
 HRESULT WIN32API OS2DirectDrawEnumerateA(LPDDENUMCALLBACKA lpCallback,
                LPVOID lpContext)
 {
-  dprintf(("DDRAW: DirectDrawEnumerateA\n Callback for DIVE\n"));
+  dprintf(("DDRAW: DirectDrawEnumerateA\n Callback for DIVE"));
   //call it twice for the DirectDraw & Direct3D classes
-  if(lpCallback(NULL, "DIVE DirectDraw for OS/2",
-                "DirectDraw/2 v0.2", lpContext) == DDENUMRET_CANCEL)
+ if(lpCallback(NULL, "DIVE DirectDraw for OS/2",
+                "DirectDraw/2 v0.4", lpContext) == DDENUMRET_CANCEL)
   {
-    dprintf(("DDRAW: Cancel Callback\n"));
+    dprintf(("DDRAW: Cancel Callback"));
     return(DD_OK);
   }
 //SvL: Crashes dxview.exe; expects a different vtbl when creating
 //     an IID_IDirect3D object
-#if 1
+#if 1 //!!enabled!!
   else //now for Direct3D
   {
     dprintf(("DDRAW: Callback for 3Dfx Voodoo"));
     if(lpCallback((GUID *)&IID_IDirect3D, "3Dfx Voodoo Direct3D/2",
       "Direct3D/2 v0.2", lpContext) == DDENUMRET_CANCEL)
     {
-      dprintf(("DDRAW: Cancel Callback\n"));
+      dprintf(("DDRAW: Cancel Callback"));
       return(DD_OK);
     }
   }
@@ -119,7 +117,7 @@ BOOL FAR PASCAL SimpleEnum ( GUID FAR *lpGUID,
   BOOL rc;
   PENUMDATA pData;
 
-  dprintf(("DDRAW: SimpleEnum\n"));
+  dprintf(("DDRAW: SimpleEnum"));
 
   pData = (PENUMDATA)lpContext;
   rc = pData->lpCallbackEx( lpGUID,
@@ -128,7 +126,7 @@ BOOL FAR PASCAL SimpleEnum ( GUID FAR *lpGUID,
                             pData->lpContext,
                             NULL);
 
-  dprintf(("DDRAW: Callback returned\n"));
+  dprintf(("DDRAW: Callback returned"));
   return rc;
 }
 
@@ -139,7 +137,7 @@ HRESULT WIN32API OS2DirectDrawEnumerateExA( LPDDENUMCALLBACKEXA lpCallbackEx,
 {
   ENUMDATA data;
 
-  dprintf(("DDRAW: DirectDrawEnumerateExA\n"));
+  dprintf(("DDRAW: DirectDrawEnumerateExA"));
 
   data.lpCallbackEx = lpCallbackEx;
   data.lpContext    = lpContext;
@@ -152,14 +150,14 @@ HRESULT WIN32API OS2DirectDrawEnumerateExA( LPDDENUMCALLBACKEXA lpCallbackEx,
 //******************************************************************************
 DWORD WIN32API DDHAL32_VidMemFree(DWORD address)
 {
-  dprintf(("DDRAW: DDHAL32_VidMemFree, not supported\n"));
+  dprintf(("DDRAW: DDHAL32_VidMemFree, not supported"));
   return(0);
 }
 //******************************************************************************
 //******************************************************************************
 DWORD WIN32API DDHAL32_VidMemAlloc(DWORD size)
 {
-  dprintf(("DDRAW: DDHAL32_VidMemAlloc, not supported\n"));
+  dprintf(("DDRAW: DDHAL32_VidMemAlloc, not supported"));
   return(0);
 }
 //******************************************************************************
@@ -186,7 +184,7 @@ DDCF_QueryInterface(LPCLASSFACTORY iface,REFIID riid,LPVOID *ppobj)
     WINE_StringFromCLSID(riid,buf);
   else
     sprintf(buf,"<guid-0x%04x>",LOWORD(riid));
-  dprintf(("DDRAW:(%p)->(%s,%p),stub!\n",This,buf,ppobj));
+  dprintf(("DDRAW:(%p)->(%s,%p),stub!",This,buf,ppobj));
   return E_NOINTERFACE;
 }
 
@@ -213,7 +211,7 @@ static HRESULT WINAPI DDCF_CreateInstance( LPCLASSFACTORY iface,
   LPGUID lpGUID;
   lpGUID = (LPGUID) riid;
 
-  dprintf(("DDRAW:DDCF_CreateInstance\n"));
+  dprintf(("DDRAW:DDCF_CreateInstance"));
   if( lpGUID &&
       ( (*lpGUID == IID_IDirectDraw ) ||
         (*lpGUID == IID_IDirectDraw2) ||
@@ -229,7 +227,7 @@ static HRESULT WINAPI DDCF_CreateInstance( LPCLASSFACTORY iface,
 static HRESULT WINAPI DDCF_LockServer(LPCLASSFACTORY iface,BOOL dolock)
 {
   ICOM_THIS(IClassFactoryImpl,iface);
-  dprintf(("DDRAW:(%p)->(%d),stub!\n",This,dolock));
+  dprintf(("DDRAW:(%p)->(%d),stub!",This,dolock));
   return S_OK;
 }
 
@@ -261,14 +259,14 @@ HRESULT WINAPI DllGetClassObject( REFCLSID rclsid,
     sprintf(buf,"<guid-0x%04x>",LOWORD(riid));
   WINE_StringFromCLSID(riid,xbuf);
 
-  dprintf(("DDRAW:(%p,%p,%p)\n", xbuf, buf, ppv));
+  dprintf(("DDRAW:(%p,%p,%p)", xbuf, buf, ppv));
   if (!memcmp(riid,&IID_IClassFactory,sizeof(IID_IClassFactory)))
   {
     *ppv = (LPVOID)&DDRAW_CF;
     DDRAW_CF.lpvtbl->AddRef((IClassFactory*)&DDRAW_CF);
     return S_OK;
   }
-  dprintf(("DDRAW: (%p,%p,%p): no interface found.\n", xbuf, buf, ppv));
+  dprintf(("DDRAW: (%p,%p,%p): no interface found.", xbuf, buf, ppv));
   return E_NOINTERFACE;
 }
 
@@ -282,7 +280,7 @@ HRESULT WINAPI DllGetClassObject( REFCLSID rclsid,
  */
 HRESULT WINAPI DllCanUnloadNow(void)
 {
-  dprintf(("DllCanUnloadNow(void) stub\n"));
+  dprintf(("DllCanUnloadNow(void) stub"));
   return S_FALSE;
 }//******************************************************************************
-}
+

@@ -1,4 +1,4 @@
-/* $Id: OS2SURFACE.CPP,v 1.28 2001-03-09 22:48:47 mike Exp $ */
+/* $Id: OS2SURFACE.CPP,v 1.29 2001-03-18 21:44:43 mike Exp $ */
 
 /*
  * DirectDraw Surface class implementaion
