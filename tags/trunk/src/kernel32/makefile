@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.65 1999-11-30 14:15:54 sandervl Exp $
+# $Id: makefile,v 1.66 1999-12-01 18:40:48 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -96,6 +96,8 @@ kernel32.OBJ: kernel32.cpp \
 
 process.obj: process.cpp \
     $(PDWIN32_INCLUDE)\misc.h \
+    oslibdos.h \
+    $(PDWIN32_INCLUDE)\winimagebase.h \
     $(PDWIN32_INCLUDE)\wprocess.h
 
 kobjects.obj: kobjects.cpp

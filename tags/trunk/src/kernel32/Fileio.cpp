@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.17 1999-11-30 19:40:25 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.18 1999-12-01 18:40:47 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -93,19 +93,23 @@ ODINFUNCTION2(HANDLE,  FindFirstFileW,
   astring = UnicodeToAsciiString((LPWSTR)arg1);
   rc = FindFirstFileA(astring, &wfda);
 
-  // convert back the result structure
-  memcpy(arg2,
-         &wfda,
-         sizeof(WIN32_FIND_DATAA));
-
-  lstrcpynAtoW (arg2->cFileName,
-                wfda.cFileName,
-                sizeof(wfda.cFileName));
-
-  lstrcpynAtoW (arg2->cAlternateFileName,
-                wfda.cAlternateFileName,
-                sizeof(wfda.cAlternateFileName));
-
+  if(rc == -1) {
+	memset(arg2, 0, sizeof(WIN32_FIND_DATAW));
+  }
+  else {
+  	// convert back the result structure
+	memcpy(arg2,
+	         &wfda,
+	         sizeof(WIN32_FIND_DATAA));
+	
+	lstrcpynAtoW (arg2->cFileName,
+	              wfda.cFileName,
+	              sizeof(wfda.cFileName));
+	
+	lstrcpynAtoW (arg2->cAlternateFileName,
+	              wfda.cAlternateFileName,
+	              sizeof(wfda.cAlternateFileName));
+  }	
   FreeAsciiString(astring);
   return(rc);
 }
@@ -118,7 +122,6 @@ ODINFUNCTION2(BOOL,   FindNextFileA,
   return O32_FindNextFile(arg1, arg2);
 }
 //******************************************************************************
-//TODO: convert string in WIN32_FIND_DATAW * structure
 //******************************************************************************
 ODINFUNCTION2(BOOL, FindNextFileW,
               HANDLE, arg1,
@@ -129,19 +132,23 @@ ODINFUNCTION2(BOOL, FindNextFileW,
 
   rc = FindNextFileA(arg1, &wfda);
 
-  // convert back the result structure
-  memcpy(arg2,
-         &wfda,
-         sizeof(WIN32_FIND_DATAA));
+  if(rc == 0) {
+	memset(arg2, 0, sizeof(WIN32_FIND_DATAW));
+  }
+  else {
+        // convert back the result structure
+  	memcpy(arg2,
+               &wfda,
+               sizeof(WIN32_FIND_DATAA));
 
-  lstrcpynAtoW (arg2->cFileName,
-                wfda.cFileName,
-                sizeof(wfda.cFileName));
+	lstrcpynAtoW (arg2->cFileName,
+                      wfda.cFileName,
+                      sizeof(wfda.cFileName));
 
-  lstrcpynAtoW (arg2->cAlternateFileName,
-                wfda.cAlternateFileName,
-                sizeof(wfda.cAlternateFileName));
-
+        lstrcpynAtoW (arg2->cAlternateFileName,
+                      wfda.cAlternateFileName,
+                      sizeof(wfda.cAlternateFileName));
+  }
   return rc;
 }
 //******************************************************************************

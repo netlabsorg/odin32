@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.11 1999-12-01 10:47:51 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.12 1999-12-01 18:40:48 sandervl Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -22,6 +22,7 @@
 #include <misc.h>
 #include "initterm.h"
 #include "oslibdos.h"
+#include "dosqss.h"
 
 APIRET APIENTRY DosAliasMem(PVOID pb, ULONG cb, PPVOID ppbAlias, ULONG fl);
 
@@ -545,6 +546,40 @@ DWORD OSLibDosDupHandle(DWORD hFile, DWORD *hNew)
 void OSLibDosDisableHardError(BOOL fTurnOff)
 {
   DosError((fTurnOff) ? FERR_DISABLEHARDERR : FERR_ENABLEHARDERR);
+}
+//******************************************************************************
+//Returns time spent in kernel & user mode in milliseconds
+//******************************************************************************
+BOOL OSLibDosQueryProcTimes(DWORD procid, ULONG *kerneltime, ULONG *usertime) 
+{
+ APIRET rc;
+ char *buf;
+ ULONG size;
+ ULONG nrthreads = 4;
+
+tryagain:
+  size = sizeof(QTOPLEVEL)+sizeof(QGLOBAL)+sizeof(QPROCESS) + nrthreads*sizeof(QTHREAD);
+  buf = (char *)malloc(size);
+  rc = DosQuerySysState(0x1, RESERVED, procid, RESERVED, (PCHAR)buf, size);
+
+  if(rc) {
+	free(buf);
+	if(rc == ERROR_BUFFER_OVERFLOW) {
+		nrthreads += 4;
+		goto tryagain;
+	}
+	return FALSE;
+  }
+  PQTOPLEVEL top = (PQTOPLEVEL)buf;
+
+  *kerneltime = 0;
+  *usertime = 0;
+  for(int i=0;i<top->procdata->threadcnt;i++) {
+	*kerneltime += top->procdata->threads[i].systime;
+	*usertime   += top->procdata->threads[i].usertime;
+  }
+  free(buf);
+  return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
