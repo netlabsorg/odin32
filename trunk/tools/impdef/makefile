@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2002-02-23 23:27:18 bird Exp $
+# $Id: makefile,v 1.11 2002-02-24 02:43:36 bird Exp $
 
 #
 # Odin32 API
@@ -37,7 +37,6 @@ NO_MAIN_BIN_COPY = 1
 # Flag overrides.
 #
 !if "$(VAC3)" == "1" || "$(VAC36)" == "1"
-CFLAGS   = $(CFLAGS)   -Wall+ppt-ppc-inl-cnv-gnr-vft-
 CXXFLAGS = $(CXXFLAGS) -Wall+ppt-ppc-inl-cnv-gnr-vft- $(CXXEXCEPTIONS)
 !else
 !ifndef WMAKE
