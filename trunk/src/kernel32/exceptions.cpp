@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.49 2001-01-29 01:22:21 bird Exp $ */
+/* $Id: exceptions.cpp,v 1.50 2001-02-14 10:36:45 sandervl Exp $ */
 
 /* WARNING: Compiling this module with ICC with optimizations turned on   */
 /* currently breaks this module. To get correct code, it is not necessary */
@@ -255,6 +255,22 @@ static DWORD WIN32API EXC_RaiseHandler( WINEXCEPTION_RECORD *rec, WINEXCEPTION_F
 }
 
 /*******************************************************************
+ *         EXC_UnwindHandler
+ *
+ * Handler for exceptions happening inside an unwind handler.
+ */
+static DWORD WIN32API EXC_UnwindHandler( WINEXCEPTION_RECORD *rec, WINEXCEPTION_FRAME *frame,
+//                              WINCONTEXT *context, WINEXCEPTION_FRAME **dispatcher )
+                                WINCONTEXT *context, LPVOID dispatcher )
+{
+    if (!(rec->ExceptionFlags & (EH_UNWINDING | EH_EXIT_UNWIND)))
+        return ExceptionContinueSearch;
+    /* We shouldn't get here so we store faulty frame in dispatcher */
+    *(PWINEXCEPTION_FRAME*)dispatcher = ((EXC_NESTED_FRAME*)frame)->prevFrame;
+    return ExceptionCollidedUnwind;
+}
+
+/*******************************************************************
  *         EXC_CallHandler
  *
  * Call an exception handler, setting up an exception frame to catch exceptions
@@ -460,7 +476,7 @@ int _Pascal OS2RtlUnwind(PWINEXCEPTION_FRAME  pEndFrame,
 
         /* Call handler */
         dprintf(("KERNEL32: RtlUnwind - calling exception handler %08X", frame->Handler));
-        rc = frame->Handler(pRecord, frame, &context, &dispatch);
+        rc = EXC_CallHandler(pRecord, frame, &context, &dispatch, frame->Handler, EXC_UnwindHandler );
         dprintf(("KERNEL32: RtlUnwind - handler returned %#x", rc));
         switch (rc)
         {

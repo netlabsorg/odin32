@@ -1,4 +1,4 @@
-/* $Id: windllbase.cpp,v 1.23 2000-12-03 10:12:33 sandervl Exp $ */
+/* $Id: windllbase.cpp,v 1.24 2001-02-14 10:36:45 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
@@ -403,10 +403,6 @@ BOOL Win32DllBase::attachProcess()
         OS2SetExceptionHandler((void *)&exceptFrame);
         sel = SetWin32TIB();
     }
-
-    //Allocate TLS index for this module
-    tlsAlloc();
-    tlsAttachThread();    //setup TLS (main thread)
 
     if(dllEntryPoint == NULL) {
         dprintf(("attachProcess not required for dll %s", szModule));
