@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 1999-12-09 12:00:13 sandervl Exp $
+# $Id: makefile,v 1.6 1999-12-12 10:52:14 achimha Exp $
 
 #
 # PD-Win32 API
@@ -52,6 +52,7 @@ clean:
         cd ..\wrc
         $(MAKE_CMD) -f makefile.os2 clean
         cd ..\bin
-        -$(RM) *.exe *.dll
+# wrc.exe requires lots of tools so better not remove it...
+#        -$(RM) *.exe *.dll
         cd ..\..
 
