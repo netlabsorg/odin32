@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.7 2001-09-28 07:50:08 sandervl Exp $
+/* $Id: initterm.cpp,v 1.8 2003-10-24 13:10:03 sandervl Exp $
  *
  * DLL entry point
  *
@@ -57,8 +57,6 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
 
    switch (ulFlag) {
       case 0 :
-         ctordtorInit();
-
          return inittermWininet(hModule, ulFlag);
 
       case 1 :

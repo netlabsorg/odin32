@@ -1,4 +1,4 @@
-/* $Id: initwininet.cpp,v 1.1 2001-09-28 07:50:10 sandervl Exp $
+/* $Id: initwininet.cpp,v 1.2 2003-10-24 13:10:03 sandervl Exp $
  *
  * DLL entry point
  *
@@ -60,7 +60,6 @@ BOOL WINAPI WininetLibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 
    case DLL_PROCESS_DETACH:
     ret = WININET_LibMain(hinstDLL, fdwReason, fImpLoad);
-    ctordtorTerm();
     return ret;
    }
    return FALSE;
