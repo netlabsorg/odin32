@@ -1,4 +1,4 @@
-/* $Id: fastdep.c,v 1.7 2000-03-15 17:14:16 bird Exp $
+/* $Id: fastdep.c,v 1.8 2000-03-16 15:27:08 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
@@ -85,7 +85,7 @@ typedef struct _Options
 /*
  * Language specific analysis functions type.
  */
-typedef int ( _FNLANG)  (FILE *phDep, const char *pszFilename, FILE *phFile,
+typedef int ( _FNLANG)  (const char *pszFilename, FILE *phFile,
                          BOOL fHeader, POPTIONS pOptions);
 typedef _FNLANG    *PFNLANG;
 
@@ -120,12 +120,12 @@ typedef struct _DepRule
 *   Internal Functions                                                         *
 *******************************************************************************/
 static void syntax(void);
-static int makeDependent(FILE *phDep, const char *pszFilename, POPTIONS pOptions);
+static int makeDependent(const char *pszFilename, POPTIONS pOptions);
 
-int langC_CPP(FILE *phDep, const char *pszFilename, FILE *phFile, BOOL fHeader, POPTIONS pOptions);
-int langAsm(FILE *phDep, const char *pszFilename, FILE *phFile, BOOL fHeader, POPTIONS pOptions);
-int langRC(FILE *phDep, const char *pszFilename, FILE *phFile, BOOL fHeader, POPTIONS pOptions);
-int langCOBOL(FILE *phDep, const char *pszFilename, FILE *phFile, BOOL fHeader, POPTIONS pOptions);
+int langC_CPP(const char *pszFilename, FILE *phFile, BOOL fHeader, POPTIONS pOptions);
+int langAsm(const char *pszFilename, FILE *phFile, BOOL fHeader, POPTIONS pOptions);
+int langRC(const char *pszFilename, FILE *phFile, BOOL fHeader, POPTIONS pOptions);
+int langCOBOL(const char *pszFilename, FILE *phFile, BOOL fHeader, POPTIONS pOptions);
 
 
 /* string operations */
@@ -162,7 +162,8 @@ static char *textbufferNextLine(void *pvBuffer, char *psz);
 /* depend workers */
 static BOOL  depReadFile(const char *pszFilename);
 static BOOL  depWriteFile(const char *pszFilename);
-static void *depAddRule(const char *pszRule);
+static void  depRemoveAll(void);
+static void *depAddRule(const char *pszRulePath, const char *pszName, const char *pszExt);
 static BOOL  depAddDepend(void *pvRule, const char *pszDep);
 
 static BOOL  depCleanFile(const char *pszFilename);
@@ -230,7 +231,6 @@ static CONFIGENTRY aConfig[] =
  */
 int main(int argc, char **argv)
 {
-    FILE       *phDep = NULL;
     int         rc   = 0;
     int         argi = 1;
     const char *pszDepFile = pszDefaultDepFile;
@@ -278,6 +278,8 @@ int main(int argc, char **argv)
 
                 case 'D':
                 case 'd': /* "-d <filename>" */
+                {
+                    const char *pszOld = pszDepFile;
                     if (argv[argi][2] != '\0')
                         pszDepFile = &argv[argi][2];
                     else
@@ -290,12 +292,16 @@ int main(int argc, char **argv)
                             return -1;
                         }
                     }
-                    if (phDep != NULL)
+
+                    /* if dependencies are generated we'll flush them to the old filename */
+                    if (pdepList != NULL && pszOld != pszDepFile)
                     {
-                        fclose(phDep);
-                        phDep = NULL;
+                        if (!depWriteFile(pszOld))
+                            fprintf(stderr, "error: failed to write (flush) dependencies.\n");
+                        depRemoveAll();
                     }
                     break;
+                }
 
                 case 'E': /* list of paths. If a file is found in one of these directories the */
                 case 'e': /* filename will be used without the directory path. */
@@ -415,19 +421,6 @@ int main(int argc, char **argv)
             memset(&filebuf, 0, sizeof(filebuf));
 
             /*
-             * Open output file.
-             */
-            if (phDep == NULL)
-            {
-                phDep = fopen(pszDepFile, options.fAppend ? "a" : "w");
-                if (phDep == NULL)
-                {
-                    fprintf(stderr, "error opening outputfile '%s'.\n", pszDepFile);
-                    return 1;
-                }
-            }
-
-            /*
              * Search for the files specified.
              */
             ulRc = DosFindFirst(argv[argi], &hDir,
@@ -453,7 +446,7 @@ int main(int argc, char **argv)
                 /*
                  * Analyse the file.
                  */
-                rc -= makeDependent(phDep, &szSource[0], &options);
+                rc -= makeDependent(&szSource[0], &options);
 
                 /* next file */
                 ulRc = DosFindNext(hDir, &filebuf, sizeof(filebuf), &ulFound);
@@ -464,14 +457,9 @@ int main(int argc, char **argv)
         argi++;
     }
 
-    /* Close the dep file! */
-    if (phDep != NULL)
-        fclose(phDep);
-
-    /* clean it! */
-    #if 0
-    depCleanFile(pszDepFile);
-    #endif
+    /* Write the depend file! */
+    if (!depWriteFile(pszDepFile))
+        fprintf(stderr, "error: failed to write dependencies file!\n");
 
     return rc;
 }
@@ -518,15 +506,15 @@ static void syntax(void)
 
 
 /**
- * Generates depend info on this file, and fwrites it to phDep.
+ * Generates depend info on this file, these are stored internally
+ * and written to file later.
  * @returns
- * @param     phDep        Pointer to file struct for outfile.
  * @param     pszFilename  Pointer to source filename.
  * @param     pOptions     Pointer to options struct.
  * @status    completely implemented.
  * @author    knut st. osmundsen
  */
-static int makeDependent(FILE *phDep, const char *pszFilename, POPTIONS pOptions)
+static int makeDependent(const char *pszFilename, POPTIONS pOptions)
 {
     int    rc = -1;
     FILE  *phFile;
@@ -557,7 +545,7 @@ static int makeDependent(FILE *phDep, const char *pszFilename, POPTIONS pOptions
 
         /* Found? */
         if (pCfg->papszExts != NULL)
-            rc = (*pCfg->pfn)(phDep, pszFilename, phFile, fHeader, pOptions);
+            rc = (*pCfg->pfn)(pszFilename, phFile, fHeader, pOptions);
         else
         {
             if (*fileName(pszFilename, szExt) != '.') /* these are 'hidden' files, like .cvsignore, let's ignore them. */
@@ -565,7 +553,6 @@ static int makeDependent(FILE *phDep, const char *pszFilename, POPTIONS pOptions
             rc = 0;
         }
 
-        fputs("\n", phDep);
         fclose(phFile);
     }
     else
@@ -576,18 +563,19 @@ static int makeDependent(FILE *phDep, const char *pszFilename, POPTIONS pOptions
 
 
 /**
- * Generates depend info on this C or C++ file, and writes it to phDep.
+ * Generates depend info on this C or C++ file, these are stored internally
+ * and written to file later.
  * @returns   0 on success.
  *            !0 on error.
- * @param     phDep        Pointer to file struct for outfile.
  * @param     pszFilename  Pointer to source filename.
  * @param     phFile       Pointer to source file handle.
  * @param     pOptions     Pointer to options struct.
  * @status    completely implemented.
  * @author    knut st. osmundsen
  */
-int langC_CPP(FILE *phDep, const char *pszFilename, FILE *phFile, BOOL fHeader, POPTIONS pOptions)
+int langC_CPP(const char *pszFilename, FILE *phFile, BOOL fHeader, POPTIONS pOptions)
 {
+    void *  pvRule;                     /* Handle to the current rule. */
     int     iLine;                      /* Linenumber. */
     char    szBuffer[4096];             /* Max line length is 4096... should not be a problem. */
     BOOL    fComment;                   /* TRUE when within a multiline comment. */
@@ -607,26 +595,28 @@ int langC_CPP(FILE *phDep, const char *pszFilename, FILE *phFile, BOOL fHeader, 
 
 
     /**********************************/
-    /* print file name to depend file */
+    /* Add the depend rule            */
     /**********************************/
     if (pOptions->fObjRule && !fHeader)
     {
         if (pOptions->fNoObjectPath)
-            fprintf(phDep, "%s.%s:", fileNameNoExt(pszFilename, szBuffer), pOptions->pszObjectExt);
+            pvRule = depAddRule(fileNameNoExt(pszFilename, szBuffer), NULL, pOptions->pszObjectExt);
         else
-            fprintf(phDep, "%s%s.%s:",
-                    pOptions->fObjectDir ?
-                        pOptions->pszObjectDir : filePathSlash(pszFilename, szBuffer),
-                    fileNameNoExt(pszFilename, szBuffer + CCHMAXPATH),
-                    pOptions->pszObjectExt);
+            pvRule = depAddRule(pOptions->fObjectDir ?
+                                    pOptions->pszObjectDir :
+                                    filePathSlash(pszFilename, szBuffer),
+                                fileNameNoExt(pszFilename, szBuffer + CCHMAXPATH),
+                                pOptions->pszObjectExt);
 
-        if (pOptions->fSrcWhenObj)
-            fprintf(phDep, " \\\n%4s %s", "",
-                    pOptions->fExcludeAll ? fileName(pszFilename, szBuffer) : pszFilename
-                    );
+        if (pOptions->fSrcWhenObj && pvRule)
+            depAddDepend(pvRule, pOptions->fExcludeAll ? fileName(pszFilename, szBuffer) : pszFilename);
     }
     else
-        fprintf(phDep, "%s:", pszFilename);
+        pvRule = depAddRule(pszFilename, NULL, NULL);
+
+    /* duplicate rule? */
+    if (pvRule == NULL)
+        return 0;
 
 
     /*******************/
@@ -725,12 +715,13 @@ int langC_CPP(FILE *phDep, const char *pszFilename, FILE *phFile, BOOL fHeader, 
                         /* did we find the include? */
                         if (psz != NULL)
                         {
-                            char szBuffer2[CCHMAXPATH];
+                            char    szBuffer2[CCHMAXPATH];
                             if (pOptions->fExcludeAll ||
                                 pathlistFindFile(pOptions->pszExclude, szFullname, szBuffer2) != NULL
                                 )
-                                strcpy(szBuffer, szFullname);
-                            fprintf(phDep, " \\\n%4.s %s", "", szBuffer);
+                                depAddDepend(pvRule, szFullname);
+                            else
+                                depAddDepend(pvRule, szBuffer);
                         }
                         else
                             fprintf(stderr, "%s(%d): warning include file '%s' not found!\n",
@@ -847,50 +838,52 @@ int langC_CPP(FILE *phDep, const char *pszFilename, FILE *phFile, BOOL fHeader, 
         else
             break;
     } /*while*/
-    fputs("\n", phDep);
 
     return 0;
 }
 
 
 /**
- * Generates depend info on this file, and fwrites it to phDep.
+ * Generates depend info on this file, these are stored internally
+ * and written to file later.
  * @returns   0 on success.
  *            !0 on error.
- * @param     phDep        Pointer to file struct for outfile.
  * @param     pszFilename  Pointer to source filename.
  * @param     phFile       Pointer to source file handle.
  * @param     pOptions     Pointer to options struct.
  * @status    completely implemented.
  * @author    knut st. osmundsen
  */
-int langAsm(FILE *phDep, const char *pszFilename, FILE *phFile, BOOL fHeader, POPTIONS pOptions)
+int langAsm(const char *pszFilename, FILE *phFile, BOOL fHeader, POPTIONS pOptions)
 {
-    char szBuffer[4096]; /* max line length */
-    int  iLine;
+    void *  pvRule;                     /* Handle to the current rule. */
+    char    szBuffer[4096];             /* Temporary buffer (max line lenght size...) */
+    int     iLine;                      /* current line number */
 
 
     /**********************************/
-    /* print file name to depend file */
+    /* Add the depend rule            */
     /**********************************/
     if (pOptions->fObjRule && !fHeader)
     {
         if (pOptions->fNoObjectPath)
-            fprintf(phDep, "%s.%s:", fileNameNoExt(pszFilename, szBuffer), pOptions->pszObjectExt);
+            pvRule = depAddRule(fileNameNoExt(pszFilename, szBuffer), NULL, pOptions->pszObjectExt);
         else
-            fprintf(phDep, "%s%s.%s:",
-                    pOptions->fObjectDir ?
-                        pOptions->pszObjectDir : filePathSlash(pszFilename, szBuffer),
-                    fileNameNoExt(pszFilename, szBuffer + CCHMAXPATH),
-                    pOptions->pszObjectExt);
+            pvRule = depAddRule(pOptions->fObjectDir ?
+                                    pOptions->pszObjectDir :
+                                    filePathSlash(pszFilename, szBuffer),
+                                fileNameNoExt(pszFilename, szBuffer + CCHMAXPATH),
+                                pOptions->pszObjectExt);
 
-        if (pOptions->fSrcWhenObj)
-            fprintf(phDep, " \\\n%4s %s", "",
-                    pOptions->fExcludeAll ? fileName(pszFilename, szBuffer) : pszFilename
-                    );
+        if (pOptions->fSrcWhenObj && pvRule)
+            depAddDepend(pvRule, pOptions->fExcludeAll ? fileName(pszFilename, szBuffer) : pszFilename);
     }
     else
-        fprintf(phDep, "%s:", pszFilename);
+        pvRule = depAddRule(pszFilename, NULL, NULL);
+
+    /* duplicate rule? */
+    if (pvRule == NULL)
+        return 0;
 
 
     /*******************/
@@ -953,8 +946,9 @@ int langAsm(FILE *phDep, const char *pszFilename, FILE *phFile, BOOL fHeader, PO
                     if (pOptions->fExcludeAll ||
                         pathlistFindFile(pOptions->pszExclude, szFullname, szBuffer2) != NULL
                         )
-                        strcpy(szBuffer, szFullname);
-                    fprintf(phDep, " \\\n%4.s %s", "", szBuffer);
+                        depAddDepend(pvRule, szFullname);
+                    else
+                        depAddDepend(pvRule, szBuffer);
                 }
                 else
                     fprintf(stderr, "%s(%d): warning include file '%s' not found!\n",
@@ -964,49 +958,52 @@ int langAsm(FILE *phDep, const char *pszFilename, FILE *phFile, BOOL fHeader, PO
         else
             break;
     } /*while*/
-    fputs("\n", phDep);
 
     return 0;
 }
 
 
 /**
- * Generates depend info on this Resource file, and writes it to phDep.
+ * Generates depend info on this Resource file, these are stored internally
+ * and written to file later.
  * @returns   0 on success.
  *            !0 on error.
- * @param     phDep        Pointer to file struct for outfile.
  * @param     pszFilename  Pointer to source filename.
  * @param     phFile       Pointer to source file handle.
  * @param     pOptions     Pointer to options struct.
  * @status    completely implemented.
  * @author    knut st. osmundsen
  */
-int langRC(FILE *phDep, const char *pszFilename, FILE *phFile, BOOL fHeader, POPTIONS pOptions)
+int langRC(const char *pszFilename, FILE *phFile, BOOL fHeader, POPTIONS pOptions)
 {
-    char szBuffer[4096]; /* max line length */
-    int  iLine;
+    void *  pvRule;                     /* Handle to the current rule. */
+    char    szBuffer[4096];             /* Temporary buffer (max line lenght size...) */
+    int     iLine;                      /* current line number */
+
 
     /**********************************/
-    /* print file name to depend file */
+    /* Add the depend rule            */
     /**********************************/
     if (pOptions->fObjRule && !fHeader)
     {
         if (pOptions->fNoObjectPath)
-            fprintf(phDep, "%s.%s:", fileNameNoExt(pszFilename, szBuffer), pOptions->pszRsrcExt);
+            pvRule = depAddRule(fileNameNoExt(pszFilename, szBuffer), NULL, pOptions->pszRsrcExt);
         else
-            fprintf(phDep, "%s%s.res:",
-                    pOptions->fObjectDir ?
-                        pOptions->pszObjectDir : filePathSlash(pszFilename, szBuffer),
-                    fileNameNoExt(pszFilename, szBuffer + CCHMAXPATH),
-                    pOptions->pszRsrcExt);
+            pvRule = depAddRule(pOptions->fObjectDir ?
+                                    pOptions->pszObjectDir :
+                                    filePathSlash(pszFilename, szBuffer),
+                                fileNameNoExt(pszFilename, szBuffer + CCHMAXPATH),
+                                pOptions->pszRsrcExt);
 
-        if (pOptions->fSrcWhenObj)
-            fprintf(phDep, " \\\n%4s %s", "",
-                    pOptions->fExcludeAll ? fileName(pszFilename, szBuffer) : pszFilename
-                    );
+        if (pOptions->fSrcWhenObj && pvRule)
+            depAddDepend(pvRule, pOptions->fExcludeAll ? fileName(pszFilename, szBuffer) : pszFilename);
     }
     else
-        fprintf(phDep, "%s:", pszFilename);
+        pvRule = depAddRule(pszFilename, NULL, NULL);
+
+    /* duplicate rule? */
+    if (pvRule == NULL)
+        return 0;
 
 
     /*******************/
@@ -1071,8 +1068,9 @@ int langRC(FILE *phDep, const char *pszFilename, FILE *phFile, BOOL fHeader, POP
                     if (pOptions->fExcludeAll ||
                         pathlistFindFile(pOptions->pszExclude, szFullname, szBuffer2) != NULL
                         )
-                        strcpy(szBuffer, szFullname);
-                    fprintf(phDep, " \\\n%4.s %s", "", szBuffer);
+                        depAddDepend(pvRule, szFullname);
+                    else
+                        depAddDepend(pvRule, szBuffer);
                 }
                 else
                     fprintf(stderr, "%s(%d): warning include file '%s' not found!\n",
@@ -1082,49 +1080,52 @@ int langRC(FILE *phDep, const char *pszFilename, FILE *phFile, BOOL fHeader, POP
         else
             break;
     } /*while*/
-    fputs("\n", phDep);
 
     return 0;
 }
 
 
 /**
- * Generates depend info on this COBOL file, and writes it to phDep.
+ * Generates depend info on this COBOL file, these are stored internally
+ * and written to file later.
  * @returns   0 on success.
  *            !0 on error.
- * @param     phDep        Pointer to file struct for outfile.
  * @param     pszFilename  Pointer to source filename.
  * @param     phFile       Pointer to source file handle.
  * @param     pOptions     Pointer to options struct.
  * @status    completely implemented.
  * @author    knut st. osmundsen
  */
-int langCOBOL(FILE *phDep, const char *pszFilename, FILE *phFile, BOOL fHeader, POPTIONS pOptions)
+int langCOBOL(const char *pszFilename, FILE *phFile, BOOL fHeader, POPTIONS pOptions)
 {
-    char szBuffer[4096]; /* max line length */
-    int  iLine;
+    void *  pvRule;                     /* Handle to the current rule. */
+    char    szBuffer[4096];             /* Temporary buffer (max line lenght size...) */
+    int     iLine;                      /* current line number */
+
 
     /**********************************/
-    /* print file name to depend file */
+    /* Add the depend rule            */
     /**********************************/
     if (pOptions->fObjRule && !fHeader)
     {
         if (pOptions->fNoObjectPath)
-            fprintf(phDep, "%s.%s:", fileNameNoExt(pszFilename, szBuffer), pOptions->pszObjectExt);
+            pvRule = depAddRule(fileNameNoExt(pszFilename, szBuffer), NULL, pOptions->pszObjectExt);
         else
-            fprintf(phDep, "%s%s.%s:",
-                    pOptions->fObjectDir ?
-                        pOptions->pszObjectDir : filePathSlash(pszFilename, szBuffer),
-                    fileNameNoExt(pszFilename, szBuffer + CCHMAXPATH),
-                    pOptions->pszObjectExt);
+            pvRule = depAddRule(pOptions->fObjectDir ?
+                                    pOptions->pszObjectDir :
+                                    filePathSlash(pszFilename, szBuffer),
+                                fileNameNoExt(pszFilename, szBuffer + CCHMAXPATH),
+                                pOptions->pszObjectExt);
 
-        if (pOptions->fSrcWhenObj)
-            fprintf(phDep, " \\\n%4s %s", "",
-                    pOptions->fExcludeAll ? fileName(pszFilename, szBuffer) : pszFilename
-                    );
+        if (pOptions->fSrcWhenObj && pvRule)
+            depAddDepend(pvRule, pOptions->fExcludeAll ? fileName(pszFilename, szBuffer) : pszFilename);
     }
     else
-        fprintf(phDep, "%s:", pszFilename);
+        pvRule = depAddRule(pszFilename, NULL, NULL);
+
+    /* duplicate rule? */
+    if (pvRule == NULL)
+        return 0;
 
 
     /*******************/
@@ -1219,8 +1220,9 @@ int langCOBOL(FILE *phDep, const char *pszFilename, FILE *phFile, BOOL fHeader, 
                     if (pOptions->fExcludeAll ||
                         pathlistFindFile(pOptions->pszExclude, szFullname, szBuffer2) != NULL
                         )
-                        strcpy(szBuffer, szFullname);
-                    fprintf(phDep, " \\\n%4.s %s", "", szBuffer);
+                        depAddDepend(pvRule, szFullname);
+                    else
+                        depAddDepend(pvRule, szBuffer);
                 }
                 else
                     fprintf(stderr, "%s(%d): warning include file '%s' not found!\n",
@@ -1230,7 +1232,6 @@ int langCOBOL(FILE *phDep, const char *pszFilename, FILE *phFile, BOOL fHeader, 
         else
             break;
     } /*while*/
-    fputs("\n", phDep);
 
     return 0;
 }
@@ -1706,6 +1707,7 @@ static BOOL  depReadFile(const char *pszFilename)
         /* new rule? */
         if (!fMoreDeps && *psz != ' ' && *psz != '\t' && *psz != '\0')
         {
+            i = 0;
             while (psz[i] != '\0')
             {
                 if (psz[i] == ':'
@@ -1722,7 +1724,7 @@ static BOOL  depReadFile(const char *pszFilename)
             if (psz[i] == ':')
             {   /* new rule! */
                 psz[i] = '\0';
-                pvRule = depAddRule(trimR(psz));
+                pvRule = depAddRule(trimR(psz), NULL, NULL);
                 psz += i + 1;
                 cch -= i + 1;
                 fMoreDeps = TRUE;
@@ -1739,9 +1741,14 @@ static BOOL  depReadFile(const char *pszFilename)
             }
             else
                 fMoreDeps = FALSE;
-            psz = trim(psz);
-            if (*psz != '\0')
-                depAddDepend(pvRule, psz);
+
+            /* if not duplicate rule */
+            if (pvRule != NULL)
+            {
+                psz = trim(psz);
+                if (*psz != '\0')
+                    depAddDepend(pvRule, psz);
+            }
         }
     } /* while */
 
@@ -1762,27 +1769,54 @@ static BOOL  depWriteFile(const char *pszFilename)
     phFile = fopen(pszFilename, "w");
     if (phFile != NULL)
     {
+        char     szBuffer[4096];
+        int      iBuffer = 0;
         PDEPRULE pdep = pdepList;
+
         while (pdep != NULL)
         {
+            /* Write rule. Flush the buffer first if necessary. */
+            if (iBuffer + 2 >= sizeof(szBuffer))
+            {
+                fwrite(szBuffer, iBuffer, 1, phFile);
+                iBuffer = 0;
+            }
+            iBuffer += sprintf(szBuffer + iBuffer, "%s:", pdep->pszRule);
 
-            fprintf(phFile, "%s:", pdep->pszRule);
+            /* write rule dependants. */
             if (pdep->papszDep != NULL)
             {
                 char **ppsz = pdep->papszDep;
                 while (*ppsz != NULL)
                 {
-                    fprintf(phFile, " \\\n    %s", *ppsz);
+                    /* flush buffer? */
+                    if (iBuffer + strlen(*ppsz) + 20 >= sizeof(szBuffer))
+                    {
+                        fwrite(szBuffer, iBuffer, 1, phFile);
+                        iBuffer = 0;
+                    }
+                    iBuffer += sprintf(szBuffer + iBuffer, " \\\n    %s", *ppsz);
 
                     /* next dependant */
                     ppsz++;
                 }
             }
-            fputs("\n\n", phFile);
+
+            /* Add two new lines. Flush buffer first if necessary. */
+            if (iBuffer + 2 >= sizeof(szBuffer))
+            {
+                fwrite(szBuffer, iBuffer, 1, phFile);
+                iBuffer = 0;
+            }
+            strcpy(szBuffer + iBuffer, "\n\n");
+            iBuffer += 2;
 
             /* next rule */
             pdep = pdep->pNext;
         }
+
+        /* flush buffer. */
+        fwrite(szBuffer, iBuffer, 1, phFile);
 
         fclose(phFile);
         return TRUE;
@@ -1791,42 +1825,84 @@ static BOOL  depWriteFile(const char *pszFilename)
     return FALSE;
 }
 
+
+/**
+ * Removes all entries in the list of dependencies. (pdepList)
+ */
+static void  depRemoveAll(void)
+{
+    while (pdepList != NULL)
+    {
+        register PDEPRULE pdepToBeFree = pdepList;
+        /* next */
+        pdepList = pdepToBeFree->pNext;
+
+        /* free this */
+        if (pdepToBeFree->papszDep != NULL)
+        {
+            char ** ppsz = pdepToBeFree->papszDep;
+            while (*ppsz != NULL)
+                free(*ppsz++);
+            free(pdepToBeFree->papszDep);
+        }
+        free(pdepToBeFree);
+    }
+}
+
+
 /**
  * Adds a rule to the list of dependant rules.
  * @returns   Rule handle. NULL if rule exists/error.
- * @param     pszRule   Pointer to rule text. Empty strings are banned!
- *
+ * @param     pszRulePath   Pointer to rule text. Empty strings are banned!
+ *                          This string might only contain the path of the rule. (with '\\')
+ * @param     pszName       Name of the rule.
+ *                          NULL if pszRulePath contains the entire rule.
+ * @param     pszExt        Extention (without '.')
+ *                          NULL if pszRulePath or pszRulePath and pszName contains the entire rule.
  */
-static void *depAddRule(const char *pszRule)
+static void *depAddRule(const char *pszRulePath, const char *pszName, const char *pszExt)
 {
+    char     szRule[CCHMAXPATH*2];
     PDEPRULE pdepPrev = NULL;
     PDEPRULE pdep = pdepList;
     PDEPRULE pNew;
+    int      cch;
+
+    /* make rulename */
+    strcpy(szRule, pszRulePath);
+    cch = strlen(szRule);
+    if (pszName != NULL)
+    {
+        strcpy(szRule + cch, pszName);
+        cch += strlen(szRule + cch);
+    }
+    if (pszExt != NULL)
+    {
+        strcat(szRule + cch++, ".");
+        strcat(szRule + cch, pszExt);
+        cch += strlen(szRule + cch);
+    }
 
     /* find location */
-    while (pdep != NULL &&
-           stricmp(pdep->pszRule, pszRule) < 0
-           )
+    while (pdep != NULL && stricmp(pdep->pszRule, szRule) < 0)
     {
-        pdep = pdepPrev;
+        pdepPrev = pdep;
         pdep = pdep->pNext;
     }
 
     /* check if matching rule name */
-    if (pdep != NULL && stricmp(pdep->pszRule, pszRule) == 0)
+    if (pdep != NULL && stricmp(pdep->pszRule, szRule) == 0)
         return NULL;
 
-    /* allocate a new rule structure and fill in data */
-    pNew = malloc(sizeof(DEPRULE));
+    /*
+     * Allocate a new rule structure and fill in data
+     * Note. One block for both the DEPRULE and the pszRule string.
+     */
+    pNew = malloc(sizeof(DEPRULE) + cch + 1);
     if (pNew == NULL)
         return NULL;
-    pNew->pszRule = malloc(strlen(pszRule) + 1);
-    if (pNew->pszRule == NULL)
-    {
-        free(pNew);
-        return NULL;
-    }
-    strcpy(pNew->pszRule, pszRule);
+    pNew->pszRule = (char*)(void*)(pNew + 1);
+    strcpy(pNew->pszRule, szRule);
     pNew->cDeps = 0;
     pNew->papszDep = NULL;
 
@@ -1853,9 +1929,9 @@ static BOOL  depAddDepend(void *pvRule, const char *pszDep)
     PDEPRULE pdep = (PDEPRULE)pvRule;
 
     /* allocate more array space */
-    if (pdep->cDeps == 0 || (pdep->cDeps + 2) % 32 == 0)
+    if (pdep->cDeps == 0 || ((pdep->cDeps + 2) % 32) == 0)
     {
-        pdep->papszDep = realloc(pdep->papszDep, 32 * sizeof(char*));
+        pdep->papszDep = realloc(pdep->papszDep, sizeof(char*) * (pdep->cDeps + 32));
         if (pdep->papszDep == NULL)
         {
             pdep->cDeps = 0;
