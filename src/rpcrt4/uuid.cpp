@@ -1,4 +1,4 @@
-/* $Id: uuid.cpp,v 1.1 2000-04-02 22:02:59 davidr Exp $ */
+/* $Id: uuid.cpp,v 1.2 2000-04-04 19:49:03 davidr Exp $ */
 /*
  * RPCRT4 library
  * UUID manipulation
@@ -136,9 +136,7 @@ gettimeofday(struct timeval* tp, void* tzp)
 // Returns
 //  S_OK if successful.
 // ----------------------------------------------------------------------
-RPCRTAPI
-RPC_STATUS
-RPC_ENTRY
+RPCRTAPI RPC_STATUS RPC_ENTRY
 UuidCreate (
     OUT UUID __RPC_FAR * pUuid
     )
@@ -255,9 +253,7 @@ UuidCreate (
 // ----------------------------------------------------------------------
 // UuidCreateNil
 // ----------------------------------------------------------------------
-RPCRTAPI
-RPC_STATUS
-RPC_ENTRY
+RPCRTAPI RPC_STATUS RPC_ENTRY
 UuidCreateNil (
     OUT UUID __RPC_FAR * NilUuid
     )
@@ -274,9 +270,7 @@ UuidCreateNil (
 // UuidToStringA
 // Memory allocated here should be released via RpcStringFreeA
 // ----------------------------------------------------------------------
-RPCRTAPI
-RPC_STATUS
-RPC_ENTRY
+RPCRTAPI RPC_STATUS RPC_ENTRY
 UuidToStringA (
     IN UUID __RPC_FAR * Uuid,
     OUT unsigned char __RPC_FAR * __RPC_FAR * StringUuid
@@ -285,6 +279,9 @@ UuidToStringA (
     char *	pString;
 
     dprintf(("RPCRT4: %s", __FUNCTION__));
+
+    // jic
+    *StringUuid = 0;
 
     if ((pString = (char *)HeapAlloc(GetProcessHeap(), 0, 40)) == NULL)
 	return RPC_S_OUT_OF_MEMORY;
@@ -312,9 +309,7 @@ UuidToStringA (
 // ----------------------------------------------------------------------
 // UuidFromStringA
 // ----------------------------------------------------------------------
-RPCRTAPI
-RPC_STATUS
-RPC_ENTRY
+RPCRTAPI RPC_STATUS RPC_ENTRY
 UuidFromStringA (
     IN unsigned char __RPC_FAR * StringUuid,
     OUT UUID __RPC_FAR * Uuid
@@ -395,9 +390,7 @@ UuidFromStringA (
 // UuidToStringW
 // Memory allocated here should be released via RpcStringFreeW
 // ----------------------------------------------------------------------
-RPCRTAPI
-RPC_STATUS
-RPC_ENTRY
+RPCRTAPI RPC_STATUS RPC_ENTRY
 UuidToStringW (
     IN UUID __RPC_FAR * Uuid,
     OUT unsigned short __RPC_FAR * __RPC_FAR * StringUuid
@@ -439,9 +432,7 @@ UuidToStringW (
 // ----------------------------------------------------------------------
 // UuidFromStringW
 // ----------------------------------------------------------------------
-RPCRTAPI
-RPC_STATUS
-RPC_ENTRY
+RPCRTAPI RPC_STATUS RPC_ENTRY
 UuidFromStringW (
     IN unsigned short __RPC_FAR * StringUuid,
     OUT UUID __RPC_FAR * Uuid
@@ -459,9 +450,7 @@ UuidFromStringW (
 // ----------------------------------------------------------------------
 // UuidCompare
 // ----------------------------------------------------------------------
-RPCRTAPI
-signed int
-RPC_ENTRY
+RPCRTAPI signed int RPC_ENTRY
 UuidCompare (
     IN UUID __RPC_FAR * Uuid1,
     IN UUID __RPC_FAR * Uuid2,
@@ -560,9 +549,7 @@ UuidCompare (
 // ----------------------------------------------------------------------
 // UuidEqual
 // ----------------------------------------------------------------------
-RPCRTAPI
-int
-RPC_ENTRY
+RPCRTAPI int RPC_ENTRY
 UuidEqual (
     IN UUID __RPC_FAR * Uuid1,
     IN UUID __RPC_FAR * Uuid2,
@@ -578,9 +565,7 @@ UuidEqual (
 // ----------------------------------------------------------------------
 // UuidHash
 // ----------------------------------------------------------------------
-RPCRTAPI
-unsigned short
-RPC_ENTRY
+RPCRTAPI unsigned short RPC_ENTRY
 UuidHash (
     IN UUID __RPC_FAR * Uuid,
     OUT RPC_STATUS __RPC_FAR * Status
@@ -673,15 +658,16 @@ UuidHash (
 // ----------------------------------------------------------------------
 // UuidIsNil
 // ----------------------------------------------------------------------
-RPCRTAPI
-int
-RPC_ENTRY
+RPCRTAPI int RPC_ENTRY
 UuidIsNil (
     IN UUID __RPC_FAR * Uuid,
     OUT RPC_STATUS __RPC_FAR * Status
     )
 {
     dprintf(("RPCRT4: %s", __FUNCTION__));
+
+    *Status = RPC_S_OK;
+
     return IsEqualGUID(Uuid, &uuid_nil);
 }
 
