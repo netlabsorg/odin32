@@ -1,4 +1,4 @@
-/* $Id: CmdQd.c,v 1.12 2001-12-09 16:11:13 bird Exp $
+/* $Id: CmdQd.c,v 1.13 2002-01-09 00:29:57 bird Exp $
  *
  * Command Queue Daemon / Client.
  *
@@ -1572,8 +1572,8 @@ void Worker(void * iWorkerId)
                  */
                 DosReleaseMutexSem(hmtxExec);
                 pJobOutput->cchOutput += sprintf(&pJobOutput->szOutput[pJobOutput->cchOutput ],
-                                                 "Failed to set current directory to: %s\n",
-                                                 pJob->JobInfo.szCurrentDir);
+                                                 "Failed to set current directory to: %s (rc=%d)\n",
+                                                 pJob->JobInfo.szCurrentDir, rc);
                 pJob->rc = -1;
                 DosClose(hPipeR);
             }
@@ -1666,7 +1666,8 @@ char *WorkerArguments(char *pszArg, const char *pszzEnv, const char *pszCommand,
      * Currently ignoring quotes for this test.
      */
     if (    strchr(pszCommand, '&')
-        ||  strchr(pszCommand, '|'))
+        ||  strchr(pszCommand, '|')
+        ||  strchr(pszCommand, '@'))
     {
         strcpy(pszArg, "cmd.exe");      /* doesn't use comspec, just defaults to cmd.exe in all cases. */
         fCMD = TRUE;
@@ -1724,6 +1725,7 @@ char *WorkerArguments(char *pszArg, const char *pszzEnv, const char *pszCommand,
         if (strchr(pszArg, '\\') || pszArg[1] == ':')
         {   /* relative path - expand it and check for file existence */
             fileNormalize(pszArg, pszCurDir);
+            pszCurDir[strlen(pszCurDir)-1] = '\0'; /* remove slash */
             rc = fileExist(pszArg);
         }
         else
