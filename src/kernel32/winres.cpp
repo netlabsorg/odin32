@@ -1,4 +1,4 @@
-/* $Id: winres.cpp,v 1.16 1999-09-13 14:31:06 sandervl Exp $ */
+/* $Id: winres.cpp,v 1.17 1999-09-14 16:55:38 sandervl Exp $ */
 
 /*
  * Win32 resource class
@@ -27,17 +27,12 @@
 #include <win32type.h>
 #include <winres.h>
 #include <misc.h>
+#include <winexebase.h>
 #include <winexepe2lx.h>
-#include <windllpe2lx.h>
 #include "cvtresource.h"
 #include <vmutex.h>
 
 VMutex resmutex;
-
-char *ResTypes[MAX_RES] =
-      {"niks", "CURSOR", "BITMAP", "ICON", "MENU", "DIALOG", "STRING",
-       "FONTDIR", "FONT", "ACCELERATOR", "RCDATA",  "MESSAGETABLE",
-       "GROUP_CURSOR", "niks", "GROUP_ICON", "niks", "VERSION"};
 
 //******************************************************************************
 //******************************************************************************
@@ -96,9 +91,7 @@ static ULONG CalcBitmapSize(ULONG cBits, LONG cx, LONG cy)
 Win32Resource::Win32Resource() :
         os2resdata(NULL), winresdata(NULL), resType(RSRC_CUSTOMNODATA)
 {
-  next       = NULL;
   module     = NULL;
-
   id         = -1;
   type       = -1;
   hres       = 0;
@@ -247,8 +240,7 @@ PVOID Win32Resource::lockResource()
     case NTRT_ACCELERATORS:
     case NTRT_MENU:
     case NTRT_DIALOG:
-    {
-//        newid = ((Win32Pe2LxImage *)module)->getWin32ResourceId(id);
+        newid = ((Win32Pe2LxImage *)module)->getWin32ResourceId(id);
 
         rc = DosGetResource((HMODULE)module->hinstance, RT_RCDATA, (int)newid, (PPVOID)&resdata);
         if(rc) {
@@ -258,7 +250,6 @@ PVOID Win32Resource::lockResource()
         winresdata = (char *)malloc(ressize);
         memcpy(winresdata, resdata, ressize);
         break;
-    }
 
     //TODO:not yet implemented
     case NTRT_FONTDIR:
