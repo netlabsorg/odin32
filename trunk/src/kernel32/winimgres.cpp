@@ -1,4 +1,4 @@
-/* $Id: winimgres.cpp,v 1.49 2000-10-09 18:35:27 sandervl Exp $ */
+/* $Id: winimgres.cpp,v 1.50 2001-03-28 16:21:41 sandervl Exp $ */
 
 /*
  * Win32 PE Image class (resource methods)
@@ -141,11 +141,13 @@ HRSRC Win32ImageBase::findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang)
     }
     pResDirRet = getResSubDirA(pResRootDir, lpszType);
     if(!pResDirRet) {
+        dprintf2(("FindResourceA %s: resource %x (type %x, lang %x) TYPE NOT FOUND", szModule, lpszName, lpszType, lang));
 	SetLastError(ERROR_RESOURCE_TYPE_NOT_FOUND);
 	return NULL;
     }
     pResDirRet = getResSubDirA(pResDirRet, lpszName);
     if(!pResDirRet) {
+        dprintf2(("FindResourceA %s: resource %x (type %x, lang %x) NAME NOT FOUND", szModule, lpszName, lpszType, lang));
 	SetLastError(ERROR_RESOURCE_NAME_NOT_FOUND);
 	return NULL;
     }
@@ -161,9 +163,9 @@ HRSRC Win32ImageBase::findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang)
     else hRes = getResourceLangEx(pResDirRet, lang);
 
     if((ULONG)lpszName != ID_GETFIRST && HIWORD(lpszName)) {
-            dprintf(("FindResource %s: resource %s (type %x, lang %x)", szModule, lpszName, lpszType, lang));
+            dprintf(("FindResourceA %s: resource %s (type %x, lang %x)", szModule, lpszName, lpszType, lang));
     }
-    else    dprintf(("FindResource %s: resource %x (type %x, lang %x)", szModule, lpszName, lpszType, lang));
+    else    dprintf(("FindResourceA %s: resource %x (type %x, lang %x)", szModule, lpszName, lpszType, lang));
 
     SetLastError(ERROR_SUCCESS);
     return hRes;
@@ -195,11 +197,13 @@ HRSRC Win32ImageBase::findResourceW(LPWSTR lpszName, LPWSTR lpszType, ULONG lang
     }
     pResDirRet = getResSubDirW(pResRootDir, lpszType);
     if(!pResDirRet) {
+        dprintf2(("FindResourceW %s: resource %x (type %x, lang %x) TYPE NOT FOUND", szModule, lpszName, lpszType, lang));
 	SetLastError(ERROR_RESOURCE_TYPE_NOT_FOUND);
 	return NULL;
     }
     pResDirRet = getResSubDirW(pResDirRet, lpszName);
     if(!pResDirRet) {
+        dprintf2(("FindResourceW %s: resource %x (type %x, lang %x) NAME NOT FOUND", szModule, lpszName, lpszType, lang));
 	SetLastError(ERROR_RESOURCE_NAME_NOT_FOUND);
 	return NULL;
     }
@@ -213,6 +217,11 @@ HRSRC Win32ImageBase::findResourceW(LPWSTR lpszName, LPWSTR lpszType, ULONG lang
       	 hRes = getResourceLang(pResDirRet);
     }
     else hRes = getResourceLangEx(pResDirRet, lang);
+
+    if((ULONG)lpszName != ID_GETFIRST && HIWORD(lpszName)) {
+            dprintf(("FindResourceW %s: resource %ls (type %x, lang %x)", szModule, lpszName, lpszType, lang));
+    }
+    else    dprintf(("FindResourceW %s: resource %x (type %x, lang %x)", szModule, lpszName, lpszType, lang));
 
     SetLastError(ERROR_SUCCESS);
     return hRes;

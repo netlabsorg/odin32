@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.59 2001-02-19 22:07:21 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.60 2001-03-28 16:21:41 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -139,6 +139,9 @@ DWORD error2WinError(APIRET rc,DWORD defaultCode = ERROR_NOT_ENOUGH_MEMORY_W)
 
     case ERROR_WRITE_PROTECT: //19
         return ERROR_WRITE_PROTECT_W;
+
+    case ERROR_NOT_READY: //21
+        return ERROR_NOT_READY_W;
 
     case ERROR_NOT_DOS_DISK: //26
         return ERROR_NOT_DOS_DISK_W;

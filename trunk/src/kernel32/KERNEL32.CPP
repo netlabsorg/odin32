@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.60 2001-03-22 18:16:40 sandervl Exp $ */
+/* $Id: KERNEL32.CPP,v 1.61 2001-03-28 16:21:40 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -455,12 +455,12 @@ BOOL WIN32API GetSystemPowerStatus(LPSYSTEM_POWER_STATUS lpSystemPowerStatus)
 	SetLastError(ERROR_INVALID_PARAMETER);
 	return FALSE;
   }
-  lpSystemPowerStatus->ACLineStatus       = 1; //online
-  lpSystemPowerStatus->BatteryFlag        = 128; //no system battery
-  lpSystemPowerStatus->BatteryLifePercent = 255; //unknown
-  lpSystemPowerStatus->reserved           = 0;
-  lpSystemPowerStatus->BatteryLifeTime    = -1; //unknown
-  lpSystemPowerStatus->BatteryFullLifeTime= -1; //unknown
+  lpSystemPowerStatus->ACLineStatus       = AC_LINE_ONLINE;
+  lpSystemPowerStatus->BatteryFlag        = BATTERY_FLAG_HIGH;
+  lpSystemPowerStatus->BatteryLifePercent = BATTERY_PERCENTAGE_UNKNOWN;
+  lpSystemPowerStatus->Reserved1          = 0;
+  lpSystemPowerStatus->BatteryLifeTime    = BATTERY_LIFE_UNKNOWN;
+  lpSystemPowerStatus->BatteryFullLifeTime= BATTERY_LIFE_UNKNOWN;
 
   return TRUE;
 }
