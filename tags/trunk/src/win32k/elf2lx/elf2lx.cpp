@@ -1,4 +1,4 @@
-/* $Id: elf2lx.cpp,v 1.6 2001-02-10 11:11:42 bird Exp $
+/* $Id: elf2lx.cpp,v 1.7 2001-03-11 16:49:16 bird Exp $
  *
  * Elf2Lx - implementation.
  *
@@ -14,11 +14,12 @@
 *******************************************************************************/
 #define FOR_EXEHDR 1                    /* To make all object flags OBJ???. */
 #define INCL_DOSERRORS                  /* DOS Error codes. */
+#define INCL_OS2KRNL_LDR                /* LdrRead */
 #ifdef RING0
-    #define INCL_OS2KRNL_LDR            /* LdrRead */
     #define INCL_NOAPI                  /* RING0: No apis. */
 #else /*RING3*/
     #define INCL_DOSPROCESS             /* RING3: DosSleep. */
+    #define INCL_OS2KRNL_LDR_NOAPIS     /* No apis */
 #endif
 
 /*******************************************************************************
@@ -28,6 +29,7 @@
 #include "types.h"                      /* Types used by the next two files. */
 #include <newexe.h>                     /* OS/2 NE structs and definitions. */
 #include <exe386.h>                     /* OS/2 LX structs and definitions. */
+#include "elf.h"                        /* Elf binary format definitions. */
 
 #include "devSegDf.h"                   /* Win32k segment definitions. */
 
@@ -44,7 +46,6 @@
 #include "dev32.h"                      /* 32-Bit part of the device driver. (SSToDS) */
 #include "OS2Krnl.h"                    /* kernel structs.  (SFN) */
 
-#include "elf.h"                        /* Elf binary format definitions. */
 #include "modulebase.h"                 /* ModuleBase class definitions, ++. */
 #include "elf2lx.h"                     /* Elf2Lx class definitions.  */
 
@@ -268,5 +269,88 @@ BOOL Elf2Lx::validHeader(Elf32_Ehdr *pEhdr)
         )
         return TRUE;
     return FALSE;
+}
+
+
+/**
+ * Read data from the virtual LX-file.
+ * @param     offLXFile  Offset (into the virtual lx file) of the data to read
+ * @param     pvBuffer   Pointer to buffer where data is to be put.
+ * @param     cbToRead   Bytes to be read.
+ * @param     fpBuffer   Flags which was spesified to the ldrRead call.
+ * @parma     pMTE       Pointer to MTE which was specified to the ldrRead call.
+ * @return    NO_ERROR if successful something else if not.
+ * @status    completely implmented; tested.
+ * @author    knut st. osmundsen
+ */
+ULONG Elf2Lx::read(ULONG offLXFile, PVOID pvBuffer, ULONG fpBuffer, ULONG cbToRead, PMTE pMTE)
+{
+    NOREF(offLXFile);
+    NOREF(pvBuffer);
+    NOREF(fpBuffer);
+    NOREF(cbToRead);
+    NOREF(pMTE);
+    return ERROR_READ_FAULT;
+}
+
+
+/**
+ * Applies relocation fixups to a page which is being loaded.
+ * @returns    NO_ERROR on success?
+ *             error code on error?
+ * @param      pMTE           Pointer Module Table Entry.
+ * @param      iObject        Index into the object table. (0-based)
+ * @param      iPageTable     Index into the page table. (0-based)
+ * @param      pvPage         Pointer to the page which is being loaded.
+ * @param      ulPageAddress  Address of page.
+ * @param      pvPTDA         Pointer to Per Task Data Aera
+ *
+ * @sketch     Find RVA.
+ * @remarks    Some more information on relocations:
+ */
+ULONG  Elf2Lx::applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID pvPage,
+                           ULONG ulPageAddress, PVOID pvPTDA)
+{
+    NOREF(pMTE);
+    NOREF(iObject);
+    NOREF(iPageTable);
+    NOREF(pvPage);
+    NOREF(ulPageAddress);
+    NOREF(pvPTDA);
+    return ERROR_READ_FAULT;
+}
+
+
+/**
+ * Writes the virtual LX file to a file. (Ring 3 only!)
+ * @returns   NO_ERROR on success. Error code on error.
+ * @param     pszLXFilename  Pointer to name of the LX file.
+ * @sketch    Find size of the virtual LX-file.
+ *            Open the output file.
+ *            LOOP while more to left of file
+ *            BEGIN
+ *                read into buffer from virtual LX-file.
+ *                write to output file.
+ *            END
+ *            return success or errorcode.
+ * @status    compeletely implemented; tested.
+ * @author    knut st. osmundsen
+ */
+ULONG Elf2Lx::writeFile(PCSZ pszLXFilename)
+{
+    NOREF(pszLXFilename);
+    return ERROR_WRITE_FAULT;
+}
+
+
+/**
+ * Dumps info on the virtual Lx file.
+ * Currently it only dumps sizes and offsets.
+ * @status    partially implemented.
+ * @author    knut st. osmundsen
+ */
+VOID Elf2Lx::dumpVirtualLxFile()
+{
+
 }
 
