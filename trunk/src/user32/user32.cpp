@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.29 1999-09-24 22:45:27 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.30 1999-09-25 09:27:08 dengert Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -1241,12 +1241,23 @@ int WIN32API MapWindowPoints( HWND arg1, HWND arg2, LPPOINT arg3, UINT arg4)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API ScreenToClient( HWND arg1, LPPOINT  arg2)
+BOOL WIN32API ScreenToClient (HWND hwnd, LPPOINT pt)
 {
 #ifdef DEBUG
     WriteLog("USER32:  ScreenToClient\n");
 #endif
-    return O32_ScreenToClient(arg1, arg2);
+    Win32BaseWindow *wnd;
+    PRECT rcl;
+
+    if (!hwnd) return (TRUE);
+    wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
+    if (!wnd) return (TRUE);
+
+    rcl   = wnd->getClientRect();
+    pt->y = ScreenHeight - pt->y;
+    OSLibWinMapWindowPoints (OSLIB_HWND_DESKTOP, wnd->getOS2WindowHandle(), (OSLIBPOINT *)pt, 1);
+    pt->y = (rcl->bottom - rcl->top) - pt->y;
+    return (TRUE);
 }
 //******************************************************************************
 //******************************************************************************

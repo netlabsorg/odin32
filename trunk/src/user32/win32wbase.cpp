@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.10 1999-09-24 22:45:27 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.11 1999-09-25 09:27:07 dengert Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1241,10 +1241,10 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         PWINDOWPOS wpos = (PWINDOWPOS)lParam;
         WPARAM     wp   = SIZE_RESTORED;
 
-        if (!(wpos->flags & SWP_NOCLIENTMOVE))
+        if (!(wpos->flags & SWP_NOMOVE) && !(wpos->flags & SWP_NOCLIENTMOVE))
             SendMessageA(WM_MOVE, 0, MAKELONG(rectClient.left, rectClient.top));
 
-        if (!(wpos->flags & SWP_NOCLIENTSIZE))
+        if (!(wpos->flags & SWP_NOSIZE) && !(wpos->flags & SWP_NOCLIENTSIZE))
         {
             if (dwStyle & WS_MAXIMIZE) wp = SIZE_MAXIMIZED;
             else if (dwStyle & WS_MINIMIZE) wp = SIZE_MINIMIZED;
