@@ -1,4 +1,4 @@
-/* $Id: dev32.h,v 1.1 2001-09-11 01:27:27 bird Exp $
+/* $Id: dev32.h,v 1.2 2001-09-14 01:50:16 bird Exp $
  *
  * dev32 - header file for 32-bit part of the driver.
  *
@@ -78,6 +78,7 @@ ULONG  _Optlink x86RestoreWriteProtect(ULONG flWP);
 /*
  * Global variables
  */
+#ifndef SSToDS
 extern PULONG pulTKSSBase32;
 extern USHORT CallGateGDT;
 
@@ -101,6 +102,8 @@ extern USHORT CallGateGDT;
 #else
     #define SSToDS(a)   ((PVOID)(a))
 #endif
+
+#endif /* SSToDS */
 
 #ifdef __cplusplus
 }

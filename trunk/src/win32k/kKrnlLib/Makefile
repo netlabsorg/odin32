@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.1 2001-09-11 01:27:21 bird Exp $
+# $Id: Makefile,v 1.2 2001-09-14 01:50:08 bird Exp $
 
 #
 # kKrnlLib.sys makefile.
@@ -41,13 +41,16 @@ OBJS  =\
     $(WIN32KOBJ)\d32hlp.obj \
     $(WIN32KOBJ)\d32globals.obj \
     $(WIN32KOBJ)\d16globl.obj \
-    $(WIN32KOBJ)\asmutils.obj \
     $(WIN32KOBJ)\calltaba.obj \
-#    $(WIN32KOBJ)\locks.obj \
+    $(WIN32KOBJ)\asmutils.obj \
+    $(WIN32KOBJ)\kAssert.obj \
+    $(WIN32KOBJ)\kAVLPV.obj \
+    $(WIN32KOBJ)\kAVLStr.obj \
+    $(WIN32KOBJ)\kAVLStrI.obj \
+    $(WIN32KOBJ)\kAVLULM.obj \
     $(WIN32KOBJ)\malloc.obj \
     $(WIN32KOBJ)\smalloc.obj \
     $(WIN32KOBJ)\rmalloc.obj \
-    $(WIN32KOBJ)\avl.obj \
     $(WIN32KOBJ)\new.obj \
     $(WIN32KOBJ)\stricmp.obj \
     $(WIN32KOBJ)\vsprintf.obj \
