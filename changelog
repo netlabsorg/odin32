@@ -1,8 +1,11 @@
-/* $Id: changelog,v 1.1859 2001-11-28 15:33:48 sandervl Exp $ */
+/* $Id: changelog,v 1.1860 2001-11-28 15:47:08 sandervl Exp $ */
 
  2001-11-28: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o WaitCommEvent fixes (must reset overlapped event semaphore &
                   store result of overlapped operation in parameter)
+                o Removed symbolic link for \\.\. Adding this is a very bad idea
+                  as CreateFile calls for device driver will be routed to files.
+                  Probably causes even more problems.
     - INCLUDE:  o winbase.h: CBR_xxxx definitions wrong
 
  2001-11-27: Patrick Haller <patrick.haller@innotek.de>
