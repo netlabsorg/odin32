@@ -1,4 +1,9 @@
- /* $Id: changelog,v 1.1095 2000-08-31 21:02:13 sandervl Exp $ */
+ /* $Id: changelog,v 1.1096 2000-09-01 01:36:10 phaller Exp $ */
+
+ 2000-09-01: Patrick Haller <phaller@gmx.net>
+    - GDI32:  - Open32 fix for CreateDIBitmap: some apps claim they have
+                a bitmap w/o palette color table and then send one in to copy.
+    - USER32: - PMWINDOW.CPP: WM_FOCUSCHANCE - validate GetTopParent() handle
 
  2000-08-31: Sander van Leeuwen <sandervl@xs4all.nl>
     - DDRAW:    Extra debug logging
