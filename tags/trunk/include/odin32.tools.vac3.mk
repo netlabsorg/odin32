@@ -1,15 +1,14 @@
-# $Id: pdwin32.vac36.tools,v 1.3 2000-11-21 04:39:19 bird Exp $
-# ODIN / win32os2 Project
+# $Id: odin32.tools.vac3.mk,v 1.1 2000-12-02 23:50:49 bird Exp $
+
 #
-# makefile for the build system tools and standard rules
-# Note: this has to be included after the compiler environment
+# Odin32 API
 #
-# phaller@gmx.net, 1999/05/27
+#       IBM Visual Age for C++ v3.08 tools and interference rules.
 #
 
 
 #
-# VAC36 Specific tools
+# VAC3 Specific tools
 #
 MAPSYM      = mapsym
 
@@ -30,7 +29,7 @@ MAKE_CMD    = $(MAKE_CMD) NODEP=1
 
 
 #
-# Targets
+# Interference rules.
 #
 .SUFFIXES: .orc_asm .orc
 

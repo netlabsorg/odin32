@@ -1,4 +1,5 @@
-# $Id: pdwin32.post,v 1.12 2000-09-28 03:16:23 bird Exp $
+# $Id: odin32.post.mk,v 1.1 2000-12-02 23:50:47 bird Exp $
+
 #
 # Odin32 API
 #
@@ -23,5 +24,5 @@
 #
 
 # Include compiler spesific post rule file.
-!include $(PDWIN32_INCLUDE)/pdwin32.$(CCENV).post
+!include $(ODIN32_INCLUDE)/odin32.post.$(CCENV).mk
 
