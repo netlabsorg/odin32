@@ -1,4 +1,4 @@
-/* $Id: pmkbdhk.h,v 1.1 2001-10-22 23:17:18 phaller Exp $ */
+/* $Id: pmkbdhk.h,v 1.2 2003-02-16 18:28:48 sandervl Exp $ */
 /*
  * OS/2 Presentation Manager Keyboard Hook
  *
@@ -14,7 +14,8 @@
  * Note: this won't interfere with any WM_USER value,
  * WM_PENFIRST is 0x04c0
  */
-#define WM_CHAR_SPECIAL 0x04bf
+#define WM_CHAR_SPECIAL              0x04be
+#define WM_CHAR_SPECIAL_ALTGRCONTROL 0x04bf
 
 
 #endif //__PMKBDHK_H__
