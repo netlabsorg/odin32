@@ -46,6 +46,7 @@ static HKEY hKeyLocalMachine = 0;
 static HKEY hKeyUsers        = 0;
 
 static HMODULE hDllAdvapi32  = 0;
+static HMODULE hDllGdi32     = 0;
 
 #ifdef __IBMCPP__
 extern "C" {
@@ -141,6 +142,12 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
          if(rc == 0) 
                 return 0UL;
 
+         SetCustomBuildName("GDI32.DLL");
+         hDllGdi32 = RegisterLxDll(hModule, NULL, NULL);
+
+         SetCustomBuildName("ADVAPI32.DLL");
+         hDllAdvapi32 = RegisterLxDll(hModule, NULL, NULL);
+
          SetCustomBuildName("VERSION.DLL");        
          if(RegisterLxDll(hModule, NULL, (PVOID)NULL) == 0)
             return 0UL;
@@ -179,9 +186,6 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
          rc = inittermComdlg32(hModule, ulFlag);
          if(rc == 0) 
                 return 0UL;
-
-         SetCustomBuildName("ADVAPI32.DLL");
-         hDllAdvapi32 = RegisterLxDll(hModule, NULL, NULL);
 
          SetCustomBuildName(NULL);
          break;
