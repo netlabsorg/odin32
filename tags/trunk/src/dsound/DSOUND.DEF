@@ -1,0 +1,7 @@
+LIBRARY DSOUND INITINSTANCE TERMINSTANCE
+PROTMODE
+DATA MULTIPLE NONSHARED READWRITE LOADONCALL
+CODE LOADONCALL
+EXPORTS
+   DirectSoundCreate     = _OS2DirectSoundCreate@12             @1
+   DirectSoundEnumerateA = _OS2DirectSoundEnumerateA@8          @2

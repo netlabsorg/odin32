@@ -1,0 +1,8 @@
+OS/2 bugs:
+- Dlls are terminated in the order in which they're present in the modules
+  name lookup table instead of taking dependencies into account
+
+- DosSetMem doesn't seem to do what it's supposed to;
+  the size parameter has to be adjusted to take page boundary crossing
+  into account. According to the Control Program Programming Guide, DosSetMem 
+  should do this automatically.

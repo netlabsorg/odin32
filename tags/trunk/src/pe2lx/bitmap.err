@@ -1,0 +1,2 @@
+bitmap.cpp(807): Warning! W014: col(0) no reference to symbol 'QueryPaletteSize' 
+bitmap.cpp(807): Note! N392: col(0) 'unsigned long QueryPaletteSize( _BITMAPINFOHEADER2 * )' defined in: bitmap.cpp(538) (col 14) 

@@ -1,0 +1,26 @@
+[COMPILER]
+compile=concur|capture|:Compile:&Compile,nmake %n.obj
+make=concur|capture|:Build:&Build,nmake
+rebuild=concur|capture|:Rebuild:&Rebuild,nmake /A
+debug=:Debug:&Debug,ipmd winspool.dll
+execute=:Execute:E&xecute,winspool.dll
+user1=hide|:User 1:User 1,
+user2=hide|:User 2:User 2,
+usertool_resource_editor=hide|:Resource Editor:Resource Editor,dlgedit
+workingdir=
+includedirs=..\..\include;%(INCLUDE)
+tagfiles=
+reffile=
+MACRO=\n
+FILTEREXPANSION=1 1 1 1 1
+[FILES]
+INITTERM.C
+makefile
+winspool.c
+winspool.DEF
+[ASSOCIATION]
+[STATE]
+FILEHIST: 0
+PRINTER: 2
+
+

@@ -1,0 +1,647 @@
+/* $Id: console2.h,v 1.1 1999-05-24 20:19:45 ktk Exp $ */
+
+/*
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
+ */
+/*
+ * Win32 Console Subsystem for OS/2
+ *
+ * 1998/02/11 PH Patrick Haller (haller@zebra.fh-weingarten.de)
+ *
+ * @(#) HandleManager.Cpp       1.0.0   1998/02/11 PH start
+ */
+
+#ifndef _CONSOLESUBSYSTEM_H_
+#define _CONSOLESUBSYSTEM_H_
+
+
+/*****************************************************************************
+ * Remark                                                                    *
+ *****************************************************************************
+
+ */
+
+
+/*****************************************************************************
+ * Resources                                                                 *
+ *****************************************************************************/
+
+#include "consolerc.h"
+
+
+/*****************************************************************************
+ * Includes                                                                  *
+ *****************************************************************************/
+
+//#include <win32type.h>
+#include "handlemanager.h"
+#include <console.h>
+
+
+/*****************************************************************************
+ * Defines & Macros                                                          *
+ *****************************************************************************/
+
+
+#define CONSOLE_TEXTMODE_BUFFER 1
+
+
+/*****************************************************************************
+ * Structures                                                                *
+ *****************************************************************************/
+
+
+typedef struct _ConsoleBuffer
+{
+      /* A console buffer is a indexed array of lines. This technique allows */
+      /* much faster scrolling than a single large textbuffer.               */
+  PSZ   *ppszLine;                  /* an array of line pointers             */
+  ULONG ulScrollLineOffset;          /* offset to the 1st line in the buffer */
+
+                /* the following structures reflect the Win32 API structures */
+  CONSOLE_CURSOR_INFO        CursorInfo;
+  COORD                      coordCursorPosition;
+
+                                     /* the mode the console is currently in */
+  DWORD                      dwConsoleMode;
+
+                              /* information about the current screen buffer */
+  //  CONSOLE_SCREEN_BUFFER_INFO ConsoleScreenBufferInfo;
+  COORD                      coordBufferSize;
+  UCHAR                      ucDefaultAttribute;   /* default text attribute */
+  COORD                      coordWindowPosition;       /* viewport position */
+  COORD                      coordWindowSize;               /* viewport size */
+} CONSOLEBUFFER, *PCONSOLEBUFFER;
+
+
+
+/*****************************************************************************
+ * Prototypes                                                                *
+ *****************************************************************************/
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
+DWORD ConsoleInit(void);       /* creation of the console subsystem */
+
+DWORD ConsoleDevicesRegister(void);       /* create console devices */
+
+void  ConsoleWaitClose(void);      /* wait for user to close console */
+
+BOOL  ConsoleIsActive(void);  /* returns TRUE if console window open */
+
+#ifndef _OS2WIN_H
+
+BOOL   WIN32API AllocConsole                  (VOID);
+
+HANDLE WIN32API CreateConsoleScreenBuffer     (DWORD         dwDesiredAccess,
+                                                  DWORD         dwShareMode,
+                                                  LPVOID        lpSecurityAttributes,
+                                                  DWORD         dwFlags,
+                                                  LPVOID        lpScreenBufferData);
+
+BOOL   WIN32API FillConsoleOutputAttribute    (HANDLE        hConsoleOutput,
+                                                  WORD          wAttribute,
+                                                  DWORD         nLength,
+                                                  COORD         dwWriteCoord,
+                                                  LPDWORD       lpNumberOfAttrsWritten);
+
+BOOL   WIN32API FillConsoleOutputCharacterW   (HANDLE        hConsoleOutput,
+                                                  WCHAR         cCharacter,
+                                                  DWORD         nLength,
+                                                  COORD         dwWriteCoord,
+                                                  LPDWORD       lpNumberOfCharsWritten);
+
+BOOL   WIN32API FillConsoleOutputCharacterA   (HANDLE        hConsoleOutput,
+                                                  UCHAR         cCharacter,
+                                                  DWORD         nLength,
+                                                  COORD         dwWriteCoord,
+                                                  LPDWORD       lpNumberOfCharsWritten);
+
+
+BOOL   WIN32API FlushConsoleInputBuffer       (HANDLE        hConsoleInput);
+
+BOOL   WIN32API FreeConsole                   (VOID);
+
+BOOL   WIN32API GenerateConsoleCtrlEvent      (DWORD         dwCtrlEvent,
+                                                  DWORD         dwProcessGroupId);
+
+UINT   WIN32API GetConsoleCP                  (VOID);
+
+BOOL   WIN32API GetConsoleCursorInfo          (HANDLE               hConsoleOutput,
+                                                  PCONSOLE_CURSOR_INFO lpConsoleCursorInfo);
+
+BOOL   WIN32API GetConsoleMode                (HANDLE        hConsole,
+                                                  LPDWORD       lpMode);
+
+UINT   WIN32API GetConsoleOutputCP            (VOID);
+
+BOOL   WIN32API GetConsoleScreenBufferInfo    (HANDLE                      hConsoleOutput,
+                                                  PCONSOLE_SCREEN_BUFFER_INFO lpConsoleScreenBufferInfo);
+
+DWORD  WIN32API GetConsoleTitleA              (LPTSTR        lpConsoleTitle,
+                                                  DWORD         nSize);
+
+DWORD  WIN32API GetConsoleTitleW              (LPTSTR        lpConsoleTitle,
+                                                  DWORD         nSize);
+
+COORD  WIN32API GetLargestConsoleWindowSize   (HANDLE        hConsoleOutput);
+
+BOOL   WIN32API GetNumberOfConsoleInputEvents (HANDLE        hConsoleInput,
+                                                  LPDWORD       lpNumberOfEvents);
+
+BOOL   WIN32API GetNumberOfConsoleMouseButtons(LPDWORD       lpcNumberOfMouseButtons);
+
+BOOL   WIN32API PeekConsoleInputA             (HANDLE        hConsoleInput,
+                                                  PINPUT_RECORD pirBuffer,
+                                                  DWORD         cInRecords,
+                                                  LPDWORD       lpcRead);
+
+BOOL   WIN32API PeekConsoleInputW             (HANDLE        hConsoleInput,
+                                                  PINPUT_RECORD pirBuffer,
+                                                  DWORD         cInRecords,
+                                                  LPDWORD       lpcRead);
+
+BOOL   WIN32API ReadConsoleA                  (HANDLE        hConsoleInput,
+                                                  LPVOID        lpvBuffer,
+                                                  DWORD         cchToRead,
+                                                  LPDWORD       lpcchRead,
+                                                  LPVOID        lpvReserved);
+
+BOOL   WIN32API ReadConsoleInputA             (HANDLE        hConsoleInput,
+                                                  PINPUT_RECORD pirBuffer,
+                                                  DWORD         cInRecords,
+                                                  LPDWORD       lpcRead);
+
+BOOL   WIN32API ReadConsoleInputW             (HANDLE        hConsoleInput,
+                                                  PINPUT_RECORD pirBuffer,
+                                                  DWORD         cInRecords,
+                                                  LPDWORD       lpcRead);
+
+BOOL   WIN32API ReadConsoleOutputA            (HANDLE        hConsoleOutput,
+                                                  PCHAR_INFO    pchiDestBuffer,
+                                                  COORD         coordDestBufferSize,
+                                                  COORD         coordDestBufferCoord,
+                                                  PSMALL_RECT   psrctSourceRect);
+
+BOOL   WIN32API ReadConsoleOutputW            (HANDLE        hConsoleOutput,
+                                                  PCHAR_INFO    pchiDestBuffer,
+                                                  COORD         coordDestBufferSize,
+                                                  COORD         coordDestBufferCoord,
+                                                  PSMALL_RECT   psrctSourceRect);
+
+BOOL   WIN32API ReadConsoleOutputAttribute    (HANDLE        hConsoleOutput,
+                                                  LPWORD        lpwAttribute,
+                                                  DWORD         cReadCells,
+                                                  COORD         coordReadCoord,
+                                                  LPDWORD       lpcNumberRead);
+
+BOOL   WIN32API ReadConsoleOutputCharacter    (HANDLE        hConsoleOutput,
+                                                  LPTSTR        lpReadBuffer,
+                                                  DWORD         cchRead,
+                                                  COORD         coordReadCoord,
+                                                  LPDWORD       lpcNumberRead);
+
+BOOL   WIN32API ScrollConsoleScreenBufferA    (HANDLE        hConsoleOutput,
+                                                  PSMALL_RECT   psrctSourceRect,
+                                                  PSMALL_RECT   psrctClipRect,
+                                                  COORD         coordDestOrigin,
+                                                  PCHAR_INFO    pchiFill);
+
+BOOL   WIN32API ScrollConsoleScreenBufferW    (HANDLE        hConsoleOutput,
+                                                  PSMALL_RECT   psrctSourceRect,
+                                                  PSMALL_RECT   psrctClipRect,
+                                                  COORD         coordDestOrigin,
+                                                  PCHAR_INFO    pchiFill);
+
+BOOL   WIN32API SetConsoleActiveScreenBuffer  (HANDLE        hConsoleOutput);
+
+BOOL   WIN32API SetConsoleCP                  (UINT          IDCodePage);
+
+BOOL   WIN32API SetConsoleCtrlHandler         (PHANDLER_ROUTINE pHandlerRoutine,
+                                                  BOOL             fAdd);
+
+BOOL   WIN32API SetConsoleCursorInfo          (HANDLE               hConsoleOutput,
+                                                  PCONSOLE_CURSOR_INFO lpConsoleCursorInfo);
+
+BOOL   WIN32API SetConsoleCursorPosition      (HANDLE        hConsoleOutput,
+                                                  COORD         coordCursor);
+
+BOOL   WIN32API SetConsoleMode                (HANDLE        hConsole,
+                                                  DWORD         fdwMode);
+
+BOOL   WIN32API SetConsoleOutputCP            (UINT          IDCodePage);
+
+BOOL   WIN32API SetConsoleScreenBufferSize    (HANDLE        hConsoleOutput,
+                                                  COORD         coordSize);
+
+BOOL   WIN32API SetConsoleTextAttribute       (HANDLE        hConsoleOutput,
+                                                  WORD          wAttr);
+
+BOOL   WIN32API SetConsoleTitleA              (LPTSTR        lpszTitle);
+
+BOOL   WIN32API SetConsoleTitleW              (LPTSTR        lpszTitle);
+
+BOOL   WIN32API SetConsoleWindowInfo          (HANDLE        hConsoleOutput,
+                                                  BOOL          fAbsolute,
+                                                  PSMALL_RECT   psrctWindowRect);
+
+BOOL   WIN32API WriteConsoleA                 (HANDLE        hConsoleOutput,
+                                                  CONST VOID*   lpvBuffer,
+                                                  DWORD         cchToWrite,
+                                                  LPDWORD       lpcchWritten,
+                                                  LPVOID        lpvReserved);
+
+BOOL   WIN32API WriteConsoleInputA            (HANDLE        hConsoleInput,
+                                                  PINPUT_RECORD pirBuffer,
+                                                  DWORD         cInRecords,
+                                                  LPDWORD       lpcWritten);
+
+BOOL   WIN32API WriteConsoleInputW            (HANDLE        hConsoleInput,
+                                                  PINPUT_RECORD pirBuffer,
+                                                  DWORD         cInRecords,
+                                                  LPDWORD       lpcWritten);
+
+BOOL   WIN32API WriteConsoleOutputA           (HANDLE        hConsoleOutput,
+                                                  PCHAR_INFO    pchiSrcBuffer,
+                                                  COORD         coordSrcBufferSize,
+                                                  COORD         coordSrcBufferCoord,
+                                                  PSMALL_RECT   psrctDestRect);
+
+BOOL   WIN32API WriteConsoleOutputW           (HANDLE        hConsoleOutput,
+                                                  PCHAR_INFO    pchiSrcBuffer,
+                                                  COORD         coordSrcBufferSize,
+                                                  COORD         coordSrcBufferCoord,
+                                                  PSMALL_RECT   psrctDestRect);
+
+BOOL   WIN32API WriteConsoleOutputAttribute   (HANDLE        hConsoleOutput,
+                                                  LPWORD        lpwAttribute,
+                                                  DWORD         cWriteCells,
+                                                  COORD         coordWriteCoord,
+                                                  LPDWORD       lpcNumberWritten);
+
+BOOL   WIN32API WriteConsoleOutputCharacterA  (HANDLE        hConsoleOutput,
+                                                  LPTSTR        lpWriteBuffer,
+                                                  DWORD         cchWrite,
+                                                  COORD         coordWriteCoord,
+                                                  LPDWORD       lpcWritten);
+
+BOOL   WIN32API WriteConsoleOutputCharacterW  (HANDLE        hConsoleOutput,
+                                                  LPTSTR        lpWriteBuffer,
+                                                  DWORD         cchWrite,
+                                                  COORD         coordWriteCoord,
+                                                  LPDWORD       lpcWritten);
+
+
+#endif // _OS2WIN_H
+
+
+#ifdef __cplusplus
+}
+#endif
+
+
+/*****************************************************************************
+ * Forwarders                                                                *
+ *****************************************************************************/
+
+#ifdef __cplusplus
+
+/*****************************************************************************
+ * Win32 Console Subsystem Pseudo-Devices                                    *
+ *****************************************************************************/
+
+
+/*****************************************************************************
+ * ConsoleInput - manages a queue of window events fro keyboard, mouse, etc. *
+ *****************************************************************************/
+
+class HMDeviceConsoleInClass : public HMDeviceHandler
+{
+  protected:
+    /* input queue */
+    DWORD dwNumberOfInputEvents;   /* number of unread events in input queue */
+
+  public:
+    HMDeviceConsoleInClass(LPCSTR lpDeviceName)
+      : HMDeviceHandler(lpDeviceName) {}
+
+                       /* this is a handler method for calls to CreateFile() */
+  virtual DWORD  CreateFile (LPCSTR        lpFileName,
+                             PHMHANDLEDATA pHMHandleData,
+                             PVOID         lpSecurityAttributes,
+                             PHMHANDLEDATA pHMHandleDataTemplate);
+
+                           /* this is a handler method for calls to ReadFile() */
+  virtual DWORD  ReadFile   (PHMHANDLEDATA pHMHandleData,
+                             LPCVOID       lpBuffer,
+                             DWORD         nNumberOfBytesToRead,
+                             LPDWORD       lpNumberOfBytesRead,
+                             LPOVERLAPPED  lpOverlapped);
+
+                        /* this is a handler method for calls to WriteFile() */
+  virtual DWORD  WriteFile  (PHMHANDLEDATA pHMHandleData,
+                             LPCVOID       lpBuffer,
+                             DWORD         nNumberOfBytesToWrite,
+                             LPDWORD       lpNumberOfBytesWritten,
+                             LPOVERLAPPED  lpOverlapped);
+
+  virtual DWORD  _DeviceRequest (PHMHANDLEDATA pHMHandleData,
+                                 ULONG         ulRequestCode,
+                                 ULONG         arg1,
+                                 ULONG         arg2,
+                                 ULONG         arg3,
+                                 ULONG         arg4);
+
+  /************************************
+   * non-standard console I/O methods *
+   ************************************/
+
+  virtual BOOL  FlushConsoleInputBuffer(PHMHANDLEDATA pHMHandleData);
+
+  virtual DWORD GetConsoleMode(PHMHANDLEDATA pHMHandleData,
+                               LPDWORD       lpMode);
+
+  virtual BOOL  GetNumberOfConsoleInputEvents(PHMHANDLEDATA pHMHandleData,
+                                              LPDWORD       lpNumberOfEvents);
+
+  virtual DWORD PeekConsoleInputA(PHMHANDLEDATA pHMHandleData,
+                                  PINPUT_RECORD pirBuffer,
+                                  DWORD         cInRecords,
+                                  LPDWORD       lpcRead);
+
+  virtual DWORD PeekConsoleInputW(PHMHANDLEDATA pHMHandleData,
+                                  PINPUT_RECORD pirBuffer,
+                                  DWORD         cInRecords,
+                                  LPDWORD       lpcRead);
+
+  virtual DWORD ReadConsoleA(PHMHANDLEDATA pHMHandleData,
+                             CONST VOID*   lpvBuffer,
+                             DWORD         cchToRead,
+                             LPDWORD       lpcchRead,
+                             LPVOID        lpvReserved);
+
+  virtual DWORD ReadConsoleW(PHMHANDLEDATA pHMHandleData,
+                             CONST VOID*   lpvBuffer,
+                             DWORD         cchToRead,
+                             LPDWORD       lpcchRead,
+                             LPVOID        lpvReserved);
+
+  virtual DWORD ReadConsoleInputA(PHMHANDLEDATA pHMHandleData,
+                                  PINPUT_RECORD pirBuffer,
+                                  DWORD         cInRecords,
+                                  LPDWORD       lpcRead);
+
+  virtual DWORD ReadConsoleInputW(PHMHANDLEDATA pHMHandleData,
+                                  PINPUT_RECORD pirBuffer,
+                                  DWORD         cInRecords,
+                                  LPDWORD       lpcRead);
+
+  virtual DWORD SetConsoleMode(PHMHANDLEDATA pHMHandleData,
+                               DWORD         dwMode);
+
+  virtual DWORD WriteConsoleInputA (PHMHANDLEDATA pHMHandleData,
+                                    PINPUT_RECORD pirBuffer,
+                                    DWORD         cInRecords,
+                                    LPDWORD       lpcWritten);
+
+  virtual DWORD WriteConsoleInputW (PHMHANDLEDATA pHMHandleData,
+                                    PINPUT_RECORD pirBuffer,
+                                    DWORD         cInRecords,
+                                    LPDWORD       lpcWritten);
+
+};
+
+
+/*****************************************************************************
+ * ConsoleOutput - redirects requests to the currently active buffer         *
+ *****************************************************************************/
+
+class HMDeviceConsoleOutClass : public HMDeviceHandler
+{
+  protected:
+    HANDLE hConsoleBuffer;            /* handle to the active console buffer */
+
+  public:
+    HMDeviceConsoleOutClass(LPCSTR lpDeviceName)
+      : HMDeviceHandler(lpDeviceName) {}
+
+                       /* this is a handler method for calls to CreateFile() */
+  virtual DWORD  CreateFile (LPCSTR        lpFileName,
+                             PHMHANDLEDATA pHMHandleData,
+                             PVOID         lpSecurityAttributes,
+                             PHMHANDLEDATA pHMHandleDataTemplate);
+
+                           /* this is a handler method for calls to ReadFile() */
+  virtual DWORD  ReadFile   (PHMHANDLEDATA pHMHandleData,
+                             LPCVOID       lpBuffer,
+                             DWORD         nNumberOfBytesToRead,
+                             LPDWORD       lpNumberOfBytesRead,
+                             LPOVERLAPPED  lpOverlapped);
+
+                        /* this is a handler method for calls to WriteFile() */
+  virtual DWORD  WriteFile  (PHMHANDLEDATA pHMHandleData,
+                             LPCVOID       lpBuffer,
+                             DWORD         nNumberOfBytesToWrite,
+                             LPDWORD       lpNumberOfBytesWritten,
+                             LPOVERLAPPED  lpOverlapped);
+
+
+                                                /* handling non-standard I/O */
+  virtual DWORD _DeviceRequest (PHMHANDLEDATA pHMHandleData,
+                                ULONG         ulRequestCode,
+                                ULONG         arg1,
+                                ULONG         arg2,
+                                ULONG         arg3,
+                                ULONG         arg4);
+};
+
+
+/*****************************************************************************
+ * ConsoleBuffer - does all the writing to an internal line buffer array     *
+ *                 if this buffer is the active one, also does a screen updt *
+ *****************************************************************************/
+
+class HMDeviceConsoleBufferClass : public HMDeviceHandler
+{
+  public:
+    HMDeviceConsoleBufferClass(LPCSTR lpDeviceName)
+      : HMDeviceHandler(lpDeviceName) {}
+
+                       /* this is a handler method for calls to CreateFile() */
+  virtual DWORD  CreateFile (LPCSTR        lpFileName,
+                             PHMHANDLEDATA pHMHandleData,
+                             PVOID         lpSecurityAttributes,
+                             PHMHANDLEDATA pHMHandleDataTemplate);
+
+                           /* this is a handler method for calls to ReadFile() */
+  virtual DWORD  ReadFile   (PHMHANDLEDATA pHMHandleData,
+                             LPCVOID       lpBuffer,
+                             DWORD         nNumberOfBytesToRead,
+                             LPDWORD       lpNumberOfBytesRead,
+                             LPOVERLAPPED  lpOverlapped);
+
+                        /* this is a handler method for calls to WriteFile() */
+  virtual DWORD  WriteFile  (PHMHANDLEDATA pHMHandleData,
+                             LPCVOID       lpBuffer,
+                             DWORD         nNumberOfBytesToWrite,
+                             LPDWORD       lpNumberOfBytesWritten,
+                             LPOVERLAPPED  lpOverlapped);
+
+  virtual DWORD  CloseHandle(PHMHANDLEDATA pHMHandleData);
+
+  virtual DWORD  _DeviceRequest (PHMHANDLEDATA pHMHandleData,
+                                 ULONG         ulRequestCode,
+                                 ULONG         arg1,
+                                 ULONG         arg2,
+                                 ULONG         arg3,
+                                 ULONG         arg4);
+
+
+  /************************************
+   * non-standard console I/O methods *
+   ************************************/
+
+  virtual DWORD  FillConsoleOutputAttribute(PHMHANDLEDATA pHMHandleData,
+                                            WORD          wAttribute,
+                                            DWORD         nLength,
+                                            COORD         dwWriteCoord,
+                                            LPDWORD       lpNumberOfAttrsWritten);
+
+  virtual DWORD  FillConsoleOutputCharacterA(PHMHANDLEDATA pHMHandleData,
+                                             UCHAR         ucCharacter,
+                                             DWORD         nLength,
+                                             COORD         dwWriteCoord,
+                                             LPDWORD       lpNumberOfCharsWritten);
+
+  virtual DWORD  FillConsoleOutputCharacterW(PHMHANDLEDATA pHMHandleData,
+                                             WCHAR         wcCharacter,
+                                             DWORD         nLength,
+                                             COORD         dwWriteCoord,
+                                             LPDWORD       lpNumberOfCharsWritten);
+
+  virtual DWORD  GetConsoleCursorInfo(PHMHANDLEDATA        pHMHandleData,
+                                      PCONSOLE_CURSOR_INFO pCCI);
+
+  virtual DWORD  GetConsoleMode(PHMHANDLEDATA pHMHandleData,
+                                LPDWORD       lpMode);
+
+  virtual DWORD  GetLargestConsoleWindowSize(PHMHANDLEDATA pHMHandleData);
+
+  virtual DWORD  GetConsoleScreenBufferInfo(PHMHANDLEDATA               pHMHandleData,
+                                            PCONSOLE_SCREEN_BUFFER_INFO pCSBI);
+
+  virtual DWORD  ReadConsoleOutputA(PHMHANDLEDATA pHMHandleData,
+                                    PCHAR_INFO    pchiDestBuffer,
+                                    COORD         coordDestBufferSize,
+                                    COORD         coordDestBufferCoord,
+                                    PSMALL_RECT   psrctSourceRect);
+
+  virtual DWORD  ReadConsoleOutputW(PHMHANDLEDATA pHMHandleData,
+                                    PCHAR_INFO    pchiDestBuffer,
+                                    COORD         coordDestBufferSize,
+                                    COORD         coordDestBufferCoord,
+                                    PSMALL_RECT   psrctSourceRect);
+
+  virtual DWORD  ReadConsoleOutputAttribute(PHMHANDLEDATA pHMHandleData,
+                                            LPWORD        lpwAttribute,
+                                            DWORD         cReadCells,
+                                            COORD         dwReadCoord,
+                                            LPDWORD       lpcNumberRead);
+
+  virtual DWORD  ReadConsoleOutputCharacterA(PHMHANDLEDATA pHMHandleData,
+                                             LPTSTR        lpwReadBuffer,
+                                             DWORD         cchRead,
+                                             COORD         coordReadCoord,
+                                             LPDWORD       lpcNumberRead);
+
+  virtual DWORD  ReadConsoleOutputCharacterW(PHMHANDLEDATA pHMHandleData,
+                                             LPWSTR        lpwReadBuffer,
+                                             DWORD         cchRead,
+                                             COORD         coordReadCoord,
+                                             LPDWORD       lpcNumberRead);
+
+  virtual DWORD  ScrollConsoleScreenBufferA(PHMHANDLEDATA pHMHandleData,
+                                            PSMALL_RECT   psrctSourceRect,
+                                            PSMALL_RECT   psrctClipRect,
+                                            COORD         coordDestOrigin,
+                                            PCHAR_INFO    pchiFill);
+
+  virtual DWORD  ScrollConsoleScreenBufferW(PHMHANDLEDATA pHMHandleData,
+                                            PSMALL_RECT   psrctSourceRect,
+                                            PSMALL_RECT   psrctClipRect,
+                                            COORD         coordDestOrigin,
+                                            PCHAR_INFO    pchiFill);
+
+  virtual DWORD  SetConsoleScreenBufferSize (PHMHANDLEDATA pHMHandleData,
+                                             COORD         coordSize);
+
+  virtual DWORD  SetConsoleCursorInfo(PHMHANDLEDATA        pHMHandleData,
+                                      PCONSOLE_CURSOR_INFO pCCI);
+
+  virtual DWORD  SetConsoleCursorPosition(PHMHANDLEDATA pHMHandleData,
+                                          COORD         coordCursorPosition);
+
+  virtual DWORD  SetConsoleMode(PHMHANDLEDATA pHMHandleData,
+                                DWORD         dwMode);
+
+  virtual DWORD  SetConsoleTextAttribute    (PHMHANDLEDATA pHMHandleData,
+                                             WORD          wAttr);
+
+  virtual DWORD  SetConsoleActiveScreenBuffer(PHMHANDLEDATA pHMHandleData);
+
+  virtual BOOL   SetConsoleWindowInfo(PHMHANDLEDATA pHMHandleData,
+                                      BOOL          fAbsolute,
+                                      PSMALL_RECT   psrctWindowRect);
+
+  virtual DWORD  WriteConsoleA(PHMHANDLEDATA pHMHandleData,
+                               CONST VOID*   lpvBuffer,
+                               DWORD         cchToWrite,
+                               LPDWORD       lpcchWritten,
+                               LPVOID        lpvReserved);
+
+  virtual DWORD  WriteConsoleW(PHMHANDLEDATA pHMHandleData,
+                               CONST VOID*   lpvBuffer,
+                               DWORD         cchToWrite,
+                               LPDWORD       lpcchWritten,
+                               LPVOID        lpvReserved);
+
+  virtual DWORD  WriteConsoleOutputA(PHMHANDLEDATA pHMHandleData,
+                                     PCHAR_INFO    pchiSrcBuffer,
+                                     COORD         coordSrcBufferSize,
+                                     COORD         coordSrcBufferCoord,
+                                     PSMALL_RECT   psrctDestRect);
+
+  virtual DWORD  WriteConsoleOutputW(PHMHANDLEDATA pHMHandleData,
+                                     PCHAR_INFO    pchiSrcBuffer,
+                                     COORD         coordSrcBufferSize,
+                                     COORD         coordSrcBufferCoord,
+                                     PSMALL_RECT   psrctDestRect);
+
+  virtual DWORD  WriteConsoleOutputAttribute(PHMHANDLEDATA pHMHandleData,
+                                             LPWORD        lpwAttribute,
+                                             DWORD         cWriteCells,
+                                             COORD         dwWriteCoord,
+                                             LPDWORD       lpcWritten);
+
+  virtual DWORD  WriteConsoleOutputCharacterA(PHMHANDLEDATA pHMHandleData,
+                                              LPTSTR        lpWriteBuffer,
+                                              DWORD         cchWrite,
+                                              COORD         dwWriteCoord,
+                                              LPDWORD       lpcWritten);
+
+  virtual DWORD  WriteConsoleOutputCharacterW(PHMHANDLEDATA pHMHandleData,
+                                              LPWSTR        lpWriteBuffer,
+                                              DWORD         cchWrite,
+                                              COORD         dwWriteCoord,
+                                              LPDWORD       lpcWritten);
+};
+
+#endif
+
+
+#endif /* _CONSOLESUBSYSTEM_H_ */

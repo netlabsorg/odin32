@@ -1,0 +1,19 @@
+;Created by BLAST for IBM's compiler
+LIBRARY VERSION INITINSTANCE
+DATA MULTIPLE NONSHARED
+
+EXPORTS
+    GetFileVersionInfoA        = _GetFileVersionInfoA@16     @1
+    GetFileVersionInfoSizeA    = _GetFileVersionInfoSizeA@8  @2
+    GetFileVersionInfoSizeW    = _GetFileVersionInfoSizeW@8  @3
+    GetFileVersionInfoW        = _GetFileVersionInfoW@16     @4
+;    VerFThk_ThunkData32        = _VerFThk_ThunkData32@??     @5
+;    VerFindFileA               = _VerFindFileA@??            @6
+;    VerFindFileW               = _VerFindFileW@??            @7
+;    VerInstallFileA            = _VerInstallFileA@??         @8
+;    VerInstallFileW            = _VerInstallFileW@??         @9
+;    VerLanguageNameA           = _VerLanguageNameA@??        @10
+;    VerLanguageNameW           = _VerLanguageNameW@??        @11
+    VerQueryValueA             = _VerQueryValueA@16          @12
+    VerQueryValueW             = _VerQueryValueW@16          @13
+;    VerThkSL_ThunkData32       = _VerThkSL_ThunkData32@??    @14

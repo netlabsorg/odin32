@@ -1,0 +1,68 @@
+;Created by BLAST for IBM's compiler
+;Basis is NT4.0's NTDLL.DLL
+LIBRARY NTDLL INITINSTANCE TERMINSTANCE
+DATA MULTIPLE NONSHARED
+
+IMPORTS
+    fwd_RtlUnwind                    =  KERNEL32.RtlUnwind
+    fwd_memmove                      =  KERNEL32.memmove
+    fwd_RtlFillMemory                =  KERNEL32.RtlFillMemory
+    fwd_RtlMoveMemory                =  KERNEL32.RtlMoveMemory
+    fwd_RtlZeroMemory                =  KERNEL32.RtlZeroMemory
+    fwd_RtlInitializeCriticalSection =  KERNEL32.InitializeCriticalSection
+    fwd_RtlLeaveCriticalSection      =  KERNEL32.LeaveCriticalSection
+    fwd_RtlEnterCriticalSection      =  KERNEL32.EnterCriticalSection
+    fwd_RtlDeleteCriticalSection     =  KERNEL32.DeleteCriticalSection
+
+
+EXPORTS
+
+; forwarders
+    RtlUnwind                    =  fwd_RtlUnwind
+    memmove                      =  fwd_memmove
+    RtlFillMemory                =  fwd_RtlFillMemory
+    RtlMoveMemory                =  fwd_RtlMoveMemory
+    RtlZeroMemory                =  fwd_RtlZeroMemory
+    RtlInitializeCriticalSection =  fwd_RtlInitializeCriticalSection
+    RtlLeaveCriticalSection      =  fwd_RtlLeaveCriticalSection
+    RtlEnterCriticalSection      =  fwd_RtlEnterCriticalSection
+    RtlDeleteCriticalSection     =  fwd_RtlDeleteCriticalSection
+
+; real functions
+    NtClose                       = _NtClose@4                        @1300
+    RtlOpenCurrentUser            = _RtlOpenCurrentUser@8             @1301
+    RtlLengthRequiredSid          = _RtlLengthRequiredSid@4           @1302
+    RtlLengthSid                  = _RtlLengthSid@4                   @1303
+    RtlCreateAcl                  = _RtlCreateAcl@12                  @1304
+    RtlFirstFreeAce               = _RtlFirstFreeAce@8                @1305
+    RtlAddAce                     = _RtlAddAce@20                     @1306
+    RtlCreateSecurityDescriptor   = _RtlCreateSecurityDescriptor@8    @1307
+    RtlSetDaclSecurityDescriptor  = _RtlSetDaclSecurityDescriptor@16  @1308
+    RtlSetSaclSecurityDescriptor  = _RtlSetSaclSecurityDescriptor@16  @1309
+    RtlSetOwnerSecurityDescriptor = _RtlSetOwnerSecurityDescriptor@12 @1310
+    RtlSetGroupSecurityDescriptor = _RtlSetGroupSecurityDescriptor@12 @1311
+    RtlNormalizeProcessParams     = _RtlNormalizeProcessParams@4      @1312
+    RtlInitializeSid              = _RtlInitializeSid@12              @1313
+    RtlSubAuthoritySid            = _RtlSubAuthoritySid@8             @1314
+    RtlSubAuthorityCountSid       = _RtlSubAuthorityCountSid@4        @1315
+    RtlCopySid                    = _RtlCopySid@12                    @1316
+    RtlAnsiStringToUnicodeString  = _RtlAnsiStringToUnicodeString@12  @1317
+    RtlOemStringToUnicodeString   = _RtlOemStringToUnicodeString@12   @1318
+    RtlMultiByteToUnicodeN        = _RtlMultiByteToUnicodeN@20        @1319
+    RtlOemToUnicodeN              = _RtlOemToUnicodeN@20              @1320
+    RtlInitAnsiString             = _RtlInitAnsiString@8              @1321
+    RtlInitString                 = _RtlInitString@8                  @1322
+    RtlInitUnicodeString          = _RtlInitUnicodeString@8           @1323
+    RtlFreeUnicodeString          = _RtlFreeUnicodeString@4           @1324
+    RtlUnicodeToOemN              = _RtlUnicodeToOemN@20              @1325
+    RtlUnicodeStringToOemString   = _RtlUnicodeStringToOemString@12   @1326
+    RtlUnicodeStringToAnsiString  = _RtlUnicodeStringToAnsiString@12  @1327
+    RtlNtStatusToDosError         = _RtlNtStatusToDosError@4          @1328
+    RtlGetNtProductType           = _RtlGetNtProductType@4            @1329
+    RtlUpcaseUnicodeString        = _RtlUpcaseUnicodeString@12        @1330
+    RtlxOemStringToUnicodeSize    = _RtlxOemStringToUnicodeSize@4     @1331
+    RtlxAnsiStringToUnicodeSize   = _RtlxAnsiStringToUnicodeSize@4    @1332
+    RtlDosPathNameToNtPathName_U  = _RtlDosPathNameToNtPathName_U@16  @1333
+    NtOpenFile                    = _NtOpenFile@24                    @1334
+
+

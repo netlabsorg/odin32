@@ -1,0 +1,47 @@
+/* $Id: CALLBACK.CPP,v 1.1 1999-05-24 20:19:39 ktk Exp $ */
+
+/*
+ * GDI32 support code for Line DDA callbacks
+ *
+ * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
+ */
+#include <os2win.h>
+#include <stdarg.h>
+#include "misc.h"
+#include "callback.h"
+
+static VOID OPEN32API Callback(int X, int Y, LPARAM lpData);
+
+//******************************************************************************
+//******************************************************************************
+LineDDAProcCallback::LineDDAProcCallback(LINEDDAPROC pUserCallback, LPARAM lpData)
+{
+  lpUserData = lpData;
+  pCallback  = (LINEDDAPROC)pUserCallback;
+}
+//******************************************************************************
+//******************************************************************************
+LineDDAProcCallback::~LineDDAProcCallback()
+{
+
+}
+//******************************************************************************
+//******************************************************************************
+LINEDDAPROC_O32 LineDDAProcCallback::GetOS2Callback()
+{
+  return Callback;
+}
+//******************************************************************************
+//******************************************************************************
+static VOID OPEN32API Callback(int X, int Y, LPARAM lpData)
+{
+ LineDDAProcCallback *me = (LineDDAProcCallback *)lpData;
+
+  me->pCallback(X, Y, me->lpUserData);
+  return;
+}
+//******************************************************************************
+//******************************************************************************
