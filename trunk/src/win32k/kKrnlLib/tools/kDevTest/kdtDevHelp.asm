@@ -1,4 +1,4 @@
-; $Id: kdtDevHelp.asm,v 1.1 2002-09-30 23:53:53 bird Exp $
+; $Id: kdtDevHelp.asm,v 1.2 2002-10-01 05:02:16 bird Exp $
 ;
 ; Device Helper Implmenetation for Ring-3 testing.
 ;
@@ -215,7 +215,7 @@ apfnDHWorkersEnd db 0
 ; @remark
 DHRouter PROC FAR
     ASSUME cs:CODE16, ds:NOTHING, es:NOTHING, ss:NOTHING
-if 1
+if 0
     cmp     dl, 130
     jle     dhr_ok
     mov     eax, 87
