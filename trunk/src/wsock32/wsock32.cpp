@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.11 1999-10-27 08:38:05 phaller Exp $ */
+/* $Id: wsock32.cpp,v 1.12 1999-11-10 16:36:15 phaller Exp $ */
 
 /*
  *
@@ -54,6 +54,9 @@
 
 #include <sys/time.h>
 #include <win32type.h>
+#include <wprocess.h>
+#include <heapstring.h>
+
 #include "wsock32const.h"
 #include "wsock32.h"
 #include "misc.h"
@@ -76,6 +79,10 @@ ODINDEBUGCHANNEL(WSOCK32-WSOCK32)
 #define FD_ZERO(x) WFD_ZERO(x)
 #undef FD_ISSET
 #define FD_ISSET(x,y) WFD_SET(x,y)
+#endif
+
+#ifndef ERROR_SUCCESS
+#define ERROR_SUCCESS 0
 #endif
 
 
@@ -116,9 +123,57 @@ typedef struct sockaddr* PSOCKADDR;
  *****************************************************************************/
 
 // @@@PH not reentrancy proof
-static WHOSTENT whsnt;
-static WSERVENT wsvnt;
-static WPROTOENT wptnt;
+//<_sandervl> phs: I already have a rewrite of the error support in wsock. Use the
+//            GetThreadTHDB export in kernel32 and add a DWORD to the thread
+//            structure in include\win\thread.h
+
+typedef struct tagWsockThreadData
+{
+  DWORD     dwLastError; // Get/SetLastError
+  WHOSTENT  whsnt;       // database conversion buffers
+  WSERVENT  wsvnt;
+  WPROTOENT wptnt;
+} WSOCKTHREADDATA, *PWSOCKTHREADDATA;
+
+static WSOCKTHREADDATA wstdFallthru; // for emergency only
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : free memory when thread dies
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+PWSOCKTHREADDATA iQueryWsockThreadData(void)
+{
+  struct _THDB*     pThreadDB = (struct _THDB*)GetThreadTHDB();
+  PWSOCKTHREADDATA pwstd;
+
+  // check for existing pointer
+  if (pThreadDB != NULL)
+  {
+    if (pThreadDB->pWsockData == NULL)
+    {
+      // allocate on demand + initialize
+      pwstd = (PWSOCKTHREADDATA)HEAP_malloc (sizeof(WSOCKTHREADDATA));
+      pThreadDB->pWsockData = (LPVOID)pwstd;
+    }
+    else
+      // use already allocated memory
+      pwstd = (PWSOCKTHREADDATA)pThreadDB->pWsockData;
+  }
+
+  if (pwstd == NULL)
+    pwstd = &wstdFallthru; // no memory and not allocated already
+
+  return pwstd;
+}
 
 
 /*****************************************************************************
@@ -239,7 +294,9 @@ ODINFUNCTION3(SOCKET,OS2accept,SOCKET,    s,
   SOCKET rc = accept(s,addr,addrlen);
 
   if (rc == INVALID_SOCKET)
-     OS2WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+    WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+  else
+    WSASetLastError(ERROR_SUCCESS);
 
   return rc;
 }
@@ -264,8 +321,9 @@ ODINFUNCTION3(int,OS2bind,SOCKET,          s,
   int rc = bind(s,(PSOCKADDR)addr,namelen);
 
   if (rc < 0)
-     OS2WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
-
+    WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+  else
+    WSASetLastError(ERROR_SUCCESS);
   return rc;
 }
 
@@ -287,7 +345,9 @@ ODINFUNCTION1(int,OS2closesocket,SOCKET,s)
   int rc = soclose((int)s);
 
   if (rc < 0)
-     OS2WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+    WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+  else
+    WSASetLastError(ERROR_SUCCESS);
 
   return rc;
 }
@@ -314,7 +374,9 @@ ODINFUNCTION3(int,OS2connect,SOCKET,          s,
                    namelen);
 
   if (rc < 0)
-     OS2WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+    WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+  else
+    WSASetLastError(ERROR_SUCCESS);
 
   return rc;
 }
@@ -339,7 +401,9 @@ ODINFUNCTION3(int,OS2ioctlsocket,SOCKET,  s,
   int rc = ioctl(s, cmd, (char *)argp, 4);
 
   if (rc < 0)
-     OS2WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+    WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+  else
+    WSASetLastError(ERROR_SUCCESS);
 
   return rc;
 }
@@ -364,7 +428,9 @@ ODINFUNCTION3(int,OS2getpeername,SOCKET,   s,
   SOCKET rc = getpeername(s,name,namelen);
 
   if (rc == SOCKET_ERROR)
-     OS2WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+    WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+  else
+    WSASetLastError(ERROR_SUCCESS);
 
   return rc;
 }
@@ -389,7 +455,9 @@ ODINFUNCTION3(int,OS2getsockname,SOCKET,   s,
   SOCKET rc = getsockname(s,name,namelen);
 
   if (rc == SOCKET_ERROR)
-     OS2WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+    WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+  else
+    WSASetLastError(ERROR_SUCCESS);
 
   return rc;
 }
@@ -416,7 +484,9 @@ ODINFUNCTION5(int,OS2getsockopt,SOCKET,s,
   int rc = getsockopt(s,level,optname,optval,optlen);
 
   if (rc == SOCKET_ERROR)
-     OS2WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+    WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+  else
+    WSASetLastError(ERROR_SUCCESS);
 
   return rc;
 }
@@ -512,7 +582,9 @@ ODINFUNCTION2(int,OS2listen,SOCKET,s,
   int rc = listen(s,backlog);
 
   if (rc < 0)
-     OS2WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+    WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+  else
+    WSASetLastError(ERROR_SUCCESS);
 
   return rc;
 }
@@ -574,7 +646,9 @@ ODINFUNCTION4(int,OS2recv,SOCKET,s,
   int rc = recv(s,buf,len,flags);
 
   if (rc < 0)
-     OS2WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+    WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+  else
+    WSASetLastError(ERROR_SUCCESS);
 
   return rc;
 }
@@ -602,7 +676,9 @@ ODINFUNCTION6(int,OS2recvfrom,SOCKET,    s,
   int rc = recvfrom(s,buf,len,flags,from,fromlen);
 
   if (rc < 0)
-     OS2WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+    WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+  else
+    WSASetLastError(ERROR_SUCCESS);
 
   return rc;
 }
@@ -635,7 +711,9 @@ ODINFUNCTION5(int,OS2select,int,      nfds,
                 (timeval *)timeout);
 
   if (rc == SOCKET_ERROR)
-     OS2WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+    WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+  else
+    WSASetLastError(ERROR_SUCCESS);
 
   return rc;
 }
@@ -665,7 +743,9 @@ ODINFUNCTION4(int,OS2send,SOCKET,      s,
   int rc = send(s,(char *)buf,len,flags);
 
   if (rc < 0)
-     OS2WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+    WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+  else
+    WSASetLastError(ERROR_SUCCESS);
 
   return rc;
 }
@@ -693,7 +773,9 @@ ODINFUNCTION6(int,OS2sendto,SOCKET,          s,
   int rc = sendto(s,(char *)buf,len,flags,(PSOCKADDR)to,tolen);
 
   if (rc < 0)
-     OS2WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+    WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+  else
+    WSASetLastError(ERROR_SUCCESS);
 
   return rc;
 }
@@ -734,7 +816,9 @@ ODINFUNCTION5(int,OS2setsockopt,SOCKET,      s,
     rc = setsockopt(s,level,optname,(char *)optval,optlen);
 
   if (rc == SOCKET_ERROR)
-     OS2WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+    WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+  else
+    WSASetLastError(ERROR_SUCCESS);
 
   return rc;
 }
@@ -758,7 +842,9 @@ ODINFUNCTION2(int,OS2shutdown,SOCKET,s,
   int rc = shutdown(s,how);
 
   if (rc == SOCKET_ERROR)
-     OS2WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+    WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+  else
+    WSASetLastError(ERROR_SUCCESS);
 
   return rc;
 }
@@ -783,7 +869,9 @@ ODINFUNCTION3(SOCKET,OS2socket,int,af,
   SOCKET rc = socket(af,type,protocol);
 
   if (rc == INVALID_SOCKET)
-     OS2WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+    WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+  else
+    WSASetLastError(ERROR_SUCCESS);
 
   return rc;
 }
@@ -805,24 +893,30 @@ ODINFUNCTION3(WHOSTENT*,OS2gethostbyaddr,const char*, addr,
                                          int,         len,
                                          int,         type)
 {
-  WHOSTENT *yy;
-  struct hostent *xx;
+  WHOSTENT         *yy;
+  struct hostent   *xx;
+  PWSOCKTHREADDATA pwstd;
 
   xx = gethostbyaddr((char *)addr,len,type);
 
   if(xx == NULL)
   {
-     OS2WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+     WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
      return (WHOSTENT *)NULL;
   }
+  else
+    WSASetLastError(ERROR_SUCCESS);
 
-  whsnt.h_name = xx->h_name;
-  whsnt.h_aliases = xx->h_aliases;
-  whsnt.h_addrtype = (short)xx->h_addrtype;
-  whsnt.h_length = (short)xx->h_length;
-  whsnt.h_addr_list = xx->h_addr_list;
+  // access current thread wsock data block
+  pwstd = iQueryWsockThreadData();
 
-  return &whsnt;
+  pwstd->whsnt.h_name      = xx->h_name;
+  pwstd->whsnt.h_aliases   = xx->h_aliases;
+  pwstd->whsnt.h_addrtype  = (short)xx->h_addrtype;
+  pwstd->whsnt.h_length    = (short)xx->h_length;
+  pwstd->whsnt.h_addr_list = xx->h_addr_list;
+
+  return &pwstd->whsnt;
 }
 
 
@@ -840,23 +934,30 @@ ODINFUNCTION3(WHOSTENT*,OS2gethostbyaddr,const char*, addr,
 
 ODINFUNCTION1(WHOSTENT*,OS2gethostbyname,const char*,name)
 {
-  WHOSTENT *yy;
-  struct hostent *xx;
+  WHOSTENT         *yy;
+  struct hostent   *xx;
+  PWSOCKTHREADDATA pwstd;
+
 
   xx = gethostbyname((char *)name);
   if(xx == NULL)
   {
-    OS2WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+    WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
     return (WHOSTENT *)NULL;
   }
+  else
+    WSASetLastError(ERROR_SUCCESS);
 
-  whsnt.h_name = xx->h_name;
-  whsnt.h_aliases = xx->h_aliases;
-  whsnt.h_addrtype = (short)xx->h_addrtype;
-  whsnt.h_length = (short)xx->h_length;
-  whsnt.h_addr_list = xx->h_addr_list;
+  // access current thread wsock data block
+  pwstd = iQueryWsockThreadData();
 
-  return &whsnt;
+  pwstd->whsnt.h_name      = xx->h_name;
+  pwstd->whsnt.h_aliases   = xx->h_aliases;
+  pwstd->whsnt.h_addrtype  = (short)xx->h_addrtype;
+  pwstd->whsnt.h_length    = (short)xx->h_length;
+  pwstd->whsnt.h_addr_list = xx->h_addr_list;
+
+  return &pwstd->whsnt;
 }
 
 
@@ -894,22 +995,28 @@ ODINFUNCTION2(int,OS2gethostname,char *,name,
 ODINFUNCTION2(WSERVENT*,OS2getservbyport, int,         port,
                                           const char*, proto)
 {
-  struct servent *xx;
+  struct servent   *xx;
+  PWSOCKTHREADDATA pwstd;
 
   xx = getservbyport(port,(char *)proto);
 
   if(xx == NULL)
   { // this call doesn't generate an error message
-    OS2WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+    WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
     return (WSERVENT *)NULL;
   }
+  else
+    WSASetLastError(ERROR_SUCCESS);
 
-  wsvnt.s_name = xx->s_name;
-  wsvnt.s_aliases = xx->s_aliases;
-  wsvnt.s_port = (short)xx->s_port;
-  wsvnt.s_proto = xx->s_proto;
+  // access current thread wsock data block
+  pwstd = iQueryWsockThreadData();
 
-  return &wsvnt;
+  pwstd->wsvnt.s_name    = xx->s_name;
+  pwstd->wsvnt.s_aliases = xx->s_aliases;
+  pwstd->wsvnt.s_port    = (short)xx->s_port;
+  pwstd->wsvnt.s_proto   = xx->s_proto;
+
+  return &pwstd->wsvnt;
 }
 
 
@@ -928,23 +1035,30 @@ ODINFUNCTION2(WSERVENT*,OS2getservbyport, int,         port,
 ODINFUNCTION2(WSERVENT*,OS2getservbyname,const char*,name,
                                          const char*,proto)
 {
-  WSERVENT *yy;
-  struct servent *xx;
+  WSERVENT         *yy;
+  struct servent   *xx;
+  PWSOCKTHREADDATA pwstd;
+
 
   xx = getservbyname((char *)name,(char *)proto);
 
   if(xx == NULL)
   { // this call doesn't generate an error message
-    OS2WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+    WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
     return (WSERVENT *)NULL;
   }
+  else
+    WSASetLastError(ERROR_SUCCESS);
 
-  wsvnt.s_name = xx->s_name;
-  wsvnt.s_aliases = xx->s_aliases;
-  wsvnt.s_port = (short)xx->s_port;
-  wsvnt.s_proto = xx->s_proto;
+  // access current thread wsock data block
+  pwstd = iQueryWsockThreadData();
 
-  return &wsvnt;
+  pwstd->wsvnt.s_name    = xx->s_name;
+  pwstd->wsvnt.s_aliases = xx->s_aliases;
+  pwstd->wsvnt.s_port    = (short)xx->s_port;
+  pwstd->wsvnt.s_proto   = xx->s_proto;
+
+  return &pwstd->wsvnt;
 }
 
 
@@ -962,22 +1076,28 @@ ODINFUNCTION2(WSERVENT*,OS2getservbyname,const char*,name,
 
 ODINFUNCTION1(WPROTOENT*,OS2getprotobynumber,int,proto)
 {
-  struct protoent *xx;
+  struct protoent  *xx;
+  PWSOCKTHREADDATA pwstd;
 
   xx = getprotobynumber(proto);
 
   if(xx == NULL)
   {
      // this call doesn't generate an error message
-    OS2WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+    WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
     return (WPROTOENT *)NULL;
   }
+  else
+    WSASetLastError(ERROR_SUCCESS);
 
-  wptnt.p_name = xx->p_name;
-  wptnt.p_aliases = xx->p_aliases;
-  wptnt.p_proto = (short)xx->p_proto;
+  // access current thread wsock data block
+  pwstd = iQueryWsockThreadData();
 
-  return &wptnt;
+  pwstd->wptnt.p_name    = xx->p_name;
+  pwstd->wptnt.p_aliases = xx->p_aliases;
+  pwstd->wptnt.p_proto   = (short)xx->p_proto;
+
+  return &pwstd->wptnt;
 }
 
 
@@ -995,21 +1115,27 @@ ODINFUNCTION1(WPROTOENT*,OS2getprotobynumber,int,proto)
 
 ODINFUNCTION1(WPROTOENT*,OS2getprotobyname,const char*,name)
 {
-  struct protoent *xx;
+  struct protoent  *xx;
+  PWSOCKTHREADDATA pwstd;
 
   xx = getprotobyname((char *)name);
 
   if(xx == NULL)
   { // this call doesn't generate an error message
-    OS2WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+    WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
     return (WPROTOENT *)NULL;
   }
+  else
+    WSASetLastError(ERROR_SUCCESS);
 
-  wptnt.p_name = xx->p_name;
-  wptnt.p_aliases = xx->p_aliases;
-  wptnt.p_proto = (short)xx->p_proto;
+  // access current thread wsock data block
+  pwstd = iQueryWsockThreadData();
 
-  return &wptnt;
+  pwstd->wptnt.p_name    = xx->p_name;
+  pwstd->wptnt.p_aliases = xx->p_aliases;
+  pwstd->wptnt.p_proto   = (short)xx->p_proto;
+
+  return &pwstd->wptnt;
 }
 
 
@@ -1029,7 +1155,6 @@ ODINFUNCTION2(int,OS2WSAStartup,USHORT,   wVersionRequired,
                                 LPWSADATA,lpWsaData)
 {
   APIRET rc;
-  int ii;
 
   /* Make sure that the version requested is >= 1.1.   */
   /* The low byte is the major version and the high    */
@@ -1056,12 +1181,11 @@ ODINFUNCTION2(int,OS2WSAStartup,USHORT,   wVersionRequired,
 #ifdef DEBUG
     WriteLog("WSOCK32: WSAStartup sock_init returned 0\n");
 #endif
-      return 0;
+    WSASetLastError(ERROR_SUCCESS);
+    return 0;
   }
   else
-    ii = iTranslateSockErrToWSock(sock_errno());
-
-  return ii;
+    return(iTranslateSockErrToWSock(sock_errno()));
 }
 
 
@@ -1095,9 +1219,10 @@ ODINFUNCTION0(int,OS2WSACleanup)
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINPROCEDURE1(OS2WSASetLastError,int,iError)
+ODINPROCEDURE1(WSASetLastError,int,iError)
 {
-  SetLastError(iError);
+  PWSOCKTHREADDATA pwstd = iQueryWsockThreadData();
+  pwstd->dwLastError = iError;
 }
 
 
@@ -1113,9 +1238,10 @@ ODINPROCEDURE1(OS2WSASetLastError,int,iError)
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION0(int,OS2WSAGetLastError)
+ODINFUNCTION0(int,WSAGetLastError)
 {
-  return GetLastError();
+  PWSOCKTHREADDATA pwstd = iQueryWsockThreadData();
+  return(pwstd->dwLastError);
 }
 
 

@@ -1,4 +1,4 @@
-/* $Id: async.cpp,v 1.12 1999-11-04 01:13:41 phaller Exp $ */
+/* $Id: async.cpp,v 1.13 1999-11-10 16:36:15 phaller Exp $ */
 
 /*
  *
@@ -47,6 +47,20 @@
  *****************************************************************************/
 
 ODINDEBUGCHANNEL(WSOCK32-ASYNC)
+
+
+typedef enum tagSocketStatus
+{
+  SOCKSTAT_UNKNOWN = 0,     // unknown socket state
+  SOCKSTAT_NORMAL,          // normal socket state
+  SOCKSTAT_CONNECT_PENDING  // non-blocking connect attempted
+};
+
+typedef struct tagSocketAsync
+{
+  int hSocket; /* operating system socket descriptor */
+  int iStatus;
+} SOCKETASYNC, *PSOCKETASYNC;
 
 
 // prototype of the OS/2 select!
@@ -121,10 +135,6 @@ typedef struct tagAsyncRequest
 
 void _Optlink WorkerThreadProc(void* pParam);
 BOOL _System PostMessageA(HWND hwnd, UINT ulMessage, WPARAM wParam, LPARAM lParam);
-
-void _System SetLastError(int iError);
-int  _System GetLastError(void);
-#define WSASetLastError(a) SetLastError(a)
 
 
 /*****************************************************************************
@@ -999,7 +1009,11 @@ void WSAAsyncWorker::asyncSelect(PASYNCREQUEST pRequest)
   sockWin = (SOCKET)pRequest->ul1;
   ulEvent = (ULONG) pRequest->ul2;
 
+  //@@@PH to do
+  // 1. automatically set socket to non-blocking mode
+
   //@@@PH how to implement other events?
+
 
   // finally do the select!
 #ifdef BSDSELECT
