@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.9 2001-09-18 04:33:00 bird Exp $
+# $Id: Makefile,v 1.10 2001-09-23 06:44:14 bird Exp $
 
 #
 # kKrnlLib.sys makefile.
@@ -147,14 +147,6 @@ $(LASTLIB): $(LASTOBJ)
 #
 TSTOBJS =\
     $(WIN32KOBJ)\devfirst.obj \
-    $(WIN32KOBJ)\$(NAME)tst.obj \
-    $(WIN32KOBJ)\dh.obj \
-    $(WIN32KOBJ)\dos.obj \
-    $(WIN32KOBJ)\dosa.obj \
-    $(WIN32KOBJ)\init.obj \
-    $(WIN32KOBJ)\fake.obj \
-    $(WIN32KOBJ)\fakea.obj \
-    $(WIN32KOBJ)\TstFakers.obj \
     $(WIN32KOBJ)\d16strat.obj \
     $(WIN32KOBJ)\d32hlp.obj \
     $(WIN32KOBJ)\d32globals.obj \
@@ -182,6 +174,14 @@ TSTOBJS =\
     $(WIN32KOBJ)\OS2KTCB.obj \
     $(WIN32KOBJ)\OS2KPTDA.obj \
     $(WIN32KOBJ)\env.obj \
+    $(WIN32KOBJ)\$(NAME)tst.obj \
+    $(WIN32KOBJ)\dh.obj \
+    $(WIN32KOBJ)\dos.obj \
+    $(WIN32KOBJ)\dosa.obj \
+    $(WIN32KOBJ)\init.obj \
+    $(WIN32KOBJ)\fake.obj \
+    $(WIN32KOBJ)\fakea.obj \
+    $(WIN32KOBJ)\TstFakers.obj \
     $(WIN32KOBJ)\vprntf16.obj_tst. \
     $(WIN32KOBJ)\d32init.obj_tst. \
     $(WIN32KOBJ)\d16init.obj_tst_init. \
