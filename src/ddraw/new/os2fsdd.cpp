@@ -336,8 +336,10 @@ VOID RestorePM(VOID)
   USHORT sel = RestoreOS2FS();
 
   // Bail out if we aren't in FS mode
-  if (!bIsInFS)
-     return;
+  if (!bIsInFS) {
+      SetFS(sel);
+      return;
+  }
 
   // Get the anchor block
   hab = WinQueryAnchorBlock(HWND_DESKTOP);

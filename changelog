@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.1145 2000-09-25 18:53:42 mike Exp $ */
+ /* $Id: changelog,v 1.1146 2000-09-25 20:53:58 mike Exp $ */
 
  2000-09-25: Michal Necasek <michalnec@volny.cz>
     - DDRAW, DDRAW\new: Fixed way too many bugs in asmutil.cpp. Both
@@ -6,6 +6,7 @@
              incredibly buggy. They probably still are, but _much_ less
              so. This fixed mouse pointer in Master of Orion II among other
              things (but the Win95 version of MOO2 is simply buggy anyway).
+             Also fixed one case of FS corruption in DDRAW\new.
 
  2000-09-25: Patrick Haller <phaller@gmx.net>
     - KERNEL32: GlobalMemoryStatus does no more rely on Open32 (experiment for AOE)
