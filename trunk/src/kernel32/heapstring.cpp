@@ -578,7 +578,7 @@ LPWSTR WIN32API lstrcpyAtoW(LPWSTR unicode, LPSTR ascii)
     return NULL;  /* garbage in, garbage out ! */
 
   /* forward to call with length parameter */
-  lstrcpynWtoA(ascii, unicode, strlen(ascii)+1); //end included
+  lstrcpynAtoW(unicode, ascii, strlen(ascii)+1); //end included
   return (unicode);
 }
 
