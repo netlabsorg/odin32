@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2025 2002-03-20 10:30:30 sandervl Exp $ */
+/* $Id: changelog,v 1.2026 2002-03-22 11:02:42 sandervl Exp $ */
+
+ 2002-03-22: Yuri Dario <mc6530@mclink.it>
+    - USER32:   o EnumThreadWindows fix (necessary due to recent process &
+                  thread id changes)
 
  2002-03-20: Platon Fomichev <platon@innotek.de>
     - USER32:   o Fixes and changes for minimizing windows (minimized window
