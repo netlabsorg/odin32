@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2000-05-02 14:09:14 bird Exp $
+# $Id: makefile,v 1.5 2000-11-19 08:58:11 bird Exp $
 
 #
 # Odin32 API
@@ -6,87 +6,86 @@
 #       Glide makefile
 #
 
+#
 # Directory macros.
+#
 PDWIN32_INCLUDE = ..\..\..\..\..\include
 PDWIN32_LIB     = ..\..\..\..\..\lib
 PDWIN32_BIN     = ..\..\..\..\..\$(OBJDIR)
 PDWIN32_TOOLS   = ..\..\..\..\..\tools\bin
 
-# Local cleanup only.
-LOCALCLEAN = 1
+#
+# Tell buildenvironmet to build an object library and to invoke additional dep rule.
+#
+LIBTARGET = 1
+ADDITIONAL_DEP = mydep
 
 
+#
 # Compiler, tools, and interference rules.
+#
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 !include ..\3dfx.mak
 
 
-# Flag overloads and local macros.
-CLEANEXTRAS = glidersrc.asm
+#
+# Flag overloads.
+#
+CINCLUDES   = $(CINCLUDES) -I..\incsrc -I..\..\swlibs\fxmisc -I..\init\initvg -I..\init -I..\texus -I..\..\swlibs\pcilib
+CFLAGS      = $(CFLAGS)   /Os-
+CXXFLAGS    = $(CXXFLAGS) /Os-
 
-CINCLUDE = -I..\incsrc -I..\..\swlibs\fxmisc -I..\init\initvg -I..\init -I..\texus -I..\..\swlibs\pcilib
-CFLAGS   = $(CFLAGS) $(CINCLUDE) /Os-
-CXXFLAGS = $(CXXFLAGS) $(CINCLUDE) /Os-
-RCFLAGS  = $(RCFLAGS) $(CINCLUDE)
 
-
-# Object files. All objects should be prefixed with $(OBJDIR)!
+#
+# Object files. Prefix with OBJDIR and one space before the '\'.
+#
 OBJS = \
-$(OBJDIR)\CPUDTECT.OBJ \
-$(OBJDIR)\DDGUMP.OBJ \
-$(OBJDIR)\DIGLIDE.OBJ \
-$(OBJDIR)\DIGUTEX.OBJ \
-$(OBJDIR)\DISST.OBJ \
-$(OBJDIR)\DITEX.OBJ \
-$(OBJDIR)\G3DF.OBJ \
-$(OBJDIR)\GAA.OBJ \
-$(OBJDIR)\GBANNER.OBJ \
-$(OBJDIR)\GDRAW.OBJ \
-$(OBJDIR)\GERROR.OBJ \
-$(OBJDIR)\GGLIDE.OBJ \
-$(OBJDIR)\GLFB.OBJ \
-$(OBJDIR)\GMOVIE.OBJ \
-$(OBJDIR)\GPCI.OBJ \
-$(OBJDIR)\GSPLASH.OBJ \
-$(OBJDIR)\GSST.OBJ \
-$(OBJDIR)\GTEX.OBJ \
-$(OBJDIR)\GTEXDL.OBJ \
-$(OBJDIR)\GU.OBJ \
-$(OBJDIR)\GUCLIP.OBJ \
-$(OBJDIR)\GUMP.OBJ \
-$(OBJDIR)\GUTEX.OBJ \
-$(OBJDIR)\GXDRAW.OBJ \
-$(OBJDIR)\P6FENCE.OBJ \
-$(OBJDIR)\FIFO.OBJ \
+$(OBJDIR)\cpudtect.obj \
+$(OBJDIR)\ddgump.obj \
+$(OBJDIR)\diglide.obj \
+$(OBJDIR)\digutex.obj \
+$(OBJDIR)\disst.obj \
+$(OBJDIR)\ditex.obj \
+$(OBJDIR)\g3df.obj \
+$(OBJDIR)\gaa.obj \
+$(OBJDIR)\gbanner.obj \
+$(OBJDIR)\gdraw.obj \
+$(OBJDIR)\gerror.obj \
+$(OBJDIR)\gglide.obj \
+$(OBJDIR)\glfb.obj \
+$(OBJDIR)\gmovie.obj \
+$(OBJDIR)\gpci.obj \
+$(OBJDIR)\gsplash.obj \
+$(OBJDIR)\gsst.obj \
+$(OBJDIR)\gtex.obj \
+$(OBJDIR)\gtexdl.obj \
+$(OBJDIR)\gu.obj \
+$(OBJDIR)\guclip.obj \
+$(OBJDIR)\gump.obj \
+$(OBJDIR)\gutex.obj \
+$(OBJDIR)\gxdraw.obj \
+$(OBJDIR)\p6fence.obj \
+$(OBJDIR)\fifo.obj \
 $(OBJDIR)\glidersrc.obj
 
 
+#
 # Target name - name of the library without extention and path.
+#
 TARGET  = glide
 
 
-# All rule - build objs and target library.
-all:    $(OBJDIR) \
-        $(OBJDIR)\$(TARGET).lib
-
-
-# Create all libraries (not importlibraries)
-libs: all
-
-
-# Lib rule - build importlibrary (and evt. other libs)
-$(OBJDIR)\$(TARGET).lib: $(OBJS)
-    $(RM) $@
-    $(ILIB) $(ILIBFLAGS) $@ $(OBJS);
-
-
-# Dep rule - makes depenencies for C, C++ and Asm files.
-dep:
-    $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win $(CINCLUDE) \
-        *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h \
-        ..\incsrc\*.h ..\..\swlibs\fxmisc\*.h ..\init\initvg\*.h ..\init\*.h ..\texus\*.h ..\..\swlibs\pcilib\*.h
-
-
+#
 # Includes the common rules.
+#
 !include $(PDWIN32_INCLUDE)/pdwin32.post
+
+
+#
+# Additional dep rule - adds depenencies for some additional headers.
+#
+mydep:
+    $(DEPEND) -a $(CINCLUDES) \
+        ..\incsrc\*.h ..\..\swlibs\fxmisc\*.h ..\init\initvg\*.h \
+        ..\init\*.h ..\texus\*.h ..\..\swlibs\pcilib\*.h
 

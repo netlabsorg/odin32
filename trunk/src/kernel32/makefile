@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.106 2000-11-13 06:48:55 phaller Exp $
+# $Id: makefile,v 1.107 2000-11-19 09:14:19 bird Exp $
 
 #
 # Odin32 API
@@ -6,67 +6,57 @@
 #       kernel32.dll makefile
 #
 
-# Directory macros.
-PDWIN32_INCLUDE = ..\..\include
-PDWIN32_LIB     = ..\..\lib
-PDWIN32_BIN     = ..\..\$(OBJDIR)
-PDWIN32_TOOLS   = ..\..\tools\bin
 
-
+#
 # Compiler, tools, and interference rules.
-!include $(PDWIN32_INCLUDE)/pdwin32.mk
+#
+!include ../../include/pdwin32.mk
 
 
-# Flag overloads and local macros.
-CLEANEXTRAS = kernelrsrc.asm
-
-#CFLAGS   = $(CFLAGS) -DDEBUG
-#CXXFLAGS = $(CXXFLAGS) /Fa+
-#LD2FLAGS = /nologo /DE /noe /map /NOD /dbgpack /packcode /packdata /exepack:2
-#CXXFLAGS = $(CXXFLAGS) /Ti+
-
-# Object files. All objects should be prefixed with $(OBJDIR)!
+#
+# Object files. Prefix with OBJDIR and one space before the '\'.
+#
 OBJS = \
-$(OBJDIR)\KERNEL32.OBJ \
-$(OBJDIR)\KOBJECTS.OBJ \
-$(OBJDIR)\CONSOLE.OBJ \
-$(OBJDIR)\CONIN.OBJ \
-$(OBJDIR)\CONBUFFER.OBJ \
-$(OBJDIR)\CONBUFFERVIO.OBJ \
-$(OBJDIR)\CONOUT.OBJ \
-$(OBJDIR)\UNICODE.OBJ \
-$(OBJDIR)\network.OBJ \
-$(OBJDIR)\HMDEVIO.OBJ \
+$(OBJDIR)\kernel32.obj \
+$(OBJDIR)\kobjects.obj \
+$(OBJDIR)\console.obj \
+$(OBJDIR)\conin.obj \
+$(OBJDIR)\conbuffer.obj \
+$(OBJDIR)\conbuffervio.obj \
+$(OBJDIR)\conout.obj \
+$(OBJDIR)\unicode.obj \
+$(OBJDIR)\network.obj \
+$(OBJDIR)\hmdevio.obj \
 $(OBJDIR)\profile.obj \
-$(OBJDIR)\THREAD.OBJ \
+$(OBJDIR)\thread.obj \
 $(OBJDIR)\virtual.obj \
-$(OBJDIR)\THUNK.OBJ \
-$(OBJDIR)\OBSOLETE.OBJ \
-$(OBJDIR)\COMM.OBJ \
-$(OBJDIR)\MESSAGE.OBJ \
-$(OBJDIR)\RESOURCE.OBJ \
-$(OBJDIR)\EXCEPTIONS.OBJ \
+$(OBJDIR)\thunk.obj \
+$(OBJDIR)\obsolete.obj \
+$(OBJDIR)\comm.obj \
+$(OBJDIR)\message.obj \
+$(OBJDIR)\resource.obj \
+$(OBJDIR)\exceptions.obj \
 $(OBJDIR)\heapshared.obj \
 $(OBJDIR)\cpuhlp.obj \
 $(OBJDIR)\heapcode.obj \
-$(OBJDIR)\LFILE.OBJ \
-$(OBJDIR)\NPIPE.OBJ \
+$(OBJDIR)\lfile.obj \
+$(OBJDIR)\npipe.obj \
 $(OBJDIR)\oslibdos.obj \
 $(OBJDIR)\oslibmisc.obj \
 $(OBJDIR)\ole2nls.obj \
-$(OBJDIR)\MISC.OBJ \
-$(OBJDIR)\EXCEPTUTIL.OBJ \
-$(OBJDIR)\LANG.OBJ \
-$(OBJDIR)\ICCIO.OBJ \
-$(OBJDIR)\MAP.OBJ \
-$(OBJDIR)\WIN32UTIL.OBJ \
-$(OBJDIR)\heap.OBJ \
+$(OBJDIR)\misc.obj \
+$(OBJDIR)\exceptutil.obj \
+$(OBJDIR)\lang.obj \
+$(OBJDIR)\iccio.obj \
+$(OBJDIR)\map.obj \
+$(OBJDIR)\win32util.obj \
+$(OBJDIR)\heap.obj \
 $(OBJDIR)\heapstring.obj \
-$(OBJDIR)\os2heap.OBJ \
-$(OBJDIR)\vmutex.OBJ \
-$(OBJDIR)\vsemaphore.OBJ \
-$(OBJDIR)\initterm.OBJ \
-$(OBJDIR)\handlemanager.OBJ \
+$(OBJDIR)\os2heap.obj \
+$(OBJDIR)\vmutex.obj \
+$(OBJDIR)\vsemaphore.obj \
+$(OBJDIR)\initterm.obj \
+$(OBJDIR)\handlemanager.obj \
 $(OBJDIR)\environ.obj \
 $(OBJDIR)\initsystem.obj \
 $(OBJDIR)\hmdevice.obj \
@@ -77,13 +67,13 @@ $(OBJDIR)\hmfile.obj \
 $(OBJDIR)\hmmutex.obj \
 $(OBJDIR)\hmcomm.obj \
 $(OBJDIR)\hmsemaphore.obj \
-$(OBJDIR)\wprocess.OBJ \
-$(OBJDIR)\conprop.OBJ \
+$(OBJDIR)\wprocess.obj \
+$(OBJDIR)\conprop.obj \
 $(OBJDIR)\conprop2.obj \
 $(OBJDIR)\winimagelx.obj \
-$(OBJDIR)\winimagebase.OBJ \
-$(OBJDIR)\windllbase.OBJ \
-$(OBJDIR)\winexebase.OBJ \
+$(OBJDIR)\winimagebase.obj \
+$(OBJDIR)\windllbase.obj \
+$(OBJDIR)\winexebase.obj \
 $(OBJDIR)\time.obj \
 $(OBJDIR)\mmap.obj \
 $(OBJDIR)\winimagepe2lx.obj \
@@ -94,12 +84,12 @@ $(OBJDIR)\windllpeldr.obj \
 $(OBJDIR)\winexepe2lx.obj \
 $(OBJDIR)\winexelx.obj \
 $(OBJDIR)\winexepeldr.obj \
-$(OBJDIR)\WINRES.OBJ \
+$(OBJDIR)\winres.obj \
 $(OBJDIR)\critsection.obj \
-$(OBJDIR)\pefile.OBJ \
-$(OBJDIR)\winimgres.OBJ \
+$(OBJDIR)\pefile.obj \
+$(OBJDIR)\winimgres.obj \
 $(OBJDIR)\wintls.obj \
-$(OBJDIR)\async.OBJ \
+$(OBJDIR)\async.obj \
 $(OBJDIR)\fileio.obj \
 $(OBJDIR)\hmtoken.obj \
 $(OBJDIR)\atom.obj \
@@ -131,55 +121,48 @@ $(OBJDIR)\exceptstackdump.obj \
 $(OBJDIR)\kernelrsrc.obj
 
 
+#
+# Libraries. One space before the '\'.
+# (Note! the order here is important!)
+#
+LIBS = \
+$(PDWIN32_LIB)/$(ODINCRT).lib \
+$(PDWIN32_LIB)\PMWINX.LIB \
+$(PDWIN32_LIB)\LIBULS.LIB \
+$(PDWIN32_LIB)\LIBCONV.LIB \
+$(PDWIN32_LIB)\WIN32K.LIB \
+OS2386.LIB \
+$(RTLLIB_O)
+
+
+#
+# OS/2 resourcefiles
+#
+OS2RES = \
+$(OBJDIR)\console.res
+
+
+#
 # Target name - name of the dll without extention and path.
+#
 TARGET = kernel32
 
 
-# All rule - build objs, target dll, copies dll to bin and makes libs.
-all:    $(OBJDIR) \
-        $(OBJDIR)\$(TARGET).dll \
-        $(PDWIN32_BIN)\$(TARGET).dll \
-        lib
-
-
-# Lib rule - build importlibrary (and evt. other libs)
-lib: $(TARGET).lib $(PDWIN32_LIB)\$(TARGET).lib
-
-
-# Dll rule - builds the target dll.
-$(OBJDIR)\$(TARGET).dll: $(OBJS) $(TARGET).def $(OBJDIR)\$(TARGET).lrf \
-                          $(OBJDIR)\console.res
-    $(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lrf
-    $(OS2RC) $(OS2RCLFLAGS) $(OBJDIR)\console.res $@
-
-
-# Linker file - creates the parameter file passed on to the linker.
-$(OBJDIR)\$(TARGET).lrf: makefile
-    @echo Creating file <<$(OBJDIR)\$(@B).lrf
-/OUT:$(OBJDIR)\$(TARGET).dll
-/MAP:$(OBJDIR)\$(TARGET).map
-$(OBJS)
-$(PDWIN32_LIB)/$(ODINCRT).lib
-$(PDWIN32_LIB)\PMWINX.LIB
-$(PDWIN32_LIB)\LIBULS.LIB
-$(PDWIN32_LIB)\LIBCONV.LIB
-$(PDWIN32_LIB)\WIN32K.LIB
-OS2386.LIB
-$(RTLLIB_O)
-$(TARGET).def
-<<keep
-
-
-# Dep rule - makes depenencies for C, C++ and Asm files.
-dep:
-    $(DEPEND) -I. -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
-        *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
-
-
+#
 # Includes the common rules.
+#
 !include $(PDWIN32_INCLUDE)/pdwin32.post
 
 
-#override flags for exceptions.cpp
+#
+# Override flags for exceptions.cpp
+#  Hmm. This is compiler depended!
+#
 $(OBJDIR)\exceptions.obj: exceptions.cpp
-    $(CXX) $(CXXFLAGS) -Op- -Fo$(OBJDIR)\$(@B).obj -c exceptions.cpp
+!if "$(VAC3)" == "1"  ||  "$(VAC36)" == "1"
+    $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -Op- \
+        -Fo$(OBJDIR)\$(@B).obj -c exceptions.cpp
+!else
+!   error "Compiler is not supported yet."
+!endif
+

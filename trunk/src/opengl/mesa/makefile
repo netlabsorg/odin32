@@ -1,33 +1,45 @@
-# $Id: makefile,v 1.8 2000-07-19 19:05:15 sandervl Exp $
+# $Id: makefile,v 1.9 2000-11-19 08:58:15 bird Exp $
 
 #
 # Odin32 API
 #
-# Makefile for Mesa OpenGL
+#       Mesa Makefile - opengl.dll
 #
 
+
+#
 # Directory macros.
+#
 PDWIN32_INCLUDE = ..\..\..\include
 PDWIN32_LIB     = ..\..\..\lib
 PDWIN32_BIN     = ..\..\..\$(OBJDIR)
 PDWIN32_TOOLS   = ..\..\..\tools\bin
 
 
+#
 # Compiler, tools, and interference rules.
+#
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 
-# Flag overloads and local macros.
-CLEANEXTRAS = lz32rsrc.asm
+
+#
+# Overrides. We have to compile this as a WIN32APP.
+#
+CINCLUDES   = -I. -IGL $(CINCLUDES) -I..\glut
+CDEFINES    = $(CDEFINES_WIN32APP) \
+              -DNO_PARALLEL -DNO_STEREO -DGL_MESA_window_pos -DOS2_THREADS \
+              -DDIVE -DUSE_X86_ASM -DUSE_MMX_ASM -DUSE_3DNOW_ASM_NOT \
+              -DFAST_MATH
+CFLAGS      = $(CFLAGS_WIN32APP) /Wcnd- -Tdp
+CXXFLAGS    = $(CFLAGS_WIN32APP) /Wcnd- -Tdp
+!ifdef WAT
+!error "Compiler not supported yet!"
+!endif
 
 
-MESADEFS = -DNO_PARALLEL -DNO_STEREO -DGL_MESA_window_pos -DOS2_THREADS \
-           -DDIVE -DUSE_X86_ASM -DUSE_MMX_ASM -DUSE_3DNOW_ASM_NOT \
-           -DFAST_MATH -Tdp
-CFLAGS   = -I. -IGL $(CFLAGS_WIN32APP)   -I..\glut $(MESADEFS) /Wcnd-
-CXXFLAGS = -I. -IGL $(CXXFLAGS_WIN32APP) -I..\glut $(MESADEFS) /Wcnd-
-
-
-# Object files. All objects should be prefixed with $(OBJDIR)!
+#
+# Object files. Prefix with OBJDIR and one space before the '\'.
+#
 OBJS = \
 $(OBJDIR)\wgl.obj \
 $(OBJDIR)\accum.obj \
@@ -117,50 +129,57 @@ $(OBJDIR)\aatriangle.obj \
 $(OBJDIR)\os2thread.obj
 
 
+#
+# Libraries. One space before the '\'.
+#
+LIBS = \
+$(PDWIN32_LIB)/$(ODINCRT).lib \
+$(PDWIN32_LIB)\kernel32.lib \
+$(PDWIN32_LIB)\gdi32.lib \
+$(PDWIN32_LIB)\user32.lib \
+$(RTLLIB_O) \
+os2386.lib \
+mmpm2.lib
+
+
+#
 # Target name - name of the dll without extention and path.
+#
 TARGET = opengl32
 
 
-# All rule - build objs, target dll, copies dll to bin and makes libs.
-all:    $(OBJDIR) \
-        $(OBJDIR)\$(TARGET).dll \
-        $(PDWIN32_BIN)\$(TARGET).dll \
-        lib
-
-
-# Lib rule - build importlibrary (and evt. other libs)
-lib: $(TARGET).lib $(PDWIN32_LIB)\$(TARGET).lib
-
-
-# Dll rule - builds the target dll.
-$(OBJDIR)\$(TARGET).dll: $(OBJS) $(TARGET).def $(OBJDIR)\$(TARGET).lrf
-    -4 $(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lrf
-
-
-# Linker file - creates the parameter file passed on to the linker.
-$(OBJDIR)\$(TARGET).lrf: makefile
-    @echo Creating file <<$@
-/OUT:$(OBJDIR)\$(TARGET).dll
-/MAP:$(OBJDIR)\$(TARGET).map
-$(OBJS)
-$(PDWIN32_LIB)/$(ODINCRT).lib
-$(PDWIN32_LIB)\KERNEL32.LIB
-$(PDWIN32_LIB)\GDI32.LIB
-$(PDWIN32_LIB)\USER32.LIB
-$(RTLLIB_O)
-OS2386.LIB
-MMPM2.LIB
-$(TARGET).def
-<<keep
-
-
-
-# Dep rule - makes depenencies for C, C++ and Asm files.
-dep:
-    $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win -IGL \
-        *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
-
-
+#
 # Includes the common rules.
+#
 !include $(PDWIN32_INCLUDE)/pdwin32.post
+
+
+#
+# Libs rule to support objectlibrary used by 3dxf.
+#
+libs: $(OBJDIR)\$(TARGET).lib
+
+
+#
+# Internal objectlibrary rule.
+#
+$(OBJDIR)\$(TARGET).lib: $(OBJS)
+!if "$(VAC3)" == "1" | "$(VAC36)" == "1"
+    $(RM) $(OBJDIR)\$(TARGET)
+    $(ILIB) $(ILIBFLAGS) $@ @<<
+$(OBJS:  = &^
+)
+$(OBJDIR)\$(@B).lst
+<<
+!else
+!   error "Compiler is not yet supported."
+!endif
+
+
+#
+# Additional dep rule - adds dependencies for some additional headers.
+#
+mydep:
+    $(DEPEND) -a $(CINCLUDES) \
+        .\gl\*.h ..\glut\*.h
 

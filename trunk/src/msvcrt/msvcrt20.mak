@@ -1,10 +1,16 @@
-# $Id: makefile,v 1.13 2000-11-19 09:13:58 bird Exp $
+# $Id: msvcrt20.mak,v 1.1 2000-11-19 09:09:12 bird Exp $
 
 #
 # Odin32 API
 #
-#       lz32.dll makefile
+#       msvcrt.dll makefile
 #
+
+
+#
+# Tell buildenvironment that we have a non-default makefilename.
+#
+MAKEFILE = msvcrt20.mak
 
 
 #
@@ -17,8 +23,10 @@
 # Object files. Prefix with OBJDIR and one space before the '\'.
 #
 OBJS = \
-$(OBJDIR)\lz32.obj \
-$(OBJDIR)\lz32rsrc.obj \
+$(OBJDIR)\msvcrt.obj \
+$(OBJDIR)\critsec.obj \
+$(OBJDIR)\util.obj \
+$(OBJDIR)\$(TARGET)rsrc.obj \
 $(DLLENTRY)
 
 
@@ -26,16 +34,17 @@ $(DLLENTRY)
 # Libraries. One space before the '\'.
 #
 LIBS = \
-$(PDWIN32_LIB)/$(ODINCRT).lib \
 $(PDWIN32_LIB)/kernel32.lib \
-os2386.lib \
+$(PDWIN32_LIB)/crtdll.lib \
+$(PDWIN32_LIB)/$(ODINCRT).lib \
+OS2386.LIB \
 $(RTLLIB_O)
 
 
 #
 # Target name - name of the dll without extention and path.
 #
-TARGET = lz32
+TARGET = msvcrt20
 
 
 #

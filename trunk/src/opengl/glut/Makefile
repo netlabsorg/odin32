@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.15 2000-07-19 19:05:15 sandervl Exp $
+# $Id: Makefile,v 1.16 2000-11-19 08:58:15 bird Exp $
 
 #
 # Odin32 API
@@ -6,25 +6,40 @@
 #       glut32.dll makefile
 #
 
+
+#
 # Directory macros.
+#
 PDWIN32_INCLUDE = ..\..\..\include
 PDWIN32_LIB     = ..\..\..\lib
 PDWIN32_BIN     = ..\..\..\$(OBJDIR)
 PDWIN32_TOOLS   = ..\..\..\tools\bin
 
 
+#
+# Tell buildenvironmet to invoke additional dep rule.
+#
+ADDITIONAL_DEP = mydep
+
+
+#
 # Compiler, tools, and interference rules.
+#
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 
 
-# Flag overloads and local macros.
-CLEANEXTRAS = 32rsrc.asm
+#
+# Overrides
+#
+CINCLUDES   = -I..\mesa\GL -I..\glu $(CINCLUDES) -I..\mesa
+CDEFINES    = $(CDEFINES_WIN32APP)
+CFLAGS      = $(CFLAGS_WIN32APP)
+CXXFLAGS    = $(CXXFLAGS_WIN32APP)
 
-CFLAGS      = -I..\mesa\GL -I..\glu $(CFLAGS_WIN32APP) -I..\mesa
-CXXFLAGS    = -I..\mesa\GL -I..\glu $(CXXFLAGS_WIN32APP) -I..\mesa
 
-
-# Object files. All objects should be prefixed with $(OBJDIR)!
+#
+# Object files. Prefix with OBJDIR and one space before the '\'.
+#
 OBJS = \
 $(OBJDIR)\glut_8x13.obj \
 $(OBJDIR)\glut_9x15.obj \
@@ -78,51 +93,37 @@ $(OBJDIR)\initterm.obj \
 $(OBJDIR)\glut32rsrc.obj
 
 
+#
+# Libraries. One space before the '\'.
+#
+LIBS = \
+$(PDWIN32_LIB)/$(ODINCRT).lib \
+$(RTLLIB_O) \
+$(PDWIN32_LIB)\winmm.lib \
+$(PDWIN32_LIB)\kernel32.lib \
+$(PDWIN32_LIB)\gdi32.lib \
+$(PDWIN32_LIB)\user32.lib \
+$(PDWIN32_LIB)\glu32.lib \
+$(PDWIN32_LIB)\opengl32.lib \
+os2386.lib
+
+
+#
 # Target name - name of the dll without extention and path.
-TARGET  = glut32
+#
+TARGET = glut32
 
 
-# All rule - build objs, target dll, copies dll to bin and makes libs.
-all:    $(OBJDIR) \
-        $(OBJDIR)\$(TARGET).dll \
-        $(PDWIN32_BIN)\$(TARGET).dll \
-        lib
-
-
-# Lib rule - build importlibrary (and evt. other libs)
-lib: $(TARGET).lib $(PDWIN32_LIB)\$(TARGET).lib
-
-
-# Dll rule - builds the target dll.
-$(OBJDIR)\$(TARGET).dll: $(OBJS) $(TARGET).def $(OBJDIR)\$(TARGET).lrf
-    $(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lrf
-
-
-# Linker file - creates the parameter file passed on to the linker.
-$(OBJDIR)\$(TARGET).lrf: makefile
-    @echo Creating file <<$@
-/OUT:$(OBJDIR)\$(TARGET).dll
-/MAP:$(OBJDIR)\$(TARGET).map
-$(OBJS)
-$(PDWIN32_LIB)/$(ODINCRT).lib
-$(RTLLIB_O)
-$(PDWIN32_LIB)\WINMM.LIB
-$(PDWIN32_LIB)\KERNEL32.LIB
-$(PDWIN32_LIB)\GDI32.LIB
-$(PDWIN32_LIB)\USER32.LIB
-$(PDWIN32_LIB)\GLU32.LIB
-$(PDWIN32_LIB)\OPENGL32.LIB
-OS2386.LIB
-$(TARGET).def
-<<keep
-
-
-# Dep rule - makes depenencies for C, C++ and Asm files.
-dep:
-    $(DEPEND) -I..\mesa\GL -I..\glu -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win -I..\mesa \
-        *.c *.cpp *.asm *.inc $(PDWIN32_INCLUDE)\*.h ..\mesa\gl\*.h
-
-
+#
 # Includes the common rules.
+#
 !include $(PDWIN32_INCLUDE)/pdwin32.post
+
+
+#
+# Additional dep rule - adds dependencies for some additional headers.
+#
+mydep:
+    $(DEPEND) -a $(CINCLUDES) \
+        *.c *.cpp *.asm *.inc $(PDWIN32_INCLUDE)\*.h ..\mesa\gl\*.h
 

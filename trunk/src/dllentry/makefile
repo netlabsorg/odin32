@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2000-09-28 03:19:53 bird Exp $
+# $Id: makefile,v 1.6 2000-11-19 09:19:09 bird Exp $
 
 #
 # Odin32 API
@@ -7,14 +7,10 @@
 #
 
 
-# For the time being
-NEW_STYLE = 1
-
-
 # We have our own rules
 NO_ALL_RULE = 1
 NO_LIB_RULE = 1
-NO_DLL_RULE = 1
+NO_MAIN_RULE = 1
 NO_LNK_RULE = 1
 
 
