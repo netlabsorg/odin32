@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.57 2002-06-15 17:38:23 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.58 2002-06-28 19:45:45 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -410,17 +410,19 @@ BOOL OSLibWinPeekMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterM
         // if this is a keyup or keydown message, we've got to
         // call the keyboard hook here
         // send keyboard messages to the registered hooks
-        switch (pMsg->message)
-        {
-          case WINWM_KEYDOWN:
-          case WINWM_KEYUP:
-          case WINWM_SYSKEYDOWN:
-          case WINWM_SYSKEYUP:
-            // only supposed to be called upon WM_KEYDOWN
-            // and WM_KEYUP according to docs.
-            if(ProcessKbdHook(pMsg, fRemove))
-                goto continuepeekmsg;
-            break;
+        if(fRemove & PM_REMOVE_W) {
+            switch (pMsg->message)
+            {
+            case WINWM_KEYDOWN:
+            case WINWM_KEYUP:
+            case WINWM_SYSKEYDOWN:
+            case WINWM_SYSKEYUP:
+                // only supposed to be called upon WM_KEYDOWN
+                // and WM_KEYUP according to docs.
+                if(ProcessKbdHook(pMsg, fRemove))
+                    goto continuepeekmsg;
+                break;
+            }
         }
     
         return TRUE;
@@ -492,17 +494,19 @@ continuepeekmsg:
     }
 
     // send keyboard messages to the registered hooks
-    switch (pMsg->message)
-    {
-    case WINWM_KEYDOWN:
-    case WINWM_KEYUP:
-    case WINWM_SYSKEYDOWN:
-    case WINWM_SYSKEYUP:
-        // only supposed to be called upon WM_KEYDOWN
-        // and WM_KEYUP according to docs.
-        if(ProcessKbdHook(pMsg, fRemove))
-            goto continuepeekmsg;
-        break;
+    if(fRemove & PM_REMOVE_W) {
+        switch (pMsg->message)
+        {
+        case WINWM_KEYDOWN:
+        case WINWM_KEYUP:
+        case WINWM_SYSKEYDOWN:
+        case WINWM_SYSKEYUP:
+            // only supposed to be called upon WM_KEYDOWN
+            // and WM_KEYUP according to docs.
+            if(ProcessKbdHook(pMsg, fRemove))
+                goto continuepeekmsg;
+            break;
+        }
     }
 
     return rc;
