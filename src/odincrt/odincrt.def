@@ -962,7 +962,9 @@ EXPORTS
     _MAKE_LDBL_POSITIVE                               @912
     do_osfx__7ostreamFv                               @913
     _Exception                                        @914
-    __ctordtorInit                                    @915
-    __ctordtorTerm                                    @916
+;SvL: These shouldn't be here. Must be local for each dll or exe or
+;     else static/global objects don't get initialized
+;    __ctordtorInit                                    @915
+;    __ctordtorTerm                                    @916
     _Exception_CPP                                    @917
-    __ctdtused                                        @918
+;    __ctdtused                                        @918
