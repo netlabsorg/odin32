@@ -1,4 +1,4 @@
-/* $Id: wndclass.cpp,v 1.12 1999-06-26 15:07:01 sandervl Exp $ */
+/* $Id: wndclass.cpp,v 1.13 1999-06-26 18:25:08 sandervl Exp $ */
 
 /*
  * Win32 Window Class Managment Code for OS/2
@@ -24,6 +24,7 @@
 #include <wndclass.h>
 #include <nameid.h>
 #include <spy.h>
+#include <wprocess.h>
 #include "hooks.h"
 
 //default window handlers that are registered by RegisterClass are called
@@ -69,11 +70,16 @@ LRESULT WIN32API ButtonCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPara
  DWORD   dwStyle, dwExStyle;
  LRESULT rc;
 
+  //Restore our FS selector
+  SetWin32TIB();
+
   PostSpyMessage(hwnd, Msg, wParam, lParam);
   switch(Msg)
   {
 	case WM_LBUTTONDOWN:
 		rc = ButtonHandler(hwnd, Msg, wParam, lParam);
+		//Restore our FS selector
+  		SetWin32TIB();
 
 		NotifyParent(hwnd, Msg, wParam, lParam);
 		dwStyle   = GetWindowLongA(hwnd, GWL_STYLE);
@@ -96,14 +102,19 @@ LRESULT WIN32API ButtonCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPara
 	case WM_MBUTTONDOWN:
 	case WM_RBUTTONDOWN:
 		rc = ButtonHandler(hwnd, Msg, wParam, lParam);
+		//Restore our FS selector
+  		SetWin32TIB();
 		NotifyParent(hwnd, Msg, wParam, lParam);
+		RestoreOS2TIB();
 		return rc;
 
 	case WM_DESTROY:
 		NotifyParent(hwnd, Msg, wParam, lParam);
 		break;
   }
-  return ButtonHandler(hwnd, Msg, wParam, lParam);
+  rc = ButtonHandler(hwnd, Msg, wParam, lParam);
+  RestoreOS2TIB();
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -826,6 +837,9 @@ LRESULT EXPENTRY_O32 OS2ToWinCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM
  HWND                  parentHwnd;
  Win32WindowProc      *window;
 
+  //Restore our FS selector
+  SetWin32TIB();
+
   if(Msg == WM_MOUSEACTIVATE) 
   {
 	//Open32 sends an OS/2 window message for a button click
@@ -838,6 +852,7 @@ LRESULT EXPENTRY_O32 OS2ToWinCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM
 	dprintf(("OS2ToWinCallback %s for %x %x %x", GetMsgText(Msg), hwnd, wParam, lParam));
 
   if(HkCBT::OS2HkCBTProc(hwnd, Msg, wParam, lParam) == TRUE) {//hook swallowed msg
+	RestoreOS2TIB();
         return(0);
   }
 
@@ -861,6 +876,7 @@ LRESULT EXPENTRY_O32 OS2ToWinCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM
 			rc = wclass->GetWinCallback()(hwnd, Msg, wParam, lParam);
 
 			NotifyParent(hwnd, WM_CREATE, wParam, lParam);
+			RestoreOS2TIB();
 			return(rc);
 
 		case WM_DESTROY: //nofity parent
@@ -897,10 +913,13 @@ LRESULT EXPENTRY_O32 OS2ToWinCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM
                   	}
 			break;
 		}
-		return wclass->GetWinCallback()(hwnd, Msg, wParam, lParam);
+		rc = wclass->GetWinCallback()(hwnd, Msg, wParam, lParam);
+		RestoreOS2TIB();
+		return rc;
 	}
   }
   dprintf(("OS2ToWinCallback: couldn't find class procedure of window %X\n", hwnd));
+  RestoreOS2TIB();
   return(0);
 }
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: OS2WIN.H,v 1.6 1999-06-10 16:21:47 achimha Exp $ */
+/* $Id: OS2WIN.H,v 1.7 1999-06-26 18:24:20 sandervl Exp $ */
 #ifndef _OS2WIN_H
 #define _OS2WIN_H
 
@@ -1622,7 +1622,7 @@ BOOL    OPEN32API _O32_WinSetTranslateMode( DWORD );
 inline int O32_WinMain(HINSTANCE a, HINSTANCE b, LPSTR c, int d)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_WinMain(a, b, c, d);
     SetFS(sel);
@@ -1633,7 +1633,7 @@ inline int O32_WinMain(HINSTANCE a, HINSTANCE b, LPSTR c, int d)
 inline int O32_AbortDoc(HDC a)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_AbortDoc(a);
     SetFS(sel);
@@ -1644,7 +1644,7 @@ inline int O32_AbortDoc(HDC a)
 inline BOOL O32_AbortPath(HDC a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_AbortPath(a);
     SetFS(sel);
@@ -1655,7 +1655,7 @@ inline BOOL O32_AbortPath(HDC a)
 inline ATOM O32_AddAtom(LPCSTR a)
 {
  ATOM yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_AddAtom(a);
     SetFS(sel);
@@ -1666,7 +1666,7 @@ inline ATOM O32_AddAtom(LPCSTR a)
 inline int O32_AddFontResource(LPCSTR a)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_AddFontResource(a);
     SetFS(sel);
@@ -1677,7 +1677,7 @@ inline int O32_AddFontResource(LPCSTR a)
 inline BOOL O32_AdjustWindowRect(PRECT a, DWORD b, BOOL c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_AdjustWindowRect(a, b, c);
     SetFS(sel);
@@ -1688,7 +1688,7 @@ inline BOOL O32_AdjustWindowRect(PRECT a, DWORD b, BOOL c)
 inline BOOL O32_AdjustWindowRectEx(PRECT a, DWORD b, BOOL c, DWORD d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_AdjustWindowRectEx(a, b, c, d);
     SetFS(sel);
@@ -1699,7 +1699,7 @@ inline BOOL O32_AdjustWindowRectEx(PRECT a, DWORD b, BOOL c, DWORD d)
 inline BOOL O32_AngleArc(HDC a, int b, int c, DWORD d, float e, float f)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_AngleArc(a, b, c, d, e, f);
     SetFS(sel);
@@ -1710,7 +1710,7 @@ inline BOOL O32_AngleArc(HDC a, int b, int c, DWORD d, float e, float f)
 inline BOOL O32_AnimatePalette(HPALETTE a, UINT b, UINT c, CONST PALETTEENTRY *d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_AnimatePalette(a, b, c, d);
     SetFS(sel);
@@ -1721,7 +1721,7 @@ inline BOOL O32_AnimatePalette(HPALETTE a, UINT b, UINT c, CONST PALETTEENTRY *d
 inline BOOL O32_AppendMenu(HMENU a, UINT b, UINT c, LPCSTR d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_AppendMenu(a, b, c, d);
     SetFS(sel);
@@ -1732,7 +1732,7 @@ inline BOOL O32_AppendMenu(HMENU a, UINT b, UINT c, LPCSTR d)
 inline BOOL O32_Arc(HDC a, int b, int c, int d, int e, int f, int g, int h, int i)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_Arc(a, b, c, d, e, f, g, h, i);
     SetFS(sel);
@@ -1743,7 +1743,7 @@ inline BOOL O32_Arc(HDC a, int b, int c, int d, int e, int f, int g, int h, int 
 inline BOOL O32_ArcTo(HDC a, int b, int c, int d, int e, int f, int g, int h, int i)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ArcTo(a, b, c, d, e, f, g, h, i);
     SetFS(sel);
@@ -1754,7 +1754,7 @@ inline BOOL O32_ArcTo(HDC a, int b, int c, int d, int e, int f, int g, int h, in
 inline UINT O32_ArrangeIconicWindows(HWND a)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ArrangeIconicWindows(a);
     SetFS(sel);
@@ -1765,7 +1765,7 @@ inline UINT O32_ArrangeIconicWindows(HWND a)
 inline BOOL O32_Beep(DWORD a, DWORD b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_Beep(a, b);
     SetFS(sel);
@@ -1776,7 +1776,7 @@ inline BOOL O32_Beep(DWORD a, DWORD b)
 inline HDWP O32_BeginDeferWindowPos(int a)
 {
  HDWP yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_BeginDeferWindowPos(a);
     SetFS(sel);
@@ -1787,7 +1787,7 @@ inline HDWP O32_BeginDeferWindowPos(int a)
 inline HDC O32_BeginPaint(HWND a, PPAINTSTRUCT b)
 {
  HDC yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_BeginPaint(a, b);
     SetFS(sel);
@@ -1798,7 +1798,7 @@ inline HDC O32_BeginPaint(HWND a, PPAINTSTRUCT b)
 inline BOOL O32_BeginPath(HDC a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_BeginPath(a);
     SetFS(sel);
@@ -1809,7 +1809,7 @@ inline BOOL O32_BeginPath(HDC a)
 inline BOOL O32_BitBlt(HDC a, int b, int c, int d, int e, HDC f, int g, int h, DWORD i)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_BitBlt(a, b, c, d, e, f, g, h, i);
     SetFS(sel);
@@ -1820,7 +1820,7 @@ inline BOOL O32_BitBlt(HDC a, int b, int c, int d, int e, HDC f, int g, int h, D
 inline BOOL O32_BringWindowToTop(HWND a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_BringWindowToTop(a);
     SetFS(sel);
@@ -1831,7 +1831,7 @@ inline BOOL O32_BringWindowToTop(HWND a)
 inline BOOL O32_CallMsgFilter(LPMSG a, int b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CallMsgFilter(a, b);
     SetFS(sel);
@@ -1842,7 +1842,7 @@ inline BOOL O32_CallMsgFilter(LPMSG a, int b)
 inline LRESULT O32_CallNextHookEx(HHOOK a, int b, WPARAM c, LPARAM d)
 {
  LRESULT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CallNextHookEx(a, b, c, d);
     SetFS(sel);
@@ -1853,7 +1853,7 @@ inline LRESULT O32_CallNextHookEx(HHOOK a, int b, WPARAM c, LPARAM d)
 inline LRESULT O32_CallWindowProc(WNDPROC_O32 a, HWND b, UINT c, WPARAM d, LPARAM e)
 {
  LRESULT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CallWindowProc(a, b, c, d, e);
     SetFS(sel);
@@ -1864,7 +1864,7 @@ inline LRESULT O32_CallWindowProc(WNDPROC_O32 a, HWND b, UINT c, WPARAM d, LPARA
 inline BOOL O32_ChangeClipboardChain(HWND a, HWND b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ChangeClipboardChain(a, b);
     SetFS(sel);
@@ -1875,7 +1875,7 @@ inline BOOL O32_ChangeClipboardChain(HWND a, HWND b)
 inline LPSTR O32_CharLower(LPSTR a)
 {
  LPSTR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CharLower(a);
     SetFS(sel);
@@ -1886,7 +1886,7 @@ inline LPSTR O32_CharLower(LPSTR a)
 inline DWORD O32_CharLowerBuff(LPSTR a, DWORD b)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CharLowerBuff(a, b);
     SetFS(sel);
@@ -1897,7 +1897,7 @@ inline DWORD O32_CharLowerBuff(LPSTR a, DWORD b)
 inline LPSTR O32_CharUpper(LPSTR a)
 {
  LPSTR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CharUpper(a);
     SetFS(sel);
@@ -1908,7 +1908,7 @@ inline LPSTR O32_CharUpper(LPSTR a)
 inline DWORD O32_CharUpperBuff(LPSTR a, DWORD b)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CharUpperBuff(a, b);
     SetFS(sel);
@@ -1919,7 +1919,7 @@ inline DWORD O32_CharUpperBuff(LPSTR a, DWORD b)
 inline BOOL O32_CheckDlgButton(HWND a, int b, UINT c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CheckDlgButton(a, b, c);
     SetFS(sel);
@@ -1930,7 +1930,7 @@ inline BOOL O32_CheckDlgButton(HWND a, int b, UINT c)
 inline DWORD O32_CheckMenuItem(HMENU a, UINT b, UINT c)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CheckMenuItem(a, b, c);
     SetFS(sel);
@@ -1941,7 +1941,7 @@ inline DWORD O32_CheckMenuItem(HMENU a, UINT b, UINT c)
 inline BOOL O32_CheckRadioButton(HWND a, int b, int c, int d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CheckRadioButton(a, b, c, d);
     SetFS(sel);
@@ -1952,7 +1952,7 @@ inline BOOL O32_CheckRadioButton(HWND a, int b, int c, int d)
 inline HWND O32_ChildWindowFromPoint(HWND a, POINT b)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ChildWindowFromPoint(a, b);
     SetFS(sel);
@@ -1963,7 +1963,7 @@ inline HWND O32_ChildWindowFromPoint(HWND a, POINT b)
 inline BOOL O32_ChooseColor(LPCHOOSECOLORA a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ChooseColor(a);
     SetFS(sel);
@@ -1974,7 +1974,7 @@ inline BOOL O32_ChooseColor(LPCHOOSECOLORA a)
 inline BOOL O32_ChooseFont(LPCHOOSEFONTA a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ChooseFont(a);
     SetFS(sel);
@@ -1985,7 +1985,7 @@ inline BOOL O32_ChooseFont(LPCHOOSEFONTA a)
 inline BOOL O32_Chord(HDC a, int b, int c, int d, int e, int f, int g, int h, int i)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_Chord(a, b, c, d, e, f, g, h, i);
     SetFS(sel);
@@ -1996,7 +1996,7 @@ inline BOOL O32_Chord(HDC a, int b, int c, int d, int e, int f, int g, int h, in
 inline BOOL O32_ClientToScreen(HWND a, PPOINT b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ClientToScreen(a, b);
     SetFS(sel);
@@ -2007,7 +2007,7 @@ inline BOOL O32_ClientToScreen(HWND a, PPOINT b)
 inline BOOL O32_ClipCursor(CONST RECT *a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ClipCursor(a);
     SetFS(sel);
@@ -2018,7 +2018,7 @@ inline BOOL O32_ClipCursor(CONST RECT *a)
 inline BOOL O32_CloseClipboard()
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CloseClipboard();
     SetFS(sel);
@@ -2029,7 +2029,7 @@ inline BOOL O32_CloseClipboard()
 inline HENHMETAFILE O32_CloseEnhMetaFile(HDC a)
 {
  HENHMETAFILE yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CloseEnhMetaFile(a);
     SetFS(sel);
@@ -2040,7 +2040,7 @@ inline HENHMETAFILE O32_CloseEnhMetaFile(HDC a)
 inline BOOL O32_CloseFigure(HDC a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CloseFigure(a);
     SetFS(sel);
@@ -2051,7 +2051,7 @@ inline BOOL O32_CloseFigure(HDC a)
 inline BOOL O32_CloseHandle(HANDLE a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CloseHandle(a);
     SetFS(sel);
@@ -2062,7 +2062,7 @@ inline BOOL O32_CloseHandle(HANDLE a)
 inline HMETAFILE O32_CloseMetaFile(HDC a)
 {
  HMETAFILE yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CloseMetaFile(a);
     SetFS(sel);
@@ -2073,7 +2073,7 @@ inline HMETAFILE O32_CloseMetaFile(HDC a)
 inline BOOL O32_CloseWindow(HWND a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CloseWindow(a);
     SetFS(sel);
@@ -2084,7 +2084,7 @@ inline BOOL O32_CloseWindow(HWND a)
 inline int O32_CombineRgn(HRGN a, HRGN b, HRGN c, int d)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CombineRgn(a, b, c, d);
     SetFS(sel);
@@ -2095,7 +2095,7 @@ inline int O32_CombineRgn(HRGN a, HRGN b, HRGN c, int d)
 inline DWORD O32_CommDlgExtendedError()
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CommDlgExtendedError();
     SetFS(sel);
@@ -2106,7 +2106,7 @@ inline DWORD O32_CommDlgExtendedError()
 inline LONG O32_CompareFileTime(FILETIME *a, FILETIME *b)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CompareFileTime(a, b);
     SetFS(sel);
@@ -2117,7 +2117,7 @@ inline LONG O32_CompareFileTime(FILETIME *a, FILETIME *b)
 inline HCURSOR O32_CopyCursor(HCURSOR a)
 {
  HCURSOR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CopyCursor(a);
     SetFS(sel);
@@ -2128,7 +2128,7 @@ inline HCURSOR O32_CopyCursor(HCURSOR a)
 inline HENHMETAFILE O32_CopyEnhMetaFile(HENHMETAFILE a, LPCSTR b)
 {
  HENHMETAFILE yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CopyEnhMetaFile(a, b);
     SetFS(sel);
@@ -2139,7 +2139,7 @@ inline HENHMETAFILE O32_CopyEnhMetaFile(HENHMETAFILE a, LPCSTR b)
 inline BOOL O32_CopyFile(LPCSTR a, LPCSTR b, BOOL c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CopyFile(a, b, c);
     SetFS(sel);
@@ -2150,7 +2150,7 @@ inline BOOL O32_CopyFile(LPCSTR a, LPCSTR b, BOOL c)
 inline HICON O32_CopyIcon(HICON a)
 {
  HICON yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CopyIcon(a);
     SetFS(sel);
@@ -2161,7 +2161,7 @@ inline HICON O32_CopyIcon(HICON a)
 inline HMETAFILE O32_CopyMetaFile(HMETAFILE a, LPCSTR b)
 {
  HMETAFILE yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CopyMetaFile(a, b);
     SetFS(sel);
@@ -2172,7 +2172,7 @@ inline HMETAFILE O32_CopyMetaFile(HMETAFILE a, LPCSTR b)
 inline BOOL O32_CopyRect(PRECT a, CONST RECT *b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CopyRect(a, b);
     SetFS(sel);
@@ -2183,7 +2183,7 @@ inline BOOL O32_CopyRect(PRECT a, CONST RECT *b)
 inline int O32_CountClipboardFormats()
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CountClipboardFormats();
     SetFS(sel);
@@ -2194,7 +2194,7 @@ inline int O32_CountClipboardFormats()
 inline HACCEL O32_CreateAcceleratorTable(LPACCEL a, int b)
 {
  HACCEL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateAcceleratorTable(a, b);
     SetFS(sel);
@@ -2205,7 +2205,7 @@ inline HACCEL O32_CreateAcceleratorTable(LPACCEL a, int b)
 inline HBITMAP O32_CreateBitmap(int a, int b, UINT c, UINT d, CONST void *e)
 {
  HBITMAP yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateBitmap(a, b, c, d, e);
     SetFS(sel);
@@ -2216,7 +2216,7 @@ inline HBITMAP O32_CreateBitmap(int a, int b, UINT c, UINT d, CONST void *e)
 inline HBITMAP O32_CreateBitmapIndirect(CONST BITMAP *a)
 {
  HBITMAP yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateBitmapIndirect(a);
     SetFS(sel);
@@ -2227,7 +2227,7 @@ inline HBITMAP O32_CreateBitmapIndirect(CONST BITMAP *a)
 inline HBRUSH O32_CreateBrushIndirect(LPLOGBRUSH a)
 {
  HBRUSH yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateBrushIndirect(a);
     SetFS(sel);
@@ -2238,7 +2238,7 @@ inline HBRUSH O32_CreateBrushIndirect(LPLOGBRUSH a)
 inline BOOL O32_CreateCaret(HWND a, HBITMAP b, int c, int d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateCaret(a, b, c, d);
     SetFS(sel);
@@ -2249,7 +2249,7 @@ inline BOOL O32_CreateCaret(HWND a, HBITMAP b, int c, int d)
 inline HBITMAP O32_CreateCompatibleBitmap(HDC a, int b, int c)
 {
  HBITMAP yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateCompatibleBitmap(a, b, c);
     SetFS(sel);
@@ -2260,7 +2260,7 @@ inline HBITMAP O32_CreateCompatibleBitmap(HDC a, int b, int c)
 inline HDC O32_CreateCompatibleDC(HDC a)
 {
  HDC yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateCompatibleDC(a);
     SetFS(sel);
@@ -2271,7 +2271,7 @@ inline HDC O32_CreateCompatibleDC(HDC a)
 inline HCURSOR O32_CreateCursor(HINSTANCE a, int b, int c, int d, int e, CONST VOID *f, CONST VOID *g)
 {
  HCURSOR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateCursor(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -2282,7 +2282,7 @@ inline HCURSOR O32_CreateCursor(HINSTANCE a, int b, int c, int d, int e, CONST V
 inline HDC O32_CreateDC(LPCSTR a, LPCSTR b, LPCSTR c, CONST DEVMODEA *d)
 {
  HDC yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateDC(a, b, c, d);
     SetFS(sel);
@@ -2293,7 +2293,7 @@ inline HDC O32_CreateDC(LPCSTR a, LPCSTR b, LPCSTR c, CONST DEVMODEA *d)
 inline HBRUSH O32_CreateDIBPatternBrushPt(CONST VOID *a, UINT b)
 {
  HBRUSH yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateDIBPatternBrushPt(a, b);
     SetFS(sel);
@@ -2304,7 +2304,7 @@ inline HBRUSH O32_CreateDIBPatternBrushPt(CONST VOID *a, UINT b)
 inline HBITMAP O32_CreateDIBitmap(HDC a, CONST BITMAPINFOHEADER *b, DWORD c, CONST void *d, CONST BITMAPINFO *e, UINT f)
 {
  HBITMAP yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateDIBitmap(a, b, c, d, e, f);
     SetFS(sel);
@@ -2315,7 +2315,7 @@ inline HBITMAP O32_CreateDIBitmap(HDC a, CONST BITMAPINFOHEADER *b, DWORD c, CON
 inline HWND O32_CreateDialog(HINSTANCE a, LPCSTR b, HWND c, DLGPROC_O32 d)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateDialog(a, b, c, d);
     SetFS(sel);
@@ -2326,7 +2326,7 @@ inline HWND O32_CreateDialog(HINSTANCE a, LPCSTR b, HWND c, DLGPROC_O32 d)
 inline HWND O32_CreateDialogParam(HINSTANCE a, LPCSTR b, HWND c, DLGPROC_O32 d, LPARAM e)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateDialogParam(a, b, c, d, e);
     SetFS(sel);
@@ -2337,7 +2337,7 @@ inline HWND O32_CreateDialogParam(HINSTANCE a, LPCSTR b, HWND c, DLGPROC_O32 d, 
 inline HWND O32_CreateDialogIndirect(HINSTANCE a, CONST DLGTEMPLATE *b, HWND c, DLGPROC_O32 d)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateDialogIndirect(a, b, c, d);
     SetFS(sel);
@@ -2348,7 +2348,7 @@ inline HWND O32_CreateDialogIndirect(HINSTANCE a, CONST DLGTEMPLATE *b, HWND c, 
 inline HWND O32_CreateDialogIndirectParam(HINSTANCE a, CONST DLGTEMPLATE *b, HWND c, DLGPROC_O32 d, LPARAM e)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateDialogIndirectParam(a, b, c, d, e);
     SetFS(sel);
@@ -2359,7 +2359,7 @@ inline HWND O32_CreateDialogIndirectParam(HINSTANCE a, CONST DLGTEMPLATE *b, HWN
 inline BOOL O32_CreateDirectory(LPCSTR a, PSECURITY_ATTRIBUTES b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateDirectory(a, b);
     SetFS(sel);
@@ -2370,7 +2370,7 @@ inline BOOL O32_CreateDirectory(LPCSTR a, PSECURITY_ATTRIBUTES b)
 inline HRGN O32_CreateEllipticRgn(int a, int b, int c, int d)
 {
  HRGN yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateEllipticRgn(a, b, c, d);
     SetFS(sel);
@@ -2381,7 +2381,7 @@ inline HRGN O32_CreateEllipticRgn(int a, int b, int c, int d)
 inline HRGN O32_CreateEllipticRgnIndirect(CONST RECT *a)
 {
  HRGN yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateEllipticRgnIndirect(a);
     SetFS(sel);
@@ -2392,7 +2392,7 @@ inline HRGN O32_CreateEllipticRgnIndirect(CONST RECT *a)
 inline HENHMETAFILE O32_CreateEnhMetaFile(HDC a, LPCSTR b, CONST RECT *c, LPCSTR d)
 {
  HENHMETAFILE yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateEnhMetaFile(a, b, c, d);
     SetFS(sel);
@@ -2403,7 +2403,7 @@ inline HENHMETAFILE O32_CreateEnhMetaFile(HDC a, LPCSTR b, CONST RECT *c, LPCSTR
 inline HANDLE O32_CreateEvent(PSECURITY_ATTRIBUTES a, BOOL b, BOOL c, LPCSTR d)
 {
  HANDLE yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateEvent(a, b, c, d);
     SetFS(sel);
@@ -2414,7 +2414,7 @@ inline HANDLE O32_CreateEvent(PSECURITY_ATTRIBUTES a, BOOL b, BOOL c, LPCSTR d)
 inline HANDLE O32_CreateFile(LPCSTR a, DWORD b, DWORD c, PSECURITY_ATTRIBUTES d, DWORD e, DWORD f, HANDLE g)
 {
  HANDLE yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateFile(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -2425,7 +2425,7 @@ inline HANDLE O32_CreateFile(LPCSTR a, DWORD b, DWORD c, PSECURITY_ATTRIBUTES d,
 inline HFONT O32_CreateFont(int a, int b, int c, int d, int e, DWORD f, DWORD g, DWORD h, DWORD i, DWORD j, DWORD k, DWORD l, DWORD m, LPCSTR n)
 {
  HFONT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateFont(a, b, c, d, e, f, g, h, i, j, k, l, m, n);
     SetFS(sel);
@@ -2436,7 +2436,7 @@ inline HFONT O32_CreateFont(int a, int b, int c, int d, int e, DWORD f, DWORD g,
 inline HFONT O32_CreateFontIndirect(CONST LOGFONTA *a)
 {
  HFONT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateFontIndirect(a);
     SetFS(sel);
@@ -2447,7 +2447,7 @@ inline HFONT O32_CreateFontIndirect(CONST LOGFONTA *a)
 inline HBRUSH O32_CreateHatchBrush(int a, COLORREF b)
 {
  HBRUSH yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateHatchBrush(a, b);
     SetFS(sel);
@@ -2458,7 +2458,7 @@ inline HBRUSH O32_CreateHatchBrush(int a, COLORREF b)
 inline HDC O32_CreateIC(LPCSTR a, LPCSTR b, LPCSTR c, CONST DEVMODEA *d)
 {
  HDC yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateIC(a, b, c, d);
     SetFS(sel);
@@ -2469,7 +2469,7 @@ inline HDC O32_CreateIC(LPCSTR a, LPCSTR b, LPCSTR c, CONST DEVMODEA *d)
 inline HICON O32_CreateIcon(HINSTANCE a, int b, int c, BYTE d, BYTE e, CONST BYTE *f, CONST BYTE *g)
 {
  HICON yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateIcon(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -2480,7 +2480,7 @@ inline HICON O32_CreateIcon(HINSTANCE a, int b, int c, BYTE d, BYTE e, CONST BYT
 inline HICON O32_CreateIconFromResource(PBYTE a, DWORD b, BOOL c, DWORD d)
 {
  HICON yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateIconFromResource(a, b, c, d);
     SetFS(sel);
@@ -2491,7 +2491,7 @@ inline HICON O32_CreateIconFromResource(PBYTE a, DWORD b, BOOL c, DWORD d)
 inline HICON O32_CreateIconIndirect(LPICONINFO a)
 {
  HICON yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateIconIndirect(a);
     SetFS(sel);
@@ -2502,7 +2502,7 @@ inline HICON O32_CreateIconIndirect(LPICONINFO a)
 inline HMENU O32_CreateMenu()
 {
  HMENU yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateMenu();
     SetFS(sel);
@@ -2513,7 +2513,7 @@ inline HMENU O32_CreateMenu()
 inline HDC O32_CreateMetaFile(LPCSTR a)
 {
  HDC yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateMetaFile(a);
     SetFS(sel);
@@ -2524,7 +2524,7 @@ inline HDC O32_CreateMetaFile(LPCSTR a)
 inline HWND O32_CreateMDIWindow(LPSTR a, LPSTR b, DWORD c, int d, int e, int f, int g, HWND h, HINSTANCE i, LPARAM j)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateMDIWindow(a, b, c, d, e, f, g, h, i, j);
     SetFS(sel);
@@ -2535,7 +2535,7 @@ inline HWND O32_CreateMDIWindow(LPSTR a, LPSTR b, DWORD c, int d, int e, int f, 
 inline HANDLE O32_CreateMutex(PSECURITY_ATTRIBUTES a, BOOL b, LPCSTR c)
 {
  HANDLE yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateMutex(a, b, c);
     SetFS(sel);
@@ -2546,7 +2546,7 @@ inline HANDLE O32_CreateMutex(PSECURITY_ATTRIBUTES a, BOOL b, LPCSTR c)
 inline HPALETTE O32_CreatePalette(CONST LOGPALETTE *a)
 {
  HPALETTE yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreatePalette(a);
     SetFS(sel);
@@ -2557,7 +2557,7 @@ inline HPALETTE O32_CreatePalette(CONST LOGPALETTE *a)
 inline HBRUSH O32_CreatePatternBrush(HBITMAP a)
 {
  HBRUSH yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreatePatternBrush(a);
     SetFS(sel);
@@ -2568,7 +2568,7 @@ inline HBRUSH O32_CreatePatternBrush(HBITMAP a)
 inline HPEN O32_CreatePen(int a, int b, COLORREF c)
 {
  HPEN yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreatePen(a, b, c);
     SetFS(sel);
@@ -2579,7 +2579,7 @@ inline HPEN O32_CreatePen(int a, int b, COLORREF c)
 inline HPEN O32_CreatePenIndirect(CONST LOGPEN *a)
 {
  HPEN yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreatePenIndirect(a);
     SetFS(sel);
@@ -2590,7 +2590,7 @@ inline HPEN O32_CreatePenIndirect(CONST LOGPEN *a)
 inline HRGN O32_CreatePolyPolygonRgn(CONST POINT *a, CONST INT *b, int c, int d)
 {
  HRGN yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreatePolyPolygonRgn(a, b, c, d);
     SetFS(sel);
@@ -2601,7 +2601,7 @@ inline HRGN O32_CreatePolyPolygonRgn(CONST POINT *a, CONST INT *b, int c, int d)
 inline HRGN O32_CreatePolygonRgn(CONST POINT *a, int b, int c)
 {
  HRGN yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreatePolygonRgn(a, b, c);
     SetFS(sel);
@@ -2612,7 +2612,7 @@ inline HRGN O32_CreatePolygonRgn(CONST POINT *a, int b, int c)
 inline HMENU O32_CreatePopupMenu()
 {
  HMENU yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreatePopupMenu();
     SetFS(sel);
@@ -2623,7 +2623,7 @@ inline HMENU O32_CreatePopupMenu()
 inline BOOL O32_CreateProcess(LPCSTR a, LPCSTR b, PSECURITY_ATTRIBUTES c, PSECURITY_ATTRIBUTES d, BOOL e, DWORD f, PVOID g, LPCSTR h, LPSTARTUPINFOA i, LPPROCESS_INFORMATION j)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateProcess(a, b, c, d, e, f, g, h, i, j);
     SetFS(sel);
@@ -2634,7 +2634,7 @@ inline BOOL O32_CreateProcess(LPCSTR a, LPCSTR b, PSECURITY_ATTRIBUTES c, PSECUR
 inline HRGN O32_CreateRectRgn(int a, int b, int c, int d)
 {
  HRGN yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateRectRgn(a, b, c, d);
     SetFS(sel);
@@ -2645,7 +2645,7 @@ inline HRGN O32_CreateRectRgn(int a, int b, int c, int d)
 inline HRGN O32_CreateRectRgnIndirect(CONST RECT *a)
 {
  HRGN yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateRectRgnIndirect(a);
     SetFS(sel);
@@ -2656,7 +2656,7 @@ inline HRGN O32_CreateRectRgnIndirect(CONST RECT *a)
 inline HRGN O32_CreateRoundRectRgn(int a, int b, int c, int d, int e, int f)
 {
  HRGN yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateRoundRectRgn(a, b, c, d, e, f);
     SetFS(sel);
@@ -2667,7 +2667,7 @@ inline HRGN O32_CreateRoundRectRgn(int a, int b, int c, int d, int e, int f)
 inline HANDLE O32_CreateSemaphore(PSECURITY_ATTRIBUTES a, LONG b, LONG c, LPSTR d)
 {
  HANDLE yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateSemaphore(a, b, c, d);
     SetFS(sel);
@@ -2678,7 +2678,7 @@ inline HANDLE O32_CreateSemaphore(PSECURITY_ATTRIBUTES a, LONG b, LONG c, LPSTR 
 inline HBRUSH O32_CreateSolidBrush(COLORREF a)
 {
  HBRUSH yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateSolidBrush(a);
     SetFS(sel);
@@ -2689,7 +2689,7 @@ inline HBRUSH O32_CreateSolidBrush(COLORREF a)
 inline HANDLE O32_CreateThread(PSECURITY_ATTRIBUTES a, DWORD b, PTHREAD_START_ROUTINE_O32 c, PVOID d, DWORD e, PDWORD f)
 {
  HANDLE yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateThread(a, b, c, d, e, f);
     SetFS(sel);
@@ -2700,7 +2700,7 @@ inline HANDLE O32_CreateThread(PSECURITY_ATTRIBUTES a, DWORD b, PTHREAD_START_RO
 inline HWND O32_CreateWindowEx(DWORD a, LPCSTR b, LPCSTR c, DWORD d, int e, int f, int g, int h, HWND i, HMENU j, HINSTANCE k, PVOID l)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CreateWindowEx(a, b, c, d, e, f, g, h, i, j, k, l);
     SetFS(sel);
@@ -2711,7 +2711,7 @@ inline HWND O32_CreateWindowEx(DWORD a, LPCSTR b, LPCSTR c, DWORD d, int e, int 
 inline BOOL O32_DPtoLP(HDC a, PPOINT b, int c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DPtoLP(a, b, c);
     SetFS(sel);
@@ -2722,7 +2722,7 @@ inline BOOL O32_DPtoLP(HDC a, PPOINT b, int c)
 inline BOOL O32_DdeAbandonTransaction(DWORD a, HCONV b, DWORD c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DdeAbandonTransaction(a, b, c);
     SetFS(sel);
@@ -2733,7 +2733,7 @@ inline BOOL O32_DdeAbandonTransaction(DWORD a, HCONV b, DWORD c)
 inline PBYTE O32_DdeAccessData(HDDEDATA a, PDWORD b)
 {
  PBYTE yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DdeAccessData(a, b);
     SetFS(sel);
@@ -2744,7 +2744,7 @@ inline PBYTE O32_DdeAccessData(HDDEDATA a, PDWORD b)
 inline HDDEDATA O32_DdeAddData(HDDEDATA a, PVOID b, DWORD c, DWORD d)
 {
  HDDEDATA yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DdeAddData(a, b, c, d);
     SetFS(sel);
@@ -2755,7 +2755,7 @@ inline HDDEDATA O32_DdeAddData(HDDEDATA a, PVOID b, DWORD c, DWORD d)
 inline HDDEDATA O32_DdeClientTransaction(PVOID a, DWORD b, HCONV c, HSZ d, UINT e, UINT f, DWORD g, PDWORD h)
 {
  HDDEDATA yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DdeClientTransaction(a, b, c, d, e, f, g, h);
     SetFS(sel);
@@ -2766,7 +2766,7 @@ inline HDDEDATA O32_DdeClientTransaction(PVOID a, DWORD b, HCONV c, HSZ d, UINT 
 inline int O32_DdeCmpStringHandles(HSZ a, HSZ b)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DdeCmpStringHandles(a, b);
     SetFS(sel);
@@ -2777,7 +2777,7 @@ inline int O32_DdeCmpStringHandles(HSZ a, HSZ b)
 inline HCONV O32_DdeConnect(DWORD a, HSZ b, HSZ c, LPCONVCONTEXT d)
 {
  HCONV yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DdeConnect(a, b, c, d);
     SetFS(sel);
@@ -2788,7 +2788,7 @@ inline HCONV O32_DdeConnect(DWORD a, HSZ b, HSZ c, LPCONVCONTEXT d)
 inline HCONVLIST O32_DdeConnectList(DWORD a, HSZ b, HSZ c, HCONVLIST d, LPCONVCONTEXT e)
 {
  HCONVLIST yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DdeConnectList(a, b, c, d, e);
     SetFS(sel);
@@ -2799,7 +2799,7 @@ inline HCONVLIST O32_DdeConnectList(DWORD a, HSZ b, HSZ c, HCONVLIST d, LPCONVCO
 inline HDDEDATA O32_DdeCreateDataHandle(DWORD a, PVOID b, DWORD c, DWORD d, HSZ e, UINT f, UINT g)
 {
  HDDEDATA yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DdeCreateDataHandle(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -2810,7 +2810,7 @@ inline HDDEDATA O32_DdeCreateDataHandle(DWORD a, PVOID b, DWORD c, DWORD d, HSZ 
 inline HSZ O32_DdeCreateStringHandle(DWORD a, LPCSTR b, int c)
 {
  HSZ yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DdeCreateStringHandle(a, b, c);
     SetFS(sel);
@@ -2821,7 +2821,7 @@ inline HSZ O32_DdeCreateStringHandle(DWORD a, LPCSTR b, int c)
 inline BOOL O32_DdeDisconnect(HCONV a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DdeDisconnect(a);
     SetFS(sel);
@@ -2832,7 +2832,7 @@ inline BOOL O32_DdeDisconnect(HCONV a)
 inline BOOL O32_DdeDisconnectList(HCONVLIST a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DdeDisconnectList(a);
     SetFS(sel);
@@ -2843,7 +2843,7 @@ inline BOOL O32_DdeDisconnectList(HCONVLIST a)
 inline BOOL O32_DdeEnableCallback(DWORD a, HCONV b, UINT c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DdeEnableCallback(a, b, c);
     SetFS(sel);
@@ -2854,7 +2854,7 @@ inline BOOL O32_DdeEnableCallback(DWORD a, HCONV b, UINT c)
 inline BOOL O32_DdeFreeDataHandle(HDDEDATA a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DdeFreeDataHandle(a);
     SetFS(sel);
@@ -2865,7 +2865,7 @@ inline BOOL O32_DdeFreeDataHandle(HDDEDATA a)
 inline BOOL O32_DdeFreeStringHandle(DWORD a, HSZ b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DdeFreeStringHandle(a, b);
     SetFS(sel);
@@ -2876,7 +2876,7 @@ inline BOOL O32_DdeFreeStringHandle(DWORD a, HSZ b)
 inline DWORD O32_DdeGetData(HDDEDATA a, PVOID b, DWORD c, DWORD d)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DdeGetData(a, b, c, d);
     SetFS(sel);
@@ -2887,7 +2887,7 @@ inline DWORD O32_DdeGetData(HDDEDATA a, PVOID b, DWORD c, DWORD d)
 inline UINT O32_DdeGetLastError(DWORD a)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DdeGetLastError(a);
     SetFS(sel);
@@ -2898,7 +2898,7 @@ inline UINT O32_DdeGetLastError(DWORD a)
 inline UINT O32_DdeInitialize(PDWORD a, PFNCALLBACK b, DWORD c, DWORD d)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DdeInitialize(a, b, c, d);
     SetFS(sel);
@@ -2909,7 +2909,7 @@ inline UINT O32_DdeInitialize(PDWORD a, PFNCALLBACK b, DWORD c, DWORD d)
 inline BOOL O32_DdeKeepStringHandle(DWORD a, HSZ b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DdeKeepStringHandle(a, b);
     SetFS(sel);
@@ -2920,7 +2920,7 @@ inline BOOL O32_DdeKeepStringHandle(DWORD a, HSZ b)
 inline HDDEDATA O32_DdeNameService(DWORD a, HSZ b, HSZ c, UINT d)
 {
  HDDEDATA yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DdeNameService(a, b, c, d);
     SetFS(sel);
@@ -2931,7 +2931,7 @@ inline HDDEDATA O32_DdeNameService(DWORD a, HSZ b, HSZ c, UINT d)
 inline BOOL O32_DdePostAdvise(DWORD a, HSZ b, HSZ c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DdePostAdvise(a, b, c);
     SetFS(sel);
@@ -2942,7 +2942,7 @@ inline BOOL O32_DdePostAdvise(DWORD a, HSZ b, HSZ c)
 inline UINT O32_DdeQueryConvInfo(HCONV a, DWORD b, LPCONVINFO c)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DdeQueryConvInfo(a, b, c);
     SetFS(sel);
@@ -2953,7 +2953,7 @@ inline UINT O32_DdeQueryConvInfo(HCONV a, DWORD b, LPCONVINFO c)
 inline HCONV O32_DdeQueryNextServer(HCONVLIST a, HCONV b)
 {
  HCONV yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DdeQueryNextServer(a, b);
     SetFS(sel);
@@ -2964,7 +2964,7 @@ inline HCONV O32_DdeQueryNextServer(HCONVLIST a, HCONV b)
 inline DWORD O32_DdeQueryString(DWORD a, HSZ b, LPSTR c, DWORD d, int e)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DdeQueryString(a, b, c, d, e);
     SetFS(sel);
@@ -2975,7 +2975,7 @@ inline DWORD O32_DdeQueryString(DWORD a, HSZ b, LPSTR c, DWORD d, int e)
 inline HCONV O32_DdeReconnect(HCONV a)
 {
  HCONV yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DdeReconnect(a);
     SetFS(sel);
@@ -2986,7 +2986,7 @@ inline HCONV O32_DdeReconnect(HCONV a)
 inline BOOL O32_DdeSetUserHandle(HCONV a, DWORD b, DWORD c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DdeSetUserHandle(a, b, c);
     SetFS(sel);
@@ -2997,7 +2997,7 @@ inline BOOL O32_DdeSetUserHandle(HCONV a, DWORD b, DWORD c)
 inline BOOL O32_DdeUnaccessData(HDDEDATA a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DdeUnaccessData(a);
     SetFS(sel);
@@ -3008,7 +3008,7 @@ inline BOOL O32_DdeUnaccessData(HDDEDATA a)
 inline BOOL O32_DdeUninitialize(DWORD a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DdeUninitialize(a);
     SetFS(sel);
@@ -3019,7 +3019,7 @@ inline BOOL O32_DdeUninitialize(DWORD a)
 inline LRESULT O32_DefDlgProc(HWND a, UINT b, WPARAM c, LPARAM d)
 {
  LRESULT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DefDlgProc(a, b, c, d);
     SetFS(sel);
@@ -3030,7 +3030,7 @@ inline LRESULT O32_DefDlgProc(HWND a, UINT b, WPARAM c, LPARAM d)
 inline HDWP O32_DeferWindowPos(HDWP a, HWND b, HWND c, int d, int e, int f, int g, UINT h)
 {
  HDWP yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DeferWindowPos(a, b, c, d, e, f, g, h);
     SetFS(sel);
@@ -3041,7 +3041,7 @@ inline HDWP O32_DeferWindowPos(HDWP a, HWND b, HWND c, int d, int e, int f, int 
 inline LRESULT O32_DefFrameProc(HWND a, HWND b, UINT c, WPARAM d, LPARAM e)
 {
  LRESULT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DefFrameProc(a, b, c, d, e);
     SetFS(sel);
@@ -3052,7 +3052,7 @@ inline LRESULT O32_DefFrameProc(HWND a, HWND b, UINT c, WPARAM d, LPARAM e)
 inline LRESULT O32_DefMDIChildProc(HWND a, UINT b, WPARAM c, LPARAM d)
 {
  LRESULT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DefMDIChildProc(a, b, c, d);
     SetFS(sel);
@@ -3063,7 +3063,7 @@ inline LRESULT O32_DefMDIChildProc(HWND a, UINT b, WPARAM c, LPARAM d)
 inline LRESULT O32_DefWindowProc(HWND a, UINT b, WPARAM c, LPARAM d)
 {
  LRESULT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DefWindowProc(a, b, c, d);
     SetFS(sel);
@@ -3074,7 +3074,7 @@ inline LRESULT O32_DefWindowProc(HWND a, UINT b, WPARAM c, LPARAM d)
 inline ATOM O32_DeleteAtom(ATOM a)
 {
  ATOM yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DeleteAtom(a);
     SetFS(sel);
@@ -3084,7 +3084,7 @@ inline ATOM O32_DeleteAtom(ATOM a)
 
 inline VOID O32_DeleteCriticalSection(CRITICAL_SECTION *a)
 {
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     _O32_DeleteCriticalSection(a);
     SetFS(sel);
@@ -3093,7 +3093,7 @@ inline VOID O32_DeleteCriticalSection(CRITICAL_SECTION *a)
 inline BOOL O32_DeleteDC(HDC a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DeleteDC(a);
     SetFS(sel);
@@ -3104,7 +3104,7 @@ inline BOOL O32_DeleteDC(HDC a)
 inline BOOL O32_DeleteEnhMetaFile(HENHMETAFILE a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DeleteEnhMetaFile(a);
     SetFS(sel);
@@ -3115,7 +3115,7 @@ inline BOOL O32_DeleteEnhMetaFile(HENHMETAFILE a)
 inline BOOL O32_DeleteFile(LPCSTR a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DeleteFile(a);
     SetFS(sel);
@@ -3126,7 +3126,7 @@ inline BOOL O32_DeleteFile(LPCSTR a)
 inline BOOL O32_DeleteMenu(HMENU a, UINT b, UINT c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DeleteMenu(a, b, c);
     SetFS(sel);
@@ -3137,7 +3137,7 @@ inline BOOL O32_DeleteMenu(HMENU a, UINT b, UINT c)
 inline BOOL O32_DeleteMetaFile(HMETAFILE a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DeleteMetaFile(a);
     SetFS(sel);
@@ -3148,7 +3148,7 @@ inline BOOL O32_DeleteMetaFile(HMETAFILE a)
 inline BOOL O32_DeleteObject(HANDLE a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DeleteObject(a);
     SetFS(sel);
@@ -3159,7 +3159,7 @@ inline BOOL O32_DeleteObject(HANDLE a)
 inline BOOL O32_DestroyAcceleratorTable(HACCEL a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DestroyAcceleratorTable(a);
     SetFS(sel);
@@ -3170,7 +3170,7 @@ inline BOOL O32_DestroyAcceleratorTable(HACCEL a)
 inline BOOL O32_DestroyCaret()
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DestroyCaret();
     SetFS(sel);
@@ -3181,7 +3181,7 @@ inline BOOL O32_DestroyCaret()
 inline BOOL O32_DestroyCursor(HCURSOR a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DestroyCursor(a);
     SetFS(sel);
@@ -3192,7 +3192,7 @@ inline BOOL O32_DestroyCursor(HCURSOR a)
 inline BOOL O32_DestroyIcon(HICON a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DestroyIcon(a);
     SetFS(sel);
@@ -3203,7 +3203,7 @@ inline BOOL O32_DestroyIcon(HICON a)
 inline BOOL O32_DestroyMenu(HMENU a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DestroyMenu(a);
     SetFS(sel);
@@ -3214,7 +3214,7 @@ inline BOOL O32_DestroyMenu(HMENU a)
 inline BOOL O32_DestroyWindow(HWND a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DestroyWindow(a);
     SetFS(sel);
@@ -3225,7 +3225,7 @@ inline BOOL O32_DestroyWindow(HWND a)
 inline DWORD O32_DeviceCapabilities(LPCSTR a, LPCSTR b, WORD c, LPTSTR d, CONST DEVMODEA *e)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DeviceCapabilities(a, b, c, d, e);
     SetFS(sel);
@@ -3236,7 +3236,7 @@ inline DWORD O32_DeviceCapabilities(LPCSTR a, LPCSTR b, WORD c, LPTSTR d, CONST 
 inline int O32_DialogBox(HINSTANCE a, LPCSTR b, HWND c, DLGPROC_O32 d)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DialogBox(a, b, c, d);
     SetFS(sel);
@@ -3247,7 +3247,7 @@ inline int O32_DialogBox(HINSTANCE a, LPCSTR b, HWND c, DLGPROC_O32 d)
 inline int O32_DialogBoxParam(HINSTANCE a, LPCSTR b, HWND c, DLGPROC_O32 d, LPARAM e)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DialogBoxParam(a, b, c, d, e);
     SetFS(sel);
@@ -3258,7 +3258,7 @@ inline int O32_DialogBoxParam(HINSTANCE a, LPCSTR b, HWND c, DLGPROC_O32 d, LPAR
 inline BOOL O32_DialogBoxIndirect(HINSTANCE a, LPDLGTEMPLATEA b, HWND c, DLGPROC_O32 d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DialogBoxIndirect(a, b, c, d);
     SetFS(sel);
@@ -3269,7 +3269,7 @@ inline BOOL O32_DialogBoxIndirect(HINSTANCE a, LPDLGTEMPLATEA b, HWND c, DLGPROC
 inline BOOL O32_DialogBoxIndirectParam(HINSTANCE a, LPDLGTEMPLATEA b, HWND c, DLGPROC_O32 d, LPARAM e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DialogBoxIndirectParam(a, b, c, d, e);
     SetFS(sel);
@@ -3280,7 +3280,7 @@ inline BOOL O32_DialogBoxIndirectParam(HINSTANCE a, LPDLGTEMPLATEA b, HWND c, DL
 inline LONG O32_DispatchMessage(CONST MSG *a)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DispatchMessage(a);
     SetFS(sel);
@@ -3291,7 +3291,7 @@ inline LONG O32_DispatchMessage(CONST MSG *a)
 inline int O32_DlgDirList(HWND a, LPSTR b, int c, int d, UINT e)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DlgDirList(a, b, c, d, e);
     SetFS(sel);
@@ -3302,7 +3302,7 @@ inline int O32_DlgDirList(HWND a, LPSTR b, int c, int d, UINT e)
 inline int O32_DlgDirListComboBox(HWND a, LPSTR b, int c, int d, UINT e)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DlgDirListComboBox(a, b, c, d, e);
     SetFS(sel);
@@ -3313,7 +3313,7 @@ inline int O32_DlgDirListComboBox(HWND a, LPSTR b, int c, int d, UINT e)
 inline BOOL O32_DlgDirSelectEx(HWND a, LPSTR b, int c, int d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DlgDirSelectEx(a, b, c, d);
     SetFS(sel);
@@ -3324,7 +3324,7 @@ inline BOOL O32_DlgDirSelectEx(HWND a, LPSTR b, int c, int d)
 inline BOOL O32_DlgDirSelectComboBoxEx(HWND a, LPSTR b, int c, int d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DlgDirSelectComboBoxEx(a, b, c, d);
     SetFS(sel);
@@ -3335,7 +3335,7 @@ inline BOOL O32_DlgDirSelectComboBoxEx(HWND a, LPSTR b, int c, int d)
 inline BOOL O32_DllEntryPoint(HINSTANCE a, DWORD b, LPVOID c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DllEntryPoint(a, b, c);
     SetFS(sel);
@@ -3346,7 +3346,7 @@ inline BOOL O32_DllEntryPoint(HINSTANCE a, DWORD b, LPVOID c)
 inline BOOL O32_DosDateTimeToFileTime(WORD a, WORD b, LPFILETIME c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DosDateTimeToFileTime(a, b, c);
     SetFS(sel);
@@ -3356,7 +3356,7 @@ inline BOOL O32_DosDateTimeToFileTime(WORD a, WORD b, LPFILETIME c)
 
 inline VOID O32_DragAcceptFiles(HWND a, BOOL b)
 {
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     _O32_DragAcceptFiles(a, b);
     SetFS(sel);
@@ -3364,7 +3364,7 @@ inline VOID O32_DragAcceptFiles(HWND a, BOOL b)
 
 inline VOID O32_DragFinish(HDROP a)
 {
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     _O32_DragFinish(a);
     SetFS(sel);
@@ -3373,7 +3373,7 @@ inline VOID O32_DragFinish(HDROP a)
 inline UINT O32_DragQueryFile(HDROP a, int b, LPSTR c, int d)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DragQueryFile(a, b, c, d);
     SetFS(sel);
@@ -3384,7 +3384,7 @@ inline UINT O32_DragQueryFile(HDROP a, int b, LPSTR c, int d)
 inline BOOL O32_DragQueryPoint(HDROP a, PPOINT b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DragQueryPoint(a, b);
     SetFS(sel);
@@ -3395,7 +3395,7 @@ inline BOOL O32_DragQueryPoint(HDROP a, PPOINT b)
 inline BOOL O32_DrawFocusRect(HDC a, CONST RECT *b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DrawFocusRect(a, b);
     SetFS(sel);
@@ -3406,7 +3406,7 @@ inline BOOL O32_DrawFocusRect(HDC a, CONST RECT *b)
 inline BOOL O32_DrawIcon(HDC a, int b, int c, HICON d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DrawIcon(a, b, c, d);
     SetFS(sel);
@@ -3417,7 +3417,7 @@ inline BOOL O32_DrawIcon(HDC a, int b, int c, HICON d)
 inline BOOL O32_DrawMenuBar(HWND a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DrawMenuBar(a);
     SetFS(sel);
@@ -3428,7 +3428,7 @@ inline BOOL O32_DrawMenuBar(HWND a)
 inline int O32_DrawText(HDC a, LPCSTR b, int c, PRECT d, UINT e)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DrawText(a, b, c, d, e);
     SetFS(sel);
@@ -3439,7 +3439,7 @@ inline int O32_DrawText(HDC a, LPCSTR b, int c, PRECT d, UINT e)
 inline BOOL O32_DuplicateHandle(HANDLE a, HANDLE b, HANDLE c, LPHANDLE d, DWORD e, BOOL f, DWORD g)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_DuplicateHandle(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -3450,7 +3450,7 @@ inline BOOL O32_DuplicateHandle(HANDLE a, HANDLE b, HANDLE c, LPHANDLE d, DWORD 
 inline BOOL O32_Ellipse(HDC a, int b, int c, int d, int e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_Ellipse(a, b, c, d, e);
     SetFS(sel);
@@ -3461,7 +3461,7 @@ inline BOOL O32_Ellipse(HDC a, int b, int c, int d, int e)
 inline BOOL O32_EmptyClipboard()
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_EmptyClipboard();
     SetFS(sel);
@@ -3472,7 +3472,7 @@ inline BOOL O32_EmptyClipboard()
 inline BOOL O32_EnableMenuItem(HMENU a, UINT b, UINT c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_EnableMenuItem(a, b, c);
     SetFS(sel);
@@ -3483,7 +3483,7 @@ inline BOOL O32_EnableMenuItem(HMENU a, UINT b, UINT c)
 inline BOOL O32_EnableScrollBar(HWND a, UINT b, UINT c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_EnableScrollBar(a, b, c);
     SetFS(sel);
@@ -3494,7 +3494,7 @@ inline BOOL O32_EnableScrollBar(HWND a, UINT b, UINT c)
 inline BOOL O32_EnableWindow(HWND a, BOOL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_EnableWindow(a, b);
     SetFS(sel);
@@ -3505,7 +3505,7 @@ inline BOOL O32_EnableWindow(HWND a, BOOL b)
 inline BOOL O32_EndDeferWindowPos(HDWP a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_EndDeferWindowPos(a);
     SetFS(sel);
@@ -3516,7 +3516,7 @@ inline BOOL O32_EndDeferWindowPos(HDWP a)
 inline BOOL O32_EndDialog(HWND a, int b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_EndDialog(a, b);
     SetFS(sel);
@@ -3527,7 +3527,7 @@ inline BOOL O32_EndDialog(HWND a, int b)
 inline int O32_EndDoc(HDC a)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_EndDoc(a);
     SetFS(sel);
@@ -3538,7 +3538,7 @@ inline int O32_EndDoc(HDC a)
 inline int O32_EndPage(HDC a)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_EndPage(a);
     SetFS(sel);
@@ -3549,7 +3549,7 @@ inline int O32_EndPage(HDC a)
 inline BOOL O32_EndPath(HDC a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_EndPath(a);
     SetFS(sel);
@@ -3560,7 +3560,7 @@ inline BOOL O32_EndPath(HDC a)
 inline BOOL O32_EndPaint(HWND a, CONST PAINTSTRUCT *b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_EndPaint(a, b);
     SetFS(sel);
@@ -3570,7 +3570,7 @@ inline BOOL O32_EndPaint(HWND a, CONST PAINTSTRUCT *b)
 
 inline VOID O32_EnterCriticalSection(CRITICAL_SECTION *a)
 {
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     _O32_EnterCriticalSection(a);
     SetFS(sel);
@@ -3579,7 +3579,7 @@ inline VOID O32_EnterCriticalSection(CRITICAL_SECTION *a)
 inline BOOL O32_EnumChildWindows(HWND a, WNDENUMPROC_O32 b, LPARAM c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_EnumChildWindows(a, b, c);
     SetFS(sel);
@@ -3590,7 +3590,7 @@ inline BOOL O32_EnumChildWindows(HWND a, WNDENUMPROC_O32 b, LPARAM c)
 inline UINT O32_EnumClipboardFormats(UINT a)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_EnumClipboardFormats(a);
     SetFS(sel);
@@ -3601,7 +3601,7 @@ inline UINT O32_EnumClipboardFormats(UINT a)
 inline BOOL O32_EnumEnhMetaFile(HDC a, HENHMETAFILE b, ENHMFENUMPROC_O32 c, PVOID d, CONST RECT *e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_EnumEnhMetaFile(a, b, c, d, e);
     SetFS(sel);
@@ -3612,7 +3612,7 @@ inline BOOL O32_EnumEnhMetaFile(HDC a, HENHMETAFILE b, ENHMFENUMPROC_O32 c, PVOI
 inline int O32_EnumFonts(HDC a, LPCSTR b, OLDFONTENUMPROC_O32 c, LPARAM d)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_EnumFonts(a, b, c, d);
     SetFS(sel);
@@ -3623,7 +3623,7 @@ inline int O32_EnumFonts(HDC a, LPCSTR b, OLDFONTENUMPROC_O32 c, LPARAM d)
 inline int O32_EnumFontFamilies(HDC a, LPCSTR b, FONTENUMPROC_O32 c, LPARAM d)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_EnumFontFamilies(a, b, c, d);
     SetFS(sel);
@@ -3634,7 +3634,7 @@ inline int O32_EnumFontFamilies(HDC a, LPCSTR b, FONTENUMPROC_O32 c, LPARAM d)
 inline BOOL O32_EnumMetaFile(HDC a, HMETAFILE b, MFENUMPROC_O32 c, LPARAM d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_EnumMetaFile(a, b, c, d);
     SetFS(sel);
@@ -3645,7 +3645,7 @@ inline BOOL O32_EnumMetaFile(HDC a, HMETAFILE b, MFENUMPROC_O32 c, LPARAM d)
 inline int O32_EnumObjects(HDC a, int b, GOBJENUMPROC_O32 c, LPARAM d)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_EnumObjects(a, b, c, d);
     SetFS(sel);
@@ -3656,7 +3656,7 @@ inline int O32_EnumObjects(HDC a, int b, GOBJENUMPROC_O32 c, LPARAM d)
 inline BOOL O32_EnumPrinters(DWORD a, LPTSTR b, DWORD c, LPBYTE d, DWORD e, LPDWORD f, LPDWORD g)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_EnumPrinters(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -3667,7 +3667,7 @@ inline BOOL O32_EnumPrinters(DWORD a, LPTSTR b, DWORD c, LPBYTE d, DWORD e, LPDW
 inline int O32_EnumProps(HWND a, PROPENUMPROC_O32 b)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_EnumProps(a, b);
     SetFS(sel);
@@ -3678,7 +3678,7 @@ inline int O32_EnumProps(HWND a, PROPENUMPROC_O32 b)
 inline int O32_EnumPropsEx(HWND a, PROPENUMPROCEX_O32 b, LPARAM c)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_EnumPropsEx(a, b, c);
     SetFS(sel);
@@ -3689,7 +3689,7 @@ inline int O32_EnumPropsEx(HWND a, PROPENUMPROCEX_O32 b, LPARAM c)
 inline BOOL O32_EnumThreadWindows(DWORD a, WNDENUMPROC_O32 b, LPARAM c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_EnumThreadWindows(a, b, c);
     SetFS(sel);
@@ -3700,7 +3700,7 @@ inline BOOL O32_EnumThreadWindows(DWORD a, WNDENUMPROC_O32 b, LPARAM c)
 inline BOOL O32_EnumWindows(WNDENUMPROC_O32 a, LPARAM b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_EnumWindows(a, b);
     SetFS(sel);
@@ -3711,7 +3711,7 @@ inline BOOL O32_EnumWindows(WNDENUMPROC_O32 a, LPARAM b)
 inline BOOL O32_EqualRect(CONST RECT *a, CONST RECT *b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_EqualRect(a, b);
     SetFS(sel);
@@ -3722,7 +3722,7 @@ inline BOOL O32_EqualRect(CONST RECT *a, CONST RECT *b)
 inline BOOL O32_EqualRgn(HRGN a, HRGN b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_EqualRgn(a, b);
     SetFS(sel);
@@ -3733,7 +3733,7 @@ inline BOOL O32_EqualRgn(HRGN a, HRGN b)
 inline int O32_Escape(HDC a, int b, int c, LPCSTR d, PVOID e)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_Escape(a, b, c, d, e);
     SetFS(sel);
@@ -3744,7 +3744,7 @@ inline int O32_Escape(HDC a, int b, int c, LPCSTR d, PVOID e)
 inline int O32_ExcludeClipRect(HDC a, int b, int c, int d, int e)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ExcludeClipRect(a, b, c, d, e);
     SetFS(sel);
@@ -3755,7 +3755,7 @@ inline int O32_ExcludeClipRect(HDC a, int b, int c, int d, int e)
 inline BOOL O32_ExcludeUpdateRgn(HDC a, HWND b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ExcludeUpdateRgn(a, b);
     SetFS(sel);
@@ -3765,7 +3765,7 @@ inline BOOL O32_ExcludeUpdateRgn(HDC a, HWND b)
 
 inline VOID O32_ExitProcess(UINT a)
 {
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     _O32_ExitProcess(a);
     SetFS(sel);
@@ -3773,7 +3773,7 @@ inline VOID O32_ExitProcess(UINT a)
 
 inline VOID O32_ExitThread(DWORD a)
 {
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     _O32_ExitThread(a);
     SetFS(sel);
@@ -3782,7 +3782,7 @@ inline VOID O32_ExitThread(DWORD a)
 inline BOOL O32_ExitWindows(DWORD a, UINT b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ExitWindows(a, b);
     SetFS(sel);
@@ -3793,7 +3793,7 @@ inline BOOL O32_ExitWindows(DWORD a, UINT b)
 inline BOOL O32_ExitWindowsEx(UINT a, DWORD b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ExitWindowsEx(a, b);
     SetFS(sel);
@@ -3804,7 +3804,7 @@ inline BOOL O32_ExitWindowsEx(UINT a, DWORD b)
 inline HPEN O32_ExtCreatePen(DWORD a, DWORD b, CONST LOGBRUSH *c, DWORD d, CONST DWORD *e)
 {
  HPEN yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ExtCreatePen(a, b, c, d, e);
     SetFS(sel);
@@ -3815,7 +3815,7 @@ inline HPEN O32_ExtCreatePen(DWORD a, DWORD b, CONST LOGBRUSH *c, DWORD d, CONST
 inline HRGN O32_ExtCreateRegion(CONST XFORM *a, DWORD b, CONST RGNDATA *c)
 {
  HRGN yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ExtCreateRegion(a, b, c);
     SetFS(sel);
@@ -3826,7 +3826,7 @@ inline HRGN O32_ExtCreateRegion(CONST XFORM *a, DWORD b, CONST RGNDATA *c)
 inline BOOL O32_ExtFloodFill(HDC a, int b, int c, COLORREF d, UINT e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ExtFloodFill(a, b, c, d, e);
     SetFS(sel);
@@ -3837,7 +3837,7 @@ inline BOOL O32_ExtFloodFill(HDC a, int b, int c, COLORREF d, UINT e)
 inline int O32_ExtSelectClipRgn(HDC a, HRGN b, int c)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ExtSelectClipRgn(a, b, c);
     SetFS(sel);
@@ -3848,7 +3848,7 @@ inline int O32_ExtSelectClipRgn(HDC a, HRGN b, int c)
 inline BOOL O32_ExtTextOut(HDC a, int b, int c, UINT d, CONST RECT *e, LPCSTR f, UINT g, CONST int *h)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ExtTextOut(a, b, c, d, e, f, g, h);
     SetFS(sel);
@@ -3858,7 +3858,7 @@ inline BOOL O32_ExtTextOut(HDC a, int b, int c, UINT d, CONST RECT *e, LPCSTR f,
 
 inline VOID O32_FatalAppExit(UINT a, LPCSTR b)
 {
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     _O32_FatalAppExit(a, b);
     SetFS(sel);
@@ -3866,7 +3866,7 @@ inline VOID O32_FatalAppExit(UINT a, LPCSTR b)
 
 inline VOID O32_FatalExit(UINT a)
 {
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     _O32_FatalExit(a);
     SetFS(sel);
@@ -3875,7 +3875,7 @@ inline VOID O32_FatalExit(UINT a)
 inline BOOL O32_FileTimeToDosDateTime(CONST FILETIME *a, LPWORD b, LPWORD c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_FileTimeToDosDateTime(a, b, c);
     SetFS(sel);
@@ -3886,7 +3886,7 @@ inline BOOL O32_FileTimeToDosDateTime(CONST FILETIME *a, LPWORD b, LPWORD c)
 inline BOOL O32_FileTimeToLocalFileTime(CONST FILETIME *a, FILETIME *b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_FileTimeToLocalFileTime(a, b);
     SetFS(sel);
@@ -3897,7 +3897,7 @@ inline BOOL O32_FileTimeToLocalFileTime(CONST FILETIME *a, FILETIME *b)
 inline BOOL O32_FileTimeToSystemTime(CONST FILETIME *a, LPSYSTEMTIME b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_FileTimeToSystemTime(a, b);
     SetFS(sel);
@@ -3908,7 +3908,7 @@ inline BOOL O32_FileTimeToSystemTime(CONST FILETIME *a, LPSYSTEMTIME b)
 inline BOOL O32_FillPath(HDC a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_FillPath(a);
     SetFS(sel);
@@ -3919,7 +3919,7 @@ inline BOOL O32_FillPath(HDC a)
 inline int O32_FillRect(HDC a, CONST RECT *b, HBRUSH c)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_FillRect(a, b, c);
     SetFS(sel);
@@ -3930,7 +3930,7 @@ inline int O32_FillRect(HDC a, CONST RECT *b, HBRUSH c)
 inline BOOL O32_FillRgn(HDC a, HRGN b, HBRUSH c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_FillRgn(a, b, c);
     SetFS(sel);
@@ -3941,7 +3941,7 @@ inline BOOL O32_FillRgn(HDC a, HRGN b, HBRUSH c)
 inline ATOM O32_FindAtom(LPCSTR a)
 {
  ATOM yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_FindAtom(a);
     SetFS(sel);
@@ -3952,7 +3952,7 @@ inline ATOM O32_FindAtom(LPCSTR a)
 inline BOOL O32_FindClose(HANDLE a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_FindClose(a);
     SetFS(sel);
@@ -3963,7 +3963,7 @@ inline BOOL O32_FindClose(HANDLE a)
 inline HANDLE O32_FindFirstFile(LPCSTR a, LPWIN32_FIND_DATAA b)
 {
  HANDLE yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_FindFirstFile(a, b);
     SetFS(sel);
@@ -3974,7 +3974,7 @@ inline HANDLE O32_FindFirstFile(LPCSTR a, LPWIN32_FIND_DATAA b)
 inline BOOL O32_FindNextFile(HANDLE a, LPWIN32_FIND_DATAA b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_FindNextFile(a, b);
     SetFS(sel);
@@ -3985,7 +3985,7 @@ inline BOOL O32_FindNextFile(HANDLE a, LPWIN32_FIND_DATAA b)
 inline HRSRC O32_FindResource(HINSTANCE a, LPCSTR b, LPCSTR c)
 {
  HRSRC yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_FindResource(a, b, c);
     SetFS(sel);
@@ -3996,7 +3996,7 @@ inline HRSRC O32_FindResource(HINSTANCE a, LPCSTR b, LPCSTR c)
 inline HWND O32_FindText(LPFINDREPLACEA a)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_FindText(a);
     SetFS(sel);
@@ -4007,7 +4007,7 @@ inline HWND O32_FindText(LPFINDREPLACEA a)
 inline HWND O32_FindWindow(LPCSTR a, LPCSTR b)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_FindWindow(a, b);
     SetFS(sel);
@@ -4018,7 +4018,7 @@ inline HWND O32_FindWindow(LPCSTR a, LPCSTR b)
 inline BOOL O32_FlashWindow(HWND a, BOOL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_FlashWindow(a, b);
     SetFS(sel);
@@ -4029,7 +4029,7 @@ inline BOOL O32_FlashWindow(HWND a, BOOL b)
 inline BOOL O32_FlattenPath(HDC a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_FlattenPath(a);
     SetFS(sel);
@@ -4040,7 +4040,7 @@ inline BOOL O32_FlattenPath(HDC a)
 inline BOOL O32_FlushFileBuffers(HANDLE a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_FlushFileBuffers(a);
     SetFS(sel);
@@ -4051,7 +4051,7 @@ inline BOOL O32_FlushFileBuffers(HANDLE a)
 inline int O32_FrameRect(HDC a, CONST RECT *b, HBRUSH c)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_FrameRect(a, b, c);
     SetFS(sel);
@@ -4062,7 +4062,7 @@ inline int O32_FrameRect(HDC a, CONST RECT *b, HBRUSH c)
 inline BOOL O32_FrameRgn(HDC a, HRGN b, HBRUSH c, int d, int e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_FrameRgn(a, b, c, d, e);
     SetFS(sel);
@@ -4073,7 +4073,7 @@ inline BOOL O32_FrameRgn(HDC a, HRGN b, HBRUSH c, int d, int e)
 inline BOOL O32_FreeDDElParam(UINT a, LONG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_FreeDDElParam(a, b);
     SetFS(sel);
@@ -4084,7 +4084,7 @@ inline BOOL O32_FreeDDElParam(UINT a, LONG b)
 inline BOOL O32_FreeLibrary(HINSTANCE a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_FreeLibrary(a);
     SetFS(sel);
@@ -4095,7 +4095,7 @@ inline BOOL O32_FreeLibrary(HINSTANCE a)
 inline UINT O32_GetACP()
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetACP();
     SetFS(sel);
@@ -4106,7 +4106,7 @@ inline UINT O32_GetACP()
 inline HWND O32_GetActiveWindow()
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetActiveWindow();
     SetFS(sel);
@@ -4117,7 +4117,7 @@ inline HWND O32_GetActiveWindow()
 inline int O32_GetArcDirection(HDC a)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetArcDirection(a);
     SetFS(sel);
@@ -4128,7 +4128,7 @@ inline int O32_GetArcDirection(HDC a)
 inline BOOL O32_GetAspectRatioFilterEx(HDC a, PSIZE b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetAspectRatioFilterEx(a, b);
     SetFS(sel);
@@ -4139,7 +4139,7 @@ inline BOOL O32_GetAspectRatioFilterEx(HDC a, PSIZE b)
 inline UINT O32_GetAtomName(ATOM a, LPSTR b, int c)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetAtomName(a, b, c);
     SetFS(sel);
@@ -4150,7 +4150,7 @@ inline UINT O32_GetAtomName(ATOM a, LPSTR b, int c)
 inline LONG O32_GetBitmapBits(HBITMAP a, LONG b, PVOID c)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetBitmapBits(a, b, c);
     SetFS(sel);
@@ -4161,7 +4161,7 @@ inline LONG O32_GetBitmapBits(HBITMAP a, LONG b, PVOID c)
 inline BOOL O32_GetBitmapDimensionEx(HBITMAP a, PSIZE b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetBitmapDimensionEx(a, b);
     SetFS(sel);
@@ -4172,7 +4172,7 @@ inline BOOL O32_GetBitmapDimensionEx(HBITMAP a, PSIZE b)
 inline COLORREF O32_GetBkColor(HDC a)
 {
  COLORREF yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetBkColor(a);
     SetFS(sel);
@@ -4183,7 +4183,7 @@ inline COLORREF O32_GetBkColor(HDC a)
 inline int O32_GetBkMode(HDC a)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetBkMode(a);
     SetFS(sel);
@@ -4194,7 +4194,7 @@ inline int O32_GetBkMode(HDC a)
 inline UINT O32_GetBoundsRect(HDC a, PRECT b, UINT c)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetBoundsRect(a, b, c);
     SetFS(sel);
@@ -4205,7 +4205,7 @@ inline UINT O32_GetBoundsRect(HDC a, PRECT b, UINT c)
 inline BOOL O32_GetBrushOrgEx(HDC a, PPOINT b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetBrushOrgEx(a, b);
     SetFS(sel);
@@ -4216,7 +4216,7 @@ inline BOOL O32_GetBrushOrgEx(HDC a, PPOINT b)
 inline HWND O32_GetCapture()
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetCapture();
     SetFS(sel);
@@ -4227,7 +4227,7 @@ inline HWND O32_GetCapture()
 inline UINT O32_GetCaretBlinkTime()
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetCaretBlinkTime();
     SetFS(sel);
@@ -4238,7 +4238,7 @@ inline UINT O32_GetCaretBlinkTime()
 inline BOOL O32_GetCaretPos(PPOINT a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetCaretPos(a);
     SetFS(sel);
@@ -4249,7 +4249,7 @@ inline BOOL O32_GetCaretPos(PPOINT a)
 inline BOOL O32_GetCharABCWidths(HDC a, UINT b, UINT c, LPABC d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetCharABCWidths(a, b, c, d);
     SetFS(sel);
@@ -4260,7 +4260,7 @@ inline BOOL O32_GetCharABCWidths(HDC a, UINT b, UINT c, LPABC d)
 inline BOOL O32_GetCharWidth(HDC a, UINT b, UINT c, PINT d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetCharWidth(a, b, c, d);
     SetFS(sel);
@@ -4271,7 +4271,7 @@ inline BOOL O32_GetCharWidth(HDC a, UINT b, UINT c, PINT d)
 inline BOOL O32_GetClassInfo(HINSTANCE a, LPCSTR b, WNDCLASSA *c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetClassInfo(a, b, c);
     SetFS(sel);
@@ -4282,7 +4282,7 @@ inline BOOL O32_GetClassInfo(HINSTANCE a, LPCSTR b, WNDCLASSA *c)
 inline DWORD O32_GetClassLong(HWND a, int b)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetClassLong(a, b);
     SetFS(sel);
@@ -4293,7 +4293,7 @@ inline DWORD O32_GetClassLong(HWND a, int b)
 inline int O32_GetClassName(HWND a, LPSTR b, int c)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetClassName(a, b, c);
     SetFS(sel);
@@ -4304,7 +4304,7 @@ inline int O32_GetClassName(HWND a, LPSTR b, int c)
 inline WORD O32_GetClassWord(HWND a, int b)
 {
  WORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetClassWord(a, b);
     SetFS(sel);
@@ -4315,7 +4315,7 @@ inline WORD O32_GetClassWord(HWND a, int b)
 inline BOOL O32_GetClientRect(HWND a, PRECT b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetClientRect(a, b);
     SetFS(sel);
@@ -4326,7 +4326,7 @@ inline BOOL O32_GetClientRect(HWND a, PRECT b)
 inline HANDLE O32_GetClipboardData(UINT a)
 {
  HANDLE yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetClipboardData(a);
     SetFS(sel);
@@ -4337,7 +4337,7 @@ inline HANDLE O32_GetClipboardData(UINT a)
 inline int O32_GetClipboardFormatName(UINT a, LPSTR b, int c)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetClipboardFormatName(a, b, c);
     SetFS(sel);
@@ -4348,7 +4348,7 @@ inline int O32_GetClipboardFormatName(UINT a, LPSTR b, int c)
 inline HWND O32_GetClipboardOwner()
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetClipboardOwner();
     SetFS(sel);
@@ -4359,7 +4359,7 @@ inline HWND O32_GetClipboardOwner()
 inline HWND O32_GetClipboardViewer()
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetClipboardViewer();
     SetFS(sel);
@@ -4370,7 +4370,7 @@ inline HWND O32_GetClipboardViewer()
 inline int O32_GetClipBox(HDC a, PRECT b)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetClipBox(a, b);
     SetFS(sel);
@@ -4381,7 +4381,7 @@ inline int O32_GetClipBox(HDC a, PRECT b)
 inline BOOL O32_GetClipCursor(PRECT a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetClipCursor(a);
     SetFS(sel);
@@ -4392,7 +4392,7 @@ inline BOOL O32_GetClipCursor(PRECT a)
 inline int O32_GetClipRgn(HDC a, HRGN b)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetClipRgn(a, b);
     SetFS(sel);
@@ -4403,7 +4403,7 @@ inline int O32_GetClipRgn(HDC a, HRGN b)
 inline LPSTR O32_GetCommandLine()
 {
  LPSTR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetCommandLine();
     SetFS(sel);
@@ -4414,7 +4414,7 @@ inline LPSTR O32_GetCommandLine()
 inline int O32_GetCurrentDirectory(DWORD a, LPSTR b)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetCurrentDirectory(a, b);
     SetFS(sel);
@@ -4425,7 +4425,7 @@ inline int O32_GetCurrentDirectory(DWORD a, LPSTR b)
 inline HGDIOBJ O32_GetCurrentObject(HDC a, DWORD b)
 {
  HGDIOBJ yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetCurrentObject(a, b);
     SetFS(sel);
@@ -4436,7 +4436,7 @@ inline HGDIOBJ O32_GetCurrentObject(HDC a, DWORD b)
 inline BOOL O32_GetCurrentPositionEx(HDC a, PPOINT b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetCurrentPositionEx(a, b);
     SetFS(sel);
@@ -4447,7 +4447,7 @@ inline BOOL O32_GetCurrentPositionEx(HDC a, PPOINT b)
 inline HANDLE O32_GetCurrentProcess()
 {
  HANDLE yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetCurrentProcess();
     SetFS(sel);
@@ -4458,7 +4458,7 @@ inline HANDLE O32_GetCurrentProcess()
 inline DWORD O32_GetCurrentProcessId()
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetCurrentProcessId();
     SetFS(sel);
@@ -4469,7 +4469,7 @@ inline DWORD O32_GetCurrentProcessId()
 inline HANDLE O32_GetCurrentThread()
 {
  HANDLE yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetCurrentThread();
     SetFS(sel);
@@ -4480,7 +4480,7 @@ inline HANDLE O32_GetCurrentThread()
 inline DWORD O32_GetCurrentThreadId()
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetCurrentThreadId();
     SetFS(sel);
@@ -4491,7 +4491,7 @@ inline DWORD O32_GetCurrentThreadId()
 inline DWORD O32_GetCurrentTime()
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetCurrentTime();
     SetFS(sel);
@@ -4502,7 +4502,7 @@ inline DWORD O32_GetCurrentTime()
 inline HCURSOR O32_GetCursor()
 {
  HCURSOR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetCursor();
     SetFS(sel);
@@ -4513,7 +4513,7 @@ inline HCURSOR O32_GetCursor()
 inline BOOL O32_GetCursorPos(PPOINT a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetCursorPos(a);
     SetFS(sel);
@@ -4524,7 +4524,7 @@ inline BOOL O32_GetCursorPos(PPOINT a)
 inline HDC O32_GetDC(HWND a)
 {
  HDC yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetDC(a);
     SetFS(sel);
@@ -4535,7 +4535,7 @@ inline HDC O32_GetDC(HWND a)
 inline HDC O32_GetDCEx(HWND a, HRGN b, DWORD c)
 {
  HDC yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetDCEx(a, b, c);
     SetFS(sel);
@@ -4546,7 +4546,7 @@ inline HDC O32_GetDCEx(HWND a, HRGN b, DWORD c)
 inline BOOL O32_GetDCOrgEx(HDC a, PPOINT b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetDCOrgEx(a, b);
     SetFS(sel);
@@ -4557,7 +4557,7 @@ inline BOOL O32_GetDCOrgEx(HDC a, PPOINT b)
 inline int O32_GetDIBits(HDC a, HBITMAP b, UINT c, UINT d, void *e, PBITMAPINFO f, UINT g)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetDIBits(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -4568,7 +4568,7 @@ inline int O32_GetDIBits(HDC a, HBITMAP b, UINT c, UINT d, void *e, PBITMAPINFO 
 inline int O32_GetDeviceCaps(HDC a, int b)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetDeviceCaps(a, b);
     SetFS(sel);
@@ -4579,7 +4579,7 @@ inline int O32_GetDeviceCaps(HDC a, int b)
 inline LONG O32_GetDialogBaseUnits()
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetDialogBaseUnits();
     SetFS(sel);
@@ -4590,7 +4590,7 @@ inline LONG O32_GetDialogBaseUnits()
 inline BOOL O32_GetDiskFreeSpace(LPCSTR a, PDWORD b, PDWORD c, PDWORD d, PDWORD e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetDiskFreeSpace(a, b, c, d, e);
     SetFS(sel);
@@ -4601,7 +4601,7 @@ inline BOOL O32_GetDiskFreeSpace(LPCSTR a, PDWORD b, PDWORD c, PDWORD d, PDWORD 
 inline int O32_GetDlgCtrlID(HWND a)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetDlgCtrlID(a);
     SetFS(sel);
@@ -4612,7 +4612,7 @@ inline int O32_GetDlgCtrlID(HWND a)
 inline HWND O32_GetDlgItem(HWND a, int b)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetDlgItem(a, b);
     SetFS(sel);
@@ -4623,7 +4623,7 @@ inline HWND O32_GetDlgItem(HWND a, int b)
 inline UINT O32_GetDlgItemInt(HWND a, int b, PBOOL c, BOOL d)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetDlgItemInt(a, b, c, d);
     SetFS(sel);
@@ -4634,7 +4634,7 @@ inline UINT O32_GetDlgItemInt(HWND a, int b, PBOOL c, BOOL d)
 inline UINT O32_GetDlgItemText(HWND a, int b, LPSTR c, int d)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetDlgItemText(a, b, c, d);
     SetFS(sel);
@@ -4645,7 +4645,7 @@ inline UINT O32_GetDlgItemText(HWND a, int b, LPSTR c, int d)
 inline UINT O32_GetDoubleClickTime()
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetDoubleClickTime();
     SetFS(sel);
@@ -4656,7 +4656,7 @@ inline UINT O32_GetDoubleClickTime()
 inline UINT O32_GetDriveType(LPCSTR a)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetDriveType(a);
     SetFS(sel);
@@ -4667,7 +4667,7 @@ inline UINT O32_GetDriveType(LPCSTR a)
 inline HENHMETAFILE O32_GetEnhMetaFile(LPCSTR a)
 {
  HENHMETAFILE yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetEnhMetaFile(a);
     SetFS(sel);
@@ -4678,7 +4678,7 @@ inline HENHMETAFILE O32_GetEnhMetaFile(LPCSTR a)
 inline UINT O32_GetEnhMetaFileBits(HENHMETAFILE a, UINT b, PBYTE c)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetEnhMetaFileBits(a, b, c);
     SetFS(sel);
@@ -4689,7 +4689,7 @@ inline UINT O32_GetEnhMetaFileBits(HENHMETAFILE a, UINT b, PBYTE c)
 inline UINT O32_GetEnhMetaFileHeader(HENHMETAFILE a, UINT b, LPENHMETAHEADER c)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetEnhMetaFileHeader(a, b, c);
     SetFS(sel);
@@ -4700,7 +4700,7 @@ inline UINT O32_GetEnhMetaFileHeader(HENHMETAFILE a, UINT b, LPENHMETAHEADER c)
 inline UINT O32_GetEnhMetaFilePaletteEntries(HENHMETAFILE a, UINT b, LPPALETTEENTRY c)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetEnhMetaFilePaletteEntries(a, b, c);
     SetFS(sel);
@@ -4711,7 +4711,7 @@ inline UINT O32_GetEnhMetaFilePaletteEntries(HENHMETAFILE a, UINT b, LPPALETTEEN
 inline PVOID O32_GetEnvironmentStrings()
 {
  PVOID yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetEnvironmentStrings();
     SetFS(sel);
@@ -4722,7 +4722,7 @@ inline PVOID O32_GetEnvironmentStrings()
 inline DWORD O32_GetEnvironmentVariable(LPCSTR a, LPSTR b, DWORD c)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetEnvironmentVariable(a, b, c);
     SetFS(sel);
@@ -4733,7 +4733,7 @@ inline DWORD O32_GetEnvironmentVariable(LPCSTR a, LPSTR b, DWORD c)
 inline BOOL O32_GetExitCodeProcess(HANDLE a, LPDWORD b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetExitCodeProcess(a, b);
     SetFS(sel);
@@ -4744,7 +4744,7 @@ inline BOOL O32_GetExitCodeProcess(HANDLE a, LPDWORD b)
 inline BOOL O32_GetExitCodeThread(HANDLE a, LPDWORD b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetExitCodeThread(a, b);
     SetFS(sel);
@@ -4755,7 +4755,7 @@ inline BOOL O32_GetExitCodeThread(HANDLE a, LPDWORD b)
 inline DWORD O32_GetFileAttributes(LPSTR a)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetFileAttributes(a);
     SetFS(sel);
@@ -4766,7 +4766,7 @@ inline DWORD O32_GetFileAttributes(LPSTR a)
 inline DWORD O32_GetFileInformationByHandle(HANDLE a, BY_HANDLE_FILE_INFORMATION *b)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetFileInformationByHandle(a, b);
     SetFS(sel);
@@ -4777,7 +4777,7 @@ inline DWORD O32_GetFileInformationByHandle(HANDLE a, BY_HANDLE_FILE_INFORMATION
 inline DWORD O32_GetFileSize(HANDLE a, PDWORD b)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetFileSize(a, b);
     SetFS(sel);
@@ -4788,7 +4788,7 @@ inline DWORD O32_GetFileSize(HANDLE a, PDWORD b)
 inline BOOL O32_GetFileTime(HANDLE a, FILETIME *b, FILETIME *c, FILETIME *d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetFileTime(a, b, c, d);
     SetFS(sel);
@@ -4799,7 +4799,7 @@ inline BOOL O32_GetFileTime(HANDLE a, FILETIME *b, FILETIME *c, FILETIME *d)
 inline short O32_GetFileTitle(LPCSTR a, LPSTR b, WORD c)
 {
  short yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetFileTitle(a, b, c);
     SetFS(sel);
@@ -4810,7 +4810,7 @@ inline short O32_GetFileTitle(LPCSTR a, LPSTR b, WORD c)
 inline DWORD O32_GetFileType(HANDLE a)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetFileType(a);
     SetFS(sel);
@@ -4821,7 +4821,7 @@ inline DWORD O32_GetFileType(HANDLE a)
 inline HWND O32_GetFocus()
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetFocus();
     SetFS(sel);
@@ -4832,7 +4832,7 @@ inline HWND O32_GetFocus()
 inline HWND O32_GetForegroundWindow()
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetForegroundWindow();
     SetFS(sel);
@@ -4843,7 +4843,7 @@ inline HWND O32_GetForegroundWindow()
 inline DWORD O32_GetFullPathName(LPCSTR a, DWORD b, LPSTR c, LPSTR *d)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetFullPathName(a, b, c, d);
     SetFS(sel);
@@ -4854,7 +4854,7 @@ inline DWORD O32_GetFullPathName(LPCSTR a, DWORD b, LPSTR c, LPSTR *d)
 inline int O32_GetGraphicsMode(HDC a)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetGraphicsMode(a);
     SetFS(sel);
@@ -4865,7 +4865,7 @@ inline int O32_GetGraphicsMode(HDC a)
 inline BOOL O32_GetIconInfo(HICON a, LPICONINFO b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetIconInfo(a, b);
     SetFS(sel);
@@ -4876,7 +4876,7 @@ inline BOOL O32_GetIconInfo(HICON a, LPICONINFO b)
 inline DWORD O32_GetKerningPairs(HDC a, DWORD b, LPKERNINGPAIR c)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetKerningPairs(a, b, c);
     SetFS(sel);
@@ -4887,7 +4887,7 @@ inline DWORD O32_GetKerningPairs(HDC a, DWORD b, LPKERNINGPAIR c)
 inline int O32_GetKeyboardType(int a)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetKeyboardType(a);
     SetFS(sel);
@@ -4898,7 +4898,7 @@ inline int O32_GetKeyboardType(int a)
 inline int O32_GetKeyNameText(LPARAM a, LPSTR b, int c)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetKeyNameText(a, b, c);
     SetFS(sel);
@@ -4909,7 +4909,7 @@ inline int O32_GetKeyNameText(LPARAM a, LPSTR b, int c)
 inline SHORT O32_GetKeyState(int a)
 {
  SHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetKeyState(a);
     SetFS(sel);
@@ -4920,7 +4920,7 @@ inline SHORT O32_GetKeyState(int a)
 inline HWND O32_GetLastActivePopup(HWND a)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetLastActivePopup(a);
     SetFS(sel);
@@ -4931,7 +4931,7 @@ inline HWND O32_GetLastActivePopup(HWND a)
 inline DWORD O32_GetLastError()
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetLastError();
     SetFS(sel);
@@ -4941,7 +4941,7 @@ inline DWORD O32_GetLastError()
 
 inline VOID O32_GetLocalTime(LPSYSTEMTIME a)
 {
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     _O32_GetLocalTime(a);
     SetFS(sel);
@@ -4950,7 +4950,7 @@ inline VOID O32_GetLocalTime(LPSYSTEMTIME a)
 inline DWORD O32_GetLogicalDriveStrings(DWORD a, LPSTR b)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetLogicalDriveStrings(a, b);
     SetFS(sel);
@@ -4961,7 +4961,7 @@ inline DWORD O32_GetLogicalDriveStrings(DWORD a, LPSTR b)
 inline DWORD O32_GetLogicalDrives()
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetLogicalDrives();
     SetFS(sel);
@@ -4972,7 +4972,7 @@ inline DWORD O32_GetLogicalDrives()
 inline int O32_GetMapMode(HDC a)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetMapMode(a);
     SetFS(sel);
@@ -4983,7 +4983,7 @@ inline int O32_GetMapMode(HDC a)
 inline HMENU O32_GetMenu(HWND a)
 {
  HMENU yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetMenu(a);
     SetFS(sel);
@@ -4994,7 +4994,7 @@ inline HMENU O32_GetMenu(HWND a)
 inline LONG O32_GetMenuCheckMarkDimensions()
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetMenuCheckMarkDimensions();
     SetFS(sel);
@@ -5005,7 +5005,7 @@ inline LONG O32_GetMenuCheckMarkDimensions()
 inline int O32_GetMenuItemCount(HMENU a)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetMenuItemCount(a);
     SetFS(sel);
@@ -5016,7 +5016,7 @@ inline int O32_GetMenuItemCount(HMENU a)
 inline UINT O32_GetMenuItemID(HMENU a, int b)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetMenuItemID(a, b);
     SetFS(sel);
@@ -5027,7 +5027,7 @@ inline UINT O32_GetMenuItemID(HMENU a, int b)
 inline UINT O32_GetMenuState(HMENU a, UINT b, UINT c)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetMenuState(a, b, c);
     SetFS(sel);
@@ -5038,7 +5038,7 @@ inline UINT O32_GetMenuState(HMENU a, UINT b, UINT c)
 inline int O32_GetMenuString(HMENU a, UINT b, LPSTR c, int d, UINT e)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetMenuString(a, b, c, d, e);
     SetFS(sel);
@@ -5049,7 +5049,7 @@ inline int O32_GetMenuString(HMENU a, UINT b, LPSTR c, int d, UINT e)
 inline BOOL O32_GetMessage(LPMSG a, HWND b, UINT c, UINT d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetMessage(a, b, c, d);
     SetFS(sel);
@@ -5060,7 +5060,7 @@ inline BOOL O32_GetMessage(LPMSG a, HWND b, UINT c, UINT d)
 inline LONG O32_GetMessageExtraInfo()
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetMessageExtraInfo();
     SetFS(sel);
@@ -5071,7 +5071,7 @@ inline LONG O32_GetMessageExtraInfo()
 inline DWORD O32_GetMessagePos()
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetMessagePos();
     SetFS(sel);
@@ -5082,7 +5082,7 @@ inline DWORD O32_GetMessagePos()
 inline LONG O32_GetMessageTime()
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetMessageTime();
     SetFS(sel);
@@ -5093,7 +5093,7 @@ inline LONG O32_GetMessageTime()
 inline HMETAFILE O32_GetMetaFile(LPCSTR a)
 {
  HMETAFILE yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetMetaFile(a);
     SetFS(sel);
@@ -5104,7 +5104,7 @@ inline HMETAFILE O32_GetMetaFile(LPCSTR a)
 inline UINT O32_GetMetaFileBitsEx(HMETAFILE a, UINT b, LPVOID c)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetMetaFileBitsEx(a, b, c);
     SetFS(sel);
@@ -5115,7 +5115,7 @@ inline UINT O32_GetMetaFileBitsEx(HMETAFILE a, UINT b, LPVOID c)
 inline BOOL O32_GetMiterLimit(HDC a, float *b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetMiterLimit(a, b);
     SetFS(sel);
@@ -5126,7 +5126,7 @@ inline BOOL O32_GetMiterLimit(HDC a, float *b)
 inline DWORD O32_GetModuleFileName(HINSTANCE a, LPSTR b, DWORD c)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetModuleFileName(a, b, c);
     SetFS(sel);
@@ -5137,7 +5137,7 @@ inline DWORD O32_GetModuleFileName(HINSTANCE a, LPSTR b, DWORD c)
 inline HMODULE O32_GetModuleHandle(LPCSTR a)
 {
  HMODULE yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetModuleHandle(a);
     SetFS(sel);
@@ -5148,7 +5148,7 @@ inline HMODULE O32_GetModuleHandle(LPCSTR a)
 inline COLORREF O32_GetNearestColor(HDC a, COLORREF b)
 {
  COLORREF yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetNearestColor(a, b);
     SetFS(sel);
@@ -5159,7 +5159,7 @@ inline COLORREF O32_GetNearestColor(HDC a, COLORREF b)
 inline UINT O32_GetNearestPaletteIndex(HPALETTE a, COLORREF b)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetNearestPaletteIndex(a, b);
     SetFS(sel);
@@ -5170,7 +5170,7 @@ inline UINT O32_GetNearestPaletteIndex(HPALETTE a, COLORREF b)
 inline HWND O32_GetNextDlgGroupItem(HWND a, HWND b, BOOL c)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetNextDlgGroupItem(a, b, c);
     SetFS(sel);
@@ -5181,7 +5181,7 @@ inline HWND O32_GetNextDlgGroupItem(HWND a, HWND b, BOOL c)
 inline HWND O32_GetNextDlgTabItem(HWND a, HWND b, BOOL c)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetNextDlgTabItem(a, b, c);
     SetFS(sel);
@@ -5192,7 +5192,7 @@ inline HWND O32_GetNextDlgTabItem(HWND a, HWND b, BOOL c)
 inline HWND O32_GetNextWindow(HWND a, UINT b)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetNextWindow(a, b);
     SetFS(sel);
@@ -5203,7 +5203,7 @@ inline HWND O32_GetNextWindow(HWND a, UINT b)
 inline int O32_GetOEMCP()
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetOEMCP();
     SetFS(sel);
@@ -5214,7 +5214,7 @@ inline int O32_GetOEMCP()
 inline int O32_GetObject(HGDIOBJ a, int b, void *c)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetObject(a, b, c);
     SetFS(sel);
@@ -5225,7 +5225,7 @@ inline int O32_GetObject(HGDIOBJ a, int b, void *c)
 inline DWORD O32_GetObjectType(HGDIOBJ a)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetObjectType(a);
     SetFS(sel);
@@ -5236,7 +5236,7 @@ inline DWORD O32_GetObjectType(HGDIOBJ a)
 inline HWND O32_GetOpenClipboardWindow()
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetOpenClipboardWindow();
     SetFS(sel);
@@ -5247,7 +5247,7 @@ inline HWND O32_GetOpenClipboardWindow()
 inline BOOL O32_GetOpenFileName(LPOPENFILENAMEA a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetOpenFileName(a);
     SetFS(sel);
@@ -5258,7 +5258,7 @@ inline BOOL O32_GetOpenFileName(LPOPENFILENAMEA a)
 inline UINT O32_GetOutlineTextMetrics(HDC a, UINT b, LPOUTLINETEXTMETRICA c)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetOutlineTextMetrics(a, b, c);
     SetFS(sel);
@@ -5269,7 +5269,7 @@ inline UINT O32_GetOutlineTextMetrics(HDC a, UINT b, LPOUTLINETEXTMETRICA c)
 inline BOOL O32_GetOverlappedResult(HANDLE a, LPOVERLAPPED b, LPDWORD c, BOOL d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetOverlappedResult(a, b, c, d);
     SetFS(sel);
@@ -5280,7 +5280,7 @@ inline BOOL O32_GetOverlappedResult(HANDLE a, LPOVERLAPPED b, LPDWORD c, BOOL d)
 inline UINT O32_GetPaletteEntries(HPALETTE a, UINT b, UINT c, PPALETTEENTRY d)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetPaletteEntries(a, b, c, d);
     SetFS(sel);
@@ -5291,7 +5291,7 @@ inline UINT O32_GetPaletteEntries(HPALETTE a, UINT b, UINT c, PPALETTEENTRY d)
 inline HWND O32_GetParent(HWND a)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetParent(a);
     SetFS(sel);
@@ -5302,7 +5302,7 @@ inline HWND O32_GetParent(HWND a)
 inline UINT O32_GetPath(HDC a, PPOINT b, PBYTE c, int d)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetPath(a, b, c, d);
     SetFS(sel);
@@ -5313,7 +5313,7 @@ inline UINT O32_GetPath(HDC a, PPOINT b, PBYTE c, int d)
 inline COLORREF O32_GetPixel(HDC a, int b, int c)
 {
  COLORREF yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetPixel(a, b, c);
     SetFS(sel);
@@ -5324,7 +5324,7 @@ inline COLORREF O32_GetPixel(HDC a, int b, int c)
 inline int O32_GetPolyFillMode(HDC a)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetPolyFillMode(a);
     SetFS(sel);
@@ -5335,7 +5335,7 @@ inline int O32_GetPolyFillMode(HDC a)
 inline DWORD O32_GetPriorityClass(HANDLE a)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetPriorityClass(a);
     SetFS(sel);
@@ -5346,7 +5346,7 @@ inline DWORD O32_GetPriorityClass(HANDLE a)
 inline int O32_GetPriorityClipboardFormat(PUINT a, int b)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetPriorityClipboardFormat(a, b);
     SetFS(sel);
@@ -5357,7 +5357,7 @@ inline int O32_GetPriorityClipboardFormat(PUINT a, int b)
 inline UINT O32_GetPrivateProfileInt(LPCSTR a, LPCSTR b, INT c, LPCSTR d)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetPrivateProfileInt(a, b, c, d);
     SetFS(sel);
@@ -5368,7 +5368,7 @@ inline UINT O32_GetPrivateProfileInt(LPCSTR a, LPCSTR b, INT c, LPCSTR d)
 inline DWORD O32_GetPrivateProfileString(LPCSTR a, LPCSTR b, LPCSTR c, LPSTR d, DWORD e, LPCSTR f)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetPrivateProfileString(a, b, c, d, e, f);
     SetFS(sel);
@@ -5379,7 +5379,7 @@ inline DWORD O32_GetPrivateProfileString(LPCSTR a, LPCSTR b, LPCSTR c, LPSTR d, 
 inline FARPROC O32_GetProcAddress(HMODULE a, LPCSTR b)
 {
  FARPROC yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetProcAddress(a, b);
     SetFS(sel);
@@ -5390,7 +5390,7 @@ inline FARPROC O32_GetProcAddress(HMODULE a, LPCSTR b)
 inline UINT O32_GetProfileInt(LPCSTR a, LPCSTR b, INT c)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetProfileInt(a, b, c);
     SetFS(sel);
@@ -5401,7 +5401,7 @@ inline UINT O32_GetProfileInt(LPCSTR a, LPCSTR b, INT c)
 inline DWORD O32_GetProfileString(LPCSTR a, LPCSTR b, LPCSTR c, LPSTR d, DWORD e)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetProfileString(a, b, c, d, e);
     SetFS(sel);
@@ -5412,7 +5412,7 @@ inline DWORD O32_GetProfileString(LPCSTR a, LPCSTR b, LPCSTR c, LPSTR d, DWORD e
 inline HANDLE O32_GetProp(HWND a, LPCSTR b)
 {
  HANDLE yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetProp(a, b);
     SetFS(sel);
@@ -5423,7 +5423,7 @@ inline HANDLE O32_GetProp(HWND a, LPCSTR b)
 inline DWORD O32_GetQueueStatus(UINT a)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetQueueStatus(a);
     SetFS(sel);
@@ -5434,7 +5434,7 @@ inline DWORD O32_GetQueueStatus(UINT a)
 inline int O32_GetROP2(HDC a)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetROP2(a);
     SetFS(sel);
@@ -5445,7 +5445,7 @@ inline int O32_GetROP2(HDC a)
 inline BOOL O32_GetRasterizerCaps(LPRASTERIZER_STATUS a, UINT b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetRasterizerCaps(a, b);
     SetFS(sel);
@@ -5456,7 +5456,7 @@ inline BOOL O32_GetRasterizerCaps(LPRASTERIZER_STATUS a, UINT b)
 inline int O32_GetRgnBox(HRGN a, PRECT b)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetRgnBox(a, b);
     SetFS(sel);
@@ -5467,7 +5467,7 @@ inline int O32_GetRgnBox(HRGN a, PRECT b)
 inline DWORD O32_GetRegionData(HRGN a, DWORD b, PRGNDATA c)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetRegionData(a, b, c);
     SetFS(sel);
@@ -5478,7 +5478,7 @@ inline DWORD O32_GetRegionData(HRGN a, DWORD b, PRGNDATA c)
 inline BOOL O32_GetSaveFileName(LPOPENFILENAMEA a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetSaveFileName(a);
     SetFS(sel);
@@ -5489,7 +5489,7 @@ inline BOOL O32_GetSaveFileName(LPOPENFILENAMEA a)
 inline int O32_GetScrollPos(HWND a, int b)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetScrollPos(a, b);
     SetFS(sel);
@@ -5500,7 +5500,7 @@ inline int O32_GetScrollPos(HWND a, int b)
 inline BOOL O32_GetScrollRange(HWND a, int b, int *c, int *d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetScrollRange(a, b, c, d);
     SetFS(sel);
@@ -5511,7 +5511,7 @@ inline BOOL O32_GetScrollRange(HWND a, int b, int *c, int *d)
 inline HANDLE O32_GetStdHandle(DWORD a)
 {
  HANDLE yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetStdHandle(a);
     SetFS(sel);
@@ -5522,7 +5522,7 @@ inline HANDLE O32_GetStdHandle(DWORD a)
 inline HGDIOBJ O32_GetStockObject(int a)
 {
  HGDIOBJ yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetStockObject(a);
     SetFS(sel);
@@ -5533,7 +5533,7 @@ inline HGDIOBJ O32_GetStockObject(int a)
 inline int O32_GetStretchBltMode(HDC a)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetStretchBltMode(a);
     SetFS(sel);
@@ -5544,7 +5544,7 @@ inline int O32_GetStretchBltMode(HDC a)
 inline HMENU O32_GetSubMenu(HWND a, int b)
 {
  HMENU yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetSubMenu(a, b);
     SetFS(sel);
@@ -5555,7 +5555,7 @@ inline HMENU O32_GetSubMenu(HWND a, int b)
 inline DWORD O32_GetSysColor(int a)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetSysColor(a);
     SetFS(sel);
@@ -5566,7 +5566,7 @@ inline DWORD O32_GetSysColor(int a)
 inline UINT O32_GetSystemDirectory(LPSTR a, UINT b)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetSystemDirectory(a, b);
     SetFS(sel);
@@ -5577,7 +5577,7 @@ inline UINT O32_GetSystemDirectory(LPSTR a, UINT b)
 inline HMENU O32_GetSystemMenu(HWND a, BOOL b)
 {
  HMENU yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetSystemMenu(a, b);
     SetFS(sel);
@@ -5588,7 +5588,7 @@ inline HMENU O32_GetSystemMenu(HWND a, BOOL b)
 inline int O32_GetSystemMetrics(int a)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetSystemMetrics(a);
     SetFS(sel);
@@ -5599,7 +5599,7 @@ inline int O32_GetSystemMetrics(int a)
 inline UINT O32_GetSystemPaletteEntries(HDC a, UINT b, UINT c, PPALETTEENTRY d)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetSystemPaletteEntries(a, b, c, d);
     SetFS(sel);
@@ -5609,7 +5609,7 @@ inline UINT O32_GetSystemPaletteEntries(HDC a, UINT b, UINT c, PPALETTEENTRY d)
 
 inline void O32_GetSystemTime(LPSYSTEMTIME a)
 {
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     _O32_GetSystemTime(a);
     SetFS(sel);
@@ -5618,7 +5618,7 @@ inline void O32_GetSystemTime(LPSYSTEMTIME a)
 inline DWORD O32_GetTabbedTextExtent(HDC a, LPCSTR b, int c, int d, int *e)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetTabbedTextExtent(a, b, c, d, e);
     SetFS(sel);
@@ -5629,7 +5629,7 @@ inline DWORD O32_GetTabbedTextExtent(HDC a, LPCSTR b, int c, int d, int *e)
 inline UINT O32_GetTempFileName(LPCSTR a, LPCSTR b, UINT c, LPSTR d)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetTempFileName(a, b, c, d);
     SetFS(sel);
@@ -5640,7 +5640,7 @@ inline UINT O32_GetTempFileName(LPCSTR a, LPCSTR b, UINT c, LPSTR d)
 inline DWORD O32_GetTempPath(DWORD a, LPSTR b)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetTempPath(a, b);
     SetFS(sel);
@@ -5651,7 +5651,7 @@ inline DWORD O32_GetTempPath(DWORD a, LPSTR b)
 inline UINT O32_GetTextAlign(HDC a)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetTextAlign(a);
     SetFS(sel);
@@ -5662,7 +5662,7 @@ inline UINT O32_GetTextAlign(HDC a)
 inline int O32_GetTextCharacterExtra(HDC a)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetTextCharacterExtra(a);
     SetFS(sel);
@@ -5673,7 +5673,7 @@ inline int O32_GetTextCharacterExtra(HDC a)
 inline COLORREF O32_GetTextColor(HDC a)
 {
  COLORREF yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetTextColor(a);
     SetFS(sel);
@@ -5684,7 +5684,7 @@ inline COLORREF O32_GetTextColor(HDC a)
 inline BOOL O32_GetTextExtentPoint(HDC a, LPCSTR b, int c, PSIZE d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetTextExtentPoint(a, b, c, d);
     SetFS(sel);
@@ -5695,7 +5695,7 @@ inline BOOL O32_GetTextExtentPoint(HDC a, LPCSTR b, int c, PSIZE d)
 inline BOOL O32_GetTextExtentPoint32(HDC a, LPCSTR b, int c, PSIZE d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetTextExtentPoint32(a, b, c, d);
     SetFS(sel);
@@ -5706,7 +5706,7 @@ inline BOOL O32_GetTextExtentPoint32(HDC a, LPCSTR b, int c, PSIZE d)
 inline int O32_GetTextFace(HDC a, int b, LPSTR c)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetTextFace(a, b, c);
     SetFS(sel);
@@ -5717,7 +5717,7 @@ inline int O32_GetTextFace(HDC a, int b, LPSTR c)
 inline BOOL O32_GetTextMetrics(HDC a, LPTEXTMETRICA b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetTextMetrics(a, b);
     SetFS(sel);
@@ -5728,7 +5728,7 @@ inline BOOL O32_GetTextMetrics(HDC a, LPTEXTMETRICA b)
 inline DWORD O32_GetThreadPriority(HANDLE a)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetThreadPriority(a);
     SetFS(sel);
@@ -5739,7 +5739,7 @@ inline DWORD O32_GetThreadPriority(HANDLE a)
 inline DWORD O32_GetTickCount()
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetTickCount();
     SetFS(sel);
@@ -5750,7 +5750,7 @@ inline DWORD O32_GetTickCount()
 inline DWORD O32_GetTimeZoneInformation(LPTIME_ZONE_INFORMATION a)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetTimeZoneInformation(a);
     SetFS(sel);
@@ -5761,7 +5761,7 @@ inline DWORD O32_GetTimeZoneInformation(LPTIME_ZONE_INFORMATION a)
 inline HWND O32_GetTopWindow(HWND a)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetTopWindow(a);
     SetFS(sel);
@@ -5772,7 +5772,7 @@ inline HWND O32_GetTopWindow(HWND a)
 inline BOOL O32_GetUpdateRect(HWND a, PRECT b, BOOL c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetUpdateRect(a, b, c);
     SetFS(sel);
@@ -5783,7 +5783,7 @@ inline BOOL O32_GetUpdateRect(HWND a, PRECT b, BOOL c)
 inline int O32_GetUpdateRgn(HWND a, HRGN b, BOOL c)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetUpdateRgn(a, b, c);
     SetFS(sel);
@@ -5794,7 +5794,7 @@ inline int O32_GetUpdateRgn(HWND a, HRGN b, BOOL c)
 inline BOOL O32_GetViewportExtEx(HDC a, PSIZE b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetViewportExtEx(a, b);
     SetFS(sel);
@@ -5805,7 +5805,7 @@ inline BOOL O32_GetViewportExtEx(HDC a, PSIZE b)
 inline BOOL O32_GetViewportOrgEx(HDC a, PPOINT b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetViewportOrgEx(a, b);
     SetFS(sel);
@@ -5816,7 +5816,7 @@ inline BOOL O32_GetViewportOrgEx(HDC a, PPOINT b)
 inline DWORD O32_GetVolumeInformation(LPCSTR a, LPSTR b, DWORD c, PDWORD d, PDWORD e, PDWORD f, LPSTR g, DWORD h)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetVolumeInformation(a, b, c, d, e, f, g, h);
     SetFS(sel);
@@ -5827,7 +5827,7 @@ inline DWORD O32_GetVolumeInformation(LPCSTR a, LPSTR b, DWORD c, PDWORD d, PDWO
 inline UINT O32_GetWinMetaFileBits(HENHMETAFILE a, UINT b, PBYTE c, int d, HDC e)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetWinMetaFileBits(a, b, c, d, e);
     SetFS(sel);
@@ -5838,7 +5838,7 @@ inline UINT O32_GetWinMetaFileBits(HENHMETAFILE a, UINT b, PBYTE c, int d, HDC e
 inline HWND O32_GetWindow(HWND a, UINT b)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetWindow(a, b);
     SetFS(sel);
@@ -5849,7 +5849,7 @@ inline HWND O32_GetWindow(HWND a, UINT b)
 inline HDC O32_GetWindowDC(HWND a)
 {
  HDC yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetWindowDC(a);
     SetFS(sel);
@@ -5860,7 +5860,7 @@ inline HDC O32_GetWindowDC(HWND a)
 inline BOOL O32_GetWindowExtEx(HDC a, PSIZE b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetWindowExtEx(a, b);
     SetFS(sel);
@@ -5871,7 +5871,7 @@ inline BOOL O32_GetWindowExtEx(HDC a, PSIZE b)
 inline LONG O32_GetWindowLong(HWND a, int b)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetWindowLong(a, b);
     SetFS(sel);
@@ -5882,7 +5882,7 @@ inline LONG O32_GetWindowLong(HWND a, int b)
 inline BOOL O32_GetWindowOrgEx(HDC a, PPOINT b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetWindowOrgEx(a, b);
     SetFS(sel);
@@ -5893,7 +5893,7 @@ inline BOOL O32_GetWindowOrgEx(HDC a, PPOINT b)
 inline BOOL O32_GetWindowPlacement(HWND a, LPWINDOWPLACEMENT b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetWindowPlacement(a, b);
     SetFS(sel);
@@ -5904,7 +5904,7 @@ inline BOOL O32_GetWindowPlacement(HWND a, LPWINDOWPLACEMENT b)
 inline BOOL O32_GetWindowRect(HWND a, PRECT b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetWindowRect(a, b);
     SetFS(sel);
@@ -5915,7 +5915,7 @@ inline BOOL O32_GetWindowRect(HWND a, PRECT b)
 inline UINT O32_GetWindowsDirectory(LPSTR a, UINT b)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetWindowsDirectory(a, b);
     SetFS(sel);
@@ -5926,7 +5926,7 @@ inline UINT O32_GetWindowsDirectory(LPSTR a, UINT b)
 inline int O32_GetWindowText(HWND a, LPSTR b, int c)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetWindowText(a, b, c);
     SetFS(sel);
@@ -5937,7 +5937,7 @@ inline int O32_GetWindowText(HWND a, LPSTR b, int c)
 inline int O32_GetWindowTextLength(HWND a)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetWindowTextLength(a);
     SetFS(sel);
@@ -5948,7 +5948,7 @@ inline int O32_GetWindowTextLength(HWND a)
 inline DWORD O32_GetWindowThreadProcessId(HWND a, PDWORD b)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetWindowThreadProcessId(a, b);
     SetFS(sel);
@@ -5959,7 +5959,7 @@ inline DWORD O32_GetWindowThreadProcessId(HWND a, PDWORD b)
 inline WORD O32_GetWindowWord(HWND a, int b)
 {
  WORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetWindowWord(a, b);
     SetFS(sel);
@@ -5970,7 +5970,7 @@ inline WORD O32_GetWindowWord(HWND a, int b)
 inline BOOL O32_GetWorldTransform(HDC a, LPXFORM b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetWorldTransform(a, b);
     SetFS(sel);
@@ -5981,7 +5981,7 @@ inline BOOL O32_GetWorldTransform(HDC a, LPXFORM b)
 inline ATOM O32_GlobalAddAtom(LPCSTR a)
 {
  ATOM yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GlobalAddAtom(a);
     SetFS(sel);
@@ -5992,7 +5992,7 @@ inline ATOM O32_GlobalAddAtom(LPCSTR a)
 inline HGLOBAL O32_GlobalAlloc(UINT a, DWORD b)
 {
  HGLOBAL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GlobalAlloc(a, b);
     SetFS(sel);
@@ -6003,7 +6003,7 @@ inline HGLOBAL O32_GlobalAlloc(UINT a, DWORD b)
 inline ATOM O32_GlobalDeleteAtom(ATOM a)
 {
  ATOM yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GlobalDeleteAtom(a);
     SetFS(sel);
@@ -6014,7 +6014,7 @@ inline ATOM O32_GlobalDeleteAtom(ATOM a)
 inline HGLOBAL O32_GlobalDiscard(HGLOBAL a)
 {
  HGLOBAL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GlobalDiscard(a);
     SetFS(sel);
@@ -6025,7 +6025,7 @@ inline HGLOBAL O32_GlobalDiscard(HGLOBAL a)
 inline ATOM O32_GlobalFindAtom(LPCSTR a)
 {
  ATOM yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GlobalFindAtom(a);
     SetFS(sel);
@@ -6036,7 +6036,7 @@ inline ATOM O32_GlobalFindAtom(LPCSTR a)
 inline UINT O32_GlobalFlags(HGLOBAL a)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GlobalFlags(a);
     SetFS(sel);
@@ -6047,7 +6047,7 @@ inline UINT O32_GlobalFlags(HGLOBAL a)
 inline HGLOBAL O32_GlobalFree(HGLOBAL a)
 {
  HGLOBAL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GlobalFree(a);
     SetFS(sel);
@@ -6058,7 +6058,7 @@ inline HGLOBAL O32_GlobalFree(HGLOBAL a)
 inline UINT O32_GlobalGetAtomName(ATOM a, LPSTR b, int c)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GlobalGetAtomName(a, b, c);
     SetFS(sel);
@@ -6069,7 +6069,7 @@ inline UINT O32_GlobalGetAtomName(ATOM a, LPSTR b, int c)
 inline HGLOBAL O32_GlobalHandle(PVOID a)
 {
  HGLOBAL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GlobalHandle(a);
     SetFS(sel);
@@ -6080,7 +6080,7 @@ inline HGLOBAL O32_GlobalHandle(PVOID a)
 inline PVOID O32_GlobalLock(HGLOBAL a)
 {
  PVOID yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GlobalLock(a);
     SetFS(sel);
@@ -6090,7 +6090,7 @@ inline PVOID O32_GlobalLock(HGLOBAL a)
 
 inline VOID O32_GlobalMemoryStatus(LPMEMORYSTATUS a)
 {
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     _O32_GlobalMemoryStatus(a);
     SetFS(sel);
@@ -6099,7 +6099,7 @@ inline VOID O32_GlobalMemoryStatus(LPMEMORYSTATUS a)
 inline HGLOBAL O32_GlobalReAlloc(HGLOBAL a, DWORD b, UINT c)
 {
  HGLOBAL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GlobalReAlloc(a, b, c);
     SetFS(sel);
@@ -6110,7 +6110,7 @@ inline HGLOBAL O32_GlobalReAlloc(HGLOBAL a, DWORD b, UINT c)
 inline DWORD O32_GlobalSize(HGLOBAL a)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GlobalSize(a);
     SetFS(sel);
@@ -6121,7 +6121,7 @@ inline DWORD O32_GlobalSize(HGLOBAL a)
 inline BOOL O32_GlobalUnlock(HGLOBAL a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GlobalUnlock(a);
     SetFS(sel);
@@ -6132,7 +6132,7 @@ inline BOOL O32_GlobalUnlock(HGLOBAL a)
 inline PVOID O32_HeapAlloc(HANDLE a, DWORD b, DWORD c)
 {
  PVOID yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_HeapAlloc(a, b, c);
     SetFS(sel);
@@ -6143,7 +6143,7 @@ inline PVOID O32_HeapAlloc(HANDLE a, DWORD b, DWORD c)
 inline HANDLE O32_HeapCreate(DWORD a, DWORD b, DWORD c)
 {
  HANDLE yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_HeapCreate(a, b, c);
     SetFS(sel);
@@ -6154,7 +6154,7 @@ inline HANDLE O32_HeapCreate(DWORD a, DWORD b, DWORD c)
 inline BOOL O32_HeapDestroy(HANDLE a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_HeapDestroy(a);
     SetFS(sel);
@@ -6165,7 +6165,7 @@ inline BOOL O32_HeapDestroy(HANDLE a)
 inline BOOL O32_HeapFree(HANDLE a, DWORD b, PVOID c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_HeapFree(a, b, c);
     SetFS(sel);
@@ -6176,7 +6176,7 @@ inline BOOL O32_HeapFree(HANDLE a, DWORD b, PVOID c)
 inline PVOID O32_HeapReAlloc(HANDLE a, DWORD b, PVOID c, DWORD d)
 {
  PVOID yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_HeapReAlloc(a, b, c, d);
     SetFS(sel);
@@ -6187,7 +6187,7 @@ inline PVOID O32_HeapReAlloc(HANDLE a, DWORD b, PVOID c, DWORD d)
 inline DWORD O32_HeapSize(HANDLE a, DWORD b, PVOID c)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_HeapSize(a, b, c);
     SetFS(sel);
@@ -6198,7 +6198,7 @@ inline DWORD O32_HeapSize(HANDLE a, DWORD b, PVOID c)
 inline BOOL O32_HideCaret(HWND a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_HideCaret(a);
     SetFS(sel);
@@ -6209,7 +6209,7 @@ inline BOOL O32_HideCaret(HWND a)
 inline BOOL O32_HiliteMenuItem(HWND a, HMENU b, UINT c, UINT d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_HiliteMenuItem(a, b, c, d);
     SetFS(sel);
@@ -6220,7 +6220,7 @@ inline BOOL O32_HiliteMenuItem(HWND a, HMENU b, UINT c, UINT d)
 inline BOOL O32_InflateRect(PRECT a, int b, int c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_InflateRect(a, b, c);
     SetFS(sel);
@@ -6231,7 +6231,7 @@ inline BOOL O32_InflateRect(PRECT a, int b, int c)
 inline BOOL O32_InSendMessage()
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_InSendMessage();
     SetFS(sel);
@@ -6242,7 +6242,7 @@ inline BOOL O32_InSendMessage()
 inline BOOL O32_InitAtomTable(DWORD a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_InitAtomTable(a);
     SetFS(sel);
@@ -6252,7 +6252,7 @@ inline BOOL O32_InitAtomTable(DWORD a)
 
 inline VOID O32_InitializeCriticalSection(CRITICAL_SECTION *a)
 {
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     _O32_InitializeCriticalSection(a);
     SetFS(sel);
@@ -6261,7 +6261,7 @@ inline VOID O32_InitializeCriticalSection(CRITICAL_SECTION *a)
 inline BOOL O32_InsertMenu(HMENU a, UINT b, UINT c, UINT d, LPCSTR e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_InsertMenu(a, b, c, d, e);
     SetFS(sel);
@@ -6272,7 +6272,7 @@ inline BOOL O32_InsertMenu(HMENU a, UINT b, UINT c, UINT d, LPCSTR e)
 inline LONG O32_InterlockedDecrement(PLONG a)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_InterlockedDecrement(a);
     SetFS(sel);
@@ -6283,7 +6283,7 @@ inline LONG O32_InterlockedDecrement(PLONG a)
 inline LONG O32_InterlockedExchange(PLONG a, LONG b)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_InterlockedExchange(a, b);
     SetFS(sel);
@@ -6294,7 +6294,7 @@ inline LONG O32_InterlockedExchange(PLONG a, LONG b)
 inline LONG O32_InterlockedIncrement(PLONG a)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_InterlockedIncrement(a);
     SetFS(sel);
@@ -6305,7 +6305,7 @@ inline LONG O32_InterlockedIncrement(PLONG a)
 inline int O32_IntersectClipRect(HDC a, int b, int c, int d, int e)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_IntersectClipRect(a, b, c, d, e);
     SetFS(sel);
@@ -6316,7 +6316,7 @@ inline int O32_IntersectClipRect(HDC a, int b, int c, int d, int e)
 inline BOOL O32_IntersectRect(PRECT a, CONST RECT *b, CONST RECT *c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_IntersectRect(a, b, c);
     SetFS(sel);
@@ -6327,7 +6327,7 @@ inline BOOL O32_IntersectRect(PRECT a, CONST RECT *b, CONST RECT *c)
 inline BOOL O32_InvalidateRect(HWND a, CONST RECT *b, BOOL c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_InvalidateRect(a, b, c);
     SetFS(sel);
@@ -6338,7 +6338,7 @@ inline BOOL O32_InvalidateRect(HWND a, CONST RECT *b, BOOL c)
 inline BOOL O32_InvalidateRgn(HWND a, HRGN b, BOOL c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_InvalidateRgn(a, b, c);
     SetFS(sel);
@@ -6349,7 +6349,7 @@ inline BOOL O32_InvalidateRgn(HWND a, HRGN b, BOOL c)
 inline BOOL O32_InvertRect(HDC a, CONST RECT *b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_InvertRect(a, b);
     SetFS(sel);
@@ -6360,7 +6360,7 @@ inline BOOL O32_InvertRect(HDC a, CONST RECT *b)
 inline BOOL O32_InvertRgn(HDC a, HRGN b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_InvertRgn(a, b);
     SetFS(sel);
@@ -6371,7 +6371,7 @@ inline BOOL O32_InvertRgn(HDC a, HRGN b)
 inline BOOL O32_IsBadCodePtr(FARPROC a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_IsBadCodePtr(a);
     SetFS(sel);
@@ -6382,7 +6382,7 @@ inline BOOL O32_IsBadCodePtr(FARPROC a)
 inline BOOL O32_IsBadReadPtr(CONST VOID *a, UINT b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_IsBadReadPtr(a, b);
     SetFS(sel);
@@ -6393,7 +6393,7 @@ inline BOOL O32_IsBadReadPtr(CONST VOID *a, UINT b)
 inline BOOL O32_IsBadStringPtr(LPCSTR a, UINT b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_IsBadStringPtr(a, b);
     SetFS(sel);
@@ -6404,7 +6404,7 @@ inline BOOL O32_IsBadStringPtr(LPCSTR a, UINT b)
 inline BOOL O32_IsBadWritePtr(PVOID a, UINT b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_IsBadWritePtr(a, b);
     SetFS(sel);
@@ -6415,7 +6415,7 @@ inline BOOL O32_IsBadWritePtr(PVOID a, UINT b)
 inline BOOL O32_IsChild(HWND a, HWND b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_IsChild(a, b);
     SetFS(sel);
@@ -6426,7 +6426,7 @@ inline BOOL O32_IsChild(HWND a, HWND b)
 inline BOOL O32_IsClipboardFormatAvailable(UINT a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_IsClipboardFormatAvailable(a);
     SetFS(sel);
@@ -6437,7 +6437,7 @@ inline BOOL O32_IsClipboardFormatAvailable(UINT a)
 inline BOOL O32_IsDBCSLeadByte(BYTE a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_IsDBCSLeadByte(a);
     SetFS(sel);
@@ -6448,7 +6448,7 @@ inline BOOL O32_IsDBCSLeadByte(BYTE a)
 inline BOOL O32_IsDialogMessage(HWND a, LPMSG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_IsDialogMessage(a, b);
     SetFS(sel);
@@ -6459,7 +6459,7 @@ inline BOOL O32_IsDialogMessage(HWND a, LPMSG b)
 inline BOOL O32_IsDlgButtonChecked(HWND a, int b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_IsDlgButtonChecked(a, b);
     SetFS(sel);
@@ -6470,7 +6470,7 @@ inline BOOL O32_IsDlgButtonChecked(HWND a, int b)
 inline BOOL O32_IsIconic(HWND a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_IsIconic(a);
     SetFS(sel);
@@ -6481,7 +6481,7 @@ inline BOOL O32_IsIconic(HWND a)
 inline BOOL O32_IsMenu(HMENU a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_IsMenu(a);
     SetFS(sel);
@@ -6492,7 +6492,7 @@ inline BOOL O32_IsMenu(HMENU a)
 inline BOOL O32_IsRectEmpty(CONST RECT *a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_IsRectEmpty(a);
     SetFS(sel);
@@ -6503,7 +6503,7 @@ inline BOOL O32_IsRectEmpty(CONST RECT *a)
 inline BOOL O32_IsWindow(HWND a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_IsWindow(a);
     SetFS(sel);
@@ -6514,7 +6514,7 @@ inline BOOL O32_IsWindow(HWND a)
 inline BOOL O32_IsWindowEnabled(HWND a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_IsWindowEnabled(a);
     SetFS(sel);
@@ -6525,7 +6525,7 @@ inline BOOL O32_IsWindowEnabled(HWND a)
 inline BOOL O32_IsWindowVisible(HWND a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_IsWindowVisible(a);
     SetFS(sel);
@@ -6536,7 +6536,7 @@ inline BOOL O32_IsWindowVisible(HWND a)
 inline BOOL O32_IsZoomed(HWND a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_IsZoomed(a);
     SetFS(sel);
@@ -6547,7 +6547,7 @@ inline BOOL O32_IsZoomed(HWND a)
 inline BOOL O32_KillTimer(HWND a, UINT b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_KillTimer(a, b);
     SetFS(sel);
@@ -6558,7 +6558,7 @@ inline BOOL O32_KillTimer(HWND a, UINT b)
 inline BOOL O32_LPtoDP(HDC a, PPOINT b, int c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_LPtoDP(a, b, c);
     SetFS(sel);
@@ -6568,7 +6568,7 @@ inline BOOL O32_LPtoDP(HDC a, PPOINT b, int c)
 
 inline VOID O32_LeaveCriticalSection(CRITICAL_SECTION *a)
 {
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     _O32_LeaveCriticalSection(a);
     SetFS(sel);
@@ -6577,7 +6577,7 @@ inline VOID O32_LeaveCriticalSection(CRITICAL_SECTION *a)
 inline BOOL O32_LineDDA(int a, int b, int c, int d, LINEDDAPROC_O32 e, LPARAM f)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_LineDDA(a, b, c, d, e, f);
     SetFS(sel);
@@ -6588,7 +6588,7 @@ inline BOOL O32_LineDDA(int a, int b, int c, int d, LINEDDAPROC_O32 e, LPARAM f)
 inline BOOL O32_LineTo(HDC a, int b, int c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_LineTo(a, b, c);
     SetFS(sel);
@@ -6599,7 +6599,7 @@ inline BOOL O32_LineTo(HDC a, int b, int c)
 inline HACCEL O32_LoadAccelerators(HINSTANCE a, LPCSTR b)
 {
  HACCEL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_LoadAccelerators(a, b);
     SetFS(sel);
@@ -6610,7 +6610,7 @@ inline HACCEL O32_LoadAccelerators(HINSTANCE a, LPCSTR b)
 inline HBITMAP O32_LoadBitmap(HINSTANCE a, LPCSTR b)
 {
  HBITMAP yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_LoadBitmap(a, b);
     SetFS(sel);
@@ -6621,7 +6621,7 @@ inline HBITMAP O32_LoadBitmap(HINSTANCE a, LPCSTR b)
 inline HCURSOR O32_LoadCursor(HINSTANCE a, LPCSTR b)
 {
  HCURSOR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_LoadCursor(a, b);
     SetFS(sel);
@@ -6632,7 +6632,7 @@ inline HCURSOR O32_LoadCursor(HINSTANCE a, LPCSTR b)
 inline HICON O32_LoadIcon(HINSTANCE a, LPCSTR b)
 {
  HICON yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_LoadIcon(a, b);
     SetFS(sel);
@@ -6643,7 +6643,7 @@ inline HICON O32_LoadIcon(HINSTANCE a, LPCSTR b)
 inline HINSTANCE O32_LoadLibrary(LPCSTR a)
 {
  HINSTANCE yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_LoadLibrary(a);
     SetFS(sel);
@@ -6654,7 +6654,7 @@ inline HINSTANCE O32_LoadLibrary(LPCSTR a)
 inline HMENU O32_LoadMenu(HINSTANCE a, LPCSTR b)
 {
  HMENU yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_LoadMenu(a, b);
     SetFS(sel);
@@ -6665,7 +6665,7 @@ inline HMENU O32_LoadMenu(HINSTANCE a, LPCSTR b)
 inline HMENU O32_LoadMenuIndirect(CONST MENUITEMTEMPLATEHEADER *a)
 {
  HMENU yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_LoadMenuIndirect(a);
     SetFS(sel);
@@ -6676,7 +6676,7 @@ inline HMENU O32_LoadMenuIndirect(CONST MENUITEMTEMPLATEHEADER *a)
 inline DWORD O32_LoadModule(LPCSTR a, PVOID b)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_LoadModule(a, b);
     SetFS(sel);
@@ -6687,7 +6687,7 @@ inline DWORD O32_LoadModule(LPCSTR a, PVOID b)
 inline HGLOBAL O32_LoadResource(HINSTANCE a, HRSRC b)
 {
  HGLOBAL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_LoadResource(a, b);
     SetFS(sel);
@@ -6698,7 +6698,7 @@ inline HGLOBAL O32_LoadResource(HINSTANCE a, HRSRC b)
 inline PVOID O32_LockResource(HGLOBAL a)
 {
  PVOID yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_LockResource(a);
     SetFS(sel);
@@ -6709,7 +6709,7 @@ inline PVOID O32_LockResource(HGLOBAL a)
 inline int O32_LoadString(HINSTANCE a, UINT b, LPSTR c, int d)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_LoadString(a, b, c, d);
     SetFS(sel);
@@ -6720,7 +6720,7 @@ inline int O32_LoadString(HINSTANCE a, UINT b, LPSTR c, int d)
 inline HLOCAL O32_LocalAlloc(UINT a, UINT b)
 {
  HLOCAL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_LocalAlloc(a, b);
     SetFS(sel);
@@ -6731,7 +6731,7 @@ inline HLOCAL O32_LocalAlloc(UINT a, UINT b)
 inline HLOCAL O32_LocalDiscard(HLOCAL a)
 {
  HLOCAL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_LocalDiscard(a);
     SetFS(sel);
@@ -6742,7 +6742,7 @@ inline HLOCAL O32_LocalDiscard(HLOCAL a)
 inline UINT O32_LocalFlags(HLOCAL a)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_LocalFlags(a);
     SetFS(sel);
@@ -6753,7 +6753,7 @@ inline UINT O32_LocalFlags(HLOCAL a)
 inline BOOL O32_LocalFileTimeToFileTime(CONST FILETIME *a, FILETIME *b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_LocalFileTimeToFileTime(a, b);
     SetFS(sel);
@@ -6764,7 +6764,7 @@ inline BOOL O32_LocalFileTimeToFileTime(CONST FILETIME *a, FILETIME *b)
 inline HLOCAL O32_LocalFree(HLOCAL a)
 {
  HLOCAL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_LocalFree(a);
     SetFS(sel);
@@ -6775,7 +6775,7 @@ inline HLOCAL O32_LocalFree(HLOCAL a)
 inline HLOCAL O32_LocalHandle(PVOID a)
 {
  HLOCAL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_LocalHandle(a);
     SetFS(sel);
@@ -6786,7 +6786,7 @@ inline HLOCAL O32_LocalHandle(PVOID a)
 inline BOOL O32_LocalUnlock(HLOCAL a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_LocalUnlock(a);
     SetFS(sel);
@@ -6797,7 +6797,7 @@ inline BOOL O32_LocalUnlock(HLOCAL a)
 inline HLOCAL O32_LocalReAlloc(HLOCAL a, UINT b, UINT c)
 {
  HLOCAL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_LocalReAlloc(a, b, c);
     SetFS(sel);
@@ -6808,7 +6808,7 @@ inline HLOCAL O32_LocalReAlloc(HLOCAL a, UINT b, UINT c)
 inline UINT O32_LocalSize(HLOCAL a)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_LocalSize(a);
     SetFS(sel);
@@ -6819,7 +6819,7 @@ inline UINT O32_LocalSize(HLOCAL a)
 inline PVOID O32_LocalLock(HLOCAL a)
 {
  PVOID yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_LocalLock(a);
     SetFS(sel);
@@ -6830,7 +6830,7 @@ inline PVOID O32_LocalLock(HLOCAL a)
 inline BOOL O32_LockFile(HANDLE a, DWORD b, DWORD c, DWORD d, DWORD e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_LockFile(a, b, c, d, e);
     SetFS(sel);
@@ -6841,7 +6841,7 @@ inline BOOL O32_LockFile(HANDLE a, DWORD b, DWORD c, DWORD d, DWORD e)
 inline BOOL O32_LockWindowUpdate(HWND a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_LockWindowUpdate(a);
     SetFS(sel);
@@ -6852,7 +6852,7 @@ inline BOOL O32_LockWindowUpdate(HWND a)
 inline BOOL O32_MapDialogRect(HWND a, PRECT b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_MapDialogRect(a, b);
     SetFS(sel);
@@ -6863,7 +6863,7 @@ inline BOOL O32_MapDialogRect(HWND a, PRECT b)
 inline UINT O32_MapVirtualKey(UINT a, UINT b)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_MapVirtualKey(a, b);
     SetFS(sel);
@@ -6874,7 +6874,7 @@ inline UINT O32_MapVirtualKey(UINT a, UINT b)
 inline int O32_MapWindowPoints(HWND a, HWND b, PPOINT c, int d)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_MapWindowPoints(a, b, c, d);
     SetFS(sel);
@@ -6885,7 +6885,7 @@ inline int O32_MapWindowPoints(HWND a, HWND b, PPOINT c, int d)
 inline BOOL O32_MaskBlt(HDC a, int b, int c, int d, int e, HDC f, int g, int h, HBITMAP i, int j, int k, DWORD l)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_MaskBlt(a, b, c, d, e, f, g, h, i, j, k, l);
     SetFS(sel);
@@ -6896,7 +6896,7 @@ inline BOOL O32_MaskBlt(HDC a, int b, int c, int d, int e, HDC f, int g, int h, 
 inline int O32_MessageBox(HWND a, LPCSTR b, LPCSTR c, UINT d)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_MessageBox(a, b, c, d);
     SetFS(sel);
@@ -6907,7 +6907,7 @@ inline int O32_MessageBox(HWND a, LPCSTR b, LPCSTR c, UINT d)
 inline BOOL O32_MessageBeep(UINT a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_MessageBeep(a);
     SetFS(sel);
@@ -6918,7 +6918,7 @@ inline BOOL O32_MessageBeep(UINT a)
 inline DWORD O32_MsgWaitForMultipleObjects(DWORD a, LPHANDLE b, BOOL c, DWORD d, DWORD e)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_MsgWaitForMultipleObjects(a, b, c, d, e);
     SetFS(sel);
@@ -6929,7 +6929,7 @@ inline DWORD O32_MsgWaitForMultipleObjects(DWORD a, LPHANDLE b, BOOL c, DWORD d,
 inline BOOL O32_ModifyMenu(HMENU a, UINT b, UINT c, UINT d, LPCSTR e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ModifyMenu(a, b, c, d, e);
     SetFS(sel);
@@ -6940,7 +6940,7 @@ inline BOOL O32_ModifyMenu(HMENU a, UINT b, UINT c, UINT d, LPCSTR e)
 inline BOOL O32_ModifyWorldTransform(HDC a, LPXFORM b, DWORD c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ModifyWorldTransform(a, b, c);
     SetFS(sel);
@@ -6951,7 +6951,7 @@ inline BOOL O32_ModifyWorldTransform(HDC a, LPXFORM b, DWORD c)
 inline BOOL O32_MoveFile(LPCSTR a, LPCSTR b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_MoveFile(a, b);
     SetFS(sel);
@@ -6962,7 +6962,7 @@ inline BOOL O32_MoveFile(LPCSTR a, LPCSTR b)
 inline BOOL O32_MoveToEx(HDC a, int b, int c, PPOINT d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_MoveToEx(a, b, c, d);
     SetFS(sel);
@@ -6973,7 +6973,7 @@ inline BOOL O32_MoveToEx(HDC a, int b, int c, PPOINT d)
 inline BOOL O32_MoveWindow(HWND a, int b, int c, int d, int e, BOOL f)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_MoveWindow(a, b, c, d, e, f);
     SetFS(sel);
@@ -6984,7 +6984,7 @@ inline BOOL O32_MoveWindow(HWND a, int b, int c, int d, int e, BOOL f)
 inline int O32_MulDiv(int a, int b, int c)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_MulDiv(a, b, c);
     SetFS(sel);
@@ -6995,7 +6995,7 @@ inline int O32_MulDiv(int a, int b, int c)
 inline int O32_OffsetClipRgn(HDC a, int b, int c)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_OffsetClipRgn(a, b, c);
     SetFS(sel);
@@ -7006,7 +7006,7 @@ inline int O32_OffsetClipRgn(HDC a, int b, int c)
 inline BOOL O32_OffsetRect(PRECT a, int b, int c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_OffsetRect(a, b, c);
     SetFS(sel);
@@ -7017,7 +7017,7 @@ inline BOOL O32_OffsetRect(PRECT a, int b, int c)
 inline int O32_OffsetRgn(HRGN a, int b, int c)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_OffsetRgn(a, b, c);
     SetFS(sel);
@@ -7028,7 +7028,7 @@ inline int O32_OffsetRgn(HRGN a, int b, int c)
 inline BOOL O32_OffsetViewportOrgEx(HDC a, int b, int c, PPOINT d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_OffsetViewportOrgEx(a, b, c, d);
     SetFS(sel);
@@ -7039,7 +7039,7 @@ inline BOOL O32_OffsetViewportOrgEx(HDC a, int b, int c, PPOINT d)
 inline BOOL O32_OffsetWindowOrgEx(HDC a, int b, int c, PPOINT d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_OffsetWindowOrgEx(a, b, c, d);
     SetFS(sel);
@@ -7050,7 +7050,7 @@ inline BOOL O32_OffsetWindowOrgEx(HDC a, int b, int c, PPOINT d)
 inline BOOL O32_OpenClipboard(HWND a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_OpenClipboard(a);
     SetFS(sel);
@@ -7061,7 +7061,7 @@ inline BOOL O32_OpenClipboard(HWND a)
 inline HANDLE O32_OpenEvent(DWORD a, BOOL b, LPCSTR c)
 {
  HANDLE yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_OpenEvent(a, b, c);
     SetFS(sel);
@@ -7072,7 +7072,7 @@ inline HANDLE O32_OpenEvent(DWORD a, BOOL b, LPCSTR c)
 inline HFILE O32_OpenFile(LPCSTR a, LPOFSTRUCT b, UINT c)
 {
  HFILE yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_OpenFile(a, b, c);
     SetFS(sel);
@@ -7083,7 +7083,7 @@ inline HFILE O32_OpenFile(LPCSTR a, LPOFSTRUCT b, UINT c)
 inline HANDLE O32_OpenMutex(DWORD a, BOOL b, LPCSTR c)
 {
  HANDLE yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_OpenMutex(a, b, c);
     SetFS(sel);
@@ -7094,7 +7094,7 @@ inline HANDLE O32_OpenMutex(DWORD a, BOOL b, LPCSTR c)
 inline HANDLE O32_OpenProcess(DWORD a, BOOL b, DWORD c)
 {
  HANDLE yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_OpenProcess(a, b, c);
     SetFS(sel);
@@ -7105,7 +7105,7 @@ inline HANDLE O32_OpenProcess(DWORD a, BOOL b, DWORD c)
 inline HANDLE O32_OpenSemaphore(DWORD a, BOOL b, LPCSTR c)
 {
  HANDLE yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_OpenSemaphore(a, b, c);
     SetFS(sel);
@@ -7115,7 +7115,7 @@ inline HANDLE O32_OpenSemaphore(DWORD a, BOOL b, LPCSTR c)
 
 inline VOID O32_OutputDebugString(LPCSTR a)
 {
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     _O32_OutputDebugString(a);
     SetFS(sel);
@@ -7124,7 +7124,7 @@ inline VOID O32_OutputDebugString(LPCSTR a)
 inline LONG O32_PackDDElParam(UINT a, UINT b, UINT c)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_PackDDElParam(a, b, c);
     SetFS(sel);
@@ -7135,7 +7135,7 @@ inline LONG O32_PackDDElParam(UINT a, UINT b, UINT c)
 inline BOOL O32_PaintRgn(HDC a, HRGN b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_PaintRgn(a, b);
     SetFS(sel);
@@ -7146,7 +7146,7 @@ inline BOOL O32_PaintRgn(HDC a, HRGN b)
 inline BOOL O32_PatBlt(HDC a, int b, int c, int d, int e, DWORD f)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_PatBlt(a, b, c, d, e, f);
     SetFS(sel);
@@ -7157,7 +7157,7 @@ inline BOOL O32_PatBlt(HDC a, int b, int c, int d, int e, DWORD f)
 inline HRGN O32_PathToRegion(HDC a)
 {
  HRGN yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_PathToRegion(a);
     SetFS(sel);
@@ -7168,7 +7168,7 @@ inline HRGN O32_PathToRegion(HDC a)
 inline BOOL O32_PeekMessage(LPMSG a, HWND b, UINT c, UINT d, UINT e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_PeekMessage(a, b, c, d, e);
     SetFS(sel);
@@ -7179,7 +7179,7 @@ inline BOOL O32_PeekMessage(LPMSG a, HWND b, UINT c, UINT d, UINT e)
 inline BOOL O32_Pie(HDC a, int b, int c, int d, int e, int f, int g, int h, int i)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_Pie(a, b, c, d, e, f, g, h, i);
     SetFS(sel);
@@ -7190,7 +7190,7 @@ inline BOOL O32_Pie(HDC a, int b, int c, int d, int e, int f, int g, int h, int 
 inline BOOL O32_PlayEnhMetaFile(HDC a, HENHMETAFILE b, CONST RECT *c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_PlayEnhMetaFile(a, b, c);
     SetFS(sel);
@@ -7201,7 +7201,7 @@ inline BOOL O32_PlayEnhMetaFile(HDC a, HENHMETAFILE b, CONST RECT *c)
 inline BOOL O32_PlayMetaFile(HDC a, HMETAFILE b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_PlayMetaFile(a, b);
     SetFS(sel);
@@ -7212,7 +7212,7 @@ inline BOOL O32_PlayMetaFile(HDC a, HMETAFILE b)
 inline BOOL O32_PlayMetaFileRecord(HDC a, LPHANDLETABLE b, PMETARECORD c, int d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_PlayMetaFileRecord(a, b, c, d);
     SetFS(sel);
@@ -7223,7 +7223,7 @@ inline BOOL O32_PlayMetaFileRecord(HDC a, LPHANDLETABLE b, PMETARECORD c, int d)
 inline BOOL O32_PolyBezier(HDC a, CONST POINT *b, int c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_PolyBezier(a, b, c);
     SetFS(sel);
@@ -7234,7 +7234,7 @@ inline BOOL O32_PolyBezier(HDC a, CONST POINT *b, int c)
 inline BOOL O32_PolyBezierTo(HDC a, CONST POINT *b, DWORD c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_PolyBezierTo(a, b, c);
     SetFS(sel);
@@ -7245,7 +7245,7 @@ inline BOOL O32_PolyBezierTo(HDC a, CONST POINT *b, DWORD c)
 inline BOOL O32_PolyDraw(HDC a, CONST POINT *b, CONST BYTE *c, int d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_PolyDraw(a, b, c, d);
     SetFS(sel);
@@ -7256,7 +7256,7 @@ inline BOOL O32_PolyDraw(HDC a, CONST POINT *b, CONST BYTE *c, int d)
 inline BOOL O32_Polygon(HDC a, CONST POINT *b, int c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_Polygon(a, b, c);
     SetFS(sel);
@@ -7267,7 +7267,7 @@ inline BOOL O32_Polygon(HDC a, CONST POINT *b, int c)
 inline BOOL O32_Polyline(HDC a, CONST POINT *b, int c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_Polyline(a, b, c);
     SetFS(sel);
@@ -7278,7 +7278,7 @@ inline BOOL O32_Polyline(HDC a, CONST POINT *b, int c)
 inline BOOL O32_PolylineTo(HDC a, CONST POINT *b, DWORD c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_PolylineTo(a, b, c);
     SetFS(sel);
@@ -7289,7 +7289,7 @@ inline BOOL O32_PolylineTo(HDC a, CONST POINT *b, DWORD c)
 inline BOOL O32_PolyPolygon(HDC a, CONST POINT *b, CONST int *c, int d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_PolyPolygon(a, b, c, d);
     SetFS(sel);
@@ -7300,7 +7300,7 @@ inline BOOL O32_PolyPolygon(HDC a, CONST POINT *b, CONST int *c, int d)
 inline BOOL O32_PolyPolyline(HDC a, CONST POINT *b, CONST DWORD *c, DWORD d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_PolyPolyline(a, b, c, d);
     SetFS(sel);
@@ -7310,7 +7310,7 @@ inline BOOL O32_PolyPolyline(HDC a, CONST POINT *b, CONST DWORD *c, DWORD d)
 
 inline VOID O32_PostQuitMessage(int a)
 {
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     _O32_PostQuitMessage(a);
     SetFS(sel);
@@ -7319,7 +7319,7 @@ inline VOID O32_PostQuitMessage(int a)
 inline BOOL O32_PostMessage(HWND a, UINT b, WPARAM c, LPARAM d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_PostMessage(a, b, c, d);
     SetFS(sel);
@@ -7330,7 +7330,7 @@ inline BOOL O32_PostMessage(HWND a, UINT b, WPARAM c, LPARAM d)
 inline BOOL O32_PostThreadMessage(DWORD a, UINT b, WPARAM c, LPARAM d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_PostThreadMessage(a, b, c, d);
     SetFS(sel);
@@ -7341,7 +7341,7 @@ inline BOOL O32_PostThreadMessage(DWORD a, UINT b, WPARAM c, LPARAM d)
 inline BOOL O32_PtInRect(CONST RECT *a, POINT b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_PtInRect(a, b);
     SetFS(sel);
@@ -7352,7 +7352,7 @@ inline BOOL O32_PtInRect(CONST RECT *a, POINT b)
 inline BOOL O32_PtInRegion(HRGN a, int b, int c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_PtInRegion(a, b, c);
     SetFS(sel);
@@ -7363,7 +7363,7 @@ inline BOOL O32_PtInRegion(HRGN a, int b, int c)
 inline BOOL O32_PtVisible(HDC a, int b, int c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_PtVisible(a, b, c);
     SetFS(sel);
@@ -7374,7 +7374,7 @@ inline BOOL O32_PtVisible(HDC a, int b, int c)
 inline BOOL O32_PrintDlg(LPPRINTDLGA a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_PrintDlg(a);
     SetFS(sel);
@@ -7385,7 +7385,7 @@ inline BOOL O32_PrintDlg(LPPRINTDLGA a)
 inline BOOL O32_PulseEvent(HANDLE a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_PulseEvent(a);
     SetFS(sel);
@@ -7396,7 +7396,7 @@ inline BOOL O32_PulseEvent(HANDLE a)
 inline BOOL O32_ReadFile(HANDLE a, PVOID b, DWORD c, PDWORD d, LPOVERLAPPED e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ReadFile(a, b, c, d, e);
     SetFS(sel);
@@ -7407,7 +7407,7 @@ inline BOOL O32_ReadFile(HANDLE a, PVOID b, DWORD c, PDWORD d, LPOVERLAPPED e)
 inline UINT O32_RealizePalette(HDC a)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_RealizePalette(a);
     SetFS(sel);
@@ -7418,7 +7418,7 @@ inline UINT O32_RealizePalette(HDC a)
 inline BOOL O32_RectInRegion(HRGN a, CONST RECT *b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_RectInRegion(a, b);
     SetFS(sel);
@@ -7429,7 +7429,7 @@ inline BOOL O32_RectInRegion(HRGN a, CONST RECT *b)
 inline BOOL O32_RectVisible(HDC a, CONST RECT *b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_RectVisible(a, b);
     SetFS(sel);
@@ -7440,7 +7440,7 @@ inline BOOL O32_RectVisible(HDC a, CONST RECT *b)
 inline BOOL O32_Rectangle(HDC a, int b, int c, int d, int e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_Rectangle(a, b, c, d, e);
     SetFS(sel);
@@ -7451,7 +7451,7 @@ inline BOOL O32_Rectangle(HDC a, int b, int c, int d, int e)
 inline BOOL O32_RedrawWindow(HWND a, CONST RECT *b, HRGN c, DWORD d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_RedrawWindow(a, b, c, d);
     SetFS(sel);
@@ -7462,7 +7462,7 @@ inline BOOL O32_RedrawWindow(HWND a, CONST RECT *b, HRGN c, DWORD d)
 inline LONG O32_RegCloseKey(HKEY a)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_RegCloseKey(a);
     SetFS(sel);
@@ -7473,7 +7473,7 @@ inline LONG O32_RegCloseKey(HKEY a)
 inline LONG O32_RegCreateKey(HKEY a, LPCSTR b, PHKEY c)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_RegCreateKey(a, b, c);
     SetFS(sel);
@@ -7484,7 +7484,7 @@ inline LONG O32_RegCreateKey(HKEY a, LPCSTR b, PHKEY c)
 inline LONG O32_RegCreateKeyEx(HKEY a, LPCSTR b, DWORD c, LPSTR d, DWORD e, REGSAM f, LPSECURITY_ATTRIBUTES g, PHKEY h, PDWORD i)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_RegCreateKeyEx(a, b, c, d, e, f, g, h, i);
     SetFS(sel);
@@ -7495,7 +7495,7 @@ inline LONG O32_RegCreateKeyEx(HKEY a, LPCSTR b, DWORD c, LPSTR d, DWORD e, REGS
 inline LONG O32_RegDeleteKey(HKEY a, LPCSTR b)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_RegDeleteKey(a, b);
     SetFS(sel);
@@ -7506,7 +7506,7 @@ inline LONG O32_RegDeleteKey(HKEY a, LPCSTR b)
 inline LONG O32_RegDeleteValue(HKEY a, LPSTR b)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_RegDeleteValue(a, b);
     SetFS(sel);
@@ -7517,7 +7517,7 @@ inline LONG O32_RegDeleteValue(HKEY a, LPSTR b)
 inline LONG O32_RegEnumKey(HKEY a, DWORD b, LPSTR c, DWORD d)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_RegEnumKey(a, b, c, d);
     SetFS(sel);
@@ -7528,7 +7528,7 @@ inline LONG O32_RegEnumKey(HKEY a, DWORD b, LPSTR c, DWORD d)
 inline LONG O32_RegEnumKeyEx(HKEY a, DWORD b, LPSTR c, PDWORD d, PDWORD e, LPSTR f, PDWORD g, FILETIME *h)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_RegEnumKeyEx(a, b, c, d, e, f, g, h);
     SetFS(sel);
@@ -7539,7 +7539,7 @@ inline LONG O32_RegEnumKeyEx(HKEY a, DWORD b, LPSTR c, PDWORD d, PDWORD e, LPSTR
 inline LONG O32_RegEnumValue(HKEY a, DWORD b, LPSTR c, PDWORD d, PDWORD e, PDWORD f, LPBYTE g, PDWORD h)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_RegEnumValue(a, b, c, d, e, f, g, h);
     SetFS(sel);
@@ -7550,7 +7550,7 @@ inline LONG O32_RegEnumValue(HKEY a, DWORD b, LPSTR c, PDWORD d, PDWORD e, PDWOR
 inline LONG O32_RegOpenKey(HKEY a, LPCSTR b, PHKEY c)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_RegOpenKey(a, b, c);
     SetFS(sel);
@@ -7561,7 +7561,7 @@ inline LONG O32_RegOpenKey(HKEY a, LPCSTR b, PHKEY c)
 inline LONG O32_RegOpenKeyEx(HKEY a, LPCSTR b, DWORD c, REGSAM d, PHKEY e)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_RegOpenKeyEx(a, b, c, d, e);
     SetFS(sel);
@@ -7572,7 +7572,7 @@ inline LONG O32_RegOpenKeyEx(HKEY a, LPCSTR b, DWORD c, REGSAM d, PHKEY e)
 inline LONG O32_RegQueryInfoKey(HKEY a, LPSTR b, PDWORD c, PDWORD d, PDWORD e, PDWORD f, PDWORD g, PDWORD h, PDWORD i, PDWORD j, PDWORD k, FILETIME *l)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_RegQueryInfoKey(a, b, c, d, e, f, g, h, i, j, k, l);
     SetFS(sel);
@@ -7583,7 +7583,7 @@ inline LONG O32_RegQueryInfoKey(HKEY a, LPSTR b, PDWORD c, PDWORD d, PDWORD e, P
 inline LONG O32_RegQueryValue(HKEY a, LPCSTR b, LPSTR c, PLONG d)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_RegQueryValue(a, b, c, d);
     SetFS(sel);
@@ -7594,7 +7594,7 @@ inline LONG O32_RegQueryValue(HKEY a, LPCSTR b, LPSTR c, PLONG d)
 inline LONG O32_RegQueryValueEx(HKEY a, LPCSTR b, PDWORD c, PDWORD d, LPBYTE e, PDWORD f)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_RegQueryValueEx(a, b, c, d, e, f);
     SetFS(sel);
@@ -7605,7 +7605,7 @@ inline LONG O32_RegQueryValueEx(HKEY a, LPCSTR b, PDWORD c, PDWORD d, LPBYTE e, 
 inline LONG O32_RegSetValue(HKEY a, LPCSTR b, DWORD c, LPCSTR d, DWORD e)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_RegSetValue(a, b, c, d, e);
     SetFS(sel);
@@ -7616,7 +7616,7 @@ inline LONG O32_RegSetValue(HKEY a, LPCSTR b, DWORD c, LPCSTR d, DWORD e)
 inline LONG O32_RegSetValueEx(HKEY a, LPCSTR b, DWORD c, DWORD d, CONST BYTE *e, DWORD f)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_RegSetValueEx(a, b, c, d, e, f);
     SetFS(sel);
@@ -7627,7 +7627,7 @@ inline LONG O32_RegSetValueEx(HKEY a, LPCSTR b, DWORD c, DWORD d, CONST BYTE *e,
 inline WORD O32_RegisterClass(CONST WNDCLASSA *a)
 {
  WORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_RegisterClass(a);
     SetFS(sel);
@@ -7638,7 +7638,7 @@ inline WORD O32_RegisterClass(CONST WNDCLASSA *a)
 inline UINT O32_RegisterClipboardFormat(LPCSTR a)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_RegisterClipboardFormat(a);
     SetFS(sel);
@@ -7649,7 +7649,7 @@ inline UINT O32_RegisterClipboardFormat(LPCSTR a)
 inline UINT O32_RegisterWindowMessage(LPCSTR a)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_RegisterWindowMessage(a);
     SetFS(sel);
@@ -7660,7 +7660,7 @@ inline UINT O32_RegisterWindowMessage(LPCSTR a)
 inline BOOL O32_ReleaseCapture()
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ReleaseCapture();
     SetFS(sel);
@@ -7671,7 +7671,7 @@ inline BOOL O32_ReleaseCapture()
 inline int O32_ReleaseDC(HWND a, HDC b)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ReleaseDC(a, b);
     SetFS(sel);
@@ -7682,7 +7682,7 @@ inline int O32_ReleaseDC(HWND a, HDC b)
 inline BOOL O32_ReleaseMutex(HANDLE a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ReleaseMutex(a);
     SetFS(sel);
@@ -7693,7 +7693,7 @@ inline BOOL O32_ReleaseMutex(HANDLE a)
 inline BOOL O32_ReleaseSemaphore(HANDLE a, LONG b, PLONG c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ReleaseSemaphore(a, b, c);
     SetFS(sel);
@@ -7704,7 +7704,7 @@ inline BOOL O32_ReleaseSemaphore(HANDLE a, LONG b, PLONG c)
 inline BOOL O32_RemoveDirectory(LPCSTR a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_RemoveDirectory(a);
     SetFS(sel);
@@ -7715,7 +7715,7 @@ inline BOOL O32_RemoveDirectory(LPCSTR a)
 inline BOOL O32_RemoveFontResource(LPCSTR a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_RemoveFontResource(a);
     SetFS(sel);
@@ -7726,7 +7726,7 @@ inline BOOL O32_RemoveFontResource(LPCSTR a)
 inline BOOL O32_RemoveMenu(HMENU a, UINT b, UINT c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_RemoveMenu(a, b, c);
     SetFS(sel);
@@ -7737,7 +7737,7 @@ inline BOOL O32_RemoveMenu(HMENU a, UINT b, UINT c)
 inline HANDLE O32_RemoveProp(HWND a, LPCSTR b)
 {
  HANDLE yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_RemoveProp(a, b);
     SetFS(sel);
@@ -7748,7 +7748,7 @@ inline HANDLE O32_RemoveProp(HWND a, LPCSTR b)
 inline HWND O32_ReplaceText(LPFINDREPLACEA a)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ReplaceText(a);
     SetFS(sel);
@@ -7759,7 +7759,7 @@ inline HWND O32_ReplaceText(LPFINDREPLACEA a)
 inline BOOL O32_ReplyMessage(LRESULT a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ReplyMessage(a);
     SetFS(sel);
@@ -7770,7 +7770,7 @@ inline BOOL O32_ReplyMessage(LRESULT a)
 inline BOOL O32_ResetDC(HDC a, CONST DEVMODEA *b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ResetDC(a, b);
     SetFS(sel);
@@ -7781,7 +7781,7 @@ inline BOOL O32_ResetDC(HDC a, CONST DEVMODEA *b)
 inline BOOL O32_ResetEvent(HANDLE a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ResetEvent(a);
     SetFS(sel);
@@ -7792,7 +7792,7 @@ inline BOOL O32_ResetEvent(HANDLE a)
 inline BOOL O32_ResizePalette(HPALETTE a, UINT b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ResizePalette(a, b);
     SetFS(sel);
@@ -7803,7 +7803,7 @@ inline BOOL O32_ResizePalette(HPALETTE a, UINT b)
 inline BOOL O32_RestoreDC(HDC a, int b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_RestoreDC(a, b);
     SetFS(sel);
@@ -7814,7 +7814,7 @@ inline BOOL O32_RestoreDC(HDC a, int b)
 inline DWORD O32_ResumeThread(HANDLE a)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ResumeThread(a);
     SetFS(sel);
@@ -7825,7 +7825,7 @@ inline DWORD O32_ResumeThread(HANDLE a)
 inline LONG O32_ReuseDDElParam(LONG a, UINT b, UINT c, UINT d, UINT e)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ReuseDDElParam(a, b, c, d, e);
     SetFS(sel);
@@ -7836,7 +7836,7 @@ inline LONG O32_ReuseDDElParam(LONG a, UINT b, UINT c, UINT d, UINT e)
 inline BOOL O32_RoundRect(HDC a, int b, int c, int d, int e, int f, int g)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_RoundRect(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -7847,7 +7847,7 @@ inline BOOL O32_RoundRect(HDC a, int b, int c, int d, int e, int f, int g)
 inline int O32_SaveDC(HDC a)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SaveDC(a);
     SetFS(sel);
@@ -7858,7 +7858,7 @@ inline int O32_SaveDC(HDC a)
 inline BOOL O32_ScaleViewportExtEx(HDC a, int b, int c, int d, int e, PSIZE f)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ScaleViewportExtEx(a, b, c, d, e, f);
     SetFS(sel);
@@ -7869,7 +7869,7 @@ inline BOOL O32_ScaleViewportExtEx(HDC a, int b, int c, int d, int e, PSIZE f)
 inline BOOL O32_ScaleWindowExtEx(HDC a, int b, int c, int d, int e, PSIZE f)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ScaleWindowExtEx(a, b, c, d, e, f);
     SetFS(sel);
@@ -7880,7 +7880,7 @@ inline BOOL O32_ScaleWindowExtEx(HDC a, int b, int c, int d, int e, PSIZE f)
 inline BOOL O32_ScreenToClient(HWND a, PPOINT b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ScreenToClient(a, b);
     SetFS(sel);
@@ -7891,7 +7891,7 @@ inline BOOL O32_ScreenToClient(HWND a, PPOINT b)
 inline BOOL O32_ScrollDC(HDC a, int b, int c, CONST RECT *d, CONST RECT *e, HRGN f, PRECT g)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ScrollDC(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -7902,7 +7902,7 @@ inline BOOL O32_ScrollDC(HDC a, int b, int c, CONST RECT *d, CONST RECT *e, HRGN
 inline BOOL O32_ScrollWindow(HWND a, int b, int c, CONST RECT *d, CONST RECT *e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ScrollWindow(a, b, c, d, e);
     SetFS(sel);
@@ -7913,7 +7913,7 @@ inline BOOL O32_ScrollWindow(HWND a, int b, int c, CONST RECT *d, CONST RECT *e)
 inline BOOL O32_ScrollWindowEx(HWND a, int b, int c, CONST RECT *d, CONST RECT *e, HRGN f, PRECT g, UINT h)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ScrollWindowEx(a, b, c, d, e, f, g, h);
     SetFS(sel);
@@ -7924,7 +7924,7 @@ inline BOOL O32_ScrollWindowEx(HWND a, int b, int c, CONST RECT *d, CONST RECT *
 inline DWORD O32_SearchPath(LPCSTR a, LPCSTR b, LPCSTR c, DWORD d, LPSTR e, LPSTR *f)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SearchPath(a, b, c, d, e, f);
     SetFS(sel);
@@ -7935,7 +7935,7 @@ inline DWORD O32_SearchPath(LPCSTR a, LPCSTR b, LPCSTR c, DWORD d, LPSTR e, LPST
 inline int O32_SelectClipRgn(HDC a, HRGN b)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SelectClipRgn(a, b);
     SetFS(sel);
@@ -7946,7 +7946,7 @@ inline int O32_SelectClipRgn(HDC a, HRGN b)
 inline HGDIOBJ O32_SelectObject(HDC a, HGDIOBJ b)
 {
  HGDIOBJ yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SelectObject(a, b);
     SetFS(sel);
@@ -7957,7 +7957,7 @@ inline HGDIOBJ O32_SelectObject(HDC a, HGDIOBJ b)
 inline HPALETTE O32_SelectPalette(HDC a, HPALETTE b, BOOL c)
 {
  HPALETTE yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SelectPalette(a, b, c);
     SetFS(sel);
@@ -7968,7 +7968,7 @@ inline HPALETTE O32_SelectPalette(HDC a, HPALETTE b, BOOL c)
 inline LONG O32_SendDlgItemMessage(HWND a, int b, UINT c, WPARAM d, LPARAM e)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SendDlgItemMessage(a, b, c, d, e);
     SetFS(sel);
@@ -7979,7 +7979,7 @@ inline LONG O32_SendDlgItemMessage(HWND a, int b, UINT c, WPARAM d, LPARAM e)
 inline LRESULT O32_SendMessage(HWND a, UINT b, WPARAM c, LPARAM d)
 {
  LRESULT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SendMessage(a, b, c, d);
     SetFS(sel);
@@ -7990,7 +7990,7 @@ inline LRESULT O32_SendMessage(HWND a, UINT b, WPARAM c, LPARAM d)
 inline HWND O32_SetActiveWindow(HWND a)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetActiveWindow(a);
     SetFS(sel);
@@ -8001,7 +8001,7 @@ inline HWND O32_SetActiveWindow(HWND a)
 inline int O32_SetArcDirection(HDC a, int b)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetArcDirection(a, b);
     SetFS(sel);
@@ -8012,7 +8012,7 @@ inline int O32_SetArcDirection(HDC a, int b)
 inline LONG O32_SetBitmapBits(HBITMAP a, DWORD b, CONST VOID *c)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetBitmapBits(a, b, c);
     SetFS(sel);
@@ -8023,7 +8023,7 @@ inline LONG O32_SetBitmapBits(HBITMAP a, DWORD b, CONST VOID *c)
 inline BOOL O32_SetBitmapDimensionEx(HBITMAP a, int b, int c, PSIZE d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetBitmapDimensionEx(a, b, c, d);
     SetFS(sel);
@@ -8034,7 +8034,7 @@ inline BOOL O32_SetBitmapDimensionEx(HBITMAP a, int b, int c, PSIZE d)
 inline COLORREF O32_SetBkColor(HDC a, COLORREF b)
 {
  COLORREF yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetBkColor(a, b);
     SetFS(sel);
@@ -8045,7 +8045,7 @@ inline COLORREF O32_SetBkColor(HDC a, COLORREF b)
 inline int O32_SetBkMode(HDC a, int b)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetBkMode(a, b);
     SetFS(sel);
@@ -8056,7 +8056,7 @@ inline int O32_SetBkMode(HDC a, int b)
 inline LONG O32_SetBoundsRect(HDC a, CONST RECT *b, UINT c)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetBoundsRect(a, b, c);
     SetFS(sel);
@@ -8067,7 +8067,7 @@ inline LONG O32_SetBoundsRect(HDC a, CONST RECT *b, UINT c)
 inline BOOL O32_SetBrushOrgEx(HDC a, int b, int c, PPOINT d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetBrushOrgEx(a, b, c, d);
     SetFS(sel);
@@ -8078,7 +8078,7 @@ inline BOOL O32_SetBrushOrgEx(HDC a, int b, int c, PPOINT d)
 inline HWND O32_SetCapture(HWND a)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetCapture(a);
     SetFS(sel);
@@ -8089,7 +8089,7 @@ inline HWND O32_SetCapture(HWND a)
 inline BOOL O32_SetCaretBlinkTime(UINT a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetCaretBlinkTime(a);
     SetFS(sel);
@@ -8100,7 +8100,7 @@ inline BOOL O32_SetCaretBlinkTime(UINT a)
 inline BOOL O32_SetCaretPos(int a, int b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetCaretPos(a, b);
     SetFS(sel);
@@ -8111,7 +8111,7 @@ inline BOOL O32_SetCaretPos(int a, int b)
 inline DWORD O32_SetClassLong(HWND a, int b, LONG c)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetClassLong(a, b, c);
     SetFS(sel);
@@ -8122,7 +8122,7 @@ inline DWORD O32_SetClassLong(HWND a, int b, LONG c)
 inline WORD O32_SetClassWord(HWND a, int b, WORD c)
 {
  WORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetClassWord(a, b, c);
     SetFS(sel);
@@ -8133,7 +8133,7 @@ inline WORD O32_SetClassWord(HWND a, int b, WORD c)
 inline HANDLE O32_SetClipboardData(UINT a, HANDLE b)
 {
  HANDLE yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetClipboardData(a, b);
     SetFS(sel);
@@ -8144,7 +8144,7 @@ inline HANDLE O32_SetClipboardData(UINT a, HANDLE b)
 inline HWND O32_SetClipboardViewer(HWND a)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetClipboardViewer(a);
     SetFS(sel);
@@ -8155,7 +8155,7 @@ inline HWND O32_SetClipboardViewer(HWND a)
 inline BOOL O32_SetCurrentDirectory(LPSTR a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetCurrentDirectory(a);
     SetFS(sel);
@@ -8166,7 +8166,7 @@ inline BOOL O32_SetCurrentDirectory(LPSTR a)
 inline HCURSOR O32_SetCursor(HCURSOR a)
 {
  HCURSOR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetCursor(a);
     SetFS(sel);
@@ -8177,7 +8177,7 @@ inline HCURSOR O32_SetCursor(HCURSOR a)
 inline BOOL O32_SetCursorPos(int a, int b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetCursorPos(a, b);
     SetFS(sel);
@@ -8188,7 +8188,7 @@ inline BOOL O32_SetCursorPos(int a, int b)
 inline int O32_SetDIBits(HDC a, HBITMAP b, UINT c, UINT d, CONST VOID *e, CONST BITMAPINFO *f, UINT g)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetDIBits(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -8199,7 +8199,7 @@ inline int O32_SetDIBits(HDC a, HBITMAP b, UINT c, UINT d, CONST VOID *e, CONST 
 inline int O32_SetDIBitsToDevice(HDC a, int b, int c, int d, int e, int f, int g, UINT h, UINT i, PVOID j, PBITMAPINFO k, UINT l)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetDIBitsToDevice(a, b, c, d, e, f, g, h, i, j, k, l);
     SetFS(sel);
@@ -8210,7 +8210,7 @@ inline int O32_SetDIBitsToDevice(HDC a, int b, int c, int d, int e, int f, int g
 inline BOOL O32_SetDlgItemInt(HWND a, int b, UINT c, BOOL d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetDlgItemInt(a, b, c, d);
     SetFS(sel);
@@ -8221,7 +8221,7 @@ inline BOOL O32_SetDlgItemInt(HWND a, int b, UINT c, BOOL d)
 inline BOOL O32_SetDlgItemText(HWND a, int b, LPCSTR c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetDlgItemText(a, b, c);
     SetFS(sel);
@@ -8232,7 +8232,7 @@ inline BOOL O32_SetDlgItemText(HWND a, int b, LPCSTR c)
 inline BOOL O32_SetDoubleClickTime(UINT a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetDoubleClickTime(a);
     SetFS(sel);
@@ -8243,7 +8243,7 @@ inline BOOL O32_SetDoubleClickTime(UINT a)
 inline BOOL O32_SetEndOfFile(HANDLE a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetEndOfFile(a);
     SetFS(sel);
@@ -8254,7 +8254,7 @@ inline BOOL O32_SetEndOfFile(HANDLE a)
 inline HENHMETAFILE O32_SetEnhMetaFileBits(UINT a, CONST BYTE *b)
 {
  HENHMETAFILE yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetEnhMetaFileBits(a, b);
     SetFS(sel);
@@ -8265,7 +8265,7 @@ inline HENHMETAFILE O32_SetEnhMetaFileBits(UINT a, CONST BYTE *b)
 inline BOOL O32_SetEnvironmentVariable(LPCSTR a, LPCSTR b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetEnvironmentVariable(a, b);
     SetFS(sel);
@@ -8276,7 +8276,7 @@ inline BOOL O32_SetEnvironmentVariable(LPCSTR a, LPCSTR b)
 inline BOOL O32_SetEvent(HANDLE a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetEvent(a);
     SetFS(sel);
@@ -8287,7 +8287,7 @@ inline BOOL O32_SetEvent(HANDLE a)
 inline BOOL O32_SetFileAttributes(LPCSTR a, DWORD b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetFileAttributes(a, b);
     SetFS(sel);
@@ -8298,7 +8298,7 @@ inline BOOL O32_SetFileAttributes(LPCSTR a, DWORD b)
 inline DWORD O32_SetFilePointer(HANDLE a, LONG b, PLONG c, DWORD d)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetFilePointer(a, b, c, d);
     SetFS(sel);
@@ -8309,7 +8309,7 @@ inline DWORD O32_SetFilePointer(HANDLE a, LONG b, PLONG c, DWORD d)
 inline BOOL O32_SetFileTime(HANDLE a, CONST FILETIME *b, CONST FILETIME *c, CONST FILETIME *d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetFileTime(a, b, c, d);
     SetFS(sel);
@@ -8320,7 +8320,7 @@ inline BOOL O32_SetFileTime(HANDLE a, CONST FILETIME *b, CONST FILETIME *c, CONS
 inline HWND O32_SetFocus(HWND a)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetFocus(a);
     SetFS(sel);
@@ -8331,7 +8331,7 @@ inline HWND O32_SetFocus(HWND a)
 inline BOOL O32_SetForegroundWindow(HWND a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetForegroundWindow(a);
     SetFS(sel);
@@ -8342,7 +8342,7 @@ inline BOOL O32_SetForegroundWindow(HWND a)
 inline int O32_SetGraphicsMode(HDC a, int b)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetGraphicsMode(a, b);
     SetFS(sel);
@@ -8353,7 +8353,7 @@ inline int O32_SetGraphicsMode(HDC a, int b)
 inline UINT O32_SetHandleCount(UINT a)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetHandleCount(a);
     SetFS(sel);
@@ -8363,7 +8363,7 @@ inline UINT O32_SetHandleCount(UINT a)
 
 inline VOID O32_SetLastError(DWORD a)
 {
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     _O32_SetLastError(a);
     SetFS(sel);
@@ -8372,7 +8372,7 @@ inline VOID O32_SetLastError(DWORD a)
 inline BOOL O32_SetLocalTime(CONST SYSTEMTIME *a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetLocalTime(a);
     SetFS(sel);
@@ -8383,7 +8383,7 @@ inline BOOL O32_SetLocalTime(CONST SYSTEMTIME *a)
 inline int O32_SetMapMode(HDC a, int b)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetMapMode(a, b);
     SetFS(sel);
@@ -8394,7 +8394,7 @@ inline int O32_SetMapMode(HDC a, int b)
 inline DWORD O32_SetMapperFlags(HDC a, DWORD b)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetMapperFlags(a, b);
     SetFS(sel);
@@ -8405,7 +8405,7 @@ inline DWORD O32_SetMapperFlags(HDC a, DWORD b)
 inline BOOL O32_SetMenu(HWND a, HMENU b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetMenu(a, b);
     SetFS(sel);
@@ -8416,7 +8416,7 @@ inline BOOL O32_SetMenu(HWND a, HMENU b)
 inline BOOL O32_SetMenuItemBitmaps(HMENU a, UINT b, UINT c, HBITMAP d, HBITMAP e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetMenuItemBitmaps(a, b, c, d, e);
     SetFS(sel);
@@ -8427,7 +8427,7 @@ inline BOOL O32_SetMenuItemBitmaps(HMENU a, UINT b, UINT c, HBITMAP d, HBITMAP e
 inline HMETAFILE O32_SetMetaFileBitsEx(UINT a, PBYTE b)
 {
  HMETAFILE yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetMetaFileBitsEx(a, b);
     SetFS(sel);
@@ -8438,7 +8438,7 @@ inline HMETAFILE O32_SetMetaFileBitsEx(UINT a, PBYTE b)
 inline BOOL O32_SetMiterLimit(HDC a, float b, float *c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetMiterLimit(a, b, c);
     SetFS(sel);
@@ -8449,7 +8449,7 @@ inline BOOL O32_SetMiterLimit(HDC a, float b, float *c)
 inline UINT O32_SetPaletteEntries(HPALETTE a, UINT b, UINT c, CONST PALETTEENTRY *d)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetPaletteEntries(a, b, c, d);
     SetFS(sel);
@@ -8460,7 +8460,7 @@ inline UINT O32_SetPaletteEntries(HPALETTE a, UINT b, UINT c, CONST PALETTEENTRY
 inline HWND O32_SetParent(HWND a, HWND b)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetParent(a, b);
     SetFS(sel);
@@ -8471,7 +8471,7 @@ inline HWND O32_SetParent(HWND a, HWND b)
 inline COLORREF O32_SetPixel(HDC a, int b, int c, COLORREF d)
 {
  COLORREF yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetPixel(a, b, c, d);
     SetFS(sel);
@@ -8482,7 +8482,7 @@ inline COLORREF O32_SetPixel(HDC a, int b, int c, COLORREF d)
 inline int O32_SetPolyFillMode(HDC a, int b)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetPolyFillMode(a, b);
     SetFS(sel);
@@ -8493,7 +8493,7 @@ inline int O32_SetPolyFillMode(HDC a, int b)
 inline BOOL O32_SetPriorityClass(HANDLE a, DWORD b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetPriorityClass(a, b);
     SetFS(sel);
@@ -8504,7 +8504,7 @@ inline BOOL O32_SetPriorityClass(HANDLE a, DWORD b)
 inline BOOL O32_SetProp(HWND a, LPCSTR b, HANDLE c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetProp(a, b, c);
     SetFS(sel);
@@ -8515,7 +8515,7 @@ inline BOOL O32_SetProp(HWND a, LPCSTR b, HANDLE c)
 inline BOOL O32_SetRect(PRECT a, int b, int c, int d, int e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetRect(a, b, c, d, e);
     SetFS(sel);
@@ -8526,7 +8526,7 @@ inline BOOL O32_SetRect(PRECT a, int b, int c, int d, int e)
 inline BOOL O32_SetRectEmpty(PRECT a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetRectEmpty(a);
     SetFS(sel);
@@ -8537,7 +8537,7 @@ inline BOOL O32_SetRectEmpty(PRECT a)
 inline BOOL O32_SetRectRgn(HRGN a, int b, int c, int d, int e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetRectRgn(a, b, c, d, e);
     SetFS(sel);
@@ -8548,7 +8548,7 @@ inline BOOL O32_SetRectRgn(HRGN a, int b, int c, int d, int e)
 inline int O32_SetROP2(HDC a, int b)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetROP2(a, b);
     SetFS(sel);
@@ -8559,7 +8559,7 @@ inline int O32_SetROP2(HDC a, int b)
 inline int O32_SetScrollPos(HWND a, int b, int c, BOOL d)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetScrollPos(a, b, c, d);
     SetFS(sel);
@@ -8570,7 +8570,7 @@ inline int O32_SetScrollPos(HWND a, int b, int c, BOOL d)
 inline BOOL O32_SetScrollRange(HWND a, int b, int c, int d, BOOL e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetScrollRange(a, b, c, d, e);
     SetFS(sel);
@@ -8581,7 +8581,7 @@ inline BOOL O32_SetScrollRange(HWND a, int b, int c, int d, BOOL e)
 inline BOOL O32_SetStdHandle(DWORD a, HANDLE b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetStdHandle(a, b);
     SetFS(sel);
@@ -8592,7 +8592,7 @@ inline BOOL O32_SetStdHandle(DWORD a, HANDLE b)
 inline int O32_SetStretchBltMode(HDC a, int b)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetStretchBltMode(a, b);
     SetFS(sel);
@@ -8603,7 +8603,7 @@ inline int O32_SetStretchBltMode(HDC a, int b)
 inline UINT O32_SetSysColors(int a, CONST int *b, CONST COLORREF *c)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetSysColors(a, b, c);
     SetFS(sel);
@@ -8614,7 +8614,7 @@ inline UINT O32_SetSysColors(int a, CONST int *b, CONST COLORREF *c)
 inline BOOL O32_SetSystemTime(CONST SYSTEMTIME *a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetSystemTime(a);
     SetFS(sel);
@@ -8625,7 +8625,7 @@ inline BOOL O32_SetSystemTime(CONST SYSTEMTIME *a)
 inline BOOL O32_SetTimeZoneInformation(CONST TIME_ZONE_INFORMATION *a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetTimeZoneInformation(a);
     SetFS(sel);
@@ -8636,7 +8636,7 @@ inline BOOL O32_SetTimeZoneInformation(CONST TIME_ZONE_INFORMATION *a)
 inline UINT O32_SetTextAlign(HDC a, UINT b)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetTextAlign(a, b);
     SetFS(sel);
@@ -8647,7 +8647,7 @@ inline UINT O32_SetTextAlign(HDC a, UINT b)
 inline int O32_SetTextCharacterExtra(HDC a, int b)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetTextCharacterExtra(a, b);
     SetFS(sel);
@@ -8658,7 +8658,7 @@ inline int O32_SetTextCharacterExtra(HDC a, int b)
 inline COLORREF O32_SetTextColor(HDC a, COLORREF b)
 {
  COLORREF yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetTextColor(a, b);
     SetFS(sel);
@@ -8669,7 +8669,7 @@ inline COLORREF O32_SetTextColor(HDC a, COLORREF b)
 inline BOOL O32_SetTextJustification(HDC a, int b, int c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetTextJustification(a, b, c);
     SetFS(sel);
@@ -8680,7 +8680,7 @@ inline BOOL O32_SetTextJustification(HDC a, int b, int c)
 inline BOOL O32_SetThreadPriority(HANDLE a, int b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetThreadPriority(a, b);
     SetFS(sel);
@@ -8691,7 +8691,7 @@ inline BOOL O32_SetThreadPriority(HANDLE a, int b)
 inline UINT O32_SetTimer(HWND a, UINT b, UINT c, TIMERPROC_O32 d)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetTimer(a, b, c, d);
     SetFS(sel);
@@ -8702,7 +8702,7 @@ inline UINT O32_SetTimer(HWND a, UINT b, UINT c, TIMERPROC_O32 d)
 inline BOOL O32_SetViewportExtEx(HDC a, int b, int c, PSIZE d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetViewportExtEx(a, b, c, d);
     SetFS(sel);
@@ -8713,7 +8713,7 @@ inline BOOL O32_SetViewportExtEx(HDC a, int b, int c, PSIZE d)
 inline BOOL O32_SetViewportOrgEx(HDC a, int b, int c, PPOINT d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetViewportOrgEx(a, b, c, d);
     SetFS(sel);
@@ -8724,7 +8724,7 @@ inline BOOL O32_SetViewportOrgEx(HDC a, int b, int c, PPOINT d)
 inline BOOL O32_SetVolumeLabel(LPCSTR a, LPCSTR b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetVolumeLabel(a, b);
     SetFS(sel);
@@ -8735,7 +8735,7 @@ inline BOOL O32_SetVolumeLabel(LPCSTR a, LPCSTR b)
 inline BOOL O32_SetWindowExtEx(HDC a, int b, int c, PSIZE d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetWindowExtEx(a, b, c, d);
     SetFS(sel);
@@ -8746,7 +8746,7 @@ inline BOOL O32_SetWindowExtEx(HDC a, int b, int c, PSIZE d)
 inline LONG O32_SetWindowLong(HWND a, int b, LONG c)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetWindowLong(a, b, c);
     SetFS(sel);
@@ -8757,7 +8757,7 @@ inline LONG O32_SetWindowLong(HWND a, int b, LONG c)
 inline BOOL O32_SetWindowOrgEx(HDC a, int b, int c, PPOINT d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetWindowOrgEx(a, b, c, d);
     SetFS(sel);
@@ -8768,7 +8768,7 @@ inline BOOL O32_SetWindowOrgEx(HDC a, int b, int c, PPOINT d)
 inline BOOL O32_SetWindowPlacement(HWND a, CONST WINDOWPLACEMENT *b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetWindowPlacement(a, b);
     SetFS(sel);
@@ -8779,7 +8779,7 @@ inline BOOL O32_SetWindowPlacement(HWND a, CONST WINDOWPLACEMENT *b)
 inline BOOL O32_SetWindowPos(HWND a, HWND b, int c, int d, int e, int f, UINT g)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetWindowPos(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -8790,7 +8790,7 @@ inline BOOL O32_SetWindowPos(HWND a, HWND b, int c, int d, int e, int f, UINT g)
 inline HHOOK O32_SetWindowsHookEx(int a, HOOKPROC_O32 b, HINSTANCE c, DWORD d)
 {
  HHOOK yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetWindowsHookEx(a, b, c, d);
     SetFS(sel);
@@ -8801,7 +8801,7 @@ inline HHOOK O32_SetWindowsHookEx(int a, HOOKPROC_O32 b, HINSTANCE c, DWORD d)
 inline BOOL O32_SetWindowText(HWND a, LPCSTR b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetWindowText(a, b);
     SetFS(sel);
@@ -8812,7 +8812,7 @@ inline BOOL O32_SetWindowText(HWND a, LPCSTR b)
 inline WORD O32_SetWindowWord(HWND a, int b, WORD c)
 {
  WORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetWindowWord(a, b, c);
     SetFS(sel);
@@ -8823,7 +8823,7 @@ inline WORD O32_SetWindowWord(HWND a, int b, WORD c)
 inline HENHMETAFILE O32_SetWinMetaFileBits(UINT a, CONST BYTE *b, HDC c, CONST METAFILEPICT *d)
 {
  HENHMETAFILE yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetWinMetaFileBits(a, b, c, d);
     SetFS(sel);
@@ -8834,7 +8834,7 @@ inline HENHMETAFILE O32_SetWinMetaFileBits(UINT a, CONST BYTE *b, HDC c, CONST M
 inline BOOL O32_SetWorldTransform(HDC a, LPXFORM b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SetWorldTransform(a, b);
     SetFS(sel);
@@ -8845,7 +8845,7 @@ inline BOOL O32_SetWorldTransform(HDC a, LPXFORM b)
 inline BOOL O32_ShowCaret(HWND a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ShowCaret(a);
     SetFS(sel);
@@ -8856,7 +8856,7 @@ inline BOOL O32_ShowCaret(HWND a)
 inline int O32_ShowCursor(BOOL a)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ShowCursor(a);
     SetFS(sel);
@@ -8867,7 +8867,7 @@ inline int O32_ShowCursor(BOOL a)
 inline BOOL O32_ShowOwnedPopups(HWND a, BOOL b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ShowOwnedPopups(a, b);
     SetFS(sel);
@@ -8878,7 +8878,7 @@ inline BOOL O32_ShowOwnedPopups(HWND a, BOOL b)
 inline BOOL O32_ShowScrollBar(HWND a, int b, BOOL c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ShowScrollBar(a, b, c);
     SetFS(sel);
@@ -8889,7 +8889,7 @@ inline BOOL O32_ShowScrollBar(HWND a, int b, BOOL c)
 inline BOOL O32_ShowWindow(HWND a, int b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ShowWindow(a, b);
     SetFS(sel);
@@ -8900,7 +8900,7 @@ inline BOOL O32_ShowWindow(HWND a, int b)
 inline DWORD O32_SizeofResource(HINSTANCE a, HRSRC b)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SizeofResource(a, b);
     SetFS(sel);
@@ -8910,7 +8910,7 @@ inline DWORD O32_SizeofResource(HINSTANCE a, HRSRC b)
 
 inline VOID O32_Sleep(DWORD a)
 {
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     _O32_Sleep(a);
     SetFS(sel);
@@ -8919,7 +8919,7 @@ inline VOID O32_Sleep(DWORD a)
 inline int O32_StartDoc(HDC a, LPDOCINFOA b)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_StartDoc(a, b);
     SetFS(sel);
@@ -8930,7 +8930,7 @@ inline int O32_StartDoc(HDC a, LPDOCINFOA b)
 inline int O32_StartPage(HDC a)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_StartPage(a);
     SetFS(sel);
@@ -8941,7 +8941,7 @@ inline int O32_StartPage(HDC a)
 inline int O32_StretchDIBits(HDC a, int b, int c, int d, int e, int f, int g, int h, int i, void *j, PBITMAPINFO k, UINT l, DWORD m)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_StretchDIBits(a, b, c, d, e, f, g, h, i, j, k, l, m);
     SetFS(sel);
@@ -8952,7 +8952,7 @@ inline int O32_StretchDIBits(HDC a, int b, int c, int d, int e, int f, int g, in
 inline BOOL O32_StretchBlt(HDC a, int b, int c, int d, int e, HDC f, int g, int h, int i, int j, DWORD k)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_StretchBlt(a, b, c, d, e, f, g, h, i, j, k);
     SetFS(sel);
@@ -8963,7 +8963,7 @@ inline BOOL O32_StretchBlt(HDC a, int b, int c, int d, int e, HDC f, int g, int 
 inline BOOL O32_StrokeAndFillPath(HDC a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_StrokeAndFillPath(a);
     SetFS(sel);
@@ -8974,7 +8974,7 @@ inline BOOL O32_StrokeAndFillPath(HDC a)
 inline BOOL O32_StrokePath(HDC a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_StrokePath(a);
     SetFS(sel);
@@ -8985,7 +8985,7 @@ inline BOOL O32_StrokePath(HDC a)
 inline BOOL O32_SubtractRect(PRECT a, CONST RECT *b, CONST RECT *c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SubtractRect(a, b, c);
     SetFS(sel);
@@ -8996,7 +8996,7 @@ inline BOOL O32_SubtractRect(PRECT a, CONST RECT *b, CONST RECT *c)
 inline DWORD O32_SuspendThread(HANDLE a)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SuspendThread(a);
     SetFS(sel);
@@ -9007,7 +9007,7 @@ inline DWORD O32_SuspendThread(HANDLE a)
 inline BOOL O32_SwapMouseButton(BOOL a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SwapMouseButton(a);
     SetFS(sel);
@@ -9018,7 +9018,7 @@ inline BOOL O32_SwapMouseButton(BOOL a)
 inline UINT O32_SystemParametersInfo(UINT a, UINT b, PVOID c, UINT d)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SystemParametersInfo(a, b, c, d);
     SetFS(sel);
@@ -9029,7 +9029,7 @@ inline UINT O32_SystemParametersInfo(UINT a, UINT b, PVOID c, UINT d)
 inline BOOL O32_SystemTimeToFileTime(CONST SYSTEMTIME *a, FILETIME *b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SystemTimeToFileTime(a, b);
     SetFS(sel);
@@ -9040,7 +9040,7 @@ inline BOOL O32_SystemTimeToFileTime(CONST SYSTEMTIME *a, FILETIME *b)
 inline BOOL O32_SystemTimeToTzSpecificLocalTime(LPTIME_ZONE_INFORMATION a, LPSYSTEMTIME b, LPSYSTEMTIME c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_SystemTimeToTzSpecificLocalTime(a, b, c);
     SetFS(sel);
@@ -9051,7 +9051,7 @@ inline BOOL O32_SystemTimeToTzSpecificLocalTime(LPTIME_ZONE_INFORMATION a, LPSYS
 inline LONG O32_TabbedTextOut(HDC a, int b, int c, LPCSTR d, int e, int f, int *g, int h)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_TabbedTextOut(a, b, c, d, e, f, g, h);
     SetFS(sel);
@@ -9062,7 +9062,7 @@ inline LONG O32_TabbedTextOut(HDC a, int b, int c, LPCSTR d, int e, int f, int *
 inline BOOL O32_TerminateProcess(HANDLE a, UINT b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_TerminateProcess(a, b);
     SetFS(sel);
@@ -9073,7 +9073,7 @@ inline BOOL O32_TerminateProcess(HANDLE a, UINT b)
 inline BOOL O32_TerminateThread(HANDLE a, DWORD b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_TerminateThread(a, b);
     SetFS(sel);
@@ -9084,7 +9084,7 @@ inline BOOL O32_TerminateThread(HANDLE a, DWORD b)
 inline BOOL O32_TextOut(HDC a, int b, int c, LPCSTR d, int e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_TextOut(a, b, c, d, e);
     SetFS(sel);
@@ -9095,7 +9095,7 @@ inline BOOL O32_TextOut(HDC a, int b, int c, LPCSTR d, int e)
 inline DWORD O32_TlsAlloc()
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_TlsAlloc();
     SetFS(sel);
@@ -9106,7 +9106,7 @@ inline DWORD O32_TlsAlloc()
 inline BOOL O32_TlsFree(DWORD a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_TlsFree(a);
     SetFS(sel);
@@ -9117,7 +9117,7 @@ inline BOOL O32_TlsFree(DWORD a)
 inline PVOID O32_TlsGetValue(DWORD a)
 {
  PVOID yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_TlsGetValue(a);
     SetFS(sel);
@@ -9128,7 +9128,7 @@ inline PVOID O32_TlsGetValue(DWORD a)
 inline BOOL O32_TlsSetValue(DWORD a, PVOID b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_TlsSetValue(a, b);
     SetFS(sel);
@@ -9139,7 +9139,7 @@ inline BOOL O32_TlsSetValue(DWORD a, PVOID b)
 inline BOOL O32_TrackPopupMenu(HMENU a, UINT b, int c, int d, int e, HWND f, CONST RECT *g)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_TrackPopupMenu(a, b, c, d, e, f, g);
     SetFS(sel);
@@ -9150,7 +9150,7 @@ inline BOOL O32_TrackPopupMenu(HMENU a, UINT b, int c, int d, int e, HWND f, CON
 inline int O32_TranslateAccelerator(HWND a, HACCEL b, LPMSG c)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_TranslateAccelerator(a, b, c);
     SetFS(sel);
@@ -9161,7 +9161,7 @@ inline int O32_TranslateAccelerator(HWND a, HACCEL b, LPMSG c)
 inline BOOL O32_TranslateMDISysAccel(HWND a, LPMSG b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_TranslateMDISysAccel(a, b);
     SetFS(sel);
@@ -9172,7 +9172,7 @@ inline BOOL O32_TranslateMDISysAccel(HWND a, LPMSG b)
 inline BOOL O32_TranslateMessage(CONST MSG *a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_TranslateMessage(a);
     SetFS(sel);
@@ -9183,7 +9183,7 @@ inline BOOL O32_TranslateMessage(CONST MSG *a)
 inline BOOL O32_UnhookWindowsHookEx(HHOOK a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_UnhookWindowsHookEx(a);
     SetFS(sel);
@@ -9194,7 +9194,7 @@ inline BOOL O32_UnhookWindowsHookEx(HHOOK a)
 inline BOOL O32_UnionRect(PRECT a, CONST RECT *b, CONST RECT *c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_UnionRect(a, b, c);
     SetFS(sel);
@@ -9205,7 +9205,7 @@ inline BOOL O32_UnionRect(PRECT a, CONST RECT *b, CONST RECT *c)
 inline BOOL O32_UnlockFile(HANDLE a, DWORD b, DWORD c, DWORD d, DWORD e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_UnlockFile(a, b, c, d, e);
     SetFS(sel);
@@ -9216,7 +9216,7 @@ inline BOOL O32_UnlockFile(HANDLE a, DWORD b, DWORD c, DWORD d, DWORD e)
 inline BOOL O32_UnpackDDElParam(UINT a, LONG b, PUINT c, PUINT d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_UnpackDDElParam(a, b, c, d);
     SetFS(sel);
@@ -9227,7 +9227,7 @@ inline BOOL O32_UnpackDDElParam(UINT a, LONG b, PUINT c, PUINT d)
 inline BOOL O32_UnrealizeObject(HGDIOBJ a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_UnrealizeObject(a);
     SetFS(sel);
@@ -9238,7 +9238,7 @@ inline BOOL O32_UnrealizeObject(HGDIOBJ a)
 inline BOOL O32_UnregisterClass(LPCSTR a, HINSTANCE b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_UnregisterClass(a, b);
     SetFS(sel);
@@ -9249,7 +9249,7 @@ inline BOOL O32_UnregisterClass(LPCSTR a, HINSTANCE b)
 inline BOOL O32_UpdateWindow(HWND a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_UpdateWindow(a);
     SetFS(sel);
@@ -9260,7 +9260,7 @@ inline BOOL O32_UpdateWindow(HWND a)
 inline BOOL O32_ValidateRect(HWND a, CONST RECT *b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ValidateRect(a, b);
     SetFS(sel);
@@ -9271,7 +9271,7 @@ inline BOOL O32_ValidateRect(HWND a, CONST RECT *b)
 inline BOOL O32_ValidateRgn(HWND a, HRGN b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_ValidateRgn(a, b);
     SetFS(sel);
@@ -9282,7 +9282,7 @@ inline BOOL O32_ValidateRgn(HWND a, HRGN b)
 inline SHORT O32_VkKeyScan(char a)
 {
  SHORT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_VkKeyScan(a);
     SetFS(sel);
@@ -9293,7 +9293,7 @@ inline SHORT O32_VkKeyScan(char a)
 inline DWORD O32_WaitForMultipleObjects(DWORD a, CONST HANDLE *b, BOOL c, DWORD d)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_WaitForMultipleObjects(a, b, c, d);
     SetFS(sel);
@@ -9304,7 +9304,7 @@ inline DWORD O32_WaitForMultipleObjects(DWORD a, CONST HANDLE *b, BOOL c, DWORD 
 inline DWORD O32_WaitForSingleObject(HANDLE a, DWORD b)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_WaitForSingleObject(a, b);
     SetFS(sel);
@@ -9315,7 +9315,7 @@ inline DWORD O32_WaitForSingleObject(HANDLE a, DWORD b)
 inline BOOL O32_WaitMessage()
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_WaitMessage();
     SetFS(sel);
@@ -9326,7 +9326,7 @@ inline BOOL O32_WaitMessage()
 inline BOOL O32_WidenPath(HDC a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_WidenPath(a);
     SetFS(sel);
@@ -9337,7 +9337,7 @@ inline BOOL O32_WidenPath(HDC a)
 inline UINT O32_WinExec(LPCSTR a, UINT b)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_WinExec(a, b);
     SetFS(sel);
@@ -9348,7 +9348,7 @@ inline UINT O32_WinExec(LPCSTR a, UINT b)
 inline BOOL O32_WinHelp(HWND a, LPCSTR b, UINT c, DWORD d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_WinHelp(a, b, c, d);
     SetFS(sel);
@@ -9359,7 +9359,7 @@ inline BOOL O32_WinHelp(HWND a, LPCSTR b, UINT c, DWORD d)
 inline HWND O32_WindowFromPoint(POINT a)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_WindowFromPoint(a);
     SetFS(sel);
@@ -9370,7 +9370,7 @@ inline HWND O32_WindowFromPoint(POINT a)
 inline HWND O32_WindowFromDC(HDC a)
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_WindowFromDC(a);
     SetFS(sel);
@@ -9381,7 +9381,7 @@ inline HWND O32_WindowFromDC(HDC a)
 inline BOOL O32_WriteFile(HANDLE a, CONST VOID *b, DWORD c, PDWORD d, LPOVERLAPPED e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_WriteFile(a, b, c, d, e);
     SetFS(sel);
@@ -9392,7 +9392,7 @@ inline BOOL O32_WriteFile(HANDLE a, CONST VOID *b, DWORD c, PDWORD d, LPOVERLAPP
 inline BOOL O32_WritePrivateProfileString(LPCSTR a, LPCSTR b, LPCSTR c, LPCSTR d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_WritePrivateProfileString(a, b, c, d);
     SetFS(sel);
@@ -9403,7 +9403,7 @@ inline BOOL O32_WritePrivateProfileString(LPCSTR a, LPCSTR b, LPCSTR c, LPCSTR d
 inline BOOL O32_WriteProfileString(LPCSTR a, LPCSTR b, LPCSTR c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_WriteProfileString(a, b, c);
     SetFS(sel);
@@ -9413,7 +9413,7 @@ inline BOOL O32_WriteProfileString(LPCSTR a, LPCSTR b, LPCSTR c)
 
 inline VOID O32_ZeroMemory(PVOID a, DWORD b)
 {
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     _O32_ZeroMemory(a, b);
     SetFS(sel);
@@ -9422,7 +9422,7 @@ inline VOID O32_ZeroMemory(PVOID a, DWORD b)
 inline HFILE O32__lclose(HFILE a)
 {
  HFILE yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32__lclose(a);
     SetFS(sel);
@@ -9433,7 +9433,7 @@ inline HFILE O32__lclose(HFILE a)
 inline HFILE O32__lcreat(LPCSTR a, int b)
 {
  HFILE yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32__lcreat(a, b);
     SetFS(sel);
@@ -9444,7 +9444,7 @@ inline HFILE O32__lcreat(LPCSTR a, int b)
 inline HFILE O32__lopen(LPCSTR a, int b)
 {
  HFILE yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32__lopen(a, b);
     SetFS(sel);
@@ -9455,7 +9455,7 @@ inline HFILE O32__lopen(LPCSTR a, int b)
 inline UINT O32__lread(HFILE a, PVOID b, UINT c)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32__lread(a, b, c);
     SetFS(sel);
@@ -9466,7 +9466,7 @@ inline UINT O32__lread(HFILE a, PVOID b, UINT c)
 inline LONG O32__llseek(HFILE a, LONG b, int c)
 {
  LONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32__llseek(a, b, c);
     SetFS(sel);
@@ -9477,7 +9477,7 @@ inline LONG O32__llseek(HFILE a, LONG b, int c)
 inline UINT O32__lwrite(HFILE a, CONST VOID *b, UINT c)
 {
  UINT yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32__lwrite(a, b, c);
     SetFS(sel);
@@ -9488,7 +9488,7 @@ inline UINT O32__lwrite(HFILE a, CONST VOID *b, UINT c)
 inline DWORD O32_timeGetSystemTime(LPMMTIME a, UINT b)
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_timeGetSystemTime(a, b);
     SetFS(sel);
@@ -9499,7 +9499,7 @@ inline DWORD O32_timeGetSystemTime(LPMMTIME a, UINT b)
 inline DWORD O32_timeGetTime()
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_timeGetTime();
     SetFS(sel);
@@ -9510,7 +9510,7 @@ inline DWORD O32_timeGetTime()
 inline int O32_wvsprintf(LPSTR a, LPCSTR b, CONST VOID *c)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_wvsprintf(a, b, c);
     SetFS(sel);
@@ -9521,7 +9521,7 @@ inline int O32_wvsprintf(LPSTR a, LPCSTR b, CONST VOID *c)
 inline LPSTR O32_CharNext(LPCSTR a)
 {
  LPSTR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CharNext(a);
     SetFS(sel);
@@ -9532,7 +9532,7 @@ inline LPSTR O32_CharNext(LPCSTR a)
 inline LPSTR O32_CharPrev(LPCSTR a, LPCSTR b)
 {
  LPSTR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CharPrev(a, b);
     SetFS(sel);
@@ -9543,7 +9543,7 @@ inline LPSTR O32_CharPrev(LPCSTR a, LPCSTR b)
 inline HWND O32_GetDesktopWindow()
 {
  HWND yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_GetDesktopWindow();
     SetFS(sel);
@@ -9554,7 +9554,7 @@ inline HWND O32_GetDesktopWindow()
 inline BOOL O32_CharToOem(LPCSTR a, LPSTR b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CharToOem(a, b);
     SetFS(sel);
@@ -9565,7 +9565,7 @@ inline BOOL O32_CharToOem(LPCSTR a, LPSTR b)
 inline BOOL O32_OemToChar(LPCSTR a, LPSTR b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_OemToChar(a, b);
     SetFS(sel);
@@ -9576,7 +9576,7 @@ inline BOOL O32_OemToChar(LPCSTR a, LPSTR b)
 inline BOOL O32_CharToOemBuff(LPCSTR a, LPSTR b, DWORD c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_CharToOemBuff(a, b, c);
     SetFS(sel);
@@ -9587,7 +9587,7 @@ inline BOOL O32_CharToOemBuff(LPCSTR a, LPSTR b, DWORD c)
 inline BOOL O32_OemToCharBuff(LPCSTR a, LPSTR b, DWORD c)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_OemToCharBuff(a, b, c);
     SetFS(sel);
@@ -9598,7 +9598,7 @@ inline BOOL O32_OemToCharBuff(LPCSTR a, LPSTR b, DWORD c)
 inline BOOL O32_IsBadHugeReadPtr(CONST void *a, UINT b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_IsBadHugeReadPtr(a, b);
     SetFS(sel);
@@ -9609,7 +9609,7 @@ inline BOOL O32_IsBadHugeReadPtr(CONST void *a, UINT b)
 inline BOOL O32_IsBadHugeWritePtr(PVOID a, UINT b)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_IsBadHugeWritePtr(a, b);
     SetFS(sel);
@@ -9620,7 +9620,7 @@ inline BOOL O32_IsBadHugeWritePtr(PVOID a, UINT b)
 inline BOOL O32_FloodFill(HDC a, int b, int c, COLORREF d)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_FloodFill(a, b, c, d);
     SetFS(sel);
@@ -9631,7 +9631,7 @@ inline BOOL O32_FloodFill(HDC a, int b, int c, COLORREF d)
 inline BOOL O32_IsCharAlpha(WCHAR a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_IsCharAlpha(a);
     SetFS(sel);
@@ -9642,7 +9642,7 @@ inline BOOL O32_IsCharAlpha(WCHAR a)
 inline BOOL O32_IsCharAlphaNumeric(WCHAR a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_IsCharAlphaNumeric(a);
     SetFS(sel);
@@ -9653,7 +9653,7 @@ inline BOOL O32_IsCharAlphaNumeric(WCHAR a)
 inline BOOL O32_IsCharLower(WCHAR a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_IsCharLower(a);
     SetFS(sel);
@@ -9664,7 +9664,7 @@ inline BOOL O32_IsCharLower(WCHAR a)
 inline BOOL O32_IsCharUpper(WCHAR a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_IsCharUpper(a);
     SetFS(sel);
@@ -9675,7 +9675,7 @@ inline BOOL O32_IsCharUpper(WCHAR a)
 inline LPSTR O32_lstrcat(LPSTR a, LPCSTR b)
 {
  LPSTR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_lstrcat(a, b);
     SetFS(sel);
@@ -9686,7 +9686,7 @@ inline LPSTR O32_lstrcat(LPSTR a, LPCSTR b)
 inline int O32_lstrcmp(LPCSTR a, LPCSTR b)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_lstrcmp(a, b);
     SetFS(sel);
@@ -9697,7 +9697,7 @@ inline int O32_lstrcmp(LPCSTR a, LPCSTR b)
 inline int O32_lstrcmpi(LPCSTR a, LPCSTR b)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_lstrcmpi(a, b);
     SetFS(sel);
@@ -9708,7 +9708,7 @@ inline int O32_lstrcmpi(LPCSTR a, LPCSTR b)
 inline LPSTR O32_lstrcpy(LPSTR a, LPCSTR b)
 {
  LPSTR yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_lstrcpy(a, b);
     SetFS(sel);
@@ -9719,7 +9719,7 @@ inline LPSTR O32_lstrcpy(LPSTR a, LPCSTR b)
 inline int O32_lstrlen(LPCSTR a)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_lstrlen(a);
     SetFS(sel);
@@ -9730,7 +9730,7 @@ inline int O32_lstrlen(LPCSTR a)
 inline int O32_WinCallWinMain(int a, char **b, FNMAIN_O32 c, int d)
 {
  int yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_WinCallWinMain(a, b, c, d);
     SetFS(sel);
@@ -9741,7 +9741,7 @@ inline int O32_WinCallWinMain(int a, char **b, FNMAIN_O32 c, int d)
 inline BOOL O32_WinTranslateDevicePoints(HDC a, HWND b, PPOINT c, INT d, XLATEDIR e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_WinTranslateDevicePoints(a, b, c, d, e);
     SetFS(sel);
@@ -9752,7 +9752,7 @@ inline BOOL O32_WinTranslateDevicePoints(HDC a, HWND b, PPOINT c, INT d, XLATEDI
 inline BOOL O32_WinTranslateDeviceRects(HDC a, HWND b, PRECT c, INT d, XLATEDIR e)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_WinTranslateDeviceRects(a, b, c, d, e);
     SetFS(sel);
@@ -9763,7 +9763,7 @@ inline BOOL O32_WinTranslateDeviceRects(HDC a, HWND b, PRECT c, INT d, XLATEDIR 
 inline ULONG O32_WinTranslateGraphicsObjectHandle(HGDIOBJ a, XLATEDIR b, ULONG c)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_WinTranslateGraphicsObjectHandle(a, b, c);
     SetFS(sel);
@@ -9774,7 +9774,7 @@ inline ULONG O32_WinTranslateGraphicsObjectHandle(HGDIOBJ a, XLATEDIR b, ULONG c
 inline ULONG O32_WinTranslateMnemonicString(LPCSTR a, LPSTR *b, ULONG c, XLATEDIR d)
 {
  ULONG yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_WinTranslateMnemonicString(a, b, c, d);
     SetFS(sel);
@@ -9785,7 +9785,7 @@ inline ULONG O32_WinTranslateMnemonicString(LPCSTR a, LPSTR *b, ULONG c, XLATEDI
 inline DWORD O32_WinQueryTranslateMode()
 {
  DWORD yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_WinQueryTranslateMode();
     SetFS(sel);
@@ -9796,7 +9796,7 @@ inline DWORD O32_WinQueryTranslateMode()
 inline BOOL O32_WinSetTranslateMode(DWORD a)
 {
  BOOL yyrc;
- USHORT sel = GetFS();
+ USHORT sel = RestoreOS2FS();
 
     yyrc = _O32_WinSetTranslateMode(a);
     SetFS(sel);
