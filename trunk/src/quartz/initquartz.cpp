@@ -1,4 +1,3 @@
-/* $Id: initquartz.cpp,v 1.2 2001-09-05 13:36:36 bird Exp $ */
 /*
  * DLL entry point
  *
@@ -55,12 +54,12 @@ BOOL WINAPI OdinLibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
    case DLL_PROCESS_ATTACH:
    case DLL_THREAD_ATTACH:
    case DLL_THREAD_DETACH:
-    return QUARTZ_DllMain(hinstDLL, fdwReason, fImpLoad);
+	return QUARTZ_DllMain(hinstDLL, fdwReason, fImpLoad);
 
    case DLL_PROCESS_DETACH:
         ret = QUARTZ_DllMain(hinstDLL, fdwReason, fImpLoad);
-    ctordtorTerm();
-    return ret;
+	ctordtorTerm();
+	return ret;
    }
    return FALSE;
 }
@@ -87,13 +86,13 @@ ULONG APIENTRY inittermQuartz(ULONG hModule, ULONG ulFlag)
       case 0 :
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
          dllHandle = RegisterLxDll(hModule, OdinLibMain, (PVOID)&_Resource_PEResTab);
-         if(dllHandle == 0)
-        return 0UL;
+         if(dllHandle == 0) 
+		return 0UL;
 
          break;
       case 1 :
          if(dllHandle) {
-        UnregisterLxDll(dllHandle);
+	 	UnregisterLxDll(dllHandle);
          }
          break;
       default  :

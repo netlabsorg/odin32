@@ -1,5 +1,3 @@
-/* $Id: main.c,v 1.3 2001-09-05 13:36:37 bird Exp $ */
-
 #include "config.h"
 
 #include "windef.h"
@@ -19,12 +17,16 @@ DEFAULT_DEBUG_CHANNEL(quartz);
 #include "fgraph.h"
 #include "sysclock.h"
 #include "memalloc.h"
+#include "devenum.h"
+#include "fmap.h"
+#include "fmap2.h"
+#include "seekpass.h"
 
 
 typedef struct QUARTZ_CLASSENTRY
 {
-    const CLSID*    pclsid;
-    QUARTZ_pCreateIUnknown  pCreateIUnk;
+	const CLSID*	pclsid;
+	QUARTZ_pCreateIUnknown	pCreateIUnk;
 } QUARTZ_CLASSENTRY;
 
 
@@ -37,29 +39,33 @@ static HRESULT WINAPI IClassFactory_fnLockServer(LPCLASSFACTORY iface,BOOL doloc
 
 static ICOM_VTABLE(IClassFactory) iclassfact =
 {
-    ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
-    IClassFactory_fnQueryInterface,
-    IClassFactory_fnAddRef,
-    IClassFactory_fnRelease,
-    IClassFactory_fnCreateInstance,
-    IClassFactory_fnLockServer
+	ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
+	IClassFactory_fnQueryInterface,
+	IClassFactory_fnAddRef,
+	IClassFactory_fnRelease,
+	IClassFactory_fnCreateInstance,
+	IClassFactory_fnLockServer
 };
 
 typedef struct
 {
-    /* IUnknown fields */
-    ICOM_VFIELD(IClassFactory);
-    DWORD   ref;
-    /* IClassFactory fields */
-    const QUARTZ_CLASSENTRY* pEntry;
+	/* IUnknown fields */
+	ICOM_VFIELD(IClassFactory);
+	LONG	ref;
+	/* IClassFactory fields */
+	const QUARTZ_CLASSENTRY* pEntry;
 } IClassFactoryImpl;
 
 static const QUARTZ_CLASSENTRY QUARTZ_ClassList[] =
 {
-    { &CLSID_FilterGraph, &QUARTZ_CreateFilterGraph },
-    { &CLSID_SystemClock, &QUARTZ_CreateSystemClock },
-    { &CLSID_MemoryAllocator, &QUARTZ_CreateMemoryAllocator },
-    { NULL, NULL },
+	{ &CLSID_FilterGraph, &QUARTZ_CreateFilterGraph },
+	{ &CLSID_SystemClock, &QUARTZ_CreateSystemClock },
+	{ &CLSID_MemoryAllocator, &QUARTZ_CreateMemoryAllocator },
+	{ &CLSID_SystemDeviceEnum, &QUARTZ_CreateSystemDeviceEnum },
+	{ &CLSID_FilterMapper, &QUARTZ_CreateFilterMapper },
+	{ &CLSID_FilterMapper2, &QUARTZ_CreateFilterMapper2 },
+	{ &CLSID_SeekingPassThru, &QUARTZ_CreateSeekingPassThru },
+	{ NULL, NULL },
 };
 
 /* per-process variables */
@@ -69,34 +75,34 @@ static HANDLE hDLLHeap;
 
 void* QUARTZ_AllocObj( DWORD dwSize )
 {
-    void*   pv;
+	void*	pv;
 
-    EnterCriticalSection( &csHeap );
-    dwClassObjRef ++;
-    pv = HeapAlloc( hDLLHeap, 0, dwSize );
-    if ( pv == NULL )
-        dwClassObjRef --;
-    LeaveCriticalSection( &csHeap );
+	EnterCriticalSection( &csHeap );
+	dwClassObjRef ++;
+	pv = HeapAlloc( hDLLHeap, 0, dwSize );
+	if ( pv == NULL )
+		dwClassObjRef --;
+	LeaveCriticalSection( &csHeap );
 
-    return pv;
+	return pv;
 }
 
 void QUARTZ_FreeObj( void* pobj )
 {
-    EnterCriticalSection( &csHeap );
-    HeapFree( hDLLHeap, 0, pobj );
-    dwClassObjRef --;
-    LeaveCriticalSection( &csHeap );
+	EnterCriticalSection( &csHeap );
+	HeapFree( hDLLHeap, 0, pobj );
+	dwClassObjRef --;
+	LeaveCriticalSection( &csHeap );
 }
 
 void* QUARTZ_AllocMem( DWORD dwSize )
 {
-    return HeapAlloc( hDLLHeap, 0, dwSize );
+	return HeapAlloc( hDLLHeap, 0, dwSize );
 }
 
 void QUARTZ_FreeMem( void* pMem )
 {
-    HeapFree( hDLLHeap, 0, pMem );
+	HeapFree( hDLLHeap, 0, pMem );
 }
 
 /************************************************************************/
@@ -104,175 +110,180 @@ void QUARTZ_FreeMem( void* pMem )
 static HRESULT WINAPI
 IClassFactory_fnQueryInterface(LPCLASSFACTORY iface,REFIID riid,LPVOID *ppobj)
 {
-    ICOM_THIS(IClassFactoryImpl,iface);
+	ICOM_THIS(IClassFactoryImpl,iface);
 
-    TRACE("(%p)->(%p,%p)\n",This,riid,ppobj);
-    if ( ( IsEqualGUID( &IID_IUnknown, riid ) ) ||
-         ( IsEqualGUID( &IID_IClassFactory, riid ) ) )
-    {
-        *ppobj = iface;
-        IClassFactory_AddRef(iface);
-        return S_OK;
-    }
+	TRACE("(%p)->(%p,%p)\n",This,riid,ppobj);
+	if ( ( IsEqualGUID( &IID_IUnknown, riid ) ) ||
+	     ( IsEqualGUID( &IID_IClassFactory, riid ) ) )
+	{
+		*ppobj = iface;
+		IClassFactory_AddRef(iface);
+		return S_OK;
+	}
 
-    return E_NOINTERFACE;
+	return E_NOINTERFACE;
 }
 
 static ULONG WINAPI IClassFactory_fnAddRef(LPCLASSFACTORY iface)
 {
-    ICOM_THIS(IClassFactoryImpl,iface);
+	ICOM_THIS(IClassFactoryImpl,iface);
 
-    TRACE("(%p)->()\n",This);
+	TRACE("(%p)->()\n",This);
 
-    return ++(This->ref);
+	return InterlockedExchangeAdd(&(This->ref),1) + 1;
 }
 
 static ULONG WINAPI IClassFactory_fnRelease(LPCLASSFACTORY iface)
 {
-    ICOM_THIS(IClassFactoryImpl,iface);
+	ICOM_THIS(IClassFactoryImpl,iface);
+	LONG	ref;
 
-    TRACE("(%p)->()\n",This);
-    if ( (--(This->ref)) > 0 )
-        return This->ref;
+	TRACE("(%p)->()\n",This);
+	ref = InterlockedExchangeAdd(&(This->ref),-1) - 1;
+	if ( ref > 0 )
+		return (ULONG)ref;
 
-    QUARTZ_FreeObj(This);
-    return 0;
+	QUARTZ_FreeObj(This);
+	return 0;
 }
 
 static HRESULT WINAPI IClassFactory_fnCreateInstance(LPCLASSFACTORY iface,LPUNKNOWN pOuter,REFIID riid,LPVOID *ppobj)
 {
-    ICOM_THIS(IClassFactoryImpl,iface);
-    HRESULT hr;
-    IUnknown*   punk;
+	ICOM_THIS(IClassFactoryImpl,iface);
+	HRESULT	hr;
+	IUnknown*	punk;
 
-    TRACE("(%p)->(%p,%s,%p)\n",This,pOuter,debugstr_guid(riid),ppobj);
+	TRACE("(%p)->(%p,%s,%p)\n",This,pOuter,debugstr_guid(riid),ppobj);
 
-    if ( ppobj == NULL )
-        return E_POINTER;
-    if ( pOuter != NULL && !IsEqualGUID( riid, &IID_IUnknown ) )
-        return CLASS_E_NOAGGREGATION;
+	if ( ppobj == NULL )
+		return E_POINTER;
+	if ( pOuter != NULL && !IsEqualGUID( riid, &IID_IUnknown ) )
+		return CLASS_E_NOAGGREGATION;
 
-    *ppobj = NULL;
+	*ppobj = NULL;
 
-    hr = (*This->pEntry->pCreateIUnk)(pOuter,(void**)&punk);
-    if ( hr != S_OK )
-        return hr;
+	hr = (*This->pEntry->pCreateIUnk)(pOuter,(void**)&punk);
+	if ( hr != S_OK )
+		return hr;
 
-    hr = IUnknown_QueryInterface(punk,riid,ppobj);
-    IUnknown_Release(punk);
+	hr = IUnknown_QueryInterface(punk,riid,ppobj);
+	IUnknown_Release(punk);
 
-    return hr;
+	return hr;
 }
 
 static HRESULT WINAPI IClassFactory_fnLockServer(LPCLASSFACTORY iface,BOOL dolock)
 {
-    ICOM_THIS(IClassFactoryImpl,iface);
-    HRESULT hr;
+	ICOM_THIS(IClassFactoryImpl,iface);
+	HRESULT	hr;
 
-    FIXME("(%p)->(%d),stub!\n",This,dolock);
-    if (dolock)
-        hr = IClassFactory_AddRef(iface);
-    else
-        hr = IClassFactory_Release(iface);
+	TRACE("(%p)->(%d)\n",This,dolock);
+	if (dolock)
+		hr = IClassFactory_AddRef(iface);
+	else
+		hr = IClassFactory_Release(iface);
 
-    return hr;
+	return hr;
 }
 
 
 
 static HRESULT IClassFactory_Alloc( const CLSID* pclsid, void** ppobj )
 {
-    const QUARTZ_CLASSENTRY*    pEntry;
-    IClassFactoryImpl*  pImpl;
+	const QUARTZ_CLASSENTRY*	pEntry;
+	IClassFactoryImpl*	pImpl;
 
-    TRACE( "(%s,%p)\n", debugstr_guid(pclsid), ppobj );
+	TRACE( "(%s,%p)\n", debugstr_guid(pclsid), ppobj );
 
-    pEntry = QUARTZ_ClassList;
-    while ( pEntry->pclsid != NULL )
-    {
-        if ( IsEqualGUID( pclsid, pEntry->pclsid ) )
-            goto found;
-    }
+	pEntry = QUARTZ_ClassList;
+	while ( pEntry->pclsid != NULL )
+	{
+		if ( IsEqualGUID( pclsid, pEntry->pclsid ) )
+			goto found;
+		pEntry ++;
+	}
 
-    return CLASS_E_CLASSNOTAVAILABLE;
+	return CLASS_E_CLASSNOTAVAILABLE;
 found:
-    pImpl = (IClassFactoryImpl*)QUARTZ_AllocObj( sizeof(IClassFactoryImpl) );
-    if ( pImpl == NULL )
-        return E_OUTOFMEMORY;
+	pImpl = (IClassFactoryImpl*)QUARTZ_AllocObj( sizeof(IClassFactoryImpl) );
+	if ( pImpl == NULL )
+		return E_OUTOFMEMORY;
 
-    ICOM_VTBL(pImpl) = &iclassfact;
-    pImpl->ref = 1;
-    pImpl->pEntry = pEntry;
+	TRACE( "allocated successfully.\n" );
 
-    *ppobj = (void*)pImpl;
-    return S_OK;
+	ICOM_VTBL(pImpl) = &iclassfact;
+	pImpl->ref = 1;
+	pImpl->pEntry = pEntry;
+
+	*ppobj = (void*)pImpl;
+	return S_OK;
 }
 
 
 /***********************************************************************
- *      QUARTZ_InitProcess (internal)
+ *		QUARTZ_InitProcess (internal)
  */
 static BOOL QUARTZ_InitProcess( void )
 {
-    TRACE("()\n");
+	TRACE("()\n");
 
-    dwClassObjRef = 0;
-    hDLLHeap = (HANDLE)NULL;
-    InitializeCriticalSection( &csHeap );
+	dwClassObjRef = 0;
+	hDLLHeap = (HANDLE)NULL;
+	InitializeCriticalSection( &csHeap );
 
-    hDLLHeap = HeapCreate( 0, 0x10000, 0 );
-    if ( hDLLHeap == (HANDLE)NULL )
-        return FALSE;
+	hDLLHeap = HeapCreate( 0, 0x10000, 0 );
+	if ( hDLLHeap == (HANDLE)NULL )
+		return FALSE;
 
-    return TRUE;
+	return TRUE;
 }
 
 /***********************************************************************
- *      QUARTZ_UninitProcess (internal)
+ *		QUARTZ_UninitProcess (internal)
  */
 static void QUARTZ_UninitProcess( void )
 {
-    TRACE("()\n");
+	TRACE("()\n");
 
-    if ( dwClassObjRef != 0 )
-        ERR( "you must release some objects allocated from quartz.\n" );
-    if ( hDLLHeap != (HANDLE)NULL )
-    {
-        HeapDestroy( hDLLHeap );
-        hDLLHeap = (HANDLE)NULL;
-    }
-    DeleteCriticalSection( &csHeap );
+	if ( dwClassObjRef != 0 )
+		ERR( "you must release some objects allocated from quartz.\n" );
+	if ( hDLLHeap != (HANDLE)NULL )
+	{
+		HeapDestroy( hDLLHeap );
+		hDLLHeap = (HANDLE)NULL;
+	}
+	DeleteCriticalSection( &csHeap );
 }
 
 /***********************************************************************
- *      QUARTZ_DllMain
+ *		QUARTZ_DllMain
  */
 BOOL WINAPI QUARTZ_DllMain(
-    HINSTANCE hInstDLL,
-    DWORD fdwReason,
-    LPVOID lpvReserved )
+	HINSTANCE hInstDLL,
+	DWORD fdwReason,
+	LPVOID lpvReserved )
 {
-    switch ( fdwReason )
-    {
-    case DLL_PROCESS_ATTACH:
-        if ( !QUARTZ_InitProcess() )
-            return FALSE;
-        break;
-    case DLL_PROCESS_DETACH:
-        QUARTZ_UninitProcess();
-        break;
-    case DLL_THREAD_ATTACH:
-        break;
-    case DLL_THREAD_DETACH:
-        break;
-    }
+	switch ( fdwReason )
+	{
+	case DLL_PROCESS_ATTACH:
+		if ( !QUARTZ_InitProcess() )
+			return FALSE;
+		break;
+	case DLL_PROCESS_DETACH:
+		QUARTZ_UninitProcess();
+		break;
+	case DLL_THREAD_ATTACH:
+		break;
+	case DLL_THREAD_DETACH:
+		break;
+	}
 
-    return TRUE;
+	return TRUE;
 }
 
 
 /***********************************************************************
- *      DllCanUnloadNow (QUARTZ.@)
+ *		DllCanUnloadNow (QUARTZ.@)
  *
  * RETURNS
  *    Success: S_OK
@@ -280,48 +291,50 @@ BOOL WINAPI QUARTZ_DllMain(
  */
 HRESULT WINAPI QUARTZ_DllCanUnloadNow(void)
 {
-    HRESULT hr;
+	HRESULT	hr;
 
-    EnterCriticalSection( &csHeap );
-    hr = ( dwClassObjRef == 0 ) ? S_OK : S_FALSE;
-    LeaveCriticalSection( &csHeap );
+	EnterCriticalSection( &csHeap );
+	hr = ( dwClassObjRef == 0 ) ? S_OK : S_FALSE;
+	LeaveCriticalSection( &csHeap );
 
-    return hr;
+	return hr;
 }
 
 /***********************************************************************
- *      DllGetClassObject (QUARTZ.@)
+ *		DllGetClassObject (QUARTZ.@)
  */
 HRESULT WINAPI QUARTZ_DllGetClassObject(
-        const CLSID* pclsid,const IID* piid,void** ppv)
+		const CLSID* pclsid,const IID* piid,void** ppv)
 {
-    *ppv = NULL;
-    if ( IsEqualCLSID( &IID_IUnknown, piid ) ||
-         IsEqualCLSID( &IID_IClassFactory, piid ) )
-    {
-        return IClassFactory_Alloc( pclsid, ppv );
-    }
+	*ppv = NULL;
+	if ( IsEqualCLSID( &IID_IUnknown, piid ) ||
+	     IsEqualCLSID( &IID_IClassFactory, piid ) )
+	{
+		return IClassFactory_Alloc( pclsid, ppv );
+	}
 
-    return CLASS_E_CLASSNOTAVAILABLE;
+	return CLASS_E_CLASSNOTAVAILABLE;
 }
 
 /***********************************************************************
- *      DllRegisterServer (QUARTZ.@)
+ *		DllRegisterServer (QUARTZ.@)
  */
 
 HRESULT WINAPI QUARTZ_DllRegisterServer( void )
 {
-    FIXME( "(): stub\n" );
-    return E_FAIL;
+	FIXME( "(): stub\n" );
+	return E_FAIL;
 }
 
 /***********************************************************************
- *      DllUnregisterServer (QUARTZ.@)
+ *		DllUnregisterServer (QUARTZ.@)
  */
 
 HRESULT WINAPI QUARTZ_DllUnregisterServer( void )
 {
-    FIXME( "(): stub\n" );
-    return E_FAIL;
+	FIXME( "(): stub\n" );
+	return E_FAIL;
 }
+
+
 
