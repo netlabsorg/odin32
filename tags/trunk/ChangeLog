@@ -1,4 +1,9 @@
-/* $Id: ChangeLog,v 1.1311 2001-03-20 19:23:10 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1312 2001-03-20 22:57:06 bird Exp $ */
+
+ 2001-03-21: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - Odin32Api:
+                 o Added sample makefile (from the Generic SDK sample)
+                   (Just remeber to rename the generic.rc to resource.orc.)
 
  2001-03-20: Sander van Leeuwen <sandervl@xs4all.nl>
     - DPLAYX:   o Fix for nameless unions & VAC 3.6.5 (makefile)
