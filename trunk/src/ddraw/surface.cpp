@@ -1,4 +1,4 @@
-/* $Id: surface.cpp,v 1.1 2002-12-04 10:35:02 sandervl Exp $ */
+/* $Id: surface.cpp,v 1.2 2002-12-04 15:21:42 sandervl Exp $ */
 
 /*
  * DirectDraw Surface class implementaion
@@ -589,11 +589,6 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
       lastError = DD_OK;
 
 #if 0
-      if(lpDraw->GetCooperativeLevel() & DDSCL_FULLSCREEN)
-      {
-           SetWindowPos(lpDraw->GetClientWindow(), HWND_TOP, 0, 0, DDSurfaceDesc.dwWidth, DDSurfaceDesc.dwHeight,0);
-      }
-
 //NOTE: This isn't working at all (interferes with mouse messages for application
 //      window)
       //If in fullscreen mode, create transparent window covering the entire desktop

@@ -1,4 +1,4 @@
-/* $Id: OS2UTIL.H,v 1.6 2001-03-18 21:44:43 mike Exp $ */
+/* $Id: OS2UTIL.H,v 1.7 2002-12-04 15:21:40 sandervl Exp $ */
 
 /*
  * OS/2 Utility functions
@@ -14,6 +14,8 @@
 char *OS2AllocMem(ULONG size);
 void  OS2FreeMem(char *lpMem);
 void  OS2MaximizeWindow(HWND hwndClient);
-void InverseDC(HDC hdc, LONG lHeight);
-int InitIO();
+BOOL  OSLibPostMessage(HWND hwnd, ULONG msg, ULONG mp1, ULONG mp2);
+void  InverseDC(HDC hdc, LONG lHeight);
+int   InitIO();
+
 #endif
