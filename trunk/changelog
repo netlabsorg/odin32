@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.1457 2001-05-30 03:29:02 phaller Exp $ */
+/* $Id: changelog,v 1.1458 2001-05-30 08:00:03 sandervl Exp $ */
+
+ 2001-05-30: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o RedrawWindow: don't clear erase background flag if the 
+                  window is already (partly) invalidated.
+                  (fixes redrawing of dialogs controls in mIRC startup dialog 
+                   window (when switching option windows))
 
  2001-05-30: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o replaced linear lists in PE loader with faster hashtables
