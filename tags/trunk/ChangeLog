@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.195 1999-09-13 09:04:46 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.196 1999-09-13 12:36:35 phaller Exp $ */
+
+ 99-09-13: Patrick Haller <phaller@gmx.net>
+	- SHELL32\NEW:	updated to current wine level
 
  99-09-13: David Raison <djr@lemur.co.uk>
 	- KERNEL32: Fixed MultiByteToWideChar. Return size of string including
