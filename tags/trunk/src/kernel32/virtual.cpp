@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.48 2002-07-15 14:28:52 sandervl Exp $ */
+/* $Id: virtual.cpp,v 1.49 2002-12-27 15:25:40 sandervl Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -469,9 +469,18 @@ BOOL WIN32API VirtualFree(LPVOID lpvAddress,
     if (FreeType &  MEM_DECOMMIT)
     {
         // check if app wants to decommit stack pages -> don't allow that!
+        // (VAC runtime uses last stack page to store some internal
+        //  data; if freed pe/pec will crash during exit)
+
         TEB *teb = GetThreadTEB();
         if(teb) {
-            if(lpvAddress >= teb->stack_low && lpvAddress < teb->stack_top) {
+            DWORD stacktop    = (DWORD)teb->stack_top;
+            DWORD stackbottom = (DWORD)teb->stack_low;
+
+            stackbottom = stackbottom & ~0xFFFF;   //round down to 64kb boundary
+            stacktop    = stacktop & ~0xFFF;
+
+            if(lpvAddress >= (PVOID)stackbottom && lpvAddress < (PVOID)stacktop) {
                 //pretend we did was was asked
                 dprintf(("WARNING: app tried to decommit stack pages; pretend success"));
                 return TRUE;
