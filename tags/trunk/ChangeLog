@@ -1,4 +1,16 @@
- /* $Id: ChangeLog,v 1.1157 2000-10-02 13:33:52 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.1158 2000-10-02 13:36:03 sandervl Exp $ */
+
+ 2000-10-02: Sander van Leeuwen <sandervl@xs4all.nl>
+    - SHLWAPI:  Rewrote VERSION_OsIsUnicode (same as SHELL_OsIsUnicode now)
+    - RICHED32: 'Handle' WM_SETTEXT messages. Wine's richedit dll is very
+                incomplete. It's better to use the native windows version.
+    - KERNEL32: Ported Wine's LoadModule (previously used Open32)
+                Changed version apis
+                You can now tell Odin to tell applications it's either
+                Windows 98 or Windows NT 4.0 (default = NT40)
+                Odin.ini:
+                [WinVersion]
+                Version=Win98
 
  2000-10-02: Patrick Haller <phaller@gmx.net>
     - GDI32:    fixed possible error in text.cpp (strrchr)
