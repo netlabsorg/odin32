@@ -1,4 +1,10 @@
-/* $Id: ChangeLog,v 1.1513 2001-06-14 01:17:58 bird Exp $ */
+/* $Id: ChangeLog,v 1.1514 2001-06-14 11:30:08 sandervl Exp $ */
+
+ 2001-06-14: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o OSLibWinGetMsg: dispatch untranslated message immediately
+                  and grab next one.
+                o Manually change min/max/restore button states (OS/2 appearance)
+                o Handle WM_SYSCOMMAND messages in frame window handler
 
  2001-06-13: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Corrected position of PM titlebar control
