@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.72 2001-11-07 15:36:10 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.73 2001-11-08 18:32:59 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -597,7 +597,7 @@ WORD *Win32Dialog::getControl(const WORD *p, DLG_CONTROL_INFO *info, BOOL dialog
         info->style   = GET_DWORD(p); p += 2;
         info->exStyle = GET_DWORD(p); p += 2;
     }
-    //x & y are signed words (VirtualPC Settings dailog)
+    //SvL: x & y are signed words!
     info->x       = GET_SHORT(p); p++;
     info->y       = GET_SHORT(p); p++;
     info->cx      = GET_WORD(p); p++;
