@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 1999-10-09 11:13:19 sandervl Exp $
+# $Id: makefile,v 1.13 1999-10-11 20:17:10 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -19,6 +19,9 @@ CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE)
 CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 
+RC = wrc
+RCFLAGS = -s -I. -If:\ibmcpp\include -I$(PDWIN32_INCLUDE) -I$(PDWIN32_INCLUDE)\win
+
 TARGET = shell32
 
 OBJS =  initterm.obj \
@@ -28,7 +31,7 @@ OBJS =  initterm.obj \
         shellguid.obj shelllink.obj shlmenu.obj shellole.obj \
         shellord.obj shellpath.obj shv_bg_cmenu.obj \
         shlfolder.obj shlview.obj shell.obj unknown.obj misc.obj \
-        she.obj sh.obj
+        she.obj sh.obj resource.obj
 
 all: $(TARGET).dll $(TARGET).lib
 
@@ -50,6 +53,10 @@ $(TARGET).lib: $(TARGET)exp.def
 $(TARGET)exp.def: $(TARGET).def
         $(IMPDEF) $** $@
 
+resource.asm: shres.rc 
+    $(RC) $(RCFLAGS) -o resource.asm shres.rc
+
+resource.obj: resource.asm
 
 
 initterm.obj:     initterm.cpp

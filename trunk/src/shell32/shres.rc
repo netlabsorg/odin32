@@ -1,4 +1,4 @@
-/* $Id: shres.rc,v 1.2 1999-10-09 11:17:07 sandervl Exp $ */
+/* $Id: shres.rc,v 1.3 1999-10-11 20:17:11 sandervl Exp $ */
 /*
  * Top level resource file for Common Dialogs
  *
@@ -8,6 +8,7 @@
 #include "winnls.h"
 #include "shlobj.h"
 #include "shresdef.h"
+#include "odinrsrc.h"
 
 /*--------------------- FIXME --------------------------
  *
@@ -125,6 +126,42 @@ STRINGTABLE DISCARDABLE
 	IDS_SELECT		"Select"
 	IDS_OPEN		"Open"
 }
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+1 VERSIONINFO
+ FILEVERSION ODIN_FILEVERSION
+ PRODUCTVERSION ODIN_PRODUCTVERSION
+ FILEFLAGSMASK 0x3fL
+ FILEFLAGS 0xaL
+ FILEOS 0x10001L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904E4"
+        BEGIN
+            VALUE "Comments", "Odin32 System Dll\0"
+            VALUE "CompanyName", "Odin Team\0"
+            VALUE "FileDescription", "Generic Example Application\0"
+            VALUE "FileVersion", "0.0\0"
+            VALUE "InternalName", "Odin32 - SHELL32\0"
+            VALUE "LegalCopyright", "Copyright (C) 1999\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "\0"
+            VALUE "ProductName", "Odin32 - SHELL32\0"
+            VALUE "ProductVersion", "1.0\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+	VALUE "Translation", 0x409, 0x04E4
+    END
+END
 
 /* document */
 0	ICON 
@@ -1189,22 +1226,22 @@ ff ff ff ff ff ff 00 00 00 00 00 00 00 00 00 00
  * which also have a neutral version. This is to
  * get localized bitmaps for example.
  */
-#include "shell32_Ca.rc"
-#include "shell32_Cs.rc"
-#include "shell32_Da.rc"
-#include "shell32_De.rc"
 #include "shell32_En.rc"
-#include "shell32_Eo.rc"
-#include "shell32_Es.rc"
-#include "shell32_Fi.rc"
-#include "shell32_Fr.rc"
-#include "shell32_Hu.rc"
-#include "shell32_It.rc"
-#include "shell32_Ko.rc"
-#include "shell32_Nl.rc"
-#include "shell32_No.rc"
-#include "shell32_Pl.rc"
-#include "shell32_Pt.rc"
-#include "shell32_Ru.rc"
-#include "shell32_Sv.rc"
-#include "shell32_Wa.rc"
+//#include "shell32_Ca.rc"
+//#include "shell32_Cs.rc"
+//#include "shell32_Da.rc"
+//#include "shell32_De.rc"
+//#include "shell32_Eo.rc"
+//#include "shell32_Es.rc"
+//#include "shell32_Fi.rc"
+//#include "shell32_Fr.rc"
+//#include "shell32_Hu.rc"
+//#include "shell32_It.rc"
+//#include "shell32_Ko.rc"
+//#include "shell32_Nl.rc"
+//#include "shell32_No.rc"
+//#include "shell32_Pl.rc"
+//#include "shell32_Pt.rc"
+//#include "shell32_Ru.rc"
+//#include "shell32_Sv.rc"
+//#include "shell32_Wa.rc"
