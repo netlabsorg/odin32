@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.25 2000-12-02 23:32:40 bird Exp $
+# $Id: makefile,v 1.26 2003-03-31 02:53:10 bird Exp $
 
 #
 # Odin32 API
@@ -64,7 +64,7 @@ LD2FLAGS    = $(LD2FLAGS) /A:16 /Stack:4096
 
 .cpp{$(OBJDIR)}.obj:
     @echo compiling: $(@B).cpp
-    @$(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -c $(CLISTING) $(COBJOUT) $<
+    @$(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -c $(CLISTING) $(COBJOUT) $(MAKEDIR)\$<
 !else
 !error  "Compiler is not yet supported."
 !endif
