@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2270 2002-08-16 16:48:17 sandervl Exp $ */
+/* $Id: changelog,v 1.2271 2002-08-17 10:33:36 sandervl Exp $ */
+
+ 2002-08-17: Yuri Dario <mc6530@mclink   >
+    - INCLUDE:  o Fixed INT32 definition
+    - USER32:   o Merged latest Rewind edit control code
 
  2002-08-16: Sander van Leeuwen <sandervl@innotek   >
     - WINMM:    o Put back old wave playback resume code
