@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.18 1999-08-16 15:55:28 dengert Exp $ */
+/* $Id: pmwindow.cpp,v 1.19 1999-08-22 08:30:52 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -209,17 +209,14 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
      HPS hps;
 
         dprintf(("OS2: WM_ERASEBACKGROUND %x", hwnd));
-        hps = WinGetPS(hwnd);
-        if(!win32wnd->MsgEraseBackGround((ULONG)hps))
+        if(!win32wnd->MsgEraseBackGround())
         {
                 /*
                  * Return TRUE to request PM to paint the window background
                  * in SYSCLR_WINDOW.
                  */
-                WinReleasePS(hps);
                 return (MRESULT)( TRUE );
         }
-        WinReleasePS(hps);
         return (MRESULT) FALSE;
     }
     case WM_SIZE:

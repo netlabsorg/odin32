@@ -1,4 +1,4 @@
-/* $Id: win32wnd.h,v 1.22 1999-08-16 15:53:04 dengert Exp $ */
+/* $Id: win32wnd.h,v 1.23 1999-08-22 08:30:53 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -73,7 +73,7 @@ virtual  ULONG  MsgCreate(HWND hwndOS2, ULONG initParam);
          ULONG  MsgButton(ULONG msg, ULONG ncx, ULONG ncy, ULONG clx, ULONG cly);
          ULONG  MsgMouseMove(ULONG keystate, ULONG x, ULONG y);
          ULONG  MsgPaint(ULONG tmp1, ULONG tmp2);
-         ULONG  MsgEraseBackGround(ULONG hps);
+         ULONG  MsgEraseBackGround();
          ULONG  MsgSetText(LPSTR lpsz, LONG cch);
          ULONG  MsgGetTextLength();
          char  *MsgGetText();

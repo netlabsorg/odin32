@@ -1,4 +1,4 @@
-/* $Id: win32class.h,v 1.3 1999-07-20 15:46:53 sandervl Exp $ */
+/* $Id: win32class.h,v 1.4 1999-08-22 08:30:52 sandervl Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -43,6 +43,8 @@ public:
 	 DWORD  getExtraWndWords() 	{ return nrExtraWindowWords; };
 
  	 HICON  getIcon()               { return hIcon; };
+
+        HBRUSH  getBackgroundBrush()    { return backgroundBrush; };
 
 	  void  setMenuName(LPSTR newMenuName);
 
