@@ -1,11 +1,19 @@
-# $Id: makefile,v 1.5 2001-08-25 13:37:12 sandervl Exp $
+# $Id: riched32lib.mak,v 1.1 2001-08-25 13:37:44 sandervl Exp $
 
 #
 # Odin32 API
 #
-#       riched32.dll makefile
+#       common.lib makefile
 #
 
+
+#
+# Tell build environmet to build an object library.
+#
+LIBTARGET = 1
+EXETARGET = 1
+PUBLICLIB = 1
+WRC_PREFIX_RESOURCE=1
 
 #
 # Compiler, tools, and interference rules.
@@ -16,7 +24,6 @@
 #
 # Overrides.
 #
-CDEFINES = $(CDEFINES) -DWIN32 -DSTDARG -DTHINK_C
 
 
 #
@@ -31,22 +38,10 @@ $(OBJDIR)\initterm.obj \
 $(OBJDIR)\initriched32.obj \
 $(OBJDIR)\riched32rsrc.obj
 
-
 #
-# Libraries. One space before the '\'.
+# Target name - name of the library without extention and path.
 #
-LIBS = \
-$(ODIN32_LIB)/kernel32.lib \
-$(ODIN32_LIB)/user32.lib \
-$(ODIN32_LIB)/$(ODINCRT).lib \
-OS2386.LIB \
-$(RTLLIB_O)
-
-
-#
-# Target name - name of the dll without extention and path.
-#
-TARGET = riched32
+TARGET  = riched32o
 
 
 #
