@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2289 2002-08-27 09:30:22 sandervl Exp $ */
+/* $Id: changelog,v 1.2290 2002-08-28 02:17:30 bird Exp $ */
+
+ 2002-08-27: knut st. osmundsen <bird@anduin   >
+    - MAKE:     o Tweaked cyclic dependency checks performance a little bit more.
 
  2002-08-27: Platon Fomichev <platon@innotek   >
     - USER32:   o Added support for WS_EX_TOPMOST
