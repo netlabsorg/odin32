@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.20 1999-11-10 17:11:30 cbratschi Exp $ */
+/* $Id: scroll.cpp,v 1.21 1999-11-12 17:16:37 cbratschi Exp $ */
 /*
  * Scrollbar control
  *
@@ -700,6 +700,7 @@ LRESULT SCROLL_HandleScrollEvent(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar,
 {
     static POINT prevPt;       /* Previous mouse position for timer events */
     static UINT trackThumbPos; /* Thumb position when tracking started. */
+    static BOOL thumbTrackSent;
     static INT lastClickPos;   /* Position in the scroll-bar of the last button-down event. */
     static INT lastMousePos;   /* Position in the scroll-bar of the last mouse event. */
     static BOOL timerRunning;
@@ -941,6 +942,7 @@ LRESULT SCROLL_HandleScrollEvent(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar,
             SCROLL_TrackingPos = trackThumbPos + lastMousePos - lastClickPos;
             SCROLL_TrackingVal = infoPtr->CurVal;
             SCROLL_MovingThumb = TRUE;
+            thumbTrackSent = FALSE;
             SCROLL_DrawMovingThumb(hdc, &rect, vertical, arrowSize, thumbSize);
         } else if (msg == WM_LBUTTONUP || msg == WM_CAPTURECHANGED)
         {
@@ -953,7 +955,7 @@ LRESULT SCROLL_HandleScrollEvent(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar,
           val = SCROLL_GetThumbVal( infoPtr, &rect, vertical,
                                     trackThumbPos + lastMousePos - lastClickPos );
 
-          if (val != infoPtr->CurVal)
+          if (val != infoPtr->CurVal || thumbTrackSent)
             SendMessageA( hwndOwner, vertical ? WM_VSCROLL : WM_HSCROLL,
                           MAKEWPARAM( SB_THUMBPOSITION, val ), hwndCtl );
 
@@ -990,6 +992,7 @@ LRESULT SCROLL_HandleScrollEvent(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar,
                 SendMessageA( hwndOwner, vertical ? WM_VSCROLL : WM_HSCROLL,
                                 MAKEWPARAM( SB_THUMBTRACK, SCROLL_TrackingVal),
                                 hwndCtl );
+                thumbTrackSent = TRUE;
             }
         }
         break;
