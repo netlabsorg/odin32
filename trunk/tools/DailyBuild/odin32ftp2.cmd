@@ -1,8 +1,8 @@
-/* $Id: odin32ftp2.cmd,v 1.4 2000-07-19 12:08:50 bird Exp $
+/* $Id: odin32ftp2.cmd,v 1.5 2001-01-08 19:51:59 bird Exp $
  *
  * Uploads the relase and debug builds to the FTP sites.
  *
- * Copyright (c) 1999-2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 1999-2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -16,7 +16,7 @@ parse arg sLoc
 
 do i = 1 to 5 /* (Retries 5 times) */
     sFile           = 'odin32bin-'|| DATE(S);
-    sDelete         = 'odin32bin-'|| DateSub7(DATE('S'));
+    sDelete         = 'odin32bin-'|| DateSub(DATE('S'), 7);
     sFileDbg        = sFile   || '-debug.zip';
     sFileDbgWPI     = sFile   || '-debug.wpi';
     sDeleteDbg      = sDelete || '-debug.zip';
@@ -46,27 +46,27 @@ do i = 1 to 5 /* (Retries 5 times) */
      */
     if (sLoc = '' | sLoc = 'os2') then
     do
-        rc = deletefunction(   '/daily/'sDeleteDbg,    '/daily/'sDeleteRel,     'os2-delete', 'www.os2.org', 'user', 'xxxxxxxx');
-        rc = deletefunction('/daily/'sDeleteDbgWPI, '/daily/'sDeleteRelWPI, 'os2-delete-wpi', 'www.os2.org', 'user', 'xxxxxxxx');
-        rc = forwardSF(sFileDbg,          'os2-debug', '/daily', 'www.os2.org', 'user', 'xxxxxxxx');
-        rc = forwardSF(sFileRel,        'os2-release', '/daily', 'www.os2.org', 'user', 'xxxxxxxx');
-        rc = forwardSF(sFileDbgWPI,   'os2-debug-wpi', '/daily', 'www.os2.org', 'user', 'xxxxxxxx');
-        rc = forwardSF(sFileRelWPI, 'os2-release-wpi', '/daily', 'www.os2.org', 'user', 'xxxxxxxx');
-        rc = forwardSF(sChangeLog,    'os2-ChangeLog', '/daily', 'www.os2.org', 'user', 'xxxxxxxx');
+        rc = deletefunction(   '/daily/'sDeleteDbg,    '/daily/'sDeleteRel,     'os2-delete', 'www.os2.org');
+        rc = deletefunction('/daily/'sDeleteDbgWPI, '/daily/'sDeleteRelWPI, 'os2-delete-wpi', 'www.os2.org');
+        rc = forwardSF(sFileDbg,          'os2-debug', '/daily', 'www.os2.org');
+        rc = forwardSF(sFileRel,        'os2-release', '/daily', 'www.os2.org');
+        rc = forwardSF(sFileDbgWPI,   'os2-debug-wpi', '/daily', 'www.os2.org');
+        rc = forwardSF(sFileRelWPI, 'os2-release-wpi', '/daily', 'www.os2.org');
+        rc = forwardSF(sChangeLog,    'os2-ChangeLog', '/daily', 'www.os2.org');
 
     end
 
     if (0 /*sLoc = '' | sLoc = 'netlabs'*/) then
     do
-        /*                 (                  sDeleteFile1,                   sDeleteFile2,            sLockFile,             sSite,  sUser,    sPasswd); */
-        rc = deletefunction(   '/odinftp/daily/'sDeleteDbg,    '/odinftp/daily/'sDeleteRel,     'netlabs-delete', 'ftp.netlabs.org', 'user', 'xxxxxxxx');
-        rc = deletefunction('/odinftp/daily/'sDeleteDbgWPI, '/odinftp/daily/'sDeleteRelWPI, 'netlabs-delete-wpi', 'ftp.netlabs.org', 'user', 'xxxxxxxx');
-        /*              (sFile,            sFileRemote,           sLockFile,             sSite,  sUser,    sPasswd); */
-        rc = putfunction(sFileDbg,    '/odinftp/daily',     'netlabs-debug', 'ftp.netlabs.org', 'user', 'xxxxxxxx');
-        rc = putfunction(sFileRel,    '/odinftp/daily',   'netlabs-release', 'ftp.netlabs.org', 'user', 'xxxxxxxx');
-        rc = putfunction(sFileDbgWPI, '/odinftp/daily',     'netlabs-debug', 'ftp.netlabs.org', 'user', 'xxxxxxxx');
-        rc = putfunction(sFileRelWPI, '/odinftp/daily',   'netlabs-release', 'ftp.netlabs.org', 'user', 'xxxxxxxx');
-        rc = putfunction('ChangeLog', '/odinftp/daily', 'netlabs-ChangeLog', 'ftp.netlabs.org', 'user', 'xxxxxxxx');
+        /*                 (                  sDeleteFile1,                   sDeleteFile2,            sLockFile,             sSite); */
+        rc = deletefunction(   '/odinftp/daily/'sDeleteDbg,    '/odinftp/daily/'sDeleteRel,     'netlabs-delete', 'ftp.netlabs.org');
+        rc = deletefunction('/odinftp/daily/'sDeleteDbgWPI, '/odinftp/daily/'sDeleteRelWPI, 'netlabs-delete-wpi', 'ftp.netlabs.org');
+        /*              (sFile,            sFileRemote,           sLockFile,             sSite); */
+        rc = putfunction(sFileDbg,    '/odinftp/daily',     'netlabs-debug', 'ftp.netlabs.org');
+        rc = putfunction(sFileRel,    '/odinftp/daily',   'netlabs-release', 'ftp.netlabs.org');
+        rc = putfunction(sFileDbgWPI, '/odinftp/daily',     'netlabs-debug', 'ftp.netlabs.org');
+        rc = putfunction(sFileRelWPI, '/odinftp/daily',   'netlabs-release', 'ftp.netlabs.org');
+        rc = putfunction('ChangeLog', '/odinftp/daily', 'netlabs-ChangeLog', 'ftp.netlabs.org');
     end
 end
 
@@ -121,12 +121,22 @@ putSF: procedure
  * Forward file from SourceForge to ftp site.
  */
 forwardSF: procedure
-    parse arg sFile, sLockFile, sRemoteDir, sSite, sUser, sPasswd
+    parse arg sFile, sLockFile, sRemoteDir, sSite
 
     sSFDir = '/home/groups/ftp/pub/kTaskMgr/daily/';
 
     if (stream(sLockFile,'c','query exists') = '') then
     do
+        /* get password */
+        sPasswdString = GetPassword(sSite);
+        if (sPasswdString = '') then
+        do
+            call failure rc, 'Can''t find userid/password for' sSite'.', -1;
+            return -1;
+        end
+        parse var sPasswdString sUser':'sPasswd;
+
+        /* invoke forward process on SourceForge(t). */
         'cls'
         say 'ssh -l stknut kTaskMgr.sourceforge.net upload' sUser sPasswd sSite sRemoteDir sFile;
         'ssh -l stknut kTaskMgr.sourceforge.net ./upload' sUser sPasswd sSite sRemoteDir sFile;
@@ -146,10 +156,23 @@ forwardSF: procedure
  * Puts a file to a ftp site using ncftpput from ncftp v3.0 beta.
  */
 putfunction: procedure
-    parse arg sFile, sRemoteDir, sLockFile, sSite, sUser, sPasswd
+    parse arg sFile, sRemoteDir, sLockFile, sSite
+
+    /* check for done-lock */
     if stream(sLockFile,'c','query exists') = '' then
     do
         say '--- put' sFile '->' sRemoteDir'/'sFile '---';
+
+        /* get password */
+        sPasswdString = GetPassword(sSite);
+        if (sPasswdString = '') then
+        do
+            call failure rc, 'Can''t find userid/password for' sSite'.', -1;
+            return -1;
+        end
+        parse var sPasswdString sUser':'sPasswd;
+
+        /* debug logging */
         if 0 then
         do
             say sFile
@@ -160,6 +183,7 @@ putfunction: procedure
             say sPasswd
         end
 
+        /* do the put */
         say 'ncftpput -u' sUser '-p' sPasswd '-z' sSite sRemoteDir sFile;
         'ncftpput -u' sUser '-p' sPasswd '-z -F' sSite sRemoteDir sFile;
         if (rc == 0) then
@@ -190,10 +214,28 @@ putfunction: procedure
  * Delete two files on a given ftp site.
  */
 deletefunction: procedure
-    parse arg sDeleteFile1, sDeleteFile2, sLockFile, sSite, sUser, sPasswd
+    parse arg sDeleteFile1, sDeleteFile2, sLockFile, sSite
+
+    /*
+     * On fridays we don't perform any deletetions.
+     */
+    if (DATE('B')//7 = 5) then
+        return 0;
+
     if stream(sLockFile,'c','query exists') = '' then
     do
         say '--- deleting old files('sDeleteFile1','sDeleteFile2') at 'sSite' ---'
+
+        /* get password */
+        sPasswdString = GetPassword(sSite);
+        if (sPasswdString = '') then
+        do
+            call failure rc, 'Can''t find userid/password for' sSite'.', -1;
+            return -1;
+        end
+        parse var sPasswdString sUser':'sPasswd;
+
+        /* debug logging */
         if 0 then
         do
             say sDeleteFile1
@@ -204,6 +246,7 @@ deletefunction: procedure
             say sPasswd
         end
 
+        /* start ftp'ing */
         rc = FtpSetUser(sSite, sUser, sPasswd);
         if rc = 1 then
         do
@@ -254,51 +297,127 @@ parse arg rc, sText, iftperrno;
     return;
 
 
+/*
+ * Reads the password file (passwd) in the script directory to
+ *   get a password and userid for a given site.
+ *
+ * Format of the passwd file is:
+ *  <site> <user> <password>
+ * Lines starting with '#' is ignored.
+ *
+ * @param   sSite   name of the site.
+ * @returns String on the form '<userid>:<passwd>' if found.
+ *          Empty string if not found.
+ */
+GetPassword: procedure;
+    parse upper arg sSiteToFind
+    parse source sd1 sd2 sScript
+    sPasswd = filespec('drive', sScript) || filespec('path', sScript)||'\passwd';
+
+    rc = stream(sPasswd, 'c', 'open read');
+    if (pos('READY', rc) <> 1) then
+    do
+        say 'failed to open ftp password file - rc='rc;
+        return '';
+    end
+
+    sRet = '';
+    do while (lines(sPasswd) > 0)
+        sLine = strip(linein(sPasswd));
+        if (sLine = '' | substr(sLine, 1, 1) = '#') then
+            iterate;
+
+        parse var sLine sSite' 'sUser' 'sPassword' 'sDummy
+        sSite = translate(strip(sSite));
+        sUser = strip(sUser);
+        sPassword = strip(sPassword);
+        if (sSite = '' | sPassword = '' | sUser = '') then
+            say 'warning! misformed password line!';
+        if (sSite = sSiteToFind) then
+        do
+           sRet = sUser||':'||sPassword;
+           leave
+        end
+    end
+    call stream sPasswd, 'c', 'close';
+    return sRet;
+
+
+testdatesub:
+    sDate='20010131';
+
+    do i = 1 to 365*2+1
+        say sDate '-' i '=' DateSub(sDate, i);
+    end
+    exit;
+
 
 /**
  * Finds date seven days ago.
  * @returns  yyyymmdd date
- * @param    iDate  Date on the yyyymmdd format.
+ * @param    sDate  Date on the yyyymmdd format.
+ * @param    cDays  Number of days to subtract.
+ * @remark   Works only for dates between 1000-01-01 and 9999-12-31
+ *           including the limits.
  */
-DateSub7: procedure
-parse arg iDate
+DateSub: procedure
+parse arg sDate, cDays
 
-    iDayInMonth = substr(iDate, 7, 2);
-    iMonth = substr(iDate, 5, 2);
-    iYear = substr(iDate, 1, 4);
+    /* subtraction loop which updates sDate and cDays for each iteration. */
+    do while (cDays > 0)
+        /*
+         * Get the day in month of sDate.
+         * Do a simple subtraction is this is higher than the number of days to subtract.
+         */
+        iDayInMonth = substr(sDate, 7, 2);
+        if (iDayInMonth > cDays) then
+            return sDate - cDays;
 
-    if (iDayInMonth > 7) then
-        return iDate - 7;
-    else
-    do
-        if iMonth > 1 then
+        /*
+         * Determin previous month and the number of days in it.
+         */
+        iMonth = substr(sDate, 5, 2);
+        iYear = substr(sDate, 1, 4);
+        if (iMonth > 1) then
             iPrvMonth = iMonth - 1;
         else
             iPrvMonth = 12;
+        cDaysPrvMonth = DateGetDaysInMonth(iYear, iPrvMonth);
 
-        select
-            when iPrvMonth = 4 | iPrvMonth = 6 | iPrvMonth = 9 | iPrvMonth = 11 then
-                iDaysInPrevMonth = 30;
-
-            when iPrvMonth = 2 then
-            do
-                if ((iYear // 4) = 0) & (((iYear // 400) <> 0) | ((iYear // 2000) = 0)) then /*?*/
-                    iDaysInPrevMonth = 29;
-                else
-                    iDaysInPrevMonth = 28;
-            end
-
-            otherwise
-                iDaysInPrevMonth = 31;
-        end /* select */
-
-        say iDaysInPrevMonth
-        if iMonth > 1 then
-            return iDate - (100 - iDaysInPrevMonth) - 7;
+        /*
+         * Update date and days left to subtract.
+         */
+        cDays = cDays - iDayInMonth;
+        if (iMonth > 1) then
+            sDate = sDate - iDayInMonth - 100 + cDaysPrvMonth; /* last day of previous month */
         else
-            return iDate - 8869 - 7;
-        end
+            sDate = sDate - iDayInMonth - 8869;   /* last day of last year */
     end
 
-    return 00010101;
+    return sDate;
+
+/*
+ * Gets the number of days in a given month.
+ * @param       iYear   the year.
+ * @param       iMonth  the month.
+ */
+DateGetDaysInMonth: procedure
+    parse arg iYear, iMonth
+
+    select
+        when (iMonth = 4 | iMonth = 6 | iMonth = 9 | iMonth = 11) then
+            cDays = 30;
+
+        when (iMonth = 2) then
+        do
+            if ((iYear // 4) = 0) & (((iYear // 400) <> 0) | ((iYear // 2000) = 0)) then
+                cDays = 29;
+            else
+                cDays = 28;
+        end
+
+        otherwise
+            cDays = 31;
+    end /* select */
+    return cDays;
 
