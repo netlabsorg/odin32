@@ -1,4 +1,4 @@
-/* $Id: windlllx.cpp,v 1.18 2001-02-24 12:59:44 sandervl Exp $ */
+/* $Id: windlllx.cpp,v 1.19 2001-05-22 14:25:36 sandervl Exp $ */
 
 /*
  * Win32 LX Dll class (compiled in OS/2 using Odin32 api)
@@ -122,11 +122,11 @@ DWORD WIN32API RegisterLxDll(HINSTANCE hInstance, WIN32DLLENTRY EntryPoint,
    	}
 	modulename[modsize] = 0;
    	windlldep = Win32DllBase::findModule(modulename, TRUE);
-   	if(windlldep) {
+   	if(windlldep && strcmp(windlldep->getModuleName(), windll->getModuleName())) {
 		dprintf(("RegisterLxDll: Add dependency %s -> %s", windll->getModuleName(), modulename));
 		windll->addDependency(windlldep);
 	}
-        else    dprintf(("WARNING: Can't find dll %s referenced by %s", modulename, windll->getModuleName()));
+        else    dprintf(("HARMLESS WARNING: Can't find dll %s referenced by %s", modulename, windll->getModuleName()));
 	offset += modsize + 1;
    }
    return windll->getInstanceHandle();

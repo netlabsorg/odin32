@@ -1,4 +1,4 @@
-/* $Id: windllbase.cpp,v 1.24 2001-02-14 10:36:45 sandervl Exp $ */
+/* $Id: windllbase.cpp,v 1.25 2001-05-22 14:25:34 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
@@ -251,6 +251,7 @@ ULONG Win32DllBase::Release()
 #ifdef DEBUG
         //printDependencies(NULL);
 #endif
+
         dprintf(("Win32DllBase::Release %s referenced == 0", getModuleName()));
 
         //delete dll object
@@ -413,8 +414,6 @@ BOOL Win32DllBase::attachProcess()
         return(TRUE);
     }
 
-    dprintf(("attachProcess to dll %s", szModule));
-
     // @@@PH 2000/06/13 lpvReserved, Starcraft STORM.DLL
     // if DLL_PROCESS_ATTACH, lpvReserved is NULL for dynamic loads
     //   and non-NULL for static loads.
@@ -426,9 +425,18 @@ BOOL Win32DllBase::attachProcess()
     else
         lpvReserved = (LPVOID)0xdeadface; // some arbitrary value
 
+#ifdef DEBUG
+    int time1, time2;
+    dprintf(("attachProcess to dll %s", szModule));
+    time1 = GetTickCount();
+#endif
+
     rc = dllEntryPoint(hinstance, DLL_PROCESS_ATTACH, lpvReserved);
 
-    dprintf(("attachProcess to dll %s DONE", szModule));
+#ifdef DEBUG
+    time2 = GetTickCount();
+    dprintf(("attachProcess to dll %s DONE in %x msec", szModule, time2-time1));
+#endif
 
     if(fSetExceptionHandler) {
         SetFS(sel);
