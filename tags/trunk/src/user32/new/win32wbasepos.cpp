@@ -1,4 +1,4 @@
-/* $Id: win32wbasepos.cpp,v 1.2 2000-01-02 19:30:45 cbratschi Exp $ */
+/* $Id: win32wbasepos.cpp,v 1.3 2000-01-05 21:25:08 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (nonclient/position methods)
  *
@@ -171,7 +171,15 @@ LONG Win32BaseWindow::SendNCCalcSize(BOOL calcValidRect, RECT *newWindowRect,
    }
    result = SendInternalMessageA(WM_NCCALCSIZE, calcValidRect,
                          (LPARAM)&params );
-   *newClientRect = params.rgrc[0];
+   if (calcValidRect)
+   {
+      /* If the application send back garbage, ignore it */
+      if (params.rgrc[2].left <= params.rgrc[2].right && params.rgrc[2].top <= params.rgrc[2].bottom)
+         *newClientRect = params.rgrc[2];
+      else
+        SetRectEmpty(newClientRect);
+   }
+
    return result;
 }
 /***********************************************************************

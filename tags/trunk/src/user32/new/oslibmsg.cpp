@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.8 2000-01-03 22:53:16 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.9 2000-01-05 21:25:03 cbratschi Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -224,7 +224,7 @@ continuegetmsg:
         }
         while(rc == FALSE);
 
-	return rc;
+        return rc;
   }
   else
   {
@@ -236,7 +236,7 @@ continuegetmsg:
     } while (eaten);
   }
   if(rc) {
-	OS2ToWinMsgTranslate((PVOID)thdb, &os2msg, pMsg, isUnicode, MSG_REMOVE);
+        OS2ToWinMsgTranslate((PVOID)thdb, &os2msg, pMsg, isUnicode, MSG_REMOVE);
         memcpy(MsgThreadPtr, &os2msg, sizeof(QMSG));
   }
   return rc;
@@ -409,7 +409,7 @@ inline BOOL O32_PostThreadMessage(DWORD a, UINT b, WPARAM c, LPARAM d)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 //******************************************************************************
 BOOL OSLibPostThreadMessage(ULONG threadid, UINT msg, WPARAM wParam, LPARAM lParam, BOOL fUnicode)
 {
