@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.11 1999-09-28 13:27:35 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.12 1999-09-29 09:16:31 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -378,15 +378,21 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
     case WM_ACTIVATE:
     {
-      HWND hwndActivate = (HWND)mp1;
+      HWND hwndActivate = (HWND)mp2;
+      BOOL fMinimized = FALSE;
 
-        dprintf(("OS2: WM_ACTIVATE %x", hwnd));
+        dprintf(("OS2: WM_ACTIVATE %x %x", hwnd, hwndActivate));
         if(WinQueryWindowULong(hwndActivate, OFFSET_WIN32PM_MAGIC) != WIN32PM_MAGIC) {
                 //another (non-win32) application's window
                 //set to NULL (allowed according to win32 SDK) to avoid problems
                 hwndActivate = NULL;
         }
-        if(win32wnd->MsgActivate(1, hwndActivate)) {
+        if(WinQueryWindowULong(hwnd, QWL_STYLE) & WS_MINIMIZED)
+        {
+           fMinimized = TRUE;
+        }
+
+        if(win32wnd->MsgActivate(SHORT1FROMMP(mp1), fMinimized, Win32BaseWindow::OS2ToWin32Handle(hwndActivate))) {
                 goto RunDefWndProc;
         }
         break;
@@ -406,9 +412,9 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                 hwndFocus = NULL;
         }
         if((ULONG)mp2 == TRUE) {
-                rc = win32wnd->MsgSetFocus(hwndFocus);
+                rc = win32wnd->MsgSetFocus(Win32BaseWindow::OS2ToWin32Handle(hwndFocus));
         }
-        else    rc = win32wnd->MsgKillFocus(hwndFocus);
+        else    rc = win32wnd->MsgKillFocus(Win32BaseWindow::OS2ToWin32Handle(hwndFocus));
         if(rc) {
                 goto RunDefWndProc;
         }

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.19 1999-09-29 08:27:15 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.20 1999-09-29 09:16:32 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -913,15 +913,28 @@ ULONG Win32BaseWindow::MsgSize(ULONG width, ULONG height, BOOL fMinimize, BOOL f
 }
 //******************************************************************************
 //******************************************************************************
-ULONG Win32BaseWindow::MsgActivate(BOOL fActivate, HWND hwnd)
+ULONG Win32BaseWindow::MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd)
 {
-    if(SendInternalMessageA(WM_NCACTIVATE, fActivate, 0) == FALSE)
+ ULONG rc, curprocid, procidhwnd = -1, threadidhwnd = 0;
+
+    //According to SDK docs, if app returns FALSE & window is being deactivated,
+    //default processing is cancelled
+    //TODO: According to Wine we should proceed anyway if window is sysmodal
+    if(SendInternalMessageA(WM_NCACTIVATE, fActivate, 0) == FALSE && !fActivate)
     {
-        if(!fActivate) {
-            return 1;
-        }
+        return 0;
     }
-    return SendInternalMessageA(WM_ACTIVATE, (fActivate) ? WA_ACTIVE : WA_INACTIVE, hwnd);
+    rc = SendInternalMessageA(WM_ACTIVATE, MAKELONG((fActivate) ? WA_ACTIVE : WA_INACTIVE, fMinimized), hwnd);
+
+    curprocid  = GetCurrentProcessId();
+    if(hwnd) {
+            threadidhwnd = GetWindowThreadProcessId(hwnd, &procidhwnd);
+    }
+
+    if(curprocid != procidhwnd && fActivate) {
+        SendInternalMessageA(WM_ACTIVATEAPP, 1, threadidhwnd);
+    }
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1060,21 +1073,13 @@ ULONG Win32BaseWindow::MsgSysKeyDown (ULONG repeatCount, ULONG scancode, ULONG v
 //******************************************************************************
 ULONG Win32BaseWindow::MsgSetFocus(HWND hwnd)
 {
-    if(hwnd == 0) {
-            //other app lost focus
-            SendInternalMessageA(WM_ACTIVATEAPP, TRUE, 0); //TODO: Need thread id from hwnd app
-    }
-    return  SendInternalMessageA(WM_SETFOCUS, OS2ToWin32Handle (hwnd), 0);
+    return  SendInternalMessageA(WM_SETFOCUS, hwnd, 0);
 }
 //******************************************************************************
 //******************************************************************************
 ULONG Win32BaseWindow::MsgKillFocus(HWND hwnd)
 {
-    if(hwnd == 0) {
-            //other app lost focus
-            SendInternalMessageA(WM_ACTIVATEAPP, FALSE, 0); //TODO: Need thread id from hwnd app
-    }
-    return  SendInternalMessageA(WM_KILLFOCUS, OS2ToWin32Handle (hwnd), 0);
+    return  SendInternalMessageA(WM_KILLFOCUS, hwnd, 0);
 }
 //******************************************************************************
 //******************************************************************************
