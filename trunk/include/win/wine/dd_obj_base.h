@@ -1,4 +1,4 @@
-/* $Id: dd_obj_base.h,v 1.2 1999-07-07 07:57:37 phaller Exp $ */
+/* $Id: dd_obj_base.h,v 1.3 2000-02-04 23:12:19 hugh Exp $ */
 /*
  * This file defines the macros and types necessary to define COM interfaces,
  * and the three most basic COM interfaces: IUnknown, IMalloc and IClassFactory.
@@ -437,16 +437,16 @@ inline BOOL operator!=(const GUID& guidOne, const GUID& guidOther)
     } ;
 
 
-#define ICOM_CALL(xfn, p)  (p)->lpvtbl->fn##xfn(p)
-#define ICOM_CALL1(xfn, p,a) (p)->lpvtbl->fn##xfn(p,a)
-#define ICOM_CALL2(xfn, p,a,b) (p)->lpvtbl->fn##xfn(p,a,b)
-#define ICOM_CALL3(xfn, p,a,b,c) (p)->lpvtbl->fn##xfn(p,a,b,c)
-#define ICOM_CALL4(xfn, p,a,b,c,d) (p)->lpvtbl->fn##xfn(p,a,b,c,d)
-#define ICOM_CALL5(xfn, p,a,b,c,d,e) (p)->lpvtbl->fn##xfn(p,a,b,c,d,e)
-#define ICOM_CALL6(xfn, p,a,b,c,d,e,f) (p)->lpvtbl->fn##xfn(p,a,b,c,d,e,f)
-#define ICOM_CALL7(xfn, p,a,b,c,d,e,f,g) (p)->lpvtbl->fn##xfn(p,a,b,c,d,e,f,g)
-#define ICOM_CALL8(xfn, p,a,b,c,d,e,f,g,h) (p)->lpvtbl->fn##xfn(p,a,b,c,d,e,f,g,h)
-#define ICOM_CALL10(xfn, p,a,b,c,d,e,f,g,h,i,j) (p)->lpvtbl->fn##xfn(p,a,b,c,d,e,f,g,h,i,j)
+#define ICOM_CALL(xfn, p)  (p)->lpvtbl->xfn(p)
+#define ICOM_CALL1(xfn, p,a) (p)->lpvtbl->xfn(p,a)
+#define ICOM_CALL2(xfn, p,a,b) (p)->lpvtbl->xfn(p,a,b)
+#define ICOM_CALL3(xfn, p,a,b,c) (p)->lpvtbl->xfn(p,a,b,c)
+#define ICOM_CALL4(xfn, p,a,b,c,d) (p)->lpvtbl->xfn(p,a,b,c,d)
+#define ICOM_CALL5(xfn, p,a,b,c,d,e) (p)->lpvtbl->xfn(p,a,b,c,d,e)
+#define ICOM_CALL6(xfn, p,a,b,c,d,e,f) (p)->lpvtbl->xfn(p,a,b,c,d,e,f)
+#define ICOM_CALL7(xfn, p,a,b,c,d,e,f,g) (p)->lpvtbl->xfn(p,a,b,c,d,e,f,g)
+#define ICOM_CALL8(xfn, p,a,b,c,d,e,f,g,h) (p)->lpvtbl->xfn(p,a,b,c,d,e,f,g,h)
+#define ICOM_CALL10(xfn, p,a,b,c,d,e,f,g,h,i,j) (p)->lpvtbl->xfn(p,a,b,c,d,e,f,g,h,i,j)
 
 
 #define ICOM_THIS(impl,iface)          impl* const This=(impl*)iface
@@ -476,28 +476,34 @@ typedef struct IUnknown IUnknown, *LPUNKNOWN;
     ICOM_METHOD2(HRESULT,QueryInterface,REFIID,riid, LPVOID*,ppvObj) \
     ICOM_METHOD (ULONG,AddRef) \
     ICOM_METHOD (ULONG,Release)
+
 #ifdef ICOM_CINTERFACE
-typedef struct ICOM_VTABLE(IUnknown) ICOM_VTABLE(IUnknown);
-struct IUnknown {
+  typedef struct ICOM_VTABLE(IUnknown) ICOM_VTABLE(IUnknown);
+  struct IUnknown
+  {
     ICOM_VTABLE(IUnknown)* lpvtbl;
-};
-struct ICOM_VTABLE(IUnknown) {
+  };
+  struct ICOM_VTABLE(IUnknown)
+  {
     ICOM_METHOD2(HRESULT,QueryInterface,REFIID,riid, LPVOID*,ppvObj)
 #else /* ICOM_CINTERFACE */
-struct IUnknown {
-#ifndef ICOM_VIRTUAL_METHODS
-    union {
+  struct IUnknown
+  {
+    #ifndef ICOM_VIRTUAL_METHODS
+      union
+      {
         const void* lpvtbl;
         HRESULT (CALLBACK *fnQueryInterface)(IUnknown* me, REFIID riid, LPVOID* ppvObj);
-    } t;
-    inline int QueryInterface(REFIID a, LPVOID* b) { return ((IUnknown*)t.lpvtbl)->t.fnQueryInterface(this,a,b); }
-#else /* ICOM_VIRTUAL_METHODS */
-    ICOM_METHOD2(HRESULT,QueryInterface,REFIID,riid, LPVOID*,ppvObj)
-#endif /* ICOM_VIRTUAL_METHODS */
+      } t;
+      inline int QueryInterface(REFIID a, LPVOID* b) { return ((IUnknown*)t.lpvtbl)->t.fnQueryInterface(this,a,b); }
+    #else /* ICOM_VIRTUAL_METHODS */
+      ICOM_METHOD2(HRESULT,QueryInterface,REFIID,riid, LPVOID*,ppvObj)
+    #endif /* ICOM_VIRTUAL_METHODS */
 #endif /* ICOM_CINTERFACE */
     ICOM_METHOD (ULONG,AddRef)
     ICOM_METHOD (ULONG,Release)
-};
+  };
+
 #undef ICOM_INTERFACE
 
 #ifdef ICOM_CINTERFACE
@@ -505,6 +511,171 @@ struct IUnknown {
 #define IUnknown_QueryInterface(p,a,b) ICOM_CALL2(QueryInterface,p,a,b)
 #define IUnknown_AddRef(p)             ICOM_CALL (AddRef,p)
 #define IUnknown_Release(p)            ICOM_CALL (Release,p)
+#endif
+
+
+/*****************************************************************************
+ * IClassFactory interface
+ */
+#define ICOM_INTERFACE IClassFactory
+#define IClassFactory_METHODS \
+    ICOM_METHOD3(HRESULT,CreateInstance, LPUNKNOWN,pUnkOuter, REFIID,riid, LPVOID*,ppvObject) \
+    ICOM_METHOD1(HRESULT,LockServer,     BOOL,fLock)
+#define IClassFactory_IMETHODS \
+    IUnknown_IMETHODS \
+    IClassFactory_METHODS
+
+
+ICOM_DEFINE(IClassFactory,IUnknown)
+#undef ICOM_INTERFACE
+
+/*** IUnknown methods ***/
+#define IClassFactory_QueryInterface(p,a,b) ICOM_CALL2(QueryInterface,p,a,b)
+#define IClassFactory_AddRef(p)             ICOM_CALL (AddRef,p)
+#define IClassFactory_Release(p)            ICOM_CALL (Release,p)
+/*** IClassFactory methods ***/
+#define IClassFactory_CreateInstance(p,a,b,c) ICOM_CALL3(CreateInstance,p,a,b,c)
+#define IClassFactory_LockServer(p,a)         ICOM_CALL1(LockServer,p,a)
+
+
+/*****************************************************************************
+ * IMalloc interface
+ */
+#define ICOM_INTERFACE IMalloc16
+#define IMalloc16_METHODS \
+    ICOM_METHOD1 (LPVOID,Alloc,       DWORD,cb) \
+    ICOM_METHOD2 (LPVOID,Realloc,     LPVOID,pv, DWORD,cb) \
+    ICOM_VMETHOD1(       Free,        LPVOID,pv) \
+    ICOM_CMETHOD1(DWORD, GetSize,     LPVOID,pv) \
+    ICOM_CMETHOD1(INT16, DidAlloc,    LPVOID,pv) \
+    ICOM_METHOD  (LPVOID,HeapMinimize)
+#define IMalloc16_IMETHODS \
+    IUnknown_IMETHODS \
+    IMalloc16_METHODS
+ICOM_DEFINE(IMalloc16,IUnknown)
+#undef ICOM_INTERFACE
+
+/*** IUnknown methods ***/
+#define IMalloc16_QueryInterface(p,a,b) ICOM_CALL2(QueryInterface,p,a,b)
+#define IMalloc16_AddRef(p)             ICOM_CALL (AddRef,p)
+#define IMalloc16_Release(p)            ICOM_CALL (Release,p)
+/*** IMalloc16 methods ***/
+#define IMalloc16_Alloc(p,a)      ICOM_CALL1(Alloc,p,a)
+#define IMalloc16_Realloc(p,a,b)  ICOM_CALL2(Realloc,p,a,b)
+#define IMalloc16_Free(p,a)       ICOM_CALL1(Free,p,a)
+#define IMalloc16_GetSize(p,a)    ICOM_CALL1(GetSize,p,a)
+#define IMalloc16_DidAlloc(p,a)   ICOM_CALL1(DidAlloc,p,a)
+#define IMalloc16_HeapMinimize(p) ICOM_CALL (HeapMinimize,p)
+
+
+#define ICOM_INTERFACE IMalloc
+#define IMalloc_METHODS \
+    ICOM_METHOD1 (LPVOID,Alloc,       DWORD,cb) \
+    ICOM_METHOD2 (LPVOID,Realloc,     LPVOID,pv, DWORD,cb) \
+    ICOM_VMETHOD1(       Free,        LPVOID,pv) \
+    ICOM_CMETHOD1(DWORD, GetSize,     LPVOID,pv) \
+    ICOM_CMETHOD1(INT, DidAlloc,    LPVOID,pv) \
+    ICOM_METHOD  (LPVOID,HeapMinimize)
+#define IMalloc_IMETHODS \
+    IUnknown_IMETHODS \
+    IMalloc_METHODS
+ICOM_DEFINE(IMalloc,IUnknown)
+#undef ICOM_INTERFACE
+
+/*** IUnknown methods ***/
+#define IMalloc_QueryInterface(p,a,b) ICOM_CALL2(QueryInterface,p,a,b)
+#define IMalloc_AddRef(p)             ICOM_CALL (AddRef,p)
+#define IMalloc_Release(p)            ICOM_CALL (Release,p)
+/*** IMalloc32 methods ***/
+#define IMalloc_Alloc(p,a)      ICOM_CALL1(Alloc,p,a)
+#define IMalloc_Realloc(p,a,b)  ICOM_CALL2(Realloc,p,a,b)
+#define IMalloc_Free(p,a)       ICOM_CALL1(Free,p,a)
+#define IMalloc_GetSize(p,a)    ICOM_CALL1(GetSize,p,a)
+#define IMalloc_DidAlloc(p,a)   ICOM_CALL1(DidAlloc,p,a)
+#define IMalloc_HeapMinimize(p) ICOM_CALL (HeapMinimize,p)
+
+
+HRESULT WINAPI CoCreateStandardMalloc16(DWORD dwMemContext, LPMALLOC16* lpMalloc);
+
+HRESULT WINAPI CoGetMalloc16(DWORD dwMemContext,LPMALLOC16* lpMalloc);
+HRESULT WINAPI CoGetMalloc(DWORD dwMemContext,LPMALLOC* lpMalloc);
+
+LPVOID WINAPI CoTaskMemAlloc(ULONG size);
+
+void WINAPI CoTaskMemFree(LPVOID ptr);
+
+/* FIXME: unimplemented */
+LPVOID WINAPI CoTaskMemRealloc(LPVOID ptr, ULONG size);
+
+
+/*****************************************************************************
+ * Additional API
+ */
+
+HRESULT WINAPI CoCreateGuid(GUID* pguid);
+
+void WINAPI CoFreeAllLibraries(void);
+
+void WINAPI CoFreeLibrary(HINSTANCE hLibrary);
+
+void WINAPI CoFreeUnusedLibraries(void);
+
+HRESULT WINAPI CoCreateInstance(REFCLSID rclsid, LPUNKNOWN pUnkOuter, DWORD dwClsContext, REFIID iid, LPVOID *ppv);
+
+HRESULT WINAPI CoGetClassObject(REFCLSID rclsid, DWORD dwClsContext, LPVOID pvReserved, REFIID iid, LPVOID *ppv);
+
+HRESULT WINAPI CoInitialize16(LPVOID lpReserved);
+HRESULT WINAPI CoInitialize(LPVOID lpReserved);
+HRESULT WINAPI CoInitializeEx(LPVOID lpReserved, DWORD dwCoInit);
+
+void WINAPI CoUninitialize16(void);
+void WINAPI CoUninitialize(void);
+
+typedef enum tagCOINIT
+{
+    COINIT_APARTMENTTHREADED  = 0x2, /* Apartment model */
+    COINIT_MULTITHREADED      = 0x0, /* OLE calls objects on any thread */
+    COINIT_DISABLE_OLE1DDE    = 0x4, /* Don't use DDE for Ole1 support */
+    COINIT_SPEED_OVER_MEMORY  = 0x8  /* Trade memory for speed */
+} COINIT;
+
+
+/* FIXME: not implemented */
+BOOL WINAPI CoIsOle1Class(REFCLSID rclsid);
+
+HINSTANCE WINAPI CoLoadLibrary(LPOLESTR16 lpszLibName, BOOL bAutoFree);
+
+HRESULT WINAPI CoLockObjectExternal16(LPUNKNOWN pUnk, BOOL16 fLock, BOOL16 fLastUnlockReleases);
+HRESULT WINAPI CoLockObjectExternal(LPUNKNOWN pUnk, BOOL fLock, BOOL fLastUnlockReleases);
+
+/* class registration flags; passed to CoRegisterClassObject */
+typedef enum tagREGCLS
+{
+    REGCLS_SINGLEUSE = 0,
+    REGCLS_MULTIPLEUSE = 1,
+    REGCLS_MULTI_SEPARATE = 2,
+    REGCLS_SUSPENDED = 4
+} REGCLS;
+
+HRESULT WINAPI CoRegisterClassObject16(REFCLSID rclsid, LPUNKNOWN pUnk, DWORD dwClsContext, DWORD flags, LPDWORD lpdwRegister);
+HRESULT WINAPI CoRegisterClassObject(REFCLSID rclsid,LPUNKNOWN pUnk,DWORD dwClsContext,DWORD flags,LPDWORD lpdwRegister);
+
+HRESULT WINAPI CoRevokeClassObject(DWORD dwRegister);
+
+void WINAPI CoUninitialize16(void);
+void WINAPI CoUninitialize(void);
+
+/*****************************************************************************
+ *  COM Server dll - exports
+ */
+HRESULT WINAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, LPVOID * ppv);
+HRESULT WINAPI DllCanUnloadNow(void);
+
+/*****************************************************************************
+ * Internal WINE API
+ */
+#ifdef __WINE__
+HRESULT WINAPI WINE_StringFromCLSID(const CLSID *id, LPSTR);
 #endif
 
 
