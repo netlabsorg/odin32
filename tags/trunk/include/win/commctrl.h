@@ -1,5 +1,21 @@
 /*
  * Common controls definitions
+ *
+ * Copyright (C) the Wine project
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #ifndef __WINE_COMMCTRL_H
@@ -231,7 +247,7 @@ typedef struct tagNMCUSTOMDRAWINFO
 	DWORD	dwDrawStage;
 	HDC	hdc;
 	RECT	rc;
-	DWORD	dwItemSpec; 
+	DWORD	dwItemSpec;
 	UINT	uItemState;
 	LPARAM	lItemlParam;
 } NMCUSTOMDRAW, *LPNMCUSTOMDRAW;
@@ -467,14 +483,17 @@ typedef struct _IMAGELIST *HIMAGELIST;
 #define ILC_COLOR32      0x0020
 #define ILC_PALETTE      0x0800  /* no longer supported by M$ */
 
-#define ILD_NORMAL       0x0000
-#define ILD_TRANSPARENT  0x0001
-#define ILD_BLEND25      0x0002
-#define ILD_BLEND50      0x0004
-#define ILD_MASK         0x0010
-#define ILD_IMAGE        0x0020
-#define ILD_ROP          0x0040
-#define ILD_OVERLAYMASK  0x0F00
+#define ILD_NORMAL        0x0000
+#define ILD_TRANSPARENT   0x0001
+#define ILD_BLEND25       0x0002
+#define ILD_BLEND50       0x0004
+#define ILD_MASK          0x0010
+#define ILD_IMAGE         0x0020
+#define ILD_ROP           0x0040
+#define ILD_OVERLAYMASK   0x0F00
+#define ILD_PRESERVEALPHA 0x1000
+#define ILD_SCALE         0x2000
+#define ILD_DPISCALE      0x4000
 
 #define ILD_SELECTED     ILD_BLEND50
 #define ILD_FOCUS        ILD_BLEND25
@@ -486,6 +505,11 @@ typedef struct _IMAGELIST *HIMAGELIST;
 #define ILCF_MOVE        (0x00000000)
 #define ILCF_SWAP        (0x00000001)
 
+#define ILS_NORMAL	0x0000
+#define ILS_GLOW	0x0001
+#define ILS_SHADOW	0x0002
+#define ILS_SATURATE	0x0004
+#define ILS_ALPHA	0x0008
 
 typedef struct _IMAGEINFO
 {
@@ -501,18 +525,21 @@ typedef struct _IMAGELISTDRAWPARAMS
 {
     DWORD       cbSize;
     HIMAGELIST  himl;
-    INT       i;
-    HDC       hdcDst;
-    INT       x;
-    INT       y;
-    INT       cx;
-    INT       cy;
-    INT       xBitmap;  /* x offest from the upperleft of bitmap */
-    INT       yBitmap;  /* y offset from the upperleft of bitmap */
+    INT         i;
+    HDC         hdcDst;
+    INT         x;
+    INT         y;
+    INT         cx;
+    INT         cy;
+    INT         xBitmap;  /* x offest from the upperleft of bitmap */
+    INT         yBitmap;  /* y offset from the upperleft of bitmap */
     COLORREF    rgbBk;
     COLORREF    rgbFg;
-    UINT      fStyle;
+    UINT        fStyle;
     DWORD       dwRop;
+    DWORD       fState;
+    DWORD       Frame;
+    DWORD       crEffect;
 } IMAGELISTDRAWPARAMS, *LPIMAGELISTDRAWPARAMS;
 
  
@@ -524,13 +551,13 @@ BOOL     WINAPI ImageList_Copy(HIMAGELIST,INT,HIMAGELIST,INT,INT);
 HIMAGELIST WINAPI ImageList_Create(INT,INT,UINT,INT,INT);
 BOOL     WINAPI ImageList_Destroy(HIMAGELIST);
 BOOL     WINAPI ImageList_DragEnter(HWND,INT,INT);
-BOOL     WINAPI ImageList_DragLeave(HWND); 
+BOOL     WINAPI ImageList_DragLeave(HWND);
 BOOL     WINAPI ImageList_DragMove(INT,INT);
 BOOL     WINAPI ImageList_DragShowNolock (BOOL);
 BOOL     WINAPI ImageList_Draw(HIMAGELIST,INT,HDC,INT,INT,UINT);
 BOOL     WINAPI ImageList_DrawEx(HIMAGELIST,INT,HDC,INT,INT,INT,
                                    INT,COLORREF,COLORREF,UINT);
-BOOL     WINAPI ImageList_DrawIndirect(IMAGELISTDRAWPARAMS*); 
+BOOL     WINAPI ImageList_DrawIndirect(IMAGELISTDRAWPARAMS*);
 HIMAGELIST WINAPI ImageList_Duplicate(HIMAGELIST);
 BOOL     WINAPI ImageList_EndDrag(VOID);
 COLORREF   WINAPI ImageList_GetBkColor(HIMAGELIST);
@@ -644,6 +671,16 @@ BOOL  WINAPI FlatSB_SetScrollProp(HWND, UINT, INT, BOOL);
 BOOL  WINAPI InitializeFlatSB(HWND);
 HRESULT WINAPI UninitializeFlatSB(HWND);
 
+/* Subclassing stuff */
+#ifdef __WIN32OS2__
+typedef LRESULT (* CALLBACK SUBCLASSPROC)(HWND, UINT, WPARAM, LPARAM, UINT_PTR, DWORD);
+#else
+typedef LRESULT (CALLBACK *SUBCLASSPROC)(HWND, UINT, WPARAM, LPARAM, UINT_PTR, DWORD_PTR);
+#endif
+BOOL WINAPI SetWindowSubclass(HWND, SUBCLASSPROC, UINT_PTR, DWORD_PTR);
+BOOL WINAPI GetWindowSubclass(HWND, SUBCLASSPROC, UINT_PTR, DWORD_PTR*);
+BOOL WINAPI RemoveWindowSubclass(HWND, SUBCLASSPROC, UINT_PTR);
+LRESULT WINAPI DefSubclassProc(HWND, UINT, WPARAM, LPARAM);
 
 /* Header control */
 
@@ -656,12 +693,12 @@ static const WCHAR WC_HEADERW[] = { 'S','y','s','H','e','a','d','e','r','3','2',
 #endif
 #define WC_HEADER		WINELIB_NAME_AW(WC_HEADER)
  
-#define HDS_HORZ                0x0000 
-#define HDS_BUTTONS             0x0002 
-#define HDS_HOTTRACK            0x0004 
-#define HDS_HIDDEN              0x0008 
-#define HDS_DRAGDROP            0x0040 
-#define HDS_FULLDRAG            0x0080 
+#define HDS_HORZ                0x0000
+#define HDS_BUTTONS             0x0002
+#define HDS_HOTTRACK            0x0004
+#define HDS_HIDDEN              0x0008
+#define HDS_DRAGDROP            0x0040
+#define HDS_FULLDRAG            0x0080
 
 #define HDI_WIDTH               0x0001
 #define HDI_HEIGHT              HDI_WIDTH
@@ -920,7 +957,7 @@ typedef struct tagNMHDFILTERBTNCLICK
 
 /* Toolbar */
 
-#define TOOLBARCLASSNAME16      "ToolbarWindow" 
+#define TOOLBARCLASSNAME16      "ToolbarWindow"
 #define TOOLBARCLASSNAMEA       "ToolbarWindow32"
 #ifdef __WIN32OS2__
 #define TOOLBARCLASSNAMEW       L"ToolbarWindow32"
@@ -942,7 +979,7 @@ static const WCHAR TOOLBARCLASSNAMEW[] = { 'T','o','o','l','b','a','r',
 #define TBSTATE_MARKED          0x80
 
 
-/* as of _WIN32_IE >= 0x0500 the following symbols are obsolete, 
+/* as of _WIN32_IE >= 0x0500 the following symbols are obsolete,
  * "everyone" should use the BTNS_... stuff below
  */
 #define TBSTYLE_BUTTON          0x00
@@ -969,7 +1006,7 @@ static const WCHAR TOOLBARCLASSNAMEW[] = { 'T','o','o','l','b','a','r',
 #define TBSTYLE_ALTDRAG         0x0400
 #define TBSTYLE_FLAT            0x0800
 #define TBSTYLE_LIST            0x1000
-#define TBSTYLE_CUSTOMERASE     0x2000 
+#define TBSTYLE_CUSTOMERASE     0x2000
 #define TBSTYLE_REGISTERDROP    0x4000
 #define TBSTYLE_TRANSPARENT     0x8000
 #define TBSTYLE_EX_DRAWDDARROWS         0x00000001
@@ -986,7 +1023,7 @@ static const WCHAR TOOLBARCLASSNAMEW[] = { 'T','o','o','l','b','a','r',
 #define TBIF_COMMAND            0x00000020
 #define TBIF_SIZE               0x00000040
 
-#define TBBF_LARGE		0x0001 
+#define TBBF_LARGE		0x0001
 
 #define TB_ENABLEBUTTON          (WM_USER+1)
 #define TB_CHECKBUTTON           (WM_USER+2)
@@ -994,9 +1031,9 @@ static const WCHAR TOOLBARCLASSNAMEW[] = { 'T','o','o','l','b','a','r',
 #define TB_HIDEBUTTON            (WM_USER+4)
 #define TB_INDETERMINATE         (WM_USER+5)
 #define TB_MARKBUTTON		 (WM_USER+6)
-#define TB_ISBUTTONENABLED       (WM_USER+9) 
-#define TB_ISBUTTONCHECKED       (WM_USER+10) 
-#define TB_ISBUTTONPRESSED       (WM_USER+11) 
+#define TB_ISBUTTONENABLED       (WM_USER+9)
+#define TB_ISBUTTONCHECKED       (WM_USER+10)
+#define TB_ISBUTTONPRESSED       (WM_USER+11)
 #define TB_ISBUTTONHIDDEN        (WM_USER+12)
 #define TB_ISBUTTONINDETERMINATE (WM_USER+13)
 #define TB_ISBUTTONHIGHLIGHTED   (WM_USER+14)
@@ -1018,8 +1055,8 @@ static const WCHAR TOOLBARCLASSNAMEW[] = { 'T','o','o','l','b','a','r',
 #define TB_SAVERESTOREW        (WM_USER+76)
 #define TB_SAVERESTORE WINELIB_NAME_AW(TB_SAVERESTORE)
 #define TB_CUSTOMIZE             (WM_USER+27)
-#define TB_ADDSTRINGA          (WM_USER+28) 
-#define TB_ADDSTRINGW          (WM_USER+77) 
+#define TB_ADDSTRINGA          (WM_USER+28)
+#define TB_ADDSTRINGW          (WM_USER+77)
 #define TB_ADDSTRING WINELIB_NAME_AW(TB_ADDSTRING)
 #define TB_GETITEMRECT           (WM_USER+29)
 #define TB_BUTTONSTRUCTSIZE      (WM_USER+30)
@@ -1389,7 +1426,7 @@ typedef struct
 #define HICF_LMOUSE         0x00000080   /* left mouse button selected     */
 #define HICF_TOGGLEDROPDOWN 0x00000100   /* Toggle button's dropdown state */
 
-typedef struct 
+typedef struct
 {
     int   iButton;
     DWORD dwFlags;
@@ -1399,15 +1436,15 @@ typedef struct
 
 HWND WINAPI
 CreateToolbar(HWND, DWORD, UINT, INT, HINSTANCE,
-              UINT, LPCOLDTBBUTTON, INT); 
+              UINT, LPCOLDTBBUTTON, INT);
  
 HWND WINAPI
 CreateToolbarEx(HWND, DWORD, UINT, INT,
-                HINSTANCE, UINT, LPCTBBUTTON, 
-                INT, INT, INT, INT, INT, UINT); 
+                HINSTANCE, UINT, LPCTBBUTTON,
+                INT, INT, INT, INT, INT, UINT);
 
 HBITMAP WINAPI
-CreateMappedBitmap (HINSTANCE, INT, UINT, LPCOLORMAP, INT); 
+CreateMappedBitmap (HINSTANCE, INT, UINT, LPCOLORMAP, INT);
 
 
 /* Tool tips */
@@ -1454,37 +1491,37 @@ static const WCHAR TOOLTIPS_CLASSW[] = { 't','o','o','l','t','i','p','s','_',
 
 #define TTM_ACTIVATE            (WM_USER+1)
 #define TTM_SETDELAYTIME        (WM_USER+3)
-#define TTM_ADDTOOLA          (WM_USER+4)
-#define TTM_ADDTOOLW          (WM_USER+50)
+#define TTM_ADDTOOLA            (WM_USER+4)
+#define TTM_ADDTOOLW            (WM_USER+50)
 #define TTM_ADDTOOL WINELIB_NAME_AW(TTM_ADDTOOL)
-#define TTM_DELTOOLA          (WM_USER+5)
-#define TTM_DELTOOLW          (WM_USER+51)
+#define TTM_DELTOOLA            (WM_USER+5)
+#define TTM_DELTOOLW            (WM_USER+51)
 #define TTM_DELTOOL WINELIB_NAME_AW(TTM_DELTOOL)
-#define TTM_NEWTOOLRECTA      (WM_USER+6)
-#define TTM_NEWTOOLRECTW      (WM_USER+52)
+#define TTM_NEWTOOLRECTA        (WM_USER+6)
+#define TTM_NEWTOOLRECTW        (WM_USER+52)
 #define TTM_NEWTOOLRECT WINELIB_NAME_AW(TTM_NEWTOOLRECT)
 #define TTM_RELAYEVENT          (WM_USER+7)
-#define TTM_GETTOOLINFOA      (WM_USER+8)
-#define TTM_GETTOOLINFOW      (WM_USER+53)
+#define TTM_GETTOOLINFOA        (WM_USER+8)
+#define TTM_GETTOOLINFOW        (WM_USER+53)
 #define TTM_GETTOOLINFO WINELIB_NAME_AW(TTM_GETTOOLINFO)
-#define TTM_SETTOOLINFOA      (WM_USER+9)
-#define TTM_SETTOOLINFOW      (WM_USER+54)
+#define TTM_SETTOOLINFOA        (WM_USER+9)
+#define TTM_SETTOOLINFOW        (WM_USER+54)
 #define TTM_SETTOOLINFO WINELIB_NAME_AW(TTM_SETTOOLINFO)
-#define TTM_HITTESTA          (WM_USER+10)
-#define TTM_HITTESTW          (WM_USER+55)
+#define TTM_HITTESTA            (WM_USER+10)
+#define TTM_HITTESTW            (WM_USER+55)
 #define TTM_HITTEST WINELIB_NAME_AW(TTM_HITTEST)
-#define TTM_GETTEXTA          (WM_USER+11)
-#define TTM_GETTEXTW          (WM_USER+56)
+#define TTM_GETTEXTA            (WM_USER+11)
+#define TTM_GETTEXTW            (WM_USER+56)
 #define TTM_GETTEXT WINELIB_NAME_AW(TTM_GETTEXT)
-#define TTM_UPDATETIPTEXTA    (WM_USER+12)
-#define TTM_UPDATETIPTEXTW    (WM_USER+57)
+#define TTM_UPDATETIPTEXTA      (WM_USER+12)
+#define TTM_UPDATETIPTEXTW      (WM_USER+57)
 #define TTM_UPDATETIPTEXT WINELIB_NAME_AW(TTM_UPDATETIPTEXT)
 #define TTM_GETTOOLCOUNT        (WM_USER+13)
-#define TTM_ENUMTOOLSA        (WM_USER+14)
-#define TTM_ENUMTOOLSW        (WM_USER+58)
+#define TTM_ENUMTOOLSA          (WM_USER+14)
+#define TTM_ENUMTOOLSW          (WM_USER+58)
 #define TTM_ENUMTOOLS WINELIB_NAME_AW(TTM_ENUMTOOLS)
-#define TTM_GETCURRENTTOOLA   (WM_USER+15)
-#define TTM_GETCURRENTTOOLW   (WM_USER+59)
+#define TTM_GETCURRENTTOOLA     (WM_USER+15)
+#define TTM_GETCURRENTTOOLW     (WM_USER+59)
 #define TTM_GETCURRENTTOOL WINELIB_NAME_AW(TTM_GETCURRENTTOOL)
 #define TTM_WINDOWFROMPOINT     (WM_USER+16)
 #define TTM_TRACKACTIVATE       (WM_USER+17)
@@ -1500,12 +1537,13 @@ static const WCHAR TOOLTIPS_CLASSW[] = { 't','o','o','l','t','i','p','s','_',
 #define TTM_GETMARGIN           (WM_USER+27)
 #define TTM_POP                 (WM_USER+28)
 #define TTM_UPDATE              (WM_USER+29)
+#define TTM_GETBUBBLESIZE       (WM_USER+30)
 
 
 #define TTN_FIRST               (0U-520U)
 #define TTN_LAST                (0U-549U)
-#define TTN_GETDISPINFOA      (TTN_FIRST-0)
-#define TTN_GETDISPINFOW      (TTN_FIRST-10)
+#define TTN_GETDISPINFOA        (TTN_FIRST-0)
+#define TTN_GETDISPINFOW        (TTN_FIRST-10)
 #define TTN_GETDISPINFO WINELIB_NAME_AW(TTN_GETDISPINFO)
 #define TTN_SHOW                (TTN_FIRST-1)
 #define TTN_POP                 (TTN_FIRST-2)
@@ -1839,7 +1877,8 @@ static const WCHAR TRACKBAR_CLASSW[] = { 'm','s','c','t','l','s','_',
 #define TBS_FIXEDLENGTH         0x0040
 #define TBS_NOTHUMB             0x0080
 #define TBS_TOOLTIPS            0x0100
-#define TBS_REVERSED			0x0200
+#define TBS_REVERSED		0x0200
+#define TBS_DOWNISLEFT		0x0400
 
 #define TBTS_TOP                0
 #define TBTS_LEFT               1
@@ -2680,7 +2719,7 @@ static const WCHAR WC_LISTVIEWW[] = { 'S','y','s',
 #define LVFI_PARAM              0X0001
 #define LVFI_STRING             0X0002
 #define LVFI_PARTIAL            0X0008
-#define LVFI_WRAP               0X0020  
+#define LVFI_WRAP               0X0020
 #define LVFI_NEARESTXY          0X0040
 
 #define LVIF_TEXT               0x0001
@@ -2694,7 +2733,7 @@ static const WCHAR WC_LISTVIEWW[] = { 'S','y','s',
 #define LVIR_BOUNDS             0x0000
 #define LVIR_LABEL              0x0002
 #define LVIR_ICON               0x0001
-#define LVIR_SELECTBOUNDS       0x0003 
+#define LVIR_SELECTBOUNDS       0x0003
 
 #define LVIS_FOCUSED            0x0001
 #define LVIS_SELECTED           0x0002
@@ -2832,6 +2871,8 @@ static const WCHAR WC_LISTVIEWW[] = { 'S','y','s',
 #define LVM_GETNUMBEROFWORKAREAS (LVM_FIRST+73)
 #define LVM_SETTOOLTIPS         (LVM_FIRST+74)
 #define LVM_GETTOOLTIPS         (LVM_FIRST+78)
+#define LVM_GETUNICODEFORMAT    (CCM_GETUNICODEFORMAT)
+#define LVM_SETUNICODEFORMAT    (CCM_SETUNICODEFORMAT)
 
 #define LVN_FIRST               (0U-100U)
 #define LVN_LAST                (0U-199U)
@@ -3509,6 +3550,8 @@ typedef struct tagNMLVODSTATECHANGE
     (INT)SendMessageA((hwnd),LVM_FINDITEMA,(WPARAM)(INT)(nItem),(LPARAM)(LVFINDINFOA*)(plvfi))
 #define ListView_FindItemW(hwnd,nItem,plvfi) \
     (INT)SendMessageW((hwnd),LVM_FINDITEMW,(WPARAM)(INT)(nItem),(LPARAM)(LVFINDINFOW*)(plvfi))
+#define ListView_FindItem WINELIB_NAME_AW(ListView_FindItem)
+
 #define ListView_Arrange(hwnd,code) \
     (INT)SendMessageA((hwnd),LVM_ARRANGE,(WPARAM)(INT)(code),0L)
 #define ListView_GetItemPosition(hwnd,i,ppt) \
@@ -3587,10 +3630,10 @@ typedef struct tagNMLVODSTATECHANGE
 
 #define ListView_SetItemTextA(hwndLV, i, _iSubItem, _pszText) \
 { LVITEMA _LVi; _LVi.iSubItem = _iSubItem; _LVi.pszText = _pszText;\
-  SendMessageA(hwndLV, LVM_SETITEMTEXTA, (WPARAM)i, (LPARAM) (LVITEMA*)&_LVi);}                
+  SendMessageA(hwndLV, LVM_SETITEMTEXTA, (WPARAM)i, (LPARAM) (LVITEMA*)&_LVi);}
 #define ListView_SetItemTextW(hwndLV, i, _iSubItem, _pszText) \
 { LVITEMW _LVi; _LVi.iSubItem = _iSubItem; _LVi.pszText = _pszText;\
-  SendMessageW(hwndLV, LVM_SETITEMTEXTW, (WPARAM)i, (LPARAM) (LVITEMW*)& _LVi);}                
+  SendMessageW(hwndLV, LVM_SETITEMTEXTW, (WPARAM)i, (LPARAM) (LVITEMW*)& _LVi);}
 #define ListView_SetItemText WINELIB_NAME_AW(ListView_SetItemText)
 
 #define ListView_DeleteItem(hwndLV, i) \
@@ -4189,12 +4232,12 @@ static const WCHAR MONTHCAL_CLASSW[] = { 'S','y','s',
 #define MCN_GETDAYSTATE       (MCN_FIRST + 3)
 #define MCN_SELECT            (MCN_FIRST + 4)
 
-#define MCSC_BACKGROUND   0   
-#define MCSC_TEXT         1   
-#define MCSC_TITLEBK      2   
+#define MCSC_BACKGROUND   0
+#define MCSC_TEXT         1
+#define MCSC_TITLEBK      2
 #define MCSC_TITLETEXT    3
-#define MCSC_MONTHBK      4   
-#define MCSC_TRAILINGTEXT 5   
+#define MCSC_MONTHBK      4
+#define MCSC_TRAILINGTEXT 5
 
 #define MCS_DAYSTATE           0x0001
 #define MCS_MULTISELECT        0x0002
@@ -4206,8 +4249,8 @@ static const WCHAR MONTHCAL_CLASSW[] = { 'S','y','s',
 #define MCHT_CALENDAR          0x00020000
 #define MCHT_TODAYLINK         0x00030000
 
-#define MCHT_NEXT              0x01000000   
-#define MCHT_PREV              0x02000000  
+#define MCHT_NEXT              0x01000000
+#define MCHT_PREV              0x02000000
 #define MCHT_NOWHERE           0x00000000
 #define MCHT_TITLEBK           (MCHT_TITLE)
 #define MCHT_TITLEMONTH        (MCHT_TITLE | 0x0001)
@@ -4224,8 +4267,8 @@ static const WCHAR MONTHCAL_CLASSW[] = { 'S','y','s',
 
 
 
-#define GMR_VISIBLE     0      
-#define GMR_DAYSTATE    1     
+#define GMR_VISIBLE     0
+#define GMR_DAYSTATE    1
 
 
 /*  Month calendar's structures */
@@ -4234,13 +4277,13 @@ static const WCHAR MONTHCAL_CLASSW[] = { 'S','y','s',
 typedef struct {
         UINT cbSize;
         POINT pt;
-        UINT uHit;   
+        UINT uHit;
         SYSTEMTIME st;
 } MCHITTESTINFO, *PMCHITTESTINFO;
 
 typedef struct tagNMSELCHANGE
 {
-    NMHDR           nmhdr; 
+    NMHDR           nmhdr;
     SYSTEMTIME      stSelStart;
     SYSTEMTIME      stSelEnd;
 } NMSELCHANGE, *LPNMSELCHANGE;
@@ -4250,7 +4293,7 @@ typedef DWORD MONTHDAYSTATE, *LPMONTHDAYSTATE;
 
 typedef struct tagNMDAYSTATE
 {
-    NMHDR           nmhdr;  
+    NMHDR           nmhdr;
     SYSTEMTIME      stStart;
     int             cDayState;
     LPMONTHDAYSTATE prgDayState;
@@ -4341,13 +4384,13 @@ static const WCHAR DATETIMEPICK_CLASSW[] = { 'S','y','s',
 
 /* Datetime Notifications */
 
-#define DTN_DATETIMECHANGE  (DTN_FIRST + 1) 
-#define DTN_USERSTRINGA     (DTN_FIRST + 2) 
-#define DTN_WMKEYDOWNA      (DTN_FIRST + 3) 
-#define DTN_FORMATA         (DTN_FIRST + 4) 
-#define DTN_FORMATQUERYA    (DTN_FIRST + 5) 
+#define DTN_DATETIMECHANGE  (DTN_FIRST + 1)
+#define DTN_USERSTRINGA     (DTN_FIRST + 2)
+#define DTN_WMKEYDOWNA      (DTN_FIRST + 3)
+#define DTN_FORMATA         (DTN_FIRST + 4)
+#define DTN_FORMATQUERYA    (DTN_FIRST + 5)
 #define DTN_DROPDOWN        (DTN_FIRST + 6)
-#define DTN_CLOSEUP         (DTN_FIRST + 7) 
+#define DTN_CLOSEUP         (DTN_FIRST + 7)
 #define DTN_USERSTRINGW     (DTN_FIRST + 15)
 #define DTN_WMKEYDOWNW      (DTN_FIRST + 16)
 #define DTN_FORMATW         (DTN_FIRST + 17)
@@ -4358,35 +4401,35 @@ static const WCHAR DATETIMEPICK_CLASSW[] = { 'S','y','s',
 #define DTN_FORMAT          WINELIB_NAME_AW(DTN_FORMAT)
 #define DTN_FORMATQUERY     WINELIB_NAME_AW(DTN_FORMATQUERY)
 
-#define DTS_SHORTDATEFORMAT 0x0000 
-#define DTS_UPDOWN          0x0001 
-#define DTS_SHOWNONE        0x0002 
-#define DTS_LONGDATEFORMAT  0x0004 
-#define DTS_TIMEFORMAT      0x0009 
-#define DTS_APPCANPARSE     0x0010 
-#define DTS_RIGHTALIGN      0x0020 
+#define DTS_SHORTDATEFORMAT 0x0000
+#define DTS_UPDOWN          0x0001
+#define DTS_SHOWNONE        0x0002
+#define DTS_LONGDATEFORMAT  0x0004
+#define DTS_TIMEFORMAT      0x0009
+#define DTS_APPCANPARSE     0x0010
+#define DTS_RIGHTALIGN      0x0020
 
 typedef struct tagNMDATETIMECHANGE
 {
     NMHDR       nmhdr;
-    DWORD       dwFlags;    
-    SYSTEMTIME  st;         
+    DWORD       dwFlags;
+    SYSTEMTIME  st;
 } NMDATETIMECHANGE, *LPNMDATETIMECHANGE;
 
 typedef struct tagNMDATETIMESTRINGA
 {
     NMHDR      nmhdr;
-    LPCSTR     pszUserString; 
-    SYSTEMTIME st;      
-    DWORD      dwFlags;  
+    LPCSTR     pszUserString;
+    SYSTEMTIME st;
+    DWORD      dwFlags;
 } NMDATETIMESTRINGA, *LPNMDATETIMESTRINGA;
 
 typedef struct tagNMDATETIMESTRINGW
 {
     NMHDR      nmhdr;
     LPCWSTR    pszUserString;
-    SYSTEMTIME st;          
-    DWORD      dwFlags;    
+    SYSTEMTIME st;
+    DWORD      dwFlags;
 } NMDATETIMESTRINGW, *LPNMDATETIMESTRINGW;
 
 DECL_WINELIB_TYPE_AW(NMDATETIMESTRING)
@@ -4395,17 +4438,17 @@ DECL_WINELIB_TYPE_AW(LPNMDATETIMESTRING)
 typedef struct tagNMDATETIMEWMKEYDOWNA
 {
     NMHDR      nmhdr;
-    int        nVirtKey;  
-    LPCSTR     pszFormat; 
-    SYSTEMTIME st;       
+    int        nVirtKey;
+    LPCSTR     pszFormat;
+    SYSTEMTIME st;
 } NMDATETIMEWMKEYDOWNA, *LPNMDATETIMEWMKEYDOWNA;
 
 typedef struct tagNMDATETIMEWMKEYDOWNW
 {
     NMHDR      nmhdr;
-    int        nVirtKey;  
-    LPCWSTR    pszFormat; 
-    SYSTEMTIME st;       
+    int        nVirtKey;
+    LPCWSTR    pszFormat;
+    SYSTEMTIME st;
 } NMDATETIMEWMKEYDOWNW, *LPNMDATETIMEWMKEYDOWNW;
 
 DECL_WINELIB_TYPE_AW(NMDATETIMEWMKEYDOWN)
@@ -4414,18 +4457,18 @@ DECL_WINELIB_TYPE_AW(LPNMDATETIMEWMKEYDOWN)
 typedef struct tagNMDATETIMEFORMATA
 {
     NMHDR nmhdr;
-    LPCSTR  pszFormat;   
-    SYSTEMTIME st;      
-    LPCSTR pszDisplay;  
-    CHAR szDisplay[64]; 
+    LPCSTR  pszFormat;
+    SYSTEMTIME st;
+    LPCSTR pszDisplay;
+    CHAR szDisplay[64];
 } NMDATETIMEFORMATA, *LPNMDATETIMEFORMATA;
 
 
 typedef struct tagNMDATETIMEFORMATW
 {
     NMHDR nmhdr;
-    LPCWSTR pszFormat;  
-    SYSTEMTIME st;     
+    LPCWSTR pszFormat;
+    SYSTEMTIME st;
     LPCWSTR pszDisplay;
     WCHAR szDisplay[64];
 } NMDATETIMEFORMATW, *LPNMDATETIMEFORMATW;
@@ -4436,15 +4479,15 @@ DECL_WINELIB_TYPE_AW(LPNMDATETIMEFORMAT)
 typedef struct tagNMDATETIMEFORMATQUERYA
 {
     NMHDR nmhdr;
-    LPCSTR pszFormat; 
-    SIZE szMax;       
+    LPCSTR pszFormat;
+    SIZE szMax;
 } NMDATETIMEFORMATQUERYA, *LPNMDATETIMEFORMATQUERYA;
 
 typedef struct tagNMDATETIMEFORMATQUERYW
 {
     NMHDR nmhdr;
-    LPCWSTR pszFormat; 
-    SIZE szMax;        
+    LPCWSTR pszFormat;
+    SIZE szMax;
 } NMDATETIMEFORMATQUERYW, *LPNMDATETIMEFORMATQUERYW;
 
 DECL_WINELIB_TYPE_AW(NMDATETIMEFORMATQUERY)
@@ -4461,11 +4504,11 @@ DECL_WINELIB_TYPE_AW(LPNMDATETIMEFORMATQUERY)
 
 
 #define DateTime_GetSystemtime(hdp, pst)   \
-  (DWORD)SendMessageA (hdp, DTM_GETSYSTEMTIME , 0, (LPARAM)(pst)) 
+  (DWORD)SendMessageA (hdp, DTM_GETSYSTEMTIME , 0, (LPARAM)(pst))
 #define DateTime_SetSystemtime(hdp, gd, pst)   \
   (BOOL)SendMessageA (hdp, DTM_SETSYSTEMTIME, (LPARAM)(gd), (LPARAM)(pst))
 #define DateTime_GetRange(hdp, rgst)  \
-  (DWORD)SendMessageA (hdp, DTM_GETRANGE, 0, (LPARAM)(rgst)) 
+  (DWORD)SendMessageA (hdp, DTM_GETRANGE, 0, (LPARAM)(rgst))
 #define DateTime_SetRange(hdp, gd, rgst) \
    (BOOL)SendMessageA (hdp, DTM_SETRANGE, (WPARAM)(gd), (LPARAM)(rgst))
 #define DateTime_SetFormat WINELIB_NAME_AW(DateTime_SetFormat)
@@ -4544,7 +4587,7 @@ BOOL WINAPI DSA_DestroyCallback (const HDSA, DSAENUMPROC, LPARAM);
 typedef struct _DPA
 {
     INT    nItemCount;
-    LPVOID   *ptrs; 
+    LPVOID   *ptrs;
     HANDLE hHeap;
     INT    nGrow;
     INT    nMaxCount;
@@ -4613,5 +4656,3 @@ LRESULT WINAPI COMCTL32_SendNotifyEx (HWND, HWND, UINT, LPNMHDR, DWORD);
 #endif
 
 #endif  /* __WINE_COMMCTRL_H */
-
-
