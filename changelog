@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.330 1999-10-16 18:56:26 sandervl Exp $ */
+ /* $Id: changelog,v 1.331 1999-10-17 01:55:08 bird Exp $ */
+ 99-10-17: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
+    - KERNEL32: Removed exception throwing from Pe2Lx classes.
+                Implemented TLS support in Pe2Lx classes.
 
  99-10-16: Yuri Dario <mc6530@mclink.it>
 	- USER32: Button bugfix (BUTTON_CheckAutoRadioButton)
@@ -77,7 +80,7 @@
                   Only set FCF_TASKLIST bit when parent == desktop & window
                   has titlebar. (too many Opera windows in tasklist)
 		  Clear unsupported frame styles (i.e. no titlebar & minimize/maximize button)
-                  Fixed MapOS2ToWin32Rectl & GetWindowRect. 
+                  Fixed MapOS2ToWin32Rectl & GetWindowRect.
                   Removed code that adds bordersize during SetWindowPos & window
                   creation. Fixed listbox code instead. (use window rectangle
                   for SetWindowPos call, not client rectangle)
