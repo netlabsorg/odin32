@@ -1,4 +1,4 @@
-/* $Id: console.h,v 1.1 1999-05-24 20:19:06 ktk Exp $ */
+/* $Id: console.h,v 1.2 1999-05-27 15:17:57 phaller Exp $ */
 
 #ifndef __CONSOLE_H__
 #define __CONSOLE_H__
