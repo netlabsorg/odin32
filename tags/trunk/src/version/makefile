@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.15 2000-11-19 08:38:50 bird Exp $
+# $Id: makefile,v 1.16 2000-11-19 08:39:49 bird Exp $
 
 #
 # Odin32 API
@@ -21,7 +21,7 @@ $(OBJDIR)\version.obj \
 $(OBJDIR)\install.obj \
 $(OBJDIR)\info.obj \
 $(OBJDIR)\versionrsrc.obj \
-$(PDWIN32_LIB)\dllentry.obj
+$(DLLENTRY)
 
 
 #
