@@ -1,8 +1,13 @@
+ /* $Id */
  99-20-06: Sander van Leeuwen
 	- KERNEL32: Call HMInitialize from initterm, not winexe object creation
 	- KERNEL32: Added comctl to list of system dlls (windll.cpp)
 	- KERNEL32: Fixed dll detach (windll.cpp) for converted win32 dlls
 	- KERNEL32: Module name detection (windll.cpp)
+	- KERNEL32: Activated Win32 TIB code; a selector + memory is allocated
+ 		    for the main thread and every thread created.
+		    When it's completed, it should fix several problems due to
+	  	    differences between OS/2's TIB and Win32's TEB.
 	- COMCTL32: Fixed crash on exit (moved unregister of class into exit list handler)
 	- USER32: Changed bugfix (WS_CLIPCHILDREN) for winhlp32 (same as Wine now)
 
