@@ -103,7 +103,7 @@ typedef struct tagCCINFOA {
 typedef struct tagCCINFOW {
     WCHAR   szClass[CCHCCCLASS];
     DWORD   flOptions;
-    WCHAR   szDesc[CCHCCDESC]
+    WCHAR   szDesc[CCHCCDESC];
     UINT    cxDefault;
     UINT    cyDefault;
     DWORD   flStyleDefault;
