@@ -11,8 +11,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include <time.h>
 
+#include "wine/unicode.h"
 #include "wrc.h"
 #include "writeres.h"
 #include "genres.h"
@@ -25,10 +25,9 @@ char Underscore[] = "_";
 char Underscore[] = "";
 #endif
 
-#define MASM 1
 #ifdef MASM
     #define DIRECTIVE_BYTE  "db"
-    #define DIRECTIVE_WORD  "dw"
+    #define DIRECTIVE_SHORT "dw"
     #define DIRECTIVE_LONG  "dd"
     #define DIRECTIVE_ALIGN "align"
     #define DIRECTIVE_GLOBAL "public"
@@ -39,11 +38,12 @@ char Underscore[] = "";
     #define HEXBIT31        "80000000h"
     #define COMMENT_LINE    ";"
     #define OR              "or"
-char s_file_head_str[] =
-        ";/* This file is generated with wrc version " WRC_FULLVERSION ". Do not edit! */\n"
-        ";/* Source : %s */\n"
-        ";/* Cmdline: %s */\n"
-        ";/* Date   : %s */\n"
+
+static char s_file_head_str[] =
+        "; This file is generated with wrc version " WRC_FULLVERSION ". Do not edit! */\n"
+        "; Source : %s */\n"
+        "; Cmdline: %s */\n"
+        "; Date   : %s */\n"
         "\n"
 	"\t.386p\n"
 	"\t.model flat\n"
@@ -51,15 +51,15 @@ char s_file_head_str[] =
         "\n"
 	;
 
-char s_file_tail_str[] =
+static char s_file_tail_str[] =
 	"\tend\n"
-        ";/* <eof> */\n"
+        "; <eof> */\n"
         "\n"
 	;
 
 #else
     #define DIRECTIVE_BYTE  ".byte"
-    #define DIRECTIVE_WORD  ".word"
+    #define DIRECTIVE_SHORT ".short"
     #define DIRECTIVE_LONG  ".long"
     #define DIRECTIVE_ALIGN ".align"
     #define DIRECTIVE_GLOBAL ".globl"
@@ -71,7 +71,7 @@ char s_file_tail_str[] =
     #define COMMENT_LINE
     #define OR              "|"
 
-char s_file_head_str[] =
+static char s_file_head_str[] =
         "/* This file is generated with wrc version " WRC_FULLVERSION ". Do not edit! */\n"
         "/* Source : %s */\n"
         "/* Cmdline: %s */\n"
@@ -81,14 +81,15 @@ char s_file_head_str[] =
         "\n"
 	;
 
-char s_file_tail_str[] =
+static char s_file_tail_str[] =
         "/* <eof> */\n"
         "\n"
 	;
 
 #endif
 
-char s_file_autoreg_str[] =
+
+static char s_file_autoreg_str[] =
 	"\t.text\n"
 	".LAuto_Register:\n"
 	"\tpushl\t$%s%s\n"
@@ -103,11 +104,11 @@ char s_file_autoreg_str[] =
 	".stabs \"___CTOR_LIST__\",22,0,0,.LAuto_Register\n\n"
 #else
 	"\t.section .ctors,\"aw\"\n"
-	"\t.long\t.LAuto_Register\n\n"
+	"\t"DIRECTIVE_LONG"\t.LAuto_Register\n\n"
 #endif
 	;
 
-char h_file_head_str[] =
+static char h_file_head_str[] =
 	"/*\n"
 	" * This file is generated with wrc version " WRC_FULLVERSION ". Do not edit!\n"
 	" * Source : %s\n"
@@ -122,7 +123,7 @@ char h_file_head_str[] =
 	"\n"
 	;
 
-char h_file_tail_str[] =
+static char h_file_tail_str[] =
 	"#endif\n"
 	"/* <eof> */\n\n"
 	;
@@ -138,8 +139,6 @@ int n_id_entries = 0;		/* win32 only: Nr of unique ids in the type-level array *
 int n_name_entries = 0;		/* win32 only: Nr of unique namess in the type-level array */
 
 static int direntries;		/* win32 only: Total number of unique resources */
-
-time_t now;
 
 /*
  *****************************************************************************
@@ -225,7 +224,7 @@ void write_resfile(char *outname, resource_t *top)
  *****************************************************************************
 */
 #define BYTESPERLINE	8
-void write_s_res(FILE *fp, res_t *res)
+static void write_s_res(FILE *fp, res_t *res)
 {
 	int idx = res->dataidx;
 	int end = res->size;
@@ -235,25 +234,26 @@ void write_s_res(FILE *fp, res_t *res)
 
 	for(i = 0 ; i < lines; i++)
 	{
-		fprintf(fp, "\t%s\t", DIRECTIVE_BYTE);
+		fprintf(fp, "\t"DIRECTIVE_BYTE"\t");
 		for(j = 0; j < BYTESPERLINE; j++, idx++)
 		{
-			fprintf(fp, BYTEFRMT"%s", res->data[idx] & 0xff,
+			fprintf(fp, ""BYTEFRMT"%s", res->data[idx] & 0xff,
 					j == BYTESPERLINE-1 ? "" : ", ");
 		}
 		fprintf(fp, "\n");
 	}
 	if(rest)
 	{
-		fprintf(fp, "\t%s\t", DIRECTIVE_BYTE);
+		fprintf(fp, "\t"DIRECTIVE_BYTE"\t");
 		for(j = 0; j < rest; j++, idx++)
 		{
-			fprintf(fp, BYTEFRMT"%s", res->data[idx] & 0xff,
+			fprintf(fp, ""BYTEFRMT"%s", res->data[idx] & 0xff,
 					j == rest-1 ? "" : ", ");
 		}
 		fprintf(fp, "\n");
 	}
 }
+#undef BYTESPERLINE
 
 /*
  *****************************************************************************
@@ -265,7 +265,7 @@ void write_s_res(FILE *fp, res_t *res)
  * Remarks	: One level self recursive for string type conversion
  *****************************************************************************
 */
-void write_name_str(FILE *fp, name_id_t *nid)
+static void write_name_str(FILE *fp, name_id_t *nid)
 {
 	res_t res;
 	assert(nid->type == name_str);
@@ -280,7 +280,7 @@ void write_name_str(FILE *fp, name_id_t *nid)
 		res.dataidx = 0;
 		res.data = (char *)xmalloc(res.size + 1);
 		res.data[0] = (char)res.size;
-		res.size++;	/* We need to write the lenth byte as well */
+		res.size++;	/* We need to write the length byte as well */
 		strcpy(res.data+1, nid->name.s_name->str.cstr);
 		write_s_res(fp, &res);
 		free(res.data);
@@ -311,7 +311,7 @@ void write_name_str(FILE *fp, name_id_t *nid)
 	}
 	else  if(win32 && nid->name.s_name->type == str_unicode)
 	{
-		res.size = wstrlen(nid->name.s_name->str.wstr);
+		res.size = strlenW(nid->name.s_name->str.wstr);
 		if(res.size > 65534)
 			error("Can't write strings larger than 65534 bytes");
 		if(res.size == 0)
@@ -319,7 +319,7 @@ void write_name_str(FILE *fp, name_id_t *nid)
 		res.dataidx = 0;
 		res.data = (char *)xmalloc((res.size + 1) * 2);
 		((short *)res.data)[0] = (short)res.size;
-		wstrcpy((short *)(res.data+2), nid->name.s_name->str.wstr);
+		strcpyW((WCHAR *)(res.data+2), nid->name.s_name->str.wstr);
 		res.size *= 2; /* Function writes bytes, not shorts... */
 		res.size += 2; /* We need to write the length word as well */
 		write_s_res(fp, &res);
@@ -334,50 +334,6 @@ void write_name_str(FILE *fp, name_id_t *nid)
 
 /*
  *****************************************************************************
- * Function	: compare_name_id
- * Syntax	: int compare_name_id(name_id_t *n1, name_id_t *n2)
- * Input	:
- * Output	:
- * Description	:
- * Remarks	:
- *****************************************************************************
-*/
-int compare_name_id(name_id_t *n1, name_id_t *n2)
-{
-	if(n1->type == name_ord && n2->type == name_ord)
-	{
-		return n1->name.i_name - n2->name.i_name;
-	}
-	else if(n1->type == name_str && n2->type == name_str)
-	{
-		if(n1->name.s_name->type == str_char
-		&& n2->name.s_name->type == str_char)
-		{
-			return strcasecmp(n1->name.s_name->str.cstr, n2->name.s_name->str.cstr);
-		}
-		else if(n1->name.s_name->type == str_unicode
-		&& n2->name.s_name->type == str_unicode)
-		{
-			return wstricmp(n1->name.s_name->str.wstr, n2->name.s_name->str.wstr);
-		}
-		else
-		{
-			internal_error(__FILE__, __LINE__, "Can't yet compare strings of mixed type");
-		}
-	}
-	else if(n1->type == name_ord && n2->type == name_str)
-		return 1;
-	else if(n1->type == name_str && n2->type == name_ord)
-		return -1;
-	else
-		internal_error(__FILE__, __LINE__, "Comparing name-ids with unknown types (%d, %d)",
-				n1->type, n2->type);
-
-	return 0; /* Keep the compiler happy */
-}
-
-/*
- *****************************************************************************
  * Function	: find_counter
  * Syntax	: res_count_t *find_counter(name_id_t *type)
  * Input	:
@@ -386,7 +342,7 @@ int compare_name_id(name_id_t *n1, name_id_t *n2)
  * Remarks	:
  *****************************************************************************
 */
-res_count_t *find_counter(name_id_t *type)
+static res_count_t *find_counter(name_id_t *type)
 {
 	int i;
 	for(i = 0; i < rccount; i++)
@@ -413,12 +369,12 @@ res_count_t *find_counter(name_id_t *type)
 */
 #define RCT(v)	(*((resource_t **)(v)))
 /* qsort sorting function */
-int sort_name_id(const void *e1, const void *e2)
+static int sort_name_id(const void *e1, const void *e2)
 {
 	return compare_name_id(RCT(e1)->name, RCT(e2)->name);
 }
 
-int sort_language(const void *e1, const void *e2)
+static int sort_language(const void *e1, const void *e2)
 {
 	assert((RCT(e1)->lan) != NULL);
 	assert((RCT(e2)->lan) != NULL);
@@ -428,13 +384,13 @@ int sort_language(const void *e1, const void *e2)
 }
 #undef RCT
 #define RCT(v)	((res_count_t *)(v))
-int sort_type(const void *e1, const void *e2)
+static int sort_type(const void *e1, const void *e2)
 {
 	return compare_name_id(&(RCT(e1)->type), &(RCT(e2)->type));
 }
 #undef RCT
 
-void count_resources(resource_t *top)
+static void count_resources(resource_t *top)
 {
 	resource_t *rsc;
 	res_count_t *rcp;
@@ -604,28 +560,28 @@ void count_resources(resource_t *top)
 /*
  *****************************************************************************
  * Function	: write_pe_segment
- * Syntax	: void write_pe_segment(FILE *fp, resource_t *top)
+ * Syntax	: void write_pe_segment(FILE *fp)
  * Input	:
  * Output	:
  * Description	:
  * Remarks	:
  *****************************************************************************
 */
-void write_pe_segment(FILE *fp, resource_t *top)
+static void write_pe_segment(FILE *fp)
 {
 	int i;
 
-	fprintf(fp, "\t%s\t4\n", DIRECTIVE_ALIGN);
+	fprintf(fp, "\t"DIRECTIVE_ALIGN"\t4\n");
 	fprintf(fp, "%s%s:\n", prefix, _PEResTab);
-	fprintf(fp, "\t%s\t%s%s\n", DIRECTIVE_GLOBAL, prefix, _PEResTab);
+	fprintf(fp, "\t"DIRECTIVE_GLOBAL"\t%s%s\n", prefix, _PEResTab);
 	/* Flags */
-	fprintf(fp, "\t%s\t0\n", DIRECTIVE_LONG);
+	fprintf(fp, "\t"DIRECTIVE_LONG"\t0\n");
 	/* Time/Date stamp */
-	fprintf(fp, "\t%s\t"LONGFRMT"\n", DIRECTIVE_LONG, (long)now);
+	fprintf(fp, "\t"DIRECTIVE_LONG"\t"LONGFRMT"\n", (long)now);
 	/* Version */
-	fprintf(fp, "\t%s\t0\n", DIRECTIVE_LONG);	/* FIXME: must version be filled out? */
+	fprintf(fp, "\t"DIRECTIVE_LONG"\t0\n");	/* FIXME: must version be filled out? */
 	/* # of id entries, # of name entries */
-	fprintf(fp, "\t%s\t%d, %d\n", DIRECTIVE_WORD, n_name_entries, n_id_entries);
+	fprintf(fp, "\t"DIRECTIVE_SHORT"\t%d, %d\n", n_name_entries, n_id_entries);
 
 	/* Write the type level of the tree */
 	for(i = 0; i < rccount; i++)
@@ -637,22 +593,22 @@ void write_pe_segment(FILE *fp, resource_t *top)
 
 		/* TypeId */
 		if(rcp->type.type == name_ord)
-			fprintf(fp, "\t%s\t%d\n", DIRECTIVE_LONG, rcp->type.name.i_name);
+			fprintf(fp, "\t"DIRECTIVE_LONG"\t%d\n", rcp->type.name.i_name);
 		else
 		{
 			char *name = prep_nid_for_label(&(rcp->type));
-			fprintf(fp, "\t%s\t(%s_%s_typename - %s%s) %s %s\n",
-				DIRECTIVE_LONG, prefix,
+			fprintf(fp, "\t"DIRECTIVE_LONG"\t(%s_%s_typename - %s%s) "OR" "HEXBIT31"\n",
+				prefix,
 				name,
 				prefix,
-				_PEResTab, OR, HEXBIT31);
+				_PEResTab);
 		}
 		/* Offset */
 		label = prep_nid_for_label(&(rcp->type));
-		fprintf(fp, "\t%s\t(%sL%s - %s%s) %s %s\n",
-			DIRECTIVE_LONG, LOCAL_PREFIX, label,
+		fprintf(fp, "\t"DIRECTIVE_LONG"\t("LOCAL_PREFIX"L%s - %s%s) "OR" "HEXBIT31"\n",
+			label,
 			prefix,
-			_PEResTab, OR, HEXBIT31);
+			_PEResTab);
 	}
 
 	/* Write the name level of the tree */
@@ -667,37 +623,37 @@ void write_pe_segment(FILE *fp, resource_t *top)
 		rcp = &rcarray[i];
 
 		typelabel = xstrdup(prep_nid_for_label(&(rcp->type)));
-		fprintf(fp, "%sL%s:\n", LOCAL_PREFIX, typelabel);
+		fprintf(fp, ""LOCAL_PREFIX"L%s:\n", typelabel);
 
-		fprintf(fp, "\t%s\t0\n", DIRECTIVE_LONG);		/* Flags */
-		fprintf(fp, "\t%s\t"LONGFRMT"\n", DIRECTIVE_LONG, (long)now);	/* TimeDate */
-		fprintf(fp, "\t%s\t0\n", DIRECTIVE_LONG);	/* FIXME: must version be filled out? */
-		fprintf(fp, "\t%s\t%d, %d\n", DIRECTIVE_WORD, rcp->n_name_entries, rcp->n_id_entries);
+		fprintf(fp, "\t"DIRECTIVE_LONG"\t0\n");		/* Flags */
+		fprintf(fp, "\t"DIRECTIVE_LONG"\t"LONGFRMT"\n", (long)now);	/* TimeDate */
+		fprintf(fp, "\t"DIRECTIVE_LONG"\t0\n");	/* FIXME: must version be filled out? */
+		fprintf(fp, "\t"DIRECTIVE_SHORT"\t%d, %d\n", rcp->n_name_entries, rcp->n_id_entries);
 		for(j = 0; j < rcp->count32; j++)
 		{
 			resource_t *rsc = rcp->rsc32array[j].rsc[0];
 			/* NameId */
 			if(rsc->name->type == name_ord)
-				fprintf(fp, "\t%s\t%d\n", DIRECTIVE_LONG, rsc->name->name.i_name);
+				fprintf(fp, "\t"DIRECTIVE_LONG"\t%d\n", rsc->name->name.i_name);
 			else
 			{
-				fprintf(fp, "\t%s\t(%s%s_name - %s%s) %s %s\n",
-					DIRECTIVE_LONG, prefix,
+				fprintf(fp, "\t"DIRECTIVE_LONG"\t(%s%s_name - %s%s) "OR" "HEXBIT31"\n",
+					prefix,
 					rsc->c_name,
 					prefix,
-					_PEResTab, OR, HEXBIT31);
+					_PEResTab);
 			}
-			/* Maybe FIXME: Unescape the tree (ommit 0x80000000) and
+			/* Maybe FIXME: Unescape the tree (ommit "HEXBIT31") and
 			 * put the offset to the resource data entry.
 			 * ?? Is unescaping worth while ??
 			 */
 			/* Offset */
 			namelabel = prep_nid_for_label(rsc->name);
-			fprintf(fp, "\t%s\t(%sL%s_%s - %s%s) %s %s\n",
-				DIRECTIVE_LONG, LOCAL_PREFIX, typelabel,
+			fprintf(fp, "\t"DIRECTIVE_LONG"\t("LOCAL_PREFIX"L%s_%s - %s%s) "OR" "HEXBIT31"\n",
+				typelabel,
 				namelabel,
 				prefix,
-				_PEResTab, OR, HEXBIT31);
+				_PEResTab);
 		}
 		free(typelabel);
 	}
@@ -720,22 +676,22 @@ void write_pe_segment(FILE *fp, resource_t *top)
 			int k;
 
 			namelabel = xstrdup(prep_nid_for_label(r32cp->rsc[0]->name));
-			fprintf(fp, "%sL%s_%s:\n", LOCAL_PREFIX, typelabel, namelabel);
+			fprintf(fp, ""LOCAL_PREFIX"L%s_%s:\n", typelabel, namelabel);
 
-			fprintf(fp, "\t%s\t0\n", DIRECTIVE_LONG);		/* Flags */
-			fprintf(fp, "\t%s\t"LONGFRMT"\n", DIRECTIVE_LONG, (long)now);	/* TimeDate */
-			fprintf(fp, "\t%s\t0\n", DIRECTIVE_LONG);	/* FIXME: must version be filled out? */
-			fprintf(fp, "\t%s\t0, %d\n", DIRECTIVE_WORD, r32cp->count);
+			fprintf(fp, "\t"DIRECTIVE_LONG"\t0\n");		/* Flags */
+			fprintf(fp, "\t"DIRECTIVE_LONG"\t"LONGFRMT"\n", (long)now);	/* TimeDate */
+			fprintf(fp, "\t"DIRECTIVE_LONG"\t0\n");	/* FIXME: must version be filled out? */
+			fprintf(fp, "\t"DIRECTIVE_SHORT"\t0, %d\n", r32cp->count);
 
 			for(k = 0; k < r32cp->count; k++)
 			{
 				resource_t *rsc = r32cp->rsc[k];
 				assert(rsc->lan != NULL);
 				/* LanguageId */
-				fprintf(fp, "\t%s\t"LONGFRMT"\n", DIRECTIVE_LONG, rsc->lan ? MAKELANGID(rsc->lan->id, rsc->lan->sub) : 0);
+				fprintf(fp, "\t"DIRECTIVE_LONG"\t"LONGFRMT"\n", rsc->lan ? MAKELANGID(rsc->lan->id, rsc->lan->sub) : 0);
 				/* Offset */
-				fprintf(fp, "\t%s\t%sL%s_%s_%d - %s%s\n",
-					DIRECTIVE_LONG, LOCAL_PREFIX, typelabel,
+				fprintf(fp, "\t"DIRECTIVE_LONG"\t"LOCAL_PREFIX"L%s_%s_%d - %s%s\n",
+					typelabel,
 					namelabel,
 					rsc->lan ? MAKELANGID(rsc->lan->id, rsc->lan->sub) : 0,
 					prefix,
@@ -748,7 +704,7 @@ void write_pe_segment(FILE *fp, resource_t *top)
 
 	/* Write the resource table itself */
 	fprintf(fp, "%s_ResourceDirectory:\n", prefix);
-	fprintf(fp, "\t%s\t%s_ResourceDirectory\n", DIRECTIVE_GLOBAL, prefix);
+	fprintf(fp, "\t"DIRECTIVE_GLOBAL"\t%s_ResourceDirectory\n", prefix);
 	direntries = 0;
 
 	for(i = 0; i < rccount; i++)
@@ -774,24 +730,24 @@ void write_pe_segment(FILE *fp, resource_t *top)
 
 				assert(rsc->lan != NULL);
 
-				fprintf(fp, "%sL%s_%s_%d:\n",
-					LOCAL_PREFIX, typelabel,
+				fprintf(fp, ""LOCAL_PREFIX"L%s_%s_%d:\n",
+					typelabel,
 					namelabel,
 					rsc->lan ? MAKELANGID(rsc->lan->id, rsc->lan->sub) : 0);
 
 				/* Data RVA */
-				fprintf(fp, "\t%s\t%s%s_data - %s%s\n",
-					DIRECTIVE_LONG, prefix,
+				fprintf(fp, "\t"DIRECTIVE_LONG"\t%s%s_data - %s%s\n",
+					prefix,
 					rsc->c_name,
 					prefix,
 					_PEResTab);
 				/* Size */
-				fprintf(fp, "\t%s\t%d\n",
-					DIRECTIVE_LONG, rsc->binres->size - rsc->binres->dataidx);
+				fprintf(fp, "\t"DIRECTIVE_LONG"\t%d\n",
+					rsc->binres->size - rsc->binres->dataidx);
 				/* CodePage */
-				fprintf(fp, "\t%s\t%ld\n", DIRECTIVE_LONG, codepage);
+				fprintf(fp, "\t"DIRECTIVE_LONG"\t%ld\n", codepage);
 				/* Reserved */
-				fprintf(fp, "\t%s\t0\n", DIRECTIVE_LONG);
+				fprintf(fp, "\t"DIRECTIVE_LONG"\t0\n");
 
 				direntries++;
 			}
@@ -804,23 +760,23 @@ void write_pe_segment(FILE *fp, resource_t *top)
 /*
  *****************************************************************************
  * Function	: write_ne_segment
- * Syntax	: void write_ne_segment(FILE *fp, resource_t *top)
+ * Syntax	: void write_ne_segment(FILE *fp)
  * Input	:
  * Output	:
  * Description	:
  * Remarks	:
  *****************************************************************************
 */
-void write_ne_segment(FILE *fp, resource_t *top)
+static void write_ne_segment(FILE *fp)
 {
 	int i, j;
 
-	fprintf(fp, "\t%s\t4\n", DIRECTIVE_ALIGN);
+	fprintf(fp, "\t"DIRECTIVE_ALIGN"\t4\n");
 	fprintf(fp, "%s%s:\n", prefix, _NEResTab);
-	fprintf(fp, "\t%s\t%s%s\n", DIRECTIVE_GLOBAL, prefix, _NEResTab);
+	fprintf(fp, "\t"DIRECTIVE_GLOBAL"\t%s%s\n", prefix, _NEResTab);
 
 	/* AlignmentShift */
-	fprintf(fp, "\t%s\t%d\n", DIRECTIVE_WORD, alignment_pwr);
+	fprintf(fp, "\t"DIRECTIVE_SHORT"\t%d\n", alignment_pwr);
 
 	/* TypeInfo */
 	for(i = 0; i < rccount; i++)
@@ -829,17 +785,17 @@ void write_ne_segment(FILE *fp, resource_t *top)
 
 		/* TypeId */
 		if(rcp->type.type == name_ord)
-			fprintf(fp, "\t%s\t"SHORTFRMT"\n", DIRECTIVE_WORD, rcp->type.name.i_name | 0x8000);
+			fprintf(fp, "\t"DIRECTIVE_SHORT"\t"SHORTFRMT"\n", rcp->type.name.i_name | 0x8000);
 		else
-			fprintf(fp, "\t%s\t%s_%s_typename - %s%s\n",
-				DIRECTIVE_WORD, prefix,
+			fprintf(fp, "\t"DIRECTIVE_SHORT"\t%s_%s_typename - %s%s\n",
+				prefix,
 				rcp->type.name.s_name->str.cstr,
 				prefix,
 				_NEResTab);
 		/* ResourceCount */
-		fprintf(fp, "\t%s\t%d\n", DIRECTIVE_WORD, rcp->count);
+		fprintf(fp, "\t"DIRECTIVE_SHORT"\t%d\n", rcp->count);
 		/* Reserved */
-		fprintf(fp, "\t%s\t0\n", DIRECTIVE_LONG);
+		fprintf(fp, "\t"DIRECTIVE_LONG"\t0\n");
 		/* NameInfo */
 		for(j = 0; j < rcp->count; j++)
 		{
@@ -852,45 +808,45 @@ void write_ne_segment(FILE *fp, resource_t *top)
  * All other things are as the MS doc describes (alignment etc.)
  */
 			/* Offset */
-			fprintf(fp, "\t%s\t(%s%s_data - %s%s) >> %d\n",
-				DIRECTIVE_WORD, prefix,
+			fprintf(fp, "\t"DIRECTIVE_SHORT"\t(%s%s_data - %s%s) >> %d\n",
+				prefix,
 				rcp->rscarray[j]->c_name,
 				prefix,
 				_NEResTab,
 				alignment_pwr);
 			/* Length */
-			fprintf(fp, "\t%s\t%d\n",
-				DIRECTIVE_WORD, rcp->rscarray[j]->binres->size - rcp->rscarray[j]->binres->dataidx);
+			fprintf(fp, "\t"DIRECTIVE_SHORT"\t%d\n",
+				(rcp->rscarray[j]->binres->size - rcp->rscarray[j]->binres->dataidx + alignment - 1) >> alignment_pwr);
 			/* Flags */
-			fprintf(fp, "\t%s\t"SHORTFRMT"\n", DIRECTIVE_WORD, (WORD)rcp->rscarray[j]->memopt);
+			fprintf(fp, "\t"DIRECTIVE_SHORT"\t"SHORTFRMT"\n", (WORD)rcp->rscarray[j]->memopt);
 			/* Id */
 			if(rcp->rscarray[j]->name->type == name_ord)
-				fprintf(fp, "\t%s\t"SHORTFRMT"\n", DIRECTIVE_WORD, rcp->rscarray[j]->name->name.i_name | 0x8000);
+				fprintf(fp, "\t"DIRECTIVE_SHORT"\t"SHORTFRMT"\n", rcp->rscarray[j]->name->name.i_name | 0x8000);
 			else
-				fprintf(fp, "\t%s\t%s%s_name - %s%s\n",
-				DIRECTIVE_WORD, prefix,
+				fprintf(fp, "\t"DIRECTIVE_SHORT"\t%s%s_name - %s%s\n",
+				prefix,
 				rcp->rscarray[j]->c_name,
 				prefix,
 				_NEResTab);
 			/* Handle and Usage */
-			fprintf(fp, "\t%s\t0, 0\n", DIRECTIVE_WORD);
+			fprintf(fp, "\t"DIRECTIVE_SHORT"\t0, 0\n");
 		}
 	}
 	/* EndTypes */
-	fprintf(fp, "\t%s\t0\n", DIRECTIVE_WORD);
+	fprintf(fp, "\t"DIRECTIVE_SHORT"\t0\n");
 }
 
 /*
  *****************************************************************************
  * Function	: write_rsc_names
- * Syntax	: void write_rsc_names(FILE *fp, resource_t *top)
+ * Syntax	: void write_rsc_names(FILE *fp)
  * Input	:
  * Output	:
  * Description	:
  * Remarks	:
  *****************************************************************************
 */
-void write_rsc_names(FILE *fp, resource_t *top)
+static void write_rsc_names(FILE *fp)
 {
 	int i, j;
 	
@@ -934,15 +890,15 @@ void write_rsc_names(FILE *fp, resource_t *top)
 		{
 			res_count_t *rcp = &rcarray[i];
 
+			if(rcp->type.type == name_str)
+			{
+				fprintf(fp, "%s_%s_typename:\n",
+					prefix,
+					rcp->type.name.s_name->str.cstr);
+				write_name_str(fp, &(rcp->type));
+			}
 			for(j = 0; j < rcp->count; j++)
 			{
-				if(rcp->type.type == name_str)
-				{
-					fprintf(fp, "%s_%s_typename:\n",
-						prefix,
-						rcp->type.name.s_name->str.cstr);
-					write_name_str(fp, &(rcp->type));
-				}
 				if(rcp->rscarray[j]->name->type == name_str)
 				{
 					fprintf(fp, "%s%s_name:\n",
@@ -956,7 +912,7 @@ void write_rsc_names(FILE *fp, resource_t *top)
 		
 		/* This is to end the NE resource table */
 		if(create_dir)
-			fprintf(fp, "\t%s\t0\n", DIRECTIVE_BYTE);
+			fprintf(fp, "\t"DIRECTIVE_BYTE"\t0\n");
 	}
 
 	fprintf(fp, "\n");
@@ -988,7 +944,6 @@ void write_s_file(char *outname, resource_t *top)
 
 	{
 		char *s, *p;
-		now = time(NULL);
 		s = ctime(&now);
 		p = strchr(s, '\n');
 		if(p) *p = '\0';
@@ -1003,22 +958,22 @@ void write_s_file(char *outname, resource_t *top)
 	if(create_dir)
 	{
 		if(win32)
-			write_pe_segment(fo, top);
+			write_pe_segment(fo);
 		else
-			write_ne_segment(fo, top);
+			write_ne_segment(fo);
 	}
 
 	/* Dump the names */
-	write_rsc_names(fo, top);
+	write_rsc_names(fo);
 
 	if(create_dir)
-		fprintf(fo, "%sLResTabEnd:\n", LOCAL_PREFIX);
+		fprintf(fo, LOCAL_PREFIX"LResTabEnd:\n");
 	
 	if(!indirect_only)
 	{
 		/* Write the resource data */
 #ifdef MASM
-	        fprintf(fo, "\n;/* Resource binary data */\n\n");
+	        fprintf(fo, "\n; Resource binary data */\n\n");
 #else
 	        fprintf(fo, "\n/* Resource binary data */\n\n");
 #endif
@@ -1027,10 +982,10 @@ void write_s_file(char *outname, resource_t *top)
 			if(!rsc->binres)
 				continue;
 
-			fprintf(fo, "\t%s\t%d\n", DIRECTIVE_ALIGN, win32 ? 4 : alignment);
+			fprintf(fo, "\t"DIRECTIVE_ALIGN"\t%d\n", win32 ? 4 : alignment);
 			fprintf(fo, "%s%s_data:\n", prefix, rsc->c_name);
 			if(global)
-				fprintf(fo, "\t%s\t%s%s_data\n", DIRECTIVE_GLOBAL, prefix, rsc->c_name);
+				fprintf(fo, "\t"DIRECTIVE_GLOBAL"\t%s%s_data\n", prefix, rsc->c_name);
 
 			write_s_res(fo, rsc->binres);
 
@@ -1040,27 +995,27 @@ void write_s_file(char *outname, resource_t *top)
 		if(create_dir)
 		{
 			/* Add a resource descriptor for built-in and elf-dlls */
-			fprintf(fo, "\t%s\t4\n", DIRECTIVE_ALIGN);
+			fprintf(fo, "\t"DIRECTIVE_ALIGN"\t4\n");
 			fprintf(fo, "%s_ResourceDescriptor:\n", prefix);
-			fprintf(fo, "\t%s\t%s_ResourceDescriptor\n", DIRECTIVE_GLOBAL, prefix);
+			fprintf(fo, "\t"DIRECTIVE_GLOBAL"\t%s_ResourceDescriptor\n", prefix);
 			fprintf(fo, "%s_ResourceTable:\n", prefix);
 			if(global)
-				fprintf(fo, "\t%s\t%s_ResourceTable\n", DIRECTIVE_GLOBAL, prefix);
-			fprintf(fo, "\t%s\t%s%s\n", DIRECTIVE_LONG, prefix, win32 ? _PEResTab : _NEResTab);
+				fprintf(fo, "\t"DIRECTIVE_GLOBAL"\t%s_ResourceTable\n", prefix);
+			fprintf(fo, "\t"DIRECTIVE_LONG"\t%s%s\n", prefix, win32 ? _PEResTab : _NEResTab);
 			fprintf(fo, "%s_NumberOfResources:\n", prefix);
 			if(global)
-				fprintf(fo, "\t%s\t%s_NumberOfResources\n", DIRECTIVE_GLOBAL, prefix);
-			fprintf(fo, "\t%s\t%d\n", DIRECTIVE_LONG, direntries);
+				fprintf(fo, "\t"DIRECTIVE_GLOBAL"\t%s_NumberOfResources\n", prefix);
+			fprintf(fo, "\t"DIRECTIVE_LONG"\t%d\n", direntries);
 			fprintf(fo, "%s_ResourceSectionSize:\n", prefix);
 			if(global)
-				fprintf(fo, "\t%s\t%s_ResourceSectionSize\n", DIRECTIVE_GLOBAL, prefix);
-			fprintf(fo, "\t%s\t%sLResTabEnd - %s%s\n", DIRECTIVE_LONG, LOCAL_PREFIX, prefix, win32 ? _PEResTab : _NEResTab);
+				fprintf(fo, "\t"DIRECTIVE_GLOBAL"\t%s_ResourceSectionSize\n", prefix);
+			fprintf(fo, "\t"DIRECTIVE_LONG"\t"LOCAL_PREFIX"LResTabEnd - %s%s\n", prefix, win32 ? _PEResTab : _NEResTab);
 			if(win32)
 			{
 				fprintf(fo, "%s_ResourcesEntries:\n", prefix);
 				if(global)
-					fprintf(fo, "\t%s\t%s_ResourcesEntries\n", DIRECTIVE_GLOBAL, prefix);
-				fprintf(fo, "\t%s\t%s_ResourceDirectory\n", DIRECTIVE_LONG, prefix);
+					fprintf(fo, "\t"DIRECTIVE_GLOBAL"\t%s_ResourcesEntries\n", prefix);
+				fprintf(fo, "\t"DIRECTIVE_LONG"\t%s_ResourceDirectory\n", prefix);
 			}
 		}
 	}
@@ -1069,7 +1024,7 @@ void write_s_file(char *outname, resource_t *top)
 	{
 		/* Write the indirection structures */
 	        fprintf(fo, "\n/* Resource indirection structures */\n\n");
-		fprintf(fo, "\t%s\t4\n", DIRECTIVE_ALIGN);
+		fprintf(fo, "\t"DIRECTIVE_ALIGN"\t4\n");
 		for(rsc = top; rsc; rsc = rsc->next)
 		{
 			int type;
@@ -1111,9 +1066,8 @@ void write_s_file(char *outname, resource_t *top)
 			 */
 			fprintf(fo, "%s%s:\n", prefix, rsc->c_name);
 			if(global)
-				fprintf(fo, "\t%s\t%s%s\n", DIRECTIVE_GLOBAL, prefix, rsc->c_name);
-			fprintf(fo, "\t%s\t%d, %s%s%s, %d, %s%s%s%s, %s%s_data, %d\n",
-				DIRECTIVE_LONG, 
+				fprintf(fo, "\t"DIRECTIVE_GLOBAL"\t%s%s\n", prefix, rsc->c_name);
+			fprintf(fo, "\t"DIRECTIVE_LONG"\t%d, %s%s%s, %d, %s%s%s%s, %s%s_data, %d\n",
 				rsc->name->type == name_ord ? rsc->name->name.i_name : 0,
 				rsc->name->type == name_ord ? "0" : prefix,
 				rsc->name->type == name_ord ? "" : rsc->c_name,
@@ -1132,14 +1086,14 @@ void write_s_file(char *outname, resource_t *top)
 
 		/* Write the indirection table */
 		fprintf(fo, "/* Resource indirection table */\n\n");
-		fprintf(fo, "\t%s\t4\n", DIRECTIVE_ALIGN);
+		fprintf(fo, "\t"DIRECTIVE_ALIGN"\t4\n");
 		fprintf(fo, "%s%s:\n", prefix, _ResTable);
-		fprintf(fo, "\t%s\t%s%s\n", DIRECTIVE_GLOBAL, prefix, _ResTable);
+		fprintf(fo, "\t"DIRECTIVE_GLOBAL"\t%s%s\n", prefix, _ResTable);
 		for(rsc = top; rsc; rsc = rsc->next)
 		{
-			fprintf(fo, "\t%s\t%s%s\n", DIRECTIVE_LONG, prefix, rsc->c_name);
+			fprintf(fo, "\t"DIRECTIVE_LONG"\t%s%s\n", prefix, rsc->c_name);
 		}
-		fprintf(fo, "\t%s\t0\n", DIRECTIVE_LONG);
+		fprintf(fo, "\t"DIRECTIVE_LONG"\t0\n");
 		fprintf(fo, "\n");
 	}
 
@@ -1180,7 +1134,6 @@ void write_h_file(char *outname, resource_t *top)
 		error("Could not open %s\n", outname);
 	}
 
-	time(&now);
 	fprintf(fo, h_file_head_str, input_name ? input_name : "stdin",
                 cmdline, ctime(&now), (long)now, (long)now);
 
@@ -1234,5 +1187,4 @@ void write_h_file(char *outname, resource_t *top)
 	fprintf(fo, h_file_tail_str);
 	fclose(fo);
 }
-
 
