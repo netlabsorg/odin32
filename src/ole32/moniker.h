@@ -1,3 +1,4 @@
+/* $Id: moniker.h,v 1.2 1999-09-08 11:29:27 davidr Exp $ */
 /*
  * moniker.h [OLE32]
  *
