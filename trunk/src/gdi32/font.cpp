@@ -1,4 +1,4 @@
-/* $Id: font.cpp,v 1.23 2002-01-02 18:36:00 sandervl Exp $ */
+/* $Id: font.cpp,v 1.24 2002-04-30 10:32:21 sandervl Exp $ */
 
 /*
  * GDI32 font apis
@@ -384,7 +384,7 @@ int  EXPENTRY_O32 EnumFontProcExA(LPENUMLOGFONTA lpLogFont, LPNEWTEXTMETRICA
   memcpy(&textM.ntmetm, lpTextM, sizeof(textM.ntmetm));
   memset(&textM.ntmeFontSignature, 0, sizeof(textM.ntmeFontSignature));
 
-  dprintf(("EnumFontProcExA %s", logFont.elfLogFont.lfFaceName));
+  dprintf(("EnumFontProcExA %s height %d", logFont.elfLogFont.lfFaceName, textM.ntmetm.tmHeight));
 
   int rc = proc(&logFont, &textM, arg3, lpEnumData->userData);
   SetFS(selTIB);           // switch back to the saved FS selector
@@ -400,6 +400,7 @@ int EXPENTRY_O32 EnumFontProcExW(LPENUMLOGFONTA lpLogFont, LPNEWTEXTMETRICA lpTe
  FONTENUMPROCEXW proc = (FONTENUMPROCEXW)lpEnumData->userProc;
  ENUMLOGFONTEXW LogFont;
  NEWTEXTMETRICEXW textM;
+ USHORT selTIB = SetWin32TIB(); // save current FS selector and set win32 sel
  int rc;
 
   memcpy(&LogFont, lpLogFont, ((ULONG)&LogFont.elfLogFont.lfFaceName - (ULONG)&LogFont));
@@ -434,77 +435,85 @@ int EXPENTRY_O32 EnumFontProcExW(LPENUMLOGFONTA lpLogFont, LPNEWTEXTMETRICA lpTe
   textM.ntmetm.ntmAvgWidth = 0;
   memset(&textM.ntmeFontSignature, 0, sizeof(textM.ntmeFontSignature));
 
-  dprintf(("EnumFontProcExW %s", lpLogFont->elfLogFont.lfFaceName));
-  return proc(&LogFont, &textM, arg3, lpEnumData->userData);
+  dprintf(("EnumFontProcExW %s height %d", lpLogFont->elfLogFont.lfFaceName, textM.ntmetm.tmHeight));
+  rc = proc(&LogFont, &textM, arg3, lpEnumData->userData);
+  SetFS(selTIB);           // switch back to the saved FS selector
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************
 ODINFUNCTION4(int, EnumFontsA,
-              HDC, arg1, 
+              HDC, hdc, 
               LPCSTR, arg2, 
               FONTENUMPROCA, arg3, 
               LPARAM,  arg4)
 {
   //@@@PH shouldn't this rather be O32_EnumFonts ?
-  return EnumFontFamiliesA(arg1, arg2, arg3, arg4);
+  return EnumFontFamiliesA(hdc, arg2, arg3, arg4);
 }
 //******************************************************************************
 //******************************************************************************
 ODINFUNCTION4(int, EnumFontsW,
-              HDC, arg1, 
+              HDC, hdc, 
               LPCWSTR, arg2,
               FONTENUMPROCW, arg3,
               LPARAM,  arg4)
 {
   //@@@PH shouldn't this rather be O32_EnumFonts ?
-  return EnumFontFamiliesW(arg1, arg2, arg3, arg4);
+  return EnumFontFamiliesW(hdc, arg2, arg3, arg4);
 }
 //******************************************************************************
 //******************************************************************************
 ODINFUNCTION4(int, EnumFontFamiliesA,
-              HDC, arg1,
-              LPCSTR, arg2,
+              HDC, hdc,
+              LPCSTR, lpszFontFamily,
               FONTENUMPROCA, arg3,
               LPARAM, arg4)
 {
   ENUMUSERDATA enumData;
+  CHAR         lpstrFamilyNew[LF_FACESIZE];
   int rc;
 
-  dprintf(("GDI32: EnumFontFamiliesA %s", arg2));
+  dprintf(("GDI32: EnumFontFamiliesA %s", lpszFontFamily));
+
+  iFontRename(lpszFontFamily, lpstrFamilyNew);
 
   enumData.userProc = (DWORD)arg3;
   enumData.userData = arg4;
 
-  rc = O32_EnumFontFamilies(arg1, arg2, &EnumFontProcA, (LPARAM)&enumData);
+  rc = O32_EnumFontFamilies(hdc, lpstrFamilyNew, &EnumFontProcA, (LPARAM)&enumData);
 
   return rc;
 }
 //******************************************************************************
 //******************************************************************************
 ODINFUNCTION4(int, EnumFontFamiliesW,
-              HDC, arg1,
-              LPCWSTR, arg2,
+              HDC, hdc,
+              LPCWSTR, lpszFontFamilyW,
               FONTENUMPROCW, arg3,
               LPARAM, arg4)
 {
+  CHAR         lpstrFamilyNew[LF_FACESIZE];
   ENUMUSERDATA enumData;
-  int rc;
-  char *astring = UnicodeToAsciiString((LPWSTR)arg2);
+  int          rc;
+  char        *lpszFontFamilyA = UnicodeToAsciiString((LPWSTR)lpszFontFamilyW);
 
-  dprintf(("GDI32: EnumFontFamiliesW %s", astring));
+  dprintf(("GDI32: EnumFontFamiliesW %s", lpszFontFamilyA));
+
+  iFontRename(lpszFontFamilyA, lpstrFamilyNew);
 
   enumData.userProc = (DWORD)arg3;
   enumData.userData = arg4;
 
-  rc = O32_EnumFontFamilies(arg1, astring, &EnumFontProcW, (LPARAM)&enumData);
+  rc = O32_EnumFontFamilies(hdc, lpstrFamilyNew, &EnumFontProcW, (LPARAM)&enumData);
 
-  FreeAsciiString(astring);
+  if(lpszFontFamilyA) FreeAsciiString(lpszFontFamilyA);
   return rc;
 }
 //******************************************************************************
 //******************************************************************************
 ODINFUNCTION5(INT, EnumFontFamiliesExA,
-              HDC, arg1, 
+              HDC, hdc, 
               LPLOGFONTA, arg2, 
               FONTENUMPROCEXA, arg3, 
               LPARAM, arg4, 
@@ -519,14 +528,14 @@ ODINFUNCTION5(INT, EnumFontFamiliesExA,
   enumData.userData = arg4;
   enumData.dwFlags  = dwFlags;
 
-  rc = O32_EnumFontFamilies(arg1, arg2->lfFaceName, &EnumFontProcExA, (LPARAM)&enumData);
+  rc = O32_EnumFontFamilies(hdc, arg2->lfFaceName, &EnumFontProcExA, (LPARAM)&enumData);
 
   return rc;
 }
 //******************************************************************************
 //******************************************************************************
 ODINFUNCTION5(INT, EnumFontFamiliesExW,
-              HDC, arg1, 
+              HDC, hdc, 
               LPLOGFONTW, arg2,
               FONTENUMPROCEXW, arg3,
               LPARAM, arg4, 
@@ -542,7 +551,7 @@ ODINFUNCTION5(INT, EnumFontFamiliesExW,
   enumData.userData = arg4;
   enumData.dwFlags  = dwFlags;
 
-  rc = O32_EnumFontFamilies(arg1, astring, &EnumFontProcExW, (LPARAM)&enumData);
+  rc = O32_EnumFontFamilies(hdc, astring, &EnumFontProcExW, (LPARAM)&enumData);
 
   FreeAsciiString(astring);
   return rc;
@@ -722,7 +731,7 @@ ODINFUNCTION3(BOOL, TranslateCharsetInfo,
     int index = 0;
     switch (flags) {
     case TCI_SRCFONTSIG:
-  while (!(*lpSrc>>index & 0x0001) && index<MAXTCIINDEX) index++;
+      while (!(*lpSrc>>index & 0x0001) && index<MAXTCIINDEX) index++;
       break;
     case TCI_SRCCODEPAGE:
       while ((UINT) (lpSrc) != FONT_tci[index].ciACP && index < MAXTCIINDEX) index++;
@@ -736,6 +745,87 @@ ODINFUNCTION3(BOOL, TranslateCharsetInfo,
     if (index >= MAXTCIINDEX || FONT_tci[index].ciCharset == DEFAULT_CHARSET) return FALSE;
     memcpy(lpCs, &FONT_tci[index], sizeof(CHARSETINFO));
     return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetTextMetricsA( HDC hdc, LPTEXTMETRICA  pwtm)
+{
+ BOOL rc;
+
+    rc = O32_GetTextMetrics(hdc, pwtm);
+    dprintf(("GDI32: GetTextMetricsA %x %x returned %d", hdc, pwtm, rc));
+    return(rc);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetTextMetricsW( HDC hdc, LPTEXTMETRICW pwtm)
+{
+ BOOL rc;
+ TEXTMETRICA atm;
+
+    dprintf(("GDI32: GetTextMetricsW"));
+
+    rc = O32_GetTextMetrics(hdc, &atm);
+    pwtm->tmHeight = atm.tmHeight;
+    pwtm->tmAscent = atm.tmAscent;
+    pwtm->tmDescent = atm.tmDescent;
+    pwtm->tmInternalLeading = atm.tmInternalLeading;
+    pwtm->tmExternalLeading = atm.tmExternalLeading;
+    pwtm->tmAveCharWidth = atm.tmAveCharWidth;
+    pwtm->tmMaxCharWidth = atm.tmMaxCharWidth;
+    pwtm->tmWeight = atm.tmWeight;
+    pwtm->tmOverhang = atm.tmOverhang;
+    pwtm->tmDigitizedAspectX = atm.tmDigitizedAspectX;
+    pwtm->tmDigitizedAspectY = atm.tmDigitizedAspectY;
+    pwtm->tmFirstChar = atm.tmFirstChar;
+    pwtm->tmLastChar = atm.tmLastChar;
+    pwtm->tmDefaultChar = atm.tmDefaultChar;
+    pwtm->tmBreakChar = atm.tmBreakChar;
+    pwtm->tmItalic = atm.tmItalic;
+    pwtm->tmUnderlined = atm.tmUnderlined;
+    pwtm->tmStruckOut = atm.tmStruckOut;
+    pwtm->tmPitchAndFamily = atm.tmPitchAndFamily;
+    pwtm->tmCharSet = atm.tmCharSet;
+
+    dprintf(("GDI32: GetTextMetricsW %x %x returned %d", hdc, pwtm, rc));
+    return(rc);
+}
+//******************************************************************************
+//******************************************************************************
+int WIN32API GetTextFaceA( HDC hdc, int arg2, LPSTR  arg3)
+{
+    dprintf(("GDI32: GetTextFaceA %x %d %x", hdc, arg2, arg3));
+    return O32_GetTextFace(hdc, arg2, arg3);
+}
+//******************************************************************************
+//******************************************************************************
+int WIN32API GetTextFaceW( HDC hdc, int arg2, LPWSTR  arg3)
+{
+ char *astring = (char *)malloc(arg2+1);
+ int   rc;
+
+    dprintf(("GDI32: GetTextFaceW"));
+    *astring = 0;
+    rc = GetTextFaceA(hdc, arg2, astring);
+    AsciiToUnicode(astring, arg3);
+    free(astring);
+    return rc;
+}
+//******************************************************************************
+//******************************************************************************
+UINT WIN32API GetOutlineTextMetricsA( HDC hdc, UINT arg2, LPOUTLINETEXTMETRICA  arg3)
+{
+    dprintf(("GDI32: GetOutlineTextMetricsA %x %x %x", hdc, arg2, arg3));
+    return O32_GetOutlineTextMetrics(hdc, arg2, arg3);
+}
+//******************************************************************************
+//******************************************************************************
+UINT WIN32API GetOutlineTextMetricsW( HDC hdc, UINT arg2, LPOUTLINETEXTMETRICW  arg3)
+{
+    dprintf(("!ERROR!: GDI32: GetOutlineTextMetricsW STUB"));
+    // NOTE: This will not work as is (needs UNICODE support)
+//    return O32_GetOutlineTextMetrics(hdc, arg2, arg3);
+    return 0;
 }
 //******************************************************************************
 //******************************************************************************
