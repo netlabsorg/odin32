@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2039 2002-04-07 21:36:25 sandervl Exp $ */
+/* $Id: changelog,v 1.2040 2002-04-10 18:48:44 bird Exp $ */
+
+ 2002-04-10: knut st. osmundsen <bird@anduin.net>
+    - UXTHEME:  o Stubbed the DLL as some apps keeps trying to load it.
 
  2002-04-07: Sander van Leeuwen <sandervl@xs4all.nl>
     - ODINCRT:  o Wrote OS/2 version of CriticalSection apis (including
