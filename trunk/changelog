@@ -1,9 +1,10 @@
- /* $Id: changelog,v 1.286 1999-10-08 14:57:51 sandervl Exp $ */
+ /* $Id: changelog,v 1.287 1999-10-08 16:13:48 cbratschi Exp $ */
 
  99-10-08: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: added WM_STYLECHANGING/WM_STYLECHANGED.
 		  button,combo: bitmap fix.
 		  added frame to children with WS_* border flags
+		  subclass frame windows
 
  99-10-08: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- KERNEL32: Accelerator conversion fixes + changes
