@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.22 1999-10-12 14:47:22 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.23 1999-10-12 18:14:55 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -621,8 +621,10 @@ void OSLibMapWINDOWPOStoSWP(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, HWND hPar
          {
             y = parentHeight - y - pswpOld->cy;
          }
+	 else     y = parentHeight - y - cy;
       }
-
+      else     y = parentHeight - y - cy;
+ 
       if (flags & SWP_SIZE)
       {
          if (cy != pswpOld->cy)
@@ -634,9 +636,7 @@ void OSLibMapWINDOWPOStoSWP(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, HWND hPar
          cy = pswpOld->cy;
       }
 
-      y = parentHeight - y - cy;
-
-      if ((pswpOld->x == x) && (pswpOld->y == y))
+       if ((pswpOld->x == x) && (pswpOld->y == y))
          flags &= ~SWP_MOVE;
 
       if ((pswpOld->cx == cx) && (pswpOld->cy == cy))
@@ -737,14 +737,15 @@ BOOL OSLibWinEnableScrollBar(HWND hwndParent, int scrollBar, BOOL fEnable)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibWinShowScrollBar(HWND hwndParent, HWND hwndScroll, int scrollBar, BOOL fShow)
+BOOL OSLibWinShowScrollBar(HWND hwndParent, HWND hwndScroll, int scrollBar, 
+                           BOOL fShow, BOOL fForceChange)
 {
    if(hwndScroll == NULL) {
         dprintf(("OSLibWinShowScrollBar: scrollbar %d (parent %x) not found!", scrollBar, hwndParent));
         return FALSE;
    }
 
-   if(fShow != WinIsWindowVisible(hwndScroll))
+   if(fShow != WinIsWindowVisible(hwndScroll) || fForceChange)
    {
          WinSetParent(hwndScroll, fShow ? hwndParent : HWND_OBJECT, FALSE);
          WinSendMsg(hwndParent, WM_UPDATEFRAME,

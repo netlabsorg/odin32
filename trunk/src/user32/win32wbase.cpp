@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.37 1999-10-12 14:47:23 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.38 1999-10-12 18:14:56 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -509,10 +509,12 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   if (cs->style & WS_HSCROLL)
   {
         hwndHorzScroll = OSLibWinQueryScrollBarHandle(OS2HwndFrame, OSLIB_HSCROLL);
+        OSLibWinShowScrollBar(OS2HwndFrame, hwndHorzScroll, OSLIB_HSCROLL, FALSE, TRUE);
   }
 
   if (cs->style & WS_VSCROLL) {
         hwndVertScroll = OSLibWinQueryScrollBarHandle(OS2HwndFrame, OSLIB_VSCROLL);
+        OSLibWinShowScrollBar(OS2HwndFrame, hwndVertScroll, OSLIB_VSCROLL, FALSE, TRUE);
   }
 
   fakeWinBase.hwndThis     = OS2Hwnd;
@@ -1423,18 +1425,19 @@ LONG Win32BaseWindow::setScrollInfo(int nBar, SCROLLINFO *info, int fRedraw)
             if (info->fMask & SIF_DISABLENOSCROLL)
             {
                 new_flags = ESB_DISABLE_BOTH;
-                //TODO:
+//               *action |= SA_SSI_REFRESH;
             }
             else if (nBar != SB_CTL)
             {
-                //TODO
+//                *action = SA_SSI_HIDE;
                 goto done;
             }
         }
         else  /* Show and enable scroll-bar */
         {
-            //TODO
             new_flags = 0;
+//            if (nBar != SB_CTL)
+//                *action |= SA_SSI_SHOW;
         }
 
         if (infoPtr->flags != new_flags) /* check arrow flags */
