@@ -1,4 +1,11 @@
-/* $Id: ChangeLog,v 1.1668 2001-08-31 19:56:17 phaller Exp $ */
+/* $Id: ChangeLog,v 1.1669 2001-09-01 23:16:49 bird Exp $ */
+
+ 2001-09-01: knut st. osmundsen <kosmunds@csc.com>
+    - Tools\CmdQd:
+                o Do DosExecPgm directly on programs when possible.
+                  (It's not possible if multiple commands is specified in a job.)
+                o Path search result caching.
+                o Uses CMD.EXE nomatter what is in the COMSPEC.
 
  2001-08-31: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o Fix in MoveFileExW, MoveFileExA prevents stack corruption
@@ -20,16 +27,16 @@
                   (fixes buttons in Abiword)
 
  2001-08-27: Sander van Leeuwen <sandervl@xs4all.nl>
-    - USER32:   o FillRect fix: brush 0 means current selected brush 
+    - USER32:   o FillRect fix: brush 0 means current selected brush
                   (verified in NT4)
                   (fixes background in registration dialog of CVP)
 
  2001-08-26: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Convert icon & cursor to OS/2 format in CreateIconIndirect,
                   CreateCursor & CreateIcon
-                o Convert RGB 555 to 565 for 16 bits icons and cursors 
+                o Convert RGB 555 to 565 for 16 bits icons and cursors
                   (win to os/2 icon/cursor conversion)
-    - SHELL32:  o SHBrowseForFolderA fix: don't send dummy BFFM_SELCHANGED 
+    - SHELL32:  o SHBrowseForFolderA fix: don't send dummy BFFM_SELCHANGED
                   during WM_INITDIALOG
                   (breaks folder dialog in CVP)
 
@@ -37,7 +44,7 @@
     - KERNEL32: o Set last error to ERROR_ALREADY_EXISTS when CreateMutex,
                   CreateEvent or CreateSemaphore is called with existing
                   semaphore name.
-    - CUSTOMBUILD: 
+    - CUSTOMBUILD:
                 o Added riched32
     - RICHED32: o Changes for custom build
 
