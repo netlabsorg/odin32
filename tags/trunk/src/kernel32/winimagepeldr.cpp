@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.38 2000-03-28 17:11:50 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.39 2000-04-14 22:35:28 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -128,38 +128,8 @@ Win32PeLdrImage::Win32PeLdrImage(char *pszFileName, BOOL isExe, int loadtype) :
   	else	OSLibDosClose(dllfile);
   }
   else {
-	if(!strchr(szFileName, '.')) {
-		strcat(szFileName,".DLL");
-	}
-  	dllfile = OSLibDosOpen(szFileName, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
-  	if(dllfile == NULL) {//search in libpath for dll
-		strcpy(szModule, kernel32Path);
-		strcat(szModule, szFileName);
-		strcpy(szFileName, szModule);
-
-  		dllfile = OSLibDosOpen(szFileName, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
-  		if(dllfile == NULL) {
-			if(!strstr(szFileName, ".DLL")) {
-				strcat(szFileName,".DLL");
-  				dllfile = OSLibDosOpen(szFileName, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
-  				if(dllfile == NULL) {
-					strcpy(szModule, kernel32Path);
-					strcat(szModule, szFileName);
-					strcpy(szFileName, szModule);
-				}
-				else	OSLibDosClose(dllfile);
-			}
-			dllfile = OSLibDosOpen(szFileName, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
-			if(dllfile == NULL) {
-				strcpy(szFileName, pszFileName);
-				strupr(szFileName);
-				OSLibDosSearchPath(OSLIB_SEARCHENV, "PATH", szFileName, szFileName, sizeof(szFileName));
-			}
-			else	OSLibDosClose(dllfile);
-		}
-		else	OSLibDosClose(dllfile);
-	}
-	else	OSLibDosClose(dllfile);
+  	findDll(szFileName, szModule, sizeof(szModule));
+	strcpy(szFileName, szModule);
   }
   strcpy(szModule, OSLibStripPath(szFileName));
   strupr(szModule);

@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.39 2000-03-16 19:20:39 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.40 2000-04-14 22:35:27 sandervl Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -132,7 +132,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 	    //SvL: Kernel32 is a special case; pe.exe loads it, so increase
             //     the reference count here
   	    Win32DllBase *module = Win32DllBase::findModule(hModule);
-  	    if(module && !fPe2Lx) {
+  	    if(module) {
 		module->AddRef();
 		module->DisableUnload();
 	    }

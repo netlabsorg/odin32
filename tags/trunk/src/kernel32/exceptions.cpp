@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.38 2000-03-20 20:32:40 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.39 2000-04-14 22:35:27 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -966,13 +966,13 @@ ULONG APIENTRY OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
 		        pCtxRec->ctx_stack[0].hisig = 0;
 		        pCtxRec->ctx_stack[0].signexp = 0;
 		}
-  	dprintf(("KERNEL32: OS2ExceptionHandler: fix and continue\n"));
+  		dprintf(("KERNEL32: OS2ExceptionHandler: fix and continue\n"));
 	      	return (XCPT_CONTINUE_EXECUTION);
 	}
 	else
 	{
-	  dprintf(("KERNEL32: OS2ExceptionHandler: continue search\n"));
-	  return (XCPT_CONTINUE_SEARCH);
+	  	dprintf(("KERNEL32: OS2ExceptionHandler: continue search\n"));
+	  	return (XCPT_CONTINUE_SEARCH);
 	}
 
   case XCPT_PROCESS_TERMINATE:
