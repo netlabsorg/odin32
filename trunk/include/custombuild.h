@@ -217,5 +217,14 @@ FARPROC WIN32API ODIN_SetProcAddress(HMODULE hModule, LPCSTR lpszProc, FARPROC p
 //******************************************************************************
 void WIN32API ODIN_SetTIBSwitch(BOOL fSwitchTIB);
 
+//******************************************************************************
+// ODIN_DisableFolderShellLink
+//
+// Disable object creation in Odin folder. Desktop shortcuts will still be 
+// created as WPS objects on the desktop.
+//
+//******************************************************************************
+void WIN32API ODIN_DisableFolderShellLink();
+
 #endif  /*__CUSTOMBUILD_H__*/
 
