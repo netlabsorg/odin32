@@ -1,4 +1,4 @@
-/* $Id: options.h,v 1.22 2001-06-14 01:06:47 bird Exp $
+/* $Id: options.h,v 1.23 2001-09-28 07:43:38 sandervl Exp $
  *
  * Options.
  *
@@ -97,6 +97,9 @@
             TRUE,                   /* fREXXScript   */     \
             TRUE,                   /* fJava         */     \
             FALSE,                  /* fNoLoader     */     \
+            FALSE,                  /* fSkipFixups   */     \
+            NULL,                   /* pszCustomDll  */     \
+            NULL,                   /* pszCustomExports  */ \
             TRUE,                   /* fDllFixes     */     \
             TRUE,                   /* fExeFixes     */     \
             FALSE,                  /* fForcePreload */     \
@@ -124,6 +127,12 @@
 #define isREXXScriptEnabled()       (options.fREXXScript)
 #define isJAVADisabled()            (!options.fJava)
 #define isJAVAEnabled()             (options.fJava)
+
+#define areFixupsEnabled()          (!options.fSkipFixups)
+#define areFixupsDisabled()         (options.fSkipFixups)
+
+#define hasCustomDll()              (options.pszCustomDll != NULL)
+#define hasCustomExports()          (options.pszCustomExports != NULL)
 
 #define isSMPKernel()               (options.fKernel & KF_SMP)
 #define isUNIKernel()               (!(options.fKernel & KF_SMP))
@@ -183,6 +192,10 @@ struct options
 
     /** @cat Options affecting the  executables */
     ULONG       fNoLoader;              /* No loader stuff. !FIXME! We should import / functions even if this flag is set!!! */
+
+    ULONG       fSkipFixups;
+    PSZ         pszCustomDll;           /* pointer to custom odin dll name */
+    PSZ         pszCustomExports;       /* pointer to custom export table */
 
     /** @cat Options affecting the behaviour changes in the OS/2 loader */
     ULONG       fDllFixes;              /* Enables the long DLL name and non .DLL extention fixes. */
