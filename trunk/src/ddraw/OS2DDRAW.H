@@ -1,4 +1,4 @@
-/* $Id: OS2DDRAW.H,v 1.12 2000-08-31 12:48:41 sandervl Exp $ */
+/* $Id: OS2DDRAW.H,v 1.13 2000-08-31 17:57:10 sandervl Exp $ */
 
 /*
  * DX Draw base class definition
@@ -41,6 +41,11 @@ class OS2IDirectDraw
                                        // Height (236),  Bits (241)
                                        // ToDO :
                                        // debug into DirectDrawCreate and se what MS is doing !
+    //Use for Direct3D interface (This != this)
+    IDirect3DVtbl    *lpVtbl3D;
+    IDirect3DVtbl    *lpVtbl3D2;
+    DWORD            *pdwUnknownData3D;
+
     IDirectDrawVtbl  Vtbl;
     IDirectDraw2Vtbl  Vtbl2;
     // MS did it again with direct/X 6 they changed the behavior of the directdraw component
@@ -139,6 +144,9 @@ class OS2IDirectDraw
     friend    HRESULT __stdcall D3DFindDevice(THIS, LPD3DFINDDEVICESEARCH, LPD3DFINDDEVICERESULT);
 
 };
+
+#define OFFSET_D3DVTABLE	(LONG)(&((OS2IDirectDraw *)NULL)->lpVtbl3D)
+#define DDraw3D_GetThisPtr(a)   (OS2IDirectDraw *)((ULONG)a-OFFSET_D3DVTABLE)
 
 //******************************************************************************
 HRESULT __stdcall DrawQueryInterface(THIS, REFIID riid, LPVOID  * ppvObj);
