@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2602 2003-07-16 10:46:39 sandervl Exp $ */
+/* $Id: changelog,v 1.2603 2003-07-16 10:52:01 sandervl Exp $ */
+
+ 2002-07-16: Yuri Dario <mc6530@mclink   >
+    - INSTALL:  o Do not overwrite program files registry entry if it already
+                  exists and is valid.
 
  2003-07-16: Dietrich Teickner <Dietrich_Teickner@t-online   >
     - GDI32:    o Fix for partial blits in StretchDIBits
