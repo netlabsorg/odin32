@@ -1,4 +1,4 @@
-/* $Id: winuser32.h,v 1.3 2000-11-14 14:28:47 sandervl Exp $ */
+/* $Id: winuser32.h,v 1.4 2000-11-15 13:55:48 sandervl Exp $ */
 
 /*
  * Internal functions exported by user32
@@ -18,6 +18,7 @@ void WIN32API Calculate1PixelDelta(pDCData pHps);
 void WIN32API TestWideLine (pDCData pHps);
 BOOL WIN32API changePageXForm(pDCData pHps, POINTL *pValue, int x, int y, POINTL *pPrev);
 BOOL WIN32API setPageXForm(pDCData pHps);
+VOID WIN32API selectClientArea(pDCData pHps);
 VOID WIN32API removeClientArea(pDCData pHps);
 LONG WIN32API clientHeight(HWND hwnd, pDCData pHps);
 int  WIN32API setMapMode(pDCData pHps, int mode);
