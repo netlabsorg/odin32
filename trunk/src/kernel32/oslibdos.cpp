@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.99 2002-04-13 07:47:24 bird Exp $ */
+/* $Id: oslibdos.cpp,v 1.100 2002-04-16 00:21:04 bird Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -2722,12 +2722,19 @@ ULONG OSLibGetDriveType(ULONG ulDrive)
 
     /*
      * Optimize floppy queries for A: and B:.
-     * (I don't hope these are any subject of change.)
+     * (These aren't currently a subject of change.)
      */
     static ULONG ulFloppyMask = 0;
     if (ulFloppyMask & (1 << ulDrive))
         return DRIVE_REMOVABLE_W;
 
+    /*
+     * Optimize for CDROM requests.
+     * (These aren't currently a subject of change.)
+     */
+    static ULONG ulCDROMMask = 0;
+    if (ulCDROMMask & (1 << ulDrive))
+        return DRIVE_CDROM_W;
 
     /*
      * Check for CD drives
@@ -2876,7 +2883,11 @@ ULONG OSLibGetDriveType(ULONG ulDrive)
             ulFloppyMask |= 1 << ulDrive;
     }
     else if (bpb.fsDeviceAttr & CDType)
+    {
         ulDriveType = DRIVE_CDROM_W;
+        /* update cdrom cache */
+        ulCDROMMask |= 1 << ulDrive;
+    }
     else if (bpb.fsDeviceAttr & LanType)
         ulDriveType = DRIVE_REMOTE_W;
     else if (bpb.fsDeviceAttr & VDISKType)
