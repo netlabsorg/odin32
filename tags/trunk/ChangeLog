@@ -1,4 +1,21 @@
- /* $Id: ChangeLog,v 1.1001 2000-06-21 18:41:03 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.1002 2000-06-21 20:53:22 sandervl Exp $ */
+
+ 2000-06-21: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32:    Setup enviroment similar to NT. I.e.:
+                   CPU=i386
+                   HOMEDRIVE=<Odin drive>
+                   HOMEPATH=\
+                   NUMBER_OF_PROCESSORS=2
+                   OS=Windows_NT
+                   PATHEXT=.COM;.EXE;.BAT;.CMD
+                   PROCESSOR_ARCHITECTURE=x86
+                   PROCESSOR_IDENTIFIER=x86 Family 6 Model 6 Stepping 5, GenuineIntel
+                   PROCESSOR_LEVEL=6
+                   PROCESSOR_REVISION=0605
+                   SystemDrive=<Odin drive>
+                   SystemRoot=<Odin Windows dir>
+                   windir=<Odin Windows dir>
+                   TODO: Some environment variables still missing (see kernel32\initsystem.cpp)
 
  2000-06-21: Patrick Haller <phaller@gmx.net>
     - MSVCRT:      - Added stub for __CxxLongjmpUnwind (NETSCAPE 4.7)
@@ -13,7 +30,7 @@
  2000-06-18: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
     - KERNEL32:    Added language support for Poland
 
- 2000-06-18: Patrick Haller <phaller@gmx.net>
+ 2000-06-18 Patrick Haller <phaller@gmx.net>
     - KERNEL32:    - fixed potential memory leak in GetLocaleInfoA
                    - improved GetNumberFormatA
 
