@@ -1,4 +1,4 @@
--- $Id: CreateTables.sql,v 1.13 2000-07-29 21:19:34 bird Exp $
+-- $Id: CreateTables.sql,v 1.14 2000-08-01 01:50:24 bird Exp $
 --
 -- Create all tables.
 --
@@ -146,8 +146,11 @@ CREATE TABLE function (
     UNIQUE i2(name, dll, refcode),
     UNIQUE i3(intname, dll, refcode),
     INDEX  i4(dll, file),
-    INDEX  i5(file),
-    INDEX  i6(state),
+    INDEX  i5(file. refcode),
+    INDEX  i6(state, file),
+    UNIQUE i7(state, refcode),
+    UNIQUE i8(refcode, state),
+    UNIQUE i9(dll, state, refcode),
     UNIQUE u1(refcode),
     UNIQUE u2(name, dll),
     UNIQUE u3(type, refcode)
@@ -174,7 +177,8 @@ CREATE TABLE parameter (
 CREATE TABLE fnauthor (
     author   SMALLINT NOT NULL,
     function INTEGER NOT NULL,
-    UNIQUE u1(function, author)
+    UNIQUE u1(author, function),
+    UNIQUE u2(function, author)
 );
 
 
