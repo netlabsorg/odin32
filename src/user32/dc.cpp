@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.25 1999-12-07 12:26:58 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.26 1999-12-07 18:19:47 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -357,62 +357,6 @@ INT revertDy (Win32BaseWindow *wnd, INT dy)
    return (dy);
 }
 
-VOID removeClientArea(pDCData pHps)
-{
-   pHps->isClient = FALSE;
-
-   if (pHps->isClientArea)
-   {
-      pHps->isClientArea = FALSE;
-      GreSetupDC(pHps->hps,
-                 pHps->hrgnVis,
-                 pHps->ptlOrigin.x,
-                 pHps->ptlOrigin.y,
-                 0,
-                 SETUPDC_ORIGIN | SETUPDC_VISRGN | SETUPDC_RECALCCLIP);
-   }
-}
-
-BOOL selectClientArea(Win32BaseWindow *wnd, pDCData pHps, PRECTL prclPaint)
-{
-   RECTL rcl;
-   HRGN hrgnRect;
-   HWND hwnd;
-
-   if (!wnd) return (FALSE);
-
-   pHps->isClient = TRUE;
-   hwnd = pHps->hwnd;
-
-   rcl.xLeft  = rcl.yBottom = 0;
-   rcl.xRight = wnd->getWindowWidth();
-   rcl.yTop   = wnd->getWindowHeight();
-
-   WinMapWindowPoints(hwnd, HWND_DESKTOP, (PPOINTL) &rcl, 2);
-   pHps->ptlOrigin = *((PPOINTL) &rcl);
-
-   if (pHps->hrgnVis == 0)
-      pHps->hrgnVis = GreCreateRectRegion(pHps->hps, &rcl, 1);
-
-   hrgnRect = GreCreateRectRegion(pHps->hps, &rcl, 1);
-
-   if (!pHps->isClientArea)
-      GreCopyClipRegion(pHps->hps, pHps->hrgnVis, 0, COPYCRGN_VISRGN);
-
-   GreCombineRegion(pHps->hps, hrgnRect, pHps->hrgnVis, hrgnRect, CRGN_AND);
-   GreSetupDC(pHps->hps,
-              hrgnRect,
-              rcl.xLeft,
-              rcl.yBottom,
-              prclPaint,
-              SETUPDC_ORIGIN | SETUPDC_VISRGN | SETUPDC_RECALCCLIP);
-
-   pHps->isClientArea = TRUE;
-   GreDestroyRegion(pHps->hps, hrgnRect);
-
-   return (TRUE);
-}
-
 HDC sendEraseBkgnd (Win32BaseWindow *wnd)
 {
    BOOL  erased;
@@ -511,13 +455,6 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
       pHps = (pDCData)GpiQueryDCData(hps);
    }
 
-//   if (wnd->isFrameWindow())
-//   {
-//      WinSendMsg( hwnd, /* WM_DRAW */ 0x20D, (MPARAM)hps, MPVOID );
-      //CB: subclassed window haven't got a frame
-//      if (!wnd->isSubclassedOS2Wnd()) selectClientArea(wnd, pHps, &rect);
-//   }
-
    if (hPS_ownDC == 0)
       setMapMode (wnd, pHps, MM_TEXT_W);
    else
@@ -566,7 +503,6 @@ dprintf (("USER32: EndPaint(%x)", hwnd));
        pDCData pHps = (pDCData)GpiQueryDCData((HPS)pPaint->hdc);
        if (pHps && (pHps->hdcType == TYPE_3))
        {
-           removeClientArea (pHps);
           WinEndPaint (pHps->hps);
        }
    }
@@ -687,11 +623,6 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
          if (!pHps)
             goto error;
 
-         if (flags & DCX_WINDOW_W)
-            removeClientArea (pHps);
-         else
-            selectClientArea (wnd, pHps, 0);
-
          setPageXForm (wnd, pHps);
 
          pHps->hdcType = TYPE_1;
@@ -724,11 +655,6 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
 
    HPSToHDC (hWindow, hps, NULL, NULL);
    pHps = (pDCData)GpiQueryDCData (hps);
-
-   if (!(flags & DCX_WINDOW_W)) {
-      if (selectClientArea (wnd, pHps, 0))
-         setMapMode (wnd, pHps, MM_TEXT_W);
-   }
 
    if ((flags & DCX_EXCLUDERGN_W) || (flags & DCX_INTERSECTRGN_W))
    {
