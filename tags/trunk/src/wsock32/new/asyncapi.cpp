@@ -1,4 +1,4 @@
-/* $Id: asyncapi.cpp,v 1.2 2000-03-23 19:21:53 sandervl Exp $ */
+/* $Id: asyncapi.cpp,v 1.3 2000-03-23 23:07:22 sandervl Exp $ */
 
 /*
  *
@@ -149,6 +149,7 @@ void ASYNCCNV WSAsyncThreadProc(void *pparm)
    lParam = (fail << 16) | size;
 
    if(!pThreadParm->fCancelled) {
+   	dprintf(("WSAsyncThreadProc %x %x %x %x", pThreadParm->hwnd, pThreadParm->msg, pThreadParm->hAsyncTaskHandle, lParam));
   	PostMessageA(pThreadParm->hwnd, pThreadParm->msg, 
                      (WPARAM)pThreadParm->hAsyncTaskHandle, lParam);
    }
@@ -395,6 +396,7 @@ void AsyncNotifyEvent(PASYNCTHREADPARM pThreadParm, ULONG event, ULONG socket_er
 
    event = WSAMAKESELECTREPLY(event, socket_error);
 
+   dprintf(("AsyncNotifyEvent %x %x %x %x", pThreadParm->u.asyncselect.s, pThreadParm->hwnd, pThreadParm->msg, event));
    PostMessageA(pThreadParm->hwnd, pThreadParm->msg, (WPARAM)pThreadParm->u.asyncselect.s, 
                (LPARAM)event);
 }
@@ -413,8 +415,8 @@ void ASYNCCNV WSAsyncSelectThreadProc(void *pparm)
    while(TRUE)
    {
 asyncloopstart:
-	i         = 0;
-	noread    = nowrite = noexcept = -1;
+	i      = 0;
+	noread = nowrite = noexcept = -1;
 
 	//break if user cancelled request
       	if(pThreadParm->u.asyncselect.lEvents == 0) {
@@ -436,7 +438,10 @@ asyncloopstart:
 		noread = i++;
 		sockets[noread] = s;
 	}
-	if(lEventsPending & (FD_WRITE | FD_CONNECT)) {
+	if((lEventsPending & FD_CONNECT) ||
+          ((lEventsPending & FD_WRITE) &&
+           (!(ioctl(s, FIOBSTATUS, (char *)&tmp, sizeof(tmp)) & SS_CANTSENDMORE))))
+        {
 		nowrite = i++;
 		sockets[nowrite] = s;
 	}
@@ -445,11 +450,12 @@ asyncloopstart:
 		sockets[noexcept] = s;
 	}
 
-        dprintf(("WSAsyncSelectThreadProc %x wrs=%d, rds=%d, oos =%d, pending = %x", pThreadParm->u.asyncselect.s, noread, nowrite, noexcept, lEventsPending));
+//        dprintf(("WSAsyncSelectThreadProc %x rds=%d, wrs=%d, oos =%d, pending = %x", pThreadParm->u.asyncselect.s, noread, nowrite, noexcept, lEventsPending));
 
 	ret = select((int *)sockets, nr(noread), nr(nowrite), nr(noexcept), -1);
 	if(ret == SOCKET_ERROR) {
 		int selecterr = sock_errno();
+        	dprintf(("WSAsyncSelectThreadProc %x rds=%d, wrs=%d, oos =%d, pending = %x select returned %x", pThreadParm->u.asyncselect.s, noread, nowrite, noexcept, lEventsPending, selecterr));
 		switch(selecterr) 
 		{
 		case SOCEINTR:
@@ -489,7 +495,7 @@ asyncloopstart:
 
             			ret = getsockopt(s, SOL_SOCKET, SO_ERROR,
                 	        		 (char *) &sockoptval, &sockoptlen);
-				if(sockoptval == (WSAECONNREFUSED-WSABASEERR)) {
+				if(sockoptval == WSAECONNREFUSED) {
 					AsyncNotifyEvent(pThreadParm, FD_CONNECT, WSAECONNREFUSED);
 				}
             		}  
