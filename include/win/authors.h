@@ -1,4 +1,4 @@
-/* $Id: authors.h,v 1.4 1999-11-28 12:34:29 sandervl Exp $ */
+/* $Id: authors.h,v 1.5 1999-12-27 18:41:41 sandervl Exp $ */
 #ifndef __WINE_AUTHORS_H
 #define __WINE_AUTHORS_H
 
@@ -22,6 +22,7 @@ static const char * const SHELL_People[] =
     "Vitali E. Pelenyov",
     "Rene Pronk",
     "David Raison",
+    "Vit Timchishin",
     "Joel Troster",
     "Jens Wiessner",
     "Vince Vielhaber",
