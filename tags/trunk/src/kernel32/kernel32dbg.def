@@ -1,4 +1,4 @@
-; $Id: kernel32dbg.def,v 1.37 2004-01-12 09:55:27 sandervl Exp $
+; $Id: kernel32dbg.def,v 1.38 2004-01-31 02:05:05 bird Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -1172,7 +1172,6 @@ EXPORTS
 ;Build number
     _Odin32GetBuildNumber@0                                       @1293 NONAME
 
-    _AttachThreadInput@12                                         @1300 NONAME
     _WaitForInputIdle@8                                           @1301 NONAME
 
     InitializeKernel32                                            @1302 NONAME
