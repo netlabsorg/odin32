@@ -1,9 +1,7 @@
- /* $Id: changelog,v 1.600 2000-01-01 14:36:59 cbratschi Exp $ */
+ /* $Id: changelog,v 1.601 2000-01-02 20:16:09 sandervl Exp $ */
 
- 2000-01-01: Christoph Bratschi <cbratschi@datacomm.ch>
-	- USER32: copied all files to subdirectory /NEW for non-client frame changes
-		  ATTENTION: add your new code to /NEW or synchronize both 
-			     directories
+ 2000-01-02: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Implemented Set/GetWindowRgn (not activated)
 
  2000-01-01: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Workaround for crash in Lotus Notes when switching to a new
