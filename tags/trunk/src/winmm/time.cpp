@@ -1,4 +1,4 @@
-/* $Id: time.cpp,v 1.10 2001-03-21 12:33:22 sandervl Exp $ */
+/* $Id: time.cpp,v 1.11 2001-03-24 13:23:48 sandervl Exp $ */
 
 /*
  * Timer MM apis
@@ -27,7 +27,6 @@
 ODINDEBUGCHANNEL(WINMM-TIME)
 
 
-
 /*****************************************************************************
  * Name      : mmsystemGetVersion
  * Purpose   : determine version of MM system
@@ -43,9 +42,9 @@ ODINDEBUGCHANNEL(WINMM-TIME)
 
 ODINFUNCTION0(UINT, mmsystemGetVersion)
 {
-  return 4;
+  //Returned by winmm.dll from NT4, SP6
+  return 0x030A;
 }
-
 
 /*****************************************************************************
  * Name      :
