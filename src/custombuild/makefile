@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2001-08-06 17:40:25 achimha Exp $
+# $Id: makefile,v 1.6 2001-08-25 13:36:06 sandervl Exp $
 
 #
 # Odin32 API
@@ -48,6 +48,7 @@ $(ODIN32_LIB)/winmmo.lib \
 $(ODIN32_LIB)/ole32os2o.lib \
 $(ODIN32_LIB)/rpcrt4o.lib \
 $(ODIN32_LIB)/versiono.lib \
+$(ODIN32_LIB)/riched32o.lib \
 $(ODIN32_LIB)/lz32o.lib \
 $(ODIN32_LIB)/unicode.lib \
 $(ODIN32_LIB)/win32k.lib \
