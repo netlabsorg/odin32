@@ -1,8 +1,12 @@
-/* $Id: changelog,v 1.2370 2002-11-29 15:04:18 sandervl Exp $ */
+/* $Id: changelog,v 1.2371 2002-11-29 15:46:57 sandervl Exp $ */
 
  2002-11-29: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Add ODIN_SetSyscolors to override system colors without
                   forcing a desktop repaint
+                o Don't call SetSysColors in WGSS anymore. That call updates
+                  system colors in PM.
+                o Always use the internal color table in GetSysColor; don't
+                  call WGSS
 
  2002-11-28: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Make sure the stack is properly aligned
