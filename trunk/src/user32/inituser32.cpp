@@ -1,4 +1,4 @@
-/* $Id: inituser32.cpp,v 1.14 2003-10-02 10:35:59 sandervl Exp $ */
+/* $Id: inituser32.cpp,v 1.15 2003-10-20 17:18:30 sandervl Exp $ */
 /*
  * USER32 DLL entry point
  *
@@ -28,6 +28,7 @@
 #define  INCL_DOSSEMAPHORES
 #define  INCL_DOSMISC
 #define  INCL_DOSERRORS
+#define  INCL_WINSHELLDATA
 #include <os2wrap.h>    //Odin32 OS/2 api wrappers
 #include <stdlib.h>
 #include <stdio.h>
@@ -66,6 +67,7 @@ extern "C" {
 }
 DWORD hInstanceUser32 = 0;
 
+extern INT __cdecl wsnprintfA(LPSTR,UINT,LPCSTR,...);
 
 /**************************************************************/
 /* Try to load the Presentation Manager Keyboard Hook module. */
@@ -91,6 +93,58 @@ void WIN32API SetCustomPMHookDll(LPSTR pszKbdDllName)
 {
    strcpy(PMKBDHK_MODULE, pszKbdDllName);
 }
+
+#define FONTSDIRECTORY "Fonts"
+#define REGPATH "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Fonts"
+
+//******************************************************************************
+//******************************************************************************
+void MigrateWindowsFonts()
+{
+  HKEY  hkFonts,hkOS2Fonts;
+  char  buffer[512];
+  UINT  len = GetWindowsDirectoryA( NULL, 0 );
+  
+  if (RegOpenKeyExA(HKEY_LOCAL_MACHINE, REGPATH ,0, KEY_ALL_ACCESS, &hkFonts) == 0)
+  {
+      DWORD dwIndex, dwType;
+      char subKeyName[255], dataArray[512];
+      DWORD sizeOfSubKeyName = 254, sizeOfDataArray = 511;
+
+      // loop over all values of the current key
+      for (dwIndex=0;
+           RegEnumValueA(hkFonts, dwIndex, subKeyName, &sizeOfSubKeyName, NULL, &dwType ,(LPBYTE)dataArray, &sizeOfDataArray) != ERROR_NO_MORE_ITEMS_W;
+           ++dwIndex, sizeOfSubKeyName = 254, sizeOfDataArray = 511)
+      {
+         //Check OS/2 INI profile for font entry
+         if (!PrfQueryProfileString(HINI_PROFILE, "PM_Fonts", dataArray,
+                            NULL, (PVOID)subKeyName, (LONG)sizeof(subKeyName)))
+         {
+           HDIR          hdirFindHandle = HDIR_CREATE;
+           FILEFINDBUF3  FindBuffer     = {0};      
+           ULONG         ulResultBufLen = sizeof(FILEFINDBUF3);
+           ULONG         ulFindCount    = 1;       
+           APIRET        rc             = NO_ERROR; 
+
+           dprintf(("Migrating font %s to OS/2",dataArray));
+
+           GetWindowsDirectoryA( buffer, len + 1 );
+           wsnprintfA( buffer, sizeof(buffer), "%s\\%s\\%s", buffer, FONTSDIRECTORY, dataArray );
+
+           rc = DosFindFirst( buffer, &hdirFindHandle, FILE_NORMAL,&FindBuffer, ulResultBufLen, &ulFindCount, FIL_STANDARD);
+
+           //Check that file actaully exist 
+  	   if ( rc == NO_ERROR  && !(FindBuffer.attrFile & FILE_DIRECTORY))
+  	   {
+              PrfWriteProfileString(HINI_PROFILE,"PM_Fonts",dataArray, buffer);   
+	      DosFindClose(hdirFindHandle);
+           }
+        } 
+      }
+      RegCloseKey(hkFonts);
+  }
+}
+
 //******************************************************************************
 //******************************************************************************
 void pmkbdhk_initialize(HAB _hab)
@@ -226,6 +280,9 @@ ULONG APIENTRY inittermUser32(ULONG hModule, ULONG ulFlag)
 
          //CB: initialize PM monitor driver
          MONITOR_Initialize(&MONITOR_PrimaryMonitor);
+
+         //PF: migrate windows fonts
+         MigrateWindowsFonts();
 
          break;
 
