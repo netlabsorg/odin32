@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.4 1999-08-16 16:28:04 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.5 1999-08-16 16:55:33 sandervl Exp $ */
 
 /*
  * WINMM DLL entry point
@@ -38,6 +38,8 @@
 
 extern "C" {
 void IRTMidiShutdown();  // IRTMidi shutdown routine
+void CDECL _ctordtorInit( void );
+void CDECL _ctordtorTerm( void );
 }
 
 /*-------------------------------------------------------------------*/
@@ -72,6 +74,7 @@ unsigned long _System _DLL_InitTerm(unsigned long hModule, unsigned long
 
    switch (ulFlag) {
       case 0 :
+         _ctordtorInit();
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
@@ -103,6 +106,7 @@ static void APIENTRY cleanup(ULONG ulReason)
 {
    auxOS2Close();  /* SvL: Close aux device if necessary */
    IRTMidiShutdown;  /* JT: Shutdown RT Midi subsystem, if running. */
+   _ctordtorTerm();
    DosExitList(EXLST_EXIT, cleanup);
    return ;
 }

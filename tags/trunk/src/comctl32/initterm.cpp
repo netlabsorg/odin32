@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.5 1999-08-16 16:28:02 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.6 1999-08-16 16:55:32 sandervl Exp $ */
 /*
  * COMCTL32 DLL entry point
  *
@@ -32,6 +32,19 @@
 #include <string.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:29*/
 
+extern "C" {
+void CDECL _ctordtorInit( void );
+void CDECL _ctordtorTerm( void );
+}
+
+/*-------------------------------------------------------------------*/
+/* A clean up routine registered with DosExitList must be used if    */
+/* runtime calls are required and the runtime is dynamically linked. */
+/* This will guarantee that this clean up routine is run before the  */
+/* library DLL is terminated.                                        */
+/*-------------------------------------------------------------------*/
+static void APIENTRY cleanup(ULONG reason);
+
 void CDECL RegisterCOMCTL32WindowClasses(unsigned long hinstDLL);
 void CDECL UnregisterCOMCTL32WindowClasses(void);
 
@@ -58,11 +71,16 @@ unsigned long _System _DLL_InitTerm(unsigned long hModule, unsigned long
    switch (ulFlag) {
       case 0 :
 
+         _ctordtorInit();
+
          /*******************************************************************/
-         /* The C run-time environment initialization function must be      */
-         /* called before any calls to C run-time functions that are not    */
-         /* inlined.                                                        */
+         /* A DosExitList routine must be used to clean up if runtime calls */
+         /* are required and the runtime is dynamically linked.             */
          /*******************************************************************/
+
+         rc = DosExitList(0x0000F000|EXLST_ADD, cleanup);
+         if(rc)
+                return 0UL;
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
@@ -71,8 +89,6 @@ unsigned long _System _DLL_InitTerm(unsigned long hModule, unsigned long
 
          break;
       case 1 :
-   	 /* unregister Win32 window classes */
-   	 UnregisterCOMCTL32WindowClasses();
          break;
       default  :
          return 0UL;
@@ -84,3 +100,11 @@ unsigned long _System _DLL_InitTerm(unsigned long hModule, unsigned long
    return 1UL;
 }
 
+static void APIENTRY cleanup(ULONG ulReason)
+{
+   /* unregister Win32 window classes */
+   UnregisterCOMCTL32WindowClasses();
+   _ctordtorTerm();
+   DosExitList(EXLST_EXIT, cleanup);
+   return ;
+}
