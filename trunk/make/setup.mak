@@ -1,4 +1,4 @@
-# $Id: setup.mak,v 1.14 2002-08-25 04:23:39 bird Exp $
+# $Id: setup.mak,v 1.15 2002-08-28 03:47:09 bird Exp $
 
 #
 # Generic makefile system.
@@ -9,8 +9,13 @@
 #
 
 
-!ifndef MAKE_SETUP_INCLUDED
-MAKE_SETUP_INCLUDED=YES
+# -----------------------------------------------------------------------------
+# Assert that the file isn't included several times.
+# -----------------------------------------------------------------------------
+!ifdef MAKE_SETUP_INCLUDED
+! error Fatal error: You've included setup.mak before!!!
+!endif
+MAKE_SETUP_INCLUDED = YES
 
 
 # -----------------------------------------------------------------------------
@@ -201,6 +206,21 @@ OBJ_DLLENTRY            =
 MAKE_INCLUDE_PROCESS    = $(PATH_MAKE)\process.mak
 
 
+# -----------------------------------------------------------------------------
+# Set forwarding flag.
+#   If    there is any change in the environment
+#      OR the environment is uncertain (_BUILD_PROJECT not right) Then
+#   Forward all target commands to the new shell environment we setup.
+#
+#   (This have to be done early so the CC setup and it's like can check for
+#   the flag. The rest of the forward stuff is at the bottom.)
+# -----------------------------------------------------------------------------
+!if "$(_BUILD_PROJECT)" != "$(BUILD_PROJECT)" || "$(BUILD_ENV)" != "$(BUILD_ENV_FORCE)" || "$(BUILD_ENVS_PRE)" != "" || "$(BUILD_ENVS_POST)" != ""
+BUILD_FORWARDING = 1
+!else
+BUILD_FORWARDING = 0
+!endif
+
 
 # -----------------------------------------------------------------------------
 # Include the setup.
@@ -224,36 +244,39 @@ $(ECHO) Including platform setup file $(CLRFIL)$(MAKE_INCLUDE_SETUP)$(CLRRST)
 
 # -----------------------------------------------------------------------------
 # Verify the environment setups.
+#   Uncomment this when configuring a new project.
+#   When the setup is stable comment it out. (it's a waste of time!)
 # -----------------------------------------------------------------------------
 
-!ifndef ENV_NAME
-!error No environment signature has been defined ($(NAME_COMPLETE))
-!endif
-
-!ifndef MAKE_INCLUDE_SETUP
-!error No setup to include has been determined (MAKE_INCLUDE_SETUP)
-!endif
-
-!if "$(ENV_STATUS)" != "OK"
-!error Environment $(ENV_NAME) does work yet (ENV_STATUS is not OK).
-!endif
-
-!ifndef CC
-!error Environment $(ENV_NAME) does not define variable (CC).
-!endif
-
-!ifndef CC_FLAGS_EXE
-!error Environment $(ENV_NAME) does not define variable (CC_FLAGS_EXE).
-!endif
-
-!ifndef LINK
-!error Environment $(ENV_NAME) does not define variable (LINK).
-!endif
-
-!ifndef LINK_FLAGS_EXE
-!error Environment $(ENV_NAME) does not define variable (LINK_FLAGS_EXE).
-!endif
-
+#
+#!ifndef ENV_NAME
+#!error No environment signature has been defined ($(NAME_COMPLETE))
+#!endif
+#
+#!ifndef MAKE_INCLUDE_SETUP
+#!error No setup to include has been determined (MAKE_INCLUDE_SETUP)
+#!endif
+#
+#!if "$(ENV_STATUS)" != "OK"
+#!error Environment $(ENV_NAME) does work yet (ENV_STATUS is not OK).
+#!endif
+#
+#!ifndef CC
+#!error Environment $(ENV_NAME) does not define variable (CC).
+#!endif
+#
+#!ifndef CC_FLAGS_EXE
+#!error Environment $(ENV_NAME) does not define variable (CC_FLAGS_EXE).
+#!endif
+#
+#!ifndef LINK
+#!error Environment $(ENV_NAME) does not define variable (LINK).
+#!endif
+#
+#!ifndef LINK_FLAGS_EXE
+#!error Environment $(ENV_NAME) does not define variable (LINK_FLAGS_EXE).
+#!endif
+#
 
 # -----------------------------------------------------------------------------
 # Build the environments
@@ -278,12 +301,11 @@ BUILD_ENVS_BASE_POST_16 =
 BUILD_ENVS_BASE_PRE     = buildsetup emx cvs
 BUILD_ENVS_BASE_PRE_16  = buildsetup emx cvs toolkit40 ddkbase
 
+#
+# Forwarding processing.
+#
+!if $(BUILD_FORWARDING)
 
-# Check if there is any change in the environment OR if the environment is
-# uncertain (_BUILD_PROJECT not right).
-# If there are Then we will have to forward all target commands to the
-# correct shell environment
-!if "$(_BUILD_PROJECT)" != "$(BUILD_PROJECT)" || "$(BUILD_ENV)" != "$(BUILD_ENV_FORCE)" || "$(BUILD_ENVS_PRE)" != "" || "$(BUILD_ENVS_POST)" != ""
 MAKE_INCLUDE_PROCESS = $(PATH_MAKE)\process.forwarder.mak
 
 # Debug - find the reason for forwarding.
@@ -306,8 +328,6 @@ MAKE_INCLUDE_PROCESS = $(PATH_MAKE)\process.forwarder.mak
 #!  endif
 #! endif
 
-# flag that we're forwarding.
-BUILD_FORWARDING = 1
 
 # set the secret _build_project env.var.
 # Note: This 'SET' operation doesn't allways work as designed.
@@ -344,10 +364,5 @@ BUILD_ENVS_CHANGE = $(BUILD_ENVS_BASE_PRE) $(BUILD_ENVS_PRE) $(ENV_ENVS) $(BUILD
 !  endif
 ! endif
 
-!else
-# Flag that we're not forwarding
-BUILD_FORWARDING = 0
-!endif
+!endif # BUILD_FORWARDING
 
-
-!endif # MAKE_SETUP_INCLUDED
