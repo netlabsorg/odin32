@@ -1,7 +1,21 @@
-/* $Id: changelog,v 1.2053 2002-04-29 16:29:18 sandervl Exp $ */
+/* $Id: changelog,v 1.2054 2002-04-29 17:05:58 sandervl Exp $ */
 
  2002-04-29: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Export RegisterCustomDriver
+
+ 2002-04-29: Patrick Haller <patrick.haller@innotek.de>
+    - OLEAUT32: o Clean up hash object during dll unload
+    - KERNEL32: o Fixed memory leaks in handlename class, Win32ImageBase::isPEImage 
+                  and DestroyTIB
+                o fixed unicode conversion for APIs that allow
+                  NULL strings as input parameter (SearchPathW,
+                  Registry APIs) not to set last error to EROROR_INVALID_HANDLE
+                o wprocess.cpp:
+                  - set ODIN32.DEBUG_CHILD=ICSDEBUG.EXE will cause CreateProcess
+                    to start PE-clients inside a new debugger instance
+                  - GetModuleFileName fixes (don't count zero termination)
+                o don't set last error in HeapFree()
+    - COMCTL32: o Draglist control bugfix (crash)                 
 
  2002-04-28: knut st. osmundsen <bird@anduin.net>
     - Configure.cmd, Odincrt:
