@@ -1,4 +1,4 @@
-/* $Id: HMObjects.cpp,v 1.1 1999-07-06 15:48:45 phaller Exp $ */
+/* $Id: HMObjects.cpp,v 1.2 2000-02-16 14:24:00 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -30,6 +30,8 @@
 #include "HandleManager.H"
 #include "HMObjects.h"
 
+#define DBG_LOCALLOG	DBG_hmobjects
+#include "dbglocal.h"
 
 /*****************************************************************************
  * Defines                                                                   *

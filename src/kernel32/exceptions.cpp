@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.33 2000-01-29 14:22:56 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.34 2000-02-16 14:25:39 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -64,6 +64,9 @@
 #include "mmap.h"
 #include <wprocess.h>
 #include "oslibexcept.h"
+
+#define DBG_LOCALLOG	DBG_exceptions
+#include "dbglocal.h"
 
 //Global Process Unhandled exception filter
 static LPTOP_LEVEL_EXCEPTION_FILTER CurrentUnhExceptionFlt = NULL;
@@ -861,7 +864,7 @@ void static dprintfException(PEXCEPTIONREPORTRECORD       pERepRec,
 
   if (pCtxRec->ContextFlags & CONTEXT_CONTROL)         /* check flags */
     dprintf(("   SS:ESP=%04x:%08x EFLAGS=%08x\n"
-             "   CS:EIP=%04x:%08x EBP   =%08x\n",
+             "       CS:EIP=%04x:%08x EBP   =%08x\n",
              pCtxRec->ctx_SegSs,
              pCtxRec->ctx_RegEsp,
              pCtxRec->ctx_EFlags,
@@ -871,7 +874,7 @@ void static dprintfException(PEXCEPTIONREPORTRECORD       pERepRec,
 
   if (pCtxRec->ContextFlags & CONTEXT_INTEGER)         /* check flags */
     dprintf(("   EAX=%08x EBX=%08x ESI=%08x\n"
-             "   ECX=%08x EDX=%08x EDI=%08x\n",
+             "       ECX=%08x EDX=%08x EDI=%08x\n",
              pCtxRec->ctx_RegEax,
              pCtxRec->ctx_RegEbx,
              pCtxRec->ctx_RegEsi,
@@ -881,7 +884,7 @@ void static dprintfException(PEXCEPTIONREPORTRECORD       pERepRec,
 
   if (pCtxRec->ContextFlags & CONTEXT_SEGMENTS)        /* check flags */
     dprintf(("   DS=%04x     ES=%08x"
-             "   FS=%04x     GS=%04x\n",
+             "       FS=%04x     GS=%04x\n",
               pCtxRec->ctx_SegDs,
               pCtxRec->ctx_SegEs,
               pCtxRec->ctx_SegFs,

@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.34 2000-01-05 19:39:54 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.35 2000-02-16 14:23:57 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -57,6 +57,9 @@
 #include "HMComm.h"
 #include "HMToken.h"
 #include <winconst.h>
+
+#define DBG_LOCALLOG	DBG_handlemanager
+#include "dbglocal.h"
 
 /*****************************************************************************
  * Defines                                                                   *

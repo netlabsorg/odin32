@@ -1,4 +1,4 @@
-/* $Id: vmutex.cpp,v 1.7 1999-10-24 22:51:22 sandervl Exp $ */
+/* $Id: vmutex.cpp,v 1.8 2000-02-16 14:22:47 sandervl Exp $ */
 
 /*
  * Mutex class
@@ -14,6 +14,9 @@
 #include <vmutex.h>
 #include <win32type.h>
 #include <misc.h>
+
+#define DBG_LOCALLOG	DBG_vmutex
+#include "dbglocal.h"
 
 /******************************************************************************/
 /******************************************************************************/

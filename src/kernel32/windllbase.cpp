@@ -1,4 +1,4 @@
-/* $Id: windllbase.cpp,v 1.8 2000-01-05 19:39:57 sandervl Exp $ */
+/* $Id: windllbase.cpp,v 1.9 2000-02-16 14:22:11 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
@@ -36,6 +36,9 @@
 #include "oslibmisc.h"
 #include "oslibdos.h"
 #include "profile.h"
+
+#define DBG_LOCALLOG	DBG_windllbase
+#include "dbglocal.h"
 
 VMutex dlllistmutex;   //protects linked lists of heaps
 

@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.41 2000-01-21 22:38:52 sandervl Exp $ */
+/* $Id: KERNEL32.CPP,v 1.42 2000-02-16 14:25:29 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -35,6 +35,9 @@
 #include "handlemanager.h"
 #include "wprocess.h"
 #include <versionos2.h>
+
+#define DBG_LOCALLOG	DBG_kernel32
+#include "dbglocal.h"
 
 /*****************************************************************************
  * Defines                                                                   *

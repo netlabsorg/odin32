@@ -1,4 +1,4 @@
-/* $Id: winexebase.cpp,v 1.4 2000-01-06 20:07:10 sandervl Exp $ */
+/* $Id: winexebase.cpp,v 1.5 2000-02-16 14:22:11 sandervl Exp $ */
 
 /*
  * Win32 exe base class
@@ -32,6 +32,9 @@
 
 #include "conwin.h"          // Windows Header for console only
 #include "console.h"
+
+#define DBG_LOCALLOG	DBG_winexebase
+#include "dbglocal.h"
 
 BOOL         fExeStarted = FALSE;
 Win32ExeBase *WinExe = NULL;

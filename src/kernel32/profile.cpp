@@ -1,4 +1,4 @@
-/* $Id: profile.cpp,v 1.21 1999-11-22 20:35:51 sandervl Exp $ */
+/* $Id: profile.cpp,v 1.22 2000-02-16 14:23:12 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -29,6 +29,9 @@
 #include "winnls.h"
 
 #include "profile.h"
+
+#define DBG_LOCALLOG	DBG_profile
+#include "dbglocal.h"
 
 ODINDEBUGCHANNEL(PROFILE)
 

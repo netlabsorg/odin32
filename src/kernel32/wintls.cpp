@@ -1,4 +1,4 @@
-/* $Id: wintls.cpp,v 1.8 1999-11-30 20:19:34 sandervl Exp $ */
+/* $Id: wintls.cpp,v 1.9 2000-02-16 14:22:13 sandervl Exp $ */
 /*
  * Win32 TLS API functions
  *
@@ -14,6 +14,9 @@
 #include <thread.h>
 #include <wprocess.h>
 #include "exceptutil.h"
+
+#define DBG_LOCALLOG	DBG_wintls
+#include "dbglocal.h"
 
 //******************************************************************************
 //******************************************************************************

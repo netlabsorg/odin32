@@ -1,4 +1,4 @@
-/* $Id: oslibgdi.cpp,v 1.5 2000-02-02 23:45:07 sandervl Exp $ */
+/* $Id: oslibgdi.cpp,v 1.6 2000-02-16 14:18:11 sandervl Exp $ */
 
 /*
  * GDI32 support code
@@ -18,6 +18,9 @@
 #define  OS2_ONLY
 #include "dibsect.h"
 #include "oslibgdi.h"
+
+#define DBG_LOCALLOG	DBG_oslibgdi
+#include "dbglocal.h"
 
 //******************************************************************************
 //******************************************************************************

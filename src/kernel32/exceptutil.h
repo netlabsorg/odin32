@@ -1,4 +1,4 @@
-/* $Id: exceptutil.h,v 1.5 1999-12-19 17:49:38 sandervl Exp $ */
+/* $Id: exceptutil.h,v 1.6 2000-02-16 14:25:40 sandervl Exp $ */
 
 /*
  * Exception + misc functions for OS/2
@@ -20,9 +20,6 @@ void  ChangeTIBStack();
 void  __cdecl SetExceptionChain(DWORD);
 
 extern "C" PVOID QueryExceptionChain();
-
-void  DisableFPUExceptions();
-ULONG GetDllEntryPoint();
 
 void  OS2SetExceptionHandler(void *exceptframe);
 void  OS2UnsetExceptionHandler(void *exceptframe);

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.83 2000-02-09 23:46:57 bird Exp $
+# $Id: makefile,v 1.84 2000-02-16 14:25:41 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -15,8 +15,8 @@ PDWIN32_TOOLS = ..\..\tools\bin
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 
 
-CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE) /Tm+
-CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE) /Tm+
+CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE)
+CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE) 
 
 !ifdef NODEBUGINFO
 CFLAGS = $(CFLAGS) -DDEFAULT_LOGGING_OFF
@@ -47,7 +47,7 @@ pefile.OBJ winimgres.OBJ wintls.obj async.OBJ fileio.obj hmtoken.obj kernelrsrc.
 atom.obj disk.obj directory.obj cvtbitmap.obj hmmmap.obj winfakepeldr.obj \
 cvtaccel.obj cvticon.obj cvticongrp.obj oslibexcept.obj cpu.obj process.obj \
 cvtcursor.obj cvtcursorgrp.obj stubs.obj interlock.obj toolhelp.obj codepage.obj \
-debug.obj oslibdebug.obj
+debug.obj oslibdebug.obj dbglocal.obj
 
 
 TARGET = kernel32

@@ -1,4 +1,4 @@
-/* $Id: windllpe2lx.cpp,v 1.5 2000-01-31 09:40:07 bird Exp $ */
+/* $Id: windllpe2lx.cpp,v 1.6 2000-02-16 14:22:11 sandervl Exp $ */
 
 /*
  * Win32 PE2LX Dll class
@@ -33,6 +33,9 @@
 #include "oslibmisc.h"      // OSLibGetDllName
 #include "conwin.h"         // Windows Header for console only
 #include "console.h"
+
+#define DBG_LOCALLOG	DBG_windllpe2lx
+#include "dbglocal.h"
 
 
 /**

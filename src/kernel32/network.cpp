@@ -4,6 +4,7 @@
  * Copyright 1998 Peter Fitzsimmons
  *           1999 Przemyslaw Dobrowolski
  *
+ * Project Odin Software License can be found in LICENSE.TXT
  */
 #define INCL_DOSEXCEPTIONS
 #define INCL_DOSMEMMGR
@@ -13,6 +14,9 @@
 #include <string.h>
 #include "misc.h"
 #include "unicode.h"
+
+#define DBG_LOCALLOG	DBG_network
+#include "dbglocal.h"
 
 //******************************************************************************
 // GetComputerName

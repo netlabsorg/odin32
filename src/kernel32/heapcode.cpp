@@ -1,4 +1,4 @@
-/* $Id: heapcode.cpp,v 1.1 1999-12-09 00:52:20 sandervl Exp $ */
+/* $Id: heapcode.cpp,v 1.2 2000-02-16 14:23:57 sandervl Exp $ */
 /*
  * Code heap functions for OS/2
  *
@@ -17,6 +17,9 @@
 #include <os2wrap.h>
 #include <misc.h>
 #include <heapcode.h>
+
+#define DBG_LOCALLOG	DBG_heapcode
+#include "dbglocal.h"
 
 static Heap_t  codeHeap = 0;
 static PVOID   pCodeMem = NULL;

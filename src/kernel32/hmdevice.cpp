@@ -1,4 +1,4 @@
-/* $Id: hmdevice.cpp,v 1.15 2000-01-05 19:39:55 sandervl Exp $ */
+/* $Id: hmdevice.cpp,v 1.16 2000-02-16 14:23:58 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -22,6 +22,9 @@
 #include <misc.h>
 #include "HandleManager.h"
 #include "HMDevice.h"
+
+#define DBG_LOCALLOG	DBG_hmdevice
+#include "dbglocal.h"
 
 
 /*****************************************************************************

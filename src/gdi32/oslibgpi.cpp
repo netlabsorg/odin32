@@ -1,4 +1,4 @@
-/* $Id: oslibgpi.cpp,v 1.3 2000-01-20 21:39:36 sandervl Exp $ */
+/* $Id: oslibgpi.cpp,v 1.4 2000-02-16 14:18:11 sandervl Exp $ */
 
 /*
  * GPI interface code
@@ -18,6 +18,9 @@
 #include "win32type.h"
 #include "oslibgpi.h"
 #include "dcdata.h"
+
+#define DBG_LOCALLOG	DBG_oslibgpi
+#include "dbglocal.h"
 
 #define GetDCData(a) ((pDCData)a)
 

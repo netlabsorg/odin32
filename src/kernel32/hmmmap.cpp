@@ -1,4 +1,4 @@
-/* $Id: hmmmap.cpp,v 1.9 1999-12-10 14:06:11 sandervl Exp $ */
+/* $Id: hmmmap.cpp,v 1.10 2000-02-16 14:23:59 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -31,6 +31,9 @@
 #include "HMMMap.h"
 #include "mmap.h"
 #include "heapshared.h"
+
+#define DBG_LOCALLOG	DBG_hmmmap
+#include "dbglocal.h"
 
 /*****************************************************************************
  * Defines                                                                   *

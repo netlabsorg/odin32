@@ -1,4 +1,4 @@
-/* $Id: conout.cpp,v 1.5 1999-12-09 19:08:26 sandervl Exp $ */
+/* $Id: conout.cpp,v 1.6 2000-02-16 14:25:32 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -72,6 +72,9 @@
 #include "console2.h"
 #include "conprop.h"
 #include "unicode.h"
+
+#define DBG_LOCALLOG	DBG_conout
+#include "dbglocal.h"
 
 
 /***********************************

@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.34 2000-02-05 02:01:04 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.35 2000-02-16 14:25:40 sandervl Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -48,6 +48,8 @@
 #include <windllbase.h>
 #include "initsystem.h"
 #include <exitlist.h>
+#define DBG_LOCALLOG	DBG_initterm
+#include "dbglocal.h"
 
 /*-------------------------------------------------------------------*/
 /* A clean up routine registered with DosExitList must be used if    */
@@ -102,6 +104,8 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
     {
         case 0 :
 	{
+	    ParseLogStatus();
+
             loadNr = globLoadNr++;
 
 	    strcpy(kernel32Path, OSLibGetDllName(hModule));

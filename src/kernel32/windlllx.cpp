@@ -1,4 +1,4 @@
-/* $Id: windlllx.cpp,v 1.7 2000-02-15 14:37:43 sandervl Exp $ */
+/* $Id: windlllx.cpp,v 1.8 2000-02-16 14:22:11 sandervl Exp $ */
 
 /*
  * Win32 LX Dll class (compiled in OS/2 using Odin32 api)
@@ -33,6 +33,9 @@
 #include <windlllx.h>
 #include <odinlx.h>
 #include "oslibmisc.h"
+
+#define DBG_LOCALLOG	DBG_windlllx
+#include "dbglocal.h"
 
 //******************************************************************************
 //Create LX Dll object and send process attach message

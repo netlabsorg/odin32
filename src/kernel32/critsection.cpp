@@ -1,4 +1,4 @@
-/* $Id: critsection.cpp,v 1.3 2000-01-06 20:24:25 sandervl Exp $ */
+/* $Id: critsection.cpp,v 1.4 2000-02-16 14:25:36 sandervl Exp $ */
 /*
  * Win32 critical sections
  * 
@@ -16,6 +16,9 @@
 #include "debugtools.h"
 #include <misc.h>
 #include <odinwrap.h>
+
+#define DBG_LOCALLOG	DBG_critsection
+#include "dbglocal.h"
 
 DECLARE_DEBUG_CHANNEL(relay)
 

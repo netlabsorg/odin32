@@ -1,4 +1,4 @@
-/* $Id: metafile.cpp,v 1.1 2000-02-01 12:53:30 sandervl Exp $ */
+/* $Id: metafile.cpp,v 1.2 2000-02-16 14:18:11 sandervl Exp $ */
 
 /*
  * GDI32 metafile code
@@ -14,6 +14,9 @@
 #include <stdarg.h>
 #include <string.h>
 #include "misc.h"
+
+#define DBG_LOCALLOG	DBG_metafile
+#include "dbglocal.h"
 
 //******************************************************************************
 //******************************************************************************
