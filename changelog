@@ -1,7 +1,10 @@
- /* $Id: changelog,v 1.729 2000-02-14 20:20:39 sandervl Exp $ */
+ /* $Id: changelog,v 1.730 2000-02-15 00:15:03 sandervl Exp $ */
 
  2000-02-14: Sander van Leeuwen <sandervl@xs4all.nl>
 	- COMCTL32: Added Wine license
+	- KERNEL32: Search in path for dlls if the pe loader can't find them
+                    (RP7 loads pngu3264.dll by changing PATH and then calling
+                     LoadLibrary)
 
  2000-02-14: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: merged combobox with Corel 20000212
