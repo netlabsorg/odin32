@@ -111,6 +111,10 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
 #  define PROFILE_STOP(a)
 #endif
 
+
+
+#if defined(PROFILE) || defined(DEBUG)
+
 #ifndef FNINIT
 #define FNINIT \
   unsigned short sel;
@@ -130,6 +134,30 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
     SetFS(sel); \
     dprintf(("WARNING: FS: for thread %08xh corrupted by "a, GetCurrentThreadId())); \
   }
+
+#endif
+
+
+#if defined(RELEASE)
+
+#define FNINIT
+#define FNPROLOGUE(a)
+#define FNEPILOGUE(a)
+
+#endif
+
+// check if all macros are defined
+#ifndef FNINIT
+#error FNINIT not defined: DEBUG, PROFILE, or RELEASE not specified
+#endif
+
+#ifndef FNPROLOGUE
+#error FNPROLOGUE not defined: DEBUG, PROFILE, or RELEASE not specified
+#endif
+
+#ifndef FNEPILOGUE
+#error FNEPILOGUE not defined: DEBUG, PROFILE, or RELEASE not specified
+#endif
 
 
 /****************************************************************************
