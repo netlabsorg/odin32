@@ -1,4 +1,4 @@
-/* $Id: CmdQd.c,v 1.2 2001-08-16 04:27:44 bird Exp $
+/* $Id: CmdQd.c,v 1.3 2001-09-01 22:48:10 bird Exp $
  *
  * Command Queue Daemon / Client.
  *
@@ -192,6 +192,15 @@ typedef struct Job
 } JOB, *PJOB;
 
 
+typedef struct PathCache
+{
+    char    szPath[4096 - CCHMAXPATH * 3]; /* The path which this is valid for. */
+    char    szCurDir[CCHMAXPATH];       /* The current dir this is valid for. */
+    char    szProgram[CCHMAXPATH];      /* The program. */
+    char    szResult[CCHMAXPATH];       /* The result. */
+} PATHCACHE, *PPATHCACHE;
+
+
 /*******************************************************************************
 *   Global Variables                                                           *
 *******************************************************************************/
@@ -226,6 +235,9 @@ int  Daemon(int cWorkers);
 int  DaemonInit(int cWorkers);
 void signalhandler(int sig);
 void Worker(void * iWorkerId);
+char*WorkerArguments(char *pszArg, const char *pszzEnv, const char *pszCommand, char *pszCurDir, PPATHCACHE pPathCache);
+char*fileNormalize(char *pszFilename, char *pszCurDir);
+APIRET fileExist(const char *pszFilename);
 int  Submit(int rcIgnore);
 int  Wait(void);
 int  Kill(void);
@@ -310,7 +322,7 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    return 0;
+    //return 0;
 }
 
 
@@ -698,8 +710,9 @@ int DaemonInit(int cWorkers)
  */
 void signalhandler(int sig)
 {
-     shrmemFree();
-     exit(-42);
+    sig = sig;
+    shrmemFree();
+    exit(-42);
 }
 
 
@@ -710,6 +723,9 @@ void signalhandler(int sig)
  */
 void Worker(void * iWorkerId)
 {
+    PATHCACHE   PathCache;
+    memset(&PathCache, 0, sizeof(PathCache));
+
     while (!DosWaitEventSem(hevJobQueue, SEM_INDEFINITE_WAIT))
     {
         PJOB    pJob;
@@ -757,8 +773,8 @@ void Worker(void * iWorkerId)
             /*
              * Redirect output and start process.
              */
-            sprintf(szArg, "%s\t /C \"%s\"\n", getenv("COMSPEC"), pJob->JobInfo.szCommand);
-            *strchr(szArg, '\t') = '\0';
+            WorkerArguments(szArg, &pJob->JobInfo.szzEnv, &pJob->JobInfo.szCommand[0],
+                            &pJob->JobInfo.szCurrentDir[0], &PathCache);
             rc = DosCreatePipe(&hPipeR, &hPipeW, sizeof(pJobOutput->szOutput) - 1);
             if (rc)
             {
@@ -911,6 +927,252 @@ void Worker(void * iWorkerId)
             //printf("debug-%d: fine\n", iWorkerId);
         }
     }
+    iWorkerId = iWorkerId;
+}
+
+
+/**
+ * Builds the input to DosExecPgm.
+ * Will execute programs directly and command thru the shell.
+ *
+ * @returns pszArg.
+ * @param   pszArg          Arguments to DosExecPgm.(output)
+ *                          Assumes that the buffer is large enought.
+ * @param   pszzEnv         Pointer to environment block.
+ * @param   pszCommand      Command to execute.
+ * @param   pszCurDir       From where the command is to executed.
+ * @param   pPathCache      Used to cache the last path, executable, and the search result.
+ */
+char *WorkerArguments(char *pszArg, const char *pszzEnv, const char *pszCommand, char *pszCurDir, PPATHCACHE pPathCache)
+{
+    BOOL        fCMD = FALSE;
+    const char *psz;
+    const char *psz2;
+    char *      pszW;
+    char        ch;
+    int         cch;
+    APIRET      rc;
+
+    /*
+     * Check if this is multiple command separated by either &, && or |.
+     * Currently ignoring quotes for this test.
+     */
+    if (    strchr(pszCommand, '&')
+        ||  strchr(pszCommand, '|'))
+    {
+        strcpy(pszArg, "cmd.exe");      /* doesn't use comspec, just defaults to cmd.exe in all cases. */
+        fCMD = TRUE;
+        psz2 = pszCommand;              /* start of arguments. */
+    }
+    else
+    {
+        char chEnd = ' ';
+
+        /*
+         * Parse out the first name.
+         */
+        for (psz = pszCommand; *psz == '\t' || *psz == ' ';) //strip(,'L');
+            psz++;
+        if (*psz == '"' || *psz == '\'')
+            chEnd = *psz++;
+        psz2 = psz;
+        if (chEnd == ' ')
+        {
+            while ((ch = *psz) != '\0' && ch != ' ' && ch != '\t')
+                psz++;
+        }
+        else
+        {
+            while ((ch = *psz) != '\0' && ch != chEnd)
+                psz++;
+        }
+        *pszArg = '\0';
+        strncat(pszArg, psz2, psz - psz2);
+        psz2 = psz+1;                   /* start of arguments. */
+    }
+
+
+    /*
+     * Resolve the executable name if not qualified.
+     * NB! We doesn't fully support references to other driveletters yet. (TODO/BUGBUG)
+     */
+    /* correct slashes */
+    pszW = pszArg;
+    while ((pszW = strchr(pszW, '//')) != NULL)
+        *pszW++ = '\\';
+
+    /* make sure it ends with .exe */
+    pszW = pszArg + strlen(pszArg) - 1;
+    while (pszW > pszArg && *pszW != '.' && *pszW != '\\')
+        pszW--;
+    if (*pszW != '.')
+        strcat(pszArg, ".exe");
+
+    if (pszArg[1] != ':' || *pszArg == *pszCurDir)
+    {
+        rc = -1;                        /* indicate that we've not found the file. */
+
+        /* relative path? - expand it */
+        if (strchr(pszArg, '\\') || pszArg[1] == ':')
+        {   /* relative path - expand it and check for file existence */
+            fileNormalize(pszArg, pszCurDir);
+            rc = fileExist(pszArg);
+        }
+        else
+        {   /* Search path. */
+            const char *pszPath = pszzEnv;
+            while (*pszPath != '\0' && strncmp(pszPath, "PATH=", 5))
+                pszPath += strlen(pszPath) + 1;
+
+            if (pszPath && *pszPath != '\0')
+            {
+                /* check cache */
+                if (   !strcmp(pPathCache->szProgram, pszArg)
+                    && !strcmp(pPathCache->szPath, pszPath)
+                    && !strcmp(pPathCache->szCurDir, pszCurDir)
+                       )
+                {
+                    strcpy(pszArg, pPathCache->szResult);
+                    rc = fileExist(pszArg);
+                }
+
+                if (rc)
+                {   /* search path */
+                    char    szResult[CCHMAXPATH];
+                    rc = DosSearchPath(SEARCH_IGNORENETERRS, pszPath, pszArg, &szResult[0] , sizeof(szResult));
+                    if (!rc)
+                    {
+                        strcpy(pszArg, szResult);
+
+                        /* update cache */
+                        strcpy(pPathCache->szProgram, pszArg);
+                        strcpy(pPathCache->szPath, pszPath);
+                        strcpy(pPathCache->szCurDir, pszCurDir);
+                        strcpy(pPathCache->szResult, szResult);
+                    }
+                }
+            }
+        }
+    }
+    /* else nothing to do - assume full path (btw. we don't have the current dir for other drives anyway :-) */
+    else
+        rc = !fCMD ? fileExist(pszArg) : NO_ERROR;
+
+    /* In case of error use CMD */
+    if (rc && !fCMD)
+    {
+        strcpy(pszArg, "cmd.exe");      /* doesn't use comspec, just defaults to cmd.exe in all cases. */
+        fCMD = TRUE;
+        psz2 = pszCommand;              /* start of arguments. */
+    }
+
+
+    /*
+     * Complete the argument string.
+     * ---
+     * szArg current holds the command.
+     * psz2 points to the first parameter. (needs strip(,'L'))
+     */
+    while ((ch = *psz2) != '\0' && (ch == '\t' || ch == ' '))
+        psz2++;
+
+    pszW = pszArg + strlen(pszArg) + 1;
+    cch = strlen(psz2);
+    if (!fCMD)
+    {
+        memcpy(pszW, psz2, ++cch);
+        pszW[cch] = '\0';
+    }
+    else
+    {
+        strcpy(pszW, "/C \"");
+        pszW += strlen(pszW);
+        memcpy(pszW, psz2, cch);
+        memcpy(pszW + cch, "\"\0", 3);
+    }
+
+    return pszArg;
+}
+
+
+
+/**
+ * Normalizes the path slashes for the filename. It will partially expand paths too.
+ * @returns pszFilename
+ * @param   pszFilename  Pointer to filename string. Not empty string!
+ *                       Much space to play with.
+ * @remark  (From fastdep.)
+ */
+char *fileNormalize(char *pszFilename, char *pszCurDir)
+{
+    char *  psz;
+    int     aiSlashes[CCHMAXPATH/2];
+    int     cSlashes;
+    int     i;
+
+    /*
+     * Init stuff.
+     */
+    for (i = 1, cSlashes; pszCurDir[i] != '\0'; i++)
+    {
+        if (pszCurDir[i] == '/')
+            pszCurDir[i] = '\\';
+        if (pszCurDir[i] == '\\')
+            aiSlashes[cSlashes++] = i;
+    }
+    if (pszCurDir[i-1] != '\\')
+    {
+        aiSlashes[cSlashes] = i;
+        pszCurDir[i++] = '\\';
+        pszCurDir[i] = '\0';
+    }
+
+
+    /* expand path? */
+    pszFilename = psz;
+    if (pszFilename[1] != ':')
+    {   /* relative path */
+        int     iSlash;
+        char    szFile[CCHMAXPATH];
+        char *  psz = szFile;
+
+        strcpy(szFile, pszFilename);
+        iSlash = *psz == '\\' ? 1 : cSlashes;
+        while (*psz != '\0')
+        {
+            if (*psz == '.' && psz[1] == '.'  && psz[2] == '\\')
+            {   /* up one directory */
+                if (iSlash > 0)
+                    iSlash--;
+                psz += 3;
+            }
+            else if (*psz == '.' && psz[1] == '\\')
+            {   /* no change */
+                psz += 2;
+            }
+            else
+            {   /* completed expantion! */
+                strncpy(pszFilename, pszCurDir, aiSlashes[iSlash]+1);
+                strcpy(pszFilename + aiSlashes[iSlash]+1, psz);
+                break;
+            }
+        }
+    }
+    /* else: assume full path */
+
+    return psz;
+}
+
+/**
+ * Checks if a given file exist.
+ * @returns 0 if the file exists.   (NO_ERROR)
+ *          2 if the file doesn't exist. (ERROR_FILE_NOT_FOUND)
+ * @param   pszFilename     Name of the file to check existance for.
+ */
+APIRET fileExist(const char *pszFilename)
+{
+    FILESTATUS3     fsts3;
+    return DosQueryPathInfo(pszFilename, FIL_STANDARD, &fsts3, sizeof(fsts3));
 }
 
 
@@ -922,7 +1184,6 @@ void Worker(void * iWorkerId)
  */
 int Submit(int rcIgnore)
 {
-    int     i;
     int     cch;
     int     rc;
     char *  psz;
@@ -959,6 +1220,11 @@ int Submit(int rcIgnore)
         Error("Fatal error: Command too long.\n");
         shrmemFree();
         return -1;
+    }
+    if (*psz == '"' && psz[cch-2] == '"')    /* remove start & end quotes if any */
+    {
+        cch--;
+        psz++;
     }
     memcpy(&pShrMem->u1.Submit.szCommand[0], psz, cch);
 
@@ -1080,7 +1346,7 @@ int Kill(void)
 int shrmemCreate(void)
 {
     int rc;
-    rc = DosAllocSharedMem((PPVOID)&pShrMem,
+    rc = DosAllocSharedMem((PPVOID)(PVOID)&pShrMem,
                            SHARED_MEM_NAME,
                            SHARED_MEM_SIZE,
                            PAG_COMMIT | PAG_READ | PAG_WRITE);
@@ -1150,8 +1416,8 @@ int shrmemCreate(void)
 int shrmemOpen(void)
 {
     int     rc;
-    ULONG   ulDummy;
-    rc = DosGetNamedSharedMem((PPVOID)&pShrMem,
+
+    rc = DosGetNamedSharedMem((PPVOID)(PVOID)&pShrMem,
                               SHARED_MEM_NAME,
                               PAG_READ | PAG_WRITE);
     if (rc)
