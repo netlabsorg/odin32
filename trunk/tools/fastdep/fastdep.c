@@ -1,4 +1,4 @@
-/* $Id: fastdep.c,v 1.39 2002-08-21 01:51:56 bird Exp $
+/* $Id: fastdep.c,v 1.40 2002-08-27 21:48:45 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
@@ -3780,6 +3780,8 @@ BOOL depCheckCyclic(PDEPRULE pdepRule, const char *pszDep)
     char *  apszHistory[HISTORY];
     int     iHistory;
     int     j;
+    int     k;
+    int     iCmp;
 #endif
     PDEPRULE pdep;
     int     i;
@@ -3824,6 +3826,7 @@ BOOL depCheckCyclic(PDEPRULE pdepRule, const char *pszDep)
                 /*
                  * Check if in history, if so we'll skip it.
                  */
+                #if 1
                 for (j = 0;  j < iHistory; j++)
                     if (!strcmp(apszHistory[j], pdep->pszRule))
                         break;
@@ -3835,6 +3838,45 @@ BOOL depCheckCyclic(PDEPRULE pdepRule, const char *pszDep)
                  */
                 if (iHistory < HISTORY)
                     apszHistory[iHistory++] = pdep->pszRule;
+
+                #else
+                /*
+                 * Check if in history, if so we'll skip it.
+                 *  (Binary search)
+                 * ASSUMES: Always something in the history!
+                 */
+                j = iHistory / 2;
+                k = (iHistory + 1) / 2;
+                do 
+                {
+                    iCmp = strcmp(pdep->pszRule, apszHistroy[j]);
+                    if (!iCmp) 
+                        break;
+                    k = (k + 1) / 2;
+                    if (iCmp > 0)
+                        j += k;
+                    else
+                        j -= k;
+                } while (!k);
+
+                if (!iCmp) 
+                    continue;           /* found */
+
+                /*
+                 * Push into history - might concider make this binary sorted one day.
+                 */
+                if (iHistory < HISTORY)
+                {
+                    if (iCmp > 0)       /* Insert after. */
+                        j++;
+                    for (k = iHistory; k < j; k--) 
+                        apszHistory[k] = apszHistory[k - 1];
+                    apszHistory[j] = pdep->pszRule;
+                    iHistory++;
+                }
+
+                #endif
+
 #endif
                 /*
                  * Push on to the stack.
