@@ -1,5 +1,8 @@
-/* $Id: changelog,v 1.1554 2001-07-03 06:52:36 sandervl Exp $ */
+/* $Id: changelog,v 1.1555 2001-07-03 13:22:13 sandervl Exp $ */
 
  2001-07-03: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Executable load fix
                   (fixes crash during RealPlayer 8 install)
+                o Allow loading of OS/2 dlls for Odin32 apps (like Opera)
+    - USER32:   o GetKeyboardState fixes
+                  (for Putty keyboard input)
