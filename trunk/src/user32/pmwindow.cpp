@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.26 1999-10-14 09:22:40 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.27 1999-10-14 18:27:58 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -240,7 +240,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         break;
 
     case WM_SHOW:
-        dprintf(("OS2: WM_SHOW %x", hwnd));
+        dprintf(("OS2: WM_SHOW %x %d", hwnd, mp1));
         if(win32wnd->MsgShow((ULONG)mp1)) {
                 goto RunDefWndProc;
         }
@@ -305,13 +305,13 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         WinQueryWindowPos(win32wnd->getOS2FrameWindowHandle(), &swpFrame);
         dprintf(("WINDOWPOSCHANGE %x %x %x (%d,%d) (%d,%d)", win32wnd->getWindowHandle(), win32wnd->getOS2FrameWindowHandle(),
                          swpFrame.fl,swpFrame.x, swpFrame.y, swpFrame.cx, swpFrame.cy));
+	POINTL point;
+	point.x = swpFrame.x;
+	point.y = swpFrame.y;
+	WinMapWindowPoints(win32wnd->getOS2FrameWindowHandle(), HWND_DESKTOP,
+                           &point, 1);
 
-	RECTL rect;
-        WinQueryWindowRect(win32wnd->getOS2FrameWindowHandle(), &rect);
-        dprintf(("WINDOWPOSCHANGE %x %x (%d,%d) (%d,%d)", win32wnd->getWindowHandle(), win32wnd->getOS2FrameWindowHandle(),
-                         rect.xLeft, rect.yBottom, rect.xRight, rect.yTop));
-
-        win32wnd->setWindowRect(wp.x, wp.y, wp.x + wp.cx, wp.y + wp.cy);
+        win32wnd->setWindowRect(point.x, point.y, point.x+swpFrame.cx, point.y+swpFrame.cy);
         win32wnd->setClientRect(pswpo->x, pswpo->y, pswpo->x + pswpo->cx, pswpo->y + pswpo->cy);
 
         wp.hwnd = win32wnd->getWindowHandle();
@@ -341,14 +341,14 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
 #ifdef DEBUG
                 Win32BaseWindow *window = Win32BaseWindow::GetWindowFromOS2Handle(hwnd);
-                dprintf(("ENUMERATE %x delta %d (%d,%d) (%d,%d)", (window) ? window->getWindowHandle() : hwnd,
-                         yDelta, swp[i].x, swp[i].y, swp[i].cx, swp[i].cy));
+                dprintf(("ENUMERATE %x delta %d (%d,%d) (%d,%d) %x", (window) ? window->getWindowHandle() : hwnd,
+                         yDelta, swp[i].x, swp[i].y, swp[i].cx, swp[i].cy, swp[i].fl));
 #endif
 
                 if(swp[i].y != 0) {
                     //child window at offset <> 0 from client area -> offset now changes
                     swp[i].y  += yDelta;
-                    swp[i].fl &= ~SWP_NOREDRAW;
+                    swp[i].fl &= ~(SWP_NOREDRAW);
                 }
                 //else child window with the same start coorindates as the client area
                 //The app should resize it.
@@ -386,6 +386,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
     case WM_ERASEBACKGROUND:
     {
+	dprintf(("OS2: WM_ERASEBACKGROUND %x", win32wnd->getWindowHandle()));
         if (!win32wnd->isSupressErase()) {
             BOOL erased = sendEraseBkgnd (win32wnd);
             win32wnd->setEraseBkgnd (!erased, !erased);

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.41 1999-10-14 09:22:42 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.42 1999-10-14 18:27:59 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -453,10 +453,6 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   OSLibWinConvertStyle(cs->style, &cs->dwExStyle, &dwOSWinStyle, &dwOSFrameStyle, &borderWidth, &borderHeight);
   dwExStyle = cs->dwExStyle;
 
-  //SvL: Add bordersize
-  cs->cy += 2*borderHeight;
-  cs->cx += 2*borderWidth;
-
   rectWindow.left   = cs->x;
   rectWindow.top    = cs->y;
   rectWindow.right  = cs->x + cs->cx;
@@ -488,7 +484,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
                                  dwOSWinStyle, dwOSFrameStyle, (char *)windowNameA,
                                  (owner) ? owner->getOS2WindowHandle() : OSLIB_HWND_DESKTOP,
                                  (hwndLinkAfter == HWND_BOTTOM) ? TRUE : FALSE,
-                                 &OS2HwndFrame);
+                                 &OS2HwndFrame, 0);
 
   if(OS2Hwnd == 0) {
         dprintf(("Window creation failed!!"));
@@ -547,6 +543,8 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
   }
 #endif
 
+  OSLibWinSetOwner(OS2Hwnd, OS2HwndFrame);
+
   if (dwStyle & WS_HSCROLL)
   {
         hwndHorzScroll = OSLibWinQueryScrollBarHandle(OS2HwndFrame, OSLIB_HSCROLL);
@@ -584,12 +582,12 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
         SetIcon(windowClass->getIcon());
 
   //Subclass frame
-  if(isFrameWindow() && (HAS_3DFRAME(dwExStyle) ||
-     (!HAS_DLGFRAME(dwStyle, dwExStyle) && (dwStyle & (WS_DLGFRAME|WS_BORDER|WS_THICKFRAME)) == WS_BORDER)))
-  {
+//  if(isFrameWindow() && (HAS_3DFRAME(dwExStyle) ||
+//     (!HAS_DLGFRAME(dwStyle, dwExStyle) && (dwStyle & (WS_DLGFRAME|WS_BORDER|WS_THICKFRAME)) == WS_BORDER)))
+//  {
         pOldFrameProc = FrameSubclassFrameWindow(this);
         if (isChild()) FrameSetBorderSize(this,TRUE);
-  }
+//  }
 
   /* Send the WM_CREATE message
    * Perhaps we shouldn't allow width/height changes as well.
@@ -616,7 +614,7 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
   {
         SendNCCalcSize(FALSE, &rectWindow, NULL, NULL, 0, &rectClient );
 
-        OffsetRect(&rectWindow, maxPos.x - rectWindow.left, maxPos.y - rectWindow.top);
+//        OffsetRect(&rectWindow, maxPos.x - rectWindow.left, maxPos.y - rectWindow.top);
         dprintf(("Sending WM_CREATE"));
         if( (SendMessageA(WM_CREATE, 0, (LPARAM)cs )) != -1 )
         {
@@ -685,13 +683,21 @@ ULONG Win32BaseWindow::MsgEnable(BOOL fEnable)
 //******************************************************************************
 ULONG Win32BaseWindow::MsgShow(BOOL fShow)
 {
+    if(fNoSizeMsg) {
+        return 1;
+    }
+
+    if(fShow) {
+            setStyle(getStyle() | WS_VISIBLE);
+    }
+    else    setStyle(getStyle() & ~WS_VISIBLE);
+
     return SendInternalMessageA(WM_SHOWWINDOW, fShow, 0);
 }
 //******************************************************************************
 //******************************************************************************
 ULONG Win32BaseWindow::MsgPosChanging(LPARAM lp)
 {
-    dprintf(("MsgPosChanging"));
     if(fNoSizeMsg)
         return 1;
 
@@ -701,7 +707,6 @@ ULONG Win32BaseWindow::MsgPosChanging(LPARAM lp)
 //******************************************************************************
 ULONG Win32BaseWindow::MsgPosChanged(LPARAM lp)
 {
-    dprintf(("MsgPosChanged"));
     if(fNoSizeMsg)
         return 1;
 
@@ -1968,48 +1973,44 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
    Win32BaseWindow *window;
    HWND hParent = 0;
 
-   dprintf (("SetWindowPos %x %x (%d,%d)(%d,%d) %x", Win32Hwnd, hwndInsertAfter, x, y, cx, cy, fuFlags));
+    dprintf (("SetWindowPos %x %x (%d,%d)(%d,%d) %x", Win32Hwnd, hwndInsertAfter, x, y, cx, cy, fuFlags));
 
-   if (fuFlags &
+    if (fuFlags &
        ~(SWP_NOSIZE     | SWP_NOMOVE     | SWP_NOZORDER     |
          SWP_NOREDRAW   | SWP_NOACTIVATE | SWP_FRAMECHANGED |
          SWP_SHOWWINDOW | SWP_HIDEWINDOW | SWP_NOCOPYBITS   |
          SWP_NOOWNERZORDER))
-   {
-      return FALSE;
-   }
+    {
+        return FALSE;
+    }
 
-   WINDOWPOS wpos;
-   SWP swp, swpOld;
+    WINDOWPOS wpos;
+    SWP swp, swpOld;
 
-   wpos.flags            = fuFlags;
-   wpos.cy               = cy;
-   wpos.cx               = cx;
-   wpos.x                = x;
-   wpos.y                = y;
-   wpos.hwndInsertAfter  = hwndInsertAfter;
-   wpos.hwnd             = getWindowHandle();
+    wpos.flags            = fuFlags;
+    wpos.cy               = cy;
+    wpos.cx               = cx;
+    wpos.x                = x;
+    wpos.y                = y;
+    wpos.hwndInsertAfter  = hwndInsertAfter;
+    wpos.hwnd             = getWindowHandle();
 
-   //SvL: Add bordersize
-   wpos.cy              += 2*borderHeight;
-   wpos.cx              += 2*borderWidth;
-
-   if(~fuFlags & (SWP_NOMOVE | SWP_NOSIZE))
-   {
+    if(~fuFlags & (SWP_NOMOVE | SWP_NOSIZE))
+    {
        if (isChild())
        {
            hParent = getParent()->getOS2WindowHandle();
        }
        OSLibWinQueryWindowPos(OS2HwndFrame, &swpOld);
-   }
+    }
 
-   OSLibMapWINDOWPOStoSWP(&wpos, &swp, &swpOld, hParent, OS2HwndFrame);
-   if (swp.fl == 0)
+    OSLibMapWINDOWPOStoSWP(&wpos, &swp, &swpOld, hParent, OS2HwndFrame);
+    if (swp.fl == 0)
       return TRUE;
 
 //   if ((swp.fl & SWPOS_ZORDER) && (swp.hwndInsertBehind > HWNDOS_BOTTOM))
-   if ((swp.hwndInsertBehind > HWNDOS_BOTTOM))
-   {
+    if ((swp.hwndInsertBehind > HWNDOS_BOTTOM))
+    {
         Win32BaseWindow *wndBehind = Win32BaseWindow::GetWindowFromHandle(swp.hwndInsertBehind);
         if(wndBehind) {
             swp.hwndInsertBehind   = wndBehind->getOS2WindowHandle();
@@ -2018,10 +2019,10 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
             dprintf(("ERROR: SetWindowPos: hwndInsertBehind %x invalid!",swp.hwndInsertBehind));
             swp.hwndInsertBehind = 0;
         }
-   }
+    }
 #if 0
-   if (isFrameWindow())
-   {
+    if (isFrameWindow())
+    {
       if (!isChild())
       {
         POINT maxSize, maxPos, minTrack, maxTrack;
@@ -2034,33 +2035,33 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
         if (swp.cy < minTrack.y) swp.cy = minTrack.y;
       }
       swp.hwnd = OS2HwndFrame;
-   }
-   else
+    }
+    else
 #endif
       swp.hwnd = OS2HwndFrame;
 
-   dprintf (("WinSetWindowPos %x %x (%d,%d)(%d,%d) %x", swp.hwnd, swp.hwndInsertBehind, swp.x, swp.y, swp.cx, swp.cy, swp.fl));
+    dprintf (("WinSetWindowPos %x %x (%d,%d)(%d,%d) %x", swp.hwnd, swp.hwndInsertBehind, swp.x, swp.y, swp.cx, swp.cy, swp.fl));
 
-   rc = OSLibWinSetMultWindowPos(&swp, 1);
+    rc = OSLibWinSetMultWindowPos(&swp, 1);
 
-   if (rc == FALSE)
-   {
+    if (rc == FALSE)
+    {
         dprintf(("OSLibWinSetMultWindowPos failed!"));
-   }
-   else
-   {
-      if (fuFlags & SWP_FRAMECHANGED_W)
-         OSLibSendMessage (OS2HwndFrame, 0x42 /*WM_UPDATEFRAME*/, -1, 0);
-   }
+    }
+    else
+    {
+        if (fuFlags & SWP_FRAMECHANGED_W)
+            OSLibSendMessage (OS2HwndFrame, 0x42 /*WM_UPDATEFRAME*/, -1, 0);
+    }
 
-   return (rc);
+    return (rc);
 }
 //******************************************************************************
 //Also destroys all the child windows (destroy parent, destroy children)
 //******************************************************************************
 BOOL Win32BaseWindow::DestroyWindow()
 {
-  return OSLibWinDestroyWindow(OS2HwndFrame);
+    return OSLibWinDestroyWindow(OS2HwndFrame);
 }
 //******************************************************************************
 //******************************************************************************
@@ -2348,7 +2349,7 @@ BOOL Win32BaseWindow::IsWindowVisible()
 //******************************************************************************
 BOOL Win32BaseWindow::GetWindowRect(PRECT pRect)
 {
-    return OSLibWinQueryWindowRect(OS2Hwnd, pRect, RELATIVE_TO_SCREEN);
+    return OSLibWinQueryWindowRect(OS2HwndFrame, pRect, RELATIVE_TO_SCREEN);
 }
 //******************************************************************************
 //******************************************************************************
