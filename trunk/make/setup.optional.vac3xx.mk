@@ -1,4 +1,4 @@
-# $Id: setup.optional.vac3xx.mk,v 1.4 2002-08-29 10:01:41 bird Exp $
+# $Id: setup.optional.vac3xx.mk,v 1.5 2002-09-05 02:56:11 bird Exp $
 
 #
 #  Helper file for all the optional stuff which is common for
@@ -53,8 +53,8 @@ _CC_PACK        = /Sp$(CC_PACK)
 !if defined(CC_DBGMEM) || defined(ALL_DBGMEM)
 _CC_DBGMEM      = /Tm+
 !endif
-!if defined(CXX_NO_DBGMEM) || defined(ALL_NO_DBGMEM)
-_CXX_DBGMEM      = /Tm-
+!if defined(CC_NO_DBGMEM) || defined(ALL_NO_DBGMEM)
+_CC_DBGMEM      = /Tm-
 !endif
 !if defined(CC_RING0) || defined(ALL_RING0)
 _CC_RING0       = /Gr+
