@@ -1,9 +1,11 @@
-/* $Id: heapstring.cpp,v 1.29 2000-07-06 21:18:42 sandervl Exp $ */
+/* $Id: heapstring.cpp,v 1.30 2000-07-10 18:38:51 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  *
  * Win32 compatibility string functions for OS/2
+ *
+ * NOTE: lstrcpyn* always appends a terminating 0 (unlike strncpy)!
  *
  * Copyright 1999 Patrick Haller
  */
