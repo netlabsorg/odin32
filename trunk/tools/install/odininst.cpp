@@ -1,4 +1,4 @@
-/* $Id: odininst.cpp,v 1.5 2001-05-17 11:26:29 sandervl Exp $ */
+/* $Id: odininst.cpp,v 1.6 2001-05-17 18:32:56 sandervl Exp $ */
 /*
  * Odin WarpIn installation app
  *
@@ -528,11 +528,11 @@ BOOL InitSystemAndRegistry()
 
 //[HKEY_LOCAL_MACHINE\HARDWARE\DEVICEMAP\SERIALCOMM]
 //"Serial1"="COM2"
-   if(RegCreateKey(HKEY_LOCAL_MACHINE,"HARDWARE\\DEVICEMAP\\SERIALCOMM",&hkey)!=ERROR_SUCCESS) {
-    goto initreg_error;
-   }
-   RegSetValueEx(hkey, "Serial1",0,REG_SZ, (LPBYTE)"COM2", 5);
-   RegCloseKey(hkey);
+////   if(RegCreateKey(HKEY_LOCAL_MACHINE,"HARDWARE\\DEVICEMAP\\SERIALCOMM",&hkey)!=ERROR_SUCCESS) {
+////    goto initreg_error;
+////   }
+////   RegSetValueEx(hkey, "Serial1",0,REG_SZ, (LPBYTE)"COM2", 5);
+////   RegCloseKey(hkey);
 
 
 //[HKEY_LOCAL_MACHINE\Software\Microsoft\OLE]
