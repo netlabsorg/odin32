@@ -138,7 +138,7 @@ MYTOOLINFO Tools[] =
 #ifdef __WIN32OS2__
 typedef void (* CALLBACK PFNSHGETSETTINGSPROC)(LPSHELLFLAGSTATE lpsfs, DWORD dwMask);
 #else
-typedef void CALLBACK (*PFNSHGETSETTINGSPROC)(LPSHELLFLAGSTATE lpsfs, DWORD dwMask);
+typedef void (CALLBACK *PFNSHGETSETTINGSPROC)(LPSHELLFLAGSTATE lpsfs, DWORD dwMask);
 #endif
 
 /**********************************************************
@@ -535,7 +535,7 @@ static BOOLEAN LV_RenameItem(IShellViewImpl * This, LPCITEMIDLIST pidlOld, LPCIT
 	  lvItem.lParam = (LPARAM) ILClone(ILFindLastID(pidlNew));	/* set the item's data */
 	  ListView_SetItemA(This->hWndList, &lvItem);
 	  ListView_Update(This->hWndList, nItem);
-	  return TRUE;					/* fixme: better handling */
+	  return TRUE;					/* FIXME: better handling */
 	}
 	return FALSE;
 }
@@ -1151,7 +1151,8 @@ static LRESULT ShellView_OnNotify(IShellViewImpl * This, UINT CtlID, LPNMHDR lpn
 	    break;
 	
 	  case LVN_GETDISPINFOA:
-	    TRACE("-- LVN_GETDISPINFOA %p\n",This);
+	  case LVN_GETDISPINFOW:
+	    TRACE("-- LVN_GETDISPINFO %p\n",This);
 	    pidl = (LPITEMIDLIST)lpdi->item.lParam;
 
 	    if(lpdi->item.mask & LVIF_TEXT)	/* text requested */
@@ -1160,8 +1161,16 @@ static LRESULT ShellView_OnNotify(IShellViewImpl * This, UINT CtlID, LPNMHDR lpn
 	      {
 	        SHELLDETAILS sd;
 	        IShellFolder2_GetDetailsOf(This->pSF2Parent, pidl, lpdi->item.iSubItem, &sd);
+                if (lpnmh->code == LVN_GETDISPINFOA)
+                {
 	        StrRetToStrNA( lpdi->item.pszText, lpdi->item.cchTextMax, &sd.str, NULL);
 	        TRACE("-- text=%s\n",lpdi->item.pszText);		
+	      }
+                else /* LVN_GETDISPINFOW */
+                {
+                    StrRetToStrNW( lpdi->item.pszText, lpdi->item.cchTextMax, &sd.str, NULL);
+                    TRACE("-- text=%s\n",debugstr_w((WCHAR*)(lpdi->item.pszText)));
+                }
 	      }
 	      else
 	      {
@@ -1558,7 +1567,7 @@ static HRESULT WINAPI IShellView_fnTranslateAccelerator(IShellView * iface,LPMSG
 	
 	if ((lpmsg->message>=WM_KEYFIRST) && (lpmsg->message>=WM_KEYLAST))
 	{
-	  TRACE("-- key=0x04%x",lpmsg->wParam) ;
+	  TRACE("-- key=0x04%x\n",lpmsg->wParam) ;
 	}
 	return S_FALSE; /* not handled */
 }

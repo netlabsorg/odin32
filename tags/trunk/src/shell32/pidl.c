@@ -1,3 +1,4 @@
+/* $Id: pidl.c,v 1.15 2002-03-08 11:00:59 sandervl Exp $ */
 /*
  *	pidl Handling
  *
@@ -24,7 +25,7 @@ ODINDEBUGCHANNEL(SHELL32-PIDL)
 #include <stdlib.h>
 #include <string.h>
 #include "winbase.h"
-#include "debugtools.h"
+#include "winreg.h"
 #include "shlguid.h"
 #include "winerror.h"
 #include "winnls.h"
@@ -34,6 +35,7 @@ ODINDEBUGCHANNEL(SHELL32-PIDL)
 #include "shlwapi.h"
 
 #include "pidl.h"
+#include "debugtools.h"
 
 DEFAULT_DEBUG_CHANNEL(pidl);
 

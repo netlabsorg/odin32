@@ -1536,7 +1536,7 @@ static HRESULT WINAPI ISFHelper_fnDeleteItems(
 	    TRACE("delete %s\n", szPath);
 	    if (! SHELL_DeleteDirectoryA(szPath, bConfirm))
 	    {
-              TRACE("delete %s failed, bConfirm=%d", szPath, bConfirm);
+              TRACE("delete %s failed, bConfirm=%d\n", szPath, bConfirm);
 	      return E_FAIL;
 	    }
 	    pidl = ILCombine(This->absPidl, apidl[i]);
@@ -1550,7 +1550,7 @@ static HRESULT WINAPI ISFHelper_fnDeleteItems(
 	    TRACE("delete %s\n", szPath);
 	    if (! SHELL_DeleteFileA(szPath, bConfirm))
 	    {
-              TRACE("delete %s failed, bConfirm=%d", szPath, bConfirm);
+              TRACE("delete %s failed, bConfirm=%d\n", szPath, bConfirm);
 	      return E_FAIL;
 	    }
 	    pidl = ILCombine(This->absPidl, apidl[i]);
@@ -1565,7 +1565,7 @@ static HRESULT WINAPI ISFHelper_fnDeleteItems(
 /****************************************************************************
  * ISFHelper_fnCopyItems
  *
- * copys items to this folder
+ * copies items to this folder
  */
 static HRESULT WINAPI ISFHelper_fnCopyItems(
 	ISFHelper *iface,
@@ -1720,7 +1720,7 @@ static HRESULT WINAPI ISF_Desktop_fnParseDisplayName(
 	*ppidl = 0;
 	if (pchEaten) *pchEaten = 0;	/* strange but like the original */
 	
-	/* fixme no real parsing implemented */
+	/* FIXME no real parsing implemented */
 	pidlTemp = _ILCreateMyComputer();
 	szNext = lpszDisplayName;
 
@@ -1777,6 +1777,7 @@ static HRESULT WINAPI ISF_Desktop_fnBindToObject( IShellFolder2 * iface, LPCITEM
 	_ICOM_THIS_From_IShellFolder2(IGenericSFImpl, iface)
 	GUID		const * clsid;
 	IShellFolder	*pShellFolder, *pSubFolder;
+	HRESULT		hr;
 	
 	TRACE("(%p)->(pidl=%p,%p,\n\tIID:\t%s,%p)\n",
               This,pidl,pbcReserved,debugstr_guid(riid),ppvOut);
@@ -1823,17 +1824,18 @@ static HRESULT WINAPI ISF_Desktop_fnBindToObject( IShellFolder2 * iface, LPCITEM
 	if (_ILIsPidlSimple(pidl))	/* no sub folders */
 	{
 	  *ppvOut = pShellFolder;
+	  hr = S_OK;
 	}
 	else				/* go deeper */
 	{
-	  IShellFolder_BindToObject(pShellFolder, ILGetNext(pidl), NULL, riid, (LPVOID)&pSubFolder);
+	  hr = IShellFolder_BindToObject(pShellFolder, ILGetNext(pidl), NULL, riid, (LPVOID)&pSubFolder);
 	  IShellFolder_Release(pShellFolder);
 	  *ppvOut = pSubFolder;
 	}
 
-	TRACE("-- (%p) returning (%p)\n",This, *ppvOut);
+	TRACE("-- (%p) returning (%p) %08lx\n",This, *ppvOut, hr);
 
-	return S_OK;
+	return hr;
 }
 
 /**************************************************************************
@@ -2219,6 +2221,7 @@ static HRESULT WINAPI ISF_MyComputer_fnBindToObject( IShellFolder2 * iface, LPCI
 	GUID		const * clsid;
 	IShellFolder	*pShellFolder, *pSubFolder;
 	LPITEMIDLIST	pidltemp;
+	HRESULT		hr;
 	
 	TRACE("(%p)->(pidl=%p,%p,\n\tIID:\t%s,%p)\n",
               This,pidl,pbcReserved,debugstr_guid(riid),ppvOut);
@@ -2246,17 +2249,19 @@ static HRESULT WINAPI ISF_MyComputer_fnBindToObject( IShellFolder2 * iface, LPCI
 	if (_ILIsPidlSimple(pidl))	/* no sub folders */
 	{
 	  *ppvOut = pShellFolder;
+	  hr = S_OK;
 	}
 	else				/* go deeper */
 	{
-	  IShellFolder_BindToObject(pShellFolder, ILGetNext(pidl), NULL, &IID_IShellFolder, (LPVOID)&pSubFolder);
+	  hr = IShellFolder_BindToObject(pShellFolder, ILGetNext(pidl), NULL,
+					 riid, (LPVOID)&pSubFolder);
 	  IShellFolder_Release(pShellFolder);
 	  *ppvOut = pSubFolder;
 	}
 
-	TRACE("-- (%p) returning (%p)\n",This, *ppvOut);
+	TRACE("-- (%p) returning (%p) %08lx\n",This, *ppvOut, hr);
 
-	return S_OK;
+	return hr;
 }
 
 /**************************************************************************

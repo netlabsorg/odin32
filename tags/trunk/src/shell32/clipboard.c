@@ -1,4 +1,4 @@
-/* $Id: clipboard.c,v 1.1 2000-08-30 13:52:50 sandervl Exp $ */
+/* $Id: clipboard.c,v 1.2 2002-03-08 11:00:58 sandervl Exp $ */
 /*
  *	clipboard helper functions
  *
@@ -26,14 +26,15 @@
 
 #include <string.h>
 
-#include "debugtools.h"
-
+#include "winreg.h"
 #include "pidl.h"
 #include "wine/undocshell.h"
 #include "shell32_main.h"
-#include "shell.h" /* DROPFILESTRUCT */
+#include "shlwapi.h"
 
-DEFAULT_DEBUG_CHANNEL(shell)
+#include "debugtools.h"
+
+DEFAULT_DEBUG_CHANNEL(shell);
 
 static int refClipCount = 0;
 static HINSTANCE hShellOle32 = 0;
@@ -101,13 +102,13 @@ HGLOBAL RenderHDROP(LPITEMIDLIST pidlRoot, LPITEMIDLIST * apidl, UINT cidl)
 	char szRootPath[MAX_PATH];
 	char szFileName[MAX_PATH];
 	HGLOBAL hGlobal;
-	LPDROPFILESTRUCT pDropFiles;
+	DROPFILES *pDropFiles;
 	int offset;
 	
 	TRACE("(%p,%p,%u)\n", pidlRoot, apidl, cidl);
 
 	/* get the size needed */
-	size = sizeof(DROPFILESTRUCT);
+	size = sizeof(DROPFILES);
 
 	SHGetPathFromIDListA(pidlRoot, szRootPath);
 	PathAddBackslashA(szRootPath);
@@ -125,11 +126,11 @@ HGLOBAL RenderHDROP(LPITEMIDLIST pidlRoot, LPITEMIDLIST * apidl, UINT cidl)
 	hGlobal = GlobalAlloc(GHND|GMEM_SHARE, size);
 	if(!hGlobal) return hGlobal;
 
-        pDropFiles = (LPDROPFILESTRUCT)GlobalLock(hGlobal);
-        pDropFiles->lSize = sizeof(DROPFILESTRUCT);
-        pDropFiles->fWideChar = FALSE;
+        pDropFiles = (DROPFILES *)GlobalLock(hGlobal);
+        pDropFiles->pFiles = sizeof(DROPFILES);
+        pDropFiles->fWide = FALSE;
 
-	offset = pDropFiles->lSize;
+	offset = pDropFiles->pFiles;
 	strcpy(szFileName, szRootPath);
 	
 	for (i=0; i<cidl;i++)

@@ -40,6 +40,9 @@ ODINDEBUGCHANNEL(SHELL32-SHELLORD)
 #else
 #include "undocshell.h"
 #endif
+#include "pidl.h"
+#include "shlwapi.h"
+#include "commdlg.h"
 
 DEFAULT_DEBUG_CHANNEL(shell);
 
@@ -80,7 +83,7 @@ DWORD WINAPI ParseFieldA(
 /*************************************************************************
  * ParseFieldW			[internal]
  *
- * copys a field from a ',' delimited string
+ * copies a field from a ',' delimited string
  * 
  * first field is nField = 1
  */
@@ -105,19 +108,49 @@ DWORD WINAPI ParseFieldAW(LPCVOID src, DWORD nField, LPVOID dst, DWORD len)
  * GetFileNameFromBrowse			[SHELL32.63]
  * 
  */
-BOOL WIN32API GetFileNameFromBrowse(HWND hwndOwner, LPSTR lpstrFile,
-                                    DWORD nMaxFile, LPCSTR lpstrInitialDir,
-                                    LPCSTR lpstrDefExt, LPCSTR lpstrFilter,
+BOOL WINAPI GetFileNameFromBrowse(
+	HWND hwndOwner,
+	LPSTR lpstrFile,
+	DWORD nMaxFile,
+	LPCSTR lpstrInitialDir,
+	LPCSTR lpstrDefExt,
+	LPCSTR lpstrFilter,
                                     LPCSTR lpstrTitle)
 {
-	FIXME("(%04x,%s,%ld,%s,%s,%s,%s):stub.\n",
+    HMODULE hmodule;
+    FARPROC pGetOpenFileNameA;
+    OPENFILENAMEA ofn;
+    BOOL ret;
+
+    TRACE("%04x, %s, %ld, %s, %s, %s, %s)\n",
 	  hwndOwner, lpstrFile, nMaxFile, lpstrInitialDir, lpstrDefExt,
 	  lpstrFilter, lpstrTitle);
 
-    /* puts up a Open Dialog and requests input into targetbuf */
     /* OFN_HIDEREADONLY|OFN_NOCHANGEDIR|OFN_FILEMUSTEXIST|OFN_unknown */
-    strcpy(lpstrFile,"x:\\dummy.exe");
-    return 1;
+    hmodule = LoadLibraryA("comdlg32.dll");
+    if(!hmodule) return FALSE;
+    pGetOpenFileNameA = GetProcAddress(hmodule, "GetOpenFileNameA");
+    if(!pGetOpenFileNameA)
+    {
+	FreeLibrary(hmodule);
+	return FALSE;
+    }
+
+    memset(&ofn, 0, sizeof(ofn));
+
+    ofn.lStructSize = sizeof(ofn);
+    ofn.hwndOwner = hwndOwner;
+    ofn.lpstrFilter = lpstrFilter;
+    ofn.lpstrFile = lpstrFile;
+    ofn.nMaxFile = nMaxFile;
+    ofn.lpstrInitialDir = lpstrInitialDir;
+    ofn.lpstrTitle = lpstrTitle;
+    ofn.lpstrDefExt = lpstrDefExt;
+    ofn.Flags = OFN_EXPLORER | OFN_HIDEREADONLY | OFN_FILEMUSTEXIST;
+    ret = pGetOpenFileNameA(&ofn);
+    
+    FreeLibrary(hmodule);
+    return ret;
 }
 
 /*************************************************************************
@@ -347,7 +380,7 @@ void WIN32API SHFree(LPVOID x)
 	TRACE("%p\n",x);
 #endif
   
-#if __WIN32OS2_
+#if __WIN32OS2__
   HEAP_free(x);
 #else
   HeapFree(GetProcessHeap(), 0, x);
@@ -1029,7 +1062,7 @@ BOOL WINAPI ShellExecuteExA (LPSHELLEXECUTEINFOA sei)
         /* FIXME: szCommandline should not be of a fixed size. Plus MAX_PATH is way too short! */
 	  /* the commandline contains 'c:\Path\wordpad.exe "%1"' */
 	  HCR_GetExecuteCommand(sei->lpClass, (sei->lpVerb) ? sei->lpVerb : "open", szCommandline, sizeof(szCommandline));
-	  /* fixme: get the extension of lpFile, check if it fits to the lpClass */
+	  /* FIXME: get the extension of lpFile, check if it fits to the lpClass */
 	  TRACE("SEE_MASK_CLASSNAME->'%s'\n", szCommandline);
 	}
 
@@ -1063,15 +1096,18 @@ BOOL WINAPI ShellExecuteExA (LPSHELLEXECUTEINFOA sei)
 
 	TRACE("execute:'%s','%s'\n",szApplicationName, szCommandline);
 
-	strcat(szApplicationName, " ");
-	strcat(szApplicationName, szCommandline);
+	if (szCommandline[0]) {
+		strcat(szApplicationName, " ");
+		strcat(szApplicationName, szCommandline);
+	}
 
 	ZeroMemory(&startup,sizeof(STARTUPINFOA));
 	startup.cb = sizeof(STARTUPINFOA);
 
 	if (! CreateProcessA(NULL, szApplicationName,
 			 NULL, NULL, FALSE, 0, 
-			 NULL, NULL, &startup, &info))
+			 NULL, sei->lpDirectory, 
+			&startup, &info))
 	{
 	  sei->hInstApp = GetLastError();
 	  return FALSE;
@@ -1262,8 +1298,8 @@ HGLOBAL WINAPI SHAllocShared(LPVOID psrc, DWORD size, DWORD procID)
  * NOTES
  *  parameter1 is return value from SHAllocShared
  *  parameter2 is return value from GetCurrentProcessId
- *  the receiver of (WM_USER+2) trys to lock the HANDLE (?) 
- *  the returnvalue seems to be a memoryadress
+ *  the receiver of (WM_USER+2) tries to lock the HANDLE (?) 
+ *  the return value seems to be a memory address
  */
 LPVOID WINAPI SHLockShared(HANDLE hmem, DWORD procID)
 {	TRACE("handle=0x%04x procID=0x%04lx\n",hmem,procID);

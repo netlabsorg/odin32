@@ -122,7 +122,7 @@ static LPWSTR PathGetExtensionW(LPCWSTR lpszPath)
 /*************************************************************************
  * PathGetExtensionAW		[SHELL32.158]
  */
-LPVOID WINAPI PathGetExtensionAW(LPCVOID lpszPath) 
+LPVOID WINAPI PathGetExtensionAW(LPCVOID lpszPath, DWORD void1, DWORD void2) 
 {
 	if (SHELL_OsIsUnicode())
 	  return PathGetExtensionW(lpszPath);
@@ -823,10 +823,10 @@ static const CSIDL_DATA CSIDL_Data[] =
 	"PrintHood",
 	"PrintHood"
     },
-    { /* CSIDL_LOCAL_APPDATA */
-	0, 0, /* FIXME */
-	NULL,
-	NULL,
+    { /* CSIDL_LOCAL_APPDATA (win2k only/undocumented) */
+	1, HKCU, 
+	"Local AppData",
+	"Local Settings\\Application Data",
     },
     { /* CSIDL_ALTSTARTUP */
 	0, 1, /* FIXME */

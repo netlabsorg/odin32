@@ -1,4 +1,4 @@
-/* $Id: classes.c,v 1.1 2000-08-30 13:52:50 sandervl Exp $ */
+/* $Id: classes.c,v 1.2 2002-03-08 11:00:58 sandervl Exp $ */
 /*
  *	file type mapping 
  *	(HKEY_CLASSES_ROOT - Stuff)
@@ -16,11 +16,11 @@
 #include "winerror.h"
 #include "winreg.h"
 
-#include "wine/obj_queryassociations.h"
 #include "shlobj.h"
 #include "shell32_main.h"
 #include "shlguid.h"
 #include "shresdef.h"
+#include "wine/obj_queryassociations.h"
 
 DEFAULT_DEBUG_CHANNEL(shell);
 
@@ -31,6 +31,10 @@ BOOL HCR_MapTypeToValue ( LPCSTR szExtension, LPSTR szFileType, DWORD len, BOOL 
 	char	szTemp[MAX_EXTENSION_LENGTH + 2];
 
 	TRACE("%s %p\n",szExtension, szFileType );
+
+	/* added because we do not want to have double dots */
+	if (szExtension[0]=='.')
+		bPrependDot=0;
 
 	if (bPrependDot)
 	  strcpy(szTemp, ".");
@@ -105,7 +109,10 @@ BOOL HCR_GetDefaultIcon (LPCSTR szClass, LPSTR szDest, DWORD len, LPDWORD dwNr)
 	      ExpandEnvironmentStringsA(szDest, sTemp, MAX_PATH);
 	      strcpy(szDest, sTemp);
 	    }
-	    if (ParseFieldA (szDest, 2, sNum, 5)) *dwNr=atoi(sNum);
+	    if (ParseFieldA (szDest, 2, sNum, 5))
+               *dwNr=atoi(sNum);
+            else
+               *dwNr=0; /* sometimes the icon number is missing */
 	    ParseFieldA (szDest, 1, szDest, len);
 	    ret = TRUE;
 	  }	
