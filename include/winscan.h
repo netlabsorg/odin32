@@ -59,6 +59,7 @@
 #define WINSCAN_PADSLASH        0x35
 #define WINSCAN_SHIFTRIGHT      0x36  
 #define WINSCAN_PADASTERISK     0x37  
+#define WINSCAN_PRINT           0x37
 #define WINSCAN_ALTLEFT         0x38  
 #define WINSCAN_SPACE           0x39  
 #define WINSCAN_CAPSLOCK        0x3a  
@@ -73,6 +74,7 @@
 #define WINSCAN_F9              0x43  
 #define WINSCAN_F10             0x44  
 #define WINSCAN_NUMLOCK         0x45  
+#define WINSCAN_PAUSE           0x45
 #define WINSCAN_SCROLLLOCK      0x46  
 #define WINSCAN_PAD7            0x47  
 #define WINSCAN_HOME            0x47
@@ -105,10 +107,8 @@
 #define WINSCAN_BACKTAB         0x59  
 #define WINSCAN_WINLEFT         0x5b
 #define WINSCAN_WINRIGHT        0x5c
-#define WINSCAN_PRINT           0x5d  
 #define WINSCAN_APPLICATION     0x5d
 #define WINSCAN_ALTRIGHT        0x5e  
-#define WINSCAN_PAUSE           0x5f  
 #define WINSCAN_F23             0x6a  
 #define WINSCAN_F24             0x6b  
 #define WINSCAN_SYSMEM          0x6c  
