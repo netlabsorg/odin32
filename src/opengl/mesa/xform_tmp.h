@@ -1,4 +1,4 @@
-/* $Id: xform_tmp.h,v 1.2 2000-03-01 18:49:41 jeroen Exp $ */
+/* $Id: xform_tmp.h,v 1.3 2000-05-23 20:35:00 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -65,7 +65,7 @@
  *     cliped and/or culled vertices.
  */
 
-static void __cdecl TAG(transform_points1_general)( GLvector4f *to_vec,
+static void _XFORMAPI TAG(transform_points1_general)( GLvector4f *to_vec,
                                             const GLmatrix *mat,
                                             const GLvector4f *from_vec,
                                             const GLubyte *mask,
@@ -85,8 +85,8 @@ static void __cdecl TAG(transform_points1_general)( GLvector4f *to_vec,
    (void) flag;
    STRIDE_LOOP {
       CLIP_CHECK {
-	 const GLfloat ox = from[0];
-	 to[i][0] = m0 * ox + m12;
+         const GLfloat ox = from[0];
+         to[i][0] = m0 * ox + m12;
          to[i][1] = m1 * ox + m13;
          to[i][2] = m2 * ox + m14;
          to[i][3] = m3 * ox + m15;
@@ -98,7 +98,7 @@ static void __cdecl TAG(transform_points1_general)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static void __cdecl TAG(transform_points1_identity)( GLvector4f *to_vec,
+static void _XFORMAPI TAG(transform_points1_identity)( GLvector4f *to_vec,
                                              const GLmatrix *mat,
                                              const GLvector4f *from_vec,
                                              const GLubyte *mask,
@@ -125,7 +125,7 @@ static void __cdecl TAG(transform_points1_identity)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static void __cdecl TAG(transform_points1_2d)( GLvector4f *to_vec,
+static void _XFORMAPI TAG(transform_points1_2d)( GLvector4f *to_vec,
                                        const GLmatrix *mat,
                                        const GLvector4f *from_vec,
                                        const GLubyte *mask,
@@ -154,7 +154,7 @@ static void __cdecl TAG(transform_points1_2d)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static void __cdecl TAG(transform_points1_2d_no_rot)( GLvector4f *to_vec,
+static void _XFORMAPI TAG(transform_points1_2d_no_rot)( GLvector4f *to_vec,
                                               const GLmatrix *mat,
                                               const GLvector4f *from_vec,
                                               const GLubyte *mask,
@@ -183,7 +183,7 @@ static void __cdecl TAG(transform_points1_2d_no_rot)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static void __cdecl TAG(transform_points1_3d)( GLvector4f *to_vec,
+static void _XFORMAPI TAG(transform_points1_3d)( GLvector4f *to_vec,
                                        const GLmatrix *mat,
                                        const GLvector4f *from_vec,
                                        const GLubyte *mask,
@@ -202,7 +202,7 @@ static void __cdecl TAG(transform_points1_3d)( GLvector4f *to_vec,
    ASSERT(mat->type == MATRIX_3D);
    STRIDE_LOOP {
       CLIP_CHECK {
-	 const GLfloat ox = from[0];
+         const GLfloat ox = from[0];
          to[i][0] = m0 * ox + m12;
          to[i][1] = m1 * ox + m13;
          to[i][2] = m2 * ox + m14;
@@ -214,7 +214,7 @@ static void __cdecl TAG(transform_points1_3d)( GLvector4f *to_vec,
 }
 
 
-static void __cdecl TAG(transform_points1_3d_no_rot)( GLvector4f *to_vec,
+static void _XFORMAPI TAG(transform_points1_3d_no_rot)( GLvector4f *to_vec,
                                               const GLmatrix *mat,
                                               const GLvector4f *from_vec,
                                               const GLubyte *mask,
@@ -244,7 +244,7 @@ static void __cdecl TAG(transform_points1_3d_no_rot)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static void __cdecl TAG(transform_points1_perspective)( GLvector4f *to_vec,
+static void _XFORMAPI TAG(transform_points1_perspective)( GLvector4f *to_vec,
                                                 const GLmatrix *mat,
                                                 const GLvector4f *from_vec,
                                                 const GLubyte *mask,
@@ -262,11 +262,11 @@ static void __cdecl TAG(transform_points1_perspective)( GLvector4f *to_vec,
    ASSERT(mat->type == MATRIX_PERSPECTIVE);
    STRIDE_LOOP {
       CLIP_CHECK {
-	 const GLfloat ox = from[0];
-	 to[i][0] = m0 * ox                ;
-	 to[i][1] =           0            ;
-	 to[i][2] =                     m14;
-	 to[i][3] = 0;
+         const GLfloat ox = from[0];
+         to[i][0] = m0 * ox                ;
+         to[i][1] =           0            ;
+         to[i][2] =                     m14;
+         to[i][3] = 0;
       }
    }
    to_vec->size = 4;
@@ -281,7 +281,7 @@ static void __cdecl TAG(transform_points1_perspective)( GLvector4f *to_vec,
  * present early in the geometry pipeline and throughout the
  * texture pipeline.
  */
-static void __cdecl TAG(transform_points2_general)( GLvector4f *to_vec,
+static void _XFORMAPI TAG(transform_points2_general)( GLvector4f *to_vec,
                                             const GLmatrix *mat,
                                             const GLvector4f *from_vec,
                                             const GLubyte *mask,
@@ -301,7 +301,7 @@ static void __cdecl TAG(transform_points2_general)( GLvector4f *to_vec,
    (void) flag;
    STRIDE_LOOP {
       CLIP_CHECK {
-	 const GLfloat ox = from[0], oy = from[1];
+         const GLfloat ox = from[0], oy = from[1];
          to[i][0] = m0 * ox + m4 * oy + m12;
          to[i][1] = m1 * ox + m5 * oy + m13;
          to[i][2] = m2 * ox + m6 * oy + m14;
@@ -313,7 +313,7 @@ static void __cdecl TAG(transform_points2_general)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static void __cdecl TAG(transform_points2_identity)( GLvector4f *to_vec,
+static void _XFORMAPI TAG(transform_points2_identity)( GLvector4f *to_vec,
                                              const GLmatrix *mat,
                                              const GLvector4f *from_vec,
                                              const GLubyte *mask,
@@ -340,7 +340,7 @@ static void __cdecl TAG(transform_points2_identity)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static void __cdecl TAG(transform_points2_2d)( GLvector4f *to_vec,
+static void _XFORMAPI TAG(transform_points2_2d)( GLvector4f *to_vec,
                                        const GLmatrix *mat,
                                        const GLvector4f *from_vec,
                                        const GLubyte *mask,
@@ -370,7 +370,7 @@ static void __cdecl TAG(transform_points2_2d)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static void __cdecl TAG(transform_points2_2d_no_rot)( GLvector4f *to_vec,
+static void _XFORMAPI TAG(transform_points2_2d_no_rot)( GLvector4f *to_vec,
                                               const GLmatrix *mat,
                                               const GLvector4f *from_vec,
                                               const GLubyte *mask,
@@ -399,7 +399,7 @@ static void __cdecl TAG(transform_points2_2d_no_rot)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static void __cdecl TAG(transform_points2_3d)( GLvector4f *to_vec,
+static void _XFORMAPI TAG(transform_points2_3d)( GLvector4f *to_vec,
                                        const GLmatrix *mat,
                                        const GLvector4f *from_vec,
                                        const GLubyte *mask,
@@ -418,10 +418,10 @@ static void __cdecl TAG(transform_points2_3d)( GLvector4f *to_vec,
    ASSERT(mat->type == MATRIX_3D);
    STRIDE_LOOP {
       CLIP_CHECK {
-	 const GLfloat ox = from[0], oy = from[1];
-	 to[i][0] = m0 * ox + m4 * oy + m12;
-	 to[i][1] = m1 * ox + m5 * oy + m13;
-	 to[i][2] = m2 * ox + m6 * oy + m14;
+         const GLfloat ox = from[0], oy = from[1];
+         to[i][0] = m0 * ox + m4 * oy + m12;
+         to[i][1] = m1 * ox + m5 * oy + m13;
+         to[i][2] = m2 * ox + m6 * oy + m14;
       }
    }
    to_vec->size = 3;
@@ -433,7 +433,7 @@ static void __cdecl TAG(transform_points2_3d)( GLvector4f *to_vec,
 /* I would actually say this was a fairly important function, from
  * a texture transformation point of view.
  */
-static void __cdecl TAG(transform_points2_3d_no_rot)( GLvector4f *to_vec,
+static void _XFORMAPI TAG(transform_points2_3d_no_rot)( GLvector4f *to_vec,
                                               const GLmatrix *mat,
                                               const GLvector4f *from_vec,
                                               const GLubyte *mask,
@@ -452,10 +452,10 @@ static void __cdecl TAG(transform_points2_3d_no_rot)( GLvector4f *to_vec,
    ASSERT(mat->type == MATRIX_3D_NO_ROT);
    STRIDE_LOOP {
       CLIP_CHECK {
-	 const GLfloat ox = from[0], oy = from[1];
-	 to[i][0] = m0 * ox           + m12;
-	 to[i][1] =           m5 * oy + m13;
-	 to[i][2] =                     m14;
+         const GLfloat ox = from[0], oy = from[1];
+         to[i][0] = m0 * ox           + m12;
+         to[i][1] =           m5 * oy + m13;
+         to[i][2] =                     m14;
       }
    }
    if (m14 == 0) {
@@ -472,7 +472,7 @@ static void __cdecl TAG(transform_points2_3d_no_rot)( GLvector4f *to_vec,
  * code.  It's also hard to remove any of these functions if you are
  * attached to the assertions that have appeared in them.
  */
-static void __cdecl TAG(transform_points2_perspective)( GLvector4f *to_vec,
+static void _XFORMAPI TAG(transform_points2_perspective)( GLvector4f *to_vec,
                                                 const GLmatrix *mat,
                                                 const GLvector4f *from_vec,
                                                 const GLubyte *mask,
@@ -490,9 +490,9 @@ static void __cdecl TAG(transform_points2_perspective)( GLvector4f *to_vec,
    ASSERT(mat->type == MATRIX_PERSPECTIVE);
    STRIDE_LOOP {
       CLIP_CHECK {
-	 const GLfloat ox = from[0], oy = from[1];
-	 to[i][0] = m0 * ox                ;
-	 to[i][1] =           m5 * oy      ;
+         const GLfloat ox = from[0], oy = from[1];
+         to[i][0] = m0 * ox                ;
+         to[i][1] =           m5 * oy      ;
          to[i][2] =                     m14;
          to[i][3] = 0;
       }
@@ -504,7 +504,7 @@ static void __cdecl TAG(transform_points2_perspective)( GLvector4f *to_vec,
 
 
 
-static void __cdecl TAG(transform_points3_general)( GLvector4f *to_vec,
+static void _XFORMAPI TAG(transform_points3_general)( GLvector4f *to_vec,
                                             const GLmatrix *mat,
                                             const GLvector4f *from_vec,
                                             const GLubyte *mask,
@@ -537,7 +537,7 @@ static void __cdecl TAG(transform_points3_general)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static void __cdecl TAG(transform_points3_identity)( GLvector4f *to_vec,
+static void _XFORMAPI TAG(transform_points3_identity)( GLvector4f *to_vec,
                                              const GLmatrix *mat,
                                              const GLvector4f *from_vec,
                                              const GLubyte *mask,
@@ -565,7 +565,7 @@ static void __cdecl TAG(transform_points3_identity)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static void __cdecl TAG(transform_points3_2d)( GLvector4f *to_vec,
+static void _XFORMAPI TAG(transform_points3_2d)( GLvector4f *to_vec,
                                        const GLmatrix *mat,
                                        const GLvector4f *from_vec,
                                        const GLubyte *mask,
@@ -595,7 +595,7 @@ static void __cdecl TAG(transform_points3_2d)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static void __cdecl TAG(transform_points3_2d_no_rot)( GLvector4f *to_vec,
+static void _XFORMAPI TAG(transform_points3_2d_no_rot)( GLvector4f *to_vec,
                                               const GLmatrix *mat,
                                               const GLvector4f *from_vec,
                                               const GLubyte *mask,
@@ -624,7 +624,7 @@ static void __cdecl TAG(transform_points3_2d_no_rot)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static void __cdecl TAG(transform_points3_3d)( GLvector4f *to_vec,
+static void _XFORMAPI TAG(transform_points3_3d)( GLvector4f *to_vec,
                                        const GLmatrix *mat,
                                        const GLvector4f *from_vec,
                                        const GLubyte *mask,
@@ -657,7 +657,7 @@ static void __cdecl TAG(transform_points3_3d)( GLvector4f *to_vec,
 
 /* previously known as ortho...
  */
-static void __cdecl TAG(transform_points3_3d_no_rot)( GLvector4f *to_vec,
+static void _XFORMAPI TAG(transform_points3_3d_no_rot)( GLvector4f *to_vec,
                                               const GLmatrix *mat,
                                               const GLvector4f *from_vec,
                                               const GLubyte *mask,
@@ -687,7 +687,7 @@ static void __cdecl TAG(transform_points3_3d_no_rot)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static void __cdecl TAG(transform_points3_perspective)( GLvector4f *to_vec,
+static void _XFORMAPI TAG(transform_points3_perspective)( GLvector4f *to_vec,
                                                 const GLmatrix *mat,
                                                 const GLvector4f *from_vec,
                                                 const GLubyte *mask,
@@ -720,7 +720,7 @@ static void __cdecl TAG(transform_points3_perspective)( GLvector4f *to_vec,
 
 
 
-static void __cdecl TAG(transform_points4_general)( GLvector4f *to_vec,
+static void _XFORMAPI TAG(transform_points4_general)( GLvector4f *to_vec,
                                             const GLmatrix *mat,
                                             const GLvector4f *from_vec,
                                             const GLubyte *mask,
@@ -753,7 +753,7 @@ static void __cdecl TAG(transform_points4_general)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static void __cdecl TAG(transform_points4_identity)( GLvector4f *to_vec,
+static void _XFORMAPI TAG(transform_points4_identity)( GLvector4f *to_vec,
                                              const GLmatrix *mat,
                                              const GLvector4f *from_vec,
                                              const GLubyte *mask,
@@ -782,7 +782,7 @@ static void __cdecl TAG(transform_points4_identity)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static void __cdecl TAG(transform_points4_2d)( GLvector4f *to_vec,
+static void _XFORMAPI TAG(transform_points4_2d)( GLvector4f *to_vec,
                                        const GLmatrix *mat,
                                        const GLvector4f *from_vec,
                                        const GLubyte *mask,
@@ -813,7 +813,7 @@ static void __cdecl TAG(transform_points4_2d)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static void __cdecl TAG(transform_points4_2d_no_rot)( GLvector4f *to_vec,
+static void _XFORMAPI TAG(transform_points4_2d_no_rot)( GLvector4f *to_vec,
                                               const GLmatrix *mat,
                                               const GLvector4f *from_vec,
                                               const GLubyte *mask,
@@ -843,7 +843,7 @@ static void __cdecl TAG(transform_points4_2d_no_rot)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static void __cdecl TAG(transform_points4_3d)( GLvector4f *to_vec,
+static void _XFORMAPI TAG(transform_points4_3d)( GLvector4f *to_vec,
                                        const GLmatrix *mat,
                                        const GLvector4f *from_vec,
                                        const GLubyte *mask,
@@ -875,7 +875,7 @@ static void __cdecl TAG(transform_points4_3d)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static void __cdecl TAG(transform_points4_3d_no_rot)( GLvector4f *to_vec,
+static void _XFORMAPI TAG(transform_points4_3d_no_rot)( GLvector4f *to_vec,
                                               const GLmatrix *mat,
                                               const GLvector4f *from_vec,
                                               const GLubyte *mask,
@@ -906,7 +906,7 @@ static void __cdecl TAG(transform_points4_3d_no_rot)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static void __cdecl TAG(transform_points4_perspective)( GLvector4f *to_vec,
+static void _XFORMAPI TAG(transform_points4_perspective)( GLvector4f *to_vec,
                                                 const GLmatrix *mat,
                                                 const GLvector4f *from_vec,
                                                 const GLubyte *mask,
@@ -938,16 +938,16 @@ static void __cdecl TAG(transform_points4_perspective)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static transform_func TAG(transform_tab_1)[7];
-static transform_func TAG(transform_tab_2)[7];
-static transform_func TAG(transform_tab_3)[7];
-static transform_func TAG(transform_tab_4)[7];
+static transform_func /* _XFORMAPI */ TAG(transform_tab_1)[7];
+static transform_func /* _XFORMAPI */ TAG(transform_tab_2)[7];
+static transform_func /* _XFORMAPI */ TAG(transform_tab_3)[7];
+static transform_func /* _XFORMAPI */ TAG(transform_tab_4)[7];
 
 /* Similar functions could be called several times, with more highly
  * optimized routines overwriting the arrays.  This only occurs during
  * startup.
  */
-static void TAG(init_c_transformations)( void )
+static void _XFORMAPI TAG(init_c_transformations)( void )
 {
 #define TAG_TAB   gl_transform_tab[IDX]
 #define TAG_TAB_1 TAG(transform_tab_1)

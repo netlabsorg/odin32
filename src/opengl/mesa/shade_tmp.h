@@ -1,4 +1,4 @@
-/* $Id: shade_tmp.h,v 1.1 2000-02-29 00:48:37 sandervl Exp $ */
+/* $Id: shade_tmp.h,v 1.2 2000-05-23 20:34:55 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -27,10 +27,6 @@
 /*
  * New (3.1) transformation code written by Keith Whitwell.
  */
-
-#ifdef __WIN32OS2__
-#include <misc.h>
-#endif
 
 static void TAG(shade_rgba_spec)( struct vertex_buffer *VB )
 {
@@ -138,7 +134,7 @@ static void TAG(shade_rgba_spec)( struct vertex_buffer *VB )
                SUB_3V(VP, light->Position, vertex);
             }
 
-            d = LEN_3FV( VP );
+            d = (GLfloat) LEN_3FV( VP );
 
             if (d > 1e-6) {
                GLfloat invd = 1.0F / d;
@@ -160,7 +156,7 @@ static void TAG(shade_rgba_spec)( struct vertex_buffer *VB )
                else {
                   double x = PV_dot_dir * (EXP_TABLE_SIZE-1);
                   int k = (int) x;
-                  GLfloat spot = (light->SpotExpTable[k][0]
+                  GLfloat spot = (GLfloat) (light->SpotExpTable[k][0]
                                   + (x-k)*light->SpotExpTable[k][1]);
                   attenuation *= spot;
                }
@@ -237,7 +233,7 @@ static void TAG(shade_rgba_spec)( struct vertex_buffer *VB )
             }
 
             if (n_dot_h>1.0) {
-               spec_coef = pow( n_dot_h, tab->shininess );
+               spec_coef = (GLfloat) pow( n_dot_h, tab->shininess );
             } else
                GET_SHINE_TAB_ENTRY( tab, n_dot_h, spec_coef );
 
@@ -557,15 +553,10 @@ static void TAG(shade_fast_rgba)( struct vertex_buffer *VB )
             COPY_3V(sum[0], base[0]);
             if (NR_SIDES == 2)  COPY_3V(sum[1], base[1]);
 
-#ifdef __WIN32OS2__
-               dprintf(("light normal %d/%d, %f %f %f\n",
-                       j, VB->Start, normal[0], normal[1], normal[2]));
-#else
-            if (0)
-/*             if (ctx->Light.ShadeModel == GL_SMOOTH) */
+            if (MESA_VERBOSE&VERBOSE_LIGHTING)
                fprintf(stderr, "light normal %d/%d, %f %f %f\n",
                        j, VB->Start, normal[0], normal[1], normal[2]);
-#endif
+
 
             foreach (light, &ctx->Light.EnabledList) {
 

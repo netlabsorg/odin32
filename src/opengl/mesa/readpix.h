@@ -1,8 +1,8 @@
-/* $Id: readpix.h,v 1.1 2000-02-29 00:48:36 sandervl Exp $ */
+/* $Id: readpix.h,v 1.2 2000-05-23 20:34:55 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -34,10 +34,9 @@
 
 #include "types.h"
 
-
-extern void gl_ReadPixels( GLcontext *ctx,
-                           GLint x, GLint y, GLsizei width, GLsizei height,
-                           GLenum format, GLenum type, GLvoid *pixels );
+extern void
+_mesa_ReadPixels( GLint x, GLint y, GLsizei width, GLsizei height,
+                  GLenum format, GLenum type, GLvoid *pixels );
 
 
 #endif

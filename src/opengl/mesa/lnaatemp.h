@@ -1,4 +1,4 @@
-/* $Id: lnaatemp.h,v 1.1 2000-02-29 00:48:32 sandervl Exp $ */
+/* $Id: lnaatemp.h,v 1.2 2000-05-23 20:34:52 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -52,7 +52,7 @@
 {
    const struct vertex_buffer *VB = ctx->VB;
    struct pixel_buffer *pb = ctx->PB;
-   GLfloat halfWidth = 0.5F * ctx->Line.Width;  /* 0.5 is a bit of a hack */
+   GLfloat halfWidth = 0.5F * ctx->Line.Width; /* 0.5 is a bit of a hack   */
    GLboolean solid = !ctx->Line.StippleFlag;
    GLint x0 = (GLint) VB->Win.data[vert0][0];
    GLint x1 = (GLint) VB->Win.data[vert1][0];
@@ -62,6 +62,9 @@
    GLint dy = y1 - y0;
    GLint xStep, yStep;
    GLint z0, z1;
+   const GLint depthBits = ctx->Visual->DepthBits;
+   const GLint fixedToDepthShift = depthBits <= 16 ? FIXED_SHIFT : 0;
+#define FixedToDepth(F)  ((F) >> fixedToDepthShift)
 #if INTERP_RGBA
    GLfixed fr, fg, fb, fa;      /* fixed-pt RGBA */
    GLfixed dfr, dfg, dfb, dfa;  /* fixed-pt RGBA deltas */
@@ -98,13 +101,14 @@
    if (dx == 0 && dy == 0)
       return;
 
-#if DEPTH_BITS==16
-   z0 = FloatToFixed(VB->Win.data[vert0][2]);
-   z1 = FloatToFixed(VB->Win.data[vert1][2]);
-#else
-   z0 = (int) VB->Win.data[vert0][2];
-   z1 = (int) VB->Win.data[vert1][2];
-#endif
+   if (depthBits <= 16) {
+      z0 = FloatToFixed(VB->Win.data[vert0][2]);
+      z1 = FloatToFixed(VB->Win.data[vert1][2]);
+   }
+   else {
+      z0 = (int) VB->Win.data[vert0][2];
+      z1 = (int) VB->Win.data[vert1][2];
+   }
 
 #if INTERP_STUV0
    if (VB->TexCoordPtr[0]->size > 2) {
@@ -194,10 +198,9 @@
       GLint i;
       GLint x = x0;
       GLfloat y = VB->Win.data[vert0][1];
-      GLfloat yStep = (VB->Win.data[vert1][1] - y) / (GLfloat) dx;
-      GLint dz = (z1 - z0) / dx;
-      GLfloat invDx = 1.0F / dx;
-      (void) invDx;
+      const GLfloat invDx = 1.0F / dx;
+      GLfloat yStep = (VB->Win.data[vert1][1] - y) * invDx;
+      GLint dz = (GLint) ((z1 - z0) * invDx);
 #if INTERP_RGBA
       if (ctx->Light.ShadeModel == GL_SMOOTH) {
          dfr = (IntToFixed(VB->ColorPtr->data[vert1][0]) - fr) * invDx;
@@ -225,6 +228,12 @@
       dhu1 *= invDx;
       dhv1 *= invDx;
 #endif
+#if INTERP_INDEX
+      if (ctx->Light.ShadeModel == GL_SMOOTH) {
+         dfi = (IntToFixed(VB->IndexPtr->data[vert1]) - fi) * invDx;
+      }
+#endif
+
       for (i = 0; i < dx; i++) {
          if (solid || (ctx->Line.StipplePattern & (1 << ((ctx->StippleCounter/ctx->Line.StippleFactor) & 0xf)))) {
 
@@ -249,11 +258,7 @@
             GLuint index = FixedToInt(fi) & 0xfffffff0;
             GLuint coverage;
 #endif
-#if DEPTH_BITS==16
-            GLdepth z = FixedToInt(z0);
-#else
-            GLdepth z = z0;
-#endif
+            GLdepth z = FixedToDepth(z0);
             ASSERT(yBoti <= yTopi);
 
             {
@@ -344,10 +349,9 @@
       GLint i;
       GLint y = y0;
       GLfloat x = VB->Win.data[vert0][0];
-      GLfloat xStep = (VB->Win.data[vert1][0] - x) / (GLfloat) dy;
-      GLint dz = (z1 - z0) / dy;
-      GLfloat invDy = 1.0F / dy;
-      (void) invDy;
+      const GLfloat invDy = 1.0F / dy;
+      GLfloat xStep = (VB->Win.data[vert1][0] - x) * invDy;
+      GLint dz = (GLint) ((z1 - z0) * invDy);
 #if INTERP_RGBA
       if (ctx->Light.ShadeModel == GL_SMOOTH) {
          dfr = (IntToFixed(VB->ColorPtr->data[vert1][0]) - fr) * invDy;
@@ -377,7 +381,7 @@
 #endif
 #if INTERP_INDEX
       if (ctx->Light.ShadeModel == GL_SMOOTH) {
-         dfi = (IntToFixed(VB->IndexPtr->data[vert1]) - fi) / dy;
+         dfi = (IntToFixed(VB->IndexPtr->data[vert1]) - fi) * invDy;
       }
 #endif
       for (i = 0; i < dy; i++) {
@@ -403,11 +407,7 @@
             GLuint index = FixedToInt(fi) & 0xfffffff0;
             GLuint coverage;
 #endif
-#if DEPTH_BITS==16
-            GLdepth z = FixedToInt(z0);
-#else
-            GLdepth z = z0;
-#endif
+            GLdepth z = FixedToDepth(z0);
 
             ASSERT(xLefti < xRight);
 

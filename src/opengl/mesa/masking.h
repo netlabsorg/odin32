@@ -1,8 +1,8 @@
-/* $Id: masking.h,v 1.1 2000-02-29 00:48:33 sandervl Exp $ */
+/* $Id: masking.h,v 1.2 2000-05-23 20:34:52 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -36,10 +36,12 @@
 
 
 
-extern void gl_IndexMask( GLcontext *ctx, GLuint mask );
+extern void
+_mesa_IndexMask( GLuint mask );
 
-extern void gl_ColorMask( GLcontext *ctx, GLboolean red, GLboolean green,
-                          GLboolean blue, GLboolean alpha );
+extern void
+_mesa_ColorMask( GLboolean red, GLboolean green,
+                 GLboolean blue, GLboolean alpha );
 
 
 /*
