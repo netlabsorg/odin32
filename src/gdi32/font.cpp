@@ -1,4 +1,4 @@
-/* $Id: font.cpp,v 1.24 2002-04-30 10:32:21 sandervl Exp $ */
+/* $Id: font.cpp,v 1.25 2002-05-15 11:43:18 sandervl Exp $ */
 
 /*
  * GDI32 font apis
@@ -471,7 +471,7 @@ ODINFUNCTION4(int, EnumFontFamiliesA,
               LPARAM, arg4)
 {
   ENUMUSERDATA enumData;
-  CHAR         lpstrFamilyNew[LF_FACESIZE];
+  CHAR         lpstrFamilyNew[LF_FACESIZE] = "";
   int rc;
 
   dprintf(("GDI32: EnumFontFamiliesA %s", lpszFontFamily));
@@ -493,7 +493,7 @@ ODINFUNCTION4(int, EnumFontFamiliesW,
               FONTENUMPROCW, arg3,
               LPARAM, arg4)
 {
-  CHAR         lpstrFamilyNew[LF_FACESIZE];
+  CHAR         lpstrFamilyNew[LF_FACESIZE] = "";
   ENUMUSERDATA enumData;
   int          rc;
   char        *lpszFontFamilyA = UnicodeToAsciiString((LPWSTR)lpszFontFamilyW);
