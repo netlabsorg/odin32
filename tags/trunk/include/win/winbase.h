@@ -2289,9 +2289,6 @@ BOOL WINAPI InitiateSystemShutdownW(LPWSTR lpMachineName,
                                          DWORD  dwTimeout,
                                          BOOL   bForceAppsClosed,
                                          BOOL   bRebootAfterShutdown);
-DWORD WINAPI IsTextUnicode(CONST LPVOID  lpBuffer,
-                                int           cb,
-                                LPINT         lpi);
 BOOL WINAPI IsValidAcl(PACL pAcl);
 BOOL WINAPI LogonUserA(LPTSTR  lpszUsername,
                             LPTSTR  lpszDomain,
