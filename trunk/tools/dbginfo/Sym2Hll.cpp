@@ -1,4 +1,4 @@
-/* $Id: Sym2Hll.cpp,v 1.3 2000-03-27 10:20:41 bird Exp $
+/* $Id: Sym2Hll.cpp,v 1.4 2000-04-07 02:49:36 bird Exp $
  *
  * Sym2Hll - Symbol file to HLL debuginfo converter.
  *
@@ -131,6 +131,7 @@ int main(int argc, char **argv)
                 fprintf(stderr, "addModule failed\n");
                 return -3;
             }
+            pModule->getSourceEntry()->addFile(pMapDef->achModName, pMapDef->cbModName);
 
 
             /*
