@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.49 2000-04-10 19:42:38 sandervl Exp $ */
+/* $Id: pmframe.cpp,v 1.50 2000-04-10 19:43:15 sandervl Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -489,7 +489,7 @@ PosChangedEnd:
 		hwndrelated = WinQueryWindow(hwnd, QW_PREV);
 		dprintf(("WM_VRNENABLED hwndrelated = %x (hwnd=%x)", hwndrelated, hwnd));
 		topwindow = Win32BaseWindow::GetWindowFromOS2FrameHandle(hwndrelated);
-		if(topwindow == NULL || ((win32wnd->getStyle() & WS_EX_TOPMOST_W) == 0)) {
+		if(topwindow == NULL || ((win32wnd->getExStyle() & WS_EX_TOPMOST_W) == 0)) {
 			//put window at the top of z order
 			WinSetWindowPos( hwnd, HWND_TOP, 0, 0, 0, 0, SWP_ZORDER );
 		}
