@@ -1,6 +1,10 @@
-/* $Id: ChangeLog,v 1.1656 2001-08-23 18:33:30 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1657 2001-08-25 10:28:01 sandervl Exp $ */
 
- 2001-08-32: Sander van Leeuwen <sandervl@xs4all.nl>
+ 2000-08-25: Yuri Dario <mc6530@mclink.it>
+    - USER32:   o Button: don't send BN_PAINT/HILITE/UNHILITE/DISABLE/SETFOCUS/KILLFOCUS
+                  (not done in Wine either)
+
+ 2001-08-23: Sander van Leeuwen <sandervl@xs4all.nl>
     - OLEAUT32: o Wine updates
     - QUARTZ:   o Wine updates
 
