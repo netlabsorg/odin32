@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.1195 2000-12-27 23:07:45 sandervl Exp $ */
+/* $Id: changelog,v 1.1196 2000-12-29 18:41:44 sandervl Exp $ */
+
+ 2000-12-29: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Export OS2ToWin32Handle & Win32ToOS2Handle with stdcall
+                  convention. (not mangled)
+    - GDI32:    o Changes for above exports
 
  2000-12-27: Jeroen van den Horn <J.vandenHorn@chello.nl>
     - WININET:  o Resync with latest Wine + fixes/additions
