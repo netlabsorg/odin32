@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2002-04-11 21:28:27 bird Exp $
+# $Id: makefile,v 1.9 2002-08-22 00:13:04 bird Exp $
 
 #
 # Odin32 API
@@ -7,6 +7,29 @@
 #
 #
 
+!ifdef BUILD_SETUP_MAK                  # If defined use the new build system.
+
+#
+# Setup config
+#
+PATH_ROOT = ..\..
+!include $(PATH_ROOT)\$(BUILD_SETUP_MAK)
+
+#
+# Target config
+#
+TARGET_NAME = CmdQd
+TARGET_PUBLIC = 1
+TARGET_PUBNAME = $(PATH_TOOLS)\$(TARGET_NAME).$(EXT_EXE)
+
+#
+# Rules config
+#
+RULES_FORWARD =
+!include $(MAKE_INCLUDE_PROCESS)
+
+
+!else                                   # else use the ole make system.
 
 #
 # Directory macro.
@@ -75,12 +98,6 @@ TARGET = CmdQd
 
 
 #
-# We need all.
-#
-needed: all
-
-
-#
 # Extra clean rule to which removes the cmdqd.exe file from /tools/bin
 # if it's not currently used.
 #
@@ -92,6 +109,12 @@ clean2:
     @echo Info: Not removing $(ODIN32_TOOLS)\cmdqd.exe because MULTIJOBS is defined.
 !endif
 
+!endif # new/old makefile
+
+#
+# We need all.
+#
+needed: all
 
 #
 # If MULTIJOBS is defined make sure cmdqd is NOT while we make it running.
