@@ -1,4 +1,4 @@
-/* $Id: probkrnl.c,v 1.35 2001-02-23 02:57:52 bird Exp $
+/* $Id: probkrnl.c,v 1.36 2001-07-10 05:18:41 bird Exp $
  *
  * Description:   Autoprobes the os2krnl file and os2krnl[*].sym files.
  *                Another Hack!
@@ -121,6 +121,8 @@ IMPORTKRNLSYM DATA16_GLOBAL aImportTab[NBR_OF_KRNLIMPORTS] =
     {FALSE, -1, 11, "_VMGetOwner",          "@8",  -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
     {FALSE, -1, 16, "_VMObjHandleInfo",     "@12", -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
     {FALSE, -1, 16, "_VMMapDebugAlias",     "@20", -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1, 21, "_VMCreatePseudoHandle","@12", -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1, 19, "_VMFreePseudoHandle",  "@4",  -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
     {FALSE, -1, 17, "_KSEMRequestMutex",    "@8",  -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
     {FALSE, -1, 17, "_KSEMReleaseMutex",    "@4",  -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
     {FALSE, -1, 15, "_KSEMQueryMutex",      "@8",  -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
@@ -129,9 +131,17 @@ IMPORTKRNLSYM DATA16_GLOBAL aImportTab[NBR_OF_KRNLIMPORTS] =
     {FALSE, -1,  9, "_TKFuBuff",            "@16", -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
     {FALSE, -1, 11, "_TKFuBufLen",          "@20", -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
     {FALSE, -1, 11, "_TKSuFuBuff",          "@16", -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1, 14, "_TKForceThread",       "@8",  -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1, 12, "_TKForceTask",         "@12", -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1, 14, "_TKGetPriority",       "@4",  -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1,  8, "_TKSleep",             "@16", -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1,  9, "_TKWakeup",            "@12", -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1, 13, "_TKWakeThread",        "@4",  -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1, 14, "_TKQueryWakeup",       "@8",  -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
     {FALSE, -1, 11, "f_FuStrLenZ",          "",    -1,  -1,  -1,  -1, EPT_PROCIMPORT16},
     {FALSE, -1, 10, "f_FuStrLen",           "",    -1,  -1,  -1,  -1, EPT_PROCIMPORT16},
     {FALSE, -1,  8, "f_FuBuff",             "",    -1,  -1,  -1,  -1, EPT_PROCIMPORT16},
+    {FALSE, -1, 13, "h_POST_SIGNAL",        "",    -1,  -1,  -1,  -1, EPT_PROCIMPORTH16},
     {FALSE, -1, 12, "_SftFileSize",         "@8",  -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
     {FALSE, -1, 12, "_PGPhysAvail",         "@0",  -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
     {FALSE, -1, 14, "_PGPhysPresent",       "@0",  -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
