@@ -1,4 +1,4 @@
-/* $Id: font.cpp,v 1.19 2001-05-24 19:26:30 sandervl Exp $ */
+/* $Id: font.cpp,v 1.20 2001-07-16 20:17:39 sandervl Exp $ */
 
 /*
  * GDI32 font apis
@@ -553,7 +553,15 @@ ODINFUNCTION5(DWORD, GetFontData,
 ODINFUNCTION1(int, AddFontResourceA,
               LPCSTR, szFont)
 {
+    HINSTANCE hInstance;
+
     dprintf(("GDI32: AddFontResourceA %s", szFont));
+    hInstance = LoadLibraryA(szFont);
+    if(hInstance) {
+        dprintf(("AddFontResourceA: executable file; NOT IMPLEMENTED"));
+        FreeLibrary(hInstance);
+        return 1;
+    }
     return O32_AddFontResource(szFont);
 }
 //******************************************************************************
