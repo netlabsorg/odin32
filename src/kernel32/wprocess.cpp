@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.179 2003-02-13 15:30:53 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.180 2003-02-13 17:16:50 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -48,6 +48,8 @@
 #include "initterm.h"
 #include "directory.h"
 
+#include <win\ntddk.h>
+
 #define DBG_LOCALLOG    DBG_wprocess
 #include "dbglocal.h"
 
@@ -86,19 +88,6 @@ DWORD       *TIBFlatPtr    = 0;
 static TEB      *threadList = 0;
 static VMutex    threadListMutex;
 
-//TODO: This should not be here: (need to rearrange NTDLL; kernel32 can't depend on ntdll)
-static BOOLEAN (* WINAPI NTDLL_RtlAllocateAndInitializeSid) ( PSID_IDENTIFIER_AUTHORITY pIdentifierAuthority,
-                                                              BYTE nSubAuthorityCount,
-                                                              DWORD nSubAuthority0,
-                                                              DWORD nSubAuthority1,
-                                                              DWORD nSubAuthority2,
-                                                              DWORD nSubAuthority3,
-                                                              DWORD nSubAuthority4,
-                                                              DWORD nSubAuthority5,
-                                                              DWORD nSubAuthority6,
-                                                              DWORD nSubAuthority7,
-                                                              PSID *pSid);
-static HINSTANCE hInstNTDll = 0;
 
 //******************************************************************************
 //******************************************************************************
@@ -309,30 +298,17 @@ BOOL WIN32API InitializeThread(TEB *winteb, BOOL fMainThread)
     else winteb->flags      = 0;  //todo textmode
 
     //Initialize thread security objects (TODO: Not complete)
-    if(hInstNTDll == 0) {
-        hInstNTDll = LoadLibraryA("NTDLL.DLL");
-        *(ULONG *)&NTDLL_RtlAllocateAndInitializeSid = (ULONG)GetProcAddress(hInstNTDll, "RtlAllocateAndInitializeSid");
-        if(NTDLL_RtlAllocateAndInitializeSid == NULL) {
-            DebugInt3();
-        }
-    }
     SID_IDENTIFIER_AUTHORITY sidIdAuth = {0};
     winteb->o.odin.threadinfo.dwType = SECTYPE_PROCESS | SECTYPE_INITIALIZED;
 
-    if (NULL != NTDLL_RtlAllocateAndInitializeSid) {
-        NTDLL_RtlAllocateAndInitializeSid(&sidIdAuth, 1, 0, 0, 0, 0, 0, 0, 0, 0, &winteb->o.odin.threadinfo.SidUser.User.Sid);
-    }
-    else DebugInt3();
+    RtlAllocateAndInitializeSid(&sidIdAuth, 1, 0, 0, 0, 0, 0, 0, 0, 0, &winteb->o.odin.threadinfo.SidUser.User.Sid);
 
     winteb->o.odin.threadinfo.SidUser.User.Attributes = 0; //?????????
 
     winteb->o.odin.threadinfo.pTokenGroups = (TOKEN_GROUPS*)malloc(sizeof(TOKEN_GROUPS));
     winteb->o.odin.threadinfo.pTokenGroups->GroupCount = 1;
 
-    if (NULL != NTDLL_RtlAllocateAndInitializeSid) {
-         NTDLL_RtlAllocateAndInitializeSid(&sidIdAuth, 1, 0, 0, 0, 0, 0, 0, 0, 0, &winteb->o.odin.threadinfo.PrimaryGroup.PrimaryGroup);
-    }
-    else DebugInt3();
+    RtlAllocateAndInitializeSid(&sidIdAuth, 1, 0, 0, 0, 0, 0, 0, 0, 0, &winteb->o.odin.threadinfo.PrimaryGroup.PrimaryGroup);
 
     winteb->o.odin.threadinfo.pTokenGroups->Groups[0].Sid = winteb->o.odin.threadinfo.PrimaryGroup.PrimaryGroup;
     winteb->o.odin.threadinfo.pTokenGroups->Groups[0].Attributes = 0; //????

@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.73 2003-01-10 12:57:12 sandervl Exp $ */
+/* $Id: KERNEL32.CPP,v 1.74 2003-02-13 17:16:47 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -395,70 +395,6 @@ BOOL WIN32API FlushInstructionCache(     /*PLF Mon  98-02-09 23:56:49 : STUB STU
         dprintf(("FlushInstructionCache() - NIY\n"));
         return TRUE;
 }
-
-
-//******************************************************************************
-
-/***********************************************************************
-*           RtlFillMemory   (KERNEL32.441)
-*/
-VOID WIN32API RtlFillMemory(LPVOID ptr,
-                            UINT len,
-                            UINT fill )
-{
-#ifdef DEBUG_LOCAL
-  dprintf(("KERNEL32: RtlFillMemory(%08x,%08x,%08x)\n",
-           ptr,
-           len,
-           fill));
-#endif
-
-  memset(ptr,
-         fill,
-         len );
-}
-
-
-/***********************************************************************
-*           RtlMoveMemory   (KERNEL32.442)
-*/
-VOID WIN32API RtlMoveMemory(LPVOID  dst,
-                            LPCVOID src,
-                            UINT  len )
-{
-  dprintf2(("KERNEL32: RtlMoveMemory(%08x,%08x,%08x)\n",
-           dst,
-           src,
-           len));
-
-  memmove(dst,
-          src,
-          len );
-}
-
-
-/***********************************************************************
-*           RtlZeroMemory   (KERNEL32.444)
-*/
-VOID WIN32API RtlZeroMemory(LPVOID ptr,
-                            UINT len)
-{
-  dprintf2(("KERNEL32: RtlZeroMemory(%08x,%08x)\n",
-           ptr,
-           len));
-
-  memset(ptr,
-         0,
-         len);
-}
-
-//******************************************************************************
-
-
-
-
-
-
 
 
 /*****************************************************************************
