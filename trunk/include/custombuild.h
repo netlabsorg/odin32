@@ -403,15 +403,95 @@ void WIN32API ODIN_waveOutSetFixedBuffers();
 void WIN32API ODIN_waveInSetFixedBuffers();
 
 
-/** Enter odin context with this thread. */
+/** @defgroup   odin32_threadctx    Odin32 Thread Context
+ * @{ */
+#pragma pack(1)
+/** Saved odin/os2 thread context.
+ * (This structure is 32 bytes, there is assembly workers which depends on this size.)
+ */
+typedef struct _ODINTHREADCTX
+{
+    /** Flags. */
+    unsigned        fFlags;
+    /** Saved fs selector. */
+    unsigned short  fs;
+    /** FPU control word. */
+    unsigned short  cw;
+    /** Exception registration record. */
+    unsigned        XctpRegRec[2];
+    /** Reserved for future use. */
+    unsigned        aReserved[4];
+} ODINTHREADCTX, *PODINTHREADCTX;
+#pragma pack()
+
+/** @defgroup odin32_threadctx_flags    Odin32 Thread Context Flags
+ * These flags are used to direct what is done and saved on a switch. The flags
+ * passed to the save function will be stored in fFlags of ODINTHREADCTX.
+ * @{ */
+/** Default switch from OS/2 to Odin32 context. */
+#define OTCTXF_DEF_TO_OS2       (OTCTXF_ENTER_OS2 | OTCTXF_LOAD_OS2 | OTCTXF_MAYBE_NESTED | OTCTXF_SAVE_FPU)
+/** Default switch from OS/2 to Odin32 context. */
+#define OTCTXF_DEF_TO_ODIN32    (OTCTXF_ENTER_ODIN32 | OTCTXF_LOAD_ODIN32 | OTCTXF_MAYBE_NESTED | OTCTXF_SAVE_FPU)
+
+/** Perhaps this is a nested enter and/or leave. (advisory only) */
+#define OTCTXF_MAYBE_NESTED     0x0001
+/** Enter OS/2 context from Odin32 context. */
+#define OTCTXF_ENTER_OS2       (0x0002 | OTCTXF_SAVE_FS | OTCTXF_SAVE_FPU)
+/** Enter Odin32 context from OS/2 context. */
+#define OTCTXF_ENTER_ODIN32    (0x0004 | OTCTXF_SAVE_FS | OTCTXF_SAVE_FPU)
+/** Load Default OS/2 context. */
+#define OTCTXF_LOAD_OS2        (0x0008 | OTCTXF_LOAD_FS_OS2    | OTCTXF_LOAD_FPU_OS2    | OTCTXF_LOAD_XCPT_OS2)
+/** Load Default Odin32 context. */
+#define OTCTXF_LOAD_ODIN32     (0x0010 | OTCTXF_LOAD_FS_ODIN32 | OTCTXF_LOAD_FPU_ODIN32 | OTCTXF_LOAD_XCPT_ODIN32)
+
+/** Save FS. */
+#define OTCTXF_SAVE_FS          0x0100
+/** Load OS/2 FS. */
+#define OTCTXF_LOAD_FS_OS2      0x0200
+/** Load Odin32 FS. */
+#define OTCTXF_LOAD_FS_ODIN32   0x0400
+/** Save FPU control word. */
+#define OTCTXF_SAVE_FPU         0x0800
+/** Load OS/2 FPU control word. */
+#define OTCTXF_LOAD_FPU_OS2     0x1000
+/** Load Odin32 FPU control word. */
+#define OTCTXF_LOAD_FPU_ODIN32  0x2000
+/** Install OS/2 exception handler. (not implemented) */
+#define OTCTXF_LOAD_XCPT_OS2    0x4000
+/** Install Odin32 exception handler. */
+#define OTCTXF_LOAD_XCPT_ODIN32 0x8000
+/** @} */
+
+/** Save thread context and/or load other thread context.
+ * @param   pCtx    Where to save the current thread context.
+ * @param   fFlags  Flags telling what to do.
+ */
+void    WIN32API ODIN_ThreadContextSave(PODINTHREADCTX pCtx, unsigned fFlags);
+
+/** Restore saved thread context and/or do additional loads.
+ * @param   pCtx    Where to save the current thread context.
+ *                  (This will be zero'ed.)
+ * @param   fFlags  Flags telling extra stuff to load.
+ *                  Only CTCTXF_LOAD_* flags will be evaluated.
+ */
+void    WIN32API ODIN_ThreadContextRestore(PODINTHREADCTX pCtx, unsigned fFlags);
+
+
+/** Enter odin context with this thread.
+ * @deprecated */
 USHORT WIN32API ODIN_ThreadEnterOdinContext(void *pExceptionRegRec, BOOL fForceFSSwitch);
-/** Leave odin context with this thread. */
+/** Leave odin context with this thread.
+ * @deprecated */
 void   WIN32API ODIN_ThreadLeaveOdinContext(void *pExceptionRegRec, USHORT selFSOld);
 
-/** Leave odin context to call back into OS/2 code. */
+/** Leave odin context to call back into OS/2 code.
+ * @deprecated */
 USHORT WIN32API ODIN_ThreadLeaveOdinContextNested(void *pExceptionRegRec, BOOL fRemoveOdinExcpt);
-/** Re-enter Odin context after being back in OS/2 code. */
+/** Re-enter Odin context after being back in OS/2 code.
+ * @deprecated */
 void   WIN32API ODIN_ThreadEnterOdinContextNested(void *pExceptionRegRec, BOOL fRestoreOdinExcpt, USHORT selFSOld);
+
+/** @} */
 
 void   WIN32API ODIN_SetExceptionHandler(void *pExceptionRegRec);
 void   WIN32API ODIN_UnsetExceptionHandler(void *pExceptionRegRec);
@@ -425,6 +505,7 @@ void WIN32API SetFreeTypeIntegration(BOOL fEnabled);
 void WINAPI ODIN_SetProcessDword( DWORD dwProcessID, INT offset, DWORD value );
 
 void WIN32API ODIN_SetPostscriptPassthrough(BOOL fEnable);
+BOOL WIN32API ODIN_QueryPostscriptPassthrough();
 
 //PE headers of system dlls
 #ifdef __cplusplus
@@ -468,6 +549,8 @@ extern IMAGE_FILE_HEADER nt_uxtheme_header;
 extern IMAGE_FILE_HEADER nt_mciwave_header;
 extern IMAGE_FILE_HEADER nt_urlmon_header;
 extern IMAGE_FILE_HEADER nt_netapi32_header;
+extern IMAGE_FILE_HEADER nt_winscard_header;
+extern IMAGE_FILE_HEADER nt_shdocvw_header;
 #ifdef __cplusplus
 }
 #endif
