@@ -1,4 +1,13 @@
-/* $Id: changelog,v 1.1365 2001-04-17 04:37:58 bird Exp $ */
+/* $Id: changelog,v 1.1366 2001-04-18 08:28:37 bird Exp $ */
+
+ 2001-04-18: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - dailybuild:
+                o Adjusted to new build pattern.
+                o Copy all builds to local archive directory.
+    - tools\install:
+                o Added Xx2Lx.
+    - Readme.txt:
+                o Changed Pe2Lx to Xx2Lx.
 
  2001-04-17: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Unicode:  o Minor addjustments to makefile. CFLAGS is the correct
