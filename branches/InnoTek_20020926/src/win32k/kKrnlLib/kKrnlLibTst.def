@@ -1,0 +1,62 @@
+;/* $Id: kKrnlLibTst.def,v 1.7 2002-01-09 00:51:47 bird Exp $
+; *
+; * Definition file for the Ring-3 test program.
+; *
+; * Copyright (c) 1998-2001 knut st. osmundsen (kosmunds@csc.com)
+; *
+; * Project Odin Software License can be found in LICENSE.TXT
+; *
+; */
+
+NAME kKrnlLibTst WINDOWCOMPAT
+DESCRIPTION "Odin32 Ring-0 Kernel Library - Ring-3 Testing - copyright (c) 1998-2001 knut st. osmundsen"
+
+STACKSIZE 4096
+
+SEGMENTS
+    DATA16              class 'FAR_DATA'
+    DATA16_BSS          class 'FAR_DATA'
+    DATA16_CONST        class 'FAR_DATA'
+    DATA16_GLOBAL       class 'FAR_DATA'
+    DATA16_INIT         class 'FAR_DATA'
+    DATA16_INIT_BSS     class 'FAR_DATA'
+    DATA16_INIT_CONST   class 'FAR_DATA'
+
+    CODE16              class 'CODE'
+    CODE16_IOSEG        class 'CODE'
+    CODE16_INIT         class 'CODE'
+
+    LOGDATA_16BIT       class 'LOGDATA_16BIT'
+
+    CALLTAB16           class 'CALLTAB16_DATA'
+
+    DATA32              class 'DATA'
+    c_common            class 'DATA'
+    DDE4_DATA32         class 'DATA'
+    CTOR_DTOR1          class 'DATA'
+    CTOR_DTOR2          class 'DATA'
+    CTOR_DTOR3          class 'DATA'
+
+    _VFT                class 'CONST'
+    CONST32_RO          class 'CONST'
+    EH_DATA             class 'CONST'
+
+    BSS32               class 'BSS'
+
+    SYMBOLDB32          class 'SYMBOLDB32'
+
+    CODE32              class 'CODE'
+
+    STACK32             class 'STACK' STACK
+
+IMPORTS
+     DosQuerySysState = DOSCALL1.368
+
+     _DosRead         = DOSCALL1.281
+     _DosWrite        = DOSCALL1.282
+     _DosOpen         = DOSCALL1.273
+     _DosClose        = DOSCALL1.257
+     _DosSetFilePtr   = DOSCALL1.256
+
+     _DOS16OPEN       = DOSCALL1.70
+     _DOS16CLOSE      = DOSCALL1.59

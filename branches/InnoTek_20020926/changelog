@@ -1,0 +1,106 @@
+/* $Id: changelog,v 1.2321 2002-09-24 15:15:48 sandervl Exp $ */
+
+ 2002-09-24: Vit Timchishin <tivv@ukr    >
+    - KERNEL32: o Fix for OSLibDosFreeMem
+
+ 2002-09-24: Sander van Leeuwen <sandervl@innotek   >
+    - BIN:      o WGSS update from IBM
+    - IPHLPAPI: o GetNetworkParams: fixed completely broken code to fill in
+                  DNS entries.
+
+ 2002-09-19:
+    - MAKE, TOOLS/BIN/RM, FASTDEP:
+                o IPF and IPP support. They are built in the 'misc' pass.
+                  See make\testcase\ipf.mak for usage example.
+                  NB. FastDep does only C styled dependency generation
+                  for .IPP files.
+                o Corrected bad .orc dependency generation.
+                o Added some shortcut rules to restart/skip passes.
+                o Fixed rm -R filename. Suppressed ERROR_PATH_NOT_FOUND msgs.
+
+ 2002-09-19: Sander van Leeuwen <sandervl@innotek   >
+    - ODINCRT:  o Include new & delete in memory statistics
+
+ 2002-09-19: Platon Fomichev <platon@innotek   >
+    - USER32:   o Put window on top of owner if owner is not in the foreground;
+                  HWND_TOP forces the owner to the top as well
+                  (window creation)
+
+ 2002-09-18: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Added code to print leaked heap memory
+
+ 2002-09-18: Platon Fomichev <platon@innotek   >
+    - USER32:   o WM_MOUSEWHEEL update
+
+ 2002-09-17: Platon Fomichev <platon@innotek   >
+    - USER32:   o Create invisible vertical scroller for all top-level windows
+                  so the IBM wheel driver sends us WM_VSCROLL messages
+                o Added WM_MOUSEWHEEL message support
+
+ 2002-09-16: Sander van Leeuwen <sandervl@innotek   >
+    - COMCTL32: o LISTVIEW_ProcessLetterKeys bugfix
+    - GDI32:    o Statistics fixes & print leaked gdi handles
+                  when unloaded.
+                o Don't recycle handles too soon. That makes it more difficult
+                  to interpret the logfile.
+
+ 2002-09-16: Platon Fomichev <platon@innotek   >
+    - USER32:   o Combobox fix to update selected item when the control is rolled
+                  up
+
+ 2001-09-15: Dietrich Teickner <Dietrich_Teickner@t-online   >
+    - SHELL32:  o Wine resync for shfileop.c
+
+ 2002-09-14: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o WaitForSingleObject, (Msg)WaitForMultipleObjects:
+                  If dwTimeout is not 0 and smaller than 20 ms, then
+                  temporarily change thread priority to time critical to
+                  make sure we don't get a late timeout.
+                  (CLOCKSCALE=4 in config.sys also improves timeout responds)
+
+ 2002-09-14: Yuri Dario <mc6530@mclink   >
+    - DSOUND:   o Load MMPM2 (MDM.DLL) on demand
+
+ 2002-09-12: Platon Fomichev <platon@innotek   >
+    - USER32:   o Translate PM WM_VSCROLL to WM_MOUSEWHEEL messages (currently
+                  only dispatched to (dinput) hook handler)
+
+ 2002-09-12: knut st. osmundsen <bird@anduin   >
+    - MAKE:     o Corrected bug in process which made it put the libraries in
+                  the wrong place.
+                o Always stamp the .def file before linking so that build level
+                  info will be up to date.
+                o Added some shortcuts rules for lazy programmers:
+                  * pass[1-6] for starting from a given pass.
+                  * quick for only doing lib, executable and publish.
+
+ 2002-09-10: knut st. osmundsen <bird@anduin   >
+    - TOOLS/VSLICK:
+                o Added kdev.e. Odin32.e with more goodies like an 'Extra' menu.
+
+ 2002-09-05: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Caret bug in edit control WM_ERASEBKGND handler (hidden,
+                  but not shown again)
+                o Removed obsolete hack in CreateCaret
+
+ 2002-09-05: Dietrich Teickner <Dietrich_Teickner@t-online   >
+    - COMDLG32: o Corrected translation of IDS_TODESKTOP resource string
+
+ 2002-09-04: knut st. osmundsen <bird@anduin   >
+    - FASTDEP:  o Corrected bug in caching. Didn't force rescan of files when
+                  a dependant file wasn't present any more.
+                o Corrected makefile. No memory debug.
+    - CMDQD:    o Corrected makefile.
+
+    - Tools/DailyBuilds:
+                o Changed odin32env.cmd to use buildenv.cmd to set up the
+                  desired build environment.
+                o Changed odin32clean.cmd to use tools\bin\rm.exe.
+    - MAKE:     o Corrected CC_NO_DBGMEM check for vac3xx.
+
+ 2002-09-03: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Cleaned up clipboard code
+
+ 2002-09-03: Platon Fomichev <platon@innotek   >
+    - USER32:   o Fix for Ctrl-Break
+
