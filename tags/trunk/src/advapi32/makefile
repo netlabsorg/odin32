@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.27 2000-12-02 23:36:27 bird Exp $
+# $Id: makefile,v 1.28 2001-05-19 11:13:04 sandervl Exp $
 
 #
 # Odin32 API
@@ -21,6 +21,7 @@ $(OBJDIR)\advapi32.obj \
 $(OBJDIR)\advapi32rsrc.obj \
 $(OBJDIR)\lsa.obj \
 $(OBJDIR)\security.obj \
+$(OBJDIR)\systemfunction.obj \
 $(OBJDIR)\service.obj \
 $(OBJDIR)\eventlog.obj \
 $(OBJDIR)\crypt.obj \
