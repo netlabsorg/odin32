@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2060 2002-04-30 18:46:38 sandervl Exp $ */
+/* $Id: changelog,v 1.2061 2002-05-01 08:02:04 sandervl Exp $ */
+
+ 2002-05-01: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o PMSCAN_DBE_CONV & PMSCAN_DBE_NOCONV added to keyboard
+                  translation array
 
  2002-04-30: Sander van Leeuwen <sandervl@xs4all.nl>
     - GDI32:    o Font renaming support added to EnumFontFamiliesA/W
