@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.43 1999-10-09 15:03:10 sandervl Exp $
+# $Id: makefile,v 1.44 1999-10-14 09:21:42 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -175,6 +175,7 @@ wprocess.OBJ: \
     $(PDWIN32_INCLUDE)\winimagebase.h \
     $(PDWIN32_INCLUDE)\versionos2.h \
     $(PDWIN32_INCLUDE)\wprocess.h \
+    $(PDWIN32_INCLUDE)\win\thread.h \
     console2.h \
     mmap.h \
     cio.h \

@@ -1,4 +1,4 @@
-/* $Id: heapstring.cpp,v 1.13 1999-10-04 20:52:33 sandervl Exp $ */
+/* $Id: heapstring.cpp,v 1.14 1999-10-14 09:21:41 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -11,6 +11,7 @@
 /*****************************************************************************
  * Includes                                                                  *
  *****************************************************************************/
+#undef DEBUG
 
 #include <os2win.h>
 #include <stdlib.h>
@@ -274,8 +275,12 @@ int WIN32API lstrcmpW(LPCWSTR arg1, LPCWSTR arg2)
              arg1,
              arg2,
              arg2));
-//    return UniStrcmp( (UniChar*)arg1,
-//                      (UniChar*)arg2 );
+
+    if(arg1 == NULL)
+      return -1;
+    if(arg2 == NULL)
+      return 1;
+
     return wcscmp( (wchar_t*)arg1,
                    (wchar_t*)arg2 );
 }
