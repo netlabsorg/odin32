@@ -4,6 +4,7 @@
 
 #define ICOM_CINTERFACE 1
 
+#include <winbase.h>
 #include "winerror.h"
 #include "heap.h"
 #include "resource.h"
