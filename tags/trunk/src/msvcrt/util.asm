@@ -17,9 +17,11 @@ _MSVCRT__EH_prolog:
    push        ecx
    push        edx
    pushfd
+IFDEF DEBUG
    push        offset FLAT:label1
    call        WriteLog
    add         esp,04h
+ENDIF
    popfd
    pop         edx
    pop         ecx
