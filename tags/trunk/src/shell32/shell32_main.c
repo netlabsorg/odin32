@@ -1,10 +1,25 @@
-/* $Id: shell32_main.c,v 1.11 2005-03-06 10:36:28 sao2l02 Exp $ */
+/* $Id: shell32_main.c,v 1.12 2005-03-08 19:07:11 sao2l02 Exp $ */
 /*
  * 				Shell basics
  *
  *  1998 Marcus Meissner
  *  1998 Juergen Schmied (jsch)  *  <juergen.schmied@metronet.de>
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+
 #ifdef __WIN32OS2__
 #define ICOM_CINTERFACE 1
 #include <odin.h>
@@ -43,9 +58,6 @@ DEFAULT_DEBUG_CHANNEL(shell);
 
 #define MORE_DEBUG 1
 /*************************************************************************
- * CommandLineToArgvW			[SHELL32.7]
- */
- /*************************************************************************
  * CommandLineToArgvW            [SHELL32.@]
  *
  * We must interpret the quotes in the command line to rebuild the argv
@@ -229,46 +241,51 @@ DWORD WINAPI SHGetFileInfoA(LPCSTR path,DWORD dwFileAttributes,
                               UINT flags )
 {
 	char szLocation[MAX_PATH];
-	int iIndex;
-	DWORD ret = TRUE, dwAttributes = 0;
-	IShellFolder * psfParent = NULL;
+    int iIndex;
+    DWORD ret = TRUE, dwAttributes = 0;
+    IShellFolder * psfParent = NULL;
 	IExtractIconA * pei = NULL;
-	LPITEMIDLIST	pidlLast = NULL, pidl = NULL;
-	HRESULT hr = S_OK;
-	BOOL IconNotYetLoaded=TRUE;
+    LPITEMIDLIST    pidlLast = NULL, pidl = NULL;
+    HRESULT hr = S_OK;
+    BOOL IconNotYetLoaded=TRUE;
 
 	TRACE("(%s fattr=0x%lx sfi=%p(attr=0x%08lx) size=0x%x flags=0x%x)\n", 
 	  (flags & SHGFI_PIDL)? "pidl" : debugstr_a(path), dwFileAttributes, psfi, psfi->dwAttributes, sizeofpsfi, flags);
 
 	if ((flags & SHGFI_USEFILEATTRIBUTES) && (flags & (SHGFI_ATTRIBUTES|SHGFI_EXETYPE|SHGFI_PIDL)))
-	  return FALSE;
+        return FALSE;
 
-	/* windows initializes this values regardless of the flags */
-        if (psfi != NULL) {
-	    psfi->szDisplayName[0] = '\0';
-	    psfi->szTypeName[0] = '\0';
-	    psfi->iIcon = 0;
-        }
+    /* windows initializes this values regardless of the flags */
+    if (psfi != NULL)
+    {
+        psfi->szDisplayName[0] = '\0';
+        psfi->szTypeName[0] = '\0';
+        psfi->iIcon = 0;
+    }
 
-	if (flags & SHGFI_EXETYPE) {
-	  BOOL status = FALSE;
-	  HANDLE hfile;
-	  DWORD BinaryType;
-	  IMAGE_DOS_HEADER mz_header;
-	  IMAGE_NT_HEADERS nt;
-	  DWORD len;
-	  char magic[4];
+    if (flags & SHGFI_EXETYPE)
+    {
+        BOOL status = FALSE;
+        HANDLE hfile;
+        DWORD BinaryType;
+        IMAGE_DOS_HEADER mz_header;
+        IMAGE_NT_HEADERS nt;
+        DWORD len;
+        char magic[4];
 
-	  if (flags != SHGFI_EXETYPE) return 0;
+        if (flags != SHGFI_EXETYPE)
+            return 0;
 
 	  status = GetBinaryTypeA (path, &BinaryType);
-	  if (!status) return 0;
-	  if ((BinaryType == SCS_DOS_BINARY)
-		|| (BinaryType == SCS_PIF_BINARY)) return 0x4d5a;
+        if (!status)
+            return 0;
+        if ((BinaryType == SCS_DOS_BINARY) || (BinaryType == SCS_PIF_BINARY))
+            return 0x4d5a;
 
 	  hfile = CreateFileA( path, GENERIC_READ, FILE_SHARE_READ,
-		NULL, OPEN_EXISTING, 0, 0 );
-	  if ( hfile == INVALID_HANDLE_VALUE ) return 0;
+                             NULL, OPEN_EXISTING, 0, 0 );
+        if ( hfile == INVALID_HANDLE_VALUE )
+            return 0;
 
         /*
          * The next section is adapted from MODULE_GetBinaryType, as we need
@@ -278,58 +295,66 @@ DWORD WINAPI SHGetFileInfoA(LPCSTR path,DWORD dwFileAttributes,
          * Seek to the start of the file and read the header information.
          */
 
-	  SetFilePointer( hfile, 0, NULL, SEEK_SET );
-	  ReadFile( hfile, &mz_header, sizeof(mz_header), &len, NULL );
+        SetFilePointer( hfile, 0, NULL, SEEK_SET );
+        ReadFile( hfile, &mz_header, sizeof(mz_header), &len, NULL );
 
-         SetFilePointer( hfile, mz_header.e_lfanew, NULL, SEEK_SET );
-         ReadFile( hfile, magic, sizeof(magic), &len, NULL );
-         if ( *(DWORD*)magic      == IMAGE_NT_SIGNATURE )
-         {
-             SetFilePointer( hfile, mz_header.e_lfanew, NULL, SEEK_SET );
-             ReadFile( hfile, &nt, sizeof(nt), &len, NULL );
-	      CloseHandle( hfile );
-	      if (nt.OptionalHeader.Subsystem == IMAGE_SUBSYSTEM_WINDOWS_GUI) {
-                 return IMAGE_NT_SIGNATURE
-			| (nt.OptionalHeader.MajorSubsystemVersion << 24)
-			| (nt.OptionalHeader.MinorSubsystemVersion << 16);
-	      }
-	      return IMAGE_NT_SIGNATURE;
-	  }
-         else if ( *(WORD*)magic == IMAGE_OS2_SIGNATURE )
-         {
-             IMAGE_OS2_HEADER ne;
-             SetFilePointer( hfile, mz_header.e_lfanew, NULL, SEEK_SET );
-             ReadFile( hfile, &ne, sizeof(ne), &len, NULL );
-	      CloseHandle( hfile );
-             if (ne.ne_exetyp == 2) return IMAGE_OS2_SIGNATURE
-			| (ne.ne_expver << 16);
-	      return 0;
-	  }
-	  CloseHandle( hfile );
-	  return 0;
-      }
+        SetFilePointer( hfile, mz_header.e_lfanew, NULL, SEEK_SET );
+        ReadFile( hfile, magic, sizeof(magic), &len, NULL );
+        if ( *(DWORD*)magic      == IMAGE_NT_SIGNATURE )
+        {
+            SetFilePointer( hfile, mz_header.e_lfanew, NULL, SEEK_SET );
+            ReadFile( hfile, &nt, sizeof(nt), &len, NULL );
+            CloseHandle( hfile );
+            if (nt.OptionalHeader.Subsystem == IMAGE_SUBSYSTEM_WINDOWS_GUI)
+            {
+                 return IMAGE_NT_SIGNATURE | 
+                       (nt.OptionalHeader.MajorSubsystemVersion << 24) |
+                       (nt.OptionalHeader.MinorSubsystemVersion << 16);
+            }
+            return IMAGE_NT_SIGNATURE;
+        }
+        else if ( *(WORD*)magic == IMAGE_OS2_SIGNATURE )
+        {
+            IMAGE_OS2_HEADER ne;
+            SetFilePointer( hfile, mz_header.e_lfanew, NULL, SEEK_SET );
+            ReadFile( hfile, &ne, sizeof(ne), &len, NULL );
+            CloseHandle( hfile );
+            if (ne.ne_exetyp == 2)
+                return IMAGE_OS2_SIGNATURE | (ne.ne_expver << 16);
+            return 0;
+        }
+        CloseHandle( hfile );
+        return 0;
+    }
 
-      /* psfi is NULL normally to query EXE type. If it is NULL, none of the
-       * below makes sense anyway. Windows allows this and just returns FALSE */
-      if (psfi == NULL) return FALSE;
+    /*
+     * psfi is NULL normally to query EXE type. If it is NULL, none of the
+     * below makes sense anyway. Windows allows this and just returns FALSE
+     */
+    if (psfi == NULL)
+        return FALSE;
 
-	/* translate the path into a pidl only when SHGFI_USEFILEATTRIBUTES
-    	 * is not specified.
-	   The pidl functions fail on not existing file names */
-	if (flags & SHGFI_PIDL)
-	{
+    /*
+     * translate the path into a pidl only when SHGFI_USEFILEATTRIBUTES
+     * is not specified.
+     * The pidl functions fail on not existing file names
+     */
+
+    if (flags & SHGFI_PIDL)
+    {
 	  pidl = (LPCITEMIDLIST) path;
 	  if (!pidl )
 	  {
 	    ERR("pidl is null!\n");
 	    return FALSE;
 	  }
-	}
-	else if (!(flags & SHGFI_USEFILEATTRIBUTES))
-	{
+    }
+    else if (!(flags & SHGFI_USEFILEATTRIBUTES))
+    {
 	  hr = SHILCreateFromPathA ( path, &pidl, &dwAttributes);
 	  /* note: the attributes in ISF::ParseDisplayName are not implemented */
-	}
+    }
+
     if ((flags & SHGFI_PIDL) || !(flags & SHGFI_USEFILEATTRIBUTES))
     {
         /* get the parent shellfolder */
@@ -353,7 +378,8 @@ DWORD WINAPI SHGetFileInfoA(LPCSTR path,DWORD dwFileAttributes,
         {
             psfi->dwAttributes = 0xffffffff;
         }
-	  IShellFolder_GetAttributesOf(psfParent, 1 , &pidlLast, &(psfi->dwAttributes));
+        IShellFolder_GetAttributesOf( psfParent, 1, (LPCITEMIDLIST*)&pidlLast,
+                                      &(psfi->dwAttributes) );
     }
 
     /* get the displayname */
@@ -371,13 +397,15 @@ DWORD WINAPI SHGetFileInfoA(LPCSTR path,DWORD dwFileAttributes,
         }
     }
 
-	/* get the type name */
-	if (SUCCEEDED(hr) && (flags & SHGFI_TYPENAME))
-	{
-            if (!(flags & SHGFI_USEFILEATTRIBUTES))
+    /* get the type name */
+    if (SUCCEEDED(hr) && (flags & SHGFI_TYPENAME))
+    {
+        if (!(flags & SHGFI_USEFILEATTRIBUTES))
+        {
 		_ILGetFileType(pidlLast, psfi->szTypeName, 80);
-            else
-            {
+        }
+        else
+        {
                 char sTemp[64];
                 strcpy(sTemp,PathFindExtensionA(path));
                 if (!( HCR_MapTypeToValue(sTemp, sTemp, 64, TRUE)
@@ -387,9 +415,9 @@ DWORD WINAPI SHGetFileInfoA(LPCSTR path,DWORD dwFileAttributes,
                     strcat (psfi->szTypeName, "-file");
                 }
             }
-	}
+    }
 
-	/* ### icons ###*/
+    /* ### icons ###*/
 #ifndef __WIN32OS2__
     if (flags & SHGFI_ADDOVERLAYS)
         FIXME("SHGFI_ADDOVERLAYS unhandled\n");
@@ -398,41 +426,44 @@ DWORD WINAPI SHGetFileInfoA(LPCSTR path,DWORD dwFileAttributes,
         FIXME("SHGFI_OVERLAYINDEX unhandled\n");
 #endif
 
-	if (flags & SHGFI_LINKOVERLAY)
-	  FIXME("set icon to link, stub\n");
+    if (flags & SHGFI_LINKOVERLAY)
+        FIXME("set icon to link, stub\n");
 
-	if (flags & SHGFI_SELECTED)
-	  FIXME("set icon to selected, stub\n");
+    if (flags & SHGFI_SELECTED)
+        FIXME("set icon to selected, stub\n");
 
-	if (flags & SHGFI_SHELLICONSIZE)
-	  FIXME("set icon to shell size, stub\n");
+    if (flags & SHGFI_SHELLICONSIZE)
+        FIXME("set icon to shell size, stub\n");
 
-	/* get the iconlocation */
-	if (SUCCEEDED(hr) && (flags & SHGFI_ICONLOCATION ))
-	{
-	  UINT uDummy,uFlags;
+    /* get the iconlocation */
+#ifdef __WIN32OS2__
+    if (psfParent)
+#endif
+    if (SUCCEEDED(hr) && (flags & SHGFI_ICONLOCATION ))
+    {
+        UINT uDummy,uFlags;
+
 	  hr = IShellFolder_GetUIObjectOf(psfParent, 0, 1, &pidlLast, &IID_IExtractIconA, &uDummy, (LPVOID*)&pei);
 
-	  if (SUCCEEDED(hr))
-	  {
+        if (SUCCEEDED(hr))
+        {
 	    hr = IExtractIconA_GetIconLocation(pei, (flags & SHGFI_OPENICON)? GIL_OPENICON : 0,szLocation, MAX_PATH, &iIndex, &uFlags);
-           psfi->iIcon = iIndex;
+            psfi->iIcon = iIndex;
 
-	    if(uFlags != GIL_NOTFILENAME)
+            if (uFlags != GIL_NOTFILENAME)
 	      strcpy (psfi->szDisplayName, szLocation);
-	    else
-	      ret = FALSE;
+            else
+                ret = FALSE;
 
-	    IExtractIconA_Release(pei);
-	  }
-	}
+            IExtractIconA_Release(pei);
+        }
+    }
 
-	/* get icon index (or load icon)*/
-	if (SUCCEEDED(hr) && (flags & (SHGFI_ICON | SHGFI_SYSICONINDEX)))
-	{
-
-	  if (flags & SHGFI_USEFILEATTRIBUTES)
-	  {
+    /* get icon index (or load icon)*/
+    if (SUCCEEDED(hr) && (flags & (SHGFI_ICON | SHGFI_SYSICONINDEX)))
+    {
+        if (flags & SHGFI_USEFILEATTRIBUTES)
+        {
 	    char sTemp [MAX_PATH];
 	    char * szExt;
 	    DWORD dwNr=0;
@@ -483,13 +514,15 @@ DWORD WINAPI SHGetFileInfoA(LPCSTR path,DWORD dwFileAttributes,
 	if (flags & (SHGFI_UNKNOWN1 | SHGFI_UNKNOWN2 | SHGFI_UNKNOWN3))
 	  FIXME("unknown attribute!\n");
 
-	if (psfParent)
-	  IShellFolder_Release(psfParent);
+    if (psfParent)
+        IShellFolder_Release(psfParent);
 
-	if (hr != S_OK)
-	  ret = FALSE;
+    if (hr != S_OK)
+        ret = FALSE;
 
-	if(pidlLast) SHFree(pidlLast);
+    if (pidlLast)
+        SHFree(pidlLast);
+
 #ifdef MORE_DEBUG
 	TRACE ("icon=0x%08x index=0x%08x attr=0x%08lx name=%s type=%s ret=0x%08lx\n", 
 		psfi->hIcon, psfi->iIcon, psfi->dwAttributes, psfi->szDisplayName, psfi->szTypeName, ret);

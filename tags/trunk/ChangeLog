@@ -1,10 +1,13 @@
-/* $Id: ChangeLog,v 1.2759 2005-03-06 10:35:38 sao2l02 Exp $ */
+/* $Id: ChangeLog,v 1.2760 2005-03-08 19:06:57 sao2l02 Exp $ */
+2005-03-08: Dietrich Teickner <dietrich_teickner@arcor   >
+    - shell32:  o src\shell32\shell32_main.c
+                  some repairs for setup flashfxp 3.02.  
 2005-03-02: Dietrich Teickner <dietrich_teickner@arcor   >
     - makefile: o new cleanrule for cleaning only maintargets (dll+exe) for faster switch in debugbuild.
                   with and without debuginfo. 
-    - comctl32: o src\comctl32\listview.c
-                  partialy switch of the message WM_NOTIFY to parent,
-                  cause of stackoverflow with flashfxp 3.02. new problem, no text will seen.
+;    - comctl32: o src\comctl32\listview.c
+;                  partialy switch of the message WM_NOTIFY to parent,
+;                  cause of stackoverflow with flashfxp 3.02. new problem, no text will seen.
     - shell32:  o src\shell32\shell32_main.c
                   some resyncs with wine for setup flashfxp 3.02.  
     - advapi32: o src\advapi32\ADVAPI32.DEF
