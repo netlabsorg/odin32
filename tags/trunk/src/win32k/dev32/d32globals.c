@@ -1,4 +1,4 @@
-/* $Id: d32globals.c,v 1.3 1999-11-10 01:45:30 bird Exp $
+/* $Id: d32globals.c,v 1.4 2000-02-21 15:59:20 bird Exp $
  *
  * d32globals - global data (32-bit)
  *
@@ -23,5 +23,11 @@
 *   Global Variables                                                           *
 *******************************************************************************/
 PULONG          pulTKSSBase32;
-struct options  options;
+#ifdef DEBUG
+char szStartOfOptions[] = "START-OF-OPTIONS";
+#endif
+struct options  options = {0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0};
+#ifdef DEBUG
+char szEndOfOptions[] = "END-OF-OPTIONS";
+#endif
 
