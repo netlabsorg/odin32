@@ -47,6 +47,7 @@ A list of Open32 bugs (under construction):
     LineTo (hdc, x, rect.bottom);
     SetROP2 (hdc, oldRop);
     SelectObject (hdc, hOldPen);
+- FillRect uses the wrong color sometimes; see menu code (MENU_DrawMenuItem)
 
 Limitations:
 - No support for COMCTL32 controls.
