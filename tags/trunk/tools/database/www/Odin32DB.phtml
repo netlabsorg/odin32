@@ -1,6 +1,8 @@
 <?php
 
-require "stilovi.php3";
+$sMainDir = "../";
+
+require $sMainDir."stilovi.php3";
 require "Odin32DBHelpers.php3";
 
 /* Profiling */
@@ -13,7 +15,7 @@ $Title ="The Odin32 API Database";
 /*
  * Connect to database
  */
-require "Odin32DBConnect.php3";
+require $sMainDir."Odin32DBConnect.php3";
 
 
 /*
@@ -124,18 +126,18 @@ else
     @mysql_free_result($result);
 }
 
-require "01-PreTitle.php3";
+require $sMainDir."01-PreTitle.php3";
 if ($sName == "")   echo $Title." - ".$sCategoryName;
 else                echo $Title." - ".$sCategoryName.": ".$sName;
-require "02-PostTitle.php3";
+require $sMainDir."02-PostTitle.php3";
 
-require "03-MainTableBeg.php3";
-require "04-ColumnOne.php3";
+require $sMainDir."03-MainTableBeg.php3";
+require $sMainDir."04-ColumnOne.php3";
 
-require "05-ColumnTwoHeader.php3";
+require $sMainDir."05-ColumnTwoHeader.php3";
 if ($sName == "")   echo $Title."<br>".$sCategoryName;
 else                echo $Title."<br>".$sCategoryName.": ".$sName;
-require "06-ColumnTwoHeader2.php3";
+require $sMainDir."06-ColumnTwoHeader2.php3";
 
 
 TekstBeg();
@@ -351,19 +353,19 @@ else
 
 TekstEnd();
 
-require "07-ColumnTwoFooter.php3";
-require "08-News.php3";
-require "09-ContentsTitle.php3";
+require $sMainDir."07-ColumnTwoFooter.php3";
+require $sMainDir."08-News.php3";
+require $sMainDir."09-ContentsTitle.php3";
 
 Odin32DBWriteContents();
 
-require "10-EndOfContent.php3";
-require "11-NetlabsContact.php3";
+require $sMainDir."10-EndOfContent.php3";
+require $sMainDir."11-NetlabsContact.php3";
 
 $Kada=date ("j M Y", filemtime(__file__));
-require "12-OdinBanner.php3";
+require $sMainDir."12-OdinBanner.php3";
 
-require "13-Closing.php3";
+require $sMainDir."13-Closing.php3";
 
 
 /* Profiling */
