@@ -40,7 +40,6 @@ EXPORTS
    _O32_DeleteMetaFile @ 139
    _O32_DeleteObject @ 140
 
-   _O32_DrawFocusRect @ 159
    _O32_Ellipse @ 164
    _O32_EndDoc @ 171
    _O32_EndPage @ 172
@@ -173,54 +172,54 @@ EXPORTS
    _O32_UnrealizeObject @ 704
    _O32_WidenPath @ 713
 
-   _O32_DdeAbandonTransaction            @801 
-   _O32_DdeAccessData                    @802 
-   _O32_DdeAddData                       @803 
-   _O32_DdeClientTransaction             @804 
-   _O32_DdeCmpStringHandles              @805 
-   _O32_DdeConnect                       @806 
-   _O32_DdeConnectList                   @807 
-   _O32_DdeCreateDataHandle              @808 
-   _O32_DdeCreateStringHandle            @809 
-   _O32_DdeDisconnect                    @810 
-   _O32_DdeDisconnectList                @811 
-   _O32_DdeEnableCallback                @812 
-   _O32_DdeFreeDataHandle                @813 
-   _O32_DdeFreeStringHandle              @814 
-   _O32_DdeGetData                       @815 
-   _O32_DdeGetLastError                  @816 
-   _O32_DdeInitialize                    @817 
-   _O32_DdeKeepStringHandle              @818 
-   _O32_DdeNameService                   @819 
-   _O32_DdePostAdvise                    @820 
-   _O32_DdeQueryConvInfo                 @821 
-   _O32_DdeQueryNextServer               @822 
-   _O32_DdeQueryString                   @823 
-   _O32_DdeReconnect                     @824 
-   _O32_DdeSetUserHandle                 @825 
-   _O32_DdeUnaccessData                  @826 
-   _O32_DdeUninitialize                  @827 
-   _O32_ReuseDDElParam                   @828 
-   _O32_PackDDElParam                    @829 
-   _O32_FreeDDElParam                    @830 
-   _O32_UnpackDDElParam                  @831 
+   _O32_DdeAbandonTransaction            @801
+   _O32_DdeAccessData                    @802
+   _O32_DdeAddData                       @803
+   _O32_DdeClientTransaction             @804
+   _O32_DdeCmpStringHandles              @805
+   _O32_DdeConnect                       @806
+   _O32_DdeConnectList                   @807
+   _O32_DdeCreateDataHandle              @808
+   _O32_DdeCreateStringHandle            @809
+   _O32_DdeDisconnect                    @810
+   _O32_DdeDisconnectList                @811
+   _O32_DdeEnableCallback                @812
+   _O32_DdeFreeDataHandle                @813
+   _O32_DdeFreeStringHandle              @814
+   _O32_DdeGetData                       @815
+   _O32_DdeGetLastError                  @816
+   _O32_DdeInitialize                    @817
+   _O32_DdeKeepStringHandle              @818
+   _O32_DdeNameService                   @819
+   _O32_DdePostAdvise                    @820
+   _O32_DdeQueryConvInfo                 @821
+   _O32_DdeQueryNextServer               @822
+   _O32_DdeQueryString                   @823
+   _O32_DdeReconnect                     @824
+   _O32_DdeSetUserHandle                 @825
+   _O32_DdeUnaccessData                  @826
+   _O32_DdeUninitialize                  @827
+   _O32_ReuseDDElParam                   @828
+   _O32_PackDDElParam                    @829
+   _O32_FreeDDElParam                    @830
+   _O32_UnpackDDElParam                  @831
 
-   _O32_ChangeClipboardChain             @840 
-   _O32_CloseClipboard                   @841 
-   _O32_CountClipboardFormats            @842 
-   _O32_EmptyClipboard                   @843 
-   _O32_EnumClipboardFormats             @844 
-   _O32_GetClipboardData                 @845 
-   _O32_GetClipboardFormatName           @846 
-   _O32_GetClipboardOwner                @847 
-   _O32_GetClipboardViewer               @848 
-   _O32_GetOpenClipboardWindow           @849 
-   _O32_GetPriorityClipboardFormat       @850 
-   _O32_IsClipboardFormatAvailable       @851 
-   _O32_OpenClipboard                    @852 
-   _O32_RegisterClipboardFormat          @853 
-   _O32_SetClipboardData                 @854 
-   _O32_SetClipboardViewer               @855 
+   _O32_ChangeClipboardChain             @840
+   _O32_CloseClipboard                   @841
+   _O32_CountClipboardFormats            @842
+   _O32_EmptyClipboard                   @843
+   _O32_EnumClipboardFormats             @844
+   _O32_GetClipboardData                 @845
+   _O32_GetClipboardFormatName           @846
+   _O32_GetClipboardOwner                @847
+   _O32_GetClipboardViewer               @848
+   _O32_GetOpenClipboardWindow           @849
+   _O32_GetPriorityClipboardFormat       @850
+   _O32_IsClipboardFormatAvailable       @851
+   _O32_OpenClipboard                    @852
+   _O32_RegisterClipboardFormat          @853
+   _O32_SetClipboardData                 @854
+   _O32_SetClipboardViewer               @855
 
    _O32_MapVirtualKey                    @860
    _O32_GetAsyncKeyState                 @861
@@ -262,10 +261,13 @@ EXPORTS
    _O32_GetEnvironmentStrings            @926
    _O32_SetEnvironmentVariable           @927
    _O32_GetEnvironmentVariable           @928
-   _O32_GetPriorityClass                 @929
+;;   _O32_GetPriorityClass                 @929
+;;   _O32_GetThreadPriority                @930
    _O32_OpenProcess                      @931
    _O32_ResumeThread                     @932
-   _O32_SetPriorityClass                 @933
+;;   _O32_SetPriorityClass                 @933
+;;   _O32_SetThreadPriority                @934
+;;   _O32_Sleep                            @935
    _O32_SuspendThread                    @936
    _O32_TerminateProcess                 @937
    _O32_TerminateThread                  @938
@@ -275,7 +277,6 @@ EXPORTS
    _O32_SetLastError                     @942
    _O32_GetLastError                     @943
 
-   _O32_GetDriveType                     @944
    _O32_CompareFileTime                  @945
    _O32_DosDateTimeToFileTime            @946
    _O32_FileTimeToDosDateTime            @947
@@ -306,7 +307,7 @@ EXPORTS
    _O32_GetFullPathName                  @977
    _O32_GetLogicalDriveStrings           @978
    _O32_GetTempFileName                  @979
-   _O32_GetTempPath                      @980
+;;   _O32_GetTempPath                      @980
    _O32_SetCurrentDirectory              @981
    _O32_SetFileAttributes                @982
    _O32_SetVolumeLabel                   @983
@@ -337,9 +338,8 @@ EXPORTS
    _O32_CreateHandleForMemory @ 1902
    _O32_DiscardMemoryHandle @ 1903
    _O32_GdiComment @ 1905
-   _O32__CreateBitmapIndirect @ 5000
-   _O32_WinTranslateGraphicsObjectHandle @6005
+   _O32_CreateBitmapIndirect @ 5000
 
    _GpiQueryDCData @ 7000
-
-   _O32_CreateBitmapFromPMHandle         @7001  
+   _O32_CreateBitmapFromPMHandle         @7001
+   _O32_GetStartupInfo                   @7002
