@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.48 2000-06-26 12:23:54 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.49 2000-06-28 18:08:36 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -500,11 +500,11 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
   //SvL: Set instance handle in process database structure
   SetPDBInstance(hinstance);
 
-  //PH: get pResDir pointer correct first, since processImports may
+  //PH: get pResRootDir pointer correct first, since processImports may
   //    implicitly call functions depending on it.
   if(GetSectionHdrByName (win32file, &sh, ".rsrc")) {
     	//get offset in resource object of directory entry
-	pResDir = (PIMAGE_RESOURCE_DIRECTORY)(sh.VirtualAddress + realBaseAddress);
+	pResRootDir = (PIMAGE_RESOURCE_DIRECTORY)(sh.VirtualAddress + realBaseAddress);
         ulRVAResourceSection = sh.VirtualAddress;
   }
 

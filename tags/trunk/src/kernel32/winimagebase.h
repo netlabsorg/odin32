@@ -1,4 +1,4 @@
-/* $Id: winimagebase.h,v 1.12 2000-06-17 09:03:36 sandervl Exp $ */
+/* $Id: winimagebase.h,v 1.13 2000-06-28 18:08:35 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -21,8 +21,8 @@
 #define CCHMAXPATH 260
 #endif
 
-#define LANG_GETFIRST           0x80000000
-#define IDLANG_GETFIRST         LANG_GETFIRST
+#define LANG_GETFIRST           0xF0000000
+#define ID_GETFIRST             0xF0000000
 
 #ifndef ENUMRESNAMEPROC
     typedef BOOL (* CALLBACK ENUMRESTYPEPROCA)(HMODULE,LPSTR,LONG);
@@ -58,28 +58,28 @@ virtual ~Win32ImageBase();
         HINSTANCE getInstanceHandle() { return hinstance; };
 
 //Returns required OS version for this image
-virtual ULONG     getVersion();
+virtual ULONG getVersion();
 
-virtual void setFullPath(char *name);
+virtual void  setFullPath(char *name);
         char *getFullPath()           { return fullpath; };
 
 	char *getModuleName()	      { return szModule; };
 
         //findResource returns the pointer of the resource's IMAGE_RESOURCE_DATA_ENTRY structure
-virtual HRSRC findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang = LANG_GETFIRST);
-        HRSRC findResourceW(LPWSTR lpszName, LPWSTR lpszType, ULONG lang = LANG_GETFIRST);
+	HRSRC findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang = LANG_GETFIRST);
+	HRSRC findResourceW(LPWSTR lpszName, LPWSTR lpszType, ULONG lang = LANG_GETFIRST);
 
-virtual ULONG getResourceSizeA(LPCSTR lpszName, LPSTR lpszType, ULONG lang = LANG_GETFIRST);
-        ULONG getResourceSizeW(LPCWSTR lpszName, LPWSTR lpszType, ULONG lang = LANG_GETFIRST);
-virtual BOOL  enumResourceNamesA(HMODULE hmod, LPCTSTR  lpszType, ENUMRESNAMEPROCA lpEnumFunc, LONG lParam);
-virtual BOOL  enumResourceNamesW(HMODULE hmod, LPCWSTR  lpszType, ENUMRESNAMEPROCW lpEnumFunc, LONG lParam);
-virtual BOOL  enumResourceTypesA(HMODULE hmod, ENUMRESTYPEPROCA lpEnumFunc, 
+	ULONG getResourceSizeA(LPSTR lpszName, LPSTR lpszType, ULONG lang = LANG_GETFIRST);
+        ULONG getResourceSizeW(LPWSTR lpszName, LPWSTR lpszType, ULONG lang = LANG_GETFIRST);
+	BOOL  enumResourceNamesA(HMODULE hmod, LPCTSTR  lpszType, ENUMRESNAMEPROCA lpEnumFunc, LONG lParam);
+	BOOL  enumResourceNamesW(HMODULE hmod, LPCWSTR  lpszType, ENUMRESNAMEPROCW lpEnumFunc, LONG lParam);
+	BOOL  enumResourceTypesA(HMODULE hmod, ENUMRESTYPEPROCA lpEnumFunc, 
                                  LONG lParam);
-virtual BOOL  enumResourceTypesW(HMODULE hmod, ENUMRESTYPEPROCW lpEnumFunc, 
+	BOOL  enumResourceTypesW(HMODULE hmod, ENUMRESTYPEPROCW lpEnumFunc, 
                                  LONG lParam);
 
-virtual ULONG getVersionSize();
-virtual BOOL  getVersionStruct(char *verstruct, ULONG bufLength);
+	ULONG getVersionSize();
+	BOOL  getVersionStruct(char *verstruct, ULONG bufLength);
 
         //Returns pointer to data of resource handle
         char *getResourceAddr(HRSRC hResource);
@@ -139,15 +139,12 @@ protected:
   	PIMAGE_TLS_CALLBACK  *tlsCallBackAddr;	//ptr to TLS callback array
 	ULONG                 tlsIndex;		//module TLS index
 
-        ULONG getPEResourceSize(ULONG id, ULONG type, ULONG lang = LANG_GETFIRST);
-
-        PIMAGE_RESOURCE_DATA_ENTRY getPEResourceEntry(ULONG id, ULONG type, ULONG lang, int *error);
-        PIMAGE_RESOURCE_DATA_ENTRY ProcessResSubDir(PIMAGE_RESOURCE_DIRECTORY prdType,
-                                                    ULONG *nodeData, int level, int *error);
         PIMAGE_RESOURCE_DIRECTORY  getResSubDirW(PIMAGE_RESOURCE_DIRECTORY pResDir, LPCWSTR lpszName);
         PIMAGE_RESOURCE_DIRECTORY  getResSubDirA(PIMAGE_RESOURCE_DIRECTORY pResDir, LPCTSTR lpszName);
 
-        PIMAGE_RESOURCE_DIRECTORY pResDir;
+	PIMAGE_RESOURCE_DATA_ENTRY getResDataLang(PIMAGE_RESOURCE_DIRECTORY pResDir, ULONG language, BOOL fGetDefault = FALSE);
+
+        PIMAGE_RESOURCE_DIRECTORY pResRootDir;
 
         //substracted from RVA data offsets
         ULONG                     ulRVAResourceSection;
