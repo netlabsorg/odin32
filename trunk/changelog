@@ -1,4 +1,13 @@
- /* $Id: changelog,v 1.221 1999-09-22 08:57:41 sandervl Exp $ */
+ /* $Id: changelog,v 1.222 1999-09-22 09:45:41 sandervl Exp $ */
+
+ 99-09-22: Yuri Dario <mc6530@mclink.it>
+	- MISC: Fixed WINELIB macro's in wingdi.h, added fixes to headers
+                for VAC 3.6.5
+	- ODINCRT: Also link with SOMLIB (VAC 3.6.5)
+	- CRTDLL: Compilation fix for VAC 3.6.5
+	- TOOLS\COMMON: Minor change to makefile
+	- TOOLS\IMPDEF: Minor change to makefile
+	- TOOLS\WRC: Makefile fixes
 
  99-09-22: Rene Pronk <R.Pronk@twi.tudelft.nl>
 	- USER32: Changed WM_CHAR PM handling to generate WM_(SYS)KEYUP/DOWN
