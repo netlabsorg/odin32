@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.153 1999-08-29 20:04:42 sandervl Exp $ */
+ /* $Id: changelog,v 1.154 1999-08-30 12:00:55 sandervl Exp $ */
+
+ 99-08-30: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32\NEW: Redesign. Create base class for all window types
 
  99-08-29: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: Changed behaviour of mouse messages (send NC messages
