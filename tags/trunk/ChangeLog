@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.1556 2001-07-03 13:23:55 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1557 2001-07-03 13:26:00 bird Exp $ */
+
+ 2001-07-03: knut st. osmundsen <kosmunds@csc.com>
+    - KERNEL32: o Improoved the Unhandled exception message by
+                  trying to provide modulename and some kind of obj/offset.
 
  2001-07-03: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Executable load fix
