@@ -1,4 +1,4 @@
-/* $Id: winerror.h,v 1.4 1999-11-08 13:46:45 sandervl Exp $ */
+/* $Id: winerror.h,v 1.5 2000-03-18 17:03:34 davidr Exp $ */
 #ifndef __WINE_WINERROR_H
 #define __WINE_WINERROR_H
 
@@ -796,5 +796,13 @@ extern int WIN32_LastError;
 #define OLEOBJ_E_NOVERBS                0x00040180L
 #define OLEOBJ_E_INVALIDVERB            0x00040181L
 #define OLEOBJ_S_INVALIDVERB            0x00040180L
+
+#define CONVERT10_E_OLESTREAM_GET        0x800401C0
+#define CONVERT10_E_OLESTREAM_PUT        0x800401C1
+#define CONVERT10_E_OLESTREAM_FMT        0x800401C2
+#define CONVERT10_E_OLESTREAM_BITMAP_TO_DIB 0x800401C3
+#define CONVERT10_E_STG_FMT              0x800401C4
+#define CONVERT10_E_STG_NO_STD_STREAM    0x800401C5
+#define CONVERT10_E_STG_DIB_TO_BITMAP    0x800401C6
 
 #endif  /* __WINE_WINERROR_H */
