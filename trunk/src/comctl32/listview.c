@@ -762,7 +762,11 @@ static INT LISTVIEW_ProcessLetterKeys(
     }
     do {
         if (idx == nSize) {
+#ifdef __WIN32OS2__
+            if (endidx == nSize || endidx == 0)
+#else
             if (endidx == nSize)
+#endif
                 break;
             idx=0;
         }
