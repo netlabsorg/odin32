@@ -1,4 +1,4 @@
-/* $Id: winexepeldr.cpp,v 1.22 2003-01-13 16:51:40 sandervl Exp $ */
+/* $Id: winexepeldr.cpp,v 1.23 2003-02-10 16:05:39 sandervl Exp $ */
 
 /*
  * Win32 PE loader Exe class
@@ -181,6 +181,8 @@ Win32PeLdrExe::~Win32PeLdrExe()
 //******************************************************************************
 ULONG Win32PeLdrExe::getDefaultStackSize()
 {
+    //Note: MUST use 128kb as a minimum. Or else the workarounds for out of
+    //      stack space in 16 bits code (thread entrypoint) might fail.
     return (oh.SizeOfStackReserve > 128*1024) ? oh.SizeOfStackReserve : 128*1024;
 }
 //******************************************************************************
