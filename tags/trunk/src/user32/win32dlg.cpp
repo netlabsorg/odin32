@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.14 1999-10-14 09:22:41 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.15 1999-10-16 11:05:38 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -1068,17 +1068,23 @@ HWND Win32Dialog::getNextDlgGroupItem(HWND hwndCtrl, BOOL fPrevious)
 
             for(pWndTemp = nextchild;pWndTemp;pWndTemp = (Win32BaseWindow *)pWndTemp->getNextChild())
             {
-                if (pWndTemp->getStyle() & WS_GROUP) nextchild = pWndTemp;
-                if (pWndTemp == child) break;
+                if (pWndTemp->getStyle() & WS_GROUP)
+                    nextchild = pWndTemp;
+
+                if (pWndTemp == child)
+                    break;
             }
 
         }
-        if (nextchild == child) break;
+        if (nextchild == child)
+            break;
 
-            if ((nextchild->getStyle() & WS_VISIBLE) && !(nextchild->getStyle() & WS_DISABLED))
-            {
-                lastchild = nextchild;
-            if (!fPrevious) break;
+        if ((nextchild->getStyle() & WS_VISIBLE) && !(nextchild->getStyle() & WS_DISABLED))
+        {
+            lastchild = nextchild;
+
+            if (!fPrevious)
+                break;
         }
 
         nextchild = (Win32BaseWindow *)nextchild->getNextChild();
