@@ -1,7 +1,13 @@
-/* $Id: ChangeLog,v 1.1430 2001-05-19 19:44:23 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1431 2001-05-19 21:31:39 bird Exp $ */
+
+ 2001-05-19: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - win32k:   o Added improovments from Rafal, better validation of the
+                  paths which are found. Might cause some warnings for
+                  some of you, but just read and ignore them.
+                  Run configure.cmd (one of them)!
 
  2001-05-19: Sander van Leeuwen <sandervl@xs4all.nl>
-    - GDI32:    o LPtoDP/DPtoLP: check input because GpiConvert doesn't like 
+    - GDI32:    o LPtoDP/DPtoLP: check input because GpiConvert doesn't like
                   illegal values (TODO: check what NT does)
                   (fixes huge buttons in VirtualPC dialog (font with wrong
                    height created))
@@ -17,11 +23,11 @@
                 o Ordinal export 342 is InterlockedCompareExchange implementation
                   Takes 3 parameters, not 4. (Wine bug)
                 o Ordinal export 151 takes 3 parameters, not zero.
-                o Implemented SHLWAPI_151 (case sensitive string compare 
+                o Implemented SHLWAPI_151 (case sensitive string compare
                   with length; ascii version of SHLWAPI_152)
-                o Implemented SHLWAPI_153 (case insensitive string compare 
+                o Implemented SHLWAPI_153 (case insensitive string compare
                   with length (ascii))
-                o Added SHLWAPI_154 (case insensitive string compare with 
+                o Added SHLWAPI_154 (case insensitive string compare with
                   length (unicode))
     - USER32:   o Added TrackMouseEvent, GetGUIThreadInfo & SendInput stubs
     - ADVAPI32: o Added undocumented SystemFunctionXXX functions (stubs)
@@ -38,13 +44,13 @@
 
  2001-05-17: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o InvalidateRect & InvalidateRgn must call RedrawWindow
-                  with RDW_ALLCHILDREN flag. 
+                  with RDW_ALLCHILDREN flag.
                   (RealPlayer 8 install dialog doesn't have WS_CLIPCHILDREN
                    style -> InvalidateRect overwrites child windows (buttons))
 
  2001-05-17: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Destroy menu windows when they are no longer used.
-                  (fixes activation problems with dialogs created after 
+                  (fixes activation problems with dialogs created after
                    selecting a menu item)
                   (TODO: sync with latest wine menu control sourcecode)
                 o clientHeight bugfix (fixes crash in Solitaire)
