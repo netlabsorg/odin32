@@ -1,11 +1,10 @@
-# $Id: user32lib.mak,v 1.2 2001-07-29 18:59:28 sandervl Exp $
+# $Id: user32lib.mak,v 1.3 2001-09-15 15:23:12 sandervl Exp $
 
 #
 # Odin32 API
 #
 #       common.lib makefile
 #
-WRC_PREFIX_RESOURCE=1
 
 
 #
@@ -14,6 +13,7 @@ WRC_PREFIX_RESOURCE=1
 LIBTARGET = 1
 EXETARGET = 1
 PUBLICLIB = 1
+WRC_PREFIX_RESOURCE=1
 
 
 #
@@ -26,9 +26,9 @@ PUBLICLIB = 1
 # Overrides.
 #
 !ifndef WAT
-CDEFINES = $(CDEFINES) -DINVERT -DCLIENTFRAME -DUSING_OPEN32CLIPBOARD
+CDEFINES = $(CDEFINES) -DINVERT -DCLIENTFRAME
 !else
-CDEFINES += -DINVERT -DCLIENTFRAME -DUSING_OPEN32CLIPBOARD
+CDEFINES += -DINVERT -DCLIENTFRAME
 !endif
 
 
@@ -103,6 +103,7 @@ $(OBJDIR)\timer.obj \
 $(OBJDIR)\dbglocal.obj \
 $(OBJDIR)\caret.obj \
 $(OBJDIR)\text.obj \
+$(OBJDIR)\winevent.obj \
 $(OBJDIR)\oldnls32.obj \
 $(OBJDIR)\user32rsrc.obj \
 $(OBJDIR)\oslibprf.obj

@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.58 2001-07-15 14:36:38 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.59 2001-09-15 15:23:11 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -555,8 +555,20 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             win32sc = SC_MOVE_W;
             break;
         case SC_CLOSE:
+        {
+            HWND hwnd = win32wnd->GetTopParent();
+            if(win32wnd->getWindowHandle() != hwnd) {
+                RELEASE_WNDOBJ(win32wnd);
+                win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
+                if(win32wnd == NULL) {
+                    DebugInt3();
+                    goto dummymessage;
+                }
+                winMsg->hwnd = hwnd;
+            }
             win32sc = SC_CLOSE_W;
             break;
+        }
         case SC_MAXIMIZE:
             win32sc = SC_MAXIMIZE_W;
             break;
@@ -577,7 +589,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             dprintf(("Unknown/unsupported SC command %d", SHORT1FROMMP(os2Msg->mp1)));
             goto dummymessage;
         }
-        winMsg->message    = WINWM_SYSCOMMAND;
+        winMsg->message= WINWM_SYSCOMMAND;
         winMsg->wParam = (WPARAM)win32sc;
         winMsg->lParam = MAKELONG((USHORT)x, (USHORT)y);
         break;
