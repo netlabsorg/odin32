@@ -1,4 +1,4 @@
-/* $Id: hmdisk.h,v 1.5 2001-10-30 00:46:17 sandervl Exp $ */
+/* $Id: hmdisk.h,v 1.6 2001-11-22 16:03:23 sandervl Exp $ */
 
 #ifndef __HMDISK_H__
 #define __HMDISK_H__
@@ -49,6 +49,30 @@ public:
                                      LPVOID lpInBuffer, DWORD nInBufferSize,
                                      LPVOID lpOutBuffer, DWORD nOutBufferSize,
                                      LPDWORD lpBytesReturned, LPOVERLAPPED lpOverlapped);
+
+                        /* this is a handler method for calls to ReadFileEx() */
+  virtual BOOL  ReadFileEx(PHMHANDLEDATA pHMHandleData,
+                           LPVOID       lpBuffer,
+                           DWORD        nNumberOfBytesToRead,
+                           LPOVERLAPPED lpOverlapped,
+                           LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine);
+
+                        /* this is a handler method for calls to WriteFile() */
+  virtual BOOL   WriteFile  (PHMHANDLEDATA pHMHandleData,
+                             LPCVOID       lpBuffer,
+                             DWORD         nNumberOfBytesToWrite,
+                             LPDWORD       lpNumberOfBytesWritten,
+                             LPOVERLAPPED  lpOverlapped);
+
+                        /* this is a handler method for calls to WriteFileEx() */
+  virtual BOOL  WriteFileEx(PHMHANDLEDATA pHMHandleData,
+                            LPVOID       lpBuffer,
+                            DWORD        nNumberOfBytesToWrite,
+                            LPOVERLAPPED lpOverlapped,
+                            LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine);
+
+                      /* this is a handler method for calls to GetFileType() */
+  virtual DWORD GetFileType (PHMHANDLEDATA pHMHandleData);
 
 private:
           DWORD  OpenDisk(PVOID pDrvInfo);
