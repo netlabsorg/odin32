@@ -1,9 +1,10 @@
-/* $Id: changelog,v 1.2497 2003-02-24 11:14:21 sandervl Exp $ */
+/* $Id: changelog,v 1.2498 2003-02-24 11:40:31 sandervl Exp $ */
 
  2003-02-24: Sander van Leeuwen <sandervl@innotek   >
     - WS2_32:   o Implemented non-overlapped WSARecv & WSASend.
     - WSOCK32:  o check for local host name in gethostbyname. if identical,
                   then use "localhost" instead
+    - KERNEL32: o GetFullPathNameA: don't change the input string
 
  2003-02-23: knut st. osmundsen <bird@anduin   >
     - TOOLS/ALIASDEF:
