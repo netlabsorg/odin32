@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.125 2003-01-02 13:04:45 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.126 2003-01-03 17:20:04 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -552,7 +552,7 @@ int WIN32API GetSystemMetrics(int nIndex)
         rc = FALSE;
         break;
     case SM_CXMENUCHECK:
-        rc = 4;     //TODO
+        rc = 13;     //TODO
         break;
     case SM_CYMENUCHECK:
         rc = OSLibWinQuerySysValue(SVOS_CYMENU);
