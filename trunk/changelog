@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1414 2001-05-15 16:59:24 sandervl Exp $ */
+/* $Id: changelog,v 1.1415 2001-05-16 01:18:58 bird Exp $ */
+
+ 2001-05-15: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - Tools\bin:o Synced with other projects using the same tools.
 
  2001-05-15: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o BeginPaint must return logical points instead of device points.
@@ -27,18 +30,18 @@
                   (fixes visible region problems with e.g. Opera)
                   Frame windows never have the WS_CLIPCHILDREN style; this caused
                   the transparency problems reported earlier when using this method.
-                  E.g.: Dialog parent, groupbox; invalidate part of groupbox -> 
-                        painting algorithm stops top-down search when it finds 
+                  E.g.: Dialog parent, groupbox; invalidate part of groupbox ->
+                        painting algorithm stops top-down search when it finds
                         a window with WS_CLIPCHILDREN style
-                        -> result: dialog window won't update groupbox background 
+                        -> result: dialog window won't update groupbox background
                                    as groupbox only draws the border
-                o UpdateWindow: Must use frame window handle even though 
+                o UpdateWindow: Must use frame window handle even though
                   UpdateWindow only updates the client area.
                   If the frame window has a valid update region and we call
-                  WinUpdateWindow for the client window, then no WM_PAINT 
+                  WinUpdateWindow for the client window, then no WM_PAINT
                   messages will be sent.
                 o Don't erase background in RedrawWindow (invalidate) when
-                  RDW_ERASE flag not set. 
+                  RDW_ERASE flag not set.
                   (gets rid of excessive background redraws (flickering) for
                    progress windows in some installers)
                 o Fixed ScrollWindow bug
