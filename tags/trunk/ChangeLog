@@ -1,4 +1,11 @@
-/* $Id: ChangeLog,v 1.1233 2001-01-24 20:33:07 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1234 2001-01-25 20:18:33 sandervl Exp $ */
+
+ 2001-01-25: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Memory map commit bugfix for write accesses
+                  (fixes eternal loop in OLE during IE5 install)
+    - NTDLL:    o Ported latest NtQuerySystemInformation from Wine 
+                  (includes fix for IE5 install)
+    - OLE32:    o Resync with latest Wine (storage, stg_*)
 
  2001-01-24: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Default display and windows codepage set to 1252
