@@ -1,4 +1,4 @@
-/* $Id: oslibgpi.h,v 1.9 2000-11-16 16:34:49 sandervl Exp $ */
+/* $Id: oslibgpi.h,v 1.10 2001-05-19 19:43:54 sandervl Exp $ */
 
 /*
  * GPI interface code
@@ -308,4 +308,33 @@ inline ULONG APIENTRY _Gre32Entry8 (ULONG a, ULONG b, ULONG c, ULONG d, ULONG e,
    #define GreSelectClipRegion(a,b,c) (INT) _Gre32Entry5((ULONG)(HDC)(a),(ULONG)(HRGN)(b),(ULONG)(PHRGN)(c),0L,0x00004074L)
    #define GreIntersectClipRectangle(a,b) (INT) _Gre32Entry4((ULONG)(HDC)(a),(ULONG)(PRECTL)(b),0L,0x00004075L)
 
+#ifndef _OS2WIN_H
+#define OPEN32API       _System
+
+BOOL    OPEN32API _O32_LPtoDP( HDC, PPOINT, int );
+
+inline BOOL O32_LPtoDP(HDC a, PPOINT b, int c)
+{
+ BOOL yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = _O32_LPtoDP(a, b, c);
+    SetFS(sel);
+
+    return yyrc;
+} 
+BOOL    OPEN32API _O32_DPtoLP( HDC, PPOINT, int );
+
+inline BOOL O32_DPtoLP(HDC a, PPOINT b, int c)
+{
+ BOOL yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = _O32_DPtoLP(a, b, c);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#endif
 #endif

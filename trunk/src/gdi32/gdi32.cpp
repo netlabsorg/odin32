@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.69 2001-05-15 10:34:01 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.70 2001-05-19 19:43:53 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -516,13 +516,6 @@ ODINFUNCTION1(HBRUSH, CreateSolidBrush, COLORREF, color)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API DPtoLP( HDC arg1, PPOINT arg2, int  arg3)
-{
-    dprintf(("GDI32: DPtoLP\n"));
-    return O32_DPtoLP(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API Ellipse(HDC hdc, int nLeftRect, int nTopRect, int nRightRect,
                       int nBottomRect)
 {
@@ -980,30 +973,6 @@ BOOL WIN32API GetTextMetricsW( HDC arg1, LPTEXTMETRICW pwtm)
     pwtm->tmPitchAndFamily = atm.tmPitchAndFamily;
     pwtm->tmCharSet = atm.tmCharSet;
     return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API LPtoDP(HDC hdc, PPOINT lpPoints, int nCount)
-{
- BOOL ret;
-
-    dprintf(("LPtoDP %x %x %d", hdc, lpPoints, nCount));
-#ifdef DEBUG
-    if(nCount && lpPoints) {
-        for(int i=0;i<nCount;i++) {
-            dprintf(("LPtoDP in (%d,%d)", lpPoints[i].x, lpPoints[i].y));
-        }
-    }
-#endif
-    ret = O32_LPtoDP(hdc, lpPoints, nCount);
-#ifdef DEBUG
-    if(nCount && lpPoints) {
-        for(int i=0;i<nCount;i++) {
-            dprintf(("LPtoDP out (%d,%d)", lpPoints[i].x, lpPoints[i].y));
-        }
-    }
-#endif
-    return ret;
 }
 //******************************************************************************
 //******************************************************************************
