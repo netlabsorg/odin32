@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2546 2003-04-08 13:44:34 sandervl Exp $ */
+/* $Id: changelog,v 1.2547 2003-04-09 10:39:14 sandervl Exp $ */
+
+ 2002-04-09: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Unmap memory view when deleting PE dll object. 
+                  (problem found by Dietrich)
 
  2003-04-08: Platon Fomichev <platon@innotek   >
     - USER32:   o Treat LBUTTON press different from others in scrollbar. (WineX resync)
