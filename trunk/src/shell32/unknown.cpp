@@ -1,4 +1,4 @@
-/* $Id: unknown.cpp,v 1.4 1999-06-25 08:07:13 phaller Exp $ */
+/* $Id: unknown.cpp,v 1.5 1999-08-05 17:18:09 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -183,3 +183,27 @@ DWORD WIN32API RegenerateUserEnvironment(DWORD x1,
   return (0);
 }
 
+
+/*****************************************************************************
+ * Name      : DWORD RestartDialog
+ * Purpose   :
+ * Parameters: unknown, probably wrong
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.59
+ * Status    : UNTESTED STUB UNKNOWN
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
+ *****************************************************************************/
+
+DWORD WIN32API RestartDialog(DWORD x1,
+                             DWORD x2,
+                             DWORD x3)
+{
+  dprintf(("SHELL32: RestartDialog(%08xh,%08xhz) not implemented.\n",
+           x1,
+           x2,
+           x3));
+
+  return (0);
+}
