@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.38 2002-08-05 09:45:49 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.39 2002-08-05 16:31:27 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -838,7 +838,7 @@ DWORD WIN32API MsgWaitForMultipleObjects(DWORD nCount, LPHANDLE pHandles, BOOL f
 
     //4 cases:
     //1: Wait for all   -> check for message arrival, call WaitForMultipleObjects
-    //2: Timeout = 0 ms -> check for message arrival, call WaitForMultipleObjects with timeout 0
+    //2: Timeout = 0 ms -> call WaitForMultipleObjects with timeout 0, check for message arrival
     //3: nCount = 0     -> check for message arrival
     //4: rest           -> check for either message arrival or signalled object
 
