@@ -1,4 +1,4 @@
-# $Id: makefile.gcc,v 1.6 2000-05-23 18:23:04 bird Exp $
+# $Id: makefile.gcc,v 1.7 2000-11-19 08:29:54 bird Exp $
 
 #
 # PD-Win32 API
@@ -29,6 +29,7 @@ PDWIN32_TCOMMON = ..\common
 # Definitions for pdwin32.post
 LOCALCLEAN  = 1
 CLEANEXTRAS = commongcc.*
+OLD_STYLE = 1
 
 
 #

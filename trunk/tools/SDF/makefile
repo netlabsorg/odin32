@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2000-09-28 03:06:27 bird Exp $
+# $Id: makefile,v 1.3 2000-11-19 08:25:50 bird Exp $
 
 #
 # PD-Win32 API
@@ -8,52 +8,65 @@
 #
 
 
-# include common definitions
+#
+# Directory macros.
+#
 PDWIN32_INCLUDE = ..\..\include
+PDWIN32_LIB     = ..\..\lib
+PDWIN32_BIN     = ..\bin
 PDWIN32_TOOLS   = ..\bin
+PDWIN32_TCOMMON = ..\common
+
+
+#
+# Tell buildenvironment that we're makeing an .exe.
+# Tell buildenvironment that we should not copy this into /bin.
+#
+EXETARGET = 1
+NO_MAIN_BIN_COPY = 1
+
+
+#
+# Compiler, tools, and interference rules.
+#
 !include $(PDWIN32_INCLUDE)\pdwin32.mk
-
-# Addjust common definitions
-CINCLUDES= -I$(PDWIN32_INCLUDE) -I$(PDWIN32_INCLUDE)\win -I..\common
-!ifdef DEBUG
-CFLAGS   = $(CFLAGS)   -Ge+ -Tx+ $(CINCLUDES) -Wall+ppt-ppc-inl-cnv-gnr-vft-
-CXXFLAGS = $(CXXFLAGS) -Ge+ -Gx- -Tx+ $(CINCLUDES) -Wall+ppt-ppc-inl-cnv-gnr-vft-
-LDFLAGS  = $(LDFLAGS)  -Ge+ -Fe$@ /B"/MAP:full"
-!else
-CFLAGS   = $(CFLAGS)   -Ge+ -Tx+ $(CINCLUDES) -Wall+ppt-ppc-inl-cnv-gnr-vft-
-CXXFLAGS = $(CXXFLAGS) -Ge+ -Gx- -Tx+ $(CINCLUDES) -Wall+ppt-ppc-inl-cnv-gnr-vft-
-LDFLAGS  = $(LDFLAGS)  -Ge+ -Fe$@ /B"/MAP:full"
-!endif
-
-
-
-all: sdf.exe ..\bin\sdf.exe
-
-
-sdf.exe: sdf.obj ..\common\commonicc.lib
-   $(LD) $(LDFLAGS) $** $(RTLLIB) os2386.lib
-
-..\bin\sdf.exe: sdf.exe
-   $(CP) $** $@
-
-dep:
-    $(DEPEND) $(CINCLUDES) -I *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h \
-        *.c *.cpp
-
-clean:
-    @$(RM) *.obj *.exe *.map *.pch *.log
+!include $(PDWIN32_TCOMMON)\common.mk
 
 
 #
-# Include the .depend file.
-#   If the depend file don't exists we'll complain about it.
+# Flag overrides.
 #
-!ifndef NODEP
-!   if [$(EXISTS) .depend] == 0
-!       include .depend
-!   else
-!       if [$(ECHO) .depend doesn't exist]
-!       endif
-!   endif
+!if "$(VAC3)" == "1" || "$(VAC36)" == "1"
+CFLAGS      = $(CFLAGS)        -Wall+ppt-ppc-inl-cnv-gnr-vft-
+CXXFLAGS    = $(CXXFLAGS) -Gx- -Wall+ppt-ppc-inl-cnv-gnr-vft-
 !endif
+
+
+#
+# Object files. Prefix with OBJDIR and one space before the '\'.
+#
+OBJS= \
+$(OBJDIR)\sdf.obj
+
+
+#
+# Libraries. One space before the '\'.
+#
+LIBS = \
+$(COMMONLIB) \
+$(RTLLIB) \
+os2386.lib
+
+
+#
+# Target name - name of the exe without extention and path.
+#
+TARGET = sdf
+
+
+#
+# Includes the common rules.
+#
+!include $(PDWIN32_INCLUDE)\pdwin32.post
+!include $(PDWIN32_TCOMMON)\common.mk.post
 

@@ -1,4 +1,4 @@
-# $Id: pdwin32.vac3.tools,v 1.1 2000-09-28 03:16:24 bird Exp $
+# $Id: pdwin32.vac3.tools,v 1.2 2000-11-19 08:31:21 bird Exp $
 # ODIN / win32os2 Project
 #
 # makefile for the build system tools and standard rules
@@ -29,39 +29,39 @@ MAKE_CMD    = $(MAKE_CMD) NODEP=1
 .SUFFIXES: .orc_asm .orc
 
 .c{$(OBJDIR)}.obj:
-    $(CC) $(CFLAGS) -c -Fo$(OBJDIR)\$(@B).obj $<
+    $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES) -Fo$(OBJDIR)\$(@B).obj -c $<
 
 .cpp{$(OBJDIR)}.obj:
-    $(CXX) $(CXXFLAGS) -Fo$(OBJDIR)\$(@B).obj -c $<
+    $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -Fo$(OBJDIR)\$(@B).obj -c $<
 
 .asm{$(OBJDIR)}.obj:
     $(AS) $(ASFLAGS) -Fdo:$(OBJDIR) $<
 
 .orc{$(OBJDIR)}.orc_asm:
-    $(RC) $(RCFLAGS) -o $(OBJDIR)\$(@B).orc_asm $<
+    $(RC) $(RCFLAGS) $(CINCLUDES) -o $(OBJDIR)\$(@B).orc_asm $<
 
 .orc{$(OBJDIR)}.obj:
-    $(RC) $(RCFLAGS) -o $(OBJDIR)\$(@B).orc_asm $<
+    $(RC) $(RCFLAGS) $(CINCLUDES) -o $(OBJDIR)\$(@B).orc_asm $<
     $(AS) $(ASFLAGS) -Fdo:$(OBJDIR) $(OBJDIR)\$(@B).orc_asm
 
 .rc{$(OBJDIR)}.res:
-    $(OS2RC) $(OS2RCFLAGS) $< $@
+    $(OS2RC) $(OS2RCFLAGS) $(CINCLUDES:-I=-i ) $< $@
 
 
 #
 # Old Targets
 #
 .c.obj:
-    $(CC) $(CFLAGS) -c $<
+    $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES) -c $<
 
 .cpp.obj:
-    $(CXX) $(CXXFLAGS) -c $<
+    $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -c $<
 
 .asm.obj:
     $(AS) $(ASFLAGS) -Fdo:$(OBJDIR) $<
 
 .orc.asm:
-    $(RC) $(RCFLAGS) -o $@ $<
+    $(RC) $(RCFLAGS) $(CINCLUDES) -o $@ $<
 
 .rc.res:
     $(OS2RC) $(OS2RCFLAGS) $< $@

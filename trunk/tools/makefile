@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2000-09-28 03:06:26 bird Exp $
+# $Id: makefile,v 1.13 2000-11-19 08:20:55 bird Exp $
 
 #
 # PD-Win32 API
@@ -15,36 +15,46 @@
 #
 #
 #
+
+
+#
+# Directory macros.
+#
 PDWIN32_INCLUDE = ..\include
+PDWIN32_TOOLS   = .\bin
 !include $(PDWIN32_INCLUDE)\pdwin32.tools
 
-!ifdef DEBUG
-MAKE_CMD = $(MAKE) -nologo DEBUG=1
-!else
-MAKE_CMD = $(MAKE) -nologo
-!endif
+
+#
+# The directories included in the usual makes; all, clean, dep rules.
+#
+ALL_DIRS = \
+.\common \
+.\database \
+.\impdef \
+.\fastdep \
+.\wrc \
+.\omfdumper \
+.\sdf \
+.\install
 
 
-all:
-    cd common
-    $(MAKE_CMD)
-    cd ..\database
-    $(MAKE_CMD)
-    cd ..\impdef
-    $(MAKE_CMD)
-    cd ..\fastdep
-    $(MAKE_CMD)
-    cd ..\wrc
-    $(MAKE_CMD) -f makefile.os2
-    cd ..\omfdumper
-    $(MAKE_CMD)
-    cd ..\sdf
-    $(MAKE_CMD)
-    cd ..\install
-    $(MAKE_CMD)
-    cd ..
+#
+# Dummy all rule.
+#
+_all: all
 
+
+#
+# common rules.
+#
+dep clean all:
+    $(DODIRS) "$(ALL_DIRS)" $(MAKE_CMD) $@
+
+
+#
 # compile tools needed to compile rest of the tree.
+#
 needed:
     cd fastdep
     $(MAKE_CMD)
@@ -57,36 +67,7 @@ needed:
     cd ..
 
 
-dep:
-    cd common
-    $(MAKE_CMD) NODEP=1 dep
-    cd ..\database
-    $(MAKE_CMD) NODEP=1 dep
-    cd ..\impdef
-    $(MAKE_CMD) NODEP=1 dep
-    cd ..\wrc
-    $(MAKE_CMD) -f makefile.os2 NODEP=1 dep
-    cd ..\omfdumper
-    $(MAKE_CMD) NODEP=1 dep
-    cd ..\sdf
-    $(MAKE_CMD) NODEP=1 dep
-    cd ..
-
-
-clean:
-    cd common
-    $(MAKE_CMD) NODEP=1 clean
-    cd ..\database
-    $(MAKE_CMD) NODEP=1 clean
-    cd ..\impdef
-    $(MAKE_CMD) NODEP=1 clean
-    cd ..\fastdep
-    $(MAKE_CMD) NODEP=1 clean
-    cd ..\wrc
-    $(MAKE_CMD) -f makefile.os2 NODEP=1 clean
-    cd ..\omfdumper
-    $(MAKE_CMD) NODEP=1 clean
-    cd ..\sdf
-    $(MAKE_CMD) NODEP=1 clean
-    cd ..
+#
+# Do not includes the common rules.
+#
 

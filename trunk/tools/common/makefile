@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2000-10-03 05:42:39 bird Exp $
+# $Id: makefile,v 1.8 2000-11-19 08:29:54 bird Exp $
 
 #
 # PD-Win32 API
@@ -20,7 +20,9 @@
 !include ..\..\include\pdwin32.mk
 
 
-all:    commonicc.lib commongcc.a commongcc.lib
+all:    commonicc.lib commongcc.a commongcc.lib \
+        $(PDWIN32_TOOLS)\kDef2Wat.exe
+#        $(PDWIN32_TOOLS)\kDump.exe
 
 
 needed: commonicc.lib $(PDWIN32_TOOLS)\kDef2Wat.exe
@@ -63,4 +65,8 @@ clean:
 dep:
     $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
         *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h *.c *.cpp -objo *.c *.cpp -objgobj *.c *.cpp
+
+#
+# Do not includes the common rules.
+#
 
