@@ -1,4 +1,4 @@
-/* $Id: async.cpp,v 1.1 1999-10-20 01:18:28 phaller Exp $ */
+/* $Id: async.cpp,v 1.2 1999-10-20 10:03:52 phaller Exp $ */
 
 /*
  *
@@ -22,9 +22,28 @@
 #include <odin.h>
 #include <odinwrap.h>
 #include <os2sel.h>
-#include <os2win.h>
-//#include <wsock32.h>
+#define INCL_DOSERRORS
+#define INCL_DOSSEMAPHORES
+#include <os2.h>
+
+#include <netdb.h>
+#include <nerrno.h>
+#include <sys/socket.h>
+#include <wsock32const.h>
+
+#include <process.h>
+#include <string.h>
+#include <stdlib.h>
+
 #include <misc.h>
+
+
+/*****************************************************************************
+ * Definitions                                                               *
+ *****************************************************************************/
+
+ODINDEBUGCHANNEL(WSOCK32-ASYNC)
+
 
 
 /*****************************************************************************
@@ -72,11 +91,20 @@ typedef struct tagAsyncRequest
   ULONG  ul1;                    // multi purpose parameters
   ULONG  ul2;
   ULONG  ul3;
-  ULONG  ul4;
-  ULONG  ul5;
 
 } ASYNCREQUEST, *PASYNCREQUEST;
 
+
+/*****************************************************************************
+ * Prototypes                                                                *
+ *****************************************************************************/
+
+void _Optlink WorkerThreadProc(void* pParam);
+BOOL _System PostMessageA(HWND hwnd, UINT ulMessage, WPARAM wParam, LPARAM lParam);
+
+void _System SetLastError(int iError);
+int  _System GetLastError(void);
+#define WSASetLastError(a) SetLastError(a)
 
 
 /*****************************************************************************
@@ -85,38 +113,40 @@ typedef struct tagAsyncRequest
 
 class WSAAsyncWorker
 {
-  // private members
-  PASYNCREQUEST pRequestHead = NULL; // chain root
-  PASYNCREQUEST pRequestTail = NULL; // chain root
-  TID           tidWorker    = 0;    // worker thread id
-  HEV           hevRequest;          // fired upon new request
-  HMUTEX        hmtxRequestQueue;    // request queue protection
-
   // public members
   public:
     WSAAsyncWorker(void);                         // constructor
     ~WSAAsyncWorker();                            // destructor
 
-    PASYNCREQUEST createRequest  (HWND  hwnd,
+    PASYNCREQUEST createRequest  (ULONG ulType,
+                                  HWND  hwnd,
                                   ULONG ulMessage,
+                                  PVOID pBuffer,
+                                  ULONG ulBufferLength,
                                   ULONG ul1 = 0,
                                   ULONG ul2 = 0,
-                                  ULONG ul3 = 0,
-                                  ULONG ul4 = 0,
-                                  ULONG ul5 = 0);
-    void          pushRequest    (PASYNCREQUEST pRequest); // put request on queue
+                                  ULONG ul3 = 0);
 
+    void          pushRequest    (PASYNCREQUEST pRequest); // put request on queue
+    BOOL          deleteRequest  (PASYNCREQUEST pRequest); // remove particular request
+
+    // the thread procedure
+    friend void _Optlink WorkerThreadProc(void* pParam);
 
 
   // protected members
   protected:
-    BOOL          fTerminate = FALSE;                      // got to die ?
+    PASYNCREQUEST pRequestHead;        // chain root
+    PASYNCREQUEST pRequestTail;        // chain root
+    TID           tidWorker;           // worker thread id
+    HEV           hevRequest;          // fired upon new request
+    HMTX          hmtxRequestQueue;    // request queue protection
+    BOOL          fTerminate;          // got to die ?
 
     TID           startWorker    (void);                   // start worker thread
     void          processingLoop (void);                   // "work"
     int           dispatchRequest(PASYNCREQUEST pRequest); // complete request
     PASYNCREQUEST popRequest     (void);                   // get one request from queue
-    BOOL          deleteRequest  (PASYNCREQUEST pRequest); // remove particular request
 
     void          lockQueue      (void);                   // enter mutex
     void          unlockQueue    (void);                   // leave mutex
@@ -131,16 +161,55 @@ class WSAAsyncWorker
 };
 
 
+/*****************************************************************************
+ * Local variables                                                           *
+ *****************************************************************************/
+
+static WSAAsyncWorker* wsaWorker = NULL;
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
 // constructor
 WSAAsyncWorker::WSAAsyncWorker(void)
 {
+  dprintf(("WSOCK32-ASYNC: WSAAsyncWorker::WSAAsyncWorker\n"));
+
+  pRequestHead = NULL;  // chain root
+  pRequestTail = NULL;  // chain root
+  tidWorker    = 0;     // worker thread id
+  fTerminate   = FALSE; // got to die ?
+
   startWorker();
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
 // destructor
 WSAAsyncWorker::~WSAAsyncWorker(void)
 {
+  dprintf(("WSOCK32-ASYNC: WSAAsyncWorker::~WSAAsyncWorker (%08xh)\n",
+           this));
+
   // remove all requests
   while (popRequest() != NULL);
 
@@ -157,10 +226,24 @@ WSAAsyncWorker::~WSAAsyncWorker(void)
 
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
 // start worker thread if necessary
 TID WSAAsyncWorker::startWorker(void)
 {
   APIRET rc;
+
+  dprintf(("WSOCK32-ASYNC: WSAAsyncWorker::startWorker (%08xh)\n",
+           this));
 
   if (tidWorker == 0)
   {
@@ -191,9 +274,16 @@ TID WSAAsyncWorker::startWorker(void)
     }
 
     // create thread
+#if defined(__IBMCPP__)
+    tidWorker = _beginthread(WorkerThreadProc,
+                             (PVOID)this,
+                             4096,
+                             NULL);
+#else
     tidWorker = _beginthread(WorkerThreadProc,
                              (PVOID)this,
                              4096);
+#endif
     if (tidWorker == -1)
     {
       // cancel the whole thing
@@ -207,20 +297,53 @@ TID WSAAsyncWorker::startWorker(void)
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
 // lock double-linked request chain
 void WSAAsyncWorker::lockQueue(void)
 {
-  DosRequestMutex(hmtxRequestQueue, SEM_INDEFINITE_WAIT);
+  DosRequestMutexSem(hmtxRequestQueue, SEM_INDEFINITE_WAIT);
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
 // unlock double-linked request chain
 void WSAAsyncWorker::unlockQueue(void)
 {
-  DosReleaseMutex(hmtxRequestQueue);
+  DosReleaseMutexSem(hmtxRequestQueue);
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
 // get request from queue
 PASYNCREQUEST WSAAsyncWorker::popRequest(void)
 {
@@ -244,6 +367,17 @@ PASYNCREQUEST WSAAsyncWorker::popRequest(void)
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
 // insert request into queue
 void WSAAsyncWorker::pushRequest(PASYNCREQUEST pNew)
 {
@@ -274,6 +408,17 @@ void WSAAsyncWorker::pushRequest(PASYNCREQUEST pNew)
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
 // delete particular request from queue
 BOOL WSAAsyncWorker::deleteRequest(PASYNCREQUEST pDelete)
 {
@@ -320,6 +465,7 @@ BOOL WSAAsyncWorker::deleteRequest(PASYNCREQUEST pDelete)
             pDelete->pNext->pPrev = pDelete->pPrev;
         }
 
+    delete pDelete; // free the memory
     bResult = TRUE; // OK
   }
 
@@ -328,6 +474,57 @@ BOOL WSAAsyncWorker::deleteRequest(PASYNCREQUEST pDelete)
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+PASYNCREQUEST WSAAsyncWorker::createRequest  (ULONG ulType,
+                                              HWND  hwnd,
+                                              ULONG ulMessage,
+                                              PVOID pBuffer,
+                                              ULONG ulBufferLength,
+                                              ULONG ul1,
+                                              ULONG ul2,
+                                              ULONG ul3)
+{
+  PASYNCREQUEST pNew = new ASYNCREQUEST();
+
+  // fill the structure
+  pNew->pPrev          = NULL;
+  pNew->pNext          = NULL;
+  pNew->ulType         = ulType;
+  pNew->ulState        = RS_WAITING;
+  pNew->hwnd           = hwnd;
+  pNew->ulMessage      = ulMessage;
+  pNew->pBuffer        = pBuffer;
+  pNew->ulBufferLength = ulBufferLength;
+  pNew->ul1            = ul1;
+  pNew->ul2            = ul2;
+  pNew->ul3            = ul3;
+
+  return pNew;
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
 
 void WSAAsyncWorker::asyncGetHostByAddr   (PASYNCREQUEST pRequest)
 {
@@ -337,13 +534,17 @@ void WSAAsyncWorker::asyncGetHostByAddr   (PASYNCREQUEST pRequest)
   ULONG           lParam;
   USHORT          rc;
 
+  dprintf(("WSOCK32-ASYNC: WSAAsyncWorker::asyncGetHostByAddr (%08xh, %08xh)\n",
+           this,
+           pRequest));
+
   // result buffer length
   usLength = min(pRequest->ulBufferLength, sizeof(struct hostent));
 
   // call API
-  pHostent = gethostbyaddr((const char*)pRequest->u1,
-                           (int)        pRequest->u2,
-                           (int)        pRequest->u3);
+  pHostent = gethostbyaddr((const char*)pRequest->ul1,
+                           (int)        pRequest->ul2,
+                           (int)        pRequest->ul3);
   if (pHostent == NULL) // error ?
   {
     rc = sock_errno();   // assuming OS/2 return codes are
@@ -366,6 +567,19 @@ void WSAAsyncWorker::asyncGetHostByAddr   (PASYNCREQUEST pRequest)
 
   // M$ says, if PostMessageA fails, spin as long as window exists
 }
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
 
 void WSAAsyncWorker::asyncGetHostByName   (PASYNCREQUEST pRequest)
 {
@@ -375,11 +589,15 @@ void WSAAsyncWorker::asyncGetHostByName   (PASYNCREQUEST pRequest)
   ULONG           lParam;
   USHORT          rc;
 
+  dprintf(("WSOCK32-ASYNC: WSAAsyncWorker::asyncGetHostByName (%08xh, %08xh)\n",
+           this,
+           pRequest));
+
   // result buffer length
   usLength = min(pRequest->ulBufferLength, sizeof(struct hostent));
 
   // call API
-  pHostent = gethostbyname((const char*)pRequest->u1);
+  pHostent = gethostbyname((const char*)pRequest->ul1);
   if (pHostent == NULL) // error ?
   {
     rc = sock_errno();   // assuming OS/2 return codes are
@@ -404,6 +622,18 @@ void WSAAsyncWorker::asyncGetHostByName   (PASYNCREQUEST pRequest)
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
 void WSAAsyncWorker::asyncGetProtoByName  (PASYNCREQUEST pRequest)
 {
   struct protoent* pProtoent;
@@ -412,11 +642,15 @@ void WSAAsyncWorker::asyncGetProtoByName  (PASYNCREQUEST pRequest)
   ULONG            lParam;
   USHORT           rc;
 
+  dprintf(("WSOCK32-ASYNC: WSAAsyncWorker::asyncGetProtoByName (%08xh, %08xh)\n",
+           this,
+           pRequest));
+
   // result buffer length
   usLength = min(pRequest->ulBufferLength, sizeof(struct protoent));
 
   // call API
-  pProtoent = getprotobyname((const char*)pRequest->u1);
+  pProtoent = getprotobyname((const char*)pRequest->ul1);
   if (pProtoent == NULL) // error ?
   {
     rc = sock_errno();   // assuming OS/2 return codes are
@@ -439,6 +673,19 @@ void WSAAsyncWorker::asyncGetProtoByName  (PASYNCREQUEST pRequest)
 
   // M$ says, if PostMessageA fails, spin as long as window exists
 }
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
 
 void WSAAsyncWorker::asyncGetProtoByNumber(PASYNCREQUEST pRequest)
 {
@@ -448,11 +695,15 @@ void WSAAsyncWorker::asyncGetProtoByNumber(PASYNCREQUEST pRequest)
   ULONG            lParam;
   USHORT           rc;
 
+  dprintf(("WSOCK32-ASYNC: WSAAsyncWorker::asyncGetProtoByNumber (%08xh, %08xh)\n",
+           this,
+           pRequest));
+
   // result buffer length
   usLength = min(pRequest->ulBufferLength, sizeof(struct protoent));
 
   // call API
-  pProtoent = getprotobyname((int)pRequest->u1);
+  pProtoent = getprotobyname((const char*)pRequest->ul1);
   if (pProtoent == NULL) // error ?
   {
     rc = sock_errno();   // assuming OS/2 return codes are
@@ -477,6 +728,18 @@ void WSAAsyncWorker::asyncGetProtoByNumber(PASYNCREQUEST pRequest)
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
 void WSAAsyncWorker::asyncGetServByName(PASYNCREQUEST pRequest)
 {
   struct servent* pServent;
@@ -485,12 +748,16 @@ void WSAAsyncWorker::asyncGetServByName(PASYNCREQUEST pRequest)
   ULONG           lParam;
   USHORT          rc;
 
+  dprintf(("WSOCK32-ASYNC: WSAAsyncWorker::asyncGetServByName (%08xh, %08xh)\n",
+           this,
+           pRequest));
+
   // result buffer length
   usLength = min(pRequest->ulBufferLength, sizeof(struct servent));
 
   // call API
-  pServent = getservbyname((const char*)pRequest->u1,
-                           (const char*)pRequest->u2);
+  pServent = getservbyname((const char*)pRequest->ul1,
+                           (const char*)pRequest->ul2);
   if (pServent == NULL) // error ?
   {
     rc = sock_errno();   // assuming OS/2 return codes are
@@ -514,6 +781,18 @@ void WSAAsyncWorker::asyncGetServByName(PASYNCREQUEST pRequest)
   // M$ says, if PostMessageA fails, spin as long as window exists
 }
 
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
 
 void WSAAsyncWorker::asyncGetServByPort(PASYNCREQUEST pRequest)
 {
@@ -523,12 +802,16 @@ void WSAAsyncWorker::asyncGetServByPort(PASYNCREQUEST pRequest)
   ULONG           lParam;
   USHORT          rc;
 
+  dprintf(("WSOCK32-ASYNC: WSAAsyncWorker::asyncGetServByPort (%08xh, %08xh)\n",
+           this,
+           pRequest));
+
   // result buffer length
   usLength = min(pRequest->ulBufferLength, sizeof(struct servent));
 
   // call API
-  pServent = getservbyport((int        )pRequest->u1,
-                           (const char*)pRequest->u2);
+  pServent = getservbyport((int        )pRequest->ul1,
+                           (const char*)pRequest->ul2);
   if (pServent == NULL) // error ?
   {
     rc = sock_errno();   // assuming OS/2 return codes are
@@ -553,9 +836,24 @@ void WSAAsyncWorker::asyncGetServByPort(PASYNCREQUEST pRequest)
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
 // process one request
 int WSAAsyncWorker::dispatchRequest(PASYNCREQUEST pRequest)
 {
+  dprintf(("WSOCK32-ASYNC: WSAAsyncWorker::dispatchRequest (%08xh, %08xh)\n",
+           this,
+           pRequest));
+
   // check request state first
   switch(pRequest->ulState)
   {
@@ -573,7 +871,7 @@ int WSAAsyncWorker::dispatchRequest(PASYNCREQUEST pRequest)
   }
 
   // OK, servicing request
-  pRequest->ulStatus = RS_BUSY;
+  pRequest->ulState = RS_BUSY;
 
   switch(pRequest->ulType)
   {
@@ -581,60 +879,15 @@ int WSAAsyncWorker::dispatchRequest(PASYNCREQUEST pRequest)
       fTerminate = TRUE;
       return 1;
 
-    case WSAASYNC_GETHOSTBYADDR:
-      asyncGetHostByAddr(pRequest->hwnd,
-                         pRequest->ulMessage,
-                         (char*)pRequest->u1,
-                         (int)  pRequest->u2,
-                         (int)  pRequest->u3,
-                         (char*)pRequest->u4,
-                         (int)  pRequest->u5);
-      return 1;
+    case WSAASYNC_GETHOSTBYADDR:    asyncGetHostByAddr   (pRequest); return 1;
+    case WSAASYNC_GETHOSTBYNAME:    asyncGetHostByName   (pRequest); return 1;
+    case WSAASYNC_GETPROTOBYNAME:   asyncGetProtoByName  (pRequest); return 1;
+    case WSAASYNC_GETPROTOBYNUMBER: asyncGetProtoByNumber(pRequest); return 1;
+    case WSAASYNC_GETSERVBYNAME:    asyncGetServByName   (pRequest); return 1;
+    case WSAASYNC_GETSERVBYPORT:    asyncGetServByPort   (pRequest); return 1;
 
-    case WSAASYNC_GETHOSTBYNAME:
-      asyncGetHostByName(pRequest->hwnd,
-                         pRequest->ulMessage,
-                         (char*)pRequest->u1,
-                         (char*)pRequest->u2,
-                         (int)  pRequest->u3);
-      break;
-
-    case WSAASYNC_GETPROTOBYNAME:
-      asyncGetProtoByName  (pRequest->hwnd,
-                            pRequest->ulMessage,
-                            (char*)pRequest->u1,
-                            (char*)pRequest->u2,
-                            (int)  pRequest->u3);
-      break;
-
-    case WSAASYNC_GETPROTOBYNUMBER:
-      asyncGetProtoByNumber(pRequest->hwnd,
-                            pRequest->ulMessage,
-                            (int)  pRequest->u1,
-                            (char*)pRequest->u2,
-                            (int)  pRequest->u3);
-      break;
-
-    case WSAASYNC_GETSERVBYNAME:
-      asyncGetServByName   (pRequest->hwnd,
-                            pRequest->ulMessage,
-                            (char*)pRequest->u1,
-                            (char*)pRequest->u2,
-                            (char*)pRequest->u3,
-                            (int)  pRequest->u4);
-      break;
-
-    case WSAASYNC_GETSERVBYPORT:
-      asyncGetServByPort   (pRequest->hwnd,
-                            pRequest->ulMessage,
-                            (int)  pRequest->u1,
-                            (char*)pRequest->u2,
-                            (char*)pRequest->u3,
-                            (int)  pRequest->u4);
-      break;
-
-    case WSAASYNC_SELECT:
-      break;
+//    case WSAASYNC_SELECT:
+//      break;
 
     default:
       dprintf(("WSOCK32: WSAAsyncWorker::dispatchRequest - invalid request type %d\n",
@@ -642,11 +895,22 @@ int WSAAsyncWorker::dispatchRequest(PASYNCREQUEST pRequest)
       return 1;
   }
 
-  pRequest->ulStatus = RS_DONE;
+  pRequest->ulState = RS_DONE;
   return 0;
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
 // process all requests in queue until termination
 void WSAAsyncWorker::processingLoop(void)
 {
@@ -661,9 +925,12 @@ void WSAAsyncWorker::processingLoop(void)
     {
       pRequest = popRequest();     // get request from queue
       if (pRequest != NULL)
+      {
         dispatchRequest(pRequest); // process request
+        delete pRequest;           // free the memory
+      }
     }
-    while (pRequest != NULL)
+    while (pRequest != NULL);
 
     // wait for semaphore
     rc = DosWaitEventSem(hevRequest, SEM_INDEFINITE_WAIT);
@@ -675,8 +942,19 @@ void WSAAsyncWorker::processingLoop(void)
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
 // thread procedure
-void _System WorkerThreadProc(PVOID pParam)
+void _Optlink WorkerThreadProc(void* pParam)
 {
   // convert object pointer
   WSAAsyncWorker* pWSAAsyncWorker = (WSAAsyncWorker*)pParam;
@@ -684,6 +962,17 @@ void _System WorkerThreadProc(PVOID pParam)
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
 // the real function calls
 ODINFUNCTION5(HANDLE, WSAAsyncGetHostByName, HWND,         hwnd,
                                              unsigned int, wMsg,
@@ -691,13 +980,198 @@ ODINFUNCTION5(HANDLE, WSAAsyncGetHostByName, HWND,         hwnd,
                                              char*,        buf,
                                              int,          buflen)
 {
-  PASYNCREQUEST pRequest = wsaWorker->createRequest((HWND) hwnd,
+  dprintf(("name = %s\n", name));
+  PASYNCREQUEST pRequest = wsaWorker->createRequest(WSAASYNC_GETHOSTBYNAME,
+                                                    (HWND) hwnd,
+                                                    (ULONG)wMsg,
                                                     (PVOID)buf,
                                                     (ULONG)buflen,
-                                                    (ULONG)wMsg,
                                                     (ULONG)name);
   wsaWorker->pushRequest(pRequest);
   return (HANDLE)pRequest;
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+// the real function calls
+ODINFUNCTION7(HANDLE, WSAAsyncGetHostByAddr, HWND,         hwnd,
+                                             unsigned int, wMsg,
+                                             const char*,  addr,
+                                             int,          len,
+                                             int,          type,
+                                             char*,        buf,
+                                             int,          buflen)
+{
+  PASYNCREQUEST pRequest = wsaWorker->createRequest(WSAASYNC_GETHOSTBYADDR,
+                                                    (HWND) hwnd,
+                                                    (ULONG)wMsg,
+                                                    (PVOID)buf,
+                                                    (ULONG)buflen,
+                                                    (ULONG)addr,
+                                                    (ULONG)len,
+                                                    (ULONG)type);
+  wsaWorker->pushRequest(pRequest);
+  return (HANDLE)pRequest;
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+// the real function calls
+ODINFUNCTION6(HANDLE, WSAAsyncGetServByName, HWND,         hwnd,
+                                             unsigned int, wMsg,
+                                             const char*,  name,
+                                             const char*,  proto,
+                                             char*,        buf,
+                                             int,          buflen)
+{
+  dprintf(("name = %s, proto = %s\n", name, proto));
+  PASYNCREQUEST pRequest = wsaWorker->createRequest(WSAASYNC_GETSERVBYNAME,
+                                                    (HWND) hwnd,
+                                                    (ULONG)wMsg,
+                                                    (PVOID)buf,
+                                                    (ULONG)buflen,
+                                                    (ULONG)name,
+                                                    (ULONG)proto);
+  wsaWorker->pushRequest(pRequest);
+  return (HANDLE)pRequest;
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+// the real function calls
+ODINFUNCTION6(HANDLE, WSAAsyncGetServByPort, HWND,         hwnd,
+                                             unsigned int, wMsg,
+                                             int,          port,
+                                             const char*,  proto,
+                                             char*,        buf,
+                                             int,          buflen)
+{
+  dprintf(("proto = %s\n", proto));
+  PASYNCREQUEST pRequest = wsaWorker->createRequest(WSAASYNC_GETSERVBYPORT,
+                                                    (HWND) hwnd,
+                                                    (ULONG)wMsg,
+                                                    (PVOID)buf,
+                                                    (ULONG)buflen,
+                                                    (ULONG)port,
+                                                    (ULONG)proto);
+  wsaWorker->pushRequest(pRequest);
+  return (HANDLE)pRequest;
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+// the real function calls
+ODINFUNCTION5(HANDLE, WSAAsyncGetProtoByName, HWND,         hwnd,
+                                              unsigned int, wMsg,
+                                              const char*,  name,
+                                              char*,        buf,
+                                              int,          buflen)
+{
+  dprintf(("name = %s\n", name));
+  PASYNCREQUEST pRequest = wsaWorker->createRequest(WSAASYNC_GETPROTOBYNAME,
+                                                    (HWND) hwnd,
+                                                    (ULONG)wMsg,
+                                                    (PVOID)buf,
+                                                    (ULONG)buflen,
+                                                    (ULONG)name);
+  wsaWorker->pushRequest(pRequest);
+  return (HANDLE)pRequest;
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+// the real function calls
+ODINFUNCTION5(HANDLE, WSAAsyncGetProtoByNumber, HWND,         hwnd,
+                                              unsigned int, wMsg,
+                                              int,          number,
+                                              char*,        buf,
+                                              int,          buflen)
+{
+  PASYNCREQUEST pRequest = wsaWorker->createRequest(WSAASYNC_GETPROTOBYNUMBER,
+                                                    (HWND) hwnd,
+                                                    (ULONG)wMsg,
+                                                    (PVOID)buf,
+                                                    (ULONG)buflen,
+                                                    (ULONG)number);
+  wsaWorker->pushRequest(pRequest);
+  return (HANDLE)pRequest;
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   : cancel a queued or busy request
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+ODINFUNCTION1(int, WSACancelAsyncRequest, HANDLE, hAsyncTaskHandle)
+{
+  PASYNCREQUEST pRequest = (PASYNCREQUEST)hAsyncTaskHandle;
+  BOOL          rc;
+
+  // remove request from queue
+  rc = wsaWorker->deleteRequest(pRequest);
+  if (rc == TRUE)
+    return 0; // success
+  else
+  {
+    WSASetLastError(WSAEINVAL);
+    return (SOCKET_ERROR);
+  }
+}
