@@ -1,4 +1,11 @@
- /* $Id: changelog,v 1.1088 2000-08-25 18:03:19 achimha Exp $ */
+ /* $Id: changelog,v 1.1089 2000-08-27 03:47:51 bird Exp $ */
+
+ 2000-08-19: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - KERNEL32: PROFILE_LoadOdinIni use kernel32Path not reload KERNEL32
+                using LoadLibraryA. Internal paths are not initated yet,
+                so LoadLibraryA migth end up loading the wrong DLL
+                (Which happend for me, a NT edition of kernel32 was loaded.)
+    (- Win32k:  Works ok, will merge the changes into the main branch soon.)
 
  2000-08-25: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: Create DirectX registry keys during installation
