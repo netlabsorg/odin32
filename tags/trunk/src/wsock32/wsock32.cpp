@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.10 1999-10-26 23:59:19 phaller Exp $ */
+/* $Id: wsock32.cpp,v 1.11 1999-10-27 08:38:05 phaller Exp $ */
 
 /*
  *
@@ -13,11 +13,6 @@
  *
  */
 
-
-/* TODO
-   - correct return codes for all API calls
-   - correctly translate return codes to WSock style
-*/
 
 /*****************************************************************************
  * Includes                                                                  *
