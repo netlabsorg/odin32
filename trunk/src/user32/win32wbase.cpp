@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.365 2003-03-29 16:38:00 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.366 2003-04-11 15:22:33 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1389,7 +1389,8 @@ ULONG Win32BaseWindow::MsgFormatFrame(WINDOWPOS *lpWndPos)
     }
   }
 #endif
-  if(fOS2Look && ((dwStyle & WS_CAPTION) == WS_CAPTION))
+  //WS_EX_TOOLWINDOW is incompatible with the OS2Look (titlebar thinner + smaller font)
+  if(fOS2Look && ((dwStyle & WS_CAPTION) == WS_CAPTION) && !(dwExStyle & WS_EX_TOOLWINDOW)) 
   {
       RECT rect = {0};
       BOOL fCloseButton;
