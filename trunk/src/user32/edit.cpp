@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.38 2000-03-18 16:13:26 cbratschi Exp $ */
+/* $Id: edit.cpp,v 1.39 2000-05-22 17:21:07 cbratschi Exp $ */
 /*
  *      Edit control
  *
@@ -8,7 +8,7 @@
  *
  *      Copyright  1999 Christoph Bratschi
  *
- * Corel version: 20000317
+ * Corel version: 20000513
  * (WINE version: 991212)
  *
  * Status:  complete
@@ -108,6 +108,7 @@ typedef struct
         INT y_offset;                   /* scroll offset in number of lines */
         BOOL bCaptureState; /* flag indicating whether mouse was captured */
         BOOL bEnableState;             /* flag keeping the enable state */
+	HWND hwndListBox;              /* handle of ComboBox's listbox or NULL */
         /*
          *      only for multi line controls
          */
@@ -589,17 +590,34 @@ LRESULT WINAPI EditWndProc( HWND hwnd, UINT msg,
 
         case WM_GETDLGCODE:
                 //DPRINTF_EDIT_MSG32("WM_GETDLGCODE");
-		result = DLGC_HASSETSEL | DLGC_WANTCHARS | DLGC_WANTARROWS;
-		if (es->style & ES_WANTRETURN)
+                result = DLGC_HASSETSEL | DLGC_WANTCHARS | DLGC_WANTARROWS;
+
+       		if (lParam && (((LPMSG)lParam)->message == WM_KEYDOWN))
 		{
-		   LPMSG msg = (LPMSG)lParam;
-		   if (msg && (msg->message == WM_KEYDOWN) && (msg->wParam == VK_RETURN))
+		   int vk = (int)((LPMSG)lParam)->wParam;
+
+		   if ((GetWindowLongA(hwnd,GWL_STYLE) & ES_WANTRETURN) && vk == VK_RETURN)
+		   {
 		      result |= DLGC_WANTMESSAGE;
+		   }
+		   else if (es->hwndListBox && (vk == VK_RETURN || vk == VK_ESCAPE))
+		   {
+		      if (SendMessageA(GetParent(hwnd), CB_GETDROPPEDSTATE, 0, 0))
+		         result |= DLGC_WANTMESSAGE;
+		   }
 		}
 		break;
 
         case WM_CHAR:
                 //DPRINTF_EDIT_MSG32("WM_CHAR");
+		if (((CHAR)wParam == VK_RETURN || (CHAR)wParam == VK_ESCAPE) && es->hwndListBox)
+		{
+		   HWND hwndParent = GetParent(hwnd);
+		
+		   if (SendMessageA(hwndParent, CB_GETDROPPEDSTATE, 0, 0))
+		      SendMessageA(hwndParent, WM_KEYDOWN, wParam, 0);
+		   break;
+		}
                 EDIT_WM_Char(hwnd, es, (CHAR)wParam, (DWORD)lParam);
                 break;
 
@@ -3368,70 +3386,59 @@ static LRESULT EDIT_WM_HScroll(HWND hwnd, EDITSTATE *es, INT action, INT pos, HW
  *      EDIT_CheckCombo
  *
  */
-static BOOL EDIT_CheckCombo(HWND hwnd, UINT msg, INT key, DWORD key_data)
+static BOOL EDIT_CheckCombo(HWND hwnd, EDITSTATE *es, UINT msg, INT key, DWORD key_data)
 {
-        HWND hLBox;
+   HWND hLBox = es->hwndListBox;
+   HWND hCombo;
+   BOOL bDropped;
+   int  nEUI;
 
-        /********************************************************************
-         * This if statement used to check to see if the parent of the
-         * edit control was a 'combobox' by comparing the ATOM of the parent
-         * to a table of internal window control ATOMs.  However, this check
-         * would fail if the parent was a superclassed combobox (Although
-         * having the same basic functionality of a combobox, it has a
-         * different name and ATOM, thus defeating this check.)
-         *
-         * The safe way to determine if the parent is a combobox is to send it
-         * a message only a combo box would understand.  I send it a message
-         * CB_GETCOUNT, if I get 0 then the parent is not a combobox -
-         * return FALSE.  If I get > 0, then the parent IS a combobox
-         * (or sub/super classed derrivative thereof)
-         ********************************************************************/
-#if 0 //CB: our code
-        if (GetClassWord(GetParent(hwnd),GCW_ATOM) ==  GlobalFindAtomA(COMBOBOXCLASSNAME) &&
-                        (hLBox = COMBO_GetLBWindow(GetParent(hwnd))))
-#else
-        if (
-             ((SendMessageA(GetParent(hwnd), CB_GETCOUNT, 0, 0)) > 0) &&
-             (hLBox = COMBO_GetLBWindow(GetParent(hwnd)))
-           )
-#endif
-        {
-                HWND hCombo = GetParent(hwnd);
-                BOOL bUIFlip = TRUE;
+   if (!hLBox)
+      return FALSE;
 
-                //TRACE_(combo)("[%04x]: handling msg %04x (%04x)\n",
-                //             wnd->hwndSelf, (UINT16)msg, (UINT16)key);
+   hCombo   = GetParent(hwnd);
+   bDropped = TRUE;
+   nEUI     = 0;
 
-                switch (msg) {
-                case WM_KEYDOWN: /* Handle F4 and arrow keys */
-                        if (key != VK_F4) {
-                                bUIFlip = (BOOL)SendMessageA(hCombo, CB_GETEXTENDEDUI, 0, 0);
-                                if (SendMessageA(hCombo, CB_GETDROPPEDSTATE, 0, 0))
-                                        bUIFlip = FALSE;
-                        }
-                        if (!bUIFlip)
-                                SendMessageA(hLBox, WM_KEYDOWN, (WPARAM)key, 0);
-                        else {
-                                /* make sure ComboLBox pops up */
-                                SendMessageA(hCombo, CB_SETEXTENDEDUI, 0, 0);
-                                SendMessageA(hLBox, WM_KEYDOWN, VK_F4, 0);
-                                SendMessageA(hCombo, CB_SETEXTENDEDUI, 1, 0);
-                        }
-                        break;
-                case WM_SYSKEYDOWN: /* Handle Alt+up/down arrows */
-                        bUIFlip = (BOOL)SendMessageA(hCombo, CB_GETEXTENDEDUI, 0, 0);
-                        if (bUIFlip) {
-                                bUIFlip = (BOOL)SendMessageA(hCombo, CB_GETDROPPEDSTATE, 0, 0);
-                                SendMessageA(hCombo, CB_SHOWDROPDOWN, (bUIFlip) ? FALSE : TRUE, 0);
-                        } else
-                                SendMessageA(hLBox, WM_KEYDOWN, VK_F4, 0);
-                        break;
-                }
-                return TRUE;
-        }
-        return FALSE;
+   //TRACE_(combo)("[%04x]: handling msg %04x (%04x)\n",
+   //    		     wnd->hwndSelf, (UINT16)msg, (UINT16)key);
+
+   if (key == VK_UP || key == VK_DOWN)
+   {
+      if (SendMessageA(hCombo, CB_GETEXTENDEDUI, 0, 0))
+         nEUI = 1;
+
+      if (msg == WM_KEYDOWN || nEUI)
+          bDropped = (BOOL)SendMessageA(hCombo, CB_GETDROPPEDSTATE, 0, 0);
+   }
+
+   switch (msg)
+   {
+      case WM_KEYDOWN:
+         if (!bDropped && nEUI && (key == VK_UP || key == VK_DOWN))
+         {
+            /* make sure ComboLBox pops up */
+            SendMessageA(hCombo, CB_SETEXTENDEDUI, FALSE, 0);
+            key = VK_F4;
+            nEUI = 2;
+         }
+
+         SendMessageA(hLBox, WM_KEYDOWN, (WPARAM)key, 0);
+         break;
+
+      case WM_SYSKEYDOWN: /* Handle Alt+up/down arrows */
+         if (nEUI)
+            SendMessageA(hCombo, CB_SHOWDROPDOWN, bDropped ? FALSE : TRUE, 0);
+         else
+            SendMessageA(hLBox, WM_KEYDOWN, (WPARAM)VK_F4, 0);
+         break;
+   }
+
+   if(nEUI == 2)
+      SendMessageA(hCombo, CB_SETEXTENDEDUI, TRUE, 0);
+
+   return TRUE;
 }
-
 
 /*********************************************************************
  *
@@ -3455,9 +3462,7 @@ static LRESULT EDIT_WM_KeyDown(HWND hwnd, EDITSTATE *es, INT key, DWORD key_data
         switch (key) {
         case VK_F4:
         case VK_UP:
-                if (EDIT_CheckCombo(hwnd, WM_KEYDOWN, key, key_data))
-                        break;
-                if (key == VK_F4)
+                if (EDIT_CheckCombo(hwnd,es, WM_KEYDOWN, key, key_data) || key == VK_F4)
                         break;
                 /* fall through */
         case VK_LEFT:
@@ -3470,7 +3475,7 @@ static LRESULT EDIT_WM_KeyDown(HWND hwnd, EDITSTATE *es, INT key, DWORD key_data
                                 EDIT_MoveBackward(hwnd, es, shift);
                 break;
         case VK_DOWN:
-                if (EDIT_CheckCombo(hwnd, WM_KEYDOWN, key, key_data))
+                if (EDIT_CheckCombo(hwnd,es, WM_KEYDOWN, key, key_data))
                         break;
                 /* fall through */
         case VK_RIGHT:
@@ -3490,10 +3495,14 @@ static LRESULT EDIT_WM_KeyDown(HWND hwnd, EDITSTATE *es, INT key, DWORD key_data
         case VK_PRIOR:
                 if (es->style & ES_MULTILINE)
                         EDIT_MovePageUp_ML(hwnd, es, shift);
+		else
+			EDIT_CheckCombo(hwnd, es, WM_KEYDOWN, key, key_data);
                 break;
         case VK_NEXT:
                 if (es->style & ES_MULTILINE)
                         EDIT_MovePageDown_ML(hwnd, es, shift);
+		else
+			EDIT_CheckCombo(hwnd, es, WM_KEYDOWN, key, key_data);
                 break;
         case VK_DELETE:
                 if (!(es->style & ES_READONLY) && !(shift && control)) {
@@ -3707,6 +3716,9 @@ static LRESULT EDIT_WM_NCCreate(HWND hwnd, LPCREATESTRUCTA cs)
           SetWindowLongA(hwnd,GWL_STYLE,GetWindowLongA(hwnd,GWL_STYLE) & ~WS_BORDER);
           SetWindowLongA(hwnd,GWL_EXSTYLE,GetWindowLongA(hwnd,GWL_EXSTYLE) | WS_EX_CLIENTEDGE);
         }
+
+	if (es->style & ES_COMBO)
+	   es->hwndListBox = GetDlgItem(cs->hwndParent, ID_CB_LISTBOX);
 
         if (es->style & ES_MULTILINE) {
                 es->buffer_size = BUFSTART_MULTI;
@@ -4075,8 +4087,10 @@ static LRESULT EDIT_WM_SysKeyDown(HWND hwnd, EDITSTATE *es, INT key, DWORD key_d
                         EDIT_EM_Undo(hwnd, es);
                 return 0;
         } else if ((key == VK_UP) || (key == VK_DOWN))
-                if (EDIT_CheckCombo(hwnd, WM_SYSKEYDOWN, key, key_data))
+        {
+                if (EDIT_CheckCombo(hwnd,es, WM_SYSKEYDOWN, key, key_data))
                         return 0;
+         }
         return DefWindowProcA(hwnd, WM_SYSKEYDOWN, (WPARAM)key, (LPARAM)key_data);
 }
 

@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.53 2000-05-12 18:09:41 sandervl Exp $ */
+/* $Id: pmframe.cpp,v 1.54 2000-05-22 17:21:10 cbratschi Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -167,9 +167,9 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
 
     case WM_HITTEST:
     {
-	if(win32wnd->getWindowHandle() != pWinMsg->hwnd) {
-		win32wnd = Win32BaseWindow::GetWindowFromHandle(pWinMsg->hwnd);
-	}
+        if(win32wnd->getWindowHandle() != pWinMsg->hwnd) {
+                win32wnd = Win32BaseWindow::GetWindowFromHandle(pWinMsg->hwnd);
+        }
         if(win32wnd && win32wnd->IsWindowCreated())
         {
           MRESULT rc;
@@ -191,9 +191,9 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
     case WM_BUTTON3UP:
     case WM_BUTTON3DBLCLK:
     {
-	if(win32wnd->getWindowHandle() != pWinMsg->hwnd) {
-		win32wnd = Win32BaseWindow::GetWindowFromHandle(pWinMsg->hwnd);
-	}
+        if(win32wnd->getWindowHandle() != pWinMsg->hwnd) {
+                win32wnd = Win32BaseWindow::GetWindowFromHandle(pWinMsg->hwnd);
+        }
         if(win32wnd && win32wnd->IsWindowCreated())
         {
           win32wnd->MsgButton(pWinMsg);
@@ -216,11 +216,11 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
 
     case WM_MOUSEMOVE:
     {
-	if(win32wnd->getWindowHandle() != pWinMsg->hwnd) {
-		win32wnd = Win32BaseWindow::GetWindowFromHandle(pWinMsg->hwnd);
-	}
+        if(win32wnd->getWindowHandle() != pWinMsg->hwnd) {
+                win32wnd = Win32BaseWindow::GetWindowFromHandle(pWinMsg->hwnd);
+        }
         if(win32wnd && win32wnd->IsWindowCreated())
-          	win32wnd->MsgMouseMove(pWinMsg);
+                win32wnd->MsgMouseMove(pWinMsg);
         RestoreOS2TIB();
         return (MRESULT)TRUE;
     }
@@ -229,9 +229,9 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
     {
         dprintf(("PMFRAME: WM_PAINT"));
         if(win32wnd->getStyle() & WS_MINIMIZE_W)
-         	goto RunDefFrameProc;
+                goto RunDefFrameProc;
         if(win32wnd->IsWindowCreated())
-          	win32wnd->MsgNCPaint();
+                win32wnd->MsgNCPaint();
 
         goto RunDefWndProc;
     }
@@ -440,7 +440,7 @@ PosChangedEnd:
     }
 
     case WM_SHOW:
-      	dprintf(("PMFRAME: WM_SHOW"));
+        dprintf(("PMFRAME: WM_SHOW"));
         break;
 
     case WM_ERASEBACKGROUND:
@@ -496,25 +496,25 @@ PosChangedEnd:
       goto RunDefFrameProc;
 
     case WM_VRNENABLED:
-      	if(!win32wnd->isComingToTop() && ((win32wnd->getExStyle() & WS_EX_TOPMOST_W) == WS_EX_TOPMOST_W))
-	{
- 	 	HWND hwndrelated;
-		Win32BaseWindow *topwindow;
+        if(!win32wnd->isComingToTop() && ((win32wnd->getExStyle() & WS_EX_TOPMOST_W) == WS_EX_TOPMOST_W))
+        {
+                HWND hwndrelated;
+                Win32BaseWindow *topwindow;
 
-		win32wnd->setComingToTop(TRUE);
+                win32wnd->setComingToTop(TRUE);
 
-		hwndrelated = WinQueryWindow(hwnd, QW_PREV);
-		dprintf(("WM_VRNENABLED hwndrelated = %x (hwnd=%x)", hwndrelated, hwnd));
-		topwindow = Win32BaseWindow::GetWindowFromOS2FrameHandle(hwndrelated);
-		if(topwindow == NULL || ((win32wnd->getExStyle() & WS_EX_TOPMOST_W) == 0)) {
-			//put window at the top of z order
-			WinSetWindowPos( hwnd, HWND_TOP, 0, 0, 0, 0, SWP_ZORDER );
-		}
+                hwndrelated = WinQueryWindow(hwnd, QW_PREV);
+                dprintf(("WM_VRNENABLED hwndrelated = %x (hwnd=%x)", hwndrelated, hwnd));
+                topwindow = Win32BaseWindow::GetWindowFromOS2FrameHandle(hwndrelated);
+                if(topwindow == NULL || ((win32wnd->getExStyle() & WS_EX_TOPMOST_W) == 0)) {
+                        //put window at the top of z order
+                        WinSetWindowPos( hwnd, HWND_TOP, 0, 0, 0, 0, SWP_ZORDER );
+                }
 
-		win32wnd->setComingToTop(FALSE);
-		break;
-	}
-	goto RunDefFrameProc;
+                win32wnd->setComingToTop(FALSE);
+                break;
+        }
+        goto RunDefFrameProc;
 
     default:
       RestoreOS2TIB();

@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.21 2000-05-09 18:56:56 sandervl Exp $*/
+/* $Id: menu.cpp,v 1.22 2000-05-22 17:21:09 cbratschi Exp $*/
 /*
  * Menu functions
  *
@@ -8,7 +8,7 @@
  *
  * Copyright 1999 Christoph Bratschi
  *
- * Corel version: 20000317
+ * Corel version: 200005313
  * (WINE version: 20000130)
  *
  * Status:  ???
@@ -836,7 +836,7 @@ static void MENU_CalcItemSize( HDC hdc, MENUITEM *lpitem, HWND hwndOwner,
         lpitem->rect.bottom += mis.itemHeight;
         lpitem->rect.right  += mis.itemWidth;
 
-	//SvL: Add size of space between two menu items (fixes RealPlayer 7 menu)
+        //SvL: Add size of space between two menu items (fixes RealPlayer 7 menu)
         if(menuBar)
         {
              lpitem->rect.right += MENU_BAR_ITEMS_SPACE;
@@ -1598,7 +1598,7 @@ static BOOL MENU_ShowPopup( HWND hwndOwner, HMENU hmenu, UINT id,
                                           (LPVOID)hmenu );
             if (!pTopPopupWnd)
             {
- 	        DebugInt3();
+                DebugInt3();
                 return FALSE;
             }
             menu->hWnd = pTopPopupWnd;
@@ -1615,7 +1615,7 @@ static BOOL MENU_ShowPopup( HWND hwndOwner, HMENU hmenu, UINT id,
                                           (LPVOID)hmenu );
                 if( !menu->hWnd )
                 {
-		    DebugInt3();
+                    DebugInt3();
                     return FALSE;
                 }
             }
@@ -2186,9 +2186,9 @@ static HMENU MENU_PtMenu(HMENU hMenu,POINT pt,BOOL inMenuBar)
         Win32BaseWindow *win32wnd = Win32BaseWindow::GetWindowFromHandle(menu->hWnd);
         if(win32wnd==NULL) {
             //SvL: This happens in Moraff's YourJongg 2.0, return here
-	    //TODO: Check if this is supposed to happen at all...
+            //TODO: Check if this is supposed to happen at all...
             return (HMENU)0;
-	}
+        }
 
         ht = win32wnd->HandleNCHitTest(pt);
         if( menu->wFlags & MF_POPUP )
@@ -2432,7 +2432,7 @@ static BOOL MENU_MouseMove( MTRACKER* pmt, HMENU hPtMenu, UINT wFlags )
               For some reason the timer wasn't set up properly... Revert to old
               functionality.
             */
-	    pmt->hCurrentMenu = MENU_ShowSubPopup(pmt->hOwnerWnd,hPtMenu,FALSE,wFlags,&pmt->pt);
+            pmt->hCurrentMenu = MENU_ShowSubPopup(pmt->hOwnerWnd,hPtMenu,FALSE,wFlags,&pmt->pt);
             return TRUE;
          }
        } else
@@ -2783,19 +2783,19 @@ static INT MENU_TrackMenu(HMENU hmenu,UINT wFlags,INT x,INT y,HWND hwnd,BOOL inM
                     if (!(wFlags & TPM_RIGHTBUTTON)) break;
                     goto buttondown;
                 case WM_LBUTTONDBLCLK:
-		    if (bSysMenu && (hmenu == mt.hTopMenu))
-		    {
-			fEndMenu = TRUE;
-			break;
-		    }
-		    /* fall through */
+                    if (bSysMenu && (hmenu == mt.hTopMenu))
+                    {
+                        fEndMenu = TRUE;
+                        break;
+                    }
+                    /* fall through */
                 case WM_LBUTTONDOWN:
                     /* If the message belongs to the menu, removes it from the queue */
                     /* Else, end menu tracking */
 
-		 buttondown:
+                 buttondown:
                     /* Forcing mouse popup NOW - Ensure timer doesn't popup menu also */
-		    mouseOverMenuID = -1;
+                    mouseOverMenuID = -1;
                     fRemove = MENU_ButtonDown( &mt, hmenu, wFlags );
                     fEndMenu = !fRemove;
                     break;
@@ -2808,7 +2808,7 @@ static INT MENU_TrackMenu(HMENU hmenu,UINT wFlags,INT x,INT y,HWND hwnd,BOOL inM
                     if (hmenu)
                     {
                         /* Forcing mouse popup NOW - Ensure timer doesn't popup menu also */
-			mouseOverMenuID = -1;
+                        mouseOverMenuID = -1;
                         executedMenuId = MENU_ButtonUp( &mt, hmenu, wFlags);
 
                         /* End the loop if executedMenuId is an item ID */
@@ -2851,12 +2851,12 @@ static INT MENU_TrackMenu(HMENU hmenu,UINT wFlags,INT x,INT y,HWND hwnd,BOOL inM
                  else
                    MENU_FindItemByCoords( ptmenu, mt.pt, &id );
 
-	         /* If it is over the same item that set up the timer originally .... */
-	         if (mouseOverMenuID != -1 && mouseOverMenuID == id)
-	         {
-	           /* .... Pop up the menu */
+                 /* If it is over the same item that set up the timer originally .... */
+                 if (mouseOverMenuID != -1 && mouseOverMenuID == id)
+                 {
+                   /* .... Pop up the menu */
                    mt.hCurrentMenu = MENU_ShowSubPopup(mt.hOwnerWnd, hmenu, FALSE, wFlags,&mt.pt);
-	          }
+                  }
               }
 
               /* Reset the timer so it doesn't fire again. (So we are ready for the next
@@ -2967,12 +2967,12 @@ static INT MENU_TrackMenu(HMENU hmenu,UINT wFlags,INT x,INT y,HWND hwnd,BOOL inM
                 break;
             }  /* switch(msg.message) - kbd */
         }
-	else if (msg.message == WM_SYSCOMMAND)
-	{
-		/* The user clicked on the system menu/button */
+        else if (msg.message == WM_SYSCOMMAND)
+        {
+                /* The user clicked on the system menu/button */
         fEndMenu = TRUE;
         break;
-	}
+        }
         else
         {
             DispatchMessageA( &msg );
@@ -3481,12 +3481,25 @@ INT WINAPI GetMenuStringA(
 
     //TRACE("menu=%04x item=%04x ptr=%p len=%d flags=%04x\n",
     //             hMenu, wItemID, str, nMaxSiz, wFlags );
-    if (!(item = MENU_FindItem( &hMenu, &wItemID, wFlags ))) return 0;
-    if (!IS_STRING_ITEM(item->fType)) return 0;
-    if (!str || !nMaxSiz) return strlen(item->text);
+
+    item = MENU_FindItem( &hMenu, &wItemID, wFlags );
+
+    if (!str || !nMaxSiz)
+    {
+	if (item && IS_STRING_ITEM(item->fType))
+	    return strlen(item->text);
+	else
+	    return 0;
+    }
+
     str[0] = '\0';
-    lstrcpynA( str, item->text, nMaxSiz );
-    //TRACE("returning '%s'\n", str );
+
+    if (item)
+    {
+	if (!IS_STRING_ITEM(item->fType)) return 0;
+	lstrcpynA( str, item->text, nMaxSiz );
+    }
+
     return strlen(str);
 }
 
@@ -3503,11 +3516,25 @@ INT WINAPI GetMenuStringW( HMENU hMenu, UINT wItemID,
 
     //TRACE("menu=%04x item=%04x ptr=%p len=%d flags=%04x\n",
     //             hMenu, wItemID, str, nMaxSiz, wFlags );
-    if (!(item = MENU_FindItem( &hMenu, &wItemID, wFlags ))) return 0;
-    if (!IS_STRING_ITEM(item->fType)) return 0;
-    if (!str || !nMaxSiz) return strlen(item->text);
+
+    item = MENU_FindItem( &hMenu, &wItemID, wFlags );
+
+    if (!str || !nMaxSiz)
+    {
+	if (item && IS_STRING_ITEM(item->fType))
+	    return strlen(item->text);
+	else
+	    return 0;
+    }
+
     str[0] = '\0';
-    lstrcpynAtoW( str, item->text, nMaxSiz );
+
+    if (item)
+    {
+	if (!IS_STRING_ITEM(item->fType)) return 0;
+	lstrcpynAtoW( str, item->text, nMaxSiz );
+    }
+
     return lstrlenW(str);
 }
 
@@ -4726,7 +4753,7 @@ UINT WINAPI MenuItemFromPoint(HWND hWnd, HMENU hMenu, POINT ptScreen)
 /**********************************************************************
  *         IsMenuActive    (Internal)
  */
-BOOL IsMenuActive()
+BOOL IsMenuActive(void)
 {
     return pTopPopupWnd &&  (GetWindowLongA(pTopPopupWnd,GWL_STYLE) & WS_VISIBLE);
 }
