@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1866 2001-11-29 18:47:52 phaller Exp $ */
+/* $Id: changelog,v 1.1867 2001-11-29 20:00:20 sandervl Exp $ */
 
  2001-11-29: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o Split dosdevice.cpp from stubs.cpp
@@ -15,6 +15,8 @@
     - COMCTL32: o Listview: invalidate entire item for ownerdraw control
                             (don't exclude report margin)
     - KERNEL32: o Fixed disk access (yesterday's changes broke it)
+    - SHELL32:  o Removed wrong call to ctordtorInit that caused the disk
+                  access problems in the custom build.
 
  2001-11-28: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o fixes in ::CreateFile calls (return codes must be Win32)
