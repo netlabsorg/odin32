@@ -1,4 +1,4 @@
-/* $Id: win32wdesktop.cpp,v 1.7 1999-11-24 20:28:21 sandervl Exp $ */
+/* $Id: win32wdesktop.cpp,v 1.8 1999-12-16 16:53:59 cbratschi Exp $ */
 /*
  * Win32 Desktop Window for OS/2
  *
@@ -24,8 +24,8 @@ BOOL CreateWin32Desktop()
 {
   windowDesktop = new Win32Desktop();
   if(windowDesktop == NULL) {
-	dprintf(("Unable to create desktop window!!!"));
-	return FALSE;
+        dprintf(("Unable to create desktop window!!!"));
+        return FALSE;
   }
   return TRUE;
 }
@@ -34,8 +34,8 @@ BOOL CreateWin32Desktop()
 void DestroyDesktopWindow()
 {
   if(windowDesktop) {
-	delete windowDesktop;
-	windowDesktop = 0;
+        delete windowDesktop;
+        windowDesktop = 0;
   }
 }
 //******************************************************************************
@@ -76,7 +76,15 @@ BOOL Win32Desktop::EnableWindow(BOOL fEnable)
 //******************************************************************************
 LRESULT WIN32API DesktopWndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam )
 {
-    return 0;
+  switch (message)
+  {
+    case WM_GETTEXT:
+      if (!lParam || !wParam) return 0;
+      ((LPSTR)lParam)[0] = 0;
+      return 0;
+  }
+
+  return 0;
 }
 //******************************************************************************
 //******************************************************************************

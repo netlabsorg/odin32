@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.59 1999-12-16 00:11:45 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.60 1999-12-16 16:53:58 cbratschi Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -1644,69 +1644,6 @@ int WIN32API GetWindowRgn (HWND hWnd,
   return (NULLREGION);
 }
 //******************************************************************************
-//TODO: Not complete
-//******************************************************************************
-BOOL WIN32API GrayStringA(HDC hdc, HBRUSH hBrush, GRAYSTRINGPROC lpOutputFunc,
-                          LPARAM lpData, int nCount, int X, int Y, int nWidth,
-                          int nHeight)
-{
- BOOL     rc;
- COLORREF curclr;
-
-#ifdef DEBUG
-  WriteLog("USER32:  GrayStringA, not completely implemented\n");
-#endif
-  if(lpOutputFunc == NULL && lpData == NULL) {
-#ifdef DEBUG
-    WriteLog("USER32:  lpOutputFunc == NULL && lpData == NULL\n");
-#endif
-    return(FALSE);
-  }
-  if(lpOutputFunc) {
-        return(lpOutputFunc(hdc, lpData, nCount));
-  }
-  curclr = SetTextColor(hdc, GetSysColor(COLOR_GRAYTEXT));
-  rc = TextOutA(hdc, X, Y, (char *)lpData, nCount);
-  SetTextColor(hdc, curclr);
-
-  return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GrayStringW(HDC hdc, HBRUSH hBrush, GRAYSTRINGPROC lpOutputFunc,
-                          LPARAM lpData, int nCount, int X, int Y, int nWidth,
-                          int nHeight)
-{
- BOOL     rc;
- char    *astring;
- COLORREF curclr;
-
-#ifdef DEBUG
-  WriteLog("USER32:  GrayStringW, not completely implemented\n");
-#endif
-
-  if(lpOutputFunc == NULL && lpData == NULL) {
-#ifdef DEBUG
-    WriteLog("USER32:  lpOutputFunc == NULL && lpData == NULL\n");
-#endif
-    return(FALSE);
-  }
-  if(nCount == 0)
-    nCount = UniStrlen((UniChar*)lpData);
-
-  if(lpOutputFunc) {
-    return(lpOutputFunc(hdc, lpData, nCount));
-  }
-  astring = UnicodeToAsciiString((LPWSTR)lpData);
-
-  curclr = SetTextColor(hdc, GetSysColor(COLOR_GRAYTEXT));
-  rc = TextOutA(hdc, X, Y, astring, nCount);
-  SetTextColor(hdc, curclr);
-
-  FreeAsciiString(astring);
-  return(rc);
-}
-//******************************************************************************
 //******************************************************************************
 #if 0
 BOOL WIN32API InvalidateRgn( HWND hWnd, HRGN hRgn, BOOL bErase)
@@ -1854,49 +1791,6 @@ HDESK WIN32API GetThreadDesktop(DWORD dwThreadId)
 
 /* Message and Message Queue Functions */
 
-
-/* Font and Text Functions */
-
-DWORD WIN32API GetTabbedTextExtentA( HDC hDC, LPCSTR lpString, int nCount, int nTabPositions, LPINT lpnTabStopPositions)
-{
-    dprintf2(("USER32: GetTabbedTextExtentA %x %s", hDC, lpString));
-    return O32_GetTabbedTextExtent(hDC,lpString,nCount,nTabPositions,lpnTabStopPositions);
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API GetTabbedTextExtentW( HDC hDC, LPCWSTR lpString, int nCount, int nTabPositions, LPINT lpnTabStopPositions)
-{
- char *astring = UnicodeToAsciiString((LPWSTR)lpString);
- DWORD rc;
-
-    dprintf2(("USER32: GetTabbedTextExtentW %x %s", hDC, astring));
-    rc = O32_GetTabbedTextExtent(hDC,astring,nCount,nTabPositions,lpnTabStopPositions);
-    FreeAsciiString(astring);
-    return rc;
-}
-//******************************************************************************
-//******************************************************************************
-LONG WIN32API TabbedTextOutA( HDC hdc, int x, int y, LPCSTR lpString, int nCount, int nTabPositions, LPINT lpnTabStopPositions, int  nTabOrigin)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  TabbedTextOutA\n");
-#endif
-    return O32_TabbedTextOut(hdc,x,y,lpString,nCount,nTabPositions,lpnTabStopPositions,nTabOrigin);
-}
-//******************************************************************************
-//******************************************************************************
-LONG WIN32API TabbedTextOutW( HDC hdc, int x, int y, LPCWSTR lpString, int nCount, int nTabPositions, LPINT lpnTabStopPositions, int  nTabOrigin)
-{
- char *astring = UnicodeToAsciiString((LPWSTR)lpString);
- LONG rc;
-
-#ifdef DEBUG
-    WriteLog("USER32:  TabbedTextOutW\n");
-#endif
-    rc = O32_TabbedTextOut(hdc,x,y,astring,nCount,nTabPositions,lpnTabStopPositions,nTabOrigin);
-    FreeAsciiString(astring);
-    return rc;
-}
 
 /* Device Context Functions */
 
