@@ -1,4 +1,4 @@
-/* $Id: pmtitlebar.cpp,v 1.2 2000-01-09 14:37:10 sandervl Exp $ */
+/* $Id: pmtitlebar.cpp,v 1.3 2000-01-09 15:56:03 sandervl Exp $ */
 /*
  * Win32 Titlebar Managment Code for OS/2
  *
@@ -103,7 +103,7 @@ MRESULT EXPENTRY Win32TitleBarProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
   case WINWM_NCMOUSEMOVE:
   {
         win32wnd->MsgMouseMove(pWinMsg);
-        break;
+        goto RunDefWndProc;
   }
 
   default:

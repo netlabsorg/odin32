@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.68 2000-01-09 14:37:12 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.69 2000-01-09 15:56:05 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -150,6 +150,7 @@ Win32BaseWindow *getParent();
 
          HMENU  GetMenu()                           { return (HMENU) OS2HwndMenu; };
          BOOL   SetMenu(ULONG hMenu);
+	 HMENU  GetSystemMenu(BOOL fRevert);
 
          BOOL   SetIcon(HICON hIcon);
          HICON  GetIcon()                           { return (HICON) iconResource; };
@@ -278,6 +279,7 @@ protected:
         HWND    OS2Hwnd;
         HWND    OS2HwndFrame;
         HWND    OS2HwndMenu;
+        HMENU   OS2SysMenu;
         HWND    Win32Hwnd;
         BOOL    isUnicode;
 

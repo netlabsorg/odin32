@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.135 2000-01-09 14:37:11 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.136 2000-01-09 15:56:04 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -46,6 +46,7 @@
 #include <win\hook.h>
 #define INCL_TIMERWIN32
 #include "timer.h"
+#include "initterm.h"
 
 #define HAS_DLGFRAME(style,exStyle) \
     (((exStyle) & WS_EX_DLGMODALFRAME) || \
@@ -163,6 +164,7 @@ void Win32BaseWindow::Init()
   OS2Hwnd          = 0;
   OS2HwndFrame     = 0;
   OS2HwndMenu      = 0;
+  OS2SysMenu       = 0;
   Win32Hwnd        = 0;
 
   if(HwAllocateWindowHandle(&Win32Hwnd, (ULONG)this) == FALSE)
@@ -240,6 +242,11 @@ Win32BaseWindow::~Win32BaseWindow()
     if(fDestroyAll) {
         dprintf(("Destroying window %x %s", getWindowHandle(), windowNameA));
         setParent(NULL);  //or else we'll crash in the dtor of the ChildWindow class
+    }
+
+    if(OS2SysMenu) {
+        DestroyMenu(OS2SysMenu);
+        OS2SysMenu = 0;
     }
 
     if (isOwnDC())
@@ -1231,119 +1238,6 @@ BOOL Win32BaseWindow::showScrollBars(BOOL changeHorz,BOOL changeVert,BOOL fShow)
 
   return rc;
 }
-/***********************************************************************
- *           NC_HandleSysCommand
- *
- * Handle a WM_SYSCOMMAND message. Called from DefWindowProc().
- *
- * TODO: Not done (see #if 0)
- */
-LONG Win32BaseWindow::HandleSysCommand(WPARAM wParam, POINT *pt32)
-{
-    UINT uCommand = wParam & 0xFFF0;
-
-    if ((getStyle() & WS_CHILD) && (uCommand != SC_KEYMENU))
-        ScreenToClient(getParent()->getWindowHandle(), pt32 );
-
-    switch (uCommand)
-    {
-
-    case SC_SIZE:
-    {
-      DWORD flags = 0;
-
-      switch ((wParam & 0xF)+2)
-      {
-        case HTLEFT:
-          flags = TFOS_LEFT;
-          break;
-
-        case HTRIGHT:
-          flags = TFOS_RIGHT;
-          break;
-
-        case HTTOP:
-          flags = TFOS_TOP;
-          break;
-
-        case HTTOPLEFT:
-          flags = TFOS_TOP | TFOS_LEFT;
-          break;
-
-        case HTTOPRIGHT:
-          flags = TFOS_TOP | TFOS_RIGHT;
-          break;
-
-        case HTBOTTOM:
-          flags = TFOS_BOTTOM;
-          break;
-
-        case HTBOTTOMLEFT:
-          flags = TFOS_BOTTOM | TFOS_LEFT;
-          break;
-
-        case HTBOTTOMRIGHT:
-          flags = TFOS_BOTTOM | TFOS_RIGHT;
-          break;
-      }
-      if (flags) FrameTrackFrame(this,flags);
-      break;
-    }
-
-    case SC_MOVE:
-      FrameTrackFrame(this,TFOS_MOVE);
-      break;
-
-    case SC_MINIMIZE:
-        ShowWindow(SW_MINIMIZE);
-        break;
-
-    case SC_MAXIMIZE:
-        ShowWindow(SW_MAXIMIZE);
-        break;
-
-    case SC_RESTORE:
-        ShowWindow(SW_RESTORE);
-        break;
-
-    case SC_CLOSE:
-        return SendInternalMessageA(WM_CLOSE, 0, 0);
-
-#if 0
-    case SC_VSCROLL:
-    case SC_HSCROLL:
-        NC_TrackScrollBar( hwnd, wParam, pt32 );
-        break;
-
-    case SC_MOUSEMENU:
-        MENU_TrackMouseMenuBar( wndPtr, wParam & 0x000F, pt32 );
-        break;
-
-    case SC_KEYMENU:
-        MENU_TrackKbdMenuBar( wndPtr , wParam , pt.x );
-        break;
-
-    case SC_TASKLIST:
-        WinExec( "taskman.exe", SW_SHOWNORMAL );
-        break;
-
-    case SC_SCREENSAVE:
-        if (wParam == SC_ABOUTWINE)
-            ShellAboutA(hwnd, "Odin", WINE_RELEASE_INFO, 0);
-        else
-        if (wParam == SC_PUTMARK)
-            dprintf(("Mark requested by user\n"));
-        break;
-
-    case SC_HOTKEY:
-    case SC_ARRANGE:
-    case SC_NEXTWINDOW:
-    case SC_PREVWINDOW:
-        break;
-#endif
-    }
-    return 0;
-}
 //******************************************************************************
 //******************************************************************************
 LRESULT Win32BaseWindow::DefWndControlColor(UINT ctlType, HDC hdc)
@@ -2105,6 +1999,25 @@ void Win32BaseWindow::NotifyParent(UINT Msg, WPARAM wParam, LPARAM lParam)
 
         window = parentwindow;
    }
+}
+//******************************************************************************
+//******************************************************************************
+HMENU Win32BaseWindow::GetSystemMenu(BOOL fRevert)
+{
+    if(!fOS2Look) {
+        if(fRevert == FALSE) {
+            OS2SysMenu = LoadMenuA(hInstanceUser32, (LPCSTR)"SYSMENU");
+            return OS2SysMenu;
+        }
+        else {//revert back to default system menu
+            if(OS2SysMenu) {
+                DestroyMenu(OS2SysMenu);
+                OS2SysMenu = 0;
+            }
+            return 0;
+        }
+    }
+    else return O32_GetSystemMenu(getOS2FrameWindowHandle(), fRevert);
 }
 //******************************************************************************
 //******************************************************************************

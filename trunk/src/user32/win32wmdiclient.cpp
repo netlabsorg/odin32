@@ -1,4 +1,4 @@
-/* $Id: win32wmdiclient.cpp,v 1.20 1999-12-29 22:54:03 cbratschi Exp $ */
+/* $Id: win32wmdiclient.cpp,v 1.21 2000-01-09 15:56:05 sandervl Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -831,7 +831,7 @@ BOOL Win32MDIClientWindow::tile(UINT fuTile)
  */
 BOOL Win32MDIClientWindow::augmentFrameMenu(Win32MDIChildWindow *child)
 {
-  HMENU   hSysPopup = 0,hFrameMenu = ::GetMenu(getParent()->getWindowHandle()),hSysMenu = GetSystemMenu(child->getWindowHandle(),FALSE);
+  HMENU   hSysPopup = 0,hFrameMenu = ::GetMenu(getParent()->getWindowHandle()),hSysMenu = ::GetSystemMenu(child->getWindowHandle(),FALSE);
   HBITMAP hSysMenuBitmap = 0;
 
   if (!hFrameMenu || !hSysMenu)
