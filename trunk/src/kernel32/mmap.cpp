@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.62 2003-02-18 18:58:47 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.63 2003-03-06 10:44:34 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -125,15 +125,8 @@ BOOL Win32MemMap::Init(DWORD aMSize)
         if(DuplicateHandle(GetCurrentProcess(), hMemFile, GetCurrentProcess(),
                            &hMemFile, 0, FALSE, DUPLICATE_SAME_ACCESS) == FALSE)
 #else
-        DWORD dwOdinOptions;
-
-        if(!(mProtFlags & PAGE_READWRITE)) {
-                dwOdinOptions = DUPLICATE_ACCESS_READ | DUPLICATE_SHARE_DENYNONE;
-        }
-        else    dwOdinOptions = DUPLICATE_ACCESS_READWRITE | DUPLICATE_SHARE_DENYNONE;
-
-        if(HMDuplicateHandleOdin(GetCurrentProcess(), hMemFile, GetCurrentProcess(),
-                           &hMemFile, 0, FALSE, DUPLICATE_SAME_ACCESS, dwOdinOptions) == FALSE)
+        if(HMDuplicateHandle(GetCurrentProcess(), hMemFile, GetCurrentProcess(),
+                           &hMemFile, 0, FALSE, DUPLICATE_SAME_ACCESS) == FALSE)
 #endif
         {
             dprintf(("Win32MemMap::Init: DuplicateHandle failed!"));
@@ -264,11 +257,71 @@ void Win32MemMap::Release()
     }
 }
 //******************************************************************************
-//We determine whether a page has been modified by checking it's protection flags
-//If the write flag is set, this means commitPage had to enable this due to a pagefault
-//(all pages are readonly until the app tries to write to it)
+// Win32MemMap::commitRange
+//
+// Commit a range of pages
+//
+// Parameters:
+//
+//   ULONG ulFaultAddr          - exception address
+//   ULONG ulOffset             - offset in memory map
+//   BOOL  fWriteAccess         - TRUE  -> write exception
+//                                FALSE -> read exception
+//   int   nrpages              - number of pages
+//
+// Returns:
+//   TRUE                       - success
+//   FALSE                      - failure
+//
 //******************************************************************************
-BOOL Win32MemMap::commitPage(ULONG offset, BOOL fWriteAccess, int nrpages)
+BOOL Win32MemMap::commitRange(ULONG ulFaultAddr, ULONG offset, BOOL fWriteAccess, int nrpages)
+{
+    LPVOID lpPageFaultAddr = (LPVOID)((ULONG)pMapping + offset);
+    DWORD  pageAddr        = (DWORD)lpPageFaultAddr & ~0xFFF;
+
+    dprintf(("Win32MemMap::commitRange %x (faultaddr %x)", pageAddr, lpPageFaultAddr));
+
+    if(fWriteAccess) 
+    {//writes are handled on a per-page basis
+        for(int i=i;i<nrpages;i++) 
+        {
+            if(commitPage(ulFaultAddr, offset, TRUE, 1) == FALSE) {
+                dprintf(("Win32MemMap::commit: commitPage failed!!"));
+                return FALSE;
+            }
+            ulFaultAddr += PAGE_SIZE;
+            offset      += PAGE_SIZE;
+        }
+        return TRUE;
+    }
+    else    return commitPage(ulFaultAddr, offset, FALSE, nrpages);
+}
+//******************************************************************************
+// Win32MemMap::commitPage
+//
+// Handle a pagefault for a memory map
+//
+// Parameters:
+//
+//   ULONG ulFaultAddr          - exception address
+//   ULONG ulOffset             - offset in memory map
+//   BOOL  fWriteAccess         - TRUE  -> write exception
+//                                FALSE -> read exception
+//   int   nrpages              - number of pages
+//
+// Returns:
+//   TRUE                       - success
+//   FALSE                      - failure
+//
+// NOTE: 
+//   We handle only one pages for write access!
+//
+// REMARKS:
+//   We determine whether a page has been modified by checking it's protection flags
+//   If the write flag is set, this means commitPage had to enable this due to a pagefault
+//   (all pages are readonly until the app tries to write to it)
+//******************************************************************************
+BOOL Win32MemMap::commitPage(ULONG ulFaultAddr, ULONG offset, BOOL fWriteAccess, int nrpages)
 {
  MEMORY_BASIC_INFORMATION memInfo;
  LPVOID lpPageFaultAddr = (LPVOID)((ULONG)pMapping + offset);
@@ -362,6 +415,46 @@ BOOL Win32MemMap::commitPage(ULONG offset, BOOL fWriteAccess, int nrpages)
 fail:
 //  mapMutex.leave();
   return FALSE;
+}
+//******************************************************************************
+// Win32MemMap::commitGuardPage
+//
+// Handle a guard page exception for a copy-on-write view (one page only)
+//
+// Parameters:
+//
+//   ULONG ulFaultAddr          - exception address
+//   ULONG ulOffset             - offset in memory map
+//   BOOL  fWriteAccess         - TRUE  -> write exception
+//                                FALSE -> read exception
+//
+// Returns:
+//   TRUE                       - success
+//   FALSE                      - failure
+//
+//******************************************************************************
+BOOL Win32MemMap::commitGuardPage(ULONG ulFaultAddr, ULONG ulOffset, BOOL fWriteAccess)
+{
+    return FALSE;
+}
+//******************************************************************************
+// Win32MemMap::invalidatePages
+//
+// Invalidate map pages. (called by WriteFile)
+//
+// Parameters:
+//
+//   ULONG offset               - offset in memory map
+//   ULONG size                 - invalid range size
+//
+// Returns:
+//   TRUE                       - success
+//   FALSE                      - failure
+//
+//******************************************************************************
+BOOL Win32MemMap::invalidatePages(ULONG offset, ULONG size)
+{
+    return FALSE;
 }
 //******************************************************************************
 // Win32MemMap::unmapViewOfFile
@@ -516,7 +609,7 @@ fail:
 //TODO: Are apps allowed to change the protection flags of memory mapped pages?
 //      I'm assuming they aren't for now.
 //******************************************************************************
-BOOL Win32MemMap::flushView(ULONG offset, ULONG cbFlush)
+BOOL Win32MemMap::flushView(ULONG viewaddr, ULONG offset, ULONG cbFlush)
 {
  LPVOID lpvBase = (LPVOID)((ULONG)pMapping+offset);
  MEMORY_BASIC_INFORMATION memInfo;
@@ -766,7 +859,7 @@ Win32MemMapView::~Win32MemMapView()
     dprintf(("Win32MemMapView dtor: deleting view %x %x", mOffset, mSize));
 
     if(mfAccess & MEMMAP_ACCESS_WRITE)
-        mParentMap->flushView(mOffset, mSize);
+        mParentMap->flushView(MMAP_FLUSHVIEW_ALL, mOffset, mSize);
 
     //Don't free memory for executable image map views (only used internally)
     if(!mParentMap->getImage())
