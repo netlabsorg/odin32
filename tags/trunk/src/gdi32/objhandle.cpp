@@ -1,4 +1,4 @@
-/* $Id: objhandle.cpp,v 1.20 2001-12-15 18:50:27 sandervl Exp $ */
+/* $Id: objhandle.cpp,v 1.21 2002-04-07 14:38:08 sandervl Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
@@ -44,11 +44,17 @@ static GdiObject objHandleTable[MAX_OBJECT_HANDLES] = {0};
 static ULONG     lowestFreeIndex = 1;
 static VMutex    objTableMutex;
 
+#ifdef DEBUG
+static DWORD GetObjectTypeNoDbg( HGDIOBJ hObj);
+#else
+#define GetObjectTypeNoDbg GetObjectType
+#endif
+
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API ObjAllocateHandle(HANDLE *hObject, DWORD dwUserData, ObjectType type)
 {
-    objTableMutex.enter(VMUTEX_WAIT_FOREVER);
+    objTableMutex.enter();
     if(lowestFreeIndex == -1) {
         //oops, out of handles
         objTableMutex.leave();
@@ -84,7 +90,7 @@ void WIN32API ObjFreeHandle(HANDLE hObject)
 {
     hObject &= OBJHANDLE_MAGIC_MASK;
     if(hObject < MAX_OBJECT_HANDLES) {
-        objTableMutex.enter(VMUTEX_WAIT_FOREVER);
+        objTableMutex.enter();
         objHandleTable[hObject].dwUserData = 0;
         objHandleTable[hObject].type = GDIOBJ_NONE;
         if(lowestFreeIndex == -1 || hObject < lowestFreeIndex)
@@ -157,7 +163,7 @@ int WIN32API GetObjectA( HGDIOBJ hObject, int size, void *lpBuffer)
   }
   if(lpBuffer == NULL)
   { //return required size if buffer pointer == NULL
-    int objtype = GetObjectType(hObject);
+    int objtype = GetObjectTypeNoDbg(hObject);
     switch(objtype)
     {
     case OBJ_PEN:
@@ -218,7 +224,7 @@ int WIN32API GetObjectW( HGDIOBJ hObject, int size, void *lpBuffer)
   if(HIWORD(hObject) == 0) {
         hObject |= GDIOBJ_PREFIX;
   }
-  objtype = GetObjectType(hObject);
+  objtype = GetObjectTypeNoDbg(hObject);
 
   switch(objtype)
   {
@@ -252,6 +258,34 @@ int WIN32API GetObjectW( HGDIOBJ hObject, int size, void *lpBuffer)
 }
 //******************************************************************************
 //******************************************************************************
+#ifdef DEBUG
+static char *gditypenames[] = {
+"NULL",
+"OBJ_PEN", 
+"OBJ_BRUSH", 
+"OBJ_DC", 
+"OBJ_METADC", 
+"OBJ_PAL", 
+"OBJ_FONT", 
+"OBJ_BITMAP", 
+"OBJ_REGION", 
+"OBJ_METAFILE", 
+"OBJ_MEMDC", 
+"OBJ_EXTPEN", 
+"OBJ_ENHMETADC", 
+"OBJ_ENHMETAFILE"
+};
+
+char *DbgGetGDITypeName(DWORD handleType)
+{
+    if(handleType <= OBJ_ENHMETAFILE) {
+        return gditypenames[handleType];
+    }
+    return "UNKNOWN TYPE";
+}
+#endif
+//******************************************************************************
+//******************************************************************************
 HGDIOBJ WIN32API SelectObject(HDC hdc, HGDIOBJ hObj)
 {
  HGDIOBJ rc;
@@ -262,8 +296,8 @@ HGDIOBJ WIN32API SelectObject(HDC hdc, HGDIOBJ hObj)
         hObj |= GDIOBJ_PREFIX;
     }
 
-    handleType = GetObjectType(hObj);
-    dprintf2(("GDI32: SelectObject %x %x type %x", hdc, hObj, handleType));
+    handleType = GetObjectTypeNoDbg(hObj);
+    dprintf2(("GDI32: SelectObject %x %x type %s", hdc, hObj, DbgGetGDITypeName(handleType)));
     if(handleType == GDIOBJ_REGION) {
         //Return complexity here; not previously selected clip region
         return (HGDIOBJ)SelectClipRgn(hdc, hObj);
@@ -286,7 +320,7 @@ HGDIOBJ WIN32API SelectObject(HDC hdc, HGDIOBJ hObj)
         }
     }
     rc = O32_SelectObject(hdc, hObj);
-    if(rc != 0 && GetObjectType(rc) == OBJ_BITMAP && DIBSection::getSection != NULL)
+    if(rc != 0 && GetObjectTypeNoDbg(rc) == OBJ_BITMAP && DIBSection::getSection != NULL)
     {
         DIBSection *dsect = DIBSection::findObj(rc);
         if(dsect)
@@ -326,6 +360,25 @@ VOID WIN32API UnselectGDIObjects(HDC hdc)
 }
 //******************************************************************************
 //******************************************************************************
+#ifdef DEBUG
+static DWORD GetObjectTypeNoDbg( HGDIOBJ hObj)
+{
+    DWORD objtype;
+
+    //TODO: must use 16 bits gdi object handles
+    if(HIWORD(hObj) == 0) {
+        hObj |= GDIOBJ_PREFIX;
+    }
+    if(ObjGetHandleType(hObj) == GDIOBJ_REGION) {
+        dprintf2(("GDI32: GetObjectType %x REGION", hObj));
+        SetLastError(ERROR_SUCCESS);
+        return OBJ_REGION;
+    }
+    return O32_GetObjectType(hObj);
+}
+#endif
+//******************************************************************************
+//******************************************************************************
 DWORD WIN32API GetObjectType( HGDIOBJ hObj)
 {
     DWORD objtype;
@@ -359,7 +412,7 @@ BOOL WIN32API DeleteObject(HANDLE hObj)
     }
 
     //System objects can't be deleted (TODO: any others?? (fonts?))!!!!)
-    objtype = GetObjectType(hObj);
+    objtype = GetObjectTypeNoDbg(hObj);
     switch (objtype)
     {
         case OBJ_PEN:
