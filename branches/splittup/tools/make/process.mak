@@ -1,4 +1,4 @@
-# $Id: process.mak,v 1.1.2.2 2002-03-10 05:24:33 bird Exp $
+# $Id: process.mak,v 1.1.2.3 2002-04-01 13:54:20 bird Exp $
 
 #
 # Unix-like tools for OS/2
@@ -34,6 +34,10 @@ TARGET_LIBS=$(LIB_C_DLL) $(LIB_OS) $(LIB_C_RTDLL)
 
 !ifndef TARGET_DEF
 TARGET_DEF=$(MAKEDIR)\$(PATH_DEF)\$(TARGET_NAME).def
+!endif
+
+!ifndef TARGET_IDEF
+TARGET_IDEF=$(TARGET_DEF)
 !endif
 
 !ifndef TARGET_MAP
@@ -431,13 +435,19 @@ clean:
 # EXE, DLL and SYS Targets
 #
 !if "$(TARGET_MODE)" == "EXE" || "$(TARGET_MODE)" == "DLL" || "$(TARGET_MODE)" == "CRT" || "$(TARGET_MODE)" == "SYS"
+! if "$(TARGET_MODE)" == "DLL" || "$(TARGET_MODE)" == "CRT"
+TARGET_IGNORE_LINKER_WARNINGS=1
+!endif
 $(TARGET): $(TARGET_OBJS) $(TARGET_RES) $(TARGET_DEF) $(TARGET_LNK) $(TARGET_DEPS)
     @$(ECHO) Linking $(TARGET_MODE) $(CLRFIL)$@ $(CLRRST)
+!ifdef TARGET_IGNORE_LINKER_WARNINGS
+    -4 \
+!endif
 !if "$(TARGET_MODE)" == "EXE"
     @$(LINK_CMD_EXE)
 !endif
-!if "$(TARGET_MODE)" == "DLL" || "$(TARGET_MODE)" == "CRT" || "$(TARGET_MODE)" == "SYS"
-    -4 @$(LINK_CMD_DLL)
+!if "$(TARGET_MODE)" == "DLL" || "$(TARGET_MODE)" == "CRT"
+    @$(LINK_CMD_DLL)
 !endif
 !if "$(TARGET_MODE)" == "SYS"
     @$(LINK_CMD_SYS)
@@ -469,9 +479,9 @@ $(LINK_LNK5)
 # DLL Import library
 #
 !ifdef TARGET_ILIB
-$(TARGET_ILIB): $(TARGET_DEF)
+$(TARGET_ILIB): $(TARGET_IDEF)
     @$(ECHO) Creating Import Library $(CLRFIL)$@ $(CLRRST)
-    $(IMPLIB) $(IMPLIB_FLAGS) $@ $(TARGET_DEF)
+    $(IMPLIB) $(IMPLIB_FLAGS) $@ $(TARGET_IDEF)
 !endif
 !endif
 
@@ -511,6 +521,15 @@ $(TARGET_PUBLIB): $(TARGET)
 
 
 #
+# Empty target.
+#
+!if "$(TARGET_MODE)" == "EMPTY"
+$(TARGET):
+    @$(ECHO) .
+!endif
+
+
+#
 # read dependency file from current directory
 #
 !if "$(TARGET_MODE)" != "EMPTY"
@@ -531,5 +550,5 @@ $(TARGET_PUBLIB): $(TARGET)
 # Force rule.
 #
 .force:
-    $(ECHO) .
+    @$(ECHO) .
 
