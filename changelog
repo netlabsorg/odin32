@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.456 1999-11-18 18:59:31 cbratschi Exp $ */
+ /* $Id: changelog,v 1.457 1999-11-19 16:23:36 achimha Exp $ */
+
+ 99-11-14: Achim Hasenmueller <achimha@innotek.de>
+        - COMCTL32: Merged with WINE 991114
 
  99-11-18: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
     - KERNEL32:   Win32Pe2LxImage didn't issue the setFullPath(szFileName)
