@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.59 2002-10-07 16:42:13 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.60 2003-01-12 16:19:37 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -1631,7 +1631,36 @@ writecheckfail:
         break;
 
     case IOCTL_SCSI_GET_CAPABILITIES:
-        break;
+    {
+        PIO_SCSI_CAPABILITIES pPacket = (PIO_SCSI_CAPABILITIES)lpOutBuffer; 
+
+        if(nOutBufferSize < sizeof(IO_SCSI_CAPABILITIES) ||
+           !pPacket || pPacket->Length < sizeof(IO_SCSI_CAPABILITIES))
+        {
+            SetLastError(ERROR_INSUFFICIENT_BUFFER);
+            return FALSE;
+        }
+        if(!drvInfo || drvInfo->fCDIoSupported == FALSE) {
+            dprintf(("os2cdrom.dmd CD interface not supported!!"));
+            SetLastError(ERROR_ACCESS_DENIED);
+            return FALSE;
+        }
+        if(lpBytesReturned) {
+            *lpBytesReturned = 0;
+        }
+        pPacket->MaximumTransferLength = 128*1024;
+        pPacket->MaximumPhysicalPages  = 64*1024;
+        pPacket->SupportedAsynchronousEvents = FALSE;
+        pPacket->AlignmentMask         = -1;
+        pPacket->TaggedQueuing         = FALSE;
+        pPacket->AdapterScansDown      = FALSE;
+        pPacket->AdapterUsesPio        = FALSE;
+        if(lpBytesReturned)
+            *lpBytesReturned = sizeof(*pPacket);
+
+        SetLastError(ERROR_SUCCESS);
+        return TRUE;
+    }
 
     case IOCTL_SCSI_PASS_THROUGH:
         //no break; same as IOCTL_SCSI_PASS_THROUGH_DIRECT

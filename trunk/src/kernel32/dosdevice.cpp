@@ -1,9 +1,14 @@
-/* $Id: dosdevice.cpp,v 1.1 2001-11-29 10:31:07 phaller Exp $
+/* $Id: dosdevice.cpp,v 1.2 2003-01-12 16:19:36 sandervl Exp $
  *
  * Win32 Kernel Symbolic Link Subsystem for OS/2
  *
  * 2001/11/29 Patrick Haller <patrick.haller@innotek.de>
  *
+ *
+ * QueryDosDeviceA/W borrowed from Rewind (pre-LGPL Wine)
+ * Copyright 1993 Erik Bos
+ * Copyright 1996 Alexandre Julliard
+ * 
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
@@ -17,6 +22,7 @@
  * Includes                                                                  *
  *****************************************************************************/
 #include <os2win.h>
+#include <stdio.h>
 #include <winnls.h>
 #include "unicode.h"
 #include "handlemanager.h"
@@ -70,6 +76,7 @@ BOOL WIN32API DefineDosDeviceA( DWORD dwFlags, LPCSTR lpDeviceName,
            dwFlags,  lpDeviceName, lpTargetPath
           ));
 
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return (FALSE);
 }
 
@@ -97,79 +104,112 @@ BOOL WIN32API DefineDosDeviceW( DWORD dwFlags, LPCWSTR lpDeviceName,
            dwFlags,  lpDeviceName, lpTargetPath
           ));
 
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return (FALSE);
 }
 
 
-/*****************************************************************************
- * Name      : DWORD QueryDosDeviceA
- * Purpose   : The QueryDosDevice function lets an application obtain information
- *             about MS-DOS device names. The function can obtain the current
- *             mapping for a particular MS-DOS device name. The function can also
- *             obtain a list of all existing MS-DOS device names.
- *             MS-DOS device names are stored as symbolic links in the Windows NT
- *             object name space. The code that converts an MS-DOS path into a
- *             corresponding Windows NT path uses these symbolic links to map
- *             MS-DOS devices and drive letters. The QueryDosDevice function
- *             provides a mechanism whereby a Win32-based application can query
- *             the names of the symbolic links used to implement the MS-DOS device
- *             namespace as well as the value of each specific symbolic link.
- * Parameters: LPCTSTR lpDeviceName address of MS-DOS device name string
- *             LPTSTR  lpTargetPath ddress of buffer for storing query results
- *             DWORD   ucchMax       maximum storage capacity of buffer
- * Variables :
- * Result    : pointer to lpTargetPath
- * Remark    :
- * Status    : UNTESTED STUB
+/***********************************************************************
+ *           QueryDosDeviceA   (KERNEL32.@)
  *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-
-DWORD WIN32API QueryDosDeviceA(LPCTSTR lpDeviceName,
-                               LPTSTR  lpTargetPath,
-                               DWORD   ucchMax)
+ * returns array of strings terminated by \0, terminated by \0
+ */
+DWORD WINAPI QueryDosDeviceA(LPCSTR devname,LPSTR target,DWORD bufsize)
 {
-  dprintf(("Kernel32: QueryDosDeviceA(%s,%08xh,%08xh) not implemented.\n",
-           lpDeviceName,
-           lpTargetPath,
-           ucchMax));
+    LPSTR s;
+    char  buffer[200];
 
-  return (0);
+    dprintf(("(%s,...)\n", devname ? devname : "<null>"));
+    if (!devname) {
+	/* return known MSDOS devices */
+#ifdef __WIN32OS2__
+        static const char devices[24] = "CON\0COM1\0COM2\0LPT1\0NUL\0";
+        if(bufsize < 128 + sizeof(devices)) {
+            SetLastError(ERROR_INSUFFICIENT_BUFFER);
+            return 0;
+        }
+
+        memcpy( target, devices, sizeof(devices) );
+
+        //Add all valid drive letters
+        int drivemask = GetLogicalDrives();
+        ULONG mask = 1;
+        int i, len = 0;
+        char *ptr = target+sizeof(devices)-1;
+
+        for(i=0;i<26;i++)
+        {
+            if(drivemask & mask)
+            {
+                len += 3;
+                *ptr++ = (char)('A' + i);
+                *ptr++ = ':';
+                *ptr++ = 0;
+            }
+            mask <<= 1;
+        }
+        *ptr = 0;
+        
+        SetLastError(ERROR_SUCCESS);
+        return sizeof(devices)+len;
+#else
+        static const char devices[24] = "CON\0COM1\0COM2\0LPT1\0NUL\0\0";
+        memcpy( target, devices, min(bufsize,sizeof(devices)) );
+        return min(bufsize,sizeof(devices));
+#endif
+    }
+    /* In theory all that are possible and have been defined.
+     * Now just those below, since mirc uses it to check for special files.
+     *
+     * (It is more complex, and supports netmounted stuff, and \\.\ stuff,
+     *  but currently we just ignore that.)
+     */
+#define CHECK(x) (strstr(devname,#x)==devname)
+    if (CHECK(con) || CHECK(com) || CHECK(lpt) || CHECK(nul)) {
+	strcpy(buffer,"\\DEV\\");
+	strcat(buffer,devname);
+	if ((s=strchr(buffer,':'))) *s='\0';
+	lstrcpynA(target,buffer,bufsize);
+	return strlen(buffer)+1;
+    } else {
+#ifdef __WIN32OS2__
+        if(devname[1] == ':' && devname[2] == 0) {
+            int ret = GetDriveTypeA(devname);
+            if(ret != DRIVE_UNKNOWN) 
+            {
+                if(bufsize < 16) {
+                    SetLastError(ERROR_INSUFFICIENT_BUFFER);
+                    return 0;
+                }
+                sprintf(target, "\\\\.\\%s", devname);
+                SetLastError(ERROR_SUCCESS);
+                return strlen(target)+1;
+            }
+        }
+#endif
+	if (strchr(devname,':') || devname[0]=='\\') {
+	    /* This might be a DOS device we do not handle yet ... */
+	    dprintf(("(%s) not detected as DOS device!\n",devname));
+	}
+	SetLastError(ERROR_DEV_NOT_EXIST);
+	return 0;
+    }
 }
 
 
-/*****************************************************************************
- * Name      : DWORD QueryDosDeviceW
- * Purpose   : The QueryDosDevice function lets an application obtain information
- *             about MS-DOS device names. The function can obtain the current
- *             mapping for a particular MS-DOS device name. The function can also
- *             obtain a list of all existing MS-DOS device names.
- *             MS-DOS device names are stored as symbolic links in the Windows NT
- *             object name space. The code that converts an MS-DOS path into a
- *             corresponding Windows NT path uses these symbolic links to map
- *             MS-DOS devices and drive letters. The QueryDosDevice function
- *             provides a mechanism whereby a Win32-based application can query
- *             the names of the symbolic links used to implement the MS-DOS device
- *             namespace as well as the value of each specific symbolic link.
- * Parameters: LPCTSTR lpDeviceName address of MS-DOS device name string
- *             LPTSTR  lpTargetPath ddress of buffer for storing query results
- *             DWORD   ucchMax       maximum storage capacity of buffer
- * Variables :
- * Result    : pointer to lpTargetPath
- * Remark    :
- * Status    : UNTESTED STUB
+/***********************************************************************
+ *           QueryDosDeviceW   (KERNEL32.@)
  *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-
-DWORD WIN32API QueryDosDeviceW(LPCWSTR lpDeviceName,
-                               LPWSTR  lpTargetPath,
-                               DWORD   ucchMax)
+ * returns array of strings terminated by \0, terminated by \0
+ */
+DWORD WINAPI QueryDosDeviceW(LPCWSTR devname,LPWSTR target,DWORD bufsize)
 {
-  dprintf(("Kernel32: QueryDosDeviceW(%s,%08xh,%08xh) not implemented.\n",
-           lpDeviceName,
-           lpTargetPath,
-           ucchMax));
+    LPSTR devnameA = devname?HEAP_strdupWtoA(GetProcessHeap(),0,devname):NULL;
+    LPSTR targetA = (LPSTR)HeapAlloc(GetProcessHeap(),0,bufsize);
+    DWORD ret = QueryDosDeviceA(devnameA,targetA,bufsize);
 
-  return (0);
+    ret = MultiByteToWideChar( CP_ACP, 0, targetA, ret, target, bufsize );
+    if (devnameA) HeapFree(GetProcessHeap(),0,devnameA);
+    if (targetA) HeapFree(GetProcessHeap(),0,targetA);
+    return ret;
 }

@@ -96,6 +96,10 @@ BOOL OSLibCdIoIsSupported(HFILE hDisk)
         return FALSE;
     }
 
+    if(hDisk == 0) {//no media present; return success here as the DosDevIOCtl will fail
+        return TRUE;
+    }
+
     if(DosDevIOCtl(hDisk, IOCTL_CDROMDISK, CDROMDISK_GETDRIVER, &ulCDSig, sizeof(ulCDSig), NULL,
 		           &ulCDSig, sizeof(ulCDSig), NULL) == 0 &&
 	    ulCDSig == (('C') | ('D' << 8) | ('0' << 16) | ('1' << 24)) )
