@@ -36,7 +36,6 @@
 #define RECT_HEIGHT(a)  ((a)->bottom - (a)->top) 
 #define RECT_EQUAL(a,b) (memcmp(a, b, sizeof(RECT)) == 0)
 
-#ifdef CUSTOM_TRACKFRAME 
 
 /***********************************************************************
  *           draw_moving_frame
@@ -757,7 +756,7 @@ void Frame_SysCommandSizeMove(Win32BaseWindow *win32wnd, WPARAM wParam )
     {
         /* Single click brings up the system menu when iconized */
 
-        if( !moved )
+        if( !moved && !fOS2Look)
         {
             if(style & WS_SYSMENU )
                 SendMessageA( hwnd, WM_SYSCOMMAND,
@@ -767,4 +766,3 @@ void Frame_SysCommandSizeMove(Win32BaseWindow *win32wnd, WPARAM wParam )
     }
 }
 
-#endif //#ifdef CUSTOM_TRACKFRAME 

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.334 2002-08-13 20:39:51 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.335 2002-08-14 10:37:44 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2751,6 +2751,10 @@ BOOL Win32BaseWindow::DestroyWindow()
         //     PM chooses another window to be activated before WM_DESTROY is
         //     sent. VPC enables the owner when it receives that message,
         //     but by then it's too late.
+        //     (MFC created modeless dialog)
+        //TODO: This might be the wrong place to do it. EndDialog is called,
+        //      so perhaps it should be done there. (although Wine only 
+        //      enables the owner if the dialog is modal)
         ::EnableWindow(owner->getWindowHandle(), 1);
     }
   
