@@ -1,3 +1,5 @@
+/* $Id: advapi32.h,v 1.3 1999-06-10 14:23:34 phaller Exp $ */
+
 /*
  * Win32 advanced API functions for OS/2
  *
