@@ -1,4 +1,4 @@
-/* $Id: Porting.txt,v 1.1 2000-07-09 22:27:54 phaller Exp $ */
+/* $Id: Porting.txt,v 1.2 2000-08-11 10:54:06 sandervl Exp $ */
 
             Porting Win32 applications to OS/2 using Odin - 991212
             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -84,6 +84,7 @@ object during a dll load and UnregisterLXDll when the dll is unloaded.
 It's parameters are the dll module handle, the win32 dll entrypoint (LibMain)
 and, again, a pointer to the resource object. (as produced by wrc)
 The resource pointer can be NULL.
+The handle returned by RegisterLxDll must be used when calling UnregisterLxDll.
 
 In the skeleton dll entrypoint we also call ctordtorInit/Term to create/destroy
 and static C++ objects.
