@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.7 1999-07-18 18:04:30 sandervl Exp $ */
+/* $Id: window.cpp,v 1.8 1999-07-23 19:09:25 cbratschi Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -177,8 +177,8 @@ BOOL WIN32API DestroyWindow(HWND hwnd)
 
     window = Win32Window::GetWindowFromHandle(hwnd);
     if(!window) {
-    	dprintf(("DestroyWindow, window %x not found", hwnd));
-    	return 0;
+        dprintf(("DestroyWindow, window %x not found", hwnd));
+        return 0;
     }
     dprintf(("DestroyWindow %x", hwnd));
     return window->DestroyWindow();
@@ -191,8 +191,8 @@ HWND WIN32API SetActiveWindow( HWND hwnd)
 
     window = Win32Window::GetWindowFromHandle(hwnd);
     if(!window) {
-    	dprintf(("SetActiveWindow, window %x not found", hwnd));
-    	return 0;
+        dprintf(("SetActiveWindow, window %x not found", hwnd));
+        return 0;
     }
     dprintf(("SetActiveWindow %x", hwnd));
     return window->SetActiveWindow();
@@ -205,8 +205,8 @@ HWND WIN32API GetParent( HWND hwnd)
 
     window = Win32Window::GetWindowFromHandle(hwnd);
     if(!window) {
-    	dprintf(("GetParent, window %x not found", hwnd));
-    	return 0;
+        dprintf(("GetParent, window %x not found", hwnd));
+        return 0;
     }
     dprintf(("GetParent %x", hwnd));
     return window->GetParent();
@@ -219,8 +219,8 @@ HWND WIN32API SetParent( HWND hwndChild, HWND hwndNewParent)
 
     window = Win32Window::GetWindowFromHandle(hwndChild);
     if(!window) {
-    	dprintf(("SetParent, window %x not found", hwndChild));
-    	return 0;
+        dprintf(("SetParent, window %x not found", hwndChild));
+        return 0;
     }
     dprintf(("SetParent %x %x", hwndChild, hwndNewParent));
     return window->SetParent(hwndNewParent);
@@ -233,8 +233,8 @@ BOOL WIN32API IsChild( HWND hwndParent, HWND hwnd)
 
     window = Win32Window::GetWindowFromHandle(hwnd);
     if(!window) {
-    	dprintf(("IsChild, window %x not found", hwnd));
-    	return 0;
+        dprintf(("IsChild, window %x not found", hwnd));
+        return 0;
     }
     dprintf(("IsChild %x %x", hwndParent, hwnd));
     return window->IsChild(hwndParent);
@@ -592,7 +592,7 @@ BOOL WIN32API GetClientRect( HWND arg1, PRECT  arg2)
 #ifdef DEBUG
     WriteLog("USER32:  GetClientRect of %X\n", arg1);
 #endif
-
+    arg1 = Win32Window::Win32ToOS2Handle(arg1);
     return O32_GetClientRect(arg1, arg2);
 }
 //******************************************************************************
