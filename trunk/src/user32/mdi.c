@@ -1520,9 +1520,15 @@ LRESULT WINAPI DefFrameProcA( HWND hwnd, HWND hwndMDIClient,
 	{
         case WM_SETTEXT:
             {
+#ifdef __WIN32OS2__
+                LPWSTR text;
+                STACK_strdupAtoW( (LPSTR)lParam, text)
+                MDI_UpdateFrameText(hwnd, hwndMDIClient, MDI_REPAINTFRAME, text );
+#else
                 LPWSTR text = HEAP_strdupAtoW( GetProcessHeap(), 0, (LPSTR)lParam );
                 MDI_UpdateFrameText(hwnd, hwndMDIClient, MDI_REPAINTFRAME, text );
                 HeapFree( GetProcessHeap(), 0, text );
+#endif
             }
             return 1; /* success. FIXME: check text length */
 
