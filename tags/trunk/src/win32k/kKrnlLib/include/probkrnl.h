@@ -1,4 +1,4 @@
-/* $Id: probkrnl.h,v 1.4 2001-09-18 04:33:01 bird Exp $
+/* $Id: probkrnl.h,v 1.5 2001-09-26 03:53:13 bird Exp $
  *
  * Include file for ProbKrnl.
  *
@@ -14,7 +14,7 @@
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
 *******************************************************************************/
-#define NBR_OF_KRNLIMPORTS      99     /* When this is changed make sure to   */
+#define NBR_OF_KRNLIMPORTS      107     /* When this is changed make sure to   */
                                         /* update the aImportTab in probkrnl.c */
                                         /* and make test faker in test.h and   */
                                         /* the appropriate fake.c or fakea.asm.*/
