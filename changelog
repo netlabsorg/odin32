@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.2292 2002-08-28 08:22:34 sandervl Exp $ */
+/* $Id: changelog,v 1.2293 2002-08-29 07:57:35 bird Exp $ */
+
+ 2002-08-29: knut st. osmundsen <bird@anduin   >
+    - COMMON:   o Implemented parsing of the SEGMENTS in a definition file
+                  (class kFileDef), in order to produce better watcom linker
+                  directives.
 
  2002-08-28: Platon Fomichev <platon@innotek   >
     - DDRAW:    o Added custom function to hide mouse cursor when the primary
