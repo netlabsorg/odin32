@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.27 2000-02-23 09:02:19 bird Exp $
+# $Id: Makefile,v 1.28 2000-02-25 18:15:01 bird Exp $
 #
 # Copyright 1998-1999 knut st. osmundsen
 #
@@ -33,7 +33,7 @@ CPPFLAGS    = -q -Ge -Gs- -Gr+ -Rn -Ss+ -Mp -Gx -Wall+ppt-ppc-inl-cnv-gnr-vft-
 ASFLAGS     = -Sv:ALP -Mb -Li
 LFLAGS      = /nologo /MAP /NOI /NOE /NOD /A:16 /MAP /O:$@
 CDEFINES    = -DWIN32K -DRING0 -D__WIN32OS2__ -D__WINE__
-CDEFINES16  =
+CDEFINES16  = -DRING0
 ADEFINES    = -D:WIN32K
 
 
@@ -55,7 +55,7 @@ ASDEFINES   = $(ASDEFINES)  -D:RELEASE
 CFLAGS      = $(CFLAGS)     -O- -Ti+
 CFLAGS16    = $(CFLAGS16)   -Zi -Od
 CPPFLAGS    = $(CPPFLAGS)   -O- -Ti+
-LFLAGS      = $(LFLAGS)     /NOEXEPACK /DEBUG /NODEBUG
+LFLAGS      = $(LFLAGS)     /NOEXEPACK /DEBUG  /NODEB
 ASFLAGS     = $(ASFLAGS)    -Od+
 CDEFINES    = $(CDEFINES)   -DDEBUG
 CDEFINES16  = $(CDEFINES16) -DDEBUG
@@ -63,7 +63,10 @@ ASDEFINES   = $(ASDEFINES)  -D:DEBUG
 !endif
 
 !ifdef NODEBUGINFO
-LFLAGS      = $(LFLAGS)     /NODEB
+LFLAGS      = $(LFLAGS)     /NODEB /EXEPACK:2 /PACKD /PACKC
+CFLAGS16    = $(CFLAGS16)   -Owis
+CFLAGS      = $(CFLAGS)     -O+ -Oi-
+CPPFLAGS    = $(CPPFLAGS)   -O+ -Oi-
 !endif
 
 ################################################################################
@@ -94,54 +97,54 @@ AINCLUDES  = -Fdi:$(WIN32KBASE)\include \
 ################################################################################
 .SUFFIXES: .obj .cpp .c .asm
 
-{dev16}.c{object}.obj:
+{dev16}.c{$(WIN32KOBJ)}.obj:
     @$(ECHO) compiling 16bit: $<
     @$(CC16) $(CFLAGS16) $(CDEFINES16) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES16) $<
 
-{dev32}.asm{object}.obj:
+{dev32}.asm{$(WIN32KOBJ)}.obj:
     @$(ECHO) assembling:      $<
     @$(AS) $(ASFLAGS) $(ADEFINES) $(AINCLUDES) $< -Fo:$@ -Fl:$(WIN32KLIST)\$(*B).lst
-{dev32}.c{object}.obj:
+{dev32}.c{$(WIN32KOBJ)}.obj:
     @$(ECHO) compiling 32bit: $<
     @$(CC) -c $(CFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
-{dev32}.cpp{object}.obj:
+{dev32}.cpp{$(WIN32KOBJ)}.obj:
     @$(ECHO) compiling 32bit: $<
     @$(CC) -c $(CPPFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
 
-{k32}.asm{object}.obj:
+{k32}.asm{$(WIN32KOBJ)}.obj:
     @$(ECHO) assembling:      $<
     @$(AS) $(ASFLAGS) $(ADEFINES) $(AINCLUDES) $< -Fo:$@ -Fl:$(WIN32KLIST)\$(*B).lst
-{k32}.c{object}.obj:
+{k32}.c{$(WIN32KOBJ)}.obj:
     @$(ECHO) compiling 32bit: $<
     @$(CC) -c $(CFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
-{k32}.cpp{object}.obj:
+{k32}.cpp{$(WIN32KOBJ)}.obj:
     @$(ECHO) compiling 32bit: $<
     @$(CC) -c $(CPPFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
 
-{ldr}.asm{object}.obj:
+{ldr}.asm{$(WIN32KOBJ)}.obj:
     @$(ECHO) assembling:      $<
     @$(AS) $(ASFLAGS) $(ADEFINES) $(AINCLUDES) $< -Fo:$@ -Fl:$(WIN32KLIST)\$(*B).lst
-{ldr}.c{object}.obj:
+{ldr}.c{$(WIN32KOBJ)}.obj:
     @$(ECHO) compiling 32bit: $<
     @$(CC) -c $(CFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
-{ldr}.cpp{object}.obj:
+{ldr}.cpp{$(WIN32KOBJ)}.obj:
     @$(ECHO) compiling 32bit: $<
     @$(CC) -c $(CPPFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
 
-{misc}.asm{object}.obj:
+{misc}.asm{$(WIN32KOBJ)}.obj:
     @$(ECHO) assembling:      $<
     $(AS) $(ASFLAGS) $(ADEFINES) $(AINCLUDES) $< -Fo:$@ -Fl:$(WIN32KLIST)\$(*B).lst
-{misc}.c{object}.obj:
+{misc}.c{$(WIN32KOBJ)}.obj:
     @$(ECHO) compiling 32bit: $<
     @$(CC) -c $(CFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
-{misc}.cpp{object}.obj:
+{misc}.cpp{$(WIN32KOBJ)}.obj:
     @$(ECHO) compiling 32bit: $<
     @$(CC) -c $(CPPFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
 
-{pe2lx}.c{object}.obj 32bit:
+{pe2lx}.c{$(WIN32KOBJ)}.obj 32bit:
     @$(ECHO) compiling: $<
     @$(CC) -c $(CFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
-{pe2lx}.cpp{object}.obj:
+{pe2lx}.cpp{$(WIN32KOBJ)}.obj:
     @$(ECHO) compiling 32bit: $<
     @$(CC) -c $(CPPFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
 
@@ -158,40 +161,43 @@ all:$(NAME).sys
 ################################################################################
 # OBJECTS and LIBRARIES - Don't mess with the order or objects and libraries!
 ################################################################################
-OBJS  = object\devfirst.obj \
-        object\d16strat.obj \
-        object\d32hlp.obj \
-        object\d32globals.obj \
-        object\asmutils.obj \
-        object\calltab.obj \
-        object\malloc.obj \
-        object\smalloc_avl.obj \
-        object\avl.obj \
-        object\rmalloc_avl.obj \
-        object\new.obj \
-        object\stricmp.obj \
-        object\yield.obj \
-        object\vsprintf.obj \
-        object\vprintf.obj \
-        object\ldr.obj \
-        object\myldrClose.obj \
-        object\myldrOpen.obj \
-        object\myldrRead.obj \
-        object\myLDRQAppType.obj \
-        object\myldrEnum32bitRelRecs.obj \
-        object\pe2lx.obj \
-        object\ModuleBase.obj \
-        object\d32ElfIOCtl.obj \
-        object\d32Win32kIOCtl.obj \
-        object\k32AllocMemEx.obj \
-        object\buffer.obj \
-        object\mytkExecPgm.obj
+OBJS  = $(WIN32KOBJ)\devfirst.obj \
+        $(WIN32KOBJ)\d16strat.obj \
+        $(WIN32KOBJ)\d32hlp.obj \
+        $(WIN32KOBJ)\d32globals.obj \
+        $(WIN32KOBJ)\d16globl.obj \
+        $(WIN32KOBJ)\asmutils.obj \
+        $(WIN32KOBJ)\calltab.obj \
+        $(WIN32KOBJ)\malloc.obj \
+        $(WIN32KOBJ)\smalloc_avl.obj \
+        $(WIN32KOBJ)\avl.obj \
+        $(WIN32KOBJ)\rmalloc_avl.obj \
+        $(WIN32KOBJ)\new.obj \
+        $(WIN32KOBJ)\stricmp.obj \
+        $(WIN32KOBJ)\yield.obj \
+        $(WIN32KOBJ)\vsprintf.obj \
+        $(WIN32KOBJ)\vprintf.obj \
+        $(WIN32KOBJ)\ldr.obj \
+        $(WIN32KOBJ)\myldrClose.obj \
+        $(WIN32KOBJ)\myldrOpen.obj \
+        $(WIN32KOBJ)\myldrRead.obj \
+        $(WIN32KOBJ)\myLDRQAppType.obj \
+        $(WIN32KOBJ)\myldrEnum32bitRelRecs.obj \
+        $(WIN32KOBJ)\pe2lx.obj \
+        $(WIN32KOBJ)\ModuleBase.obj \
+        $(WIN32KOBJ)\d32ElfIOCtl.obj \
+        $(WIN32KOBJ)\d32Win32kIOCtl.obj \
+        $(WIN32KOBJ)\k32AllocMemEx.obj \
+        $(WIN32KOBJ)\buffer.obj \
+        $(WIN32KOBJ)\mytkExecPgm.obj
 
 
 OBJSINIT = \
-        object\d16init.obj \
-        object\d32init.obj \
-        object\probkrnl.obj
+        $(WIN32KOBJ)\d16init.obj \
+        $(WIN32KOBJ)\d32init.obj \
+        $(WIN32KOBJ)\ProbKrnl.obj \
+        $(WIN32KOBJ)\SymDB.obj \
+        $(WIN32KOBJ)\vprntf16.obj
 
 LIBS = \
 !if "$(CCENV)" == "VAC36"
@@ -209,22 +215,48 @@ LIBSINIT = \
 ################################################################################
 # SPECIAL RULES - Testing
 ################################################################################
-ProbKrnl.exe: dev16\ProbKrnl.c $(WIN32KBASE)\include\sym.h \
+ProbKrnl.exe: dev16\ProbKrnl.c dev16\symdb.c dev16\vprntf16.c \
+              $(WIN32KBASE)\include\sym.h \
               $(WIN32KBASE)\include\probKrnl.h
+    $(CC16) -c -W4 -Asfw -G2s -Zp -Zl -nologo -Fa -Zi -Od -Lp \
+        -DDEBUG -DDEBUGR3 -Fa$(WIN32KLIST)\$(*B).s     \
+        -Fo$(WIN32KOBJ)\probkrnl_p.obj $(CINCLUDES16) dev16\probkrnl.c
+    $(CC16) -c -W4 -Asfw -G2s -Zp -Zl -nologo -Fa -Zi -Od -Lp \
+        -DDEBUG -DDEBUGR3 -Fa$(WIN32KLIST)\$(*B).s     \
+        -Fo$(WIN32KOBJ)\symdb_p.obj $(CINCLUDES16) dev16\symdb.c
+    $(CC16) -c -W4 -Asfw -G2s -Zp -Zl -nologo -Fa -Zi -Od -Lp \
+        -DDEBUG -DDEBUGR3 -Fa$(WIN32KLIST)\$(*B).s     \
+        -Fo$(WIN32KOBJ)\vprntf16_p.obj $(CINCLUDES16) dev16\vprntf16.c
+    link /NOD /MAP:FULL /CO /pmtype:vio \
+        $(WIN32KOBJ)\probkrnl_p.obj + $(WIN32KOBJ)\symdb_p.obj + $(WIN32KOBJ)\vprntf16_p.obj, \
+        probkrnl.exe, probkrnl.map, $(TOOLKIT)\lib\os2286.lib + $(MSCPATH)\lib\clibcep.lib;
+
+extract.exe: dev16\ProbKrnl.c dev16\vprntf16.c \
+             $(WIN32KBASE)\include\sym.h \
+             $(WIN32KBASE)\include\probKrnl.h
     $(CC16) -c -W4 -Asfw -G2s -Zp -Zl -nologo -Fo$@ -Fa -Zi -Od -Lp \
-        $(CDEFINES16) -DDEBUGR3 -Fa$(WIN32KLIST)\$(*B).s     \
-        -Foprobkrnl.obj $(CINCLUDES16) dev16\probkrnl.c
-    link /NOD /MAP:FULL /CO /pmtype:vio probkrnl.obj, probkrnl.exe, probkrnl.map, $(TOOLKIT)\lib\os2286.lib + $(MSCPATH)\lib\clibcep.lib;
+        -DDEBUG -DEXTRACT -Fa$(WIN32KLIST)\$(*B).s     \
+        -Fo$(WIN32KOBJ)\probkrnl_e.obj $(CINCLUDES16) dev16\probkrnl.c
+    $(CC16) -c -W4 -Asfw -G2s -Zp -Zl -nologo -Fo$@ -Fa -Zi -Od -Lp \
+        -DDEBUG -DEXTRACT -Fa$(WIN32KLIST)\$(*B).s     \
+        -Fo$(WIN32KOBJ)\vprntf16_e.obj $(CINCLUDES16) dev16\vprntf16.c
+    link /NOD /MAP:FULL /CO /pmtype:vio \
+        $(WIN32KOBJ)\probkrnl_e.obj + $(WIN32KOBJ)\vprntf16_e.obj, \
+        $@, $(*B).map, $(TOOLKIT)\lib\os2286.lib + $(MSCPATH)\lib\clibcep.lib;
+
+d32init.exe: dev32\d32init.c
+    icc -Ss /Gr+ $(CINCLUDES) -DRING3 -DDEBUGR3 -DDEBUG \
+        -Fo$(WIN32KOBJ)\$(*B).r3obj -Fe$@ dev32\$(*B).c
 
 
 
 ################################################################################
 # Win32k.sys rule. Don't mess with the order or objects and libraries!
 ################################################################################
-$(NAME).sys: $(OBJS) $(LIBS) last.lib $(OBJSINIT) $(LIBSINIT) $(NAME).def
+$(NAME).sys: $(OBJS) $(LIBS) last.lib init.lib $(LIBSINIT) $(NAME).def
     -@$(ECHO) linking: $@
     $(LD) $(LFLAGS) @<<
-$(OBJS) $(LIBS) last.lib $(OBJSINIT) /IG $(LIBSINIT) $(NAME).def
+$(OBJS) $(LIBS) last.lib init.lib /IG $(LIBSINIT) $(NAME).def
 <<
     @mapsym $*.map > nul
     $(CP) $@ $(PDWIN32_BIN)
@@ -246,12 +278,16 @@ clib.lib: $(MSCPATH)\lib\clibcep.lib libconv.exe
     libconv $(MSCPATH)\lib\clibcep.lib $@ > nul
     $(ILIB) /nologo /nobackup /convformat $@;
 
-last.lib: object\devlast.obj
-    -@del $@ > nul 2> nul
+last.lib: $(WIN32KOBJ)\devlast.obj
+    -@$(RM) $@ > nul 2> nul
+    $(ILIB) /nologo /nobackup $@ $**;
+
+init.lib: $(OBJSINIT)
+    -@$(RM) $@ > nul 2> nul
     $(ILIB) /nologo /nobackup $@ $**;
 
 libconv.exe: libconv.c
-    icc -Q+ libconv.c
+    icc -Q+ -Fe$@ -Fo$(WIN32KOBJ)\$(*B).obj libconv.c
 
 
 #################################################################################
@@ -290,18 +326,18 @@ clean:
 #                asm deps must be updated by hand
 ################################################################################
 dep:
-    $(PDWIN32_TOOLS)\fastdep -oObject $(CINCLUDES) misc\*.c* ldr\*.c* dev32\*.c* \
+    $(PDWIN32_TOOLS)\fastdep -o$(WIN32KOBJ) $(CINCLUDES) misc\*.c* ldr\*.c* dev32\*.c* \
         dev16\*.c* pe2lx\*.c* k32\*.c* lib\*.c include\*.h
-    $(PDWIN32_TOOLS)\fastdep -a+ -oObject $(CINCLUDES16) dev16\*.c*
+    $(PDWIN32_TOOLS)\fastdep -a+ -o$(WIN32KOBJ) $(CINCLUDES16) dev16\*.c*
 
 
-object\asmutils.obj:            misc\asmutils.asm     include\devsegdf.inc
-object\buffer.obj:              misc\buffer.asm       include\devsegdf.inc
-object\calltab.obj:             ldr\calltab.asm       include\devsegdf.inc
-object\mytkExecPgm.obj:         ldr\mytkExecPgm.asm   include\devsegdf.inc
-object\d32hlp.obj:              dev32\d32hlp.asm      include\devsegdf.inc
-object\devfirst.obj:            dev32\devfirst.asm    include\devsegdf.inc
-object\devlast.obj:             dev32\devlast.asm     include\devsegdf.inc
+$(WIN32KOBJ)\asmutils.obj:      misc\asmutils.asm     include\devsegdf.inc
+$(WIN32KOBJ)\buffer.obj:        misc\buffer.asm       include\devsegdf.inc
+$(WIN32KOBJ)\calltab.obj:       ldr\calltab.asm       include\devsegdf.inc
+$(WIN32KOBJ)\mytkExecPgm.obj:   ldr\mytkExecPgm.asm   include\devsegdf.inc
+$(WIN32KOBJ)\d32hlp.obj:        dev32\d32hlp.asm      include\devsegdf.inc
+$(WIN32KOBJ)\devfirst.obj:      dev32\devfirst.asm    include\devsegdf.inc
+$(WIN32KOBJ)\devlast.obj:       dev32\devlast.asm     include\devsegdf.inc
 
 !ifndef NODEP
 !include .depend

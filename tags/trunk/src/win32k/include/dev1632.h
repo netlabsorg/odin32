@@ -1,4 +1,4 @@
-/* $Id: dev1632.h,v 1.3 2000-02-19 23:52:00 bird Exp $
+/* $Id: dev1632.h,v 1.4 2000-02-25 18:15:04 bird Exp $
  * dev1632.h - Common header file for 16-bit and 32-bit C
  *
  * Copyright (c) 1999 knut st. osmundsen
@@ -47,15 +47,18 @@ typedef struct _RP32GENIOCTL
 
 
 #define MAXKRNLOBJECTS 24
-typedef struct _KRNLOBJTABLE
+typedef struct _KRNLINFO
 {
     unsigned char   cObjects;
+    unsigned char   fDebug;
+    unsigned char   fSMP;
+    unsigned short  usBuild;
     OTE             aObjects[MAXKRNLOBJECTS];
-} KRNLOBJTABLE, FAR * PKRNLOBJTABLE;
+} KRNLINFO, FAR * PKRNLINFO;
 
 #else
 
-#define PKRNLOBJTABLE void *
+#define PKRNLINFO void *
 
 #endif
 

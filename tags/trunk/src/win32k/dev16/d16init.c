@@ -1,4 +1,4 @@
-/* $Id: d16init.c,v 1.5 2000-02-21 04:45:45 bird Exp $
+/* $Id: d16init.c,v 1.6 2000-02-25 18:15:02 bird Exp $
  *
  * d16init - init routines for both drivers.
  *
@@ -20,6 +20,7 @@
 #define INCL_DOSMISC
 #define INCL_DOSERRORS
 #define INCL_NOPMAPI
+
 
 /*******************************************************************************
 *   Header Files                                                               *

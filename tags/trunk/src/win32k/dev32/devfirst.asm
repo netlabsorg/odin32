@@ -1,4 +1,4 @@
-; $Id: devfirst.asm,v 1.4 2000-02-21 04:45:46 bird Exp $
+; $Id: devfirst.asm,v 1.5 2000-02-25 18:15:03 bird Exp $
 ;
 ; DevFirst - entrypoint and segment definitions
 ;
@@ -27,10 +27,13 @@
     public DATA32START
     public BSS32START
     public CONST32_ROSTART
+    public _VFTSTART
+    public EH_DATASTART
+
 
     public _strategyAsm0
     public _strategyAsm1
-    public _CallGetOTEs32
+    public _CallGetKernelInfo32
     public _CallElfIOCtl
     public _CallWin32kIOCtl
     public _SSToDS_16a
@@ -41,7 +44,7 @@
 ; Externs
 ;
     extrn _TKSSBase16:dword
-    extrn GETOTES32:FAR
+    extrn GETKERNELINFO32:FAR
     extrn ELFIOCTL:FAR
     extrn WIN32KIOCTL:FAR
     .286p
@@ -85,20 +88,20 @@ _strategyAsm endp
     .386p
 ;;
 ; Thunk procedure for R0Init32.
-; @cproto    USHORT NEAR CallGetOTEs32(ULONG addressOTEBuf);
-; @returns   Same as GetOTEs32.
-; @param     address of OTEBuf  32-bit pointer to request data.
+; @cproto    USHORT NEAR CallGetKernelInfo32(ULONG addressKrnlInfoBuf);
+; @returns   Same as GetKernelInfo32.
+; @param     addressKrnlInfoBuf  32-bit pointer to request data on stack.
 ; @status    completely implemented.
 ; @author    knut st. osmundsen
-_CallGetOTEs32 PROC NEAR
+_CallGetKernelInfo32 PROC NEAR
     ASSUME CS:CODE16
     push    ds
     push    word ptr [esp+6]            ; push high word.
     push    word ptr [esp+6]            ; push low word.
-    call    far ptr FLAT:GETOTES32
+    call    far ptr FLAT:GETKERNELINFO32
     pop     ds
     retn
-_CallGetOTEs32 ENDP
+_CallGetKernelInfo32 ENDP
 
 
 
