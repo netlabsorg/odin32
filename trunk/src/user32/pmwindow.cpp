@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.116 2001-02-18 14:18:38 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.117 2001-02-19 10:15:52 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -437,7 +437,8 @@ MRESULT ProcessPMMessage(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2, Win32Base
         {
           //CB: todo: use result for WM_CALCVALIDRECTS
           //Get old client rectangle (for invalidation of frame window parts later on)
-          mapWin32ToOS2Rect(win32wnd->getWindowHeight(), win32wnd->getClientRectPtr(), (PRECTLOS2)&rect);
+          //Use new window height to calculate the client area
+          mapWin32ToOS2Rect(pswp->cy, win32wnd->getClientRectPtr(), (PRECTLOS2)&rect);
 
           //Note: Also updates the new window rectangle
           win32wnd->MsgFormatFrame(&wp);
@@ -473,6 +474,7 @@ MRESULT ProcessPMMessage(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2, Win32Base
               RECTL frame,client,arcl[4];
 
               WinQueryWindowRect(hwnd,&frame);
+
                //top
               arcl[0].xLeft = 0;
               arcl[0].xRight = frame.xRight;
@@ -1237,23 +1239,23 @@ VOID FrameTrackFrame(Win32BaseWindow *win32wnd,DWORD flags)
         /* if successful copy final position back */
         if(!WinEqualRect(0, &rcl, &track.rclTrack)) {
             dprintf(("FrameTrackFrame: new (os/2) window rect: (%d,%d)(%d,%d)", track.rclTrack.xLeft, track.rclTrack.yBottom, track.rclTrack.xRight - track.rclTrack.xLeft, track.rclTrack.yTop - track.rclTrack.yBottom));
-        if(flags == TF_MOVE) {
-            WinSetWindowPos(win32wnd->getOS2WindowHandle(),
-                                        0, track.rclTrack.xLeft, track.rclTrack.yBottom,
-                                        0, 0, SWP_MOVE);
-        }
-        else {
+            if(flags == TF_MOVE) {
+                WinSetWindowPos(win32wnd->getOS2WindowHandle(),
+                                0, track.rclTrack.xLeft, track.rclTrack.yBottom,
+                                0, 0, SWP_MOVE);
+            }
+            else {
               SetWindowPos(win32wnd->getWindowHandle(), 0, track.rclTrack.xLeft,
                            parentHeight - track.rclTrack.yTop,
                            track.rclTrack.xRight - track.rclTrack.xLeft,
                            track.rclTrack.yTop - track.rclTrack.yBottom,
                            SWP_NOACTIVATE_W | SWP_NOZORDER_W | SWP_NOACTIVATE_W);
-//            WinSetWindowPos(win32wnd->getOS2WindowHandle(),
-//                                        0, track.rclTrack.xLeft, track.rclTrack.yBottom,
-//                                        track.rclTrack.xRight - track.rclTrack.xLeft,
-//                                        track.rclTrack.yTop - track.rclTrack.yBottom,
-//                                        SWP_SIZE|SWP_MOVE);
-        }
+//                WinSetWindowPos(win32wnd->getOS2WindowHandle(),
+//                                0, track.rclTrack.xLeft, track.rclTrack.yBottom,
+//                               track.rclTrack.xRight - track.rclTrack.xLeft,
+//                                track.rclTrack.yTop - track.rclTrack.yBottom,
+//                                SWP_SIZE|SWP_MOVE);
+            }
         }
         return;
    }
