@@ -1,4 +1,4 @@
-/* $Id: odin32pack.cmd,v 1.15 2001-04-02 01:55:42 bird Exp $
+/* $Id: odin32pack.cmd,v 1.16 2001-04-18 08:00:24 bird Exp $
  *
  * Make the two zip files.
  *
@@ -35,6 +35,11 @@
     call packdir3dx 'bin\debug\glide', 'glide-debug'
     call packdir 'bin\release', 'release'
     call packdir3dx 'bin\release\glide', 'glide-release'
+
+    /*
+     * Make copy.
+     */
+    'copy *.wpi *.zip e:\DailyBuildArchive\'
 
     /* return successfully */
     exit(0);
