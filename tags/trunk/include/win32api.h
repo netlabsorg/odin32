@@ -166,4 +166,7 @@ LONG    WIN32API InterlockedDecrement(LPLONG);
 LONG    WIN32API InterlockedExchange(LPLONG,LONG);
 LONG    WIN32API InterlockedIncrement(LPLONG);
 
+UINT    WIN32API GetSystemDirectoryA(LPSTR,UINT);
+UINT    WIN32API GetWindowsDirectoryA(LPSTR,UINT);
+
 #endif

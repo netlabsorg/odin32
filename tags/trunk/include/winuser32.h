@@ -45,4 +45,7 @@ HWND WIN32API CreateFakeWindowEx(HWND hwndOS2);
 #define OS2_APPEARANCE 		1
 void WIN32API SetWindowAppearance(BOOL fOS2Looks);
 
+BOOL WIN32API OSLibWinCreateObject(LPSTR pszPath, LPSTR pszArgs, LPSTR pszWorkDir, LPSTR pszName, 
+                                   LPSTR pszDescription, LPSTR pszIcoPath, INT iIcoNdx, BOOL fDesktop);
+
 #endif //__WINUSER32_H__
