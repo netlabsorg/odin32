@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.19 2000-01-08 16:47:50 cbratschi Exp $ */
+/* $Id: win32wbase.h,v 1.20 2000-01-09 14:14:25 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -159,8 +159,10 @@ Win32BaseWindow *getParent();
          DWORD  getFlags()                      { return flags; };
          void   setFlags(DWORD newflags)        { flags = newflags; };
 
-         HMENU  GetMenu()                           { return (HMENU) OS2HwndMenu; };
-         BOOL   SetMenu(ULONG hMenu);
+         HMENU  GetMenu()                           { return hMenu; };
+         VOID   SetMenu(HMENU newMenu)              { hMenu = newMenu; };
+         HMENU  GetSysMenu()                        { return hSysMenu; };
+         VOID   SetSysMenu(HMENU newSysMenu)        { hSysMenu = newSysMenu; };
 
          BOOL   SetIcon(HICON hIcon);
          HICON  GetIcon()                           { return (HICON) iconResource; };
@@ -219,12 +221,6 @@ Win32BaseWindow *getOwner()                         { return owner; };
         void    setOwner(Win32BaseWindow *newOwner) { owner = newOwner; };
 
  SCROLLBAR_INFO *getScrollInfo(int nBar);
-       HWND      getVertScrollHandle()               { return hwndVertScroll; };
-       VOID      setVertScrollHandle(HWND newHandle) { hwndVertScroll = newHandle; }
-       HWND      getHorzScrollHandle()               { return hwndHorzScroll; };
-       VOID      setHorzScrollHandle(HWND newHandle) { hwndHorzScroll = newHandle; }
-       VOID      subclassScrollBars(BOOL subHorz,BOOL subVert);
-       BOOL      showScrollBars(BOOL changeHorz,BOOL changeVert,BOOL fShow);
 
        LRESULT  SendMessageA(ULONG msg, WPARAM wParam, LPARAM lParam);
        LRESULT  SendMessageW(ULONG msg, WPARAM wParam, LPARAM lParam);
@@ -282,7 +278,8 @@ protected:
 
         HWND    OS2Hwnd;
         HWND    OS2HwndFrame;
-        HWND    OS2HwndMenu;
+        HMENU   hMenu;
+        HMENU   hSysMenu;
         HWND    Win32Hwnd;
         BOOL    isUnicode;
 
@@ -348,8 +345,6 @@ CREATESTRUCTA  *tmpcs; //temporary pointer to CREATESTRUCT used in CreateWindowE
 
 SCROLLBAR_INFO *vertScrollInfo;
 SCROLLBAR_INFO *horzScrollInfo;
-        HWND    hwndHorzScroll; //os/2 handle
-        HWND    hwndVertScroll; //os/2 handle
 
 Win32WndClass  *windowClass;
 
@@ -362,6 +357,7 @@ private:
         LONG  HandleNCActivate(WPARAM wParam);
         VOID  TrackMinMaxBox(WORD wParam);
         VOID  TrackCloseButton(WORD wParam);
+        VOID  TrackScrollBar(WPARAM wParam,POINT pt);
         LONG  HandleNCLButtonDown(WPARAM wParam,LPARAM lParam);
         LONG  HandleNCLButtonDblClk(WPARAM wParam,LPARAM lParam);
         BOOL  WindowNeedsWMBorder();
