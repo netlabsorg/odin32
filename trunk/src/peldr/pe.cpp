@@ -1,4 +1,4 @@
-/* $Id: pe.cpp,v 1.19 2000-07-15 17:12:02 sandervl Exp $ */
+/* $Id: pe.cpp,v 1.20 2000-07-20 18:06:29 sandervl Exp $ */
 
 /*
  * PELDR main exe loader code
@@ -271,9 +271,9 @@ void AllocateExeMem(char *filename)
   if(doshdr.e_magic != IMAGE_DOS_SIGNATURE || signature != IMAGE_NT_SIGNATURE) {
     	goto end;
   }
-  if(!(fh.Characteristics & IMAGE_FILE_RELOCS_STRIPPED)) {
-	goto end; //no need to allocate anything now
-  }
+//  if(!(fh.Characteristics & IMAGE_FILE_RELOCS_STRIPPED)) {
+//	goto end; //no need to allocate anything now
+//  }
 
   // check for high memory support
   rc = DosQuerySysInfo(QSV_VIRTUALADDRESSLIMIT, QSV_VIRTUALADDRESSLIMIT, &ulSysinfo, sizeof(ulSysinfo));

@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.49 2000-07-06 21:18:38 sandervl Exp $ */
+/* $Id: KERNEL32.CPP,v 1.50 2000-07-20 18:06:58 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -704,19 +704,6 @@ const WORD OLE2NLS_CT_CType3_LUT[] = {
 
 
 
-ODINFUNCTION4(BOOL,    GetStringTypeW,
-              DWORD,   dwInfoType,
-              LPCWSTR, lpSrcStr,
-              int,     cchSrc,
-              LPWORD,  lpCharType)
-{
-  return GetStringTypeExW(0,
-                          dwInfoType,
-                          lpSrcStr,
-                          cchSrc,
-                          lpCharType);
-}
-
 
 ODINFUNCTION5(BOOL,    GetStringTypeExW,
               LCID,    locale,
@@ -768,17 +755,13 @@ ODINFUNCTION5(BOOL,    GetStringTypeExW,
   return FALSE;
 }
 
-//******************************************************************************
-//NOTE: This has one parameter more than the W version! (@#$@#$)
-//******************************************************************************
-ODINFUNCTION5(BOOL,    GetStringTypeA,
-              LCID,    locale,
+ODINFUNCTION4(BOOL,    GetStringTypeW,
               DWORD,   dwInfoType,
-              LPCSTR,  lpSrcStr,
+              LPCWSTR, lpSrcStr,
               int,     cchSrc,
               LPWORD,  lpCharType)
 {
-  return GetStringTypeExA(locale,
+  return ODIN_GetStringTypeExW(0,
                           dwInfoType,
                           lpSrcStr,
                           cchSrc,
@@ -851,6 +834,22 @@ ODINFUNCTION5(BOOL,    GetStringTypeExA,
   }
 }
 
+//******************************************************************************
+//NOTE: This has one parameter more than the W version! (@#$@#$)
+//******************************************************************************
+ODINFUNCTION5(BOOL,    GetStringTypeA,
+              LCID,    locale,
+              DWORD,   dwInfoType,
+              LPCSTR,  lpSrcStr,
+              int,     cchSrc,
+              LPWORD,  lpCharType)
+{
+  return ODIN_GetStringTypeExA(locale,
+                          dwInfoType,
+                          lpSrcStr,
+                          cchSrc,
+                          lpCharType);
+}
 
 //******************************************************************************
 VOID WIN32API GlobalMemoryStatus( MEMORYSTATUS *arg1)
