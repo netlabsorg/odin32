@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.873 2000-04-07 18:21:01 mike Exp $ */
+ /* $Id: changelog,v 1.874 2000-04-07 19:43:08 sandervl Exp $ */
 
  2000-04-07: Michal Necasek <mike@mendelu.cz>
         - DDRAW\NEW: Experimental fullscreen DDraw, VIDEOPMI based.
@@ -20,6 +20,9 @@
                   is not compressed. (fixes crash during startup in Excel)
                   NOTE: Open32 doesn't implement compression type conversion
                         correctly. (black splash screen for RLE8 bitmap)
+	- KERNEL32: Return length of windows or system directory when
+                    GetWindowsDirectory/GetSystemDirectory is called with
+                    a NULL pointer
 
  2000-04-07: David Raison <djr@lemur.co.uk>
         - USER32: Set lfSmCaptionFont structure in NONCLIENTMETRICSA
