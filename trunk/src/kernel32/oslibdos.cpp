@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.52 2000-11-26 15:10:06 bird Exp $ */
+/* $Id: oslibdos.cpp,v 1.53 2000-12-07 12:00:23 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -17,6 +17,7 @@
 #define INCL_DOSPROCESS
 #define INCL_DOSFILEMGR
 #define INCL_DOSERRORS
+#define INCL_DOSDEVIOCTL
 #define INCL_NPIPES
 #include <os2wrap.h>                     //Odin32 OS/2 api wrappers
 #include <stdlib.h>
@@ -2034,6 +2035,40 @@ BOOL OSLibGetDiskFreeSpace(LPSTR lpRootPathName, LPDWORD lpSectorsPerCluster,
    }
    SetLastError(error2WinError(rc));
    return FALSE;
+}
+//******************************************************************************
+//Returns bit map where with the mapping of the logical drives
+//******************************************************************************
+ULONG OSLibGetLogicalDrives()
+{
+ ULONG   ulDriveNum   = 0;      /* Drive number (A=1, B=2, C=3, ...)    */
+ ULONG   ulDriveMap   = 0;      /* Mapping of valid drives              */
+ APIRET  rc;
+
+    rc = DosQueryCurrentDisk(&ulDriveNum, &ulDriveMap);
+    if(rc) {
+        DebugInt3();
+        SetLastError(error2WinError(rc));
+        return 0;
+    }
+    return ulDriveMap;
+}
+//******************************************************************************
+//******************************************************************************
+ULONG OSLibDosQueryCurrentDisk()
+
+{
+ ULONG   ulDriveNum   = 0;      /* Drive number (A=1, B=2, C=3, ...)    */
+ ULONG   ulDriveMap   = 0;      /* Mapping of valid drives              */
+ APIRET  rc;
+
+    rc = DosQueryCurrentDisk(&ulDriveNum, &ulDriveMap);
+    if(rc) {
+        DebugInt3();
+        SetLastError(error2WinError(rc));
+        return 0;
+    }
+    return ulDriveNum;
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: disk.cpp,v 1.22 2000-12-04 12:42:22 bird Exp $ */
+/* $Id: disk.cpp,v 1.23 2000-12-07 12:00:23 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -184,22 +184,22 @@ ODINFUNCTION4(BOOL,GetDiskFreeSpaceExA,
     if(rc)
     {
         if(lpFreeBytesAvailableToCaller!=NULL) {
-        Mul32x32to64(lpFreeBytesAvailableToCaller, dwNumberOfFreeClusters, (dwSectorsPerCluster*dwBytesPerSector));
-        dprintf(("lpFreeBytesAvailableToCaller %x%x", lpFreeBytesAvailableToCaller->LowPart, lpFreeBytesAvailableToCaller->HighPart));
-    }
+            Mul32x32to64(lpFreeBytesAvailableToCaller, dwNumberOfFreeClusters, (dwSectorsPerCluster*dwBytesPerSector));
+            dprintf(("lpFreeBytesAvailableToCaller %x%x", lpFreeBytesAvailableToCaller->LowPart, lpFreeBytesAvailableToCaller->HighPart));
+        }
         if(lpTotalNumberOfBytes!=NULL) {
-        Mul32x32to64(lpTotalNumberOfBytes, dwTotalNumberOfClusters, (dwSectorsPerCluster*dwBytesPerSector));
-        dprintf(("lpTotalNumberOfBytes %x%x", lpTotalNumberOfBytes->LowPart, lpTotalNumberOfBytes->HighPart));
-    }
+            Mul32x32to64(lpTotalNumberOfBytes, dwTotalNumberOfClusters, (dwSectorsPerCluster*dwBytesPerSector));
+            dprintf(("lpTotalNumberOfBytes %x%x", lpTotalNumberOfBytes->LowPart, lpTotalNumberOfBytes->HighPart));
+        }
         if(lpTotalNumberOfFreeBytes!=NULL) {
-        memcpy(lpTotalNumberOfFreeBytes, lpFreeBytesAvailableToCaller, sizeof(*lpFreeBytesAvailableToCaller));
-        dprintf(("lpTotalNumberOfFreeBytes %x%x", lpTotalNumberOfFreeBytes->LowPart, lpTotalNumberOfFreeBytes->HighPart));
-    }
+            memcpy(lpTotalNumberOfFreeBytes, lpFreeBytesAvailableToCaller, sizeof(*lpFreeBytesAvailableToCaller));
+            dprintf(("lpTotalNumberOfFreeBytes %x%x", lpTotalNumberOfFreeBytes->LowPart, lpTotalNumberOfFreeBytes->HighPart));
+        }
     }
     return rc;
 }
-
-
+//******************************************************************************
+//******************************************************************************
 ODINFUNCTION4(BOOL,GetDiskFreeSpaceExW,
               LPCWSTR,         lpDirectoryName,
               PULARGE_INTEGER, lpFreeBytesAvailableToCaller,
@@ -215,14 +215,30 @@ ODINFUNCTION4(BOOL,GetDiskFreeSpaceExW,
     FreeAsciiString(astring);
     return(rc);
 }
-
-
 //******************************************************************************
+//Note: NT4, SP6 does not change the last error, regardless of the junk it receives!
 //******************************************************************************
 UINT WIN32API GetDriveTypeA(LPCSTR lpszDrive)
 {
-    UINT rc;
+   UINT rc;
+   ULONG driveIndex;
+
+    if(lpszDrive == 0) {
+        driveIndex = OSLibDosQueryCurrentDisk() - 1;
+    }
+    else
+    if(*lpszDrive >= 'A' && *lpszDrive <= 'Z')
+        driveIndex = (DWORD)(*lpszDrive - 'A');
+    else
+    if(*lpszDrive >= 'a' && *lpszDrive <= 'z') {
+        driveIndex = (DWORD)(*lpszDrive - 'a');
+    }
+    else {
+        return DRIVE_NO_ROOT_DIR;   //return value checked in NT4, SP6 (GetDriveType(""), GetDriveType("4");
+    }
+
     //NOTE: Although GetDriveTypeW handles -1, GetDriveTypeA crashes in NT 4, SP6
+//    rc = OSLibGetDriveType(driveIndex);
     rc = O32_GetDriveType(lpszDrive);
     dprintf(("KERNEL32:  GetDriveType %s = %d", lpszDrive, rc));
     return rc;
@@ -235,7 +251,7 @@ UINT WIN32API GetDriveTypeW(LPCWSTR lpszDrive)
  char *astring;
 
     if(lpszDrive == (LPCWSTR)-1) {
-    return DRIVE_CANNOTDETERMINE;   //NT 4, SP6 returns this (VERIFIED)
+        return DRIVE_CANNOTDETERMINE;   //NT 4, SP6 returns this (VERIFIED)
     }
     astring = UnicodeToAsciiString((LPWSTR)lpszDrive);
     dprintf(("KERNEL32:  OS2GetDriveTypeW %s", astring));
@@ -259,73 +275,74 @@ ODINFUNCTION8(BOOL,    GetVolumeInformationA,
    ULONG  drive;
    BOOL   rc;
 
-   dprintf(("GetVolumeInformationA %s", lpRootPathName));
+    dprintf(("GetVolumeInformationA %s", lpRootPathName));
 
-   if(lpRootPathName == NULL) {
-    GetCurrentDirectoryA(sizeof(tmpstring), tmpstring);
-    lpRootPathName = tmpstring;
-   }
+    if(lpRootPathName == NULL) {
+        GetCurrentDirectoryA(sizeof(tmpstring), tmpstring);
+        lpRootPathName = tmpstring;
+    }
 
-   if('A' <= *lpRootPathName && *lpRootPathName <= 'Z') {
+    if('A' <= *lpRootPathName && *lpRootPathName <= 'Z') {
         drive = *lpRootPathName - 'A' + 1;
-   }
-   else
-   if('a' <= *lpRootPathName && *lpRootPathName <= 'z') {
+    }
+    else
+    if('a' <= *lpRootPathName && *lpRootPathName <= 'z') {
         drive = *lpRootPathName - 'a' + 1;
-   }
-   else {
-    SetLastError(ERROR_INVALID_PARAMETER);
-    return FALSE;
-   }
+    }
+    else {
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return FALSE;
+    }
 
-   if(lpVolumeSerialNumber || lpVolumeNameBuffer) {
-    rc = OSLibDosQueryVolumeSerialAndName(drive, lpVolumeSerialNumber, lpVolumeNameBuffer, nVolumeNameSize);
+    if(lpVolumeSerialNumber || lpVolumeNameBuffer) {
+        rc = OSLibDosQueryVolumeSerialAndName(drive, lpVolumeSerialNumber, lpVolumeNameBuffer, nVolumeNameSize);
         if(lpVolumeSerialNumber) {
-        dprintf2(("Volume serial number: %x", *lpVolumeSerialNumber));
-    }
+            dprintf2(("Volume serial number: %x", *lpVolumeSerialNumber));
+        }
         if(lpVolumeNameBuffer) {
-        dprintf2(("Volume name: %s", lpVolumeNameBuffer));
+            dprintf2(("Volume name: %s", lpVolumeNameBuffer));
+        }
     }
-   }
-   if(lpFileSystemNameBuffer || lpMaximumComponentLength) {
-    if(!lpFileSystemNameBuffer) {
-        lpFileSystemNameBuffer = tmpstring;
-        nFileSystemNameSize    = sizeof(tmpstring);
-    }
-    rc = OSLibDosQueryVolumeFS(drive, lpFileSystemNameBuffer, nFileSystemNameSize);
+    if(lpFileSystemNameBuffer || lpMaximumComponentLength) {
+        if(!lpFileSystemNameBuffer) {
+            lpFileSystemNameBuffer = tmpstring;
+            nFileSystemNameSize    = sizeof(tmpstring);
+        }
+        rc = OSLibDosQueryVolumeFS(drive, lpFileSystemNameBuffer, nFileSystemNameSize);
         if(lpFileSystemNameBuffer) {
-        dprintf2(("File system name: %s", lpFileSystemNameBuffer));
+            dprintf2(("File system name: %s", lpFileSystemNameBuffer));
+        }
     }
-   }
-   if(lpMaximumComponentLength) {
-    if(!strcmp(lpFileSystemNameBuffer, "FAT")) {
-        *lpMaximumComponentLength = 12;
+    if(lpMaximumComponentLength) {
+        if(!strcmp(lpFileSystemNameBuffer, "FAT")) {
+            *lpMaximumComponentLength = 12;
+        }
+        else    *lpMaximumComponentLength = 255; //TODO: Always correct? (CDFS?)
     }
-    else    *lpMaximumComponentLength = 255; //TODO: Always correct? (CDFS?)
-   }
-   if(lpFileSystemFlags) {
-    if(strcmp(lpFileSystemNameBuffer, "FAT")) {
-        *lpFileSystemFlags = FS_CASE_IS_PRESERVED;
-    }
-    else
-    if(!strcmp(lpFileSystemNameBuffer, "CDFS")) {
-        *lpFileSystemFlags = FS_CASE_SENSITIVE; //NT4 returns this
-    }
-    else
-    if(!strcmp(lpFileSystemNameBuffer, "UDF")) {//TODO: correct?
-        *lpFileSystemFlags = FS_CASE_SENSITIVE | FS_UNICODE_STORED_ON_DISK;
-    }
-    else    *lpFileSystemFlags = 0;
+    if(lpFileSystemFlags)
+    {
+        if(strcmp(lpFileSystemNameBuffer, "FAT")) {
+            *lpFileSystemFlags = FS_CASE_IS_PRESERVED;
+        }
+        else
+        if(!strcmp(lpFileSystemNameBuffer, "CDFS")) {
+            *lpFileSystemFlags = FS_CASE_SENSITIVE; //NT4 returns this
+        }
+        else
+        if(!strcmp(lpFileSystemNameBuffer, "UDF")) {//TODO: correct?
+            *lpFileSystemFlags = FS_CASE_SENSITIVE | FS_UNICODE_STORED_ON_DISK;
+        }
+        else    *lpFileSystemFlags = 0;
 
-    dprintf2(("File system flags: %x", lpFileSystemFlags));
-   }
+        dprintf2(("File system flags: %x", lpFileSystemFlags));
+    }
 
-   if(rc) {
-    SetLastError(rc);
-    return FALSE;
-   }
-   SetLastError(ERROR_SUCCESS);
-   return TRUE;
+    if(rc) {
+        SetLastError(rc);
+        return FALSE;
+    }
+    SetLastError(ERROR_SUCCESS);
+    return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
@@ -385,7 +402,7 @@ ODINFUNCTION8(BOOL,    GetVolumeInformationW,
 DWORD WIN32API GetLogicalDrives(void)
 {
     dprintf(("KERNEL32:  GetLogicalDrives\n"));
-    return O32_GetLogicalDrives();
+    return OSLibGetLogicalDrives();
 }
 //******************************************************************************
 //******************************************************************************
@@ -408,3 +425,6 @@ UINT WIN32API GetLogicalDriveStringsW(UINT nBufferLength, LPWSTR lpBuffer)
     free(asciibuffer);
     return(rc);
 }
+//******************************************************************************
+//******************************************************************************
+

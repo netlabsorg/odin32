@@ -1,4 +1,4 @@
-/* $Id: oslibdos.h,v 1.26 2000-11-05 13:40:46 sandervl Exp $ */
+/* $Id: oslibdos.h,v 1.27 2000-12-07 12:00:24 sandervl Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -203,7 +203,9 @@ BOOL OSLibGetDiskFreeSpace(LPSTR lpRootPathName, LPDWORD lpSectorsPerCluster,
                            LPDWORD lpTotalNumberOfClusters);
 
 ULONG OSLibDosQuerySysInfo(ULONG iStart, ULONG iLast, PVOID pBuf, ULONG cbBuf);
-
+ULONG OSLibGetDriveType(ULONG diskIndex);
+ULONG OSLibGetLogicalDrives();
+ULONG OSLibDosQueryCurrentDisk();
 
 #ifdef OS2DEF_INCLUDED
 #ifndef FIL_STANDARDL
