@@ -1,4 +1,4 @@
-/* $Id: display.cpp,v 1.7 2000-08-02 17:32:27 bird Exp $ */
+/* $Id: display.cpp,v 1.8 2000-10-03 17:29:20 sandervl Exp $ */
 /*
  * Display/Monitor Win32 apis
  *
@@ -15,6 +15,7 @@
  */
 #include <os2win.h>
 #include <misc.h>
+#include <string.h>
 #include <heapstring.h>
 #include "pmwindow.h"
 #include "monitor.h"
@@ -279,11 +280,21 @@ void MONITOR_SetScreenSaveTimeout(MONITOR *pMonitor, int nTimeout)
 BOOL WIN32API EnumDisplaySettingsA(
         LPCSTR name,            /* [in] huh? */
         DWORD n,                /* [in] nth entry in display settings list*/
-        LPDEVMODEA devmode      /* [out] devmode for that setting */
-)
+        LPDEVMODEA devmode)     /* [out] devmode for that setting */
 {
-        dprintf(("USER32:  EnumDisplaySettingsA %d", n));
-        if (n==0) {
+        dprintf(("USER32: EnumDisplaySettingsA %s %d %x", name, n, devmode));
+	if(devmode == NULL) {
+		SetLastError(ERROR_INVALID_PARAMETER);
+		return FALSE;
+	}
+	//SvL: VMWare calls this with -1; valid in NT4, SP6
+        //     Other negative numbers too. Don't know what they mean.
+	if(n == 0xFFFFFFFF) {
+		n = 0;
+	}
+	memset(devmode, 0, sizeof(*devmode));
+	devmode->dmSize = sizeof(*devmode);
+        if(n==0) {
                 devmode->dmBitsPerPel = ScreenBitsPerPel;
                 devmode->dmPelsHeight = ScreenHeight;
                 devmode->dmPelsWidth = ScreenWidth;
@@ -295,6 +306,7 @@ BOOL WIN32API EnumDisplaySettingsA(
                 devmode->dmPelsWidth    = modes[(n-1)%NRMODES].w;
                 return TRUE;
         }
+ 	SetLastError(ERROR_INVALID_PARAMETER);
         return FALSE;
 }
 
