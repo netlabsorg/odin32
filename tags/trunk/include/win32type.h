@@ -1407,4 +1407,52 @@ typedef struct tagGCP_RESULTSW
     UINT   nMaxFit;
 } GCP_RESULTSW, *LPGCP_RESULTSW;
 
+typedef struct
+{
+    INT     tmHeight;
+    INT     tmAscent;
+    INT     tmDescent;
+    INT     tmInternalLeading;
+    INT     tmExternalLeading;
+    INT     tmAveCharWidth;
+    INT     tmMaxCharWidth;
+    INT     tmWeight;
+    INT     tmOverhang;
+    INT     tmDigitizedAspectX;
+    INT     tmDigitizedAspectY;
+    BYTE      tmFirstChar;
+    BYTE      tmLastChar;
+    BYTE      tmDefaultChar;
+    BYTE      tmBreakChar;
+    BYTE      tmItalic;
+    BYTE      tmUnderlined;
+    BYTE      tmStruckOut;
+    BYTE      tmPitchAndFamily;
+    BYTE      tmCharSet;
+} TEXTMETRICA, *LPTEXTMETRICA;
+
+typedef struct
+{
+    INT     tmHeight;
+    INT     tmAscent;
+    INT     tmDescent;
+    INT     tmInternalLeading;
+    INT     tmExternalLeading;
+    INT     tmAveCharWidth;
+    INT     tmMaxCharWidth;
+    INT     tmWeight;
+    INT     tmOverhang;
+    INT     tmDigitizedAspectX;
+    INT     tmDigitizedAspectY;
+    WCHAR     tmFirstChar;
+    WCHAR     tmLastChar;
+    WCHAR     tmDefaultChar;
+    WCHAR     tmBreakChar;
+    BYTE      tmItalic;
+    BYTE      tmUnderlined;
+    BYTE      tmStruckOut;
+    BYTE      tmPitchAndFamily;
+    BYTE      tmCharSet;
+} TEXTMETRICW, *LPTEXTMETRICW;
+
 #endif
