@@ -8,6 +8,7 @@
 #define DBGWRAP_MODULE "WINMM"
 #include <dbgwrap.h>
 
+#include "dbglocal.h"
 
 #undef DBG_LOCALLOG
 #define DBG_LOCALLOG    DBG_auxiliary
