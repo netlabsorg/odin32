@@ -1,4 +1,4 @@
-/* $Id: heapcode.h,v 1.1 1999-12-09 00:50:46 sandervl Exp $ */
+/* $Id: heapcode.h,v 1.2 2001-02-09 18:32:06 sandervl Exp $ */
 /*
  * Code heap functions for OS/2
  *
@@ -10,9 +10,11 @@
 
 #include <heapshared.h>
 
+extern Heap_t codeHeap;
+
 BOOL   InitializeCodeHeap();
 void   DestroyCodeHeap();
 
-void  *_cmalloc(size_t size);
+#define _cmalloc(size)	_umalloc(codeHeap, size)
 
 #endif
