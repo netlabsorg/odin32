@@ -28,8 +28,10 @@ class OS2IDirectDrawSurface
 {
  public:
   //this one has to go first!
-  IDirectDrawSurface4Vtbl *lpVtbl;
-  IDirectDrawSurface4Vtbl *lpVtbl2;         // 2nd Vtable pointer An other MS assumtion see below
+  IDirectDrawSurface2Vtbl *lpVtbl;
+  IDirectDrawSurface2Vtbl *lpVtbl2;         // 2nd Vtable pointer An other MS assumtion see below
+//  IDirectDrawSurface4Vtbl *lpVtbl;
+//  IDirectDrawSurface4Vtbl *lpVtbl2;         // 2nd Vtable pointer An other MS assumtion see below
   DWORD                    dwUnknownData;   // Pointer to unknown data set to DEADDEAD to indicate that we can't handle this
   IDirectDrawSurface2Vtbl  Vtbl2;
   IDirectDrawSurface3Vtbl  Vtbl3;
@@ -102,22 +104,28 @@ class OS2IDirectDrawSurface
     friend    ULONG   __stdcall SurfAddRef(THIS);
     friend    ULONG   __stdcall SurfRelease(THIS);
     friend    HRESULT __stdcall SurfAddAttachedSurface(THIS, LPDIRECTDRAWSURFACE2);
+    friend    HRESULT __stdcall SurfAddAttachedSurface3(THIS, LPDIRECTDRAWSURFACE3);
     friend    HRESULT __stdcall SurfAddAttachedSurface4(THIS, LPDIRECTDRAWSURFACE4);
     friend    HRESULT __stdcall SurfAddOverlayDirtyRect(THIS, LPRECT);
     friend    HRESULT __stdcall SurfBlt(THIS, LPRECT,LPDIRECTDRAWSURFACE2, LPRECT,DWORD, LPDDBLTFX);
+    friend    HRESULT __stdcall SurfBlt3(THIS, LPRECT,LPDIRECTDRAWSURFACE3, LPRECT,DWORD, LPDDBLTFX);
     friend    HRESULT __stdcall SurfBlt4(THIS, LPRECT,LPDIRECTDRAWSURFACE4, LPRECT,DWORD, LPDDBLTFX);
     friend    HRESULT __stdcall SurfBltBatch(THIS, LPDDBLTBATCH, DWORD, DWORD );
     friend    HRESULT __stdcall SurfBltFast(THIS, DWORD,DWORD,LPDIRECTDRAWSURFACE2, LPRECT,DWORD);
+    friend    HRESULT __stdcall SurfBltFast3(THIS, DWORD,DWORD,LPDIRECTDRAWSURFACE3, LPRECT,DWORD);
     friend    HRESULT __stdcall SurfBltFast4(THIS, DWORD,DWORD,LPDIRECTDRAWSURFACE4, LPRECT,DWORD);
     friend    HRESULT __stdcall SurfDeleteAttachedSurface(THIS, DWORD,LPDIRECTDRAWSURFACE2);
+    friend    HRESULT __stdcall SurfDeleteAttachedSurface3(THIS, DWORD,LPDIRECTDRAWSURFACE3);
     friend    HRESULT __stdcall SurfDeleteAttachedSurface4(THIS, DWORD,LPDIRECTDRAWSURFACE4);
     friend    HRESULT __stdcall SurfEnumAttachedSurfaces(THIS, LPVOID,LPDDENUMSURFACESCALLBACK);
     friend    HRESULT __stdcall SurfEnumAttachedSurfaces4(THIS, LPVOID,LPDDENUMSURFACESCALLBACK2);
     friend    HRESULT __stdcall SurfEnumOverlayZOrders(THIS, DWORD,LPVOID,LPDDENUMSURFACESCALLBACK);
     friend    HRESULT __stdcall SurfEnumOverlayZOrders4(THIS, DWORD,LPVOID,LPDDENUMSURFACESCALLBACK2);
     friend    HRESULT __stdcall SurfFlip(THIS, LPDIRECTDRAWSURFACE2 , DWORD);
+    friend    HRESULT __stdcall SurfFlip3(THIS, LPDIRECTDRAWSURFACE3 , DWORD);
     friend    HRESULT __stdcall SurfFlip4(THIS, LPDIRECTDRAWSURFACE4 , DWORD);
     friend    HRESULT __stdcall SurfGetAttachedSurface(THIS, LPDDSCAPS, LPDIRECTDRAWSURFACE2 FAR *);
+    friend    HRESULT __stdcall SurfGetAttachedSurface3(THIS, LPDDSCAPS, LPDIRECTDRAWSURFACE3 FAR *);
     friend    HRESULT __stdcall SurfGetAttachedSurface4(THIS, LPDDSCAPS2, LPDIRECTDRAWSURFACE4 FAR *);
     friend    HRESULT __stdcall SurfGetBltStatus(THIS, DWORD);
     friend    HRESULT __stdcall SurfGetCaps(THIS, LPDDSCAPS);
@@ -145,9 +153,11 @@ class OS2IDirectDrawSurface
     friend    HRESULT __stdcall SurfUnlock(THIS, LPVOID);
     friend    HRESULT __stdcall SurfUnlock4(THIS, LPRECT);
     friend    HRESULT __stdcall SurfUpdateOverlay(THIS, LPRECT, LPDIRECTDRAWSURFACE2,LPRECT,DWORD, LPDDOVERLAYFX);
+    friend    HRESULT __stdcall SurfUpdateOverlay3(THIS, LPRECT, LPDIRECTDRAWSURFACE3,LPRECT,DWORD, LPDDOVERLAYFX);
     friend    HRESULT __stdcall SurfUpdateOverlay4(THIS, LPRECT, LPDIRECTDRAWSURFACE4,LPRECT,DWORD, LPDDOVERLAYFX);
     friend    HRESULT __stdcall SurfUpdateOverlayDisplay(THIS, DWORD);
     friend    HRESULT __stdcall SurfUpdateOverlayZOrder(THIS, DWORD, LPDIRECTDRAWSURFACE2);
+    friend    HRESULT __stdcall SurfUpdateOverlayZOrder3(THIS, DWORD, LPDIRECTDRAWSURFACE3);
     friend    HRESULT __stdcall SurfUpdateOverlayZOrder4(THIS, DWORD, LPDIRECTDRAWSURFACE4);
     // Added in V2 interface
     friend    HRESULT __stdcall SurfGetDDInterface(THIS, LPVOID FAR *);
@@ -169,22 +179,28 @@ HRESULT __stdcall SurfQueryInterface(THIS, REFIID riid, LPVOID FAR * ppvObj);
 ULONG   __stdcall SurfAddRef(THIS);
 ULONG   __stdcall SurfRelease(THIS);
 HRESULT __stdcall SurfAddAttachedSurface(THIS, LPDIRECTDRAWSURFACE2);
+HRESULT __stdcall SurfAddAttachedSurface3(THIS, LPDIRECTDRAWSURFACE3);
 HRESULT __stdcall SurfAddAttachedSurface4(THIS, LPDIRECTDRAWSURFACE4);
 HRESULT __stdcall SurfAddOverlayDirtyRect(THIS, LPRECT);
 HRESULT __stdcall SurfBlt(THIS, LPRECT,LPDIRECTDRAWSURFACE2, LPRECT,DWORD, LPDDBLTFX);
+HRESULT __stdcall SurfBlt3(THIS, LPRECT,LPDIRECTDRAWSURFACE3, LPRECT,DWORD, LPDDBLTFX);
 HRESULT __stdcall SurfBlt4(THIS, LPRECT,LPDIRECTDRAWSURFACE4, LPRECT,DWORD, LPDDBLTFX);
 HRESULT __stdcall SurfBltBatch(THIS, LPDDBLTBATCH, DWORD, DWORD );
 HRESULT __stdcall SurfBltFast(THIS, DWORD,DWORD,LPDIRECTDRAWSURFACE2, LPRECT,DWORD);
+HRESULT __stdcall SurfBltFast3(THIS, DWORD,DWORD,LPDIRECTDRAWSURFACE3, LPRECT,DWORD);
 HRESULT __stdcall SurfBltFast4(THIS, DWORD,DWORD,LPDIRECTDRAWSURFACE4, LPRECT,DWORD);
 HRESULT __stdcall SurfDeleteAttachedSurface(THIS, DWORD,LPDIRECTDRAWSURFACE2);
+HRESULT __stdcall SurfDeleteAttachedSurface3(THIS, DWORD,LPDIRECTDRAWSURFACE3);
 HRESULT __stdcall SurfDeleteAttachedSurface4(THIS, DWORD,LPDIRECTDRAWSURFACE4);
 HRESULT __stdcall SurfEnumAttachedSurfaces(THIS, LPVOID,LPDDENUMSURFACESCALLBACK);
 HRESULT __stdcall SurfEnumAttachedSurfaces4(THIS, LPVOID,LPDDENUMSURFACESCALLBACK2);
 HRESULT __stdcall SurfEnumOverlayZOrders(THIS, DWORD,LPVOID,LPDDENUMSURFACESCALLBACK);
 HRESULT __stdcall SurfEnumOverlayZOrders4(THIS, DWORD,LPVOID,LPDDENUMSURFACESCALLBACK2);
 HRESULT __stdcall SurfFlip(THIS, LPDIRECTDRAWSURFACE2 , DWORD);
+HRESULT __stdcall SurfFlip3(THIS, LPDIRECTDRAWSURFACE3 , DWORD);
 HRESULT __stdcall SurfFlip4(THIS, LPDIRECTDRAWSURFACE4 , DWORD);
 HRESULT __stdcall SurfGetAttachedSurface(THIS, LPDDSCAPS, LPDIRECTDRAWSURFACE2 FAR *);
+HRESULT __stdcall SurfGetAttachedSurface3(THIS, LPDDSCAPS, LPDIRECTDRAWSURFACE3 FAR *);
 HRESULT __stdcall SurfGetAttachedSurface4(THIS, LPDDSCAPS2, LPDIRECTDRAWSURFACE4 FAR *);
 HRESULT __stdcall SurfGetBltStatus(THIS, DWORD);
 HRESULT __stdcall SurfGetCaps4(THIS, LPDDSCAPS2);
@@ -212,9 +228,11 @@ HRESULT __stdcall SurfSetPalette(THIS, LPDIRECTDRAWPALETTE);
 HRESULT __stdcall SurfUnlock(THIS, LPVOID);
 HRESULT __stdcall SurfUnlock4(THIS, LPRECT);
 HRESULT __stdcall SurfUpdateOverlay(THIS, LPRECT, LPDIRECTDRAWSURFACE2,LPRECT,DWORD, LPDDOVERLAYFX);
+HRESULT __stdcall SurfUpdateOverlay3(THIS, LPRECT, LPDIRECTDRAWSURFACE3,LPRECT,DWORD, LPDDOVERLAYFX);
 HRESULT __stdcall SurfUpdateOverlay4(THIS, LPRECT, LPDIRECTDRAWSURFACE4,LPRECT,DWORD, LPDDOVERLAYFX);
 HRESULT __stdcall SurfUpdateOverlayDisplay(THIS, DWORD);
 HRESULT __stdcall SurfUpdateOverlayZOrder(THIS, DWORD, LPDIRECTDRAWSURFACE2);
+HRESULT __stdcall SurfUpdateOverlayZOrder3(THIS, DWORD, LPDIRECTDRAWSURFACE3);
 HRESULT __stdcall SurfUpdateOverlayZOrder4(THIS, DWORD, LPDIRECTDRAWSURFACE4);
 HRESULT __stdcall SurfGetDDInterface(THIS, LPVOID FAR *);
 HRESULT __stdcall SurfPageLock(THIS, DWORD);

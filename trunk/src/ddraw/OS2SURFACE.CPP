@@ -285,7 +285,6 @@ WORD wDefaultPalete16[256];
 BOOL fPalInit=FALSE;
 
 #define CBM_CREATEDIB   0x02L   /* create DIB bitmap */
-#define BI_BITFIELDS  0x03L
 #ifdef DEBUG
 
 // ******************************************************************************
@@ -530,8 +529,8 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
   OS2IDirectDrawSurface *AttachedSurface;
   OS2IDirectDrawSurface *MipMapSurface;
 
-  lpVtbl                     = &Vtbl;
-  lpVtbl2                    = &Vtbl;
+  lpVtbl                     = &Vtbl2;
+  lpVtbl2                    = &Vtbl2;
   dwUnknownData              = 0xDEADDEAD;
   Vtbl.AddRef                = SurfAddRef;
   Vtbl.Release               = SurfRelease;
@@ -578,6 +577,88 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
   Vtbl.FreePrivateData       = SurfFreePrivateData;
   Vtbl.ChangeUniquenessValue = SurfChangeUniquenessValue;
   Vtbl.GetUniquenessValue    = SurfGetUniquenessValue;
+
+  Vtbl3.AddRef                = SurfAddRef;
+  Vtbl3.Release               = SurfRelease;
+  Vtbl3.QueryInterface        = SurfQueryInterface;
+  Vtbl3.AddAttachedSurface    = SurfAddAttachedSurface3;
+  Vtbl3.AddOverlayDirtyRect   = SurfAddOverlayDirtyRect;
+  Vtbl3.Blt                   = SurfBlt3;
+  Vtbl3.BltBatch              = SurfBltBatch;
+  Vtbl3.BltFast               = SurfBltFast3;
+  Vtbl3.DeleteAttachedSurface = SurfDeleteAttachedSurface3;
+  Vtbl3.EnumAttachedSurfaces  = SurfEnumAttachedSurfaces;
+  Vtbl3.EnumOverlayZOrders    = SurfEnumOverlayZOrders;
+  Vtbl3.Flip                  = SurfFlip3;
+  Vtbl3.GetAttachedSurface    = SurfGetAttachedSurface3;
+  Vtbl3.GetBltStatus          = SurfGetBltStatus;
+  Vtbl3.GetCaps               = SurfGetCaps;
+  Vtbl3.GetClipper            = SurfGetClipper;
+  Vtbl3.GetColorKey           = SurfGetColorKey;
+  Vtbl3.GetDC                 = SurfGetDC;
+  Vtbl3.GetFlipStatus         = SurfGetFlipStatus;
+  Vtbl3.GetOverlayPosition    = SurfGetOverlayPosition;
+  Vtbl3.GetPalette            = SurfGetPalette;
+  Vtbl3.GetPixelFormat        = SurfGetPixelFormat;
+  Vtbl3.GetSurfaceDesc        = SurfGetSurfaceDesc;
+  Vtbl3.Initialize            = SurfInitialize;
+  Vtbl3.IsLost                = SurfIsLost;
+  Vtbl3.Lock                  = SurfLock;
+  Vtbl3.ReleaseDC             = SurfReleaseDC;
+  Vtbl3.Restore               = SurfRestore;
+  Vtbl3.SetClipper            = SurfSetClipper;
+  Vtbl3.SetColorKey           = SurfSetColorKey;
+  Vtbl3.SetOverlayPosition    = SurfSetOverlayPosition;
+  Vtbl3.SetPalette            = SurfSetPalette;
+  Vtbl3.Unlock                = SurfUnlock;
+  Vtbl3.UpdateOverlay         = SurfUpdateOverlay3;
+  Vtbl3.UpdateOverlayDisplay  = SurfUpdateOverlayDisplay;
+  Vtbl3.UpdateOverlayZOrder   = SurfUpdateOverlayZOrder3;
+  Vtbl3.GetDDInterface        = SurfGetDDInterface;
+  Vtbl3.PageLock              = SurfPageLock;
+  Vtbl3.PageUnlock            = SurfPageUnlock;
+  Vtbl3.SetSurfaceDesc        = SurfSetSurfaceDesc;
+
+  Vtbl2.AddRef                = SurfAddRef;
+  Vtbl2.Release               = SurfRelease;
+  Vtbl2.QueryInterface        = SurfQueryInterface;
+  Vtbl2.AddAttachedSurface    = SurfAddAttachedSurface;
+  Vtbl2.AddOverlayDirtyRect   = SurfAddOverlayDirtyRect;
+  Vtbl2.Blt                   = SurfBlt;
+  Vtbl2.BltBatch              = SurfBltBatch;
+  Vtbl2.BltFast               = SurfBltFast;
+  Vtbl2.DeleteAttachedSurface = SurfDeleteAttachedSurface;
+  Vtbl2.EnumAttachedSurfaces  = SurfEnumAttachedSurfaces;
+  Vtbl2.EnumOverlayZOrders    = SurfEnumOverlayZOrders;
+  Vtbl2.Flip                  = SurfFlip;
+  Vtbl2.GetAttachedSurface    = SurfGetAttachedSurface;
+  Vtbl2.GetBltStatus          = SurfGetBltStatus;
+  Vtbl2.GetCaps               = SurfGetCaps;
+  Vtbl2.GetClipper            = SurfGetClipper;
+  Vtbl2.GetColorKey           = SurfGetColorKey;
+  Vtbl2.GetDC                 = SurfGetDC;
+  Vtbl2.GetFlipStatus         = SurfGetFlipStatus;
+  Vtbl2.GetOverlayPosition    = SurfGetOverlayPosition;
+  Vtbl2.GetPalette            = SurfGetPalette;
+  Vtbl2.GetPixelFormat        = SurfGetPixelFormat;
+  Vtbl2.GetSurfaceDesc        = SurfGetSurfaceDesc;
+  Vtbl2.Initialize            = SurfInitialize;
+  Vtbl2.IsLost                = SurfIsLost;
+  Vtbl2.Lock                  = SurfLock;
+  Vtbl2.ReleaseDC             = SurfReleaseDC;
+  Vtbl2.Restore               = SurfRestore;
+  Vtbl2.SetClipper            = SurfSetClipper;
+  Vtbl2.SetColorKey           = SurfSetColorKey;
+  Vtbl2.SetOverlayPosition    = SurfSetOverlayPosition;
+  Vtbl2.SetPalette            = SurfSetPalette;
+  Vtbl2.Unlock                = SurfUnlock;
+  Vtbl2.UpdateOverlay         = SurfUpdateOverlay;
+  Vtbl2.UpdateOverlayDisplay  = SurfUpdateOverlayDisplay;
+  Vtbl2.UpdateOverlayZOrder   = SurfUpdateOverlayZOrder;
+  Vtbl2.GetDDInterface        = SurfGetDDInterface;
+  Vtbl2.PageLock              = SurfPageLock;
+  Vtbl2.PageUnlock            = SurfPageUnlock;
+
   lpDraw                     = lpDirectDraw;
   lpDraw->Vtbl.AddRef(lpDraw);
 
@@ -1855,23 +1936,52 @@ inline  void OS2IDirectDrawSurface::SetFrontBuffer( OS2IDirectDrawSurface* NewFB
 HRESULT __stdcall SurfQueryInterface(THIS This, REFIID riid, LPVOID FAR * ppvObj)
 {
   // ToDo: Add Interface handling for D3D Textures
+  HRESULT rc;
+  OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
 
-  #ifdef DEBUG
-    dprintf(("OS2IDirectDrawSurface::SurfQueryInterface\n"));
-  #endif
+  dprintf(("OS2IDirectDrawSurface::SurfQueryInterface\n"));
 
+  if(NULL==ppvObj)
+  {
+    rc = DDERR_INVALIDPARAMS;
+    goto RetFn;
+  }
+
+  rc = E_NOINTERFACE;
   *ppvObj = NULL;
 
-  if(!IsEqualGUID(riid, IID_IDirectDrawSurface) &&
-     !IsEqualGUID(riid, IID_IDirectDrawSurface2))
-//&& !IsEqualGUID(riid, IID_IUnknown))
-    return E_NOINTERFACE;
+  if(IsEqualGUID(riid, IID_IDirectDrawSurface))
+  {
+    *ppvObj = &me->Vtbl2;  // ToDo DO a real V1 table
+    rc = DD_OK;
+    goto RetFn;
+  }
+  if(IsEqualGUID(riid, IID_IDirectDrawSurface2))
+  {
+    *ppvObj = &me->Vtbl2;
+    rc = DD_OK;
+    goto RetFn;
+  }
+  if(IsEqualGUID(riid, IID_IDirectDrawSurface3))
+  {
+    *ppvObj = &me->Vtbl3;
+    rc = DD_OK;
+    goto RetFn;
+  }
+  if(IsEqualGUID(riid, IID_IDirectDrawSurface4))
+  {
+    *ppvObj = This;
+    rc =DD_OK;
+  }
 
-  *ppvObj = This;
+  //if(IsEqualGUID(riid, IID_IUnknown)) ...
 
-  SurfAddRef(This);
+RetFn:
 
-  return(DD_OK);
+  if(DD_OK==rc)
+    SurfAddRef(This);
+
+  return(rc);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1915,6 +2025,16 @@ ULONG __stdcall SurfRelease(THIS This)
 //******************************************************************************
 //******************************************************************************
 HRESULT __stdcall SurfAddAttachedSurface(THIS This, LPDIRECTDRAWSURFACE2 lpDDSurface)
+{
+
+  #ifdef DEBUG
+    dprintf(("SurfAddAttachedSurface\n"));
+  #endif
+  return SurfAddAttachedSurface4(This, (LPDIRECTDRAWSURFACE4)lpDDSurface);
+}
+//******************************************************************************
+//******************************************************************************
+HRESULT __stdcall SurfAddAttachedSurface3(THIS This, LPDIRECTDRAWSURFACE3 lpDDSurface)
 {
 
   #ifdef DEBUG
@@ -2146,6 +2266,18 @@ HRESULT __stdcall SurfBlt(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE2 lpD
 }
 //******************************************************************************
 //******************************************************************************
+HRESULT __stdcall SurfBlt3(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE3 lpDDSrcSurface,
+        LPRECT lpSrcRect, DWORD dwFlags, LPDDBLTFX lpDDBltFx)
+{
+ return SurfBlt4( This,
+                  lpDestRect,
+                  (LPDIRECTDRAWSURFACE4)lpDDSrcSurface,
+                  lpSrcRect,
+                  dwFlags,
+                  lpDDBltFx);
+}
+//******************************************************************************
+//******************************************************************************
 HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lpDDSrcSurface,
         LPRECT lpSrcRect, DWORD dwFlags, LPDDBLTFX lpDDBltFx)
 {
@@ -2190,11 +2322,61 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
 
   if (NULL!=lpDestRect)
   {
-    pIRectDest = new DDRectangle( lpDestRect->top,
-                                  lpDestRect->left,
-                                  lpDestRect->bottom,
-                                  lpDestRect->right);
+    // HACK: RA does pss in negative values we might be better etrun an error,
+    //for now we clip
+#define RA_HACK 1
+
+#ifdef RA_HACK
+    int top,left,bottom,right;
+
+    top    = lpDestRect->top;
+    left   = lpDestRect->left;
+    bottom = lpDestRect->bottom;
+    right  = lpDestRect->right;
+
+    if(top<0)
+    {
+      bottom += top;
+      top = 0;
+    }
+
+    if(top > dest->height)
+      return DDERR_INVALIDPARAMS;
+
+    if(bottom<0)
+      return DDERR_INVALIDPARAMS;
+
+    if(bottom>dest->height)
+      bottom=dest->height;
+
+    if(left<0)
+    {
+      right += left;
+      left = 0;
+    }
+
+    if(left>dest->width)
+      return DDERR_INVALIDPARAMS;
+
+    if(right<0)
+      return DDERR_INVALIDPARAMS;
+
+    if(right>dest->width)
+       right = dest->width;
+#endif    // RA_HACK
+
+    pIRectDest = new DDRectangle( top,
+                                  left,
+                                  bottom,
+                                  right);
+#ifdef RA_HACK
+    DestRect.top    = top;
+    DestRect.left   = left;
+    DestRect.bottom = bottom;
+    DestRect.right  = right;
+#else
     memcpy(&DestRect,lpDestRect,sizeof(RECTL) );
+#endif //RA_HACK
   }
   else
   {
@@ -2327,11 +2509,59 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
 
   if (NULL!=lpSrcRect)
   {
-    pIRectSrc = new DDRectangle( lpSrcRect->top,
-                                 lpSrcRect->left,
-                                 lpSrcRect->bottom,
-                                 lpSrcRect->right);
+#ifdef RA_HACK
+    // Same as for dest rectangle now for src
+
+    int top,left,bottom,right;
+
+    top    = lpSrcRect->top;
+    left   = lpSrcRect->left;
+    bottom = lpSrcRect->bottom;
+    right  = lpSrcRect->right;
+
+    if(top<0)
+    {
+      bottom += top;
+      top = 0;
+    }
+
+    if(top > src->height)
+      return DDERR_INVALIDPARAMS;
+
+    if(bottom<0)
+      return DDERR_INVALIDPARAMS;
+
+    if(bottom>src->height)
+      bottom=src->height;
+
+    if(left<0)
+    {
+      right += left;
+      left = 0;
+    }
+
+    if(left>src->width)
+      return DDERR_INVALIDPARAMS;
+
+    if(right<0)
+      return DDERR_INVALIDPARAMS;
+
+    if(right>src->width)
+       right = src->width;
+#endif    // RA_HACK
+
+    pIRectSrc = new DDRectangle( top,
+                                 left,
+                                 bottom,
+                                 right);
+#ifdef RA_HACK
+    SrcRect.top    = top;
+    SrcRect.left   = left;
+    SrcRect.bottom = bottom;
+    SrcRect.right  = right;
+#else
     memcpy(&SrcRect,lpSrcRect,sizeof(RECTL) );
+#endif
   }
   else
   {
@@ -2710,7 +2940,8 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
                 }
                 break;
             }  // end switch
-            dest->lpVtbl->ChangeUniquenessValue(dest);
+            //if(dest->lpVtbl == dest->Vtbl4)
+            //  dest->Vtbl4->ChangeUniquenessValue(dest);
             return DD_OK;
           }
 
@@ -2873,7 +3104,8 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
           {
             // Only Source colorkey
           }
-          dest->lpVtbl->ChangeUniquenessValue(dest);
+          // if(dest->lpVtbl == dest->Vtbl4)
+          //  dest->Vtbl4->ChangeUniquenessValue(dest);
           return DD_OK;
         }
 
@@ -2987,7 +3219,8 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
 
   }// end handling destination not framebuffer
 
-  dest->lpVtbl->ChangeUniquenessValue(dest);
+  // if(dest->lpVtbl == dest->Vtbl4)
+  //   dest->Vtbl4->ChangeUniquenessValue(dest);
   return(DD_OK);
 }
 //******************************************************************************
@@ -3002,13 +3235,37 @@ HRESULT __stdcall SurfBltBatch(THIS, LPDDBLTBATCH, DWORD, DWORD )
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall SurfBltFast(THIS, DWORD,DWORD,LPDIRECTDRAWSURFACE2, LPRECT,DWORD)
+HRESULT __stdcall SurfBltFast( THIS This ,
+                               DWORD dwX,
+                               DWORD dwY,
+                               LPDIRECTDRAWSURFACE2 lpDDSrcSurface,
+                               LPRECT lpSrcRect,
+                               DWORD dwTrans)
 {
-  #ifdef DEBUG
-    dprintf(("SurfBltFast NIY\n"));
-  #endif
-
-  return(DD_OK);
+  dprintf(("SurfBltFast=>"));
+  return SurfBltFast4( This,
+                       dwX,
+                       dwY,
+                       (LPDIRECTDRAWSURFACE4) lpDDSrcSurface,
+                       lpSrcRect,
+                       dwTrans);
+}
+//******************************************************************************
+//******************************************************************************
+HRESULT __stdcall SurfBltFast3(THIS This ,
+                               DWORD dwX,
+                               DWORD dwY,
+                               LPDIRECTDRAWSURFACE3 lpDDSrcSurface,
+                               LPRECT lpSrcRect,
+                               DWORD dwTrans)
+{
+  dprintf(("SurfBltFast3=>"));
+  return SurfBltFast4( This,
+                       dwX,
+                       dwY,
+                       (LPDIRECTDRAWSURFACE4) lpDDSrcSurface,
+                       lpSrcRect,
+                       dwTrans);
 }
 //******************************************************************************
 //******************************************************************************
@@ -3066,7 +3323,9 @@ HRESULT __stdcall SurfBltFast4( THIS This,
 
   if(DDBLTFAST_NOCOLORKEY == dwTrans )
   {
-    dprintf(("Solid Blit"));
+    dprintf(( "Solid Blit, %d bits => %d bytes per line\n",
+              (SrcRect.right - SrcRect.left),
+              BlitWidth) );
     #ifdef USE_ASM
       BltRec(pBltPos, pSrcPos, BlitWidth, BlitHeight,
              dest->dwPitchDB,
@@ -3347,14 +3606,26 @@ HRESULT __stdcall SurfBltFast4( THIS This,
       }
     }
   }
-  dest->lpVtbl->ChangeUniquenessValue(dest);
 
+  // if(dest->lpVtbl == dest->Vtbl4)
+  //   dest->Vtbl4->ChangeUniquenessValue(dest);
 
   return(DD_OK);
 }
 //******************************************************************************
 //******************************************************************************
 HRESULT __stdcall SurfDeleteAttachedSurface(THIS This, DWORD dwFlags, LPDIRECTDRAWSURFACE2 lpDDSurface)
+{
+  OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
+  #ifdef DEBUG
+    dprintf(("SurfDeleteAttachedSurface\n"));
+  #endif
+
+  return(SurfDeleteAttachedSurface4(me, dwFlags, (LPDIRECTDRAWSURFACE4)lpDDSurface));
+}
+//******************************************************************************
+//******************************************************************************
+HRESULT __stdcall SurfDeleteAttachedSurface3(THIS This, DWORD dwFlags, LPDIRECTDRAWSURFACE3 lpDDSurface)
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
   #ifdef DEBUG
@@ -3586,9 +3857,7 @@ HRESULT __stdcall SurfEnumAttachedSurfaces4(THIS This, LPVOID lpContext ,LPDDENU
 //******************************************************************************
 HRESULT __stdcall SurfEnumOverlayZOrders(THIS, DWORD,LPVOID,LPDDENUMSURFACESCALLBACK)
 {
-  #ifdef DEBUG
-    dprintf(("SurfEnumOverlayZOrders\n"));
-  #endif
+  dprintf(("SurfEnumOverlayZOrders\n"));
 
   return(DD_OK);
 }
@@ -3596,9 +3865,7 @@ HRESULT __stdcall SurfEnumOverlayZOrders(THIS, DWORD,LPVOID,LPDDENUMSURFACESCALL
 //******************************************************************************
 HRESULT __stdcall SurfEnumOverlayZOrders4(THIS, DWORD,LPVOID,LPDDENUMSURFACESCALLBACK2)
 {
-  #ifdef DEBUG
-    dprintf(("SurfEnumOverlayZOrders\n"));
-  #endif
+  dprintf(("SurfEnumOverlayZOrders\n"));
 
   return(DD_OK);
 }
@@ -3607,9 +3874,18 @@ HRESULT __stdcall SurfEnumOverlayZOrders4(THIS, DWORD,LPVOID,LPDDENUMSURFACESCAL
 HRESULT __stdcall SurfFlip(THIS This, LPDIRECTDRAWSURFACE2 lpDDSurf, DWORD dwFlags)
 {
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
-  #ifdef DEBUG
-    dprintf(("SurfFlip\n"));
-  #endif
+
+  dprintf(("SurfFlip\n"));
+
+  return(SurfFlip4(me, (LPDIRECTDRAWSURFACE4) lpDDSurf, dwFlags));
+}
+//******************************************************************************
+//******************************************************************************
+HRESULT __stdcall SurfFlip3(THIS This, LPDIRECTDRAWSURFACE3 lpDDSurf, DWORD dwFlags)
+{
+  OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
+
+  dprintf(("SurfFlip\n"));
 
   return(SurfFlip4(me, (LPDIRECTDRAWSURFACE4) lpDDSurf, dwFlags));
 }
@@ -3624,9 +3900,8 @@ HRESULT __stdcall SurfFlip4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSurf, DWORD dwFl
   char *pcrFB,*pcFB,*pcrDB,*pcDB;
   ULONG rc;
 
-  #ifdef DEBUG
-    dprintf(("SurfFlip4\n"));
-  #endif
+  dprintf(("SurfFlip4\n"));
+
   if(!((me->DDSurfaceDesc.ddsCaps.dwCaps & DDSCAPS_FRONTBUFFER) &&
        (me->DDSurfaceDesc.ddsCaps.dwCaps & DDSCAPS_FLIP))
     )
@@ -3641,9 +3916,7 @@ HRESULT __stdcall SurfFlip4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSurf, DWORD dwFl
 
   if(NULL!=lpDDSurf)
   {
-    #ifdef DEBUG
-      dprintf(("Check if Surface is in Flipchain!\n"));
-    #endif
+    dprintf(("Check if Surface is in Flipchain!\n"));
 
     // We got an override surface check if it is in the flipchain
     FlipSurface = (OS2IDirectDrawSurface*) lpDDSurf;
@@ -3655,33 +3928,27 @@ HRESULT __stdcall SurfFlip4(THIS This, LPDIRECTDRAWSURFACE4 lpDDSurf, DWORD dwFl
 
     if(FlipCursor!=FlipSurface)
     {
-      #ifdef DEBUG
-        dprintf(("Surface not in Flipchain!\n"));
-      #endif
+      dprintf(("Surface not in Flipchain!\n"));
+
       return (DDERR_INVALIDPARAMS); // Not sure if the returnvalue is right
     }
   }
   else
   {
     FlipSurface = me->NextFlip; // Take the next Surface in the Flipchain
-    #ifdef DEBUG
-      dprintf(("Next Surface @ 0x%08X\n",FlipSurface));
-    #endif
+    dprintf(("Next Surface @ 0x%08X\n",FlipSurface));
   }
 
   if((me->fLocked)||(FlipSurface->fLocked))
   {
-    #ifdef DEBUG
-      dprintf(("Locked surface(s) Dest %d Src %d\n",me->fLocked,FlipSurface->fLocked));
-    #endif
+    dprintf(("Locked surface(s) Dest %d Src %d\n",me->fLocked,FlipSurface->fLocked));
+
     return(DDERR_SURFACEBUSY);
   }
 
   if(-1 != me->diveBufNr)
   {
-    #ifdef DEBUG
-      dprintf(("DIVE Flipchain"));
-    #endif
+    dprintf(("DIVE Flipchain"));
 
     // we got some DIVE surfaces
     // On Dive Buffers More then Double buffering won't get any perf. gain
@@ -3757,6 +4024,18 @@ HRESULT __stdcall SurfGetAttachedSurface(THIS This, LPDDSCAPS lpDDCaps,
   OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
   #ifdef DEBUG
     dprintf(("SurfGetAttachedSurface\n"));
+  #endif
+
+  return(SurfGetAttachedSurface4(me, (LPDDSCAPS2)lpDDCaps , (LPDIRECTDRAWSURFACE4*)lpDDSurf));
+}
+//******************************************************************************
+//******************************************************************************
+HRESULT __stdcall SurfGetAttachedSurface3(THIS This, LPDDSCAPS lpDDCaps,
+                                         LPDIRECTDRAWSURFACE3 FAR * lpDDSurf)
+{
+  OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
+  #ifdef DEBUG
+    dprintf(("SurfGetAttachedSurface3\n"));
   #endif
 
   return(SurfGetAttachedSurface4(me, (LPDDSCAPS2)lpDDCaps , (LPDIRECTDRAWSURFACE4*)lpDDSurf));
@@ -4354,7 +4633,12 @@ HRESULT __stdcall SurfLock4( THIS This,
   HRESULT rc;
 
   #ifdef DEBUG
-    dprintf(("SurfLock4 %08X %08X %d %d\n", (int)lpRect, (int)lpSurfaceDesc, dwFlags, hEvent));
+    dprintf( ("SurfLock4 %08X %08X %08X %d %d\n",
+              me,
+              (int)lpRect,
+              (int)lpSurfaceDesc,
+              dwFlags,
+              hEvent) );
   #endif
 
   if( (NULL==lpSurfaceDesc) ||
@@ -4626,7 +4910,8 @@ HRESULT __stdcall SurfSetColorKey(THIS  This, DWORD dwFlags, LPDDCOLORKEY lpDDCo
 
   if(DDCKEY_SRCBLT & dwFlags)
   {
-    me->lpVtbl->ChangeUniquenessValue(me); // we changed somethin so change this value
+    //(me->lpVtbl == me->Vtbl4)
+    //  me->Vtbl4->ChangeUniquenessValue(me); // we changed somethin so change this value
     if(NULL!=lpDDColKey)
     {
       memcpy(&(me->DDSurfaceDesc.ddckCKSrcBlt), lpDDColKey, sizeof(DDCOLORKEY) );
@@ -4728,7 +5013,7 @@ HRESULT __stdcall SurfSetPalette(THIS This, LPDIRECTDRAWPALETTE lpPalette)
   {
     me->lpPalette->SetIsPrimary(TRUE);
   }
-  me->lpVtbl->ChangeUniquenessValue(me);
+  // me->lpVtbl->ChangeUniquenessValue(me);
 
   return(DD_OK);
 }
@@ -4893,7 +5178,7 @@ HRESULT __stdcall SurfUnlock(THIS This, LPVOID lpSurfaceData)
     // delete tne DDRectobject of the found rectangle
     delete pIRectEnum;
 
-    me->lpVtbl->ChangeUniquenessValue(me);
+    // me->lpVtbl->ChangeUniquenessValue(me);
 
     dprintf(("Unlock OK\n\n"));
 
@@ -5021,7 +5306,7 @@ HRESULT __stdcall SurfUnlock4(THIS This, LPRECT lpSurfaceRect)
       me->ColorConversion(lpSurfaceRect);
     }
 
-    me->lpVtbl->ChangeUniquenessValue(me);
+    // me->lpVtbl->ChangeUniquenessValue(me);
 
     dprintf(("Unlock OK\n\n"));
     rc = DD_OK;
@@ -5032,6 +5317,15 @@ HRESULT __stdcall SurfUnlock4(THIS This, LPRECT lpSurfaceRect)
 //******************************************************************************
 //******************************************************************************
 HRESULT __stdcall SurfUpdateOverlay(THIS This, LPRECT, LPDIRECTDRAWSURFACE2,LPRECT,DWORD, LPDDOVERLAYFX)
+{
+  #ifdef DEBUG
+    dprintf(("SurfUpdateOverlay\n"));
+  #endif
+  return(DD_OK);
+}
+//******************************************************************************
+//******************************************************************************
+HRESULT __stdcall SurfUpdateOverlay3(THIS This, LPRECT, LPDIRECTDRAWSURFACE3,LPRECT,DWORD, LPDDOVERLAYFX)
 {
   #ifdef DEBUG
     dprintf(("SurfUpdateOverlay\n"));
@@ -5059,6 +5353,15 @@ HRESULT __stdcall SurfUpdateOverlayDisplay(THIS, DWORD)
 //******************************************************************************
 //******************************************************************************
 HRESULT __stdcall SurfUpdateOverlayZOrder(THIS, DWORD, LPDIRECTDRAWSURFACE2)
+{
+  #ifdef DEBUG
+    dprintf(("SurfUpdateOverlayZOrder\n"));
+  #endif
+  return(DD_OK);
+}
+//******************************************************************************
+//******************************************************************************
+HRESULT __stdcall SurfUpdateOverlayZOrder3(THIS, DWORD, LPDIRECTDRAWSURFACE3)
 {
   #ifdef DEBUG
     dprintf(("SurfUpdateOverlayZOrder\n"));
@@ -5135,7 +5438,7 @@ HRESULT __stdcall SurfSetSurfaceDesc(THIS This, LPDDSURFACEDESC lpSurfDesc, DWOR
     if(me->DDSurfaceDesc.dwFlags & DDSD_LPSURFACE)
       free(me->DDSurfaceDesc.lpSurface);
   }
-  me->lpVtbl->ChangeUniquenessValue(me);
+  // me->lpVtbl->ChangeUniquenessValue(me);
   memcpy((char *)&(me->DDSurfaceDesc), (char *)lpSurfDesc, sizeof(DDSURFACEDESC));
 
   return DD_OK;
@@ -5166,7 +5469,7 @@ HRESULT __stdcall SurfSetSurfaceDesc4(THIS This, LPDDSURFACEDESC2 lpSurfDesc, DW
     if(me->DDSurfaceDesc.dwFlags & DDSD_LPSURFACE)
       free(me->DDSurfaceDesc.lpSurface);
   }
-  me->lpVtbl->ChangeUniquenessValue(me);
+  // me->lpVtbl->ChangeUniquenessValue(me);
   memcpy((char *)&(me->DDSurfaceDesc), (char *)lpSurfDesc, sizeof(DDSURFACEDESC2));
 
   return DD_OK;
