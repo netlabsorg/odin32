@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.4 1999-11-08 13:44:17 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.5 1999-11-10 14:16:45 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -180,10 +180,8 @@ BOOL WIN32API PostMessageW(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 //******************************************************************************
 BOOL WIN32API WaitMessage(void)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  WaitMessage\n");
-#endif
-    return O32_WaitMessage();
+    dprintf2(("USER32: WaitMessage"));
+    return OSLibWinWaitMessage();
 }
 //******************************************************************************
 //******************************************************************************
