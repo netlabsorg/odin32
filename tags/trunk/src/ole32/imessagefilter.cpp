@@ -1,4 +1,4 @@
-/* $Id: imessagefilter.cpp,v 1.1 2000-09-17 10:31:04 davidr Exp $ */
+/* $Id: imessagefilter.cpp,v 1.2 2002-02-15 17:18:49 sandervl Exp $ */
 /* 
  * 
  * Project Odin Software License can be found in LICENSE.TXT
@@ -167,16 +167,5 @@ static DWORD	WIN32API IMessageFilterImpl_MessagePending(LPMESSAGEFILTER iface,
 
     dprintf(("OLE32: IMessageFilter(%p)->MessagePending()\n", This));
     return E_NOTIMPL;
-}
-
-//*******************************************************************************
-//*******************************************************************************
-HRESULT WIN32API CoRegisterMessageFilter(LPMESSAGEFILTER lpMessageFilter,
-                                            LPMESSAGEFILTER *lplpMessageFilter)
-{
-    dprintf(("OLE32: CoRegisterMessageFilter - stub"));
-    if (lplpMessageFilter)
-	*lplpMessageFilter = NULL;
-    return S_FALSE;
 }
 

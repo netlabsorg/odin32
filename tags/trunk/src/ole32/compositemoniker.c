@@ -16,27 +16,6 @@
 #include "wine/unicode.h"
 #include "ole2.h"
 
-#ifdef __WIN32OS2__
-#undef FIXME
-#undef TRACE
-#ifdef DEBUG
-// PH 2001-11-30
-// this macro definition causes the control leave the scope of a
-// non-curly-braced preceeding if statement. Therefore,
-//   if (p!=NULL) 
-//      TRACE("p->a=%d", p->a)
-// crashes.
-//
-// !!! ENSURE TRACES AND FIXMES WITH PRECEEDING IF STATEMENT 
-// !!! ARE PUT INTO CURLY BRACES
-#define TRACE WriteLog("OLE32: %s", __FUNCTION__); WriteLog
-#define FIXME WriteLog("FIXME OLE32: %s", __FUNCTION__); WriteLog
-#else
-#define TRACE 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
-#define FIXME 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
-#endif
-#endif
-
 DEFAULT_DEBUG_CHANNEL(ole);
 
 #define  BLOCK_TAB_SIZE 5 /* represent the first size table and it's increment block size */
@@ -46,8 +25,9 @@ typedef struct CompositeMonikerImpl{
 
     ICOM_VTABLE(IMoniker)*  lpvtbl1;  /* VTable relative to the IMoniker interface.*/
 
-    /* The ROT (RunningObjectTable implementation) uses the IROTData interface to test whether 
-     * two monikers are equal. That's whay IROTData interface is implemented by monikers.
+    /* The ROT (RunningObjectTable implementation) uses the IROTData 
+     * interface to test whether two monikers are equal. That's why IROTData 
+     * interface is implemented by monikers.
      */
     ICOM_VTABLE(IROTData)*  lpvtbl2;  /* VTable relative to the IROTData interface.*/
 
@@ -361,8 +341,10 @@ HRESULT WINAPI CompositeMonikerImpl_Load(IMoniker* iface,IStream* pStm)
         else if (IsEqualIID(&clsid,&CLSID_CompositeMoniker))
             return E_FAIL;
 
-        else{
-            FIXME("()");
+        else
+        {
+            FIXME("()\n");
+            /* FIXME: To whoever wrote this code: It's either return or break. it cannot be both! */
             break;
             return E_NOTIMPL;
         }
@@ -393,10 +375,12 @@ HRESULT WINAPI CompositeMonikerImpl_Save(IMoniker* iface,IStream* pStm,BOOL fCle
     
     TRACE("(%p,%p,%d)\n",iface,pStm,fClearDirty);
 
-    /* this function call OleSaveToStream function for each moniker within this object */
-
-    /* when I tested this function in windows system ! I usually found this constant in the begining of */
-    /* the stream  I dont known why (there's no indication in specification) ! */
+    /* This function calls OleSaveToStream function for each moniker within 
+     * this object.
+     * When I tested this function in windows, I usually found this constant 
+     * at the beginning of the stream. I don't known why (there's no 
+     * indication in the specification) !
+     */
     res=IStream_Write(pStm,&constant,sizeof(constant),NULL);
 
     IMoniker_Enum(iface,TRUE,&enumMk);
@@ -428,8 +412,9 @@ HRESULT WINAPI CompositeMonikerImpl_GetSizeMax(IMoniker* iface,ULARGE_INTEGER* p
     IMoniker *pmk;
     ULARGE_INTEGER ptmpSize;
 
-    /* the sizeMax of this object is calculated by calling  GetSizeMax on each moniker within this object then */
-    /* suming all returned sizemax */
+    /* The sizeMax of this object is calculated by calling  GetSizeMax on 
+     * each moniker within this object then summing all returned values
+     */
 
     TRACE("(%p,%p)\n",iface,pcbSize);
 
@@ -468,7 +453,7 @@ HRESULT WINAPI CompositeMonikerImpl_Construct(CompositeMonikerImpl* This,LPMONIK
     
     TRACE("(%p,%p,%p)\n",This,pmkFirst,pmkRest);
 
-    /* Initialize the virtual fgunction table. */
+    /* Initialize the virtual function table. */
     This->lpvtbl1      = &VT_CompositeMonikerImpl;
     This->lpvtbl2      = &VT_ROTDataImpl;
     This->ref          = 0;
@@ -482,7 +467,7 @@ HRESULT WINAPI CompositeMonikerImpl_Construct(CompositeMonikerImpl* This,LPMONIK
 
     IMoniker_IsSystemMoniker(pmkFirst,&mkSys);
 
-    /* put the first moniker contents in the begining of the table */
+    /* put the first moniker contents in the beginning of the table */
     if (mkSys!=MKSYS_GENERICCOMPOSITE){
 
         This->tabMoniker[(This->tabLastIndex)++]=pmkFirst;
@@ -556,8 +541,10 @@ HRESULT WINAPI CompositeMonikerImpl_Construct(CompositeMonikerImpl* This,LPMONIK
     }
     else{
 
-        /* add a composite moniker to the moniker table (do the same thing for each moniker within the */
-        /* composite moniker as a simple moniker (see above how to add a simple moniker case) ) */
+        /* add a composite moniker to the moniker table (do the same thing 
+         * for each moniker within the composite moniker as a simple moniker 
+         * (see above for how to add a simple moniker case) )
+         */
         IMoniker_Enum(pmkRest,TRUE,&enumMoniker);
 
         while(IEnumMoniker_Next(enumMoniker,1,&This->tabMoniker[This->tabLastIndex],NULL)==S_OK){
@@ -1663,7 +1650,7 @@ HRESULT WINAPI EnumMonikerImpl_CreateEnumMoniker(IMoniker** tabMoniker,
 }
 
 /******************************************************************************
- *        CreateGenericComposite	[OLE.55]
+ *        CreateGenericComposite	[OLE32.56]
  ******************************************************************************/
 HRESULT WINAPI CreateGenericComposite(LPMONIKER pmkFirst, LPMONIKER pmkRest, LPMONIKER* ppmkComposite)
 {
@@ -1712,7 +1699,7 @@ HRESULT WINAPI CreateGenericComposite(LPMONIKER pmkFirst, LPMONIKER pmkRest, LPM
 }
 
 /******************************************************************************
- *        MonikerCommonPrefixWith	[OLE.55]
+ *        MonikerCommonPrefixWith	[OLE32.82]
  ******************************************************************************/
 HRESULT WINAPI MonikerCommonPrefixWith(IMoniker* pmkThis,IMoniker* pmkOther,IMoniker** ppmkCommon)
 {

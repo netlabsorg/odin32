@@ -4,18 +4,22 @@
  *	Copyright 1997	Marcus Meissner
  */
 
+#include "config.h"
+
 #include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include "winerror.h"
-#include "heap.h"
-#include "wine/winbase16.h"
-#include "wine/obj_base.h"
-#include "debugtools.h"
 
-#include "ole.h"
+#include "ole2.h"
+#include "windef.h"
+#include "winerror.h"
+
+#include "wine/obj_base.h"
+#include "wine/winbase16.h"
 #include "ifs.h"
+
+#include "debugtools.h"
 
 DEFAULT_DEBUG_CHANNEL(relay);
 
@@ -138,25 +142,32 @@ ULONG WINAPI IMalloc16_fnRelease(IMalloc16* iface) {
 SEGPTR WINAPI IMalloc16_fnAlloc(IMalloc16* iface,DWORD cb) {
         ICOM_THIS(IMalloc16Impl,iface);
 	TRACE("(%p)->Alloc(%ld)\n",This,cb);
-        return MapLS( HeapAlloc( GetProcessHeap(), HEAP_WINE_SEGPTR, cb ) );
+        return MapLS( HeapAlloc( GetProcessHeap(), 0, cb ) );
 }
 
 /******************************************************************************
  * IMalloc16_Realloc [COMPOBJ.504]
  */
-SEGPTR WINAPI IMalloc16_fnRealloc(IMalloc16* iface,SEGPTR pv,DWORD cb) {
-        ICOM_THIS(IMalloc16Impl,iface);
-        TRACE("(%p)->Realloc(%08lx,%ld)\n",This,pv,cb);
-        return MapLS( HeapReAlloc( GetProcessHeap(), HEAP_WINE_SEGPTR, MapSL(pv), cb ) );
+SEGPTR WINAPI IMalloc16_fnRealloc(IMalloc16* iface,SEGPTR pv,DWORD cb)
+{
+    SEGPTR ret;
+    ICOM_THIS(IMalloc16Impl,iface);
+    TRACE("(%p)->Realloc(%08lx,%ld)\n",This,pv,cb);
+    ret = MapLS( HeapReAlloc( GetProcessHeap(), 0, MapSL(pv), cb ) );
+    UnMapLS(pv);
+    return ret;
 }
 
 /******************************************************************************
  * IMalloc16_Free [COMPOBJ.505]
  */
-VOID WINAPI IMalloc16_fnFree(IMalloc16* iface,SEGPTR pv) {
-        ICOM_THIS(IMalloc16Impl,iface);
-        TRACE("(%p)->Free(%08lx)\n",This,pv);
-        HeapFree( GetProcessHeap(), HEAP_WINE_SEGPTR, MapSL(pv) );
+VOID WINAPI IMalloc16_fnFree(IMalloc16* iface,SEGPTR pv)
+{
+    void *ptr = MapSL(pv);
+    ICOM_THIS(IMalloc16Impl,iface);
+    TRACE("(%p)->Free(%08lx)\n",This,pv);
+    UnMapLS(pv);
+    HeapFree( GetProcessHeap(), 0, ptr );
 }
 
 /******************************************************************************
@@ -166,7 +177,7 @@ DWORD WINAPI IMalloc16_fnGetSize(const IMalloc16* iface,SEGPTR pv)
 {
 	ICOM_CTHIS(IMalloc16Impl,iface);
         TRACE("(%p)->GetSize(%08lx)\n",This,pv);
-        return HeapSize( GetProcessHeap(), HEAP_WINE_SEGPTR, MapSL(pv) );
+        return HeapSize( GetProcessHeap(), 0, MapSL(pv) );
 }
 
 /******************************************************************************
@@ -187,35 +198,36 @@ LPVOID WINAPI IMalloc16_fnHeapMinimize(IMalloc16* iface) {
 	return NULL;
 }
 
-static ICOM_VTABLE(IMalloc16)* msegvt16 = NULL;
-
 /******************************************************************************
  * IMalloc16_Constructor [VTABLE]
  */
 LPMALLOC16
-IMalloc16_Constructor() {
-	IMalloc16Impl*	This;
-        HMODULE16	hcomp = GetModuleHandle16("COMPOBJ");
+IMalloc16_Constructor()
+{
+    static ICOM_VTABLE(IMalloc16) vt16;
+    static SEGPTR msegvt16;
+    IMalloc16Impl* This;
+    HMODULE16 hcomp = GetModuleHandle16("COMPOBJ");
 
-	This = (IMalloc16Impl*)SEGPTR_NEW(IMalloc16Impl);
-        if (!msegvt16) {
-            msegvt16 = SEGPTR_NEW(ICOM_VTABLE(IMalloc16));
-
-#define VTENT(x) msegvt16->x = (void*)GetProcAddress16(hcomp,"IMalloc16_"#x);assert(msegvt16->x)
-            VTENT(QueryInterface);
-            VTENT(AddRef);
-            VTENT(Release);
-            VTENT(Alloc);
-            VTENT(Realloc);
-            VTENT(Free);
-            VTENT(GetSize);
-            VTENT(DidAlloc);
-            VTENT(HeapMinimize);
+    This = HeapAlloc( GetProcessHeap(), 0, sizeof(IMalloc16Impl) );
+    if (!msegvt16)
+    {
+#define VTENT(x) vt16.x = (void*)GetProcAddress16(hcomp,"IMalloc16_"#x);assert(vt16.x)
+        VTENT(QueryInterface);
+        VTENT(AddRef);
+        VTENT(Release);
+        VTENT(Alloc);
+        VTENT(Realloc);
+        VTENT(Free);
+        VTENT(GetSize);
+        VTENT(DidAlloc);
+        VTENT(HeapMinimize);
 #undef VTENT
-	}
-        ICOM_VTBL(This) = (ICOM_VTABLE(IMalloc16)*)SEGPTR_GET(msegvt16);
-	This->ref = 1;
-	return (LPMALLOC16)SEGPTR_GET(This);
+        msegvt16 = MapLS( &vt16 );
+    }
+    ICOM_VTBL(This) = (ICOM_VTABLE(IMalloc16)*)msegvt16;
+    This->ref = 1;
+    return (LPMALLOC16)MapLS( This );
 }
 #endif
 

@@ -9,16 +9,19 @@
  */
 
 #include <string.h>
-#include "debugtools.h"
+
 #include "windef.h"
-#include "heap.h"
+#include "winbase.h"
+#include "oleauto.h"
 #include "winerror.h"
-#include "thread.h"
-#include "debugtools.h"
+
 #include "wine/obj_base.h"
 #include "wine/obj_oleaut.h"
 #include "wine/obj_errorinfo.h"
 #include "wine/unicode.h"
+#include "thread.h"
+
+#include "debugtools.h"
 
 DEFAULT_DEBUG_CHANNEL(ole);
 
@@ -40,9 +43,9 @@ static BSTR WINAPI ERRORINFO_SysAllocString(const OLECHAR* in)
 
     /*
      * Allocate a new buffer to hold the string.
-     * dont't forget to keep an empty spot at the begining of the
+     * dont't forget to keep an empty spot at the beginning of the
      * buffer for the character count and an extra character at the
-     * end for the NULL.
+     * end for the '\0'.
      */
     newBuffer = (DWORD*)HeapAlloc(GetProcessHeap(),
                                  0,
@@ -447,7 +450,7 @@ static ICOM_VTABLE(ISupportErrorInfo) ISupportErrorInfoImpl_VTable =
   ISupportErrorInfoImpl_InterfaceSupportsErrorInfo
 };
 /***********************************************************************
- *		CreateErrorInfo
+ *		CreateErrorInfo (OLE32.192)
  */
 HRESULT WINAPI CreateErrorInfo(ICreateErrorInfo **pperrinfo)
 {
@@ -463,7 +466,7 @@ HRESULT WINAPI CreateErrorInfo(ICreateErrorInfo **pperrinfo)
 }
 
 /***********************************************************************
- *		GetErrorInfo
+ *		GetErrorInfo (OLE32.196)
  */
 HRESULT WINAPI GetErrorInfo(ULONG dwReserved, IErrorInfo **pperrinfo)
 {
@@ -478,7 +481,7 @@ HRESULT WINAPI GetErrorInfo(ULONG dwReserved, IErrorInfo **pperrinfo)
 }
 
 /***********************************************************************
- *		SetErrorInfo
+ *		SetErrorInfo (OLE32.255)
  */
 HRESULT WINAPI SetErrorInfo(ULONG dwReserved, IErrorInfo *perrinfo)
 {

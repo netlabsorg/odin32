@@ -15,23 +15,14 @@
 #include "wine/obj_storage.h"
 #include "wine/obj_misc.h"
 #include "wine/obj_moniker.h"
+#ifdef __WIN32OS2__
+#include "wine/obj_channel.h"
+#endif
+
 #include "debugtools.h"
-#include "heap.h"
 #include "ole2.h"
 
 #include "compobj_private.h"
-
-#ifdef __WIN32OS2__
-#undef FIXME
-#undef TRACE
-#ifdef DEBUG
-#define TRACE WriteLog("OLE32: %s", __FUNCTION__); WriteLog
-#define FIXME WriteLog("FIXME OLE32: %s", __FUNCTION__); WriteLog
-#else
-#define TRACE 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
-#define FIXME 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
-#endif
-#endif
 
 DEFAULT_DEBUG_CHANNEL(ole);
 
@@ -289,7 +280,7 @@ HRESULT WINAPI RunningObjectTableImpl_Register(IRunningObjectTable* iface,
 
         FIXME("runObjTabRegister: %ld is out of data limite \n",This->runObjTabRegister);
 	return E_FAIL;
-}
+    }
     This->runObjTabRegister++;
     This->runObjTabLastIndx++;
     
@@ -467,7 +458,7 @@ HRESULT WINAPI RunningObjectTableImpl_GetObjectIndex(RunningObjectTableImpl* Thi
 }
 
 /******************************************************************************
- *		GetRunningObjectTable16	[OLE2.30]
+ *		GetRunningObjectTable	[OLE2.30]
  */
 HRESULT WINAPI GetRunningObjectTable16(DWORD reserved, LPRUNNINGOBJECTTABLE *pprot)
 {
@@ -476,7 +467,7 @@ HRESULT WINAPI GetRunningObjectTable16(DWORD reserved, LPRUNNINGOBJECTTABLE *ppr
 }
 
 /***********************************************************************
- *           GetRunningObjectTable (OLE2.73)
+ *           GetRunningObjectTable (OLE32.73)
  */
 HRESULT WINAPI GetRunningObjectTable(DWORD reserved, LPRUNNINGOBJECTTABLE *pprot)
 {
@@ -504,12 +495,6 @@ HRESULT WINAPI OleRun(LPUNKNOWN pUnknown)
   IRunnableObject	*runable;
   ICOM_THIS(IRunnableObject,pUnknown);
   LRESULT		ret;
-
-#ifdef __WIN32OS2__
-  if(!IsValidInterface(pUnknown)) {
-      return E_INVALIDARG;
-  }
-#endif
 
   ret = IRunnableObject_QueryInterface(This,&IID_IRunnableObject,(LPVOID*)&runable);
   if (ret) 
