@@ -1,4 +1,4 @@
-/* $Id: winexepeldr.cpp,v 1.19 2002-07-23 13:51:48 sandervl Exp $ */
+/* $Id: winexepeldr.cpp,v 1.20 2002-12-20 10:38:58 sandervl Exp $ */
 
 /*
  * Win32 PE loader Exe class
@@ -33,7 +33,6 @@
 #include "exceptions.h"
 #include "exceptutil.h"
 
-#include "cio.h"
 #include "oslibmisc.h"
 
 #define DBG_LOCALLOG	DBG_winexepeldr
@@ -119,9 +118,6 @@ BOOL WIN32API CreateWin32PeLdrExe(char *szFileName, char *szCmdLine,
   dprintf(("Cmd line: %s", szFullCmdLine));
   free(szFullCmdLine);
 
-  if(getenv("WIN32_IOPL2")) {
-        io_init1();
-  }
   //Init console before loading executable as dlls might want to print 
   //something on the console while being loaded
   if(WinExe->isConsoleApp()) 

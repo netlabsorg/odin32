@@ -1,4 +1,4 @@
-/* $Id: winexelx.cpp,v 1.10 2001-12-07 14:13:39 sandervl Exp $ */
+/* $Id: winexelx.cpp,v 1.11 2002-12-20 10:38:58 sandervl Exp $ */
 
 /*
  * Win32 LX Exe class (compiled in OS/2 using Odin32 api)
@@ -30,7 +30,6 @@
 
 #include "exceptions.h"
 #include "exceptutil.h"
-#include "cio.h"
 
 #define DBG_LOCALLOG	DBG_winexelx
 #include "dbglocal.h"
@@ -51,10 +50,6 @@ BOOL WIN32API RegisterLxExe(WINMAIN EntryPoint, PVOID pResData)
 
   if(WinExe != NULL) //should never happen
     	delete(WinExe);
-
-  if(getenv("WIN32_IOPL2")) {
-    io_init1();
-  }
 
   rc = DosGetInfoBlocks(&ptib, &ppib);
   if(rc) {
@@ -101,9 +96,6 @@ ULONG Win32LxExe::start()
  WINEXCEPTION_FRAME exceptFrame;
  ULONG rc;
 
-  if(getenv("WIN32_IOPL2")) {
-   	io_init1();
-  }
   dprintf(("Start executable %X\n", WinExe));
 
   fExeStarted  = TRUE;

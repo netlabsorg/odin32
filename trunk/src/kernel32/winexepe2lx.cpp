@@ -1,4 +1,4 @@
-/* $Id: winexepe2lx.cpp,v 1.11 2002-05-16 13:45:32 sandervl Exp $ */
+/* $Id: winexepe2lx.cpp,v 1.12 2002-12-20 10:38:58 sandervl Exp $ */
 
 /*
  * Win32 PE2LX Exe class
@@ -31,7 +31,6 @@
 #include <wprocess.h>
 #include <win32api.h>
 
-#include "cio.h"            // I/O
 #include "oslibmisc.h"      // OSLibGetDllName
 #include "conwin.h"         // Windows Header for console only
 #include "console.h"
@@ -68,10 +67,6 @@ BOOL Win32Pe2LxExe::fEarlyInit = FALSE;
 void WIN32API RegisterPe2LxExe(ULONG ulPe2LxVersion, HINSTANCE hinstance, ULONG ulReserved)
 {
     Win32Pe2LxExe *pWinPe2LxExe;
-
-    /* I/O init. */
-    if (getenv("WIN32_IOPL2"))
-        io_init1();
 
     /* Check that pe2lx version matches the version of kernel32.dll. */
     CheckVersion(ulPe2LxVersion & ~0x80000000UL, OSLibGetDllName(hinstance));

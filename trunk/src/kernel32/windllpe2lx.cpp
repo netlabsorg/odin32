@@ -1,4 +1,4 @@
-/* $Id: windllpe2lx.cpp,v 1.11 2001-07-10 20:18:12 bird Exp $ */
+/* $Id: windllpe2lx.cpp,v 1.12 2002-12-20 10:38:57 sandervl Exp $ */
 
 /*
  * Win32 PE2LX Dll class
@@ -30,7 +30,6 @@
 #include <winexepe2lx.h>
 #include <wprocess.h>
 
-#include "cio.h"            // I/O
 #include "oslibmisc.h"      // OSLibGetDllName
 #include "conwin.h"         // Windows Header for console only
 #include "console.h"
@@ -82,10 +81,6 @@ ULONG WIN32API RegisterPe2LxDll(ULONG ulPe2LxVersion, HINSTANCE hinstance, ULONG
     Win32Pe2LxDll *pWinMod = (Win32Pe2LxDll *)Win32DllBase::findModule(hinstance);
     if (ulAttachType == 0UL)
     {   /* Process attach */
-
-        /* Init I/O */
-        if (getenv("WIN32_IOPL2"))
-            io_init1();
 
         /* Get Lib name and match Pe2Lx version with kernel32 version. */
         pszName = OSLibGetDllName(hinstance);

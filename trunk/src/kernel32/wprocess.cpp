@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.166 2002-12-17 13:48:24 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.167 2002-12-20 10:38:58 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -41,7 +41,6 @@
 
 #include "console.h"
 #include "wincon.h"
-#include "cio.h"
 #include "versionos2.h"    /*PLF Wed  98-03-18 02:36:51*/
 #include <wprocess.h>
 #include "mmap.h"

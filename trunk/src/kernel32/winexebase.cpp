@@ -1,4 +1,4 @@
-/* $Id: winexebase.cpp,v 1.20 2002-05-20 13:48:51 sandervl Exp $ */
+/* $Id: winexebase.cpp,v 1.21 2002-12-20 10:38:57 sandervl Exp $ */
 
 /*
  * Win32 exe base class
@@ -29,7 +29,6 @@
 #include <cpuhlp.h>
 #include "exceptions.h"
 #include "exceptutil.h"
-#include "cio.h"
 
 #include "conwin.h"          // Windows Header for console only
 #include "console.h"
@@ -97,9 +96,6 @@ ULONG Win32ExeBase::start()
  WINEXCEPTION_FRAME exceptFrame;
  ULONG rc;
 
-  if(getenv("WIN32_IOPL2")) {
-   	io_init1();
-  }
 #ifdef DEBUG
   TEB *teb = GetThreadTEB();
   dprintf(("Start executable %x\n", WinExe));
