@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.35 2000-06-17 11:58:07 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.36 2000-06-26 10:27:45 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -396,7 +396,7 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
  HWND   hwndDest;
  pDCData pHps;
 
-  pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
+  pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdcDest);
   if(!pHps)
   {
       SetLastError(ERROR_INVALID_HANDLE_W);
@@ -427,8 +427,9 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
 	hdcWidth  = pOS2bmp->cx;
   }
 
-  //win32 coordinates are of the left top, OS/2 expects left bottom
+  //win32 coordinates are relative to left top, OS/2 expects left bottom
   //source rectangle is non-inclusive (top, right not included)
+  //destination rectangle is incl.-inclusive (everything included)
   if(nXdest + nDestWidth > hdcWidth) {
 	nDestWidth  = hdcWidth - nXdest;
   }
@@ -437,8 +438,8 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
   }
   point[0].x = nXdest;
   point[0].y = hdcHeight - nYdest - nDestHeight;
-  point[1].x = nXdest + nDestWidth;
-  point[1].y = hdcHeight - nYdest;
+  point[1].x = nXdest + nDestWidth - 1;
+  point[1].y = hdcHeight - nYdest - 1;
 
   //target rectangle is inclusive-inclusive
   if(nXsrc + nSrcWidth > pOS2bmp->cx) {
@@ -452,6 +453,17 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
   point[3].x = nXsrc + nSrcWidth;
   point[3].y = pOS2bmp->cy - nYsrc;
 
+  dprintf(("DIBSection::BitBlt (%d,%d)(%d,%d) from (%d,%d)(%d,%d) dim (%d,%d)(%d,%d)", point[0].x, point[0].y,
+           point[1].x, point[1].y, point[2].x, point[2].y, point[3].x, point[3].y,
+           nDestWidth, nDestHeight, nSrcWidth, nSrcHeight));
+
+/*
+  hwndDest = Win32ToOS2Handle(hwndDest);
+  if(hwndDest != 0)
+  {
+    	hps = WinGetPS(hwndDest);
+  }
+*/
   oldyinversion = GpiQueryYInversion(hps);
   if(oldyinversion != 0) {
 	GpiEnableYInversion(hps, 0);
@@ -510,6 +522,12 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
   }
   else	rc = GpiDrawBits(hps, bitmapBits, pOS2bmp, 4, &point[0], ROP_SRCCOPY, os2mode);
 
+/*
+  if(hwndDest != 0)
+  {
+    WinReleasePS(hps);
+  }
+*/
   if(rc == GPI_OK) {
    	DIBSection *destdib = DIBSection::findHDC(hdcDest);
         if(destdib) {
@@ -518,6 +536,7 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
 	//restore old y inversion height
 	if(fRestoryYInversion) GpiEnableYInversion(hps, oldyinversion);
     	SetLastError(ERROR_SUCCESS_W);
+
     	return(TRUE);
   }
   if(fRestoryYInversion) GpiEnableYInversion(hps, oldyinversion);
