@@ -1,4 +1,4 @@
-/* $Id: oslibdos.h,v 1.39 2001-11-11 13:46:19 bird Exp $ */
+/* $Id: oslibdos.h,v 1.40 2001-11-29 10:53:28 phaller Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -356,6 +356,8 @@ BOOL  OSLibDosSetThreadAffinity(DWORD dwThreadAffinityMask);
 #define MASK_SYSTEM	0
 #define MASK_THREAD     1
 BOOL  OSLibDosQueryAffinity(DWORD fMaskType, DWORD *pdwThreadAffinityMask);
+
+DWORD OSLibDosDevConfig(PVOID pdevinfo, ULONG item);
 
 #endif //__OSLIBDOS_H__
 

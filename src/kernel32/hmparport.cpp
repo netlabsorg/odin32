@@ -1,4 +1,4 @@
-/* $Id: hmparport.cpp,v 1.11 2001-11-29 00:20:48 phaller Exp $ */
+/* $Id: hmparport.cpp,v 1.12 2001-11-29 10:53:27 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -143,8 +143,26 @@ HMDeviceParPortClass::HMDeviceParPortClass(LPCSTR lpDeviceName) : HMDeviceHandle
   dprintf(("HMDeviceParPortClass::HMDevParPortClass(%s)\n",
            lpDeviceName));
   
+#ifndef DEVINFO_PRINTER
+#define DEVINFO_PRINTER         0
+#endif
+  
+  // first, we determine the number of parallel port devices available
+  BYTE  bParallelPorts;
+  DWORD rc = OSLibDosDevConfig(&bParallelPorts,
+                               DEVINFO_PRINTER);
+  dprintf(("HMDeviceParPortClass: Parallel ports reported: %d\n",
+          bParallelPorts));
+  if (0 == bParallelPorts)
+    return;
+  
+  // @@@PH
+  // query configuration data from Resource Manager
+  // (base i/o ports, etc. for the IOCTL_INTERNAL_GET_xxx)
+  
+  
   VOID *pData;
-  dprintf(("HMDeviceParPortClass: Register LPT1 to LPT3 with Handle Manager\n"));
+  dprintf(("HMDeviceParPortClass: Registering LPTs with Handle Manager\n"));
   
   pData = CreateDevData();
   if(pData!= NULL)
@@ -155,7 +173,7 @@ HMDeviceParPortClass::HMDeviceParPortClass(LPCSTR lpDeviceName) : HMDeviceHandle
     // Note: \\.\LPTx: is invalid (NT4SP6)
     PSZ pszLPT  = strdup("\\\\.\\LPTx");
     PSZ pszLPT2 = strdup("\\Device\\ParallelPort1");
-    for (char ch = '1'; ch <= '3'; ch++)
+    for (char ch = '1'; ch <= '1' + (bParallelPorts - 1); ch++)
     {
       pszLPT[7] = ch;
       pszLPT2[20] = ch;
