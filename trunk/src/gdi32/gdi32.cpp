@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.48 2000-06-01 11:27:05 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.49 2000-06-01 19:00:05 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <odinwrap.h>
 #include "misc.h"
 #include "callback.h"
 #include "unicode.h"
@@ -23,6 +24,8 @@
 
 #define DBG_LOCALLOG    DBG_gdi32
 #include "dbglocal.h"
+
+ODINDEBUGCHANNEL(GDI32-GDI32)
 
 //******************************************************************************
 //******************************************************************************
@@ -1076,10 +1079,9 @@ int WIN32API IntersectClipRect(HDC arg1, int arg2, int arg3, int arg4, int  arg5
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API LPtoDP( HDC arg1, PPOINT arg2, int  arg3)
+ODINFUNCTION3(BOOL, LPtoDP, HDC, hdc, PPOINT, lpPoints, int, nCount)
 {
-    dprintf(("GDI32: LPtoDP"));
-    return O32_LPtoDP(arg1, arg2, arg3);
+    return O32_LPtoDP(hdc, lpPoints, nCount);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1255,52 +1257,45 @@ int WIN32API SetGraphicsMode(HDC arg1, int  arg2)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API SetMapMode( HDC arg1, int  arg2)
+ODINFUNCTION2(int, SetMapMode, HDC, hdc, int, fnMapMode)
 {
-    dprintf(("GDI32: SetMapMode"));
-    return O32_SetMapMode(arg1, arg2);
+    return O32_SetMapMode(hdc, fnMapMode);
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API SetMapperFlags( HDC arg1, DWORD  arg2)
+ODINFUNCTION2(DWORD, SetMapperFlags, HDC, hdc, DWORD, dwFlag)
 {
-    dprintf(("GDI32: SetMapperFlags"));
-    return O32_SetMapperFlags(arg1, arg2);
+    return O32_SetMapperFlags(hdc, dwFlag);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetMiterLimit( HDC arg1, float  arg2, float *  arg3)
+ODINFUNCTION3(BOOL, SetMiterLimit, HDC, hdc, float, eNewLimit, float* ,peOldLimit)
 {
-    dprintf(("GDI32: SetMiterLimit"));
-    return O32_SetMiterLimit(arg1, arg2, arg3);
+    return O32_SetMiterLimit(hdc, eNewLimit, peOldLimit);
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API SetPolyFillMode( HDC arg1, int  arg2)
+ODINFUNCTION2(int, SetPolyFillMode, HDC, hdc, int, iPolyFillMode)
 {
-    dprintf(("GDI32: SetPolyFillMode"));
-    return O32_SetPolyFillMode(arg1, arg2);
+    return O32_SetPolyFillMode(hdc, iPolyFillMode);
 }
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API SetTextAlign( HDC arg1, UINT  arg2)
+ODINFUNCTION2(UINT, SetTextAlign, HDC, hdc, UINT, fMode)
 {
-    dprintf(("GDI32: SetTextAlign"));
-    return O32_SetTextAlign(arg1, arg2);
+    return O32_SetTextAlign(hdc, fMode);
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API SetTextCharacterExtra( HDC arg1, int  arg2)
+ODINFUNCTION2(int, SetTextCharacterExtra, HDC, hdc, int, nCharExtra)
 {
-    dprintf(("GDI32: SetTextCharacterExtra"));
-    return O32_SetTextCharacterExtra(arg1, arg2);
+    return O32_SetTextCharacterExtra(hdc, nCharExtra);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetTextJustification( HDC arg1, int arg2, int  arg3)
+ODINFUNCTION3(BOOL, SetTextJustification, HDC, hdc, int, nBreakExtra, int, nBreakCount)
 {
-    dprintf(("GDI32: SetTextJustification"));
-    return O32_SetTextJustification(arg1, arg2, arg3);
+    return O32_SetTextJustification(hdc, nBreakExtra, nBreakCount);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1362,17 +1357,17 @@ int WIN32API StartPage( HDC arg1)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API UnrealizeObject( HGDIOBJ arg1)
+BOOL WIN32API UnrealizeObject( HGDIOBJ hObject)
 {
-    dprintf(("GDI32: UnrealizeObject"));
-    return O32_UnrealizeObject(arg1);
+    dprintf(("GDI32: UnrealizeObject %x", hObject));
+    return O32_UnrealizeObject(hObject);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API WidenPath( HDC arg1)
+BOOL WIN32API WidenPath( HDC hdc)
 {
-    dprintf(("GDI32: WidenPath"));
-    return O32_WidenPath(arg1);
+    dprintf(("GDI32: WidenPath %x", hdc));
+    return O32_WidenPath(hdc);
 }
 //******************************************************************************
 //TODO: Not implemented
