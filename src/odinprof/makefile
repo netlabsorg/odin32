@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2002-02-23 23:50:47 bird Exp $
+# $Id: makefile,v 1.3 2003-01-23 13:11:14 sandervl Exp $
 
 #
 # Odin32 API
@@ -11,7 +11,7 @@
 # Tell the buildenvironment not to
 #
 NOTEXPDEF   = 1
-
+STATIC_CRT  = 1
 
 #
 # Compiler, tools, and interference rules.

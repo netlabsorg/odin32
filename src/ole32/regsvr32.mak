@@ -1,4 +1,4 @@
-# $Id: regsvr32.mak,v 1.2 2000-12-02 23:40:43 bird Exp $
+# $Id: regsvr32.mak,v 1.3 2003-01-23 13:14:16 sandervl Exp $
 
 #
 # Odin32 API
@@ -13,7 +13,7 @@
 EXETARGET       = 1
 DEFFILE         = $(TARGET).def
 MAKEFILE        = regsvr32.mak
-
+STATIC_CRT      = 1
 
 #
 # Compiler, tools, and interference rules.
@@ -35,9 +35,8 @@ LIBS = \
 $(ODIN32_LIB)/user32.lib \
 $(ODIN32_LIB)/kernel32.lib \
 $(ODIN32_LIB)/ole32.lib \
-$(ODIN32_LIB)/$(ODINCRT).lib \
 OS2386.LIB \
-$(RTLLIB_O)
+$(RTLLIB)
 
 
 #
