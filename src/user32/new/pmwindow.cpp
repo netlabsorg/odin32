@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.14 1999-07-25 09:19:21 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.15 1999-07-25 15:51:56 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -472,6 +472,9 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         if(fl & KC_PREVDOWN) {
             keyflags |= KEY_PREVDOWN;
         }
+        if(fl & KC_DEADKEY) {
+            keyflags |= KEY_DEADKEY;
+        }
         if(win32wnd->MsgChar(SHORT1FROMMP(mp2), CHAR3FROMMP(mp1), CHAR4FROMMP(mp1), vkey, keyflags)) {
             goto RunDefWndProc;
         }
@@ -498,6 +501,22 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         goto RunDefWndProc;
     }
 
+    case WM_QUERYWINDOWPARAMS:
+    {
+     PWNDPARAMS wndpars = (PWNDPARAMS)mp1;
+     ULONG textlen;
+     PSZ   wintext;
+
+        if(wndpars->fsStatus & (WPM_CCHTEXT | WPM_TEXT)) {
+            if(wndpars->fsStatus & WPM_CCHTEXT)
+                wndpars->cchText = win32wnd->MsgGetTextLength();
+            if(wndpars->fsStatus & WPM_TEXT)
+                wndpars->pszText = win32wnd->MsgGetText();
+            return (MRESULT)TRUE;
+        }
+        goto RunDefWndProc;
+    }
+
     case WM_PAINT:
         dprintf(("OS2: WM_PAINT %x", hwnd));
         if(win32wnd->MsgPaint(0, 0)) {
@@ -514,7 +533,6 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     case WM_SYSCOLORCHANGE:
     case WM_SYSVALUECHANGED:
     case WM_CALCVALIDRECTS:
-    case WM_QUERYWINDOWPARAMS:
     case WM_SETSELECTION:
     case WM_PPAINT:
     case WM_PSETFOCUS:

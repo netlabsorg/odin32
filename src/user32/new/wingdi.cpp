@@ -1,4 +1,4 @@
-/* $Id: wingdi.cpp,v 1.7 1999-07-25 09:19:22 sandervl Exp $ */
+/* $Id: wingdi.cpp,v 1.8 1999-07-25 15:51:57 sandervl Exp $ */
 /*
  * Win32 Window graphics apis for OS/2
  *
@@ -64,8 +64,15 @@ HDC WIN32API GetDC(HWND hwnd)
 
    window = Win32Window::GetWindowFromHandle(hwnd);
    if(!window) {
-    dprintf(("GetDC, window %x not found", hwnd));
-    return 0;
+    	dprintf(("GetDC, window %x not found", hwnd));
+#ifdef OPEN32_GDI
+	dprintf(("GetDC %x", hwnd));
+    	return O32_GetDC(0);
+#else
+	//desktop window?
+	dprintf(("GetDC %x", hwnd));
+	return OSLibWinGetPS(OSLIB_HWND_DESKTOP);
+#endif
    }
    dprintf(("GetDC %x", hwnd));
 #ifdef OPEN32_GDI
@@ -88,6 +95,7 @@ HDC WIN32API GetDCEx(HWND hwnd, HRGN arg2, DWORD arg3)
 //******************************************************************************
 int WIN32API ReleaseDC(HWND hwnd, HDC hdc)
 {
+    dprintf(("ReleaseDC %x %x", hwnd, hdc));
 #ifdef OPEN32_GDI
     return O32_ReleaseDC(hwnd,hdc);
 #else
@@ -110,6 +118,17 @@ HDC WIN32API GetWindowDC(HWND hwnd)
    return O32_GetWindowDC(window->getOS2WindowHandle());
 #else
    return OSLibWinGetPS(window->getOS2FrameWindowHandle());
+#endif
+}
+//******************************************************************************
+//******************************************************************************
+HWND WIN32API WindowFromDC(HDC hdc)
+{
+    dprintf(("USER32:  WindowFromDC\n"));
+#ifdef OPEN32_GDI
+    return O32_WindowFromDC(hdc);
+#else
+    ?????
 #endif
 }
 //******************************************************************************
