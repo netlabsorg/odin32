@@ -1,4 +1,4 @@
-/* $Id: heapstring.cpp,v 1.40 2001-06-24 14:13:04 sandervl Exp $ */
+/* $Id: heapstring.cpp,v 1.41 2001-07-13 14:33:00 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -57,6 +57,10 @@ int WIN32API lstrlenA(LPCSTR arg1)
   dprintf2(("KERNEL32: lstrlenA(%s)\n",
            arg1));
 
+  if(arg1 == NULL) {
+      SetLastError(ERROR_INVALID_PARAMETER);
+      return 0;
+  }
   return strlen(arg1);
 }
 
@@ -76,6 +80,11 @@ int WIN32API lstrlenA(LPCSTR arg1)
 int WIN32API lstrlenW(LPCWSTR arg1)
 {
   int rc;
+
+  if(arg1 == NULL) {
+      SetLastError( ERROR_INVALID_PARAMETER );
+      return 0;
+  }
 
   rc = UniStrlen( (UniChar*)arg1);
   dprintf2(("KERNEL32: lstrlenW(%08xh) returns %d\n",
