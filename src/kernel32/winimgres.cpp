@@ -1,4 +1,4 @@
-/* $Id: winimgres.cpp,v 1.29 1999-11-30 14:15:55 sandervl Exp $ */
+/* $Id: winimgres.cpp,v 1.30 1999-12-19 19:54:31 sandervl Exp $ */
 
 /*
  * Win32 PE Image class (resource methods)
@@ -295,7 +295,7 @@ HRSRC Win32ImageBase::findResourceW(LPWSTR lpszName, LPWSTR lpszType, ULONG lang
     }
     else    astring2 = (char *)lpszType;
 
-    hres = (HRSRC) findResourceA(astring1, astring2);
+    hres = (HRSRC) findResourceA(astring1, astring2, lang);
 
     if(HIWORD(astring1)) FreeAsciiString(astring1);
     if(HIWORD(astring2)) FreeAsciiString(astring2);
