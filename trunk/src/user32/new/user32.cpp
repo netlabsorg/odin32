@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.20 1999-09-10 19:00:11 dengert Exp $ */
+/* $Id: user32.cpp,v 1.21 1999-09-14 20:46:40 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -30,7 +30,6 @@
 
 #include "user32.h"
 #include <winicon.h>
-#include "usrcall.h"
 #include "syscolor.h"
 
 #include <wchar.h>
@@ -826,36 +825,6 @@ BOOL WIN32API EndDeferWindowPos( HDWP arg1)
     WriteLog("USER32:  EndDeferWindowPos\n");
 #endif
     return O32_EndDeferWindowPos(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API EnumChildWindows(HWND hwnd, WNDENUMPROC lpfn, LPARAM lParam)
-{
- BOOL                rc;
- EnumWindowCallback *callback = new EnumWindowCallback(lpfn, lParam);
-
-#ifdef DEBUG
-  WriteLog("USER32:  EnumChildWindows\n");
-#endif
-  rc = O32_EnumChildWindows(hwnd, callback->GetOS2Callback(), (LPARAM)callback);
-  if(callback)
-    delete callback;
-  return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API EnumWindows(WNDENUMPROC lpfn, LPARAM lParam)
-{
- BOOL                rc;
- EnumWindowCallback *callback = new EnumWindowCallback(lpfn, lParam);
-
-#ifdef DEBUG
-  WriteLog("USER32:  EnumWindows\n");
-#endif
-  rc = O32_EnumWindows(callback->GetOS2Callback(), (LPARAM)callback);
-  if(callback)
-        delete callback;
-  return(rc);
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.50 1999-09-13 16:13:46 dengert Exp $
+# $Id: makefile,v 1.51 1999-09-14 20:46:39 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -24,7 +24,7 @@ TARGET = user32
 OBJS =  user32.obj loadres.obj \
         dde.obj heapshared.obj win32wndhandle.obj \
         icon.obj hook.obj hooks.obj winmenu.obj \
-        usrcall.obj defwndproc.obj syscolor.obj char.obj initterm.obj \
+        defwndproc.obj syscolor.obj char.obj initterm.obj \
         uitools.obj unknown.obj spy.obj wndmsg.obj \
         pmwindow.obj win32class.obj win32wnd.obj win32dlg.obj \
         msgbox.obj window.obj windowmsg.obj windowclass.obj win32wbase.obj \
@@ -67,7 +67,6 @@ loadres.obj: loadres.cpp user32.h dib.h
 icon.obj: icon.cpp $(PDWIN32_INCLUDE)\winicon.h
 winmenu.obj: winmenu.cpp user32.h $(PDWIN32_INCLUDE)\winres.h $(PDWIN32_INCLUDE)\winresmenu.h win32wbase.h
 syscolor.obj: syscolor.cpp syscolor.h
-usrcall.obj: usrcall.cpp usrcall.h
 dde.obj: dde.cpp
 hook.obj: hook.cpp hooks.h
 defwndproc.obj: defwndproc.cpp syscolor.h win32wmdiclient.h win32wbase.h win32wnd.h win32dlg.h
