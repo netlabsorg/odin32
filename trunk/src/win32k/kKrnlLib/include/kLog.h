@@ -1,4 +1,4 @@
-/* $Id: kLog.h,v 1.1 2001-10-14 22:52:16 bird Exp $
+/* $Id: kLog.h,v 1.2 2001-10-16 02:20:39 bird Exp $
  *
  * kLog - Generic Logging and Trace Routines.
  *
@@ -50,6 +50,13 @@
 #define KLOGPOS_DECL        const char *pszFile, int iLine, const char *pszFunction
 
 
+/*
+ * RAS Data.
+ */
+#define KLOG_MAJOR          253
+#define KLOG_MINOR          42
+
+
 /*******************************************************************************
 *   Structures and Typedefs                                                    *
 *******************************************************************************/
@@ -89,6 +96,7 @@ typedef struct kLogTypedefInfo
 typedef struct kLogTypeInfo
 {
     const char *            pszType;
+    const char *            pszFormat;
     unsigned short          fCurrent;
     const unsigned short    fDefault;
 } KLOGTYPEINFO, *PKLOGTYPEINFO;
@@ -147,10 +155,14 @@ typedef union kLogSeqHandle
 KBOOL       KLIBCALL kLogInit(unsigned long cbBufferSize);
 KBOOL       KLIBCALL kLogInitBuffer(unsigned long cbBufferSize);
 
-HKLOGMOD    KLIBCALL kLogInitMod(PKLOGMODDATA pModData, KLOGPOS_DECL);
-#define KLOGINITMOD(pModData)              kLogInitMod(pModData, KLOGPOS_EXT)
+HKLOGMOD    KLIBCALL kLogInitMod(PKLOGMODDATA pMod, KLOGPOS_DECL);
+void        KLIBCALL kLogEntry(HKLOGMOD hLogMod, KLOGPOS_DECL, const char *pszFuncProto, KBOOL fOptlink, ...);
+void        KLIBCALL kLogExit(HKLOGMOD hLogMod, KLOGPOS_DECL, const char *pszReturnType, unsigned uReturn);
+void        KLIBCALL kLog(HKLOGMOD hLogMod, KLOGPOS_DECL, int iType, ...);
 
-void        KLIBCALL kLog(HKLOGMOD hLogMod, int iType, KLOGPOS_DECL, ...);
+#define KLOGINITMOD(pMod)                   kLogInitMod(pMod, KLOGPOS_EXT)
+#define KLOGENTRY(hLogMod, pszFuncProto)        kLogEntry(hLogMod, KLOGPOS_EXT, pszFuncProto, FALSE)
+#define KLOGEXIT(hLogMod, pszType, uValue)      kLogExit(hLogMod, KLOGPOS_EXT, pszType, uValue)
 
 
 #endif
