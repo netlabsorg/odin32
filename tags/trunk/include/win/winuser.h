@@ -1,4 +1,4 @@
-/* $Id: winuser.h,v 1.16 1999-11-05 10:32:48 phaller Exp $ */
+/* $Id: winuser.h,v 1.17 1999-11-08 13:45:35 sandervl Exp $ */
 
 #ifndef __INCLUDE_WINUSER_H
 #define __INCLUDE_WINUSER_H
@@ -2724,6 +2724,22 @@ typedef struct
 #define VK_NONAME           0xFC
 #define VK_PA1              0xFD
 #define VK_OEM_CLEAR        0xFE
+
+/**************************************************************/
+/* The following vkey definitions are undocumented in Windows */
+/**************************************************************/
+#define VK_SEMICOLON       0xBA
+#define VK_EQUAL           0xBB
+#define VK_COMMA           0xBC
+#define VK_HYPHEN          0xBD
+#define VK_PERIOD          0xBE
+#define VK_SLASH           0xBF
+#define VK_GRAVE           0xC0
+#define VK_BRACKETLEFT     0xDB
+#define VK_BACKSLASH       0xDC
+#define VK_BRACKETRIGHT    0xDD
+#define VK_QUOTESINGLE     0xDE
+#define VK_EXTRA           0xE2
 
   /* Key status flags for mouse events */
 #define MK_LBUTTON          0x0001

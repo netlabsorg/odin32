@@ -1,4 +1,4 @@
-/* $Id: winconst.h,v 1.11 1999-10-17 19:30:51 cbratschi Exp $ */
+/* $Id: winconst.h,v 1.12 1999-11-08 13:45:35 sandervl Exp $ */
 
 /*
  * Win32 constants
@@ -244,3 +244,10 @@
 #define SC_TASKLIST_W     0xf130
 #define SC_SCREENSAVE_W   0xf140
 #define SC_HOTKEY_W       0xf150
+
+/* Key status flags for mouse events */
+#define MK_LBUTTON_W        0x0001
+#define MK_RBUTTON_W        0x0002
+#define MK_SHIFT_W          0x0004
+#define MK_CONTROL_W        0x0008
+#define MK_MBUTTON_W        0x0010

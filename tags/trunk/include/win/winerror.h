@@ -1,3 +1,4 @@
+/* $Id: winerror.h,v 1.4 1999-11-08 13:46:45 sandervl Exp $ */
 #ifndef __WINE_WINERROR_H
 #define __WINE_WINERROR_H
 
