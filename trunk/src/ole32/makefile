@@ -70,35 +70,335 @@ $(TARGET).lib: $(TARGET)exp.def
 $(TARGET)exp.def: $(TARGET).def
         $(IMPDEF) $** $@
 
+.\stubs.obj: \
+    .\stubs.cpp \
+    .\ole32.h \
+    $(PDWIN32_INCLUDE)/win/objbase.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_inplace.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleobj.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_surrogate.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleview.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_cache.h
 
-antimoniker.obj:	antimoniker.cpp
-bindctx.obj:		bindctx.cpp
-clsid.obj:		clsid.cpp 
-compositemoniker.obj:	compositemoniker.cpp
-datacache.obj:		datacache.cpp
-defaulthandler.obj:	defaulthandler.cpp
-filemoniker.obj:	filemoniker.cpp
-guid.obj:		guid.cpp 
-hglobalstream.obj:	hglobalstream.cpp
-initialise.obj:		initialise.cpp 
-initterm.obj:		initterm.cpp
-iunknown.obj:		iunknown.cpp
-itemmoniker.obj:	itemmoniker.cpp
-library.obj:		library.cpp
-memlockbytes.obj:	memlockbytes.cpp
-moniker.obj:		moniker.cpp
-oString.obj:		oString.cpp 
-ole2.obj:		ole2.cpp 
-oleobj.obj:		oleobj.cpp 
-ole32.obj:		ole32.cpp 
-oleClip.obj:		oleClip.cpp 
-oleDrag.obj:		oleDrag.cpp 
-oleMenu.obj:		oleMenu.cpp 
-stg_bigblockfile.obj:	stg_bigblockfile.cpp
-stg_stream.obj:		stg_stream.cpp
-storage.obj:		storage.cpp
-stubs.obj:		stubs.cpp 
-taskmem.obj:		taskmem.cpp
+.\storage.obj: \
+    .\storage.cpp \
+    .\ole32.h \
+    $(PDWIN32_INCLUDE)/win/objbase.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_inplace.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleobj.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_surrogate.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleview.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_cache.h \
+    $(PDWIN32_INCLUDE)/win/debugtools.h \
+    $(PDWIN32_INCLUDE)/heapstring.h \
+    .\storage.h \
+    $(PDWIN32_INCLUDE)/win/wtypes.h \
+    $(PDWIN32_INCLUDE)/win/winnt.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_storage.h
+
+.\stg_stream.obj: \
+    .\stg_stream.cpp \
+    .\ole32.h \
+    $(PDWIN32_INCLUDE)/win/objbase.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_inplace.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleobj.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_surrogate.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleview.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_cache.h \
+    $(PDWIN32_INCLUDE)/win/debugtools.h \
+    $(PDWIN32_INCLUDE)/heapstring.h \
+    .\storage.h \
+    $(PDWIN32_INCLUDE)/win/wtypes.h \
+    $(PDWIN32_INCLUDE)/win/winnt.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_storage.h
+
+.\stg_bigblockfile.obj: \
+    .\stg_bigblockfile.cpp \
+    .\ole32.h \
+    $(PDWIN32_INCLUDE)/win/objbase.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_inplace.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleobj.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_surrogate.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleview.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_cache.h \
+    $(PDWIN32_INCLUDE)/win/debugtools.h \
+    $(PDWIN32_INCLUDE)/heapstring.h \
+    .\storage.h \
+    $(PDWIN32_INCLUDE)/win/wtypes.h \
+    $(PDWIN32_INCLUDE)/win/winnt.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_storage.h
+
+.\regsvr32.obj: \
+    .\regsvr32.cpp
+
+.\oString.obj: \
+    .\oString.cpp \
+    .\ole32.h \
+    .\oString.h \
+    $(PDWIN32_INCLUDE)/win/objbase.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_inplace.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleobj.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_surrogate.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleview.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_cache.h
+
+.\oleobj.obj: \
+    .\oleobj.cpp \
+    .\ole32.h \
+    $(PDWIN32_INCLUDE)/win/objbase.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_inplace.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleobj.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_surrogate.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleview.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_cache.h \
+    $(PDWIN32_INCLUDE)/win/debugtools.h
+
+.\oleMenu.obj: \
+    .\oleMenu.cpp \
+    .\ole32.h \
+    .\oString.h \
+    $(PDWIN32_INCLUDE)/win/objbase.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_inplace.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleobj.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_surrogate.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleview.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_cache.h \
+    $(PDWIN32_INCLUDE)/win/commctrl.h
+
+.\oleDrag.obj: \
+    .\oleDrag.cpp \
+    .\ole32.h \
+    .\oString.h \
+    $(PDWIN32_INCLUDE)/win/objbase.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_inplace.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleobj.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_surrogate.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleview.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_cache.h \
+    $(PDWIN32_INCLUDE)/win/commctrl.h
+
+.\oleClip.obj: \
+    .\oleClip.cpp \
+    .\ole32.h \
+    .\oString.h \
+    $(PDWIN32_INCLUDE)/win/objbase.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_inplace.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleobj.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_surrogate.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleview.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_cache.h \
+    $(PDWIN32_INCLUDE)/win/commctrl.h
+
+.\ole32.obj: \
+    .\ole32.cpp \
+    .\ole32.h \
+    .\oString.h \
+    $(PDWIN32_INCLUDE)/win/objbase.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_inplace.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleobj.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_surrogate.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleview.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_cache.h \
+    .\filemoniker.h \
+    .\moniker.h
+
+.\ole2.obj: \
+    .\ole2.cpp \
+    .\ole32.h \
+    .\oString.h \
+    $(PDWIN32_INCLUDE)/win/objbase.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_inplace.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleobj.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_surrogate.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleview.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_cache.h \
+    $(PDWIN32_INCLUDE)/win/commctrl.h
+
+.\moniker.obj: \
+    .\moniker.cpp \
+    .\ole32.h \
+    $(PDWIN32_INCLUDE)/win/objbase.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_inplace.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleobj.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_surrogate.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleview.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_cache.h \
+    .\moniker.h
+
+.\memlockbytes.obj: \
+    .\memlockbytes.cpp \
+    .\ole32.h \
+    $(PDWIN32_INCLUDE)/win/objbase.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_inplace.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleobj.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_surrogate.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleview.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_cache.h \
+    $(PDWIN32_INCLUDE)/win/debugtools.h
+
+.\library.obj: \
+    .\library.cpp \
+    .\ole32.h \
+    .\oString.h \
+    $(PDWIN32_INCLUDE)/win/objbase.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_inplace.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleobj.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_surrogate.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleview.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_cache.h \
+    .\moniker.h
+
+.\iunknown.obj: \
+    .\iunknown.cpp \
+    .\ole32.h \
+    .\oString.h \
+    $(PDWIN32_INCLUDE)/win/objbase.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_inplace.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleobj.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_surrogate.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleview.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_cache.h
+
+.\itemmoniker.obj: \
+    .\itemmoniker.cpp \
+    .\ole32.h \
+    $(PDWIN32_INCLUDE)/win/objbase.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_inplace.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleobj.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_surrogate.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleview.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_cache.h \
+    $(PDWIN32_INCLUDE)/win/debugtools.h \
+    $(PDWIN32_INCLUDE)/heapstring.h
+
+.\initterm.obj: \
+    .\initterm.cpp
+
+.\initialise.obj: \
+    .\initialise.cpp \
+    .\ole32.h \
+    $(PDWIN32_INCLUDE)/win/objbase.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_inplace.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleobj.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_surrogate.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleview.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_cache.h
+
+.\hglobalstream.obj: \
+    .\hglobalstream.cpp \
+    .\ole32.h \
+    $(PDWIN32_INCLUDE)/win/objbase.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_inplace.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleobj.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_surrogate.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleview.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_cache.h \
+    $(PDWIN32_INCLUDE)/win/debugtools.h \
+    $(PDWIN32_INCLUDE)/heapstring.h
+
+.\guid.obj: \
+    .\guid.cpp \
+    .\ole32.h \
+    $(PDWIN32_INCLUDE)/win/objbase.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_inplace.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleobj.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_surrogate.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleview.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_cache.h
+
+.\filemoniker.obj: \
+    .\filemoniker.cpp \
+    .\ole32.h \
+    $(PDWIN32_INCLUDE)/win/objbase.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_inplace.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleobj.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_surrogate.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleview.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_cache.h \
+    $(PDWIN32_INCLUDE)/win/debugtools.h \
+    $(PDWIN32_INCLUDE)/heapstring.h \
+    .\filemoniker.h
+
+.\defaulthandler.obj: \
+    .\defaulthandler.cpp \
+    .\ole32.h \
+    $(PDWIN32_INCLUDE)/win/objbase.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_inplace.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleobj.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_surrogate.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleview.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_cache.h \
+    $(PDWIN32_INCLUDE)/win/debugtools.h \
+    $(PDWIN32_INCLUDE)/heapstring.h \
+    $(PDWIN32_INCLUDE)/win/oleauto.h
+
+.\datacache.obj: \
+    .\datacache.cpp \
+    .\ole32.h \
+    $(PDWIN32_INCLUDE)/win/objbase.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_inplace.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleobj.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_surrogate.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleview.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_cache.h \
+    $(PDWIN32_INCLUDE)/win/debugtools.h \
+    $(PDWIN32_INCLUDE)/heapstring.h
+
+.\compositemoniker.obj: \
+    .\compositemoniker.cpp \
+    .\ole32.h \
+    $(PDWIN32_INCLUDE)/win/objbase.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_inplace.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleobj.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_surrogate.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleview.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_cache.h \
+    $(PDWIN32_INCLUDE)/win/debugtools.h
+
+.\clsid.obj: \
+    .\clsid.cpp \
+    .\ole32.h \
+    .\oString.h \
+    $(PDWIN32_INCLUDE)/win/objbase.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_inplace.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleobj.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_surrogate.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleview.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_cache.h
+
+.\bindctx.obj: \
+    .\bindctx.cpp \
+    .\ole32.h \
+    $(PDWIN32_INCLUDE)/win/objbase.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_inplace.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleobj.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_surrogate.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleview.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_cache.h \
+    $(PDWIN32_INCLUDE)/win/debugtools.h \
+    $(PDWIN32_INCLUDE)/heapstring.h
+
+.\antimoniker.obj: \
+    .\antimoniker.cpp \
+    .\ole32.h \
+    $(PDWIN32_INCLUDE)/win/objbase.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_inplace.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleobj.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_surrogate.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleview.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_cache.h \
+    $(PDWIN32_INCLUDE)/win/debugtools.h
+
+.\taskmem.obj: \
+    .\taskmem.cpp \
+    .\ole32.h \
+    .\oString.h \
+    $(PDWIN32_INCLUDE)/win/objbase.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_inplace.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleobj.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_surrogate.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_oleview.h \
+    $(PDWIN32_INCLUDE)/win/wine/obj_cache.h
 
 regsvr32.obj:	regsvr32.cpp
     $(CC) -C $(CXXFLAGS) -Ge+ -Tm+ $**
