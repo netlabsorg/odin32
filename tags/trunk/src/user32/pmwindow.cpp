@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.10 1999-09-26 22:24:28 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.11 1999-09-28 13:27:35 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -704,7 +704,7 @@ VirtualKeyFound:
         }
         //NOTE: These actually need to be posted so that the next message retrieved by GetMessage contains
         //      the newly generated WM_CHAR message.
-        if(fTranslated) {//TranslatedMessage was called before DispatchMessage, so send WM_CHAR messages
+        if(fTranslated && !((flags & KC_KEYUP) == KC_KEYUP)) {//TranslatedMessage was called before DispatchMessage, so send WM_CHAR messages
             ULONG keyflags = 0, vkey = 0;
             ULONG fl = SHORT1FROMMP(mp1);
 
