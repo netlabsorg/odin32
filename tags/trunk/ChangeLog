@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.1074 2000-08-18 18:17:58 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1075 2000-08-18 21:29:40 sandervl Exp $ */
 
  2000-08-18: Sander van Leeuwen <sandervl@xs4all.nl>
     - GDI32:    Added support for level 2 debug logging
@@ -8,7 +8,8 @@
                 (PowerDVD colors still wrong)
     - KERNEL32: Added display driver keys for PowerDVD video tester applet
                 Extra logging for GetProcAddress
-
+    - DDRAW:    Changed File and Product version to 0x0404, 0x05650114
+    - DSOUND:   Changed File and Product version to 0x0404, 0x056500A4
  2000-08-18: Patrick Haller <phaller@gmx.net>
     - NTDLL:    roughly synchronized with current WINE
     - SHELL32:  roughly synchronized with current WINE
