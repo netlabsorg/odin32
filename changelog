@@ -1,8 +1,13 @@
-/* $Id: changelog,v 1.1685 2001-09-19 09:09:34 sandervl Exp $ */
+/* $Id: changelog,v 1.1686 2001-09-19 15:38:23 sandervl Exp $ */
+
+ 2000-09-19: Oliver Braun <Oliver.Braun@hamburg.de>
+    - USER32:   o PeekMessageW bugfix
 
  2001-09-19: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Changed GetLastActivePopup (still not complete)
                 o Prevent loop in DIALOG_IsAccelerator
+                o GetMenuItemInfoW bugfixes
+                o Ported the Wine MDI control
 
  2001-09-17: Patrick Haller <patrick.haller@innotek.de>
     - WS2_32:   o added stub for WSAIoctl() (Parsec)
