@@ -1,4 +1,4 @@
-/* $Id: winmenu.cpp,v 1.1 1999-07-20 07:42:36 sandervl Exp $ */
+/* $Id: winmenu.cpp,v 1.2 1999-08-30 11:59:54 sandervl Exp $ */
 
 /*
  * Win32 menu API functions for OS/2
@@ -17,7 +17,7 @@
  */
 #include <os2win.h>
 #include <stdlib.h>
-#include <win32wnd.h>
+#include <win32wbase.h>
 
 //******************************************************************************
 //******************************************************************************
@@ -50,7 +50,7 @@ HMENU WIN32API LoadMenuIndirectA( const MENUITEMTEMPLATEHEADER * arg1)
 
     rc = O32_LoadMenuIndirect(arg1);
     if(astring)
-	FreeAsciiString(astring);
+    FreeAsciiString(astring);
     return(rc);
 }
 //******************************************************************************
@@ -61,9 +61,9 @@ BOOL WIN32API DestroyMenu(HMENU hmenu)
 
     dprintf(("OS2DestroyMenu\n"));
     if(HIWORD(hmenu) == 0) {
-	SetLastError(ERROR_INVALID_PARAMETER);
-	return FALSE;
-    }    
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
+    }
     winres = (Win32Resource *)hmenu;
     delete winres;
     return TRUE;
@@ -82,12 +82,12 @@ HMENU WIN32API LoadMenuIndirectW(const MENUITEMTEMPLATEHEADER * arg1)
 //******************************************************************************
 HMENU WIN32API GetMenu( HWND hwnd)
 {
-  Win32Window *window;
+  Win32BaseWindow *window;
 
-    window = Win32Window::GetWindowFromHandle(hwnd);
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
-    	dprintf(("GetMenu, window %x not found", hwnd));
-    	return 0;
+        dprintf(("GetMenu, window %x not found", hwnd));
+        return 0;
     }
     dprintf(("GetMenu %x", hwnd));
     return window->GetMenu();
@@ -96,12 +96,12 @@ HMENU WIN32API GetMenu( HWND hwnd)
 //******************************************************************************
 BOOL WIN32API SetMenu( HWND hwnd, HMENU hmenu)
 {
-  Win32Window *window;
+  Win32BaseWindow *window;
 
-    window = Win32Window::GetWindowFromHandle(hwnd);
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
-    	dprintf(("GetMenu, window %x not found", hwnd));
-    	return 0;
+        dprintf(("GetMenu, window %x not found", hwnd));
+        return 0;
     }
     dprintf(("SetMenu %x %x\n", hwnd, hmenu));
     window->SetMenu(hmenu);

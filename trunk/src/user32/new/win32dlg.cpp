@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.1 1999-07-14 08:35:37 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.2 1999-08-30 11:59:53 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -17,14 +17,14 @@
 
 //******************************************************************************
 //******************************************************************************
-Win32Dialog::Win32Dialog() : Win32Window(OBJTYPE_DIALOG)
+Win32Dialog::Win32Dialog() : Win32BaseWindow(OBJTYPE_DIALOG)
 {
 }
 //******************************************************************************
 //******************************************************************************
 Win32Dialog::~Win32Dialog()
 {
-  
+
 }
 //******************************************************************************
 //******************************************************************************
@@ -41,20 +41,20 @@ LONG Win32Dialog::SetWindowLongA(int index, ULONG value)
 
   switch(index)
   {
-	case DWL_DLGPROC:
-		oldval = (LONG)Win32DlgProc;
-		Win32DlgProc = (DLGPROC)index;
-		return oldval;
-	case DWL_MSGRESULT:
-		oldval = msgResult;
-		msgResult = value;
-		return oldval;
-	case DWL_USER:
-		oldval = userDlgData;
-		userDlgData = value;
-		return oldval;
-	default:
-		return Win32Window::SetWindowLongA(index, value);
+    case DWL_DLGPROC:
+        oldval = (LONG)Win32DlgProc;
+        Win32DlgProc = (DLGPROC)index;
+        return oldval;
+    case DWL_MSGRESULT:
+        oldval = msgResult;
+        msgResult = value;
+        return oldval;
+    case DWL_USER:
+        oldval = userDlgData;
+        userDlgData = value;
+        return oldval;
+    default:
+        return Win32BaseWindow::SetWindowLongA(index, value);
   }
 }
 //******************************************************************************
@@ -63,14 +63,14 @@ ULONG Win32Dialog::GetWindowLongA(int index)
 {
   switch(index)
   {
-	case DWL_DLGPROC:
-		return (ULONG)Win32DlgProc;
-	case DWL_MSGRESULT:
-		return msgResult;
-	case DWL_USER:
-		return userDlgData;
-	default:
-		return Win32Window::GetWindowLongA(index);
+    case DWL_DLGPROC:
+        return (ULONG)Win32DlgProc;
+    case DWL_MSGRESULT:
+        return msgResult;
+    case DWL_USER:
+        return userDlgData;
+    default:
+        return Win32BaseWindow::GetWindowLongA(index);
   }
 }
 //******************************************************************************

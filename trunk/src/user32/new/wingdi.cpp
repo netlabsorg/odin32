@@ -1,4 +1,4 @@
-/* $Id: wingdi.cpp,v 1.10 1999-08-28 14:09:31 sandervl Exp $ */
+/* $Id: wingdi.cpp,v 1.11 1999-08-30 11:59:54 sandervl Exp $ */
 /*
  * Win32 Window graphics apis for OS/2
  *
@@ -12,7 +12,7 @@
 #include <os2win.h>
 #include <misc.h>
 
-#include <win32wnd.h>
+#include <win32wbase.h>
 #include <oslibwin.h>
 #include <oslibgdi.h>
 
@@ -23,13 +23,13 @@
 //******************************************************************************
 HDC WIN32API BeginPaint(HWND hwnd, PPAINTSTRUCT lps)
 {
-  Win32Window *window;
+  Win32BaseWindow *window;
   HDC hdc;
 
-    window = Win32Window::GetWindowFromHandle(hwnd);
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
-	dprintf(("GetDC, window %x not found", hwnd));
-	return 0;
+    dprintf(("GetDC, window %x not found", hwnd));
+    return 0;
     }
     window->MsgEraseBackGround(hdc);
 #ifdef OPEN32_GDI
@@ -63,18 +63,18 @@ BOOL WIN32API EndPaint(HWND hwnd, const PAINTSTRUCT *lps)
 //******************************************************************************
 HDC WIN32API GetDC(HWND hwnd)
 {
-  Win32Window *window;
+  Win32BaseWindow *window;
 
-   window = Win32Window::GetWindowFromHandle(hwnd);
+   window = Win32BaseWindow::GetWindowFromHandle(hwnd);
    if(!window) {
-	dprintf(("GetDC, window %x not found", hwnd));
+    dprintf(("GetDC, window %x not found", hwnd));
 #ifdef OPEN32_GDI
-	dprintf(("GetDC %x", hwnd));
-	return O32_GetDC(0);
+    dprintf(("GetDC %x", hwnd));
+    return O32_GetDC(0);
 #else
-	//desktop window?
-	dprintf(("GetDC %x", hwnd));
-	return OSLibWinGetPS(OSLIB_HWND_DESKTOP);
+    //desktop window?
+    dprintf(("GetDC %x", hwnd));
+    return OSLibWinGetPS(OSLIB_HWND_DESKTOP);
 #endif
    }
    dprintf(("GetDC %x", hwnd));
@@ -109,9 +109,9 @@ int WIN32API ReleaseDC(HWND hwnd, HDC hdc)
 //******************************************************************************
 HDC WIN32API GetWindowDC(HWND hwnd)
 {
-  Win32Window *window;
+  Win32BaseWindow *window;
 
-   window = Win32Window::GetWindowFromHandle(hwnd);
+   window = Win32BaseWindow::GetWindowFromHandle(hwnd);
    if(!window) {
     dprintf(("GetWindowDC, window %x not found", hwnd));
     return 0;
