@@ -1,8 +1,9 @@
-/* $Id: changelog,v 1.1226 2001-01-20 16:58:03 sandervl Exp $ */
+/* $Id: changelog,v 1.1227 2001-01-20 18:05:32 sandervl Exp $ */
 
  2001-01-20: Sander van Leeuwen <sandervl@xs4all.nl>
     - AVIFIL32: o Resynched with latest Wine code
                 o Added AVIStreamTimeToSample & AVIStreamSampleToTime stubs
+    - SETUPAPI: o Wine port (stubs only)
 
  2001-01-20: Yuri Dario <mc6530@mclink.it>
     - USER32:   o Set codepage for DCs returned by GetDCEx
