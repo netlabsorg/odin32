@@ -1,4 +1,4 @@
-; $Id: wsock32.def,v 1.21 2000-12-16 22:53:51 bird Exp $
+; $Id: wsock32.def,v 1.22 2001-07-07 10:44:11 achimha Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY WSOCK32 INITINSTANCE
@@ -111,3 +111,6 @@ EXPORTS
 ; -----------------------
 
                                  _OS2gethostname@8                        @2000
+
+; functions for ws2_32 implemented here
+   WSAEventSelect              = _WSAEventSelect@12                       @3001
