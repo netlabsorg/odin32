@@ -1,4 +1,4 @@
-/* $Id: win32type.h,v 1.36 2000-03-16 19:16:35 sandervl Exp $ */
+/* $Id: win32type.h,v 1.37 2000-03-29 15:16:09 cbratschi Exp $ */
 
 /*
  * Win32 type definitions for OS/2
@@ -420,6 +420,34 @@ typedef struct
 
 typedef struct
 {
+    DWORD     dwFileAttributes;
+    FILETIME  ftCreationTime;
+    FILETIME  ftLastAccessTime;
+    FILETIME  ftLastWriteTime;
+    DWORD     nFileSizeHigh;
+    DWORD     nFileSizeLow;
+    DWORD     dwReserved0;
+    DWORD     dwReserved1;
+    CHAR      cFileName[260];
+    CHAR      cAlternateFileName[14];
+} WIN32_FIND_DATAA, *LPWIN32_FIND_DATAA;
+
+typedef struct
+{
+    DWORD     dwFileAttributes;
+    FILETIME  ftCreationTime;
+    FILETIME  ftLastAccessTime;
+    FILETIME  ftLastWriteTime;
+    DWORD     nFileSizeHigh;
+    DWORD     nFileSizeLow;
+    DWORD     dwReserved0;
+    DWORD     dwReserved1;
+    WCHAR     cFileName[260];
+    WCHAR     cAlternateFileName[14];
+} WIN32_FIND_DATAW, *LPWIN32_FIND_DATAW;
+
+typedef struct
+{
   int dwFileAttributes;
   FILETIME ftCreationTime;
   FILETIME ftLastAccessTime;
@@ -622,12 +650,12 @@ typedef struct _MEMORY_BASIC_INFORMATION
 #ifndef __WINE_WINBASE_H
 
 typedef struct {
-	LPVOID	DebugInfo;
-	LONG LockCount;
-	LONG RecursionCount;
-	HANDLE OwningThread;
-	HANDLE LockSemaphore;
-	DWORD Reserved;
+        LPVOID  DebugInfo;
+        LONG LockCount;
+        LONG RecursionCount;
+        HANDLE OwningThread;
+        HANDLE LockSemaphore;
+        DWORD Reserved;
 }CRITICAL_SECTION;
 
 /* The 'overlapped' data structure used by async I/O functions.
@@ -790,8 +818,8 @@ typedef struct _SID {
 } SID,*PSID;
 #endif /* !defined(SID_DEFINED) */
 
-/* 
- * ACL 
+/*
+ * ACL
  */
 
 typedef struct _ACL {
@@ -802,38 +830,38 @@ typedef struct _ACL {
     WORD Sbz2;
 } ACL, *PACL;
 
-/* 
+/*
  * SID_AND_ATTRIBUTES
  */
 
 typedef struct _SID_AND_ATTRIBUTES {
-  PSID  Sid; 
-  DWORD Attributes; 
-} SID_AND_ATTRIBUTES ; 
- 
+  PSID  Sid;
+  DWORD Attributes;
+} SID_AND_ATTRIBUTES ;
+
 /*
  * TOKEN_USER
  */
 
 typedef struct _TOKEN_USER {
-  SID_AND_ATTRIBUTES User; 
-} TOKEN_USER; 
+  SID_AND_ATTRIBUTES User;
+} TOKEN_USER;
 
 /*
  * TOKEN_GROUPS
  */
 
 typedef struct _TOKEN_GROUPS  {
-  DWORD GroupCount; 
-  SID_AND_ATTRIBUTES Groups[ANYSIZE_ARRAY]; 
-} TOKEN_GROUPS; 
+  DWORD GroupCount;
+  SID_AND_ATTRIBUTES Groups[ANYSIZE_ARRAY];
+} TOKEN_GROUPS;
 
 typedef LARGE_INTEGER LUID,*PLUID;
 
 typedef struct _LUID_AND_ATTRIBUTES {
-  LUID   Luid; 
-  DWORD  Attributes; 
-} LUID_AND_ATTRIBUTES; 
+  LUID   Luid;
+  DWORD  Attributes;
+} LUID_AND_ATTRIBUTES;
 
 /*
  * PRIVILEGE_SET
@@ -850,63 +878,63 @@ typedef struct _PRIVILEGE_SET {
  */
 
 typedef struct _TOKEN_PRIVILEGES {
-  DWORD PrivilegeCount; 
-  LUID_AND_ATTRIBUTES Privileges[ANYSIZE_ARRAY]; 
-} TOKEN_PRIVILEGES, *PTOKEN_PRIVILEGES; 
+  DWORD PrivilegeCount;
+  LUID_AND_ATTRIBUTES Privileges[ANYSIZE_ARRAY];
+} TOKEN_PRIVILEGES, *PTOKEN_PRIVILEGES;
 
 /*
  * TOKEN_OWNER
  */
 
 typedef struct _TOKEN_OWNER {
-  PSID Owner; 
-} TOKEN_OWNER; 
+  PSID Owner;
+} TOKEN_OWNER;
 
 /*
  * TOKEN_PRIMARY_GROUP
  */
 
 typedef struct _TOKEN_PRIMARY_GROUP {
-  PSID PrimaryGroup; 
-} TOKEN_PRIMARY_GROUP; 
+  PSID PrimaryGroup;
+} TOKEN_PRIMARY_GROUP;
 
 
 /*
  * TOKEN_DEFAULT_DACL
  */
 
-typedef struct _TOKEN_DEFAULT_DACL { 
-  PACL DefaultDacl; 
-} TOKEN_DEFAULT_DACL; 
+typedef struct _TOKEN_DEFAULT_DACL {
+  PACL DefaultDacl;
+} TOKEN_DEFAULT_DACL;
 
 /*
  * TOKEN_SOURCEL
  */
 
 typedef struct _TOKEN_SOURCE {
-  char Sourcename[8]; 
-  LUID SourceIdentifier; 
-} TOKEN_SOURCE; 
+  char Sourcename[8];
+  LUID SourceIdentifier;
+} TOKEN_SOURCE;
 
 /*
  * TOKEN_TYPE
  */
 
 typedef enum tagTOKEN_TYPE {
-  TokenPrimary = 1, 
-  TokenImpersonation 
-} TOKEN_TYPE; 
+  TokenPrimary = 1,
+  TokenImpersonation
+} TOKEN_TYPE;
 
 /*
  * SECURITY_IMPERSONATION_LEVEL
  */
 
 typedef enum _SECURITY_IMPERSONATION_LEVEL {
-  SecurityAnonymous, 
-  SecurityIdentification, 
-  SecurityImpersonation, 
-  SecurityDelegation 
-} SECURITY_IMPERSONATION_LEVEL, *PSECURITY_IMPERSONATION_LEVEL; 
+  SecurityAnonymous,
+  SecurityIdentification,
+  SecurityImpersonation,
+  SecurityDelegation
+} SECURITY_IMPERSONATION_LEVEL, *PSECURITY_IMPERSONATION_LEVEL;
 
 #define SIZE_OF_80387_REGISTERS      80
 
@@ -914,11 +942,11 @@ typedef struct _FLOATING_SAVE_AREA
 {
     DWORD   ControlWord;
     DWORD   StatusWord;
-    DWORD   TagWord;    
+    DWORD   TagWord;
     DWORD   ErrorOffset;
     DWORD   ErrorSelector;
     DWORD   DataOffset;
-    DWORD   DataSelector;    
+    DWORD   DataSelector;
     BYTE    RegisterArea[SIZE_OF_80387_REGISTERS];
     DWORD   Cr0NpxState;
 } FLOATING_SAVE_AREA, *PFLOATING_SAVE_AREA;
@@ -942,18 +970,18 @@ typedef struct _CONTEXT86
     DWORD   SegGs;
     DWORD   SegFs;
     DWORD   SegEs;
-    DWORD   SegDs;    
+    DWORD   SegDs;
 
     /* These are selected by CONTEXT_INTEGER */
     DWORD   Edi;
     DWORD   Esi;
     DWORD   Ebx;
-    DWORD   Edx;    
+    DWORD   Edx;
     DWORD   Ecx;
     DWORD   Eax;
 
     /* These are selected by CONTEXT_CONTROL */
-    DWORD   Ebp;    
+    DWORD   Ebp;
     DWORD   Eip;
     DWORD   SegCs;
     DWORD   EFlags;
