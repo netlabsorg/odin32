@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2000-03-06 23:33:44 bird Exp $
+# $Id: makefile,v 1.4 2000-03-07 11:12:31 bird Exp $
 
 #
 # Odin32 API
@@ -33,7 +33,7 @@ TARGET = glide2x
 all:    $(OBJDIR) \
         libs \
         $(OBJDIR)\$(TARGET).dll \
-        $(PDWIN32_BIN)\$(TARGET).dll \
+        $(PDWIN32_BIN)\Glide\Voodoo1\$(TARGET).dll \
         lib
 
 
@@ -86,6 +86,7 @@ $(TARGET).def
 # Copy rule.
 $(PDWIN32_BIN)\Glide\Voodoo1\$(TARGET).dll: $(OBJDIR)\$(TARGET).dll
     $(CP) $** $@
+    $(CP) $** ..\..\..\..\bin\Glide\Voodoo1\$(TARGET).dll
 
 
 # Dep rule - makes depenencies for C, C++ and Asm files.

@@ -1,7 +1,7 @@
-# $Id: makefile,v 1.15 2000-03-06 23:38:55 bird Exp $
+# $Id: makefile,v 1.16 2000-03-07 11:11:10 bird Exp $
 
 #
-# PD-Win32 API
+# Odin32 API
 #
 #       pe.exe makefile
 #
