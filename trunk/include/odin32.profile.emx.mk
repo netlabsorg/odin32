@@ -1,4 +1,4 @@
-# $Id: odin32.profile.emx.mk,v 1.1 2000-12-09 16:03:37 phaller Exp $
+# $Id: odin32.profile.emx.mk,v 1.2 2001-10-01 01:23:14 bird Exp $
 
 #
 # Odin32 API
@@ -60,11 +60,11 @@ CTARGETFLAGS     = -Zdll
 CXXTARGETFLAGS   = -Zdll
 !endif
 CXXEXCEPTIONS    = -fhandle-exceptions
-CFLAGS           = -mprobe -pg -c -pipe -Wall -Zmt -g $(CTARGETFLAGS)
-CXXFLAGS         = -mprobe -pg -c -pipe -Wall -Zmt -g $(CXXTARGETFLAGS)
-CXXFLAGS_ODINCRT = -mprobe -pg -c -pipe -Wall -Zmt -g $(CXXTARGETFLAGS)
-CFLAGS_WIN32APP  = -mprobe -pg -c -pipe -Wall -Zmt -g $(CTARGETFLAGS)
-CXXFLAGS_WIN32APP= -mprobe -pg -c -pipe -Wall -Zmt -g $(CXXTARGETFLAGS) $(CXXEXCEPTIONS)
+CFLAGS           = -c -mprobe -pg -pipe -Wall -Zmt -g $(CTARGETFLAGS)
+CXXFLAGS         = -c -mprobe -pg -pipe -Wall -Zmt -g $(CXXTARGETFLAGS)
+CXXFLAGS_ODINCRT = -c -mprobe -pg -pipe -Wall -Zmt -g $(CXXTARGETFLAGS)
+CFLAGS_WIN32APP  = -c -mprobe -pg -pipe -Wall -Zmt -g $(CTARGETFLAGS)
+CXXFLAGS_WIN32APP= -c -mprobe -pg -pipe -Wall -Zmt -g $(CXXTARGETFLAGS) $(CXXEXCEPTIONS)
 CINCLUDES        = -I$(ODIN32_INCLUDE)\Win -I. -I$(ODIN32_INCLUDE)
 CDEFINES_WIN32APP= -DDEBUG -DPROFILE -D__WIN32OS2__ -D__i386__
 CDEFINES_ODINCRT = -DDEBUG -DPROFILE -D__WIN32OS2__ -D__i386__ -D__WINE__
