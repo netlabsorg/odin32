@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.186 2000-05-10 13:14:43 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.187 2000-05-12 18:09:42 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1055,7 +1055,6 @@ ULONG Win32BaseWindow::MsgNCPaint()
     ULONG rc;
     RECT client = rectClient;
 
-////    mapWin32Rect(getParent() ? getParent()->getOS2WindowHandle():OSLIB_HWND_DESKTOP,OS2HwndFrame,&client);
     	if ((rect.left >= client.left) && (rect.left < client.right) &&
            (rect.right >= client.left) && (rect.right < client.right) &&
            (rect.top  >= client.top) && (rect.top < client.bottom) &&

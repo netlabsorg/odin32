@@ -1,4 +1,4 @@
-/* $Id: HOOK.CPP,v 1.13 2000-03-23 19:24:25 sandervl Exp $ */
+/* $Id: HOOK.CPP,v 1.14 2000-05-12 18:09:39 sandervl Exp $ */
 
 /*
  * Windows hook functions
@@ -332,7 +332,6 @@ static BOOL HOOK_RemoveHook( HOOKDATA *data )
 {
   HOOKDATA **prevHook;
   THDB     *thdb;
-  VMutex   *hookMutex;
 
     dprintf(("Removing hook %08x\n", data));
 
@@ -357,24 +356,30 @@ static BOOL HOOK_RemoveHook( HOOKDATA *data )
                 dprintf(("HOOK_RemoveHook: can't find thread database for thread %x", data->ownerThread));
                 return FALSE;
         }
-        hookMutex = &threadHookMutex;
-        hookMutex->enter();
+        threadHookMutex.enter();
         prevHook = (HOOKDATA **)&thdb->hooks[data->id - WH_MINHOOK];
     }
     else {
-        hookMutex = &systemHookMutex;
-        hookMutex->enter();
+        systemHookMutex.enter(VMUTEX_WAIT_FOREVER, &hGlobalHookMutex);
         prevHook = (HOOKDATA **)&HOOK_systemHooks[data->id - WH_MINHOOK];
     }
     while (*prevHook && *prevHook != data)
         prevHook = (HOOKDATA **)&(*prevHook)->next;
 
     if (!prevHook) {
-        hookMutex->leave();
+	if (data->ownerThread) {
+        	threadHookMutex.leave();
+        }
+	else    systemHookMutex.leave(&hGlobalHookMutex);
+
         return FALSE;
     }
     *prevHook = (HOOKDATA *)data->next;
-    hookMutex->leave();
+
+    if (data->ownerThread) {
+       	 threadHookMutex.leave();
+    }
+    else systemHookMutex.leave(&hGlobalHookMutex);
 
     HeapFree(GetProcessHeap(), 0, (LPVOID)data );
     return TRUE;

@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.32 2000-04-13 18:50:44 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.33 2000-05-12 18:09:40 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -98,22 +98,8 @@ MSGTRANSTAB MsgTransTab[] = {
 };
 #define MAX_MSGTRANSTAB (sizeof(MsgTransTab)/sizeof(MsgTransTab[0]))
 
-QMSG *MsgThreadPtr = 0;
-
 LRESULT WIN32API SendMessageA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-//******************************************************************************
-//******************************************************************************
-BOOL OSLibInitMsgQueue()
-{
-   if(DosAllocThreadLocalMemory(sizeof(QMSG)/sizeof(ULONG), (PULONG *)&MsgThreadPtr) != 0)
-   {
-        dprintf(("OSLibInitMsgQueue: local thread memory alloc failed!!"));
-        DebugInt3();
-        return FALSE;
-   }
-   return TRUE;
-}
 //******************************************************************************
 //******************************************************************************
 void WinToOS2MsgTranslate(MSG *winMsg, QMSG *os2Msg, BOOL isUnicode)
@@ -175,16 +161,18 @@ LONG OSLibWinDispatchMsg(MSG *msg, BOOL isUnicode)
   //TODO: What to do if app changed msg? (translate)
   //  WinToOS2MsgTranslate(msg, &qmsg, isUnicode);
 
-  if(msg->time == MsgThreadPtr->time || msg->hwnd == 0) {
-        memcpy(&os2msg, MsgThreadPtr, sizeof(QMSG));
-        MsgThreadPtr->time = -1;
+  if(!memcmp(msg, &thdb->winmsg, sizeof(MSG)) || msg->hwnd == 0) {
+        memcpy(&os2msg, &thdb->os2msg, sizeof(QMSG));
+        thdb->os2msg.time = -1;
+        thdb->winmsg.time = -1;
         if(msg->hwnd) {
             	thdb->nrOfMsgs = 1;
             	thdb->msgstate++; //odd -> next call to our PM window handler should dispatch the translated msg
             	memcpy(&thdb->msg, msg, sizeof(MSG));
         }
         if(os2msg.hwnd || os2msg.msg == WM_QUIT) {
-		memset(MsgThreadPtr, 0, sizeof(*MsgThreadPtr));
+		memset(&thdb->os2msg, 0, sizeof(thdb->os2msg));
+		memset(&thdb->winmsg, 0, sizeof(thdb->winmsg));
             	return (LONG)WinDispatchMsg(thdb->hab, &os2msg);
         }
         //SvL: Don't dispatch messages sent by PostThreadMessage (correct??)
@@ -234,8 +222,8 @@ BOOL OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMa
         }
         thdb->fTranslated = FALSE;
         memcpy(pMsg, &thdb->msgWCHAR, sizeof(MSG));
-        MsgThreadPtr->msg  = 0;
-        MsgThreadPtr->hwnd = 0;
+        thdb->os2msg.msg  = 0;
+        thdb->os2msg.hwnd = 0;
         return (pMsg->message != WINWM_QUIT);
   }
 
@@ -260,7 +248,8 @@ continuegetmsg:
   }
 
   OS2ToWinMsgTranslate((PVOID)thdb, &os2msg, pMsg, isUnicode, MSG_REMOVE);
-  memcpy(MsgThreadPtr, &os2msg, sizeof(QMSG));
+  memcpy(&thdb->os2msg, &os2msg, sizeof(QMSG));
+  memcpy(&thdb->winmsg, pMsg, sizeof(MSG));
 
   if(pMsg->message <= WINWM_KEYLAST && pMsg->message >= WINWM_KEYDOWN)
   {
@@ -316,8 +305,8 @@ BOOL OSLibWinPeekMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterM
 
         if(fRemove & PM_REMOVE_W) {
             thdb->fTranslated = FALSE;
-            MsgThreadPtr->msg  = 0;
-            MsgThreadPtr->hwnd = 0;
+            thdb->os2msg.msg  = 0;
+            thdb->os2msg.hwnd = 0;
         }
         memcpy(pMsg, &thdb->msgWCHAR, sizeof(MSG));
         return TRUE;
@@ -342,7 +331,8 @@ continuepeekmsg:
   OS2ToWinMsgTranslate((PVOID)thdb, &os2msg, pMsg, isUnicode, (fRemove & PM_REMOVE_W) ? MSG_REMOVE : MSG_NOREMOVE);
   //TODO: This is not safe! There's no guarantee this message will be dispatched and it might overwrite a previous message
   if(fRemove & PM_REMOVE_W) {
-        memcpy(MsgThreadPtr, &os2msg, sizeof(QMSG));
+  	memcpy(&thdb->os2msg, &os2msg, sizeof(QMSG));
+  	memcpy(&thdb->winmsg, pMsg, sizeof(MSG));
   }
 
   if(pMsg->message <= WINWM_KEYLAST && pMsg->message >= WINWM_KEYDOWN)
