@@ -1,4 +1,4 @@
-/* $Id: directory.cpp,v 1.26 2000-06-13 17:56:45 phaller Exp $ */
+/* $Id: directory.cpp,v 1.27 2000-06-13 21:19:32 sandervl Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
@@ -335,7 +335,6 @@ ODINFUNCTION2(UINT,GetSystemDirectoryW,LPWSTR,lpBuffer,
   if(rc && asciibuffer)
     AsciiToUnicode(asciibuffer, lpBuffer);
   
-  free(asciibuffer);
   return(rc);
 }
 
@@ -396,7 +395,6 @@ ODINFUNCTION2(UINT,GetWindowsDirectoryW,LPWSTR,lpBuffer,
   if(rc && asciibuffer)
     AsciiToUnicode(asciibuffer, lpBuffer);
   
-  free(asciibuffer);
   return(rc);
 }
 
