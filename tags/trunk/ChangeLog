@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.722 2000-02-11 11:24:01 bird Exp $ */
+ /* $Id: ChangeLog,v 1.723 2000-02-12 10:44:15 sandervl Exp $ */
+
+ 2000-02-11: Vit Timchishin <tvv@sbs.kiev.ua>
+	- KERNEL32: Fix for OpenFile; fill in OFSTRUCT even if api fails
+                    (needed for Acrobat Reader 4.0)
 
  2000-02-10: Knut Stange Osmundsen (knut.stange.osmundsen@pmsc.no)
         - /tools/database/ + /src/makefile: Odin32 API DB.
