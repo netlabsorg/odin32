@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.94 2002-01-18 16:23:35 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.95 2002-02-11 13:46:36 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -42,6 +42,10 @@ static PROC_DosSetFilePtrL   DosSetFilePtrLProc   = 0;
 static PROC_DosSetFileLocksL DosSetFileLocksLProc = 0;
 static PROC_DosOpenL         DosOpenLProc = 0;
 static BOOL f64BitIO = FALSE;
+
+BOOL WINAPI CharToOemA( LPCSTR s, LPSTR d );
+BOOL WINAPI OemToCharA( LPCSTR s, LPSTR d );
+
 //******************************************************************************
 //******************************************************************************
 void OSLibInitWSeBFileIO()
@@ -115,12 +119,14 @@ APIRET APIENTRY OdinDosOpenL(PCSZ  pszFileName,
 {
  APIRET yyrc;
  USHORT sel = RestoreOS2FS();
+ char OemFileName[260];
+ CharToOemA(pszFileName, OemFileName);
 
     if(DosOpenLProc) {
-        yyrc = DosOpenLProc(pszFileName, phf, pulAction, cbFile, ulAttribute, fsOpenFlags,
+        yyrc = DosOpenLProc(OemFileName, phf, pulAction, cbFile, ulAttribute, fsOpenFlags,
                             fsOpenMode, peaop2);
     }
-    else yyrc = DosOpen(pszFileName, phf, pulAction, cbFile.ulLo, ulAttribute, fsOpenFlags,
+    else yyrc = DosOpen(OemFileName, phf, pulAction, cbFile.ulLo, ulAttribute, fsOpenFlags,
                         fsOpenMode, peaop2);
     SetFS(sel);
 
@@ -580,6 +586,9 @@ DWORD OSLibDosOpen(char *lpszFileName, DWORD flags)
  HFILE  hFile;
  ULONG  ulAction;
  DWORD  os2flags = OPEN_FLAGS_NOINHERIT;
+ char lOemFileName[260];        
+
+ CharToOemA(lpszFileName, lOemFileName);
 
 
   if(flags & OSLIB_ACCESS_READONLY)
@@ -598,7 +607,7 @@ DWORD OSLibDosOpen(char *lpszFileName, DWORD flags)
         os2flags |= OPEN_SHARE_DENYWRITE;
 
 tryopen:
-  rc = DosOpen(lpszFileName,                     /* File path name */
+  rc = DosOpen(lOemFileName,                     /* File path name */
                &hFile,                   /* File handle */
                &ulAction,                      /* Action taken */
                0L,                             /* File primary allocation */
@@ -647,8 +656,12 @@ BOOL OSLibDosClose(DWORD hFile)
 BOOL OSLibDosCopyFile(LPCSTR lpszOldFile, LPCSTR lpszNewFile, BOOL fFailIfExist)
 {
  APIRET rc;
+ char lOemOldFile[260], lOemNewFile[260];
 
-  rc = DosCopy((PSZ)lpszOldFile, (PSZ)lpszNewFile, fFailIfExist ? 0: DCPY_EXISTING);
+  CharToOemA(lpszOldFile, lOemOldFile);
+  CharToOemA(lpszNewFile, lOemNewFile);
+
+  rc = DosCopy((PSZ)lOemOldFile, (PSZ)lOemNewFile, fFailIfExist ? 0: DCPY_EXISTING);
   SetLastError(error2WinError(rc));
   return (rc == NO_ERROR);
 }
@@ -657,8 +670,12 @@ BOOL OSLibDosCopyFile(LPCSTR lpszOldFile, LPCSTR lpszNewFile, BOOL fFailIfExist)
 BOOL OSLibDosMoveFile(LPCSTR lpszOldFile, LPCSTR lpszNewFile)
 {
  APIRET rc;
+ char lOemOldFile[260], lOemNewFile[260];
 
-  rc = DosMove((PSZ)lpszOldFile, (PSZ)lpszNewFile);
+  CharToOemA(lpszOldFile, lOemOldFile);
+  CharToOemA(lpszNewFile, lOemNewFile);
+
+  rc = DosMove((PSZ)lOemOldFile, (PSZ)lOemNewFile);
   SetLastError(error2WinError(rc));
   return (rc == NO_ERROR);
 }
@@ -667,8 +684,11 @@ BOOL OSLibDosMoveFile(LPCSTR lpszOldFile, LPCSTR lpszNewFile)
 BOOL OSLibDosRemoveDir(LPCSTR lpszDir)
 {
  APIRET rc;
+ char lOemDir[260];
 
-  rc = DosDeleteDir((PSZ)lpszDir);
+  CharToOemA(lpszDir, lOemDir);
+
+  rc = DosDeleteDir((PSZ)lOemDir);
   SetLastError(error2WinError(rc));
   return (rc == NO_ERROR);
 }
@@ -677,8 +697,11 @@ BOOL OSLibDosRemoveDir(LPCSTR lpszDir)
 BOOL OSLibDosCreateDirectory(LPCSTR lpszDir)
 {
  APIRET rc;
+ char lOemDir[260];
 
-  rc = DosCreateDir((PSZ)lpszDir, NULL);
+  CharToOemA(lpszDir, lOemDir);
+
+  rc = DosCreateDir((PSZ)lOemDir, NULL);
   SetLastError(error2WinError(rc));
   return (rc == NO_ERROR);
 }
@@ -784,8 +807,11 @@ DWORD OSLibDosSetFilePtr(DWORD hFile, DWORD offset, DWORD method)
 BOOL OSLibDosDelete(char *lpszFileName)
 {
  APIRET rc;
+ char lOemFileName[260];        
 
-  rc = DosDelete(lpszFileName);
+ CharToOemA(lpszFileName, lOemFileName);
+
+  rc = DosDelete(lOemFileName);
   if(rc) {
       SetLastError(error2WinError(rc));
       return FALSE;
@@ -1080,7 +1106,7 @@ DWORD OSLibDosCreateFile(CHAR *lpszFile,
          *      So, I guess this emulation may help...
          *      This problem exist on WS4eB SMP FP1 and Warp4 FP14/Kernel 14059 at least.
          */
-        rc = DosOpen((PSZ)lpszFile,
+        rc = DosOpen((PSZ)lOemFile,
                       &hFile,
                       &actionTaken,
                       fileSize,
@@ -2195,13 +2221,15 @@ VOID translateFileResults(FILESTATUS3 *pResult,LPWIN32_FIND_DATAA pFind,CHAR* ac
   if (name)
   {
     name++;
-    strcpy(pFind->cFileName,name);
+//    strcpy(pFind->cFileName,name);
+    OemToCharA( name, pFind->cFileName );
   }
   else
     pFind->cFileName[0] = 0;
 
   long2ShortName(pFind->cFileName,pFind->cAlternateFileName);
 }
+
 
 VOID translateFindResults(FILEFINDBUF3 *pResult,LPWIN32_FIND_DATAA pFind)
 {
@@ -2214,7 +2242,8 @@ VOID translateFindResults(FILEFINDBUF3 *pResult,LPWIN32_FIND_DATAA pFind)
 
   pFind->nFileSizeHigh = 0; //CB: fixme
   pFind->nFileSizeLow = pResult->cbFile;
-  strcpy(pFind->cFileName,pResult->achName);
+//  strcpy(pFind->cFileName,pResult->achName);
+  OemToCharA( pResult->achName, pFind->cFileName );
   long2ShortName(pFind->cFileName,pFind->cAlternateFileName);
 }
 //******************************************************************************
@@ -2230,7 +2259,11 @@ DWORD OSLibDosFindFirst(LPCSTR lpFileName,WIN32_FIND_DATAA* lpFindFileData)
   result.achName[0] = 0;
 
   ULONG oldmode = SetErrorMode(SEM_FAILCRITICALERRORS_W);
-  APIRET rc = DosFindFirst((PSZ)lpFileName,&hDir,attrs,&result,sizeof(result),&searchCount,FIL_STANDARD);
+  char    lOemFileName[260];        
+
+  CharToOemA(lpFileName, lOemFileName);
+
+  APIRET rc = DosFindFirst((PSZ)lOemFileName,&hDir,attrs,&result,sizeof(result),&searchCount,FIL_STANDARD);
 
   //check root: skip "." and ".." (HPFS, not on FAT)
   //check in OSLibDosFindNext not necessary: "." and ".." are the first two entries
@@ -2280,7 +2313,10 @@ DWORD OSLibDosFindFirstMulti(LPCSTR lpFileName,WIN32_FIND_DATAA *lpFindFileData,
   result = (FILEFINDBUF3*)malloc(searchCount*sizeof(FILEFINDBUF3));
 
   ULONG oldmode = SetErrorMode(SEM_FAILCRITICALERRORS_W);
-  APIRET rc = DosFindFirst((PSZ)lpFileName,&hDir,attrs,result,searchCount*sizeof(FILEFINDBUF3),&searchCount,FIL_STANDARD);
+  char  lOemFileName[260];        
+
+  CharToOemA(lpFileName, lOemFileName);
+  APIRET rc = DosFindFirst((PSZ)lOemFileName,&hDir,attrs,result,searchCount*sizeof(FILEFINDBUF3),&searchCount,FIL_STANDARD);
   SetErrorMode(oldmode);
   if (rc)
   {
