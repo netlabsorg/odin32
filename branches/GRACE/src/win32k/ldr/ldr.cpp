@@ -1,4 +1,4 @@
-/* $Id: ldr.cpp,v 1.7 2000-01-22 18:21:01 bird Exp $
+/* $Id: ldr.cpp,v 1.7.4.1 2000-07-16 22:43:34 bird Exp $
  *
  * ldr.cpp - Loader helpers.
  *
@@ -27,23 +27,44 @@
 #include <stddef.h>
 
 #include "log.h"
+#include "avl.h"
 #include <peexe.h>
 #include <exe386.h>
 #include "OS2Krnl.h"
+#include "ldr.h"
+#include "ldrCalls.h"
 #include "ModuleBase.h"
 #include "pe2lx.h"
-#include "avl.h"
-#include "ldr.h"
 #include "options.h"
 
 
 /*******************************************************************************
 *   Global Variables                                                           *
 *******************************************************************************/
-PAVLNODECORE    pSFNRoot = NULL;
-PAVLNODECORE    pMTERoot = NULL;
+static PAVLNODECORE    pSFNRoot = NULL;
+static PAVLNODECORE    pMTERoot = NULL;
 
+
+/*
+ * Loader State. (See ldr.h for more info.)
+ */
+ULONG          ulLdrState = LDRSTATE_UNKNOWN;
+
+
+/*
+ * Pointer to the executable module being loaded.
+ * This pointer is set by ldrOpen and cleared by tkExecPgm.
+ * It's hence only valid at tkExecPgm time. (isLdrStateExecPgm() == TRUE).
+ */
+PMODULE         pExeModule = NULL;
+
+
+/*
+ * Filehandle bitmap.
+ */
 unsigned char   achHandleStates[MAX_FILE_HANDLES/8];
+
+
 
 
 /**
@@ -63,7 +84,7 @@ PMODULE     getModuleBySFN(SFN hFile)
 /**
  * Gets a module by the MTE.
  * @returns   Pointer to module node. If not found NULL.
- * @param     pMTE  Pointer an Module Table Entry.
+ * @param     pMTE  Pointer a Module Table Entry.
  * @sketch    Try find it in the MTE tree.
  *            IF not found THEN
  *            BEGIN
@@ -119,6 +140,27 @@ PMODULE     getModuleByMTE(PMTE pMTE)
 
         return NULL;
     #endif
+}
+
+
+/**
+ * Gets a module by the hMTE.
+ * @returns   Pointer to module node. If not found NULL.
+ * @param     hMTE  Handle to a Module Table Entry.
+ * @sketch    Convert hMte to an pMTE (pointer to MTE).
+ *            Call getModuleByMTE with MTE pointer.
+ * @status    completely implemented.
+ * @author    knut st. osmundsen
+ */
+PMODULE     getModuleByhMTE(HMTE hMTE)
+{
+    PMTE pMTE;
+
+    pMTE = ldrValidateMteHandle(hMTE);
+    if (pMTE != NULL)
+        return getModuleByMTE(pMTE);
+
+    return NULL;
 }
 
 

@@ -1,4 +1,4 @@
-/* $Id: pe2lx.h,v 1.9 2000-02-27 02:16:43 bird Exp $
+/* $Id: pe2lx.h,v 1.9.4.1 2000-07-16 22:43:32 bird Exp $
  *
  * Pe2Lx class declarations. Ring 0 and Ring 3
  *
@@ -65,10 +65,15 @@ public:
     ULONG  read(ULONG offLXFile, PVOID pvBuffer, ULONG cbToRead, ULONG flFlags, PMTE pMTE);
     ULONG  applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID pvPage,
                        ULONG ulPageAddress, PVOID pvPTDA); /*(ldrEnum32bitRelRecs)*/
+    ULONG  openPath(PCHAR pachModname, USHORT cchModname, ldrlv_t *pLdrLv, PULONG pfl); /* (ldrOpenPath) */
     #ifndef RING0
     ULONG  testApplyFixups();
     ULONG  writeFile(PCSZ pszLXFilename);
     #endif
+
+    /** @cat public query methods */
+    BOOL    isExe();
+    BOOL    isDll();
 
     /** @cat public Helper methods */
     ULONG  querySizeOfLxFile();
@@ -119,6 +124,7 @@ private:
 
     /** @cat static helpers */
     static PCSZ queryOdin32ModuleName(PCSZ pszWin32ModuleName);
+    static BOOL initOdin32Path();
 
     /** @cat static dump methods */
     static VOID dumpNtHeaders(PIMAGE_NT_HEADERS pNtHdrs);
@@ -194,6 +200,8 @@ private:
         unsigned int Characteristics;       /* set of section characteristics */
         ULONG flFlags;                      /* equivalent object flags */
     } paSecChars2Flags[];
+
+    static const char *     pszOdin32Path;  /* Odin32 base path. */
 };
 
 

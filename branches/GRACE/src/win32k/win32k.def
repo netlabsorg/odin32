@@ -14,6 +14,7 @@ SEGMENTS
     DATA16_BSS      class 'FAR_DATA'
     DATA16_CONST    class 'FAR_DATA'
     CODE16          class 'CODE'
+    _IOSEG          class 'IOSEG_CODE'
     CODE32          class 'CODE'
     DATA32          class 'DATA'
     c_common        class 'DATA'

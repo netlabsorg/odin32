@@ -1,4 +1,4 @@
-/* $Id: libconv.c,v 1.2 1999-11-10 01:45:29 bird Exp $
+/* $Id: libconv.c,v 1.2.4.1 2000-07-16 22:43:19 bird Exp $
  *
  * Very simple OMF/LIB dumper.
  *
@@ -173,6 +173,8 @@ void *processRecord(void *pvRecord, void *pvBase, FILE *phNew)
                 "_CODE",    "CODE16",
                 "TEXT",     "CODE16",
                 "_TEXT",    "CODE16",
+                "_IOSEG",   "CODE16",
+                "IOSEG_CODE", "CODE",
                 "DATA",     "FAR_DATA",
                 "_DATA",    "DATA16",
                 "DGROUP",   "DATA16_GROUP",

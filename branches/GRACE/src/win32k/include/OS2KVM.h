@@ -1,4 +1,4 @@
-/* $Id: OS2KVM.h,v 1.4 2000-04-17 01:56:49 bird Exp $
+/* $Id: OS2KVM.h,v 1.4.4.1 2000-07-16 22:43:27 bird Exp $
  *
  * OS/2 kernel VM functions.
  *
@@ -80,9 +80,6 @@ typedef struct _vmac
     USHORT      ac_hob;                 /* off=6 cb=2 Object handle. */
 } VMAC, *PVMAC;
 
-
-typedef USHORT HMTE, *PHMTE;
-typedef USHORT HPTDA, *PHPTDA;
 
 /*******************************************************************************
 *   Exported Functions                                                         *

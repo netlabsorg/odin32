@@ -1,4 +1,4 @@
-/* $Id: ModuleBase.cpp,v 1.3 2000-02-27 02:17:06 bird Exp $
+/* $Id: ModuleBase.cpp,v 1.3.4.1 2000-07-16 22:43:33 bird Exp $
  *
  * ModuleBase - Implementetation.
  *
@@ -11,28 +11,29 @@
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
 *******************************************************************************/
-#define INCL_DOSERRORS                      /* DOS Error codes. */
+#define INCL_DOSERRORS                  /* DOS Error codes. */
 #ifdef RING0
-    #define INCL_NOAPI                      /* RING0: No apis. */
+    #define INCL_NOAPI                  /* RING0: No apis. */
 #else /*RING3*/
-    #define INCL_DOSFILEMGR                 /* RING3: DOS File api. */
+    #define INCL_DOSFILEMGR             /* RING3: DOS File api. */
 #endif
 
 
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
-#include <os2.h>                            /* OS/2 header file. */
+#include <os2.h>                        /* OS/2 header file. */
 
-#include "malloc.h"                         /* win32k malloc. Not C library! */
+#include "malloc.h"                     /* win32k malloc. Not C library! */
 
-#include <string.h>                         /* C library string.h. */
-#include <stdarg.h>                         /* C library stdarg.h. */
+#include <string.h>                     /* C library string.h. */
+#include <stdarg.h>                     /* C library stdarg.h. */
 
-#include "vprintf.h"                        /* win32k printf and vprintf. Not C library! */
-#include "dev32.h"                          /* 32-Bit part of the device driver. (SSToDS) */
-#include "OS2Krnl.h"                        /* kernel structs.  (SFN) */
-#include "modulebase.h"                     /* ModuleBase class definitions, ++. */
+#include "vprintf.h"                    /* win32k printf and vprintf. Not C library! */
+#include "dev32.h"                      /* 32-Bit part of the device driver. (SSToDS) */
+#include "OS2Krnl.h"                    /* kernel structs.  (SFN) */
+#include "ldrCalls.h"                   /* ldrOpenPath and ldrlv_t. */
+#include "modulebase.h"                 /* ModuleBase class definitions, ++. */
 
 
 /*******************************************************************************
@@ -159,6 +160,44 @@ ULONG  ModuleBase::applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID
 }
 
 
+/**
+ * openPath - opens file eventually searching loader specific paths.
+ *
+ * This base implementation simply calls ldrOpenPath.
+ * This method is only called for DLLs. DosLoadModule and Imports.
+ *
+ * @returns   OS2 return code.
+ *            pLdrLv->lv_sfn  is set to filename handle.
+ * @param     pachModname   Pointer to modulename. Not zero terminated!
+ * @param     cchModname    Modulename length.
+ * @param     pLdrLv        Loader local variables? (Struct from KERNEL.SDF)
+ * @param     pfl           Pointer to flags which are passed on to ldrOpen.
+ * @sketch
+ * This is roughly what the original ldrOpenPath does:
+ *      if !CLASS_GLOBAL or miniifs then
+ *          ldrOpen(pachModName)
+ *      else
+ *          loop until no more libpath elements
+ *              get next libpath element and add it to the modname.
+ *              try open the modname
+ *              if successfull then break the loop.
+ *          endloop
+ *      endif
+ */
+ULONG  ModuleBase::openPath(PCHAR pachModname, USHORT cchModname, ldrlv_t *pLdrLv, PULONG pfl) /* (ldrOpenPath) */
+{
+    #ifdef RING0
+    printf("ModuleBase::openPath:\n");
+    return ldrOpenPath(pachModname, cchModname, pLdrLv, pfl);
+    #else
+    NOREF(pachModname);
+    NOREF(cchModname);
+    NOREF(pLdrLv);
+    NOREF(pfl);
+    return ERROR_NOT_SUPPORTED;
+    #endif
+}
+
 
 #ifndef RING0
 
@@ -272,7 +311,7 @@ APIRET ReadAt(SFN hFile, ULONG ulOffset, PVOID pvBuffer, ULONG cbToRead)
     if (rc == NO_ERROR)
         rc = DosRead(hFile, pvBuffer, cbToRead, &cbRead);
     else
-        printErr(("DosSetFilePtr(hfile, %#8x(%d),..) failed with rc = %d.",
+        printErr(("DosSetFilePtr(hfile, %#8x(%d),..) failed with rc = %d.\n",
                   ulOffset, ulOffset, rc));
 
     return rc;

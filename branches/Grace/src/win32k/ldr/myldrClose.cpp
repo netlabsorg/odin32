@@ -1,4 +1,4 @@
-/* $Id: myldrClose.cpp,v 1.5 2000-01-22 18:21:02 bird Exp $
+/* $Id: myldrClose.cpp,v 1.5.4.1 2000-07-16 22:43:35 bird Exp $
  *
  * myldrClose - ldrClose
  *
@@ -23,13 +23,13 @@
 #include <stdlib.h>
 
 #include "log.h"
+#include "avl.h"
 #include <peexe.h>
 #include <exe386.h>
 #include "OS2Krnl.h"
-#include "avl.h"
-#include "ModuleBase.h"
 #include "ldr.h"
 #include "ldrCalls.h"
+#include "ModuleBase.h"
 
 
 /**
@@ -41,7 +41,7 @@
 ULONG LDRCALL myldrClose(SFN hFile)
 {
     /* closes handle */
-    kprintf(("ldrClose: hFile = %.4x\n", hFile));
+    kprintf(("myldrClose: hFile = %.4x\n", hFile));
     if (GetState(hFile) == HSTATE_OUR)
     {
         APIRET rc;
@@ -51,12 +51,12 @@ ULONG LDRCALL myldrClose(SFN hFile)
         if (pMod != NULL)
             pMod->Data.pModule->dumpVirtualLxFile();
         else
-            kprintf(("ldrClose: getModuleBySFN failed!!!"));
+            kprintf(("myldrClose: getModuleBySFN failed!!!"));
         #endif
 
         rc = removeModule(hFile);
         if (rc != NO_ERROR)
-            kprintf(("ldrClose: removeModule retured rc=%d\n", rc));
+            kprintf(("myldrClose: removeModule retured rc=%d\n", rc));
 
         #pragma info(notrd)
         SetState(hFile, HSTATE_UNUSED);

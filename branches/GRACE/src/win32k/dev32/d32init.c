@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.19 2000-05-03 10:46:06 bird Exp $
+/* $Id: d32init.c,v 1.19.4.1 2000-07-16 22:42:03 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -13,7 +13,6 @@
 *******************************************************************************/
 #define MAXSIZE_PROLOG 0x18             /* Note that this must be synced with */
                                         /* the one used in calltab.asm.       */
-#define static                          /* just to make all symbols visible in the kernel debugger.  */
 #if  0                                  /* Enable this to have extra debug logging. */
     #define kprintf2(a) kprintf
 #else
@@ -23,6 +22,7 @@
 #define INCL_DOSERRORS
 #define INCL_NOPMAPI
 #define LDR_INCL_INITONLY
+#define INCL_OS2KRNL_ALL
 
 /*******************************************************************************
 *   Header Files                                                               *
@@ -44,6 +44,10 @@
 #include "ldrCalls.h"
 #include "macros.h"
 
+#ifdef R3TST
+    #include "test.h"
+#endif
+
 
 /*******************************************************************************
 *   Global Variables                                                           *
@@ -52,19 +56,25 @@
 static char * apszPE[] = {"FLAGS_PE_NOT", "FLAGS_PE_PE2LX", "FLAGS_PE_PE", "FLAGS_PE_MIXED", "!invalid!"};
 static char * apszInfoLevel[] = {"INFOLEVEL_QUIET", "INFOLEVEL_ERROR", "INFOLEVEL_WARNING", "INFOLEVEL_INFO", "INFOLEVEL_INFOALL", "!invalid!"};
 #endif
-static PMTE    pKrnlMTE = NULL;
-static PSMTE   pKrnlSMTE = NULL;
-static POTE    pKrnlOTE = NULL;
+PMTE    pKrnlMTE = NULL;
+PSMTE   pKrnlSMTE = NULL;
+POTE    pKrnlOTE = NULL;
 
 
 /*******************************************************************************
 *   Internal Functions                                                         *
 *******************************************************************************/
-static ULONG        readnum(const char *pszNum);
-_Inline int         ModR_M_32bit(char bModRM);
-static int          interpretFunctionProlog32(char *pach, BOOL fOverload);
-static int          interpretFunctionProlog16(char *pach, BOOL fOverload);
-static int          ImportTabInit(void);
+ ULONG          readnum(const char *pszNum);
+_Inline int     ModR_M_32bit(char bModRM);
+_Inline int     ModR_M_16bit(char bModRM);
+int             interpretFunctionProlog32(char *pach, BOOL fOverload);
+int             interpretFunctionProlog16(char *pach, BOOL fOverload);
+int             importTabInit(void);
+#ifdef R3TST
+PMTE            GetOS2KrnlMTETst(void);
+void            R3TstFixImportTab(void);
+#endif
+
 
 
 /* externs located in 16-bit data segement in ProbKrnl.c */
@@ -117,23 +127,19 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
         switch (*pszTmp)
         {
             case 'c':
-            case 'C': /* -C[1|2] - com-port no, def:-C2 */
-                switch (pszTmp[1])
-                {
-                    case '1':
-                        options.usCom = OUTPUT_COM1;
-                        break;
-
-                    case '2':
-                    default:
-                        options.usCom = OUTPUT_COM2;
-                }
+            case 'C': /* -C[1|2] or -Com:[1|2]  -  com-port no, def:-C2 */
+                pszTmp2 = strpbrk(pszTmp, ":=/- ");
+                if (pszTmp2 != NULL && (*pszTmp2 == ':' || *pszTmp2 == '='))
+                    pszTmp2++;
+                else
+                    pszTmp2 = pszTmp + 1;
+                options.usCom = (USHORT)(*pszTmp2 == '1' ? OUTPUT_COM1 : OUTPUT_COM2);
                 break;
 
             case 'e':
             case 'E':/* ELF */
                 pszTmp2 = strpbrk(pszTmp, ":=/- ");
-                if (pszTmp2 != NULL && (int)(pszTmp2-pszTmp) < cch-1
+                if (pszTmp2 != NULL
                     && (pszTmp2[1] == 'N' ||pszTmp2[1] == 'n' || pszTmp2[1] == 'D' || pszTmp2[1] == 'd')
                     )
                     options.fElf = FALSE;
@@ -144,8 +150,7 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
             case 'h':
             case 'H': /* Heap options */
                 pszTmp2 = strpbrk(pszTmp, ":=/- ");
-                if (pszTmp2 != NULL && (int)(pszTmp2-pszTmp) < cch-1
-                    && (*pszTmp2 == ':' || *pszTmp2 == '='))
+                if (pszTmp2 != NULL && (*pszTmp2 == ':' || *pszTmp2 == '='))
                 {
                     ul = readnum(pszTmp2 + 1);
                     if (ul > 0x1000UL && ul < 0x2000000UL) /* 4KB < ul < 32MB */
@@ -161,12 +166,12 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
             case 'l':
             case 'L': /* -L[..]<:|=| >[<Y..|E..| > | <N..|D..>] */
                 pszTmp2 = strpbrk(pszTmp, ":=/- ");
-                if (pszTmp2 != NULL && (int)(pszTmp2-pszTmp) < cch-1
-                    && (pszTmp2[1] == 'N' ||pszTmp2[1] == 'n' || pszTmp2[1] == 'D' || pszTmp2[1] == 'd')
+                if (pszTmp2 != NULL
+                    && (pszTmp2[1] == 'Y' ||pszTmp2[1] == 'y' || pszTmp2[1] == 'E' || pszTmp2[1] == 'e')
                     )
-                    options.fLogging = FALSE;
-                else
                     options.fLogging = TRUE;
+                else
+                    options.fLogging = FALSE;
                 break;
 
             case 'n':
@@ -177,17 +182,16 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
             case 'p':
             case 'P': /* PE */
                 pszTmp2 = strpbrk(pszTmp, ":=/- ");
-                if (pszTmp2 != NULL && (int)(pszTmp2-pszTmp) < cch-1
-                    && (*pszTmp2 == ':' || *pszTmp2 == '='))
+                if (pszTmp2 != NULL && (*pszTmp2 == ':' || *pszTmp2 == '='))
                 {
-                    pszTmp++;
-                    if (strnicmp(pszTmp, "pe2lx", 5) == 0)
+                    pszTmp2++;
+                    if (strnicmp(pszTmp2, "pe2lx", 5) == 0)
                         options.fPE = FLAGS_PE_PE2LX;
-                    else if (strnicmp(pszTmp, "pe", 2) == 0)
+                    else if (strnicmp(pszTmp2, "pe", 2) == 0)
                         options.fPE = FLAGS_PE_PE;
-                    else if (strnicmp(pszTmp, "mixed", 2) == 0)
+                    else if (strnicmp(pszTmp2, "mixed", 2) == 0)
                         options.fPE = FLAGS_PE_MIXED;
-                    else if (strnicmp(pszTmp, "not", 2) == 0)
+                    else if (strnicmp(pszTmp2, "not", 2) == 0)
                         options.fPE = FLAGS_PE_NOT;
                     else
                         kprintf(("R0Init32: invalid parameter -PE:...\n"));
@@ -204,8 +208,7 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
             case 'r':
             case 'R': /* ResHeap options */
                 pszTmp2 = strpbrk(pszTmp, ":=/- ");
-                if (pszTmp2 != NULL && (int)(pszTmp2-pszTmp) < cch-1
-                    && (*pszTmp2 == ':' || *pszTmp2 == '='))
+                if (pszTmp2 != NULL && (*pszTmp2 == ':' || *pszTmp2 == '='))
                 {
                     ul = readnum(pszTmp2 + 1);
                     if (ul > 0x1000UL && ul < 0x700000UL) /* 4KB < ul < 7MB */
@@ -221,23 +224,15 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
             case 's':
             case 'S': /* Sym:<filename> or Script:<Yes|No> or Smp */
                 /* SMP kernel */
-                if (pszTmp[1] == 'm' || pszTmp[1] == 'M')
-                    options.fKernel = KF_SMP;
-                else
+                pszTmp2 = strpbrk(pszTmp, ":=/- ");
+                if (pszTmp[1] == 'c' || pszTmp[1] == 'C')
                 {
-                    if (pszTmp[1] == 'c' || pszTmp[1] == 'C')
-                    {
-                        pszTmp2 = strpbrk(pszTmp, ":=/- ");
-                        options.fScript = pszTmp2 != NULL && (int)(pszTmp2-pszTmp) < cch-1
-                            && (*pszTmp2 == ':' || *pszTmp2 == '=')
-                            && (pszTmp2[1] == 'Y' || pszTmp2[1] == 'y');
-                    }
+                    options.fUNIXScript =
+                        pszTmp2 != NULL
+                        && (int)(pszTmp2-pszTmp) < cch-1
+                        && (*pszTmp2 == ':' || *pszTmp2 == '=')
+                        && (pszTmp2[1] == 'Y' || pszTmp2[1] == 'y');
                 }
-                break;
-
-            case 'u':
-            case 'U': /* UNI kernel */
-                options.fKernel = KF_UNI;
                 break;
 
             case 'v':
@@ -246,17 +241,19 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
                 break;
 
             case 'w':
-            case 'W':
+            case 'W': /* ModuleBase info level; -W<n> or -Warning:<n> */
                 if (pszTmp[1] >= '0' && pszTmp[1] <= '4')
                     options.ulInfoLevel = pszTmp[1] - '0';
                 else
                 {
                     pszTmp2 = strpbrk(pszTmp, ":=/- ");
-                    if (pszTmp2 != NULL && (int)(pszTmp2-pszTmp) < cch-1
-                        && (*pszTmp2 == ':' || *pszTmp2 == '=')
-                        && pszTmp2[1] >= '0' && pszTmp2[1] <= '4'
-                        )
-                        options.ulInfoLevel = pszTmp2[1] - '0';
+                    if (pszTmp2 != NULL && (*pszTmp2 == ':' || *pszTmp2 == '='))
+                        pszTmp2++;
+                    else
+                        pszTmp2 = pszTmp + 1;
+
+                    if (*pszTmp2 >= '0' && *pszTmp2 <= '4')
+                        options.ulInfoLevel = *pszTmp2 - '0';
                 }
                 break;
 
@@ -270,11 +267,6 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
     if (options.cbResHeapInit > options.cbResHeapMax)
         options.cbResHeapMax = options.cbResHeapInit;
 
-    /* Transfer version and build number from 16-bit probkrnl.c */
-    options.ulBuild    = _usBuild;
-    options.usVerMajor = _usVerMajor;
-    options.usVerMinor = _usVerMinor;
-
     /* Log option summary */
     #ifdef DEBUG
     kprintf(("Options - Summary - Start\n"));
@@ -287,23 +279,34 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
         kprintf(("\tlogging enabled\n"));
     else
         kprintf(("\tlogging disabled\n"));
-    kprintf(("\tCom port no.%d\n", options.usCom));
+    kprintf(("\tCom port no.%03xh\n", options.usCom));
 
-    kprintf(("\tKernel: ver%d.%d  build %d  type %s\n",
+    kprintf(("\tKernel: v%d.%d  build %d  type ",
                 options.usVerMajor,
                 options.usVerMinor,
-                options.ulBuild,
-                (options.fKernel & KF_SMP) ? "SMP" : "UNI"
-              ));
-    kprintf(("\tfPE=%d (%s)\n", options.fPE, apszPE[MIN(options.fPE, 5)]));
+                options.ulBuild));
+    if (options.fKernel & KF_SMP)
+        kprintf(("SMP "));
+    else if (options.fKernel & KF_W4)
+        kprintf(("W4 "));
+    else
+        kprintf(("UNI "));
+    if (options.fKernel & KF_DEBUG)
+        kprintf(("DEBUG\n"));
+    else
+        kprintf(("\n"));
+
+    kprintf(("\tfPE=%d (%s)\n",     options.fPE, apszPE[MIN(options.fPE, 5)]));
     kprintf(("\tulInfoLevel=%d (%s)\n", options.ulInfoLevel, apszInfoLevel[MIN(options.ulInfoLevel, 5)]));
-    kprintf(("\tfElf=%d\n", options.fElf));
-    kprintf(("\tfScript=%d\n", options.fScript));
-    kprintf(("\tfNoLoader=%d\n", options.fNoLoader));
+    kprintf(("\tfElf=%d\n",         options.fElf));
+    kprintf(("\tfUNIXScript=%d\n",  options.fUNIXScript));
+    kprintf(("\tfREXXScript=%d\n",  options.fREXXScript));
+    kprintf(("\tfJAVA=%d\n",        options.fJava));
+    kprintf(("\tfNoLoader=%d\n",    options.fNoLoader));
     kprintf(("\tcbSwpHeapInit=0x%08x  cbSwpHeapMax=0x%08x\n",
              options.cbSwpHeapInit, options.cbSwpHeapMax));
     kprintf(("\tcbResHeapInit=0x%08x  cbResHeapMax=0x%08x\n",
-             options.cbSwpHeapInit, options.cbSwpHeapMax));
+             options.cbResHeapInit, options.cbResHeapMax));
     kprintf(("Options - Summary - End\n"));
     #endif /* debug */
     /* end option summary */
@@ -324,7 +327,7 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
 
     /* functionoverrides */
     if (!options.fNoLoader)
-        if (ImportTabInit() != NO_ERROR)
+        if (importTabInit() != NO_ERROR)
             return STATUS_DONE | STERR | ERROR_I24_QUIET_INIT_FAIL;
 
     /*
@@ -368,7 +371,7 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
  * @status    competely implemented.
  * @author    knut st. osmundsen
  */
-static ULONG    readnum(const char *pszNum)
+ULONG    readnum(const char *pszNum)
 {
     ULONG ulRet = 0;
     ULONG ulBase = 10;
@@ -427,7 +430,11 @@ USHORT _loadds _Far32 _Pascal GetKernelInfo32(PKRNLINFO pKrnlInfo)
     pulTKSSBase32 = (PULONG)_TKSSBase16;
 
     /* Find the kernel OTE table */
+#ifndef R3TST
     pKrnlMTE = GetOS2KrnlMTE();
+#else
+    pKrnlMTE = GetOS2KrnlMTETst();
+#endif
     if (pKrnlMTE != NULL)
     {
         pKrnlSMTE = pKrnlMTE->mte_swapmte;
@@ -460,18 +467,24 @@ USHORT _loadds _Far32 _Pascal GetKernelInfo32(PKRNLINFO pKrnlInfo)
                     /*
                      * Search for internal revision stuff in the two first objects.
                      */
-                    pKrnlInfo->usBuild = 0;
-                    for (i = 0; i < 2 && pKrnlInfo->usBuild == 0; i++)
+                    pKrnlInfo->ulBuild = 0;
+                    for (i = 0; i < 2 && pKrnlInfo->ulBuild == 0; i++)
                     {
+                        #ifndef R3TST
                         const char *psz = (const char*)pKrnlOTE[i].ote_base;
-                        const char *pszEnd = psz + pKrnlOTE[i].ote_size;
+                        const char *pszEnd = psz + pKrnlOTE[i].ote_size - 50; /* Last possible search position. */
+                        #else
+                        extern const char *pszInternalRevision; /* defined in win32ktst.c */
+                        const char *psz =  pszInternalRevision;
+                        const char *pszEnd = psz + 3;
+                        #endif
 
-                        while (psz + 100 < pszEnd)
+                        while (psz < pszEnd)
                         {
                             if (strncmp(psz, "Internal revision ", 18) == 0 && (psz[18] >= '0' && psz[18] <= '9'))
                             {
                                 int j;
-                                kprintf2(("GetOTEs32: found internal revision: '%s'\n", psz));
+                                kprintf2(("GetKernelInfo32: found internal revision: '%s'\n", psz));
 
                                 /* skip to end of "Internal revision " string. */
                                 psz += 18;
@@ -480,18 +493,18 @@ USHORT _loadds _Far32 _Pascal GetKernelInfo32(PKRNLINFO pKrnlInfo)
                                 while ((*psz >= '0' && *psz <= '9') || *psz == '.')
                                 {
                                     if (*psz != '.')
-                                        pKrnlInfo->usBuild = (unsigned short)(pKrnlInfo->usBuild * 10 + (*psz - '0'));
+                                        pKrnlInfo->ulBuild = (unsigned short)(pKrnlInfo->ulBuild * 10 + (*psz - '0'));
                                     psz++;
                                 }
 
                                 /* Check if build number seems valid. */
-                                if (   !(pKrnlInfo->usBuild >=  8254 && pKrnlInfo->usBuild <  8383) /* Warp 3 fp 32 -> fp 60 */
-                                    && !(pKrnlInfo->usBuild >=  9023 && pKrnlInfo->usBuild <= 9036) /* Warp 4 GA -> fp 12 */
-                                    && !(pKrnlInfo->usBuild >= 14039 && pKrnlInfo->usBuild < 14080) /* Warp 4.5 GA -> fp 40 */
+                                if (   !(pKrnlInfo->ulBuild >=  8254 && pKrnlInfo->ulBuild <  8383) /* Warp 3 fp 32 -> fp 60 */
+                                    && !(pKrnlInfo->ulBuild >=  9023 && pKrnlInfo->ulBuild <= 9036) /* Warp 4 GA -> fp 12 */
+                                    && !(pKrnlInfo->ulBuild >= 14039 && pKrnlInfo->ulBuild < 14080) /* Warp 4.5 GA -> fp 40 */
                                       )
                                 {
-                                    kprintf(("GetOTEs32: info summary: Build %d is invalid - invalid fixpack?\n", pKrnlInfo->usBuild));
-                                    usRc = 6;
+                                    kprintf(("GetKernelInfo32: info summary: Build %d is invalid - invalid fixpack?\n", pKrnlInfo->ulBuild));
+                                    usRc = ERROR_D32_INVALID_BUILD;
                                     break;
                                 }
 
@@ -499,16 +512,19 @@ USHORT _loadds _Far32 _Pascal GetKernelInfo32(PKRNLINFO pKrnlInfo)
                                 if ((psz[0] != ',' && psz[1] == '_' && (psz[2] == 'S' || psz[2] == 's'))  /* F_SMP */
                                     || (psz[0] == '_' && (psz[1] == 'S' || psz[1] == 's'))  /* _SMP  */
                                     )
-                                    pKrnlInfo->fchType = TYPE_SMP;
-                                else if (psz[0] == '_' && psz[1] == 'W' && psz[2] == '4')    /* _W4  */
-                                    pKrnlInfo->fchType = TYPE_W4;
+                                    pKrnlInfo->fKernel = KF_SMP;
                                 else
-                                    pKrnlInfo->fchType = TYPE_UNI;
+                                    if (*psz != ','
+                                        && (psz[0] == '_' && (psz[1] == 'W' || psz[1] == 'w') && psz[2] == '4')  /* _W4 */
+                                        )
+                                    pKrnlInfo->fKernel = KF_W4 | KF_UNI;
+                                else
+                                    pKrnlInfo->fKernel = KF_UNI;
 
 
                                 /* Check if its a debug kernel (look for DEBUG at start of object 3-5) */
+                            #ifndef R3TST
                                 j = 3;
-                                pKrnlInfo->fDebug = FALSE;
                                 while (j < 5)
                                 {
                                     /* There should be no iopl object preceding the debugger data object. */
@@ -519,15 +535,18 @@ USHORT _loadds _Far32 _Pascal GetKernelInfo32(PKRNLINFO pKrnlInfo)
                                         && (pKrnlOTE[j].ote_flags & (OBJREAD | OBJWRITE)) == (OBJREAD | OBJWRITE)
                                         && strncmp((char*)pKrnlOTE[j].ote_base, "DEBUG", 5) == 0)
                                     {
-                                        pKrnlInfo->fDebug = TRUE;
+                                        pKrnlInfo->fKernel |= KF_DEBUG;
                                         break;
                                     }
                                     j++;
                                 }
+                            #else
+                                NOREF(j);
+                            #endif
 
                                 /* Display info */
-                                kprintf(("GetOTEs32: info summary: Build %d, fchType=%d, fDebug=%d\n",
-                                         pKrnlInfo->usBuild, pKrnlInfo->fchType, pKrnlInfo->fDebug));
+                                kprintf(("GetKernelInfo32: info summary: Build %d, fKernel=%d\n",
+                                         pKrnlInfo->ulBuild, pKrnlInfo->fKernel));
 
                                 /* Break out */
                                 break;
@@ -539,27 +558,26 @@ USHORT _loadds _Far32 _Pascal GetKernelInfo32(PKRNLINFO pKrnlInfo)
                     } /* for loop on objects 0-1. */
 
                     /* Set error code if not found */
-                    if (pKrnlInfo->usBuild == 0)
+                    if (pKrnlInfo->ulBuild == 0)
                     {
-                        usRc = 5;
-                        kprintf(("GetOTEs32: Internal revision was not found!\n"));
+                        usRc = ERROR_D32_BUILD_INFO_NOT_FOUND;
+                        kprintf(("GetKernelInfo32: Internal revision was not found!\n"));
                     }
                 }
                 else
-                    usRc = 4;
+                    usRc = ERROR_D32_NO_OBJECT_TABLE;
             }
             else
-                usRc = 3;
+                usRc = ERROR_D32_TOO_MANY_OBJECTS;
         }
         else
-            usRc = 2;
+            usRc = ERROR_D32_NO_SWAPMTE;
     }
     else
-        usRc = 1;
+        usRc = ERROR_D32_GETOS2KRNL_FAILED;
 
-
-    if (usRc != 0)
-        kprintf(("GetOTEs32: failed. usRc = %d\n", usRc));
+    if (usRc != NO_ERROR)
+        kprintf(("GetKernelInfo32: failed. usRc = %d\n", usRc));
 
     return (USHORT)(usRc | (usRc != NO_ERROR ? STATUS_DONE | STERR : STATUS_DONE));
 }
@@ -574,12 +592,35 @@ USHORT _loadds _Far32 _Pascal GetKernelInfo32(PKRNLINFO pKrnlInfo)
  * @status    completely implemented.
  * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
  */
-_Inline int ModR_M_32bit(char bModRM)
+int ModR_M_32bit(char bModRM)
 {
     if ((bModRM & 0xc0) == 0x80  /* ex. mov ax,[ebp+11145543h] */
         || ((bModRM & 0xc0) == 0 && (bModRM & 0x07) == 5)) /* ex. mov ebp,[0ff231234h] */
     {   /* 32-bit displacement */
         return 5;
+    }
+    else if ((bModRM & 0xc0) == 0x40) /* ex. mov ecx,[esi]+4fh */
+    {   /* 8-bit displacement */
+        return 2;
+    }
+    /* no displacement (only /r byte) */
+    return 1;
+}
+
+
+/**
+ * Functions which cacluates the instructionsize given a ModR/M byte.
+ * @returns   Number of bytes to add to cb and pach.
+ * @param     bModRM  ModR/M byte.
+ * @status    completely implemented.
+ * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ */
+int ModR_M_16bit(char bModRM)
+{
+    if ((bModRM & 0xc0) == 0x80  /* ex. mov ax,[ebp+11145543h] */
+        || ((bModRM & 0xc0) == 0 && (bModRM & 0x07) == 5)) /* ex. mov ebp,[0ff231234h] */
+    {   /* 16-bit displacement */
+        return 4;
     }
     else if ((bModRM & 0xc0) == 0x40) /* ex. mov ecx,[esi]+4fh */
     {   /* 8-bit displacement */
@@ -602,10 +643,9 @@ _Inline int ModR_M_32bit(char bModRM)
  * @param     fOverload  TRUE:  Function is to be overloaded.
  *                       FALSE: Function is to be imported.
  */
-static int interpretFunctionProlog32(char *pach, BOOL fOverload)
+int interpretFunctionProlog32(char *pach, BOOL fOverload)
 {
     int cb = -3;
-
     kprintf2(("interpretFunctionProlog32(0x%08x, %d):\n"
               "\t%02x %02x %02x %02x - %02x %02x %02x %02x\n"
               "\t%02x %02x %02x %02x - %02x %02x %02x %02x\n",
@@ -786,7 +826,7 @@ static int interpretFunctionProlog32(char *pach, BOOL fOverload)
  * @param     fOverload  TRUE:  Function is to be overloaded.
  *                       FALSE: Function is to be imported.
  */
-static int interpretFunctionProlog16(char *pach, BOOL fOverload)
+int interpretFunctionProlog16(char *pach, BOOL fOverload)
 {
     int cb = -7;
 
@@ -808,9 +848,16 @@ static int interpretFunctionProlog16(char *pach, BOOL fOverload)
         cb = 0;
         while (cb < 8 || fForce)        /* 8 is the size of a 66h prefixed far jump instruction. */
         {
+            int cb2;
             fForce = FALSE;
             switch (*pach)
             {
+                case 0x06:              /* push es */
+                case 0x0e:              /* push cs */
+                case 0x1e:              /* push ds */
+                case 0x16:              /* push ss */
+                    break;
+
                 case 0x0f:              /* push gs and push fs */
                     if (pach[1] != 0xA0 && pach[1] != 0xA8)
                     {
@@ -887,6 +934,24 @@ static int interpretFunctionProlog16(char *pach, BOOL fOverload)
                     }
                     break;
 
+                /* complex sized instruction - "/5 ib" */
+                case 0x80:              /* 5: sub r/m8, imm8  7: cmp r/m8, imm8 */
+                case 0x83:              /* 5: sub r/m16, imm8 7: cmp r/m16, imm8 */
+                    if ((pach[1] & 0x38) == (5<<3)
+                        || (pach[1] & 0x38) == (7<<3)
+                        )
+                    {
+                        cb += cb2 = 1 + ModR_M_16bit(pach[1]); /* 1 is the size of the imm8 */
+                        pach += cb2;
+                    }
+                    else
+                    {
+                        kprintf(("interpretFunctionProlog32: unknown instruction (-3) 0x%x 0x%x 0x%x\n", pach[0], pach[1], pach[2]));
+                        return -3;
+                    }
+                    break;
+
+
                 default:
                     kprintf(("interpretFunctionProlog16: unknown instruction 0x%x 0x%x 0x%x\n", pach[0], pach[1], pach[2]));
                     return 0;
@@ -912,16 +977,22 @@ static int interpretFunctionProlog16(char *pach, BOOL fOverload)
  */
 USHORT _loadds _Far32 _Pascal VerifyImportTab32(void)
 {
-    int i;
-    int cb;
-    int cbmin;
+    USHORT  usRc;
+    int     i;
+    int     cb;
+    int     cbmin;
 
     /* VerifyImporTab32 is called before the initroutine! */
     pulTKSSBase32 = (PULONG)_TKSSBase16;
 
+#ifdef R3TST
+    R3TstFixImportTab();
+#endif
+
     /* Check that pKrnlOTE is set */
-    if (GetKernelInfo32(NULL) != NO_ERROR)
-        return STATUS_DONE | STERR | 1;
+    usRc = GetKernelInfo32(NULL);
+    if (usRc != NO_ERROR)
+        return (USHORT)(STATUS_DONE | STERR | (usRc & STECODE));
 
     /*
      * Verify aImportTab.
@@ -939,9 +1010,10 @@ USHORT _loadds _Far32 _Pascal VerifyImportTab32(void)
         if (!_aImportTab[i].fFound)
         {
             kprintf(("VerifyImportTab32: procedure no.%d was not fFound!\n", i));
-            return STATUS_DONE | STERR | 2;
+            return STATUS_DONE | STERR | ERROR_D32_PROC_NOT_FOUND;
         }
 
+    #ifndef R3TST
         /* Verify read/writeable. */
         if (_aImportTab[i].iObject >= pKrnlSMTE->smte_objcnt                                /* object index valid? */
             || _aImportTab[i].ulAddress < pKrnlOTE[_aImportTab[i].iObject].ote_base         /* address valid? */
@@ -955,7 +1027,7 @@ USHORT _loadds _Far32 _Pascal VerifyImportTab32(void)
                      "                   %s  addr=0x%08x iObj=%d offObj=%d\n",
                      i, &_aImportTab[i].achName[0], _aImportTab[i].ulAddress,
                      _aImportTab[i].iObject, _aImportTab[i].offObject));
-            return STATUS_DONE | STERR | 3;
+            return STATUS_DONE | STERR | ERROR_D32_INVALID_OBJ_OR_ADDR;
         }
 
 
@@ -964,8 +1036,9 @@ USHORT _loadds _Far32 _Pascal VerifyImportTab32(void)
         {
             kprintf(("VerifyImportTab32: procedure no.%d has an invalid address, %#08x!\n",
                      i, _aImportTab[i].ulAddress));
-            return STATUS_DONE | STERR | 4;
+            return STATUS_DONE | STERR | ERROR_D32_INVALID_ADDRESS;
         }
+    #endif
 
         switch (_aImportTab[i].fType & ~EPT_BIT_MASK)
         {
@@ -990,10 +1063,10 @@ USHORT _loadds _Far32 _Pascal VerifyImportTab32(void)
                 /*
                  * Check result of the function prolog interpretations.
                  */
-                if (cb <= 0 && cb + cbmin >= MAXSIZE_PROLOG)
+                if (cb <= 0 || cb + cbmin >= MAXSIZE_PROLOG)
                 {   /* failed, too small or too large. */
                     kprintf(("VerifyImportTab32: verify failed for procedure no.%d (cd=%d)\n", i, cb));
-                    return STATUS_DONE | STERR | 5;
+                    return STATUS_DONE | STERR | ERROR_D32_TOO_INVALID_PROLOG;
                 }
                 break;
 
@@ -1002,9 +1075,9 @@ USHORT _loadds _Far32 _Pascal VerifyImportTab32(void)
                 break;
 
             default:
-                kprintf(("VerifyImportTab32: only EPT_PROC is implemented\n",i));
+                kprintf(("VerifyImportTab32: invalid type/type not implemented\n",i));
                 Int3(); /* temporary fix! */
-                return STATUS_DONE | STERR | 6;
+                return STATUS_DONE | STERR | ERROR_D32_NOT_IMPLEMENTED;
         }
     }
 
@@ -1016,34 +1089,49 @@ USHORT _loadds _Far32 _Pascal VerifyImportTab32(void)
  * Initiates the overrided functions.
  * @returns   NO_ERROR on success. !0 on error.
  */
-static int importTabInit(void)
+int importTabInit(void)
 {
     /* This table must be updated with the overloading functions. */
     static unsigned auFuncs[NBR_OF_KRNLIMPORTS] =
     {
-        (unsigned)myldrRead,
-        (unsigned)myldrOpen,
-        (unsigned)myldrClose,
-        (unsigned)myLDRQAppType,
-        (unsigned)myldrEnum32bitRelRecs,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        0,
-        (unsigned)&mytkExecPgm,
-        0,
-        0,
-        0,
-        0
+        (unsigned)myldrRead,            /* 0 */
+        (unsigned)myldrOpen,            /* 1 */
+        (unsigned)myldrClose,           /* 2 */
+        (unsigned)myLDRQAppType,        /* 3 */
+        (unsigned)myldrEnum32bitRelRecs,/* 4 */
+        0,                              /* 5 */
+        0,                              /* 6 */
+        0,                              /* 7 */
+        0,                              /* 8 */
+        0,                              /* 9 */
+        0,                              /* 10 */
+        0,                              /* 11 */
+        0,                              /* 12 */
+        (unsigned)&mytkExecPgm,         /* 13 */
+        0,                              /* 14 */
+        0,                              /* 15 */
+        0,                              /* 16 */
+        0,                              /* 17 */
+        (unsigned)myldrOpenPath,        /* 18 */
+        0,                              /* 19 */
+        0,                              /* 20 */
+        0,                              /* 21 */
+        0,                              /* 22 */
+        0,                              /* 23 */
+        0,                              /* 24 */
+        0,                              /* 25 */
+        0,                              /* 26 */
+        0,                              /* 27 */
+        0,                              /* 28 */
+        0                               /* 29 */
     };
-
     int i;
     int cb;
     int cbmin;
+
+#ifdef R3TST
+    R3TstFixImportTab();
+#endif
 
     /*
      * verify proctable
@@ -1067,7 +1155,7 @@ static int importTabInit(void)
         if (cb <= 0 || cb + cbmin >= MAXSIZE_PROLOG)
         {
             kprintf(("ImportTabInit: Verify failed for procedure no.%d, cb=%d\n", i, cb));
-            return 1;
+            return ERROR_D32_VERIFY_FAILED;
         }
     }
 
@@ -1113,7 +1201,7 @@ static int importTabInit(void)
                 {   /* !fatal! - this could never happen really... */
                     kprintf(("ImportTabInit: FATAL verify failed for procedure no.%d when rehooking it!\n",i));
                     Int3(); /* ipe - later! */
-                    return 1;
+                    return ERROR_D32_VERIFY_FAILED;
                 }
                 break;
             }
@@ -1158,7 +1246,7 @@ static int importTabInit(void)
                 {   /* !fatal! - this could never happen really... */
                     kprintf(("ImportTabInit: FATAL verify failed for procedure no.%d when rehooking it!\n",i));
                     Int3(); /* ipe - later! */
-                    return 1;
+                    return ERROR_D32_VERIFY_FAILED;
                 }
                 break;
             }
@@ -1186,7 +1274,7 @@ static int importTabInit(void)
                 {   /* !fatal! - this should never really happen... */
                     kprintf(("ImportTabInit: FATAL verify failed for procedure no.%d when importing it!\n",i));
                     Int3(); /* ipe - later! */
-                    return 1;
+                    return ERROR_D32_VERIFY_FAILED;
                 }
                 break;
             }
@@ -1214,7 +1302,7 @@ static int importTabInit(void)
                 {   /* !fatal! - this should never really happen... */
                     kprintf(("ImportTabInit: FATAL verify failed for procedure no.%d when importing it!\n",i));
                     Int3(); /* ipe - later! */
-                    return 1;
+                    return ERROR_D32_VERIFY_FAILED;
                 }
                 break;
             }
@@ -1241,7 +1329,7 @@ static int importTabInit(void)
             default:
                 kprintf(("ImportTabInit: unsupported type. (procedure no.%d, cb=%d)\n", i, cb));
                 Int3(); /* ipe - later! */
-                return 1;
+                return ERROR_D32_VERIFY_FAILED;
         } /* switch - type */
     }   /* for */
 
@@ -1249,6 +1337,264 @@ static int importTabInit(void)
 }
 #endif /* !DEBUGR3 */
 
+
+#ifdef R3TST
+/**
+ * Creates a fake kernel MTE, SMTE and OTE for use while testing in Ring3.
+ * @returns Pointer to the fake kernel MTE.
+ * @status  completely implemented.
+ * @author  knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ */
+PMTE GetOS2KrnlMTETst(void)
+{
+    static MTE    KrnlMTE;
+    static SMTE   KrnlSMTE;
+    static OTE    aKrnlOTE[17];
+
+    extern int  cObjectsFake; /* defined in win32ktst.c */
+
+    KrnlMTE.mte_swapmte = &KrnlSMTE;
+    KrnlSMTE.smte_objtab = &aKrnlOTE[0];
+    KrnlSMTE.smte_objcnt = cObjectsFake;
+
+    aKrnlOTE[0].ote_size     = 0x00000FB4;
+    aKrnlOTE[0].ote_base     = 0xffe10000;
+    aKrnlOTE[0].ote_flags    = 0x80001063;
+    aKrnlOTE[0].ote_pagemap  = 1;
+    aKrnlOTE[0].ote_mapsize  = 1;
+    aKrnlOTE[0].ote_sel      = 0;
+    aKrnlOTE[0].ote_hob      = 0;
+
+    aKrnlOTE[1].ote_size     = 0x0000A7CD;
+    aKrnlOTE[1].ote_base     = 0xffe20000;
+    aKrnlOTE[1].ote_flags    = 0x80001063;
+    aKrnlOTE[1].ote_pagemap  = 0x00000002;
+    aKrnlOTE[1].ote_mapsize  = 0x0000000B;
+    aKrnlOTE[1].ote_sel      = 0x0;
+    aKrnlOTE[1].ote_hob      = 0x0;
+
+    aKrnlOTE[2].ote_size     = 0x000084C9;
+    aKrnlOTE[2].ote_base     = 0xffe30000;
+    aKrnlOTE[2].ote_flags    = 0x80001045;
+    aKrnlOTE[2].ote_pagemap  = 0x0000000D;
+    aKrnlOTE[2].ote_mapsize  = 0x00000009;
+    aKrnlOTE[2].ote_sel      = 0x0;
+    aKrnlOTE[2].ote_hob      = 0x0;
+
+    aKrnlOTE[3].ote_size     = 0x00010000;
+    aKrnlOTE[3].ote_base     = 0xffe40000;
+    aKrnlOTE[3].ote_flags    = 0x800090A3;
+    aKrnlOTE[3].ote_pagemap  = 0x00000016;
+    aKrnlOTE[3].ote_mapsize  = 0x00000010;
+    aKrnlOTE[3].ote_sel      = 0x0;
+    aKrnlOTE[3].ote_hob      = 0x0;
+
+    aKrnlOTE[4].ote_size     = 0x00002A80;
+    aKrnlOTE[4].ote_base     = 0xffe50000;
+    aKrnlOTE[4].ote_flags    = 0x80009023;
+    aKrnlOTE[4].ote_pagemap  = 0x00000026;
+    aKrnlOTE[4].ote_mapsize  = 0x00000003;
+    aKrnlOTE[4].ote_sel      = 0x0;
+    aKrnlOTE[4].ote_hob      = 0x0;
+
+    aKrnlOTE[5].ote_size     = 0x00005734;
+    aKrnlOTE[5].ote_base     = 0xffe60000;
+    aKrnlOTE[5].ote_flags    = 0x80001023;
+    aKrnlOTE[5].ote_pagemap  = 0x00000029;
+    aKrnlOTE[5].ote_mapsize  = 0x00000003;
+    aKrnlOTE[5].ote_sel      = 0x0;
+    aKrnlOTE[5].ote_hob      = 0x0;
+
+    aKrnlOTE[6].ote_size     = 0x00002833;
+    aKrnlOTE[6].ote_base     = 0xffe70000;
+    aKrnlOTE[6].ote_flags    = 0x80001015;
+    aKrnlOTE[6].ote_pagemap  = 0x0000002C;
+    aKrnlOTE[6].ote_mapsize  = 0x00000003;
+    aKrnlOTE[6].ote_sel      = 0x0;
+    aKrnlOTE[6].ote_hob      = 0x0;
+
+    aKrnlOTE[7].ote_size     = 0x000001B0;
+    aKrnlOTE[7].ote_base     = 0xffe80000;
+    aKrnlOTE[7].ote_flags    = 0x80002213;
+    aKrnlOTE[7].ote_pagemap  = 0x0000002F;
+    aKrnlOTE[7].ote_mapsize  = 0x00000001;
+    aKrnlOTE[7].ote_sel      = 0x0;
+    aKrnlOTE[7].ote_hob      = 0x0;
+
+    aKrnlOTE[8].ote_size     = 0x000027CC;
+    aKrnlOTE[8].ote_base     = 0xffe90000;
+    aKrnlOTE[8].ote_flags    = 0x80002013;
+    aKrnlOTE[8].ote_pagemap  = 0x00000030;
+    aKrnlOTE[8].ote_mapsize  = 0x00000003;
+    aKrnlOTE[8].ote_sel      = 0x0;
+    aKrnlOTE[8].ote_hob      = 0x0;
+
+    aKrnlOTE[9].ote_size     = 0x0000FDA8;
+    aKrnlOTE[9].ote_base     = 0xffeA0000;
+    aKrnlOTE[9].ote_flags    = 0x80002033;
+    aKrnlOTE[9].ote_pagemap  = 0x00000033;
+    aKrnlOTE[9].ote_mapsize  = 0x0000000D;
+    aKrnlOTE[9].ote_sel      = 0x0;
+    aKrnlOTE[9].ote_hob      = 0x0;
+
+    aKrnlOTE[10].ote_size     = 0x0000ECD6;
+    aKrnlOTE[10].ote_base     = 0xffeB0000;
+    aKrnlOTE[10].ote_flags    = 0x80001015;
+    aKrnlOTE[10].ote_pagemap  = 0x00000040;
+    aKrnlOTE[10].ote_mapsize  = 0x0000000F;
+    aKrnlOTE[10].ote_sel      = 0x0;
+    aKrnlOTE[10].ote_hob      = 0x0;
+
+    aKrnlOTE[11].ote_size     = 0x0000EAF4;
+    aKrnlOTE[11].ote_base     = 0xffeC0000;
+    aKrnlOTE[11].ote_flags    = 0x80001015;
+    aKrnlOTE[11].ote_pagemap  = 0x0000004F;
+    aKrnlOTE[11].ote_mapsize  = 0x0000000F;
+    aKrnlOTE[11].ote_sel      = 0x0;
+    aKrnlOTE[11].ote_hob      = 0x0;
+
+    aKrnlOTE[12].ote_size     = 0x0000D900;
+    aKrnlOTE[12].ote_base     = 0xffeD0000;
+    aKrnlOTE[12].ote_flags    = 0x80001015;
+    aKrnlOTE[12].ote_pagemap  = 0x0000005E;
+    aKrnlOTE[12].ote_mapsize  = 0x0000000E;
+    aKrnlOTE[12].ote_sel      = 0x0;
+    aKrnlOTE[12].ote_hob      = 0x0;
+
+    aKrnlOTE[13].ote_size     = 0x0000D6DC;
+    aKrnlOTE[13].ote_base     = 0xffeE0000;
+    aKrnlOTE[13].ote_flags    = 0x80001015;
+    aKrnlOTE[13].ote_pagemap  = 0x0000006C;
+    aKrnlOTE[13].ote_mapsize  = 0x0000000E;
+    aKrnlOTE[13].ote_sel      = 0x0;
+    aKrnlOTE[13].ote_hob      = 0x0;
+
+    aKrnlOTE[14].ote_size     = 0x000B684B;
+    aKrnlOTE[14].ote_base     = 0xffeF0000;
+    aKrnlOTE[14].ote_flags    = 0x80002015;
+    aKrnlOTE[14].ote_pagemap  = 0x0000007A;
+    aKrnlOTE[14].ote_mapsize  = 0x000000B7;
+    aKrnlOTE[14].ote_sel      = 0x0;
+    aKrnlOTE[14].ote_hob      = 0x0;
+
+    aKrnlOTE[15].ote_size     = 0x000B684B;
+    aKrnlOTE[15].ote_base     = 0xffeF0000;
+    aKrnlOTE[15].ote_flags    = 0x80002015;
+    aKrnlOTE[15].ote_pagemap  = 0x0000007A;
+    aKrnlOTE[15].ote_mapsize  = 0x000000B7;
+    aKrnlOTE[15].ote_sel      = 0x0;
+    aKrnlOTE[15].ote_hob      = 0x0;
+
+    aKrnlOTE[16].ote_size     = 0x000B684B;
+    aKrnlOTE[16].ote_base     = 0xffeF0000;
+    aKrnlOTE[16].ote_flags    = 0x80002015;
+    aKrnlOTE[16].ote_pagemap  = 0x0000007A;
+    aKrnlOTE[16].ote_mapsize  = 0x000000B7;
+    aKrnlOTE[16].ote_sel      = 0x0;
+    aKrnlOTE[16].ote_hob      = 0x0;
+
+    return &KrnlMTE;
+}
+
+/**
+ * -Ring-3 testing-
+ * Changes the entries in _aImportTab to point to their fake equivalents.
+ * @returns void
+ * @param   void
+ * @status  completely implemented.
+ * @author  knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @remark  Called before the _aImportTab array is used/verified.
+ */
+VOID R3TstFixImportTab(VOID)
+{
+    struct _TstFaker
+    {
+        unsigned   uAddress;
+        int        fObj;                   /* 1 = CODE32, 2 = CODE16, 3 = DATA32, 4 = DATA16 */
+    }
+    aTstFakers[NBR_OF_KRNLIMPORTS] =
+    {
+        {(unsigned)fakeldrRead,             1},
+        {(unsigned)fakeldrOpen,             1},
+        {(unsigned)fakeldrClose,            1},
+        {(unsigned)fakeLDRQAppType,         1},
+        {(unsigned)fakeldrEnum32bitRelRecs, 1},
+        {(unsigned)fakeIOSftOpen,           1},
+        {(unsigned)fakeIOSftClose,          1},
+        {(unsigned)fakeIOSftTransPath,      1},
+        {(unsigned)fakeIOSftReadAt,         1},
+        {(unsigned)fakeIOSftWriteAt,        1},
+        {(unsigned)fakeSftFileSize,         1},
+        {(unsigned)fakeVMAllocMem,          1},
+        {(unsigned)fakeVMGetOwner,          1},
+        {(unsigned)fakeg_tkExecPgm,         1},
+        {(unsigned)fakef_FuStrLenZ,         2},
+        {(unsigned)fakef_FuStrLen,          2},
+        {(unsigned)fakef_FuBuff,            2},
+        {(unsigned)fakeVMObjHandleInfo,     1},
+        {(unsigned)fakeldrOpenPath,         1},
+        {(unsigned)fakeLDRClearSem,         1},
+        {(unsigned)fakeKSEMRequestMutex,    1},
+        {(unsigned)&fakeLDRSem,             3},
+        {(unsigned)fakeTKSuBuff,            1},
+        {(unsigned)fakeTKFuBuff,            1},
+        {(unsigned)fakeTKFuBufLen,          1},
+        {(unsigned)fakeldrValidateMteHandle,1},
+        {(unsigned)&fakepTCBCur,            4},
+        {(unsigned)&fakepPTDACur,           4},
+        {(unsigned)&fakeptda_start,         4},
+        {(unsigned)&fakeptda_environ,       4}
+    };
+    int i;
+
+    for (i = 0; i < NBR_OF_KRNLIMPORTS; i++)
+    {
+        switch (_aImportTab[i].fType)
+        {
+            case EPT_PROC32:
+                if (aTstFakers[i].fObj != 1)
+                    kprintf(("R3TstFixImportTab: invalid segment config for entry %i. (PROC32)\n", i));
+                break;
+            case EPT_PROCIMPORT32:
+                if (aTstFakers[i].fObj != 1)
+                    kprintf(("R3TstFixImportTab: invalid segment config for entry %i. (PROCIMPORT32)\n", i));
+                break;
+            case EPT_PROCIMPORT16:
+                if (aTstFakers[i].fObj != 2)
+                    kprintf(("R3TstFixImportTab: invalid segment config for entry %i. (PROCIMPORT16)\n", i));
+                break;
+            case EPT_VARIMPORT32:
+            case EPT_VARIMPORT16:
+                if (aTstFakers[i].fObj != 3 && aTstFakers[i].fObj != 4)
+                    kprintf(("R3TstFixImportTab: invalid segment config for entry %i. (VARIMPORT32/16)\n", i));
+                break;
+        } /* switch - type */
+
+        _aImportTab[i].ulAddress = aTstFakers[i].uAddress;
+        switch (aTstFakers[i].fObj)
+        {
+            case 1:
+                _aImportTab[i].usSel = GetSelectorCODE32();
+                _aImportTab[i].offObject = aTstFakers[i].uAddress - (unsigned)&CODE32START;
+                break;
+            case 2:
+                _aImportTab[i].usSel = GetSelectorCODE16();
+                _aImportTab[i].offObject = aTstFakers[i].uAddress - (unsigned)&CODE16START;
+                break;
+            case 3:
+                _aImportTab[i].usSel = GetSelectorDATA32();
+                _aImportTab[i].offObject = aTstFakers[i].uAddress - (unsigned)&DATA32START;
+                break;
+            case 4:
+                _aImportTab[i].usSel = GetSelectorDATA16();
+                _aImportTab[i].offObject = aTstFakers[i].uAddress - (unsigned)&DATA16START;
+                break;
+            default:
+                kprintf(("R3TstFixImportTab: invalid segment config for entry %i.\n", i));
+        }
+    } /* for */
+}
+#endif
 
 
 
@@ -1367,6 +1713,11 @@ void main(void)
         0xEC, 0x83, 0xEC, 0x0C, 0x53, 0x57, 0x8D, 0x55,
         0xF8
     };
+    char achf_ldrOpenPath[] = {
+        0x55, 0xA1, 0xA4, 0x0A, 0x00, 0x00, 0x8B, 0xEC,
+        0x83, 0xEC, 0x28, 0x66, 0x8B, 0x80, 0xFE, 0x01,
+        0x00, 0x00, 0x53, 0x57, 0x66, 0x89, 0x45, 0xE2
+    };
 
 
     char *aProcs[] =
@@ -1389,6 +1740,7 @@ void main(void)
         achf_FuStrLen          ,
         achf_FuBuff            ,
         achf_VMObjHandleInfo   ,
+        achf_ldrOpenPath       ,
         NULL
     };
     int i;
