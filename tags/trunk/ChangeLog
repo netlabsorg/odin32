@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.1771 2001-10-19 16:19:47 phaller Exp $ */
+/* $Id: ChangeLog,v 1.1772 2001-10-19 18:50:49 achimha Exp $ */
+
+ 2001-10-19: Achim Hasenmueller <achimha@innotek.de>
+    - WSOCK32:  o implemented error bit handling in Winsock 2.0
+                  event semaphore notification for asynch select
 
  2001-10-19: Patrick Haller <patrick.haller@innotek.de>
     - COMCTL32: o updated listview and status to wine level
