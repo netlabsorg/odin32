@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.762 2000-03-01 13:31:06 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.763 2000-03-01 14:25:41 sandervl Exp $ */
 
  2000-03-01: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Fixes for FindWindow(ExA/W) - now more like Wine
@@ -12,6 +12,17 @@
                         always call WinSetFocus???
                   Call Dinput handler when translating mouse & keyboard
                   messages (during Get/PeekMessage)
+	- OPENGL: Always build release version of glide, mesa, glu32 & glut
+        - OPENGL\GLIDE\CVG\GLIDE: 
+                  Disable instruction scheduling in release build -> messed up
+                  colors when turned on (most likely VAC optimizer bug)
+		  TODO: Somebody should also check this for the voodoo 1 glide dll.
+	- OPENGL\GLIDE\CVG:
+		  Fixed makefile
+	- OPENGL\MESA\GL\gl.h
+		  Removed circular header dependency (breaks build)
+	- OPENGL\MESA\3dfx:
+		  Copy 3dfx opengl32.dll to bin\glide
 
  2000-03-01: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- USER32: Fixed dprintf in CreateWindowExW
