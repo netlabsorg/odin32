@@ -1,4 +1,4 @@
-/* $Id: dde.h,v 1.1 1999-05-24 20:19:10 ktk Exp $ */
+/* $Id: dde.h,v 1.2 2002-02-11 13:51:38 sandervl Exp $ */
 
 /*****************************************************************************
  * Copyright 1995, Technion, Israel Institute of Technology
@@ -59,5 +59,19 @@ struct tagDDEPOKE
     BYTE Value[1];   	/* undetermined array */
 };
 typedef struct tagDDEPOKE DDEPOKE;
+
+
+BOOL WINAPI DdeSetQualityOfService(HWND hwndClient,
+				   CONST SECURITY_QUALITY_OF_SERVICE *pqosNew,
+				   PSECURITY_QUALITY_OF_SERVICE pqosPrev);
+ 
+BOOL WINAPI ImpersonateDdeClientWindow(HWND hWndClient, HWND hWndServer);
+
+/* lParam packing/unpacking API */
+
+LPARAM      WINAPI PackDDElParam(UINT,UINT,UINT);
+BOOL        WINAPI UnpackDDElParam(UINT,LPARAM,PUINT,PUINT);
+BOOL        WINAPI FreeDDElParam(UINT,LPARAM);
+LPARAM      WINAPI ReuseDDElParam(LPARAM,UINT,UINT,UINT,UINT);
 
 #endif /* __WINE_DDE_H */
