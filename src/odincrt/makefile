@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.28 2002-04-29 14:45:43 bird Exp $
+# $Id: makefile,v 1.29 2002-06-25 07:15:04 sandervl Exp $
 
 #
 # Odin32 API
@@ -23,7 +23,11 @@ NOTEXPDEF   = 1
 #
 CXXFLAGS    = $(CXXFLAGS_ODINCRT)
 LD2FLAGS    = $(LD2FLAGS_ODINCRT)
+!ifdef WITH_KLIB
+CDEFINES    = $(CDEFINES_ODINCRT) -DWITH_KLIB
+!else
 CDEFINES    = $(CDEFINES_ODINCRT)
+!endif
 IMPLIBFLAGS = $(IMPLIBFLAGS) /NOIgnoreCase
 
 !ifdef DEBUG
