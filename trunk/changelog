@@ -1,6 +1,10 @@
-/* $Id: changelog,v 1.2202 2002-07-01 19:14:08 sandervl Exp $ */
+/* $Id: changelog,v 1.2203 2002-07-02 09:54:39 sandervl Exp $ */
 
- 2002-06-30: Sander van Leeuwen <sandervl@innotek.de>
+ 2002-07-02: Sander van Leeuwen <sandervl@innotek.de>
+    - DDRAW:    o Removed RGB555->565 conversion in Fill16on16 & SurfReleaseDC
+                  (problem located in GDI32)
+
+ 2002-07-01: Sander van Leeuwen <sandervl@innotek.de>
     - USER32:   o Translate & dispatch unprocessed messages in IsDialogMessageA/W
                   (Wine doesn't do this, but experiments in Windows 2000 show
                    different behaviour)
