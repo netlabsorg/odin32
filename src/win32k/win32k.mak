@@ -1,4 +1,4 @@
-# $Id: win32k.mak,v 1.5 2001-02-11 14:54:56 bird Exp $
+# $Id: win32k.mak,v 1.6 2001-02-20 05:08:49 bird Exp $
 
 #
 # Win32k.sys makefile.
@@ -37,6 +37,7 @@ all:    $(WIN32KBIN)\$(NAME).sys
 OBJS  =\
     $(WIN32KOBJ)\devfirst.obj \
     $(WIN32KOBJ)\d16strat.obj \
+    $(WIN32KOBJ)\d32CallGate.obj \
     $(WIN32KOBJ)\d32hlp.obj \
     $(WIN32KOBJ)\d32globals.obj \
     $(WIN32KOBJ)\d16globl.obj \
@@ -65,6 +66,7 @@ OBJS  =\
     $(WIN32KOBJ)\myldrFindModule.obj \
     $(WIN32KOBJ)\myldrCheckInternalName.obj \
     $(WIN32KOBJ)\myldrGetFileName.obj \
+#    $(WIN32KOBJ)\d32Events.obj \
     $(WIN32KOBJ)\OS2KTCB.obj \
     $(WIN32KOBJ)\OS2KPTDA.obj \
     $(WIN32KOBJ)\pe2lx.obj \
@@ -72,6 +74,7 @@ OBJS  =\
     $(WIN32KOBJ)\d32ElfIOCtl.obj \
     $(WIN32KOBJ)\d32Win32kIOCtl.obj \
     $(WIN32KOBJ)\k32AllocMemEx.obj \
+#    $(WIN32KOBJ)\k32HandleSystemEvent.obj \
     $(WIN32KOBJ)\k32ProcessReadWrite.obj \
     $(WIN32KOBJ)\k32QueryOTEs.obj \
     $(WIN32KOBJ)\k32QueryOptionsStatus.obj \
@@ -165,6 +168,7 @@ TSTOBJS =\
     $(WIN32KOBJ)\fakea.obj \
     $(WIN32KOBJ)\TstFakers.obj \
     $(WIN32KOBJ)\d16strat.obj \
+    $(WIN32KOBJ)\d32CallGate.obj \
     $(WIN32KOBJ)\d32hlp.obj \
     $(WIN32KOBJ)\d32globals.obj \
     $(WIN32KOBJ)\d16globl.obj \
@@ -193,6 +197,7 @@ TSTOBJS =\
     $(WIN32KOBJ)\myldrFindModule.obj \
     $(WIN32KOBJ)\myldrCheckInternalName.obj \
     $(WIN32KOBJ)\myldrGetFileName.obj \
+#    $(WIN32KOBJ)\d32Events.obj \
     $(WIN32KOBJ)\OS2KTCB.obj \
     $(WIN32KOBJ)\OS2KPTDA.obj \
     $(WIN32KOBJ)\pe2lx.obj \
@@ -200,6 +205,7 @@ TSTOBJS =\
     $(WIN32KOBJ)\d32ElfIOCtl.obj \
     $(WIN32KOBJ)\d32Win32kIOCtl.obj \
     $(WIN32KOBJ)\k32AllocMemEx.obj \
+#    $(WIN32KOBJ)\k32HandleSystemEvent.obj \
     $(WIN32KOBJ)\k32ProcessReadWrite.obj \
     $(WIN32KOBJ)\k32QueryOTEs.obj \
     $(WIN32KOBJ)\k32QueryOptionsStatus.obj \
