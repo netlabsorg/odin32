@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.5 1999-06-10 20:48:01 phaller Exp $ */
+/* $Id: stubs.cpp,v 1.6 1999-08-18 22:00:58 phaller Exp $ */
 
 /*
  *
@@ -3545,6 +3545,29 @@ DWORD WIN32API GetVDMCurrentDirectories(DWORD x1)
 {
   dprintf(("KERNEL32: GetVDMCurrentDirectories(%08xh) not implemented\n",
            x1));
+
+  return (0);
+}
+
+
+/*****************************************************************************
+ * Name      : DWORD SetThreadPriorityBoost
+ * Purpose   : Unknown
+ * Parameters: Unknown (wrong)
+ * Variables :
+ * Result    : Unknown
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1999/06/08 21:44]
+ *****************************************************************************/
+
+DWORD WIN32API SetThreadPriorityBoost(DWORD x1,
+                                      DWORD x2)
+{
+  dprintf(("KERNEL32: SetThreadPriorityBoost(%08xh, %08xh) not implemented\n",
+           x1,
+           x2));
 
   return (0);
 }
