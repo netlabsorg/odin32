@@ -1,4 +1,10 @@
- /* $Id: changelog,v 1.673 2000-01-29 10:43:17 sandervl Exp $ */
+ /* $Id: changelog,v 1.674 2000-01-29 14:21:30 sandervl Exp $ */
+
+ 2000-01-29: Sander van Leeuwen <sandervl@xs4all.nl>
+	- GDI32: Save and restore FPU control word when calling
+                 Open32's DrawText. DrawText trashes it which causes drawing
+                 problems in RealPlayer 7.
+	- USER32: Call DrawTextA in uitools.cpp, not Open32's DrawText.
 
  2000-01-29: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
 	- KERNEL32: Added GlobalWire/GlobalUnwire
