@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.807 2000-03-14 15:01:59 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.808 2000-03-14 18:26:32 cbratschi Exp $ */
+
+ 2000-03-14: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32: implemented much faster LB_SETCOUNT
 
  2000-03-12: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Put back check (oldsel == newsel) in LISTBOX_SetSelection
