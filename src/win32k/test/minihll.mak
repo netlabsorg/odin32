@@ -1,4 +1,4 @@
-# $Id: minihll.mak,v 1.1.2.4 2001-08-16 15:57:02 bird Exp $
+# $Id: minihll.mak,v 1.1.2.5 2001-08-16 17:49:56 bird Exp $
 
 #
 # Odin32 API
@@ -69,17 +69,22 @@ os2386.lib
 # Target name - name of the exe without extention and path.
 #
 TARGET  = minihll
+DEFFILE = $(TARGET).def
 
 
 #
 # Main rule
 #
-$(OBJDIR)\$(TARGET).exe: $(OBJS)  $(DEFFILE)
+$(OBJDIR)\$(TARGET).exe: $(OBJS) $(DEFFILE)
 !ifndef WAT
-    ilink /FORCE /BASE:0x10000 /PACKCODE /PACKDATA /NOEXEPACK /ALIGNMENT:1 $(OBJS) \
+    $(LD2) /FORCE $(LD2FLAGS) /BASE:0x10000 /PACKCODE /PACKDATA /NOEXEPACK \
+!ifdef VAC36
+        /ALIGNFILE:1 \
+!else
+        /ALIGNMENT:1 \
+!endif
         /OUT:$(OBJDIR)\$(TARGET).exe /MAP:$(OBJDIR)\$(TARGET).map \
-        $(LIBS) $(DEFFILE)
-    echo ok
+        $(OBJS) $(LIBS) $(DEFFILE)
 !else
     wlink system os2v2 file {$(OBJS)} name $(OBJDIR)\.exe \
         option offset=0x10000 option alignment=1 option stack=4060 \
@@ -103,7 +108,6 @@ $(OBJDIR)\$(TARGET).exe: $(OBJS)  $(DEFFILE)
 #
 # Exe: Linker file - creates the parameter file passed on to the linker.
 #
-!if 1 #ndef WAT
 $(OBJDIR)\$(TARGET).lrf: makefile
     @$(RM) $@
     @echo Creating file <<$@
@@ -115,13 +119,4 @@ $(LIBS:  =^
 )
 $(DEFFILE)
 <<keep
-
-!else
-$(OBJDIR)\$(TARGET).lrf: makefile
-    echo $@ <<$@
-<<
-!endif
-
-
-
 
