@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.97 2000-07-19 19:05:09 sandervl Exp $
+# $Id: makefile,v 1.98 2000-09-02 21:14:50 bird Exp $
 
 #
 # Odin32 API
@@ -150,7 +150,7 @@ lib: $(TARGET).lib $(PDWIN32_LIB)\$(TARGET).lib
 $(OBJDIR)\$(TARGET).dll: $(OBJS) $(TARGET).def $(OBJDIR)\$(TARGET).lrf \
                           $(OBJDIR)\console.res
     $(LD2) $(LD2FLAGS) @$(OBJDIR)\$(TARGET).lrf
-    $(OS2RC) $(OBJDIR)\console.res $@
+    $(OS2RC) $(OS2RCLFLAGS) $(OBJDIR)\console.res $@
 
 
 # Linker file - creates the parameter file passed on to the linker.
@@ -163,6 +163,7 @@ $(PDWIN32_LIB)/$(ODINCRT).lib
 $(PDWIN32_LIB)\PMWINX.LIB
 $(PDWIN32_LIB)\LIBULS.LIB
 $(PDWIN32_LIB)\LIBCONV.LIB
+$(PDWIN32_LIB)\WIN32K.LIB
 OS2386.LIB
 $(RTLLIB_O)
 $(TARGET).def

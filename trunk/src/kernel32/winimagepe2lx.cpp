@@ -1,4 +1,4 @@
-/* $Id: winimagepe2lx.cpp,v 1.13 2000-08-27 03:20:37 bird Exp $ */
+/* $Id: winimagepe2lx.cpp,v 1.14 2000-09-02 21:14:50 bird Exp $ */
 
 /*
  * Win32 PE2LX Image base class
@@ -32,8 +32,9 @@
 
 #include <win32type.h>
 #include <misc.h>
-#include <winimagebase.h>
-#include <winimagepe2lx.h>
+#include "winimagebase.h"
+#include "winimagepe2lx.h"
+#include "Win32k.h"
 
 #define DBG_LOCALLOG    DBG_winimagepe2lx
 #include "dbglocal.h"
@@ -385,6 +386,76 @@ BOOL Win32Pe2LxImage::init()
 ULONG  Win32Pe2LxImage::getSections()
 {
     APIRET rc = NO_ERROR;
+
+    /*
+     * If Win32k.sys is installed we'll use it.
+     */
+    if (libWin32kInstalled())
+    {
+        ULONG           cbQte = sizeof(QOTEBUFFER) + sizeof(QOTE)*20;
+        PQOTEBUFFER     pQOte = (PQOTEBUFFER)malloc(sizeof(QOTEBUFFER) + sizeof(QOTE)*20);
+        if (pQOte != NULL)
+        {
+            /*
+             * Get the query OTEs for this module.
+             * If there is a buffer overflow we'll allocate more storage and retry.
+             */
+            rc = W32kQueryOTEs(hinstance, pQOte, cbQte);
+            while (rc == ERROR_BUFFER_OVERFLOW && cbQte < 32000);
+            {
+                PVOID pvOld = pQOte;
+                cbQte += sizeof(QOTE) * 20;
+                pQOte = (PQOTEBUFFER)realloc(pQOte, cbQte);
+                if (pQOte == NULL)
+                {
+                    free(pvOld);
+                    return ERROR_NOT_ENOUGH_MEMORY;
+                }
+
+                rc = W32kQueryOTEs(hinstance, pQOte, cbQte);
+            }
+
+            /*
+             * If successfully got the OTEs then allocate and set paSections structs.
+             */
+            if (rc == NO_ERROR)
+            {
+                /* Allocate memory for paSections */
+                paSections = (PSECTION)malloc(pQOte->cOTEs * sizeof(SECTION));
+                if (paSections != NULL)
+                {
+                    /* objects -> section array */
+                    for (int i = 0; i < pQOte->cOTEs; i++)
+                    {
+                        paSections[i].ulRVA = ~0UL;
+                        paSections[i].cbVirtual = pQOte->aOTE[i].ote_size;
+                        paSections[i].ulAddress = pQOte->aOTE[i].ote_base;
+                    }
+                    cSections = pQOte->cOTEs;
+                }
+                else
+                    rc = ERROR_NOT_ENOUGH_MEMORY;
+            }
+            else
+            {
+                dprintf(("Win32Pe2LxImage::getSections: libW32kQueryOTEs failed with rc=%d."
+                         " Falls back on the DosQuerySysState method.\n", rc));
+            }
+        }
+        else
+        {   /* server error, no use in trying the fallback method. */
+            dprintf(("Win32Pe2LxImage::getSections: malloc failed\n"));
+            return ERROR_NOT_ENOUGH_MEMORY;
+        }
+
+        if (rc == NO_ERROR)
+            return rc;
+    }
+
+
+    /*
+     * Fallback method, using DosQuerySysState.
+     */
     qsPtrRec_t *    pPtrRec;
     ULONG           cbBuf = 65536;
 
