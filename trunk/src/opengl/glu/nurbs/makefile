@@ -1,19 +1,18 @@
-# $Id: makefile,v 1.4 2000-03-04 19:49:03 bird Exp $
+# $Id: makefile,v 1.5 2000-03-04 19:59:20 bird Exp $
 #
 # PD-Win32 API
 #
 #       glu/nurbs makefile
 #
 
-!ifdef DEBUG
-!ifdef NODEBUGINFO
-MAKE_CMD=nmake DEBUG=1 NODEBUGINFO=1
-!else
-MAKE_CMD=nmake DEBUG=1
-!endif
-!else
-MAKE_CMD=nmake
-!endif
+PDWIN32_INCLUDE = ..\..\..\..\include
+PDWIN32_LIB     = ..\..\..\..\lib
+PDWIN32_BIN     = ..\..\..\..\bin
+PDWIN32_TOOLS   = ..\..\..\..\tools\bin
+
+
+!include $(PDWIN32_INCLUDE)/pdwin32.mk
+
 
 all:
     cd interface
