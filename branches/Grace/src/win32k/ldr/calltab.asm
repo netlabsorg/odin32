@@ -1,4 +1,4 @@
-; $Id: calltab.asm,v 1.12.4.3 2000-08-19 14:37:13 bird Exp $
+; $Id: calltab.asm,v 1.12.4.7 2000-08-23 04:16:43 bird Exp $
 ;
 ; callTab - Call back again table - table with entry for each function or
 ;           variable which is overrided.
@@ -36,19 +36,29 @@
     public _VMAllocMem@36
     public _VMGetOwner@8
     public _g_tkExecPgm
+    public _tkStartProcess
     public _f_FuStrLenZ
     public _f_FuBuff
 
     public _VMObjHandleInfo@12
+    public _ldrASMpMTEFromHandle@4
     public _ldrOpenPath@16
     public _LDRClearSem@0
+    public _ldrFindModule@16
     public _KSEMRequestMutex@8
     public _KSEMReleaseMutex@4
+    public _KSEMQueryMutex@8
+    public _KSEMInit@12
 
     public pLDRSem
     public LDRSem_offObject
     public _fpLDRSem
     public LDRSem_sel
+
+    public pLDRLibPath
+    public LDRLibPath_offObject
+    public _fpLDRLibPath
+    public LDRLibPath_sel
 
     public _TKSuBuff@16
     public _TKFuBuff@16
@@ -79,6 +89,16 @@
     public ptda_module_offObject
     public _fpptda_module
     public ptda_module_sel
+
+    public pptda_pBeginLIBPATH
+    public ptda_pBeginLIBPATH_offObject
+    public _fpptda_pBeginLIBPATH
+    public pptda_pBeginLIBPATH_sel
+
+    public pldrpFileNameBuf
+    public pldrpFileNameBuf_offObject
+    public _fpldrpFileNameBuf
+    public pldrpFileNameBuf_sel
 
 
 ;
@@ -171,108 +191,154 @@ _g_tkExecPgm PROC NEAR
 _g_tkExecPgm ENDP
 
 ; 14
+_tkStartProcess PROC NEAR
+    db MAXSIZE_PROLOG dup(0cch)
+_tkStartProcess ENDP
+
+; 15
 _f_FuStrLenZ PROC FAR
     db MAXSIZE_PROLOG dup(0cch)
 _f_FuStrLenZ ENDP
 
-; 15
+; 16
 _f_FuStrLen PROC FAR
     db MAXSIZE_PROLOG dup(0cch)
 _f_FuStrLen ENDP
 
-; 16
+; 17
 _f_FuBuff PROC FAR
     db MAXSIZE_PROLOG dup(0cch)
 _f_FuBuff ENDP
 
-; 17
+; 18
 _VMObjHandleInfo@12 PROC NEAR
     db MAXSIZE_PROLOG dup(0cch)
 _VMObjHandleInfo@12 ENDP
 
-; 18
+; 19
+_ldrASMpMTEFromHandle@4 PROC NEAR
+    db MAXSIZE_PROLOG dup(0cch)
+_ldrASMpMTEFromHandle@4 ENDP
+
+; 20
 _ldrOpenPath@16 PROC NEAR
     db MAXSIZE_PROLOG dup(0cch)
 _ldrOpenPath@16 ENDP
 
-; 19
+; 21
 _LDRClearSem@0 PROC NEAR
     db MAXSIZE_PROLOG dup(0cch)
 _LDRClearSem@0 ENDP
 
-; 20
+; 22
+_ldrFindModule@16 PROC NEAR
+    db MAXSIZE_PROLOG dup(0cch)
+_ldrFindModule@16 ENDP
+
+; 23
 _KSEMRequestMutex@8 PROC NEAR
     db MAXSIZE_PROLOG dup(0cch)
 _KSEMRequestMutex@8 ENDP
 
-; 21
+; 24
 _KSEMReleaseMutex@4 PROC NEAR
     db MAXSIZE_PROLOG dup(0cch)
 _KSEMReleaseMutex@4 ENDP
 
-; 22
+; 25
+_KSEMQueryMutex@8 PROC NEAR
+    db MAXSIZE_PROLOG dup(0cch)
+_KSEMQueryMutex@8 ENDP
+
+; 26
+_KSEMInit@12 PROC NEAR
+    db MAXSIZE_PROLOG dup(0cch)
+_KSEMInit@12 ENDP
+
+; 27
 pLDRSem          dd  0
 LDRSem_offObject dd  0
 _fpLDRSem        dd  0
 LDRSem_sel       dw  0
     db (MAXSIZE_PROLOG - 14) dup(0cch)
 
-; 23
+
+; 28
+pLDRLibPath          dd  0
+LDRLibPath_offObject dd  0
+_fpLDRLibPath        dd  0
+LDRLibPath_sel       dw  0
+    db (MAXSIZE_PROLOG - 14) dup(0cch)
+
+; 29
 _TKSuBuff@16 PROC NEAR
     db MAXSIZE_PROLOG dup(0cch)
 _TKSuBuff@16 ENDP
 
-; 24
+; 30
 _TKFuBuff@16 PROC NEAR
     db MAXSIZE_PROLOG dup(0cch)
 _TKFuBuff@16 ENDP
 
-; 25
+; 31
 _TKFuBufLen@20 PROC NEAR
     db MAXSIZE_PROLOG dup(0cch)
 _TKFuBufLen@20 ENDP
 
-; 26
+; 32
 _ldrValidateMteHandle@4 PROC NEAR
     db MAXSIZE_PROLOG dup(0cch)
 _ldrValidateMteHandle@4 ENDP
 
-; 27
+; 33
 ppTCBCur           dd  0
 pTCBCur_offObject  dd  0
 _fppTCBCur         dd  0
 pTCBCur_sel        dw  0
     db (MAXSIZE_PROLOG - 14) dup(0cch)
 
-; 28
+; 34
 ppPTDACur          dd  0
 pPTDACur_offObject dd  0
 _fppPTDACur        dd  0
 pPTDACur_sel       dw  0
     db (MAXSIZE_PROLOG - 14) dup(0cch)
 
-; 29
+; 35
 pptda_start          dd  0
 ptda_start_offObject dd  0
 _fpptda_start        dd  0
 ptda_start_sel       dw  0
     db (MAXSIZE_PROLOG - 14) dup(0cch)
 
-; 30
+; 36
 pptda_environ          dd  0
 ptda_environ_offObject dd  0
 _fpptda_environ        dd  0
 ptda_environ_sel       dw  0
     db (MAXSIZE_PROLOG - 14) dup(0cch)
 
-; 31
+; 37
 pptda_module          dd  0
 ptda_module_offObject dd  0
 _fpptda_module        dd  0
 ptda_module_sel       dw  0
     db (MAXSIZE_PROLOG - 14) dup(0cch)
 
+; 38
+pptda_pBeginLIBPATH           dd  0
+ptda_pBeginLIBPATH_offObject  dd  0
+_fpptda_pBeginLIBPATH         dd  0
+pptda_pBeginLIBPATH_sel       dw  0
+    db (MAXSIZE_PROLOG - 14) dup(0cch)
 
+
+; 39
+pldrpFileNameBuf              dd  0
+pldrpFileNameBuf_offObject    dd  0
+_fpldrpFileNameBuf            dd  0
+pldrpFileNameBuf_sel          dw  0
+    db (MAXSIZE_PROLOG - 14) dup(0cch)
 
 CALLTAB ENDS
 
