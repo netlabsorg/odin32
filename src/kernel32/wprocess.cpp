@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.59 1999-12-16 00:12:55 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.60 1999-12-17 16:56:30 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -215,10 +215,30 @@ void DestroyTIB()
 
    winteb = (TEB *)*TIBFlatPtr;
    if(winteb) {
-    thdb = (THDB *)(winteb+1);
-    orgtibsel = thdb->OrgTIBSel;
+	thdb = (THDB *)(winteb+1);
+	orgtibsel = thdb->OrgTIBSel;
+	
+	threadListMutex.enter();
+	THDB *curthdb        = threadList;
+	if(curthdb == thdb) {
+		threadList = thdb->next;
+	}
+	else {
+	  	while(curthdb->next != thdb) {
+			curthdb = curthdb->next;
+			if(curthdb == NULL) {
+				dprintf(("DestroyTIB: couldn't find thdb %x", thdb));
+				DebugInt3();
+				break;
+			}
+		}
+		if(curthdb) {
+			curthdb->next = thdb->next;
+		}
+	}
+	threadListMutex.leave();
 
-    //Restore our original FS selector
+    	//Restore our original FS selector
         SetFS(orgtibsel);
 
         //And free our own
@@ -672,6 +692,10 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
     dprintf(("KERNEL32: CreateProcessA %s cline:%s inherit:%d cFlags:%x Env:%x CurDir:%s StartupFlags:%x\n",
             lpApplicationName, lpCommandLine, bInheritHandles, dwCreationFlags,
             lpEnvironment, lpCurrentDirectory, lpStartupInfo));
+
+    // open32 does not support DEBUG_ONLY_THIS_PROCESS
+    if(dwCreationFlags & DEBUG_ONLY_THIS_PROCESS)
+      dwCreationFlags |= DEBUG_PROCESS;
 
     if(O32_CreateProcess(lpApplicationName, lpCommandLine, lpProcessAttributes,
                          lpThreadAttributes, bInheritHandles, dwCreationFlags,
