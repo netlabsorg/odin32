@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1575 2001-07-08 03:58:58 bird Exp $ */
+/* $Id: changelog,v 1.1576 2001-07-08 07:14:22 sandervl Exp $ */
+
+ 2001-07-08: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Some icon fixes
+    - KERNEL32: o More pointer checks added to GlobalLock/Unlock
 
  2001-07-08: knut st. osmundsen <kosmunds@csc.com>:
     - KERNEL32: o Added call in initterm to tell win32k where the Odin32
