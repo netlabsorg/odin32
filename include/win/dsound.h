@@ -1,4 +1,4 @@
-/* $Id: dsound.h,v 1.3 2000-02-03 23:55:07 sandervl Exp $ */
+/* $Id: dsound.h,v 1.4 2000-08-31 12:46:05 sandervl Exp $ */
 
 #ifndef __WINE_DSOUND_H
 #define __WINE_DSOUND_H
@@ -180,8 +180,19 @@ typedef const DSBPOSITIONNOTIFY *LPCDSBPOSITIONNOTIFY;
 
 typedef LPVOID* LPLPVOID;
 
-typedef BOOL (CALLBACK *LPDSENUMCALLBACKW)(LPGUID,LPWSTR,LPWSTR,LPVOID);
-typedef BOOL (CALLBACK *LPDSENUMCALLBACKA)(LPGUID,LPSTR,LPSTR,LPVOID);
+typedef BOOL (* CALLBACK LPDSENUMCALLBACKW)(LPGUID,LPWSTR,LPWSTR,LPVOID);
+typedef BOOL (* CALLBACK LPDSENUMCALLBACKA)(LPGUID,LPSTR,LPSTR,LPVOID);
+
+extern HRESULT WINAPI DirectSoundEnumerateW(LPDSENUMCALLBACKW lpCallback, LPVOID lpContext );
+extern HRESULT WINAPI DirectSoundEnumerateA(LPDSENUMCALLBACKA lpCallback, LPVOID lpContext );
+
+#ifdef UNICODE
+#define LPDSENUMCALLBACK	LPDSENUMCALLBACKW
+#define DirectSoundEnumerate	DirectSoundEnumerateW
+#else
+#define LPDSENUMCALLBACK	LPDSENUMCALLBACKA
+#define DirectSoundEnumerate	DirectSoundEnumerateA
+#endif
 
 extern HRESULT WINAPI DirectSoundCreate(REFGUID lpGUID,LPDIRECTSOUND * ppDS,IUnknown *pUnkOuter );
 
