@@ -1,4 +1,4 @@
-/* $Id: waveoutdart.cpp,v 1.9 2002-06-05 09:19:30 sandervl Exp $ */
+/* $Id: waveoutdart.cpp,v 1.10 2002-06-05 11:44:11 sandervl Exp $ */
 
 /*
  * Wave playback class (DART)
@@ -336,6 +336,7 @@ MMRESULT DartWaveOut::pause()
 MMRESULT DartWaveOut::resume()
 {
     MCI_GENERIC_PARMS Params;
+    int i, curbuf;
 
     dprintf(("DartWaveOut::resume"));
     
@@ -344,14 +345,30 @@ MMRESULT DartWaveOut::resume()
         wmutex.leave();
         return(MMSYSERR_NOERROR);
     }
-
-    State = STATE_PLAYING;
     wmutex.leave();
 
-    memset(&Params, 0, sizeof(Params));
+    //Only write buffers to dart if mixer has been initialized; if not, then
+    //the first buffer write will do this for us.
+    if(fMixerSetup == TRUE)
+    {
+        wmutex.enter();
+        State     = STATE_PLAYING;
+        fUnderrun = FALSE;
+        wmutex.leave();
+        curbuf = curPlayBuf;
 
-    // Resume the playback.
-    mymciSendCommand(DeviceId, MCI_RESUME, MCI_WAIT, (PVOID)&Params, 0);
+        // MCI_MIXSETUP_PARMS->pMixWrite does alter FS: selector!
+        USHORT selTIB = GetFS(); // save current FS selector
+
+        for(i=0;i<PREFILLBUF_DART;i++)
+        {
+            dprintf(("restart: write buffer at %x size %d", MixBuffer[curbuf].pBuffer, MixBuffer[curbuf].ulBufferLength));
+            MixSetupParms->pmixWrite(MixSetupParms->ulMixHandle, &MixBuffer[curbuf], 1);
+            if(++curbuf == PREFILLBUF_DART)
+                curbuf = 0;
+        }
+        SetFS(selTIB);           // switch back to the saved FS selector
+    }
 
     return(MMSYSERR_NOERROR);
 }
@@ -359,7 +376,7 @@ MMRESULT DartWaveOut::resume()
 /******************************************************************************/
 MMRESULT DartWaveOut::stop()
 {
- MCI_GENERIC_PARMS Params;
+    MCI_GENERIC_PARMS Params;
 
     dprintf(("DartWaveOut::stop %s", (State == STATE_PLAYING) ? "playing" : "stopped"));
     if(State != STATE_PLAYING)
@@ -382,8 +399,8 @@ MMRESULT DartWaveOut::stop()
 /******************************************************************************/
 MMRESULT DartWaveOut::reset()
 {
- MCI_GENERIC_PARMS Params;
- LPWAVEHDR tmpwavehdr;
+     MCI_GENERIC_PARMS Params;
+    LPWAVEHDR tmpwavehdr;
 
     dprintf(("DartWaveOut::reset %s", (State == STATE_PLAYING) ? "playing" : "stopped"));
     if(State != STATE_PLAYING)
