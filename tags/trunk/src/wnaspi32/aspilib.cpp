@@ -1,4 +1,4 @@
-/* $Id: aspilib.cpp,v 1.5 2000-09-15 13:25:46 sandervl Exp $ */
+/* $Id: aspilib.cpp,v 1.6 2000-12-16 15:42:41 sandervl Exp $ */
 /*
  *  ASPI Router Library
  *  for Odin WNASPI32.DLL
@@ -31,7 +31,7 @@
 //*  Standard constructor                                                   *
 //*                                                                         *
 //***************************************************************************
-scsiObj::scsiObj() : buffer(NULL), hmtxDriver(0)
+scsiObj::scsiObj() : buffer(NULL), hmtxDriver(0), postSema(0)
 {
    memset(&SRBlock, 0, sizeof(SRBlock));
    memset(&AbortSRB, 0, sizeof(AbortSRB));
@@ -475,7 +475,7 @@ BOOL scsiObj::access(BOOL fWait)
 {
  APIRET rc;
 
-  if(!fWait) {
+  if(fWait) {
   	rc = DosRequestMutexSem((HMTX) hmtxDriver, SEM_INDEFINITE_WAIT);
   }
   else 	rc = DosRequestMutexSem((HMTX) hmtxDriver, 100);
