@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.142 2002-02-02 14:19:01 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.143 2002-02-06 16:33:40 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -371,15 +371,18 @@ void WIN32API RestoreOS2TIB()
     }
 }
 /******************************************************************************/
+//Switch to WIN32 TIB (FS selector)
+//NOTE: This is not done for Odin32 applications (LX), unless
+//      fForceSwitch is TRUE)
 /******************************************************************************/
-USHORT WIN32API SetWin32TIB()
+USHORT WIN32API SetWin32TIB(BOOL fForceSwitch)
 {
  SHORT  win32tibsel;
  TEB   *winteb;
 
     //If we're running an Odin32 OS/2 application (not converted!), then we
     //we don't switch FS selectors
-    if(fIsOS2Image) {
+    if(fIsOS2Image && !fForceSwitch) {
         return GetFS();
     }
 

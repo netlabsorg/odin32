@@ -1,4 +1,4 @@
-/* $Id: winimagebase.cpp,v 1.33 2001-07-30 12:01:25 sandervl Exp $ */
+/* $Id: winimagebase.cpp,v 1.34 2002-02-06 16:33:39 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -48,7 +48,7 @@ Win32ImageBase::Win32ImageBase(HINSTANCE hInstance) :
     errorState(NO_ERROR), entryPoint(0), fullpath(NULL),
     tlsAddress(0), tlsIndexAddr(0), tlsInitSize(0), tlsTotalSize(0),
     tlsCallBackAddr(0), tlsIndex(-1), pResRootDir(NULL),
-    ulRVAResourceSection(0)
+    ulRVAResourceSection(0), fIsPEImage(FALSE)
 {
   char *name;
 

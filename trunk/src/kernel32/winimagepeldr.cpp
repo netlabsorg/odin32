@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.94 2001-12-22 12:34:06 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.95 2002-02-06 16:33:39 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -117,6 +117,8 @@ Win32PeLdrImage::Win32PeLdrImage(char *pszFileName, BOOL isExe) :
     nrOrdExportsRegistered(0)
 {
  HFILE  dllfile;
+
+    fIsPEImage = TRUE;
 
     strcpy(szFileName, pszFileName);
     strupr(szFileName);
@@ -623,7 +625,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
     //Must do this before dlls are loaded for this module. Some apps assume
     //they get TLS index 0 for their main executable
     {
-      USHORT sel = SetWin32TIB();
+      USHORT sel = SetWin32TIB(TIB_SWITCH_FORCE_WIN32);
       tlsAlloc();
       tlsAttachThread();  //setup TLS (main thread)
       SetFS(sel);
