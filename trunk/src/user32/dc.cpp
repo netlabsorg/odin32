@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.82 2001-01-20 16:57:00 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.83 2001-02-01 18:02:20 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -533,7 +533,7 @@ LONG   WIN32API clientHeight(HWND hwnd, pDCData pHps)
 {
  Win32BaseWindow *wnd;
 
-   wnd = Win32BaseWindow::GetWindowFromOS2Handle(pHps->hwnd);
+   wnd = Win32BaseWindow::GetWindowFromOS2Handle(hwnd);
    return clientHeight(wnd, hwnd, pHps);
 }
 //******************************************************************************
