@@ -1,4 +1,4 @@
-/* $Id: sec.cpp,v 1.3 1999-07-06 15:48:45 phaller Exp $ */
+/* $Id: sec.cpp,v 1.4 1999-12-18 20:01:14 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -43,33 +43,49 @@
  *  RtlAllocateAndInitializeSid             [NTDLL.265]
  *
  */
-BOOLEAN WINAPI RtlAllocateAndInitializeSid (PSID_IDENTIFIER_AUTHORITY pIdentifierAuthority,
-                                            DWORD                     nSubAuthorityCount,
-                                            DWORD                     x3,
-                                            DWORD                     x4,
-                                            DWORD                     x5,
-                                            DWORD                     x6,
-                                            DWORD                     x7,
-                                            DWORD                     x8,
-                                            DWORD                     x9,
-                                            DWORD                     x10,
-                                            PSID                      pSid)
+BOOLEAN WINAPI RtlAllocateAndInitializeSid ( PSID_IDENTIFIER_AUTHORITY pIdentifierAuthority,
+					     BYTE nSubAuthorityCount,
+					     DWORD nSubAuthority0,
+					     DWORD nSubAuthority1,
+					     DWORD nSubAuthority2,
+					     DWORD nSubAuthority3,
+					     DWORD nSubAuthority4,
+					     DWORD nSubAuthority5,
+					     DWORD nSubAuthority6,
+					     DWORD nSubAuthority7,
+					     PSID *pSid)
 {
   dprintf(("NTDLL: RtlAllocateAndInitializeSid(%08xh,%08xh,%08xh,"
            "%08xh,%08xh,%08xh,%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
            pIdentifierAuthority,
            nSubAuthorityCount,
-           x3,
-           x4,
-           x5,
-           x6,
-           x7,
-           x8,
-           x9,
-           x10,
+           nSubAuthority0,
+           nSubAuthority1,
+           nSubAuthority2,
+           nSubAuthority3,
+           nSubAuthority4,
+           nSubAuthority5,
+           nSubAuthority6,
+           nSubAuthority7,
            pSid));
 
-  return 0;
+  *pSid = (PSID)Heap_Alloc(sizeof(SID)+nSubAuthorityCount*sizeof(DWORD));
+  if(*pSid == NULL) {
+	SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+	return FALSE;
+  }
+  (*pSid)->Revision          = SID_REVISION;
+  (*pSid)->SubAuthorityCount = nSubAuthorityCount;
+  (*pSid)->SubAuthority[0]   = nSubAuthority0;
+  (*pSid)->SubAuthority[1]   = nSubAuthority1;
+  (*pSid)->SubAuthority[2]   = nSubAuthority2;
+  (*pSid)->SubAuthority[3]   = nSubAuthority3;
+  (*pSid)->SubAuthority[4]   = nSubAuthority4;
+  (*pSid)->SubAuthority[5]   = nSubAuthority5;
+  (*pSid)->SubAuthority[6]   = nSubAuthority6;
+  (*pSid)->SubAuthority[7]   = nSubAuthority7;
+  memcpy((PVOID)&(*pSid)->IdentifierAuthority, (PVOID)pIdentifierAuthority, sizeof(SID_IDENTIFIER_AUTHORITY));
+  return TRUE;
 }
 
 
@@ -77,12 +93,11 @@ BOOLEAN WINAPI RtlAllocateAndInitializeSid (PSID_IDENTIFIER_AUTHORITY pIdentifie
  *  RtlEqualSid                          [NTDLL.352]
  *
  */
-DWORD WINAPI RtlEqualSid(DWORD x1,
-                         DWORD x2)
+BOOL WINAPI RtlEqualSid(PSID pSid1, PSID pSid2)
 {
   dprintf(("NTDLL: RtlEqualSid(%08x, %08x) not implemented.\n",
-           x1,
-           x2));
+           pSid1,
+           pSid2));
 
   return TRUE;
 }
@@ -91,12 +106,13 @@ DWORD WINAPI RtlEqualSid(DWORD x1,
 /******************************************************************************
  *  RtlFreeSid    [NTDLL.376]
  */
-DWORD WINAPI RtlFreeSid(DWORD x1)
+VOID* WINAPI RtlFreeSid(PSID pSid)
 {
   dprintf(("NTDLL: RtlFreeSid(%08xh) not implemented.\n",
-           x1));
+           pSid));
 
-  return TRUE;
+  Heap_Free(pSid);
+  return (VOID*)TRUE; //??????
 }
 
 
