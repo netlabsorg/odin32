@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.18 1999-10-08 21:25:26 cbratschi Exp $ */
+/* $Id: oslibwin.cpp,v 1.19 1999-10-10 08:59:40 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -119,10 +119,13 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle, ULO
 
   if (dwStyle & WS_CHILD_W)
   {
+//SvL: Causes crash in VPBuddy if enabled
+#if 0
     if (dwStyle & WS_BORDER_W ||
         dwStyle & WS_DLGFRAME_W ||
         dwStyle & WS_THICKFRAME_W)
-          if (!HAS_3DFRAME(*OSFrameStyle)) *OSFrameStyle |= WS_EX_WINDOWEDGE_W;
+          if (!HAS_3DFRAME(dwExStyle)) dwExStyle |= WS_EX_WINDOWEDGE_W;
+#endif
 
     if (dwExStyle & WS_EX_CLIENTEDGE_W ||
         dwExStyle & WS_EX_STATICEDGE_W ||
@@ -131,12 +134,12 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle, ULO
             *OSFrameStyle |= FCF_DLGBORDER;
             *borderHeight = *borderWidth = 2; //CB: right?
           }
-
     if(dwStyle & WS_VSCROLL_W)
           *OSFrameStyle |= FCF_VERTSCROLL;
     if(dwStyle & WS_HSCROLL_W)
           *OSFrameStyle |= FCF_HORZSCROLL;
-  } else
+  } 
+  else
   {
     if((dwStyle & WS_CAPTION_W) == WS_CAPTION_W)
           *OSFrameStyle |= FCF_TITLEBAR;

@@ -1,4 +1,4 @@
-/* $Id: windlg.cpp,v 1.3 1999-10-04 09:56:03 sandervl Exp $ */
+/* $Id: windlg.cpp,v 1.4 1999-10-10 08:59:41 sandervl Exp $ */
 /*
  * Win32 dialog apis for OS/2
  *
@@ -18,6 +18,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <limits.h>
+#include <errno.h>
 #include "win32wbase.h"
 #include "win32dlg.h"
 #include <heapstring.h>
@@ -315,21 +317,50 @@ BOOL WIN32API SetDlgItemTextW( HWND hwnd, int id, LPCWSTR lpszName)
 }
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API GetDlgItemInt( HWND arg1, int arg2, PBOOL arg3, BOOL  arg4)
+UINT WIN32API GetDlgItemInt(HWND hwnd, INT id, BOOL *translated, BOOL fSigned)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  GetDlgItemInt\n");
-#endif
-    return O32_GetDlgItemInt(arg1, arg2, arg3, arg4);
+  char str[30];
+  char * endptr;
+  long result = 0;
+
+    dprintf(("USER32:  GetDlgItemInt\n"));
+    if (translated) *translated = FALSE;
+
+    if (!SendDlgItemMessageA(hwnd, id, WM_GETTEXT, sizeof(str), (LPARAM)str))
+        return 0;
+
+    if (fSigned)
+    {
+        result = strtol( str, &endptr, 10 );
+        if (!endptr || (endptr == str))  /* Conversion was unsuccessful */
+            return 0;
+        if (((result == LONG_MIN) || (result == LONG_MAX)) && (errno==ERANGE))
+            return 0;
+    }
+    else
+    {
+        result = strtoul( str, &endptr, 10 );
+        if (!endptr || (endptr == str))  /* Conversion was unsuccessful */
+            return 0;
+        if ((result == ULONG_MAX) && (errno == ERANGE)) return 0;
+    }
+    if (translated) *translated = TRUE;
+    return (UINT)result;
 }
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API GetNextDlgGroupItem( HWND arg1, HWND arg2, BOOL  arg3)
+HWND WIN32API GetNextDlgGroupItem( HWND hwnd, HWND hwndCtrl, BOOL fPrevious)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  GetNextDlgGroupItem\n");
-#endif
-    return O32_GetNextDlgGroupItem(arg1, arg2, arg3);
+  Win32Dialog *dialog;
+
+    dialog = (Win32Dialog *)Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if(!dialog || !dialog->IsDialog()) {
+        dprintf(("GetNextDlgGroupItem, window %x not found", hwnd));
+	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        return 0;
+    }
+    dprintf(("USER32:  GetNextDlgGroupItem\n"));
+    return dialog->getNextDlgGroupItem(hwndCtrl, fPrevious);
 }
 /***********************************************************************
  *           GetDialogBaseUnits   (USER.243) (USER32.233)
