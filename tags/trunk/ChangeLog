@@ -1,4 +1,14 @@
- /* $Id: ChangeLog,v 1.837 2000-03-24 18:23:40 achimha Exp $ */
+ /* $Id: ChangeLog,v 1.838 2000-03-24 19:30:59 sandervl Exp $ */
+
+ 2000-03-24: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: Fixed typo in pe loader (check for < 512 MB)
+	- USER32:   Add size of space between two menu items when calculating
+                    size of ownerdrawn menu item (fixes RealPlayer 7 menu)
+	- GDI32:    Default format of 16 bits dibsection is RGB555
+                    (fixes wrong colors when (sometimes) playing flash files
+                     in RealPlayer 7)
+	- WSOCK32\NEW: Bugfixes
+        - WSOCK32:  Replaced with new wsock32
 
  2000-03-24: Achim Hasenmueller <achimha@innotek.de>
 	- WSOCK32\NEW: Made it compile with the TCP/IP V5
