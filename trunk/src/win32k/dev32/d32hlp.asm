@@ -1,4 +1,4 @@
-; $Id: d32hlp.asm,v 1.5 2001-02-20 05:00:53 bird Exp $
+; $Id: d32hlp.asm,v 1.6 2001-07-08 02:53:52 bird Exp $
 ;
 ; d32hlp - 32-bit Device Driver Helper Function.
 ;
@@ -102,28 +102,104 @@ Finished:
 D32Hlp_VirtToLin3 endp
 
 
+;
+; Jump table used by D32Hlp_GetDOSVar
+;
+DosVarThunkTab  LABEL DWORD
+    dd  0                               ; 0 - Reserved
+    dd  FLAT:Load1600Thunk              ; 1 - GIS
+    dd  FLAT:Load1616Thunk              ; 2 - LIS
+    dd  0                               ; 3 - Reserved
+    dd  FLAT:Load1616                   ; 4 - VectorSDF
+    dd  FLAT:Load1616                   ; 5 - VectorReboot
+    dd  FLAT:Load1616                   ; 6 - VectorMSATS
+    dd  FLAT:ThunkPtr                   ; 7 - YieldFlag (Resched)
+    dd  FLAT:ThunkPtr                   ; 8 - TCYieldFlag (TCResched)
+    dd  FLAT:ThunkPtr                   ; 9 - DOSTable (yeah, reserved)
+    dd  FLAT:Load1616                   ; a - VectorDEKKO (yeah, reserved)
+    dd  FLAT:ThunkPtr                   ; b - CodePgBuff
+    dd  FLAT:Load1616                   ; c - VectorRIPL
+    dd  FLAT:ThunkPtr                   ; d - InterruptLevel
+    dd  FLAT:ThunkPtr                   ; e - DevClassTables
+    dd  FLAT:ThunkPtr                   ; f - DMQS_Sel
+    dd  FLAT:ThunkPtr                   ;10 - APMInfo
+    dd  FLAT:LoadWord                   ;11 - APM_Length (length of above structure)
+DosVarThunkTabSize equ ($ - DosVarThunkTab) / 4
+
+
 ;PVOID  D32HLPCALL D32Hlp_GetDOSVar(ULONG ulVarNumber,  /* eax */
 ;                                   ULONG ulVarMember); /* edx */
+;
+; Note that we do post processing of the value....!
+;
 D32Hlp_GetDOSVar proc near
-    push    bx
+    ASSUME DS:FLAT, ES:NOTHING
+    push    ebx
+    push    es
+    push    ds
+    push    ds
+    pop     es                          ; paranoia
+    ASSUME  es:FLAT
+    push    eax
     mov     ecx, edx
     mov     dl, DevHlp_GetDOSVar
     jmp     far ptr CODE16:Thunk16_GetDOSVar
 Thunk32_GetDOSVar::
     jc  Error
-    shl     eax, 16
-    mov     bx, ax
-    xchg    eax, ebx
-    call    D32Hlp_VirtToLin
+    mov     ds, ax
+    pop     eax                         ; Index...
+    cmp     eax, DosVarThunkTabSize
+    jg      Error
+    and     ebx, 0000ffffh              ; (ds:ebx is ptr to be processed)
+    jmp     es:DosVarThunkTab[eax*4]
+
+; Load Word at ds:bx
+LoadWord::
+    xor     eax, eax
+    mov     ax, word ptr [bx]
     jmp Finished
 
+; Load selector at ds:bx and thunk it.
+Load1600Thunk::
+    xor     eax, eax
+    mov     ax, word ptr [bx]
+    rol     ax, 16
+    jmp ThunkIt
+
+; Load 16:16 ptr at ds:bx and thunk it.
+Load1616Thunk::
+    mov     eax, dword ptr [ebx]
+    jmp ThunkIt
+
+; Load 16:16 ptr at ds:bx and return it.
+Load1616::
+    mov     eax, dword ptr [ebx]
+    jmp Finished
+
+; Thunk the ds:bx ptr.
+ThunkPtr::
+    mov     ax, ds
+    shl     eax, 16
+    mov     ax, bx
+
+; Thunks 16:16 ptr in eax
+ThunkIt::
+    pop     ds
+    call    D32Hlp_VirtToLin
+    jmp Finished2
+
 Error:
+    add     esp, 4
     xor     eax, eax
 
 Finished:
-    pop     bx
+    pop     ds
+Finished2:
+    pop     es
+    pop     ebx
     ret
 D32Hlp_GetDOSVar endp
+
 
 
 ;VOID   D32HLPCALL D32Hlp_Yield(VOID);
