@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.17 2000-03-23 19:21:54 sandervl Exp $ */
+/* $Id: wsock32.cpp,v 1.18 2000-03-23 23:07:23 sandervl Exp $ */
 
 /*
  *
@@ -231,10 +231,9 @@ ODINFUNCTION1(int,OS2closesocket,SOCKET, s)
       	return SOCKET_ERROR;
    } 
    ret = soclose(s);
-
    //Close WSAAsyncSelect thread if one was created for this socket
-   WSAAsyncSelect(s, 0, 0, 0);
-   
+   FindAndSetAsyncEvent(s, 0, 0, 0);
+  
    if(ret == SOCKET_ERROR) {
  	WSASetLastError(wsaErrno());
    }
@@ -861,6 +860,7 @@ ODINFUNCTION5(int,OS2setsockopt,
 tryagain:
 		ret = setsockopt(s,level,optname, (char *)&size, sizeof(ULONG));
 		if(ret == SOCKET_ERROR && size > 65535) {
+			dprintf(("setsockopt: change size from %d to 65000", size));
 			//SvL: Limit send & receive buffer length to 64k
 	                //     (only happens with 16 bits tcpip stack?)
 			size = 65000;
