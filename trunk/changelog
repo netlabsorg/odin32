@@ -1,7 +1,13 @@
- /* $Id: changelog,v 1.941 2000-05-16 07:16:04 jeroen Exp $ */
+ /* $Id: changelog,v 1.942 2000-05-16 20:01:37 sandervl Exp $ */
+
+ 2000-05-16: Sander van Leeuwen <sandervl@xs4all.nl>
+    - COMDLG32:
+                Fixed shlwapi imports (GetProcAddress failed for PathFindFileNameA
+                -> crash when calling file dialog functions)
 
  2000-05-16: Jeroen van den Horn <J.vandenHorn@fibre.a2000.nl>
-    - GDI32: Fixed bug in font.cpp
+    - GDI32: 
+             Fixed bug in font.cpp
              iFontRename should use strncpy instead of memcpy since source
              string passed may be smaller than amount of bytes to copy
              resulting in GPF.
@@ -10,8 +16,7 @@
     - WNASPI32: Implemented working ASPI.
 
  2000-05-14: Patrick Haller <phaller@gmx.net>
-    - SHLWAPI: finally separated SHELL32 and SHLWAPI,
-               adjusted to NT4 functions and exports
+    - SHLWAPI: finally separated SHELL32 and SHLWAPI, adjusted to NT4 functions and exports
 
  2000-05-13: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - tools\common: Corrected makefiles.
