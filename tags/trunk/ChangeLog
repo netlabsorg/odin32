@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.676 2000-01-29 20:45:58 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.677 2000-01-30 12:57:25 sandervl Exp $ */
+
+ 2000-01-30: Sander van Leeuwen <sandervl@xs4all.nl>
+	- PELDR: Some bugfixes
 
  2000-01-29: Sander van Leeuwen <sandervl@xs4all.nl>
 	- GDI32: Save and restore FPU control word when calling
