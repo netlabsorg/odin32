@@ -94,7 +94,7 @@ int WIN32API GetLocaleInfoA(LCID lcid, LCTYPE LCType, LPSTR buf, int len)
     free(lpWStr);
   }
 
-  dprintf(("KERNEL32:  OS2GetLocaleInfoA returned %d\n",len));
+  dprintf(("KERNEL32:  OS2GetLocaleInfoA returned %d\n",ret_len));
 
   return (ret_len);
 }
