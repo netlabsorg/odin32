@@ -1,10 +1,11 @@
-/* $Id: changelog,v 1.1624 2001-07-30 11:59:53 sandervl Exp $ */
+/* $Id: changelog,v 1.1625 2001-07-30 18:55:36 sandervl Exp $ */
 
  2001-07-30: Sander van Leeuwen <sandervl@xs4all.nl>
     - WINMM:    o Rewrote timeGetSystemTime & timeGetTime
     - KERNEL32: o Fix for names of dlls in custom build
     - USER32/GDI32/KERNEL32:
                 o Custom build changes
+    - WGSS50:   o WGSS update
 
  2001-07-29: knut st. osmundsen <kosmunds@csc.com>
     - Makefiles:
