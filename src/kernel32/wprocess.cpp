@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.191 2004-01-15 10:41:39 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.192 2004-01-15 16:53:25 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -66,9 +66,6 @@
 
 ODINDEBUGCHANNEL(KERNEL32-WPROCESS)
 
-
-//environ.cpp
-char *CreateNewEnvironment(char *lpEnvironment);
 
 /*******************************************************************************
 *   Global Variables                                                           *
@@ -1915,15 +1912,6 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
             lpApplicationName, lpCommandLine, bInheritHandles, dwCreationFlags,
             lpEnvironment, lpCurrentDirectory, lpStartupInfo));
 
-    if(lpEnvironment) {
-        newenv = CreateNewEnvironment((char *)lpEnvironment);
-        if(newenv == NULL) {
-            SetLastError(ERROR_NOT_ENOUGH_MEMORY);
-            rc = FALSE;
-            goto finished;
-        }
-        lpEnvironment = newenv;
-    }
 #ifdef DEBUG
     if(lpStartupInfo) {
         dprintf(("lpStartupInfo->lpReserved %x", lpStartupInfo->lpReserved));
