@@ -47,7 +47,7 @@ LPVOID WIN32API HEAP_xrealloc  ( HANDLE heap, DWORD flags, LPVOID lpMem, DWORD s
 LPVOID WIN32API HEAP_malloc    ( DWORD size );
 LPVOID WIN32API HEAP_realloc   ( LPVOID lpMem, DWORD size );
 DWORD  WIN32API HEAP_size      ( LPVOID lpMem );
-VOID   WIN32API HEAP_free      ( LPVOID lpMem );
+BOOL   WIN32API HEAP_free      ( LPVOID lpMem );
 
 LPSTR  WIN32API HEAP_strdupA   ( HANDLE heap, DWORD flags, LPCSTR str );
 LPWSTR WIN32API HEAP_strdupW   ( HANDLE heap, DWORD flags, LPCWSTR str );
