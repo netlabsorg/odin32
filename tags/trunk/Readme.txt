@@ -46,13 +46,36 @@ in a position where we can expect the first bigger applications to
 run well and to make much more visible progress.
 
 
-2.0 Using Odin to run your Windows applications
+2.0 Installing Odin
+-------------------
+Odin installation must be done manually at this time. However, only
+a few simple tasks must be completed:
+  - Unzip the odin zipfile into a new directory (i.e. C:\ODIN)
+  - Add this directory to the LIBPATH and PATH statements of your config.sys
+  - Optionally install the win32k device driver (see 2.3.3)
+  - Reboot your machine
+
+2.0.1 Log files
+---------------
+The alpha 5 binaries and daily build zipfiles can generate logfiles to show 
+what a win32 application is doing. This can be very useful to determine
+why certain applications don't run correctly.
+
+The major disadvantage of loggging is the overhead. Therefor it has been 
+disabled by default in the alpha 5 release and daily builds.
+To enable logging set the environment variable WIN32LOG_ENABLED:
+   SET WIN32LOG_ENABLED=1
+
+To disable logging again, you must clear this variable:
+   SET WIN32LOG_ENABLED=
+
+2.1 Using Odin to run your Windows applications
 -----------------------------------------------
 
 Odin still has several ways to execute Win32 programs.
 
 
-2.1 The Ring3 Win32 Loader (PE.EXE)
+2.2 The Ring3 Win32 Loader (PE.EXE)
 ----------------------------------
 
 This is the new and also recommended method for loading programs.
@@ -77,13 +100,13 @@ that the loader imports. It will tell you if it couldn't find a
 DLL and you can correct the problem and try it again.
 
 
-2.1.1 PE loader issues
+2.2.1 PE loader issues
 ----------------------
 
 As the PE loader will create the process and load the program,
 a process utility such as pstat will always show PE.EXE as the
 executable file.
-It is also possible that a certain Win32 applications becomes
+It is also possible that a certain Win32 application becomes
 a zombie (that is when it does certain things the OS/2 kernel
 cannot recover such as die when waiting on a semaphore). Then
 it will not be possible to kill the application - only a system
@@ -98,13 +121,13 @@ to fall under this category are Microsoft Office (also the
 Office viewers) and other mainly Microsoft programs.
 
 
-2.2 The Ring0 conversion utility driver (WIN32K.SYS)
+2.3 The Ring0 conversion utility driver (WIN32K.SYS)
 ----------------------------------------------------
 
 The win32k.sys driver makes PE (Win32) executables equal to native OS/2
 executables by implementing a Ring 0 on-the-fly converter. The converter is
 Pe2Lx.exe. So, everything that works with Pe2Lx will probably work with
-win32k.sys. And vice versa, when Pe2lx don't make it, win32k.sys won't either.
+win32k.sys. And vice versa, when Pe2lx can't handle it, win32k.sys won't either.
 
 You may wonder how you may run a Win32 program using a device driver. You
 don't have to worry about that, simply treat the Win32 program just as an
@@ -121,10 +144,10 @@ For example, if you fancy playing windows solitaire.
        Simply find the SOL.EXE icon (or create it) and double click on it!
 
 
-2.2.1 WARNING
+2.3.1 WARNING
 -------------
 
-The Win32k.sys is quite alpha software and any bugs which haven't been found
+The Win32k.sys is alpha software and any bugs which haven't been found
 yet may crash and/or corrupt you entire system! Make sure you have backed up
 important stuff first!
 
@@ -136,7 +159,7 @@ and choose Commandline boot (F2). Make sure you have an textmode editor which
 works; for example TEDIT.EXE.
 
 
-2.2.2 Requirements
+2.3.2 Requirements
 ------------------
 
 Win32k should work on any Warp 4 or Warp Server for e-business installations
@@ -151,15 +174,15 @@ the running kernel, while this file too is investigated. (The complete list
 is found in src\Win32k\dev16\probkrnl.c,apszSym[] - odin32 source tree.)
 
 
-2.2.2.1 Warp 3
+2.3.2.1 Warp 3
 --------------
 
 Win32k is not tested with Warp 3. It is supposed to work with Warp 3 provided
-that the os2krnl.sym file is present. Warp Server 4 have this, common Warp 3
-don't.
+that the os2krnl.sym file is present. Warp Server 4 has this, common Warp 3
+doesn't.
 
 
-2.2.3 Installation
+2.3.3 Installation
 ------------------
 
 To use Win32k.sys you have to add the following line into your config.sys:
@@ -168,15 +191,15 @@ To use Win32k.sys you have to add the following line into your config.sys:
 Where <d:\path\> is the path to the win32k.sys, i.e. the odin32 executables
 directory.
 
-After doing this you'll have to reboot your machine to load the driver. During
+After doing this, you'll have to reboot your machine to load the driver. During
 the boot process you will on a successful installation see some lines of
 technical info and finally a line saying:
     'Win32k.sys succesfully initiated!'
 
-If you don't see the line above something is wrong!
+If you don't see the line above something is wrong.
 
 
-2.2.4 Win32k parameters
+2.3.4 Win32k parameters
 -----------------------
 
 There are some useful parameters for Win32k:
@@ -186,15 +209,15 @@ There are some useful parameters for Win32k:
 -K:<filename>  Full path to the running OS/2 kernel.
 
 
-2.2.5 Rings - Ring 0 / Ring 3
+2.3.5 Rings - Ring 0 / Ring 3
 -----------------------------
 
 FYI. Ring 0 is the most priveleged level of execution in OS/2. The OS/2 kernel
-and device drivers execute at this level, while user applications executes in
+and device drivers execute at this level, while user applications execute in
 Ring 3, the least priveleged executing level.
 
 
-2.3 The Ring3 conversion utility (PE2LX.EXE)
+2.4 The Ring3 conversion utility (PE2LX.EXE)
 --------------------------------------------
 
 PE2LX.EXE was the first method of running Win32 programs under
@@ -241,7 +264,7 @@ Project Odin Source Code Notes
 This readme is intended for making people more familiar with ODIN and to 
 describe various aspects of the project such as accessing latest sources via 
 cvs, building the binaries, running win32 applications, how to identify and 
-report problems and bugs, as well as how to acticely participate in this very 
+report problems and bugs, as well as how to participate in this very 
 promising project.
 
 
@@ -326,11 +349,13 @@ To enable logging again, clear this environment variable by typing:
 
   SET NOWIN32LOG=
 
+Logging is enabled by default in the debug build, but disabled by default
+in the nodebuginfo build and not present in the release build.
 
 3.1 Build problems
 ------------------
 
-ODIN is moving at fast pace. Sometimes side effects of source dependencies may 
+ODIN is moving at a fast pace. Sometimes side effects of source dependencies may 
 require you to do a full rebuild of the binaries instead of an incremental build.
 
 However, rarely it also happens the sources contained in the CVS repository do 
