@@ -1,4 +1,4 @@
-/* $Id: tooltips.h,v 1.3 2000-03-18 16:10:57 cbratschi Exp $ */
+/* $Id: tooltips.h,v 1.4 2000-08-06 14:39:05 sandervl Exp $ */
 
 /*
  * Tool tips class extra info
@@ -53,6 +53,7 @@ typedef struct tagTOOLTIPS_INFO
     INT      nAutoPopTime;
     INT      nInitialTime;
     RECT     rcMargin;
+    BOOL     bNotifyUnicode;
 
     TTTOOL_INFO *tools;
 } TOOLTIPS_INFO;
