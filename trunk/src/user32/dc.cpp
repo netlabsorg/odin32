@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.35 2000-01-18 20:10:33 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.36 2000-01-25 20:39:41 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -827,10 +827,14 @@ int WIN32API ReleaseDC (HWND hwnd, HDC hdc)
 
    if (hwnd)
    {
-      Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
-      //SvL: Hack for memory.exe (doesn't get repainted properly otherwise)
+      	Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
+	if(wnd == NULL) {
+   		dprintf(("ERROR: ReleaseDC %x %x failed", hwnd, hdc));
+		return 0;
+	}
+      	//SvL: Hack for memory.exe (doesn't get repainted properly otherwise)
 //      isOwnDC = wnd->isOwnDC() && wnd->getOwnDC();
-      isOwnDC = wnd->isOwnDC() && (wnd->getOwnDC() == hdc);
+      	isOwnDC = wnd->isOwnDC() && (wnd->getOwnDC() == hdc);
    }
    if (isOwnDC)
       rc = TRUE;
