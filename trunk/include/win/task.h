@@ -1,4 +1,4 @@
-/* $Id: task.h,v 1.2 1999-11-30 14:19:02 sandervl Exp $ */
+/* $Id: task.h,v 1.3 2000-02-05 02:42:19 sandervl Exp $ */
 /*
  * Task definitions
  *
@@ -55,8 +55,8 @@ struct _WSINFO;
 struct _NE_MODULE;
 
   /* signal proc typedef */
-typedef void (CALLBACK *USERSIGNALPROC)(HANDLE16, UINT16, UINT16,
-                                        HINSTANCE16, HQUEUE16);
+typedef void (* CALLBACK USERSIGNALPROC)(HANDLE16, UINT16, UINT16,
+                                         HINSTANCE16, HQUEUE16);
 
   /* Task database. See 'Windows Internals' p. 226.
    * Note that 16-bit OLE 2 libs like to read it directly 

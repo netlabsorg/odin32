@@ -1,8 +1,10 @@
-/* $Id: wininet.h,v 1.1 1999-12-28 13:03:25 sandervl Exp $ */
+/* $Id: wininet.h,v 1.2 2000-02-05 02:42:19 sandervl Exp $ */
 #ifndef __WININET_H__
 #define __WININET_H__
 
 #define INTERNETAPI
+#define BOOLAPI INTERNETAPI BOOL WINAPI
+
 #define URLCACHEAPI 
 
 typedef LPVOID HINTERNET;
@@ -606,22 +608,43 @@ typedef struct {
 } INTERNET_PROXY_INFO, *LPINTERNET_PROXY_INFO;
 
 typedef struct {
-    DWORD dwStructSize;
-    LPTSTR lpszScheme;
-    DWORD dwSchemeLength;
+    DWORD   dwStructSize;       
+    LPSTR   lpszScheme;
+    DWORD   dwSchemeLength;
     INTERNET_SCHEME nScheme;
-    LPTSTR lpszHostName;
-    DWORD dwHostNameLength;
+    LPSTR   lpszHostName;
+    DWORD   dwHostNameLength;
     INTERNET_PORT nPort;
-    LPTSTR lpszUserName;
-    DWORD dwUserNameLength;
-    LPTSTR lpszPassword;
-    DWORD dwPasswordLength;
-    LPTSTR lpszUrlPath;
-    DWORD dwUrlPathLength;
-    LPTSTR lpszExtraInfo;
-    DWORD dwExtraInfoLength;
-} URL_COMPONENTS, *LPURL_COMPONENTS;
+    LPSTR   lpszUserName;
+    DWORD   dwUserNameLength;
+    LPSTR   lpszPassword;
+    DWORD   dwPasswordLength;   
+    LPSTR   lpszUrlPath;        
+    DWORD   dwUrlPathLength;    
+    LPSTR   lpszExtraInfo;      
+    DWORD   dwExtraInfoLength;  
+} URL_COMPONENTSA,* LPURL_COMPONENTSA;
+
+typedef struct {
+    DWORD   dwStructSize;       
+    LPWSTR  lpszScheme;         
+    DWORD   dwSchemeLength;     
+    INTERNET_SCHEME nScheme;    
+    LPWSTR  lpszHostName;       
+    DWORD   dwHostNameLength;   
+    INTERNET_PORT nPort;        
+    LPWSTR  lpszUserName;       
+    DWORD   dwUserNameLength;   
+    LPWSTR  lpszPassword;       
+    DWORD   dwPasswordLength;   
+    LPWSTR  lpszUrlPath;        
+    DWORD   dwUrlPathLength;    
+    LPWSTR  lpszExtraInfo;      
+    DWORD   dwExtraInfoLength;  
+} URL_COMPONENTSW,* LPURL_COMPONENTSW;
+
+DECL_WINELIB_TYPE_AW(URL_COMPONENTS)
+DECL_WINELIB_TYPE_AW(LPURL_COMPONENTS)
 
 typedef struct {
     FILETIME ftExpiry;
@@ -634,7 +657,7 @@ typedef struct {
     DWORD dwKeySize;
 } INTERNET_CERTIFICATE_INFO, *LPINTERNET_CERTIFICATE_INFO;
 
-typedef VOID (CALLBACK * INTERNET_STATUS_CALLBACK)(
+typedef VOID (* CALLBACK  INTERNET_STATUS_CALLBACK)(
     HINTERNET hInternet,
     DWORD dwContext,
     DWORD dwInternetStatus,
@@ -768,7 +791,7 @@ typedef struct {
     } AttributeType;
 } GOPHER_ATTRIBUTE_TYPE, *LPGOPHER_ATTRIBUTE_TYPE;
 
-typedef BOOL (CALLBACK * GOPHER_ATTRIBUTE_ENUMERATOR)(
+typedef BOOL (* CALLBACK  GOPHER_ATTRIBUTE_ENUMERATOR)(
     LPGOPHER_ATTRIBUTE_TYPE lpAttributeInfo,
     DWORD dwError
     );
@@ -778,17 +801,17 @@ BOOL WINAPI InternetTimeFromSystemTime(CONST SYSTEMTIME *pst, DWORD dwRFC,
                                        LPSTR lpszTime, DWORD cbTime);
 
 BOOL WINAPI InternetCrackUrlA(LPCSTR lpszUrl, DWORD dwUrlLength, DWORD dwFlags,
-                              LPURL_COMPONENTS lpUrlComponents);
+                              LPURL_COMPONENTSA lpUrlComponents);
 
 BOOL WINAPI InternetCrackUrlW(LPCWSTR lpszUrl, DWORD dwUrlLength, DWORD dwFlags,
-                              LPURL_COMPONENTS lpUrlComponents);
+                              LPURL_COMPONENTSW lpUrlComponents);
 
 #define InternetCrackUrl WINELIB_NAME_AW(InternetCrackUrl)
 
-BOOL WINAPI InternetCreateUrlA(LPURL_COMPONENTS lpUrlComponents, DWORD dwFlags,
+BOOL WINAPI InternetCreateUrlA(LPURL_COMPONENTSA lpUrlComponents, DWORD dwFlags,
                                LPSTR lpszUrl, LPDWORD lpdwUrlLength);
 
-BOOL WINAPI InternetCreateUrlW(LPURL_COMPONENTS lpUrlComponents, DWORD dwFlags,
+BOOL WINAPI InternetCreateUrlW(LPURL_COMPONENTSW lpUrlComponents, DWORD dwFlags,
                                LPWSTR lpszUrl, LPDWORD lpdwUrlLength);
 
 #define InternetCreateUrl WINELIB_NAME_AW(InternetCreateUrl)

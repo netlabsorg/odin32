@@ -4,11 +4,59 @@
 
 #ifdef __WIN32OS2__
 #include <odinwrap.h>
-// @@@PH 2000/01/08 causes trouble in SHELL32
-// #include <misc.h>
-// that include is NOT intended to be HERE since it
-// may override native win32 types as it includes win32type.h
-// if no other base type definition is already included.
+
+#ifndef __MISC_H__
+
+#ifdef DEBUG
+#ifdef PRIVATE_LOGGING
+  //To use private dll logging, define PRIVATE_LOGGING and
+  //add Open/ClosePrivateLogFiles (see below) functions to the dll
+  //to open close the private logfile. The logfile handle should
+  //be stored in the _privateLogFile variable
+  //dprintf can be called like this:
+  //dprintf((LOG, "PE file           : %s", szFileName));
+  #define LOG		  (void*)_privateLogFile
+  #define dprintf(a)      WritePrivateLog a
+  #define dprintfGlobal(a)      WriteLog a
+#else
+  #define dprintf(a)      WriteLog a
+#endif
+  #define eprintf(a)      WriteLog a ; WriteLogError a
+  #define dassert(a, b)   if(!(a)) WriteLogError b
+  #define dbgCheckObj(a)	a->checkObject()
+  #define DisableLogging  DecreaseLogCount
+  #define EnableLogging   IncreaseLogCount
+
+#ifdef DEBUG_ENABLELOG_LEVEL2
+#ifdef PRIVATE_LOGGING
+  #define dprintf2(a)      WritePrivateLog a
+#else
+  #define dprintf2(a)      WriteLog a
+#endif
+#else
+  #define dprintf2(a)
+#endif
+
+#else
+  #define dprintfGlobal(a)
+  #define dprintf(a)
+  #define dprintf2(a)
+  #define eprintf(a)
+  #define dassert(a, b)
+  #define dbgCheckObj(a)
+  #define DisableLogging
+  #define EnableLogging
+#endif
+
+int  SYSTEM WriteLog(char *tekst, ...);
+int  SYSTEM WritePrivateLog(void *logfile, char *tekst, ...);
+int  SYSTEM WriteLogError(char *tekst, ...);
+
+void SYSTEM DecreaseLogCount();
+void SYSTEM IncreaseLogCount();
+
+#endif //__MISC_H__
+
 #endif
 
 #ifdef __WINE__  /* Debugging interface is internal to Wine */
