@@ -2858,10 +2858,14 @@ BOOL WIN32API OLEDD_DragEnter(HWND hwnd, HDROP hDrop, DWORD dwEffect)
 BOOL WIN32API OLEDD_DragLeave(HWND hwnd)
 {
     DropTargetNode *pTarget;
+    HWND            nexttar = hwnd;
 
     dprintf(("OLEDD_DragLeave %x", hwnd));
 
-    pTarget = OLEDD_FindDropTarget(hwnd);
+    do {
+        pTarget = OLEDD_FindDropTarget(nexttar);
+    } 
+    while(!pTarget && (nexttar = GetParent(nexttar)) != 0);
     if(pTarget == NULL) {
         return FALSE;
     }
