@@ -1,79 +1,83 @@
+/* $Id: gtexdl.c,v 1.2 2001-09-05 14:30:55 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glide/sst1/glide/gtexdl.c,v 1.1 2000-02-25 00:31:19 sandervl Exp $
+** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glide/sst1/glide/gtexdl.c,v 1.2 2001-09-05 14:30:55 bird Exp $
 ** $Log: gtexdl.c,v $
-** Revision 1.1  2000-02-25 00:31:19  sandervl
+** Revision 1.2  2001-09-05 14:30:55  bird
+** Added $Id:$ keyword.
+**
+** Revision 1.1  2000/02/25 00:31:19  sandervl
 ** Created new Voodoo 1 Glide dir
 **
- * 
+ *
  * 28    6/19/97 7:35p Dow
  * More P6 Stuff
- * 
+ *
  * 27    6/10/97 3:59p Garymct
  * Fixed a bug in a sanity checking macro.
- * 
+ *
  * 26    6/10/97 11:09a Pgj
  * fix 8-bit & optimize
- * 
+ *
  * 25    6/08/97 11:06p Pgj
  * use Group Write for Texture Downloads
- * 
+ *
  * 24    5/09/97 5:12p Jdt
  * Removed redundant download of NCC Table
- * 
+ *
  * 23    3/18/97 9:07p Dow
  * Got rid of #$#%#$ // comments
- * 
+ *
  * 22    3/15/97 8:08p Jdt
  * Moved grTexDownloadTable into this file as it not precisely DI.
- * 
+ *
  * 21    3/04/97 9:08p Dow
  * Neutered multiplatform multiheaded monster
- * 
+ *
  * 20    2/26/97 11:58a Jdt
  * fixed a warning
- * 
+ *
  * 19    2/19/97 4:25p Hanson
  * Added Gary T's changes to the expected size value for texture downloads
- * 
+ *
  * 18    2/18/97 9:52a Jdt
  * Fixed some warnings.
- * 
+ *
  * 17    2/12/97 2:09p Hanson
- * Hopefully removed the rest of my muckage. 
- * 
+ * Hopefully removed the rest of my muckage.
+ *
  * 16    2/12/97 12:34p Dow
  * Fixed Hanson muckage
- * 
+ *
  * 15    2/12/97 12:03p Hanson
  * Adjusted Convert and download code for Descent
- * 
+ *
  * 14    2/12/97 11:30a Hanson
  * Added ConvertRle function
- * 
+ *
  * 13    1/27/97 2:29p Murali
  * Changed texture download code to help compiler use registers optimally.
- * 
+ *
  * 12    12/23/96 1:37p Dow
  * chagnes for multiplatform glide
- * 
+ *
  * 11    11/18/96 9:13a Sellers
  * fixed bug in checking for crossing of 2 MByte texture boundry
 **
@@ -101,7 +105,7 @@ GR_DDFUNC(_grTexDownloadNccTable, void, ( GrChipID_t tmu, FxU32 which, const GuN
 {
   int i;
   FxU32 *hwNCC;
-  
+
   GR_BEGIN_NOFIFOCHECK("_grTexDownloadNccTable",89);
   GDBG_INFO_MORE((gc->myLevel,"(%d,%d, 0x%x, %d,%d)\n",tmu,which,table,start,end));
   GR_ASSERT( start==0 );
@@ -186,7 +190,7 @@ GR_ENTRY(grTexDownloadTable, void,
                      and grTexMaxAddress()
     thisLod      - lod constant that describes the mipmap level
                     to be downloaded
-    largeLod     - largest level of detail in complete mipmap to 
+    largeLod     - largest level of detail in complete mipmap to
                    be downloaded at startAddress of which level to
                    be downloaded is a part
     aspectRatio  - aspect ratio of this mipmap
@@ -194,7 +198,7 @@ GR_ENTRY(grTexDownloadTable, void,
     evenOdd      - which set of mipmap levels have been downloaded for
                     the selected texture
                     One of:
-                      GR_MIPMAPLEVELMASK_EVEN 
+                      GR_MIPMAPLEVELMASK_EVEN
                       GR_MIPMAPLEVELMASK_ODD
                       GR_MIPMAPLEVELMASK_BOTH
     data          - pointer to mipmap data
@@ -204,7 +208,7 @@ GR_ENTRY(grTexDownloadTable, void,
 
 GR_ENTRY(grTexDownloadMipMapLevelPartial, void, ( GrChipID_t tmu, FxU32 startAddress, GrLOD_t thisLod, GrLOD_t largeLod, GrAspectRatio_t   aspectRatio, GrTextureFormat_t format, FxU32 evenOdd, void *data, int t, int max_t ))
 {
-  const FxU8  *src8  = ( const FxU8  * ) data; 
+  const FxU8  *src8  = ( const FxU8  * ) data;
   const FxU16 *src16 = ( const FxU16 * ) data;
   FxI32   sh, bytesPerTexel;
   FxU32 max_s, s, width, tex_address, tmu_baseaddress;
@@ -254,12 +258,12 @@ GR_ENTRY(grTexDownloadMipMapLevelPartial, void, ( GrChipID_t tmu, FxU32 startAdd
   /* assume max_s is a power of two */
   GR_ASSERT(( (max_s) & (max_s -1) ) == 0);
 
-  
+
   /*------------------------------------------------------------
     Compute Base Address Given Start Address Offset
     ------------------------------------------------------------*/
   baseAddress = _grTexCalcBaseAddress( startAddress,
-                                       largeLod, 
+                                       largeLod,
                                        aspectRatio,
                                        format,
                                        evenOdd );
@@ -270,9 +274,9 @@ GR_ENTRY(grTexDownloadMipMapLevelPartial, void, ( GrChipID_t tmu, FxU32 startAdd
     ------------------------------------------------------------*/
   tmu_baseaddress = (FxU32)gc->tex_ptr;
   tmu_baseaddress += (((FxU32)tmu)<<21) + (((FxU32)thisLod)<<17);
-  
+
   /*------------------------------------------------------------
-    Compute pertinant contents of tLOD and texMode registers 
+    Compute pertinant contents of tLOD and texMode registers
     ------------------------------------------------------------*/
   tLod = SST_TLOD_MINMAX_INT(largeLod,GR_LOD_1);
   tLod |= _gr_evenOdd_xlate_table[evenOdd];
@@ -316,7 +320,7 @@ GR_ENTRY(grTexDownloadMipMapLevelPartial, void, ( GrChipID_t tmu, FxU32 startAdd
       for ( ; t <= max_t; t++) {
         SET_TRAM( tex_address, *(const FxU8*) src8);
         src8 += 1;
-        tex_address += (1 << 9); 
+        tex_address += (1 << 9);
       }
       break;
 
@@ -325,7 +329,7 @@ GR_ENTRY(grTexDownloadMipMapLevelPartial, void, ( GrChipID_t tmu, FxU32 startAdd
       for ( ; t <= max_t; t++) {
         SET_TRAM( tex_address, *(const FxU16*) src8);
         src8 += 2;
-        tex_address += (1 << 9); 
+        tex_address += (1 << 9);
       }
       break;
 
@@ -334,7 +338,7 @@ GR_ENTRY(grTexDownloadMipMapLevelPartial, void, ( GrChipID_t tmu, FxU32 startAdd
       for ( ; t <= max_t; t++) {
         SET_TRAM( tex_address, *(const FxU32*) src8);
         src8 += 4;
-        tex_address += (1 << 9); 
+        tex_address += (1 << 9);
       }
       break;
 
@@ -355,7 +359,7 @@ GR_ENTRY(grTexDownloadMipMapLevelPartial, void, ( GrChipID_t tmu, FxU32 startAdd
             tex_address += 16;
             src8 += 8;
           }
-        } 
+        }
       } else {                      /* New TMUs    */
 #if (GLIDE_PLATFORM & GLIDE_HW_SST96)
 
@@ -415,12 +419,12 @@ GR_ENTRY(grTexDownloadMipMapLevelPartial, void, ( GrChipID_t tmu, FxU32 startAdd
             tex_address += 8;
             src8 += 8;
           }
-        } 
+        }
 #endif
       }
       break;
     }
-  } else { 
+  } else {
 
     /*------------------------------------------------------------
       Handle 16-bit Textures
@@ -433,7 +437,7 @@ GR_ENTRY(grTexDownloadMipMapLevelPartial, void, ( GrChipID_t tmu, FxU32 startAdd
       for ( ; t <= max_t; t++) {
         SET_TRAM( tex_address, *src16 );
         src16 += 1;
-        tex_address += (1 << 9); 
+        tex_address += (1 << 9);
       }
       break;
 
@@ -442,7 +446,7 @@ GR_ENTRY(grTexDownloadMipMapLevelPartial, void, ( GrChipID_t tmu, FxU32 startAdd
       for ( ; t <= max_t; t++) {
         SET_TRAM( tex_address, *(const FxU32 *)src16 );
         src16 += 2;
-        tex_address += (1 << 9); 
+        tex_address += (1 << 9);
       }
       break;
 
@@ -504,7 +508,7 @@ GR_ENTRY(grTexDownloadMipMapLevelPartial, void, ( GrChipID_t tmu, FxU32 startAdd
       break;
     }
   } /* end switch( width ) */
-  
+
   /* Flush the write buffers after the texture downloads */
   P6FENCE;
 
@@ -563,11 +567,11 @@ GR_DDFUNC(_grTexDownloadPalette, void, ( GrChipID_t tmu, GuTexPalette *pal, int 
   PACKER_WORKAROUND;
   P6FENCE;
   GR_END();
-} /* _grTexDownloadPalette */ 
+} /* _grTexDownloadPalette */
 
 
 #ifndef __linux__
-/* 
+/*
    Let me take this opportunity to register my formal opposition to
    this function.  Either we do this or we don't.  Let's not hack like
    this.
@@ -591,10 +595,10 @@ GR_ENTRY(ConvertAndDownloadRle, void, ( GrChipID_t tmu, FxU32 startAddress, GrLO
 
 /* make sure even number */
   width&=0xFFFFFFFE;
-  
+
   max_s=width>>1;
   max_t=height;
-  
+
   GDBG_INFO_MORE((gc->myLevel,"(%d,0x%x, %d,%d,%d, %d,%d 0x%x, %d)\n",
                   tmu,startAddress,thisLod,largeLod,aspectRatio,
                   format,evenOdd,bm_data,max_t));
@@ -621,12 +625,12 @@ GR_ENTRY(ConvertAndDownloadRle, void, ( GrChipID_t tmu, FxU32 startAddress, GrLO
     ------------------------------------------------------------*/
   if ( !(evenOdd & (thisLod & 0x1 ? GR_MIPMAPLEVELMASK_ODD:GR_MIPMAPLEVELMASK_EVEN)))
       goto all_done;
-  
+
   /*------------------------------------------------------------
     Compute Base Address Given Start Address Offset
     ------------------------------------------------------------*/
   baseAddress = _grTexCalcBaseAddress( startAddress,
-                                       largeLod, 
+                                       largeLod,
                                        aspectRatio,
                                        format,
                                        evenOdd );
@@ -637,9 +641,9 @@ GR_ENTRY(ConvertAndDownloadRle, void, ( GrChipID_t tmu, FxU32 startAddress, GrLO
     ------------------------------------------------------------*/
   tmu_baseaddress = (FxU32)gc->tex_ptr;
   tmu_baseaddress += (((FxU32)tmu)<<21) + (((FxU32)thisLod)<<17);
-  
+
   /*------------------------------------------------------------
-    Compute pertinant contents of tLOD and texMode registers 
+    Compute pertinant contents of tLOD and texMode registers
     ------------------------------------------------------------*/
   tLod = SST_TLOD_MINMAX_INT(largeLod,GR_LOD_1);
   tLod |= _gr_evenOdd_xlate_table[evenOdd];

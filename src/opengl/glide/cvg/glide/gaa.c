@@ -1,174 +1,178 @@
+/* $Id: gaa.c,v 1.2 2001-09-05 14:30:23 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glide/cvg/glide/gaa.c,v 1.1 2000-02-25 00:37:37 sandervl Exp $
+** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glide/cvg/glide/gaa.c,v 1.2 2001-09-05 14:30:23 bird Exp $
 ** $Log: gaa.c,v $
-** Revision 1.1  2000-02-25 00:37:37  sandervl
+** Revision 1.2  2001-09-05 14:30:23  bird
+** Added $Id:$ keyword.
+**
+** Revision 1.1  2000/02/25 00:37:37  sandervl
 ** Created Voodoo 2 dir
 **
-** 
+**
 ** 64    5/18/98 12:15p Peter
 ** crybaby check for alpha enable
-** 
+**
 ** 63    4/22/98 6:18p Jdt
 ** Optimized AA Lines.
-** 
+**
 ** 62    2/20/98 11:00a Peter
 ** removed glide3 from glid2 tree
- * 
+ *
  * 61    1/15/98 2:46p Atai
  * fixed grDrawPoint and grDrawLine in aa mode
- * 
+ *
  * 60    12/17/97 4:45p Peter
  * groundwork for CrybabyGlide
- * 
+ *
  * 59    12/12/97 12:43p Atai
  * move i and dateElem into the set up loop
- * 
+ *
  * 57    12/08/97 10:40a Atai
  * modify draw vertex primitive routines to do grDrawVertexArrayLinear()
- * 
+ *
  * 56    12/05/97 4:26p Peter
  * watcom warnings
- * 
+ *
  * 55    11/24/97 4:40p Peter
  * aa prims vs packing
- * 
+ *
  * 54    11/21/97 6:05p Atai
  * use one datalist (tsuDataList) in glide3
- * 
+ *
  * 53    11/21/97 3:20p Peter
  * direct writes tsu registers
- * 
+ *
  * 52    11/18/97 6:11p Peter
  * fixed glide3 muckage
- * 
+ *
  * 51    11/18/97 4:36p Peter
  * chipfield stuff cleanup and w/ direct writes
- * 
+ *
  * 50    11/18/97 3:26p Atai
- * update vData 
+ * update vData
  * optimize state monster
- * 
+ *
  * 49    11/17/97 4:55p Peter
  * watcom warnings/chipfield stuff
- * 
+ *
  * 48    11/06/97 6:10p Atai
  * update GrState size
  * rename grDrawArray to grDrawVertexArray
  * update _grDrawPoint and _grDrawVertexList
- * 
+ *
  * 47    11/04/97 6:35p Atai
  * 1. sync with data structure changes
  * 2. break up aa triangle routine
- * 
+ *
  * 46    11/04/97 5:04p Peter
  * cataclysm part deux
- * 
+ *
  * 45    11/04/97 4:57p Atai
  * use byte offset
- * 
+ *
  * 44    11/03/97 3:43p Peter
  * h3/cvg cataclysm
- * 
+ *
  * 43    11/03/97 3:19p Atai
  * optimization
- * 
+ *
  * 42    10/29/97 2:45p Peter
  * C version of Taco's packing code
- * 
+ *
  * 41    10/29/97 2:24p Atai
  * re-work aa draw routines to increase sbench number
- * 
+ *
  * 40    10/21/97 8:38p Atai
  * added lines routine for grDrawArray
- * 
+ *
  * 39    10/21/97 3:22p Peter
  * hand pack rgb
- * 
+ *
  * 38    10/19/97 12:51p Peter
  * no tsu happiness
- * 
+ *
  * 37    10/17/97 3:15p Peter
  * removed unused addr field from datalist
- * 
+ *
  * 36    10/17/97 10:15a Peter
  * packed rgb state cleanup
- * 
+ *
  * 35    10/16/97 5:33p Peter
  * argb != rgba
- * 
+ *
  * 34    10/16/97 3:40p Peter
  * packed rgb
- * 
+ *
  * 33    10/16/97 1:50p Atai
  * fix drawarray bugs
- * 
+ *
  * 32    10/14/97 7:33p Atai
  * fix compiler error
- * 
+ *
  * 31    10/14/97 5:40p Atai
  * added grculltest
- * 
+ *
  * 30    10/14/97 4:36p Atai
  * added aa points, strip line and trianlges for drawarray
- * 
+ *
  * 29    10/09/97 8:02p Dow
  * State Monster 1st Cut
- * 
+ *
  * 28    10/08/97 5:19p Peter
  * optinally clamp only texture params
- * 
+ *
  * 27    10/08/97 11:32a Peter
  * pre-computed packet headers for packet 3
- * 
+ *
  * 26    9/20/97 4:42p Peter
  * tri_setf fixup/big fifo
- * 
+ *
  * 25    9/16/97 2:49p Peter
  * fixed watcom unhappiness w/ static initializers
- * 
+ *
  * 24    9/15/97 7:31p Peter
  * more cmdfifo cleanup, fixed normal buffer clear, banner in the right
  * place, lfb's are on, Hmmmm.. probably more
- * 
+ *
  * 23    9/10/97 10:13p Peter
  * fifo logic from GaryT, non-normalized fp first cut
- * 
+ *
  * 22    8/30/97 5:58p Tarolli
  * cleanups
- * 
+ *
  * 21    7/29/97 4:31p Atai
  * replace old edge sense routine
- * 
+ *
  * 19    7/28/97 2:42p Peter
  * aa points?
- * 
+ *
  * 18    7/26/97 3:04p Peter
  * cleanup
- * 
+ *
  * 17    7/25/97 11:40a Peter
  * removed dHalf, change field name to match real use for cvg
- * 
+ *
  * 16    6/30/97 3:21p Peter
  * more aa through cmd fifo
- * 
+ *
  * 15    6/20/97 1:17p Peter
  * changes for new CVG_TRI macros
 **
@@ -199,12 +203,12 @@
 **   D --C -
 **   w = h = 2pixels
 */
-GR_ENTRY(grAADrawPoint, void, (const GrVertex *e)) 
+GR_ENTRY(grAADrawPoint, void, (const GrVertex *e))
 {
 #define FN_NAME "grAADrawPoint"
   GR_DCL_GC;
   GrCullMode_t cullSave;
-  
+
 #if GLIDE_HW_TRI_SETUP && GLIDE_PACKET3_TRI_SETUP
   const FxU32 vertexParamOffset = _GlideRoot.curVertexSize;
 #endif /* GLIDE_HW_TRI_SETUP && GLIDE_PACKET3_TRI_SETUP */
@@ -222,8 +226,8 @@ GR_ENTRY(grAADrawPoint, void, (const GrVertex *e))
 #if GLIDE_HW_TRI_SETUP && GLIDE_PACKET3_TRI_SETUP
   /* We draw this as a 4 triangle fan centered around E. */
   GR_SET_EXPECTED_SIZE(vertexParamOffset * 6, 1);
-  TRI_STRIP_BEGIN(kSetupFan, 
-                  0x06UL, vertexParamOffset, 
+  TRI_STRIP_BEGIN(kSetupFan,
+                  0x06UL, vertexParamOffset,
                   SSTCP_PKT3_BDDDDD);
 
   {
@@ -241,15 +245,15 @@ GR_ENTRY(grAADrawPoint, void, (const GrVertex *e))
 #if GLIDE_PACKED_RGB
       if ((gc->cmdTransportInfo.paramMask & SSTCP_PKT3_PACKEDCOLOR) != 0) {
         FxU32 packedColor = 0x00;
-        
+
         if (*dataList == (GR_VERTEX_R_OFFSET << 2)) {
           packedColor = (RGBA_COMP_CLAMP(FARRAY(fp, (GR_VERTEX_B_OFFSET << 2)), B) |
                          RGBA_COMP_CLAMP(FARRAY(fp, (GR_VERTEX_G_OFFSET << 2)), G) |
                          RGBA_COMP_CLAMP(FARRAY(fp, (GR_VERTEX_R_OFFSET << 2)), R));
-          
+
           dataList++;
         }
-        
+
         packedColor |= RGBA_COMP_CLAMP(FARRAY(fp, (GR_VERTEX_A_OFFSET << 2)), A);
         TRI_SET(packedColor);
       } else {
@@ -266,7 +270,7 @@ GR_ENTRY(grAADrawPoint, void, (const GrVertex *e))
 
       dataList++;
 #endif /* GLIDE_FP_CLAMP_TEX */
-      
+
       while(*dataList != 0) {
         TRI_SETF_CLAMP(FARRAY(fp, *dataList));
         dataList++;
@@ -282,28 +286,28 @@ GR_ENTRY(grAADrawPoint, void, (const GrVertex *e))
       int v;
       static const float xAdjust[] = {  1.0f, -1.0f, -1.0f, 1.0f,  1.0f };
       static const float yAdjust[] = { -1.0f, -1.0f,  1.0f, 1.0f, -1.0f };
-         
+
       ASSERT(ArraySize(xAdjust) == ArraySize(yAdjust));
-         
+
       for(v = 0; v < ArraySize(xAdjust); v++) {
         TRI_SETF(ptX + xAdjust[v]);
         TRI_SETF(ptY + yAdjust[v]);
-           
+
         {
           const int* dataList = gc->tsuDataList;
 
 #if GLIDE_PACKED_RGB
           if ((gc->cmdTransportInfo.paramMask & SSTCP_PKT3_PACKEDCOLOR) != 0) {
             FxU32 packedColor = 0x00;
-            
+
             if (*dataList == (GR_VERTEX_R_OFFSET << 2)) {
               packedColor = (RGBA_COMP_CLAMP(FARRAY(fp, (GR_VERTEX_B_OFFSET << 2)), B) |
                              RGBA_COMP_CLAMP(FARRAY(fp, (GR_VERTEX_G_OFFSET << 2)), G) |
                              RGBA_COMP_CLAMP(FARRAY(fp, (GR_VERTEX_R_OFFSET << 2)), R));
-              
+
               dataList++;
             }
-            
+
             TRI_SET(packedColor);
           } else {
             TRI_SETF(0.0f);
@@ -318,7 +322,7 @@ GR_ENTRY(grAADrawPoint, void, (const GrVertex *e))
             TRI_SETF(FARRAY(fp, *dataList));
             dataList++;
           }
-          
+
           /* Send constant Alpha == 0.0f */
           TRI_SETF(0.0f);
 #endif /* !GLIDE_PACKED_RGB */
@@ -334,9 +338,9 @@ GR_ENTRY(grAADrawPoint, void, (const GrVertex *e))
 
           dataList++;
 #endif /* GLIDE_FP_CLAMP_TEX */
-          
+
           /* Anything else in the dataList */
-          while(*dataList != 0) {                  
+          while(*dataList != 0) {
             TRI_SETF_CLAMP(FARRAY(fp, *dataList));
             dataList++;
           }
@@ -344,47 +348,47 @@ GR_ENTRY(grAADrawPoint, void, (const GrVertex *e))
       }
     }
   }
-  
+
   TRI_END;
   GR_CHECK_SIZE();
 #else
   {
-    GrVertex a, b;      
+    GrVertex a, b;
 
     /*
     ** make corners of a square
     */
-    a = 
+    a =
     b = *e;
-      
+
     a.tmuvtx[0].oow =
     b.tmuvtx[0].oow = _GlideRoot.pool.f1;
-      
+
     a.x -= _GlideRoot.pool.f1;
     a.y -= _GlideRoot.pool.f1;
 
     b.x += _GlideRoot.pool.f1;
     b.y -= _GlideRoot.pool.f1;
 
-    a.a =  
+    a.a =
       b.a =  _GlideRoot.pool.f0;
-      
+
     grDrawTriangle(&a, &b, e);    /* A B E */
-      
+
     b.x -= 2.0F;                  /* compute point D */
     b.y += 2.0F;
     grDrawTriangle(&a, e, &b);    /* A E D */
-      
+
     a.x += 2.0F;                  /* compute point C */
     a.y += 2.0F;
     grDrawTriangle(&b, e, &a);    /* D E C */
-      
+
     b.x += 2.0F;
     b.y -= 2.0F;
     grDrawTriangle(&a, e, &b);    /* C E B */
   }
 #endif /* GLIDE_HW_TRI_SETUP && GLIDE_PACKET3_TRI_SETUP */
-  
+
   /* Restore culling mode */
   gc->state.cull_mode = cullSave;
 #undef FN_NAME
@@ -396,7 +400,7 @@ grAADrawStrip(const FxU32 cullMode, const float* const vectorList[], const FxU32
 {
 #define FN_NAME "grAADrawStrip"
   const FxU32 vertexParamOffset = _GlideRoot.curVertexSize;
-   
+
   GR_BEGIN_NOFIFOCHECK(FN_NAME, gc->myLevel);
   GDBG_INFO_MORE(gc->myLevel, "(): 0x%X\n", vectorNum);
 
@@ -404,14 +408,14 @@ grAADrawStrip(const FxU32 cullMode, const float* const vectorList[], const FxU32
 
   GR_SET_EXPECTED_SIZE(vertexParamOffset * vectorNum, 1);
   TRI_PACKET_BEGIN(cullMode, gc->cmdTransportInfo.paramMask,
-                   vectorNum, vertexParamOffset, 
+                   vectorNum, vertexParamOffset,
                    SSTCP_PKT3_BDDDDD);
   {
     FxU32 v;
 
     for(v = 0; v < vectorNum; v++) {
       const float* const vector = vectorList[v];
-         
+
       TRI_SETF(vector[GR_VERTEX_X_OFFSET]);
       TRI_SETF(vector[GR_VERTEX_Y_OFFSET]);
 
@@ -421,15 +425,15 @@ grAADrawStrip(const FxU32 cullMode, const float* const vectorList[], const FxU32
 #if GLIDE_PACKED_RGB
         if ((gc->cmdTransportInfo.paramMask & SSTCP_PKT3_PACKEDCOLOR) != 0) {
           FxU32 packedColor = 0x00;
-          
+
           if (*dataList == (GR_VERTEX_R_OFFSET << 2)) {
             packedColor = (RGBA_COMP_CLAMP(FARRAY(vector, (GR_VERTEX_B_OFFSET << 2)), B) |
                            RGBA_COMP_CLAMP(FARRAY(vector, (GR_VERTEX_G_OFFSET << 2)), G) |
                            RGBA_COMP_CLAMP(FARRAY(vector, (GR_VERTEX_R_OFFSET << 2)), R));
-            
+
             dataList++;
           }
-          
+
           packedColor |= RGBA_COMP_CLAMP(FARRAY(vector, (GR_VERTEX_A_OFFSET << 2)), A);
           TRI_SET(packedColor);
         } else {
@@ -437,7 +441,7 @@ grAADrawStrip(const FxU32 cullMode, const float* const vectorList[], const FxU32
         }
         dataList++;
 #endif /* GLIDE_PACKED_RGB */
-        
+
 #if GLIDE_FP_CLAMP_TEX
         while(*dataList != 0) {
           TRI_SETF(FARRAY(vector, *dataList));
@@ -446,7 +450,7 @@ grAADrawStrip(const FxU32 cullMode, const float* const vectorList[], const FxU32
 
         dataList++;
 #endif /* GLIDE_FP_CLAMP_TEX */
-        
+
         while(*dataList != 0) {
           TRI_SETF_CLAMP(FARRAY(vector, *dataList));
           dataList++;
@@ -475,7 +479,7 @@ grAADrawEdgeTriangle(float *va, float *vb, float *vc)
   float
     ooa, dxAB, dxBC, dyAB, dyBC;
   float negateArea = -1.f;
- 
+
   GR_BEGIN_NOFIFOCHECK("grAADrawEdgeTriangle",gc->myLevel);
   GDBG_INFO_MORE(gc->myLevel,"()\n");
   GR_FLUSH_STATE();
@@ -485,7 +489,7 @@ grAADrawEdgeTriangle(float *va, float *vb, float *vc)
   **  Whenever the radial order is reversed (from counter-clockwise to
   **  clockwise), we need to change the area of the triangle.  Note
   **  that we know the first two elements are X & Y by looking at the
-  **  grVertex structure.  
+  **  grVertex structure.
   */
   if (va[1] < vb[1]) {
     if (vb[1] > vc[1]) {        /* acb */
@@ -543,7 +547,7 @@ grAADrawEdgeTriangle(float *va, float *vb, float *vc)
   dxAB *= ooa;
   dyBC *= ooa;
 
-  GR_SET_EXPECTED_SIZE(((10 + (_GlideRoot.paramCount - 1)) << 2), 
+  GR_SET_EXPECTED_SIZE(((10 + (_GlideRoot.paramCount - 1)) << 2),
                        10 + (_GlideRoot.paramCount - 1));
 
   /* write out X & Y  for vertex A */
@@ -569,9 +573,9 @@ grAADrawEdgeTriangle(float *va, float *vb, float *vc)
   GR_SETF(BROADCAST_ID, hw, Fdady , dpdy);
 
   {
-    const struct dataList_s* dlp = gc->regDataList; 
+    const struct dataList_s* dlp = gc->regDataList;
     int i = dlp->i;
-    
+
     /* We already put the alpha out, and this is guaranteed to
      * be included in the dataList via convention.
      */
@@ -580,16 +584,16 @@ grAADrawEdgeTriangle(float *va, float *vb, float *vc)
       dlp++;
       i = dlp->i;
     }
-    
+
     dlp++;
     i = dlp->i;
-    
+
     while (i != 0) {
       GR_SETF_INDEX(BROADCAST_ID, hw, ((FxU32*)dlp->addr - (FxU32*)hw), FARRAY(fa, i));
       dlp++;
       i = dlp->i;
     }
-    
+
     /* Draw the triangle by writing the area to the triangleCMD register */
     GR_SETF(BROADCAST_ID, hw, FtriangleCMD, area);
   }
@@ -603,11 +607,11 @@ all_done:
 #if (GLIDE_HW_TRI_SETUP && GLIDE_PACKET3_TRI_SETUP)
 #define FUCAST( X ) (*(unsigned long*)&(X))
 #define FN_NAME "grAADrawLine"
-GR_ENTRY(grAADrawLine, void, (const GrVertex *v1, const GrVertex *v2)) 
+GR_ENTRY(grAADrawLine, void, (const GrVertex *v1, const GrVertex *v2))
 {
     GR_DCL_GC;
     GrVertex *_v1, *_v2;
-    const FxU32 vertexParamOffset = _GlideRoot.curVertexSize;  
+    const FxU32 vertexParamOffset = _GlideRoot.curVertexSize;
     const int* datalist;
     float xoff, yoff;
     float alpha;
@@ -619,12 +623,12 @@ GR_ENTRY(grAADrawLine, void, (const GrVertex *v1, const GrVertex *v2))
                          "Antialiasing require enabling alpha");
 
     GR_SET_EXPECTED_SIZE( vertexParamOffset * 6, 1 );
-    TRI_PACKET_BEGIN( 0, 
+    TRI_PACKET_BEGIN( 0,
                       gc->cmdTransportInfo.paramMask,
-                      6, 
-                      vertexParamOffset, 
+                      6,
+                      vertexParamOffset,
                       SSTCP_PKT3_BDDDDD );
-    
+
     /* y sort*/
     if (v2->y < v1->y) {
         _v1 = (void*) v2;
@@ -636,13 +640,13 @@ GR_ENTRY(grAADrawLine, void, (const GrVertex *v1, const GrVertex *v2))
 #define v1 _v1
 #define v2 _v2
     /* compute deltas and absolute deltas */
-    
+
     dx  = v2->x - v1->x;
     dy  = v2->y - v1->y;
-    
+
     adx = (float)(FUCAST( dx ) & 0x7fffffff);
     ady = (float)(FUCAST( dy ) & 0x7fffffff);
-    
+
     if ( adx >= ady ) {
         xoff = 0.0f;
         yoff = 1.0f;
@@ -650,14 +654,14 @@ GR_ENTRY(grAADrawLine, void, (const GrVertex *v1, const GrVertex *v2))
         xoff = 1.0f;
         yoff = 0.0f;
     }
-    
+
     /*  A---B  Alpha = 0.0
-        | \ |  
+        | \ |
         V1-V2  Alpha = 1.0 ( user )
-        | \ |  
+        | \ |
         E---F  Alpha = 0.0
 */
-    
+
     /* B Vertex */
     TRI_SETF( v2->x + xoff );
     TRI_SETF( v2->y - yoff );
@@ -689,29 +693,29 @@ GR_ENTRY(grAADrawLine, void, (const GrVertex *v1, const GrVertex *v2))
     }
 
     v1->a = alpha;
-      
+
       /* V2 Vertex */
     datalist = gc->tsuDataList;
 
     TRI_SETF( v2->x );
     TRI_SETF( v2->y );
-      
+
     while( *datalist != 0 ) {
         TRI_SETF(FARRAY(v2, *datalist));
         datalist++;
     }
-      
+
     /* V1 Vertex */
     datalist = gc->tsuDataList;
 
     TRI_SETF( v1->x );
     TRI_SETF( v1->y );
-      
+
     while( *datalist != 0 ) {
         TRI_SETF(FARRAY(v1, *datalist));
         datalist++;
     }
-      
+
     /* F Vertex */
     datalist = gc->tsuDataList;
 
@@ -745,7 +749,7 @@ GR_ENTRY(grAADrawLine, void, (const GrVertex *v1, const GrVertex *v2))
         datalist++;
     }
     v1->a = alpha;
-      
+
 #undef v1
 #undef v2
     TRI_END;
@@ -753,7 +757,7 @@ GR_ENTRY(grAADrawLine, void, (const GrVertex *v1, const GrVertex *v2))
 }
 #undef FN_NAME
 #else /* !(GLIDE_HW_TRI_SETUP && GLIDE_PACKET3_TRI_SETUP */
-GR_ENTRY(grAADrawLine, void, (const GrVertex *v1, const GrVertex *v2)) 
+GR_ENTRY(grAADrawLine, void, (const GrVertex *v1, const GrVertex *v2))
 {
   float           dx, dy;           /* delta X and Y */
   float           adx, ady;         /* |dX| and |dY| */
@@ -766,7 +770,7 @@ GR_ENTRY(grAADrawLine, void, (const GrVertex *v1, const GrVertex *v2))
    */
   GrCullMode_t cullSave = gc->state.cull_mode;
   gc->state.cull_mode = GR_CULL_DISABLE;
-  
+
   GDBG_INFO(95, "grAADrawLine (%f %f) -> (%f %f)\n",
             v1->x, v1->y, v2->x, v2->y);
 
@@ -776,7 +780,7 @@ GR_ENTRY(grAADrawLine, void, (const GrVertex *v1, const GrVertex *v2))
   if (v2->y < v1->y) {
     const GrVertex* tv = v1; v1 = v2; v2 = tv;
   }
-  
+
   /* compute deltas and absolute deltas */
   dx = adx = v2->x - v1->x;
   dy = ady = v2->y - v1->y;
@@ -784,7 +788,7 @@ GR_ENTRY(grAADrawLine, void, (const GrVertex *v1, const GrVertex *v2))
     adx = -adx;
   if (ady < 0)
     ady = -ady;
-  
+
   a = *v1;
   e = *v1;
   b = *v2;
@@ -869,7 +873,7 @@ grAADrawTriEdge(const GrVertex *a, const GrVertex *b, aaEdgeSense sense)
     /* Maintain the same culling mode that we would have used for
      * the inner triangle.
      */
-    GR_DCL_GC;      
+    GR_DCL_GC;
     const FxU32 cullMode = gc->state.cull_mode;
     const FxU32 sMode = ((cullMode != GR_CULL_DISABLE)
                          ? (kSetupCullEnable | ((cullMode == GR_CULL_POSITIVE)
@@ -899,8 +903,8 @@ grAADrawTriEdge(const GrVertex *a, const GrVertex *b, aaEdgeSense sense)
 } /* grAADrawTriEdge */
 
 #define DXSQUARED(i,j) ((i->x - j->x) * (i->x - j->x))
-#define DYSQUARED(i,j) ((i->y - j->y) * (i->y - j->y))  
-  
+#define DYSQUARED(i,j) ((i->y - j->y) * (i->y - j->y))
+
 /*
 **
 */
@@ -953,7 +957,7 @@ aaCalcEdgeSense(const GrVertex *a, const GrVertex *b, const GrVertex *c)
 GR_ENTRY(grAADrawTriangle,
          void,
          (const GrVertex *a, const GrVertex *b, const GrVertex *c,
-          FxBool ab_antialias, FxBool bc_antialias, FxBool ca_antialias)) 
+          FxBool ab_antialias, FxBool bc_antialias, FxBool ca_antialias))
 {
 #define FN_NAME "grAADrawTriangle"
   FxU32
@@ -969,14 +973,14 @@ GR_ENTRY(grAADrawTriangle,
   GR_CHECK_COMPATABILITY(FN_NAME,
                          ((gc->cmdTransportInfo.paramMask & (SST_SETUP_A << SSTCP_PKT3_PMASK_SHIFT)) == 0),
                          "Antialiasing require enabling alpha");
-  
+
   GR_FLUSH_STATE();
 
   fbzModeOld = gc->state.fbi_config.fbzMode;
-  
+
   /* backfaced or zero area */
   if (TRISETUP(a, b, c) <= 0) return;
-   
+
   /* Disable depth buffer writes for edge triangles */
   fbzMode = fbzModeOld;
   fbzMode &= ~(SST_ZAWRMASK);
@@ -989,12 +993,12 @@ GR_ENTRY(grAADrawTriangle,
     sense = aaCalcEdgeSense(a, b, c);
     grAADrawTriEdge(a, b, sense);
   }
-  
+
   if (bc_antialias) {
     sense = aaCalcEdgeSense(b, c, a);
     grAADrawTriEdge(b, c, sense);
   }
-  
+
   if (ca_antialias) {
     sense = aaCalcEdgeSense(c, a, b);
     grAADrawTriEdge(c, a, sense);
@@ -1012,7 +1016,7 @@ GR_ENTRY(grAADrawTriangle,
 **  NOTE:  This routine does not do backface culling!!!
 */
 
-GR_ENTRY(grAADrawPolygon, void, (const int nverts, const int ilist[], const GrVertex vlist[])) 
+GR_ENTRY(grAADrawPolygon, void, (const int nverts, const int ilist[], const GrVertex vlist[]))
 {
 #define FN_NAME "grAADrawPolygon"
   int
@@ -1050,7 +1054,7 @@ GR_ENTRY(grAADrawPolygon, void, (const int nverts, const int ilist[], const GrVe
     } else if (i == (nverts - 2)) {
       sense = aaCalcEdgeSense(c, a, b);
       grAADrawTriEdge(c, a, sense);
-    } 
+    }
 
     sense = aaCalcEdgeSense(b, c, a);
     grAADrawTriEdge(b, c, sense);
@@ -1065,7 +1069,7 @@ GR_ENTRY(grAADrawPolygon, void, (const int nverts, const int ilist[], const GrVe
 **  NOTE:  This routine does not do backface culling!!!
 */
 
-GR_ENTRY(grAADrawPolygonVertexList, void, (const int nverts, const GrVertex vlist[])) 
+GR_ENTRY(grAADrawPolygonVertexList, void, (const int nverts, const GrVertex vlist[]))
 {
 #define FN_NAME "grAADrawPolygonVertexList"
   int
@@ -1107,7 +1111,7 @@ GR_ENTRY(grAADrawPolygonVertexList, void, (const int nverts, const GrVertex vlis
     } else if (i == (nverts - 2)) {
       sense = aaCalcEdgeSense(c, a, b);
       grAADrawTriEdge(c, a, sense);
-    } 
+    }
 
     sense = aaCalcEdgeSense(b, c, a);
     grAADrawTriEdge(b, c, sense);

@@ -1,24 +1,25 @@
-/* 
+/* $Id: sst1init.c,v 1.2 2001-09-05 14:31:06 bird Exp $ */
+/*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Revision: 1.1 $ 
-** $Date: 2000-02-25 00:31:35 $ 
+** $Revision: 1.2 $
+** $Date: 2001-09-05 14:31:06 $
 **
 */
 
@@ -27,7 +28,7 @@
 **
 ** NOTE: This code must compiled with optimizations DISABLED!!
 **
-** The following environment variables can optionally be used to alter 
+** The following environment variables can optionally be used to alter
 ** functionality (A value of X is a "don't care"):
 **
 ** Variable                    Value   Description
@@ -202,7 +203,7 @@ FX_EXPORT FxU32 * FX_CSTYLE sst1InitMapBoard(FxU32 BoardNumber)
             sst = pciMapCardMulti(vendorID, deviceID, sizeOfCard,
                 &sst1InitDeviceNumber, j, 0);
 #else
-            sst = pciMapCardMulti(vendorID, deviceID, sizeOfCard, 
+            sst = pciMapCardMulti(vendorID, deviceID, sizeOfCard,
                 &sst1InitDeviceNumber, j, 0);
 #endif /* DIRECTX */
             if(sst) {
@@ -330,7 +331,7 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitRegisters(FxU32 *sstbase)
                                    /* FBI could be hung at this stage */
     sst1InitReturnStatus(sstbase);
     sst1InitReturnStatus(sstbase);
-    
+
     /* Adjust Fbi-to-Trex clock delay value */
     /* Adjust Trex-to-Fbi FIFO */
     if(GETENV(("SST_TF_FIFO_THRESH")))
@@ -485,7 +486,7 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitRegisters(FxU32 *sstbase)
             ~SST_TEX_TF_CLK_DEL_ADJ) |
             (tf2_clk_del<<SST_TEX_TF_CLK_DEL_ADJ_SHIFT);
     }
-    INIT_PRINTF(("sst1InitRegisters(): Storing TREX2INIT1=0x%x\n", 
+    INIT_PRINTF(("sst1InitRegisters(): Storing TREX2INIT1=0x%x\n",
         sst1CurrentBoard->tmuInit1[2]));
 
     ISET(SST_TREX(sst,2)->trexInit0, sst1CurrentBoard->tmuInit0[2]);
@@ -708,12 +709,12 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitShutdown(FxU32 *sstbase)
             return(FXFALSE);
     }
 #ifdef __DOS32__
-    /* 
+    /*
      * HACK alert. -MS
      *
      * There's a pciClose(), but nobody calls it. This is needed by the
      * DOS DPMI services to close fxmemmap.vxd.
-     * 
+     *
      * We need to move this to the "appropriate" place, wherever that may be.
      */
     pciClose();
@@ -761,7 +762,7 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitShutdown(FxU32 *sstbase)
         if(sst1InitSetGrxClk((FxU32 *) sstPtr, &sstGrxClk) == FXFALSE)
             return(FXFALSE);
         sst1CurrentBoard->initGrxClkDone = 0;
-        
+
         if((++n > 1) || !SliEnable)
             break;
     }
@@ -876,7 +877,7 @@ FX_ENTRY FxU32 FX_CSTYLE sst1InitNumBoardsInSystem(void)
     return(numBoards);
 }
 
-static FxU32 
+static FxU32
   mtrr;
 
 /*
@@ -885,10 +886,10 @@ static FxU32
 ** Sets up memory caching on P6 systems.
 **
 */
-FX_EXPORT void FX_CSTYLE 
+FX_EXPORT void FX_CSTYLE
 sst1InitCachingOn(void)
 {
-  FxU32 
+  FxU32
     physAddr;
   FxBool
     res;
@@ -908,7 +909,7 @@ sst1InitCachingOn(void)
     res = pciFindFreeMTRR(&mtrr);
   else
     return;                   /* It's already there.  We're done. */
-  
+
   if (res)
     pciSetMTRR(mtrr, physAddr, 0x1000000, PciMemTypeWriteCombining);
 

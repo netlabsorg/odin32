@@ -1,28 +1,29 @@
+/* $Id: initmcrx.c,v 1.2 2001-09-05 14:31:02 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
 **
-** $Revision: 1.1 $ 
-** $Date: 2000-02-25 00:31:31 $ 
+** $Revision: 1.2 $
+** $Date: 2001-09-05 14:31:02 $
 **
 */
-static char revString[] = "@#%$Workfile: initmcrx.c $ $Revision: 1.1 $";
+static char revString[] = "@#%$Workfile: initmcrx.c $ $Revision: 1.2 $";
 
 #include <3dfx.h>
 
@@ -84,9 +85,9 @@ static FxBool tiling;
   Implementor(s): dow
   Library: Init Code for MCRX
   Description:
-  
+
   Arguments:
-  
+
   Return:
         address of mcrxHALData
   -------------------------------------------------------------------*/
@@ -105,7 +106,7 @@ INITMCRXENTRY(initMCRXGetHALData, Init96HALData *, (void) )
   Description:
   Initialize rd pointers to access apertures
   Arguments:
-  
+
   Return:
   -------------------------------------------------------------------*/
 INITMCRXENTRY(initMCRXAperture, FxBool , (InitRegisterDesc *rd) )
@@ -120,9 +121,9 @@ INITMCRXENTRY(initMCRXAperture, FxBool , (InitRegisterDesc *rd) )
     ((FxU32) rd->hwDep.VG96RegDesc.baseAddress +
      0x2000000 - 0x20000);
 
-  GDBG_INFO((80, "%s:  Setting partnerRegPtr to 0x%x\n", 
+  GDBG_INFO((80, "%s:  Setting partnerRegPtr to 0x%x\n",
              FN_NAME, rd->hwDep.VG96RegDesc.partnerRegPtr));
-  
+
 #if 1
   rd->hwDep.VG96RegDesc.serialStatus = (FxU32 *)
     ((FxU32) rd->hwDep.VG96RegDesc.partnerRegPtr + 0x700);
@@ -136,26 +137,26 @@ INITMCRXENTRY(initMCRXAperture, FxBool , (InitRegisterDesc *rd) )
   /* BOGUS */
   rd->hwDep.VG96RegDesc.fifoApertureBase =
     (FxU32 *) (((FxU32)rd->hwDep.VG96RegDesc.baseAddress) + 0x400000);
-  
+
   GDBG_INFO((80, "%s:  returning TRUE\n", FN_NAME));
-  
+
   return rVal;
 
 #undef FN_NAME
 } /* initMCRXAperture */
 
 /* FIXME !! jdt - need to add more resolutions to dos */
-INITMCRXENTRY(initMCRXSetVideo, FxBool, (GrScreenResolution_t res, GrScreenRefresh_t refresh, FxU32 *xr, FxU32 *yr )) 
+INITMCRXENTRY(initMCRXSetVideo, FxBool, (GrScreenResolution_t res, GrScreenRefresh_t refresh, FxU32 *xr, FxU32 *yr ))
 {
 #define FN_NAME "initMCRXSetVideo"
   FxBool rv = FXTRUE;
-#if defined(INIT_ACCESS_DIRECT) && defined( __DOS32__ ) 
+#if defined(INIT_ACCESS_DIRECT) && defined( __DOS32__ )
   union REGS r0, r1;
 #endif
-  
+
   GDBG_INFO((80, "%s: \n", FN_NAME));
 
-#if defined(INIT_ACCESS_DIRECT) && defined( __DOS32__ ) 
+#if defined(INIT_ACCESS_DIRECT) && defined( __DOS32__ )
   switch( res ) {
   case GR_RESOLUTION_320x200:
     /* Set up VESA Mode 0x136 - 320x200x16 */
@@ -214,9 +215,9 @@ INITMCRXENTRY(initMCRXSetVideo, FxBool, (GrScreenResolution_t res, GrScreenRefre
   }
 
 #endif
-  GDBG_INFO((80, "%s: returning %s\n", FN_NAME, rv?"TRUE":"FALSE"));  
+  GDBG_INFO((80, "%s: returning %s\n", FN_NAME, rv?"TRUE":"FALSE"));
   return rv;
-#undef FN_NAME  
+#undef FN_NAME
 } /* initMCRXSetVideo */
 
 /*-------------------------------------------------------------------
@@ -227,17 +228,17 @@ INITMCRXENTRY(initMCRXSetVideo, FxBool, (GrScreenResolution_t res, GrScreenRefre
   Description:
 
   Do all setup necessary to enable direct writes to JR Space
-  
+
   Arguments:
   rd - pointer to register description
-  
+
   Return:
   True if success, False if Failure
   -------------------------------------------------------------------*/
-INITMCRXENTRY(initMCRXEnableRegs, FxBool, (InitRegisterDesc *rd))  
+INITMCRXENTRY(initMCRXEnableRegs, FxBool, (InitRegisterDesc *rd))
 {
 #define FN_NAME "initMCRXEnableRegs"
-  FxU32 
+  FxU32
     tmp;
   FxU8
     crtcIndex;
@@ -255,7 +256,7 @@ INITMCRXENTRY(initMCRXEnableRegs, FxBool, (InitRegisterDesc *rd))
 
   GDBG_INFO((80, "%s:    Save Extended Registers Protection State\n",
              FN_NAME));
-  
+
   OUTP(0x3d4, 0x19);
   INP(0x3d5, protState);
 
@@ -272,9 +273,9 @@ INITMCRXENTRY(initMCRXEnableRegs, FxBool, (InitRegisterDesc *rd))
 
   OUTP(0x3C4, 0x1B);
   INP(0x3C5, rd->hwDep.VG96RegDesc.mclockLo);
-  GDBG_INFO((80, "%s: mclock registers: (0x%X : 0x%X)\n", FN_NAME, 
+  GDBG_INFO((80, "%s: mclock registers: (0x%X : 0x%X)\n", FN_NAME,
              (FxU32)rd->hwDep.VG96RegDesc.mclockHi, (FxU32)rd->hwDep.VG96RegDesc.mclockHi));
-  
+
   GDBG_INFO((80, "%s:  Enabling FBI Jr.\n", FN_NAME));
   OUTPW(0x3C4, 0x001F);
 
@@ -310,12 +311,12 @@ INITMCRXENTRY(initMCRXEnableRegs, FxBool, (InitRegisterDesc *rd))
 
 
 /* FIXME!!! jdt - puma/ram timing fixes need to go here */
-INITMCRXENTRY(initMCRXDisableRegs,FxBool,(InitRegisterDesc *rd)) 
+INITMCRXENTRY(initMCRXDisableRegs,FxBool,(InitRegisterDesc *rd))
 {
 #define FN_NAME "initMCRXDisableRegs"
   FxU8
     seqSave, crtcSave;
-  
+
   FxU16
     protState;
 
@@ -348,7 +349,7 @@ INITMCRXENTRY(initMCRXDisableRegs,FxBool,(InitRegisterDesc *rd))
   GDBG_INFO((80, "%s:  Disabling PUMA\n", FN_NAME));
   CRTC_GET(0x28, tmp);
   GDBG_INFO((80, "%s:  crtc 0x28: 0x%X\n", FN_NAME, tmp));
-  tmp &= ~1; 
+  tmp &= ~1;
   CRTC_SET(0x28, tmp);
 
   GDBG_INFO((80, "%s:  Turning off FBI Jr.\n", FN_NAME));
@@ -357,11 +358,11 @@ INITMCRXENTRY(initMCRXDisableRegs,FxBool,(InitRegisterDesc *rd))
   /* Restore the mclock */
   {
     FxU16 tempMclock;
-    
+
     GDBG_INFO((80, "%s:  Restoring mclock\n", FN_NAME));
     tempMclock = (0x1A | (rd->hwDep.VG96RegDesc.mclockHi << 8));
     OUTPW(0x3C4, tempMclock);
-    
+
     tempMclock = (0x1B | (rd->hwDep.VG96RegDesc.mclockLo << 8));
     OUTPW(0x3C4, tempMclock);
 
@@ -369,7 +370,7 @@ INITMCRXENTRY(initMCRXDisableRegs,FxBool,(InitRegisterDesc *rd))
     OUTPW(0x3C4, 0x081C);
     OUTPW(0x3C4, 0x001C);
   }
-  
+
   GDBG_INFO((80, "%s:  Restoring Protection\n", FN_NAME));
   OUTPW(0x3df, protState);
 
@@ -380,7 +381,7 @@ INITMCRXENTRY(initMCRXDisableRegs,FxBool,(InitRegisterDesc *rd))
   OUTP(0x3c4, seqSave);
 
   return FXTRUE;
-  
+
 #undef FN_NAME
 } /* initMCRXDisableRegs */
 
@@ -390,9 +391,9 @@ INITMCRXENTRY(initMCRXDisableRegs,FxBool,(InitRegisterDesc *rd))
   Implementor(s): tarolli
   Library: Init Code for MCRX
   Description:
-  
+
   Arguments:
-  
+
   Return:
   -------------------------------------------------------------------*/
 INITMCRXENTRY(initMCRXWrapFIFO, FxBool, (InitRegisterDesc *rd, InitFIFOData *fd) )
@@ -407,10 +408,10 @@ INITMCRXENTRY(initMCRXWrapFIFO, FxBool, (InitRegisterDesc *rd, InitFIFOData *fd)
 static unsigned char magic[MAX_BUF][3] = {
   { 0x0d, 0x0c, 0x21 },
   { 0x71, 0x72, 0x73 },
-  /* chd - Fixme! 
+  /* chd - Fixme!
    * Bogus numbers.  Does triple buffering work on Macronix?
-   * 
-   * dpc - 23 jan 1998 - 
+   *
+   * dpc - 23 jan 1998 -
    * Donny just told me this so hopefully this will work.
    */
   { 0x74, 0x75, 0x76 }
@@ -437,11 +438,11 @@ INITMCRXENTRY(initMCRXSwapTiles, FxBool, (InitRegisterDesc* rd))
     const FxU8 bufferBits = (crtcSwapStatus & 0x03);
     const FxU8 maxBufferBits = (((crtcSwapControl & 0x08) == 0) ? 1 : 2);
 
-    crtcSwapStatus = ((crtcSwapStatus & ~0x03) | 
+    crtcSwapStatus = ((crtcSwapStatus & ~0x03) |
                       ((bufferBits == maxBufferBits) ? 0x00 : bufferBits + 1));
     CRTC_SET(0x7A, crtcSwapStatus);
   }
-  
+
   /* We have no way of knowing that this worked so of course we always
    * return success.
    */
@@ -455,7 +456,7 @@ INITMCRXENTRY(initMCRXSwapTiles, FxBool, (InitRegisterDesc* rd))
   Implementor(s): pgj, dow
   Library: Init Code for MCRX
   Description:
-  
+
   Arguments:
   atmm:                 Pointer to base of MCRX
   buffers:              Pointer to array of offsets to buffers
@@ -471,13 +472,13 @@ INITMCRXENTRY(initMCRXUseTiles, int, (InitRegisterDesc *rd,
                                       FxU32 *buffers,
                                       FxU32 nBuffers,
                                       FxU32 strideInBytes,
-                                      FxU32 Width, FxU32 Height, FxU32 PageFlipping)) 
+                                      FxU32 Width, FxU32 Height, FxU32 PageFlipping))
 #else
 INITMCRXENTRY(initMCRXUseTiles, int, (InitRegisterDesc *rd,
                                       FxU32 *buffers,
                                       FxU32 nBuffers,
                                       FxU32 strideInBytes,
-                                      FxU32 Width, FxU32 Height)) 
+                                      FxU32 Width, FxU32 Height))
 #endif
 {
 #define FN_NAME "initMCRXUseTiles"
@@ -495,7 +496,7 @@ INITMCRXENTRY(initMCRXUseTiles, int, (InitRegisterDesc *rd,
     tmp;
 
   const char *envVal;
-  
+
   GDBG_INFO((80, "%s:\n", FN_NAME));
 
   regVal = _inp(VGA_MISC_OUTPUT_READ);
@@ -537,12 +538,12 @@ INITMCRXENTRY(initMCRXUseTiles, int, (InitRegisterDesc *rd,
   /* dpc - 26 han 1998
    * If we are triple buffering we need to enable this on the actual
    * macronix part as well. This is set by enabling bit 3 of the crtc
-   * register.  
+   * register.
    */
   if (nBuffers == 3) tmp |= 0x08;
   mcrxHALData.initSwapTiles = initMCRXSwapTiles;
 
-  if (envVal = myGetenv("MRCX_71")) 
+  if (envVal = myGetenv("MRCX_71"))
     sscanf(envVal, "%x", &tmp);
   CRTC_SET(0x70, tmp);
 
@@ -561,7 +562,7 @@ INITMCRXENTRY(initMCRXUseTiles, int, (InitRegisterDesc *rd,
 
 #undef FN_NAME
 } /* initMCRXUseTiles */
- 
+
 
 /*-------------------------------------------------------------------
   Function: initMCRXGetInfo
@@ -571,14 +572,14 @@ INITMCRXENTRY(initMCRXUseTiles, int, (InitRegisterDesc *rd,
   Description:
 
   get information about MCRX
-  
+
   Arguments:
   info - pointer to info struct
-  
+
   Return:
   True if success, False if Failure
   -------------------------------------------------------------------*/
-INITMCRXENTRY(initMCRXGetInfo,FxBool,(VG96Info *info))  
+INITMCRXENTRY(initMCRXGetInfo,FxBool,(VG96Info *info))
 {
 #define FN_NAME "initMCRXGetInfo"
   FxU32 mBytesPow;
@@ -593,19 +594,19 @@ INITMCRXENTRY(initMCRXGetInfo,FxBool,(VG96Info *info))
 
   /* Watcom warning suppression */
   revString[0] = revString[0];
-  
+
   info->vgaChip = 0;
   info->vg96Rev = 0;
   info->nTFX    = 1;
   info->tfxRev  = 1;
   info->tfxRam  = 2;
-  
+
   info->vg96Ram = (0x100000 << mBytesPow);
 
   GDBG_INFO((80, "%s: frame buffer has 0x%x bytes\n", FN_NAME, info->vg96Ram));
-  
+
   return FXTRUE;
-  
+
 #undef FN_NAME
 } /* initMCRXGetInfo */
 

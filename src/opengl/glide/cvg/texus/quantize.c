@@ -1,25 +1,26 @@
+/* $Id: quantize.c,v 1.2 2001-09-05 14:30:46 bird Exp $ */
 
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Revision: 1.1 $
-** $Date: 2000-02-25 00:38:00 $
+** $Revision: 1.2 $
+** $Date: 2001-09-05 14:30:46 $
 */
 
 #include <stdio.h>
@@ -29,14 +30,14 @@
 
 #include "texusint.h"
 
-static int 
-dithmat[4][4] = {       0,  8,  2, 10, 
-                           12,  4, 14,  6, 
-                            3, 11,  1,  9, 
+static int
+dithmat[4][4] = {       0,  8,  2, 10,
+                           12,  4, 14,  6,
+                            3, 11,  1,  9,
                            15,  7, 13,  5 };
 
 // for error diffusion.
-static int      errR[MAX_TEXWIDTH], errG[MAX_TEXWIDTH], errB[MAX_TEXWIDTH];     
+static int      errR[MAX_TEXWIDTH], errG[MAX_TEXWIDTH], errB[MAX_TEXWIDTH];
 
 static int
 _txPixQuantize_RGB332( unsigned long argb, int x, int y, int w)
@@ -53,11 +54,11 @@ _txPixQuantize_RGB332_D4x4( unsigned long argb, int x, int y, int w)
     int d = dithmat[y&3][x&3];
     int n, t;
 
-    n = (int) (((argb >> 16) & 0xFF) * 0x70/255.0f + 0.5f) + d; 
+    n = (int) (((argb >> 16) & 0xFF) * 0x70/255.0f + 0.5f) + d;
     t = (n>>4)<<5;
-    n = (int) (((argb >>  8) & 0xFF) * 0x70/255.0f + 0.5f) + d; 
+    n = (int) (((argb >>  8) & 0xFF) * 0x70/255.0f + 0.5f) + d;
     t |= (n>>4)<<2;
-    n = (int) (((argb      ) & 0xFF) * 0x30/255.0f + 0.5f) + d; 
+    n = (int) (((argb      ) & 0xFF) * 0x30/255.0f + 0.5f) + d;
     t |= (n>>4)<<0;
     return t & 0xFF;
 }
@@ -81,7 +82,7 @@ _txPixQuantize_RGB332_DErr( unsigned long argb, int x, int y, int w)
     ig += errG[x] + qg;
     ib += errB[x] + qb;
 
-    qr = ir;            // quantized pixel values. 
+    qr = ir;            // quantized pixel values.
     qg = ig;            // qR is error from pixel to left, errR is
     qb = ib;            // error from pixel to the top & top left.
 
@@ -156,7 +157,7 @@ _txPixQuantize_AI44_D4x4( unsigned long argb, int x, int y, int w)
                                 ((argb    ) & 0xFF) * .11F + 0.5f);
 
 
-    n = (int) (n * 0xF0/255.0f + 0.5f) + d;     
+    n = (int) (n * 0xF0/255.0f + 0.5f) + d;
     t = (n>>4);
     t |= (int)  ((argb>>24) & 0xF0);
     return t & 0xFF;
@@ -214,11 +215,11 @@ _txPixQuantize_ARGB8332_D4x4( unsigned long argb, int x, int y, int w)
     int d = dithmat[y&3][x&3];
     int n, t;
 
-    n = (int) (((argb >> 16) & 0xFF) * 0x70/255.0f + 0.5f) + d; 
+    n = (int) (((argb >> 16) & 0xFF) * 0x70/255.0f + 0.5f) + d;
     t = (n>>4)<<5;
-    n = (int) (((argb >>  8) & 0xFF) * 0x70/255.0f + 0.5f) + d; 
+    n = (int) (((argb >>  8) & 0xFF) * 0x70/255.0f + 0.5f) + d;
     t |= (n>>4)<<2;
-    n = (int) (((argb      ) & 0xFF) * 0x30/255.0f + 0.5f) + d; 
+    n = (int) (((argb      ) & 0xFF) * 0x30/255.0f + 0.5f) + d;
     t |= (n>>4)<<0;
     t |= ((argb >> 16) & 0xFF00);
     return t & 0xFFFF;
@@ -251,11 +252,11 @@ _txPixQuantize_RGB565_D4x4 ( unsigned long argb, int x, int y, int w)
     int d = dithmat[y&3][x&3];
     int n, t;
 
-    n = (int) (((argb >> 16) & 0xFF) * 0x1F0/255.0f + 0.5f) + d;        
+    n = (int) (((argb >> 16) & 0xFF) * 0x1F0/255.0f + 0.5f) + d;
     t = (n>>4)<<11;
-    n = (int) (((argb >>  8) & 0xFF) * 0x3F0/255.0f + 0.5f) + d;        
+    n = (int) (((argb >>  8) & 0xFF) * 0x3F0/255.0f + 0.5f) + d;
     t |= (n>>4)<<5;
-    n = (int) (((argb      ) & 0xFF) * 0x1F0/255.0f + 0.5f) + d;        
+    n = (int) (((argb      ) & 0xFF) * 0x1F0/255.0f + 0.5f) + d;
     t |= (n>>4)<<0;
     return t & 0xFFFF;
 }
@@ -278,7 +279,7 @@ _txPixQuantize_RGB565_DErr ( unsigned long argb, int x, int y, int w)
     ig += errG[x] + qg;
     ib += errB[x] + qb;
 
-    qr = ir;            // quantized pixel values. 
+    qr = ir;            // quantized pixel values.
     qg = ig;            // qR is error from pixel to left, errR is
     qb = ib;            // error from pixel to the top & top left.
 
@@ -323,7 +324,7 @@ _txPixQuantize_ARGB1555( unsigned long argb, int x, int y, int w)
     return (
                     ((argb >> 9) & 0x7C00) |
                         ((argb >> 6) & 0x03E0) |
-                        ((argb >> 3) & 0x001F) |        
+                        ((argb >> 3) & 0x001F) |
                         ((argb >> 24) ? 0x8000 : 0)     );
 }
 
@@ -333,11 +334,11 @@ _txPixQuantize_ARGB1555_D4x4 ( unsigned long argb, int x, int y, int w)
     int d = dithmat[y&3][x&3];
     int n, t;
 
-    n = (int) (((argb >> 16) & 0xFF) * 0x1F0/255.0f + 0.5f) + d;        
+    n = (int) (((argb >> 16) & 0xFF) * 0x1F0/255.0f + 0.5f) + d;
     t = (n>>4)<<10;
-    n = (int) (((argb >>  8) & 0xFF) * 0x1F0/255.0f + 0.5f) + d;        
+    n = (int) (((argb >>  8) & 0xFF) * 0x1F0/255.0f + 0.5f) + d;
     t |= (n>>4)<<5;
-    n = (int) (((argb      ) & 0xFF) * 0x1F0/255.0f + 0.5f) + d;        
+    n = (int) (((argb      ) & 0xFF) * 0x1F0/255.0f + 0.5f) + d;
     t |= (n>>4)<<0;
     t |= ((argb >> 24) ? 0x8000 : 0);
     return t & 0xFFFF;
@@ -360,7 +361,7 @@ _txPixQuantize_ARGB1555_DErr ( unsigned long argb, int x, int y, int w)
     ig += errG[x] + qg;
     ib += errB[x] + qb;
 
-    qr = ir;            // quantized pixel values. 
+    qr = ir;            // quantized pixel values.
     qg = ig;            // qR is error from pixel to left, errR is
     qb = ib;            // error from pixel to the top & top left.
 
@@ -406,7 +407,7 @@ _txPixQuantize_ARGB4444 (unsigned long argb, int x, int y, int w)
     return (
                     ((argb >> 12) & 0x0F00) |
                         ((argb >>  8) & 0x00F0) |
-                        ((argb >>  4) & 0x000F) |       
+                        ((argb >>  4) & 0x000F) |
                         ((argb >> 16) & 0xF000) );
 }
 
@@ -416,11 +417,11 @@ _txPixQuantize_ARGB4444_D4x4 (unsigned long argb, int x, int y, int w)
     int d = dithmat[y&3][x&3];
     int n, t;
 
-    n = (int) (((argb >> 16) & 0xFF) * 0xF0/255.0f + 0.5f) + d; 
+    n = (int) (((argb >> 16) & 0xFF) * 0xF0/255.0f + 0.5f) + d;
     t = (n>>4)<<8;
-    n = (int) (((argb >>  8) & 0xFF) * 0xF0/255.0f + 0.5f) + d; 
+    n = (int) (((argb >>  8) & 0xFF) * 0xF0/255.0f + 0.5f) + d;
     t |= (n>>4)<<4;
-    n = (int) (((argb      ) & 0xFF) * 0xF0/255.0f + 0.5f) + d; 
+    n = (int) (((argb      ) & 0xFF) * 0xF0/255.0f + 0.5f) + d;
     t |= (n>>4)<<0;
     t |= (argb >> 16) & 0xF000;
     return t & 0xFFFF;
@@ -443,7 +444,7 @@ _txPixQuantize_ARGB4444_DErr (unsigned long argb, int x, int y, int w)
     ig += errG[x] + qg;
     ib += errB[x] + qb;
 
-    qr = ir;            // quantized pixel values. 
+    qr = ir;            // quantized pixel values.
     qg = ig;            // qR is error from pixel to left, errR is
     qb = ib;            // error from pixel to the top & top left.
 
@@ -510,9 +511,9 @@ _txImgQuantize(char *dst, char *src, int w, int h, FxU32 format, FxU32 dither)
         for (i=0; i<w; i++) errR[i] = errG[i] = errB[i] = 0;
 
         switch(format) {
-        case GR_TEXFMT_RGB_332:         quantizer = _txPixQuantize_RGB332_DErr; 
+        case GR_TEXFMT_RGB_332:         quantizer = _txPixQuantize_RGB332_DErr;
                                                                 break;
-        case GR_TEXFMT_A_8:                     quantizer = _txPixQuantize_A8;                  
+        case GR_TEXFMT_A_8:                     quantizer = _txPixQuantize_A8;
                                                                 break;
         case GR_TEXFMT_I_8:                     quantizer = _txPixQuantize_I8;
                                                                 break;
@@ -520,7 +521,7 @@ _txImgQuantize(char *dst, char *src, int w, int h, FxU32 format, FxU32 dither)
                                                                 break;
         case GR_TEXFMT_ARGB_8332:       quantizer = _txPixQuantize_ARGB8332_DErr;
                                                                 break;
-        case GR_TEXFMT_RGB_565:         quantizer = _txPixQuantize_RGB565_DErr; 
+        case GR_TEXFMT_RGB_565:         quantizer = _txPixQuantize_RGB565_DErr;
                                                                 break;
         case GR_TEXFMT_ARGB_1555:       quantizer =     _txPixQuantize_ARGB1555_DErr;
                                                                 break;
@@ -534,53 +535,53 @@ _txImgQuantize(char *dst, char *src, int w, int h, FxU32 format, FxU32 dither)
     }else if (dither == TX_DITHER_4x4) { // 4x4 ordered dithering.
 
         switch(format) {
-        case GR_TEXFMT_RGB_332:         quantizer = _txPixQuantize_RGB332_D4x4; 
+        case GR_TEXFMT_RGB_332:         quantizer = _txPixQuantize_RGB332_D4x4;
                                                                 break;
-        case GR_TEXFMT_A_8:                     quantizer = _txPixQuantize_A8;                  
+        case GR_TEXFMT_A_8:                     quantizer = _txPixQuantize_A8;
                                                                 break;
-        case GR_TEXFMT_I_8:                     quantizer = _txPixQuantize_I8;                          
+        case GR_TEXFMT_I_8:                     quantizer = _txPixQuantize_I8;
                                                                 break;
-        case GR_TEXFMT_AI_44:           quantizer = _txPixQuantize_AI44_D4x4;           
-                                                                break;
-
-        case GR_TEXFMT_ARGB_8332:       quantizer = _txPixQuantize_ARGB8332_D4x4;       
-                                                                break;
-        case GR_TEXFMT_RGB_565:         quantizer = _txPixQuantize_RGB565_D4x4; 
-                                                                break;
-        case GR_TEXFMT_ARGB_1555:       quantizer =     _txPixQuantize_ARGB1555_D4x4;   
-                                                                break;
-        case GR_TEXFMT_ARGB_4444:       quantizer = _txPixQuantize_ARGB4444_D4x4;       
-                                                                break;
-        case GR_TEXFMT_AI_88:           quantizer = _txPixQuantize_AI88;                        
+        case GR_TEXFMT_AI_44:           quantizer = _txPixQuantize_AI44_D4x4;
                                                                 break;
 
-        default: txPanic("Bad case in txQuantize()\n");                         
+        case GR_TEXFMT_ARGB_8332:       quantizer = _txPixQuantize_ARGB8332_D4x4;
+                                                                break;
+        case GR_TEXFMT_RGB_565:         quantizer = _txPixQuantize_RGB565_D4x4;
+                                                                break;
+        case GR_TEXFMT_ARGB_1555:       quantizer =     _txPixQuantize_ARGB1555_D4x4;
+                                                                break;
+        case GR_TEXFMT_ARGB_4444:       quantizer = _txPixQuantize_ARGB4444_D4x4;
+                                                                break;
+        case GR_TEXFMT_AI_88:           quantizer = _txPixQuantize_AI88;
+                                                                break;
+
+        default: txPanic("Bad case in txQuantize()\n");
                                                                 break;
         }
     } else {            // No dithering.
 
         switch(format) {
-        case GR_TEXFMT_RGB_332:         quantizer = _txPixQuantize_RGB332;              
+        case GR_TEXFMT_RGB_332:         quantizer = _txPixQuantize_RGB332;
                                                                 break;
-        case GR_TEXFMT_A_8:                     quantizer = _txPixQuantize_A8;          
+        case GR_TEXFMT_A_8:                     quantizer = _txPixQuantize_A8;
                                                                 break;
-        case GR_TEXFMT_I_8:                     quantizer = _txPixQuantize_I8;                  
+        case GR_TEXFMT_I_8:                     quantizer = _txPixQuantize_I8;
                                                                 break;
-        case GR_TEXFMT_AI_44:           quantizer = _txPixQuantize_AI44;                
-                                                                break;
-    
-        case GR_TEXFMT_ARGB_8332:       quantizer = _txPixQuantize_ARGB8332;    
-                                                                break;
-        case GR_TEXFMT_RGB_565:         quantizer = _txPixQuantize_RGB565;              
-                                                                break;
-        case GR_TEXFMT_ARGB_1555:       quantizer =     _txPixQuantize_ARGB1555;        
-                                                                break;
-        case GR_TEXFMT_ARGB_4444:       quantizer = _txPixQuantize_ARGB4444;    
-                                                                break;
-        case GR_TEXFMT_AI_88:           quantizer = _txPixQuantize_AI88;                
+        case GR_TEXFMT_AI_44:           quantizer = _txPixQuantize_AI44;
                                                                 break;
 
-        default: txPanic("Bad case in txQuantize()\n");                 
+        case GR_TEXFMT_ARGB_8332:       quantizer = _txPixQuantize_ARGB8332;
+                                                                break;
+        case GR_TEXFMT_RGB_565:         quantizer = _txPixQuantize_RGB565;
+                                                                break;
+        case GR_TEXFMT_ARGB_1555:       quantizer =     _txPixQuantize_ARGB1555;
+                                                                break;
+        case GR_TEXFMT_ARGB_4444:       quantizer = _txPixQuantize_ARGB4444;
+                                                                break;
+        case GR_TEXFMT_AI_88:           quantizer = _txPixQuantize_AI88;
+                                                                break;
+
+        default: txPanic("Bad case in txQuantize()\n");
                                                                 break;
         }
     }
@@ -613,7 +614,7 @@ _txImgQuantize(char *dst, char *src, int w, int h, FxU32 format, FxU32 dither)
  * For the special cases of YIQ image, you also get the choice of 2 different
  * quality levels in each of the compression cases.
  */
-void    
+void
 txMipQuantize(TxMip *pxMip, TxMip *txMip, int format, FxU32 dither, FxU32 compression)
 {
     int         i, w, h;
@@ -635,7 +636,7 @@ txMipQuantize(TxMip *pxMip, TxMip *txMip, int format, FxU32 dither, FxU32 compre
                 txMipNcc(pxMip, txMip, format, dither, compression);
                 return;
 
-    case GR_TEXFMT_ARGB_8888: 
+    case GR_TEXFMT_ARGB_8888:
                 // Copy source to destination, and be done.
                 if( txVerbose )
                   printf(".\n");
@@ -650,13 +651,13 @@ txMipQuantize(TxMip *pxMip, TxMip *txMip, int format, FxU32 dither, FxU32 compre
                 return;
 
     // Normal cases
-    case GR_TEXFMT_A_8: 
-    case GR_TEXFMT_I_8: 
-    case GR_TEXFMT_AI_44: 
+    case GR_TEXFMT_A_8:
+    case GR_TEXFMT_I_8:
+    case GR_TEXFMT_AI_44:
     case GR_TEXFMT_RGB_332:
-    case GR_TEXFMT_RGB_565: 
-    case GR_TEXFMT_ARGB_8332: 
-    case GR_TEXFMT_ARGB_1555: 
+    case GR_TEXFMT_RGB_565:
+    case GR_TEXFMT_ARGB_8332:
+    case GR_TEXFMT_ARGB_1555:
     case GR_TEXFMT_ARGB_4444:
     case GR_TEXFMT_AI_88:
                 break;

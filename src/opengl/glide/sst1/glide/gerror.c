@@ -1,47 +1,51 @@
+/* $Id: gerror.c,v 1.2 2001-09-05 14:30:51 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
 **
-** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glide/sst1/glide/gerror.c,v 1.1 2000-02-25 00:31:13 sandervl Exp $
+** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glide/sst1/glide/gerror.c,v 1.2 2001-09-05 14:30:51 bird Exp $
 ** $Log: gerror.c,v $
-** Revision 1.1  2000-02-25 00:31:13  sandervl
+** Revision 1.2  2001-09-05 14:30:51  bird
+** Added $Id:$ keyword.
+**
+** Revision 1.1  2000/02/25 00:31:13  sandervl
 ** Created new Voodoo 1 Glide dir
 **
- * 
+ *
  * 10    6/03/97 11:57p Pgj
  * fix bug 558
- * 
+ *
  * 9     5/28/97 2:10p Dow
  * Some mode setting, other cleanup
- * 
+ *
  * 8     5/27/97 2:02p Dow
  * added _grAssert
- * 
+ *
  * 7     5/20/97 9:47a Pgj
  * Use OutputDebugString for non-fatal errors under windows
- * 
+ *
  * 6     5/19/97 7:35p Pgj
  * Print cogent error message if h/w not found
- * 
+ *
  * 5     3/09/97 10:31a Dow
  * Added GR_DIENTRY for di glide functions
- * 
+ *
  * 4     12/23/96 1:37p Dow
  * chagnes for multiplatform glide
 **
@@ -132,12 +136,12 @@ _grErrorDefaultCallback( const char *s, FxBool fatal )
     grSstWinClose();
     grGlideShutdown();
 
-#if (GLIDE_PLATFORM & GLIDE_HW_SST96) && (GLIDE_PLATFORM & GLIDE_OS_DOS32)    
+#if (GLIDE_PLATFORM & GLIDE_HW_SST96) && (GLIDE_PLATFORM & GLIDE_OS_DOS32)
     {
       /* Set Mode 3 before going */
       union REGS
         inR, outR;
-      
+
       inR.w.ax = 0x0003;
       int386(0x10, &inR, &outR);
 

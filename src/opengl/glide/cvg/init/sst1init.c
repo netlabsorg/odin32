@@ -1,25 +1,26 @@
 /*-*-c++-*-*/
+/* $Id: sst1init.c,v 1.2 2001-09-05 14:30:42 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Revision: 1.1 $ 
-** $Date: 2000-02-25 00:37:54 $ 
+** $Revision: 1.2 $
+** $Date: 2001-09-05 14:30:42 $
 **
 */
 
@@ -28,7 +29,7 @@
 **
 ** NOTE: This code must compiled with optimizations DISABLED!!
 **
-** The following environment variables can optionally be used to alter 
+** The following environment variables can optionally be used to alter
 ** functionality (A value of X is a "don't care"):
 **
 ** Variable                    Value   Description
@@ -98,9 +99,9 @@
 **                               856,    (856x600)
 **                               960,    (960x720)
 **                               1024}   (1024x768)
-** SSTV2_SLOWMEM_RTW             X       Insert wait state for read-to-write 
+** SSTV2_SLOWMEM_RTW             X       Insert wait state for read-to-write
 **                                       transitions
-** SSTV2_SLOWMEM_WTR             X       Insert wait state for write-to-read 
+** SSTV2_SLOWMEM_WTR             X       Insert wait state for write-to-read
 **                                       transitions
 ** SSTV2_SLOWPCIWR               X       Enable 1 wait-state PCI writes
 ** SSTV2_SLISWAP                 1       Use dac_data[0] for SLI swapping
@@ -185,7 +186,7 @@ FX_EXPORT FxU32 * FX_CSTYLE sst1InitMapBoard(FxU32 BoardNumber)
 // next time around.
 static FxU32 clearBoardInfo = FXTRUE;
 
-FX_EXPORT FxU32 * FX_CSTYLE sst1InitMapBoardDirect(FxU32 BoardNumber, 
+FX_EXPORT FxU32 * FX_CSTYLE sst1InitMapBoardDirect(FxU32 BoardNumber,
                                                    FxBool resetSLI)
 {
     static FxU32 firstTime = 1;
@@ -203,7 +204,7 @@ FX_EXPORT FxU32 * FX_CSTYLE sst1InitMapBoardDirect(FxU32 BoardNumber,
 
     // Open PCI library (necessary for multiple calls to init routines, after
     // PCI library is closed by pciClose() call in sst1InitShutdown().
-    // 
+    //
     // NB: It is safe to do this even if we never called pciClose.
     pciOpen();
 
@@ -230,7 +231,7 @@ FX_EXPORT FxU32 * FX_CSTYLE sst1InitMapBoardDirect(FxU32 BoardNumber,
 
         // Clear board info structure
         sst1InitClearBoardInfo();
-        
+
         clearBoardInfo = FXFALSE;
 
 #if !DIRECTX
@@ -238,7 +239,7 @@ FX_EXPORT FxU32 * FX_CSTYLE sst1InitMapBoardDirect(FxU32 BoardNumber,
          * If glide is running on windows the a pciClose will close
          * the vxd etc. This is not functionally longer fatal, but w/o
          * it we will not be able to do things like set the caching on
-         * the board's memory etc. This is bad. 
+         * the board's memory etc. This is bad.
          *
          * The actual cost of doing the re-mapping again is pretty low
          * because both the pci library and the init code are caching the
@@ -322,7 +323,7 @@ FX_EXPORT FxU32 * FX_CSTYLE sst1InitMapBoardDirect(FxU32 BoardNumber,
        // Search through all known boards for SLI enabled...
        FxU32 k;
        SstRegs *sst;
- 
+
        for(k=0; k<boardsInSystemReally; k++) {
           // Disable SLI if detected...
           if(!(sstbase = (FxU32 *) sst1BoardInfo[k].virtAddr[0]))
@@ -330,7 +331,7 @@ FX_EXPORT FxU32 * FX_CSTYLE sst1InitMapBoardDirect(FxU32 BoardNumber,
           sst1InitDeviceNumber = sst1BoardInfo[k].deviceNumber;
           sst1CurrentBoard = &sst1BoardInfo[k];
           sst = (SstRegs *) sstbase;
-    
+
           if(IGET(sst->fbiInit1) & SST_EN_SCANLINE_INTERLEAVE) {
              INIT_PRINTF(("sst1InitMapBoard(): Disabling Scanline Interleaving (board #%d)...\n", (k+1)));
              // Disable SLI Snooping...
@@ -423,10 +424,10 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitRegisters(FxU32 *sstbase)
     // Reset Snoop registers to default values
     PCICFG_WR(SST1_PCI_BUS_SNOOP0, SST_PCI_BUS_SNOOP_DEFAULT);
     PCICFG_WR(SST1_PCI_BUS_SNOOP1, SST_PCI_BUS_SNOOP_DEFAULT);
-    sst1InitReturnStatus(sstbase); // Stall - can't call IdleFbi because 
+    sst1InitReturnStatus(sstbase); // Stall - can't call IdleFbi because
     sst1InitReturnStatus(sstbase); // FBI could be hung at this stage
     sst1InitReturnStatus(sstbase);
-    
+
     // Adjust Trex-to-Fbi FIFO
     if(GETENV(("SSTV2_TF_FIFO_THRESH")))
         SSCANF(GETENV(("SSTV2_TF_FIFO_THRESH")), "%i", &tf_fifo_thresh);
@@ -572,7 +573,7 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitRegisters(FxU32 *sstbase)
             ~SST_TEX_TF_CLK_DEL_ADJ) |
             (tf2_clkdel<<SST_TEX_TF_CLK_DEL_ADJ_SHIFT);
     }
-    INIT_PRINTF(("sst1InitRegisters(): Storing TREX2INIT1=0x%x\n", 
+    INIT_PRINTF(("sst1InitRegisters(): Storing TREX2INIT1=0x%x\n",
         sst1CurrentBoard->tmuInit1[2]));
 
     // Set clock at 16 MHz to properly transmit TREX configuration registers
@@ -661,7 +662,7 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitRegisters(FxU32 *sstbase)
     ISET(sst->nopCMD, 0x1); // Clear fbistat registers after clearing screen
     sst1InitIdleFBINoNOP(sstbase);
 
-    sst1InitRenderingRegisters(sstbase);    
+    sst1InitRenderingRegisters(sstbase);
     sst1CurrentBoard->tmuRevision = 0xdead; // Force sst1InitFillDeviceInfo()
     if(sst1InitFillDeviceInfo(sstbase, sst1CurrentBoard) == FXFALSE) {
         INIT_PRINTF(("sst1InitRegisters(): ERROR filling DeviceInfo...\n"));
@@ -908,17 +909,17 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitShutdown(FxU32 *sstbase)
 
 #ifndef __linux__
         pciUnmapPhysical((FxU32)sst1CurrentBoard->virtAddr[0],
-			 0x1000000UL);
+             0x1000000UL);
 #endif
-        
+
         if((++n > 1) || !sliEnabled)
             break;
     }
-    
+
     /* sst1InitIdle(sstbase);  */
 
 #if !DIRECTX
-    // 
+    //
     // HACK alert.
     //
     // There's a pciClose(), but nobody calls it. This is needed by the
@@ -939,7 +940,7 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitShutdown(FxU32 *sstbase)
     // Make sure that the board info structures are
     // cleared next time sst1InitMapBoard() is called.
     clearBoardInfo = FXTRUE;
-      
+
     return(FXTRUE);
 }
 
@@ -979,7 +980,7 @@ FX_EXPORT FxU32 * FX_CSTYLE sst1InitGetBaseAddr(FxU32 boardNum)
       sst1InitGetDeviceInfo((FxU32*)sstBaseAddr, &devInfo) &&
       devInfo.sliDetected &&
       !devInfo.monitorDetected) {
-    
+
     SstRegs* tempAddr = NULL;
 
     if (boardNum > 0) {
@@ -996,7 +997,7 @@ FX_EXPORT FxU32 * FX_CSTYLE sst1InitGetBaseAddr(FxU32 boardNum)
 
     if (tempAddr != NULL) sstBaseAddr = tempAddr;
   }
-  
+
   return (FxU32*)sstBaseAddr;
 }
 
@@ -1099,7 +1100,7 @@ FX_ENTRY FxU32 FX_CSTYLE sst1InitNumBoardsInSystem(void)
 ** address space of the card.
 **
 */
-FX_ENTRY FxBool FX_CSTYLE 
+FX_ENTRY FxBool FX_CSTYLE
 sst1InitCaching(FxU32* sstBase, FxBool enableP)
 {
   FxBool retVal = sst1InitCheckBoard(sstBase);
@@ -1108,12 +1109,12 @@ sst1InitCaching(FxU32* sstBase, FxBool enableP)
 
   if (enableP && (GETENV("SSTV2_IGNORE_CACHING") == NULL)) {
     FxU32 physAddr;
-    
+
     /* Get the board's base. Isn't this the same as what we
      * cary around in sst1CurrentBoard->physAddr[0]?
      */
     pciGetConfigData(PCI_BASE_ADDRESS_0, sst1CurrentBoard->deviceNumber, &physAddr);
-    
+
     // For some reason, there sometimes is a 008 at the end of the
     // physical address, so mask that puppy RTF out
     physAddr &= 0xfffff000;
@@ -1133,7 +1134,7 @@ sst1InitCaching(FxU32* sstBase, FxBool enableP)
 #define kCacheSizeWriteCombine (0x08UL << 20UL)
 #define kCacheSizeUncacheable  (0x1000UL)
       FxBool hasWC = pciFindMTRRMatch(physAddr, kCacheSizeWriteCombine,
-                                      PciMemTypeWriteCombining, 
+                                      PciMemTypeWriteCombining,
                                       &sst1CurrentBoard->mtrrWriteCombine);
       FxBool hasUC = pciFindMTRRMatch(physAddr, kCacheSizeUncacheable,
                                       PciMemTypeUncacheable,
@@ -1166,7 +1167,7 @@ sst1InitCaching(FxU32* sstBase, FxBool enableP)
       }
 
       /* We only succeed if we have them both since having only uswc
-       * seems to cause problems.  
+       * seems to cause problems.
        */
       retVal = (hasWC && hasUC);
       if (!retVal) goto __errExit;

@@ -1,25 +1,26 @@
+/* $Id: dequant.c,v 1.2 2001-09-05 14:31:08 bird Exp $ */
 
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Revision: 1.1 $
-** $Date: 2000-02-25 00:31:37 $
+** $Revision: 1.2 $
+** $Date: 2001-09-05 14:31:08 $
 */
 
 #include <stdio.h>
@@ -29,7 +30,7 @@
 
 #include "texusint.h"
 
-/* 
+/*
  * Pn_8 = convert n bits (n <= 6) to 8 bits by replicating the msb's of input
  * into the lsb's of the output.
  */
@@ -93,11 +94,11 @@ _txPixAi44to8888 (FxU8 c44)
 /* P8 treated at the image level */
 
 /* 16 bit pixels */
-static FxU32 
+static FxU32
 _txPixArgb8332to8888(FxU16 c8332)
 {
     FxU32       a, r, g, b;
-    a =      (c8332 >>  8);      
+    a =      (c8332 >>  8);
     r = P3_8[(c8332 >>  5) & 0x7];
     g = P3_8[(c8332 >>  2) & 0x7];
     b = P2_8[(c8332      ) & 0x3];
@@ -232,7 +233,7 @@ _txImgDequantizeAYIQ8422(FxU32 *out, FxU16 *in, int w, int h, const long *yab)
     out += n;
     in  += n;
     while (n--) {
-        in--; 
+        in--;
         *--out = (pal[(*in) & 0xff] & 0x00ffffff) | ((*in & 0xFF00) << 16);
     }
 }
@@ -301,7 +302,7 @@ _txImgDequantizeARGB8888(FxU32 *out, FxU32 *in, int w, int h)
     out += n;
     in  += n;
 
-    while (n--) *--out = *--in; 
+    while (n--) *--out = *--in;
 }
 
 static void
@@ -313,15 +314,15 @@ _txImgDequantizeRGB888(FxU32 *out, FxU32 *in_, int w, int h)
 
     for( i = 0; i < n; i++ )
       {
-        out[i] = 
-          ( ( ( FxU32 )0xff ) << 24 ) | 
+        out[i] =
+          ( ( ( FxU32 )0xff ) << 24 ) |
           ( ( ( FxU32 )in[i*3] )<< 16 ) |
           ( ( ( FxU32 )in[i*3+1] )<< 8 ) |
           ( ( ( FxU32 )in[i*3+2] ) );
       }
 }
 
-void    
+void
 txMipDequantize(TxMip *txMip, TxMip *pxMip)
 {
     /* Walk through all mipmap levels, and convert to ARGB8888 format */
@@ -343,41 +344,41 @@ txMipDequantize(TxMip *txMip, TxMip *pxMip)
           {
             printf(" %dx%d", w, h); fflush(stdout);
           }
-            
+
         switch(pxMip->format) {
-        case GR_TEXFMT_RGB_332:         _txImgDequantizeRGB332(dst, src, w, h);         
+        case GR_TEXFMT_RGB_332:         _txImgDequantizeRGB332(dst, src, w, h);
                                                                 break;
-        case GR_TEXFMT_YIQ_422:         _txImgDequantizeYIQ422(dst, src, w, h, 
+        case GR_TEXFMT_YIQ_422:         _txImgDequantizeYIQ422(dst, src, w, h,
                                                                         (long *)pxMip->pal); break;
-        case GR_TEXFMT_A_8:                     _txImgDequantizeA8(dst, src, w, h);             
+        case GR_TEXFMT_A_8:                     _txImgDequantizeA8(dst, src, w, h);
                                                                 break;
-        case GR_TEXFMT_I_8:                     _txImgDequantizeI8(dst, src, w, h);             
+        case GR_TEXFMT_I_8:                     _txImgDequantizeI8(dst, src, w, h);
                                                                 break;
-        case GR_TEXFMT_AI_44:           _txImgDequantizeAI44(dst, src, w, h);           
+        case GR_TEXFMT_AI_44:           _txImgDequantizeAI44(dst, src, w, h);
                                                                 break;
-        case GR_TEXFMT_P_8:                     _txImgDequantizeP8(dst, src, w, h, 
+        case GR_TEXFMT_P_8:                     _txImgDequantizeP8(dst, src, w, h,
                                                                         pxMip->pal); break;
 
-        case GR_TEXFMT_ARGB_8332:       _txImgDequantizeARGB8332(dst, src, w, h);       
+        case GR_TEXFMT_ARGB_8332:       _txImgDequantizeARGB8332(dst, src, w, h);
                                                                 break;
-        case GR_TEXFMT_AYIQ_8422:       _txImgDequantizeAYIQ8422(dst, src, w, h, 
+        case GR_TEXFMT_AYIQ_8422:       _txImgDequantizeAYIQ8422(dst, src, w, h,
                                                                         (long *)pxMip->pal); break;
-        case GR_TEXFMT_RGB_565:         _txImgDequantizeRGB565(dst, src, w, h); 
+        case GR_TEXFMT_RGB_565:         _txImgDequantizeRGB565(dst, src, w, h);
                                                                 break;
-        case GR_TEXFMT_ARGB_1555:       _txImgDequantizeARGB1555(dst, src, w, h);       
+        case GR_TEXFMT_ARGB_1555:       _txImgDequantizeARGB1555(dst, src, w, h);
                                                                 break;
-        case GR_TEXFMT_ARGB_4444:       _txImgDequantizeARGB4444(dst, src, w, h);       
+        case GR_TEXFMT_ARGB_4444:       _txImgDequantizeARGB4444(dst, src, w, h);
                                                                 break;
-        case GR_TEXFMT_AI_88:           _txImgDequantizeAI88(dst, src, w, h);           
+        case GR_TEXFMT_AI_88:           _txImgDequantizeAI88(dst, src, w, h);
                                                                 break;
-        case GR_TEXFMT_AP_88:           _txImgDequantizeAP88(dst, src, w, h, 
+        case GR_TEXFMT_AP_88:           _txImgDequantizeAP88(dst, src, w, h,
                                                                         pxMip->pal); break;
-        case GR_TEXFMT_ARGB_8888:       _txImgDequantizeARGB8888(dst, src, w, h);       
+        case GR_TEXFMT_ARGB_8888:       _txImgDequantizeARGB8888(dst, src, w, h);
                                                                 break;
-        case GR_TEXFMT_RGB_888:         _txImgDequantizeRGB888(dst, src, w, h);       
+        case GR_TEXFMT_RGB_888:         _txImgDequantizeRGB888(dst, src, w, h);
                                                                 break;
 
-        default:                                                                                                        
+        default:
                                                                 break;
         }
 

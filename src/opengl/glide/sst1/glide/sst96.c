@@ -1,86 +1,90 @@
+/* $Id: sst96.c,v 1.2 2001-09-05 14:30:58 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glide/sst1/glide/sst96.c,v 1.1 2000-02-25 00:31:23 sandervl Exp $
+** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glide/sst1/glide/sst96.c,v 1.2 2001-09-05 14:30:58 bird Exp $
 ** $Log: sst96.c,v $
-** Revision 1.1  2000-02-25 00:31:23  sandervl
+** Revision 1.2  2001-09-05 14:30:58  bird
+** Added $Id:$ keyword.
+**
+** Revision 1.1  2000/02/25 00:31:23  sandervl
 ** Created new Voodoo 1 Glide dir
 **
- * 
+ *
  * 20    9/19/97 12:38p Peter
  * asm rush trisetup vs alt fifo
- * 
+ *
  * 19    9/12/97 12:56p Dow
  * Protected JUJU code
- * 
+ *
  * 18    9/11/97 2:22p Atai
  * fixed muckage
- * 
+ *
  * 17    9/10/97 10:15p Peter
  * fifo logic from GaryT
- * 
+ *
  * 16    8/19/97 8:55p Peter
  * lots of stuff, hopefully no muckage
- * 
+ *
  * 15    8/01/97 11:49a Dow
  * Allowed for non4K fifo wraps
- * 
+ *
  * 14    7/08/97 1:29p Jdt
  * Fixed watcom muckage
- * 
+ *
  * 13    7/04/97 12:08p Dow
  * Modified GWP debugging
- * 
+ *
  * 12    6/20/97 5:54p Dow
  * Moved grDebugGroupWriteHeader in here.
- * 
+ *
  * 11    6/18/97 5:54p Dow
  * P6 adjustments
- * 
+ *
  * 10    5/27/97 2:03p Dow
  * added new assertion
- * 
+ *
  * 9     5/04/97 12:49p Dow
  * Moved texture downloads to level 195, like on SST1
- * 
+ *
  * 8     4/13/97 2:06p Pgj
  * eliminate all anonymous unions (use hwDep)
- * 
+ *
  * 7     3/16/97 12:39a Jdt
  * initWrapFifo only neads fifodata...
- * 
+ *
  * 6     3/04/97 9:12p Dow
  * Neutered mutiplatform multiheaded monster.
- * 
+ *
  * 5     2/18/97 9:53a Jdt
  * Removed some unecessary declarations.
- * 
+ *
  * 4     2/14/97 12:55p Dow
  * moved vg96 fifo wrap into init code
- * 
+ *
  * 3     2/11/97 6:59p Dow
  * Changes to support vid tiles and ser status
- * 
+ *
  * 2     1/14/97 10:49a Dow
  * Changed all output to use GDBG_INFO
  * Renabled some messages
- * 
+ *
  * 1     12/23/96 1:39p Dow
  * Changes for multiplatform
 **
@@ -368,7 +372,7 @@ char
 */
 #if defined(GDBG_INFO_ON) && (GLIDE_PLATFORM & GLIDE_HW_SST96)
 void
-_grDebugGroupWriteHeader(FxU32 header, FxU32 address) 
+_grDebugGroupWriteHeader(FxU32 header, FxU32 address)
 {
 #define FN_NAME "_grDebugGroupWriteHeader"
   GR_DCL_GC;
@@ -388,15 +392,15 @@ _grDebugGroupWriteHeader(FxU32 header, FxU32 address)
   GDBG_INFO((128, "Header:       0x%x\n", header));
   GDBG_INFO((128, "PCI Address:  0x%x\n", (address & 0xfffff) << 2));
   GDBG_INFO((128, "Chip Field:   0x%x\n", (address >> 14) & 0xf));
-            
+
   offset = (address & ~(0xf << 14)) & 0xfffff;
   index = offset;
 
   if (offset < 0x100 ) { /* It's state or triangle */
-    
+
     GDBG_INFO((128, "Start:     0x%s (0x%x)\n", regNames[index], index));
     GDBG_INFO((128, "Mask:      0x%x\n", header));
-    
+
     while (lheader) {
       if (lheader & 0x1) {
         nBits++;
@@ -419,7 +423,7 @@ _grDebugGroupWriteHeader(FxU32 header, FxU32 address)
   }
 
   GDBG_INFO((128, "%s:  %d bits of mask 0x%x were set\n", FN_NAME,
-             nBits, header)); 
+             nBits, header));
 
   GR_ASSERT(nBits);
 
@@ -434,11 +438,11 @@ _grFifoWriteDebug(FxU32 addr, FxU32 val, FxU32 fifoPtr)
   FxU32
     index = GEN_INDEX(addr);
   char
-    *regName; 
+    *regName;
 
   regName = (index <= 0xff) ? regNames[index] : "TRAM";
- 
-  if (index <= 0xff) { 
+
+  if (index <= 0xff) {
     GDBG_INFO((120, "Storing to FIFO:\n"));
     GDBG_INFO((120, "\tReg Name:    %s\n", regName));
     GDBG_INFO((120, "\tReg Num:     0x%x\n", index));
@@ -456,12 +460,12 @@ _grFifoFWriteDebug(FxU32 addr, float val, FxU32 fifoPtr)
   FxU32
     index = GEN_INDEX(addr);
   char
-    *regName; 
+    *regName;
 
   if (index <= 0xff) {
-    
+
     regName = regNames[index];
-    
+
     GDBG_INFO((120, "Storing to FIFO:\n"));
     GDBG_INFO((120, "\tReg Name:    %s\n", regName));
     GDBG_INFO((120, "\tReg Num:     0x%x\n", index));
@@ -474,12 +478,12 @@ _grFifoFWriteDebug(FxU32 addr, float val, FxU32 fifoPtr)
     GDBG_INFO((195, "\tTexel:       %4.2f\n", val));
     GDBG_INFO((195, "\tFIFO Ptr:    0x%x\n", fifoPtr));
     GDBG_INFO((120, "\tFIFO Test:    0x%x\n", gc->fifoData.hwDep.vg96FIFOData.fifoSize));
-  }  
+  }
 } /* _grFifoFWriteDebug */
 
 
 /*--------------------------------------------------------------------------
-** _grSst96PCIFifoEmpty 
+** _grSst96PCIFifoEmpty
 */
 FxBool
 _grSst96PCIFifoEmpty() {
@@ -494,13 +498,13 @@ _grSst96PCIFifoEmpty() {
   for (;;) {
     if (SST96_PCI_FIFO_EMPTY(hw))
       return FXTRUE;
-    
+
     if (!(++count % COUNT_PATIENCE_VALUE)) {
       GDBG_INFO((120, "Losing Patients after %d tries\n", COUNT_PATIENCE_VALUE));
       break;
     }
   }
-  return FXFALSE;  
+  return FXFALSE;
 } /* _grSst96PCIFifoEmpty */
 
 
@@ -508,12 +512,12 @@ FxU32
 *sstGlobal(void);
 
 void GR_CDECL
-_grSst96FifoMakeRoom(void) 
+_grSst96FifoMakeRoom(void)
 {
   GR_DCL_GC;
 #ifdef SST96_ALT_FIFO_WRAP
   /* NB: W/ the alternate fifo wrapping stuff on only the asm
-   * tri-setup uses this routine.  
+   * tri-setup uses this routine.
    */
   gc->fifoData.hwDep.vg96FIFOData.blockSize = _GlideRoot.curTriSize;
 #endif
@@ -545,7 +549,7 @@ _grSst96Load32(FxU32 *s) {
     GDBG_INFO((120, "\tReg Num:         0x%x\n", index));
     GDBG_INFO((120, "\tReg Val:         0x%x\n", regVal));
   }
-      
+
   return regVal;
 
 } /* _grSst96Load32 */
@@ -694,7 +698,7 @@ _grSst96CheckFifoData()
   /* GC */
   fifoStartGC = (FxU32) gc->fifoData.hwDep.vg96FIFOData.fifoVirt - (FxU32) gc->base_ptr;
   fifoWrPtrGC = (FxU32) gc->fifoData.hwDep.vg96FIFOData.fifoPtr - (FxU32) gc->base_ptr;
-  
+
   /* Deduce relevant data from registers */
   fifoStartHW = FIFO_BOT_BYTES(fbiJrInit3);
   fifoTopHW = FIFO_TOP_BYTES(fbiJrInit3) + 0x1000;

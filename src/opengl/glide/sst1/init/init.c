@@ -1,25 +1,26 @@
+/* $Id: init.c,v 1.2 2001-09-05 14:31:00 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
 **
-** $Revision: 1.1 $ 
-** $Date: 2000-02-25 00:31:26 $ 
+** $Revision: 1.2 $
+** $Date: 2001-09-05 14:31:00 $
 **
 */
 
@@ -98,7 +99,7 @@ initEnumHardware( InitHWEnumCallback *cb )
   FxU32  device;
   if ( !libInitialized ) {
 
-    /* When initializing the Library snoop out all 3Dfx devices 
+    /* When initializing the Library snoop out all 3Dfx devices
        and fill a static data structure with pertinant data.  */
 
     numDevicesInSystem = 0;
@@ -127,7 +128,7 @@ initEnumHardware( InitHWEnumCallback *cb )
 
               hwInfo[numDevicesInSystem-1].hwDep.vgInfo.slaveBaseAddr =
                 (FxU32)sst1InitMapBoard( numSst1s );
-              hwInfo[numDevicesInSystem-1].regs.hwDep.VGRegDesc.slavePtr = 
+              hwInfo[numDevicesInSystem-1].regs.hwDep.VGRegDesc.slavePtr =
                 (FxU32*)hwInfo[numDevicesInSystem-1].hwDep.vgInfo.slaveBaseAddr;
               numSst1s++;
               continue;
@@ -176,7 +177,7 @@ initEnumHardware( InitHWEnumCallback *cb )
             FxU8 regVal;
             _outp(0x3d4, 0x3f);
             regVal = _inp(0x3d5);
-            
+
             if (!(regVal & (1 << 2))) /* we're not there */
               continue;
           }
@@ -195,19 +196,19 @@ initEnumHardware( InitHWEnumCallback *cb )
           initMapBoard(numDevicesInSystem);
 #endif
 
-          hwInfo[numDevicesInSystem].hwDep.vg96Info.vgaBaseAddr = 
+          hwInfo[numDevicesInSystem].hwDep.vg96Info.vgaBaseAddr =
             (FxU32)hwInfo[numDevicesInSystem].regs.hwDep.VG96RegDesc.partnerRegPtr;
-          hwInfo[numDevicesInSystem].hwDep.vg96Info.vg96BaseAddr = 
+          hwInfo[numDevicesInSystem].hwDep.vg96Info.vg96BaseAddr =
             (FxU32)hwInfo[numDevicesInSystem].regs.hwDep.VG96RegDesc.baseAddress;
-          
+
           numDevicesInSystem++;
-        } 
+        }
 #else
 #  error "Do hardware enumeration for this chip!"
 #endif
       }
     }
-    
+
 
     /* Sanity Check for SLI detection */
     for( device = 0; device < numDevicesInSystem; device++ ) {
@@ -227,11 +228,11 @@ initEnumHardware( InitHWEnumCallback *cb )
     /* Mark the library as initialized */
     libInitialized = FXTRUE;
   }
-  
+
   if ( cb ) {
     for( device = 0; device < numDevicesInSystem; device++ ) {
       cb( &hwInfo[device] );
-    } 
+    }
   }
   return;
 } /* initEnumHardware */
@@ -241,12 +242,12 @@ initMapBoard(const FxU32 boardNum)
 {
    volatile FxU32* retVal = NULL;
    FxBool okP = (boardNum < INIT_MAX_DEVICES);
-   
+
    if (okP) {
       InitDeviceInfo* infoP = (hwInfo + boardNum);
       const FxU32 vId = infoP->vendorID;
       const FxU32 dId = infoP->deviceID;
-      
+
 #if defined(SST1)
       okP = ((vId == TDFXVID) &&
              (dId == SST1DID));
@@ -293,7 +294,7 @@ void initClose( void ) {
         }
         pciClose();
         libInitialized = FXFALSE;
-    } 
+    }
 } /* initClose */
 
 /*-------------------------------------------------------------------
@@ -333,8 +334,8 @@ initGetDeviceInfo( FxU32 devNumber, InitDeviceInfo *info )
   Date: 10/9
   Implementor(s): jdt
   Library: init
-  Description: 
-  Selects a 3Dfx device ( potentially from among many in the system ) and 
+  Description:
+  Selects a 3Dfx device ( potentially from among many in the system ) and
   initializes the internal init driver functions with behavior appropriate
   to the type of the selected device.
   Arguments:
@@ -345,16 +346,16 @@ initGetDeviceInfo( FxU32 devNumber, InitDeviceInfo *info )
   -------------------------------------------------------------------*/
 
 FxBool
-initDeviceSelect( FxU32 devNumber ) 
+initDeviceSelect( FxU32 devNumber )
 {
   FxBool rv = FXFALSE;
-  
+
   if ( devNumber < numDevicesInSystem ) {
     context = &contexts[hwInfo[devNumber].hwClass];
     context->info = hwInfo[devNumber];
     rv =  FXTRUE;
-  } 
-  
+  }
+
   return rv;
 
 }/* initDeviceSelect */
@@ -389,7 +390,7 @@ void initSetWriteMethod( InitWriteCallback *wcb ) {
         This will initialize the video, and allocate color and aux buffers
         prior to rendering.
   Arguments:
-  hwnd - pointer to a window handle or null.  If NULL, then 
+  hwnd - pointer to a window handle or null.  If NULL, then
          the application window handle will be inferred though
          the GetActiveWindow() api.
   resolution - either one of the pre-defined glide resolutions,
@@ -430,7 +431,7 @@ FxBool initSetVideo( FxU32                hWnd,
                      sst1VideoTimingStruct *vidTimings) {
     FxBool rv;
     if ( context ) {
-        rv = context->setVideo( hWnd, sRes, vRefresh, cFormat, 
+        rv = context->setVideo( hWnd, sRes, vRefresh, cFormat,
                                 yOrigin, nColBuffers, nAuxBuffers,
                                 xres, yres, fbStride, vidTimings);
     } else {
@@ -453,7 +454,7 @@ FxBool initSetVideo( FxU32                hWnd,
   none
   -------------------------------------------------------------------*/
 void initRestoreVideo( void ) {
-    if ( context ) 
+    if ( context )
         context->restoreVideo();
 } /* initRestoreVideo */
 
@@ -463,7 +464,7 @@ void initRestoreVideo( void ) {
   Implementor(s): jdt
   Library: init
   Description:
-  Enable the command transport mechanism for the underlying 
+  Enable the command transport mechanism for the underlying
   hardware and return information about accessing the transport
   to the caller
   Arguments:
@@ -495,7 +496,7 @@ FxBool initEnableTransport( InitFIFOData *info ) {
   none
   -------------------------------------------------------------------*/
 void initDisableTransport( void ) {
-    if ( context ) 
+    if ( context )
         context->disableTransport();
 } /* initDisableTransport */
 
@@ -505,8 +506,8 @@ void initDisableTransport( void ) {
   Implementor(s): jdt, murali
   Library: init
   Description:
-  Initiate a buffer swap.  
-  Arguments: 
+  Initiate a buffer swap.
+  Arguments:
   code - code describing type of swap, wether to sync to vretrace, how
          many vretraces to wait, etc.
   -------------------------------------------------------------------*/
@@ -566,7 +567,7 @@ FxBool initBusy( void ) {
   Implementor(s): jdt
   Library: init
   Description:
-  Returns only when graphics pipeline is completely idle. 
+  Returns only when graphics pipeline is completely idle.
   May hang software if hardware is permanently busy.
   Arguments:
   none
@@ -586,7 +587,7 @@ void initIdle( void ) {
   Description:
   Get the current pointer to a particular buffer
   Arguments:
-  buffer - which buffer to get pointer to 
+  buffer - which buffer to get pointer to
   Return:
   integer pointer
   -------------------------------------------------------------------*/
@@ -601,7 +602,7 @@ void *initGetBufferPtr( InitBuffer_t buffer, int *strideBytes ) {
   Function: initRenderBuffer
   Date: 2/25
   Implementor(s): jdt
-  Library: init 
+  Library: init
   Description:
   Sets the current render buffer
   Arguments:
@@ -637,7 +638,7 @@ void initOrigin( InitOriginLocation_t origin ) {
   Implementor(s): jdt
   Library: init
   Description:
-  CYA function so that emergency functionality may be added w/o 
+  CYA function so that emergency functionality may be added w/o
   corrupting dll interface
   Arguments:
   token    - describes IOCTL function
@@ -657,7 +658,7 @@ void initIOCtl( FxU32 token, void *argument ) {
   Library: init
   Description:
         This will re-attach new buffers for the rendering context, used
-        typically only in a windowing system where buffers need to move 
+        typically only in a windowing system where buffers need to move
         and resize. Also, implicitly detach old associated buffers.
   Arguments:
         XXX

@@ -1,25 +1,26 @@
+/* $Id: gamma.c,v 1.2 2001-09-05 14:31:04 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
 **
-** $Revision: 1.1 $ 
-** $Date: 2000-02-25 00:31:33 $ 
+** $Revision: 1.2 $
+** $Date: 2001-09-05 14:31:04 $
 **
 ** Initialization code for loading SST-1 gamma tables
 **
@@ -131,7 +132,7 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitGammaRGB(FxU32 *sstbase, double gammaR,
             sstVideoIsReset = FXTRUE;
         else
             sstVideoIsReset = FXFALSE;
-   
+
         ISET(sst->fbiInit1, IGET(sst->fbiInit1) & ~SST_VIDEO_RESET);
         /* wait for video reset to be deasserted */
         sst1InitIdleFBINoNOP(sstbase);
@@ -146,7 +147,7 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitGammaRGB(FxU32 *sstbase, double gammaR,
         FxU32 gcR = gammaTableR[(x<<3)];
         FxU32 gcG = gammaTableG[(x<<3)];
         FxU32 gcB = gammaTableB[(x<<3)];
-        ISET(sst->clutData, ((x<<SST_CLUTDATA_INDEX_SHIFT) | 
+        ISET(sst->clutData, ((x<<SST_CLUTDATA_INDEX_SHIFT) |
                          (gcR<<SST_CLUTDATA_RED_SHIFT) |
                          (gcG<<SST_CLUTDATA_GREEN_SHIFT) |
                          (gcB<<SST_CLUTDATA_BLUE_SHIFT)));
@@ -172,7 +173,7 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitGammaRGB(FxU32 *sstbase, double gammaR,
     return(FXTRUE);
 }
 
-FX_EXPORT FxBool FX_CSTYLE sst1InitGammaTable(FxU32 *sstbase, FxU32 nentries, 
+FX_EXPORT FxBool FX_CSTYLE sst1InitGammaTable(FxU32 *sstbase, FxU32 nentries,
 FxU32 *r, FxU32 *g, FxU32 *b)
 {
     FxU32 x, n;
@@ -212,7 +213,7 @@ FxU32 *r, FxU32 *g, FxU32 *b)
             sstVideoIsReset = FXTRUE;
         else
             sstVideoIsReset = FXFALSE;
-   
+
         ISET(sst->fbiInit1, IGET(sst->fbiInit1) & ~SST_VIDEO_RESET);
         /* wait for video reset to be deasserted */
         sst1InitIdleFBINoNOP(sstbase);
@@ -227,7 +228,7 @@ FxU32 *r, FxU32 *g, FxU32 *b)
         FxU32 gcR = gammaTableR[(x<<3)];
         FxU32 gcG = gammaTableG[(x<<3)];
         FxU32 gcB = gammaTableB[(x<<3)];
-        ISET(sst->clutData, ((x<<SST_CLUTDATA_INDEX_SHIFT) | 
+        ISET(sst->clutData, ((x<<SST_CLUTDATA_INDEX_SHIFT) |
                          (gcR<<SST_CLUTDATA_RED_SHIFT) |
                          (gcG<<SST_CLUTDATA_GREEN_SHIFT) |
                          (gcB<<SST_CLUTDATA_BLUE_SHIFT)));

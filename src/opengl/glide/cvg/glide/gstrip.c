@@ -1,82 +1,86 @@
+/* $Id: gstrip.c,v 1.2 2001-09-05 14:30:28 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glide/cvg/glide/gstrip.c,v 1.1 2000-02-25 00:37:41 sandervl Exp $
+** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glide/cvg/glide/gstrip.c,v 1.2 2001-09-05 14:30:28 bird Exp $
 ** $Log: gstrip.c,v $
-** Revision 1.1  2000-02-25 00:37:41  sandervl
+** Revision 1.2  2001-09-05 14:30:28  bird
+** Added $Id:$ keyword.
+**
+** Revision 1.1  2000/02/25 00:37:41  sandervl
 ** Created Voodoo 2 dir
 **
- * 
+ *
  * 19    12/12/97 12:43p Atai
  * move i and dateElem into the set up loop
- * 
+ *
  * 17    12/08/97 10:38a Atai
  * added grDrawVertexArrayLinear()
- * 
+ *
  * 16    11/21/97 6:05p Atai
  * use one datalist (tsuDataList) in glide3
- * 
+ *
  * 15    11/06/97 6:10p Atai
  * update GrState size
  * rename grDrawArray to grDrawVertexArray
  * update _grDrawPoint and _grDrawVertexList
- * 
+ *
  * 14    11/04/97 6:35p Atai
  * 1. sync with data structure changes
  * 2. break up aa triangle routine
- * 
+ *
  * 13    11/04/97 4:57p Atai
  * use byte offset
- * 
+ *
  * 12    11/03/97 3:43p Peter
  * h3/cvg cataclysm
- * 
+ *
  * 11    10/17/97 2:11p Atai
  * added grContinueArray. We only support non aa mode for now.
- * 
+ *
  * 10    10/16/97 1:50p Atai
  * fix drawarray bugs
- * 
+ *
  * 9     10/14/97 6:16p Atai
  * reverse triangle order in _grAADrawVertexList
- * 
+ *
  * 8     10/14/97 5:41p Atai
  * added _grAADrawVertexList()
- * 
+ *
  * 7     10/14/97 4:57p Dow
  * Clamping
- * 
+ *
  * 6     10/09/97 8:02p Dow
  * State Monster 1st Cut
- * 
+ *
  * 5     10/08/97 11:32a Peter
  * pre-computed packet headers for packet 3
- * 
+ *
  * 4     9/29/97 1:26p Dow
  * Fixed packed color strips/fans
- * 
+ *
  * 3     9/26/97 10:24a Dow
  * Fixed state Muckage in Glide3 parameter data
- * 
+ *
  * 2     9/23/97 2:35p Dow
  * One less loop
- * 
+ *
  * 1     9/23/97 2:04p Dow
  * DD code for strips
 **
@@ -97,7 +101,7 @@
   Description:
         Sends a triangle strip to CVG.
   Arguments:
-  
+
   Return:
   -------------------------------------------------------------------*/
 void FX_CSTYLE
@@ -149,12 +153,12 @@ _grDrawVertexList(FxU32 type, FxI32 mode, FxI32 count, void *pointers)
       for (k = 0; k < vcount; k++) {
         FxU32 i, dataElem;
         float *vPtr;
-        
+
         vPtr = pointers;
         if (mode)
           vPtr = *(float **)vPtr;
         (float *)pointers += stride;
-        
+
         TRI_SETF(FARRAY(vPtr, GR_VERTEX_X_OFFSET << 2));
         dataElem = 0;
         TRI_SETF(FARRAY(vPtr, GR_VERTEX_Y_OFFSET << 2));
@@ -176,14 +180,14 @@ _grDrawVertexList(FxU32 type, FxI32 mode, FxI32 count, void *pointers)
      * first cut of clip space coordinate code, no optimization.
      */
     float oow;
-    
+
     while (count > 0) {
       FxI32 k, vcount = count >= 15 ? 15 : count;
       GR_SET_EXPECTED_SIZE(vcount * vSize, 1);
       TRI_STRIP_BEGIN(type, vcount, vSize, pktype);
       for (k = 0; k < vcount; k++) {
         float *vPtr;
-        
+
         vPtr = pointers;
         if (mode)
           vPtr = *(float **)vPtr;
@@ -214,7 +218,7 @@ _grDrawVertexList(FxU32 type, FxI32 mode, FxI32 count, void *pointers)
   Description:
   Sends an aa triangle strip/fan to CVG.
   Arguments:
-  
+
   Return:
   -------------------------------------------------------------------*/
 void FX_CSTYLE
@@ -258,7 +262,7 @@ _grAADrawVertexList(FxU32 type, FxI32 mode, FxI32 count, void *pointers)
       if (gc->state.grCoordinateSpaceArgs.coordinate_space_mode == GR_WINDOW_COORDS)
         _grAADrawTriangles(1, type, 3, v);
       else
-        _grAAVpDrawTriangles(1, type, 3, v);    
+        _grAAVpDrawTriangles(1, type, 3, v);
     }
   }
   else if (type == kSetupStrip){
@@ -274,7 +278,7 @@ _grAADrawVertexList(FxU32 type, FxI32 mode, FxI32 count, void *pointers)
           v[2] = (float *)pointers+(stride<<1);
         }
       }
-      else { 
+      else {
         if (mode) {
           v[0] = *(float **)pointers;
           v[1] = *((float **)pointers+1);
@@ -288,7 +292,7 @@ _grAADrawVertexList(FxU32 type, FxI32 mode, FxI32 count, void *pointers)
       if (gc->state.grCoordinateSpaceArgs.coordinate_space_mode == GR_WINDOW_COORDS)
         _grAADrawTriangles(1, type, 3, v);
       else
-        _grAAVpDrawTriangles(1, type, 3, v);    
+        _grAAVpDrawTriangles(1, type, 3, v);
       (float *)pointers += stride;
       flip = ~flip;
     }

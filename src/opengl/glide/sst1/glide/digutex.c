@@ -1,40 +1,44 @@
+/* $Id: digutex.c,v 1.2 2001-09-05 14:30:49 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glide/sst1/glide/digutex.c,v 1.1 2000-02-25 00:31:10 sandervl Exp $
+** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glide/sst1/glide/digutex.c,v 1.2 2001-09-05 14:30:49 bird Exp $
 ** $Log: digutex.c,v $
-** Revision 1.1  2000-02-25 00:31:10  sandervl
+** Revision 1.2  2001-09-05 14:30:49  bird
+** Added $Id:$ keyword.
+**
+** Revision 1.1  2000/02/25 00:31:10  sandervl
 ** Created new Voodoo 1 Glide dir
 **
- * 
+ *
  * 5     8/14/97 7:02p Pgj
  * per GMT
- * 
+ *
  * 4     5/05/97 4:24p Pgj
  * Neuter guTexDownloadMipMap error message
- * 
+ *
  * 3     3/18/97 9:07p Dow
  * Got rid of #$#%#$ // comments
- * 
+ *
  * 2     3/09/97 10:31a Dow
  * Added GR_DIENTRY for di glide functions
- * 
+ *
  * 1     12/23/96 1:39p Dow
  * Changes for multiplatform
 **
@@ -97,7 +101,7 @@ GR_DIENTRY(guTexAllocateMemory, GrMipMapId_t, ( GrChipID_t tmu,
    ** test IS valid!
    */
   GR_CHECK_F(myName, small_lod < large_lod, "smallest_lod is larger than large_lod");
-  
+
   info.smallLod = small_lod;
   info.largeLod = large_lod;
   info.aspectRatio = aspect_ratio;
@@ -110,18 +114,18 @@ GR_DIENTRY(guTexAllocateMemory, GrMipMapId_t, ( GrChipID_t tmu,
   if ((gc->tmu_state[tmu].freemem_base < 0x200000) &&
     (gc->tmu_state[tmu].freemem_base + memrequired > 0x200000))
     gc->tmu_state[tmu].freemem_base = 0x200000;
-  
+
   /*
    ** If we have enough memory and a free mip map handle then go for it
    */
   memavail = guTexMemQueryAvail( tmu );
-  
+
   if ( memavail < memrequired )
     return (GrMipMapId_t) GR_NULL_MIPMAP_HANDLE;
-  
+
   if (gc->mm_table.free_mmid >= MAX_MIPMAPS_PER_SST )
     return (GrMipMapId_t) GR_NULL_MIPMAP_HANDLE;
-  
+
   /*
    ** Allocate the mip map id
    */
@@ -130,14 +134,14 @@ GR_DIENTRY(guTexAllocateMemory, GrMipMapId_t, ( GrChipID_t tmu,
   /*
    ** calculate baseAddress (where LOD 0 would go)
    */
-  baseAddress = _grTexCalcBaseAddress( gc->tmu_state[tmu].freemem_base, 
-                                       large_lod, 
-                                       aspect_ratio, 
-                                       format, 
+  baseAddress = _grTexCalcBaseAddress( gc->tmu_state[tmu].freemem_base,
+                                       large_lod,
+                                       aspect_ratio,
+                                       format,
                                        odd_even_mask );
 
   GDBG_INFO((gc->myLevel,"  baseAddress = 0x%x (in bytes)\n",baseAddress));
-  
+
   /*
    ** reduce available memory to reflect allocation
    */
@@ -156,12 +160,12 @@ GR_DIENTRY(guTexAllocateMemory, GrMipMapId_t, ( GrChipID_t tmu,
                 (minfilter_mode == GR_TEXTUREFILTER_BILINEAR ? SST_TMINFILTER : 0) |
                 (magfilter_mode == GR_TEXTUREFILTER_BILINEAR ? SST_TMAGFILTER : 0)
                 );
-  
+
   clampMode = (
                (s_clamp_mode == GR_TEXTURECLAMP_CLAMP ? SST_TCLAMPS : 0) |
                (t_clamp_mode == GR_TEXTURECLAMP_CLAMP ? SST_TCLAMPT : 0)
-               );  
-  
+               );
+
   /*
    ** Create the tTextureMode register value for this mip map
    */
@@ -170,10 +174,10 @@ GR_DIENTRY(guTexAllocateMemory, GrMipMapId_t, ( GrChipID_t tmu,
   texturemode |= SST_TPERSP_ST;
   texturemode |= filterMode;
   texturemode |= clampMode;
-  
+
   if ( mipmap_mode == GR_MIPMAP_NEAREST_DITHER )
     texturemode |= SST_TLODDITHER;
-  
+
   if ( trilinear ) {
       texturemode |= SST_TRILINEAR;
 
@@ -183,7 +187,7 @@ GR_DIENTRY(guTexAllocateMemory, GrMipMapId_t, ( GrChipID_t tmu,
       if ( odd_even_mask != GR_MIPMAPLEVELMASK_BOTH )
         tLod |= SST_LOD_TSPLIT;
   }
-  
+
   /*
    ** Fill in the mm_table data for this mip map
    */
@@ -209,7 +213,7 @@ GR_DIENTRY(guTexAllocateMemory, GrMipMapId_t, ( GrChipID_t tmu,
   gc->mm_table.data[mmid].valid          = FXTRUE;
   gc->mm_table.data[mmid].width          = width;
   gc->mm_table.data[mmid].height         = height;
-  
+
   GR_RETURN(mmid);
 } /* guTexAllocateMemory */
 
@@ -220,7 +224,7 @@ _guTexRebuildRegisterShadows( GrMipMapId_t mmid )
   GrMipMapInfo *mminfo = &gc->mm_table.data[mmid];
   int texturemode      = 0;
   int tLod             = 0;
-  FxU32 
+  FxU32
     filterMode,                 /* filter mode bits of texturemode */
     clampMode;                  /* clamp mode bits of texturemode */
 
@@ -233,7 +237,7 @@ _guTexRebuildRegisterShadows( GrMipMapId_t mmid )
                (mminfo->s_clamp_mode == GR_TEXTURECLAMP_CLAMP ? SST_TCLAMPS : 0) |
                (mminfo->t_clamp_mode == GR_TEXTURECLAMP_CLAMP ? SST_TCLAMPT : 0)
                );
-   
+
   /*
    ** build up tTextureMode
    */
@@ -267,7 +271,7 @@ _guTexRebuildRegisterShadows( GrMipMapId_t mmid )
 
 
 /*---------------------------------------------------------------------------
-**  guTexChangeAttributes 
+**  guTexChangeAttributes
 */
 GR_DIENTRY(guTexChangeAttributes, FxBool, ( GrMipMapId_t mmid,
                       int width, int height,
@@ -331,17 +335,17 @@ GR_DIENTRY(guTexChangeAttributes, FxBool, ( GrMipMapId_t mmid,
 
 /*---------------------------------------------------------------------------
 ** grTexCombineFunction - obsolete
-**                              
+**
 */
 GR_DIENTRY(grTexCombineFunction, void,
-           (GrChipID_t tmu, GrTextureCombineFnc_t tc)) 
+           (GrChipID_t tmu, GrTextureCombineFnc_t tc))
 {
   guTexCombineFunction( tmu, tc );
 }
 
 /*---------------------------------------------------------------------------
 ** guTexCombineFunction
-**                              
+**
 ** Sets the texture combine function.  For a dual TMU system this function
 ** will configure the TEXTUREMODE registers as appropriate.  For a
 ** single TMU system this function will configure TEXTUREMODE if
@@ -420,7 +424,7 @@ GR_DIENTRY(guTexCombineFunction, void,
 ** the hardware using the given data and ncctble.  The "data" is assumed
 ** to be in row major order from largest mip map to smallest mip map.
 */
-GR_DIENTRY(guTexDownloadMipMap, void, 
+GR_DIENTRY(guTexDownloadMipMap, void,
            (GrMipMapId_t mmid, const void *src, const GuNccTable
             *ncc_table ) )
 {
@@ -471,7 +475,7 @@ GR_DIENTRY(guTexDownloadMipMapLevel, void,
   FxU32 i;
   const  GrMipMapInfo *mminfo;
   GR_DCL_GC;
- 
+
   GDBG_INFO((99,"guTexDownloadMipMapLevel(%d,%d,0x%x)\n",mmid,lod,src_base));
   GR_ASSERT(src_base != NULL);
   mminfo = &gc->mm_table.data[mmid];
@@ -545,19 +549,19 @@ GR_DIENTRY(guTexMemQueryAvail, FxU32, ( GrChipID_t tmu ))
 GR_DIENTRY(guTexMemReset, void, ( void ))
 {
   int i;
-  
+
   GR_BEGIN_NOFIFOCHECK("guTexMemReset",99);
   GDBG_INFO_MORE((gc->myLevel,"()\n"));
 
   memset( gc->mm_table.data, 0, sizeof( gc->mm_table.data ) );
   gc->mm_table.free_mmid = 0;
-  
+
   for ( i = 0; i < gc->num_tmu; i++ ) {
     gc->state.current_mm[i] = (GrMipMapId_t) GR_NULL_MIPMAP_HANDLE;
     gc->tmu_state[i].freemem_base = 0;
-    gc->tmu_state[i].ncc_mmids[0] = 
-      gc->tmu_state[i].ncc_mmids[1] = GR_NULL_MIPMAP_HANDLE;    
-    gc->tmu_state[i].ncc_table[0] = 
+    gc->tmu_state[i].ncc_mmids[0] =
+      gc->tmu_state[i].ncc_mmids[1] = GR_NULL_MIPMAP_HANDLE;
+    gc->tmu_state[i].ncc_table[0] =
       gc->tmu_state[i].ncc_table[1] = 0;
   }
   GR_END();

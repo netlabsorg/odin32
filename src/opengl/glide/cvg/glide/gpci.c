@@ -1,216 +1,220 @@
+/* $Id: gpci.c,v 1.2 2001-09-05 14:30:27 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glide/cvg/glide/gpci.c,v 1.1 2000-02-25 00:37:40 sandervl Exp $
+** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glide/cvg/glide/gpci.c,v 1.2 2001-09-05 14:30:27 bird Exp $
 ** $Log: gpci.c,v $
-** Revision 1.1  2000-02-25 00:37:40  sandervl
+** Revision 1.2  2001-09-05 14:30:27  bird
+** Added $Id:$ keyword.
+**
+** Revision 1.1  2000/02/25 00:37:40  sandervl
 ** Created Voodoo 2 dir
 **
-** 
+**
 ** 110   6/30/98 6:08p Jeske
 ** fixed bug where we tried to setup MTRRs on old (<p6) systems which
-** didn't have them. 
-** 
+** didn't have them.
+**
 ** 109   5/21/98 5:52p Peter
 ** mismatched pairs
-** 
+**
 ** 108   5/20/98 3:51p Peter
 ** no fifo glide
-** 
+**
 ** 107   5/18/98 12:15p Peter
 ** better point code
-** 
+**
 ** 106   4/21/98 5:53p Peter
 ** slidetect vs hw pointers
-** 
+**
 ** 105   4/08/98 3:52p Peter
 ** point coordinate truncation
-** 
+**
 ** 104   4/06/98 9:55a Peter
 ** sli slave detection for oem dll
-** 
+**
 ** 103   3/17/98 6:50p Peter
 ** sli paired vs active
-** 
+**
 ** 102   3/17/98 3:00p Peter
 ** removed unused stats
-** 
+**
 ** 101   3/13/98 5:08p Peter
 ** doh, got it backwards
-** 
+**
 ** 100   3/13/98 3:39p Peter
 ** voodoo1.5 silliness
-** 
+**
 ** 99    2/20/98 9:05a Peter
 ** removed remnants of comdex grot
-** 
+**
 ** 98    2/11/98 5:25p Peter
 ** detection dialog fixes
-** 
+**
 ** 97    1/30/98 4:51p Peter
 ** fixed sli-detect for multiple pairs
-** 
+**
 ** 96    1/30/98 4:27p Peter
 ** no uswc for sli slave
-** 
+**
 ** 95    1/24/98 12:29p Peter
 ** more caching fun
-** 
+**
 ** 94    1/20/98 11:03a Peter
 ** env var to force triple buffering
- * 
+ *
  * 93    1/16/98 5:41p Peter
  * fixed sense of lod_dither
- * 
+ *
  * 92    1/14/98 10:22a Peter
  * no more hacks
- * 
+ *
  * 91    1/08/98 7:09p Peter
  * real hw stuff modulo makefile change
- * 
+ *
  * 90    1/07/98 11:18a Atai
  * remove GrMipMapInfo and GrGC.mm_table in glide3
- * 
+ *
  * 89    1/07/98 10:22a Peter
  * lod dithering env var
- * 
+ *
  * 88    12/17/97 10:08a Peter
  * fast system comdex twiddling
- * 
+ *
  * 87    12/09/97 4:20p Peter
  * 0x100 fbiRev ofset for v2
- * 
+ *
  * 86    12/09/97 12:20p Peter
  * mac glide port
- * 
+ *
  * 85    12/05/97 4:26p Peter
  * watcom warnings
- * 
+ *
  * 84    12/03/97 2:36p Peter
  * upped comdex reset defaults
- * 
+ *
  * 83    12/02/97 9:48a Dow
  * Removed some spurious code I inadvertantly added.
- * 
+ *
  * 82    11/21/97 6:24p Dow
  * Banshee Lying about being Rush stuf
- * 
+ *
  * 81    11/21/97 11:19a Dow
  * Made Banshee report Voodoo2
- * 
+ *
  * 80    11/20/97 6:39p Peter
  * fixed direct_exec w/ csim
- * 
+ *
  * 79    11/19/97 2:49p Peter
  * env vars in registry for win32
- * 
+ *
  * 78    11/17/97 4:55p Peter
  * watcom warnings/chipfield stuff
- * 
+ *
  * 77    11/15/97 7:43p Peter
  * more comdex silliness
- * 
+ *
  * 76    11/14/97 11:10p Peter
  * open vs hw init confusion
- * 
+ *
  * 75    11/14/97 5:02p Peter
  * more comdex stuff
- * 
+ *
  * 74    11/14/97 12:09a Peter
  * comdex thing and some other stuff
- * 
+ *
  * 73    11/12/97 9:54p Peter
  * fixed all the muckage from new config
- * 
+ *
  * 72    11/12/97 9:37p Dow
  * Textures on Banshee half work
- * 
+ *
  * 71    11/12/97 9:22a Dow
  * h3 mods
- * 
+ *
  * 70    11/08/97 3:34p Peter
  * fixed stupid gdbg_info crasher
- * 
+ *
  * 69    11/04/97 4:00p Dow
  * Banshee Mods
- * 
+ *
  * 68    11/03/97 3:43p Peter
  * h3/cvg cataclysm
- * 
+ *
  * 67    11/01/97 12:11p Pgj
  * glide.dll ---> glide2x.dll
- * 
+ *
  * 66    10/31/97 8:53a Peter
  * last lying change, really
- * 
+ *
  * 65    10/30/97 3:42p Peter
  * protected the last bit of nonsense
- * 
+ *
  * 64    10/30/97 3:37p Peter
  * spoof sst1
- * 
+ *
  * 63    10/29/97 2:45p Peter
  * C version of Taco's packing code
- * 
+ *
  * 62    10/23/97 5:28p Peter
  * sli fifo thing
- * 
+ *
  * 61    9/15/97 7:31p Peter
  * more cmdfifo cleanup, fixed normal buffer clear, banner in the right
  * place, lfb's are on, Hmmmm.. probably more
- * 
+ *
  * 60    9/10/97 10:13p Peter
  * fifo logic from GaryT, non-normalized fp first cut
- * 
+ *
  * 59    9/05/97 5:29p Peter
  * changes for direct hw
- * 
+ *
  * 58    9/01/97 3:18p Peter
  * correct integer rounding for pts
- * 
+ *
  * 57    8/30/97 5:59p Tarolli
  * init and hal fixups
- * 
+ *
  * 56    8/30/97 1:19p Peter
  * first cut at using blit to clear, more to come to do inner rects
- * 
+ *
  * 55    8/18/97 3:52p Peter
  * pre-hw arrival fixes/cleanup
- * 
+ *
  * 54    7/30/97 2:42p Peter
  * shared and sanitized
- * 
+ *
  * 53    7/28/97 2:41p Peter
  * turned sli code back on for cvg, but waiting for hal
- * 
+ *
  * 52    7/25/97 11:40a Peter
  * removed dHalf, change field name to match real use for cvg
- * 
+ *
  * 51    7/08/97 2:47p Peter
  * fixed merge stupidity from last checkin
- * 
+ *
  * 50    7/02/97 12:28p Peter
  * removed spurious NOP, tex dl
- * 
+ *
  * 49    6/24/97 4:02p Peter
  * proper cmd fifo placement
- * 
+ *
  * 48    6/23/97 4:46p Peter
  * fixed my ,uckage
  * 47    6/23/97 4:43p Peter
@@ -233,8 +237,8 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
-BOOL WINAPI 
-DllMain(HANDLE hInst, ULONG  ul_reason_for_call, LPVOID lpReserved) 
+BOOL WINAPI
+DllMain(HANDLE hInst, ULONG  ul_reason_for_call, LPVOID lpReserved)
 {
   switch( ul_reason_for_call ) {
   case DLL_PROCESS_DETACH:
@@ -254,7 +258,7 @@ DllMain(HANDLE hInst, ULONG  ul_reason_for_call, LPVOID lpReserved)
     GDBG_INFO((80, "DllMain: Unhandled message.\n"));
     break;
   }
-  
+
   return TRUE;
 
 } /* DllMain */
@@ -269,20 +273,20 @@ DllMain(HANDLE hInst, ULONG  ul_reason_for_call, LPVOID lpReserved)
   Description:
   Discover devices on the PCI bus.
   Discover configuration of detected devices.
-  Initialize all Glide GC's 
+  Initialize all Glide GC's
 
   Recognized devices depend upon compile time flags
 
-  This code should NOT initialize the hardware 
-  any more than is necessary for discovery of 
+  This code should NOT initialize the hardware
+  any more than is necessary for discovery of
   configuration
 
   Arguments: none
-  Return: 
+  Return:
   FXTRUE  - at least one device was detected
   FXFALSE - no devices were detected.
   -------------------------------------------------------------------*/
-FxBool 
+FxBool
 _grSstDetectResources(void)
 {
   static FxBool calledP = FXFALSE;
@@ -300,7 +304,7 @@ _grSstDetectResources(void)
     FxDeviceInfo dummyDevInfo;
 #endif /* !GLIDE_INIT_HAL */
 
-    /* The first time through the init code we need to map 
+    /* The first time through the init code we need to map
      * all of the boards. Future calls can just grab this
      * info out of the halInfo that we have here.
      */
@@ -316,7 +320,7 @@ _grSstDetectResources(void)
       const FxU32 hwRevNum = ((GETENV("FX_GLIDE_HW_REV") == NULL)
                               ? 4
                               : atol(GETENV("FX_GLIDE_HW_REV")));
-      
+
       for(ctx = device = 0; device < count; device++) {
         const FxDeviceInfo* curDev = NULL;
         FxBool regInitP = FXFALSE;
@@ -335,13 +339,13 @@ _grSstDetectResources(void)
         }
 #endif /* !GLIDE_INIT_HAL */
 
-        if ((devRegs != NULL) && 
+        if ((devRegs != NULL) &&
             (curDev != NULL) &&
             (curDev->fbiRevision >= hwRevNum)) {
           const FxU32 curSstNum = hwConfig->num_sst;
           FxU32 i;
 
-#if (GLIDE_PLATFORM & GLIDE_HW_CVG)        
+#if (GLIDE_PLATFORM & GLIDE_HW_CVG)
           /* Internally we always keep the real type. */
           hwConfig->SSTs[ctx].type = GR_SSTTYPE_Voodoo2;
 #else
@@ -357,11 +361,11 @@ _grSstDetectResources(void)
            * mimic the actions of the nt driver, where everything is
            * happy, in win95.  However, if this is the slave of an sli
            * pair then we don't want to waste mtrr's that we're never
-           * really going to write to.  
+           * really going to write to.
            */
           if (!inSliPairP && (_GlideRoot.CPUType >= 6)) {
-		sst1InitCaching((FxU32*)devRegs, FXTRUE);
-	  }
+        sst1InitCaching((FxU32*)devRegs, FXTRUE);
+      }
 
           if (!sst1InitRegisters((FxU32*)devRegs) ||
               !sst1InitGetDeviceInfo((FxU32*)devRegs, &dummyDevInfo)) goto __errRegFailure;
@@ -377,7 +381,7 @@ _grSstDetectResources(void)
           /* Video parameters */
           _GlideRoot.GCs[ctx].grSstRez     = GR_RESOLUTION_NONE;
           _GlideRoot.GCs[ctx].grSstRefresh = curDev->fbiVideoRefresh;
-        
+
           /* Chip configuration */
           _GlideRoot.GCs[ctx].num_tmu   = curDev->numberTmus;
           _GlideRoot.GCs[ctx].fbuf_size = hwConfig->SSTs[curSstNum].sstBoard.Voodoo2Config.fbRam;
@@ -385,24 +389,24 @@ _grSstDetectResources(void)
           /* Independet board or physical sli master */
           if (!inSliPairP) {
             _GlideRoot.gcMap[curSstNum] = _GlideRoot.gcNum;
-            
+
             /* Voodoo^2 glide2x returns that it is an sst1, but the
              * revision is bumped so that developers can really tell.
              * Additionally, we now have the fun on Voodoo^1.5 which is
-             * just a Voodoo^2 in a 2200 configuration. 
+             * just a Voodoo^2 in a 2200 configuration.
              */
-            hwConfig->SSTs[curSstNum].sstBoard.Voodoo2Config.fbiRev = (curDev->fbiRevision + 
+            hwConfig->SSTs[curSstNum].sstBoard.Voodoo2Config.fbiRev = (curDev->fbiRevision +
                                                                        ((curDev->numberTmus == 1)
-                                                                        ? 0x080 
+                                                                        ? 0x080
                                                                         : 0x100));
-            
+
             hwConfig->SSTs[curSstNum].sstBoard.Voodoo2Config.fbRam     = curDev->fbiMemSize;
             hwConfig->SSTs[curSstNum].sstBoard.Voodoo2Config.nTexelfx  = curDev->numberTmus;
             hwConfig->SSTs[curSstNum].sstBoard.Voodoo2Config.sliDetect = curDev->sliDetected;
 
             for(i = 0; i < curDev->numberTmus; i++) {
               const FxU32 curTmuMemSize = curDev->tmuMemSize[i];
-              
+
               hwConfig->SSTs[curSstNum].sstBoard.Voodoo2Config.tmuConfig[i].tmuRev = curDev->tmuRevision;
               hwConfig->SSTs[curSstNum].sstBoard.Voodoo2Config.tmuConfig[i].tmuRam = curTmuMemSize;
             }
@@ -413,18 +417,18 @@ _grSstDetectResources(void)
           /* Clear the tmu state */
           for(i = 0; i < curDev->numberTmus; i++) {
             const FxU32 curTmuMemSize = curDev->tmuMemSize[i];
-            
+
             memset(&_GlideRoot.GCs[ctx].tmu_state[i], 0, sizeof(_GlideRoot.GCs[ctx].tmu_state[i]));
             _GlideRoot.GCs[ctx].tmu_state[i].total_mem = (curTmuMemSize << 20);
-            
-            _GlideRoot.GCs[ctx].tmu_state[i].ncc_mmids[0] = 
+
+            _GlideRoot.GCs[ctx].tmu_state[i].ncc_mmids[0] =
               _GlideRoot.GCs[ctx].tmu_state[i].ncc_mmids[1] = GR_NULL_MIPMAP_HANDLE;
           }
 
           /* sst1GetDeviceInfo will not return any pairing information
            * until after the boards are paired w/ sst1InitSli which we
            * have not yet done. Currently we assume that the next
-           * discovered board will be the slave.  
+           * discovered board will be the slave.
            */
           _GlideRoot.GCs[ctx].scanline_interleaved = curDev->sliDetected;
           _GlideRoot.GCs[ctx].sliPairP             = curDev->sliPaired;
@@ -467,7 +471,7 @@ _grSstDetectResources(void)
           regInitP = FXTRUE;
           _GlideRoot.gcNum++;
           _GlideRoot.GCs[ctx].hwInitP = FXTRUE;
-        
+
           rv = FXTRUE;
           ctx++;
 
@@ -499,8 +503,8 @@ __errExit:
   }
 #else
 #  error "Write code for this chip"
-#endif  
-  
+#endif
+
   return rv;
 } /* _grSstDetectResources */
 
@@ -512,7 +516,7 @@ displayBoardInfo(int i, GrHwConfiguration *hwc)
       (hwc->SSTs[i].type == GR_SSTTYPE_Voodoo2)) {
     int tmuNum;
 
-    GDBG_INFO(80,"SST board %d: 3Dfx Voodoo%s\n", 
+    GDBG_INFO(80,"SST board %d: 3Dfx Voodoo%s\n",
               i, ((hwc->SSTs[i].type == GR_SSTTYPE_VOODOO) ? " Graphics" : "^2"));
     if (hwc->SSTs[i].sstBoard.VoodooConfig.sliDetect) {
       GDBG_INFO(80,"\tScanline Interleaved\n");
@@ -596,18 +600,18 @@ _GlideInitEnvironment(void)
     _GlideRoot.environment.texLodDither      = ((GETENV("FX_GLIDE_LOD_DITHER") == NULL)
                                                 ? 0x00UL
                                                 : SST_TLODDITHER);
-    
+
     _GlideRoot.environment.nColorBuffer      = GLIDE_GETENV("FX_GLIDE_ALLOC_COLOR", -1L);
-    _GlideRoot.environment.nAuxBuffer        = GLIDE_GETENV("FX_GLIDE_ALLOC_AUX", -1L);    
+    _GlideRoot.environment.nAuxBuffer        = GLIDE_GETENV("FX_GLIDE_ALLOC_AUX", -1L);
     _GlideRoot.environment.swFifoLWM         = GLIDE_GETENV("FX_GLIDE_LWM", -1L);
 
     _GlideRoot.environment.swapInterval      = GLIDE_GETENV("FX_GLIDE_SWAPINTERVAL", -1L);
     if ((envStr != NULL) && (_GlideRoot.environment.swapInterval < 0)) {
       _GlideRoot.environment.swapInterval = 0;
     }
-    
+
     _GlideRoot.environment.snapshot          = GLIDE_GETENV("FX_SNAPSHOT", 0);
-    
+
     GDBG_INFO(80,"    triBoundsCheck: %d\n",_GlideRoot.environment.triBoundsCheck);
     GDBG_INFO(80,"      swapInterval: %d\n",_GlideRoot.environment.swapInterval);
     GDBG_INFO(80,"          noSplash: %d\n",_GlideRoot.environment.noSplash);
@@ -636,7 +640,7 @@ _GlideInitEnvironment(void)
     if (!hwDetectP) {
       char s[128];
       const char* errStr = s;
-      
+
       if (pciGetErrorCode() == PCI_ERR_NOERR) {
 #ifndef __linux__
         sprintf(s, "%s: glide2x.dll expected %s, none detected\n",
@@ -648,16 +652,16 @@ _GlideInitEnvironment(void)
       } else {
         errStr = pciGetErrorString();
       }
-      
+
       GrErrorCallback(errStr, FXTRUE);
     }
-    
+
     /* GMT: this isn't really necessary since GlideRoot is static */
     for (i = 0; i < _GlideRoot.hwConfig.num_sst; i++) {
       _GlideRoot.GCs[i].mm_table.free_mmid = 0;
       displayBoardInfo(i, &_GlideRoot.hwConfig);
     }
-    
+
     _grMipMapInit();
     _GlideRoot.initialized = hwDetectP;               /* save this for the end */
   }

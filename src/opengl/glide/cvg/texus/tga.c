@@ -1,24 +1,25 @@
+/* $Id: tga.c,v 1.2 2001-09-05 14:30:47 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Revision: 1.1 $
-** $Date: 2000-02-25 00:38:01 $
+** $Revision: 1.2 $
+** $Date: 2001-09-05 14:30:47 $
 */
 
 #include <stdio.h>
@@ -51,37 +52,37 @@ typedef struct _tgaHeader{
 } TgaHeader;
 
 /* Definitions for image types. */
-#define TGA_NULL	0
-#define TGA_CMAP	1
-#define TGA_TRUE	2
-#define TGA_MONO	3
-#define TGA_CMAP_RLE	9
-#define TGA_TRUE_RLE	10
-#define TGA_MONO_RLE	11
+#define TGA_NULL    0
+#define TGA_CMAP    1
+#define TGA_TRUE    2
+#define TGA_MONO    3
+#define TGA_CMAP_RLE    9
+#define TGA_TRUE_RLE    10
+#define TGA_MONO_RLE    11
 
 FxBool
 _txReadTGAHeader( FILE *stream, FxU32 cookie, TxMip *info)
 {
-    TgaHeader	*tgaHeader = (TgaHeader *) info->pal;
-    int			i;
+    TgaHeader   *tgaHeader = (TgaHeader *) info->pal;
+    int         i;
 
-    // Fill up rest of the TGA header. 
-    if ( fread( &(tgaHeader->ImgType), 1, sizeof(TgaHeader)-2, stream ) != 
-    	sizeof(TgaHeader)-2) {
-    	txPanic("Unexpected end of file.");
-    	return FXFALSE;
+    // Fill up rest of the TGA header.
+    if ( fread( &(tgaHeader->ImgType), 1, sizeof(TgaHeader)-2, stream ) !=
+        sizeof(TgaHeader)-2) {
+        txPanic("Unexpected end of file.");
+        return FXFALSE;
     }
-    tgaHeader->IDLength	= (FxU8) ((cookie >>  8) & 0xFF);
+    tgaHeader->IDLength = (FxU8) ((cookie >>  8) & 0xFF);
     tgaHeader->CMapType = (FxU8) ((cookie      ) & 0xFF);
 
     // Optionally, skip the image id fields.
     for (i= (tgaHeader->IDLength) & 0xFF; i; i--) {
-    	int	c;
+        int c;
 
-    	if ((c = getc(stream)) == EOF) {
-    		txPanic("Unexpected EOF.");
-    		return FXFALSE;
-    	}
+        if ((c = getc(stream)) == EOF) {
+            txPanic("Unexpected EOF.");
+            return FXFALSE;
+        }
     }
 
     // 3Dfx specific part here.
@@ -90,53 +91,53 @@ _txReadTGAHeader( FILE *stream, FxU32 cookie, TxMip *info)
     info->depth  = 1;
 
     if ((info->width <= 0) || (info->height <= 0)) {
-    	txError("TGA Image: width or height is 0.");
-    	return FXFALSE;
+        txError("TGA Image: width or height is 0.");
+        return FXFALSE;
     }
 
     switch(tgaHeader->ImgType) {
     case TGA_MONO:
-    case TGA_MONO_RLE:			// True color image.
-    	if (tgaHeader->PixelDepth != 8) {
-	    txError("TGA Image: Mono image is not 8 bits/pixel.");
-	    return FXFALSE;
-    	}
-    	info->format = GR_TEXFMT_I_8;
-    	break;
+    case TGA_MONO_RLE:          // True color image.
+        if (tgaHeader->PixelDepth != 8) {
+        txError("TGA Image: Mono image is not 8 bits/pixel.");
+        return FXFALSE;
+        }
+        info->format = GR_TEXFMT_I_8;
+        break;
 
     case TGA_TRUE:
     case TGA_TRUE_RLE:
-    	switch (tgaHeader->PixelDepth ) {
-    	case	15: 
-    	case	16: 
-			info->format = GR_TEXFMT_ARGB_1555; break;
-    	case	24: 
-    	case	32: 
-			info->format = GR_TEXFMT_ARGB_8888; break;
-    	default:	
-    			txError("TGA Image: True color image is not 24/32 bits/pixel.");
-    			return FXFALSE; 
-    			break;
-    	}
-    	break;
-      
+        switch (tgaHeader->PixelDepth ) {
+        case    15:
+        case    16:
+            info->format = GR_TEXFMT_ARGB_1555; break;
+        case    24:
+        case    32:
+            info->format = GR_TEXFMT_ARGB_8888; break;
+        default:
+                txError("TGA Image: True color image is not 24/32 bits/pixel.");
+                return FXFALSE;
+                break;
+        }
+        break;
+
     case TGA_CMAP:
-    case TGA_CMAP_RLE:			// Color mapped image.
-    	if ( tgaHeader->CMapType     != 1 ) {
-    		txError("TGA Image: Color-mapped TGA image has no palette");
-    		return FXFALSE;
-    	}
-    	if (((tgaHeader->CMapLengthLo + tgaHeader->CMapLengthHi * 256L)
-    	    +(tgaHeader->CMapStartLo + tgaHeader->CMapStartHi * 256L)) > 256){
-    		txError("TGA Image: Color-mapped image has > 256 colors");
-    		return FXFALSE;
-    	}
-    	info->format = GR_TEXFMT_P_8;
-    	break;
+    case TGA_CMAP_RLE:          // Color mapped image.
+        if ( tgaHeader->CMapType     != 1 ) {
+            txError("TGA Image: Color-mapped TGA image has no palette");
+            return FXFALSE;
+        }
+        if (((tgaHeader->CMapLengthLo + tgaHeader->CMapLengthHi * 256L)
+            +(tgaHeader->CMapStartLo + tgaHeader->CMapStartHi * 256L)) > 256){
+            txError("TGA Image: Color-mapped image has > 256 colors");
+            return FXFALSE;
+        }
+        info->format = GR_TEXFMT_P_8;
+        break;
 
     default:
-    	txError("TGA Image: unsupported format");
-    	return  FXFALSE;
+        txError("TGA Image: unsupported format");
+        return  FXFALSE;
     }
     info->size = info->width*info->height*GR_TEXFMT_SIZE(info->format);
 
@@ -146,10 +147,10 @@ _txReadTGAHeader( FILE *stream, FxU32 cookie, TxMip *info)
 static FxBool
 _txReadTGAColorMap(FILE *stream, const TgaHeader *tgaHeader, FxU32 *palette)
 {
-    int		cmapStart;
-    int		cmapLength;
-    int		cmapDepth;
-    int		i;
+    int     cmapStart;
+    int     cmapLength;
+    int     cmapDepth;
+    int     i;
 
     cmapStart   = tgaHeader->CMapStartLo;
     cmapStart  += tgaHeader->CMapStartHi * 256L;
@@ -159,152 +160,152 @@ _txReadTGAColorMap(FILE *stream, const TgaHeader *tgaHeader, FxU32 *palette)
 
     cmapDepth   = tgaHeader->CMapDepth;
 
-    if (tgaHeader->CMapType == 0) return FXTRUE;		// no colormap.
+    if (tgaHeader->CMapType == 0) return FXTRUE;        // no colormap.
 
     /* Validate some parameters */
     if (cmapStart < 0) {
-    	txError("TGA Image: Bad Color Map start value.");
-    	return FXFALSE;
+        txError("TGA Image: Bad Color Map start value.");
+        return FXFALSE;
     }
 
-    cmapDepth = (cmapDepth + 1) >> 3;		// to bytes.
+    cmapDepth = (cmapDepth + 1) >> 3;       // to bytes.
     if ((cmapDepth <= 0) || (cmapDepth > 4)) {
-    	txError("TGA Image: Bad Color Map depth.");
-    	return FXFALSE;
+        txError("TGA Image: Bad Color Map depth.");
+        return FXFALSE;
     }
 
     // May have to skip the color map.
-    if ((tgaHeader->ImgType != TGA_CMAP) && 
-    	(tgaHeader->ImgType != TGA_CMAP_RLE)) {
-    	/* True color, yet there is a palette, this is OK, just skip. */
+    if ((tgaHeader->ImgType != TGA_CMAP) &&
+        (tgaHeader->ImgType != TGA_CMAP_RLE)) {
+        /* True color, yet there is a palette, this is OK, just skip. */
 
-    	cmapLength *= cmapDepth;
-    	while (cmapLength--) {
-    		int		c;
+        cmapLength *= cmapDepth;
+        while (cmapLength--) {
+            int     c;
 
-    		c = getc(stream);
-    		if (c == EOF) {
-    			txError("TGA Image: Unexpected EOF reading Color Map.");
-    			return FXFALSE;
-    		}
-    	}
-    	return FXTRUE;
+            c = getc(stream);
+            if (c == EOF) {
+                txError("TGA Image: Unexpected EOF reading Color Map.");
+                return FXFALSE;
+            }
+        }
+        return FXTRUE;
     }
 
-    // This is a real palette that's going to be used. 
+    // This is a real palette that's going to be used.
 
     // Verify that it's not too large.
     if ((cmapStart + cmapLength) > 256) {
-    	txError("TGA Image: Color Map > 256 entries.");
-    	return FXFALSE;
+        txError("TGA Image: Color Map > 256 entries.");
+        return FXFALSE;
     }
 
 
     // printf("cmapdepth = %d, start = %d, length = %d\n", cmapDepth,
-    // 	cmapStart, cmapLength);
+    //  cmapStart, cmapLength);
     for (i=0; i<256; i++) {
-    	int	r, g, b, a;
+        int r, g, b, a;
 
-    	if ((i < cmapStart) || (i >= (cmapStart + cmapLength))) {
-    		palette[i] = 0;
-    		// printf("Skipping palette entry %d\n", i);
-    		continue;
-    	}
+        if ((i < cmapStart) || (i >= (cmapStart + cmapLength))) {
+            palette[i] = 0;
+            // printf("Skipping palette entry %d\n", i);
+            continue;
+        }
 
-    	// Read this colormap entry.
-    	switch (cmapDepth) {
-    	case 1:	// 8 bpp
-    		r = getc(stream);
-    		if (r == EOF) {
-  		    txError("TGA Image: Unexpected End of File.");
-		    return FXFALSE;
-    		}
-    		r &= 0xFF;
-    		palette[i] = (r << 24) | (r << 16) | (r << 8) | (r);
-   		break;
+        // Read this colormap entry.
+        switch (cmapDepth) {
+        case 1: // 8 bpp
+            r = getc(stream);
+            if (r == EOF) {
+            txError("TGA Image: Unexpected End of File.");
+            return FXFALSE;
+            }
+            r &= 0xFF;
+            palette[i] = (r << 24) | (r << 16) | (r << 8) | (r);
+        break;
 
-    	case 2:	// 15, 16 bpp.
+        case 2: // 15, 16 bpp.
 
-   		b = getc(stream);
-   		r = getc(stream);
-   		if ((r == EOF) || (b == EOF)) {
-   			txError("TGA Image: Unexpected End of File.");
-   			return FXFALSE;
-   		}
-   		r &= 0xFF;
-   		b &= 0xFF;
-   		g = ((r & 0x3) << 6) + ((b & 0xE0) >> 2);
-   		r = (r & 0x7C) << 1;
-   		b = (b & 0x1F) << 3;
+        b = getc(stream);
+        r = getc(stream);
+        if ((r == EOF) || (b == EOF)) {
+            txError("TGA Image: Unexpected End of File.");
+            return FXFALSE;
+        }
+        r &= 0xFF;
+        b &= 0xFF;
+        g = ((r & 0x3) << 6) + ((b & 0xE0) >> 2);
+        r = (r & 0x7C) << 1;
+        b = (b & 0x1F) << 3;
 
-   		palette[i] = (r << 16) | (g << 8) | (b) | 0xFF000000L;
-   		break;
+        palette[i] = (r << 16) | (g << 8) | (b) | 0xFF000000L;
+        break;
 
-    	case 3:
-    	case 4:
-   		b = getc(stream);
-   		g = getc(stream);
-   		r = getc(stream);
-   		a = (cmapDepth == 4) ? getc(stream) : 0x0FF;
+        case 3:
+        case 4:
+        b = getc(stream);
+        g = getc(stream);
+        r = getc(stream);
+        a = (cmapDepth == 4) ? getc(stream) : 0x0FF;
 
-   		if ((r == EOF) || (g == EOF) || (b == EOF) | (a == EOF)) {
-   			txError("TGA Image: Unexpected End of File.");
-   			return FXFALSE;
-   		}
-   		palette[i] = (a << 24) | (r << 16) | (g << 8) | b;
-   		// printf("Setting palette %3d to %.08x\n", i, palette[i]);
-   		break;
+        if ((r == EOF) || (g == EOF) || (b == EOF) | (a == EOF)) {
+            txError("TGA Image: Unexpected End of File.");
+            return FXFALSE;
+        }
+        palette[i] = (a << 24) | (r << 16) | (g << 8) | b;
+        // printf("Setting palette %3d to %.08x\n", i, palette[i]);
+        break;
 
-    	default:
-    		txError("TGA Image: Bad Color Map depth.");
-    		return FXFALSE;
-    	}
+        default:
+            txError("TGA Image: Bad Color Map depth.");
+            return FXFALSE;
+        }
     }
     return FXTRUE;
 }
 
-static	int	tgaRLE, tgaRLEflag, tgaRLEcount, tgaRLEsav[4]; 
+static  int tgaRLE, tgaRLEflag, tgaRLEcount, tgaRLEsav[4];
 
-static	FxBool
+static  FxBool
 _txReadTGARLEPixel( FILE *stream, FxU8 *data, int pixsize)
 {
-    int		c, i;
+    int     c, i;
 
     // Run length encoded data Only
     if (tgaRLEcount == 0) {
-    	// Need to restart the run.
-    	if ( (tgaRLEcount = c = getc( stream )) == EOF) {
-    		txError("TGA Image: Unexpected End of File.");
-    		return FXFALSE;
-    	}
-    	tgaRLEflag = tgaRLEcount & 0x80;
-    	tgaRLEcount = (tgaRLEcount & 0x7F) + 1;
+        // Need to restart the run.
+        if ( (tgaRLEcount = c = getc( stream )) == EOF) {
+            txError("TGA Image: Unexpected End of File.");
+            return FXFALSE;
+        }
+        tgaRLEflag = tgaRLEcount & 0x80;
+        tgaRLEcount = (tgaRLEcount & 0x7F) + 1;
 
-    	if (tgaRLEflag) {
-	    // Replicated color, read the color to be replicated 
-    	    for (i=0; i<pixsize; i++) {
-		if ( (c = getc( stream )) == EOF) {
-    		    txError("TGA Image: Unexpected End of File\n");
-    		    return FXFALSE;
-    		}
-    		tgaRLEsav[i] = (FxU8) c;
-    	    }
-    	}
+        if (tgaRLEflag) {
+        // Replicated color, read the color to be replicated
+            for (i=0; i<pixsize; i++) {
+        if ( (c = getc( stream )) == EOF) {
+                txError("TGA Image: Unexpected End of File\n");
+                return FXFALSE;
+            }
+            tgaRLEsav[i] = (FxU8) c;
+            }
+        }
     }
 
     // Now deliver the data either from input or from saved values.
     tgaRLEcount--;
     if (tgaRLEflag) {
-    	// deliver from saved data.
-    	for (i=0; i<pixsize; i++) *data++ = (FxU8) tgaRLEsav[i];
+        // deliver from saved data.
+        for (i=0; i<pixsize; i++) *data++ = (FxU8) tgaRLEsav[i];
     } else {
-    	for (i=0; i<pixsize; i++) {
-    	    if ( (c = getc( stream )) == EOF) {
-    		txError("TGA Image: Unexpected End of File\n");
-    		return FXFALSE;
-	    }
-    	    *data++ = (FxU8) c;
-    	}
+        for (i=0; i<pixsize; i++) {
+            if ( (c = getc( stream )) == EOF) {
+            txError("TGA Image: Unexpected End of File\n");
+            return FXFALSE;
+        }
+            *data++ = (FxU8) c;
+        }
     }
     return FXTRUE;
 }
@@ -313,19 +314,19 @@ static FxBool
 _txReadTGASpan( FILE *stream, FxU8 *data, int w, int pixsize)
 {
     if (tgaRLE == 0) {
-    	if ( fread( data, 1, w * pixsize, stream) != (FxU32)(w * pixsize)) {
-    		txError("TGA Image: Unexpected End of File\n");
-    		return FXFALSE;
-    	}
-    	return FXTRUE;
+        if ( fread( data, 1, w * pixsize, stream) != (FxU32)(w * pixsize)) {
+            txError("TGA Image: Unexpected End of File\n");
+            return FXFALSE;
+        }
+        return FXTRUE;
     }
 
     // Otherwise, RLE data.
     while (w--) {
-    	if (!_txReadTGARLEPixel( stream, data, pixsize)) {
-	    return FXFALSE;
-    	}
-    	data += pixsize;
+        if (!_txReadTGARLEPixel( stream, data, pixsize)) {
+        return FXFALSE;
+        }
+        data += pixsize;
     }
     return FXTRUE;
 }
@@ -333,11 +334,11 @@ _txReadTGASpan( FILE *stream, FxU8 *data, int w, int pixsize)
 FxBool
 _txReadTGAData( FILE *stream, TxMip *info)
 {
-    TgaHeader	*tgaHeader = (TgaHeader *) info->pal;
-    int		i, stride;
-    int 	bpp;			// bytesPerPixel
-    FxU8*	data;
-    long	BigEndian = 0xff000000;
+    TgaHeader   *tgaHeader = (TgaHeader *) info->pal;
+    int     i, stride;
+    int     bpp;            // bytesPerPixel
+    FxU8*   data;
+    long    BigEndian = 0xff000000;
 
     // printf("TxREAD TGA DATA\n");
     tgaRLEcount = 0;
@@ -345,16 +346,16 @@ _txReadTGAData( FILE *stream, TxMip *info)
     bpp = (tgaHeader->PixelDepth + 1) >> 3;
 
     switch (tgaHeader->ImgType) {
-    case TGA_MONO:	tgaRLE = 0; info->format = GR_TEXFMT_I_8; break;
-    case TGA_MONO_RLE:	tgaRLE = 1; info->format = GR_TEXFMT_I_8; break;
+    case TGA_MONO:  tgaRLE = 0; info->format = GR_TEXFMT_I_8; break;
+    case TGA_MONO_RLE:  tgaRLE = 1; info->format = GR_TEXFMT_I_8; break;
 
-    case TGA_TRUE:	tgaRLE = 0; info->format = (bpp == 2) ? 
-    			GR_TEXFMT_ARGB_1555 : GR_TEXFMT_ARGB_8888; break;
-    case TGA_TRUE_RLE:	tgaRLE = 1; info->format = (bpp == 2) ? 
-    			GR_TEXFMT_ARGB_1555 : GR_TEXFMT_ARGB_8888; break;
+    case TGA_TRUE:  tgaRLE = 0; info->format = (bpp == 2) ?
+                GR_TEXFMT_ARGB_1555 : GR_TEXFMT_ARGB_8888; break;
+    case TGA_TRUE_RLE:  tgaRLE = 1; info->format = (bpp == 2) ?
+                GR_TEXFMT_ARGB_1555 : GR_TEXFMT_ARGB_8888; break;
 
-    case TGA_CMAP:	tgaRLE = 0; info->format = GR_TEXFMT_P_8; break;
-    case TGA_CMAP_RLE:	tgaRLE = 1; info->format = GR_TEXFMT_P_8; break;
+    case TGA_CMAP:  tgaRLE = 0; info->format = GR_TEXFMT_P_8; break;
+    case TGA_CMAP_RLE:  tgaRLE = 1; info->format = GR_TEXFMT_P_8; break;
     }
 
     // printf("bpp = %d, rle = %d\n", bpp, tgaRLE);
@@ -362,23 +363,23 @@ _txReadTGAData( FILE *stream, TxMip *info)
     stride =  info->width * bpp;
     data   =  info->data[0];
     if ((tgaHeader->ImageDescriptor & 0x20) == 0) {
-    	// Origin is lower left
-    	data   = data + (info->height-1) * stride;
-    	stride = -stride;
+        // Origin is lower left
+        data   = data + (info->height-1) * stride;
+        stride = -stride;
     }
 
     /* If there's a colormap, read it now. */
-    if (!_txReadTGAColorMap(stream, tgaHeader, (FxU32 *) &(info->pal[0]))) 
-    	return FXFALSE;
+    if (!_txReadTGAColorMap(stream, tgaHeader, (FxU32 *) &(info->pal[0])))
+        return FXFALSE;
     // printf("read in color map\n");
 
     /* Read in all the data */
     for ( i = 0; i < info->height; i++) {
-    	if (!_txReadTGASpan( stream, data, info->width, bpp)) {
-    			txError("TGA Image: Unexpected end of file.");
-    			return FXFALSE;
-    	}
-    	data += stride;
+        if (!_txReadTGASpan( stream, data, info->width, bpp)) {
+                txError("TGA Image: Unexpected end of file.");
+                return FXFALSE;
+        }
+        data += stride;
     }
 
     /*
@@ -389,42 +390,42 @@ _txReadTGAData( FILE *stream, TxMip *info)
      */
     // printf("Repacking\n");
     if (bpp == 3) {
-    	int		npixels = info->width * info->height;
-    	FxU8	*src = ((FxU8 *) info->data[0]) + (npixels - 1) * 3;
-    	FxU8	*dst = ((FxU8 *) info->data[0]) + (npixels - 1) * 4;
+        int     npixels = info->width * info->height;
+        FxU8    *src = ((FxU8 *) info->data[0]) + (npixels - 1) * 3;
+        FxU8    *dst = ((FxU8 *) info->data[0]) + (npixels - 1) * 4;
 
-    	while (npixels--) {
-    		dst[3] = 0xFF;
-    		dst[2] = src[2];
-    		dst[1] = src[1];
-    		dst[0] = src[0];
-    		dst -= 4;
-    		src -= 3;
-    	}
+        while (npixels--) {
+            dst[3] = 0xFF;
+            dst[2] = src[2];
+            dst[1] = src[1];
+            dst[0] = src[0];
+            dst -= 4;
+            src -= 3;
+        }
     }
     // printf("Done\n");
     if (*(FxU8 *)&BigEndian) {
-	/* Repack 16bpp and 32bpp cases */
+    /* Repack 16bpp and 32bpp cases */
         if (bpp == 2) {
-    	    int		npixels = info->width * info->height;
-    	    FxU16	*src = (FxU16 *) info->data[0];
+            int     npixels = info->width * info->height;
+            FxU16   *src = (FxU16 *) info->data[0];
 
-    	    while (npixels--) {
-            	*src = (*src << 8) | ((*src >> 8) & 0xff);
+            while (npixels--) {
+                *src = (*src << 8) | ((*src >> 8) & 0xff);
                 src++;
-    	    }
+            }
         }
         if ((bpp == 3) || (bpp == 4)) {
-    	    int		npixels = info->width * info->height;
-    	    FxU32	*src = (FxU32 *) info->data[0];
+            int     npixels = info->width * info->height;
+            FxU32   *src = (FxU32 *) info->data[0];
 
-    	    while (npixels--) {
-            	*src = (((*src      ) & 0xff)  << 24)|
-            	       (((*src >>  8) & 0xff)  << 16)|
-            	       (((*src >> 16) & 0xff)  <<  8)|
-            	       (((*src >> 24) & 0xff)       );
+            while (npixels--) {
+                *src = (((*src      ) & 0xff)  << 24)|
+                       (((*src >>  8) & 0xff)  << 16)|
+                       (((*src >> 16) & 0xff)  <<  8)|
+                       (((*src >> 24) & 0xff)       );
                 src++;
-    	    }
+            }
         }
     }
     return FXTRUE;

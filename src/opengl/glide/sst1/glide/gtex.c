@@ -1,34 +1,38 @@
+/* $Id: gtex.c,v 1.2 2001-09-05 14:30:54 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glide/sst1/glide/gtex.c,v 1.1 2000-02-25 00:31:19 sandervl Exp $
+** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glide/sst1/glide/gtex.c,v 1.2 2001-09-05 14:30:54 bird Exp $
 ** $Log: gtex.c,v $
-** Revision 1.1  2000-02-25 00:31:19  sandervl
+** Revision 1.2  2001-09-05 14:30:54  bird
+** Added $Id:$ keyword.
+**
+** Revision 1.1  2000/02/25 00:31:19  sandervl
 ** Created new Voodoo 1 Glide dir
 **
- * 
+ *
  * 12    3/04/97 9:08p Dow
  * Neutered multiplatform multiheaded monster
- * 
+ *
  * 11    3/03/97 10:58a Jdt
  * Fixe for 2-pass trilinear
- * 
+ *
  * 10    12/23/96 1:37p Dow
  * chagnes for multiplatform glide
 **
@@ -62,7 +66,7 @@ GR_ENTRY(grTexClampMode, void, ( GrChipID_t tmu, GrTextureClampMode_t s_clamp_mo
   GR_BEGIN("grTexClampMode",88,4+2*PACKER_WORKAROUND_SIZE);
   GDBG_INFO_MORE((gc->myLevel,"(%d, %d,%d)\n",tmu,s_clamp_mode,t_clamp_mode));
   GR_CHECK_TMU(myName, tmu);
-  
+
   texturemode  = gc->state.tmu_config[tmu].textureMode;
   texturemode &= ~( SST_TCLAMPS | SST_TCLAMPT );
   texturemode |=  clampMode;
@@ -87,7 +91,7 @@ GR_ENTRY(grTexCombine, void, ( GrChipID_t tmu, GrCombineFunction_t rgb_function,
 
   GR_BEGIN("grTexCombine",88,8+2*PACKER_WORKAROUND_SIZE);
   GDBG_INFO_MORE((gc->myLevel,"(%d, %d,%d, %d,%d, %d,%d)\n",
-                 tmu, rgb_function, rgb_factor, 
+                 tmu, rgb_function, rgb_factor,
                  alpha_function, alpha_factor,
                  rgb_invert, alpha_invert));
   GR_CHECK_TMU( myName, tmu );
@@ -110,7 +114,7 @@ GR_ENTRY(grTexCombine, void, ( GrChipID_t tmu, GrCombineFunction_t rgb_function,
                alpha_factor > GR_COMBINE_FACTOR_ONE_MINUS_LOD_FRACTION,
                "unsupported texture alpha combine scale factor" );
 
-  /* tmuMask tells grColorCombineFunction what to turn off an on if 
+  /* tmuMask tells grColorCombineFunction what to turn off an on if
      the ccFunc requires texture mapping */
   texturemode = gc->state.tmu_config[tmu].textureMode;
   texturemode &= ~(SST_TCOMBINE | SST_TACOMBINE);
@@ -148,7 +152,7 @@ GR_ENTRY(grTexCombine, void, ( GrChipID_t tmu, GrCombineFunction_t rgb_function,
     texturemode |= SST_TCA_INVERT_OUTPUT;
 
   /* setup core color combine unit bits */
-  
+
   switch ( rgb_function )
   {
   case GR_COMBINE_FUNCTION_ZERO:
@@ -203,7 +207,7 @@ GR_ENTRY(grTexCombine, void, ( GrChipID_t tmu, GrCombineFunction_t rgb_function,
     gc->state.tmuMask |= tmuMask;
     break;
   }
-  
+
   switch ( alpha_function )
   {
   case GR_COMBINE_FUNCTION_ZERO:
@@ -258,9 +262,9 @@ GR_ENTRY(grTexCombine, void, ( GrChipID_t tmu, GrCombineFunction_t rgb_function,
     gc->state.tmuMask |= tmuMask;
     break;
   }
-  
-  /* Hack to enable TWO-PASS Trilinear 
-     
+
+  /* Hack to enable TWO-PASS Trilinear
+
    */
   if ( texturemode & SST_TRILINEAR ) {
     if ( ( texturemode & SST_TC_ZERO_OTHER ) &&
@@ -332,11 +336,11 @@ GR_ENTRY(grTexFilterMode, void, ( GrChipID_t tmu, GrTextureFilterMode_t minfilte
 GR_ENTRY(grTexLodBiasValue, void, ( GrChipID_t tmu, float fvalue ))
 {
   FxU32 tLod;
-  
+
   GR_BEGIN("grTexLodBiasValue",88,4+2*PACKER_WORKAROUND_SIZE);
   GDBG_INFO_MORE((gc->myLevel,"(%d,%g)\n",tmu,fvalue));
   GR_CHECK_TMU(myName,tmu);
-  
+
   tLod = gc->state.tmu_config[tmu].tLOD;
   tLod &= ~( SST_LODBIAS );
   tLod |= _grTexFloatLODToFixedLOD( fvalue ) << SST_LODBIAS_SHIFT;
@@ -356,11 +360,11 @@ GR_ENTRY(grTexLodBiasValue, void, ( GrChipID_t tmu, float fvalue ))
   Library: glide
   Description:
     Sets the mip map mode for the specified TMU
-    "Ex" because glide's grTexMipMapMode is inadequate for 
+    "Ex" because glide's grTexMipMapMode is inadequate for
     low level texture memory management
   Arguments:
     tmu       - tmu to update
-    mmMode   - mipmap mode 
+    mmMode   - mipmap mode
       One of:
         GR_MIPMAP_DISABLE
         GR_MIPMAP_NEAREST
@@ -381,7 +385,7 @@ GR_ENTRY(grTexMipMapMode, void, ( GrChipID_t tmu, GrMipMapMode_t mmMode, FxBool 
   GR_BEGIN("grTexMipMapMode",88,8+2*PACKER_WORKAROUND_SIZE);
   GDBG_INFO_MORE((gc->myLevel,"(%d,%d,%d)\n",tmu,mmMode,lodBlend));
   GR_CHECK_TMU(myName,tmu);
-  
+
   /*--------------------------------------------------------------
     Get Current tLod and texMode register values
     --------------------------------------------------------------*/
@@ -412,7 +416,7 @@ GR_ENTRY(grTexMipMapMode, void, ( GrChipID_t tmu, GrMipMapMode_t mmMode, FxBool 
     /* intentional fall-through to set lodmin and lodmax values */
   case GR_MIPMAP_NEAREST:
     /*----------------------------------------------------------
-      Set LODMIN and LODMAX in the tLod register to the 
+      Set LODMIN and LODMAX in the tLod register to the
       actual min and max LODs of the current texture.
       ----------------------------------------------------------*/
     tLod |= SST_TLOD_MINMAX_INT(gc->state.tmu_config[tmu].largeLod,
@@ -423,14 +427,14 @@ GR_ENTRY(grTexMipMapMode, void, ( GrChipID_t tmu, GrMipMapMode_t mmMode, FxBool 
     break;
   }
   gc->state.tmu_config[tmu].mmMode = mmMode;
-  
+
   /*--------------------------------------------------------------
     Fix trilinear and evenOdd bits -
 
     This is a bit of a hack to make two pass trilinear work with
     full textures.  The assumption here is that the only reason
     you would ever set up Multiply by LODFRAC w/o REVERSE BLEND
-    is for the ODD pass of trilinear.  
+    is for the ODD pass of trilinear.
     --------------------------------------------------------------*/
   if ( lodBlend ) {
     texMode |= SST_TRILINEAR;
@@ -441,7 +445,7 @@ GR_ENTRY(grTexMipMapMode, void, ( GrChipID_t tmu, GrMipMapMode_t mmMode, FxBool 
     }
   }
   tLod |= _gr_evenOdd_xlate_table[gc->state.tmu_config[tmu].evenOdd];
-  
+
   /*--------------------------------------------------------------
     Write State To Hardware and Update Glide Shadow State
     --------------------------------------------------------------*/
@@ -491,7 +495,7 @@ GR_ENTRY(grTexMipMapMode, void, ( GrChipID_t tmu, GrMipMapMode_t mmMode, FxBool 
 GR_ENTRY(grTexNCCTable, void, ( GrChipID_t tmu, GrNCCTable_t table ))
 {
   FxU32 texMode;
-  
+
   GR_BEGIN("grTexNCCTable",88,4+2*PACKER_WORKAROUND_SIZE);
   GDBG_INFO_MORE((gc->myLevel,"(%d)\n",tmu));
   GR_CHECK_TMU(myName,tmu);
@@ -501,7 +505,7 @@ GR_ENTRY(grTexNCCTable, void, ( GrChipID_t tmu, GrNCCTable_t table ))
     Update local state
     ------------------------------------------------------------------*/
   gc->state.tmu_config[tmu].nccTable = table;
-  
+
   /*------------------------------------------------------------------
     Grab shadow texMode, update TexMode, update shadow/real register
     ------------------------------------------------------------------*/
@@ -509,7 +513,7 @@ GR_ENTRY(grTexNCCTable, void, ( GrChipID_t tmu, GrNCCTable_t table ))
   texMode &= ~( SST_TNCCSELECT );
   if ( table )
     texMode |= SST_TNCCSELECT;
-  else 
+  else
     texMode &= ~(SST_TNCCSELECT);
 
   PACKER_WORKAROUND;
@@ -535,7 +539,7 @@ GR_ENTRY(grTexNCCTable, void, ( GrChipID_t tmu, GrNCCTable_t table ))
     evenOdd  - which set of mipmap levels have been downloaded for
                 the selected texture
                 One of:
-                  GR_MIPMAPLEVELMASK_EVEN 
+                  GR_MIPMAPLEVELMASK_EVEN
                   GR_MIPMAPLEVELMASK_ODD
                   GR_MIPMAPLEVELMASK_BOTH
     info         - pointer to GrTexInfo structure containing
@@ -557,19 +561,19 @@ GR_ENTRY(grTexSource, void, ( GrChipID_t tmu, FxU32 startAddress, FxU32 evenOdd,
                "insufficient texture ram at startAddress" );
   GR_CHECK_F( myName, evenOdd > 0x3 || evenOdd == 0, "evenOdd mask invalid");
   GR_CHECK_F( myName, !info, "invalid info pointer" );
-  
+
   /*-------------------------------------------------------------
     Update Texture Unit State
     -------------------------------------------------------------*/
-  gc->state.tmu_config[tmu].smallLod = info->smallLod; 
-  gc->state.tmu_config[tmu].largeLod = info->largeLod; 
-  gc->state.tmu_config[tmu].evenOdd  =  evenOdd; 
-  
+  gc->state.tmu_config[tmu].smallLod = info->smallLod;
+  gc->state.tmu_config[tmu].largeLod = info->largeLod;
+  gc->state.tmu_config[tmu].evenOdd  =  evenOdd;
+
   /*-------------------------------------------------------------
     Calculate Base Address
     -------------------------------------------------------------*/
   baseAddress = _grTexCalcBaseAddress( startAddress,
-                                       info->largeLod, 
+                                       info->largeLod,
                                        info->aspectRatio,
                                        info->format,
                                        evenOdd ) >> 3;
@@ -579,7 +583,7 @@ GR_ENTRY(grTexSource, void, ( GrChipID_t tmu, FxU32 startAddress, FxU32 evenOdd,
   texMode = gc->state.tmu_config[tmu].textureMode;
   texMode &= ~SST_TFORMAT;
   texMode |= ( info->format << SST_TFORMAT_SHIFT ) | SST_TPERSP_ST | SST_TCLAMPW;
-  
+
   /*-------------------------------------------------------------
     Compute TLOD (keep LODBIAS in tact)
     -------------------------------------------------------------*/
@@ -587,7 +591,7 @@ GR_ENTRY(grTexSource, void, ( GrChipID_t tmu, FxU32 startAddress, FxU32 evenOdd,
   tLod &= ~(SST_LODMIN | SST_LODMAX | SST_LOD_ASPECT |
             SST_LOD_TSPLIT | SST_LOD_ODD | SST_LOD_S_IS_WIDER);
   tLod |= SST_TLOD_MINMAX_INT(info->largeLod,
-                     gc->state.tmu_config[tmu].mmMode==GR_MIPMAP_DISABLE ? 
+                     gc->state.tmu_config[tmu].mmMode==GR_MIPMAP_DISABLE ?
                               info->largeLod : info->smallLod);
   tLod |= _gr_evenOdd_xlate_table[evenOdd];
   tLod |= _gr_aspect_xlate_table[info->aspectRatio];
@@ -599,12 +603,12 @@ GR_ENTRY(grTexSource, void, ( GrChipID_t tmu, FxU32 startAddress, FxU32 evenOdd,
   GR_SET( hw->textureMode , texMode );
   GR_SET( hw->tLOD , tLod );
   PACKER_WORKAROUND;
-  
+
   /* update shadows */
-  gc->state.tmu_config[tmu].texBaseAddr = baseAddress; 
-  gc->state.tmu_config[tmu].textureMode = texMode; 
-  gc->state.tmu_config[tmu].tLOD        = tLod; 
-  
+  gc->state.tmu_config[tmu].texBaseAddr = baseAddress;
+  gc->state.tmu_config[tmu].textureMode = texMode;
+  gc->state.tmu_config[tmu].tLOD        = tLod;
+
   GR_END();
 } /* grTexSource */
 
@@ -626,11 +630,11 @@ GR_ENTRY(grTexSource, void, ( GrChipID_t tmu, FxU32 startAddress, FxU32 evenOdd,
 GR_ENTRY(grTexMultibase, void, ( GrChipID_t tmu, FxBool enable ))
 {
   FxU32 tLod;
-    
+
   GR_BEGIN("grTexMultibase",88,4+PACKER_WORKAROUND_SIZE);
   GDBG_INFO_MORE((gc->myLevel,"(%d,%d)\n",tmu,enable));
   GR_CHECK_TMU(myName,tmu);
-  
+
   tLod  = gc->state.tmu_config[tmu].tLOD;
   if ( enable )
     tLod |= SST_TMULTIBASEADDR;
@@ -662,7 +666,7 @@ GR_ENTRY(grTexMultibase, void, ( GrChipID_t tmu, FxBool enable ))
              GR_TEXBASE_128
              GR_TEXBASE_64
              GR_TEXBASE_32_TO_1
-    startAddress - start address that data was downloaded to 
+    startAddress - start address that data was downloaded to
                     hardware with using grTexDownload/Level
     info         - pointer to GrTexInfo structure containing
                    texture dimensions
@@ -681,7 +685,7 @@ GR_ENTRY(grTexMultibaseAddress, void, ( GrChipID_t tmu, GrTexBaseRange_t range, 
   GR_CHECK_F( myName, startAddress >= gc->tmu_state[tmu].total_mem, "invalid startAddress" );
   GR_CHECK_F( myName, evenOdd > 0x3, "evenOdd mask invalid" );
   GR_CHECK_F( myName, info, "invalid info pointer" );
-  
+
 
   /* Write relevant registers out to hardware and shadows */
   PACKER_WORKAROUND;
@@ -694,7 +698,7 @@ GR_ENTRY(grTexMultibaseAddress, void, ( GrChipID_t tmu, GrTexBaseRange_t range, 
                                            info->format,
                                            evenOdd ) >> 3;
       GR_SET( hw->texBaseAddr , baseAddress );
-      gc->state.tmu_config[tmu].texBaseAddr = baseAddress; 
+      gc->state.tmu_config[tmu].texBaseAddr = baseAddress;
       break;
     case GR_TEXBASE_128:
       baseAddress = _grTexCalcBaseAddress( startAddress,
@@ -703,7 +707,7 @@ GR_ENTRY(grTexMultibaseAddress, void, ( GrChipID_t tmu, GrTexBaseRange_t range, 
                                            info->format,
                                            evenOdd ) >> 3;
       GR_SET( hw->texBaseAddr1 , baseAddress );
-      gc->state.tmu_config[tmu].texBaseAddr_1 = baseAddress; 
+      gc->state.tmu_config[tmu].texBaseAddr_1 = baseAddress;
       break;
     case GR_TEXBASE_64:
       baseAddress = _grTexCalcBaseAddress( startAddress,
@@ -712,7 +716,7 @@ GR_ENTRY(grTexMultibaseAddress, void, ( GrChipID_t tmu, GrTexBaseRange_t range, 
                                            info->format,
                                            evenOdd ) >> 3;
       GR_SET( hw->texBaseAddr2 , baseAddress );
-      gc->state.tmu_config[tmu].texBaseAddr_2 = baseAddress; 
+      gc->state.tmu_config[tmu].texBaseAddr_2 = baseAddress;
       break;
     case GR_TEXBASE_32_TO_1:
       baseAddress = _grTexCalcBaseAddress( startAddress,
@@ -721,7 +725,7 @@ GR_ENTRY(grTexMultibaseAddress, void, ( GrChipID_t tmu, GrTexBaseRange_t range, 
                                            info->format,
                                            evenOdd ) >> 3;
       GR_SET( hw->texBaseAddr38 , baseAddress );
-      gc->state.tmu_config[tmu].texBaseAddr_3_8 = baseAddress; 
+      gc->state.tmu_config[tmu].texBaseAddr_3_8 = baseAddress;
       break;
   }
   PACKER_WORKAROUND;
@@ -735,7 +739,7 @@ GR_ENTRY(grTexMultibaseAddress, void, ( GrChipID_t tmu, GrTexBaseRange_t range, 
 ** Forces tLOD to a specific LOD level.  This is useful only for
 ** debugging purposes.  GMT: obsolete, please remove
 */
-void 
+void
 _grTexForceLod( GrChipID_t tmu, int value )
 {
   GR_DCL_GC;

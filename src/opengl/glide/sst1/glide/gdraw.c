@@ -1,63 +1,67 @@
+/* $Id: gdraw.c,v 1.2 2001-09-05 14:30:51 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glide/sst1/glide/gdraw.c,v 1.1 2000-02-25 00:31:13 sandervl Exp $
+** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glide/sst1/glide/gdraw.c,v 1.2 2001-09-05 14:30:51 bird Exp $
 ** $Log: gdraw.c,v $
-** Revision 1.1  2000-02-25 00:31:13  sandervl
+** Revision 1.2  2001-09-05 14:30:51  bird
+** Added $Id:$ keyword.
+**
+** Revision 1.1  2000/02/25 00:31:13  sandervl
 ** Created new Voodoo 1 Glide dir
 **
-** 
+**
 ** 31    6/02/98 8:03p Peter
 ** Mmmmm.... points
- * 
+ *
  * 30    9/07/97 1:52p Atai
  * performance tuning for previous check-in
- * 
+ *
  * 29    9/05/97 7:20p Atai
  * fixed bug 764 (grDrawPoint integer snapping).
- * 
+ *
  * 28    6/20/97 5:51p Dow
  * Moved grDebugGroupWriteHEader to sst96.c
- * 
+ *
  * 27    5/27/97 11:37p Pgj
  * Fix for Bug report 545
- * 
+ *
  * 26    5/27/97 2:00p Dow
  * Parenthesized a ternary op in GR_BEGIN to work around a Watcom compiler
  * bug.
- * 
+ *
  * 25    3/21/97 12:42p Dow
  * Made STWHints not send the Bend Over Baby Packet to FBI Jr.
- * 
+ *
  * 24    3/04/97 9:08p Dow
  * Neutered multiplatform multiheaded monster
- * 
+ *
  * 23    2/18/97 9:51a Jdt
  * Ifdefed out some if(0) code to supress watcom warnings
- * 
+ *
  * 22    12/23/96 1:37p Dow
  * chagnes for multiplatform glide
- * 
+ *
  * 21    11/18/96 12:13p Jdt
  * Made all debugging code go through the C-call to the assembly trisetup
  * code.
- * 
+ *
  * 20    11/14/96 11:52p Jdt
  * Fixed Watcom Assembly calling bug
 **
@@ -83,7 +87,7 @@
 
 /*---------------------------------------------------------------------------
   NOTE: by Gary Tarolli
-  
+
   The following code is very carefully scheduled for MSVC4.2 Version 10.20.6166
   The trick is to schedule operations between PCI writes (GR_SET*).
   This is because PCI writes cannot get off the CPU chip quickly and there
@@ -115,7 +119,7 @@ GR_ENTRY(grDrawPoint, void, ( const GrVertex *p ))
    * NB: IEEE rounds to nearest integer by default, but applications
    * can change the rounding mode so that it is difficult to get the
    * correct truncation/ceiling operation w/ a simple adjustment to
-   * the bias. 
+   * the bias.
    *
    * NB: The constant kNumMantissaBits defines how many bits of
    * integer precision a coordinate can have. This needs to be atleast
@@ -144,11 +148,11 @@ GR_ENTRY(grDrawPoint, void, ( const GrVertex *p ))
 #endif
 
   _GlideRoot.stats.pointsDrawn++;
-  
+
   /* draw a little triangle, with the lower left corner at pixel center */
   GR_SET( hw->vA.x, x );
   GR_SET( hw->vA.y, y );
-  
+
   x += (0x01UL << (21UL - kNumMantissaBits));
   GR_SET( hw->vB.x, x );
   GR_SET( hw->vB.y, y );
@@ -167,7 +171,7 @@ GR_ENTRY(grDrawPoint, void, ( const GrVertex *p ))
       GR_SETF( *dlp->addr, 0.0F );
       if (i & 2) P6FENCE;
     }
-    else 
+    else
       GR_SETF( *dlp->addr, FARRAY(p,i) );
     dlp++;
     i = dlp->i;
@@ -249,7 +253,7 @@ GR_ENTRY(grDrawLine, void, ( const GrVertex *a, const GrVertex *b ))
       GR_SETF(hw->FvB.x,dp);
       GR_SETF(hw->FvC.x,dp)
        _GlideRoot.stats.linesDrawn++;
-      
+
      GR_SETF(hw->FvA.y,a->y - _GlideRoot.pool.fHalf);
 
      dp = b->y;
@@ -295,7 +299,7 @@ GR_ENTRY(grDrawLine, void, ( const GrVertex *a, const GrVertex *b ))
      GR_SETF(hw->FvB.y,dp);
      _GlideRoot.stats.linesDrawn++;
      GR_SETF(hw->FvC.y,dp);
-     
+
      GR_SETF(hw->FvA.x,a->x - _GlideRoot.pool.fHalf);
 
      dp = b->x;
@@ -303,7 +307,7 @@ GR_ENTRY(grDrawLine, void, ( const GrVertex *a, const GrVertex *b ))
 
      i = dlp->i;
      GR_SETF(hw->FvC.x,dp + _GlideRoot.pool.fHalf);
-       
+
      while (i) {
        fp = dlp->addr;
        if (i & 1) {     /* packer bug check */
@@ -324,7 +328,7 @@ GR_ENTRY(grDrawLine, void, ( const GrVertex *a, const GrVertex *b ))
        }
      }
      P6FENCE_CMD( GR_SET( hw->triangleCMD, 0xFFFFFFFF) );
-     
+
      GR_SETF(hw->FvB.x,a->x + _GlideRoot.pool.fHalf);
      GR_SETF(hw->FvB.y,a->y);
      P6FENCE_CMD( GR_SET( hw->triangleCMD, 1) );
@@ -381,7 +385,7 @@ if (0) {                        /* GMT: only use this if needed */
   }
 #endif /* GLIDE_DEBUG */
 
-  /* _trisetup and _trisetup_asm return 0 if culled, 1 if drawn */ 
+  /* _trisetup and _trisetup_asm return 0 if culled, 1 if drawn */
   TRISETUP( a, b, c );
 
 all_done:
