@@ -1,4 +1,4 @@
-/* $Id: OS2KPTDA.c,v 1.4 2000-12-11 06:53:54 bird Exp $
+/* $Id: OS2KPTDA.c,v 1.5 2001-07-08 03:09:51 bird Exp $
  *
  * PTDA access functions.
  *
@@ -35,6 +35,7 @@ extern ULONG    pptda_environ;
 extern ULONG    pptda_ptdasem;
 extern ULONG    pptda_handle;
 extern ULONG    pptda_module;
+extern ULONG    pptda_pBeginLIBPATH;
 
 
 /**
@@ -83,6 +84,37 @@ HKSEMMTX    ptda_ptda_ptdasem(PPTDA pPTDA)
 {
     return (HKSEMMTX)(void*)(((char*)(void*)pPTDA) + (pptda_ptdasem - pptda_start));
 }
+
+
+/**
+ * Gets the ptda_pBeginLIBPATH PTDA member. This member may hold the begin libpath
+ * extention for this process.
+ * @returns     beginlibpath string pointer.
+ *              NULL if member is NULL or not supported by kernel.
+ * @param       pPTDA   PTDA Pointer. (NULL is not allowed!)
+ */
+PSZ ptdaGet_ptda_pBeginLIBPATH(PPTDA pPTDA)
+{
+    if (!pptda_pBeginLIBPATH)
+        return NULL;
+    return *(PSZ*)(void*)(((char*)(void*)pPTDA) + (pptda_pBeginLIBPATH - pptda_start));
+}
+
+
+/**
+ * Gets the ptda_pEndLIBPATH PTDA member. This member might hold the end libpath
+ * extention for this process.
+ * @returns     endlibpath string pointer.
+ *              NULL if member is NULL or not supported by kernel.
+ * @param       pPTDA   PTDA Pointer. (NULL is not allowed!)
+ */
+PSZ ptdaGet_ptda_pEndLIBPATH(PPTDA pPTDA)
+{
+    if (!pptda_pBeginLIBPATH)
+        return NULL;
+    return *(PSZ*)(void*)(((char*)(void*)pPTDA) + (pptda_pBeginLIBPATH + 4 - pptda_start));
+}
+
 
 
 
