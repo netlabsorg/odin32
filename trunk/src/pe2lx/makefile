@@ -1,8 +1,10 @@
+# $Id: makefile,v 1.3 1999-06-10 17:08:54 phaller Exp $
+
 #
-# PD-Win32 API 
+# PD-Win32 API
 #
 #	pe2lx.exe makefile
-# 
+#
 
 PDWIN32_INCLUDE = ..\..\include
 PDWIN32_LIB = ..\..\lib
@@ -33,7 +35,7 @@ $(TARGET).exe: $(OBJS)
 
 
 accelerator.obj: accelerator.cpp $(PDWIN32_INCLUDE)\pefile.h lx.h \
-                 accelerator.h  icon.h misc.h 
+                 accelerator.h  icon.h misc.h
 bitmap.obj: bitmap.cpp $(PDWIN32_INCLUDE)\pefile.h lx.h \
             bitmap.h icon.h misc.h
 cursor.obj: cursor.cpp $(PDWIN32_INCLUDE)\pefile.h lx.h \
@@ -45,7 +47,7 @@ dialog.obj: dialog.cpp $(PDWIN32_INCLUDE)\pefile.h lx.h \
 icon.obj: icon.cpp $(PDWIN32_INCLUDE)\pefile.h lx.h icon.h misc.h
 icongrp.obj: icongrp.cpp $(PDWIN32_INCLUDE)\pefile.h lx.h icon.h \
              icongrp.h misc.h
-lx.obj: lx.cpp lx.h 
+lx.obj: lx.cpp lx.h
 menu.obj: menu.cpp $(PDWIN32_INCLUDE)\pefile.h lx.h menu.h
 misc.obj: misc.cpp $(PDWIN32_INCLUDE)\pefile.h lx.h ..\..\include\versionos2.h
 pe.obj: pe.cpp $(PDWIN32_INCLUDE)\pefile.h lx.h \
@@ -53,7 +55,7 @@ pe.obj: pe.cpp $(PDWIN32_INCLUDE)\pefile.h lx.h \
         cursorgrp.h dialog.h icon.h \
         icongrp.h menu.h misc.h rcdata.h \
         strings.h
-pefile.obj: pefile.cpp $(PDWIN32_INCLUDE)\pefile.h misc.h 
+pefile.obj: pefile.cpp $(PDWIN32_INCLUDE)\pefile.h misc.h
 rcdata.obj: rcdata.cpp lx.h rcdata.h
 strings.obj: strings.cpp lx.h misc.h strings.h
 

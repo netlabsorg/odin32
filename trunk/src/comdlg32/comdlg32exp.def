@@ -1,3 +1,5 @@
+; $Id: comdlg32exp.def,v 1.2 1999-06-10 17:07:28 phaller Exp $
+
 ;Created by BLAST for IBM's compiler
 LIBRARY COMDLG32 INITINSTANCE
 DATA MULTIPLE NONSHARED

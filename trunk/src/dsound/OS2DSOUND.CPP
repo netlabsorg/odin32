@@ -1,3 +1,5 @@
+/* $Id: OS2DSOUND.CPP,v 1.3 1999-06-10 17:09:29 phaller Exp $ */
+
 /*
  * DirectSound main class
  *

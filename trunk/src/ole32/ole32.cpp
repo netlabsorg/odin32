@@ -1,3 +1,5 @@
+/* $Id: ole32.cpp,v 1.4 1999-06-10 17:05:54 phaller Exp $ */
+
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT

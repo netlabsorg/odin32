@@ -1,3 +1,5 @@
+/* $Id: OS2UTIL.CPP,v 1.3 1999-06-10 17:10:57 phaller Exp $ */
+
 /*
  * OS/2 Utility functions
  *

@@ -1,3 +1,5 @@
+/* $Id: accelerator.h,v 1.3 1999-06-10 17:08:52 phaller Exp $ */
+
 /*
  * PE2LX accelerator resource support code
  *

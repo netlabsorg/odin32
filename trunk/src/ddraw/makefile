@@ -1,8 +1,10 @@
+# $Id: makefile,v 1.3 1999-06-10 17:10:57 phaller Exp $
+
 #
-# PD-Win32 API 
+# PD-Win32 API
 #
 #	ddraw.dll makefile
-# 
+#
 
 PDWIN32_INCLUDE = ..\..\include
 PDWIN32_LIB = ..\..\lib
@@ -27,7 +29,7 @@ LIBS = pmwinx.lib mmpm2.lib $(PDWIN32_LIB)/kernel32.lib
 all: $(TARGET).dll $(TARGET).lib
 
 
-$(TARGET).dll: $(OBJS) $(TARGET).def 
+$(TARGET).dll: $(OBJS) $(TARGET).def
         $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def $(LIBS)
 	$(CP) $@ $(PDWIN32_BIN)
 
@@ -39,16 +41,16 @@ $(TARGET).lib: $(TARGET).dll
 
 
 ddraw.obj: ddraw.cpp  \
-    os2ddraw.h 
+    os2ddraw.h
 
 os2ddraw.obj: os2ddraw.cpp  \
     os2palette.h \
     os2clipper.h \
     os2surface.h \
-    os2ddraw.h 
+    os2ddraw.h
 
 os2d3d.obj: os2d3d.cpp \
-    os2ddraw.h 
+    os2ddraw.h
 
 misc.obj: misc.c \
     $(PDWIN32_INCLUDE)\misc.h
@@ -62,16 +64,16 @@ os2palette.obj: os2palette.cpp  \
     os2clipper.h \
     os2surface.h \
     os2palset.h \
-    os2ddraw.h 
+    os2ddraw.h
 
 os2palset.obj: os2palset.cpp  \
-    os2palset.h 
+    os2palset.h
 
 os2clipper.obj: os2clipper.cpp  \
     os2palette.h \
     os2clipper.h \
     os2surface.h \
-    os2ddraw.h 
+    os2ddraw.h
 
 os2surface.obj: os2surface.cpp  \
     os2util.h \
@@ -79,7 +81,7 @@ os2surface.obj: os2surface.cpp  \
     os2palette.h \
     os2clipper.h \
     os2surface.h \
-    os2ddraw.h 
+    os2ddraw.h
 
 initterm.obj: initterm.cpp
 

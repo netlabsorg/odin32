@@ -1,3 +1,5 @@
+/* $Id: asmutil.h,v 1.3 1999-06-10 17:10:57 phaller Exp $ */
+
 /*
  * asmutil.asm function definition
  *
