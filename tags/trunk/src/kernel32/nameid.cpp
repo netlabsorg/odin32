@@ -1,4 +1,4 @@
-/* $Id: nameid.cpp,v 1.6 1999-08-18 17:18:00 sandervl Exp $ */
+/* $Id: nameid.cpp,v 1.7 1999-08-19 10:25:27 sandervl Exp $ */
 
 /*
  * Resource id to name id conversion procedures
@@ -29,20 +29,16 @@
 /******************************************************************************/
 int SYSTEM EXPORT ConvertNameId(ULONG hmod, char *name)
 {
- HMODULE   hmodule;
  Win32Dll *module;
 
   dprintf(("Convert %s in mod %X to id\n", name, hmod ));
 
-  hmodule = GetOS2ModuleHandle(hmod);
-  if(  hmodule == 0
-    || hmodule == -1
-    || hmodule == OS2iGetModuleHandleA( NULL ) )
+  if(hmod == 0 || hmod == -1 || hmod == WinExe->getInstanceHandle() )
   {
     return WinExe->convertNameId(name);
   }
 
-  module = Win32Dll::findModule(hmodule);
+  module = Win32Dll::findModule(hmod);
   if(module == 0)
   {
     dprintf(("ConvertNameId: module %X not found\n", hmod));
@@ -69,26 +65,3 @@ char *StripPath(char *path)
 }
 //******************************************************************************
 //******************************************************************************
-ULONG GetOS2ModuleHandle(ULONG hmod)
-{
- APIRET  rc;
- char    modname[128];
- HMODULE hmodule;
-
-  if(hmod == 0 || hmod == -1) {
-        return(0);
-  }
-
-  if(Win32QueryModuleName(hmod, modname, sizeof(modname)) == 0) {
-        dprintf(("Can't determine handle of dll %X\n", hmod));
-        return(0);
-  }
-  rc = DosQueryModuleHandle(modname, &hmodule);
-  if(rc) {
-        dprintf(("Can't determine handle of dll %s\n", modname));
-        return(0);
-  }
-  return(hmodule);
-}
-/******************************************************************************/
-/******************************************************************************/
