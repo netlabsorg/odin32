@@ -1,4 +1,4 @@
-/* $Id: registry.cpp,v 1.15 2002-05-16 12:53:45 sandervl Exp $ */
+/* $Id: registry.cpp,v 1.16 2002-06-15 17:16:06 sandervl Exp $ */
 
 /*
  * Win32 registry API functions for OS/2
@@ -1039,7 +1039,7 @@ LONG WIN32API RegSetValueExA(HKEY  hkey,
                              BYTE*  lpbData,
                              DWORD  cbData)
 {
-  if(fdwType == REG_SZ) {
+  if(fdwType == REG_SZ || fdwType == REG_EXPAND_SZ) {
     dprintf(("ADVAPI32: RegSetValueExA)%08xh,%s,%08xh,%08xh,%s,%08xh)",
                hkey,
                lpszValueName,
@@ -1058,6 +1058,10 @@ LONG WIN32API RegSetValueExA(HKEY  hkey,
                cbData));
   }
 
+  if(fdwType == REG_EXPAND_SZ) {
+      dprintf(("!WARNING!: REG_EXPAND_SZ converted to REG_SZ"));
+      fdwType = REG_SZ; //registry.dll doesn't like this type
+  }
   return O32_RegSetValueEx(ConvertKey(hkey),
                            lpszValueName,
                            dwReserved,
