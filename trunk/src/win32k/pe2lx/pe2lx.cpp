@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.19 2000-09-02 21:08:16 bird Exp $
+/* $Id: pe2lx.cpp,v 1.20 2000-09-22 03:47:37 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -558,6 +558,10 @@ ULONG Pe2Lx::init(PCSZ pszFilename)
      *    alignment which is not a multiple of 64Kb. The sections are concatenated into one big object. */
     /* TODO! this test has to be enhanced a bit. WWPack32, new Borland++ depends on image layout. */
     fAllInOneObject = (pNtHdrs->FileHeader.Characteristics & IMAGE_FILE_RELOCS_STRIPPED) == IMAGE_FILE_RELOCS_STRIPPED;
+    fAllInOneObject = 1; /* KSO Fri 22.09.2000: for the time beeing we'll allways apply the alignment fix.
+                          * There are just too many apps failing because of missing baserelocations.
+                          * When I have explored the VDM flag of VMAllocMem I'll remove this.
+                          */
     if (fAllInOneObject)
     {
         printInf(("All-In-One-Object fix is applied.\n"));
@@ -1078,7 +1082,7 @@ ULONG  Pe2Lx::applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID pvPa
         {
             fDeltaOnly = TRUE;          /* IMPORTANT: Later code assumes that this is true when fAllInOneObject is true. */
             if (fAllInOneObject)
-                fApplyFixups = ulImageBase == pSMTE->smte_objtab[0].ote_base;
+                fApplyFixups = ulImageBase != pSMTE->smte_objtab[0].ote_base;
             else
             {
                 int i = 0;
@@ -1260,6 +1264,7 @@ ULONG  Pe2Lx::applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID pvPa
                             switch (fType)
                             {
                                 case IMAGE_REL_BASED_HIGHLOW:
+                                    printInfA(("IMAGE_REL_BASED_HIGHLOW offset=0x%08x\n", offFixup));
                                     if (fDeltaOnly)
                                         *pul += ulDelta;
                                     else
@@ -1282,12 +1287,12 @@ ULONG  Pe2Lx::applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID pvPa
                                 case IMAGE_REL_BASED_HIGH:
                                 case IMAGE_REL_BASED_HIGHADJ:   /* According to M$ docs these seems to be the same fixups. */
                                 case IMAGE_REL_BASED_HIGH3ADJ:
-                                    printInf(("IMAGE_REL_BASED_HIGH offset=0x%08x\n", offFixup));
+                                    printInfA(("IMAGE_REL_BASED_HIGH offset=0x%08x\n", offFixup));
                                     *(PUSHORT)pul += (USHORT)(ulDelta >> 16);
                                     break;
                                 /* Will probably not work very well until the 64KB object alignment is gone! */
                                 case IMAGE_REL_BASED_LOW:
-                                    printInf(("IMAGE_REL_BASED_LOW  offset=0x%08x\n", offFixup));
+                                    printInfA(("IMAGE_REL_BASED_LOW  offset=0x%08x\n", offFixup));
                                     *(PUSHORT)pul += (USHORT)ulDelta;
                                     break;
                             }
@@ -1643,6 +1648,7 @@ ULONG Pe2Lx::testApplyFixups()
         LONG  cbObject = paObjects[i].cbVirtual;
         for (i=i; cbObject > 0; cbObject -= PAGESIZE, ulAddress += PAGESIZE, ulRVA += PAGESIZE)
         {
+            printInf(("Page at RVA 0x%08x\n", ulRVA));
             rc = readAtRVA(ulRVA, &achPage[0], PAGESIZE);
             if (rc != NO_ERROR)
             {
