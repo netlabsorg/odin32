@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.1089 2000-08-27 03:47:51 bird Exp $ */
+ /* $Id: ChangeLog,v 1.1090 2000-08-27 14:07:46 sandervl Exp $ */
+
+ 2000-08-26: Sander van Leeuwen <sandervl@xs4all.nl>
+    - SHELL32:  Open/Save dialog fix
 
  2000-08-19: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - KERNEL32: PROFILE_LoadOdinIni use kernel32Path not reload KERNEL32
