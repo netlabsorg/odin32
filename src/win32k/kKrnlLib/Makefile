@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.19 2001-11-15 04:18:49 bird Exp $
+# $Id: Makefile,v 1.20 2001-11-19 02:56:47 bird Exp $
 
 #
 # kKrnlLib.sys makefile.
@@ -29,7 +29,8 @@ TARGET = kKrnlLib
 # Main rules.
 #
 !if "$(DDKPATH)" != "" && "$(MSCPATH)" != ""  && "$(TOOLKIT)" != "" && "$(VACPATH)" != ""
-all:    $(WIN32KBIN)\$(TARGET).sys \
+all:    $(WIN32KBIN)\ignore.exe \
+        $(WIN32KBIN)\$(TARGET).sys \
         $(ODIN32_BIN)\TRC00FD.TFF \
         lib
 lib:    $(ODIN32_LIB)\$(TARGET).lib \
@@ -83,7 +84,7 @@ OBJS  =\
     $(WIN32KOBJ)\d32init.obj \
     $(WIN32KOBJ)\d16init.obj_init \
     $(WIN32KOBJ)\ProbKrnl.obj_init \
-    $(WIN32KOBJ)\SymDB.obj
+    $(WIN32KOBJ)\SymDB32.obj
 
 LASTOBJ =\
     $(WIN32KOBJ)\devlast.obj
@@ -218,7 +219,7 @@ TSTOBJS =\
     $(WIN32KOBJ)\d32init.obj_tst. \
     $(WIN32KOBJ)\d16init.obj_tst_init. \
     $(WIN32KOBJ)\ProbKrnl.obj_tst_init. \
-    $(WIN32KOBJ)\SymDB.obj
+    $(WIN32KOBJ)\SymDB32.obj
 
 TSTLASTOBJ = $(LASTOBJ)
 
@@ -418,7 +419,7 @@ $(WIN32KBIN)\MkCallTab.exe: $(WIN32KBIN)\clfix.exe $(WIN32KBIN)\ignore.exe $(MKC
 # Inference rule to make the MkCallTab objects.
 {dev16}.c.obj_c:
     @$(ECHO) compiling 16bit (MkCallTab): $<
-    @$(CC16) -c -W3 -Asfw -G2s -Zp -Zl -nologo -Fa -Zi -Od -Lp -DDEBUG -DEXTRACT \
+    @$(CC16) -c -W3 -Asfw -G2s -Zp -Zl -nologo -Fa -Zi -Od -Lp -DDEBUG -DMKCALLTAB \
         -Fa$(WIN32KLIST)\$(*B)_c.s -Fo$(WIN32KOBJ)\$(@B).obj_c $(CINCLUDES16) $<
 
 
@@ -448,8 +449,8 @@ $(WIN32KBIN)\ignore.exe: tools\ignore.c
 # Extract object files.
 EXTRACTOBJS = \
     $(WIN32KOBJ)\Extract.obj_e \
-    $(WIN32KOBJ)\Extract32.obj \
-    $(WIN32KOBJ)\krnlPrologs.obj \
+    $(WIN32KOBJ)\Extract32.obj_e \
+    $(WIN32KOBJ)\krnlPrologs.obj_e \
     $(WIN32KOBJ)\ProbKrnl.obj_e \
     $(WIN32KOBJ)\d16Globl.obj_e \
     $(WIN32KOBJ)\vprntf16.obj_e
@@ -479,7 +480,12 @@ Extract.exe: $(WIN32KBIN)\Extract.exe
 
 {dev32}.c.obj_e:
     @$(ECHO) compiling 32bit (extract): $<
-    $(CC) -c $(CFLAGS) -Gr -Rn -Ti- -ndBIG_ $(CDEFINES) $(CINCLUDES) -Fa$(WIN32KLIST)\$(@B)_e.s \
+    $(CC) -c $(CFLAGS) -DLOGGING_DISABLED -Gr -Rn -Ti- -ndBIG_ $(CDEFINES) $(CINCLUDES) -Fa$(WIN32KLIST)\$(@B)_e.s \
+        -Fo$(WIN32KOBJ)\$(@F) $<
+
+{krnl}.c.obj_e:
+    @$(ECHO) compiling 32bit (extract): $<
+    $(CC) -c $(CFLAGS) -DLOGGING_DISABLED -Gr -Rn -Ti- -ndBIG_ $(CDEFINES) $(CINCLUDES) -Fa$(WIN32KLIST)\$(@B)_e.s \
         -Fo$(WIN32KOBJ)\$(@F) $<
 
 
@@ -530,11 +536,11 @@ dep:
     $(ODIN32_TOOLS)\fastdep @<<
         -a+ -o$$(WIN32KOBJ) $(CINCLUDES16)
         dev16\*.c*
-        -objobj_e           $(CINCLUDES16) dev16\*.c*
-        -objobj_c           $(CINCLUDES16) dev16\*.c*
-        -objobj_tst         $(CINCLUDES16) dev16\*.c*
-        -objobj_init        $(CINCLUDES16) dev16\*.c*
-        -objobj_tst_init    $(CINCLUDES16) dev16\*.c*
+        -objobj_e           $(CINCLUDES16) dev16\*.c* dev32\*.c* krnl\*.c* clib\*.c*
+        -objobj_c           $(CINCLUDES16) dev16\*.c* dev32\*.c* krnl\*.c* clib\*.c*
+        -objobj_tst         $(CINCLUDES16) dev16\*.c* dev32\*.c* krnl\*.c* clib\*.c*
+        -objobj_init        $(CINCLUDES16) dev16\*.c* dev32\*.c* krnl\*.c* clib\*.c*
+        -objobj_tst_init    $(CINCLUDES16) dev16\*.c* dev32\*.c* krnl\*.c* clib\*.c*
 <<
     $(DODIRS) "clib" $(MAKE_CMD) $@
 
