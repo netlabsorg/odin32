@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.6 1999-07-06 09:49:45 phaller Exp $ */
+/* $Id: exceptions.cpp,v 1.7 1999-07-13 10:38:33 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -44,6 +44,7 @@
  *   information in UnhandledExceptionFilter.
  *
  */
+#define INCL_MISC
 #define INCL_BASE
 #include <os2wrap.h>                     //Odin32 OS/2 api wrappers
 #include <stdio.h>
@@ -80,16 +81,21 @@ LONG WIN32API UnhandledExceptionFilter(PWINEXCEPTION_POINTERS lpexpExceptionInfo
 
 UINT WIN32API SetErrorMode(UINT fuErrorMode)
 {
- UINT oldmode = CurrentErrorMode;
+  UINT oldmode = CurrentErrorMode;
 
   dprintf(("KERNEL32: SetErrorMode(%08xh)\n",
            fuErrorMode));
-
   CurrentErrorMode = fuErrorMode;
+
+  if(fuErrorMode & SEM_FAILCRITICALERRORS || fuErrorMode & SEM_NOOPENFILEERRORBOX)
+    DosError(FERR_DISABLEHARDERR);
+  else
+    DosError(FERR_ENABLEHARDERR);
+
+  // SEM_NOGPFAULTERRORBOX  and SEM_NOALIGNMENTFAULTEXCEPT --> UnhandledExceptionFilter()
 
   return(oldmode);
 }
-
 
 /*****************************************************************************
  * Name      : VOID _Pascal OS2RaiseException

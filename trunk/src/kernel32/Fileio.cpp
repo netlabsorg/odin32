@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.6 1999-06-17 18:21:42 phaller Exp $ */
+/* $Id: Fileio.cpp,v 1.7 1999-07-13 10:38:33 sandervl Exp $ */
 
 /*
  *
@@ -367,9 +367,19 @@ DWORD WIN32API SearchPathW(LPCWSTR lpPath, LPCWSTR lpFileName, LPCWSTR lpExtensi
 //******************************************************************************
 DWORD WIN32API GetFileAttributesA(LPCSTR lpszFileName)
 {
- DWORD rc;
+ DWORD rc, error;
 
     rc = O32_GetFileAttributes((LPSTR)lpszFileName);
+#if 0 // need more tests, maybe there is also a better way to hide simulated b:
+    if(rc == -1 && lpszFileName != NULL && !strnicmp(lpszFileName, "B:", 2))
+    {
+      error = GetLastError();
+      if(error = ERROR_DISK_CHANGE)
+        SetLastError(ERROR_NOT_READY);
+      else
+        SetLastError(error);
+    }
+#endif
     dprintf(("KERNEL32:  GetFileAttributes of %s returned %d\n", lpszFileName, rc));
     return(rc);
 }
