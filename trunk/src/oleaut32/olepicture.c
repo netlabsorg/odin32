@@ -59,6 +59,15 @@
 #undef FIXME
 #undef TRACE
 #ifdef DEBUG
+// PH 2001-11-30
+// this macro definition causes the control leave the scope of a
+// non-curly-braced preceeding if statement. Therefore,
+//   if (p!=NULL) 
+//      TRACE("p->a=%d", p->a)
+// crashes.
+//
+// !!! ENSURE TRACES AND FIXMES WITH PRECEEDING IF STATEMENT 
+// !!! ARE PUT INTO CURLY BRACES
 #define TRACE WriteLog("%s", __FUNCTION__); WriteLog
 #define FIXME WriteLog("FIXME %s", __FUNCTION__); WriteLog
 #else
@@ -497,8 +506,10 @@ static HRESULT WINAPI OLEPictureImpl_Render(IPicture *iface, HDC hdc,
   TRACE("(%p)->(%08x, (%ld,%ld), (%ld,%ld) <- (%ld,%ld), (%ld,%ld), %p)\n",
 	This, hdc, x, y, cx, cy, xSrc, ySrc, cxSrc, cySrc, prcWBounds);
   if(prcWBounds)
+  {
     TRACE("prcWBounds (%d,%d) - (%d,%d)\n", prcWBounds->left, prcWBounds->top,
-	  prcWBounds->right, prcWBounds->bottom);
+          prcWBounds->right, prcWBounds->bottom);
+  }
 
   /*
    * While the documentation suggests this to be here (or after rendering?)
@@ -839,7 +850,9 @@ static HRESULT WINAPI OLEPictureImpl_Load(IPersistStream* iface,IStream*pStm) {
       break;
   }
   if (xread != header[1])
+  {
     FIXME("Could only read %ld of %ld bytes?\n",xread,header[1]);
+  }
 
   magic = xbuf[0] + (xbuf[1]<<8);
   switch (magic) {
@@ -1271,7 +1284,9 @@ HRESULT WINAPI OleLoadPicture( LPSTREAM lpstream, LONG lSize, BOOL fRunmode,
   IPersistStream_Release(ps);
   hr = IPicture_QueryInterface(newpic,riid,ppvObj);
   if (hr)
-      FIXME("Failed to get interface %s from IPicture.\n",debugstr_guid(riid));
+  {
+    FIXME("Failed to get interface %s from IPicture.\n",debugstr_guid(riid));
+  }
   IPicture_Release(newpic);
   return hr;
 }
