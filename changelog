@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.1916 2001-12-19 01:28:52 bird Exp $ */
+/* $Id: changelog,v 1.1917 2001-12-20 15:08:30 sandervl Exp $ */
+
+ 2001-12-20: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Allow all sections to be accessed when loading an executable/dll
+                  with LOAD_LIBRARY_AS_DATAFILE
+                  (fixes crashes when accessing resources outside the resource
+                   section in Opera 6 binaries)
 
  2001-12-19: knut st. osmundsen <kosmunds@csc.com>
     - MAKEFILES:o Changed inference rules in /src/mesa/3dfx to support MULTIJOBS.
