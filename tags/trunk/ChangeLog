@@ -1,8 +1,10 @@
- /* $Id: ChangeLog,v 1.744 2000-02-22 19:09:59 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.745 2000-02-22 23:52:34 sandervl Exp $ */
 
  2000-02-22: Sander van Leeuwen <sandervl@xs4all.nl>
 	- WINMM/GDI32/KERNEL32/USER32: Fixed compile problems for release build
 	- USER32: Fixed bug in window class ctor (windowProc not set to 0)
+                  (only showed up in release build)
+	- KERNEL32: Fixed bug in commitPage (winimagepeldr.cpp) 
                   (only showed up in release build)
 
  2000-02-22: Christoph Bratschi <cbratschi@datacomm.ch>
