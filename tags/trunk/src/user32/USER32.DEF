@@ -1,4 +1,4 @@
-; $Id: USER32.DEF,v 1.36 2000-08-02 19:41:06 bird Exp $
+; $Id: USER32.DEF,v 1.37 2000-08-24 09:30:29 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
@@ -657,3 +657,5 @@ EXPORTS
     ;SvL: Used by GDI32
     OSLibGetScreenHeight__Fv                                     @2013
     OSLibGetScreenWidth__Fv                                      @2014
+
+    _wvsnprintfW@16                                              @2015
