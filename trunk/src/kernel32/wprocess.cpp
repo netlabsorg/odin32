@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.102 2000-10-06 15:16:07 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.103 2000-10-10 17:14:09 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -8,6 +8,9 @@
  *
  * NOTE: Even though Odin32 OS/2 apps don't switch FS selectors,
  *       we still allocate a TEB to store misc information.
+ *
+ * TODO: What happens when a dll is first loaded as LOAD_LIBRARY_AS_DATAFILE
+ *       and then for real? (first one not freed of course)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -24,7 +27,6 @@
 #include "winexebase.h"
 #include "windllpeldr.h"
 #include "winexepeldr.h"
-#include "winfakepeldr.h"
 #include "windlllx.h"
 #include <vmutex.h>
 #include <handlemanager.h>
@@ -442,6 +444,7 @@ BOOL WIN32API FreeLibrary(HINSTANCE hinstance)
  Win32DllBase *winmod;
  BOOL rc;
 
+    SetLastError(ERROR_SUCCESS);
     //SvL: Ignore FreeLibary for executable
     if(WinExe && hinstance == WinExe->getInstanceHandle()) {
         return TRUE;
@@ -632,7 +635,6 @@ HINSTANCE WIN32API LoadLibraryW(LPCWSTR lpszLibFile)
  *                      DllMain for process and thread init and term (if wished
  *                      by the module).
  *
- *                  partially implemented yet - imports are resolved it seems.
  *
  *                  LOAD_LIBRARY_AS_DATAFILE
  *                      If this flag is set, the module is mapped into the
@@ -647,7 +649,6 @@ HINSTANCE WIN32API LoadLibraryW(LPCWSTR lpszLibFile)
  *                      support the specialized resource APIs: LoadBitmap,
  *                      LoadCursor, LoadIcon, LoadImage, LoadMenu.)
  *
- *                  not implemented yet.
  *
  *                  LOAD_WITH_ALTERED_SEARCH_PATH
  *                      If this flag is set and lpszLibFile specifies a path
@@ -676,6 +677,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
     BOOL            fPath;              /* Flags which is set if the    */
                                         /* lpszLibFile contains a path. */
     ULONG           fPE;                /* isPEImage return value. */
+    DWORD           Characteristics;    //file header's Characteristics
 
     /** @sketch
      * Some parameter validations is probably useful.
@@ -719,6 +721,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
      */
     if (WinExe != NULL && WinExe->matchModName(lpszLibFile))
         return WinExe->getInstanceHandle();
+
     pModule = Win32DllBase::findModule((LPSTR)lpszLibFile);
     if (pModule)
     {
@@ -759,7 +762,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
     }
 
     //test if dll is in PE or LX format
-    fPE = Win32ImageBase::isPEImage(szModname);
+    fPE = Win32ImageBase::isPEImage(szModname, &Characteristics);
 
     /** @sketch
      *  IF dwFlags == 0 && (!fPeLoader || !fPE) THEN
@@ -784,7 +787,6 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
             pModule = (Win32DllBase *)Win32LxDll::findModuleByOS2Handle(hDll);
             if(pModule)
             {
-
                 if(pModule->isLxDll())
                 {
                     	((Win32LxDll *)pModule)->setDllHandleOS2(hDll);
@@ -828,17 +830,13 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
      */
     if(fPE == ERROR_SUCCESS)
     {
-        Win32PeLdrDll * peldrDll;
-        /* TODO!
-         * We might use the fake loader class to do the LOAD_LIBRARY_AS_DATAFILE and
-         * executable image loading. These are both loaded for accessing resource.
-         * But this requires that they behaves like Dlls...
-        if (dwFlags & LOAD_LIBRARY_AS_DATAFILE || fPE == 2)
+        Win32PeLdrDll *peldrDll;
+
+        //SvL: If executable -> load as data file (only resources)
+        if(!(Characteristics & IMAGE_FILE_DLL))
         {
-            peldrDll = new Win32PeLdrRsrcImg(szModname);
+            dwFlags |= (LOAD_LIBRARY_AS_DATAFILE | DONT_RESOLVE_DLL_REFERENCES);
         }
-        else
-        */
 
         peldrDll = new Win32PeLdrDll(szModname);
         if (peldrDll == NULL)
@@ -852,22 +850,25 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
         /** @sketch
          * Process dwFlags
          */
-        if (dwFlags & (DONT_RESOLVE_DLL_REFERENCES | LOAD_LIBRARY_AS_DATAFILE))
+        if (dwFlags & LOAD_LIBRARY_AS_DATAFILE) 
         {
-            peldrDll->disableThreadLibraryCalls();
-            //peldrDll->setDontProcessImports(); not implemented?
+            dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): LOAD_LIBRARY_AS_DATAFILE",
+                      lpszLibFile, hFile, dwFlags));
+            peldrDll->setLoadAsDataFile();
+       	    peldrDll->disableLibraryCalls();
+        }
+        if (dwFlags & DONT_RESOLVE_DLL_REFERENCES)
+        {
+            dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): DONT_RESOLVE_DLL_REFERENCES",
+                      lpszLibFile, hFile, dwFlags));
+       	    peldrDll->disableLibraryCalls();
+            peldrDll->disableImportHandling();
         }
         if (dwFlags & LOAD_WITH_ALTERED_SEARCH_PATH)
         {
             dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): Warning dwFlags LOAD_WITH_ALTERED_SEARCH_PATH is not implemented.",
                       lpszLibFile, hFile, dwFlags));
             //peldrDll->setLoadWithAlteredSearchPath();
-        }
-        if (dwFlags & LOAD_LIBRARY_AS_DATAFILE)
-        {
-            dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): Warning dwFlags LOAD_LIBRARY_AS_DATAFILE is not implemented.",
-                     lpszLibFile, hFile, dwFlags));
-            //peldrDll->setLoadAsDatafile();
         }
 
         /** @sketch
@@ -917,7 +918,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
                      lpszLibFile, hFile, dwFlags, peldrDll->getError()));
             SetLastError(ERROR_INVALID_EXE_SIGNATURE);
             delete peldrDll;
-		return NULL;
+	    return NULL;
         }
     }
     else
@@ -1811,51 +1812,57 @@ FARPROC WIN32API GetProcAddress(HMODULE hModule, LPCSTR lpszProc)
 BOOL SYSTEM GetVersionStruct(char *lpszModName, char *verstruct, ULONG bufLength)
 {
  Win32ImageBase *winimage;
- Win32PeLdrRsrcImg *rsrcimg;
+ HINSTANCE hDll;
 
-  dprintf(("GetVersionStruct of module %s", lpszModName));
-  if(WinExe && !stricmp(WinExe->getFullPath(), lpszModName)) {
+  dprintf(("GetVersionStruct of module %s %x %d", lpszModName, verstruct, bufLength));
+  if(verstruct == NULL) {
+	SetLastError(ERROR_INVALID_PARAMETER);
+	return FALSE;
+  }
+  if(WinExe && !stricmp(WinExe->getFullPath(), lpszModName)) 
+  {
         winimage = (Win32ImageBase *)WinExe;
   }
-  else {
+  else 
+  {
         winimage = (Win32ImageBase *)Win32DllBase::findModule(lpszModName);
         if(winimage == NULL)
         {
-        char modname[CCHMAXPATH];
+          char modname[CCHMAXPATH];
 
-        strcpy(modname, lpszModName);
-        //rename dll if necessary (i.e. OLE32 -> OLE32OS2)
-        Win32DllBase::renameDll(modname);
+          strcpy(modname, lpszModName);
+          //rename dll if necessary (i.e. OLE32 -> OLE32OS2)
+          Win32DllBase::renameDll(modname);
 
-        if(Win32ImageBase::isPEImage(modname) != ERROR_SUCCESS)
-        {
-         HINSTANCE hInstance;
+          if(Win32ImageBase::isPEImage(modname) != ERROR_SUCCESS)
+          {
+            HINSTANCE hInstance;
 
-            //must be an LX dll, just load it (app will probably load it anyway)
-            hInstance = LoadLibraryA(modname);
-            if(hInstance == 0)
-                return 0;
-                winimage = (Win32ImageBase *)Win32DllBase::findModule(hInstance);
-                if(winimage) {
-                return winimage->getVersionStruct(verstruct, bufLength);
-            }
-            return 0;
-        }
-        //SvL: Try to load it
-        rsrcimg = new Win32PeLdrRsrcImg(modname);
-        if(rsrcimg == NULL)
-            return 0;
+              //must be an LX dll, just load it (app will probably load it anyway)
+              hInstance = LoadLibraryA(modname);
+              if(hInstance == 0)
+                  return 0;
 
-            rsrcimg->init(0);
-        if(rsrcimg->getError() != NO_ERROR)
-        {
-                dprintf(("GetVersionStruct can't load %s\n", modname));
-            delete rsrcimg;
-                return(FALSE);
-        }
-        BOOL rc = rsrcimg->getVersionStruct(verstruct, bufLength);
-        delete rsrcimg;
-        return rc;
+              winimage = (Win32ImageBase *)Win32DllBase::findModule(hInstance);
+              if(winimage) {
+                   return winimage->getVersionStruct(verstruct, bufLength);
+              }
+   	      dprintf(("GetVersionStruct; just loaded dll %s, but can't find it now!", modname));
+              return 0;
+          }
+          BOOL rc = FALSE;
+
+          hDll = LoadLibraryExA(lpszModName, 0, LOAD_LIBRARY_AS_DATAFILE);
+          if(hDll == 0)
+              return 0;
+
+          winimage = (Win32ImageBase *)Win32DllBase::findModule(lpszModName);
+          if(winimage != NULL) {
+	        rc = winimage->getVersionStruct(verstruct, bufLength);
+	  }
+          else	dprintf(("GetVersionSize; just loaded dll %s, but can't find it now!", lpszModName));
+	  FreeLibrary(hDll);
+          return rc;
         }
   }
   return winimage->getVersionStruct(verstruct, bufLength);
@@ -1865,7 +1872,7 @@ BOOL SYSTEM GetVersionStruct(char *lpszModName, char *verstruct, ULONG bufLength
 ULONG SYSTEM GetVersionSize(char *lpszModName)
 {
  Win32ImageBase *winimage;
- Win32PeLdrRsrcImg *rsrcimg;
+ HINSTANCE hDll;
 
   dprintf(("GetVersionSize of %s\n", lpszModName));
 
@@ -1876,48 +1883,46 @@ ULONG SYSTEM GetVersionSize(char *lpszModName)
         winimage = (Win32ImageBase *)Win32DllBase::findModule(lpszModName);
         if(winimage == NULL)
         {
-     char modname[CCHMAXPATH];
+          char modname[CCHMAXPATH];
 
-        strcpy(modname, lpszModName);
-        //rename dll if necessary (i.e. OLE32 -> OLE32OS2)
-        Win32DllBase::renameDll(modname);
+          strcpy(modname, lpszModName);
+          //rename dll if necessary (i.e. OLE32 -> OLE32OS2)
+          Win32DllBase::renameDll(modname);
 
-        if(Win32ImageBase::isPEImage(modname) != ERROR_SUCCESS)
-        {
-         HINSTANCE hInstance;
+          if(Win32ImageBase::isPEImage(modname) != ERROR_SUCCESS)
+          {
+            HINSTANCE hInstance;
 
             //must be an LX dll, just load it (app will probably load it anyway)
             hInstance = LoadLibraryA(modname);
             if(hInstance == 0)
                 return 0;
-                winimage = (Win32ImageBase *)Win32DllBase::findModule(hInstance);
-                if(winimage) {
+
+            winimage = (Win32ImageBase *)Win32DllBase::findModule(hInstance);
+            if(winimage) {
                 return winimage->getVersionSize();
             }
+	    dprintf(("GetVersionSize; just loaded dll %s, but can't find it now!", modname));
             return 0;
         }
+        int size = 0;
 
-        //SvL: Try to load it
-        rsrcimg = new Win32PeLdrRsrcImg(modname);
-        if(rsrcimg == NULL)
+        hDll = LoadLibraryExA(lpszModName, 0, LOAD_LIBRARY_AS_DATAFILE);
+        if(hDll == 0)
             return 0;
 
-            rsrcimg->init(0);
-        if(rsrcimg->getError() != NO_ERROR)
-        {
-                dprintf(("GetVersionSize can't load %s\n", modname));
-            delete rsrcimg;
-                return(FALSE);
-        }
-        int size = rsrcimg->getVersionSize();
-        delete rsrcimg;
+        winimage = (Win32ImageBase *)Win32DllBase::findModule(lpszModName);
+        if(winimage != NULL) {
+	        size = winimage->getVersionSize();
+	}
+        else	dprintf(("GetVersionSize; just loaded dll %s, but can't find it now!", lpszModName));
+	FreeLibrary(hDll);
         return size;
-        }
+      }
   }
   return winimage->getVersionSize();
 }
 //******************************************************************************
-//TODO:What does this do exactly??
 //******************************************************************************
 ODINFUNCTION1(BOOL,DisableThreadLibraryCalls,HMODULE,hModule)
 {

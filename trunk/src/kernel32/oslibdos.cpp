@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.48 2000-10-09 22:51:18 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.49 2000-10-10 17:14:04 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -1743,9 +1743,10 @@ DWORD OSLibDosFindFirst(LPCSTR lpFileName,WIN32_FIND_DATAA* lpFindFileData)
   if(rc) {
         DosFindClose(hDir);
         SetLastError(error2WinError(rc));
-  return INVALID_HANDLE_VALUE_W;
+        return INVALID_HANDLE_VALUE_W;
   }
   translateFindResults(&result,lpFindFileData);
+  SetLastError(ERROR_SUCCESS_W);
   return hDir;
 }
 //******************************************************************************
@@ -1782,6 +1783,7 @@ DWORD OSLibDosFindFirstMulti(LPCSTR lpFileName,WIN32_FIND_DATAA *lpFindFileData,
   free(result);
   *count = searchCount;
 
+  SetLastError(ERROR_SUCCESS_W);
   return hDir;
 }
 //******************************************************************************
@@ -1800,7 +1802,7 @@ BOOL  OSLibDosFindNext(DWORD hFindFile,WIN32_FIND_DATAA *lpFindFileData)
   }
 
   translateFindResults(&result,lpFindFileData);
-
+  SetLastError(ERROR_SUCCESS_W);
   return TRUE;
 }
 //******************************************************************************
@@ -1830,6 +1832,7 @@ BOOL  OSLibDosFindNextMulti(DWORD hFindFile,WIN32_FIND_DATAA *lpFindFileData,DWO
   free(result);
   *count = searchCount;
 
+  SetLastError(ERROR_SUCCESS_W);
   return TRUE;
 }
 //******************************************************************************
@@ -1840,10 +1843,10 @@ BOOL  OSLibDosFindClose(DWORD hFindFile)
   if (rc)
   {
     SetLastError(error2WinError(rc));
-
     return FALSE;
   }
 
+  SetLastError(ERROR_SUCCESS_W);
   return TRUE;
 }
 //******************************************************************************
@@ -1858,8 +1861,8 @@ DWORD OSLibDosQueryVolumeFS(int drive, LPSTR lpFileSystemNameBuffer, DWORD nFile
  APIRET      rc;
 
    if(lpFileSystemNameBuffer == NULL) {
-  DebugInt3();
-  return ERROR_INVALID_PARAMETER_W;
+        DebugInt3();
+        return ERROR_INVALID_PARAMETER_W;
    }
    drv[0] = (char)('A' + drive - 1);
 
@@ -1869,13 +1872,13 @@ DWORD OSLibDosQueryVolumeFS(int drive, LPSTR lpFileSystemNameBuffer, DWORD nFile
 
    switch(rc) {
    case ERROR_INVALID_DRIVE:
-  return ERROR_INVALID_DRIVE_W;
+        return ERROR_INVALID_DRIVE_W;
    case ERROR_NO_VOLUME_LABEL:
-  return ERROR_NO_VOLUME_LABEL_W;
+        return ERROR_NO_VOLUME_LABEL_W;
    case NO_ERROR:
-  break;
+        break;
    default:
-  return ERROR_NOT_ENOUGH_MEMORY; //whatever
+        return ERROR_NOT_ENOUGH_MEMORY; //whatever
    }
 
    fsname = (char *)&fsinfo->szName[0] + fsinfo->cbName + 1;
@@ -1888,7 +1891,7 @@ DWORD OSLibDosQueryVolumeFS(int drive, LPSTR lpFileSystemNameBuffer, DWORD nFile
            nFileSystemNameSize);
   /*
    if(strlen(fsname) < nFileSystemNameSize) {
-  strcpy(lpFileSystemNameBuffer, fsname);
+        strcpy(lpFileSystemNameBuffer, fsname);
    }
    else return ERROR_BUFFER_OVERFLOW_W;
    */
@@ -1999,6 +2002,7 @@ BOOL OSLibDosCreatePipe(PHANDLE phfRead,
     SetLastError(error2WinError(rc,ERROR_INVALID_PARAMETER_W));
     return -1; // INVALID_HANDLE_VALUE
   }
+  SetLastError(ERROR_SUCCESS_W);
   return NO_ERROR;
 }
 //******************************************************************************
@@ -2074,6 +2078,8 @@ ULONG OSLibDosQueryDir(DWORD length, LPSTR lpszCurDir)
         lpszCurDir[2] = '\\';
    }
    else len += 3;   // + 3 since DosQueryCurDir doesn't include drive
+
+   SetLastError(ERROR_SUCCESS_W);
    return len;
 }
 //******************************************************************************

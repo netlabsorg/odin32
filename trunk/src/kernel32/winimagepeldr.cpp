@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.59 2000-10-09 18:35:26 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.60 2000-10-10 17:14:08 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -13,9 +13,8 @@
  * TODO: Loading of forwarder dlls before handling imports might not be correct
  *       (circular dependencies; have to check what NT does)
  *
- * NOTE: RSRC_LOAD is a special flag to only load the resource directory
+ * NOTE: FLAG_PELDR_LOADASDATAFILE is a special flag to only load the resource directory
  *       of a PE image. Processing imports, sections etc is not done.
- *       Nor is it put into the linked list of dlls (if it's a dll).
  *       This is useful for GetVersionSize/Resource in case it wants to
  *       get version info of an image that is not loaded.
  *       So an instance of this type can't be used for anything but resource lookup!
@@ -102,16 +101,14 @@ void ClosePrivateLogFilePE()
 }
 //******************************************************************************
 //******************************************************************************
-Win32PeLdrImage::Win32PeLdrImage(char *pszFileName, BOOL isExe, int loadtype) :
+Win32PeLdrImage::Win32PeLdrImage(char *pszFileName, BOOL isExe) :
     Win32ImageBase(-1),
-    nrsections(0), imageSize(0),
+    nrsections(0), imageSize(0), dwFlags(0),
     imageVirtBase(-1), realBaseAddress(0), imageVirtEnd(0),
     nrNameExports(0), nrOrdExports(0), nameexports(NULL), ordexports(NULL),
     memmap(NULL), pFixups(NULL), dwFixupSize(0), curnameexport(NULL), curordexport(NULL)
 {
  HFILE  dllfile;
-
-  loadType = loadtype;
 
   strcpy(szFileName, pszFileName);
   strupr(szFileName);
@@ -281,7 +278,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
 
   nSections = NR_SECTIONS(win32file);
 
-  if(loadType == REAL_LOAD)
+  if(!(dwFlags & FLAG_PELDR_LOADASDATAFILE))
   {
    imageSize = 0;
    if ((psh = (PIMAGE_SECTION_HEADER)SECTIONHDROFF (win32file)) != NULL) {
@@ -306,11 +303,15 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
         }
 	if(IsSectionType(win32file, &psh[i], IMAGE_DIRECTORY_ENTRY_EXPORT)) 
         {
-            dprintf((LOG, ".edata" ));
-            addSection(SECTION_EXPORT, psh[i].PointerToRawData,
-                   psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
-                   psh[i].Misc.VirtualSize, psh[i].Characteristics);
-            continue;
+            //SvL: Angus.exe has empty export section that's really an
+            //     uninitialized data section
+            if(psh[i].SizeOfRawData) {
+                 dprintf((LOG, ".edata" ));
+                 addSection(SECTION_EXPORT, psh[i].PointerToRawData,
+                      psh[i].SizeOfRawData, psh[i].VirtualAddress + oh.ImageBase,
+                      psh[i].Misc.VirtualSize, psh[i].Characteristics);
+                 continue;
+            }
         }
 	if(IsSectionType(win32file, &psh[i], IMAGE_DIRECTORY_ENTRY_RESOURCE)) 
         {
@@ -438,7 +439,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
     	goto failure;
   }
 
-  if(loadType == REAL_LOAD)
+  if(!(dwFlags & FLAG_PELDR_LOADASDATAFILE))
   {
    if(tlsDir = (IMAGE_TLS_DIRECTORY *)ImageDirectoryOffset(win32file, IMAGE_DIRECTORY_ENTRY_TLS)) 
    {
@@ -553,15 +554,15 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
         ulRVAResourceSection = sh.VirtualAddress;
   }
 
-  if (loadType == REAL_LOAD)
+  if(!(dwFlags & (FLAG_PELDR_LOADASDATAFILE | FLAG_PELDR_SKIPIMPORTS)))
   {
-   if(processImports((char *)win32file) == FALSE) {
-    	dprintf((LOG, "Failed to process imports!" ));
-     	goto failure;
-   }
+        if(processImports((char *)win32file) == FALSE) {
+             dprintf((LOG, "Failed to process imports!" ));
+             goto failure;
+        }
   }
-
   return(TRUE);
+
 failure:
   if(memmap) {
 	delete memmap;
@@ -729,7 +730,7 @@ BOOL Win32PeLdrImage::allocSections(ULONG reservedMem)
   }
 
   //SvL: We don't care where the image is loaded for resource lookup
-  if(fh.Characteristics & IMAGE_FILE_RELOCS_STRIPPED && loadType == REAL_LOAD) {
+  if(fh.Characteristics & IMAGE_FILE_RELOCS_STRIPPED && !(dwFlags & FLAG_PELDR_LOADASDATAFILE)) {
     	return allocFixedMem(reservedMem);
   }
   rc = DosAllocMem((PPVOID)&baseAddress, imageSize, PAG_READ | PAG_WRITE | flAllocMem);
@@ -897,10 +898,17 @@ BOOL Win32PeLdrImage::setMemFlags()
 		break;
 
         case SECTION_READONLYDATA:
+        case SECTION_EXPORT:
         default:
             	section[i].pageflags = PAG_READ;
             	break;
     	}
+	if(section[i].flags & (IMAGE_SCN_CNT_INITIALIZED_DATA|IMAGE_SCN_CNT_UNINITIALIZED_DATA)) {
+		//SvL: sometimes i.e. import/export sections also contain data
+                //     must make them read/write
+            	section[i].pageflags = PAG_WRITE;
+        }
+
   }
   return(TRUE);
 }
@@ -1485,7 +1493,9 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
   for (i = 0; i < cModules; i++)
   {
     dprintf((LOG, "Module %s", pszCurModule ));
-    dprintf((LOG, "ForwarderChain: %x", pID[i].ForwarderChain));
+    if(pID[i].ForwarderChain) {
+        dprintf((LOG, "ForwarderChain: %x", pID[i].ForwarderChain));
+    }
     //  a) check that OriginalFirstThunk not is 0 and look for Borland-styled PE
     if (i == 0)
     {

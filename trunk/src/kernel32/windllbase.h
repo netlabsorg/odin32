@@ -1,4 +1,4 @@
-/* $Id: windllbase.h,v 1.5 2000-08-11 10:56:18 sandervl Exp $ */
+/* $Id: windllbase.h,v 1.6 2000-10-10 17:14:06 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
@@ -52,6 +52,7 @@ virtual	ULONG     Release();
 
         //do not call the ATTACH_THREAD, DETACH_THREAD functions
 	void      disableThreadLibraryCalls()  { fSkipThreadEntryCalls = TRUE; };
+	void      disableLibraryCalls()        { fSkipEntryCalls = fSkipThreadEntryCalls = TRUE; };
 
 	Win32DllBase *getNext()  { return next; };
 static 	Win32DllBase *getFirst();
@@ -113,7 +114,7 @@ protected:
 	void          printDependencies(char *parent);
 #endif
 
-	BOOL          fSkipThreadEntryCalls, fUnloaded, fAttachedToProcess;
+	BOOL          fSkipThreadEntryCalls, fUnloaded, fAttachedToProcess, fSkipEntryCalls;
 
 	WIN32DLLENTRY dllEntryPoint;
 

@@ -1,4 +1,4 @@
-/* $Id: winimagebase.cpp,v 1.28 2000-10-06 11:04:02 sandervl Exp $ */
+/* $Id: winimagebase.cpp,v 1.29 2000-10-10 17:14:07 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -201,9 +201,10 @@ BOOL Win32ImageBase::findDll(const char *szFileName, char *szFullName,
 }
 
 //******************************************************************************
-//returns ERROR_SUCCESS or error code
+//returns ERROR_SUCCESS or error code (Characteristics will contain
+//the Characteristics member of the file header structure)
 //******************************************************************************
-ULONG Win32ImageBase::isPEImage(char *szFileName)
+ULONG Win32ImageBase::isPEImage(char *szFileName, DWORD *Characteristics)
 {
  char   filename[CCHMAXPATH];
  char  *syspath;
@@ -290,6 +291,9 @@ ULONG Win32ImageBase::isPEImage(char *szFileName)
   //IMAGE_FILE_SYSTEM == only drivers (device/file system/video etc)?
   if(fh.Characteristics & IMAGE_FILE_SYSTEM) {
         goto failure;
+  }
+  if(Characteristics) {
+	*Characteristics = fh.Characteristics;
   }
   DosClose(win32handle);
   return ERROR_SUCCESS_W;

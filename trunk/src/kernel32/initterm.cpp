@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.47 2000-10-02 21:40:57 phaller Exp $ */
+/* $Id: initterm.cpp,v 1.48 2000-10-10 17:14:04 sandervl Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -119,7 +119,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
             strcpy(kernel32Path, OSLibGetDllName(hModule));
             char *endofpath = strrchr(kernel32Path, '\\');
             *(endofpath+1) = 0;
-            dprintf(("kernel32 init\n"));
+            dprintf(("kernel32 init %s %s", __DATE__, __TIME__));
             _ctordtorInit();
 
             CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
