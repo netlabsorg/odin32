@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2000-12-03 00:26:11 bird Exp $
+# $Id: makefile,v 1.9 2001-09-29 20:26:44 bird Exp $
 
 #
 # Odin32 API
@@ -19,5 +19,5 @@ all_: all
 
 # All, Lib, Clean and Dep rules.
 $(COMMONRULES):
-    $(DODIRS) "cvg sst1" $(MAKE_CMD) $@
+    @$(DODIRS) "cvg sst1" $(MAKE_CMD) $@
 
