@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.11 2000-03-06 23:33:11 bird Exp $
+# $Id: Makefile,v 1.12 2000-03-08 08:55:47 bird Exp $
 
 #
 # Odin32 API
@@ -101,6 +101,8 @@ $(OBJDIR)\$(TARGET).dll: $(OBJS) $(TARGET).def $(OBJDIR)\$(TARGET).lrf
 # Linker file - creates the parameter file passed on to the linker.
 $(OBJDIR)\$(TARGET).lrf: makefile
     @echo Creating file <<$@
+/OUT:$(OBJDIR)\$(TARGET).dll
+/MAP:$(OBJDIR)\$(TARGET).map
 $(OBJS)
 $(PDWIN32_LIB)\ODINCRT.LIB
 $(RTLLIB_O)
