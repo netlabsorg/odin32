@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.141 2002-07-21 09:20:55 sandervl Exp $
+; $Id: KERNEL32.DEF,v 1.142 2002-07-21 09:23:19 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -22,9 +22,6 @@ IMPORTS
   _DosQuerySysState            =  DOSCALLS.368
 
   WinQueueFromID                = PMMERGE.5313
-  WinXxAllocFill                = PMMERGE.5423
-  WinXxFreeMem                  = PMMERGE.5427
-  WinXxReallocMem               = PMMERGE.5429
 
   Win32WaitForIdleThread        = PMMERGE.5474
   LookupAtom                    = PMMERGE.10020
