@@ -1,4 +1,4 @@
-/* $Id: progress.c,v 1.9 1999-08-19 21:24:19 cbratschi Exp $ */
+/* $Id: progress.c,v 1.10 1999-08-21 12:10:01 cbratschi Exp $ */
 /*
  * Progress control
  *
@@ -27,9 +27,9 @@
 //#define UNKNOWN_PARAM(msg, wParam, lParam) WARN(progress, \
 //        "Unknown parameter(s) for message " #msg     \
 //      "(%04x): wp=%04x lp=%08lx\n", msg, wParam, lParam);
-#define UNKNOWN_PARAM(msg, wParam, lParam)
+//#define UNKNOWN_PARAM(msg, wParam, lParam)
 
-#define PROGRESS_GetInfoPtr(hwnd) ((PROGRESS_INFO *)GetWindowLongA(hwnd, 0))
+#define PROGRESS_GetInfoPtr(hwnd) ((PROGRESS_INFO *)GetWindowLongA(hwnd,0))
 
 
 /***********************************************************************
