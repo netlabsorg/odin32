@@ -1,4 +1,4 @@
-/* $Id: odincrt.h,v 1.1 1999-08-09 21:44:52 phaller Exp $ */
+/* $Id: odincrt.h,v 1.2 1999-08-10 13:52:09 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -70,6 +70,11 @@ USHORT _System RestoreOS2FS();
 void   _System SetFS(USHORT selector);
 USHORT _System SetReturnFS(USHORT selector);
 
+
+/****************************************************************************
+ * Heap Management                                                          *
+ ****************************************************************************/
+
 void * ODINAPI  ODIN_calloc       ( size_t, size_t );
 void   ODINAPI  ODIN_free         ( void * );
 void * ODINAPI  ODIN_malloc       ( size_t );
@@ -80,8 +85,18 @@ void * ODINAPI  ODIN_debug_malloc ( size_t, const char *, size_t );
 void * ODINAPI  ODIN_debug_realloc( void *, size_t, const char *, size_t );
 
 
+/****************************************************************************
+ * String Management                                                        *
+ ****************************************************************************/
+
 char*  ODINAPI  ODIN_strdup       ( const char * );
 
+
+/****************************************************************************
+ * C++ wrappers (experimental)                                              *
+ ****************************************************************************/
+
+void*  ODINAPI  __nw__FUi         ( void* p1 );              // operator new()
 
 //@@@PH ODIN_new(myClass, ##myParams) new ....
 //@@@PH ODIN_delete(myObject) ... delete myObject ...
