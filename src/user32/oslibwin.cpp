@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.147 2004-01-15 10:28:41 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.148 2004-03-19 14:42:03 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -148,7 +148,9 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle,
         *OSWinStyle |= WS_CLIPSIBLINGS;
   if(dwStyle & WS_CLIPCHILDREN_W)
         *OSWinStyle |= WS_CLIPCHILDREN;
-  if(dwExStyle & WS_EX_TOPMOST_W)
+
+  //Topmost child windows cause painting problems when moved in PM
+  if(!(dwStyle & WS_CHILD_W) && dwExStyle & WS_EX_TOPMOST_W)
         *OSWinStyle |= WS_TOPMOST;
 
   //WS_EX_TOOLWINDOW is incompatible with the OS2Look (titlebar thinner + smaller font)
@@ -1061,7 +1063,7 @@ void OSLibSetWindowStyle(HWND hwndFrame, HWND hwndClient, ULONG dwStyle,
     }
     else dwWinStyle &= ~WS_DISABLED;
 
-    if(dwExStyle & WS_EX_TOPMOST_W) {
+    if(!(dwStyle & WS_CHILD_W) && dwExStyle & WS_EX_TOPMOST_W) {
          dwWinStyle |= WS_TOPMOST;
     }
     else dwWinStyle &= ~WS_TOPMOST;
