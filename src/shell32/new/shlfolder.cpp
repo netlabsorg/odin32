@@ -211,7 +211,7 @@ typedef struct
 
 extern struct ICOM_VTABLE(IShellFolder) sfvt;
 extern struct ICOM_VTABLE(IPersistFolder) psfvt;
-extern struct ICOM_VTABLE(IDropTarget) dtvt;
+extern struct ICOM_VTABLE(IDropTarget) dt2vt;
 
 static IShellFolder * ISF_MyComputer_Constructor(void);
 
@@ -254,7 +254,7 @@ static IShellFolder * IShellFolder_Constructor(
 
 	sf->lpvtbl=&sfvt;
 	sf->lpvtblPersistFolder=&psfvt;
-	sf->lpvtblDropTarget=&dtvt;
+	sf->lpvtblDropTarget=&dt2vt;
 	sf->pclsid = (CLSID*)&CLSID_SFFile;
 	sf->cfShellIDList=0;
 	sf->fAcceptFmt=FALSE;
@@ -1899,7 +1899,7 @@ static HRESULT WINAPI ISFDropTarget_Drop(
 	return E_NOTIMPL;
 }
 
-struct ICOM_VTABLE(IDropTarget) dtvt =
+struct ICOM_VTABLE(IDropTarget) dt2vt =
 {
 	ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
 	ISFDropTarget_QueryInterface,

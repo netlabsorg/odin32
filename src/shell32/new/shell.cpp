@@ -13,6 +13,7 @@
 
 #define ICOM_CINTERFACE 1
 #define CINTERFACE 1
+#define INITGUID
 
 //#include "wine/winuser16.h"
 //#include "wine/winbase16.h"
