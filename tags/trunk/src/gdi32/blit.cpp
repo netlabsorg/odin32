@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.48 2004-03-09 10:03:21 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.49 2004-03-09 14:24:34 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -275,14 +275,6 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
 
     if (!cx || !cy) goto invalid_parameter;
 
-//testestset
-    if(xSrc != 0 || ySrc != 0) 
-    {
-        dprintf(("xSrc %d ySrc %d bpp %d", xSrc, ySrc, info->bmiHeader.biBitCount));
-//        return lines;
-    }
-//testestest
-
     // check if new bitmap must be created
     if (xSrc == 0 && ySrc == 0 && startscan == 0 && lines == height &&
         cx == width && cy == height && info->bmiHeader.biHeight > 0)
@@ -295,9 +287,12 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
         if (info->bmiHeader.biCompression == BI_RGB ||
             info->bmiHeader.biCompression == BI_BITFIELDS) 
         {
+            // not zero if bpp < 8 and starting on an uneven pixel
+            UINT xOffset = (xSrc * info->bmiHeader.biBitCount) % 8;
+
             // compute size of memory buffer
             UINT lBytesPerLineOrig = DIB_GetDIBWidthBytes (info->bmiHeader.biWidth, info->bmiHeader.biBitCount);
-            UINT lBytesToCopyInLine = DIB_GetDIBWidthBytes (cx, info->bmiHeader.biBitCount);
+            UINT lBytesToCopyInLine = DIB_GetDIBWidthBytes (cx + xOffset, info->bmiHeader.biBitCount);
             
             newBits = (char *)malloc (lBytesToCopyInLine * cy);
             
@@ -305,15 +300,16 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
             {
                 // copy bits to new buffer
                 int i;
-                // starting pointer
-                char *pBits = (char *)bits +                           // origin
-                              (ySrc - startscan) * lBytesPerLineOrig + // y offset
-                              (xSrc * info->bmiHeader.biBitCount) / 8; // x offset
-                               
+
+                char *pNewBits = (char *)newBits;
+                              
                 if (info->bmiHeader.biHeight > 0)
                 {
-                    char *pNewBits = (char *)newBits;
-                
+                    // starting pointer
+                    char *pBits = (char *)bits +                           // origin
+                                  (ySrc - startscan) * lBytesPerLineOrig + // y offset
+                                  (xSrc * info->bmiHeader.biBitCount) / 8; // x offset
+               
                     for (i = 0; i < cy; i++)
                     {
                         memcpy (pNewBits, pBits, lBytesToCopyInLine);
@@ -323,27 +319,30 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
                 }
                 else
                 {
-                    char *pNewBits = (char *)newBits + (cy - 1) * lBytesToCopyInLine;
-                
+                    // starting pointer
+                    char *pBits = (char *)bits +                           // origin
+                                  (lines - 1 - (ySrc - startscan)) * lBytesPerLineOrig + // y offset
+                                  (xSrc * info->bmiHeader.biBitCount) / 8; // x offset
+
                     for (i = 0; i < cy; i++)
                     {
                         memcpy (pNewBits, pBits, lBytesToCopyInLine);
-                        pBits += lBytesPerLineOrig;
-                        pNewBits -= lBytesToCopyInLine;
+                        pBits    -= lBytesPerLineOrig;
+                        pNewBits += lBytesToCopyInLine;
                     }
                 }
                 
                 // newBits contain partial bitmap, correct the header
                 // todo bitcount < 8
-                ((BITMAPINFO *)info)->bmiHeader.biWidth = cx;
+                ((BITMAPINFO *)info)->bmiHeader.biWidth  = cx + xOffset;
                 ((BITMAPINFO *)info)->bmiHeader.biHeight = cy;
                 ((BITMAPINFO *)info)->bmiHeader.biSizeImage = lBytesToCopyInLine * cy;
                 
-                xSrc = (xSrc * info->bmiHeader.biBitCount) % 8;
                 ySrc = startscan = 0;
+                xSrc = xOffset;
                 lines = cy;
-                dprintf(("Converted BITMAP: (%d,%d) %d bytes",
-                         info->bmiHeader.biWidth, info->bmiHeader.biHeight, info->bmiHeader.biSizeImage));
+                dprintf(("Converted BITMAP: (%d,%d) %d bytes xSrc %d ySrc %d",
+                         info->bmiHeader.biWidth, info->bmiHeader.biHeight, info->bmiHeader.biSizeImage, xSrc, ySrc));
             }
         }
     }
