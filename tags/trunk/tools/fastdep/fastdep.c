@@ -1,4 +1,4 @@
-/* $Id: fastdep.c,v 1.20 2000-05-18 21:28:40 bird Exp $
+/* $Id: fastdep.c,v 1.21 2000-06-08 16:27:14 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
@@ -2248,13 +2248,13 @@ static void *textbufferCreate(const char *pszFilename)
     if (phFile != NULL)
     {
         signed long cbFile = fsize(phFile);
-        if (cbFile > 0)
+        if (cbFile >= 0)
         {
             pvFile = malloc(cbFile + 1);
             if (pvFile != NULL)
             {
                 memset(pvFile, 0, cbFile + 1);
-                if (fread(pvFile, 1, cbFile, phFile) == 0)
+                if (cbFile > 0 && fread(pvFile, 1, cbFile, phFile) == 0)
                 {   /* failed! */
                     free(pvFile);
                     pvFile = NULL;
