@@ -1,4 +1,12 @@
- /* $Id: changelog,v 1.625 2000-01-09 14:15:08 davidr Exp $ */
+ /* $Id: changelog,v 1.626 2000-01-09 15:59:32 sandervl Exp $ */
+
+ 2000-01-09: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Added border size for top-level windows in OSLibWinConvertStyle 
+                  (borders are not drawn correctly)
+                  Fixed bug in pmframe WM_WINDOWPOSCHANGED handler (don't update
+                  client/window rectangle when size nor position have changed)
+                  Fixed out of sync rectWindow. (children don't get notified of
+                  parent position change -> rectWindow (in screen coord.) not updated)
 
  2000-01-09: David Raison <djr@lemur.co.uk>
         - OLEAUT32: Typelib - Updated TKIND_ALIAS handling.
@@ -10,6 +18,9 @@
  2000-01-08: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: ModifyMenuA bugfix (changing menu ids didn't work)
                   OSLibGetMsg bugfix + WM_QUIT translation fix
+                  OSLibGetMenuItemRect fix (y coordinate conversion)
+                  Changed WM_NCHITTEST behaviour. Now sent during WM_MOUSEMOVE
+                  or button down/up message translation.
 	- OLE32/OLEAUT32/OLESVR32/OLEDLG/OLECLI32: 
                   Added Wine-like license that supercedes the main Odin license
 	- CRTDLL: Fixed many register based floating point exports (CRTDLL__CIcos,
