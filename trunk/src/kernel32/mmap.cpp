@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.34 2000-02-17 14:08:51 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.35 2000-03-02 19:17:21 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -269,6 +269,7 @@ fail:
 //******************************************************************************
 BOOL Win32MemMap::unmapViewOfFile(Win32MemMapView *view)
 {
+  dprintf(("Win32MemMap::unmapViewOfFile %x (nrmaps=%d)", view, nrMappings));
   mapMutex.enter();
 
   if(nrMappings == 0)

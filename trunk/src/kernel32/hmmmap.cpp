@@ -1,4 +1,4 @@
-/* $Id: hmmmap.cpp,v 1.10 2000-02-16 14:23:59 sandervl Exp $ */
+/* $Id: hmmmap.cpp,v 1.11 2000-03-02 19:17:21 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -196,6 +196,7 @@ DWORD HMDeviceMemMapClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
 {
  Win32MemMap *map;
 
+  dprintf(("HMDeviceMemMapClass::CloseHandle %x", pHMHandleData->dwUserData));
   if(pHMHandleData->dwUserData == NULL || pHMHandleData->dwInternalType != HMTYPE_MEMMAP) {
 	dprintf(("MapViewOfFileEx: invalid handle data!"));
 	return ERROR_INVALID_HANDLE;

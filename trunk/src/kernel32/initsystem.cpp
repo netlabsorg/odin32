@@ -1,6 +1,9 @@
-/* $Id: initsystem.cpp,v 1.4 2000-02-16 14:25:40 sandervl Exp $ */
+/* $Id: initsystem.cpp,v 1.5 2000-03-02 19:17:21 sandervl Exp $ */
 /*
  * Odin system initialization (registry & directories)
+ *
+ *
+ * NOTE: Most of this has to be moved into the Odin install program!!!!!
  *
  * Copyright 1999 Sander van Leeuwen (sandervl@xs4all.nl)
  *
@@ -28,6 +31,7 @@ static HINSTANCE hInstance = 0;
 BOOL InitRegistry();
 
 LONG (WIN32API *ADVAPI32_RegCloseKey)(HKEY) = 0;
+LONG (WIN32API *ADVAPI32_RegOpenKeyA)(HKEY,LPCSTR,LPHKEY) = 0;
 LONG (WIN32API *ADVAPI32_RegCreateKeyA)(HKEY,LPCSTR,LPHKEY) = 0;
 LONG (WIN32API *ADVAPI32_RegSetValueExA)(HKEY,LPSTR,DWORD,DWORD,LPBYTE,DWORD) = 0;
 
@@ -38,6 +42,7 @@ BOOL InitSystemEnvironment(ULONG nrCPUs)
    hInstance = LoadLibraryA("ADVAPI32.DLL");
    if(hInstance) {
     	*(VOID **)&ADVAPI32_RegCloseKey=(void*)GetProcAddress(hInstance, (LPCSTR)"RegCloseKey");
+        *(VOID **)&ADVAPI32_RegOpenKeyA=(void*)GetProcAddress(hInstance, (LPCSTR)"RegOpenKeyA");
         *(VOID **)&ADVAPI32_RegCreateKeyA=(void*)GetProcAddress(hInstance, (LPCSTR)"RegCreateKeyA");
         *(VOID **)&ADVAPI32_RegSetValueExA=(void*)GetProcAddress(hInstance, (LPCSTR)"RegSetValueExA");
    }
@@ -99,6 +104,74 @@ BOOL InitRegistry()
    
    ADVAPI32_RegCloseKey(hkey);
    //todo: productid, registered org/owner, sourcepath,    
+
+   //Create Software\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders keys
+   //"Favorites"="C:\WINDOWS\Favorites"
+   //"StartUp"="C:\WINDOWS\Start Menu\Programs\Startup"
+   //"Desktop"="C:\WINDOWS\Desktop"
+   //"Programs"="C:\WINDOWS\Start Menu\Programs"
+   //"Fonts"="C:\WINDOWS\Fonts"
+   //"SendTo"="C:\WINDOWS\SendTo"
+   //"Start Menu"="C:\WINDOWS\Start Menu"
+   //"Templates"="C:\WINDOWS\ShellNew"
+   //"Recent"="C:\WINDOWS\Recent"
+   //"NetHood"="C:\WINDOWS\NetHood"
+   //"Personal"="C:\My Documents"
+
+   char shellpath[260];
+
+   if(ADVAPI32_RegOpenKeyA(HKEY_CURRENT_USER, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders", &hkey) != ERROR_SUCCESS) 
+   {
+   	if(ADVAPI32_RegCreateKeyA(HKEY_CURRENT_USER,"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Shell Folders",&hkey)!=ERROR_SUCCESS) {
+      		dprintf(("InitRegistry: Unable to register system information (3)"));
+		return FALSE;
+   	}
+   	strcpy(shellpath, InternalGetSystemDirectoryA());
+   	strcat(shellpath, "\\Favorites");
+   	CreateDirectoryA(shellpath, NULL);
+   	ADVAPI32_RegSetValueExA(hkey,"Favorites",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
+   	strcpy(shellpath, InternalGetSystemDirectoryA());
+   	strcat(shellpath, "\\Programs\\Startup");
+   	CreateDirectoryA(shellpath, NULL);
+   	ADVAPI32_RegSetValueExA(hkey,"Startup",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
+   	strcpy(shellpath, InternalGetSystemDirectoryA());
+   	strcat(shellpath, "\\Desktop");
+   	CreateDirectoryA(shellpath, NULL);
+   	ADVAPI32_RegSetValueExA(hkey,"Desktop",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
+   	strcpy(shellpath, InternalGetSystemDirectoryA());
+   	strcat(shellpath, "\\Start Menu\\Programs");
+   	CreateDirectoryA(shellpath, NULL);
+   	ADVAPI32_RegSetValueExA(hkey,"Programs",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
+   	strcpy(shellpath, InternalGetSystemDirectoryA());
+   	strcat(shellpath, "\\Fonts");
+   	CreateDirectoryA(shellpath, NULL);
+   	ADVAPI32_RegSetValueExA(hkey,"Fonts",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
+   	strcpy(shellpath, InternalGetSystemDirectoryA());
+   	strcat(shellpath, "\\SendTo");
+   	CreateDirectoryA(shellpath, NULL);
+   	ADVAPI32_RegSetValueExA(hkey,"SendTo",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
+   	strcpy(shellpath, InternalGetSystemDirectoryA());
+   	strcat(shellpath, "\\Start Menu");
+   	CreateDirectoryA(shellpath, NULL);
+   	ADVAPI32_RegSetValueExA(hkey,"Start Menu",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
+   	strcpy(shellpath, InternalGetSystemDirectoryA());
+   	strcat(shellpath, "\\ShellNew");
+   	CreateDirectoryA(shellpath, NULL);
+   	ADVAPI32_RegSetValueExA(hkey,"Templates",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
+   	strcpy(shellpath, InternalGetSystemDirectoryA());
+   	strcat(shellpath, "\\Recent");
+   	CreateDirectoryA(shellpath, NULL);
+   	ADVAPI32_RegSetValueExA(hkey,"Recent",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
+   	strcpy(shellpath, InternalGetSystemDirectoryA());
+   	strcat(shellpath, "\\NetHood");
+   	CreateDirectoryA(shellpath, NULL);
+   	ADVAPI32_RegSetValueExA(hkey,"NetHood",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
+   	strcpy(shellpath, InternalGetSystemDirectoryA());
+   	strcat(shellpath, "\\My Documents");
+   	CreateDirectoryA(shellpath, NULL);
+   	ADVAPI32_RegSetValueExA(hkey,"Personal",0,REG_SZ, (LPBYTE)shellpath, strlen(shellpath)+1);
+   }
+   ADVAPI32_RegCloseKey(hkey);
    return TRUE;
 }
 //******************************************************************************
