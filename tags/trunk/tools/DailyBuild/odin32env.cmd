@@ -1,4 +1,4 @@
-/* $Id: odin32env.cmd,v 1.16 2001-01-18 14:47:06 bird Exp $
+/* $Id: odin32env.cmd,v 1.17 2001-03-15 20:12:46 bird Exp $
  *
  * Sets the build environment.
  *
@@ -27,6 +27,8 @@ parse arg sCompiler
      * Call the procedures which configure each tool.
      * (The order this is done is _very_ important!)
      */
+    call Jade 0;
+    call DocBookXML 0;
     call WarpIn 0;
     call EMX 0;
     call mySQL 0;
@@ -138,7 +140,42 @@ DDKBase: procedure
     return 0;
 
 
+/*
+ * DocBook 4.1.x XML.
+ */               
+DocBookXML: procedure
+    parse arg fRM
 
+    /*
+     * DocBook XML dir.
+     */
+    sDocBookXML = 'e:\coding\DocBook\XML'
+    
+    call EnvVar_Set      fRM, 'docbookxml',         sDocBookXML
+    call EnvVar_AddFront fRM, 'SGML_CATALOG_FILES', sDocBookXML'\docbook.cat;'
+     
+    return 0;
+    
+
+/*
+ * Jade 1.2.1 for OS/2.
+ */               
+Jade: procedure
+    parse arg fRM
+
+    /*
+     * Jade install dir.
+     */
+    sJadeMain = 'e:\apps\jade'
+    
+    call EnvVar_Set      fRM, 'jademain',           sJadeMain
+    call EnvVar_AddFront fRM, 'path',               sJadeMain';'
+    call EnvVar_AddFront fRM, 'SGML_CATALOG_FILES', sJadeMain'\catalog;'
+    call EnvVar_AddEnd   fRM, 'SGML_CATALOG_FILES', '.\catalog;'
+     
+    return 0;
+
+    
 /*
  * Microsoft C v6.0a
  */
@@ -166,7 +203,7 @@ mySQL: procedure
     /*
      * mySQL Database system main directory.
      */
-    sMySQLMain    = 'c:\emx\mysql';
+    sMySQLMain    = 'd:\knut\apps\MySql';
     call EnvVar_Set      fRM, 'mysqlmain',      sMySQLMain;
     call EnvVar_AddFront fRM, 'path',           sMySQLMain'\bin;'
     call EnvVar_AddFront fRM, 'beginlibpath',   sMySQLMain'\dll;'
