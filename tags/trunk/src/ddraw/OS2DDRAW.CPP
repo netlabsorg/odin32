@@ -1,3 +1,5 @@
+#include <stdlib.h>
+#include <string.h>
 #include <memory.h>
 
 #define INITGUID
@@ -128,6 +130,12 @@ OS2IDirectDraw::OS2IDirectDraw(GUID *lpGUID) :
     }
   }
 
+  lpVtbl2 = lpVtbl;
+
+  pdwUnknownData = (DWORD*) malloc (255*sizeof(DWORD));
+  for(int i= 0 ;i<255;i++)
+    pdwUnknownData[i] = 0;
+
   rc = DiveOpen( &hDive,
                  FALSE,
                  &pFrameBuffer);
@@ -153,6 +161,9 @@ OS2IDirectDraw::OS2IDirectDraw(GUID *lpGUID) :
 
   WriteLog("DiveQueryCaps rc=0x%08X\n",rc);
 
+  pdwUnknownData[235] = dCaps.ulHorizontalResolution;
+  pdwUnknownData[236] = dCaps.ulVerticalResolution;
+  pdwUnknownData[241] = dCaps.ulDepth;
 
   // Shall we run in FS mode ?
   if(ERROR_SUCCESS==RegOpenKeyA(HKEY_LOCAL_MACHINE,KEY_DIRECT2DRAW,&hkDirectDraw2))
@@ -476,8 +487,11 @@ HRESULT __stdcall DrawDuplicateSurface4(THIS, LPDIRECTDRAWSURFACE4, LPDIRECTDRAW
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall DrawEnumDisplayModes(THIS This, DWORD dwFlags, LPDDSURFACEDESC lpDDSurfaceDesc,
-                                       LPVOID lpContext, LPDDENUMMODESCALLBACK lpDDEnumModesCallback)
+HRESULT __stdcall DrawEnumDisplayModes( THIS This,
+                                        DWORD dwFlags,
+                                        LPDDSURFACEDESC lpDDSurfaceDesc,
+                                        LPVOID lpContext,
+                                        LPDDENUMMODESCALLBACK lpDDEnumModesCallback)
 {
   int iMode = 0;
   DDSURFACEDESC DDSurfAct;
@@ -514,18 +528,33 @@ HRESULT __stdcall DrawEnumDisplayModes(THIS This, DWORD dwFlags, LPDDSURFACEDESC
   {
     // DIVE modes
 
+    #ifdef DEBUG
+      WriteLog("EnumDisplayModes : DIVE modes\n");
+    #endif
+
     // Enumerate all modes ?
     if (NULL==lpDDSurfaceDesc)
     {
       // Check if we shall report 320x200 mode
 
+      #ifdef DEBUG
+        WriteLog("EnumDisplayModes : ALL modes\n");
+      #endif
+
       if(dwFlags && DDEDM_STANDARDVGAMODES)
       {
+        #ifdef DEBUG
+          WriteLog("EnumDisplayModes : STANDARDVGAMODES\n");
+        #endif
         DDSurfAct.dwHeight = ModesDive[0].iYRes;
         DDSurfAct.dwWidth  = ModesDive[0].iXRes;
         DDSurfAct.ddpfPixelFormat.dwRGBBitCount = ModesDive[0].iBits;
+        DDSurfAct.ddpfPixelFormat.dwFlags |= DDPF_PALETTEINDEXED8 ;
         if(!lpDDEnumModesCallback(&DDSurfAct,lpContext))
         {
+          #ifdef DEBUG
+            WriteLog("EnumDisplayModes : Enum done\n");
+          #endif
           return (DD_OK);
         }
       }
@@ -538,6 +567,7 @@ HRESULT __stdcall DrawEnumDisplayModes(THIS This, DWORD dwFlags, LPDDSURFACEDESC
       {
         // if the mode fits in the current resolution report it
         // Change this if we support Fullscreen later !!!
+
         if(ModesDive[iMode].iXRes < me->dCaps.ulHorizontalResolution)
         {
           DDSurfAct.dwHeight = ModesDive[iMode].iYRes;
@@ -545,27 +575,43 @@ HRESULT __stdcall DrawEnumDisplayModes(THIS This, DWORD dwFlags, LPDDSURFACEDESC
           DDSurfAct.ddpfPixelFormat.dwRGBBitCount = ModesDive[iMode].iBits;
           switch(ModesDive[iMode].iBits)
           {
+            case 8:
+              DDSurfAct.ddpfPixelFormat.dwFlags |= DDPF_PALETTEINDEXED8;
+              break;
             case 16:
               // VESA uses 565 encoding in 16 bit modes
-              lpDDSurfaceDesc->ddpfPixelFormat.dwRBitMask = 0x0000F800;
-              lpDDSurfaceDesc->ddpfPixelFormat.dwGBitMask = 0x000007E0;
-              lpDDSurfaceDesc->ddpfPixelFormat.dwBBitMask = 0x0000001F;
+              DDSurfAct.ddpfPixelFormat.dwFlags &= ~DDPF_PALETTEINDEXED8;
+              DDSurfAct.ddpfPixelFormat.dwRBitMask = 0x0000F800;
+              DDSurfAct.ddpfPixelFormat.dwGBitMask = 0x000007E0;
+              DDSurfAct.ddpfPixelFormat.dwBBitMask = 0x0000001F;
               break;
             case 24:
               // VESA uses per default RGB4
-              lpDDSurfaceDesc->ddpfPixelFormat.dwRBitMask = 0x00FF0000;
-              lpDDSurfaceDesc->ddpfPixelFormat.dwGBitMask = 0x0000FF00;
-              lpDDSurfaceDesc->ddpfPixelFormat.dwBBitMask = 0x000000FF;
+              DDSurfAct.ddpfPixelFormat.dwFlags &= ~DDPF_PALETTEINDEXED8;
+              DDSurfAct.ddpfPixelFormat.dwRBitMask = 0x00FF0000;
+              DDSurfAct.ddpfPixelFormat.dwGBitMask = 0x0000FF00;
+              DDSurfAct.ddpfPixelFormat.dwBBitMask = 0x000000FF;
               break;
             default:
               break;
           }
+          #ifdef DEBUG
+            WriteLog( "EnumDisplayModes : Enum Mode %dx%d @ %d\n",
+                      DDSurfAct.dwHeight,
+                      DDSurfAct.dwWidth,
+                      DDSurfAct.ddpfPixelFormat.dwRGBBitCount);
+          #endif
           fCallAgain = lpDDEnumModesCallback(&DDSurfAct,lpContext);
+          #ifdef DEBUG
+            WriteLog( "EnumDisplayModes : Callback returned with %d\n",
+                      fCallAgain);
+          #endif
         }
         iMode++;
       }
-      while((ModesDive[iMode].iBits <= me->dCaps.ulDepth) &&
-            (iMode < NUM_MODES_DIVE) && (TRUE==fCallAgain));
+      while( (iMode < NUM_MODES_DIVE) &&
+             (ModesDive[iMode].iBits <= me->dCaps.ulDepth) &&
+             (TRUE==fCallAgain) );
     }
     else
     {
@@ -595,6 +641,7 @@ HRESULT __stdcall DrawEnumDisplayModes(THIS This, DWORD dwFlags, LPDDSURFACEDESC
         DDSurfAct.dwHeight = ModesDive[0].iYRes;
         DDSurfAct.dwWidth  = ModesDive[0].iXRes;
         DDSurfAct.ddpfPixelFormat.dwRGBBitCount = ModesDive[0].iBits;
+        DDSurfAct.ddpfPixelFormat.dwFlags |= DDPF_PALETTEINDEXED8;
         if(!lpDDEnumModesCallback(&DDSurfAct,lpContext))
         {
           return (DD_OK);
@@ -626,6 +673,28 @@ HRESULT __stdcall DrawEnumDisplayModes(THIS This, DWORD dwFlags, LPDDSURFACEDESC
           DDSurfAct.dwHeight = ModesDive[iMode].iYRes;
           DDSurfAct.dwWidth  = ModesDive[iMode].iXRes;
           DDSurfAct.ddpfPixelFormat.dwRGBBitCount = ModesDive[iMode].iBits;
+          switch(ModesDive[iMode].iBits)
+          {
+            case 8:
+              DDSurfAct.ddpfPixelFormat.dwFlags |= DDPF_PALETTEINDEXED8;
+              break;
+            case 16:
+              // VESA uses 565 encoding in 16 bit modes
+              DDSurfAct.ddpfPixelFormat.dwFlags &= ~DDPF_PALETTEINDEXED8;
+              DDSurfAct.ddpfPixelFormat.dwRBitMask = 0x0000F800;
+              DDSurfAct.ddpfPixelFormat.dwGBitMask = 0x000007E0;
+              DDSurfAct.ddpfPixelFormat.dwBBitMask = 0x0000001F;
+              break;
+            case 24:
+              // VESA uses per default RGB4
+              DDSurfAct.ddpfPixelFormat.dwFlags &= ~DDPF_PALETTEINDEXED8;
+              DDSurfAct.ddpfPixelFormat.dwRBitMask = 0x00FF0000;
+              DDSurfAct.ddpfPixelFormat.dwGBitMask = 0x0000FF00;
+              DDSurfAct.ddpfPixelFormat.dwBBitMask = 0x000000FF;
+              break;
+            default:
+              break;
+          }
 
           fCallAgain = lpDDEnumModesCallback(&DDSurfAct,lpContext);
         }
@@ -673,6 +742,10 @@ HRESULT __stdcall DrawEnumDisplayModes(THIS This, DWORD dwFlags, LPDDSURFACEDESC
 
       iMode = 2;
       fCallAgain = TRUE;
+      // All reported mode are 16bit
+      DDSurfAct.ddpfPixelFormat.dwRBitMask = 0x0000F800;
+      DDSurfAct.ddpfPixelFormat.dwGBitMask = 0x000007E0;
+      DDSurfAct.ddpfPixelFormat.dwBBitMask = 0x0000001F;
       do
       {
         // if the mode fits the filter applies report it
