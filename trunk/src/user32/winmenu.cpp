@@ -1,4 +1,4 @@
-/* $Id: winmenu.cpp,v 1.12 1999-10-28 19:09:17 sandervl Exp $ */
+/* $Id: winmenu.cpp,v 1.13 1999-11-03 18:16:19 phaller Exp $ */
 
 /*
  * Win32 menu API functions for OS/2
@@ -557,7 +557,9 @@ ODINFUNCTION6(BOOL, TrackPopupMenuEx,
     }
 
     dprintf(("USER32:  TrackPopupMenuEx, not completely implemented\n"));
-    if(lpPM->cbSize != 0)
+
+    if (lpPM != NULL) // this parameter can be NULL
+      if(lpPM->cbSize != 0)
         rect = &lpPM->rcExclude;
 
     if(hMenu == 0)

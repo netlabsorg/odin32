@@ -1,11 +1,12 @@
- /* $Id: changelog,v 1.402 1999-11-03 17:59:26 cbratschi Exp $ */
+ /* $Id: changelog,v 1.403 1999-11-03 18:19:29 phaller Exp $ */
 
  99-11-03: Christoph Bratschi <cbratschi@datacomm.ch>
 	USER32: fixed modal dialogs
 
  99-11-03: Patrick Haller <phaller@gmx.net>
-	KERNEL32:	Fix: 	undocumented behaviour in SearchPathA 
+	- KERNEL32:	Fix: 	undocumented behaviour in SearchPathA 
 				and bugfix in SearchPathW
+	- USER32:	Fix:	TrackPopupMenuEx lpPM can be NULL
 
  99-11-02  Markus Montkowski <mmontkowski@gmx.de>
                  Changed debug output to DDRAW: ...
