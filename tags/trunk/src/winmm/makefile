@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.24 2001-09-30 00:37:17 bird Exp $
+# $Id: makefile,v 1.25 2004-01-21 10:07:06 sandervl Exp $
 #
 # Odin32 API
 #
@@ -16,7 +16,8 @@ _all: all
 
 # Subdirectories.
 SUBDIRS = \
-mcicda
+mcicda \
+mciwave
 
 
 # All the common rules like all, lib, clean and dep.
