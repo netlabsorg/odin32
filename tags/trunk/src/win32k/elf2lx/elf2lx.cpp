@@ -1,4 +1,4 @@
-/* $Id: elf2lx.cpp,v 1.5 2000-12-11 06:53:48 bird Exp $
+/* $Id: elf2lx.cpp,v 1.6 2001-02-10 11:11:42 bird Exp $
  *
  * Elf2Lx - implementation.
  *
@@ -15,6 +15,7 @@
 #define FOR_EXEHDR 1                    /* To make all object flags OBJ???. */
 #define INCL_DOSERRORS                  /* DOS Error codes. */
 #ifdef RING0
+    #define INCL_OS2KRNL_LDR            /* LdrRead */
     #define INCL_NOAPI                  /* RING0: No apis. */
 #else /*RING3*/
     #define INCL_DOSPROCESS             /* RING3: DosSleep. */
@@ -42,9 +43,6 @@
 #include "vprintf.h"                    /* win32k printf and vprintf. Not C library! */
 #include "dev32.h"                      /* 32-Bit part of the device driver. (SSToDS) */
 #include "OS2Krnl.h"                    /* kernel structs.  (SFN) */
-#ifdef RING0
-    #include "ldrCalls.h"               /* ldr* calls. (ldrRead) */
-#endif
 
 #include "elf.h"                        /* Elf binary format definitions. */
 #include "modulebase.h"                 /* ModuleBase class definitions, ++. */

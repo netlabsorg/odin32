@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2000-12-02 23:32:41 bird Exp $
+# $Id: makefile,v 1.6 2001-02-10 11:11:48 bird Exp $
 
 #
 # Odin32 API
@@ -12,6 +12,8 @@
 #
 EXETARGET=1
 ADDITIONAL_DEP = mydep
+WIN32KAPI     = ..\api
+WIN32KMISC    = ..\misc
 WIN32KINCLUDE = ..\include
 
 
@@ -37,7 +39,9 @@ CXXFLAGS   = $(CXXFLAGS) -Wall+ppt-ppc-inl-cnv-gnr-vft-
 # Object files. Prefix with OBJDIR and one space before the '\'.
 #
 OBJS = \
-$(OBJDIR)\Win32kCC.obj
+$(OBJDIR)\Win32kCC.obj 
+#$(OBJDIR)\api.obj \
+#$(OBJDIR)\locks.obj
 
 
 #
@@ -73,4 +77,21 @@ TARGET = Win32kCC
 #
 mydep:
     $(DEPEND) -a -o$$(OBJDIR) $(CINCLUDES) $(WIN32KINCLUDE)\*.h
+
+
+#
+# Extra rules to build api.obj and locks.obj
+#
+!if "$(VAC3)" == "1" | "$(VAC36)" == "1"
+$(OBJDIR)\api.obj: $(WIN32KAPI)\api.cpp
+    $(CC) -c $(CXXFLAGS) $(CDEFINES) $(CINCLUDES) -Fo$(OBJDIR)\$(@B).obj $**
+
+$(OBJDIR)\locks.obj: $(WIN32KMISC)\locks.asm
+    $(AS) $(ASFLAGS) -I:$(WIN32KINCLUDE) -Fdo:$(OBJDIR) $**
+!else
+!error  "not ready for this compiler yet"
+!endif
+
+
+
 

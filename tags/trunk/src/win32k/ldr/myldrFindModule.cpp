@@ -1,4 +1,4 @@
-/* $Id: myldrFindModule.cpp,v 1.1 2000-12-11 06:32:06 bird Exp $
+/* $Id: myldrFindModule.cpp,v 1.2 2001-02-10 11:11:46 bird Exp $
  *
  * ldrFindModule - ldrFindModule replacement with support for long DLL names
  *                  and .DLL-extention dependency.
@@ -14,6 +14,7 @@
 *******************************************************************************/
 #define INCL_DOSERRORS
 #define INCL_NOPMAPI
+#define INCL_OS2KRNL_LDR
 
 /*******************************************************************************
 *   Header Files                                                               *
@@ -32,7 +33,6 @@
 #include "OS2Krnl.h"
 #include "dev32.h"
 #include "ldr.h"
-#include "ldrCalls.h"
 #include "ModuleBase.h"
 #include "options.h"
 

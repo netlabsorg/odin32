@@ -1,4 +1,4 @@
-/* $Id: myldrWasLoadModuled.cpp,v 1.1 2000-12-17 22:44:45 bird Exp $
+/* $Id: myldrWasLoadModuled.cpp,v 1.2 2001-02-10 11:11:47 bird Exp $
  *
  * ldrWasLoadModuled - Tells OS/2 that the executable module was LoadModuled
  *      too. This way DosQueryProcAddr and DosQueryProcType will work for
@@ -16,6 +16,7 @@
 #define INCL_DOSERRORS
 #define INCL_NOPMAPI
 #define INCL_OS2KRNL_PTDA
+#define INCL_OS2KRNL_LDR
 
 /*******************************************************************************
 *   Header Files                                                               *
@@ -34,7 +35,6 @@
 #include "OS2Krnl.h"
 #include "dev32.h"
 #include "ldr.h"
-#include "ldrCalls.h"
 #include "options.h"
 
 

@@ -1,4 +1,4 @@
-/* $Id: api.cpp,v 1.4 2001-01-22 08:06:38 bird Exp $
+/* $Id: api.cpp,v 1.5 2001-02-10 11:11:41 bird Exp $
  *
  * API Overload Init and Helper Function.
  *
@@ -47,7 +47,7 @@
 #include <stdio.h>
 #define IOSftClose(hFile)   DosClose(hFile)
 #define rmalloc             malloc
-#define realloc             realloc
+#define rrealloc            realloc
 #define rfree               free
 #undef kprintf
 #define kprintf(a)          printf a

@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.31 2001-02-02 08:27:16 bird Exp $
+/* $Id: d32init.c,v 1.32 2001-02-10 11:11:42 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -30,6 +30,7 @@
 #define INCL_NOPMAPI
 #define LDR_INCL_INITONLY
 #define INCL_OS2KRNL_ALL
+#define INCL_OS2KRNL_LDR
 
 /*******************************************************************************
 *   Header Files                                                               *
@@ -49,7 +50,6 @@
 #include "asmutils.h"
 #include "malloc.h"
 #include "ldr.h"
-#include "ldrCalls.h"
 #include "macros.h"
 #include "errors.h"
 

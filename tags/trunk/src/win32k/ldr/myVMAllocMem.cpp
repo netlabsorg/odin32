@@ -1,4 +1,4 @@
-/* $Id: myVMAllocMem.cpp,v 1.2 2000-12-11 06:53:53 bird Exp $
+/* $Id: myVMAllocMem.cpp,v 1.3 2001-02-10 11:11:45 bird Exp $
  *
  * Debug module - overloads VMAllocMem to analyse input parameters....
  *
@@ -13,6 +13,7 @@
 *******************************************************************************/
 #define INCL_DOSERRORS
 #define INCL_NOPMAPI
+#define INCL_OS2KRNL_LDR
 
 /*******************************************************************************
 *   Header Files                                                               *
@@ -23,7 +24,6 @@
 #include "OS2Krnl.h"
 #include "avl.h"
 #include "ldr.h"
-#include "ldrCalls.h"
 
 
 
