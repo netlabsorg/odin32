@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.17 2000-01-27 23:54:36 bird Exp $
+# $Id: Makefile,v 1.18 2000-01-28 13:17:52 bird Exp $
 #
 # Copyright 1998-1999 knut st. osmundsen
 #
@@ -27,7 +27,6 @@ ILIB        = ilib
 LD          = ilink
 AS          = alp
 
-
 CFLAGS      = -q -Ge -Gs- -Gr+ -Rn -Ss+ -Mp -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext-
 CFLAGS16    = -c -W4 -Asfw /NTCODE16 /NDDATA16 -G2s -Zp -Zl -nologo -Fo$@ -Fa
 CPPFLAGS    = -q -Ge -Gs- -Gr+ -Rn -Ss+ -Mp -Gx -Wall+ppt-ppc-inl-cnv-gnr-vft-
@@ -39,7 +38,8 @@ ADEFINES    = -D:WIN32K
 
 
 
-!ifdef %RELEASE
+
+!ifndef DEBUG
 # RELEASE
 CFLAGS      = $(CFLAGS)     -G5 -O+
 CFLAGS16    = $(CFLAGS16)   -Ogeitln -Gs
