@@ -1,4 +1,4 @@
-; $Id: wnetap32.def,v 1.6 2002-03-08 11:37:56 sandervl Exp $
+; $Id: netapi32.def,v 1.7 2004-02-27 20:15:44 sandervl Exp $
 
 LIBRARY WNETAP32 INITINSTANCE
 
