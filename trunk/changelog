@@ -1,9 +1,10 @@
-/* $Id: changelog,v 1.1746 2001-10-12 21:11:47 achimha Exp $ */
+/* $Id: changelog,v 1.1747 2001-10-12 21:59:08 achimha Exp $ */
 
  2001-10-12: Achim Hasenmueller <achimha@innotek.de>
     - KERNEL32: o use bounce buffers if end of buffer crosses
                   tiled region barrier, not start of buffer
-                  (yeah, being nit-picking here...)
+                  (yeah, being nit-picking here, OS/2 will actually
+                  never give you a memory object that crosses the boundary...)
 
  2001-10-11: Patrick Haller <patrick.haller@innotek.de>
     - include:  o debugtools.h: memory corruption in debugstr_()
