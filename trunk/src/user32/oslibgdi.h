@@ -1,4 +1,4 @@
-/* $Id: oslibgdi.h,v 1.7 2000-06-08 18:10:10 sandervl Exp $ */
+/* $Id: oslibgdi.h,v 1.8 2000-11-19 11:52:39 sandervl Exp $ */
 /*
  * Window GDI wrapper functions for OS/2
  *
@@ -110,5 +110,8 @@ BOOL mapOS2ToWin32RectFrameToClient(Win32BaseWindow *window, PRECTLOS2 rectOS2, 
 BOOL copyOS2ToWin32Rect(PRECTLOS2 rectOS2,PRECT rectWin32);
 BOOL copyWin32ToOS2WindowRect(PRECT rectWin32,PRECTLOS2 rectOS2);
 INT  mapOS2ToWin32ChildOrigin(INT parentH,INT parentPosY,INT childH);
+
+#define RECT_WIDTH(a)	((a).right - (a).left)
+#define RECT_HEIGHT(a)	((a).bottom - (a).top)
 
 #endif //__OSLIBGDI_H__

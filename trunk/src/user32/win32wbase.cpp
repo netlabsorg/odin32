@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.222 2000-11-17 09:56:54 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.223 2000-11-19 11:52:40 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2312,10 +2312,7 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
     if (swp.fl == 0) {
         if(fuFlags & SWP_FRAMECHANGED)
         {
-            MsgFormatFrame(NULL);
-            UnionRect(&oldClientRect, &oldClientRect, &rectClient);
-            OffsetRect(&oldClientRect, -rectClient.left, -rectClient.top);
-            InvalidateRect(getWindowHandle(), &oldClientRect, TRUE);
+            NotifyFrameChanged(&wpos, &oldClientRect);
         }
         return TRUE;
     }
@@ -2360,12 +2357,35 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
 
     if((fuFlags & SWP_FRAMECHANGED) && (fuFlags & (SWP_NOMOVE | SWP_NOSIZE) == (SWP_NOMOVE | SWP_NOSIZE)))
     {
-        MsgFormatFrame(NULL);
-        UnionRect(&oldClientRect, &oldClientRect, &rectClient);
-        OffsetRect(&oldClientRect, -rectClient.left, -rectClient.top);
-        InvalidateRect(getWindowHandle(), &oldClientRect, TRUE);
+            NotifyFrameChanged(&wpos, &oldClientRect);
     }
     return (rc);
+}
+//******************************************************************************
+//******************************************************************************
+void Win32BaseWindow::NotifyFrameChanged(WINDOWPOS *wpos, RECT *oldClientRect)
+{
+    MsgFormatFrame(NULL);
+    if(RECT_WIDTH(rectClient) != RECT_WIDTH(*oldClientRect) || 
+       RECT_HEIGHT(rectClient) != RECT_HEIGHT(*oldClientRect)) 
+    {
+         wpos->flags &= ~SWP_NOSIZE;
+    }
+
+    WINDOWPOS wpOld = *wpos;
+    SendInternalMessageA(WM_WINDOWPOSCHANGING, 0, (LPARAM)wpos);
+
+    UnionRect(oldClientRect, oldClientRect, &rectClient);
+    OffsetRect(oldClientRect, -rectClient.left, -rectClient.top);
+    InvalidateRect(getWindowHandle(), oldClientRect, TRUE);
+
+    if ((wpos->hwndInsertAfter != wpOld.hwndInsertAfter) ||
+        (wpos->x != wpOld.x) || (wpos->y != wpOld.y) || (wpos->cx != wpOld.cx) || (wpos->cy != wpOld.cy) || (wpos->flags != wpOld.flags))
+    {
+         dprintf(("WARNING, NotifyFrameChanged: TODO -> adjust flags!!!!"));
+         SetWindowPos(wpos->hwndInsertAfter, wpos->x, wpos->y, wpos->cx, wpos->cy, wpos->flags | SWP_NOSENDCHANGING);
+    }
+    else SendInternalMessageA(WM_WINDOWPOSCHANGED, 0, (LPARAM)wpos);
 }
 //******************************************************************************
 //TODO: Check how this api really works in NT

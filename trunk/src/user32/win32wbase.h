@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.100 2000-11-05 18:49:09 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.101 2000-11-19 11:52:41 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -311,6 +311,8 @@ protected:
        LRESULT  SendInternalMessageA(ULONG msg, WPARAM wParam, LPARAM lParam);
        LRESULT  SendInternalMessageW(ULONG msg, WPARAM wParam, LPARAM lParam);
         void    Init();
+
+        void    NotifyFrameChanged(WINDOWPOS *wpos, RECT *oldClientRect);
 
         //called in destructor to remove all (if any) window properties
         void    removeWindowProps();
