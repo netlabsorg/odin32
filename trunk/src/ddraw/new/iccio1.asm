@@ -229,8 +229,10 @@ ok:
         ; return code = 0 (in EAX)
 
         ; now use this function to raise the IOPL
+  PUSH  EBX                             ; bird fix
   MOV  EBX,13    ; special function code
   CALL  FWORD PTR [ioentry]  ; CALL intersegment indirect 16:32
+  POP   EBX                             ; bird fix
 
   ; thread should now be running at IOPL=3
 
@@ -250,8 +252,10 @@ io_init2  PROC
         ; return code = 0 (in EAX)
 
         ; now use this function to raise the IOPL
+  PUSH  EBX                             ; bird fix
   MOV  EBX,13    ; special function code
   CALL  FWORD PTR [ioentry]  ; CALL intersegment indirect 16:32
+  POP   EBX                             ; bird fix
 
   XOR  EAX, EAX  ; return code = 0
   ret
@@ -268,8 +272,10 @@ io_exit1  PROC
   JZ  exerr    ; no gdt entry, so process cannot be at IOPL=3
         ; through this mechanism
 
+  PUSH  EBX                             ; bird fix
   MOV  EBX, 14    ; function code to disable iopl
   CALL  FWORD PTR [ioentry]  ; call intersegment indirect 16:32
+  POP   EBX                             ; bird fix
 
   ; process should now be at IOPL=3 again
   XOR  EAX, EAX  ; ok, RETurn code = 0
