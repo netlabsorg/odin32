@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.15 2002-06-08 11:42:02 sandervl Exp $
+# $Id: makefile,v 1.1 2002-06-08 11:42:03 sandervl Exp $
 
 #
 # Odin32 API
@@ -18,8 +18,8 @@ WRC_PREFIX_RESOURCE=1
 # Object files. Prefix with OBJDIR and one space before the '\'.
 #
 OBJS = \
+$(OBJDIR)\aspilib.obj \
 $(OBJDIR)\winaspi32.obj \
-$(OBJDIR)\cdio.obj \
 $(OBJDIR)\wnaspi32rsrc.obj \
 $(OBJDIR)\initwnaspi32.obj \
 $(OBJDIR)\initterm.obj
@@ -31,6 +31,7 @@ $(OBJDIR)\initterm.obj
 LIBS = \
 $(ODIN32_LIB)/kernel32.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
+$(ODIN32_LIB)/advapi32.lib \
 OS2386.LIB \
 $(RTLLIB_O)
 
