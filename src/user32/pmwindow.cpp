@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.140 2001-07-14 09:21:43 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.141 2001-07-15 14:36:40 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -565,6 +565,12 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         dprintf(("OS2: WM_REALIZEPALETTE"));
         goto RunDefWndProc;
     }
+
+    case WM_HSCROLL:
+    case WM_VSCROLL:
+        dprintf(("OS2: %s %x %x %x", (msg == WM_HSCROLL) ? "WM_HSCROLL" : "WM_VSCROLL", win32wnd->getWindowHandle(), mp1, mp2));
+        win32wnd->DispatchMsgA(pWinMsg);
+        break;
 
     case WM_INITMENU:
     case WM_MENUSELECT:
