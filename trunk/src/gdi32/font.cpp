@@ -1,4 +1,4 @@
-/* $Id: font.cpp,v 1.30 2003-07-16 15:47:37 sandervl Exp $ */
+/* $Id: font.cpp,v 1.31 2003-08-13 09:11:42 sandervl Exp $ */
 
 /*
  * GDI32 font apis
@@ -565,7 +565,7 @@ int WIN32API AddFontResourceA(LPCSTR szFont)
         FreeLibrary(hInstance);
         return 1;
     }
-    return O32_AddFontResource(szFont);
+    return 1;
 }
 //******************************************************************************
 //******************************************************************************
@@ -585,7 +585,7 @@ int WIN32API AddFontResourceW(LPCWSTR szFont)
 BOOL WIN32API RemoveFontResourceA(LPCSTR lpszFont)
 {
     dprintf(("GDI32: RemoveFontResourceA %s", lpszFont));
-    return O32_RemoveFontResource(lpszFont);
+    return FALSE;
 }
 //******************************************************************************
 //******************************************************************************
