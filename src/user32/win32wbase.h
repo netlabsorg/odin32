@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.47 1999-12-01 16:58:29 achimha Exp $ */
+/* $Id: win32wbase.h,v 1.48 1999-12-02 19:30:41 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -121,7 +121,7 @@ virtual  WORD   GetWindowWord(int index);
 virtual  BOOL   isMDIClient();
 virtual  BOOL   isMDIChild();
 
-Win32BaseWindow *getParent()                    { return (Win32BaseWindow *)ChildWindow::GetParent(); };
+Win32BaseWindow *getParent();
          void   setParent(Win32BaseWindow *pwindow) { ChildWindow::SetParent((ChildWindow *)pwindow); };
        WNDPROC  getWindowProc()                 { return win32wndproc; };
          void   setWindowProc(WNDPROC newproc)  { win32wndproc = newproc; };
@@ -228,6 +228,8 @@ Win32BaseWindow *FindWindowById(int id);
                              BOOL fUnicode = 0);
 
            BOOL EnumChildWindows(WNDENUMPROC lpfn, LPARAM lParam);
+	   BOOL EnumThreadWindows(DWORD dwThreadId, WNDENUMPROC lpfn, LPARAM lParam);
+	   BOOL EnumWindows(WNDENUMPROC lpfn, LPARAM lParam);
 
          HWND   getNextDlgTabItem(HWND hwndCtrl, BOOL fPrevious);
          HWND   getNextDlgGroupItem(HWND hwndCtrl, BOOL fPrevious);
