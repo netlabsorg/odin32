@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.191 2002-12-04 15:23:39 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.192 2003-01-03 21:43:15 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -52,6 +52,7 @@
 #include <winscan.h>
 #include <win\dbt.h>
 #include "dragdrop.h"
+#include "menu.h"
 
 #define DBG_LOCALLOG    DBG_pmwindow
 #include "dbglocal.h"
@@ -239,7 +240,9 @@ BOOL InitPM()
     fOS2Look = PROFILE_GetOdinIniBool(ODINSYSTEM_SECTION, "OS2Look", FALSE);
     if(fOS2Look)
     {
+#if 0
         SYSCOLOR_Init(FALSE); //use OS/2 colors
+#endif
         QueryPMMenuBitmaps();
     }
 
@@ -296,7 +299,6 @@ static void QueryPMMenuBitmaps()
         hbmFrameMenu[PMMENU_CLOSEBUTTON] = GpiLoadBitmap(hdc, hModDisplay, SBMP_CLOSE, 0, 0);
         hbmFrameMenu[PMMENU_CLOSEBUTTONDOWN] = GpiLoadBitmap(hdc, hModDisplay, SBMP_CLOSEDEP, 0, 0);
 
-#ifdef NEW_WGSS
         //Create win32 bitmap handles of the OS/2 min, max and restore buttons
         hBmpMinButton     = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_MINBUTTON]);
         hBmpMinButtonDown = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_MINBUTTONDOWN]);
@@ -306,20 +308,18 @@ static void QueryPMMenuBitmaps()
         hBmpRestoreButtonDown = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_RESTOREBUTTONDOWN]);
         hBmpCloseButton   = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_CLOSEBUTTON]);
         hBmpCloseButtonDown   = O32_CreateBitmapFromPMHandle(hbmFrameMenu[PMMENU_CLOSEBUTTONDOWN]);
-#endif
         DevCloseDC(hdc);
     }
 }
-//******************************************************************************
-//menu.cpp
-BOOL MENU_Init();
 //******************************************************************************
 //******************************************************************************
 void WIN32API SetWindowAppearance(int fLooks)
 {
     if(fLooks == OS2_APPEARANCE || fLooks == OS2_APPEARANCE_SYSMENU)
     {
+#if 0
         SYSCOLOR_Init(FALSE); //use OS/2 colors
+#endif
         QueryPMMenuBitmaps();
     }
     fOS2Look = fLooks;
