@@ -1,4 +1,4 @@
-/* $Id: winkeyboard.cpp,v 1.35 2002-05-29 09:56:43 sandervl Exp $ */
+/* $Id: winkeyboard.cpp,v 1.36 2002-05-29 11:47:18 sandervl Exp $ */
 /*
  * Win32 <-> PM key translation
  *
@@ -1418,7 +1418,7 @@ WORD WIN32API GetAsyncKeyState(INT nVirtKey)
     case KEYOVERLAYSTATE_UP:
       return 0x0000;
   } 
-  if (nVirtKey == VK_MENU)  return O32_GetKeyState(VK_LMENU) | O32_GetKeyState(VK_RMENU);
+  if (nVirtKey == VK_MENU)  return O32_GetAsyncKeyState(VK_LMENU) | O32_GetAsyncKeyState(VK_RMENU);
   return O32_GetAsyncKeyState(nVirtKey);
 }
 //******************************************************************************
