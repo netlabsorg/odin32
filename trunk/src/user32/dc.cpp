@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.65 2000-07-04 08:42:05 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.66 2000-07-15 08:08:01 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -1043,15 +1043,10 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
             SetLastError(ERROR_INVALID_PARAMETER_W);
             return FALSE;
         }
-	//TODO: If frame, exclude client window from update
-        if(redraw & RDW_FRAME_W) {
-		hwnd = wnd->getOS2WindowHandle();
-	}
-	else   	hwnd = wnd->getOS2WindowHandle();
-
+	hwnd = wnd->getOS2WindowHandle();
    }
 
-   BOOL  IncludeChildren = redraw & RDW_ALLCHILDREN_W ? TRUE : FALSE;
+   BOOL  IncludeChildren = (redraw & RDW_ALLCHILDREN_W) ? TRUE : FALSE;
    BOOL  success = TRUE;
    HPS   hpsTemp = NULLHANDLE;
    HRGN  hrgnTemp = NULLHANDLE;
@@ -1116,15 +1111,32 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
         else
         if (hrgn) {
             success = WinInvalidateRegion (hwnd, hrgnTemp, IncludeChildren);
+            if(IncludeChildren && WinQueryUpdateRect(hwnd, NULL) == FALSE) {
+		dprintf(("WARNING: WinQueryUpdateRect %x region %x returned false even though we just invalidated part of a window!!!", hwnd, hrgnTemp));
+                success = success = WinInvalidateRegion (hwnd, hrgnTemp, FALSE);
+            }
         }
-        else
+        else {
             success = WinInvalidateRect (hwnd, &rectl, IncludeChildren);
-
-#ifdef DEBUG
-        if(WinQueryUpdateRect(hwnd, NULL) == FALSE) {
+//SvL: If all children are included, then WinInvalidateRect is called
+//     with fIncludeChildren=1 -> rect of hwnd isn't invalidated if child(ren)
+//     overlap(s) the specified rectangle completely (EVEN if window doesn't 
+//     have WS_CLIPCHILREN!)
+//     -> example: XWing vs Tie Fighter install window
+//     WinInvalidateRect with fIncludeChildren=0 invalidates both the parent
+//     and child windows
+//SvL: Can't always set fIncludeChildren to FALSE or else some controls in
+//     the RealPlayer setup application aren't redrawn when invalidating
+//     their parent
+//     SO: Check if IncludeChildren is set and part of the window is invalid
+//         If not -> call WinInvalidateRect with IncludeChildren=0 to force
+//         the window rectangle to be invalidated
+//
+            if(IncludeChildren && WinQueryUpdateRect(hwnd, NULL) == FALSE) {
 		dprintf(("WARNING: WinQueryUpdateRect %x (%d,%d)(%d,%d) returned false even though we just invalidated part of a window!!!", hwnd, rectl.xLeft, rectl.yBottom, rectl.xRight, rectl.yTop));
-	}
-#endif
+                success = WinInvalidateRect (hwnd, &rectl, FALSE);
+            }
+        }
 
         if (!success) goto error;
    }
@@ -1135,15 +1147,17 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
 
         if (WinQueryUpdateRect (hwnd, NULL))
         {
-            if (!pRect && !hrgn)
+            if(!pRect && !hrgn) {
                 success = WinValidateRect (hwnd, NULL, IncludeChildren);
-            else
-            if (hrgn) {
-                success = WinValidateRegion (hwnd, hrgnTemp, IncludeChildren);
             }
             else
+            if(hrgn) {
+                success = WinValidateRegion (hwnd, hrgnTemp, IncludeChildren);
+            }
+            else {
                 success = WinValidateRect (hwnd, &rectl, IncludeChildren);
-            if (!success) goto error;
+            }
+            if(!success) goto error;
         }
    }
 
@@ -1234,14 +1248,7 @@ BOOL WIN32API InvalidateRect (HWND hwnd, const RECT *pRect, BOOL erase)
    }
    else dprintf(("InvalidateRect %x NULL erase=%d", hwnd, erase));
    result = RedrawWindow (hwnd, pRect, NULLHANDLE,
-//SvL: If all children are included, then WinInvalidateRect is called
-//     with fIncludeChildren=1 -> rect of hwnd isn't invalid if child(ren)
-//     overlap(s) it completely (EVEN if window doesn't have WS_CLIPCHILREN!)
-//     -> example: XWing vs Tie Fighter install window
-//     WinInvalidateRect with fIncludeChildren=0 invalidates both the parent
-//     and child windows
-//                          RDW_ALLCHILDREN_W | RDW_INVALIDATE_W |
-                          RDW_NOCHILDREN_W | RDW_INVALIDATE_W |
+                          RDW_ALLCHILDREN_W | RDW_INVALIDATE_W |
                           (erase ? RDW_ERASE_W : RDW_NOERASE_W) |
                           (hwnd == NULLHANDLE ? RDW_UPDATENOW_W : 0));
    return (result);
@@ -1254,14 +1261,7 @@ BOOL WIN32API InvalidateRgn (HWND hwnd, HRGN hrgn, BOOL erase)
 
    dprintf(("InvalidateRgn %x %x erase=%d", hwnd, hrgn, erase));
    result = RedrawWindow (hwnd, NULL, hrgn,
-//SvL: If all children are included, then WinInvalidateRegion is called
-//     with fIncludeChildren=1 -> region of hwnd isn't invalid if child(ren)
-//     overlap(s) it completely (EVEN if window doesn't have WS_CLIPCHILREN!)
-//     -> example: XWing vs Tie Fighter install window
-//     WinInvalidateRegion with fIncludeChildren=0 invalidates both the parent
-//     and child windows
-//                          RDW_ALLCHILDREN_W | RDW_INVALIDATE_W |
-                          RDW_NOCHILDREN_W | RDW_INVALIDATE_W |
+                          RDW_ALLCHILDREN_W | RDW_INVALIDATE_W |
                           (erase ? RDW_ERASE_W : RDW_NOERASE_W) |
                           (hwnd == NULLHANDLE ? RDW_UPDATENOW_W : 0));
    return (result);
