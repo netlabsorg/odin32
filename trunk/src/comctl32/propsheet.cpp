@@ -1,4 +1,4 @@
-/* $Id: propsheet.cpp,v 1.4 2000-05-22 17:25:10 cbratschi Exp $ */
+/* $Id: propsheet.cpp,v 1.5 2000-08-01 23:19:49 sandervl Exp $ */
 /*
  * Property Sheets
  *
@@ -1067,6 +1067,63 @@ static int PROPSHEET_CreatePage(HWND hwndParent,
   return TRUE;
 }
 
+#if 1
+/******************************************************************************
+ *            PROPSHEET_ShowPage
+ *
+ * Displays or creates the specified page.
+ */
+static BOOL PROPSHEET_ShowPage(HWND hwndDlg, int index, PropSheetInfo * psInfo)
+{
+  if (index == psInfo->active_page)
+    {
+      if (GetTopWindow(hwndDlg) != psInfo->proppage[index].hwndPage)
+          SetWindowPos(psInfo->proppage[index].hwndPage, HWND_TOP, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE);
+    return TRUE;
+    }
+
+  if (psInfo->proppage[index].hwndPage == 0)
+  {
+     LPCPROPSHEETPAGEA ppshpage;
+     PSHNOTIFY psn;
+
+     ppshpage = (LPCPROPSHEETPAGEA)psInfo->proppage[index].hpage;
+     PROPSHEET_CreatePage(hwndDlg, index, psInfo, (PROPSHEETPAGEA*)ppshpage);
+
+     psn.hdr.hwndFrom = hwndDlg;
+     psn.hdr.code     = PSN_SETACTIVE;
+     psn.hdr.idFrom   = 0;
+     psn.lParam       = 0;
+
+     /* Send the notification before showing the page. */
+     SendMessageA(psInfo->proppage[index].hwndPage,
+                  WM_NOTIFY, 0, (LPARAM) &psn);
+
+     /*
+      * TODO: check return value. 
+      */
+  }
+
+  if (psInfo->active_page != -1)
+     ShowWindow(psInfo->proppage[psInfo->active_page].hwndPage, SW_HIDE);
+
+  ShowWindow(psInfo->proppage[index].hwndPage, SW_SHOW);
+
+  if (!(psInfo->ppshheader->dwFlags & PSH_WIZARD))
+  {
+     HWND hwndTabCtrl;
+
+     /* Synchronize current selection with tab control */
+     hwndTabCtrl = GetDlgItem(hwndDlg, IDC_TABCONTROL);
+     SendMessageA(hwndTabCtrl, TCM_SETCURSEL, index, 0);
+  }
+
+  psInfo->active_page = index;
+  psInfo->activeValid = TRUE;
+
+  return TRUE;
+}
+#else
 /******************************************************************************
  *            PROPSHEET_ShowPage
  *
@@ -1161,6 +1218,7 @@ static BOOL PROPSHEET_ShowPage(HWND hwndDlg, int index, PropSheetInfo * psInfo)
 
   return TRUE;
 }
+#endif
 
 /******************************************************************************
  *            PROPSHEET_Back
