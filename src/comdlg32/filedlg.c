@@ -22,6 +22,7 @@
 
 #ifdef __WIN32OS2__
 #include <win\cursoricon.h>
+#include <heapstring.h>
 
 #define GlobalFree16 GlobalFree
 #define GlobalLock16 GlobalLock
