@@ -1,5 +1,17 @@
- /* $Id: changelog,v 1.924 2000-05-02 20:54:49 sandervl Exp $ */
+ /* $Id: changelog,v 1.925 2000-05-03 18:33:38 sandervl Exp $ */
 
+ 2000-05-03: Sander van Leeuwen <sandervl@xs4all.nl>
+	- WSOCK32:  Fixed WSAEFAULT errors in setsockopt (16 bits TCP/IP stack
+                    doesn't like high addresses; similar problems can also occur 
+                    elsewhere in wsock32)
+	- USER32:   Change settings return by SystemParameterInfo for SPI_GETNONCLIENTMETRICS
+                    Caption & menu fonts now bold; different sizes (more like Wine now)
+                    Set/clear WS_VISIBLE flag in SetWindowPos; don't call 
+                    ShowWindow.
+                    Implemented Set/Get/ReleaseCapture without Open32
+                    Release capture for window that is about to be disabled
+                    Send WM_CAPTURECHANGED messages when capture changes
+                    
  2000-05-02: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: GetLocaleInfoA/W fix (size of buffer for i.e. LOCALE_IDATE
                     should be >= 2, not > 2)
