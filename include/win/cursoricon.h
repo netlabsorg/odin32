@@ -1,4 +1,4 @@
-/* $Id: cursoricon.h,v 1.4 2000-11-19 11:50:13 sandervl Exp $ */
+/* $Id: cursoricon.h,v 1.5 2001-03-27 16:15:49 sandervl Exp $ */
 
 /*
  * Cursor and icon definitions
@@ -8,8 +8,6 @@
 
 #ifndef __WINE_CURSORICON_H
 #define __WINE_CURSORICON_H
-
-#include "windef.h"
 
 #include "pshpack1.h"
 
@@ -43,7 +41,7 @@ typedef struct
     WORD                idReserved;
     WORD                idType;
     WORD                idCount;
-    CURSORICONDIRENTRY  idEntries[1] WINE_PACKED;
+    CURSORICONDIRENTRY  idEntries[1];
 } CURSORICONDIR;
 
 typedef struct {
@@ -86,9 +84,6 @@ typedef struct tagCURSORICONINFO
 #define CID_NONSHARED 0x0008
 
 extern void CURSORICON_Init( void );
-
-extern HCURSOR16 CURSORICON_IconToCursor( HICON16 hIcon,
-                                          BOOL bSemiTransparent );
 
 extern HGLOBAL CURSORICON_Load( HINSTANCE hInstance, LPCWSTR name,
                                 int width, int height, int colors,
