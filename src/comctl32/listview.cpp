@@ -1,4 +1,4 @@
-/*$Id: listview.cpp,v 1.17 2000-04-18 16:02:37 cbratschi Exp $*/
+/*$Id: listview.cpp,v 1.18 2000-05-10 19:50:32 cbratschi Exp $*/
 /*
  * Listview control
  *
@@ -11,6 +11,8 @@
  *   Listview control implementation.
  *
  * TODO:
+ *   - mouse selection
+ *   - DrawText with end ellipsis
  *   - Hot item handling.
  *   - rcView and origin (need testcase!!!)
  *   - rcView not updated in LVM_SETITEMPOSITION and other messages
