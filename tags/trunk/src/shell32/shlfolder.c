@@ -7,8 +7,20 @@
  *	IShellFolder2 and related interfaces
  *
  */
+
+/****************************************************************************
+ * includes
+ ****************************************************************************/
+
+#include <odin.h>
+#include <os2sel.h>
+#include <odinwrap.h>
+
+ODINDEBUGCHANNEL(SHELL32-SHLFOLDER)
+
+
+
 #ifdef __WIN32OS2__
-#define WINE_LARGE_INTEGER
 #define snprintf(a,b,c,d)	sprintf(a,c,d)
 #endif
 #include <stdlib.h>
@@ -843,11 +855,11 @@ static HRESULT WINAPI IShellFolder_fnBindToStorage(
 *  use SCODE_CODE() on the return value to get the result
 */
 
-static HRESULT WINAPI  IShellFolder_fnCompareIDs(
-	IShellFolder2 * iface,
-	LPARAM lParam,
-	LPCITEMIDLIST pidl1,
-	LPCITEMIDLIST pidl2)
+static ODINFUNCTION4(HRESULT, IShellFolder_fnCompareIDs,
+                     IShellFolder2 *, iface,
+                     LPARAM, lParam,
+                     LPCITEMIDLIST, pidl1,
+                     LPCITEMIDLIST, pidl2)
 {
 	_ICOM_THIS_From_IShellFolder2(IGenericSFImpl, iface)
 
@@ -2531,7 +2543,7 @@ static HRESULT WINAPI ISF_MyComputer_fnGetDetailsOf(
 	      {
 	        _ILSimpleGetText(pidl, szPath, MAX_PATH);
 	        GetDiskFreeSpaceExA(szPath, NULL, &ulBytes, NULL);
-	        StrFormatByteSizeA(ulBytes.s.LowPart, psd->str.u.cStr, MAX_PATH);
+	        StrFormatByteSizeA(ulBytes.LowPart, psd->str.u.cStr, MAX_PATH);
 	      }
 	      break;
 	    case 3:	/* free size */
@@ -2539,7 +2551,7 @@ static HRESULT WINAPI ISF_MyComputer_fnGetDetailsOf(
 	      {
 	        _ILSimpleGetText(pidl, szPath, MAX_PATH);
 	        GetDiskFreeSpaceExA(szPath, &ulBytes, NULL, NULL);
-	        StrFormatByteSizeA(ulBytes.s.LowPart, psd->str.u.cStr, MAX_PATH);
+	        StrFormatByteSizeA(ulBytes.LowPart, psd->str.u.cStr, MAX_PATH);
 	      }
 	      break;
 	  }
