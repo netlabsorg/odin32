@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.2353 2002-11-05 18:59:29 sandervl Exp $ */
+/* $Id: changelog,v 1.2354 2002-11-12 15:13:00 sandervl Exp $ */
+
+ 2002-11-12: Sander van Leeuwen <sandervl@innotek   >
+    - COMCTL32: o Wine resync (toolbar, propsheet, imagelist)
+
+ 2001-11-12: Dietrich Teickner <Dietrich_Teickner@t-online   >
+    - COMCTL32: o Wine resync (comboex)
 
  2002-11-05: Platon Fomichev <platon@innotek   >
     - GDI32:    o FillRgn fix for DIB sections
