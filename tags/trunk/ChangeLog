@@ -1,6 +1,12 @@
- /* $Id: ChangeLog,v 1.1099 2000-09-02 21:31:53 bird Exp $ */
+ /* $Id: ChangeLog,v 1.1100 2000-09-03 09:36:47 sandervl Exp $ */
 
- 2000-09-01: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+ 2000-09-03: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: More logging; 
+                DeviceIoControl didn't have handlemanager wrapper
+    - GDI32:    Missing wrapper for WinDrawTabbedText caused FS corruption.
+                PLEASE be more careful in the future!
+
+ 2000-09-02: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Win32k:   Finally. I've merged the new changes into the main branch.
                 The most important things are:
                     - More correct search order for DLLs. The differences are
