@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.92 2004-01-30 22:19:59 bird Exp $ */
+/* $Id: gdi32.cpp,v 1.93 2004-02-10 15:35:38 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -828,16 +828,6 @@ BOOL WIN32API SetTextJustification(HDC hdc, int nBreakExtra, int nBreakCount)
 BOOL WIN32API WidenPath( HDC hdc)
 {
     return O32_WidenPath(hdc);
-}
-//******************************************************************************
-//Selects the current path as a clipping region for a device context, combining
-//any existing clipping region by using the specified mode
-//TODO: Can be emulated with SelectClipRegion??
-//******************************************************************************
-BOOL WIN32API SelectClipPath(HDC hdc, int iMode)
-{
-  dprintf(("GDI32: SelectClipPath, not implemented!(TRUE)\n"));
-  return(TRUE);
 }
 //******************************************************************************
 //TODO: Sets the color adjustment values for a device context. (used to adjust
