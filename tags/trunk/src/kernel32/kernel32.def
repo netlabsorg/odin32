@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.85 2000-08-11 10:56:16 sandervl Exp $
+; $Id: kernel32.def,v 1.86 2000-09-15 13:24:29 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -1023,6 +1023,7 @@ EXPORTS
     DebugErrorBox                 = DebugErrorBox                 @1201
     WriteLog                                                      @1202
     WriteLogError                                                 @1214
+    WriteLogNoEOL                                                 @1218
     WritePrivateLog                                               @1208
     DecreaseLogCount                                              @1273
     IncreaseLogCount                                              @1274

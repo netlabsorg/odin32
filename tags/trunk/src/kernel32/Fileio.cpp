@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.38 2000-09-10 21:54:05 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.39 2000-09-15 13:24:28 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -409,7 +409,7 @@ ODINFUNCTION1(BOOL, DeleteFileA,
 {
  BOOL rc;
 
-#if 1
+#if 0
   dprintf(("DeleteFileA %s", lpszFile));
   return 1;
 #else
