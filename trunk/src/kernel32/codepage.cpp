@@ -495,3 +495,15 @@ BOOL WINAPI GetStringTypeExW( LCID locale, DWORD type, LPCWSTR src, INT count, L
     /* locale is ignored for Unicode */
     return GetStringTypeW( type, src, count, chartype );
 }
+
+WCHAR WIN32API tolowerW( WCHAR ch )
+{
+    extern const WCHAR casemap_lower[];
+    return ch + casemap_lower[casemap_lower[ch >> 8] + (ch & 0xff)];
+}
+
+WCHAR WIN32API toupperW( WCHAR ch )
+{
+    extern const WCHAR casemap_upper[];
+    return ch + casemap_upper[casemap_upper[ch >> 8] + (ch & 0xff)];
+}
