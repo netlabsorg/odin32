@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.52 2000-07-04 08:40:14 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.53 2000-08-02 16:26:43 bird Exp $ */
 
 /*
  * GDI32 apis
@@ -1606,7 +1606,7 @@ BOOL WIN32API ColorMatchToTarget(HDC   hdc,
  * Variables :
  * Result    : TRUE / FALSE
  * Remark    :
- * Status    : UNTESTED
+ * Status    : COMPLETELY UNTESTED
  *
  * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
  *             Markus Montkowski [Wen, 1999/01/12 20:18]
@@ -1655,6 +1655,7 @@ BOOL WIN32API CombineTransform(LPXFORM lLPXFORMResult,
  *             bitmap (DIB). The brush can subsequently be selected into any
  *             device context that is associated with a device that supports
  *             raster operations.
+ *
  *             This function is provided only for compatibility with applications
  *             written for versions of Windows earlier than 3.0. For Win32-based
  *             applications, use the CreateDIBPatternBrushPt function.
@@ -1665,7 +1666,7 @@ BOOL WIN32API CombineTransform(LPXFORM lLPXFORMResult,
  * Variables :
  * Result    : TRUE / FALSE
  * Remark    :
- * Status    : UNTESTED
+ * Status    : ODIN32 COMPLETELY UNTESTED
  *
  * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
  *             Markus Montkowski [Wen, 1999/01/12 20:00]
