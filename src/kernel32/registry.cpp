@@ -1,4 +1,4 @@
-/* $Id: registry.cpp,v 1.10 2001-04-15 09:06:50 sandervl Exp $ */
+/* $Id: registry.cpp,v 1.11 2001-07-16 09:25:16 sandervl Exp $ */
 
 /*
  * Win32 registry API functions for OS/2
@@ -419,35 +419,35 @@ ODINFUNCTION8(LONG,RegEnumKeyExA,HKEY,      arg1,
  * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
  *****************************************************************************/
 
-ODINFUNCTION8(LONG,RegEnumKeyExW,HKEY,      arg1,
-                                 DWORD,     arg2,
-                                 LPWSTR,    arg3,
-                                 LPDWORD,   arg4,
-                                 LPDWORD,   arg5,
-                                 LPWSTR,    arg6,
-                                 LPDWORD,   arg7,
-                                 LPFILETIME,arg8)
+ODINFUNCTION8(LONG,RegEnumKeyExW,HKEY,      hKey,
+                                 DWORD,     iSubkey,
+                                 LPWSTR,    lpszName,
+                                 LPDWORD,   lpcchName,
+                                 LPDWORD,   lpdwReserved,
+                                 LPWSTR,    lpszClass,
+                                 LPDWORD,   lpcchClass,
+                                 LPFILETIME,lpffLastWrite)
 {
   char *astring;
   LONG  rc;
 
-  rc = O32_RegEnumKeyEx(ConvertKey(arg1),
-                        arg2,
-                        (char *)arg3,
-                        arg4,
-                        arg5,
-                        (char *)arg6,
-                        arg7,
-                        arg8);
+  rc = O32_RegEnumKeyEx(ConvertKey(hKey),
+                        iSubkey,
+                        (char *)lpszName,
+                        lpcchName,
+                        lpdwReserved,
+                        (char *)lpszClass,
+                        lpcchClass,
+                        lpffLastWrite);
   if(rc == ERROR_SUCCESS)
   {
-    astring = (char *)malloc(max(*arg4+1, *arg7+1));   //class & keyname
-    strcpy(astring, (char *)arg3);
-    AsciiToUnicode(astring, arg3);
-    if(arg6 != NULL)
+    astring = (char *)malloc(max(*lpcchName+1, (lpcchClass) ? (*lpcchClass+1) : 0));   //class & keyname
+    strcpy(astring, (char *)lpszName);
+    AsciiToUnicode(astring, lpszName);
+    if(lpszClass != NULL)
     {
-      strcpy(astring, (char *)arg6);
-      AsciiToUnicode(astring, arg6);
+      strcpy(astring, (char *)lpszClass);
+      AsciiToUnicode(astring, lpszClass);
     }
     free(astring);
   }
