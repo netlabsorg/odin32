@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.17 1999-08-25 14:41:14 phaller Exp $ */
+/* $Id: HandleManager.cpp,v 1.18 1999-08-31 23:14:02 phaller Exp $ */
 
 /*
  *
@@ -1558,6 +1558,8 @@ DWORD HMWaitForSingleObject(HANDLE hObject,
     return (INVALID_HANDLE_ERROR);                         /* signal failure */
   }
 
+  // @@@PH Problem: wrong class (base class) is called instead of
+  //                open32 class ?! Why ?!
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
   dwResult = pHMHandle->pDeviceHandler->WaitForSingleObject(&pHMHandle->hmHandleData,
                                                             dwTimeout);

@@ -1,4 +1,4 @@
-/* $Id: hmsemaphore.h,v 1.1 1999-07-06 15:48:48 phaller Exp $ */
+/* $Id: hmsemaphore.h,v 1.2 1999-08-31 23:14:03 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -21,17 +21,17 @@
  *****************************************************************************/
 
 #include "HMDevice.h"
-#include "HMObjects.h"
+#include "HMOpen32.h"
 
 
 /*****************************************************************************
  * Structures                                                                *
  *****************************************************************************/
 
-class HMDeviceSemaphoreClass : public HMDeviceKernelObjectClass
+class HMDeviceSemaphoreClass : public HMDeviceOpen32Class
 {
 public:
-  HMDeviceSemaphoreClass(LPCSTR lpDeviceName) : HMDeviceKernelObjectClass(lpDeviceName) {}
+  HMDeviceSemaphoreClass(LPCSTR lpDeviceName) : HMDeviceOpen32Class(lpDeviceName) {}
 
                      /* this is a handler method for calls to CreateSemaphore() */
   virtual DWORD CreateSemaphore (PHMHANDLEDATA         pHMHandleData,
