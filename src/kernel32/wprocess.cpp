@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.110 2000-11-23 19:23:51 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.111 2001-01-14 17:16:55 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -1567,7 +1567,9 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
         cmdline = (char *)malloc(strlen(lpCommandLine) + 16);
         sprintf(cmdline, "%s", lpCommandLine);
     }
+
     char szAppName[255];
+    DWORD fileAttr;
     char *exename = szAppName;
     strncpy(szAppName, cmdline, sizeof(szAppName));
     szAppName[254] = 0;
@@ -1575,25 +1577,45 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
         exename++;
         while(*exename != 0 && *exename != '"')
              exename++;
-    }
-    else {
-        //TODO: doesn't work for directories with spaces!
-        while(*exename != 0 && *exename != ' ' && *exename != '"')
-             exename++;
-    }
-    if(*exename != 0) {
-         *exename = 0;
-    }
-    if(szAppName[0] == '"') {
+
+        if(*exename != 0) {
+             *exename = 0;
+        }
         exename = &szAppName[1];
     }
-    else exename = szAppName;
+    else {
+        BOOL fTerminate = FALSE;
+        DWORD fileAttr;
 
-    if(GetFileAttributesA(exename) == -1) {
+        //TODO: doesn't work for directories with spaces!
+        while(*exename != 0) {
+             while(*exename != 0 && *exename != ' ')
+                  exename++;
+
+             if(*exename != 0) {
+                  *exename = 0;
+                  fTerminate = TRUE;
+             }
+
+             fileAttr = GetFileAttributesA(szAppName);
+             if(fileAttr != -1 && !(fileAttr & FILE_ATTRIBUTE_DIRECTORY)) {
+                  break;
+             }
+             if(fTerminate) {
+                  *exename = ' ';
+                  exename++;
+                  fTerminate = FALSE;
+             }
+        }
+        exename = szAppName;
+    }
+    fileAttr = GetFileAttributesA(exename);
+    if(fileAttr == -1 || (fileAttr & FILE_ATTRIBUTE_DIRECTORY)) {
         dprintf(("CreateProcess: can't find executable!"));
         SetLastError(ERROR_FILE_NOT_FOUND);
         return FALSE;
     }
+
     dprintf(("KERNEL32:  CreateProcess %s\n", cmdline));
 
     //SvL: Allright. Before we call O32_CreateProcess, we must take care of

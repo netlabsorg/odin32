@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.56 2000-12-03 10:12:32 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.57 2001-01-14 17:16:54 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -61,6 +61,7 @@
 #include "HMThread.h"
 #include "HMNPipe.h"
 #include <vmutex.h>
+#include <win\thread.h>
 
 #define DBG_LOCALLOG  DBG_handlemanager
 #include "dbglocal.h"
@@ -1850,11 +1851,66 @@ DWORD HMWaitForSingleObject(HANDLE hObject,
   iIndex = _HMHandleQuery(hObject);                         /* get the index */
   if (-1 == iIndex)                                               /* error ? */
   {
-    dprintf(("KERNEL32: HandleManager:HMWaitForSingleObject(%08xh) passed on to Open32.\n",
-             hObject));
+       dprintf(("KERNEL32: HandleManager:HMWaitForSingleObject(%08xh) passed on to Open32.\n",
+                 hObject));
 
+#if 1
+       //Workaround for applications that block the PM input queue
+       //while waiting for a child process to terminate.
+       //(WaitSingleObject now calls MsgWaitMultipleObjects and
+       // processes messages while waiting for the process to die)
+       //(Napster install now doesn't block PM anymore (forcing a reboot))
+
+       HMODULE hUser32 = LoadLibraryA("USER32.DLL");
+
+       BOOL (* WINAPI pfnPeekMessageA)(LPMSG,HWND,UINT,UINT,UINT);
+       LONG (* WINAPI pfnDispatchMessageA)(const MSG*);
+
+       *(FARPROC *)&pfnPeekMessageA = GetProcAddress(hUser32,"PeekMessageA");
+       *(FARPROC *)&pfnDispatchMessageA = GetProcAddress(hUser32,"DispatchMessageA");
+
+       TEB *teb = GetThreadTEB();
+
+       if(!teb || !pfnPeekMessageA || !pfnDispatchMessageA) {
+           dprintf(("ERROR: !teb || !pfnPeekMessageA || !pfnDispatchMessageA"));
+           DebugInt3();
+           return WAIT_FAILED;
+       }
+
+       //TODO: Ignoring all messages could be dangerous. But processing them,
+       //while the app doesn't expect any, isn't safe either.
+//-> must active check in pmwindow.cpp if this is enabled again!
+//       teb->o.odin.fIgnoreMsgs = TRUE;
+
+       while(TRUE) {
+           dwResult =  (O32_MsgWaitForMultipleObjects(1, &hObject, FALSE, 
+                                                      INFINITE, QS_ALLINPUT));
+           if(dwResult == WAIT_OBJECT_0 + 1) {
+               MSG msg ;
+
+               while (pfnPeekMessageA(&msg, NULL, 0, 0, PM_REMOVE)) 
+               {
+                  if (msg.message == WM_QUIT)  return 1;
+
+                  /* otherwise dispatch it */
+                  pfnDispatchMessageA(&msg);
+
+               } // end of PeekMessage while loop
+           }
+           else {
+               dprintf(("WaitForSingleObject: Process %x terminated", hObject));
+               break;
+           }
+       }
+//       teb->o.odin.fIgnoreMsgs = FALSE;
+       FreeLibrary(hUser32);
+       return dwResult;
+  }
+  else {
+#else
     // maybe handles from CreateProcess() ...
     dwResult = O32_WaitForSingleObject(hObject, dwTimeout);
+#endif
     return (dwResult);
   }
 
