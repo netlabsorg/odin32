@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.57 2001-12-01 19:26:40 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.58 2001-12-05 14:15:55 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -662,7 +662,7 @@ ODINFUNCTION5(BOOL,         ReadFile,
                      pBuffer,
                      dwLength,
                      lpNumberOfBytesRead,
-                     lpOverlapped));
+                     lpOverlapped, NULL));
 }
 //******************************************************************************
 //******************************************************************************
@@ -678,10 +678,10 @@ ODINFUNCTION5(BOOL,         ReadFileEx,
       //TODO: should we fail here instead?? (wine doesn't)
       return TRUE;
   }
-  return (HMReadFileEx(hFile,
-                       lpBuffer,
-                       nNumberOfBytesToRead,
-                       lpOverlapped, lpCompletionRoutine));
+  return (HMReadFile(hFile,
+                     lpBuffer,
+                     nNumberOfBytesToRead, NULL,
+                     lpOverlapped, lpCompletionRoutine));
 }
 //******************************************************************************
 //******************************************************************************
@@ -703,7 +703,7 @@ ODINFUNCTION5(BOOL, WriteFile,
                       buffer,
                       nrbytes,
                       nrbyteswritten,
-                      lpOverlapped));
+                      lpOverlapped, NULL));
 }
 /*****************************************************************************
  * Name      : BOOL WriteFileEx
@@ -739,10 +739,10 @@ ODINFUNCTION5(BOOL,         WriteFileEx,
       return TRUE;
   }
 
-  return (HMWriteFileEx(hFile,
-                        (LPVOID)lpBuffer,
-                        nNumberOfBytesToWrite,
-                        lpOverlapped, lpCompletionRoutine));
+  return (HMWriteFile(hFile,
+                      (LPVOID)lpBuffer,
+                      nNumberOfBytesToWrite, NULL,
+                      lpOverlapped, lpCompletionRoutine));
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: hmnpipe.cpp,v 1.6 2001-11-29 13:38:51 sandervl Exp $ */
+/* $Id: hmnpipe.cpp,v 1.7 2001-12-05 14:16:02 sandervl Exp $ */
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -127,8 +127,7 @@ DWORD HMDeviceNamedPipeClass::CreateNamedPipe(PHMHANDLEDATA pHMHandleData,
  * Author    : SvL
  *****************************************************************************/
 
-DWORD HMDeviceNamedPipeClass::CreateFile (HANDLE        hHandle,
-                                          LPCSTR        lpFileName,
+DWORD HMDeviceNamedPipeClass::CreateFile (LPCSTR        lpFileName,
                                           PHMHANDLEDATA pHMHandleData,
                                           PVOID         lpSecurityAttributes,
                                           PHMHANDLEDATA pHMHandleDataTemplate)
@@ -143,6 +142,27 @@ DWORD HMDeviceNamedPipeClass::CreateFile (HANDLE        hHandle,
       return GetLastError();
    }
    return ERROR_SUCCESS;
+}
+
+/*****************************************************************************
+ * Name      : DWORD HMDeviceFileClass::GetFileType
+ * Purpose   : determine the handle type
+ * Parameters: PHMHANDLEDATA pHMHandleData
+ * Variables :
+ * Result    : API returncode
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+
+DWORD HMDeviceNamedPipeClass::GetFileType(PHMHANDLEDATA pHMHandleData)
+{
+  dprintfl(("KERNEL32: HMDeviceNamedPipeClass::GetFileType %s(%08x)\n",
+           lpHMDeviceName,
+           pHMHandleData));
+
+  return FILE_TYPE_PIPE;
 }
 
 /*****************************************************************************

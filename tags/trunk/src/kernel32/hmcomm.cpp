@@ -1,4 +1,4 @@
-/* $Id: hmcomm.cpp,v 1.25 2001-12-04 16:11:25 sandervl Exp $ */
+/* $Id: hmcomm.cpp,v 1.26 2001-12-05 14:15:59 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -59,8 +59,6 @@ BAUDTABLEENTRY BaudTable[] =
 };
 
 #define BaudTableSize (sizeof(BaudTable)/sizeof(BAUDTABLEENTRY))
-
-DWORD CALLBACK SerialCommThread(LPVOID lpThreadParam);
 
 //******************************************************************************
 //******************************************************************************
@@ -156,13 +154,13 @@ BOOL HMDeviceCommClass::FindDevice(LPCSTR lpClassDevName, LPCSTR lpDeviceName, i
 }
 //******************************************************************************
 //******************************************************************************
-DWORD HMDeviceCommClass::CreateFile(HANDLE hComm,
-                                    LPCSTR lpFileName,
+DWORD HMDeviceCommClass::CreateFile(LPCSTR lpFileName,
                                     PHMHANDLEDATA pHMHandleData,
                                     PVOID lpSecurityAttributes,
                                     PHMHANDLEDATA pHMHandleDataTemplate)
 {
- char comname[6];
+ char  comname[6];
+ DWORD ret = ERROR_SUCCESS;
 
   dprintf(("HMComm: Serial communication port %s open request\n", lpFileName));
 
@@ -236,22 +234,38 @@ DWORD HMDeviceCommClass::CreateFile(HANDLE hComm,
         PHMDEVCOMDATA pDevData = (PHMDEVCOMDATA)pHMHandleData->lpHandlerData;
         DWORD         dwThreadId;
 
-        pDevData->hEventSem = ::CreateEventA(NULL, TRUE, FALSE, NULL);
-        pDevData->hThread   = ::CreateThread(NULL, 32*1024, SerialCommThread, (LPVOID)hComm, 0, &dwThreadId);
-
-        if(!pDevData->hEventSem || !pDevData->hThread) 
-        {
-            DebugInt3();
-            if(pDevData->hEventSem) ::CloseHandle(pDevData->hEventSem);
-	    delete pHMHandleData->lpHandlerData;
-            OSLibDosClose(pHMHandleData->hHMHandle);
-            return ERROR_NOT_ENOUGH_MEMORY;
-        }
     }
     return ERROR_SUCCESS;
   }
   else
     return ERROR_ACCESS_DENIED;
+
+
+fail:
+
+  delete pHMHandleData->lpHandlerData;
+  OSLibDosClose(pHMHandleData->hHMHandle);
+  return ret;
+}
+/*****************************************************************************
+ * Name      : DWORD HMDeviceCommClass::GetFileType
+ * Purpose   : determine the handle type
+ * Parameters: PHMHANDLEDATA pHMHandleData
+ * Variables :
+ * Result    : API returncode
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+
+DWORD HMDeviceCommClass::GetFileType(PHMHANDLEDATA pHMHandleData)
+{
+  dprintf(("KERNEL32: HMDeviceCommClass::GetFileType %s(%08x)\n",
+           lpHMDeviceName,
+           pHMHandleData));
+
+  return FILE_TYPE_CHAR;
 }
 //******************************************************************************
 //******************************************************************************
@@ -262,16 +276,7 @@ BOOL HMDeviceCommClass::CloseHandle(PHMHANDLEDATA pHMHandleData)
 
   if(pDevData && pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) 
   {
-      pDevData->fClosing = TRUE;
-      dprintf(("signalling serial thread"));
-      ::SetEvent(pDevData->hEventSem);
-      ::ResetEvent(pDevData->hEventSem);
-
-      //Wait for thread to clean up
-      dprintf(("waiting for serial thread"));
-      DWORD ret = ::WaitForSingleObject(pDevData->hEventSem, 200);
-      dprintf(("waiting for serial thread done -> %x", ret));
-      ::CloseHandle(pDevData->hEventSem);
+      DebugInt3();
   }
   delete pHMHandleData->lpHandlerData;
   return OSLibDosClose(pHMHandleData->hHMHandle);
@@ -295,7 +300,8 @@ BOOL HMDeviceCommClass::WriteFile(PHMHANDLEDATA pHMHandleData,
                                   LPCVOID       lpBuffer,
                                   DWORD         nNumberOfBytesToWrite,
                                   LPDWORD       lpNumberOfBytesWritten,
-                                  LPOVERLAPPED  lpOverlapped)
+                                  LPOVERLAPPED  lpOverlapped,
+                                  LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
 {
   dprintf(("KERNEL32:HMDeviceCommClass::WriteFile %s(%08x,%08x,%08x,%08x,%08x)",
            lpHMDeviceName,
@@ -317,9 +323,9 @@ BOOL HMDeviceCommClass::WriteFile(PHMHANDLEDATA pHMHandleData,
     dprintf(("Warning: lpOverlapped != NULL & !FILE_FLAG_OVERLAPPED; sync operation"));
   }
 //testestestest
-  dprintf(("Bytes to write:"));
+  dprintf2(("Bytes to write:"));
   for(int i=0;i<nNumberOfBytesToWrite;i++) {
-          dprintf(("%x %c", ((char *)lpBuffer)[i], ((char *)lpBuffer)[i]));
+          dprintf2(("%x %c", ((char *)lpBuffer)[i], ((char *)lpBuffer)[i]));
   }
 //testestestset
 
@@ -335,50 +341,6 @@ BOOL HMDeviceCommClass::WriteFile(PHMHANDLEDATA pHMHandleData,
   }
 
   return ret;
-}
-/*****************************************************************************
- * Name      : BOOL WriteFileEx
- * Purpose   : The WriteFileEx function writes data to a file. It is designed
- *             solely for asynchronous operation, unlike WriteFile, which is
- *             designed for both synchronous and asynchronous operation.
- *             WriteFileEx reports its completion status asynchronously,
- *             calling a specified completion routine when writing is completed
- *             and the calling thread is in an alertable wait state.
- * Parameters: HANDLE       hFile                handle of file to write
- *             LPVOID       lpBuffer             address of buffer
- *             DWORD        nNumberOfBytesToRead number of bytes to write
- *             LPOVERLAPPED lpOverlapped         address of offset
- *             LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine address of completion routine
- * Variables :
- * Result    : TRUE / FALSE
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : SvL
- *****************************************************************************/
-
-BOOL HMDeviceCommClass::WriteFileEx(PHMHANDLEDATA pHMHandleData,
-                           LPVOID       lpBuffer,
-                           DWORD        nNumberOfBytesToWrite,
-                           LPOVERLAPPED lpOverlapped,
-                           LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
-{
-  dprintf(("!ERROR!: WriteFileEx %s (%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
-           lpHMDeviceName,
-           pHMHandleData->hHMHandle,
-           lpBuffer,
-           nNumberOfBytesToWrite,
-           lpOverlapped,
-           lpCompletionRoutine));
-
-  if(!(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED)) {
-      dprintf(("!WARNING!: Handle not created with FILE_FLAG_OVERLAPPED!"));
-      ::SetLastError(ERROR_ACCESS_DENIED); //todo: right error?
-      return FALSE;
-  }
-
-  ::SetLastError(ERROR_INVALID_FUNCTION);
-  return FALSE;
 }
 /*****************************************************************************
  * Name      : BOOL HMDeviceCommClass::ReadFile
@@ -400,7 +362,8 @@ BOOL HMDeviceCommClass::ReadFile(PHMHANDLEDATA pHMHandleData,
                                  LPCVOID       lpBuffer,
                                  DWORD         nNumberOfBytesToRead,
                                  LPDWORD       lpNumberOfBytesRead,
-                                 LPOVERLAPPED  lpOverlapped)
+                                 LPOVERLAPPED  lpOverlapped,
+                                 LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
 {
   dprintf(("KERNEL32:HMDeviceCommClass::ReadFile %s(%08x,%08x,%08x,%08x,%08x)",
            lpHMDeviceName,
@@ -443,60 +406,15 @@ BOOL HMDeviceCommClass::ReadFile(PHMHANDLEDATA pHMHandleData,
   }
   else {
 //testestestest
-      dprintf(("Bytes read:"));
+      dprintf2(("%d Bytes read:", ulBytesRead));
       for(int i=0;i<ulBytesRead;i++) {
-          dprintf(("%x %c", ((char *)lpBuffer)[i], ((char *)lpBuffer)[i]));
+          dprintf2(("%x %c", ((char *)lpBuffer)[i], ((char *)lpBuffer)[i]));
       }
 //testestestset
   }
   return ret;
 }
 
-/*****************************************************************************
- * Name      : BOOL ReadFileEx
- * Purpose   : The ReadFileEx function reads data from a file asynchronously.
- *             It is designed solely for asynchronous operation, unlike the
- *             ReadFile function, which is designed for both synchronous and
- *             asynchronous operation. ReadFileEx lets an application perform
- *             other processing during a file read operation.
- *             The ReadFileEx function reports its completion status asynchronously,
- *             calling a specified completion routine when reading is completed
- *             and the calling thread is in an alertable wait state.
- * Parameters: HANDLE       hFile                handle of file to read
- *             LPVOID       lpBuffer             address of buffer
- *             DWORD        nNumberOfBytesToRead number of bytes to read
- *             LPOVERLAPPED lpOverlapped         address of offset
- *             LPOVERLAPPED_COMPLETION_ROUTINE lpCompletionRoutine address of completion routine
- * Variables :
- * Result    : TRUE / FALSE
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : SvL
- *****************************************************************************/
-BOOL HMDeviceCommClass::ReadFileEx(PHMHANDLEDATA pHMHandleData,
-                                   LPVOID       lpBuffer,
-                                   DWORD        nNumberOfBytesToRead,
-                                   LPOVERLAPPED lpOverlapped,
-                                   LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
-{
-  dprintf(("!ERROR!: ReadFileEx %s (%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
-           lpHMDeviceName,
-           pHMHandleData->hHMHandle,
-           lpBuffer,
-           nNumberOfBytesToRead,
-           lpOverlapped,
-           lpCompletionRoutine));
-
-  if(!(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED)) {
-      dprintf(("!WARNING!: Handle not created with FILE_FLAG_OVERLAPPED!"));
-      ::SetLastError(ERROR_ACCESS_DENIED); //todo: right error?
-      return FALSE;
-  }
-
-  ::SetLastError(ERROR_INVALID_FUNCTION);
-  return FALSE;
-}
 /*****************************************************************************
  * Name      : DWORD HMDeviceHandler::SetupComm
  * Purpose   : set com port parameters (queue)
@@ -525,158 +443,7 @@ BOOL HMDeviceCommClass::SetupComm( PHMHANDLEDATA pHMHandleData,
   return(TRUE);
 }
 //******************************************************************************
-#define TIMEOUT_COMM  50
-//******************************************************************************
-DWORD CALLBACK SerialCommThread(LPVOID lpThreadParam)
-{
-  HANDLE        hComm = (HANDLE)lpThreadParam;
-  PHMHANDLEDATA pHMHandleData;
-  PHMDEVCOMDATA pDevData;
-  DWORD         ret;
-  APIRET        rc;
-  ULONG         ulLen;
-  USHORT        COMEvt;
-  DWORD         dwEvent,dwMask;
-
-  pHMHandleData = HMQueryHandleData(hComm);
-  if(!pHMHandleData) {
-      dprintf(("!ERROR!: Invalid handle -> aborting"));
-      return 0;
-  }
-
-  pDevData = (PHMDEVCOMDATA)pHMHandleData->lpHandlerData;
-  if(!pDevData) {
-      dprintf(("!ERROR! SerialCommThread !pDevData"));
-      DebugInt3();
-      return 0;
-  }
-  HANDLE hEvent   = pDevData->hEventSem;
-  HANDLE hCommOS2 = pHMHandleData->hHMHandle;
-  if(!hCommOS2 || !hEvent) {
-      dprintf(("!ERROR! SerialCommThread !hCommOS2 || !hEvent"));
-      DebugInt3();
-      return 0;
-  } 
-  dprintf(("SerialCommThread %x entered", hComm));
-
-  SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
-  while(TRUE) 
-  {
-      //validate handle 
-      pHMHandleData = HMQueryHandleData(hComm);
-      if(!pHMHandleData) {
-          dprintf(("!ERROR!: Invalid handle -> aborting"));
-          return 0;
-      }
-      if(pDevData->fClosing) {
-          dprintf(("Cleaning up async comm thread"));
-          SetEvent(hEvent); //signal to CloseHandle that we're done
-          return 0;
-      }
-
-      //Wait for the app to call WaitCommEvent
-      dprintf(("SerialCommThread: wait for WaitCommEvent"));
-      ret = WaitForSingleObject(hEvent, INFINITE);
-      ResetEvent(hEvent);
-      dprintf(("SerialCommThread: wait for WaitCommEvent done %x", ret));
-
-      //validate handle first
-      pHMHandleData = HMQueryHandleData(hComm);
-      if(!pHMHandleData) {
-          dprintf(("!ERROR!: Invalid handle -> aborting"));
-          return 0;
-      }
-
-      if(pDevData->fClosing) {
-          dprintf(("Cleaning up async comm thread"));
-          SetEvent(hEvent); //signal to CloseHandle that we're done
-          return 0;
-      }
-
-      HANDLE hOverlappedEvent = pDevData->overlapped.hEvent;
-      if(!hOverlappedEvent) {
-          DebugInt3();
-          return 0;
-      } 
-
-      ulLen   = sizeof(CHAR);
-      dwEvent = 0;
-      rc      = 0;
-      ulLen   = sizeof(COMEvt);
-      dwMask  = pDevData->dwEventMask;
-
-      while( (0==rc) &&
-            !(dwEvent & dwMask) &&
-            (dwMask == pDevData->dwEventMask) && 
-            !(pDevData->fCancelIo) && !(pDevData->fClosing) ) // Exit if the Mask gets changed
-      {
-          rc = OSLibDosDevIOCtl(hCommOS2,
-                                IOCTL_ASYNC,
-                                ASYNC_GETCOMMEVENT,
-                                0,0,0,
-                                &COMEvt,ulLen,&ulLen);
-          if(!rc)
-          {
-              dwEvent |= (COMEvt&0x0001)? EV_RXCHAR:0;
-              //dwEvent |= (COMEvt&0x0002)? 0:0;
-              dwEvent |= (COMEvt&0x0004)? EV_TXEMPTY:0;
-              dwEvent |= (COMEvt&0x0008)? EV_CTS:0;
-              dwEvent |= (COMEvt&0x0010)? EV_DSR:0;
-              //dwEvent |= (COMEvt&0x0020)? 0:0; DCS = RLSD?
-              dwEvent |= (COMEvt&0x0040)? EV_BREAK:0;
-              dwEvent |= (COMEvt&0x0080)? EV_ERR:0;
-              dwEvent |= (COMEvt&0x0100)? EV_RING:0;
-              if((dwEvent & dwMask)) break;
-          }
-          else break;
-
-          //validate handle first
-          pHMHandleData = HMQueryHandleData(hComm);
-          if(!pHMHandleData) {
-              dprintf(("!ERROR!: Invalid handle -> aborting"));
-              return 0;
-          }
-
-          if(pDevData->fClosing) {
-              dprintf(("Cleaning up async comm thread"));
-              SetEvent(hEvent); //signal to CloseHandle that we're done
-              return 0;
-          }
-
-          DosSleep(TIMEOUT_COMM);
-      }
-      if(pDevData->fClosing) {
-          dprintf(("Cleaning up async comm thread"));
-          SetEvent(hEvent); //signal to CloseHandle that we're done
-          return 0;
-      }
-      else
-      if(pDevData->fCancelIo) {
-          pDevData->overlapped.Internal = 0;
-          pDevData->dwLastError = ERROR_OPERATION_ABORTED;
-          if(pDevData->lpfdwEvtMask) *pDevData->lpfdwEvtMask = 0;
-          dprintf(("Overlapped: WaitCommEvent ERROR_OPERATION_ABORTED"));
-
-          //signal to app that a comm event has occurred
-          SetEvent(hOverlappedEvent);
-      }
-      else
-      if((dwEvent & dwMask) && (dwMask == pDevData->dwEventMask)) {
-          pDevData->overlapped.Internal |= (rc==0) ? (dwEvent & dwMask) : 0;
-          pDevData->dwLastError = rc;
-
-          //We're also supposed to write the result to the address supplied
-          //by the call to WaitCommEvent
-          if(pDevData->lpfdwEvtMask) *pDevData->lpfdwEvtMask = (rc==0) ? (dwEvent & dwMask) : 0;
-          dprintf(("Overlapped: WaitCommEvent returned %x", pDevData->overlapped.Internal));
-
-          //signal to app that a comm event has occurred
-          SetEvent(hOverlappedEvent);
-      }
-  }
-  return 0;
-}
-//******************************************************************************
+#define TIMEOUT_COMM 50
 //******************************************************************************
 BOOL HMDeviceCommClass::WaitCommEvent( PHMHANDLEDATA pHMHandleData,
                                        LPDWORD lpfdwEvtMask,
@@ -740,8 +507,6 @@ BOOL HMDeviceCommClass::WaitCommEvent( PHMHANDLEDATA pHMHandleData,
         //Set app event semaphore to non-signalled state
         ::ResetEvent(lpo->hEvent);
 
-        //signal async comm thread to start polling comm status
-        ::SetEvent(pDevData->hEventSem);
         ::SetLastError(ERROR_IO_PENDING);
         return FALSE;
     }
@@ -778,7 +543,7 @@ BOOL HMDeviceCommClass::CancelIo(PHMHANDLEDATA pHMHandleData)
 
     //signal serial thread to cancel pending IO operation
     pDevData->fCancelIo = TRUE;
-    ::SetEvent(pDevData->hEventSem);
+//    ::SetEvent(pDevData->hEventSem);
 
     ::SetLastError(ERROR_SUCCESS);
     return(TRUE);
@@ -1186,27 +951,32 @@ BOOL HMDeviceCommClass::SetCommTimeouts( PHMHANDLEDATA pHMHandleData,
 
   memcpy(&os2dcb,&pDevData->dcbOS2,sizeof(DCBINFO));
 
-  fbTimeOut = 0x02;
+  fbTimeOut = 0x02; //normal processing (wait until timout or buffer full)
   if(MAXDWORD==pDevData->CommTOuts.ReadIntervalTimeout)
   {
     if( (0==pDevData->CommTOuts.ReadTotalTimeoutMultiplier) &&
         (0==pDevData->CommTOuts.ReadTotalTimeoutConstant))
-      fbTimeOut = 0x05;
+      fbTimeOut = 0x05; //no wait
     else
-      fbTimeOut = 0x04;
+      fbTimeOut = 0x04; //wait for something
   }
   else
   {
     DWORD dwTimeout;
     dwTimeout = pDevData->CommTOuts.ReadIntervalTimeout/10;
-#if 0
     if(dwTimeout)
       dwTimeout--; // 0=10 ms unit is 10ms or .01s
-#endif
+
     os2dcb.usWriteTimeout = 0x0000FFFF & dwTimeout;
     os2dcb.usReadTimeout  = 0x0000FFFF & dwTimeout;
   }
-  os2dcb.fbTimeOut = (os2dcb.fbTimeOut & 0xF9) | fbTimeOut;
+  if( (0==pDevData->CommTOuts.WriteTotalTimeoutMultiplier) &&
+      (0==pDevData->CommTOuts.WriteTotalTimeoutConstant)) 
+  {//no timeout used for writing
+    os2dcb.fbTimeOut |= 1; //write infinite timeout
+  }
+
+  os2dcb.fbTimeOut = (os2dcb.fbTimeOut & 0xF8) | fbTimeOut;
 
   dprintf((" New DCB:\n"
            " WriteTimeout           : %d\n"
