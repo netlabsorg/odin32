@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.30 2000-05-12 19:14:55 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.31 2000-05-19 18:42:14 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -347,8 +347,9 @@ int DIBSection::SetDIBits(HDC hdc, HBITMAP hbitmap, UINT startscan, UINT
    }
 
    dprintf(("DIBSection::SetDIBits (%d,%d), %d %d", pbmi->biWidth, pbmi->biHeight, pbmi->biBitCount, pbmi->biCompression));
-   if(palsize)
-   	memcpy(pOS2bmp->argbColor, (char *)pbmi + 1 , palsize);
+   if(palsize) {
+	SetDIBColorTable(0, 1 << pbmi->biBitCount, (RGBQUAD *)(pbmi+1));
+   }
 
    if(bits)
    {
@@ -417,17 +418,6 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
 	hdcHeight = pOS2bmp->cy;
 	hdcWidth  = pOS2bmp->cx;
   }
-
-#if 0
-  nXdest = 0;
-  nYdest = 0;
-  nXsrc  = 0;
-  nXsrc  = 0;
-  nDestWidth = pOS2bmp->cx;
-  nDestHeight = pOS2bmp->cy;
-  nSrcWidth = pOS2bmp->cx;
-  nSrcHeight = pOS2bmp->cy;
-#endif
 
   //win32 coordinates are of the left top, OS/2 expects left bottom
   //source rectangle is non-inclusive (top, right not included)
