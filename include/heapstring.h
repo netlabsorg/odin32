@@ -10,10 +10,10 @@
 
 #include <wine\unicode.h>
 //SvL: strcase -> case insensitive!
-#define strncasecmp	lstrncmpiA
-#define strcasecmp	lstrcmpiA
+#define strncasecmp lstrncmpiA
+#define strcasecmp  lstrcmpiA
 #define strncmpiW       lstrncmpiW
-#define _strlwr(a) 	strlwr(a)
+#define _strlwr(a)  strlwr(a)
 
 
 /*****************************************************************************
@@ -40,10 +40,12 @@ LPSTR  WIN32API lstrcpynA      (LPSTR arg1, LPCSTR  arg2, int arg3);
 LPWSTR WIN32API lstrcpynW      (LPWSTR dest, LPCWSTR src, int arg3);
 int    WIN32API lstrcmpiA      (LPCSTR arg1, LPCSTR  arg2);
 int    WIN32API lstrcmpiW      (LPCWSTR arg1, LPCWSTR arg2);
-int    WIN32API lstrcpynAtoW   (LPWSTR unicode, LPCSTR ascii, int asciilen);
-int    WIN32API lstrcpynWtoA   (LPSTR ascii, LPCWSTR unicode, int unilen);
+int    WIN32API lstrcpynAtoW   (LPWSTR unicode, LPCSTR ascii, int unilen);
+int    WIN32API lstrcpynWtoA   (LPSTR ascii, LPCWSTR unicode, int asciilen);
 LPSTR  WIN32API lstrcpyWtoA    (LPSTR ascii, LPCWSTR unicode);
 LPWSTR WIN32API lstrcpyAtoW    (LPWSTR unicode, LPCSTR ascii);
+int    WIN32API lstrlenWtoA    ( LPCWSTR ustring, int ulen );
+int    WIN32API lstrlenAtoW    ( LPCSTR astring, int alen );
 
 LPVOID WIN32API HEAP_xalloc    ( HANDLE heap, DWORD flags, DWORD size );
 LPVOID WIN32API HEAP_xrealloc  ( HANDLE heap, DWORD flags, LPVOID lpMem, DWORD size );
