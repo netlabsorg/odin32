@@ -1,4 +1,4 @@
-/* $Id: win32wndhandle.cpp,v 1.12 2002-04-07 21:37:35 sandervl Exp $ */
+/* $Id: win32wndhandle.cpp,v 1.13 2002-06-09 19:54:28 sandervl Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
@@ -28,7 +28,7 @@
 #pragma data_seg(_GLOBALDATA)
 ULONG                WindowHandleTable[MAX_WINDOW_HANDLES] = {0};
 CRITICAL_SECTION_OS2 globalwhandlecritsect = {0};
-ULONG  lastIndex = 0;
+ULONG                lastIndex = 0;
 #pragma data_seg()
 
 //******************************************************************************
@@ -66,7 +66,7 @@ BOOL HwAllocateWindowHandle(HWND *hwnd, DWORD dwUserData)
 	DebugInt3();
 	return FALSE;
   }
-  *hwnd  = lastIndex;
+  *hwnd  = lastIndex+1;	//we skip handle 0x68000000 
   *hwnd |= WNDHANDLE_MAGIC_HIGHWORD;
   WindowHandleTable[lastIndex] = dwUserData;
 
@@ -79,6 +79,7 @@ BOOL HwAllocateWindowHandle(HWND *hwnd, DWORD dwUserData)
 //******************************************************************************
 void HwFreeWindowHandle(HWND hwnd)
 {
+  hwnd = hwnd - 1; //we skip handle 0x68000000 
   hwnd &= WNDHANDLE_MAGIC_MASK;
   if(hwnd < MAX_WINDOW_HANDLES) {
 	DosEnterCriticalSection(&globalwhandlecritsect);
@@ -89,12 +90,9 @@ void HwFreeWindowHandle(HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
-/* 2001-10-17 PH
- * Note: this function is repeated as "inline macro" in win32wbase.cpp.
- * Changes here must be reflected there, tool.
- */
 BOOL HwGetWindowHandleData(HWND hwnd, DWORD *pdwUserData)
 {
+  hwnd = hwnd - 1; //we skip handle 0x68000000 
   if((hwnd & 0xFFFF0000) != WNDHANDLE_MAGIC_HIGHWORD) {
 	return FALSE; //unknown window (PM?)
   }
