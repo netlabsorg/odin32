@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.104 2001-07-03 18:33:26 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.105 2001-07-04 09:55:17 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -20,6 +20,7 @@
 #include <misc.h>
 #include <win32type.h>
 #include <winconst.h>
+#include <winuser32.h>
 #include "oslibwin.h"
 #include "oslibutil.h"
 #include "oslibmsg.h"
@@ -493,7 +494,10 @@ BOOL OSLibWinGetBorderSize(HWND hwnd, OSLIBPOINT *pointl)
 //******************************************************************************
 BOOL OSLibWinSetIcon(HWND hwnd, HANDLE hIcon)
 {
-    return (BOOL) WinSendMsg(hwnd, WM_SETICON, (MPARAM)hIcon, 0);
+    ULONG hIconOS2 = GetOS2Icon(hIcon);
+    if(hIconOS2) 
+       return (BOOL) WinSendMsg(hwnd, WM_SETICON, (MPARAM)hIconOS2, 0);
+    return FALSE;
 }
 //******************************************************************************
 //******************************************************************************
