@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.202 2003-03-20 13:20:44 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.203 2003-03-22 20:27:11 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -865,6 +865,8 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
       RECTL rectl;
       BOOL  rc;
 
+        win32wnd->checkForDirtyUpdateRegion();
+
         rc = WinQueryUpdateRect(hwnd, &rectl);
         dprintf(("OS2: WM_PAINT %x (%d,%d) (%d,%d) rc=%d", win32wnd->getWindowHandle(), rectl.xLeft, rectl.yBottom, rectl.xRight, rectl.yTop, rc));
 
@@ -872,6 +874,14 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
            rectl.yBottom != rectl.yTop) && !IsIconic(win32wnd->GetTopParent()))
         {
                 win32wnd->DispatchMsgA(pWinMsg);
+                if(WinQueryUpdateRect(hwnd, NULL) == TRUE) 
+                {//the application didn't validate the update region; Windows
+                 //will only send a WM_PAINT once until another part of the
+                 //window is invalidated. Unfortunately PM keeps on sending
+                 //WM_PAINT messages until we validate the update region.
+
+                    win32wnd->saveAndValidateUpdateRegion();
+                }
         }
         else    goto RunDefWndProc;
         break;

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.362 2003-03-20 13:20:45 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.363 2003-03-22 20:27:12 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -118,6 +118,7 @@ void Win32BaseWindow::Init()
   fVisibleRegionChanged = FALSE;
   fEraseBkgndFlag  = TRUE;
   fIsDragDropActive= FALSE;
+  fDirtyUpdateRegion = FALSE;
 
   state            = STATE_INIT;
   windowNameA      = NULL;
@@ -173,6 +174,7 @@ void Win32BaseWindow::Init()
   ownDC              = 0;
   hWindowRegion      = 0;
   hClipRegion        = 0;
+  hUpdateRegion      = 0;
 
   hTaskList          = 0;
 
@@ -271,6 +273,10 @@ Win32BaseWindow::~Win32BaseWindow()
     }
     if(propertyList) {
         removeWindowProps();
+    }
+    if(hUpdateRegion) {
+        DeleteObject(hUpdateRegion);
+        hUpdateRegion = NULL;
     }
 }
 //******************************************************************************
@@ -1189,6 +1195,65 @@ ULONG Win32BaseWindow::MsgPaint(ULONG tmp, ULONG select)
         return SendMessageA(getWindowHandle(),WM_PAINTICON, 1, 0);
     else
         return SendMessageA(getWindowHandle(),WM_PAINT, 0, 0);
+}
+//******************************************************************************
+// 
+// Win32BaseWindow::saveAndValidateUpdateRegion
+//
+//   If an application doesn't validate the update region while processing 
+//   WM_PAINT, then we must remember it for the next time. Also validates
+//   the current update region.
+//
+// Parameters:
+// Returns:
+//
+// NOTE:
+//   Windows will only send a WM_PAINT once until another part of the
+//   window is invalidated. Unfortunately PM keeps on sending
+//   WM_PAINT messages until we validate the update region.
+//
+//   This affects UpdateWindow, RedrawWindow, GetUpdateRgn, GetUpdateRect,
+//   BeginPaint and the next WM_PAINT message.
+//
+//******************************************************************************
+void Win32BaseWindow::saveAndValidateUpdateRegion()
+{
+    if(hUpdateRegion == NULL) {
+        hUpdateRegion = ::CreateRectRgn(0, 0, 1, 1);
+    }
+
+    dprintf(("Win32BaseWindow::saveAndValidateUpdateRegion; marked dirty!"));
+
+    //save update region
+    ::GetUpdateRgn(getWindowHandle(), hUpdateRegion, FALSE);
+
+    //and validate it so PM won't bother us again
+    ::ValidateRgn(getWindowHandle(), hUpdateRegion);
+
+    //we just pretend the entire window is invalid. easier this way
+    fDirtyUpdateRegion = TRUE;
+}
+//******************************************************************************
+// 
+// Win32BaseWindow::checkForDirtyUpdateRegion
+//
+//   If an application doesn't validate the update region while processing 
+//   WM_PAINT, then we must remember it for the next time. If the window has
+//   a dirty update region, then invalidate that region.
+//
+// Parameters:
+// Returns:
+//
+// NOTE:
+//
+//******************************************************************************
+void Win32BaseWindow::checkForDirtyUpdateRegion()
+{
+    if(fDirtyUpdateRegion) {
+        dprintf(("Win32BaseWindow::checkForDirtyUpdateRegion; marked dirty -> invalidate whole window!"));
+        fDirtyUpdateRegion = FALSE;
+        ::InvalidateRgn(getWindowHandle(), hUpdateRegion, TRUE);
+    }
 }
 //******************************************************************************
 //TODO: Is the clipper region of the window DC equal to the invalidated rectangle?
