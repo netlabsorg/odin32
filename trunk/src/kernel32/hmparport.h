@@ -1,4 +1,4 @@
-/* $Id: hmparport.h,v 1.1 2001-11-08 14:49:27 phaller Exp $ */
+/* $Id: hmparport.h,v 1.2 2001-11-08 15:10:38 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -30,6 +30,13 @@ class HMDeviceParPortClass : public HMDeviceHandler
   /* this is the handler method for calls to CloseHandle() */
   virtual BOOL CloseHandle(PHMHANDLEDATA pHMHandleData);
 
+  virtual BOOL GetCommProperties( PHMHANDLEDATA pHMHandleData,
+                                 LPCOMMPROP lpcmmp);
+  
+  virtual BOOL ClearCommError( PHMHANDLEDATA pHMHandleData,
+                               LPDWORD lpdwErrors,
+                               LPCOMSTAT lpcst);
+  
                            /* this is a handler method for calls to ReadFile() */
   virtual BOOL   ReadFile   (PHMHANDLEDATA pHMHandleData,
                              LPCVOID       lpBuffer,
