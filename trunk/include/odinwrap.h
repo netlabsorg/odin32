@@ -1,4 +1,4 @@
-/* $Id: odinwrap.h,v 1.9 1999-08-20 00:58:05 phaller Exp $ */
+/* $Id: odinwrap.h,v 1.10 1999-08-20 09:56:36 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -748,7 +748,7 @@
     return rc;                    \
   }                               \
                                   \
-  cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4,a4,t5 a5,t6 a6,t7 a7,t8 a8)
+  cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8)
 
 #define ODINPROCEDURE8(cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8)  \
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8);  \
@@ -773,7 +773,7 @@
     return rc;                    \
   }                               \
                                   \
-  cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4,a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9)
+  cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9)
 
 #define ODINPROCEDURE9(cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8,t9,a9)  \
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9);  \
@@ -798,7 +798,7 @@
     return rc;                    \
   }                               \
                                   \
-  cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4,a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10)
+  cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10)
 
 #define ODINPROCEDURE10(cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8,t9,a9,t10,a10)  \
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10);  \
@@ -823,7 +823,7 @@
     return rc;                    \
   }                               \
                                   \
-  cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4,a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11)
+  cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11)
 
 #define ODINPROCEDURE11(cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8,t9,a9,t10,a10,t11,a11)  \
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11);  \
@@ -848,7 +848,7 @@
     return rc;                    \
   }                               \
                                   \
-  cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4,a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12)
+  cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12)
 
 #define ODINPROCEDURE12(cName,t1,a1,t2,a2,t3,a3,t4,a4,t5,a5,t6,a6,t7,a7,t8,a8,t9,a9,t10,a10,t11,a11,t12,a12)  \
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12);  \
