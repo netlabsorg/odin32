@@ -1,3 +1,4 @@
+/* $Id: initterm.cpp,v 1.14 2001-09-05 12:12:02 bird Exp $ */
 /*
  * DLL entry point
  *
@@ -65,7 +66,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
       case 1 :
          inittermComdlg32(hModule, ulFlag);
-	 ctordtorTerm();
+     ctordtorTerm();
          break;
 
       default  :

@@ -1,6 +1,7 @@
+/* $Id: crtdll_main.c,v 1.2 2001-09-05 12:14:24 bird Exp $ */
 /*
  * The C RunTime DLL
- * 
+ *
  * Implements C run-time functionality as known from UNIX.
  *
  * Copyright 1996,1998 Marcus Meissner
@@ -12,12 +13,12 @@
 /*
 Unresolved issues Uwe Bonnes 970904:
 - tested with ftp://ftp.remcomp.com/pub/remcomp/lcc-win32.zip, a C-Compiler
- 		for Win32, based on lcc, from Jacob Navia
+        for Win32, based on lcc, from Jacob Navia
 UB 000416:
 - probably not thread safe
 */
 
-/* NOTE: This file also implements the wcs* functions. They _ARE_ in 
+/* NOTE: This file also implements the wcs* functions. They _ARE_ in
  * the newer Linux libcs, but use 4 byte wide characters, so are unusable,
  * since we need 2 byte wide characters. - Marcus Meissner, 981031
  */
@@ -62,7 +63,7 @@ UINT CRTDLL_osversion_dll;    /* CRTDLL.245 */
 UINT CRTDLL_winmajor_dll;     /* CRTDLL.329 */
 UINT CRTDLL_winminor_dll;     /* CRTDLL.330 */
 UINT CRTDLL_winver_dll;       /* CRTDLL.331 */
-INT  CRTDLL_doserrno = 0; 
+INT  CRTDLL_doserrno = 0;
 INT  CRTDLL_errno = 0;
 const INT  CRTDLL__sys_nerr = 43;
 
@@ -76,20 +77,20 @@ const INT  CRTDLL__sys_nerr = 43;
 /*********************************************************************
  *                  CRTDLL_MainInit  (CRTDLL.init)
  */
- 
+
 BOOL WINAPI CRTDLL_Init(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 {
   FS_OS2
-    
+
     // call i/o initializer in file.c
-    if (fdwReason == DLL_PROCESS_ATTACH) 
+    if (fdwReason == DLL_PROCESS_ATTACH)
     {
       __CRTDLL__init_io();
     }
-    
+
   /*
     PH 2000/11/21 this code doesn't look very useful
-    
+
     if (fdwReason == DLL_PROCESS_ATTACH) {
       _fdopen(0,"r");
       _fdopen(1,"w");
@@ -102,7 +103,7 @@ BOOL WINAPI CRTDLL_Init(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
         CRTDLL_hHeap = 0;
       }
   */
-  
+
   FS_WIN32
   return TRUE;
 }
@@ -175,75 +176,75 @@ LPSTR * CDECL CRTDLL__GetMainArgs(LPDWORD argc,LPSTR **argv,
 {
         char *cmdline;
         char  **xargv;
-	int	xargc,end,last_arg,afterlastspace;
-	DWORD	version;
+    int xargc,end,last_arg,afterlastspace;
+    DWORD   version;
 
-	TRACE("(%p,%p,%p,%ld).\n",
-		argc,argv,environ,flag
-	);
+    TRACE("(%p,%p,%p,%ld).\n",
+        argc,argv,environ,flag
+    );
 
-	if (CRTDLL_acmdln_dll != NULL)
-		HeapFree(GetProcessHeap(), 0, CRTDLL_acmdln_dll);
+    if (CRTDLL_acmdln_dll != NULL)
+        HeapFree(GetProcessHeap(), 0, CRTDLL_acmdln_dll);
 
-	CRTDLL_acmdln_dll = cmdline = CRTDLL__strdup( GetCommandLineA() );
- 	TRACE("got '%s'\n", cmdline);
+    CRTDLL_acmdln_dll = cmdline = CRTDLL__strdup( GetCommandLineA() );
+    TRACE("got '%s'\n", cmdline);
 
-	version	= GetVersion();
-	CRTDLL_osver_dll       = version >> 16;
-	CRTDLL_winminor_dll    = version & 0xFF;
-	CRTDLL_winmajor_dll    = (version>>8) & 0xFF;
-	CRTDLL_baseversion_dll = version >> 16;
-	CRTDLL_winver_dll      = ((version >> 8) & 0xFF) + ((version & 0xFF) << 8);
-	CRTDLL_baseminor_dll   = (version >> 16) & 0xFF;
-	CRTDLL_basemajor_dll   = (version >> 24) & 0xFF;
-	CRTDLL_osversion_dll   = version & 0xFFFF;
-	CRTDLL_osminor_dll     = version & 0xFF;
-	CRTDLL_osmajor_dll     = (version>>8) & 0xFF;
+    version = GetVersion();
+    CRTDLL_osver_dll       = version >> 16;
+    CRTDLL_winminor_dll    = version & 0xFF;
+    CRTDLL_winmajor_dll    = (version>>8) & 0xFF;
+    CRTDLL_baseversion_dll = version >> 16;
+    CRTDLL_winver_dll      = ((version >> 8) & 0xFF) + ((version & 0xFF) << 8);
+    CRTDLL_baseminor_dll   = (version >> 16) & 0xFF;
+    CRTDLL_basemajor_dll   = (version >> 24) & 0xFF;
+    CRTDLL_osversion_dll   = version & 0xFFFF;
+    CRTDLL_osminor_dll     = version & 0xFF;
+    CRTDLL_osmajor_dll     = (version>>8) & 0xFF;
 
-	/* missing threading init */
+    /* missing threading init */
 
-	end=0;last_arg=0;xargv=NULL;xargc=0;afterlastspace=0;
-	while (1)
-	{
-	    if ((cmdline[end]==' ') || (cmdline[end]=='\0'))
-	    {
-		if (cmdline[end]=='\0')
-		    last_arg=1;
-		else
-		    cmdline[end]='\0';
-		/* alloc xargc + NULL entry */
-			xargv=(char**)HeapReAlloc( GetProcessHeap(), 0, xargv,
-		                             sizeof(char*)*(xargc+1));
-		if (strlen(cmdline+afterlastspace))
-		{
-		    xargv[xargc] = CRTDLL__strdup(cmdline+afterlastspace);
-		    xargc++;
+    end=0;last_arg=0;xargv=NULL;xargc=0;afterlastspace=0;
+    while (1)
+    {
+        if ((cmdline[end]==' ') || (cmdline[end]=='\0'))
+        {
+        if (cmdline[end]=='\0')
+            last_arg=1;
+        else
+            cmdline[end]='\0';
+        /* alloc xargc + NULL entry */
+            xargv=(char**)HeapReAlloc( GetProcessHeap(), 0, xargv,
+                                     sizeof(char*)*(xargc+1));
+        if (strlen(cmdline+afterlastspace))
+        {
+            xargv[xargc] = CRTDLL__strdup(cmdline+afterlastspace);
+            xargc++;
                     if (!last_arg) /* need to seek to the next arg ? */
-		    {
-			end++;
-			while (cmdline[end]==' ')
-			    end++;
-	}
-		    afterlastspace=end;
-		}
-		else
-		{
-		    xargv[xargc] = NULL; /* the last entry is NULL */
-		    break;
-		}
-	    }
-	    else
-		end++;
-	}
-	CRTDLL_argc_dll	= xargc;
-	*argc		= xargc;
-	CRTDLL_argv_dll	= xargv;
-	*argv		= xargv;
+            {
+            end++;
+            while (cmdline[end]==' ')
+                end++;
+    }
+            afterlastspace=end;
+        }
+        else
+        {
+            xargv[xargc] = NULL; /* the last entry is NULL */
+            break;
+        }
+        }
+        else
+        end++;
+    }
+    CRTDLL_argc_dll = xargc;
+    *argc       = xargc;
+    CRTDLL_argv_dll = xargv;
+    *argv       = xargv;
 
-	TRACE("found %d arguments\n",
-		CRTDLL_argc_dll);
-	CRTDLL_environ_dll = *environ = GetEnvironmentStringsA();
-	return environ;
+    TRACE("found %d arguments\n",
+        CRTDLL_argc_dll);
+    CRTDLL_environ_dll = *environ = GetEnvironmentStringsA();
+    return environ;
 }
 
 
@@ -252,15 +253,15 @@ LPSTR * CDECL CRTDLL__GetMainArgs(LPDWORD argc,LPSTR **argv,
  */
 DWORD CDECL CRTDLL__initterm(_INITTERMFUN *start,_INITTERMFUN *end)
 {
-	_INITTERMFUN	*current;
+    _INITTERMFUN    *current;
 
-	TRACE("(%p,%p)\n",start,end);
-	current=start;
-	while (current<end) {
-		if (*current) (*current)();
-		current++;
-	}
-	return 0;
+    TRACE("(%p,%p)\n",start,end);
+    current=start;
+    while (current<end) {
+        if (*current) (*current)();
+        current++;
+    }
+    return 0;
 }
 
 
@@ -308,7 +309,7 @@ void CDECL CRTDLL__beep( UINT freq, UINT duration)
  */
 INT CDECL CRTDLL_rand()
 {
-    return (rand() & CRTDLL_RAND_MAX); 
+    return (rand() & CRTDLL_RAND_MAX);
 }
 
 
@@ -318,7 +319,7 @@ INT CDECL CRTDLL_rand()
 UINT CDECL CRTDLL__rotl(UINT x,INT shift)
 {
   // return (_rotl(value, shift));
-  
+
     shift &= 31;
     return (x << shift) | (x >> (32-shift));
 }
@@ -330,7 +331,7 @@ UINT CDECL CRTDLL__rotl(UINT x,INT shift)
 DWORD CDECL CRTDLL__lrotl(DWORD x,INT shift)
 {
   // return (_lrotl(value, shift));
-  
+
     shift &= 31;
     return (x << shift) | (x >> (32-shift));
 }
@@ -342,7 +343,7 @@ DWORD CDECL CRTDLL__lrotl(DWORD x,INT shift)
 DWORD CDECL CRTDLL__lrotr(DWORD x,INT shift)
 {
   // return (_lrotr(value, shift));
-  
+
     shift &= 0x1f;
     return (x >> shift) | (x << (32-shift));
 }
@@ -354,7 +355,7 @@ DWORD CDECL CRTDLL__lrotr(DWORD x,INT shift)
 DWORD CDECL CRTDLL__rotr(UINT x,INT shift)
 {
   // return (_rotr(value, shift));
-  
+
     shift &= 0x1f;
     return (x >> shift) | (x << (32-shift));
 }
@@ -366,7 +367,7 @@ DWORD CDECL CRTDLL__rotr(UINT x,INT shift)
 INT CDECL CRTDLL_vswprintf( LPWSTR buffer, LPCWSTR spec, va_list args )
 {
   // return (vswprintf(s, t, format, arg));
-  
+
     return wvsprintfW( buffer, spec, args );
 }
 
@@ -387,7 +388,7 @@ VOID CDECL CRTDLL_longjmp(jmp_buf env, int val)
 LPSTR CDECL CRTDLL_setlocale(INT category,LPCSTR locale)
 {
   return (setlocale(category, locale));
-  
+
   /*
     LPSTR categorystr;
 
@@ -436,7 +437,7 @@ BOOL CDECL CRTDLL__isctype(CHAR x,CHAR type)
 LPSTR CDECL CRTDLL__fullpath(LPSTR buf, LPCSTR name, INT size)
 {
   // return (_fullpath(buf, path, size));
-  
+
   if (!buf)
   {
       size = 256;
@@ -454,7 +455,7 @@ LPSTR CDECL CRTDLL__fullpath(LPSTR buf, LPCSTR name, INT size)
 VOID CDECL CRTDLL__splitpath(LPCSTR path, LPSTR drive, LPSTR directory, LPSTR filename, LPSTR extension )
 {
   // _splitpath( path, drive, dir, fname, ext);
-  
+
   /* drive includes :
      directory includes leading and trailing (forward and backward slashes)
      filename without dot and slashes
@@ -518,7 +519,7 @@ VOID CDECL CRTDLL__makepath(LPSTR path, LPCSTR drive,
                               LPCSTR extension )
 {
   // _makepath(path, drive, dir, fname, ext);
-  
+
     char ch;
     TRACE("CRTDLL__makepath got %s %s %s %s\n", drive, directory,
           filename, extension);
@@ -566,14 +567,14 @@ VOID CDECL CRTDLL__makepath(LPSTR path, LPCSTR drive,
 LPINT CDECL CRTDLL__errno( VOID )
 {
   // return (_errno());
-  
+
   return &CRTDLL_errno;
 }
 
 
 /*********************************************************************
  *                  __doserrno       (CRTDLL.26)
- * 
+ *
  * Return the address of the DOS errno (holding the last OS error).
  * @@@PH Note: veeeery strange ...
  * BUGS
@@ -582,7 +583,7 @@ LPINT CDECL CRTDLL__errno( VOID )
 LPINT CDECL CRTDLL___doserrno( VOID )
 {
   // return (__doserrno());
-  
+
   return &CRTDLL_doserrno;
 }
 
@@ -600,7 +601,7 @@ extern int sprintf(char *str, const char *format, ...);
 LPSTR CDECL CRTDLL__strerror (LPCSTR err)
 {
   // return (_strerror((char*)s));
-  
+
   static char strerrbuff[256];
   sprintf(strerrbuff,"%s: %s\n",err,CRTDLL_strerror(CRTDLL_errno));
   return strerrbuff;
@@ -615,12 +616,12 @@ LPSTR CDECL CRTDLL__strerror (LPCSTR err)
 VOID CDECL CRTDLL_perror (LPCSTR err)
 {
   // perror( s );
-  
+
   char *err_str = CRTDLL_strerror(CRTDLL_errno);
   CRTDLL_fprintf(CRTDLL_stderr,"%s: %s\n",err,err_str);
   CRTDLL_free(err_str);
 }
- 
+
 
 /*********************************************************************
  *                  strerror       (CRTDLL.465)
@@ -630,7 +631,7 @@ VOID CDECL CRTDLL_perror (LPCSTR err)
  * NOTES
  * The caller does not own the string returned.
  */
-extern char *strerror(int errnum); 
+extern char *strerror(int errnum);
 
 LPSTR CDECL CRTDLL_strerror (INT err)
 {
@@ -644,7 +645,7 @@ LPSTR CDECL CRTDLL_strerror (INT err)
 LPVOID CDECL CRTDLL_signal(INT sig, sig_handler_type ptr)
 {
   //return (signal(sig, ptr));
-  
+
   FIXME("(%d %p):stub.\n", sig, ptr);
   return (void*)-1;
 }
@@ -666,24 +667,24 @@ VOID CDECL CRTDLL__sleep(ULONG timeout)
 LPSTR CDECL CRTDLL_getenv(LPCSTR name)
 {
   // return (getenv(name));
-  
+
      LPSTR environ = GetEnvironmentStringsA();
      LPSTR pp,pos = NULL;
      unsigned int length;
 
      for (pp = environ; (*pp); pp = pp + strlen(pp) +1)
        {
-	 pos =strchr(pp,'=');
-	 if (pos)
-	   length = pos -pp;
-	 else
-	   length = strlen(pp);
-	 if (!strncmp(pp,name,length)) break;
+     pos =strchr(pp,'=');
+     if (pos)
+       length = pos -pp;
+     else
+       length = strlen(pp);
+     if (!strncmp(pp,name,length)) break;
        }
-     if ((pp)&& (pos)) 
+     if ((pp)&& (pos))
        {
-	 pp = pos+1;
-	 TRACE("got %s\n",pp);
+     pp = pos+1;
+     TRACE("got %s\n",pp);
        }
      FreeEnvironmentStringsA( environ );
      return pp;
@@ -694,15 +695,15 @@ LPSTR CDECL CRTDLL_getenv(LPCSTR name)
  *                  _except_handler2  (CRTDLL.78)
  */
 INT CDECL CRTDLL__except_handler2 (
-	PEXCEPTION_RECORD rec,
-	PEXCEPTION_FRAME frame,
-	PCONTEXT context,
-	PEXCEPTION_FRAME  *dispatcher)
+    PEXCEPTION_RECORD rec,
+    PEXCEPTION_FRAME frame,
+    PCONTEXT context,
+    PEXCEPTION_FRAME  *dispatcher)
 {
-	FIXME ("exception %lx flags=%lx at %p handler=%p %p %p stub\n",
-	rec->ExceptionCode, rec->ExceptionFlags, rec->ExceptionAddress,
-	frame->Handler, context, dispatcher);
-	return ExceptionContinueSearch;
+    FIXME ("exception %lx flags=%lx at %p handler=%p %p %p stub\n",
+    rec->ExceptionCode, rec->ExceptionFlags, rec->ExceptionAddress,
+    frame->Handler, context, dispatcher);
+    return ExceptionContinueSearch;
 }
 
 
@@ -723,7 +724,7 @@ INT CDECL CRTDLL___isascii(INT c)
 INT CDECL CRTDLL___toascii(INT c)
 {
   // return (_toascii(c));
-  
+
   return c & 0x7f;
 }
 
@@ -753,7 +754,7 @@ INT CDECL CRTDLL_iswascii(LONG c)
 INT CDECL CRTDLL___iscsym(LONG c)
 {
   // return (_iscsym(c));
-  
+
   return (isalnum(c) || c == '_');
 }
 
@@ -772,7 +773,7 @@ INT CDECL CRTDLL___iscsym(LONG c)
 INT CDECL CRTDLL___iscsymf(LONG c)
 {
   // return (_iscsymf(c));
-  
+
   return (isalpha(c) || c == '_');
 }
 
@@ -845,7 +846,7 @@ LPVOID CDECL CRTDLL__lsearch(LPVOID match,LPVOID start, LPUINT array_size,
     do
     {
       if (cf((LPVOID*)match, (LPVOID*)pStart) == 0)
-	return pStart; /* found */
+    return pStart; /* found */
       pStart += elem_size;
     } while (--size);
 
@@ -913,7 +914,7 @@ WCHAR* CDECL CRTDLL__ultow(ULONG value,WCHAR* out,INT base)
 CHAR CDECL CRTDLL__toupper(CHAR c)
 {
   // return (_toupper(n));
-  
+
   return toupper(c);
 }
 
@@ -924,7 +925,7 @@ CHAR CDECL CRTDLL__toupper(CHAR c)
 CHAR CDECL CRTDLL__tolower(CHAR c)
 {
   // return (_tolower(n));
-  
+
   return tolower(c);
 }
 
@@ -945,7 +946,7 @@ CHAR CDECL CRTDLL__tolower(CHAR c)
 double CDECL CRTDLL__cabs(struct __CRTDLL_complex c)
 {
   // return (_cabs(c));
-  
+
   return sqrt(c.real * c.real + c.imaginary * c.imaginary);
 }
 
@@ -1005,7 +1006,7 @@ INT CDECL  CRTDLL__finite(double d)
  *                  _fpreset           (CRTDLL.107)
  *
  * Reset the state of the floating point processor.
- * 
+ *
  * PARAMS
  *   None.
  *
