@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.101 2001-06-14 11:30:55 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.102 2001-06-15 14:07:22 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -95,6 +95,7 @@ HWND OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle, ULONG dwOSFrameStyle
                            id, (PVOID)&FCData, NULL);
     if(fOS2Look && *hwndFrame) {
         FCData.flCreateFlags = dwOSFrameStyle;
+//        FCData.flCreateFlags = FCF_TITLEBAR|FCF_SYSMENU|FCF_MINMAX;
         WinCreateFrameControls(*hwndFrame, &FCData, NULL);
     }
     hwndClient = WinCreateWindow (*hwndFrame, WIN32_STDCLASS,
@@ -198,7 +199,7 @@ BOOL OSLibWinPositionFrameControls(HWND hwndFrame, RECTLOS2 *pRect, DWORD dwStyl
           pRect->xLeft += swp[i].cx;
           i++;
       }
-      else return; //no titlebar -> no frame controls
+      else return FALSE; //no titlebar -> no frame controls
   }
   if((dwStyle & WS_MINIMIZEBOX_W) || (dwStyle & WS_MAXIMIZEBOX_W) || (dwStyle & WS_SYSMENU_W)) {
       hwndControl = WinWindowFromID(hwndFrame, FID_MINMAX);
@@ -888,6 +889,37 @@ void OSLibSetWindowStyle(HWND hwndFrame, HWND hwndClient, ULONG dwStyle, ULONG d
 
     if(dwWinStyle != dwOldWinStyle) {
          WinSetWindowULong(hwndFrame, QWL_STYLE, dwWinStyle);
+    }
+    if(fOS2Look) {
+        ULONG OSFrameStyle = 0;
+        if((dwStyle & WS_CAPTION_W) == WS_CAPTION_W) {
+            if(WinWindowFromID(hwndFrame, FID_TITLEBAR) == 0) {
+                OSFrameStyle = FCF_TITLEBAR;
+            }
+            if((dwStyle & WS_SYSMENU_W) && !(dwExStyle & WS_EX_TOOLWINDOW_W))
+            {
+                if(WinWindowFromID(hwndFrame, FID_SYSMENU) == 0) {
+                    OSFrameStyle |= FCF_SYSMENU;
+                }
+            }
+            if((dwStyle & WS_MINIMIZEBOX_W) || (dwStyle & WS_MAXIMIZEBOX_W)) {
+                if(WinWindowFromID(hwndFrame, FID_MINMAX) == 0) {
+                    OSFrameStyle |= FCF_MINMAX;
+                }
+            }
+            else
+            if(dwStyle & WS_SYSMENU_W) {
+                if(WinWindowFromID(hwndFrame, FID_MINMAX) == 0) {
+                    OSFrameStyle |= FCF_CLOSEBUTTON;
+                }
+            }
+        }
+        if(OSFrameStyle) {
+            FRAMECDATA FCData = {sizeof (FRAMECDATA), 0, 0, 0};
+
+            FCData.flCreateFlags = OSFrameStyle;
+            WinCreateFrameControls(hwndFrame, &FCData, NULL);
+        }
     }
 }
 //******************************************************************************

@@ -1,4 +1,4 @@
-; $Id: USER32.DEF,v 1.57 2001-06-14 11:30:55 sandervl Exp $
+; $Id: USER32.DEF,v 1.58 2001-06-15 14:07:21 sandervl Exp $
 
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
 DESCRIPTION 'Odin32 System Dll - User32'
@@ -693,4 +693,5 @@ EXPORTS
     _CreateFakeWindowEx@4                                        @2028 NONAME
     _checkOrigin@4                                               @2029 NONAME
 
+    ; Do NOT change this ordinal
     _SetWindowAppearance@4                                       @2030 NONAME
