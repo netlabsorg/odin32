@@ -1,4 +1,4 @@
-/* $Id: d16strat.c,v 1.11 2001-03-02 12:48:41 bird Exp $
+/* $Id: d16strat.c,v 1.12 2001-07-08 02:57:42 bird Exp $
  *
  * d16strat.c - 16-bit strategy routine, device headers, device_helper (ptr)
  *              and 16-bit IOClts.
@@ -38,7 +38,7 @@
 /*******************************************************************************
 *   Global Variables                                                           *
 *******************************************************************************/
-extern DDHDR _far aDevHdrs[2]; 
+extern DDHDR _far aDevHdrs[2];
 DDHDR aDevHdrs[2] = /* This is the first piece data in the driver!!!!!!! */
 {
     {
@@ -92,19 +92,33 @@ USHORT NEAR strategy(PRPH pRpH, unsigned short usDev)
             {
                 if (usDev == 0)
                     return dev0Init((PRPINITIN)pRpH, (PRPINITOUT)pRpH);
-                else
-                    return dev1Init((PRPINITIN)pRpH, (PRPINITOUT)pRpH);
+                return dev1Init((PRPINITIN)pRpH, (PRPINITOUT)pRpH);
             }
             break;
 
         case CMDGenIOCTL:               /* Generic IOCTL */
             if (usDev == 0)
                 return dev0GenIOCtl((PRP_GENIOCTL)pRpH);
-            else
-                return dev1GenIOCtl((PRP_GENIOCTL)pRpH);
+            return dev1GenIOCtl((PRP_GENIOCTL)pRpH);
 
         case CMDOpen:                   /* device open */
         case CMDClose:                  /* device close */
+            if (usDev == 1)
+            {
+                RP32OPENCLOSE rp32OpenClose = {0};
+                rp32OpenClose.rph.Len = pRpH->Len;
+                rp32OpenClose.rph.Unit = pRpH->Unit;
+                rp32OpenClose.rph.Cmd = pRpH->Cmd;
+                rp32OpenClose.rph.Status = pRpH->Status;
+                rp32OpenClose.rph.Flags = pRpH->Flags;
+                rp32OpenClose.rph.Link = (ULONG)pRpH->Link;
+                rp32OpenClose.sfn = ((PRP_OPENCLOSE)pRpH)->sfn;
+                if (pRpH->Cmd == CMDOpen)
+                    return CallWin32kOpen(SSToDS_16a(&rp32OpenClose));
+                return CallWin32kClose(SSToDS_16a(&rp32OpenClose));
+            }
+            return STATUS_DONE;
+
         case CMDDeInstall:              /* De-Install driver */
         case CMDShutdown:
             return STATUS_DONE;
