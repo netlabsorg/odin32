@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.244 1999-09-26 11:12:02 sandervl Exp $ */
+ /* $Id: changelog,v 1.245 1999-09-26 14:44:21 sandervl Exp $ */
 
  99-09-26: Achim Hasenmueller <achimha@innotek.de>
         - COMCTL32: Merged with WINE 990923 changes
@@ -8,8 +8,9 @@
 	- USER32:   Started with standard window scrollbar implementation
                     Rewrote ScrollWindow (not done and not working correctly)
                     Set text bugfix (crash in about dialog box of generic.exe)
-                    Send WM_INITDLG (fixes Options dialog, but Deck dialog is
-                    no longer shown)
+                    Send WM_INITDLG after creation of dialog controls.
+                    Set last error to 0 at end of BeginPaint/EndPaint.
+                    Set last error when window not found (window.cpp/windlg.cpp)
 
  99-09-25: Christoph Bratschi <cbratschi@datacomm.ch>
         - USER32: WS_EX_* 3D frame support for child windows
