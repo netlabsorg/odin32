@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.21 2000-09-04 02:04:20 bird Exp $
+/* $Id: d32init.c,v 1.22 2000-09-04 16:40:49 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -350,17 +350,15 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
     /* heap */
     if (heapInit(options.cbResHeapInit, options.cbResHeapMax,
                  options.cbSwpHeapInit, options.cbSwpHeapMax) != NO_ERROR)
-        return STATUS_DONE | STERR | ERROR_I24_QUIET_INIT_FAIL;
+        return ERROR_D32_HEAPINIT_FAILED;
 
     /* loader */
-    if (!options.fNoLoader)
-        if (ldrInit() != NO_ERROR)
-            return STATUS_DONE | STERR | ERROR_I24_QUIET_INIT_FAIL;
+    if (ldrInit() != NO_ERROR)
+        return ERROR_D32_LDR_INIT_FAILED;
 
     /* functionoverrides */
-    if (!options.fNoLoader)
-        if (importTabInit() != NO_ERROR)
-            return STATUS_DONE | STERR | ERROR_I24_QUIET_INIT_FAIL;
+    if ((rc = importTabInit()) != NO_ERROR)
+        return rc;
 
     /*
      * Lock the 32-bit objects/segments and 16-bit datasegment in memory
@@ -392,7 +390,7 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
     if (rc != NO_ERROR)
         kprintf(("16-bit data segment lock failed with with rc=%d\n", rc));
 
-    return STATUS_DONE;
+    return NO_ERROR;
 }
 
 
@@ -1050,7 +1048,8 @@ int interpretFunctionProlog16(char *pach, BOOL fOverload)
 
 /**
  * Verifies the aImportTab.
- * @returns   0 if ok. !0 if not ok.
+ * @returns   16-bit errorcode where the high byte is the procedure number which
+ *            the error occured on and the low byte the error code.
  * @remark    Called from IOCtl.
  *            WARNING! This function is called before the initroutine (R0INIT)!
  */
@@ -1067,7 +1066,7 @@ USHORT _loadds _Far32 _Pascal VerifyImportTab32(void)
     /* Check that pKrnlOTE is set */
     usRc = GetKernelInfo32(NULL);
     if (usRc != NO_ERROR)
-        return (USHORT)(STATUS_DONE | STERR | (usRc & STECODE));
+        return usRc;
 
     /*
      * Verify aImportTab.
@@ -1089,12 +1088,12 @@ USHORT _loadds _Far32 _Pascal VerifyImportTab32(void)
             else
             {
                 kprintf(("VerifyImportTab32: procedure no.%d was not fFound!\n", i));
-                return STATUS_DONE | STERR | ERROR_D32_PROC_NOT_FOUND;
+                return (USHORT)(ERROR_D32_PROC_NOT_FOUND | (i << ERROR_D32_PROC_SHIFT) | ERROR_D32_PROC_FLAG);
             }
         }
 
         /* Verify read/writeable. */
-        if (aImportTab[i].iObject >= pKrnlSMTE->smte_objcnt                                /* object index valid? */
+        if (   aImportTab[i].iObject >= pKrnlSMTE->smte_objcnt                                /* object index valid? */
             || aImportTab[i].ulAddress < pKrnlOTE[aImportTab[i].iObject].ote_base          /* address valid? */
             || aImportTab[i].ulAddress + 16 > (pKrnlOTE[aImportTab[i].iObject].ote_base +
                                                 pKrnlOTE[aImportTab[i].iObject].ote_size)  /* address valid? */
@@ -1106,7 +1105,7 @@ USHORT _loadds _Far32 _Pascal VerifyImportTab32(void)
                      "                   %s  addr=0x%08x iObj=%d offObj=%d\n",
                      i, &aImportTab[i].achName[0], aImportTab[i].ulAddress,
                      aImportTab[i].iObject, aImportTab[i].offObject));
-            return STATUS_DONE | STERR | ERROR_D32_INVALID_OBJ_OR_ADDR;
+            return (USHORT)(ERROR_D32_INVALID_OBJ_OR_ADDR | (i << ERROR_D32_PROC_SHIFT) | ERROR_D32_PROC_FLAG);
         }
 
 
@@ -1115,7 +1114,7 @@ USHORT _loadds _Far32 _Pascal VerifyImportTab32(void)
         {
             kprintf(("VerifyImportTab32: procedure no.%d has an invalid address, %#08x!\n",
                      i, aImportTab[i].ulAddress));
-            return STATUS_DONE | STERR | ERROR_D32_INVALID_ADDRESS;
+            return (USHORT)(ERROR_D32_INVALID_ADDRESS | (i << ERROR_D32_PROC_SHIFT) | ERROR_D32_PROC_FLAG);
         }
         #endif
 
@@ -1145,7 +1144,7 @@ USHORT _loadds _Far32 _Pascal VerifyImportTab32(void)
                 if (cb <= 0 || cb + cbmin >= MAXSIZE_PROLOG)
                 {   /* failed, too small or too large. */
                     kprintf(("VerifyImportTab32: verify failed for procedure no.%d (cb=%d)\n", i, cb));
-                    return STATUS_DONE | STERR | ERROR_D32_TOO_INVALID_PROLOG;
+                    return (USHORT)(ERROR_D32_TOO_INVALID_PROLOG | (i << ERROR_D32_PROC_SHIFT) | ERROR_D32_PROC_FLAG);
                 }
                 break;
 
@@ -1156,17 +1155,18 @@ USHORT _loadds _Far32 _Pascal VerifyImportTab32(void)
             default:
                 kprintf(("VerifyImportTab32: invalid type/type not implemented\n",i));
                 Int3(); /* temporary fix! */
-                return STATUS_DONE | STERR | ERROR_D32_NOT_IMPLEMENTED;
+                return (USHORT)(ERROR_D32_NOT_IMPLEMENTED | (i << ERROR_D32_PROC_SHIFT) | ERROR_D32_PROC_FLAG);
         }
     }
 
-    return STATUS_DONE;
+    return NO_ERROR;
 }
 
 
 /**
  * Initiates the overrided functions.
- * @returns   NO_ERROR on success. !0 on error.
+ * @returns   16-bit errorcode where the high byte is the procedure number which
+ *            the error occured on and the low byte the error code.
  */
 int importTabInit(void)
 {
@@ -1255,7 +1255,7 @@ int importTabInit(void)
         if (cb <= 0 || cb + cbmin >= MAXSIZE_PROLOG)
         {
             kprintf(("ImportTabInit: Verify failed for procedure no.%d, cb=%d\n", i, cb));
-            return ERROR_D32_VERIFY_FAILED;
+            return ERROR_D32_VERIFY_FAILED | (i << ERROR_D32_PROC_SHIFT) | ERROR_D32_PROC_FLAG;
         }
     }
 
@@ -1301,7 +1301,7 @@ int importTabInit(void)
                 {   /* !fatal! - this could never happen really... */
                     kprintf(("ImportTabInit: FATAL verify failed for procedure no.%d when rehooking it!\n", i));
                     Int3(); /* ipe - later! */
-                    return ERROR_D32_VERIFY_FAILED;
+                    return ERROR_D32_IPE | (i << ERROR_D32_PROC_SHIFT) | ERROR_D32_PROC_FLAG;
                 }
                 break;
             }
@@ -1346,7 +1346,7 @@ int importTabInit(void)
                 {   /* !fatal! - this could never happen really... */
                     kprintf(("ImportTabInit: FATAL verify failed for procedure no.%d when rehooking it!\n", i));
                     Int3(); /* ipe - later! */
-                    return ERROR_D32_VERIFY_FAILED;
+                    return ERROR_D32_IPE | (i << ERROR_D32_PROC_SHIFT) | ERROR_D32_PROC_FLAG;
                 }
                 break;
             }
@@ -1374,7 +1374,7 @@ int importTabInit(void)
                 {   /* !fatal! - this should never really happen... */
                     kprintf(("ImportTabInit: FATAL verify failed for procedure no.%d when importing it!\n", i));
                     Int3(); /* ipe - later! */
-                    return ERROR_D32_VERIFY_FAILED;
+                    return ERROR_D32_IPE | (i << ERROR_D32_PROC_SHIFT) | ERROR_D32_PROC_FLAG;
                 }
                 break;
             }
@@ -1402,7 +1402,7 @@ int importTabInit(void)
                 {   /* !fatal! - this should never really happen... */
                     kprintf(("ImportTabInit: FATAL verify failed for procedure no.%d when importing it!\n", i));
                     Int3(); /* ipe - later! */
-                    return ERROR_D32_VERIFY_FAILED;
+                    return ERROR_D32_IPE | (i << ERROR_D32_PROC_SHIFT) | ERROR_D32_PROC_FLAG;
                 }
                 break;
             }
@@ -1429,7 +1429,7 @@ int importTabInit(void)
             default:
                 kprintf(("ImportTabInit: unsupported type. (procedure no.%d, cb=%d)\n", i, cb));
                 Int3(); /* ipe - later! */
-                return ERROR_D32_VERIFY_FAILED;
+                return ERROR_D32_IPE | (i << ERROR_D32_PROC_SHIFT) | ERROR_D32_PROC_FLAG;
         } /* switch - type */
     }   /* for */
 
