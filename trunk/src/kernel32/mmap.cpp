@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.58 2002-07-15 14:28:51 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.59 2002-07-23 13:51:47 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -433,7 +433,7 @@ LPVOID Win32MemMap::mapViewOfFile(ULONG size, ULONG offset, ULONG fdwAccess)
             commitPage(0, FALSE, nrPages);
         }
     }
-    mapview = new Win32MemMapView(this, offset, (size == 0) ? mSize : size, fdwAccess);
+    mapview = new Win32MemMapView(this, offset, (size == 0) ? (mSize - offset) : size, fdwAccess);
     if(mapview == NULL) {
         goto fail;
     }

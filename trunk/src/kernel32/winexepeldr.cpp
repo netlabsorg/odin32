@@ -1,4 +1,4 @@
-/* $Id: winexepeldr.cpp,v 1.18 2002-07-23 13:25:34 sandervl Exp $ */
+/* $Id: winexepeldr.cpp,v 1.19 2002-07-23 13:51:48 sandervl Exp $ */
 
 /*
  * Win32 PE loader Exe class
@@ -134,7 +134,7 @@ BOOL WIN32API CreateWin32PeLdrExe(char *szFileName, char *szCmdLine,
   }
 
   OS2SetExceptionHandler(&exceptFrame);
-  if(WinExe->init(reservedMem) == FALSE) 
+  if(WinExe->init(reservedMem, ulPEOffset) == FALSE) 
   {
 	if(szErrorModule[0] != 0) {
    	        char szErrorMsg[128];
@@ -181,15 +181,6 @@ Win32PeLdrExe::Win32PeLdrExe(char *szFileName, BOOL fConsoleApp) :
 Win32PeLdrExe::~Win32PeLdrExe()
 {
     fExitProcess = TRUE;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL Win32PeLdrExe::init(ULONG reservedMem)
-{
- BOOL rc;
-
-  rc = Win32PeLdrImage::init(reservedMem);
-  return rc;
 }
 //******************************************************************************
 //******************************************************************************

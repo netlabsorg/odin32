@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.h,v 1.16 2001-06-06 10:01:48 phaller Exp $ */
+/* $Id: winimagepeldr.h,v 1.17 2002-07-23 13:51:49 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -75,10 +75,11 @@ public:
          Win32PeLdrImage(char *szFileName, BOOL isExe);
 virtual ~Win32PeLdrImage();
 
-        //reservedMem is address of memory reserved in peldr.dll (allocated before
-        //any dlls are loaded, so that exes without fixups can be loaded at a low
-        //address)
-    virtual BOOL  init(ULONG reservedMem);
+    //reservedMem: address of memory reserved in peldr.dll (allocated before
+    //             any dlls are loaded, so that exes without fixups can be 
+    //             loaded at a low address)
+    //ulPEOffset:  offset in file where real PE image starts
+    virtual BOOL  init(ULONG reservedMem, ULONG ulPEOffset = 0);
 
     virtual BOOL  insideModule(ULONG address);
     virtual BOOL  insideModuleCode(ULONG address);
@@ -138,6 +139,9 @@ Win32DllBase *loadDll(char *pszCurModule);
         //OS/2 virtual base address
         ULONG                 realBaseAddress;
         Section               *section;
+
+        //offset in executable image where real PE file starts (default 0)
+        ULONG                 ulPEOffset;
 
         //internal flags (see FLAGS_PELDR_*)
 	DWORD                 dwFlags;
