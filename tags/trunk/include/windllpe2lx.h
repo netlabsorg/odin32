@@ -1,4 +1,4 @@
-/* $Id: windllpe2lx.h,v 1.2 1999-10-14 01:39:12 bird Exp $ */
+/* $Id: windllpe2lx.h,v 1.3 1999-10-17 01:52:19 bird Exp $ */
 
 /*
  * Win32 PE2LX Dll class
@@ -15,12 +15,18 @@
 #include <windllbase.h>
 #include <winimagepe2lx.h>
 
+/**
+ * Pe2Lx Dll images.
+ * @author      knut st. osmundsen
+ * @approval    -
+ */
 class Win32Pe2LxDll : public Win32Pe2LxImage, public Win32DllBase
 {
 public:
     /** @cat Constructor/Destructor */
     Win32Pe2LxDll(HINSTANCE hinstance, BOOL fWin32k) throw(ULONG);
     virtual ~Win32Pe2LxDll();
+    BOOL     init();
 
     /** @cat Exports */
     virtual ULONG getApi(char *name);

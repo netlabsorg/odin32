@@ -1,4 +1,4 @@
-/* $Id: winexepe2lx.h,v 1.2 1999-10-14 01:39:13 bird Exp $ */
+/* $Id: winexepe2lx.h,v 1.3 1999-10-17 01:52:19 bird Exp $ */
 
 /*
  * Win32 PE2LX Exe class
@@ -26,8 +26,9 @@ class Win32Pe2LxExe : public Win32Pe2LxImage, public Win32ExeBase
 {
 public:
     /** @cat Constructor/Destructor */
-    Win32Pe2LxExe(HINSTANCE hinstance, BOOL fWin32k) throw(ULONG);
+    Win32Pe2LxExe(HINSTANCE hinstance, BOOL fWin32k);
     virtual ~Win32Pe2LxExe();
+    BOOL init();
 };
 
 
