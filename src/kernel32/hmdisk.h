@@ -1,4 +1,4 @@
-/* $Id: hmdisk.h,v 1.3 2001-04-26 13:22:45 sandervl Exp $ */
+/* $Id: hmdisk.h,v 1.4 2001-06-16 16:10:12 sandervl Exp $ */
 
 #ifndef __HMDISK_H__
 #define __HMDISK_H__
@@ -30,6 +30,19 @@ public:
                              PHMHANDLEDATA pHMHandleDataTemplate);
 
   virtual BOOL   CloseHandle(PHMHANDLEDATA pHMHandleData);
+
+  /* this is a handler method for calls to ReadFile() */
+  virtual BOOL   ReadFile   (PHMHANDLEDATA pHMHandleData,
+                             LPCVOID       lpBuffer,
+                             DWORD         nNumberOfBytesToRead,
+                             LPDWORD       lpNumberOfBytesRead,
+                             LPOVERLAPPED  lpOverlapped);
+
+  /* this is a handler method for calls to SetFilePointer() */
+  virtual DWORD SetFilePointer(PHMHANDLEDATA pHMHandleData,
+                               LONG          lDistanceToMove,
+                               PLONG         lpDistanceToMoveHigh,
+                               DWORD         dwMoveMethod);
 
   /* this is a handler method for calls to DeviceIoControl() */
   virtual BOOL   DeviceIoControl    (PHMHANDLEDATA pHMHandleData, DWORD dwIoControlCode,
