@@ -1,4 +1,21 @@
- /* $Id: changelog,v 1.1069 2000-08-14 19:17:03 sandervl Exp $ */
+ /* $Id: changelog,v 1.1070 2000-08-16 08:03:32 sandervl Exp $ */
+
+ 2000-08-16: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: Changed search order for resource languages:
+                According to Wine:
+                FindResourceA/W does search in the following order:
+                1. Neutral language with neutral sublanguage
+                2. Neutral language with default sublanguage
+                3. Current locale lang id
+                4. Current locale lang id with neutral sublanguage
+                5. (!) LANG_ENGLISH, SUBLANG_DEFAULT
+                6. Return first in the list
+                FindResourceExA/W does search in the following order:
+                1. Exact specified language
+                2. Language with neutral sublanguage
+                3. Neutral language with neutral sublanguage
+                4. Neutral language with default sublanguage
+                (fixes bad string in PowerDVD)
 
  2000-08-14: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: Fixed sharing violation errors in OSLibDosCreateFile
