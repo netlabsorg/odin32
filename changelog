@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1932 2001-12-30 21:27:36 bird Exp $ */
+/* $Id: changelog,v 1.1933 2001-12-30 22:18:17 sandervl Exp $ */
   
  2001-12-31: knut st. osmundsen <bird@anduin.net>
     - Tools/CmdQd:
@@ -10,6 +10,9 @@
                   determine maximum file name length
     - USER32:   o Enforce WS_EX_WINDOWEDGE style (Wine)
                   (fixes Opera 6 menu)
+    - GDI32:    o BitBlt, StretchBlt: sync dib section if selected into 
+                  destination HDC
+                  (fixes Opera 6 background)
 
  2001-12-28: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Do not send WM_SETCURSOR when mouse is captured (SDK docs)
