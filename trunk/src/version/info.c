@@ -1,4 +1,4 @@
-/* $Id: info.c,v 1.3 2001-04-04 09:02:15 sandervl Exp $ */
+/* $Id: info.c,v 1.4 2003-01-15 10:42:34 sandervl Exp $ */
 /* 
  * Implementation of VERSION.DLL - Version Info access (Wine 991212)
  * 
@@ -407,7 +407,11 @@ VS_VERSION_INFO_STRUCT32 *VersionInfo32_FindChild( VS_VERSION_INFO_STRUCT32 *inf
 
     while ( (DWORD)child < (DWORD)info + info->wLength )
     {
-        if ( !CRTDLL__wcsnicmp( child->szKey, szKey, cbKey ) )
+#ifdef __WIN32OS2__
+        if ( !lstrncmpiW( child->szKey, szKey, cbKey ) )
+#else
+        if ( !CRTDLL_wcsnicmp( child->szKey, szKey, cbKey ) )
+#endif
             return child;
 
         child = VersionInfo32_Next( child );
