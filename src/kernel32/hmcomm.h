@@ -1,4 +1,4 @@
-/* $Id: hmcomm.h,v 1.2 1999-11-26 08:18:15 achimha Exp $ */
+/* $Id: hmcomm.h,v 1.3 1999-11-26 21:10:52 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -12,9 +12,22 @@
 #ifndef _HM_COMM_H_
 #define _HM_COMM_H_
 
-class HMDeviceCommHandler : public HMDeviceHandler
+class HMDeviceCommClass : public HMDeviceHandler
 {
-
+  public:
+    HMDeviceCommClass(LPCSTR lpDeviceName) : HMDeviceHandler(lpDeviceName) {}
+  
+  /* @@@PH here go the API methods
+  virtual DWORD CreateEvent (PHMHANDLEDATA         pHMHandleData,
+                             LPSECURITY_ATTRIBUTES lpsa,
+                             BOOL                  fManualReset,
+                             BOOL                  fInitialState,
+                             LPCTSTR               lpszEventName);
+                             
+  - strings are ASCII
+  - HANDLEs are translated to a PHMHANDLEDATA pointer
+                             
+  */
 
 };
 

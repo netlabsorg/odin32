@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.26 1999-11-22 20:35:49 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.27 1999-11-26 21:10:51 phaller Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -54,6 +54,7 @@
 #include "HMMutex.h"
 #include "HMSemaphore.h"
 #include "HMMMap.h"
+#include "HMComm.h"
 #include <winconst.h>
 
 /*****************************************************************************
@@ -119,7 +120,8 @@ struct _HMGlobals
   HMDeviceHandler        *pHMEvent;        /* static instances of subsystems */
   HMDeviceHandler        *pHMMutex;
   HMDeviceHandler        *pHMSemaphore;
-  HMDeviceHandler        *pHMFileMapping;        /* static instances of subsystems */
+  HMDeviceHandler        *pHMFileMapping;  /* static instances of subsystems */
+  HMDeviceHandler        *pHMComm;                   /* serial communication */
 
   ULONG         ulHandleLast;                   /* index of last used handle */
 } HMGlobals;
@@ -317,7 +319,8 @@ DWORD HMInitialize(void)
     HMGlobals.pHMEvent      = new HMDeviceEventClass("\\\\EVENT\\");
     HMGlobals.pHMMutex      = new HMDeviceMutexClass("\\\\MUTEX\\");
     HMGlobals.pHMSemaphore  = new HMDeviceSemaphoreClass("\\\\SEM\\");
-    HMGlobals.pHMFileMapping = new HMDeviceMemMapClass("\\\\MEMMAP\\");
+    HMGlobals.pHMFileMapping= new HMDeviceMemMapClass("\\\\MEMMAP\\");
+    HMGlobals.pHMComm       = new HMDeviceCommClass("\\\\COM\\");
   }
   return (NO_ERROR);
 }
@@ -344,6 +347,7 @@ DWORD HMTerminate(void)
   delete HMGlobals.pHMMutex;
   delete HMGlobals.pHMSemaphore;
   delete HMGlobals.pHMFileMapping;
+  delete HMGlobals.pHMComm;
 
   return (NO_ERROR);
 }
