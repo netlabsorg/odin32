@@ -1,4 +1,4 @@
-# $Id: pdwin32.vac3.post,v 1.4 2000-11-19 08:31:20 bird Exp $
+# $Id: pdwin32.vac3.post,v 1.5 2000-11-19 23:53:47 bird Exp $
 #
 # Odin32 API
 #
@@ -131,8 +131,10 @@ $(OBJDIR)\$(TARGET).lrf: $(MAKEFILE)
     @echo Creating file <<$@
 /OUT:$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
 /MAP:$(OBJDIR)\$(TARGET).map
-$(OBJS)
-$(LIBS)
+$(OBJS:  =^
+)
+$(LIBS:  =^
+)
 $(DEFFILE)
 <<keep
 !endif
@@ -184,8 +186,11 @@ $(OBJDIR)\$(TARGET).lrf: $(MAKEFILE)
     @echo Creating file <<$@
 /OUT:$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
 /MAP:$(OBJDIR)\$(TARGET).map
-$(OBJS)
-$(LIBS) $(DEFFILE)
+$(OBJS:  =^
+)
+$(LIBS:  =^
+)
+$(DEFFILE)
 <<keep
 !endif
 
@@ -235,7 +240,7 @@ libs: all
 $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS)
     $(RM) $@
     $(ILIB) $(ILIBFLAGS) $@ @<<
-$(OBJS:  = &^
+$(OBJS:  =&^
 )
 $(OBJDIR)\$(@B).lst
 <<
@@ -284,6 +289,7 @@ $(INTLIBS):
 # Common: Copy library rule.
 #
 $(PDWIN32_LIB)\$(ORGTARGET).lib: $(ORGTARGET).lib
+    @if not exist $(@D) $(CREATEPATH) $(@D)
     $(CP) $** $@
 
 
@@ -291,6 +297,7 @@ $(PDWIN32_LIB)\$(ORGTARGET).lib: $(ORGTARGET).lib
 # Common: Copy dll/exe rule.
 #
 $(PDWIN32_BIN)\$(TARGET).$(TARGET_EXTENSION): $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
+    @if not exist $(@D) $(CREATEPATH) $(@D)
     $(CP) $** $@
 !ifndef NO_MAIN_BIN_COPY
     -$(CP) $** $(@D)..\..\$(@F)
@@ -301,6 +308,7 @@ $(PDWIN32_BIN)\$(TARGET).$(TARGET_EXTENSION): $(OBJDIR)\$(TARGET).$(TARGET_EXTEN
 # Common: Copy sym rule.
 #
 $(PDWIN32_BIN)\$(TARGET).sym: $(OBJDIR)\$(TARGET).sym
+    @if not exist $(@D) $(CREATEPATH) $(@D)
     $(CP) $** $@
 !ifndef NO_MAIN_BIN_COPY
     -$(CP) $** $(@D)..\..\$(@F)
@@ -341,8 +349,7 @@ $(ORGTARGET)exp.def: $(DEFFILE)
 # Common: Create the object directory.
 #
 $(OBJDIR):
-    @if not exist bin $(MKDIR) bin
-    @if not exist $(OBJDIR) $(MKDIR) $(OBJDIR)
+    @if not exist $(OBJDIR) $(CREATEPATH) $(OBJDIR)
 
 
 #
