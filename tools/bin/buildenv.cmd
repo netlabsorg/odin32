@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.13 2002-06-22 15:46:59 bird Exp $
+/* $Id: buildenv.cmd,v 1.14 2002-08-18 13:29:20 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -13,11 +13,16 @@
  *       those the original value, for example of no_NO, is not restored.
  *     - Same goes for some other stuff, we have no stack of previous values.
  */
-
+    
     Address CMD '@echo off';
 
     signal on novalue name NoValueHandler
 
+    /*
+     * Version
+     */
+    sVersion = '1.0.1 [2002-08-18]';
+    
     /*
      * Create argument array with lowercase arguments.
      */
@@ -30,6 +35,41 @@
     end
     sEnv.0 = i - 1;
 
+    /*
+     * Syntax
+     */
+    if (sEnv.0 = 0) then 
+    do
+        say 'BuildEnv v'||sVersion
+        say '-------------------------------'
+        say ''
+        say 'Synopsis: Environment configuration utility written to maintain'
+        say 'many different versions of compilers and toolkits on the same'
+        say 'workstation. '
+        say ''
+        say 'Syntax: BuildEnv.cmd <environments>[action]'
+        say ''
+        say 'Actions:'
+        say '   +   Install tools in environment. Default action.'
+        say '   -   Remove tools from environment.'
+        say '   *   Configure tool if needed.'
+        say '   !   Forced tool configuretion.'
+        say '   @   Verify tool configuration.'
+        say '   ?   Query if a tool is configured.'
+        say ''
+        say 'Special environments (commands):'
+        say '   allconfig       Configure all tools which fails verify.'
+        say '   allreconfig     Reconfigure all tools.'
+        say '   allverify       Verify all configured tools.'
+        say '   alluninstall    Removed all configured tools from environment.'
+        say '   showall         Show all tools.'
+        say '   showconfigured  Show all configured tools.'
+        say '   shownotconfigured   Show all tools which isn''t configured.'
+        say ''
+        say 'Copyright (c) 1999-2002 knut st. osmundsen'
+        say 'Published under GPL v2'
+        return 8;
+    end
 
     /*
      * Load REXX Util Functions.
@@ -131,14 +171,6 @@
             /*
              * Multi tool operations.
              */
-            when (sEnv.i = 'allconfig') then do
-                do j = 1 to aCfg.0
-                    rc = CfgConfigure(j, 0);
-                    if (rc >= 8) then
-                        exit(rc);
-                end
-            end
-
             when (sEnv.i = 'allconfig') then do
                 do j = 1 to aCfg.0
                     if (CfgVerify(j, 0, 1) <> 0) then
@@ -2228,6 +2260,7 @@ Python: procedure expose aCfg. aPath. sPathFile
     rc = CheckCmdOutput('echo print "hello world" | python', 0, fQuiet, 'hello world');
 return rc;
 
+ 
 
 /*
  * OS/2 Programmers Toolkit v4.0 (CSD1/4)
