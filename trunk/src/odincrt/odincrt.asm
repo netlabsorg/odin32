@@ -1,4 +1,4 @@
-; $Id: odincrt.asm,v 1.3 1999-12-01 18:41:46 sandervl Exp $
+; $Id: odincrt.asm,v 1.4 2002-09-19 09:38:27 sandervl Exp $
 
 ;/*
 ; * Project Odin Software License can be found in LICENSE.TXT
@@ -16,6 +16,10 @@
 CODE32          SEGMENT DWORD PUBLIC USE32 'CODE'
                 ASSUME  DS:FLAT, SS:FLAT
 
+IFDEF DEBUG
+                EXTRN _delete_free:NEAR
+                EXTRN _new_alloc:NEAR
+ENDIF
                 PUBLIC  __threadid 
 __threadid proc near
 	push    ebp
@@ -42,6 +46,13 @@ os2__nw__FUiPCcT1 proc near
 	mov	ax, 150bh
 	mov	fs, ax
 	pop	eax
+IFDEF DEBUG
+        pushad
+        push    eax
+        call    _new_alloc
+        add     esp, 4
+        popad
+ENDIF
 	sub	esp, 0Ch
 	call	__nw__FUiPCcT1
 	add	esp, 0Ch	
@@ -60,6 +71,13 @@ os2__dl__FPvPCcUi proc near
 	mov	ax, 150bh
 	mov	fs, ax
 	pop	eax
+IFDEF DEBUG
+        pushad
+        push    eax
+        call    _delete_free
+        add     esp, 4
+        popad
+ENDIF
 	sub	esp, 0Ch
 	call	__dl__FPvPCcUi
 	add	esp, 0Ch	
