@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.24 2000-03-16 19:20:40 sandervl Exp $ */
+/* $Id: thread.cpp,v 1.25 2000-04-18 20:06:38 sandervl Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -131,6 +131,8 @@ DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
   Win32DllBase::tlsAttachThreadToAllDlls(); //setup TLS structures of all dlls
   Win32DllBase::attachThreadToAllDlls();	  //send DLL_THREAD_ATTACH message to all dlls
 
+  //Set default FPU control word (no exceptions); same as in NT
+  _control87(0x27F, 0xFFF);
   rc = winthread(userdata);
 
   HMSetThreadTerminated(GetCurrentThread());
