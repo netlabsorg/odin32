@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.29 1999-12-26 17:30:17 cbratschi Exp $ */
+/* $Id: scroll.cpp,v 1.30 1999-12-28 17:04:23 cbratschi Exp $ */
 /*
  * Scrollbar control
  *
@@ -665,7 +665,7 @@ LRESULT SCROLL_Create(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   CREATESTRUCTA *lpCreat = (CREATESTRUCTA *)lParam;
 
-  if (!(lpCreat->style & (SBS_SIZEBOX | SBS_SIZEGRIP)) && lpCreat->style & (SBS_LEFTALIGN | SBS_RIGHTALIGN))
+  if (!(lpCreat->style & (SBS_SIZEBOX | SBS_SIZEGRIP)) && (lpCreat->style & (SBS_LEFTALIGN | SBS_RIGHTALIGN)))
   {
     if (lpCreat->style & SBS_VERT)
     {
@@ -792,7 +792,7 @@ LRESULT SCROLL_HandleScrollEvent(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar,
         }
         SCROLL_Scrolling = TRUE;
         timerRunning = FALSE;
-        if (SCROLL_FocusWin == hwnd && SCROLL_Highlighted)
+        if ((SCROLL_FocusWin == hwnd) && SCROLL_Highlighted)
         {
           hdc = GetDC(hwnd);
           SCROLL_DrawScrollBar(hwnd,hdc,nBar,FALSE,TRUE);
@@ -891,9 +891,9 @@ LRESULT SCROLL_HandleScrollEvent(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar,
         break;
 
       case SCROLL_TOP_ARROW:
-        if (msg == WM_LBUTTONUP || msg == WM_CAPTURECHANGED)
+        if ((msg == WM_LBUTTONUP) || (msg == WM_CAPTURECHANGED))
           KillSystemTimer(hwnd,SCROLL_TIMER);
-        else if (msg == WM_LBUTTONDOWN || (!timerRunning && msg == WM_SYSTIMER))
+        else if ((msg == WM_LBUTTONDOWN) || (!timerRunning && msg == WM_SYSTIMER))
         {
           SetSystemTimer( hwnd, SCROLL_TIMER, (msg == WM_LBUTTONDOWN) ?
                           SCROLL_FIRST_DELAY : SCROLL_REPEAT_DELAY,
@@ -901,20 +901,20 @@ LRESULT SCROLL_HandleScrollEvent(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar,
           if (msg != WM_LBUTTONDOWN) timerRunning = TRUE;
         }
 
-        if (msg == WM_LBUTTONDOWN || SCROLL_lastHitTest != hittest)
+        if ((msg == WM_LBUTTONDOWN) || (SCROLL_lastHitTest != hittest))
         {
           SCROLL_DrawTopArrow(hdc,infoPtr,&rect,arrowSize,vertical,(hittest == SCROLL_trackHitTest));
           SCROLL_lastHitTest = hittest;
         }
-        if (hittest == SCROLL_trackHitTest && (msg == WM_LBUTTONDOWN || msg == WM_SYSTIMER))
+        if ((hittest == SCROLL_trackHitTest) && ((msg == WM_LBUTTONDOWN) || (msg == WM_SYSTIMER)))
           SendMessageA(hwndOwner,vertical ? WM_VSCROLL:WM_HSCROLL,SB_LINEUP,hwndCtl);
 
         break;
 
       case SCROLL_TOP_RECT:
-        if (msg == WM_LBUTTONUP || msg == WM_CAPTURECHANGED)
+        if ((msg == WM_LBUTTONUP) || (msg == WM_CAPTURECHANGED))
           KillSystemTimer(hwnd,SCROLL_TIMER);
-        else if (msg == WM_LBUTTONDOWN || (!timerRunning && msg == WM_SYSTIMER))
+        else if ((msg == WM_LBUTTONDOWN) || (!timerRunning && (msg == WM_SYSTIMER)))
         {
           SetSystemTimer( hwnd, SCROLL_TIMER, (msg == WM_LBUTTONDOWN) ?
                           SCROLL_FIRST_DELAY : SCROLL_REPEAT_DELAY,
@@ -922,7 +922,7 @@ LRESULT SCROLL_HandleScrollEvent(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar,
           if (msg != WM_LBUTTONDOWN) timerRunning = TRUE;
         }
 
-        if (msg == WM_LBUTTONDOWN || SCROLL_lastHitTest != hittest)
+        if ((msg == WM_LBUTTONDOWN) || (SCROLL_lastHitTest != hittest))
         {
           SCROLL_DrawInterior( hwnd, hdc, nBar, &rect, arrowSize, thumbSize,
                              thumbPos, infoPtr->flags, vertical,
@@ -930,7 +930,7 @@ LRESULT SCROLL_HandleScrollEvent(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar,
           SCROLL_lastHitTest = hittest;
         }
 
-        if (hittest == SCROLL_trackHitTest && (msg == WM_LBUTTONDOWN || msg == WM_SYSTIMER))
+        if ((hittest == SCROLL_trackHitTest) && ((msg == WM_LBUTTONDOWN) || (msg == WM_SYSTIMER)))
           SendMessageA(hwndOwner,vertical ? WM_VSCROLL:WM_HSCROLL,SB_PAGEUP,hwndCtl);
 
         break;
@@ -945,7 +945,7 @@ LRESULT SCROLL_HandleScrollEvent(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar,
             SCROLL_MovingThumb = TRUE;
             thumbTrackSent = FALSE;
             SCROLL_DrawMovingThumb(hdc, &rect, vertical, arrowSize, thumbSize);
-        } else if (msg == WM_LBUTTONUP || msg == WM_CAPTURECHANGED)
+        } else if ((msg == WM_LBUTTONUP) || (msg == WM_CAPTURECHANGED))
         {
           UINT val;
           INT oldPos = infoPtr->CurVal;
@@ -956,7 +956,7 @@ LRESULT SCROLL_HandleScrollEvent(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar,
           val = SCROLL_GetThumbVal( infoPtr, &rect, vertical,
                                     trackThumbPos + lastMousePos - lastClickPos );
 
-          if (val != infoPtr->CurVal || thumbTrackSent)
+          if ((val != infoPtr->CurVal) || thumbTrackSent)
             SendMessageA( hwndOwner, vertical ? WM_VSCROLL : WM_HSCROLL,
                           MAKEWPARAM( SB_THUMBPOSITION, val ), hwndCtl );
 
@@ -999,9 +999,9 @@ LRESULT SCROLL_HandleScrollEvent(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar,
         break;
 
       case SCROLL_BOTTOM_RECT:
-        if (msg == WM_LBUTTONUP || msg == WM_CAPTURECHANGED)
+        if ((msg == WM_LBUTTONUP) || (msg == WM_CAPTURECHANGED))
           KillSystemTimer(hwnd,SCROLL_TIMER);
-        else if (msg == WM_LBUTTONDOWN || (!timerRunning && msg == WM_SYSTIMER))
+        else if ((msg == WM_LBUTTONDOWN) || (!timerRunning && (msg == WM_SYSTIMER)))
         {
           SetSystemTimer( hwnd, SCROLL_TIMER, (msg == WM_LBUTTONDOWN) ?
                           SCROLL_FIRST_DELAY : SCROLL_REPEAT_DELAY,
@@ -1009,7 +1009,7 @@ LRESULT SCROLL_HandleScrollEvent(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar,
           if (msg != WM_LBUTTONDOWN) timerRunning = TRUE;
         }
 
-        if (msg == WM_LBUTTONDOWN || SCROLL_lastHitTest != hittest)
+        if ((msg == WM_LBUTTONDOWN) || (SCROLL_lastHitTest != hittest))
         {
           SCROLL_DrawInterior( hwnd, hdc, nBar, &rect, arrowSize, thumbSize,
                                thumbPos, infoPtr->flags, vertical,
@@ -1017,15 +1017,15 @@ LRESULT SCROLL_HandleScrollEvent(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar,
           SCROLL_lastHitTest = hittest;
         }
 
-        if (hittest == SCROLL_trackHitTest && (msg == WM_LBUTTONDOWN || msg == WM_SYSTIMER))
+        if ((hittest == SCROLL_trackHitTest) && ((msg == WM_LBUTTONDOWN) || (msg == WM_SYSTIMER)))
           SendMessageA(hwndOwner,vertical ? WM_VSCROLL:WM_HSCROLL,SB_PAGEDOWN,hwndCtl);
 
         break;
 
       case SCROLL_BOTTOM_ARROW:
-        if (msg == WM_LBUTTONUP || msg == WM_CAPTURECHANGED)
+        if ((msg == WM_LBUTTONUP) || (msg == WM_CAPTURECHANGED))
           KillSystemTimer(hwnd,SCROLL_TIMER);
-        else if (msg == WM_LBUTTONDOWN || (!timerRunning && msg == WM_SYSTIMER))
+        else if ((msg == WM_LBUTTONDOWN) || (!timerRunning && (msg == WM_SYSTIMER)))
         {
           SetSystemTimer( hwnd, SCROLL_TIMER, (msg == WM_LBUTTONDOWN) ?
                           SCROLL_FIRST_DELAY : SCROLL_REPEAT_DELAY,
@@ -1033,18 +1033,18 @@ LRESULT SCROLL_HandleScrollEvent(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar,
           if (msg != WM_LBUTTONDOWN) timerRunning = TRUE;
         }
 
-        if (msg == WM_LBUTTONDOWN || SCROLL_lastHitTest != hittest)
+        if ((msg == WM_LBUTTONDOWN) || (SCROLL_lastHitTest != hittest))
         {
           SCROLL_DrawBottomArrow(hdc,infoPtr,&rect,arrowSize,vertical,(hittest == SCROLL_trackHitTest));
           SCROLL_lastHitTest = hittest;
         }
-        if (hittest == SCROLL_trackHitTest && (msg == WM_LBUTTONDOWN || msg == WM_SYSTIMER))
+        if ((hittest == SCROLL_trackHitTest) && ((msg == WM_LBUTTONDOWN) || (msg == WM_SYSTIMER)))
           SendMessageA(hwndOwner,vertical ? WM_VSCROLL:WM_HSCROLL,SB_LINEDOWN,hwndCtl);
 
         break;
     }
 
-    if (msg == WM_LBUTTONUP || msg == WM_CAPTURECHANGED)
+    if ((msg == WM_LBUTTONUP) || (msg == WM_CAPTURECHANGED))
     {
       SCROLL_trackHitTest = SCROLL_NOWHERE;  /* Terminate tracking */
 
@@ -1668,7 +1668,7 @@ BOOL WINAPI EnableScrollBar( HWND hwnd, INT nBar, UINT flags)
     {
       BOOL rc = FALSE;
 
-      if ((nBar == SB_VERT || nBar == SB_BOTH) && window->getStyle() & WS_VSCROLL)
+      if (((nBar == SB_VERT) || (nBar == SB_BOTH)) && (window->getStyle() & WS_VSCROLL))
       {
         HWND hwndScroll =  Win32BaseWindow::OS2ToWin32Handle(window->getVertScrollHandle());
 
@@ -1684,7 +1684,7 @@ BOOL WINAPI EnableScrollBar( HWND hwnd, INT nBar, UINT flags)
           rc = TRUE;
         }
       }
-      if ((nBar == SB_HORZ || (rc && nBar == SB_BOTH)) && window->getStyle() & WS_HSCROLL)
+      if (((nBar == SB_HORZ) || (rc && (nBar == SB_BOTH))) && (window->getStyle() & WS_HSCROLL))
       {
         HWND hwndScroll =  Win32BaseWindow::OS2ToWin32Handle(window->getHorzScrollHandle());
 
@@ -1712,7 +1712,7 @@ BOOL WINAPI EnableScrollBar( HWND hwnd, INT nBar, UINT flags)
 
 BOOL WINAPI GetScrollBarInfo(HWND hwnd,LONG idObject,PSCROLLBARINFO psbi)
 {
-  if (!psbi || psbi->cbSize != sizeof(SCROLLBARINFO))
+  if (!psbi || (psbi->cbSize != sizeof(SCROLLBARINFO)))
   {
     SetLastError(ERROR_INVALID_PARAMETER);
 
