@@ -1,4 +1,4 @@
-/* $Id: probkrnl.h,v 1.12 2000-04-05 18:40:42 bird Exp $
+/* $Id: probkrnl.h,v 1.13 2000-04-17 01:56:49 bird Exp $
  *
  * Include file for ProbKrnl.
  *
@@ -15,9 +15,9 @@
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
 *******************************************************************************/
-#define NBR_OF_KRNLIMPORTS      17      /* When this is changed make sure to   */
+#define NBR_OF_KRNLIMPORTS      18      /* When this is changed make sure to   */
                                         /* update the arrays in d32init.c and  */
-                                        /* probkrnl32.c */
+                                        /* probkrnl.c */
 #define MAX_LENGTH_NAME         32      /* Max length for the function. */
 
 /* Entry-Point Type flag */
