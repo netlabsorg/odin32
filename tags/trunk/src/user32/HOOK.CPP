@@ -1,4 +1,4 @@
-/* $Id: HOOK.CPP,v 1.15 2000-10-05 13:47:06 sandervl Exp $ */
+/* $Id: HOOK.CPP,v 1.16 2000-11-21 11:36:07 sandervl Exp $ */
 
 /*
  * Windows hook functions
@@ -239,11 +239,11 @@ static HANDLE HOOK_GetHook( INT id, DWORD threadId )
 {
   MESSAGEQUEUE *queue;
   HANDLE hook = 0;
-  THDB *thdb;
+  TEB *teb;
 
-    thdb = GetTHDBFromThreadId(threadId);
-    if(thdb) {
-        hook = thdb->hooks[id - WH_MINHOOK];
+    teb = GetTEBFromThreadId(threadId);
+    if(teb) {
+        hook = teb->o.odin.hooks[id - WH_MINHOOK];
     }
     if (!hook) hook = HOOK_systemHooks[id - WH_MINHOOK];
 
@@ -260,7 +260,7 @@ static HHOOK HOOK_SetHook( INT id, LPVOID proc, INT type,
                            HMODULE hModule, DWORD dwThreadId )
 {
   HOOKDATA *data;
-  THDB     *thdb;
+  TEB      *teb;
 
     if ((id < WH_MINHOOK) || (id > WH_MAXHOOK) || !proc )
     {
@@ -300,14 +300,14 @@ static HHOOK HOOK_SetHook( INT id, LPVOID proc, INT type,
     /* Insert it in the correct linked list */
     if(dwThreadId)
     {
-        thdb = GetTHDBFromThreadId(dwThreadId);
-        if(!thdb) {
+        teb = GetTEBFromThreadId(dwThreadId);
+        if(!teb) {
                 dprintf(("HOOK_SetHook: can't find thread database for thread %x", dwThreadId));
                 return 0;
         }
         threadHookMutex.enter();
-        data->next = thdb->hooks[id - WH_MINHOOK];
-        thdb->hooks[id - WH_MINHOOK] = (DWORD)data;
+        data->next = teb->o.odin.hooks[id - WH_MINHOOK];
+        teb->o.odin.hooks[id - WH_MINHOOK] = (DWORD)data;
         threadHookMutex.leave();
     }
     else
@@ -330,7 +330,7 @@ static HHOOK HOOK_SetHook( INT id, LPVOID proc, INT type,
 static BOOL HOOK_RemoveHook( HOOKDATA *data )
 {
   HOOKDATA **prevHook;
-  THDB     *thdb;
+  TEB       *teb;
 
     dprintf(("Removing hook %08x\n", data));
 
@@ -350,13 +350,13 @@ static BOOL HOOK_RemoveHook( HOOKDATA *data )
 
     if (data->ownerThread)
     {
-        thdb = GetTHDBFromThreadId(data->ownerThread);
-        if(!thdb) {
+        teb = GetTEBFromThreadId(data->ownerThread);
+        if(!teb) {
                 dprintf(("HOOK_RemoveHook: can't find thread database for thread %x", data->ownerThread));
                 return FALSE;
         }
         threadHookMutex.enter();
-        prevHook = (HOOKDATA **)&thdb->hooks[data->id - WH_MINHOOK];
+        prevHook = (HOOKDATA **)&teb->o.odin.hooks[data->id - WH_MINHOOK];
     }
     else {
         systemHookMutex.enter(VMUTEX_WAIT_FOREVER, &hGlobalHookMutex);

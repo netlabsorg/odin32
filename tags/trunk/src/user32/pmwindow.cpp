@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.107 2000-11-15 20:30:46 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.108 2000-11-21 11:36:09 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -143,22 +143,22 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
  POSTMSG_PACKET  *postmsg;
  OSLIBPOINT       point, ClientPoint;
  Win32BaseWindow *win32wnd;
- THDB            *thdb;
+ TEB             *teb;
  APIRET           rc = 0;
  MSG              winMsg, *pWinMsg;
 
   //Restore our FS selector
   SetWin32TIB();
 
-  thdb = GetThreadTHDB();
+  teb = GetThreadTEB();
   win32wnd = Win32BaseWindow::GetWindowFromOS2Handle(hwnd);
 
-  if(!thdb || (msg != WM_CREATE && win32wnd == NULL)) {
+  if(!teb || (msg != WM_CREATE && win32wnd == NULL)) {
         dprintf(("Invalid win32wnd pointer for window %x msg %x", hwnd, msg));
         goto RunDefWndProc;
   }
 
-  if((thdb->msgstate & 1) == 0)
+  if((teb->o.odin.msgstate & 1) == 0)
   {//message that was sent directly to our window proc handler; translate it here
         QMSG qmsg;
 
@@ -166,19 +166,19 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         qmsg.hwnd = hwnd;
         qmsg.mp1  = mp1;
         qmsg.mp2  = mp2;
-        qmsg.time = WinQueryMsgTime(thdb->hab);
-        WinQueryMsgPos(thdb->hab, &qmsg.ptl);
+        qmsg.time = WinQueryMsgTime(teb->o.odin.hab);
+        WinQueryMsgPos(teb->o.odin.hab, &qmsg.ptl);
         qmsg.reserved = 0;
 
-        if(OS2ToWinMsgTranslate((PVOID)thdb, &qmsg, &winMsg, FALSE, MSG_REMOVE) == FALSE)
+        if(OS2ToWinMsgTranslate((PVOID)teb, &qmsg, &winMsg, FALSE, MSG_REMOVE) == FALSE)
         {//message was not translated
             memset(&winMsg, 0, sizeof(MSG));
         }
         pWinMsg = &winMsg;
   }
   else {
-        pWinMsg = &thdb->msg;
-        thdb->msgstate++;
+        pWinMsg = &teb->o.odin.msg;
+        teb->o.odin.msgstate++;
   }
 
   if(msg == WIN32APP_POSTMSG) {
@@ -196,13 +196,13 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     //OS/2 msgs
     case WM_CREATE:
     {
-        if(thdb->newWindow == 0)
+        if(teb->o.odin.newWindow == 0)
             goto createfail;
 
         //Processing is done in after WinCreateWindow returns
         dprintf(("OS2: WM_CREATE %x", hwnd));
-        win32wnd = (Win32BaseWindow *)thdb->newWindow;
-        thdb->newWindow = 0;
+        win32wnd = (Win32BaseWindow *)teb->o.odin.newWindow;
+        teb->o.odin.newWindow = 0;
         if(win32wnd->MsgCreate(hwnd) == FALSE)
         {
             RestoreOS2TIB();
@@ -793,6 +793,7 @@ PosChangedEnd:
 
     case WM_RENDERFMT:
     case WM_RENDERALLFMTS:
+    case WM_DESTROYCLIPBOARD:
         win32wnd->DispatchMsgA(pWinMsg);
         break;
 

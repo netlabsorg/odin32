@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.55 2000-05-24 19:30:05 sandervl Exp $ */
+/* $Id: pmframe.cpp,v 1.56 2000-11-21 11:36:08 sandervl Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -67,21 +67,21 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
  Win32BaseWindow *win32wnd;
  PFNWP            OldFrameProc;
  MRESULT          rc;
- THDB            *thdb;
+ TEB             *teb;
  MSG             *pWinMsg,winMsg;
 
   SetWin32TIB();
 
-  thdb = GetThreadTHDB();
+  teb = GetThreadTEB();
   win32wnd = Win32BaseWindow::GetWindowFromOS2FrameHandle(hwnd);
 
-  if (!thdb || (win32wnd == NULL) || !win32wnd->getOldFrameProc())
+  if (!teb || (win32wnd == NULL) || !win32wnd->getOldFrameProc())
   {
     dprintf(("Invalid win32wnd pointer for frame %x!!", hwnd));
     goto RunDefWndProc;
   }
 
-  if((thdb->msgstate & 1) == 0)
+  if((teb->o.odin.msgstate & 1) == 0)
   {//message that was sent directly to our window proc handler; translate it here
         QMSG qmsg;
 
@@ -89,19 +89,19 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
         qmsg.hwnd = hwnd;
         qmsg.mp1  = mp1;
         qmsg.mp2  = mp2;
-        qmsg.time = WinQueryMsgTime(thdb->hab);
-        WinQueryMsgPos(thdb->hab, &qmsg.ptl);
+        qmsg.time = WinQueryMsgTime(teb->o.odin.hab);
+        WinQueryMsgPos(teb->o.odin.hab, &qmsg.ptl);
         qmsg.reserved = 0;
 
-        if(OS2ToWinMsgTranslate((PVOID)thdb, &qmsg, &winMsg, FALSE, MSG_REMOVE) == FALSE)
+        if(OS2ToWinMsgTranslate((PVOID)teb, &qmsg, &winMsg, FALSE, MSG_REMOVE) == FALSE)
         {//message was not translated
             memset(&winMsg, 0, sizeof(MSG));
         }
         pWinMsg = &winMsg;
   }
   else {
-        pWinMsg = &thdb->msg;
-        thdb->msgstate++;
+        pWinMsg = &teb->o.odin.msg;
+        teb->o.odin.msgstate++;
   }
 
   OldFrameProc = (PFNWP)win32wnd->getOldFrameProc();
@@ -356,7 +356,7 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
           swpClient.cy = rect.yTop-rect.yBottom;
           //TODO: Get rid of SWP_SHOW; needed for winhlp32 button bar for now
           swpClient.fl = (pswp->fl & ~SWP_ZORDER) | SWP_MOVE | SWP_SHOW;
-          WinSetMultWindowPos(thdb->hab, &swpClient, 1);
+          WinSetMultWindowPos(teb->o.odin.hab, &swpClient, 1);
 
           //update child positions: rectWindow is in window coordinates
           if(pswp->fl & (SWP_MOVE | SWP_SIZE)) {
