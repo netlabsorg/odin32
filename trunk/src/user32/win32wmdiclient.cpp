@@ -1,4 +1,4 @@
-/* $Id: win32wmdiclient.cpp,v 1.6 1999-10-09 19:27:40 sandervl Exp $ */
+/* $Id: win32wmdiclient.cpp,v 1.7 1999-10-19 12:52:30 sandervl Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -40,17 +40,11 @@
 //******************************************************************************
 //******************************************************************************
 Win32MDIClientWindow::Win32MDIClientWindow(CREATESTRUCTA *lpCreateStructA, ATOM classAtom, BOOL isUnicode)
-                : Win32BaseWindow(lpCreateStructA, classAtom, isUnicode)
+                : maximizedChild(0), activeChild(0), nActiveChildren(0), nTotalCreated(0),
+                  frameTitle(NULL), mdiFlags(0), idFirstChild(0), hWindowMenu(0), 
+                  sbRecalc(0),
+                  Win32BaseWindow(lpCreateStructA, classAtom, isUnicode)
 {
-    maximizedChild     = 0;
-    activeChild        = 0;
-    nActiveChildren    = 0;
-    nTotalCreated      = 0;
-    frameTitle         = NULL;
-    mdiFlags           = 0;
-    idFirstChild       = 0;
-    hWindowMenu        = 0;
-    sbRecalc           = 0;
 }
 //******************************************************************************
 //******************************************************************************
