@@ -1,5 +1,8 @@
- /* $Id: changelog,v 1.381 1999-10-28 22:40:03 sandervl Exp $ */
+ /* $Id: changelog,v 1.382 1999-10-28 22:59:03 hugh Exp $ */
 
+ 99-10-29  Markus Montkowski <mmontkowski@gmx.de>
+        - DDRAW: Changed loggin, loginfo now in odin32_x.log for the first time...
+ 
  99-10-28: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- USER32: LoadBitmapW fix
                   ModifyMenuW/InsertMenuW fixes.
