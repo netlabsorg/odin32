@@ -1,25 +1,26 @@
+/* $Id: nccnnet.c,v 1.2 2001-09-05 14:31:11 bird Exp $ */
 
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Revision: 1.1 $
-** $Date: 2000-02-25 00:31:38 $
+** $Revision: 1.2 $
+** $Date: 2001-09-05 14:31:11 $
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -32,30 +33,30 @@
  * This file implements the neural net quantizer, which takes an image in
  * ARGB8888 format and produces an optimal YAB table, and an 8 bit image
  * in YAB format that best represents the original image. A very detailed
- * explanation of the algorithm is available in 
+ * explanation of the algorithm is available in
  * /tdfx/engr/devel/sst1/docs/yab.doc. The summary follows.
  *
- * Neural net algorithms first determine a "representative sample" of the 
+ * Neural net algorithms first determine a "representative sample" of the
  * input image. This representative sample is repeatedly run through the net
  * during the network learning stage, and the neural net "learns" which colors
  * are important and which ones are not. It's quite possible to feed every
  * pixel in the original image repeatedly into the neural net
- * to make it learn; however, this can be extremely time consuming. 
+ * to make it learn; however, this can be extremely time consuming.
  *
  * So, we prefer to make a representative sample of colors for the input image.
  * The original yab.doc suggests we try to derive sample colors by reducing the
  * ARGB8888 colors to RGB555. I've found that simply color quantizing to 256
  * colors (just like for the 8-bit palettized case) works quite well, and
  * so we first quantize to 8 bit palette, and use the palette as the sample
- * colors to feed the neural network. This also makes using 256-palette 
+ * colors to feed the neural network. This also makes using 256-palette
  * textures very easy.
  *
  * After the "representative colors" are determined, we train the neural net,
- * and obtain the optimal YAB table.  Each sample color in the palette, 
- * which was originally in ARGB8888 format is now replaced with IRGB8888, 
- * where the RGB is the same as before, but the alpha channel is replaced 
- * with an 8 bit number I which is the YAB index corresponding to this 
- * representative color. 
+ * and obtain the optimal YAB table.  Each sample color in the palette,
+ * which was originally in ARGB8888 format is now replaced with IRGB8888,
+ * where the RGB is the same as before, but the alpha channel is replaced
+ * with an 8 bit number I which is the YAB index corresponding to this
+ * representative color.
  *
  * So now it's possible to translate the original image into an 8 bit image
  * by first looking up the original pixel in the representative colors table,
@@ -64,12 +65,12 @@
  *
  * In the process of converting the original image to the YAB format, we could
  * optionally dither the image. Ordered dithering doesn't quite work, so we
- * use error-diffusion dithering. 
+ * use error-diffusion dithering.
  *
  * I've found that there are three speed bottlenecks to overcome. The first
  * time consuming operation is the computation of representative image colors.
- * 256 color quantization is used for this part. The second bottleneck is the 
- * training of the neural net algorithm itself, and I've optimized this as 
+ * 256 color quantization is used for this part. The second bottleneck is the
+ * training of the neural net algorithm itself, and I've optimized this as
  * much as possible. The third bottleneck is the translation of the original
  * image into the 8 bit YAB indexed image; this still needs work, especially
  * when error diffusion dithering is enabled.
@@ -78,7 +79,7 @@
  */
 
 /******************************************************************************
- * 
+ *
  * The hardcore neural net stuff begins here.
  *
  */
@@ -116,7 +117,7 @@ static  long                    totR, totG, totB;
 static int
 _nn_modifyNeurons(long ir, long ig, long ib)
 {
-    int         i; 
+    int         i;
     int         d0, d1;                         // closest & next closest distance to input
     int         p0, p1;                         // index into the 256 color table.
     long        d, dr, dg, db;
@@ -137,14 +138,14 @@ _nn_modifyNeurons(long ir, long ig, long ib)
         n->b = py->ir + pa->ib + pb->ib; CLAMP_255(n->b);
 
         d = DISTANCE(n->r, n->g, n->b, ir, ig, ib);
-        if (d < d0) { 
+        if (d < d0) {
                 d1 = d0; d0 = d;
                 p1 = p0; p0 = i;
 
         } else if (d < d1) {
                 d1 = d;
                 p1 = i;
-        } 
+        }
     }
 
     /* track errors */
@@ -182,7 +183,7 @@ _nn_modifyNeurons(long ir, long ig, long ib)
     pa = N[p0].pa;
     pb = N[p0].pb;
     py->r += (dr >> 2) + (dg >> 1) + (db >> 2); CLAMP_PLUS(py->r);
-    pa->r += (dr >> 2) ; CLAMP_BOTH(pa->r); 
+    pa->r += (dr >> 2) ; CLAMP_BOTH(pa->r);
     pa->g += (dg >> 2) ; CLAMP_BOTH(pa->g);
     pa->b += (db >> 2) ; CLAMP_BOTH(pa->b);
     pb->r += (dr >> 2) ; CLAMP_BOTH(pb->r);
@@ -257,7 +258,7 @@ _nn_initTables()
 }
 
 static  int order[256];
-static int 
+static int
 _nn_randomOrder(const void *a, const void *b)
 {
     a = b;              // no compiler warnings
@@ -274,7 +275,7 @@ txMapPal256toYAB(FxU32 *YAB, FxU8 *map, int nsamples, FxU32 *samples)
     long        yab2pal[256];
 
     _nn_initTables();
-    /* 
+    /*
      * Select a number which is relatively prime to nsamples.
      */
     for (i=0; i<nsamples; i++) order[i] = i;
@@ -294,7 +295,7 @@ txMapPal256toYAB(FxU32 *YAB, FxU8 *map, int nsamples, FxU32 *samples)
         for (i = 0; i< nsamples; i++) {
                 FxU32   *pRGB;
 
-                // We present the samples randomly to the network. 
+                // We present the samples randomly to the network.
                 // _nn_modify_neurons() makes the neurons learn
                 // errR, errG, errB, errMax are computed in _nn_modifyNeurons(), as
                 // are totR, totG, totB (accumulative errors).
@@ -307,7 +308,7 @@ txMapPal256toYAB(FxU32 *YAB, FxU8 *map, int nsamples, FxU32 *samples)
         iterations += nsamples;
 
         if (errMax < bstMax) {
-                /* 
+                /*
                  * A lower total error than before, take a Snapshot
                  *
                  * YAB[] has 16 entries for Y, 12 entries each for A & B.
@@ -343,9 +344,9 @@ txMapPal256toYAB(FxU32 *YAB, FxU8 *map, int nsamples, FxU32 *samples)
                 bstG   = errG;
                 bstB   = errB;
 #if 0
-                printf("%8d%, dry=%8d, eMax=%8x eMax=%3d%3d%3d eAvg=%3d%3d%3d\n", 
-                   iterations, drySpells, errMax, 
-                   errG, errR, errB, 
+                printf("%8d%, dry=%8d, eMax=%8x eMax=%3d%3d%3d eAvg=%3d%3d%3d\n",
+                   iterations, drySpells, errMax,
+                   errG, errR, errB,
                    totG/nsamples, totR/nsamples, totB/nsamples
                 );
 #endif
@@ -355,14 +356,14 @@ txMapPal256toYAB(FxU32 *YAB, FxU8 *map, int nsamples, FxU32 *samples)
                 drySpells += nsamples;
         }
 
-        if (errMax == 0) { 
-                // printf("******Exact Solution in %d iterations\n", iterations); 
-                // _nn_Dump(); 
+        if (errMax == 0) {
+                // printf("******Exact Solution in %d iterations\n", iterations);
+                // _nn_Dump();
                 break;
         }
     }
 
-    /* 
+    /*
      * At this point YAB has the YAB table, samples has input palette,
      * Replace MSB of samples with index to be used with YAB table.
      */
@@ -392,8 +393,8 @@ txMipNccNNet(TxMip *pxMip, TxMip *txMip, int format, FxU32 dither, FxU32 comp)
     FxU8        map[256];
 
 
-    /* 
-     * Get a 256 color palette, to be used as samples 
+    /*
+     * Get a 256 color palette, to be used as samples
      * Incidentally, convert src 32 bit image to dst 8 bit indexed image,
      * with indices referring to the 256 color palette.
      * Also incidentally, pack the alpha channel if necessary.
@@ -402,7 +403,7 @@ txMipNccNNet(TxMip *pxMip, TxMip *txMip, int format, FxU32 dither, FxU32 comp)
       {
         printf("NCC Neural nets..."); fflush(stdout);
       }
-    pxMip->format = (format == GR_TEXFMT_YIQ_422) ? GR_TEXFMT_P_8 : 
+    pxMip->format = (format == GR_TEXFMT_YIQ_422) ? GR_TEXFMT_P_8 :
         GR_TEXFMT_AP_88;
     ncolors = txMipPal256(pxMip, txMip, pxMip->format, 0, 0);
     if( txVerbose )
@@ -412,8 +413,8 @@ txMipNccNNet(TxMip *pxMip, TxMip *txMip, int format, FxU32 dither, FxU32 comp)
     txMapPal256toYAB((FxU32 *)yabTable, (FxU8 *)map, ncolors, (FxU32 *)pxMip->pal);
     if( txVerbose )
       {
-        printf("eMax=(%3d%3d%3d)...eAvg=(%3d%3d%3d)\n", 
-               errG, errR, errB, 
+        printf("eMax=(%3d%3d%3d)...eAvg=(%3d%3d%3d)\n",
+               errG, errR, errB,
                totG/ncolors, totR/ncolors, totB/ncolors
                );
       }
@@ -422,12 +423,12 @@ txMipNccNNet(TxMip *pxMip, TxMip *txMip, int format, FxU32 dither, FxU32 comp)
     if ((dither & TX_DITHER_MASK) != TX_DITHER_NONE) {
         /*
          * At this point, we can lose the 256 color palette, and replace it with
-         * the 256 color palette generated from the YAB table. This will be 
+         * the 256 color palette generated from the YAB table. This will be
          * useful for error diffusion dithering.
          */
         txYABtoPal256((long *)pxMip->pal, (long *)yabTable);
         txDiffuseIndex(pxMip, txMip, pixsize, pxMip->pal, 256);
-    } 
+    }
     else {
 
         /* Translate image to YAB format */

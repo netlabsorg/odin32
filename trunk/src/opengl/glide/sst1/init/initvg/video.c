@@ -1,25 +1,26 @@
+/* $Id: video.c,v 1.2 2001-09-05 14:31:07 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
 **
-** $Revision: 1.1 $ 
-** $Date: 2000-02-25 00:31:35 $ 
+** $Revision: 1.2 $
+** $Date: 2001-09-05 14:31:07 $
 **
 ** Initialization code for initializing SST-1 video unit
 **
@@ -347,7 +348,7 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitVideo(FxU32 *sstbase,
 
     /* Reset Video Refresh Unit */
     ISET(sst->fbiInit1, IGET(sst->fbiInit1) | SST_VIDEO_RESET);
-    
+
     /* Enable video clock */
     if(SLI_DRIVEOK()) {
         INIT_PRINTF(("sst1InitVideo(): Enabling Video Clock...\n"));
@@ -399,9 +400,9 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitVideo(FxU32 *sstbase,
 
     /* Setup SST memory mapper for desired resolution */
     if(sst1CurrentBoard->fbiMemSize == 4)
-        sst1InitSetResolution(sstbase, sstVideoRez, 1); 
+        sst1InitSetResolution(sstbase, sstVideoRez, 1);
     else
-        sst1InitSetResolution(sstbase, sstVideoRez, 0); 
+        sst1InitSetResolution(sstbase, sstVideoRez, 0);
 
     if((GETENV(("SST_TRIPLE_BUFFER"))) ||
        (sst1CurrentBoard->fbiTripleBufferingEnabled == FXTRUE)) {
@@ -505,7 +506,7 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitVideo(FxU32 *sstbase,
     /* Prohibit illegal memory fifo settings... */
     if(sst1CurrentBoard->fbiMemSize == 1 && sstVideoRez->xDimension > 512)
         n = 0;
-    
+
     if(n) {
         sst1CurrentBoard->fbiMemoryFifoEn = 1;
         if(sst1CurrentBoard->fbiMemSize == 1)
@@ -529,7 +530,7 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitVideo(FxU32 *sstbase,
     }
     INIT_PRINTF(("sst1InitVideo(): Setting memory FIFO LWM to 0x%x (%d)\n",
                  sst1CurrentBoard->memFifoStatusLwm,
-                 sst1CurrentBoard->memFifoStatusLwm));  
+                 sst1CurrentBoard->memFifoStatusLwm));
 
     vInClkDel = 0;
     if((sst1MonitorRez == 960 && !video16BPP) ||
@@ -780,7 +781,7 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitVideo(FxU32 *sstbase,
 **    Returns:
 **      Video Timing Structure
 */
-FX_EXPORT sst1VideoTimingStruct * FX_CSTYLE sst1InitFindVideoTimingStruct(GrScreenResolution_t screenResolution, 
+FX_EXPORT sst1VideoTimingStruct * FX_CSTYLE sst1InitFindVideoTimingStruct(GrScreenResolution_t screenResolution,
                                                                           GrScreenRefresh_t screenRefresh)
 {
     sst1VideoTimingStruct *sstVideoRez = NULL;
@@ -994,7 +995,7 @@ FxBool sst1InitSetVidMode(FxU32 *sstbase, FxU32 video16BPP)
 **
 **
 */
-FX_EXPORT void FX_CSTYLE sst1InitSetResolution(FxU32 *sstbase, 
+FX_EXPORT void FX_CSTYLE sst1InitSetResolution(FxU32 *sstbase,
     sst1VideoTimingStruct *sstVideoRez, FxU32 Banked)
 {
     volatile Sstregs *sst = (Sstregs *) sstbase;
@@ -1088,7 +1089,7 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitSetGrxClk(FxU32 *sstbase,
 /*
 ** sst1InitSetTripleBuffering():
 **  Specify Video Triple Buffering
-**  NOTE: sst1InitSetTripleBuffering() must be called prior to calling 
+**  NOTE: sst1InitSetTripleBuffering() must be called prior to calling
 **   sst1InitVideo() to properly setup Video Triple Buffering
 **
 */

@@ -1,25 +1,26 @@
+/* $Id: util.c,v 1.2 2001-09-05 14:30:47 bird Exp $ */
 
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Revision: 1.1 $
-** $Date: 2000-02-25 00:38:01 $
+** $Revision: 1.2 $
+** $Date: 2001-09-05 14:30:47 $
 */
 
 #include <stdio.h>
@@ -32,7 +33,7 @@
 int txVerbose = 0;
 
 char *Format_Name[] = {
-         "rgb332",                              // GR_TEXFMT_RGB_332 
+         "rgb332",                              // GR_TEXFMT_RGB_332
          "yiq",                                 // GR_TEXFMT_YIQ_422
          "a8",                                  // GR_TEXFMT_ALPHA_8
          "i8",                                  // GR_TEXFMT_INTENSITY_8
@@ -135,7 +136,7 @@ txGCD(int a, int b)
 void
 txYABtoPal256(long *palette, const long* yabTable)
 {
-        // Convert YAB table to a 256 color palette 
+        // Convert YAB table to a 256 color palette
         // Assume yabTable[] has first 16Y's, 12 A's, 12 B's
 
         const   long    *Y = yabTable;
@@ -267,20 +268,20 @@ int  *explode3 = &_explode3[255];
 int
 txNearestColor(long ir, long ig, long ib, const FxU32 *pal, int ncolors)
 {
-        int             i, d; 
+        int             i, d;
         int             mindist, minpos;                // closest distance to input
 
         if (&explode3[-255] != &_explode3[0])
                 txPanic("Bad explode\n");
 
-        mindist = DISTANCE((*pal>>16)&0xff, (*pal>>8)&0xff, (*pal)&0xff, 
+        mindist = DISTANCE((*pal>>16)&0xff, (*pal>>8)&0xff, (*pal)&0xff,
                 ir, ig, ib);
         minpos  = 0;
         pal ++;
 
         /* Find closest color */
         for (i=1; i<ncolors; i++, pal ++) {
-                d = DISTANCE((*pal>>16)&0xff, (*pal>>8)&0xff, (*pal)&0xff, 
+                d = DISTANCE((*pal>>16)&0xff, (*pal>>8)&0xff, (*pal)&0xff,
                         ir, ig, ib);
                 if (d < mindist) { mindist = d; minpos = i; }
         }
@@ -326,7 +327,7 @@ txAspectRatio(int w, int h)
 #endif /* GLIDE3 */
 
 void
-txRectCopy(FxU8 *dst, int dstStride, const FxU8 *src, int srcStride, 
+txRectCopy(FxU8 *dst, int dstStride, const FxU8 *src, int srcStride,
         int width, int height)
 {
         // Copy a rectangular region from src to dst, each with different strides.
@@ -413,7 +414,7 @@ void
 txBasename(const char *name, char* basename)
 {
         /* Strip the pathname and leave us with filename.ext */
-        char    *s; 
+        char    *s;
         const   char *p, *slash;
 
         /* Find the last slash */
@@ -427,7 +428,7 @@ txBasename(const char *name, char* basename)
         // Walk to end of string */
         for (s = basename; *s; s++);
 
-        // Walk backwards; replace any . with 0 
+        // Walk backwards; replace any . with 0
         while (--s >= basename) {
                 if (*s == '.') {*s = 0; break;}
         }
@@ -462,9 +463,9 @@ txExtension(const char *name, char *extname)
                 if (*p == '.')  ext = p;
         }
 
-        if (ext) 
+        if (ext)
             while (*ext)  *extname++ = *ext++;
-        
+
         *extname = 0;
 }
 

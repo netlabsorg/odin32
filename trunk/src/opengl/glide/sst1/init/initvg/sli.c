@@ -1,25 +1,26 @@
+/* $Id: sli.c,v 1.2 2001-09-05 14:31:05 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
 **
-** $Revision: 1.1 $ 
-** $Date: 2000-02-25 00:31:34 $ 
+** $Revision: 1.2 $
+** $Date: 2001-09-05 14:31:05 $
 **
 ** Initialization code for initializing scanline interleaving
 **
@@ -83,7 +84,7 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitSli(FxU32 *sstbase0, FxU32 *sstbase1)
             return(FXFALSE);
         PCICFG_RD(SST1_PCI_INIT_ENABLE, j);
         PCICFG_WR(SST1_PCI_INIT_ENABLE,
-            (j | SST_SCANLINE_SLV_OWNPCI | SST_SCANLINE_SLI_SLV)); 
+            (j | SST_SCANLINE_SLV_OWNPCI | SST_SCANLINE_SLI_SLV));
         ISET(sstSlave->fbiInit1, IGET(sstSlave->fbiInit1) |
           (SST_VIDEO_RESET | SST_EN_SCANLINE_INTERLEAVE));
         sst1InitIdleFBINoNOP(sstbase1);
@@ -152,7 +153,7 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitSli(FxU32 *sstbase0, FxU32 *sstbase1)
         if(sst1CurrentBoard->fbiVideo16BPP)
             /* 16-bit Video Output */
             ISET(sstSlave->fbiInit1, (IGET(sstSlave->fbiInit1) &
-                    ~(SST_VIDEO_VCLK_2X_OUTPUT_DEL | SST_VIDEO_VCLK_DEL)) | 
+                    ~(SST_VIDEO_VCLK_2X_OUTPUT_DEL | SST_VIDEO_VCLK_DEL)) |
                 SST_EN_SCANLINE_INTERLEAVE |
                 /* SST_VIDEO_VID_CLK_SLAVE | */
                 SST_VIDEO_VID_CLK_2X |
@@ -165,7 +166,7 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitSli(FxU32 *sstbase0, FxU32 *sstbase1)
             /* 24-bit Video Output */
             ISET(sstSlave->fbiInit1, (IGET(sstSlave->fbiInit1) &
                     ~(SST_VIDEO_VCLK_2X_OUTPUT_DEL | SST_VIDEO_VCLK_DEL |
-                      SST_VIDEO_VCLK_SEL | SST_VIDEO_VCLK_2X_INPUT_DEL)) | 
+                      SST_VIDEO_VCLK_SEL | SST_VIDEO_VCLK_2X_INPUT_DEL)) |
                 SST_EN_SCANLINE_INTERLEAVE |
                 /* SST_VIDEO_VID_CLK_SLAVE | */
                 SST_VIDEO_VID_CLK_2X |
@@ -273,7 +274,7 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitSli(FxU32 *sstbase0, FxU32 *sstbase1)
     if(sst1CurrentBoard->fbiVideo16BPP)
         /* 16-bit Video Output */
         ISET(sstMaster->fbiInit1, (IGET(sstMaster->fbiInit1) &
-                ~(SST_VIDEO_VCLK_2X_OUTPUT_DEL | SST_VIDEO_VCLK_DEL)) | 
+                ~(SST_VIDEO_VCLK_2X_OUTPUT_DEL | SST_VIDEO_VCLK_DEL)) |
             SST_EN_SCANLINE_INTERLEAVE |
             SST_VIDEO_VID_CLK_2X |
             /* SST_VIDEO_INVERT_VID_CLK_2X | */
@@ -285,7 +286,7 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitSli(FxU32 *sstbase0, FxU32 *sstbase1)
         /* 24-bit Video Output */
         ISET(sstMaster->fbiInit1, (IGET(sstMaster->fbiInit1) &
                 ~(SST_VIDEO_VCLK_2X_OUTPUT_DEL | SST_VIDEO_VCLK_DEL |
-                      SST_VIDEO_VCLK_SEL | SST_VIDEO_VCLK_2X_INPUT_DEL)) | 
+                      SST_VIDEO_VCLK_SEL | SST_VIDEO_VCLK_2X_INPUT_DEL)) |
             SST_EN_SCANLINE_INTERLEAVE |
             SST_VIDEO_VID_CLK_2X |
             /*SST_VIDEO_INVERT_VID_CLK_2X | */
@@ -320,7 +321,7 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitSli(FxU32 *sstbase0, FxU32 *sstbase1)
         return(FXFALSE);
     PCICFG_RD(SST1_PCI_INIT_ENABLE, j);
     PCICFG_WR(SST1_PCI_INIT_ENABLE,
-        (j & ~(SST_SCANLINE_SLV_OWNPCI | SST_SCANLINE_SLI_SLV))); 
+        (j & ~(SST_SCANLINE_SLV_OWNPCI | SST_SCANLINE_SLI_SLV)));
     MasterPhysAddr = sst1CurrentBoard->physAddr;
     sst1InitReturnStatus(sstbase0); /* flush pci packer with reads */
     sst1InitReturnStatus(sstbase0);
@@ -331,7 +332,7 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitSli(FxU32 *sstbase0, FxU32 *sstbase1)
         return(FXFALSE);
     PCICFG_RD(SST1_PCI_INIT_ENABLE, j);
     PCICFG_WR(SST1_PCI_INIT_ENABLE,
-        ((j & ~(SST_SCANLINE_SLV_OWNPCI)) | SST_SCANLINE_SLI_SLV)); 
+        ((j & ~(SST_SCANLINE_SLV_OWNPCI)) | SST_SCANLINE_SLI_SLV));
     /* Map both boards to same Master physical address */
     PCICFG_WR(PCI_BASE_ADDRESS_0, MasterPhysAddr);
     sst1InitReturnStatus(sstbase0); /* flush pci packer with reads */
@@ -431,13 +432,13 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitShutdownSli(FxU32 *sstbase)
             PCICFG_RD(SST1_PCI_INIT_ENABLE, j);
             PCICFG_WR(SST1_PCI_INIT_ENABLE,
                 (j | SST_SCANLINE_SLV_OWNPCI | SST_SCANLINE_SLI_SLV |
-                 SST_INITWR_EN | SST_PCI_FIFOWR_EN)); 
+                 SST_INITWR_EN | SST_PCI_FIFOWR_EN));
             PCICFG_RD(SST1_PCI_INIT_ENABLE, j); /* delay */
             ISET(sstSlave->fbiInit1, IGET(sstSlave->fbiInit1) &
               ~SST_EN_SCANLINE_INTERLEAVE);
             PCICFG_RD(SST1_PCI_INIT_ENABLE, j);
             PCICFG_WR(SST1_PCI_INIT_ENABLE,
-                (j & ~(SST_SCANLINE_SLV_OWNPCI | SST_SCANLINE_SLI_SLV))); 
+                (j & ~(SST_SCANLINE_SLV_OWNPCI | SST_SCANLINE_SLI_SLV)));
             PCICFG_RD(SST1_PCI_INIT_ENABLE, j); /* delay */
             sst1InitIdle((FxU32 *) sstSlave);
 

@@ -1,86 +1,90 @@
+/* $Id: gsplash.c,v 1.2 2001-09-05 14:30:27 bird Exp $ */
 /*
  ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
  ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
  ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
- ** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
- ** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
- ** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+ ** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+ ** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+ ** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
  ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
- ** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
- ** 
+ ** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+ **
  ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
  ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
  ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
  ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
  ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
- ** THE UNITED STATES.  
- ** 
+ ** THE UNITED STATES.
+ **
  ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
  **
- ** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glide/cvg/glide/gsplash.c,v 1.1 2000-02-25 00:37:41 sandervl Exp $
+ ** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glide/cvg/glide/gsplash.c,v 1.2 2001-09-05 14:30:27 bird Exp $
  ** $Log: gsplash.c,v $
- ** Revision 1.1  2000-02-25 00:37:41  sandervl
+ ** Revision 1.2  2001-09-05 14:30:27  bird
+ ** Added $Id:$ keyword.
+ **
+ ** Revision 1.1  2000/02/25 00:37:41  sandervl
  ** Created Voodoo 2 dir
  **
-** 
+**
 ** 26    2/20/98 11:00a Peter
 ** removed glide3 from glid2 tree
-** 
+**
 ** 25    2/17/98 3:21p Peter
 ** no splash w/o deepth buffer
-** 
+**
 ** 24    1/28/98 1:12p Peter
 ** Stupid swap state form gratuitous splash screen
- * 
+ *
  * 23    1/09/98 6:48p Atai
  * grTexInfo, GR_LOD_* and GR_ASPECT_*
- * 
+ *
  * 21    1/06/98 6:47p Atai
  * undo grSplash and remove gu routines
- * 
+ *
  * 20    12/18/97 2:13p Peter
  * fogTable cataclysm
- * 
+ *
  * 19    12/15/97 5:52p Atai
  * disable obsolete glide2 api for glide3
- * 
+ *
  * 18    12/09/97 10:20a Peter
  * removed extraneous cruft
- * 
+ *
  * 17    11/14/97 5:03p Peter
  * picking up the torch... removed #!@#$% c++ comments
- * 
+ *
  * 16    10/23/97 5:30p Peter
  * packed rgb happiness
- * 
+ *
  * 15    7/31/97 11:14a Peter
  * merge w/ sst1 glide tree, hopefully
- * 
+ *
  * 13    7/07/97 3:05p Dow
  * Moved fouled clears
- * 
+ *
  * 12    3/18/97 9:07p Dow
  * Got rid of #$#%#$ // comments
- * 
+ *
  * 11    3/16/97 12:42a Jdt
  * Removed watcom warning
- * 
+ *
  * 10    3/13/97 10:53p Jdt
  * Rewrote with simple optimizations.  Changed prototype for
  * multi-resolution, and running as a better shameless plug.
- * 
+ *
  * 9     3/13/97 2:52a Jdt
  * Added arguments to splash.
- * 
+ *
  * 8     3/09/97 10:31a Dow
  * Added GR_DIENTRY for di glide functions
- * 
+ *
  * 7     3/01/97 6:24p Jdt
  * Made splash force yorigin.
- * 
+ *
  * 6     1/02/97 1:06p Dow
  * Fixed state bug
- * 
+ *
  * 3     11/17/96 11:16p Garymct
  * Updated grSplash code to set all of the necessary state itself rather
  * than expecting the caller to do so.
@@ -148,9 +152,9 @@ typedef union {
   Globals
   -----------------------------*/
 /* xScale, xOffset, yScale, yOffset */
-static float viewPort[4] = { 
-  480.0f, 320.0f, 
-  480.0f, 240.0f 
+static float viewPort[4] = {
+  480.0f, 320.0f,
+  480.0f, 240.0f
 };
 
 typedef struct {
@@ -179,8 +183,8 @@ static FxU32 nextFreeBase;
 /*-----------------------------
   Privates
   -----------------------------*/
-static void 
-sourceTexture(Texture *texture) 
+static void
+sourceTexture(Texture *texture)
 {
   static Texture *lastTexture;
 
@@ -198,8 +202,8 @@ sourceTexture(Texture *texture)
   }
 }
 
-static GrTexTable_t 
-texTableType(GrTextureFormat_t format) 
+static GrTexTable_t
+texTableType(GrTextureFormat_t format)
 {
   GrTexTable_t rv = (GrTexTable_t)NO_TABLE;
 
@@ -218,8 +222,8 @@ texTableType(GrTextureFormat_t format)
   return rv;
 }
 
-static void 
-downloadTexture(Texture *texture, Gu3dfInfo *info) 
+static void
+downloadTexture(Texture *texture, Gu3dfInfo *info)
 {
   texture->info.data        = info->data;
   texture->info.smallLod    = info->header.small_lod;
@@ -247,8 +251,8 @@ downloadTexture(Texture *texture, Gu3dfInfo *info)
   }
 }
 
-static void 
-createTextures(void) 
+static void
+createTextures(void)
 {
   Gu3dfInfo *info;
 
@@ -269,43 +273,43 @@ createTextures(void)
   downloadTexture(&shadowImage, info);
 }
 
-static void 
-vecMatMult(float *dstVec, float *srcVec, float *matrix) 
+static void
+vecMatMult(float *dstVec, float *srcVec, float *matrix)
 {
   dstVec[0] = (srcVec[0] * matrix[0] +
                srcVec[1] * matrix[4] +
                srcVec[2] * matrix[8] +
                matrix[12]);
-    
+
   dstVec[1] = (srcVec[0] * matrix[1] +
                srcVec[1] * matrix[5] +
                srcVec[2] * matrix[9] +
                matrix[13]);
-    
+
   dstVec[2] = (srcVec[0] * matrix[2] +
                srcVec[1] * matrix[6] +
                srcVec[2] * matrix[10] +
                matrix[14]);
 }
 
-static void 
-normMatMult(float *dstVec, float *srcVec, float *matrix) 
+static void
+normMatMult(float *dstVec, float *srcVec, float *matrix)
 {
   dstVec[0] = (srcVec[0] * matrix[0] +
                srcVec[1] * matrix[4] +
                srcVec[2] * matrix[8]);
-    
+
   dstVec[1] = (srcVec[0] * matrix[1] +
                srcVec[1] * matrix[5] +
                srcVec[2] * matrix[9]);
-    
+
   dstVec[2] = (srcVec[0] * matrix[2] +
                srcVec[1] * matrix[6] +
                srcVec[2] * matrix[10]);
 }
 
-static void 
-xfAndProj(int frame, int obj) 
+static void
+xfAndProj(int frame, int obj)
 {
   int    vertex;
   float *matrix;
@@ -334,8 +338,8 @@ xfAndProj(int frame, int obj)
   }
 }
 
-static void 
-setupMaterial(int material_index) 
+static void
+setupMaterial(int material_index)
 {
   switch(material_index) {
   case 0:                       /* 3d */
@@ -362,7 +366,7 @@ setupMaterial(int material_index)
                      GR_COMBINE_LOCAL_NONE,
                      GR_COMBINE_OTHER_TEXTURE,
                      FXFALSE);
-    } 
+    }
     break;
   case 1:                       /* fx */
     if (pass == 0xbeef) {
@@ -397,10 +401,10 @@ setupMaterial(int material_index)
   }
 }
 
-static void 
-calculateIntensity(int material_index, 
-                   Vector intensity_factor, 
-                   int frame) 
+static void
+calculateIntensity(int material_index,
+                   Vector intensity_factor,
+                   int frame)
 {
   switch(material_index) {
   case 0:
@@ -436,8 +440,8 @@ calculateIntensity(int material_index,
   }
 }
 
-static void 
-drawFaces(int frame, int objnum) 
+static void
+drawFaces(int frame, int objnum)
 {
   int facenum;
   int material_index;
@@ -446,7 +450,7 @@ drawFaces(int frame, int objnum)
   static int prev_mat_index = 0xffff;
   int i;
   FxBool aa_a, aa_b, aa_c;
-    
+
   for(facenum = 0; facenum < num_faces[objnum]; facenum++)  {
     material_index = face[objnum][facenum].mat_index;
     if(material_index != prev_mat_index)  {
@@ -455,10 +459,10 @@ drawFaces(int frame, int objnum)
                          intensity_factor, frame);
       prev_mat_index = material_index;
     }
-        
+
     if((material_index != 0) && (pass == 2))
       continue;
-          
+
     aa_a = aa_b = aa_c = FXFALSE;
     if(face[objnum][facenum].aa_edge_flags & 4)
       aa_a = FXTRUE;
@@ -466,27 +470,27 @@ drawFaces(int frame, int objnum)
       aa_b = FXTRUE;
     if(face[objnum][facenum].aa_edge_flags & 1)
       aa_c = FXTRUE;
-        
+
     for(i = 0; i < 3; i++) {
       float *transformed_vert, *transformed_norm;
       Vert *v;
       int vertnum;
       float factor;
-            
+
       vertnum = face[objnum][facenum].v[i];
       transformed_vert = transformed_verts[vertnum];
       transformed_norm = transformed_norms[vertnum];
       v = &vert[objnum][vertnum];
-            
+
       gvert[i].x = transformed_vert[0];
       gvert[i].y = transformed_vert[1];
       gvert[i].oow = 1.0f / transformed_vert[2];
       gvert[i].tmuvtx[0].oow = gvert[i].oow;
       gvert[i].tmuvtx[0].sow = v->s * gvert[i].oow;
       gvert[i].tmuvtx[0].tow = v->t * gvert[i].oow;
-            
-      factor = ((light[0] * transformed_norm[0] + 
-                 light[1] * transformed_norm[1] + 
+
+      factor = ((light[0] * transformed_norm[0] +
+                 light[1] * transformed_norm[1] +
                  light[2] * transformed_norm[2])+ 1.0f) * 127.5f;
 
       gvert[i].r = factor * intensity_factor[0];
@@ -494,35 +498,35 @@ drawFaces(int frame, int objnum)
       gvert[i].b = factor * intensity_factor[2];
       gvert[i].a = 255.0f;
     }
-        
+
     if(pass == 2) {
       for(i = 0; i < 3; i++) {
         float *transformed_norm;
-                
-        transformed_norm = 
+
+        transformed_norm =
           transformed_norms[face[objnum][facenum].v[i]];
-                
-        gvert[i].tmuvtx[0].sow = gvert[i].oow * 
+
+        gvert[i].tmuvtx[0].sow = gvert[i].oow *
           (128.0f + transformed_norm[0] * 128.0f);
-        gvert[i].tmuvtx[0].tow = gvert[i].oow * 
+        gvert[i].tmuvtx[0].tow = gvert[i].oow *
           (128.0f + transformed_norm[1] * 128.0f);
-                
+
         gvert[i].r = intensity_factor[0] * 255.0f;
         gvert[i].g = intensity_factor[1] * 255.0f;
         gvert[i].b = intensity_factor[2] * 255.0f;
-      }                 
-            
+      }
+
       grDrawTriangle(&gvert[0], &gvert[1], &gvert[2]);
-            
+
       continue;
     }
-        
-    grAlphaBlendFunction(GR_BLEND_SRC_ALPHA, GR_BLEND_ONE_MINUS_SRC_ALPHA, 
+
+    grAlphaBlendFunction(GR_BLEND_SRC_ALPHA, GR_BLEND_ONE_MINUS_SRC_ALPHA,
                          GR_BLEND_ONE, GR_BLEND_ZERO);
     /* Do this if 3D. */
     if(material_index == 0) {
       /*
-       * Draw the textured 3D without specular. 
+       * Draw the textured 3D without specular.
        */
       sourceTexture(&textImage);
 #if 0
@@ -532,7 +536,7 @@ drawFaces(int frame, int objnum)
                      GR_COMBINE_OTHER_TEXTURE,
                      FXFALSE);
 #endif
-      grAADrawTriangle(&gvert[0], &gvert[1], &gvert[2], 
+      grAADrawTriangle(&gvert[0], &gvert[1], &gvert[2],
                        aa_a, aa_b, aa_c);
     } else if(material_index != 1) {
       /*
@@ -542,125 +546,125 @@ drawFaces(int frame, int objnum)
       grAADrawTriangle(&gvert[0], &gvert[1], &gvert[2],
                        aa_a, aa_b, aa_c);
     }
-        
+
     if(do_phong && (material_index != 0)) {
-      /* 
+      /*
        * figure out texture coords in [0..255.0f] based on the normal
        * the specular highlight.
        */
       for(i = 0; i < 3; i++) {
         float *transformed_norm;
-                
-        transformed_norm = 
+
+        transformed_norm =
           transformed_norms[face[objnum][facenum].v[i]];
-                
-        gvert[i].tmuvtx[0].sow = gvert[i].oow * 
+
+        gvert[i].tmuvtx[0].sow = gvert[i].oow *
           (128.0f + transformed_norm[0] * 128.0f);
-        gvert[i].tmuvtx[0].tow = gvert[i].oow * 
+        gvert[i].tmuvtx[0].tow = gvert[i].oow *
           (128.0f + transformed_norm[1] * 128.0f);
-                
+
         gvert[i].r = intensity_factor[0] * 255.0f;
         gvert[i].g = intensity_factor[1] * 255.0f;
         gvert[i].b = intensity_factor[2] * 255.0f;
-      }                 
-            
-      grAADrawTriangle(&gvert[0], &gvert[1], &gvert[2], 
+      }
+
+      grAADrawTriangle(&gvert[0], &gvert[1], &gvert[2],
                        aa_a, aa_b, aa_c);
     }
   }
 }
 
-static void 
-intersectLineWithZPlane(Vector result, Vector p1, 
-                        Vector p2, float z) 
+static void
+intersectLineWithZPlane(Vector result, Vector p1,
+                        Vector p2, float z)
 {
   float t;
-  
+
   t = (z - p1[2]) / (p2[2] - p1[2]);
   result[0] = p1[0] + (p2[0] - p1[0]) * t;
   result[1] = p1[1] + (p2[1] - p1[1]) * t;
   result[2] = z;
 }
 
-static float 
-vectorMag(float *v) 
+static float
+vectorMag(float *v)
 {
   return (float)sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
 }
 
-static void 
-drawShadow(int frame, int shadow_object_index, 
-           int receiver_object_index, Vector light_position) 
+static void
+drawShadow(int frame, int shadow_object_index,
+           int receiver_object_index, Vector light_position)
 {
   float *shadow_object_matrix;
   float *receiver_object_matrix;
   Vector view_verts[4];
   Vector projected_view_verts[4];
   int i;
-  
+
   Vector local_verts[4] = {
     { -280.0f, 0.0f, -160.0f },
     { -280.0f, 0.0f,  150.0f },
     {  280.0f, 0.0f,  150.0f },
-    {  280.0f, 0.0f, -160.0f } 
+    {  280.0f, 0.0f, -160.0f }
   };
-  
+
   float texcoords[4][2] = {
     {  10.5f, 127.5f },
     {  10.5f,   0.5f },
     { 255.0f,   0.5f },
     { 255.0f, 127.5f }
   };
-  
+
   GrVertex gvert[4];
   GrVertex projected_gvert[4];
   GrVertex light_gvert;
-  
+
   /*
-   * The point relative to the back part of the shield that 
+   * The point relative to the back part of the shield that
    * the shadow is going to be projected onto.
    */
   Vector shadow_light;
-  
+
   shadow_light[0] = light_position[0];
   shadow_light[1] = light_position[1];
   shadow_light[2] = light_position[2];
-  
+
   shadow_object_matrix   = &mat[frame][shadow_object_index][0];
   receiver_object_matrix = &mat[frame][receiver_object_index][0];
-  
+
   /*
-   * Offset the light by the Z position of 
+   * Offset the light by the Z position of
    * the backplane that we are projected
    * onto.
    */
   shadow_light[2] += receiver_object_matrix[14];
-  
+
   for(i = 0; i < 4; i++) {
     vecMatMult(view_verts[i], local_verts[i], shadow_object_matrix);
-        
+
     /*
-     * project . . . 
+     * project . . .
      */
     gvert[i].oow = 1.0f / view_verts[i][2];
-    gvert[i].x = 
-      view_verts[i][0] * gvert[i].oow * viewPort[0] + 
+    gvert[i].x =
+      view_verts[i][0] * gvert[i].oow * viewPort[0] +
         viewPort[1] + SNAP_BIAS;
-    gvert[i].y = 
-      view_verts[i][1] * gvert[i].oow * viewPort[2] + 
+    gvert[i].y =
+      view_verts[i][1] * gvert[i].oow * viewPort[2] +
         viewPort[3] + SNAP_BIAS;
-        
+
     /*
      * Set up texture coordinates.
      */
     gvert[i].tmuvtx[0].sow = texcoords[i][0] * gvert[i].oow;
     gvert[i].tmuvtx[0].tow = texcoords[i][1] * gvert[i].oow;
   }
-  
-  
+
+
   /*
    * Intersect each line formed by the light source and a
-   * particular corner of the shadow object with the 
+   * particular corner of the shadow object with the
    * plane which the texture is to be projected onto.
    */
   for(i = 0; i < 4; i++) {
@@ -672,29 +676,29 @@ drawShadow(int frame, int shadow_object_index,
      * These are left uninitialized, yet they are being sent to the
      * hw, probably because some other state is not being correctly
      * setup. This doesn't seem to affect the 'correctness' of the
-     * splash screen so I'm not investigating it any more.  
+     * splash screen so I'm not investigating it any more.
      */
-    projected_gvert[i].r = 
-    projected_gvert[i].g = 
-    projected_gvert[i].b = 
+    projected_gvert[i].r =
+    projected_gvert[i].g =
+    projected_gvert[i].b =
     projected_gvert[i].a = 0.0f;
 #endif /* GLIDE_PACKED_RGB */
-        
-    intersectLineWithZPlane(projected_view_verts[i], 
-                            shadow_light, 
-                            view_verts[i], 
+
+    intersectLineWithZPlane(projected_view_verts[i],
+                            shadow_light,
+                            view_verts[i],
                             receiver_object_matrix[14] - 26.0f);
     projected_gvert[i].oow = 1.0f / projected_view_verts[i][2];
     projected_gvert[i].x = (projected_view_verts[i][0] * projected_gvert[i].oow * viewPort[0] +
                             viewPort[1] + SNAP_BIAS);
     projected_gvert[i].y = (projected_view_verts[i][1] * projected_gvert[i].oow * viewPort[2] +
                             viewPort[3] + SNAP_BIAS);
-        
+
     tmpvect[0] = projected_view_verts[i][0] - shadow_light[0];
     tmpvect[1] = projected_view_verts[i][1] - shadow_light[1];
     tmpvect[2] = projected_view_verts[i][2] - shadow_light[2];
     q = vectorMag(tmpvect);
-        
+
     /*
      * Set up texture coordinates.
      */
@@ -702,11 +706,11 @@ drawShadow(int frame, int shadow_object_index,
     projected_gvert[i].tmuvtx[0].sow = texcoords[i][0] * projected_gvert[i].oow;
     projected_gvert[i].tmuvtx[0].tow = texcoords[i][1] * projected_gvert[i].oow;
   }
-  
+
   light_gvert.oow = 1.0f / shadow_light[2];
   light_gvert.x = shadow_light[0] * light_gvert.oow * viewPort[0] + viewPort[1] + SNAP_BIAS;
   light_gvert.y = shadow_light[1] * light_gvert.oow * viewPort[2] + viewPort[3] + SNAP_BIAS;
-  
+
   /*
    * Draw a segment between the light and the point which hits
    * the surface that the light is being projected onto.
@@ -717,26 +721,26 @@ drawShadow(int frame, int shadow_object_index,
                  GR_COMBINE_OTHER_TEXTURE,
                  FXFALSE);
   sourceTexture(&shadowImage);
-  
+
   grAlphaBlendFunction(GR_BLEND_DST_COLOR, GR_BLEND_ZERO,
                         GR_BLEND_ONE, GR_BLEND_ZERO);
 
-  grDrawTriangle(&projected_gvert[0], 
-                 &projected_gvert[1], 
+  grDrawTriangle(&projected_gvert[0],
+                 &projected_gvert[1],
                  &projected_gvert[2]);
-  grDrawTriangle(&projected_gvert[0], 
-                 &projected_gvert[2], 
+  grDrawTriangle(&projected_gvert[0],
+                 &projected_gvert[2],
                  &projected_gvert[3]);
-  grDrawTriangle(&projected_gvert[0], 
-                 &projected_gvert[2], 
+  grDrawTriangle(&projected_gvert[0],
+                 &projected_gvert[2],
                  &projected_gvert[1]);
-  grDrawTriangle(&projected_gvert[0], 
-                 &projected_gvert[3], 
+  grDrawTriangle(&projected_gvert[0],
+                 &projected_gvert[3],
                  &projected_gvert[2]);
-  
+
   grAlphaBlendFunction(GR_BLEND_ONE, GR_BLEND_ZERO,
                        GR_BLEND_ONE, GR_BLEND_ZERO);
-  
+
 }
 
 
@@ -774,10 +778,10 @@ GR_DIENTRY(grSplash,void,(float x,float y,float w,float h,FxU32 _frame))
                   x, y, w, h, _frame);
 
   /* Check Screen Dimensions and Check Avail of Depth Buffer */
-  if ((x > gc->state.screen_width) || 
+  if ((x > gc->state.screen_width) ||
       ((x+w) > gc->state.screen_width) ||
       (y > gc->state.screen_height) ||
-      ((y+h) > gc->state.screen_height)) 
+      ((y+h) > gc->state.screen_height))
     return;
 
   if (gc->state.screen_height == 640) {
@@ -796,7 +800,7 @@ GR_DIENTRY(grSplash,void,(float x,float y,float w,float h,FxU32 _frame))
   if (!(gc->state.fbi_config.fbzMode & SST_YORIGIN)) {
     y = ((gc->state.screen_height - 1.0f) - (h-1.0f)) - y;
   }
-        
+
   viewPort[0] = w *  (480.0f / 640.0f);
   viewPort[1] = x + (w / 2.0f);
   viewPort[2] = h;
@@ -826,7 +830,7 @@ GR_DIENTRY(grSplash,void,(float x,float y,float w,float h,FxU32 _frame))
   grAlphaBlendFunction(GR_BLEND_ONE, GR_BLEND_ZERO,
                        GR_BLEND_ONE, GR_BLEND_ZERO);
   if (useTextures)
-    grTexCombine(GR_TMU0, 
+    grTexCombine(GR_TMU0,
                  GR_COMBINE_FUNCTION_LOCAL, GR_COMBINE_FACTOR_NONE,
                  GR_COMBINE_FUNCTION_NONE, GR_COMBINE_FACTOR_NONE,
                  FXFALSE, FXFALSE);
@@ -845,28 +849,28 @@ GR_DIENTRY(grSplash,void,(float x,float y,float w,float h,FxU32 _frame))
   grCullMode(GR_CULL_NEGATIVE);
   /* grClipWindow((int)x, (int)y, (int)(x+w), (int)(y+h)); */
   grFogColorValue(0x0);
-  
+
   fadeInFrames  = (int)(((float)total_num_frames) * FADEIN_END_PERCENT);
-  fadeOutFrames = (int)(((float)total_num_frames) * 
+  fadeOutFrames = (int)(((float)total_num_frames) *
                         (1.0f - FADEOUT_BEGIN_PERCENT));
 
   if (_frame == 0) {          /* Render Whole Animation */
     for(frame = 1; frame < total_num_frames; frame++) {
       int i;
-            
+
       /* Set Fog Value For This Frame */
       if(frame < fadeInFrames)  {
-        unsigned char fval = (((unsigned char)0xFF) - 
+        unsigned char fval = (((unsigned char)0xFF) -
                               ((unsigned char)(255.0f * (float)(frame + 1) / (float)fadeInFrames)));
         for(i = 0; i < kInternalFogTableEntryCount; i++) fogTable[i] = fval;
         grFogMode(GR_FOG_WITH_TABLE);
         grFogTable(fogTable);
         fog = 1;
       } else if(frame > total_num_frames-fadeOutFrames) {
-        unsigned char fval = (((unsigned char)0xFF) - 
-                              (unsigned char)(255.0f* ((float)(total_num_frames - frame))/ 
+        unsigned char fval = (((unsigned char)0xFF) -
+                              (unsigned char)(255.0f* ((float)(total_num_frames - frame))/
                                               ((float)fadeOutFrames)));
-        for(i = 0; i < kInternalFogTableEntryCount; i++) 
+        for(i = 0; i < kInternalFogTableEntryCount; i++)
           fogTable[i] = fval;
         grFogMode(GR_FOG_WITH_TABLE);
         grFogTable(fogTable);
@@ -875,9 +879,9 @@ GR_DIENTRY(grSplash,void,(float x,float y,float w,float h,FxU32 _frame))
         grFogMode(GR_FOG_DISABLE);
         fog = 0;
       }
-        
+
       grBufferClear(0x00000000, 0, GR_WDEPTHVALUE_FARTHEST);
-        
+
       pass = 1;
 
       /*
@@ -889,7 +893,7 @@ GR_DIENTRY(grSplash,void,(float x,float y,float w,float h,FxU32 _frame))
       /* cyan part of shield */
       xfAndProj(frame, 2);
       drawFaces(frame, 2);
-      
+
       /* yellow and white part of shield. */
       xfAndProj(frame, 0);
       drawFaces(frame, 0);
@@ -925,13 +929,13 @@ GR_DIENTRY(grSplash,void,(float x,float y,float w,float h,FxU32 _frame))
     }
   } else {                      /* Render One Frame */
     frame = ((_frame>>1) % SPIN_FRAMES)+SPIN_START;
-        
+
     grColorMask(FXFALSE, FXFALSE);
     grBufferClear(0x00000000, 0, GR_WDEPTHVALUE_FARTHEST);
     grColorMask(FXTRUE, FXFALSE);
-        
+
     pass = 0xbeef;
-        
+
     /* 3Dfx logo */
     xfAndProj(frame, 1);
     drawFaces(frame, 1);
@@ -943,13 +947,13 @@ GR_DIENTRY(grSplash,void,(float x,float y,float w,float h,FxU32 _frame))
    */
   if (frame == 0) {
     int i;
-    
+
     for(i = 0; i < gc->grColBuf; i++) {
       grBufferClear(0x00000000, 0, GR_WDEPTHVALUE_FARTHEST);
       grBufferSwap(0);
     }
   }
-    
+
   /*
    * Clean up after yourself!
    */

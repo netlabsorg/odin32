@@ -1,25 +1,26 @@
+/* $Id: vg96drvr.c,v 1.2 2001-09-05 14:31:00 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
 **
-** $Revision: 1.1 $ 
-** $Date: 2000-02-25 00:31:27 $ 
+** $Revision: 1.2 $
+** $Date: 2001-09-05 14:31:00 $
 **
 */
 
@@ -49,7 +50,7 @@ static FxBool setVideo( FxU32                   hWnd,
                         int                     *yres,
                         int                     *fbStride,
                         sst1VideoTimingStruct   *vidTimings) {
-    return init96SetVideo( hWnd, sRes, vRefresh, cFormat, yOrigin, 
+    return init96SetVideo( hWnd, sRes, vRefresh, cFormat, yOrigin,
                            nColBuffers, nAuxBuffers,
                            &context->info.regs,
                            xres, yres, fbStride );
@@ -71,11 +72,11 @@ static InitSwapType_t swapBuffers( FxU32 code ) {
     if ( context && context->writeMethod )
         init96Swap( code, &context->info.regs, context->writeMethod );
     return INIT_SWAP_FLIP;
-} 
+}
 
 static FxU32 status( void ) {
   return *(context->info.regs.hwDep.VG96RegDesc.serialStatus);
-} 
+}
 
 static FxBool busy(void) {
   FxBool rv;
@@ -83,7 +84,7 @@ static FxBool busy(void) {
   rv = (status() & 0x1) ? FXTRUE : FXFALSE;
 
   return rv;
-} 
+}
 
 static void idle( void ) {
     init96Idle(context->writeMethod);
@@ -110,7 +111,7 @@ static void ioCtl( FxU32 token, void *argument ) {
 static FxBool control( FxU32 code ) {
     FxBool rv = FXFALSE;
     GDBG_INFO((80, "vg96drvr: control: code = %d\n", code));
-    if (context) 
+    if (context)
         rv = init96Control( code, &context->info.regs);
     return rv;
 }
@@ -159,7 +160,7 @@ void vg96DriverInit( InitContext *context ) {
     context->gammaRGB         = gammargb;
     context->initGammaTable   = gammatable;
     context->findVidTimingStruct = findvidtiming;
-} 
+}
 #else
 /* I've got to stub this one to get the Voodoo Graphics glide to link */
 void vg96DriverInit( InitContext *context ) {
@@ -183,7 +184,7 @@ void vg96DriverInit( InitContext *context ) {
 
     context->gammaRGB         = NULL;
     context->initGammaTable   = NULL;
-    context->findVidTimingStruct = NULL; 
+    context->findVidTimingStruct = NULL;
 
 }
 #endif

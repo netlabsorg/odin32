@@ -1,25 +1,26 @@
 /*-*-c++-*-*/
+/* $Id: video.c,v 1.2 2001-09-05 14:30:43 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Revision: 1.1 $ 
-** $Date: 2000-02-25 00:37:55 $ 
+** $Revision: 1.2 $
+** $Date: 2001-09-05 14:30:43 $
 **
 ** Initialization code for initializing SST-1 video unit
 **
@@ -160,7 +161,7 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitVideoBuffers(FxU32 *sstbase,
     if(sst1CurrentBoard->sliDetected)
       memSizeInPages <<= 1;
 
-    // To be compatible with Voodoo1, if there is enough memory to 
+    // To be compatible with Voodoo1, if there is enough memory to
     // allocate an aux buffer, then do it...
     if(nCol == 2 && nAux == 0) {
        if(memSizeInPages > (3 * sstVideoRez->memOffset)) {
@@ -210,7 +211,7 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitVideoBuffers(FxU32 *sstbase,
 
     // Reset Video Refresh Unit
     ISET(sst->fbiInit1, IGET(sst->fbiInit1) | SST_VIDEO_RESET);
-    
+
     // Setup SST video timing registers
     if(GETENV(("SSTV2_HSYNC"))) {
         SSCANF(GETENV(("SSTV2_HSYNC")), "%i", &vtmp);
@@ -266,9 +267,9 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitVideoBuffers(FxU32 *sstbase,
 
     // Setup SST memory mapper for desired resolution
     if(sst1CurrentBoard->fbiMemSize == 4)
-        sst1InitSetResolution(sstbase, sstVideoRez, 1); 
+        sst1InitSetResolution(sstbase, sstVideoRez, 1);
     else
-        sst1InitSetResolution(sstbase, sstVideoRez, 0); 
+        sst1InitSetResolution(sstbase, sstVideoRez, 0);
 
     // Calculate graphics clock frequency
     if(sst1InitCalcGrxClk(sstbase) == FXFALSE)
@@ -341,8 +342,8 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitVideoBuffers(FxU32 *sstbase,
     // Setup buffer management...
     if(sst1InitAllocBuffers(sstbase, nCol, nAux) == FXFALSE)
        return(FXFALSE);
-   
-    INIT_PRINTF(("sst1InitVideo(): Allocating %d Color Buffers and %d Aux Buffer(s)...\n", 
+
+    INIT_PRINTF(("sst1InitVideo(): Allocating %d Color Buffers and %d Aux Buffer(s)...\n",
                  sst1CurrentBoard->fbiVideoColBuffs, sst1CurrentBoard->fbiVideoAuxBuffs));
     ISET(sst->fbiInit4, IGET(sst->fbiInit4) |
         (((nCol+nAux)*sstVideoRez->memOffset) << SST_MEM_FIFO_ROW_BASE_SHIFT));
@@ -388,7 +389,7 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitVideoBuffers(FxU32 *sstbase,
             SST_MEM_FIFO_EN);
         INIT_PRINTF(("sst1InitVideo(): Setting memory FIFO LWM to 0x%x (%d)\n",
             sst1CurrentBoard->memFifoStatusLwm,
-            sst1CurrentBoard->memFifoStatusLwm));  
+            sst1CurrentBoard->memFifoStatusLwm));
     }
 
     vInClkDel = 1;
@@ -664,7 +665,7 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitVideoBuffers(FxU32 *sstbase,
 **  Initialize video for buffer management
 **
 */
-static FxBool 
+static FxBool
 sst1InitAllocBuffersDirect(FxU32 *sstbase, FxU32 nColorBuffs, FxU32 nAuxBuffs)
 {
    SstRegs *sst = (SstRegs *) sstbase;
@@ -688,7 +689,7 @@ sst1InitAllocBuffersDirect(FxU32 *sstbase, FxU32 nColorBuffs, FxU32 nAuxBuffs)
      ISET(sst->fbiInit5, (IGET(sst->fbiInit5) & ~SST_BUFFER_ALLOC) |
        SST_BUFFER_ALLOC_3C1Z);
    else {
-     INIT_PRINTF(("sst1InitAllocBuffers(): Unsupported Color/Aux buffer combination (%d/%d)\n", 
+     INIT_PRINTF(("sst1InitAllocBuffers(): Unsupported Color/Aux buffer combination (%d/%d)\n",
                   nCol, nAux));
      return(FXFALSE);
    }
@@ -697,7 +698,7 @@ sst1InitAllocBuffersDirect(FxU32 *sstbase, FxU32 nColorBuffs, FxU32 nAuxBuffs)
    return(FXTRUE);
 }
 
-FX_EXPORT FxBool FX_CSTYLE 
+FX_EXPORT FxBool FX_CSTYLE
 sst1InitAllocBuffers(FxU32 *sstbase, FxU32 nColorBuffs, FxU32 nAuxBuffs)
 {
    SstRegs *sst = (SstRegs *) sstbase;
@@ -711,12 +712,12 @@ sst1InitAllocBuffers(FxU32 *sstbase, FxU32 nColorBuffs, FxU32 nAuxBuffs)
    if(sst1InitCheckBoard(sstbase) == FXFALSE)
        return(FXFALSE);
 
-   retVal = sst1InitAllocBuffersDirect(sstbase, 
+   retVal = sst1InitAllocBuffersDirect(sstbase,
                                        nColorBuffs, nAuxBuffs);
 
    if (retVal && sst1CurrentBoard->sliDetected) {
      /* NB: When writing to the slave we need to make sure that it does
-      * not have a client callback installed.  
+      * not have a client callback installed.
       */
      FxSet32Proc saveProc = sst1CurrentBoard->set32;
      sst1CurrentBoard->set32 = NULL;
@@ -796,8 +797,8 @@ FxBool sst1InitSetVidMode(FxU32 *sstbase, FxU32 video16BPP)
 **
 **
 */
-FX_EXPORT void FX_CSTYLE sst1InitSetResolution(FxU32 *sstbase, 
-                                               sst1VideoTimingStruct *sstVideoRez, 
+FX_EXPORT void FX_CSTYLE sst1InitSetResolution(FxU32 *sstbase,
+                                               sst1VideoTimingStruct *sstVideoRez,
                                                FxU32 Banked)
 {
     SstRegs *sst = (SstRegs *) sstbase;
@@ -906,7 +907,7 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitSetGrxClk(FxU32 *sstbase,
 **
 */
 FX_EXPORT FxBool FX_CSTYLE sst1InitVideoBorder(FxU32 *sstbase,
-                                               FxU32 mask, 
+                                               FxU32 mask,
                                                FxU32 color)
 {
 
@@ -948,7 +949,7 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitVideoBorder(FxU32 *sstbase,
 */
 
 FX_EXPORT sst1VideoTimingStruct* FX_CSTYLE
-sst1InitFindVideoTimingStruct(GrScreenResolution_t screenResolution, 
+sst1InitFindVideoTimingStruct(GrScreenResolution_t screenResolution,
                               GrScreenRefresh_t screenRefresh)
 {
     GrScreenResolution_t screenRez = screenResolution;
@@ -1013,10 +1014,10 @@ sst1InitFindVideoTimingStruct(GrScreenResolution_t screenResolution,
           break;
 
         case(GR_RESOLUTION_512x384):
-        
+
           if( GETENV( ("SSTV2_REFRESH_512x384") ) )
             refreshRate = sst1InitConvertRefreshRate( ATOI( GETENV( ("SSTV2_REFRESH_512x384") ) ) );
-            
+
           if(refreshRate == GR_REFRESH_120Hz)
              return(&SST_VREZ_512X384_120);
           else if(refreshRate == GR_REFRESH_85Hz) {
@@ -1038,10 +1039,10 @@ sst1InitFindVideoTimingStruct(GrScreenResolution_t screenResolution,
           break;
 
         case(GR_RESOLUTION_640x400):
-        
+
           if( GETENV( ("SSTV2_REFRESH_640x400") ) )
             refreshRate = sst1InitConvertRefreshRate( ATOI( GETENV( ("SSTV2_REFRESH_640x400") ) ) );
-        
+
           if(refreshRate == GR_REFRESH_120Hz)
              return(&SST_VREZ_640X400_120);
           else if(refreshRate == GR_REFRESH_85Hz)
@@ -1053,10 +1054,10 @@ sst1InitFindVideoTimingStruct(GrScreenResolution_t screenResolution,
           break;
 
         case(GR_RESOLUTION_640x480):
-        
+
           if( GETENV( ("SSTV2_REFRESH_640x480") ) )
             refreshRate = sst1InitConvertRefreshRate( ATOI( GETENV( ("SSTV2_REFRESH_640x480") ) ) );
-            
+
           if(refreshRate == GR_REFRESH_120Hz)
              return(&SST_VREZ_640X480_120);
           else if(refreshRate == GR_REFRESH_85Hz)
@@ -1068,10 +1069,10 @@ sst1InitFindVideoTimingStruct(GrScreenResolution_t screenResolution,
           break;
 
         case(GR_RESOLUTION_800x600):
-        
+
           if( GETENV( ("SSTV2_REFRESH_800x600") ) )
             refreshRate = sst1InitConvertRefreshRate( ATOI( GETENV( ("SSTV2_REFRESH_800x600") ) ) );
-            
+
           if(refreshRate == GR_REFRESH_120Hz)
              return(&SST_VREZ_800X600_120);
           else if(refreshRate == GR_REFRESH_85Hz)
@@ -1089,7 +1090,7 @@ sst1InitFindVideoTimingStruct(GrScreenResolution_t screenResolution,
         case(GR_RESOLUTION_960x720):
           if( GETENV( ("SSTV2_REFRESH_960x720") ) )
             refreshRate = sst1InitConvertRefreshRate( ATOI( GETENV( ("SSTV2_REFRESH_960x720") ) ) );
-            
+
           if(refreshRate == GR_REFRESH_85Hz)
              return(&SST_VREZ_960X720_85);
           else if(refreshRate == GR_REFRESH_75Hz)
@@ -1099,10 +1100,10 @@ sst1InitFindVideoTimingStruct(GrScreenResolution_t screenResolution,
           break;
 
         case(GR_RESOLUTION_1024x768):
-        
+
           if( GETENV( ("SSTV2_REFRESH_1024x768") ) )
             refreshRate = sst1InitConvertRefreshRate( ATOI( GETENV( ("SSTV2_REFRESH_1024x768") ) ) );
-            
+
           if(refreshRate == GR_REFRESH_85Hz)
              return(&SST_VREZ_1024X768_85);
           else if(refreshRate == GR_REFRESH_75Hz)
@@ -1172,7 +1173,7 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitMonitorDetect(FxU32 *sstbase)
       do {
           j = IGET(sst->status);
       } while(!(j & SST_VRETRACE));
-  
+
       // Wait for active vsync
       do {
           j = IGET(sst->status);
@@ -1263,7 +1264,7 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitSetClkDelays(FxU32 *sstbase)
          tf2_clkdel = 0x7;
       else
          tf2_clkdel = 0x6;
-   } else 
+   } else
       tf2_clkdel = 0x6;
 
    // TF1 Clock Delay...
@@ -1273,7 +1274,7 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitSetClkDelays(FxU32 *sstbase)
          tf1_clkdel = 0x7;
       else
          tf1_clkdel = 0x6;
-   } else 
+   } else
       tf1_clkdel = 0x6;
 
    // Reset FBI & TMU, and put TF1 clock delay value back to default...

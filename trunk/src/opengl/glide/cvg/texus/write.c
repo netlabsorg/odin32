@@ -1,20 +1,21 @@
+/* $Id: write.c,v 1.2 2001-09-05 14:30:48 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 */
 
@@ -29,14 +30,14 @@
  * The only two file formats we can write are: 3df and tga.
  */
 static  char *Version = "1.1";
-static char* aspect_names[] = { "8 1", "4 1", "2 1", "1 1", 
+static char* aspect_names[] = { "8 1", "4 1", "2 1", "1 1",
                                                         "1 2", "1 4", "1 8" };
 
 /*************************************** tga files ****************************/
-/* 
+/*
  * Write a tga file from an ARGB8888 mipmap.
  */
-static FxBool 
+static FxBool
 txWriteTGA( FILE *stream, TxMip *txMip)
 {
 
@@ -72,11 +73,11 @@ txWriteTGA( FILE *stream, TxMip *txMip)
         txPanic("Bad file handle");
         return FXFALSE;
     }
-    
+
     outW = txMip->width;
     outH = txMip->height;
     if (txMip->depth > 1) outW += outW/2;
-    
+
     tgaHeader.IDLength         = 0;
     tgaHeader.ColorMapType     = 0;
     tgaHeader.ImgType          = 0x2;
@@ -95,7 +96,7 @@ txWriteTGA( FILE *stream, TxMip *txMip)
     tgaHeader.HeightLo         = (FxU8) (outH & 0xFF);
     tgaHeader.PixelDepth       = 32;
     tgaHeader.ImageDescriptor  = 0x20;          // image always right side up.
-        
+
 
     if ( fwrite( &tgaHeader, 1, 18, stream ) != 18 ) {
         txPanic("TGA Header stream write error");
@@ -109,14 +110,14 @@ txWriteTGA( FILE *stream, TxMip *txMip)
     memset(data, 0, outW * outH * 4);
 
     /* Copy level 0 into malloc'd area */
-    txRectCopy( data, outW * 4, txMip->data[0], txMip->width * 4, 
+    txRectCopy( data, outW * 4, txMip->data[0], txMip->width * 4,
         txMip->width * 4, txMip->height);
 
     p += (txMip->width * 4);
 
     /* Copy the rest of the levels to the right of level 0 */
-    w = txMip->width; 
-    h = txMip->height; 
+    w = txMip->width;
+    h = txMip->height;
     for (i=1; i< txMip->depth; i++) {
         // printf("Copying: level = %d\n", i);
         if (w > 1) w >>= 1;
@@ -128,10 +129,10 @@ txWriteTGA( FILE *stream, TxMip *txMip)
     /* Write out the data */
     data32 = (FxU32 *) data;
     for (i=outW*outH; i; i--) {
-        putc(((*data32      ) & 0xff)    , stream);     
-        putc(((*data32 >>  8) & 0xff)    , stream);     
-        putc(((*data32 >> 16) & 0xff)    , stream);     
-        putc(((*data32 >> 24) & 0xff)    , stream);     
+        putc(((*data32      ) & 0xff)    , stream);
+        putc(((*data32 >>  8) & 0xff)    , stream);
+        putc(((*data32 >> 16) & 0xff)    , stream);
+        putc(((*data32 >> 24) & 0xff)    , stream);
         data32++;
     }
     return FXTRUE;
@@ -141,7 +142,7 @@ txWriteTGA( FILE *stream, TxMip *txMip)
 /*************************************** 3df files ****************************/
 /* Write word, msb first */
 
-static FxBool 
+static FxBool
 _txWrite16 (FILE *stream, FxU16 data)
 {
     FxU8 byte[2];
@@ -154,7 +155,7 @@ _txWrite16 (FILE *stream, FxU16 data)
 
 /* Write long word, msb first */
 
-static FxBool 
+static FxBool
 _txWrite32 (FILE *stream, FxU32 data)
 {
     FxU8 byte[4];
@@ -168,7 +169,7 @@ _txWrite32 (FILE *stream, FxU32 data)
 }
 
 /* Write NCC table */
-static FxBool 
+static FxBool
 _txWrite3dfNCCTable (FILE *stream, FxU32 *yab)
 {
     int         i;
@@ -176,10 +177,10 @@ _txWrite3dfNCCTable (FILE *stream, FxU32 *yab)
     for (i = 0; i < 16; i++)
         if (!_txWrite16 (stream, (FxU16) (yab[i] & 0x00ff))) return FXFALSE;
 
-    for (i = 0; i < 12; i++) 
+    for (i = 0; i < 12; i++)
         if (!_txWrite16 (stream, (FxU16) (yab[16+i] & 0xffff))) return FXFALSE;
 
-    for (i = 0; i < 12; i++) 
+    for (i = 0; i < 12; i++)
         if (!_txWrite16 (stream, (FxU16) (yab[28+i] & 0xffff))) return FXFALSE;
 
     return FXTRUE;
@@ -196,7 +197,7 @@ _txWrite3dfPalTable (FILE *stream, FxU32 *pal)
         return FXTRUE;
 }
 
-static FxBool 
+static FxBool
 txWrite3df (FILE *stream, TxMip *txMip)
 {
     FxU32       i;
@@ -212,9 +213,9 @@ txWrite3df (FILE *stream, TxMip *txMip)
     // printf("Format = %s\n", Format_Name[txMip->format]);
 
     // printf("Writing header...\n");
-    if (EOF == fprintf (stream, 
+    if (EOF == fprintf (stream,
         "3df v%s\n%s\nlod range: %d %d\naspect ratio: %s\n",
-        Version, 
+        Version,
         Format_Name[txMip->format],
         small_lod,
         large_lod,
@@ -225,12 +226,12 @@ txWrite3df (FILE *stream, TxMip *txMip)
     if ((txMip->format == GR_TEXFMT_YIQ_422) ||
         (txMip->format == GR_TEXFMT_AYIQ_8422)) {
                 if (!_txWrite3dfNCCTable (stream, txMip->pal)) return FXFALSE;
-    } 
+    }
 
     else if ((txMip->format == GR_TEXFMT_P_8) ||
         (txMip->format == GR_TEXFMT_AP_88)) {
                 if (!_txWrite3dfPalTable (stream, txMip->pal)) return FXFALSE;
-    } 
+    }
 
 
     /* write out mipmap image data */
@@ -288,7 +289,7 @@ txMipWrite(TxMip *txMip, char *file, char *ext, int split)
         strcat(filename, ext);
         if( txVerbose )
           {
-            printf("Writing file \"%s\" (format: %s)\n", 
+            printf("Writing file \"%s\" (format: %s)\n",
                    filename, Format_Name[txMip->format]);
           }
         stream = fopen(filename, "wb");
@@ -379,7 +380,7 @@ FxBool txWrite( Gu3dfInfo *info, FILE *fp, FxU32 flags )
         return FXFALSE;
       break;
     case TX_WRITE_TGA:
-      if( mip.format == GR_TEXFMT_YIQ_422 || 
+      if( mip.format == GR_TEXFMT_YIQ_422 ||
           mip.format == GR_TEXFMT_AYIQ_8422 )
         {
           txPanic( "Don't know how to write NCC textures\n" );

@@ -1,25 +1,26 @@
+/* $Id: diffuse.c,v 1.2 2001-09-05 14:30:44 bird Exp $ */
 
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Revision: 1.1 $
-** $Date: 2000-02-25 00:37:58 $
+** $Revision: 1.2 $
+** $Date: 2001-09-05 14:30:44 $
 */
 
 #include <stdio.h>
@@ -38,21 +39,21 @@ int     nsorted;
 FxU32   sortR[256], sortG[256], sortB[256];
 FxU8    bestR[256], bestG[256], bestB[256];
 
-static int 
+static int
 _txAscendingR(const void *a, const void *b)
 {
     return ((*(FxI32 *)a) & 0x00FF0000) - ((*(FxI32 *)b) & 0x00FF0000);
 }
 
 
-static int 
+static int
 _txAscendingG(const void *a, const void *b)
 {
     return ((*(FxI32 *)a) & 0x0000ff00) - ((*(FxI32 *)b) & 0x0000ff00);
 }
 
 
-static int 
+static int
 _txAscendingB(const void *a, const void *b)
 {
     return ((*(FxI32 *)a) & 0x000000ff) - ((*(FxI32 *)b) & 0x000000ff);
@@ -77,12 +78,12 @@ _txMakeRange(const FxU32 *palette, int ncolors)
     nsorted = ncolors;
 
 #if 0
-    for (i=0; i<ncolors; i++) 
-        printf("[%3d] = R%.08x G%.08x B%.08x\n", 
+    for (i=0; i<ncolors; i++)
+        printf("[%3d] = R%.08x G%.08x B%.08x\n",
             i, sortR[i], sortG[i], sortB[i]);
 #endif
 
- 
+
     for (i=0; i<256; i++) {
 
         /* Find index of best matching Red component given r=i */
@@ -128,7 +129,7 @@ _txFastMatch(int r, int g, int b)
     pal = sortR;
     persist = 0;
     for (i=bestR[r]; i>=0; i--) {
-        d = DISTANCE(r, g, b, 
+        d = DISTANCE(r, g, b,
             ((pal[i] >> 16) & 0xff), ((pal[i] >> 8) & 0xff), ((pal[i]) & 0xff));
         if (d < mindist) { mindist = d; minpos = (pal[i] >> 24) & 0xff; }
         else if (++persist > 3) break;
@@ -137,7 +138,7 @@ _txFastMatch(int r, int g, int b)
     /* Walk forwards from bestR+1, tracking best index */
     persist = 0;
     for (i=bestR[r]+1; i < nsorted; i++) {
-        d = DISTANCE(r, g, b, 
+        d = DISTANCE(r, g, b,
             ((pal[i] >> 16) & 0xff), ((pal[i] >> 8) & 0xff), ((pal[i]) & 0xff));
         if (d < mindist) { mindist = d; minpos = (pal[i] >> 24) & 0xff; }
         else if (++persist > 3) break;
@@ -148,7 +149,7 @@ _txFastMatch(int r, int g, int b)
     pal = sortG;
     persist = 0;
     for (i=bestG[g]; i>=0; i--) {
-        d = DISTANCE(r, g, b, 
+        d = DISTANCE(r, g, b,
             ((pal[i] >> 16) & 0xff), ((pal[i] >> 8) & 0xff), ((pal[i]) & 0xff));
         if (d < mindist) { mindist = d; minpos = (pal[i]>>24) & 0xff; }
         else if (++persist > 3) break;
@@ -157,7 +158,7 @@ _txFastMatch(int r, int g, int b)
     /* Walk forwards from bestG+1, tracking best index */
     persist = 0;
     for (i=bestG[g]+1; i < nsorted; i++) {
-        d = DISTANCE(r, g, b, 
+        d = DISTANCE(r, g, b,
             ((pal[i] >> 16) & 0xff), ((pal[i] >> 8) & 0xff), ((pal[i]) & 0xff));
         if (d < mindist) { mindist = d; minpos = (pal[i]>>24) & 0xff; }
         else if (++persist > 3) break;
@@ -167,7 +168,7 @@ _txFastMatch(int r, int g, int b)
     pal = sortB;
     persist = 0;
     for (i=bestB[b]; i>=0; i--) {
-        d = DISTANCE(r, g, b, 
+        d = DISTANCE(r, g, b,
             ((pal[i] >> 16) & 0xff), ((pal[i] >> 8) & 0xff), ((pal[i]) & 0xff));
         if (d < mindist) { mindist = d; minpos = (pal[i]>>24) & 0xff; }
         else if (++persist > 3) break;
@@ -176,7 +177,7 @@ _txFastMatch(int r, int g, int b)
     /* Walk forwards from bestB+1, tracking best index */
     persist = 0;
     for (i=bestB[b]+1; i < nsorted; i++) {
-        d = DISTANCE(r, g, b, 
+        d = DISTANCE(r, g, b,
             ((pal[i] >> 16) & 0xff), ((pal[i] >> 8) & 0xff), ((pal[i]) & 0xff));
         if (d < mindist) { mindist = d; minpos = (pal[i]>>24) & 0xff; }
         else if (++persist > 3) break;
@@ -220,7 +221,7 @@ _txToDiffuseIndex (FxU8 *opixels, int pixsize, const FxU32 *pal, int ncolors,
             ig += qg + ErrG[x];
             ib += qb + ErrB[x];
 
-            qr = ir;    // quantized pixel values. 
+            qr = ir;    // quantized pixel values.
             qg = ig;    // qR is error from pixel to left, errR is
             qb = ib;    // error from pixel to the top & top left.
 
@@ -244,7 +245,7 @@ _txToDiffuseIndex (FxU8 *opixels, int pixsize, const FxU32 *pal, int ncolors,
             qg = ig - qg;
             qb = ib - qb;
 
-            // 3/8 (=0.375) to the EAST, 3/8 to the SOUTH, 
+            // 3/8 (=0.375) to the EAST, 3/8 to the SOUTH,
             // 1/4 (0.25) to the SOUTH-EAST.
             ErrR[x]  = ((x == 0) ? 0 : ErrR[x]) + ((int) (qr * 0.375f));
             ErrG[x]  = ((x == 0) ? 0 : ErrG[x]) + ((int) (qg * 0.375f));
@@ -278,7 +279,7 @@ txDiffuseIndex(TxMip *pxMip, TxMip *txMip, int pixsize, const FxU32 *palette,
       {
         printf("EDiffusion:..."); fflush(stdout);
       }
-        
+
 #if     FAST_DIFFUSION
     _txMakeRange(palette, ncolors);
 #endif
@@ -288,7 +289,7 @@ txDiffuseIndex(TxMip *pxMip, TxMip *txMip, int pixsize, const FxU32 *palette,
     h = txMip->height;
 
     for (i=0; i<txMip->depth; i++) {
-        _txToDiffuseIndex(pxMip->data[i], pixsize, palette, ncolors, 
+        _txToDiffuseIndex(pxMip->data[i], pixsize, palette, ncolors,
             txMip->data[i], w, h);
             if (w > 1) w >>= 1;
             if (h > 1) h >>= 1;

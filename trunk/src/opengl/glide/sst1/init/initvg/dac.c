@@ -1,25 +1,26 @@
+/* $Id: dac.c,v 1.2 2001-09-05 14:31:03 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
 **
-** $Revision: 1.1 $ 
-** $Date: 2000-02-25 00:31:32 $ 
+** $Revision: 1.2 $
+** $Date: 2001-09-05 14:31:03 $
 **
 ** Initialization code for initializing supported SST-1 DACs
 **
@@ -38,7 +39,7 @@
 ** sst1InitDacRd():
 **  Read external DAC registers
 **  NOTE: The video unit of FBI must be in reset before calling this routine.
-**        The rendering engines of FBI and TREX must be idle before calling 
+**        The rendering engines of FBI and TREX must be idle before calling
 **        this routine.
 **        fbiInit23 register remapping (PCI config. initEnable[2]=1) must be
 **        enabled before calling this routine
@@ -71,7 +72,7 @@ FX_EXPORT FxU32 FX_CSTYLE sst1InitDacRd(FxU32 *sstbase, FxU32 addr)
 ** sst1InitDacWr():
 **  Write to external DAC registers
 **  NOTE: The video unit of FBI must be in reset before calling this routine.
-**        The rendering engines of FBI and TREX must be idle before calling 
+**        The rendering engines of FBI and TREX must be idle before calling
 **        this routine.
 **
 **  Valid addresses are 0 <= addr <= 3
@@ -590,7 +591,7 @@ FxBool sst1InitComputeClkParams(float freq, sst1ClkTimingStruct
 #if 0
     {
         float calc;
-        
+
         calc = ((float) 14.318 * (float) (m + 2)) /
             ((float) (n + 2) * vcoFreqDivide);
         printf("freq:%.3f  calc:%.3f\n", freq, calc);

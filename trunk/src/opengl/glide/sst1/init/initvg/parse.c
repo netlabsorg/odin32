@@ -1,25 +1,26 @@
+/* $Id: parse.c,v 1.2 2001-09-05 14:31:05 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
 **
-** $Revision: 1.1 $ 
-** $Date: 2000-02-25 00:31:34 $ 
+** $Revision: 1.2 $
+** $Date: 2001-09-05 14:31:05 $
 **
 ** Parsing code for grabbing information from "voodoo.ini" initialization file
 **
@@ -169,7 +170,7 @@ FX_ENTRY FxBool FX_CALL sst1InitVoodooFile() {
   if (getenv("VOODOO_FILE")) {
     /* Override voodoo.ini name */
     strcpy(filename, getenv("VOODOO_FILE"));
-    if (!(file = fopen(filename, "r"))) 
+    if (!(file = fopen(filename, "r")))
       goto __errExit;
   } else {
     /* Override path setting */
@@ -182,20 +183,20 @@ FX_ENTRY FxBool FX_CALL sst1InitVoodooFile() {
     i = 0;
     while(1) {
       if (!i) {
-	if ((tmpPtr = strtok(path, ":")) == NULL)
-	  break;
+    if ((tmpPtr = strtok(path, ":")) == NULL)
+      break;
       } else {
-	if ((tmpPtr = strtok(NULL, ":")) == NULL)
-	  break;
+    if ((tmpPtr = strtok(NULL, ":")) == NULL)
+      break;
       }
       strcpy(filename, tmpPtr);
       if (filename[strlen(filename)-1] == '\\')
-	sprintf(filename, "%voodoo", filename);
+    sprintf(filename, "%voodoo", filename);
       else
-	sprintf(filename, "%s/voodoo", filename);
+    sprintf(filename, "%s/voodoo", filename);
       i++;
       if ((file = fopen(filename, "r")))
-	break;
+    break;
     }
   }
   if (!file) {
@@ -512,7 +513,7 @@ static int sst1InitParseDacRdWrString(char *string, sst1InitDacStruct *dacBase)
             if((dacRdWrCmd = strtok(NULL, ";")) == NULL) {
                 break;
             }
-            if(!(dacRdWrPtr->nextRdWr = malloc(sizeof(sst1InitDacRdWrStruct)))) 
+            if(!(dacRdWrPtr->nextRdWr = malloc(sizeof(sst1InitDacRdWrStruct))))
                 return(0);
 
             dacRdWrPtr = (sst1InitDacRdWrStruct *)dacRdWrPtr->nextRdWr;
@@ -897,7 +898,7 @@ myGetenv(const char* envKey)
    * exit() or dropped off of the end of main the per dll environ
    * string table has been freed by the c runtime but has not been set
    * to NULL. Bad things happen if this memory has been unmapped by
-   * the system or if the string cannot be found.  
+   * the system or if the string cannot be found.
    */
   {
     HANDLE curProcessHandle = GetCurrentProcess();

@@ -1,25 +1,26 @@
 /*-*-c++-*-*/
+/* $Id: util.c,v 1.2 2001-09-05 14:30:42 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Revision: 1.1 $ 
-** $Date: 2000-02-25 00:37:55 $ 
+** $Revision: 1.2 $
+** $Date: 2001-09-05 14:30:42 $
 **
 ** Utility routines for SST-1 Initialization code
 **
@@ -344,12 +345,12 @@ FX_EXPORT FxBool FX_CSTYLE sst1InitVgaPassCtrl(FxU32 *sstbase, FxU32 enable)
 
     if(enable) {
         // VGA controls monitor
-        ISET(sst->fbiInit0, (IGET(sst->fbiInit0) & ~SST_EN_VGA_PASSTHRU) | 
+        ISET(sst->fbiInit0, (IGET(sst->fbiInit0) & ~SST_EN_VGA_PASSTHRU) |
             sst1CurrentBoard->vgaPassthruEnable);
         ISET(sst->fbiInit1, IGET(sst->fbiInit1) | SST_VIDEO_BLANK_EN);
     } else {
         // SST-1 controls monitor
-        ISET(sst->fbiInit0, (IGET(sst->fbiInit0) & ~SST_EN_VGA_PASSTHRU) | 
+        ISET(sst->fbiInit0, (IGET(sst->fbiInit0) & ~SST_EN_VGA_PASSTHRU) |
             sst1CurrentBoard->vgaPassthruDisable);
         ISET(sst->fbiInit1, IGET(sst->fbiInit1) & ~SST_VIDEO_BLANK_EN);
     }
@@ -492,7 +493,7 @@ FX_EXPORT void FX_CSTYLE sst1InitWrite32(FxU32 *addr, FxU32 data)
    * register writes from the init code into the command fifo that
    * they are managing. However, some registers cannot be accessed via
    * the command fifo, and, inconveniently, these are not contiguously
-   * allocated.  
+   * allocated.
    */
   const FxU32 addrOffset = ((const FxU32)addr - (const FxU32)sst1CurrentBoard->virtAddr[0]);
   FxBool directWriteP = ((sst1CurrentBoard == NULL) ||
@@ -544,7 +545,7 @@ FX_EXPORT FxU32 FX_CSTYLE sst1InitRead32(FxU32 *addr)
 **   'memAddrStart' and 'size' are all specified in bytes.
 **
 */
-FX_ENTRY FxBool FX_CALL sst1InitCmdFifo(FxU32 *sstbase, FxBool enable, 
+FX_ENTRY FxBool FX_CALL sst1InitCmdFifo(FxU32 *sstbase, FxBool enable,
   FxU32 *virtAddrStart, FxU32 *memAddrStart, FxU32 *size, FxSet32Proc set32Proc)
 {
     SstRegs *sst = (SstRegs *) sstbase;
@@ -565,7 +566,7 @@ FX_ENTRY FxBool FX_CALL sst1InitCmdFifo(FxU32 *sstbase, FxBool enable,
 
     if(enable == FXFALSE) {
        // Remove any client set callbacks before continuing since
-       // these must go straight to the hw.  
+       // these must go straight to the hw.
        sst1CurrentBoard->set32 = NULL;
        sst1CurrentBoard->fbiCmdFifoEn = 0;
 
@@ -620,17 +621,17 @@ FX_ENTRY FxBool FX_CALL sst1InitCmdFifo(FxU32 *sstbase, FxBool enable,
     *memAddrStart = fifoStart;
     *size = fifoSize;
 
-    if(!sst1InitCmdFifoDirect(sstbase, 0, 
-                              fifoStart, fifoSize, 
+    if(!sst1InitCmdFifoDirect(sstbase, 0,
+                              fifoStart, fifoSize,
                               directExec, disableHoles,
                               set32Proc)) {
       INIT_PRINTF(("sst1InitCmdFifo(): sst1InitCmdFifoDirect() failed...\n"));
       return(FXFALSE);
     }
-    
+
     if(sst1CurrentBoard->sliSlaveVirtAddr) {
       if(!sst1InitCmdFifoDirect(sst1CurrentBoard->sliSlaveVirtAddr, 0,
-                               fifoStart, fifoSize, 
+                               fifoStart, fifoSize,
                                directExec, disableHoles,
                                set32Proc)) {
           INIT_PRINTF(("sst1InitCmdFifo(): sst1InitCmdFifoDirect() failed for SLI Slave...\n"));
@@ -645,15 +646,15 @@ FX_ENTRY FxBool FX_CALL sst1InitCmdFifo(FxU32 *sstbase, FxBool enable,
 /*
 **
 ** sst1InitCmdFifoDirect():
-**   Explicitly initialize Command FIFO.  This routine is typically not 
+**   Explicitly initialize Command FIFO.  This routine is typically not
 **   called directly from apps.
 **
 **   The 'start' and 'size' parameters are specified in bytes.
 **   The 'which' parameter is not used, but is included for H3 compatibility.
 **
 */
-FX_ENTRY FxBool FX_CALL sst1InitCmdFifoDirect(FxU32 *sstbase, FxU32 which, 
-  FxU32 start, FxU32 size, FxBool directExec, FxBool disableHoles, 
+FX_ENTRY FxBool FX_CALL sst1InitCmdFifoDirect(FxU32 *sstbase, FxU32 which,
+  FxU32 start, FxU32 size, FxBool directExec, FxBool disableHoles,
   FxSet32Proc set32Proc)
 {
     SstRegs *sst = (SstRegs *) sstbase;
@@ -685,7 +686,7 @@ FX_ENTRY FxBool FX_CALL sst1InitCmdFifoDirect(FxU32 *sstbase, FxU32 which,
         sst1InitIdle(sstbase);
     // Disable memory-backed fifo, and disallow lfb and texture writes
     // through command fifo...
-    ISET(sst->fbiInit0, (IGET(sst->fbiInit0) & 
+    ISET(sst->fbiInit0, (IGET(sst->fbiInit0) &
       ~(SST_MEM_FIFO_EN | SST_EN_LFB_MEMFIFO | SST_EN_TEX_MEMFIFO)));
     sst1InitReturnStatus(sstbase);
 
@@ -750,7 +751,7 @@ FX_ENTRY FxBool FX_CALL sst1InitCmdFifoDirect(FxU32 *sstbase, FxU32 which,
 **   sst1InitLfbUnlock() dynamically disable the command fifo so that lfb
 **   and texture accesses do not pass through the command fifo.
 **   WARNING: No register writes of any kind may be performed between a
-**   sst1InitLfbLock() and sst1InitLfbUnlock() pair -- only lfb reads and 
+**   sst1InitLfbLock() and sst1InitLfbUnlock() pair -- only lfb reads and
 **   writes are allowed.
 */
 FX_ENTRY FxBool FX_CALL sst1InitLfbLock(FxU32* sstbase)
@@ -809,7 +810,7 @@ FX_ENTRY FxBool FX_CALL sst1InitLfbLockDirect(FxU32* sstbase)
 **   sst1InitLfbUnlock() dynamically disable the command fifo so that lfb
 **   and texture accesses do not pass through the command fifo.
 **   WARNING: No register writes of any kind may be performed between a
-**   sst1InitLfbLock() and sst1InitLfbUnlock() pair -- only lfb reads and 
+**   sst1InitLfbLock() and sst1InitLfbUnlock() pair -- only lfb reads and
 **   writes are allowed.
 */
 
@@ -924,20 +925,20 @@ FX_EXPORT FxU32 FX_CSTYLE sst1InitMeasureSiProcess(FxU32 *sstbase, FxU32 which)
        PCICFG_WR(SST1_PCI_SIPROCESS,
         (pciCntrLoad<<SST_SIPROCESS_PCI_CNTR_SHIFT) |
          SST_SIPROCESS_OSC_CNTR_RESET_N | SST_SIPROCESS_OSC_NAND_SEL);
-   
+
        // Allow oscillator to run...
        PCICFG_RD(SST1_PCI_SIPROCESS, siProcess);
        PCICFG_WR(SST1_PCI_SIPROCESS,
         (pciCntrLoad<<SST_SIPROCESS_PCI_CNTR_SHIFT) |
          SST_SIPROCESS_OSC_CNTR_RUN | SST_SIPROCESS_OSC_NAND_SEL);
-   
+
        // Loop until PCI counter decrements to 0
        cntr = 0 ;
        do {
           ++cntr;
           PCICFG_RD(SST1_PCI_SIPROCESS, siProcess);
        } while(siProcess & SST_SIPROCESS_PCI_CNTR);
-   
+
        PCICFG_RD(SST1_PCI_SIPROCESS, siProcess);
        siProcess &= SST_SIPROCESS_OSC_CNTR;
        nandOsc = siProcess;
@@ -953,20 +954,20 @@ FX_EXPORT FxU32 FX_CSTYLE sst1InitMeasureSiProcess(FxU32 *sstbase, FxU32 which)
        PCICFG_WR(SST1_PCI_SIPROCESS,
         (pciCntrLoad<<SST_SIPROCESS_PCI_CNTR_SHIFT) |
          SST_SIPROCESS_OSC_CNTR_RESET_N | SST_SIPROCESS_OSC_NOR_SEL);
-   
+
        // Allow oscillator to run...
        PCICFG_RD(SST1_PCI_SIPROCESS, siProcess);
        PCICFG_WR(SST1_PCI_SIPROCESS,
        (pciCntrLoad<<SST_SIPROCESS_PCI_CNTR_SHIFT) |
          SST_SIPROCESS_OSC_CNTR_RUN | SST_SIPROCESS_OSC_NOR_SEL);
-   
+
        // Loop until PCI counter decrements to 0
        cntr = 0 ;
        do {
           ++cntr;
           PCICFG_RD(SST1_PCI_SIPROCESS, siProcess);
        } while(siProcess & SST_SIPROCESS_PCI_CNTR);
-   
+
        PCICFG_RD(SST1_PCI_SIPROCESS, siProcess);
        siProcess &= SST_SIPROCESS_OSC_CNTR;
        norOsc = siProcess;

@@ -1,31 +1,35 @@
+/* $Id: ddgump.c,v 1.2 2001-09-05 14:30:49 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glide/sst1/glide/ddgump.c,v 1.1 2000-02-25 00:31:09 sandervl Exp $
+** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glide/sst1/glide/ddgump.c,v 1.2 2001-09-05 14:30:49 bird Exp $
 ** $Log: ddgump.c,v $
-** Revision 1.1  2000-02-25 00:31:09  sandervl
+** Revision 1.2  2001-09-05 14:30:49  bird
+** Added $Id:$ keyword.
+**
+** Revision 1.1  2000/02/25 00:31:09  sandervl
 ** Created new Voodoo 1 Glide dir
 **
- * 
+ *
  * 2     3/04/97 9:08p Dow
  * Neutered multiplatform multiheaded monster
- * 
+ *
  * 1     12/23/96 1:39p Dow
  * Changes for multiplatform
 **
@@ -48,7 +52,7 @@ _gumpTexCombineFunction( int virtual_tmu );
 
 /*
 ** _gumpTexCombineFunction
-**                                                          
+**
 ** Sets the texture combine function.  For a dual TMU system this function
 ** will configure the TEXTUREMODE registers as appropriate.  For a
 ** single TMU system this function will configure TEXTUREMODE if
@@ -113,7 +117,7 @@ GR_DDFUNC(_gumpTexCombineFunction, void, ( int virtual_tmu ))
     {
       texmode |= ( SST_TC_BLEND_LOD | SST_TCA_BLEND_LOD |
                    SST_TC_REVERSE_BLEND | SST_TCA_REVERSE_BLEND |
-                   SST_TC_ZERO_OTHER | SST_TCA_ZERO_OTHER );      
+                   SST_TC_ZERO_OTHER | SST_TCA_ZERO_OTHER );
     }
     break;
   case GR_MPTEXTURECOMBINE_DETAIL1:
@@ -179,7 +183,7 @@ GR_DDFUNC(_gumpTexCombineFunction, void, ( int virtual_tmu ))
     break;
   case GR_MPTEXTURECOMBINE_SUBTRACT:
     /*
-       tmu0: other - local 
+       tmu0: other - local
        tmu1: local
        doesn't work, alpha blender can't subtract
        */
@@ -318,7 +322,7 @@ GR_ENTRY(guMPDrawTriangle, void, ( const GrVertex *a, const GrVertex *b, const G
       }
       */
 
-      
+
       fbzcolorpath &= ~(SST_CC_ADD_CLOCAL | SST_CC_ADD_ALOCAL | SST_CC_SUB_CLOCAL);
       GR_SET( hw->fbzColorPath, fbzcolorpath );
       GR_CHECK_SIZE_SLOPPY();

@@ -1,88 +1,92 @@
+/* $Id: gxdraw.c,v 1.2 2001-09-05 14:30:56 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glide/sst1/glide/gxdraw.c,v 1.1 2000-02-25 00:31:20 sandervl Exp $
+** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glide/sst1/glide/gxdraw.c,v 1.2 2001-09-05 14:30:56 bird Exp $
 ** $Log: gxdraw.c,v $
-** Revision 1.1  2000-02-25 00:31:20  sandervl
+** Revision 1.2  2001-09-05 14:30:56  bird
+** Added $Id:$ keyword.
+**
+** Revision 1.1  2000/02/25 00:31:20  sandervl
 ** Created new Voodoo 1 Glide dir
 **
- * 
+ *
  * 36    9/19/97 12:38p Peter
  * asm rush trisetup vs alt fifo
- * 
+ *
  * 35    9/10/97 10:13p Peter
  * fifo logic from GaryT, non-normalized fp first cut
- * 
+ *
  * 34    8/19/97 8:55p Peter
  * lots of stuff, hopefully no muckage
- * 
+ *
  * 33    8/01/97 11:49a Dow
  * Added conventional FIFO accounting
- * 
+ *
  * 32    7/07/97 3:43p Jdt
  * Fixes to trisetup_nogradients
- * 
+ *
  * 31    7/07/97 2:14p Jdt
  * Mods to drawtriangle for parity with asm
- * 
+ *
  * 30    7/07/97 8:33a Jdt
  * New tracing macros.
- * 
+ *
  * 29    7/04/97 12:08p Dow
  * Fixed chip field muckage
- * 
+ *
  * 28    7/01/97 7:44a Jdt
  * Separated SST-1 and SST-96 trisetup implementations.
- * 
+ *
  * 27    6/30/97 3:30p Jdt
  * Fixed Watcom Wart.
- * 
+ *
  * 26    6/30/97 3:23p Jdt
  * rollback
- * 
+ *
  * 24    6/29/97 11:49p Jdt
  * First pass at triangle setup optimization for SST96
- * 
+ *
  * 23    6/20/97 5:53p Dow
  * Change for subtle chip field bug
- * 
+ *
  * 22    6/18/97 5:54p Dow
  * P6 adjustments
- * 
+ *
  * 21    5/27/97 11:37p Pgj
  * Fix for Bug report 545
- * 
+ *
  * 20    4/13/97 2:06p Pgj
  * eliminate all anonymous unions (use hwDep)
- * 
+ *
  * 19    3/21/97 12:42p Dow
  * Made STWHints not send the Bend Over Baby Packet to FBI Jr.
- * 
+ *
  * 18    3/04/97 9:45p Dow
  * More neutering of the multiheaded...
- * 
+ *
  * 17    3/04/97 9:08p Dow
  * Neutered multiplatform multiheaded monster
- * 
+ *
  * 16    2/14/97 12:55p Dow
  * moved vg96 fifo wrap into init code
- * 
+ *
  * 15    12/23/96 1:37p Dow
  * chagnes for multiplatform glide
 **
@@ -98,7 +102,7 @@
 
 #ifdef GDBG_INFO_ON
   /* Some debugging information */
-static char *indexNames[] = {  
+static char *indexNames[] = {
   "GR_VERTEX_X_OFFSET",         /* 0 */
   "GR_VERTEX_Y_OFFSET",         /* 1 */
   "GR_VERTEX_Z_OFFSET",         /* 2 */
@@ -114,7 +118,7 @@ static char *indexNames[] = {
   "GR_VERTEX_SOW_TMU1_OFFSET",  /* 12 */
   "GR_VERTEX_TOW_TMU1_OFFSET",  /* 13 */
   "GR_VERTEX_OOW_TMU1_OFFSET"  /* 14 */
-};  
+};
 #endif
 
 /*
@@ -128,7 +132,7 @@ static char *indexNames[] = {
  **  fast spans, polygons, etc) is needed, this code should be used as
  **  the starting point.
 **
-*/  
+*/
 
 #if ( GLIDE_PLATFORM & GLIDE_HW_SST96 )
 GR_DDFUNC(_trisetup, FxI32, ( const GrVertex *va, const GrVertex *vb, const GrVertex *vc ))
@@ -144,16 +148,16 @@ GR_DDFUNC(_trisetup, FxI32, ( const GrVertex *va, const GrVertex *vb, const GrVe
   float *fp;
   struct dataList_s *dlp;
   volatile FxU32 *fifoPtr;
-  
+
   culltest = gc->state.cull_mode; /* 1 if negative, 0 if positive */
   _GlideRoot.stats.trisProcessed++;
-  
+
   /*
    **  Sort the vertices.
    **  Whenever the radial order is reversed (from counter-clockwise to
    **  clockwise), we need to change the area of the triangle.  Note
    **  that we know the first two elements are X & Y by looking at the
-   **  grVertex structure.  
+   **  grVertex structure.
    */
   ay = *(int *)&va->y;
   by = *(int *)&vb->y;
@@ -198,25 +202,25 @@ GR_DDFUNC(_trisetup, FxI32, ( const GrVertex *va, const GrVertex *vb, const GrVe
   /* Compute Area */
   dxAB = fa[GR_VERTEX_X_OFFSET] - fb[GR_VERTEX_X_OFFSET];
   dxBC = fb[GR_VERTEX_X_OFFSET] - fc[GR_VERTEX_X_OFFSET];
-  
+
   dyAB = fa[GR_VERTEX_Y_OFFSET] - fb[GR_VERTEX_Y_OFFSET];
   dyBC = fb[GR_VERTEX_Y_OFFSET] - fc[GR_VERTEX_Y_OFFSET];
-  
+
   /* this is where we store the area */
   _GlideRoot.pool.ftemp1 = dxAB * dyBC - dxBC * dyAB;
-  
+
   /* Zero-area triangles are BAD!! */
   j = *(long *)&_GlideRoot.pool.ftemp1;
   if ((j & 0x7FFFFFFF) == 0)
     return 0;
-  
+
   /* Backface culling, use sign bit as test */
   if (gc->state.cull_mode != GR_CULL_DISABLE) {
     if ((j ^ (culltest<<31)) >= 0) {
       return -1;
     }
   }
-  
+
   /* Fence On P6 If Necessary */
   if ( _GlideRoot.CPUType == 6 ) {
       /* In the macro there is a slop of 4 DWORDS that I have removed */
@@ -224,7 +228,7 @@ GR_DDFUNC(_trisetup, FxI32, ( const GrVertex *va, const GrVertex *vb, const GrVe
           P6FENCE;
           gc->hwDep.sst96Dep.writesSinceFence = 0;
       }
-      gc->hwDep.sst96Dep.writesSinceFence      += 
+      gc->hwDep.sst96Dep.writesSinceFence      +=
           _GlideRoot.curTriSize>>2;
   }
 
@@ -237,16 +241,16 @@ GR_DDFUNC(_trisetup, FxI32, ( const GrVertex *va, const GrVertex *vb, const GrVe
     _grSst96FifoMakeRoom();
 #endif
   }
-  
+
   GR_SET_EXPECTED_SIZE(_GlideRoot.curTriSize);
 
   /* Grab fifo pointer into a local */
   fifoPtr = gc->fifoData.hwDep.vg96FIFOData.fifoPtr;
-  
+
   /* Settle Bookeeping */
   gc->fifoData.hwDep.vg96FIFOData.fifoSize -= _GlideRoot.curTriSize;
   gc->fifoData.hwDep.vg96FIFOData.fifoPtr  += _GlideRoot.curTriSize>>2;
-  
+
   /* Start first group write packet */
   SET_GW_CMD(    fifoPtr, 0, gc->hwDep.sst96Dep.gwCommand );
   SET_GW_HEADER( fifoPtr, 1, gc->hwDep.sst96Dep.gwHeaders[0] );
@@ -259,7 +263,7 @@ GR_DDFUNC(_trisetup, FxI32, ( const GrVertex *va, const GrVertex *vb, const GrVe
 
   dlp = gc->dataList;
   i = dlp->i;
-  
+
   /* write out X & Y for vertex B */
   FSET_GW_ENTRY( fifoPtr, 4, fb[0] );
   FSET_GW_ENTRY( fifoPtr, 5, fb[1] );
@@ -283,11 +287,11 @@ GR_DDFUNC(_trisetup, FxI32, ( const GrVertex *va, const GrVertex *vb, const GrVe
   while (i) {
     fp = dlp->addr;
     /* chip field change */
-    if (i & 1) 
+    if (i & 1)
         goto secondary_packet;
     else {
       float dpAB, dpBC,dpdx, dpdy;
-      
+
       dpBC = FARRAY(fb,i);
       dpdx = FARRAY(fa,i);
       FSET_GW_ENTRY( fifoPtr, 0, dpdx );
@@ -307,7 +311,7 @@ GR_DDFUNC(_trisetup, FxI32, ( const GrVertex *va, const GrVertex *vb, const GrVe
 triangle_command:
   FSET_GW_ENTRY( fifoPtr, 0, _GlideRoot.pool.ftemp1 );
   fifoPtr+=1;
-  
+
   if (((FxU32)fifoPtr) & 0x7) {
     FSET_GW_ENTRY( fifoPtr, 0, 0.0f );
     fifoPtr += 1;
@@ -316,7 +320,7 @@ triangle_command:
   GR_ASSERT(fifoPtr == gc->fifoData.hwDep.vg96FIFOData.fifoPtr);
 
   GR_CHECK_SIZE();
-  
+
   _GlideRoot.stats.trisDrawn++;
 
   return 1;
@@ -328,7 +332,7 @@ secondary_packet:
     fifoPtr  += 1;
   }
   /* Start new packet
-     note, there can only ever be two different packets 
+     note, there can only ever be two different packets
      using gwHeaderNum++ would be more general, but this
      reflects the actual implementation */
   SET_GW_CMD(    fifoPtr, 0, (FxU32)fp );
@@ -375,16 +379,16 @@ GR_DDFUNC(_trisetup, FxI32, ( const GrVertex *va, const GrVertex *vb, const GrVe
   int ay, by, cy;
   float *fp;
   struct dataList_s *dlp;
-  
+
   culltest = gc->state.cull_mode; /* 1 if negative, 0 if positive */
   _GlideRoot.stats.trisProcessed++;
-  
+
   /*
    **  Sort the vertices.
    **  Whenever the radial order is reversed (from counter-clockwise to
    **  clockwise), we need to change the area of the triangle.  Note
    **  that we know the first two elements are X & Y by looking at the
-   **  grVertex structure.  
+   **  grVertex structure.
    */
   ay = *(int *)&va->y;
   by = *(int *)&vb->y;
@@ -431,27 +435,27 @@ GR_DDFUNC(_trisetup, FxI32, ( const GrVertex *va, const GrVertex *vb, const GrVe
   /* Compute Area */
   dxAB = fa[GR_VERTEX_X_OFFSET] - fb[GR_VERTEX_X_OFFSET];
   dxBC = fb[GR_VERTEX_X_OFFSET] - fc[GR_VERTEX_X_OFFSET];
-  
+
   dyAB = fa[GR_VERTEX_Y_OFFSET] - fb[GR_VERTEX_Y_OFFSET];
   dyBC = fb[GR_VERTEX_Y_OFFSET] - fc[GR_VERTEX_Y_OFFSET];
-  
+
   /* this is where we store the area */
   _GlideRoot.pool.ftemp1 = dxAB * dyBC - dxBC * dyAB;
-  
+
   /* Zero-area triangles are BAD!! */
   j = *(long *)&_GlideRoot.pool.ftemp1;
   if ((j & 0x7FFFFFFF) == 0)
     return 0;
-  
+
   /* Backface culling, use sign bit as test */
   if (gc->state.cull_mode != GR_CULL_DISABLE) {
     if ((j ^ (culltest<<31)) >= 0) {
       return -1;
     }
   }
-  
+
   GR_SET_EXPECTED_SIZE(_GlideRoot.curTriSize);
-  
+
   ooa = _GlideRoot.pool.f1 / _GlideRoot.pool.ftemp1;
   /* GMT: note that we spread out our PCI writes */
   /* write out X & Y for vertex A */
@@ -460,11 +464,11 @@ GR_DDFUNC(_trisetup, FxI32, ( const GrVertex *va, const GrVertex *vb, const GrVe
 
   dlp = gc->dataList;
   i = dlp->i;
-  
+
   /* write out X & Y for vertex B */
   GR_SETF( hw->FvB.x, fb[GR_VERTEX_X_OFFSET] );
   GR_SETF( hw->FvB.y, fb[GR_VERTEX_Y_OFFSET] );
-  
+
   /* write out X & Y for vertex C */
   GR_SETF( hw->FvC.x, fc[GR_VERTEX_X_OFFSET] );
   GR_SETF( hw->FvC.y, fc[GR_VERTEX_Y_OFFSET] );
@@ -480,7 +484,7 @@ GR_DDFUNC(_trisetup, FxI32, ( const GrVertex *va, const GrVertex *vb, const GrVe
 /* access a floating point array with a byte index */
 #define FARRAY(p,i) (*(float *)((i)+(int)(p)))
 
-  /* 
+  /*
   ** The src vector contains offsets from fa, fb, and fc to for which
   **  gradients need to be calculated, and is null-terminated.
   */
@@ -535,7 +539,7 @@ GDBG_INFO((285,"p0,1y: %g %g dpdy: %g\n",dpBC * dxAB,dpAB * dxBC,dpdy));
 **
 **  Also we assume we don't have to test for backface triangles - this is
 **  typically done outside this routine, as in grDrawPlanarPolygon
-*/  
+*/
 
 #if ( GLIDE_PLATFORM & GLIDE_HW_SST96 )
 GR_DDFUNC(_trisetup_nogradients, FxI32, ( const GrVertex *va, const GrVertex *vb, const GrVertex *vc ))
@@ -557,7 +561,7 @@ GR_DDFUNC(_trisetup_nogradients, FxI32, ( const GrVertex *va, const GrVertex *vb
   **  Whenever the radial order is reversed (from counter-clockwise to
   **  clockwise), we need to change the area of the triangle.  Note
   **  that we know the first two elements are X & Y by looking at the
-  **  grVertex structure.  
+  **  grVertex structure.
   */
   ay = *(int *)&va->y;
   by = *(int *)&vb->y;
@@ -616,12 +620,12 @@ GR_DDFUNC(_trisetup_nogradients, FxI32, ( const GrVertex *va, const GrVertex *vb
   /* Fence On P6 If Necessary */
   if ( _GlideRoot.CPUType == 6 ) {
       /* In the macro there is a slop of 4 DWORDS that I have removed */
-      if ( (gc->hwDep.sst96Dep.writesSinceFence + 
+      if ( (gc->hwDep.sst96Dep.writesSinceFence +
             ( _GlideRoot.curTriSizeNoGradient >> 2 )) > 128 ) {
           P6FENCE;
           gc->hwDep.sst96Dep.writesSinceFence = 0;
       }
-      gc->hwDep.sst96Dep.writesSinceFence      += 
+      gc->hwDep.sst96Dep.writesSinceFence      +=
           _GlideRoot.curTriSizeNoGradient>>2;
   }
 
@@ -649,7 +653,7 @@ GR_DDFUNC(_trisetup_nogradients, FxI32, ( const GrVertex *va, const GrVertex *vb
 
   dlp = gc->dataList;
   i = dlp->i;
-  
+
   /* write out X & Y for vertex B */
   FSET_GW_ENTRY( fifoPtr, 4, fb[0] );
   FSET_GW_ENTRY( fifoPtr, 5, fb[1] );
@@ -667,7 +671,7 @@ GR_DDFUNC(_trisetup_nogradients, FxI32, ( const GrVertex *va, const GrVertex *vb
 
   while (i) {
     fp = dlp->addr;
-    if (i & 1) 
+    if (i & 1)
         goto secondary_packet;
     else {
       float dpdx;
@@ -702,7 +706,7 @@ secondary_packet:
   }
 
   /* Start new packet
-     note, there can only ever be two different packets 
+     note, there can only ever be two different packets
      using gwHeaderNum++ would be more general, but this
      reflects the actual implementation */
   SET_GW_CMD(    fifoPtr, 0, (FxU32)fp );
@@ -748,7 +752,7 @@ GR_DDFUNC(_trisetup_nogradients, FxI32, ( const GrVertex *va, const GrVertex *vb
   **  Whenever the radial order is reversed (from counter-clockwise to
   **  clockwise), we need to change the area of the triangle.  Note
   **  that we know the first two elements are X & Y by looking at the
-  **  grVertex structure.  
+  **  grVertex structure.
   */
   ay = *(int *)&va->y;
   by = *(int *)&vb->y;
@@ -818,7 +822,7 @@ GR_DDFUNC(_trisetup_nogradients, FxI32, ( const GrVertex *va, const GrVertex *vb
     GR_CHECK_SIZE_SLOPPY();
     return 0;
   }
-  
+
   /* write out X & Y for vertex C */
   GR_SETF( hw->FvC.x, fc[GR_VERTEX_X_OFFSET] );
   GR_SETF( hw->FvC.y, fc[GR_VERTEX_Y_OFFSET] );
@@ -829,7 +833,7 @@ GR_DDFUNC(_trisetup_nogradients, FxI32, ( const GrVertex *va, const GrVertex *vb
 /* access a floating point array with a byte index */
 #define FARRAY(p,i) (*(float *)((i)+(int)(p)))
 
-  /* 
+  /*
   ** The src vector contains offsets from fa, fb, and fc to for which
   ** gradients need to be calculated, and is null-terminated.
   */

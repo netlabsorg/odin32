@@ -1,24 +1,25 @@
+/* $Id: gdebug.c,v 1.2 2001-09-05 14:31:04 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Revision: 1.1 $
-** $Date: 2000-02-25 00:31:33 $
+** $Revision: 1.2 $
+** $Date: 2001-09-05 14:31:04 $
 */
 
 #include <stdio.h>
@@ -103,7 +104,7 @@ gdbg_init(void)
 
     /* I can't init gdbg_msgfile to stdout since it isn't constant so
      * I do it now */
-    gdbg_msgfile = stdout;    
+    gdbg_msgfile = stdout;
 
     done = 1;
     gdbg_debuglevel[0] = 1;             // always enable level 0
@@ -131,14 +132,14 @@ gdbg_shutdown(void)
 void FX_EXPORT FX_CSTYLE
 gdbg_vprintf (const char *format,va_list args)
 {
-  
+
     if (gdbg_msgfile != NULL) {
         if (!UseDebugString) {
 
             vfprintf(gdbg_msgfile,format,args);
 
-            fflush(gdbg_msgfile);   
-        } 
+            fflush(gdbg_msgfile);
+        }
 #ifdef __WIN32__
         else {
             char msgString[1024];
@@ -260,5 +261,5 @@ gdbg_set_file(const char *name)
         outf = fopen(name,"w");             // open up a new one
         if (outf) gdbg_msgfile = outf;
         return outf != NULL;
-    } 
+    }
 }

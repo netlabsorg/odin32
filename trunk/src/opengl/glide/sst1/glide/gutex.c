@@ -1,34 +1,38 @@
+/* $Id: gutex.c,v 1.2 2001-09-05 14:30:56 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glide/sst1/glide/gutex.c,v 1.1 2000-02-25 00:31:20 sandervl Exp $
+** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glide/sst1/glide/gutex.c,v 1.2 2001-09-05 14:30:56 bird Exp $
 ** $Log: gutex.c,v $
-** Revision 1.1  2000-02-25 00:31:20  sandervl
+** Revision 1.2  2001-09-05 14:30:56  bird
+** Added $Id:$ keyword.
+**
+** Revision 1.1  2000/02/25 00:31:20  sandervl
 ** Created new Voodoo 1 Glide dir
 **
- * 
+ *
  * 7     3/04/97 9:08p Dow
  * Neutered multiplatform multiheaded monster
- * 
+ *
  * 6     12/23/96 1:37p Dow
  * chagnes for multiplatform glide
- * 
+ *
  * 5     11/18/96 9:14a Sellers
  * added checking for crossing of 2 MByte texture boundry
 **
@@ -98,17 +102,17 @@ GR_ENTRY(guTexSource, void, ( GrMipMapId_t mmid ))
   tLod        = mminfo->tLOD;
 
   oldtexMode = gc->state.tmu_config[tmu].textureMode;
-  oldtexMode &= ~( SST_TFORMAT | SST_TCLAMPT | 
-                   SST_TCLAMPS | SST_TNCCSELECT | 
-                   SST_TLODDITHER | SST_TCLAMPW | 
-                   SST_TMAGFILTER | SST_TMINFILTER | 
+  oldtexMode &= ~( SST_TFORMAT | SST_TCLAMPT |
+                   SST_TCLAMPS | SST_TNCCSELECT |
+                   SST_TLODDITHER | SST_TCLAMPW |
+                   SST_TMAGFILTER | SST_TMINFILTER |
                    SST_TRILINEAR );
   texMode |= oldtexMode;
   if (!gc->state.allowLODdither)
     texMode &= ~SST_TLODDITHER;
 
- /* 
-  **  Download the NCC table, if needed.  
+ /*
+  **  Download the NCC table, if needed.
   */
   if (
       (mminfo->format==GR_TEXFMT_YIQ_422) ||
@@ -164,7 +168,7 @@ GR_ENTRY(guTexSource, void, ( GrMipMapId_t mmid ))
   gc->state.tmu_config[tmu].texBaseAddr = baseAddress;
   gc->state.tmu_config[tmu].textureMode = texMode;
   gc->state.tmu_config[tmu].tLOD = tLod;
- 
+
   GR_END();
 } /* guTexSource */
 

@@ -1,148 +1,152 @@
+/* $Id: glfb.c,v 1.2 2001-09-05 14:30:26 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glide/cvg/glide/glfb.c,v 1.1 2000-02-25 00:37:39 sandervl Exp $
+** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glide/cvg/glide/glfb.c,v 1.2 2001-09-05 14:30:26 bird Exp $
 ** $Log: glfb.c,v $
-** Revision 1.1  2000-02-25 00:37:39  sandervl
+** Revision 1.2  2001-09-05 14:30:26  bird
+** Added $Id:$ keyword.
+**
+** Revision 1.1  2000/02/25 00:37:39  sandervl
 ** Created Voodoo 2 dir
 **
-** 
+**
 ** 75    6/23/98 5:38p Peter
 ** lfb hinting
-** 
+**
 ** 74    4/29/98 2:49p Peter
 ** fixed debug build
-** 
+**
 ** 73    4/16/98 3:54p Peter
 ** removed cruft
-** 
+**
 ** 72    4/01/98 1:51p Peter
 ** sli origin thing vs grRenderBuffer
-** 
+**
 ** 71    3/31/98 6:09p Peter
 ** sli origin everywhere (I think) and grLfbReadRegion/grRenderBuffer vs
 ** triple buffering
-** 
+**
 ** 70    3/29/98 1:07p Peter
 ** yet another sli origin thing
-** 
+**
 ** 69    3/23/98 5:57p Peter
 ** warning cleanup
-** 
+**
 ** 68    3/18/98 3:04p Peter
 ** cleaner origin swapping hacks
-** 
+**
 ** 67    3/13/98 1:56p Peter
 ** more sli origin swapping
-** 
+**
 ** 66    3/13/98 1:27p Peter
 ** grLfbReadRegion vs triple buffering
-** 
+**
 ** 65    3/09/98 2:24p Peter
 ** change for new pci passthrough interface
-** 
+**
 ** 63    3/02/98 7:23p Peter
 ** clear slop on sli systems when changing y origin
-** 
+**
 ** 62    2/20/98 11:00a Peter
 ** removed glide3 from glid2 tree
-** 
+**
 ** 61    2/11/98 5:26p Peter
 ** new write edge stuff
-** 
+**
 ** 60    2/01/98 7:52p Peter
 ** grLfbWriteRegion byte count problems
-** 
+**
 ** 59    1/30/98 4:31p Peter
 ** general clenaup
- * 
+ *
  * 58    1/16/98 4:18p Atai
  * fixed lfb and grLoadGammaTable
- * 
+ *
  * 57    1/06/98 3:53p Atai
  * remove grHint, modify grLfbWriteRegion and grGet
- * 
+ *
  * 56    12/17/97 4:45p Peter
  * groundwork for CrybabyGlide
- * 
+ *
  * 55    12/15/97 6:04p Atai
  * disable obsolete glide2 api for glide3
- * 
+ *
  * 54    12/15/97 5:54p Peter
  * swizzle reads too
- * 
+ *
  * 53    12/11/97 4:15p Peter
  * mac lfb write region
- * 
+ *
  * 52    12/01/97 5:18p Peter
- * 
+ *
  * 51    11/25/97 12:09p Peter
  * nested calls to grLfbLock vs init code locking on v2
- * 
+ *
  * 50    11/18/97 4:36p Peter
  * chipfield stuff cleanup and w/ direct writes
- * 
+ *
  * 49    11/17/97 4:55p Peter
  * watcom warnings/chipfield stuff
- * 
+ *
  * 48    11/06/97 3:38p Dow
  * More banshee stuff
- * 
+ *
  * 47    11/04/97 5:04p Peter
  * cataclysm part deux
- * 
+ *
  * 46    11/03/97 3:43p Peter
  * h3/cvg cataclysm
- * 
+ *
  * 45    10/27/97 11:10a Peter
  * starting cleanup
- * 
+ *
  * 44    10/09/97 8:02p Dow
  * State Monster 1st Cut
- * 
+ *
  * 43    10/08/97 5:18p Peter
  * fixed grLfbLock wrt writemode_any
- * 
+ *
  * 42    10/08/97 11:33a Peter
  * hmmmm....
- * 
+ *
  * 41    9/30/97 1:03p Peter
  * more debugging code
- * 
+ *
  * 40    9/25/97 1:35p Peter
- * 
+ *
  * 39    9/24/97 4:09p Peter
  * lfb/idle fixes
- * 
+ *
  * 38    9/24/97 1:31p Peter
  * assert if grXX call inside lock/unlock
- * 
+ *
  * 37    9/20/97 10:54a Peter
  * naked lfb writes
- * 
+ *
  * 36    9/15/97 7:31p Peter
  * more cmdfifo cleanup, fixed normal buffer clear, banner in the right
  * place, lfb's are on, Hmmmm.. probably more
- * 
+ *
  * 35    9/10/97 10:13p Peter
  * fifo logic from GaryT, non-normalized fp first cut
- * 
+ *
 **
 */
 
@@ -203,9 +207,9 @@ GR_ENTRY(grLfbConstantDepth, void, (FxU16 depth))
   FXFALSE - lock fails
   -------------------------------------------------------------------*/
 
-GR_ENTRY(grLfbLock, FxBool,(GrLock_t type, GrBuffer_t buffer, 
-                            GrLfbWriteMode_t writeMode, GrOriginLocation_t origin, 
-                            FxBool pixelPipeline, GrLfbInfo_t *info)) 
+GR_ENTRY(grLfbLock, FxBool,(GrLock_t type, GrBuffer_t buffer,
+                            GrLfbWriteMode_t writeMode, GrOriginLocation_t origin,
+                            FxBool pixelPipeline, GrLfbInfo_t *info))
 {
 #define FN_NAME "grLfbLock"
   FxBool rv = FXTRUE;
@@ -214,9 +218,9 @@ GR_ENTRY(grLfbLock, FxBool,(GrLock_t type, GrBuffer_t buffer,
 #if (GLIDE_PLATFORM & GLIDE_OS_MACOS) && SET_BSWAP
   FxBool swizzleByteP = FXFALSE;
 #endif /* (GLIDE_PLATFORM & GLIDE_OS_MACOS) && SET_BSWAP */
-  
+
   GR_BEGIN_NOFIFOCHECK("grLfbLock", 87);
-  GDBG_INFO_MORE(gc->myLevel,"(%d, %d, %d, %d, %d)\n", 
+  GDBG_INFO_MORE(gc->myLevel,"(%d, %d, %d, %d, %d)\n",
                  type, buffer, writeMode, origin, pixelPipeline);
 
   GR_CHECK_COMPATABILITY(FN_NAME, !info,
@@ -234,9 +238,9 @@ GR_ENTRY(grLfbLock, FxBool,(GrLock_t type, GrBuffer_t buffer,
       rv = FXFALSE;
     } else {
       lfbMode = gc->state.fbi_config.lfbMode;
-      lfbMode &= ~(SST_LFB_READBUFSELECT | 
+      lfbMode &= ~(SST_LFB_READBUFSELECT |
                    SST_LFB_YORIGIN);
-                    
+
       switch(buffer) {
       case GR_BUFFER_FRONTBUFFER:
         lfbMode |= SST_LFB_READFRONTBUFFER;
@@ -251,8 +255,8 @@ GR_ENTRY(grLfbLock, FxBool,(GrLock_t type, GrBuffer_t buffer,
         break;
 
       default:
-        GR_CHECK_F(myName, 
-                   1, 
+        GR_CHECK_F(myName,
+                   1,
                    "illegal buffer parameter passed");
         rv = FXFALSE;
         break;
@@ -274,14 +278,14 @@ GR_ENTRY(grLfbLock, FxBool,(GrLock_t type, GrBuffer_t buffer,
   break;
 
   case GR_LFB_WRITE_ONLY:
-  {           
+  {
     if (gc->lockPtrs[type] != (FxU32)-1) {
       GDBG_INFO(83, "Write failure due to existing lock");
       rv = FXFALSE;
     } else {
       /* Set up the constant depth register because it may have
        * been trashed by a call to grDepthBiasLevel
-       * (depthbiaslevel and constant depth use the same register) 
+       * (depthbiaslevel and constant depth use the same register)
        */
       zaColor = gc->state.fbi_config.zaColor;
       zaColor = (((FxU32) gc->state.lfb_constant_depth) << SST_ZACOLOR_DEPTH_SHIFT);
@@ -290,13 +294,13 @@ GR_ENTRY(grLfbLock, FxBool,(GrLock_t type, GrBuffer_t buffer,
       /* disable depth biasing */
       fbzMode = gc->state.fbi_config.fbzMode;
       fbzMode &= ~(SST_ENZBIAS);
-          
+
       lfbMode = gc->state.fbi_config.lfbMode;
       lfbMode &= ~(SST_LFB_WRITEBUFSELECT |
                    SST_LFB_YORIGIN        |
                    SST_LFB_FORMAT         |
                    SST_LFB_ENPIXPIPE);
-          
+
       switch(writeMode) {
       case GR_LFBWRITEMODE_RESERVED1:
       case GR_LFBWRITEMODE_RESERVED2:
@@ -314,7 +318,7 @@ GR_ENTRY(grLfbLock, FxBool,(GrLock_t type, GrBuffer_t buffer,
                      ? GR_LFBWRITEMODE_ZA16
                      : GR_LFBWRITEMODE_565);
       }
-          
+
       switch(buffer) {
       case GR_BUFFER_FRONTBUFFER:
         if (writeMode == GR_LFBWRITEMODE_ZA16) {
@@ -352,7 +356,7 @@ GR_ENTRY(grLfbLock, FxBool,(GrLock_t type, GrBuffer_t buffer,
         fbzMode |= (origin ? SST_YORIGIN : 0);
       }
       gc->state.fbi_config.lfbMode = lfbMode;
-                        
+
       info->origin    = origin;
       info->writeMode = writeMode;
 
@@ -367,7 +371,7 @@ GR_ENTRY(grLfbLock, FxBool,(GrLock_t type, GrBuffer_t buffer,
        */
       if (!gc->cmdTransportInfo.fifoLfbP) lfbMode |= SST_LFB_WRITE_SWAP16;
 #endif /* (GLIDE_PLATFORM & GLIDE_OS_MACOS) */
-                    
+
       switch(lfbMode & SST_LFB_FORMAT) {
       case SST_LFB_565:
       case SST_LFB_555:
@@ -406,7 +410,7 @@ GR_ENTRY(grLfbLock, FxBool,(GrLock_t type, GrBuffer_t buffer,
 
 #if (GLIDE_PLATFORM & GLIDE_HW_CVG) && !GLIDE_INIT_HAL
     /* If the cmd fifo has been turned off before then make sure its
-     * on again before trying to dork w/ the modes etc.  
+     * on again before trying to dork w/ the modes etc.
      */
     if (lfbLockCount > 0) {
       GR_ASSERT(!gc->cmdTransportInfo.fifoLfbP);
@@ -436,7 +440,7 @@ GR_ENTRY(grLfbLock, FxBool,(GrLock_t type, GrBuffer_t buffer,
 
     case GR_LFB_WRITE_ONLY:
       REG_GROUP_BEGIN(BROADCAST_ID, fbzMode, 3, 0x103);
-      {          
+      {
         REG_GROUP_SET(hw, fbzMode, fbzMode);
         REG_GROUP_SET(hw, lfbMode, lfbMode);
         REG_GROUP_SET(hw, zaColor, zaColor);
@@ -477,12 +481,12 @@ GR_ENTRY(grLfbLock, FxBool,(GrLock_t type, GrBuffer_t buffer,
     if (!gc->cmdTransportInfo.fifoLfbP) {
 #if (GLIDE_PLATFORM & GLIDE_HW_CVG) && !GLIDE_INIT_HAL
       sst1InitLfbLock((FxU32*)hw);
-      
+
 #if GLIDE_DEBUG || GLIDE_CHECK_COMPATABILITY
       grHints(GR_HINT_LFB_PROTECT, info->strideInBytes);
 #endif /* GLIDE_DEBUG || GLIDE_CHECK_COMPATABILITY */
 #endif /* (GLIDE_PLATFORM & GLIDE_HW_CVG) && !GLIDE_INIT_HAL */
-      
+
       /* Increment lock count */
       gc->cmdTransportInfo.lfbLockCount = lfbLockCount + 1;
     }
@@ -491,7 +495,7 @@ GR_ENTRY(grLfbLock, FxBool,(GrLock_t type, GrBuffer_t buffer,
   GR_RETURN(rv);
 #undef FN_NAME
 } /* grLfbLock */
-    
+
 /*-------------------------------------------------------------------
   Function: grLfbUnlock
   Date: 2/21
@@ -501,7 +505,7 @@ GR_ENTRY(grLfbLock, FxBool,(GrLock_t type, GrBuffer_t buffer,
   Unlock a previously locked buffer
   Arguments:
   type - type of lock (read only/write only)
-  buffer - which buffer to unlock 
+  buffer - which buffer to unlock
   Return:
   FXTRUE  - success
   FXFALSE - failure
@@ -511,24 +515,24 @@ GR_ENTRY(grLfbUnlock, FxBool, (GrLock_t type, GrBuffer_t buffer))
 {
 #define FN_NAME "grLfbUnlock"
   FxBool rval = FXFALSE;
-  
+
   GR_BEGIN_NOFIFOCHECK("grLfbUnLock", 87);
   GDBG_INFO_MORE(gc->myLevel,"(%d, %d)\n", type, buffer);
 
   type = type & ~(GR_LFB_NOIDLE);
-  
-  GR_CHECK_COMPATABILITY(FN_NAME, 
+
+  GR_CHECK_COMPATABILITY(FN_NAME,
                          type != GR_LFB_WRITE_ONLY &&
                          type != GR_LFB_READ_ONLY,
                          "Bad type");
-  
-  GR_CHECK_COMPATABILITY(FN_NAME, 
+
+  GR_CHECK_COMPATABILITY(FN_NAME,
                          buffer != GR_BUFFER_FRONTBUFFER &&
                          buffer != GR_BUFFER_BACKBUFFER  &&
                          buffer != GR_BUFFER_AUXBUFFER,
                          "Bad buffer");
 
-#if ((GLIDE_PLATFORM & GLIDE_HW_SST1) || (GLIDE_PLATFORM & GLIDE_HW_CVG)) 
+#if ((GLIDE_PLATFORM & GLIDE_HW_SST1) || (GLIDE_PLATFORM & GLIDE_HW_CVG))
   if (gc->lockPtrs[type] == (FxU32)buffer) {
     rval = FXTRUE;
     gc->lockPtrs[type] = (FxU32)-1;
@@ -540,7 +544,7 @@ GR_ENTRY(grLfbUnlock, FxBool, (GrLock_t type, GrBuffer_t buffer))
 
       /* If there are no more outstanding lfb locks, then turn the
        * fifo back on before we do anything else otherwise just
-       * return w/ the new lock count.  
+       * return w/ the new lock count.
        */
       gc->cmdTransportInfo.lfbLockCount--;
       if (gc->cmdTransportInfo.lfbLockCount == 0) {
@@ -555,16 +559,16 @@ GR_ENTRY(grLfbUnlock, FxBool, (GrLock_t type, GrBuffer_t buffer))
         return FXTRUE;
       }
     }
-    
+
     GR_SET_EXPECTED_SIZE(8 + MaskSelect(gc->scanline_interleaved, sizeof(FxU32)),
                          2 + gc->scanline_interleaved);
     {
       /* Restore depth bias level */
       GR_SET(BROADCAST_ID, hw, zaColor, gc->state.fbi_config.zaColor);
-      
+
       /* turn back on depth biasing */
       GR_SET(BROADCAST_ID, hw, fbzMode, gc->state.fbi_config.fbzMode);
-      
+
       if (gc->scanline_interleaved) GR_SET(BROADCAST_ID, hw, nopCMD, 0x0);
     }
     GR_CHECK_SIZE();
@@ -608,7 +612,7 @@ GR_STATE_ENTRY(grLfbWriteColorFormat, void, (GrColorFormat_t colorFormat))
     {
       GR_SET(BROADCAST_ID, hw, lfbMode, lfbMode);
       gc->state.fbi_config.lfbMode = lfbMode;
-      
+
       if (sliP) GR_SET(BROADCAST_ID, hw, nopCMD, 0x0);
     }
     GR_CHECK_SIZE();
@@ -653,7 +657,7 @@ GR_STATE_ENTRY(grLfbWriteColorSwizzle, void, (FxBool swizzleBytes, FxBool swapWo
     {
       GR_SET(BROADCAST_ID, hw, lfbMode, lfbMode);
       gc->state.fbi_config.lfbMode = lfbMode;
-      
+
       if (sliP) GR_SET(BROADCAST_ID, hw, nopCMD, 0x0);
     }
     GR_CHECK_SIZE();
@@ -665,35 +669,35 @@ GR_STATE_ENTRY(grLfbWriteColorSwizzle, void, (FxBool swizzleBytes, FxBool swapWo
 
 FxBool
 _grLfbWriteRegion(FxBool pixPipelineP,
-                  GrBuffer_t dst_buffer, FxU32 dst_x, FxU32 dst_y, 
-                  GrLfbSrcFmt_t src_format, 
-                  FxU32 src_width, FxU32 src_height, 
+                  GrBuffer_t dst_buffer, FxU32 dst_x, FxU32 dst_y,
+                  GrLfbSrcFmt_t src_format,
+                  FxU32 src_width, FxU32 src_height,
                   FxI32 src_stride, void *src_data)
 {
 #define FN_NAME "_grLfbWriteRegion"
   FxBool           rv = FXTRUE;
   GrLfbInfo_t      info;
   GrLfbWriteMode_t writeMode;
-  
+
   GR_BEGIN_NOFIFOCHECK("_grLfbWriteRegion", 82);
   GDBG_INFO_MORE(gc->myLevel,
-                 "(0x%x, %s, %d, %d, %d, %d, %d, %d, 0x%x)\n", 
+                 "(0x%x, %s, %d, %d, %d, %d, %d, %d, 0x%x)\n",
                  dst_buffer,
                  (pixPipelineP ? "Enable" : "Disable"),
-                 dst_x, dst_y, 
+                 dst_x, dst_y,
                  src_format, src_width, src_height,
                  src_stride, src_data);
-  
-  if (src_format == GR_LFB_SRC_FMT_RLE16) 
+
+  if (src_format == GR_LFB_SRC_FMT_RLE16)
     writeMode = GR_LFBWRITEMODE_565;
-  else 
+  else
     writeMode = src_format;
-  
+
   gc->cmdTransportInfo.fifoLfbP = FXTRUE;
   info.size = sizeof(info);
-  
-  if (grLfbLock(GR_LFB_WRITE_ONLY | GR_LFB_NOIDLE, 
-                dst_buffer, 
+
+  if (grLfbLock(GR_LFB_WRITE_ONLY | GR_LFB_NOIDLE,
+                dst_buffer,
                 writeMode,
                 GR_ORIGIN_UPPER_LEFT,
                 pixPipelineP,
@@ -715,10 +719,10 @@ _grLfbWriteRegion(FxBool pixPipelineP,
 #else
     dstData = (FxU32*)(((FxU8*)info.lfbPtr) + (dst_y * info.strideInBytes));
 #endif
-      
+
     srcData = (FxU32*)src_data;
     scanline = src_height;
-    
+
     switch(src_format) {
       /* 16-bit aligned */
     case GR_LFB_SRC_FMT_565:
@@ -735,7 +739,7 @@ _grLfbWriteRegion(FxBool pixPipelineP,
         while(scanline--) {
           GR_ASSERT(((FxU32)dstData & 0x03UL) == 0);
           end = (FxU32*)((char*)srcData + length - 2);
-               
+
           if (srcData < end) {
             LINEAR_WRITE_BEGIN(length >> 2, kLinearWriteLFB, dstData, 0x00, 0x00);
             while(srcData < end) {
@@ -745,13 +749,13 @@ _grLfbWriteRegion(FxBool pixPipelineP,
             }
             LINEAR_WRITE_END();
           }
-                  
+
           if ((length & 0x3) != 0x00) {
             LINEAR_WRITE_EDGE(kLinearWriteLFB, dstData, *(FxU16*)srcData, sizeof(FxU16));
             dstData = (FxU32*)(((FxU16*)dstData) + 1);
             srcData = (FxU32*)(((FxU16*)srcData) + 1);
           }
-                  
+
           dstData = (FxU32*)(((char*)dstData) + dstJump);
           srcData = (FxU32*)(((char*)srcData) + srcJump);
         }
@@ -760,11 +764,11 @@ _grLfbWriteRegion(FxBool pixPipelineP,
           GR_ASSERT(((FxU32)dstData & 0x03UL) != 0);
           end = (FxU32*)((char*)srcData + length);
 
-          LINEAR_WRITE_EDGE(kLinearWriteLFB, dstData, 
+          LINEAR_WRITE_EDGE(kLinearWriteLFB, dstData,
                             *(FxU16*)srcData, sizeof(FxU16));
           dstData = (FxU32*)(((FxU16*)dstData) + 1);
           srcData = (FxU32*)(((FxU16*)srcData) + 1);
-                  
+
           if (srcData < end) {
             const FxU32 numWords = (((FxU32)end - (FxU32)srcData) >> 2);
             FxU32 i;
@@ -777,14 +781,14 @@ _grLfbWriteRegion(FxBool pixPipelineP,
             }
             LINEAR_WRITE_END();
           }
-                  
+
           if ((length & 0x03) == 0) {
-            LINEAR_WRITE_EDGE(kLinearWriteLFB, dstData, 
+            LINEAR_WRITE_EDGE(kLinearWriteLFB, dstData,
                               *(FxU16*)srcData, sizeof(FxU16));
             dstData = (FxU32*)(((FxU16*)dstData) + 1);
             srcData = (FxU32*)(((FxU16*)srcData) + 1);
           }
-                  
+
           dstData = (FxU32*)(((char*)dstData) + dstJump);
           srcData = (FxU32*)(((char*)srcData) + srcJump);
         }
@@ -803,7 +807,7 @@ _grLfbWriteRegion(FxBool pixPipelineP,
       dstJump = info.strideInBytes - length;
       while(scanline--) {
         end = (FxU32*)((char*)srcData + length);
-            
+
         LINEAR_WRITE_BEGIN(src_width,
                            kLinearWriteLFB,
                            (FxU32)dstData,
@@ -814,7 +818,7 @@ _grLfbWriteRegion(FxBool pixPipelineP,
           srcData++;
         }
         LINEAR_WRITE_END();
-            
+
         dstData = (FxU32*)(((char*)dstData)+dstJump);
         srcData = (FxU32*)(((char*)srcData)+srcJump);
       }
@@ -844,30 +848,30 @@ _grLfbWriteRegion(FxBool pixPipelineP,
   dst_buffer  - buffer to which to copy data
   dst_x,dst_y - destination image start coordinates
   src_format  - data format of source image
-  src_width, src_height 
+  src_width, src_height
               - dimensions of source image
   src_stride  - stride of source image in bytes, not meaningful
                 for RLE images
-  src_data    - pointer to source data memory           
+  src_data    - pointer to source data memory
   Return:
   FXTRUE  succeed
   FXFALSE fail
   -------------------------------------------------------------------*/
-GR_ENTRY(grLfbWriteRegion, FxBool, (GrBuffer_t dst_buffer, 
-                                    FxU32 dst_x, FxU32 dst_y, 
-                                    GrLfbSrcFmt_t src_format, 
-                                    FxU32 src_width, FxU32 src_height, 
+GR_ENTRY(grLfbWriteRegion, FxBool, (GrBuffer_t dst_buffer,
+                                    FxU32 dst_x, FxU32 dst_y,
+                                    GrLfbSrcFmt_t src_format,
+                                    FxU32 src_width, FxU32 src_height,
                                     FxI32 src_stride, void *src_data))
 {
   FxBool           rv = FXTRUE;
-  
+
   GR_BEGIN_NOFIFOCHECK("grLfbWriteRegion",82);
   GDBG_INFO_MORE(gc->myLevel,
-                 "(0x%x,%d,%d,%d,%d,%d,%d,0x%x)\n", 
-                 dst_buffer, dst_x, dst_y, 
+                 "(0x%x,%d,%d,%d,%d,%d,%d,0x%x)\n",
+                 dst_buffer, dst_x, dst_y,
                  src_format, src_width, src_height,
                  src_stride, src_data);
-  
+
   rv = _grLfbWriteRegion(FXFALSE, dst_buffer, dst_x, dst_y,
                          src_format, src_width, src_height,
                          src_stride, src_data);
@@ -883,7 +887,7 @@ GR_ENTRY(grLfbWriteRegion, FxBool, (GrBuffer_t dst_buffer,
   Description:
   Grab a rectangle from the frame buffer into user supplied memory
   Arguments:
-  src_buffer - buffer to read from 
+  src_buffer - buffer to read from
   src_x      - x coordinate of upper left corner rectangle to read
   src_y      - y coordinate of upper left corner of rectangle to read
   src_width  - width of rectangle to read
@@ -894,22 +898,22 @@ GR_ENTRY(grLfbWriteRegion, FxBool, (GrBuffer_t dst_buffer,
   FXTRUE - success
   FXFALSE - failure
   -------------------------------------------------------------------*/
-GR_ENTRY(grLfbReadRegion, FxBool, (GrBuffer_t src_buffer, 
-                                   FxU32 src_x, FxU32 src_y, 
-                                   FxU32 src_width, FxU32 src_height, 
+GR_ENTRY(grLfbReadRegion, FxBool, (GrBuffer_t src_buffer,
+                                   FxU32 src_x, FxU32 src_y,
+                                   FxU32 src_width, FxU32 src_height,
                                    FxU32 dst_stride, void *dst_data))
 {
 #define FN_NAME "grLfbReadRegion"
   FxBool rv = FXTRUE;
   GrLfbInfo_t info;
-  
+
   GR_BEGIN_NOFIFOCHECK("grLfbReadRegion", 82);
   GDBG_INFO_MORE(gc->myLevel,
                  "(0x%x,%d,%d,%d,%d,%d,0x%x)\n",
                  src_buffer, src_x, src_y,
                  src_width, src_height, dst_stride, dst_data);
 
-#if (GLIDE_PLATFORM & GLIDE_HW_CVG) 
+#if (GLIDE_PLATFORM & GLIDE_HW_CVG)
 #define kTileSize (32 * sizeof(FxU16))
 #define kTileMask (kTileSize - 1)
 #define kPageMask ((kTileSize << 1) - 1)
@@ -919,11 +923,11 @@ GR_ENTRY(grLfbReadRegion, FxBool, (GrBuffer_t src_buffer,
                           (((src_buffer == GR_BUFFER_BACKBUFFER) && (gc->hwDep.cvgDep.backBuf == 2)) ||
                            ((src_buffer == GR_BUFFER_FRONTBUFFER) && (gc->hwDep.cvgDep.frontBuf == 2))));
 
-    if (swapP && (gc->grAuxBuf > 0)) sst1InitAllocBuffers(gc->base_ptr, 
-                                                          gc->grColBuf, 
+    if (swapP && (gc->grAuxBuf > 0)) sst1InitAllocBuffers(gc->base_ptr,
+                                                          gc->grColBuf,
                                                           0);
 #endif /* (GLIDE_PLATFORM & GLIDE_HW_CVG) */
-  
+
     info.size = sizeof(info);
     if (grLfbLock(GR_LFB_READ_ONLY,
                   src_buffer,
@@ -937,7 +941,7 @@ GR_ENTRY(grLfbReadRegion, FxBool, (GrBuffer_t src_buffer,
       FxU32 dstJump;              /* bytes to next scanline */
       FxU32 length;               /* bytes to copy in scanline */
       FxU32 scanline;             /* scanline number */
-     
+
       dstData = (FxU32*)dst_data;
       srcData = (const FxU32*)((FxU8*)info.lfbPtr +
                                (src_y * info.strideInBytes) +
@@ -947,7 +951,7 @@ GR_ENTRY(grLfbReadRegion, FxBool, (GrBuffer_t src_buffer,
       dstJump  = dst_stride - length;
       srcJump  = info.strideInBytes - length;
 
-#if (GLIDE_PLATFORM & GLIDE_HW_CVG) 
+#if (GLIDE_PLATFORM & GLIDE_HW_CVG)
       /* Voodoo2 has a problem reading from the frame buffer if we are
        * triple buffering and the triple buffer is the currently
        * active lfb buffer. The problem is that the 32 pixel screen
@@ -993,10 +997,10 @@ GR_ENTRY(grLfbReadRegion, FxBool, (GrBuffer_t src_buffer,
 
             /* Copying the logical 1 tile. This may require us to go
              * 'backwards' in physical memory if there was no logical
-             * 0 tile in the current read.  
+             * 0 tile in the current read.
              */
             tilePtr      = (const FxU32*)(((FxU32)srcData - tileSlopAdjust) & tileSlopMask);
-            tileEnd      = (const FxU32*)MIN((((FxU32)tilePtr + kTileSize) & ~kTileMask), 
+            tileEnd      = (const FxU32*)MIN((((FxU32)tilePtr + kTileSize) & ~kTileMask),
                                              (FxU32)end - kTileSize - sizeof(FxU16));
             tileEndAlign = (const FxU32*)((FxU32)tileEnd & ~0x03UL);
 
@@ -1007,13 +1011,13 @@ GR_ENTRY(grLfbReadRegion, FxBool, (GrBuffer_t src_buffer,
                 dstData = (FxU32*)((FxU8*)dstData + sizeof(FxU16));
                 tilePtr = (const FxU32*)((FxU8*)tilePtr + sizeof(FxU16));
               }
-              
+
               /* Copy the remainder of the logical 1 tile */
               while(tilePtr < tileEndAlign) *dstData++ = GR_GET(*tilePtr++);
-              if (tileEnd != tileEndAlign) 
+              if (tileEnd != tileEndAlign)
                 *(FxU16*)dstData = GR_GET16(*tilePtr);
             }
-              
+
             srcData = (const FxU32*)(((FxU32)srcData + (kTileSize << 1)) & ~kPageMask);
           }
 
@@ -1025,7 +1029,7 @@ GR_ENTRY(grLfbReadRegion, FxBool, (GrBuffer_t src_buffer,
               tilePtr     = (const FxU32*)((FxU32)srcData + kTileSize);
               tileEnd     = (const FxU32*)((FxU32)tilePtr + kTileSize);
               while(tilePtr < tileEnd) *dstData++ = GR_GET(*tilePtr++);
-              
+
               tilePtr = srcData;
               tileEnd = (const FxU32*)((FxU32)tilePtr + kTileSize);
               while(tilePtr < tileEnd) *dstData++ = GR_GET(*tilePtr++);
@@ -1037,24 +1041,24 @@ GR_ENTRY(grLfbReadRegion, FxBool, (GrBuffer_t src_buffer,
           /* Slop 01 tile group */
           if (srcData < end) {
             const FxU32* startTileAddr = (const FxU32*)((FxU32)srcData + kTileSize);
-            
+
             tilePtr      = startTileAddr;
-            tileEnd      = (const FxU32*)((FxU32)startTileAddr + 
+            tileEnd      = (const FxU32*)((FxU32)startTileAddr +
                                           MIN(kTileSize, ((FxU32)end - (FxU32)srcData)));
             tileEndAlign = (const FxU32*)((FxU32)tileEnd & ~0x3);
 
             while(tilePtr < tileEndAlign) *dstData++ = GR_GET(*tilePtr++);
-            if (tileEnd != tileEndAlign) 
+            if (tileEnd != tileEndAlign)
               *(FxU16*)dstData = GR_GET16(*tilePtr);
 
             if (startTileAddr < end) {
               tilePtr      = srcData;
-              tileEnd      = (const FxU32*)((FxU8*)tilePtr + kTileSize - 
+              tileEnd      = (const FxU32*)((FxU8*)tilePtr + kTileSize -
                                             ((FxU32)tileEndAlign - (FxU32)end));
               tileEndAlign = (const FxU32*)((FxU32)tileEnd & ~0x3);
 
               while(tilePtr < tileEndAlign) *dstData++ = GR_GET(*tilePtr++);
-              if (tileEnd != tileEndAlign) 
+              if (tileEnd != tileEndAlign)
                 *(FxU16*)dstData = GR_GET16(*tilePtr);
             }
           }
@@ -1064,22 +1068,22 @@ GR_ENTRY(grLfbReadRegion, FxBool, (GrBuffer_t src_buffer,
           srcData = (const FxU32*)((FxU8*)end + srcJump);
         }
       } else
-#endif /* (GLIDE_PLATFORM & GLIDE_HW_CVG) */     
+#endif /* (GLIDE_PLATFORM & GLIDE_HW_CVG) */
       /* If the source data is aligned for 4 byte pci reads */
       if (((FxU32)srcData & 0x02UL) == 0) {
         while(scanline--) {
           const FxU32* end = (const FxU32*)((char*)srcData + length - 2);
-          
+
           while(srcData < end) {
             *dstData++ = GR_GET(*srcData++);
           }
-          
+
           if (((int)length) & 0x2) {
             (*(FxU16*)dstData) = GR_GET16(*srcData);
             dstData = (FxU32*)(((FxU16*)dstData) + 1);
             srcData = (FxU32*)(((FxU16*)srcData) + 1);
           }
-          
+
           dstData = (FxU32*)(((char*)dstData)+dstJump);
           srcData = (FxU32*)(((char*)srcData)+srcJump);
         }
@@ -1100,7 +1104,7 @@ GR_ENTRY(grLfbReadRegion, FxBool, (GrBuffer_t src_buffer,
             dstData = (FxU32*)(((FxU16*)dstData) + 1);
             srcData = (FxU32*)(((FxU16*)srcData) + 1);
           }
-                
+
           dstData = (FxU32*)(((char*)dstData)+dstJump);
           srcData = (FxU32*)(((char*)srcData)+srcJump);
         }
@@ -1111,9 +1115,9 @@ GR_ENTRY(grLfbReadRegion, FxBool, (GrBuffer_t src_buffer,
       rv = FXFALSE;
     }
 
-#if (GLIDE_PLATFORM & GLIDE_HW_CVG) 
-    if (swapP && (gc->grAuxBuf > 0)) sst1InitAllocBuffers(gc->base_ptr, 
-                                                          gc->grColBuf, 
+#if (GLIDE_PLATFORM & GLIDE_HW_CVG)
+    if (swapP && (gc->grAuxBuf > 0)) sst1InitAllocBuffers(gc->base_ptr,
+                                                          gc->grColBuf,
                                                           gc->grAuxBuf);
   }
 #endif /* (GLIDE_PLATFORM & GLIDE_HW_CVG)  */

@@ -1,141 +1,145 @@
+/* $Id: gglide.c,v 1.2 2001-09-05 14:30:25 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glide/cvg/glide/gglide.c,v 1.1 2000-02-25 00:37:39 sandervl Exp $
+** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glide/cvg/glide/gglide.c,v 1.2 2001-09-05 14:30:25 bird Exp $
 ** $Log: gglide.c,v $
-** Revision 1.1  2000-02-25 00:37:39  sandervl
+** Revision 1.2  2001-09-05 14:30:25  bird
+** Added $Id:$ keyword.
+**
+** Revision 1.1  2000/02/25 00:37:39  sandervl
 ** Created Voodoo 2 dir
 **
-** 
+**
 ** 168   7/02/98 6:59p Peter
 ** Fixed merge problem from previous checkin
-** 
+**
 ** 167   6/30/98 6:08p Jeske
 ** fixed bug where we tried to setup MTRRs on old (<p6) systems which
-** didn't have them. 
-** 
+** didn't have them.
+**
 ** 165   6/11/98 3:59p Peter
 ** sli buffer swap needs to be max of app setting vs forcing sync
-** 
+**
 ** 164   6/03/98 6:31p Peter
 ** clearing single scanlines
-** 
+**
 ** 163   5/28/98 2:52p Peter
 ** fixed wrong checking w/ h3
-** 
+**
 ** 162   5/27/98 9:41a Peter
 ** grBufferClear is constrained by clipping
-** 
+**
 ** 161   5/18/98 12:16p Peter
 ** culling enabling
-** 
+**
 ** 160   4/16/98 3:54p Peter
 ** 1x1 lod fix, sorry John
-** 
+**
 ** 159   4/08/98 3:52p Peter
 ** fixed resetting of unused tmu to small lod
-** 
+**
 ** 158   4/01/98 1:51p Peter
 ** fixed resetting unused tmu muckage/sli origin thing vs grRenderBuffer
-** 
+**
 ** 157   3/31/98 6:09p Peter
 ** sli origin everywhere (I think) and grLfbReadRegion/grRenderBuffer vs
 ** triple buffering
-** 
+**
 ** 156   3/30/98 4:56p Peter
 ** fog table monotonicity
-** 
+**
 ** 155   3/29/98 1:07p Peter
 ** removed shutdown cruft and yet another sli origin thing
-** 
+**
 ** 154   3/23/98 4:21p Jdt
 ** Fixed texture state validation bug in grColorCombine
-** 
+**
 ** 153   3/20/98 11:02a Peter
 ** inactive tmu reset
-** 
+**
 ** 152   3/04/98 9:10p Peter
 ** properly restore fbzMode for the sli swapping thing
-** 
+**
 ** 151   3/03/98 9:37p Peter
 ** more sli origin fun
-** 
+**
 ** 150   3/02/98 7:22p Peter
 ** more crybaby stuff
-** 
+**
 ** 149   2/21/98 8:33a Peter
 ** mixed case ini vars
-** 
+**
 ** 148   2/20/98 5:31p Peter
 ** crybaby glide
-** 
+**
 ** 147   2/20/98 2:16p Peter
 ** shutting down hw should clear hwInit and open
-** 
+**
 ** 146   2/20/98 11:00a Peter
 ** removed glide3 from glid2 tree
-** 
+**
 ** 145   2/20/98 9:05a Peter
 ** removed remnants of comdex grot
-** 
+**
 ** 144   2/17/98 12:40p Peter
 ** fog table fix
-** 
+**
 ** 143   2/12/98 3:40p Peter
 ** single buffering for opengl
-** 
+**
 ** 142   2/11/98 5:23p Peter
 ** fixed grRenderBuffer vs blit clear
-** 
+**
 ** 141   1/30/98 4:19p Peter
 ** sli/y-origin blit clear
-** 
+**
 ** 140   1/23/98 3:02p Peter
 ** uswc nightmare
-** 
+**
 ** 139   1/19/98 1:43p Atai
 ** fixed non-debug mode assignement
-** 
+**
 ** 138   1/19/98 11:00a Atai
 ** remove assignment before validate the state
- * 
+ *
  * 137   1/15/98 1:12p Peter
  * only one culler please
- * 
+ *
  * 136   1/13/98 7:48p Atai
  * fixed gu3dfGetInfo, grBufferClear, and GrState size
- * 
+ *
  * 135   1/13/98 12:42p Atai
  * fixed grtexinfo, grVertexLayout, and draw triangle
- * 
+ *
  * 134   1/09/98 7:29p Atai
  * fixed grBufferSwap for glide3
- * 
+ *
  * 133   1/08/98 9:25p Peter
  * infinite recurrsion in debugging assert
- * 
+ *
  * 132   1/08/98 9:23p Peter
  * fixed macro muckage
- * 
+ *
  * 131   1/08/98 7:09p Peter
  * real hw stuff modulo makefile change
- * 
+ *
 **
 */
 
@@ -155,7 +159,7 @@ static char glideIdent[] = "@#%" VERSIONSTR ;
 
 #if GLIDE_HW_TRI_SETUP
 static void
-_grUpdateTriPacketHdr(FxU32 paramMask, 
+_grUpdateTriPacketHdr(FxU32 paramMask,
                       const GrCullMode_t mode);
 #endif /* GLIDE_HW_TRI_SETUP */
 
@@ -166,8 +170,8 @@ _grUpdateTriPacketHdr(FxU32 paramMask,
 **          blending wont work!
 */
 
-GR_STATE_ENTRY(grAlphaBlendFunction, void, 
-               (GrAlphaBlendFnc_t rgb_sf, GrAlphaBlendFnc_t rgb_df, 
+GR_STATE_ENTRY(grAlphaBlendFunction, void,
+               (GrAlphaBlendFnc_t rgb_sf, GrAlphaBlendFnc_t rgb_df,
                 GrAlphaBlendFnc_t alpha_sf, GrAlphaBlendFnc_t alpha_df))
 {
 #define FN_NAME "grAlphaBlendFunction"
@@ -195,9 +199,9 @@ GR_STATE_ENTRY(grAlphaBlendFunction, void,
     alphamode &= ~SST_ENALPHABLEND;
   else
     alphamode |=  SST_ENALPHABLEND;
-  
+
   alphamode &= ~(SST_RGBSRCFACT | SST_RGBDSTFACT | SST_ASRCFACT | SST_ADSTFACT);
-  
+
   alphamode |= ((((FxU32) rgb_sf) << SST_RGBSRCFACT_SHIFT) |
                 (((FxU32) rgb_df) << SST_RGBDSTFACT_SHIFT) |
                 (((FxU32) alpha_sf) << SST_ASRCFACT_SHIFT) |
@@ -215,8 +219,8 @@ GR_STATE_ENTRY(grAlphaBlendFunction, void,
 ** grAlphaCombine
 */
 
-GR_STATE_ENTRY(grAlphaCombine, void, 
-               (GrCombineFunction_t function, GrCombineFactor_t factor, 
+GR_STATE_ENTRY(grAlphaCombine, void,
+               (GrCombineFunction_t function, GrCombineFactor_t factor,
                 GrCombineLocal_t local, GrCombineOther_t other, FxBool invert))
 {
 #define FN_NAME "grAlphaCombine"
@@ -254,7 +258,7 @@ GR_STATE_ENTRY(grAlphaCombine, void,
                     SST_CCA_ADD_CLOCAL |
                     SST_CCA_ADD_ALOCAL |
                     SST_CCA_INVERT_OUTPUT);
-  
+
   /* setup reverse blending first, then strip off the the high bit */
   if ((factor & 0x8) == 0)
     fbzColorPath |= SST_CCA_REVERSE_BLEND;
@@ -265,49 +269,49 @@ GR_STATE_ENTRY(grAlphaCombine, void,
                                    (other == GR_COMBINE_OTHER_TEXTURE));
   gc->state.ac_requires_it_alpha = ((local == GR_COMBINE_LOCAL_ITERATED) |
                                     (other == GR_COMBINE_OTHER_ITERATED));
-  
+
   /* setup scale factor bits */
   fbzColorPath |= factor << SST_CCA_MSELECT_SHIFT;
 
   /* setup local color bits */
   fbzColorPath |= local << SST_ALOCALSELECT_SHIFT;
-  
+
   /* setup other color bits */
   fbzColorPath |= other << SST_ASELECT_SHIFT;
-  
-  
+
+
   /* setup invert output bits */
   if (invert)
     fbzColorPath |= SST_CCA_INVERT_OUTPUT;
-  
+
   /* setup core color combine unit bits */
   switch (function) {
   case GR_COMBINE_FUNCTION_ZERO:
     fbzColorPath |= SST_CCA_ZERO_OTHER;
     break;
-    
+
   case GR_COMBINE_FUNCTION_LOCAL:
   case GR_COMBINE_FUNCTION_LOCAL_ALPHA:
     fbzColorPath |= SST_CCA_ZERO_OTHER | SST_CCA_ADD_ALOCAL;
     break;
-    
+
   case GR_COMBINE_FUNCTION_SCALE_OTHER:
     break;
-    
+
   case GR_COMBINE_FUNCTION_SCALE_OTHER_ADD_LOCAL:
   case GR_COMBINE_FUNCTION_SCALE_OTHER_ADD_LOCAL_ALPHA:
     fbzColorPath |= SST_CCA_ADD_ALOCAL;
     break;
-    
+
   case GR_COMBINE_FUNCTION_SCALE_OTHER_MINUS_LOCAL:
     fbzColorPath |= SST_CCA_SUB_CLOCAL;
     break;
-    
+
   case GR_COMBINE_FUNCTION_SCALE_OTHER_MINUS_LOCAL_ADD_LOCAL:
   case GR_COMBINE_FUNCTION_SCALE_OTHER_MINUS_LOCAL_ADD_LOCAL_ALPHA:
     fbzColorPath |= SST_CCA_SUB_CLOCAL | SST_CCA_ADD_ALOCAL;
     break;
-    
+
   case GR_COMBINE_FUNCTION_SCALE_MINUS_LOCAL_ADD_LOCAL:
   case GR_COMBINE_FUNCTION_SCALE_MINUS_LOCAL_ADD_LOCAL_ALPHA:
     fbzColorPath |= SST_CCA_ZERO_OTHER | SST_CCA_SUB_CLOCAL | SST_CCA_ADD_ALOCAL;
@@ -338,12 +342,12 @@ GR_STATE_ENTRY(grAlphaCombine, void,
 
 /*---------------------------------------------------------------------------
 ** grAlphaControlsITRGBLighting
-** 
+**
 ** Determines whether the LSB of alpha controls what lighting is used--
 ** Specifically whether grConstantColorValu or the interated RGB values are used
 ** during TEXTURE_TIMES_itrgb & TEXTURE_TIMES_ITRGB_DELTA0 color combine modes.
 **
-*/  
+*/
 
 GR_STATE_ENTRY(grAlphaControlsITRGBLighting, void, (FxBool enable))
 {
@@ -462,7 +466,7 @@ GR_ENTRY(grBufferClear, void, (GrColor_t color, GrAlpha_t alpha, FxU16 depth))
     /* If the width clipping is the same as the screen resolution
      * then we can use the sgram fill rect to clear the page aligned
      * region, and then use the fastFillCmd to clear the remainder.
-     * 
+     *
      * NB: The test really does check against (clipLeft == 0) &&
      * (clipright == screenWidth) since screenWidth should have 0
      * in its upper bits.
@@ -500,19 +504,19 @@ GR_ENTRY(grBufferClear, void, (GrColor_t color, GrAlpha_t alpha, FxU16 depth))
       const FxU32 tileHi = (clipHi >> yTileShift);
 
       /* If they're both in the same tile then just clear using a
-       * fastFillCmd 
+       * fastFillCmd
        */
       if (tileHi <= tileLow) goto __skipBlitClear;
 
       /* Column size is always a full page size divided by the #
-       * of points in a tile row (2 tiles). 
+       * of points in a tile row (2 tiles).
        *
        * NB: This set is 'lifted' out of the groupings below because
        * it is common and stays set accross blit invocations.
        */
       {
         GR_SET_EXPECTED_SIZE(sizeof(FxU32), 1);
-        GR_SET(BROADCAST_ID, hw, bltSize,  
+        GR_SET(BROADCAST_ID, hw, bltSize,
                (((((tileHi - tileLow) * gc->hwDep.cvgDep.xTilePages) - 1) << 16) | (0x1000 >> 3) - 1));
         GR_CHECK_SIZE();
       }
@@ -524,7 +528,7 @@ GR_ENTRY(grBufferClear, void, (GrColor_t color, GrAlpha_t alpha, FxU16 depth))
         REG_GROUP_BEGIN(BROADCAST_ID, bltDstXY, 3, 0x29);
         {
           /* Starting point of the blit. We always do a full page in x. */
-          REG_GROUP_SET(hw, bltDstXY, 
+          REG_GROUP_SET(hw, bltDstXY,
                         (((tileBuffer + (tileLow * gc->hwDep.cvgDep.xTilePages)) << 16) | 0x00UL));
 
           /* dpc - 27 aug 1997 - FixMe!
@@ -544,7 +548,7 @@ GR_ENTRY(grBufferClear, void, (GrColor_t color, GrAlpha_t alpha, FxU16 depth))
       /* Clear the aux buffer */
       if (doAuxP) {
         const FxU32 tileBuffer = (gc->hwDep.cvgDep.numBufferPages * gc->state.num_buffers);
-           
+
         REG_GROUP_BEGIN(BROADCAST_ID, bltDstXY, 3, 0x29);
         {
           REG_GROUP_SET(hw, bltDstXY, (((tileBuffer + (tileLow * gc->hwDep.cvgDep.xTilePages)) << 16) |
@@ -559,7 +563,7 @@ GR_ENTRY(grBufferClear, void, (GrColor_t color, GrAlpha_t alpha, FxU16 depth))
   __skipBlitClear:
       /* Did we round off crap to page align the top part of
        * clipping? If so then reset the hw clipping and use
-       * the normal fastFillCmd on this region. 
+       * the normal fastFillCmd on this region.
        */
       didClipP = ((tileLow << yTileShift) > clipLow);
       if (didClipP) {
@@ -571,7 +575,7 @@ GR_ENTRY(grBufferClear, void, (GrColor_t color, GrAlpha_t alpha, FxU16 depth))
         }
         REG_GROUP_END();
 
-        REG_GROUP_BEGIN(BROADCAST_ID, fbzMode, 
+        REG_GROUP_BEGIN(BROADCAST_ID, fbzMode,
                         2 + bottomOriginP, (bottomOriginP | 0x28UL));
         {
           /* Put the origin in our canonical clipping form */
@@ -582,13 +586,13 @@ GR_ENTRY(grBufferClear, void, (GrColor_t color, GrAlpha_t alpha, FxU16 depth))
            */
           REG_GROUP_SET(hw, clipBottomTop, ((clipLow << SST_CLIPBOTTOM_SHIFT) |
                                             MIN(((tileLow << yTileShift) << SST_CLIPTOP_SHIFT), clipHi)));
-          
+
           /* Execute the FASTFILL command */
           REG_GROUP_SET(hw, fastfillCMD, 1);
         }
         REG_GROUP_END();
-      }       
-         
+      }
+
       /* If we're done then we have to restore the color registers.
        * Otherwise, leave them set for the next fastFillCmd, and
        * reset the clipping for the bottom rounding error.
@@ -620,13 +624,13 @@ GR_ENTRY(grBufferClear, void, (GrColor_t color, GrAlpha_t alpha, FxU16 depth))
         /* Clear the color sense flags so that we don't waste
          * time sending them again, and always set the clip flag.
          */
-        doColorP = 
+        doColorP =
         doAuxP   = FXFALSE;
         didClipP = FXTRUE;
       }
     }
 #endif /* (GLIDE_PLATFORM & GLIDE_HW_CVG) && GLIDE_BLIT_CLEAR */
-    
+
     if (!doneP) {
       REG_GROUP_BEGIN(BROADCAST_ID, zaColor, 2, 0x41);
       {
@@ -634,12 +638,12 @@ GR_ENTRY(grBufferClear, void, (GrColor_t color, GrAlpha_t alpha, FxU16 depth))
         REG_GROUP_SET(hw, c1, color);
       }
       REG_GROUP_END();
-      
+
       REG_GROUP_BEGIN(BROADCAST_ID, fastfillCMD, 3, 0x209);
       {
         /* Execute the FASTFILL command */
         REG_GROUP_SET(hw, fastfillCMD, 1);
-        
+
         /* Restore C1 and ZACOLOR */
         REG_GROUP_SET(hw, zaColor, oldzacolor);
         REG_GROUP_SET(hw, c1, oldc1);
@@ -650,7 +654,7 @@ GR_ENTRY(grBufferClear, void, (GrColor_t color, GrAlpha_t alpha, FxU16 depth))
 #if (GLIDE_PLATFORM & GLIDE_HW_CVG) && GLIDE_BLIT_CLEAR
     /* Restore clipping */
     if (didClipP) {
-      REG_GROUP_BEGIN(BROADCAST_ID, fbzMode, 
+      REG_GROUP_BEGIN(BROADCAST_ID, fbzMode,
                       bottomOriginP + 1, (bottomOriginP | 0x8UL));
       {
         if (bottomOriginP) REG_GROUP_SET(hw, fbzMode, fbzMode);
@@ -693,12 +697,12 @@ _grSliOriginClear(void)
     REG_GROUP_SET(hw, c1, 0x00UL);
   }
   REG_GROUP_END();
-  
+
   /* Do the clear */
   REG_GROUP_BEGIN(BROADCAST_ID, fbzMode, 2, 0x21UL);
   {
-    REG_GROUP_SET(hw, fbzMode, 
-                  ((gc->state.fbi_config.fbzMode & ~SST_YORIGIN) | 
+    REG_GROUP_SET(hw, fbzMode,
+                  ((gc->state.fbi_config.fbzMode & ~SST_YORIGIN) |
                    (~gc->state.fbi_config.fbzMode & SST_YORIGIN) |
                    SST_RGBWRMASK));
     REG_GROUP_SET(hw, fastfillCMD, 0x01UL);
@@ -707,12 +711,12 @@ _grSliOriginClear(void)
 
   REG_GROUP_BEGIN(BROADCAST_ID, fbzMode, 2, 0x21UL);
   {
-    REG_GROUP_SET(hw, fbzMode, 
+    REG_GROUP_SET(hw, fbzMode,
                   (gc->state.fbi_config.fbzMode | SST_RGBWRMASK));
     REG_GROUP_SET(hw, fastfillCMD, 0x01UL);
   }
   REG_GROUP_END();
-  
+
   /* Restore the initial glide state.
    * NB: Cannot be done in one packet. Wah!
    */
@@ -755,19 +759,19 @@ GR_ENTRY(grBufferSwap, void, (int swapInterval))
 #if ((GLIDE_PLATFORM & GLIDE_HW_CVG) || (GLIDE_PLATFORM & GLIDE_HW_H3))
   /* optionally display the 3Dfx powerfield logo overlay */
   if (_GlideRoot.environment.shamelessPlug) _grShamelessPlug();
-  
+
   /* check for environmental override.
-   * 
+   *
    * NB: If we are sli, the application passes in 0, and the user has
    * elected to not sync to retrace then we honor the user's
    * choice. Otherwise we force syncing because most apps don't know
    * any better. If, however, the user has not chosen, but the app
-   * wants something other than 0 then we need to honor their choice.  
+   * wants something other than 0 then we need to honor their choice.
    */
   swapInterval = ((_GlideRoot.environment.swapInterval >= 0)
                   ? _GlideRoot.environment.swapInterval
                   : (gc->scanline_interleaved ? MAX(swapInterval, 1) : swapInterval));
-  
+
   GR_CHECK_F(myName,
              (swapInterval > 255) || (swapInterval < 0),
              "swap_interval out of range");
@@ -778,12 +782,12 @@ GR_ENTRY(grBufferSwap, void, (int swapInterval))
    */
   while (grBufferNumPending() > 6)
     ;
-  
+
   /* if the interval is non-zero turn on VSYNC waiting */
   vSync = (swapInterval > 0);
-  
+
   if (swapInterval > 0) swapInterval--;
-  
+
     /* NOTE: we need a PCI read before and after the swap command */
     /* but since we already called grBufferNumPending() we've done a read */
   {
@@ -808,15 +812,15 @@ GR_ENTRY(grBufferSwap, void, (int swapInterval))
     GR_SET(BROADCAST_ID, hw, swapbufferCMD,  swapCmdVal);
     GR_CHECK_SIZE();
   }
-  
+
 #ifdef GLIDE_DEBUG
   {
     if ((FxI32)_GlideRoot.environment.snapshot > 0) {
       static char saveDBG[GDBG_MAX_LEVELS];
       int i;
-      
+
       /* turn off tracing after frame 0 and the snapshot frame */
-      if ((_GlideRoot.stats.bufferSwaps == 0) || 
+      if ((_GlideRoot.stats.bufferSwaps == 0) ||
           (_GlideRoot.stats.bufferSwaps == _GlideRoot.environment.snapshot + 3)) {
         GDBG_PRINTF(FN_NAME": FX_SNAPSHOT (%ld)\n", _GlideRoot.stats.bufferSwaps);
         for (i = 1; i < GDBG_MAX_LEVELS; i++) {
@@ -853,7 +857,7 @@ GR_ENTRY(grBufferSwap, void, (int swapInterval))
       *bufPtrs[i] = (*bufPtrs[i] + 1) % numBufs;
     }
 
-  GDBG_INFO(gc->myLevel, 
+  GDBG_INFO(gc->myLevel,
               "\trenderBuf: 0x%X\n",
               gc->hwDep.cvgDep.renderBuf);
   }
@@ -862,13 +866,13 @@ GR_ENTRY(grBufferSwap, void, (int swapInterval))
 
   grSstStatus();        /* special bug workaround       */
 #else
-#    error "Need to implement swap." 
+#    error "Need to implement swap."
 #endif /* GLIDE_PLATFORM & GLIDE_HW_SST1 */
-  
+
   _GlideRoot.stats.bufferSwaps++;
-  
+
   GR_END();
-#undef FN_NAME  
+#undef FN_NAME
 } /* grBufferSwap */
 
 /*---------------------------------------------------------------------------
@@ -881,7 +885,7 @@ GR_ENTRY(grBufferNumPending, int, (void))
 
   {
     FxU32 status = grSstStatus();
-    
+
 #if ((GLIDE_PLATFORM & GLIDE_HW_CVG) || (GLIDE_PLATFORM & GLIDE_HW_H3))
     pend = ((status & SST_SWAPBUFPENDING) >> SST_SWAPBUFPENDING_SHIFT);
 #else
@@ -984,7 +988,7 @@ _grClipNormalizeAndGenerateRegValues(FxU32 minx, FxU32 miny, FxU32 maxx,
   GDBG_INFO(85, "%s:  minx = %d, maxx = %d, miny = %d, maxy = %d\n",
             FN_NAME, minx, maxx, miny, maxy);
 
-  GR_CHECK_COMPATABILITY(FN_NAME, 
+  GR_CHECK_COMPATABILITY(FN_NAME,
                          ((maxx > gc->state.screen_width) || (maxy > gc->state.screen_height)),
                          "Max clip coordinate > screen size");
   GR_CHECK_COMPATABILITY(FN_NAME,
@@ -1000,20 +1004,20 @@ _grClipNormalizeAndGenerateRegValues(FxU32 minx, FxU32 miny, FxU32 maxx,
   GDBG_INFO(85, "%s: normalized  minx = %d, maxx = %d, miny = %d, maxy = %d\n",
             FN_NAME, minx, maxx, miny, maxy);
 
-  *clipLeftRight = (minx << SST_CLIPLEFT_SHIFT) | (maxx << SST_CLIPRIGHT_SHIFT); 
+  *clipLeftRight = (minx << SST_CLIPLEFT_SHIFT) | (maxx << SST_CLIPRIGHT_SHIFT);
   *clipBottomTop = (miny << SST_CLIPBOTTOM_SHIFT) | (maxy << SST_CLIPTOP_SHIFT);
 
   GDBG_INFO(85, "%s:  clipLeftRight = 0x%x, clipBottomTop = 0x%x\n",
             FN_NAME, clipLeftRight, clipBottomTop);
 
-#undef FN_NAME 
+#undef FN_NAME
 } /* _grClipNormalizeAndGenerateRegValues */
 
 /*---------------------------------------------------------------------------
 ** grClipWindow
 */
-GR_STATE_ENTRY(grClipWindow, void, (FxU32 minx, FxU32 miny, 
-                                    FxU32 maxx, FxU32 maxy)) 
+GR_STATE_ENTRY(grClipWindow, void, (FxU32 minx, FxU32 miny,
+                                    FxU32 maxx, FxU32 maxy))
 {
 #define FN_NAME "grClipWindow"
   FxU32
@@ -1049,7 +1053,7 @@ GR_STATE_ENTRY(grClipWindow, void, (FxU32 minx, FxU32 miny,
 ** grColorCombine
 */
 
-GR_STATE_ENTRY(grColorCombine, void, 
+GR_STATE_ENTRY(grColorCombine, void,
                (GrCombineFunction_t function, GrCombineFactor_t factor,
                 GrCombineLocal_t local, GrCombineOther_t other, FxBool invert))
 {
@@ -1175,7 +1179,7 @@ GR_STATE_ENTRY(grColorCombine, void,
 
     GR_SET_EXPECTED_SIZE(sizeof(FxU32) + (texTransP ? sizeof(FxU32) : 0),
                          1 + texTransP);
-    
+
     /* transition into/out of texturing ... add nopCMD */
     if (texTransP) GR_SET(BROADCAST_ID, hw, nopCMD, 0);
     GR_SET(BROADCAST_ID, hw, fbzColorPath,  fbzColorPath);
@@ -1381,15 +1385,15 @@ GR_STATE_ENTRY(grDepthBufferMode, void, (GrDepthBufferMode_t mode))
 
   /* turn off all the bits and then turn them back on selectively */
   fbzMode = gc->state.fbi_config.fbzMode;
-  fbzMode &= ~(SST_ENDEPTHBUFFER | 
-               SST_WBUFFER | 
-               SST_ENZBIAS | 
+  fbzMode &= ~(SST_ENDEPTHBUFFER |
+               SST_WBUFFER |
+               SST_ENZBIAS |
                SST_ZCOMPARE_TO_ZACOLOR);
 
   switch (mode) {
   case GR_DEPTHBUFFER_DISABLE:
     break;
-    
+
   case GR_DEPTHBUFFER_ZBUFFER:
     fbzMode |= SST_ENDEPTHBUFFER | SST_ENZBIAS;
     break;
@@ -1498,7 +1502,7 @@ GR_STATE_ENTRY(grDitherMode, void, (GrDitherMode_t mode))
   GDBG_INFO_MORE(gc->myLevel, "(%d)\n", mode);
 
   fbzMode = gc->state.fbi_config.fbzMode;
-  if (_GlideRoot.environment.disableDitherSub == FXTRUE) 
+  if (_GlideRoot.environment.disableDitherSub == FXTRUE)
     fbzMode &= ~(SST_ENDITHER | SST_DITHER2x2);
   else
     fbzMode &= ~(SST_ENDITHER | SST_DITHER2x2 | SST_ENDITHERSUBTRACT);
@@ -1506,7 +1510,7 @@ GR_STATE_ENTRY(grDitherMode, void, (GrDitherMode_t mode))
   switch (mode) {
   case GR_DITHER_DISABLE:
     break;
-        
+
   case GR_DITHER_2x2:
     fbzMode |= (SST_ENDITHER | SST_DITHER2x2);
     break;
@@ -1536,11 +1540,11 @@ GR_STATE_ENTRY(grFogMode, void, (GrFogMode_t mode))
   GDBG_INFO_MORE(gc->myLevel,"(%d)\n",mode);
 
   fogmode = gc->state.fbi_config.fogMode;
-  fogmode &= ~(SST_ENFOGGING | 
-               SST_FOGADD | 
-               SST_FOGMULT | 
-               SST_FOG_ALPHA | 
-               SST_FOG_Z | 
+  fogmode &= ~(SST_ENFOGGING |
+               SST_FOGADD |
+               SST_FOGMULT |
+               SST_FOG_ALPHA |
+               SST_FOG_Z |
                SST_FOG_CONSTANT);
 
   switch (mode & 0xFF) {    /* switch based on lower 8 bits */
@@ -1563,7 +1567,7 @@ GR_STATE_ENTRY(grFogMode, void, (GrFogMode_t mode))
   if (mode &  GR_FOG_ADD2) fogmode |= SST_FOGADD;
 
   /* GMT says that this should be enabled for CVG.  It is always safe
-   * to enable these even when fogging is not enabled.  
+   * to enable these even when fogging is not enabled.
    */
   fogmode |= (SST_FOG_DITHER | SST_FOG_ZONES);
 
@@ -1617,28 +1621,28 @@ GR_ENTRY(grFogTable, void, (const GrFog_t fogtable[]))
   REG_GROUP_LONG_BEGIN(BROADCAST_ID, fogTable[0], 32);
   {
     int j;
-    
+
     for (j = 0; j < iend; j++) {
       FxU32 e0, e1, d0, d1;
-      
+
       e0 = locTable[0];                     /* lower entry */
       e1 = locTable[1];                     /* upper entry */
 
-      GR_CHECK_COMPATABILITY(FN_NAME, 
-                             (e1 < e0), 
+      GR_CHECK_COMPATABILITY(FN_NAME,
+                             (e1 < e0),
                              "Invalid fog table entry. (Must be monotonically increasing)");
-      GR_CHECK_COMPATABILITY(FN_NAME, 
+      GR_CHECK_COMPATABILITY(FN_NAME,
                              ((j > 0) ? (e0 < locTable[-1]) : 0),
                              "Invalid fog table entry. (Must be monotonically increasing)");
-      
+
       /* del0 in .2 format */
-      d0 = ((e1 - e0) << 2); 
+      d0 = ((e1 - e0) << 2);
 
       /* del1 in .2 format - don't access beyond end of table */
       d1 = ((j == (iend - 1)) ? e1 : locTable[2]);
       d1 = (d1 - e1) << 2;
-      
-      REG_GROUP_SET(hw, fogTable[j], 
+
+      REG_GROUP_SET(hw, fogTable[j],
                     ((e1 << 24) | (d1 << 16) | (e0 << 8) | d0));
       GDBG_INFO(gc->myLevel + 200, "fogTable[%ld]: 0x%X\n",
                 j, ((e1 << 24) | (d1 << 16) | (e0 << 8) | d0));
@@ -1657,7 +1661,7 @@ GR_ENTRY(grFogTable, void, (const GrFog_t fogtable[]))
   Implementor(s): dow, gmt, jdt
   Library: Glide
   Description:
-  Shutdown the Glide Library.  Iterate through all hardware and 
+  Shutdown the Glide Library.  Iterate through all hardware and
   call grSstWinClose().  Call InitShutdown() which unmaps all
   hardware from linear memory.
   Arguments:
@@ -1694,19 +1698,19 @@ GR_ENTRY(grGlideShutdown, void, (void))
 #else /* !GLIDE_INIT_HAL */
     /* dpc - 5 sep 1997 - FixMe!
      * Move this to the new initCode world some time.
-     * 
+     *
      * initClose();
      *
      * NB: This is only necessary to properly shtudown the hw and vxd
      * if the application never called grSstWinOpen because they are
      * doing some sort of hw/dll detection before trying to run w/
-     * glide.  
+     * glide.
      */
     for(i = 0; i < _GlideRoot.hwConfig.num_sst; i++) {
       if (_GlideRoot.GCs[i].hwInitP) {
         if (_GlideRoot.CPUType >= 6) {
-		sst1InitCaching(_GlideRoot.GCs[i].base_ptr, FXFALSE);
-	}
+        sst1InitCaching(_GlideRoot.GCs[i].base_ptr, FXFALSE);
+    }
         sst1InitShutdown(_GlideRoot.GCs[i].base_ptr);
 
         _GlideRoot.GCs[i].hwInitP = FXFALSE;
@@ -1729,7 +1733,7 @@ GR_ENTRY(grGlideShutdown, void, (void))
         Flushes all State Monster regs.  If we're not doing Glide 3,
         then it's still used by grGlideSetState()
   Arguments:
-  
+
   Return:
   -------------------------------------------------------------------*/
 void
@@ -1749,17 +1753,17 @@ _grFlushCommonStateRegs()
     REG_GROUP_SET(hw, fogMode, gc->state.fbi_config.fogMode);
     REG_GROUP_SET(hw, alphaMode, gc->state.fbi_config.alphaMode);
     REG_GROUP_SET(hw, fbzMode, gc->state.fbi_config.fbzMode);
-    
+
     REG_GROUP_SET(hw, lfbMode, gc->state.fbi_config.lfbMode);
     REG_GROUP_SET(hw, clipLeftRight, gc->state.fbi_config.clipLeftRight);
     REG_GROUP_SET(hw, clipBottomTop, gc->state.fbi_config.clipBottomTop);
-    
+
     REG_GROUP_SET(hw, fogColor, gc->state.fbi_config.fogColor);
     REG_GROUP_SET(hw, zaColor, gc->state.fbi_config.zaColor);
     REG_GROUP_SET(hw, chromaKey, gc->state.fbi_config.chromaKey);
   }
   REG_GROUP_NO_CHECK_END();
-  
+
   REG_GROUP_NO_CHECK_BEGIN(BROADCAST_ID, stipple, 3, 0x07);
   {
     REG_GROUP_SET(hw, stipple, gc->state.fbi_config.stipple);
@@ -1784,10 +1788,10 @@ GR_ENTRY(grGlideSetState, void, (const GrState *state))
   GDBG_INFO_MORE(gc->myLevel,"(0x%x)\n",state);
 
   GR_ASSERT(state != NULL);
-  
+
   /* if texture mapping changed then we need to issue a NOP command*/
   {
-    const FxBool texChangeP = (((gc->state.fbi_config.fbzColorPath ^ state->fbi_config.fbzColorPath) & 
+    const FxBool texChangeP = (((gc->state.fbi_config.fbzColorPath ^ state->fbi_config.fbzColorPath) &
                                 SST_ENTEXTUREMAP) != 0);
     if (texChangeP) {
       GR_SET_EXPECTED_SIZE(sizeof(FxU32), 1);
@@ -1798,7 +1802,7 @@ GR_ENTRY(grGlideSetState, void, (const GrState *state))
 
 #if (GLIDE_PLATFORM & GLIDE_HW_CVG)
   /* If we're on sli and the new state includes changing the origin
-   * that we clear the slop lines at the bottom of the screen.  
+   * that we clear the slop lines at the bottom of the screen.
    */
   if (gc->scanline_interleaved) gc->hwDep.cvgDep.sliOriginBufCount = gc->grColBuf;
 #endif /* (GLIDE_PLATFORM & GLIDE_HW_CVG) */
@@ -1808,22 +1812,22 @@ GR_ENTRY(grGlideSetState, void, (const GrState *state))
 
   /* Update the hardware state from the saved state. */
   _grFlushCommonStateRegs();
-  
+
   GR_SET_EXPECTED_SIZE((7 * sizeof(FxU32)) * gc->num_tmu, gc->num_tmu);
   {
     int tmu;
-    
+
     for (tmu = 0; tmu < gc->num_tmu; tmu++) {
       SstRegs* tmuregs = SST_TMU(hw, tmu);
       const FifoChipField chipField = (FifoChipField)(0x02UL << tmu);
-      
+
       REG_GROUP_NO_CHECK_BEGIN(chipField, textureMode, 7, 0x7F);
       {
         REG_GROUP_SET(tmuregs, textureMode, gc->state.tmu_config[tmu].textureMode);
         REG_GROUP_SET(tmuregs, tLOD, gc->state.tmu_config[tmu].tLOD);
         REG_GROUP_SET(tmuregs, tDetail, gc->state.tmu_config[tmu].tDetail);
         REG_GROUP_SET(tmuregs, texBaseAddr, gc->state.tmu_config[tmu].texBaseAddr);
-        
+
         REG_GROUP_SET(tmuregs, texBaseAddr1, gc->state.tmu_config[tmu].texBaseAddr_1);
         REG_GROUP_SET(tmuregs, texBaseAddr2, gc->state.tmu_config[tmu].texBaseAddr_2);
         REG_GROUP_SET(tmuregs, texBaseAddr38, gc->state.tmu_config[tmu].texBaseAddr_3_8);
@@ -1835,7 +1839,7 @@ GR_ENTRY(grGlideSetState, void, (const GrState *state))
 
   /* NOTE: since glide state includes things like hints and all cached
    * variables like paramIndex we needn't recompute these, BUT: we do
-   * need to rebuild stuff that depends on them!!! 
+   * need to rebuild stuff that depends on them!!!
    */
   _grUpdateParamIndex();
 
@@ -1860,11 +1864,11 @@ GR_STATE_ENTRY(grRenderBuffer, void, (GrBuffer_t buffer))
 
   {
     FxU32 fbzMode;
-    
+
     fbzMode = gc->state.fbi_config.fbzMode;
     fbzMode &= ~(SST_DRAWBUFFER);
     fbzMode |= ((buffer == GR_BUFFER_FRONTBUFFER)
-                ? SST_DRAWBUFFER_FRONT 
+                ? SST_DRAWBUFFER_FRONT
                 : SST_DRAWBUFFER_BACK);
 
     GR_SET_EXPECTED_SIZE(sizeof(FxU32), 1);
@@ -1874,14 +1878,14 @@ GR_STATE_ENTRY(grRenderBuffer, void, (GrBuffer_t buffer))
     gc->state.fbi_config.fbzMode = fbzMode;
   }
 
-#if (GLIDE_PLATFORM & GLIDE_HW_CVG) && GLIDE_BLIT_CLEAR 
+#if (GLIDE_PLATFORM & GLIDE_HW_CVG) && GLIDE_BLIT_CLEAR
     /* Setting the render buffer means we need to adjust
      * our current pointer to the render buffer's physical
      * address if we're doing blit clears.
      */
     {
       const FxU32 oldRenderBuf = gc->hwDep.cvgDep.renderBuf;
-      
+
       gc->hwDep.cvgDep.renderBuf = ((buffer == GR_BUFFER_FRONTBUFFER)
                                     ? gc->hwDep.cvgDep.frontBuf
                                     : gc->hwDep.cvgDep.backBuf);
@@ -1889,7 +1893,7 @@ GR_STATE_ENTRY(grRenderBuffer, void, (GrBuffer_t buffer))
           (gc->hwDep.cvgDep.sliOriginBufCount != 0)) _grSliOriginClear();
     }
 #endif /* (GLIDE_PLATFORM & GLIDE_HW_CVG) && GLIDE_BLIT_CLEAR */
-    
+
   GR_END();
 #undef FN_NAME
 } /* grRenderBuffer */
@@ -1931,36 +1935,36 @@ GR_DDFUNC(_grUpdateParamIndex, void, (void))
     static FxU32 paramI_array[] = {
       /* 0 */
       STATE_REQUIRES_OOW_FBI,
-      
+
       /* 1 */
-      STATE_REQUIRES_OOW_FBI | 
+      STATE_REQUIRES_OOW_FBI |
       STATE_REQUIRES_W_TMU0 | STATE_REQUIRES_ST_TMU0,
 
       /* 2 */
-      STATE_REQUIRES_OOW_FBI | 
+      STATE_REQUIRES_OOW_FBI |
       STATE_REQUIRES_W_TMU1 | STATE_REQUIRES_ST_TMU1,
 
       /* 3 */
-      STATE_REQUIRES_OOW_FBI | 
-      STATE_REQUIRES_W_TMU0 | STATE_REQUIRES_ST_TMU0 | 
+      STATE_REQUIRES_OOW_FBI |
+      STATE_REQUIRES_W_TMU0 | STATE_REQUIRES_ST_TMU0 |
       STATE_REQUIRES_W_TMU1 | STATE_REQUIRES_ST_TMU1,
 
       /* 4 */
-      STATE_REQUIRES_OOW_FBI | 
+      STATE_REQUIRES_OOW_FBI |
       STATE_REQUIRES_W_TMU2 | STATE_REQUIRES_ST_TMU2,
 
       /* 5 */
-      STATE_REQUIRES_OOW_FBI | 
+      STATE_REQUIRES_OOW_FBI |
       STATE_REQUIRES_W_TMU0 | STATE_REQUIRES_ST_TMU0 |
       STATE_REQUIRES_W_TMU2 | STATE_REQUIRES_ST_TMU2,
 
       /* 6 */
-      STATE_REQUIRES_OOW_FBI | 
+      STATE_REQUIRES_OOW_FBI |
       STATE_REQUIRES_W_TMU1 | STATE_REQUIRES_ST_TMU1 |
       STATE_REQUIRES_W_TMU2 | STATE_REQUIRES_ST_TMU2,
 
       /* 7 */
-      STATE_REQUIRES_OOW_FBI | 
+      STATE_REQUIRES_OOW_FBI |
       STATE_REQUIRES_W_TMU0 | STATE_REQUIRES_ST_TMU0 |
       STATE_REQUIRES_W_TMU1 | STATE_REQUIRES_ST_TMU1 |
       STATE_REQUIRES_W_TMU2 | STATE_REQUIRES_ST_TMU2,
@@ -1968,7 +1972,7 @@ GR_DDFUNC(_grUpdateParamIndex, void, (void))
 
     GR_ASSERT(gc->state.tmuMask < sizeof(paramI_array)/sizeof(paramI_array[0]));
     paramIndex |= paramI_array[gc->state.tmuMask];
-  }  
+  }
 
   /* See if we need iterated RGB */
   if (gc->state.cc_requires_it_rgb && !gc->state.cc_delta0mode) {
@@ -1976,7 +1980,7 @@ GR_DDFUNC(_grUpdateParamIndex, void, (void))
   }
 
   /* See if we need to iterate alpha based on the value of
-     ac_requires_it_alpha */ 
+     ac_requires_it_alpha */
   if (gc->state.ac_requires_it_alpha) {
     paramIndex |= STATE_REQUIRES_IT_ALPHA;
   }
@@ -2021,29 +2025,29 @@ GR_DDFUNC(_grUpdateParamIndex, void, (void))
     if (!(hints & GR_STWHINT_W_DIFF_TMU0))
       paramIndex &= ~STATE_REQUIRES_W_TMU0;
   }
-  
+
   /* Turn off ST for TMU1 if TMU0 is active and TMU1 is not different */
   if (((paramIndex & (STATE_REQUIRES_ST_TMU0 | STATE_REQUIRES_ST_TMU1)) ==
        (STATE_REQUIRES_ST_TMU0 | STATE_REQUIRES_ST_TMU1)) &&
       !(hints & GR_STWHINT_ST_DIFF_TMU1))
     paramIndex &= ~STATE_REQUIRES_ST_TMU1;
-  
-  /* Turn off W for TMU1 if we have a previous W, and don't have a hint */ 
+
+  /* Turn off W for TMU1 if we have a previous W, and don't have a hint */
   if ((paramIndex & STATE_REQUIRES_W_TMU1) && !(hints & GR_STWHINT_W_DIFF_TMU1))
     paramIndex &= ~STATE_REQUIRES_W_TMU1;
 
 #if (GLIDE_NUM_TMU > 2)
-  /* Turn off ST for TMU1 if it's not different & any other is set up.  */ 
+  /* Turn off ST for TMU1 if it's not different & any other is set up.  */
   if ((paramIndex & (STATE_REQUIRES_ST_TMU0 | STATE_REQURES_ST_TMU1)) &&
       (paramIndex & STATE_REQUIRES_ST_TMU2) &&
       !(hints & GR_STWHINT_ST_DIFF_TMU2))
     paramIndex &= ~STATE_REQUIRES_ST_TMU2;
-  
-  /* Turn off W for TMU2 if we have a previous W, and don't have a hint */ 
+
+  /* Turn off W for TMU2 if we have a previous W, and don't have a hint */
   if ((paramIndex & STATE_REQUIRES_W_TMU2) && !(hints & GR_STWHINT_W_DIFF_TMU2))
     paramIndex &= ~STATE_REQUIRES_W_TMU2;
 #endif
-  
+
   gc->state.paramIndex = paramIndex;
 
   _grRebuildDataList();
@@ -2104,21 +2108,21 @@ GR_DDFUNC(_grUpdateParamIndex, void, (void))
 
 #if GLIDE_HW_TRI_SETUP
 static void
-_grUpdateTriPacketHdr(FxU32 paramMask, 
+_grUpdateTriPacketHdr(FxU32 paramMask,
                       const GrCullMode_t cullMode)
 {
   GR_DCL_GC;
-  FxU32 sMode = ((cullMode != GR_CULL_DISABLE) 
-                 ? kSetupCullEnable 
+  FxU32 sMode = ((cullMode != GR_CULL_DISABLE)
+                 ? kSetupCullEnable
                  : kSetupPingPongDisable);
-  if (sMode != kSetupPingPongDisable) sMode |= ((cullMode == GR_CULL_POSITIVE) 
-                                                ? kSetupCullPositive 
+  if (sMode != kSetupPingPongDisable) sMode |= ((cullMode == GR_CULL_POSITIVE)
+                                                ? kSetupCullPositive
                                                 : kSetupCullNegative);
 
 #if GLIDE_DISPATCH_SETUP
 #define COLOR_COMP_ARGB ((SST_SETUP_RGB | SST_SETUP_A) << SSTCP_PKT3_PMASK_SHIFT)
 #define COLOR_COMP_RGB  (SST_SETUP_RGB << SSTCP_PKT3_PMASK_SHIFT)
-#define COLOR_COMP_MASK COLOR_COMP_ARGB 
+#define COLOR_COMP_MASK COLOR_COMP_ARGB
 
   /* Setup custom triangle/strip procs.
    *
@@ -2161,7 +2165,7 @@ _grUpdateTriPacketHdr(FxU32 paramMask,
   gc->cmdTransportInfo.cullStripHdr = ((sMode << SSTCP_PKT3_SMODE_SHIFT) |
                                        paramMask |
                                        SSTCP_PKT3);
-  
+
   /* Independent triangle hdr for grDrawTriangle */
   gc->cmdTransportInfo.triPacketHdr = (gc->cmdTransportInfo.cullStripHdr |
                                        (0x3UL << SSTCP_PKT3_NUMVERTEX_SHIFT) |
@@ -2199,15 +2203,15 @@ GR_DDFUNC(_grRebuildDataList, void, (void))
 #if GLIDE_PACKED_RGB
   FxBool packedRGB = FXFALSE;
 #endif /* GLIDE_PACKED_RGB */
-    
+
 #ifdef GLIDE_DEBUG
   static char *p_str[] = {"x","y","z","r","g","b","ooz","a","oow",
                           "s0","t0","w0","s1","t1","w1","s2","t2","w2"};
 #endif /* GLIDE_DEBUG */
-  
+
   GDBG_INFO(85,"(s) paramHints=0x%x paramIndex=0x%x\n", FN_NAME,
             gc->state.paramHints,gc->state.paramIndex);
-  
+
   curTriSize = params = 0;
   i = gc->state.paramIndex;
 #ifdef GLIDE_USE_ALT_REGMAP
@@ -2228,7 +2232,7 @@ GR_DDFUNC(_grRebuildDataList, void, (void))
 
     /* When using packed color we only add *ONE* item to the data list
      * and this signals the entire color set since it is not possible
-     * to specify a single color component in any packet.  
+     * to specify a single color component in any packet.
      */
 #if !GLIDE_PACKED_RGB
     gc->tsuDataList[curTriSize + 1] = GR_VERTEX_G_OFFSET << 2;
@@ -2273,7 +2277,7 @@ GR_DDFUNC(_grRebuildDataList, void, (void))
 #if GLIDE_PACKED_RGB
     {
       /* Only increment the parameter packet size if we have not already
-       * added the rgb fields.  
+       * added the rgb fields.
        */
       if ((i & STATE_REQUIRES_IT_DRGB) == 0) params += 1;
       packedRGB = FXTRUE;
@@ -2282,7 +2286,7 @@ GR_DDFUNC(_grRebuildDataList, void, (void))
     params += 1;
 #endif /* !GLIDE_PACKED_RGB */
   }
-  
+
   if (i & STATE_REQUIRES_OOZ) {
 #if GLIDE_HW_TRI_SETUP
     gc->tsuDataList[curTriSize + 0]      = GR_VERTEX_OOZ_OFFSET << 2;
@@ -2328,7 +2332,7 @@ GR_DDFUNC(_grRebuildDataList, void, (void))
    */
   gc->tsuDataList[curTriSize++] = 0;
 #endif /* GLIDE_FP_CLAMP_TEX */
-  
+
   /* NOTE: this is the first */
   if (i & STATE_REQUIRES_W_TMU0) {
 #if GLIDE_HW_TRI_SETUP
@@ -2344,7 +2348,7 @@ GR_DDFUNC(_grRebuildDataList, void, (void))
     curTriSize += 1;
     params += 1;
   }
-  
+
   /* TMU0 --------------------------------- */
   /* always output to ALL chips, saves from having to change CHIP field */
   if (i & STATE_REQUIRES_ST_TMU0) {
@@ -2364,7 +2368,7 @@ GR_DDFUNC(_grRebuildDataList, void, (void))
     curTriSize += 2;
     params += 2;
   }
-    
+
   /* TMU1 --------------------------------- */
   if (i & STATE_REQUIRES_W_TMU1) {
 #if GLIDE_HW_TRI_SETUP
@@ -2399,7 +2403,7 @@ GR_DDFUNC(_grRebuildDataList, void, (void))
     curTriSize += 2;
     params += 2;
   }
-  
+
 #if (GLIDE_NUM_TMU > 2)
 #error "GLIDE_NUM_TMU > 2: Write this code."
 #endif
@@ -2451,7 +2455,7 @@ GR_DDFUNC(_grRebuildDataList, void, (void))
    */
   gc->tsuDataList[++curTriSize]   = 0;
 #endif /* GLIDE_FP_CLAMP_TEX */
-  
+
 #ifdef GDBG_INFO_ON
 #if GLIDE_HW_TRI_SETUP
   for (i = 0; gc->tsuDataList[i]; i++) {
@@ -2479,116 +2483,116 @@ GR_DDFUNC(_grRebuildDataList, void, (void))
 */
 GR_DDFUNC(_grInitializeGCFuncs, void, (GrGC *gc))
 {
-  
+
   gc->gcFuncs._grColorCombineDelta0Mode = (void *)
-    GR_DDNAME(_grColorCombineDelta0Mode); 
+    GR_DDNAME(_grColorCombineDelta0Mode);
   gc->gcFuncs._grRebuildDataList = (void *) GR_DDNAME(_grRebuildDataList);
   gc->gcFuncs._grTexDetailControl = (void *) GR_DDNAME(_grTexDetailControl);
   gc->gcFuncs._grTexDownloadNccTable = (void *)
-    GR_DDNAME(_grTexDownloadNccTable); 
+    GR_DDNAME(_grTexDownloadNccTable);
   gc->gcFuncs._grTexDownloadPalette = (void *)
-    GR_DDNAME(_grTexDownloadPalette); 
+    GR_DDNAME(_grTexDownloadPalette);
   gc->gcFuncs._gumpTexCombineFunction = (void *)
-    GR_DDNAME(_gumpTexCombineFunction); 
+    GR_DDNAME(_gumpTexCombineFunction);
   gc->gcFuncs._grUpdateParamIndex = (void *)
-    GR_DDNAME(_grUpdateParamIndex); 
-  gc->gcFuncs._trisetup = (void *) GR_DDNAME(_trisetup); 
+    GR_DDNAME(_grUpdateParamIndex);
+  gc->gcFuncs._trisetup = (void *) GR_DDNAME(_trisetup);
   gc->gcFuncs._trisetup_nogradients = (void *)
-    GR_DDNAME(_trisetup_nogradients); 
-  gc->gcFuncs.grAADrawLine = (void *) GR_DDNAME(grAADrawLine); 
-  gc->gcFuncs.grAADrawPoint = (void *) GR_DDNAME(grAADrawPoint); 
-  gc->gcFuncs.grAADrawPolygon = (void *) GR_DDNAME(grAADrawPolygon); 
+    GR_DDNAME(_trisetup_nogradients);
+  gc->gcFuncs.grAADrawLine = (void *) GR_DDNAME(grAADrawLine);
+  gc->gcFuncs.grAADrawPoint = (void *) GR_DDNAME(grAADrawPoint);
+  gc->gcFuncs.grAADrawPolygon = (void *) GR_DDNAME(grAADrawPolygon);
   gc->gcFuncs.grAADrawPolygonVertexList = (void *)
-    GR_DDNAME(grAADrawPolygonVertexList); 
-  gc->gcFuncs.grAADrawTriangle = (void *) GR_DDNAME(grAADrawTriangle); 
+    GR_DDNAME(grAADrawPolygonVertexList);
+  gc->gcFuncs.grAADrawTriangle = (void *) GR_DDNAME(grAADrawTriangle);
   gc->gcFuncs.grAlphaBlendFunction = (void *)
-    GR_DDNAME(grAlphaBlendFunction); 
-  gc->gcFuncs.grAlphaCombine = (void *) GR_DDNAME(grAlphaCombine); 
+    GR_DDNAME(grAlphaBlendFunction);
+  gc->gcFuncs.grAlphaCombine = (void *) GR_DDNAME(grAlphaCombine);
   gc->gcFuncs.grAlphaControlsITRGBLighting = (void *)
-    GR_DDNAME(grAlphaControlsITRGBLighting); 
+    GR_DDNAME(grAlphaControlsITRGBLighting);
   gc->gcFuncs.grAlphaTestFunction = (void *)
-    GR_DDNAME(grAlphaTestFunction); 
+    GR_DDNAME(grAlphaTestFunction);
   gc->gcFuncs.grAlphaTestReferenceValue = (void *)
-    GR_DDNAME(grAlphaTestReferenceValue); 
-  gc->gcFuncs.grBufferClear = (void *) GR_DDNAME(grBufferClear); 
+    GR_DDNAME(grAlphaTestReferenceValue);
+  gc->gcFuncs.grBufferClear = (void *) GR_DDNAME(grBufferClear);
   gc->gcFuncs.grBufferNumPending = (void *)
-    GR_DDNAME(grBufferNumPending); 
-  gc->gcFuncs.grBufferSwap = (void *) GR_DDNAME(grBufferSwap); 
-  gc->gcFuncs.grChromakeyMode = (void *) GR_DDNAME(grChromakeyMode); 
-  gc->gcFuncs.grChromakeyValue = (void *) GR_DDNAME(grChromakeyValue); 
-  gc->gcFuncs.grClipWindow = (void *) GR_DDNAME(grClipWindow); 
-  gc->gcFuncs.grColorCombine = (void *) GR_DDNAME(grColorCombine); 
-  gc->gcFuncs.grColorMask = (void *) GR_DDNAME(grColorMask); 
+    GR_DDNAME(grBufferNumPending);
+  gc->gcFuncs.grBufferSwap = (void *) GR_DDNAME(grBufferSwap);
+  gc->gcFuncs.grChromakeyMode = (void *) GR_DDNAME(grChromakeyMode);
+  gc->gcFuncs.grChromakeyValue = (void *) GR_DDNAME(grChromakeyValue);
+  gc->gcFuncs.grClipWindow = (void *) GR_DDNAME(grClipWindow);
+  gc->gcFuncs.grColorCombine = (void *) GR_DDNAME(grColorCombine);
+  gc->gcFuncs.grColorMask = (void *) GR_DDNAME(grColorMask);
   gc->gcFuncs.grConstantColorValue = (void *)
-    GR_DDNAME(grConstantColorValue); 
+    GR_DDNAME(grConstantColorValue);
   gc->gcFuncs.grConstantColorValue4 = (void *)
-    GR_DDNAME(grConstantColorValue4); 
-  gc->gcFuncs.grCullMode = (void *) GR_DDNAME(grCullMode); 
-  gc->gcFuncs.grDepthBiasLevel = (void *) GR_DDNAME(grDepthBiasLevel); 
+    GR_DDNAME(grConstantColorValue4);
+  gc->gcFuncs.grCullMode = (void *) GR_DDNAME(grCullMode);
+  gc->gcFuncs.grDepthBiasLevel = (void *) GR_DDNAME(grDepthBiasLevel);
   gc->gcFuncs.grDepthBufferFunction = (void *)
-    GR_DDNAME(grDepthBufferFunction); 
+    GR_DDNAME(grDepthBufferFunction);
   gc->gcFuncs.grDepthBufferMode = (void *) GR_DDNAME(grDepthBufferMode);
-  
-  gc->gcFuncs.grDepthMask = (void *) GR_DDNAME(grDepthMask); 
+
+  gc->gcFuncs.grDepthMask = (void *) GR_DDNAME(grDepthMask);
   gc->gcFuncs.grDisableAllEffects = (void *)
-    GR_DDNAME(grDisableAllEffects); 
-  gc->gcFuncs.grDitherMode = (void *) GR_DDNAME(grDitherMode); 
-  gc->gcFuncs.grDrawLine = (void *) GR_DDNAME(grDrawLine); 
+    GR_DDNAME(grDisableAllEffects);
+  gc->gcFuncs.grDitherMode = (void *) GR_DDNAME(grDitherMode);
+  gc->gcFuncs.grDrawLine = (void *) GR_DDNAME(grDrawLine);
   gc->gcFuncs.grDrawPlanarPolygon = (void *)
-    GR_DDNAME(grDrawPlanarPolygon); 
+    GR_DDNAME(grDrawPlanarPolygon);
   gc->gcFuncs.grDrawPlanarPolygonVertexList = (void *)
-    GR_DDNAME(grDrawPlanarPolygonVertexList); 
-  gc->gcFuncs.grDrawPoint = (void *) GR_DDNAME(grDrawPoint); 
-  gc->gcFuncs.grDrawPolygon = (void *) GR_DDNAME(grDrawPolygon); 
+    GR_DDNAME(grDrawPlanarPolygonVertexList);
+  gc->gcFuncs.grDrawPoint = (void *) GR_DDNAME(grDrawPoint);
+  gc->gcFuncs.grDrawPolygon = (void *) GR_DDNAME(grDrawPolygon);
   gc->gcFuncs.grDrawPolygonVertexList = (void *)
-    GR_DDNAME(grDrawPolygonVertexList); 
-  gc->gcFuncs.grDrawTriangle = (void *) GR_DDNAME(grDrawTriangle); 
-  gc->gcFuncs.grFogColorValue = (void *) GR_DDNAME(grFogColorValue); 
-  gc->gcFuncs.grFogMode = (void *) GR_DDNAME(grFogMode); 
-  gc->gcFuncs.grFogTable = (void *) GR_DDNAME(grFogTable); 
+    GR_DDNAME(grDrawPolygonVertexList);
+  gc->gcFuncs.grDrawTriangle = (void *) GR_DDNAME(grDrawTriangle);
+  gc->gcFuncs.grFogColorValue = (void *) GR_DDNAME(grFogColorValue);
+  gc->gcFuncs.grFogMode = (void *) GR_DDNAME(grFogMode);
+  gc->gcFuncs.grFogTable = (void *) GR_DDNAME(grFogTable);
   gc->gcFuncs.grGammaCorrectionValue = (void *)
-    GR_DDNAME(grGammaCorrectionValue); 
-  gc->gcFuncs.grGlideSetState = (void *) GR_DDNAME(grGlideSetState); 
-  gc->gcFuncs.grGlideShutdown = (void *) GR_DDNAME(grGlideShutdown); 
+    GR_DDNAME(grGammaCorrectionValue);
+  gc->gcFuncs.grGlideSetState = (void *) GR_DDNAME(grGlideSetState);
+  gc->gcFuncs.grGlideShutdown = (void *) GR_DDNAME(grGlideShutdown);
   gc->gcFuncs.grLfbConstantAlpha = (void *)
-    GR_DDNAME(grLfbConstantAlpha); 
+    GR_DDNAME(grLfbConstantAlpha);
   gc->gcFuncs.grLfbConstantDepth = (void *)
-    GR_DDNAME(grLfbConstantDepth); 
+    GR_DDNAME(grLfbConstantDepth);
   gc->gcFuncs.grLfbLock = (void *)GR_DDNAME(grLfbLock);
   gc->gcFuncs.grLfbUnlock = (void*)GR_DDNAME(grLfbUnlock);
   gc->gcFuncs.grLfbWriteColorFormat = (void *)
-    GR_DDNAME(grLfbWriteColorFormat); 
+    GR_DDNAME(grLfbWriteColorFormat);
   gc->gcFuncs.grLfbWriteColorSwizzle = (void *)
-    GR_DDNAME(grLfbWriteColorSwizzle); 
-  gc->gcFuncs.grRenderBuffer = (void *) GR_DDNAME(grRenderBuffer); 
+    GR_DDNAME(grLfbWriteColorSwizzle);
+  gc->gcFuncs.grRenderBuffer = (void *) GR_DDNAME(grRenderBuffer);
   gc->gcFuncs.grSstConfigPipeline = (void *)
-    GR_DDNAME(grSstConfigPipeline); 
-  gc->gcFuncs.grSstIdle = (void *) GR_DDNAME(grSstIdle); 
-  gc->gcFuncs.grSstIsBusy = (void *) GR_DDNAME(grSstIsBusy); 
-  gc->gcFuncs.grSstOpen = (void *) GR_DDNAME(grSstOpen); 
-  gc->gcFuncs.grSstOrigin = (void *) GR_DDNAME(grSstOrigin); 
+    GR_DDNAME(grSstConfigPipeline);
+  gc->gcFuncs.grSstIdle = (void *) GR_DDNAME(grSstIdle);
+  gc->gcFuncs.grSstIsBusy = (void *) GR_DDNAME(grSstIsBusy);
+  gc->gcFuncs.grSstOpen = (void *) GR_DDNAME(grSstOpen);
+  gc->gcFuncs.grSstOrigin = (void *) GR_DDNAME(grSstOrigin);
   gc->gcFuncs.grSstPassthruMode = (void *) GR_DDNAME(grSstPassthruMode);
-  
-  gc->gcFuncs.grSstPerfStats = (void *) GR_DDNAME(grSstPerfStats); 
+
+  gc->gcFuncs.grSstPerfStats = (void *) GR_DDNAME(grSstPerfStats);
   gc->gcFuncs.grSstResetPerfStats = (void *) GR_DDNAME(grSstResetPerfStats);
-  gc->gcFuncs.grSstStatus = (void *) GR_DDNAME(grSstStatus); 
-  gc->gcFuncs.grSstVRetraceOn = (void *) GR_DDNAME(grSstVRetraceOn); 
-  gc->gcFuncs.grSstVideoLine = (void *) GR_DDNAME(grSstVideoLine); 
-  gc->gcFuncs.grTexClampMode = (void *) GR_DDNAME(grTexClampMode); 
-  gc->gcFuncs.grTexCombine = (void *) GR_DDNAME(grTexCombine); 
+  gc->gcFuncs.grSstStatus = (void *) GR_DDNAME(grSstStatus);
+  gc->gcFuncs.grSstVRetraceOn = (void *) GR_DDNAME(grSstVRetraceOn);
+  gc->gcFuncs.grSstVideoLine = (void *) GR_DDNAME(grSstVideoLine);
+  gc->gcFuncs.grTexClampMode = (void *) GR_DDNAME(grTexClampMode);
+  gc->gcFuncs.grTexCombine = (void *) GR_DDNAME(grTexCombine);
   gc->gcFuncs.grTexDownloadMipMapLevelPartial = (void *)
-    GR_DDNAME(grTexDownloadMipMapLevelPartial); 
-  gc->gcFuncs.grTexFilterMode = (void *) GR_DDNAME(grTexFilterMode); 
+    GR_DDNAME(grTexDownloadMipMapLevelPartial);
+  gc->gcFuncs.grTexFilterMode = (void *) GR_DDNAME(grTexFilterMode);
   gc->gcFuncs.grTexLodBiasValue = (void *) GR_DDNAME(grTexLodBiasValue);
   gc->gcFuncs.grTexMipMapMode = (void *) GR_DDNAME(grTexMipMapMode);
-  gc->gcFuncs.grTexMultibase = (void *) GR_DDNAME(grTexMultibase); 
+  gc->gcFuncs.grTexMultibase = (void *) GR_DDNAME(grTexMultibase);
   gc->gcFuncs.grTexMultibaseAddress = (void *)
-    GR_DDNAME(grTexMultibaseAddress); 
-  gc->gcFuncs.grTexNCCTable = (void *) GR_DDNAME(grTexNCCTable); 
-  gc->gcFuncs.grTexSource = (void *) GR_DDNAME(grTexSource); 
-  gc->gcFuncs.guMPDrawTriangle = (void *) GR_DDNAME(guMPDrawTriangle); 
+    GR_DDNAME(grTexMultibaseAddress);
+  gc->gcFuncs.grTexNCCTable = (void *) GR_DDNAME(grTexNCCTable);
+  gc->gcFuncs.grTexSource = (void *) GR_DDNAME(grTexSource);
+  gc->gcFuncs.guMPDrawTriangle = (void *) GR_DDNAME(guMPDrawTriangle);
   gc->gcFuncs.guTexSource = (void *) GR_DDNAME(guTexSource);
-  gc->gcFuncs.ConvertAndDownloadRle=(void *) GR_DDNAME(ConvertAndDownloadRle); 
-  gc->gcFuncs.grCheckForRoom=(void *) GR_DDNAME(grCheckForRoom); 
+  gc->gcFuncs.ConvertAndDownloadRle=(void *) GR_DDNAME(ConvertAndDownloadRle);
+  gc->gcFuncs.grCheckForRoom=(void *) GR_DDNAME(grCheckForRoom);
 } /* _grInitializeGCFuncs */
 #endif

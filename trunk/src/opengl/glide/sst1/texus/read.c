@@ -1,24 +1,25 @@
+/* $Id: read.c,v 1.2 2001-09-05 14:31:13 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
-** $Revision: 1.1 $
-** $Date: 2000-02-25 00:31:38 $
+** $Revision: 1.2 $
+** $Date: 2001-09-05 14:31:13 $
 */
 
 #include <stdio.h>
@@ -37,7 +38,7 @@
 #define TX_RGT  0x106
 #define TX_UNK  0x200   // TGA is unknown from cookie signature.
 
-int 
+int
 _txReadHeader( FILE *stream, TxMip *info )
 {
     FxU32       cookie;
@@ -85,7 +86,7 @@ _txReadHeader( FILE *stream, TxMip *info )
         return (status) ? fformat : 0;
 }
 
-static FxBool 
+static FxBool
 _txReadData( FILE *stream, int fformat, TxMip *info )
 {
         switch (fformat) {
@@ -108,12 +109,12 @@ txMipRead(TxMip *txMip, const char *filename, int prefFormat)
   FxBool retval;
 
   file = fopen(filename, "rb");
-  if( file == NULL ) 
+  if( file == NULL )
     {
       fprintf( stderr,"Error: can't open input file %s\n", filename );
       exit(2);
     }
-  
+
   retval = txMipReadFromFP( txMip, filename, file, prefFormat );
   fclose(file);
   return retval;
@@ -127,7 +128,7 @@ txMipReadFromFP(TxMip *txMip, const char *debug_filename, FILE *file, int prefFo
         int                     w, h;
 
         if ((prefFormat != GR_TEXFMT_ARGB_8888) &&
-            (prefFormat != GR_TEXFMT_ANY)) 
+            (prefFormat != GR_TEXFMT_ANY))
           {
             txPanic("txMipRead: bad preferred format.");
             return FXFALSE;
@@ -142,12 +143,12 @@ txMipReadFromFP(TxMip *txMip, const char *debug_filename, FILE *file, int prefFo
           {
             fprintf(stderr,"Loading image file ");
 
-            fprintf (stderr,"%s (%dw x %dh x %d Bpp x %d mips) .. ", debug_filename, 
+            fprintf (stderr,"%s (%dw x %dh x %d Bpp x %d mips) .. ", debug_filename,
                      txMip->width,txMip->height, GR_TEXFMT_SIZE(txMip->format), txMip->depth);
           }
 
         /*
-         * Allocate memory requested in data[0]; 
+         * Allocate memory requested in data[0];
          */
 
         w = txMip->width;
@@ -158,17 +159,17 @@ txMipReadFromFP(TxMip *txMip, const char *debug_filename, FILE *file, int prefFo
                         txMip->data[i] = NULL;
                         continue;
                 }
-                txMip->data[i] = (FxU8*)txMip->data[i-1] + 
+                txMip->data[i] = (FxU8*)txMip->data[i-1] +
                         w * h * GR_TEXFMT_SIZE(txMip->format);
                 if (w > 1) w >>= 1;
                 if (h > 1) h >>= 1;
         }
 
         if( txVerbose ) {
-	          fprintf( stderr, "mip-> format: %d width: %d height: %d depth: %d size: %d\n",
-		txMip->format, txMip->width, txMip->height, txMip->depth,
-		txMip->size );
-	         fflush( stderr );
+              fprintf( stderr, "mip-> format: %d width: %d height: %d depth: %d size: %d\n",
+        txMip->format, txMip->width, txMip->height, txMip->depth,
+        txMip->size );
+             fflush( stderr );
         }
 
         if ( _txReadData( file, format, txMip ) == FXFALSE ) {
@@ -194,7 +195,7 @@ txMipReadFromFP(TxMip *txMip, const char *debug_filename, FILE *file, int prefFo
          */
         if( txVerbose )
           {
-            fprintf(stderr, "Dequantizing Input from %s to argb8888.\n", 
+            fprintf(stderr, "Dequantizing Input from %s to argb8888.\n",
                    Format_Name[txMip->format]);
           }
         txMipDequantize(&txTrue, txMip);

@@ -1,20 +1,21 @@
+/* $Id: lindrvr.c,v 1.2 2001-09-05 14:31:03 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
 **
@@ -57,14 +58,14 @@ FxBool tripleBuffering = 0;
 #define NUM_BUFS 6
 
 #ifndef DUMMY
-static Display		    *dpy	= 0;
-static int		    screenNum   = 0;
-static int		    screenWidth = 0;
-static void*		    screenPhys  = 0;
-static int		    screenMem   = 0;
-static GC		    xgc		= 0;
+static Display          *dpy    = 0;
+static int          screenNum   = 0;
+static int          screenWidth = 0;
+static void*            screenPhys  = 0;
+static int          screenMem   = 0;
+static GC           xgc     = 0;
 static Window               hWndApp     = 0;
-static FxU32                Width       = 0; 
+static FxU32                Width       = 0;
 static FxU32                Height      = 0;
 static FxBool               IsFullScreen = 0;
 static InitBufDesc_t        BufDesc[NUM_BUFS]  = {0};
@@ -154,7 +155,7 @@ FxBool linSetup() {
   }
   screenNum=XDefaultScreen(dpy);
   XF86DGAGetVideoLL(dpy, screenNum, (int*)&screenPhys, &screenWidth, &banksize,
-		    &screenMem);
+            &screenMem);
   screenMem*=1024;
   return FXTRUE;
 }
@@ -167,7 +168,7 @@ cvtAddrToBufDesc(void *pixAddr, InitBufDesc_t *pDesc) {
   return FXTRUE;
 }
 
-static int 
+static int
 cvtXToGlideDesc(InitBufDesc_t *pDesc) {
   InitBufDesc_t   *dFront  = &pDesc[0];
   InitBufDesc_t   *dBack   = &pDesc[1];
@@ -199,13 +200,13 @@ cvtXToGlideDesc(InitBufDesc_t *pDesc) {
   if (!cvtAddrToBufDesc(addrBack, dBack))
     return ErrorMessage(hWndApp, "Couldn't get Backbuffer Info");
   dBack->bufOffset -= dScreen->bufOffset;
-  
+
   /* Get info about aux buffer (pixmap) */
   dAux->bufType = INIT_BUFFER_AUXBUFFER;
-  if (!cvtAddrToBufDesc(addrAux, dAux)) 
+  if (!cvtAddrToBufDesc(addrAux, dAux))
     return ErrorMessage(hWndApp, "Couldn't get AuxBuffer Info");
   dAux->bufOffset -= dScreen->bufOffset;
-  
+
   /* Get info about triple buffer (pixmap if used) */
   if (tripleBuffering) {
     dTriple->bufType  = INIT_BUFFER_TRIPLEBUFFER;
@@ -218,7 +219,7 @@ cvtXToGlideDesc(InitBufDesc_t *pDesc) {
   dFifo->bufType   = INIT_BUFFER_FIFOBUFFER;
   dFifo->bufOffset = (int)addrFifo-dScreen->bufOffset;
   dFifo->bufStride = FIFOSIZE;
-  
+
   GDBG_INFO((80, "cvtXToGlideDesc: dFront->bufOffset = 0x%x\n", dFront->bufOffset));
   GDBG_INFO((80, "cvtXToGlideDesc: dBack->bufOffset = 0x%x\n", dBack->bufOffset));
   GDBG_INFO((80, "cvtXToGlideDesc: dAux->bufOffset = 0x%x\n", dAux->bufOffset));
@@ -268,15 +269,15 @@ findWindow(Display *dpy, Window hWndApp, void **addrFront) {
 }
 
 static int
-doAllocPixmaps(int xRes, int yRes, int vRefresh, 
-		      InitBufDesc_t *pDesc) {
-    GDBG_INFO((80, "doAllocPixmaps: hWnd = %x, fs=%d, xRes=%d, yRes=%d, vRefresh=%d\n", 
+doAllocPixmaps(int xRes, int yRes, int vRefresh,
+              InitBufDesc_t *pDesc) {
+    GDBG_INFO((80, "doAllocPixmaps: hWnd = %x, fs=%d, xRes=%d, yRes=%d, vRefresh=%d\n",
              hWndApp, IsFullScreen, xRes, yRes, vRefresh));
 
   doReleasePixmaps();
 
   pixFifo=XCreatePixmap(dpy, hWndApp, screenWidth,
-			(FIFOSIZE/2+4096+screenWidth-1)/screenWidth, 16);
+            (FIFOSIZE/2+4096+screenWidth-1)/screenWidth, 16);
   if ((XF86RushLockPixmap(dpy, screenNum, pixFifo, &addrFifo)==FXFALSE)
       || !addrFifo) {
     doReleasePixmaps();
@@ -288,20 +289,20 @@ doAllocPixmaps(int xRes, int yRes, int vRefresh,
   findWindow(dpy, hWndApp, &addrFront);
   pixBack=XCreatePixmap(dpy, hWndApp, xRes, yRes, 16);
   if ((XF86RushLockPixmap(dpy, screenNum, pixBack,
-			  &addrBack)==FXFALSE) || !addrBack) {
+              &addrBack)==FXFALSE) || !addrBack) {
     doReleasePixmaps();
     return ErrorMessage(hWndApp, "Failed to lock back pixmap\n");
   }
   pixAux=XCreatePixmap(dpy, hWndApp, xRes, yRes, 16);
   if ((XF86RushLockPixmap(dpy, screenNum, pixAux,
-			  &addrAux)==FXFALSE) || !addrAux) {
+              &addrAux)==FXFALSE) || !addrAux) {
     doReleasePixmaps();
     return ErrorMessage(hWndApp, "Failed to lock aux pixmap\n");
   }
   if (tripleBuffering) {
     pixTriple=XCreatePixmap(dpy, hWndApp, xRes, yRes, 16);
     if ((XF86RushLockPixmap(dpy, screenNum, pixTriple,
-			    &addrTriple)==FXFALSE) || !addrTriple) {
+                &addrTriple)==FXFALSE) || !addrTriple) {
       doReleasePixmaps();
       return ErrorMessage(hWndApp, "Failed to lock triple pixmap\n");
     }
@@ -310,7 +311,7 @@ doAllocPixmaps(int xRes, int yRes, int vRefresh,
   return FXTRUE;
 }
 
-static FxBool 
+static FxBool
 getWindowSize(int *width, int *height) {
     XWindowAttributes attr;
 
@@ -350,7 +351,7 @@ linOpen(
   if (sRes == GR_RESOLUTION_NONE ) { /* In a window */
 
     /*
-     * Get ourselves a valid window handle 
+     * Get ourselves a valid window handle
      */
     hWndApp = (Window)hWindow;
     if (hWndApp == 0)
@@ -373,7 +374,7 @@ linOpen(
     static int _h[] = {200,240,256,384,200,350,400,480,600,720,480,256};
 
     if ((sRes <  GR_RESOLUTION_320x200) ||
-        (sRes >  GR_RESOLUTION_512x256)) 
+        (sRes >  GR_RESOLUTION_512x256))
       return ErrorMessage(hWndApp, "Bad Fullscreen resolution");
 
     tripleBuffering = (nColBuffers == 3);
@@ -388,23 +389,23 @@ linOpen(
     if (attr.depth!=16)
       return ErrorMessage(hWndApp, "Screen depth must be 16\n");
     if (XF86DGAQueryDirectVideo(dpy, DefaultScreen(dpy), &flags)==False ||
-	!flags) {
+    !flags) {
       GDBG_INFO((0, "Could query Direct Video"));
       return ErrorMessage(hWndApp, "Direct video not supported\n");
     }
     if (XF86VidModeGetAllModeLines(dpy, DefaultScreen(dpy), &numModes,
-				   &vidModes)==False) {
+                   &vidModes)==False) {
       return ErrorMessage(hWndApp, "Couldn't query vidmode list\n");
       return 1;
     }
     for (i=0; i<numModes; i++)
       if ((vidModes[i]->hdisplay==Width) && (vidModes[i]->vdisplay==Height))
-	break;
+    break;
     if (i==numModes) {
       return ErrorMessage(hWndApp, "Server doesn't support requested resolution\n");
       if (vidModes) {
-	XFree(vidModes);
-	vidModes=0;
+    XFree(vidModes);
+    vidModes=0;
       }
       return 1;
     }
@@ -428,7 +429,7 @@ linOpen(
     GDBG_INFO((80, "\tbufMagic = 0x%x\n", pBufDesc[i].bufMagic));
     GDBG_INFO((80, "\tbufType = 0x%x\n", pBufDesc[i].bufType));
     GDBG_INFO((80, "\tbufOffset = 0x%x\n", pBufDesc[i].bufOffset));
-    GDBG_INFO((80, "\tbufStride = 0x%x\n", pBufDesc[i].bufStride));    
+    GDBG_INFO((80, "\tbufStride = 0x%x\n", pBufDesc[i].bufStride));
     GDBG_INFO((80, "\tbufBPP = 0x%x\n", pBufDesc[i].bufBPP));
   }
 
@@ -449,7 +450,7 @@ linOpen(
   }
 
   if ( curHALData->initSetVideo ) {
-    curHALData->initSetVideo( sRes, vRefresh, 
+    curHALData->initSetVideo( sRes, vRefresh,
                              (FxU32*)width, (FxU32*)height );
   }
 
@@ -462,7 +463,7 @@ FxBool
 linControl(FxU32 code, InitBufDesc_t *pBufDesc, int *width, int *height)
 {
   int     i, w, h;
-  
+
   GDBG_INFO((80, "linControl: code = %d\n", code));
 
   if (IsFullScreen) return FXTRUE;
@@ -471,16 +472,16 @@ linControl(FxU32 code, InitBufDesc_t *pBufDesc, int *width, int *height)
   case INIT_CONTROL_RESIZE:     /* recreate surfaces */
     getWindowSize(&w, &h);
     if ((Width != w) || (Height != h)) {
-      GDBG_INFO((120, "W and H changed to %d %d\n", 
-                 Width, Height)); 
+      GDBG_INFO((120, "W and H changed to %d %d\n",
+                 Width, Height));
 
       if (!doAllocPixmaps(w, h, 0, BufDesc)) {
-	w=Width;
-	h=Height;
-	if (!doAllocPixmaps(w, h, 0, BufDesc)) {
-	  /* ErrorMessage(hWndApp, "linControl: Resize failed\n"); */
-	  return FXFALSE;
-	}
+    w=Width;
+    h=Height;
+    if (!doAllocPixmaps(w, h, 0, BufDesc)) {
+      /* ErrorMessage(hWndApp, "linControl: Resize failed\n"); */
+      return FXFALSE;
+    }
       }
       Width = w;
       Height = h;
@@ -511,7 +512,7 @@ linControl(FxU32 code, InitBufDesc_t *pBufDesc, int *width, int *height)
   *height = Height;
   GDBG_INFO((80, "linControl: code = %d, w = %d, h = %d\n", code,
              Width, Height));
-  
+
   return FXTRUE;
 } /* linControl */
 

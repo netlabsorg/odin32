@@ -1,26 +1,27 @@
 /*-*-c++-*-*/
+/* $Id: parse.c,v 1.2 2001-09-05 14:30:38 bird Exp $ */
 /*
 ** THIS SOFTWARE IS SUBJECT TO COPYRIGHT PROTECTION AND IS OFFERED ONLY
 ** PURSUANT TO THE 3DFX GLIDE GENERAL PUBLIC LICENSE. THERE IS NO RIGHT
 ** TO USE THE GLIDE TRADEMARK WITHOUT PRIOR WRITTEN PERMISSION OF 3DFX
-** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE 
-** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com). 
-** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER 
+** INTERACTIVE, INC. A COPY OF THIS LICENSE MAY BE OBTAINED FROM THE
+** DISTRIBUTOR OR BY CONTACTING 3DFX INTERACTIVE INC(info@3dfx.com).
+** THIS PROGRAM IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER
 ** EXPRESSED OR IMPLIED. SEE THE 3DFX GLIDE GENERAL PUBLIC LICENSE FOR A
-** FULL TEXT OF THE NON-WARRANTY PROVISIONS.  
-** 
+** FULL TEXT OF THE NON-WARRANTY PROVISIONS.
+**
 ** USE, DUPLICATION OR DISCLOSURE BY THE GOVERNMENT IS SUBJECT TO
 ** RESTRICTIONS AS SET FORTH IN SUBDIVISION (C)(1)(II) OF THE RIGHTS IN
 ** TECHNICAL DATA AND COMPUTER SOFTWARE CLAUSE AT DFARS 252.227-7013,
 ** AND/OR IN SIMILAR OR SUCCESSOR CLAUSES IN THE FAR, DOD OR NASA FAR
 ** SUPPLEMENT. UNPUBLISHED RIGHTS RESERVED UNDER THE COPYRIGHT LAWS OF
-** THE UNITED STATES.  
-** 
+** THE UNITED STATES.
+**
 ** COPYRIGHT 3DFX INTERACTIVE, INC. 1999, ALL RIGHTS RESERVED
 **
 **
-** $Revision: 1.1 $ 
-** $Date: 2000-02-25 00:37:52 $ 
+** $Revision: 1.2 $
+** $Date: 2001-09-05 14:30:38 $
 **
 ** Parsing code for grabbing information from "voodoo2.ini" initialization file
 **
@@ -83,146 +84,146 @@ FX_ENTRY FxBool FX_CALL sst1InitVoodooFile()
   char buffer[1024], filename[256];
   int helper = (getenv(("SSTV2_DEBUGDAC"))) ? 1 : 0;
 
-	filename[0] = '\0';
-	if (checkedFileP) goto __errExit;
-	
+    filename[0] = '\0';
+    if (checkedFileP) goto __errExit;
+
 #if __DOS32__
-	{
-	  char fixedFilename[512], *tmpPtr;
-	  char path[512];
-	  int i;
+    {
+      char fixedFilename[512], *tmpPtr;
+      char path[512];
+      int i;
 
 
-	  if(getenv("VOODOO2_FILE")) {
-	    /* Override voodoo2.ini name */
-	    strcpy(filename, getenv("VOODOO2_FILE"));
-	    if(!(file = fopen(filename, "r"))) goto __errExit;
-	  } else {
-	    /* Override path setting */
-	    if(getenv("VOODOO2_PATH"))
-	      strcpy(path, getenv("VOODOO2_PATH"));
-	    else if(getenv("PATH")) {
-	      strcpy(path, ".;");
-	      strcat(path, getenv("PATH"));
-	    } else
-	      strcpy(path, ".;");
+      if(getenv("VOODOO2_FILE")) {
+        /* Override voodoo2.ini name */
+        strcpy(filename, getenv("VOODOO2_FILE"));
+        if(!(file = fopen(filename, "r"))) goto __errExit;
+      } else {
+        /* Override path setting */
+        if(getenv("VOODOO2_PATH"))
+          strcpy(path, getenv("VOODOO2_PATH"));
+        else if(getenv("PATH")) {
+          strcpy(path, ".;");
+          strcat(path, getenv("PATH"));
+        } else
+          strcpy(path, ".;");
 
-	    i = 0;
-	    while(1) {
-	      if(!i) {
-	        if((tmpPtr = strtok(path, ";")) == NULL)
-	          break;
-	      } else {
-	        if((tmpPtr = strtok(NULL, ";")) == NULL)
-	          break;
-	      }
-	      strcpy(filename, tmpPtr);
-	      sst1InitFixFilename(fixedFilename, filename);
-	      if(fixedFilename[strlen(fixedFilename)-1] == '\\')
-	        sprintf(filename, "%svoodoo2.var", filename);
-	      else
-	        sprintf(filename, "%s\\voodoo2.var", filename);
-	      i++;
-	      if((file = fopen(filename, "r")))
-	        break;
-	    }
-	  }
-	}
+        i = 0;
+        while(1) {
+          if(!i) {
+            if((tmpPtr = strtok(path, ";")) == NULL)
+              break;
+          } else {
+            if((tmpPtr = strtok(NULL, ";")) == NULL)
+              break;
+          }
+          strcpy(filename, tmpPtr);
+          sst1InitFixFilename(fixedFilename, filename);
+          if(fixedFilename[strlen(fixedFilename)-1] == '\\')
+            sprintf(filename, "%svoodoo2.var", filename);
+          else
+            sprintf(filename, "%s\\voodoo2.var", filename);
+          i++;
+          if((file = fopen(filename, "r")))
+            break;
+        }
+      }
+    }
 #elif __MWERKS__
-	{
-		FSSpec iniSpec = {
-			0, 0,
-			"\pvoodoo2.var"
-		};
-		Boolean foundP = false;
-		
-		/* Check the app's directory */
-		if (!foundP) {
-			ProcessSerialNumber curApp;
-			ProcessInfoRec appInfo;
-			FSSpec appSpec;
-			
-			if (GetCurrentProcess(&curApp) != noErr) goto __errAppDir;
+    {
+        FSSpec iniSpec = {
+            0, 0,
+            "\pvoodoo2.var"
+        };
+        Boolean foundP = false;
 
-			/* We only care about the app's location */
-			appInfo.processInfoLength = sizeof(ProcessInfoRec);
-			appInfo.processName = NULL;
-			appInfo.processAppSpec = &appSpec;
-			if (GetProcessInformation(&curApp, &appInfo) != noErr) goto __errAppDir;
-			
-			{
-				CInfoPBRec thePB;
+        /* Check the app's directory */
+        if (!foundP) {
+            ProcessSerialNumber curApp;
+            ProcessInfoRec appInfo;
+            FSSpec appSpec;
 
-				thePB.hFileInfo.ioCompletion = NULL;
-				thePB.hFileInfo.ioNamePtr = iniSpec.name;
-				thePB.hFileInfo.ioVRefNum = appSpec.vRefNum;
-				thePB.hFileInfo.ioDirID = appSpec.parID;
+            if (GetCurrentProcess(&curApp) != noErr) goto __errAppDir;
 
-				thePB.hFileInfo.ioFDirIndex = 0;
+            /* We only care about the app's location */
+            appInfo.processInfoLength = sizeof(ProcessInfoRec);
+            appInfo.processName = NULL;
+            appInfo.processAppSpec = &appSpec;
+            if (GetProcessInformation(&curApp, &appInfo) != noErr) goto __errAppDir;
 
-				foundP = ((PBGetCatInfoSync(&thePB) == noErr) &&
-									((thePB.hFileInfo.ioFlAttrib & (0x01 << 4)) == 0));
-				if (foundP) {
-					iniSpec.vRefNum = appSpec.vRefNum;
-					iniSpec.parID = appSpec.parID;
-				}
-			}			
-			
-		__errAppDir:
-			;
-		}
-		
-		/* Check the mac's version of the 'search path' */
-		if (!foundP) {
-			OSType folderList[] = { kPreferencesFolderType, kExtensionFolderType };
-			int i;
+            {
+                CInfoPBRec thePB;
 
-			for(i = 0; i < sizeof(folderList) / sizeof(folderList[0]); i++) {
-				short vRefNum;
-				long dirId;
-				
-				if (FindFolder(kOnSystemDisk, folderList[i], false, 
-											 &vRefNum, &dirId) == noErr) {
-				
-					CInfoPBRec thePB;
-					
-					thePB.hFileInfo.ioCompletion = NULL;
-					thePB.hFileInfo.ioNamePtr = iniSpec.name;
-					thePB.hFileInfo.ioVRefNum = vRefNum;
-					thePB.hFileInfo.ioDirID = dirId;
-					
-					thePB.hFileInfo.ioFDirIndex = 0;
-					
-					foundP = ((PBGetCatInfoSync(&thePB) == noErr) &&
-										((thePB.hFileInfo.ioFlAttrib & (0x01 << 4)) == 0));
-					if (foundP) {
-						iniSpec.vRefNum = vRefNum;
-						iniSpec.parID = dirId;
-						
-						break;
-					}
-				}
-			}
-		}
-		
-		if (foundP) {
-			short wdRefNum;
-			long  wdDirId;
-			
-			/* Change working directories, just in case the app did something else */
-			if (HGetVol(NULL, &wdRefNum, &wdDirId) != noErr) goto __errFile;
-			if (HSetVol(NULL, iniSpec.vRefNum, iniSpec.parID) != noErr) goto __errFile;
-			
-			/* NB: We leave the name trashed after this */
-			p2cstr(iniSpec.name);
-			file = fopen((const char*)iniSpec.name, "r");
-			
-			HSetVol(NULL, wdRefNum, wdDirId);
-			
-		__errFile:
-			;
-		}
-	}
+                thePB.hFileInfo.ioCompletion = NULL;
+                thePB.hFileInfo.ioNamePtr = iniSpec.name;
+                thePB.hFileInfo.ioVRefNum = appSpec.vRefNum;
+                thePB.hFileInfo.ioDirID = appSpec.parID;
+
+                thePB.hFileInfo.ioFDirIndex = 0;
+
+                foundP = ((PBGetCatInfoSync(&thePB) == noErr) &&
+                                    ((thePB.hFileInfo.ioFlAttrib & (0x01 << 4)) == 0));
+                if (foundP) {
+                    iniSpec.vRefNum = appSpec.vRefNum;
+                    iniSpec.parID = appSpec.parID;
+                }
+            }
+
+        __errAppDir:
+            ;
+        }
+
+        /* Check the mac's version of the 'search path' */
+        if (!foundP) {
+            OSType folderList[] = { kPreferencesFolderType, kExtensionFolderType };
+            int i;
+
+            for(i = 0; i < sizeof(folderList) / sizeof(folderList[0]); i++) {
+                short vRefNum;
+                long dirId;
+
+                if (FindFolder(kOnSystemDisk, folderList[i], false,
+                                             &vRefNum, &dirId) == noErr) {
+
+                    CInfoPBRec thePB;
+
+                    thePB.hFileInfo.ioCompletion = NULL;
+                    thePB.hFileInfo.ioNamePtr = iniSpec.name;
+                    thePB.hFileInfo.ioVRefNum = vRefNum;
+                    thePB.hFileInfo.ioDirID = dirId;
+
+                    thePB.hFileInfo.ioFDirIndex = 0;
+
+                    foundP = ((PBGetCatInfoSync(&thePB) == noErr) &&
+                                        ((thePB.hFileInfo.ioFlAttrib & (0x01 << 4)) == 0));
+                    if (foundP) {
+                        iniSpec.vRefNum = vRefNum;
+                        iniSpec.parID = dirId;
+
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (foundP) {
+            short wdRefNum;
+            long  wdDirId;
+
+            /* Change working directories, just in case the app did something else */
+            if (HGetVol(NULL, &wdRefNum, &wdDirId) != noErr) goto __errFile;
+            if (HSetVol(NULL, iniSpec.vRefNum, iniSpec.parID) != noErr) goto __errFile;
+
+            /* NB: We leave the name trashed after this */
+            p2cstr(iniSpec.name);
+            file = fopen((const char*)iniSpec.name, "r");
+
+            HSetVol(NULL, wdRefNum, wdDirId);
+
+        __errFile:
+            ;
+        }
+    }
 #endif
 
   if(file == NULL) goto __errExit;
@@ -260,7 +261,7 @@ FX_ENTRY FxBool FX_CALL sst1InitVoodooFile()
   INIT_PRINTF(("sst1Init Routines(): Using Initialization file '%s'\n", filename));
 
 __errExit:
-	checkedFileP = FXTRUE;
+    checkedFileP = FXTRUE;
 #endif /* !DIRECTX */
 
   return retVal;
@@ -293,7 +294,7 @@ FX_ENTRY FxBool FX_CALL sst1InitVoodooFile() {
   if (getenv("VOODOO2_FILE")) {
     /* Override voodoo2.ini name */
     strcpy(filename, getenv("VOODOO2_FILE"));
-    if (!(file = fopen(filename, "r"))) 
+    if (!(file = fopen(filename, "r")))
       goto __errExit;
   } else {
     /* Override path setting */
@@ -306,20 +307,20 @@ FX_ENTRY FxBool FX_CALL sst1InitVoodooFile() {
     i = 0;
     while(1) {
       if (!i) {
-	if ((tmpPtr = strtok(path, ":")) == NULL)
-	  break;
+    if ((tmpPtr = strtok(path, ":")) == NULL)
+      break;
       } else {
-	if ((tmpPtr = strtok(NULL, ":")) == NULL)
-	  break;
+    if ((tmpPtr = strtok(NULL, ":")) == NULL)
+      break;
       }
       strcpy(filename, tmpPtr);
       if (filename[strlen(filename)-1] == '\\')
-	sprintf(filename, "%voodoo2", filename);
+    sprintf(filename, "%voodoo2", filename);
       else
-	sprintf(filename, "%s/voodoo2", filename);
+    sprintf(filename, "%s/voodoo2", filename);
       i++;
       if ((file = fopen(filename, "r")))
-	break;
+    break;
     }
   }
   if (!file) {
@@ -637,7 +638,7 @@ static int sst1InitParseDacRdWrString(char *string, sst1InitDacStruct *dacBase)
             if((dacRdWrCmd = strtok(NULL, ";")) == NULL) {
                 break;
             }
-            if(!(dacRdWrPtr->nextRdWr = malloc(sizeof(sst1InitDacRdWrStruct)))) 
+            if(!(dacRdWrPtr->nextRdWr = malloc(sizeof(sst1InitDacRdWrStruct))))
                 return(0);
 
             dacRdWrPtr = dacRdWrPtr->nextRdWr;
@@ -981,7 +982,7 @@ static void sst1InitToLower(char *string)
 }
 
 #if __WIN32__
-FxBool GetRegistryKey(HKEY hKey, const char* keyName, 
+FxBool GetRegistryKey(HKEY hKey, const char* keyName,
                       char* regValBuf, FxU32 bufSize)
 {
   DWORD type;
@@ -1003,9 +1004,9 @@ FxBool GetRegistryKey(HKEY hKey, const char* keyName,
       break;
     }
   }
-  
+
   return retVal;
-} 
+}
 #endif /* __WIN32__ */
 
 static const char*
@@ -1019,7 +1020,7 @@ myGetenv(const char* envKey)
    * exit() or dropped off of the end of main the per dll environ
    * string table has been freed by the c runtime but has not been set
    * to NULL. Bad things happen if this memory has been unmapped by
-   * the system or if the string cannot be found.  
+   * the system or if the string cannot be found.
    */
   {
     HANDLE curProcessHandle = GetCurrentProcess();
@@ -1050,7 +1051,7 @@ myGetenv(const char* envKey)
 FX_ENTRY char* FX_CALL sst1InitGetenv(char *string)
 {
   const char* retVal;
-  
+
   /* Does the real environment variable exist?
    * This overrides everything for glide.
    */
@@ -1083,19 +1084,19 @@ FX_ENTRY char* FX_CALL sst1InitGetenv(char *string)
       }
     }
 #endif /* __WIN32__ */
-  
+
     /* Does the requested environment variable exist in "voodoo2.ini"? */
     /* Dump CFG Data... */
     if (!checkedFileP) {
-    	static FxBool inProc = FXFALSE;
-    	
-    	if (!inProc) {
-    		inProc = FXTRUE;
-	    	sst1InitVoodooFile();
-	    	inProc = FXFALSE;
-	    }
+        static FxBool inProc = FXFALSE;
+
+        if (!inProc) {
+            inProc = FXTRUE;
+            sst1InitVoodooFile();
+            inProc = FXFALSE;
+        }
     }
-    
+
     {
       sst1InitEnvVarStruct *envVarsPtr = envVarsBase;
       char tempSearchString[kMaxEnvVarLen];
