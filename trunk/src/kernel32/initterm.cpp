@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.32 1999-12-29 18:49:50 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.33 2000-01-25 20:27:16 sandervl Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -120,7 +120,6 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
                 return 0UL;
 
             PROFILE_LoadOdinIni();
-//            if(RegisterLxDll(hModule, 0, 0) == FALSE)
             if(RegisterLxDll(hModule, 0, (PVOID)&_Resource_PEResTab) == FALSE)
                 return 0UL;
 
