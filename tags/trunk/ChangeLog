@@ -1,10 +1,12 @@
- /* $Id: ChangeLog,v 1.835 2000-03-24 17:37:15 achimha Exp $ */
+ /* $Id: ChangeLog,v 1.836 2000-03-24 18:03:46 achimha Exp $ */
 
  2000-03-24: Achim Hasenmueller <achimha@innotek.de>
 	- WSOCK32\NEW: Made it compile with the TCP/IP V5
 	               header files.
                        NOTE: should we rely on the 32bit
 	                     stack, is there any benefit for us?
+	- DPLAY: Added ordinals 2 and 3 to the def file, APIs
+	         already seem to be implemented?!?
 
  2000-03-24: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: fixed GetClipboardFormatNameW
