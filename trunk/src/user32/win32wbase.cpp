@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.333 2002-08-13 10:04:58 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.334 2002-08-13 20:39:51 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -65,6 +65,7 @@
 #include <menu.h>
 #define INCL_TIMERWIN32
 #include "timer.h"
+#include "user32api.h"
 
 #define DBG_LOCALLOG    DBG_win32wbase
 #include "dbglocal.h"
@@ -2684,10 +2685,22 @@ BOOL Win32BaseWindow::GetWindowPlacement(LPWINDOWPLACEMENT wndpl)
 //******************************************************************************
 BOOL Win32BaseWindow::DestroyWindow()
 {
-  HWND hwnd = getWindowHandle();
+    HWND hwnd = getWindowHandle();
 
     dprintf(("DestroyWindow %x", hwnd));
 
+#if 0
+    /* Look whether the focus is within the tree of windows we will
+     * be destroying.
+     */
+    HWND hwndFocus = GetFocus();
+    if (hwndFocus == hwnd || ::IsChild( hwnd, hwndFocus ))
+    {
+        HWND parent = GetAncestor( hwnd, GA_PARENT );
+        if (parent == GetDesktopWindow()) parent = 0;
+        SetFocus( parent );
+    }
+#endif
     /* Call hooks */
     if(HOOK_CallHooksA( WH_CBT, HCBT_DESTROYWND, getWindowHandle(), 0L))
     {
@@ -2731,6 +2744,14 @@ BOOL Win32BaseWindow::DestroyWindow()
     {
         if (owner->getLastActive() == hwnd)
             owner->setLastActive( owner->getWindowHandle() );
+
+        //SvL: Not sure this is correct, but it solves the problem of reassigning
+        //     activation. A disabled window will never be activated ->
+        //     possible that the wrong window is chosen by PM.
+        //     PM chooses another window to be activated before WM_DESTROY is
+        //     sent. VPC enables the owner when it receives that message,
+        //     but by then it's too late.
+        ::EnableWindow(owner->getWindowHandle(), 1);
     }
   
     fDestroyWindowCalled = TRUE;
