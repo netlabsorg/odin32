@@ -1,4 +1,4 @@
-/* $Id: mixeros2.cpp,v 1.8 2002-05-30 14:31:07 sandervl Exp $ */
+/* $Id: mixeros2.cpp,v 1.9 2002-07-12 08:12:30 sandervl Exp $ */
 
 /*
  * OS/2 Mixer multimedia
@@ -43,7 +43,7 @@ BOOL OSLibMixerOpen()
 {
     char szPDDName[128] = "\\DEV\\";
 
-    if(GetAudioPDDName(&szPDDName[5]) == FALSE) {
+    if(OSLibGetAudioPDDName(&szPDDName[5]) == FALSE) {
         return FALSE;
     }
 
@@ -316,10 +316,11 @@ BOOL OSLibMixSetMute(DWORD dwControl, BOOL fMute)
     //change mute
     mixstruct.Mute = fMute;
 
+    dprintf(("OSLibMixSetMute (%d,%d) %d", mixstruct.VolumeL, mixstruct.VolumeR, mixstruct.Mute));
     if(mixerapiIOCTL90(hPDDMix, dwFunc, &mixstruct, sizeof(mixstruct)) == TRUE) {
         return TRUE;
     }
-    dprintf(("OSLibMixSetVolume: mixerapiIOCTL90 %d failed!!", dwFunc));
+    dprintf(("OSLibMixSetMute: mixerapiIOCTL90 %d failed!!", dwFunc));
     return FALSE;
 }
 /******************************************************************************/
@@ -417,6 +418,48 @@ BOOL OSLibMixGetMute(DWORD dwControl, BOOL *pfMute)
         return FALSE;
     }
     if(pfMute) *pfMute = mixstruct.Mute;
+    return TRUE;
+}
+/******************************************************************************/
+/******************************************************************************/
+BOOL OSLibMixGetLineCaps(DWORD dwLine, DWORD *pcChannels)
+{
+    switch(dwLine) {
+    case MIXER_SRC_IN_L_MONOIN:
+    case MIXER_SRC_IN_W_MONOIN:
+    case MIXER_SRC_IN_L_PHONE:
+    case MIXER_SRC_IN_W_PHONE:
+    case MIXER_SRC_IN_L_MIC:
+    case MIXER_SRC_IN_W_MIC:
+        *pcChannels = 1;
+        break;
+
+    case MIXER_SRC_IN_W_LINE:
+    case MIXER_SRC_IN_W_CD:
+    case MIXER_SRC_IN_W_SPDIF:
+    case MIXER_SRC_IN_W_VIDEO:
+    case MIXER_SRC_IN_W_AUX:
+    case MIXER_SRC_IN_W_PCM:
+    case MIXER_SRC_IN_W_WAVETABLE:
+    case MIXER_SRC_IN_W_MIDI:
+        *pcChannels = 2;
+        break;
+
+    case MIXER_SRC_IN_L_LINE:
+    case MIXER_SRC_IN_L_CD:
+    case MIXER_SRC_IN_L_SPDIF:
+    case MIXER_SRC_IN_L_VIDEO:
+    case MIXER_SRC_IN_L_AUX:
+    case MIXER_SRC_IN_L_PCM:
+    case MIXER_SRC_IN_L_WAVETABLE:
+    case MIXER_SRC_IN_L_MIDI:
+        *pcChannels = 2;
+        break;
+    default:
+        DebugInt3();
+        return FALSE;
+    }
+
     return TRUE;
 }
 /******************************************************************************/
@@ -648,7 +691,7 @@ static BOOL mixerapiIOCTL90 (HFILE hPdd, ULONG ulFunc, PVOID pData, ULONG cbData
 // OS/2 32-bit program to query the Physical Device Driver name
 // for the default MMPM/2 WaveAudio device.  Joe Nord 10-Mar-1999
 /******************************************************************************/
-static BOOL GetAudioPDDName (char *pszPDDName)
+BOOL OSLibGetAudioPDDName (char *pszPDDName)
 {
    ULONG                   ulRC;
    char                    szAmpMix[9] = "AMPMIX01";
