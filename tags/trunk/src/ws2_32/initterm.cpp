@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.2 2001-09-05 10:27:06 bird Exp $
+/* $Id: initterm.cpp,v 1.3 2001-10-13 18:50:52 sandervl Exp $
  *
  * DLL entry point
  *
@@ -91,14 +91,14 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
-     dllHandle = RegisterLxDll(hModule, OdinLibMain, (PVOID)&_Resource_PEResTab);
+         dllHandle = RegisterLxDll(hModule, OdinLibMain, (PVOID)&_Resource_PEResTab);
          if(dllHandle == 0)
-        return 0UL;
+             return 0UL;
 
          break;
       case 1 :
          if(dllHandle) {
-        UnregisterLxDll(dllHandle);
+             UnregisterLxDll(dllHandle);
          }
          break;
       default  :
