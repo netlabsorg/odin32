@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.1817 2001-11-07 11:08:51 phaller Exp $ */
+/* $Id: changelog,v 1.1818 2001-11-07 15:35:15 sandervl Exp $ */
+
+ 2001-11-07: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o EndDialog fix for MFC dialog windows
+    - KERNEL32: o Fix for applications that use CreateFile to open
+                  a named pipe
 
  2001-11-07: Patrick Haller <patrick.haller@innotek.de>
     - WININET:  o http, internet: WINE sync
