@@ -1,4 +1,4 @@
-/* $Id: APIImport.cpp,v 1.8 2001-02-02 08:45:42 bird Exp $ */
+/* $Id: APIImport.cpp,v 1.9 2001-04-17 00:24:46 bird Exp $ */
 /*
  *
  * APIImport - imports a DLL or Dll-.def with functions into the Odin32 database.
@@ -17,6 +17,7 @@
 
 #include "APIImport.h"
 #include "kFile.h"
+#include "kInterfaces.h"
 #include "kFileFormatBase.h"
 #include "kFilePE.h"
 #include "kFileDef.h"
@@ -241,7 +242,6 @@ static void closeLog(void)
  */
 static long processFile(const char *pszFilename, const POPTIONS pOptions, long &cFunctions)
 {
-    kFileFormatBase  *pFile;
     long              lRc = 1;
 
     /* try open file */
@@ -251,6 +251,9 @@ static long processFile(const char *pszFilename, const POPTIONS pOptions, long &
 
         try
         {
+            kFileFormatBase *   pFileBase = NULL;
+            kExportI *          pExportFile;
+            kModuleI *          pModuleFile;
             char    achDataBuffer[0x200];
             char   *pszModuleName = &achDataBuffer[0];
             signed long  lDll;
@@ -258,15 +261,21 @@ static long processFile(const char *pszFilename, const POPTIONS pOptions, long &
             /* try create file objects */
             try
             {
-                pFile = new kFilePE(&InFile);
+                kFilePE *pFile = new kFilePE(&InFile);
+                pExportFile = pFile;
+                pModuleFile = pFile;
+                pFileBase = pFile;
             }
             catch (int i)
             {
                 i = i;
-                pFile = new kFileDef(&InFile);
+                kFileDef *pFile = new kFileDef(&InFile);
+                pExportFile = pFile;
+                pModuleFile = pFile;
+                pFileBase = pFile;
             }
 
-            if (pFile->queryModuleName(pszModuleName))
+            if (pModuleFile->moduleGetName(pszModuleName))
             {
                 int cch = strlen(pszModuleName);
 
@@ -280,18 +289,18 @@ static long processFile(const char *pszFilename, const POPTIONS pOptions, long &
                 {
                     BOOL    fClearUpdateOk = FALSE;
                     BOOL    fOk;
-                    EXPORTENTRY export;
+                    kExportEntry export;
 
                     /* Clear the update flag for all functions in this DLL. */
                     if (pOptions->fErase)
                         fClearUpdateOk = dbClearUpdateFlagFunction(lDll, FALSE);
 
                     lRc = 0;
-                    fOk = pFile->findFirstExport(&export);
+                    fOk = pExportFile->exportFindFirst(&export);
                     while (fOk)
                     {
                         /* check if name or not */
-                        if (!pFile->isDef() || export.ulOrdinal < ORD_START_INTERNAL_FUNCTIONS)
+                        if (!pFileBase->isDef() || export.ulOrdinal < ORD_START_INTERNAL_FUNCTIONS)
                         {
                             char szIntName[256];
                             char szName[256];
@@ -343,7 +352,7 @@ static long processFile(const char *pszFilename, const POPTIONS pOptions, long &
                         }
 
                         /* next */
-                        fOk = pFile->findNextExport(&export);
+                        fOk = pExportFile->exportFindNext(&export);
                     }
 
                     /* Clear the update flag for all functions in this DLL. */
@@ -361,7 +370,7 @@ static long processFile(const char *pszFilename, const POPTIONS pOptions, long &
             else
                 fprintf(phLog, "%s: error - could not get module name.\n", pszFilename);
 
-            delete(pFile);
+            delete(pFileBase);
         }
         catch (int err)
         {

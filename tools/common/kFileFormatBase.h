@@ -1,4 +1,4 @@
-/* $Id: kFileFormatBase.h,v 1.4 2000-10-02 04:01:39 bird Exp $
+/* $Id: kFileFormatBase.h,v 1.5 2001-04-17 00:26:11 bird Exp $
  *
  * kFileFormatBase - Base class for kFile<format> classes.
  *
@@ -14,7 +14,6 @@
 /******************************************************************************
 *   Defined Constants                                                         *
 ******************************************************************************/
-#define MAXEXPORTNAME 256
 #define ORD_START_INTERNAL_FUNCTIONS 1200
 
 
@@ -25,23 +24,6 @@
 
 class kFile;
 
-/**
- * ExportEntry used by the findFirstExport/findNextExport functions
- */
-typedef struct _ExportEntry
-{
-    unsigned long   ulOrdinal;
-    char            achName[MAXEXPORTNAME];
-    char            achIntName[MAXEXPORTNAME]; /* not used by PEFile */
-
-    /* these don't apply for .DEF files. (should have a flag for that...) */
-    unsigned long   offset;
-    unsigned long   iObject;
-
-    /* internal - do not use! */
-    void          *pv;
-} EXPORTENTRY, *PEXPORTENTRY;
-
 
 /**
  * Base class for file formats.
@@ -50,14 +32,9 @@ typedef struct _ExportEntry
 class kFileFormatBase
 {
 public:
-    virtual BOOL  queryModuleName(char *pszBuffer) = 0;
-    virtual BOOL  findFirstExport(PEXPORTENTRY pExport) = 0;
-    virtual BOOL  findNextExport(PEXPORTENTRY pExport)  = 0;
     virtual BOOL  isDef() const { return FALSE;}
     virtual BOOL  isPe() const  { return FALSE;}
     virtual BOOL  isLx() const  { return FALSE;}
-
-    static void * readfile(const char *pszFilename);
     virtual BOOL  dump(kFile *pOut);
 };
 
