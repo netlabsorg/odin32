@@ -1,4 +1,4 @@
-/* $Id: wingdi.h,v 1.1 1999-05-24 20:19:22 ktk Exp $ */
+/* $Id: wingdi.h,v 1.2 1999-08-22 11:39:38 sandervl Exp $ */
 
 #ifndef __WINE_WINGDI_H
 #define __WINE_WINGDI_H
@@ -3298,6 +3298,8 @@ UINT      WINAPI GetNearestPaletteIndex(HPALETTE,COLORREF);
 INT16       WINAPI GetObject16(HANDLE16,INT16,LPVOID);
 INT       WINAPI GetObjectA(HANDLE,INT,LPVOID);
 INT       WINAPI GetObjectW(HANDLE,INT,LPVOID);
+#define     GetObject WINELIB_NAME_AW(GetObject)
+
 UINT16      WINAPI GetOutlineTextMetrics16(HDC16,UINT16,LPOUTLINETEXTMETRIC16);
 UINT      WINAPI GetOutlineTextMetricsA(HDC,UINT,LPOUTLINETEXTMETRICA);
 UINT      WINAPI GetOutlineTextMetricsW(HDC,UINT,LPOUTLINETEXTMETRICW);
