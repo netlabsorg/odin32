@@ -1,4 +1,4 @@
-/* $Id: win.h,v 1.2 1999-07-04 15:34:18 sandervl Exp $ */
+/* $Id: win.h,v 1.3 2000-10-09 17:31:04 sandervl Exp $ */
 
 /*
  * Window definitions
@@ -15,17 +15,37 @@
 #define WND_MAGIC     0x444e4957  /* 'WIND' */
 
   /* Built-in class names (see _Undocumented_Windows_ p.418) */
+#ifndef POPUPMENU_CLASS_NAME
 #define POPUPMENU_CLASS_NAME "#32768"  /* PopupMenu */
+#endif
+#ifndef DESKTOP_CLASS_NAME
 #define DESKTOP_CLASS_NAME   "#32769"  /* Desktop */
+#endif
+#ifndef DIALOG_CLASS_NAME
 #define DIALOG_CLASS_NAME    "#32770"  /* Dialog */
+#endif
+#ifndef WINSWITCH_CLASS_NAME
 #define WINSWITCH_CLASS_NAME "#32771"  /* WinSwitch */
+#endif
+#ifndef ICONTITLE_CLASS_NAME
 #define ICONTITLE_CLASS_NAME "#32772"  /* IconTitle */
+#endif
 
+#ifndef POPUPMENU_CLASS_ATOM
 #define POPUPMENU_CLASS_ATOM MAKEINTATOM(32768)  /* PopupMenu */
+#endif
+#ifndef DESKTOP_CLASS_ATOM
 #define DESKTOP_CLASS_ATOM   ((ATOM)32769)       /* Desktop */
+#endif
+#ifndef DIALOG_CLASS_ATOM
 #define DIALOG_CLASS_ATOM    MAKEINTATOM(32770)  /* Dialog */
+#endif
+#ifndef WINSWITCH_CLASS_ATOM
 #define WINSWITCH_CLASS_ATOM MAKEINTATOM(32771)  /* WinSwitch */
+#endif
+#ifndef ICONTITLE_CLASS_ATOM
 #define ICONTITLE_CLASS_ATOM MAKEINTATOM(32772)  /* IconTitle */
+#endif
 
 /* Built-in 32-bit classes */
 typedef enum
@@ -152,6 +172,7 @@ typedef struct
 #define WIN_MANAGED            0x0100 /* Window managed by the window system */
 #define WIN_ISDIALOG           0x0200 /* Window is a dialog */
 #define WIN_ISWIN32            0x0400 /* Understands Win32 messages */
+#define WIN_NEEDS_SHOW_OWNEDPOPUP 0x0800 /* WM_SHOWWINDOW:SC_SHOW must be sent in the next ShowOwnedPopup call */
 
   /* BuildWinArray() flags */
 #define BWA_SKIPDISABLED	0x0001
