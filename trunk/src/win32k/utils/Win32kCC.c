@@ -1,4 +1,4 @@
-/* $Id: Win32kCC.c,v 1.14 2001-02-21 07:52:33 bird Exp $
+/* $Id: Win32kCC.c,v 1.15 2001-04-06 15:26:09 bird Exp $
  *
  * Win32CC - Win32k Control Center.
  *
@@ -594,7 +594,7 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                     if (!pThis->NewOptions.fJava)               strcat(szArgs, " -Java:N");
                     if (pThis->NewOptions.fNoLoader)            strcat(szArgs, " -Noloader");
                     if (!pThis->NewOptions.fDllFixes)           strcat(szArgs, " -DllFixes:D"); /* default is enabled */
-                    if (!pThis->NewOptions.fForcePreload)       strcat(szArgs, " -ForcePreload:Y"); /* default is disabled */
+                    if (pThis->NewOptions.fForcePreload)        strcat(szArgs, " -ForcePreload:Y"); /* default is disabled */
                     if (pThis->NewOptions.cbSwpHeapMax != CB_SWP_MAX)
                         sprintf(szArgs + strlen(szArgs), " -HeapMax:%d", pThis->NewOptions.cbSwpHeapMax); /* FIXME - to be changed */
                     if (pThis->NewOptions.cbResHeapMax != CB_RES_MAX)
