@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.107 2001-02-20 15:40:23 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.108 2001-02-20 17:22:05 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -28,6 +28,8 @@ class Win32BaseWindow;
 #define OFFSET_WIN32PM_MAGIC      4
 #define OFFSET_WIN32FLAGS         8
 #define NROF_WIN32WNDBYTES        12
+
+#define WINDOWFLAG_ACTIVE	  1
 
 #define WIN32PM_MAGIC           0x12345678
 #define CheckMagicDword(a)      (a==WIN32PM_MAGIC)
@@ -224,6 +226,7 @@ Win32BaseWindow *getParent();
          BOOL   ScrollWindow(int dx, int dy);
          BOOL   DestroyWindow();
          HWND   SetActiveWindow();
+         BOOL   DeactivateChildWindow();
          HWND   GetParent();
          HWND   SetParent(HWND hwndNewParent);
 
