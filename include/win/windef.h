@@ -1,4 +1,4 @@
-/* $Id: windef.h,v 1.25 2000-12-24 12:28:20 sandervl Exp $ */
+/* $Id: windef.h,v 1.26 2000-12-27 18:31:54 sandervl Exp $ */
 
 /*
  * Basic types definitions
@@ -160,7 +160,7 @@ extern "C" {
 
 /* Anonymous union/struct handling */
 
-#ifdef __WINE__
+#if defined(__WINE__) || defined(__WIN32OS2__)
 #if defined(__cplusplus) && !defined(NONAMELESSUNION)
 # undef NONAMELESSSTRUCT
 # undef NONAMELESSUNION
