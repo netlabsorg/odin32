@@ -240,7 +240,7 @@ DWORD WIN32API RegEnumValueW(HKEY arg1, DWORD arg2, LPWSTR arg3, LPDWORD arg4, L
 //******************************************************************************
 //******************************************************************************
 DWORD WIN32API RegOpenKeyA(HKEY    arg1,
-                           LPCSTR arg2, 
+                           LPCSTR arg2,
                            PHKEY   arg3)
 {
  LONG rc;
@@ -4501,16 +4501,22 @@ LONG WIN32API RegConnectRegistryA(LPCSTR lpszComputerName,
            lpszComputerName,
            hKey,
            phkResult));
-  
+
   if (lpszComputerName == NULL) /* local registry ? */
   {
     /* @@@PH experimental !!! */
     *phkResult = hKey;
-    
+
     return (NO_ERROR);
   }
-  
+
+#if 0
   return (ERROR_ACCESS_DENIED); /* signal failure */
+#else
+  // @@@PH 1999/06/09 always fake this API
+  *phkResult = hKey;
+  return (NO_ERROR);
+#endif
 }
 
 
@@ -4536,17 +4542,17 @@ LONG WIN32API RegConnectRegistryW(LPCWSTR lpszComputerName,
                                                /* corresponding ascii string */
   LPSTR pszAscii;
   LONG rc;         /* returncode from call to ascii version of this function */
-  
+
   if (lpszComputerName != NULL)
     pszAscii = UnicodeToAsciiString((LPWSTR)lpszComputerName);
   else
     pszAscii = NULL;
-  
+
   dprintf(("ADVAPI32: RegConnectRegistryW(%s,%08xh,%08xh) not implemented.\n",
            pszAscii,
            hKey,
            phkResult));
-  
+
   rc = RegConnectRegistryA(pszAscii,
                            hKey,
                            phkResult);
