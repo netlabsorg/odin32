@@ -1,4 +1,4 @@
-/* $Id: pathcpp.cpp,v 1.1 2000-05-18 14:07:23 sandervl Exp $ */
+/* $Id: pathcpp.cpp,v 1.2 2000-05-19 12:10:04 sandervl Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -36,6 +36,10 @@
 #define HAVE_WCTYPE_H
 
 #include "debugtools.h"
+
+#include <winreg.h>
+
+#include <heapstring.h>
 
 ODINDEBUGCHANNEL(SHLWAPI-SHELLPATH)
 
@@ -93,3 +97,17 @@ ODINFUNCTION1(LPWSTR, PathSkipRootW, LPCWSTR, pszPath)
 
   return (LPWSTR)pszPath;
 }
+
+//SvL: NT seems to concatenate both strings (not tested very well)
+ODINFUNCTION2(BOOL, PathAddExtensionA, LPSTR, pszPath, LPSTR, pszExtension)
+{
+  lstrcatA(pszPath, pszExtension);
+  return 1;
+}
+
+ODINFUNCTION2(BOOL, PathAddExtensionW, LPWSTR, pszPath, LPWSTR, pszExtension)
+{
+  lstrcatW(pszPath, pszExtension);
+  return 1;
+}
+
