@@ -1,4 +1,4 @@
-/* $Id: waveout.cpp,v 1.14 2000-04-06 20:36:29 sandervl Exp $ */
+/* $Id: waveout.cpp,v 1.15 2000-07-18 18:34:43 sandervl Exp $ */
 //#undef DEBUG
 /*
  * Wave out MM apis
@@ -437,8 +437,10 @@ ODINFUNCTION2(MMRESULT, waveOutSetVolume,
   {
     return(dwave->setVolume(dwVolume));
   }
-  else
-      return MMSYSERR_NOERROR;
+  if(hwo == NULL) {
+	DartWaveOut::setDefaultVolume(dwVolume);
+  }
+  return MMSYSERR_NOERROR;
 //    return(MMSYSERR_INVALHANDLE);
 }
 /******************************************************************************/

@@ -1,4 +1,4 @@
-/* $Id: dwaveout.cpp,v 1.27 2000-06-30 08:40:05 sandervl Exp $ */
+/* $Id: dwaveout.cpp,v 1.28 2000-07-18 18:34:41 sandervl Exp $ */
 
 /*
  * Wave playback class
@@ -118,7 +118,7 @@ void DartWaveOut::Init(LPWAVEFORMATEX pwfx)
    dwInstance    = 0;
    ulError       = 0;
    selCallback   = 0;
-   volume        = 0xFFFFFFFF;
+   volume        = defvolume;
    State         = STATE_STOPPED;
 
    MixBuffer     = (MCI_MIX_BUFFER *)malloc(PREFILLBUF_DART*sizeof(MCI_MIX_BUFFER));
@@ -422,6 +422,7 @@ MMRESULT DartWaveOut::write(LPWAVEHDR pwh, UINT cbwh)
         fUnderrun = FALSE;
         wmutex->leave();
 
+        //write buffers to DART; starts playback
         MixSetupParms->pmixWrite(MixSetupParms->ulMixHandle,
                                  MixBuffer,
                                  PREFILLBUF_DART);
@@ -528,6 +529,7 @@ MMRESULT DartWaveOut::restart()
     	fUnderrun = FALSE;
     	wmutex->leave();
     	curbuf = curPlayBuf;
+
     	for(i=0;i<PREFILLBUF_DART;i++) {
   		MixSetupParms->pmixWrite(MixSetupParms->ulMixHandle, &MixBuffer[curbuf], 1);
 		if(++curbuf == PREFILLBUF_DART) {
@@ -775,6 +777,7 @@ MMRESULT DartWaveOut::setVolume(ULONG ulVol)
   ULONG ulVolL      = ((ulVol& 0x0000ffff)*100)/0xFFFF;          // Left Volume
   MCI_SET_PARMS msp = {0};
 
+  dprintf(("DartWaveOut::setVolume %x %x", ulVolL, ulVolR));
   volume = ulVol;
 
 // PD: My card (ESS 1868 PnP) driver can't change only
@@ -803,6 +806,16 @@ MMRESULT DartWaveOut::setVolume(ULONG ulVol)
   return 0;
 }
 /******************************************************************************/
+//Called if waveOutSetVolume is called by the application with waveout handle NULL
+//Sets the default volume of each waveout stream (until it's volume is changed
+//with an appropriate waveOutSetVolume call)
+/******************************************************************************/
+void DartWaveOut::setDefaultVolume(ULONG volume)
+{
+  defvolume = volume;
+}
+/******************************************************************************/
 /******************************************************************************/
 DartWaveOut *DartWaveOut::waveout = NULL;
+ULONG DartWaveOut::defvolume = 0xFFFFFFFF;
 

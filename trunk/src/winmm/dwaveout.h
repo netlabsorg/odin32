@@ -1,4 +1,4 @@
-/* $Id: dwaveout.h,v 1.9 2000-04-08 09:16:54 sandervl Exp $ */
+/* $Id: dwaveout.h,v 1.10 2000-07-18 18:34:43 sandervl Exp $ */
 
 /*
  * Wave playback class
@@ -57,6 +57,8 @@ public:
   static BOOL find(DartWaveOut *dwave);
   static int  getNumDevices();
 
+  static void setDefaultVolume(ULONG volume);
+
 protected:
   static void mciError(ULONG ulError);
      	 void Init(LPWAVEFORMATEX pwfx);
@@ -97,6 +99,8 @@ private:
                               // Linked list management
               DartWaveOut*    next;                   // Next Timer
     static    DartWaveOut*    waveout;                // List of Timer
+
+    static    ULONG           defvolume;      //default volume for streams (if waveOutSetVolume called with NULL stream)
 
 #ifndef _OS2WIN_H
     friend    LONG APIENTRY WaveOutHandler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags);
