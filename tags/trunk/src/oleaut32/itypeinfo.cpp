@@ -1,4 +1,4 @@
-/* $Id: itypeinfo.cpp,v 1.5 2001-01-18 18:12:20 sandervl Exp $ */
+/* $Id: itypeinfo.cpp,v 1.6 2001-05-30 17:43:38 sandervl Exp $ */
 /* 
  * ITypeInfo interface
  * 
@@ -15,6 +15,8 @@
 #include "oleaut32.h"
 #include "olectl.h"
 #include "itypelib.h"
+#include <debugtools.h>
+#include "asmutil.h"
 
 HRESULT WINAPI LoadRegTypeLib(REFGUID rguid,
 		    WORD wVerMajor, WORD wVerMinor, LCID lcid, ITypeLib * * ppTLib);
@@ -462,16 +464,483 @@ HRESULT WIN32API ITypeInfoImpl_GetIDsOfNames(ITypeInfo2 * iface,
 // ----------------------------------------------------------------------
 // 
 // ----------------------------------------------------------------------
+/**
+ * Coerce arguments and, if necessary, sorts named arguments in the order 
+ * specified in the function's FUNCDESC
+ *
+ * NOTE: the arguments are left in reverse order by design. 
+ *       (see INVOKE_InvokeStdCallFunction for more information)
+ */
+static HRESULT
+INVOKE_AllocateCoerceAndSortArguments(FUNCDESC*      pFuncDesc,
+                                      DISPPARAMS*    pDispParams, 
+                                      VARIANTARG**  ppaArgsCoerced,
+                                      unsigned int*  puBadArg)
+{
+    HRESULT     hr;
+    UINT        index;        
+
+    VARIANTARG* paArgsCoerced = (VARIANTARG*)HeapAlloc(GetProcessHeap(), 
+                                          HEAP_ZERO_MEMORY, 
+                                          pDispParams->cArgs * sizeof(VARIANTARG));
+
+    if ( !paArgsCoerced )
+    {
+        hr = E_OUTOFMEMORY;
+        goto cleanup;
+    }
+
+    if ( !pDispParams->cNamedArgs )
+    {
+        /* "Arguments are stored in pDispParams->rgvarg in reverse order"
+         * 
+         * Windows Platform SDK, IDispatch::Invoke.
+         * See puArgErr argument description.
+         */
+        VARIANTARG* paSrcArg = &pDispParams->rgvarg[pDispParams->cArgs - 1];
+        VARIANTARG* paDstArg = &paArgsCoerced[pDispParams->cArgs - 1];
+
+        /* sanity check to verify we have enough required 
+         * arguments to call the method
+         */
+        if ( pDispParams->cArgs < pFuncDesc->cParams - pFuncDesc->cParamsOpt )
+        {
+            hr = DISP_E_BADPARAMCOUNT;
+            goto cleanup;
+        }
+
+        /* coerce all the arguments, if required */
+        for ( index = 0; 
+            index < pDispParams->cArgs;  
+            ++index, --paSrcArg, --paDstArg )
+        {
+            /* checks if the VARTYPEs matches */
+            VARTYPE vtdest = pFuncDesc->lprgelemdescParam[index].tdesc.vt;
+
+            if ( V_VT(paSrcArg) != vtdest )
+            {
+                USHORT wFlags = 0;
+
+               /* we don't use VariantChangeTypeEx 
+                 * because we assume system lcid (e.g. 0)
+                 */
+                hr = VariantChangeType(paDstArg, paSrcArg, wFlags, vtdest); 
+
+                if ( FAILED(hr) ) goto bad_arg_err;
+            }
+            else
+            {
+                hr = VariantCopy(paDstArg, paSrcArg);
+
+                if ( FAILED(hr) ) goto bad_arg_err;
+            }
+        }
+    }
+    else
+    {
+        FIXME("Named arguments not supported!\n");
+        /*
+                named arguments not supported ?
+                    hr = DISP_E_NONAMEDARGS
+                    
+                For each argument
+                    Check if DISPID can be found in typeinfo
+    
+                    Found -> 
+                        required argument?
+                            yes -> increase required argument counter. next.
+                            no  -> next.
+                            
+                    Not Found -> DISP_E_PARAMNOTFOUND, puBadArg = arg index.
+                
+                if function required arguments != counter
+                    DISP_E_PARAMNOTOPTIONAL
+    
+                Coerce arguments at the right spot in the variant array
+        */
+    }
+
+    hr = S_OK;
+    *ppaArgsCoerced = paArgsCoerced;
+    return hr;
+
+
+bad_arg_err:
+    *puBadArg = index;
+
+cleanup:
+    if ( paArgsCoerced )
+    {
+        HeapFree(GetProcessHeap(), 0, paArgsCoerced);
+    }
+    
+    return hr;
+}
+
+/*
+static
+WINE_EXCEPTION_FILTER(INVOKE_ExceptionHandler)
+{
+    FIXME("Exception handler currently does nothing.\n");
+    return EXCEPTION_EXECUTE_HANDLER;
+}
+*/
+
+static HRESULT
+INVOKE_InvokeStdCallFunction(IUnknown*   pIUnk,
+                             FUNCDESC*   pFuncDesc,
+                             VARIANTARG* paArgsCoerced,
+                             VARIANT*    pVarResult,
+                             EXCEPINFO*  pExcepInfo)
+{
+    typedef DWORD  (WINAPI *pDWORDRetFunc) (IUnknown*);   
+    typedef double (WINAPI *pDoubleRetFunc)(IUnknown*); 
+
+    HRESULT hr = E_FAIL;
+
+    DWORD   dwVtblBaseAddr;               /* address of vtbl   */
+    DWORD   dwFuncAddr;                   /* address of method */
+    DWORD   paramsize = 0;
+
+    int     i;                            /* index of argument */
+
+    /* Process method arguments.
+     *
+     * Following stdcall convention, arguments are pushed on the stack from 
+     * right to left. However, since they were stored in reverse order 
+     * in DISPPARAMS structure (and left in that order during coercion)
+     * we push the arguments from 0 to cArgs - 1.
+     */
+    DWORD *pStack    = (DWORD *)alloca(sizeof(double)*pFuncDesc->cParams + 8);
+    PBYTE  pStackPtr = (PBYTE)((char *)pStack + sizeof(double)*pFuncDesc->cParams);
+
+    //Don't include the pIUnknown parameter
+    for ( i = 0; i < pFuncDesc->cParams; ++i )
+    {
+        /* Decision of pushing 32 or 64 bits is based on argument's VARTYPE */
+        VARIANT* pVar   = &(paArgsCoerced[i]);
+        PVOID    pValue = &(pVar->cVal);
+
+        if(pVar == NULL) {//TODO: Is this correct?
+            /* push 32 bits on stack */
+            pStackPtr -= sizeof(DWORD);
+            * (DWORD*) pStackPtr = 0;
+
+            paramsize += sizeof(DWORD);
+        }
+        else 
+        switch ( V_VT(pVar) )
+        {
+        /* QUAD-sized values */
+        case VT_R8:
+        case VT_DATE:
+            /* push 64 bits on stack */
+            pStackPtr -= sizeof(double);
+            * (double*) pStackPtr = *(double*) pValue;
+
+            paramsize += sizeof(double);
+            break;
+
+        /* DWORD-sized values */
+        default:
+            /* push 32 bits on stack */
+            pStackPtr -= sizeof(DWORD);
+            * (DWORD*) pStackPtr = * (DWORD*) pValue;
+
+            paramsize += sizeof(DWORD);
+            break;
+        }
+   }   
+    /* assign function pointer to ITypeImpl->vtbl[index] */
+   dwVtblBaseAddr =    (DWORD)  ((IUnknown*) pIUnk)->lpVtbl;
+   dwFuncAddr     =  * (DWORD*) (dwVtblBaseAddr + pFuncDesc->oVft);
+
+   /* remove comments around __TRY for SEH
+   __TRY
+   */
+   {
+        DWORD  dwRet  = 0;
+        double dblRet = 0;
+
+        //push pIUnk
+        pStackPtr -= sizeof(DWORD);
+        * (DWORD*) pStackPtr = * (DWORD*) pIUnk;
+        paramsize += sizeof(DWORD);
+
+         /* invoke function */
+        if ( pFuncDesc->elemdescFunc.tdesc.vt == VT_R8   ||
+             pFuncDesc->elemdescFunc.tdesc.vt == VT_DATE )
+        {
+            dblRet = invokeStdCallDouble((PVOID)dwFuncAddr, paramsize/4, pStackPtr);
+        }
+        else
+        {
+            dwRet = invokeStdCallDword((PVOID)dwFuncAddr, paramsize/4, pStackPtr);
+        }
+
+        /* fill result variant */
+        if ( pVarResult )
+        {
+            pVarResult->vt = pFuncDesc->elemdescFunc.tdesc.vt;
+
+            if ( pFuncDesc->elemdescFunc.tdesc.vt == VT_R8   ||
+                 pFuncDesc->elemdescFunc.tdesc.vt == VT_DATE )
+            {
+                V_UNION(pVarResult, dblVal) = dblRet;
+            }
+            else
+            {
+                V_UNION(pVarResult, lVal)   = dwRet;
+            }
+        }
+        hr = S_OK;
+    }
+    
+    /* remove comments to enable SEH
+    __EXCEPT (INVOKE_ExceptionHandler);
+    __ENDTRY;
+    */
+    
+    return hr;
+}
+
+static BOOL
+INVOKE_RetrieveFuncDesc(oListIter<TLBFuncDesc *> itrFunc,
+                        MEMBERID     memid,
+                        UINT16       wFlags,
+                        FUNCDESC**   ppFuncDesc)
+{
+    BOOL  bFound = FALSE;
+
+    // Search functions...
+    for (itrFunc.MoveStart(); itrFunc.IsValid(); itrFunc.MoveNext())
+    {
+	if (itrFunc.Element()->funcdesc.memid == memid && 
+            itrFunc.Element()->funcdesc.invkind == wFlags)
+	{
+            *ppFuncDesc = &(itrFunc.Element()->funcdesc);
+	    return TRUE;
+	}
+    }
+
+    return(bFound);
+}
+
+static HRESULT
+INVOKE_DeferToParentTypeInfos(ITypeInfo2*     iface,
+                              VOID*           pIUnk,
+                              MEMBERID        memid,
+                              UINT16          wFlags,
+                              DISPPARAMS*     pDispParams,
+                              VARIANT*        pVarResult,
+                              EXCEPINFO*      pExcepInfo,
+                              UINT*           puArgErr)
+{
+    HRESULT hr = E_FAIL;
+    
+    unsigned short index;
+    ITypeInfo*     pRefTypeInfo = NULL;
+
+    /* retrieve ITypeInfoImpl ptr from ITypeInfo ptr */
+    ICOM_THIS( ITypeInfoImpl, iface);
+    /* call Invoke on implemented type */
+    for ( index = 0; index < This->TypeAttr.cImplTypes ; ++index )
+    {
+        HREFTYPE    hRef;
+
+        hr = ITypeInfo_GetRefTypeOfImplType(iface, index, &hRef);
+
+        if ( FAILED(hr) )
+        {
+            hr = DISP_E_MEMBERNOTFOUND;
+            goto cleanup;
+        }
+
+        hr = ITypeInfo_GetRefTypeInfo(iface, hRef, &pRefTypeInfo);
+
+        if ( FAILED(hr) )
+        {
+            hr = DISP_E_MEMBERNOTFOUND;
+            goto cleanup;
+        }
+
+        hr = ITypeInfo_Invoke(pRefTypeInfo, 
+                              pIUnk,
+                              memid,
+                              wFlags,
+                              pDispParams,
+                              pVarResult,
+                              pExcepInfo,
+                              puArgErr);
+
+        if ( hr == S_OK )
+            break;
+    }
+cleanup:
+    if (pRefTypeInfo)
+        ITypeInfo2_Release(pRefTypeInfo);
+    
+    return hr;
+}
+/**
+ * ITypeInfo::Invoke
+ * 
+ * Invokes a method, or accesses a property of an object, that implements the
+ * interface described by the type description.
+ *
+ *  Handles all the "magic" between your Automation controller
+ *  and components.
+ *
+ * 1. Find the method's position in the vtable based on
+ *    the dispid and the information contained in the type library.
+ *
+ * 2. Push all the arguments on the stack, accordingly to the __stdcall 
+ *    calling convention, e.g. right to left.
+ *
+ * 3. Coerce the retrieved value as the variant type stored in the type library.
+ *
+ * 4. Store return value in VarResult variant
+ * 
+ * 5. Return to the Invoke() caller the return value for dispid method.
+ *
+ * NOT SUPPORTED : inherited types
+ *
+ */
 HRESULT WIN32API ITypeInfoImpl_Invoke(ITypeInfo2 * iface,
-				VOID  *pIUnk, MEMBERID memid, UINT16 dwFlags,
+				VOID  *pIUnk, MEMBERID memid, UINT16 wFlags,
 				DISPPARAMS  *pDispParams, VARIANT *pVarResult,
-				EXCEPINFO  *pExcepInfo, UINT  *pArgErr)
+				EXCEPINFO  *pExcepInfo, UINT  *puArgErr)
 {
     ICOM_THIS(ITypeInfoImpl, iface);
+    HRESULT       hr = E_FAIL;
+    FUNCDESC*     pFuncDesc;
+    VARIANT*      paArgsCoerced = NULL;       /* coerced arguments */
+    BOOL          bFound;                     /* function found    */
 
-    dprintf(("OLEAUT32: ITypeInfoImpl(%p)->Invoke() STUB!\n", This));
 
-    return E_NOTIMPL;
+    dprintf(("TypeInfo_fnInvoke: (%p) (%p, memid=0x%08lx, 0x%08x, %p, %p, %p, %p)",
+          This, pIUnk, memid, wFlags, 
+          pDispParams, pVarResult, pExcepInfo, puArgErr ));
+
+//    dump_TypeInfo(This);
+
+    if ( pDispParams )
+    {
+//        dump_DispParms(pDispParams);
+
+        if ( pDispParams->cNamedArgs != pDispParams->cArgs )
+        {
+            WARN("named arguments count differs from number of arguments!\n");
+        }
+    }
+
+    if ( memid < 0 )
+    {
+        FIXME("standard MEMBERID resolution not fully implemented\n");
+
+        switch ( memid )
+        {
+        case DISPID_CONSTRUCTOR:
+            memid = This->TypeAttr.memidConstructor;
+            break;
+        case DISPID_DESTRUCTOR:
+            memid = This->TypeAttr.memidDestructor;
+            break;
+        case DISPID_UNKNOWN:
+        default:
+            return DISP_E_MEMBERNOTFOUND;
+        }
+    }
+
+    /* REMINDER:
+     *
+     * "properties are an equivalent expression of get and put functions 
+     *   for data members"
+     *  
+     *  (Brockschmidt - Inside OLE, 2nd Edition,
+     *                  Chap.14 # The Mechanics of OLE Automation)
+     *
+     * Thus, the following points to the list of methods AND properties
+     */
+
+    /* find FUNCDESC by memid */
+    FIXME("possible collision between property and method names\n");
+
+    bFound = INVOKE_RetrieveFuncDesc(This->pFunctions, 
+                                     memid, 
+                                     wFlags,
+                                    &pFuncDesc);
+
+    if ( !bFound )
+    {
+        if ( !(This->TypeAttr.cImplTypes) )     return DISP_E_MEMBERNOTFOUND;
+
+        /* indirect recursion : following function calls ITypeInfo::Invoke */
+        hr = INVOKE_DeferToParentTypeInfos(iface,
+                                           pIUnk,
+                                           memid,
+                                           wFlags,
+                                           pDispParams,
+                                           pVarResult,
+                                           pExcepInfo,
+                                           puArgErr );
+    }
+    else
+    {
+        /* Validate invoke context. No return value on property put/putref */
+        if ( wFlags & DISPATCH_PROPERTYPUTREF )
+        {
+            if ( pFuncDesc->lprgelemdescParam[0].tdesc.vt != VT_BYREF )
+            {
+                TRACE("Property put by reference not supported by object\n");
+                return DISP_E_MEMBERNOTFOUND;
+            }
+
+            pVarResult = NULL;
+        }
+        else if ( wFlags & DISPATCH_PROPERTYPUT )
+        {
+            pVarResult = NULL;
+        }
+        else if ( wFlags & DISPATCH_PROPERTYGET ||
+                  wFlags & DISPATCH_METHOD )
+        {
+            /* verify if property isn't read-only */
+        }
+        else
+        {
+            TRACE("Invalid method call context\n");
+            return DISP_E_MEMBERNOTFOUND;
+        }
+
+        if ( pDispParams && pDispParams->cArgs > 0 )
+        {
+            /* this allocates an array of VARIANTARG 
+             * in their final form for invocation
+             */
+            hr = INVOKE_AllocateCoerceAndSortArguments(pFuncDesc, 
+                                                       pDispParams, 
+                                                      &paArgsCoerced,
+                                                       puArgErr);
+            if ( FAILED(hr) ) return hr;
+        }
+
+        switch ( pFuncDesc->callconv )
+        {
+        case CC_STDCALL:
+            hr = INVOKE_InvokeStdCallFunction((IUnknown *)pIUnk,    
+                                              pFuncDesc,
+                                              paArgsCoerced,
+                                              pVarResult,
+                                              pExcepInfo);
+            break;
+        default:
+            FIXME("Calling convention not supported!\n");
+            return E_FAIL;
+        }
+    }
+    
+    return hr;
 }
 
 
