@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.346 2002-12-18 12:28:07 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.347 2002-12-28 09:30:55 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1667,22 +1667,24 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 
     case WM_VKEYTOITEM:
     case WM_CHARTOITEM:
-             return -1;
+        return -1;
 
     case WM_PARENTNOTIFY:
         return 0;
 
     case WM_MOUSEACTIVATE:
     {
+        HWND hwnd = getWindowHandle();
+
         dprintf(("DefWndProc: WM_MOUSEACTIVATE for %x Msg %s", Win32Hwnd, GetMsgText(HIWORD(lParam))));
-        if(getStyle() & WS_CHILD && !(getExStyle() & WS_EX_NOPARENTNOTIFY) )
-        {
-            if(getParent()) {
-                LRESULT rc = SendMessageA(getParent()->getWindowHandle(), WM_MOUSEACTIVATE, wParam, lParam );
-                if(rc)  return rc;
-            }
-        }
-        return (LOWORD(lParam) == HTCAPTION) ? MA_NOACTIVATE : MA_ACTIVATE;
+        if (::GetWindowLongW( hwnd, GWL_STYLE ) & WS_CHILD)
+	{
+	    LONG ret = ::SendMessageW( ::GetParent(hwnd), WM_MOUSEACTIVATE, wParam, lParam );
+	    if (ret) return ret;
+	}
+
+	/* Caption clicks are handled by the NC_HandleNCLButtonDown() */
+        return (LOWORD(lParam) >= HTCLIENT) ? MA_ACTIVATE : MA_NOACTIVATE;
     }
 
     case WM_ACTIVATE:
@@ -2437,13 +2439,13 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx,
          SWP_NOREDRAW   | SWP_NOACTIVATE | SWP_FRAMECHANGED |
          SWP_SHOWWINDOW | SWP_HIDEWINDOW | SWP_NOCOPYBITS   |
          SWP_NOOWNERZORDER | SWP_NOSENDCHANGING | SWP_DEFERERASE |
-         SWP_NOCLIENTSIZE | SWP_NOCLIENTMOVE))
+         SWP_NOCLIENTSIZE | SWP_NOCLIENTMOVE | SWP_ASYNCWINDOWPOS))
     {
         dprintf(("ERROR: SetWindowPos; UNKNOWN flag"));
         return FALSE;
     }
 
-    if( fuFlags & (SWP_DEFERERASE | SWP_NOCLIENTSIZE | SWP_NOCLIENTMOVE)) {
+    if( fuFlags & (SWP_DEFERERASE | SWP_NOCLIENTSIZE | SWP_NOCLIENTMOVE | SWP_ASYNCWINDOWPOS)) {
         dprintf(("WARNING: SetWindowPos; unsupported flag"));
     }
 
