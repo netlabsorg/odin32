@@ -1,4 +1,18 @@
- /* $Id: ChangeLog,v 1.1048 2000-08-01 23:17:28 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1049 2000-08-04 21:17:11 sandervl Exp $ */
+
+ 2000-08-04: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: Temporary workaround for differences in share mode between
+                OS/2 & NT (for opening the same file multiple times):
+                NT: CreateFile with FILE_SHARE_READ
+                    CreateFile with FILE_SHARE_READ | FILE_SHARE_WRITE
+                    -> 2nd CreateFile overrides share flags of first one
+                    -> CreateFile with GENERIC_WRITE is now allowed
+                OS2: DosOpen with OPEN_SHARE_DENYWRITE
+                     DosOpen with OPEN_SHARE_DENYNONE
+                     -> sharing violation; can't change share flags while
+                        handle returned by 1st DosOpen isn't closed
+                --> 'Solution': always open files in FILE_SHARE_DENYNONE mode
+                (several installation programs depend on this behaviour)
 
  2000-08-01: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: Create x:\Program Files & x:\Program Files\Common Files
