@@ -290,13 +290,13 @@ io_exit1  ENDP
 
 ; for diagnostic only
 
-  PUBLIC  psw
-  ALIGN  04H
-psw  PROC
-  PUSHF      ; get the current PSW
-  POP  EAX    ; into EAX
-  RET
-psw  ENDP
+;;  PUBLIC  psw
+;;  ALIGN  04H
+;;psw  PROC
+;;  PUSHF      ; get the current PSW
+;;  POP  EAX    ; into EAX
+;;  RET
+;;psw  ENDP
 
 CODE32  ENDS
   END
