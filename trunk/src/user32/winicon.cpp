@@ -1,4 +1,4 @@
-/* $Id: winicon.cpp,v 1.13 2000-11-10 10:14:50 sandervl Exp $ */
+/* $Id: winicon.cpp,v 1.14 2000-11-18 14:08:54 sandervl Exp $ */
 /*
  * Win32 Icon Code for OS/2
  *
@@ -32,10 +32,9 @@
 
 static WORD ICON_HOTSPOT = 0x4242;
 
-static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, HGLOBAL hObj, LPBYTE bits,
-                        UINT cbSize, BOOL bIcon, DWORD dwVersion,
-                        INT width, INT height, UINT loadflags );
-static HGLOBAL CURSORICON_Copy( HINSTANCE hInstance, HGLOBAL handle );
+static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, DWORD dwResGroupId, HGLOBAL hObj, LPBYTE bits,
+                                              UINT cbSize, BOOL bIcon, DWORD dwVersion, INT width, INT height, UINT loadflags );
+static HGLOBAL CURSORICON_Copy( HGLOBAL handle );
 static CURSORICONDIRENTRY *CURSORICON_FindBestIcon( CURSORICONDIR *dir, int width,
                                                     int height, int colors );
 static CURSORICONDIRENTRY *CURSORICON_FindBestCursor( CURSORICONDIR *dir,
@@ -61,7 +60,8 @@ HICON WIN32API CreateIcon(HINSTANCE hInstance, INT nWidth,
     info.nWidthBytes = 0;
     info.bPlanes = bPlanes;
     info.bBitsPerPixel = bBitsPixel;
-
+    info.hInstance = hInstance;
+    info.dwResGroupId = -1;
     return CreateCursorIconIndirect(0, &info, lpANDbits, lpXORbits);
 }
 /**********************************************************************
@@ -80,7 +80,7 @@ HICON WIN32API CreateIconFromResourceEx(LPBYTE bits, UINT cbSize,
                                         UINT cFlag )
 {
     dprintf(("USER32:  CreateIconFromResourceEx %X %d %d %X %d %d %X,", bits, cbSize, bIcon, dwVersion, width, height, cFlag));
-    return CURSORICON_CreateFromResource(0, 0, bits, cbSize, bIcon, dwVersion, width, height, cFlag );
+    return CURSORICON_CreateFromResource(0, -1, 0, bits, cbSize, bIcon, dwVersion, width, height, cFlag );
 }
 /**********************************************************************
  *          CreateIconIndirect      (USER32.78)
@@ -123,7 +123,8 @@ HICON WINAPI CreateIconIndirect(ICONINFO *iconinfo)
         info->nWidthBytes   = bmpXor.bmWidthBytes;
         info->bPlanes       = bmpXor.bmPlanes;
         info->bBitsPerPixel = bmpXor.bmBitsPixel;
-
+        info->hInstance     = -1;
+        info->dwResGroupId  = -1;
         /* Transfer the bitmap bits to the CURSORICONINFO structure */
         GetBitmapBits( iconinfo->hbmMask ,sizeAnd,(char*)(info + 1) );
         GetBitmapBits( iconinfo->hbmColor,sizeXor,(char*)(info + 1) +sizeAnd);
@@ -146,7 +147,7 @@ BOOL WIN32API DestroyIcon( HICON hIcon)
 HICON WIN32API CopyIcon( HICON hIcon)
 {
     dprintf(("USER32:  CopyIcon %x", hIcon));
-    return CURSORICON_Copy( 0, hIcon );
+    return CURSORICON_Copy( hIcon );
 }
 /**********************************************************************
  *          GetIconInfo     (USER32.242)
@@ -284,7 +285,7 @@ HGLOBAL CURSORICON_Load( HINSTANCE hInstance, LPCWSTR name,
         else
             dirEntry = (CURSORICONDIRENTRY *)CURSORICON_FindBestIcon(dir, width, height, colors);
         bits = ptr[dirEntry->wResId-1];
-        h = CURSORICON_CreateFromResource( 0, 0, bits, dirEntry->dwBytesInRes,
+        h = CURSORICON_CreateFromResource( 0, -1, 0, bits, dirEntry->dwBytesInRes,
                                            !fCursor, 0x00030000, width, height, loadflags);
         HeapFree( GetProcessHeap(), 0, dir );
         HeapFree( GetProcessHeap(), 0, ptr );
@@ -339,7 +340,7 @@ HGLOBAL CURSORICON_Load( HINSTANCE hInstance, LPCWSTR name,
 
         if (!(handle = LoadResource( hInstance, hRsrc ))) return 0;
         bits = (LPBYTE)LockResource( handle );
-        h = CURSORICON_CreateFromResource( 0, 0, bits, dwBytesInRes,
+        h = CURSORICON_CreateFromResource( hInstance, (DWORD)name, 0, bits, dwBytesInRes,
                                            !fCursor, 0x00030000, width, height, loadflags);
         FreeResource( handle );
 
@@ -458,7 +459,7 @@ fail:
  * FIXME: Convert to mono when cFlag is LR_MONOCHROME. Do something
  *        with cbSize parameter as well.
  */
-static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, HGLOBAL hObj, LPBYTE bits,
+static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, DWORD dwResGroupId, HGLOBAL hObj, LPBYTE bits,
                         UINT cbSize, BOOL bIcon, DWORD dwVersion,
                         INT width, INT height, UINT loadflags )
 {
@@ -473,6 +474,9 @@ static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, HGLOBAL hObj,
 
     hotspot.x = ICON_HOTSPOT;
     hotspot.y = ICON_HOTSPOT;
+
+//testestest
+    dprintf(("CURSORICON_CreateFromResource %x %x %x %x %d", hInstance, dwResGroupId, hObj, bits, cbSize));
 
     if (dwVersion == 0x00020000)
     {
@@ -695,6 +699,8 @@ static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, HGLOBAL hObj,
         info->bPlanes       = bmpXor.bmPlanes;
         info->bBitsPerPixel = bmpXor.bmBitsPixel;
         info->hColorBmp     = hXorBits;
+        info->hInstance     = hInstance;
+        info->dwResGroupId  = dwResGroupId;
 
         /* Transfer the bitmap bits to the CURSORICONINFO structure */
         GetBitmapBits( hAndBits, sizeAnd, (char *)(info + 1));
@@ -773,7 +779,7 @@ WORD WIN32API CURSORICON_Destroy( HGLOBAL handle, UINT flags )
  *
  * Make a copy of a cursor or icon.
  */
-static HGLOBAL CURSORICON_Copy( HINSTANCE hInstance, HGLOBAL handle )
+static HGLOBAL CURSORICON_Copy(HGLOBAL handle)
 {
     char *ptrOld, *ptrNew;
     int size;
@@ -812,19 +818,116 @@ static HGLOBAL CURSORICON_Copy( HINSTANCE hInstance, HGLOBAL handle )
  *
  *
  */
-
 HGLOBAL CURSORICON_ExtCopy(HGLOBAL Handle, UINT nType,
-               INT iDesiredCX, INT iDesiredCY,
-               UINT nFlags)
+             			   INT iDesiredCX, INT iDesiredCY,
+			               UINT nFlags)
 {
     HGLOBAL hNew=0;
 
     if(Handle == 0)
     {
-        return 0;
+	    return 0;
     }
+    /* Best Fit or Monochrome */
+    if( (nFlags & LR_COPYFROMRESOURCE
+        && (iDesiredCX > 0 || iDesiredCY > 0))
+        || nFlags & LR_MONOCHROME)
+    {
+            int iTargetCY = iDesiredCY, iTargetCX = iDesiredCX;
+            LPBYTE pBits;
+            HANDLE hMem;
+            HRSRC hRsrc;
+            DWORD dwBytesInRes;
+            WORD wResId;
+            DWORD dwResGroupId;
+            HINSTANCE hInstance;
+            CURSORICONINFO *iconinfo;
+            CURSORICONDIR *pDir;
+            CURSORICONDIRENTRY *pDirEntry;
+            BOOL bIsIcon = (nType == IMAGE_ICON);
 
-    hNew = CURSORICON_Copy(0, Handle);
+            iconinfo = (CURSORICONINFO *)GlobalLock( Handle );
+            if(iconinfo == NULL) {
+                dprintf(("ERROR: CURSORICON_ExtCopy invalid icon!"));
+            }
+            hInstance    = iconinfo->hInstance;
+            dwResGroupId = iconinfo->dwResGroupId;
+            GlobalUnlock( Handle );
+            if(dwResGroupId == -1) {
+                dprintf(("WARNING: no resource associated with icon/cursor -> copy without scaling!"));
+                hNew = CURSORICON_Copy(Handle);
+            }
+
+            /* Completing iDesiredCX CY for Monochrome Bitmaps if needed
+            */
+            if(((nFlags & LR_MONOCHROME) && !(nFlags & LR_COPYFROMRESOURCE))
+                || (iDesiredCX == 0 && iDesiredCY == 0))
+            {
+                iDesiredCY = GetSystemMetrics(bIsIcon ? SM_CYICON : SM_CYCURSOR);
+                iDesiredCX = GetSystemMetrics(bIsIcon ? SM_CXICON : SM_CXCURSOR);
+            }
+
+            /* Retreive the CURSORICONDIRENTRY
+            */
+            hRsrc = FindResourceW(hInstance, (LPWSTR)dwResGroupId, bIsIcon ? RT_GROUP_ICONW : RT_GROUP_CURSORW);
+            if(!hRsrc)  return 0;
+
+            if (!(hMem = LoadResource( hInstance, hRsrc)))
+            {
+                return 0;
+            }
+            if (!(pDir = (CURSORICONDIR*)LockResource( hMem )))
+            {
+                return 0;
+            }
+
+            /* Find Best Fit
+            */
+            if(bIsIcon)
+            {
+                pDirEntry = (CURSORICONDIRENTRY *)CURSORICON_FindBestIcon(
+                                pDir, iDesiredCX, iDesiredCY, 256);
+            }
+            else
+            {
+                pDirEntry = (CURSORICONDIRENTRY *)CURSORICON_FindBestCursor(
+                                pDir, iDesiredCX, iDesiredCY, 1);
+            }
+
+            wResId = pDirEntry->wResId;
+            dwBytesInRes = pDirEntry->dwBytesInRes;
+            FreeResource(hMem);
+
+            /* Get the Best Fit
+            */
+            if (!(hRsrc = FindResourceW(hInstance ,
+                MAKEINTRESOURCEW(wResId), bIsIcon ? RT_ICONW : RT_CURSORW)))
+            {
+                return 0;
+            }
+            if (!(hMem = LoadResource( hInstance, hRsrc )))
+            {
+                return 0;
+            }
+
+            pBits = (LPBYTE)LockResource( hMem );
+
+	        if(nFlags & LR_DEFAULTSIZE)
+	        {
+	            iTargetCY = GetSystemMetrics(SM_CYICON);
+                iTargetCX = GetSystemMetrics(SM_CXICON);
+	        }
+
+            /* Create a New Icon with the proper dimension
+            */
+            hNew = CURSORICON_CreateFromResource( hInstance, dwResGroupId, 0, pBits, dwBytesInRes,
+                                                  bIsIcon, 0x00030000, iTargetCX, iTargetCY, nFlags);
+            FreeResource(hMem);
+    }
+    else
+    {
+            hNew = CURSORICON_Copy(Handle);
+    }
     return hNew;
 }
 
@@ -878,7 +981,8 @@ static CURSORICONDIRENTRY *CURSORICON_FindBestIcon( CURSORICONDIR *dir, int widt
         }
         }
     }
-
+////testestest
+    dprintf(("CURSORICON_FindBestIcon (%d,%d) %d -> %d", width, height, colors, (bestEntry) ? bestEntry->wResId : 0));
     return bestEntry;
 }
 
