@@ -1,4 +1,9 @@
-/* $Id: ChangeLog,v 1.1628 2001-07-31 21:56:12 bird Exp $ */
+/* $Id: ChangeLog,v 1.1629 2001-08-02 14:48:46 sandervl Exp $ */
+
+ 2001-08-02: Sander van Leeuwen <sandervl@xs4all.nl>
+    - GDI32:    o Set codepage of HDC returned by CreateDCA
+    - COMDLG32: o Set codepage of HDC returned by PrintDlgA
+                  (fixes codepage problems while printing in Opera)
 
  2001-07-29: knut st. osmundsen <kosmunds@csc.com>
     - win32k:   o Merged in a patch from Rafal which as a final attempt to find
