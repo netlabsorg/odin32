@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.18 2000-02-09 23:47:06 bird Exp $
+# $Id: makefile,v 1.19 2000-03-04 19:55:39 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -15,7 +15,7 @@ PDWIN32_TOOLS = ..\..\tools\bin
 
 
 CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE)
-CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
+CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE) 
 
 
 TARGET = wsock32

@@ -41,7 +41,7 @@
 #include <os2sel.h>
 #include <wprocess.h>
 #include <heapstring.h>
-#include <win32wnd.h>
+#include <win32api.h>
 #include "wsock32.h"
 
 ODINDEBUGCHANNEL(WSOCK32-RELAYWIN)
@@ -57,9 +57,6 @@ ODINDEBUGCHANNEL(WSOCK32-RELAYWIN)
 static HWNDMSGPAIR arrHwndMsgPair[MAX_ASYNC_SOCKETS] = {0};
 static char*       ODIN_WSOCK_RELAY_CLASS = "ODIN_WSOCK_RELAY";
 static HWND        hwndRelay              = NULLHANDLE;
-
-// prototype for PostMessageA
-BOOL __stdcall PostMessageA(HWND,UINT,ULONG,ULONG);
 
 
 /*****************************************************************************
