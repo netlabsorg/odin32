@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1217 2001-01-11 18:03:13 sandervl Exp $ */
+/* $Id: changelog,v 1.1218 2001-01-12 14:51:30 bird Exp $ */
+
+ 2001-01-12: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - tools\install, tools\dailybuild:
+                o Added odincrt.dll to debug release (to make wgss50.dll happy).
 
  2001-01-11: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o DrawIconEx bugfix (fixes bitmap menu item when maximizing
