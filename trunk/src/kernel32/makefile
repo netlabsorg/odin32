@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.61 1999-11-24 19:31:23 sandervl Exp $
+# $Id: makefile,v 1.62 1999-11-25 19:19:57 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -73,7 +73,6 @@ $(PDWIN32_LIB)\PMWINX.LIB
 $(PDWIN32_LIB)\LIBULS.LIB
 $(PDWIN32_LIB)\LIBCONV.LIB
 $(PDWIN32_LIB)\odincrt.lib
-$(PDWIN32_LIB)\advapi32.lib
 OS2386.LIB
 $(RTLLIB_O)
 $(TARGET).def
