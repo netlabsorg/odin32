@@ -1,12 +1,12 @@
 /                                          sandervl phaller achimha cbratschi hugh davidr bird jeroen mike
 /CVSROOT                                   ktk sandervl phaller
 /bin                                       sandervl phaller bird
-/include                                   sandervl phaller achimha bird davidr cbratschi hugh
+/include                                   sandervl phaller achimha bird davidr cbratschi hugh mike
 /lib                                       sandervl phaller bird
 /src                                       sandervl phaller achimha bird
-/include/win                               sandervl phaller achimha bird davidr cbratschi hugh
-/include/old                               sandervl phaller bird davidr cbratschi
-/include/win/wine                          sandervl phaller achimha bird davidr cbratschi hugh
+/include/win                               sandervl phaller achimha bird davidr cbratschi hugh mike
+/include/old                               sandervl phaller bird davidr cbratschi mike
+/include/win/wine                          sandervl phaller achimha bird davidr cbratschi hugh mike
 /src/advapi32                              sandervl phaller bird
 /src/capi2032                              sandervl cbratschi phaller
 /src/comdlg32                              sandervl cbratschi
