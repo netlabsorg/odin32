@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.54 2000-12-09 16:16:26 phaller Exp $ */
+/* $Id: oslibdos.cpp,v 1.55 2000-12-31 12:28:54 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -144,6 +144,9 @@ DWORD error2WinError(APIRET rc,DWORD defaultCode = ERROR_NOT_ENOUGH_MEMORY_W)
 
     case ERROR_WRITE_FAULT: //29
         return ERROR_WRITE_FAULT_W;
+
+    case ERROR_GEN_FAILURE: //31
+        return ERROR_GEN_FAILURE_W;
 
     case ERROR_SHARING_VIOLATION: //32
         return ERROR_SHARING_VIOLATION_W;
