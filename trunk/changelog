@@ -1,4 +1,8 @@
- /* $Id: changelog,v 1.819 2000-03-19 09:16:54 mike Exp $ */
+ /* $Id: changelog,v 1.820 2000-03-19 11:08:32 sandervl Exp $ */
+
+ 2000-03-19: Sander van Leeuwen <sandervl@xs4all.nl>
+	- ODINCRT: Fixed FS wrapper for _fdopen & others in file.cpp
+                   (missing SetFS)
 
  2000-03-19: Michal Necasek <mike@mendelu.cz>
         - DINPUT: Few fixes, now Fallout 1/2 almost works
