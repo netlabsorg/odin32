@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.50 2003-02-28 09:56:00 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.51 2003-04-11 15:22:34 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -905,7 +905,8 @@ VOID Win32BaseWindow::DrawCaption(HDC hdc,RECT *rect,BOOL active)
   HDC memDC;
   HBITMAP memBmp,oldBmp;
 
-  if(fOS2Look) {
+  //WS_EX_TOOLWINDOW is incompatible with the OS2Look (titlebar thinner + smaller font)
+  if(fOS2Look && !(dwExStyle & WS_EX_TOOLWINDOW)) {
       //Note: If no class icon *and* WS_EX_DLGMODALFRAME -> no system menu
       if((dwStyle & WS_SYSMENU) && !(dwExStyle & WS_EX_TOOLWINDOW) &&
          !(!windowClass->getIcon() && (dwExStyle & WS_EX_DLGMODALFRAME)) &&
@@ -1013,7 +1014,9 @@ VOID Win32BaseWindow::DrawCaption(HDC hdc,RECT *rect,BOOL active)
       r.right -= GetSystemMetrics(SM_CXSIZE)+1;
     }
 
-    if ((dwStyle & WS_MAXIMIZEBOX) || (dwStyle & WS_MINIMIZEBOX))
+    //Testing in NT4 shows that tool windows never have a minimize or maximize button!
+    if (((dwStyle & WS_MAXIMIZEBOX) || (dwStyle & WS_MINIMIZEBOX)) &&
+        !(dwExStyle & WS_EX_TOOLWINDOW))
     {
       /* In win95 the two buttons are always there */
       /* But if the menu item is not in the menu they're disabled*/
