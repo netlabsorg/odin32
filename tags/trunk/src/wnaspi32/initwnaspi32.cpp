@@ -1,4 +1,4 @@
-/* $Id: initwnaspi32.cpp,v 1.5 2002-03-18 13:04:32 sandervl Exp $
+/* $Id: initwnaspi32.cpp,v 1.6 2002-03-28 16:53:47 sandervl Exp $
  *
  * DLL entry point
  *
@@ -31,11 +31,13 @@
 #include <string.h>
 #include <odin.h>
 #include <win32type.h>
+#include <win32api.h>
 #include <winconst.h>
 #include <odinlx.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
 #include <initdll.h>
 #include "aspilib.h"
+#include <custombuild.h>
 
 extern "C" {
  //Win32 resource table (produced by wrc)
@@ -43,13 +45,14 @@ extern "C" {
 }
 scsiObj *aspi = NULL;
 static HMODULE dllHandle = 0;
+static BOOL fDisableASPI = FALSE;
 
 //******************************************************************************
 //******************************************************************************
 void WIN32API DisableASPI()
 {
-    if (aspi) delete aspi;
-    aspi = NULL;
+   dprintf(("DisableASPI"));
+   fDisableASPI = TRUE;
 }
 //******************************************************************************
 //******************************************************************************
@@ -58,6 +61,9 @@ BOOL WINAPI Wnaspi32LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad
    switch (fdwReason)
    {
    case DLL_PROCESS_ATTACH:
+   {
+       if(fDisableASPI) return TRUE;
+
        aspi = new scsiObj();
        if(aspi == NULL) {
            dprintf(("WNASPI32: LibMain; can't allocate aspi object! APIs will not work!"));
@@ -75,6 +81,7 @@ BOOL WINAPI Wnaspi32LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad
        }
        dprintf(("WNASPI32: LibMain; aspi object created successfully"));
        return TRUE;
+   }
 
    case DLL_THREAD_ATTACH:
    case DLL_THREAD_DETACH:
