@@ -1,8 +1,10 @@
- /* $Id: changelog,v 1.1130 2000-09-17 10:31:20 davidr Exp $ */
+ /* $Id: changelog,v 1.1131 2000-09-17 22:30:04 davidr Exp $ */
 
  2000-09-15: David Raison <djr@lemur.co.uk>
     - OLE32: Further updates from Wine
              IMessageFilter stubs.
+    - OLEAUT32: Updates from Wine
+             ITypeComp stubs.
 
  2000-09-16: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Tools\dbginfo: Solved DosCall1.DLL problem. Successfully creates HLL
