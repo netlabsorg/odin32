@@ -1,11 +1,12 @@
-/* $Id: oslibdos.cpp,v 1.40 2000-09-04 18:24:42 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.41 2000-09-12 04:27:44 bird Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
  * Copyright 1998-2000 Sander van Leeuwen (sandervl@xs4all.nl)
- * Copyright 1999-2000 Edgar Buerkle <Edgar.Buerkle@gmx.net>
- * Copyright 2000 Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
+ * Copyright 1999-2000 Edgar Buerkle (Edgar.Buerkle@gmx.net)
+ * Copyright 2000 Przemyslaw Dobrowolski (dobrawka@asua.org.pl)
  * Copyright 2000 Christoph Bratschi (cbratschi@datacomm.ch)
+ * Copyright 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -39,7 +40,7 @@ static BOOL f64BitIO = FALSE;
 //******************************************************************************
 //******************************************************************************
 void OSLibInitWSeBFileIO()
-{ 
+{
  HMODULE hDoscalls;
 
   if(DosQueryModuleHandle("DOSCALLS", &hDoscalls) != NO_ERROR) {
@@ -127,7 +128,7 @@ DWORD error2WinError(APIRET rc,DWORD defaultCode = ERROR_NOT_ENOUGH_MEMORY_W)
 
     case ERROR_BAD_FORMAT: //11
       	return ERROR_BAD_FORMAT_W;
- 
+
     case ERROR_INVALID_ACCESS: //12
      	return ERROR_INVALID_ACCESS_W;
 
@@ -521,7 +522,7 @@ DWORD OSLibDosSetFilePtr(DWORD hFile, DWORD offset, DWORD method)
  DWORD  newoffset;
  APIRET rc;
 
-  switch(method) 
+  switch(method)
   {
     case OSLIB_SETPTR_FILE_CURRENT:
       os2method = FILE_CURRENT;
@@ -535,9 +536,9 @@ DWORD OSLibDosSetFilePtr(DWORD hFile, DWORD offset, DWORD method)
     default:
       return OSLIB_ERROR_INVALID_PARAMETER;
   }
-  
+
   rc = DosSetFilePtr(hFile, offset, os2method, &newoffset);
-  if(rc) 
+  if(rc)
   {
     SetLastError(error2WinError(rc));
     return -1;
@@ -685,10 +686,10 @@ DWORD OSLibDosSearchPath(DWORD cmd, char *path, char *name, char *full_name,
 }
 //******************************************************************************
 //******************************************************************************
-APIRET OSLibDosQueryPathInfo(PSZ   pszPathName,
-                             ULONG ulInfoLevel,
-                             PVOID pInfoBuf,
-                             ULONG cbInfoBuf)
+DWORD OSLibDosQueryPathInfo(CHAR *pszPathName,
+                            ULONG ulInfoLevel,
+                            PVOID pInfoBuf,
+                            ULONG cbInfoBuf)
 {
    APIRET rc = DosQueryPathInfo( pszPathName, ulInfoLevel,
                                  pInfoBuf, cbInfoBuf );
@@ -763,27 +764,27 @@ DWORD OSLibDosCreateFile(CHAR *lpszFile,
    //TODO: FILE_SHARE_DELETE
    if((fuShare & (FILE_SHARE_READ_W | FILE_SHARE_WRITE_W)) == 0 )
 	openMode |= OPEN_SHARE_DENYREADWRITE;
-   else 
+   else
    if((fuShare & (FILE_SHARE_READ_W | FILE_SHARE_WRITE_W)) == (FILE_SHARE_READ_W | FILE_SHARE_WRITE_W))
       	openMode |= OPEN_SHARE_DENYNONE;
-   else 
-   if(fuShare & FILE_SHARE_READ_W)          
+   else
+   if(fuShare & FILE_SHARE_READ_W)
         openMode |= OPEN_SHARE_DENYWRITE;
-   else 
+   else
    if(fuShare & FILE_SHARE_WRITE_W)
  	openMode |= OPEN_SHARE_DENYREAD;
 
    if(fuAccess == (GENERIC_READ_W | GENERIC_WRITE_W))
 	openMode |= OPEN_ACCESS_READWRITE;
-   else 
-   if(fuAccess & GENERIC_READ_W)            
+   else
+   if(fuAccess & GENERIC_READ_W)
 	openMode |= OPEN_ACCESS_READONLY;
    else
    if(fuAccess & GENERIC_WRITE_W)
        	openMode |= OPEN_ACCESS_WRITEONLY;
 
 #if 0
-   //SvL: Not true; verified in NT! (also messed up access of files on 
+   //SvL: Not true; verified in NT! (also messed up access of files on
    //     readonly volumes)
    //     CreateFile with OPEN_ALWAYS & GENERIC_READ on non-existing file
    //     -> creates 0 size file, WriteFile is not allowed
@@ -797,7 +798,7 @@ DWORD OSLibDosCreateFile(CHAR *lpszFile,
 #endif
 
    int retry = 0;
-   while(retry < 2) 
+   while(retry < 2)
    {
         dprintf(("DosOpen %s openFlag=%x openMode=%x", lpszFile, openFlag, openMode));
         rc = DosOpen((PSZ)lpszFile,
@@ -808,7 +809,7 @@ DWORD OSLibDosCreateFile(CHAR *lpszFile,
                       openFlag,
                       openMode,
                       NULL);
-  	if(rc == ERROR_TOO_MANY_OPEN_FILES) 
+  	if(rc == ERROR_TOO_MANY_OPEN_FILES)
         {
    	  ULONG CurMaxFH;
    	  LONG  ReqCount = 32;
@@ -860,10 +861,10 @@ DWORD OSLibDosOpenFile(CHAR *lpszFile, UINT fuMode)
 
        	if(fuMode & OF_READWRITE_W)
           	openMode |= OPEN_ACCESS_READWRITE;
-       	else 
+       	else
 	if(fuMode & OF_WRITE_W)
           	openMode |= OPEN_ACCESS_WRITEONLY;
-       	else 
+       	else
 	if(fuMode & OF_CREATE_W)
           	openMode |= OPEN_ACCESS_READWRITE;
    }
@@ -871,13 +872,13 @@ DWORD OSLibDosOpenFile(CHAR *lpszFile, UINT fuMode)
    if((fuMode & OF_SHARE_DENY_WRITE_W) ||
       !(fuMode & (OF_SHARE_DENY_READ_W | OF_SHARE_DENY_NONE_W | OF_SHARE_EXCLUSIVE_W)))
       	openMode |= OPEN_SHARE_DENYWRITE;
-   else 
+   else
    if (fuMode & OF_SHARE_DENY_NONE_W)
       	openMode |= OPEN_SHARE_DENYNONE;
-   else 
+   else
    if (fuMode & OF_SHARE_DENY_READ_W)
       	openMode |= OPEN_SHARE_DENYREAD;
-   else 
+   else
    if (fuMode & OF_SHARE_EXCLUSIVE_W)
       	openMode |= OPEN_SHARE_DENYREADWRITE;
 
@@ -903,7 +904,7 @@ DWORD OSLibDosOpenFile(CHAR *lpszFile, UINT fuMode)
       	if((rc == ERROR_OPEN_FAILED) && (openFlag & OPEN_ACTION_OPEN_IF_EXISTS))
       	{
           	SetLastError(ERROR_FILE_NOT_FOUND_W);
-      	} 
+      	}
       	else    SetLastError(error2WinError(rc));
 
       	return HFILE_ERROR_W;
@@ -927,7 +928,7 @@ BOOL OSLibDosLockFile(DWORD hFile, DWORD dwFlags,
 	dprintf(("OSLibDosLockFile: overlapped lock not yet implemented!!"));
    }
    //TODO: Locking region crossing end of file is permitted. Works in OS/2??
-   if(f64BitIO) 
+   if(f64BitIO)
    {
     FILELOCKL lockRangeL;
 
@@ -936,7 +937,7 @@ BOOL OSLibDosLockFile(DWORD hFile, DWORD dwFlags,
  	lockRangeL.lRange.ulLo  = nNumberOfBytesToLockLow;
  	lockRangeL.lRange.ulHi  = nNumberOfBytesToLockHigh;
 
-   	rc = OdinDosSetFileLocksL(hFile, NULL, &lockRangeL, 
+   	rc = OdinDosSetFileLocksL(hFile, NULL, &lockRangeL,
                                   (dwFlags & LOCKFILE_FAIL_IMMEDIATELY_W) ? 0 : 5000, 0);
         //SvL: 64 bits values are only supported by JFS
         //     Try the 32 bits DosSetFileLocks if it fails
@@ -945,12 +946,12 @@ BOOL OSLibDosLockFile(DWORD hFile, DWORD dwFlags,
 		goto oldlock;
         }
    }
-   else 
+   else
    {
 oldlock:
     FILELOCK lockRange = { OffsetLow, nNumberOfBytesToLockLow };
 
-   	rc = DosSetFileLocks(hFile, NULL, &lockRange, 
+   	rc = DosSetFileLocks(hFile, NULL, &lockRange,
                              (dwFlags & LOCKFILE_FAIL_IMMEDIATELY_W) ? 0 : 5000, 0);
    }
    if(rc) {
@@ -974,7 +975,7 @@ BOOL OSLibDosUnlockFile(DWORD hFile, DWORD OffsetLow, DWORD OffsetHigh,
    if(lpOverlapped) {//TODO:
 	dprintf(("OSLibDosUnlockFile: overlapped unlock not yet implemented!!"));
    }
-   if(f64BitIO) 
+   if(f64BitIO)
    {
     FILELOCKL unlockRangeL;
 
@@ -991,7 +992,7 @@ BOOL OSLibDosUnlockFile(DWORD hFile, DWORD OffsetLow, DWORD OffsetHigh,
 		goto oldlock;
         }
    }
-   else 
+   else
    {
 oldlock:
     FILELOCK unlockRange = { OffsetLow, nNumberOfBytesToLockLow };
@@ -1010,7 +1011,7 @@ oldlock:
 BOOL OSLibDosFlushFileBuffers(DWORD hFile)
 {
   APIRET   rc;
-  
+
    rc = DosResetBuffer(hFile);
    SetLastError(error2WinError(rc));
    return (rc == NO_ERROR);
@@ -1021,8 +1022,8 @@ DWORD OSLibDosGetFileSize(DWORD hFile, LPDWORD lpdwFileSizeHigh)
 {
  APIRET rc;
  ULONG  sizeLow;
-  
-   if(f64BitIO) 
+
+   if(f64BitIO)
    {
      FILESTATUS3L fsts3ConfigInfoL = {{0}};
      ULONG        ulBufSize       = sizeof(FILESTATUS3L);
@@ -1033,7 +1034,7 @@ DWORD OSLibDosGetFileSize(DWORD hFile, LPDWORD lpdwFileSizeHigh)
 	}
 	sizeLow = fsts3ConfigInfoL.cbFile.ulLo;
    }
-   else 
+   else
    {
      FILESTATUS3 fsts3ConfigInfo = {{0}};
      ULONG       ulBufSize       = sizeof(FILESTATUS3);
@@ -1060,21 +1061,21 @@ DWORD OSLibDosSetFilePointer(DWORD hFile, DWORD OffsetLow, DWORD *OffsetHigh, DW
   APIRET   rc;
   DWORD    newoffset;
 
-  switch(method) 
+  switch(method)
   {
     case FILE_BEGIN_W:
       method = FILE_BEGIN;
       break;
-  
+
     case FILE_CURRENT_W:
       method = FILE_CURRENT;
       break;
-  
+
     case FILE_END_W:
       method = FILE_END;
       break;
   }
-  
+
   // PH Note: for a negative 32-bit seek, the OS/2 64-bit version
   // needs to be skipped.
   if( (f64BitIO) && (OffsetHigh) )
@@ -1087,10 +1088,10 @@ DWORD OSLibDosSetFilePointer(DWORD hFile, DWORD OffsetLow, DWORD *OffsetHigh, DW
 	}
 	newoffset = newoffsetL.ulLo;
    }
-  else 
+  else
     rc = DosSetFilePtr(hFile, OffsetLow, method, &newoffset);
-  
-  if(rc) 
+
+  if(rc)
   {
     SetLastError(error2WinError(rc));
     return -1;
@@ -1106,7 +1107,7 @@ BOOL OSLibDosSetEndOfFile(DWORD hFile)
  LONGLONG FilePosL = {0,0};
  LONGLONG newFilePosL;
  APIRET   rc;
- 
+
    if(f64BitIO) {
 	rc = OdinDosSetFilePtrL(hFile, FilePosL, FILE_CURRENT, &newFilePosL);
 	if(rc == 0) {
@@ -1131,8 +1132,8 @@ BOOL OSLibDosSetEndOfFile(DWORD hFile)
 BOOL OSLibDosGetFileInformationByHandle(DWORD hFile, BY_HANDLE_FILE_INFORMATION* pInfo)
 {
  APIRET       rc;
- 
-   if(f64BitIO) 
+
+   if(f64BitIO)
    {
      FILESTATUS4L statusL = { 0 };
 
@@ -1140,7 +1141,7 @@ BOOL OSLibDosGetFileInformationByHandle(DWORD hFile, BY_HANDLE_FILE_INFORMATION*
         	              FIL_QUERYEASIZEL,
                 	      &statusL,
                               sizeof(statusL));
-   	if(rc == NO_ERROR) 
+   	if(rc == NO_ERROR)
    	{
 	  	pInfo->dwFileAttributes = 0;
 		if(!(statusL.attrFile & NOT_NORMAL))
@@ -1174,7 +1175,7 @@ BOOL OSLibDosGetFileInformationByHandle(DWORD hFile, BY_HANDLE_FILE_INFORMATION*
 		pInfo->nFileIndexLow  = 0;
 	   }
    }
-   else 
+   else
    {
      FILESTATUS4  status  = { 0 };
 
@@ -1182,7 +1183,7 @@ BOOL OSLibDosGetFileInformationByHandle(DWORD hFile, BY_HANDLE_FILE_INFORMATION*
         	              FIL_QUERYEASIZE,
                 	      &status,
                               sizeof(status));
-   	if(rc == NO_ERROR) 
+   	if(rc == NO_ERROR)
    	{
 	  	pInfo->dwFileAttributes = 0;
 		if(!(status.attrFile & NOT_NORMAL))
@@ -1225,8 +1226,8 @@ BOOL OSLibDosGetFileInformationByHandle(DWORD hFile, BY_HANDLE_FILE_INFORMATION*
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibDosSetFileTime(DWORD hFile, WORD creationdate, WORD creationtime, 
-                         WORD lastaccessdate, WORD lastaccesstime, 
+BOOL OSLibDosSetFileTime(DWORD hFile, WORD creationdate, WORD creationtime,
+                         WORD lastaccessdate, WORD lastaccesstime,
                          WORD lastwritedate, WORD lastwritetime)
 {
   FILESTATUS3 fileInfo;
@@ -1262,8 +1263,8 @@ BOOL OSLibDosSetFileTime(DWORD hFile, WORD creationdate, WORD creationtime,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibDosGetFileTime(DWORD hFile, WORD *creationdate, WORD *creationtime, 
-                         WORD *lastaccessdate, WORD *lastaccesstime, 
+BOOL OSLibDosGetFileTime(DWORD hFile, WORD *creationdate, WORD *creationtime,
+                         WORD *lastaccessdate, WORD *lastaccesstime,
                          WORD *lastwritedate, WORD *lastwritetime)
 {
   FILESTATUS3 fileInfo;
@@ -1865,7 +1866,7 @@ DWORD OSLibDosQueryVolumeFS(int drive, LPSTR lpFileSystemNameBuffer, DWORD nFile
 
    DosError(FERR_DISABLEHARDERR);
    rc = DosQueryFSAttach(drv, 1, FSAIL_QUERYNAME, fsinfo, &cb);
-   DosError(FERR_ENABLEHARDERR); 
+   DosError(FERR_ENABLEHARDERR);
 
    switch(rc) {
    case ERROR_INVALID_DRIVE:
@@ -1879,7 +1880,7 @@ DWORD OSLibDosQueryVolumeFS(int drive, LPSTR lpFileSystemNameBuffer, DWORD nFile
    }
 
    fsname = (char *)&fsinfo->szName[0] + fsinfo->cbName + 1;
-  
+
   /* @@@PH 2000/08/10 CMD.EXE querys with nFileSystemNameSize == 0
    * however does NOT expect to receive an error.
    */
@@ -1895,13 +1896,13 @@ DWORD OSLibDosQueryVolumeFS(int drive, LPSTR lpFileSystemNameBuffer, DWORD nFile
    return 0;
 }
 //******************************************************************************
-typedef struct _FSINFOBUF 
+typedef struct _FSINFOBUF
 {
 	ULONG 		ulVolser;          /* Volume serial number            */
 	VOLUMELABEL	vol;               /* Volume lable                    */
 } FSINFOBUF;
 //******************************************************************************
-DWORD OSLibDosQueryVolumeSerialAndName(int drive, LPDWORD lpVolumeSerialNumber, 
+DWORD OSLibDosQueryVolumeSerialAndName(int drive, LPDWORD lpVolumeSerialNumber,
                                        LPSTR lpVolumeNameBuffer, DWORD nVolumeNameSize)
 {
  FSINFOBUF fsi;
@@ -1925,7 +1926,7 @@ DWORD OSLibDosQueryVolumeSerialAndName(int drive, LPDWORD lpVolumeSerialNumber,
    if(lpVolumeSerialNumber) {
          *lpVolumeSerialNumber = fsi.ulVolser;
    }
-   if(lpVolumeNameBuffer) 
+   if(lpVolumeNameBuffer)
    {
    	if(nVolumeNameSize > fsi.vol.cch) {
              strcpy(lpVolumeNameBuffer, (PCHAR)fsi.vol.szVolLabel);
@@ -1947,10 +1948,10 @@ BOOL OSLibGetDiskFreeSpace(LPSTR lpRootPathName, LPDWORD lpSectorsPerCluster,
 
    if(lpRootPathName == 0)
       diskNum = 0;
-   else 
+   else
    if('A' <= *lpRootPathName && *lpRootPathName <= 'Z' )
       diskNum = *lpRootPathName - 'A' + 1;
-   else 
+   else
    if('a' <= *lpRootPathName && *lpRootPathName <= 'z' )
       diskNum = *lpRootPathName - 'a' + 1;
    else
@@ -1985,11 +1986,11 @@ BOOL OSLibDosCreatePipe(PHANDLE phfRead,
            phfRead,
            phfWrite,
            dwSize));
-  
+
   // select default buffer size
   if (dwSize == 0)
     dwSize = 4096;
-  
+
   rc = DosCreatePipe(phfRead,
                      phfWrite,
                      dwSize);
@@ -2001,3 +2002,19 @@ BOOL OSLibDosCreatePipe(PHANDLE phfRead,
   }
   return NO_ERROR;
 }
+
+/**
+ * Pure wrapper for DosQueryModulName which returns the OS/2 returncode.
+ * @returns     Returncode from DosQueryModuleName.
+ * @param       hModule     Handle of the module which name we query.
+ * @param       cchName     Length of the output name buffer.
+ * @param       pszname     Pointer to the output name buffer.
+ * @status      Completely implemented.
+ * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ */
+ULONG OSLibDosQueryModuleName(ULONG hModule, int cchName, char *pszName)
+{
+    return DosQueryModuleName(hModule, cchName, pszName);
+}
+
+

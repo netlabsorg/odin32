@@ -1,4 +1,4 @@
-/* $Id: oslibmisc.cpp,v 1.10 2000-08-11 10:56:18 sandervl Exp $ */
+/* $Id: oslibmisc.cpp,v 1.11 2000-09-12 04:27:45 bird Exp $ */
 /*
  * Misc OS/2 util. procedures
  *
@@ -133,7 +133,7 @@ void OSLibWait(ULONG msec)
 //Wrapper for Dos16AllocSeg
 //******************************************************************************
 ULONG OSLibAllocSel(ULONG size, USHORT *selector)
-{ 
+{
    return (Dos16AllocSeg(size, selector, SEG_NONSHARED) == 0);
 }
 //******************************************************************************
@@ -173,31 +173,44 @@ ULONG OSLibGetTIB(int tiboff)
 		return 0;
    }
 }
-//******************************************************************************
-//Get PIB data
-//******************************************************************************
-ULONG OSLibGetPIB(int piboff)
-{
- PTIB   ptib;
- PPIB   ppib;
- APIRET rc;
 
-   rc = DosGetInfoBlocks(&ptib, &ppib);
-   if(rc) {
-	return 0;
-   }
-   switch(piboff) 
-   {
-   	case PIB_TASKHNDL:
-		return ppib->pib_hmte;
-	case PIB_TASKTYPE:
-		if(ppib->pib_ultype == 3) {
-			return TASKTYPE_PM;
-		}
-		else	return TASKTYPE_VIO;
-	default: 
-		return 0;
-   }
+/**
+ * Gets a PIB data.
+ * @returns     Requested PIB data.
+ *              0 may indicate error or that the PIB data you requested actually is 0.
+ * @param       iPIB    PIB data index. (one of the PIB_* defines in oslibmisc.h)
+ * @author
+ * @remark      Spooky error handling.
+ */
+ULONG OSLibGetPIB(int iPIB)
+{
+     PTIB   ptib;
+     PPIB   ppib;
+     APIRET rc;
+
+    rc = DosGetInfoBlocks(&ptib, &ppib);
+    if (rc)
+    {
+	    dprintf(("KERNEL32: OSLibGetPIB(%d): DosGetInfoBlocks failed with rc=%d\n", iPIB, rc));
+        return 0;
+    }
+
+    switch(iPIB)
+    {
+    case PIB_TASKHNDL:
+        return ppib->pib_hmte;
+
+    case PIB_TASKTYPE:
+        return (ppib->pib_ultype == 3) ? TASKTYPE_PM : TASKTYPE_VIO;
+
+    case PIB_PCHCMD:
+        return (ULONG)ppib->pib_pchcmd;
+
+    default:
+        dprintf(("KERNEL32: OSLibGetPIB(%d): Invalid PIB data index\n.", iPIB));
+        DebugInt3();
+        return 0;
+    }
 }
 //******************************************************************************
 //Allocate local thread memory
@@ -220,15 +233,15 @@ char *OSLibStripPath(char *path)
 {
   /* @@@PH what does this function do ? Strip the path from a FQFN name ? */
   char *pszFilename;
-  
+
   pszFilename = strrchr(path, '\\');                 /* find rightmost slash */
   if (pszFilename != NULL)
     return (++pszFilename);              /* return pointer to next character */
-  
+
   pszFilename = strrchr(path, '/');                  /* find rightmost slash */
   if (pszFilename != NULL)
     return (++pszFilename);              /* return pointer to next character */
-  
+
   return (path);                                     /* default return value */
 }
 //******************************************************************************
@@ -254,10 +267,10 @@ ULONG OSLibQueryCountry()
  COUNTRYINFO  CtryInfo   = {0};   /* Buffer for country-specific information */
  ULONG        ulInfoLen  = 0;
  APIRET       rc         = NO_ERROR;  /* Return code                         */
- 
+
     rc = DosQueryCtryInfo(sizeof(CtryInfo), &Country,
                           &CtryInfo, &ulInfoLen);
- 
+
     if (rc != NO_ERROR) {
         return -1;
     }
