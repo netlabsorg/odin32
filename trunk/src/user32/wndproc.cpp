@@ -1,4 +1,4 @@
-/* $Id: wndproc.cpp,v 1.7 1999-06-25 21:35:27 sandervl Exp $ */
+/* $Id: wndproc.cpp,v 1.8 1999-06-26 08:25:22 sandervl Exp $ */
 
 /*
  * Win32 window procedure class for OS/2
@@ -287,10 +287,9 @@ LRESULT EXPENTRY_O32 WndCallback(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPar
 	if(curwnd)	curwnd->SetWindowHandle(hwnd);
   }
   if(curwnd != NULL) {
-#ifdef DEBUG
-        WriteLog("Message %s for %X %x %x\n", GetMsgText(Msg), hwnd, wParam, lParam);
-	PostSpyMessage(hwnd, Msg, wParam, lParam);
-#endif
+	if(PostSpyMessage(hwnd, Msg, wParam, lParam) == FALSE)
+        	dprintf(("Message %s for %X %x %x\n", GetMsgText(Msg), hwnd, wParam, lParam));
+	
 	switch(Msg) 
 	{
 	case WM_KEYDOWN:
