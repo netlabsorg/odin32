@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.838 2000-03-24 19:30:59 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.839 2000-03-24 23:14:00 sandervl Exp $ */
+
+ 2000-03-25: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: Fixes for GetStdHandle
+	- WSOCK32:  Fixes for getservbyname & getservbyport
 
  2000-03-24: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Fixed typo in pe loader (check for < 512 MB)
