@@ -1,4 +1,13 @@
- /* $Id: ChangeLog,v 1.579 1999-12-27 21:21:51 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.580 1999-12-28 10:30:13 sandervl Exp $ */
+
+ 99-12-28: Jens Wiessner <wiessnej@rfi.de>
+	- avifil32, comdlg32, crtdll, ddraw, dinput, dplay, dplayx, imagehlp,
+          mpr, msvcrt(20/40), msvfw32, olecli32, oledlg, olesvr32, psapi,
+          rasapi32, version:
+                    Added commented-out exports and changed ordinals to match 
+                    with the dlls from Windows NT 4.0 ServicePack 6 or Windows 
+                    98SE
+          NOTE: Requires recompile of all Odin dlls & any Odin32 apps.
 
  99-12-27: Jens Wiessner <wiessnej@rfi.de>
 	- WINSPOOL: Added stubs
