@@ -1,4 +1,4 @@
-/* $Id: configure.cmd,v 1.21.2.2 2002-03-31 20:08:45 bird Exp $
+/* $Id: configure.cmd,v 1.21.2.3 2002-04-29 11:14:04 bird Exp $
  *
  * Configuration script.
  * Generates makefile.inc and an empty .depend file.
@@ -34,13 +34,26 @@
                     fInteractive = 1;
                 when (ch = 'W') then
                     fWin32k = 0;
+                when (ch = '-') then
+                do
+                    parse var sArg sParm'='sOpt
+                    say sParm
+                    select
+                        when (sParm = '-WITH-KLIB') then
+                            fWithKLib = 1;
+                        otherwise
+                            say 'syntax error ('asArgs.i')';
+                            exit(2);
+                    end
+                end
                 when (ch = '?' | ch = 'H' | substr(sArg, 1, 2) = '-H') then
                 do
-                    say 'Odin32 Configure.cmd. $Revision: 1.21.2.2 $.'
-                    say 'syntax: Configure.cmd [-n] [-w]'
-                    say '  -n   Noninteractive.'
-                    say '  -w   Don''t build Win32k nor kKrnlLib.'
-                    say '  -h   This text.'
+                    say 'Odin32 Configure.cmd. $Revision: 1.21.2.3 $.'
+                    say 'syntax: Configure.cmd [options]'
+                    say '  -n           Noninteractive.'
+                    say '  -w           Don''t build Win32k.'
+                    say '  --with-klib  Build with kLib. (Will checkout kLib for you.)'
+                    say '  -h           This text.'
                     exit(1);
                 end
                 otherwise
@@ -122,6 +135,24 @@
         say 'oops, failed to open outputfile,' sIncFile;
         exit 1;
     end
+
+    /*
+     * Checkout K-Lib
+     */
+    sDir = directory();
+    if (chdir('kKrnlLib')) then
+    do
+        if (fInteractive) then
+        do
+            say 'Log in to the kLib cvs repository? (Y/N)';
+            pull sAnswer
+            if (substr(sAnswer, 1, 1) = 'Y') then
+                'cvs -d:pserver:readonly@www.netlabs.org:/netlabs.cvs/ktaskmanager login'
+        end
+        'cvs -d:pserver:readonly@www.netlabs.org:/netlabs.cvs/ktaskmanager co kLibSrc kLibInclude'
+    end
+    call directory sDir;
+
     exit 0;
 
 
@@ -209,4 +240,22 @@ ValidatePath: procedure expose fWin32k
     say 'Warning: Validatation of the' sPath 'failed. Win32k.sys will not be built.'
     say '         path='sPath;
 return '';
+
+
+
+/**
+ * Changes the directory.
+ * On error we will call failure.
+ * @returns success indicator.
+ */
+ChDir: procedure expose sStartDir;
+    parse arg sDir
+
+    'cd' sDir
+    if (rc <> 0) then
+    do
+        call failure rc, 'Failed to ChDir into' sDir '(CWD='directory()').'
+        return 0;
+    end
+return 1;
 
