@@ -1,4 +1,4 @@
-/* $Id: font.cpp,v 1.17 2001-02-02 19:37:08 sandervl Exp $ */
+/* $Id: font.cpp,v 1.18 2001-04-25 20:53:02 sandervl Exp $ */
 
 /*
  * GDI32 font apis
@@ -29,6 +29,7 @@
 #include <os2win.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <ctype.h>
 #include <string.h>
 #include "misc.h"
 #include "unicode.h"
@@ -120,7 +121,18 @@ static void iFontRename(LPCSTR lpstrFaceOriginal,
 
   strncpy(lpstrFaceTemp, lpstrFaceOriginal, LF_FACESIZE);
   lpstrFaceTemp[LF_FACESIZE-1] = 0;
-  strupr(lpstrFaceTemp);
+
+  {
+    char *y = lpstrFaceTemp;
+    while(*y) {
+      if(IsDBCSLeadByte( *y )) {
+        y += 2; // DBCS skip
+      } else {
+        *y = toupper( *y );
+        y++;
+      }
+    }
+  }
 
   //lookup table
   iRet = PROFILE_GetOdinIniString(ODINFONTSECTION,
