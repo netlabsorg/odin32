@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.37 2000-10-08 18:45:36 sandervl Exp $ */
+/* $Id: scroll.cpp,v 1.38 2001-05-20 10:44:04 sandervl Exp $ */
 /*
  * Scrollbar control
  *
@@ -1206,6 +1206,7 @@ INT WINAPI SetScrollInfo(HWND hwnd,INT nBar,const SCROLLINFO *info,BOOL bRedraw)
     SCROLLBAR_INFO *infoPtr;
     UINT new_flags;
     INT action = 0;
+    BOOL bChangeParams = FALSE; /* don't show/hide scrollbar if params don't change */
 
     dprintf(("USER32: SetScrollInfo %x %d",hwnd,nBar));
 
@@ -1221,6 +1222,7 @@ INT WINAPI SetScrollInfo(HWND hwnd,INT nBar,const SCROLLINFO *info,BOOL bRedraw)
         {
             infoPtr->Page = info->nPage;
             action |= SA_SSI_REPAINT_INTERIOR;
+            bChangeParams = TRUE; 
         }
     }
 
@@ -1244,6 +1246,7 @@ INT WINAPI SetScrollInfo(HWND hwnd,INT nBar,const SCROLLINFO *info,BOOL bRedraw)
         {
             infoPtr->MinVal = 0;
             infoPtr->MaxVal = 0;
+            bChangeParams = TRUE; 
         }
         else
         {
@@ -1253,7 +1256,8 @@ INT WINAPI SetScrollInfo(HWND hwnd,INT nBar,const SCROLLINFO *info,BOOL bRedraw)
                 action |= SA_SSI_REPAINT_INTERIOR;
                 infoPtr->MinVal = info->nMin;
                 infoPtr->MaxVal = info->nMax;
-            }
+                bChangeParams = TRUE; 
+           }
         }
     }
 
@@ -1290,16 +1294,19 @@ INT WINAPI SetScrollInfo(HWND hwnd,INT nBar,const SCROLLINFO *info,BOOL bRedraw)
         {
           new_flags = ESB_DISABLE_BOTH;
           action |= SA_SSI_REFRESH;
-        } else if (nBar != SB_CTL)
+        } 
+        else 
+        if (nBar != SB_CTL && bChangeParams)
         {
           action = SA_SSI_HIDE;
           infoPtr->flags = 0;
           goto done;
         }
-      } else  /* Show and enable scroll-bar */
+      } 
+      else  /* Show and enable scroll-bar */
       {
         new_flags = 0;
-        if (nBar != SB_CTL) action |= SA_SSI_SHOW;
+        if (nBar != SB_CTL && bChangeParams) action |= SA_SSI_SHOW;
         if (infoPtr->flags) action |= SA_SSI_REFRESH;
       }
 
