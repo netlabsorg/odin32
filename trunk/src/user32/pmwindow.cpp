@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.111 2000-12-29 18:39:58 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.112 2001-01-14 17:15:46 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -165,6 +165,9 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         dprintf(("Invalid win32wnd pointer for window %x msg %x", hwnd, msg));
         goto RunDefWndProc;
     }
+////    if(teb->o.odin.fIgnoreMsgs) {
+////        goto RunDefWndProc;
+////    }
 
     if((teb->o.odin.msgstate & 1) == 0)
     {//message that was sent directly to our window proc handler; translate it here
@@ -987,6 +990,9 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
         dprintf(("Invalid win32wnd pointer for window %x msg %x", hwnd, msg));
         goto RunDefFrameWndProc;
     }
+////    if(teb->o.odin.fIgnoreMsgs) {
+////        goto RunDefWndProc;
+////    }
 
     if((teb->o.odin.msgstate & 1) == 0)
     {//message that was sent directly to our window proc handler; translate it here

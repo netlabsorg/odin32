@@ -1,4 +1,4 @@
-/* $Id: listbox.cpp,v 1.25 2000-05-22 17:21:08 cbratschi Exp $ */
+/* $Id: listbox.cpp,v 1.26 2001-01-14 17:15:46 sandervl Exp $ */
 /*
  * Listbox controls
  *
@@ -1722,8 +1722,13 @@ static LRESULT LISTBOX_Directory( HWND hwnd, LB_DESCR *descr, UINT attrib,
             }
             else  /* not a directory */
             {
+#ifdef __WIN32OS2__
 #define ATTRIBS (FILE_ATTRIBUTE_READONLY | FILE_ATTRIBUTE_HIDDEN | \
-                 FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_ARCHIVE)
+                 FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_ARCHIVE | FILE_ATTRIBUTE_NORMAL)
+#else
+#define ATTRIBS (FILE_ATTRIBUTE_READONLY | FILE_ATTRIBUTE_HIDDEN | \
+                 FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_ARCHIVE )
+#endif
 
                 if ((attrib & DDL_EXCLUSIVE) &&
                     ((attrib & ATTRIBS) != (entry.dwFileAttributes & ATTRIBS)))
@@ -2954,7 +2959,12 @@ LRESULT COMBO_Directory( LPHEADCOMBO lphc, UINT attrib, LPSTR dir, BOOL bLong)
 
     if( descr )
     {
-        LRESULT     lRet = LISTBOX_Directory( lphc->hwndself, descr, attrib, dir, bLong );
+#ifdef __WIN32OS2__
+        //bugfix
+        LRESULT lRet = LISTBOX_Directory( lphc->hWndLBox, descr, attrib, dir, bLong );
+#else
+        LRESULT lRet = LISTBOX_Directory( lphc->hwndself, descr, attrib, dir, bLong );
+#endif
 
         RedrawWindow( lphc->hwndself, NULL, 0,
                         RDW_INVALIDATE | RDW_ERASE | RDW_UPDATENOW );

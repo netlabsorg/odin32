@@ -1,4 +1,4 @@
-/* $Id: windowword.cpp,v 1.8 2000-02-16 14:28:27 sandervl Exp $ */
+/* $Id: windowword.cpp,v 1.9 2001-01-14 17:15:47 sandervl Exp $ */
 
 /*
  * Win32 Get/SetWindowLong/Word user32 API functions for OS/2
@@ -29,7 +29,7 @@ LONG WIN32API SetWindowLongA(HWND hwnd, int nIndex, LONG  lNewLong)
       return window->SetWindowLongA(nIndex,lNewLong);
     }
     else {
-	 dprintf(("SetWindowLongA; window %x not found!", hwnd));
+	 dprintf(("SetWindowLongA %d %x; window %x not found!", nIndex, lNewLong, hwnd));
     }
     return 0;
 }

@@ -1,4 +1,4 @@
-/* $Id: win32wbasepos.cpp,v 1.17 2000-10-08 14:03:49 sandervl Exp $ */
+/* $Id: win32wbasepos.cpp,v 1.18 2001-01-14 17:15:47 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (nonclient/position methods)
  *
@@ -132,11 +132,11 @@ LONG Win32BaseWindow::SendNCCalcSize(BOOL calcValidRect, RECT *newWindowRect,
 {
    NCCALCSIZE_PARAMS params;
    WINDOWPOS winposCopy;
-   LONG result;
+   LONG result = 0;
 
    /* Send WM_NCCALCSIZE message to get new client area */
-//   if((winpos->flags & (SWP_FRAMECHANGED | SWP_NOSIZE)) != SWP_NOSIZE )
-//   {
+   if((winpos->flags & (SWP_FRAMECHANGED | SWP_NOSIZE)) != SWP_NOSIZE )
+   {
    	params.rgrc[0] = *newWindowRect;
    	if(calcValidRect)
    	{
@@ -166,12 +166,12 @@ LONG Win32BaseWindow::SendNCCalcSize(BOOL calcValidRect, RECT *newWindowRect,
            (newClientRect->bottom - newClientRect->top != rectClient.bottom - rectClient.top))
              winpos->flags &= ~SWP_NOCLIENTSIZE;
 
-//   }
-//   else
-//   if(!(winpos->flags & SWP_NOMOVE) && 
-//       (newClientRect->left != rectClient.left || newClientRect->top != rectClient.top)) {
-//            winpos->flags &= ~SWP_NOCLIENTMOVE;
-//   }
+   }
+   else
+   if(!(winpos->flags & SWP_NOMOVE) && 
+       (newClientRect->left != rectClient.left || newClientRect->top != rectClient.top)) {
+            winpos->flags &= ~SWP_NOCLIENTMOVE;
+   }
    return result;
 }
 /***********************************************************************
