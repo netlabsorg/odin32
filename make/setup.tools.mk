@@ -1,25 +1,4 @@
-# $Id: setup.tools.mk,v 1.3 2002-04-13 04:40:01 bird Exp $
-
-#
-# Standard tools - may be overridden by compiler specific setupfiles.
-#
-TOOL_RM=rm.exe -f
-TOOL_DOWITHDIRS=$(PATH_TOOLS)\dowithdirs.cmd
-TOOL_DODIRS=$(PATH_TOOLS)\dodirs.cmd
-TOOL_DOMAKES=$(PATH_TOOLS)\domakes.cmd
-TOOL_MAKE=$(MAKE) -nologo
-TOOL_DEP=$(PATH_TOOLS)\fastdep.exe
-TOOL_DEP_FLAGS=$(CC_INCLUDES) $(CXX_INCLUDES) $(AS_INCLUDES) $(ALL_INCLUDES) -i$(PATH_INCLUDES:;= -i)
-TOOL_DEP_FILES=*.c *.cpp *.asm *.h *.rc *.dlg *.orc *.inc *.ipf
-TOOL_CREATEPATH=$(PATH_TOOLS)\CreatePath.cmd
-TOOL_EXISTS=$(PATH_TOOLS)\Exists.cmd
-TOOL_CMP=$(PATH_TOOLS)\cmp.exe
-!if "$(BUILD_SHELL)" != "4OS2"
-TOOL_COPY=copy
-!else
-TOOL_COPY=copy /Q
-!endif
-TOOL_DLLRNAME=dllrname /q
+# $Id: setup.tools.mk,v 1.4 2002-04-16 00:08:25 bird Exp $
 
 
 #
@@ -40,7 +19,31 @@ CLRERR=
 CLRFIL=
 CLRRST=
 !endif
-ECHO=@echo $(CLRTXT)
+
+
+#
+# Standard tools - may be overridden by compiler specific setupfiles.
+#
+ECHO            = $(TOOL_ECHO)
+TOOL_CMP        = $(PATH_TOOLS)\cmp.exe
+!if "$(BUILD_SHELL)" != "4OS2"
+TOOL_COPY       = copy
+!else
+TOOL_COPY       = copy /Q
+!endif
+TOOL_CREATEPATH = $(PATH_TOOLS)\CreatePath.cmd
+TOOL_DEP        = $(PATH_TOOLS)\fastdep.exe
+TOOL_DEP_FILES  = *.c *.cpp *.asm *.h *.rc *.dlg *.orc *.inc *.ipf
+TOOL_DEP_FLAGS  = $(CC_INCLUDES) $(CXX_INCLUDES) $(AS_INCLUDES) $(ALL_INCLUDES) -i$(PATH_INCLUDES:;= -i)
+TOOL_DLLRNAME   = dllrname /q
+TOOL_DODIRS     = $(PATH_TOOLS)\dodirs.cmd
+TOOL_DOMAKES    = $(PATH_TOOLS)\domakes.cmd
+TOOL_DOWITHDIRS = $(PATH_TOOLS)\dowithdirs.cmd
+TOOL_ECHO       = @echo $(CLRTXT)
+TOOL_EXISTS     = $(PATH_TOOLS)\Exists.cmd
+TOOL_MAKE       = $(MAKE) -nologo
+TOOL_RM         = rm.exe -f
+TOOL_TYPE       = type
 
 
 #
