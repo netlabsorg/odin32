@@ -1,0 +1,12 @@
+; $Id: quartz.def,v 1.1 2001-08-19 14:02:13 sandervl Exp $
+
+;
+;
+LIBRARY QUARTZ INITINSTANCE
+DATA MULTIPLE NONSHARED
+
+EXPORTS
+  DllCanUnloadNow      = _QUARTZ_DllCanUnloadNow@0            @1
+  DllGetClassObject    = _QUARTZ_DllGetClassObject@12         @2
+  DllRegisterServer    = _QUARTZ_DllRegisterServer@0          @3
+  DllUnregisterServer  = _QUARTZ_DllUnregisterServer@0        @4
