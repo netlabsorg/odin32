@@ -21,6 +21,8 @@ typedef ULONG PDB;
 #include <thread.h>
 #include <FastInfoBlocks.h>
 
+#define SELECTOR_OS2_FS		0x150b
+
 #define MAKE_THREADID(processid, threadid) 	((processid << 16) | threadid)
 #define ODIN_TO_OS2_THREADID(threadid)          (threadid & 0xFFFF)
 
