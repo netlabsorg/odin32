@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.68 2004-01-11 11:42:10 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.69 2004-02-16 16:53:32 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -734,9 +734,9 @@ void DIBSection::flush(HDC hdc, DWORD nYdest, DWORD nDestHeight, BOOL orgYInvers
         }
 
         if(dibinfo.dsBitfields[1] == 0x3E0) {//RGB 555?
-            dprintf(("DIBSection::flush: convert RGB 565 to RGB 555"));
+            dprintf(("DIBSection::flush: convert RGB 555 to RGB 565"));
 
-            pRGB565to555((WORD *)destBuf, (WORD *)destBuf, (nDestHeight*dibinfo.dsBm.bmWidthBytes)/sizeof(WORD));
+            pRGB555to565((WORD *)destBuf, (WORD *)destBuf, (nDestHeight*dibinfo.dsBm.bmWidthBytes)/sizeof(WORD));
         }
 
 #ifdef INVERT
@@ -769,9 +769,9 @@ void DIBSection::flush(HDC hdc, DWORD nYdest, DWORD nDestHeight, BOOL orgYInvers
         destBuf = GetDIBObject() + dest*dibinfo.dsBm.bmWidthBytes;
 
         if(dibinfo.dsBitfields[1] == 0x3E0) {//RGB 555?
-            dprintf(("DIBSection::flush: convert RGB 565 to RGB 555"));
+            dprintf(("DIBSection::flush: convert RGB 555 to RGB 565"));
 
-            pRGB565to555((WORD *)bmpBitsDblBuffer, (WORD *)destBuf, (nDestHeight*dibinfo.dsBm.bmWidthBytes)/sizeof(WORD));
+            pRGB555to565((WORD *)bmpBitsDblBuffer, (WORD *)destBuf, (nDestHeight*dibinfo.dsBm.bmWidthBytes)/sizeof(WORD));
             destBuf = bmpBitsDblBuffer;
         }
 
