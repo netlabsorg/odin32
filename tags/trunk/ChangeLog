@@ -1,7 +1,14 @@
- /* $Id: ChangeLog,v 1.151 1999-08-29 08:13:34 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.152 1999-08-29 14:57:11 sandervl Exp $ */
+
+ 99-08-29: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32 Interlock apis ported from Wine (with help of Patrick Haller)
+	- INC: Removed Masm compatible flag for ALP and enabled debugging
+               info in debug build
 
  99-08-29: Jens Wiessner <wiessnej@rfi.de>
 	- OLECLI32: Created stub dll
+	- IMM32: Created stub dll
+	- IMAGEHLP: Created (partly) stub dll
 
  99-08-28: Sander van Leeuwen <sandervl@xs4all.nl>
  	- USER32\NEW: Use shared memory for window & class objects
