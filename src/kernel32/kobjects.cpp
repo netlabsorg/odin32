@@ -1,4 +1,4 @@
-/* $Id: kobjects.cpp,v 1.5 1999-10-26 21:42:25 phaller Exp $ */
+/* $Id: kobjects.cpp,v 1.6 1999-11-04 19:49:13 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -105,17 +105,21 @@ ODINFUNCTION4(HANDLE, CreateEventW,
   HANDLE rc;
   char  *astring;
 
+  if (arg4 != NULL) // support for unnamed semaphores
+    astring = UnicodeToAsciiString((LPWSTR)arg4);
+  else
+    arg4 = NULL;
+
   dprintf(("KERNEL32: CreateEventW(%s)\n",
            astring));
-
-  astring = UnicodeToAsciiString((LPWSTR)arg4);
 
   rc = HMCreateEvent(arg1,
                     arg2,
                     arg3,
                     astring);
 
-  FreeAsciiString(astring);
+  if (astring != NULL)
+    FreeAsciiString(astring);
 
   return(rc);
 }
