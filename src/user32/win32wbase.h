@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.30 1999-10-18 11:59:58 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.31 1999-10-20 13:46:28 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -301,6 +301,7 @@ static GenericObject *windows;
 private:
 #ifndef OS2_INCLUDED
         void  GetMinMaxInfo(POINT *maxSize, POINT *maxPos, POINT *minTrack, POINT *maxTrack );
+	LONG  HandleWindowPosChanging(WINDOWPOS *winpos);
         LONG  HandleSysCommand(WPARAM wParam, POINT *pt32);
 
         LONG  SendNCCalcSize(BOOL calcValidRect,

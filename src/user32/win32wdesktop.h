@@ -1,4 +1,4 @@
-/* $Id: win32wdesktop.h,v 1.3 1999-10-11 15:26:07 sandervl Exp $ */
+/* $Id: win32wdesktop.h,v 1.4 1999-10-20 13:46:29 sandervl Exp $ */
 /*
  * Win32 Desktop Window for OS/2
  *
@@ -12,7 +12,7 @@
 #ifndef __WIN32WDESKTOP_H__
 #define __WIN32WDESKTOP_H__
 
-#if defined(__cplusplus) && defined(_OS2WIN_H)
+#if defined(__cplusplus)
 
 #include <win32wbase.h>
 

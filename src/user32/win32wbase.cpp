@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.56 1999-10-19 19:26:08 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.57 1999-10-20 13:46:27 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -658,14 +658,15 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
         SetWindowPos(getParent()->getWindowHandle(), rectClient.left, rectClient.top,
                      rectClient.right-rectClient.left,
                      rectClient.bottom-rectClient.top,
-                     SWP_NOACTIVATE | SWP_NOZORDER );
+                     SWP_NOACTIVATE | SWP_NOZORDER | SWP_NOREDRAW);
   }
   else {
         SetWindowPos(HWND_TOP, rectClient.left, rectClient.top,
                      rectClient.right-rectClient.left,
                      rectClient.bottom-rectClient.top,
-                     SWP_NOACTIVATE);
+                     SWP_NOACTIVATE | SWP_NOREDRAW);
   }
+  //Note: Solitaire crashes when receiving WM_SIZE messages before WM_CREATE
   fNoSizeMsg = FALSE;
 
   if(SendMessageA(WM_NCCREATE, 0, (LPARAM)cs) )
@@ -1478,6 +1479,9 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         }
         return 0;
     }
+    case WM_WINDOWPOSCHANGING:
+        return HandleWindowPosChanging((WINDOWPOS *)lParam);
+
     case WM_ERASEBKGND:
     case WM_ICONERASEBKGND:
     {
@@ -2529,7 +2533,7 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value)
 
                 ss.styleOld = dwExStyle;
                 ss.styleNew = value;
-                dprintf(("SetWindowLong GWL_EXSTYLE %x new style %x", getWindowHandle(), value));
+                dprintf(("SetWindowLong GWL_EXSTYLE %x old %x new style %x", getWindowHandle(), dwExStyle, value));
                 SendMessageA(WM_STYLECHANGING,GWL_EXSTYLE,(LPARAM)&ss);
                 setExStyle(ss.styleNew);
                 SendMessageA(WM_STYLECHANGED,GWL_EXSTYLE,(LPARAM)&ss);
@@ -2544,7 +2548,7 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value)
 
                 ss.styleOld = dwStyle;
                 ss.styleNew = value;
-                dprintf(("SetWindowLong GWL_STYLE %x new style %x", getWindowHandle(), value));
+                dprintf(("SetWindowLong GWL_STYLE %x old %x new style %x", getWindowHandle(), dwStyle, value));
                 SendMessageA(WM_STYLECHANGING,GWL_STYLE,(LPARAM)&ss);
                 setStyle(ss.styleNew);
                 if(!IsWindowDestroyed())
