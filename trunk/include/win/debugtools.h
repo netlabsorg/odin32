@@ -4,6 +4,7 @@
 
 #ifdef __WIN32OS2__
 #include <odinwrap.h>
+#include <odin.h>
 
 #ifndef __MISC_H__
 
