@@ -1,4 +1,4 @@
-; $Id: kernel32dbg.def,v 1.1 2002-02-08 15:09:30 sandervl Exp $
+; $Id: kernel32dbg.def,v 1.2 2002-02-08 16:47:11 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -270,7 +270,7 @@ EXPORTS
      DefineDosDeviceA           = _DbgDefineDosDeviceA@12             @182
      DefineDosDeviceW           = _DbgDefineDosDeviceW@12             @183
      DeleteAtom                 = _DbgDeleteAtom@4                    @184
-     DeleteCriticalSection      = _DeleteCriticalSection@4         @185
+     DeleteCriticalSection      = _DbgDeleteCriticalSection@4         @185
      DeleteFiber                = _DbgDeleteFiber@4                   @77   ;NT
      DeleteFileA                = _DbgDeleteFileA@4                   @186
      DeleteFileW                = _DbgDeleteFileW@4                   @187
@@ -282,7 +282,7 @@ EXPORTS
      DuplicateHandle            = _DbgDuplicateHandle@28              @192
      EndUpdateResourceA         = _DbgEndUpdateResourceA@8            @193
      EndUpdateResourceW         = _DbgEndUpdateResourceW@8            @194
-     EnterCriticalSection       = _EnterCriticalSection@4          @195
+     EnterCriticalSection       = _DbgEnterCriticalSection@4          @195
      EnumCalendarInfoA          = _DbgEnumCalendarInfoA@16            @196
      EnumCalendarInfoW          = _DbgEnumCalendarInfoW@16            @197
      EnumDateFormatsA           = _DbgEnumDateFormatsA@12             @198
@@ -601,7 +601,7 @@ EXPORTS
      HeapWalk                   = _DbgHeapWalk@8                 @470
 
     InitAtomTable              = _DbgInitAtomTable@4             @471
-    InitializeCriticalSection  = _InitializeCriticalSection@4 @472
+    InitializeCriticalSection  = _DbgInitializeCriticalSection@4 @472
 ;   InitializeCriticialSectionAndSpinCount = _InitializeCriticalSectionAndSpinCount@?? ;NT
     InterlockedCompareExchange = _InterlockedCompareExchange@12 @787        ;NT
     InterlockedDecrement       = _InterlockedDecrement@4     @473
@@ -628,7 +628,7 @@ EXPORTS
     K32Thk1632Prolog           = _DbgK32Thk1632Prolog@4         @491       ;W95
     LCMapStringA               = _DbgLCMapStringA@24            @492
     LCMapStringW               = _DbgLCMapStringW@24            @493
-    LeaveCriticalSection       = _LeaveCriticalSection@4     @494
+    LeaveCriticalSection       = _DbgLeaveCriticalSection@4     @494
     LoadLibraryA               = _DbgLoadLibraryA@4             @495
     LoadLibraryExA             = _DbgLoadLibraryExA@12          @496
     LoadLibraryExW             = _DbgLoadLibraryExW@12          @497
@@ -650,7 +650,7 @@ EXPORTS
     LockFileEx                 = _DbgLockFileEx@24              @513
     LockResource               = _DbgLockResource@4             @514
 
-    MakeCriticalSectionGlobal  = _MakeCriticalSectionGlobal@4 @515
+    MakeCriticalSectionGlobal  = _DbgMakeCriticalSectionGlobal@4 @515
 ;   MapHInstLS                 = _DbgMapHInstLS@??              @516       ;W95
 ;   MapHInstLS_PN              = _DbgMapHInstLS_PN@??           @517       ;W95
 ;   MapHInstSL                 = _DbgMapHInstSL@??              @518       ;W95
@@ -724,7 +724,7 @@ EXPORTS
 ;   ReadFileScatter            = _DbgReadFileScatter@??                    ;NT
     ReadProcessMemory          = _DbgReadProcessMemory@20       @579
     RegisterServiceProcess     = _DbgRegisterServiceProcess@8   @580       ;W95
-   ReinitializeCriticalSection  = _ReinitializeCriticalSection@4 @581 ;W95
+   ReinitializeCriticalSection  = _DbgReinitializeCriticalSection@4 @581 ;W95
 ;   RegisterConsoleVDM         = _DbgRegisterConsoleVDM@??                 ;NT
 ;   RegisterWaitForInputIdle   = _DbgRegisterWaitForInputIdle@??           ;NT
 ;   RegisterWowBaseHandlers    = _DbgRegisterWowBaseHandlers@??            ;NT
@@ -796,7 +796,7 @@ EXPORTS
     SetConsoleTitleA           = _DbgSetConsoleTitleA@4         @632
     SetConsoleTitleW           = _DbgSetConsoleTitleW@4         @633
     SetConsoleWindowInfo       = _DbgSetConsoleWindowInfo@12     @634
-;   SetCriticalSectionSpinCount = _SetCriticalSectionSpinCount@??       ;NT
+;   SetCriticalSectionSpinCount = _DbgSetCriticalSectionSpinCount@??       ;NT
     SetCurrentDirectoryA       = _DbgSetCurrentDirectoryA@4     @635
     SetCurrentDirectoryW       = _DbgSetCurrentDirectoryW@4     @636
 ;   SetDaylightFlag            = _DbgSetDaylightFlag@??         @637       ;W95
@@ -873,13 +873,13 @@ EXPORTS
     TransactNamedPipe          = _DbgTransactNamedPipe@28       @696
     TransmitCommChar           = _DbgTransmitCommChar@8         @697
 ;   TrimVirtualBuffer          = _DbgTrimVirtualBuffer@??                  ;NT
-    TryEnterCriticalSection    = _TryEnterCriticalSection@4  @898       ;NT
+    TryEnterCriticalSection    = _DbgTryEnterCriticalSection@4  @898       ;NT
 ;   UTRegister                 = _DbgUTRegister@??              @698       ;W95
 ;   UTUnRegister               = _DbgUTUnRegister@??            @699       ;W95
     UnMapLS                    = _DbgUnMapLS@4                  @700       ;W95
     UnMapSLFixArray            = _DbgUnMapSLFixArray@12         @701       ;W95
     UnhandledExceptionFilter   = _DbgUnhandledExceptionFilter@4 @702
-    UninitializeCriticalSection  = _UninitializeCriticalSection@4 @703  ;W95
+    UninitializeCriticalSection  = _DbgUninitializeCriticalSection@4 @703  ;W95
     UnlockFile                 = _DbgUnlockFile@20              @704
     UnlockFileEx               = _DbgUnlockFileEx@20            @705
     UnmapViewOfFile            = _DbgUnmapViewOfFile@4          @706
