@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.44 2002-12-06 03:00:13 bird Exp $
+/* $Id: d32init.c,v 1.45 2004-11-10 07:48:37 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -586,7 +586,7 @@ USHORT _loadds _Far32 _Pascal GetKernelInfo32(PKRNLINFO pKrnlInfo)
                                 /* Check if build number seems valid. */
                                 if (   !(pKrnlInfo->ulBuild >=  8254 && pKrnlInfo->ulBuild <  8383) /* Warp 3 fp 32 -> fp 60 */
                                     && !(pKrnlInfo->ulBuild >=  9023 && pKrnlInfo->ulBuild <= 9036) /* Warp 4 GA -> fp 12 */
-                                    && !(pKrnlInfo->ulBuild >= 14039 && pKrnlInfo->ulBuild < 14100) /* Warp 4.5 GA -> fp 40 */
+                                    && !(pKrnlInfo->ulBuild >= 14039 && pKrnlInfo->ulBuild < 14200) /* Warp 4.5 GA -> fp 40 */
                                     && !(pKrnlInfo->ulBuild >=  6600 && pKrnlInfo->ulBuild <= 6678) /* Warp 2.1x fix?? (just for fun!) */
                                       )
                                 {
