@@ -1,9 +1,11 @@
-/* $Id: ChangeLog,v 1.2476 2003-02-10 16:05:18 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2477 2003-02-10 19:09:50 sandervl Exp $ */
 
  2003-02-10: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Touch all stack pages we skip in the out of stack workaround for
                   16 bits code. Jumping over the guard page causes a protection
                   violation exception.
+    - USER32:   o EnumThreadWindows: must return windows in Z-order
+                  (experiments show EnumThreadWindows in NT4 behaves like this)
 
  2003-02-07: Sander van Leeuwen <sandervl@innotek   >
     - DDRAW/NTDLL:
