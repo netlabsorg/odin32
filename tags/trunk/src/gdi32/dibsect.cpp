@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.46 2001-03-19 19:27:53 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.47 2001-03-21 12:31:36 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -594,8 +594,9 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
 
         rc = GpiDrawBits(hps, bmpBitsDblBuffer, pOS2bmp, 4, &point[0], ROP_SRCCOPY, os2mode);
   }
-  else  rc = GpiDrawBits(hps, bitmapBits, pOS2bmp, 4, &point[0], ROP_SRCCOPY, os2mode);
-
+  else {
+	rc = GpiDrawBits(hps, bitmapBits, pOS2bmp, 4, &point[0], ROP_SRCCOPY, os2mode);
+  }
   if(rc == GPI_OK) {
         DIBSection *destdib = DIBSection::findHDC(hdcDest);
         if(destdib) {
