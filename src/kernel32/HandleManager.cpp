@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.94 2003-02-04 11:28:55 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.95 2003-03-06 10:44:32 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -898,8 +898,7 @@ BOOL HMDuplicateHandle(HANDLE  srcprocess,
                        PHANDLE desthandle,
                        DWORD   fdwAccess,
                        BOOL    fInherit,
-                       DWORD   fdwOptions,
-                       DWORD   fdwOdinOptions)
+                       DWORD   fdwOptions)
 {
   int             iIndex;                     /* index into the handle table */
   int             iIndexNew;                  /* index into the handle table */
@@ -924,28 +923,12 @@ BOOL HMDuplicateHandle(HANDLE  srcprocess,
 
   /* initialize the complete HMHANDLEDATA structure */
   pHMHandleData                = &TabWin32Handles[iIndexNew].hmHandleData;
-  if (fdwOptions & DUPLICATE_SAME_ACCESS)
+  if (fdwOptions & DUPLICATE_SAME_ACCESS) 
       pHMHandleData->dwAccess    = TabWin32Handles[srchandle].hmHandleData.dwAccess;
   else
       pHMHandleData->dwAccess    = fdwAccess;
 
-  if((fdwOdinOptions & DUPLICATE_ACCESS_READWRITE) == DUPLICATE_ACCESS_READWRITE) {
-      pHMHandleData->dwAccess = GENERIC_READ | GENERIC_WRITE;
-  }
-  else
-  if(fdwOdinOptions & DUPLICATE_ACCESS_READ) {
-      pHMHandleData->dwAccess = GENERIC_READ;
-  }
-
-  if(fdwOdinOptions & DUPLICATE_SHARE_READ) {
-      pHMHandleData->dwShare = FILE_SHARE_READ;
-  }
-  else
-  if(fdwOdinOptions & DUPLICATE_SHARE_DENYNONE) {
-      pHMHandleData->dwShare = FILE_SHARE_READ | FILE_SHARE_WRITE;
-  }
-  else  pHMHandleData->dwShare = TabWin32Handles[srchandle].hmHandleData.dwShare;
-
+  pHMHandleData->dwShare       = TabWin32Handles[srchandle].hmHandleData.dwShare;
   pHMHandleData->dwCreation    = TabWin32Handles[srchandle].hmHandleData.dwCreation;
   pHMHandleData->dwFlags       = TabWin32Handles[srchandle].hmHandleData.dwFlags;
   pHMHandleData->lpHandlerData = TabWin32Handles[srchandle].hmHandleData.lpHandlerData;
@@ -966,8 +949,7 @@ BOOL HMDuplicateHandle(HANDLE  srcprocess,
                                        desthandle,
                                        fdwAccess,
                                        fInherit,
-                                       fdwOptions & ~DUPLICATE_CLOSE_SOURCE,
-                                       fdwOdinOptions);
+                                       fdwOptions & ~DUPLICATE_CLOSE_SOURCE, 0);
 
   //Don't let Open32 close it for us, but do it manually (regardless of error; see SDK docs))
   if (fdwOptions & DUPLICATE_CLOSE_SOURCE)
