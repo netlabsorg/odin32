@@ -1,4 +1,4 @@
-/* $Id: win32ktst.c,v 1.10 2001-07-10 05:28:15 bird Exp $
+/* $Id: win32ktst.c,v 1.11 2002-12-06 02:59:24 bird Exp $
  *
  * Win32k test module.
  *
@@ -396,10 +396,13 @@ int     kernelInit(int iTest, int argc, char **argv)
     if (szName[strlen(pszTmp) - 1] != '\\' && szName[strlen(pszTmp) - 1] != '/')
         strcat(szName, "\\");
     strcat(szName, "os2krnl");
+    rc = DosForceDelete(szName);
+    if (rc != NO_ERROR && rc != ERROR_FILE_NOT_FOUND)
+        printf("warning: delete %s -> rc=%d\n", szName, rc);
     rc = DosCopy(pszSrcName, szName, DCPY_EXISTING);
     if (rc != NO_ERROR)
     {
-        printf("Failed to copy %s to %s.\n", pszSrcName, szName);
+        printf("Failed to copy %s to %s. (rc=%d)\n", pszSrcName, szName, rc);
         return FALSE;
     }
     if (DosQueryPathInfo(szName, FIL_STANDARD, &fsts3, sizeof(fsts3)) != NO_ERROR
@@ -649,6 +652,7 @@ int TestCase1(int argc, char **argv)
             if (argv[6][0] == 'U')  opt.fKernel |= KF_UNI;
             if (argv[7][0] == 'A')  opt.fKernel |= KF_ALLSTRICT;
             if (argv[7][0] == 'H')  opt.fKernel |= KF_HALFSTRICT;
+            if (argv[7][0] == 'B')  opt.fKernel |= KF_HALFSTRICT;
 
             if (argc >= 9 && argv[8][1] == '\0')
                 switch (argv[8][0])
