@@ -1,12 +1,11 @@
-# $Id: pdwin32.tools,v 1.3 1999-06-10 16:21:50 achimha Exp $
+# $Id: pdwin32.tools,v 1.4 1999-09-06 01:39:55 bird Exp $
 # ODIN / win32os2 Project
-# 
+#
 # makefile for the build system tools and standard rules
 # Note: this has to be included after the compiler environment
 #
 # phaller@gmx.net, 1999/05/27
 #
-
 
 
 #
@@ -16,6 +15,8 @@ RM = rm -f
 CP = copy
 MKDIR = mkdir
 ECHO = echo
+IMPDEF = $(PDWIN32_TOOLS)\impdef.exe
+
 
 
 #
