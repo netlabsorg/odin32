@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.43 2000-07-17 00:40:17 phaller Exp $ */
+/* $Id: HandleManager.cpp,v 1.44 2000-07-26 18:06:21 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -1763,34 +1763,7 @@ DWORD HMWaitForSingleObject(HANDLE hObject,
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
   dwResult = pHMHandle->pDeviceHandler->WaitForSingleObject(&pHMHandle->hmHandleData,
                                                             dwTimeout);
-  // @@@PH Note: return code is wrong!
-  switch (dwResult)
-  {
-    case 1: // OS/2: ERROR_INVALID_FUNCTION
-      dprintf(("KERNEL32: HandleManager:HMWaitForSingleObject(%08xh) %s needs implementation\n",
-               pHMHandle->pDeviceHandler->lpHMDeviceName));
-      dwResult = WAIT_ABANDONED;
-      break;
-  
-    case 640: // OS/2: ERROR_TIMEOUT
-      dwResult = WAIT_TIMEOUT;
-      break;
-  
-    case 105: // ERROR_SEM_OWNER_DIED:
-    case 95:  // ERROR_INTERRUPT
-      dwResult = WAIT_ABANDONED;
-      break;
-      
-    case NO_ERROR:
-      dwResult = WAIT_OBJECT_0;
-      break;
-      
-    default:
-      SetLastError(dwResult);
-      dwResult = WAIT_FAILED;
-      break;
-  }
-  
+
   return (dwResult);                                  /* deliver return code */
 }
 
