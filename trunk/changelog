@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2644 2003-10-30 12:55:44 sandervl Exp $ */
+/* $Id: changelog,v 1.2645 2003-11-11 14:01:46 bird Exp $ */
+
+ 2003-11-11: knut st. osmundsen <bird-changelog@innotek    >
+    - MAKE:     o Added a set of custombuild rules to the root makefile.
 
  2003-10-30: Sander van Leeuwen <sandervl@innotek   >
     - SHELL32:  o Wrong if statement in recent SHAddToRecentDocs patch
