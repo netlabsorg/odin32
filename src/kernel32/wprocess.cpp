@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.92 2000-09-12 04:32:36 bird Exp $ */
+/* $Id: wprocess.cpp,v 1.93 2000-09-12 22:47:58 bird Exp $ */
 
 /*
  * Win32 process functions
@@ -73,16 +73,16 @@ static VMutex    threadListMutex;
 
 //TODO: This should not be here: (need to rearrange NTDLL; kernel32 can't depend on ntdll)
 BOOLEAN (* WINAPI RtlAllocateAndInitializeSid) ( PSID_IDENTIFIER_AUTHORITY pIdentifierAuthority,
-  					         BYTE nSubAuthorityCount,
-    					         DWORD nSubAuthority0,
-					         DWORD nSubAuthority1,
-					         DWORD nSubAuthority2,
-					         DWORD nSubAuthority3,
-					         DWORD nSubAuthority4,
-					         DWORD nSubAuthority5,
-					         DWORD nSubAuthority6,
-					         DWORD nSubAuthority7,
-					         PSID *pSid);
+                                                 BYTE nSubAuthorityCount,
+                                                 DWORD nSubAuthority0,
+                                                 DWORD nSubAuthority1,
+                                                 DWORD nSubAuthority2,
+                                                 DWORD nSubAuthority3,
+                                                 DWORD nSubAuthority4,
+                                                 DWORD nSubAuthority5,
+                                                 DWORD nSubAuthority6,
+                                                 DWORD nSubAuthority7,
+                                                 PSID *pSid);
 static HINSTANCE hInstNTDll = 0;
 
 //******************************************************************************
@@ -90,7 +90,7 @@ static HINSTANCE hInstNTDll = 0;
 TEB *WIN32API GetThreadTEB()
 {
     if(TIBFlatPtr == NULL) {
-	DebugInt3();
+        DebugInt3();
         return 0;
     }
     return (TEB *)*TIBFlatPtr;
@@ -230,11 +230,11 @@ TEB *InitializeTIB(BOOL fMainThread)
 
     //Initialize thread security objects (TODO: Not complete)
     if(hInstNTDll == 0) {
-	hInstNTDll = LoadLibraryA("NTDLL.DLL");
-	*(ULONG *)&RtlAllocateAndInitializeSid = (ULONG)GetProcAddress(hInstNTDll, "RtlAllocateAndInitializeSid");
-	if(RtlAllocateAndInitializeSid == NULL) {
-		DebugInt3();
-	}
+        hInstNTDll = LoadLibraryA("NTDLL.DLL");
+        *(ULONG *)&RtlAllocateAndInitializeSid = (ULONG)GetProcAddress(hInstNTDll, "RtlAllocateAndInitializeSid");
+        if(RtlAllocateAndInitializeSid == NULL) {
+                DebugInt3();
+        }
     }
     SID_IDENTIFIER_AUTHORITY sidIdAuth = {0};
     thdb->threadinfo.dwType = SECTYPE_PROCESS | SECTYPE_INITIALIZED;
@@ -444,7 +444,7 @@ BOOL WIN32API FreeLibrary(HINSTANCE hinstance)
 
     //SvL: Ignore FreeLibary for executable
     if(WinExe && hinstance == WinExe->getInstanceHandle()) {
-	return TRUE;
+        return TRUE;
     }
 
     winmod = Win32DllBase::findModule(hinstance);
@@ -699,12 +699,15 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
         dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): dwFlags have invalid or unsupported flags\n",
                  lpszLibFile, hFile, dwFlags));
         SetLastError(ERROR_INVALID_PARAMETER);
-	return NULL;
+        return NULL;
     }
 
 
     /** @sketch
-     *  First we'll see if the module is allready loaded.
+     *  First we'll see if the module is allready loaded - either as the EXE or as DLL.
+     *  IF Executable present AND libfile matches the modname of the executable THEN
+     *      RETURN instance handle of executable.
+     *  Endif
      *  IF allready loaded THEN
      *      IF it's a LX dll which isn't loaded and we're using the PeLoader THEN
      *          Set Load library.
@@ -714,20 +717,8 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
      *      RETURN instance handle.
      *  Endif
      */
-    if(WinExe) {
-      char  szDllName[CCHMAXPATH];
-      char *dot;
-
-        strcpy(szDllName, OSLibStripPath((char *)lpszLibFile));
-        strupr(szDllName);
-        dot = strstr(szDllName, ".");
-        if(dot)
-            *dot = 0;
-
-        if(!strcmp(szDllName, WinExe->getModuleName())) {
-		return WinExe->getInstanceHandle();
-	}
-    }
+    if (WinExe != NULL && WinExe->matchModName(lpszLibFile))
+        return WinExe->getInstanceHandle();
     pModule = Win32DllBase::findModule((LPSTR)lpszLibFile);
     if (pModule)
     {
@@ -789,23 +780,21 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
         hDll = O32_LoadLibrary(szModname);
         if (hDll)
         {
-            /* OS/2 dll, system dll, converted dll or win32k took care of it.*/
+            /* OS/2 dll, system dll, converted dll or win32k took care of it. */
             pModule = (Win32DllBase *)Win32LxDll::findModuleByOS2Handle(hDll);
             if(pModule)
             {
 
                 if(pModule->isLxDll())
                 {
-			((Win32LxDll *)pModule)->setDllHandleOS2(hDll);
-			if(fPeLoader) {
-                    		pModule->AddRef();
-			}
+                    ((Win32LxDll *)pModule)->setDllHandleOS2(hDll);
+                    if (fPeLoader)
+                        pModule->AddRef();
                 }
                 pModule->incDynamicLib();
             }
-            else {
+            else
                 return hDll; //happens when LoadLibrary is called in kernel32's initterm (nor harmful)
-            }
             dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): returns 0x%x. Loaded %s using O32_LoadLibrary.",
                      lpszLibFile, hFile, dwFlags, hDll, szModname));
             return pModule->getInstanceHandle();
@@ -894,9 +883,10 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
         if (peldrDll->init(0))
         {
             peldrDll->AddRef();
-            if (peldrDll->attachProcess()) {
+            if (peldrDll->attachProcess())
+            {
                 hDll = peldrDll->getInstanceHandle();
-   	        //Must be called *after* attachprocess, since attachprocess may also
+                //Must be called *after* attachprocess, since attachprocess may also
                 //trigger LoadLibrary calls
                 //Those dlls must not be put in front of this dll in the dynamic
                 //dll list; or else the unload order is wrong:
@@ -1057,7 +1047,7 @@ FARPROC WIN32API GetProcAddress16(HMODULE hModule, LPCSTR lpszProc)
 
 
 /**
- * Internal function which gets the commandline.
+ * Internal function which gets the commandline (string) used to start the current process.
  * @returns     OS/2 / Windows return code
  *              On successful return (NO_ERROR) the global variables
  *              pszCmdLineA and pszCmdLineW are set.
@@ -1374,51 +1364,154 @@ LPCWSTR WIN32API GetCommandLineW(void)
 }
 
 
-DWORD WIN32API GetModuleFileNameA(HMODULE hinstModule, LPTSTR lpszPath, DWORD cchPath)
+/**
+ * GetModuleFileName gets the full path and file name for the specified module.
+ * @returns     Bytes written to the buffer (lpszPath). This count includes the
+ *              terminating '\0'.
+ *              On error 0 is returned. Last error is set.
+ * @param       hModule     Handle to the module you like to get the file name to.
+ * @param       lpszPath    Output buffer for full path and file name.
+ * @param       cchPath     Size of the lpszPath buffer.
+ * @sketch      Validate lpszPath.
+ *              Find the module object using handle.
+ *              If found Then
+ *                  Get full path from module object.
+ *                  If found path Then
+ *                      Copy path to buffer and set the number of bytes written.
+ *                  Else
+ *                      IPE!
+ *              Else
+ *                  Call Open32 GetModuleFileName. (kernel32 initterm needs/needed this)
+ *              Log result.
+ *              Return number of bytes written to the buffer.
+ *
+ * @status      Completely implemented, Open32.
+ * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ *              Sander van Leeuwen (sandervl@xs4all.nl)
+ * @remark      - Do we still have to call Open32?
+ *              - Do we set ERROR_BUFFER_OVERFLOW when cch > cchPath?
+ *              - Does NT really set the last error?
+ */
+DWORD WIN32API GetModuleFileNameA(HMODULE hModule, LPTSTR lpszPath, DWORD cchPath)
 {
- DWORD rc;
- Win32ImageBase *module;
- char *fpath = NULL;
+    Win32ImageBase *    pMod;           /* Pointer to the module object. */
+    DWORD               cch;            /* Length of the  */
 
-  dprintf(("GetModuleFileName %X", hinstModule));
-  if(hinstModule == 0 || hinstModule == -1 || (WinExe && hinstModule == WinExe->getInstanceHandle())) {
-        module = (Win32ImageBase *)WinExe;
-  }
-  else {
-        module = (Win32ImageBase *)Win32DllBase::findModule(hinstModule);
-  }
+    if (!VALID_PSZ(lpszPath))
+    {
+        dprintf(("KERNEL32:  GetModuleFileNameA(0x%x, 0x%x, 0x%x): invalid pointer lpszLibFile = 0x%x\n",
+                 hModule, lpszPath, cchPath, lpszPath));
+        SetLastError(ERROR_INVALID_PARAMETER); //or maybe ERROR_ACCESS_DENIED is more appropriate?
+        return 0;
+    }
 
-  if(module) {
-        fpath = module->getFullPath();
-  }
-  if(fpath) {
-        //SvL: 13-9-98: +1
-        rc = min(strlen(fpath)+1, cchPath);
-        strncpy(lpszPath, fpath, rc);
-	lpszPath[rc-1] = 0;
-  }
-  //only needed for call inside kernel32's initterm (profile init)
-  else  rc = O32_GetModuleFileName(hinstModule, lpszPath, cchPath);
+    pMod = Win32ImageBase::findModule(hModule);
+    if (pMod != NULL)
+    {
+        const char *pszFn = pMod->getFullPath();
+        if (pszFn)
+        {
+            cch = strlen(pszFn) + 1;
+            if (cch > cchPath)
+                cch = cchPath;
+            memcpy(lpszPath, pszFn, cch);
+            lpszPath[cch - 1] = '\0';
+        }
+        else
+        {
+            dprintf(("KERNEL32:  GetModuleFileNameA(%x,...): IPE - getFullPath returned NULL or empty string\n"));
+            DebugInt3();
+            SetLastError(ERROR_INVALID_HANDLE);
+        }
+    }
+    else
+    {
+        SetLastError(ERROR_INVALID_HANDLE);
+        //only needed for call inside kernel32's initterm (profile init)
+        //(console init only it seems...)
+        cch = O32_GetModuleFileName(hModule, lpszPath, cchPath);
+        if (cch > 0)    cch++;          /* Open32 doesn't count the terminator. */
+    }
 
-  if(rc) {
-        dprintf(("KERNEL32: GetModuleFileName %s %d\n", lpszPath, hinstModule));
-  }
-  else  dprintf(("KERNEL32: WARNING: GetModuleFileName %x not found!", hinstModule));
-  return(rc);
+    if (cch > 0)
+        dprintf(("KERNEL32:  GetModuleFileNameA(%x,...): %s %d\n", lpszPath, hModule, cch));
+    else
+        dprintf(("KERNEL32:  WARNING: GetModuleFileNameA(%x,...) - not found!", hModule));
+
+    return cch;
 }
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API GetModuleFileNameW(HMODULE hModule, LPWSTR lpFileName, DWORD nSize)
+
+
+/**
+ * GetModuleFileName gets the full path and file name for the specified module.
+ * @returns     Bytes written to the buffer (lpszPath). This count includes the
+ *              terminating '\0'.
+ *              On error 0 is returned. Last error is set.
+ * @param       hModule     Handle to the module you like to get the file name to.
+ * @param       lpszPath    Output buffer for full path and file name.
+ * @param       cchPath     Size of the lpszPath buffer.
+ * @sketch      Find the module object using handle.
+ *              If found Then
+ *                  get full path from module object.
+ *                  If found path Then
+ *                      Determin path length.
+ *                      Translate the path to into the buffer.
+ *                  Else
+ *                      IPE.
+ *              else
+ *                  SetLastError to invalid handle.
+ *              Log result.
+ *              return number of bytes written to the buffer.
+ *
+ * @status      Completely implemented.
+ * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @remark      - We do _NOT_ call Open32.
+ *              - Do we set ERROR_BUFFER_OVERFLOW when cch > cchPath?
+ *              - Does NT really set the last error?
+ */
+DWORD WIN32API GetModuleFileNameW(HMODULE hModule, LPWSTR lpszPath, DWORD cchPath)
 {
- char *asciifilename = (char *)malloc(nSize+1);
- DWORD rc;
+    Win32ImageBase *    pMod;
+    DWORD               cch = 0;
 
-    dprintf(("KERNEL32:  OSLibGetModuleFileNameW\n"));
-    rc = GetModuleFileNameA(hModule, asciifilename, nSize);
-    if(rc)      AsciiToUnicode(asciifilename, lpFileName);
-    free(asciifilename);
-    return(rc);
+    if (!VALID_PSZ(lpszPath))
+    {
+        dprintf(("KERNEL32:  GetModuleFileNameW(0x%x, 0x%x, 0x%x): invalid pointer lpszLibFile = 0x%x\n",
+                 hModule, lpszPath, cchPath, lpszPath));
+        SetLastError(ERROR_INVALID_PARAMETER); //or maybe ERROR_ACCESS_DENIED is more appropriate?
+        return 0;
+    }
+
+    pMod = Win32ImageBase::findModule(hModule);
+    if (pMod != NULL)
+    {
+        const char *pszFn = pMod->getFullPath();
+        if (pszFn || *pszFn != '\0')
+        {
+            cch = strlen(pszFn) + 1;
+            if (cch > cchPath)
+                cch = cchPath;
+            AsciiToUnicodeN(pszFn, lpszPath, cch);
+        }
+        else
+        {
+            dprintf(("KERNEL32:  GetModuleFileNameW(%x,...): IPE - getFullPath returned NULL or empty string\n"));
+            DebugInt3();
+            SetLastError(ERROR_INVALID_HANDLE);
+        }
+    }
+    else
+        SetLastError(ERROR_INVALID_HANDLE);
+
+    if (cch > 0)
+        dprintf(("KERNEL32:  GetModuleFileNameW(%x,...): %s %d\n", lpszPath, hModule, cch));
+    else
+        dprintf(("KERNEL32:  WARNING: GetModuleFileNameW(%x,...) - not found!", hModule));
+
+    return cch;
 }
+
+
 //******************************************************************************
 //NOTE: GetModuleHandleA does NOT support files with multiple dots (i.e.
 //      very.weird.exe)
@@ -1647,26 +1740,26 @@ FARPROC WIN32API GetProcAddress(HMODULE hModule, LPCSTR lpszProc)
   if(winmod) {
         ulAPIOrdinal = (ULONG)lpszProc;
         if (ulAPIOrdinal <= 0x0000FFFF) {
-            	proc = (FARPROC)winmod->getApi((int)ulAPIOrdinal);
+                proc = (FARPROC)winmod->getApi((int)ulAPIOrdinal);
         }
         else    proc = (FARPROC)winmod->getApi((char *)lpszProc);
-    	if(proc == 0) {
+        if(proc == 0) {
 #ifdef DEBUG
-        	if(ulAPIOrdinal <= 0x0000FFFF) {
-			dprintf(("GetProcAddress %x %x not found!", hModule, ulAPIOrdinal));
-		}
-		else	dprintf(("GetProcAddress %x %s not found!", hModule, lpszProc));
+                if(ulAPIOrdinal <= 0x0000FFFF) {
+                        dprintf(("GetProcAddress %x %x not found!", hModule, ulAPIOrdinal));
+                }
+                else    dprintf(("GetProcAddress %x %s not found!", hModule, lpszProc));
 #endif
-        	SetLastError(ERROR_PROC_NOT_FOUND);
-    	}
-  	if(HIWORD(lpszProc))
-    		dprintf(("KERNEL32:  GetProcAddress %s from %X returned %X\n", lpszProc, hModule, proc));
-	else  	dprintf(("KERNEL32:  GetProcAddress %x from %X returned %X\n", lpszProc, hModule, proc));
-    	return proc;
+                SetLastError(ERROR_PROC_NOT_FOUND);
+        }
+        if(HIWORD(lpszProc))
+                dprintf(("KERNEL32:  GetProcAddress %s from %X returned %X\n", lpszProc, hModule, proc));
+        else    dprintf(("KERNEL32:  GetProcAddress %x from %X returned %X\n", lpszProc, hModule, proc));
+        return proc;
   }
   proc = O32_GetProcAddress(hModule, lpszProc);
   if(HIWORD(lpszProc))
-    	dprintf(("KERNEL32:  GetProcAddress %s from %X returned %X\n", lpszProc, hModule, proc));
+        dprintf(("KERNEL32:  GetProcAddress %s from %X returned %X\n", lpszProc, hModule, proc));
   else  dprintf(("KERNEL32:  GetProcAddress %x from %X returned %X\n", lpszProc, hModule, proc));
   return(proc);
 }
