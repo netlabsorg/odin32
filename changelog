@@ -1,10 +1,30 @@
- /* $Id: changelog,v 1.392 1999-10-31 21:44:06 hugh Exp $ */
+ /* $Id: changelog,v 1.393 1999-11-01 16:18:03 dengert Exp $ */
 
- 99-10-29  Markus Montkowski <mmontkowski@gmx.de>
-	- GDI32:  Fixed bug in CreateDIBSection, only copy ptr when ptr. var not 
-                  NULL.
-                  Added DIBSections to GetObject_A, so programms can query
-                  a DIBSECTION for the obj.
+ 99-11-01: Daniela Engert <dani@ngrt.de>
+	- USER32: add WS_CLIPSIBLINGS to not-WS_GROUP style STATIC controls
+		  (fixes missing text in WELCOME)
+
+	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+	This is a hack!
+
+	Dialog controls which contain/surround other controls *need* to be
+	created with the WS_CLIPSIBLINGS style.
+
+	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+ 99-10-31: Christoph Bratschi <cbratschi@datacomm.ch>
+	- KERNEL32: Ported Wine time apis
+
+ 99-10-31: Daniela Engert <dani@ngrt.de>
+	- USER32: add WS_CLIPSIBLINGS to BS_GROUPBOX style controls (fixes
+		  missing buttons in SOL)
+
+ 99-10-31: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Remove CS_SYNCPAINT class flag -> fixes VPBuddy resize + paint
+		  Put back methods that belong in the Win32Dialog class.
+		  (MapDialogRect, DIALOG_Init, several x & y unit helpers)
+		  -> fixes calc window controls.
 
  99-10-30: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: added button control text justification
@@ -12,6 +32,12 @@
 		  -> radiobuttons
 		  fixed scrollbar timer handling
 		  pmframe: fixed WM_ACTIVATE bug
+
+ 99-10-29  Markus Montkowski <mmontkowski@gmx.de>
+	- GDI32:  Fixed bug in CreateDIBSection, only copy ptr when ptr. var not
+		  NULL.
+		  Added DIBSections to GetObject_A, so programms can query
+		  a DIBSECTION for the obj.
 
  99-10-30: Daniela Engert <dani@ngrt.de>
 	- USER32: Fixed missing repaints for transparent windows (VPBuddy!)

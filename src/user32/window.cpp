@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.30 1999-10-31 17:53:55 cbratschi Exp $ */
+/* $Id: window.cpp,v 1.31 1999-11-01 16:18:05 dengert Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -86,7 +86,8 @@ HWND WIN32API CreateWindowExA(DWORD exStyle, LPCSTR className,
         }
     }
 #endif
-    if (!strcmpi(className, "BUTTON") && ((style & 0x0f) == BS_GROUPBOX))
+    if ((!strcmpi(className, "BUTTON") && ((style & 0x0f) == BS_GROUPBOX)) ||
+       ((!strcmpi(className, "STATIC")) && !(style & WS_GROUP)))
       style |= WS_CLIPSIBLINGS;
 
     /* Create the window */
