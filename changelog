@@ -1,4 +1,11 @@
-/* $Id: changelog,v 1.1367 2001-04-19 08:31:51 sandervl Exp $ */
+/* $Id: changelog,v 1.1368 2001-04-20 13:22:17 phaller Exp $ */
+
+ 2001-04-20: Patrick Haller <patrick.haller@innotek.de>
+    - DSOUND:   o Fixes / Workaround for PowerDVD 3.0
+                  Crashed when allocating sound object for
+                  48kHz, 16-Bit, 4 channels
+                o dynamically size the internal mixing buffer 
+                  in DSMIXER
 
  2001-04-19: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Fail properly when a dll can't be found or loaded.
