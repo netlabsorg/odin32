@@ -1,4 +1,4 @@
-/* $Id: shellord.cpp,v 1.10 2000-08-18 02:01:22 phaller Exp $ */
+/* $Id: shellord.cpp,v 1.11 2000-08-27 14:08:18 sandervl Exp $ */
 /*
  * The parameters of many functions changes between different OS versions
  * (NT uses Unicode strings, 95 uses ASCII strings)
@@ -725,23 +725,6 @@ BOOL WINAPI FileIconInit(BOOL bFullInit)
 HRESULT WINAPI IsUserAdmin(void)
 {       FIXME("stub\n");
         return TRUE;
-}
-/*************************************************************************
- * StrRetToStrN                                 [SHELL32.96]
- *
- * converts a STRRET to a normal string
- *
- * NOTES
- *  the pidl is for STRRET OFFSET
- */
-HRESULT WINAPI StrRetToBufA (LPSTRRET src, LPITEMIDLIST pidl, LPSTR dest, DWORD len)
-{
-        return StrRetToStrNA(dest, len, src, pidl);
-}
-
-HRESULT WINAPI StrRetToBufW (LPSTRRET src, LPITEMIDLIST pidl, LPWSTR dest, DWORD len)
-{
-        return StrRetToStrNW(dest, len, src, pidl);
 }
 
 
