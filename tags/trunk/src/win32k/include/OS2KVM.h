@@ -1,4 +1,4 @@
-/* $Id: OS2KVM.h,v 1.11 2001-02-19 05:53:53 bird Exp $
+/* $Id: OS2KVM.h,v 1.12 2001-07-10 05:26:00 bird Exp $
  *
  * OS/2 kernel VM functions.
  *
@@ -164,11 +164,14 @@
  * Handle to Memory Object.
  */
 typedef USHORT  VMHOB;
+typedef VMHOB * PVMHOB;
+
 
 /*
  * Handle to Arena Record.
  */
-typedef VMHOB  VMHAR;
+typedef VMHOB   VMHAR;
+typedef VMHOB * PVMHAR;
 
 
 /*
@@ -187,7 +190,6 @@ typedef struct _vmac
  */
 typedef PVOID   PVMAR;
 typedef PVOID   PVMBM;
-typedef PVOID   PVMHAR;
 typedef PVOID   PVMAT;
 
 
@@ -298,6 +300,32 @@ PMTE KRNLCALL VMPseudoHandleMap(
 VOID    KRNLCALL vmRecalcShrBound(
     ULONG   flFlags,
     PULONG  pulSentinelAddress);
+
+
+/**
+ * Creates a pseudo handle for a given memory address.
+ * @returns OS/2 return code. NO_ERROR on success.
+ * @param   pvData      Pointer to the data which the handle should represent.
+ * @param   hobOwner    Owner of the pseudo handle.
+ * @param   phob        Pointer to object handle variable. Upon successful return
+ *                      this will hold the handle value of the crated pseudo handle.
+ * @remark  Used for many types of handles within the kernel.
+ *          Among them are the loader HMTEs. The loader uses usOwner = 0xffa6 (ldrmte).
+ */
+APIRET KRNLCALL VMCreatePseudoHandle(
+    PVOID   pvData,
+    VMHOB   usOwner,
+    PVMHOB  phob);
+
+
+/**
+ * This call frees a pseudo handle pointer previously allocated by
+ * VMCreatePseudoHandle.
+ * @returns OS/2 return code.
+ * @param   hob     Handle to be freed.
+ */
+APIRET KRNLCALL VMFreePseudoHandle(
+    VMHOB   hob);
 
 
 #endif
