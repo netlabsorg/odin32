@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.17 1999-08-27 16:51:00 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.18 1999-09-01 00:03:51 phaller Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -59,10 +59,10 @@ Win32MemMap::Win32MemMap(HFILE hfile, ULONG size, ULONG fdwProtect, LPSTR lpszNa
 BOOL Win32MemMap::Init(HANDLE hMemMap)
 {
   mapMutex.enter();
-  if(hMemFile != -1) 
+  if(hMemFile != -1)
   {
      	if(DuplicateHandle(GetCurrentProcess(), hMemFile, GetCurrentProcess(),
-                           &hMemFile, 0, FALSE, DUPLICATE_SAME_ACCESS) == FALSE) 
+                           &hMemFile, 0, FALSE, DUPLICATE_SAME_ACCESS) == FALSE)
      	{
 		dprintf(("Win32MemMap::Init: DuplicateHandle failed!"));
 		goto fail;
@@ -135,7 +135,7 @@ BOOL Win32MemMap::commitPage(ULONG offset, BOOL fWriteAccess)
  DWORD oldProt, newProt, nrBytesRead, size;
 
 //  mapMutex.enter();
-  
+
   newProt  = mProtFlags & (PAGE_READONLY | PAGE_READWRITE | PAGE_WRITECOPY);
 
   dprintf(("Win32MemMap::commitPage %x (faultaddr %x)", pageAddr, lpPageFaultAddr));
@@ -235,14 +235,20 @@ LPVOID Win32MemMap::mapViewOfFile(ULONG size, ULONG offset, ULONG fdwAccess)
   ULONG fAlloc   = 0;
   Win32MemMapView *mapview;
 
-  if(fdwAccess & ~(FILE_MAP_WRITE|FILE_MAP_READ|FILE_MAP_COPY)) 
+  //@@@PH: if(fdwAccess & ~(FILE_MAP_WRITE|FILE_MAP_READ|FILE_MAP_COPY))
+  // Docs say FILE_MAP_ALL_ACCESS is same as FILE_MAP_WRITE. Doesn't match reality though.
+  if(fdwAccess & ~FILE_MAP_ALL_ACCESS)
 	goto parmfail;
-  if((fdwAccess & FILE_MAP_WRITE) && !(mProtFlags & PAGE_READWRITE)) 
+  if((fdwAccess & FILE_MAP_WRITE) && !(mProtFlags & PAGE_READWRITE))
 	goto parmfail;
-  if((fdwAccess & FILE_MAP_READ) && !(mProtFlags & (PAGE_READWRITE|PAGE_READONLY))) 
+  if((fdwAccess & FILE_MAP_READ) && !(mProtFlags & (PAGE_READWRITE|PAGE_READONLY)))
 	goto parmfail;
-  if((fdwAccess & FILE_MAP_COPY) && !(mProtFlags & PAGE_WRITECOPY)) 
-	goto parmfail;
+
+  //@@@PH
+  if (fdwAccess != FILE_MAP_ALL_ACCESS)
+    if((fdwAccess & FILE_MAP_COPY) && !(mProtFlags & PAGE_WRITECOPY))
+      goto parmfail;
+
   if(offset+size > mSize)
 	goto parmfail;
 
@@ -259,7 +265,7 @@ LPVOID Win32MemMap::mapViewOfFile(ULONG size, ULONG offset, ULONG fdwAccess)
 
   if(nrMappings == 0) {//if not mapped, reserve/commit entire view
 	//SvL: Always read/write access or else ReadFile will crash once we
- 	//     start committing pages. 
+ 	//     start committing pages.
 	//     This is most likely an OS/2 bug and doesn't happen in Aurora
         //     when allocating memory with the PAG_ANY bit set. (without this
         //     flag it will also crash)
@@ -307,7 +313,7 @@ BOOL Win32MemMap::flushView(ULONG offset, ULONG cbFlush)
   if(nrMappings == 0)
 	goto parmfail;
 
-  if(cbFlush == 0) 
+  if(cbFlush == 0)
  	cbFlush = mSize;
 
   if(lpvBase < pMapping || (ULONG)lpvBase+cbFlush > (ULONG)pMapping+mSize)
@@ -324,10 +330,10 @@ BOOL Win32MemMap::flushView(ULONG offset, ULONG cbFlush)
 		dprintf(("Win32MemMap::flushView: VirtualQuery (%x,%x) failed for %x", lpvBase, cbFlush, (ULONG)lpvBase+i*PAGE_SIZE));
 		goto fail;
 	}
-	//If a page (or range of pages) is reserved or write protected, we 
+	//If a page (or range of pages) is reserved or write protected, we
         //won't bother flushing it to disk
-	if(memInfo.State & MEM_COMMIT && 
-           memInfo.AllocationProtect & (PAGE_READWRITE|PAGE_WRITECOPY|PAGE_EXECUTE_READWRITE|PAGE_EXECUTE_WRITECOPY)) 
+	if(memInfo.State & MEM_COMMIT &&
+           memInfo.AllocationProtect & (PAGE_READWRITE|PAGE_WRITECOPY|PAGE_EXECUTE_READWRITE|PAGE_EXECUTE_WRITECOPY))
         {//committed and allowed for writing?
 		offset = (ULONG)lpvBase - (ULONG)pMapping;
 		size   = memInfo.RegionSize;
@@ -417,7 +423,7 @@ Win32MemMap *Win32MemMap::memmaps = NULL;
 
 //******************************************************************************
 //******************************************************************************
-Win32MemMapView::Win32MemMapView(Win32MemMap *map, ULONG offset, ULONG size, 
+Win32MemMapView::Win32MemMapView(Win32MemMap *map, ULONG offset, ULONG size,
                                  ULONG fdwAccess)
 {
  LPVOID           viewaddr = (LPVOID)((ULONG)map->getMappingAddr()+offset);
@@ -519,7 +525,7 @@ void Win32MemMapView::deleteView(Win32MemMap *map)
 }
 //******************************************************************************
 //******************************************************************************
-Win32MemMap *Win32MemMapView::findMapByView(ULONG address, ULONG *offset, 
+Win32MemMap *Win32MemMapView::findMapByView(ULONG address, ULONG *offset,
                                             ULONG accessType,
                                             Win32MemMapView **pView)
 {
@@ -530,7 +536,7 @@ Win32MemMap *Win32MemMapView::findMapByView(ULONG address, ULONG *offset,
 
   if(view != NULL) {
   	while(view && (ULONG)view->getViewAddr() <= address) {
-		if((ULONG)view->getViewAddr() <= address && 
+		if((ULONG)view->getViewAddr() <= address &&
                    (ULONG)view->getViewAddr() + view->getSize() >= address &&
                    view->getAccessFlags() >= accessType)
 		{
