@@ -1,9 +1,10 @@
+/* $Id: crtdll.cpp,v 1.30 2001-09-05 12:14:23 bird Exp $ */
 /*
  * The C RunTime DLL
- * 
+ *
  * Implements C run-time functionality as known from UNIX.
  *
- * TODO: 
+ * TODO:
  *   - Check setjmp(3)
  *   - fix *ALL* functions for the FS: wrapper problem
  *
@@ -71,7 +72,7 @@ ODINDEBUGCHANNEL(CRTDLL)
 //
 // Definitions for internal functions
 //
-void 		qsort1 (char*, char*, size_t,
+void        qsort1 (char*, char*, size_t,
                     int (* CDECL)(const void*, const void*));
 
 
@@ -443,7 +444,7 @@ INT CDECL CRTDLL__cputs( char * s )
 
 
 /*********************************************************************
- *	_cscanf	    				(CRTDLL.67)
+ *  _cscanf                     (CRTDLL.67)
  */
 INT CDECL CRTDLL__cscanf( char *s, va_list arg )
 {
@@ -603,7 +604,7 @@ long CDECL CRTDLL__filelength( int i )
 
 
 /*********************************************************************
- *	_ftime					(CRTDLL.112)
+ *  _ftime                  (CRTDLL.112)
  */
 void CDECL CRTDLL__ftime( struct timeb *timebuf )
 {
@@ -617,11 +618,11 @@ void CDECL CRTDLL__ftime( struct timeb *timebuf )
  */
 LONG CDECL CRTDLL__ftol(void)
 {
-	/* don't just do DO_FPU("fistp",retval), because the rounding
-	 * mode must also be set to "round towards zero"... */
-	double fl;
-	POP_FPU(fl);
-	return (LONG)fl;
+    /* don't just do DO_FPU("fistp",retval), because the rounding
+     * mode must also be set to "round towards zero"... */
+    double fl;
+    POP_FPU(fl);
+    return (LONG)fl;
 }
 
 
@@ -774,7 +775,7 @@ int CDECL CRTDLL__kbhit( void )
 
 
 /*********************************************************************
- *                  _ltoa 	(CRTDLL.179)
+ *                  _ltoa   (CRTDLL.179)
  */
 LPSTR  CDECL CRTDLL__ltoa(long x,LPSTR buf,INT radix)
 {
@@ -783,7 +784,7 @@ LPSTR  CDECL CRTDLL__ltoa(long x,LPSTR buf,INT radix)
 
 
 /*********************************************************************
- *                  _matherr	(CRTDLL.181)
+ *                  _matherr    (CRTDLL.181)
  */
 double CDECL CRTDLL__matherr( struct exception * excep )
 {
@@ -880,7 +881,7 @@ INT CDECL CRTDLL__rmtmp(void)
 
 
 /*********************************************************************
- *           CRTDLL__searchenv 	 (CRTDLL.260)
+ *           CRTDLL__searchenv   (CRTDLL.260)
  */
 void CDECL CRTDLL__searchenv(char *file, char *var,char *path )
 {
@@ -890,7 +891,7 @@ void CDECL CRTDLL__searchenv(char *file, char *var,char *path )
 
 
 /*********************************************************************
- *           CRTDLL__seterrormode 	 (CRTDLL.261)
+ *           CRTDLL__seterrormode    (CRTDLL.261)
  */
 void CDECL CRTDLL__seterrormode(int uMode)
 {
@@ -901,7 +902,7 @@ void CDECL CRTDLL__seterrormode(int uMode)
 
 
 /*********************************************************************
- *           CRTDLL__setjmp 	 (CRTDLL.262)
+ *           CRTDLL__setjmp      (CRTDLL.262)
  */
 int CDECL CRTDLL__setjmp( jmp_buf env )
 {
@@ -936,7 +937,7 @@ unsigned int CDECL CRTDLL__setsystime(struct tm *tp, unsigned int ms)
 
 
 /*********************************************************************
- *	_sopen					(CRTDLL.268)
+ *  _sopen                  (CRTDLL.268)
  */
 int CDECL CRTDLL__sopen( const char *s, int i1, int i2, va_list arg )
 {
@@ -946,7 +947,7 @@ int CDECL CRTDLL__sopen( const char *s, int i1, int i2, va_list arg )
 
 
 /*********************************************************************
- *           CRTDLL__spawnl 	 (CRTDLL.269)
+ *           CRTDLL__spawnl      (CRTDLL.269)
  */
 int CDECL CRTDLL__spawnl(int nMode, char* szPath, char* szArgv0, va_list arg)
 {
@@ -956,7 +957,7 @@ int CDECL CRTDLL__spawnl(int nMode, char* szPath, char* szArgv0, va_list arg)
 
 
 /*********************************************************************
- *           CRTDLL__spawnle 	 (CRTDLL.270)
+ *           CRTDLL__spawnle     (CRTDLL.270)
  */
 int CDECL CRTDLL__spawnle( int mode, char *path, char **szArgv0, va_list arg )
 {
@@ -966,7 +967,7 @@ int CDECL CRTDLL__spawnle( int mode, char *path, char **szArgv0, va_list arg )
 
 
 /*********************************************************************
- *           CRTDLL__spawnlp 	 (CRTDLL.271)
+ *           CRTDLL__spawnlp     (CRTDLL.271)
  */
 int CDECL CRTDLL__spawnlp(int nMode, char* szPath, char* szArgv0, va_list arg)
 {
@@ -976,7 +977,7 @@ int CDECL CRTDLL__spawnlp(int nMode, char* szPath, char* szArgv0, va_list arg)
 
 
 /*********************************************************************
- *           CRTDLL__spawnlpe 	 (CRTDLL.272)
+ *           CRTDLL__spawnlpe    (CRTDLL.272)
  */
 int CDECL CRTDLL__spawnlpe( int mode, char *path, char *szArgv0, va_list arg )
 {
@@ -986,7 +987,7 @@ int CDECL CRTDLL__spawnlpe( int mode, char *path, char *szArgv0, va_list arg )
 
 
 /*********************************************************************
- *           CRTDLL__spawnv 	 (CRTDLL.273)
+ *           CRTDLL__spawnv      (CRTDLL.273)
  */
 int CDECL CRTDLL__spawnv( int i, char *s1, char ** s2 )
 {
@@ -996,7 +997,7 @@ int CDECL CRTDLL__spawnv( int i, char *s1, char ** s2 )
 
 
 /*********************************************************************
- *           CRTDLL__spawnvp 	 (CRTDLL.275)
+ *           CRTDLL__spawnvp     (CRTDLL.275)
  */
 int CDECL CRTDLL__spawnvp( int i, char *s1, char ** s2 )
 {
@@ -1005,7 +1006,7 @@ int CDECL CRTDLL__spawnvp( int i, char *s1, char ** s2 )
 }
 
 /*********************************************************************
- *           CRTDLL__spawnv 	 (CRTDLL.276)
+ *           CRTDLL__spawnv      (CRTDLL.276)
  */
 int CDECL CRTDLL__spawnvpe( int i, char *s1, char ** s2, char ** s3 )
 {
@@ -1015,17 +1016,17 @@ int CDECL CRTDLL__spawnvpe( int i, char *s1, char ** s2, char ** s3 )
 
 
 /*********************************************************************
- *           CRTDLL__statusfp	 (CRTDLL.279)
+ *           CRTDLL__statusfp    (CRTDLL.279)
  */
 unsigned int CDECL CRTDLL__statusfp( void )
 {
   dprintf2(("CRTDLL: _statusfp\n"));
   return (_status87());
 }
-	
+
 
 /*********************************************************************
- *           _ultoa		 (CRTDLL.309)
+ *           _ultoa      (CRTDLL.309)
  */
 LPSTR  CDECL CRTDLL__ultoa(long x,LPSTR buf,INT radix)
 {
@@ -1035,7 +1036,7 @@ LPSTR  CDECL CRTDLL__ultoa(long x,LPSTR buf,INT radix)
 
 
 /*********************************************************************
- *           CRTDLL__ungetch	 (CRTDLL.311)
+ *           CRTDLL__ungetch     (CRTDLL.311)
  */
 int CDECL CRTDLL__ungetch( int i )
 {
@@ -1045,7 +1046,7 @@ int CDECL CRTDLL__ungetch( int i )
 
 
 /*********************************************************************
- *           _utime		 (CRTDLL.314)
+ *           _utime      (CRTDLL.314)
  */
 int CDECL CRTDLL__utime( char *path, struct utimbuf * times )
 {
@@ -1055,7 +1056,7 @@ int CDECL CRTDLL__utime( char *path, struct utimbuf * times )
 
 
 /*********************************************************************
- *	_vsnprintf			 	(CRTDLL.315)
+ *  _vsnprintf              (CRTDLL.315)
  */
 int CDECL CRTDLL__vsnprintf( char *s, size_t bufsize, const char *format, va_list arg )
 {
@@ -1099,7 +1100,7 @@ double CDECL CRTDLL__yn(int i, double x)
 
 
 /*********************************************************************
- *                  abs		(CRTDLL.336)
+ *                  abs     (CRTDLL.336)
  */
 double CDECL CRTDLL_abs(double d)
 {
@@ -1111,7 +1112,7 @@ double CDECL CRTDLL_abs(double d)
 
 
 /*********************************************************************
- *                  acos	(CRTDLL.337)
+ *                  acos    (CRTDLL.337)
  */
 double CDECL CRTDLL_acos( double x )
 {
@@ -1121,7 +1122,7 @@ double CDECL CRTDLL_acos( double x )
 
 
 /*********************************************************************
- *                  asctime	(CRTDLL.338)
+ *                  asctime (CRTDLL.338)
  */
 char * CDECL CRTDLL_asctime( const struct tm *timeptr )
 {
@@ -1131,7 +1132,7 @@ char * CDECL CRTDLL_asctime( const struct tm *timeptr )
 
 
 /*********************************************************************
- *                  asin	(CRTDLL.339)
+ *                  asin    (CRTDLL.339)
  */
 double CDECL CRTDLL_asin( double x )
 {
@@ -1141,7 +1142,7 @@ double CDECL CRTDLL_asin( double x )
 
 
 /*********************************************************************
- *                  atan 	(CRTDLL.340)
+ *                  atan    (CRTDLL.340)
  */
 double CDECL CRTDLL_atan(double d)
 {
@@ -1153,7 +1154,7 @@ double CDECL CRTDLL_atan(double d)
 
 
 /*********************************************************************
- *                  atan2	(CRTDLL.341)
+ *                  atan2   (CRTDLL.341)
  */
 double CDECL CRTDLL_atan2( double y, double x )
 {
@@ -1163,7 +1164,7 @@ double CDECL CRTDLL_atan2( double y, double x )
 
 
 /*********************************************************************
- *                  atof 	(CRTDLL.343)
+ *                  atof    (CRTDLL.343)
  */
 double CDECL CRTDLL_atof( const char *nptr )
 {
@@ -1173,7 +1174,7 @@ double CDECL CRTDLL_atof( const char *nptr )
 
 
 /*********************************************************************
- *                  atoi 	(CRTDLL.344)
+ *                  atoi    (CRTDLL.344)
  */
 int CDECL CRTDLL_atoi(LPSTR str)
 {
@@ -1185,7 +1186,7 @@ int CDECL CRTDLL_atoi(LPSTR str)
 
 
 /*********************************************************************
- *                  atol 	(CRTDLL.345)
+ *                  atol    (CRTDLL.345)
  */
 long CDECL CRTDLL_atol(LPSTR str)
 {
@@ -1197,14 +1198,14 @@ long CDECL CRTDLL_atol(LPSTR str)
 
 
 /*********************************************************************
- *                  bsearch	(CRTDLL.346)
+ *                  bsearch (CRTDLL.346)
  */
 void *CDECL CRTDLL_bsearch (const void *key, const void *base, size_t num, size_t width,
                      int (* CDECL compare)(const void *key, const void *element))
 {
   int left, right, median, sign;
   const void *element;
-  
+
   if (width == 0)
     return 0;
   left = 1; right = num;
@@ -1225,7 +1226,7 @@ void *CDECL CRTDLL_bsearch (const void *key, const void *base, size_t num, size_
 
 
 /*********************************************************************
- *                  ceil  	(CRTDLL.348)
+ *                  ceil    (CRTDLL.348)
  */
 double CDECL CRTDLL_ceil(double d)
 {
@@ -1236,7 +1237,7 @@ double CDECL CRTDLL_ceil(double d)
 
 
 /*********************************************************************
- *                  clock	(CRTDLL.350)
+ *                  clock   (CRTDLL.350)
  */
 clock_t CDECL CRTDLL_clock( void )
 {
@@ -1246,7 +1247,7 @@ clock_t CDECL CRTDLL_clock( void )
 
 
 /*********************************************************************
- *                  cos 	(CRTDLL.351)
+ *                  cos     (CRTDLL.351)
  */
 double CDECL CRTDLL_cos(double d)
 {
@@ -1258,7 +1259,7 @@ double CDECL CRTDLL_cos(double d)
 
 
 /*********************************************************************
- *                  cosh	(CRTDLL.352)
+ *                  cosh    (CRTDLL.352)
  */
 double CDECL CRTDLL_cosh( double x )
 {
@@ -1268,7 +1269,7 @@ double CDECL CRTDLL_cosh( double x )
 
 
 /*********************************************************************
- *                  ctime	(CRTDLL.353)
+ *                  ctime   (CRTDLL.353)
  */
 char * CDECL CRTDLL_ctime( const time_t *timer )
 {
@@ -1278,7 +1279,7 @@ char * CDECL CRTDLL_ctime( const time_t *timer )
 
 
 /*********************************************************************
- *                  difftime	(CRTDLL.354)
+ *                  difftime    (CRTDLL.354)
  */
 double CDECL CRTDLL_difftime( time_t t1, time_t t0 )
 {
@@ -1288,7 +1289,7 @@ double CDECL CRTDLL_difftime( time_t t1, time_t t0 )
 
 
 /*********************************************************************
- *                  div		(CRTDLL.355)
+ *                  div     (CRTDLL.355)
  */
 ULONG CDECL CRTDLL_div( int number, int denom )
 {
@@ -1302,7 +1303,7 @@ ULONG CDECL CRTDLL_div( int number, int denom )
 
 
 /*********************************************************************
- *                  exp		(CRTDLL.357)
+ *                  exp     (CRTDLL.357)
  */
 double CDECL CRTDLL_exp( double x )
 {
@@ -1312,7 +1313,7 @@ double CDECL CRTDLL_exp( double x )
 
 
 /*********************************************************************
- *                  fabs  	(CRTDLL.358)
+ *                  fabs    (CRTDLL.358)
  */
 double CDECL CRTDLL_fabs(double d)
 {
@@ -1324,7 +1325,7 @@ double CDECL CRTDLL_fabs(double d)
 
 
 /*********************************************************************
- *                  floor		(CRTDLL.367)
+ *                  floor       (CRTDLL.367)
  */
 double CDECL CRTDLL_floor(double d)
 {
@@ -1336,7 +1337,7 @@ double CDECL CRTDLL_floor(double d)
 
 
 /*********************************************************************
- *                  fmod	(CRTDLL.368)
+ *                  fmod    (CRTDLL.368)
  */
 double CDECL CRTDLL_fmod(double x, double y )
 {
@@ -1346,7 +1347,7 @@ double CDECL CRTDLL_fmod(double x, double y )
 
 
 /*********************************************************************
- *                  frexp	  (CRTDLL.377)
+ *                  frexp     (CRTDLL.377)
  */
 double CDECL CRTDLL_frexp( double value, int *exp )
 {
@@ -1488,7 +1489,7 @@ int CDECL CRTDLL_isxdigit(int i)
 
 
 /*********************************************************************
- *                  labs	(CRTDLL.416)
+ *                  labs    (CRTDLL.416)
  */
 long int CDECL CRTDLL_labs( long int j )
 {
@@ -1498,9 +1499,9 @@ long int CDECL CRTDLL_labs( long int j )
 
 
 /*********************************************************************
- *                  ldexp	(CRTDLL.417)
+ *                  ldexp   (CRTDLL.417)
  */
-double CDECL CRTDLL_ldexp( double x, int exp ) 
+double CDECL CRTDLL_ldexp( double x, int exp )
 {
   dprintf2(("CRTDLL: ldexp\n"));
   return (ldexp(x, exp));
@@ -1508,9 +1509,9 @@ double CDECL CRTDLL_ldexp( double x, int exp )
 
 
 /*********************************************************************
- *                  ldiv	(CRTDLL.418)
+ *                  ldiv    (CRTDLL.418)
  */
-ldiv_t CDECL CRTDLL_ldiv( long int numer, long int denom ) 
+ldiv_t CDECL CRTDLL_ldiv( long int numer, long int denom )
 {
   dprintf2(("CRTDLL: ldiv\n"));
   return (ldiv(numer, denom));
@@ -1518,7 +1519,7 @@ ldiv_t CDECL CRTDLL_ldiv( long int numer, long int denom )
 
 
 /*********************************************************************
- *                  localeconv	(CRTDLL.419)
+ *                  localeconv  (CRTDLL.419)
  */
 struct lconv * CDECL CRTDLL_localeconv(void)
 {
@@ -1528,7 +1529,7 @@ struct lconv * CDECL CRTDLL_localeconv(void)
 
 
 /*********************************************************************
- *                  localtime 	(CRTDLL.420)
+ *                  localtime   (CRTDLL.420)
  */
 struct tm * CDECL CRTDLL_localtime( const time_t *timer )
 {
@@ -1538,7 +1539,7 @@ struct tm * CDECL CRTDLL_localtime( const time_t *timer )
 
 
 /*********************************************************************
- *                  log  	(CRTDLL.421)
+ *                  log     (CRTDLL.421)
  */
 double CDECL CRTDLL_log( double x )
 {
@@ -1548,7 +1549,7 @@ double CDECL CRTDLL_log( double x )
 
 
 /*********************************************************************
- *                  log10	(CRTDLL.422)
+ *                  log10   (CRTDLL.422)
  */
 double CDECL CRTDLL_log10( double x )
 {
@@ -1580,7 +1581,7 @@ double CDECL CRTDLL_modf( double value, double *iptr )
 /*********************************************************************
  *                  pow      (CRTDLL.436)
  */
-double CDECL CRTDLL_pow( double x, double y )	
+double CDECL CRTDLL_pow( double x, double y )
 {
     dprintf2(("CRTDLL: pow(%08xh, %08xh)\n",x, y));
     return pow( x, y );
@@ -1620,7 +1621,7 @@ int CDECL CRTDLL_raise( int sig )
 
 
 /*********************************************************************
- *	scanf					(CRTDLL.448)
+ *  scanf                   (CRTDLL.448)
  */
 int CDECL CRTDLL_scanf( const char *format, va_list arg )
 {
@@ -1704,7 +1705,7 @@ void CDECL CRTDLL_srand( unsigned int seed )
 
 
 /*********************************************************************
- *	sscanf					(CRTDLL.458)
+ *  sscanf                  (CRTDLL.458)
  */
 int CDECL CRTDLL_sscanf( const char *s, const char *format, va_list arg )
 {
@@ -1781,7 +1782,7 @@ int CDECL CRTDLL_toupper(int c)
 
 
 /*********************************************************************
- *	ungetc					(CRTDLL.492)
+ *  ungetc                  (CRTDLL.492)
  */
 INT CDECL CRTDLL_ungetc(int c, FILE *f)
 {
@@ -1811,7 +1812,7 @@ int CDECL CRTDLL_vsprintf( char *s, const char *format, va_list arg )
 
 
 /*********************************************************************
- *           CRTDLL__setjmp3 	 (CRTDLL.600)
+ *           CRTDLL__setjmp3     (CRTDLL.600)
  */
 int CDECL CRTDLL__setjmp3( jmp_buf env )
 {

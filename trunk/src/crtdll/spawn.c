@@ -1,6 +1,7 @@
+/* $Id: spawn.c,v 1.3 2001-09-05 12:14:25 bird Exp $ */
 /*
  * CRTDLL spawn functions
- * 
+ *
  * Copyright 1996,1998 Marcus Meissner
  * Copyright 1996 Jukka Iivonen
  * Copyright 1997,2000 Uwe Bonnes
@@ -23,7 +24,7 @@
  *
  * Implementation Notes:
  * MT Safe - But only because of missing functionality.
- * 
+ *
  * After translating input arguments into the required format for
  * CreateProcess(), the internal function __CRTDLL__spawn() is
  * called to perform the actual spawning.
@@ -81,8 +82,8 @@ static int __CRTDLL__spawn(INT flags, LPSTR exe, LPSTR args, LPSTR env)
   si.cb = sizeof(si);
 
   if (!CreateProcessA(exe, args, NULL, NULL, TRUE,
-		      flags == _P_DETACH ? DETACHED_PROCESS : 0,
-		      env, NULL, &si, &pi))
+              flags == _P_DETACH ? DETACHED_PROCESS : 0,
+              env, NULL, &si, &pi))
   {
     __CRTDLL__set_errno(GetLastError());
     return -1;
@@ -156,7 +157,7 @@ static LPSTR __CRTDLL__argvtos(LPSTR *arg, CHAR delim)
 HANDLE CDECL CRTDLL__spawnve(INT flags, LPSTR name, LPSTR *argv, LPSTR *envv)
 {
   // return (_spawnve(i, s1, s2, s3));
-  
+
   LPSTR args = __CRTDLL__argvtos(argv,' ');
   LPSTR envs = __CRTDLL__argvtos(envv,0);
   LPSTR fullname = name;
@@ -185,7 +186,7 @@ HANDLE CDECL CRTDLL__spawnve(INT flags, LPSTR name, LPSTR *argv, LPSTR *envv)
 INT CDECL CRTDLL_system(LPSTR x)
 {
   // return system(string);
-  
+
     /* FIXME: should probably launch cmd interpreter in COMSPEC */
     return __CRTDLL__spawn(_P_WAIT, NULL, x, NULL);
 }
