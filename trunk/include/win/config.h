@@ -1,4 +1,4 @@
-/* $Id: config.h,v 1.2 2001-08-19 14:02:56 sandervl Exp $ */
+/* $Id: config.h,v 1.3 2002-05-16 12:13:36 sandervl Exp $ */
 
 #ifndef __CONFIG_H__
 #define __CONFIG_H__

@@ -251,8 +251,8 @@ typedef struct
             LPVOID lpFirstBlock;
             LPVOID lpLastBlock;
         } Region;
-    } Foo;
-} PROCESS_HEAP_ENTRY, *LPPROCESS_HEAP_ENTRY;
+    } DUMMYUNIONNAME;
+} PROCESS_HEAP_ENTRY, *PPROCESS_HEAP_ENTRY, *LPPROCESS_HEAP_ENTRY;
 
 #define PROCESS_HEAP_REGION                   0x0001
 #define PROCESS_HEAP_UNCOMMITTED_RANGE        0x0002
@@ -1351,9 +1351,23 @@ typedef struct _COMMCONFIG {
     WCHAR wcProviderData[1];
 } COMMCONFIG,*LPCOMMCONFIG;
 
-#include "poppack.h"
+typedef void (* CALLBACK PAPCFUNC)(ULONG_PTR);
+typedef void (* CALLBACK PTIMERAPCROUTINE)(LPVOID,DWORD,DWORD);
 
-typedef VOID (* CALLBACK PAPCFUNC)(ULONG_PTR);
+typedef enum _COMPUTER_NAME_FORMAT
+{
+	ComputerNameNetBIOS,
+	ComputerNameDnsHostname,
+	ComputerNameDnsDomain,
+	ComputerNameDnsFullyQualified,
+	ComputerNamePhysicalNetBIOS,
+	ComputerNamePhysicalDnsHostname,
+	ComputerNamePhysicalDnsDomain,
+	ComputerNamePhysicalDnsFullyQualified,
+	ComputerNameMax
+} COMPUTER_NAME_FORMAT;
+
+#include "poppack.h"
 
 BOOL      WINAPI BuildCommDCBA(LPCSTR,LPDCB);
 BOOL      WINAPI BuildCommDCBW(LPCWSTR,LPDCB);
