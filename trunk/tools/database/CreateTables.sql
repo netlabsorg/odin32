@@ -1,4 +1,4 @@
--- $Id: CreateTables.sql,v 1.15 2000-08-01 01:58:53 bird Exp $
+-- $Id: CreateTables.sql,v 1.16 2000-08-02 01:01:36 bird Exp $
 --
 -- Create all tables.
 --
@@ -14,6 +14,8 @@ USE Odin32;
 CREATE TABLE author (
     refcode     SMALLINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
     name        VARCHAR(64) NOT NULL,
+    first       VARCHAR(45) NOT NULL,
+    last        VARCHAR(45) NOT NULL,
     initials    CHAR(4) NOT NULL,
     alias       VARCHAR(32),
     email       VARCHAR(64),
@@ -22,7 +24,9 @@ CREATE TABLE author (
     description TEXT,
     UNIQUE u1(refcode),
     UNIQUE u2(name),
-    UNIQUE u3(initials)
+    UNIQUE u3(initials),
+    INDEX  i1(first),
+    INDEX  i2(last)
 --   ,UNIQUE i4(alias), UNIQUE columns have to be defined NOT NULL in mySql.
 --    UNIQUE i5(email)  UNIQUE columns have to be defined NOT NULL in mySql.
 );
@@ -54,7 +58,7 @@ CREATE TABLE state (
     color   CHAR(7) NOT NULL,
     weight  TINYINT NOT NULL,
     name    VARCHAR(32) NOT NULL,
-    description VARCHAR(128) NOT NULL,
+    description TEXT NOT NULL,
     UNIQUE u1(refcode),
     UNIQUE u2(name),
     UNIQUE u3(color)

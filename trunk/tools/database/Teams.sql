@@ -1,4 +1,4 @@
--- $Id: Teams.sql,v 1.4 2000-08-01 01:49:56 bird Exp $
+-- $Id: Teams.sql,v 1.5 2000-08-02 01:01:36 bird Exp $
 --
 -- Team data.
 --
@@ -52,21 +52,18 @@ INSERT INTO tgroup(refcode, team,    name, description)
     VALUES        (   1000,    1, 'dummy',     'dummy');
 
 INSERT INTO tgroupmember(tgroup, author)
-    SELECT 1000, refcode FROM author WHERE name = 'Sander van Leeuwen';
-INSERT INTO tgroupmember(tgroup, author)
-    SELECT 1000, refcode FROM author WHERE name = 'Achim Hasenmueller';
-INSERT INTO tgroupmember(tgroup, author)
-    SELECT 1000, refcode FROM author WHERE name = 'Peter Fitzsimmons';
-INSERT INTO tgroupmember(tgroup, author)
-    SELECT 1000, refcode FROM author WHERE name = 'Vince Vielhaber';
-INSERT INTO tgroupmember(tgroup, author)
-    SELECT 1000, refcode FROM author WHERE name = 'Patrick Haller';
-INSERT INTO tgroupmember(tgroup, author)
-    SELECT 1000, refcode FROM author WHERE name = 'Christian Langanke';
-INSERT INTO tgroupmember(tgroup, author)
-    SELECT 1000, refcode FROM author WHERE name = 'Adrian Gschwend';
-INSERT INTO tgroupmember(tgroup, author)
-    SELECT 1000, refcode FROM author WHERE name = 'knut st. osmundsen';
+    SELECT 1000, refcode FROM author
+        WHERE name IN (
+                        'Sander van Leeuwen',
+                        'Achim Hasenmueller',
+                        'Peter Fitzsimmons',
+                        'Vince Vielhaber',
+                        'Patrick Haller',
+                        'Christian Langanke',
+                        'Adrian Gschwend',
+                        'Nenad Milenkovic',
+                        'knut st. osmundsen'
+                       );
 
 
 
@@ -144,7 +141,7 @@ INSERT INTO team(refcode,
 VALUES (
 3,
 'WAI',
-'Portable Executable Loader'
+'Win32 API Implementation'
 ,
 
 'WAI Team is implementing the Odin32, API that aims to clone Win32
@@ -572,7 +569,7 @@ INSERT INTO tgroupmember(tgroup, author)
     SELECT 3012, refcode FROM author
         WHERE name IN (
                         'Sander van Leeuwen',
-                        'John P Baker'
+                        'John P. Baker'
                        );
 INSERT INTO tgroupdll(tgroup, dll)
     SELECT 3012, refcode FROM dll WHERE name IN ('ADVAPI32');
@@ -650,7 +647,7 @@ INSERT INTO tgroupdll(tgroup, dll)
 
 -- MAPI32
 INSERT INTO tgroup(refcode, team,        name,  description, notes)
-    VALUES        (      3, 3016, 'MAPI32'
+    VALUES        (   3016,    3, 'MAPI32'
 ,'Implementing \'high-level\' MAIL API so MAPI compilant applications can
 directly send mail using OS/2 messaging software and native mail packages.'
 ,
@@ -672,10 +669,10 @@ INSERT INTO tgroupdll(tgroup, dll)
 
 
 INSERT INTO tgroup(refcode, team,        name,  description)
-    VALUES        (   3999,    3, 'unassigned',
+    VALUES        (   3999,    3, 'Unassigned',
 'To get out of this group and join one that works on something! :)\n
-</i>Note: Consisting mostly of lurkers that offered their help but have yet to
-decide (or to be told) which group to join and what to do.'
+<i>Note: Consisting mostly of lurkers that offered their help but have yet to
+decide (or to be told) which group to join and what to do.</i>'
 );
 
 INSERT INTO tgroupmember(tgroup, author)
