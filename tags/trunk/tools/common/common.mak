@@ -1,4 +1,5 @@
-# $Id: common.mak,v 1.1 2000-11-21 04:37:22 bird Exp $
+# $Id: common.mak,v 1.2 2000-12-02 23:26:57 bird Exp $
+
 #
 # Odin32 API
 #
@@ -16,7 +17,7 @@ EXETARGET = 1
 #
 # Compiler, tools, and interference rules.
 #
-!include ../../include/pdwin32.mk
+!include ../../makefile.inc
 
 
 #
@@ -39,5 +40,5 @@ TARGET  = common
 #
 # Includes the common rules.
 #
-!include $(PDWIN32_INCLUDE)/pdwin32.post
+!include $(ODIN32_POST_INC)
 

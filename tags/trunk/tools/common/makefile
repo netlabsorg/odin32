@@ -1,7 +1,7 @@
-# $Id: makefile,v 1.9 2000-11-21 04:37:23 bird Exp $
+# $Id: makefile,v 1.10 2000-12-02 23:26:58 bird Exp $
 
 #
-# PD-Win32 API
+# Odin32 API
 #
 #       Tools common parts
 #
@@ -21,7 +21,7 @@
 #
 # Compiler, tools, and interference rules.
 #
-!include ..\..\include\pdwin32.mk
+!include ../../makefile.inc
 
 
 #
@@ -31,15 +31,15 @@ all:    $(OBJDIR)\common.lib \
 !ifdef GCC
         $(OBJDIR)\common.a \
 !endif
-        $(PDWIN32_TOOLS)\kDef2Wat.exe
-#        $(PDWIN32_TOOLS)\kDump.exe
+        $(ODIN32_TOOLS)\kDef2Wat.exe
+#        $(ODIN32_TOOLS)\kDump.exe
 
 
 #
 # The neede tools
 #
 needed:     $(OBJDIR)\common.lib \
-            $(PDWIN32_TOOLS)\kDef2Wat.exe
+            $(ODIN32_TOOLS)\kDef2Wat.exe
 
 
 #
@@ -60,8 +60,8 @@ $(OBJDIR)\common.a: force
 #
 # Tools.
 #
-$(PDWIN32_TOOLS)\kDump.exe    $(OBJDIR)\kDump.exe    kDump.exe \
-$(PDWIN32_TOOLS)\kDef2Wat.exe $(OBJDIR)\kDef2Wat.exe kDef2Wat.exe : force
+$(ODIN32_TOOLS)\kDump.exe    $(OBJDIR)\kDump.exe    kDump.exe \
+$(ODIN32_TOOLS)\kDef2Wat.exe $(OBJDIR)\kDef2Wat.exe kDef2Wat.exe : force
     -@echo $@
     @$(MAKE_CMD) -f $(@B).mak all
 
@@ -80,7 +80,7 @@ clean:
 #
 dep:
     $(DEPEND) $(CINCLUDES) *.c *.cpp *.h *.asm *.inc \
-        *.rc *.dlg $(PDWIN32_INCLUDE)\*.h -robj *.orc \
+        *.rc *.dlg $(ODIN32_INCLUDE)\*.h -robj *.orc \
         -objo    *.c *.cpp \
         -objgobj *.c *.cpp
 

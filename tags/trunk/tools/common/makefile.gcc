@@ -1,9 +1,9 @@
-# $Id: makefile.gcc,v 1.7 2000-11-19 08:29:54 bird Exp $
+# $Id: makefile.gcc,v 1.8 2000-12-02 23:26:58 bird Exp $
 
 #
-# PD-Win32 API
+# Odin32 API
 #
-# Tools common library, GCC version.
+#       Tools common library, GCC version.
 #
 #
 
@@ -19,14 +19,14 @@ OMF=0
 #
 # Directories and common tools.
 #
-PDWIN32_INCLUDE = ..\..\include
-PDWIN32_BIN     = ..\..\bin\$(OBJDIR)
-PDWIN32_LIB     = ..\..\lib
-PDWIN32_TOOLS   = ..\bin
-PDWIN32_TCOMMON = ..\common
-!include $(PDWIN32_INCLUDE)\pdwin32.tools
+ODIN32_INCLUDE = ..\..\include
+ODIN32_BIN     = ..\..\bin\$(OBJDIR)
+ODIN32_LIB     = ..\..\lib
+ODIN32_TOOLS   = ..\bin
+ODIN32_TCOMMON = ..\common
+!include $(ODIN32_INCLUDE)\odin32.tools
 
-# Definitions for pdwin32.post
+# Definitions for odin32.post
 LOCALCLEAN  = 1
 CLEANEXTRAS = commongcc.*
 OLD_STYLE = 1
@@ -63,7 +63,7 @@ CFZOMF   = -Zomf
 
 
 CDEFINES  = -D__WIN32OS2__ -D__WINE__
-CINCLUDES = -I$(PDWIN32_INCLUDE)\Win -I$(PDWIN32_INCLUDE)
+CINCLUDES = -I$(ODIN32_INCLUDE)\Win -I$(ODIN32_INCLUDE)
 CPLUS_INCLUDE_PATH= $(CPLUS_INCLUDE_PATH);$(INCLUDE)
 
 # Note: Add -fhandle-exceptions if old gcc version (< 2.8.x?).
@@ -119,5 +119,6 @@ dep:
 
 
 # Includes the common rules.
-!include $(PDWIN32_INCLUDE)/pdwin32.post
+!error "this makefile doesn't work right now."
+!include $(ODIN32_INCLUDE)/odin32.post
 
