@@ -1,4 +1,4 @@
-/* $Id: oslibexcept.h,v 1.2 2000-09-08 18:07:50 sandervl Exp $ */
+/* $Id: oslibexcept.h,v 1.3 2003-01-05 12:31:24 sandervl Exp $ */
 /*
  * Exception handler util. procedures
  *
@@ -8,6 +8,10 @@
 #ifndef __OSLIBEXCEPT_H__
 #define __OSLIBEXCEPT_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 //******************************************************************************
 //Dispatches OS/2 exception to win32 handler
 //Returns: TRUE, win32 exception handler returned continue execution
@@ -16,5 +20,9 @@
 BOOL APIENTRY OSLibDispatchException(PEXCEPTIONREPORTRECORD pReportRec,
                                      PEXCEPTIONREGISTRATIONRECORD pRegistrationRec,
                                      PCONTEXTRECORD pContextRec, PVOID p);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

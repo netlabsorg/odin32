@@ -1,4 +1,4 @@
-/* $Id: oslibmisc.h,v 1.10 2003-01-02 11:50:46 sandervl Exp $ */
+/* $Id: oslibmisc.h,v 1.11 2003-01-05 12:31:24 sandervl Exp $ */
 /*
  * Misc util. procedures
  *
@@ -12,6 +12,10 @@
 
 char *OSLibGetDllName(ULONG hModule);
 BOOL  OSLibGetDllName(ULONG hModule, char *name, int length);
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 char *OSLibStripPath(char *path);
 
@@ -88,5 +92,9 @@ ULONG OSLibWinSetCp(ULONG hmq, ULONG codepage);
 //#define CTRY_TAIWAN                    886
 
 ULONG OSLibQueryCountry();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -1,4 +1,4 @@
-/* $Id: oslibdos.h,v 1.49 2002-12-19 12:55:27 sandervl Exp $ */
+/* $Id: oslibdos.h,v 1.50 2003-01-05 12:31:24 sandervl Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -12,6 +12,9 @@
 #ifndef __OSLIBDOS_H__
 #define __OSLIBDOS_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #ifdef OS2_INCLUDED
 DWORD error2WinError(APIRET rc,DWORD defaultCode = ERROR_NOT_ENOUGH_MEMORY_W);
@@ -356,6 +359,10 @@ DWORD OSLibDosSetPriority(ULONG tid, int priority);
 
 //functions for physical disk & partition information
 DWORD OSLibDosGetNumPhysDrives();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif //__OSLIBDOS_H__
 

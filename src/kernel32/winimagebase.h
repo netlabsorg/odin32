@@ -1,4 +1,4 @@
-/* $Id: winimagebase.h,v 1.22 2002-12-20 11:39:41 sandervl Exp $ */
+/* $Id: winimagebase.h,v 1.23 2003-01-05 12:31:25 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -111,6 +111,9 @@ virtual BOOL  insideModuleCode(ULONG address);
 
 virtual ULONG getApi(char *name)  = 0;
 virtual ULONG getApi(int ordinal) = 0;
+
+virtual ULONG setApi(char *name, ULONG pfnNewProc);
+virtual ULONG setApi(int ordinal, ULONG pfnNewProc);
 
 virtual ULONG getImageSize();
 
