@@ -1,12 +1,25 @@
-/* $Id: d16vprintf.c,v 1.1 2002-03-31 19:01:15 bird Exp $
+/* $Id: d16vprintf.c,v 1.2 2002-12-16 01:52:50 bird Exp $
  *
- * vprintf and printf - 16-bit.
+ * vprintf and printf - 16bit versions.
  *
- * WARNING: Do not include stdarg.h! AND it's only for use during init!!!
+ * Copyright (c) 1999-2003 knut st. osmundsen <bird@anduin.net>
  *
- * Copyright (c) 1999-2001 knut st. osmundsen
  *
- * Project Odin Software License can be found in LICENSE.TXT
+ * This file is part of kKrnlLib.
+ *
+ * kKrnlLib is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * kKrnlLib is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with kKrnlLib; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  */
 
@@ -35,7 +48,6 @@
 *******************************************************************************/
 #include <os2.h>
 
-#include "devSegDf.h"                   /* Win32k segment definitions. */
 #include "dev16.h"
 #include "d16vprintf.h"
 #ifdef RING0
