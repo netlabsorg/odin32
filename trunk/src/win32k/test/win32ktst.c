@@ -1,4 +1,4 @@
-/* $Id: win32ktst.c,v 1.9 2001-03-02 12:48:41 bird Exp $
+/* $Id: win32ktst.c,v 1.10 2001-07-10 05:28:15 bird Exp $
  *
  * Win32k test module.
  *
@@ -643,18 +643,19 @@ int TestCase1(int argc, char **argv)
         {
             struct options opt = DEFAULT_OPTION_ASSIGMENTS;
             opt.ulInfoLevel = 3;
-            opt.fKernel = (argv[6][0] == 'S' ? KF_SMP : (argv[6][0] == '4' ? KF_W4 | KF_UNI : KF_UNI))
-                            | (argv[7][0] == 'A' || argv[7][0] == 'H' ? KF_DEBUG : 0);
+            opt.fKernel = 0;
+            if (argv[6][0] == 'S')  opt.fKernel |= KF_SMP;
+            if (argv[6][0] == '4')  opt.fKernel |= KF_W4;
+            if (argv[6][0] == 'U')  opt.fKernel |= KF_UNI;
+            if (argv[7][0] == 'A')  opt.fKernel |= KF_ALLSTRICT;
+            if (argv[7][0] == 'H')  opt.fKernel |= KF_HALFSTRICT;
+
             if (argc >= 9 && argv[8][1] == '\0')
                 switch (argv[8][0])
                 {
-                    case 'a': case 'A': opt.fKernel |= KF_REV_A; break;
-                    case 'b': case 'B': opt.fKernel |= KF_REV_B; break;
-                    case 'c': case 'C': opt.fKernel |= KF_REV_C; break;
-                    case 'd': case 'D': opt.fKernel |= KF_REV_D; break;
-                    case 'e': case 'E': opt.fKernel |= KF_REV_E; break;
+                    case '\0': break;
                     default:
-                    opt.fKernel = (argv[8][0] - (argv[8][0] >= 'a' ? 'a'-1 : 'A'-1)) << KF_REV_SHIFT;
+                    opt.fKernel |= (argv[8][0] - (argv[8][0] >= 'a' ? 'a'-1 : 'A'-1)) << KF_REV_SHIFT;
                 }
             opt.ulBuild = atoi(argv[5]);
             opt.usVerMajor = (USHORT)atoi(argv[3]);
