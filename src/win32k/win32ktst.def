@@ -35,6 +35,8 @@ SEGMENTS
     EH_DATA             class 'CONST'
     BSS32               class 'BSS'
 
+    'STACK'             CLASS 'STACK'    STACK
+
 IMPORTS
      _DosWrite        = DOSCALL1.282
      _DOS16OPEN       = DOSCALL1.70

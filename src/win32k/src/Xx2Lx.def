@@ -1,0 +1,4 @@
+;$Id: Xx2Lx.def,v 1.1.2.1 2002-03-31 20:09:03 bird Exp $
+NAME xx2lx WINDOWCOMPAT
+DESCRIPTION 'Odin32 - Xx2Lx - The static converters.'
+

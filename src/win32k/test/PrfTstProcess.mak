@@ -1,4 +1,4 @@
-# $Id: PrfTstProcess.mak,v 1.1 2001-07-30 00:43:19 bird Exp $
+# $Id: PrfTstProcess.mak,v 1.1.4.1 2002-03-31 20:09:22 bird Exp $
 
 #
 # Odin32 API
@@ -20,6 +20,7 @@ MAKEFILE = $(TARGET).mak
 #
 !include ..\..\..\makefile.inc
 
+LD2TARGETFLAGS = $(LD2TARGETFLAGS) /pmtype:vio
 
 #
 # Object files. Prefix with OBJDIR and one space before the '\'.
