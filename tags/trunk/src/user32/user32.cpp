@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.4 1999-06-06 12:25:49 cbratschi Exp $ */
+/* $Id: user32.cpp,v 1.5 1999-06-08 18:59:07 phaller Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -38,18 +38,14 @@
 // WIN32API CascadeChildWindows
 // WIN32API ClientThreadConnect
 // WIN32API DragObject
-// WIN32API DrawCaptionTempA
-// WIN32API DrawCaptionTempW
 // WIN32API DrawFrame
 // WIN32API EditWndProc
 // WIN32API EndTask
 // WIN32API GetInputDesktop
-// WIN32API GetInternalWindowPos
 // WIN32API GetNextQueueWindow
 // WIN32API GetShellWindow
 // WIN32API InitSharedTable
 // WIN32API InitTask
-// WIN32API InternalGetWindowText
 // WIN32API IsHungThread
 // WIN32API LockWindowStation
 // WIN32API ModifyAccess
@@ -57,7 +53,6 @@
 // WIN32API RegisterLogonProcess
 // WIN32API RegisterNetworkCapabilities
 // WIN32API RegisterSystemThread
-// WIN32API RegisterTasklist
 // WIN32API SetDeskWallpaper
 // WIN32API SetDesktopBitmap
 // WIN32API SetInternalWindowPos
@@ -249,10 +244,27 @@ int WIN32API GetWindowTextLengthA( HWND arg1)
 //******************************************************************************
 int WIN32API GetWindowTextA( HWND arg1, LPSTR arg2, int  arg3)
 {
-    dprintf(("USER32:  GetWindowText\n"));
+    dprintf(("USER32:  GetWindowTextA\n"));
     return O32_GetWindowText(arg1, arg2, arg3);
 }
 //******************************************************************************
+
+/*******************************************************************
+ *      InternalGetWindowText    (USER32.326)
+ */
+int WIN32API InternalGetWindowText(HWND   hwnd,
+                                   LPWSTR lpString,
+                                   INT    nMaxCount )
+{
+    dprintf(("USER32: InternalGetWindowText(%08xh,%08xh,%08xh) not properly implemented.\n",
+             hwnd,
+             lpString,
+             nMaxCount));
+
+    return GetWindowTextW(hwnd,lpString,nMaxCount);
+}
+
+
 //******************************************************************************
 BOOL WIN32API GetWindowRect( HWND arg1, PRECT  arg2)
 {
@@ -2297,6 +2309,31 @@ BOOL WIN32API GetWindowPlacement( HWND arg1, LPWINDOWPLACEMENT arg2)
     return O32_GetWindowPlacement(arg1, arg2);
 }
 //******************************************************************************
+
+/***********************************************************************
+ *           GetInternalWindowPos   (USER32.245)
+ */
+UINT WIN32API GetInternalWindowPos(HWND    hwnd,
+                                   LPRECT  rectWnd,
+                                   LPPOINT ptIcon )
+{
+    WINDOWPLACEMENT wndpl;
+
+    dprintf(("USER32: GetInternalWindowPos(%08xh,%08xh,%08xh)\n",
+             hwnd,
+             rectWnd,
+             ptIcon));
+
+    if (O32_GetWindowPlacement( hwnd, &wndpl ))
+    {
+   if (rectWnd) *rectWnd = wndpl.rcNormalPosition;
+   if (ptIcon)  *ptIcon = wndpl.ptMinPosition;
+   return wndpl.showCmd;
+    }
+    return 0;
+}
+
+
 //******************************************************************************
 int WIN32API GetWindowTextLengthW( HWND arg1)
 {
@@ -6519,4 +6556,237 @@ HWND WIN32API GetShellWindow(void)
   dprintf(("USER32: GetShellWindow() not implemented.\n"));
 
   return (0); /* default */
+}
+
+
+/***********************************************************************
+ *           RegisterTasklist32                [USER32.436]
+ */
+DWORD WIN32API RegisterTasklist (DWORD x)
+{
+    dprintf(("USER32: RegisterTasklist(%08xh) not implemented.\n",
+             x));
+
+    return TRUE;
+}
+
+
+/***********************************************************************
+ * DrawCaptionTemp32A [USER32.599]
+ *
+ * PARAMS
+ *
+ * RETURNS
+ *     Success:
+ *     Failure:
+ */
+
+BOOL WIN32API DrawCaptionTempA(HWND       hwnd,
+                               HDC        hdc,
+                               const RECT *rect,
+                               HFONT      hFont,
+                               HICON      hIcon,
+                               LPCSTR     str,
+                               UINT       uFlags)
+{
+  RECT   rc = *rect;
+
+  dprintf(("USER32: DrawCaptionTempA(%08xh,%08xh,%08xh,%08xh,%08xh,%08xh,%08xh)\n",
+           hwnd,
+           hdc,
+           rect,
+           hFont,
+           hIcon,
+           str,
+           uFlags));
+
+  /* drawing background */
+  if (uFlags & DC_INBUTTON)
+  {
+    O32_FillRect (hdc,
+                  &rc,
+                  GetSysColorBrush (COLOR_3DFACE));
+
+    if (uFlags & DC_ACTIVE)
+    {
+      HBRUSH hbr = O32_SelectObject (hdc,
+                                     GetSysColorBrush (COLOR_ACTIVECAPTION));
+      O32_PatBlt (hdc,
+                  rc.left,
+                  rc.top,
+                  rc.right - rc.left,
+                  rc.bottom - rc.top,
+                  0xFA0089);
+
+      O32_SelectObject (hdc,
+                        hbr);
+    }
+  }
+  else
+  {
+    O32_FillRect (hdc,
+                  &rc,
+                  GetSysColorBrush ((uFlags & DC_ACTIVE) ?
+                    COLOR_ACTIVECAPTION : COLOR_INACTIVECAPTION));
+  }
+
+
+  /* drawing icon */
+  if ((uFlags & DC_ICON) && !(uFlags & DC_SMALLCAP))
+  {
+    POINT pt;
+
+    pt.x = rc.left + 2;
+    pt.y = (rc.bottom + rc.top - O32_GetSystemMetrics(SM_CYSMICON)) / 2;
+
+    if (hIcon)
+    {
+      DrawIconEx (hdc,
+                  pt.x,
+                  pt.y,
+                  hIcon,
+                  O32_GetSystemMetrics(SM_CXSMICON),
+                  O32_GetSystemMetrics(SM_CYSMICON),
+                  0,
+                  0,
+                  DI_NORMAL);
+    }
+    else
+    {
+    /* @@@PH 1999/06/08 not ported yet, just don't draw any icon
+      WND *wndPtr = WIN_FindWndPtr(hwnd);
+      HICON hAppIcon = 0;
+
+      if (wndPtr->class->hIconSm)
+        hAppIcon = wndPtr->class->hIconSm;
+      else
+        if (wndPtr->class->hIcon)
+          hAppIcon = wndPtr->class->hIcon;
+
+      DrawIconEx (hdc,
+                  pt.x,
+                  pt.y,
+                  hAppIcon,
+                  GetSystemMetrics(SM_CXSMICON),
+                  GetSystemMetrics(SM_CYSMICON),
+                  0,
+                  0,
+                  DI_NORMAL);
+
+      WIN_ReleaseWndPtr(wndPtr);
+      */
+    }
+
+    rc.left += (rc.bottom - rc.top);
+  }
+
+  /* drawing text */
+  if (uFlags & DC_TEXT)
+  {
+    HFONT hOldFont;
+
+    if (uFlags & DC_INBUTTON)
+      O32_SetTextColor (hdc,
+                        O32_GetSysColor (COLOR_BTNTEXT));
+    else
+      if (uFlags & DC_ACTIVE)
+        O32_SetTextColor (hdc,
+                          O32_GetSysColor (COLOR_CAPTIONTEXT));
+      else
+        O32_SetTextColor (hdc,
+                          O32_GetSysColor (COLOR_INACTIVECAPTIONTEXT));
+
+    O32_SetBkMode (hdc,
+                   TRANSPARENT);
+
+    if (hFont)
+      hOldFont = O32_SelectObject (hdc,
+                                   hFont);
+    else
+    {
+      NONCLIENTMETRICSA nclm;
+      HFONT             hNewFont;
+
+      nclm.cbSize = sizeof(NONCLIENTMETRICSA);
+      O32_SystemParametersInfo (SPI_GETNONCLIENTMETRICS,
+                                0,
+                                &nclm,
+                                0);
+      hNewFont = O32_CreateFontIndirect ((uFlags & DC_SMALLCAP) ?
+                                 &nclm.lfSmCaptionFont : &nclm.lfCaptionFont);
+      hOldFont = O32_SelectObject (hdc,
+                                   hNewFont);
+    }
+
+    if (str)
+      O32_DrawText (hdc,
+                    str,
+                    -1,
+                    &rc,
+                    DT_SINGLELINE | DT_VCENTER | DT_NOPREFIX | DT_LEFT);
+    else
+    {
+      CHAR szText[128];
+      INT  nLen;
+
+      nLen = O32_GetWindowText (hwnd,
+                                szText,
+                                128);
+
+      O32_DrawText (hdc,
+                    szText,
+                    nLen,
+                    &rc,
+                    DT_SINGLELINE | DT_VCENTER | DT_NOPREFIX | DT_LEFT);
+    }
+
+    if (hFont)
+      O32_SelectObject (hdc,
+                        hOldFont);
+    else
+      O32_DeleteObject (O32_SelectObject (hdc,
+                                          hOldFont));
+  }
+
+  /* drawing focus ??? */
+  if (uFlags & 0x2000)
+  {
+    dprintf(("USER32: DrawCaptionTempA undocumented flag (0x2000)!\n"));
+  }
+
+  return 0;
+}
+
+
+/***********************************************************************
+ * DrawCaptionTemp32W [USER32.602]
+ *
+ * PARAMS
+ *
+ * RETURNS
+ *     Success:
+ *     Failure:
+ */
+
+BOOL WIN32API DrawCaptionTempW (HWND       hwnd,
+                                HDC        hdc,
+                                const RECT *rect,
+                                HFONT      hFont,
+                                HICON      hIcon,
+                                LPCWSTR    str,
+                                UINT       uFlags)
+{
+  LPSTR strAscii = UnicodeToAsciiString((LPWSTR)str);
+
+  BOOL res = DrawCaptionTempA (hwnd,
+                               hdc,
+                               rect,
+                               hFont,
+                               hIcon,
+                               strAscii,
+                               uFlags);
+
+  FreeAsciiString(strAscii);
+
+  return res;
 }

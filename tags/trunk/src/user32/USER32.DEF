@@ -119,7 +119,7 @@ EXPORTS
     DdeQueryStringW            = _DdeQueryStringW@20         @114
     DdeReconnect               = _DdeReconnect@4             @115
     DdeSetQualityOfService     = _DdeSetQualityOfService@12  @116
-    DdeSetUserHandle           = _DdeSetUserHandle@12         @117
+    DdeSetUserHandle           = _DdeSetUserHandle@12        @117
     DdeUnaccessData            = _DdeUnaccessData@4          @118
     DdeUninitialize            = _DdeUninitialize@4          @119
     DefDlgProcA                = _DefDlgProcA@16             @120
@@ -155,9 +155,9 @@ EXPORTS
     DragDetect                 = _DragDetect@12              @150
     DragObject                 = _DragObject@20              @151
     DrawAnimatedRects          = _DrawAnimatedRects@16       @152
-    DrawCaption                = _DrawCaption@16              @153
-;    DrawCaptionTempA           = _DrawCaptionTempA@??        @154
-;    DrawCaptionTempW           = _DrawCaptionTempW@??        @155
+    DrawCaption                = _DrawCaption@16             @153
+    DrawCaptionTempA           = _DrawCaptionTempA@28        @154
+    DrawCaptionTempW           = _DrawCaptionTempW@28        @155
     DrawEdge                   = _DrawEdge@16                @156
     DrawFocusRect              = _DrawFocusRect@8            @157
 ;    DrawFrame                  = _DrawFrame@??               @158
@@ -244,7 +244,7 @@ EXPORTS
     GetIconInfo                = _GetIconInfo@8              @239
 ;    GetInputDesktop            = _GetInputDesktop@??         @240
     GetInputState              = _GetInputState@0            @241
-;    GetInternalWindowPos       = _GetInternalWindowPos@??    @242
+    GetInternalWindowPos       = _GetInternalWindowPos@12    @242
     GetKBCodePage              = _GetKBCodePage@0            @243
     GetKeyNameTextA            = _GetKeyNameTextA@12         @244
     GetKeyNameTextW            = _GetKeyNameTextW@12         @245
@@ -328,7 +328,7 @@ EXPORTS
     InsertMenuItemA            = _InsertMenuItemA@16         @323
     InsertMenuItemW            = _InsertMenuItemW@16         @324
     InsertMenuW                = _InsertMenuW@20             @325
-;    InternalGetWindowText      = _InternalGetWindowText@??   @326
+    InternalGetWindowText      = _InternalGetWindowText@12   @326
     IntersectRect              = _IntersectRect@12           @327
     InvalidateRect             = _InvalidateRect@12          @328
     InvalidateRgn              = _InvalidateRgn@12           @329
@@ -435,7 +435,7 @@ EXPORTS
 ;    RegisterLogonProcess       = _RegisterLogonProcess@??    @430
     RegisterNetworkCapabilities  = _RegisterNetworkCapabilities@8 @431
     RegisterSystemThread       = _RegisterSystemThread@8     @432
-;    RegisterTasklist           = _RegisterTasklist@??        @433
+    RegisterTasklist           = _RegisterTasklist@4         @433
     RegisterWindowMessageA     = _RegisterWindowMessageA@4   @434
     RegisterWindowMessageW     = _RegisterWindowMessageW@4   @435
     ReleaseCapture             = _ReleaseCapture@0           @436
