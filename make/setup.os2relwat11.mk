@@ -1,4 +1,4 @@
-# $Id: setup.os2relwat11.mk,v 1.7 2002-08-27 03:58:03 bird Exp $
+# $Id: setup.os2relwat11.mk,v 1.8 2002-08-28 04:42:05 bird Exp $
 
 #
 # Note! Watcom is unable to do debug info release builds.
@@ -21,10 +21,18 @@ ENV_ENVS_FORCE=vac308 watcomc11c
 #
 # Include some shared standard stuff: ALP, VAC optional stuff.
 #
-AS_DEBUG_TYPE = Codeview
+AS_DEBUG_TYPE   = Codeview
 !include $(PATH_MAKE)\setup.os2relalp.mk
 !include $(PATH_MAKE)\setup.os2relrc.mk
 !include $(PATH_MAKE)\setup.os2relwrc.mk
+!include $(PATH_MAKE)\setup.os2relwlink.mk
+!ifdef LD_USE_ILINK
+LD_OLDCPP       = 1
+! include $(PATH_MAKE)\setup.os2relilink.mk
+!else
+_LD_LIBPATH     = $(PATH_WATCOM)\lib386\os2;$(PATH_WATCOM)\lib386;
+! include $(PATH_MAKE)\setup.os2relwlink.mk
+!endif
 !include $(PATH_MAKE)\setup.optional.watcom11x.mk
 
 
@@ -94,25 +102,6 @@ CXX_FLAGS_IFS=$(CC_FLAGS_IFS)
 !endif
 
 IMPLIB_FLAGS=/NOI /Nologo
-
-LINK_FLAGS=Option eliminate, manglednames, caseexact, cache $(_LD_OPTIONAL) #Debug codeview all
-LINK_FLAGS_EXE=$(LINK_FLAGS)
-LINK_FLAGS_DLL=$(LINK_FLAGS)
-LINK_FLAGS_SYS=$(LINK_FLAGS) segment type code preload segment type data preload Option internalrelocs, togglerelocs
-LINK_FLAGS_VDD=$(LINK_FLAGS_SYS)
-LINK_FLAGS_IFS=$(LINK_FLAGS_DLL) segment type code preload segment type data preload
-LINK_CMD_EXE=$(LINK) $(LINK_FLAGS_EXE) @$(TARGET_LNK)
-LINK_CMD_DLL=$(LINK) $(LINK_FLAGS_DLL) @$(TARGET_LNK)
-LINK_CMD_SYS=$(LINK) $(LINK_FLAGS_SYS) @$(TARGET_LNK)
-LINK_CMD_VDD=$(LINK) $(LINK_FLAGS_VDD) @$(TARGET_LNK)
-LINK_CMD_IFS=$(LINK) $(LINK_FLAGS_IFS) @$(TARGET_LNK)
-LINK_LNK1=file       $(TARGET_OBJS: =^
-file       )
-LINK_LNK2=libpath    $(WATCOM)\lib386\os2;$(WATCOM)\lib386;
-LINK_LNK3=option map=$(TARGET_MAP)
-LINK_LNK4=library    $(TARGET_LIBS: =^, )
-LINK_LNK5=name       $(PATH_TARGET)\$(TARGET_NAME).$(TARGET_EXT)
-
 
 
 #
