@@ -1,4 +1,4 @@
-/* $Id: wingdi32.h,v 1.1 2000-06-14 13:19:45 sandervl Exp $ */
+/* $Id: wingdi32.h,v 1.2 2000-07-19 18:59:23 sandervl Exp $ */
 
 /*
  * Internal functions exported by gdi32
@@ -9,6 +9,6 @@
 #ifndef __WINGDI32_H__
 #define __WINGDI32_H__
 
-BOOL setWinDeviceRegionFromPMDeviceRegion(HRGN winHrgn, HRGN pmHrgn, pDCData pHpsPmHrgn, HWND hwndPmHrgn);
+BOOL WIN32API setWinDeviceRegionFromPMDeviceRegion(HRGN winHrgn, HRGN pmHrgn, pDCData pHpsPmHrgn, HWND hwndPmHrgn);
 
 #endif //__WINGDI32_H__
