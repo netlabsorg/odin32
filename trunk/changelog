@@ -1,4 +1,10 @@
- /* $Id: changelog,v 1.361 1999-10-24 22:47:51 sandervl Exp $ */
+ /* $Id: changelog,v 1.362 1999-10-24 23:26:30 hugh Exp $ */
+
+ 99-10-25: Markus Montkowski <mmontkowski@gmx.de>
+        - DDRAW:  Fixed bug in Color conversion of surfaces DDEX1.EXE now works,
+                  Get/ReleaseDC functions are working, but problem
+                  with Bitmap orientation DDRAW surfaces are TopDown DCs Bmps are BottomUp
+                  this neeeds to be solved (any way to create a TopDown DC Bmp?)
 
  99-10-24: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: MDI window fixes (mdi children correctly activated; menus inserted)
