@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.56 2000-10-16 22:26:53 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.57 2000-10-26 17:20:29 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -881,10 +881,10 @@ BOOL WIN32API GetTextExtentPointW(HDC    hdc,
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API GetTextFaceA( HDC arg1, int arg2, LPSTR  arg3)
+int WIN32API GetTextFaceA( HDC hdc, int arg2, LPSTR  arg3)
 {
-    dprintf(("GDI32: GetTextFaceA"));
-    return O32_GetTextFace(arg1, arg2, arg3);
+    dprintf(("GDI32: GetTextFaceA %x %d %x", hdc, arg2, arg3));
+    return O32_GetTextFace(hdc, arg2, arg3);
 }
 //******************************************************************************
 //******************************************************************************
@@ -894,19 +894,19 @@ int WIN32API GetTextFaceW( HDC arg1, int arg2, LPWSTR  arg3)
  int   rc;
 
     dprintf(("GDI32: GetTextFaceW"));
-    rc = O32_GetTextFace(arg1, arg2, astring);
+    rc = GetTextFaceA(arg1, arg2, astring);
     AsciiToUnicode(astring, arg3);
     free(astring);
     return rc;
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GetTextMetricsA( HDC arg1, LPTEXTMETRICA  arg2)
+BOOL WIN32API GetTextMetricsA( HDC hdc, LPTEXTMETRICA  arg2)
 {
  BOOL rc;
 
-    rc = O32_GetTextMetrics(arg1, arg2);
-    dprintf(("GDI32: GetTextMetricsA returned %d\n", rc));
+    rc = O32_GetTextMetrics(hdc, arg2);
+    dprintf(("GDI32: GetTextMetricsA %x %x returned %d", hdc, arg2, rc));
     return(rc);
 }
 //******************************************************************************

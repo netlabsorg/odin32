@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.19 2000-10-01 21:21:15 phaller Exp $ */
+/* $Id: blit.cpp,v 1.20 2000-10-26 17:20:28 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -84,8 +84,8 @@ BOOL WIN32API BitBlt(HDC hdcDest,
                            dwRop);
     }
   }
-  dprintf(("GDI32: BitBlt to hdc %X from (%d,%d) to (%d,%d), (%d,%d) rop %X\n", 
-           hdcDest, nXSrc, nYSrc, nXDest, nYDest, nWidth, nHeight, dwRop));
+  dprintf(("GDI32: BitBlt to hdc %X from hdc %x (%d,%d) to (%d,%d), (%d,%d) rop %X\n", 
+           hdcDest, hdcSrc, nXSrc, nYSrc, nXDest, nYDest, nWidth, nHeight, dwRop));
   return O32_BitBlt(hdcDest, nXDest, nYDest, nWidth, nHeight, hdcSrc, nXSrc, nYSrc, dwRop);
 }
 //******************************************************************************
@@ -99,6 +99,9 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
     char *ptr;
     ULONG compression = 0, iHeight, bmpsize;
     WORD *newbits = 0;
+
+    dprintf(("GDI32: SetDIBitsToDevice hdc:%X xDest:%d yDest:%d, cx:%d, cy:%d, xSrc:%d, ySrc:%d, startscan:%d, lines:%d \nGDI32: bits 0x%X, info 0x%X, coloruse %d",
+              hdc, xDest, yDest, cx, cy, xSrc, ySrc, startscan, lines, (LPVOID) bits, (PBITMAPINFO)info, coloruse));
 
     SetLastError(ERROR_SUCCESS);
     if(info == NULL) {
