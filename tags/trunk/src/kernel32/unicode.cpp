@@ -1,4 +1,4 @@
-/* $Id: unicode.cpp,v 1.23 2000-04-29 18:26:59 sandervl Exp $ */
+/* $Id: unicode.cpp,v 1.24 2001-01-18 18:14:16 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -82,10 +82,19 @@ INT WINAPI MultiByteToWideChar(UINT page, DWORD flags,
     int ret;
 
     dprintf2(("MultiByteToWideChar: %d %x (%s %d) (%x %d)", page, flags, src, srclen, dst, dstlen));
+
+    if (!src || (!dst && dstlen))
+    {
+        SetLastError( ERROR_INVALID_PARAMETER );
+        return 0;
+    }
+    //-1 means the input string is null terminated and we need to calculate
+    //its length
     if (srclen == -1)
     	srclen = lstrlenA(src)+1;
-    if (!dstlen || !dst)
-    	return srclen;
+
+    if (!dstlen)
+        return srclen;
 
     ret = srclen;
     while (srclen && dstlen) {
