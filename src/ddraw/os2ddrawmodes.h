@@ -1,4 +1,4 @@
-/* $Id: os2ddrawmodes.h,v 1.4 2001-03-18 21:44:46 mike Exp $ */
+/* $Id: os2ddrawmodes.h,v 1.5 2002-08-12 15:06:21 sandervl Exp $ */
 
 /*
  * Defintions of common videomodes we report back
@@ -21,8 +21,10 @@ typedef struct _OS2_DXMODES
   int iRatio;   // Flag 1 if you must take care of aspect ratio, else 0
 } OS2_DXMODES, *POS2_DXMODES;
 
-#define NUM_MODES_DIVE 30
-OS2_DXMODES ModesDive[NUM_MODES_DIVE] =
+#define MAX_NUM_MODES_DIVE 30
+
+int NUM_MODES_DIVE = MAX_NUM_MODES_DIVE;
+OS2_DXMODES ModesDive[MAX_NUM_MODES_DIVE] =
 {
   {320,200,8,1},
   {320,240,8,0},
