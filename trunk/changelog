@@ -1,7 +1,8 @@
-/* $Id: changelog,v 1.2236 2002-07-28 14:37:40 sandervl Exp $ */
+/* $Id: changelog,v 1.2237 2002-07-28 15:37:22 sandervl Exp $ */
 
  2002-07-28: Sander van Leeuwen <sandervl@innotek.de> 
     - KERNEL32: o Added function to disable os2cdrom.dmd aspi support
+    - WNASPI32: o Fixes for cdrom drive/burner recognition
 
  2002-07-26: Sander van Leeuwen <sandervl@innotek.de> 
     - KERNEL32: o Keep suspend count per thread (Suspend/ResumeThread)
