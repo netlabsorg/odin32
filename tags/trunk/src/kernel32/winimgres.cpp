@@ -1,4 +1,4 @@
-/* $Id: winimgres.cpp,v 1.26 1999-11-05 12:54:50 sandervl Exp $ */
+/* $Id: winimgres.cpp,v 1.27 1999-11-29 00:04:07 bird Exp $ */
 
 /*
  * Win32 PE Image class (resource methods)
@@ -21,9 +21,6 @@
 
 #include <misc.h>
 #include <winimagebase.h>
-#include <winimagepe2lx.h>
-#include <winimagepeldr.h>
-#include <winimagelx.h>
 #include <winres.h>
 #include <unicode.h>
 #include <heapstring.h>
@@ -269,10 +266,10 @@ HRSRC Win32ImageBase::findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang)
         else    dprintf(("Win32ImageBase::getPEResource %s: couldn't find resource %d (type %d, lang %d)", szModule, id, type, lang));
         return 0;
     }
-    //pResourceSectionStart contains the virtual address of the imagebase in the PE header
-    //for the resource section (images loaded by the pe.exe)
+    //ulRVAResourceSection contains the relative virtual address (relative to the start of the image)
+    //for the resource section (images loaded by the pe.exe and pe2lx/win32k)
     //For LX images, this is 0 as OffsetToData contains a relative offset
-    char *resdata = (char *)((char *)pResDir + pData->OffsetToData - pResourceSectionStart);
+    char *resdata = (char *)((char *)pResDir + pData->OffsetToData - ulRVAResourceSection);
     res = new Win32Resource(this, id, type, pData->Size, resdata);
 
     return (HRSRC) res;
@@ -384,9 +381,324 @@ BOOL Win32ImageBase::getVersionStruct(char *verstruct, ULONG bufLength)
         dprintf(("Win32PeLdrImage::getVersionStruct: couldn't find version resource!"));
         return 0;
     }
-    char *resdata = (char *)((char *)pResDir + pData->OffsetToData - pResourceSectionStart);
+    char *resdata = (char *)((char *)pResDir + pData->OffsetToData - ulRVAResourceSection);
     memcpy(verstruct, resdata, min(bufLength, pData->Size));
     return TRUE;
 }
-//******************************************************************************
-//******************************************************************************
+
+
+/**
+ * The EnumResourceNames function searches a module for each
+ * resource of the specified type and passes the name of each
+ * resource it locates to an application-defined callback function
+ *
+ * @returns   If the function succeeds, the return value is nonzero.
+ *            If the function fails, the return value is zero
+ * @param     hmod          The specified module handle.
+ * @param     lpszType      pointer to resource type
+ * @param     lpEnumFunc    pointer to callback function
+ * @param     lParam        application-defined parameter
+ * @sketch    IF not resources in module THEN return fail.
+ *            Validate parameters.
+ *            Get the subdirectory for the specified type.
+ *            IF found THEN
+ *            BEGIN
+ *                Find the number of directory entries.
+ *                Find directory entries.
+ *                LOOP thru all entries while the callback function returns true
+ *                BEGIN
+ *                    Name = pointer to ASCII name string or Id.
+ *                    call callback function.
+ *                END
+ *            END
+ *            ELSE
+ *                fail.
+ *            return
+ * @status    completely implemented and tested.
+ * @author    knut st. osmundsen
+ * @remark    The EnumResourceNames function continues to enumerate resource
+ *            names until the callback function returns FALSE or all resource
+ *            names have been enumerated
+ */
+BOOL Win32ImageBase::enumResourceNamesA(HMODULE hmod,
+                                        LPCTSTR  lpszType,
+                                        ENUMRESNAMEPROCA lpEnumFunc,
+                                        LONG lParam)
+{
+    BOOL                            fRet;
+    PIMAGE_RESOURCE_DIRECTORY       pResDirOurType;
+    PIMAGE_RESOURCE_DIRECTORY_ENTRY paResDirEntries;
+
+    if (pResDir == NULL)
+    {
+        /* SetLastError(?);? */
+        return FALSE;
+    }
+
+    /* validate parameters - FIXME... Exception handler??? */
+    if ((unsigned)lpszType >= 0xc0000000) //....
+    {
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return FALSE;
+    }
+
+    if ((unsigned)lpEnumFunc < 0x10000 || (unsigned)lpEnumFunc >= 0xc0000000)
+    {
+        SetLastError(ERROR_NOACCESS);
+        return FALSE;
+    }
+
+    //reminder:
+    //1st level -> types
+    //2nd level -> names
+    //3rd level -> language
+
+    pResDirOurType = getResSubDirA(pResDir, lpszType);
+    if (pResDirOurType != NULL)
+    {
+        char     *pszASCII = NULL;
+        unsigned  cch = 0;
+        unsigned  cResEntries;
+        unsigned  i;
+
+        fRet = TRUE;
+        cResEntries = pResDirOurType->NumberOfNamedEntries + pResDirOurType->NumberOfIdEntries;
+        paResDirEntries = (PIMAGE_RESOURCE_DIRECTORY_ENTRY)((unsigned)pResDirOurType + sizeof(*pResDirOurType));
+        for (i = 0; i < cResEntries && fRet; i++)
+        {
+            LPSTR lpszName;
+
+            if (paResDirEntries[i].u1.s.NameIsString)
+            {
+                PIMAGE_RESOURCE_DIR_STRING_U pResDirString =
+                    (PIMAGE_RESOURCE_DIR_STRING_U)(paResDirEntries[i].u1.s.NameOffset + (unsigned)pResDir);
+
+                /* ASCII buffer allocation/adjustment? */
+                if (cch <= pResDirString->Length)
+                {
+                    void *pszTmp;
+                    cch = max(pResDirString->Length + 1, 32);
+                    pszTmp = pszASCII != NULL ? realloc(pszASCII, cch) : malloc(cch);
+                    if (pszTmp == NULL)
+                    {
+                        fRet = FALSE;
+                        break;
+                    }
+                    pszASCII = (char*)pszTmp;
+                }
+                UnicodeToAsciiN(pResDirString->NameString, pszASCII, pResDirString->Length);
+                lpszName = pszASCII;
+            }
+            else
+                lpszName = (LPSTR)paResDirEntries[i].u1.Id;
+
+            fRet = lpEnumFunc(hmod, lpszType, lpszName, lParam);
+        }
+
+        if (pszASCII != NULL)
+            free(pszASCII);
+    }
+    else
+    {
+        SetLastError(ERROR_RESOURCE_TYPE_NOT_FOUND);
+        fRet = FALSE;
+    }
+
+    return fRet > 0 ? TRUE : FALSE;
+}
+
+
+/**
+ * The EnumResourceNames function searches a module for each
+ * resource of the specified type and passes the name of each
+ * resource it locates to an application-defined callback function
+ *
+ * @returns   If the function succeeds, the return value is nonzero.
+ *            If the function fails, the return value is zero
+ * @param     hmod          The specified module handle.
+ * @param     lpszType      pointer to resource type
+ * @param     lpEnumFunc    pointer to callback function
+ * @param     lParam        application-defined parameter
+ * @sketch    IF not resources in module THEN return fail.
+ *            Validate parameters.
+ *            Get the subdirectory for the specified type.
+ *            IF found THEN
+ *            BEGIN
+ *                Find the number of directory entries.
+ *                Find directory entries.
+ *                LOOP thru all entries while the callback function returns true
+ *                BEGIN
+ *                    Name = pointer to ASCII name string or Id.
+ *                    call callback function.
+ *                END
+ *            END
+ *            ELSE
+ *                fail.
+ *            return
+ * @status    completely implemented and tested.
+ * @author    knut st. osmundsen
+ * @remark    The EnumResourceNames function continues to enumerate resource
+ *            names until the callback function returns FALSE or all resource
+ *            names have been enumerated
+ */
+BOOL Win32ImageBase::enumResourceNamesW(HMODULE hmod,
+                                        LPCWSTR  lpszType,
+                                        ENUMRESNAMEPROCW lpEnumFunc,
+                                        LONG lParam)
+{
+    BOOL                            fRet;
+    PIMAGE_RESOURCE_DIRECTORY       pResDirOurType;
+    PIMAGE_RESOURCE_DIRECTORY_ENTRY paResDirEntries;
+
+    if (pResDir == NULL)
+    {
+        SetLastError(ERROR_RESOURCE_DATA_NOT_FOUND);
+        return FALSE;
+    }
+
+    /* validate parameters - FIXME... Exception handler??? */
+    if ((unsigned)lpszType >= 0xc0000000) //....
+    {
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return FALSE;
+    }
+
+    if ((unsigned)lpEnumFunc < 0x10000 || (unsigned)lpEnumFunc >= 0xc0000000)
+    {
+        SetLastError(ERROR_NOACCESS);
+        return FALSE;
+    }
+
+
+    //reminder:
+    //1st level -> types
+    //2nd level -> names
+    //3rd level -> language
+
+    pResDirOurType = getResSubDirW(pResDir, lpszType);
+    if (pResDirOurType != NULL)
+    {
+        unsigned  cResEntries;
+        unsigned  i;
+
+        fRet = TRUE;
+        cResEntries = pResDirOurType->NumberOfNamedEntries + pResDirOurType->NumberOfIdEntries;
+        paResDirEntries = (PIMAGE_RESOURCE_DIRECTORY_ENTRY)((unsigned)pResDirOurType + sizeof(*pResDirOurType));
+        for (i = 0; i < cResEntries && fRet; i++)
+        {
+            LPWSTR lpszName;
+
+            if (paResDirEntries[i].u1.s.NameIsString)
+                lpszName = (LPWSTR)(paResDirEntries[i].u1.s.NameOffset + (unsigned)pResDir + 2);
+            else
+                lpszName = (LPWSTR)paResDirEntries[i].u1.Id;
+
+            fRet = lpEnumFunc(hmod, lpszType, lpszName, lParam);
+        }
+    }
+    else
+    {
+        SetLastError(ERROR_RESOURCE_TYPE_NOT_FOUND);
+        fRet = FALSE;
+    }
+
+    return fRet > 0;
+}
+
+
+
+/**
+ * This function finds a resource (sub)directory within a given resource directory.
+ * @returns   Pointer to resource directory. NULL if not found or not a directory.
+ * @param     pResDirToSearch  Pointer to resource directory to search. (any level)
+ * @param     lpszName         Resource ID string.
+ * @sketch
+ * @status    completely implemented
+ * @author    knut st. osmundsen
+ */
+PIMAGE_RESOURCE_DIRECTORY Win32ImageBase::getResSubDirW(PIMAGE_RESOURCE_DIRECTORY pResDirToSearch, LPCWSTR lpszName)
+{
+    PIMAGE_RESOURCE_DIRECTORY_ENTRY paResDirEntries;
+    int     i;
+    int     idName = -1;
+
+    /* lpszName */
+    if (HIWORD(lpszName) != 0)
+    {
+        if (lpszName[0] == '#')
+        {
+            char szBuf[10];
+            lstrcpynWtoA(szBuf, (WCHAR*)(lpszName + 1), sizeof(szBuf));
+            idName = atoi(szBuf);
+        }
+    }
+    else
+        idName = (int)lpszName;
+
+    paResDirEntries = (PIMAGE_RESOURCE_DIRECTORY_ENTRY)((unsigned)pResDirToSearch + sizeof(*pResDirToSearch));
+    if (idName != -1)
+    {   /* idName */
+        paResDirEntries += pResDirToSearch->NumberOfNamedEntries;
+
+        for (i = 0; i < pResDirToSearch->NumberOfIdEntries; i++)
+            if (paResDirEntries[i].u1.Id == (WORD)idName)
+                return paResDirEntries[i].u2.s.DataIsDirectory ?
+                    (PIMAGE_RESOURCE_DIRECTORY) (paResDirEntries[i].u2.s.OffsetToDirectory + (unsigned)pResDir /*?*/
+                                                 /*- ulRVAResourceSection*/)
+                    : NULL;
+    }
+    else
+    {   /* string name */
+        int cusName = lstrlenW(lpszName);
+
+        for (i = 0; i < pResDirToSearch->NumberOfNamedEntries; i++)
+        {
+            PIMAGE_RESOURCE_DIR_STRING_U pResDirStr =
+                (PIMAGE_RESOURCE_DIR_STRING_U)(paResDirEntries[i].u1.s.NameOffset + (unsigned)pResDir /*?*/);
+
+            if (pResDirStr->Length == cusName
+                && UniStrncmp(pResDirStr->NameString, lpszName, cusName) == 0)
+            {
+                return paResDirEntries[i].u2.s.DataIsDirectory ?
+                    (PIMAGE_RESOURCE_DIRECTORY) (paResDirEntries[i].u2.s.OffsetToDirectory + (unsigned)pResDir
+                                                 /*- ulRVAResourceSection*/)
+                    : NULL;
+            }
+        }
+    }
+
+    return NULL;
+}
+
+/**
+ * This function finds a resource (sub)directory within a given resource directory.
+ * @returns   Pointer to resource directory. NULL if not found or not a directory.
+ * @param     pResDirToSearch  Pointer to resource directory to search. (any level)
+ * @param     lpszName         Resource ID string.
+ * @sketch
+ * @status    completely implemented
+ * @author    knut st. osmundsen
+ */
+PIMAGE_RESOURCE_DIRECTORY Win32ImageBase::getResSubDirA(PIMAGE_RESOURCE_DIRECTORY pResDirToSearch, LPCTSTR lpszName)
+{
+    PIMAGE_RESOURCE_DIRECTORY   pResDirRet;
+    LPCWSTR                     lpszwName;
+
+    /* lpszName */
+    if (HIWORD(lpszName) != 0)
+    {
+        lpszwName = AsciiToUnicodeString((char*)lpszName);
+        if (lpszwName == NULL)
+            return NULL;
+    }
+    else
+        lpszwName = (LPWSTR)lpszName;
+
+    pResDirRet = getResSubDirW(pResDirToSearch, lpszwName);
+
+    if (HIWORD(lpszwName) != 0)
+        free((void*)lpszwName);
+
+    return pResDirRet;
+}
+

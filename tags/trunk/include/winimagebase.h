@@ -1,4 +1,4 @@
-/* $Id: winimagebase.h,v 1.5 1999-11-26 00:04:33 sandervl Exp $ */
+/* $Id: winimagebase.h,v 1.6 1999-11-29 00:05:03 bird Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -23,6 +23,15 @@
 #define LANG_GETFIRST           0x80000000
 #define ID_GETFIRST             LANG_GETFIRST
 #define IDLANG_GETFIRST         LANG_GETFIRST
+
+#ifndef ENUMRESNAMEPROC
+    typedef BOOL (* CALLBACK ENUMRESTYPEPROCA)(HMODULE,LPSTR,LONG);
+    typedef BOOL (* CALLBACK ENUMRESTYPEPROCW)(HMODULE,LPWSTR,LONG);
+    typedef BOOL (* CALLBACK ENUMRESNAMEPROCA)(HMODULE,LPCSTR,LPSTR,LONG);
+    typedef BOOL (* CALLBACK ENUMRESNAMEPROCW)(HMODULE,LPCWSTR,LPWSTR,LONG);
+    typedef BOOL (* CALLBACK ENUMRESLANGPROCA)(HMODULE,LPCSTR,LPCSTR,WORD,LONG);
+    typedef BOOL (* CALLBACK ENUMRESLANGPROCW)(HMODULE,LPCWSTR,LPCWSTR,WORD,LONG);
+#endif
 
 class Win32Resource;
 
@@ -58,6 +67,8 @@ virtual HRSRC findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang = LANG_G
         HRSRC findResourceW(LPWSTR lpszName, LPWSTR lpszType, ULONG lang = LANG_GETFIRST);
 virtual ULONG getResourceSizeA(LPCSTR lpszName, LPSTR lpszType, ULONG lang = LANG_GETFIRST);
         ULONG getResourceSizeW(LPCWSTR lpszName, LPWSTR lpszType, ULONG lang = LANG_GETFIRST);
+virtual BOOL  enumResourceNamesA(HMODULE hmod, LPCTSTR  lpszType, ENUMRESNAMEPROCA lpEnumFunc, LONG lParam);
+virtual BOOL  enumResourceNamesW(HMODULE hmod, LPCWSTR  lpszType, ENUMRESNAMEPROCW lpEnumFunc, LONG lParam);
 
 virtual ULONG getVersionSize();
 virtual BOOL  getVersionStruct(char *verstruct, ULONG bufLength);
@@ -70,7 +81,7 @@ static  BOOL  isPEImage(char *szFileName);
         void  setTLSIndexAddr(LPDWORD dwTlsIndexAddr)	{ tlsIndexAddr = dwTlsIndexAddr; };
         void  setTLSInitSize(ULONG dwTlsSize)		{ tlsInitSize = dwTlsSize; };
         void  setTLSTotalSize(ULONG dwTlsSize)		{ tlsTotalSize = dwTlsSize; };
-        void  setTLSCallBackAddr(PIMAGE_TLS_CALLBACK *dwTlsCallBackAddr)	
+        void  setTLSCallBackAddr(PIMAGE_TLS_CALLBACK *dwTlsCallBackAddr)
 	{
 	   tlsCallBackAddr = dwTlsCallBackAddr;
 	};
@@ -82,6 +93,8 @@ virtual	ULONG     getApi(char *name)  = 0;
 virtual ULONG     getApi(int ordinal) = 0;
 
 virtual BOOL  isDll() = 0;
+
+static Win32ImageBase * findModule(HMODULE hModule);
 
 protected:
 	void tlsAlloc();		//Allocate TLS index for this module
@@ -109,10 +122,13 @@ protected:
         PIMAGE_RESOURCE_DATA_ENTRY getPEResourceEntry(ULONG id, ULONG type, ULONG lang = LANG_GETFIRST);
         PIMAGE_RESOURCE_DATA_ENTRY ProcessResSubDir(PIMAGE_RESOURCE_DIRECTORY prdType,
                                                     ULONG *nodeData, int level);
+        PIMAGE_RESOURCE_DIRECTORY  getResSubDirW(PIMAGE_RESOURCE_DIRECTORY pResDir, LPCWSTR lpszName);
+        PIMAGE_RESOURCE_DIRECTORY  getResSubDirA(PIMAGE_RESOURCE_DIRECTORY pResDir, LPCTSTR lpszName);
+
         PIMAGE_RESOURCE_DIRECTORY pResDir;
 
         //substracted from RVA data offsets
-        ULONG                     pResourceSectionStart;
+        ULONG                     ulRVAResourceSection;
 
 private:
 
@@ -120,14 +136,14 @@ private:
         friend ULONG SYSTEM GetVersionSize(char *modname);
 };
 
-//SvL: This structure is placed at the end of the first page of the image (header 
+//SvL: This structure is placed at the end of the first page of the image (header
 //     page), so we can determine the Win32Image pointer from a HINSTANCE variable
 //     (which is actually the address of the win32 module)
-typedef struct 
+typedef struct
 {
-  ULONG           magic1; 
+  ULONG           magic1;
   Win32ImageBase *image;
-  ULONG           magic2; 
+  ULONG           magic2;
 } WINIMAGE_LOOKUP;
 
 #define WINIMAGE_LOOKUPADDR(a)	(WINIMAGE_LOOKUP *)((ULONG)a + PAGE_SIZE - sizeof(WINIMAGE_LOOKUP))

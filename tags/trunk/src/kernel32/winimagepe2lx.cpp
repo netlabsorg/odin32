@@ -1,4 +1,4 @@
-/* $Id: winimagepe2lx.cpp,v 1.6 1999-11-26 00:05:19 sandervl Exp $ */
+/* $Id: winimagepe2lx.cpp,v 1.7 1999-11-29 00:04:06 bird Exp $ */
 
 /*
  * Win32 PE2LX Image base class
@@ -15,7 +15,7 @@
 *******************************************************************************/
 #define INCL_DOSERRORS          /* DOS Error values */
 #define INCL_DOSPROFILE         /* DosQuerySysState (Toolkit 4.5) */
-#define INCL_DOSMODULEMGR   /* DOS Module management */
+#define INCL_DOSMODULEMGR       /* DOS Module management */
 
 #define ALIGN(a, alignment) (((a) + (alignment - 1UL)) & ~(alignment - 1UL))
 
@@ -151,7 +151,7 @@ Win32Pe2LxImage::~Win32Pe2LxImage()
  *            Validate the NT headers.
  *            Read the PE section table the set the RVAs in paSections.
  *            Locate and set the entrypoint.
- *            Locate the resource directory (if any). (pResDir, pResourceSectionStart)
+ *            Locate the resource directory (if any). (pResDir, ulRVAResourceSection)
  *            TLS - FIXME!
  * @status    completely implemented.
  * @author    knut st. osmundsen
@@ -235,8 +235,8 @@ BOOL Win32Pe2LxImage::init()
     if (pNtHdrs->OptionalHeader.NumberOfRvaAndSizes > IMAGE_DIRECTORY_ENTRY_RESOURCE
         && pNtHdrs->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress > 0UL)
     {
-        pResourceSectionStart = pNtHdrs->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress;
-        pResDir = (PIMAGE_RESOURCE_DIRECTORY)getPointerFromRVA(pResourceSectionStart);
+        ulRVAResourceSection = pNtHdrs->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress;
+        pResDir = (PIMAGE_RESOURCE_DIRECTORY)getPointerFromRVA(ulRVAResourceSection);
     }
 
     /* TLS - Thread Local Storage */

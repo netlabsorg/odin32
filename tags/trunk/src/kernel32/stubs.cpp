@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.7 1999-08-21 16:29:28 sandervl Exp $ */
+/* $Id: stubs.cpp,v 1.8 1999-11-29 00:04:05 bird Exp $ */
 
 /*
  * Win32 KERNEL32 Subsystem for OS/2
@@ -1517,41 +1517,6 @@ BOOL WIN32API EnumResourceLanguagesW(HMODULE hModule, LPCWSTR lpType,
 }
 
 
-/*****************************************************************************
- * Name      : BOOL WIN32API EnumResourceNamesW
- * Purpose   : The EnumResourceNames function searches a module for each
- *             resource of the specified type and passes the name of each
- *             resource it locates to an application-defined callback function
- * Parameters: HINSTANCE hModule             resource-module handling
- *             LPCTSTR lpszType              pointer to resource type
- *             ENUMRESNAMEPROC lpEnumFunc    pointer to callback function
- *             LONG lParam                   application-defined parameter
- * Variables :
- * Result    : If the function succeeds, the return value is nonzero.
- *             If the function fails, the return value is zero
- * Remark    : The EnumResourceNames function continues to enumerate resource
- *             names until the callback function returns FALSE or all resource
- *             names have been enumerated
- * Status    : UNTESTED STUB
- *
- * Author    : Markus Montkowski [Tha, 1998/05/21 17:46]
- *****************************************************************************/
-
-BOOL WIN32API EnumResourceNamesW(HMODULE          hModule,
-                                 LPCWSTR          lpszType,
-                                 ENUMRESNAMEPROCW lpEnumFunc,
-                                 LONG             lParam)
-{
-
-  dprintf(("KERNEL32:EnumResourceNamesW(%08x,%08x,%08x,%08x) not implemented\n",
-           hModule,
-           lpszType,
-           lpEnumFunc,
-           lParam
-          ));
-
-  return (FALSE);
-}
 
 /*****************************************************************************
  * Name      : BOOL WIN32API EnumResourceTypesA

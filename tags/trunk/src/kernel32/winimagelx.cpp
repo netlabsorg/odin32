@@ -1,4 +1,4 @@
-/* $Id: winimagelx.cpp,v 1.4 1999-11-26 00:05:19 sandervl Exp $ */
+/* $Id: winimagelx.cpp,v 1.5 1999-11-29 00:04:06 bird Exp $ */
 
 /*
  * Win32 LX Image base class
@@ -39,7 +39,7 @@
 
 //******************************************************************************
 //******************************************************************************
-Win32LxImage::Win32LxImage(HINSTANCE hInstance, PVOID pResData) 
+Win32LxImage::Win32LxImage(HINSTANCE hInstance, PVOID pResData)
                : Win32ImageBase(hInstance)
 {
  APIRET rc;
@@ -55,10 +55,10 @@ Win32LxImage::Win32LxImage(HINSTANCE hInstance, PVOID pResData)
   //Pointer to PE resource tree generates by wrc (or NULL for system dlls)
   pResDir = (PIMAGE_RESOURCE_DIRECTORY)pResData;
 
-  //pResourceSectionStart contains the virtual address of the imagebase in the PE header
+  //ulRVAResourceSection contains the virtual address of the imagebase in the PE header
   //for the resource section (images loaded by the pe.exe)
   //For LX images, this is 0 as OffsetToData contains a relative offset
-  pResourceSectionStart = 0;
+  ulRVAResourceSection = 0;
 }
 //******************************************************************************
 //******************************************************************************
@@ -73,9 +73,9 @@ ULONG Win32LxImage::getApi(char *name)
   ULONG       apiaddr;
 
   rc = DosQueryProcAddr(hinstance, 0, name, (PFN *)&apiaddr);
-  if(rc)  
+  if(rc)
   {
-	if(rc == ERROR_INVALID_HANDLE) 
+	if(rc == ERROR_INVALID_HANDLE)
         {//handle invalid for some silly reason, so load module again (initterm entrypoint not called twice)
 		char szErrName[CCHMAXPATH];
 
@@ -96,8 +96,11 @@ ULONG Win32LxImage::getApi(int ordinal)
 
   rc = DosQueryProcAddr(hinstance, ordinal, NULL, (PFN *)&apiaddr);
   if(rc) {
-	if(rc == ERROR_INVALID_HANDLE) 
-        {//handle invalid for some silly reason, so load module again (initterm entrypoint not called twice)
+	if(rc == ERROR_INVALID_HANDLE)
+        {//SvL(?): handle invalid for some silly reason, so load module again (initterm entrypoint not called twice)
+         //KSO: AFAIK you'll have to load the module calling DosLoadModule to use it's handle in API calls.
+         //     CPREF->DosGetResource->hmod: ... A value other than zero is a module handle that was returned by DosLoadModule.
+         //     You may consider adding a DosLoadModule call during RegisterLxDll or somewhere.
 		char szErrName[CCHMAXPATH];
 
 		rc = DosLoadModule(szErrName, sizeof(szErrName), szFileName, &hinstance);
