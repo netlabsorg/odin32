@@ -1,4 +1,4 @@
-# $Id: process.mak,v 1.22 2002-08-24 04:49:17 bird Exp $
+# $Id: process.mak,v 1.23 2002-08-24 22:31:24 bird Exp $
 
 #
 # Unix-like tools for OS/2
@@ -70,11 +70,11 @@
 !           if "$(TARGET_MODE)" != "TESTCASE"
 # Bad TARGET_MODE complain.
 !            ifndef MAKEVER
-!             if [$(ECHO) $(CLRERR)Fatal Error: Bad TARGET_MODE="$(TARGET_MODE)". Valid ones are: EXE, DLL, SYS, IFS, VDD, LIB, SYSLIB, IFSLIB, TESTCASE and EMPTY.$(CLRRST)]
+!             if [$(ECHO) $(CLRERR)Fatal Error: Bad TARGET_MODE="$(TARGET_MODE)". Valid ones are: EXE, DLL, SYS, IFS, VDD, LIB, SYSLIB, IFSLIB, DEPEND, TESTCASE and EMPTY.$(CLRRST)]
 !             endif
 !             error
 !            else
-!             error $(CLRERR)Fatal Error: Bad TARGET_MODE="$(TARGET_MODE)". Valid ones are: EXE, DLL, SYS, IFS, VDD, LIB, SYSLIB, IFSLIB, TESTCASE and EMPTY.$(CLRRST)
+!             error $(CLRERR)Fatal Error: Bad TARGET_MODE="$(TARGET_MODE)". Valid ones are: EXE, DLL, SYS, IFS, VDD, LIB, SYSLIB, IFSLIB, DEPEND, TESTCASE and EMPTY.$(CLRRST)
 !            endif
 !           endif
 !          endif
@@ -88,6 +88,24 @@
 !  endif
 ! endif
 !endif
+
+# stuff which has changed behavior.
+!if 1
+
+! ifdef TARGET_PUBNAME
+!  if [$(ECHO) $(CLRERR)Fatal error: TARGET_PUBNAME isn't supported. The pubname stuff has changed!$(CLRRST)]
+!  endif
+!  error
+! endif
+
+! ifdef PATH_INCLUDE
+!  if [$(ECHO) $(CLRERR)Fatal error: PATH_INCLUDE has changed name to PATH_INCLUDES!$(CLRRST)]
+!  endif
+!  error
+! endif
+
+!endif
+
 
 
 # -----------------------------------------------------------------------------
@@ -150,7 +168,11 @@ TARGET_EXT  = testcase
 
 # Default target path. (where all the generated stuff for this target goes)
 !ifndef PATH_TARGET
+!if "$(TARGET_SUB)" != ""
+PATH_TARGET = $(PATH_OBJ)\$(TARGET_SUB)\$(TARGET_NAME).$(TARGET_EXT)
+!else
 PATH_TARGET = $(PATH_OBJ)\$(TARGET_NAME).$(TARGET_EXT)
+!endif
 !endif
 
 # Default target file. (output)
@@ -217,30 +239,75 @@ TARGET_LNK  = $(PATH_TARGET)\$(TARGET_NAME).lnk
 # Default import library file. (output)
 !ifndef TARGET_ILIB
 ! if "$(TARGET_MODE)" == "DLL" || "$(TARGET_ILIB_YES)" != ""
-TARGET_ILIB =$(PATH_LIB)\$(TARGET_NAME).$(EXT_ILIB)
+TARGET_ILIB = $(PATH_LIB)\$(TARGET_NAME).$(EXT_ILIB)
 ! endif
 !endif
 
-# Default public name. (output)
-!ifndef TARGET_PUBNAME
-TARGET_PUBNAME=
-! ifdef TARGET_PUBLIC
-!  if "$(TARGET_MODE)" == "LIB" || "$(TARGET_MODE)" == "SYSLIB" || "$(TARGET_MODE)" == "IFSLIB"
-TARGET_PUBNAME=$(PATH_LIB)\$(TARGET_NAME).$(TARGET_EXT)
-!  endif
-!  if "$(TARGET_MODE)" == "EXE"
-TARGET_PUBNAME=$(PATH_EXE)\$(TARGET_NAME).$(TARGET_EXT)
-!  endif
-!  if "$(TARGET_MODE)" == "DLL"
-TARGET_PUBNAME=$(PATH_DLL)\$(TARGET_NAME).$(TARGET_EXT)
-!  endif
-!  if "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "IFS"
-TARGET_PUBNAME=$(PATH_SYS)\$(TARGET_NAME).$(TARGET_EXT)
-!  endif
-!  if "$(TARGET_MODE)" == "VDD"
-TARGET_PUBNAME=$(PATH_VDD)\$(TARGET_NAME).$(TARGET_EXT)
+# Default public base directory. (publish)
+!ifndef TARGET_PUB_BASE
+TARGET_PUB_BASE = $(PATH_PUB)
+!endif
+
+# Default public base directory for unstripped release version.
+!ifndef TARGET_PUB_BASE_DEB
+! if "$(BUILD_MODE)" == "RELEASE" && "$(TARGET_MODE:LIB=...)" == "$(TARGET_MODE)"
+!  if "$(TARGET_MODE)" == "EXE" || "$(TARGET_MODE)" == "DLL" || "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "IFS" || "$(TARGET_MODE)" == "VDD"
+TARGET_PUB_BASE_DEB = $(PATH_PUB_DEB)
 !  endif
 ! endif
+!endif
+
+# Default sub directory.
+!ifndef TARGET_PUB_SUB
+! if "$(TARGET_SUB)" != ""
+TARGET_PUB_SUB  = $(TARGET_SUB)
+! else
+!  if "$(TARGET_MODE)" == "EXE"
+TARGET_PUB_SUB  = $(PATH_SUB_BIN)
+!  endif
+!  if "$(TARGET_MODE)" == "DLL"
+TARGET_PUB_SUB  = $(PATH_SUB_DLL)
+!  endif
+!  if "$(TARGET_MODE)" == "LIB" || "$(TARGET_MODE)" == "SYSLIB" || "$(TARGET_MODE)" == "IFSLIB"
+TARGET_PUB_SUB  = $(PATH_SUB_LIB)
+!  endif
+!  if "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "IFS"
+TARGET_PUB_SUB  = $(PATH_SUB_SYS)
+!  endif
+!  if "$(TARGET_MODE)" == "VDD"
+TARGET_PUB_SUB  = $(PATH_SUB_VDD)
+!  endif
+! endif
+!endif
+
+# Default public directory.
+!ifndef TARGET_PUB_DIR
+TARGET_PUB_DIR  = $(TARGET_PUB_BASE)\$(TARGET_PUB_SUB)
+!endif
+
+# Default unstripped public directory.
+!if !defined(TARGET_PUB_DIR_DEB) && "$(TARGET_PUB_BASE_DEB)" != ""
+TARGET_PUB_DIR_DEB  = $(TARGET_PUB_BASE_DEB)\$(TARGET_PUB_SUB)
+!endif
+
+# Default public name.
+!ifndef TARGET_PUB_NAME
+TARGET_PUB_NAME = $(TARGET_NAME)
+!endif
+
+# Default public ext.
+!ifndef TARGET_PUB_EXT
+TARGET_PUB_EXT  = $(TARGET_EXT)
+!endif
+
+# Default public full name.
+!ifndef TARGET_PUB
+TARGET_PUB      = $(TARGET_PUB_DIR)\$(TARGET_PUB_NAME).$(TARGET_PUB_EXT)
+!endif
+
+# Default public full name of unstripped version.
+!if !defined(TARGET_PUB_DEB) && "$(TARGET_PUB_DIR_DEB)" != ""
+TARGET_PUB_DEB  = $(TARGET_PUB_DIR_DEB)\$(TARGET_PUB_NAME).$(TARGET_PUB_EXT)
 !endif
 
 # Default depend filename.
@@ -276,6 +343,22 @@ TARGET_STACKSIZE=0x2000
 TARGET_STACKSIZE=0x10000
 ! endif
 !endif
+
+
+
+# -----------------------------------------------------------------------------
+# Internal helper macros - don't mess!
+# -----------------------------------------------------------------------------
+
+# Helper for doing early publish of a target.
+!if defined(TARGET_NEEDED) || defined(TARGET_PUBLIC)
+_TARGET_EARLY_PUBLISH = publish_target
+!else
+_TARGET_EARLY_PUBLISH =
+!endif
+
+# The unstripped release name (internal!)
+_TARGET_DEB = $(TARGET).unstripped
 
 
 
@@ -592,7 +675,7 @@ _build_new_dependencies_: \
         _build_banner_lib           lib \
         _build_banner_executable    executable \
         _build_banner_miscellaneous miscellaneous \
-        _build_banner_install       install
+        _build_banner_publish       publish
 
 # Banners for rebuild and build.
 _build_banner_clean:
@@ -613,8 +696,8 @@ _build_banner_executable:
 _build_banner_miscellaneous:
     @$(ECHO)$(CLRMAK)[Start Pass 5 - Make Miscellaneous Targets] $(CLRRST)
     @SET _BUILD_PASS=5
-_build_banner_install:
-    @$(ECHO)$(CLRMAK)[Start Pass 6 - Make Install] $(CLRRST)
+_build_banner_publish:
+    @$(ECHO)$(CLRMAK)[Start Pass 6 - Make Public (i.e. Publish)] $(CLRRST)
     @SET _BUILD_PASS=6
 
 
@@ -635,7 +718,7 @@ rebuild: \
 
 # -----------------------------------------------------------------------------
 # Pass 0 - The clean rule - Clean up output files.
-#   The current setup doesn't clean the installed ones.
+#   The current setup doesn't clean the published ones.
 # -----------------------------------------------------------------------------
 !if "$(TARGET_MODE)" != "TESTCASE"
 clean:
@@ -669,21 +752,21 @@ clean:
 !ifdef SUBDIRS_CLEAN
     @$(TOOL_DODIRS) "$(SUBDIRS_CLEAN)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) NODEP=1 $@
 !else
-! ifdef SUBDIRS
+! if "$(SUBDIRS)$(SUBDIRS_NEEDED)$(SUBDIRS_LIB)$(SUBDIRS_EXECUTABLES)$(SUBDIRS_MISC)" != ""
     @$(TOOL_DODIRS) "$(SUBDIRS) $(SUBDIRS_NEEDED) $(SUBDIRS_LIB) $(SUBDIRS_EXECUTABLES) $(SUBDIRS_MISC)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) NODEP=1 $@
 ! endif
 !endif
 !ifdef PREMAKEFILES_CLEAN
     @$(TOOL_DOMAKES) "$(PREMAKEFILES_CLEAN)" $(TOOL_MAKE) NODEP=1 $@
 !else
-! ifdef PREMAKEFILES
+! if "$(PREMAKEFILES)$(PREMAKEFILES_NEEDED)$(PREMAKEFILES_LIB)$(PREMAKEFILES_EXECUTABLES)$(PREMAKEFILES_MISC)" != ""
     @$(TOOL_DOMAKES) "$(PREMAKEFILES) $(PREMAKEFILES_NEEDED) $(PREMAKEFILES_LIB) $(PREMAKEFILES_EXECUTABLES) $(PREMAKEFILES_MISC)" $(TOOL_MAKE) NODEP=1 $@
 ! endif
 !endif
 !ifdef POSTMAKEFILES_CLEAN
     @$(TOOL_DOMAKES) "$(POSTMAKEFILES_CLEAN)" $(TOOL_MAKE) NODEP=1 $@
 !else
-! ifdef POSTMAKEFILES
+! if "$(POSTMAKEFILES)$(POSTMAKEFILES_NEEDED)$(POSTMAKEFILES_LIB)$(POSTMAKEFILES_EXECUTABLES)$(POSTMAKEFILES_MISC)" != ""
     @$(TOOL_DOMAKES) "$(POSTMAKEFILES) $(POSTMAKEFILES_NEEDED) $(POSTMAKEFILES_LIB) $(POSTMAKEFILES_EXECUTABLES) $(POSTMAKEFILES_MISC)" $(TOOL_MAKE) NODEP=1 $@
 ! endif
 !endif
@@ -711,21 +794,21 @@ dep:
 !ifdef SUBDIRS_DEP
     @$(TOOL_DODIRS) "$(SUBDIRS_DEP)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) NODEP=1 $@
 !else
-! ifdef SUBDIRS
+! if "$(SUBDIRS)$(SUBDIRS_NEEDED)$(SUBDIRS_LIB)$(SUBDIRS_EXECUTABLES)$(SUBDIRS_MISC)" != ""
     @$(TOOL_DODIRS) "$(SUBDIRS) $(SUBDIRS_NEEDED) $(SUBDIRS_LIB) $(SUBDIRS_EXECUTABLES) $(SUBDIRS_MISC)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) NODEP=1 $@
 ! endif
 !endif
 !ifdef PREMAKEFILES_DEP
     @$(TOOL_DOMAKES) "$(PREMAKEFILES_DEP)" $(TOOL_MAKE) NODEP=1 $@
 !else
-! ifdef PREMAKEFILES
+! if "$(PREMAKEFILES)$(PREMAKEFILES_NEEDED)$(PREMAKEFILES_LIB)$(PREMAKEFILES_EXECUTABLES)$(PREMAKEFILES_MISC)" != ""
     @$(TOOL_DOMAKES) "$(PREMAKEFILES) $(PREMAKEFILES_NEEDED) $(PREMAKEFILES_LIB) $(PREMAKEFILES_EXECUTABLES) $(PREMAKEFILES_MISC)" $(TOOL_MAKE) NODEP=1 $@
 ! endif
 !endif
 !ifdef POSTMAKEFILES_DEP
     @$(TOOL_DOMAKES) "$(POSTMAKEFILES_DEP)" $(TOOL_MAKE) NODEP=1 $@
 !else
-! ifdef POSTMAKEFILES
+! if "$(POSTMAKEFILES)$(POSTMAKEFILES_NEEDED)$(POSTMAKEFILES_LIB)$(POSTMAKEFILES_EXECUTABLES)$(POSTMAKEFILES_MISC)" != ""
     @$(TOOL_DOMAKES) "$(POSTMAKEFILES) $(POSTMAKEFILES_NEEDED) $(POSTMAKEFILES_LIB) $(POSTMAKEFILES_EXECUTABLES) $(POSTMAKEFILES_MISC)" $(TOOL_MAKE) NODEP=1 $@
 ! endif
 !endif
@@ -762,7 +845,7 @@ $(_PREMAKEFILES_NEEDED):
 ! endif
 !endif
 
-!if "$(TARGET_NEEDED)" != ""
+!ifdef TARGET_NEEDED
 needed:    $(_SUBDIRS_NEEDED) $(_PREMAKEFILES_NEEDED) target
 !else
 needed:    $(_SUBDIRS_NEEDED) $(_PREMAKEFILES_NEEDED)
@@ -805,8 +888,8 @@ $(_PREMAKEFILES_LIB):
 !endif
 
 lib:    $(_SUBDIRS_LIB) $(_PREMAKEFILES_LIB) \
-!if "$(TARGET_MODE)" == "LIB" || "$(TARGET_MODE)" == "SYSLIB" || "$(TARGET_MODE)" == "IFSLIB"
-        $(TARGET) $(TARGET_PUBNAME) \
+!if !defined(TARGET_NEEDED) && ("$(TARGET_MODE)" == "LIB" || "$(TARGET_MODE)" == "SYSLIB" || "$(TARGET_MODE)" == "IFSLIB")
+        $(TARGET) $(_TARGET_EARLY_PUBLISH) \
 !endif
         $(TARGET_ILIB)
 !ifdef POSTMAKEFILES_LIB
@@ -847,11 +930,8 @@ $(_PREMAKEFILES_EXECUTABLE):
 !endif
 
 executable: \
-!if "$(TARGET_MODE)" != "LIB" && "$(TARGET_MODE)" != "SYSLIB" && "$(TARGET_MODE)" != "IFSLIB" && "$(TARGET_NEEDED)" == ""
-        $(_SUBDIRS_EXECUTABLE) $(_PREMAKEFILES_EXECUTABLE) $(TARGET) $(TARGET_PUBNAME)
-! if "$(TARGET)" != ""
-    @$(ECHO) Successfully Built $(CLRFIL)$(TARGET)$(CLRRST)
-! endif
+!if "$(TARGET_MODE)" != "LIB" && "$(TARGET_MODE)" != "SYSLIB" && "$(TARGET_MODE)" != "IFSLIB" && !defined(TARGET_NEEDED)
+        $(_SUBDIRS_EXECUTABLE) $(_PREMAKEFILES_EXECUTABLE) $(TARGET) $(_TARGET_EARLY_PUBLISH)
 !else
         $(_SUBDIRS_EXECUTABLE) $(_PREMAKEFILES_EXECUTABLE)
 !endif
@@ -909,67 +989,63 @@ miscellaneous:  $(_SUBDIRS_MISC) $(_PREMAKEFILES_MISC) \
 
 
 # -----------------------------------------------------------------------------
-# Pass 6 - The install rule - Copies target to main binary directory.
+# Pass 6 - The publish rule - Copies target to main binary directory.
 #   Installation order is not concidered vital, so subdirectories and
-#   pre-makefiles are processed after this directory. This might be changed.
+#   pre-makefiles are processed after this directory.
+#   However, this order might be changed!
 # -----------------------------------------------------------------------------
-install:
-!if "$(TARGET_PUBLIC)" == "" && "$(TARGET_PUBNAME)" == "" && "$(TARGET_PRIVATE)" == ""
-! if "$(TARGET_MODE)" == "EXE"
-    @$(ECHO) Installing $(CLRFIL)$(TARGET)$(CLRTXT) in directory $(CLRFIL)$(PATH_BIN)$(CLRRST)
-    @if not exist $(TARGET) $(ECHO) $(CLRERR)WARNING: $(CLRFIL)$(TARGET)$(CLRERR) doesn't exist. $(CLRRST)
-    @if not exist $(PATH_BIN) $(TOOL_CREATEPATH)       $(PATH_BIN)
-    @if exist $(TARGET)     $(TOOL_COPY) $(TARGET)     $(PATH_BIN)
-    @if exist $(TARGET_SYM) $(TOOL_COPY) $(TARGET_SYM) $(PATH_BIN)
+!if "$(_TARGET_EARLY_PUBLISH)" != ""
+publish:
+!else
+publish: publish_target
+!endif
+!ifdef SUBDIRS_PUBLISH
+    @$(TOOL_DODIRS) "$(SUBDIRS_PUBLISH)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) $@
+!else
+! ifdef SUBDIRS
+    @$(TOOL_DODIRS) "$(SUBDIRS)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) $@
 ! endif
-! if "$(TARGET_MODE)" == "DLL"
-    @$(ECHO) Installing $(CLRFIL)$(TARGET)$(CLRTXT) in directory $(CLRFIL)$(PATH_DLL)$(CLRRST)
-    @if not exist $(TARGET) $(ECHO) $(CLRERR)WARNING: $(CLRFIL)$(TARGET)$(CLRERR) doesn't exist. $(CLRRST)
-    @if not exist $(PATH_DLL) $(TOOL_CREATEPATH)       $(PATH_DLL)
-    @if exist $(TARGET)     $(TOOL_COPY) $(TARGET)     $(PATH_DLL)
-    @if exist $(TARGET_SYM) $(TOOL_COPY) $(TARGET_SYM) $(PATH_DLL)
+!endif
+!ifdef PREMAKEFILES_PUBLISH
+    @$(TOOL_DOMAKES) "$(PREMAKEFILES_PUBLISH)" $(TOOL_MAKE) $@
+!else
+! ifdef PREMAKEFILES
+    @$(TOOL_DOMAKES) "$(PREMAKEFILES)" $(TOOL_MAKE) $@
 ! endif
-! if "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "IFS"
-    @$(ECHO) Installing $(CLRFIL)$(TARGET)$(CLRTXT) in directory $(CLRFIL)$(PATH_SYS)$(CLRRST)
-    @if not exist $(TARGET) $(ECHO) $(CLRERR)WARNING: $(CLRFIL)$(TARGET)$(CLRERR) doesn't exist. $(CLRRST)
-    @if not exist $(PATH_SYS) $(TOOL_CREATEPATH)       $(PATH_SYS)
-    @if exist $(TARGET)     $(TOOL_COPY) $(TARGET)     $(PATH_SYS)
-    @if exist $(TARGET_SYM) $(TOOL_COPY) $(TARGET_SYM) $(PATH_SYS)
+!endif
+!ifdef POSTMAKEFILES_PUBLISH
+    @$(TOOL_DOMAKES) "$(POSTMAKEFILES_PUBLISH)" $(TOOL_MAKE) $@
+!else
+! ifdef POSTMAKEFILES
+    @$(TOOL_DOMAKES) "$(POSTMAKEFILES)" $(TOOL_MAKE) $@
 ! endif
-!if 0 # these targets are either TARGET_PUBLIC or all private.
-!  if "$(TARGET_MODE)" == "LIB" || "$(TARGET_MODE)" == "SYSLIB" || "$(TARGET_MODE)" == "IFSLIB"
-    @$(ECHO) Installing $(CLRFIL)$(TARGET)$(CLRTXT) in directory $(CLRFIL)$(PATH_LIB)$(CLRRST)
-    @if not exist $(TARGET) $(ECHO) $(CLRERR)WARNING: $(CLRFIL)$(TARGET)$(CLRERR) doesn't exist. $(CLRRST)
-    @if not exist $(PATH_LIB) $(TOOL_CREATEPATH)       $(PATH_LIB)
-    @if exist $(TARGET)     $(TOOL_COPY) $(TARGET)     $(PATH_LIB)
-    @if exist $(TARGET_SYM) $(TOOL_COPY) $(TARGET_SYM) $(PATH_LIB)
+!endif
+
+#
+# Publish rule which doesn't go down into subdirs and submakes.
+# This one is invoked when a target is 'needed' or early published.
+#
+publish_target:
+!if "$(_TARGET_EARLY_PUBLISH)" != "" || "$(TARGET_MODE:LIB=cute)" == "$(TARGET_MODE)"
+! if "$(TARGET_MODE)" != "EMPTY" && "$(TARGET_MODE)" != "TESTCASE" && "$(TARGET_MODE)" != "DEPEND"
+    @$(ECHO) Publishing $(CLRFIL)$(TARGET)$(CLRTXT) to directory $(CLRFIL)$(TARGET_PUB_DIR)\$(TARGET_PUB_SUB)$(CLRRST)
+    @if not exist "$(TARGET)"           $(TOOL_ECHO) $(CLRERR)WARNING: $(CLRFIL)$(TARGET)$(CLRERR) doesn't exist. $(CLRRST)
+    @if not exist "$(TARGET_PUB_DIR)"   $(TOOL_CREATEPATH) $(TARGET_PUB_DIR)
+    @if exist "$(TARGET)"               $(TOOL_COPY) "$(TARGET)"      "$(TARGET_PUB)"
+    @if exist "$(TARGET_SYM)"           $(TOOL_COPY) "$(TARGET_SYM)"  "$(TARGET_PUB_DIR)"
+!  if "$(TARGET_PUB_DEB)" != ""
+    @$(ECHO) Publishing unstripped $(CLRFIL)$(TARGET)$(CLRTXT) to directory $(CLRFIL)$(TARGET_PUB_DIR_DEB)$(CLRRST)
+    @if not exist "$(_TARGET_DEB)"      $(TOOL_ECHO) $(CLRERR)WARNING: $(CLRFIL)$(_TARGET)$(CLRERR) doesn't exist. $(CLRRST)
+    @if not exist "$(TARGET_PUB_DIR_DEB)" $(TOOL_CREATEPATH)  $(TARGET_PUB_DIR_DEB)
+    @if exist "$(_TARGET_DEB)"          $(TOOL_COPY) "$(_TARGET_DEB)" "$(TARGET_PUB_DEB)"
+    @if exist "$(TARGET_SYM)"           $(TOOL_COPY) "$(TARGET_SYM)"  "$(TARGET_PUB_DIR_DEB)"
 !  endif
 ! endif
 !endif
 !if "$(TARGET_DOCS)" != ""
     $(TOOL_COPY) $(TARGET_DOCS) $(PATH_DOC)
 !endif
-!ifdef SUBDIRS_INSTALL
-    @$(TOOL_DODIRS) "$(SUBDIRS_INSTALL)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) $@
-!else
-! ifdef SUBDIRS
-    @$(TOOL_DODIRS) "$(SUBDIRS)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) $@
-! endif
-!endif
-!ifdef PREMAKEFILES_INSTALL
-    @$(TOOL_DOMAKES) "$(PREMAKEFILES_INSTALL)" $(TOOL_MAKE) $@
-!else
-! ifdef PREMAKEFILES
-    @$(TOOL_DOMAKES) "$(PREMAKEFILES)" $(TOOL_MAKE) $@
-! endif
-!endif
-!ifdef POSTMAKEFILES_INSTALL
-    @$(TOOL_DOMAKES) "$(POSTMAKEFILES_INSTALL)" $(TOOL_MAKE) $@
-!else
-! ifdef POSTMAKEFILES
-    @$(TOOL_DOMAKES) "$(POSTMAKEFILES)" $(TOOL_MAKE) $@
-! endif
-!endif
+
 
 
 
@@ -1027,8 +1103,12 @@ testcase:
 # The target rule - Build the target.
 #   NOTE! NO SUBDIRS OR POST/PREMAKED INVOLVED!
 # -----------------------------------------------------------------------------
-target: $(TARGET) $(TARGET_ILIB) $(TARGET_PUBNAME)
+target: $(TARGET) $(TARGET_ILIB) $(_TARGET_EARLY_PUBLISH)
+!if "$(TARGET)$(TARGET_ILIB)" != ""
     @$(ECHO) Successfully Built $(CLRFIL)$(TARGET) $(TARGET_ILIB)$(CLRRST)
+!else
+    @$(ECHO) .$(CLRRST)
+!endif
 
 
 
@@ -1125,6 +1205,20 @@ $(TARGET): $(TARGET_OBJS) $(TARGET_RES) $(TARGET_DEF_LINK) $(TARGET_LNK) $(TARGE
 ! endif
     $(TOOL_MAPSYM) $(TARGET_MAP) $(TARGET_SYM)
 !endif
+!if "$(BUILD_MODE)" == "RELEASE"
+    \
+! ifndef BUILD_VERBOSE
+    @ \
+! endif
+    $(TOOL_COPY) "$@" "$(_TARGET_DEB)"
+! if "$(TOOL_STRIP)" != ""
+    \
+!  ifndef BUILD_VERBOSE
+    @ \
+!  endif
+    $(TOOL_STRIP) $@
+! endif
+!endif
 
 
 #
@@ -1220,28 +1314,6 @@ $(AR_LNK5)
     @type $@
 !endif
 !endif
-
-
-# -----------------------------------------------------------------------------
-# Copy rule for public targets.
-#   Normally used for public libraries, but may be used for other purposes...
-# -----------------------------------------------------------------------------
-!if "$(TARGET_PUBNAME)" != ""
-$(TARGET_PUBNAME): $(TARGET)
-    @$(ECHO) Copying $(CLRFIL)$(TARGET)$(CLRTXT) to $(CLRFIL)$(@D)$(CLRRST)
-    \
-!ifndef BUILD_VERBOSE
-    @if not exist $(@D) $(ECHO) Target public path $(CLRFIL)$(@D)$(CLRTXT) does NOT exist. Creating. $(CLRRST)
-!endif
-    @if not exist $(@D) $(TOOL_CREATEPATH) $(@D)
-    \
-!ifndef BUILD_VERBOSE
-    @ \
-!endif
-    $(TOOL_COPY) $** $@
-    @if exist $(TARGET_SYM) $(TOOL_COPY) $(TARGET_SYM) $(@R).sym
-!endif
-
 
 
 # -----------------------------------------------------------------------------
