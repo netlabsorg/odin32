@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.28 1999-12-14 19:13:18 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.29 1999-12-24 18:39:10 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -1377,6 +1377,73 @@ INT WIN32API ExcludeUpdateRgn( HDC hDC, HWND  hWnd)
     hWnd = Win32BaseWindow::Win32ToOS2Handle(hWnd);
 
     return O32_ExcludeUpdateRgn(hDC,hWnd);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API ValidateRect( HWND hwnd, const RECT * lprc)
+{
+    dprintf(("USER32: ValidateRect %x (%d,%d)(%d,%d)", hwnd, lprc->left, lprc->top, lprc->right, lprc->bottom));
+    return RedrawWindow( hwnd, lprc, 0, RDW_VALIDATE_W | RDW_NOCHILDREN_W | (hwnd==0 ? RDW_UPDATENOW_W : 0));
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API ValidateRgn( HWND hwnd, HRGN  hrgn)
+{
+    dprintf(("USER32: ValidateRgn %x %x", hwnd, hrgn));
+    return RedrawWindow( hwnd, NULL, hrgn, RDW_VALIDATE_W | RDW_NOCHILDREN_W | (hwnd==0 ? RDW_UPDATENOW_W : 0));
+}
+/*****************************************************************************
+ * Name      : int WIN32API GetWindowRgn
+ * Purpose   : The GetWindowRgn function obtains a copy of the window region of a window.
+ * Parameters: HWND hWnd handle to window whose window region is to be obtained
+ *             HRGN hRgn handle to region that receives a copy of the window region
+ * Variables :
+ * Result    : NULLREGION, SIMPLEREGION, COMPLEXREGION, ERROR
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+
+int WIN32API GetWindowRgn (HWND hWnd,
+                              HRGN hRgn)
+{
+  dprintf(("USER32:GetWindowRgn (%08xh,%08x) not implemented.\n",
+         hWnd,
+         hRgn));
+  //Attention: Win32 hwnd handle!
+
+  return (NULLREGION_W);
+}
+/*****************************************************************************
+ * Name      : int WIN32API SetWindowRgn
+ * Purpose   : The SetWindowRgn function sets the window region of a window. The
+ *             window region determines the area within the window where the
+ *             operating system permits drawing. The operating system does not
+ *             display any portion of a window that lies outside of the window region
+ * Parameters: HWND  hWnd    handle to window whose window region is to be set
+ *             HRGN  hRgn    handle to region
+ *             BOOL  bRedraw window redraw flag
+ * Variables :
+ * Result    : If the function succeeds, the return value is non-zero.
+ *             If the function fails, the return value is zero.
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+
+int WIN32API SetWindowRgn(HWND hWnd,
+                             HRGN hRgn,
+                             BOOL bRedraw)
+{
+  dprintf(("USER32:SetWindowRgn (%08xh,%08xh,%u) not implemented.\n",
+         hWnd,
+         hRgn,
+         bRedraw));
+  //Attention: Win32 hwnd handle!
+
+  return (0);
 }
 //******************************************************************************
 //******************************************************************************

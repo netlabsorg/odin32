@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.43 1999-12-18 16:31:52 cbratschi Exp $ */
+/* $Id: window.cpp,v 1.44 1999-12-24 18:39:13 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -531,6 +531,7 @@ BOOL WIN32API IsWindow( HWND hwnd)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("IsWindow, window %x not found", hwnd));
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return FALSE;
     }
     dprintf(("IsWindow %x", hwnd));
@@ -545,6 +546,7 @@ BOOL WIN32API IsWindowEnabled( HWND hwnd)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("IsWindowEnabled, window %x not found", hwnd));
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("IsWindowEnabled %x", hwnd));
@@ -1182,9 +1184,8 @@ HWND WIN32API ChildWindowFromPoint( HWND hwnd, POINT pt)
  *****************************************************************************/
 HWND WIN32API ChildWindowFromPointEx (HWND hwndParent, POINT pt, UINT uFlags)
 {
-        RECT rect;
-        HWND hWnd;
-        POINT framePt;
+  RECT rect;
+  HWND hWnd;
 
         dprintf(("ChildWindowFromPointEx(%08xh,%08xh,%08xh).\n",
                  hwndParent, pt, uFlags));
@@ -1195,8 +1196,8 @@ HWND WIN32API ChildWindowFromPointEx (HWND hwndParent, POINT pt, UINT uFlags)
                 return NULL;
         }
 
-        MapWindowPoints(hwndParent,GetParent(hwndParent),&framePt,1);
-        if (PtInRect (&rect, framePt) == 0) {
+        ClientToScreen(hwndParent, &pt);
+        if (PtInRect (&rect, pt) == 0) {
                 // point is outside window
                 return NULL;
         }
