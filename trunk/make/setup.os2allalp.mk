@@ -1,4 +1,4 @@
-# $Id: setup.os2allalp.mk,v 1.3 2003-11-14 22:02:28 bird Exp $
+# $Id: setup.os2allalp.mk,v 1.4 2003-12-11 13:38:46 bird Exp $
 
 #
 # The tool(s)
@@ -56,5 +56,5 @@ AS_FLAGS    = -D:OS2 \
                $(AS_INCLUDES:-I=-i:) $(ALL_INCLUDES:-I=-i:) -i:$(PATH_INCLUDES)
 AS_FLAGS_SYS= $(AS_FLAGS) -D:RING0
 AS_OBJ_OUT  = -Fo:
-AS_LST_OUT  = -Fl:
+AS_LST_OUT  = +Lm -Fl:
 
