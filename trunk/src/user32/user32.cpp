@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.7 1999-06-12 20:44:07 cbratschi Exp $ */
+/* $Id: user32.cpp,v 1.8 1999-06-20 14:02:13 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -544,7 +544,7 @@ HWND WIN32API CreateWindowExA(DWORD     dwExStyle,
                                  int       y,
                                  int       nWidth,
                                  int       nHeight,
-                                 HWND      arg9,
+                                 HWND      parent,
                                  HMENU     arg10,
                                  HINSTANCE arg11,
                                  PVOID     arg12)
@@ -556,51 +556,25 @@ HWND WIN32API CreateWindowExA(DWORD     dwExStyle,
   if(arg3 == NULL)
         arg3 = (LPCSTR)"CRASH, CRASH";
 
-//SvL: This break generic.exe & notepad.exe (probably many others too)
-//These parameters can be CW_USEDEFAULT, which is 0x80000000
-#if 0
-  if (nWidth < 0) nWidth  = 0;
-  if (x      < 0) x       = 0;
-  if (nHeight< 0) nHeight = 0;
-  if (y      < 0) y       = 0;
-#endif
+  // 6-12-99 CB: WS_CLIPCHILDREN not set -> controls not redrawn
+  // Problems with group boxes
 
-// 6-12-99 CB: WS_CLIPCHILDREN not set -> controls not redrawn
-// Problems with group boxes
-
-#ifndef WS_CLIPCHILDREN
-  #define WS_CLIPCHILDREN            0x20000000L
-#endif
-
-  dwStyle |= WS_CLIPCHILDREN;
-
-//SvL: Breaks applications
-#if 0
-  /* @@@PH 98/06/21 redraw problems disappear when WS_SYNCPAINT is on */
-#ifndef WS_VISIBLE
-  #define WS_VISIBLE                 0x80000000L
-#endif
-
-#ifndef WS_SYNCPAINT
-  #define WS_SYNCPAINT               0x02000000L
-#endif
-
-#ifndef WS_CLIPSYBLINGS
-  #define WS_CLIPSYBLINGS            0x10000000L
-#endif
-
-  dwStyle |= WS_SYNCPAINT;
-
-  /* @@@PH 98/06/21 experimental fix for WinHlp32 */
-  // SOL.EXE crashes here, but WINHLP32 does not display the
-  // navigation buttons otherwise.
-  dwStyle |= WS_VISIBLE;
-#endif
+  //SvL: Correct window style (like Wine does) instead
+  if(dwStyle & WS_CHILD) {
+	dwStyle |= WS_CLIPSIBLINGS;
+	if(!(dwStyle & WS_POPUP)) {
+		dwStyle |= WS_CAPTION;
+	}
+  }
+  if(dwExStyle & WS_EX_DLGMODALFRAME)
+  {
+	dwStyle &= ~WS_THICKFRAME;
+  }
 
 #ifdef DEBUG
     WriteLog("USER32:  CreateWindow: dwExStyle = %X\n", dwExStyle);
     if((int)arg2 >> 16 != 0)
-     WriteLog("USER32:  CreateWindow: classname = %s\n", arg2);
+     	 WriteLog("USER32:  CreateWindow: classname = %s\n", arg2);
     else WriteLog("USER32:  CreateWindow: classname = %X\n", arg2);
     WriteLog("USER32:  CreateWindow: windowname= %s\n", arg3);
     WriteLog("USER32:  CreateWindow: dwStyle   = %X\n", dwStyle);
@@ -608,7 +582,7 @@ HWND WIN32API CreateWindowExA(DWORD     dwExStyle,
     WriteLog("USER32:  CreateWindow: y         = %d\n", y);
     WriteLog("USER32:  CreateWindow: nWidth    = %d\n", nWidth);
     WriteLog("USER32:  CreateWindow: nHeight   = %d\n", nHeight);
-    WriteLog("USER32:  CreateWindow: parent    = %X\n", arg9);
+    WriteLog("USER32:  CreateWindow: parent    = %X\n", parent);
     WriteLog("USER32:  CreateWindow: hwmenu    = %X\n", arg10);
     WriteLog("USER32:  CreateWindow: hinstance = %X\n", arg11);
     WriteLog("USER32:  CreateWindow: param     = %X\n", arg12);
@@ -639,7 +613,7 @@ HWND WIN32API CreateWindowExA(DWORD     dwExStyle,
                           y,
                           nWidth,
                           nHeight,
-                          arg9,
+                          parent,
                           arg10,
                           arg11,
                           arg12);
@@ -652,6 +626,13 @@ HWND WIN32API CreateWindowExA(DWORD     dwExStyle,
     if(window) {
         window->SetWindowHandle(hwnd);
     }
+    //SvL: Taken from Wine
+    if(dwStyle & WS_CHILD && !(dwExStyle & WS_EX_NOPARENTNOTIFY) )
+    {
+	/* Notify the parent window only */
+	SendMessageA(parent, WM_PARENTNOTIFY, MAKEWPARAM(WM_CREATE, 0), (LPARAM)hwnd );
+    }
+
     dprintf(("USER32:  ************CreateWindowExA %s (%d,%d,%d,%d), hwnd = %X\n", arg2, x, y, nWidth, nHeight, hwnd));
     return(hwnd);
 }
