@@ -1,4 +1,4 @@
-/* $Id: os2heap.cpp,v 1.19 2001-07-06 13:47:19 sandervl Exp $ */
+/* $Id: os2heap.cpp,v 1.20 2001-07-17 12:10:21 sandervl Exp $ */
 
 /*
  * Heap class for OS/2
@@ -19,6 +19,7 @@
 #include <os2wrap.h>	//Odin32 OS/2 api wrappers
 #include <stdlib.h>
 #include <string.h>
+#include <umalloc.h>
 
 #include "win32type.h"
 #include "os2heap.h"
@@ -40,6 +41,9 @@
 
 VMutex heaplistmutex;   //protects linked lists of heaps
 
+void * _LNK_CONV getmoreHeapMem(Heap_t pHeap, size_t *size, int *clean);
+void _LNK_CONV   releaseHeapMem(Heap_t pHeap, void *block, size_t size);
+
 //******************************************************************************
 //******************************************************************************
 OS2Heap::OS2Heap(HANDLE hHeap, DWORD flOptions, DWORD dwInitialSize, DWORD dwMaximumSize)
@@ -53,7 +57,7 @@ OS2Heap::OS2Heap(HANDLE hHeap, DWORD flOptions, DWORD dwInitialSize, DWORD dwMax
   heapelem     = NULL;
 
   this->dwMaximumSize = dwMaximumSize;
-  this->dwInitialSize = dwInitialSize;
+  this->dwInitialSize = (dwInitialSize) ? dwInitialSize : 0x4000;
   this->flOptions     = flOptions;
 
   dprintf(("KERNEL32:  HeapCreate: initial size %d, max size %d (flags %X) returned %X\n", dwInitialSize, dwMaximumSize, flOptions, hPrimaryHeap));
@@ -76,6 +80,22 @@ OS2Heap::OS2Heap(HANDLE hHeap, DWORD flOptions, DWORD dwInitialSize, DWORD dwMax
   next = NULL;
 
   heaplistmutex.leave();
+
+  APIRET rc;
+
+  rc = DosAllocMem((PPVOID)&pInitialHeapMem, dwInitialSize, PAG_READ|PAG_WRITE|PAG_COMMIT);
+  if(rc != 0) {
+	dprintf(("OS2Heap::OS2Heap: DosAllocSharedMem failed with %d", rc));
+        DebugInt3();
+  }
+  uheap = _ucreate(pInitialHeapMem, dwInitialSize, _BLOCK_CLEAN,
+                   _HEAP_REGULAR, getmoreHeapMem, releaseHeapMem);
+  if(uheap == NULL) {
+	DosFreeMem(pInitialHeapMem);
+        pInitialHeapMem = NULL;
+	dprintf(("OS2Heap::OS2Heap: _ucreate failed!"));
+        DebugInt3();
+  }
 }
 //******************************************************************************
 //******************************************************************************
@@ -115,6 +135,17 @@ OS2Heap::~OS2Heap()
         }
   }
   heaplistmutex.leave();
+
+  if(uheap) {
+	_uclose(uheap);
+	_udestroy(uheap, _FORCE);
+	uheap = NULL;
+  }
+  if(pInitialHeapMem) {
+	DosFreeMem(pInitialHeapMem);
+	pInitialHeapMem = NULL;
+  }
+
   dprintf(("dtr OS2Heap, hPrimaryHeap = %X done\n", hPrimaryHeap));
 }
 //******************************************************************************
@@ -125,7 +156,7 @@ LPVOID OS2Heap::Alloc(DWORD dwFlags, DWORD dwBytes)
  LPVOID    lpMem;
 
 //  dprintf(("OS2Heap::Alloc\n"));
-  lpMem = malloc(dwBytes + HEAP_OVERHEAD);
+  lpMem = _umalloc(uheap, dwBytes + HEAP_OVERHEAD);
   if(lpMem == NULL) {
       dprintf(("OS2Heap::Alloc, lpMem == NULL"));
       return(NULL);
@@ -273,7 +304,26 @@ DWORD OS2Heap::Compact(DWORD dwFlags)
 //******************************************************************************
 BOOL OS2Heap::Validate(DWORD dwFlags, LPCVOID lpMem)
 {
-  dprintf(("OS2Heap::Validate, %X %X - stub? (TRUE)\n", dwFlags, lpMem));
+  HEAPELEM *helem = GET_HEAPOBJ(lpMem);
+
+  dprintf(("OS2Heap::Validate, %X %X", dwFlags, lpMem));
+
+  if(lpMem == NULL) {
+    	dprintf(("OS2Heap::Validate lpMem == NULL\n"));
+    	return(FALSE);
+  }
+  /* verify lpMem address */
+  if (lpMem >= (LPVOID)ulMaxAddr || lpMem < (LPVOID)0x10000)
+  {
+    	dprintf(("OS2Heap::Validate BAD HEAP POINTER:%X\n", lpMem));
+    	return FALSE;
+  }
+
+  if(helem->magic != MAGIC_NR_HEAP)
+  {
+    	dprintf(("OS2Heap::Validate BAD HEAP POINTER:%X\n", lpMem));
+    	return FALSE;
+  }
   return(TRUE);
 }
 //******************************************************************************
@@ -306,3 +356,34 @@ OS2Heap *OS2Heap::find(HANDLE hHeap)
 //******************************************************************************
 //******************************************************************************
 OS2Heap *OS2Heap::heap = NULL;
+
+//******************************************************************************
+//******************************************************************************
+void * _LNK_CONV getmoreHeapMem(Heap_t pHeap, size_t *size, int *clean)
+{
+ APIRET rc;
+ PVOID newblock;
+
+  dprintf(("KERNEL32: getmoreHeapMem(%08xh, %08xh, %08xh)", pHeap, *size, *clean));
+
+  /* round the size up to a multiple of 4K */
+  *size = (*size / 4096) * 4096 + 4096;
+
+  rc = DosAllocMem(&newblock, *size, PAG_READ|PAG_WRITE|PAG_COMMIT|PAG_EXECUTE);
+  if(rc != 0) {
+	dprintf(("getmoreHeapMem: DosAllocMem failed with %d", rc));
+	return FALSE;
+  }
+  *clean = _BLOCK_CLEAN;
+  dprintf(("KERNEL32: getmoreHeapMem %x %d", newblock, *size));
+  return newblock;
+}
+//******************************************************************************
+//******************************************************************************
+void _LNK_CONV releaseHeapMem(Heap_t pHeap, void *block, size_t size)
+{
+  dprintf(("KERNEL32: releaseHeapMem %x %x %d", pHeap, block, size));
+  DosFreeMem(block);
+}
+//******************************************************************************
+//******************************************************************************

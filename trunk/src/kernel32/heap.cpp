@@ -1,4 +1,4 @@
-/* $Id: heap.cpp,v 1.31 2001-07-08 07:14:45 sandervl Exp $ */
+/* $Id: heap.cpp,v 1.32 2001-07-17 12:10:21 sandervl Exp $ */
 
 /*
  * Win32 heap API functions for OS/2
@@ -138,8 +138,13 @@ ODINFUNCTIONNODBG2(DWORD, HeapCompact, HANDLE, hHeap, DWORD, dwFlags)
 //******************************************************************************
 ODINFUNCTIONNODBG3(BOOL, HeapValidate, HANDLE, hHeap, DWORD, dwFlags, LPCVOID, lpMem)
 {
-  dprintf(("KERNEL32:  HeapValidate - stub\n"));
-  return(TRUE);
+ OS2Heap *curheap = OS2Heap::find(hHeap);
+
+  dprintf2(("KERNEL32: HeapValidate %x %x %x", hHeap, dwFlags, lpMem));
+  if(curheap == NULL)
+        return FALSE;
+
+  return curheap->Validate(dwFlags, lpMem);
 }
 //******************************************************************************
 //******************************************************************************
@@ -288,17 +293,17 @@ LPVOID WINAPI GlobalLock(
    LPVOID           palloc;
 
 
+   if(hmem == NULL || ISPOINTER(hmem)) {
+      dprintf(("KERNEL32: GlobalLock %x returned %x", hmem, hmem));
+      return (LPVOID) hmem;
+   }
+
    /* verify lpMem address */
    if (hmem >= (HGLOBAL)ulMaxAddr || hmem < (HGLOBAL)0x10000)
    {
     	dprintf(("GlobalLock ERROR BAD HEAP POINTER:%X\n", hmem));
         DebugInt3();
     	return 0;
-   }
-
-   if(hmem == NULL || ISPOINTER(hmem)) {
-      dprintf(("KERNEL32: GlobalLock %x returned %x", hmem, hmem));
-      return (LPVOID) hmem;
    }
 
    /* HeapLock(GetProcessHeap()); */
@@ -337,6 +342,9 @@ BOOL WINAPI GlobalUnlock(
 
    dprintf(("KERNEL32: GlobalUnlock %x", hmem));
 
+   if(hmem == NULL || ISPOINTER(hmem))
+      return FALSE;
+
    /* verify lpMem address */
    if (hmem >= (HGLOBAL)ulMaxAddr || hmem < (HGLOBAL)0x10000)
    {
@@ -344,9 +352,6 @@ BOOL WINAPI GlobalUnlock(
         DebugInt3();
     	return 0;
    }
-
-   if(hmem == NULL || ISPOINTER(hmem))
-      return FALSE;
 
    /* HeapLock(GetProcessHeap()); */
    pintern=HANDLE_TO_INTERN(hmem);
@@ -480,6 +485,10 @@ HGLOBAL WINAPI GlobalReAlloc(
    HGLOBAL            hnew;
    PGLOBAL32_INTERN     pintern;
    DWORD heap_flags = (flags & GMEM_ZEROINIT) ? HEAP_ZERO_MEMORY : 0;
+
+#ifdef __WIN32OS2__
+   hmem = GlobalHandle((LPCVOID)hmem);
+#endif
 
    hnew = 0;
    /* HeapLock(heap); */
