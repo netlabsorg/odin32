@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.114 2003-08-06 11:00:45 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.115 2003-08-08 13:30:19 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -719,8 +719,8 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         BYTE  bWinVKey;
         WORD  wWinScan;
 
-        if ( (!IsDBCSEnv() && scanCode == 0) || 
-             (scanCode==0 ) && !( flags & KC_CHAR ) ) 
+        if ( (!IsDBCSEnv() && scanCode == 0) ||
+             (scanCode==0 ) && !( flags & KC_CHAR ) )
         {
             goto dummymessage;
         }
@@ -745,28 +745,17 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
 
             if( CHAR2FROMMP( os2Msg->mp2 ))     // DBCS character
             {
+                CHAR dbcsCh[ 2 ] = { CHAR1FROMMP( os2Msg->mp2 ), CHAR2FROMMP( os2Msg->mp2 )};
+
                 if( isUnicode )
                 {
-                    char  dbcsCh[] = { CHAR1FROMMP( os2Msg->mp2 ), CHAR2FROMMP( os2Msg->mp2 ), 0 };
-                    WCHAR uniChar[ 2 ];
+                    WCHAR  uniChar;
 
-                    lstrcpynAtoW(( LPWSTR )&uniChar, ( LPCSTR )&dbcsCh, 2 );
-                    winMsg->wParam = ( WPARAM )uniChar[ 0 ];
+                    MultiByteToWideChar( CP_ACP, 0, dbcsCh, 2, &uniChar, 1 );
+                    winMsg->wParam = ( WPARAM )uniChar;
                 }
-                // insert DBCS trail byte for Non-Unicode window
-                else if(fMsgRemoved && !(teb->o.odin.fTranslated))
-                {
-                    MSG extramsg;
-                    memcpy(&extramsg, winMsg, sizeof(MSG));
-
-                    //After SetFocus(0), all keystrokes are converted in WM_SYS*
-                    extramsg.message = (fIgnoreKeystrokes) ? WINWM_SYSCHAR : WINWM_CHAR;
-
-                    extramsg.wParam = CHAR2FROMMP( os2Msg->mp2 );
-                    extramsg.lParam = 0;
-
-                    setThreadQueueExtraCharMessage(teb, &extramsg);
-                }
+                else
+                    winMsg->wParam = ( dbcsCh[ 0 ] << 8 ) | dbcsCh[ 1 ];
             }
         }
         winMsg->lParam  = repeatCount & 0x0FFFF;                 // bit 0-15, repeatcount
@@ -829,8 +818,13 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
           }
           else if( scanCode == 0 )
           {
-            //After SetFocus(0), all keystrokes are converted in WM_SYS*
-            winMsg->message = (fIgnoreKeystrokes) ? WINWM_SYSCHAR :  WINWM_CHAR;
+            if( CHAR2FROMMP( os2Msg->mp2 ))
+                winMsg->message = WINWM_IME_CHAR;
+            else
+            {
+                //After SetFocus(0), all keystrokes are converted in WM_SYS*
+                winMsg->message = (fIgnoreKeystrokes) ? WINWM_SYSCHAR :  WINWM_CHAR;
+            }
           }
           else
           { // send WM_KEYDOWN message

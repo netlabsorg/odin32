@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.46 2003-08-04 17:01:58 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.47 2003-08-08 13:30:22 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -34,7 +34,7 @@
 #define INCL_TIMERWIN32
 #include "timer.h"
 
-#define DBG_LOCALLOG	DBG_windowmsg
+#define DBG_LOCALLOG    DBG_windowmsg
 #include "dbglocal.h"
 
 ODINDEBUGCHANNEL(USER32-WINDOWMSG)
@@ -49,17 +49,17 @@ LONG WIN32API DispatchMessageA(const MSG * msg)
     /* Process timer messages */
     if ((msg->message == WM_TIMER) || (msg->message == WM_SYSTIMER))
     {
-	if (msg->lParam)
+    if (msg->lParam)
         {
 /*            HOOK_CallHooks32A( WH_CALLWNDPROC, HC_ACTION, 0, FIXME ); */
 
             /* before calling window proc, verify whether timer is still valid;
                there's a slim chance that the application kills the timer
-	       between GetMessage and DispatchMessage API calls */
+           between GetMessage and DispatchMessage API calls */
             if (!TIMER_IsTimerValid(msg->hwnd, (UINT) msg->wParam, msg->lParam))
                 return 0; /* invalid winproc */
 
-	    return CallWindowProcA( (WNDPROC)msg->lParam, msg->hwnd,
+        return CallWindowProcA( (WNDPROC)msg->lParam, msg->hwnd,
                                    msg->message, msg->wParam, GetTickCount() );
         }
     }
@@ -75,17 +75,17 @@ LONG WIN32API DispatchMessageW( const MSG * msg)
     /* Process timer messages */
     if ((msg->message == WM_TIMER) || (msg->message == WM_SYSTIMER))
     {
-	if (msg->lParam)
+    if (msg->lParam)
         {
 /*            HOOK_CallHooks32A( WH_CALLWNDPROC, HC_ACTION, 0, FIXME ); */
 
             /* before calling window proc, verify whether timer is still valid;
                there's a slim chance that the application kills the timer
-	       between GetMessage and DispatchMessage API calls */
+           between GetMessage and DispatchMessage API calls */
             if (!TIMER_IsTimerValid(msg->hwnd, (UINT) msg->wParam, msg->lParam))
                 return 0; /* invalid winproc */
 
-	    return CallWindowProcW( (WNDPROC)msg->lParam, msg->hwnd,
+        return CallWindowProcW( (WNDPROC)msg->lParam, msg->hwnd,
                                    msg->message, msg->wParam, GetTickCount() );
         }
     }
@@ -99,7 +99,12 @@ BOOL WIN32API TranslateMessage(const MSG *msg)
     if ( (msg->message <  WM_KEYDOWN) ||
          (msg->message >  WM_SYSKEYUP)||
          (msg->message == WM_CHAR)    ||
+#ifdef __WIN32OS2__
+         (msg->message == WM_DEADCHAR)||
+         (msg->message == WM_IME_CHAR) )
+#else
          (msg->message == WM_DEADCHAR) )
+#endif
     {
         SetLastError(ERROR_INVALID_PARAMETER);
         return FALSE;
@@ -447,6 +452,21 @@ INT WINPROC_MapMsg32ATo32W( HWND hwnd, UINT msg, WPARAM *pwparam, LPARAM *plpara
         }
         return 0;
 
+#ifdef __WIN32OS2__
+    case WM_IME_CHAR:
+    {
+        // always DBCS char
+        CHAR charA[ 2 ];
+
+        charA[ 0 ] = ( CHAR )( *pwparam >> 8 );
+        charA[ 1 ] = ( CHAR )*pwparam;
+
+        MultiByteToWideChar( CP_ACP, 0, ( LPSTR )charA, 2, ( LPWSTR )pwparam, 1);
+
+        return 0;
+    }
+#endif
+
     case WM_PAINTCLIPBOARD:
     case WM_SIZECLIPBOARD:
         // FIXME_(msg)("message %s (0x%x) needs translation, please report\n", SPY_GetMsgName(msg), msg );
@@ -724,6 +744,18 @@ INT WINPROC_MapMsg32WTo32A( HWND hwnd, UINT msg, WPARAM *pwparam, LPARAM *plpara
         }
         return 0;
 
+#ifdef __WIN32OS2__
+    case WM_IME_CHAR:
+    {   // always DBCS char
+        CHAR charA[ 2 ];
+
+        WideCharToMultiByte( CP_ACP, 0, ( LPWSTR )pwparam, 1, ( LPSTR )charA, 2, 0, 0 );
+        *pwparam = ( charA[ 0 ] << 8 ) | charA[ 1 ];
+
+        return 0;
+    }
+#endif
+
     case WM_PAINTCLIPBOARD:
     case WM_SIZECLIPBOARD:
         // FIXME_(msg)("message %s (%04x) needs translation, please report\n",SPY_GetMsgName(msg),msg );
@@ -861,33 +893,13 @@ LRESULT WINPROC_CallProc32ATo32W( WNDPROC func, HWND hwnd,
 {
     LRESULT result;
 
-#ifdef __WIN32OS2__
-    if( IsDBCSEnv() && msg == WM_CHAR )
-    {
-        static BYTE dbcsLead = 0;
-        WCHAR charA = wParam;
-        int size = dbcsLead ? 2 : 1;
-
-        if( dbcsLead )
-               charA = ( charA << 8 ) | dbcsLead;
-        else if( IsDBCSLeadByte( wParam ))
-        {
-            dbcsLead = wParam;
-            return 0;
-        }
-        MultiByteToWideChar( CP_ACP, 0, ( LPSTR )&charA, size, ( LPWSTR )&wParam, 1 );
-
-        dbcsLead = 0;
-    }
-    else
-#endif
     if (WINPROC_MapMsg32ATo32W( hwnd, msg, &wParam, &lParam ) == -1) return 0;
 
     result = func( hwnd, msg, wParam, lParam );
     WINPROC_UnmapMsg32ATo32W( hwnd, msg, wParam, lParam );
 
 #ifdef __WIN32OS2__
-    if(IsDBCSEnv()) 
+    if(IsDBCSEnv())
     {
       switch( msg )
       {
@@ -939,21 +951,6 @@ LRESULT WINPROC_CallProc32WTo32A( WNDPROC func, HWND hwnd,
 {
     LRESULT result;
 
-#ifdef __WIN32OS2__
-    if( IsDBCSEnv() && msg == WM_CHAR )
-    {
-        char charA[ 2 ];
-
-        if( WideCharToMultiByte( CP_ACP, 0, ( LPWSTR )&wParam, 1, ( LPSTR )charA, 2, 0, 0 ) > 1 )
-        {
-            func( hwnd, msg, ( WPARAM )charA[ 0 ], lParam );
-            wParam = charA[ 1 ];
-        }
-        else
-            wParam = charA[ 0 ];
-    }
-    else
-#endif
     if (WINPROC_MapMsg32WTo32A( hwnd, msg, &wParam, &lParam ) == -1) return 0;
 
     result = func( hwnd, msg, wParam, lParam );
