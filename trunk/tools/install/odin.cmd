@@ -65,9 +65,37 @@ rc = lineout(instfile, 'that it is possible to build OS/2 programs using Windows
 rc = lineout(instfile, 'code. This is also refered to as Odin32 whereas Odin is the name');
 rc = lineout(instfile, 'of the Win32 binary emulator.');
 rc = lineout(instfile, '');
-rc = lineout(instfile, 'This readme is intended for end users that have downloaded the');
-rc = lineout(instfile, 'latest public alpha release and want to give it a try. For more');
-rc = lineout(instfile, 'information, be sure to regularly check http://www.netlabs.org/odin.</TEXT>');
+rc = lineout(instfile, 'Odin is available thanks to the work of the following people:');
+rc = lineout(instfile, '');
+rc = lineout(instfile, '     Christoph Bratschi');
+rc = lineout(instfile, '     Edgar Buerkle');
+rc = lineout(instfile, '     Yuri Dario');
+rc = lineout(instfile, '     Przemyslaw Dobrowolski');
+rc = lineout(instfile, '     Daniela Engert');
+rc = lineout(instfile, '     Peter Fitzsimmons');
+rc = lineout(instfile, '     Adrian Gschwend');
+rc = lineout(instfile, '     Jeroen van den Horn');
+rc = lineout(instfile, '     Patrick Haller');
+rc = lineout(instfile, '     Achim Hasenmueller');
+rc = lineout(instfile, '     Kevin Langman');
+rc = lineout(instfile, '     Bart van Leeuwen');
+rc = lineout(instfile, '     Sander van Leeuwen');
+rc = lineout(instfile, '     Felix Maschek');
+rc = lineout(instfile, '     Chris McKillop');
+rc = lineout(instfile, '     Nenad Milenkovic');
+rc = lineout(instfile, '     Michal Necasek');
+rc = lineout(instfile, '     Ondrej Necasek');
+rc = lineout(instfile, '     Knut Stange Osmundsen');
+rc = lineout(instfile, '     Vitali E. Pelenyov');
+rc = lineout(instfile, '     Rene Pronk');
+rc = lineout(instfile, '     David Raison');
+rc = lineout(instfile, '     Vit Timchishin');
+rc = lineout(instfile, '     Joel Troster');
+rc = lineout(instfile, '     Jens Wiessner');
+rc = lineout(instfile, '     Vince Vielhaber');
+rc = lineout(instfile, '     All the WINE people');
+rc = lineout(instfile, '');
+rc = lineout(instfile, '</TEXT>');
 rc = lineout(instfile, '</PAGE>');
 rc = lineout(instfile, '<PAGE INDEX=2 TYPE=README>');
 rc = lineout(instfile, '<NEXTBUTTON TARGET=3>~I agree</NEXTBUTTON>');
@@ -144,19 +172,34 @@ rc = lineout(instfile, 'LICENSOR SHALL BE LIABLE TO YOU FOR DAMAGES OF ANY KIND,
 rc = lineout(instfile, 'THEY HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.');
 rc = lineout(instfile, '</README>');
 rc = lineout(instfile, '</PAGE>');
-rc = lineout(instfile, '<PAGE INDEX=3 TYPE=CONTAINER>');
+rc = lineout(instfile, '<PAGE INDEX=3 TYPE=README>');
 rc = lineout(instfile, '<NEXTBUTTON TARGET=4>~Next</NEXTBUTTON>');
+rc = lineout(instfile, '<TEXT>');
+rc = lineout(instfile, 'List of changes and bugfixes for this Odin daily build ('date()')');
+rc = lineout(instfile, '</TEXT>');
+rc = lineout(instfile, '<README>');
+/* Insert ChangeLog */
+changelog = '..\..\ChangeLog'
+logline = linein(changelog);
+do while lines(changelog) > 0
+rc = lineout(instfile, logline);
+logline = linein(changelog);
+end
+rc = lineout(instfile, '</README>');
+rc = lineout(instfile, '</PAGE>');
+rc = lineout(instfile, '<PAGE INDEX=4 TYPE=CONTAINER>');
+rc = lineout(instfile, '<NEXTBUTTON TARGET=5>~Next</NEXTBUTTON>');
 rc = lineout(instfile, '<TEXT>');
 rc = lineout(instfile, 'Please select the packages which are to be installed. You may change the target paths for the packages.');
 rc = lineout(instfile, '</TEXT>');
 rc = lineout(instfile, '</PAGE>');
-rc = lineout(instfile, '<PAGE INDEX=4 TYPE=CONFIGURE>');
-rc = lineout(instfile, '<NEXTBUTTON TARGET=5>~Next</NEXTBUTTON>');
+rc = lineout(instfile, '<PAGE INDEX=5 TYPE=CONFIGURE>');
+rc = lineout(instfile, '<NEXTBUTTON TARGET=6>~Next</NEXTBUTTON>');
 rc = lineout(instfile, '<TEXT>');
 rc = lineout(instfile, 'Please select additional configuration that WarpIN should perform after installing this archive.');
 rc = lineout(instfile, '</TEXT>');
 rc = lineout(instfile, '</PAGE>');
-rc = lineout(instfile, '<PAGE INDEX=5 TYPE=TEXT>');
+rc = lineout(instfile, '<PAGE INDEX=6 TYPE=TEXT>');
 rc = lineout(instfile, '<NEXTBUTTON TARGET=0>I~nstall</NEXTBUTTON>');
 rc = lineout(instfile, '<TEXT>');
 rc = lineout(instfile, 'Press "Install" to begin installing Odin.</TEXT>');
@@ -174,19 +217,18 @@ if cmdline = "debug"
 then
 do
 	dlldir = "bin\debug";
-	installarchive = "odin32bin-"date('S')"_debug"
+	installarchive = "odin32bin-"date('S')"-debug"
 end
 else
 do
 	dlldir = "bin\release";
-	installarchive = "odin32bin-"date('S')"_release"
+	installarchive = "odin32bin-"date('S')"-release"
 end
 
 maindir = "..\..";
 
 "del "installarchive".wpi";
 
-/* package 1: Mahjongg */
 call directory maindir;
 "wic.exe "curdir"\"installarchive" -a 1 LICENSE.TXT ChangeLog Readme.txt";
 
@@ -199,7 +241,7 @@ call directory "Glide"
 call directory "Voodoo1"
 "wic.exe "curdir"\"installarchive" -a 4 *.dll";
 
-call directory "..\Voodoo1"
+call directory "..\Voodoo2"
 "wic.exe "curdir"\"installarchive" -a 5 *.dll";
 
 call directory "..\..\..\..\tools\bin"
