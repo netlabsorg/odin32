@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.62 1999-12-05 00:31:47 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.63 1999-12-05 14:31:41 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -375,8 +375,15 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
            Win32BaseWindow *wndAfter = Win32BaseWindow::GetWindowFromOS2Handle(pswp->hwndInsertBehind);
            wp.hwndInsertAfter = wndAfter->getWindowHandle();
         }
-        //SvL: Can be sent twice now (once in pmframe, once here); shouldn't really matter though...
-        win32wnd->MsgPosChanged((LPARAM)&wp);
+
+	PRECT lpRect = win32wnd->getWindowRect();
+        //SvL: Only send it when the client has changed & the frame hasn't
+        //     If the frame size/position has changed, pmframe.cpp will send
+        //     this message
+	if(lpRect->right == wp.x+wp.cx && lpRect->bottom == wp.y+wp.cy) {
+	        win32wnd->MsgPosChanged((LPARAM)&wp);
+	}
+ 	else	win32wnd->setWindowRect(wp.x, wp.y, wp.x+wp.cx, wp.y+wp.cy);
 
         goto RunDefWndProc;
     }
