@@ -21,6 +21,18 @@
 #include "parser.h"
 #include "preproc.h"
 
+
+/*
+ * Ease debugging on OS/2.
+ */
+#if defined(__DEBUG_ALLOC__) && defined(__IBMC__)
+#undef malloc
+#define malloc(a)       _debug_malloc(a, pszFile, iLine)
+#undef realloc
+#define realloc(a,b)    _debug_realloc(a, b, pszFile, iLine)
+#endif
+
+
 /* #define WANT_NEAR_INDICATION */
 
 static const union cptable *current_codepage;
@@ -28,146 +40,150 @@ static const union cptable *current_codepage;
 #ifdef WANT_NEAR_INDICATION
 void make_print(char *str)
 {
-	while(*str)
-	{
-		if(!isprint(*str))
-			*str = ' ';
-		str++;
-	}
+    while(*str)
+    {
+        if(!isprint(*str))
+            *str = ' ';
+        str++;
+    }
 }
 #endif
 
 static void generic_msg(const char *s, const char *t, const char *n, va_list ap)
 {
-	fprintf(stderr, "%s:%d:%d: %s: ", input_name ? input_name : "stdin", line_number, char_number, t);
-	vfprintf(stderr, s, ap);
+    fprintf(stderr, "%s:%d:%d: %s: ", input_name ? input_name : "stdin", line_number, char_number, t);
+    vfprintf(stderr, s, ap);
 #ifdef WANT_NEAR_INDICATION
-	{
-		char *cpy;
-		if(n)
-		{
-			cpy = xstrdup(n);
-			make_print(cpy);
-			fprintf(stderr, " near '%s'", cpy);
-			free(cpy);
-		}
-	}
+    {
+        char *cpy;
+        if(n)
+        {
+            cpy = xstrdup(n);
+            make_print(cpy);
+            fprintf(stderr, " near '%s'", cpy);
+            free(cpy);
+        }
+    }
 #endif
-	fprintf(stderr, "\n");
+    fprintf(stderr, "\n");
 }
 
 
 int yyerror(const char *s, ...)
 {
-	va_list ap;
-	va_start(ap, s);
-	generic_msg(s, "Error", yytext, ap);
-	va_end(ap);
-	exit(1);
-	return 1;
+    va_list ap;
+    va_start(ap, s);
+    generic_msg(s, "Error", yytext, ap);
+    va_end(ap);
+    exit(1);
+    return 1;
 }
 
 int yywarning(const char *s, ...)
 {
-	va_list ap;
-	va_start(ap, s);
-	generic_msg(s, "Warning", yytext, ap);
-	va_end(ap);
-	return 0;
+    va_list ap;
+    va_start(ap, s);
+    generic_msg(s, "Warning", yytext, ap);
+    va_end(ap);
+    return 0;
 }
 
 int pperror(const char *s, ...)
 {
-	va_list ap;
-	va_start(ap, s);
-	generic_msg(s, "Error", pptext, ap);
-	va_end(ap);
-	exit(1);
-	return 1;
+    va_list ap;
+    va_start(ap, s);
+    generic_msg(s, "Error", pptext, ap);
+    va_end(ap);
+    exit(1);
+    return 1;
 }
 
 int ppwarning(const char *s, ...)
 {
-	va_list ap;
-	va_start(ap, s);
-	generic_msg(s, "Warning", pptext, ap);
-	va_end(ap);
-	return 0;
+    va_list ap;
+    va_start(ap, s);
+    generic_msg(s, "Warning", pptext, ap);
+    va_end(ap);
+    return 0;
 }
 
 
 void internal_error(const char *file, int line, const char *s, ...)
 {
-	va_list ap;
-	va_start(ap, s);
-	fprintf(stderr, "Internal error (please report) %s %d: ", file, line);
-	vfprintf(stderr, s, ap);
-	fprintf(stderr, "\n");
-	va_end(ap);
-	exit(3);
+    va_list ap;
+    va_start(ap, s);
+    fprintf(stderr, "Internal error (please report) %s %d: ", file, line);
+    vfprintf(stderr, s, ap);
+    fprintf(stderr, "\n");
+    va_end(ap);
+    exit(3);
 }
 
 void error(const char *s, ...)
 {
-	va_list ap;
-	va_start(ap, s);
-	fprintf(stderr, "Error: ");
-	vfprintf(stderr, s, ap);
-	fprintf(stderr, "\n");
-	va_end(ap);
-	exit(2);
+    va_list ap;
+    va_start(ap, s);
+    fprintf(stderr, "Error: ");
+    vfprintf(stderr, s, ap);
+    fprintf(stderr, "\n");
+    va_end(ap);
+    exit(2);
 }
 
 void warning(const char *s, ...)
 {
-	va_list ap;
-	va_start(ap, s);
-	fprintf(stderr, "Warning: ");
-	vfprintf(stderr, s, ap);
-	fprintf(stderr, "\n");
-	va_end(ap);
+    va_list ap;
+    va_start(ap, s);
+    fprintf(stderr, "Warning: ");
+    vfprintf(stderr, s, ap);
+    fprintf(stderr, "\n");
+    va_end(ap);
 }
 
 void chat(const char *s, ...)
 {
-	if(debuglevel & DEBUGLEVEL_CHAT)
-	{
-		va_list ap;
-		va_start(ap, s);
-		fprintf(stderr, "FYI: ");
-		vfprintf(stderr, s, ap);
-		fprintf(stderr, "\n");
-		va_end(ap);
-	}
+    if(debuglevel & DEBUGLEVEL_CHAT)
+    {
+        va_list ap;
+        va_start(ap, s);
+        fprintf(stderr, "FYI: ");
+        vfprintf(stderr, s, ap);
+        fprintf(stderr, "\n");
+        va_end(ap);
+    }
 }
 
 char *dup_basename(const char *name, const char *ext)
 {
-	int namelen;
-	int extlen = strlen(ext);
-	char *base;
-	char *slash;
+    int namelen;
+    int extlen = strlen(ext);
+    char *base;
+    char *slash;
 
-	if(!name)
-		name = "wrc.tab";
+    if(!name)
+        name = "wrc.tab";
 
-	slash = strrchr(name, '/');
-	if (slash)
-		name = slash + 1;
+    slash = strrchr(name, '/');
+    if (slash)
+        name = slash + 1;
 
-	namelen = strlen(name);
+    namelen = strlen(name);
 
-	/* +4 for later extension and +1 for '\0' */
-	base = (char *)xmalloc(namelen +4 +1);
-	strcpy(base, name);
-	if(!strcasecmp(name + namelen-extlen, ext))
-	{
-		base[namelen - extlen] = '\0';
-	}
-	return base;
+    /* +4 for later extension and +1 for '\0' */
+    base = (char *)xmalloc(namelen +4 +1);
+    strcpy(base, name);
+    if(!strcasecmp(name + namelen-extlen, ext))
+    {
+        base[namelen - extlen] = '\0';
+    }
+    return base;
 }
 
+#if defined(__DEBUG_ALLOC__) && defined(__IBMC__)
+void *_xmalloc(size_t size, char *pszFile, int iLine)
+#else
 void *xmalloc(size_t size)
+#endif
 {
     void *res;
 
@@ -175,7 +191,7 @@ void *xmalloc(size_t size)
     res = malloc(size);
     if(res == NULL)
     {
-	error("Virtual memory exhausted.\n");
+    error("Virtual memory exhausted.\n");
     }
     /*
      * We set it to 0.
@@ -187,7 +203,12 @@ void *xmalloc(size_t size)
 }
 
 
+
+#if defined(__DEBUG_ALLOC__) && defined(__IBMC__)
+void *_xrealloc(void *p, size_t size, char *pszFile, int iLine)
+#else
 void *xrealloc(void *p, size_t size)
+#endif
 {
     void *res;
 
@@ -195,88 +216,96 @@ void *xrealloc(void *p, size_t size)
     res = realloc(p, size);
     if(res == NULL)
     {
-	error("Virtual memory exhausted.\n");
+    error("Virtual memory exhausted.\n");
     }
     return res;
 }
 
+#if defined(__DEBUG_ALLOC__) && defined(__IBMC__)
+char *_xstrdup(const char *str, char *pszFile, int iLine)
+#else
 char *xstrdup(const char *str)
+#endif
 {
-	char *s;
+    char *s;
 
-	assert(str != NULL);
-	s = (char *)xmalloc(strlen(str)+1);
-	return strcpy(s, str);
+    assert(str != NULL);
+    #if defined(__DEBUG_ALLOC__) && defined(__IBMC__)
+        s = (char *)_xmalloc(strlen(str)+1, pszFile, iLine);
+    #else
+        s = (char *)xmalloc(strlen(str)+1);
+    #endif
+    return strcpy(s, str);
 }
 
 short *dupcstr2wstr(const char *str)
 {
-	int len;
-	WCHAR *ws;
+    int len;
+    WCHAR *ws;
 
-	if (!current_codepage) set_language( LANG_NEUTRAL, SUBLANG_NEUTRAL );
-	len = cp_mbstowcs( current_codepage, 0, str, strlen(str), NULL, 0 );
-	ws = xmalloc( sizeof(WCHAR) * (len + 1) );
-	len = cp_mbstowcs( current_codepage, 0, str, strlen(str), ws, len );
-	ws[len] = 0;
-	return ws;
+    if (!current_codepage) set_language( LANG_NEUTRAL, SUBLANG_NEUTRAL );
+    len = cp_mbstowcs( current_codepage, 0, str, strlen(str), NULL, 0 );
+    ws = xmalloc( sizeof(WCHAR) * (len + 1) );
+    len = cp_mbstowcs( current_codepage, 0, str, strlen(str), ws, len );
+    ws[len] = 0;
+    return ws;
 }
 
 char *dupwstr2cstr(const short *str)
 {
-	int len;
-	char *cs;
+    int len;
+    char *cs;
 
-	if (!current_codepage) set_language( LANG_NEUTRAL, SUBLANG_NEUTRAL );
-	len = cp_wcstombs( current_codepage, 0, str, strlenW(str), NULL, 0, NULL, NULL );
-	cs = xmalloc( len + 1 );
-	len = cp_wcstombs( current_codepage, 0, str, strlenW(str),  cs, len, NULL, NULL );
-	cs[len] = 0;
-	return cs;
+    if (!current_codepage) set_language( LANG_NEUTRAL, SUBLANG_NEUTRAL );
+    len = cp_wcstombs( current_codepage, 0, str, strlenW(str), NULL, 0, NULL, NULL );
+    cs = xmalloc( len + 1 );
+    len = cp_wcstombs( current_codepage, 0, str, strlenW(str),  cs, len, NULL, NULL );
+    cs[len] = 0;
+    return cs;
 }
 
 /*
  *****************************************************************************
- * Function	: compare_name_id
- * Syntax	: int compare_name_id(name_id_t *n1, name_id_t *n2)
- * Input	:
- * Output	:
- * Description	:
- * Remarks	:
+ * Function : compare_name_id
+ * Syntax   : int compare_name_id(name_id_t *n1, name_id_t *n2)
+ * Input    :
+ * Output   :
+ * Description  :
+ * Remarks  :
  *****************************************************************************
 */
 int compare_name_id(name_id_t *n1, name_id_t *n2)
 {
-	if(n1->type == name_ord && n2->type == name_ord)
-	{
-		return n1->name.i_name - n2->name.i_name;
-	}
-	else if(n1->type == name_str && n2->type == name_str)
-	{
-		if(n1->name.s_name->type == str_char
-		&& n2->name.s_name->type == str_char)
-		{
-			return strcasecmp(n1->name.s_name->str.cstr, n2->name.s_name->str.cstr);
-		}
-		else if(n1->name.s_name->type == str_unicode
-		&& n2->name.s_name->type == str_unicode)
-		{
-			return strcmpiW(n1->name.s_name->str.wstr, n2->name.s_name->str.wstr);
-		}
-		else
-		{
-			internal_error(__FILE__, __LINE__, "Can't yet compare strings of mixed type");
-		}
-	}
-	else if(n1->type == name_ord && n2->type == name_str)
-		return 1;
-	else if(n1->type == name_str && n2->type == name_ord)
-		return -1;
-	else
-		internal_error(__FILE__, __LINE__, "Comparing name-ids with unknown types (%d, %d)",
-				n1->type, n2->type);
+    if(n1->type == name_ord && n2->type == name_ord)
+    {
+        return n1->name.i_name - n2->name.i_name;
+    }
+    else if(n1->type == name_str && n2->type == name_str)
+    {
+        if(n1->name.s_name->type == str_char
+        && n2->name.s_name->type == str_char)
+        {
+            return strcasecmp(n1->name.s_name->str.cstr, n2->name.s_name->str.cstr);
+        }
+        else if(n1->name.s_name->type == str_unicode
+        && n2->name.s_name->type == str_unicode)
+        {
+            return strcmpiW(n1->name.s_name->str.wstr, n2->name.s_name->str.wstr);
+        }
+        else
+        {
+            internal_error(__FILE__, __LINE__, "Can't yet compare strings of mixed type");
+        }
+    }
+    else if(n1->type == name_ord && n2->type == name_str)
+        return 1;
+    else if(n1->type == name_str && n2->type == name_ord)
+        return -1;
+    else
+        internal_error(__FILE__, __LINE__, "Comparing name-ids with unknown types (%d, %d)",
+                n1->type, n2->type);
 
-	return 0; /* Keep the compiler happy */
+    return 0; /* Keep the compiler happy */
 }
 
 string_t *convert_string(const string_t *str, enum str_e type)
@@ -284,32 +313,32 @@ string_t *convert_string(const string_t *str, enum str_e type)
         string_t *ret = xmalloc(sizeof(*ret));
 
         if((str->type == str_char) && (type == str_unicode))
-	{
-		ret->str.wstr = dupcstr2wstr(str->str.cstr);
-		ret->type     = str_unicode;
-		ret->size     = strlenW(ret->str.wstr);
-	}
-	else if((str->type == str_unicode) && (type == str_char))
-	{
-	        ret->str.cstr = dupwstr2cstr(str->str.wstr);
-	        ret->type     = str_char;
-	        ret->size     = strlen(ret->str.cstr);
-	}
-	else if(str->type == str_unicode)
+    {
+        ret->str.wstr = dupcstr2wstr(str->str.cstr);
+        ret->type     = str_unicode;
+        ret->size     = strlenW(ret->str.wstr);
+    }
+    else if((str->type == str_unicode) && (type == str_char))
+    {
+            ret->str.cstr = dupwstr2cstr(str->str.wstr);
+            ret->type     = str_char;
+            ret->size     = strlen(ret->str.cstr);
+    }
+    else if(str->type == str_unicode)
         {
-	        ret->type     = str_unicode;
-		ret->size     = strlenW(str->str.wstr);
-		ret->str.wstr = xmalloc(sizeof(WCHAR)*(ret->size+1));
-		strcpyW(ret->str.wstr, str->str.wstr);
-	}  
-	else /* str->type == str_char */
+            ret->type     = str_unicode;
+        ret->size     = strlenW(str->str.wstr);
+        ret->str.wstr = xmalloc(sizeof(WCHAR)*(ret->size+1));
+        strcpyW(ret->str.wstr, str->str.wstr);
+    }
+    else /* str->type == str_char */
         {
-	        ret->type     = str_char;
-		ret->size     = strlen(str->str.cstr);
-		ret->str.cstr = xmalloc( ret->size + 1 );
-		strcpy(ret->str.cstr, str->str.cstr);
+            ret->type     = str_char;
+        ret->size     = strlen(str->str.cstr);
+        ret->str.cstr = xmalloc( ret->size + 1 );
+        strcpy(ret->str.cstr, str->str.cstr);
         }
-	return ret;
+    return ret;
 }
 
 
@@ -401,7 +430,7 @@ void set_language( unsigned short lang, unsigned short sublang )
         error( "Bad codepage %d for language %04x", cp, MAKELANGID(lang,sublang) );
 }
 
-#ifdef __EMX__
+#if defined(__WIN32OS2__)
 WCHAR WINAPI toupperW( WCHAR ch )
 {
     extern const WCHAR casemap_upper[];
@@ -416,11 +445,12 @@ WCHAR WINAPI tolowerW( WCHAR ch )
 
 int strcasecmp( char *p1, char *p2 )
 {
-	return stricmp( p1, p2 );
+    return stricmp( p1, p2 );
 }
 
 int lstrcmpiA( char *p1, char *p2 )
 {
-	return stricmp( p1, p2 );
+    return stricmp( p1, p2 );
 }
+
 #endif
