@@ -1,4 +1,4 @@
-/* $Id: options.h,v 1.19 2001-02-02 08:39:52 bird Exp $
+/* $Id: options.h,v 1.20 2001-02-11 15:04:26 bird Exp $
  *
  * Options.
  *
@@ -26,7 +26,9 @@
 #define KF_REV_A            0x0010
 #define KF_REV_B            0x0020
 #define KF_REV_C            0x0030
-#define KF_REV_ECS          0x0040
+#define KF_REV_D            0x0040
+#define KF_REV_E            0x0050
+#define KF_REV_ECS          0x0900
 #define KF_DEBUG            0x1000
 #define KF_HAS_DEBUGTYPE    0x2000
 #define KF_ALLSTRICT        0x3000
@@ -103,6 +105,8 @@
 
 #define isSMPKernel()               (options.fKernel & KF_SMP)
 #define isUNIKernel()               (!(options.fKernel & KF_SMP))
+
+#define isHighMemorySupported()     (options.ulBuild >= 14000 || isSMPKernel())
 
 #define isDllFixesEnabled()         (options.fDllFixes)
 #define isDllFixesDisabled()        (!options.fDllFixes)
