@@ -1,4 +1,4 @@
-# $Id: makefile.os2,v 1.9 2000-02-09 23:49:07 bird Exp $
+# $Id: makefile.os2,v 1.10 2000-05-02 14:33:04 bird Exp $
 
 
 PDWIN32_TOOLS = ..\bin
@@ -7,7 +7,7 @@ PDWIN32_INCLUDE = ..\..\include
 
 
 #DEFS      = -D__WINE__ -D__WIN32OS2__ -idirafter ../../include/win -idirafter ../../include
-DEFS      = -D__WINE__ -I. -I../../include/win -I../../include
+DEFS      = -D__WINE__ -D__SEMICOLON__  -I. -I../../include/win -I../../include
 
 PROGRAMS = wrc.exe
 MODULE   = none
