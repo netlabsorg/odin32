@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.14 2000-12-02 23:26:57 bird Exp $
+# $Id: makefile,v 1.15 2000-12-16 20:07:49 bird Exp $
 
 #
 # Odin32 API
@@ -28,13 +28,14 @@
 #
 ALL_DIRS = \
 .\common \
-.\database \
-.\impdef \
 .\fastdep \
-.\wrc \
+.\impdef \
+.\install \
+.\regedit \
+.\database \
 .\omfdumper \
 .\sdf \
-.\install
+.\wrc \
 
 
 #
