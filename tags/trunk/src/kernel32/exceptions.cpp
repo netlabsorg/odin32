@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.21 1999-10-08 19:47:26 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.22 1999-10-09 13:33:23 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -276,7 +276,7 @@ int _Pascal OS2RtlUnwind(PWINEXCEPTION_FRAME  pEndFrame,
   WINCONTEXT          context;
   int                 rc;
 
-  dprintf(("KERNEL32: RtlUnwind\n"));
+  dprintf(("KERNEL32: RtlUnwind %x %x\n", pEndFrame, pRecord));
 
   memset(&context, 0, sizeof(context));
   context.ContextFlags = WINCONTEXT_FULL;   //segments, integer, control

@@ -1,4 +1,4 @@
-/* $Id: oslibmisc.cpp,v 1.2 1999-09-15 23:38:01 sandervl Exp $ */
+/* $Id: oslibmisc.cpp,v 1.3 1999-10-09 13:33:24 sandervl Exp $ */
 
 /*
  * Misc OS/2 util. procedures
@@ -225,9 +225,9 @@ ULONG OSLibGetTIB(int tiboff)
    switch(tiboff)
    {
    	case TIB_STACKTOP:
-		return (ULONG)ptib->tib_pstack;
-	case TIB_STACKLOW:
 		return (ULONG)ptib->tib_pstacklimit;
+	case TIB_STACKLOW:
+		return (ULONG)ptib->tib_pstack;
 	default:
 		return 0;
    }
