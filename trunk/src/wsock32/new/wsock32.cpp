@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.3 1999-11-26 21:46:36 phaller Exp $ */
+/* $Id: wsock32.cpp,v 1.4 1999-11-29 07:22:55 phaller Exp $ */
 
 /*
  *
@@ -1341,6 +1341,19 @@ ODINFUNCTION4(int,OS2WSAAsyncSelect,
 {
   int rc;
   int iError;
+  
+  /* @@@PH: our source window doesn't seem to have an anchor block.
+            Docs suggest we've missed to call WinInitialize on the
+            caller thread.
+            
+            Cause however is the Open32 handle is (of course!) invalid
+            in plain PM Window Manager! -> use DAPWSOCK
+            
+            Unfortunately, DAPWSOCK calls WinQueryAnchorBlock(hOpen32), too.
+            So, we're stuck until I resolve hWnd to it's valid PM
+            counterpart.
+   */
+  
   
   rc = WSAAsyncSelect(s,
                       hWnd,
