@@ -1,4 +1,11 @@
- /* $Id: changelog,v 1.797 2000-03-11 09:09:55 jeroen Exp $ */
+ /* $Id: changelog,v 1.798 2000-03-11 15:11:36 sandervl Exp $ */
+
+ 2000-03-11: Sander van Leeuwen <sandervl@xs4all.nl>
+	- OPENGL\GLUT: Fixed compile problems + cleanup
+                       (use C(XX)FLAGS_WIN32APP so you don't have to 
+                        explicitely specify which api type you use (ascii or unicode)!)
+
+	- OPENGL\GLIDE: Fixed wrong binary path for voodoo1 glide
 
  2000-03-11: Jeroen van den Horn <J.vandenHorn@fibre.a2000.nl>
         - OPENGL: Fixed error preventing build to complete
