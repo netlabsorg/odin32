@@ -1,4 +1,4 @@
-/* $Id: myldrOpen.cpp,v 1.11 2000-09-02 21:08:09 bird Exp $
+/* $Id: myldrOpen.cpp,v 1.12 2000-09-12 04:40:57 bird Exp $
  *
  * myldrOpen - ldrOpen.
  *
@@ -292,11 +292,15 @@ ULONG LDRCALL myldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl)
                          * and executable filename tkExecPgm were called with.
                          * If not tkExecPgm we can't do anything about parameters (and there is
                          * probably nothing to do either).
+                         * We'll always enclose the PE executable name in quotes.
                          */
                         kprintf(("myldrOpen-%d: pe.exe - %s\n", cNesting, u1.pach));
                         if (isLdrStateExecPgm() && fTkExecPgm)
                         {
-                            rc = AddArgsToFront(2, ldrpFileNameBuf, achTkExecPgmFilename);
+                            u1.pach[0] = '"';
+                            strcpy(&u1.pach[1], achTkExecPgmFilename);
+                            u1.pach[strlen(u1.pach)] = '\0';
+                            rc = AddArgsToFront(2, ldrpFileNameBuf, u1.pach);
                             if (rc == NO_ERROR)
                             {
                                 rc = SetExecName(ldrpFileNameBuf);
@@ -418,6 +422,7 @@ ULONG LDRCALL myldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl)
                      * and environmental CLASSPATHs. So, we'll have to pass in the value of
                      * the CLASSPATH env.var. or generate the default class path (what ever that is).
                      *
+                     * TODO: spaces in class path.
                      */
                     if (isLdrStateExecPgm() && fTkExecPgm)
                     {
@@ -533,6 +538,8 @@ ULONG LDRCALL myldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl)
          *      - And we're loading an EXE
          *      - And we're either in QAppType or ExecPgm state.
          *      - And that a bang (!) is the first char after the hash (ignoring blanks).
+         *
+         * FIXME: spaces script name.
          */
         if (*u1.pach == '#'
             && isLdrStateLoadingEXE()
@@ -666,6 +673,8 @@ ULONG LDRCALL myldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl)
          *      - Extention:
          *          .RX and .REX are known to be pure REXX scripts.
          *          While .CMD has to invoked used the commandline OS2_SHELL or COMSPEC variable.
+         *
+         * FIXME: spaces script name.
          */
         psz2 = pszFilename + strlen(pszFilename) - 1;
         while (psz2 > pszFilename && *psz2 != '.')
