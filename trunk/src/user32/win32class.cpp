@@ -1,4 +1,4 @@
-/* $Id: win32class.cpp,v 1.19 2000-11-11 18:39:30 sandervl Exp $ */
+/* $Id: win32class.cpp,v 1.20 2001-02-02 19:04:02 sandervl Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -519,16 +519,29 @@ WORD Win32WndClass::setClassWord(int index, WORD wNewVal)
 //******************************************************************************
 //FIXME: Windows that still exists with this class
 //******************************************************************************
-void Win32WndClass::UnregisterClassA(HINSTANCE hinst, LPSTR id)
+BOOL Win32WndClass::UnregisterClassA(HINSTANCE hinst, LPSTR id)
 {
   Win32WndClass *wndclass;
 
+  if(HIWORD(id)) {
+       dprintf(("Win32WndClass::UnregisterClassA class %s, instance %x!!", id, hinst));
+  }
+  else dprintf(("Win32WndClass::UnregisterClassA class %x, instance %x!!", id, hinst));
+
   wndclass = FindClass(hinst, id);
   if(wndclass) {
+        if(wndclass->GetWindowCount() != 0) {
+            dprintf2(("Win32WndClass::UnregisterClassA class %x still has windows!!", id));
+            SetLastError(ERROR_CLASS_HAS_WINDOWS);
+            return FALSE;
+        }
         delete wndclass;
-        return;
+        SetLastError(ERROR_SUCCESS);
+        return TRUE;
   }
   dprintf(("::UnregisterClass, couldn't find class %X!!\n", id));
+  SetLastError(ERROR_CLASS_DOES_NOT_EXIST);
+  return FALSE;
 }
 //******************************************************************************
 //******************************************************************************

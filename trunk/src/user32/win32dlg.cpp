@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.54 2000-11-24 10:30:36 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.55 2001-02-02 19:04:02 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -23,6 +23,7 @@
 #include "win32wdesktop.h"
 #include "controls.h"
 #include "syscolor.h"
+#include <math.h>
 
 #define DBG_LOCALLOG    DBG_win32dlg
 #include "dbglocal.h"
@@ -399,7 +400,7 @@ BOOL Win32Dialog::DIALOG_Init(void)
 BOOL Win32Dialog::getCharSizeFromDC( HDC hDC, HFONT hUserFont, SIZE * pSize )
 {
     BOOL Success = FALSE;
-    HFONT hUserFontPrev = 0;
+    HFONT hFontPrev = 0;
     pSize->cx = xBaseUnit;
     pSize->cy = yBaseUnit;
 
@@ -408,7 +409,7 @@ BOOL Win32Dialog::getCharSizeFromDC( HDC hDC, HFONT hUserFont, SIZE * pSize )
         /* select the font */
         TEXTMETRICA tm;
         memset(&tm,0,sizeof(tm));
-        if (hUserFont) hUserFontPrev = SelectFont(hDC,hUserFont);
+        if (hUserFont) hFontPrev = SelectFont(hDC,hUserFont);
         if (GetTextMetricsA(hDC,&tm))
         {
             pSize->cx = tm.tmAveCharWidth;
@@ -440,7 +441,7 @@ BOOL Win32Dialog::getCharSizeFromDC( HDC hDC, HFONT hUserFont, SIZE * pSize )
         }
 
         /* select the original font */
-        if (hUserFontPrev) SelectFont(hDC,hUserFontPrev);
+        if (hFontPrev) SelectFont(hDC,hFontPrev);
     }
     return (Success);
 }
@@ -656,35 +657,17 @@ BOOL Win32Dialog::createControls(LPCSTR dlgtemplate, HINSTANCE hInst)
         dlgtemplate = (LPCSTR)getControl( (WORD *)dlgtemplate, &info, dlgInfo.dialogEx );
 
         dprintf(("Create CONTROL %d", info.id));
-        char *classNameA = NULL;
-        char *windowNameA = NULL;
 
-        if(HIWORD(info.className)) {
-             classNameA = UnicodeToAsciiString((LPWSTR)info.className);
-        }
-        else classNameA = (char *)info.className;
-
-        if(HIWORD(info.windowName)) {
-             windowNameA = UnicodeToAsciiString((LPWSTR)info.windowName);
-        }
-        else windowNameA = (char *)info.windowName;
-
-        hwndCtrl = ::CreateWindowExA( info.exStyle | WS_EX_NOPARENTNOTIFY,
-                                      classNameA,
-                                      windowNameA,
+        hwndCtrl = ::CreateWindowExW( info.exStyle | WS_EX_NOPARENTNOTIFY,
+                                      (LPCWSTR)info.className,
+                                      (LPCWSTR)info.windowName,
                                       info.style | WS_CHILD,
-                                      info.x * xUnit / 4,
-                                      info.y * yUnit / 8,
-                                      info.cx * xUnit / 4,
-                                      info.cy * yUnit / 8,
+                                      MulDiv(info.x, xUnit, 4),
+                                      MulDiv(info.y, yUnit, 8),
+                                      MulDiv(info.cx, xUnit, 4),
+                                      MulDiv(info.cy, yUnit, 8),
                                       getWindowHandle(), (HMENU)info.id,
                                       hInst, info.data );
-        if(HIWORD(classNameA)) {
-            FreeAsciiString(classNameA);
-        }
-        if(HIWORD(windowNameA)) {
-            FreeAsciiString(windowNameA);
-        }
 
         if (!hwndCtrl) return FALSE;
 

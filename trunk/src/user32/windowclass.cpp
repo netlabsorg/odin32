@@ -1,4 +1,4 @@
-/* $Id: windowclass.cpp,v 1.14 2001-01-02 18:14:59 sandervl Exp $ */
+/* $Id: windowclass.cpp,v 1.15 2001-02-02 19:04:03 sandervl Exp $ */
 /*
  * Win32 Window Class Code for OS/2
  *
@@ -156,16 +156,22 @@ ATOM WIN32API RegisterClassExW(CONST WNDCLASSEXW *lpwc)
 //******************************************************************************
 BOOL WIN32API UnregisterClassA(LPCSTR lpszClassName, HINSTANCE hinst)
 {
-   Win32WndClass::UnregisterClassA(hinst, (LPSTR)lpszClassName);
+ BOOL ret;
 
-   //Spintest returns FALSE in dll termination, so pretend it succeeded
-   return(TRUE);
+   ret = Win32WndClass::UnregisterClassA(hinst, (LPSTR)lpszClassName);
+#if 1
+   return ret;
+#else
+  //Spintest returns FALSE in dll termination, so pretend it succeeded
+//  return(TRUE);
+#endif
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API UnregisterClassW(LPCWSTR lpszClassName, HINSTANCE hinst)
 {
  char *astring = NULL;
+ BOOL  ret;
 
   dprintf(("USER32:  UnregisterClassW\n"));
   if(HIWORD(lpszClassName) != 0) {
@@ -173,12 +179,16 @@ BOOL WIN32API UnregisterClassW(LPCWSTR lpszClassName, HINSTANCE hinst)
   }
   else  astring = (char *)lpszClassName;
 
-  Win32WndClass::UnregisterClassA(hinst, (LPSTR)astring);
+  ret = Win32WndClass::UnregisterClassA(hinst, (LPSTR)astring);
   if(HIWORD(astring) != 0)
         FreeAsciiString((char *)astring);
 
+#if 1
+  return ret;
+#else
   //Spintest returns FALSE in dll termination, so pretend it succeeded
-  return(TRUE);
+//  return(TRUE);
+#endif
 }
 //******************************************************************************
 //******************************************************************************
@@ -197,8 +207,10 @@ BOOL WIN32API GetClassInfoA(HINSTANCE hInstance, LPCSTR lpszClass, WNDCLASSA *lp
   if(wndclass) {
         wndclass->getClassInfo(&wc);
         memcpy(lpwc, &wc.style, sizeof(WNDCLASSA));
+        SetLastError(ERROR_SUCCESS);
         return(TRUE);
   }
+  SetLastError(ERROR_CLASS_DOES_NOT_EXIST);
   return(FALSE);
 }
 //******************************************************************************
@@ -224,8 +236,10 @@ BOOL WIN32API GetClassInfoW(HINSTANCE  hinst, LPCWSTR lpszClass, WNDCLASSW *lpwc
   if(wndclass) {
         wndclass->getClassInfo(&wc);
         memcpy(lpwc, &wc.style, sizeof(WNDCLASSW));
-       return(TRUE);
+        SetLastError(ERROR_SUCCESS);
+        return(TRUE);
   }
+  SetLastError(ERROR_CLASS_DOES_NOT_EXIST);
   return(FALSE);
 }
 /****************************************************************************
@@ -261,8 +275,10 @@ BOOL WIN32API GetClassInfoExA(HINSTANCE     hInstance,
   if(wndclass) {
         wndclass->getClassInfo(lpwcx);
         lpwcx->cbSize = sizeof(WNDCLASSEXA);
+        SetLastError(ERROR_SUCCESS);
         return(TRUE);
   }
+  SetLastError(ERROR_CLASS_DOES_NOT_EXIST);
   return(FALSE);
 }
 /*****************************************************************************
@@ -303,8 +319,10 @@ BOOL WIN32API GetClassInfoExW(HINSTANCE     hInstance,
   if(wndclass) {
         wndclass->getClassInfo(lpwcx);
         lpwcx->cbSize = sizeof(WNDCLASSEXW);
+        SetLastError(ERROR_SUCCESS);
         return(TRUE);
   }
+  SetLastError(ERROR_CLASS_DOES_NOT_EXIST);
   return(FALSE);
 }
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: win32class.h,v 1.12 2000-06-13 21:26:30 sandervl Exp $ */
+/* $Id: win32class.h,v 1.13 2001-02-02 19:04:02 sandervl Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -64,7 +64,7 @@ public:
 
           BOOL  isAppClass(ULONG curProcessId);
 
- static  void   UnregisterClassA(HINSTANCE hinst, LPSTR id);
+ static   BOOL  UnregisterClassA(HINSTANCE hinst, LPSTR id);
 
  static Win32WndClass *FindClass(HINSTANCE hinst, LPSTR id);
  static Win32WndClass *FindClass(HINSTANCE hinst, LPWSTR id);
