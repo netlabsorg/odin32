@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.4 1999-10-15 10:03:14 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.5 1999-10-28 18:22:26 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -36,9 +36,12 @@ typedef struct
 // PFNTRANS toWIN32;
 } MSGTRANSTAB, *PMSGTRANSTAB;
 
-#define MAX_MSGTRANSTAB 12
+#define MAX_MSGTRANSTAB 15
 MSGTRANSTAB MsgTransTab[MAX_MSGTRANSTAB] = {
    0x0000, 0x0000,  // WM_NULL,            WM_NULL
+   0x0024, 0x0113,  // WM_TIMER,           WM_TIMER
+   0x0029, 0x0010,  // WM_CLOSE,           WM_CLOSE 
+   0x002a, 0x0012,  // WM_QUIT,            WM_QUIT
    0x0070, 0x0200,  // WM_MOUSEMOVE,       WM_MOUSEMOVE
    0x0071, 0x0201,  // WM_BUTTON1DOWN,     WM_LBUTTONDOWN
    0x0072, 0x0202,  // WM_BUTTON1UP,       WM_LBUTTONUP
@@ -130,14 +133,26 @@ ULONG TranslateWinMsg(ULONG msg)
 //******************************************************************************
 void OSLibWinPostQuitMessage(ULONG nExitCode)
 {
-  WinPostQueueMsg(NULLHANDLE, WM_QUIT, (MPARAM)nExitCode, 0);
+ APIRET rc;
+
+  rc = WinPostQueueMsg(NULLHANDLE, WM_QUIT, (MPARAM)nExitCode, 0);
+  dprintf(("WinPostQueueMsg %d returned %d", nExitCode, rc));
 }
 //******************************************************************************
 //******************************************************************************
 LONG OSLibWinDispatchMsg(MSG *msg, BOOL isUnicode)
 {
+ BOOL eaten = 0;
+
 //TODO: What to do if app changed msg? (translate)
 //  WinToOS2MsgTranslate(msg, &qmsg, isUnicode);
+
+  //SvL: Some apps use PeeKMessage(remove) & DispatchMessage instead of 
+  //     GetMessage/DispatchMessage
+  if (MsgThreadPtr->msg == WM_TIMER)
+      eaten = TIMER_HandleTimer (MsgThreadPtr);
+  
+  if(eaten)	return 0;
 
   return (LONG)WinDispatchMsg(GetThreadHAB(), MsgThreadPtr);
 }

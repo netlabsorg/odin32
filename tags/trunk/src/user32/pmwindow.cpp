@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.45 1999-10-25 20:17:20 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.46 1999-10-28 18:22:27 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -785,6 +785,7 @@ VirtualKeyFound:
           BOOL sys;
           ULONG id;
 
+	  dprintf(("OS2: WM_TIMER %x %d", hwnd, mp1));
           if (TIMER_GetTimerInfo(hwnd,(ULONG)mp1,&sys,&id))
           {
             if (sys)
