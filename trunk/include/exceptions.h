@@ -1,4 +1,4 @@
-/* $Id: exceptions.h,v 1.4 1999-10-09 15:03:47 sandervl Exp $ */
+/* $Id: exceptions.h,v 1.5 2000-03-16 19:16:35 sandervl Exp $ */
 
 #ifndef __EXCEPTIONS_H__
 #define __EXCEPTIONS_H__
@@ -108,7 +108,7 @@ typedef struct
     DWORD   DataSelector;
     BYTE    RegisterArea[SIZE_OF_80387_REGISTERS];
     DWORD   Cr0NpxState;
-} FLOATING_SAVE_AREA;
+} FLOATING_SAVE_AREA_WIN;
 
 typedef struct
 {
@@ -121,7 +121,7 @@ typedef struct
     DWORD   Dr6;
     DWORD   Dr7;
 
-    FLOATING_SAVE_AREA FloatSave;
+    FLOATING_SAVE_AREA_WIN FloatSave;
 
     DWORD   SegGs;
     DWORD   SegFs;

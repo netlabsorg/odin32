@@ -1,4 +1,4 @@
-/* $Id: HandleManager.h,v 1.16 2000-01-05 19:35:52 sandervl Exp $ */
+/* $Id: HandleManager.h,v 1.17 2000-03-16 19:16:34 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -131,7 +131,7 @@ BOOL    HMSetStdHandle(DWORD  nStdHandle,
 /*****************************************************************************/
 
 DWORD  HMHandleAllocate       (PULONG phHandle16,
-                                       ULONG  hHandle32);
+                               ULONG  hHandle32);
 
 DWORD  HMHandleFree           (ULONG  hHandle16);
 
@@ -140,10 +140,10 @@ DWORD  HMHandleGetUserData    (ULONG  hHandle16);
 DWORD  HMHandleValidate       (ULONG  hHandle16);
 
 DWORD  HMHandleTranslateToWin (ULONG  hHandle32,
-                                       PULONG phHandle16);
+                               PULONG phHandle16);
 
 DWORD  HMHandleTranslateToOS2 (ULONG  hHandle16,
-                                       PULONG hHandle32);
+                               PULONG hHandle32);
 
 DWORD  HMHandleTranslateToOS2i(ULONG  hHandle16);
 
@@ -347,6 +347,22 @@ DWORD HMOpenProcessToken(HANDLE  ProcessHandle,
 BOOL HMSetupComm(HANDLE hFile, DWORD dwInQueue, DWORD dwOutQueue);
 
 BOOL HMGetCommState(INT hCommDev, LPDCB lpdcb);
+
+HANDLE HMCreateThread(LPSECURITY_ATTRIBUTES  lpsa,
+                      DWORD                  cbStack,
+                      LPTHREAD_START_ROUTINE lpStartAddr,
+                      LPVOID                 lpvThreadParm,
+                      DWORD                  fdwCreate,
+                      LPDWORD                lpIDThread);
+INT    HMGetThreadPriority(HANDLE hThread);
+DWORD  HMSuspendThread(HANDLE hThread);
+BOOL   HMSetThreadPriority(HANDLE hThread, int priority);
+BOOL   HMGetThreadContext(HANDLE hThread, CONTEXT *lpContext);
+BOOL   HMSetThreadContext(HANDLE hThread, const CONTEXT *lpContext);
+BOOL   HMTerminateThread(HANDLE hThread, DWORD exitcode);
+DWORD  HMResumeThread(HANDLE hThread);
+BOOL   HMGetExitCodeThread(HANDLE hThread, LPDWORD lpExitCode);
+BOOL   HMSetThreadTerminated(HANDLE hThread);
 
 #ifdef __cplusplus__
   }

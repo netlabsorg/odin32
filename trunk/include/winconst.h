@@ -1,4 +1,4 @@
-/* $Id: winconst.h,v 1.28 2000-03-13 12:44:05 sandervl Exp $ */
+/* $Id: winconst.h,v 1.29 2000-03-16 19:16:36 sandervl Exp $ */
 
 /*
  * Win32 constants
@@ -1125,3 +1125,183 @@
 #define HKEY_PERFORMANCE_DATA   ((HKEY) 0x80000004)
 #define HKEY_CURRENT_CONFIG     ((HKEY) 0x80000005)
 #define HKEY_DYN_DATA           ((HKEY) 0x80000006)
+
+/* Virtual key codes */
+#define VK_LBUTTON_W          0x01
+#define VK_RBUTTON_W          0x02
+#define VK_CANCEL_W           0x03
+#define VK_MBUTTON_W          0x04
+/*                          0x05-0x07  Undefined */
+#define VK_BACK_W             0x08
+#define VK_TAB_W              0x09
+/*                          0x0A-0x0B  Undefined */
+#define VK_CLEAR_W            0x0C
+#define VK_RETURN_W           0x0D
+/*                          0x0E-0x0F  Undefined */
+#define VK_SHIFT_W            0x10
+#define VK_CONTROL_W          0x11
+#define VK_MENU_W             0x12
+#define VK_PAUSE_W            0x13
+#define VK_CAPITAL_W          0x14
+/*                          0x15-0x19  Reserved for Kanji systems */
+/*                          0x1A       Undefined */
+#define VK_ESCAPE_W           0x1B
+/*                          0x1C-0x1F  Reserved for Kanji systems */
+#define VK_SPACE_W            0x20
+#define VK_PRIOR_W            0x21
+#define VK_NEXT_W             0x22
+#define VK_END_W              0x23
+#define VK_HOME_W             0x24
+#define VK_LEFT_W             0x25
+#define VK_UP_W               0x26
+#define VK_RIGHT_W            0x27
+#define VK_DOWN_W             0x28
+#define VK_SELECT_W           0x29
+#define VK_PRINT_W            0x2A /* OEM specific in Windows 3.1 SDK */
+#define VK_EXECUTE_W          0x2B
+#define VK_SNAPSHOT_W         0x2C
+#define VK_INSERT_W           0x2D
+#define VK_DELETE_W           0x2E
+#define VK_HELP_W             0x2F
+#define VK_0_W                0x30
+#define VK_1_W                0x31
+#define VK_2_W                0x32
+#define VK_3_W                0x33
+#define VK_4_W                0x34
+#define VK_5_W                0x35
+#define VK_6_W                0x36
+#define VK_7_W                0x37
+#define VK_8_W                0x38
+#define VK_9_W                0x39
+/*                          0x3A-0x40  Undefined */
+#define VK_A_W                0x41
+#define VK_B_W                0x42
+#define VK_C_W                0x43
+#define VK_D_W                0x44
+#define VK_E_W                0x45
+#define VK_F_W                0x46
+#define VK_G_W                0x47
+#define VK_H_W                0x48
+#define VK_I_W                0x49
+#define VK_J_W                0x4A
+#define VK_K_W                0x4B
+#define VK_L_W                0x4C
+#define VK_M_W                0x4D
+#define VK_N_W                0x4E
+#define VK_O_W                0x4F
+#define VK_P_W                0x50
+#define VK_Q_W                0x51
+#define VK_R_W                0x52
+#define VK_S_W                0x53
+#define VK_T_W                0x54
+#define VK_U_W                0x55
+#define VK_V_W                0x56
+#define VK_W_W                0x57
+#define VK_X_W                0x58
+#define VK_Y_W                0x59
+#define VK_Z_W                0x5A
+
+#define VK_LWIN_W             0x5B
+#define VK_RWIN_W             0x5C
+#define VK_APPS_W             0x5D
+/*                          0x5E-0x5F Unassigned */
+#define VK_NUMPAD0_W          0x60
+#define VK_NUMPAD1_W          0x61
+#define VK_NUMPAD2_W          0x62
+#define VK_NUMPAD3_W          0x63
+#define VK_NUMPAD4_W          0x64
+#define VK_NUMPAD5_W          0x65
+#define VK_NUMPAD6_W          0x66
+#define VK_NUMPAD7_W          0x67
+#define VK_NUMPAD8_W          0x68
+#define VK_NUMPAD9_W          0x69
+#define VK_MULTIPLY_W         0x6A
+#define VK_ADD_W              0x6B
+#define VK_SEPARATOR_W        0x6C
+#define VK_SUBTRACT_W         0x6D
+#define VK_DECIMAL_W          0x6E
+#define VK_DIVIDE_W           0x6F
+#define VK_F1_W               0x70
+#define VK_F2_W               0x71
+#define VK_F3_W               0x72
+#define VK_F4_W               0x73
+#define VK_F5_W               0x74
+#define VK_F6_W               0x75
+#define VK_F7_W               0x76
+#define VK_F8_W               0x77
+#define VK_F9_W               0x78
+#define VK_F10_W              0x79
+#define VK_F11_W              0x7A
+#define VK_F12_W              0x7B
+#define VK_F13_W              0x7C
+#define VK_F14_W              0x7D
+#define VK_F15_W              0x7E
+#define VK_F16_W              0x7F
+#define VK_F17_W              0x80
+#define VK_F18_W              0x81
+#define VK_F19_W              0x82
+#define VK_F20_W              0x83
+#define VK_F21_W              0x84
+#define VK_F22_W              0x85
+#define VK_F23_W              0x86
+#define VK_F24_W              0x87
+/*                          0x88-0x8F  Unassigned */
+#define VK_NUMLOCK_W          0x90
+#define VK_SCROLL_W           0x91
+/*                          0x92-0x9F  Unassigned */
+/*
+ * differencing between right and left shift/control/alt key.
+ * Used only by GetAsyncKeyState() and GetKeyState().
+ */
+#define VK_LSHIFT_W           0xA0
+#define VK_RSHIFT_W           0xA1
+#define VK_LCONTROL_W         0xA2
+#define VK_RCONTROL_W         0xA3
+#define VK_LMENU_W            0xA4
+#define VK_RMENU_W            0xA5
+/*                          0xA6-0xB9  Unassigned */
+#define VK_OEM_1_W            0xBA
+#define VK_OEM_PLUS_W         0xBB
+#define VK_OEM_COMMA_W        0xBC
+#define VK_OEM_MINUS_W        0xBD
+#define VK_OEM_PERIOD_W       0xBE
+#define VK_OEM_2_W            0xBF
+#define VK_OEM_3_W            0xC0
+/*                          0xC1-0xDA  Unassigned */
+#define VK_OEM_4_W            0xDB
+#define VK_OEM_5_W            0xDC
+#define VK_OEM_6_W            0xDD
+#define VK_OEM_7_W            0xDE
+/*                          0xDF-0xE4  OEM specific */
+
+#define VK_PROCESSKEY_W       0xE5
+
+/*                          0xE6       OEM specific */
+/*                          0xE7-0xE8  Unassigned */
+/*                          0xE9-0xF5  OEM specific */
+
+#define VK_ATTN_W             0xF6
+#define VK_CRSEL_W            0xF7
+#define VK_EXSEL_W            0xF8
+#define VK_EREOF_W            0xF9
+#define VK_PLAY_W             0xFA
+#define VK_ZOOM_W             0xFB
+#define VK_NONAME_W           0xFC
+#define VK_PA1_W              0xFD
+#define VK_OEM_CLEAR_W        0xFE
+
+/**************************************************************/
+/* The following vkey definitions are undocumented in Windows */
+/**************************************************************/
+#define VK_SEMICOLON_W       0xBA
+#define VK_EQUAL_W           0xBB
+#define VK_COMMA_W           0xBC
+#define VK_HYPHEN_W          0xBD
+#define VK_PERIOD_W          0xBE
+#define VK_SLASH_W           0xBF
+#define VK_GRAVE_W           0xC0
+#define VK_BRACKETLEFT_W     0xDB
+#define VK_BACKSLASH_W       0xDC
+#define VK_BRACKETRIGHT_W    0xDD
+#define VK_QUOTESINGLE_W     0xDE
+#define VK_EXTRA_W           0xE2

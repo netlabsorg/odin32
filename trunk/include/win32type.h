@@ -1,4 +1,4 @@
-/* $Id: win32type.h,v 1.35 2000-03-03 11:14:24 sandervl Exp $ */
+/* $Id: win32type.h,v 1.36 2000-03-16 19:16:35 sandervl Exp $ */
 
 /*
  * Win32 type definitions for OS/2
@@ -907,6 +907,61 @@ typedef enum _SECURITY_IMPERSONATION_LEVEL {
   SecurityImpersonation, 
   SecurityDelegation 
 } SECURITY_IMPERSONATION_LEVEL, *PSECURITY_IMPERSONATION_LEVEL; 
+
+#define SIZE_OF_80387_REGISTERS      80
+
+typedef struct _FLOATING_SAVE_AREA
+{
+    DWORD   ControlWord;
+    DWORD   StatusWord;
+    DWORD   TagWord;    
+    DWORD   ErrorOffset;
+    DWORD   ErrorSelector;
+    DWORD   DataOffset;
+    DWORD   DataSelector;    
+    BYTE    RegisterArea[SIZE_OF_80387_REGISTERS];
+    DWORD   Cr0NpxState;
+} FLOATING_SAVE_AREA, *PFLOATING_SAVE_AREA;
+
+typedef struct _CONTEXT86
+{
+    DWORD   ContextFlags;
+
+    /* These are selected by CONTEXT_DEBUG_REGISTERS */
+    DWORD   Dr0;
+    DWORD   Dr1;
+    DWORD   Dr2;
+    DWORD   Dr3;
+    DWORD   Dr6;
+    DWORD   Dr7;
+
+    /* These are selected by CONTEXT_FLOATING_POINT */
+    FLOATING_SAVE_AREA FloatSave;
+
+    /* These are selected by CONTEXT_SEGMENTS */
+    DWORD   SegGs;
+    DWORD   SegFs;
+    DWORD   SegEs;
+    DWORD   SegDs;    
+
+    /* These are selected by CONTEXT_INTEGER */
+    DWORD   Edi;
+    DWORD   Esi;
+    DWORD   Ebx;
+    DWORD   Edx;    
+    DWORD   Ecx;
+    DWORD   Eax;
+
+    /* These are selected by CONTEXT_CONTROL */
+    DWORD   Ebp;    
+    DWORD   Eip;
+    DWORD   SegCs;
+    DWORD   EFlags;
+    DWORD   Esp;
+    DWORD   SegSs;
+} CONTEXT;
+
+typedef CONTEXT *PCONTEXT;
 
 #pragma pack()
 
