@@ -49,7 +49,7 @@ void WIN32API SetWindowAppearance(BOOL fOS2Looks);
 BOOL WIN32API OSLibWinCreateObject(LPSTR pszPath, LPSTR pszArgs, LPSTR pszWorkDir, LPSTR pszName, 
                                    LPSTR pszDescription, LPSTR pszIcoPath, INT iIcoNdx, BOOL fDesktop);
 
-typedef BOOL (WIN32API *VISRGN_NOTIFY_PROC)(HWND hwnd, BOOL fDrawingAllowed, DWORD dwUserData);
+typedef BOOL (* WIN32API VISRGN_NOTIFY_PROC)(HWND hwnd, BOOL fDrawingAllowed, DWORD dwUserData);
 //******************************************************************************
 // WinSetVisibleRgnNotifyProc
 //   To set a notification procedure for visible region changes of a specific window.
