@@ -1,4 +1,4 @@
-/* $Id: file.cpp,v 1.3 2000-02-03 21:46:42 sandervl Exp $ */
+/* $Id: file.cpp,v 1.4 2000-10-03 06:04:48 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -12,6 +12,10 @@
 #include <string.h>
 
 #include "ntdll.h"
+
+#ifndef ERROR_INVALID_FUNCTION
+#define ERROR_INVALID_FUNCTION 1
+#endif
 
 
 /**************************************************************************
@@ -40,7 +44,7 @@ NTSTATUS WIN32API NtOpenFile(PHANDLE            FileHandle,
            ShareAccess,
            OpenOptions));
 
-  return 0;
+  return ERROR_INVALID_FUNCTION;
 }
 
 
@@ -88,7 +92,7 @@ NTSTATUS WIN32API NtCreateFile(PHANDLE            FileHandle,
            EaBuffer,
            EaLength));
 
-  return 0;
+  return ERROR_INVALID_FUNCTION;
 }
 
 
@@ -128,7 +132,7 @@ NTSTATUS WIN32API NtReadFile (HANDLE           FileHandle,
            ByteOffset,
            Key));
 
-  return 0;
+  return ERROR_INVALID_FUNCTION;
 }
 
 
@@ -158,7 +162,7 @@ NTSTATUS WIN32API NtDeviceIoControlFile(HANDLE           DeviceHandle,
            OutputBuffer,
            OutputBufferSize));
 
-  return 0;
+  return ERROR_INVALID_FUNCTION;
 }
 
 
@@ -188,7 +192,7 @@ NTSTATUS WIN32API NtFsControlFile(HANDLE           DeviceHandle,
            OutputBuffer,
            OutputBufferSize));
 
-  return 0;
+  return ERROR_INVALID_FUNCTION;
 }
 
 
@@ -206,7 +210,7 @@ NTSTATUS WIN32API NtSetVolumeInformationFile(HANDLE FileHandle,
            VolumeInformation,
            Length));
 
-  return 0;
+  return ERROR_INVALID_FUNCTION;
 }
 
 
@@ -226,7 +230,7 @@ NTSTATUS WIN32API NtQueryInformationFile(HANDLE                 FileHandle,
            Length,
            FileInformationClass));
 
-  return 0;
+  return ERROR_INVALID_FUNCTION;
 }
 
 
@@ -246,7 +250,7 @@ NTSTATUS WIN32API NtSetInformationFile(HANDLE                 FileHandle,
            Length,
            FileInformationClass));
 
-  return 0;
+  return ERROR_INVALID_FUNCTION;
 }
 
 
@@ -279,7 +283,7 @@ NTSTATUS WIN32API NtQueryDirectoryFile(HANDLE                 FileHandle,
            FileName,
            RestartScan));
 
-  return 0;
+  return ERROR_INVALID_FUNCTION;
 }
 
 
