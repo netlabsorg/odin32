@@ -41,6 +41,10 @@
 #include <heapstring.h>
 #include <win32api.h>
 #include "wsock32.h"
+#include <vmutex.h>
+
+#define DBG_LOCALLOG	DBG_relaywin
+#include "dbglocal.h"
 
 ODINDEBUGCHANNEL(WSOCK32-RELAYWIN)
 
@@ -55,7 +59,8 @@ ODINDEBUGCHANNEL(WSOCK32-RELAYWIN)
 static HWNDMSGPAIR arrHwndMsgPair[MAX_ASYNC_SOCKETS] = {0};
 static char*       ODIN_WSOCK_RELAY_CLASS = "ODIN_WSOCK_RELAY";
 static HWND        hwndRelay              = NULLHANDLE;
-
+static HAB         hab;
+static VMutex      relayMutex;
 
 /*****************************************************************************
  * Name      :
@@ -79,24 +84,25 @@ ULONG RelayAlloc(HWND  hwnd,
 {
   ULONG ulCounter;
 
-  for (ulCounter = 0;
-       ulCounter < MAX_ASYNC_SOCKETS;
-       ulCounter++)
-    if ( (arrHwndMsgPair[ulCounter].hwnd == 0) ||    // slot free?
-         ( (fSingleRequestPerWindow == TRUE) &&      // more than one request
-                                                     // per window ?
+  relayMutex.enter();
+  for(ulCounter = 0; ulCounter < MAX_ASYNC_SOCKETS; ulCounter++)
+  {
+    	if ( (arrHwndMsgPair[ulCounter].hwnd == 0) ||    // slot free?
+           ( (fSingleRequestPerWindow == TRUE) &&      // more than one request per window?
            (arrHwndMsgPair[ulCounter].hwnd == hwnd) ) ) // same window?
-    {
-      // occupy slot
-      arrHwndMsgPair[ulCounter].hwnd          = hwnd;
-      arrHwndMsgPair[ulCounter].ulMsg         = ulMsg;
-      arrHwndMsgPair[ulCounter].ulRequestType = ulRequestType;
-      arrHwndMsgPair[ulCounter].pvUserData1   = pvUserData1;
-      arrHwndMsgPair[ulCounter].pvUserData2   = pvUserData2;
-      arrHwndMsgPair[ulCounter].pvUserData3   = pvUserData3;
-      return ulCounter + 1; // return "id"
-    }
-
+        {
+      		// occupy slot
+	      	arrHwndMsgPair[ulCounter].hwnd          = hwnd;
+	      	arrHwndMsgPair[ulCounter].ulMsg         = ulMsg;
+	      	arrHwndMsgPair[ulCounter].ulRequestType = ulRequestType;
+	      	arrHwndMsgPair[ulCounter].pvUserData1   = pvUserData1;
+	      	arrHwndMsgPair[ulCounter].pvUserData2   = pvUserData2;
+	      	arrHwndMsgPair[ulCounter].pvUserData3   = pvUserData3;
+	  	relayMutex.leave();
+	      	return ulCounter + 1; // return "id"
+    	}
+  }
+  relayMutex.leave();
   return -1; // not found
 }
 
@@ -119,12 +125,14 @@ ULONG RelayFree(ULONG ulID)
        (ulID > MAX_ASYNC_SOCKETS) )
     return -1; // error
 
+  relayMutex.enter();
   arrHwndMsgPair[ulID-1].hwnd = 0; // mark free
   arrHwndMsgPair[ulID-1].ulMsg = 0;
   arrHwndMsgPair[ulID-1].ulRequestType = 0;
   arrHwndMsgPair[ulID-1].pvUserData1 = 0;
   arrHwndMsgPair[ulID-1].pvUserData2 = 0;
   arrHwndMsgPair[ulID-1].pvUserData3 = 0;
+  relayMutex.leave();
 
   return 0; // OK
 }
@@ -146,15 +154,23 @@ ULONG RelayFreeByHwnd(HWND hwnd)
 {
   ULONG ulCounter;
 
-  for (ulCounter = 0;
-       ulCounter < MAX_ASYNC_SOCKETS;
-       ulCounter++)
-    if ( arrHwndMsgPair[ulCounter].hwnd == hwnd )  // same window?
-    {
-      arrHwndMsgPair[ulCounter].hwnd  = 0; // free slot
-      return 0; // OK
-    }
-
+  relayMutex.enter();
+  for(ulCounter = 0; ulCounter < MAX_ASYNC_SOCKETS; ulCounter++)
+  {
+    	if ( arrHwndMsgPair[ulCounter].hwnd == hwnd )  // same window?
+    	{
+      		arrHwndMsgPair[ulCounter].hwnd  = 0; // free slot
+  		arrHwndMsgPair[ulCounter].ulMsg = 0;
+  		arrHwndMsgPair[ulCounter].ulRequestType = 0;
+  		arrHwndMsgPair[ulCounter].pvUserData1 = 0;
+  		arrHwndMsgPair[ulCounter].pvUserData2 = 0;
+  		arrHwndMsgPair[ulCounter].pvUserData3 = 0;
+  		relayMutex.leave();
+      		return 0; // OK
+    	}
+  }
+  relayMutex.leave();
+  dprintf(("RelayFreeByHwnd: window %x not found!", hwnd));
   return -1; // not found
 }
 
@@ -215,9 +231,9 @@ MRESULT EXPENTRY RelayWindowProc(HWND   hwnd,
   {
     rc = SHORT1FROMMP(mp2);                /* asynchronous operation result */
 
-    dprintf(("WSOCK32: RelayWindowProc, message %x for window %x with "
-             "mp1 = %d and mp2 = %d (rc = %d) received\n",
-             ulMsg, hwnd, mp1, mp2, rc));
+//    dprintf(("WSOCK32: RelayWindowProc, message %x for window %x with "
+//             "mp1 = %d and mp2 = %d (rc = %d) (time = %x) received\n",
+//             ulMsg, hwnd, mp1, mp2, rc, WinQueryMsgTime(hab)));
 
     /* check request type for special handling */
     switch (pHM->ulRequestType)
@@ -227,7 +243,7 @@ MRESULT EXPENTRY RelayWindowProc(HWND   hwnd,
        **********/
       case ASYNCREQUEST_SELECT:
       {
-        dprintf(("WSOCK32:RelayWindowProc, AsyncSelect notification\n"));
+        dprintf(("WSOCK32:RelayWindowProc, AsyncSelect notification %x %x (%d,%d) time %x\n", pHM->hwnd, pHM->ulMsg, mp1, mp2, WinQueryMsgTime(hab)));
         break;
       }
 
@@ -389,11 +405,11 @@ MRESULT EXPENTRY RelayWindowProc(HWND   hwnd,
     }
 
 
-    dprintf(("WSOCK32:RelayWinProc, Posting hwnd=%08xh, msg=%08xh, w=%08xh, l=%08xh\n",
-             pHM->hwnd,
-             pHM->ulMsg,
-             mp1,
-             mp2));
+//    dprintf(("WSOCK32:RelayWinProc, Posting hwnd=%08xh, msg=%08xh, w=%08xh, l=%08xh\n",
+//             pHM->hwnd,
+//             pHM->ulMsg,
+//             mp1,
+//             mp2));
 
     PostMessageA(pHM->hwnd,
                  pHM->ulMsg,
@@ -438,7 +454,6 @@ MRESULT EXPENTRY RelayWindowProc(HWND   hwnd,
 HWND RelayInitialize(HWND hwndPost)
 {
   BOOL       fSuccess;
-  HAB        hab;
   HWND       hwnd;
 
 

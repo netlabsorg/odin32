@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.20 2000-03-06 23:39:20 bird Exp $
+# $Id: makefile,v 1.21 2000-03-17 16:06:42 sandervl Exp $
 
 #
 # Odin32 API
@@ -27,7 +27,10 @@ $(OBJDIR)\wsock32.obj \
 $(OBJDIR)\unknown.obj \
 $(OBJDIR)\relaywin.obj \
 $(OBJDIR)\wsock32rsrc.obj \
-$(PDWIN32_LIB)/dllentry.obj
+$(OBJDIR)\initterm.obj \
+#$(OBJDIR)\async.obj \
+#$(OBJDIR)\asyncthread.obj \
+$(OBJDIR)\dbglocal.obj
 
 
 # Target name - name of the dll without extention and path.
