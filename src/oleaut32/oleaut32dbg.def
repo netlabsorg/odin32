@@ -1,4 +1,4 @@
-;/* $Id: oleaut32dbg.def,v 1.2 2002-02-15 15:23:43 sandervl Exp $ */
+;/* $Id: oleaut32dbg.def,v 1.3 2002-11-12 17:07:46 sandervl Exp $ */
 LIBRARY OLAUTOS2 INITINSTANCE
 DESCRIPTION 'Odin32 System DLL - OleAut32'
 DATA MULTIPLE NONSHARED
@@ -67,96 +67,122 @@ VarI4FromDisp = _DbgVarI4FromDisp@12  @65
 VarI4FromBool = _DbgVarI4FromBool@8  @66
 VarR4FromUI1 = _DbgVarR4FromUI1@8  @68
 VarR4FromI2 = _DbgVarR4FromI2@8  @69
-VarR4FromI4 = _DbgVarR4FromI4@8  @70
-VarR4FromR8 = _DbgVarR4FromR8@12  @71
-VarR4FromCy = _DbgVarR4FromCy@12  @72
-VarR4FromDate = _DbgVarR4FromDate@12  @73
-VarR4FromStr = _DbgVarR4FromStr@16  @74
-VarR4FromDisp = _DbgVarR4FromDisp@12  @75
-VarR4FromBool = _DbgVarR4FromBool@8  @76
-VarR8FromUI1 = _DbgVarR8FromUI1@8  @78
-VarR8FromI2 = _DbgVarR8FromI2@8  @79
-VarR8FromI4 = _DbgVarR8FromI4@8  @80
-VarR8FromR4 = _DbgVarR8FromR4@8  @81
-VarR8FromCy = _DbgVarR8FromCy@12  @82
-VarR8FromDate = _DbgVarR8FromDate@12  @83
-VarR8FromStr = _DbgVarR8FromStr@16  @84
-VarR8FromDisp = _DbgVarR8FromDisp@12  @85
-VarR8FromBool = _DbgVarR8FromBool@8  @86
-VarDateFromUI1 = _DbgVarDateFromUI1@8  @88
-VarDateFromI2 = _DbgVarDateFromI2@8  @89
-VarDateFromI4 = _DbgVarDateFromI4@8  @90
-VarDateFromR4 = _DbgVarDateFromR4@8  @91
-VarDateFromR8 = _DbgVarDateFromR8@12  @92
-VarDateFromCy = _DbgVarDateFromCy@12  @93
-VarDateFromStr = _DbgVarDateFromStr@16  @94
-VarDateFromDisp = _DbgVarDateFromDisp@12  @95
-VarDateFromBool = _DbgVarDateFromBool@8  @96
-VarCyFromUI1 = _DbgVarCyFromUI1@8  @98
-VarCyFromI2 = _DbgVarCyFromI2@8  @99
-VarCyFromI4 = _DbgVarCyFromI4@8  @100
-VarCyFromR4 = _DbgVarCyFromR4@8  @101
-VarCyFromR8 = _DbgVarCyFromR8@12  @102
-VarCyFromDate = _DbgVarCyFromDate@12  @103
-VarCyFromStr = _DbgVarCyFromStr@16  @104
-VarCyFromDisp = _DbgVarCyFromDisp@12  @105
-VarCyFromBool = _DbgVarCyFromBool@8  @106
-VarBstrFromUI1 = _DbgVarBstrFromUI1@16  @108
-VarBstrFromI2 = _DbgVarBstrFromI2@16  @109
-VarBstrFromI4 = _DbgVarBstrFromI4@16  @110
-VarBstrFromR4 = _DbgVarBstrFromR4@16  @111
-VarBstrFromR8 = _DbgVarBstrFromR8@20  @112
-VarBstrFromCy = _DbgVarBstrFromCy@20  @113
-VarBstrFromDate = _DbgVarBstrFromDate@20  @114
-VarBstrFromDisp = _DbgVarBstrFromDisp@16  @115
-VarBstrFromBool = _DbgVarBstrFromBool@16  @116
-VarBoolFromUI1 = _DbgVarBoolFromUI1@8  @118
-VarBoolFromI2 = _DbgVarBoolFromI2@8  @119
-VarBoolFromI4 = _DbgVarBoolFromI4@8  @120
-VarBoolFromR4 = _DbgVarBoolFromR4@8  @121
-VarBoolFromR8 = _DbgVarBoolFromR8@12  @122
-VarBoolFromDate = _DbgVarBoolFromDate@12  @123
-VarBoolFromCy = _DbgVarBoolFromCy@12  @124
-VarBoolFromStr = _DbgVarBoolFromStr@16  @125
-VarBoolFromDisp = _DbgVarBoolFromDisp@12  @126
-VarUI1FromI2 = _DbgVarUI1FromI2@8  @130
-VarUI1FromI4 = _DbgVarUI1FromI4@8  @131
-VarUI1FromR4 = _DbgVarUI1FromR4@8  @132
-VarUI1FromR8 = _DbgVarUI1FromR8@12  @133
-VarUI1FromCy = _DbgVarUI1FromCy@12  @134
-VarUI1FromDate = _DbgVarUI1FromDate@12  @135
-VarUI1FromStr = _DbgVarUI1FromStr@16  @136
-VarUI1FromDisp = _DbgVarUI1FromDisp@12  @137
-VarUI1FromBool = _DbgVarUI1FromBool@8  @138
-DispCallFunc = _DbgDispCallFunc@32  @146
-VariantChangeTypeEx = _DbgVariantChangeTypeEx@20  @147
-SafeArrayPtrOfIndex = _DbgSafeArrayPtrOfIndex@12  @148
-SysStringByteLen = _DbgSysStringByteLen@4  @149
-SysAllocStringByteLen = _DbgSysAllocStringByteLen@8  @150
-CreateTypeLib = _DbgCreateTypeLib@12  @160
-LoadTypeLib = _DbgLoadTypeLib@8  @161
-LoadRegTypeLib = _DbgLoadRegTypeLib@20  @162
-RegisterTypeLib = _DbgRegisterTypeLib@12  @163
-QueryPathOfRegTypeLib = _DbgQueryPathOfRegTypeLib@20  @164
-LHashValOfNameSys = _DbgLHashValOfNameSys@12  @165
-LHashValOfNameSysA = _DbgLHashValOfNameSysA@12  @166
-OaBuildVersion = _DbgOaBuildVersion@0  @170
-ClearCustData = _DbgClearCustData@4  @171
-CreateTypeLib2 = _DbgCreateTypeLib2@12  @180
-LoadTypeLibEx = _DbgLoadTypeLibEx@12  @183
-SystemTimeToVariantTime = _DbgSystemTimeToVariantTime@8  @184
-VariantTimeToSystemTime = _DbgVariantTimeToSystemTime@12  @185
-UnRegisterTypeLib = _DbgUnRegisterTypeLib@20  @186
-VarDecFromUI1 = _DbgVarDecFromUI1@8  @190
-VarDecFromI2 = _DbgVarDecFromI2@8  @191
-VarDecFromI4 = _DbgVarDecFromI4@8  @192
-VarDecFromR4 = _DbgVarDecFromR4@8  @193
-VarDecFromR8 = _DbgVarDecFromR8@12  @194
-VarDecFromDate = _DbgVarDecFromDate@12  @195
-VarDecFromCy = _DbgVarDecFromCy@12  @196
-VarDecFromStr = _DbgVarDecFromStr@16  @197
-VarDecFromDisp = _DbgVarDecFromDisp@12  @198
-VarDecFromBool = _DbgVarDecFromBool@8  @199
+
+  VarR4FromI4                 = _DbgVarR4FromI4@8                  @70
+  VarR4FromR8                 = _DbgVarR4FromR8@12                 @71
+  VarR4FromCy                 = _DbgVarR4FromCy@12                 @72
+  VarR4FromDate               = _DbgVarR4FromDate@12               @73
+  VarR4FromStr                = _DbgVarR4FromStr@16                @74
+  VarR4FromDisp               = _DbgVarR4FromDisp@12               @75
+  VarR4FromBool               = _DbgVarR4FromBool@8                @76
+  SafeArrayGetVartype         = _DbgSafeArrayGetVartype@8          @77
+  VarR8FromUI1                = _DbgVarR8FromUI1@8                 @78
+  VarR8FromI2                 = _DbgVarR8FromI2@8                  @79
+
+  VarR8FromI4                 = _DbgVarR8FromI4@8                  @80
+  VarR8FromR4                 = _DbgVarR8FromR4@8                  @81
+  VarR8FromCy                 = _DbgVarR8FromCy@12                 @82
+  VarR8FromDate               = _DbgVarR8FromDate@12               @83
+  VarR8FromStr                = _DbgVarR8FromStr@16                @84
+  VarR8FromDisp               = _DbgVarR8FromDisp@12               @85
+  VarR8FromBool               = _DbgVarR8FromBool@8                @86
+  VarFormat                   = _DbgVarFormat@24                   @87
+  VarDateFromUI1              = _DbgVarDateFromUI1@8               @88
+  VarDateFromI2               = _DbgVarDateFromI2@8                @89
+
+  VarDateFromI4               = _DbgVarDateFromI4@8                @90
+  VarDateFromR4               = _DbgVarDateFromR4@8                @91
+  VarDateFromR8               = _DbgVarDateFromR8@12               @92
+  VarDateFromCy               = _DbgVarDateFromCy@12               @93
+  VarDateFromStr              = _DbgVarDateFromStr@16              @94
+  VarDateFromDisp             = _DbgVarDateFromDisp@12             @95
+  VarDateFromBool             = _DbgVarDateFromBool@8              @96
+  VarFormatDateTime           = _DbgVarFormatDateTime@16           @97
+  VarCyFromUI1                = _DbgVarCyFromUI1@8                 @98
+  VarCyFromI2                 = _DbgVarCyFromI2@8                  @99
+
+  VarCyFromI4                 = _DbgVarCyFromI4@8                  @100
+  VarCyFromR4                 = _DbgVarCyFromR4@8                  @101
+  VarCyFromR8                 = _DbgVarCyFromR8@12                 @102
+  VarCyFromDate               = _DbgVarCyFromDate@12               @103
+  VarCyFromStr                = _DbgVarCyFromStr@16                @104
+  VarCyFromDisp               = _DbgVarCyFromDisp@12               @105
+  VarCyFromBool               = _DbgVarCyFromBool@8                @106
+;;  VarFormatNumber             = _DbgVarFormatNumber@28             @107
+  VarBstrFromUI1              = _DbgVarBstrFromUI1@16              @108
+  VarBstrFromI2               = _DbgVarBstrFromI2@16               @109
+
+  VarBstrFromI4               = _DbgVarBstrFromI4@16               @110
+  VarBstrFromR4               = _DbgVarBstrFromR4@16               @111
+  VarBstrFromR8               = _DbgVarBstrFromR8@20               @112
+  VarBstrFromCy               = _DbgVarBstrFromCy@20               @113
+  VarBstrFromDate             = _DbgVarBstrFromDate@20             @114
+  VarBstrFromDisp             = _DbgVarBstrFromDisp@16             @115
+  VarBstrFromBool             = _DbgVarBstrFromBool@16             @116
+;;  VarFormatPercent            = _DbgVarFormatPercent@28            @117
+  VarBoolFromUI1              = _DbgVarBoolFromUI1@8               @118
+  VarBoolFromI2               = _DbgVarBoolFromI2@8                @119
+
+  VarBoolFromI4               = _DbgVarBoolFromI4@8                @120
+  VarBoolFromR4               = _DbgVarBoolFromR4@8                @121
+  VarBoolFromR8               = _DbgVarBoolFromR8@12               @122
+  VarBoolFromDate             = _DbgVarBoolFromDate@12             @123
+  VarBoolFromCy               = _DbgVarBoolFromCy@12               @124
+  VarBoolFromStr              = _DbgVarBoolFromStr@16              @125
+  VarBoolFromDisp             = _DbgVarBoolFromDisp@12             @126
+  VarFormatCurrency           = _DbgVarFormatCurrency@28           @127
+
+  VarUI1FromI2                = _DbgVarUI1FromI2@8                 @130
+  VarUI1FromI4                = _DbgVarUI1FromI4@8                 @131
+  VarUI1FromR4                = _DbgVarUI1FromR4@8                 @132
+  VarUI1FromR8                = _DbgVarUI1FromR8@12                @133
+  VarUI1FromCy                = _DbgVarUI1FromCy@12                @134
+  VarUI1FromDate              = _DbgVarUI1FromDate@12              @135
+  VarUI1FromStr               = _DbgVarUI1FromStr@16               @136
+  VarUI1FromDisp              = _DbgVarUI1FromDisp@12              @137
+  VarUI1FromBool              = _DbgVarUI1FromBool@8               @138
+  VarFormatFromTokens         = _DbgVarFormatFromTokens@24         @139
+
+  VarTokenizeFormatString     = _DbgVarTokenizeFormatString@28     @140
+  VarAnd                      = _DbgVarAnd@12                      @142
+
+  DispCallFunc                = _DbgDispCallFunc@32                @146
+  VariantChangeTypeEx         = _DbgVariantChangeTypeEx@20         @147
+  SafeArrayPtrOfIndex         = _DbgSafeArrayPtrOfIndex@12         @148
+  SysStringByteLen            = _DbgSysStringByteLen@4             @149
+
+  SysAllocStringByteLen       = _DbgSysAllocStringByteLen@8        @150
+
+  CreateTypeLib               = _DbgCreateTypeLib@12               @160
+  LoadTypeLib                 = _DbgLoadTypeLib@8                  @161
+  LoadRegTypeLib              = _DbgLoadRegTypeLib@20              @162
+  RegisterTypeLib             = _DbgRegisterTypeLib@12             @163
+  QueryPathOfRegTypeLib       = _DbgQueryPathOfRegTypeLib@20       @164
+  LHashValOfNameSys           = _DbgLHashValOfNameSys@12           @165
+  LHashValOfNameSysA          = _DbgLHashValOfNameSysA@12          @166
+
+  OaBuildVersion              = _DbgOaBuildVersion@0               @170
+  ClearCustData               = _DbgClearCustData@4                @171
+  VarNot                      = _DbgVarNot@8                       @174
+  VarCmp                      = _DbgVarCmp@16                      @176
+
+  CreateTypeLib2              = _DbgCreateTypeLib2@12              @180
+  LoadTypeLibEx               = _DbgLoadTypeLibEx@12               @183
+  SystemTimeToVariantTime     = _DbgSystemTimeToVariantTime@8      @184
+  VariantTimeToSystemTime     = _DbgVariantTimeToSystemTime@12     @185
+  UnRegisterTypeLib           = _DbgUnRegisterTypeLib@20           @186
+
+  VarDecFromUI1               = _DbgVarDecFromUI1@8                @190
+  VarDecFromI2                = _DbgVarDecFromI2@8                 @191
+  VarDecFromI4                = _DbgVarDecFromI4@8                 @192
+  VarDecFromR4                = _DbgVarDecFromR4@8                 @193
+  VarDecFromR8                = _DbgVarDecFromR8@12                @194
+  VarDecFromDate              = _DbgVarDecFromDate@12              @195
+  VarDecFromCy                = _DbgVarDecFromCy@12                @196
+  VarDecFromStr               = _DbgVarDecFromStr@16               @197
+  VarDecFromDisp              = _DbgVarDecFromDisp@12              @198
+  VarDecFromBool              = _DbgVarDecFromBool@8               @199
+
 GetErrorInfo = _GetErrorInfo@8  @200
 SetErrorInfo = _SetErrorInfo@8  @201
 CreateErrorInfo = _CreateErrorInfo@4  @202
@@ -253,6 +279,13 @@ LPSAFEARRAY_UserFree = _DbgLPSAFEARRAY_UserFree@8  @294
 LPSAFEARRAY_Size = _DbgLPSAFEARRAY_Size@0  @295
 LPSAFEARRAY_Marshal = _DbgLPSAFEARRAY_Marshal@0  @296
 LPSAFEARRAY_Unmarshal = _DbgLPSAFEARRAY_Unmarshal@0  @297
+
+  VarCyMulI4               = _DbgVarCyMulI4@16                    @304
+
+  VarBstrCat               = _DbgVarBstrCat@12                    @313
+  VarBstrCmp               = _DbgVarBstrCmp@16                    @314
+  VarCat                   = _DbgVarCat@12                        @318
+
 DllRegisterServer = _DbgOLEAUT32_DllRegisterServer@0  @320
 DllUnregisterServer = _DbgOLEAUT32_DllUnregisterServer@0  @321
 VarDateFromUdate = _DbgVarDateFromUdate@12  @330
@@ -302,67 +335,3 @@ OleLoadPictureEx   = _DbgOleLoadPictureEx@32    @425
 
 SafeArrayAllocDescriptorEx = _DbgSafeArrayAllocDescriptorEx@12 @429
 
-;430 stub SafeArrayCreateEx
-;431 stub SafeArrayCreateVectorEx
-;432 stub SafeArrayGetIID
-;433 stub SafeArrayGetRecordInfo
-;434 stub SafeArraySetIID
-;435 stub SafeArraySetRecordInfo
-;436 stub VarAbs ; stdcall (ptr ptr)
-;437 stub VarAdd ; stdcall (ptr ptr ptr)
-;438 stub VarAnd ; stdcall (ptr ptr ptr)
-VarBstrCat          = _DbgVarBstrCat@12                    @439
-VarBstrCmp          = _DbgVarBstrCmp@16                    @440
-VarCat              = _DbgVarCat@12                        @441
-
-;442 stub VarCmp ; stdcall (ptr ptr long long)
-;443 stub VarCyAbs
-;444 stub VarCyAdd
-;445 stub VarCyCmp
-;446 stub VarCyCmpR8
-;447 stub VarCyFix
-;448 stub VarCyInt
-;449 stub VarCyMul
-;450 stub VarCyMulI4
-;451 stub VarCyNeg
-;452 stub VarCyRound
-;453 stub VarCySub
-;454 stub VarDateFromUdateEx ; stdcall (ptr long long ptr)
-;455 stub VarDecAbs ; stdcall (ptr ptr)
-;456 stub VarDecAdd ; stdcall (ptr ptr ptr)
-;457 stub VarDecCmp ; stdcall (ptr ptr)
-;458 stub VarDecCmpR8 ; stdcall (ptr double)
-;459 stub VarDecDiv ; stdcall (ptr ptr ptr)
-;460 stub VarDecFix ; stdcall (ptr ptr)
-;461 stub VarDecInt ; stdcall (ptr ptr)
-;462 stub VarDecMul ; stdcall (ptr ptr ptr)
-;463 stub VarDecNeg ; stdcall (ptr ptr)
-;464 stub VarDecRound ; stdcall (ptr long ptr)
-;465 stub VarDecSub ; stdcall (ptr ptr ptr)
-;466 stub VarDiv ; stdcall (ptr ptr ptr)
-;467 stub VarEqv ; stdcall (ptr ptr ptr)
-;468 stub VarFix ; stdcall (ptr ptr)
-;469 stub VarFormat ; stdcall (ptr ptr long long long ptr)
-;470 stub VarFormatCurrency ; stdcall (ptr long long long long long ptr)
-;471 stub VarFormatDateTime ; stdcall (ptr long long ptr)
-;472 stub VarFormatFromTokens ; stdcall (ptr ptr ptr long ptr long)
-;473 stub VarFormatNumber ; stdcall (ptr long long long long long ptr)
-;474 stub VarFormatPercent ; stdcall (ptr long long long long long ptr)
-;475 stub VarIdiv ; stdcall (ptr ptr ptr)
-;476 stub VarImp ; stdcall (ptr ptr ptr)
-;477 stub VarInt ; stdcall (ptr ptr)
-;478 stub VarMod ; stdcall (ptr ptr ptr)
-;479 stub VarMonthName ; stdcall (long long long ptr)
-;480 stub VarMul ; stdcall (ptr ptr ptr)
-;481 stub VarNeg ; stdcall (ptr ptr)
-;482 stub VarNot ; stdcall (ptr ptr)
-;483 stub VarOr ; stdcall (ptr ptr ptr)
-;484 stub VarPow ; stdcall (ptr ptr ptr)
-;485 stub VarR4CmpR8
-;486 stub VarR8Pow ; stdcall (double double ptr)
-;487 stub VarR8Round ; stdcall (double long ptr)
-;488 stub VarRound ; stdcall (ptr long ptr)
-;489 stub VarSub ; stdcall (ptr ptr ptr)
-;490 stub VarTokenizeFormatString ; stdcall (ptr ptr long long long long ptr)
-;491 stub VarWeekdayName ; stdcall (long long long long ptr)
-;492 stub VarXor ; stdcall (ptr ptr ptr)

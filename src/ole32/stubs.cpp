@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.21 2002-02-19 12:34:50 sandervl Exp $ */
+/* $Id: stubs.cpp,v 1.22 2002-11-12 17:06:03 sandervl Exp $ */
 /* 
  * Win32 COM/OLE stubs for OS/2
  * 
@@ -79,24 +79,10 @@ HRESULT WIN32API CoQueryReleaseObject()
 }
 //*******************************************************************************
 //*******************************************************************************
-HRESULT WIN32API CoRegisterMallocSpy(LPMALLOCSPY pMallocSpy)
-{
-    dprintf(("OLE32: CoRegisterMallocSpy - stub"));
-    return CO_E_OBJISREG;
-}
-//*******************************************************************************
-//*******************************************************************************
 HRESULT WIN32API CoReleaseMarshalData(IStream *pStm)
 {
     dprintf(("OLE32: CoReleaseMarshalData - stub"));
     return E_OUTOFMEMORY;
-}
-//*******************************************************************************
-//*******************************************************************************
-HRESULT WIN32API CoRevokeMallocSpy()
-{
-    dprintf(("OLE32: CoRevokeMallocSpy - stub"));
-    return E_ACCESSDENIED;
 }
 //*******************************************************************************
 //*******************************************************************************
@@ -336,23 +322,6 @@ HRESULT WIN32API WriteStringStream()
 HRESULT WIN32API CoImpersonateClient()		// DCOM - obj_clientserver.h
 {
     dprintf(("OLE32: CoImpersonateClient - Stub"));
-    return(S_OK);
-}
-
-//*******************************************************************************
-//*******************************************************************************
-HRESULT WIN32API CoInitializeSecurity(		// DCOM - obj_clientserver.h
-    PSECURITY_DESCRIPTOR         pSecDesc,
-    LONG                         cAuthSvc,
-    SOLE_AUTHENTICATION_SERVICE *asAuthSvc,
-    void                        *pReserved1,
-    DWORD                        dwAuthnLevel,
-    DWORD                        dwImpLevel,
-    void                        *pReserved2,
-    DWORD                        dwCapabilities,
-    void                        *pReserved3 )
-{
-    dprintf(("OLE32: CoInitializeSecurity - Stub"));
     return(S_OK);
 }
 
