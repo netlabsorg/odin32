@@ -1,4 +1,4 @@
-/* $Id: dart.cpp,v 1.5 2001-04-20 13:22:37 phaller Exp $ */
+/* $Id: dart.cpp,v 1.6 2002-09-14 08:31:24 sandervl Exp $ */
 /*
  *  Dart Interface..
  *
@@ -20,6 +20,8 @@
 #define DART_DSOUND
 #include "dart.h"
 #include "dsmixer.h"
+
+#include "initdsound.h"
 
 #include <misc.h>
 
@@ -59,7 +61,7 @@ LONG APIENTRY OS2_Dart_Update(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulF
 
      if( fIsPlaying == FALSE /*&& lLastBuff == 0*/ )
      {
-       mciSendCommand(usDeviceID, MCI_STOP, MCI_WAIT, NULL, 0);
+       dsmciSendCommand(usDeviceID, MCI_STOP, MCI_WAIT, NULL, 0);
        return TRUE;
      }
 
@@ -118,7 +120,7 @@ long Dart_Open_Device(USHORT *pusDeviceID, void **vpMixBuffer, void **vpMixSetup
    //AmpOpenParms.pszDeviceType = (PSZ)MCI_DEVTYPE_AUDIO_AMPMIX;
    AmpOpenParms.pszDeviceType = (PSZ)MAKEULONG(MCI_DEVTYPE_AUDIO_AMPMIX, (USHORT)device);
 
-   rc = mciSendCommand(0, MCI_OPEN, MCI_WAIT | MCI_OPEN_TYPE_ID, (PVOID)&AmpOpenParms, 0);
+   rc = dsmciSendCommand(0, MCI_OPEN, MCI_WAIT | MCI_OPEN_TYPE_ID, (PVOID)&AmpOpenParms, 0);
    if (rc != MCIERR_SUCCESS) {
       dprintf(("DSOUND-DART: MCI_OPEN %d", rc));
       return DSERR_GENERIC;
@@ -136,7 +138,7 @@ long Dart_Open_Device(USHORT *pusDeviceID, void **vpMixBuffer, void **vpMixSetup
    MixSetupParms.ulDeviceType     = MCI_DEVTYPE_WAVEFORM_AUDIO;
    MixSetupParms.pmixEvent        = OS2_Dart_Update;
 
-   rc = mciSendCommand(usDeviceID, MCI_MIXSETUP, MCI_WAIT | MCI_MIXSETUP_INIT,
+   rc = dsmciSendCommand(usDeviceID, MCI_MIXSETUP, MCI_WAIT | MCI_MIXSETUP_INIT,
                       (PVOID)&MixSetupParms, 0);
    if (rc != MCIERR_SUCCESS) {
       dprintf(("DSOUND-DART: MCI_MIXSETUP (Constructor) %d", rc));
@@ -156,11 +158,11 @@ long Dart_Open_Device(USHORT *pusDeviceID, void **vpMixBuffer, void **vpMixSetup
    BufferParms.ulBufferSize   = MixSetupParms.ulBufferSize;
    BufferParms.pBufList       = pMixBuffers;
 
-   rc = mciSendCommand(usDeviceID, MCI_BUFFER, MCI_WAIT | MCI_ALLOCATE_MEMORY,
+   rc = dsmciSendCommand(usDeviceID, MCI_BUFFER, MCI_WAIT | MCI_ALLOCATE_MEMORY,
                                 (PVOID)&BufferParms, 0);
    if ( ULONG_LOWD(rc) != MCIERR_SUCCESS ) {
       dprintf(("DSOUND-DART: MCI_BUFFER (Alloc) %d", rc));
-      mciSendCommand(*pusDeviceID, MCI_CLOSE, MCI_WAIT, NULL, 0);
+      dsmciSendCommand(*pusDeviceID, MCI_CLOSE, MCI_WAIT, NULL, 0);
       return DSERR_OUTOFMEMORY;
    }
 
@@ -198,11 +200,11 @@ long Dart_Close_Device(USHORT usDeviceID, void *vpMixBuffer, void *vpMixSetup,
    MixSetup    = (MCI_MIXSETUP_PARMS*)vpMixSetup;
    BufferParms = (MCI_BUFFER_PARMS*)vpBuffParms;
 
-   rc = mciSendCommand(usDeviceID, MCI_BUFFER, MCI_WAIT | MCI_DEALLOCATE_MEMORY, BufferParms, 0);
+   rc = dsmciSendCommand(usDeviceID, MCI_BUFFER, MCI_WAIT | MCI_DEALLOCATE_MEMORY, BufferParms, 0);
    if (rc != MCIERR_SUCCESS) {
       dprintf(("DSOUND-DART: MCI_BUFFER (Close) %d", rc));
    }
-   rc = mciSendCommand(usDeviceID, MCI_CLOSE, MCI_WAIT, NULL, 0);
+   rc = dsmciSendCommand(usDeviceID, MCI_CLOSE, MCI_WAIT, NULL, 0);
    if (rc != MCIERR_SUCCESS) {
       dprintf(("DSOUND-DART: MCI_CLOSE (Close) %d", rc));
    }
@@ -256,14 +258,14 @@ long Dart_SetFormat(USHORT *pusDeviceID, void *vpMixSetup, void *vpBufferParms, 
    }
 
    /* Dealloc to avoid the 5511 error */
-   rc = mciSendCommand(*pusDeviceID, MCI_BUFFER, MCI_WAIT | MCI_DEALLOCATE_MEMORY,
+   rc = dsmciSendCommand(*pusDeviceID, MCI_BUFFER, MCI_WAIT | MCI_DEALLOCATE_MEMORY,
                        BufferParms, 0);
    if (rc != MCIERR_SUCCESS) {
       dprintf(("DSOUND-DART: MCI_DEALLOCATE_MEMORY (SetFormat) %d", rc));
       return DSERR_GENERIC;
    }
 
-   rc = mciSendCommand(*pusDeviceID, MCI_CLOSE, MCI_WAIT, NULL, 0);
+   rc = dsmciSendCommand(*pusDeviceID, MCI_CLOSE, MCI_WAIT, NULL, 0);
    if (rc != MCIERR_SUCCESS) {
       dprintf(("DSOUND-DART: MCI_CLOSE (SetFormat) %d", rc));
       return(DSERR_GENERIC);
@@ -274,7 +276,7 @@ long Dart_SetFormat(USHORT *pusDeviceID, void *vpMixSetup, void *vpBufferParms, 
    AmpOpenParms.usDeviceID    = 0;
    AmpOpenParms.pszDeviceType = (PSZ)MAKEULONG(MCI_DEVTYPE_AUDIO_AMPMIX, (USHORT)device);
 
-   rc = mciSendCommand(0, MCI_OPEN, MCI_WAIT | MCI_OPEN_TYPE_ID, (PVOID)&AmpOpenParms, 0);
+   rc = dsmciSendCommand(0, MCI_OPEN, MCI_WAIT | MCI_OPEN_TYPE_ID, (PVOID)&AmpOpenParms, 0);
    if (rc != MCIERR_SUCCESS) {
       dprintf(("DSOUND-DART: MCI_OPEN %d", rc));
       return DSERR_GENERIC;
@@ -291,7 +293,7 @@ long Dart_SetFormat(USHORT *pusDeviceID, void *vpMixSetup, void *vpBufferParms, 
    MixSetup->ulDeviceType     = MCI_DEVTYPE_WAVEFORM_AUDIO;
    MixSetup->pmixEvent        = OS2_Dart_Update;
 
-   rc = mciSendCommand(*pusDeviceID, MCI_MIXSETUP, MCI_WAIT | MCI_MIXSETUP_INIT,
+   rc = dsmciSendCommand(*pusDeviceID, MCI_MIXSETUP, MCI_WAIT | MCI_MIXSETUP_INIT,
                        (PVOID)MixSetup, 0);
    if (rc != MCIERR_SUCCESS) {
       dprintf(("DSOUND-DART: MCI_MIXSETUP (SetFormat) %d", rc));
@@ -306,11 +308,11 @@ long Dart_SetFormat(USHORT *pusDeviceID, void *vpMixSetup, void *vpBufferParms, 
    BufferParms->pBufList       = pMixBuffers;
    pMixBuffers->pBuffer        = NULL;
 
-   rc = mciSendCommand(*pusDeviceID, MCI_BUFFER, MCI_WAIT | MCI_ALLOCATE_MEMORY,
+   rc = dsmciSendCommand(*pusDeviceID, MCI_BUFFER, MCI_WAIT | MCI_ALLOCATE_MEMORY,
                        (PVOID)BufferParms, 0);
    if (rc != MCIERR_SUCCESS) {
       dprintf(("DSOUND-DART: MCI_BUFFER_ALLOCATE_MEMORY (SetFormat) %d", rc));
-      mciSendCommand(*pusDeviceID, MCI_CLOSE, MCI_WAIT, NULL, 0);
+      dsmciSendCommand(*pusDeviceID, MCI_CLOSE, MCI_WAIT, NULL, 0);
       memset(pMixBuffers, 0, sizeof(MCI_MIX_BUFFER) * ulNumDartBuffs);
       return DSERR_OUTOFMEMORY;
    }
@@ -359,7 +361,7 @@ long Dart_Stop(USHORT usDeviceID)
    // continue to loop because the OS2_Dart_Update would send the next
    // buffer causing Dart to start again..
 
-   //rc = mciSendCommand(usDeviceID, MCI_STOP, MCI_WAIT, NULL, 0);
+   //rc = dsmciSendCommand(usDeviceID, MCI_STOP, MCI_WAIT, NULL, 0);
    //if (rc != MCIERR_SUCCESS) {
    //   { FILE *dbf; dbf=fopen("log.log", "a"); fprintf( dbf, "Error in MCI_STOP...\n"); fclose(dbf); }
    //   dprintf(("DSOUND-DART: MCI_PAUSE %d", rc));
@@ -383,7 +385,7 @@ long Dart_Play(USHORT usDeviceID, void *vpMixSetup, void *vpMixBuffer, long play
 
   if (playing == TRUE) 
   {
-    rc = mciSendCommand(usDeviceID, MCI_RESUME, MCI_WAIT, NULL, 0);
+    rc = dsmciSendCommand(usDeviceID, MCI_RESUME, MCI_WAIT, NULL, 0);
     if (rc != MCIERR_SUCCESS) 
     {
       dprintf(("DSOUND-DART: MCI_RESUME %d", rc));
