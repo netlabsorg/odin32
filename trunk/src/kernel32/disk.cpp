@@ -1,4 +1,4 @@
-/* $Id: disk.cpp,v 1.33 2002-04-13 06:20:36 bird Exp $ */
+/* $Id: disk.cpp,v 1.34 2002-05-08 15:02:58 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -84,9 +84,9 @@ BOOL WIN32API GetDiskFreeSpaceA(LPCSTR lpszRootPathName, PDWORD lpSectorsPerClus
        [DRIVESPACE]
        TVFSTOHPFS = 1
        */
-    if(lpSectorsPerCluster!=NULL)
+    if(lpSectorsPerCluster!=NULL) 
     {
-      if(*lpSectorsPerCluster==1024 && PROFILE_GetOdinIniBool("DRIVESPACE","CLUSTERTO32",0))
+      if(*lpSectorsPerCluster==1024 && PROFILE_GetOdinIniBool("DRIVESPACE","CLUSTERTO32",0)) 
       {/* TVFS returns 1024 sectors per cluster */
         dprintf(("KERNEL32:  GetDiskFreeSpaceA, TVFS-Drive detected. Faking clustersize to 32.\n"));
         *lpSectorsPerCluster=32;
@@ -205,127 +205,35 @@ BOOL WIN32API GetDiskFreeSpaceExW(LPCWSTR         lpDirectoryName,
     FreeAsciiString(astring);
     return(rc);
 }
-
-
-/**
- * Determin the type of a specific drive or the current drive.
- *
- * @returns DRIVE_UNKNOWN
- *          DRIVE_NO_ROOT_DIR
- *          DRIVE_CANNOTDETERMINE
- *          DRIVE_DOESNOTEXIST
- *          DRIVE_REMOVABLE
- *          DRIVE_FIXED
- *          DRIVE_REMOTE
- *          DRIVE_CDROM
- *          DRIVE_RAMDISK
- *
- * @param   lpszDrive   Root path of the drive in question.
- *                      NULL means the current drive.
- * @sketch
- *          If no drive Then
- *              Get Current Drive Index.
- *          ElseIf valid drive letter Then
- *              Convert to Drive Index.
- *          Else
- *              Return Error: Invalid root dir.
- *          Endif
- *          Call the OSLib worker function with the index.
- *          return it's result.
- *
- * @status  completely implemented and tested
- * @author  Sander
- * @remark  NT4, SP6 does not change the last error, regardless of the junk it receives!
- */
+//******************************************************************************
+//Note: NT4, SP6 does not change the last error, regardless of the junk it receives!
+//******************************************************************************
 UINT WIN32API GetDriveTypeA(LPCSTR lpszDrive)
 {
-    UINT    rc;
-    ULONG   ulDrive = ~0;
+   UINT rc;
+   ULONG driveIndex;
 
-    /* validate and convert input */
-    if (!lpszDrive)
-        ulDrive = OSLibDosQueryCurrentDisk() - 1;
-    else if (*lpszDrive != '\0' && lpszDrive[1] == ':')
-    {
-        if (*lpszDrive >= 'A' && *lpszDrive <= 'Z')
-            ulDrive = *lpszDrive - 'A';
-        else if (*lpszDrive >= 'a' && *lpszDrive <= 'z')
-            ulDrive = *lpszDrive - 'a';
-
-        /*
-         * Validate the rest of the path.
-         * Note:    This validate is kind of weird.
-         *          "c:\\\\\\\\\\\\" is ok
-         *          "c:\\\\\\\\\\\\." is ok
-         *          "c:\\\\\\\\\\\\........" is ok
-         *          "c:\\\\\\\\\\\.\" is not ok
-         *          "c:..............." is ok
-         *          "c:\\ \ \ \ \ \\\\\" is not ok
-         *          "c:\\ \ \ \ \ \\\\\" is not ok
-         *          "c:\ . . . . . ." is ok
-         *          "c:\/\/\/ . . . . ." is ok
-         *          "c:\\\.\\\/\." is ok
-         * I hope I got it right.
-         */
-        if (ulDrive != ~0)
-        {
-            LPCSTR lpsz = lpszDrive + 2;
-
-            /* skip slashes and dots */
-            while (*lpsz == '.' || *lpsz == '\\' || *lpsz == '/')
-                lpsz++;
-            /* skip dot's and spaces. */
-            while (*lpsz == ' ' || *lpsz == '.')
-                lpsz++;
-            if (*lpsz)
-                ulDrive = ~0;
-        }
+    if(lpszDrive == 0) {
+        driveIndex = OSLibDosQueryCurrentDisk() - 1;
     }
-
-    /* check if validation failed */
-    if (ulDrive == ~0)
-    {
-        dprintf(("KERNEL32:  GetDriveType(""%s"") -> DRIVE_NO_ROOT_DIR (%d)", lpszDrive, DRIVE_NO_ROOT_DIR));
+    else
+    if(*lpszDrive >= 'A' && *lpszDrive <= 'Z')
+        driveIndex = (DWORD)(*lpszDrive - 'A');
+    else
+    if(*lpszDrive >= 'a' && *lpszDrive <= 'z') {
+        driveIndex = (DWORD)(*lpszDrive - 'a');
+    }
+    else {
         return DRIVE_NO_ROOT_DIR;   //return value checked in NT4, SP6 (GetDriveType(""), GetDriveType("4");
     }
 
     //NOTE: Although GetDriveTypeW handles -1, GetDriveTypeA crashes in NT 4, SP6
-    rc = OSLibGetDriveType(ulDrive);
+    rc = OSLibGetDriveType(driveIndex);
     dprintf(("KERNEL32:  GetDriveType %s = %d", lpszDrive, rc));
     return rc;
 }
-
-
-/**
- * Determin the type of a specific drive or the current drive.
- *
- * @returns DRIVE_UNKNOWN
- *          DRIVE_NO_ROOT_DIR
- *          DRIVE_CANNOTDETERMINE
- *          DRIVE_DOESNOTEXIST
- *          DRIVE_REMOVABLE
- *          DRIVE_FIXED
- *          DRIVE_REMOTE
- *          DRIVE_CDROM
- *          DRIVE_RAMDISK
- *
- * @param   lpszDrive   Root path of the drive in question.
- *                      NULL means the current drive.
- * @sketch
- *          If no drive Then
- *              Get Current Drive Index.
- *          ElseIf valid drive letter Then
- *              Convert to Drive Index.
- *          Else
- *              Return Error: Invalid root dir.
- *          Endif
- *          Call the OSLib worker function with the index.
- *          return it's result.
- *
- * @status  completely implemented and tested
- * @author  Sander
- * @remark  NT4, SP6 does not change the last error, regardless of the junk it receives!
- */
+//******************************************************************************
+//******************************************************************************
 UINT WIN32API GetDriveTypeW(LPCWSTR lpszDrive)
 {
  UINT  rc;
@@ -384,7 +292,7 @@ BOOL WIN32API GetVolumeInformationA(LPCSTR  lpRootPathName,
             dprintf2(("Volume name: %s", lpVolumeNameBuffer));
         }
     }
-    if(lpFileSystemNameBuffer || lpMaximumComponentLength || lpFileSystemFlags)
+    if(lpFileSystemNameBuffer || lpMaximumComponentLength || lpFileSystemFlags) 
     {
         if(!lpFileSystemNameBuffer) {
             lpFileSystemNameBuffer = tmpstring;
@@ -394,10 +302,10 @@ BOOL WIN32API GetVolumeInformationA(LPCSTR  lpRootPathName,
         //save original file system name
         if(rc == ERROR_SUCCESS) strcpy(szOrgFileSystemName, lpFileSystemNameBuffer);
 
-        if(lpFileSystemNameBuffer)
+        if(lpFileSystemNameBuffer) 
         {
             dprintf2(("File system name: %s", lpFileSystemNameBuffer));
-            if(!strcmp(lpFileSystemNameBuffer, "JFS"))
+            if(!strcmp(lpFileSystemNameBuffer, "JFS")) 
             {
                 strcpy(lpFileSystemNameBuffer, "NTFS");
             }
@@ -407,7 +315,7 @@ BOOL WIN32API GetVolumeInformationA(LPCSTR  lpRootPathName,
             {
                 //do nothing
             }
-            else
+            else 
             {//pretend everything else is FAT16 (HPFS and FAT have the same file size limit)
                 strcpy(lpFileSystemNameBuffer, "FAT16");
             }
@@ -527,4 +435,89 @@ UINT WIN32API GetLogicalDriveStringsW(UINT nBufferLength, LPWSTR lpBuffer)
 }
 //******************************************************************************
 //******************************************************************************
-
+HANDLE WIN32API FindFirstVolumeA(LPTSTR lpszVolumeName, DWORD cchBufferLength)
+{
+    return 0;
+}
+//******************************************************************************
+//******************************************************************************
+HANDLE WIN32API FindFirstVolumeW(LPWSTR lpszVolumeName, DWORD cchBufferLength)
+{
+    return 0;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API FindNextVolumeA(HANDLE hFindVolume, LPTSTR lpszVolumeName, 
+                              DWORD cchBufferLength)
+{
+    return FALSE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API FindNextVolumeW(HANDLE hFindVolume, LPWSTR lpszVolumeName, 
+                              DWORD cchBufferLength)
+{
+    return FALSE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API FindVolumeClose(HANDLE hFindVolume)
+{
+    return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+HANDLE WIN32API FindFirstVolumeMountPointA(LPTSTR lpszRootPathName, 
+                                           LPTSTR lpszVolumeMountPoint,
+                                           DWORD cchBufferLength)
+{
+    return 0;
+}
+//******************************************************************************
+//******************************************************************************
+HANDLE WIN32API FindFirstVolumeMountPointW(LPWSTR lpszRootPathName, 
+                                           LPWSTR lpszVolumeMountPoint,
+                                           DWORD cchBufferLength)
+{
+    return 0;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API FindNextVolumeMountPointA(HANDLE hFindVolumeMountPoint,
+                                        LPTSTR lpszVolumeMountPoint,
+                                        DWORD cchBufferLength)
+{
+    return FALSE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API FindNextVolumeMountPointW(HANDLE hFindVolumeMountPoint,
+                                        LPWSTR lpszVolumeMountPoint,
+                                        DWORD cchBufferLength)
+{
+    return FALSE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API FindVolumeMountPointClose(HANDLE hFindVolumeMountPoint)
+{
+    return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetVolumeNameForVolumeMountPointA(LPCSTR lpszVolumeMountPoint,
+                                                LPSTR lpszVolumeName,
+                                                DWORD cchBufferLength)
+{
+    return FALSE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetVolumeNameForVolumeMountPointW(LPCWSTR lpszVolumeMountPoint,
+                                                LPWSTR lpszVolumeName,
+                                                DWORD cchBufferLength)
+{
+    return FALSE;
+}
+//******************************************************************************
+//******************************************************************************
