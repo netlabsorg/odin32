@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2048 2002-04-17 04:09:31 bird Exp $ */
+/* $Id: changelog,v 1.2049 2002-04-17 13:42:04 sandervl Exp $ */
+
+ 2002-04-17: Platon Fomichev <platon@innotek.de>
+    - COMDLG32: o If application specifies full path in file dialog structure
+                  (and initial dir string is NULL), then change to the directory.
 
  2002-04-17: knut st. osmundsen <bird@anduin.net>
     - Makefiles:
