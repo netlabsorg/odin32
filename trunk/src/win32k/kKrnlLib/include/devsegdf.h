@@ -1,4 +1,4 @@
-/* $Id: devsegdf.h,v 1.1 2001-09-11 01:27:27 bird Exp $
+/* $Id: devsegdf.h,v 1.2 2001-09-16 03:11:33 bird Exp $
  *
  * Segment stuff used in 16 and 32 bits C/C++.
  *
@@ -12,7 +12,7 @@
 #ifndef _devSegDf_h
 #define _devSegDf_h
 
-#ifdef INCL_16
+#if defined(INCL_16) && !defined(EXTRACT)
 
 /*
  * More segment stuff
