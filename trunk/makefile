@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.19 2002-02-23 23:13:08 bird Exp $
+# $Id: makefile,v 1.20 2002-02-23 23:47:08 bird Exp $
 
 #
 # Odin32
@@ -65,6 +65,21 @@ clean nothing:
 libs: lib
 lib dep:        needed
     @$(DODIRS) "$(ALL_DIRS)"    $(MAKE_CMD) $@
+
+cleanall:
+    SET DEBUG=
+    SET CCENV=VAC3
+    -@$(DODIRS) "$(ALL_DIRS)"    $(MAKE_CMD)           clean
+    -@$(DODIRS) "$(ALL_DIRS)"    $(MAKE_CMD) DEBUG=1   clean
+    -@$(DODIRS) "$(ALL_DIRS)"    $(MAKE_CMD) PROFILE=1 clean
+    SET CCENV=VAC36
+    -@$(DODIRS) "$(ALL_DIRS)"    $(MAKE_CMD)           clean
+    -@$(DODIRS) "$(ALL_DIRS)"    $(MAKE_CMD) DEBUG=1   clean
+    -@$(DODIRS) "$(ALL_DIRS)"    $(MAKE_CMD) PROFILE=1 clean
+    SET CCENV=WAT
+    -@$(DODIRS) "$(ALL_DIRS)"    $(MAKE_CMD)           clean
+    -@$(DODIRS) "$(ALL_DIRS)"    $(MAKE_CMD) DEBUG=1   clean
+    -@$(DODIRS) "$(ALL_DIRS)"    $(MAKE_CMD) PROFILE=1 clean
 
 
 #
