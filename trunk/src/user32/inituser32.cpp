@@ -1,4 +1,4 @@
-/* $Id: inituser32.cpp,v 1.6 2001-10-22 23:13:58 phaller Exp $ */
+/* $Id: inituser32.cpp,v 1.7 2001-11-20 09:53:56 sandervl Exp $ */
 /*
  * USER32 DLL entry point
  *
@@ -243,6 +243,9 @@ void APIENTRY cleanupUser32(ULONG ulReason)
 
 //SvL: Causes PM hangs on some (a lot?) machines. Reason unknown.
 ////   RestoreCursor();
+
+   //Destroy CD notification window
+   WinDestroyWindow(hwndCD);
    DestroyDesktopWindow();
    Win32BaseWindow::DestroyAll();
    UnregisterSystemClasses();
