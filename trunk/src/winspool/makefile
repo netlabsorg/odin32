@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.22 2003-08-14 09:31:22 sandervl Exp $
+# $Id: makefile,v 1.23 2003-08-14 10:39:30 sandervl Exp $
 
 #
 # Odin32 API
@@ -20,7 +20,7 @@ WRC_PREFIX_RESOURCE=1
 OBJS = \
 $(OBJDIR)\winspool.obj \
 $(OBJDIR)\oslibspl.obj \
-$(OBJDIR)\winspoolrsrc.obj 
+$(OBJDIR)\winspoolrsrc.obj  \
 $(DLLENTRY)
 
 
