@@ -1,4 +1,4 @@
-/* $Id: ccollection.h,v 1.3 2001-05-30 13:02:43 phaller Exp $ */
+/* $Id: ccollection.h,v 1.4 2001-05-30 18:29:44 phaller Exp $ */
 
 /*
  * Collection class:
@@ -74,6 +74,9 @@ class CIndexLookup : public CCollection
         /* this is the highest valid index in the table */
         int iHigh;
         int iUsedHigh;
+
+        /* are the iUsedOffset and iUserHigh initialized? */
+        int iInitialized;
 };
 
 
