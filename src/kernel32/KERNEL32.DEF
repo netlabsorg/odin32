@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.66 2000-01-27 21:51:16 sandervl Exp $
+; $Id: KERNEL32.DEF,v 1.67 2000-01-29 10:42:37 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -550,10 +550,10 @@ EXPORTS
      GlobalMemoryStatus         = _GlobalMemoryStatus@4       @448
      GlobalReAlloc              = _GlobalReAlloc@12           @449
      GlobalSize                 = _GlobalSize@4               @450
-;    GlobalUnWire               = _GlobalUnWire@??            @451      ;obsolete
+     GlobalUnWire               = _GlobalUnWire@4             @451      ;obsolete
 ;    GlobalUnfix                = _GlobalUnfix@??             @452      ;obsolete
      GlobalUnlock               = _GlobalUnlock@4             @453
-;    GlobalWire                 = _GlobalWire@??              @454      ;obsolete
+     GlobalWire                 = _GlobalWire@4               @454      ;obsolete
 ;    Heap32First                = _Heap32First@??             @455      ;W95
 ;    Heap32ListFirst            = _Heap32ListFirst@??         @456      ;W95
 ;    Heap32ListNext             = _Heap32ListNext@??          @457      ;W95
