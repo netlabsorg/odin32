@@ -1,4 +1,4 @@
-/* $Id: winuser.h,v 1.25 2000-01-02 19:29:24 cbratschi Exp $ */
+/* $Id: winuser.h,v 1.26 2000-01-07 17:37:02 cbratschi Exp $ */
 
 #ifndef __INCLUDE_WINUSER_H
 #define __INCLUDE_WINUSER_H
@@ -2256,7 +2256,7 @@ typedef struct
 #define WS_EX_PALETTEWINDOW    (WS_EX_WINDOWEDGE|WS_EX_TOOLWINDOW|WS_EX_TOPMOST)
 
 /* WINE internal... */
-#define WS_EX_TRAYWINDOW	0x80000000L
+#define WS_EX_TRAYWINDOW        0x80000000L
 
 /* Window scrolling */
 #define SW_SCROLLCHILDREN      0x0001
@@ -3705,11 +3705,14 @@ HPEN      WINAPI GetSysColorPen(INT);
 INT       WINAPI LoadMessageA(HMODULE,UINT,WORD,LPSTR,INT);
 INT       WINAPI LoadMessageW(HMODULE,UINT,WORD,LPWSTR,INT);
 
- //USER32 functions imported from GDI32
-
 #ifndef SYSTEM
  #define SYSTEM _System
 #endif
+
+INT       SYSTEM GetOS2UpdateRgn(HWND,HRGN);
+BOOL      SYSTEM GetOS2UpdateRect(HWND,LPRECT);
+
+ //USER32 functions imported from GDI32
 
 INT       SYSTEM InternalDrawTextExA(HDC,LPCSTR,INT,LPRECT,UINT,LPDRAWTEXTPARAMS,BOOL);
 INT       SYSTEM InternalDrawTextExW(HDC,LPCWSTR,INT,LPRECT,UINT,LPDRAWTEXTPARAMS,BOOL);

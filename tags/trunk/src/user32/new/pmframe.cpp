@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.6 2000-01-06 17:05:52 cbratschi Exp $ */
+/* $Id: pmframe.cpp,v 1.7 2000-01-07 17:38:47 cbratschi Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -480,12 +480,15 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
           win32wnd->MsgPosChanged((LPARAM)&wp);
 
 PosChangedEnd:
+        //update the client rect
+        RECTL rectl;
+
+        WinQueryWindowRect(win32wnd->getOS2WindowHandle(),&rectl);
+        mapOS2ToWin32Rect(win32wnd->getOS2WindowHandle(),WinQueryWindow(hwnd,QW_PARENT),(PRECTLOS2)&rectl,win32wnd->getClientRectPtr());
+
         //calls WM_FORMATFRAME if SWP_SIZE is set
         RestoreOS2TIB();
         rc = OldFrameProc(hwnd,msg,mp1,mp2);
-        SetWin32TIB();
-
-        RestoreOS2TIB();
         return rc;
     }
 
