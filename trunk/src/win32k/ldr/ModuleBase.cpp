@@ -1,4 +1,4 @@
-/* $Id: ModuleBase.cpp,v 1.4 2000-09-02 21:08:06 bird Exp $
+/* $Id: ModuleBase.cpp,v 1.5 2000-09-22 09:22:39 bird Exp $
  *
  * ModuleBase - Implementetation.
  *
@@ -173,23 +173,40 @@ ULONG  ModuleBase::applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID
  * @param     cchFilename   Filename length.
  * @param     pLdrLv        Loader local variables? (Struct from KERNEL.SDF)
  * @param     pful          Pointer to flags which are passed on to ldrOpen.
+ * @param     lLibPath      New parameter in build 14053(/8266?)
+ *                          ldrGetMte calls with 1
+ *                          ldrOpenNewExe calls with 3
+ *                          This is compared to the initial libpath index.
+ *                              The libpath index is:
+ *                                  BEGINLIBPATH    1
+ *                                  LIBPATH         2
+ *                                  ENDLIBPATH      3
+ *                              The initial libpath index is either 1 or 2.
+ *                          Currently we'll ignore it. (I don't know why ldrGetMte calls ldrOpenPath...)
  * @sketch
  * This is roughly what the original ldrOpenPath does:
+ *      Save pTCBCur->TCBFailErr.
  *      if !CLASS_GLOBAL or miniifs then
- *          ldrOpen(pachModName)
+ *          ldrOpen(pachFilename)
  *      else
+ *          if beglibpath != NULL then path = 1 else path = 2
+ *          if (lLibPath < path)
+ *              return ERROR_FILE_NOT_FOUND; (2)
+ *          Allocate buffer.
  *          loop until no more libpath elements
  *              get next libpath element and add it to the modname.
  *              try open the modname
  *              if successfull then break the loop.
  *          endloop
+ *          Free buffer.
  *      endif
+ *      Restore pTCBCur->TCBFailErr.
  */
-ULONG  ModuleBase::openPath(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *pLdrLv, PULONG pful) /* (ldrOpenPath) */
+ULONG  ModuleBase::openPath(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *pLdrLv, PULONG pful, ULONG lLibPath) /* (ldrOpenPath) */
 {
     #ifdef RING0
     printf("ModuleBase::openPath:\n");
-    return ldrOpenPath(pachFilename, cchFilename, pLdrLv, pful);
+    return ldrOpenPath(pachFilename, cchFilename, pLdrLv, pful, lLibPath);
     #else
     NOREF(pachFilename);
     NOREF(cchFilename);

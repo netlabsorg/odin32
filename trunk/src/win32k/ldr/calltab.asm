@@ -1,4 +1,4 @@
-; $Id: calltab.asm,v 1.14 2000-09-08 21:34:12 bird Exp $
+; $Id: calltab.asm,v 1.15 2000-09-22 09:22:39 bird Exp $
 ;
 ; callTab - Call back again table - table with entry for each function or
 ;           variable which is overrided.
@@ -42,7 +42,7 @@
 
     public _VMObjHandleInfo@12
     public _ldrASMpMTEFromHandle@4
-    public _ldrOpenPath@16
+    public __ldrOpenPath                ; exported thru assembly wrapper
     public _LDRClearSem@0
     public _ldrFindModule@16
     public _KSEMRequestMutex@8
@@ -227,10 +227,10 @@ _ldrASMpMTEFromHandle@4 PROC NEAR
     db MAXSIZE_PROLOG dup(0cch)
 _ldrASMpMTEFromHandle@4 ENDP
 
-; 20
-_ldrOpenPath@16 PROC NEAR
+; 20 - exported thru assembly interface due to change in build 14053.
+__ldrOpenPath PROC NEAR
     db MAXSIZE_PROLOG dup(0cch)
-_ldrOpenPath@16 ENDP
+__ldrOpenPath ENDP
 
 ; 21
 _LDRClearSem@0 PROC NEAR

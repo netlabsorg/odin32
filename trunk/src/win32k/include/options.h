@@ -1,4 +1,4 @@
-/* $Id: options.h,v 1.11 2000-09-02 21:08:03 bird Exp $
+/* $Id: options.h,v 1.12 2000-09-22 09:22:37 bird Exp $
  *
  * Options.
  *
@@ -8,8 +8,10 @@
  *
  */
 
+/* NOINC */
 #ifndef _options_h_
 #define _options_h_
+/* INC */
 
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
@@ -42,6 +44,7 @@
 #define CB_RES_INIT         ((unsigned long)1024*256)      /* 256KB */
 #define CB_RES_MAX          ((unsigned long)1024*1024*10)  /*  10MB  */
 
+/* NOINC */
 /* default assignments */
 #define DEFAULT_OPTION_ASSIGMENTS                           \
             {FALSE,                 /* fQuiet        */     \
@@ -81,7 +84,7 @@
 
 #define isSMPKernel()               (options.fKernel & KF_SMP)
 #define isUNIKernel()               !(options.fKernel & KF_SMP)
-
+/* INC */
 
 /*******************************************************************************
 *   Structures and Typedefs                                                    *
@@ -95,7 +98,7 @@ struct options
 
     /** @cat logging options */
     USHORT      usCom;                  /* Output port no. */
-    ULONG       fLogging;               /* Logging. */
+    USHORT      fLogging;               /* Logging. */
 
     /** @cat kernel selection */
     ULONG       fKernel;                /* Smp or uni kernel. */
@@ -133,10 +136,14 @@ struct options
 /*******************************************************************************
 *   Global Variables                                                           *
 *******************************************************************************/
+/* NOINC */
 extern struct options DATA16_GLOBAL options;    /* defined in d16globals.c */
 #if defined(__IBMC__) || defined(__IBMCPP__)
     #pragma map( options , "_options"  )
 #endif
+/* INC */
 
+/* NOINC */
 #endif
+/* INC */
 

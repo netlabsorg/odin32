@@ -1,4 +1,4 @@
-/* $Id: win32ktst.c,v 1.2 2000-09-02 21:08:21 bird Exp $
+/* $Id: win32ktst.c,v 1.3 2000-09-22 09:22:43 bird Exp $
  *
  * Win32k test module.
  *
@@ -866,7 +866,7 @@ int TestCaseExeLoad2(void)
      * Do the real execution.
      */
     printf("--- TestcaseExeLoad2 - loading win32ktst.exe (LX image) ----\n");
-    rc = CalltkExecPgm(EXEC_LOAD, NULL, NULL, "win32ktst.exe");
+    rc = CalltkExecPgm(EXEC_LOAD, NULL, NULL, "GLC6000.TMP");
     if (rc == NO_ERROR)
     {
         psz = "BIN\\DEBUG\\LIBCONV.EXE\0";

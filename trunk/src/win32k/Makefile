@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.51 2000-09-21 15:37:04 bird Exp $
+# $Id: Makefile,v 1.52 2000-09-22 09:22:32 bird Exp $
 #
 # Win32k makefile.
 #
@@ -45,6 +45,7 @@ ILIB        = ilib /nobackup /nologo
 !endif
 LD          = ilink
 AS          = alp
+H2INC       = $(DDKBASE)\tools\h2inc.exe
 
 CFLAGS      = -q -Ge -Gs- -Gr+ -Rn -Ss+ -Mp -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext-
 CFLAGS16    = -c -W3 -Asfw /NTCODE16 /NDDATA16 -G2s -Zp -Zl -nologo
@@ -120,7 +121,7 @@ AINCLUDES  = -Fdi:$(WIN32KINCLUDE) \
 ################################################################################
 # SUFFIXES AND INFERENCE RULES
 ################################################################################
-.SUFFIXES: .obj .cpp .c .asm .c .obj_e
+.SUFFIXES: .obj .cpp .c .asm .c .obj_e .inc
 
 {dev16}.c.obj:
     @$(ECHO) compiling 16bit: $<
@@ -305,9 +306,15 @@ AINCLUDES  = -Fdi:$(WIN32KINCLUDE) \
 # TARGETS
 ################################################################################
 !if "$(DDKPATH)" == "" || "$(MSCPATH)" == ""  || "$(TOOLKIT)" == "" || "$(VACPATH)" == ""
-all: pe2lx.exe
+all:    pe2lx.exe
 !else
-all: clfix.exe $(WIN32KBIN)\$(NAME).sys pe2lx.exe kRx.exe lib Win32kCC.exe
+all:    clfix.exe \
+        $(WIN32KINCLUDE)\options.inc \
+        $(WIN32KBIN)\$(NAME).sys \
+        pe2lx.exe \
+        kRx.exe \
+        lib \
+        Win32kCC.exe
 !endif
 
 
@@ -339,6 +346,7 @@ OBJS  =\
     $(WIN32KOBJ)\myLDRQAppType.obj \
     $(WIN32KOBJ)\myldrEnum32bitRelRecs.obj \
     $(WIN32KOBJ)\myldrOpenPath.obj \
+    $(WIN32KOBJ)\myldrOpenPatha.obj \
     $(WIN32KOBJ)\OS2KTCB.obj \
     $(WIN32KOBJ)\OS2KPTDA.obj \
     $(WIN32KOBJ)\pe2lx.obj \
@@ -422,6 +430,14 @@ TSTOBJS =\
 TSTLASTOBJ = $(LASTOBJ)
 
 TSTLIBS = $(LIBS)
+
+
+################################################################################
+# options.inc rule.
+################################################################################
+$(WIN32KINCLUDE)\options.inc:  $(WIN32KINCLUDE)\options.h
+    @$(ECHO) H2Inc: $**
+    $(H2INC) $** > $@
 
 
 ################################################################################

@@ -1,4 +1,4 @@
-/* $Id: LdrCalls.h,v 1.5 2000-09-08 21:34:11 bird Exp $
+/* $Id: LdrCalls.h,v 1.6 2000-09-22 09:22:37 bird Exp $
  *
  * Prototypes for the loader overrided function.
  *
@@ -137,6 +137,7 @@ typedef struct ldrlv_s /* #memb 12 size 39 (0x027) */
 
 /**
  * ldrOpenPath
+ *  pre 14053.
  * @returns   OS2 return code.
  *            pLdrLv->lv_sfn  is set to filename handle.
  * @param     pachModname   Pointer to modulename. Not zero terminated!
@@ -154,14 +155,63 @@ typedef struct ldrlv_s /* #memb 12 size 39 (0x027) */
  *      endloop
  *  endif
  */
-extern ULONG LDRCALL ldrOpenPath(   /* retd  0x10 */
+extern ULONG LDRCALL ldrOpenPath_old(   /* retd  0x10 */
     PCHAR       pachFilename,       /* ebp + 0x08 */
     USHORT      cchFilename,        /* ebp + 0x0c */
     ldrlv_t *   plv,                /* ebp + 0x10 */
     PULONG      pful                /* ebp + 0x14 */
     );
 
-ULONG LDRCALL myldrOpenPath(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *plv, PULONG pful);
+ULONG LDRCALL myldrOpenPath_old(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *plv, PULONG pful);
+
+
+/**
+ * ldrOpenPath - ldrOpenPath for build 14053 and above.
+ *
+ * @returns   OS2 return code.
+ *            plv->lv_sfn  is set to filename handle.
+ * @param     pachFilename  Pointer to modulename. Not zero terminated!
+ * @param     cchFilename   Modulename length.
+ * @param     plv           Loader local variables? (Struct from KERNEL.SDF)
+ * @param     pful          Pointer to flags which are passed on to ldrOpen.
+ * @param     lLibPath      New parameter in build 14053.
+ *                          ldrGetMte calls with 1
+ *                          ldrOpenNewExe calls with 3
+ *                          This is compared to the initial libpath index.
+ *                              The libpath index is:
+ *                                  BEGINLIBPATH    1
+ *                                  LIBPATH         2
+ *                                  ENDLIBPATH      3
+ *                              The initial libpath index is either 1 or 2.
+ *
+ * @sketch
+ * This is roughly what the original ldrOpenPath does:
+ *      Save pTCBCur->TCBFailErr.
+ *      if !CLASS_GLOBAL or miniifs then
+ *          ldrOpen(pachFilename)
+ *      else
+ *          if beglibpath != NULL then path = 1 else path = 2
+ *          if (lLibPath < path)
+ *              return ERROR_FILE_NOT_FOUND; (2)
+ *          Allocate buffer.
+ *          loop until no more libpath elements
+ *              get next libpath element and add it to the modname.
+ *              try open the modname
+ *              if successfull then break the loop.
+ *          endloop
+ *          Free buffer.
+ *      endif
+ *      Restore pTCBCur->TCBFailErr.
+ */
+extern ULONG LDRCALL ldrOpenPath(  /* retd  0x14 */
+    PCHAR       pachFilename,      /* ebp + 0x08 */
+    USHORT      cchFilename,       /* ebp + 0x0c */
+    ldrlv_t *   plv,               /* ebp + 0x10 */
+    PULONG      pful,              /* ebp + 0x14 */
+    ULONG       lLibPath           /* ebp + 0x18 */
+    );
+
+ULONG LDRCALL myldrOpenPath(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *plv, PULONG pful, ULONG lLibPath);
 
 
 /**
