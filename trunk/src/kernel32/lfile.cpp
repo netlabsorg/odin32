@@ -8,9 +8,11 @@
  *
  * 1998/06/12 PH Patrick Haller (haller@zebra.fh-weingarten.de)
  *
- * @(#) LFILE.C         1.0.0	1998/06/12 PH added HandleManager support
+ * @(#) LFILE.C         1.0.0 1998/06/12 PH  added HandleManager support
  *                      1.1.0 1998/08/29 KSO corrected error codes and forwarded
- *                                       to Win32 file api as NT/95 does.
+ *                                           to Win32 file api as NT/95 does.
+ *                      1.1.1 1999/06/09 PH  NOTE: only forard to KERNEL32:FILEIO
+ *                                           calls, never do anything else !
  */
 
 
@@ -35,12 +37,13 @@
 
 HFILE WIN32API _lclose(HFILE arg1)
 {
-	dprintf(("KERNEL32: _lclose(%08xh)\n",
-				arg1));
-	if (CloseHandle(arg1))
-		return 0;
-	else
-		return -1;
+   dprintf(("KERNEL32: _lclose(%08xh)\n",
+            arg1));
+
+   if (CloseHandle(arg1))
+      return 0;
+   else
+      return -1;
 }
 
 
@@ -57,26 +60,29 @@ HFILE WIN32API _lclose(HFILE arg1)
  *****************************************************************************/
 
 HFILE WIN32API _lcreat(LPCSTR arg1,
-								  int    arg2)
+                       int    arg2)
 {
-	HANDLE hFile;
-	dprintf(("KERNEL32: _lcreat(%s, %08xh)\n",
-				arg1,
-				arg2));
+   HANDLE hFile;
 
-	//if (arg2 & ~(1 | 2 | 4))
-	//   dprintf(("KERNEL32: Warning: _lcreat has unknown flag(s) set - fails.\n"));
+   dprintf(("KERNEL32: _lcreat(%s, %08xh)\n",
+            arg1,
+            arg2));
 
-	//SetLastError(0); - CreateFileA sets error
-	hFile = CreateFileA(arg1,										 /* filename */
-								  GENERIC_READ | GENERIC_WRITE,		 /* readwrite access */
-								  FILE_SHARE_READ | FILE_SHARE_WRITE,/* share all */
-								  NULL,										 /* ignore scurity */
-								  CREATE_ALWAYS,							 /* create (trunkate don't work) */
-								  arg2 & 0x3fb7,							 /* so M$ does (that is more attributes than I could find in the headers and in the docs!) */
-								  NULL);										 /* no template */
-	dprintf(("KERNEL32: _lcreat returns %d.\n", hFile));
-	return hFile;
+   //if (arg2 & ~(1 | 2 | 4))
+   //   dprintf(("KERNEL32: Warning: _lcreat has unknown flag(s) set - fails.\n"));
+
+   //SetLastError(0); - CreateFileA sets error
+   hFile = CreateFileA(arg1,                              /* filename */
+                       GENERIC_READ | GENERIC_WRITE,      /* readwrite access */
+                       FILE_SHARE_READ | FILE_SHARE_WRITE,/* share all */
+                       NULL,                              /* ignore scurity */
+                       CREATE_ALWAYS,                     /* create (trunkate don't work) */
+                       arg2 & 0x3fb7,                     /* so M$ does (that is more attributes than I could find in the headers and in the docs!) */
+                       NULL);                             /* no template */
+
+   dprintf(("KERNEL32: _lcreat returns %08xh.\n",
+            hFile));
+   return hFile;
 }
 
 
@@ -93,52 +99,54 @@ HFILE WIN32API _lcreat(LPCSTR arg1,
  *****************************************************************************/
 
 HFILE WIN32API _lopen(LPCSTR pszFileName,
-								 int    arg2)
+                      int    arg2)
 {
-	ULONG  ulAccess = 0;
-	ULONG  ulShare;
-	HANDLE hFile;
+   ULONG  ulAccess = 0;
+   ULONG  ulShare;
+   HANDLE hFile;
 
-	dprintf(("KERNEL32: _lopen(%s, %08xh)\n",
-				pszFileName,
-				arg2));
+   dprintf(("KERNEL32: _lopen(%s, %08xh)\n",
+            pszFileName,
+            arg2));
 
-	if (arg2 & ~(OF_READ|OF_READWRITE|OF_WRITE|OF_SHARE_COMPAT|OF_SHARE_DENY_NONE|OF_SHARE_DENY_READ|OF_SHARE_DENY_WRITE|OF_SHARE_EXCLUSIVE))
-		dprintf(("KERNEL32: (warn) _lopen has unknown flag(s) set.\n"));
+   if (arg2 & ~(OF_READ|OF_READWRITE|OF_WRITE|OF_SHARE_COMPAT|OF_SHARE_DENY_NONE|OF_SHARE_DENY_READ|OF_SHARE_DENY_WRITE|OF_SHARE_EXCLUSIVE))
+      dprintf(("KERNEL32: (warn) _lopen has unknown flag(s) set.\n"));
 
-	/* Access */
-	ulAccess |= arg2 & OF_READ      ? GENERIC_READ                 : 0;
-	ulAccess |= arg2 & OF_WRITE     ? GENERIC_WRITE                : 0;
-	ulAccess |= arg2 & OF_READWRITE ? GENERIC_READ | GENERIC_WRITE : 0;
+   /* Access */
+   ulAccess |= arg2 & OF_READ      ? GENERIC_READ                 : 0;
+   ulAccess |= arg2 & OF_WRITE     ? GENERIC_WRITE                : 0;
+   ulAccess |= arg2 & OF_READWRITE ? GENERIC_READ | GENERIC_WRITE : 0;
 
-	/* Share */
-	ulShare = arg2 & (OF_SHARE_COMPAT | OF_SHARE_DENY_NONE | OF_SHARE_DENY_READ | OF_SHARE_DENY_WRITE | OF_SHARE_EXCLUSIVE);
-	if (ulShare == OF_SHARE_DENY_READ)
-		ulShare = FILE_SHARE_WRITE;
-	else if (ulShare == OF_SHARE_DENY_WRITE)
-		ulShare = FILE_SHARE_READ;
-	else if (ulShare == OF_SHARE_DENY_NONE)
-		ulShare = FILE_SHARE_READ | FILE_SHARE_WRITE;
-	else if (ulShare == OF_SHARE_EXCLUSIVE)
-		ulShare = 0; //no share
-	else if (ulShare == OF_SHARE_COMPAT)
-		ulShare = FILE_SHARE_READ | FILE_SHARE_WRITE;
-	else
-	{
-		dprintf(("KERNEL32: _lopen - warning incorrect value for arg2 (or incorrect implementation...)\n"));
-		ulShare = 0;
-	}
+   /* Share */
+   ulShare = arg2 & (OF_SHARE_COMPAT | OF_SHARE_DENY_NONE | OF_SHARE_DENY_READ | OF_SHARE_DENY_WRITE | OF_SHARE_EXCLUSIVE);
+   if (ulShare == OF_SHARE_DENY_READ)
+      ulShare = FILE_SHARE_WRITE;
+   else if (ulShare == OF_SHARE_DENY_WRITE)
+      ulShare = FILE_SHARE_READ;
+   else if (ulShare == OF_SHARE_DENY_NONE)
+      ulShare = FILE_SHARE_READ | FILE_SHARE_WRITE;
+   else if (ulShare == OF_SHARE_EXCLUSIVE)
+      ulShare = 0; //no share
+   else if (ulShare == OF_SHARE_COMPAT)
+      ulShare = FILE_SHARE_READ | FILE_SHARE_WRITE;
+   else
+   {
+      dprintf(("KERNEL32: _lopen - warning incorrect value for arg2 (or incorrect implementation...)\n"));
+      ulShare = 0;
+   }
 
-	hFile = CreateFileA(pszFileName,				  /* filename */
-								  ulAccess,					  /*  */
-								  ulShare,					  /*  */
-								  NULL,						  /* ignore scurity */
-								  OPEN_EXISTING,			  /* create a _new_ file - fail if exists */
-								  FILE_ATTRIBUTE_NORMAL,  /* normal attribs - no flags */ //m$ sets this to 0
-								  NULL);						  /* no template */
+   hFile = CreateFileA(pszFileName,                 /* filename */
+                       ulAccess,               /*  */
+                       ulShare,                /*  */
+                       NULL,                   /* ignore scurity */
+                       OPEN_EXISTING,          /* open existing file, fail if new */
+                       FILE_ATTRIBUTE_NORMAL,  /* normal attribs - no flags */ //m$ sets this to 0
+                       NULL);                  /* no template */
 
-	dprintf(("KERNEL32: _lopen returns %d.\n", hFile));
-	return hFile;
+   dprintf(("KERNEL32: _lopen returns %08xh.\n",
+            hFile));
+
+   return hFile;
 }
 
 
@@ -155,21 +163,27 @@ HFILE WIN32API _lopen(LPCSTR pszFileName,
  *****************************************************************************/
 
 UINT WIN32API _lread(HFILE arg1,
-								PVOID arg2,
-								UINT  arg3)
+                     PVOID arg2,
+                     UINT  arg3)
 {
-	ULONG rc;
+   ULONG rc;
 
-	dprintf(("KERNEL32: _lread(%08xh, %08xh, %08xh)\n",
-				arg1,
-				arg2,
-				arg3));
+   dprintf(("KERNEL32: _lread(%08xh, %08xh, %08xh)\n",
+            arg1,
+            arg2,
+            arg3));
 
-	if (!ReadFile(arg1, arg2, arg3, &rc, NULL))
-		rc = -1;
-	dprintf(("KERNEL32: _lread returns %d.", rc));
+   if (!ReadFile(arg1,
+                 arg2,
+                 arg3,
+                 &rc,
+                 NULL))
+      rc = -1;
 
-	return rc;
+   dprintf(("KERNEL32: _lread returns %08xh.",
+            rc));
+
+   return rc;
 }
 
 
@@ -186,24 +200,31 @@ UINT WIN32API _lread(HFILE arg1,
  *****************************************************************************/
 
 LONG WIN32API _llseek(HFILE arg1,
-								 LONG  arg2,
-								 int   arg3)
+                      LONG  arg2,
+                      int   arg3)
 {
-	ULONG rc;
+   ULONG rc;
 
-	dprintf(("KERNEL32: _llseek(%08xh, %08xh, %08xh)\n",
-				arg1,
-				arg2,
-				arg3));
-	if (!(arg3 == FILE_BEGIN || arg3 == FILE_CURRENT || arg3 == FILE_END))
-	{
-		dprintf(("KERNEL32: _llseek - incorrect origin - fails.\n" ));
-		return -1;
-	}
+   dprintf(("KERNEL32: _llseek(%08xh, %08xh, %08xh)\n",
+            arg1,
+            arg2,
+            arg3));
+   if (!(arg3 == FILE_BEGIN   ||
+         arg3 == FILE_CURRENT ||
+         arg3 == FILE_END))
+   {
+      dprintf(("KERNEL32: _llseek - incorrect origin - fails.\n" ));
+      return -1;
+   }
 
-	rc = SetFilePointer(arg1, arg2, NULL, arg3);	//returns -1 on error (-1 == 0xffffffff)
-	dprintf(("KERNEL32: _llseek returns %d", rc));
-	return rc;
+   rc = SetFilePointer(arg1,
+                       arg2,
+                       NULL,
+                       arg3);   //returns -1 on error (-1 == 0xffffffff)
+
+   dprintf(("KERNEL32: _llseek returns %08xh", rc));
+
+   return rc;
 }
 
 
@@ -219,19 +240,27 @@ LONG WIN32API _llseek(HFILE arg1,
  * Author    : Patrick Haller [Fri, 1998/06/12 03:44]
  *****************************************************************************/
 
-UINT WIN32API _lwrite(HFILE arg1, LPCSTR arg2,
-		      UINT  arg3)
+UINT WIN32API _lwrite(HFILE arg1,
+                      LPCSTR arg2,
+                      UINT  arg3)
 {
-	ULONG rc;
+   ULONG rc;
 
-	dprintf(("KERNEL32: _lwrite(%08xh, %08xh, %08xh)\n",
-				arg1,
-				arg2,
-				arg3));
+   dprintf(("KERNEL32: _lwrite(%08xh, %08xh, %08xh)\n",
+            arg1,
+            arg2,
+            arg3));
 
-	if (!WriteFile(arg1, (PVOID)arg2, arg3, &rc, NULL))
-		rc = -1;
-	dprintf(("KERNEL32: _lwrite returns %d.\n", rc));
-	return rc;
+   if (!WriteFile(arg1,
+                  (PVOID)arg2,
+                  arg3,
+                  &rc,
+                  NULL))
+      rc = -1;
+
+   dprintf(("KERNEL32: _lwrite returns %08xh.\n",
+            rc));
+
+   return rc;
 }
 
