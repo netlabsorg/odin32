@@ -1,4 +1,4 @@
-/* $Id: winos2def.h,v 1.4 1999-05-31 22:37:22 phaller Exp $ */
+/* $Id: winos2def.h,v 1.5 1999-06-24 08:46:35 sandervl Exp $ */
 
 /*
  *
@@ -44,5 +44,82 @@ extern "C" {
    APIRET APIENTRY_OS2 DosSleep(ULONG msec);
 
 }
+
+inline BOOL _WinPostMsg(HWND a, ULONG b, MPARAM c, MPARAM d)
+{
+ BOOL yyrc;
+ USHORT sel = GetFS();
+
+    yyrc = WinPostMsg(a, b, c, d);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  WinPostMsg
+#define WinPostMsg _WinPostMsg
+
+inline ULONG _DosSleep(ULONG a)
+{
+ ULONG yyrc;
+ USHORT sel = GetFS();
+
+    yyrc = DosSleep(a);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  DosSleep
+#define DosSleep _DosSleep
+
+
+   typedef struct _COUNTRYCODE   /* ctryc */
+   {
+      ULONG       country;
+      ULONG       codepage;
+   } COUNTRYCODE;
+   typedef COUNTRYCODE *PCOUNTRYCODE;
+
+   typedef struct _COUNTRYINFO   /* ctryi */
+   {
+      ULONG       country;
+      ULONG       codepage;
+      ULONG       fsDateFmt;
+      CHAR        szCurrency[5];
+      CHAR        szThousandsSeparator[2];
+      CHAR        szDecimal[2];
+      CHAR        szDateSeparator[2];
+      CHAR        szTimeSeparator[2];
+      UCHAR       fsCurrencyFmt;
+      UCHAR       cDecimalPlace;
+      UCHAR       fsTimeFmt;
+      USHORT      abReserved1[2];
+      CHAR        szDataSeparator[2];
+      USHORT      abReserved2[5];
+   } COUNTRYINFO, *PCOUNTRYINFO;
+
+extern "C" {
+   APIRET APIENTRY_OS2  DosQueryCtryInfo(ULONG cb,
+                                         PCOUNTRYCODE pcc,
+                                         PCOUNTRYINFO pci,
+                                         PULONG pcbActual);
+}
+
+inline ULONG _DosQueryCtryInfo(ULONG a, PCOUNTRYCODE b, PCOUNTRYINFO c, PULONG d)
+{
+ ULONG yyrc;
+ USHORT sel = GetFS();
+
+    yyrc = DosQueryCtryInfo(a, b, c, d);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  DosQueryCtryInfo
+#define DosQueryCtryInfo _DosQueryCtryInfo
+
+
 
 #endif //__WINOS2DEF_H__
