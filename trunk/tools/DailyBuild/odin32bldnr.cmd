@@ -1,4 +1,4 @@
-/* $Id: odin32bldnr.cmd,v 1.3 2001-01-10 13:49:52 bird Exp $
+/* $Id: odin32bldnr.cmd,v 1.4 2001-01-20 18:22:47 bird Exp $
  *
  * Build number update script.
  *
@@ -37,14 +37,14 @@ if (rc <> 0) then call failure rc, 'cd include failed.';
 if (substr(sOperation, 1, 3) = 'inc') then
 do
     /*
-     * Scan the versionos2.h file for ODIN32_BUILD_NR.
+     * Scan the odinbuild.h file for ODIN32_BUILD_NR.
      */
-    sOut = 'versionos2.h';
-    sIn = 'versionos2.h.backup';
-    call SysFileDelete('versionos2.h.backup');
+    sOut = 'odinbuild.h';
+    sIn = 'odinbuild.h.backup';
+    call SysFileDelete('odinbuild.h.backup');
     'copy' sOut sIn;
     if (rc) then call failure rc, 'backup copy failed';
-    call SysFileDelete('versionos2.h');
+    call SysFileDelete('odinbuild.h');
 
     rcIn = stream(sIn, 'c', 'open read');
     rcOut = stream(sOut, 'c', 'open write');
@@ -83,8 +83,8 @@ do
     /*
      * Commit the build nr. file.
      */
-    'cvs commit -m "Daily build - 'Date('S')'" versionos2.h';
-    if (rc <> 0) then call failed rc, 'failed to commit versionos2.h'
+    'cvs commit -m "Daily build - 'Date('S')'" odinbuild.h';
+    if (rc <> 0) then call failed rc, 'failed to commit odinbuild.h'
 end
 else
 do
