@@ -1,4 +1,4 @@
- /* $Id: string_odin.cpp,v 1.6 2002-02-06 20:18:30 sandervl Exp $ */
+ /* $Id: string_odin.cpp,v 1.7 2002-02-08 10:23:35 sandervl Exp $ */
 
 /*
  * Win32 Lightweight SHELL32 for OS/2
@@ -136,7 +136,7 @@ ODINFUNCTION2(LPWSTR,   StrChrIW,
   return lpRes;
 }
 
-
+#if 0
 /*****************************************************************************
  * Name      : StrCpyA
  * Purpose   : copy a string
@@ -156,7 +156,7 @@ ODINFUNCTIONNODBG2(LPSTR,  StrCpyA,
   return lstrcpyA(lpDest,
                   lpSource);
 }
-
+#endif
 
 /*****************************************************************************
  * Name      : StrSpnA
