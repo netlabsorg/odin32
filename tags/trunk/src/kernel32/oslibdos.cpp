@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.25 2000-04-03 15:01:22 cbratschi Exp $ */
+/* $Id: oslibdos.cpp,v 1.26 2000-04-09 15:08:25 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -1104,8 +1104,12 @@ DWORD OSLibDosFindFirst(LPCSTR lpFileName,WIN32_FIND_DATAA* lpFindFileData)
       }
     }
   }
+  if(rc) {
+        DosFindClose(hDir);
+        SetLastError(error2WinError(rc));
+	return INVALID_HANDLE_VALUE_W;
+  }
   translateFindResults(&result,lpFindFileData);
-
   return hDir;
 }
 //******************************************************************************
