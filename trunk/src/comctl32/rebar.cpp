@@ -1,4 +1,4 @@
-/* $Id: rebar.cpp,v 1.1 2000-02-23 17:09:47 cbratschi Exp $ */
+/* $Id: rebar.cpp,v 1.2 2000-03-18 16:17:27 cbratschi Exp $ */
 /*
  * Rebar control
  *
@@ -28,6 +28,7 @@
 #include "winbase.h"
 #include "wingdi.h"
 #include "commctrl.h"
+#include "ccbase.h"
 #include "rebar.h"
 #include "comctl32.h"
 
@@ -41,7 +42,7 @@
 #define GRIPPER_WIDTH   13
 
 
-#define REBAR_GetInfoPtr(wndPtr) ((REBAR_INFO *)GetWindowLongA (hwnd, 0))
+#define REBAR_GetInfoPtr(hwnd) ((REBAR_INFO*)getInfoPtr(hwnd))
 
 
 static VOID
@@ -908,20 +909,6 @@ REBAR_GetToolTips (HWND hwnd)
 
 
 static LRESULT
-REBAR_GetUnicodeFormat (HWND hwnd)
-{
-    REBAR_INFO *infoPtr = REBAR_GetInfoPtr (hwnd);
-    return infoPtr->bUnicode;
-}
-
-static LRESULT
-REBAR_GetVersion (HWND hwnd)
-{
-    REBAR_INFO *infoPtr = REBAR_GetInfoPtr (hwnd);
-    return infoPtr->iVersion;
-}
-
-static LRESULT
 REBAR_HitTest (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
     /* REBAR_INFO *infoPtr = REBAR_GetInfoPtr (hwnd); */
@@ -1497,9 +1484,9 @@ static LRESULT
 REBAR_SetParent (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
     REBAR_INFO *infoPtr = REBAR_GetInfoPtr (hwnd);
-    HWND hwndTemp = infoPtr->hwndNotify;
+    HWND hwndTemp = infoPtr->header.hwndNotify;
 
-    infoPtr->hwndNotify = (HWND)wParam;
+    infoPtr->header.hwndNotify = (HWND)wParam;
 
     return (LRESULT)hwndTemp;
 }
@@ -1522,29 +1509,6 @@ REBAR_SetTextColor (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
 /* << REBAR_SetTooltips >> */
 
-
-static LRESULT
-REBAR_SetUnicodeFormat (HWND hwnd, WPARAM wParam)
-{
-    REBAR_INFO *infoPtr = REBAR_GetInfoPtr (hwnd);
-    BOOL bTemp = infoPtr->bUnicode;
-    infoPtr->bUnicode = (BOOL)wParam;
-    return bTemp;
-}
-
-static LRESULT
-REBAR_SetVersion (HWND hwnd, INT iVersion)
-{
-    REBAR_INFO *infoPtr = REBAR_GetInfoPtr (hwnd);
-    INT iOldVersion = infoPtr->iVersion;
-
-    if (iVersion > COMCTL32_VERSION)
-        return -1;
-
-    infoPtr->iVersion = iVersion;
-
-    return iOldVersion;
-}
 
 static LRESULT
 REBAR_ShowBand (HWND hwnd, WPARAM wParam, LPARAM lParam)
@@ -1612,11 +1576,9 @@ REBAR_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
     REBAR_INFO *infoPtr;
 
     /* allocate memory for info structure */
-    infoPtr = (REBAR_INFO *)COMCTL32_Alloc (sizeof(REBAR_INFO));
-    SetWindowLongA (hwnd, 0, (DWORD)infoPtr);
+    infoPtr = (REBAR_INFO*)initControl(hwnd,sizeof(REBAR_INFO));
 
     /* initialize info structure */
-    infoPtr->iVersion = 0;
     infoPtr->clrBk = CLR_NONE;
     infoPtr->clrText = RGB(0, 0, 0);
 
@@ -1626,16 +1588,9 @@ REBAR_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
     infoPtr->hcurVert  = LoadCursorA (0, IDC_SIZENSA);
     infoPtr->hcurDrag  = LoadCursorA (0, IDC_SIZEA);
 
-    infoPtr->bUnicode = IsWindowUnicode (hwnd);
-
 //    if (GetWindowLongA (hwnd, GWL_STYLE) & RBS_AUTOSIZE)
 //      FIXME (rebar, "style RBS_AUTOSIZE set!\n");
 
-#if 0
-    SendMessageA (hwnd, WM_NOTIFYFORMAT, (WPARAM)hwnd, NF_QUERY);
-#endif
-
-//    TRACE (rebar, "created!\n");
     return 0;
 }
 
@@ -1680,9 +1635,8 @@ REBAR_Destroy (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
 
     /* free rebar info data */
-    COMCTL32_Free (infoPtr);
+    doneControl(hwnd);
 
-//    TRACE (rebar, "destroyed!\n");
     return 0;
 }
 
@@ -1942,12 +1896,6 @@ REBAR_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
         case RB_GETTOOLTIPS:
             return REBAR_GetToolTips (hwnd);
 
-        case RB_GETUNICODEFORMAT:
-            return REBAR_GetUnicodeFormat (hwnd);
-
-        case CCM_GETVERSION:
-            return REBAR_GetVersion (hwnd);
-
         case RB_HITTEST:
             return REBAR_HitTest (hwnd, wParam, lParam);
 
@@ -1992,12 +1940,6 @@ REBAR_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             return REBAR_SetTextColor (hwnd, wParam, lParam);
 
 /*      case RB_SETTOOLTIPS: */
-
-        case RB_SETUNICODEFORMAT:
-            return REBAR_SetUnicodeFormat (hwnd, wParam);
-
-        case CCM_SETVERSION:
-            return REBAR_SetVersion (hwnd, (INT)wParam);
 
         case RB_SHOWBAND:
             return REBAR_ShowBand (hwnd, wParam, lParam);
@@ -2050,7 +1992,7 @@ REBAR_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 //          if (uMsg >= WM_USER)
 //              ERR (rebar, "unknown msg %04x wp=%08x lp=%08lx\n",
 //                   uMsg, wParam, lParam);
-            return DefWindowProcA (hwnd, uMsg, wParam, lParam);
+            return defComCtl32ProcA (hwnd, uMsg, wParam, lParam);
     }
     return 0;
 }
@@ -2060,9 +2002,6 @@ VOID
 REBAR_Register (VOID)
 {
     WNDCLASSA wndClass;
-
-//SvL: Don't check this now
-//    if (GlobalFindAtomA (REBARCLASSNAMEA)) return;
 
     ZeroMemory (&wndClass, sizeof(WNDCLASSA));
     wndClass.style         = CS_GLOBALCLASS | CS_DBLCLKS;
@@ -2080,7 +2019,6 @@ REBAR_Register (VOID)
 VOID
 REBAR_Unregister (VOID)
 {
-    if (GlobalFindAtomA (REBARCLASSNAMEA))
-        UnregisterClassA (REBARCLASSNAMEA, (HINSTANCE)NULL);
+     UnregisterClassA (REBARCLASSNAMEA, (HINSTANCE)NULL);
 }
 

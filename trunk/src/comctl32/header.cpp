@@ -1,4 +1,4 @@
-/* $Id: header.cpp,v 1.2 2000-02-25 17:00:15 cbratschi Exp $ */
+/* $Id: header.cpp,v 1.3 2000-03-18 16:17:23 cbratschi Exp $ */
 /*
  *  Header control
  *
@@ -15,6 +15,10 @@
  * Status: ready (inconsistent parts in Microsoft SDK documentation)
  * Version: 5.00
  */
+
+/*
+ - Corel 20000317 level
+*/
 
 #include <string.h>
 

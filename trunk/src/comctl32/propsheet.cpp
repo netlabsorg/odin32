@@ -1,4 +1,4 @@
-/* $Id: propsheet.cpp,v 1.2 2000-03-17 17:13:24 cbratschi Exp $ */
+/* $Id: propsheet.cpp,v 1.3 2000-03-18 16:17:26 cbratschi Exp $ */
 /*
  * Property Sheets
  *
@@ -12,7 +12,10 @@
  *   - Unicode property sheets
  */
 
-/* WINE 991212 level */
+/*
+ - Corel WINE 20000317 level
+ - (WINE 991212 level)
+*/
 
 #include <string.h>
 #include "winbase.h"
@@ -87,6 +90,7 @@ const char * PropSheetInfoStr = "PropertySheetInfo";
  * Prototypes
  */
 static BOOL PROPSHEET_CreateDialog(PropSheetInfo* psInfo);
+static BOOL PROPSHEET_SizeMismatch(HWND hwndDlg, PropSheetInfo* psInfo);
 static BOOL PROPSHEET_IsTooSmall(HWND hwndDlg, PropSheetInfo* psInfo);
 static BOOL PROPSHEET_AdjustSize(HWND hwndDlg, PropSheetInfo* psInfo);
 static BOOL PROPSHEET_AdjustButtons(HWND hwndParent, PropSheetInfo* psInfo);
@@ -473,6 +477,44 @@ static BOOL PROPSHEET_IsTooSmall(HWND hwndDlg, PropSheetInfo* psInfo)
     return TRUE;
 
   if (rcPage.bottom > rcOrigTab.bottom)
+    return TRUE;
+
+  return FALSE;
+}
+
+/******************************************************************************
+ *            PROPSHEET_SizeMismatch
+ *
+ *     Verify that the tab control and the "largest" property sheet page dlg. template
+ *     match in size.
+ */
+static BOOL PROPSHEET_SizeMismatch(HWND hwndDlg, PropSheetInfo* psInfo)
+{
+  HWND hwndTabCtrl = GetDlgItem(hwndDlg, IDC_TABCONTROL);
+  RECT rcOrigTab, rcPage;
+
+  /*
+   * Original tab size.
+   */
+  GetClientRect(hwndTabCtrl, &rcOrigTab);
+  //TRACE("orig tab %d %d %d %d\n", rcOrigTab.left, rcOrigTab.top,
+  //      rcOrigTab.right, rcOrigTab.bottom);
+
+  /*
+   * Biggest page size.
+   */
+  rcPage.left   = psInfo->x;
+  rcPage.top    = psInfo->y;
+  rcPage.right  = psInfo->width;
+  rcPage.bottom = psInfo->height;
+
+  MapDialogRect(hwndDlg, &rcPage);
+  //TRACE("biggest page %d %d %d %d\n", rcPage.left, rcPage.top,
+  //      rcPage.right, rcPage.bottom);
+
+  if ( (rcPage.right - rcPage.left) != (rcOrigTab.right - rcOrigTab.left) )
+    return TRUE;
+  if ( (rcPage.bottom - rcPage.top) != (rcOrigTab.bottom - rcOrigTab.top) )
     return TRUE;
 
   return FALSE;
@@ -2093,7 +2135,7 @@ PROPSHEET_DialogProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
       }
       else
       {
-        if (PROPSHEET_IsTooSmall(hwnd, psInfo))
+        if (PROPSHEET_SizeMismatch(hwnd, psInfo))
         {
           PROPSHEET_AdjustSize(hwnd, psInfo);
           PROPSHEET_AdjustButtons(hwnd, psInfo);
