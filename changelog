@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2215 2002-07-12 09:22:27 sandervl Exp $ */
+/* $Id: changelog,v 1.2216 2002-07-12 19:48:44 sandervl Exp $ */
+
+ 2002-07-12: Platon Fomichev <platon@innotek.de>
+    - USER32:   o Close menu when RMB is pressed outside menu window
 
  2002-07-12: Sander van Leeuwen <sandervl@innotek.de> 
     - WINMM:    o Changed init order; do not check for MMPM2 presence if
