@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.262 1999-10-02 04:10:14 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.263 1999-10-02 13:56:40 cbratschi Exp $ */
+
+ 99-10-02: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32: DrawTextExA/W: implemented DT_END_ELLIPSIS
+		  added DrawTextExA/W to header files
 
  99-10-02: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- VERSION: Allocation bugfix in VerQueryValueA
