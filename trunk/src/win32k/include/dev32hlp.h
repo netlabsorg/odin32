@@ -1,4 +1,4 @@
-/* $Id: dev32hlp.h,v 1.3 1999-11-10 01:45:32 bird Exp $
+/* $Id: dev32hlp.h,v 1.4 2001-07-10 16:44:08 bird Exp $
  *
  * Dev32Hlp - 32-bit Device helpers.
  *
@@ -84,9 +84,14 @@ extern "C" {
 /*******************************************************************************
 *   Structures and Typedefs                                                    *
 *******************************************************************************/
-typedef struct _LockHandle
+typedef struct vmlh_s /* #memb 5 size 12 (0x00c) */
 {
-    char ach[12];
+    unsigned                lh_page  : 20,     /* off:   0(00)  size:  4(04) */
+                            lh_flags : 12;
+    short                   lh_hptda;          /* off:   4(04)  size:  2(02) */
+    short                   lh_npages;         /* off:   6(06)  size:  2(02) */
+    short                   lh_hob;            /* off:   8(08)  size:  2(02) */
+    short                   lh_sig;            /* off:  10(0a)  size:  2(02) */
 } LOCKHANDLE, *PLOCKHANDLE;
 
 
