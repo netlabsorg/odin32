@@ -1,4 +1,4 @@
-/* $Id: get.c,v 1.1 2000-02-29 00:46:16 sandervl Exp $ */
+/* $Id: get.c,v 1.2 2000-03-01 22:45:22 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -37,6 +37,7 @@
 #else
 #include "GL/xf86glx.h"
 #endif
+#include "types.h"
 #include "context.h"
 #include "enable.h"
 #include "enums.h"
@@ -44,15 +45,14 @@
 #include "get.h"
 #include "macros.h"
 #include "mmath.h"
-#include "types.h"
 #include "vb.h"
 #endif
 
 
 
-#define FLOAT_TO_BOOL(X)	( (X)==0.0F ? GL_FALSE : GL_TRUE )
-#define INT_TO_BOOL(I)		( (I)==0 ? GL_FALSE : GL_TRUE )
-#define ENUM_TO_BOOL(E)		( (E)==0 ? GL_FALSE : GL_TRUE )
+#define FLOAT_TO_BOOL(X)        ( (X)==0.0F ? GL_FALSE : GL_TRUE )
+#define INT_TO_BOOL(I)          ( (I)==0 ? GL_FALSE : GL_TRUE )
+#define ENUM_TO_BOOL(E)         ( (E)==0 ? GL_FALSE : GL_TRUE )
 
 #ifdef SPECIALCAST
 /* Needed for an Amiga compiler */

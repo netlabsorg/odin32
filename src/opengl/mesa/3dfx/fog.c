@@ -1,4 +1,4 @@
-/* $Id: fog.c,v 1.1 2000-02-29 00:46:16 sandervl Exp $ */
+/* $Id: fog.c,v 1.2 2000-03-01 22:45:22 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -36,11 +36,11 @@
 #else
 #include "GL/xf86glx.h"
 #endif
+#include "types.h"
 #include "context.h"
 #include "fog.h"
 #include "macros.h"
 #include "mmath.h"
-#include "types.h"
 #include "xform.h"
 #endif
 
@@ -53,17 +53,17 @@ void gl_Fogfv( GLcontext *ctx, GLenum pname, const GLfloat *params )
    switch (pname) {
       case GL_FOG_MODE:
          m = (GLenum) (GLint) *params;
-	 if (m==GL_LINEAR || m==GL_EXP || m==GL_EXP2) {
-	    ctx->Fog.Mode = m;
-	 }
-	 else {
-	    gl_error( ctx, GL_INVALID_ENUM, "glFog" );
+         if (m==GL_LINEAR || m==GL_EXP || m==GL_EXP2) {
+            ctx->Fog.Mode = m;
+         }
+         else {
+            gl_error( ctx, GL_INVALID_ENUM, "glFog" );
             return;
-	 }
-	 break;
+         }
+         break;
       case GL_FOG_DENSITY:
-	 if (*params<0.0) {
-	    gl_error( ctx, GL_INVALID_VALUE, "glFog" );
+         if (*params<0.0) {
+            gl_error( ctx, GL_INVALID_VALUE, "glFog" );
             return;
 	 }
 	 else {

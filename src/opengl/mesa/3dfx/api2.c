@@ -1,4 +1,4 @@
-/* $Id: api2.c,v 1.1 2000-02-29 00:46:11 sandervl Exp $ */
+/* $Id: api2.c,v 1.2 2000-03-01 22:45:17 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -36,13 +36,13 @@
 #include "GL/xf86glx.h"
 #endif
 #include "api.h"
+#include "types.h"
 #include "context.h"
 #include "varray.h"
 #include "image.h"
 #include "macros.h"
 #include "matrix.h"
 #include "teximage.h"
-#include "types.h"
 #include "vb.h"
 #endif
 

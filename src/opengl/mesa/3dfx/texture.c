@@ -1,4 +1,4 @@
-/* $Id: texture.c,v 1.1 2000-02-29 00:46:26 sandervl Exp $ */
+/* $Id: texture.c,v 1.2 2000-03-01 22:45:28 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -35,12 +35,12 @@
 #else
 #include "GL/xf86glx.h"
 #endif
+#include "types.h"
 #include "context.h"
 #include "macros.h"
 #include "mmath.h"
 #include "pb.h"
 #include "texture.h"
-#include "types.h"
 #include "xform.h"
 #endif
 
