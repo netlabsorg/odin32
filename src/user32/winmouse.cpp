@@ -1,4 +1,4 @@
-/* $Id: winmouse.cpp,v 1.24 2002-05-31 09:54:05 sandervl Exp $ */
+/* $Id: winmouse.cpp,v 1.25 2002-06-18 09:32:26 sandervl Exp $ */
 /*
  * Win32 mouse functions
  *
@@ -69,8 +69,8 @@ BOOL WIN32API GetCursorPos( PPOINT lpPoint)
 BOOL WIN32API SetCursorPos( int X, int Y)
 {
     BOOL ret;
+    dprintf(("USER32: SetCursorPos (%d,%d)", X,Y));
 
-    dprintf(("USER32: SetCursorPos %d %d", X,Y));
     ret = OSLibWinSetPointerPos(X, mapScreenY(Y));
     if(ret == TRUE) {
         MSLLHOOKSTRUCT hook;
