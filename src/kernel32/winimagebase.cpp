@@ -1,4 +1,4 @@
-/* $Id: winimagebase.cpp,v 1.24 2000-07-15 09:14:26 sandervl Exp $ */
+/* $Id: winimagebase.cpp,v 1.25 2000-08-12 16:58:40 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -250,7 +250,7 @@ ULONG Win32ImageBase::isPEImage(char *szFileName)
         return ERROR_INVALID_EXE_SIGNATURE_W;
   }
   rc = DosRead(win32handle, pdoshdr, sizeof(IMAGE_DOS_HEADER), &ulRead);
-  if(rc != NO_ERROR) {
+  if(rc != NO_ERROR || ulRead != sizeof(IMAGE_DOS_HEADER)) {
 	free(pdoshdr);
         DosClose(win32handle);                /* Close the file */
         return ERROR_INVALID_EXE_SIGNATURE_W;
@@ -272,7 +272,7 @@ ULONG Win32ImageBase::isPEImage(char *szFileName)
         return ERROR_NOT_ENOUGH_MEMORY_W;
   }
   rc = DosRead(win32handle, win32file, hdrsize, &ulRead);
-  if(rc != NO_ERROR) {
+  if(rc != NO_ERROR || ulRead != hdrsize) {
         goto failure;
   }
 
