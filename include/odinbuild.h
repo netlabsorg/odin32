@@ -1,4 +1,4 @@
-/* $Id: odinbuild.h,v 1.25 2001-02-22 05:20:53 bird Exp $
+/* $Id: odinbuild.h,v 1.26 2001-02-23 03:24:52 bird Exp $
  *
  * Odin32 version number and build numbers.
  *
@@ -11,6 +11,7 @@
 #ifndef _ODINBUILD_H_
 #define _ODINBUILD_H_
 
+
 /*
  * Current Odin version and build number.
  * Used for bldlevel info.
@@ -21,5 +22,3 @@
 #define ODIN32_BUILD_NR       332        /* This started at 300 on the 17th Des 2000. */
 
 #endif
-
-
