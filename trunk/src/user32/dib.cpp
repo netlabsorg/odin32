@@ -1,4 +1,4 @@
-/* $Id: dib.cpp,v 1.8 2000-11-15 20:44:26 sandervl Exp $ */
+/* $Id: dib.cpp,v 1.9 2002-03-18 13:03:53 sandervl Exp $ */
 
 /*
  * Win32 DIB functions for OS/2
@@ -81,9 +81,19 @@ int DIB_BitmapInfoSize( BITMAPINFO * info, WORD coloruse )
     }
     else  /* assume BITMAPINFOHEADER */
     {
-        colors = info->bmiHeader.biClrUsed;
-        if (!colors && (info->bmiHeader.biBitCount <= 8))
-            colors = 1 << info->bmiHeader.biBitCount;
+#ifdef __WIN32OS2__
+        /* many windows apps write bitmaps that have 0x1000000 in biClrUsed when
+           in 24 bpp, so I think we can do generic action 24bpp - no clrUsed */
+        colors = 0;
+        if (info->bmiHeader.biBitCount <= 8)
+        {
+#endif
+           colors = info->bmiHeader.biClrUsed;
+           if (!colors)
+              colors = 1 << info->bmiHeader.biBitCount;
+#ifdef __WIN32OS2__
+        }
+#endif
         return sizeof(BITMAPINFOHEADER) + colors *
                ((coloruse == DIB_RGB_COLORS) ? sizeof(RGBQUAD) : sizeof(WORD));
     }
