@@ -1,4 +1,4 @@
-/* $Id: defwndproc.cpp,v 1.4 1999-06-21 00:48:57 buerkle Exp $ */
+/* $Id: defwndproc.cpp,v 1.5 1999-06-26 13:21:11 sandervl Exp $ */
 
 /*
  * Win32 default window API functions for OS/2
@@ -11,6 +11,11 @@
  */
 #include "user32.h"
 #include "syscolor.h"
+#include <wndproc.h>
+
+#ifdef DEBUG
+char *GetMsgText(int Msg);
+#endif
 
 //******************************************************************************
 //******************************************************************************
@@ -43,6 +48,38 @@ LRESULT WIN32API DefWindowProcA(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lPara
 	case WM_PARENTNOTIFY: //Open32 doesn't like receiving those!!
 		dprintf(("DefWndProc: WM_PARENTNOTIFY for %x", hwnd));
 		return 0;
+
+	case WM_MOUSEACTIVATE:
+	{
+		DWORD dwStyle = GetWindowLongA(hwnd, GWL_STYLE);
+		dprintf(("DefWndProc: WM_MOUSEACTIVATE for %x Msg %s", hwnd, GetMsgText(HIWORD(lParam))));
+		if (dwStyle & WS_CHILD)
+		{
+			HWND hwndParent = GetParent(hwnd);
+			Win32WindowProc *parentwnd = Win32WindowProc::FindProc(hwndParent);
+			if(parentwnd) {
+				LRESULT rc = parentwnd->SendMessageA(hwndParent, WM_MOUSEACTIVATE, wParam, lParam );
+				if(rc)	return rc;
+			}
+		}
+		return (LOWORD(lParam) == HTCAPTION) ? MA_NOACTIVATE : MA_ACTIVATE;
+	}
+	case WM_SETCURSOR:
+	{
+		DWORD dwStyle = GetWindowLongA(hwnd, GWL_STYLE);
+		dprintf(("DefWndProc: WM_SETCURSOR for %x Msg %s", hwnd, GetMsgText(HIWORD(lParam))));
+		if (dwStyle & WS_CHILD)
+		{
+			HWND hwndParent = GetParent(hwnd);
+
+			Win32WindowProc *parentwnd = Win32WindowProc::FindProc(hwndParent);
+			if(parentwnd) {
+				LRESULT rc = parentwnd->SendMessageA(hwndParent, WM_SETCURSOR, wParam, lParam);
+				if(rc)	return rc;
+			}
+		}
+		return O32_DefWindowProc(hwnd, Msg, wParam, lParam);
+	}
         default:
                 return O32_DefWindowProc(hwnd, Msg, wParam, lParam);
     }
