@@ -1,4 +1,4 @@
-/* $Id: initkernel32.cpp,v 1.22 2002-07-21 09:17:28 sandervl Exp $
+/* $Id: initkernel32.cpp,v 1.23 2002-09-18 10:58:48 sandervl Exp $
  *
  * KERNEL32 DLL entry point
  *
@@ -221,8 +221,8 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
     /***********************************************************/
     return 1UL;
 }
-
-
+//******************************************************************************
+//******************************************************************************
 void APIENTRY cleanupKernel32(ULONG ulReason)
 {
     dprintf(("kernel32 exit %d\n", ulReason));
