@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.40 1999-11-01 19:11:38 sandervl Exp $
+# $Id: Makefile,v 1.41 1999-11-04 19:00:59 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -24,7 +24,7 @@ RCFLAGS = -s -I. -I$(CPPMAIN)\include -I$(PDWIN32_INCLUDE) -I$(PDWIN32_INCLUDE)\
 TARGET = user32
 
 OBJS =  user32.obj loadres.obj \
-        dde.obj win32wndhandle.obj \
+        dde.obj win32wndhandle.obj wsprintf.obj \
         icon.obj hook.obj hooks.obj winmenu.obj \
         defwndproc.obj syscolor.obj char.obj initterm.obj \
         uitools.obj unknown.obj spy.obj wndmsg.obj \
@@ -146,6 +146,7 @@ caret.obj:      caret.cpp win32wbase.h caret.h dcdata.h
 
 clipboard.obj:  clipboard.cpp
 dib.obj:        dib.cpp dib.h
+wsprintf.obj:   wsprintf.cpp
 
 clean:
         $(RM) *.obj *.lib *.dll *.map *.pch *.res
