@@ -1,4 +1,4 @@
-/* $Id: combo.cpp,v 1.3 1999-10-08 12:10:26 cbratschi Exp $ */
+/* $Id: combo.cpp,v 1.4 1999-10-08 21:23:37 cbratschi Exp $ */
 /*
  * Combo controls
  *
@@ -6,6 +6,8 @@
  * Copyright 1999 Christoph Bratschi
  *
  * FIXME: roll up in Netscape 3.01.
+ *
+ * WINE version: 990923
  */
 
 #include <string.h>
@@ -654,57 +656,23 @@ static void CBPaintButton(
   HDC         hdc,
   RECT        rectButton)
 {
-    UINT        x, y;
-    BOOL        bBool;
-    HDC       hMemDC;
-    HBRUSH    hPrevBrush;
-    COLORREF    oldTextColor, oldBkColor;
-
     if( lphc->wState & CBF_NOREDRAW )
       return;
 
-    hPrevBrush = SelectObject(hdc, GetSysColorBrush(COLOR_BTNFACE));
 
-    /*
-     * Draw the button background
-     */
-    PatBlt( hdc,
-            rectButton.left,
-            rectButton.top,
-            rectButton.right-rectButton.left,
-            rectButton.bottom-rectButton.top,
-            PATCOPY );
+    UINT buttonState = DFCS_SCROLLCOMBOBOX;
 
-    bBool = lphc->wState & CBF_BUTTONDOWN;
-    if (bBool)
+    if (lphc->wState & CBF_BUTTONDOWN)
     {
-        DrawEdge( hdc, &rectButton, EDGE_SUNKEN, BF_RECT );
-    }
-    else
-    {
-        DrawEdge( hdc, &rectButton, EDGE_RAISED, BF_RECT );
+      buttonState |= DFCS_PUSHED;
     }
 
-    /*
-     * Remove the edge of the button from the rectangle
-     * and calculate the position of the bitmap.
-     */
-    InflateRect( &rectButton, -2, -2);
+    if (CB_DISABLED(lphc))
+    {
+      buttonState |= DFCS_INACTIVE;
+    }
 
-    x = (rectButton.left + rectButton.right - CBitWidth) >> 1;
-    y = (rectButton.top + rectButton.bottom - CBitHeight) >> 1;
-
-
-    hMemDC = CreateCompatibleDC( hdc );
-    SelectObject( hMemDC, hComboBmp );
-    oldTextColor = SetTextColor( hdc, GetSysColor(COLOR_BTNFACE) );
-    oldBkColor = SetBkColor( hdc, CB_DISABLED(lphc) ? RGB(128,128,128) :
-                               RGB(0,0,0) );
-    BitBlt( hdc, x, y, CBitWidth, CBitHeight, hMemDC, 0, 0, SRCCOPY );
-    SetBkColor( hdc, oldBkColor );
-    SetTextColor( hdc, oldTextColor );
-    DeleteDC( hMemDC );
-    SelectObject( hdc, hPrevBrush );
+    DrawFrameControl(hdc,&rectButton,DFC_SCROLL,buttonState);			
 }
 
 /***********************************************************************
@@ -717,8 +685,8 @@ static void CBPaintText(
   HDC         hdc,
   RECT        rectEdit)
 {
-   INT  id, size = 0;
-   LPSTR        pText = NULL;
+   INT	id, size = 0;
+   LPSTR	pText = NULL;
 
    if( lphc->wState & CBF_NOREDRAW ) return;
 
@@ -728,134 +696,108 @@ static void CBPaintText(
    if( (id = SendMessageA(lphc->hWndLBox, LB_GETCURSEL, 0, 0) ) != LB_ERR )
    {
         size = SendMessageA( lphc->hWndLBox, LB_GETTEXTLEN, id, 0);
-        pText = (LPSTR)HeapAlloc( GetProcessHeap(), 0, size + 1);
-        if(pText)
-        {
-            SendMessageA( lphc->hWndLBox, LB_GETTEXT, (WPARAM)id, (LPARAM)pText );
-            pText[size] = '\0'; /* just in case */
-        } else return;
+        if( (pText = (char*)HeapAlloc( GetProcessHeap(), 0, size + 1)) != NULL )
+	{
+	    SendMessageA( lphc->hWndLBox, LB_GETTEXT, (WPARAM)id, (LPARAM)pText );
+	    pText[size] = '\0';	/* just in case */
+	} else return;
    }
 
    if( lphc->wState & CBF_EDIT )
    {
-        if( CB_HASSTRINGS(lphc) ) SetWindowTextA( lphc->hWndEdit, pText ? pText : "" );
-        if( lphc->wState & CBF_FOCUSED )
-            SendMessageA( lphc->hWndEdit, EM_SETSEL, 0, (LPARAM)(-1));
+	if( CB_HASSTRINGS(lphc) ) SetWindowTextA( lphc->hWndEdit, pText ? pText : "" );
+	if( lphc->wState & CBF_FOCUSED )
+	    SendMessageA( lphc->hWndEdit, EM_SETSEL, 0, (LPARAM)(-1));
    }
    else /* paint text field ourselves */
    {
-        HBRUSH hPrevBrush = 0;
-        HDC      hDC = hdc;
+     UINT	itemState;
+     HFONT	hPrevFont = (lphc->hFont) ? SelectObject(hdc, lphc->hFont) : 0;
 
-        if( !hDC )
-        {
-            hDC = GetDC(lphc->hwndself);
-            if (hDC)
-            {
-                HBRUSH hBrush = SendMessageA( lphc->owner,
-                                                  WM_CTLCOLORLISTBOX,
-                                                  hDC, lphc->hwndself );
-                hPrevBrush = SelectObject( hDC,
-                           (hBrush) ? hBrush : GetStockObject(WHITE_BRUSH) );
-            }
-        }
-        if( hDC )
-        {
-            UINT        itemState;
-            HFONT       hPrevFont = (lphc->hFont) ? SelectObject(hDC, lphc->hFont) : 0;
+     /*
+      * Give ourselves some space.
+      */
+     InflateRect( &rectEdit, -1, -1 );
 
-            /*
-             * Give ourselves some space.
-             */
-            InflateRect( &rectEdit, -1, -1 );
+     if ( (lphc->wState & CBF_FOCUSED) &&
+	  !(lphc->wState & CBF_DROPPED) )
+     {
+       /* highlight */
 
-            if ( (lphc->wState & CBF_FOCUSED) &&
-                !(lphc->wState & CBF_DROPPED) )
-            {
-                /* highlight */
+       FillRect( hdc, &rectEdit, GetSysColorBrush(COLOR_HIGHLIGHT) );
+       SetBkColor( hdc, GetSysColor( COLOR_HIGHLIGHT ) );
+       SetTextColor( hdc, GetSysColor( COLOR_HIGHLIGHTTEXT ) );
+       itemState = ODS_SELECTED | ODS_FOCUS;
+     }
+     else
+       itemState = 0;
 
-                FillRect( hDC, &rectEdit, GetSysColorBrush(COLOR_HIGHLIGHT) );
-                SetBkColor( hDC, GetSysColor( COLOR_HIGHLIGHT ) );
-                SetTextColor( hDC, GetSysColor( COLOR_HIGHLIGHTTEXT ) );
-                itemState = ODS_SELECTED | ODS_FOCUS;
-            }
-            else
-              itemState = 0;
+     if( CB_OWNERDRAWN(lphc) )
+     {
+       DRAWITEMSTRUCT dis;
+       HRGN           clipRegion;
+       DWORD dwStyle = GetWindowLongA(lphc->hwndself,GWL_STYLE);
 
-            if( CB_OWNERDRAWN(lphc) )
-            {
-                DRAWITEMSTRUCT dis;
-                HRGN           clipRegion;
+       /*
+	* Save the current clip region.
+	* To retrieve the clip region, we need to create one "dummy"
+	* clip region.
+	*/
+       clipRegion = CreateRectRgnIndirect(&rectEdit);
 
-                /*
-                 * Save the current clip region.
-                 * To retrieve the clip region, we need to create one "dummy"
-                 * clip region.
-                 */
-                clipRegion = CreateRectRgnIndirect(&rectEdit);
+       if (GetClipRgn(hdc, clipRegion)!=1)
+       {
+	 DeleteObject(clipRegion);
+	 clipRegion=(HRGN)NULL;
+       }
 
-                if (GetClipRgn(hDC, clipRegion)!=1)
-                {
-                  DeleteObject(clipRegion);
-                  clipRegion=(HRGN)NULL;
-                }
+       if ( dwStyle & WS_DISABLED )
+	 itemState |= ODS_DISABLED;
 
-                if ( GetWindowLongA(lphc->hwndself,GWL_STYLE) & WS_DISABLED )
-                  itemState |= ODS_DISABLED;
+       dis.CtlType	= ODT_COMBOBOX;
+       dis.CtlID	= GetWindowLongA(lphc->hwndself,GWL_ID);
+       dis.hwndItem	= lphc->hwndself;
+       dis.itemAction	= ODA_DRAWENTIRE;
+       dis.itemID	= id;
+       dis.itemState	= itemState;
+       dis.hDC		= hdc;
+       dis.rcItem	= rectEdit;
+       dis.itemData	= SendMessageA( lphc->hWndLBox, LB_GETITEMDATA,
+					(WPARAM)id, 0 );
 
-                dis.CtlType     = ODT_COMBOBOX;
-                dis.CtlID       = GetWindowLongA(lphc->hwndself,GWL_ID);
-                dis.hwndItem    = lphc->hwndself;
-                dis.itemAction  = ODA_DRAWENTIRE;
-                dis.itemID      = id;
-                dis.itemState   = itemState;
-                dis.hDC         = hDC;
-                dis.rcItem      = rectEdit;
-                dis.itemData    = SendMessageA( lphc->hWndLBox, LB_GETITEMDATA,
-                                                                  (WPARAM)id, 0 );
+       /*
+	* Clip the DC and have the parent draw the item.
+	*/
+       IntersectClipRect(hdc,
+			 rectEdit.left,  rectEdit.top,
+			 rectEdit.right, rectEdit.bottom);
 
-                /*
-                 * Clip the DC and have the parent draw the item.
-                 */
-                IntersectClipRect(hDC,
-                                  rectEdit.left,  rectEdit.top,
-                                  rectEdit.right, rectEdit.bottom);
+       SendMessageA(lphc->owner, WM_DRAWITEM,
+		    GetWindowLongA(lphc->hwndself,GWL_ID), (LPARAM)&dis );
 
-                SendMessageA(lphc->owner, WM_DRAWITEM,
-                             GetWindowLongA(lphc->hwndself,GWL_ID), (LPARAM)&dis );
+       /*
+	* Reset the clipping region.
+	*/
+       SelectClipRgn(hdc, clipRegion);		
+     }
+     else
+     {
+       ExtTextOutA( hdc,
+		    rectEdit.left + 1,
+		    rectEdit.top + 1,
+		    ETO_OPAQUE | ETO_CLIPPED,
+		    &rectEdit,
+		    pText ? pText : "" , size, NULL );
 
-                /*
-                 * Reset the clipping region.
-                 */
-                SelectClipRgn(hDC, clipRegion);
-            }
-            else
-            {
-                ExtTextOutA( hDC,
-                             rectEdit.left + 1,
-                             rectEdit.top + 1,
-                             ETO_OPAQUE | ETO_CLIPPED,
-                             &rectEdit,
-                               pText ? pText : "" , size, NULL );
+       if(lphc->wState & CBF_FOCUSED && !(lphc->wState & CBF_DROPPED))
+	 DrawFocusRect( hdc, &rectEdit );
+     }
 
-                if(lphc->wState & CBF_FOCUSED && !(lphc->wState & CBF_DROPPED))
-                    DrawFocusRect( hDC, &rectEdit );
-            }
-
-            if( hPrevFont )
-              SelectObject(hDC, hPrevFont );
-
-            if( !hdc )
-            {
-                if( hPrevBrush )
-                  SelectObject( hDC, hPrevBrush );
-
-                ReleaseDC( lphc->hwndself, hDC );
-            }
-        }
+     if( hPrevFont )
+       SelectObject(hdc, hPrevFont );
    }
    if (pText)
-        HeapFree( GetProcessHeap(), 0, pText );
+	HeapFree( GetProcessHeap(), 0, pText );
 }
 
 /***********************************************************************
@@ -881,6 +823,59 @@ static void CBPaintBorder(
   }
 
   DrawEdge(hdc, &clientRect, EDGE_SUNKEN, BF_RECT);
+}
+
+/***********************************************************************
+ *           COMBO_PrepareColors
+ *
+ * This method will sent the appropriate WM_CTLCOLOR message to
+ * prepare and setup the colors for the combo's DC.
+ *
+ * It also returns the brush to use for the background.
+ */
+static HBRUSH COMBO_PrepareColors(
+  HWND        hwnd,
+  LPHEADCOMBO lphc,
+  HDC         hDC)
+{
+  HBRUSH  hBkgBrush;
+
+  /*
+   * Get the background brush for this control.
+   */
+  if (CB_DISABLED(lphc))
+  {
+    hBkgBrush = SendMessageA( lphc->owner, WM_CTLCOLORSTATIC,
+			      hDC, lphc->hwndself );
+
+    /*
+     * We have to change the text color since WM_CTLCOLORSTATIC will
+     * set it to the "enabled" color. This is the same behavior as the
+     * edit control
+     */
+    SetTextColor(hDC, GetSysColor(COLOR_GRAYTEXT));
+  }
+  else
+  {
+    if (lphc->wState & CBF_EDIT)
+    {
+      hBkgBrush = SendMessageA( lphc->owner, WM_CTLCOLOREDIT,
+				hDC, lphc->hwndself );
+    }
+    else
+    {
+      hBkgBrush = SendMessageA( lphc->owner, WM_CTLCOLORLISTBOX,
+				hDC, lphc->hwndself );
+    }
+  }
+
+  /*
+   * Catch errors.
+   */
+  if( !hBkgBrush )
+    hBkgBrush = GetSysColorBrush(COLOR_WINDOW);
+
+  return hBkgBrush;
 }
 
 /***********************************************************************
@@ -912,11 +907,10 @@ static LRESULT COMBO_EraseBackground(
     InflateRect(&clientRect, COMBO_XBORDERSIZE(), COMBO_YBORDERSIZE());
   }
 
-  hBkgBrush = SendMessageA( lphc->owner, WM_CTLCOLORLISTBOX,
-                            hDC, hwnd);
-
-  if( !hBkgBrush )
-    hBkgBrush = GetStockObject(WHITE_BRUSH);
+  /*
+   * Retrieve the background brush
+   */
+  hBkgBrush = COMBO_PrepareColors(hwnd, lphc, hDC);
 
   FillRect(hDC, &clientRect, hBkgBrush);
 
@@ -942,11 +936,11 @@ static LRESULT COMBO_Paint(LPHEADCOMBO lphc, HDC hParamDC)
   {
       HBRUSH    hPrevBrush, hBkgBrush;
 
-      hBkgBrush = SendMessageA( lphc->owner, WM_CTLCOLORLISTBOX,
-                                  hDC, lphc->hwndself );
-
-      if( !hBkgBrush )
-        hBkgBrush = GetStockObject(WHITE_BRUSH);
+      /*
+       * Retrieve the background brush and select it in the
+       * DC.
+       */
+      hBkgBrush = COMBO_PrepareColors(lphc->hwndself, lphc, hDC);
 
       hPrevBrush = SelectObject( hDC, hBkgBrush );
 
@@ -1081,7 +1075,7 @@ static void CBDropDown( LPHEADCOMBO lphc )
    int nItems = 0;
    int i;
    int nHeight;
-   int nDroppedHeight;
+   int nDroppedHeight,nTempDroppedHeight;
 
    //TRACE("[%04x]: drop down\n", CB_HWND(lphc));
 
@@ -1121,19 +1115,24 @@ static void CBDropDown( LPHEADCOMBO lphc )
      items list, then force the drop down list height to be the total height
      of the items in the dropped list */
 
+  /* And Remove any extra space (Best Fit) */
    nDroppedHeight = lphc->droppedRect.bottom - lphc->droppedRect.top;
    nItems = (int)SendMessageA (lphc->hWndLBox, LB_GETCOUNT, 0, 0);
-   nHeight = COMBO_YBORDERGAP;
+   nHeight = COMBO_YBORDERSIZE();
+   nTempDroppedHeight = 0;
    for (i = 0; i < nItems; i++)
    {
      nHeight += (int)SendMessageA (lphc->hWndLBox, LB_GETITEMHEIGHT, i, 0);
 
-     if (nHeight >= nDroppedHeight)
+     /* Did we pass the limit of what can be displayed */
+     if (nHeight > nDroppedHeight)
+     {
        break;
    }
+     nTempDroppedHeight = nHeight;
+   }
 
-   if (nHeight < nDroppedHeight)
-      nDroppedHeight = nHeight;
+   nDroppedHeight = nTempDroppedHeight;
 
    SetWindowPos( lphc->hWndLBox, HWND_TOP, rect.left, rect.bottom,
                  lphc->droppedRect.right - lphc->droppedRect.left,
@@ -1176,6 +1175,11 @@ static void CBRollUp( LPHEADCOMBO lphc, BOOL ok, BOOL bButton )
 
            lphc->wState &= ~CBF_DROPPED;
            ShowWindow( lphc->hWndLBox, SW_HIDE );
+           if(GetCapture() == lphc->hWndLBox)
+           {
+               ReleaseCapture();
+           }
+
 
            if( CB_GETTYPE(lphc) == CBS_DROPDOWN )
            {
@@ -1707,6 +1711,7 @@ static void COMBO_LButtonUp( LPHEADCOMBO lphc, LPARAM lParam )
            CBUpdateEdit( lphc, index );
        }
        ReleaseCapture();
+       SetCapture(lphc->hWndLBox);
    }
 
    if( lphc->wState & CBF_BUTTONDOWN )
@@ -1851,6 +1856,9 @@ LRESULT WINAPI ComboWndProc( HWND hwnd, UINT message,
                 if( lphc->wState & CBF_EDIT )
                     EnableWindow( lphc->hWndEdit, (BOOL)wParam );
                 EnableWindow( lphc->hWndLBox, (BOOL)wParam );
+
+		/* Force the control to repaint when the enabled state changes. */
+		InvalidateRect(CB_HWND(lphc), NULL, TRUE);
                 return  TRUE;
         case WM_SETREDRAW:
                 if( wParam )

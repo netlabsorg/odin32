@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.1 1999-09-15 23:18:50 sandervl Exp $ */
+/* $Id: edit.cpp,v 1.2 1999-10-08 21:24:07 cbratschi Exp $ */
 /*
  *      Edit control
  *
@@ -8,6 +8,7 @@
  *
  *      Copyright  1999 Christoph Bratschi (ported from WINE)
  *
+ * WINE version: 990923
  */
 
 /*
@@ -89,6 +90,7 @@ typedef struct
         INT line_count;         /* number of lines */
         INT y_offset;                   /* scroll offset in number of lines */
         BOOL bCaptureState; /* flag indicating whether mouse was captured */
+	BOOL bEnableState;             /* flag keeping the enable state */
         /*
          *      only for multi line controls
          */
@@ -213,7 +215,7 @@ static LRESULT  EDIT_WM_LButtonDown(HWND hwnd, EDITSTATE *es, DWORD keys, INT x,
 static LRESULT  EDIT_WM_LButtonUp(HWND hwnd, EDITSTATE *es, DWORD keys, INT x, INT y);
 static LRESULT  EDIT_WM_MouseMove(HWND hwnd, EDITSTATE *es, DWORD keys, INT x, INT y);
 static LRESULT  EDIT_WM_NCCreate(HWND hwnd, LPCREATESTRUCTA cs);
-static void     EDIT_WM_Paint(HWND hwnd, EDITSTATE *es);
+static void     EDIT_WM_Paint(HWND hwnd, EDITSTATE *es,WPARAM wParam);
 static void     EDIT_WM_Paste(HWND hwnd, EDITSTATE *es);
 static void     EDIT_WM_SetFocus(HWND hwnd, EDITSTATE *es, HWND window_losing_focus);
 static void     EDIT_WM_SetFont(HWND hwnd, EDITSTATE *es, HFONT font, BOOL redraw);
@@ -319,6 +321,7 @@ LRESULT WINAPI EditWndProc( HWND hwnd, UINT msg,
         case EM_SETSEL:
                 //DPRINTF_EDIT_MSG32("EM_SETSEL");
                 EDIT_EM_SetSel(hwnd, es, wParam, lParam, FALSE);
+                EDIT_EM_ScrollCaret(hwnd,es);
                 result = 1;
                 break;
 
@@ -597,6 +600,7 @@ LRESULT WINAPI EditWndProc( HWND hwnd, UINT msg,
 
         case WM_ENABLE:
                 //DPRINTF_EDIT_MSG32("WM_ENABLE");
+                es->bEnableState = (BOOL)wParam;
                 InvalidateRect(hwnd, NULL, TRUE);
                 break;
 
@@ -671,7 +675,7 @@ LRESULT WINAPI EditWndProc( HWND hwnd, UINT msg,
 
         case WM_PAINT:
                 //DPRINTF_EDIT_MSG32("WM_PAINT");
-                EDIT_WM_Paint(hwnd, es);
+                EDIT_WM_Paint(hwnd, es,wParam);
                 break;
 
         case WM_PASTE:
@@ -1296,9 +1300,10 @@ static void EDIT_MoveEnd(HWND hwnd, EDITSTATE *es, BOOL extend)
         BOOL after_wrap = FALSE;
         INT e;
 
-        if (es->style & ES_MULTILINE)
-                e = EDIT_CharFromPos(hwnd, es, 0x7fffffff,
-                        HIWORD(EDIT_EM_PosFromChar(hwnd, es, es->selection_end, es->flags & EF_AFTER_WRAP)), &after_wrap);
+	/* Pass a high value in x to make sure of receiving the en of the line */
+	if (es->style & ES_MULTILINE)
+		e = EDIT_CharFromPos(hwnd, es, 0x3fffffff,
+			HIWORD(EDIT_EM_PosFromChar(hwnd, es, es->selection_end, es->flags & EF_AFTER_WRAP)), &after_wrap);
         else
                 e = lstrlenA(es->text);
         EDIT_EM_SetSel(hwnd, es, extend ? es->selection_start : e, e, after_wrap);
@@ -1340,12 +1345,13 @@ static void EDIT_MoveHome(HWND hwnd, EDITSTATE *es, BOOL extend)
 {
         INT e;
 
-        if (es->style & ES_MULTILINE)
-                e = EDIT_CharFromPos(hwnd, es, 0x80000000,
-                        HIWORD(EDIT_EM_PosFromChar(hwnd, es, es->selection_end, es->flags & EF_AFTER_WRAP)), NULL);
-        else
-                e = 0;
-        EDIT_EM_SetSel(hwnd, es, e, extend ? es->selection_start : e, FALSE);
+	/* Pass the x_offset in x to make sure of receiving the first position of the line */
+	if (es->style & ES_MULTILINE)
+		e = EDIT_CharFromPos(hwnd, es, -es->x_offset,
+			HIWORD(EDIT_EM_PosFromChar(hwnd, es, es->selection_end, es->flags & EF_AFTER_WRAP)), NULL);
+	else
+		e = 0;
+	EDIT_EM_SetSel(hwnd, es, extend ? es->selection_start : e, e, FALSE);
         EDIT_EM_ScrollCaret(hwnd, es);
 }
 
@@ -2562,8 +2568,12 @@ static BOOL EDIT_EM_Undo(HWND hwnd, EDITSTATE *es)
  */
 static void EDIT_WM_Char(HWND hwnd, EDITSTATE *es, CHAR c, DWORD key_data)
 {
+        BOOL control = GetKeyState(VK_CONTROL) & 0x8000;
         switch (c) {
         case '\r':
+	    /* If the edit doesn't want the return, do nothing */
+	    if(!(es->style & ES_WANTRETURN))
+		break;
         case '\n':
                 if (es->style & ES_MULTILINE) {
                         if (es->style & ES_READONLY) {
@@ -2577,6 +2587,18 @@ static void EDIT_WM_Char(HWND hwnd, EDITSTATE *es, CHAR c, DWORD key_data)
                 if ((es->style & ES_MULTILINE) && !(es->style & ES_READONLY))
                         EDIT_EM_ReplaceSel(hwnd, es, TRUE, "\t");
                 break;
+	case VK_BACK:
+		if (!(es->style & ES_READONLY) && !control) {
+			if (es->selection_start != es->selection_end)
+				EDIT_WM_Clear(hwnd, es);
+			else {
+				/* delete character left of caret */
+				EDIT_EM_SetSel(hwnd, es, -1, 0, FALSE);
+				EDIT_MoveBackward(hwnd, es, TRUE);
+				EDIT_WM_Clear(hwnd, es);
+			}
+		}
+		break;
         default:
                 if (!(es->style & ES_READONLY) && ((BYTE)c >= ' ') && (c != 127)) {
                         char str[2];
@@ -2698,27 +2720,30 @@ static void EDIT_WM_Copy(HWND hwnd, EDITSTATE *es)
 
 /*********************************************************************
  *
- *      WM_CREATE
+ *	WM_CREATE
  *
  */
 static LRESULT EDIT_WM_Create(HWND hwnd, EDITSTATE *es, LPCREATESTRUCTA cs)
 {
-        /*
-         *      To initialize some final structure members, we call some helper
-         *      functions.  However, since the EDITSTATE is not consistent (i.e.
-         *      not fully initialized), we should be very careful which
-         *      functions can be called, and in what order.
-         */
+       /*
+        *	To initialize some final structure members, we call some helper
+        *	functions.  However, since the EDITSTATE is not consistent (i.e.
+        *	not fully initialized), we should be very careful which
+        *	functions can be called, and in what order.
+        */
         EDIT_WM_SetFont(hwnd, es, 0, FALSE);
-    EDIT_EM_EmptyUndoBuffer(hwnd, es);
-
-        if (cs->lpszName && *(cs->lpszName) != '\0') {
-                EDIT_EM_ReplaceSel(hwnd, es, FALSE, cs->lpszName);
-                /* if we insert text to the editline, the text scrolls out of the window, as the caret is placed after the insert pos normally; thus we reset es->selection... to 0 and update caret */
-                es->selection_start = es->selection_end = 0;
-                EDIT_EM_ScrollCaret(hwnd, es);
-        }
-        return 0;
+        EDIT_EM_EmptyUndoBuffer(hwnd, es);
+       if (cs->lpszName && *(cs->lpszName) != '\0') {
+	   EDIT_EM_ReplaceSel(hwnd, es, FALSE, cs->lpszName);
+	   /* if we insert text to the editline, the text scrolls out
+            * of the window, as the caret is placed after the insert
+            * pos normally; thus we reset es->selection... to 0 and
+            * update caret
+            */
+	   es->selection_start = es->selection_end = 0;
+	   EDIT_EM_ScrollCaret(hwnd, es);
+       }
+       return 0;
 }
 
 
@@ -2750,7 +2775,7 @@ static LRESULT EDIT_WM_EraseBkGnd(HWND hwnd, EDITSTATE *es, HDC dc)
         HBRUSH brush;
         RECT rc;
 
-        if (!IsWindowEnabled(hwnd) || (es->style & ES_READONLY))
+        if (!es->bEnableState || (es->style & ES_READONLY))
                 brush = (HBRUSH)EDIT_SEND_CTLCOLORSTATIC(hwnd, dc);
         else
                 brush = (HBRUSH)EDIT_SEND_CTLCOLOR(hwnd, dc);
@@ -3038,18 +3063,6 @@ static LRESULT EDIT_WM_KeyDown(HWND hwnd, EDITSTATE *es, INT key, DWORD key_data
                 if (es->style & ES_MULTILINE)
                         EDIT_MovePageDown_ML(hwnd, es, shift);
                 break;
-        case VK_BACK:
-                if (!(es->style & ES_READONLY) && !control) {
-                        if (es->selection_start != es->selection_end)
-                                EDIT_WM_Clear(hwnd, es);
-                        else {
-                                /* delete character left of caret */
-                                EDIT_EM_SetSel(hwnd, es, -1, 0, FALSE);
-                                EDIT_MoveBackward(hwnd, es, TRUE);
-                                EDIT_WM_Clear(hwnd, es);
-                        }
-                }
-                break;
         case VK_DELETE:
                 if (!(es->style & ES_READONLY) && !(shift && control)) {
                         if (es->selection_start != es->selection_end) {
@@ -3084,6 +3097,20 @@ static LRESULT EDIT_WM_KeyDown(HWND hwnd, EDITSTATE *es, INT key, DWORD key_data
                 } else if (control)
                         EDIT_WM_Copy(hwnd, es);
                 break;
+	case VK_RETURN:
+	    /* If the edit doesn't want the return send a message to the default object */
+	    if(!(es->style & ES_WANTRETURN))
+	    {
+		HWND hwndParent = GetParent(hwnd);
+		DWORD dw = SendMessageA( hwndParent, DM_GETDEFID, 0, 0 );
+		if (HIWORD(dw) == DC_HASDEFID)
+		{
+		    SendMessageA( hwndParent, WM_COMMAND,
+				  MAKEWPARAM( LOWORD(dw), BN_CLICKED ),
+ 			      (LPARAM)GetDlgItem( hwndParent, LOWORD(dw) ) );
+		}
+	    }
+	    break;
         }
         return 0;
 }
@@ -3166,13 +3193,13 @@ static LRESULT EDIT_WM_LButtonDown(HWND hwnd, EDITSTATE *es, DWORD keys, INT x, 
  */
 static LRESULT EDIT_WM_LButtonUp(HWND hwnd, EDITSTATE *es, DWORD keys, INT x, INT y)
 {
-	if (es->bCaptureState && GetCapture() == hwnd) {
-		KillTimer(hwnd, 0);
-		ReleaseCapture();
-	}
-	es->bCaptureState = FALSE;
+        if (es->bCaptureState && GetCapture() == hwnd) {
+                KillTimer(hwnd, 0);
+                ReleaseCapture();
+        }
+        es->bCaptureState = FALSE;
 
-	return 0;
+        return 0;
 }
 
 
@@ -3227,19 +3254,20 @@ static LRESULT EDIT_WM_NCCreate(HWND hwnd, LPCREATESTRUCTA cs)
                 return FALSE;
         es->style = cs->style;
 
+        es->bEnableState = !(cs->style & WS_DISABLED);
 
-	/*
-	 * In Win95 look and feel, the WS_BORDER style is replaced by the
-	 * WS_EX_CLIENTEDGE style for the edit control. This gives the edit
-	 * control a non client area.
-	 */
+        /*
+         * In Win95 look and feel, the WS_BORDER style is replaced by the
+         * WS_EX_CLIENTEDGE style for the edit control. This gives the edit
+         * control a non client area.
+         */
         if (es->style & WS_BORDER)
-	{
-	  es->style      &= ~WS_BORDER;
-	  SetWindowLongA(hwnd,GWL_STYLE,GetWindowLongA(hwnd,GWL_STYLE) & ~WS_BORDER);
-	  SetWindowLongA(hwnd,GWL_EXSTYLE,GetWindowLongA(hwnd,GWL_EXSTYLE) | WS_EX_CLIENTEDGE);
-	}
-	
+        {
+          es->style      &= ~WS_BORDER;
+          SetWindowLongA(hwnd,GWL_STYLE,GetWindowLongA(hwnd,GWL_STYLE) & ~WS_BORDER);
+          SetWindowLongA(hwnd,GWL_EXSTYLE,GetWindowLongA(hwnd,GWL_EXSTYLE) | WS_EX_CLIENTEDGE);
+        }
+
         if (es->style & ES_MULTILINE) {
                 es->buffer_size = BUFSTART_MULTI;
                 es->buffer_limit = BUFLIMIT_MULTI;
@@ -3297,7 +3325,7 @@ static LRESULT EDIT_WM_NCCreate(HWND hwnd, LPCREATESTRUCTA cs)
  *      WM_PAINT
  *
  */
-static void EDIT_WM_Paint(HWND hwnd, EDITSTATE *es)
+static void EDIT_WM_Paint(HWND hwnd, EDITSTATE *es,WPARAM wParam)
 {
         PAINTSTRUCT ps;
         INT i;
@@ -3306,14 +3334,18 @@ static void EDIT_WM_Paint(HWND hwnd, EDITSTATE *es)
         RECT rc;
         RECT rcLine;
         RECT rcRgn;
-        BOOL rev = IsWindowEnabled(hwnd) &&
+        BOOL rev = es->bEnableState &&
                                 ((es->flags & EF_FOCUSED) ||
                                         (es->style & ES_NOHIDESEL));
 
         if (es->flags & EF_UPDATE)
                 EDIT_NOTIFY_PARENT(hwnd, EN_UPDATE, "EN_UPDATE");
 
-        dc = BeginPaint(hwnd, &ps);
+        if (!wParam)
+            dc = BeginPaint(hwnd, &ps);
+        else
+            dc = (HDC) wParam;
+
         if(es->style & WS_BORDER) {
                 GetClientRect(hwnd, &rc);
                 if(es->style & ES_MULTILINE) {
@@ -3332,11 +3364,11 @@ static void EDIT_WM_Paint(HWND hwnd, EDITSTATE *es)
         }
         if (es->font)
                 old_font = SelectObject(dc, es->font);
-        if (!IsWindowEnabled(hwnd) || (es->style & ES_READONLY))
+        if (!es->bEnableState || (es->style & ES_READONLY))
                 EDIT_SEND_CTLCOLORSTATIC(hwnd, dc);
         else
                 EDIT_SEND_CTLCOLOR(hwnd, dc);
-        if (!IsWindowEnabled(hwnd))
+        if (!es->bEnableState)
                 SetTextColor(dc, GetSysColor(COLOR_GRAYTEXT));
         GetClipBox(dc, &rcRgn);
         if (es->style & ES_MULTILINE) {
@@ -3356,7 +3388,7 @@ static void EDIT_WM_Paint(HWND hwnd, EDITSTATE *es)
         if (es->flags & EF_FOCUSED)
                 EDIT_SetCaretPos(hwnd, es, es->selection_end,
                                  es->flags & EF_AFTER_WRAP);
-        EndPaint(hwnd, &ps);
+        if (!wParam) EndPaint(hwnd, &ps);
         if ((es->style & WS_VSCROLL) && !(es->flags & EF_VSCROLL_TRACK)) {
                 INT vlc = (es->format_rect.bottom - es->format_rect.top) / es->line_height;
                 SCROLLINFO si;
@@ -3440,6 +3472,7 @@ static void EDIT_WM_SetFont(HWND hwnd, EDITSTATE *es, HFONT font, BOOL redraw)
         TEXTMETRICA tm;
         HDC dc;
         HFONT old_font = 0;
+        RECT r;
 
         es->font = font;
         dc = GetDC(hwnd);
@@ -3454,13 +3487,12 @@ static void EDIT_WM_SetFont(HWND hwnd, EDITSTATE *es, HFONT font, BOOL redraw)
         if (font)
                 EDIT_EM_SetMargins(hwnd, es, EC_LEFTMARGIN | EC_RIGHTMARGIN,
                                    EC_USEFONTINFO, EC_USEFONTINFO);
+	/* Force the recalculation of the format rect for each font change */
+	GetClientRect(hwnd, &r);
+	EDIT_SetRectNP(hwnd, es, &r);
         if (es->style & ES_MULTILINE)
                 EDIT_BuildLineDefs_ML(hwnd, es);
-        else {
-                RECT r;
-                GetClientRect(hwnd, &r);
-                EDIT_SetRectNP(hwnd, es, &r);
-        }
+
         if (redraw)
                 InvalidateRect(hwnd, NULL, TRUE);
         if (es->flags & EF_FOCUSED) {

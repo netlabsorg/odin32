@@ -1,10 +1,12 @@
-/* $Id: button.cpp,v 1.4 1999-10-08 12:10:26 cbratschi Exp $ */
+/* $Id: button.cpp,v 1.5 1999-10-08 21:23:07 cbratschi Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
  * Copyright (C) 1993 David Metcalfe
  * Copyright (C) 1994 Alexandre Julliard
  * Copyright (c) 1999 Christoph Bratschi
+ *
+ * WINE version: 990923
  */
 
 /* CB: todo
@@ -466,7 +468,7 @@ static LRESULT BUTTON_SetCheck(HWND hwnd,WPARAM wParam,LPARAM lParam)
       else
         dwStyle &= ~WS_TABSTOP;
 
-      if (oldStyle != dwStyle) SetWindowLongA(hwnd,GWL_STYLE,dwStyle);
+      //if (oldStyle != dwStyle) SetWindowLongA(hwnd,GWL_STYLE,dwStyle);
     }
     infoPtr->state = (infoPtr->state & ~3) | wParam;
     PAINT_BUTTON(hwnd,style,ODA_SELECT);
@@ -929,23 +931,20 @@ static void CB_Paint(HWND hwnd,HDC hDC,WORD action)
     }
     if (action == ODA_DRAWENTIRE || action == ODA_SELECT)
     {
-        HDC hMemDC = CreateCompatibleDC( hDC );
-        int x = 0, y = 0;
-        delta = (rbox.bottom - rbox.top - checkBoxHeight) >> 1;
+        UINT state;
 
-        if (action == ODA_SELECT) FillRect( hDC, &rbox, hBrush );
-        else FillRect( hDC, &client, hBrush );
-
-        if (infoPtr->state & BUTTON_HIGHLIGHTED) x += 2 * checkBoxWidth;
-        if (infoPtr->state & (BUTTON_CHECKED | BUTTON_3STATE)) x += checkBoxWidth;
         if (((dwStyle & 0x0f) == BS_RADIOBUTTON) ||
-            ((dwStyle & 0x0f) == BS_AUTORADIOBUTTON)) y += checkBoxHeight;
-        else if (infoPtr->state & BUTTON_3STATE) y += 2 * checkBoxHeight;
+            ((dwStyle & 0x0f) == BS_AUTORADIOBUTTON)) state = DFCS_BUTTONRADIO;
+        else if (infoPtr->state & BUTTON_3STATE) state = DFCS_BUTTON3STATE;
+        else state = DFCS_BUTTONCHECK;
 
-        SelectObject( hMemDC, hbitmapCheckBoxes );
-        BitBlt( hDC, rbox.left, rbox.top + delta, checkBoxWidth,
-                  checkBoxHeight, hMemDC, x, y, SRCCOPY );
-        DeleteDC( hMemDC );
+        if (infoPtr->state & (BUTTON_CHECKED | BUTTON_3STATE)) state |= DFCS_CHECKED;
+
+        if (infoPtr->state & BUTTON_HIGHLIGHTED) state |= DFCS_PUSHED;
+
+        if (dwStyle & WS_DISABLED) state |= DFCS_INACTIVE;
+
+        DrawFrameControl( hDC, &rbox, DFC_BUTTON, state );
 
         if( text && action != ODA_SELECT )
         {
@@ -959,7 +958,6 @@ static void CB_Paint(HWND hwnd,HDC hDC,WORD action)
                 SetTextColor( hDC, GetSysColor(COLOR_GRAYTEXT) );
             DrawTextA( hDC, text, -1, &rtext,
                          DT_SINGLELINE | DT_VCENTER );
-            textLen = 0; /* skip DrawText() below */
           }
         }
     }
