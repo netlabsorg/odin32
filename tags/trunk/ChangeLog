@@ -1,4 +1,9 @@
- /* $Id: ChangeLog,v 1.1016 2000-06-29 21:28:34 mike Exp $ */
+ /* $Id: ChangeLog,v 1.1017 2000-06-30 08:38:40 sandervl Exp $ */
+
+ 2000-06-30: Michal Necasek <mike@mendelu.cz>
+    - KERNEL32:    Fixed lstrcpynA(toW) calls (wrong length)
+    - WINMM:       Resume playback when writing a buffer in underrun state
+                   Set minimal buffer size to (bytes per second)/32.
 
  2000-06-29: Michal Necasek <michalnec@volny.cz>
     - DDRAW:   Experimentally changed SurfGetDC behavior which fixed
