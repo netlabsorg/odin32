@@ -1,4 +1,4 @@
-# $Id: kernel32lib.mak,v 1.3 2001-08-02 14:50:13 sandervl Exp $
+# $Id: kernel32lib.mak,v 1.4 2001-08-07 21:34:16 sandervl Exp $
 
 #
 # Odin32 API
@@ -118,6 +118,9 @@ $(OBJDIR)\hmthread.obj \
 $(OBJDIR)\hmnpipe.obj \
 $(OBJDIR)\hmdisk.obj \
 $(OBJDIR)\version.obj \
+$(OBJDIR)\cvticon.obj \
+$(OBJDIR)\cvticongrp.obj \
+$(OBJDIR)\winres.obj \
 !ifdef DEBUG
 $(OBJDIR)\exceptstackdump.obj \
 !endif

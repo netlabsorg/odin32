@@ -1,4 +1,4 @@
-/* $Id: winres.cpp,v 1.29 2001-03-13 18:45:34 sandervl Exp $ */
+/* $Id: winres.cpp,v 1.30 2001-08-07 21:34:16 sandervl Exp $ */
 
 /*
  * Win32 resource class
@@ -34,6 +34,7 @@
 #define DBG_LOCALLOG	DBG_winres
 #include "dbglocal.h"
 
+#if 0
 //******************************************************************************
 //******************************************************************************
 PVOID WIN32API ConvertResourceToOS2(HINSTANCE hInstance, LPSTR restype, HRSRC hResource)
@@ -93,6 +94,7 @@ VOID WIN32API FreeOS2Resource(LPVOID lpResource)
 {
   free(lpResource);
 }
+#endif
 //******************************************************************************
 //******************************************************************************
 ULONG WIN32API QueryConvertedResourceSize(HINSTANCE hInstance, LPSTR restype, HRSRC hResource)
@@ -112,8 +114,11 @@ ULONG WIN32API QueryConvertedResourceSize(HINSTANCE hInstance, LPSTR restype, HR
   ressize = SizeofResource(hInstance, hResource);
 
   switch((int)restype) {
-    case NTRT_CURSOR:
-    	return QueryConvertedCursorSize((CursorComponent *)resdata, ressize);
+    case NTRT_ICON:
+    	return QueryConvertedIconSize((WINBITMAPINFOHEADER *)resdata, ressize);
+
+//    case NTRT_CURSOR:
+//    	return QueryConvertedCursorSize((CursorComponent *)resdata, ressize);
 
     case NTRT_GROUP_ICON:
     case NTRT_GROUP_CURSOR:
