@@ -1387,6 +1387,9 @@ BOOL FILEDLG95_OnOpen(HWND hwnd)
 
   nOpenAction = ONOPEN_BROWSE;
 
+  /* @@@AH 2001-06-02 moved out of !OFN_NONVALIDATE block - needs to be set */
+  if (FAILED (SHGetDesktopFolder(&lpsf))) return FALSE;
+
   /* dont apply any checks with OFN_NOVALIDATE */
   if(!(fodInfos->ofnInfos->Flags & OFN_NOVALIDATE))
   {
@@ -1401,8 +1404,6 @@ BOOL FILEDLG95_OnOpen(HWND hwnd)
       goto ret;
     }
 
-    if (FAILED (SHGetDesktopFolder(&lpsf))) return FALSE;
-  
     lpszTemp1 = lpszTemp = lpstrPathAndFile;
     while (lpszTemp1)
     {
@@ -1489,6 +1490,13 @@ BOOL FILEDLG95_OnOpen(HWND hwnd)
       }
     }
     if(pidl) COMDLG32_SHFree(pidl);
+  }
+  else
+  {
+    // @@@AH 2001-06-02 when we are in OFN_NOVALIDATE mode, the action
+    // must be to open the specified file when pressing open button
+    TRACE("OFN_NOVALIDATE mode, set open action to ONOPEN_OPEN\n");
+    nOpenAction = ONOPEN_OPEN;
   }
 
 /*
