@@ -32,9 +32,6 @@
 #include "wine/debug.h"
 #include "heap.h"
 
-#ifdef __WIN32OS2__
-#include <heapstring.h>
-#endif
 
 /******************************************************************************
  * Data structures
@@ -211,7 +208,6 @@ static VOID PROPSHEET_UnImplementedFlags(DWORD dwFlags)
 }
 #undef add_flag
 
-#ifdef __WIN32OS2__
 /******************************************************************************
  *            PROPSHEET_FindPageByResId
  *
@@ -232,7 +228,6 @@ INT PROPSHEET_FindPageByResId(PropSheetInfo * psInfo, LRESULT resId)
 
    return i;
 }
-#endif
 
 /******************************************************************************
  *            PROPSHEET_AtoW
@@ -488,7 +483,7 @@ BOOL PROPSHEET_CollectPageInfo(LPCPROPSHEETPAGEW lppsp,
     else
       pTitle = lppsp->pszTitle;
 
-    len = strlenW(szTitle);
+    len = strlenW(pTitle);
     psInfo->proppage[index].pszText = COMCTL32_Alloc( (len+1)*sizeof (WCHAR) );
     strcpyW( (LPWSTR)psInfo->proppage[index].pszText,pTitle);
   }
@@ -1163,13 +1158,10 @@ static BOOL PROPSHEET_CreatePage(HWND hwndParent,
 
   TRACE("index %d\n", index);
 
-#ifdef __WIN32OS2__
   if (ppshpage == NULL)
   {
-    dprintf(("COMCTL32:PROPSHEET_CreatePage: ERROR!!! ppshpage == NULL!!!\n"));
     return FALSE;
   }
-#endif
 
   if (ppshpage->dwFlags & PSP_DLGINDIRECT)
     pTemplate = (DLGTEMPLATE*)ppshpage->u.pResource;
@@ -1211,9 +1203,7 @@ static BOOL PROPSHEET_CreatePage(HWND hwndParent,
     ((MyDLGTEMPLATEEX*)pTemplate)->style &= ~WS_POPUP;
     ((MyDLGTEMPLATEEX*)pTemplate)->style &= ~WS_DISABLED;
     ((MyDLGTEMPLATEEX*)pTemplate)->style &= ~WS_VISIBLE;
-#ifdef __WIN32OS2__
     ((MyDLGTEMPLATEEX*)pTemplate)->style &= ~WS_THICKFRAME;
-#endif
   }
   else
   {
@@ -1224,9 +1214,7 @@ static BOOL PROPSHEET_CreatePage(HWND hwndParent,
     pTemplate->style &= ~WS_POPUP;
     pTemplate->style &= ~WS_DISABLED;
     pTemplate->style &= ~WS_VISIBLE;
-#ifdef __WIN32OS2__
     pTemplate->style &= ~WS_THICKFRAME;
-#endif
   }
 
   if (psInfo->proppage[index].useCallback)
@@ -1268,22 +1256,10 @@ static BOOL PROPSHEET_CreatePage(HWND hwndParent,
     padding = PROPSHEET_GetPaddingInfo(hwndParent);
   }
 
-#ifdef __WIN32OS2__
-  //HACK alert!
-  //SvL: CVP multiplies y padding by two to calculate the new height
-  //I have no idea if this is always correct
-  //This actually does make sense. The property page will get centered instead
-  //of being slammed in the lower right corner
   SetWindowPos(hwndPage, HWND_TOP,
                rc.left + padding.x/2,
                rc.top + padding.y/2,
                pageWidth, pageHeight, 0);
-#else
-  SetWindowPos(hwndPage, HWND_TOP,
-               rc.left + padding.x,
-               rc.top + padding.y,
-               pageWidth, pageHeight, 0);
-#endif
 
   return TRUE;
 }
@@ -1334,15 +1310,12 @@ static BOOL PROPSHEET_ShowPage(HWND hwndDlg, int index, PropSheetInfo * psInfo)
  */
 static BOOL PROPSHEET_Back(HWND hwndDlg)
 {
-  BOOL res;
   PSHNOTIFY psn;
   HWND hwndPage;
   PropSheetInfo* psInfo = (PropSheetInfo*) GetPropW(hwndDlg,
                                                     PropSheetInfoStr);
   LRESULT result;
-#ifdef __WIN32OS2__
   int idx;
-#endif
 
   TRACE("active_page %d\n", psInfo->active_page);
   if (psInfo->active_page < 0)
@@ -1358,7 +1331,6 @@ static BOOL PROPSHEET_Back(HWND hwndDlg)
   result = SendMessageW(hwndPage, WM_NOTIFY, 0, (LPARAM) &psn);
   if (result == -1)
     return FALSE;
-#ifdef __WIN32OS2__
   else if (result == 0)
      idx = psInfo->active_page - 1;
   else
@@ -1369,16 +1341,6 @@ static BOOL PROPSHEET_Back(HWND hwndDlg)
      if (PROPSHEET_CanSetCurSel(hwndDlg))
         PROPSHEET_SetCurSel(hwndDlg, idx, -1, 0);
   }
-#else
-  if (psInfo->active_page > 0)
-  {
-     res = PROPSHEET_CanSetCurSel(hwndDlg);
-     if(res != FALSE)
-     {
-       res = PROPSHEET_SetCurSel(hwndDlg, psInfo->active_page - 1, -1, 0);
-     }
-  }
-#endif
   return TRUE;
 }
 
@@ -1392,9 +1354,7 @@ static BOOL PROPSHEET_Next(HWND hwndDlg)
   LRESULT msgResult = 0;
   PropSheetInfo* psInfo = (PropSheetInfo*) GetPropW(hwndDlg,
                                                     PropSheetInfoStr);
-#ifdef __WIN32OS2__
   int idx;
-#endif
 
   TRACE("active_page %d\n", psInfo->active_page);
   if (psInfo->active_page < 0)
@@ -1410,7 +1370,6 @@ static BOOL PROPSHEET_Next(HWND hwndDlg)
   msgResult = SendMessageA(hwndPage, WM_NOTIFY, 0, (LPARAM) &psn);
   if (msgResult == -1)
     return FALSE;
-#ifdef __WIN32OS2__
   else if (msgResult == 0)
      idx = psInfo->active_page + 1;
   else
@@ -1421,12 +1380,6 @@ static BOOL PROPSHEET_Next(HWND hwndDlg)
      if (PROPSHEET_CanSetCurSel(hwndDlg) != FALSE)
         PROPSHEET_SetCurSel(hwndDlg, idx, 1, 0);
   }
-#else
-  if(PROPSHEET_CanSetCurSel(hwndDlg) != FALSE)
-  {
-    PROPSHEET_SetCurSel(hwndDlg, psInfo->active_page + 1, 1, 0);
-  }
-#endif
 
   return TRUE;
 }
@@ -1798,13 +1751,11 @@ static BOOL PROPSHEET_SetCurSel(HWND hwndDlg,
 	break;
       }
     }
-#ifdef __WIN32OS2__
     else if (result != 0)
     {
        index = PROPSHEET_FindPageByResId(psInfo, result);
        continue;
     }
-#endif
   }
   /*
    * Display the new page.
