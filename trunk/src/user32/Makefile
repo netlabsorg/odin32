@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.90 2001-07-30 18:09:29 sandervl Exp $
+# $Id: Makefile,v 1.91 2001-07-31 07:56:48 sandervl Exp $
 
 #
 # Odin32 API
@@ -110,7 +110,6 @@ $(ODIN32_LIB)/wgss50.lib \
 $(ODIN32_LIB)/kernel32.lib \
 $(ODIN32_LIB)/libuls.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
-$(ODIN32_LIB)/pmwinx.lib \
 OS2386.LIB \
 $(RTLLIB_O)
 
