@@ -1,4 +1,4 @@
-/* $Id: exceptions.h,v 1.3 1999-10-08 19:46:06 sandervl Exp $ */
+/* $Id: exceptions.h,v 1.4 1999-10-09 15:03:47 sandervl Exp $ */
 
 #ifndef __EXCEPTIONS_H__
 #define __EXCEPTIONS_H__
@@ -204,5 +204,7 @@ typedef PTOP_LEVEL_EXCEPTION_FILTER LPTOP_LEVEL_EXCEPTION_FILTER;
 #define STATUS_INVALID_DISPOSITION       0xC0000026
 
 #pragma pack()
+
+DWORD RtlDispatchException(WINEXCEPTION_RECORD *pRecord, WINCONTEXT *pContext);
 
 #endif
