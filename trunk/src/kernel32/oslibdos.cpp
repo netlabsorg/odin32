@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.97 2002-04-13 06:31:53 bird Exp $ */
+/* $Id: oslibdos.cpp,v 1.98 2002-04-13 07:41:31 bird Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -11,6 +11,12 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+
+
+
+/*******************************************************************************
+*   Header Files                                                               *
+*******************************************************************************/
 #define INCL_BASE
 #define INCL_DOSEXCEPTIONS
 #define INCL_DOSMEMMGR
@@ -37,14 +43,58 @@
 #define DBG_LOCALLOG    DBG_oslibdos
 #include "dbglocal.h"
 
+
+/*******************************************************************************
+*   Structures and Typedefs                                                    *
+*******************************************************************************/
+#ifndef DEVTYPE_OPTICAL
+#define DEVTYPE_OPTICAL                    0x0008
+#endif
+
+#define IOC_CDROM_2                 0x82 /* from cdioctl.h (ddk, os2cdrom.dmd sample) */
+#define IOCD_RETURN_DRIVE_LETTER    0x60
+
+
+// used for input to logical disk Get device parms Ioctl
+#pragma pack(1)
+typedef struct
+{
+    UCHAR   Infotype;
+    UCHAR   DriveUnit;
+} DSKREQ;
+
+/*------------------------------------------------*
+ * Cat 0x82, Func 0x60:  Return Drive Letter Info *
+ *------------------------------------------------*/
+typedef struct DriveLetter_Data
+{
+    USHORT  drive_count;
+    USHORT  first_drive_number;
+} CDDRVLTR;
+#pragma pack()
+
+
+/*******************************************************************************
+*   Global Variables                                                           *
+*******************************************************************************/
 static PROC_DosSetFileSizeL  DosSetFileSizeLProc = 0;
 static PROC_DosSetFilePtrL   DosSetFilePtrLProc   = 0;
 static PROC_DosSetFileLocksL DosSetFileLocksLProc = 0;
 static PROC_DosOpenL         DosOpenLProc = 0;
 static BOOL f64BitIO = FALSE;
 
+/* first user queries the data */
+static  CDDRVLTR    cdDrvLtr = {0xffff, 0xffff};
+
+
+/*******************************************************************************
+*   Functions Prototypes.                                                      *
+*******************************************************************************/
 BOOL WINAPI CharToOemA( LPCSTR s, LPSTR d );
 BOOL WINAPI OemToCharA( LPCSTR s, LPSTR d );
+
+
+
 
 //******************************************************************************
 //******************************************************************************
@@ -2630,27 +2680,6 @@ BOOL  OSLibDosGetDiskGeometry(HANDLE hDisk, DWORD cDisk, PVOID pdiskgeom)
 
 #define DisketteCylinders 80
 
-#ifndef DEVTYPE_OPTICAL
-#define DEVTYPE_OPTICAL                    0x0008
-#endif
-
-// used for input to logical disk Get device parms Ioctl
-#pragma pack(1)
-typedef struct
-{
-    UCHAR   Infotype;
-    UCHAR   DriveUnit;
-} DSKREQ;
-
-/*------------------------------------------------*
- * Cat 0x82, Func 0x60:  Return Drive Letter Info *
- *------------------------------------------------*/
-typedef struct DriveLetter_Data
-{
-    USHORT  drive_count;
-    USHORT  first_drive_number;
-} CDDRVLTR;
-#pragma pack()
 
 
 /**
@@ -2705,7 +2734,6 @@ ULONG OSLibGetDriveType(ULONG ulDrive)
      * We don't have to this everytime. I mean, the os2cdrom.dmd is
      * exactly very dynamic when it comes to this info.
      */
-    static  CDDRVLTR    cdDrvLtr = {0xffff, 0xffff};
     if (cdDrvLtr.drive_count == 0xffff)
     {
         HFILE           hCDRom2;
@@ -2716,8 +2744,6 @@ ULONG OSLibGetDriveType(ULONG ulDrive)
                     OPEN_SHARE_DENYNONE | OPEN_ACCESS_READONLY, NULL)
             == NO_ERROR)
         {
-            #define IOC_CDROM_2                 0x82 /* from cdioctl.h (ddk, os2cdrom.dmd sample) */
-            #define IOCD_RETURN_DRIVE_LETTER    0x60
             cbData = sizeof(cdDrvLtr);
             rc = DosDevIOCtl(hCDRom2,
                              IOC_CDROM_2,
@@ -2726,6 +2752,8 @@ ULONG OSLibGetDriveType(ULONG ulDrive)
                              (PVOID)&cdDrvLtr, sizeof(cdDrvLtr), &cbData);
             DosClose(hCDRom2);
         }
+        else
+            cdDrvLtr.drive_count = 0;
     }
 
 
@@ -2972,6 +3000,59 @@ DWORD OSLibDosDevIOCtl( DWORD hFile, DWORD dwCat, DWORD dwFunc,
   if (pTiledData != pData)
     memcpy(pTiledData, pData, *pdwDataLen);
 
+#if 1
+    /*
+     * Quick and Dirty Fix!
+     * TO BE REMOVED!
+     *
+     * On some VPC installation without CDROM we seem to
+     * use a concidrable amount of time during Win2k shutdown.
+     * No idea why, but it has to do with CDROM we think.
+     *
+     * So, let's just fail all IOCtls to CD01 if there aren't any
+     * CDROMs in the system.
+     *
+     */
+
+    /*
+     * Check for CD drives
+     * We don't have to this everytime. I mean, the os2cdrom.dmd is
+     * exactly very dynamic when it comes to this info.
+     */
+    if (cdDrvLtr.drive_count == 0xffff)
+    {
+        HFILE           hCDRom2;
+        ULONG           ulAction = 0;
+
+        if (DosOpen("\\DEV\\CD-ROM2$", &hCDRom2, &ulAction, 0,
+                    FILE_NORMAL, OPEN_ACTION_OPEN_IF_EXISTS,
+                    OPEN_SHARE_DENYNONE | OPEN_ACCESS_READONLY, NULL)
+            == NO_ERROR)
+        {
+            ULONG cbData = sizeof(cdDrvLtr);
+            rc = DosDevIOCtl(hCDRom2,
+                             IOC_CDROM_2,
+                             IOCD_RETURN_DRIVE_LETTER,
+                             NULL, 0, NULL,
+                             (PVOID)&cdDrvLtr, sizeof(cdDrvLtr), &cbData);
+            DosClose(hCDRom2);
+        }
+        else
+            cdDrvLtr.drive_count = 0;
+    }
+
+    if (    cdDrvLtr.drive_count == 0
+        &&  (dwCat == IOCTL_CDROMDISK
+             || (dwCat == IOCTL_CDROMAUDIO
+                 && dwParmMaxLen >= 4 && strncmp((char*)pParm, "CD01", 4))
+             )
+       )
+    {
+        /* just return some error code */
+        return ERROR_BAD_COMMAND;
+    }
+
+#endif
 
   rc = DosDevIOCtl( (HFILE)hFile, dwCat, dwFunc,
                      pParm, dwParmMaxLen, pdwParmLen,
