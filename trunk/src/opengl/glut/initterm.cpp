@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.4 2000-02-09 14:45:47 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.5 2000-02-10 01:53:01 bird Exp $ */
 
 /*
  * DLL entry point
@@ -64,6 +64,7 @@ BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
    }
    return FALSE;
 }
+
 
 /****************************************************************************/
 /* _DLL_InitTerm is the function that gets called by the operating system   */
