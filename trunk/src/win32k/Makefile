@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.74 2003-02-28 10:32:23 sandervl Exp $
+# $Id: Makefile,v 1.75 2004-10-16 12:26:02 bird Exp $
 
 #
 # Win32k makefile.
@@ -128,7 +128,8 @@ clean:
     $(RM) $(WIN32KBASE)\ldr\calltaba.asm $(WIN32KBASE)\test\TstFakers.c
 !endif
     $(DODIRS) "$(SUBDIRS)" $(MAKE_CMD) clean
-
+	$(MAKE_CMD) -f Xx2Lx.mak clean
+	
 #
 # cleanall
 #
