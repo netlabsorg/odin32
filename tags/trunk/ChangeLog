@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.304 1999-10-11 15:27:08 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.305 1999-10-11 16:05:44 cbratschi Exp $ */
+
+ 99-10-11: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32: pmframe finished
 
  99-10-11: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Disabling the desktop window is a very bad idea.
