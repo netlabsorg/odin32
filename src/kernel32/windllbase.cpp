@@ -1,4 +1,4 @@
-/* $Id: windllbase.cpp,v 1.32 2003-01-05 12:31:25 sandervl Exp $ */
+/* $Id: windllbase.cpp,v 1.33 2003-04-30 11:04:07 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
@@ -689,13 +689,13 @@ void Win32DllBase::setDefaultRenaming()
     if(PROFILE_GetOdinIniString(DLLRENAMEWIN_SECTION, "WINSPOOL", "", renameddll,
                                 sizeof(renameddll)-1) <= 1)
     {
-        PROFILE_SetOdinIniString(DLLRENAMEWIN_SECTION, "WINSPOOL", "WINSPOOL.DLL");
+        PROFILE_SetOdinIniString(DLLRENAMEWIN_SECTION, "WINSPOOL.DRV", "WINSPOOL.DLL");
         PROFILE_SetOdinIniString(DLLRENAMEOS2_SECTION, "WINSPOOL", "WINSPOOL.DRV");
     }
     if(PROFILE_GetOdinIniString(DLLRENAMEWIN_SECTION, "MCICDA", "", renameddll,
                                 sizeof(renameddll)-1) <= 1)
     {
-        PROFILE_SetOdinIniString(DLLRENAMEWIN_SECTION, "MCICDA", "MCICDA.DLL");
+        PROFILE_SetOdinIniString(DLLRENAMEWIN_SECTION, "MCICDA.DRV", "MCICDA.DLL");
         PROFILE_SetOdinIniString(DLLRENAMEOS2_SECTION, "MCICDA", "MCICDA.DRV");
     }
     if(PROFILE_GetOdinIniString(DLLRENAMEWIN_SECTION, "CRTDLL", "", renameddll,
@@ -727,8 +727,10 @@ void Win32DllBase::renameDll(char *dllname, BOOL fWinToOS2)
     namestart = OSLibStripPath(dllname);
     strcpy(modname, namestart);
     char *dot = strrchr(modname, '.');
-    if(dot)
+
+    if((dot) && !(stricmp(dot,".DLL")))
         *dot = 0;
+
     strupr(modname);
     if(PROFILE_GetOdinIniString(sectionname, modname, "", renameddll,
                                    sizeof(renameddll)-1) > 1)
