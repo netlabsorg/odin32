@@ -1,4 +1,4 @@
-/* $Id: line.cpp,v 1.8 2001-01-18 18:13:17 sandervl Exp $ */
+/* $Id: line.cpp,v 1.9 2001-02-01 18:01:52 sandervl Exp $ */
 /*
  * Line API's
  *
@@ -166,9 +166,7 @@ BOOL WIN32API LineTo( HDC hdc, int nXEnd, int  nYEnd)
 BOOL WIN32API LineDDA( int nXStart, int nYStart, int nXEnd, int nYEnd, LINEDDAPROC lpLineFunc, LPARAM lpData)
 {
   BOOL                 rc;
-#ifndef STDCALL_ENUMPROCS
   LineDDAProcCallback *callback = new LineDDAProcCallback(lpLineFunc, lpData);
-#endif
   POINTLOS2 startPt,endPt;
 
   dprintf(("GDI32: LineDDA\n"));
@@ -179,15 +177,9 @@ BOOL WIN32API LineDDA( int nXStart, int nYStart, int nXEnd, int nYEnd, LINEDDAPR
 
   rc = O32_LineDDA(startPt.x,startPt.y,endPt.x,endPt.y, lpLineFunc, lpData);
 #else
-#ifdef STDCALL_ENUMPROCS
-  //should change os2win.h
-  rc = O32_LineDDA(nXStart,nYStart,nXEnd,nYEnd, (LINEDDAPROC_O32)lpLineFunc, lpData);
-#else
   rc = O32_LineDDA(nXStart,nYStart,nXEnd,nYEnd,callback->GetOS2Callback(),(LPARAM)callback);
   if(callback)
         delete callback;
-#endif
-
 #endif
   return(rc);
 }
