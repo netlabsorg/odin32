@@ -1,4 +1,3 @@
-/* $Id: wprocess.h,v 1.19 2001-03-19 19:30:15 sandervl Exp $ */
 /*
  * Process help functions
  *
