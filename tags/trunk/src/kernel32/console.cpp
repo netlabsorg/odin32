@@ -1,4 +1,4 @@
-/* $Id: console.cpp,v 1.18 2000-02-16 14:25:34 sandervl Exp $ */
+/* $Id: console.cpp,v 1.19 2000-07-06 21:18:39 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -82,6 +82,7 @@
 
 #include "conprop.h"
 #include "unicode.h"
+#include "heapstring.h"
 
 #define DBG_LOCALLOG	DBG_console
 #include "dbglocal.h"
@@ -2706,7 +2707,7 @@ BOOL WIN32API GetConsoleScreenBufferInfo(HANDLE                      hConsoleOut
  *****************************************************************************/
 
 DWORD WIN32API GetConsoleTitleA(LPTSTR lpConsoleTitle,
-                                   DWORD  nSize)
+                                DWORD  nSize)
 {
   ULONG ulLength;                                          /* length of text */
 
@@ -2724,6 +2725,7 @@ DWORD WIN32API GetConsoleTitleA(LPTSTR lpConsoleTitle,
   strncpy(lpConsoleTitle,
           ConsoleGlobals.pszWindowTitle,
           nSize);
+  lpConsoleTitle[nSize-1] = 0;
 
   return (nSize < ulLength) ? nSize : ulLength;
 }
@@ -2742,13 +2744,13 @@ DWORD WIN32API GetConsoleTitleA(LPTSTR lpConsoleTitle,
  * Author    : Patrick Haller [Thu, 1998/02/12 23:31]
  *****************************************************************************/
 
-DWORD WIN32API GetConsoleTitleW(LPTSTR lpConsoleTitle,
-                                   DWORD  nSize)
+DWORD WIN32API GetConsoleTitleW(LPWSTR lpConsoleTitle,
+                                DWORD  nSize)
 {
   ULONG ulLength;                                          /* length of text */
 
 #ifdef DEBUG_LOCAL2
-  WriteLog("KERNEL32/CONSOLE: OS2GetConsoleTitleW(%08x,%08x).\n",
+  WriteLog("KERNEL32/CONSOLE: GetConsoleTitleW(%08x,%08x)",
            lpConsoleTitle,
            nSize);
 #endif
@@ -2758,9 +2760,9 @@ DWORD WIN32API GetConsoleTitleW(LPTSTR lpConsoleTitle,
 
   ulLength = strlen(ConsoleGlobals.pszWindowTitle);        /* length of text */
 
-  strncpy(lpConsoleTitle,
-          ConsoleGlobals.pszWindowTitle,
-          nSize);
+  lstrcpynAtoW(lpConsoleTitle,
+               ConsoleGlobals.pszWindowTitle,
+               nSize);
 
   /* @@@PH Ascii2Unicode */
 

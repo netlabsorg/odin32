@@ -1,4 +1,4 @@
-/* $Id: message.cpp,v 1.10 2000-02-16 14:25:42 sandervl Exp $ */
+/* $Id: message.cpp,v 1.11 2000-07-06 21:18:43 sandervl Exp $ */
 
 /*
  * Win32 message API functions for OS/2
@@ -343,8 +343,10 @@ DWORD WIN32API FormatMessageA(DWORD   dwFlags,
     *((LPVOID*)lpBuffer) = (LPVOID)LocalAlloc(GMEM_ZEROINIT,talloced);
     memcpy(*(LPSTR*)lpBuffer,target,talloced);
   }
-  else
+  else {
     strncpy(lpBuffer,target,nSize);
+    lpBuffer[nSize-1] = 0;
+  }
 
   HeapFree(GetProcessHeap(),0,target);
   if (from)

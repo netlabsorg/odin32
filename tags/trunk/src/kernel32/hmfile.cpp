@@ -1,4 +1,4 @@
-/* $Id: hmfile.cpp,v 1.9 2000-07-01 12:51:51 sandervl Exp $ */
+/* $Id: hmfile.cpp,v 1.10 2000-07-06 21:18:42 sandervl Exp $ */
 
 /*
  * File IO win32 apis
@@ -177,7 +177,8 @@ DWORD HMDeviceFileClass::OpenFile (LPCSTR        lpszFileName,
   // filling OFSTRUCT
   pOFStruct->cBytes = sizeof(OFSTRUCT);
   pOFStruct->nErrCode = 0;
-  strncpy((char *)pOFStruct->szPathName, lpFileName, OFS_MAXPATHNAME - 1);
+  strncpy((char *)pOFStruct->szPathName, lpFileName, OFS_MAXPATHNAME);
+  pOFStruct->szPathName[OFS_MAXPATHNAME-1] = 0;
 
   hFile = OSLibDosOpenFile((LPSTR)lpFileName, fuMode);
 
