@@ -1,4 +1,4 @@
-/* $Id: varray.c,v 1.1 2000-02-29 00:46:27 sandervl Exp $ */
+/* $Id: varray.c,v 1.2 2000-03-01 22:45:29 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -34,6 +34,7 @@
 #else
 #include "GL/xf86glx.h"
 #endif
+#include "types.h"
 #include "context.h"
 #include "api.h"
 #include "cva.h"
@@ -46,7 +47,6 @@
 #include "pipeline.h"
 #include "texstate.h"
 #include "translate.h"
-#include "types.h"
 #include "varray.h"
 #include "vb.h"
 #include "vbfill.h"

@@ -1,4 +1,4 @@
-/* $Id: drawpix.c,v 1.1 2000-02-29 00:46:14 sandervl Exp $ */
+/* $Id: drawpix.c,v 1.2 2000-03-01 22:45:20 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -38,6 +38,7 @@
 #else
 #include "GL/xf86glx.h"
 #endif
+#include "types.h"
 #include "context.h"
 #include "drawpix.h"
 #include "feedback.h"
@@ -47,7 +48,6 @@
 #include "pixel.h"
 #include "span.h"
 #include "stencil.h"
-#include "types.h"
 #include "zoom.h"
 #endif
 

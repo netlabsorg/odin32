@@ -56,7 +56,7 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <assert.h>
-#else 
+#else
 #include "GL/xf86glx.h"
 #endif
 
@@ -65,11 +65,11 @@
 #include <signal.h>
 #endif
 
+#include "types.h"
 #include "context.h"
 #include "macros.h"
 #include "matrix.h"
 #include "texture.h"
-#include "types.h"
 #include "vb.h"
 #include "xform.h"
 #include "clip.h"
@@ -152,7 +152,7 @@ typedef struct {
   ( ((unsigned int)(c[0]))<<16 ) | \
   ( ((unsigned int)(c[1]))<<8 )  | \
   (  (unsigned int)(c[2])) )
-  
+
 #else
 #ifdef __i386__
 #define FXCOLOR4( c )  (* (int *)c)
@@ -306,7 +306,7 @@ typedef struct tfxTexInfo_t {
 
   GLfloat sScale, tScale;
   GLint int_sScale, int_tScale;	/* x86 floating point trick for
-				 * multiplication by powers of 2.  
+				 * multiplication by powers of 2.
 				 * Used in fxfasttmp.h
 				 */
 
@@ -324,16 +324,16 @@ typedef struct {
 } tfxStats;
 
 
-typedef void (*tfxTriViewClipFunc)( struct vertex_buffer *VB, 
+typedef void (*tfxTriViewClipFunc)( struct vertex_buffer *VB,
 				    GLuint v[],
 				    GLubyte mask );
 
-typedef void (*tfxTriClipFunc)( struct vertex_buffer *VB, 
+typedef void (*tfxTriClipFunc)( struct vertex_buffer *VB,
 				GLuint v[],
 				GLuint mask );
 
 
-typedef void (*tfxLineClipFunc)( struct vertex_buffer *VB, 
+typedef void (*tfxLineClipFunc)( struct vertex_buffer *VB,
 				 GLuint v1, GLuint v2,
 				 GLubyte mask );
 
@@ -369,10 +369,10 @@ typedef struct {
  */
 #define FX_OFFSET             0x1
 #define FX_TWOSIDE            0x2
-#define FX_FRONT_BACK         0x4 
+#define FX_FRONT_BACK         0x4
 #define FX_FLAT               0x8
-#define FX_ANTIALIAS          0x10 
-#define FX_FALLBACK           0x20 
+#define FX_ANTIALIAS          0x10
+#define FX_FALLBACK           0x20
 
 
 /* Flags for fxMesa->new_state
@@ -456,7 +456,7 @@ struct tfxMesaContext {
   GLuint last_tri_caps;
   GLuint stw_hint_state;		/* for grHints */
   GLuint is_in_hardware;
-  GLuint new_state;   
+  GLuint new_state;
   GLuint using_fast_path, passes, multipass;
 
   tfxLineClipFunc clip_line;
@@ -506,7 +506,7 @@ struct tfxMesaContext {
   GLboolean haveGlobalPaletteTexture;
   GLint swapInterval;
   GLint maxPendingSwapBuffers;
-  
+
   FX_GrContext_t glideContext;
 
   int x_offset;
@@ -540,7 +540,7 @@ extern void fxDDFastPathInit(void);
 
 extern void fxDDChooseRenderState( GLcontext *ctx );
 
-extern void fxRenderClippedLine( struct vertex_buffer *VB, 
+extern void fxRenderClippedLine( struct vertex_buffer *VB,
 				 GLuint v1, GLuint v2 );
 
 extern void fxRenderClippedTriangle( struct vertex_buffer *VB,
@@ -587,12 +587,12 @@ extern void fxDDRegisterVB( struct vertex_buffer *VB );
 extern void fxDDUnregisterVB( struct vertex_buffer *VB );
 extern void fxDDResizeVB( struct vertex_buffer *VB, GLuint size );
 
-extern void fxDDCheckMergeAndRender( GLcontext *ctx, 
+extern void fxDDCheckMergeAndRender( GLcontext *ctx,
 				     struct gl_pipeline_stage *d );
 
 extern void fxDDMergeAndRender( struct vertex_buffer *VB );
 
-extern void fxDDCheckPartialRasterSetup( GLcontext *ctx, 
+extern void fxDDCheckPartialRasterSetup( GLcontext *ctx,
 					 struct gl_pipeline_stage *d );
 
 extern void fxDDPartialRasterSetup( struct vertex_buffer *VB );
@@ -605,7 +605,7 @@ extern GLuint fxDDRegisterPipelineStages( struct gl_pipeline_stage *out,
 
 extern GLboolean fxDDBuildPrecalcPipeline( GLcontext *ctx );
 
-extern void fxDDOptimizePrecalcPipeline( GLcontext *ctx, 
+extern void fxDDOptimizePrecalcPipeline( GLcontext *ctx,
 					 struct gl_pipeline *pipe );
 
 extern void fxDDRenderElementsDirect( struct vertex_buffer *VB );
@@ -630,17 +630,17 @@ extern int fxTexGetInfo(int, int, GrLOD_t *, GrAspectRatio_t *,
 extern void fxDDScissor( GLcontext *ctx,
 			      GLint x, GLint y, GLsizei w, GLsizei h );
 extern void fxDDFogfv( GLcontext *ctx, GLenum pname, const GLfloat *params );
-extern GLboolean fxDDColorMask(GLcontext *ctx, 
-			       GLboolean r, GLboolean g, 
+extern GLboolean fxDDColorMask(GLcontext *ctx,
+			       GLboolean r, GLboolean g,
 			       GLboolean b, GLboolean a );
 
 extern GLuint fxDDDepthTestSpanGeneric(GLcontext *ctx,
-                                       GLuint n, GLint x, GLint y, 
+                                       GLuint n, GLint x, GLint y,
 				       const GLdepth z[],
                                        GLubyte mask[]);
 
 extern void fxDDDepthTestPixelsGeneric(GLcontext* ctx,
-                                       GLuint n, 
+                                       GLuint n,
 				       const GLint x[], const GLint y[],
                                        const GLdepth z[], GLubyte mask[]);
 
@@ -667,8 +667,8 @@ extern int fxDDInitFxMesaContext( fxMesaContext fxMesa );
 
 
 extern void fxSetScissorValues(GLcontext *ctx);
-extern void fxTMMoveInTM_NoLock(fxMesaContext fxMesa, 
-				struct gl_texture_object *tObj, 
+extern void fxTMMoveInTM_NoLock(fxMesaContext fxMesa,
+				struct gl_texture_object *tObj,
 				GLint where);
 extern void fxSetupTexture_NoLock(GLcontext *ctx);
 extern void fxSetupTexture(GLcontext *ctx);

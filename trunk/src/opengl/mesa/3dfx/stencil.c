@@ -1,4 +1,4 @@
-/* $Id: stencil.c,v 1.1 2000-02-29 00:46:25 sandervl Exp $ */
+/* $Id: stencil.c,v 1.2 2000-03-01 22:45:26 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -36,11 +36,11 @@
 #else
 #include "GL/xf86glx.h"
 #endif
+#include "types.h"
 #include "context.h"
 #include "macros.h"
 #include "pb.h"
 #include "stencil.h"
-#include "types.h"
 #include "enable.h"
 #endif
 
