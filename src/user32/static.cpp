@@ -1,4 +1,4 @@
-/* $Id: static.cpp,v 1.9 1999-11-13 16:42:42 cbratschi Exp $ */
+/* $Id: static.cpp,v 1.10 1999-11-21 14:37:17 achimha Exp $ */
 /*
  * Static control
  *
@@ -78,6 +78,9 @@ static HICON STATIC_SetIcon( HWND hwnd, HICON hicon )
     DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
     ICONINFO ii;
     BITMAP bmp;
+
+    if (infoPtr == NULL)
+      return 0;
 
     if ((dwStyle & SS_TYPEMASK) != SS_ICON) return 0;
 
