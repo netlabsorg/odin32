@@ -1,4 +1,4 @@
-/* $Id: odinwrap.h,v 1.11 1999-10-25 15:04:37 phaller Exp $ */
+/* $Id: odinwrap.h,v 1.12 1999-10-25 15:14:52 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -30,6 +30,9 @@
 
 
 #ifdef DEBUG
+
+//@@@PH 1999/10/25 IBM VAC++ debug memory support
+#include <malloc.h>
 
 /****************************************************************************
  * General Wrapper Macros (debug instrumented)                              *
