@@ -1,4 +1,4 @@
-/* $Id: mipmap.c,v 1.2 2000-05-20 13:47:55 jeroen Exp $ */
+/* $Id: mipmap.c,v 1.3 2002-01-05 11:14:32 sandervl Exp $ */
 /*
 ** License Applicability. Except to the extent portions of this file are
 ** made subject to an alternative license as permitted in the SGI Free
@@ -32,8 +32,8 @@
 ** published by SGI, but has not been independently verified as being
 ** compliant with the OpenGL(R) version 1.2.1 Specification.
 **
-** $Date: 2000-05-20 13:47:55 $ $Revision: 1.2 $
-** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glu/util/mipmap.c,v 1.2 2000-05-20 13:47:55 jeroen Exp $
+** $Date: 2002-01-05 11:14:32 $ $Revision: 1.3 $
+** $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/opengl/glu/util/mipmap.c,v 1.3 2002-01-05 11:14:32 sandervl Exp $
 */
 
 #include "gluos.h"
