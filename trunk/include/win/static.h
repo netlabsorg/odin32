@@ -1,4 +1,4 @@
-/* $Id: static.h,v 1.2 1999-07-21 07:13:47 sandervl Exp $ */
+/* $Id: static.h,v 1.3 1999-07-23 17:55:27 sandervl Exp $ */
 
 /*
  * Static-class extra info
@@ -7,8 +7,7 @@
  * Copyright 1999 Christoph Bratschi
  */
 
-#define ODINSTATICCLASSNAME  "ODIN_STATIC"
-#define WIN32STATICCLASSNAME "STATIC"
+#define STATICCLASSNAME "STATIC"
 
 #ifndef __WINE_STATIC_H
 #define __WINE_STATIC_H

@@ -1,4 +1,4 @@
-/* $Id: scroll.h,v 1.2 1999-07-21 17:18:43 sandervl Exp $ */
+/* $Id: scroll.h,v 1.3 1999-07-23 17:55:27 sandervl Exp $ */
 
 /*
  * Scroll-bar class extra info
@@ -11,8 +11,7 @@
 #ifndef __WINE_SCROLL_H
 #define __WINE_SCROLL_H
 
-#define ODINSCROLLBARCLASSNAME "ODIN_SCROLLBAR"
-#define WIN32SCROLLBARCLASSNAME "SCROLLBAR"
+#define SCROLLBARCLASSNAME "SCROLLBAR"
 
 #include "windef.h"
 

@@ -17,7 +17,4 @@
 void CONTROLS_Register();
 void CONTROLS_Unregister();
 
-char* Win32ToOdinControlName(char* name);
-char* OdinToWin32ControlName(char* name);
-
 #endif // __CONTROLS_H
