@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.10 1999-08-26 12:55:36 sandervl Exp $ */
+/* $Id: misc.cpp,v 1.11 1999-09-13 14:57:07 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -345,3 +345,61 @@ void WIN32API DebugBreak()
 }
 //******************************************************************************
 //******************************************************************************
+
+
+/*****************************************************************************
+ * Name      : DebugErrorBox
+ * Purpose   : display an apprioriate error box with detailed information
+ *             about the error cause
+ * Parameters: APIRET iErrorCode - OS/2 error code
+ *             PSZ    pszFormat  - printf-format string
+ *             ...
+ * Variables :
+ * Result    : return code of the message box
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Tue, 1999/09/13 19:55]
+ *****************************************************************************/
+
+int SYSTEM EXPORT DebugErrorBox(ULONG  iErrorCode,
+                                char*  pszFormat,
+                                ...)
+{
+  char   szMessageBuffer[1024];              /* buffer for the text message */
+  char   szErrorBuffer[1024];       /* buffer for the operating system text */
+  ULONG  bc;                                                       /* dummy */
+  APIRET rc2;                                             /* API returncode */
+  int    iRC;                                    /* message box return code */
+
+  USHORT  sel = RestoreOS2FS();
+  va_list argptr;
+
+  // clear memory
+  memset (szMessageBuffer, 0, sizeof(szMessageBuffer));
+  memset (szErrorBuffer, 0, sizeof(szErrorBuffer));
+
+  // build message string
+  va_start(argptr, pszFormat);
+  vsprintf(szMessageBuffer, pszFormat, argptr);
+  va_end(argptr);
+
+  // query error string
+  rc2 = DosGetMessage(NULL,
+                      0,
+                      szErrorBuffer,
+                      sizeof(szErrorBuffer),
+                      iErrorCode,
+                      "OSO001.MSG",
+                      &bc);
+
+  // display message box
+  iRC = WinMessageBox(HWND_DESKTOP,
+                      NULLHANDLE,
+                      szMessageBuffer,
+                      szErrorBuffer,
+                      0,
+                      MB_OK | MB_ICONEXCLAMATION | MB_MOVEABLE);
+  SetFS(sel);
+  return iRC;
+}
