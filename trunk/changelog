@@ -1,9 +1,12 @@
-/* $Id: changelog,v 1.2402 2002-12-29 14:10:30 sandervl Exp $ */
+/* $Id: changelog,v 1.2403 2002-12-29 17:16:55 sandervl Exp $ */
 
  2002-12-29: Sander van Leeuwen <sandervl@innotek   >
     - DDRAW:    o Cleanup
     - KERNEL32: o Fix return value in case of error in SetThreadPriority
                 o Fixed GetSystemTimeAsFileTime
+    - USER32:   o Fix for painting a completely ownerdrawn menu (owner window
+                  was wrong; need to resync with Rewind/Wine)
+                o Don't proceed with DoNCPaint if window is invisible or minimized
 
  2002-12-28: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Changed default WM_MOUSEACTIVATE handler (like Wine now)
