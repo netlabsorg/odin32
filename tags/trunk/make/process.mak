@@ -1,4 +1,4 @@
-# $Id: process.mak,v 1.17 2002-08-20 04:05:40 bird Exp $
+# $Id: process.mak,v 1.18 2002-08-20 05:53:26 bird Exp $
 
 #
 # Unix-like tools for OS/2
@@ -264,11 +264,13 @@ TARGET_STACKSIZE=0x10000
 # Tell user what we're building.
 # -----------------------------------------------------------------------------
 !ifndef BUILD_QUIET
-! ifndef MAKEVER
-!  if [$(ECHO) Target is $(CLRFIL)$(TARGET)$(CLRRST)]
-!  endif
-! else
+! if "$(TARGET)" != ""
+!  ifndef MAKEVER
+!   if [$(ECHO) Target is $(CLRFIL)$(TARGET)$(CLRRST)]
+!   endif
+!  else
 $(ECHO) Target is $(CLRFIL)$(TARGET)$(CLRRST)
+!  endif
 ! endif
 !endif
 
@@ -592,39 +594,39 @@ clean:
     @ \
 ! endif
     $(TOOL_RM) \
-        $(PATH_TARGET)\*.$(EXT_OBJ) \
-        $(PATH_TARGET)\*.$(EXT_ILIB) \
-        $(PATH_TARGET)\*.$(EXT_EXE) \
-        $(PATH_TARGET)\*.$(EXT_DLL) \
-        $(PATH_TARGET)\*.$(EXT_RES)
+        "$(PATH_TARGET)\*.$(EXT_OBJ)" \
+        "$(PATH_TARGET)\*.$(EXT_ILIB)" \
+        "$(PATH_TARGET)\*.$(EXT_EXE)" \
+        "$(PATH_TARGET)\*.$(EXT_DLL)" \
+        "$(PATH_TARGET)\*.$(EXT_RES)"
     \
 ! ifndef BUILD_VERBOSE
     @ \
 ! endif
     $(TOOL_RM) \
-        $(PATH_TARGET)\*.$(EXT_SYS) \
-        $(PATH_TARGET)\*.$(EXT_LIB) \
-        $(PATH_TARGET)\*.$(EXT_IFS) \
-        $(PATH_TARGET)\*.$(EXT_MAP) \
-        $(PATH_TARGET)\*.$(EXT_SYM)
+        "$(PATH_TARGET)\*.$(EXT_SYS)" \
+        "$(PATH_TARGET)\*.$(EXT_LIB)" \
+        "$(PATH_TARGET)\*.$(EXT_IFS)" \
+        "$(PATH_TARGET)\*.$(EXT_MAP)" \
+        "$(PATH_TARGET)\*.$(EXT_SYM)"
     \
 ! ifndef BUILD_VERBOSE
     @ \
 ! endif
     $(TOOL_RM) \
-        $(PATH_TARGET)\*.s \
-        $(PATH_TARGET)\*.lst \
-        $(PATH_TARGET)\*.lnk \
-        $(PATH_TARGET)\*.ii \
-        $(PATH_TARGET)\.depend
+        "$(PATH_TARGET)\*.s" \
+        "$(PATH_TARGET)\*.lst" \
+        "$(PATH_TARGET)\*.lnk" \
+        "$(PATH_TARGET)\*.ii" \
+        "$(PATH_TARGET)\.depend"
     \
 ! ifndef BUILD_VERBOSE
     @ \
 ! endif
     $(TOOL_RM) \
-        .\*.ii \
-        .\*.err \
-        .\.depend
+        ".\*.ii" \
+        ".\*.err" \
+        ".\.depend"
 !endif
 !ifdef SUBDIRS
     @$(TOOL_DODIRS) "$(SUBDIRS)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) NODEP=1 $@
@@ -643,12 +645,12 @@ clean:
 # Pass 1 - The dep rule - Make dependencies.
 # -----------------------------------------------------------------------------
 dep:
+!if "$(TARGET_MODE)" != "EMPTY" && "$(TARGET_MODE)" != "TESTCASE"
     @$(ECHO) Making dependencies... $(CLRRST)
     \
-!ifndef BUILD_VERBOSE
+! ifndef BUILD_VERBOSE
     @ \
-!endif
-!if "$(TARGET_MODE)" != "EMPTY" && "$(TARGET_MODE)" != "TESTCASE"
+! endif
     $(TOOL_DEP) $(TOOL_DEP_FLAGS) -o$$(PATH_TARGET) -d$(TARGET_DEPEND)\
 ! ifdef TARGET_NO_DEP
         -x$(TARGET_NO_DEP: =;)\
@@ -711,7 +713,9 @@ $(PREMAKEFILES_EXECUTABLE):
 executable: \
 !if "$(TARGET_MODE)" != "LIB" && "$(TARGET_MODE)" != "SYSLIB" && "$(TARGET_MODE)" != "IFSLIB"
         $(SUBDIRS_EXECUTABLE) $(PREMAKEFILES_EXECUTABLE) $(TARGET) $(TARGET_PUBNAME)
+! if "$(TARGET)" != ""
     @$(ECHO) Successfully Built $(CLRFIL)$(TARGET)$(CLRRST)
+! endif
 !else
         $(SUBDIRS_EXECUTABLE) $(PREMAKEFILES_EXECUTABLE)
 !endif
@@ -971,7 +975,7 @@ $(LINK_LNK5)
 <<KEEP
 !else
     @$(ECHO) Creating Linker Input File $(CLRRST) $@
-    @$(TOOL_RM) $@
+    @$(TOOL_RM) "$@"
     \
 ! ifdef BUILD_VERBOSE
     @ \
@@ -1027,10 +1031,10 @@ $(TARGET): $(TARGET_OBJS) $(TARGET_LNK) $(TARGET_DEPS)
 !endif
     @$(ECHO) Creating Library $(CLRFIL)$@ $(CLRRST)
 !ifndef BUILD_VERBOSE
-    @$(TOOL_RM) $@
+    @$(TOOL_RM) "$@"
     @$(AR_CMD)
 !else
-    $(TOOL_RM) $@
+    $(TOOL_RM) "$@"
     $(AR_CMD)
 !endif
 
