@@ -955,6 +955,8 @@ HRESULT WINAPI CoRegisterClassObject(REFCLSID rclsid,LPUNKNOWN pUnk,DWORD dwClsC
 
 HRESULT WINAPI CoRevokeClassObject(DWORD dwRegister);
 
+HRESULT WINAPI CoGetPSClsid(REFIID riid,CLSID *pclsid);
+
 void WINAPI CoUninitialize16(void);
 void WINAPI CoUninitialize(void);
 
