@@ -1,4 +1,4 @@
-/* $Id: directory.cpp,v 1.30 2000-10-02 18:39:33 sandervl Exp $ */
+/* $Id: directory.cpp,v 1.31 2000-10-06 15:16:03 sandervl Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
@@ -111,7 +111,13 @@ void InitDirectories()
 ODINFUNCTION2(UINT, GetCurrentDirectoryA, UINT,  nBufferLength,
                                           LPSTR, lpBuffer)
 {
-  return O32_GetCurrentDirectory(nBufferLength, lpBuffer);
+ UINT rc;
+
+  rc = O32_GetCurrentDirectory(nBufferLength, lpBuffer);
+  if(rc) {
+    dprintf(("CurrentDirectory = %s", lpBuffer)); 
+  }
+  return rc;
 }
 
 

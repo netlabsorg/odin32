@@ -1,10 +1,14 @@
-/* $Id: pe.cpp,v 1.22 2000-10-06 11:04:42 sandervl Exp $ */
+/* $Id: pe.cpp,v 1.23 2000-10-06 15:15:25 sandervl Exp $ */
 
 /*
  * PELDR main exe loader code
  *
- * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
+ * Copyright 1998-2000 Sander van Leeuwen (sandervl@xs4all.nl)
  *
+ * Command line options:
+ *   /OPT:[x1=y,x2=z,..]	 
+ *   x = CURDIR    -> set current directory to y
+ *   (not other options available at this time)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -62,7 +66,7 @@ KRNL32EXCEPTPROC       Krnl32SetExceptionHandler = 0;
 KRNL32EXCEPTPROC       Krnl32UnsetExceptionHandler = 0;
 
 //should be the same as in ..\kernel32\winexepeldr.h
-typedef BOOL (* WIN32API WIN32CTOR)(char *, char *, ULONG, BOOL);
+typedef BOOL (* WIN32API WIN32CTOR)(char *, char *, char *, ULONG, BOOL);
 
 WIN32CTOR   CreateWin32Exe       = 0;
 ULONG       reservedMemory       = 0;
@@ -82,7 +86,7 @@ int main(int argc, char *argv[])
  HMODULE hmodPMWin = 0, hmodKernel32 = 0;
  PTIB   ptib;
  PPIB   ppib;
- char  *cmdline, *win32cmdline;
+ char  *cmdline, *win32cmdline, *peoptions, *newcmdline;
  BOOL   fQuote = FALSE;
  int    nrTries = 1;
 
@@ -91,6 +95,14 @@ int main(int argc, char *argv[])
 tryagain:
 		cmdline = ppib->pib_pchcmd;
 		cmdline += strlen(cmdline)+1; 	//skip pe.exe
+                peoptions = strstr(cmdline, "/OPT:[");
+		if(peoptions) {
+			newcmdline = strchr(peoptions, ']');
+			if(newcmdline) {
+				cmdline = newcmdline+1;
+			}
+			else 	DebugInt3();	//should not happen!
+		}		
 		while(*cmdline == ' ')	cmdline++; //skip leading space
 		if(*cmdline == '"') {
 			cmdline++;
@@ -185,9 +197,9 @@ filenotfound:
 	MyWinMessageBox(HWND_DESKTOP, NULL, exeName, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
         goto fail;
   }
-  rc = DosQueryProcAddr(hmodKernel32, 0, "_CreateWin32PeLdrExe@16", (PFN *)&CreateWin32Exe);
+  rc = DosQueryProcAddr(hmodKernel32, 0, "_CreateWin32PeLdrExe@20", (PFN *)&CreateWin32Exe);
 
-  if(CreateWin32Exe(exeName, win32cmdline, reservedMemory, fConsoleApp) == FALSE) {
+  if(CreateWin32Exe(exeName, win32cmdline, peoptions, reservedMemory, fConsoleApp) == FALSE) {
         goto fail;
   }
 
