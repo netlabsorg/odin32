@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.79 2000-10-08 20:05:29 sandervl Exp $ */
+/* $Id: window.cpp,v 1.80 2000-10-09 17:26:55 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -15,6 +15,9 @@
  *
  *
  * TODO: Decide what to do about commands for OS/2 windows (non-Win32 apps)
+ * TODO: ShowOwnedPopups needs to be tested
+ *       GetLastActivePopup needs to be rewritten
+ *       ArrangeIconicWindows probably also
  *
  */
 
@@ -31,6 +34,7 @@
 #include "user32.h"
 #include "winicon.h"
 #include <win\winpos.h>
+#include <win\win.h>
 #include <heapstring.h>
 
 #define DBG_LOCALLOG    DBG_window
@@ -288,7 +292,7 @@ HWND WIN32API CreateMDIWindowW(LPCWSTR lpszClassName, LPCWSTR lpszWindowName,
     window = Win32BaseWindow::GetWindowFromHandle(hwndParent);
     if(!window) {
         dprintf(("CreateMDIWindowW, window %x not found", hwndParent));
-    	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
 
@@ -318,8 +322,8 @@ BOOL WIN32API DestroyWindow(HWND hwnd)
         return 0;
     }
     if(window->isDesktopWindow()) {
-	dprintf(("WARNING: Trying to destroy desktop window!"));
-	return FALSE;
+    dprintf(("WARNING: Trying to destroy desktop window!"));
+    return FALSE;
     }
     return window->DestroyWindow();
 }
@@ -365,15 +369,15 @@ HWND WIN32API SetParent( HWND hwndChild, HWND hwndNewParent)
         return 0;
     }
     if(hwndNewParent == HWND_DESKTOP) {
-	hwndNewParent = GetDesktopWindow();
+    hwndNewParent = GetDesktopWindow();
     }
     else {
-    	parent = Win32BaseWindow::GetWindowFromHandle(hwndNewParent);
-    	if(!window) {
-        	dprintf(("SetParent, parent %x not found", hwndNewParent));
-	        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
-	        return 0;
-	}
+        parent = Win32BaseWindow::GetWindowFromHandle(hwndNewParent);
+        if(!window) {
+            dprintf(("SetParent, parent %x not found", hwndNewParent));
+            SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+            return 0;
+    }
     }
     dprintf(("SetParent %x %x", hwndChild, hwndNewParent));
     return window->SetParent(hwndNewParent);
@@ -401,15 +405,15 @@ HWND WIN32API GetTopWindow( HWND hwnd)
   HWND hwndTop;
 
     if(hwnd == HWND_DESKTOP) {
-	window = windowDesktop;
+    window = windowDesktop;
     }
     else {
-    	window = Win32BaseWindow::GetWindowFromHandle(hwnd);
-    	if(!window) {
-        	dprintf(("GetTopWindow, window %x not found", hwnd));
-	        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
-        	return 0;
-	}
+        window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+        if(!window) {
+            dprintf(("GetTopWindow, window %x not found", hwnd));
+            SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+            return 0;
+    }
     }
     hwndTop = window->GetTopWindow();
     dprintf2(("GetTopWindow %x returned %x", hwnd, hwndTop));
@@ -481,23 +485,23 @@ void WIN32API SetInternalWindowPos(HWND    hwnd,
 
     if( IsWindow(hwnd) )
     {
-	WINDOWPLACEMENT wndpl;
-	UINT flags;
+    WINDOWPLACEMENT wndpl;
+    UINT flags;
 
         GetWindowPlacement(hwnd, &wndpl);
-	wndpl.length  = sizeof(wndpl);
-	wndpl.showCmd = showCmd;
-	wndpl.flags = 0;
+    wndpl.length  = sizeof(wndpl);
+    wndpl.showCmd = showCmd;
+    wndpl.flags = 0;
 
-	if(lpPoint)
-	{
+    if(lpPoint)
+    {
             wndpl.flags |= WPF_SETMINPOSITION;
-	    wndpl.ptMinPosition = *lpPoint;
-	}
-	if(lpRect)
-	{
+        wndpl.ptMinPosition = *lpPoint;
+    }
+    if(lpRect)
+    {
             wndpl.rcNormalPosition = *lpRect;
-	}
+    }
         SetWindowPlacement( hwnd, &wndpl);
     }
 
@@ -746,7 +750,7 @@ BOOL WIN32API GetWindowRect( HWND hwnd, PRECT pRect)
 
     //convert from parent coordinates to screen (if necessary)
     if(window->getParent()) {
-    	 MapWindowPoints(window->getParent()->getWindowHandle(), 0, (PPOINT)pRect, 2);
+         MapWindowPoints(window->getParent()->getWindowHandle(), 0, (PPOINT)pRect, 2);
     }
 
     dprintf(("GetWindowRect %x (%d,%d) (%d,%d)", hwnd, pRect->left, pRect->top, pRect->right, pRect->bottom));
@@ -806,9 +810,9 @@ int WIN32API GetWindowTextW(HWND hwnd, LPWSTR lpsz, int cch)
 #ifdef DEBUG
     int rc = window->GetWindowTextW(lpsz, cch);
     if(rc) {
-    	LPSTR astring = UnicodeToAsciiString(lpsz);
-    	dprintf(("GetWindowTextW %x %s", hwnd, lpsz));
-    	free(astring);
+        LPSTR astring = UnicodeToAsciiString(lpsz);
+        dprintf(("GetWindowTextW %x %s", hwnd, lpsz));
+        free(astring);
     }
     else dprintf(("GetWindowTextW %x returned %d", hwnd, rc));
     return rc;
@@ -847,10 +851,6 @@ BOOL WIN32API SetWindowTextW( HWND hwnd, LPCWSTR lpsz)
     LPSTR astring = UnicodeToAsciiString(lpsz);
     dprintf(("SetWindowTextW %x %s", hwnd, astring));
     free(astring);
-    if(hwnd == 0x68000008) {
-	int i;
-	i = 5;
-    }
 #endif
     return window->SetWindowTextW((LPWSTR)lpsz);
 }
@@ -912,12 +912,12 @@ BOOL WIN32API AdjustWindowRectEx( PRECT rect, DWORD style, BOOL menu, DWORD exSt
 {
     if(style == 0 && menu == FALSE && exStyle == 0) {
         dprintf(("AdjustWindowRectEx %x %x %d (%d,%d)(%d,%d) -> no change required", style, exStyle, menu, rect->left, rect->top, rect->right, rect->bottom));
-	return TRUE;	//nothing needs to be changed (VERIFIED in NT 4)
+    return TRUE;    //nothing needs to be changed (VERIFIED in NT 4)
     }
     dprintf(("AdjustWindowRectEx %x %x %d (%d,%d)(%d,%d)\n", style, exStyle, menu, rect->left, rect->top, rect->right, rect->bottom));
     /* Correct the window style */
     if (!(style & (WS_POPUP | WS_CHILD)))  /* Overlapped window */
-    	style |= WS_CAPTION;
+        style |= WS_CAPTION;
 
     //SvL: Include WS_POPUP -> otherwise HAS_THINFRAME is true for popup windows
     //     Also include WS_CHILD -> otherwise HAS_THICKFRAME doesn't work correctly
@@ -948,18 +948,18 @@ BOOL WIN32API AdjustWindowRectEx( PRECT rect, DWORD style, BOOL menu, DWORD exSt
 
     //Adjust rect inner (Win32BaseWindow::AdjustRectInner)
     if(!(style & WS_ICONIC)) {
-	if (exStyle & WS_EX_CLIENTEDGE)
-      		InflateRect (rect, GetSystemMetrics(SM_CXEDGE), GetSystemMetrics(SM_CYEDGE));
+    if (exStyle & WS_EX_CLIENTEDGE)
+            InflateRect (rect, GetSystemMetrics(SM_CXEDGE), GetSystemMetrics(SM_CYEDGE));
 
-	if (exStyle & WS_EX_STATICEDGE)
-      		InflateRect (rect, GetSystemMetrics(SM_CXBORDER), GetSystemMetrics(SM_CYBORDER));
+    if (exStyle & WS_EX_STATICEDGE)
+            InflateRect (rect, GetSystemMetrics(SM_CXBORDER), GetSystemMetrics(SM_CYBORDER));
 
-	//SvL: scrollbars aren't checked *UNLESS* the style includes a border (any border)
+    //SvL: scrollbars aren't checked *UNLESS* the style includes a border (any border)
         //     --> VERIFIED IN NT4, SP6 (fixes MFC apps with scrollbars + bar controls)
-	if(style & (WS_THICKFRAME|WS_BORDER|WS_DLGFRAME)) {
-    		if (style & WS_VSCROLL) rect->right  += GetSystemMetrics(SM_CXVSCROLL);
-    		if (style & WS_HSCROLL) rect->bottom += GetSystemMetrics(SM_CYHSCROLL);
-	}
+    if(style & (WS_THICKFRAME|WS_BORDER|WS_DLGFRAME)) {
+            if (style & WS_VSCROLL) rect->right  += GetSystemMetrics(SM_CXVSCROLL);
+            if (style & WS_HSCROLL) rect->bottom += GetSystemMetrics(SM_CYHSCROLL);
+    }
     }
 
     dprintf(("AdjustWindowRectEx returned (%d,%d)(%d,%d)\n", rect->left, rect->top, rect->right, rect->bottom));
@@ -985,7 +985,7 @@ static void WINPOS_GetWinOffset( Win32BaseWindow *wndFrom, Win32BaseWindow *wndT
     /* Translate source window origin to screen coords */
     if(wndFrom != windowDesktop)
     {
-	window = wndFrom;
+    window = wndFrom;
         while(window)
         {
             offset->x += window->getClientRectPtr()->left + window->getWindowRect()->left;
@@ -997,7 +997,7 @@ static void WINPOS_GetWinOffset( Win32BaseWindow *wndFrom, Win32BaseWindow *wndT
     /* Translate origin to destination window coords */
     if(wndTo != windowDesktop)
     {
-	window = wndTo;
+    window = wndTo;
         while(window)
         {
             offset->x -= window->getClientRectPtr()->left + window->getWindowRect()->left;
@@ -1065,7 +1065,7 @@ BOOL WIN32API ScreenToClient(HWND hwnd, LPPOINT pt)
     BOOL rc;
 
     if(!hwnd) {
-	return (TRUE);
+    return (TRUE);
     }
     wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
     if (!wnd) {
@@ -1551,7 +1551,7 @@ UINT WIN32API ArrangeIconicWindows( HWND hwnd)
 //******************************************************************************
 BOOL WIN32API OpenIcon(HWND hwnd)
 {
-  dprintf(("USER32:  OpenIcon"));
+  dprintf(("USER32: OpenIcon %x", hwnd));
 
   if(!IsIconic(hwnd))
         return FALSE;
@@ -1559,11 +1559,59 @@ BOOL WIN32API OpenIcon(HWND hwnd)
   return TRUE;
 }
 //******************************************************************************
+//SDK: Windows can only be shown with ShowOwnedPopups if they were previously
+//     hidden with the same api
+//TODO: -> needs testing
 //******************************************************************************
-BOOL WIN32API ShowOwnedPopups( HWND hwnd, BOOL  arg2)
+BOOL WIN32API ShowOwnedPopups(HWND hwndOwner, BOOL fShow)
 {
-    dprintf(("USER32:  ShowOwnedPopups (OPEN32: todo) %x", hwnd));
-    return O32_ShowOwnedPopups(Win32BaseWindow::Win32ToOS2Handle(hwnd), arg2);
+  Win32BaseWindow *window, *owner;
+  HWND hwnd;
+
+  owner = Win32BaseWindow::GetWindowFromHandle(hwndOwner);
+  if(!owner) {
+        dprintf(("ShowOwnedPopups, window %x not found", hwndOwner));
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        return FALSE;
+  }
+  dprintf(("USER32: ShowOwnedPopups %x %d", hwnd, fShow));
+
+  hwnd = GetWindow(GetDesktopWindow(), GW_CHILD);
+  while(hwnd) {
+        window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+        if(window) {
+            if(window == owner && (window->getStyle() & WS_POPUP))
+            {
+                if(fShow) {
+                    if(window->getFlags() & WIN_NEEDS_SHOW_OWNEDPOPUP)
+                    {
+                        /*
+                        * In Windows, ShowOwnedPopups(TRUE) generates WM_SHOWWINDOW messages with SW_PARENTOPENING,
+                        * regardless of the state of the owner
+                        */
+                        SendMessageA(hwnd, WM_SHOWWINDOW, SW_SHOW, SW_PARENTOPENING);
+                        window->setFlags(window->getFlags() & ~WIN_NEEDS_SHOW_OWNEDPOPUP);
+                    }
+                }
+                else
+                {
+                    if(IsWindowVisible(hwnd))
+                    {
+                        /*
+                         * In Windows, ShowOwnedPopups(FALSE) generates WM_SHOWWINDOW messages with SW_PARENTCLOSING,
+                         * regardless of the state of the owner
+                         */
+                        SendMessageA(hwnd, WM_SHOWWINDOW, SW_HIDE, SW_PARENTCLOSING);
+                        window->setFlags(window->getFlags() | WIN_NEEDS_SHOW_OWNEDPOPUP);
+                    }
+                }
+            }
+        }
+        else    dprintf(("WARNING: window %x is not valid", hwnd));
+
+        hwnd = GetWindow(hwnd, GW_HWNDNEXT);
+  }
+  return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1585,7 +1633,7 @@ HWND WIN32API GetLastActivePopup( HWND hWnd)
 
     hwnd = Win32BaseWindow::OS2ToWin32Handle(O32_GetLastActivePopup(hWnd));
 
-    dprintf(("GetLastActivePopup %x returned %x", hWnd, hwnd));
+    dprintf(("GetLastActivePopup %x returned %x NOT CORRECTLY IMPLEMENTED", hWnd, hwnd));
     return hwnd;
 }
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.214 2000-10-05 18:37:26 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.215 2000-10-09 17:26:52 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2177,9 +2177,6 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
    HWND hParent = 0;
    RECT oldClientRect = rectClient;
 
-    if(getWindowHandle() == 0x68000004) {
-	rc = FALSE;
-    }
     if (fuFlags &
        ~(SWP_NOSIZE     | SWP_NOMOVE     | SWP_NOZORDER     |
          SWP_NOREDRAW   | SWP_NOACTIVATE | SWP_FRAMECHANGED |
