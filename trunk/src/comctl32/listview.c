@@ -3059,7 +3059,7 @@ static LRESULT LISTVIEW_GetColumnA(HWND hwnd, INT nItem, LPLVCOLUMNA lpColumn)
 
       if ((lpColumn->mask & LVCF_TEXT) && (lpColumn->pszText) && (hdi.pszText))
       {
-        lstrcpynA (lpColumn->pszText, hdi.pszText, MIN(lpColumn->cchTextMax,lstrlenA(hdi.pszText)));
+        lstrcpynA (lpColumn->pszText, hdi.pszText, lpColumn->cchTextMax);
       }
 
       if (lpColumn->mask & LVCF_IMAGE)

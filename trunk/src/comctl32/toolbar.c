@@ -1,4 +1,4 @@
-/* $Id: toolbar.c,v 1.7 1999-06-28 15:46:27 cbratschi Exp $ */
+/* $Id: toolbar.c,v 1.8 1999-06-30 15:52:18 cbratschi Exp $ */
 /*
  * Toolbar control
  *
@@ -1517,7 +1517,7 @@ TOOLBAR_GetButtonInfoA (HWND hwnd, WPARAM wParam, LPARAM lParam)
         if ((btnPtr->iString >= 0) || (btnPtr->iString < infoPtr->nNumStrings))
             lstrcpynA (lpTbInfo->pszText,
                          (LPSTR)infoPtr->strings[btnPtr->iString],
-                         MIN(lpTbInfo->cchText,lstrlenA((LPSTR)infoPtr->strings[btnPtr->iString])));
+                         lpTbInfo->cchText);
     }
 
     return nIndex;

@@ -1,4 +1,4 @@
-/* $Id: tooltips.c,v 1.8 1999-06-28 15:46:27 cbratschi Exp $ */
+/* $Id: tooltips.c,v 1.9 1999-06-30 15:52:18 cbratschi Exp $ */
 /*
  * Tool tip control
  *
@@ -7,7 +7,6 @@
  * Copyright 1999 Christoph Bratschi
  *
  * TODO:
- *   - Unicode support.
  *   - Custom draw support.
  *
  * Testing:
@@ -19,6 +18,7 @@
 
 /* CB: Odin32 problems
  - WM_NCCREATE not handled first -> title bar visible if WS_POPUP wasn't set before
+ - CS_SAVEBITS: window movements are slow, bug in Open32?
 */
 
 #include <string.h>
@@ -116,7 +116,7 @@ TOOLTIPS_GetTipText(HWND hwnd,TOOLTIPS_INFO *infoPtr,INT nTool)
           }
         } else if (ttnmdi.szText[0])
         {
-          lstrcpynAtoW(infoPtr->szTipText,ttnmdi.szText,MIN(INFOTIPSIZE-1,lstrlenA(ttnmdi.szText)));
+          lstrcpynAtoW(infoPtr->szTipText,ttnmdi.szText,INFOTIPSIZE);
           if (ttnmdi.uFlags & TTF_DI_SETITEM)
           {
             INT len = lstrlenA(ttnmdi.szText);
@@ -130,7 +130,7 @@ TOOLTIPS_GetTipText(HWND hwnd,TOOLTIPS_INFO *infoPtr,INT nTool)
           infoPtr->szTipText[0] = '\0';
         } else if (ttnmdi.lpszText != LPSTR_TEXTCALLBACKA)
         {
-          lstrcpynAtoW(infoPtr->szTipText,ttnmdi.lpszText,MIN(INFOTIPSIZE-1,lstrlenA(ttnmdi.lpszText)));
+          lstrcpynAtoW(infoPtr->szTipText,ttnmdi.lpszText,INFOTIPSIZE);
           if (ttnmdi.uFlags & TTF_DI_SETITEM)
           {
             INT len = lstrlenA(ttnmdi.lpszText);
@@ -146,7 +146,7 @@ TOOLTIPS_GetTipText(HWND hwnd,TOOLTIPS_INFO *infoPtr,INT nTool)
       } else
       {
         /* the item is a usual (unicode) text */
-        lstrcpynW(infoPtr->szTipText,toolPtr->lpszText,MIN(INFOTIPSIZE-1,lstrlenW(toolPtr->lpszText)));
+        lstrcpynW(infoPtr->szTipText,toolPtr->lpszText,INFOTIPSIZE);
       }
     }
     else
@@ -159,12 +159,13 @@ TOOLTIPS_GetTipText(HWND hwnd,TOOLTIPS_INFO *infoPtr,INT nTool)
 }
 
 static VOID
-TOOLTIPS_CalcTipSize (HWND hwnd,TOOLTIPS_INFO *infoPtr,LPSIZE lpSize)
+TOOLTIPS_CalcTipRect (HWND hwnd,TOOLTIPS_INFO *infoPtr,TTTOOL_INFO *toolPtr,LPRECT lpRect)
 {
     HDC hdc;
     HFONT hOldFont;
     UINT uFlags = DT_EXTERNALLEADING | DT_CALCRECT;
     RECT rc = {0,0,0,0};
+    SIZE size;
 
     if (infoPtr->nMaxTipWidth > -1)
     {
@@ -180,8 +181,73 @@ TOOLTIPS_CalcTipSize (HWND hwnd,TOOLTIPS_INFO *infoPtr,LPSIZE lpSize)
     SelectObject(hdc,hOldFont);
     ReleaseDC(hwnd,hdc);
 
-    lpSize->cx = rc.right-rc.left+4+infoPtr->rcMargin.left+infoPtr->rcMargin.right;
-    lpSize->cy = rc.bottom-rc.top+4+infoPtr->rcMargin.bottom+infoPtr->rcMargin.top;
+    size.cx = rc.right-rc.left+4+infoPtr->rcMargin.left+infoPtr->rcMargin.right;
+    size.cy = rc.bottom-rc.top+4+infoPtr->rcMargin.bottom+infoPtr->rcMargin.top;
+
+    //CB: optimize
+
+    if (toolPtr->uFlags & TTF_ABSOLUTE)
+    {
+      rc.left = infoPtr->xTrackPos;
+      rc.top  = infoPtr->yTrackPos;
+
+      if (toolPtr->uFlags & TTF_CENTERTIP)
+      {
+        rc.left -= (size.cx/2);
+        rc.top  -= (size.cy/2);
+      }
+    } else
+    {
+      RECT rcTool;
+
+      if (toolPtr->uFlags & TTF_IDISHWND)
+      {
+        GetWindowRect((HWND)toolPtr->uId,&rcTool); //screen coordinates
+      } else
+      {
+        rcTool = toolPtr->rect;
+        MapWindowPoints(toolPtr->hwnd,(HWND)0,(LPPOINT)&rcTool,2);
+      }
+
+      if (toolPtr->uFlags & TTF_CENTERTIP)
+      {
+        if (infoPtr->bTrackActive)
+        {
+          GetCursorPos((LPPOINT)&rc);
+          rc.top += 20;
+          rc.left -= (size.cx / 2);
+          rc.top  -= (size.cy / 2);
+        } else
+        {
+          rc.left = (rcTool.left + rcTool.right-size.cx)/ 2;
+          rc.top  = rcTool.bottom+2;
+        }
+
+      } else
+      {
+        GetCursorPos((LPPOINT)&rc);
+        rc.top += 20;
+      }
+
+      /* smart placement */
+      if (infoPtr->bTrackActive)
+      {
+        if ((rc.left + size.cx > rcTool.left) && (rc.left < rcTool.right) &&
+            (rc.top + size.cy > rcTool.top) && (rc.top < rcTool.bottom))
+            rc.left = rcTool.right;
+      }
+    }
+
+//    TRACE (tooltips, "pos %d - %d\n", rect.left, rect.top);
+
+    rc.right = rc.left+size.cx;
+    rc.bottom = rc.top+size.cy;
+
+    AdjustWindowRectEx (&rc,GetWindowLongA(hwnd,GWL_STYLE),
+                        FALSE,GetWindowLongA(hwnd,GWL_EXSTYLE));
+
+    *lpRect = rc;
+
 }
 
 
@@ -190,7 +256,6 @@ TOOLTIPS_Show (HWND hwnd, TOOLTIPS_INFO *infoPtr)
 {
     TTTOOL_INFO *toolPtr;
     RECT rect;
-    SIZE size;
     HDC  hdc;
     NMHDR  hdr;
 
@@ -222,37 +287,7 @@ TOOLTIPS_Show (HWND hwnd, TOOLTIPS_INFO *infoPtr)
 
 //    TRACE (tooltips, "\"%s\"\n", debugstr_w(infoPtr->szTipText));
 
-    TOOLTIPS_CalcTipSize (hwnd, infoPtr, &size);
-//    TRACE (tooltips, "size %d - %d\n", size.cx, size.cy);
-
-    if (toolPtr->uFlags & TTF_CENTERTIP)
-    {
-        RECT rc;
-
-        if (toolPtr->uFlags & TTF_IDISHWND)
-            GetWindowRect ((HWND)toolPtr->uId, &rc);
-        else
-        {
-            rc = toolPtr->rect;
-            MapWindowPoints (toolPtr->hwnd, (HWND)0, (LPPOINT)&rc, 2);
-        }
-        rect.left = (rc.left + rc.right - size.cx) / 2;
-        rect.top  = rc.bottom + 2;
-    } else
-    {
-        GetCursorPos((LPPOINT)&rect);
-        rect.top += 20;
-    }
-
-    /* FIXME: check position */
-
-//    TRACE (tooltips, "pos %d - %d\n", rect.left, rect.top);
-
-    rect.right = rect.left + size.cx;
-    rect.bottom = rect.top + size.cy;
-
-    AdjustWindowRectEx (&rect,GetWindowLongA(hwnd, GWL_STYLE),
-                        FALSE,GetWindowLongA(hwnd, GWL_EXSTYLE));
+    TOOLTIPS_CalcTipRect(hwnd,infoPtr,toolPtr,&rect);
 
     SetWindowPos (hwnd,HWND_TOP,rect.left,rect.top,
                     rect.right-rect.left,rect.bottom-rect.top,
@@ -298,7 +333,6 @@ TOOLTIPS_TrackShow (HWND hwnd, TOOLTIPS_INFO *infoPtr)
 {
     TTTOOL_INFO *toolPtr;
     RECT rect;
-    SIZE size;
     HDC  hdc;
     NMHDR hdr;
 
@@ -328,54 +362,7 @@ TOOLTIPS_TrackShow (HWND hwnd, TOOLTIPS_INFO *infoPtr)
 
 //    TRACE (tooltips, "\"%s\"\n", debugstr_w(infoPtr->szTipText));
 
-    TOOLTIPS_CalcTipSize(hwnd,infoPtr,&size);
-//    TRACE (tooltips, "size %d - %d\n", size.cx, size.cy);
-
-    if (toolPtr->uFlags & TTF_ABSOLUTE)
-    {
-      rect.left = infoPtr->xTrackPos;
-      rect.top  = infoPtr->yTrackPos;
-
-      if (toolPtr->uFlags & TTF_CENTERTIP)
-      {
-        rect.left -= (size.cx/2);
-        rect.top  -= (size.cy/2);
-      }
-    } else
-    {
-      RECT rcTool;
-
-      if (toolPtr->uFlags & TTF_IDISHWND)
-      {
-        GetWindowRect((HWND)toolPtr->uId,&rcTool); //screen coordinates
-      } else
-      {
-        rcTool = toolPtr->rect;
-        MapWindowPoints(toolPtr->hwnd,(HWND)0,(LPPOINT)&rcTool,2);
-      }
-
-      GetCursorPos ((LPPOINT)&rect);
-      rect.top += 20;
-
-      if (toolPtr->uFlags & TTF_CENTERTIP)
-      {
-        rect.left -= (size.cx / 2);
-        rect.top  -= (size.cy / 2);
-      }
-
-      /* smart placement */
-      if ((rect.left + size.cx > rcTool.left) && (rect.left < rcTool.right) &&
-          (rect.top + size.cy > rcTool.top) && (rect.top < rcTool.bottom))
-          rect.left = rcTool.right;
-    }
-
-//    TRACE (tooltips, "pos %d - %d\n", rect.left, rect.top);
-
-    rect.right = rect.left+size.cx;
-    rect.bottom = rect.top+size.cy;
-
-    AdjustWindowRectEx (&rect,GetWindowLongA(hwnd,GWL_STYLE),
-                        FALSE,GetWindowLongA(hwnd,GWL_EXSTYLE));
+    TOOLTIPS_CalcTipRect(hwnd,infoPtr,toolPtr,&rect);
 
     SetWindowPos (hwnd,HWND_TOP,rect.left,rect.top,
                     rect.right-rect.left,rect.bottom-rect.top,
@@ -1700,7 +1687,6 @@ TOOLTIPS_TrackPosition (HWND hwnd, WPARAM wParam, LPARAM lParam)
     {
 //      TRACE (tooltips, "[%d %d]\n",
 //             infoPtr->xTrackPos, infoPtr->yTrackPos);
-
       TOOLTIPS_TrackShow(hwnd,infoPtr);
     }
 
@@ -2057,7 +2043,7 @@ TOOLTIPS_OnWMGetText (HWND hwnd, WPARAM wParam, LPARAM lParam)
        copy wParam characters of the tip text and return wParam */
     if(wParam < length)
     {
-        lstrcpynWtoA((LPSTR)lParam,infoPtr->szTipText,MIN((UINT)wParam,lstrlenW(infoPtr->szTipText)));
+        lstrcpynWtoA((LPSTR)lParam,infoPtr->szTipText,(UINT)wParam);//includes 0 terminator
         return wParam;
     }
     lstrcpyWtoA((LPSTR)lParam,infoPtr->szTipText);
