@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1804 2001-10-28 15:24:59 sandervl Exp $ */
+/* $Id: changelog,v 1.1805 2001-10-28 17:13:59 sandervl Exp $ */
 
  2001-10-28: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMCTL32: o LISTVIEW_GetItemWidth bugfix: item can never be bigger
@@ -7,6 +7,7 @@
                   passed to parent class methods)
                 o Added SetDialogHook function for custom build
     - KERNEL32: o Added RegisterCustomDriver
+                o Added SetDefaultLanguage to override default language
 
  2001-10-27: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o IOCTL_SCSI_GET_ADDRESS: fail if wnaspi32 not loaded
