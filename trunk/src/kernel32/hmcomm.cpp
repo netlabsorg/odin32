@@ -1,4 +1,4 @@
-/* $Id: hmcomm.cpp,v 1.35 2002-06-11 12:51:43 sandervl Exp $ */
+/* $Id: hmcomm.cpp,v 1.36 2002-06-12 14:28:33 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -565,21 +565,15 @@ BOOL HMDeviceCommClass::ReadFile(PHMHANDLEDATA pHMHandleData,
         dprintf(("!WARNING!: lpCompletionRoutine not supported -> fall back to sync IO"));
     }
 
-    if(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) {
+    RXQUEUE qInfo;
+    ULONG ulLen = sizeof(qInfo);
+    ULONG rc = OSLibDosDevIOCtl(pHMHandleData->hHMHandle, IOCTL_ASYNC, ASYNC_GETINQUECOUNT, 0,0,0, &qInfo,ulLen,&ulLen);
+    dprintf(("ASYNC_GETINQUECOUNT -> qInfo.cch %d (queue size %d) rc %d", qInfo.cch, qInfo.cb, rc));
+
+    if(!qInfo.cch && pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) {
         return pDevData->iohandler->ReadFile(pHMHandleData->hWin32Handle, lpBuffer, nNumberOfBytesToRead,
                                              lpNumberOfBytesRead, lpOverlapped, lpCompletionRoutine, (DWORD)pDevData);
     }
-
-#ifdef DEBUG
-    RXQUEUE qInfo;
-    ULONG ulLen = sizeof(qInfo);
-    ULONG rc = OSLibDosDevIOCtl(pHMHandleData->hHMHandle,
-                                IOCTL_ASYNC,
-                                ASYNC_GETINQUECOUNT,
-                                0,0,0,
-                                &qInfo,ulLen,&ulLen);
-    dprintf(("ASYNC_GETINQUECOUNT -> qInfo.cch %d (queue size %d) rc %d", qInfo.cch, qInfo.cb, rc));
-#endif
 
     ret = OSLibDosRead(pHMHandleData->hHMHandle, (LPVOID)lpBuffer, nNumberOfBytesToRead,
                        &ulBytesRead);
@@ -599,6 +593,17 @@ BOOL HMDeviceCommClass::ReadFile(PHMHANDLEDATA pHMHandleData,
         }
     }
 #endif
+
+    if(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) {
+        //reset overlapped semaphore to non-signalled
+        ::ResetEvent(lpOverlapped->hEvent);
+
+        //set event to make sure next GetOverlappedResult doesn't block
+        ::SetEvent(lpOverlapped->hEvent);
+
+        lpOverlapped->Internal     = GetLastError();
+        lpOverlapped->InternalHigh = ulBytesRead;
+    }
     return ret;
 }
 /*****************************************************************************
