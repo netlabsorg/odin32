@@ -12,6 +12,8 @@
 
 #include <misc.h>
 
+#include <winnls.h>
+
 #define DBG_LOCALLOG    DBG_wsprintf
 #include "dbglocal.h"
 
@@ -372,7 +374,11 @@ INT WINAPI wvsnprintfA( LPSTR buffer, UINT maxlen, LPCSTR spec, va_list args )
     CHAR number[20];
     WPRINTF_DATA argData;
 
+#ifdef __WIN32OS2__
+    TRACE("wvsnprintfA : %p %u %s\n", buffer, maxlen, debugstr_a(spec));
+#else
     TRACE("%p %u %s\n", buffer, maxlen, debugstr_a(spec));
+#endif
 
     while (*spec && (maxlen > 1))
     {
@@ -412,7 +418,16 @@ INT WINAPI wvsnprintfA( LPSTR buffer, UINT maxlen, LPCSTR spec, va_list args )
         switch(format.type)
         {
         case WPR_WCHAR:
+#ifdef __WIN32OS2__
+            i = WideCharToMultiByte( CP_ACP, 0, &argData.wchar_view, 1, p, maxlen, 0, NULL );
+            if( i )
+            {
+                p += i - 1;
+                len = i;
+            }
+#else
             *p = argData.wchar_view;
+#endif
             if (*p != '\0') p++;
             else if (format.width > 1) *p++ = ' ';
             else len = 0;
@@ -430,7 +445,16 @@ INT WINAPI wvsnprintfA( LPSTR buffer, UINT maxlen, LPCSTR spec, va_list args )
         case WPR_WSTRING:
             {
                 LPCWSTR ptr = argData.lpcwstr_view;
+#ifdef __WIN32OS2__
+                i = WideCharToMultiByte( CP_ACP, 0, ptr, len, p, maxlen, 0, 0 );
+                if( i )
+                {
+                    p += i;
+                    len = i;
+                }
+#else
                 for (i = 0; i < len; i++) *p++ = (CHAR)*ptr++;
+#endif
             }
             break;
         case WPR_HEXA:
@@ -457,7 +481,11 @@ INT WINAPI wvsnprintfA( LPSTR buffer, UINT maxlen, LPCSTR spec, va_list args )
         maxlen -= len;
     }
     *p = 0;
+#ifdef __WIN32OS2__
+    TRACE("%s\n",buffer);
+#else
     TRACE("%s\n",debugstr_a(buffer));
+#endif
     return (maxlen > 1) ? (INT)(p - buffer) : -1;
 }
 
@@ -473,7 +501,7 @@ INT WINAPI wvsnprintfW( LPWSTR buffer, UINT maxlen, LPCWSTR spec, va_list args )
     CHAR number[20];
     WPRINTF_DATA argData;
 
-    TRACE("%p %u %s\n", buffer, maxlen, debugstr_w(spec));
+    TRACE("wvsnprintfW : %p %u %s\n", buffer, maxlen, debugstr_w(spec));
 
     while (*spec && (maxlen > 1))
     {
@@ -519,7 +547,11 @@ INT WINAPI wvsnprintfW( LPWSTR buffer, UINT maxlen, LPCWSTR spec, va_list args )
             else len = 0;
             break;
         case WPR_CHAR:
+#ifdef __WIN32OS2__
+            MultiByteToWideChar( CP_ACP, 0, &argData.char_view, 1, p, maxlen );
+#else
             *p = argData.char_view;
+#endif
             if (*p != '\0') p++;
             else if (format.width > 1) *p++ = ' ';
             else len = 0;
@@ -527,7 +559,16 @@ INT WINAPI wvsnprintfW( LPWSTR buffer, UINT maxlen, LPCWSTR spec, va_list args )
         case WPR_STRING:
             {
                 LPCSTR ptr = argData.lpcstr_view;
+#ifdef __WIN32OS2__
+                i = MultiByteToWideChar( CP_ACP, 0, ptr, len, p, maxlen );
+                if( i )
+                {
+                    p += i;
+                    len = i;
+                }
+#else
                 for (i = 0; i < len; i++) *p++ = (WCHAR)*ptr++;
+#endif
             }
             break;
         case WPR_WSTRING:
