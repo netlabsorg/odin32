@@ -1,4 +1,4 @@
-/* $Id: hmfile.cpp,v 1.3 2000-06-16 00:04:29 phaller Exp $ */
+/* $Id: hmfile.cpp,v 1.4 2000-06-17 09:42:58 sandervl Exp $ */
 
 /*
  * File IO win32 apis
@@ -308,7 +308,7 @@ BOOL HMDeviceFileClass::DuplicateHandle(PHMHANDLEDATA pHMHandleData,
     dprintf(("ERROR: DuplicateHandle; CreateFile %s failed!", 
              srcfileinfo->lpszFileName));
     return FALSE;
-#endif
+#else
 
     rc = OSLibDosDupHandle(pHMSrcHandle->hHMHandle,
                            desthandle);
@@ -320,8 +320,11 @@ BOOL HMDeviceFileClass::DuplicateHandle(PHMHANDLEDATA pHMHandleData,
       SetLastError(rc);
       return FALSE;   // ERROR
     }
-    else
+    else {
+      pHMHandleData->hHMHandle = *desthandle;
       return TRUE;    // OK
+    }
+#endif
   }
   else
   {
