@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 1999-11-12 15:46:19 bird Exp $
+# $Id: makefile,v 1.14 1999-12-07 20:26:08 achimha Exp $
 
 #
 # PD-Win32 API
@@ -6,10 +6,10 @@
 #	wsock32.dll makefile
 #
 
-PDWIN32_INCLUDE = ..\..\include
-PDWIN32_LIB = ..\..\lib
-PDWIN32_BIN = ..\..\bin
-PDWIN32_TOOLS = ..\..\tools\bin
+PDWIN32_INCLUDE = ..\..\..\include
+PDWIN32_LIB = ..\..\..\lib
+PDWIN32_BIN = ..\..\..\bin
+PDWIN32_TOOLS = ..\..\..\tools\bin
 
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 
@@ -20,15 +20,15 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 TARGET = wsock32
 
-OBJS =  wsock32.obj initterm.obj unknown.obj async.obj
+OBJS =  wsock32.obj initterm.obj unknown.obj relaywin.obj
 
 all: $(TARGET).dll $(TARGET).lib
 
 
 $(TARGET).dll: $(OBJS) $(TARGET).def
 	$(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
-              $(PDWIN32_LIB)\pmwinx.lib $(PDWIN32_LIB)\user32.lib \
-              tcp32dll.lib so32dll.lib  $(PDWIN32_LIB)\kernel32.lib \
+              pmwsock.lib $(PDWIN32_LIB)\kernel32.lib \
+              $(PDWIN32_LIB)\user32.lib \
               $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
 	$(CP) $@ $(PDWIN32_BIN)
 
@@ -39,10 +39,10 @@ $(TARGET).lib: $(TARGET)exp.def
 $(TARGET)exp.def: $(TARGET).def
     $(IMPDEF) $** $@
 
-wsock32.obj: wsock32.cpp wsock32.h wsock32const.h
-unknown.obj: unknown.cpp wsock32.h
-async.obj:   async.cpp wsock32const.h
+wsock32.obj: wsock32.cpp   relaywin.h wsock32.h
+unknown.obj: unknown.cpp   wsock32.h
 initterm.obj: initterm.cpp
+relaywin.obj: relaywin.cpp relaywin.h wsock32.h
 
 
 clean:
