@@ -1,4 +1,4 @@
-/* $Id: odin32env.cmd,v 1.9 2000-08-08 13:54:17 bird Exp $
+/* $Id: odin32env.cmd,v 1.10 2000-10-20 17:56:50 bird Exp $
  *
  * Sets the build environment.
  *
@@ -27,6 +27,7 @@
     call WarpIn 0;
     call EMX 0;
     call mySQL 0;
+    call Perl 0;
     call CVS 0;
     call DDKBase 0;
     call MSC60 0;
@@ -174,6 +175,29 @@ NetQOS2: procedure
     call EnvVar_Set      fRM, 'imncscfgfile',   'NETQ.CFG'
     call EnvVar_Set      fRM, 'imqconfigsrv',   sNetQ11Main'\instance'
     call EnvVar_Set      fRM, 'imqconfigcl',    sNetQ11Main'\instance\dbcshelp'
+    return 0;
+
+
+
+/*
+ * PERL 5005_53
+ */
+Perl: procedure
+    parse arg fRM
+
+    /*
+     * Perl main directory.
+     */
+    sPerlMain       = 'd:\perllib';
+    sPerlMainForw   = 'd:/perllib';
+    call EnvVar_Set      fRM, 'perlmain',       sPerlMain;
+    call EnvVar_AddFront fRM, 'path',           sPerlMain'\bin;'
+    call EnvVar_AddFront fRM, 'beginlibpath',   sPerlMain'\dll;'
+    call EnvVar_AddEnd   fRM, 'bookshelf',      sPerlMain'\book;'
+    call EnvVar_Set      fRM, 'perllib_prefix', sPerlMainForw'/lib;'sPerlMainForw'/lib'
+    call EnvVar_Set      fRM, 'perl_sh_dir',    sPerlMainForw'/bin_sh'
+    call EnvVar_Set      fRM, 'manpath',        sPerlMainForw'/man'
+    call EnvVar_Set      fRM, 'perl5lib',       sPerlMainForw'/lib'
     return 0;
 
 
