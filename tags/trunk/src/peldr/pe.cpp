@@ -1,4 +1,4 @@
-/* $Id: pe.cpp,v 1.13 2000-01-30 14:48:51 sandervl Exp $ */
+/* $Id: pe.cpp,v 1.14 2000-03-09 19:01:55 sandervl Exp $ */
 
 /*
  * PELDR main exe loader code
@@ -24,8 +24,8 @@
 #include <assert.h>
 #include <win32type.h>
 #include <misc.h>
-#include <winexepeldr.h>
 #include <wprocess.h>
+#include <win\peexe.h>
 #include "pe.h"
 
 char INFO_BANNER[]      = "Usage: PE winexe commandline";
@@ -36,7 +36,7 @@ char szPEErrorMsg[]     = "Not a valid win32 exe. (perhaps 16 bits windows)";
 char szCPUErrorMsg[]    = "Executable doesn't run on x86 machines";
 char szExeErrorMsg[]    = "File isn't an executable";
 char szInteralErrorMsg[]= "Internal Error";
-char szNoKernel32Msg[]  = "Can't load/find kernel32.dll";
+char szNoKernel32Msg[]  = "Can't load/find kernel32.dll (rc=%d)";
 
 char fullpath[CCHMAXPATH];
 
@@ -59,6 +59,9 @@ WINDESTROYMSGQUEUEPROC MyWinDestroyMsgQueue = 0;
 WINMESSAGEBOXPROC      MyWinMessageBox      = 0;
 KRNL32EXCEPTPROC       Krnl32SetExceptionHandler = 0;
 KRNL32EXCEPTPROC       Krnl32UnsetExceptionHandler = 0;
+
+//should be the same as in ..\kernel32\winexepeldr.h
+typedef BOOL (* WIN32API WIN32CTOR)(char *, ULONG);
 
 WIN32CTOR              CreateWin32Exe       = 0;
 
@@ -101,7 +104,8 @@ int main(int argc, char *argv[])
 
   rc = DosLoadModule(exeName, sizeof(exeName), "KERNEL32.DLL", &hmodKernel32);
   if(rc) {
-	MyWinMessageBox(HWND_DESKTOP, NULL, szNoKernel32Msg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
+	sprintf(exeName, szNoKernel32Msg, rc);
+	MyWinMessageBox(HWND_DESKTOP, NULL, exeName, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
         goto fail;
   }
   rc = DosQueryProcAddr(hmodKernel32, 0, "_CreateWin32PeLdrExe@8", (PFN *)&CreateWin32Exe);
