@@ -79,9 +79,9 @@ EXPORTS
     GetHGlobalFromStream       = _GetHGlobalFromStream@8     @71
     GetHookInterface           = _GetHookInterface@0         @72
     GetRunningObjectTable      = _GetRunningObjectTable@8    @73
-    IIDFromString              = _IIDFromString@8            @74
+    IIDFromString              = _CLSIDFromString@8          @74
     IsAccelerator              = _IsAccelerator@16           @75
-    IsEqualGUID                = _CONCRETE_IsEqualGUID@8              @76
+    IsEqualGUID                = _IsEqualGUID@8              @76
     IsValidIid                 = _IsValidIid@4               @77
     IsValidInterface           = _IsValidInterface@4         @78
     IsValidPtrIn               = _IsValidPtrIn@4             @79
@@ -158,7 +158,7 @@ EXPORTS
     StgSetTimes                = _StgSetTimes@16             @150
     StringFromCLSID            = _StringFromCLSID@8          @151
     StringFromGUID2            = _StringFromGUID2@12         @152
-    StringFromIID              = _StringFromIID@8            @153
+    StringFromIID              = _StringFromCLSID@8          @153
     UtConvertDvtd16toDvtd32    = _UtConvertDvtd16toDvtd32@0  @154
     UtConvertDvtd32toDvtd16    = _UtConvertDvtd32toDvtd16@0  @155
     UtGetDvtd16Info            = _UtGetDvtd16Info@0          @156

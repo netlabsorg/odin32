@@ -1,4 +1,4 @@
-# $Id: ole32.mak,v 1.17 2002-02-15 17:18:50 sandervl Exp $
+# $Id: ole32.mak,v 1.18 2002-02-19 13:24:06 sandervl Exp $
 
 #
 # Odin32 API
@@ -37,7 +37,6 @@ OBJS = \
 $(OBJDIR)\ole32.obj \
 $(OBJDIR)\antimoniker.obj \
 $(OBJDIR)\bindctx.obj \
-$(OBJDIR)\clsid.obj \
 $(OBJDIR)\compositemoniker.obj \
 $(OBJDIR)\datacache.obj \
 $(OBJDIR)\defaulthandler.obj \
