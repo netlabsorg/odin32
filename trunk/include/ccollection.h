@@ -1,4 +1,4 @@
-/* $Id: ccollection.h,v 1.4 2001-05-30 18:29:44 phaller Exp $ */
+/* $Id: ccollection.h,v 1.5 2001-10-01 01:14:42 bird Exp $ */
 
 /*
  * Collection class:
@@ -22,7 +22,7 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <math.h>
-
+#include <odin.h>                       /* Watcom needs max/min... */
 
 class CCollection
 {
