@@ -1,4 +1,4 @@
-/* $Id: monitor.h,v 1.1 1999-05-24 20:19:14 ktk Exp $ */
+/* $Id: monitor.h,v 1.2 1999-11-27 14:15:42 cbratschi Exp $ */
 
 /*
  * Monitor definitions
@@ -8,11 +8,11 @@
 #ifndef __WINE_MONITOR_H
 #define __WINE_MONITOR_H
 
-#include "windef.h"
+//#include "windef.h"
 
 struct tagMONITOR_DRIVER;
 
-typedef struct tagMONITOR 
+typedef struct tagMONITOR
 {
   void *pDriverData;
 } MONITOR;
