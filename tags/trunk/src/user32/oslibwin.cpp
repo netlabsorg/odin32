@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.127 2002-09-12 09:30:06 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.128 2002-09-17 10:24:02 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -108,7 +108,10 @@ HWND OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle, ULONG dwOSFrameStyle
     hwndClient = WinCreateWindow (*hwndFrame, WIN32_STDCLASS,
                               NULL, dwWinStyle | WS_VISIBLE, 0, 0, 0, 0,
                               *hwndFrame, HWND_TOP, FID_CLIENT, NULL, NULL);
-
+    //@PF For all top-level windows we create invisible vertical scroller
+    //to show IBM wheel driver that we need WM_VSCROLL messages
+    if (hwndParent == HWND_DESKTOP && *hwndFrame)
+       OSLibWinCreateInvisibleScroller(*hwndFrame, SBS_VERT);
     return hwndClient;
 }
 //******************************************************************************
