@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.174 2002-06-01 17:26:30 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.175 2002-06-02 10:07:57 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -50,6 +50,7 @@
 #include <pmscan.h>
 #include <winscan.h>
 #include <win\dbt.h>
+#include "dragdrop.h"
 
 #define DBG_LOCALLOG    DBG_pmwindow
 #include "dbglocal.h"
@@ -795,7 +796,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         dprintf(("OS2: DM_DRAGOVER %x (%d,%d)", win32wnd->getWindowHandle(), sxDrop, syDrop));
 
         //does this window accept dropped files?
-        if(!win32wnd->AcceptsDropFiles()) {
+        if(!DragDropAccept(win32wnd->getWindowHandle())) {
 	        rc = (MRFROM2SHORT (DOR_NEVERDROP, 0));
             break;
         }
@@ -888,7 +889,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         dprintf(("OS2: DM_DROP %x (%d,%d)", win32wnd->getWindowHandle(), sxDrop, syDrop));
 
         //does this window accept dropped files?
-        if(!win32wnd->AcceptsDropFiles()) {
+        if(!DragDropAccept(win32wnd->getWindowHandle())) {
             rc = 0;
             break;
         }
@@ -942,7 +943,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
             dprintf(("dropped file %s", pszTemp));
         }
         POINT point = {sxDrop, syDrop};
-        win32wnd->MsgDropFiles(cItems, point, pszFiles, bufsize);
+        DragDropFiles(win32wnd->getWindowHandle(), cItems, point, pszFiles, bufsize);
         free(pszFiles);
 
         /* Release the draginfo data structure */

@@ -1,4 +1,4 @@
-/* $Id: windlg.cpp,v 1.32 2002-03-28 16:20:07 sandervl Exp $ */
+/* $Id: windlg.cpp,v 1.33 2002-06-02 10:07:59 sandervl Exp $ */
 /*
  * Win32 dialog apis for OS/2
  *
@@ -67,7 +67,7 @@ HWND WIN32API CreateDialogParamW(HINSTANCE hInst, LPCWSTR lpszTemplate,
 //******************************************************************************
 //******************************************************************************
 HWND WIN32API CreateDialogIndirectParamA(HINSTANCE hInst,
-                         LPCDLGTEMPLATEA dlgtemplate,
+                         LPCVOID dlgtemplate,
                          HWND hwndOwner, DLGPROC dlgproc,
                          LPARAM lParamInit)
 {
@@ -100,7 +100,7 @@ HWND WIN32API CreateDialogIndirectParamA(HINSTANCE hInst,
 //******************************************************************************
 //******************************************************************************
 HWND WIN32API CreateDialogIndirectParamW(HINSTANCE hInst,
-                         LPCDLGTEMPLATEW dlgtemplate,
+                         LPCVOID dlgtemplate,
                          HWND hwndOwner, DLGPROC dlgproc,
                          LPARAM lParamInit)
 {
@@ -134,7 +134,7 @@ HWND WIN32API CreateDialogIndirectParamW(HINSTANCE hInst,
 //******************************************************************************
 //******************************************************************************
 INT  WIN32API DialogBoxIndirectParamA(HINSTANCE hInst,
-                      LPCDLGTEMPLATEA dlgtemplate,
+                      LPCVOID dlgtemplate,
                       HWND hwndOwner, DLGPROC dlgproc,
                       LPARAM lParamInit)
 {
@@ -160,7 +160,7 @@ INT  WIN32API DialogBoxIndirectParamA(HINSTANCE hInst,
 }
 //******************************************************************************
 //******************************************************************************
-INT  WIN32API DialogBoxIndirectParamW(HINSTANCE hInst, LPCDLGTEMPLATEW dlgtemplate,
+INT  WIN32API DialogBoxIndirectParamW(HINSTANCE hInst, LPCVOID dlgtemplate,
                                       HWND hwndOwner, DLGPROC dlgproc,
                                       LPARAM lParamInit)
 {
@@ -259,7 +259,7 @@ BOOL WIN32API MapDialogRect(HWND hwndDlg, LPRECT rect)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API IsDlgButtonChecked( HWND hwnd, UINT id)
+UINT WIN32API IsDlgButtonChecked( HWND hwnd, UINT id)
 {
     dprintf(("USER32:  IsDlgButtonChecked\n"));
 
@@ -476,13 +476,13 @@ BOOL WIN32API CheckRadioButton( HWND hDlg, UINT nIDFirstButton, UINT nIDLastButt
 }
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API GetDlgItemTextA(HWND hwnd, int id, LPSTR lpszName, UINT cch)
+INT WIN32API GetDlgItemTextA(HWND hwnd, int id, LPSTR lpszName, UINT cch)
 {
     return SendDlgItemMessageA( hwnd, id, WM_GETTEXT, cch, (LPARAM)lpszName);
 }
 //*****************************************************************************
 //*****************************************************************************
-UINT WIN32API GetDlgItemTextW(HWND   hwnd, int id, LPWSTR lpszName, UINT cch)
+INT WIN32API GetDlgItemTextW(HWND   hwnd, int id, LPWSTR lpszName, UINT cch)
 {
     return SendDlgItemMessageW( hwnd, id, WM_GETTEXT, cch, (LPARAM)lpszName);
 }
