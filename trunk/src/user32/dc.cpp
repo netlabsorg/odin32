@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.26 1999-12-07 18:19:47 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.27 1999-12-07 20:43:39 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -342,6 +342,8 @@ BOOL isYup (pDCData pHps)
 
 INT revertDy (Win32BaseWindow *wnd, INT dy)
 {
+   //SvL: Hack for memory.exe (doesn't get repainted properly otherwise)
+//   if (wnd->isOwnDC() && wnd->getOwnDC())
    if (wnd->isOwnDC())
    {
       pDCData pHps = (pDCData)GpiQueryDCData (wnd->getOwnDC());
@@ -437,13 +439,16 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
 
    if ((hwnd != HWND_DESKTOP) && wnd->isOwnDC())
    {
-      hPS_ownDC = wnd->getOwnDC();
-      pHps = (pDCData)GpiQueryDCData(hPS_ownDC);
-      if (!pHps)
-      {
-         O32_SetLastError (ERROR_INVALID_PARAMETER);
-         return (HDC)NULLHANDLE;
-      }
+      	hPS_ownDC = wnd->getOwnDC();
+	//SvL: Hack for memory.exe (doesn't get repainted properly otherwise)
+	if(hPS_ownDC) {
+      		pHps = (pDCData)GpiQueryDCData(hPS_ownDC);
+	      	if (!pHps)
+	      	{
+	         	O32_SetLastError (ERROR_INVALID_PARAMETER);
+	         	return (HDC)NULLHANDLE;
+	      	}
+	}
    }
 
    HWND hwndClient = wnd->getOS2WindowHandle();
@@ -498,7 +503,9 @@ dprintf (("USER32: EndPaint(%x)", hwnd));
 
    if (!wnd) goto exit;
 
-   if(wnd->isOwnDC())
+   //SvL: Hack for memory.exe (doesn't get repainted properly otherwise)
+   if(wnd->isOwnDC() && wnd->getOwnDC())
+//   if(wnd->isOwnDC())
    {
        pDCData pHps = (pDCData)GpiQueryDCData((HPS)pPaint->hdc);
        if (pHps && (pHps->hdcType == TYPE_3))
@@ -534,6 +541,8 @@ BOOL WIN32API GetUpdateRect (HWND hwnd, LPRECT pRect, BOOL erase)
 
    if (updateRegionExists)
    {
+      //SvL: Hack for memory.exe (doesn't get repainted properly otherwise)
+//      if (wnd->isOwnDC() && wnd->getOwnDC())
       if (wnd->isOwnDC())
       {
          pDCData pHps = NULL;
@@ -611,7 +620,9 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
 
    dprintf (("User32: GetDCEx hwnd %x (%x %x) -> wnd %x", hwnd, hrgn, flags, wnd));
 
-   isWindowOwnDC = (((hWindow == HWND_DESKTOP) ? FALSE : wnd->isOwnDC())
+   //SvL: Hack for memory.exe (doesn't get repainted properly otherwise)
+//   isWindowOwnDC = (((hWindow == HWND_DESKTOP) ? FALSE : (wnd->isOwnDC() && wnd->getOwnDC()))
+   isWindowOwnDC = (((hWindow == HWND_DESKTOP) ? FALSE : (wnd->isOwnDC()))
                  && !(flags & DCX_CACHE_W));
 
    if (isWindowOwnDC)
@@ -746,6 +757,8 @@ int WIN32API ReleaseDC (HWND hwnd, HDC hdc)
    if (hwnd)
    {
       Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
+      //SvL: Hack for memory.exe (doesn't get repainted properly otherwise)
+//      isOwnDC = wnd->isOwnDC() && wnd->getOwnDC();
       isOwnDC = wnd->isOwnDC();
    }
    if (isOwnDC)

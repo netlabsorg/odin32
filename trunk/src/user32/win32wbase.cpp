@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.106 1999-12-07 12:26:58 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.107 1999-12-07 20:43:39 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -627,7 +627,7 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
   /* Get class or window DC if needed */
   if(windowClass->getStyle() & CS_OWNDC) {
 	dprintf(("Class with CS_OWNDC style"));
-	ownDC = GetWindowDC(getWindowHandle());
+//	ownDC = GetWindowDC(getWindowHandle());
   }
   else 
   if (windowClass->getStyle() & CS_PARENTDC)  {
