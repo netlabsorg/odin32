@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2234 2002-07-26 10:49:45 sandervl Exp $ */
+/* $Id: changelog,v 1.2235 2002-07-26 17:18:02 sandervl Exp $ */
 
  2002-07-26: Sander van Leeuwen <sandervl@innotek.de> 
     - KERNEL32: o Keep suspend count per thread (Suspend/ResumeThread)
@@ -11,6 +11,7 @@
                 o Terminate thread when exception occurs after ExitProcess
                 o Protect larger part of on-demand page load handler
                   (DosEnterCritSec)
+    - IPHLPAPI: o Use gethostname from wsock32, not the OS/2 version
 
  2002-07-24: Platon Fomichev <platon@innotek.de>
     - USER32:   o Pass on WM_PAINT of client window to default PM handler
