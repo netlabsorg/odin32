@@ -1,4 +1,4 @@
-/* $Id: gen_object.cpp,v 1.6 2000-03-13 13:10:45 sandervl Exp $ */
+/* $Id: gen_object.cpp,v 1.7 2001-02-10 10:31:31 sandervl Exp $ */
 /*
  * Generic Object Class for OS/2
  *
@@ -12,9 +12,9 @@
 #define  INCL_DOSSEMAPHORES
 #include <os2wrap.h>
 #include <stdlib.h>
+#include <misc.h>
 #include <win32type.h>
 #include <gen_object.h>
-#include <misc.h>
 #include <vmutex.h>
 
 #define DBG_LOCALLOG	DBG_gen_object
