@@ -1,4 +1,4 @@
-/* $Id: combo.cpp,v 1.2 1999-07-24 17:10:24 cbratschi Exp $ */
+/* $Id: combo.cpp,v 1.3 1999-08-15 19:11:00 cbratschi Exp $ */
 /*
  * Combo controls
  *
@@ -38,6 +38,7 @@ static UINT     CBitHeight, CBitWidth;
 /*
  * Look and feel dependant "constants"
  */
+#define COMBO_YBORDERGAP         5
 #define COMBO_XBORDERSIZE()      ( 2 )
 #define COMBO_YBORDERSIZE()      ( 2 )
 #define COMBO_EDITBUTTONSPACE()  ( 0 )
@@ -483,7 +484,8 @@ static LRESULT COMBO_Create( LPHEADCOMBO lphc, HWND hwnd, LPARAM lParam)
 
   if( lphc->owner || !(lpcs->style & WS_VISIBLE) )
   {
-      UINT      lbeStyle;
+      UINT lbeStyle   = 0;
+      UINT lbeExStyle = 0;
 
       /*
        * Initialize the dropped rect to the size of the client area of the
@@ -529,15 +531,24 @@ static LRESULT COMBO_Create( LPHEADCOMBO lphc, HWND hwnd, LPARAM lParam)
       if( lphc->dwStyle & CBS_DISABLENOSCROLL )
         lbeStyle |= LBS_DISABLENOSCROLL;
 
-      if( CB_GETTYPE(lphc) == CBS_SIMPLE )      /* child listbox */
-        lbeStyle |= WS_CHILD | WS_VISIBLE;
-      else                                      /* popup listbox */
-        lbeStyle |= WS_POPUP;
+      if( CB_GETTYPE(lphc) == CBS_SIMPLE ) 	/* child listbox */
+      {
+	lbeStyle |= WS_CHILD | WS_VISIBLE;
+
+	/*
+	 * In win 95 look n feel, the listbox in the simple combobox has
+	 * the WS_EXCLIENTEDGE style instead of the WS_BORDER style.
+	 */
+        lbeStyle   &= ~WS_BORDER;
+        lbeExStyle |= WS_EX_CLIENTEDGE;
+      }
+      else					/* popup listbox */
+	lbeStyle |= WS_POPUP;
 
      /* Dropdown ComboLBox is not a child window and we cannot pass
       * ID_CB_LISTBOX directly because it will be treated as a menu handle.
       */
-      lphc->hWndLBox = CreateWindowExA(0,
+      lphc->hWndLBox = CreateWindowExA(lbeExStyle,
                                        clbName,
                                        NULL,
                                        lbeStyle,
@@ -1062,6 +1073,10 @@ static void CBUpdateEdit( LPHEADCOMBO lphc , INT index )
 static void CBDropDown( LPHEADCOMBO lphc )
 {
    RECT rect;
+   int nItems = 0;
+   int i;
+   int nHeight;
+   int nDroppedHeight;
 
    //TRACE("[%04x]: drop down\n", CB_HWND(lphc));
 
@@ -1091,17 +1106,35 @@ static void CBDropDown( LPHEADCOMBO lphc )
    /* now set popup position */
    GetWindowRect( lphc->hwndself, &rect );
 
-
    /*
     * If it's a dropdown, the listbox is offset
     */
    if( CB_GETTYPE(lphc) == CBS_DROPDOWN )
      rect.left += COMBO_EDITBUTTONSPACE();
 
+   /* if the dropped height is greater than the total height of the dropped
+     items list, then force the drop down list height to be the total height
+     of the items in the dropped list */
+
+   nDroppedHeight = lphc->droppedRect.bottom - lphc->droppedRect.top;
+   nItems = (int)SendMessageA (lphc->hWndLBox, LB_GETCOUNT, 0, 0);
+   nHeight = COMBO_YBORDERGAP;
+   for (i = 0; i < nItems; i++)
+   {
+     nHeight += (int)SendMessageA (lphc->hWndLBox, LB_GETITEMHEIGHT, i, 0);
+
+     if (nHeight >= nDroppedHeight)
+       break;
+   }
+
+   if (nHeight < nDroppedHeight)
+      nDroppedHeight = nHeight;
+
    SetWindowPos( lphc->hWndLBox, HWND_TOP, rect.left, rect.bottom,
-                 lphc->droppedRect.right - lphc->droppedRect.left,
-                 lphc->droppedRect.bottom - lphc->droppedRect.top,
-                 SWP_NOACTIVATE | SWP_NOREDRAW);
+		 lphc->droppedRect.right - lphc->droppedRect.left,
+                 nDroppedHeight,
+		 SWP_NOACTIVATE | SWP_NOREDRAW);
+
 
    if( !(lphc->wState & CBF_NOREDRAW) )
      RedrawWindow( lphc->hwndself, NULL, 0, RDW_INVALIDATE |
@@ -1126,15 +1159,15 @@ static void CBRollUp( LPHEADCOMBO lphc, BOOL ok, BOOL bButton )
 
        //TRACE("[%04x]: roll up [%i]\n", CB_HWND(lphc), (INT)ok );
 
-       /*
-        * It seems useful to send the WM_LBUTTONUP with (-1,-1) when cancelling
-        * and with (0,0) (anywhere in the listbox) when Oking.
-        */
-       SendMessageA( lphc->hWndLBox, WM_LBUTTONUP, 0, ok ? (LPARAM)0 : (LPARAM)(-1) );
-
        if( lphc->wState & CBF_DROPPED )
        {
            RECT rect;
+
+	   /*
+	    * It seems useful to send the WM_LBUTTONUP with (-1,-1) when cancelling
+	    * and with (0,0) (anywhere in the listbox) when Oking.
+	    */
+	   SendMessageA( lphc->hWndLBox, WM_LBUTTONUP, 0, ok ? (LPARAM)0 : (LPARAM)(-1) );
 
            lphc->wState &= ~CBF_DROPPED;
            ShowWindow( lphc->hWndLBox, SW_HIDE );
