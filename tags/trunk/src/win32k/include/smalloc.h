@@ -1,6 +1,6 @@
-/* $Id: rmalloc.h,v 1.2 2000-01-24 01:44:08 bird Exp $
+/* $Id: smalloc.h,v 1.1 2000-01-24 01:44:08 bird Exp $
  *
- * Resident Heap.
+ * Swappable Heap.
  *
  * Note: This heap does very little checking on input.
  *       Use with care! We're running at Ring-0!
@@ -12,8 +12,8 @@
  */
 
 /* XLATOFF */
-#ifndef _RMALLOC_H_
-#define _RMALLOC_H_
+#ifndef _SMALLOC_H_
+#define _SMALLOC_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,19 +23,19 @@ extern "C" {
 /*******************************************************************************
 *   Exported Functions and Variables                                           *
 *******************************************************************************/
-int         resHeapInit(unsigned, unsigned);
-void *      rmalloc(unsigned);
-void *      rrealloc(void *, unsigned);
-void        rfree(void *);
+int         swpHeapInit(unsigned, unsigned);
+void *      smalloc(unsigned);
+void *      srealloc(void *, unsigned);
+void        sfree(void *);
 
-unsigned    _res_msize(void *);
-int         _res_validptr(void *);
-int         _res_validptr2(void *, unsigned);
-unsigned    _res_memfree(void);
-int         _res_heap_check(void);
-void        _res_heapmin(void);
-void        _res_dump_subheaps(void);
-void        _res_dump_allocated(unsigned);
+unsigned    _swp_msize(void *);
+int         _swp_validptr(void *);
+int         _swp_validptr2(void *, unsigned);
+unsigned    _swp_memfree(void);
+int         _swp_heap_check(void);
+void        _swp_heapmin(void);
+void        _swp_dump_subheaps(void);
+void        _swp_dump_allocated(unsigned);
 
 /* XLATOFF */
 #ifdef __cplusplus
