@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.3 1999-06-19 10:54:38 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.4 1999-06-20 14:02:12 sandervl Exp $ */
 /*
  * COMDLG32 DLL entry point
  *
@@ -109,8 +109,6 @@ unsigned long _System _DLL_InitTerm(unsigned long hModule, unsigned long
 
          break;
       case 1 :
-         /* unregister Win32 window classes */
-         UnregisterCOMCTL32WindowClasses();
          break;
       default  :
          return 0UL;
@@ -125,6 +123,9 @@ unsigned long _System _DLL_InitTerm(unsigned long hModule, unsigned long
 
 static void APIENTRY cleanup(ULONG ulReason)
 {
+   /* unregister Win32 window classes */
+   UnregisterCOMCTL32WindowClasses();
+
    _ctordtorTerm();
    CRT_term();
    DosExitList(EXLST_EXIT, cleanup);
