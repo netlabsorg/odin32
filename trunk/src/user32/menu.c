@@ -1429,7 +1429,11 @@ static void MENU_DrawMenuItem( HWND hwnd, HMENU hmenu, HWND hwndOwner, HDC hdc, 
 			DT_CENTER | DT_VCENTER | DT_SINGLELINE :
 			DT_LEFT | DT_VCENTER | DT_SINGLELINE;
 
+#ifdef __WIN32OS2__
+	if ( lpitem->fState & MFS_DEFAULT && !fOS2Look)
+#else
 	if ( lpitem->fState & MFS_DEFAULT )
+#endif
 	{
 	     hfontOld = SelectObject( hdc, hMenuFontBold);
 	}
