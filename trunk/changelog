@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.2618 2003-08-07 16:03:52 sandervl Exp $ */
+/* $Id: changelog,v 1.2619 2003-08-08 14:54:20 sandervl Exp $ */
+
+ 2003-08-08: Sander van Leeuwen <sandervl@innotek   >
+    - TOOLS\CVTASM:
+                o Header parser and assembly wrapper generator
+    - LIBWRAP:  o Assembly wrappers for WGSS and OS/2 functions
+    - USER32:   o Update for libwrap
 
  2003-08-07: KO Myung-Hun <komh@chollian    >
     - USER32:   o Generate WM_IME_CHAR messages for DBCS input
