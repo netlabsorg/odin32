@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.32 1999-10-20 13:46:26 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.33 1999-10-21 12:19:26 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -485,7 +485,7 @@ void OSLibMapSWPtoWINDOWPOS(PSWP pswp, PWINDOWPOS pwpos, PSWP pswpOld, HWND hPar
 
    HWND   hWinAfter;
    ULONG  flags = 0;
-   SWP    swpFrame;
+   SWP    swpFrame, swpClient;
    POINTL point;
 
    HWND  hWnd = (hWindow == HWND_DESKTOP) ? HWND_DESKTOP_W: hWindow;
@@ -507,8 +507,17 @@ void OSLibMapSWPtoWINDOWPOS(PSWP pswp, PWINDOWPOS pwpos, PSWP pswpOld, HWND hPar
     if (!(fuFlags & SWP_ACTIVATE))   flags |= SWP_NOACTIVATE_W;
     if (  fuFlags & SWP_SHOW)        flags |= SWP_SHOWWINDOW_W;
     if (  fuFlags & SWP_HIDE)        flags |= SWP_HIDEWINDOW_W;
+    if (  fuFlags & SWP_NOADJUST)    flags |= SWP_NOSENDCHANGING_W;
 
     WinQueryWindowPos(hFrame, &swpFrame);
+
+    if ( fuFlags & SWP_NOADJUST) {
+        WinQueryWindowPos(WinWindowFromID(hFrame, FID_CLIENT), &swpClient);
+        x  = swpClient.x;
+        cx = swpClient.cx;
+        y  = swpClient.y;
+        cy = swpClient.cy;
+    }
 
     if(fuFlags & (SWP_MOVE | SWP_SIZE))
     {
@@ -595,6 +604,7 @@ void OSLibMapWINDOWPOStoSWP(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, HWND hPar
    if (!(fuFlags & SWP_NOACTIVATE_W)) flags |= SWP_ACTIVATE;
    if (  fuFlags & SWP_SHOWWINDOW_W)  flags |= SWP_SHOW;
    if (  fuFlags & SWP_HIDEWINDOW_W)  flags |= SWP_HIDE;
+   if (  fuFlags & SWP_NOSENDCHANGING_W) flags |= SWP_NOADJUST;
 
    if (flags & (SWP_MOVE | SWP_SIZE))
    {

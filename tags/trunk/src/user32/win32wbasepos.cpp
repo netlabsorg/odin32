@@ -1,4 +1,4 @@
-/* $Id: win32wbasepos.cpp,v 1.4 1999-10-20 13:46:28 sandervl Exp $ */
+/* $Id: win32wbasepos.cpp,v 1.5 1999-10-21 12:19:29 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (nonclient/position methods)
  *
@@ -425,24 +425,36 @@ void Win32BaseWindow::NC_AdjustRectInner(LPRECT rect, DWORD style, DWORD exStyle
 LONG Win32BaseWindow::HandleWindowPosChanging(WINDOWPOS *winpos)
 {
  POINT maxSize, minTrack;
+ int   rc = 1;
 
     if (winpos->flags & SWP_NOSIZE)
         return 1;
 
     if ((getStyle() & WS_THICKFRAME) ||
-	    ((getStyle() & (WS_POPUP | WS_CHILD)) == 0))
+        ((getStyle() & (WS_POPUP | WS_CHILD)) == 0))
     {
-	    GetMinMaxInfo(&maxSize, NULL, &minTrack, NULL );
-	    if (maxSize.x < winpos->cx) winpos->cx = maxSize.x;
-	    if (maxSize.y < winpos->cy) winpos->cy = maxSize.y;
-	    if (!(getStyle() & WS_MINIMIZE))
-	    {
-    	    if (winpos->cx < minTrack.x ) winpos->cx = minTrack.x;
-    	    if (winpos->cy < minTrack.y ) winpos->cy = minTrack.y;
-    	}
-    	return 0;
+        GetMinMaxInfo(&maxSize, NULL, &minTrack, NULL );
+        if (maxSize.x < winpos->cx) {
+            winpos->cx = maxSize.x;
+            rc = 0;
+        }
+        if (maxSize.y < winpos->cy) {
+            winpos->cy = maxSize.y;
+            rc = 0;
+        }
+        if (!(getStyle() & WS_MINIMIZE))
+        {
+            if (winpos->cx < minTrack.x ) {
+                winpos->cx = minTrack.x;
+                rc = 0;
+            }
+            if (winpos->cy < minTrack.y ) {
+                winpos->cy = minTrack.y;
+                rc = 0;
+            }
+        }
     }
-    return 1;
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
