@@ -1,4 +1,15 @@
-/* $Id: ChangeLog,v 1.1607 2001-07-16 20:18:07 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1608 2001-07-17 12:09:49 sandervl Exp $ */
+
+ 2001-07-17: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o HeapCreate now creates a separate heap (_ucreate) instead
+                  of sharing the same heap as Odin.
+                  (lowers the chance of fatal crashes on heap corruption;
+                   hangs in exitlist)
+                o Implemented HeapValidate
+                o GlobalReAlloc bugfix; must check if pointer has a handle
+                  associated with it. 
+                  (RealDraw install calls GlobalReAlloc with pointer returned
+                   by GlobalLock(handle))
 
  2001-07-16: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o RegEnumKeyExW fix (lpszClass can be NULL)
