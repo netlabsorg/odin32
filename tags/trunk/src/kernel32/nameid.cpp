@@ -1,4 +1,4 @@
-/* $Id: nameid.cpp,v 1.7 1999-08-19 10:25:27 sandervl Exp $ */
+/* $Id: nameid.cpp,v 1.8 1999-08-26 12:55:36 sandervl Exp $ */
 
 /*
  * Resource id to name id conversion procedures
@@ -23,7 +23,6 @@
 #include "win32util.h"
 #include <winimage.h>
 #include <winexe.h>
-#include "os2util.h"
 
 /******************************************************************************/
 /******************************************************************************/
@@ -45,23 +44,6 @@ int SYSTEM EXPORT ConvertNameId(ULONG hmod, char *name)
     return(0);
   }
   return module->convertNameId(name);
-}
-//******************************************************************************
-//******************************************************************************
-char *StripPath(char *path)
-{
-  /* @@@PH what does this function do ? Strip the path from a FQFN name ? */
-  char *pszFilename;
-  
-  pszFilename = strrchr(path, '\\');                 /* find rightmost slash */
-  if (pszFilename != NULL)
-    return (pszFilename++);              /* return pointer to next character */
-  
-  pszFilename = strrchr(path, '/');                  /* find rightmost slash */
-  if (pszFilename != NULL)
-    return (pszFilename++);              /* return pointer to next character */
-  
-  return (path);                                     /* default return value */
 }
 //******************************************************************************
 //******************************************************************************

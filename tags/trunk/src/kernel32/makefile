@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.33 1999-08-25 14:27:07 sandervl Exp $
+# $Id: makefile,v 1.34 1999-08-26 12:55:36 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -22,10 +22,10 @@ OBJS = KERNEL32.OBJ KOBJECTS.OBJ CONSOLE.OBJ CONIN.OBJ CONBUFFER.OBJ \
  CONOUT.OBJ UNICODE.OBJ network.OBJ DEVIO.OBJ profile.obj \
  THREAD.OBJ virtual.obj THUNK.OBJ OBSOLETE.OBJ COMM.OBJ \
  MESSAGE.OBJ RESOURCE.OBJ NAMEID.OBJ WINRES.OBJ WINMOD.OBJ \
- OS2NATIVE.OBJ EXCEPTIONS.OBJ LFILE.OBJ NPIPE.OBJ \
+ EXCEPTIONS.OBJ LFILE.OBJ NPIPE.OBJ oslibdos.obj oslibmisc.obj \
  MISC.OBJ EXCEPTUTIL.OBJ LANG.OBJ ICCIO.OBJ MAP.OBJ \
  WIN32UTIL.OBJ heap.OBJ heapstring.obj os2heap.OBJ \
- vmutex.OBJ initterm.OBJ os2util.OBJ handlemanager.OBJ \
+ vmutex.OBJ initterm.OBJ handlemanager.OBJ \
  hmdevice.obj hmopen32.obj hmobjects.obj hmevent.obj \
  hmmutex.obj hmsemaphore.obj wprocess.OBJ conprop.OBJ \
  winimage.OBJ windll.OBJ winexe.OBJ time.obj mmap.obj \
@@ -58,7 +58,6 @@ kernel32.OBJ: kernel32.cpp \
     $(PDWIN32_INCLUDE)\unicode.h \
     $(PDWIN32_INCLUDE)\heap.h \
     $(PDWIN32_INCLUDE)\wprocess.h \
-    os2util.h \
     $(PDWIN32_INCLUDE)\nameid.h
 
 kobjects.obj: kobjects.cpp
@@ -150,16 +149,15 @@ wprocess.OBJ: \
     console2.h \
     mmap.h \
     cio.h \
-    os2util.h
+    oslibmisc.h
 
 map.OBJ: \
     .\map.cpp \
     map.h \
     mapos2.h
 
-os2native.OBJ: \
-    .\os2native.cpp \
-    $(PDWIN32_INCLUDE)\unicode.h
+oslibdos.OBJ: \
+    .\oslibdos.cpp oslibdos.h initterm.h
 
 network.OBJ: \
     .\network.cpp \
@@ -202,8 +200,7 @@ conbuffer.OBJ: \
 
 lfile.OBJ: \
     .\lfile.cpp \
-    $(PDWIN32_INCLUDE)\wprocess.h \
-    os2util.h
+    $(PDWIN32_INCLUDE)\wprocess.h 
 
 obsolete.OBJ: \
     .\obsolete.cpp
@@ -248,7 +245,7 @@ winmod.OBJ: \
     $(PDWIN32_INCLUDE)\winimage.h \
     $(PDWIN32_INCLUDE)\misc.h
 
-os2util.OBJ: .\os2util.cpp
+oslibmisc.OBJ: .\oslibmisc.cpp oslibmisc.h
 
 handlemanager.OBJ: \
         .\handlemanager.cpp \
@@ -306,12 +303,12 @@ async.OBJ: \
         $(PDWIN32_INCLUDE)\unicode.h
 
 virtual.obj:   virtual.cpp $(PDWIN32_INCLUDE)\win\virtual.h $(PDWIN32_INCLUDE)\handlemanager.h mmap.h
-mmap.obj:      mmap.cpp mmap.h $(PDWIN32_INCLUDE)\vmutex.h
+mmap.obj:      mmap.cpp mmap.h $(PDWIN32_INCLUDE)\vmutex.h oslibdos.h
 
 pefile.OBJ:    pefile.cpp $(PDWIN32_INCLUDE)\pefile.h
-winimage.OBJ:  winimage.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h $(PDWIN32_INCLUDE)\pefile.h $(PDWIN32_INCLUDE)\winres.h initterm.h $(PDWIN32_INCLUDE)\win\virtual.h
+winimage.OBJ:  winimage.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h $(PDWIN32_INCLUDE)\pefile.h $(PDWIN32_INCLUDE)\winres.h initterm.h $(PDWIN32_INCLUDE)\win\virtual.h oslibmisc.h
 winimgres.OBJ: winimgres.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h $(PDWIN32_INCLUDE)\pefile.h $(PDWIN32_INCLUDE)\winexe.h $(PDWIN32_INCLUDE)\winres.h
-windll.OBJ:    windll.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h
+windll.OBJ:    windll.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h oslibmisc.h
 winexe.OBJ:    winexe.cpp $(PDWIN32_INCLUDE)\winimage.h $(PDWIN32_INCLUDE)\windll.h $(PDWIN32_INCLUDE)\winexe.h
 stubs.obj:     stubs.cpp stubs.h
 

@@ -1,7 +1,7 @@
-/* $Id: os2util.cpp,v 1.8 1999-08-18 17:18:00 sandervl Exp $ */
+/* $Id: oslibmisc.cpp,v 1.1 1999-08-26 12:56:02 sandervl Exp $ */
 
 /*
- * Misc util. procedures
+ * Misc OS/2 util. procedures
  *
  * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
  * Copyright 1998 Peter FitzSimmons
@@ -19,8 +19,8 @@
 #include <stdlib.h>
 #include <stdio.h>  /*PLF Wed  98-03-18 05:15:04*/
 #include <malloc.h>  /*PLF Wed  98-03-18 05:15:04*/
-#include "os2util.h"
-#include "misc.h"
+#include "oslibmisc.h"
+#include <misc.h>
 
 /***********************************
  * PH: fixups for missing os2win.h *
@@ -30,7 +30,7 @@ void _System SetLastError(ULONG ulError);
 
 //******************************************************************************
 //******************************************************************************
-void OS2SetExitList(unsigned long handler)
+void OSLibSetExitList(unsigned long handler)
 {
  APIRET rc;
 
@@ -41,20 +41,20 @@ void OS2SetExitList(unsigned long handler)
 }
 //******************************************************************************
 //******************************************************************************
-void OS2ClearExitList()
+void OSLibClearExitList()
 {
   DosExitList(EXLST_EXIT, NULL);
 }
 //******************************************************************************
 //******************************************************************************
-void OS2RemoveExitList(unsigned long handler)
+void OSLibRemoveExitList(unsigned long handler)
 {
   DosExitList(EXLST_REMOVE, (PFNEXITLIST)handler);
 }
 //******************************************************************************
 //TODO: not reentrant!
 //******************************************************************************
-char *OS2GetDllName(ULONG hModule)
+char *OSLibGetDllName(ULONG hModule)
 {
  static char modname[CCHMAXPATH] = {0};
 
@@ -62,33 +62,8 @@ char *OS2GetDllName(ULONG hModule)
   return(modname);
 }
 //******************************************************************************
-void SYSTEM CheckVersion(ULONG version, char *modname)
-{
-    dprintf(("CheckVersion of %s, %d\n", modname, version));
-    if(version != PE2LX_VERSION){
-        static char msg[300];
-        int r;
-        dprintf(("Version mismatch! %d, %d: %s\n", version, PE2LX_VERSION, modname));
-        sprintf(msg, "%s is intended for use with a different release of PE2LX.\n", modname);
-        do{
-            r = WinMessageBox(HWND_DESKTOP, NULLHANDLE, msg, "Version Mismatch!", 0, MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION | MB_MOVEABLE);
-        }while(r == MBID_RETRY);   // giggle
-        if( r != MBID_IGNORE )
-            exit(987);
-    }
-}
-
-void SYSTEM CheckVersionFromHMOD(ULONG version, HMODULE hModule)
-{
-    char name[_MAX_PATH];
-
-    // query name of dll.
-    if(!DosQueryModuleName(hModule, sizeof(name), name))
-        CheckVersion(version, name);
-}
-
 /*****************************************************************************
- * Name      : HMODULE OS2iGetModuleHandleA
+ * Name      : ULONG OSLibiGetModuleHandleA
  * Purpose   : replacement for IBM Open32's GetModuleHandle
  * Parameters: LPCTSTR lpszModule
  * Variables :
@@ -99,7 +74,7 @@ void SYSTEM CheckVersionFromHMOD(ULONG version, HMODULE hModule)
  * Author    : Patrick Haller [Sun, 1998/04/04 01:55]
  *****************************************************************************/
 
-HMODULE OS2iGetModuleHandleA(PSZ pszModule)
+ULONG OSLibiGetModuleHandleA(char * pszModule)
 {
   HMODULE hModule;                                          /* module handle */
   APIRET  rc;                                              /* API returncode */
@@ -155,7 +130,7 @@ HMODULE OS2iGetModuleHandleA(PSZ pszModule)
 }
 
 
-HMODULE OS2QueryModuleHandle(char *modname)
+ULONG OSLibQueryModuleHandle(char *modname)
 {
  HMODULE hModule;
  APIRET  rc;
@@ -169,7 +144,7 @@ HMODULE OS2QueryModuleHandle(char *modname)
 }
 
 //SvL: only for RT_RCDATA!
-ULONG OS2GetResourceSize(HMODULE hinstance, int id)
+ULONG OSLibGetResourceSize(HMODULE hinstance, int id)
 {
  APIRET rc;
  ULONG  size;
@@ -182,7 +157,7 @@ ULONG OS2GetResourceSize(HMODULE hinstance, int id)
   return(size);
 }
 
-BOOL OS2GetResource(HMODULE hinstance, int id, char *destbuf, int bufLength)
+ULONG OSLibGetResource(HMODULE hinstance, int id, char *destbuf, int bufLength)
 {
  APIRET rc;
  char  *resdata;
@@ -190,15 +165,15 @@ BOOL OS2GetResource(HMODULE hinstance, int id, char *destbuf, int bufLength)
 
    rc = DosQueryResourceSize(hinstance, RT_RCDATA, id, &size);
    if(rc) {
-    dprintf(("OS2GetResource: Can't get resource size of %d!!!\n", id));
+    dprintf(("OSLibGetResource: Can't get resource size of %d!!!\n", id));
     return(FALSE);
    }
    rc = DosGetResource(hinstance, RT_RCDATA, id, (PPVOID)&resdata);
    if(rc) {
-    dprintf(("OS2GetResource: Can't find resource %d!!!\n", id));
+    dprintf(("OSLibGetResource: Can't find resource %d!!!\n", id));
     return(FALSE);
    }
-   dprintf(("OS2GetResoure: bufLength %d, size %d, id %d", bufLength, size, id));
+   dprintf(("OSLibGetResoure: bufLength %d, size %d, id %d", bufLength, size, id));
    size = min(size, bufLength);
    memcpy(destbuf, resdata, size);
    DosFreeResource(resdata);
@@ -206,7 +181,7 @@ BOOL OS2GetResource(HMODULE hinstance, int id, char *destbuf, int bufLength)
    return(TRUE);
 }
 
-void  OS2Wait(ULONG msec)
+void  OSLibWait(ULONG msec)
 {
    DosSleep(msec);
 }
@@ -214,28 +189,28 @@ void  OS2Wait(ULONG msec)
 //******************************************************************************
 //Wrapper for Dos16AllocSeg
 //******************************************************************************
-BOOL OS2AllocSel(ULONG size, USHORT *selector)
+ULONG OSLibAllocSel(ULONG size, USHORT *selector)
 { 
    return (Dos16AllocSeg(size, selector, SEG_NONSHARED) == 0);
 }
 //******************************************************************************
 //Wrapper for Dos16FreeSeg
 //******************************************************************************
-BOOL OS2FreeSel(USHORT selector)
+ULONG OSLibFreeSel(USHORT selector)
 {
    return (Dos16FreeSeg(selector) == 0);
 }
 //******************************************************************************
 //Wrapper for Dos32SelToFlat
 //******************************************************************************
-PVOID OS2SelToFlat(USHORT selector)
+PVOID OSLibSelToFlat(USHORT selector)
 {
    return (PVOID)DosSelToFlat(selector << 16);
 }
 //******************************************************************************
 //Get TIB data
 //******************************************************************************
-ULONG OS2GetTIB(int tiboff)
+ULONG OSLibGetTIB(int tiboff)
 {
  PTIB   ptib;
  PPIB   ppib;
@@ -258,7 +233,7 @@ ULONG OS2GetTIB(int tiboff)
 //******************************************************************************
 //Get PIB data
 //******************************************************************************
-ULONG OS2GetPIB(int piboff)
+ULONG OSLibGetPIB(int piboff)
 {
  PTIB   ptib;
  PPIB   ppib;
@@ -284,7 +259,7 @@ ULONG OS2GetPIB(int piboff)
 //******************************************************************************
 //Allocate local thread memory
 //******************************************************************************
-ULONG OS2AllocThreadLocalMemory(int nrdwords)
+ULONG OSLibAllocThreadLocalMemory(int nrdwords)
 {
  APIRET rc;
  PULONG thrdaddr;
@@ -295,6 +270,23 @@ ULONG OS2AllocThreadLocalMemory(int nrdwords)
 	return 0;
    }
    return (ULONG)thrdaddr;
+}
+//******************************************************************************
+//******************************************************************************
+char *OSLibStripPath(char *path)
+{
+  /* @@@PH what does this function do ? Strip the path from a FQFN name ? */
+  char *pszFilename;
+  
+  pszFilename = strrchr(path, '\\');                 /* find rightmost slash */
+  if (pszFilename != NULL)
+    return (pszFilename++);              /* return pointer to next character */
+  
+  pszFilename = strrchr(path, '/');                  /* find rightmost slash */
+  if (pszFilename != NULL)
+    return (pszFilename++);              /* return pointer to next character */
+  
+  return (path);                                     /* default return value */
 }
 //******************************************************************************
 //******************************************************************************

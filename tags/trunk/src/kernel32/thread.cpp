@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.11 1999-08-22 11:11:10 sandervl Exp $ */
+/* $Id: thread.cpp,v 1.12 1999-08-26 12:55:37 sandervl Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -116,6 +116,24 @@ BOOL WIN32API SetThreadPriority(HANDLE hThread, int priority)
              priority));
 
     return O32_SetThreadPriority(hThread, priority);
+}
+//******************************************************************************
+//TODO: Implement this??
+//******************************************************************************
+BOOL WIN32API GetThreadContext(HANDLE hThread, PCONTEXT lpContext)
+{
+  dprintf(("GetThreadContext NOT IMPLEMENTED!! (TRUE)\n"));
+  memset(lpContext, 0, sizeof(CONTEXT));
+  return TRUE;
+}
+//******************************************************************************
+//TODO: Implement this??
+//******************************************************************************
+BOOL WIN32API SetThreadContext(HANDLE hThread, const CONTEXT *lpContext)
+{
+  dprintf(("SetThreadContext NOT IMPLEMENTED!!\n"));
+
+  return FALSE;
 }
 //******************************************************************************
 //******************************************************************************
