@@ -1,15 +1,29 @@
-/* $Id: shellole.cpp,v 1.2 1999-10-09 11:17:05 sandervl Exp $ */
+/* $Id: shellole.cpp,v 1.3 1999-10-19 10:23:27 phaller Exp $ */
+
 /*
- *	handling of SHELL32.DLL OLE-Objects
+ * Win32 SHELL32 for OS/2
  *
- *	Copyright 1997	Marcus Meissner
- *	Copyright 1998	Juergen Schmied  <juergen.schmied@metronet.de>
+ * Copyright 1999 Patrick Haller (haller@zebra.fh-weingarten.de)
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
+ * handling of SHELL32.DLL OLE-Objects
+ *
+ * Copyright 1997 Marcus Meissner
+ * Copyright 1998 Juergen Schmied  <juergen.schmied@metronet.de>
  *
  */
 
+
+/*****************************************************************************
+ * Includes                                                                  *
+ *****************************************************************************/
+
+#include <odin.h>
+#include <odinwrap.h>
+#include <os2sel.h>
+
 #include <stdlib.h>
 #include <string.h>
-#include <odin.h>
 
 #define ICOM_CINTERFACE 1
 #define CINTERFACE 1
@@ -32,7 +46,13 @@
 
 #include <misc.h>
 
-DEFAULT_DEBUG_CHANNEL(shell)
+
+/*****************************************************************************
+ * Implementation                                                            *
+ *****************************************************************************/
+
+ODINDEBUGCHANNEL(SHELL32-SHELLOLE)
+
 
 DWORD WINAPI SHCLSIDFromStringA (LPSTR clsid, CLSID *id);
 
@@ -42,110 +62,128 @@ DWORD WINAPI SHCLSIDFromStringA (LPSTR clsid, CLSID *id);
  * NOTES
  *     exported by ordinal
  */
-LRESULT WINAPI SHCoCreateInstance(
-	LPSTR aclsid,
-	REFCLSID clsid,
-	IUnknown * unknownouter,
-	REFIID refiid,
-	LPVOID *ppv)
+
+ODINFUNCTION5(LRESULT, SHCoCreateInstance, LPSTR,     aclsid,
+                                           REFCLSID,  clsid,
+                                           IUnknown*, unknownouter,
+                                           REFIID,    refiid,
+                                           LPVOID*,   ppv)
 {
-	char	xclsid[48], xiid[48], xuout[48];
-	DWORD	hres;
-	IID	iid;
-	CLSID * myclsid = (CLSID*)clsid;
-	
-	WINE_StringFromCLSID(refiid,xiid);
+   char  xclsid[48], xiid[48], xuout[48];
+   DWORD hres;
+   IID   iid;
+   CLSID * myclsid = (CLSID*)clsid;
 
-	if (!clsid)
-	{
-	  if (!aclsid) return REGDB_E_CLASSNOTREG;
-	  SHCLSIDFromStringA(aclsid, &iid);
-	  myclsid = &iid;
-	}
+   WINE_StringFromCLSID(refiid,xiid);
 
-	WINE_StringFromCLSID(myclsid,xclsid);
-	WINE_StringFromCLSID(refiid,xiid);
-	if (unknownouter)
-		WINE_StringFromCLSID((const CLSID*)unknownouter,xuout);
-	
-	TRACE("(%p,\n\tCLSID:\t%s\n\tUOUT:\t%s\n\tIID:\t%s,%p)\n",
-		aclsid,xclsid,unknownouter?xuout:"nil",xiid,ppv);
+   if (!clsid)
+   {
+     if (!aclsid) return REGDB_E_CLASSNOTREG;
+     SHCLSIDFromStringA(aclsid, &iid);
+     myclsid = &iid;
+   }
 
-	hres = CoCreateInstance(myclsid, NULL, CLSCTX_INPROC_SERVER, refiid, ppv);
+   WINE_StringFromCLSID(myclsid,xclsid);
+   WINE_StringFromCLSID(refiid,xiid);
+   if (unknownouter)
+      WINE_StringFromCLSID((const CLSID*)unknownouter,xuout);
 
-	if(hres!=S_OK)
-	{
-	  ERR("failed (0x%08lx) to create \n\tCLSID:\t%s\n\tIID:\t%s\n", hres, xclsid, xiid);
-	  ERR("you might need to import the winedefault.reg\n");
-	}
+   dprintf(("SHELL32:SHCoCreateInstance (%p,CLSID:%s UOUT:%s IID:%s,%p)\n",
+            aclsid,
+            xclsid,
+            unknownouter?xuout:"nil",xiid,ppv));
 
-	return hres;
+   hres = CoCreateInstance(myclsid, NULL, CLSCTX_INPROC_SERVER, refiid, ppv);
+
+   if(hres!=S_OK)
+   {
+     dprintf(("SHELL32:SHCoCreateInstance failed (0x%08lx) to create CLSID:%s IID:%s\n",
+              hres,
+              xclsid,
+              xiid));
+     dprintf(("SHELL32:SHCoCreateInstance you might need to import the winedefault.reg\n"));
+   }
+
+   return hres;
 }
 
 /*************************************************************************
  * SHELL32_DllGetClassObject   [SHELL32.128]
  */
-HRESULT WINAPI SHELL32_DllGetClassObject(REFCLSID rclsid, REFIID iid,LPVOID *ppv)
-{	HRESULT	hres = E_OUTOFMEMORY;
-	LPCLASSFACTORY lpclf;
 
-	char xclsid[50],xiid[50];
-	WINE_StringFromCLSID((LPCLSID)rclsid,xclsid);
-	WINE_StringFromCLSID((LPCLSID)iid,xiid);
-	TRACE("\n\tCLSID:\t%s,\n\tIID:\t%s\n",xclsid,xiid);
-	
-	*ppv = NULL;
+ODINFUNCTION3(HRESULT, SHELL32_DllGetClassObject, REFCLSID, rclsid,
+                                                  REFIID,   iid,
+                                                  LPVOID*,  ppv)
+{
+   HRESULT  hres = E_OUTOFMEMORY;
+   LPCLASSFACTORY lpclf;
 
-	if(IsEqualCLSID(rclsid, &CLSID_PaperBin))
-	{
-	  ERR("paper bin not implemented\n");
-	  return CLASS_E_CLASSNOTAVAILABLE;
-	}
-	if(IsEqualCLSID(rclsid, &CLSID_ShellDesktop)||
-	   IsEqualCLSID(rclsid, &CLSID_ShellLink))
-	{
-	  lpclf = IClassFactory_Constructor( rclsid );
+   char xclsid[50],xiid[50];
+   WINE_StringFromCLSID((LPCLSID)rclsid,xclsid);
+   WINE_StringFromCLSID((LPCLSID)iid,xiid);
+   dprintf(("SHELL32:SHELL32_DllGetClassObject CLSID:%s, IID:%s\n",
+            xclsid,
+            xiid));
 
-	  if(lpclf)
-	  {
-	    hres = IClassFactory_QueryInterface(lpclf,iid, ppv);
-	    IClassFactory_Release(lpclf);
-	  }
-	}
-	else
-	{
-	  WARN("-- CLSID not found\n");
-	  hres = CLASS_E_CLASSNOTAVAILABLE;
-	}
-	TRACE("-- pointer to class factory: %p\n",*ppv);
-	return hres;
+   *ppv = NULL;
+
+   if(IsEqualCLSID(rclsid, &CLSID_PaperBin))
+   {
+     dprintf(("SHELL32:SHELL32_DllGetClassObject paper bin not implemented\n"));
+     return CLASS_E_CLASSNOTAVAILABLE;
+   }
+   if(IsEqualCLSID(rclsid, &CLSID_ShellDesktop)||
+      IsEqualCLSID(rclsid, &CLSID_ShellLink))
+   {
+     lpclf = IClassFactory_Constructor( rclsid );
+
+     if(lpclf)
+     {
+       hres = IClassFactory_QueryInterface(lpclf,iid, ppv);
+       IClassFactory_Release(lpclf);
+     }
+   }
+   else
+   {
+     dprintf(("SHELL32:SHELL32_DllGetClassObject -- CLSID not found\n"));
+     hres = CLASS_E_CLASSNOTAVAILABLE;
+   }
+   dprintf(("SHELL32:SHELL32_DllGetClassObject -- pointer to class factory: %p\n",
+            *ppv));
+   return hres;
 }
 
 /*************************************************************************
- * SHCLSIDFromString				[SHELL32.147]
+ * SHCLSIDFromString                              [SHELL32.147]
  *
  * NOTES
  *     exported by ordinal
  */
-DWORD WINAPI SHCLSIDFromStringA (LPSTR clsid, CLSID *id)
+ODINFUNCTION2(DWORD, SHCLSIDFromStringA, LPSTR,  clsid,
+                                         CLSID*, id)
 {
-	TRACE("(%p(%s) %p)\n", clsid, clsid, id);
-	return CLSIDFromStringA(clsid, id);
-}
-DWORD WINAPI SHCLSIDFromStringW (LPWSTR clsid, CLSID *id)
-{
-	TRACE("(%p(%s) %p)\n", clsid, debugstr_w(clsid), id);
-	return CLSIDFromString(clsid, id);
-}
-DWORD WINAPI SHCLSIDFromStringAW (LPVOID clsid, CLSID *id)
-{
-	if (VERSION_OsIsUnicode())
-	  return SHCLSIDFromStringW ((LPWSTR)clsid, id);
-	return SHCLSIDFromStringA ((LPSTR)clsid, id);
+   return CLSIDFromStringA(clsid, id);
 }
 
+
+ODINFUNCTION2(DWORD, SHCLSIDFromStringW, LPWSTR, clsid,
+                                         CLSID*, id)
+{
+   return CLSIDFromString(clsid, id);
+}
+
+
+ODINFUNCTION2(DWORD, SHCLSIDFromStringAW, LPVOID, clsid,
+                                          CLSID*, id)
+{
+   if (VERSION_OsIsUnicode())
+     return SHCLSIDFromStringW ((LPWSTR)clsid, id);
+   return SHCLSIDFromStringA ((LPSTR)clsid, id);
+}
+
+
 /*************************************************************************
- *			 SHGetMalloc			[SHELL32.220]
+ *        SHGetMalloc                          [SHELL32.220]
  * returns the interface to shell malloc.
  *
  * [SDK header win95/shlobj.h:
@@ -154,44 +192,45 @@ DWORD WINAPI SHCLSIDFromStringAW (LPVOID clsid, CLSID *id)
  * What we are currently doing is not very wrong, since we always use the same
  * heap (ProcessHeap).
  */
-DWORD WINAPI SHGetMalloc(LPMALLOC *lpmal)
+
+ODINFUNCTION1(DWORD, SHGetMalloc, LPMALLOC*, lpmal)
 {
-	TRACE("(%p)\n", lpmal);
-	return CoGetMalloc(0,lpmal);
+  return CoGetMalloc(0,lpmal);
 }
 
+
 /*************************************************************************
- * SHGetDesktopFolder			[SHELL32.216]
+ * SHGetDesktopFolder                          [SHELL32.216]
  */
 LPSHELLFOLDER pdesktopfolder=NULL;
 
-DWORD WINAPI SHGetDesktopFolder(IShellFolder **psf)
+ODINFUNCTION1(DWORD, SHGetDesktopFolder, IShellFolder**, psf)
 {
-	HRESULT	hres = S_OK;
-	LPCLASSFACTORY lpclf;
-	TRACE_(shell)("%p->(%p)\n",psf,*psf);
+   HRESULT  hres = S_OK;
+   LPCLASSFACTORY lpclf;
+   dprintf(("SHELL32: SHGetDesktopFolder %p->(%p)\n",psf,*psf));
 
-	*psf=NULL;
+   *psf=NULL;
 
-	if (!pdesktopfolder)
-	{
-	  lpclf = IClassFactory_Constructor(&CLSID_ShellDesktop);
-	  if(lpclf)
-	  {
-	    hres = IClassFactory_CreateInstance(lpclf,NULL,(REFIID)&IID_IShellFolder, (LPVOID*)&pdesktopfolder);
-	    IClassFactory_Release(lpclf);
-	  }
-	}
-	
-	if (pdesktopfolder)
-	{
-	  /* even if we create the folder, add a ref so the application can´t destroy the folder*/
-	  IShellFolder_AddRef(pdesktopfolder);
-	  *psf = pdesktopfolder;
-	}
+   if (!pdesktopfolder)
+   {
+     lpclf = IClassFactory_Constructor(&CLSID_ShellDesktop);
+     if(lpclf)
+     {
+       hres = IClassFactory_CreateInstance(lpclf,NULL,(REFIID)&IID_IShellFolder, (LPVOID*)&pdesktopfolder);
+       IClassFactory_Release(lpclf);
+     }
+   }
 
-	TRACE_(shell)("-- %p->(%p)\n",psf, *psf);
-	return hres;
+   if (pdesktopfolder)
+   {
+     /* even if we create the folder, add a ref so the application can´t destroy the folder*/
+     IShellFolder_AddRef(pdesktopfolder);
+     *psf = pdesktopfolder;
+   }
+
+   dprintf(("SHELL32: SHGetDesktopFolder-- %p->(%p)\n",psf, *psf));
+   return hres;
 }
 
 /**************************************************************************
@@ -203,7 +242,7 @@ typedef struct
     /* IUnknown fields */
     ICOM_VTABLE(IClassFactory)* lpvtbl;
     DWORD                       ref;
-    CLSID			*rclsid;
+    CLSID         *rclsid;
 } IClassFactoryImpl;
 
 //static ICOM_VTABLE(IClassFactory) clfvt;
@@ -214,54 +253,55 @@ typedef struct
 static HRESULT WINAPI IClassFactory_fnQueryInterface(
   LPCLASSFACTORY iface, REFIID riid, LPVOID *ppvObj)
 {
-	ICOM_THIS(IClassFactoryImpl,iface);
-	char	xriid[50];
-	WINE_StringFromCLSID((LPCLSID)riid,xriid);
-	TRACE("(%p)->(\n\tIID:\t%s)\n",This,xriid);
+   ICOM_THIS(IClassFactoryImpl,iface);
+   char  xriid[50];
+   WINE_StringFromCLSID((LPCLSID)riid,xriid);
 
-	*ppvObj = NULL;
+   dprintf(("SHELL32: IClassFactory_fnQueryInterface (%p)->(\n\tIID:\t%s)\n",This,xriid));
 
-	if(IsEqualIID(riid, &IID_IUnknown))          /*IUnknown*/
-	{ *ppvObj = This;
-	}
-	else if(IsEqualIID(riid, &IID_IClassFactory))  /*IClassFactory*/
-	{ *ppvObj = (IClassFactory*)This;
-	}
+   *ppvObj = NULL;
 
-	if(*ppvObj)
-	{ IUnknown_AddRef((LPUNKNOWN)*ppvObj);  	
-	  TRACE("-- Interface: (%p)->(%p)\n",ppvObj,*ppvObj);
-	  return S_OK;
-	}
-	TRACE("-- Interface: %s E_NOINTERFACE\n", xriid);
-	return E_NOINTERFACE;
+   if(IsEqualIID(riid, &IID_IUnknown))          /*IUnknown*/
+   { *ppvObj = This;
+   }
+   else if(IsEqualIID(riid, &IID_IClassFactory))  /*IClassFactory*/
+   { *ppvObj = (IClassFactory*)This;
+   }
+
+   if(*ppvObj)
+   { IUnknown_AddRef((LPUNKNOWN)*ppvObj);
+     dprintf(("SHELL32: IClassFactory_fnQueryInterface -- Interface: (%p)->(%p)\n",ppvObj,*ppvObj));
+     return S_OK;
+   }
+   dprintf(("SHELL32: IClassFactory_fnQueryInterface -- Interface: %s E_NOINTERFACE\n", xriid));
+   return E_NOINTERFACE;
 }
 /******************************************************************************
  * IClassFactory_AddRef
  */
 static ULONG WINAPI IClassFactory_fnAddRef(LPCLASSFACTORY iface)
 {
-	ICOM_THIS(IClassFactoryImpl,iface);
-	TRACE("(%p)->(count=%lu)\n",This,This->ref);
+   ICOM_THIS(IClassFactoryImpl,iface);
+   dprintf(("SHELL32: IClassFactory_fnAddRef (%p)->(count=%lu)\n",This,This->ref));
 
-	shell32_ObjCount++;
-	return ++(This->ref);
+   shell32_ObjCount++;
+   return ++(This->ref);
 }
 /******************************************************************************
  * IClassFactory_Release
  */
 static ULONG WINAPI IClassFactory_fnRelease(LPCLASSFACTORY iface)
 {
-	ICOM_THIS(IClassFactoryImpl,iface);
-	TRACE("(%p)->(count=%lu)\n",This,This->ref);
+   ICOM_THIS(IClassFactoryImpl,iface);
+   dprintf(("SHELL32: IClassFactory_fnRelease (%p)->(count=%lu)\n",This,This->ref));
 
-	shell32_ObjCount--;
-	if (!--(This->ref))
-	{ TRACE("-- destroying IClassFactory(%p)\n",This);
-		HeapFree(GetProcessHeap(),0,This);
-		return 0;
-	}
-	return This->ref;
+   shell32_ObjCount--;
+   if (!--(This->ref))
+   { dprintf(("SHELL32: IClassFactory_fnRelease -- destroying IClassFactory(%p)\n",This));
+      HeapFree(GetProcessHeap(),0,This);
+      return 0;
+   }
+   return This->ref;
 }
 /******************************************************************************
  * IClassFactory_CreateInstance
@@ -269,55 +309,55 @@ static ULONG WINAPI IClassFactory_fnRelease(LPCLASSFACTORY iface)
 static HRESULT WINAPI IClassFactory_fnCreateInstance(
   LPCLASSFACTORY iface, LPUNKNOWN pUnknown, REFIID riid, LPVOID *ppObject)
 {
-	ICOM_THIS(IClassFactoryImpl,iface);
-	IUnknown *pObj = NULL;
-	HRESULT hres;
-	char	xriid[50];
+   ICOM_THIS(IClassFactoryImpl,iface);
+   IUnknown *pObj = NULL;
+   HRESULT hres;
+   char  xriid[50];
 
-	WINE_StringFromCLSID((LPCLSID)riid,xriid);
-	TRACE("%p->(%p,\n\tIID:\t%s,%p)\n",This,pUnknown,xriid,ppObject);
+   WINE_StringFromCLSID((LPCLSID)riid,xriid);
+   dprintf(("SHELL32: IClassFactory_fnCreateInstance %p->(%p,\n\tIID:\t%s,%p)\n",This,pUnknown,xriid,ppObject));
 
-	*ppObject = NULL;
-		
-	if(pUnknown)
-	{
-	  return(CLASS_E_NOAGGREGATION);
-	}
+   *ppObject = NULL;
 
-	if (IsEqualCLSID(This->rclsid, &CLSID_ShellDesktop))
-	{
-	  pObj = (IUnknown *)ISF_Desktop_Constructor();
-	}
-	else if (IsEqualCLSID(This->rclsid, &CLSID_ShellLink))
-	{
-	  pObj = (IUnknown *)IShellLink_Constructor(FALSE);
-	}
-	else
-	{
-	  ERR("unknown IID requested\n\tIID:\t%s\n",xriid);
-	  return(E_NOINTERFACE);
-	}
-	
-	if (!pObj)
-	{
-	  return(E_OUTOFMEMORY);
-	}
-	
-	hres = IUnknown_QueryInterface(pObj,riid, ppObject);
-	IUnknown_Release(pObj);
+   if(pUnknown)
+   {
+     return(CLASS_E_NOAGGREGATION);
+   }
 
-	TRACE("-- Object created: (%p)->%p\n",This,*ppObject);
+   if (IsEqualCLSID(This->rclsid, &CLSID_ShellDesktop))
+   {
+     pObj = (IUnknown *)ISF_Desktop_Constructor();
+   }
+   else if (IsEqualCLSID(This->rclsid, &CLSID_ShellLink))
+   {
+     pObj = (IUnknown *)IShellLink_Constructor(FALSE);
+   }
+   else
+   {
+     dprintf(("SHELL32: IClassFactory_fnCreateInstance unknown IID requested\n\tIID:\t%s\n",xriid));
+     return(E_NOINTERFACE);
+   }
 
-	return hres;
+   if (!pObj)
+   {
+     return(E_OUTOFMEMORY);
+   }
+
+   hres = IUnknown_QueryInterface(pObj,riid, ppObject);
+   IUnknown_Release(pObj);
+
+   dprintf(("SHELL32: IClassFactory_fnCreateInstance -- Object created: (%p)->%p\n",This,*ppObject));
+
+   return hres;
 }
 /******************************************************************************
  * IClassFactory_LockServer
  */
 static HRESULT WINAPI IClassFactory_fnLockServer(LPCLASSFACTORY iface, BOOL fLock)
 {
-	ICOM_THIS(IClassFactoryImpl,iface);
-	TRACE("%p->(0x%x), not implemented\n",This, fLock);
-	return E_NOTIMPL;
+   ICOM_THIS(IClassFactoryImpl,iface);
+   dprintf(("SHELL32: IClassFactory_fnLockServer %p->(0x%x), not implemented\n",This, fLock));
+   return E_NOTIMPL;
 }
 
 static ICOM_VTABLE(IClassFactory) clfvt =
@@ -336,16 +376,16 @@ static ICOM_VTABLE(IClassFactory) clfvt =
 
 LPCLASSFACTORY IClassFactory_Constructor(REFCLSID rclsid)
 {
-	IClassFactoryImpl* lpclf;
+   IClassFactoryImpl* lpclf;
 
-	lpclf= (IClassFactoryImpl*)HeapAlloc(GetProcessHeap(),0,sizeof(IClassFactoryImpl));
-	lpclf->ref = 1;
-	lpclf->lpvtbl = &clfvt;
-	lpclf->rclsid = (CLSID*)rclsid;
+   lpclf= (IClassFactoryImpl*)HeapAlloc(GetProcessHeap(),0,sizeof(IClassFactoryImpl));
+   lpclf->ref = 1;
+   lpclf->lpvtbl = &clfvt;
+   lpclf->rclsid = (CLSID*)rclsid;
 
-	TRACE("(%p)->()\n",lpclf);
-	shell32_ObjCount++;
-	return (LPCLASSFACTORY)lpclf;
+   dprintf(("SHELL32: IClassFactory_Constructor (%p)->()\n",lpclf));
+   shell32_ObjCount++;
+   return (LPCLASSFACTORY)lpclf;
 }
 
 
@@ -365,10 +405,10 @@ typedef struct
 {
     ICOM_VTABLE(IClassFactory)* lpvtbl;
     DWORD                       ref;
-    CLSID			*rclsid;
-    LPFNCREATEINSTANCE		lpfnCI;
-    const IID *			riidInst;
-    UINT *			pcRefDll; /* pointer to refcounter in external dll (ugrrr...) */
+    CLSID         *rclsid;
+    LPFNCREATEINSTANCE                      lpfnCI;
+    const IID *                             riidInst;
+    UINT *        pcRefDll; /* pointer to refcounter in external dll (ugrrr...) */
 } IDefClFImpl;
 
 //static ICOM_VTABLE(IClassFactory) dclfvt;
@@ -379,60 +419,60 @@ typedef struct
 static HRESULT WINAPI IDefClF_fnQueryInterface(
   LPCLASSFACTORY iface, REFIID riid, LPVOID *ppvObj)
 {
-	ICOM_THIS(IDefClFImpl,iface);
-	char	xriid[50];
-	WINE_StringFromCLSID((LPCLSID)riid,xriid);
-	TRACE("(%p)->(\n\tIID:\t%s)\n",This,xriid);
+   ICOM_THIS(IDefClFImpl,iface);
+   char  xriid[50];
+   WINE_StringFromCLSID((LPCLSID)riid,xriid);
+   dprintf(("SHELL32: IDefClF_fnQueryInterface (%p)->(\n\tIID:\t%s)\n",This,xriid));
 
-	*ppvObj = NULL;
+   *ppvObj = NULL;
 
-	if(IsEqualIID(riid, &IID_IUnknown))          /*IUnknown*/
-	{ *ppvObj = This;
-	}
-	else if(IsEqualIID(riid, &IID_IClassFactory))  /*IClassFactory*/
-	{ *ppvObj = (IClassFactory*)This;
-	}
+   if(IsEqualIID(riid, &IID_IUnknown))          /*IUnknown*/
+   { *ppvObj = This;
+   }
+   else if(IsEqualIID(riid, &IID_IClassFactory))  /*IClassFactory*/
+   { *ppvObj = (IClassFactory*)This;
+   }
 
-	if(*ppvObj)
-	{ IUnknown_AddRef((LPUNKNOWN)*ppvObj);  	
-	  TRACE("-- Interface: (%p)->(%p)\n",ppvObj,*ppvObj);
-	  return S_OK;
-	}
-	TRACE("-- Interface: %s E_NOINTERFACE\n", xriid);
-	return E_NOINTERFACE;
+   if(*ppvObj)
+   { IUnknown_AddRef((LPUNKNOWN)*ppvObj);
+     dprintf(("SHELL32: IDefClF_fnQueryInterface -- Interface: (%p)->(%p)\n",ppvObj,*ppvObj));
+     return S_OK;
+   }
+   dprintf(("SHELL32: IDefClF_fnQueryInterface -- Interface: %s E_NOINTERFACE\n", xriid));
+   return E_NOINTERFACE;
 }
 /******************************************************************************
  * IDefClF_fnAddRef
  */
 static ULONG WINAPI IDefClF_fnAddRef(LPCLASSFACTORY iface)
 {
-	ICOM_THIS(IDefClFImpl,iface);
-	TRACE("(%p)->(count=%lu)\n",This,This->ref);
+   ICOM_THIS(IDefClFImpl,iface);
+   dprintf(("SHELL32: IDefClF_fnAddRef (%p)->(count=%lu)\n",This,This->ref));
 
-	shell32_ObjCount++;
+   shell32_ObjCount++;
 
-	return ++(This->ref);
+   return ++(This->ref);
 }
 /******************************************************************************
  * IDefClF_fnRelease
  */
 static ULONG WINAPI IDefClF_fnRelease(LPCLASSFACTORY iface)
 {
-	ICOM_THIS(IDefClFImpl,iface);
-	TRACE("(%p)->(count=%lu)\n",This,This->ref);
+   ICOM_THIS(IDefClFImpl,iface);
+   dprintf(("SHELL32: IDefClF_fnRelease (%p)->(count=%lu)\n",This,This->ref));
 
-	shell32_ObjCount--;
+   shell32_ObjCount--;
 
-	if (!--(This->ref))
-	{
-	  if (This->pcRefDll)
-	    (*This->pcRefDll)--;
+   if (!--(This->ref))
+   {
+     if (This->pcRefDll)
+       (*This->pcRefDll)--;
 
-	  TRACE("-- destroying IClassFactory(%p)\n",This);
-	  HeapFree(GetProcessHeap(),0,This);
-	  return 0;
-	}
-	return This->ref;
+     dprintf(("SHELL32: IDefClF_fn -- destroying IClassFactory(%p)\n",This));
+     HeapFree(GetProcessHeap(),0,This);
+     return 0;
+   }
+   return This->ref;
 }
 /******************************************************************************
  * IDefClF_fnCreateInstance
@@ -440,35 +480,35 @@ static ULONG WINAPI IDefClF_fnRelease(LPCLASSFACTORY iface)
 static HRESULT WINAPI IDefClF_fnCreateInstance(
   LPCLASSFACTORY iface, LPUNKNOWN pUnkOuter, REFIID riid, LPVOID *ppvObject)
 {
-	ICOM_THIS(IDefClFImpl,iface);
-	char	xriid[50];
+   ICOM_THIS(IDefClFImpl,iface);
+   char  xriid[50];
 
-	WINE_StringFromCLSID((LPCLSID)riid,xriid);
-	TRACE("%p->(%p,\n\tIID:\t%s,%p)\n",This,pUnkOuter,xriid,ppvObject);
+   WINE_StringFromCLSID((LPCLSID)riid,xriid);
+   dprintf(("SHELL32: IDefClF_fnCreateInterface %p->(%p,\n\tIID:\t%s,%p)\n",This,pUnkOuter,xriid,ppvObject));
 
-	*ppvObject = NULL;
-		
-	if(pUnkOuter)
-	  return(CLASS_E_NOAGGREGATION);
+   *ppvObject = NULL;
 
-	if ( This->riidInst==NULL ||
-	     IsEqualCLSID(riid, This->riidInst) ||
-	     IsEqualCLSID(riid, &IID_IUnknown) )
-	{
-	  return This->lpfnCI(pUnkOuter, riid, ppvObject);
-	}
+   if(pUnkOuter)
+     return(CLASS_E_NOAGGREGATION);
 
-	ERR("unknown IID requested\n\tIID:\t%s\n",xriid);
-	return E_NOINTERFACE;
+   if ( This->riidInst==NULL ||
+        IsEqualCLSID(riid, This->riidInst) ||
+        IsEqualCLSID(riid, &IID_IUnknown) )
+   {
+     return This->lpfnCI(pUnkOuter, riid, ppvObject);
+   }
+
+   dprintf(("SHELL32: IDefClF_fn unknown IID requested\n\tIID:\t%s\n",xriid));
+   return E_NOINTERFACE;
 }
 /******************************************************************************
  * IDefClF_fnLockServer
  */
 static HRESULT WINAPI IDefClF_fnLockServer(LPCLASSFACTORY iface, BOOL fLock)
 {
-	ICOM_THIS(IDefClFImpl,iface);
-	TRACE("%p->(0x%x), not implemented\n",This, fLock);
-	return E_NOTIMPL;
+   ICOM_THIS(IDefClFImpl,iface);
+   dprintf(("SHELL32: IDefClF_fnLockServer %p->(0x%x), not implemented\n",This, fLock));
+   return E_NOTIMPL;
 }
 
 static ICOM_VTABLE(IClassFactory) dclfvt =
@@ -487,56 +527,56 @@ static ICOM_VTABLE(IClassFactory) dclfvt =
 
 IClassFactory * IDefClF_fnConstructor(LPFNCREATEINSTANCE lpfnCI, UINT * pcRefDll, REFIID riidInst)
 {
-	IDefClFImpl* lpclf;
-	char	xriidInst[50];
+   IDefClFImpl* lpclf;
+   char  xriidInst[50];
 
-	WINE_StringFromCLSID((LPCLSID)riidInst,xriidInst);
+   WINE_StringFromCLSID((LPCLSID)riidInst,xriidInst);
 
-	lpclf = (IDefClFImpl*)HeapAlloc(GetProcessHeap(),0,sizeof(IDefClFImpl));
-	lpclf->ref = 1;
-	lpclf->lpvtbl = &dclfvt;
-	lpclf->lpfnCI = lpfnCI;
-	lpclf->pcRefDll = pcRefDll;
+   lpclf = (IDefClFImpl*)HeapAlloc(GetProcessHeap(),0,sizeof(IDefClFImpl));
+   lpclf->ref = 1;
+   lpclf->lpvtbl = &dclfvt;
+   lpclf->lpfnCI = lpfnCI;
+   lpclf->pcRefDll = pcRefDll;
 
-	if (pcRefDll)
-	  (*pcRefDll)++;
+   if (pcRefDll)
+     (*pcRefDll)++;
 
-	lpclf->riidInst = riidInst;
+   lpclf->riidInst = riidInst;
 
-	TRACE("(%p)\n\tIID:\t%s\n",lpclf, xriidInst);
-	shell32_ObjCount++;
-	return (LPCLASSFACTORY)lpclf;
+   dprintf(("SHELL32: IDefClF_fnConstructor (%p)\n\tIID:\t%s\n",lpclf, xriidInst));
+   shell32_ObjCount++;
+   return (LPCLASSFACTORY)lpclf;
 }
 
 
 /******************************************************************************
- * SHCreateDefClassObject			[SHELL32.70]
+ * SHCreateDefClassObject                      [SHELL32.70]
  */
-HRESULT WINAPI SHCreateDefClassObject(
-	REFIID	riid,				
-	LPVOID*	ppv,	
-	LPFNCREATEINSTANCE lpfnCI,	/* create instance callback entry */
-	UINT	*pcRefDll,		/* ref count of the dll */
-	REFIID	riidInst)		/* optional interface to the instance */
+
+ODINFUNCTION5(HRESULT, SHCreateDefClassObject, REFIID,            riid,
+                                               LPVOID*,           ppv,
+                                               LPFNCREATEINSTANCE,lpfnCI,
+                                               UINT*,             pcRefDll,
+                                               REFIID,            riidInst)
 {
 
-	char xriid[50],xriidInst[50];
-	WINE_StringFromCLSID((LPCLSID)riid,xriid);
-	WINE_StringFromCLSID((LPCLSID)riidInst,xriidInst);
+   char xriid[50],xriidInst[50];
+   WINE_StringFromCLSID((LPCLSID)riid,xriid);
+   WINE_StringFromCLSID((LPCLSID)riidInst,xriidInst);
 
-	TRACE("\n\tIID:\t%s %p %p %p \n\tIIDIns:\t%s\n",
-	xriid, ppv, lpfnCI, pcRefDll, xriidInst);
+   dprintf(("SHELL32: SHCreateDefClassObject \n\tIID:\t%s %p %p %p \n\tIIDIns:\t%s\n",
+   xriid, ppv, lpfnCI, pcRefDll, xriidInst));
 
-	if ( IsEqualCLSID(riid, &IID_IClassFactory) )
-	{
-	  IClassFactory * pcf = IDefClF_fnConstructor(lpfnCI, pcRefDll, riidInst);
-	  if (pcf)
-	  {
-	    *ppv = pcf;
-	    return NOERROR;
-	  }
-	  return E_OUTOFMEMORY;
-	}
-	return E_NOINTERFACE;
+   if ( IsEqualCLSID(riid, &IID_IClassFactory) )
+   {
+     IClassFactory * pcf = IDefClF_fnConstructor(lpfnCI, pcRefDll, riidInst);
+     if (pcf)
+     {
+       *ppv = pcf;
+       return NOERROR;
+     }
+     return E_OUTOFMEMORY;
+   }
+   return E_NOINTERFACE;
 }
 
