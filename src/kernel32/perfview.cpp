@@ -1,4 +1,4 @@
-/* $Id: perfview.cpp,v 1.2 2001-10-12 00:49:24 phaller Exp $ */
+/* $Id: perfview.cpp,v 1.3 2001-10-12 03:48:06 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -96,7 +96,10 @@ void _Optlink PerfView_RegisterCall(char* pszFunctionName,
   // subtract the measurement overhead factor.
   // Note: this should rather be done where the times are taken,
   // however this would spread the code just too far.
-  nTicks -= tsCompensation;
+  if (tsCompensation < nTicks)
+    nTicks -= tsCompensation;
+  else
+    nTicks = 0;
   
   // check if that particular function is registered already
   PPERFVIEW_FUNCTION p = (PPERFVIEW_FUNCTION)pProfileMap->getElement(pszFunctionName);
@@ -310,7 +313,7 @@ void PerfView_Write()
   
   if(_privateLogFile == NULL) 
   {
-    sprintf(szFilename, "%spe_%d.log", kernel32Path, loadNr);
+    sprintf(szFilename, "%sperf_%d.log", kernel32Path, loadNr);
     _privateLogFile = fopen(szFilename, "w");
   }
   
