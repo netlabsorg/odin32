@@ -1,4 +1,4 @@
-/* $Id: pidl.cpp,v 1.7 2000-03-28 15:28:43 cbratschi Exp $ */
+/* $Id: pidl.cpp,v 1.8 2000-05-01 01:33:25 phaller Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -49,6 +49,25 @@
 
 ODINDEBUGCHANNEL(SHELL32-PIDL)
 
+
+/*****************************************************************************
+ * Local prototypes (performance optimization)                               *
+ *****************************************************************************/
+
+LPITEMIDLIST _Optlink ODIN_ILGetNext         (LPITEMIDLIST pidl);
+BOOL         _Optlink ODIN__ILIsDesktop      (LPCITEMIDLIST pidl);
+BOOL         _Optlink ODIN__ILIsValue        (LPCITEMIDLIST pidl);
+LPPIDLDATA   _Optlink ODIN__ILGetDataPointer (LPITEMIDLIST pidl);
+LPITEMIDLIST _Optlink ODIN_ILFindLastID      (LPITEMIDLIST pidl);
+LPSTR        _Optlink ODIN__ILGetTextPointer (PIDLTYPE type, LPPIDLDATA pidldata);
+DWORD        _Optlink ODIN__ILSimpleGetText  (LPCITEMIDLIST pidl,LPSTR szOut, UINT uOutSize);
+DWORD        _Optlink ODIN_ILGetSize         (LPITEMIDLIST pidl);
+LPITEMIDLIST _Optlink ODIN_ILClone           (LPCITEMIDLIST pidl);
+LPITEMIDLIST _Optlink ODIN_ILCloneFirst      (LPCITEMIDLIST pidl);
+
+
+
+
 #ifdef DEBUG
 void pdump (LPCITEMIDLIST pidl)
 {  DWORD type;
@@ -77,15 +96,15 @@ void pdump (LPCITEMIDLIST pidl)
      {
        do
        {
-         type   = _ILGetDataPointer(pidltemp)->type;
-         szData = _ILGetTextPointer(type, _ILGetDataPointer(pidltemp));
-         szShortName = _ILGetSTextPointer(type, _ILGetDataPointer(pidltemp));
-         _ILSimpleGetText(pidltemp, szName, MAX_PATH);
+         type   = ODIN__ILGetDataPointer(pidltemp)->type;
+         szData = ODIN__ILGetTextPointer(type, ODIN__ILGetDataPointer(pidltemp));
+         szShortName = _ILGetSTextPointer(type, ODIN__ILGetDataPointer(pidltemp));
+         ODIN__ILSimpleGetText(pidltemp, szName, MAX_PATH);
 
          MESSAGE ("-- pidl=%p size=%u type=%lx name=%s (%s,%s)\n",
                   pidltemp, pidltemp->mkid.cb,type,szName,debugstr_a(szData), debugstr_a(szShortName));
 
-         pidltemp = ILGetNext(pidltemp);
+         pidltemp = ODIN_ILGetNext(pidltemp);
 
        } while (pidltemp->mkid.cb);
      }
@@ -114,7 +133,7 @@ BOOL pcheck (LPCITEMIDLIST pidl)
 
         if (pidltemp && pidltemp->mkid.cb)
         { do
-          { type   = _ILGetDataPointer(pidltemp)->type;
+          { type   = ODIN__ILGetDataPointer(pidltemp)->type;
             switch (type)
        { case PT_DESKTOP:
          case PT_MYCOMP:
@@ -153,7 +172,7 @@ BOOL pcheck (LPCITEMIDLIST pidl)
       ret = FALSE;
          }
        }
-       pidltemp = ILGetNext(pidltemp);
+       pidltemp = ODIN_ILGetNext(pidltemp);
      } while (pidltemp->mkid.cb);
    }
    __SET_DEBUGGING(__DBCL_TRACE, dbch_pidl, bIsPidlDebug);
@@ -185,7 +204,7 @@ ODINFUNCTION1(LPITEMIDLIST,ILFindLastID,LPITEMIDLIST, pidl)
    while (pidl->mkid.cb)
    {
      pidlLast = pidl;
-     pidl = ILGetNext(pidl);
+     pidl = ODIN_ILGetNext(pidl);
    }
    return pidlLast;
 }
@@ -200,7 +219,7 @@ ODINFUNCTION1(BOOL,ILRemoveLastID,LPCITEMIDLIST, pidl)
 {
    if (!pidl || !pidl->mkid.cb)
      return 0;
-   ILFindLastID(pidl)->mkid.cb = 0;
+   ODIN_ILFindLastID(pidl)->mkid.cb = 0;
    return 1;
 }
 
@@ -218,7 +237,7 @@ ODINFUNCTION1(LPITEMIDLIST,ILClone,LPCITEMIDLIST,pidl)
   if (!pidl)
     return NULL;
 
-  len = ILGetSize(pidl);
+  len = ODIN_ILGetSize(pidl);
   newpidl = (LPITEMIDLIST)SHAlloc(len);
   if (newpidl)
     memcpy(newpidl,pidl,len);
@@ -252,7 +271,7 @@ ODINFUNCTION1(LPITEMIDLIST,ILCloneFirst,LPCITEMIDLIST,pidl)
        memcpy(pidlNew,pidl,len+2);          /* 2 -> mind a desktop pidl */
 
        if (len)
-         ILGetNext(pidlNew)->mkid.cb = 0x00;
+         ODIN_ILGetNext(pidlNew)->mkid.cb = 0x00;
      }
    }
    TRACE_(pidl)("-- newpidl=%p\n",pidlNew);
@@ -387,7 +406,7 @@ ODINFUNCTION1(LPITEMIDLIST,ILGlobalClone,LPCITEMIDLIST, pidl)
    if (!pidl)
      return NULL;
 
-   len = ILGetSize(pidl);
+   len = ODIN_ILGetSize(pidl);
    newpidl = (LPITEMIDLIST)pCOMCTL32_Alloc(len);
    if (newpidl)
      memcpy(newpidl,pidl,len);
@@ -423,14 +442,14 @@ ODINFUNCTION2(BOOL,ILIsEqual,LPCITEMIDLIST, pidl1,
 
    while (pidltemp1->mkid.cb && pidltemp2->mkid.cb)
    {
-       _ILSimpleGetText(pidltemp1, szData1, MAX_PATH);
-       _ILSimpleGetText(pidltemp2, szData2, MAX_PATH);
+       ODIN__ILSimpleGetText(pidltemp1, szData1, MAX_PATH);
+       ODIN__ILSimpleGetText(pidltemp2, szData2, MAX_PATH);
 
        if (strcmp ( szData1, szData2 )!=0 )
          return FALSE;
 
-       pidltemp1 = ILGetNext(pidltemp1);
-       pidltemp2 = ILGetNext(pidltemp2);
+       pidltemp1 = ODIN_ILGetNext(pidltemp1);
+       pidltemp2 = ODIN_ILGetNext(pidltemp2);
    }
 
    if (!pidltemp1->mkid.cb && !pidltemp2->mkid.cb)
@@ -460,20 +479,20 @@ ODINFUNCTION3(BOOL,ILIsParent,LPCITEMIDLIST, pidlParent,
 
    while (pParent->mkid.cb && pChild->mkid.cb)
    {
-     _ILSimpleGetText(pParent, szData1, MAX_PATH);
-     _ILSimpleGetText(pChild, szData2, MAX_PATH);
+     ODIN__ILSimpleGetText(pParent, szData1, MAX_PATH);
+     ODIN__ILSimpleGetText(pChild, szData2, MAX_PATH);
 
      if (strcmp ( szData1, szData2 )!=0 )
        return FALSE;
 
-     pParent = ILGetNext(pParent);
-     pChild = ILGetNext(pChild);
+     pParent = ODIN_ILGetNext(pParent);
+     pChild = ODIN_ILGetNext(pChild);
    }
 
    if ( pParent->mkid.cb || ! pChild->mkid.cb) /* child shorter or has equal length to parent */
      return FALSE;
 
-   if ( ILGetNext(pChild)->mkid.cb && bImmediate) /* not immediate descent */
+   if ( ODIN_ILGetNext(pChild)->mkid.cb && bImmediate) /* not immediate descent */
      return FALSE;
 
    return TRUE;
@@ -510,7 +529,7 @@ ODINFUNCTION2(LPITEMIDLIST,ILFindChild,LPCITEMIDLIST, pidl1,
    pdump (pidl1);
    pdump (pidl2);
 
-   if ( _ILIsDesktop(pidl1) )
+   if ( ODIN__ILIsDesktop(pidl1) )
    {
      ret = pidl2;
    }
@@ -518,14 +537,14 @@ ODINFUNCTION2(LPITEMIDLIST,ILFindChild,LPCITEMIDLIST, pidl1,
    {
      while (pidltemp1->mkid.cb && pidltemp2->mkid.cb)
      {
-       _ILSimpleGetText(pidltemp1, szData1, MAX_PATH);
-       _ILSimpleGetText(pidltemp2, szData2, MAX_PATH);
+       ODIN__ILSimpleGetText(pidltemp1, szData1, MAX_PATH);
+       ODIN__ILSimpleGetText(pidltemp2, szData2, MAX_PATH);
 
        if (strcmp(szData1,szData2))
          break;
 
-       pidltemp1 = ILGetNext(pidltemp1);
-       pidltemp2 = ILGetNext(pidltemp2);
+       pidltemp1 = ODIN_ILGetNext(pidltemp1);
+       pidltemp2 = ODIN_ILGetNext(pidltemp2);
        ret = pidltemp2;
      }
 
@@ -560,18 +579,18 @@ ODINFUNCTION2(LPITEMIDLIST, ILCombine, LPCITEMIDLIST, pidl1,
 
    if(!pidl1)
    {
-     pidlNew = ILClone(pidl2);
+     pidlNew = ODIN_ILClone(pidl2);
      return pidlNew;
    }
 
    if(!pidl2)
    {
-     pidlNew = ILClone(pidl1);
+     pidlNew = ODIN_ILClone(pidl1);
      return pidlNew;
    }
 
-   len1  = ILGetSize(pidl1)-2;
-   len2  = ILGetSize(pidl2);
+   len1  = ODIN_ILGetSize(pidl1)-2;
+   len2  = ODIN_ILGetSize(pidl2);
    pidlNew  = (ITEMIDLIST*)SHAlloc(len1+len2);
 
    if (pidlNew)
@@ -617,7 +636,7 @@ ODINFUNCTION1(LPITEMIDLIST,SHLogILFromFSIL,LPITEMIDLIST,pidl)
 }
 
 /*************************************************************************
- * ILGetSize [SHELL32.152]
+ * ODIN_ILGetSize [SHELL32.152]
  *  gets the byte size of an idlist including zero terminator (pidl)
  *
  * PARAMETERS
@@ -647,7 +666,7 @@ ODINFUNCTION1(DWORD,ILGetSize,LPITEMIDLIST,pidl)
 }
 
 /*************************************************************************
- * ILGetNext [SHELL32.153]
+ * ODIN_ILGetNext [SHELL32.153]
  *  gets the next simple pidl of a complex pidl
  *
  * observed return values:
@@ -693,9 +712,9 @@ ODINFUNCTION3(LPITEMIDLIST,ILAppend,LPITEMIDLIST,  pidl,
    pdump (pidl);
    pdump (item);
 
-   if (_ILIsDesktop(pidl))
+   if (ODIN__ILIsDesktop(pidl))
    {
-      idlRet = ILClone(item);
+      idlRet = ODIN_ILClone(item);
       if (pidl)
         SHFree (pidl);
       return idlRet;
@@ -925,9 +944,9 @@ ODINFUNCTION5(HRESULT,SHGetDataFromIDListA,LPSHELLFOLDER, psf,
                _ILGetFileDateTime( pidl, &(pfd->ftLastWriteTime));
                pfd->dwFileAttributes = _ILGetFileAttributes(pidl, NULL, 0);
                pfd->nFileSizeLow = _ILGetFileSize ( pidl, NULL, 0);
-               type   = _ILGetDataPointer(pidl)->type;
-               lstrcpynA(pfd->cFileName,_ILGetTextPointer(type,_ILGetDataPointer(pidl)), MAX_PATH);
-               lstrcpynA(pfd->cAlternateFileName,_ILGetSTextPointer(type,_ILGetDataPointer(pidl)), 14);
+               type   = ODIN__ILGetDataPointer(pidl)->type;
+               lstrcpynA(pfd->cFileName,ODIN__ILGetTextPointer(type,ODIN__ILGetDataPointer(pidl)), MAX_PATH);
+               lstrcpynA(pfd->cAlternateFileName,_ILGetSTextPointer(type,ODIN__ILGetDataPointer(pidl)), 14);
        }
        return NOERROR;
 
@@ -969,9 +988,9 @@ ODINFUNCTION5(HRESULT,SHGetDataFromIDListW,LPSHELLFOLDER, psf,
                _ILGetFileDateTime( pidl, &(pfd->ftLastWriteTime));
                pfd->dwFileAttributes = _ILGetFileAttributes(pidl, NULL, 0);
                pfd->nFileSizeLow = _ILGetFileSize ( pidl, NULL, 0);
-               type   = _ILGetDataPointer(pidl)->type;
-               lstrcpynAtoW(pfd->cFileName,_ILGetTextPointer(type,_ILGetDataPointer(pidl)), MAX_PATH);
-               lstrcpynAtoW(pfd->cAlternateFileName,_ILGetSTextPointer(type,_ILGetDataPointer(pidl)), 14);
+               type   = ODIN__ILGetDataPointer(pidl)->type;
+               lstrcpynAtoW(pfd->cFileName,ODIN__ILGetTextPointer(type,ODIN__ILGetDataPointer(pidl)), MAX_PATH);
+               lstrcpynAtoW(pfd->cAlternateFileName,_ILGetSTextPointer(type,ODIN__ILGetDataPointer(pidl)), 14);
             }
             return NOERROR;
           case SHGDFIL_NETRESOURCE:
@@ -1014,7 +1033,7 @@ ODINFUNCTION2(BOOL,SHGetPathFromIDListA,LPCITEMIDLIST, pidl,
 
    pdump(pidl);
 #ifdef SHELL_NO_DESKTOP
-   if(_ILIsDesktop(pidl))
+   if(ODIN__ILIsDesktop(pidl))
    {
       SHGetSpecialFolderPathA(0, pszPath, CSIDL_DESKTOPDIRECTORY, FALSE);
    }
@@ -1070,13 +1089,13 @@ ODINFUNCTION4(HRESULT,SHBindToParent,LPCITEMIDLIST, pidl,
    {
      /* we are on desktop level */
      if (ppidlLast)
-       *ppidlLast = ILClone(pidl);
+       *ppidlLast = ODIN_ILClone(pidl);
      hr = SHGetDesktopFolder((IShellFolder**)ppv);
    }
    else
    {
-     pidlChild =  ILClone(ILFindLastID(pidl));
-     pidlParent = ILClone(pidl);
+     pidlChild =  ODIN_ILClone(ODIN_ILFindLastID(pidl));
+     pidlParent = ODIN_ILClone(pidl);
      ILRemoveLastID(pidlParent);
 
      hr = SHGetDesktopFolder(&psf);
@@ -1200,7 +1219,7 @@ ODINFUNCTION1(LPITEMIDLIST,_ILCreateFolder,WIN32_FIND_DATAA*, stffile )
    if (pidl)
    {
      LPPIDLDATA pData;
-     pData = _ILGetDataPointer(pidl);
+     pData = ODIN__ILGetDataPointer(pidl);
      FileTimeToDosDateTime(&(stffile->ftLastWriteTime),&pData->u.folder.uFileDate,&pData->u.folder.uFileTime);
      pData->u.folder.dwFileSize = stffile->nFileSizeLow;
      pData->u.folder.uFileAttribs=stffile->dwFileAttributes;
@@ -1240,7 +1259,7 @@ ODINFUNCTION1(LPITEMIDLIST,_ILCreateValue,WIN32_FIND_DATAA*, stffile)
    if (pidl)
    {
      LPPIDLDATA pData;
-     pData = _ILGetDataPointer(pidl);
+     pData = ODIN__ILGetDataPointer(pidl);
      FileTimeToDosDateTime(&(stffile->ftLastWriteTime),&pData->u.folder.uFileDate,&pData->u.folder.uFileTime);
      pData->u.folder.dwFileSize = stffile->nFileSizeLow;
      pData->u.folder.uFileAttribs=stffile->dwFileAttributes;
@@ -1285,7 +1304,7 @@ ODINFUNCTION3(LPITEMIDLIST,_ILCreate,PIDLTYPE,type,
        pidlOut = (ITEMIDLIST*)SHAlloc(uSize + 2);
        ZeroMemory(pidlOut, uSize + 2);
        pidlOut->mkid.cb = uSize;
-       pData =_ILGetDataPointer(pidlOut);
+       pData =ODIN__ILGetDataPointer(pidlOut);
        pData->type = type;
        memcpy(&(pData->u.mycomp.guid), pIn, uInSize);
        TRACE_(pidl)("- create GUID-pidl\n");
@@ -1296,9 +1315,9 @@ ODINFUNCTION3(LPITEMIDLIST,_ILCreate,PIDLTYPE,type,
        pidlOut = (ITEMIDLIST*)SHAlloc(uSize + 2);
        ZeroMemory(pidlOut, uSize + 2);
        pidlOut->mkid.cb = uSize;
-       pData =_ILGetDataPointer(pidlOut);
+       pData =ODIN__ILGetDataPointer(pidlOut);
        pData->type = type;
-       pszDest =  _ILGetTextPointer(type, pData);
+       pszDest =  ODIN__ILGetTextPointer(type, pData);
        memcpy(pszDest, pIn, uInSize);
        TRACE_(pidl)("- create Drive: %s\n",debugstr_a(pszDest));
        break;
@@ -1309,15 +1328,15 @@ ODINFUNCTION3(LPITEMIDLIST,_ILCreate,PIDLTYPE,type,
        pidlOut = (ITEMIDLIST*)SHAlloc(uSize + 2);
        ZeroMemory(pidlOut, uSize + 2);
        pidlOut->mkid.cb = uSize;
-       pData =_ILGetDataPointer(pidlOut);
+       pData =ODIN__ILGetDataPointer(pidlOut);
        pData->type = type;
-       pszDest =  _ILGetTextPointer(type, pData);
+       pszDest =  ODIN__ILGetTextPointer(type, pData);
        memcpy(pszDest, pIn, uInSize);
        TRACE_(pidl)("- create Value: %s\n",debugstr_a(pszDest));
        break;
    }
 
-   pidlTemp = ILGetNext(pidlOut);
+   pidlTemp = ODIN_ILGetNext(pidlOut);
    if (pidlTemp)
      pidlTemp->mkid.cb = 0x00;
 
@@ -1339,10 +1358,10 @@ ODINFUNCTION3(DWORD,_ILGetDrive,LPCITEMIDLIST, pidl,
                                 UINT16,        uSize)
 {
    if(_ILIsMyComputer(pidl))
-     pidl = ILGetNext(pidl);
+     pidl = ODIN_ILGetNext(pidl);
 
    if (pidl && _ILIsDrive(pidl))
-     return _ILSimpleGetText(pidl, pOut, uSize);
+     return ODIN__ILSimpleGetText(pidl, pOut, uSize);
 
    return 0;
 }
@@ -1352,12 +1371,12 @@ ODINFUNCTION3(DWORD,_ILGetDrive,LPCITEMIDLIST, pidl,
  * ### 2. section testing pidls ###
  *
  **************************************************************************
- *  _ILIsDesktop()
+ *  ODIN__ILIsDesktop()
  *  _ILIsMyComputer()
  *  _ILIsSpecialFolder()
  *  _ILIsDrive()
  *  _ILIsFolder()
- *  _ILIsValue()
+ *  ODIN__ILIsValue()
  *  _ILIsPidlSimple()
  */
 
@@ -1379,7 +1398,7 @@ ODINFUNCTION1(BOOL,_ILIsMyComputer,LPCITEMIDLIST, pidl)
 
 ODINFUNCTION1(BOOL,_ILIsSpecialFolder,LPCITEMIDLIST, pidl)
 {
-   LPPIDLDATA lpPData = _ILGetDataPointer(pidl);
+   LPPIDLDATA lpPData = ODIN__ILGetDataPointer(pidl);
    TRACE_(pidl)("(%p)\n",pidl);
    return (pidl && ( (lpPData && (PT_MYCOMP== lpPData->type || PT_SPECIAL== lpPData->type)) ||
            (pidl && pidl->mkid.cb == 0x00)
@@ -1387,7 +1406,7 @@ ODINFUNCTION1(BOOL,_ILIsSpecialFolder,LPCITEMIDLIST, pidl)
 }
 
 ODINFUNCTION1(BOOL,_ILIsDrive,LPCITEMIDLIST, pidl)
-{  LPPIDLDATA lpPData = _ILGetDataPointer(pidl);
+{  LPPIDLDATA lpPData = ODIN__ILGetDataPointer(pidl);
    TRACE_(pidl)("(%p)\n",pidl);
    return (pidl && lpPData && (PT_DRIVE == lpPData->type ||
                 PT_DRIVE1 == lpPData->type ||
@@ -1396,13 +1415,13 @@ ODINFUNCTION1(BOOL,_ILIsDrive,LPCITEMIDLIST, pidl)
 }
 
 ODINFUNCTION1(BOOL,_ILIsFolder,LPCITEMIDLIST, pidl)
-{  LPPIDLDATA lpPData = _ILGetDataPointer(pidl);
+{  LPPIDLDATA lpPData = ODIN__ILGetDataPointer(pidl);
    TRACE_(pidl)("(%p)\n",pidl);
    return (pidl && lpPData && (PT_FOLDER == lpPData->type || PT_FOLDER1 == lpPData->type));
 }
 
 ODINFUNCTION1(BOOL,_ILIsValue,LPCITEMIDLIST, pidl)
-{  LPPIDLDATA lpPData = _ILGetDataPointer(pidl);
+{  LPPIDLDATA lpPData = ODIN__ILGetDataPointer(pidl);
    TRACE_(pidl)("(%p)\n",pidl);
    return (pidl && lpPData && PT_VALUE == lpPData->type);
 }
@@ -1414,7 +1433,7 @@ ODINFUNCTION1(BOOL,_ILIsPidlSimple,LPCITEMIDLIST, pidl)
 {
    BOOL ret = TRUE;
 
-   if(! _ILIsDesktop(pidl))              /* pidl=NULL or mkid.cb=0 */
+   if(! ODIN__ILIsDesktop(pidl))              /* pidl=NULL or mkid.cb=0 */
    {
      WORD len = pidl->mkid.cb;
      LPCITEMIDLIST pidlnext = (LPCITEMIDLIST) (((LPBYTE)pidl) + len );
@@ -1432,7 +1451,7 @@ ODINFUNCTION1(BOOL,_ILIsPidlSimple,LPCITEMIDLIST, pidl)
  */
 
  /**************************************************************************
- *  _ILSimpleGetText
+ *  ODIN__ILSimpleGetText
  *
  * gets the text for the first item in the pidl (eg. simple pidl)
  *
@@ -1454,9 +1473,9 @@ ODINFUNCTION3(DWORD, _ILSimpleGetText, LPCITEMIDLIST, pidl,
    if (szOut)
      *szOut = 0;
 
-   pData = _ILGetDataPointer(pidl);
+   pData = ODIN__ILGetDataPointer(pidl);
 
-   if (_ILIsDesktop(pidl))
+   if (ODIN__ILIsDesktop(pidl))
    {
     /* desktop */
      if (HCR_GetClassName(&CLSID_ShellDesktop, szTemp, MAX_PATH))
@@ -1467,7 +1486,7 @@ ODINFUNCTION3(DWORD, _ILSimpleGetText, LPCITEMIDLIST, pidl,
        dwReturn = strlen (szTemp);
      }
    }
-   else if (( szSrc = _ILGetTextPointer(pData->type, pData) ))
+   else if (( szSrc = ODIN__ILGetTextPointer(pData->type, pData) ))
    {
      /* filesystem */
      if (szOut)
@@ -1500,7 +1519,7 @@ ODINFUNCTION3(DWORD, _ILSimpleGetText, LPCITEMIDLIST, pidl,
  * ### 4. getting pointers to parts of pidls ###
  *
  **************************************************************************
- *  _ILGetDataPointer()
+ *  ODIN__ILGetDataPointer()
  */
 
 ODINFUNCTION1(LPPIDLDATA,_ILGetDataPointer,LPITEMIDLIST, pidl)
@@ -1511,7 +1530,7 @@ ODINFUNCTION1(LPPIDLDATA,_ILGetDataPointer,LPITEMIDLIST, pidl)
 }
 
 /**************************************************************************
- *  _ILGetTextPointer()
+ *  ODIN__ILGetTextPointer()
  * gets a pointer to the long filename string stored in the pidl
  */
 
@@ -1583,7 +1602,7 @@ ODINFUNCTION2(LPSTR,_ILGetSTextPointer,PIDLTYPE,   type,
 
 ODINFUNCTION1(REFIID,_ILGetGUIDPointer,LPCITEMIDLIST, pidl)
 {
-   LPPIDLDATA pdata =_ILGetDataPointer(pidl);
+   LPPIDLDATA pdata =ODIN__ILGetDataPointer(pidl);
 
    if (pdata)
    {
@@ -1616,7 +1635,7 @@ ODINFUNCTION1(REFIID,_ILGetGUIDPointer,LPCITEMIDLIST, pidl)
 ODINFUNCTION2(BOOL, _ILGetFileDateTime,LPCITEMIDLIST, pidl,
                                        FILETIME *,    pFt)
 {
-    LPPIDLDATA pdata =_ILGetDataPointer(pidl);
+    LPPIDLDATA pdata =ODIN__ILGetDataPointer(pidl);
 
     switch (pdata->type)
     {
@@ -1682,7 +1701,7 @@ ODINFUNCTION3(BOOL,_ILGetFileSize,LPCITEMIDLIST, pidl,
                                   LPSTR,         pOut,
                                   UINT,          uOutSize)
 {
-   LPPIDLDATA pdata =_ILGetDataPointer(pidl);
+   LPPIDLDATA pdata =ODIN__ILGetDataPointer(pidl);
    DWORD dwSize;
 
    switch (pdata->type)
@@ -1716,7 +1735,7 @@ ODINFUNCTION3(BOOL,_ILGetFileSize,LPCITEMIDLIST, pidl,
  */
 DWORD _ILGetFileSizeKB (LPCITEMIDLIST pidl, LPSTR pOut, UINT uOutSize)
 {
-    LPPIDLDATA pdata =_ILGetDataPointer(pidl);
+    LPPIDLDATA pdata =ODIN__ILGetDataPointer(pidl);
     DWORD dwSize;
     char tempSizeStr[24];
     char kbStr[] = "KB";
@@ -1776,10 +1795,10 @@ ODINFUNCTION3(BOOL,_ILGetExtension,LPCITEMIDLIST, pidl,
 
    if (!pidl) return FALSE;
 
-   pidlTemp = ILFindLastID(pidl);
+   pidlTemp = ODIN_ILFindLastID(pidl);
 
-   if (!_ILIsValue(pidlTemp)) return FALSE;
-   if (!_ILSimpleGetText(pidlTemp, szTemp, MAX_PATH)) return FALSE;
+   if (!ODIN__ILIsValue(pidlTemp)) return FALSE;
+   if (!ODIN__ILSimpleGetText(pidlTemp, szTemp, MAX_PATH)) return FALSE;
 
    pPoint = PathFindExtensionA(szTemp);
 
@@ -1812,7 +1831,7 @@ ODINPROCEDURE3(_ILGetFileType,LPCITEMIDLIST, pidl,
                               LPSTR,         pOut,
                               UINT,          uOutSize)
 {
-   if(_ILIsValue(pidl))
+   if(ODIN__ILIsValue(pidl))
    {
      char sTemp[64];
           if(uOutSize > 0)
@@ -1855,7 +1874,7 @@ ODINFUNCTION3(BOOL, _ILGetFileAttributes, LPCITEMIDLIST, pidl,
                                         LPSTR,         pOut,
                                         UINT,          uOutSize)
 {
-    LPPIDLDATA pData =_ILGetDataPointer(pidl);
+    LPPIDLDATA pData =ODIN__ILGetDataPointer(pidl);
     WORD wAttrib = 0;
     int i;
 
