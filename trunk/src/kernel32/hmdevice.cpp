@@ -1,4 +1,4 @@
-/* $Id: hmdevice.cpp,v 1.18 2000-03-17 16:08:39 sandervl Exp $ */
+/* $Id: hmdevice.cpp,v 1.19 2000-05-22 19:07:54 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -349,6 +349,30 @@ BOOL HMDeviceHandler::SetFileTime(PHMHANDLEDATA pHMHandleData,
            pFT2,
            pFT3));
 
+  return(ERROR_INVALID_FUNCTION);
+}
+
+/*****************************************************************************
+ * Name      : BOOL HMDeviceHandler::GetFileTime
+ * Purpose   : get file time
+ * Parameters: PHMHANDLEDATA pHMHandleData
+ *             PFILETIME     pFT1
+ *             PFILETIME     pFT2
+ *             PFILETIME     pFT3
+ * Variables :
+ * Result    : API returncode
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+
+BOOL HMDeviceHandler::GetFileTime(PHMHANDLEDATA pHMHandleData,
+                                      LPFILETIME pFT1,
+                                      LPFILETIME pFT2,
+                                      LPFILETIME pFT3)
+{
+  DebugInt3();
   return(ERROR_INVALID_FUNCTION);
 }
 

@@ -1,4 +1,4 @@
-/* $Id: winimagebase.h,v 1.7 2000-05-02 20:53:14 sandervl Exp $ */
+/* $Id: winimagebase.h,v 1.8 2000-05-22 19:08:00 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -135,9 +135,9 @@ protected:
 
         ULONG getPEResourceSize(ULONG id, ULONG type, ULONG lang = LANG_GETFIRST);
 
-        PIMAGE_RESOURCE_DATA_ENTRY getPEResourceEntry(ULONG id, ULONG type, ULONG lang = LANG_GETFIRST);
+        PIMAGE_RESOURCE_DATA_ENTRY getPEResourceEntry(ULONG id, ULONG type, ULONG lang, int *error);
         PIMAGE_RESOURCE_DATA_ENTRY ProcessResSubDir(PIMAGE_RESOURCE_DIRECTORY prdType,
-                                                    ULONG *nodeData, int level);
+                                                    ULONG *nodeData, int level, int *error);
         PIMAGE_RESOURCE_DIRECTORY  getResSubDirW(PIMAGE_RESOURCE_DIRECTORY pResDir, LPCWSTR lpszName);
         PIMAGE_RESOURCE_DIRECTORY  getResSubDirA(PIMAGE_RESOURCE_DIRECTORY pResDir, LPCTSTR lpszName);
 

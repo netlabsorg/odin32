@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.80 2000-05-02 20:53:15 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.81 2000-05-22 19:08:01 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -61,6 +61,20 @@ DWORD    *TIBFlatPtr    = 0;
 //list of thread database structures
 static THDB     *threadList = 0;
 static VMutex    threadListMutex;
+
+//TODO: This should not be here: (need to rearrange NTDLL; kernel32 can't depend on ntdll)
+BOOLEAN (* WINAPI RtlAllocateAndInitializeSid) ( PSID_IDENTIFIER_AUTHORITY pIdentifierAuthority,
+  					         BYTE nSubAuthorityCount,
+    					         DWORD nSubAuthority0,
+					         DWORD nSubAuthority1,
+					         DWORD nSubAuthority2,
+					         DWORD nSubAuthority3,
+					         DWORD nSubAuthority4,
+					         DWORD nSubAuthority5,
+					         DWORD nSubAuthority6,
+					         DWORD nSubAuthority7,
+					         PSID *pSid);
+static HINSTANCE hInstNTDll = 0;
 //******************************************************************************
 //******************************************************************************
 TEB *WIN32API GetThreadTEB()
@@ -201,6 +215,31 @@ TEB *InitializeTIB(BOOL fMainThread)
         thdb->flags      = 0;  //todo gui
     }
     else thdb->flags      = 0;  //todo textmode
+
+    //Initialize thread security objects (TODO: Not complete)
+    if(hInstNTDll == 0) {
+	hInstNTDll = LoadLibraryA("NTDLL.DLL");
+	*(ULONG *)&RtlAllocateAndInitializeSid = (ULONG)GetProcAddress(hInstNTDll, "RtlAllocateAndInitializeSid");
+	if(RtlAllocateAndInitializeSid == NULL) {
+		DebugInt3();
+	}
+    }
+    SID_IDENTIFIER_AUTHORITY sidIdAuth = {0};
+    thdb->threadinfo.dwType = SECTYPE_PROCESS | SECTYPE_INITIALIZED;
+    RtlAllocateAndInitializeSid(&sidIdAuth, 1, 0, 0, 0, 0, 0, 0, 0, 0, &thdb->threadinfo.SidUser.User.Sid);
+    thdb->threadinfo.SidUser.User.Attributes = 0; //?????????
+ 
+    thdb->threadinfo.pTokenGroups = (TOKEN_GROUPS*)malloc(sizeof(TOKEN_GROUPS));
+    thdb->threadinfo.pTokenGroups->GroupCount = 1;
+    RtlAllocateAndInitializeSid(&sidIdAuth, 1, 0, 0, 0, 0, 0, 0, 0, 0, &thdb->threadinfo.PrimaryGroup.PrimaryGroup);
+    thdb->threadinfo.pTokenGroups->Groups[0].Sid = thdb->threadinfo.PrimaryGroup.PrimaryGroup;
+    thdb->threadinfo.pTokenGroups->Groups[0].Attributes = 0; //????
+//        pPrivilegeSet   = NULL;
+//        pTokenPrivileges= NULL;
+//        TokenOwner      = {0};
+//        DefaultDACL     = {0};
+//        TokenSource     = {0};
+    thdb->threadinfo.TokenType = TokenPrimary;
 
     if(fMainThread)
     {

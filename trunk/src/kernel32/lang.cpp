@@ -1,4 +1,4 @@
-/* $Id: lang.cpp,v 1.19 2000-05-09 18:56:09 sandervl Exp $ */
+/* $Id: lang.cpp,v 1.20 2000-05-22 19:07:57 sandervl Exp $ */
 /*
  * Win32 language API functions for OS/2
  *
@@ -140,7 +140,7 @@ BOOL WIN32API IsValidCodePage(UINT CodePage)
 LCID WIN32API GetUserDefaultLCID(void)
 {
   dprintf(("KERNEL32:  OS2GetUserDefaultLCID: returns %x", MAKELCID(GetLanguageId(), SORT_DEFAULT)));
-  return(MAKELCID(GetLanguageId(), SORT_DEFAULT));        //US English
+  return(MAKELCID(GetLanguageId(), SORT_DEFAULT));
 }
 //******************************************************************************
 //******************************************************************************

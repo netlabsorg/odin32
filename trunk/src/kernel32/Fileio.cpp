@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.32 2000-05-09 19:27:44 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.33 2000-05-22 19:07:53 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -240,6 +240,12 @@ ODINFUNCTION2(INT, CompareFileTime,
 }
 //******************************************************************************
 //******************************************************************************
+ODINFUNCTION4(BOOL, GetFileTime, HANDLE, hFile, LPFILETIME, arg2, LPFILETIME, arg3, LPFILETIME, arg4)
+{
+    return HMGetFileTime(hFile, arg2, arg3, arg4);
+}
+//******************************************************************************
+//******************************************************************************
 ODINFUNCTION3(BOOL, CopyFileA,
               LPCSTR, arg1,
               LPCSTR, arg2,
@@ -279,9 +285,18 @@ ODINFUNCTION2(DWORD, GetFileSize,
 ODINFUNCTION1(BOOL, DeleteFileA,
               LPCSTR, lpszFile)
 {
-  dprintf(("DeleteFileA %s", lpszFile));
-  return O32_DeleteFile(lpszFile);
-//  return TRUE;
+ BOOL rc;
+
+  rc = O32_DeleteFile(lpszFile);
+  if(!rc) {
+  	dprintf(("DeleteFileA %s returned FALSE; last error %x", lpszFile, GetLastError()));
+	if(GetLastError() == 20) {
+		return TRUE;
+	}
+  } 
+  else  dprintf(("DeleteFileA %s", lpszFile));
+
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -429,6 +444,11 @@ ODINFUNCTION1(DWORD, GetFileAttributesA,
                 strcat(filename, "\\");
 		rc = O32_GetFileAttributes((LPSTR)filename);
 	}
+    }
+    //SvL: Open32 returns FILE_ATTRIBUTE_DIRECTORY|FILE_ATTRIBUTE_NORMAL for
+    //     directories whereas NT 4 (SP6) only returns FILE_ATTRIBUTE_DIRECTORY
+    if(rc != -1 && (rc & FILE_ATTRIBUTE_DIRECTORY)) {
+	rc = FILE_ATTRIBUTE_DIRECTORY;
     }
 
 #if 0 // need more tests, maybe there is also a better way to hide simulated b:
