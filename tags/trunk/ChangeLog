@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1787 2001-10-24 15:39:16 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1788 2001-10-24 22:48:08 sandervl Exp $ */
 
  2001-10-24: Patrick Haller <patrick.haller@innotek.de>
     - USER32:   o added translation between PM Scancodes and
@@ -23,6 +23,9 @@
                    track frame without activating it)
                 o Double mouse click sent two up messages
                 o Double click on system menu now closes window
+                  (SetCapture interferes with double click message generation)
+    - WINMM:    o Dynamically load MMPM/2; Windows applications (that don't
+                  require sound) will no longer fail when MMPM/2 isn't available.
 
  2001-10-23: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMCTL32: o ListView: WM_KEYDOWN -> if WM_NOTIFY returns TRUE, then
