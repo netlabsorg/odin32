@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1346 2001-04-03 18:41:27 sandervl Exp $ */
+/* $Id: changelog,v 1.1347 2001-04-03 20:55:19 sandervl Exp $ */
 
  2001-04-03: Sander van Leeuwen <sandervl@xs4all.nl>   
     - DDRAW:    o Only reset physical palette in DirectDraw destructor if 
@@ -11,6 +11,8 @@
                   (kernel32\unicode)
                 o Rewrote string functions (heapstring.cpp) to use new unicode
                   functions.
+    - USER32:   o Ported Wine's Char* functions
+                  TODO: IsCharAlphaA & IsCharAlphaNumericA
 
  2001-04-02: Sander van Leeuwen <sandervl@xs4all.nl>   
     - USER32:   o Mouse message translation fix (check capture)
