@@ -3970,7 +3970,47 @@ static DWORD LISTVIEW_ApproximateViewRect(LISTVIEW_INFO *infoPtr, INT nItemCount
     dwViewRect = MAKELONG(wWidth, wHeight);
   }
   else if (uView == LVS_REPORT)
+#ifdef __WIN32OS2__
+  {
+    FIXME("uView == LVS_REPORT: implemented likely incorrect\n");
+
+    if (wHeight == 0xFFFF)
+    {
+      /* use current height */
+      wHeight = infoPtr->rcList.bottom - infoPtr->rcList.top;
+    }
+
+    if (wHeight < infoPtr->nItemHeight)
+      wHeight = infoPtr->nItemHeight;
+
+    if (nItemCount > 0)
+    {
+      if (infoPtr->nItemHeight > 0)
+      {
+        nItemCountPerColumn = wHeight / infoPtr->nItemHeight;
+        if (nItemCountPerColumn == 0)
+          nItemCountPerColumn = 1;
+
+        if (nItemCount % nItemCountPerColumn != 0)
+          nColumnCount = nItemCount / nItemCountPerColumn;
+        else
+          nColumnCount = nItemCount / nItemCountPerColumn + 1;
+      }
+    }
+    else {
+        nItemCountPerColumn = 0;
+        nColumnCount = 0;
+    }
+
+    /* Microsoft padding magic */
+    wHeight = nItemCountPerColumn * infoPtr->nItemHeight + 2;
+    wWidth = nColumnCount * infoPtr->nItemWidth + 2;
+
+    dwViewRect = MAKELONG(wWidth, wHeight); 
+  }
+#else
     FIXME("uView == LVS_REPORT: not implemented\n");
+#endif
   else if (uView == LVS_SMALLICON)
     FIXME("uView == LVS_SMALLICON: not implemented\n");
   else if (uView == LVS_ICON)
