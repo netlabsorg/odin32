@@ -1,4 +1,4 @@
-/* $Id: winimagebase.cpp,v 1.16 2000-04-16 04:27:37 bird Exp $ */
+/* $Id: winimagebase.cpp,v 1.17 2000-04-16 06:47:22 bird Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -268,6 +268,7 @@ BOOL Win32ImageBase::findDll(const char *pszFileName,
                      *      path, ie. with at least one backslash. and that all
                      *      slashes are backslashes!
                      */
+                    if (!WinExe) continue;
                     pszPath = strcpy(plv->szPath, WinExe->getFullPath());
                 }
                 psz = strrchr(plv->szPath, '\\');
@@ -454,6 +455,16 @@ end:
 
 //******************************************************************************
 //******************************************************************************
+/**
+ * Checks if a file is a PE executable image valid to be executed on this machine.
+ * @returns   FALSE if not PE image.
+ *            > 0 if valid PE image.
+ *                1 DLL
+ *                2 EXE
+ * @param     szFilename    Pointer to filename
+ * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @remark    Should not call findDll!
+ */
 BOOL Win32ImageBase::isPEImage(char *szFileName)
 {
  char   filename[CCHMAXPATH];
@@ -538,7 +549,7 @@ BOOL Win32ImageBase::isPEImage(char *szFileName)
         goto failure;
   }
   DosClose(win32handle);
-  return(TRUE);
+  return (fh.Characteristics & IMAGE_FILE_DLL ? 1 : 2);
 
 failure:
   free(win32file);
