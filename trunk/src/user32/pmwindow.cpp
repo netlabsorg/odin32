@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.175 2002-06-02 10:07:57 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.176 2002-06-02 19:34:28 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -83,6 +83,8 @@ LONG CapsCharHeight = 0;
 static BOOL fKeyAltGrDown = FALSE;
 
 
+static char *PMDragExtractFiles(PDRAGINFO pDragInfo, ULONG *pcItems, ULONG *pulBytes);
+static BOOL  PMDragValidate(PDRAGINFO pDragInfo);
 
 MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
 MRESULT EXPENTRY Win32CDWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
@@ -786,12 +788,6 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         PDRAGITEM pDragItem;
         USHORT    sxDrop = SHORT1FROMMP(mp2);
         USHORT    syDrop = SHORT2FROMMP(mp2);
-        USHORT    usIndicator, usOp;
-        ULONG     ulBytes;
-        int       i, cItems;
-        BOOL      ret;
-        char      szFileName[CCHMAXPATH];
-        char      szContainerName[CCHMAXPATH];
 
         dprintf(("OS2: DM_DRAGOVER %x (%d,%d)", win32wnd->getWindowHandle(), sxDrop, syDrop));
 
@@ -800,76 +796,44 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 	        rc = (MRFROM2SHORT (DOR_NEVERDROP, 0));
             break;
         }
-        /* Get access to the DRAGINFO data structure */
-        if(!DrgAccessDraginfo(pDragInfo)) {
-	        rc = (MRFROM2SHORT (DOR_NODROP, 0));
+
+        if(PMDragValidate(pDragInfo) == FALSE) {
+	        rc = (MRFROM2SHORT (DOR_NEVERDROP, 0));
             break;
         }
+        if(win32wnd->isDragDropActive() == FALSE) {
+            ULONG ulBytes, cItems;
+            char *pszFiles;
 
-        /* Can we accept this drop? */
-        switch (pDragInfo->usOperation) {
-        /* Return DOR_NODROPOP if current operation */
-        /* is link or unknown                       */
-	    case DO_LINK:
-        case DO_COPY:
-        case DO_UNKNOWN:
-            DrgFreeDraginfo(pDragInfo);
-            rc = (MRFROM2SHORT (DOR_NODROPOP, 0));
-            break;
-  
-        /* Our default operation is Move */
-        case DO_MOVE:
-        case DO_DEFAULT:
-            pDragItem = DrgQueryDragitemPtr(pDragInfo, 0);
-            ulBytes   = DrgQueryStrName(pDragItem->hstrContainerName,
-                                        sizeof(szContainerName),
-                                        szContainerName);
-            ulBytes   = DrgQueryStrName(pDragItem->hstrSourceName,
-                                        sizeof(szFileName),
-                                        szFileName);
-            if (!ulBytes) {
-                rc = (MRFROM2SHORT (DOR_NODROPOP, 0));
-                break;
-            }
-            else usOp =  DO_MOVE;
+            win32wnd->setDragDropActive(TRUE);
 
-            dprintf(("dropped file %s%s", szContainerName, szFileName));
-            break; 
-        }
-        if(rc == MRFROM2SHORT (DOR_NODROPOP, 0)) {
-            break;
-        }
-
-        usIndicator = (USHORT)DOR_DROP;
-        cItems = DrgQueryDragitemCount(pDragInfo);
-  
-        /* Now, we need to look at each item in turn */
-        for (i = 0; i < cItems; i++) {
-            pDragItem = DrgQueryDragitemPtr(pDragInfo, i);
-  
-            /* Make sure we can move for a Move request */
-            if ((pDragItem->fsSupportedOps & DO_MOVEABLE)   &&
-               (usOp == (USHORT)DO_MOVE)) 
-            {
-                usIndicator = DOR_DROP;
+            pszFiles = PMDragExtractFiles(pDragInfo, &cItems, &ulBytes);
+            if(pszFiles) {
+                POINT point = {sxDrop, syDrop};
+                if(DragDropDragEnter(win32wnd->getWindowHandle(), point, cItems, pszFiles, ulBytes, DROPEFFECT_COPY_W) == FALSE) {
+                        rc = (MRFROM2SHORT (DOR_NEVERDROP, 0));
+                }
+                else    rc = (MRFROM2SHORT(DOR_DROP, DO_MOVE));
+                free(pszFiles);
             }
             else {
-                dprintf(("item %d not accepted", i));
-                usIndicator = DOR_NODROPOP;
-                break;
+                rc = (MRFROM2SHORT (DOR_NEVERDROP, 0));
             }
         }
-        /* Release the draginfo data structure */
-        DrgFreeDraginfo(pDragInfo);
-  
-        dprintf(("return %x", MRFROM2SHORT(usIndicator, usOp)));
-        rc = (MRFROM2SHORT(usIndicator, usOp));
+        else {
+            if(DragDropDragOver(win32wnd->getWindowHandle(), DROPEFFECT_COPY_W) == FALSE) {
+                    rc = (MRFROM2SHORT (DOR_NEVERDROP, 0));
+            }
+            else    rc = (MRFROM2SHORT(DOR_DROP, DO_MOVE));
+        }
         break;
     }
 
     case DM_DRAGLEAVE:
     {
         dprintf(("OS2: DM_DRAGLEAVE %x", win32wnd->getWindowHandle()));
+        DragDropDragLeave(win32wnd->getWindowHandle());
+        win32wnd->setDragDropActive(FALSE);
         break;
     }
 
@@ -880,76 +844,31 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         USHORT    sxDrop = SHORT1FROMMP(mp2);
         USHORT    syDrop = SHORT2FROMMP(mp2);
         USHORT    usIndicator, usOp;
-        ULONG     ulBytes;
-        int       i, cItems;
-        BOOL      ret;
-        char      szFileName[CCHMAXPATH];
-        char      szContainerName[CCHMAXPATH];
 
         dprintf(("OS2: DM_DROP %x (%d,%d)", win32wnd->getWindowHandle(), sxDrop, syDrop));
 
+        rc = (MRFROM2SHORT (DOR_NODROP, 0));
+
         //does this window accept dropped files?
         if(!DragDropAccept(win32wnd->getWindowHandle())) {
-            rc = 0;
             break;
         }
-        /* Get access to the DRAGINFO data structure */
-        if(!DrgAccessDraginfo(pDragInfo)) {
-            rc = 0;
-            break;
-        }
-
-        usIndicator = (USHORT)DOR_DROP;
-        cItems = DrgQueryDragitemCount(pDragInfo);
   
-        //computer memory required to hold all filenames
-        int bufsize = 0;        
-        for (i = 0; i < cItems; i++) {
-            pDragItem = DrgQueryDragitemPtr(pDragInfo, i);
-  
-            bufsize += DrgQueryStrNameLen(pDragItem->hstrContainerName) + DrgQueryStrNameLen(pDragItem->hstrSourceName);
-            bufsize++;  //0 terminator
-            bufsize++;  //+ potential missing backslash
-        }
-        //copy all filenames
-        char *pszFiles   = (char *)malloc(bufsize);
-        if(pszFiles == NULL) {
-            dprintf(("Out of memory!!"));
-            DebugInt3();
-            break;
-        }
-        char *pszCurFile = pszFiles;
+        ULONG ulBytes, cItems;
+        char *pszFiles;
 
-        for (i = 0; i < cItems; i++) {
-            char *pszTemp = pszCurFile;
-
-            pDragItem = DrgQueryDragitemPtr(pDragInfo, i);
-  
-            ulBytes = DrgQueryStrNameLen(pDragItem->hstrContainerName);
-
-            ulBytes = DrgQueryStrName(pDragItem->hstrContainerName,
-                                      ulBytes, pszCurFile);
-            if(pszCurFile[ulBytes-1] != '\\') {
-                pszCurFile[ulBytes] = '\\';
-                pszCurFile++;
+        pszFiles = PMDragExtractFiles(pDragInfo, &cItems, &ulBytes);
+        if(pszFiles) {
+            POINT point = {sxDrop, syDrop};
+            if(DragDropFiles(win32wnd->getWindowHandle(), point, cItems, pszFiles, ulBytes) == FALSE) {
+                    rc = (MRFROM2SHORT (DOR_NEVERDROP, 0));
             }
-            pszCurFile += ulBytes;
-
-            ulBytes = DrgQueryStrNameLen(pDragItem->hstrSourceName);
-            ulBytes = DrgQueryStrName(pDragItem->hstrSourceName,
-                                      ulBytes+1, pszCurFile);
-            pszCurFile += ulBytes + 1;  //+ terminator
-
-            dprintf(("dropped file %s", pszTemp));
+            else    rc = (MRFROM2SHORT(DOR_DROP, DO_MOVE));
+            free(pszFiles);
         }
-        POINT point = {sxDrop, syDrop};
-        DragDropFiles(win32wnd->getWindowHandle(), cItems, point, pszFiles, bufsize);
-        free(pszFiles);
-
-        /* Release the draginfo data structure */
-        DrgFreeDraginfo(pDragInfo);
-  
-        rc = 0;
+        else {
+            rc = (MRFROM2SHORT (DOR_NEVERDROP, 0));
+        }  
         break;
     }
 
@@ -2049,3 +1968,148 @@ void FrameReplaceMenuItem(HWND hwndMenu, ULONG nIndex, ULONG idOld, ULONG   idNe
 }
 //******************************************************************************
 //******************************************************************************
+static char *PMDragExtractFiles(PDRAGINFO pDragInfo, ULONG *pcItems, ULONG *pulBytes) 
+{
+    PDRAGITEM pDragItem;
+    int       i, cItems;
+    BOOL      ret;
+    char      szFileName[CCHMAXPATH];
+    char      szContainerName[CCHMAXPATH];
+    ULONG     ulBytes;
+    char     *pszCurFile = NULL;
+
+    /* Get access to the DRAGINFO data structure */
+    if(!DrgAccessDraginfo(pDragInfo)) {
+        return NULL;
+    }
+
+    cItems = DrgQueryDragitemCount(pDragInfo);
+
+    //computer memory required to hold all filenames
+    int bufsize = 0;        
+    for (i = 0; i < cItems; i++) {
+        pDragItem = DrgQueryDragitemPtr(pDragInfo, i);
+
+        bufsize += DrgQueryStrNameLen(pDragItem->hstrContainerName) + DrgQueryStrNameLen(pDragItem->hstrSourceName);
+        bufsize++;  //0 terminator
+        bufsize++;  //+ potential missing backslash
+    }
+    bufsize++;  //extra 0 terminator
+    char *pszFiles = (char *)malloc(bufsize);
+    if(pszFiles == NULL) {
+        dprintf(("Out of memory!!"));
+        DebugInt3();
+        goto failure;
+    }
+    memset(pszFiles, 0, bufsize); 
+
+    pszCurFile = pszFiles;
+
+    //copy all filenames
+    for (i = 0; i < cItems; i++) {
+        char *pszTemp = pszCurFile;
+
+        pDragItem = DrgQueryDragitemPtr(pDragInfo, i);
+
+        ulBytes = DrgQueryStrNameLen(pDragItem->hstrContainerName);
+        ulBytes = DrgQueryStrName(pDragItem->hstrContainerName,
+                                  ulBytes, pszCurFile);
+        if(pszCurFile[ulBytes-1] != '\\') {
+            pszCurFile[ulBytes] = '\\';
+            pszCurFile++;
+        }
+        pszCurFile += ulBytes;
+
+        ulBytes = DrgQueryStrNameLen(pDragItem->hstrSourceName);
+        ulBytes = DrgQueryStrName(pDragItem->hstrSourceName,
+                                  ulBytes+1, pszCurFile);
+        pszCurFile += ulBytes + 1;  //+ terminator
+
+        dprintf(("dropped file %s", pszTemp));
+    }
+
+    /* Release the draginfo data structure */
+    DrgFreeDraginfo(pDragInfo);
+
+    *pulBytes = bufsize;
+    *pcItems  = cItems;
+
+    return pszFiles;
+
+failure:
+    /* Release the draginfo data structure */
+    DrgFreeDraginfo(pDragInfo);
+    if(pszFiles) {
+        free(pszFiles);
+    }
+    return NULL;
+}
+//******************************************************************************
+//******************************************************************************
+static BOOL PMDragValidate(PDRAGINFO pDragInfo) 
+{
+    PDRAGITEM pDragItem;
+    ULONG     ulBytes;
+    int       i, cItems;
+    BOOL      ret;
+    char      szFileName[CCHMAXPATH];
+    char      szContainerName[CCHMAXPATH];
+    USHORT    usOp = DO_MOVE;
+
+    /* Get access to the DRAGINFO data structure */
+    if(!DrgAccessDraginfo(pDragInfo)) {
+        return FALSE;
+    }
+
+    /* Can we accept this drop? */
+    switch (pDragInfo->usOperation) {
+    /* Return DOR_NODROPOP if current operation */
+    /* is link or unknown                       */
+    case DO_LINK:
+    case DO_COPY:
+    case DO_UNKNOWN:
+        goto failure;
+
+    /* Our default operation is Move */
+    case DO_MOVE:
+    case DO_DEFAULT:
+        pDragItem = DrgQueryDragitemPtr(pDragInfo, 0);
+        ulBytes   = DrgQueryStrName(pDragItem->hstrContainerName,
+                                    sizeof(szContainerName),
+                                    szContainerName);
+        ulBytes   = DrgQueryStrName(pDragItem->hstrSourceName,
+                                    sizeof(szFileName),
+                                    szFileName);
+        if (!ulBytes) {
+            goto failure;
+        }
+
+        dprintf(("dropped file %s%s", szContainerName, szFileName));
+        break; 
+    }
+
+    cItems = DrgQueryDragitemCount(pDragInfo);
+
+    /* Now, we need to look at each item in turn */
+    for (i = 0; i < cItems; i++) {
+        pDragItem = DrgQueryDragitemPtr(pDragInfo, i);
+
+        /* Make sure we can move for a Move request */
+        if (!((pDragItem->fsSupportedOps & DO_MOVEABLE)   &&
+           (usOp == (USHORT)DO_MOVE)))
+        {
+            dprintf(("item %d not accepted", i));
+            goto failure;
+        }
+    }
+    /* Release the draginfo data structure */
+    DrgFreeDraginfo(pDragInfo);
+    return TRUE;
+
+failure:
+    DrgFreeDraginfo(pDragInfo);
+    return FALSE;    
+}
+//******************************************************************************
+//******************************************************************************
+

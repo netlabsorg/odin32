@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.326 2002-06-02 10:07:58 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.327 2002-06-02 19:34:31 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -178,6 +178,7 @@ void Win32BaseWindow::Init()
   fVisibleRegionChanged = FALSE;
   fEraseBkgndFlag  = TRUE;
   fFakeWindow      = FALSE;
+  fIsDragDropActive= FALSE;
 
   state            = STATE_INIT;
   windowNameA      = NULL;

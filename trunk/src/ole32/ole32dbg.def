@@ -217,3 +217,9 @@ EXPORTS
     CLSIDFromStringA           = _DbgCLSIDFromStringA@8         @1001
     CLSIDFromString16          = _DbgCLSIDFromString16@8        @1002  ; COMPOBJ.19
 
+; private functions for drag and drop (used by user32\dragdrop.cpp)
+    OLEDD_AcceptsDragDrop      = _OLEDD_AcceptsDragDrop@4    @1010
+    OLEDD_DropFiles            = _OLEDD_DropFiles@4          @1011
+    OLEDD_DragOver             = _OLEDD_DragOver@8           @1012
+    OLEDD_DragEnter            = _OLEDD_DragEnter@12         @1013
+    OLEDD_DragLeave            = _OLEDD_DragLeave@4          @1014

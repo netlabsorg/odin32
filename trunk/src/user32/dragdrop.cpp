@@ -1,4 +1,4 @@
-/* $Id: dragdrop.cpp,v 1.1 2002-06-02 10:08:09 sandervl Exp $ */
+/* $Id: dragdrop.cpp,v 1.2 2002-06-02 19:34:25 sandervl Exp $ */
 
 /*
  * Win32 Drag 'n Drop functions for OS/2
@@ -10,29 +10,40 @@
  */
 #include <windows.h>
 #include <dbglog.h>
+#include <oledd.h>
 
 #define DBG_LOCALLOG    DBG_dragdrop
 #include "dbglocal.h"
 
+static PFN_DRAGENTER       pfnDragEnter       = NULL;
+static PFN_DRAGLEAVE       pfnDragLeave       = NULL;
+static PFN_DROPFILES       pfnDropFiles       = NULL;
+static PFN_DRAGOVER        pfnDragOver        = NULL;
+static PFN_ACCEPTSDRAGDROP pfnAcceptsDragDrop = NULL;
+static HANDLE              hOLE32             = 0;
+
 //******************************************************************************
 //******************************************************************************
-ULONG DragDropFiles(HWND hwnd, UINT cFiles, POINT point, LPSTR pszFiles, UINT cbszFiles, BOOL fNonClient)
+ULONG DragDropFiles(HWND hwnd, POINT point, UINT cFiles, LPSTR pszFiles, UINT cbszFiles, BOOL fNonClient)
 {
     DROPFILES *pDropFile;
     HGLOBAL    hDropFile;
     DWORD      dwExStyle;
+    HWND       orghwnd = hwnd;
 
     dwExStyle = GetWindowLongA(hwnd, GWL_EXSTYLE);
     
-    //Is it correct if the window or parent accepts files or must we check the topparent parent?
+    //TODO: Is it correct if the window or parent accepts files or must we check the top parent?
     hwnd = (dwExStyle & WS_EX_ACCEPTFILES) ? hwnd : GetParent(hwnd);
-    cbszFiles++;    //extra terminating 0
 
-    if(IsWindowUnicode(hwnd)) {
-        dprintf(("unicode dropfiles"));
-        cbszFiles *= 2;
+    dwExStyle = GetWindowLongA(hwnd, GWL_EXSTYLE);
+    if(!(dwExStyle & WS_EX_ACCEPTFILES)) {
+        if(pfnDropFiles) {
+            return pfnDropFiles(hwnd);
+        }
+        return FALSE;
     }
-
+    cbszFiles++;    //extra terminating 0
     hDropFile = GlobalAlloc(0, sizeof(DROPFILES)+cbszFiles);
     pDropFile = (DROPFILES *)GlobalLock(hDropFile);
     if(pDropFile == NULL) {
@@ -41,25 +52,59 @@ ULONG DragDropFiles(HWND hwnd, UINT cFiles, POINT point, LPSTR pszFiles, UINT cb
     }
     pDropFile->pFiles = sizeof(DROPFILES);
     pDropFile->fNC    = fNonClient;
-    pDropFile->fWide  = ::IsWindowUnicode(hwnd);
+    pDropFile->fWide  = FALSE;
     pDropFile->pt     = point;
-    if(IsWindowUnicode(hwnd)) {
-        LPWSTR lpszFilesW = (LPWSTR)(pDropFile+1);
-        while(*pszFiles) {
-            int len = strlen(pszFiles);
-            MultiByteToWideChar(CP_ACP, 0, pszFiles, -1, lpszFilesW, len);
-            pszFiles   += len + 1;
-            lpszFilesW += len + 1;
-        }
-        *lpszFilesW = 0;
-    }
-    else {
-        //copy strings (excluding terminating 0)
-        memcpy((pDropFile+1), pszFiles, cbszFiles-1);
-    }
+    //copy strings (excluding terminating 0)
+    memcpy((pDropFile+1), pszFiles, cbszFiles-1);
     GlobalUnlock(hDropFile);
     SendMessageA(hwnd, WM_DROPFILES, hDropFile, 0);
     return 0;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL DragDropDragOver(HWND hwnd, DWORD dwEffect)
+{
+    if(pfnDragOver) {
+        return pfnDragOver(hwnd, dwEffect);
+    }
+    return TRUE;    //ignore
+}
+//******************************************************************************
+//******************************************************************************
+BOOL DragDropDragEnter(HWND hwnd, POINT point, UINT cFiles, LPSTR pszFiles, UINT cbszFiles, 
+                       DWORD dwEffect, BOOL fNonClient)
+{
+    DROPFILES *pDropFile;
+    HGLOBAL    hDropFile;
+
+    if(pfnDragEnter) {
+        cbszFiles++;    //extra terminating 0
+        hDropFile = GlobalAlloc(0, sizeof(DROPFILES)+cbszFiles);
+        pDropFile = (DROPFILES *)GlobalLock(hDropFile);
+        if(pDropFile == NULL) {
+            DebugInt3();
+            return FALSE;
+        }
+        pDropFile->pFiles = sizeof(DROPFILES);
+        pDropFile->fNC    = fNonClient;
+        pDropFile->fWide  = FALSE;
+        pDropFile->pt     = point;
+        //copy strings (excluding terminating 0)
+        memcpy((pDropFile+1), pszFiles, cbszFiles-1);
+        GlobalUnlock(hDropFile);
+
+        return pfnDragEnter(hwnd, hDropFile, dwEffect);
+    }
+    return TRUE;    //ignore
+}
+//******************************************************************************
+//******************************************************************************
+BOOL DragDropDragLeave(HWND hwnd)
+{
+    if(pfnDragLeave) {
+        return pfnDragLeave(hwnd);
+    }
+    return TRUE;    //ignore
 }
 //******************************************************************************
 //******************************************************************************
@@ -74,6 +119,31 @@ BOOL DragDropAccept(HWND hwnd)
     }
     DWORD dwStyle = GetWindowLongA(GetParent(hwnd), GWL_EXSTYLE);
     if(!(dwStyle & WS_EX_ACCEPTFILES)) {
+        if(pfnAcceptsDragDrop == NULL) {
+            //check for OLE drag & drop
+
+            hOLE32 = GetModuleHandleA("OLE32.DLL");
+            if(hOLE32 == 0) {
+                //if ole32.dll isn't loaded, then ole drag and drop can't be active
+                return FALSE;
+            }
+            //make sure the dll doesn't get unloaded
+            hOLE32 = LoadLibraryA("OLE32.DLL");
+
+            pfnAcceptsDragDrop = (PFN_ACCEPTSDRAGDROP)GetProcAddress(hOLE32, "OLEDD_AcceptsDragDrop");
+            pfnDragOver        = (PFN_DRAGOVER)GetProcAddress(hOLE32, "OLEDD_DragOver");
+            pfnDragLeave       = (PFN_DRAGLEAVE)GetProcAddress(hOLE32, "OLEDD_DragLeave");
+            pfnDragEnter       = (PFN_DRAGENTER)GetProcAddress(hOLE32, "OLEDD_DragEnter");
+            pfnDropFiles       = (PFN_DROPFILES)GetProcAddress(hOLE32, "OLEDD_DropFiles");
+            if(!pfnAcceptsDragDrop || !pfnDragOver || !pfnDragLeave || !pfnDragEnter || !pfnDropFiles) {
+                dprintf(("OLE DD functions not found!!"));
+                DebugInt3();
+                return FALSE;
+            }
+        }
+        if(pfnAcceptsDragDrop) {
+            return pfnAcceptsDragDrop(hwnd);
+        }
         return FALSE;
     }
     return TRUE;
