@@ -1,4 +1,4 @@
-/* $Id: cvtcursor.cpp,v 1.1 1999-08-19 19:50:40 sandervl Exp $ */
+/* $Id: cvtcursor.cpp,v 1.2 1999-08-22 22:11:21 sandervl Exp $ */
 
 /*
  * PE2LX cursor conversion code
@@ -33,18 +33,18 @@
 void *ConvertCursor(CursorComponent *curHdr, int size, int offsetBits)
 {
  RGBQUAD   *rgb;
- RGB       *os2rgb;
+ RGB2      *os2rgb;
  WINBITMAPINFOHEADER *bhdr = (WINBITMAPINFOHEADER *)(curHdr+1);
- BITMAPFILEHEADER    *cursorhdr;
+ BITMAPFILEHEADER2   *cursorhdr;
  int        i, bwsize, bmpsize, cursorsize;
 
   dprintf(("ConvertCursor: Cursor size %d", size));
   bmpsize = size - sizeof(CursorComponent) - (1<<bhdr->biBitCount)*sizeof(RGBQUAD);
-  cursorsize = sizeof(BITMAPFILEHEADER) + bmpsize + (1<<bhdr->biBitCount)*sizeof(RGB);
+  cursorsize = sizeof(BITMAPFILEHEADER2) + bmpsize + (1<<bhdr->biBitCount)*sizeof(RGB2);
 
-  cursorhdr  = (BITMAPFILEHEADER *)malloc(cursorsize);
+  cursorhdr  = (BITMAPFILEHEADER2 *)malloc(cursorsize);
   cursorhdr->usType        = BFT_POINTER;
-  cursorhdr->cbSize        = sizeof(BITMAPFILEHEADER);
+  cursorhdr->cbSize        = sizeof(BITMAPFILEHEADER2);
   cursorhdr->xHotspot      = curHdr->xHotspot;
 
   /* @@@PH y-hotspot is upside down ! */
@@ -54,12 +54,12 @@ void *ConvertCursor(CursorComponent *curHdr, int size, int offsetBits)
   dprintf(("Cursor Hot.x   : %d", curHdr->xHotspot));
   dprintf(("Cursor Hot.y   : %d", curHdr->yHotspot));
 
-  cursorhdr->offBits       = sizeof(BITMAPFILEHEADER) + 2*sizeof(RGB) + offsetBits;
-  cursorhdr->bmp.cbFix     = sizeof(BITMAPINFOHEADER);
-  cursorhdr->bmp.cx        = (USHORT)bhdr->biWidth;
-  cursorhdr->bmp.cy        = (USHORT)(bhdr->biHeight);
-  cursorhdr->bmp.cPlanes   = bhdr->biPlanes;
-  cursorhdr->bmp.cBitCount = bhdr->biBitCount;
+  cursorhdr->offBits       = sizeof(BITMAPFILEHEADER2) + 2*sizeof(RGB2) + offsetBits;
+  cursorhdr->bmp2.cbFix     = sizeof(BITMAPINFOHEADER);
+  cursorhdr->bmp2.cx        = (USHORT)bhdr->biWidth;
+  cursorhdr->bmp2.cy        = (USHORT)(bhdr->biHeight);
+  cursorhdr->bmp2.cPlanes   = bhdr->biPlanes;
+  cursorhdr->bmp2.cBitCount = bhdr->biBitCount;
   dprintf(("Cursor size    : %d", bhdr->biSizeImage));
   dprintf(("Cursor Width   : %d", bhdr->biWidth));
   //height for both the XOR and AND bitmap (color & BW)
@@ -67,7 +67,7 @@ void *ConvertCursor(CursorComponent *curHdr, int size, int offsetBits)
   dprintf(("Cursor Bitcount: %d", bhdr->biBitCount));
   dprintf(("Cursor Compress: %d", bhdr->biCompression));
 
-  os2rgb                   = (RGB *)(cursorhdr+1);
+  os2rgb                   = (RGB2 *)(cursorhdr+1);
   rgb                      = (RGBQUAD *)(bhdr+1);
   for(i=0;i<(1<<bhdr->biBitCount);i++) {
         os2rgb->bRed   = rgb->red;

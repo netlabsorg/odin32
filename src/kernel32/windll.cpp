@@ -1,4 +1,4 @@
-/* $Id: windll.cpp,v 1.12 1999-08-22 15:11:35 sandervl Exp $ */
+/* $Id: windll.cpp,v 1.13 1999-08-22 22:11:22 sandervl Exp $ */
 
 /*
  * Win32 DLL class
@@ -46,6 +46,8 @@ Win32Dll::Win32Dll(char *szDllName) : Win32Image(szDllName), referenced(0),
   fUnloaded    = FALSE;
   next = head;
   head = this;
+
+  dllEntryPoint = 0;
 
   dprintf(("Win32Dll::Win32Dll %s %s", szFileName, szModule));
 }

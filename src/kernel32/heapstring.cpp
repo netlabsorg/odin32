@@ -1,4 +1,4 @@
-/* $Id */
+/* $Id: heapstring.cpp,v 1.8 1999-08-22 22:11:21 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -842,6 +842,7 @@ LPSTR WIN32API HEAP_strdupWtoA( HANDLE heap, DWORD flags, LPCWSTR str )
   lstrcpyWtoA( ret, (LPWSTR)str );
   return ret;
 }
+
 
 
 #if 0

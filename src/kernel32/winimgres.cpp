@@ -1,4 +1,4 @@
-/* $Id: winimgres.cpp,v 1.11 1999-08-20 11:52:44 sandervl Exp $ */
+/* $Id: winimgres.cpp,v 1.12 1999-08-22 22:11:22 sandervl Exp $ */
 
 /*
  * Win32 PE Image class (resource methods)
@@ -80,7 +80,7 @@ PIMAGE_RESOURCE_DATA_ENTRY
 
        	pstring = (PIMAGE_RESOURCE_DIR_STRING_U)((ULONG)pResDir + nameOffset);
 	char *typename = (char *)malloc(pstring->Length+1);
-       	lstrcpynWtoA(typename, pstring->NameString, pstring->Length);
+       	lstrcpynWtoA(typename, pstring->NameString, pstring->Length+1);
 	typename[pstring->Length] = 0;
         
         if(!fNumType) {
@@ -169,7 +169,7 @@ PIMAGE_RESOURCE_DATA_ENTRY
            	pstring = (PIMAGE_RESOURCE_DIR_STRING_U)((ULONG)pResDir + nameOffset);
 
 		resname = (char *)malloc(pstring->Length+1);
-         	lstrcpynWtoA(resname, pstring->NameString, pstring->Length);
+         	lstrcpynWtoA(resname, pstring->NameString, pstring->Length+1);
 		resname[pstring->Length] = 0;
          	if(stricmp(resname, (char *)*nodeData) == 0) {
                   	fFound = TRUE;
@@ -252,7 +252,10 @@ Win32Resource *Win32Image::getPEResource(ULONG id, ULONG type, ULONG lang)
 
   pData = getPEResourceEntry(id, type, lang);
   if(pData == NULL) {
-	dprintf(("Win32Image::getPEResource: couldn't find resource %d (type %d, lang %d)", id, type, lang));
+	if(HIWORD(id)) {
+		dprintf(("Win32Image::getPEResource: couldn't find resource %s (type %d, lang %d)", id, type, lang));
+	}
+	else	dprintf(("Win32Image::getPEResource: couldn't find resource %d (type %d, lang %d)", id, type, lang));
 	return 0;
   }
 
