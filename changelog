@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2114 2002-05-30 14:22:59 sandervl Exp $ */
+/* $Id: changelog,v 1.2115 2002-05-30 14:30:12 sandervl Exp $ */
+
+ 2002-05-30: Sander van Leeuwen <sandervl@innotek.de>
+    - WINMM:    o Mixer fixes
 
  2002-05-30: Platon Fomichev <platon@innotek.de>
     - COMCTL32: o Correct scrollbar range for listview control (during WM_VSCROLL)
