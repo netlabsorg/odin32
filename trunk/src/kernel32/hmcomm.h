@@ -1,4 +1,4 @@
-/* $Id: hmcomm.h,v 1.9 2001-11-26 14:54:00 sandervl Exp $ */
+/* $Id: hmcomm.h,v 1.10 2001-11-28 15:35:15 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -90,6 +90,7 @@ typedef struct _HMDEVCOMDATA
   HANDLE     hEventSem;
   OVERLAPPED overlapped;
   DWORD      dwLastError;
+  DWORD     *lpfdwEvtMask;
   BOOL       fClosing;
   BOOL       fCancelIo;
   //OS/2 Device Control Block
