@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.22 2000-04-08 18:31:07 cbratschi Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.23 2000-05-28 16:43:47 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -23,7 +23,6 @@
 #include <misc.h>
 #include <heapstring.h>
 #include <win32wbase.h>
-#include <winres.h>
 #include "wndmsg.h"
 #include "pmframe.h"
 #include "oslibwin.h"

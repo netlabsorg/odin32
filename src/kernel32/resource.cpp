@@ -1,4 +1,4 @@
-/* $Id: resource.cpp,v 1.15 2000-02-16 14:25:45 sandervl Exp $ */
+/* $Id: resource.cpp,v 1.16 2000-05-28 16:45:12 sandervl Exp $ */
 
 /*
  * Misc resource procedures
@@ -12,7 +12,6 @@
  */
 #include <os2win.h>
 #include <unicode.h>
-#include "winres.h"
 #include <winimagebase.h>
 #include <winexebase.h>
 #include <windllbase.h>
@@ -70,8 +69,8 @@ HRSRC WIN32API FindResourceW(HINSTANCE hModule, LPCWSTR lpszName,
  * Author    : SvL
  *****************************************************************************/
 
-HRSRC  WIN32API FindResourceExA( HMODULE hModule, LPCSTR lpType,
-                                    LPCSTR lpName, WORD wLanguage)
+HRSRC WIN32API FindResourceExA( HMODULE hModule, LPCSTR lpType,
+                                LPCSTR lpName, WORD wLanguage)
 {
  Win32ImageBase *module;
 
@@ -104,10 +103,10 @@ HRSRC  WIN32API FindResourceExA( HMODULE hModule, LPCSTR lpType,
  * Author    : SvL
  *****************************************************************************/
 
-HRSRC  WIN32API FindResourceExW(HMODULE hModule,
-                                LPCWSTR lpType,
-                                LPCWSTR lpName,
-                                WORD    wLanguage)
+HRSRC WIN32API FindResourceExW(HMODULE hModule,
+                               LPCWSTR lpType,
+                               LPCWSTR lpName,
+                               WORD    wLanguage)
 {
  Win32ImageBase *module;
 
@@ -116,7 +115,6 @@ HRSRC  WIN32API FindResourceExW(HMODULE hModule,
 	  dprintf(("FindResourceExW Module %X not found (%x %d)", hModule, lpName, lpType));
           return(NULL);
     }
-
     return module->findResourceW((LPWSTR)lpName, (LPWSTR)lpType, wLanguage);
 }
 //******************************************************************************
@@ -127,33 +125,50 @@ PVOID WIN32API LockResource(HGLOBAL hRes)
     return (PVOID)hRes;
 }
 //******************************************************************************
-//hRes == returned by FindResource(Ex)
+//hRes == returned by FindResource(Ex) = PIMAGE_RESOURCE_DATA_ENTRY for resource
 //******************************************************************************
 HGLOBAL WIN32API LoadResource(HINSTANCE hModule, HRSRC hRes)
 {
-  Win32Resource *res = (Win32Resource *)hRes;
-
-  dprintf(("LoadResource %x %X\n", hModule, hRes));
+  Win32ImageBase *module;
 
   /* @@@PH */
-  if (HIWORD(res) == NULL) {
-   dprintf(("LoadResource %x: invalid hRes %x", hModule, hRes));
-   return 0;
+  if(HIWORD(hRes) == NULL) {
+   	dprintf(("ERROR: LoadResource %x: invalid hRes %x", hModule, hRes));
+   	return 0;
   }
-  else  return (HGLOBAL)res->lockResource();
+
+  dprintf(("LoadResource %x %X\n", hModule, hRes));
+  if(hModule == 0 || hModule == -1 || (WinExe && hModule == WinExe->getInstanceHandle())) {
+        module = (Win32ImageBase *)WinExe;
+  }
+  else {
+        module = (Win32ImageBase *)Win32DllBase::findModule(hModule);
+  }
+
+  return (HGLOBAL)module->getResourceAddr(hRes);
 }
 //******************************************************************************
 //hRes == returned by FindResource(Ex)
 //******************************************************************************
 DWORD WIN32API SizeofResource(HINSTANCE hModule, HRSRC hRes)
 {
- Win32Resource *res = (Win32Resource *)hRes;
+ Win32ImageBase *module;
 
-    dprintf(("OS2SizeofResource\n"));
-    if(res == NULL)
-    return(0);
+  if(hRes == NULL) {
+   	dprintf(("ERROR: SizeofResource %x: invalid hRes %x", hModule, hRes));
+   	return(0);
+  }
 
-    return res->getSize();
+  dprintf(("SizeofResource %x %x", hModule, hRes));
+
+  if(hModule == 0 || hModule == -1 || (WinExe && hModule == WinExe->getInstanceHandle())) {
+        module = (Win32ImageBase *)WinExe;
+  }
+  else {
+        module = (Win32ImageBase *)Win32DllBase::findModule(hModule);
+  }
+
+  return module->getResourceSize(hRes);
 }
 //******************************************************************************
 

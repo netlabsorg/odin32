@@ -1,4 +1,4 @@
-/* $Id: cvtcursorgrp.cpp,v 1.9 2000-03-13 13:10:09 sandervl Exp $ */
+/* $Id: cvtcursorgrp.cpp,v 1.10 2000-05-28 16:45:12 sandervl Exp $ */
 
 /*
  * PE2LX cursor group code
@@ -22,15 +22,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <win32type.h>
+#include <win32api.h>
+#include <winconst.h>
 #include <wincursor.h>
-#include <winres.h>
 #include <misc.h>
 #include "cvtresource.h"
+#include <winres.h>
 
 #define DBG_LOCALLOG	DBG_cvtcursorgrp
 #include "dbglocal.h"
-
-HRSRC WIN32API FindResourceA(HINSTANCE hModule, LPCSTR lpszName, LPCSTR lpszType);
 
 //******************************************************************************
 //******************************************************************************
@@ -40,8 +40,8 @@ void *ConvertCursorGroup(CursorHeader *chdr, int size, Win32ImageBase *module)
  int i, groupsize = 0, os2cursorsize;
  BITMAPARRAYFILEHEADER2 *bafh, *orgbafh;
  CursorComponent       *cursorhdr;
- Win32Resource         *winres;
  void                  *os2cursor;
+ HRSRC                  hRes;
 
   dprintf(("ConvertCursorGroup"));
   dprintf(("Cursor Group type : %d", chdr->wType));
@@ -52,10 +52,10 @@ void *ConvertCursorGroup(CursorHeader *chdr, int size, Win32ImageBase *module)
         dprintf2(("Height  : %d", (int)rdir->wHeight));
         dprintf2(("Bits    : %d", rdir->wBitCount));
         dprintf2(("ResBytes: %d", rdir->lBytesInRes));
-	winres     = (Win32Resource *)FindResourceA(module->getInstanceHandle(), 
-                                                    (LPCSTR)rdir->wNameOrdinal, 
-                                                    (LPSTR)NTRT_CURSOR);
-	groupsize += winres->getOS2Size();
+	hRes = FindResourceA(module->getInstanceHandle(), 
+                            (LPCSTR)rdir->wNameOrdinal, (LPSTR)NTRT_CURSOR);
+
+	groupsize += QueryConvertedResourceSize(module->getInstanceHandle(), (char *)NTRT_CURSOR, hRes);
         rdir++;
   }
   bafh    = (BITMAPARRAYFILEHEADER2 *)malloc(groupsize+chdr->cwCount*sizeof(BITMAPARRAYFILEHEADER2));
@@ -67,21 +67,20 @@ void *ConvertCursorGroup(CursorHeader *chdr, int size, Win32ImageBase *module)
         bafh->cbSize    = sizeof(BITMAPARRAYFILEHEADER2);
         bafh->cxDisplay = 0;
         bafh->cyDisplay = 0;
-	winres          = (Win32Resource *)FindResourceA(module->getInstanceHandle(), 
-                                                         (LPCSTR)rdir->wNameOrdinal, 
-                                                         (LPSTR)NTRT_CURSOR);
-        if(winres == NULL) {
+	hRes = FindResourceA(module->getInstanceHandle(), 
+                            (LPCSTR)rdir->wNameOrdinal, (LPSTR)NTRT_CURSOR);
+
+        if(hRes == NULL) {
                 dprintf(("Can't find cursor!"));
                 rdir++;
                 continue;
         }
 
-	cursorhdr = (CursorComponent *)winres->lockResource();
-	os2cursor = ConvertCursor(cursorhdr, winres->getSize(), &os2cursorsize, (int)bafh - (int)orgbafh + sizeof(BITMAPARRAYFILEHEADER2)-sizeof(BITMAPFILEHEADER2));
+	cursorhdr = (CursorComponent *)LockResource(LoadResource(module->getInstanceHandle(), hRes));
+	os2cursor = ConvertCursor(cursorhdr, SizeofResource(module->getInstanceHandle(), hRes), &os2cursorsize, (int)bafh - (int)orgbafh + sizeof(BITMAPARRAYFILEHEADER2)-sizeof(BITMAPFILEHEADER2));
 
         if(os2cursor == NULL) {
                 dprintf(("Can't convert cursor!"));
-		delete winres;
                 rdir++;
                 continue;
         }
@@ -95,7 +94,6 @@ void *ConvertCursorGroup(CursorHeader *chdr, int size, Win32ImageBase *module)
 	free(os2cursor);
 
         bafh = (BITMAPARRAYFILEHEADER2 *)((int)&bafh->bfh2 + os2cursorsize);
-	delete winres;
 
         rdir++;
   }

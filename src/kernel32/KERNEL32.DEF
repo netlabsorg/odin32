@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.80 2000-04-29 18:26:56 sandervl Exp $
+; $Id: KERNEL32.DEF,v 1.81 2000-05-28 16:45:11 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -1084,6 +1084,7 @@ EXPORTS
     _GetCPUFeatures       @2004
     CPUFeatures          @2005
     InitSystemAndRegistry__Fv @2006
+    _ConvertResourceToOS2@12  @2007
 
 ;registry apis imported by advapi32
     RegCloseKey                           = _RegCloseKey@4                     @2280

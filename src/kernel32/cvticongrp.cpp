@@ -1,4 +1,4 @@
-/* $Id: cvticongrp.cpp,v 1.6 2000-02-16 14:25:37 sandervl Exp $ */
+/* $Id: cvticongrp.cpp,v 1.7 2000-05-28 16:45:12 sandervl Exp $ */
 
 /*
  * PE2LX Icon group code
@@ -22,15 +22,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <win32type.h>
+#include <win32api.h>
+#include <winconst.h>
 #include <winicon.h>
-#include <winres.h>
 #include <misc.h>
 #include "cvtresource.h"
+#include <winres.h>
 
 #define DBG_LOCALLOG	DBG_cvticongrp
 #include "dbglocal.h"
-
-HRSRC WIN32API FindResourceA(HINSTANCE hModule, LPCSTR lpszName, LPCSTR lpszType);
 
 //******************************************************************************
 //******************************************************************************
@@ -40,8 +40,8 @@ void *ConvertIconGroup(IconHeader *ihdr, int size, Win32ImageBase *module)
  int i, groupsize = 0, os2iconsize;
  BITMAPARRAYFILEHEADER2 *bafh, *orgbafh;
  WINBITMAPINFOHEADER    *iconhdr;
- Win32Resource          *winres;
  void                   *os2icon;
+ HRSRC                   hRes;
 
   dprintf(("Icon Group type :%d", ihdr->wType));
   dprintf(("Icon Group count:%d", ihdr->wCount));
@@ -52,10 +52,10 @@ void *ConvertIconGroup(IconHeader *ihdr, int size, Win32ImageBase *module)
         dprintf2(("Colors  : %d", (int)rdir->bColorCount));
         dprintf2(("Bits    : %d", rdir->wBitCount));
         dprintf2(("ResBytes: %d", rdir->lBytesInRes));
-	winres     = (Win32Resource *)FindResourceA(module->getInstanceHandle(), 
-                                                   (LPCSTR)rdir->wNameOrdinal, 
-                                                   (LPSTR)NTRT_ICON);
-	groupsize += winres->getOS2Size();
+	hRes = FindResourceA(module->getInstanceHandle(), 
+                             (LPCSTR)rdir->wNameOrdinal, (LPSTR)NTRT_ICON);
+
+	groupsize += QueryConvertedResourceSize(module->getInstanceHandle(), (char *)NTRT_ICON, hRes);
         rdir++;
   }
   bafh    = (BITMAPARRAYFILEHEADER2 *)malloc(groupsize+ihdr->wCount*sizeof(BITMAPARRAYFILEHEADER2));
@@ -67,21 +67,20 @@ void *ConvertIconGroup(IconHeader *ihdr, int size, Win32ImageBase *module)
         bafh->cbSize    = sizeof(BITMAPARRAYFILEHEADER2);
         bafh->cxDisplay = 0;
         bafh->cyDisplay = 0;
-	winres          = (Win32Resource *)FindResourceA(module->getInstanceHandle(), 
-                                                         (LPCSTR)rdir->wNameOrdinal, 
-                                                         (LPSTR)NTRT_ICON);
-        if(winres == NULL) {
+	hRes = FindResourceA(module->getInstanceHandle(), 
+                             (LPCSTR)rdir->wNameOrdinal, (LPSTR)NTRT_ICON);
+
+        if(hRes == NULL) {
                 dprintf(("Can't find icon!"));
                 rdir++;
                 continue;
         }
 
-	iconhdr = (WINBITMAPINFOHEADER *)winres->lockResource();
-	os2icon = ConvertIcon(iconhdr, winres->getSize(), &os2iconsize, (int)bafh - (int)orgbafh + sizeof(BITMAPARRAYFILEHEADER2)-sizeof(BITMAPFILEHEADER2));
+	iconhdr = (WINBITMAPINFOHEADER *)LockResource(LoadResource(module->getInstanceHandle(), hRes));
+	os2icon = ConvertIcon(iconhdr, SizeofResource(module->getInstanceHandle(), hRes), &os2iconsize, (int)bafh - (int)orgbafh + sizeof(BITMAPARRAYFILEHEADER2)-sizeof(BITMAPFILEHEADER2));
 
         if(os2icon == NULL) {
                 dprintf(("Can't convert icon!"));
-		delete winres;
                 rdir++;
                 continue;
         }
@@ -95,7 +94,6 @@ void *ConvertIconGroup(IconHeader *ihdr, int size, Win32ImageBase *module)
 	free(os2icon);
 
         bafh = (BITMAPARRAYFILEHEADER2 *)((int)&bafh->bfh2 + os2iconsize);
-	delete winres;
 
         rdir++;
   }

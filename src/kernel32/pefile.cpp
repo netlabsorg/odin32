@@ -1,4 +1,4 @@
-/* $Id: pefile.cpp,v 1.7 2000-02-16 14:23:11 sandervl Exp $ */
+/* $Id: pefile.cpp,v 1.8 2000-05-28 16:45:12 sandervl Exp $ */
 
 /*
  * PE2LX PE utility functions
@@ -14,7 +14,6 @@
 #include <win32type.h>
 #include <pefile.h>
 #include <misc.h>
-#include <winres.h>
 
 #define DBG_LOCALLOG	DBG_pefile
 #include "dbglocal.h"

@@ -1,4 +1,4 @@
-/* $Id: winimagebase.cpp,v 1.20 2000-05-26 18:42:56 sandervl Exp $ */
+/* $Id: winimagebase.cpp,v 1.21 2000-05-28 16:45:12 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -31,7 +31,6 @@
 #include <winexebase.h>
 #include <pefile.h>
 #include <unicode.h>
-#include <winres.h>
 #include "oslibmisc.h"
 #include "oslibdos.h"
 #include "initterm.h"
@@ -46,7 +45,7 @@
 Win32ImageBase::Win32ImageBase(HINSTANCE hInstance) :
     errorState(NO_ERROR), entryPoint(0), fullpath(NULL),
     tlsAddress(0), tlsIndexAddr(0), tlsInitSize(0), tlsTotalSize(0),
-    tlsCallBackAddr(0), tlsIndex(-1), winres(NULL), pResDir(NULL),
+    tlsCallBackAddr(0), tlsIndex(-1), pResDir(NULL),
     ulRVAResourceSection(0)
 {
   magic = MAGIC_WINIMAGE;
@@ -77,14 +76,6 @@ Win32ImageBase::Win32ImageBase(HINSTANCE hInstance) :
 //******************************************************************************
 Win32ImageBase::~Win32ImageBase()
 {
- Win32Resource *res;
-
-  while(winres)
-  {
-        res    = winres->next;
-        delete(winres);
-        winres = res;
-  }
   if(fullpath)
         free(fullpath);
 }
