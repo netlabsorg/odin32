@@ -1,8 +1,16 @@
-/* $Id: ChangeLog,v 1.1702 2001-09-28 07:45:26 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1703 2001-09-28 07:51:55 phaller Exp $ */
 
  2001-09-28: Sander van Leeuwen <sandervl@xs4all.nl>
     - PE2LX:    o Added options to remove fixups and to reroute all
                   imports to a custom odin dll
+
+ 2001-09-27: Patrick Haller <patrick.haller@innotek.de>
+    - USER32:   o partial implementation of SendInput()
+    - KERNEL32: o improved error code mapping (error2WinError)
+                o keep HandleManager from reusing last handle
+                  too quickly (CreateFile after CloseHandle might
+                  return the same handle again, which is correct but doesn't
+                  put the spotlight on buggy apps)
 
  2001-09-26: Sander van Leeuwen <sandervl@xs4all.nl>
     - WININET/ICMP/WS2_32/WINSPOOL/CTL3D32:
@@ -10,10 +18,6 @@
     - WININET:  o Split up initterm
     - CUSTOMBUILD: 
                 o Ordinals definitions moved into ordinals.h
-
- 2001-09-27: Patrick Haller <patrick.haller@innotek.de>
-    - USER32:   o partial implementation of SendInput()
-    - KERNEL32: o improved error code mapping (error2WinError)
 
  2001-09-26: knut st. osmundsen <kosmunds@csc.com>
     - Win32k:   o Create development branch 'splittup' which in the
