@@ -1,9 +1,10 @@
-/* $Id: win32class.h,v 1.1 1999-09-15 23:19:00 sandervl Exp $ */
+/* $Id: win32class.h,v 1.2 1999-09-21 17:04:27 dengert Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
  *
  * Copyright 1998-1999 Sander van Leeuwen (sandervl@xs4all.nl)
+ * Copyright 1999      Daniela Engert (dani@ngrt.de)
  *
  */
 #ifndef __WIN32CLASS_H__

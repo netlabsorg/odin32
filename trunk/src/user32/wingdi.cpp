@@ -1,9 +1,10 @@
-/* $Id: wingdi.cpp,v 1.1 1999-09-15 23:19:03 sandervl Exp $ */
+/* $Id: wingdi.cpp,v 1.2 1999-09-21 17:04:27 dengert Exp $ */
 /*
  * Win32 Window graphics apis for OS/2
  *
  *
  * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
+ * Copyright 1999 Daniela Engert (dani@ngrt.de)
  *
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -32,7 +33,7 @@ HDC WIN32API BeginPaint(HWND hwnd, PPAINTSTRUCT lps)
     dprintf(("GetDC, window %x not found", hwnd));
     return 0;
     }
-// !! there is no HDC to paint on !!!	 window->MsgEraseBackGround(hdc);
+// !! there is no HDC to paint on !!!    window->MsgEraseBackGround(hdc);
 #ifdef OPEN32_GDI
     hdc = O32_BeginPaint(window->getOS2WindowHandle(),lps);
     //CB: conflict with Open32 mechanism
@@ -117,8 +118,8 @@ HDC WIN32API GetWindowDC(HWND hwnd)
 
    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
    if(!window) {
-	dprintf(("GetWindowDC, window %x not found", hwnd));
-	return 0;
+        dprintf(("GetWindowDC, window %x not found", hwnd));
+        return 0;
    }
    dprintf(("GetWindowDC %x", hwnd));
 #ifdef OPEN32_GDI

@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.2 1999-09-17 18:49:53 dengert Exp $ */
+/* $Id: oslibwin.cpp,v 1.3 1999-09-21 17:04:26 dengert Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -153,6 +153,12 @@ ULONG OSLibWinGetWindowULong(HWND hwnd, ULONG offset)
 BOOL OSLibPostMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam)
 {
   return WinPostMsg(hwnd, msg, (MPARAM)wParam, (MPARAM)lParam);
+}
+//******************************************************************************
+//******************************************************************************
+ULONG OSLibSendMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam)
+{
+  return (ULONG)WinSendMsg(hwnd, msg, (MPARAM)wParam, (MPARAM)lParam);
 }
 //******************************************************************************
 //******************************************************************************
@@ -422,14 +428,11 @@ void OSLibMapSWPtoWINDOWPOS(PSWP pswp, PWINDOWPOS pwpos, PSWP pswpOld, HWND hPar
    HWND  hWinAfter;
    ULONG flags = 0;
 
-   //***************************************************
-   // Map constant HWNDs (e.g. HWND_DESKTOP, HWND_TOP)
-   //***************************************************
    HWND  hWnd = (hWindow == HWND_DESKTOP) ? HWND_DESKTOP_W: hWindow;
 
-   if ( hWndInsertAfter == HWND_TOP )
+   if (hWndInsertAfter == HWND_TOP)
       hWinAfter = HWND_TOP_W;
-   else if ( hWndInsertAfter == HWND_BOTTOM )
+   else if (hWndInsertAfter == HWND_BOTTOM)
       hWinAfter = HWND_BOTTOM_W;
    else
       hWinAfter = (HWND) hWndInsertAfter;
@@ -445,23 +448,7 @@ void OSLibMapSWPtoWINDOWPOS(PSWP pswp, PWINDOWPOS pwpos, PSWP pswpOld, HWND hPar
    if (  fuFlags & SWP_SHOW)        flags |= SWP_SHOWWINDOW_W;
    if (  fuFlags & SWP_HIDE)        flags |= SWP_HIDEWINDOW_W;
 
-   //**************************************************************************
-   // When moving or sizing we'll have to do some calculations for Y inversion.
-   //
-   // If moving - invert Y coord.
-   //
-   // If sizing - if the height is changing, have to move the window to
-   //             maintain correct windows position.  If we just size then the
-   //             TR corner will extend.  The Windows behaviour should be to
-   //             extend the BR corner.
-   //
-   // If this is a child window then we'll have to move within the client
-   // area of the parent.
-   //
-   // If this is an overlapped or popup window we'll have to move around
-   // within the desktop.
-   //**************************************************************************
-   if ( fuFlags & (SWP_MOVE | SWP_SIZE) )
+   if (fuFlags & (SWP_MOVE | SWP_SIZE))
    {
       if (hParent == NULLHANDLE)
       {
@@ -489,7 +476,6 @@ void OSLibMapSWPtoWINDOWPOS(PSWP pswp, PWINDOWPOS pwpos, PSWP pswpOld, HWND hPar
 
       if (fuFlags & SWP_SIZE)
       {
-         // If height is changing we MUST move to maintain top-left alignment
          if (cy != pswpOld->cy)
          {
             flags &= ~SWP_NOMOVE_W;
@@ -501,30 +487,19 @@ void OSLibMapSWPtoWINDOWPOS(PSWP pswp, PWINDOWPOS pwpos, PSWP pswpOld, HWND hPar
          cy = pswpOld->cy;
       }
 
-      //**********************************************************
-      // We'll need both a y and cy for the Y inversion code.
-      // If either wasn't passed in, calculate the current value.
-      //**********************************************************
       if ((fuFlags & SWP_MOVE) == 0)
       {
          x = pswpOld->x;
          y = pswpOld->y;
       }
 
-      //********************************************************
-      // Y inversion here... old Y is top left corner of window
-      // relative to top left of parent.
-      //********************************************************
-      y          = parentHeight - y - cy;
-      LONG oldY  = parentHeight - pswpOld->y - pswpOld->cy;
+      y         = parentHeight - y - cy;
+      LONG oldY = parentHeight - pswpOld->y - pswpOld->cy;
 
-      // Set the SWP_NOMOVE_W flag if the window has not moved in windows
-      // coordinates.
-      if ( ( pswpOld->x == x ) && ( oldY == y ) )
+      if ((pswpOld->x == x) && (oldY == y))
          flags |= SWP_NOMOVE_W;
 
-      // Set the SWP_NOSIZE_W flag if the window is not really being sized.
-      if ( ( pswpOld->cx == cx ) && ( pswpOld->cy == cy ) )
+      if ((pswpOld->cx == cx) && (pswpOld->cy == cy))
          flags |= SWP_NOSIZE_W;
    }
 
@@ -543,7 +518,6 @@ void OSLibMapSWPtoWINDOWPOS(PSWP pswp, PWINDOWPOS pwpos, PSWP pswpOld, HWND hPar
 dprintf(("window (%d,%d)(%d,%d)  client (%d,%d)(%d,%d)",
          x,y,cx,cy, pswpOld->x,pswpOld->y,pswpOld->cx,pswpOld->cy));
 
-   // Fill in the WINDOWPOS structure with the now calculated PM values.
    pwpos->flags            = (UINT)flags;
    pwpos->cy               = (int)cy;
    pwpos->cx               = (int)cx;
@@ -556,93 +530,60 @@ dprintf(("window (%d,%d)(%d,%d)  client (%d,%d)(%d,%d)",
 //******************************************************************************
 void OSLibMapWINDOWPOStoSWP(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, HWND hParent, HWND hFrame)
 {
-   HWND hWnd              = pwpos->hwnd;
-   HWND hWndInsertAfter   = pwpos->hwndInsertAfter;
-   long x                 = pwpos->x;
-   long y                 = pwpos->y;
-   long cx                = pwpos->cx;
-   long cy                = pwpos->cy;
-   UINT fuFlags           = pwpos->flags;
+   HWND hWnd            = pwpos->hwnd;
+   HWND hWndInsertAfter = pwpos->hwndInsertAfter;
+   long x               = pwpos->x;
+   long y               = pwpos->y;
+   long cx              = pwpos->cx;
+   long cy              = pwpos->cy;
+   UINT fuFlags         = pwpos->flags;
    ULONG parentHeight;
 
    HWND  hWinAfter;
    ULONG flags = 0;
-
-   //***************************************************
-   // Map constant HWNDs (e.g. HWND_DESKTOP, HWND_TOP)
-   //***************************************************
    HWND  hWindow = hWnd ? (HWND)hWnd : HWND_DESKTOP;
 
-   if ( hWndInsertAfter == HWND_TOPMOST_W )
+   if (hWndInsertAfter == HWND_TOPMOST_W)
 //      hWinAfter = HWND_TOPMOST;
       hWinAfter = HWND_TOP;
-   else if ( hWndInsertAfter == HWND_NOTOPMOST_W )
+   else if (hWndInsertAfter == HWND_NOTOPMOST_W)
 //      hWinAfter = HWND_NOTOPMOST;
       hWinAfter = HWND_TOP;
-   else if ( hWndInsertAfter == HWND_TOP_W )
+   else if (hWndInsertAfter == HWND_TOP_W)
       hWinAfter = HWND_TOP;
-   else if ( hWndInsertAfter == HWND_BOTTOM_W )
+   else if (hWndInsertAfter == HWND_BOTTOM_W)
       hWinAfter = HWND_BOTTOM;
    else
       hWinAfter = (HWND) hWndInsertAfter;
 
-   //***********************************
-   // convert Windows flags to PM flags
-   //***********************************
-   if ( ! ( fuFlags & SWP_NOSIZE_W     ) ) flags |= SWP_SIZE;
-   if ( ! ( fuFlags & SWP_NOMOVE_W     ) ) flags |= SWP_MOVE;
-   if ( ! ( fuFlags & SWP_NOZORDER_W   ) ) flags |= SWP_ZORDER;
-   if (     fuFlags & SWP_NOREDRAW_W   )   flags |= SWP_NOREDRAW;
-   if ( ! ( fuFlags & SWP_NOACTIVATE_W ) ) flags |= SWP_ACTIVATE;
-   if (     fuFlags & SWP_SHOWWINDOW_W )   flags |= SWP_SHOW;
-   if (     fuFlags & SWP_HIDEWINDOW_W )   flags |= SWP_HIDE;
-   /* no PM equivalent for SWP_FRAMECHANGED_W, SWP_NOCOPYBITS_W and SWP_NOOWNERZORDER_W */
+   if (!(fuFlags & SWP_NOSIZE_W    )) flags |= SWP_SIZE;
+   if (!(fuFlags & SWP_NOMOVE_W    )) flags |= SWP_MOVE;
+   if (!(fuFlags & SWP_NOZORDER_W  )) flags |= SWP_ZORDER;
+   if (  fuFlags & SWP_NOREDRAW_W  )  flags |= SWP_NOREDRAW;
+   if (!(fuFlags & SWP_NOACTIVATE_W)) flags |= SWP_ACTIVATE;
+   if (  fuFlags & SWP_SHOWWINDOW_W)  flags |= SWP_SHOW;
+   if (  fuFlags & SWP_HIDEWINDOW_W)  flags |= SWP_HIDE;
 
-   //**************************************************************************
-   // When moving or sizing we'll have to do some calculations for Y inversion.
-   //
-   // If moving - invert Y coord.
-   //
-   // If sizing - if the height is changing, have to move the window to
-   //             maintain correct windows position.  If we just size then the
-   //             TR corner will extend.  The Windows behaviour should be to
-   //             extend the BR corner.
-   //
-   // If this is a child window then we'll have to move within the client
-   // area of the parent.
-   //
-   // If this is an overlapped or popup window we'll have to move around
-   // within the desktop.
-   //**************************************************************************
-   if ( flags & (SWP_MOVE | SWP_SIZE) )
+   if (flags & (SWP_MOVE | SWP_SIZE))
    {
       if (hParent == NULLHANDLE)
         parentHeight = ScreenHeight;
       else
         parentHeight = OSLibGetWindowHeight(hParent);
 
-      //**********************************************************
-      // We'll need both a y and cy for the Y inversion code.
-      // If either wasn't passed in, calculate the current value.
-      //**********************************************************
       if ((flags & SWP_MOVE) == 0)
       {
          x = pswpOld->x;
          y = pswpOld->y;
 
-         // If the window is at (x,0) with a height of zero then this calculation
-         // won't quite work.  Instead of calculating the Windows y coord, we set
-         // it at (x,0).
-         if (!(y == 0 && pswpOld->cy == 0))
+         if (!((y == 0) && (pswpOld->cy == 0)))
          {
-            // convert Y coordinate back to Windows's for later conversion with new size
             y = parentHeight - y - pswpOld->cy;
          }
       }
 
       if (flags & SWP_SIZE)
       {
-         // If height is changing we MUST move to maintain top-left alignment
          if (cy != pswpOld->cy)
             flags |= SWP_MOVE;
       }
@@ -652,22 +593,15 @@ void OSLibMapWINDOWPOStoSWP(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, HWND hPar
          cy = pswpOld->cy;
       }
 
-      //********************************************************
-      // Y inversion here... old Y is top left corner of window
-      // relative to top left of parent.
-      //********************************************************
       y = parentHeight - y - cy;
 
-      // Clear the SWP_MOVE flag if the window is not really being moved.
-      if ( ( pswpOld->x == x ) && ( pswpOld->y == y ) )
+      if ((pswpOld->x == x) && (pswpOld->y == y))
          flags &= ~SWP_MOVE;
 
-      // Clear the SWP_SIZE flag if the window is not really being sized.
-      if ( ( pswpOld->cx == cx ) && ( pswpOld->cy == cy ) )
+      if ((pswpOld->cx == cx) && (pswpOld->cy == cy))
          flags &= ~SWP_SIZE;
    }
 
-   // Fill in the SWP structure with the now calculated PM values.
    pswp->fl               = flags;
    pswp->cy               = cy;
    pswp->cx               = cx;
