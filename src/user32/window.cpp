@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.59 2000-03-14 20:04:09 sandervl Exp $ */
+/* $Id: window.cpp,v 1.60 2000-04-13 18:50:44 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -106,9 +106,9 @@ HWND WIN32API CreateWindowExA(DWORD exStyle, LPCSTR className,
     cs.lpszClass      = className;
     cs.dwExStyle      = exStyle;
     if(HIWORD(className)) {
-         dprintf(("CreateWindowExA: class %s parent %x (%d,%d) (%d,%d), %x %x", className, parent, x, y, width, height, style, exStyle));
+         dprintf(("CreateWindowExA: class %s parent %x (%d,%d) (%d,%d), %x %x menu=%x", className, parent, x, y, width, height, style, exStyle, menu));
     }
-    else dprintf(("CreateWindowExA: class %d parent %x (%d,%d) (%d,%d), %x %x", className, parent, x, y, width, height, style, exStyle));
+    else dprintf(("CreateWindowExA: class %d parent %x (%d,%d) (%d,%d), %x %x menu=%x", className, parent, x, y, width, height, style, exStyle, menu));
 
     if(!strcmpi(className, MDICLIENTCLASSNAMEA)) {
         window = (Win32BaseWindow *) new Win32MDIClientWindow(&cs, classAtom, FALSE);
@@ -371,7 +371,7 @@ BOOL WIN32API IsChild( HWND hwndParent, HWND hwnd)
 
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
-        dprintf(("IsChild, window %x not found", hwnd));
+        dprintf(("IsChild %x, window %x not found", hwndParent, hwnd));
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
