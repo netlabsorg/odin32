@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.23 1999-12-16 16:53:56 cbratschi Exp $ */
+/* $Id: edit.cpp,v 1.24 1999-12-21 17:03:43 cbratschi Exp $ */
 /*
  *      Edit control
  *
@@ -8,7 +8,7 @@
  *
  *      Copyright  1999 Christoph Bratschi
  *
- * WINE version: 991031
+ * WINE version: 991212
  *
  * Status:  complete
  * Version: 5.00
@@ -2394,6 +2394,7 @@ static void EDIT_EM_ReplaceSel(HWND hwnd, EDITSTATE *es, BOOL can_undo, LPCSTR l
         es->flags |= EF_UPDATE;
         EDIT_EM_ScrollCaret(hwnd, es);
 
+        EDIT_NOTIFY_PARENT(hwnd,EN_UPDATE);
         /* FIXME: really inefficient */
         EDIT_Refresh(hwnd,es);
 }
@@ -3642,8 +3643,6 @@ static VOID EDIT_Draw(HWND hwnd,EDITSTATE *es,HDC hdc,BOOL eraseBkGnd)
   RECT rcRgn;
   BOOL rev = es->bEnableState && ((es->flags & EF_FOCUSED) || (es->style & ES_NOHIDESEL));
 
-  if (es->flags & EF_UPDATE) EDIT_NOTIFY_PARENT(hwnd, EN_UPDATE);
-
   HideCaret(hwnd);
 
   if (eraseBkGnd)
@@ -3891,6 +3890,7 @@ static void EDIT_WM_SetText(HWND hwnd, EDITSTATE *es, LPCSTR text)
         EDIT_EM_SetSel(hwnd, es, 0, 0, FALSE);
         EDIT_EM_ScrollCaret(hwnd, es);
         EDIT_UpdateScrollBars(hwnd,es,TRUE,TRUE);
+        if (es->flags & EF_UPDATE) EDIT_NOTIFY_PARENT(hwnd,EN_UPDATE);
 }
 
 

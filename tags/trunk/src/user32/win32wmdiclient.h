@@ -1,4 +1,4 @@
-/* $Id: win32wmdiclient.h,v 1.5 1999-12-17 17:18:04 cbratschi Exp $ */
+/* $Id: win32wmdiclient.h,v 1.6 1999-12-21 17:03:46 cbratschi Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -69,6 +69,8 @@ Win32BaseWindow** buildWindowArray(UINT bwaFlags,PUINT total);
         void    calcDefaultChildPos(WORD n,LPPOINT lpPos,INT delta);
         BOOL    cascade(UINT fuCascade);
         BOOL    tile(UINT fuTile);
+        BOOL    augmentFrameMenu(Win32MDIChildWindow *child);
+        BOOL    restoreFrameMenu(Win32MDIChildWindow *child);
 
 private:
   Win32MDIChildWindow *maximizedChild;

@@ -1,4 +1,4 @@
-/* $Id: win32wmdiclient.cpp,v 1.16 1999-12-18 16:31:51 cbratschi Exp $ */
+/* $Id: win32wmdiclient.cpp,v 1.17 1999-12-21 17:03:45 cbratschi Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -572,10 +572,10 @@ LRESULT Win32MDIClientWindow::setMDIMenu(HMENU hmenuFrame, HMENU hmenuWindow)
     if( hmenuFrame && hmenuFrame!=oldFrameMenu)
     {
         ::SetMenu(hwndFrame, hmenuFrame);
-#if 0
-        if( ci->hwndChildMaximized )
-            MDI_AugmentFrameMenu(ci, w->parent, ci->hwndChildMaximized );
-#endif
+
+        if (maximizedChild)
+          augmentFrameMenu(maximizedChild);
+
         return oldFrameMenu;
     }
     return 0;
@@ -823,14 +823,15 @@ BOOL Win32MDIClientWindow::tile(UINT fuTile)
 
   return TRUE;
 }
-#if 0
+
 /* ----------------------- Frame window ---------------------------- */
 
 /**********************************************************************
  *                  MDI_AugmentFrameMenu
  */
-BOOL Win32MDIClientWindow::augmentFrameMenu(HWND hChild )
+BOOL Win32MDIClientWindow::augmentFrameMenu(Win32MDIChildWindow *child)
 {
+/*
     WND*    child = WIN_FindWndPtr(hChild);
     HMENU   hSysPopup = 0;
     HBITMAP hSysMenuBitmap = 0;
@@ -842,20 +843,20 @@ BOOL Win32MDIClientWindow::augmentFrameMenu(HWND hChild )
     }
     WIN_ReleaseWndPtr(child);
 
-    /* create a copy of sysmenu popup and insert it into frame menu bar */
+    // create a copy of sysmenu popup and insert it into frame menu bar
 
     if (!(hSysPopup = LoadMenuA(GetModuleHandleA("USER32"), "SYSMENU")))
     return 0;
 
-    TRACE("\tgot popup %04x in sysmenu %04x\n",
-        hSysPopup, child->hSysMenu);
+    //TRACE("\tgot popup %04x in sysmenu %04x\n",
+    //    hSysPopup, child->hSysMenu);
 
     AppendMenuA(frame->wIDmenu,MF_HELP | MF_BITMAP,
                    SC_MINIMIZE, (LPSTR)(DWORD)HBMMENU_MBAR_MINIMIZE ) ;
     AppendMenuA(frame->wIDmenu,MF_HELP | MF_BITMAP,
                    SC_RESTORE, (LPSTR)(DWORD)HBMMENU_MBAR_RESTORE );
 
-  /* In Win 95 look, the system menu is replaced by the child icon */
+  // In Win 95 look, the system menu is replaced by the child icon
 
   if(TWEAK_WineLook > WIN31_LOOK)
   {
@@ -899,7 +900,7 @@ BOOL Win32MDIClientWindow::augmentFrameMenu(HWND hChild )
     return 0;
     }
 
-    /* The close button is only present in Win 95 look */
+    // The close button is only present in Win 95 look
     if(TWEAK_WineLook > WIN31_LOOK)
     {
         AppendMenuA(frame->wIDmenu,MF_HELP | MF_BITMAP,
@@ -911,17 +912,18 @@ BOOL Win32MDIClientWindow::augmentFrameMenu(HWND hChild )
     EnableMenuItem(hSysPopup, SC_MAXIMIZE, MF_BYCOMMAND | MF_GRAYED);
     SetMenuDefaultItem(hSysPopup, SC_CLOSE, FALSE);
 
-    /* redraw menu */
+    // redraw menu
     DrawMenuBar(frame->hwndSelf);
-
+*/
     return 1;
 }
 
 /**********************************************************************
  *                  MDI_RestoreFrameMenu
  */
-static BOOL MDI_RestoreFrameMenu( WND *frameWnd, HWND hChild )
+BOOL Win32MDIClientWindow::restoreFrameMenu(Win32MDIChildWindow *child)
 {
+/*
     MENUITEMINFOA menuInfo;
     INT nItems = GetMenuItemCount(frameWnd->wIDmenu) - 1;
     UINT iId = GetMenuItemID(frameWnd->wIDmenu,nItems) ;
@@ -935,6 +937,7 @@ static BOOL MDI_RestoreFrameMenu( WND *frameWnd, HWND hChild )
      * Remove the system menu, If that menu is the icon of the window
      * as it is in win95, we have to delete the bitmap.
      */
+/*
     menuInfo.cbSize = sizeof(MENUITEMINFOA);
     menuInfo.fMask  = MIIM_DATA | MIIM_TYPE;
 
@@ -954,19 +957,18 @@ static BOOL MDI_RestoreFrameMenu( WND *frameWnd, HWND hChild )
 
     if(TWEAK_WineLook > WIN31_LOOK)
     {
-        /* close */
+        // close
         DeleteMenu(frameWnd->wIDmenu,GetMenuItemCount(frameWnd->wIDmenu) - 1,MF_BYPOSITION);
     }
-    /* restore */
+    // restore
     DeleteMenu(frameWnd->wIDmenu,GetMenuItemCount(frameWnd->wIDmenu) - 1,MF_BYPOSITION);
-    /* minimize */
+    // minimize
     DeleteMenu(frameWnd->wIDmenu,GetMenuItemCount(frameWnd->wIDmenu) - 1,MF_BYPOSITION);
 
     DrawMenuBar(frameWnd->hwndSelf);
-
+*/
     return 1;
 }
-#endif
 
 /***********************************************************************
  *           CalcChildScroll   (USER.462)
