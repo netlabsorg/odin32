@@ -1,4 +1,3 @@
-/* $Id: olefont.c,v 1.3 2001-09-05 13:19:00 bird Exp $ */
 /*
  * OLE Font encapsulation implementation
  *

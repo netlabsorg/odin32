@@ -1,4 +1,3 @@
-/* $Id: variant.c,v 1.5 2001-09-05 13:19:02 bird Exp $ */
 /*
  * VARIANT
  *

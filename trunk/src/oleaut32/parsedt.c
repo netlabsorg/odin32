@@ -1,4 +1,3 @@
-/* $Id: parsedt.c,v 1.2 2001-09-05 13:19:01 bird Exp $ */
 /*
 PostgreSQL Data Base Management System (formerly known as Postgres, then
 as Postgres95).
