@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.37 2000-08-11 10:56:17 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.38 2000-08-12 07:32:19 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -781,12 +781,19 @@ DWORD OSLibDosCreateFile(CHAR *lpszFile,
    if(fuAccess & GENERIC_WRITE_W)
        	openMode |= OPEN_ACCESS_WRITEONLY;
 
+#if 0
+   //SvL: Not true; verified in NT! (also messed up access of files on 
+   //     readonly volumes)
+   //     CreateFile with OPEN_ALWAYS & GENERIC_READ on non-existing file
+   //     -> creates 0 size file, WriteFile is not allowed
+   //     Same in OS/2.
    /* if creating a file, access cannot be readonly! */
    if (openFlag & OPEN_ACTION_CREATE_IF_NEW &&
        (!(openMode & OPEN_ACCESS_READWRITE) &&
         !(openMode & OPEN_ACCESS_WRITEONLY))) {
         openMode |= OPEN_ACCESS_READWRITE;
    }
+#endif
 
    int retry = 0;
    while(retry < 2) 
