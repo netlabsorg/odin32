@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.86 2003-01-15 10:41:46 sandervl Exp $
+# $Id: makefile,v 1.87 2003-02-28 10:32:01 sandervl Exp $
 
 #
 # Odin32 API
@@ -26,9 +26,9 @@
 #
 # Exclude lists which is to be passed in to DOWITHDIRS
 #
-NOTTOBEMADE = CVS;pe2lx;odin32api;odinwps;spy;odinldr;ws2help;win16ldr;oslib;custombuild;opengl   # generally not made
+NOTTOBEMADE = CVS;pe2lx;odin32api;odinwps;spy;odinldr;ws2help;win16ldr;oslib;custombuild;opengl;programs;ntdll;crtdll;msvcrt   # generally not made
 NOTDLLS     = $(NOTTOBEMADE);peldr;dllentry;guidlib     # not dlls
-NOTHAVELIBS = $(NOTTOBEMADE);peldr;crtdll;              # don't generate libs
+NOTHAVELIBS = $(NOTTOBEMADE);peldr                      # don't generate libs
 NOTWIN32DLLS= $(NOTDLLS);win32k;odincrt;dllentry        # not win32 dlls.
 
 
@@ -88,12 +88,12 @@ dep:
         $(CMDQD_SUB) $(MAKE_CMD) NODEP=1 dep
     $(CMDQD_WAIT)
 
-clean:
+clean cleanall:
     @$(DOWITHDIRS) -e$(NOTTOBEMADE) -c -lcln$(CCENV)$(DEBUG) $(EXTRA) \
-        $(CMDQD_SUB)  $(MAKE_CMD) NODEP=1 clean
+        $(CMDQD_SUB)  $(MAKE_CMD) NODEP=1 $@
     $(CMDQD_WAIT)
 
-$(COMMONRULES:clean dep lib all=):
+$(COMMONRULES:cleanall clean dep lib all=):
     @$(DOWITHDIRS) -e$(NOTTOBEMADE) -c -l$@$(CCENV)$(DEBUG) $(EXTRA) \
         $(MAKE_CMD) $@
 
