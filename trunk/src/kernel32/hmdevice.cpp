@@ -1,4 +1,4 @@
-/* $Id: hmdevice.cpp,v 1.12 1999-12-10 14:06:11 sandervl Exp $ */
+/* $Id: hmdevice.cpp,v 1.13 1999-12-17 17:25:10 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -19,7 +19,6 @@
 
 #include <odin.h>
 #include <os2win.h>
-#include <win32type.h>
 #include <misc.h>
 #include "HandleManager.h"
 #include "HMDevice.h"
