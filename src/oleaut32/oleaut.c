@@ -2,6 +2,12 @@
  *	OLEAUT32
  *
  */
+#ifdef __WIN32OS2__
+#define HAVE_FLOAT_H
+#define WINE_LARGE_INTEGER
+#include "oleaut32.h"
+#endif
+
 #include <string.h>
 
 #include "windef.h"
@@ -11,7 +17,9 @@
 #include "winerror.h"
 
 #include "ole2.h"
-#include "heap.h"
+#include "olectl.h"
+#include "wine/obj_oleaut.h"
+#include "wine/obj_olefont.h"
 #include "debugtools.h"
 
 DEFAULT_DEBUG_CHANNEL(ole);
@@ -138,7 +146,6 @@ UINT WINAPI OaBuildVersion()
     }
 }
 
-#ifndef __WIN32OS2__
 /***********************************************************************
  *		DllRegisterServer
  */
@@ -154,4 +161,31 @@ HRESULT WINAPI OLEAUT32_DllUnregisterServer() {
     FIXME("stub!\n");
     return S_OK;
 }
-#endif //__WIN32OS2__
+
+
+extern void _get_STDFONT_CF(LPVOID);
+
+/***********************************************************************
+ *		DllGetClassObject (OLEAUT32.1)
+ */
+HRESULT WINAPI OLEAUT32_DllGetClassObject(REFCLSID rclsid, REFIID iid,LPVOID *ppv)
+{
+    *ppv = NULL;
+    if (IsEqualGUID(rclsid,&CLSID_StdFont)) {
+	if (IsEqualGUID(iid,&IID_IClassFactory)) {
+	    _get_STDFONT_CF(ppv);
+	    IClassFactory_AddRef((IClassFactory*)*ppv);
+	    return S_OK;
+	}
+    }
+    FIXME("\n\tCLSID:\t%s,\n\tIID:\t%s\n",debugstr_guid(rclsid),debugstr_guid(iid));
+    return CLASS_E_CLASSNOTAVAILABLE;
+}
+
+/***********************************************************************
+ *		DllCanUnloadNow (OLEAUT32.410)
+ */
+HRESULT WINAPI OLEAUT32_DllCanUnloadNow() {
+    FIXME("(), stub!\n");
+    return S_FALSE;
+}

@@ -7,22 +7,23 @@
  *
  * TODO: Type coercion is implemented in variant.c but not called yet.
  */
-#ifdef __WIN32OS2__
-#define HAVE_FLOAT_H
-#define WINE_LARGE_INTEGER
-#include "oleaut32.h"
-#endif
+
+#include "config.h"
 
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <ctype.h>
+
+#include "windef.h"
+#include "ole.h"
+#include "oleauto.h"
 #include "winerror.h"
 #include "winreg.h"         /* for HKEY_LOCAL_MACHINE */
 #include "winnls.h"         /* for PRIMARYLANGID */
-#include "ole.h"
-#include "heap.h"
+
 #include "wine/obj_oleaut.h"
+
 #include "debugtools.h"
 
 DEFAULT_DEBUG_CHANNEL(ole);
@@ -30,7 +31,7 @@ DECLARE_DEBUG_CHANNEL(typelib);
 
 
 /******************************************************************************
- *         DispInvoke    (OLEAUT32.30)
+ *		DispInvoke (OLEAUT32.30)
  *
  *
  * Calls method of an object through its IDispatch interface.
@@ -42,16 +43,15 @@ DECLARE_DEBUG_CHANNEL(typelib);
  *
  * 		S_OK on success.
  */
-HRESULT WINAPI
-DispInvoke(VOID*            _this,          /* object instance */
-           ITypeInfo*       ptinfo,         /* object's type info */
-           DISPID           dispidMember,   /* member id */
-           USHORT           wFlags,         /* kind of method call */
-           DISPPARAMS*      pparams,        /* array of arguments */
-           VARIANT*         pvarResult,     /* result of method call */
-           EXCEPINFO*       pexcepinfo,     /* information about exception */
-           UINT*            puArgErr        /* index of bad argument(if any) */
-          )
+HRESULT WINAPI DispInvoke(
+	VOID       *_this,        /* [in] object instance */
+	ITypeInfo  *ptinfo,       /* [in] object's type info */
+	DISPID      dispidMember, /* [in] member id */
+	USHORT      wFlags,       /* [in] kind of method call */
+	DISPPARAMS *pparams,      /* [in] array of arguments */
+	VARIANT    *pvarResult,   /* [out] result of method call */
+	EXCEPINFO  *pexcepinfo,   /* [out] information about exception */
+	UINT       *puArgErr)     /* [out] index of bad argument(if any) */
 {
     HRESULT hr = E_FAIL;
 
@@ -73,7 +73,7 @@ DispInvoke(VOID*            _this,          /* object instance */
 
 
 /******************************************************************************
- *         DispGetIDsOfNames (OLEAUT32.29)
+ *		DispGetIDsOfNames (OLEAUT32.29)
  *
  * Convert a set of names to dispids, based on information 
  * contained in object's type library.
@@ -85,11 +85,11 @@ DispInvoke(VOID*            _this,          /* object instance */
  *
  * 		S_OK on success.
  */
-HRESULT WINAPI
-DispGetIDsOfNames(ITypeInfo* ptinfo,
-                  OLECHAR**  rgszNames,
-                  UINT       cNames,
-                  DISPID*    rgdispid)
+HRESULT WINAPI DispGetIDsOfNames(
+	ITypeInfo  *ptinfo,    /* [in] */
+	OLECHAR   **rgszNames, /* [in] */
+	UINT        cNames,    /* [in] */
+	DISPID     *rgdispid)  /* [out] */
 {
     HRESULT hr = E_FAIL;
 
@@ -102,7 +102,7 @@ DispGetIDsOfNames(ITypeInfo* ptinfo,
 }
 
 /******************************************************************************
- *         DispGetParam    (OLEAUT32.30)
+ *		DispGetParam (OLEAUT32.28)
  *
  * Retrive a parameter from a DISPPARAMS structures and coerce it to
  * specified variant type
@@ -114,15 +114,33 @@ DispGetIDsOfNames(ITypeInfo* ptinfo,
  *
  * 		S_OK on success.
  */
-HRESULT WINAPI DispGetParam(DISPPARAMS* pdispparams, UINT position,
-            VARTYPE vtTarg, VARIANT* pvarResult, UINT* puArgErr)
+HRESULT WINAPI DispGetParam(
+	DISPPARAMS *pdispparams, /* [in] */
+	UINT        position,    /* [in] */
+	VARTYPE     vtTarg,      /* [in] */
+	VARIANT    *pvarResult,  /* [out] */
+	UINT       *puArgErr)    /* [out] */
 {
-    HRESULT hr = E_FAIL;
+    /* position is counted backwards */
+    UINT pos;
+    HRESULT hr;
 
-    /**
-     * TODO : Call VariantChangeTypeEx with LCID 0 (system)
-     */
+    TRACE("position=%d, cArgs=%d, cNamedArgs=%d\n",
+          position, pdispparams->cArgs, pdispparams->cNamedArgs);
+    if (position < pdispparams->cArgs) {
+      /* positional arg? */
+      pos = pdispparams->cArgs - position - 1;
+    } else {
+      /* FIXME: is this how to handle named args? */
+      for (pos=0; pos<pdispparams->cNamedArgs; pos++)
+        if (pdispparams->rgdispidNamedArgs[pos] == position) break;
 
-    FIXME("Coercion of arguments not implemented\n");
-    return (hr);
+      if (pos==pdispparams->cNamedArgs)
+        return DISP_E_PARAMNOTFOUND;
+    }
+    hr = VariantChangeType(pvarResult,
+                           &pdispparams->rgvarg[pos],
+                           0, vtTarg);
+    if (hr == DISP_E_TYPEMISMATCH) *puArgErr = pos;
+    return hr;
 }

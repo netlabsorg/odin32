@@ -1,10 +1,10 @@
-;/* $Id: oleaut32.def,v 1.7 2001-08-23 18:11:20 sandervl Exp $ */
+;/* $Id: oleaut32.def,v 1.8 2001-10-03 19:21:59 sandervl Exp $ */
 LIBRARY OLAUTOS2 INITINSTANCE
 DESCRIPTION 'Odin32 System DLL - OleAut32'
 DATA MULTIPLE NONSHARED
 
 EXPORTS
-DllGetClassObject = _DllGetClassObject@12  @1
+DllGetClassObject = _OLEAUT32_DllGetClassObject@12  @1
 SysAllocString = _SysAllocString@4  @2
 SysReAllocString = _SysReAllocString@8  @3
 SysAllocStringLen = _SysAllocStringLen@8  @4
@@ -253,8 +253,8 @@ LPSAFEARRAY_UserFree = _LPSAFEARRAY_UserFree@8  @294
 LPSAFEARRAY_Size = _LPSAFEARRAY_Size@0  @295
 LPSAFEARRAY_Marshal = _LPSAFEARRAY_Marshal@0  @296
 LPSAFEARRAY_Unmarshal = _LPSAFEARRAY_Unmarshal@0  @297
-DllRegisterServer = _DllRegisterServer@0  @320
-DllUnregisterServer = _DllUnregisterServer@0  @321
+DllRegisterServer = _OLEAUT32_DllRegisterServer@0  @320
+DllUnregisterServer = _OLEAUT32_DllUnregisterServer@0  @321
 VarDateFromUdate = _VarDateFromUdate@12  @330
 VarUdateFromDate = _VarUdateFromDate@16  @331
 GetAltMonthNames = _GetAltMonthNames@8  @332
@@ -278,7 +278,7 @@ UserMSG_from_local = _UserMSG_from_local@0  @396
 UserMSG_to_local = _UserMSG_to_local@0  @397
 UserMSG_free_inst = _UserMSG_free_inst@0  @398
 UserMSG_free_local = _UserMSG_free_local@0  @399
-DllCanUnloadNow = _DllCanUnloadNow@0  @410
+DllCanUnloadNow = _OLEAUT32_DllCanUnloadNow@0  @410
 SafeArrayCreateVector = _SafeArrayCreateVector@12  @411
 SafeArrayCopyData = _SafeArrayCopyData@8  @412
 VectorFromBstr = _VectorFromBstr@8  @413
