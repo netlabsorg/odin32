@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.42 2000-02-16 14:34:30 sandervl Exp $ */
+/* $Id: pmframe.cpp,v 1.43 2000-02-20 18:28:32 cbratschi Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -25,7 +25,7 @@
 #include "caret.h"
 #include "oslibmsg.h"
 
-#define DBG_LOCALLOG	DBG_pmframe
+#define DBG_LOCALLOG    DBG_pmframe
 #include "dbglocal.h"
 
 #define PMFRAMELOG
@@ -360,6 +360,9 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
 
             if (redrawAll)
             {
+              //CB: redraw all children for now
+              //    -> problems with update region if we don't do it
+              //       todo: rewrite whole handling
               WinInvalidateRect(hwnd,NULL,TRUE);
             }
             else
@@ -389,7 +392,7 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
               arcl[3].yBottom = 0;
               arcl[3].yTop = rect.yBottom;
 
-              HRGN hrgn = GpiCreateRegion(hps,3,(PRECTL)&arcl);
+              HRGN hrgn = GpiCreateRegion(hps,4,(PRECTL)&arcl);
 
               WinInvalidateRegion(hwnd,hrgn,FALSE);
               GpiDestroyRegion(hps,hrgn);
@@ -419,6 +422,7 @@ PosChangedEnd:
     case WM_CALCVALIDRECTS:
     {
       //don't redraw here or PM redraw the whole frame (done in WM_WINDOWPOSCHANGED)
+      dprintf(("PMFRAME: WM_CALCVALIDRECTS"));
       RestoreOS2TIB();
       return (MRESULT)(CVR_ALIGNLEFT | CVR_ALIGNTOP);
     }

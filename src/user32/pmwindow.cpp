@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.85 2000-02-16 14:34:31 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.86 2000-02-20 18:28:32 cbratschi Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -37,7 +37,7 @@
 #include "timer.h"
 #include <codepage.h>
 
-#define DBG_LOCALLOG	DBG_pmwindow
+#define DBG_LOCALLOG    DBG_pmwindow
 #include "dbglocal.h"
 
 HMQ  hmq = 0;                             /* Message queue handle         */
@@ -309,6 +309,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
       return (MRESULT)res;
     }
 #else
+      dprintf(("PMWINDOW: WM_CALCVALIDRECTS"));
       RestoreOS2TIB();
       return (MRESULT)(CVR_ALIGNLEFT | CVR_ALIGNTOP);
 #endif
