@@ -1,4 +1,4 @@
-/* $Id: winimagelx.cpp,v 1.14 2002-02-03 13:16:22 sandervl Exp $ */
+/* $Id: winimagelx.cpp,v 1.15 2002-07-15 14:28:53 sandervl Exp $ */
 
 /*
  * Win32 LX Image base class
@@ -65,134 +65,134 @@ BYTE dosHeader[16*15] = {
 Win32LxImage::Win32LxImage(HINSTANCE hInstance, PVOID pResData)
                : Win32ImageBase(hInstance), header(0)
 {
- APIRET rc;
- char  *name;
+    APIRET rc;
+    char  *name;
 
-  szFileName[0] = 0;
+    szFileName[0] = 0;
 
-  if(lpszCustomDllName) {
+    if(lpszCustomDllName) {
        name = lpszCustomDllName;
        this->dwOrdinalBase = ::dwOrdinalBase;
-  }
-  else {
+    }
+    else {
        name = OSLibGetDllName(hinstance);
        this->dwOrdinalBase = 0;
-  }
+    }
 
-  strcpy(szFileName, name);
-  strupr(szFileName);
+    strcpy(szFileName, name);
+    strupr(szFileName);
 
-  setFullPath(szFileName);
+    setFullPath(szFileName);
 
-  //Pointer to PE resource tree generates by wrc (or NULL for system dlls)
-  pResRootDir = (PIMAGE_RESOURCE_DIRECTORY)pResData;
+    //Pointer to PE resource tree generates by wrc (or NULL for system dlls)
+    pResRootDir = (PIMAGE_RESOURCE_DIRECTORY)pResData;
 
-  //ulRVAResourceSection contains the virtual address of the imagebase in the PE header
-  //for the resource section (images loaded by the pe.exe)
-  //For LX images, this is 0 as OffsetToData contains a relative offset
-  ulRVAResourceSection = 0;
+    //ulRVAResourceSection contains the virtual address of the imagebase in the PE header
+    //for the resource section (images loaded by the pe.exe)
+    //For LX images, this is 0 as OffsetToData contains a relative offset
+    ulRVAResourceSection = 0;
 }
 //******************************************************************************
 //******************************************************************************
 Win32LxImage::~Win32LxImage()
 {
-  if(header) {
-	DosFreeMem(header);
-  }
+    if(header) {
+    	DosFreeMem(header);
+    }
 }
 //******************************************************************************
 //******************************************************************************
 ULONG Win32LxImage::getApi(char *name)
 {
-  APIRET      rc;
-  ULONG       apiaddr;
+    APIRET      rc;
+    ULONG       apiaddr;
 
-  rc = DosQueryProcAddr(hinstanceOS2, 0, name, (PFN *)&apiaddr);
-  if(rc)
-  {
-	dprintf(("Win32LxImage::getApi %x %s -> rc = %d", hinstanceOS2, name, rc));
-	return(0);
-  }
-  return(apiaddr);
+    rc = DosQueryProcAddr(hinstanceOS2, 0, name, (PFN *)&apiaddr);
+    if(rc)
+    {
+	    dprintf(("Win32LxImage::getApi %x %s -> rc = %d", hinstanceOS2, name, rc));
+	    return(0);
+    }
+    return(apiaddr);
 }
 //******************************************************************************
 //******************************************************************************
 ULONG Win32LxImage::getApi(int ordinal)
 {
- APIRET      rc;
- ULONG       apiaddr;
+    APIRET      rc;
+    ULONG       apiaddr;
 
-  rc = DosQueryProcAddr(hinstanceOS2, dwOrdinalBase+ordinal, NULL, (PFN *)&apiaddr);
-  if(rc) {
-	dprintf(("Win32LxImage::getApi %x %d -> rc = %d", hinstanceOS2, ordinal, rc));
-	return(0);
-  }
-  return(apiaddr);
+    rc = DosQueryProcAddr(hinstanceOS2, dwOrdinalBase+ordinal, NULL, (PFN *)&apiaddr);
+    if(rc) {
+    	dprintf(("Win32LxImage::getApi %x %d -> rc = %d", hinstanceOS2, ordinal, rc));
+    	return(0);
+    }
+    return(apiaddr);
 }
 //******************************************************************************
 //******************************************************************************
 LPVOID Win32LxImage::buildHeader(DWORD MajorImageVersion, DWORD MinorImageVersion,
                                  DWORD Subsystem) 
 {
- APIRET rc;
- IMAGE_DOS_HEADER *pdosheader;
- PIMAGE_OPTIONAL_HEADER poh;
- PIMAGE_FILE_HEADER     pfh;
- DWORD *ntsig;
+    APIRET rc;
+    IMAGE_DOS_HEADER *pdosheader;
+    PIMAGE_OPTIONAL_HEADER poh;
+    PIMAGE_FILE_HEADER     pfh;
+    DWORD *ntsig;
 
-  rc = DosAllocMem(&header, 4096, PAG_READ | PAG_WRITE | PAG_COMMIT);
-  if(rc) {
-	dprintf(("ERROR: buildHeader DosAllocMem failed!! (rc=%x)", rc));
+    rc = DosAllocMem(&header, 4096, PAG_READ | PAG_WRITE | PAG_COMMIT | flAllocMem);
+    if(rc) {
+    	dprintf(("ERROR: buildHeader DosAllocMem failed!! (rc=%x)", rc));
         DebugInt3();
-	return NULL;
-  }
-  memcpy(header, dosHeader, sizeof(dosHeader));
-  ntsig  = (DWORD *)((LPBYTE)header + sizeof(dosHeader));
-  *ntsig = IMAGE_NT_SIGNATURE;
-  pfh    = (PIMAGE_FILE_HEADER)(ntsig+1);
-  pfh->Machine              = IMAGE_FILE_MACHINE_I386;
-  pfh->NumberOfSections     = 0;
-  pfh->TimeDateStamp        = 0x3794f60f;
-  pfh->PointerToSymbolTable = 0;
-  pfh->NumberOfSymbols      = 0;
-  pfh->SizeOfOptionalHeader = sizeof(IMAGE_OPTIONAL_HEADER);
-  pfh->Characteristics      = IMAGE_FILE_DLL | IMAGE_FILE_32BIT_MACHINE | 
-                              IMAGE_FILE_DEBUG_STRIPPED | IMAGE_FILE_EXECUTABLE_IMAGE | 
-                              IMAGE_FILE_RELOCS_STRIPPED;
-  poh    = (PIMAGE_OPTIONAL_HEADER)(pfh+1);
-  poh->Magic                       = IMAGE_NT_OPTIONAL_HDR_MAGIC;
-  poh->MajorLinkerVersion          = 0x3;
-  poh->MinorLinkerVersion          = 0xA;
-  poh->SizeOfCode                  = 0;
-  poh->SizeOfInitializedData       = 0;
-  poh->SizeOfUninitializedData     = 0;
-  poh->AddressOfEntryPoint         = 0;
-  poh->BaseOfCode                  = 0;
-  poh->BaseOfData                  = 0;
-  poh->ImageBase                   = 0;
-  poh->SectionAlignment            = 4096;
-  poh->FileAlignment               = 512;
-  poh->MajorOperatingSystemVersion = MajorImageVersion;
-  poh->MinorOperatingSystemVersion = MinorImageVersion;
-  poh->MajorImageVersion           = MajorImageVersion;
-  poh->MinorImageVersion           = MinorImageVersion;
-  poh->MajorSubsystemVersion       = ODINNT_MAJOR_VERSION;
-  poh->MinorSubsystemVersion       = ODINNT_MINOR_VERSION;
-  poh->Reserved1                   = 0;
-  poh->SizeOfImage                 = 0;
-  poh->SizeOfHeaders               = 1024;
-  poh->CheckSum                    = 0;
-  poh->Subsystem                   = Subsystem;
-  poh->DllCharacteristics          = 0;
-  poh->SizeOfStackReserve          = 1*1024*1024;
-  poh->SizeOfStackCommit           = 4096;
-  poh->SizeOfHeapReserve           = 1*1024*1024;
-  poh->SizeOfHeapCommit            = 4096;
-  poh->LoaderFlags                 = 0;
-  poh->NumberOfRvaAndSizes         = 0;
+	    return NULL;
+    }
+    memcpy(header, dosHeader, sizeof(dosHeader));
+    ntsig  = (DWORD *)((LPBYTE)header + sizeof(dosHeader));
+    *ntsig = IMAGE_NT_SIGNATURE;
+    pfh    = (PIMAGE_FILE_HEADER)(ntsig+1);
+    pfh->Machine              = IMAGE_FILE_MACHINE_I386;
+    pfh->NumberOfSections     = 0;
+    pfh->TimeDateStamp        = 0x3794f60f;
+    pfh->PointerToSymbolTable = 0;
+    pfh->NumberOfSymbols      = 0;
+    pfh->SizeOfOptionalHeader = sizeof(IMAGE_OPTIONAL_HEADER);
+    pfh->Characteristics      = IMAGE_FILE_DLL | IMAGE_FILE_32BIT_MACHINE | 
+                                IMAGE_FILE_DEBUG_STRIPPED | IMAGE_FILE_EXECUTABLE_IMAGE | 
+                                IMAGE_FILE_RELOCS_STRIPPED;
+    poh    = (PIMAGE_OPTIONAL_HEADER)(pfh+1);
+    poh->Magic                       = IMAGE_NT_OPTIONAL_HDR_MAGIC;
+    poh->MajorLinkerVersion          = 0x3;
+    poh->MinorLinkerVersion          = 0xA;
+    poh->SizeOfCode                  = 0;
+    poh->SizeOfInitializedData       = 0;
+    poh->SizeOfUninitializedData     = 0;
+    poh->AddressOfEntryPoint         = 0;
+    poh->BaseOfCode                  = 0;
+    poh->BaseOfData                  = 0;
+    poh->ImageBase                   = 0;
+    poh->SectionAlignment            = 4096;
+    poh->FileAlignment               = 512;
+    poh->MajorOperatingSystemVersion = MajorImageVersion;
+    poh->MinorOperatingSystemVersion = MinorImageVersion;
+    poh->MajorImageVersion           = MajorImageVersion;
+    poh->MinorImageVersion           = MinorImageVersion;
+    poh->MajorSubsystemVersion       = ODINNT_MAJOR_VERSION;
+    poh->MinorSubsystemVersion       = ODINNT_MINOR_VERSION;
+    poh->Reserved1                   = 0;
+    poh->SizeOfImage                 = 0;
+    poh->SizeOfHeaders               = 1024;
+    poh->CheckSum                    = 0;
+    poh->Subsystem                   = Subsystem;
+    poh->DllCharacteristics          = 0;
+    poh->SizeOfStackReserve          = 1*1024*1024;
+    poh->SizeOfStackCommit           = 4096;
+    poh->SizeOfHeapReserve           = 1*1024*1024;
+    poh->SizeOfHeapCommit            = 4096;
+    poh->LoaderFlags                 = 0;
+    poh->NumberOfRvaAndSizes         = 0;
 //  poh->DataDirectory[0]
 
-  return header;
+    return header;
 }
 //******************************************************************************
 //******************************************************************************

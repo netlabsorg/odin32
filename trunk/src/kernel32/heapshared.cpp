@@ -1,4 +1,4 @@
-/* $Id: heapshared.cpp,v 1.8 2001-04-22 09:00:19 sandervl Exp $ */
+/* $Id: heapshared.cpp,v 1.9 2002-07-15 14:28:51 sandervl Exp $ */
 /*
  * Shared heap functions for OS/2
  *
@@ -38,147 +38,142 @@ void _LNK_CONV releaseShared(Heap_t pHeap, void *block, size_t size);
 //******************************************************************************
 BOOL InitializeSharedHeap()
 {
- APIRET rc;
+    APIRET rc;
 
-  if(pSharedMem == NULL) {
-  	rc = DosAllocSharedMem(&pSharedMem, NULL, MAX_HEAPSIZE, PAG_READ|PAG_WRITE|OBJ_GETTABLE);
-  	if(rc != 0) {
-		dprintf(("InitializeSharedHeap: DosAllocSharedMem failed with %d", rc));
-		return FALSE;
-	}
-	rc = DosSetMem(pSharedMem, INCR_HEAPSIZE, PAG_READ|PAG_WRITE|PAG_COMMIT);
-	if(rc != 0) {
-		DosFreeMem(pSharedMem);
-		dprintf(("InitializeSharedHeap: DosSetMem failed with %d", rc));
-		return FALSE;
-	}
-  	sharedHeap = _ucreate(pSharedMem, INCR_HEAPSIZE, _BLOCK_CLEAN,
-        	              _HEAP_REGULAR|_HEAP_SHARED,
-                	      getmoreShared, releaseShared);
+    if(pSharedMem == NULL) {
+  	    rc = DosAllocSharedMem(&pSharedMem, NULL, MAX_HEAPSIZE, PAG_READ|PAG_WRITE|OBJ_GETTABLE);
+  	    if(rc != 0) {
+    		dprintf(("InitializeSharedHeap: DosAllocSharedMem failed with %d", rc));
+		    return FALSE;
+	    }
+	    rc = DosSetMem(pSharedMem, INCR_HEAPSIZE, PAG_READ|PAG_WRITE|PAG_COMMIT);
+	    if(rc != 0) {
+    		DosFreeMem(pSharedMem);
+		    dprintf(("InitializeSharedHeap: DosSetMem failed with %d", rc));
+		    return FALSE;
+	    }
+  	    sharedHeap = _ucreate(pSharedMem, INCR_HEAPSIZE, _BLOCK_CLEAN, _HEAP_REGULAR|_HEAP_SHARED,
+                	          getmoreShared, releaseShared);
 
-  	if(sharedHeap == NULL) {
-		DosFreeMem(pSharedMem);
-		dprintf(("InitializeSharedHeap: _ucreate failed!"));
-		return FALSE;
-	}
-  	dprintf(("KERNEL32: First InitializeSharedHeap %x %x", pSharedMem, sharedHeap));
-	for(int i=0;i<INCR_HEAPSIZE/PAGE_SIZE;i++) {
-	  	pageBitmap[i] = 1; //mark as committed
-	}
-  }
-  else {
-	if(DosGetSharedMem(pSharedMem, PAG_READ|PAG_WRITE) != 0) {
-		dprintf(("InitializeSharedHeap: DosGetSharedMem failed!"));
-		return FALSE;
-	}
-  	dprintf(("KERNEL32: InitializeSharedHeap %x %x refcount %d", pSharedMem, sharedHeap, refCount));
-	if(_uopen(sharedHeap) != 0) {
-		dprintf(("InitializeSharedHeap: unable to open shared heap!"));
-		return FALSE;
-	}
-  }
-  refCount++;
-  return TRUE;
+  	    if(sharedHeap == NULL) {
+    		DosFreeMem(pSharedMem);
+		    dprintf(("InitializeSharedHeap: _ucreate failed!"));
+		    return FALSE;
+	    }
+  	    dprintf(("KERNEL32: First InitializeSharedHeap %x %x", pSharedMem, sharedHeap));
+	    for(int i=0;i<INCR_HEAPSIZE/PAGE_SIZE;i++) {
+    	  	pageBitmap[i] = 1; //mark as committed
+    	}
+    }
+    else {
+    	if(DosGetSharedMem(pSharedMem, PAG_READ|PAG_WRITE) != 0) {
+		    dprintf(("InitializeSharedHeap: DosGetSharedMem failed!"));
+		    return FALSE;
+	    }
+  	    dprintf(("KERNEL32: InitializeSharedHeap %x %x refcount %d", pSharedMem, sharedHeap, refCount));
+	    if(_uopen(sharedHeap) != 0) {
+    		dprintf(("InitializeSharedHeap: unable to open shared heap!"));
+		    return FALSE;
+	    }
+    }
+    refCount++;
+    return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
 void DestroySharedHeap()
 {
-  dprintf(("KERNEL32: DestroySharedHeap %d", refCount));
-  if(--refCount == 0) {
-  	if(sharedHeap) {
-		_uclose(sharedHeap);
-		_udestroy(sharedHeap, _FORCE);
-		sharedHeap = NULL;
-	}
-	if(pSharedMem) {
-		DosFreeMem(pSharedMem);
-		pSharedMem = NULL;
-	}
-  }
-  else {
-	_uclose(sharedHeap);
-  }
+    dprintf(("KERNEL32: DestroySharedHeap %d", refCount));
+    if(--refCount == 0) {
+  	    if(sharedHeap) {
+    		_uclose(sharedHeap);
+		    _udestroy(sharedHeap, _FORCE);
+		    sharedHeap = NULL;
+	    }
+	    if(pSharedMem) {
+    		DosFreeMem(pSharedMem);
+		    pSharedMem = NULL;
+	    }
+    }
+    else {
+    	_uclose(sharedHeap);
+    }
 }
 //******************************************************************************
 //******************************************************************************
 ULONG GetPageRangeFree(ULONG pageoffset)
 {
-  dprintf(("KERNEL32: GetPageRangeFree(%08xh)\n",
-           pageoffset));
+    dprintf(("KERNEL32: GetPageRangeFree(%08xh)", pageoffset));
 
-  for(int i=pageoffset;i<MAX_HEAPPAGES;i++) {
-	if(pageBitmap[i] == 1) {
-		break;
-	}
-  }
-  return i-pageoffset;
+    for(int i=pageoffset;i<MAX_HEAPPAGES;i++) {
+        if(pageBitmap[i] == 1) {
+		    break;
+	    }
+    }
+    return i-pageoffset;
 }
 //******************************************************************************
 //******************************************************************************
 void * _LNK_CONV getmoreShared(Heap_t pHeap, size_t *size, int *clean)
 {
- APIRET rc;
- ULONG newsize;
- PVOID newblock;
+    APIRET rc;
+    ULONG newsize;
+    PVOID newblock;
 
- dprintf(("KERNEL32: getmoreShared(%08xh, %08xh, %08xh)\n",
-          pHeap,
-          *size,
-          *clean));
+    dprintf(("KERNEL32: getmoreShared(%08xh, %08xh, %08xh)\n", pHeap, *size, *clean));
 
-  /* round the size up to a multiple of 4K */
-  // *size = (*size / 4096) * 4096 + 4096;
-  // @@@PH speed improvement
-  *size = (*size + 4096) & 0xFFFFF000;
-  *size = max(*size, INCR_HEAPSIZE);
+    /* round the size up to a multiple of 4K */
+    // *size = (*size / 4096) * 4096 + 4096;
+    // @@@PH speed improvement
+    *size = (*size + 4096) & 0xFFFFF000;
+    *size = max(*size, INCR_HEAPSIZE);
 
-  for(int i=0;i<MAX_HEAPPAGES;i++)
-  {
-	int nrpagesfree = GetPageRangeFree(i);
-	if(nrpagesfree >= *size/PAGE_SIZE) {
-  		newblock = (PVOID)((ULONG)pSharedMem + i*PAGE_SIZE);
-  		rc = DosSetMem(newblock, *size, PAG_READ|PAG_WRITE|PAG_COMMIT);
-  		if(rc != 0) {
-			dprintf(("getmoreShared: DosSetMem failed with %d", rc));
-			return NULL;
-  		}
-  		for(int j=0;j < *size/PAGE_SIZE; j++)
-                {
-  			pageBitmap[i+j] = 1; //mark as committed
-  		}
+    for(int i=0;i<MAX_HEAPPAGES;i++)
+    {
+    	int nrpagesfree = GetPageRangeFree(i);
+    	if(nrpagesfree >= *size/PAGE_SIZE) {
+  		    newblock = (PVOID)((ULONG)pSharedMem + i*PAGE_SIZE);
+  		    rc = DosSetMem(newblock, *size, PAG_READ|PAG_WRITE|PAG_COMMIT);
+  		    if(rc != 0) {
+    			dprintf(("getmoreShared: DosSetMem failed with %d", rc));
+			    return NULL;
+  		    }
+  		    for(int j=0;j < *size/PAGE_SIZE; j++)
+            {
+  			    pageBitmap[i+j] = 1; //mark as committed
+  		    }
 
-		*clean = _BLOCK_CLEAN;
-		dprintf(("KERNEL32: getmoreShared %x %d", newblock, *size));
-		return newblock;
-	}
-	if(nrpagesfree)
-		i += nrpagesfree-1;
-  }
-  dprintf(("KERNEL32: getmoreShared NOTHING LEFT (%d)", *size));
-  return NULL;
+		    *clean = _BLOCK_CLEAN;
+		    dprintf(("KERNEL32: getmoreShared %x %d", newblock, *size));
+		    return newblock;
+	    }
+	    if(nrpagesfree)
+    		i += nrpagesfree-1;
+    }
+    dprintf(("KERNEL32: getmoreShared NOTHING LEFT (%d)", *size));
+    return NULL;
 }
 //******************************************************************************
 //******************************************************************************
 void _LNK_CONV releaseShared(Heap_t pHeap, void *block, size_t size)
 {
- ULONG pagenr;
+    ULONG pagenr;
 
-  dprintf(("KERNEL32: releaseShared %x %d", block, size));
-  DosSetMem(block, size, PAG_READ|PAG_WRITE|PAG_DECOMMIT);
+    dprintf(("KERNEL32: releaseShared %x %d", block, size));
+    DosSetMem(block, size, PAG_READ|PAG_WRITE|PAG_DECOMMIT);
 
-  pagenr  = (ULONG)block - (ULONG)pSharedMem;
-  pagenr /= PAGE_SIZE;
-  for(int i=pagenr;i<pagenr+size/PAGE_SIZE;i++) {
-  	pageBitmap[i] = 0; //mark as decommitted
-  }
+    pagenr  = (ULONG)block - (ULONG)pSharedMem;
+    pagenr /= PAGE_SIZE;
+    for(int i=pagenr;i<pagenr+size/PAGE_SIZE;i++) {
+  	    pageBitmap[i] = 0; //mark as decommitted
+    }
 }
 //******************************************************************************
 //******************************************************************************
 DWORD  HeapGetSharedMemBase()
 {
-  dprintf(("KERNEL32: HeapGetSharedMemBase()\n"));
-  return (DWORD) pSharedMem;
+    dprintf(("KERNEL32: HeapGetSharedMemBase()\n"));
+    return (DWORD) pSharedMem;
 }
 //******************************************************************************
 //******************************************************************************
