@@ -1,4 +1,4 @@
-/* $Id: ole32.cpp,v 1.16 2002-02-15 17:18:50 sandervl Exp $ */
+/* $Id: ole32.c,v 1.1 2002-11-12 17:06:30 sandervl Exp $ */
 /* 
  * 
  * Project Odin Software License can be found in LICENSE.TXT
@@ -19,6 +19,7 @@
  */
 
 #include "ole32.h"
+#include "compobj_private.h"
 
 // ----------------------------------------------------------------------
 // CoDosDateTimeToFileTime
@@ -53,4 +54,53 @@ HRESULT WIN32API CLSIDFromStringA(
     LPCLSID		pclsid)		// [out] - Binary CLSID
 {
     return CLSIDFromString16(lpsz, pclsid);
+}
+
+/******************************************************************************
+ *		CLSIDFromProgID	[COMPOBJ.61]
+ * Converts a program id into the respective GUID. (By using a registry lookup)
+ * RETURNS
+ *	riid associated with the progid
+ */
+HRESULT WINAPI CLSIDFromProgID16(
+	LPCOLESTR16 progid,	/* [in] program id as found in registry */
+	LPCLSID riid		/* [out] associated CLSID */
+) {
+	char	*buf,buf2[80];
+	DWORD	buf2len;
+	HRESULT	err;
+	HKEY	xhkey;
+
+	buf = HeapAlloc(GetProcessHeap(),0,strlen(progid)+8);
+	sprintf(buf,"%s\\CLSID",progid);
+	if ((err=RegOpenKeyA(HKEY_CLASSES_ROOT,buf,&xhkey))) {
+		HeapFree(GetProcessHeap(),0,buf);
+                return CO_E_CLASSSTRING;
+	}
+	HeapFree(GetProcessHeap(),0,buf);
+	buf2len = sizeof(buf2);
+	if ((err=RegQueryValueA(xhkey,NULL,buf2,&buf2len))) {
+		RegCloseKey(xhkey);
+                return CO_E_CLASSSTRING;
+	}
+	RegCloseKey(xhkey);
+	return __CLSIDFromStringA(buf2,riid);
+}
+
+/******************************************************************************
+ *		CLSIDFromString	[COMPOBJ.20]
+ * Converts a unique identifier from its string representation into
+ * the GUID struct.
+ *
+ * Class id: DWORD-WORD-WORD-BYTES[2]-BYTES[6]
+ *
+ * RETURNS
+ *	the converted GUID
+ */
+HRESULT WINAPI CLSIDFromString16(
+	LPCOLESTR16 idstr,	/* [in] string representation of guid */
+	CLSID *id)		/* [out] GUID converted from string */
+{
+
+  return __CLSIDFromStringA(idstr,id);
 }
