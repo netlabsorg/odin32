@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.53 2000-12-07 12:00:23 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.54 2000-12-09 16:16:26 phaller Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -583,11 +583,13 @@ BOOL OSLibDosDelete(char *lpszFileName)
 //******************************************************************************
 BOOL pmDateTimeToFileTime(FDATE *pDate,FTIME *pTime,FILETIME *pFT)
 {
-  USHORT dosTime, dosDate;
+  register USHORT dosTime, dosDate;
 
   dosTime = *(USHORT*)pTime;
   dosDate = *(USHORT*)pDate;
-
+  
+  // PH: probably replace with faster implementation than calling Open32
+  // through the external interface!
   return DosDateTimeToFileTime(dosDate,dosTime,pFT);
 }
 //******************************************************************************
@@ -615,6 +617,9 @@ inline DWORD pm2WinFileAttributes(DWORD attrFile)
     res |= FILE_ATTRIBUTE_ARCHIVE_W;
 
   //CB: not used: FILE_ATTRIBUTE_COMPRESSED_W
+  //PH: NT server will serve appropriate sizes for compressed files
+  //    over network. So if realSize < allocatedSize, the file must
+  //    be compressed.
 
   return res;
 }
@@ -1678,18 +1683,114 @@ inline CHAR system2DOSCharacter(CHAR ch)
   }
 }
 
-VOID long2ShortName(CHAR* longName,CHAR* shortName)
+VOID long2ShortName(CHAR* longName, CHAR* shortName)
 {
-  INT x;
-  CHAR *source = longName,*dest = shortName,*ext = strrchr(longName,'.');
-
-  if ((strcmp(longName,".") == 0) || (strcmp(longName,"..") == 0))
+  // check for uplink / root: "." and ".."
+  if (longName[0] == '.')
   {
-    strcpy(shortName,longName);
-    return;
+    // if ((strcmp(longName,".") == 0) || (strcmp(longName,"..") == 0))
+    if (longName[1] == 0) // "."
+    {
+      shortName[0] = '.';
+      shortName[1] = 0;
+      return;
+    }
+    
+    if (longName[1] == '.' && longName[2] == 0) // ".."
+    {
+      shortName[0] = '.';
+      shortName[1] = '.';
+      shortName[2] = 0;
+      return;
+    }
   }
+  else
+    // check for empty name
+    if(longName[0] == 0)
+    {
+      shortName[0] = 0;
+      return;
+    }
+  
+  INT x;
+  CHAR *source = longName;
 
+  // Test if longName is 8:3 compliant and simply copy
+  // the filename.
+  BOOL flag83 = TRUE;
+  
+  // verify forbidden characters
+  for (x = 0; 
+       (x < 8) && 
+       (flag83 == TRUE);
+       x++)
+  {
+    switch (*source++)
+    {
+      case '.': // a period will cause the loop to abort!
+        x=1000;
+        break;
+      
+      case '/':      case '?':
+      case '*':      case ':':
+      case '\\':     case '"':
+      case ' ':
+        flag83 = FALSE;
+        break;
+    }
+  }
+  
+  // verify we're on a period now
+  if (flag83 == TRUE)
+    if (*source != '.')
+      flag83 = FALSE;
+  
+  // verify extension
+  if (flag83 == TRUE)
+    for (INT y = 0;
+         (y < 3) && (flag83 == TRUE);
+         y++)
+    {
+      switch (*source)
+      {
+        case '/':      case '?':
+        case '*':      case ':':
+        case '\\':     case '"':
+        case ' ':      case '.':
+          flag83 = FALSE;
+          break;
+      }
+    }
+  
+  // verify we're at the end of the string now
+  if (flag83 == TRUE)
+    if (*source != 0)
+      flag83 = FALSE;
+  
+  // OK, done
+  if (flag83 == TRUE)
+  {
+    // we might not alter any character here, since
+    // an app opening a specific file with an 8:3 "alias",
+    // would surely fail.
+    strcpy(longName,
+           shortName);
+    
+    return; // Done
+  }
+  
+  
+  // @@@PH
+  shortName[0] = 0; // this function is disabled anyway ...
+  return;
+  
+  CHAR *dest = shortName;
+  CHAR *ext = strrchr(longName,'.');
+  
   //CB: quick and dirty, real FILE~12.EXT is too slow
+  //PH: We'd have to count the number of non-8:3-compliant files
+  //    within a directory. Or simpler: the number of files within
+  //    the current directory.
 
   //8 character file name
   for (x = 0;x < 8;x++)
@@ -1748,7 +1849,10 @@ VOID translateFileResults(FILESTATUS3 *pResult,LPWIN32_FIND_DATAA pFind,CHAR* ac
   {
     name++;
     strcpy(pFind->cFileName,name);
-  } else pFind->cFileName[0] = 0;
+  } 
+  else 
+    pFind->cFileName[0] = 0;
+  
   long2ShortName(pFind->cFileName,pFind->cAlternateFileName);
 }
 
@@ -1779,32 +1883,39 @@ DWORD OSLibDosFindFirst(LPCSTR lpFileName,WIN32_FIND_DATAA* lpFindFileData)
 
   DosError(FERR_DISABLEHARDERR | FERR_DISABLEEXCEPTION);
   APIRET rc = DosFindFirst((PSZ)lpFileName,&hDir,attrs,&result,sizeof(result),&searchCount,FIL_STANDARD);
-  DosError(FERR_ENABLEHARDERR | FERR_ENABLEEXCEPTION);
+  //PH: DosError(FERR_ENABLEHARDERR | FERR_ENABLEEXCEPTION);
 
   //check root: skip "." and ".." (HPFS, not on FAT)
   //check in OSLibDosFindNext not necessary: "." and ".." are the first two entries
   if ((rc == 0) && isRoot((LPSTR)lpFileName))
   {
-    while ((strcmp(result.achName,".") == 0) || (strcmp(result.achName,"..") == 0))
+    while ((strcmp(result.achName,".") == 0) ||
+           (strcmp(result.achName,"..") == 0))
     {
       result.achName[0] = 0;
-      DosError(FERR_DISABLEHARDERR | FERR_DISABLEEXCEPTION);
+      //PH: DosError(FERR_DISABLEHARDERR | FERR_DISABLEEXCEPTION);
       searchCount = 1;
       APIRET rc = DosFindNext(hDir,&result,sizeof(result),&searchCount);
-      DosError(FERR_ENABLEHARDERR | FERR_ENABLEEXCEPTION);
+      //PH: DosError(FERR_ENABLEHARDERR | FERR_ENABLEEXCEPTION);
       if (rc)
       {
         DosFindClose(hDir);
         SetLastError(error2WinError(rc));
 
+        DosError(FERR_ENABLEHARDERR | FERR_ENABLEEXCEPTION);
         return INVALID_HANDLE_VALUE_W;
       }
     }
   }
-  if(rc) {
-        DosFindClose(hDir);
-        SetLastError(error2WinError(rc));
-        return INVALID_HANDLE_VALUE_W;
+
+  // enable i/o kernel exceptions again
+  DosError(FERR_ENABLEHARDERR | FERR_ENABLEEXCEPTION);
+
+  if(rc) 
+  {
+    DosFindClose(hDir);
+    SetLastError(error2WinError(rc));
+    return INVALID_HANDLE_VALUE_W;
   }
   translateFindResults(&result,lpFindFileData);
   SetLastError(ERROR_SUCCESS_W);
