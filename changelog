@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.1827 2001-11-13 15:42:38 sandervl Exp $ */
+/* $Id: changelog,v 1.1828 2001-11-14 14:39:29 phaller Exp $ */
+
+ 2001-11-13: Patrick Haller <patrick.haller@innotek.de>
+    - KERNEL32: o provided faster alternatives to HEAP_strdupXXX
+      ...         which operate on stack only (STACK_strdupXXX)
+                  This could slightly reduce heap pressure.
+    - USER32:   o avoid unnecessary strcpy/strlen when get/setting window text
 
  2001-11-13: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Added missing entry in debug log table for hmparport
