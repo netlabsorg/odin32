@@ -1,4 +1,4 @@
-/* $Id: heapstring.cpp,v 1.14 1999-10-14 09:21:41 sandervl Exp $ */
+/* $Id: heapstring.cpp,v 1.15 1999-10-14 17:15:26 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -11,7 +11,10 @@
 /*****************************************************************************
  * Includes                                                                  *
  *****************************************************************************/
-#undef DEBUG
+
+#include <odin.h>
+#include <odinwrap.h>
+#include <os2sel.h>
 
 #include <os2win.h>
 #include <stdlib.h>
@@ -28,6 +31,8 @@
 /*****************************************************************************
  * Defines                                                                   *
  *****************************************************************************/
+
+ODINDEBUGCHANNEL(KERNEL32-HEAPSTRING)
 
 
 /*****************************************************************************
@@ -322,13 +327,13 @@ int WIN32API lstrncmpW(LPCWSTR arg1, LPCWSTR  arg2, int l)
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
-LPSTR WIN32API lstrcpyA(LPSTR arg1, LPCSTR  arg2)
+ODINFUNCTION2(LPSTR,lstrcpyA,LPSTR, dest,
+                             LPCSTR,src)
 {
-  dprintf(("KERNEL32: lstrcpy(%08xh,%s)\n",
-           arg1,
-           arg2));
+  if ( (src == NULL) || (dest == NULL) ) // stupid parameter checking
+     return NULL;
 
-  return O32_lstrcpy(arg1, arg2);
+  return O32_lstrcpy(dest, src);
 }
 
 
@@ -344,11 +349,11 @@ LPSTR WIN32API lstrcpyA(LPSTR arg1, LPCSTR  arg2)
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
-LPWSTR WIN32API lstrcpyW(LPWSTR dest, LPCWSTR src)
+ODINFUNCTION2(LPWSTR,lstrcpyW,LPWSTR, dest,
+                              LPCWSTR,src)
 {
-  dprintf(("KERNEL32: lstrcpyW(%08xh,%08xh)",
-           dest,
-           src));
+  if ( (src == NULL) || (dest == NULL) ) // stupid parameter checking
+     return NULL;
 
   UniStrcpy( (UniChar*)dest,
              (UniChar*)src );
