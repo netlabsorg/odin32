@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.935 2000-05-12 19:13:58 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.936 2000-05-13 07:16:39 sandervl Exp $ */
+
+ 2000-05-12: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+    - KERNEL32: Print name of image referenced by EIP
 
  2000-05-12: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   
