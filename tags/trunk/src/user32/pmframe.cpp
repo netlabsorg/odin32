@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.29 1999-12-24 18:39:10 sandervl Exp $ */
+/* $Id: pmframe.cpp,v 1.30 1999-12-26 17:30:16 cbratschi Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -202,22 +202,8 @@ void DrawActivate(Win32BaseWindow *win32wnd, HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
-void FrameTrackFrame(Win32BaseWindow *win32wnd,BOOL lefttop)
+VOID FrameTrackFrame(Win32BaseWindow *win32wnd,DWORD flags)
 {
-  INT flags = lefttop ? (TF_LEFT | TF_TOP):(TF_RIGHT | TF_BOTTOM);
-
-  WinSendMsg(win32wnd->getOS2FrameWindowHandle(),WM_TRACKFRAME,(MPARAM)flags,(MPARAM)0);
-}
-//******************************************************************************
-// used by statusbar control
-//******************************************************************************
-VOID WINAPI TrackWin32Window(HWND hwnd,BOOL lefttop)
-{
-  Win32BaseWindow *win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
-  INT flags = lefttop ? (TF_LEFT | TF_TOP):(TF_RIGHT | TF_BOTTOM);
-
-  if (!win32wnd) return;
-
   WinSendMsg(win32wnd->getOS2FrameWindowHandle(),WM_TRACKFRAME,(MPARAM)flags,(MPARAM)0);
 }
 //******************************************************************************
@@ -318,22 +304,12 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
       SWP       swpOld = *(pswp + 1);
       WINDOWPOS wp;
       HWND      hParent = NULLHANDLE;
-      LONG      yDelta = pswp->cy - swpOld.cy;
-      LONG      xDelta = pswp->cx - swpOld.cx;
-      LONG      clientHeight;
 
         dprintf(("PMFRAME: WM_WINDOWPOSCHANGED (%x) %x %x (%d,%d) (%d,%d)", mp2, win32wnd->getWindowHandle(), pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
-
-        //Save height so WM_WINDOWPOSCHANGED handler in pmwindow.cpp
-        //(for client) doesn't overwrite the client rectangle (breaks ydelta calculation)
-        clientHeight = win32wnd->getWindowHeight();
 
         RestoreOS2TIB();
         rc = OldFrameProc(hwnd,msg,mp1,mp2);
         SetWin32TIB();
-
-        if (win32wnd->getParent() && win32wnd->getParent()->InMovingChildren())
-          goto PosChangedEnd; //same Win32 pos, only OS/2 pos changed
 
         if ((pswp->fl & (SWP_SIZE | SWP_MOVE | SWP_ZORDER)) == 0)
             goto PosChangedEnd;
@@ -348,79 +324,11 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
         }
         OSLibMapSWPtoWINDOWPOSFrame(pswp, &wp, &swpOld, hParent, hwnd);
 
-        //delta is difference between old and new client height
-        yDelta = swpOld.cy - clientHeight;
-
         win32wnd->setWindowRect(wp.x, wp.y, wp.x+wp.cx, wp.y+wp.cy);
         win32wnd->setClientRect(swpOld.x, swpOld.y, swpOld.x + swpOld.cx, swpOld.y + swpOld.cy);
 
-        wp.hwnd = win32wnd->getWindowHandle();
-        if ((pswp->fl & SWP_ZORDER) && (pswp->hwndInsertBehind > HWND_BOTTOM))
-        {
-           Win32BaseWindow *wndAfter = Win32BaseWindow::GetWindowFromOS2Handle(pswp->hwndInsertBehind);
-           if(wndAfter) wp.hwndInsertAfter = wndAfter->getWindowHandle();
-        }
-
-#if 0 //CB: PM does it now for us (-> WM_CALVALIDRECTS)
-      //    if you remove this code, delete *MovingChildren in Win32BaseWindow class
-        if (yDelta != 0 || xDelta != 0)
-        {
-            HENUM henum = WinBeginEnumWindows(WinWindowFromID(hwnd,FID_CLIENT));
-            SWP swp[10];
-            int i = 0;
-            HWND hwnd;
-
-            win32wnd->setMovingChildren(TRUE);
-            while ((hwnd = WinGetNextWindow(henum)) != NULLHANDLE)
-            {
-                WinQueryWindowPos(hwnd, &(swp[i]));
-
-#ifdef DEBUG
-                Win32BaseWindow *window = Win32BaseWindow::GetWindowFromOS2Handle(hwnd);
-                dprintf(("ENUMERATE %x delta %d (%d,%d) (%d,%d) %x", (window) ? window->getWindowHandle() : hwnd,
-                         yDelta, swp[i].x, swp[i].y, swp[i].cx, swp[i].cy, swp[i].fl));
-#endif
-
-                //if(swp[i].y != 0) //CB: y value of 0 is valid!
-                {
-                    //child window at offset <> 0 from client area -> offset now changes
-                    swp[i].y  += yDelta;
-                    swp[i].fl = SWP_MOVE | SWP_NOADJUST;
-                }
-                //else child window with the same start coordinates as the client area
-                //The app should resize it.
-
-               if (i == 9)
-                {
-                    WinSetMultWindowPos(GetThreadHAB(), swp, 10);
-                    i = 0;
-                }
-                else
-                {
-                    i++;
-                }
-            }
-
-            WinEndEnumWindows(henum);
-
-            if (i)
-               WinSetMultWindowPos(GetThreadHAB(), swp, i);
-            win32wnd->setMovingChildren(FALSE);
-        }
-        if (yDelta != 0)
-        {
-            POINT pt;
-            if(GetCaretPos (&pt) == TRUE)
-            {
-                pt.y -= yDelta;
-                SetCaretPos (pt.x, pt.y);
-            }
-        }
-#endif
-        if(!win32wnd->CanReceiveSizeMsgs())
-            goto PosChangedEnd;
-
-        win32wnd->MsgPosChanged((LPARAM)&wp);
+        if(win32wnd->CanReceiveSizeMsgs())
+          win32wnd->MsgPosChanged((LPARAM)&wp);
 
 PosChangedEnd:
         RestoreOS2TIB();
@@ -702,3 +610,62 @@ VOID FrameUpdateFrame(Win32BaseWindow *win32wnd,DWORD flags)
   WinSendMsg(win32wnd->getOS2FrameWindowHandle(),WM_UPDATEFRAME,(MPARAM)flags,(MPARAM)0);
 }
 
+DWORD FrameHitTest(Win32BaseWindow *win32wnd,INT x,INT y)
+{
+  POINTL point;
+  HWND hwnd = win32wnd->getOS2FrameWindowHandle(),child;
+
+  if (hwnd == win32wnd->getOS2WindowHandle()) return HTCLIENT_W;
+  if (win32wnd->getOS2WindowHandle() == WinQueryCapture(HWND_DESKTOP)) return HTCLIENT_W;
+  point.x = x;
+  point.y = WinQuerySysValue(HWND_DESKTOP,SV_CYSCREEN)-y-1;
+  WinMapWindowPoints(HWND_DESKTOP,hwnd,&point,1);
+  child = WinWindowFromPoint(hwnd,&point,FALSE);
+
+  if (child == 0) return HTERROR_W;
+  if (child == win32wnd->getOS2FrameWindowHandle())
+  {
+    RECTL client,frame;
+
+    if (CanDrawSizeBox(win32wnd))
+    {
+      RECTL rect;
+
+      GetSizeBox(win32wnd,&rect);
+      if (WinPtInRect(GetThreadHAB(),&rect,&point)) return HTGROWBOX_W;
+    }
+    //somewhere in the border
+    INT w = WinQuerySysValue(HWND_DESKTOP,SV_CXMINMAXBUTTON);
+    INT h = WinQuerySysValue(HWND_DESKTOP,SV_CXMINMAXBUTTON);
+    WinQueryWindowRect(hwnd,&frame);
+
+    if (point.y < h)
+    {
+      if (point.x < w) return HTBOTTOMLEFT_W;
+      if (point.x > frame.xRight-1-w) return HTBOTTOMRIGHT_W;
+      return HTBOTTOM_W;
+    }
+    if (point.y > frame.yTop-1-h)
+    {
+      if (point.x < w) return HTTOPLEFT_W;
+      if (point.x > frame.xRight-1-w) return HTTOPRIGHT_W;
+      return HTTOP_W;
+    }
+    return HTBORDER_W;
+  } else
+  {
+    if (child == WinWindowFromID(hwnd,FID_CLIENT)) return HTCLIENT_W;
+    if (child == WinWindowFromID(hwnd,FID_VERTSCROLL)) return HTVSCROLL_W;
+    if (child == WinWindowFromID(hwnd,FID_HORZSCROLL)) return HTHSCROLL_W;
+    if (child == WinWindowFromID(hwnd,FID_SYSMENU)) return HTSYSMENU_W;
+    if (child == WinWindowFromID(hwnd,FID_TITLEBAR)) return HTCAPTION_W;
+    if (child == WinWindowFromID(hwnd,FID_MENU)) return HTMENU_W;
+    if (child == WinWindowFromID(hwnd,FID_MINMAX))
+    {
+      //CB: close, reduce or zoom
+      return HTZOOM_W;
+    }
+
+    return HTERROR_W;
+  }
+}

@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.1 1999-12-24 18:42:46 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.2 1999-12-26 17:30:15 cbratschi Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -282,6 +282,7 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
         //WM_NC*BUTTON* is posted when the cursor is in a non-client area of the window
         if(win32wnd->lastHitTestVal != HTCLIENT_W) {
             winMsg->message = WINWM_NCLBUTTONDOWN + (os2Msg->msg - WM_BUTTON1DOWN);
+            winMsg->wParam = win32wnd->lastHitTestVal;
             winMsg->lParam  = MAKELONG(winMsg->pt.x, winMsg->pt.y); //screen coordinates
         }
         else {
@@ -323,18 +324,24 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
             keystate |= MK_CONTROL_W;
 
         //WM_NCMOUSEMOVE is posted when the cursor moves into a non-client area of the window
-        if(win32wnd->lastHitTestVal != HTCLIENT_W) {
-                setcursormsg   = WINWM_NCMOUSEMOVE;
-                winMsg->wParam = (WPARAM)win32wnd->lastHitTestVal;
+        if(win32wnd->lastHitTestVal != HTCLIENT_W)
+        {
+          setcursormsg   = WINWM_NCMOUSEMOVE;
+          winMsg->wParam = (WPARAM)win32wnd->lastHitTestVal;
+          winMsg->lParam = MAKELONG(winMsg->pt.x,winMsg->pt.y);
+        } else
+        {
+          winMsg->wParam = (WPARAM)keystate;
+          winMsg->lParam  = MAKELONG(SHORT1FROMMP(os2Msg->mp1), MapOS2ToWin32Y(win32wnd, SHORT2FROMMP(os2Msg->mp1)));
         }
-        else    winMsg->wParam = (WPARAM)keystate;
         //OS/2 Window coordinates -> Win32 Window coordinates
         winMsg->message = setcursormsg;
-        winMsg->lParam  = MAKELONG(SHORT1FROMMP(os2Msg->mp1), MapOS2ToWin32Y(win32wnd, SHORT2FROMMP(os2Msg->mp1)));
         break;
     }
 
     case WM_CONTROL:
+      goto dummymessage;
+
     case WM_COMMAND:
         if(SHORT1FROMMP(os2Msg->mp2) == CMDSRC_MENU) {
             winMsg->message = WINWM_COMMAND;
@@ -510,7 +517,7 @@ VirtualKeyFound:
                 break;
           }
         }
-        goto dummymessage;
+        goto dummymessage; //for caret blinking
 
     case WM_SETWINDOWPARAMS:
     {
@@ -555,18 +562,18 @@ VirtualKeyFound:
     }
 
     case WM_HITTEST:
-        // Only send this message if the window is enabled
-        if (WinIsWindowEnabled(os2Msg->hwnd))
-        {
-            OSLIBPOINT pt;
-            pt.x = (*(POINTS *)&os2Msg->mp1).x;
-            pt.y = (*(POINTS *)&os2Msg->mp1).y;
-            MapOS2ToWin32Point( OSLIB_HWND_DESKTOP, os2Msg->hwnd, &pt);
-            winMsg->message = WINWM_NCHITTEST;
-            winMsg->lParam  = MAKELONG((USHORT)pt.x, (USHORT)pt.y);
-            break;
-        }
-        goto dummymessage;
+    {
+        OSLIBPOINT pt;
+
+        pt.x = (*(POINTS *)&os2Msg->mp1).x;
+        pt.y = (*(POINTS *)&os2Msg->mp1).y;
+
+        MapOS2ToWin32Point(OSLIB_HWND_DESKTOP,os2Msg->hwnd,&pt);
+        winMsg->message  = WINWM_NCHITTEST;
+        winMsg->wParam  = 0;
+        winMsg->lParam  = MAKELONG((USHORT)pt.x, (USHORT)pt.y);
+        break;
+    }
 
     case WM_CONTEXTMENU:
     {

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.57 1999-12-24 21:44:04 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.58 1999-12-26 17:30:19 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -103,6 +103,9 @@ virtual  WORD   GetWindowWord(int index);
          HWND   getOS2FrameWindowHandle()       { return OS2HwndFrame; };
  Win32WndClass *getWindowClass()                { return windowClass; };
 
+         BOOL   getIgnoreHitTest()              { return fIgnoreHitTest; }
+         VOID   setIgnoreHitTest(BOOL ignore)   { fIgnoreHitTest = ignore; }
+
          DWORD  getWindowContextHelpId()        { return contextHelpId; };
          void   setWindowContextHelpId(DWORD id){ contextHelpId = id; };
 
@@ -172,8 +175,6 @@ Win32BaseWindow *GetTopParent();
          VOID   setOS2HwndModalDialog(HWND aHwnd) { OS2HwndModalDialog = aHwnd; };
          HWND   getOS2HwndModalDialog()       { return OS2HwndModalDialog; };
          BOOL   CanReceiveSizeMsgs()          { return !fNoSizeMsg; };
-         BOOL   InMovingChildren()            { return fMovingChildren; };
-         VOID   setMovingChildren(BOOL fMC)   { fMovingChildren = fMC; };
          BOOL   IsWindowDestroyed()           { return fIsDestroyed; };
          BOOL   IsWindowEnabled();
          BOOL   IsWindowVisible();
@@ -216,6 +217,7 @@ static LRESULT  BroadcastMessageW(int type, UINT msg, WPARAM wParam, LPARAM lPar
        LRESULT  DefWindowProcW(UINT msg, WPARAM wParam, LPARAM lParam);
 
        LRESULT  DefWndControlColor(UINT ctlType, HDC hdc);
+       LRESULT  DefWndPrint(HDC hdc,ULONG uFlags);
 
          void   NotifyParent(UINT Msg, WPARAM wParam, LPARAM lParam);
 
@@ -285,6 +287,7 @@ protected:
         DWORD   flags;
         DWORD   contextHelpId;
         LONG    lastHitTestVal;         //Last value returned by WM_NCHITTEST handler
+        BOOL    fIgnoreHitTest;         //Use WinWindowFromPoint during WM_HITTEST
 
         BOOL    isIcon;
         BOOL    fFirstShow;
@@ -295,7 +298,6 @@ protected:
         BOOL    fInternalMsg;           //Used to distinguish between messages
                                         //sent by PM and those sent by apps
         BOOL    fNoSizeMsg;
-        BOOL    fMovingChildren;
         BOOL    fIsDestroyed;
         BOOL    fDestroyWindowCalled;   //DestroyWindow was called for this window
         BOOL    fCreated;
@@ -342,6 +344,9 @@ private:
 #ifndef OS2_INCLUDED
         void  GetMinMaxInfo(POINT *maxSize, POINT *maxPos, POINT *minTrack, POINT *maxTrack );
         LONG  HandleWindowPosChanging(WINDOWPOS *winpos);
+        LONG  HandleNCLButtonDown(WPARAM wParam,LPARAM lParam);
+        LONG  HandleNCLButtonUp(WPARAM wParam,LPARAM lParam);
+        LONG  HandleNCLButtonDblClk(WPARAM wParam,LPARAM lParam);
         LONG  HandleSysCommand(WPARAM wParam, POINT *pt32);
 
         LONG  SendNCCalcSize(BOOL calcValidRect,

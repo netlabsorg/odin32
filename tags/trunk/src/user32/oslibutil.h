@@ -1,4 +1,4 @@
-/* $Id: oslibutil.h,v 1.1 1999-09-15 23:18:54 sandervl Exp $ */
+/* $Id: oslibutil.h,v 1.2 1999-12-26 17:30:15 cbratschi Exp $ */
 /*
  * Window API utility functions for OS/2
  *
@@ -22,5 +22,8 @@ void  SetThreadHAB(HAB hab);
 
 HMQ   GetThreadMessageQueue();
 void  SetThreadMessageQueue(HMQ hmq);
+
+DWORD GetThreadMessageExtraInfo();
+DWORD SetThreadMessageExtraInfo(DWORD lParam);
 
 #endif //__OSLIBUTIL_H__

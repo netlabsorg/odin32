@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.118 1999-12-24 21:44:04 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.119 1999-12-26 17:30:18 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -7,7 +7,8 @@
  *
  * Parts based on Wine Windows code (windows\win.c)
  *
- * Copyright 1993, 1994 Alexandre Julliard
+ * Copyright 1993, 1994, 1996 Alexandre Julliard
+ *           1995 Alex Korobka
  *
  * TODO: Not thread/process safe
  *
@@ -145,7 +146,6 @@ void Win32BaseWindow::Init()
   OS2HwndModalDialog  = 0;
   fInternalMsg     = FALSE;
   fNoSizeMsg       = FALSE;
-  fMovingChildren  = FALSE;
   fIsDestroyed     = FALSE;
   fDestroyWindowCalled = FALSE;
   fCreated         = FALSE;
@@ -189,7 +189,8 @@ void Win32BaseWindow::Init()
   hwndLinkAfter    = HWND_BOTTOM;
   flags            = 0;
   isIcon           = FALSE;
-  lastHitTestVal   = 0;
+  lastHitTestVal   = HTOS_NORMAL;
+  fIgnoreHitTest   = FALSE;
   owner            = NULL;
   windowClass      = 0;
 
@@ -776,11 +777,7 @@ ULONG Win32BaseWindow::MsgQuit()
 //******************************************************************************
 ULONG Win32BaseWindow::MsgClose()
 {
-  if(SendInternalMessageA(WM_CLOSE, 0, 0) == 0) {
-        dprintf(("Win32BaseWindow::MsgClose, app handles msg"));
-        return 0; //app handles this message
-  }
-  return 1;
+  return SendInternalMessageA(WM_CLOSE,0,0);
 }
 //******************************************************************************
 //******************************************************************************
@@ -855,7 +852,7 @@ ULONG Win32BaseWindow::MsgShow(BOOL fShow)
 //******************************************************************************
 ULONG Win32BaseWindow::MsgPosChanging(LPARAM lp)
 {
-    if(fNoSizeMsg || (getParent() && getParent()->InMovingChildren()))
+    if(fNoSizeMsg)
         return 1;
 
     return SendInternalMessageA(WM_WINDOWPOSCHANGING, 0, lp);
@@ -864,7 +861,7 @@ ULONG Win32BaseWindow::MsgPosChanging(LPARAM lp)
 //******************************************************************************
 ULONG Win32BaseWindow::MsgPosChanged(LPARAM lp)
 {
-    if(fNoSizeMsg || (getParent() && getParent()->InMovingChildren()))
+    if(fNoSizeMsg)
         return 1;
 
     return SendInternalMessageA(WM_WINDOWPOSCHANGED, 0, lp);
@@ -891,7 +888,16 @@ ULONG Win32BaseWindow::MsgHitTest(MSG *msg)
 {
   lastHitTestVal = SendInternalMessageA(WM_NCHITTEST, 0, MAKELONG((USHORT)msg->pt.x, (USHORT)msg->pt.y));
   dprintf2(("MsgHitTest returned %x", lastHitTestVal));
-  return 1; //TODO: May need to change this
+
+  if (lastHitTestVal == HTERROR)
+    return HTOS_ERROR;
+
+#if 0 //CB: problems with groupboxes, internal handling is better
+  if (lastHitTestVal == HTTRANSPARENT)
+    return HTOS_TRANSPARENT;
+#endif
+
+  return HTOS_NORMAL;
 }
 //******************************************************************************
 //******************************************************************************
@@ -966,20 +972,27 @@ ULONG Win32BaseWindow::MsgButton(MSG *msg)
  BOOL  fClick = FALSE;
 
     dprintf(("MsgButton at (%d,%d)", msg->pt.x, msg->pt.y));
-    switch(msg->message) { //TODO: double click also?
+    switch(msg->message) {
         case WM_LBUTTONDBLCLK:
         case WM_RBUTTONDBLCLK:
         case WM_MBUTTONDBLCLK:
+        case WM_NCLBUTTONDBLCLK:
+        case WM_NCRBUTTONDBLCLK:
+        case WM_NCMBUTTONDBLCLK:
                 if (!(windowClass && windowClass->getClassLongA(GCL_STYLE) & CS_DBLCLKS))
                 {
                     msg->message = msg->message - (WM_LBUTTONDBLCLK - WM_LBUTTONDOWN); //dblclick -> down
                     MsgButton(msg);
+                    msg->message++; //button-up
                     return MsgButton(msg);
                 }
                 break;
         case WM_LBUTTONDOWN:
         case WM_RBUTTONDOWN:
         case WM_MBUTTONDOWN:
+        case WM_NCLBUTTONDOWN:
+        case WM_NCRBUTTONDOWN:
+        case WM_NCMBUTTONDOWN:
                 fClick = TRUE;
                 break;
     }
@@ -1235,6 +1248,116 @@ BOOL Win32BaseWindow::showScrollBars(BOOL changeHorz,BOOL changeVert,BOOL fShow)
   return rc;
 }
 /***********************************************************************
+ *           NC_HandleNCLButtonDown
+ *
+ * Handle a WM_NCLBUTTONDOWN message. Called from DefWindowProc().
+ */
+LONG Win32BaseWindow::HandleNCLButtonDown(WPARAM wParam,LPARAM lParam)
+{
+  switch(wParam)  /* Hit test */
+  {
+    case HTCAPTION:
+      SendInternalMessageA(WM_SYSCOMMAND,SC_MOVE+HTCAPTION,lParam);
+      break;
+
+    case HTSYSMENU:
+      SendInternalMessageA(WM_SYSCOMMAND,SC_MOUSEMENU+HTSYSMENU,lParam);
+      break;
+
+    case HTMENU:
+      SendInternalMessageA(WM_SYSCOMMAND,SC_MOUSEMENU,lParam);
+      break;
+
+    case HTHSCROLL:
+      SendInternalMessageA(WM_SYSCOMMAND,SC_HSCROLL+HTHSCROLL,lParam);
+      break;
+
+    case HTVSCROLL:
+      SendInternalMessageA(WM_SYSCOMMAND,SC_VSCROLL+HTVSCROLL,lParam);
+      break;
+
+    case HTLEFT:
+    case HTRIGHT:
+    case HTTOP:
+    case HTTOPLEFT:
+    case HTTOPRIGHT:
+    case HTBOTTOM:
+    case HTBOTTOMLEFT:
+    case HTBOTTOMRIGHT:
+        /* make sure hittest fits into 0xf and doesn't overlap with HTSYSMENU */
+        SendInternalMessageA(WM_SYSCOMMAND,SC_SIZE+wParam-2,lParam);
+        break;
+    case HTBORDER:
+        break;
+  }
+
+  return 0;
+}
+//******************************************************************************
+//******************************************************************************
+LONG Win32BaseWindow::HandleNCLButtonUp(WPARAM wParam,LPARAM lParam)
+{
+  switch(wParam)  /* Hit test */
+  {
+    case HTMINBUTTON:
+      SendInternalMessageA(WM_SYSCOMMAND,SC_MINIMIZE,lParam);
+      break;
+
+    case HTMAXBUTTON:
+      SendInternalMessageA(WM_SYSCOMMAND,SC_MAXIMIZE,lParam);
+      break;
+
+    case HTCLOSE:
+      SendInternalMessageA(WM_SYSCOMMAND,SC_CLOSE,lParam);
+      break;
+  }
+
+  return 0;
+}
+/***********************************************************************
+ *           NC_HandleNCLButtonDblClk
+ *
+ * Handle a WM_NCLBUTTONDBLCLK message. Called from DefWindowProc().
+ */
+LONG Win32BaseWindow::HandleNCLButtonDblClk(WPARAM wParam,LPARAM lParam)
+{
+  /*
+   * if this is an icon, send a restore since we are handling
+   * a double click
+   */
+  if (dwStyle & WS_MINIMIZE)
+  {
+    SendInternalMessageA(WM_SYSCOMMAND,SC_RESTORE,lParam);
+    return 0;
+  }
+
+  switch(wParam)  /* Hit test */
+  {
+    case HTCAPTION:
+      /* stop processing if WS_MAXIMIZEBOX is missing */
+      if (dwStyle & WS_MAXIMIZEBOX)
+        SendInternalMessageA(WM_SYSCOMMAND,
+                      (dwStyle & WS_MAXIMIZE) ? SC_RESTORE : SC_MAXIMIZE,
+                      lParam);
+      break;
+
+    case HTSYSMENU:
+      if (!(GetClassWord(Win32Hwnd,GCW_STYLE) & CS_NOCLOSE))
+        SendInternalMessageA(WM_SYSCOMMAND,SC_CLOSE,lParam);
+      break;
+
+    case HTHSCROLL:
+      SendInternalMessageA(WM_SYSCOMMAND,SC_HSCROLL+HTHSCROLL,lParam);
+      break;
+
+    case HTVSCROLL:
+      SendInternalMessageA(WM_SYSCOMMAND,SC_VSCROLL+HTVSCROLL,lParam);
+      break;
+  }
+
+  return 0;
+}
+/***********************************************************************
  *           NC_HandleSysCommand
  *
  * Handle a WM_SYSCOMMAND message. Called from DefWindowProc().
@@ -1250,12 +1373,52 @@ LONG Win32BaseWindow::HandleSysCommand(WPARAM wParam, POINT *pt32)
 
     switch (uCommand)
     {
-#if 0
+
     case SC_SIZE:
+    {
+      DWORD flags = 0;
+
+      switch ((wParam & 0xF)+2)
+      {
+        case HTLEFT:
+          flags = TFOS_LEFT;
+          break;
+
+        case HTRIGHT:
+          flags = TFOS_RIGHT;
+          break;
+
+        case HTTOP:
+          flags = TFOS_TOP;
+          break;
+
+        case HTTOPLEFT:
+          flags = TFOS_TOP | TFOS_LEFT;
+          break;
+
+        case HTTOPRIGHT:
+          flags = TFOS_TOP | TFOS_RIGHT;
+          break;
+
+        case HTBOTTOM:
+          flags = TFOS_BOTTOM;
+          break;
+
+        case HTBOTTOMLEFT:
+          flags = TFOS_BOTTOM | TFOS_LEFT;
+          break;
+
+        case HTBOTTOMRIGHT:
+          flags = TFOS_BOTTOM | TFOS_RIGHT;
+          break;
+      }
+      if (flags) FrameTrackFrame(this,flags);
+      break;
+    }
+
     case SC_MOVE:
-        NC_DoSizeMove( hwnd, wParam );
-        break;
-#endif
+      FrameTrackFrame(this,TFOS_MOVE);
+      break;
 
     case SC_MINIMIZE:
         ShowWindow(SW_MINIMIZE);
@@ -1361,6 +1524,42 @@ LRESULT Win32BaseWindow::DefWndControlColor(UINT ctlType, HDC hdc)
 }
 //******************************************************************************
 //******************************************************************************
+LRESULT Win32BaseWindow::DefWndPrint(HDC hdc,ULONG uFlags)
+{
+  /*
+   * Visibility flag.
+   */
+  if ( (uFlags & PRF_CHECKVISIBLE) &&
+       !IsWindowVisible() )
+      return 0;
+
+  /*
+   * Unimplemented flags.
+   */
+  if ( (uFlags & PRF_CHILDREN) ||
+       (uFlags & PRF_OWNED)    ||
+       (uFlags & PRF_NONCLIENT) )
+  {
+    dprintf(("WM_PRINT message with unsupported flags\n"));
+  }
+
+  /*
+   * Background
+   */
+  if ( uFlags & PRF_ERASEBKGND)
+    SendInternalMessageA(WM_ERASEBKGND, (WPARAM)hdc, 0);
+
+  /*
+   * Client area
+   */
+  if ( uFlags & PRF_CLIENT)
+    SendInternalMessageA(WM_PRINTCLIENT, (WPARAM)hdc, PRF_CLIENT);
+
+
+  return 0;
+}
+//******************************************************************************
+//******************************************************************************
 LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 {
     switch(Msg)
@@ -1410,18 +1609,32 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 
     case WM_SETREDRAW:
     {
-     DWORD oldStyle = getStyle();
-
-        if(wParam)
-                setStyle(getStyle() | WS_VISIBLE);
-        else    setStyle(getStyle() & ~WS_VISIBLE);
-
-        updateWindowStyle(getExStyle(), oldStyle);
-
-        return 0; //TODO
+      if (wParam)
+      {
+        setStyle(getStyle() | WS_VISIBLE);
+        OSLibWinEnableWindowUpdate(OS2HwndFrame,TRUE);
+      } else
+      {
+        if (getStyle() & WS_VISIBLE)
+        {
+          setStyle(getStyle() & ~WS_VISIBLE);
+          OSLibWinEnableWindowUpdate(OS2HwndFrame,FALSE);
+        }
+      }
+      return 0;
     }
+
+    case WM_NCPAINT:
+        return 0;
+
+    case WM_NCACTIVATE:
+        return TRUE;
+
     case WM_NCCREATE:
         return(TRUE);
+
+    case WM_NCDESTROY:
+        return 0;
 
     case WM_NCCALCSIZE:
         return NCHandleCalcSize(wParam, (NCCALCSIZE_PARAMS *)lParam);
@@ -1457,6 +1670,11 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         }
         return (LOWORD(lParam) == HTCAPTION) ? MA_NOACTIVATE : MA_ACTIVATE;
     }
+
+    case WM_ACTIVATE:
+      //CB: todo
+      return 0;
+
     case WM_SETCURSOR:
     {
         dprintf(("DefWndProc: WM_SETCURSOR for %x Msg %s", Win32Hwnd, GetMsgText(HIWORD(lParam))));
@@ -1469,14 +1687,45 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         }
         if (wParam == Win32Hwnd)
         {
-          HCURSOR hCursor = windowClass ? windowClass->getCursor():LoadCursorA(0,IDC_ARROWA);
+          HCURSOR hCursor;
 
-          if (hCursor) SetCursor(hCursor);
-          return 1;
+          switch(lastHitTestVal)
+          {
+            case HTLEFT:
+            case HTRIGHT:
+              hCursor = LoadCursorA(0,IDC_SIZEWEA);
+              break;
+
+            case HTTOP:
+            case HTBOTTOM:
+              hCursor = LoadCursorA(0,IDC_SIZENSA);
+              break;
+
+            case HTTOPLEFT:
+            case HTBOTTOMRIGHT:
+              hCursor = LoadCursorA(0,IDC_SIZENWSEA);
+              break;
+
+            case HTTOPRIGHT:
+            case HTBOTTOMLEFT:
+              hCursor = LoadCursorA(0,IDC_SIZENESWA);
+              break;
+
+            default:
+              hCursor = windowClass ? windowClass->getCursor():LoadCursorA(0,IDC_ARROWA);
+              break;
+          }
+
+          if (hCursor)
+          {
+            SetCursor(hCursor);
+            return 1;
+          } else return 0;
         } else return 0;
     }
+
     case WM_MOUSEMOVE:
-        return 0; //we do our own cursor handling
+        return 0;
 
     case WM_WINDOWPOSCHANGED:
     {
@@ -1524,6 +1773,10 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 
         return 1;
     }
+
+    case WM_PRINT:
+        return DefWndPrint(wParam,lParam);
+
     case WM_PAINTICON:
     case WM_PAINT:
     {
@@ -1547,18 +1800,34 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         return 0;
 
     case WM_NCLBUTTONDOWN:
+        return HandleNCLButtonDown(wParam,lParam);
+
     case WM_NCLBUTTONUP:
+        return HandleNCLButtonUp(wParam,lParam);
+
     case WM_NCLBUTTONDBLCLK:
-    case WM_NCRBUTTONUP:
+        return HandleNCLButtonDblClk(wParam,lParam);
+
     case WM_NCRBUTTONDOWN:
     case WM_NCRBUTTONDBLCLK:
     case WM_NCMBUTTONDOWN:
-    case WM_NCMBUTTONUP:
     case WM_NCMBUTTONDBLCLK:
-        return 0;           //TODO: Send WM_SYSCOMMAND if required
+        if (lastHitTestVal == HTERROR) MessageBeep(MB_ICONEXCLAMATION);
+        return 0;
 
-    case WM_NCHITTEST: //TODO: Calculate position of
-        return HTCLIENT;
+    case WM_NCRBUTTONUP:
+    case WM_NCMBUTTONUP:
+        return 0;
+
+    case WM_NCHITTEST:
+    {
+      POINT point;
+
+      point.x = (SHORT)LOWORD(lParam);
+      point.y = (SHORT)HIWORD(lParam);
+
+      return FrameHitTest(this,point.x,point.y);
+    }
 
     case WM_SYSCOMMAND:
     {
@@ -1611,6 +1880,41 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 
         return 0;
 
+    case WM_SHOWWINDOW:
+        if (!lParam) return 0; /* sent from ShowWindow */
+        if (!(dwStyle & WS_POPUP) || !owner) return 0;
+        if ((dwStyle & WS_VISIBLE) && wParam) return 0;
+        else if (!(dwStyle & WS_VISIBLE) && !wParam) return 0;
+        ShowWindow(wParam ? SW_SHOWNOACTIVATE : SW_HIDE);
+        return 0;
+
+    case WM_CANCELMODE:
+        //if (getParent() == windowDesktop) EndMenu();
+        if (GetCapture() == Win32Hwnd) ReleaseCapture();
+        return 0;
+
+    case WM_DROPOBJECT:
+        return DRAG_FILE;
+
+    case WM_QUERYDROPOBJECT:
+        if (dwExStyle & WS_EX_ACCEPTFILES) return 1;
+        return 0;
+
+    case WM_QUERYDRAGICON:
+        {
+            HICON hIcon = windowClass->getCursor();
+            UINT len;
+
+            if(hIcon) return (LRESULT)hIcon;
+            for(len = 1; len < 64; len++)
+            {
+              hIcon = LoadIconA(hInstance,MAKEINTRESOURCEA(len));
+              if(hIcon)
+                return (LRESULT)hIcon;
+            }
+            return (LRESULT)LoadIconA(0,IDI_APPLICATIONA);
+        }
+
     case WM_QUERYOPEN:
     case WM_QUERYENDSESSION:
         return 1;
@@ -1636,6 +1940,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 
             return result;
     }
+
     case WM_NOTIFY:
         return 0; //comctl32 controls expect this
 
@@ -1643,7 +1948,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         if(Msg > WM_USER) {
             return 0;
         }
-        return 1;
+        return 1; //CB: shouldn't this be 0?
     }
 }
 //******************************************************************************
@@ -2743,7 +3048,10 @@ VOID Win32BaseWindow::updateWindowStyle(DWORD oldExStyle,DWORD oldStyle)
 {
   if(IsWindowDestroyed()) return;
 
-  if (dwStyle != oldStyle) OSLibSetWindowStyle(OS2HwndFrame, dwStyle, fTaskList);
+  //CB: todo: dwExStyle, creating new frame controls, destroy not used, WS_VISIBLE, ...
+  //    write test cases
+  if (dwStyle & 0xFFFF0000 != oldStyle & 0xFFFF0000)
+    OSLibSetWindowStyle(OS2HwndFrame, dwStyle, fTaskList);
 }
 //******************************************************************************
 //******************************************************************************
@@ -2779,7 +3087,7 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value, BOOL fUnicode)
                         value &= ~(WS_VISIBLE | WS_CHILD);      /* Some bits can't be changed this way (WINE) */
                 ss.styleOld = getStyle();
                         ss.styleNew = value | (ss.styleOld & (WS_VISIBLE | WS_CHILD));
-                dprintf(("SetWindowLong GWL_STYLE %x old %x new style %x", getWindowHandle(), getStyle(), value));
+                dprintf(("SetWindowLong GWL_STYLE %x old %x new style %x", getWindowHandle(), ss.styleOld, ss.styleNew));
                 SendInternalMessageA(WM_STYLECHANGING,GWL_STYLE,(LPARAM)&ss);
                 setStyle(ss.styleNew);
                 updateWindowStyle(dwExStyle,ss.styleOld);
