@@ -1,4 +1,3 @@
-/* $Id: parsedt.h,v 1.2 1999-08-22 22:08:48 sandervl Exp $ */
 /*
 PostgreSQL Data Base Management System (formerly known as Postgres, then
 as Postgres95).
@@ -32,7 +31,7 @@ PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
  *
  * Copyright (c) 1994, Regents of the University of California
  *
- * $Id: parsedt.h,v 1.2 1999-08-22 22:08:48 sandervl Exp $
+ * $Id: parsedt.h,v 1.3 2000-12-24 14:39:55 sandervl Exp $
  *
  *-------------------------------------------------------------------------
  */
@@ -60,11 +59,11 @@ PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
  */
 #define false	((char) 0)
 #define true	((char) 1)
-//#ifndef __cplusplus
+#ifndef __cplusplus
 #ifndef bool
 typedef char bool;
 #endif   /* ndef bool */
-//#endif	 /* not C++ */
+#endif	 /* not C++ */
 typedef bool *BoolPtr;
 
 #ifndef TRUE
@@ -146,9 +145,9 @@ typedef uint32 bool32;			/* >= 32 bits */
 #define USE_SQL_DATES			2
 #define USE_GERMAN_DATES		3
 
-extern int	DateStyle;
-extern bool EuroDates;
-extern int	CTimeZone;
+extern	int	DateStyle;
+extern	bool	EuroDates;
+extern	int	CTimeZone;
 
 typedef double float8;
 

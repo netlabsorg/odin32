@@ -1,4 +1,4 @@
-/* $Id: oleaut32.h,v 1.8 2000-01-26 11:26:05 sandervl Exp $ */
+/* $Id: oleaut32.h,v 1.9 2000-12-24 14:39:54 sandervl Exp $ */
 /*
  * Win32 OLE stubs for OS/2
  *
@@ -31,7 +31,6 @@
 #include "oleauto.h"
 #undef CALLCONV
 
-#include <os2win.h>
 #include <ole2ver.h>
 #include <ole.h>
 #include <winreg.h>
@@ -50,6 +49,7 @@
 #include "wine/obj_picture.h"
 
 #include <heapstring.h>
+#include <misc.h>
 
 extern int 	loadNr;
 extern char 	oleaut32Path[];
