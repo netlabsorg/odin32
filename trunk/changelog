@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1720 2001-10-05 12:31:34 sandervl Exp $ */
+/* $Id: changelog,v 1.1721 2001-10-06 08:56:53 sandervl Exp $ */
+
+ 2001-10-06: Sander van Leeuwen <sandervl@xs4all.nl>
+    - QUARTZ/OLEAUT32: 
+                o Wine 20011004 resync
 
  2001-10-05: Sander van Leeuwen <sandervl@xs4all.nl>
     - DDRAW:    o Added stretching support for blitting to the screen
