@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.318 1999-10-14 09:58:37 sandervl Exp $ */
+ /* $Id: changelog,v 1.319 1999-10-14 12:28:35 sandervl Exp $ */
 
  99-10-14: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
     - PE2LX:      New implementation in src\win32k\pe2lx.
@@ -43,6 +43,9 @@
                     In iLoadLibrary first check if the dll has already been loaded.
                     Fixed console initalization for pe loader apps.
                     Fixed SetWin32TIB. Return current FS selector for Odin32 apps.
+		    Removed generic.exe fix in OS2UnsetExceptionHandler.
+                    (creates problems when loading multiple PE dlls with pe loader
+                     and generic.exe still works fine now)
 
  99-10-13: Patrick Haller <phaller@gmx.net>
 	- KERNEL32: Fix: XCPT_GUARD_PAGE_VIOLATION are now supported.
