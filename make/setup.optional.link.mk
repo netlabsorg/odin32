@@ -1,4 +1,5 @@
-# $Id: setup.optional.link.mk,v 1.1 2002-08-29 10:01:40 bird Exp $
+# $Id: setup.optional.link.mk,v 1.2 2002-09-14 23:29:13 bird Exp $
+MAKE_INCLUDE_LD_OPT = $(PATH_MAKE)\setup.optional.link.mk
 
 #
 # Helper file for all the option stuff for the ibm linker (ilink).
@@ -28,19 +29,27 @@ _LD_EXTDIC      = /NoE
 _LD_PACKCODE    = /NoPackcode
 !endif
 !if defined(LD_PACKCODE)
+! if "$(LD_PACKCODE)" == ""
+_LD_PACKCODE    = /Packcode
+! else
 _LD_PACKCODE    = /Packcode:$(LD_PACKCODE)
+! endif
 !endif
 !if defined(LD_NO_PACKDATA)
 _LD_PACKDATA    = /NoPackdata
 !endif
 !if defined(LD_PACKDATA)
+! if "$(LD_PACKDATA)" == ""
+_LD_PACKDATA    = /Packdata
+! else
 _LD_PACKDATA    = /Packdata:$(LD_PACKDATA)
+! endif
 !endif
 !if defined(LD_IGNORECASE) || defined(ALL_IGNORECASE)
-_LD_IGNORECASE  = /Ig
+_LD_IGNORECASE  =
 !endif
 !if defined(LD_NO_IGNORECASE) || defined(ALL_NO_IGNORECASE)
-_LD_IGNORECASE  = /NoI
+_LD_IGNORECASE  = /noignorecase
 !endif
 !ifdef LD_NO_DOSSEG
 _LD_DOSSEG      =
@@ -56,7 +65,7 @@ _LD_FAR         = /FAR
 !endif
 
 
-_LD_OPTIONAL = $(_LD_ALIGN) $(_LD_DEFAULT_LIBS) $(_LD_EXTDIC) $(_LD_PACKCODE) $(_LD_PACKDATA) $(_LD_IGNORECASE) $(_LD_DOSSEG) $(_LD_FAR)
+_LD_OPTIONAL = $(_LD_DEFAULT_LIBS) $(_LD_EXTDIC) $(_LD_IGNORECASE) $(_LD_DOSSEG) $(_LD_FAR) $(_LD_PACKCODE) $(_LD_PACKDATA) $(_LD_ALIGN)
 
 #!if !$(BUILD_FORWARDING)
 #! ifdef LD_FORMAT
