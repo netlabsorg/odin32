@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.46 1999-07-10 15:59:42 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.47 1999-07-12 17:51:15 phaller Exp $ */
+ 99-07-12: Patrick Haller <phaller@gmx.net>
+       - KERNEL32: various console fixes
+
  99-07-10: Edgar Buerkle <100566.557@compuserve.com>
 	- USER32: Fixes for CreateWindowExW and several unicode menu apis
 
