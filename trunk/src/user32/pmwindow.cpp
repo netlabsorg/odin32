@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.12 1999-09-29 09:16:31 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.13 1999-09-29 09:31:18 dengert Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -29,6 +29,7 @@
 #include "dc.h"
 #include <thread.h>
 #include <wprocess.h>
+#include <caret.h>
 
 HMQ  hmq = 0;                             /* Message queue handle         */
 HAB  hab = 0;
@@ -412,7 +413,9 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                 hwndFocus = NULL;
         }
         if((ULONG)mp2 == TRUE) {
-                rc = win32wnd->MsgSetFocus(Win32BaseWindow::OS2ToWin32Handle(hwndFocus));
+                HWND hwndFocusWin32 = Win32BaseWindow::OS2ToWin32Handle(hwndFocus);
+                recreateCaret (hwndFocusWin32);
+                rc = win32wnd->MsgSetFocus(hwndFocusWin32);
         }
         else    rc = win32wnd->MsgKillFocus(Win32BaseWindow::OS2ToWin32Handle(hwndFocus));
         if(rc) {
@@ -747,7 +750,7 @@ VirtualKeyFound:
         goto RunDefWndProc;
 
     case WM_TIMER:
-        win32wnd->MsgTimer((ULONG)mp1);
+        if (mp2) win32wnd->MsgTimer((ULONG)mp1);
         goto RunDefWndProc;
 
     case WM_SETWINDOWPARAMS:

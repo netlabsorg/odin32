@@ -1,4 +1,4 @@
-/* $Id: timer.cpp,v 1.3 1999-09-26 16:09:04 dengert Exp $ */
+/* $Id: timer.cpp,v 1.4 1999-09-29 09:31:18 dengert Exp $ */
 
 /*
  * timer functions for USER32
@@ -73,9 +73,10 @@ BOOL TIMER_HandleTimer (PQMSG pMsg)
             break;
 
     if (i == NB_TIMERS)  /* no matching timer found */
-        return (TRUE);   /* eat message */
+        return (FALSE);  /* forward message */
 
     pMsg->mp1 = MPFROMLONG (pTimer->id);
+    pMsg->mp2 = MPFROMLONG (TRUE);   /* mark for Win32 */
     if (!pTimer->proc)
         return (FALSE);  /* forward message */
 
