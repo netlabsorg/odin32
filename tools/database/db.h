@@ -1,4 +1,4 @@
-/* $Id: db.h,v 1.5 2000-02-12 17:55:03 bird Exp $ */
+/* $Id: db.h,v 1.6 2000-02-12 23:54:29 bird Exp $ */
 /*
  * DB - contains all database routines
  *
@@ -30,8 +30,8 @@ extern "C" {
     typedef struct _FunctionDescription
     {
         /* buffers */
-        char  szFnDclBuffer[512];
-        char  szFnHdrBuffer[1024];
+        char  szFnDclBuffer[2048];
+        char  szFnHdrBuffer[2048];
 
         /* function name and type */
         char *pszName;
@@ -77,8 +77,8 @@ extern "C" {
                                       const char *pszDatabase);
     BOOL            _System dbDisconnect();
     signed short    _System dbGetDll(const char *pszDllName);
-    signed long     _System dbCountFunctionInDll(signed long ulDll);
-
+    signed long     _System dbCountFunctionInDll(signed long ulDll,
+                                                 BOOL fNotAliases);
     signed short    _System dbCheckInsertDll(const char *pszDll);
     unsigned short  _System dbGet(const char *pszTable,
                                   const char *pszGetColumn,
