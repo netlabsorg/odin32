@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1459 2001-05-30 08:22:26 sandervl Exp $ */
+/* $Id: changelog,v 1.1460 2001-05-30 17:43:08 sandervl Exp $ */
 
  2001-05-30: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o RedrawWindow: don't clear erase background flag if the 
@@ -9,6 +9,14 @@
                   New files renamed to winimagepeldr_new.cpp/h
                   (Odin test app crashes; looks like MFC42 ordinal lookup
                    fails somewhere)
+    - OLEAUT32: o Added RegisterTypeLib (ported recent Wine patch) &
+                  UnRegisterTypeLib
+                o Added ITypeInfoImpl_Invoke (ported Francois Jacques'
+                  (refused) patch and rewrote it to get rid of stack
+                  layout dependency.
+                o VT_HRESULT -> VT_INT conversion added to Coerce
+                  (all needed for Quicken Deluxe 2001; still crashes, but
+                   gets passed data loading)
 
  2001-05-30: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o replaced linear lists in PE loader with faster hashtables
