@@ -1,4 +1,4 @@
-/* $Id: listbox.cpp,v 1.20 2000-02-21 17:25:27 cbratschi Exp $ */
+/* $Id: listbox.cpp,v 1.21 2000-03-14 15:00:59 sandervl Exp $ */
 /*
  * Listbox controls
  *
@@ -1239,7 +1239,9 @@ static LRESULT LISTBOX_SetSelection( HWND hwnd, LB_DESCR *descr, INT index,
     else
     {
         INT oldsel = descr->selected_item;
-////        if (index == oldsel) return LB_OKAY;
+	//SvL: Why was this commented out??? (enabled in latest wine code)
+        if (index == oldsel) return LB_OKAY;
+
         if (oldsel != -1) descr->items[oldsel].selected = FALSE;
         if (index != -1) descr->items[index].selected = TRUE;
         descr->selected_item = index;

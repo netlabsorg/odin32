@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.23 2000-03-13 13:10:46 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.24 2000-03-14 15:01:00 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -194,8 +194,9 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
         }
         if(ISMOUSE_CAPTURED())
         {
-            if(DInputMouseHandler(win32wnd->getWindowHandle(), winMsg->message, winMsg->pt.x, winMsg->pt.y))
+            if(DInputMouseHandler(win32wnd->getWindowHandle(), winMsg->message, winMsg->pt.x, winMsg->pt.y)) {
                 goto dummymessage; //dinput swallowed message
+	    }
         }
 
         return TRUE;
@@ -230,8 +231,9 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
         }
         if(ISMOUSE_CAPTURED())
         {
-            if(DInputMouseHandler(win32wnd->getWindowHandle(), winMsg->message, winMsg->pt.x, winMsg->pt.y))
+            if(DInputMouseHandler(win32wnd->getWindowHandle(), winMsg->message, winMsg->pt.x, winMsg->pt.y)) {
                 goto dummymessage; //dinput swallowed message
+            }
         }
         //OS/2 Window coordinates -> Win32 Window coordinates
         return TRUE;
@@ -448,8 +450,9 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
         }
         if(ISMOUSE_CAPTURED())
         {
-            if(DInputMouseHandler(win32wnd->getWindowHandle(), winMsg->message, winMsg->pt.x, winMsg->pt.y))
+            if(DInputMouseHandler(win32wnd->getWindowHandle(), winMsg->message, winMsg->pt.x, winMsg->pt.y)) {
                 goto dummymessage; //dinput swallowed message
+            }
         }
 
         break;
@@ -484,8 +487,9 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
         }
         if(ISMOUSE_CAPTURED())
         {
-            if(DInputMouseHandler(win32wnd->getWindowHandle(), winMsg->message, winMsg->pt.x, winMsg->pt.y))
+            if(DInputMouseHandler(win32wnd->getWindowHandle(), winMsg->message, winMsg->pt.x, winMsg->pt.y)) {
                 goto dummymessage; //dinput swallowed message
+            }
         }
         //OS/2 Window coordinates -> Win32 Window coordinates
         break;
@@ -644,8 +648,9 @@ VirtualKeyFound:
         }
         if(ISKDB_CAPTURED())
         {
-            if(DInputKeyBoardHandler(winMsg))
+            if(DInputKeyBoardHandler(winMsg)) {
                 goto dummymessage; //dinput swallowed message
+	    }
         }
         break;
     }
@@ -740,6 +745,9 @@ VirtualKeyFound:
     case WM_SEMANTICEVENT:
     default:
 dummymessage:
+	winMsg->message = 0;
+	winMsg->wParam  = 0;
+	winMsg->lParam  = 0;
         return FALSE;
   }
   return TRUE;
