@@ -1,4 +1,4 @@
-# $Id: setup.os2prfvac365.mk,v 1.5 2002-04-22 02:09:28 bird Exp $
+# $Id: setup.os2prfvac365.mk,v 1.6 2002-04-30 06:20:04 bird Exp $
 
 # ---OS2, PROFILE, VAC365-------------------------
 ENV_NAME="OS/2, Profile, IBM VisualAge for C++ 3.6.5"
@@ -11,9 +11,10 @@ ENV_ENVS_FORCE=vac365
 
 
 #
-# Include some shared standard stuff: ALP.
+# Include some shared standard stuff: ALP, VAC optional stuff.
 #
 !include $(PATH_MAKE)\setup.os2prfalp.mk
+!include $(PATH_MAKE)\setup.optional.vac3xx.mk
 
 
 #
@@ -39,24 +40,22 @@ _AR_LNK1= "$(TARGET_OBJS: ="&^
 AR_LNK1= $(_AR_LNK1:""=)
 AR_LNK2= $(@R).lst
 
-CC_FLAGS=/Q /DDEBUG /DOS2 /Ti+ /O- /Gh+ /Ss+ /C+ $(CC_SEGS) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES) $(ALL_INCLUDES) /I$(PATH_INCLUDES)
-CC_FLAGS_EXE=$(CC_FLAGS) /Gm+ /Ge+ /Gn+
-CC_FLAGS_DLL=$(CC_FLAGS) /Gm+ /Ge- /Gn-
-CC_FLAGS_CRT=$(CC_FLAGS) /Gm+ /Ge-
-CC_FLAGS_SYS=$(CC_FLAGS) /Rn  /Ge+ /Gn+ /DRING0 /Gr+ /Gs- -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext-
+CC_FLAGS=/Q /DDEBUG /DOS2 /Ti+ /O- /Gh+ /Ss+ /C+ $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES) $(ALL_INCLUDES) /I$(PATH_INCLUDES)
+CC_FLAGS_EXE=$(CC_FLAGS) /Gm+ /Ge+
+CC_FLAGS_DLL=$(CC_FLAGS) /Gm+ /Ge-
+CC_FLAGS_SYS=$(CC_FLAGS) /Rn  /Ge+ /DRING0 /Gr+ /Gs- /Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext-
 CC_FLAGS_VDD=$(CC_FLAGS_SYS)
-CC_FLAGS_IFS=$(CC_FLAGS_SYS)
+CC_FLAGS_IFS=$(CC_FLAGS_SYS) /Ge-
 CC_OBJ_OUT=/Fo
 CC_LST_OUT=/Fa
 CC_PC_2_STDOUT=/Pd+ /P+
 
-CXX_FLAGS=/Q /DDEBUG /DOS2 /Ti+ /O- /Gh+ /Ss+ /C+ $(CXX_SEGS) $(CXX_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CXX_INCLUDES) $(ALL_INCLUDES) /I$(PATH_INCLUDES)
-CXX_FLAGS_EXE=$(CXX_FLAGS) /Gm+ /Ge+ /Gn+
-CXX_FLAGS_DLL=$(CXX_FLAGS) /Gm+ /Ge- /Gn-
-CXX_FLAGS_CRT=$(CXX_FLAGS) /Gm+ /Ge-
-CXX_FLAGS_SYS=$(CXX_FLAGS) /Rn  /Ge+ /Gn+ /DRING0 /Gr+ /Gs- /Gx+ /Tm- -Wall+ppt-ppc-inl-cnv-gnr-vft-
+CXX_FLAGS=/Q /DDEBUG /DOS2 /Ti+ /O- /Gh+ /Ss+ /C+ $(_CXX_OPTIONAL) $(CXX_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CXX_INCLUDES) $(ALL_INCLUDES) /I$(PATH_INCLUDES)
+CXX_FLAGS_EXE=$(CXX_FLAGS) /Gm+ /Ge+
+CXX_FLAGS_DLL=$(CXX_FLAGS) /Gm+ /Ge-
+CXX_FLAGS_SYS=$(CXX_FLAGS) /Rn  /Ge+ /DRING0 /Gr+ /Gs- /Tm- /Wall+ppt-ppc-inl-cnv-gnr-vft- /Gx+
 CXX_FLAGS_VDD=$(CXX_FLAGS_SYS)
-CXX_FLAGS_IFS=$(CXX_FLAGS_SYS)
+CXX_FLAGS_IFS=$(CXX_FLAGS_SYS) /Ge-
 CXX_OBJ_OUT=/Fo
 CXX_LST_OUT=/Fa
 CXX_PC_2_STDOUT=/Pd+ /P+
@@ -80,7 +79,7 @@ LINK_LNK2=$(TARGET),
 LINK_LNK3=$(TARGET_MAP),
 LINK_LNK4=$(TARGET_LIBS: =+^
 ),
-LINK_LNK5=$(TARGET_DEF)
+LINK_LNK5=$(TARGET_DEF_LINK)
 
 RC_FLAGS=-r -n -i $(PATH_INCLUDES:;= -i ) $(RC_DEFINES) $(RC_INCLUDES)
 RL_FLAGS=-x2 -n
