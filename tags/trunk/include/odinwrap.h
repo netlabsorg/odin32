@@ -103,9 +103,11 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
 #  define PROFILE_STOP(a)
 #endif
 
+#define FNINIT \
+  unsigned short sel;
 
 #define FNPROLOGUE(a)   \
-  USHORT sel = GetFS(); \
+  sel = GetFS(); \
   dbg_IncThreadCallDepth(); \
   ODIN_HEAPCHECK();     \
   PROFILE_START(a)
@@ -129,10 +131,12 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   cRet ODIN_INTERNAL ODIN_##cName (void);     \
   cRet WINAPI cName(void)                     \
   {                                           \
+    FNINIT                                    \
+    cRet   rc;                                \
     dprintf(("%s: "#cRet" "#cName"()",   \
              pszOdinDebugChannel));           \
     FNPROLOGUE(#cName)                        \
-    cRet   rc  = ODIN_##cName();              \
+    rc  = ODIN_##cName();                     \
     FNEPILOGUE(#cName)                        \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
@@ -147,6 +151,7 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   void ODIN_INTERNAL ODIN_##cName (void);     \
   void WINAPI cName(void)                     \
   {                                           \
+    FNINIT                                    \
     dprintf(("%s: void "#cName"()",   \
              pszOdinDebugChannel));           \
     FNPROLOGUE(#cName)                       \
@@ -164,11 +169,13 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1);    \
   cRet WINAPI cName(t1 a1)                    \
   {                                           \
+    FNINIT                                    \
+    cRet   rc;                                \
     dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh)", \
              pszOdinDebugChannel,             \
              a1));                            \
-    FNPROLOGUE(#cName)                       \
-    cRet   rc  = ODIN_##cName(a1);            \
+    FNPROLOGUE(#cName)                        \
+    rc  = ODIN_##cName(a1);                   \
     FNEPILOGUE(#cName)                        \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
@@ -182,6 +189,7 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1);    \
   void WINAPI cName(t1 a1)                    \
   {                                           \
+    FNINIT                                    \
     dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh)", \
              pszOdinDebugChannel,             \
              a1));                            \
@@ -200,12 +208,14 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2); \
   cRet WINAPI cName(t1 a1,t2 a2)               \
   {                                            \
+    FNINIT                                    \
+    cRet   rc;                                \
     dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh)", \
              pszOdinDebugChannel,              \
              a1,a2));                          \
     FNPROLOGUE(#cName)                        \
-    cRet   rc  = ODIN_##cName(a1,a2);          \
-    FNEPILOGUE(#cName)                         \
+    rc  = ODIN_##cName(a1,a2);                \
+    FNEPILOGUE(#cName)                        \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,              \
              rc));                             \
@@ -218,6 +228,7 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2);     \
   void WINAPI cName(t1 a1,t2 a2)              \
   {                                           \
+    FNINIT                                    \
     dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh)", \
              pszOdinDebugChannel,             \
              a1,a2));                         \
@@ -236,11 +247,13 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3);      \
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3)        \
   {                                           \
+    FNINIT                                    \
+    cRet   rc;                                \
     dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)", \
              pszOdinDebugChannel,             \
              a1,a2,a3));                      \
     FNPROLOGUE(#cName)                       \
-    cRet   rc  = ODIN_##cName(a1,a2,a3);      \
+    rc  = ODIN_##cName(a1,a2,a3);            \
     FNEPILOGUE(#cName)            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
@@ -254,6 +267,7 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3);  \
   void WINAPI cName(t1 a1,t2 a2,t3 a3)    \
   {                               \
+    FNINIT                                    \
     dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)", \
              pszOdinDebugChannel,             \
              a1,a2,a3));                      \
@@ -272,11 +286,13 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4);      \
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4)        \
   {                               \
+    FNINIT                                    \
+    cRet   rc;                                \
     dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh, "#t4" "#a4"=%08xh)", \
              pszOdinDebugChannel,             \
              a1,a2,a3,a4));                   \
     FNPROLOGUE(#cName)                       \
-    cRet   rc  = ODIN_##cName(a1,a2,a3,a4); \
+    rc  = ODIN_##cName(a1,a2,a3,a4); \
     FNEPILOGUE(#cName)            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
@@ -290,6 +306,7 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4);  \
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4)    \
   {                               \
+    FNINIT                                    \
     dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh, "#t4" "#a4"=%08xh)", \
              pszOdinDebugChannel,             \
              a1,a2,a3,a4));                    \
@@ -308,12 +325,14 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5);      \
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5)        \
   {                               \
+    FNINIT                                    \
+    cRet   rc;                                \
     dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh)", \
              pszOdinDebugChannel,             \
              a1,a2,a3,a4,a5));                \
     FNPROLOGUE(#cName)                       \
-    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5); \
+    rc  = ODIN_##cName(a1,a2,a3,a4,a5); \
     FNEPILOGUE(#cName)            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
@@ -327,6 +346,7 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5);  \
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5)    \
   {                               \
+    FNINIT                                    \
     dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh)", \
              pszOdinDebugChannel,             \
@@ -346,12 +366,14 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6);      \
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6)        \
   {                               \
+    FNINIT                                    \
+    cRet   rc;                                \
     dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh)", \
              pszOdinDebugChannel,             \
              a1,a2,a3,a4,a5,a6));             \
     FNPROLOGUE(#cName)                       \
-    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6); \
+    rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6); \
     FNEPILOGUE(#cName)            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
@@ -365,6 +387,7 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6);  \
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6)    \
   {                               \
+    FNINIT                                    \
     dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh)", \
              pszOdinDebugChannel,             \
@@ -384,12 +407,14 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7);      \
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7)        \
   {                               \
+    FNINIT                                    \
+    cRet   rc;                                \
     dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh)", \
              pszOdinDebugChannel,             \
              a1,a2,a3,a4,a5,a6,a7));          \
     FNPROLOGUE(#cName)                       \
-    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7); \
+    rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7); \
     FNEPILOGUE(#cName)            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
@@ -403,6 +428,7 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7);  \
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7)    \
   {                               \
+    FNINIT                                    \
     dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh)", \
              pszOdinDebugChannel,             \
@@ -422,13 +448,15 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8);      \
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8)        \
   {                               \
+    FNINIT                                    \
+    cRet   rc;                                \
     dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh" \
              ", "#t8" "#a8"=%08xh)", \
              pszOdinDebugChannel,             \
              a1,a2,a3,a4,a5,a6,a7,a8));       \
     FNPROLOGUE(#cName)                       \
-    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8); \
+    rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8); \
     FNEPILOGUE(#cName)            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
@@ -442,6 +470,7 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8);  \
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8)    \
   {                               \
+    FNINIT                                    \
     dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh" \
              ", "#t8" "#a8"=%08xh)", \
@@ -462,13 +491,15 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9);      \
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9)        \
   {                               \
+    FNINIT                                    \
+    cRet   rc;                                \
     dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh" \
              ", "#t8" "#a8"=%08xh, "#t9" "#a9"=%08xh)", \
              pszOdinDebugChannel,             \
              a1,a2,a3,a4,a5,a6,a7,a8,a9));    \
     FNPROLOGUE(#cName)                       \
-    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9); \
+    rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9); \
     FNEPILOGUE(#cName)            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
@@ -482,6 +513,7 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9);  \
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9)    \
   {                               \
+    FNINIT                                    \
     dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh" \
              ", "#t8" "#a8"=%08xh, "#t9" "#a9"=%08xh)", \
@@ -502,13 +534,15 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10);      \
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10)        \
   {                               \
+    FNINIT                                    \
+    cRet   rc;                                \
     dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh" \
              ", "#t8" "#a8"=%08xh, "#t9" "#a9"=%08xh, "#t10" "#a10"=%08xh)", \
              pszOdinDebugChannel,             \
              a1,a2,a3,a4,a5,a6,a7,a8,a9,a10));\
     FNPROLOGUE(#cName)                       \
-    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10); \
+    rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10); \
     FNEPILOGUE(#cName)            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
@@ -522,6 +556,7 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10);  \
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10)    \
   {                               \
+    FNINIT                                    \
     dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh" \
              ", "#t8" "#a8"=%08xh, "#t9" "#a9"=%08xh, "#t10" "#a10"=%08xh)", \
@@ -542,13 +577,15 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11);      \
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11)        \
   {                               \
+    FNINIT                                    \
+    cRet   rc;                                \
     dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh"  \
              ", "#t8" "#a8"=%08xh, "#t9" "#a9"=%08xh, "#t10" "#a10"=%08xh, "#t11" "#a11"=%08xh)", \
              pszOdinDebugChannel,             \
              a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11)); \
     FNPROLOGUE(#cName)                       \
-    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11); \
+    rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11); \
     FNEPILOGUE(#cName)            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
@@ -562,6 +599,7 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11);  \
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11)    \
   {                               \
+    FNINIT                                    \
     dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh"  \
              ", "#t8" "#a8"=%08xh, "#t9" "#a9"=%08xh, "#t10" "#a10"=%08xh, "#t11" "#a11"=%08xh)", \
@@ -582,6 +620,8 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12);      \
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12)        \
   {                               \
+    FNINIT                                    \
+    cRet   rc;                                \
     dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh"     \
              ", "#t8" "#a8"=%08xh, "#t9" "#a9"=%08xh, "#t10" "#a10"=%08xh, "#t11" "#a11"=%08xh" \
@@ -589,7 +629,7 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
              pszOdinDebugChannel,             \
              a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12)); \
     FNPROLOGUE(#cName)                       \
-    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12); \
+    rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12); \
     FNEPILOGUE(#cName)            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
@@ -603,6 +643,7 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12);  \
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12)    \
   {                               \
+    FNINIT                                    \
     dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh"     \
              ", "#t8" "#a8"=%08xh, "#t9" "#a9"=%08xh, "#t10" "#a10"=%08xh, "#t11" "#a11"=%08xh" \
@@ -624,6 +665,8 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13);      \
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13)        \
   {                               \
+    FNINIT                                    \
+    cRet   rc;                                \
     dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh"     \
              ", "#t8" "#a8"=%08xh, "#t9" "#a9"=%08xh, "#t10" "#a10"=%08xh, "#t11" "#a11"=%08xh" \
@@ -631,7 +674,7 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
              pszOdinDebugChannel,             \
              a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13)); \
     FNPROLOGUE(#cName)                       \
-    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13); \
+    rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13); \
     FNEPILOGUE(#cName)            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
@@ -645,6 +688,7 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13);  \
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13)    \
   {                               \
+    FNINIT                                    \
     dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh"     \
              ", "#t8" "#a8"=%08xh, "#t9" "#a9"=%08xh, "#t10" "#a10"=%08xh, "#t11" "#a11"=%08xh" \
@@ -666,6 +710,8 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13,t14 a14);      \
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13,t14 a14)        \
   {                               \
+    FNINIT                                    \
+    cRet   rc;                                \
     dprintf(("%s: "#cRet" "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh"     \
              ", "#t8" "#a8"=%08xh, "#t9" "#a9"=%08xh, "#t10" "#a10"=%08xh, "#t11" "#a11"=%08xh" \
@@ -673,7 +719,7 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
              pszOdinDebugChannel,             \
              a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14)); \
     FNPROLOGUE(#cName)                       \
-    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14); \
+    rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14); \
     FNEPILOGUE(#cName)            \
     dprintf(("%s: "#cRet" "#cName"() leave = %08xh\n", \
              pszOdinDebugChannel,             \
@@ -687,6 +733,7 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13,t14 a14);  \
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13,t14 a14)    \
   {                               \
+    FNINIT                                    \
     dprintf(("%s: void "#cName"("#t1" "#a1"=%08xh, "#t2" "#a2"=%08xh, "#t3" "#a3"=%08xh)" \
              ", "#t4" "#a4"=%08xh, "#t5" "#a5"=%08xh, "#t6" "#a6"=%08xh, "#t7" "#a7"=%08xh"     \
              ", "#t8" "#a8"=%08xh, "#t9" "#a9"=%08xh, "#t10" "#a10"=%08xh, "#t11" "#a11"=%08xh" \
@@ -709,8 +756,11 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
  * General Wrapper Macros                                                   *
  ****************************************************************************/
 
+#define FNINIT          \
+  unsigned short sel;
+
 #define FNPROLOGUE(a)   \
-  USHORT sel = GetFS();
+  sel = GetFS();
 
 #define FNEPILOGUE(a)   \
   SetFS(sel);
@@ -759,8 +809,10 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   cRet ODIN_INTERNAL ODIN_##cName (void);     \
   cRet WINAPI cName(void)                     \
   {                                           \
+    FNINIT                                    \
+    cRet   rc;                                \
     FNPROLOGUE(#cName)                        \
-    cRet   rc  = ODIN_##cName();              \
+    rc  = ODIN_##cName();              \
     FNEPILOGUE(#cName)                        \
     return rc;                                \
   }                                           \
@@ -772,6 +824,7 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   void ODIN_INTERNAL ODIN_##cName (void);     \
   void WINAPI cName(void)                     \
   {                                           \
+    FNINIT                                    \
     FNPROLOGUE(#cName)                       \
     ODIN_##cName();                           \
     FNEPILOGUE(#cName)                        \
@@ -785,8 +838,10 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1);    \
   cRet WINAPI cName(t1 a1)                    \
   {                                           \
+    FNINIT                                    \
+    cRet   rc;                                \
     FNPROLOGUE(#cName)                       \
-    cRet   rc  = ODIN_##cName(a1);            \
+    rc  = ODIN_##cName(a1);            \
     FNEPILOGUE(#cName)                        \
     return rc;                                \
   }                                           \
@@ -797,6 +852,7 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1);    \
   void WINAPI cName(t1 a1)                    \
   {                                           \
+    FNINIT                                    \
     FNPROLOGUE(#cName)                       \
     ODIN_##cName(a1);                         \
     FNEPILOGUE(#cName)                        \
@@ -810,8 +866,10 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2); \
   cRet WINAPI cName(t1 a1,t2 a2)               \
   {                                            \
+    FNINIT                                    \
+    cRet   rc;                                \
     FNPROLOGUE(#cName)                        \
-    cRet   rc  = ODIN_##cName(a1,a2);          \
+    rc  = ODIN_##cName(a1,a2);          \
     FNEPILOGUE(#cName)                         \
     return rc;                                 \
   }                                            \
@@ -822,6 +880,7 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2);     \
   void WINAPI cName(t1 a1,t2 a2)              \
   {                                           \
+    FNINIT                                    \
     FNPROLOGUE(#cName)                       \
     ODIN_##cName(a1,a2);                      \
     FNEPILOGUE(#cName)                        \
@@ -835,8 +894,10 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3);      \
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3)        \
   {                                           \
+    FNINIT                                    \
+    cRet   rc;                                \
     FNPROLOGUE(#cName)                       \
-    cRet   rc  = ODIN_##cName(a1,a2,a3);      \
+    rc  = ODIN_##cName(a1,a2,a3);      \
     FNEPILOGUE(#cName)            \
     return rc;                    \
   }                               \
@@ -847,6 +908,7 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3);  \
   void WINAPI cName(t1 a1,t2 a2,t3 a3)    \
   {                               \
+    FNINIT                                    \
     FNPROLOGUE(#cName)                       \
     ODIN_##cName(a1,a2,a3);              \
     FNEPILOGUE(#cName)            \
@@ -860,8 +922,10 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4);      \
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4)        \
   {                               \
+    FNINIT                                    \
+    cRet   rc;                                \
     FNPROLOGUE(#cName)                       \
-    cRet   rc  = ODIN_##cName(a1,a2,a3,a4); \
+    rc  = ODIN_##cName(a1,a2,a3,a4); \
     FNEPILOGUE(#cName)            \
     return rc;                    \
   }                               \
@@ -872,6 +936,7 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4);  \
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4)    \
   {                               \
+    FNINIT                                    \
     FNPROLOGUE(#cName)                       \
     ODIN_##cName(a1,a2,a3,a4); \
   FNEPILOGUE(#cName)       \
@@ -885,8 +950,10 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5);      \
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5)        \
   {                               \
+    FNINIT                                    \
+    cRet   rc;                                \
     FNPROLOGUE(#cName)                       \
-    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5); \
+    rc  = ODIN_##cName(a1,a2,a3,a4,a5); \
     FNEPILOGUE(#cName)            \
     return rc;                    \
   }                               \
@@ -897,6 +964,7 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5);  \
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5)    \
   {                               \
+    FNINIT                                    \
     FNPROLOGUE(#cName)                       \
     ODIN_##cName(a1,a2,a3,a4,a5); \
     FNEPILOGUE(#cName)       \
@@ -910,8 +978,10 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6);      \
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6)        \
   {                               \
+    FNINIT                                    \
+    cRet   rc;                                \
     FNPROLOGUE(#cName)                       \
-    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6); \
+    rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6); \
     FNEPILOGUE(#cName)            \
     return rc;                    \
   }                               \
@@ -922,6 +992,7 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6);  \
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6)    \
   {                               \
+    FNINIT                                    \
     FNPROLOGUE(#cName)                       \
     ODIN_##cName(a1,a2,a3,a4,a5,a6); \
     FNEPILOGUE(#cName)       \
@@ -935,8 +1006,10 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7);      \
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7)        \
   {                               \
+    FNINIT                                    \
+    cRet   rc;                                \
     FNPROLOGUE(#cName)                       \
-    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7); \
+    rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7); \
     FNEPILOGUE(#cName)            \
     return rc;                    \
   }                               \
@@ -947,6 +1020,7 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7);  \
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7)    \
   {                               \
+    FNINIT                                    \
     FNPROLOGUE(#cName)                       \
     ODIN_##cName(a1,a2,a3,a4,a5,a6,a7); \
     FNEPILOGUE(#cName)       \
@@ -960,8 +1034,10 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8);      \
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8)        \
   {                               \
+    FNINIT                                    \
+    cRet   rc;                                \
     FNPROLOGUE(#cName)                       \
-    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8); \
+    rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8); \
     FNEPILOGUE(#cName)            \
     return rc;                    \
   }                               \
@@ -972,6 +1048,7 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8);  \
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8)    \
   {                               \
+    FNINIT                                    \
     FNPROLOGUE(#cName)                       \
     ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8); \
     FNEPILOGUE(#cName)       \
@@ -985,8 +1062,10 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9);      \
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9)        \
   {                               \
+    FNINIT                                    \
+    cRet   rc;                                \
     FNPROLOGUE(#cName)                       \
-    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9); \
+    rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9); \
     FNEPILOGUE(#cName)            \
     return rc;                    \
   }                               \
@@ -997,6 +1076,7 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9);  \
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9)    \
   {                               \
+    FNINIT                                    \
     FNPROLOGUE(#cName)                       \
     ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9); \
     FNEPILOGUE(#cName)       \
@@ -1010,8 +1090,10 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10);      \
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10)        \
   {                               \
+    FNINIT                                    \
+    cRet   rc;                                \
     FNPROLOGUE(#cName)                       \
-    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10); \
+    rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10); \
     FNEPILOGUE(#cName)            \
     return rc;                    \
   }                               \
@@ -1022,6 +1104,7 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10);  \
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10)    \
   {                               \
+    FNINIT                                    \
     FNPROLOGUE(#cName)                       \
     ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10); \
     FNEPILOGUE(#cName)       \
@@ -1035,8 +1118,10 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11);      \
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11)        \
   {                               \
+    FNINIT                                    \
+    cRet   rc;                                \
     FNPROLOGUE(#cName)                       \
-    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11); \
+    rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11); \
     FNEPILOGUE(#cName)            \
     return rc;                    \
   }                               \
@@ -1047,6 +1132,7 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11);  \
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11)    \
   {                               \
+    FNINIT                                    \
     FNPROLOGUE(#cName)                       \
     ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11); \
     FNEPILOGUE(#cName)       \
@@ -1060,8 +1146,10 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12);      \
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12)        \
   {                               \
+    FNINIT                                    \
+    cRet   rc;                                \
     FNPROLOGUE(#cName)                       \
-    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12); \
+    rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12); \
     FNEPILOGUE(#cName)            \
     return rc;                    \
   }                               \
@@ -1072,6 +1160,7 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12);  \
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12)    \
   {                               \
+    FNINIT                                    \
     FNPROLOGUE(#cName)                       \
     ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12); \
     FNEPILOGUE(#cName)       \
@@ -1085,8 +1174,10 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13);      \
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13)        \
   {                               \
+    FNINIT                                    \
+    cRet   rc;                                \
     FNPROLOGUE(#cName)                       \
-    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13); \
+    rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13); \
     FNEPILOGUE(#cName)            \
     return rc;                    \
   }                               \
@@ -1097,6 +1188,7 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13);  \
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13)    \
   {                               \
+    FNINIT                                    \
     FNPROLOGUE(#cName)                       \
     ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13); \
     FNEPILOGUE(#cName)       \
@@ -1110,8 +1202,10 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   cRet ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13,t14 a14);      \
   cRet WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13,t14 a14)        \
   {                               \
+    FNINIT                                    \
+    cRet   rc;                                \
     FNPROLOGUE(#cName)                       \
-    cRet   rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14); \
+    rc  = ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14); \
     FNEPILOGUE(#cName)            \
     return rc;                    \
   }                               \
@@ -1122,6 +1216,7 @@ extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13,t14 a14);  \
   void WINAPI cName(t1 a1,t2 a2,t3 a3,t4 a4,t5 a5,t6 a6,t7 a7,t8 a8,t9 a9,t10 a10,t11 a11,t12 a12,t13 a13,t14 a14)    \
   {                               \
+    FNINIT                                    \
     FNPROLOGUE(#cName)                       \
     ODIN_##cName(a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a11,a12,a13,a14); \
     FNEPILOGUE(#cName)       \
