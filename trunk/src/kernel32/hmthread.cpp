@@ -1,4 +1,4 @@
-/* $Id: hmthread.cpp,v 1.3 2000-03-17 16:28:59 sandervl Exp $ */
+/* $Id: hmthread.cpp,v 1.4 2000-03-30 10:52:04 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -59,13 +59,13 @@ HANDLE HMDeviceThreadClass::CreateThread(PHMHANDLEDATA          pHMHandleData,
   if(winthread == 0)
     return(0);
 
-#ifdef DEBUG
   // @@@PH Note: with debug code enabled, ODIN might request more stack space!
+  //SvL: Also need more stack in release build (RealPlayer 7 sometimes runs
+  //     out of stack
   if (cbStack > 0)
      cbStack <<= 1;     // double stack
   else
      cbStack = 1048576; // per default 1MB stack per thread
-#endif
 
   pHMHandleData->hHMHandle = O32_CreateThread(lpsa,
                                               cbStack,
