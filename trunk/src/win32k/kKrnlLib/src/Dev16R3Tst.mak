@@ -1,4 +1,4 @@
-# $Id: Dev16R3Tst.mak,v 1.6 2002-08-20 07:02:42 bird Exp $
+# $Id: Dev16R3Tst.mak,v 1.7 2002-08-22 03:19:27 bird Exp $
 
 #
 # kKrnlLib/Dev16R3Tst
@@ -15,7 +15,9 @@
 !if [SET INCLUDE=]
 !endif
 BUILD_ENV_FORCE = MSCV6-16
-PATH_ROOT  = ..\..\..\..
+ALL_SEG_TEXT    = CODE16
+ALL_SEG_DATA    = DATA16
+PATH_ROOT       = ..\..\..\..
 !include $(PATH_ROOT)\make\setup.mak
 !include ..\..\makefile.inc
 
@@ -28,7 +30,6 @@ TARGET_NAME = kKrnlLib_Dev16R3Tst
 MAKEFILE    = Dev16R3Tst.mak
 CC_INCLUDES = -I../include -I../kLib/include -I$(PATH_DDKBASE)/h -I$(PATH_MSC)/include -I$(PATH_TOOLKIT)/h
 ALL_DEFINES = -DKKRNLLIB -DR3TST
-CC_SEGS     = -NTCODE16 -NDDATA16
 
 
 #
