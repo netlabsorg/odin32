@@ -1,4 +1,4 @@
-/* $Id: windlgmsg.cpp,v 1.10 2001-09-19 09:10:13 sandervl Exp $ */
+/* $Id: windlgmsg.cpp,v 1.11 2001-11-30 18:45:51 sandervl Exp $ */
 /*
  * Win32 dialog message APIs for OS/2
  *
@@ -20,6 +20,8 @@
 #include <ctype.h>
 #include "win32wbase.h"
 #include "win32dlg.h"
+#include <winnls.h>
+#include <wine\unicode.h>
 
 #define DBG_LOCALLOG    DBG_windlgmsg
 #include "dbglocal.h"
@@ -69,8 +71,8 @@ static BOOL DIALOG_IsAccelerator( HWND hwnd, HWND hwndDlg, WPARAM vKey )
 {
     HWND hwndControl = hwnd;
     HWND hwndNext;
-    Win32BaseWindow *win32wnd;
     BOOL RetVal = FALSE;
+    WCHAR buffer[128];
     INT dlgCode;
 
     if (vKey == VK_SPACE)
@@ -78,111 +80,87 @@ static BOOL DIALOG_IsAccelerator( HWND hwnd, HWND hwndDlg, WPARAM vKey )
         dlgCode = SendMessageA( hwndControl, WM_GETDLGCODE, 0, 0 );
         if (dlgCode & DLGC_BUTTON)
         {
-            SendMessageA( hwndControl, WM_LBUTTONDOWN, 0, 0);
-            SendMessageA( hwndControl, WM_LBUTTONUP, 0, 0);
-            RetVal = TRUE;
+            /* send BM_CLICK message to the control */
+            SendMessageA( hwndControl, BM_CLICK, 0, 0 );
+            return TRUE;
         }
     }
-    else
+
+    do
     {
-        do
+        DWORD style = GetWindowLongW( hwndControl, GWL_STYLE );
+        if ((style & (WS_VISIBLE | WS_DISABLED)) == WS_VISIBLE)
         {
-            win32wnd = Win32BaseWindow::GetWindowFromHandle(hwndControl);
-            if ( (win32wnd != NULL) &&
-                 ((win32wnd->getStyle() & (WS_VISIBLE | WS_DISABLED)) == WS_VISIBLE) )
+            dlgCode = SendMessageA( hwndControl, WM_GETDLGCODE, 0, 0 );
+            if ( (dlgCode & (DLGC_BUTTON | DLGC_STATIC)) &&
+                 GetWindowTextW( hwndControl, buffer, sizeof(buffer)/sizeof(WCHAR) ))
             {
-                dlgCode = SendMessageA( hwndControl, WM_GETDLGCODE, 0, 0 );
-                if (dlgCode & (DLGC_BUTTON | DLGC_STATIC))
+                /* find the accelerator key */
+                LPWSTR p = buffer - 2;
+                char a_char = vKey;
+                WCHAR w_char = 0;
+
+                do
                 {
-                    INT textLen = win32wnd->GetWindowTextLengthA();
-
-                    if (textLen > 0)
-                    {
-                        /* find the accelerator key */
-                        char* text;
-                        LPSTR p;
-
-                        text = (char*)malloc(textLen+1);
-                        win32wnd->GetWindowTextA(text,textLen);
-                        p = text - 2;
-                        do
-                        {
-                            p = strchr( p + 2, '&' );
-                        }
-                        while (p != NULL && p[1] == '&');
-
-                        /* and check if it's the one we're looking for */
-                        if (p != NULL && toupper( p[1] ) == toupper( vKey ) )
-                        {
-                            if ((dlgCode & DLGC_STATIC) ||
-                                (win32wnd->getStyle() & 0x0f) == BS_GROUPBOX )
-                            {
-                                /* set focus to the control */
-                                SendMessageA( hwndDlg, WM_NEXTDLGCTL,
-                                              hwndControl, 1);
-                                /* and bump it on to next */
-                                SendMessageA( hwndDlg, WM_NEXTDLGCTL, 0, 0);
-                            }
-                            else
-                            //TODO: this else part was removed in Wine and above if rules out this possibility (if (dlgCode & (DLGC_BUTTON | DLGC_STATIC)))
-                            if (dlgCode & (DLGC_DEFPUSHBUTTON | DLGC_UNDEFPUSHBUTTON))
-                            {
-                                /* send command message as from the control */
-                                SendMessageA( hwndDlg, WM_COMMAND, MAKEWPARAM( LOWORD(win32wnd->getWindowId()), BN_CLICKED ),
-                                              (LPARAM)hwndControl );
-                            }
-                            else if (dlgCode & DLGC_BUTTON)
-                            {
-                                /* send BM_CLICK message to the control */
-                                SendMessageA( hwndControl, BM_CLICK, 0, 0 );
-                            }
-                            RetVal = TRUE;
-                            free(text);
-                            RELEASE_WNDOBJ(win32wnd);
-                            break;
-                        }
-                        free(text);
-                    }
+                    p = strchrW( p + 2, '&' );
                 }
-                hwndNext = GetWindow( hwndControl, GW_CHILD );
+                while (p != NULL && p[1] == '&');
+
+                /* and check if it's the one we're looking for */
+                MultiByteToWideChar(CP_ACP, 0, &a_char, 1, &w_char, 1);
+                if (p != NULL && toupperW( p[1] ) == toupperW( w_char ) )
+                {
+                    if ((dlgCode & DLGC_STATIC) || (style & 0x0f) == BS_GROUPBOX )
+                    {
+                        /* set focus to the control */
+                        SendMessageA( hwndDlg, WM_NEXTDLGCTL, (WPARAM)hwndControl, 1);
+                        /* and bump it on to next */
+                        SendMessageA( hwndDlg, WM_NEXTDLGCTL, 0, 0);
+                    }
+                    else if (dlgCode & DLGC_BUTTON)
+                    {
+             	           /* send BM_CLICK message to the control */
+                        SendMessageA( hwndControl, BM_CLICK, 0, 0 );
+                    }
+                    return TRUE;
+                }
+            }
+            hwndNext = GetWindow( hwndControl, GW_CHILD );
+        }
+        else hwndNext = 0;
+
+        if (!hwndNext) hwndNext = GetWindow( hwndControl, GW_HWNDNEXT );
+
+        while (!hwndNext && hwndControl)
+        {
+            hwndControl = GetParent( hwndControl );
+            if (hwndControl == hwndDlg)
+            {
+                if(hwnd==hwndDlg)   /* prevent endless loop */
+                {
+                    hwndNext=hwnd;
+                    break;
+                }
+                hwndNext = GetWindow( hwndDlg, GW_CHILD );
             }
             else
+#ifdef __WIN32OS2__
             {
-                hwndNext = 0;
-            }
-            if(win32wnd) RELEASE_WNDOBJ(win32wnd);
-
-            if (!hwndNext)
-            {
+                if(hwndControl == 0) {
+                    dprintf(("WARNING: DIALOG_IsAccelerator %x %x -> hwndControl == 0", hwnd, hwndDlg));
+                    return FALSE;
+                }
                 hwndNext = GetWindow( hwndControl, GW_HWNDNEXT );
             }
-            while (!hwndNext)
-            {
-                hwndControl = GetParent( hwndControl );
-                if (hwndControl == hwndDlg)
-                {
-                    if(hwnd==hwndDlg){  /* prevent endless loop */
-                        hwndNext=hwnd;
-                        break;
-                    }
-                    hwndNext = GetWindow( hwndDlg, GW_CHILD );
-                }
-                else
-                {
-#ifdef __WIN32OS2__
-                    if(hwndControl == 0) {
-                        dprintf(("WARNING: DIALOG_IsAccelerator %x %x -> hwndControl == 0", hwnd, hwndDlg));
-                        return FALSE;
-                    }
+#else
+                hwndNext = GetWindow( hwndControl, GW_HWNDNEXT );
 #endif
-                    hwndNext = GetWindow( hwndControl, GW_HWNDNEXT );
-                }
-            }
-            hwndControl = hwndNext;
         }
-        while (hwndControl != hwnd);
+        hwndControl = hwndNext;
     }
-    return RetVal;
+    while (hwndControl && (hwndControl != hwnd));
+
+    return FALSE;
 }
 /***********************************************************************
  *           DIALOG_FindMsgDestination
