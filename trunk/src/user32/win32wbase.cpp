@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.340 2002-09-19 09:37:42 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.341 2002-10-11 14:58:36 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2902,7 +2902,8 @@ HWND Win32BaseWindow::SetParent(HWND hwndNewParent)
         windowDesktop->addChild(this);
         OSLibWinSetParent(getOS2FrameWindowHandle(), OSLIB_HWND_DESKTOP);
 
-        setWindowId(0);
+        //Do not change the window id!
+////        setWindowId(0);
     }
     /* SetParent additionally needs to make hwndChild the topmost window
        in the x-order and send the expected WM_WINDOWPOSCHANGING and
