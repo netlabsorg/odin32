@@ -2017,4 +2017,10 @@
 #define PBT_APMOEMEVENT_W                 0x000B
 #define PBT_APMRESUMEAUTOMATIC_W          0x0012
 
+#define CTRL_C_EVENT_W        0
+#define CTRL_BREAK_EVENT_W    1
+#define CTRL_CLOSE_EVENT_W    2
+#define CTRL_LOGOFF_EVENT_W   5
+#define CTRL_SHUTDOWN_EVENT_W 6
+
 #endif //__WINCONST_H__

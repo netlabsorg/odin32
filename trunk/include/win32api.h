@@ -229,4 +229,6 @@ BOOL      WINAPI WritePrivateProfileStructW(LPCWSTR,LPCWSTR,LPVOID,UINT,LPCWSTR)
 BOOL      WINAPI WriteProfileStringA(LPCSTR,LPCSTR,LPCSTR);
 BOOL      WINAPI WriteProfileStringW(LPCWSTR,LPCWSTR,LPCWSTR);
 
+BOOL      WINAPI GenerateConsoleCtrlEvent( DWORD dwCtrlEvent, DWORD dwProcessGroupID);
+
 #endif
