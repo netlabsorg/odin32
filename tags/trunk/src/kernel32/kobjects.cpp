@@ -1,4 +1,4 @@
-/* $Id: kobjects.cpp,v 1.6 1999-11-04 19:49:13 phaller Exp $ */
+/* $Id: kobjects.cpp,v 1.7 1999-11-04 20:03:08 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -108,7 +108,7 @@ ODINFUNCTION4(HANDLE, CreateEventW,
   if (arg4 != NULL) // support for unnamed semaphores
     astring = UnicodeToAsciiString((LPWSTR)arg4);
   else
-    arg4 = NULL;
+    astring = NULL;
 
   dprintf(("KERNEL32: CreateEventW(%s)\n",
            astring));
@@ -171,7 +171,10 @@ ODINFUNCTION3(HANDLE, CreateMutexW,
   HANDLE rc;
   char  *astring;
 
-  astring = UnicodeToAsciiString((LPWSTR)arg3);
+  if (arg3 != NULL) // support for unnamed mutexes
+    astring = UnicodeToAsciiString((LPWSTR)arg3);
+  else
+    astring = NULL;
 
   dprintf(("KERNEL32: CreateMutexW(%s)\n",
            astring));
@@ -179,7 +182,9 @@ ODINFUNCTION3(HANDLE, CreateMutexW,
   rc = HMCreateMutex(arg1,
                      arg2,
                      astring);
-  FreeAsciiString(astring);
+
+  if (astring != NULL)
+    FreeAsciiString(astring);
 
   return(rc);
 }
@@ -414,7 +419,10 @@ ODINFUNCTION4(HANDLE, CreateSemaphoreW,
   HANDLE rc;
   char   *astring;
 
-  astring = UnicodeToAsciiString((LPWSTR)arg4);
+  if (arg4 != NULL) // support for unnamed semaphores
+    astring = UnicodeToAsciiString((LPWSTR)arg4);
+  else
+    astring = NULL;
 
   dprintf(("KERNEL32: CreateSemaphoreW(%s)\n",
            astring));
@@ -423,7 +431,9 @@ ODINFUNCTION4(HANDLE, CreateSemaphoreW,
                          arg2,
                          arg3,
                          astring);
-  FreeAsciiString(astring);
+
+  if (astring != NULL)
+    FreeAsciiString(astring);
   return(rc);
 }
 
@@ -480,7 +490,7 @@ ODINFUNCTION3(HANDLE, OpenEventA,
 
 
 /*****************************************************************************
- * Name      : BOOL OpenEventW
+ * Name      : BOOL
  * Purpose   : forward call to Open32
  * Parameters:
  * Variables :
