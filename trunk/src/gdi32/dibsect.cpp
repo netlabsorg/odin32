@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.33 2000-05-28 17:03:18 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.34 2000-06-14 18:30:15 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -26,6 +26,7 @@
 #include <winconst.h>
 #include <win32wnd.h>
 #include <cpuhlp.h>
+#include <dcdata.h>
 #include "oslibgpi.h"
 #include "rgbcvt.h"
 
@@ -37,7 +38,7 @@ static VMutex dibMutex;
 //******************************************************************************
 //******************************************************************************
 DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DWORD hSection, DWORD dwOffset, DWORD handle, int fFlip)
-                : bmpBits(NULL), pOS2bmp(NULL), next(NULL), bmpBitsBuffer(NULL)
+                : bmpBits(NULL), pOS2bmp(NULL), next(NULL), bmpBitsDblBuffer(NULL)
 {
   bmpsize = pbmi->biWidth;
   /* @@@PH 98/06/07 -- high-color bitmaps don't have palette */
@@ -163,7 +164,7 @@ DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DW
    }
    //double buffer for rgb 555 dib sections (for conversion) or flipped sections
    if(dibinfo.dsBitfields[1] == 0x03e0 || (fFlip & FLIP_VERT)) {
-	DosAllocMem((PPVOID)&bmpBitsBuffer, bmpsize*pbmi->biHeight, PAG_READ|PAG_WRITE|PAG_COMMIT);
+	DosAllocMem((PPVOID)&bmpBitsDblBuffer, bmpsize*pbmi->biHeight, PAG_READ|PAG_WRITE|PAG_COMMIT);
    }
 
    this->handle = handle;
@@ -204,8 +205,8 @@ DIBSection::~DIBSection()
    if(bmpBits)
         DosFreeMem(bmpBits);
 
-   if(bmpBitsBuffer)
- 	DosFreeMem(bmpBitsBuffer);
+   if(bmpBitsDblBuffer)
+ 	DosFreeMem(bmpBitsDblBuffer);
 
    if(pOS2bmp)
         free(pOS2bmp);
@@ -340,10 +341,10 @@ int DIBSection::SetDIBits(HDC hdc, HBITMAP hbitmap, UINT startscan, UINT
 
    //double buffer for rgb 555 dib sections (for conversion) or flipped sections
    if(dibinfo.dsBitfields[1] == 0x03e0 || (fFlip & FLIP_VERT)) {
-	if(bmpBitsBuffer) {
-		DosFreeMem(bmpBitsBuffer);
+	if(bmpBitsDblBuffer) {
+		DosFreeMem(bmpBitsDblBuffer);
 	}
-	DosAllocMem((PPVOID)&bmpBitsBuffer, dibinfo.dsBm.bmWidthBytes*pbmi->biHeight, PAG_READ|PAG_WRITE|PAG_COMMIT);
+	DosAllocMem((PPVOID)&bmpBitsDblBuffer, dibinfo.dsBm.bmWidthBytes*pbmi->biHeight, PAG_READ|PAG_WRITE|PAG_COMMIT);
    }
 
    dprintf(("DIBSection::SetDIBits (%d,%d), %d %d", pbmi->biWidth, pbmi->biHeight, pbmi->biBitCount, pbmi->biCompression));
@@ -393,12 +394,19 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
  int    oldyinversion = 0;
  BOOL   fRestoryYInversion = FALSE, fFrameWindowDC = FALSE;
  HWND   hwndDest;
+ pDCData pHps;
 
-  hwndDest = WindowFromDC(hdcDest);
-  //TODO: Test whether dc is for the client or frame window
-//  if(hwndDest && IsOS2FrameWindowHandle(hwndDest)) {
-//	fFrameWindowDC = TRUE;
-//  }
+  pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
+  if(!pHps)
+  {
+      SetLastError(ERROR_INVALID_HANDLE_W);
+      return FALSE;
+  }
+
+  hwndDest = WindowFromDC(hdcDest); //could return desktop window, so check that
+  if(hwndDest && pHps->hwnd && !pHps->isClient) {
+	fFrameWindowDC = TRUE;
+  }
 
   dprintf(("DIBSection::BitBlt %x %X (hps %x) %x to(%d,%d)(%d,%d) from (%d,%d)(%d,%d) rop %x flip %x",
           handle, hdcDest, hps, hwndDest, nXdest, nYdest, nDestWidth, nDestHeight,
@@ -477,29 +485,30 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
   if(fFlip & FLIP_VERT) {
 	//manually reverse bitmap data
 	char *src = bmpBits + (pOS2bmp->cy-1)*dibinfo.dsBm.bmWidthBytes;
-	char *dst = bmpBitsBuffer;
+	char *dst = bmpBitsDblBuffer;
 	for(int i=0;i<pOS2bmp->cy;i++) {
 		memcpy(dst, src, dibinfo.dsBm.bmWidthBytes);
 		dst += dibinfo.dsBm.bmWidthBytes;
 		src -= dibinfo.dsBm.bmWidthBytes;
 	}
-	bmpBits = bmpBitsBuffer;
+	bitmapBits = bmpBitsDblBuffer;
   }
+  else  bitmapBits = bmpBits;
 
   //SvL: Optimize this.. (don't convert entire bitmap if only a part will be blitted to the dc)
   if(dibinfo.dsBitfields[1] == 0x3E0) {//RGB 555?
        	dprintf(("DIBSection::BitBlt; convert rgb 555 to 565 (old y inv. = %d)", oldyinversion));
 
-	if(bmpBitsBuffer == NULL)
+	if(bmpBitsDblBuffer == NULL)
 		DebugInt3();
 
 	if(CPUFeatures & CPUID_MMX) {
-		RGB555to565MMX((WORD *)bmpBitsBuffer, (WORD *)bmpBits, pOS2bmp->cbImage/sizeof(WORD));
+		RGB555to565MMX((WORD *)bmpBitsDblBuffer, (WORD *)bitmapBits, pOS2bmp->cbImage/sizeof(WORD));
 	}
-	else   	RGB555to565((WORD *)bmpBitsBuffer, (WORD *)bmpBits, pOS2bmp->cbImage/sizeof(WORD));
-	rc = GpiDrawBits(hps, bmpBitsBuffer, pOS2bmp, 4, &point[0], ROP_SRCCOPY, os2mode);
+	else   	RGB555to565((WORD *)bmpBitsDblBuffer, (WORD *)bitmapBits, pOS2bmp->cbImage/sizeof(WORD));
+	rc = GpiDrawBits(hps, bmpBitsDblBuffer, pOS2bmp, 4, &point[0], ROP_SRCCOPY, os2mode);
   }
-  else	rc = GpiDrawBits(hps, bmpBits, pOS2bmp, 4, &point[0], ROP_SRCCOPY, os2mode);
+  else	rc = GpiDrawBits(hps, bitmapBits, pOS2bmp, 4, &point[0], ROP_SRCCOPY, os2mode);
 
   if(rc == GPI_OK) {
    	DIBSection *destdib = DIBSection::findHDC(hdcDest);
@@ -532,9 +541,26 @@ void DIBSection::sync(HDC hdc, DWORD nYdest, DWORD nDestHeight)
 
   BITMAPINFO2 *tmphdr = (BITMAPINFO2 *)malloc(os2bmphdrsize);
   memcpy(tmphdr, pOS2bmp, os2bmphdrsize);
-  destBuf = GetDIBObject() + nYdest*dibinfo.dsBm.bmWidthBytes;
-  rc = GpiQueryBitmapBits(hdc, nYdest, nDestHeight, destBuf,
+
+  if(fFlip & FLIP_VERT) {
+  	destBuf = bmpBitsDblBuffer + nYdest*dibinfo.dsBm.bmWidthBytes;
+
+        rc = GpiQueryBitmapBits(hdc, nYdest, nDestHeight, destBuf,
+                                tmphdr);
+	//manually reverse bitmap data
+	char *src = destBuf;
+	char *dst = GetDIBObject() + (nYdest+nDestHeight-1)*dibinfo.dsBm.bmWidthBytes;
+	for(int i=0;i<nDestHeight;i++) {
+		memcpy(dst, src, dibinfo.dsBm.bmWidthBytes);
+		dst -= dibinfo.dsBm.bmWidthBytes;
+		src += dibinfo.dsBm.bmWidthBytes;
+	}
+  }
+  else {
+  	destBuf = GetDIBObject() + nYdest*dibinfo.dsBm.bmWidthBytes;
+        rc = GpiQueryBitmapBits(hdc, nYdest, nDestHeight, destBuf,
                           tmphdr);
+  }
   free(tmphdr);
   if(rc != nDestHeight) {
 	DebugInt3();
