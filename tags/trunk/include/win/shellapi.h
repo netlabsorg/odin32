@@ -155,6 +155,7 @@ DWORD	WINAPI SHGetFileInfoW(LPCWSTR,DWORD,SHFILEINFOW*,UINT,UINT);
 #define FOF_SIMPLEPROGRESS         0x0100
 #define FOF_NOCONFIRMMKDIR         0x0200
 #define FOF_NOERRORUI              0x0400
+#define FOF_NOCOPYSECURITYATTRIBS  0x0800
 
 typedef WORD FILEOP_FLAGS;
 
@@ -186,9 +187,12 @@ typedef struct _SHFILEOPSTRUCTW
   LPCWSTR         lpszProgressTitle;
 } SHFILEOPSTRUCTW, *LPSHFILEOPSTRUCTW;
 
+#define  SHFILEOPSTRUCT WINELIB_NAME_AW(SHFILEOPSTRUCT)
+#define  LPSHFILEOPSTRUCT WINELIB_NAME_AW(LPSHFILEOPSTRUCT)
+
 DWORD	WINAPI SHFileOperationA (LPSHFILEOPSTRUCTA lpFileOp);
 DWORD	WINAPI SHFileOperationW (LPSHFILEOPSTRUCTW lpFileOp);
-
+#define  SHFileOperation WINELIB_NAME_AW(SHFileOperation)
 
 
 /*************************************
@@ -208,8 +212,6 @@ DWORD	WINAPI SHFileOperationW (LPSHFILEOPSTRUCTW lpFileOp);
 HINSTANCE	WINAPI ShellExecuteA(HWND,LPCSTR,LPCSTR,LPCSTR,LPCSTR,INT);
 HINSTANCE	WINAPI ShellExecuteW(HWND,LPCWSTR,LPCWSTR,LPCWSTR,LPCWSTR,INT);
 #define ShellExecute WINELIB_NAME_AW(ShellExecute)
-
-
 
 /******************************************
  * Tray Notification
@@ -265,22 +267,10 @@ HICON	WINAPI ExtractIconW(HINSTANCE,LPCWSTR,UINT);
 
 HICON     WINAPI ExtractAssociatedIconA(HINSTANCE,LPSTR,LPWORD);
 HICON     WINAPI ExtractAssociatedIconW(HINSTANCE,LPWSTR,LPWORD);
-
-#ifdef __WIN32OS2__
-
 UINT WINAPI ExtractIconExA( LPCSTR, INT, HICON *, HICON *, UINT );
 UINT WINAPI ExtractIconExW( LPCWSTR, INT, HICON *, HICON *, UINT );
+#define     ExtractIconEx WINELIB_NAME_AW(ExtractIconEx)
 UINT WINAPI ExtractIconExAW(LPCVOID, INT, HICON *, HICON *, UINT );
-
-#else /* __WIN32OS2__ */
-
-/* Return types are wrong according to SDK docs. */
-HICON WINAPI ExtractIconExA( LPCSTR, INT, HICON *, HICON *, UINT );
-HICON WINAPI ExtractIconExW( LPCWSTR, INT, HICON *, HICON *, UINT );
-HICON WINAPI ExtractIconExAW(LPCVOID, INT, HICON *, HICON *, UINT );
-
-#endif /* __WIN32OS2__ */
-
 HINSTANCE WINAPI FindExecutableA(LPCSTR,LPCSTR,LPSTR);
 HINSTANCE WINAPI FindExecutableW(LPCWSTR,LPCWSTR,LPWSTR);
 #define FindExecutable WINELIB_NAME_AW(FindExecutable)
