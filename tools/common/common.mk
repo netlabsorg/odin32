@@ -1,4 +1,4 @@
-# $Id: common.mk,v 1.5 2000-12-16 20:10:07 bird Exp $
+# $Id: common.mk,v 1.6 2001-09-30 00:18:10 bird Exp $
 #
 # Common definitions for tools.
 #
@@ -49,7 +49,7 @@ CINCLUDES = -I$(ODIN32_TCOMMON) $(CINCLUDES)
 # No internal libs cause we define our own internal libs.
 #
 NO_INTERNAL_LIBS = 1
-INTLIBS = $(COMMONLIB)
+INTLIBS = common_lib
 
 
 #
