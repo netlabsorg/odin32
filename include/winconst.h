@@ -1,4 +1,4 @@
-/* $Id: winconst.h,v 1.32 2000-04-18 11:09:53 sandervl Exp $ */
+/* $Id: winconst.h,v 1.33 2000-05-28 16:40:23 sandervl Exp $ */
 
 /*
  * Win32 constants
@@ -1014,10 +1014,10 @@
 #endif
 
   /* biCompression */
-#define BI_RGB           0
-#define BI_RLE8          1
-#define BI_RLE4          2
-#define BI_BITFIELDS     3
+#define BI_RGB_W           0
+#define BI_RLE8_W          1
+#define BI_RLE4_W          2
+#define BI_BITFIELDS_W     3
 
   /* Polygon modes */
 #define ALTERNATE_W         1
@@ -1329,3 +1329,23 @@
 #define COLORONCOLOR_W	       3
 #define HALFTONE_W             4
 #define MAXSTRETCHBLTMODE_W    4
+
+    #define    NTRT_NEWRESOURCE      0x2000
+    #define    NTRT_ERROR            0x7fff
+    #define    NTRT_CURSOR           1
+    #define    NTRT_BITMAP           2
+    #define    NTRT_ICON             3
+    #define    NTRT_MENU             4
+    #define    NTRT_DIALOG           5
+    #define    NTRT_STRING           6
+    #define    NTRT_FONTDIR          7
+    #define    NTRT_FONT             8
+    #define    NTRT_ACCELERATORS     9
+    #define    NTRT_RCDATA           10
+    #define    NTRT_MESSAGETABLE     11
+    #define    NTRT_GROUP_CURSOR     12
+    #define    NTRT_GROUP_ICON       14
+    #define    NTRT_VERSION          16
+    #define    NTRT_NEWBITMAP        (NTRT_BITMAP|NTRT_NEWRESOURCE)
+    #define    NTRT_NEWMENU          (NTRT_MENU|NTRT_NEWRESOURCE)
+    #define    NTRT_NEWDIALOG        (NTRT_DIALOG|NTRT_NEWRESOURCE)
