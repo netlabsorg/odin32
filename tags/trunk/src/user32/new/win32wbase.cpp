@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.2 1999-08-30 16:38:59 dengert Exp $ */
+/* $Id: win32wbase.cpp,v 1.3 1999-08-31 10:36:22 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1418,6 +1418,7 @@ BOOL Win32BaseWindow::SetMenu(HMENU hMenu)
 	dprintf(("Win32BaseWindow::SetMenu OS2HwndMenu == 0"));
 	return FALSE;
     }
+    winres->setOS2Handle(OS2HwndMenu);
     menuResource = winres;
     return TRUE;
 }
@@ -1716,17 +1717,17 @@ HWND Win32BaseWindow::FindWindowEx(HWND hwndParent, HWND hwndChildAfter, LPSTR l
     }
     if(hwndParent != OSLIB_HWND_DESKTOP)
     {//if the current process owns the window, just do a quick search
-	child = (Win32BaseWindow *)parent->GetFirstChild();
+	child = (Win32BaseWindow *)parent->getFirstChild();
 	if(hwndChildAfter != 0)
 	{
 	    while(child)
 	    {
 		if(child->getWindowHandle() == hwndChildAfter)
 		{
-		    child = (Win32BaseWindow *)child->GetNextChild();
+		    child = (Win32BaseWindow *)child->getNextChild();
 		    break;
 		}
-		child = (Win32BaseWindow *)child->GetNextChild();
+		child = (Win32BaseWindow *)child->getNextChild();
 	    }
 	}
 	while(child)
@@ -1737,7 +1738,7 @@ HWND Win32BaseWindow::FindWindowEx(HWND hwndParent, HWND hwndChildAfter, LPSTR l
 		dprintf(("FindWindowEx: Found window %x", child->getWindowHandle()));
 		return child->getWindowHandle();
 	    }
-	    child = (Win32BaseWindow *)child->GetNextChild();
+	    child = (Win32BaseWindow *)child->getNextChild();
 	}
     }
     else {
@@ -1946,11 +1947,11 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value)
    switch(index) {
 	case GWL_EXSTYLE:
 		oldval = dwExStyle;
-		dwExStyle = value;
+		setExStyle(value);
 		return oldval;
 	case GWL_STYLE:
 		oldval = dwStyle;
-		dwStyle = value;
+		setStyle(value);
 		return oldval;
 	case GWL_WNDPROC:
 		oldval = (LONG)getWindowProc();
