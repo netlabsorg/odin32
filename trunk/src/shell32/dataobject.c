@@ -1,4 +1,4 @@
-/* $Id: dataobject.c,v 1.1 2000-08-30 13:52:51 sandervl Exp $ */
+/* $Id: dataobject.c,v 1.2 2002-03-08 11:00:58 sandervl Exp $ */
 /*
  *	IEnumFORMATETC, IDataObject
  *
@@ -19,7 +19,7 @@
 #include "wine/undocshell.h"
 #include "wine/obj_dataobject.h"
 
-DEFAULT_DEBUG_CHANNEL(shell)
+DEFAULT_DEBUG_CHANNEL(shell);
 
 /***********************************************************************
 *   IEnumFORMATETC implementation

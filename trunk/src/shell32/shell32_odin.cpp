@@ -1,4 +1,4 @@
-/* $Id: shell32_odin.cpp,v 1.3 2002-02-14 12:10:10 sandervl Exp $ */
+/* $Id: shell32_odin.cpp,v 1.4 2002-03-08 11:01:00 sandervl Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -54,6 +54,9 @@
 #include <cursoricon.h>
 #include <ctype.h>
 #include <module.h>
+
+#include "os2_integration.h"
+
 
 /*****************************************************************************
  * Local Variables                                                           *
@@ -981,118 +984,194 @@ HINSTANCE WIN32API ShellExecuteA(HWND hWnd, LPCSTR lpOperation,
                                  LPCSTR lpParameters,
                                  LPCSTR lpDirectory,
                                  INT    iShowCmd )
-{   HINSTANCE retval=31;
-    char old_dir[1024];
-    char cmd[256];
+{ 
+  HINSTANCE retval=31;
+  char old_dir[1024];
+  char cmd[256];
+  LONG cmdlen = sizeof( cmd );
+  LPSTR tok;
 
-    if (lpFile==NULL) return 0; /* should not happen */
-    if (lpOperation==NULL) /* default is open */
-      lpOperation="open";
+  if (lpFile==NULL) 
+    return 0; /* should not happen */
+  
+  if (lpOperation==NULL) /* default is open */
+    lpOperation="open";
 
-    if (lpDirectory)
-    { GetCurrentDirectoryA( sizeof(old_dir), old_dir );
-        SetCurrentDirectoryA( lpDirectory );
+  if (lpDirectory)
+  {
+    // @@@PH 2002-02-26 might throw whole process off track
+    // in case of concurrency
+    GetCurrentDirectoryA( sizeof(old_dir), old_dir );
+    SetCurrentDirectoryA( lpDirectory );
+  }
+
+  cmd[0] = '\0';
+  retval = SHELL_FindExecutable( lpFile, lpOperation, cmd );
+
+  if (retval > 32)  /* Found */
+  {
+    if (lpParameters)
+    {
+      strcat(cmd," ");
+      strcat(cmd,lpParameters);
     }
 
-    cmd[0] = '\0';
-    retval = SHELL_FindExecutable( lpFile, lpOperation, cmd );
+    dprintf(("starting %s\n",cmd));
+    retval = WinExec( cmd, iShowCmd );
+  }
+  else
+  {
+    // - path might be an URL
+    // - argument might be associated with some class / app
 
-    if (retval > 32)  /* Found */
-    {
-        if (lpParameters)
-        {
-            strcat(cmd," ");
-            strcat(cmd,lpParameters);
-        }
+    // 2002-02-26 PH
+    // File Extension Association is missing. We'd have to lookup
+    // i. e. ".doc" and create the command.
+    // @@@PH
 
-        dprintf(("starting %s\n",cmd));
-        retval = WinExec( cmd, iShowCmd );
-    }
-    else if(PathIsURLA((LPSTR)lpFile))    /* File not found, check for URL */
+    // build lookup key
+    char lpstrShellSubkey[256] = "\\shell\\";
+    /* Looking for ...protocol\shell\lpOperation\command */
+    strcat( lpstrShellSubkey, lpOperation );
+    strcat( lpstrShellSubkey, "\\command" );
+
+    // First, check for URL association
+    if(PathIsURLA((LPSTR)lpFile))    /* File not found, check for URL */
     {
-      char lpstrProtocol[256];
-      LONG cmdlen = 512;
       LPSTR lpstrRes;
       INT iSize;
 
       lpstrRes = strchr(lpFile,':');
-      iSize = lpstrRes - lpFile;
-
-      /* Looking for ...protocol\shell\lpOperation\command */
-      strncpy(lpstrProtocol,lpFile,iSize);
-      lpstrProtocol[iSize]='\0';
-      strcat( lpstrProtocol, "\\shell\\" );
-      strcat( lpstrProtocol, lpOperation );
-      strcat( lpstrProtocol, "\\command" );
-
-      /* Remove File Protocol from lpFile */
-      /* In the case file://path/file     */
-      if(!strnicmp(lpFile,"file",iSize))
+      if (NULL != lpstrRes)
       {
-        lpFile += iSize;
-        while(*lpFile == ':') lpFile++;
-      }
-
-
-      /* Get the application for the protocol and execute it */
-      if (RegQueryValueA( HKEY_CLASSES_ROOT, lpstrProtocol, cmd,
+        char szProtocol[256];
+        
+        iSize = lpstrRes - lpFile;
+  
+        strncpy(szProtocol,
+                lpFile, 
+                min( sizeof( szProtocol ), iSize) );
+  
+        /* Remove File Protocol from lpFile */
+        /* In the case file://path/file     */
+        if(!strnicmp(lpFile,"file",iSize))
+        {
+          lpFile += iSize;
+          while(*lpFile == ':') lpFile++;
+        }
+  
+        /* Get the application for the protocol and execute it */
+        if (RegQueryValueA(HKEY_CLASSES_ROOT,
+                           szProtocol, 
+                           cmd,
                            &cmdlen ) == ERROR_SUCCESS )
-      {
-          LPSTR tok;
+        {
           LPSTR tmp;
           char param[256] = "";
           LONG paramlen = 256;
-
+  
           /* Get the parameters needed by the application
              from the associated ddeexec key */
-          tmp = strstr(lpstrProtocol,"command");
+          tmp = strstr(szProtocol,"command");
           tmp[0] = '\0';
-          strcat(lpstrProtocol,"ddeexec");
-
-          if(RegQueryValueA( HKEY_CLASSES_ROOT, lpstrProtocol, param,&paramlen ) == ERROR_SUCCESS)
+          strcat(szProtocol,"ddeexec");
+  
+          if(RegQueryValueA(HKEY_CLASSES_ROOT,
+                            szProtocol,
+                            param,
+                            &paramlen ) == ERROR_SUCCESS)
           {
             strcat(cmd," ");
             strcat(cmd,param);
             cmdlen += paramlen;
           }
-
-          /* Is there a replace() function anywhere? */
-          cmd[cmdlen]='\0';
-          tok=strstr( cmd, "%1" );
-          if (tok != NULL)
-          {
-            tok[0]='\0'; /* truncate string at the percent */
-            strcat( cmd, lpFile ); /* what if no dir in xlpFile? */
-            tok=strstr( cmd, "%1" );
-            if ((tok!=NULL) && (strlen(tok)>2))
-            {
-              strcat( cmd, &tok[2] );
-            }
-          }
-
-          retval = WinExec( cmd, iShowCmd );
+        }
       }
     }
-    /* Check if file specified is in the form www.??????.*** */
-    else if(!strnicmp(lpFile,"www",3))
+
+
+    // Second, check for filename extension association
+    if (0 == cmd[0])
     {
-      /* if so, append lpFile http:// and call ShellExecute */
-      char lpstrTmpFile[256] = "http://" ;
-      strcat(lpstrTmpFile,lpFile);
-      retval = ShellExecuteA(hWnd,lpOperation,lpstrTmpFile,NULL,NULL,0);
+      LPSTR lpstrRDot = strrchr(lpFile, '.');
+      if (NULL != lpstrRDot)
+      {
+        char szAssociation[256];
+        LONG lAssociationLen = sizeof( szAssociation );
+
+        // lookup associated application (or COM object) for
+        // this extension
+        if (RegQueryValueA(HKEY_CLASSES_ROOT,
+                           lpstrRDot,
+                           szAssociation,
+                           &lAssociationLen) == ERROR_SUCCESS)
+        {
+          // append the shell subkey
+          strcat(szAssociation, lpstrShellSubkey);
+          lAssociationLen = sizeof( szAssociation );
+
+          // lookup application for retrieved association
+          if (RegQueryValueA(HKEY_CLASSES_ROOT,
+                             szAssociation,
+                             cmd,
+                             &cmdlen) == ERROR_SUCCESS)
+          {
+            // received cmd now
+          }
+        }
+      }
     }
+      
+      
+#ifdef __WIN32OS2__
+    if (0 == cmd[0])
+    {
+      // OS/2 specific addon:
+      // if no windows association is found, pass on to the workplace shell
+      // eventually.
+      retval = ShellExecuteOS2(hWnd,
+                               lpOperation,
+                               lpFile,
+                               lpParameters,
+                               lpDirectory,
+                               iShowCmd);
+    }
+#endif
+
+    if (0 != cmd[0])
+    {
+      // resolve the parameters
+      // @@@PH 2002-02-26 there might be more than one parameter only
+      /* Is there a replace() function anywhere? */
+      tok=strstr( cmd, "%1" );
+      if (tok != NULL)
+      {
+        tok[0]='\0'; /* truncate string at the percent */
+        strcat( cmd, lpFile ); /* what if no dir in xlpFile? */
+        tok=strstr( cmd, "%1" );
+        if ((tok!=NULL) && (strlen(tok)>2))
+        {
+          strcat( cmd, &tok[2] );
+        }
+      }
+    }
+
     /* Nothing was done yet, try to execute the cmdline directly,
-       maybe it's an OS/2 program */
-    else
+     maybe it's an OS/2 program */
+    if (0 == cmd[0])
     {
       strcpy(cmd,lpFile);
       strcat(cmd,lpParameters ? lpParameters : "");
-      retval = WinExec( cmd, iShowCmd );
     }
+      
+    // now launch ... something :)
+    retval = WinExec( cmd, iShowCmd );
+  }
 
-    if (lpDirectory)
-      SetCurrentDirectoryA( old_dir );
-    return retval;
+  if (lpDirectory)
+    SetCurrentDirectoryA( old_dir );
+  
+  return retval;
 }
 
 

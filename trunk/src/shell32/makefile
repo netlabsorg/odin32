@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.38 2002-02-14 12:10:08 sandervl Exp $
+# $Id: makefile,v 1.39 2002-03-08 11:00:59 sandervl Exp $
 
 #
 # Odin32 API
@@ -31,6 +31,7 @@ RCFLAGS = $(RCFLAGS) -D__WIN32OS2__
 OBJS = \
 $(OBJDIR)\initterm.obj \
 $(OBJDIR)\initshell32.obj \
+$(OBJDIR)\os2_integration.obj \
 $(OBJDIR)\brsfolder.obj \
 $(OBJDIR)\changenotify.obj \
 $(OBJDIR)\classes.obj \

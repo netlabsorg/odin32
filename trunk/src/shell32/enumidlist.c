@@ -1,4 +1,4 @@
-/* $Id: enumidlist.c,v 1.3 2001-11-16 12:57:45 phaller Exp $ */
+/* $Id: enumidlist.c,v 1.4 2002-03-08 11:00:59 sandervl Exp $ */
 /*
  *	IEnumIDList
  *
@@ -90,7 +90,7 @@ static BOOL AddToEnumList(
 /**************************************************************************
  *  CreateFolderEnumList()
  */
-#ifdef __WIN32OS2__
+#ifdef __WIN32OS2__TEST_TURNED_OFF
 //CB: Special version to speed up retrieving files in a directory
 
 /**************************************************************************

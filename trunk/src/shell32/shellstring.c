@@ -5,19 +5,96 @@
 
 #include "winnls.h"
 #include "winerror.h"
-#include "debugtools.h"
-#include "heap.h"
+#include "winreg.h"
 
 #include "shlobj.h"
-#include "shlwapi.h"
 #include "shellapi.h"
 #include "shell32_main.h"
 #include "wine/undocshell.h"
 #include "wine/unicode.h"
+#include "debugtools.h"
 
 DEFAULT_DEBUG_CHANNEL(shell);
 
 /************************* STRRET functions ****************************/
+
+/*
+ * ***** NOTE *****
+ *  These routines are identical to StrRetToBuf[AW] in dlls/shlwapi/string.c.
+ *  They were duplicated here because not every version of Shlwapi.dll exports
+ *  StrRetToBuf[AW]. If you change one routine, change them both. YOU HAVE BEEN
+ *  WARNED.
+ * ***** NOTE *****
+ */
+
+HRESULT WINAPI StrRetToStrNA (LPVOID dest, DWORD len, LPSTRRET src, const ITEMIDLIST *pidl)
+{
+	TRACE("dest=0x%p len=0x%lx strret=0x%p pidl=%p stub\n",dest,len,src,pidl);
+
+	switch (src->uType)
+	{
+	  case STRRET_WSTR:
+	    WideCharToMultiByte(CP_ACP, 0, src->u.pOleStr, -1, (LPSTR)dest, len, NULL, NULL);
+/*	    SHFree(src->u.pOleStr);  FIXME: is this right? */
+	    break;
+
+	  case STRRET_CSTRA:
+	    lstrcpynA((LPSTR)dest, src->u.cStr, len);
+	    break;
+
+	  case STRRET_OFFSETA:
+	    lstrcpynA((LPSTR)dest, ((LPCSTR)&pidl->mkid)+src->u.uOffset, len);
+	    break;
+
+	  default:
+	    FIXME("unknown type!\n");
+	    if (len)
+	    {
+	      *(LPSTR)dest = '\0';
+	    }
+	    return(FALSE);
+	}
+	return S_OK;
+}
+
+/************************************************************************/
+
+HRESULT WINAPI StrRetToStrNW (LPVOID dest1, DWORD len, LPSTRRET src, const ITEMIDLIST *pidl)
+{
+    LPWSTR dest = (LPWSTR) dest1;
+	TRACE("dest=0x%p len=0x%lx strret=0x%p pidl=%p stub\n",dest,len,src,pidl);
+
+	switch (src->uType)
+	{
+	  case STRRET_WSTR:
+	    lstrcpynW((LPWSTR)dest, src->u.pOleStr, len);
+/*	    SHFree(src->u.pOleStr);  FIXME: is this right? */
+	    break;
+
+	  case STRRET_CSTRA:
+              if (!MultiByteToWideChar( CP_ACP, 0, src->u.cStr, -1, dest, len ) && len)
+                  dest[len-1] = 0;
+	    break;
+
+	  case STRRET_OFFSETA:
+	    if (pidl)
+	    {
+              if (!MultiByteToWideChar( CP_ACP, 0, ((LPCSTR)&pidl->mkid)+src->u.uOffset, -1,
+                                        dest, len ) && len)
+                  dest[len-1] = 0;
+	    }
+	    break;
+
+	  default:
+	    FIXME("unknown type!\n");
+	    if (len)
+	    { *(LPSTR)dest = '\0';
+	    }
+	    return(FALSE);
+	}
+	return S_OK;
+}
+
 
 /*************************************************************************
  * StrRetToStrN					[SHELL32.96]
@@ -27,16 +104,6 @@ DEFAULT_DEBUG_CHANNEL(shell);
  * NOTES
  *  the pidl is for STRRET OFFSET
  */
-HRESULT WINAPI StrRetToStrNA (LPVOID dest, DWORD len, LPSTRRET src, const ITEMIDLIST *pidl)
-{
-        return StrRetToBufA( src, pidl, dest, len );
-}
-
-HRESULT WINAPI StrRetToStrNW (LPVOID dest, DWORD len, LPSTRRET src, const ITEMIDLIST *pidl)
-{
-        return StrRetToBufW( src, pidl, dest, len );
-}
-
 HRESULT WINAPI StrRetToStrNAW (LPVOID dest, DWORD len, LPSTRRET src, const ITEMIDLIST *pidl)
 {
 	if(SHELL_OsIsUnicode())
@@ -125,4 +192,44 @@ BOOL WINAPI OleStrToStrNAW (LPVOID lpOut, INT nOut, LPCVOID lpIn, INT nIn)
 	if (SHELL_OsIsUnicode())
 	  return OleStrToStrNW (lpOut, nOut, lpIn, nIn);
 	return OleStrToStrNA (lpOut, nOut, lpIn, nIn);
+}
+
+
+/*************************************************************************
+ * CheckEscapes [SHELL32]
+ */
+DWORD WINAPI CheckEscapesA(
+    LPSTR    string,         /* [in]    string to check ??*/
+           DWORD    b,              /* [???]   is 0 */
+           DWORD    c,              /* [???]   is 0 */
+           LPDWORD  d,              /* [???]   is address */
+           LPDWORD  e,              /* [???]   is address */
+           DWORD    handle )        /* [in]    looks like handle but not */
+{
+    FIXME("(%p<%s> %ld %ld %p<%ld> %p<%ld> 0x%08lx) stub\n",
+   string, debugstr_a(string),
+   b,
+   c,
+   d, (d) ? *d : 0xabbacddc,
+   e, (e) ? *e : 0xabbacddd,
+   handle);
+    return 0;
+}
+
+DWORD WINAPI CheckEscapesW(
+    LPWSTR   string,         /* [in]    string to check ??*/
+           DWORD    b,              /* [???]   is 0 */
+           DWORD    c,              /* [???]   is 0 */
+           LPDWORD  d,              /* [???]   is address */
+           LPDWORD  e,              /* [???]   is address */
+           DWORD    handle )        /* [in]    looks like handle but not */
+{
+    FIXME("(%p<%s> %ld %ld %p<%ld> %p<%ld> 0x%08lx) stub\n",
+   string, debugstr_w(string),
+   b,
+   c,
+   d, (d) ? *d : 0xabbacddc,
+   e, (e) ? *e : 0xabbacddd,
+   handle);
+    return 0;
 }

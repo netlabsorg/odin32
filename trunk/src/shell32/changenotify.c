@@ -1,4 +1,4 @@
-/* $Id: changenotify.c,v 1.1 2000-08-30 13:52:50 sandervl Exp $ */
+/* $Id: changenotify.c,v 1.2 2002-03-08 11:00:58 sandervl Exp $ */
 /*
  *	shell change notification
  *
@@ -28,7 +28,7 @@ typedef struct _NOTIFICATIONLIST
 	struct _NOTIFICATIONLIST *prev; 
 	HWND hwnd;		/* window to notify */
 	DWORD uMsg;		/* message to send */
-	LPNOTIFYREGISTER apidl; /* array of entrys to watch*/
+	LPNOTIFYREGISTER apidl; /* array of entries to watch*/
 	UINT cidl;		/* number of pidls in array */
 	LONG wEventMask;	/* subscribed events */
 	DWORD dwFlags;		/* client flags */
@@ -181,6 +181,19 @@ SHChangeNotifyDeregister(
 	TRACE("(0x%08x)\n",hNotify);
 
 	return DeleteNode((LPNOTIFICATIONLIST)hNotify);;
+}
+
+/*************************************************************************
+ * SHChangeNotifyUpdateEntryList       		[SHELL32.5]
+ */
+BOOL WINAPI
+SHChangeNotifyUpdateEntryList(DWORD unknown1, DWORD unknown2,
+			      DWORD unknown3, DWORD unknown4)
+{
+	FIXME("(0x%08lx, 0x%08lx, 0x%08lx, 0x%08lx)\n",
+	      unknown1, unknown2, unknown3, unknown4);
+
+	return -1;
 }
 
 /*************************************************************************

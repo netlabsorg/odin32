@@ -117,6 +117,11 @@ typedef struct
 
 #include "poppack.h"
 
+typedef struct
+{
+        HRSRC *pResInfo;
+        int   nIndex;
+} ENUMRESSTRUCT;
 
 static ICOM_VTABLE(IShellLinkA)		slvt;
 static ICOM_VTABLE(IShellLinkW)		slvtw;
@@ -161,6 +166,17 @@ typedef struct
 #define _IPersistStream_Offset ((int)(&(((IShellLinkImpl*)0)->lpvtblPersistStream)))
 #define _ICOM_THIS_From_IPersistStream(class, name) class* This = (class*)(((char*)name)-_IPersistStream_Offset);
 #define _IPersistStream_From_ICOM_THIS(class, name) class* StreamThis = (class*)(((char*)name)+_IPersistStream_Offset);
+
+
+/* strdup on the process heap */
+inline static LPSTR heap_strdup( LPCSTR str )
+{
+    INT len = strlen(str) + 1;
+    LPSTR p = HeapAlloc( GetProcessHeap(), 0, len );
+    if (p) memcpy( p, str, len );
+    return p;
+}
+
 
 /**************************************************************************
  *  IPersistFile_QueryInterface
@@ -363,9 +379,17 @@ static BOOL SaveIconResAsXPM(const BITMAPINFO *pIcon, const char *szXPMFileName)
 
 static BOOL CALLBACK EnumResNameProc(HANDLE hModule, const char *lpszType, char *lpszName, LONG lParam)
 {
-    *(HRSRC *) lParam = FindResourceA(hModule, lpszName, RT_GROUP_ICONA);
-    return FALSE;
+	ENUMRESSTRUCT *sEnumRes = (ENUMRESSTRUCT *) lParam;
+    
+	if (!sEnumRes->nIndex--)
+	{
+		*sEnumRes->pResInfo = FindResourceA(hModule, lpszName, RT_GROUP_ICONA);
+		return FALSE;
+	}
+	else
+		return TRUE;
 }
+
 
 static int ExtractFromEXEDLL(const char *szFileName, int nIndex, const char *szXPMFileName)
 {
@@ -447,10 +471,18 @@ static int ExtractFromEXEDLL(const char *szFileName, int nIndex, const char *szX
     }
 #else
     for (i = 0; i < pIconDir->idCount; i++)
-        if ((pIconDir->idEntries[i].bHeight * pIconDir->idEntries[i].bWidth) > nMax)
+        if ((pIconDir->idEntries[i].wBitCount >= nMaxBits) && (pIconDir->idEntries[i].wBitCount <= 8))
         {
-            lpName = MAKEINTRESOURCEA(pIconDir->idEntries[i].nID);
-            nMax = pIconDir->idEntries[i].bHeight * pIconDir->idEntries[i].bWidth;
+          if (pIconDir->idEntries[i].wBitCount > nMaxBits)
+          {
+              nMaxBits = pIconDir->idEntries[i].wBitCount;
+              nMax = 0;
+          }
+          if ((pIconDir->idEntries[i].bHeight * pIconDir->idEntries[i].bWidth) > nMax)
+          {
+              lpName = MAKEINTRESOURCEA(pIconDir->idEntries[i].nID);
+              nMax = pIconDir->idEntries[i].bHeight * pIconDir->idEntries[i].bWidth;
+          }
         }
 
     FreeResource(hResData);
@@ -479,6 +511,7 @@ static int ExtractFromEXEDLL(const char *szFileName, int nIndex, const char *szX
 #endif
 
 done:
+
     FreeResource(hResData);
     FreeLibrary(hModule);
 
@@ -564,7 +597,7 @@ inline static char *get_unix_file_name( const char *dos )
     char buffer[MAX_PATH];
 
     if (!wine_get_unix_file_name( dos, buffer, sizeof(buffer) )) return NULL;
-    return HEAP_strdupA( GetProcessHeap(), 0, buffer );
+    return heap_strdup( buffer );
 }
 
 static BOOL create_default_icon( const char *filename )
@@ -593,7 +626,7 @@ static char *extract_icon( const char *path, char *filename, int index)
 #else
 static char *extract_icon( const char *path, int index)
 {
-    char *filename = HEAP_strdupA( GetProcessHeap(), 0, tmpnam(NULL) );
+    char *filename = heap_strdup( tmpnam(NULL) );
     if (ExtractFromEXEDLL( path, index, filename )) return filename;
     if (ExtractFromICO( path, filename )) return filename;
     if (create_default_icon( filename )) return filename;
@@ -601,6 +634,7 @@ static char *extract_icon( const char *path, int index)
     return NULL;
 }
 #endif
+
 
 static HRESULT WINAPI IPersistFile_fnSave(IPersistFile* iface, LPCOLESTR pszFileName, BOOL fRemember)
 {
@@ -708,12 +742,12 @@ static HRESULT WINAPI IPersistFile_fnSave(IPersistFile* iface, LPCOLESTR pszFile
         RegCloseKey( hkey );
     }
     if (!*buffer) return NOERROR;
-    shell_link_app = HEAP_strdupA( GetProcessHeap(), 0, buffer );
+    shell_link_app = heap_strdup( buffer );
 
     if (!WideCharToMultiByte( CP_ACP, 0, pszFileName, -1, buffer, sizeof(buffer), NULL, NULL))
         return ERROR_UNKNOWN;
     GetFullPathNameA( buffer, sizeof(buff2), buff2, NULL );
-    filename = HEAP_strdupA( GetProcessHeap(), 0, buff2 );
+    filename = heap_strdup( buff2 );
 
     if (SHGetSpecialFolderPathA( 0, buffer, CSIDL_STARTUP, FALSE ))
     {
@@ -961,7 +995,7 @@ static HRESULT WINAPI IPersistStream_fnLoad(
 	            This->pPidl = ILClone (&lpLinkHeader->Pidl);
 
 	            SHGetPathFromIDListA(&lpLinkHeader->Pidl, sTemp);
-	            This->sPath = HEAP_strdupA ( GetProcessHeap(), 0, sTemp);
+	            This->sPath = heap_strdup( sTemp );
 	          }
 		  This->wHotKey = lpLinkHeader->wHotKey;
 		  FileTimeToSystemTime (&lpLinkHeader->Time1, &This->time1);
@@ -1125,7 +1159,6 @@ static ULONG WINAPI IShellLinkA_fnRelease(IShellLinkA * iface)
 	  if (This->sArgs)
 	    HeapFree(GetProcessHeap(), 0, This->sArgs);
 
-
 	  if (This->sWorkDir)
 	    HeapFree(GetProcessHeap(), 0, This->sWorkDir);
 	    
@@ -1198,7 +1231,7 @@ static HRESULT WINAPI IShellLinkA_fnSetDescription(IShellLinkA * iface, LPCSTR p
 
 	if (This->sDescription)
 	    HeapFree(GetProcessHeap(), 0, This->sDescription);
-	if (!(This->sDescription = HEAP_strdupA(GetProcessHeap(), 0, pszName)))
+	if (!(This->sDescription = heap_strdup(pszName)))
 	    return E_OUTOFMEMORY;
 
 	return NOERROR;
@@ -1221,7 +1254,7 @@ static HRESULT WINAPI IShellLinkA_fnSetWorkingDirectory(IShellLinkA * iface, LPC
 
 	if (This->sWorkDir)
 	    HeapFree(GetProcessHeap(), 0, This->sWorkDir);
-	if (!(This->sWorkDir = HEAP_strdupA(GetProcessHeap(), 0, pszDir)))
+	if (!(This->sWorkDir = heap_strdup(pszDir)))
 	    return E_OUTOFMEMORY;
 
 	return NOERROR;
@@ -1244,7 +1277,7 @@ static HRESULT WINAPI IShellLinkA_fnSetArguments(IShellLinkA * iface, LPCSTR psz
 
 	if (This->sArgs)
 	    HeapFree(GetProcessHeap(), 0, This->sArgs);
-	if (!(This->sArgs = HEAP_strdupA(GetProcessHeap(), 0, pszArgs)))
+	if (!(This->sArgs = heap_strdup(pszArgs)))
 	    return E_OUTOFMEMORY;
 
 	return NOERROR;
@@ -1303,7 +1336,7 @@ static HRESULT WINAPI IShellLinkA_fnSetIconLocation(IShellLinkA * iface, LPCSTR 
 	
 	if (This->sIcoPath)
 	    HeapFree(GetProcessHeap(), 0, This->sIcoPath);
-	if (!(This->sIcoPath = HEAP_strdupA(GetProcessHeap(), 0, pszIconPath)))
+	if (!(This->sIcoPath = heap_strdup(pszIconPath)))
 	    return E_OUTOFMEMORY;	
 	This->iIcoNdx = iIcon;
 	
@@ -1331,7 +1364,7 @@ static HRESULT WINAPI IShellLinkA_fnSetPath(IShellLinkA * iface, LPCSTR pszFile)
 
 	if (This->sPath)
 	    HeapFree(GetProcessHeap(), 0, This->sPath);
-	if (!(This->sPath = HEAP_strdupA(GetProcessHeap(), 0, pszFile)))
+	if (!(This->sPath = heap_strdup(pszFile)))
 	    return E_OUTOFMEMORY;
 	
 	return NOERROR;
