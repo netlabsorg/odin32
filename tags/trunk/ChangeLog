@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.2679 2004-02-16 15:20:33 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2680 2004-02-16 16:54:05 sandervl Exp $ */
 
  2004-02-16: KO Myung-Hun <komh@chollian    >
     - USER32:   o Edit control: DBCS related fixes
@@ -6,6 +6,7 @@
  2004-02-16: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o EndPaint; fixed region handle leaks
     - GDI32:    o Another region leak in GdiCombineVisRgnClipRgn fixed
+                o DIB Section: flush used the wrong RGB conversion
 
  2004-02-13: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Allocate memory for the map during CreateFileMapping and
