@@ -1,4 +1,4 @@
-# $Id: setup.os2relmscv6.mk,v 1.7 2002-04-30 22:42:49 bird Exp $
+# $Id: setup.os2relmscv6.mk,v 1.8 2002-05-16 11:37:04 bird Exp $
 
 # ---OS2, RELEASE, MSCV6-------------------------
 ENV_NAME="OS/2, Release, Microsoft C v6.0a 32-bit"
@@ -8,6 +8,7 @@ ENV_ENVS=vac308 mscv6
 !else
 ENV_ENVS_FORCE=vac308 mscv6
 !endif
+!undef ENV_16BIT
 
 
 #
@@ -96,6 +97,17 @@ CXX_OBJ_OUT=
 CXX_LST_OUT=
 CXX_PC_2_STDOUT=
 
+!if "$(CC_AS_CXX)" != ""
+! if [@(ECHO) $(CLRERR)Error: CC_AS_CXX is not supported by this compiler!$(CLRRST)]
+! endif
+! error
+!endif
+!if "$(CXX_AS_CC)" != ""
+! if [@(ECHO) $(CLRERR)Error: CXX_AS_CC is not supported by this compiler!$(CLRRST)]
+! endif
+! error
+!endif
+
 IMPLIB_FLAGS=/NOI /Nologo
 
 LINK_FLAGS=/nofree /nologo /map /linenumbers /NOIgnorecase /NOE /NOD /Optfunc /PACKCODE /PACKDATA /EXEPACK:2 /NODEBUG
@@ -117,7 +129,7 @@ LINK_LNK4=$(TARGET_LIBS: =+^
 ),
 LINK_LNK5=$(TARGET_DEF_LINK)
 
-RC_FLAGS=-r -n -i $(PATH_INCLUDES:;= -i ) $(RC_DEFINES) $(RC_INCLUDES)
+RC_FLAGS=-r -n $(RC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(RC_INCLUDES:-I=-i ) $(ALL_INCLUDES:-I=-i ) -i $(PATH_INCLUDES:;= -i )
 RL_FLAGS=-x2 -n
 
 

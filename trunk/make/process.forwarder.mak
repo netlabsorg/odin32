@@ -1,4 +1,4 @@
-# $Id: process.forwarder.mak,v 1.2 2002-04-22 02:21:51 bird Exp $
+# $Id: process.forwarder.mak,v 1.3 2002-05-16 11:36:59 bird Exp $
 
 #
 # Generic makefile system.
@@ -24,8 +24,25 @@
 !error Fatal error: The environment is not valid. Bad setup.mak?
 !endif
 
-!if "$(TARGET_NAME)" == ""
+!if "$(TARGET_NAME)" == "" && "$(TARGET_MODE)" != "EMPTY"
 !error Fatal error: TARGET_NAME is not defined! Should be set in the makefile.
+!endif
+
+# -----------------------------------------------------------------------------
+# Set necessary defaults.
+# -----------------------------------------------------------------------------
+
+# just make it shut up for now.
+TARGET = process.forwarder.mak
+
+# Default makefile names.
+!ifndef BUILD_MAKEFILE
+BUILD_MAKEFILE = Makefile
+!endif
+
+# Default makefile name.
+!ifndef MAKEFILE
+MAKEFILE = $(BUILD_MAKEFILE)
 !endif
 
 
@@ -51,13 +68,13 @@
 !ifndef BUILD_VERBOSE
     @ \
 !endif
-    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) $@
+    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
 
 .asm.$(EXT_OBJ):
 !ifndef BUILD_VERBOSE
     @ \
 !endif
-    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) $@
+    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
 
 
 # Compiling C++ source.
@@ -65,13 +82,13 @@
 !ifndef BUILD_VERBOSE
     @ \
 !endif
-    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) $@
+    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
 
 .cpp.$(EXT_OBJ):
 !ifndef BUILD_VERBOSE
     @ \
 !endif
-    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) $@
+    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
 
 
 # Pre-Compiling C++ source.
@@ -79,7 +96,7 @@
 !ifndef BUILD_VERBOSE
     @ \
 !endif
-    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) $@
+    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
 
 
 # Compiling C source.
@@ -87,13 +104,13 @@
 !ifndef BUILD_VERBOSE
     @ \
 !endif
-    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) $@
+    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
 
 .c.$(EXT_OBJ):
 !ifndef BUILD_VERBOSE
     @ \
 !endif
-    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) $@
+    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
 
 
 # Pre-Compiling C source.
@@ -101,7 +118,7 @@
 !ifndef BUILD_VERBOSE
     @ \
 !endif
-    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) $@
+    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
 
 
 # Compiling resources.
@@ -109,13 +126,13 @@
 !ifndef BUILD_VERBOSE
     @ \
 !endif
-    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) $@
+    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
 
 .rc.res:
 !ifndef BUILD_VERBOSE
     @ \
 !endif
-    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) $@
+    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
 
 
 
@@ -135,7 +152,7 @@ build:
 !ifndef BUILD_VERBOSE
     @ \
 !endif
-    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) $@
+    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
 
 
 
@@ -146,7 +163,7 @@ lib:
 !ifndef BUILD_VERBOSE
     @ \
 !endif
-    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) $@
+    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
 
 
 
@@ -157,7 +174,7 @@ install:
 !ifndef BUILD_VERBOSE
     @ \
 !endif
-    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) $@
+    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
 
 
 
@@ -168,7 +185,7 @@ testcase:
 !ifndef BUILD_VERBOSE
     @ \
 !endif
-    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) $@
+    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
 
 
 
@@ -190,7 +207,7 @@ dep:
 !ifndef BUILD_VERBOSE
     @ \
 !endif
-    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) $@
+    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
 
 
 
@@ -202,19 +219,19 @@ clean:
 !ifndef BUILD_VERBOSE
     @ \
 !endif
-    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) $@
+    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
 
 
 
 # -----------------------------------------------------------------------------
 # The $(TARGET) rule - For EXE, DLL, SYS and IFS targets
 # -----------------------------------------------------------------------------
-!if "$(TARGET_MODE)" == "EXE" || "$(TARGET_MODE)" == "DLL" || "$(TARGET_MODE)" == "CRT" || "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "IFS" || "$(TARGET_MODE)" == "VDD"
+!if "$(TARGET_MODE)" == "EXE" || "$(TARGET_MODE)" == "DLL" || "$(TARGET_MODE)" == "SYS" || "$(TARGET_MODE)" == "IFS" || "$(TARGET_MODE)" == "VDD"
 $(TARGET):
 !ifndef BUILD_VERBOSE
     @ \
 !endif
-    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) $@
+    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
 !endif
 
 
@@ -227,7 +244,7 @@ $(TARGET):
 !ifndef BUILD_VERBOSE
     @ \
 !endif
-    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) $@
+    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
 !endif
 
 
@@ -250,7 +267,7 @@ $(TARGET_ILIB):
 !ifndef BUILD_VERBOSE
     @ \
 !endif
-    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) $@
+    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
 
 !endif
 

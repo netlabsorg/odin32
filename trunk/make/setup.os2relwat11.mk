@@ -1,14 +1,14 @@
-# $Id: setup.os2debwat11-16.mk,v 1.3 2002-05-16 11:37:01 bird Exp $
+# $Id: setup.os2relwat11.mk,v 1.1 2002-05-16 11:37:05 bird Exp $
 
-# ---OS2, DEBUG, WAT11-------------------------
-ENV_NAME="OS/2, Debug, Watcom C/C++ v11.0c 16-bit"
+# ---OS2, RELEASE, WAT11-------------------------
+ENV_NAME="OS/2, Release, Watcom C/C++ v11.0c"
 ENV_STATUS=OK
 !if "$(ENV_ENVS)" == ""
-ENV_ENVS=vac308 watcomc11c-16
+ENV_ENVS=vac308 watcomc11c
 !else
-ENV_ENVS_FORCE=vac308 watcomc11c-16
+ENV_ENVS_FORCE=vac308 watcomc11c
 !endif
-ENV_16BIT = 16
+!undef ENV_16BIT
 
 
 #
@@ -22,8 +22,8 @@ ENV_16BIT = 16
 # The tools
 #
 AR=ilib.exe
-CC=wcc.exe
-CXX=wpp.exe
+CC=wcc386.exe
+CXX=wpp386.exe
 LINK=wlink.exe
 IMPLIB=implib.exe
 RC=rc.exe
@@ -41,20 +41,20 @@ _AR_LNK1= "$(TARGET_OBJS: ="&^
 AR_LNK1= $(_AR_LNK1:""=)
 AR_LNK2= $(@R).lst
 
-CC_FLAGS=-bt=os2 -dOS2 -dDEBUG -d__16BIT__ -5 -zq -bm -ze -w4 -d2 -hc -zc $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
+CC_FLAGS=-bt=os2v2 -dOS2 -d__32BIT__ -d__i386__ -omlinear -5r -zq -bm -ze -w4 -d2 -hc -zc $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
 CC_FLAGS_EXE=$(CC_FLAGS)
 CC_FLAGS_DLL=$(CC_FLAGS) -bd
-CC_FLAGS_SYS=$(CC_FLAGS) -s -zfp -zgp -zu
+CC_FLAGS_SYS=$(CC_FLAGS) -s -zdp -zff -zgf
 CC_FLAGS_VDD=$(CC_FLAGS_SYS)
 CC_FLAGS_IFS=$(CC_FLAGS_SYS) -bd
 CC_OBJ_OUT=-fo=
 CC_LST_OUT=
 CC_PC_2_STDOUT=-pc
 
-CXX_FLAGS=-bt=os2 -dOS2 -dDEBUG -d__16BIT__ -5 -zq -bm -ze -w4 -d2 -hc -zc $(_CXX_OPTIONAL)  $(CXX_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CXX_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
+CXX_FLAGS=-bt=os2v2 -dOS2 -d__32BIT__ -d__i386__ -omlinear -5r -zq -bm -ze -w4 -d2 -hc -zc $(_CXX_OPTIONAL)  $(CXX_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CXX_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
 CXX_FLAGS_EXE=$(CXX_FLAGS)
 CXX_FLAGS_DLL=$(CXX_FLAGS) -bd
-CXX_FLAGS_SYS=$(CXX_FLAGS) -s -zfp -zgp -zu
+CXX_FLAGS_SYS=$(CXX_FLAGS) -s -zdp -zff -zgf
 CXX_FLAGS_VDD=$(CXX_FLAGS_SYS)
 CXX_FLAGS_IFS=$(CXX_FLAGS_SYS) -bd
 CXX_OBJ_OUT=-fo=
@@ -85,7 +85,7 @@ CXX_FLAGS_IFS=$(C_FLAGS_IFS)
 
 IMPLIB_FLAGS=/NOI /Nologo
 
-LINK_FLAGS=Sort global Debug codeview Option quiet, dosseg, eliminate, manglednames, caseexact, MAXErrors=20
+LINK_FLAGS=Sort global Option quiet, dosseg, eliminate, manglednames, caseexact
 LINK_FLAGS_EXE=$(LINK_FLAGS)
 LINK_FLAGS_DLL=$(LINK_FLAGS)
 LINK_FLAGS_SYS=$(LINK_FLAGS) Option oneautodata, internalrelocs, togglerelocs
@@ -98,7 +98,7 @@ LINK_CMD_VDD=$(LINK) $(LINK_FLAGS_VDD) @$(TARGET_LNK)
 LINK_CMD_IFS=$(LINK) $(LINK_FLAGS_IFS) @$(TARGET_LNK)
 LINK_LNK1=file       $(TARGET_OBJS: =^
 file       )
-LINK_LNK2=libpath    $(WATCOM)\lib286\os2;$(WATCOM)\lib286;
+LINK_LNK2=libpath    $(WATCOM)\lib386\os2;$(WATCOM)\lib386;
 LINK_LNK3=option map=$(TARGET_MAP)
 LINK_LNK4=library    $(TARGET_LIBS: =^, )
 LINK_LNK5=name       $(PATH_TARGET)\$(TARGET_NAME).$(TARGET_EXT)
@@ -109,26 +109,21 @@ RL_FLAGS=-x2 -n
 
 #
 # Libraries and object files.
-# TODO - DLL and RTDLL doesn't work.
-#        Probably needing code to be compiled with far code. I.e. MODEL hugh, large or medium.
 #
-LIB_OS      = os2286.lib
-
-_LIB_MT =
-!if "$(_OBJ_MODEL)" == "m"
-_LIB_MT = mt # this is the only one there is a MT edition of, don't know why.
-!endif
-!if "$(_CXX_XCPT)" != "-xs"
-LIB_C_OBJ   = clib$(_LIB_MT)$(_OBJ_MODEL).lib plib$(_LIB_MT)$(_OBJ_MODEL).lib math87$(_LIB_MT)$(_OBJ_MODEL).lib emu87.lib
+LIB_OS      = os2386.lib
+!if "$(_CXX_XCPT)" == "-xd"
+LIB_C_OBJ   = clib3r.lib plibmt3r.lib math387r.lib emu387.lib
+LIB_C_DLL   = clbrdll.lib plbrdll.lib mt7rdll.lib emu387.lib
+LIB_C_RTDLL = clbrdll.lib  # TODO
+LIB_C_NRE   = $(LIB_C_OBJ) # TODO
 !else
-LIB_C_OBJ   = clib$(_LIB_MT)$(_OBJ_MODEL).lib plbx$(_LIB_MT)$(_OBJ_MODEL).lib math87$(_LIB_MT)$(_OBJ_MODEL).lib emu87.lib
+LIB_C_OBJ   = clib3r.lib plbxmt3r.lib math387r.lib emu387.lib
+LIB_C_DLL   = clbrdll.lib plbrdllx.lib mt7rdll.lib emu387.lib
+LIB_C_RTDLL = clbrdll.lib  # TODO
+LIB_C_NRE   = $(LIB_C_OBJ) # TODO
 !endif
-LIB_C_DLL   = $(LIB_C_OBJ)  # clibdll.lib
-LIB_C_RTDLL = $(LIB_C_OBJ)  # clibdll.lib
-LIB_C_NRE   = $(LIB_C_OBJ)
 LIB_C_DMNGL =
 OBJ_PROFILE =
 
-
-# ---OS2, DEBUG, WAT11-------------------------
+# ---OS2, RELEASE, WAT11-------------------------
 

@@ -1,13 +1,14 @@
-# $Id: setup.os2relemx.mk,v 1.1 2002-04-30 22:40:18 bird Exp $
+# $Id: setup.os2relemx.mk,v 1.2 2002-05-16 11:37:04 bird Exp $
 
 # ---OS2, DEBUG, EMX----------------------------
 ENV_NAME="OS/2, Debug, EMX/GCC Compiler"
 ENV_STATUS=OK
 !if "$(ENV_ENVS)" == ""
-ENV_ENVS=vac308 emx
+ENV_ENVS=vac308 emx emxpgcc
 !else
-ENV_ENVS_FORCE=vac308 emx
+ENV_ENVS_FORCE=vac308 emx emxpgcc
 !endif
+!undef ENV_16BIT
 SPACE=_
 
 
@@ -73,6 +74,25 @@ CXX_OBJ_OUT=-o$(SPACE:_= )
 #CXX_LST_OUT=-S -o$(SPACE:_= )
 CXX_PC_2_STDOUT=-C -E
 
+!if "$(CC_AS_CXX)" != ""
+! if "$(CXX_AS_CC)" != ""
+!  if [@(ECHO) $(CLRERR)Error: Do you think you're smart? CC_AS_CXX and CXX_AS_CC is mutual execlusive!$(CLRRST)]
+!  endif
+!  error
+! endif
+CC=g++
+CC_FLAGS_EXE=$(CXX_FLAGS_EXE)
+CC_FLAGS_DLL=$(CXX_FLAGS_DLL)
+CC_FLAGS_SYS=$(CXX_FLAGS_SYS)
+CC_FLAGS_VDD=$(CXX_FLAGS_VDD)
+CC_FLAGS_IFS=$(CXX_FLAGS_IFS)
+!endif
+!if "$(CXX_AS_CC)" != ""
+! if [@(ECHO) $(CLRERR)Error: CXX_AS_CC is not supported by this compiler!$(CLRRST)]
+! endif
+! error
+!endif
+
 IMPLIB_FLAGS=/NOI /Nologo
 
 LINK_FLAGS=/nofree /nologo /map /linenumbers /NOIgnorecase /noe /nod /Optfunc /packcode /packdata /exepack:2 /nodebug
@@ -94,7 +114,7 @@ LINK_LNK4=$(TARGET_LIBS: =+^
 ) end.lib,
 LINK_LNK5=$(TARGET_DEF_LINK)
 
-RC_FLAGS=-r -n -i $(PATH_INCLUDE:;= -i ) $(RC_DEFINES) $(RC_INCLUDES)
+RC_FLAGS=-r -n $(RC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(RC_INCLUDES:-I=-i ) $(ALL_INCLUDES:-I=-i ) -i $(PATH_INCLUDES:;= -i )
 RL_FLAGS=-x2 -n
 
 #

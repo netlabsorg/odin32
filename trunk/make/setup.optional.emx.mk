@@ -1,4 +1,4 @@
-# $Id: setup.optional.emx.mk,v 1.1 2002-04-30 22:40:17 bird Exp $
+# $Id: setup.optional.emx.mk,v 1.2 2002-05-16 11:37:00 bird Exp $
 
 #
 #  Helper file for all the optional stuff which is common for

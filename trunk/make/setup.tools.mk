@@ -1,4 +1,4 @@
-# $Id: setup.tools.mk,v 1.7 2002-04-30 06:19:13 bird Exp $
+# $Id: setup.tools.mk,v 1.8 2002-05-16 11:37:05 bird Exp $
 
 
 #
@@ -6,7 +6,7 @@
 # Define BUILD_NOCOLORS if you don't like it.. :-)
 #
 !ifdef SLKRUNS
-BUILD_NOCOLORS = 1;
+BUILD_NOCOLORS = 1
 !endif
 !ifndef BUILD_NOCOLORS
 CLRTXT=[32;1m
@@ -28,6 +28,7 @@ ECHO            = $(TOOL_ECHO)
 TOOL_BLDLEVEL   = $(PATH_TOOLS)\BldLevelInf.cmd
 TOOL_BUILDENV   = $(PATH_TOOLS)\BuildEnv.cmd
 TOOL_CMP        = $(PATH_TOOLS)\cmp.exe
+TOOL_CMDQD      = $(PATH_TOOLS)\cmdqd.exe
 !if "$(BUILD_SHELL)" != "4OS2"
 TOOL_COPY       = copy
 !else
@@ -43,10 +44,34 @@ TOOL_DOMAKES    = $(PATH_TOOLS)\domakes.cmd
 TOOL_DOWITHDIRS = $(PATH_TOOLS)\dowithdirs.cmd
 TOOL_ECHO       = @echo $(CLRTXT)
 TOOL_EXISTS     = $(PATH_TOOLS)\Exists.cmd
-TOOL_MAKE       = $(MAKE) -nologo
+!if "$(BUILD_MULTIJOBS)" != ""
+TOOL_JOB_SUB    = $(TOOL_CMDQD) submit
+TOOL_JOB_WAIT   = $(TOOL_CMDQD) wait
+TOOL_JOB_UP     = $(TOOL_CMDQD) queryrunning
+TOOL_JOB_INIT   = $(TOOL_CMDQD) init
+TOOL_JOB_WORKERS= 5
+TOOL_JOB_SUB_MSG= (submitting job)
+!endif
+TOOL_MAKE       = $(MAKE:.exe=).exe -nologo
 TOOL_MAPSYM     = $(PATH_TOOLS)\MapSym.cmd $(BUILD_ENV)
 TOOL_RM         = rm.exe -f
 TOOL_TYPE       = type
+
+
+#
+# Check for all mode and modify some tool flags
+#
+!ifdef MAKEFLAGS
+!if "$(MAKEVER)" != "5.0"
+!if "$(MAKEFLAGS:A=z)" != "$(MAKEFLAGS)"
+TOOL_DEP_FLAGS = $(TOOL_DEP_FLAGS) -F+
+!endif
+!else
+!if "$(MAKEFLAGS:a=z)" != "$(MAKEFLAGS)"
+TOOL_DEP_FLAGS += -F+
+!endif
+!endif
+!endif
 
 
 #

@@ -1,12 +1,12 @@
-# $Id: setup.os2debwat11-16.mk,v 1.3 2002-05-16 11:37:01 bird Exp $
+# $Id: setup.os2relwat11-16.mk,v 1.1 2002-05-16 11:37:05 bird Exp $
 
-# ---OS2, DEBUG, WAT11-------------------------
-ENV_NAME="OS/2, Debug, Watcom C/C++ v11.0c 16-bit"
+# ---OS2, RELEASE, WAT11-------------------------
+ENV_NAME="OS/2, Release, Watcom C/C++ v11.0c 16-bit"
 ENV_STATUS=OK
 !if "$(ENV_ENVS)" == ""
-ENV_ENVS=vac308 watcomc11c-16
+ENV_ENVS=ddkbase vac308 watcomc11c-16
 !else
-ENV_ENVS_FORCE=vac308 watcomc11c-16
+ENV_ENVS_FORCE=ddkbase vac308 watcomc11c-16
 !endif
 ENV_16BIT = 16
 
@@ -41,7 +41,10 @@ _AR_LNK1= "$(TARGET_OBJS: ="&^
 AR_LNK1= $(_AR_LNK1:""=)
 AR_LNK2= $(@R).lst
 
-CC_FLAGS=-bt=os2 -dOS2 -dDEBUG -d__16BIT__ -5 -zq -bm -ze -w4 -d2 -hc -zc $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
+_CC_FLAGS_OS =
+
+# Note: wlink doesn't like 16-bit objects with debuginfo if Debug is disabled. (Failes on make\testcase.)
+CC_FLAGS=-bt=os2 -dOS2 -d__16BIT__ -5 -omlinear -zq -bm -ze -w4 -zc $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
 CC_FLAGS_EXE=$(CC_FLAGS)
 CC_FLAGS_DLL=$(CC_FLAGS) -bd
 CC_FLAGS_SYS=$(CC_FLAGS) -s -zfp -zgp -zu
@@ -51,7 +54,8 @@ CC_OBJ_OUT=-fo=
 CC_LST_OUT=
 CC_PC_2_STDOUT=-pc
 
-CXX_FLAGS=-bt=os2 -dOS2 -dDEBUG -d__16BIT__ -5 -zq -bm -ze -w4 -d2 -hc -zc $(_CXX_OPTIONAL)  $(CXX_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CXX_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
+# Note: wlink doesn't like 16-bit objects with debuginfo if Debug is disabled. (paranoia since CC failed)
+CXX_FLAGS=-bt=os2 -dOS2 -d__16BIT__ -5 -omlinear -zq -bm -ze -w4 -zc $(_CXX_OPTIONAL)  $(CXX_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CXX_INCLUDES:-I=-i=) $(ALL_INCLUDES:-I=-i=) -i=$(PATH_INCLUDES) -i=$(WATCOM)\h
 CXX_FLAGS_EXE=$(CXX_FLAGS)
 CXX_FLAGS_DLL=$(CXX_FLAGS) -bd
 CXX_FLAGS_SYS=$(CXX_FLAGS) -s -zfp -zgp -zu
@@ -85,7 +89,7 @@ CXX_FLAGS_IFS=$(C_FLAGS_IFS)
 
 IMPLIB_FLAGS=/NOI /Nologo
 
-LINK_FLAGS=Sort global Debug codeview Option quiet, dosseg, eliminate, manglednames, caseexact, MAXErrors=20
+LINK_FLAGS=Sort global Option quiet, dosseg, eliminate, manglednames, caseexact
 LINK_FLAGS_EXE=$(LINK_FLAGS)
 LINK_FLAGS_DLL=$(LINK_FLAGS)
 LINK_FLAGS_SYS=$(LINK_FLAGS) Option oneautodata, internalrelocs, togglerelocs
@@ -130,5 +134,5 @@ LIB_C_DMNGL =
 OBJ_PROFILE =
 
 
-# ---OS2, DEBUG, WAT11-------------------------
+# ---OS2, RELEASE, WAT11-------------------------
 

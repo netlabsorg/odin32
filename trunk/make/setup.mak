@@ -1,4 +1,4 @@
-# $Id: setup.mak,v 1.8 2002-04-30 19:48:28 bird Exp $
+# $Id: setup.mak,v 1.9 2002-05-16 11:37:00 bird Exp $
 
 #
 # Generic makefile system.
@@ -159,9 +159,10 @@ PATH_HLP    = $(PATH_ROOT)\bin\$(BUILD_MODE)
 # -----------------------------------------------------------------------------
 
 # The default definitions.
-BUILD_DEFINES           = -D__WIN32OS2__ -D__WINE__ -D__i386__
+BUILD_DEFINES           = -D__WIN32OS2__ -D__WINE__
 BUILD_BLDLEVEL_FLAGS    = -V^"^#define=ODIN32_VERSION,$(PATH_ROOT)\include\odinbuild.h^" \
                           -M^"^#define=ODIN32_BUILD_NR,$(PATH_ROOT)\include\odinbuild.h^"
+BUILD_PROJECT           = Odin32
 
 # This is the process file to include at end of the makefile.
 MAKE_INCLUDE_PROCESS    = $(PATH_MAKE)\process.mak
@@ -218,23 +219,6 @@ MAKE_INCLUDE_SETUP = $(PATH_MAKE)\setup.$(SHT_TRGPLTFRM)$(SHT_BLDMD)$(SHT_BLDENV
 
 
 # -----------------------------------------------------------------------------
-# Ensure the output path exists
-# -----------------------------------------------------------------------------
-!if "$(PATH_OBJ)" != ""
-! if [$(TOOL_EXISTS) $(PATH_OBJ)] != 0
-!  ifndef BUILD_QUIET
-!   if [$(ECHO) Target path $(PATH_OBJ) does NOT exist. Creating. $(CLRRST)]
-!   endif
-!  endif
-!  if [$(TOOL_CREATEPATH) $(PATH_OBJ)]
-!   error Fatal error: Could not create $(PATH_OBJ).
-!  endif
-! endif
-!endif
-
-
-
-# -----------------------------------------------------------------------------
 # Build the environments
 # -----------------------------------------------------------------------------
 
@@ -253,15 +237,23 @@ MAKE_INCLUDE_SETUP = $(PATH_MAKE)\setup.$(SHT_TRGPLTFRM)$(SHT_BLDMD)$(SHT_BLDENV
 # TODO   Should these be overridable by setup.[w]xyz.mak ? (kso)
 
 BUILD_ENVS_BASE_POST    = toolkit40
-BUILD_ENVS_BASE_PRE     = odin32testcase
+BUILD_ENVS_BASE_POST_16 =
+BUILD_ENVS_BASE_PRE     = buildsetup emx cvs
+BUILD_ENVS_BASE_PRE_16  = buildsetup emx cvs toolkit40 ddkbase
 
 
-# Check if there is any change in the environment.
-# If there are we will have to forward all target commands to the
+# Check if there is any change in the environment OR if the environment is
+# uncertain (_BUILD_PROJECT not right).
+# If there are Then we will have to forward all target commands to the
 # correct shell environment
-!if "$(BUILD_ENV)" != "$(BUILD_ENV_FORCE)" || "$(BUILD_ENVS_PRE)" != "" || "$(BUILD_ENVS_POST)" != ""
+!if "$(_BUILD_PROJECT)" != "$(BUILD_PROJECT)" || "$(BUILD_ENV)" != "$(BUILD_ENV_FORCE)" || "$(BUILD_ENVS_PRE)" != "" || "$(BUILD_ENVS_POST)" != ""
 MAKE_INCLUDE_PROCESS = $(PATH_MAKE)\process.forwarder.mak
 
+# set the secret _build_project env.var.
+!if "$(_BUILD_PROJECT)" != "$(BUILD_PROJECT)"
+! if [set _BUILD_PROJECT=$(BUILD_PROJECT)]
+! endif
+!endif
 
 # Compiler change or just environment change.
 ! if "$(BUILD_ENV)" != "$(BUILD_ENV_FORCE)"
@@ -271,9 +263,17 @@ MAKE_INCLUDE_SETUP_FORCE = $(PATH_MAKE)\setup.$(SHT_TRGPLTFRM)$(SHT_BLDMD)$(SHT_
 !   endif
 !  endif
 !  include $(MAKE_INCLUDE_SETUP_FORCE)
+!  ifdef ENV_16BIT
+BUILD_ENVS_CHANGE = $(ENV_ENVS: =- )- $(BUILD_ENVS_BASE_PRE_16) $(BUILD_ENVS_PRE) $(ENV_ENVS_FORCE) $(BUILD_ENVS_BASE_POST_16) $(BUILD_ENVS_POST)
+!  else
 BUILD_ENVS_CHANGE = $(ENV_ENVS: =- )- $(BUILD_ENVS_BASE_PRE) $(BUILD_ENVS_PRE) $(ENV_ENVS_FORCE) $(BUILD_ENVS_BASE_POST) $(BUILD_ENVS_POST)
+!  endif
 ! else
+!  ifdef ENV_16BIT
+BUILD_ENVS_CHANGE = $(BUILD_ENVS_BASE_PRE_16) $(BUILD_ENVS_PRE) $(ENV_ENVS) $(BUILD_ENVS_BASE_POST_16) $(BUILD_ENVS_POST)
+!  else
 BUILD_ENVS_CHANGE = $(BUILD_ENVS_BASE_PRE) $(BUILD_ENVS_PRE) $(ENV_ENVS) $(BUILD_ENVS_BASE_POST) $(BUILD_ENVS_POST)
+!  endif
 ! endif
 
 !endif
