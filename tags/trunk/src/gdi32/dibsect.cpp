@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.60 2001-11-16 15:50:59 phaller Exp $ */
+/* $Id: dibsect.cpp,v 1.61 2001-12-20 19:57:01 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -494,10 +494,10 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
         hdcWidth  = pHps->bitmapWidth;
   }
 
-  //win32 coordinates are relative to left top, OS/2 expects left bottom
-  //source rectangle is non-inclusive (top, right not included)
-  //destination rectangle is incl.-inclusive (everything included)
-
+  //Don't clip destination size to destination DC size
+  //This messes up the two bitmaps in the opening window of Opera 6
+  //(choice between MDI & SDI interface)
+#if 0
   if(nXdest + nDestWidth > hdcWidth) {
         nDestWidth  = hdcWidth - nXdest;
   }
@@ -505,19 +505,28 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
   if(nYdest + nDestHeight > hdcHeight) {
         nDestHeight = hdcHeight - nYdest;
   }
+#endif
+
+  //win32 coordinates are relative to left top, OS/2 expects left bottom
+  //source rectangle is non-inclusive (top, right not included)
+  //destination rectangle is incl.-inclusive (everything included)
 
   point[0].x = nXdest;
   point[0].y = hdcHeight - nYdest - nDestHeight;
   point[1].x = nXdest + nDestWidth - 1;
   point[1].y = hdcHeight - nYdest - 1;
 
-  //target rectangle is inclusive-inclusive
+#if 0
+  //Don't check size here either. Let GpiDrawBits do that for us
   if(nXsrc + nSrcWidth > pOS2bmp->cx) {
         nSrcWidth  = pOS2bmp->cx - nXsrc;
   }
   if(nYsrc + nSrcHeight > pOS2bmp->cy) {
         nSrcHeight = pOS2bmp->cy - nYsrc;
   }
+#endif
+
+  //target rectangle is inclusive-inclusive
   point[2].x = nXsrc;
   point[2].y = pOS2bmp->cy - nYsrc - nSrcHeight;
   point[3].x = nXsrc + nSrcWidth;
