@@ -1,4 +1,15 @@
-/* $Id: changelog,v 1.1225 2001-01-19 23:05:34 sandervl Exp $ */
+/* $Id: changelog,v 1.1226 2001-01-20 16:58:03 sandervl Exp $ */
+
+ 2001-01-20: Sander van Leeuwen <sandervl@xs4all.nl>
+    - AVIFIL32: o Resynched with latest Wine code
+                o Added AVIStreamTimeToSample & AVIStreamSampleToTime stubs
+
+ 2001-01-20: Yuri Dario <mc6530@mclink.it>
+    - USER32:   o Set codepage for DCs returned by GetDCEx
+
+ 2000-01-20: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
+    - WINMM/MCICDA:
+                o MCI_STATUS_POSITION bugfix
 
  2001-01-19: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o GetCaretPos & SetCaretPos bugfixes. Did not take client
