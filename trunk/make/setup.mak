@@ -1,11 +1,11 @@
-# $Id: setup.mak,v 1.20 2002-09-20 03:37:37 bird Exp $
-
+# $Id: setup.mak,v 1.21 2002-09-20 04:24:06 bird Exp $
 #
-# Generic makefile system.
+#   The common build setup.
 #
-#   Setting up the build environment variables
+# Copyright (c) 2001-2002 knut st. osmundsen <bird@anduin.net>
+# Copyright (c) 2001 Patrick Haller
 #
-#   Many of the variables are a subject to change from project to project.
+# This file is part of Generic Buildsystem.
 #
 
 

@@ -1,13 +1,14 @@
-# $Id: process.forwarder.mak,v 1.16 2002-09-20 03:38:43 bird Exp $
-
+# $Id: process.forwarder.mak,v 1.17 2002-09-20 04:24:05 bird Exp $
 #
-# Generic makefile system.
+# Generic Buildsystem
 #
-#   The common build process rules for the case
-#   where we forward to a different compiler environment.
+#   The common build process rules for all cases
+#   where are forwarding the request to another environment setup.
 #
-# Note: this makefile is supposed to be included from the
-# current source path.
+#
+# Copyright (c) 2002 knut st. osmundsen <bird@anduin.net>
+#
+# This file is part of Generic Buildsystem.
 #
 
 
