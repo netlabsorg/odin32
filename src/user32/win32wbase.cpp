@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.111 1999-12-16 00:11:46 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.112 1999-12-16 00:47:21 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -785,6 +785,7 @@ ULONG Win32BaseWindow::MsgDestroy()
 {
  ULONG rc;
  Win32BaseWindow *child;
+ HWND hwnd = getWindowHandle();
 
     if (isSubclassedOS2Wnd) OSLibWinSubclassWindow(OS2Hwnd,pOldWndProc);
 
@@ -804,6 +805,10 @@ ULONG Win32BaseWindow::MsgDestroy()
         }
     }
     SendInternalMessageA(WM_DESTROY, 0, 0);
+    if(::IsWindow(hwnd) == FALSE) {
+	//object already destroyed, so return immediately
+	return 1;
+    }
     SendInternalMessageA(WM_NCDESTROY, 0, 0);
 
     if (hwndHorzScroll && OSLibWinQueryWindow(hwndHorzScroll,QWOS_PARENT) == OSLibWinQueryObjectWindow()) OSLibWinDestroyWindow(hwndHorzScroll);
