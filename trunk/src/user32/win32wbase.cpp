@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.306 2001-12-26 11:35:39 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.307 2001-12-30 10:48:08 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1181,7 +1181,10 @@ ULONG Win32BaseWindow::MsgEraseBackGround(HDC hdc)
 ULONG Win32BaseWindow::MsgMouseMove(MSG *msg)
 {
     //TODO: hiword should be 0 if window enters menu mode (SDK docs)
-    SendInternalMessageA(WM_SETCURSOR, Win32Hwnd, MAKELONG(lastHitTestVal, msg->message));
+    //SDK: WM_SETCURSOR is not sent if the mouse is captured
+    if(GetCapture() == 0) {
+        SendInternalMessageA(WM_SETCURSOR, Win32Hwnd, MAKELONG(lastHitTestVal, msg->message));
+    }
 
     //translated message == WM_(NC)MOUSEMOVE
     return SendInternalMessageA(msg->message, msg->wParam, msg->lParam);
@@ -3698,7 +3701,7 @@ LONG Win32BaseWindow::SetWindowLong(int index, ULONG value, BOOL fUnicode)
                     type = (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A;
                 }
                 oldval = (LONG)WINPROC_GetProc(win32wndproc, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A);
-                dprintf(("SetWindowLong GWL_WNDPROC %x old %x new wndproc %x", getWindowHandle(), oldval, value));
+                dprintf(("SetWindowLong%c GWL_WNDPROC %x old %x new wndproc %x", (fUnicode) ? 'W' : 'A', getWindowHandle(), oldval, value));
                 WINPROC_SetProc((HWINDOWPROC *)&win32wndproc, (WNDPROC)value, type, WIN_PROC_WINDOW);
                 break;
         }
@@ -3968,14 +3971,14 @@ HWND WIN32API OS2ToWin32Handle(HWND hwnd)
 #ifdef DEBUG
 LONG  Win32BaseWindow::addRef()
 {
-    dprintf2(("addRef %x %d", getWindowHandle(), getRefCount()+1));
+//    dprintf2(("addRef %x %d", getWindowHandle(), getRefCount()+1));
     return GenericObject::addRef();
 }
 //******************************************************************************
 //******************************************************************************
 LONG  Win32BaseWindow::release(char *function, int line)
 {
-    dprintf2(("release %s %d %x %d", function, line, getWindowHandle(), getRefCount()-1));
+//    dprintf2(("release %s %d %x %d", function, line, getWindowHandle(), getRefCount()-1));
     return GenericObject::release();
 }
 #endif
