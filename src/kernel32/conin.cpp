@@ -1,4 +1,4 @@
-/* $Id: conin.cpp,v 1.10 2000-08-10 02:19:53 phaller Exp $ */
+/* $Id: conin.cpp,v 1.11 2000-08-10 16:54:23 phaller Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -165,6 +165,11 @@ BOOL HMDeviceConsoleInClass::ReadFile(PHMHANDLEDATA pHMHandleData,
             // filter special characters first
             switch (InputRecord.Event.KeyEvent.uChar.AsciiChar)
             {
+              case 0x00:
+                // Ascii values of 0x00 are sent e.g. for SHIFT-DOWN
+                // key events, etc.
+                break;
+              
               case 0x03: // ctrl-c is filtered!
                 // @@@PH we're supposed to call a ctrl-c break handler here!
                 break;
