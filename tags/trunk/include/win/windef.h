@@ -212,6 +212,7 @@ typedef void            VOID;
 typedef short           INT16;
 typedef unsigned short  UINT16;
 typedef int             INT;
+typedef INT *           INT_PTR;
 typedef unsigned int    UINT;
 typedef signed int      INT32;
 typedef UINT *          UINT_PTR;
