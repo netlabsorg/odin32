@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.11 1999-10-02 04:09:12 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.12 1999-10-04 09:56:00 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -125,7 +125,7 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle, ULO
           *OSFrameStyle |= FCF_HORZSCROLL;
   } else
   {
-    if(dwStyle & WS_CAPTION_W)
+    if((dwStyle & WS_CAPTION_W) == WS_CAPTION_W)
           *OSFrameStyle |= FCF_TITLEBAR;
     if(dwStyle & WS_DLGFRAME_W)
           *OSFrameStyle |= FCF_DLGBORDER;
@@ -827,6 +827,64 @@ void OSLibSetWindowStyle(HWND hwnd, ULONG dwStyle)
   WinSetWindowULong(hwnd, QWL_STYLE,
                     (WinQueryWindowULong(hwnd, QWL_STYLE) & ~0xffff0000) |
                     OSWinStyle);
+
+  if(OSFrameStyle != 0)  // maybe WinQueryClassName == WC_FRAME is better
+  {
+    if(OSFrameStyle & FCF_TITLEBAR)
+    {
+      WinSetParent(OSLibWinObjectWindowFromID(hwnd, FID_TITLEBAR), hwnd, FALSE);
+      WinSetParent(OSLibWinObjectWindowFromID(hwnd, FID_MENU), hwnd, FALSE);
+    }
+    else
+    {
+      WinSetParent(WinWindowFromID(hwnd, FID_TITLEBAR), HWND_OBJECT, FALSE);
+      WinSetParent(WinWindowFromID(hwnd, FID_MENU), HWND_OBJECT, FALSE);
+    }
+    if(OSFrameStyle & FCF_SYSMENU)
+      WinSetParent(OSLibWinObjectWindowFromID(hwnd, FID_SYSMENU), hwnd, FALSE);
+    else
+      WinSetParent(WinWindowFromID(hwnd, FID_SYSMENU), HWND_OBJECT, FALSE);
+
+    if(OSFrameStyle & FCF_MINBUTTON | OSFrameStyle & FCF_MAXBUTTON)
+      WinSetParent(OSLibWinObjectWindowFromID(hwnd, FID_MINMAX), hwnd, FALSE);
+    else
+      WinSetParent(WinWindowFromID(hwnd, FID_MINMAX), HWND_OBJECT, FALSE);
+
+    if(OSFrameStyle & FCF_VERTSCROLL)
+      WinSetParent(OSLibWinObjectWindowFromID(hwnd, FID_VERTSCROLL), hwnd, FALSE);
+    else
+      WinSetParent(WinWindowFromID(hwnd, FID_VERTSCROLL), HWND_OBJECT, FALSE);
+
+    if(OSFrameStyle & FCF_HORZSCROLL)
+      WinSetParent(OSLibWinObjectWindowFromID(hwnd, FID_HORZSCROLL), hwnd, FALSE);
+    else
+      WinSetParent(WinWindowFromID(hwnd, FID_HORZSCROLL), HWND_OBJECT, FALSE);
+
+    WinSendMsg(hwnd, WM_UPDATEFRAME,
+               MPFROMLONG(FCF_TITLEBAR | FCF_SYSMENU | FCF_MINMAX |
+                          FCF_MENU | FCF_VERTSCROLL | FCF_HORZSCROLL),
+               MPVOID);
+  }
+}
+//******************************************************************************
+//******************************************************************************
+HWND OSLibWinObjectWindowFromID(HWND hwndOwner, ULONG ID)
+{
+  HWND   hwndNext, hwndFound=0;
+  HENUM  henum;
+
+  henum = WinBeginEnumWindows(HWND_OBJECT);
+  while ((hwndNext = WinGetNextWindow(henum)) != 0)
+  {
+    if(WinQueryWindow(hwndNext, QW_OWNER) == hwndOwner &&
+       WinQueryWindowUShort(hwndNext, QWS_ID) == ID)
+    {
+       hwndFound = hwndNext;
+       break;
+    }
+  }
+  WinEndEnumWindows(henum);
+  return hwndFound;
 }
 //******************************************************************************
 //******************************************************************************

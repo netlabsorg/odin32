@@ -1,4 +1,40 @@
- /* $Id: changelog,v 1.264 1999-10-03 20:40:54 sandervl Exp $ */
+ /* $Id: changelog,v 1.265 1999-10-04 09:55:47 sandervl Exp $ */
+
+ 99-10-04: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+	- USER32: Fixes for window style update, mouse button messages,
+                  WS_CAPTION style and apps with a dialog as their main window.
+                  (set owner to desktop)
+	- KERNEL32: Extra checks for valid heap pointers
+
+ 99-10-04: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Deleted dialog.cpp
+	- DPLAY, MSACM32: Compilation fix (indirectly included win32type.h)
+	- KERNEL32: Fixed getVersionStruct for PE & LX images (didn't copy
+                    version data before)
+	            Fixed module name lookup for win32 images executed by the PE
+                    loader. (can't use OSLibQueryModuleHandle for those)
+
+ 99-10-04: Jens Wiessner <wiessnej@rfi.de>
+	- CRTDLL: Implemented functions + added stubs
+	- MSVCRT: More stubs + crtdll forwarders
+
+ 99-10-04: Yuri Dario <mc6530@mclink.it>
+	- ddeml.h: new macros
+	- mmsystem.h: changed sndPlaySound and mciCommand prototypes (as in MS sdk)
+	- shlobh.h: added ifdef for direct inclusion
+	- winbase.h: added UnlockResource macro
+	- windef.h: changed return type (maybe also other functions are wrong)
+	- windows.h: included ddeml.h
+	- windowsx.h: added macros
+	- wingdi.h: added win95 bitmap structures
+	- winuser.h: few macros and changed DLGTEMPLATE prototypes as in MS sdk
+	- crtdll.cpp: now includes libc/locale.h, so toolkit headers are included also for VA36
+	- shell32/makefile: added code for library export.
+	- shell32/new/makefile: added code for library export.
+	- dialog.cpp: DLGTEMPLATE changes
+	- windlg.cpp: DLGTEMPLATE changes.
+	- win32k/makefile: corrected paths
+	- win32k/include/pe2lx.h: this section should be included for VA36
 
  99-10-03: Daniela Engert <dani@ngrt.de>
 	- USER32: WM_MOUSEMOVE bugfix (removed check for captured mouse)

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 1999-08-21 12:29:31 sandervl Exp $
+# $Id: makefile,v 1.11 1999-10-04 09:55:59 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -9,6 +9,7 @@
 PDWIN32_INCLUDE = ..\..\include
 PDWIN32_LIB = ..\..\lib
 PDWIN32_BIN = ..\..\bin
+PDWIN32_TOOLS = ..\..\tools\bin
 
 
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
@@ -34,11 +35,12 @@ $(TARGET).dll: $(OBJS) $(TARGET).def
         $(CP) $@ $(PDWIN32_BIN)
 
 
-$(TARGET).lib: $(TARGET).dll
-        $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET).dll
+$(TARGET).lib: $(TARGET)exp.def
+        $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
         $(CP) $@ $(PDWIN32_LIB)
 
-
+$(TARGET)exp.def: $(TARGET).def
+        $(IMPDEF) $** $@
 
 shell32.obj: shell32.cpp shell32.h
 

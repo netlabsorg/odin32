@@ -1,4 +1,4 @@
-/* $Id: crtinc.h,v 1.3 1999-09-23 09:38:04 sandervl Exp $ */
+/* $Id: crtinc.h,v 1.4 1999-10-04 09:55:56 sandervl Exp $ */
 
 /* Definitions for the CRTDLL library (CRTDLL.DLL)
  *
@@ -48,23 +48,31 @@ static new_handler_type new_handler;
 
 CRTDLL_FILE * CDECL CRTDLL__fdopen(INT handle, LPCSTR mode);
 
-UINT CRTDLL_argc_dll;         /* CRTDLL.23 */
-LPSTR *CRTDLL_argv_dll;         /* CRTDLL.24 */
-LPSTR  CRTDLL_acmdln_dll;       /* CRTDLL.38 */
-UINT CRTDLL_basemajor_dll;    /* CRTDLL.42 */
-UINT CRTDLL_baseminor_dll;    /* CRTDLL.43 */
-UINT CRTDLL_baseversion_dll;  /* CRTDLL.44 */
-UINT CRTDLL_commode_dll;      /* CRTDLL.59 */
-LPSTR  CRTDLL_environ_dll;      /* CRTDLL.75 */
-UINT CRTDLL_fmode_dll;        /* CRTDLL.104 */
-UINT CRTDLL_osmajor_dll;      /* CRTDLL.241 */
-UINT CRTDLL_osminor_dll;      /* CRTDLL.242 */
-UINT CRTDLL_osmode_dll;       /* CRTDLL.243 */
-UINT CRTDLL_osver_dll;        /* CRTDLL.244 */
-UINT CRTDLL_osversion_dll;    /* CRTDLL.245 */
-UINT CRTDLL_winmajor_dll;     /* CRTDLL.329 */
-UINT CRTDLL_winminor_dll;     /* CRTDLL.330 */
-UINT CRTDLL_winver_dll;       /* CRTDLL.331 */
+
+
+UINT 	CRTDLL_argc_dll;         /* CRTDLL.23 */
+LPSTR 	*CRTDLL_argv_dll;        /* CRTDLL.24 */
+LPSTR  	CRTDLL_acmdln_dll;       /* CRTDLL.38 */
+UINT 	CRTDLL_basemajor_dll;    /* CRTDLL.42 */
+UINT 	CRTDLL_baseminor_dll;    /* CRTDLL.43 */
+UINT 	CRTDLL_baseversion_dll;  /* CRTDLL.44 */
+UINT 	CRTDLL_commode_dll;      /* CRTDLL.59 */
+UINT 	CRTDLL_daylight_dll;	 /* CRTDLL.70 */
+LPSTR	CRTDLL_environ_dll;      /* CRTDLL.75 */
+LPSTR	CRTDLL_fileinfo_dll;     /* CRTDLL.95 */
+UINT 	CRTDLL_fmode_dll;        /* CRTDLL.104 */
+UINT 	CRTDLL_osmajor_dll;      /* CRTDLL.239 */
+UINT 	CRTDLL_osminor_dll;      /* CRTDLL.240 */
+UINT 	CRTDLL_osmode_dll;       /* CRTDLL.241 */
+UINT 	CRTDLL_osver_dll;        /* CRTDLL.242 */
+UINT 	CRTDLL_osversion_dll;    /* CRTDLL.243 */
+UINT 	CRTDLL_sys_errlist;      /* CRTDLL.300 */
+UINT 	CRTDLL_sys_nerr_dll;     /* CRTDLL.301 */
+UINT 	CRTDLL_timezone_dll;	 /* CRTDLL.304 */
+LPSTR	CRTDLL_tzname;		 /* CRTDLL.307 */
+UINT 	CRTDLL_winmajor_dll;     /* CRTDLL.326 */
+UINT 	CRTDLL_winminor_dll;     /* CRTDLL.327 */
+UINT 	CRTDLL_winver_dll;       /* CRTDLL.328 */
 
 INT CDECL NTDLL__wcsicmp( LPCWSTR str1, LPCWSTR str2 );
 INT CDECL CRTDLL_vfprintf( CRTDLL_FILE *file, LPSTR format, va_list args );

@@ -1,4 +1,4 @@
-/* $Id: windowsx.h,v 1.5 1999-09-08 12:12:28 sandervl Exp $ */
+/* $Id: windowsx.h,v 1.6 1999-10-04 09:55:51 sandervl Exp $ */
 
 /* Copyright (C) 1999 Corel Corporation (Paul Quinn) */
 
@@ -29,6 +29,10 @@ extern "C" {
 #define GET_WM_CTLCOLOR_TYPE(wp, lp, msg)       (WORD)(msg - WM_CTLCOLORMSGBOX)
 #define GET_WM_CTLCOLOR_MSG(type)               (WORD)(WM_CTLCOLORMSGBOX+(type))
 #define GET_WM_CTLCOLOR_MPS(hdc, hwnd, type)    (WPARAM)(hdc), (LONG)(hwnd)
+#define GET_WM_MENUSELECT_CMD(wp, lp)            LOWORD(wp)
+#define GET_WM_MENUSELECT_FLAGS(wp, lp)         (UINT)(int)(short)HIWORD(wp)
+#define GET_WM_MENUSELECT_HMENU(wp, lp)         (HMENU)(lp)
+#define GET_WM_MENUSELECT_MPS(cmd, f, hmenu)    (WPARAM)MAKELONG(cmd, f), (LONG)(hmenu)
 
 #define GET_WM_VKEYTOITEM_CODE(wp, lp)          (int)(short)LOWORD(wp)
 #define GET_WM_VKEYTOITEM_ITEM(wp, lp)          HIWORD(wp)
@@ -943,6 +947,10 @@ extern "C" {
 #define ComboBox_GetLBTextLen(hwndCtl, index) \
 		((int)(DWORD)SendMessage((hwndCtl), CB_GETLBTEXTLEN, (WPARAM)(int)(index), 0L))
 
+#define ComboBox_GetLBText(hwndCtl, index, lpszBuffer)  ((int)(DWORD)SendMessage((hwndCtl), CB_GETLBTEXT, (WPARAM)(int)(index), (LPARAM)(LPCTSTR)(lpszBuffer)))
+#define ComboBox_GetItemData(hwndCtl, index)        ((LRESULT)(DWORD)SendMessage((hwndCtl), CB_GETITEMDATA, (WPARAM)(int)(index), 0L))
+#define ComboBox_SetItemData(hwndCtl, index, data)  ((int)(DWORD)SendMessage((hwndCtl), CB_SETITEMDATA, (WPARAM)(int)(index), (LPARAM)(data)))
+
 #define ComboBox_DeleteString(hwndCtl, index) \
 		((int)(DWORD)SendMessage((hwndCtl), CB_DELETESTRING, (WPARAM)(int)(index), 0L))
 
@@ -958,6 +966,10 @@ extern "C" {
 		((int)(DWORD)SendMessage((hwndCtl), CB_GETLBTEXTLEN, (WPARAM)(int)(index), 0L))
 #define ComboBox_GetLBText(hwndCtl, index, lpszBuffer) \
 		((int)(DWORD)SendMessage((hwndCtl), CB_GETLBTEXT, (WPARAM)(int)(index), (LPARAM)(LPCTSTR)(lpszBuffer)))
+
+#define ComboBox_ShowDropdown(hwndCtl, fShow)       ((BOOL)(DWORD)SendMessage((hwndCtl), CB_SHOWDROPDOWN, (WPARAM)(BOOL)(fShow), 0L))
+#define ComboBox_GetEditSel(hwndCtl)            ((DWORD)SendMessage((hwndCtl), CB_GETEDITSEL, 0L, 0L))
+#define ComboBox_SetEditSel(hwndCtl, ichStart, ichEnd) ((int)(DWORD)SendMessage((hwndCtl), CB_SETEDITSEL, 0L, MAKELPARAM((ichStart), (ichEnd))))
 
 #define ComboBox_GetDroppedState(hwndCtl)             \
            ((BOOL)(DWORD)SendMessage((hwndCtl), CB_GETDROPPEDSTATE, 0L, 0L))
@@ -1037,6 +1049,9 @@ extern "C" {
 #define Edit_GetText(hwndCtl, lpch, cchMax)     GetWindowText((hwndCtl), (lpch), (cchMax))
 #define Edit_GetTextLength(hwndCtl)             GetWindowTextLength(hwndCtl)
 #define Edit_SetText(hwndCtl, lpsz)             SetWindowText((hwndCtl), (lpsz))
+
+#define Edit_Enable(hwndCtl, fEnable)           EnableWindow((hwndCtl), (fEnable))
+#define Edit_SetReadOnly(hwndCtl, fReadOnly)    ((BOOL)(DWORD)SendMessage((hwndCtl), EM_SETREADONLY, (WPARAM)(BOOL)(fReadOnly), 0L))
 	
 #define Edit_GetModify(hwndCtl)            \
 	((BOOL)(DWORD)SendMessage((hwndCtl), EM_GETMODIFY, 0L, 0L))

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.21 1999-10-02 04:09:13 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.22 1999-10-04 09:56:02 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1151,7 +1151,7 @@ ULONG Win32BaseWindow::MsgButton(ULONG msg, ULONG ncx, ULONG ncy, ULONG clx, ULO
 
     //WM_NC*BUTTON* is posted when the cursor is in a non-client area of the window
     if(lastHitTestVal != HTCLIENT) {
-            SendInternalMessageA(win32ncmsg, lastHitTestVal, MAKELONG(ncx, ncy)); //TODO:
+            return SendInternalMessageA(win32ncmsg, lastHitTestVal, MAKELONG(ncx, ncy)); //TODO:
     }
     return  SendInternalMessageA(win32msg, 0, MAKELONG(clx, cly));
 }

@@ -1,4 +1,4 @@
-/* $Id: msacm32.cpp,v 1.2 1999-09-23 09:38:04 sandervl Exp $ */
+/* $Id: msacm32.cpp,v 1.3 1999-10-04 09:55:58 sandervl Exp $ */
 /*
  *      MSACM32 library
  *
@@ -6,7 +6,7 @@
  *	Copyright 1999	Jens Wiessner
  */
 
-#include <winbase.h>
+#include <os2win.h>
 #include <winerror.h>
 #include <windef.h>
 #include <winuser.h>

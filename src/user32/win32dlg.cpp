@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.5 1999-09-26 14:44:58 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.6 1999-10-04 09:56:01 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -18,6 +18,7 @@
 #include <misc.h>
 #include <win32dlg.h>
 #include "oslibmsg.h"
+#include "win32wdesktop.h"
 
 #define DEFAULT_DLGFONT "9.WarpSans"
 
@@ -228,10 +229,10 @@ INT Win32Dialog::doDialogBox()
 
     /* Owner must be a top-level window */
     if(getOwner() == NULL) {
-        dprintf(("Dialog box has no owner!!!"));
-        return -1;
+	 topOwner = windowDesktop;
     }
-    topOwner = getOwner()->getTopParent();
+    else topOwner = getOwner()->getTopParent();
+
     if(topOwner == NULL) {
         dprintf(("Dialog box has no top owner!!!"));
         return -1;

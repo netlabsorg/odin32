@@ -1,4 +1,4 @@
-/* $Id: dplay.cpp,v 1.1 1999-09-15 15:38:47 phaller Exp $ */
+/* $Id: dplay.cpp,v 1.2 1999-10-04 09:55:56 sandervl Exp $ */
 
 /* Direct Play 3 and Direct Play Lobby 2 Implementation
  *
@@ -7,6 +7,7 @@
  */
 
 #include <odin.h>
+#include <os2win.h>
 
 #define ICOM_CINTERFACE 1
 #define CINTERFACE

@@ -1,4 +1,4 @@
-/* $Id: windlg.cpp,v 1.2 1999-09-26 14:44:58 sandervl Exp $ */
+/* $Id: windlg.cpp,v 1.3 1999-10-04 09:56:03 sandervl Exp $ */
 /*
  * Win32 dialog apis for OS/2
  *
@@ -38,7 +38,7 @@ HWND WIN32API CreateDialogParamA(HINSTANCE hInst, LPCSTR lpszTemplate,
     if (!hrsrc)
         return 0;
 
-    return CreateDialogIndirectParamA(hInst, (DLGTEMPLATE*)LoadResource(hInst, hrsrc),
+    return CreateDialogIndirectParamA(hInst, (LPCDLGTEMPLATEA)LoadResource(hInst, hrsrc),
                                       hwndOwner, dlgproc, lParamInit);
 }
 //******************************************************************************
@@ -52,13 +52,13 @@ HWND WIN32API CreateDialogParamW(HINSTANCE hInst, LPCWSTR lpszTemplate,
     if (!hrsrc)
         return 0;
 
-    return CreateDialogIndirectParamW(hInst, (DLGTEMPLATE*)LoadResource(hInst, hrsrc),
+    return CreateDialogIndirectParamW(hInst, (LPCDLGTEMPLATEW)LoadResource(hInst, hrsrc),
                                       hwndOwner, dlgproc, lParamInit);
 }
 //******************************************************************************
 //******************************************************************************
 HWND WIN32API CreateDialogIndirectParamA(HINSTANCE hInst,
-                         DLGTEMPLATE *dlgtemplate,
+                         LPCDLGTEMPLATEA dlgtemplate,
                          HWND hwndParent, DLGPROC dlgproc,
                          LPARAM lParamInit)
 {
@@ -86,7 +86,7 @@ HWND WIN32API CreateDialogIndirectParamA(HINSTANCE hInst,
 //******************************************************************************
 //******************************************************************************
 HWND WIN32API CreateDialogIndirectParamW(HINSTANCE hInst,
-                         DLGTEMPLATE *dlgtemplate,
+                         LPCDLGTEMPLATEW dlgtemplate,
                          HWND hwndParent, DLGPROC dlgproc,
                          LPARAM lParamInit)
 {
@@ -114,7 +114,7 @@ HWND WIN32API CreateDialogIndirectParamW(HINSTANCE hInst,
 //******************************************************************************
 //******************************************************************************
 INT  WIN32API DialogBoxIndirectParamA(HINSTANCE hInst,
-                      DLGTEMPLATE *dlgtemplate,
+                      LPCDLGTEMPLATEA dlgtemplate,
                       HWND hwndParent, DLGPROC dlgproc,
                       LPARAM lParamInit)
 {
@@ -135,7 +135,7 @@ INT  WIN32API DialogBoxIndirectParamA(HINSTANCE hInst,
 }
 //******************************************************************************
 //******************************************************************************
-INT  WIN32API DialogBoxIndirectParamW(HINSTANCE hInst, DLGTEMPLATE *dlgtemplate,
+INT  WIN32API DialogBoxIndirectParamW(HINSTANCE hInst, LPCDLGTEMPLATEW dlgtemplate,
                                       HWND hwndParent, DLGPROC dlgproc,
                                       LPARAM lParamInit)
 {

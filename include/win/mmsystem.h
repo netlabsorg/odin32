@@ -1,4 +1,4 @@
-/* $Id: mmsystem.h,v 1.1 1999-05-24 20:19:14 ktk Exp $ */
+/* $Id: mmsystem.h,v 1.2 1999-10-04 09:55:49 sandervl Exp $ */
 
 /* 
  * MMSYSTEM - Multimedia Wine Extension ... :-)
@@ -189,7 +189,9 @@ typedef void (* CALLBACK LPDRVCALLBACK) (HDRVR h, UINT uMessage, DWORD dwUser, D
 
 UINT16		WINAPI	mmsystemGetVersion16(void);
 UINT 		WINAPI 	mmsystemGetVersion(void);
-BOOL16 		WINAPI 	sndPlaySound(LPCSTR lpszSoundName, UINT16 uFlags);
+BOOL            WINAPI  sndPlaySoundA(LPCSTR pszSound, UINT fuSound);
+BOOL            WINAPI  sndPlaySoundW(LPCWSTR pszSound, UINT fuSound);
+#define                 sndPlaySound WINELIB_NAME_AW(sndPlaySound)
 BOOL 		WINAPI 	PlaySoundA(LPCSTR pszSound, HMODULE hmod, DWORD fdwSound);
 BOOL 		WINAPI 	PlaySoundW(LPCWSTR pszSound, HMODULE hmod, DWORD fdwSound);
 #define 		PlaySound WINELIB_NAME_AW(PlaySound)
@@ -1649,8 +1651,8 @@ UINT		WINAPI	mmioCreateChunk(HMMIO,MMCKINFO*,UINT);
 typedef UINT16 (* CALLBACK YIELDPROC)(UINT16,DWORD);
 
 DWORD		WINAPI	mciSendCommand16(UINT16,UINT16,DWORD,DWORD);
-DWORD		WINAPI	mciSendCommandA(UINT,UINT,DWORD,DWORD);
-DWORD		WINAPI	mciSendCommandW(UINT,UINT,DWORD,DWORD);
+MCIERROR	WINAPI	mciSendCommandA(MCIDEVICEID,UINT,DWORD,DWORD);
+MCIERROR	WINAPI	mciSendCommandW(MCIDEVICEID,UINT,DWORD,DWORD);
 #define 		mciSendCommand WINELIB_NAME_AW(mciSendCommand)
 
 DWORD		WINAPI	mciSendString16(LPCSTR,LPSTR,UINT16,HWND16);
