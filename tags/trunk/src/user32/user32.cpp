@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.68 2000-02-03 23:29:53 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.69 2000-02-06 17:39:33 cbratschi Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -1087,27 +1087,103 @@ DWORD WIN32API WaitForInputIdle(HANDLE hProcess, DWORD dwTimeOut)
 
 BOOL WIN32API WinHelpA( HWND hwnd, LPCSTR lpszHelp, UINT uCommand, DWORD  dwData)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  WinHelp not implemented %s\n", lpszHelp);
-#endif
-//    hwnd = Win32Window::Win32ToOS2Handle(hwnd);
-//    return O32_WinHelp(arg1, arg2, arg3, arg4);
+  static WORD WM_WINHELP = 0;
+  HWND hDest;
+  LPWINHELP lpwh;
+  HGLOBAL hwh;
+  HINSTANCE winhelp;
+  int size,dsize,nlen;
 
-    return(TRUE);
+  dprintf(("USER32:  WinHelpA %s\n", lpszHelp));
+
+  if(!WM_WINHELP)
+  {
+    WM_WINHELP=RegisterWindowMessageA("WM_WINHELP");
+    if(!WM_WINHELP)
+      return FALSE;
+  }
+
+  hDest = FindWindowA( "MS_WINHELP", NULL );
+  if(!hDest)
+  {
+    if(uCommand == HELP_QUIT)
+      return TRUE;
+    else
+      winhelp = WinExec ( "winhlp32.exe -x", SW_SHOWNORMAL );
+    if ( winhelp <= 32 ) return FALSE;
+    if ( ! ( hDest = FindWindowA ( "MS_WINHELP", NULL ) )) return FALSE;
+  }
+
+  switch(uCommand)
+  {
+    case HELP_CONTEXT:
+    case HELP_SETCONTENTS:
+    case HELP_CONTENTS:
+    case HELP_CONTEXTPOPUP:
+    case HELP_FORCEFILE:
+    case HELP_HELPONHELP:
+    case HELP_FINDER:
+    case HELP_QUIT:
+      dsize=0;
+      break;
+
+    case HELP_KEY:
+    case HELP_PARTIALKEY:
+    case HELP_COMMAND:
+      dsize = strlen( (LPSTR)dwData )+1;
+      break;
+
+    case HELP_MULTIKEY:
+      dsize = ((LPMULTIKEYHELP)dwData)->mkSize;
+      break;
+
+    case HELP_SETWINPOS:
+      dsize = ((LPHELPWININFO)dwData)->wStructSize;
+      break;
+
+    default:
+      //WARN("Unknown help command %d\n",wCommand);
+      return FALSE;
+  }
+  if(lpszHelp)
+    nlen = strlen(lpszHelp)+1;
+  else
+    nlen = 0;
+  size = sizeof(WINHELP) + nlen + dsize;
+  hwh = GlobalAlloc(0,size);
+  lpwh = (WINHELP*)GlobalLock(hwh);
+  lpwh->size = size;
+  lpwh->command = uCommand;
+  lpwh->data = dwData;
+  if(nlen)
+  {
+    strcpy(((char*)lpwh) + sizeof(WINHELP),lpszHelp);
+    lpwh->ofsFilename = sizeof(WINHELP);
+  } else
+      lpwh->ofsFilename = 0;
+  if(dsize)
+  {
+    memcpy(((char*)lpwh)+sizeof(WINHELP)+nlen,(LPSTR)dwData,dsize);
+    lpwh->ofsData = sizeof(WINHELP)+nlen;
+  } else
+      lpwh->ofsData = 0;
+  GlobalUnlock(hwh);
+
+  return SendMessageA(hDest,WM_WINHELP,hwnd,hwh);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API WinHelpW( HWND arg1, LPCWSTR arg2, UINT arg3, DWORD  arg4)
+BOOL WIN32API WinHelpW( HWND hwnd, LPCWSTR lpszHelp, UINT uCommand, DWORD  dwData)
 {
- char *astring = UnicodeToAsciiString((LPWSTR)arg2);
- BOOL  rc;
+  char *astring = UnicodeToAsciiString((LPWSTR)lpszHelp);
+  BOOL  rc;
 
-#ifdef DEBUG
-    WriteLog("USER32:  WinHelpW\n");
-#endif
-    rc = WinHelpA(arg1, astring, arg3, arg4);
-    FreeAsciiString(astring);
-    return rc;
+  dprintf(("USER32:  WinHelpW\n"));
+
+  rc = WinHelpA(hwnd,astring,uCommand,dwData);
+  FreeAsciiString(astring);
+
+  return rc;
 }
 
 /* Keyboard and Input Functions */
@@ -1593,28 +1669,6 @@ WORD WIN32API VkKeyScanExA(CHAR uChar,
   return (uChar);
 }
 
-/* Button Functions */
-
-BOOL WIN32API CheckRadioButton( HWND hDlg, UINT nIDFirstButton, UINT nIDLastButton, UINT  nIDCheckButton)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  CheckRadioButton\n");
-#endif
-    //CB: check radio buttons in interval
-    if (nIDFirstButton > nIDLastButton)
-    {
-      SetLastError(ERROR_INVALID_PARAMETER);
-      return (FALSE);
-    }
-
-    for (UINT x = nIDFirstButton;x <= nIDLastButton;x++)
-    {
-     SendDlgItemMessageA(hDlg,x,BM_SETCHECK,(x == nIDCheckButton) ? BST_CHECKED : BST_UNCHECKED,0);
-    }
-
-    return (TRUE);
-}
-
 /* Window Functions */
 
 /*****************************************************************************
@@ -1641,8 +1695,6 @@ BOOL WIN32API AnyPopup(VOID)
   return (FALSE);
 }
 
-//******************************************************************************
-//******************************************************************************
 /*****************************************************************************
  * Name      : BOOL WIN32API PaintDesktop
  * Purpose   : The PaintDesktop function fills the clipping region in the
@@ -1702,13 +1754,8 @@ int WIN32API GetKeyboardType( int nTypeFlag)
     return O32_GetKeyboardType(nTypeFlag);
 }
 
-/* Message and Message Queue Functions */
-
-
-/* Device Context Functions */
-
-
 /* Window Station and Desktop Functions */
+
 /*****************************************************************************
  * Name      : HDESK WIN32API GetThreadDesktop
  * Purpose   : The GetThreadDesktop function returns a handle to the desktop
@@ -2499,10 +2546,6 @@ VOID WIN32API SetDebugErrorLevel(DWORD dwLevel)
   dprintf(("USER32:SetDebugErrorLevel (%08x) not implemented.\n",
          dwLevel));
 }
-
-/* Hook Functions */
-
-/* CB: move to MDI */
 
 /* Drag'n'drop */
 
