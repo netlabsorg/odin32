@@ -1,4 +1,4 @@
-/* $Id: glut_event.c,v 1.2 2000-02-09 08:46:09 jeroen Exp $ */
+/* $Id: glut_event.c,v 1.3 2000-03-04 19:10:14 jeroen Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1994, 1995, 1996, 1997, 1998. */
 
 /* This program is freely distributable without licensing fees
@@ -99,13 +99,13 @@ Atom __glutMotifHints = None;
 unsigned int __glutModifierMask = (unsigned int) ~0;
 int __glutWindowDamaged = 0;
 
-void APIENTRY
+void GLAPIENTRY
 glutIdleFunc(GLUTidleCB idleFunc)
 {
   __glutIdleFunc = idleFunc;
 }
 
-void APIENTRY
+void GLAPIENTRY
 glutTimerFunc(unsigned int interval, GLUTtimerCB timerFunc, int value)
 {
   GLUTtimer *timer, *other;
@@ -203,7 +203,7 @@ __glutPostRedisplay(GLUTwindow * window, int layerMask)
 }
 
 /* CENTRY */
-void APIENTRY
+void GLAPIENTRY
 glutPostRedisplay(void)
 {
   __glutPostRedisplay(__glutCurrentWindow, GLUT_REDISPLAY_WORK);
@@ -213,7 +213,7 @@ glutPostRedisplay(void)
    glutSetWindow call (entailing an expensive OpenGL context switch),
    particularly useful when multiple windows need redisplays posted at
    the same times.  See also glutPostWindowOverlayRedisplay. */
-void APIENTRY
+void GLAPIENTRY
 glutPostWindowRedisplay(int win)
 {
   __glutPostRedisplay(__glutWindowList[win - 1], GLUT_REDISPLAY_WORK);
@@ -1204,27 +1204,12 @@ processWindowWorkList(GLUTwindow * window)
 
       __glutSetWindow(window);
 
-      window->reshape(window->width, window->height);
+      /* JvdH: DO NOT REMPVE THE EXPLICIT TYPECAST TO THIS GLAPIENTRY   */
+      /* FUNCTION, OR THE COMPILER WILL NUKE THE STACK WHEN OPTIMIZING! */
+      /* VACPP obviously has a bug, and will adjust the ESP after the   */
+      /* call, but the callee has already done so!!!!                   */
+      ((GLUTreshapeCB)(window->reshape))(window->width, window->height);
       window->forceReshape = False;
-
-#ifdef __WIN32OS2__
-      /* JvdH - 03/02/2000 */
-      /* FIXME: This is a rather stupid hack... */
-      /* The client area appears transparent... */
-      /* By twice swapping the ZORDER the client area is repainted... */
-      /* I'd like a better fix, but for now this seems to work */
-      SetWindowPos(window->win,
-                   HWND_BOTTOM,
-                   0,0,
-                   0,0,
-                   SWP_NOMOVE | SWP_NOSIZE);
-
-      SetWindowPos(window->win,
-                   HWND_TOP,
-                   0,0,
-                   0,0,
-                   SWP_NOMOVE | SWP_NOSIZE);
-#endif
 
       /* Setting the redisplay bit on the first reshape is
          necessary to make the "Mesa glXSwapBuffers to repair
@@ -1233,8 +1218,8 @@ processWindowWorkList(GLUTwindow * window)
          buffer render from which to blit from when damage
          happens to the window. */
       workMask |= GLUT_REDISPLAY_WORK;
-    }
 
+    }
 
     /* The code below is more involved than otherwise necessary
        because it is paranoid about the overlay or entire window
@@ -1259,6 +1244,7 @@ processWindowWorkList(GLUTwindow * window)
       if (workMask & (GLUT_REDISPLAY_WORK | GLUT_REPAIR_WORK)) {
         if (__glutMesaSwapHackSupport) {
           if (window->usedSwapBuffers) {
+
             if ((workMask & (GLUT_REPAIR_WORK | GLUT_REDISPLAY_WORK)) == GLUT_REPAIR_WORK) {
               SWAP_BUFFERS_WINDOW(window);
               goto skippedDisplayCallback1;
@@ -1281,6 +1267,7 @@ processWindowWorkList(GLUTwindow * window)
       skippedDisplayCallback1:;
       }
       if (workMask & (GLUT_OVERLAY_REDISPLAY_WORK | GLUT_OVERLAY_REPAIR_WORK)) {
+
         window = __glutWindowList[num];
         if (window && window->overlay &&
           window->overlay->win == xid && window->overlay->display) {
@@ -1305,12 +1292,14 @@ processWindowWorkList(GLUTwindow * window)
       if (__glutMesaSwapHackSupport) {
         if (!window->overlay && window->usedSwapBuffers) {
           if ((workMask & (GLUT_REPAIR_WORK | GLUT_REDISPLAY_WORK)) == GLUT_REPAIR_WORK) {
+
             SWAP_BUFFERS_WINDOW(window);
             goto skippedDisplayCallback2;
           }
         }
       }
       /* Render to normal plane (and possibly overlay). */
+
       __glutWindowDamaged = (workMask & (GLUT_OVERLAY_REPAIR_WORK | GLUT_REPAIR_WORK));
       __glutSetWindow(window);
       window->usedSwapBuffers = 0;
@@ -1326,6 +1315,7 @@ processWindowWorkList(GLUTwindow * window)
   workMask |= window->workMask;
 
   if (workMask & GLUT_FINISH_WORK) {
+
     /* Finish work makes sure a glFinish gets done to indirect
        rendering contexts.  Indirect contexts tend to have much
        longer latency because lots of OpenGL extension requests
@@ -1341,6 +1331,9 @@ processWindowWorkList(GLUTwindow * window)
   }
   /* Strip out dummy, finish, and debug work bits. */
   window->workMask &= ~(GLUT_DUMMY_WORK | GLUT_FINISH_WORK | GLUT_DEBUG_WORK);
+
+    WriteLog("GLUT32: processWindowWorkList -> will now return!\n");
+
   if (window->workMask) {
     /* Leave on work list. */
     return window;
@@ -1351,9 +1344,10 @@ processWindowWorkList(GLUTwindow * window)
 }
 
 /* CENTRY */
-void APIENTRY
+void GLAPIENTRY
 glutMainLoop(void)
 {
+  WriteLog("GLUT32 MainLoop entered\n");
 #if !defined(_WIN32) && !defined(__WIN32OS2__)
   if (!__glutDisplay)
     __glutFatalUsage("main loop entered with out proper initialization.");
@@ -1362,6 +1356,7 @@ glutMainLoop(void)
     __glutFatalUsage(
       "main loop entered with no windows created.");
   for (;;) {
+    WriteLog("GLUT32 --> LOOP in!\n");
     if (__glutWindowWorkList) {
       GLUTwindow *remainder, *work;
 
@@ -1372,7 +1367,7 @@ glutMainLoop(void)
         if (remainder) {
           *beforeEnd = __glutWindowWorkList;
           __glutWindowWorkList = remainder;
-        }
+       }
       }
     }
     if (__glutIdleFunc || __glutWindowWorkList) {
@@ -1381,9 +1376,13 @@ glutMainLoop(void)
       if (__glutTimerList) {
         waitForSomething();
       } else {
+    WriteLog("Calling processEventsAndTimeouts from #1403\n");
         processEventsAndTimeouts();
+    WriteLog("processEventsAndTimeouts from #1403 returned!\n");
       }
     }
   }
+
+    WriteLog("MainLoop ended... ???\n");
 }
 /* ENDCENTRY */

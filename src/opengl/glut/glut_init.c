@@ -1,4 +1,4 @@
-/* $Id: glut_init.c,v 1.2 2000-02-09 08:46:13 jeroen Exp $ */
+/* $Id: glut_init.c,v 1.3 2000-03-04 19:10:15 jeroen Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1994, 1997. */
 
 /* This program is freely distributable without licensing fees
@@ -15,7 +15,9 @@
 #endif
 
 #if defined(__WIN32OS2__)
+#include <windows.h>
 #include "winconst.h"
+#include "GL\gl.h"
 #undef WH_NB_HOOKS /* Get rid of copiler warning... */
 #endif
 
@@ -198,6 +200,8 @@ removeArgs(int *argcp, char **argv, int numToRemove)
 void APIENTRY
 glutInit(int *argcp, char **argv)
 {
+  dprintf(("GLUT32: glutInit()\n"));
+
   char *display = NULL;
   char *str, *geometry = NULL;
   struct timeval unused;
@@ -372,6 +376,7 @@ glutInitWindowSize(int width, int height)
 void APIENTRY
 glutInitDisplayMode(unsigned int mask)
 {
+  dprintf(("GLUT32: glutInitDisplayMode()\n"));
   __glutDisplayMode = mask;
 }
 

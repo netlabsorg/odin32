@@ -1,4 +1,4 @@
-/* $Id: win32_glx.c,v 1.2 2000-02-09 08:46:22 jeroen Exp $ */
+/* $Id: win32_glx.c,v 1.3 2000-03-04 19:10:16 jeroen Exp $ */
 /* Copyright (c) Nate Robins, 1997. */
 
 /* This program is freely distributable without licensing fees
@@ -8,7 +8,7 @@
 #include <stdio.h>
 #if defined(__WIN32OS2__)
 #include "os2_glx.h"
-#include "wgl.h"
+//#include "wgl.h"
 #include "pfddefs.h"
 #include <memory.h>
 #else

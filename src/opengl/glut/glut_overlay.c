@@ -1,4 +1,4 @@
-/* $Id: glut_overlay.c,v 1.2 2000-02-09 08:46:15 jeroen Exp $ */
+/* $Id: glut_overlay.c,v 1.3 2000-03-04 19:10:15 jeroen Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1996, 1997.  */
 
 /* This program is freely distributable without licensing fees
@@ -25,9 +25,9 @@
 #include "glutint.h"
 #include "layerutil.h"
 
-#if defined(__WIN32OS2__)
-#include "wgl.h"
-#endif
+//#if defined(__WIN32OS2__)
+//#include "wgl.h"
+//#endif
 
 static Criterion requiredOverlayCriteria[] =
 {

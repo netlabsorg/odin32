@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.7 2000-02-11 13:29:29 bird Exp $ */
+/* $Id: initterm.cpp,v 1.8 2000-03-04 19:10:16 jeroen Exp $ */
 
 /*
  * DLL entry point
@@ -30,11 +30,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <odin.h>
+#include <misc.h>
 #include <win32type.h>
 #include <winconst.h>
 #include <odinlx.h>
-#include <misc.h>                      /* PLF Wed  98-03-18 23:18:15       */
 
 
 extern "C" {
@@ -45,23 +44,23 @@ void CDECL _ctordtorTerm( void );
  extern DWORD _Resource_PEResTab;
 }
 
-BOOL WINAPI Glut32LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID ImpLoad);
+void CDECL Glut32Terminate(void);
 
-//******************************************************************************
-//******************************************************************************
+//* ******************************************************************************/
+//* ******************************************************************************/
 BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 {
    switch (fdwReason)
    {
-   case DLL_PROCESS_ATTACH:
-   case DLL_THREAD_ATTACH:
-   case DLL_THREAD_DETACH:
-	return Glut32LibMain(hinstDLL, fdwReason, fImpLoad);
+     case DLL_PROCESS_ATTACH:
+     case DLL_THREAD_ATTACH:
+     case DLL_THREAD_DETACH:
+       return TRUE;
 
-   case DLL_PROCESS_DETACH:
-   	Glut32LibMain(hinstDLL, fdwReason, fImpLoad);
-   	_ctordtorTerm();
-	return TRUE;
+     case DLL_PROCESS_DETACH:
+       Glut32Terminate();
+       _ctordtorTerm();
+      return TRUE;
    }
    return FALSE;
 }
@@ -75,12 +74,9 @@ BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 /* linkage convention MUST be used because the operating system loader is   */
 /* calling this function.                                                   */
 /****************************************************************************/
-unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
+unsigned long _System _DLL_InitTerm(unsigned long hModule, unsigned long
                                    ulFlag)
 {
-   size_t i;
-   APIRET rc;
-
    /*-------------------------------------------------------------------------*/
    /* If ulFlag is zero then the DLL is being loaded so initialization should */
    /* be performed.  If ulFlag is 1 then the DLL is being freed so            */
@@ -91,8 +87,6 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
       case 0 :
          _ctordtorInit();
 
-         CheckVersionFromHMOD(PE2LX_VERSION, hModule);/* PLF Wed  98-03-18 05:28:48*/
-
          /*******************************************************************/
          /* A DosExitList routine must be used to clean up if runtime calls */
          /* are required and the runtime is dynamically linked.             */
@@ -100,6 +94,8 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
          if(RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab) == FALSE)
                 return 0UL;
+
+         CheckVersionFromHMOD(PE2LX_VERSION, hModule);/* PLF Wed  98-03-18 05:28:48*/
 
          break;
 
@@ -116,5 +112,5 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
    /***********************************************************/
    return 1UL;
 }
-//******************************************************************************
-//******************************************************************************
+//* ******************************************************************************/
+//* ******************************************************************************/
