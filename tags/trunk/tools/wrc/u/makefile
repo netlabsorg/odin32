@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2002-02-08 00:43:46 bird Exp $
+# $Id: makefile,v 1.4 2003-01-23 13:50:52 bird Exp $
 
 
 #
@@ -12,7 +12,7 @@ ODIN32_BIN     = $(ODIN32_TOOLS)
 #
 LIBTARGET = 1
 EXETARGET = 1
-
+STATIC_CRT = 1
 
 #
 # include common definitions
