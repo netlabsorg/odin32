@@ -1,4 +1,4 @@
-/* $Id: ImpDef.cpp,v 1.5 2000-10-04 15:12:23 bird Exp $ */
+/* $Id: ImpDef.cpp,v 1.6 2000-12-17 03:26:41 bird Exp $ */
 /*
  * ImpDef - Create export file which use internal names and ordinals.
  *
@@ -235,6 +235,7 @@ static long processFile(const char *pszInput, const char *pszOutput, const POPTI
 
                         Output.printf("    %-*s  @%ld\n", 40, pszName, export.ulOrdinal);
                     } while (DefFile.findNextExport(&export));
+                Output.setSize();
                 }
             }
             catch (int errorcode)
