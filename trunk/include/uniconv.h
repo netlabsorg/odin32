@@ -1,4 +1,4 @@
-/* $Id: uniconv.h,v 1.4 1999-07-22 08:04:18 sandervl Exp $ */
+/* $Id: uniconv.h,v 1.5 1999-07-22 15:41:33 sandervl Exp $ */
 /*
  * OS/2 Unicode API definitions
  *
@@ -172,6 +172,8 @@ typedef int LocaleItem;
 // Names like regedit2 uses:
 #define XLOCALETOKEN      50
 #define XWINLOCALE        51
+#define ICURRENCY         75
+#define INEGCURR          83
 #define SINTLSYMBOL       87
 #define SABBREVLANGNAME   88 
 #define SLANGUAGE        104
