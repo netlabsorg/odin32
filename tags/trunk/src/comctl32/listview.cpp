@@ -1,4 +1,4 @@
-/*$Id: listview.cpp,v 1.7 2000-03-24 17:14:02 cbratschi Exp $*/
+/*$Id: listview.cpp,v 1.8 2000-03-26 16:32:33 cbratschi Exp $*/
 /*
  * Listview control
  *
@@ -159,7 +159,7 @@ static VOID LISTVIEW_Refresh(HWND hwnd)
 {
   LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO*)LISTVIEW_GetInfoPtr(hwnd);
 
-  if (infoPtr->refreshFlags & (RF_REFRESH | RF_NOREDRAW)) return;
+  if (infoPtr->internalFlags & IF_NOREDRAW) return;
 
   if ((infoPtr->uView == LVS_REPORT) && !(infoPtr->dwStyle & LVS_NOCOLUMNHEADER))
   {
@@ -173,40 +173,11 @@ static VOID LISTVIEW_Refresh(HWND hwnd)
   } else InvalidateRect(hwnd,NULL,TRUE);
 }
 
-static VOID LISTVIEW_QueueRefresh(HWND hwnd)
-{
-  LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO*)LISTVIEW_GetInfoPtr(hwnd);
-
-  if (infoPtr->refreshFlags & RF_NOREDRAW) return;
-
-  if (infoPtr->refreshFlags & RF_REFRESH)
-    KillTimer (hwnd,LV_REFRESH_TIMER);
-  infoPtr->refreshFlags |= RF_REFRESH;
-  SetTimer(hwnd,LV_REFRESH_TIMER,LV_REFRESH_DELAY,0);
-}
-
 static LRESULT LISTVIEW_Timer(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO*)LISTVIEW_GetInfoPtr(hwnd);
 
-  switch (wParam)
-  {
-    case LV_REFRESH_TIMER:
-      KillTimer(hwnd,LV_REFRESH_TIMER);
-      if (infoPtr->refreshFlags & RF_UPDATESCROLL)
-      {
-        LISTVIEW_UpdateScroll(hwnd);
-        infoPtr->refreshFlags &= ~RF_UPDATESCROLL;
-      }
-      if (infoPtr->refreshFlags & RF_REFRESH)
-      {
-        infoPtr->refreshFlags &= ~RF_REFRESH;
-        LISTVIEW_Refresh(hwnd);
-      }
-      return 0;
-  }
-
-  return 1;
+  return DefWindowProcA(hwnd,WM_TIMER,wParam,lParam);
 }
 
 static VOID LISTVIEW_RefreshItem(HWND hwnd,INT nItem)
@@ -214,7 +185,7 @@ static VOID LISTVIEW_RefreshItem(HWND hwnd,INT nItem)
   LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO*)LISTVIEW_GetInfoPtr(hwnd);
   RECT rect;
 
-  if (infoPtr->refreshFlags & (RF_REFRESH | RF_NOREDRAW)) return;
+  if (infoPtr->internalFlags & IF_NOREDRAW) return;
   LISTVIEW_GetItemRect(hwnd,nItem,&rect,LVIR_SELECTBOUNDS);
 
   if ((infoPtr->uView == LVS_REPORT) && !(infoPtr->dwStyle & LVS_NOCOLUMNHEADER))
@@ -237,7 +208,7 @@ static VOID LISTVIEW_RefreshSubItem(HWND hwnd,INT nItem,INT nSubItem)
   RECT rect,header;
   INT xOffset = infoPtr->lefttop.x*infoPtr->scrollStep.x;
 
-  if (infoPtr->refreshFlags & (RF_REFRESH | RF_NOREDRAW)) return;
+  if (infoPtr->internalFlags & IF_NOREDRAW) return;
   LISTVIEW_GetItemRect(hwnd,nItem,&rect,LVIR_SELECTBOUNDS);
 
   //get header rect
@@ -266,7 +237,7 @@ static VOID LISTVIEW_ScrollWindow(HWND hwnd,INT xScroll,INT yScroll)
 {
   LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO*)LISTVIEW_GetInfoPtr(hwnd);
 
-  if (infoPtr->refreshFlags & (RF_REFRESH | RF_NOREDRAW)) return;
+  if (infoPtr->internalFlags & IF_NOREDRAW) return;
 
   if ((infoPtr->uView == LVS_REPORT) && !(infoPtr->dwStyle & LVS_NOCOLUMNHEADER))
   {
@@ -2750,8 +2721,8 @@ static LRESULT LISTVIEW_DeleteItem(HWND hwnd, INT nItem)
           infoPtr->nFocusedItem = -1;
 
     /* refresh client area */
-    infoPtr->refreshFlags |= RF_UPDATESCROLL;
-    LISTVIEW_QueueRefresh(hwnd);
+    LISTVIEW_UpdateScroll(hwnd);
+    LISTVIEW_Refresh(hwnd);
   }
 
   return bResult;
@@ -5134,8 +5105,8 @@ static LRESULT LISTVIEW_InsertColumn(HWND hwnd,INT nColumn,LPLVCOLUMNW lpColumn,
     /* Need to reset the item width when inserting a new column */
     infoPtr->nItemWidth = LISTVIEW_GetItemWidth(hwnd);
 
-    infoPtr->refreshFlags |= RF_UPDATESCROLL;
-    LISTVIEW_QueueRefresh(hwnd);
+    LISTVIEW_UpdateScroll(hwnd);
+    LISTVIEW_Refresh(hwnd);
   }
 
   return nNewColumn;
@@ -5270,8 +5241,8 @@ static LRESULT LISTVIEW_InsertItem(HWND hwnd, LPLVITEMW lpLVItem,BOOL unicode)
                 }
 
                 /* refresh client area */
-                infoPtr->refreshFlags |= RF_UPDATESCROLL;
-                LISTVIEW_QueueRefresh(hwnd);
+                LISTVIEW_UpdateScroll(hwnd);
+                LISTVIEW_Refresh(hwnd);
               }
             }
           }
@@ -5550,7 +5521,7 @@ static LRESULT LISTVIEW_SetColumnWidth(HWND hwnd, INT iCol, INT cx)
 
     infoPtr->nItemWidth = LISTVIEW_GetItemWidth(hwnd);
 
-    LISTVIEW_QueueRefresh(hwnd); // force redraw of the listview
+    LISTVIEW_Refresh(hwnd); // force redraw of the listview
 
     return lret;
 }
@@ -5670,7 +5641,7 @@ static LRESULT LISTVIEW_SetItem(HWND hwnd,LPLVITEMW lpLVItem,BOOL unicode)
   BOOL bResult = FALSE;
   HDPA hdpaSubItems;
   NMLISTVIEW nmlv;
-
+//CB: LVS_REPORT (and other) and new text: invalidate if item rect > nItemWidth
   if (lpLVItem != NULL)
   {
     if ((lpLVItem->iItem >= 0) && (lpLVItem->iItem < GETITEMCOUNT(infoPtr)))
@@ -6166,7 +6137,7 @@ static LRESULT LISTVIEW_Update(HWND hwnd, INT nItem)
  */
 static LRESULT LISTVIEW_Create(HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
-  LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO *)LISTVIEW_GetInfoPtr(hwnd);
+  LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO*)LISTVIEW_GetInfoPtr(hwnd);
   LPCREATESTRUCTA lpcs = (LPCREATESTRUCTA)lParam;
   UINT uView = lpcs->style & LVS_TYPEMASK;
   LOGFONTA logFont;
@@ -6626,7 +6597,7 @@ static INT LISTVIEW_ProcessLetterKeys( HWND hwnd, WPARAM charCode, LPARAM keyDat
     if ( !hwnd || !charCode || !keyData )
         return 0;
 
-    infoPtr = (LISTVIEW_INFO *)GetWindowLongA(hwnd, 0);
+    infoPtr = (LISTVIEW_INFO*)getInfoPtr(hwnd);
 
     if ( !infoPtr )
         return 0;
@@ -7016,8 +6987,6 @@ static LRESULT LISTVIEW_NCCreate(HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
   LISTVIEW_INFO *infoPtr;
 
-  //TRACE("(hwnd=%x,wParam=%x,lParam=%lx)\n", hwnd, wParam, lParam);
-
   /* allocate memory for info structure */
   infoPtr = (LISTVIEW_INFO*)initControl(hwnd,sizeof(LISTVIEW_INFO));
   if (!infoPtr) return 0;
@@ -7229,9 +7198,6 @@ static LRESULT LISTVIEW_RButtonUp(HWND hwnd, WORD wKey, WORD wPosX,
                                   WORD wPosY)
 {
   LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO *)LISTVIEW_GetInfoPtr(hwnd);
-  INT nCtrlId = GetWindowLongA(hwnd, GWL_ID);
-
-//  TRACE("(hwnd=%x,key=%hu,X=%hu,Y=%hu)\n", hwnd, wKey, wPosX, wPosY);
 
   if (infoPtr->bRButtonDown != FALSE)
   {
@@ -7339,18 +7305,14 @@ static LRESULT LISTVIEW_SetRedraw(HWND hwnd,BOOL bRedraw)
 
   if (bRedraw)
   {
-    infoPtr->refreshFlags &= ~RF_NOREDRAW;
+    infoPtr->internalFlags &= ~IF_NOREDRAW;
     lResult = DefWindowProcA(hwnd, WM_SETREDRAW, bRedraw, 0);
 
     LISTVIEW_UpdateScroll(hwnd);
-    //CB: WINE calls RedrawWindow but many (all?) programs invalidate the control themself
-    //  RedrawWindow(hwnd,NULL,0,RDW_INVALIDATE | RDW_FRAME | RDW_ERASE | RDW_ALLCHILDREN | RDW_ERASENOW);
+    RedrawWindow(hwnd,NULL,0,RDW_INVALIDATE | RDW_FRAME | RDW_ERASE | RDW_ALLCHILDREN | RDW_ERASENOW);
   } else
   {
-    infoPtr->refreshFlags |= RF_NOREDRAW;
-    if (infoPtr->refreshFlags & RF_REFRESH)
-      KillTimer(hwnd,LV_REFRESH_TIMER);
-    infoPtr->refreshFlags &= ~(RF_REFRESH | RF_UPDATESCROLL);
+    infoPtr->internalFlags |= IF_NOREDRAW;
     lResult = DefWindowProcA(hwnd, WM_SETREDRAW, bRedraw, 0);
   }
 

@@ -78,7 +78,7 @@ typedef struct tagLISTVIEW_INFO
     POINT          maxScroll;    //in scroll units
     POINT          scrollPage;   //in scroll units
     POINT          scrollStep;   //in pixels
-    DWORD          refreshFlags;
+    DWORD          internalFlags;
 
     WPARAM charCode;
     CHAR   szSearchParam[ MAX_PATH ];
@@ -93,12 +93,7 @@ typedef struct
   BOOL unicode;
 } LVINTERNALITEMW, *LPLVINTERNALITEMW;
 
-#define LV_REFRESH_TIMER 1
-#define LV_REFRESH_DELAY 100
-
-#define RF_REFRESH      1
-#define RF_UPDATESCROLL 2
-#define RF_NOREDRAW     4
+#define IF_NOREDRAW     1
 
 extern VOID LISTVIEW_Register (VOID);
 extern VOID LISTVIEW_Unregister (VOID);

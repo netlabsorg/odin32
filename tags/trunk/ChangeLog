@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.839 2000-03-24 23:14:00 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.840 2000-03-26 16:28:56 cbratschi Exp $ */
+
+ 2000-03-26: Christoph Bratschi <cbratschi@datacomm.ch>
+	- COMDLG32:
+	- SHELL32:  merged with Corel WINE 20000324
 
  2000-03-25: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Fixes for GetStdHandle
