@@ -1,15 +1,16 @@
-/* $Id: BldLevelInf.cmd,v 1.3 2001-01-22 20:25:01 phaller Exp $
+/* $Id: BldLevelInf.cmd,v 1.4 2001-01-23 15:32:18 bird Exp $
  *
  * Adds a Description string to the given .def-file.
  * Fills in default values; like build time and host.
  *
  */
 
-if RxFuncQuery('SysLoadFuncs'=0 THEN
-DO
-  call RxFuncAdd 'SysLoadFuncs', 'RexxUtil', 'SysLoadFuncs';
-  call SysLoadFuncs;
-END
+if (RxFuncQuery('SysLoadFuncs') = 0) then
+do
+    call RxFuncAdd 'SysLoadFuncs', 'RexxUtil', 'SysLoadFuncs';
+    call SysLoadFuncs;
+end
+
 
 /*
  * Set default parameter values.
