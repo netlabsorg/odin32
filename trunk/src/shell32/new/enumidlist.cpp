@@ -1,13 +1,28 @@
+/* $Id: enumidlist.cpp,v 1.2 1999-10-07 10:34:46 phaller Exp $ */
+
+/*
+ * Win32 SHELL32 for OS/2
+ *
+ * Copyright 1999 Patrick Haller (haller@zebra.fh-weingarten.de)
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
+ */
+
 /*
  *	IEnumIDList
  *
  *	Copyright 1998	Juergen Schmied <juergen.schmied@metronet.de>
  */
 
+
+/*****************************************************************************
+ * Includes                                                                  *
+ *****************************************************************************/
+
 #include <stdlib.h>
 #include <string.h>
-
 #include <odin.h>
+#include <odinwrap.h>
 
 #define ICOM_CINTERFACE 1
 #define CINTERFACE 1
@@ -25,7 +40,9 @@
 
 #include <misc.h>
 
-DEFAULT_DEBUG_CHANNEL(shell)
+
+
+ODINDEBUGCHANNEL(SHELL32-ENUMIDLIST)
 
 typedef struct tagENUMLIST
 {
@@ -310,7 +327,11 @@ static HRESULT WINAPI IEnumIDList_fnQueryInterface(
 
 	char	xriid[50];
 	WINE_StringFromCLSID((LPCLSID)riid,xriid);
-	TRACE("(%p)->(\n\tIID:\t%s,%p)\n",This,xriid,ppvObj);
+
+  dprintf(("SHELL32:enumidlist: IEnumIDList_fnQueryInterface((%p)->(\n\tIID:\t%s,%p)\n",
+           This,
+           xriid,
+           ppvObj));
 
 	*ppvObj = NULL;
 
@@ -339,7 +360,9 @@ static ULONG WINAPI IEnumIDList_fnAddRef(
 {
 	ICOM_THIS(IEnumIDListImpl,iface);
 
-	TRACE("(%p)->(%lu)\n",This,This->ref);
+  dprintf(("SHELL32:enumidlist: IEnumIDList_fnAddRef((%p)->(%lu)\n",
+           This,
+           This->ref));
 
 	shell32_ObjCount++;
 	return ++(This->ref);
@@ -352,7 +375,9 @@ static ULONG WINAPI IEnumIDList_fnRelease(
 {
 	ICOM_THIS(IEnumIDListImpl,iface);
 
-	TRACE("(%p)->(%lu)\n",This,This->ref);
+  dprintf(("SHELL32:enumidlist: IEnumIDList_fnRelease((%p)->(%lu)\n",
+           This,
+           This->ref));
 
 	shell32_ObjCount--;
 
@@ -381,7 +406,11 @@ static HRESULT WINAPI IEnumIDList_fnNext(
 	HRESULT  hr = S_OK;
 	LPITEMIDLIST  temp;
 
-	TRACE("(%p)->(%ld,%p, %p)\n",This,celt,rgelt,pceltFetched);
+  dprintf(("SHELL32:enumidlist: IEnumIDList_fnNext((%p)->(%ld,%p, %p)\n",
+           This,
+           celt,
+           rgelt,
+           pceltFetched));
 
 /* It is valid to leave pceltFetched NULL when celt is 1. Some of explorer's
  * subsystems actually use it (and so may a third party browser)
@@ -422,7 +451,9 @@ static HRESULT WINAPI IEnumIDList_fnSkip(
 	DWORD    dwIndex;
 	HRESULT  hr = S_OK;
 
-	TRACE("(%p)->(%lu)\n",This,celt);
+  dprintf(("SHELL32:enumidlist: IEnumIDList_fnSkip((%p)->(%lu)\n",
+           This,
+           celt));
 
 	for(dwIndex = 0; dwIndex < celt; dwIndex++)
 	{ if(!This->mpCurrent)
@@ -433,6 +464,8 @@ static HRESULT WINAPI IEnumIDList_fnSkip(
 	}
 	return hr;
 }
+
+
 /**************************************************************************
 *  IEnumIDList_fnReset
 */
@@ -441,7 +474,9 @@ static HRESULT WINAPI IEnumIDList_fnReset(
 {
 	ICOM_THIS(IEnumIDListImpl,iface);
 
-	TRACE("(%p)\n",This);
+  dprintf(("SHELL32:enumidlist: IEnumIDList_fnReset((%p)\n",
+           This));
+
 	This->mpCurrent = This->mpFirst;
 	return S_OK;
 }
@@ -453,7 +488,10 @@ static HRESULT WINAPI IEnumIDList_fnClone(
 {
 	ICOM_THIS(IEnumIDListImpl,iface);
 
-	TRACE("(%p)->() to (%p)->() E_NOTIMPL\n",This,ppenum);
+  dprintf(("SHELL32:enumidlist: IEnumIDList_fnClone((%p)->() to (%p)->() not implemented\n",
+           This,
+           ppenum));
+
 	return E_NOTIMPL;
 }
 
@@ -487,7 +525,11 @@ IEnumIDList * IEnumIDList_Constructor(
 
 	lpeidl = (IEnumIDListImpl*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(IEnumIDListImpl));
 
-	TRACE("(%p)->(%s flags=0x%08lx kind=0x%08lx)\n",lpeidl,debugstr_a(lpszPath),dwFlags, dwKind);
+  dprintf(("SHELL32:enumidlist: IEnumIDList_Constructor((%p)->(%08xh flags=0x%08lx kind=0x%08lx)\n",
+           lpeidl,
+           lpszPath,
+           dwFlags,
+           dwKind));
 
 	if (lpeidl)
 	{

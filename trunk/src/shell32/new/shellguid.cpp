@@ -1,3 +1,14 @@
+/* $Id: shellguid.cpp,v 1.4 1999-10-07 10:34:47 phaller Exp $ */
+
+/*
+ * Win32 SHELL32 for OS/2
+ *
+ * Copyright 1997 Marcus Meissner
+ * Copyright 1999 Patrick Haller (haller@zebra.fh-weingarten.de)
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
+ */
+
 /*
  *  Shell UID
  *
@@ -6,7 +17,14 @@
  *  this in in a single file due to interfering definitions
  *
  */
+
+
+/*****************************************************************************
+ * Includes                                                                  *
+ *****************************************************************************/
+
 #include <odin.h>
+#include <odinwrap.h>
 
 #define ICOM_CINTERFACE 1
 #define CINTERFACE 1
@@ -37,3 +55,7 @@
  statically linked with the rest of wine, the initializer of it's * GUIDs
  will have to be in the same place as everybody else. This is * the same
  problem as with "real" Windows programs. */
+
+ODINDEBUGCHANNEL(SHELL32-SHELLGUID)
+
+
