@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 1999-11-03 23:28:07 sandervl Exp $
+# $Id: makefile,v 1.8 1999-12-09 00:56:54 bird Exp $
 
 #
 # PD-Win32 API
@@ -9,6 +9,7 @@
 PDWIN32_INCLUDE = ..\..\include
 PDWIN32_LIB = ..\..\lib
 PDWIN32_BIN = ..\..\bin
+PDWIN32_TOOLS = ..\..\tools\bin
 
 
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
@@ -33,9 +34,12 @@ $(TARGET).dll: $(OBJS) $(TARGET).def
 	$(CP) $@ $(PDWIN32_BIN)
 
 
-$(TARGET).lib: $(TARGET).def
+$(TARGET).lib: $(TARGET)exp.def
 	$(IMPLIB) $(IMPLIBFLAGS) $@ $**
 	$(CP) $@ $(PDWIN32_LIB)
+
+$(TARGET)exp.def: $(TARGET).def
+    $(IMPDEF) $** $@
 
 
 wnetap32.obj: wnetap32.cpp
