@@ -1,4 +1,4 @@
-/* $Id: windll.h,v 1.6 1999-08-23 17:04:14 sandervl Exp $ */
+/* $Id: windll.h,v 1.7 1999-08-23 18:06:45 sandervl Exp $ */
 
 /*
  *
@@ -80,7 +80,7 @@ static  Win32Dll *findModule(HINSTANCE hinstance);
 static  Win32Dll *findModule(WIN32DLLENTRY DllEntryPoint);
 
 
-virtual BOOL  isDll()                          { return FALSE; };
+virtual BOOL  isDll();
 
 protected:
 	BOOL      fSystemDll, fSkipEntryCalls, fUnloaded, fAttachedToProcess;

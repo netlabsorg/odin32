@@ -1,4 +1,4 @@
-/* $Id: winexe.h,v 1.5 1999-08-23 17:04:14 sandervl Exp $ */
+/* $Id: winexe.h,v 1.6 1999-08-23 18:06:45 sandervl Exp $ */
 
 /*
  *
@@ -36,7 +36,7 @@ public:
 
 virtual ULONG start();
 
-virtual BOOL  isDll()                          { return FALSE; };
+virtual BOOL  isDll();
 	
 protected:
 	char *cmdline;
