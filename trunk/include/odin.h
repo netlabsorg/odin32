@@ -52,7 +52,9 @@
   #define WINAPI    __stdcall
   #define SYSTEM    _System
   #define PASCAL    __stdcall
+  #define INLINE    inline              /* is this allowed for C too? */
   #define UNALIGNED
+  #define __attribute__(x)
 
 //MN: For some strange reason Watcom doesn't define these for C++!
 //    This is not the best place to define them though.
@@ -65,12 +67,20 @@
 
 /* ---------- GCC/EMX ---------- */
 #ifdef __GNUC__
+  #if defined(__GNUC__) && (__GNUC__ <= 2) && (__GNUC_MINOR__ < 7)
+    #error You need gcc >= 2.7 to build Odin32
+  #endif
+  #if !defined(__stdcall__)             /* this is also defined in windef.h if !defined(WIN32OS2) */
+    #define __stdcall __attribute__((__stdcall__))
+    #define __cdecl   __attribute__((__cdecl__))
+  #endif
   #define CDECL     _cdecl
   #define EXPORT    _export
   #define WIN32API  __stdcall
   #define WINAPI    __stdcall
   #define SYSTEM    __stdcall
   #define PASCAL    __stdcall
+  #define INLINE    __inline__
   #define UNALIGNED
   #define NONAMELESSUNION
   #define NONAMELESSSTRUCT
@@ -78,6 +88,7 @@
 
 /* ---------- VAC ---------- */
 #if (defined(__IBMCPP__) || defined(__IBMC__))
+
   #define CDECL     __cdecl
   #define EXPORT    _Export
   #define WIN32API  __stdcall
@@ -85,7 +96,15 @@
   #define SYSTEM    _System
   #define PASCAL    __stdcall
   #define UNALIGNED
-  #define __inline__ inline
+  #ifndef __cplusplus
+    #define INLINE  _Inline
+    #define inline  INLINE
+  #else
+    #define INLINE  inline
+  #endif
+  #define __inline__ INLINE
+  #define __attribute__(x)
+
 
 #ifndef RC_INVOKED
   //Nameless unions or structures are not supported in C mode
@@ -106,17 +125,18 @@
 #else
 #ifdef RC_INVOKED
   //SvL: wrc chokes on calling conventions....
-  #define CDECL     
-  #define EXPORT    
-  #define WIN32API  
-  #define WINAPI    
-  #define CALLBACK    
-  #define SYSTEM    
-  #define PASCAL    
+  #define CDECL
+  #define EXPORT
+  #define WIN32API
+  #define WINAPI
+  #define CALLBACK
+  #define SYSTEM
+  #define PASCAL
   #define UNALIGNED
   #define __cdecl
   #define _System
-  #define __inline__ 
+  #define __inline__
+  #define INLINE
 #else
 /* ---------- ??? ---------- */
 #error No known compiler.
