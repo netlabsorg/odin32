@@ -1,4 +1,4 @@
-/* $Id: job.cmd,v 1.5 2001-01-08 22:08:28 bird Exp $
+/* $Id: job.cmd,v 1.6 2001-02-19 17:15:31 bird Exp $
  *
  * Main job for building OS/2.
  *
@@ -55,12 +55,12 @@
     if (rc <> 0) then call failure rc, 'db failed.';
 
     /*
-     * Update local installation at c:\odin32...
+     * Update local installation at d:\odin...
      */
-    'c:';
-    if (rc <> 0) then call failure rc, 'c: failed.';
-    'cd c:\odin32';
-    if (rc <> 0) then call failure rc, 'cd c:\odin32 failed.';
+    'd:';
+    if (rc <> 0) then call failure rc, 'd: failed.';
+    'cd d:\odin';
+    if (rc <> 0) then call failure rc, 'cd d:\odin failed.';
     'unzip -o ' || sTree || '\*debug.zip';
     if (rc <> 0) then call failure rc, 'unzip failed.';
     'd:'
