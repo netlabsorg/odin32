@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.13 1999-11-12 17:16:36 cbratschi Exp $ */
+/* $Id: edit.cpp,v 1.14 1999-11-13 16:42:41 cbratschi Exp $ */
 /*
  *      Edit control
  *
@@ -8,7 +8,7 @@
  *
  *      Copyright  1999 Christoph Bratschi
  *
- * WINE version: 990923
+ * WINE version: 991031
  */
 
 /*
@@ -183,7 +183,6 @@ static VOID     EDIT_Refresh(HWND hwnd,EDITSTATE *es);
 static LRESULT  EDIT_EM_CharFromPos(HWND hwnd, EDITSTATE *es, INT x, INT y);
 static BOOL     EDIT_EM_FmtLines(HWND hwnd, EDITSTATE *es, BOOL add_eol);
 static HLOCAL   EDIT_EM_GetHandle(HWND hwnd, EDITSTATE *es);
-static HLOCAL16 EDIT_EM_GetHandle16(HWND hwnd, EDITSTATE *es);
 static INT      EDIT_EM_GetLine(HWND hwnd, EDITSTATE *es, INT line, LPSTR lpch);
 static LRESULT  EDIT_EM_GetSel(HWND hwnd, EDITSTATE *es, LPUINT start, LPUINT end);
 static LRESULT  EDIT_EM_GetThumb(HWND hwnd, EDITSTATE *es);
@@ -1076,7 +1075,11 @@ static void EDIT_SL_InvalidateText(HWND hwnd, EDITSTATE *es, INT start, INT end)
 
         EDIT_GetLineRect(hwnd, es, 0, start, end, &line_rect);
         if (IntersectRect(&rc, &line_rect, &es->format_rect))
-                InvalidateRect(hwnd, &rc, FALSE);
+        {
+          if (es->flags & EF_FOCUSED) HideCaret(hwnd);
+          InvalidateRect(hwnd, &rc, FALSE);
+          if (es->flags & EF_FOCUSED) ShowCaret(hwnd);
+        }
 }
 
 
@@ -1116,6 +1119,7 @@ static void EDIT_ML_InvalidateText(HWND hwnd, EDITSTATE *es, INT start, INT end)
         }
         GetClientRect(hwnd, &rc1);
         IntersectRect(&rcWnd, &rc1, &es->format_rect);
+        if (es->flags & EF_FOCUSED) HideCaret(hwnd);
         if (sl == el) {
                 EDIT_GetLineRect(hwnd, es, sl, sc, ec, &rcLine);
                 if (IntersectRect(&rcUpdate, &rcWnd, &rcLine))
@@ -1139,6 +1143,7 @@ static void EDIT_ML_InvalidateText(HWND hwnd, EDITSTATE *es, INT start, INT end)
                 if (IntersectRect(&rcUpdate, &rcWnd, &rcLine))
                         InvalidateRect(hwnd, &rcUpdate, FALSE);
         }
+        if (es->flags & EF_FOCUSED) ShowCaret(hwnd);
 }
 
 
@@ -1180,7 +1185,6 @@ static void EDIT_InvalidateText(HWND hwnd, EDITSTATE *es, INT start, INT end)
 static BOOL EDIT_MakeFit(HWND hwnd, EDITSTATE *es, INT size)
 {
         HLOCAL hNew32;
-        HLOCAL16 hNew16;
 
         if (size <= es->buffer_size)
                 return TRUE;
@@ -2622,9 +2626,9 @@ static void EDIT_WM_Char(HWND hwnd, EDITSTATE *es, CHAR c, DWORD key_data)
         BOOL control = GetKeyState(VK_CONTROL) & 0x8000;
         switch (c) {
         case '\r':
-            /* If the edit doesn't want the return, do nothing */
-            if(!(es->style & ES_WANTRETURN))
-                break;
+	    /* If the edit doesn't want the return and it's not a multiline edit, do nothing */
+	    if(!(es->style & ES_MULTILINE) && !(es->style & ES_WANTRETURN))
+		break;
         case '\n':
                 if (es->style & ES_MULTILINE) {
                         if (es->style & ES_READONLY) {
