@@ -1,4 +1,4 @@
-/* $Id: Win32kCC.c,v 1.6 2000-12-03 22:00:30 bird Exp $
+/* $Id: Win32kCC.c,v 1.7 2000-12-11 06:17:50 bird Exp $
  *
  * Win32CC - Win32k Control Center.
  *
@@ -360,6 +360,7 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                     if (!pThis->NewOptions.fREXXScript)         strcat(szArgs, " -Rexx:N");
                     if (!pThis->NewOptions.fJava)               strcat(szArgs, " -Java:N");
                     if (pThis->NewOptions.fNoLoader)            strcat(szArgs, " -Noloader");
+                    if (pThis->NewOptions.fDllFixes)            strcat(szArgs, " -DllFixes");
                     if (pThis->NewOptions.cbSwpHeapMax != CB_SWP_MAX)
                         sprintf(szArgs + strlen(szArgs), " -HeapMax:%d", pThis->NewOptions.cbSwpHeapMax); /* FIXME - to be changed */
                     if (pThis->NewOptions.cbResHeapMax != CB_RES_MAX)
@@ -540,6 +541,9 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
             /* REXX Scripts */
             WinSendDlgItemMsg(hwnd, CB_LDR_REXX,            BM_SETCHECK,    (MPARAM)(pThis->Options.fREXXScript),               NULL);
 
+            /* OS/2 Loader Fixes */
+            WinSendDlgItemMsg(hwnd, CB_LDRFIX_DLLFIXES,     BM_SETCHECK,    (MPARAM)(pThis->Options.fDllFixes),                 NULL);
+
             /* heaps */
             /* Resident */
             WinSendDlgItemMsg(hwnd, SB_HEAP_RES_MAX,        SPBM_SETCURRENTVALUE, (MPARAM)(pThis->Options.cbResHeapMax / 1024), NULL);
@@ -667,6 +671,11 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
             pThis->NewOptions.fJava = WinSendDlgItemMsg(hwnd, CB_LDR_JAVA, BM_QUERYCHECK, NULL, NULL) != 0;
             /* REXX Scripts */
             pThis->NewOptions.fREXXScript = WinSendDlgItemMsg(hwnd, CB_LDR_REXX, BM_QUERYCHECK, NULL, NULL) != 0;
+
+            /*
+             * OS/2 Loader Fixes.
+             */
+            pThis->NewOptions.fDllFixes = WinSendDlgItemMsg(hwnd, CB_LDRFIX_DLLFIXES, BM_QUERYCHECK, NULL, NULL) != 0;
 
             /*
              * Heaps

@@ -1,4 +1,4 @@
-/* $Id: Win32kCC.h,v 1.4 2000-11-26 13:36:53 bird Exp $
+/* $Id: Win32kCC.h,v 1.5 2000-12-11 06:17:51 bird Exp $
  *
  *
  *
@@ -128,5 +128,9 @@
 #define TX_W32K_SYMBOLFILE_VAL      1206
 #define TX_W32K_KERNELBUILD         1207
 #define TX_W32K_KERNELBUILD_VAL     1208
+
+#define GR_LDRFIX                   1250
+#define CB_LDRFIX_DLLFIXES          1251
+
 
 
