@@ -1,4 +1,4 @@
-/* $Id: api2.c,v 1.1 2000-02-29 00:49:58 sandervl Exp $ */
+/* $Id: api2.c,v 1.2 2000-03-01 18:49:23 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -36,13 +36,13 @@
 #include "GL/xf86glx.h"
 #endif
 #include "api.h"
+#include "types.h"
 #include "context.h"
 #include "varray.h"
 #include "image.h"
 #include "macros.h"
 #include "matrix.h"
 #include "teximage.h"
-#include "types.h"
 #include "vb.h"
 #endif
 
@@ -662,48 +662,48 @@ void GLAPIENTRY glStencilOp(CTX_ARG GLenum fail, GLenum zfail, GLenum zpass )
    (*CC->API.StencilOp)(CC, fail, zfail, zpass);
 }
 
-#define TEXCOORD1(s)				\
-{						\
-   GLuint count;				\
-   GLfloat *tc;					\
-   GET_IMMEDIATE;				\
-   count = IM->Count;				\
-   IM->Flag[count] |= VERT_TEX0_1;		\
-   tc = IM->TexCoord[0][count];			\
-   ASSIGN_4V(tc,s,0,0,1);			\
+#define TEXCOORD1(s)                            \
+{                                               \
+   GLuint count;                                \
+   GLfloat *tc;                                 \
+   GET_IMMEDIATE;                               \
+   count = IM->Count;                           \
+   IM->Flag[count] |= VERT_TEX0_1;              \
+   tc = IM->TexCoord[0][count];                 \
+   ASSIGN_4V(tc,s,0,0,1);                       \
 }
 
-#define TEXCOORD2(s,t)				\
-{						\
-   GLuint count;				\
-   GLfloat *tc;					\
-   GET_IMMEDIATE;				\
-   count = IM->Count;				\
-   IM->Flag[count] |= VERT_TEX0_12;		\
-   tc = IM->TexCoord[0][count];			\
-   ASSIGN_4V(tc, s,t,0,1);		        \
+#define TEXCOORD2(s,t)                          \
+{                                               \
+   GLuint count;                                \
+   GLfloat *tc;                                 \
+   GET_IMMEDIATE;                               \
+   count = IM->Count;                           \
+   IM->Flag[count] |= VERT_TEX0_12;             \
+   tc = IM->TexCoord[0][count];                 \
+   ASSIGN_4V(tc, s,t,0,1);                      \
 }
 
-#define TEXCOORD3(s,t,u)			\
-{						\
-   GLuint count;				\
-   GLfloat *tc;					\
-   GET_IMMEDIATE;				\
-   count = IM->Count;				\
-   IM->Flag[count] |= VERT_TEX0_123;		\
-   tc = IM->TexCoord[0][count];			\
-   ASSIGN_4V(tc, s,t,u,1);			\
+#define TEXCOORD3(s,t,u)                        \
+{                                               \
+   GLuint count;                                \
+   GLfloat *tc;                                 \
+   GET_IMMEDIATE;                               \
+   count = IM->Count;                           \
+   IM->Flag[count] |= VERT_TEX0_123;            \
+   tc = IM->TexCoord[0][count];                 \
+   ASSIGN_4V(tc, s,t,u,1);                      \
 }
 
-#define TEXCOORD4(s,t,u,v)			\
-{						\
-   GLuint count;				\
-   GLfloat *tc;					\
-   GET_IMMEDIATE;				\
-   count = IM->Count;				\
-   IM->Flag[count] |= VERT_TEX0_1234;		\
-   tc = IM->TexCoord[0][count];			\
-   ASSIGN_4V(tc, s,t,u,v);			\
+#define TEXCOORD4(s,t,u,v)                      \
+{                                               \
+   GLuint count;                                \
+   GLfloat *tc;                                 \
+   GET_IMMEDIATE;                               \
+   count = IM->Count;                           \
+   IM->Flag[count] |= VERT_TEX0_1234;           \
+   tc = IM->TexCoord[0][count];                 \
+   ASSIGN_4V(tc, s,t,u,v);                      \
 }
 
 
@@ -1145,34 +1145,34 @@ void GLAPIENTRY glTranslatef(CTX_ARG GLfloat x, GLfloat y, GLfloat z )
 /* KW: Run into bad problems in reset_vb/fixup_input if we don't fully pad
  *     the incoming vertices.
  */
-#define VERTEX2(IM, x,y)			\
-{						\
-   GLuint count = IM->Count++;			\
-   GLfloat *dest = IM->Obj[count];		\
-   IM->Flag[count] |= VERT_OBJ_2;		\
-   ASSIGN_4V(dest, x, y, 0, 1);			\
-   if (dest == IM->Obj[VB_MAX-1])		\
-      IM->maybe_transform_vb( IM );		\
+#define VERTEX2(IM, x,y)                        \
+{                                               \
+   GLuint count = IM->Count++;                  \
+   GLfloat *dest = IM->Obj[count];              \
+   IM->Flag[count] |= VERT_OBJ_2;               \
+   ASSIGN_4V(dest, x, y, 0, 1);                 \
+   if (dest == IM->Obj[VB_MAX-1])               \
+      IM->maybe_transform_vb( IM );             \
 }
 
-#define VERTEX3(IM,x,y,z)			\
-{						\
-   GLuint count = IM->Count++;			\
-   GLfloat *dest = IM->Obj[count];		\
-   IM->Flag[count] |= VERT_OBJ_23;		\
-   ASSIGN_4V(dest, x, y, z, 1);			\
-   if (dest == IM->Obj[VB_MAX-1])		\
-      IM->maybe_transform_vb( IM );		\
+#define VERTEX3(IM,x,y,z)                       \
+{                                               \
+   GLuint count = IM->Count++;                  \
+   GLfloat *dest = IM->Obj[count];              \
+   IM->Flag[count] |= VERT_OBJ_23;              \
+   ASSIGN_4V(dest, x, y, z, 1);                 \
+   if (dest == IM->Obj[VB_MAX-1])               \
+      IM->maybe_transform_vb( IM );             \
 }
 
-#define VERTEX4(IM, x,y,z,w)			\
-{						\
-   GLuint count = IM->Count++;			\
-   GLfloat *dest = IM->Obj[count];		\
-   IM->Flag[count] |= VERT_OBJ_234;		\
-   ASSIGN_4V(dest, x, y, z, w);			\
-   if (dest == IM->Obj[VB_MAX-1])		\
-      IM->maybe_transform_vb( IM );		\
+#define VERTEX4(IM, x,y,z,w)                    \
+{                                               \
+   GLuint count = IM->Count++;                  \
+   GLfloat *dest = IM->Obj[count];              \
+   IM->Flag[count] |= VERT_OBJ_234;             \
+   ASSIGN_4V(dest, x, y, z, w);                 \
+   if (dest == IM->Obj[VB_MAX-1])               \
+      IM->maybe_transform_vb( IM );             \
 }
 
 
@@ -1323,8 +1323,8 @@ void GLAPIENTRY glVertex4dv(CTX_ARG const GLdouble *v )
 {
    GET_IMMEDIATE;
    VERTEX4( IM,
-	    (GLfloat) v[0], (GLfloat) v[1],
-	    (GLfloat) v[2], (GLfloat) v[3] );
+            (GLfloat) v[0], (GLfloat) v[1],
+            (GLfloat) v[2], (GLfloat) v[3] );
 }
 
 
@@ -1339,8 +1339,8 @@ void GLAPIENTRY glVertex4iv(CTX_ARG const GLint *v )
 {
    GET_IMMEDIATE;
    VERTEX4( IM,
-	    (GLfloat) v[0], (GLfloat) v[1],
-	    (GLfloat) v[2], (GLfloat) v[3] );
+            (GLfloat) v[0], (GLfloat) v[1],
+            (GLfloat) v[2], (GLfloat) v[3] );
 }
 
 
@@ -1348,8 +1348,8 @@ void GLAPIENTRY glVertex4sv(CTX_ARG const GLshort *v )
 {
    GET_IMMEDIATE;
    VERTEX4( IM,
-	    (GLfloat) v[0], (GLfloat) v[1],
-	    (GLfloat) v[2], (GLfloat) v[3] );
+            (GLfloat) v[0], (GLfloat) v[1],
+            (GLfloat) v[2], (GLfloat) v[3] );
 }
 
 

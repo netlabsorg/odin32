@@ -1,4 +1,4 @@
-/* $Id: alpha.c,v 1.1 2000-02-29 00:49:57 sandervl Exp $ */
+/* $Id: alpha.c,v 1.2 2000-03-01 18:49:22 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -35,8 +35,8 @@
 #include "GL/xf86glx.h"
 #endif
 #include "alpha.h"
-#include "context.h"
 #include "types.h"
+#include "context.h"
 #include "macros.h"
 #include "mmath.h"
 #endif
@@ -94,42 +94,42 @@ GLint gl_alpha_test( const GLcontext* ctx,
    switch (ctx->Color.AlphaFunc) {
       case GL_LESS:
          for (i=0;i<n;i++) {
-	    mask[i] &= (rgba[i][ACOMP] < ref);
-	 }
-	 return 1;
+            mask[i] &= (rgba[i][ACOMP] < ref);
+         }
+         return 1;
       case GL_LEQUAL:
          for (i=0;i<n;i++) {
-	    mask[i] &= (rgba[i][ACOMP] <= ref);
-	 }
-	 return 1;
+            mask[i] &= (rgba[i][ACOMP] <= ref);
+         }
+         return 1;
       case GL_GEQUAL:
          for (i=0;i<n;i++) {
-	    mask[i] &= (rgba[i][ACOMP] >= ref);
-	 }
-	 return 1;
+            mask[i] &= (rgba[i][ACOMP] >= ref);
+         }
+         return 1;
       case GL_GREATER:
          for (i=0;i<n;i++) {
-	    mask[i] &= (rgba[i][ACOMP] > ref);
-	 }
-	 return 1;
+            mask[i] &= (rgba[i][ACOMP] > ref);
+         }
+         return 1;
       case GL_NOTEQUAL:
          for (i=0;i<n;i++) {
-	    mask[i] &= (rgba[i][ACOMP] != ref);
-	 }
-	 return 1;
+            mask[i] &= (rgba[i][ACOMP] != ref);
+         }
+         return 1;
       case GL_EQUAL:
          for (i=0;i<n;i++) {
-	    mask[i] &= (rgba[i][ACOMP] == ref);
-	 }
-	 return 1;
+            mask[i] &= (rgba[i][ACOMP] == ref);
+         }
+         return 1;
       case GL_ALWAYS:
-	 /* do nothing */
-	 return 1;
+         /* do nothing */
+         return 1;
       case GL_NEVER:
          /* caller should check for zero! */
-	 return 0;
+         return 0;
       default:
-	 gl_problem( ctx, "Invalid alpha test in gl_alpha_test" );
+         gl_problem( ctx, "Invalid alpha test in gl_alpha_test" );
          return 0;
    }
    /* Never get here */

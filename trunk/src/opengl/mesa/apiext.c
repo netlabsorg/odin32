@@ -1,4 +1,4 @@
-/* $Id: apiext.c,v 1.1 2000-02-29 00:49:58 sandervl Exp $ */
+/* $Id: apiext.c,v 1.2 2000-03-01 18:49:23 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -36,10 +36,10 @@
 #include "GL/xf86glx.h"
 #endif
 #include "api.h"
+#include "types.h"
 #include "context.h"
 #include "cva.h"
 #include "image.h"
-#include "types.h"
 #include "varray.h"
 #endif
 
@@ -426,45 +426,45 @@ void GLAPIENTRY glResizeBuffersMESA(CTX_VOID )
  * GL_SGIS_multitexture (obsolete - will be removed in near future)
  */
 
-#define TEXCOORD1(s)				\
-{						\
-   GLuint count;				\
-   GLfloat *tc;					\
-   count = IM->Count;				\
-   IM->Flag[count] |= IM->TF1[texSet];		\
-   tc = IM->TexCoordPtr[texSet][count];		\
-   ASSIGN_4V(tc, s,0,0,1);			\
+#define TEXCOORD1(s)                            \
+{                                               \
+   GLuint count;                                \
+   GLfloat *tc;                                 \
+   count = IM->Count;                           \
+   IM->Flag[count] |= IM->TF1[texSet];          \
+   tc = IM->TexCoordPtr[texSet][count];         \
+   ASSIGN_4V(tc, s,0,0,1);                      \
 }
 
 
-#define TEXCOORD2(s,t)				\
-{						\
-   GLuint count;				\
-   GLfloat *tc;					\
-   count = IM->Count;				\
-   IM->Flag[count] |= IM->TF2[texSet];		\
-   tc = IM->TexCoordPtr[texSet][count];		\
-   ASSIGN_4V(tc, s,t,0,1);			\
+#define TEXCOORD2(s,t)                          \
+{                                               \
+   GLuint count;                                \
+   GLfloat *tc;                                 \
+   count = IM->Count;                           \
+   IM->Flag[count] |= IM->TF2[texSet];          \
+   tc = IM->TexCoordPtr[texSet][count];         \
+   ASSIGN_4V(tc, s,t,0,1);                      \
 }
 
-#define TEXCOORD3(s,t,u)			\
-{						\
-   GLuint count;				\
-   GLfloat *tc;					\
-   count = IM->Count;				\
-   IM->Flag[count] |= IM->TF3[texSet];		\
-   tc = IM->TexCoordPtr[texSet][count];		\
-   ASSIGN_4V(tc, s,t,u,1);			\
+#define TEXCOORD3(s,t,u)                        \
+{                                               \
+   GLuint count;                                \
+   GLfloat *tc;                                 \
+   count = IM->Count;                           \
+   IM->Flag[count] |= IM->TF3[texSet];          \
+   tc = IM->TexCoordPtr[texSet][count];         \
+   ASSIGN_4V(tc, s,t,u,1);                      \
 }
 
-#define TEXCOORD4(s,t,u,v)			\
-{						\
-   GLuint count;				\
-   GLfloat *tc;					\
-   count = IM->Count;				\
-   IM->Flag[count] |= IM->TF4[texSet];		\
-   tc = IM->TexCoordPtr[texSet][count];		\
-   ASSIGN_4V(tc, s,t,u,v);			\
+#define TEXCOORD4(s,t,u,v)                      \
+{                                               \
+   GLuint count;                                \
+   GLfloat *tc;                                 \
+   count = IM->Count;                           \
+   IM->Flag[count] |= IM->TF4[texSet];          \
+   tc = IM->TexCoordPtr[texSet][count];         \
+   ASSIGN_4V(tc, s,t,u,v);                      \
 }
 
 
@@ -479,13 +479,13 @@ void GLAPIENTRY glResizeBuffersMESA(CTX_VOID )
  * GL_ARB_multitexture
  */
 
-#define CHECK_ARB							\
-   if (target >= GL_TEXTURE0_ARB && target <= GL_TEXTURE1_ARB) {	\
-      texSet = target - GL_TEXTURE0_ARB;				\
-   }									\
-   else {								\
-      gl_error(IM->backref, GL_INVALID_ENUM, "glMultiTexCoord(target)");	\
-      return;								\
+#define CHECK_ARB                                                       \
+   if (target >= GL_TEXTURE0_ARB && target <= GL_TEXTURE1_ARB) {        \
+      texSet = target - GL_TEXTURE0_ARB;                                \
+   }                                                                    \
+   else {                                                               \
+      gl_error(IM->backref, GL_INVALID_ENUM, "glMultiTexCoord(target)");        \
+      return;                                                           \
    }
 
 void GLAPIENTRY glActiveTextureARB(CTX_ARG GLenum texture)
@@ -882,7 +882,7 @@ glBlendColor(CTX_ARG GLclampf red, GLclampf green, GLclampf blue, GLclampf alpha
 
 void GLAPIENTRY
 glHistogram(CTX_ARG GLenum target, GLsizei width, GLenum internalFormat,
-	     GLboolean sink )
+             GLboolean sink )
 {
    GET_CONTEXT;
    (void) target;
@@ -906,7 +906,7 @@ glResetHistogram(CTX_ARG GLenum target )
 
 void GLAPIENTRY
 glGetHistogram(CTX_ARG GLenum target, GLboolean reset, GLenum format,
-		GLenum type, GLvoid *values )
+                GLenum type, GLvoid *values )
 {
    GET_CONTEXT;
    (void) target;
@@ -1006,7 +1006,7 @@ glGetMinmaxParameteriv(CTX_ARG GLenum target, GLenum pname, GLint *params )
 
 void GLAPIENTRY
 glConvolutionFilter1D(CTX_ARG GLenum target, GLenum internalFormat, GLsizei width,
-		       GLenum format, GLenum type, const GLvoid *image )
+                       GLenum format, GLenum type, const GLvoid *image )
 {
    GET_CONTEXT;
    (void) target;
@@ -1022,8 +1022,8 @@ glConvolutionFilter1D(CTX_ARG GLenum target, GLenum internalFormat, GLsizei widt
 
 void GLAPIENTRY
 glConvolutionFilter2D(CTX_ARG GLenum target, GLenum internalFormat, GLsizei width,
-		       GLsizei height, GLenum format, GLenum type,
-		       const GLvoid *image )
+                       GLsizei height, GLenum format, GLenum type,
+                       const GLvoid *image )
 {
    GET_CONTEXT;
    (void) target;
@@ -1088,7 +1088,7 @@ glConvolutionParameteriv(CTX_ARG GLenum target, GLenum pname, const GLint *param
 
 void GLAPIENTRY
 glCopyConvolutionFilter1D(CTX_ARG GLenum target, GLenum internalFormat,
-			   GLint x, GLint y, GLsizei width )
+                           GLint x, GLint y, GLsizei width )
 {
    GET_CONTEXT;
    (void) target;
@@ -1103,7 +1103,7 @@ glCopyConvolutionFilter1D(CTX_ARG GLenum target, GLenum internalFormat,
 
 void GLAPIENTRY
 glCopyConvolutionFilter2D(CTX_ARG GLenum target, GLenum internalFormat,
-			   GLint x, GLint y, GLsizei width, GLsizei height)
+                           GLint x, GLint y, GLsizei width, GLsizei height)
 {
    GET_CONTEXT;
    (void) target;
@@ -1119,7 +1119,7 @@ glCopyConvolutionFilter2D(CTX_ARG GLenum target, GLenum internalFormat,
 
 void GLAPIENTRY
 glGetConvolutionFilter(CTX_ARG GLenum target, GLenum format,
-			GLenum type, GLvoid *image )
+                        GLenum type, GLvoid *image )
 {
    GET_CONTEXT;
    (void) target;
@@ -1157,8 +1157,8 @@ glGetConvolutionParameteriv(CTX_ARG GLenum target, GLenum pname, GLint *params )
 
 void GLAPIENTRY
 glSeparableFilter2D(CTX_ARG GLenum target, GLenum internalFormat,
-		     GLsizei width, GLsizei height, GLenum format,
-		     GLenum type, const GLvoid *row, const GLvoid *column )
+                     GLsizei width, GLsizei height, GLenum format,
+                     GLenum type, const GLvoid *row, const GLvoid *column )
 {
    GET_CONTEXT;
    (void) target;
@@ -1177,7 +1177,7 @@ glSeparableFilter2D(CTX_ARG GLenum target, GLenum internalFormat,
 
 void GLAPIENTRY
 glGetSeparableFilter(CTX_ARG GLenum target, GLenum format, GLenum type,
-		      GLvoid *row, GLvoid *column, GLvoid *span )
+                      GLvoid *row, GLvoid *column, GLvoid *span )
 {
    GET_CONTEXT;
    (void) target;
@@ -1193,7 +1193,7 @@ glGetSeparableFilter(CTX_ARG GLenum target, GLenum format, GLenum type,
 
 void GLAPIENTRY
 glCopyColorSubTable(CTX_ARG GLenum target, GLsizei start, GLint x, GLint y,
-		     GLsizei width )
+                     GLsizei width )
 {
    GET_CONTEXT;
    (void) target;
@@ -1208,7 +1208,7 @@ glCopyColorSubTable(CTX_ARG GLenum target, GLsizei start, GLint x, GLint y,
 
 void GLAPIENTRY
 glCopyColorTable(CTX_ARG GLenum target, GLenum internalFormat,
-		  GLint x, GLint y, GLsizei width )
+                  GLint x, GLint y, GLsizei width )
 {
    GET_CONTEXT;
    (void) target;

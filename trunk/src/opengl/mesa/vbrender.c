@@ -1,4 +1,4 @@
-/* $Id: vbrender.c,v 1.1 2000-02-29 00:50:14 sandervl Exp $ */
+/* $Id: vbrender.c,v 1.2 2000-03-01 18:49:39 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -47,6 +47,7 @@
 #include "GL/xf86glx.h"
 #endif
 #include "clip.h"
+#include "types.h"
 #include "context.h"
 #include "light.h"
 #include "lines.h"
@@ -56,7 +57,6 @@
 #include "points.h"
 #include "pipeline.h"
 #include "stages.h"
-#include "types.h"
 #include "vb.h"
 #include "vbcull.h"
 #include "vbrender.h"

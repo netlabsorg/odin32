@@ -1,4 +1,4 @@
-/* $Id: extensions.c,v 1.1 2000-02-29 00:50:03 sandervl Exp $ */
+/* $Id: extensions.c,v 1.2 2000-03-01 18:49:28 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -30,10 +30,10 @@
 #else
 #include "GL/xf86glx.h"
 #endif
+#include "types.h"
 #include "context.h"
 #include "extensions.h"
 #include "simple_list.h"
-#include "types.h"
 
 
 #define MAX_EXT_NAMELEN 80

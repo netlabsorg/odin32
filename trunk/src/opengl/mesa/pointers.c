@@ -1,4 +1,4 @@
-/* $Id: pointers.c,v 1.1 2000-02-29 00:50:08 sandervl Exp $ */
+/* $Id: pointers.c,v 1.2 2000-03-01 18:49:34 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -44,6 +44,7 @@
 #include "bitmap.h"
 #include "blend.h"
 #include "clip.h"
+#include "types.h"
 #include "context.h"
 #include "colortab.h"
 #include "copypix.h"
@@ -75,7 +76,6 @@
 #include "teximage.h"
 #include "texobj.h"
 #include "texstate.h"
-#include "types.h"
 #include "varray.h"
 #include "vbfill.h"
 #include "winpos.h"

@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.1 2000-02-29 00:50:05 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.2 2000-03-01 18:49:30 jeroen Exp $ */
 
 /*
  * DLL entry point
@@ -39,6 +39,11 @@ extern "C" {
 void CDECL _ctordtorInit( void );
 void CDECL _ctordtorTerm( void );
 }
+
+#ifdef DIVE
+void _System DiveGlobalInitialize(void);
+void _System DiveGlobalTerminate(void);
+#endif
 
 /*-------------------------------------------------------------------*/
 /* A clean up routine registered with DosExitList must be used if    */
@@ -86,6 +91,11 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          rc = DosExitList(0x0000F000|EXLST_ADD, cleanup);
          if(rc)
                 return 0UL;
+
+#ifdef DIVE
+           /* Dive specific - get capabilities */
+         DiveGlobalInitialize();
+#endif
          break;
 
       case 1 :
@@ -105,6 +115,8 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
 static void APIENTRY cleanup(ULONG ulReason)
 {
+   DiveGlobalTerminate();
+
    _ctordtorTerm();
 
    DosExitList(EXLST_EXIT, cleanup);

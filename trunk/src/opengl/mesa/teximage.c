@@ -1,4 +1,4 @@
-/* $Id: teximage.c,v 1.1 2000-02-29 00:50:11 sandervl Exp $ */
+/* $Id: teximage.c,v 1.2 2000-03-01 18:49:36 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -36,6 +36,7 @@
 #else
 #include "GL/xf86glx.h"
 #endif
+#include "types.h"
 #include "context.h"
 #include "image.h"
 #include "macros.h"
@@ -43,7 +44,6 @@
 #include "span.h"
 #include "teximage.h"
 #include "texstate.h"
-#include "types.h"
 #endif
 
 

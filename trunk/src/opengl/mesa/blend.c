@@ -1,4 +1,4 @@
-/* $Id: blend.c,v 1.1 2000-02-29 00:49:59 sandervl Exp $ */
+/* $Id: blend.c,v 1.2 2000-03-01 18:49:23 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -274,7 +274,7 @@ void gl_BlendColor( GLcontext *ctx, GLclampf red, GLclampf green,
 /*
  * Common transparency blending mode.
  */
-static void blend_transparency( GLcontext *ctx, GLuint n, const GLubyte mask[],
+static void __cdecl blend_transparency( GLcontext *ctx, GLuint n, const GLubyte mask[],
                                 GLubyte rgba[][4], CONST GLubyte dest[][4] )
 {
    GLuint i;
@@ -319,7 +319,7 @@ static void blend_transparency( GLcontext *ctx, GLuint n, const GLubyte mask[],
 /*
  * Add src and dest.
  */
-static void blend_add( GLcontext *ctx, GLuint n, const GLubyte mask[],
+static void __cdecl blend_add( GLcontext *ctx, GLuint n, const GLubyte mask[],
                        GLubyte rgba[][4], CONST GLubyte dest[][4] )
 {
    GLuint i;
@@ -347,7 +347,7 @@ static void blend_add( GLcontext *ctx, GLuint n, const GLubyte mask[],
 /*
  * Blend min function  (for GL_EXT_blend_minmax)
  */
-static void blend_min( GLcontext *ctx, GLuint n, const GLubyte mask[],
+static void __cdecl blend_min( GLcontext *ctx, GLuint n, const GLubyte mask[],
                        GLubyte rgba[][4], CONST GLubyte dest[][4] )
 {
    GLuint i;
@@ -369,7 +369,7 @@ static void blend_min( GLcontext *ctx, GLuint n, const GLubyte mask[],
 /*
  * Blend max function  (for GL_EXT_blend_minmax)
  */
-static void blend_max( GLcontext *ctx, GLuint n, const GLubyte mask[],
+static void __cdecl blend_max( GLcontext *ctx, GLuint n, const GLubyte mask[],
                        GLubyte rgba[][4], CONST GLubyte dest[][4] )
 {
    GLuint i;
@@ -391,7 +391,7 @@ static void blend_max( GLcontext *ctx, GLuint n, const GLubyte mask[],
 /*
  * Modulate:  result = src * dest
  */
-static void blend_modulate( GLcontext *ctx, GLuint n, const GLubyte mask[],
+static void __cdecl blend_modulate( GLcontext *ctx, GLuint n, const GLubyte mask[],
                             GLubyte rgba[][4], CONST GLubyte dest[][4] )
 {
    GLuint i;
@@ -420,7 +420,7 @@ static void blend_modulate( GLcontext *ctx, GLuint n, const GLubyte mask[],
  * In/Out:  rgba - the incoming and modified pixels
  * Input:  dest - the pixels from the dest color buffer
  */
-static void blend_general( GLcontext *ctx, GLuint n, const GLubyte mask[],
+static void __cdecl blend_general( GLcontext *ctx, GLuint n, const GLubyte mask[],
                            GLubyte rgba[][4], CONST GLubyte dest[][4] )
 {
    GLfloat rscale = 1.0F / 255.0F;
@@ -480,7 +480,11 @@ static void blend_general( GLcontext *ctx, GLuint n, const GLubyte mask[],
                sR = sG = sB = 1.0F - (GLfloat) Ad * ascale;
                break;
             case GL_SRC_ALPHA_SATURATE:
+#ifdef __WIN32OS2__
+               if(As < 255 - Ad) {
+#else
                if (As < 1.0F - (GLfloat) Ad * ascale) {
+#endif
                   sR = sG = sB = (GLfloat) As * ascale;
                }
                else {

@@ -1,4 +1,4 @@
-/* $Id: winpos.c,v 1.1 2000-02-29 00:50:15 sandervl Exp $ */
+/* $Id: winpos.c,v 1.2 2000-03-01 18:49:40 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -85,7 +85,6 @@ void gl_WindowPos4fMESA( GLcontext *ctx,
 /*
  * OpenGL implementation of glWindowPos*MESA()
  */
-/* FIX: JvdH - was glWindowPos4fMESA */
 void glWindowPos4fMESA( GLfloat x, GLfloat y, GLfloat z, GLfloat w )
 {
    GLfloat fx, fy;

@@ -1,4 +1,4 @@
-/* $Id: readpix.c,v 1.1 2000-02-29 00:50:09 sandervl Exp $ */
+/* $Id: readpix.c,v 1.2 2000-03-01 18:49:35 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -39,6 +39,7 @@
 #include "GL/xf86glx.h"
 #endif
 #include "alphabuf.h"
+#include "types.h"
 #include "context.h"
 #include "depth.h"
 #include "feedback.h"
@@ -48,7 +49,6 @@
 #include "readpix.h"
 #include "span.h"
 #include "stencil.h"
-#include "types.h"
 #endif
 
 
@@ -59,7 +59,7 @@
  */
 static void read_index_pixels( GLcontext *ctx,
                                GLint x, GLint y,
-			       GLsizei width, GLsizei height,
+                               GLsizei width, GLsizei height,
 			       GLenum type, GLvoid *pixels,
                                const struct gl_pixelstore_attrib *packing )
 {

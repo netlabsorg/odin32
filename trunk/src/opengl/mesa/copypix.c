@@ -1,4 +1,4 @@
-/* $Id: copypix.c,v 1.1 2000-02-29 00:50:01 sandervl Exp $ */
+/* $Id: copypix.c,v 1.2 2000-03-01 18:49:25 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -36,6 +36,7 @@
 #else
 #include "GL/xf86glx.h"
 #endif
+#include "types.h"
 #include "context.h"
 #include "copypix.h"
 #include "depth.h"
@@ -45,7 +46,6 @@
 #include "pixel.h"
 #include "span.h"
 #include "stencil.h"
-#include "types.h"
 #include "zoom.h"
 #endif
 #ifdef __WIN32OS2__

@@ -1,4 +1,4 @@
-/* $Id: vbxform.c,v 1.1 2000-02-29 00:50:14 sandervl Exp $ */
+/* $Id: vbxform.c,v 1.2 2000-03-01 18:49:39 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -36,6 +36,7 @@
 #else
 #include "GL/xf86glx.h"
 #endif
+#include "types.h"
 #include "context.h"
 #include "cva.h"
 #include "clip.h"
@@ -50,7 +51,6 @@
 #include "pipeline.h"
 #include "shade.h"
 #include "texture.h"
-#include "types.h"
 #include "varray.h"
 #include "vb.h"
 #include "vbcull.h"

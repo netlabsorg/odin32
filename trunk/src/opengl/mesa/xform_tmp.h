@@ -1,4 +1,4 @@
-/* $Id: xform_tmp.h,v 1.1 2000-02-29 00:48:45 sandervl Exp $ */
+/* $Id: xform_tmp.h,v 1.2 2000-03-01 18:49:41 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -65,11 +65,11 @@
  *     cliped and/or culled vertices.
  */
 
-static void TAG(transform_points1_general)( GLvector4f *to_vec,
-					    const GLmatrix *mat,
-					    const GLvector4f *from_vec,
-					    const GLubyte *mask,
-					    const GLubyte flag )
+static void __cdecl TAG(transform_points1_general)( GLvector4f *to_vec,
+                                            const GLmatrix *mat,
+                                            const GLvector4f *from_vec,
+                                            const GLubyte *mask,
+                                            const GLubyte flag )
 {
    const GLuint stride = from_vec->stride;
    GLfloat *from = from_vec->start;
@@ -87,9 +87,9 @@ static void TAG(transform_points1_general)( GLvector4f *to_vec,
       CLIP_CHECK {
 	 const GLfloat ox = from[0];
 	 to[i][0] = m0 * ox + m12;
-	 to[i][1] = m1 * ox + m13;
-	 to[i][2] = m2 * ox + m14;
-	 to[i][3] = m3 * ox + m15;
+         to[i][1] = m1 * ox + m13;
+         to[i][2] = m2 * ox + m14;
+         to[i][3] = m3 * ox + m15;
       }
    }
 
@@ -98,11 +98,11 @@ static void TAG(transform_points1_general)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static void TAG(transform_points1_identity)( GLvector4f *to_vec,
-					     const GLmatrix *mat,
-					     const GLvector4f *from_vec,
-					     const GLubyte *mask,
-					     const GLubyte flag )
+static void __cdecl TAG(transform_points1_identity)( GLvector4f *to_vec,
+                                             const GLmatrix *mat,
+                                             const GLvector4f *from_vec,
+                                             const GLubyte *mask,
+                                             const GLubyte flag )
 {
    const GLuint stride = from_vec->stride;
    GLfloat *from = from_vec->start;
@@ -116,7 +116,7 @@ static void TAG(transform_points1_identity)( GLvector4f *to_vec,
    if (to_vec == from_vec) return;
    STRIDE_LOOP {
       CLIP_CHECK {
-	 to[i][0] = from[0];
+         to[i][0] = from[0];
       }
    }
 
@@ -125,11 +125,11 @@ static void TAG(transform_points1_identity)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static void TAG(transform_points1_2d)( GLvector4f *to_vec,
-				       const GLmatrix *mat,
-				       const GLvector4f *from_vec,
-				       const GLubyte *mask,
-				       const GLubyte flag )
+static void __cdecl TAG(transform_points1_2d)( GLvector4f *to_vec,
+                                       const GLmatrix *mat,
+                                       const GLvector4f *from_vec,
+                                       const GLubyte *mask,
+                                       const GLubyte flag )
 {
    const GLuint stride = from_vec->stride;
    GLfloat *from = from_vec->start;
@@ -144,9 +144,9 @@ static void TAG(transform_points1_2d)( GLvector4f *to_vec,
    ASSERT(mat->type == MATRIX_2D);
    STRIDE_LOOP {
       CLIP_CHECK {
-	 const GLfloat ox = from[0];
-	 to[i][0] = m0 * ox + m12;
-	 to[i][1] = m1 * ox + m13;
+         const GLfloat ox = from[0];
+         to[i][0] = m0 * ox + m12;
+         to[i][1] = m1 * ox + m13;
       }
    }
    to_vec->size = 2;
@@ -154,11 +154,11 @@ static void TAG(transform_points1_2d)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static void TAG(transform_points1_2d_no_rot)( GLvector4f *to_vec,
-					      const GLmatrix *mat,
-					      const GLvector4f *from_vec,
-					      const GLubyte *mask,
-					      const GLubyte flag )
+static void __cdecl TAG(transform_points1_2d_no_rot)( GLvector4f *to_vec,
+                                              const GLmatrix *mat,
+                                              const GLvector4f *from_vec,
+                                              const GLubyte *mask,
+                                              const GLubyte flag )
 {
    const GLuint stride = from_vec->stride;
    GLfloat *from = from_vec->start;
@@ -172,9 +172,9 @@ static void TAG(transform_points1_2d_no_rot)( GLvector4f *to_vec,
    ASSERT(mat->type == MATRIX_2D_NO_ROT);
    STRIDE_LOOP {
       CLIP_CHECK {
-	 const GLfloat ox = from[0];
-	 to[i][0] = m0 * ox + m12;
-	 to[i][1] =           m13;
+         const GLfloat ox = from[0];
+         to[i][0] = m0 * ox + m12;
+         to[i][1] =           m13;
       }
    }
 
@@ -183,11 +183,11 @@ static void TAG(transform_points1_2d_no_rot)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static void TAG(transform_points1_3d)( GLvector4f *to_vec,
-				       const GLmatrix *mat,
-				       const GLvector4f *from_vec,
-				       const GLubyte *mask,
-				       const GLubyte flag )
+static void __cdecl TAG(transform_points1_3d)( GLvector4f *to_vec,
+                                       const GLmatrix *mat,
+                                       const GLvector4f *from_vec,
+                                       const GLubyte *mask,
+                                       const GLubyte flag )
 {
    const GLuint stride = from_vec->stride;
    GLfloat *from = from_vec->start;
@@ -203,9 +203,9 @@ static void TAG(transform_points1_3d)( GLvector4f *to_vec,
    STRIDE_LOOP {
       CLIP_CHECK {
 	 const GLfloat ox = from[0];
-	 to[i][0] = m0 * ox + m12;
-	 to[i][1] = m1 * ox + m13;
-	 to[i][2] = m2 * ox + m14;
+         to[i][0] = m0 * ox + m12;
+         to[i][1] = m1 * ox + m13;
+         to[i][2] = m2 * ox + m14;
       }
    }
    to_vec->size = 3;
@@ -214,11 +214,11 @@ static void TAG(transform_points1_3d)( GLvector4f *to_vec,
 }
 
 
-static void TAG(transform_points1_3d_no_rot)( GLvector4f *to_vec,
-					      const GLmatrix *mat,
-					      const GLvector4f *from_vec,
-					      const GLubyte *mask,
-					      const GLubyte flag )
+static void __cdecl TAG(transform_points1_3d_no_rot)( GLvector4f *to_vec,
+                                              const GLmatrix *mat,
+                                              const GLvector4f *from_vec,
+                                              const GLubyte *mask,
+                                              const GLubyte flag )
 {
    const GLuint stride = from_vec->stride;
    GLfloat *from = from_vec->start;
@@ -233,10 +233,10 @@ static void TAG(transform_points1_3d_no_rot)( GLvector4f *to_vec,
    ASSERT(mat->type == MATRIX_3D_NO_ROT);
    STRIDE_LOOP {
       CLIP_CHECK {
-	 const GLfloat ox = from[0];
-	 to[i][0] = m0 * ox           + m12;
-	 to[i][1] =                     m13;
-	 to[i][2] =                     m14;
+         const GLfloat ox = from[0];
+         to[i][0] = m0 * ox           + m12;
+         to[i][1] =                     m13;
+         to[i][2] =                     m14;
       }
    }
    to_vec->size = 3;
@@ -244,11 +244,11 @@ static void TAG(transform_points1_3d_no_rot)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static void TAG(transform_points1_perspective)( GLvector4f *to_vec,
-						const GLmatrix *mat,
-						const GLvector4f *from_vec,
-						const GLubyte *mask,
-						const GLubyte flag )
+static void __cdecl TAG(transform_points1_perspective)( GLvector4f *to_vec,
+                                                const GLmatrix *mat,
+                                                const GLvector4f *from_vec,
+                                                const GLubyte *mask,
+                                                const GLubyte flag )
 {
    const GLuint stride = from_vec->stride;
    GLfloat *from = from_vec->start;
@@ -281,11 +281,11 @@ static void TAG(transform_points1_perspective)( GLvector4f *to_vec,
  * present early in the geometry pipeline and throughout the
  * texture pipeline.
  */
-static void TAG(transform_points2_general)( GLvector4f *to_vec,
-					    const GLmatrix *mat,
-					    const GLvector4f *from_vec,
-					    const GLubyte *mask,
-					    const GLubyte flag )
+static void __cdecl TAG(transform_points2_general)( GLvector4f *to_vec,
+                                            const GLmatrix *mat,
+                                            const GLvector4f *from_vec,
+                                            const GLubyte *mask,
+                                            const GLubyte flag )
 {
    const GLuint stride = from_vec->stride;
    GLfloat *from = from_vec->start;
@@ -302,10 +302,10 @@ static void TAG(transform_points2_general)( GLvector4f *to_vec,
    STRIDE_LOOP {
       CLIP_CHECK {
 	 const GLfloat ox = from[0], oy = from[1];
-	 to[i][0] = m0 * ox + m4 * oy + m12;
-	 to[i][1] = m1 * ox + m5 * oy + m13;
-	 to[i][2] = m2 * ox + m6 * oy + m14;
-	 to[i][3] = m3 * ox + m7 * oy + m15;
+         to[i][0] = m0 * ox + m4 * oy + m12;
+         to[i][1] = m1 * ox + m5 * oy + m13;
+         to[i][2] = m2 * ox + m6 * oy + m14;
+         to[i][3] = m3 * ox + m7 * oy + m15;
       }
    }
    to_vec->size = 4;
@@ -313,11 +313,11 @@ static void TAG(transform_points2_general)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static void TAG(transform_points2_identity)( GLvector4f *to_vec,
-					     const GLmatrix *mat,
-					     const GLvector4f *from_vec,
-					     const GLubyte *mask,
-					     const GLubyte flag )
+static void __cdecl TAG(transform_points2_identity)( GLvector4f *to_vec,
+                                             const GLmatrix *mat,
+                                             const GLvector4f *from_vec,
+                                             const GLubyte *mask,
+                                             const GLubyte flag )
 {
    const GLuint stride = from_vec->stride;
    GLfloat *from = from_vec->start;
@@ -331,8 +331,8 @@ static void TAG(transform_points2_identity)( GLvector4f *to_vec,
    if (to_vec == from_vec) return;
    STRIDE_LOOP {
       CLIP_CHECK {
-	 to[i][0] = from[0];
-	 to[i][1] = from[1];
+         to[i][0] = from[0];
+         to[i][1] = from[1];
       }
    }
    to_vec->size = 2;
@@ -340,11 +340,11 @@ static void TAG(transform_points2_identity)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static void TAG(transform_points2_2d)( GLvector4f *to_vec,
-				       const GLmatrix *mat,
-				       const GLvector4f *from_vec,
-				       const GLubyte *mask,
-				       const GLubyte flag )
+static void __cdecl TAG(transform_points2_2d)( GLvector4f *to_vec,
+                                       const GLmatrix *mat,
+                                       const GLvector4f *from_vec,
+                                       const GLubyte *mask,
+                                       const GLubyte flag )
 {
    const GLuint stride = from_vec->stride;
    GLfloat *from = from_vec->start;
@@ -359,9 +359,9 @@ static void TAG(transform_points2_2d)( GLvector4f *to_vec,
    ASSERT(mat->type == MATRIX_2D);
    STRIDE_LOOP {
       CLIP_CHECK {
-	 const GLfloat ox = from[0], oy = from[1];
-	 to[i][0] = m0 * ox + m4 * oy + m12;
-	 to[i][1] = m1 * ox + m5 * oy + m13;
+         const GLfloat ox = from[0], oy = from[1];
+         to[i][0] = m0 * ox + m4 * oy + m12;
+         to[i][1] = m1 * ox + m5 * oy + m13;
       }
    }
 
@@ -370,11 +370,11 @@ static void TAG(transform_points2_2d)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static void TAG(transform_points2_2d_no_rot)( GLvector4f *to_vec,
-					      const GLmatrix *mat,
-					      const GLvector4f *from_vec,
-					      const GLubyte *mask,
-					      const GLubyte flag )
+static void __cdecl TAG(transform_points2_2d_no_rot)( GLvector4f *to_vec,
+                                              const GLmatrix *mat,
+                                              const GLvector4f *from_vec,
+                                              const GLubyte *mask,
+                                              const GLubyte flag )
 {
    const GLuint stride = from_vec->stride;
    GLfloat *from = from_vec->start;
@@ -388,9 +388,9 @@ static void TAG(transform_points2_2d_no_rot)( GLvector4f *to_vec,
    ASSERT(mat->type == MATRIX_2D_NO_ROT);
    STRIDE_LOOP {
       CLIP_CHECK {
-	 const GLfloat ox = from[0], oy = from[1];
-	 to[i][0] = m0 * ox           + m12;
-	 to[i][1] =           m5 * oy + m13;
+         const GLfloat ox = from[0], oy = from[1];
+         to[i][0] = m0 * ox           + m12;
+         to[i][1] =           m5 * oy + m13;
       }
    }
 
@@ -399,11 +399,11 @@ static void TAG(transform_points2_2d_no_rot)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static void TAG(transform_points2_3d)( GLvector4f *to_vec,
-				       const GLmatrix *mat,
-				       const GLvector4f *from_vec,
-				       const GLubyte *mask,
-				       const GLubyte flag )
+static void __cdecl TAG(transform_points2_3d)( GLvector4f *to_vec,
+                                       const GLmatrix *mat,
+                                       const GLvector4f *from_vec,
+                                       const GLubyte *mask,
+                                       const GLubyte flag )
 {
    const GLuint stride = from_vec->stride;
    GLfloat *from = from_vec->start;
@@ -433,11 +433,11 @@ static void TAG(transform_points2_3d)( GLvector4f *to_vec,
 /* I would actually say this was a fairly important function, from
  * a texture transformation point of view.
  */
-static void TAG(transform_points2_3d_no_rot)( GLvector4f *to_vec,
-					      const GLmatrix *mat,
-					      const GLvector4f *from_vec,
-					      const GLubyte *mask,
-					      const GLubyte flag )
+static void __cdecl TAG(transform_points2_3d_no_rot)( GLvector4f *to_vec,
+                                              const GLmatrix *mat,
+                                              const GLvector4f *from_vec,
+                                              const GLubyte *mask,
+                                              const GLubyte flag )
 {
    const GLuint stride = from_vec->stride;
    GLfloat *from = from_vec->start;
@@ -472,11 +472,11 @@ static void TAG(transform_points2_3d_no_rot)( GLvector4f *to_vec,
  * code.  It's also hard to remove any of these functions if you are
  * attached to the assertions that have appeared in them.
  */
-static void TAG(transform_points2_perspective)( GLvector4f *to_vec,
-						const GLmatrix *mat,
-						const GLvector4f *from_vec,
-						const GLubyte *mask,
-						const GLubyte flag )
+static void __cdecl TAG(transform_points2_perspective)( GLvector4f *to_vec,
+                                                const GLmatrix *mat,
+                                                const GLvector4f *from_vec,
+                                                const GLubyte *mask,
+                                                const GLubyte flag )
 {
    const GLuint stride = from_vec->stride;
    GLfloat *from = from_vec->start;
@@ -493,8 +493,8 @@ static void TAG(transform_points2_perspective)( GLvector4f *to_vec,
 	 const GLfloat ox = from[0], oy = from[1];
 	 to[i][0] = m0 * ox                ;
 	 to[i][1] =           m5 * oy      ;
-	 to[i][2] =                     m14;
-	 to[i][3] = 0;
+         to[i][2] =                     m14;
+         to[i][3] = 0;
       }
    }
    to_vec->size = 4;
@@ -504,11 +504,11 @@ static void TAG(transform_points2_perspective)( GLvector4f *to_vec,
 
 
 
-static void TAG(transform_points3_general)( GLvector4f *to_vec,
-					    const GLmatrix *mat,
-					    const GLvector4f *from_vec,
-					    const GLubyte *mask,
-					    const GLubyte flag )
+static void __cdecl TAG(transform_points3_general)( GLvector4f *to_vec,
+                                            const GLmatrix *mat,
+                                            const GLvector4f *from_vec,
+                                            const GLubyte *mask,
+                                            const GLubyte flag )
 {
    const GLuint stride = from_vec->stride;
    GLfloat *from = from_vec->start;
@@ -525,11 +525,11 @@ static void TAG(transform_points3_general)( GLvector4f *to_vec,
    ASSERT(mat->type == MATRIX_GENERAL);
    STRIDE_LOOP {
       CLIP_CHECK {
-	 const GLfloat ox = from[0], oy = from[1], oz = from[2];
-	 to[i][0] = m0 * ox + m4 * oy + m8  * oz + m12;
-	 to[i][1] = m1 * ox + m5 * oy + m9  * oz + m13;
-	 to[i][2] = m2 * ox + m6 * oy + m10 * oz + m14;
-	 to[i][3] = m3 * ox + m7 * oy + m11 * oz + m15;
+         const GLfloat ox = from[0], oy = from[1], oz = from[2];
+         to[i][0] = m0 * ox + m4 * oy + m8  * oz + m12;
+         to[i][1] = m1 * ox + m5 * oy + m9  * oz + m13;
+         to[i][2] = m2 * ox + m6 * oy + m10 * oz + m14;
+         to[i][3] = m3 * ox + m7 * oy + m11 * oz + m15;
       }
    }
    to_vec->size = 4;
@@ -537,11 +537,11 @@ static void TAG(transform_points3_general)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static void TAG(transform_points3_identity)( GLvector4f *to_vec,
-					     const GLmatrix *mat,
-					     const GLvector4f *from_vec,
-					     const GLubyte *mask,
-					     const GLubyte flag )
+static void __cdecl TAG(transform_points3_identity)( GLvector4f *to_vec,
+                                             const GLmatrix *mat,
+                                             const GLvector4f *from_vec,
+                                             const GLubyte *mask,
+                                             const GLubyte flag )
 {
    const GLuint stride = from_vec->stride;
    GLfloat *from = from_vec->start;
@@ -555,9 +555,9 @@ static void TAG(transform_points3_identity)( GLvector4f *to_vec,
    if (to_vec == from_vec) return;
    STRIDE_LOOP {
       CLIP_CHECK {
-	 to[i][0] = from[0];
-	 to[i][1] = from[1];
-	 to[i][2] = from[2];
+         to[i][0] = from[0];
+         to[i][1] = from[1];
+         to[i][2] = from[2];
       }
    }
    to_vec->size = 3;
@@ -565,11 +565,11 @@ static void TAG(transform_points3_identity)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static void TAG(transform_points3_2d)( GLvector4f *to_vec,
-				       const GLmatrix *mat,
-				       const GLvector4f *from_vec,
-				       const GLubyte *mask,
-				       const GLubyte flag )
+static void __cdecl TAG(transform_points3_2d)( GLvector4f *to_vec,
+                                       const GLmatrix *mat,
+                                       const GLvector4f *from_vec,
+                                       const GLubyte *mask,
+                                       const GLubyte flag )
 {
    const GLuint stride = from_vec->stride;
    GLfloat *from = from_vec->start;
@@ -584,10 +584,10 @@ static void TAG(transform_points3_2d)( GLvector4f *to_vec,
    ASSERT(mat->type == MATRIX_2D);
    STRIDE_LOOP {
       CLIP_CHECK {
-	 const GLfloat ox = from[0], oy = from[1], oz = from[2];
-	 to[i][0] = m0 * ox + m4 * oy            + m12       ;
-	 to[i][1] = m1 * ox + m5 * oy            + m13       ;
-	 to[i][2] =                   +       oz             ;
+         const GLfloat ox = from[0], oy = from[1], oz = from[2];
+         to[i][0] = m0 * ox + m4 * oy            + m12       ;
+         to[i][1] = m1 * ox + m5 * oy            + m13       ;
+         to[i][2] =                   +       oz             ;
       }
    }
    to_vec->size = 3;
@@ -595,11 +595,11 @@ static void TAG(transform_points3_2d)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static void TAG(transform_points3_2d_no_rot)( GLvector4f *to_vec,
-					      const GLmatrix *mat,
-					      const GLvector4f *from_vec,
-					      const GLubyte *mask,
-					      const GLubyte flag )
+static void __cdecl TAG(transform_points3_2d_no_rot)( GLvector4f *to_vec,
+                                              const GLmatrix *mat,
+                                              const GLvector4f *from_vec,
+                                              const GLubyte *mask,
+                                              const GLubyte flag )
 {
    const GLuint stride = from_vec->stride;
    GLfloat *from = from_vec->start;
@@ -613,10 +613,10 @@ static void TAG(transform_points3_2d_no_rot)( GLvector4f *to_vec,
    ASSERT(mat->type == MATRIX_2D_NO_ROT);
    STRIDE_LOOP {
       CLIP_CHECK {
-	 const GLfloat ox = from[0], oy = from[1], oz = from[2];
-	 to[i][0] = m0 * ox                      + m12       ;
-	 to[i][1] =           m5 * oy            + m13       ;
-	 to[i][2] =                   +       oz             ;
+         const GLfloat ox = from[0], oy = from[1], oz = from[2];
+         to[i][0] = m0 * ox                      + m12       ;
+         to[i][1] =           m5 * oy            + m13       ;
+         to[i][2] =                   +       oz             ;
       }
    }
    to_vec->size = 3;
@@ -624,11 +624,11 @@ static void TAG(transform_points3_2d_no_rot)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static void TAG(transform_points3_3d)( GLvector4f *to_vec,
-				       const GLmatrix *mat,
-				       const GLvector4f *from_vec,
-				       const GLubyte *mask,
-				       const GLubyte flag )
+static void __cdecl TAG(transform_points3_3d)( GLvector4f *to_vec,
+                                       const GLmatrix *mat,
+                                       const GLvector4f *from_vec,
+                                       const GLubyte *mask,
+                                       const GLubyte flag )
 {
    const GLuint stride = from_vec->stride;
    GLfloat *from = from_vec->start;
@@ -644,10 +644,10 @@ static void TAG(transform_points3_3d)( GLvector4f *to_vec,
    ASSERT(mat->type == MATRIX_3D);
    STRIDE_LOOP {
       CLIP_CHECK {
-	 const GLfloat ox = from[0], oy = from[1], oz = from[2];
-	 to[i][0] = m0 * ox + m4 * oy +  m8 * oz + m12       ;
-	 to[i][1] = m1 * ox + m5 * oy +  m9 * oz + m13       ;
-	 to[i][2] = m2 * ox + m6 * oy + m10 * oz + m14       ;
+         const GLfloat ox = from[0], oy = from[1], oz = from[2];
+         to[i][0] = m0 * ox + m4 * oy +  m8 * oz + m12       ;
+         to[i][1] = m1 * ox + m5 * oy +  m9 * oz + m13       ;
+         to[i][2] = m2 * ox + m6 * oy + m10 * oz + m14       ;
       }
    }
    to_vec->size = 3;
@@ -657,11 +657,11 @@ static void TAG(transform_points3_3d)( GLvector4f *to_vec,
 
 /* previously known as ortho...
  */
-static void TAG(transform_points3_3d_no_rot)( GLvector4f *to_vec,
-					      const GLmatrix *mat,
-					      const GLvector4f *from_vec,
-					      const GLubyte *mask,
-					      const GLubyte flag )
+static void __cdecl TAG(transform_points3_3d_no_rot)( GLvector4f *to_vec,
+                                              const GLmatrix *mat,
+                                              const GLvector4f *from_vec,
+                                              const GLubyte *mask,
+                                              const GLubyte flag )
 {
    const GLuint stride = from_vec->stride;
    GLfloat *from = from_vec->start;
@@ -676,10 +676,10 @@ static void TAG(transform_points3_3d_no_rot)( GLvector4f *to_vec,
    ASSERT(mat->type == MATRIX_3D_NO_ROT);
    STRIDE_LOOP {
       CLIP_CHECK {
-	 const GLfloat ox = from[0], oy = from[1], oz = from[2];
-	 to[i][0] = m0 * ox                      + m12       ;
-	 to[i][1] =           m5 * oy            + m13       ;
-	 to[i][2] =                     m10 * oz + m14       ;
+         const GLfloat ox = from[0], oy = from[1], oz = from[2];
+         to[i][0] = m0 * ox                      + m12       ;
+         to[i][1] =           m5 * oy            + m13       ;
+         to[i][2] =                     m10 * oz + m14       ;
       }
    }
    to_vec->size = 3;
@@ -687,11 +687,11 @@ static void TAG(transform_points3_3d_no_rot)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static void TAG(transform_points3_perspective)( GLvector4f *to_vec,
-						const GLmatrix *mat,
-						const GLvector4f *from_vec,
-						const GLubyte *mask,
-						const GLubyte flag )
+static void __cdecl TAG(transform_points3_perspective)( GLvector4f *to_vec,
+                                                const GLmatrix *mat,
+                                                const GLvector4f *from_vec,
+                                                const GLubyte *mask,
+                                                const GLubyte flag )
 {
    const GLuint stride = from_vec->stride;
    GLfloat *from = from_vec->start;
@@ -706,11 +706,11 @@ static void TAG(transform_points3_perspective)( GLvector4f *to_vec,
    ASSERT(mat->type == MATRIX_PERSPECTIVE);
    STRIDE_LOOP {
       CLIP_CHECK {
-	 const GLfloat ox = from[0], oy = from[1], oz = from[2];
-	 to[i][0] = m0 * ox           + m8  * oz       ;
-	 to[i][1] =           m5 * oy + m9  * oz       ;
-	 to[i][2] =                     m10 * oz + m14 ;
-	 to[i][3] =                          -oz       ;
+         const GLfloat ox = from[0], oy = from[1], oz = from[2];
+         to[i][0] = m0 * ox           + m8  * oz       ;
+         to[i][1] =           m5 * oy + m9  * oz       ;
+         to[i][2] =                     m10 * oz + m14 ;
+         to[i][3] =                          -oz       ;
       }
    }
    to_vec->size = 4;
@@ -720,11 +720,11 @@ static void TAG(transform_points3_perspective)( GLvector4f *to_vec,
 
 
 
-static void TAG(transform_points4_general)( GLvector4f *to_vec,
-					    const GLmatrix *mat,
-					    const GLvector4f *from_vec,
-					    const GLubyte *mask,
-					    const GLubyte flag )
+static void __cdecl TAG(transform_points4_general)( GLvector4f *to_vec,
+                                            const GLmatrix *mat,
+                                            const GLvector4f *from_vec,
+                                            const GLubyte *mask,
+                                            const GLubyte flag )
 {
    const GLuint stride = from_vec->stride;
    GLfloat *from = from_vec->start;
@@ -741,11 +741,11 @@ static void TAG(transform_points4_general)( GLvector4f *to_vec,
    ASSERT(mat->type == MATRIX_GENERAL);
    STRIDE_LOOP {
       CLIP_CHECK {
-	 const GLfloat ox = from[0], oy = from[1], oz = from[2], ow = from[3];
-	 to[i][0] = m0 * ox + m4 * oy + m8  * oz + m12 * ow;
-	 to[i][1] = m1 * ox + m5 * oy + m9  * oz + m13 * ow;
-	 to[i][2] = m2 * ox + m6 * oy + m10 * oz + m14 * ow;
-	 to[i][3] = m3 * ox + m7 * oy + m11 * oz + m15 * ow;
+         const GLfloat ox = from[0], oy = from[1], oz = from[2], ow = from[3];
+         to[i][0] = m0 * ox + m4 * oy + m8  * oz + m12 * ow;
+         to[i][1] = m1 * ox + m5 * oy + m9  * oz + m13 * ow;
+         to[i][2] = m2 * ox + m6 * oy + m10 * oz + m14 * ow;
+         to[i][3] = m3 * ox + m7 * oy + m11 * oz + m15 * ow;
       }
    }
    to_vec->size = 4;
@@ -753,11 +753,11 @@ static void TAG(transform_points4_general)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static void TAG(transform_points4_identity)( GLvector4f *to_vec,
-					     const GLmatrix *mat,
-					     const GLvector4f *from_vec,
-					     const GLubyte *mask,
-					     const GLubyte flag )
+static void __cdecl TAG(transform_points4_identity)( GLvector4f *to_vec,
+                                             const GLmatrix *mat,
+                                             const GLvector4f *from_vec,
+                                             const GLubyte *mask,
+                                             const GLubyte flag )
 {
    const GLuint stride = from_vec->stride;
    GLfloat *from = from_vec->start;
@@ -771,10 +771,10 @@ static void TAG(transform_points4_identity)( GLvector4f *to_vec,
    if (to_vec == from_vec) return;
    STRIDE_LOOP {
       CLIP_CHECK {
-	 to[i][0] = from[0];
-	 to[i][1] = from[1];
-	 to[i][2] = from[2];
-	 to[i][3] = from[3];
+         to[i][0] = from[0];
+         to[i][1] = from[1];
+         to[i][2] = from[2];
+         to[i][3] = from[3];
       }
    }
    to_vec->size = 4;
@@ -782,11 +782,11 @@ static void TAG(transform_points4_identity)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static void TAG(transform_points4_2d)( GLvector4f *to_vec,
-				       const GLmatrix *mat,
-				       const GLvector4f *from_vec,
-				       const GLubyte *mask,
-				       const GLubyte flag )
+static void __cdecl TAG(transform_points4_2d)( GLvector4f *to_vec,
+                                       const GLmatrix *mat,
+                                       const GLvector4f *from_vec,
+                                       const GLubyte *mask,
+                                       const GLubyte flag )
 {
    const GLuint stride = from_vec->stride;
    GLfloat *from = from_vec->start;
@@ -801,11 +801,11 @@ static void TAG(transform_points4_2d)( GLvector4f *to_vec,
    ASSERT(mat->type == MATRIX_2D);
    STRIDE_LOOP {
       CLIP_CHECK {
-	 const GLfloat ox = from[0], oy = from[1], oz = from[2], ow = from[3];
-	 to[i][0] = m0 * ox + m4 * oy            + m12 * ow;
-	 to[i][1] = m1 * ox + m5 * oy            + m13 * ow;
-	 to[i][2] =                   +       oz           ;
-	 to[i][3] =                                      ow;
+         const GLfloat ox = from[0], oy = from[1], oz = from[2], ow = from[3];
+         to[i][0] = m0 * ox + m4 * oy            + m12 * ow;
+         to[i][1] = m1 * ox + m5 * oy            + m13 * ow;
+         to[i][2] =                   +       oz           ;
+         to[i][3] =                                      ow;
       }
    }
    to_vec->size = 4;
@@ -813,11 +813,11 @@ static void TAG(transform_points4_2d)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static void TAG(transform_points4_2d_no_rot)( GLvector4f *to_vec,
-					      const GLmatrix *mat,
-					      const GLvector4f *from_vec,
-					      const GLubyte *mask,
-					      const GLubyte flag )
+static void __cdecl TAG(transform_points4_2d_no_rot)( GLvector4f *to_vec,
+                                              const GLmatrix *mat,
+                                              const GLvector4f *from_vec,
+                                              const GLubyte *mask,
+                                              const GLubyte flag )
 {
    const GLuint stride = from_vec->stride;
    GLfloat *from = from_vec->start;
@@ -831,11 +831,11 @@ static void TAG(transform_points4_2d_no_rot)( GLvector4f *to_vec,
    ASSERT(mat->type == MATRIX_2D_NO_ROT);
    STRIDE_LOOP {
       CLIP_CHECK {
-	 const GLfloat ox = from[0], oy = from[1], oz = from[2], ow = from[3];
-	 to[i][0] = m0 * ox                      + m12 * ow;
-	 to[i][1] =           m5 * oy            + m13 * ow;
-	 to[i][2] =                   +       oz           ;
-	 to[i][3] =                                      ow;
+         const GLfloat ox = from[0], oy = from[1], oz = from[2], ow = from[3];
+         to[i][0] = m0 * ox                      + m12 * ow;
+         to[i][1] =           m5 * oy            + m13 * ow;
+         to[i][2] =                   +       oz           ;
+         to[i][3] =                                      ow;
       }
    }
    to_vec->size = 4;
@@ -843,11 +843,11 @@ static void TAG(transform_points4_2d_no_rot)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static void TAG(transform_points4_3d)( GLvector4f *to_vec,
-				       const GLmatrix *mat,
-				       const GLvector4f *from_vec,
-				       const GLubyte *mask,
-				       const GLubyte flag )
+static void __cdecl TAG(transform_points4_3d)( GLvector4f *to_vec,
+                                       const GLmatrix *mat,
+                                       const GLvector4f *from_vec,
+                                       const GLubyte *mask,
+                                       const GLubyte flag )
 {
    const GLuint stride = from_vec->stride;
    GLfloat *from = from_vec->start;
@@ -863,11 +863,11 @@ static void TAG(transform_points4_3d)( GLvector4f *to_vec,
    ASSERT(mat->type == MATRIX_3D);
    STRIDE_LOOP {
       CLIP_CHECK {
-	 const GLfloat ox = from[0], oy = from[1], oz = from[2], ow = from[3];
-	 to[i][0] = m0 * ox + m4 * oy +  m8 * oz + m12 * ow;
-	 to[i][1] = m1 * ox + m5 * oy +  m9 * oz + m13 * ow;
-	 to[i][2] = m2 * ox + m6 * oy + m10 * oz + m14 * ow;
-	 to[i][3] =                                      ow;
+         const GLfloat ox = from[0], oy = from[1], oz = from[2], ow = from[3];
+         to[i][0] = m0 * ox + m4 * oy +  m8 * oz + m12 * ow;
+         to[i][1] = m1 * ox + m5 * oy +  m9 * oz + m13 * ow;
+         to[i][2] = m2 * ox + m6 * oy + m10 * oz + m14 * ow;
+         to[i][3] =                                      ow;
       }
    }
    to_vec->size = 4;
@@ -875,11 +875,11 @@ static void TAG(transform_points4_3d)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static void TAG(transform_points4_3d_no_rot)( GLvector4f *to_vec,
-					      const GLmatrix *mat,
-					      const GLvector4f *from_vec,
-					      const GLubyte *mask,
-					      const GLubyte flag )
+static void __cdecl TAG(transform_points4_3d_no_rot)( GLvector4f *to_vec,
+                                              const GLmatrix *mat,
+                                              const GLvector4f *from_vec,
+                                              const GLubyte *mask,
+                                              const GLubyte flag )
 {
    const GLuint stride = from_vec->stride;
    GLfloat *from = from_vec->start;
@@ -894,11 +894,11 @@ static void TAG(transform_points4_3d_no_rot)( GLvector4f *to_vec,
    ASSERT(mat->type == MATRIX_3D_NO_ROT);
    STRIDE_LOOP {
       CLIP_CHECK {
-	 const GLfloat ox = from[0], oy = from[1], oz = from[2], ow = from[3];
-	 to[i][0] = m0 * ox                      + m12 * ow;
-	 to[i][1] =           m5 * oy            + m13 * ow;
-	 to[i][2] =                     m10 * oz + m14 * ow;
-	 to[i][3] =                                      ow;
+         const GLfloat ox = from[0], oy = from[1], oz = from[2], ow = from[3];
+         to[i][0] = m0 * ox                      + m12 * ow;
+         to[i][1] =           m5 * oy            + m13 * ow;
+         to[i][2] =                     m10 * oz + m14 * ow;
+         to[i][3] =                                      ow;
       }
    }
    to_vec->size = 4;
@@ -906,11 +906,11 @@ static void TAG(transform_points4_3d_no_rot)( GLvector4f *to_vec,
    to_vec->count = from_vec->count;
 }
 
-static void TAG(transform_points4_perspective)( GLvector4f *to_vec,
-						const GLmatrix *mat,
-						const GLvector4f *from_vec,
-						const GLubyte *mask,
-						const GLubyte flag )
+static void __cdecl TAG(transform_points4_perspective)( GLvector4f *to_vec,
+                                                const GLmatrix *mat,
+                                                const GLvector4f *from_vec,
+                                                const GLubyte *mask,
+                                                const GLubyte flag )
 {
    const GLuint stride = from_vec->stride;
    GLfloat *from = from_vec->start;
@@ -925,11 +925,11 @@ static void TAG(transform_points4_perspective)( GLvector4f *to_vec,
    ASSERT(mat->type == MATRIX_PERSPECTIVE);
    STRIDE_LOOP {
       CLIP_CHECK {
-	 const GLfloat ox = from[0], oy = from[1], oz = from[2], ow = from[3];
-	 to[i][0] = m0 * ox           + m8  * oz            ;
-	 to[i][1] =           m5 * oy + m9  * oz            ;
-	 to[i][2] =                     m10 * oz + m14 * ow ;
-	 to[i][3] =                          -oz            ;
+         const GLfloat ox = from[0], oy = from[1], oz = from[2], ow = from[3];
+         to[i][0] = m0 * ox           + m8  * oz            ;
+         to[i][1] =           m5 * oy + m9  * oz            ;
+         to[i][2] =                     m10 * oz + m14 * ow ;
+         to[i][3] =                          -oz            ;
       }
    }
 

@@ -1,4 +1,4 @@
-/* $Id: feedback.c,v 1.1 2000-02-29 00:50:03 sandervl Exp $ */
+/* $Id: feedback.c,v 1.2 2000-03-01 18:49:28 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -37,22 +37,22 @@
 #else
 #include "GL/xf86glx.h"
 #endif
+#include "types.h"
 #include "context.h"
 #include "enums.h"
 #include "feedback.h"
 #include "macros.h"
 #include "mmath.h"
-#include "types.h"
 #include "triangle.h"
 #endif
 
 
 
-#define FB_3D		0x01
-#define FB_4D		0x02
-#define FB_INDEX	0x04
-#define FB_COLOR	0x08
-#define FB_TEXTURE	0X10
+#define FB_3D           0x01
+#define FB_4D           0x02
+#define FB_INDEX        0x04
+#define FB_COLOR        0x08
+#define FB_TEXTURE      0X10
 
 
 

@@ -1,4 +1,4 @@
-/* $Id: wmesadef.h,v 1.1 2000-02-29 00:48:44 sandervl Exp $ */
+/* $Id: wmesadef.h,v 1.2 2000-03-01 18:49:40 jeroen Exp $ */
 /*      File name       :       wmesadef.h
  *  Version             :       2.3
  *
@@ -19,7 +19,10 @@
 
 /*
  * $Log: wmesadef.h,v $
- * Revision 1.1  2000-02-29 00:48:44  sandervl
+ * Revision 1.2  2000-03-01 18:49:40  jeroen
+ * *** empty log message ***
+ *
+ * Revision 1.1  2000/02/29 00:48:44  sandervl
  * created
  *
  * Revision 1.1.1.1  1999/08/19 00:55:42  jtg
@@ -33,7 +36,10 @@
 
 /*
  * $Log: wmesadef.h,v $
- * Revision 1.1  2000-02-29 00:48:44  sandervl
+ * Revision 1.2  2000-03-01 18:49:40  jeroen
+ * *** empty log message ***
+ *
+ * Revision 1.1  2000/02/29 00:48:44  sandervl
  * created
  *
  * Revision 1.1.1.1  1999/08/19 00:55:42  jtg
@@ -49,7 +55,10 @@
 
 /*
  * $Log: wmesadef.h,v $
- * Revision 1.1  2000-02-29 00:48:44  sandervl
+ * Revision 1.2  2000-03-01 18:49:40  jeroen
+ * *** empty log message ***
+ *
+ * Revision 1.1  2000/02/29 00:48:44  sandervl
  * created
  *
  * Revision 1.1.1.1  1999/08/19 00:55:42  jtg
@@ -67,8 +76,9 @@
 #ifndef DDMESADEF_H
 #define DDMESADEF_H
 
-#ifdef __WIN32OS2__
-#include <os2win.h>
+#ifdef __WIN32OS2__/* Nope, we use this hdr in DIVE code, so instead include*/
+                   /* os2win.h in the source if it is needed! */
+//#include <os2win.h>
 #else
 #include <windows.h>
 #endif
@@ -77,8 +87,8 @@
 #include <ddraw.h>
 #endif
 
-#include "gl.h"
-#include "context.h"
+//#include "gl.h"
+//#include "context.h"
 //#include "profile.h"
 
 #define REDBITS         0x03
@@ -95,14 +105,63 @@ typedef struct _dibSection{
         LPVOID  base;
 }WMDIBSECTION, *PWMDIBSECTION;
 
+typedef struct tagMY_RECTL
+  {
+    LONG xLeft,xRight,yBottom,yTop;
+  }MY_RECTL;
 
 typedef struct wmesa_context{
-    GLcontext *gl_ctx;          /* The core GL/Mesa context */
-        GLvisual *gl_visual;            /* Describes the buffers */
-    GLframebuffer *gl_buffer;   /* Depth, stencil, accum, etc buffers */
+  /* This defs *MUST* be at the TOP, since some structure definitions below  */
+  /* are NOT correct!! This is because of the fact that wmesa is WIN based,  */
+  /* whereas this file is OS/2 based. If we put this stuff at the end of the */
+  /* structure the offsets to for example the hDiveInstance will be          */
+  /* interpreted differently in this file and in wmesa.c.                    */
+#ifdef DIVE
+    ULONG               hDiveInstance; /* This actually is a DIVE Handle   */
+    ULONG               BackBufferNumber;
+    PVOID               ppFrameBuffer;
+    ULONG               ScanLineBytes,ScanLines;
+    POINT               WinPos;
+    WNDPROC             hWndProc;
+    BOOL                DiveSoftwareBlit;/* If BlitSetup failed do it in SW*/
+    ULONG               NumClipRects;  /* Clip-info is maintained here     */
+    MY_RECTL            rctls[50];
+    HRGN                hrgn;
+    HDC                 hps;
+    BOOL                BackBufferOwnAllocation;
+    GLint               awidth,aheight; /* Allocated w/h for ImageBuffer */
+#endif
+    PBYTE               pbPixels;
+    int                 nColors;
+    BYTE                cColorBits;
+    int                 pixelformat;
+    GLboolean           db_flag;       /* double buffered?                 */
+    GLboolean           rgb_flag;      /* RGB mode?                        */
+    GLboolean           dither_flag;/* use dither when 256 color mode for RGB?*/
+    GLuint              depth;         /* bits per pixel (1, 8, 24, etc)   */
+    ULONG               pixel;   /* current color index or RGBA pixel value*/
+    ULONG               clearpixel; //* pixel for clearing the color buffers*/
+    GLuint              width;
+    GLuint              height;
+    unsigned long       ScanWidth;
 
-
-        HWND                            Window;
+    GLcontext          *gl_ctx;                 /* The core GL/Mesa context*/
+    GLvisual           *gl_visual;                 /* Describes the buffers*/
+    GLframebuffer      *gl_buffer;    /* Depth, stencil, accum, etc buffers*/
+    RECT                drawRect;
+    UINT                uiDIBoffset;
+    PBYTE               ScreenMem;     /* WinG memory                      */
+    HPALETTE            hPal;          /* Current Palette                  */
+    HPALETTE            hPalHalfTone;
+    HPALETTE            hGLPalette;
+    WMDIBSECTION        dib;
+    BITMAPINFO         *IndexFormat;
+    BITMAPINFO          bmi;
+    HBITMAP             hbmDIB;
+    HBITMAP             hOldBitmap;
+    HBITMAP             Old_Compat_BM;
+    HBITMAP             Compat_BM;     /* Bitmap for double buffering      */
+    HWND                Window;
     HDC                 hDC;
     HPALETTE            hPalette;
     HPALETTE            hOldPalette;
@@ -110,44 +169,13 @@ typedef struct wmesa_context{
     HPEN                hOldPen;
     HCURSOR             hOldCursor;
     COLORREF            crColor;
-    // 3D projection stuff
-    RECT                drawRect;
-    UINT                uiDIBoffset;
-    // OpenGL stuff
-    HPALETTE            hGLPalette;
-        GLuint                          width;
-        GLuint                          height;
-        GLuint                          ScanWidth;
-        GLboolean                       db_flag;        //* double buffered?
-        GLboolean                       rgb_flag;       //* RGB mode?
-        GLboolean                       dither_flag;    //* use dither when 256 color mode for RGB?
-        GLuint                          depth;          //* bits per pixel (1, 8, 24, etc)
-        ULONG                           pixel;  // current color index or RGBA pixel value
-        ULONG                           clearpixel; //* pixel for clearing the color buffers
-        PBYTE                           ScreenMem; // WinG memory
-        BITMAPINFO                      *IndexFormat;
-        HPALETTE                        hPal; // Current Palette
-        HPALETTE                        hPalHalfTone;
-
-
-        WMDIBSECTION            dib;
-    BITMAPINFO          bmi;
-    HBITMAP             hbmDIB;
-    HBITMAP             hOldBitmap;
-        HBITMAP                         Old_Compat_BM;
-        HBITMAP                         Compat_BM;            // Bitmap for double buffering
-    PBYTE               pbPixels;
-    int                 nColors;
-        BYTE                            cColorBits;
-        int                                     pixelformat;
-
 #ifdef DDRAW
-        LPDIRECTDRAW            lpDD;           // DirectDraw object
-//      LPDIRECTDRAW2            lpDD2;           // DirectDraw object
-        LPDIRECTDRAWSURFACE     lpDDSPrimary;   // DirectDraw primary surface
+        LPDIRECTDRAW            lpDD;  /* DirectDraw object                */
+//      LPDIRECTDRAW2            lpDD2;                /* DirectDraw object*/
+        LPDIRECTDRAWSURFACE     lpDDSPrimary; /* DirectDraw primary surface*/
         LPDIRECTDRAWSURFACE     lpDDSOffScreen; // DirectDraw off screen surface
         LPDIRECTDRAWPALETTE     lpDDPal;        // DirectDraw palette
-        BOOL                    bActive;        // is application active?
+        BOOL                    bActive;       /* is application active?   */
         DDSURFACEDESC           ddsd;
         int                                     fullScreen;
         int                                 gMode ;
@@ -157,9 +185,9 @@ typedef struct wmesa_context{
         HWND                                    hwnd;
         DWORD                                   pitch;
         PBYTE                                   addrOffScreen;
-//#ifdef PROFILE
-//      MESAPROF        profile;
-//#endif
+                                       /* #ifdef PROFILE                   */
+                                       /* MESAPROF        profile;         */
+                                       /* #endif                           */
 }  *PWMC;
 
 

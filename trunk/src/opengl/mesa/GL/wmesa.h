@@ -1,4 +1,4 @@
-/* $Id: wmesa.h,v 1.1 2000-02-29 00:43:33 sandervl Exp $ */
+/* $Id: wmesa.h,v 1.2 2000-03-01 18:49:42 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -24,7 +24,10 @@
 
 /*
  * $Log: wmesa.h,v $
- * Revision 1.1  2000-02-29 00:43:33  sandervl
+ * Revision 1.2  2000-03-01 18:49:42  jeroen
+ * *** empty log message ***
+ *
+ * Revision 1.1  2000/02/29 00:43:33  sandervl
  * created
  *
  * Revision 1.1.1.1  1999/08/19 00:55:40  jtg
@@ -111,7 +114,7 @@ typedef struct wmesa_context *WMesaContext;
  *
  * Return:  a WMesa_context or NULL if error.
  */
-extern WMesaContext WMesaCreateContext(HWND hWnd,HPALETTE* pPal,
+extern WMesaContext WIN32API WMesaCreateContext(HWND hWnd,HPALETTE* pPal,
                                        GLboolean rgb_flag,GLboolean db_flag);
 
 

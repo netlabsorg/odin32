@@ -1,4 +1,4 @@
-/* $Id: wmesa.c,v 1.1 2000-02-29 00:50:15 sandervl Exp $ */
+/* $Id: wmesa.c,v 1.2 2000-03-01 18:49:40 jeroen Exp $ */
 
 /*
 *   File name   :   wmesa.c
@@ -22,8 +22,8 @@
 
 /*
  * $Log: wmesa.c,v $
- * Revision 1.1  2000-02-29 00:50:15  sandervl
- * created
+ * Revision 1.2  2000-03-01 18:49:40  jeroen
+ * *** empty log message ***
  *
  * Revision 1.1.1.1  1999/08/19 00:55:42  jtg
  * Imported sources
@@ -66,13 +66,18 @@
 
 #define WMESA_STEREO_C
 
+#ifdef __WIN32OS2__
+#include <os2win.h>
+#else
 #include <windows.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include "wmesa.h"
 #include "mesa_extend.h"
 #include "colors.h"
 #include "macros.h"
+#include "types.h"
 #include "context.h"
 #include "dd.h"
 #include "xform.h"
@@ -83,6 +88,11 @@
 
 #ifndef __WIN32OS2__
 #pragma warning ( disable : 4133 4761 )
+#else
+#ifdef DIVE
+#include <mesadive.h>
+extern HWND Win32ToOS2Handle(HWND);
+#endif
 #endif
 
 #ifdef PROFILE
@@ -121,7 +131,7 @@ GLint stereo_flag = 0 ;
 
 /* end of added code*/
 
-static PWMC Current = NULL;
+PWMC Current = NULL;
 WMesaContext WC = NULL;
 
 #ifdef NDEBUG
@@ -133,6 +143,9 @@ void Mesa_Assert(void *Cond,void *File,unsigned Line)
 {
     char Msg[512];
     sprintf(Msg,"%s %s %d",Cond,File,Line);
+#ifdef __WIN32OS2__
+    dprintf((Msg,"%s %s %d",Cond,File,Line));
+#endif
     MessageBox(NULL,Msg,"Assertion failed.",MB_OK);
     exit(1);
 }
@@ -213,10 +226,18 @@ static triangle_func choose_triangle_function( GLcontext *ctx );
 
 static void wmSetPixelFormat( PWMC wc, HDC hDC)
 {
+  dprintf(("OPENGL32: Setting PixelFormat\n"));
+
+#ifdef DIVE
+  wc->cColorBits=DiveQueryDepth();
+
+  wc->pixelformat=DiveQueryNativePixelFormat();
+#else
     if(wc->rgb_flag)
-        wc->cColorBits = GetDeviceCaps(hDC, BITSPIXEL);
+      wc->cColorBits = GetDeviceCaps(hDC, BITSPIXEL);
     else
-        wc->cColorBits = 8;
+      wc->cColorBits = 8;
+
     switch(wc->cColorBits){
     case 8:
         if(wc->dither_flag != GL_TRUE)
@@ -224,20 +245,27 @@ static void wmSetPixelFormat( PWMC wc, HDC hDC)
         else
             wc->pixelformat = PF_DITHER8;
         break;
+
     case 16:
         wc->pixelformat = PF_5R6G5B;
         break;
+
     case 32:
         wc->pixelformat = PF_8R8G8B;
         break;
-    default:
+
+    default:                                    /* This also handles 24 bpp*/
         wc->pixelformat = PF_BADFORMAT;
+      break;
     }
+#endif
+
+  dprintf(("OPENGL32: Color Bits: %d\n",wc->cColorBits));
 }
 
 //
-// This function sets the color table of a DIB section
-// to match that of the destination DC
+                     /* This function sets the color table of a DIB section*/
+                                     /* to match that of the destination DC*/
 //
 BOOL /*WINAPI*/ wmSetDibColors(PWMC pwc)
 {
@@ -297,6 +325,8 @@ BOOL /*WINAPI*/ wmCreateBackingStore(PWMC pwc, long lxSize, long lySize)
     LPBITMAPINFO pbmi = &(pwc->bmi);
     int     iUsage;
 
+    dprintf(("OPENGL32: Creating BackingStore for %08X\n",pwc));
+
     pbmi->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
     pbmi->bmiHeader.biWidth = lxSize;
     pbmi->bmiHeader.biHeight= -lySize;
@@ -339,8 +369,6 @@ BOOL WINAPI wmSetDIBits(PWMC pwc, UINT uiScanWidth, UINT uiNumScans, UINT nBypp,
     DWORD   dwNextScan = uiScanWidth;
     DWORD   dwNewScan = uiNewWidth;
     DWORD   dwScanWidth = (uiScanWidth * nBypp);
-
-    dprintf(("OPENGL32: wmSetDIBits\n"));
 
     //
     // We need to round up to the nearest DWORD
@@ -399,10 +427,7 @@ static void flush(GLcontext* ctx)
             wmFlush(Current);
         }
         ENDPROFILE(flush)
-
 }
-
-
 
 /*
 * Set the color index used to clear the color buffer.
@@ -432,11 +457,11 @@ static void clear_color( GLcontext* ctx, GLubyte r, GLubyte g, GLubyte b, GLubyt
 * Clear the specified region of the color buffer using the clear color
 * or index as specified by one of the two functions above.
 */
-//static void clear(GLcontext* ctx,
-//                  GLboolean all,GLint x, GLint y, GLint width, GLint height )
-// TODO: I modified this function to match the prototype in dd.h. (swansma@geocities.com)
-//       dd.h does not explain what the return type is so I could not set this to the proper
-//       value.
+                                       /* static void clear(GLcontext* ctx,*/
+             /* GLboolean all,GLint x, GLint y, GLint width, GLint height )*/
+/* TODO: I modified this function to match the prototype in dd.h. (swansma@geocities.com)*/
+/* dd.h does not explain what the return type is so I could not set this to the proper*/
+                                       /* value.                           */
 static GLbitfield clear(GLcontext* ctx, GLbitfield mask,
                   GLboolean all, GLint x, GLint y, GLint width, GLint height)
 {
@@ -448,7 +473,8 @@ static GLbitfield clear(GLcontext* ctx, GLbitfield mask,
     LPBYTE  lpb = Current->pbPixels;
     int     lines;
 
-    dprintf(("OPENGL32: clear\n"));
+    dprintf(("OPENGL32: clear - all %08d - x %d - y %d - width %d - height %d\n",
+             all,x,y,width,height));
 
     STARTPROFILE
 
@@ -457,10 +483,16 @@ static GLbitfield clear(GLcontext* ctx, GLbitfield mask,
             width=Current->width;
             height=Current->height;
         }
+
+    dprintf(("OPENGL32: clear - all %08d - x %d - y %d - width %d - height %d\n",
+             all,x,y,width,height));
+
         if(Current->db_flag==GL_TRUE){
             UINT    nBypp = Current->cColorBits / 8;
             int     i = 0;
             int     iSize = 0;
+
+            dprintf(("OPENGL32: Clearing BackBuffer\n"));
 
             if(nBypp ==1 ){
                 /* Need rectification */
@@ -519,26 +551,33 @@ static GLbitfield clear(GLcontext* ctx, GLbitfield mask,
             }
             while (i<lines-1);
         }
-        else { // For single buffer
+        else
+          {                                            /* For single buffer*/
+            dprintf(("OPENGL32: Clearing FrontBuffer\n"));
+
             HDC DC=DD_GETDC;
+
+            dprintf(("OPENGL32: Clearing FrontBuffer DC is %08X\n",DC));
+
             HPEN Pen=CreatePen(PS_SOLID,1,Current->clearpixel);
             HBRUSH Brush=CreateSolidBrush(Current->clearpixel);
             HPEN Old_Pen=SelectObject(DC,Pen);
             HBRUSH Old_Brush=SelectObject(DC,Brush);
-//            Rectangle(DC,x,y,x+width,y+height);
+
+            Rectangle(DC,x,y,x+width,y+height);
+
             SelectObject(DC,Old_Pen);
             SelectObject(DC,Old_Brush);
             DeleteObject(Pen);
             DeleteObject(Brush);
+
             DD_RELEASEDC;
-        }
-
-
+          }
 
         ENDPROFILE(clear)
 
-                return mask;    // TODO: I doubt this is correct. dd.h doesn't explain what this should
-                                //       be...
+                return mask;/* TODO: I doubt this is correct. dd.h doesn't explain what this should*/
+                                       /* be...                            */
 }
 
 
@@ -639,6 +678,7 @@ static void buffer_size( GLcontext* ctx, GLuint *width, GLuint *height )
    RECT CR;
 
    STARTPROFILE
+
    GetClientRect(Current->Window,&CR);
 
    *width=CR.right;
@@ -650,10 +690,18 @@ static void buffer_size( GLcontext* ctx, GLuint *width, GLuint *height )
       Current->width=*width;
       Current->height=*height;
       Current->ScanWidth=Current->width;
+
       if ((Current->ScanWidth%sizeof(long))!=0)
          Current->ScanWidth+=(sizeof(long)-(Current->ScanWidth%sizeof(long)));
 
       if (Current->db_flag){
+#ifdef DIVE
+         if(!DiveDirectAccess())
+           if (Current->rgb_flag==GL_TRUE && Current->dither_flag!=GL_TRUE){
+              wmDeleteBackingStore(Current);
+              wmCreateBackingStore(Current, Current->width, Current->height);
+           }
+#else
 #ifdef DDRAW
          DDDeleteOffScreen(Current);
          DDCreateOffScreen(Current);
@@ -662,6 +710,7 @@ static void buffer_size( GLcontext* ctx, GLuint *width, GLuint *height )
             wmDeleteBackingStore(Current);
             wmCreateBackingStore(Current, Current->width, Current->height);
          }
+#endif
 #endif
       }
 
@@ -718,7 +767,8 @@ static void fast_rgb_points( GLcontext* ctx, GLuint first, GLuint last )
                 }
             }
         }
-        //   DD_RELEASEDC;
+
+                                       /* DD_RELEASEDC;                    */
         ENDPROFILE(fast_rgb_points)
 }
 
@@ -752,12 +802,21 @@ static void fast_flat_rgb_line( GLcontext* ctx, GLuint v0, GLuint v1, GLuint pv 
     HPEN Old_Pen;
 
     if (0 /*Current->gl_ctx->VB->MonoColor*/) {
-        pixel = Current->pixel;  /* use current color */
+        pixel = Current->pixel;                        /* use current color*/
     }
     else {
-        pixel = RGB((GLubyte)(Current->gl_ctx->VB->ColorPtr->data[pv][0]),
-                    (GLubyte)(Current->gl_ctx->VB->ColorPtr->data[pv][1]),
-                    (GLubyte)(Current->gl_ctx->VB->ColorPtr->data[pv][2]));
+        dprintf(("OPENGL32: READADDR: %08X - pv %d - LINE R-G-B is %d,%d,%d\n",
+                 Current->gl_ctx->VB->ColorPtr->data[pv],
+                 pv,
+                 Current->gl_ctx->VB->ColorPtr->data[pv][0],
+                 Current->gl_ctx->VB->ColorPtr->data[pv][1],
+                 Current->gl_ctx->VB->ColorPtr->data[pv][2]));
+
+        pixel = RGB((GLubyte)(Current->gl_ctx->VB->ColorPtr->data[pv][0]/* *255.0*/),
+                    (GLubyte)(Current->gl_ctx->VB->ColorPtr->data[pv][1]/* *255.0*/),
+                    (GLubyte)(Current->gl_ctx->VB->ColorPtr->data[pv][2]/* *255.0*/));
+
+        dprintf(("OPENGL32: PIXEL set to %08X",pixel));
     }
 
     x0 =       (int) Current->gl_ctx->VB->Win.data[v0][0];
@@ -768,7 +827,7 @@ static void fast_flat_rgb_line( GLcontext* ctx, GLuint v0, GLuint v1, GLuint pv 
 
     BEGINGDICALL
 
-    Pen=CreatePen(PS_SOLID,1,pixel);
+    Pen=CreatePen(PS_SOLID,1,(COLORREF)pixel);
     Old_Pen=SelectObject(DC,Pen);
     MoveToEx(DC,x0,y0,NULL);
     LineTo(DC,x1,y1);
@@ -901,6 +960,7 @@ static void write_rgba_span( const GLcontext* ctx, GLuint n, GLint x, GLint y,
                 Mem[i] = GetNearestPaletteIndex(Current->hPal,RGB(rgba[i][RCOMP], rgba[i][GCOMP], rgba[i][BCOMP]));
         }
     }
+
     ENDPROFILE(write_rgba_span)
 
 }
@@ -944,6 +1004,7 @@ static void write_rgb_span( const GLcontext* ctx,
                 Mem[i] = GetNearestPaletteIndex(Current->hPal,RGB(rgb[i][RCOMP], rgb[i][GCOMP], rgb[i][BCOMP]));
         }
     }
+
     ENDPROFILE(write_rgb_span)
 
 }
@@ -962,10 +1023,11 @@ static void write_mono_rgba_span( const GLcontext* ctx,
     PWMC pwc = Current;
     assert(Current->rgb_flag==GL_TRUE);
     y=FLIP(y);
+
     if(Current->rgb_flag==GL_TRUE){
         for (i=0; i<n; i++)
             if (mask[i])
-                // Trying
+                                       /* Trying                           */
                 wmSetPixel(pwc,y,x+i,GetRValue(Current->pixel), GetGValue(Current->pixel), GetBValue(Current->pixel));
     }
     else {
@@ -974,6 +1036,7 @@ static void write_mono_rgba_span( const GLcontext* ctx,
                 SetPixel(DC, y, x+i, Current->pixel);
     }
     DD_RELEASEDC;
+
     ENDPROFILE(write_mono_rgba_span)
 }
 
@@ -1032,13 +1095,16 @@ static void write_rgba_pixels( const GLcontext* ctx,
                                const GLubyte rgba[][4], const GLubyte mask[] )
 {
     STARTPROFILE
+
         GLuint i;
     PWMC    pwc = Current;
     HDC DC=DD_GETDC;
     assert(Current->rgb_flag==GL_TRUE);
+
     for (i=0; i<n; i++)
        if (mask[i])
           wmSetPixel(pwc, FLIP(y[i]),x[i],rgba[i][RCOMP],rgba[i][GCOMP],rgba[i][BCOMP]);
+
     DD_RELEASEDC;
     ENDPROFILE(write_rgba_pixels)
 }
@@ -1059,10 +1125,12 @@ static void write_mono_rgba_pixels( const GLcontext* ctx,
     PWMC    pwc = Current;
     HDC DC=DD_GETDC;
     assert(Current->rgb_flag==GL_TRUE);
+
     for (i=0; i<n; i++)
         if (mask[i])
             wmSetPixel(pwc, FLIP(y[i]),x[i],GetRValue(Current->pixel),
                        GetGValue(Current->pixel), GetBValue(Current->pixel));
+
     DD_RELEASEDC;
     ENDPROFILE(write_mono_rgba_pixels)
 }
@@ -1284,8 +1352,27 @@ static void GetPalette(HPALETTE Pal,RGBQUAD *aRGB)
     ENDPROFILE(GetPalette)
 }
 
+void WMesaUpdateScreenPos(PWMC c,HWND hWnd)
+{
+  RECT CR;
 
-WMesaContext WMesaCreateContext( HWND hWnd, HPALETTE* Pal,
+  GetWindowRect(hWnd,&CR);
+
+  c->WinPos.x=CR.left+GetSystemMetrics(SM_CXFRAME);
+  c->WinPos.y=CR.top+GetSystemMetrics(SM_CYCAPTION)+GetSystemMetrics(SM_CYFRAME);
+
+  c->width=CR.right-CR.left-2*GetSystemMetrics(SM_CXFRAME);
+  c->height=CR.bottom-CR.top-GetSystemMetrics(SM_CYCAPTION)-2*GetSystemMetrics(SM_CYFRAME);
+
+  dprintf(("OPENGL32: WMesaUpdateScreenPos %08X - x/y %d/%d, w/h %d/%d\n",
+           hWnd,
+           c->WinPos.x,
+           c->WinPos.y,
+           c->width,
+           c->height));
+}
+
+WMesaContext WIN32API WMesaCreateContext( HWND hWnd, HPALETTE* Pal,
                                 GLboolean rgb_flag,
                                 GLboolean db_flag )
 {
@@ -1293,13 +1380,18 @@ WMesaContext WMesaCreateContext( HWND hWnd, HPALETTE* Pal,
     WMesaContext c;
     GLboolean true_color_flag;
     c = (struct wmesa_context * ) calloc(1,sizeof(struct wmesa_context));
+
+    dprintf(("OPENGL32: Creating MESA Context (%s)\n",
+             db_flag?"DOUBLE BUFFERED":"SINGLE_BUFFERED"));
+
     if (!c)
         return NULL;
 
     c->Window=hWnd;
     c->hDC = GetDC(hWnd);
     true_color_flag = GetDeviceCaps(c->hDC, BITSPIXEL) > 8;
-#ifdef DDRAW
+
+#if defined(DDRAW) || defined(DIVE)
     if(true_color_flag) c->rgb_flag = rgb_flag = GL_TRUE;
 #endif
 
@@ -1315,32 +1407,44 @@ WMesaContext WMesaCreateContext( HWND hWnd, HPALETTE* Pal,
     c->dither_flag = GL_FALSE;
 #endif
 
+    dprintf(("OPENGL32: WMesaCreateContext - db_flag is %d\n",db_flag));
 
     if (rgb_flag==GL_FALSE)
     {
         c->rgb_flag = GL_FALSE;
-        //    c->pixel = 1;
-        c->db_flag = db_flag =GL_TRUE; // WinG requires double buffering
-        printf("Single buffer is not supported in color index mode, setting to double buffer.\n");
+#ifndef DIVE
+        c->db_flag = db_flag =GL_TRUE;    /* WinG requires double buffering*/
+
+        dprintf(("OPENGL32: Single buffer is not supported in color index mode, setting to double buffer.\n"));
+#endif
     }
     else
     {
         c->rgb_flag = GL_TRUE;
-        //    c->pixel = 0;
+                                       /* c->pixel = 0;                    */
     }
+
     GetClientRect(c->Window,&CR);
+
     c->width=CR.right;
     c->height=CR.bottom;
+
     if (db_flag)
     {
         c->db_flag = 1;
         /* Double buffered */
-#ifndef DDRAW
-        //  if (c->rgb_flag==GL_TRUE && c->dither_flag != GL_TRUE )
+#if !defined(DDRAW) && !defined(DIVE)
+                 /* if (c->rgb_flag==GL_TRUE && c->dither_flag != GL_TRUE )*/
         {
             wmCreateBackingStore(c, c->width, c->height);
 
         }
+#else
+#ifdef DIVE
+            /* Dive direct access unavailable - switch to DIB mode */
+            if(!DiveDirectAccess())
+              wmCreateBackingStore(c, c->width, c->height);
+#endif
 #endif
     }
     else
@@ -1349,23 +1453,47 @@ WMesaContext WMesaCreateContext( HWND hWnd, HPALETTE* Pal,
         if (c->rgb_flag)
             c->db_flag = 0;
     }
+
+    /* Also set the correct PixelFormat now! */
+    wmSetPixelFormat(c, c->hDC);
+
+#ifdef DIVE
+    /* Store window position for DIVE draws - all x/y's are relative to this */
+    /* base position of the screen...                                        */
+    dprintf(("OPENGL32: Creating context (%08X)\n",c));
+
+    WMesaUpdateScreenPos(c,hWnd);
+
+    if(DiveDirectAccess())
+      if(!DiveInit(c,hWnd))
+        {
+          free( (void *) c );
+          Current=0;
+          dprintf(("OPENGL32: DIVEINIT failed - exiting!\n"));
+          MessageBoxA( hWnd, "Dive Init FAILED", "", MB_OK );
+          exit(1);
+        }
+#else
 #ifdef DDRAW
     if (DDInit(c,hWnd) == GL_FALSE) {
         free( (void *) c );
+        dprintf(("OPENGL32: DIVEINIT failed - exiting!\n"));
         exit(1);
     }
 #endif
+#endif
 
+/* JvdH - Enable software Alpha! (was FALSE!!) */
 
     c->gl_visual = gl_create_visual(rgb_flag,
-                                    GL_FALSE,   /* software alpha */
-                                    db_flag,    /* db_flag */
-                                    GL_FALSE,   /* stereo */
-                                    16,         /* depth_bits */
-                                    8,          /* stencil_bits */
-                                    8,          /* accum_bits */
-                                    0,          /* index bits */
-                                    8,8,8,8 );  /* r, g, b, a bits */
+                                    GL_TRUE,              /* software alpha*/
+                                    db_flag,                     /* db_flag*/
+                                    GL_FALSE,                     /* stereo*/
+                                    16,                       /* depth_bits*/
+                                    8,                      /* stencil_bits*/
+                                    8,                        /* accum_bits*/
+                                    0,                        /* index bits*/
+                                    8,8,8,8 );           /* r, g, b, a bits*/
 
     if (!c->gl_visual) {
         return NULL;
@@ -1381,6 +1509,7 @@ WMesaContext WMesaCreateContext( HWND hWnd, HPALETTE* Pal,
     }
 
     c->gl_buffer = gl_create_framebuffer( c->gl_visual );
+
     if (!c->gl_buffer) {
         gl_destroy_visual( c->gl_visual );
         gl_destroy_context( c->gl_ctx );
@@ -1388,44 +1517,67 @@ WMesaContext WMesaCreateContext( HWND hWnd, HPALETTE* Pal,
         return NULL;
     }
 
-        c->gl_ctx->Driver.UpdateState = setup_DD_pointers;
+    c->gl_ctx->Driver.UpdateState = setup_DD_pointers;
 
-    //  setup_DD_pointers(c->gl_ctx);
+                                       /* setup_DD_pointers(c->gl_ctx);    */
+
+    dprintf(("OPENGL32: Created context %08X - (%s)\n",c,c->db_flag?"DOUBLE":"SINGLE"));
 
     return c;
 }
 
-void WMesaDestroyContext( void )
+void WIN32API WMesaDestroyContext( void )
 {
     WMesaContext c = Current;
+
     ReleaseDC(c->Window,c->hDC);
+
     WC = c;
+
     if(c->hPalHalfTone != NULL)
         DeleteObject(c->hPalHalfTone);
+
     gl_destroy_visual( c->gl_visual );
     gl_destroy_framebuffer( c->gl_buffer );
     gl_destroy_context( c->gl_ctx );
 
     if (c->db_flag)
+#ifdef DIVE
+    if(DiveDirectAccess())
+      {
+        DiveFree(c);
+                                       /* Clean up the screen on exit      */
+        RedrawWindow( NULL, NULL, NULL, RDW_INVALIDATE | RDW_ERASE |
+            RDW_ALLCHILDREN );
+      }
+    else
+      wmDeleteBackingStore(c);
+#else
 #ifdef DDRAW
+      {
         DDFree(c);
+      }
 #else
     wmDeleteBackingStore(c);
 #endif
+#endif
     free( (void *) c );
-    //Following code is added to enable parallel render
-    // Parallel render only work in double buffer mode
+
+    /* Set current context to 0, otherwise exitlist-routine will trap */
+    Current=0;
+                       /* Following code is added to enable parallel render*/
+                         /* Parallel render only work in double buffer mode*/
 #if !defined(NO_PARALLEL)
     if(parallelMachine)
         PRDestroyRenderBuffer();
 #endif
-    // End modification
+                                       /* End modification                 */
 }
-
-
 
 void WIN32API WMesaMakeCurrent( WMesaContext c )
 {
+  dprintf(("OPENGL32: WMesaMakeCurrent %08X\n",c));
+
     if(!c){
         Current = c;
         return;
@@ -1458,6 +1610,10 @@ void WIN32API WMesaMakeCurrent( WMesaContext c )
 void WIN32API WMesaSwapBuffers( void )
 {
     HDC DC = Current->hDC;
+
+    dprintf(("OPENGL32: WMesaSwapBuffers() - Current %08X (%s)\n",
+             Current,Current->db_flag?"DOUBLE":"SINGLE"));
+
     if (Current->db_flag)
         wmFlush(Current);
 }
@@ -1468,19 +1624,32 @@ void WIN32API WMesaPaletteChange(HPALETTE Pal)
 {
     int vRet;
     LPPALETTEENTRY pPal;
+    ULONG rc;
+
+    dprintf(("OPENGL32: WMesaPaletteChange - Pal %08X",Pal));
+
     if (Current && (Current->rgb_flag==GL_FALSE || Current->dither_flag == GL_TRUE))
     {
         pPal = (PALETTEENTRY *)malloc( 256 * sizeof(PALETTEENTRY));
         Current->hPal=Pal;
-        //  GetPaletteEntries( Pal, 0, 256, pPal );
+                                 /* GetPaletteEntries( Pal, 0, 256, pPal );*/
         GetPalette( Pal, (RGBQUAD *)pPal );
+#ifdef DIVE
+/*        rc=DiveSetSourcePalette(Current->hDiveInstance,
+                                0,
+                                256,
+                                (PBYTE)pPal);
+*/
+        dprintf(("OPENGL32: DiveSetupSourcePalette rc %d\n",rc));
+#else
 #ifdef DDRAW
         Current->lpDD->lpVtbl->CreatePalette(Current->lpDD,DDPCAPS_8BIT,
             pPal, &(Current->lpDDPal), NULL);
         if (Current->lpDDPal)
             Current->lpDDSPrimary->lpVtbl->SetPalette(Current->lpDDSPrimary,Current->lpDDPal);
 #else
-        vRet = SetDIBColorTable(Current->dib.hDC,0,256,(RGBQUAD *)pPal);
+        vRet = SetDIBColorTable(Current->dib.hDC,0,256, (RGBQUAD *)pPal);
+#endif
 #endif
         free( pPal );
     }
@@ -1576,52 +1745,77 @@ void /*WINAPI*/ wmCreatePalette( PWMC pwdc )
 
 }
 
+void DibSetPixel(PWMC pwc, int iScanLine, int iPixel, BYTE r, BYTE g, BYTE b)
+{
+   if (Current->db_flag)
+   {
+       LPBYTE  lpb = pwc->pbPixels;
+       LPDWORD lpdw;
+       LPWORD  lpw;
+       UINT    nBypp = pwc->cColorBits >> 3;
+       UINT    nOffset = iPixel % nBypp;
+
+       // Move the pixel buffer pointer to the scanline that we
+       // want to access
+
+       //      pwc->dib.fFlushed = FALSE;
+
+       lpb += pwc->ScanWidth * iScanLine;
+                                      /* Now move to the desired pixel    */
+       lpb += iPixel * nBypp;
+       lpb = PIXELADDR(iPixel, iScanLine);
+       lpdw = (LPDWORD)lpb;
+       lpw = (LPWORD)lpb;
+
+       if(nBypp == 1){
+           if(pwc->dither_flag)
+               *lpb = DITHER_RGB_2_8BIT(r,g,b,iScanLine,iPixel);
+           else
+               *lpb = BGR8(r,g,b);
+       }
+       else if(nBypp == 2)
+           *lpw = BGR16(r,g,b);
+       else if (nBypp == 3){
+           *lpdw = BGR24(r,g,b);
+       }
+       else if (nBypp == 4)
+           *lpdw = BGR32(r,g,b);
+   }
+   else{
+       SetPixel(Current->hDC, iPixel, iScanLine, RGB(r,g,b));
+       DD_RELEASEDC;
+   }
+}
+
 void /*WINAPI*/ wmSetPixel(PWMC pwc, int iScanLine, int iPixel, BYTE r, BYTE g, BYTE b)
 {
-    if (Current->db_flag) {
-        LPBYTE  lpb = pwc->pbPixels;
-        LPDWORD lpdw;
-        LPWORD  lpw;
-        UINT    nBypp = pwc->cColorBits >> 3;
-        UINT    nOffset = iPixel % nBypp;
-
-        // Move the pixel buffer pointer to the scanline that we
-        // want to access
-
-        //      pwc->dib.fFlushed = FALSE;
-
-        lpb += pwc->ScanWidth * iScanLine;
-        // Now move to the desired pixel
-        lpb += iPixel * nBypp;
-        lpb = PIXELADDR(iPixel, iScanLine);
-        lpdw = (LPDWORD)lpb;
-        lpw = (LPWORD)lpb;
-
-        if(nBypp == 1){
-            if(pwc->dither_flag)
-                *lpb = DITHER_RGB_2_8BIT(r,g,b,iScanLine,iPixel);
-            else
-                *lpb = BGR8(r,g,b);
+#ifdef DIVE
+  if(DiveDirectAccess())
+    {
+      if (Current->db_flag)
+        {
+          /* We're using a buffered context - write to the backbuffer */
+          DiveWriteBackbuffer(pwc,iScanLine,iPixel,r,g,b);
         }
-        else if(nBypp == 2)
-            *lpw = BGR16(r,g,b);
-        else if (nBypp == 3){
-            *lpdw = BGR24(r,g,b);
+      else
+        {
+          /* We're using a non-buffered context - write to the video mem! */
+          /* TODO: What about cards that do not support direct access??   */
+          DiveWriteFrontbuffer(pwc,iScanLine,iPixel,r,g,b);
         }
-        else if (nBypp == 4)
-            *lpdw = BGR32(r,g,b);
     }
-    else{
-        SetPixel(Current->hDC, iPixel, iScanLine, RGB(r,g,b));
-        DD_RELEASEDC;
-    }
+  else
+    DibSetPixel(pwc, iScanLine, iPixel, r, g, b);
+#else
+   DibSetPixel(pwc, iScanLine, iPixel, r, g, b);
+#endif
 }
 
 void /*WINAPI*/ wmCreateDIBSection(
                                    HDC   hDC,
-                                   PWMC pwc,    // handle of device context
-                                   CONST BITMAPINFO *pbmi,  // address of structure containing bitmap size, format, and color data
-                                   UINT iUsage  // color data type indicator: RGB values or palette indices
+                                   PWMC pwc,   /* handle of device context */
+                                   CONST BITMAPINFO *pbmi,/* address of structure containing bitmap size, format, and color data*/
+                                   UINT iUsage/* color data type indicator: RGB values or palette indices*/
                                    )
 {
     DWORD   dwSize = 0;
@@ -1640,7 +1834,11 @@ void /*WINAPI*/ wmCreateDIBSection(
 
     dwSize = sizeof(BITMAPINFO) + (dwScanWidth * pwc->height);
 
+#ifdef __WIN32OS2__
+    pwc->dib.hFileMap = CreateFileMappingA((HANDLE)PAGE_FILE,
+#else
     pwc->dib.hFileMap = CreateFileMapping((HANDLE)PAGE_FILE,
+#endif
         NULL,
         PAGE_READWRITE | SEC_COMMIT,
         0,
@@ -1667,7 +1865,11 @@ void /*WINAPI*/ wmCreateDIBSection(
 
     memcpy(pwc->dib.base, pbmi, sizeof(BITMAPINFO));
 
+#ifdef __WIN32OS2__
+    hic = CreateICA("display", NULL, NULL, NULL);
+#else
     hic = CreateIC("display", NULL, NULL, NULL);
+#endif
     pwc->dib.hDC = CreateCompatibleDC(hic);
 
 
@@ -1692,7 +1894,6 @@ void /*WINAPI*/ wmCreateDIBSection(
         pwc->dib.hFileMap,
         0);
     */
-    dprintf(("CreateDIBSection set pix %08X\n",pwc->pbPixels));
 
     pwc->ScreenMem = pwc->addrOffScreen = pwc->pbPixels;
     pwc->hOldBitmap = SelectObject(pwc->dib.hDC, pwc->hbmDIB);
@@ -1710,12 +1911,21 @@ BOOL /*WINAPI*/ wmFlush(PWMC pwc)
 {
     BOOL    bRet = 0;
     DWORD   dwErr = 0;
+#ifdef DIVE
+    ULONG rc;
+#endif
 #ifdef DDRAW
     HRESULT             ddrval;
 #endif
 
-    // Now search through the torus frames and mark used colors
     if(pwc->db_flag){
+#ifdef DIVE
+       if(DiveDirectAccess())
+         DiveFlush(pwc);
+       else
+         bRet = BitBlt(pwc->hDC, 0, 0, pwc->width, pwc->height,
+                       pwc->dib.hDC, 0, 0, SRCCOPY);
+#else
 #ifdef DDRAW
         if (pwc->lpDDSOffScreen == NULL)
             if(DDCreateOffScreen(pwc) == GL_FALSE)
@@ -1754,6 +1964,7 @@ BOOL /*WINAPI*/ wmFlush(PWMC pwc)
 #else
             bRet = BitBlt(pwc->hDC, 0, 0, pwc->width, pwc->height,
                 pwc->dib.hDC, 0, 0, SRCCOPY);
+#endif
 #endif
     }
 
@@ -1955,7 +2166,11 @@ HRESULT DDRestoreAll( WMesaContext wc )
 BOOL initFail( HWND hwnd, WMesaContext wc )
 {
     DDFree(wc);
+#ifdef __WIN32OS2__
+    MessageBoxA( hwnd, "DirectDraw Init FAILED", "", MB_OK );
+#else
     MessageBox( hwnd, "DirectDraw Init FAILED", "", MB_OK );
+#endif
     return FALSE;
 
 } /* initFail */
@@ -2123,7 +2338,7 @@ static BOOL DDInit( WMesaContext wc, HWND hwnd)
         return DDCreateOffScreen(wc);
 
    return 0; /* Eliminate compiler warning */
-} /* DDInit */
+}                                                                 /* DDInit*/
 
 static void DDFree( WMesaContext wc)
 {
@@ -2134,7 +2349,7 @@ static void DDFree( WMesaContext wc)
         wc->lpDD->lpVtbl->Release(wc->lpDD);
         wc->lpDD = NULL;
     }
-    // Clean up the screen on exit
+                                       /* Clean up the screen on exit      */
     RedrawWindow( NULL, NULL, NULL, RDW_INVALIDATE | RDW_ERASE |
         RDW_ALLCHILDREN );
 
@@ -2152,8 +2367,6 @@ void WMesaMove(void)
         OffsetRect(&(wc->rectSurface), pt.x, pt.y);
     }
 }
-
-
 
 /*
 * Like PACK_8A8B8G8R() but don't use alpha.  This is usually an acceptable

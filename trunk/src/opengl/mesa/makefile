@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2000-03-01 14:50:16 sandervl Exp $
+# $Id: makefile,v 1.3 2000-03-01 18:49:31 jeroen Exp $
 #
 # PD-Win32
 #
@@ -16,9 +16,8 @@ PDWIN32_TOOLS = ..\..\..\tools\bin
 L=/CO
 !endif
 
-#MESADEFS=-DNO_PARALLEL -DNO_STEREO -DGL_MESA_window_pos -DTHREADS -DDDRAW \
-MESADEFS=-DNO_PARALLEL -DNO_STEREO -DGL_MESA_window_pos -DTHREADS \
-         -DUSE_X86_ASM_NOT -DUSE_MMX_ASM_NOT -DUSE_3DNOW_ASM_NOT
+MESADEFS=-DNO_PARALLEL -DNO_STEREO -DGL_MESA_window_pos -DTHREADS -DDIVE \
+         -DUSE_X86_ASM -DUSE_MMX_ASM -DUSE_3DNOW_ASM_NOT
 
 CFLAGS = -I. -IGL $(CFLAGS_WIN32APP) -I$(PDWIN32_INCLUDE) -I..\glut $(MESADEFS) /Tdp /Wcnd-
 CXXFLAGS = -I. -IGL $(CXXFLAGS_WIN32APP) -I$(PDWIN32_INCLUDE) -I..\glut $(MESADEFS) /Tdp /Wcnd-
@@ -101,7 +100,17 @@ OBJS = \
   initterm.obj \
   texture.obj \
   mthreads.obj \
-  wmesa.obj
+  wmesa.obj \
+  x86a.obj \
+  vertex.obj \
+  mmx_blend.obj \
+  osmesa.obj \
+  resource.obj \
+  mesadive.obj \
+  internal.obj
+
+resource.asm: $(TARGET).rc
+    $(RC) $(RCFLAGS) -o resource.asm $(TARGET).rc
 
 $(TARGET).DLL: $(OBJS) $(TARGET).lrf $(TARGET).def
     -ILINK /FREE /NOE $(L) @$(TARGET).lrf
@@ -117,6 +126,7 @@ $(PDWIN32_LIB)\GDI32.LIB
 $(PDWIN32_LIB)\USER32.LIB
 $(RTLLIB_O)
 OS2386.LIB
+MMPM2.LIB
 $(TARGET).def
 <<keep
 
@@ -136,9 +146,9 @@ dep:
 !endif
 
 clean:
-        $(RM) *.obj 
-        $(RM) *.dll 
-        $(RM) *.lib 
+        $(RM) *.obj
+        $(RM) *.dll
+        $(RM) *.lib
         $(RM) *.lrf
         $(RM) resource.asm
         $(RM) $(TARGET)exp.def
