@@ -1,4 +1,4 @@
--- $Id: CreateTables.sql,v 1.11 2000-07-19 21:29:36 bird Exp $
+-- $Id: CreateTables.sql,v 1.12 2000-07-20 11:39:59 bird Exp $
 --
 -- Create all tables.
 --
@@ -7,6 +7,33 @@ CREATE DATABASE Odin32;
 
 USE Odin32;
 
+
+--
+-- Manually create author table.
+--
+CREATE TABLE author (
+    refcode     SMALLINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    name        VARCHAR(64) NOT NULL,
+    initials    CHAR(4) NOT NULL,
+    alias       VARCHAR(32),
+    email       VARCHAR(64),
+    country     VARCHAR(64),
+    location    VARCHAR(64),
+    description TEXT,
+    UNIQUE u1(refcode),
+    UNIQUE u2(name),
+    UNIQUE u3(initials)
+--   ,UNIQUE i4(alias), UNIQUE columns have to be defined NOT NULL in mySql.
+--    UNIQUE i5(email)  UNIQUE columns have to be defined NOT NULL in mySql.
+);
+
+
+
+--
+--
+-- Documentation
+--
+--
 
 --
 -- This table holds the known states.
@@ -25,10 +52,16 @@ CREATE TABLE state (
 
 --
 -- This table holds the dll names.
+--    Type has these known types:
+--       'A' for Odin32 API dll
+--       'I' for Internal Odin32 (API) dll
+--       'S' for support stuff (ie. pe.exe and win32k.sys).
+--       'T' for tools (executables and dlls)
 --
 CREATE TABLE dll (
-    refcode     TINYINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    name        VARCHAR(32) NOT NULL,
+    refcode     TINYINT       NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    name        VARCHAR(32)   NOT NULL,
+    type        CHAR          NOT NULL DEFAULT 'A',
     description VARCHAR(255),
     UNIQUE u1(refcode),
     UNIQUE u2(name)
@@ -45,11 +78,13 @@ CREATE TABLE file (
     lastdatetime    DATETIME NOT NULL,
     lastauthor      SMALLINT NOT NULL,
     revision        CHAR(10) NOT NULL,
+    updated         TINYINT  NOT NULL DEFAULT 0,
     description     TEXT,
     UNIQUE u1(refcode),
     UNIQUE u2(dll, name),
     INDEX  i1(name)
 );
+
 
 --
 -- This table holds design notes (per dll).
@@ -70,6 +105,10 @@ CREATE TABLE designnote (
 --
 -- This table holds API information (per dll / file).
 --
+-- Type has these known values:
+--       'A' for API
+--       'I' for Internal Odin32 API
+--
 CREATE TABLE function (
     refcode  INTEGER  NOT NULL AUTO_INCREMENT PRIMARY KEY,
     dll      TINYINT  NOT NULL,
@@ -81,6 +120,7 @@ CREATE TABLE function (
     ordinal  INTEGER  NOT NULL,
     apigroup SMALLINT,
     return   VARCHAR(64),
+    type     CHAR     NOT NULL DEFAULT 'A',
     updated  TINYINT  NOT NULL DEFAULT 0,
     description TEXT,
     remark      TEXT,
@@ -97,7 +137,8 @@ CREATE TABLE function (
     INDEX  i4(dll, file),
     INDEX  i5(file),
     UNIQUE u1(refcode),
-    UNIQUE u2(name, dll)
+    UNIQUE u2(name, dll),
+    UNIQUE u3(type, refcode)
 );
 
 
@@ -115,6 +156,15 @@ CREATE TABLE parameter (
 );
 
 
+--
+-- Many to many relation between functions and authors.
+--
+CREATE TABLE fnauthor (
+    author   SMALLINT NOT NULL,
+    function INTEGER NOT NULL,
+    UNIQUE u1(function, author)
+);
+
 
 --
 -- Manually created Groups of APIs
@@ -129,34 +179,12 @@ CREATE TABLE apigroup (
 );
 
 
---
--- Manually create author table.
---
-CREATE TABLE author (
-    refcode  SMALLINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    name     VARCHAR(64) NOT NULL,
-    initials CHAR(4) NOT NULL,
-    alias    VARCHAR(32),
-    email    VARCHAR(64),
-    country  VARCHAR(64),
-    location VARCHAR(64),
-    UNIQUE u1(refcode),
-    UNIQUE u2(name),
-    UNIQUE u3(initials)
---   ,UNIQUE i4(alias), UNIQUE columns have to be defined NOT NULL in mySql.
---    UNIQUE i5(email)  UNIQUE columns have to be defined NOT NULL in mySql.
-);
-
 
 --
--- Many to many relation between functions and authors.
 --
-CREATE TABLE fnauthor (
-    author   SMALLINT NOT NULL,
-    function INTEGER NOT NULL,
-    UNIQUE u1(function, author)
-);
-
+-- History information
+--
+--
 
 --
 -- Status history for dlls.
