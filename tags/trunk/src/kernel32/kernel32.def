@@ -168,7 +168,7 @@ EXPORTS
 ;    CloseConsoleHandle         = _CloseConsoleHandle@??           @22   ;NT
 ;    CloseProfileUserMapping    = _CloseProfileUserMapping@??      @138
 ;    CloseSystemHandle          = _CloseSystemHandle@??            @139  ;W95
-;    CmdBatNotification         = _CmdBatNotification@??           @26   ;NT
+     CmdBatNotification         = _CmdBatNotification@4            @26   ;NT
      CommConfigDialogA          = _CommConfigDialogA@12            @140
      CommConfigDialogW          = _CommConfigDialogW@12            @141
      CompareFileTime            = _CompareFileTime@8               @142
@@ -501,7 +501,7 @@ EXPORTS
      GetTimeZoneInformation     = _GetTimeZoneInformation@4   @424
      GetUserDefaultLCID         = _GetUserDefaultLCID@0       @425
      GetUserDefaultLangID       = _GetUserDefaultLangID@0     @426
-;    GetVDMCurrentDirectories   = _GetVDMCurrentDirectories@??          ;NT
+     GetVDMCurrentDirectories   = _GetVDMCurrentDirectories@4           ;NT
      GetVersion                 = _GetVersion@0               @427
      GetVersionExA              = _GetVersionExA@4            @428
      GetVersionExW              = _GetVersionExW@4            @429
