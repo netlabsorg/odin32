@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.172 2003-01-15 10:42:19 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.173 2003-01-16 00:44:32 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -531,6 +531,7 @@ VOID WIN32API ExitProcess(DWORD exitcode)
     threadListMutex.enter();
     teb = threadList;
     while(teb) {
+        dprintf(("Active thread id %d, handle %x", LOWORD(teb->o.odin.threadId), teb->o.odin.hThread));
         if(teb->o.odin.hThread != hThread && teb->o.odin.dwSuspend > 0) {
             //kill any threads that are suspended; dangerous, but so is calling
             //SuspendThread; we assume the app knew what it was doing
