@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.112 2003-01-10 15:19:54 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.113 2003-01-18 20:11:46 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -2210,7 +2210,12 @@ DWORD OSLibDosFindFirst(LPCSTR lpFileName,WIN32_FIND_DATAA* lpFindFileData)
   if(rc)
   {
     DosFindClose(hDir);
-    SetLastError(error2WinError(rc));
+   
+    //Windows returns ERROR_FILE_NOT_FOUND if the file/directory is not present
+    if(rc == ERROR_NO_MORE_FILES) {
+         SetLastError(ERROR_FILE_NOT_FOUND_W); 
+    } 
+    else SetLastError(error2WinError(rc));
     return INVALID_HANDLE_VALUE_W;
   }
   translateFindResults(&result,lpFindFileData);
