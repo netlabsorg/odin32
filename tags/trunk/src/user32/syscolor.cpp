@@ -1,4 +1,4 @@
-/* $Id: syscolor.cpp,v 1.27 2001-06-10 12:05:39 sandervl Exp $ */
+/* $Id: syscolor.cpp,v 1.28 2001-06-12 17:02:35 sandervl Exp $ */
 
 /*
  * Win32 system color API functions for OS/2
@@ -257,7 +257,12 @@ HBRUSH WIN32API GetSysColorBrush(int nIndex)
     fColorInit = TRUE;
   }
   dprintf(("GetSysColorBrush %d returned %x ", nIndex, ((nIndex >= 0) && (nIndex < NUM_SYS_COLORS)) ? SysColorBrushes[nIndex]:0));
-  return ((nIndex >= 0) && (nIndex < NUM_SYS_COLORS)) ? SysColorBrushes[nIndex]:0;
+  if( ((nIndex >= 0) && (nIndex < NUM_SYS_COLORS))  )
+      return SysColorBrushes[nIndex];
+
+  //MED calls FillRect with (hardcoded) zero brush -> index -1
+  dprintf2(("WARNING: Unknown index(%d)", nIndex ));
+  return GetStockObject(LTGRAY_BRUSH);
 }
 /***********************************************************************
  * This function is new to the Wine lib -- it does not exist in
