@@ -1,4 +1,4 @@
-/* $Id: initsystem.cpp,v 1.22 2000-10-25 19:46:59 sandervl Exp $ */
+/* $Id: initsystem.cpp,v 1.23 2000-11-09 19:21:39 sandervl Exp $ */
 /*
  * Odin system initialization (registry, directories & environment)
  *
@@ -7,6 +7,7 @@
  *
  * InitSystemAndRegistry creates:
  *      - SYSTEMDIR\drivers
+ *      - SYSTEMDIR\drivers\etc
  *  - WINDOWSDIR\SYSTEM
  *      - WINDOWSDIR\AppData
  *      - WINDOWSDIR\Cache
@@ -202,6 +203,8 @@ BOOL InitSystemAndRegistry()
         //system32\drivers dir
     strcpy(shellpath, InternalGetSystemDirectoryA());
     strcat(shellpath, "\\Drivers");
+    CreateDirectoryA(shellpath, NULL);
+    strcat(shellpath, "\\etc");
     CreateDirectoryA(shellpath, NULL);
 
     //SYSTEM dir
