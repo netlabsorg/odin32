@@ -1,4 +1,4 @@
-/* $Id: wndproc.h,v 1.5 1999-06-27 21:56:00 sandervl Exp $ */
+/* $Id: wndproc.h,v 1.6 1999-06-28 16:58:41 sandervl Exp $ */
 
 /*
  *
@@ -57,6 +57,8 @@ public:
 		{ 
 			pCallback = pUserCallback; 
 		};
+    WNDPROC_O32 GetOrgOS2Callback() { return pOS2Callback; };
+
 	 int    IsWindow() { return fIsWindow; };
 
 Win32WindowClass *GetWindowClass() { return win32class; };

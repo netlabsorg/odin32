@@ -1,4 +1,4 @@
-/* $Id: setwindow.cpp,v 1.5 1999-06-27 21:59:40 sandervl Exp $ */
+/* $Id: setwindow.cpp,v 1.6 1999-06-28 16:59:43 sandervl Exp $ */
 
 /*
  * Win32 Get/SetWindowLong/Word user32 API functions for OS/2
@@ -37,6 +37,19 @@ LONG WIN32API SetWindowLongA(HWND hwnd, int nIndex, LONG  arg3)
         }
         else {
                 if(!(nIndex == DWL_DLGPROC && wndproc->IsWindow() == TRUE)) {
+			if(arg3 == (LONG)wndproc->GetWin32ToOS2Callback()) {
+				//restore original dialog control handler
+				dprintf(("SetWindowLongA: restore original dialog control handler"));
+				rc = (LONG)wndproc->GetWin32Callback();
+				wndproc->SetWin32Callback(0);
+#ifdef DEBUG
+				if(wndproc->GetOrgOS2Callback() == NULL) {
+					DebugInt3();
+				}
+#endif
+				O32_SetWindowLong(hwnd, nIndex, (LONG)wndproc->GetOrgOS2Callback());
+				return rc;
+			}
 	                rc = (LONG)wndproc->GetWin32Callback();
 			if(rc == 0) {
 				//window proc that was just created with os/2 callback only
@@ -88,7 +101,14 @@ LONG WIN32API GetWindowLongA(HWND hwnd, int nIndex)
      	Win32WindowProc *wndproc = Win32WindowProc::FindProc(hwnd);
         if(wndproc) {
 		if(!(nIndex == DWL_DLGPROC && wndproc->IsWindow() == TRUE))
-        		return (LONG)wndproc->GetWin32Callback();
+		{
+			rc = (LONG)wndproc->GetWin32Callback();
+			if(rc == 0) {
+				//window proc that was just created with os/2 callback only
+				rc = (LONG) wndproc->GetWin32ToOS2Callback();
+			}
+        		return rc;
+		}
      	}
 	else {//probably a dialog box control
                 dprintf(("USER32:  GetWindowLong create new Win32 to OS/2 callback\n"));

@@ -1,4 +1,10 @@
- /* $Id: changelog,v 1.31 1999-06-27 21:57:47 sandervl Exp $ */
+ /* $Id: changelog,v 1.32 1999-06-28 16:58:26 sandervl Exp $ */
+ 99-06-28: Christoph Bratschi
+	- USER32: AsciiToUnicodeN bugfix (unicode.cpp)
+
+ 99-06-28: Sander van Leeuwen
+	- USER32: Get/SetWindowLongA bugfix for dialog controls
+
  99-06-27: Sander van Leeuwen
 	- USER32: Message handler updates & lots of bugfixes 
 	- USER32: Fix for GetWindowLongA, if Open32 returns 0xffff it really
