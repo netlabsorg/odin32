@@ -1,4 +1,11 @@
-/* $Id: ChangeLog,v 1.2501 2003-02-25 14:36:28 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2502 2003-02-26 14:17:13 sandervl Exp $ */
+
+ 2003-02-26: Sander van Leeuwen <sandervl@innotek   >
+    - RICHED32: o Rewrote control; no longer creates a child Edit window as this
+                  doesn't happen in Windows and breaks subclassing
+                o EM_CHARFROMPOS is different for RichEdit controls (lParam is
+                  a POINTL pointer)
+                o Implemented EM_FINDWORDBREAK
 
  2003-02-25: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Bugfix for WPS object creation
