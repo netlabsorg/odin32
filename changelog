@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2380 2002-12-06 03:07:38 bird Exp $ */
+/* $Id: changelog,v 1.2381 2002-12-10 18:51:38 sandervl Exp $ */
+
+ 2002-12-10: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Closing a root key should just return success
+                  (matters for custom builds)
 
  2002-12-05: Knut St. Osmundsen <bird@anduin   >
     - WIN32K:   o Finially got around fixing the bug.
