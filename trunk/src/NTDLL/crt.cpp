@@ -1,4 +1,4 @@
-/* $Id: crt.cpp,v 1.5 1999-08-18 21:45:13 phaller Exp $ */
+/* $Id: crt.cpp,v 1.6 1999-08-18 23:41:15 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -24,7 +24,6 @@
 
 /*
 NTDLL.sprintf
-NTDLL._itoa
 NTDLL._wcsicmp
 */
 
@@ -811,10 +810,88 @@ LPSTR CDECL OS2strstr(const LPSTR str1,
 }
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.929
+ * Status    :
+ *
+ * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
+ *****************************************************************************/
+
+int CDECL OS2toupper(int c)
+{
+  dprintf(("NTDLL: toupper(%c)\n",
+           c));
+
+  return (toupper(c));
+}
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.930
+ * Status    :
+ *
+ * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
+ *****************************************************************************/
+
+int CDECL OS2tolower(int c)
+{
+  dprintf(("NTDLL: tolower(%c)\n",
+           c));
+
+  return (tolower(c));
+}
 
 
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.931
+ * Status    :
+ *
+ * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
+ *****************************************************************************/
+
+int CDECL OS2towupper(int c)
+{
+  dprintf(("NTDLL: towupper(%c)\n",
+           c));
+
+  return (towupper(c));
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.932
+ * Status    :
+ *
+ * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
+ *****************************************************************************/
+
+int CDECL OS2towlower(int c)
+{
+  dprintf(("NTDLL: towlower(%c)\n",
+           c));
+
+  return (towlower(c));
+}
 
 
 
@@ -1143,3 +1220,25 @@ char * CDECL OS2_itoa(int i, char *s, int r)
   return (_itoa(i,s,r));
 }
 
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.?
+ * Status    :
+ *
+ * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
+ *****************************************************************************/
+
+char * CDECL OS2_itow(int i, char *s, int r)
+{
+  dprintf(("NTDLL: _itow(%08xh, %08xh, %08xh) no unicode support !\n",
+           i,
+           s,
+           r));
+
+  return (_itoa(i,s,r));
+}
