@@ -1,4 +1,4 @@
-/* $Id: vprntf16.c,v 1.5 2001-03-11 16:47:28 bird Exp $
+/* $Id: vprntf16.c,v 1.6 2001-04-16 23:05:31 bird Exp $
  *
  * vprintf and printf - 16-bit.
  *
@@ -435,13 +435,13 @@ static void choutconsole(int ch)
  * @remark    At inittime the text is outputed to both screen and com-port.
  *            At runtime the text is only sendt to com-port.
  */
-static char *stroutconsole(register char *psz, signed cchMax)
+static char *stroutconsole(char *psz, signed cchMax)
 {
-    register CHAR   ch;
+    CHAR   ch;
 
     while (cchMax > 0 && *psz != '\0')
     {
-        register signed cch = 0;
+        signed cch = 0;
         USHORT          us;             /* Bytes written (ignored). */
 
         while (cchMax > cch && (ch = psz[cch]) != '\0' && ch != '\r' && ch != '\n')
