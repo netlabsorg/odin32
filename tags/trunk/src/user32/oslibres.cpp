@@ -1,4 +1,4 @@
-/* $Id: oslibres.cpp,v 1.3 1999-09-24 22:45:26 sandervl Exp $ */
+/* $Id: oslibres.cpp,v 1.4 1999-09-25 14:16:05 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -144,15 +144,15 @@ HANDLE OSLibWinCreatePointer(PVOID cursorbitmap)
  HANDLE      hPointer;
 
     if(cursorbitmap == NULL) {
-    	dprintf(("OSLibWinCreatePointer cursorbitmap == NULL!!"));
-    	return 0;
+        dprintf(("OSLibWinCreatePointer cursorbitmap == NULL!!"));
+        return 0;
     }
     if(bafh->usType == BFT_BITMAPARRAY && bafh->cbSize == sizeof(BITMAPARRAYFILEHEADER2)) {
-    	bfh  = &bafh->bfh2;
+        bfh  = &bafh->bfh2;
     }
     else {//single icon
-    	bfh  = (BITMAPFILEHEADER2 *)cursorbitmap;
-	bafh = (BITMAPARRAYFILEHEADER2 *)bfh; //for calculation bitmap offset
+        bfh  = (BITMAPFILEHEADER2 *)cursorbitmap;
+    bafh = (BITMAPARRAYFILEHEADER2 *)bfh; //for calculation bitmap offset
     }
     //skip xor/and mask
     hps = WinGetScreenPS(HWND_DESKTOP);
@@ -171,6 +171,7 @@ HANDLE OSLibWinCreatePointer(PVOID cursorbitmap)
     pointerInfo.hbmColor   = 0;
     pointerInfo.hbmPointer = hbmColor;
     hPointer = WinCreatePointerIndirect(HWND_DESKTOP, &pointerInfo);
+
     if(hPointer == NULL) {
         dprintf(("OSLibWinCreatePointer: WinCreatePointerIndirect failed!"));
     }
@@ -185,7 +186,7 @@ HANDLE OSLibWinQuerySysIcon(ULONG type)
  ULONG os2type = 0;
 
     switch(type) {
-        case IDI_APPLICATION_W:
+    case IDI_APPLICATION_W:
         os2type = SPTR_PROGRAM;
         break;
     case IDI_HAND_W:
@@ -213,46 +214,46 @@ HANDLE OSLibWinQuerySysPointer(ULONG type)
  ULONG os2type = 0;
 
     switch(type) {
-        case IDC_ARROW_W:
+    case IDC_ARROW_W:
         os2type = SPTR_ARROW;
         break;
-        case IDC_UPARROW_W:
+    case IDC_UPARROW_W:
         os2type = SPTR_ARROW;
         break;
-        case IDC_IBEAM_W:
+    case IDC_IBEAM_W:
         os2type = SPTR_TEXT;
         break;
-        case IDC_ICON_W:
+    case IDC_ICON_W:
         os2type = SPTR_PROGRAM;
         break;
-        case IDC_NO_W:
+    case IDC_NO_W:
         os2type = SPTR_ILLEGAL;
         break;
-        case IDC_CROSS_W:
+    case IDC_CROSS_W:
         os2type = SPTR_MOVE;
         break;
-        case IDC_SIZE_W:
+    case IDC_SIZE_W:
         os2type = SPTR_MOVE;
         break;
-        case IDC_SIZEALL_W:
+    case IDC_SIZEALL_W:
         os2type = SPTR_MOVE;
         break;
-        case IDC_SIZENESW_W:
+    case IDC_SIZENESW_W:
         os2type = SPTR_SIZENESW;
         break;
-        case IDC_SIZENS_W:
+    case IDC_SIZENS_W:
         os2type = SPTR_SIZENS;
         break;
-        case IDC_SIZENWSE_W:
+    case IDC_SIZENWSE_W:
         os2type = SPTR_SIZENWSE;
         break;
-        case IDC_SIZEWE_W:
+    case IDC_SIZEWE_W:
         os2type = SPTR_SIZEWE;
         break;
-        case IDC_WAIT_W:
+    case IDC_WAIT_W:
         os2type = SPTR_WAIT;
         break;
-        case IDC_APPSTARTING_W:
+    case IDC_APPSTARTING_W:
         os2type = SPTR_WAIT;
         break;
     case IDC_HELP_W: //TODO: Create a cursor for this one
@@ -261,7 +262,8 @@ HANDLE OSLibWinQuerySysPointer(ULONG type)
     default:
         return 0;
     }
-    return WinQuerySysPointer(HWND_DESKTOP, os2type, TRUE);
+    //Note: Does not create a copy
+    return WinQuerySysPointer(HWND_DESKTOP, os2type, FALSE);
 }
 //******************************************************************************
 //******************************************************************************
