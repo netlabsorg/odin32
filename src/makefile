@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 1999-08-25 22:37:58 sandervl Exp $
+# $Id: makefile,v 1.10 1999-08-27 19:36:33 achimha Exp $
 
 #
 # PD-Win32 API
@@ -28,6 +28,9 @@ all:
         $(MAKE_CMD)
         cd ..\user32
         $(MAKE_CMD)
+        cd new
+        $(MAKE_CMD)
+        cd ..
         cd ..\advapi32
         $(MAKE_CMD)
         cd ..\comdlg32
