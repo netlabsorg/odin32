@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.1111 2000-09-07 18:19:39 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1112 2000-09-07 21:40:27 phaller Exp $ */
+
+ 2000-09-07: Patrick Haller <phaller@gmx.net>
+    - KERNEL32: Fixed some FS: bugs in time.cpp, environ.cpp
 
  2000-09-07: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMCTL32: TOOLBAR_SetBitmapSize & TOOLBAR_SetBitmapSize; do not return
