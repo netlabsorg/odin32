@@ -547,7 +547,7 @@ void Frame_SysCommandSizeMove(Win32BaseWindow *win32wnd, WPARAM wParam )
         if (CallMsgFilterW( &msg, MSGF_SIZE )) continue;
 
         /* Exit on button-up, Return, or Esc */
-        if ((msg.message == WM_LBUTTONUP) ||
+        if ((msg.message == WM_LBUTTONUP) || (msg.message == WM_RBUTTONUP) ||
             ((msg.message == WM_KEYDOWN) &&
              ((msg.wParam == VK_RETURN) || (msg.wParam == VK_ESCAPE)))) break;
 
