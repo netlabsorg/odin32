@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.5 1999-11-10 14:16:45 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.6 1999-11-24 19:32:23 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -113,11 +113,16 @@ LONG WIN32API GetMessageTime(void)
     return O32_GetMessageTime();
 }
 //******************************************************************************
-//TODO: hwnd == HWND_BROADCAST
 //******************************************************************************
 LRESULT WIN32API SendMessageA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
   Win32BaseWindow *window;
+
+    if (hwnd == HWND_BROADCAST|| hwnd == HWND_TOPMOST)
+    {
+	Win32BaseWindow::BroadcastMessageA(BROADCAST_SEND, msg, wParam, lParam);
+	return TRUE;
+    }
 
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
@@ -127,11 +132,16 @@ LRESULT WIN32API SendMessageA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     return window->SendMessageA(msg, wParam, lParam);
 }
 //******************************************************************************
-//TODO: hwnd == HWND_BROADCAST
 //******************************************************************************
 LRESULT WIN32API SendMessageW(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
   Win32BaseWindow *window;
+
+    if (hwnd == HWND_BROADCAST|| hwnd == HWND_TOPMOST)
+    {
+	Win32BaseWindow::BroadcastMessageW(BROADCAST_SEND, msg, wParam, lParam);
+	return TRUE;
+    }
 
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
@@ -141,11 +151,16 @@ LRESULT WIN32API SendMessageW(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     return window->SendMessageW(msg, wParam, lParam);
 }
 //******************************************************************************
-//TODO: hwnd == HWND_BROADCAST
 //******************************************************************************
 BOOL WIN32API PostMessageA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
   Win32BaseWindow *window;
+
+    if (hwnd == HWND_BROADCAST) //Not HWND_TOPMOST???
+    {
+	Win32BaseWindow::BroadcastMessageA(BROADCAST_POST, msg, wParam, lParam);
+	return TRUE;
+    }
 
     if(hwnd == NULL)
         return PostThreadMessageA(GetCurrentThreadId(), msg, wParam, lParam);
@@ -159,11 +174,16 @@ BOOL WIN32API PostMessageA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     return window->PostMessageA(msg, wParam, lParam);
 }
 //******************************************************************************
-//TODO: hwnd == HWND_BROADCAST
 //******************************************************************************
 BOOL WIN32API PostMessageW(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
   Win32BaseWindow *window;
+
+    if (hwnd == HWND_BROADCAST) //Not HWND_TOPMOST???
+    {
+	Win32BaseWindow::BroadcastMessageW(BROADCAST_POST, msg, wParam, lParam);
+	return TRUE;
+    }
 
     if(hwnd == NULL)
         return PostThreadMessageW(GetCurrentThreadId(), msg, wParam, lParam);
@@ -207,14 +227,14 @@ BOOL WIN32API ReplyMessage( LRESULT arg1)
 BOOL WIN32API PostThreadMessageA( DWORD threadid, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     dprintf(("USER32:  PostThreadMessageA\n"));
-    return O32_PostThreadMessage(threadid, WIN32APP_USERMSGBASE+msg, wParam, lParam);
+    return Win32BaseWindow::PostThreadMessageA(threadid, msg, wParam, lParam);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API PostThreadMessageW( DWORD threadid, UINT msg, WPARAM wParam, LPARAM lParam)
 {
     dprintf(("USER32:  PostThreadMessageW\n"));
-    return O32_PostThreadMessage(threadid, WIN32APP_USERMSGBASE+msg, wParam, lParam);
+    return Win32BaseWindow::PostThreadMessageW(threadid, msg, wParam, lParam);
 }
 //******************************************************************************
 //SvL: 24-6-'97 - Added

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.92 1999-11-22 21:42:06 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.93 1999-11-24 19:32:22 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2009,13 +2009,97 @@ LRESULT Win32BaseWindow::SendInternalMessageW(ULONG Msg, WPARAM wParam, LPARAM l
 //******************************************************************************
 BOOL Win32BaseWindow::PostMessageA(ULONG msg, WPARAM wParam, LPARAM lParam)
 {
-  return OSLibPostMessage(OS2Hwnd, WIN32APP_USERMSGBASE+msg, wParam, lParam);
+ POSTMSG_PACKET *packet = (POSTMSG_PACKET *)_smalloc(sizeof(POSTMSG_PACKET));
+
+    packet->Msg = msg;
+    packet->wParam = wParam;
+    packet->lParam = lParam;
+    packet->fUnicode = FALSE;
+    return OSLibPostMessage(OS2Hwnd, WIN32APP_POSTMSG, WIN32PM_MAGIC, (DWORD)packet);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL Win32BaseWindow::PostMessageW(ULONG msg, WPARAM wParam, LPARAM lParam)
 {
-  return OSLibPostMessage(OS2Hwnd, WIN32APP_USERMSGBASE+msg, wParam, lParam);
+ POSTMSG_PACKET *packet = (POSTMSG_PACKET *)_smalloc(sizeof(POSTMSG_PACKET));
+
+    packet->Msg = msg;
+    packet->wParam = wParam;
+    packet->lParam = lParam;
+    packet->fUnicode = TRUE;
+    return OSLibPostMessage(OS2Hwnd, WIN32APP_POSTMSG, WIN32PM_MAGIC, (DWORD)packet);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32BaseWindow::PostThreadMessageA(ULONG threadid, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+ POSTMSG_PACKET *packet = (POSTMSG_PACKET *)_smalloc(sizeof(POSTMSG_PACKET));
+
+    packet->Msg = msg;
+    packet->wParam = wParam;
+    packet->lParam = lParam;
+    packet->fUnicode = FALSE;
+    return O32_PostThreadMessage(threadid, WIN32APP_POSTMSG, WIN32PM_MAGIC, (DWORD)packet);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32BaseWindow::PostThreadMessageW(ULONG threadid, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+ POSTMSG_PACKET *packet = (POSTMSG_PACKET *)_smalloc(sizeof(POSTMSG_PACKET));
+
+    packet->Msg = msg;
+    packet->wParam = wParam;
+    packet->lParam = lParam;
+    packet->fUnicode = TRUE;
+    return O32_PostThreadMessage(threadid, WIN32APP_POSTMSG, WIN32PM_MAGIC, (DWORD)packet);
+}
+//******************************************************************************
+//******************************************************************************
+void Win32BaseWindow::PostMessage(POSTMSG_PACKET *packet)
+{
+    if(packet == NULL)
+        return;
+
+    if(packet->fUnicode) {
+            SendMessageW(packet->Msg, packet->wParam, packet->lParam);
+    }
+    else    SendMessageA(packet->Msg, packet->wParam, packet->lParam);
+
+    free(packet);
+}
+//******************************************************************************
+//TODO: Probably not complete compatible with win32 implementation
+//******************************************************************************
+LRESULT Win32BaseWindow::BroadcastMessageA(int type, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+ POSTMSG_PACKET *packet = (POSTMSG_PACKET *)_smalloc(sizeof(POSTMSG_PACKET));
+
+    dprintf(("BroadCastMessageA %x %x %x", msg, wParam, lParam));
+    return 0;
+
+    packet->Msg = msg;
+    packet->wParam = wParam;
+    packet->lParam = lParam;
+    packet->fUnicode = FALSE;
+
+    return OSLibWinBroadcastMsg(WIN32APP_POSTMSG, WIN32PM_MAGIC, (DWORD)packet, type == BROADCAST_SEND);
+}
+//******************************************************************************
+//TODO: Probably not complete compatible with win32 implementation
+//******************************************************************************
+LRESULT Win32BaseWindow::BroadcastMessageW(int type, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+ POSTMSG_PACKET *packet = (POSTMSG_PACKET *)_smalloc(sizeof(POSTMSG_PACKET));
+
+    dprintf(("BroadCastMessageW %x %x %x", msg, wParam, lParam));
+    return 0;
+
+    packet->Msg = msg;
+    packet->wParam = wParam;
+    packet->lParam = lParam;
+    packet->fUnicode = TRUE;
+
+    return OSLibWinBroadcastMsg(WIN32APP_POSTMSG, WIN32PM_MAGIC, (DWORD)packet, type == BROADCAST_SEND);
 }
 //******************************************************************************
 //TODO: do we need to inform the parent of the parent (etc) of the child window?
@@ -2440,7 +2524,7 @@ Win32BaseWindow *Win32BaseWindow::FindWindowById(int id)
 //the current process owns them.
 //******************************************************************************
 HWND Win32BaseWindow::FindWindowEx(HWND hwndParent, HWND hwndChildAfter, LPSTR lpszClass, LPSTR lpszWindow,
-                               BOOL fUnicode)
+                                   BOOL fUnicode)
 {
  Win32BaseWindow *parent = GetWindowFromHandle(hwndParent);
  Win32BaseWindow *child  = GetWindowFromHandle(hwndChildAfter);
@@ -2860,9 +2944,6 @@ void Win32BaseWindow::setWindowId(DWORD id)
 Win32BaseWindow *Win32BaseWindow::GetWindowFromHandle(HWND hwnd)
 {
  Win32BaseWindow *window;
-
-    if(hwnd == NULL && windowDesktop)
-         return windowDesktop;
 
     if(HwGetWindowHandleData(hwnd, (DWORD *)&window) == TRUE) {
          return window;

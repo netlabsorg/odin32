@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.44 1999-11-23 19:34:19 sandervl Exp $
+# $Id: Makefile,v 1.45 1999-11-24 19:32:21 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -140,7 +140,7 @@ win32wdesktop.obj: win32wdesktop.cpp win32wbase.h win32wdesktop.h gen_object.h
 gen_object.obj: gen_object.cpp gen_object.h $(PDWIN32_INCLUDE)\heapshared.h
 oslibwin.obj:   oslibwin.cpp oslibwin.h oslibutil.h oslibgdi.h $(PDWIN32_INCLUDE)\winconst.h
 oslibutil.obj:  oslibutil.cpp oslibutil.h $(PDWIN32_INCLUDE)\wprocess.h oslibmsg.h
-oslibmsg.obj:   oslibmsg.cpp oslibmsg.h timer.h
+oslibmsg.obj:   oslibmsg.cpp oslibmsg.h timer.h win32wbase.h win32wnd.h
 oslibmenu.obj:  oslibmenu.cpp oslibmenu.h
 oslibgdi.obj:   oslibgdi.cpp oslibgdi.h win32wbase.h
 oslibres.obj:   oslibres.cpp oslibwin.h oslibres.h $(PDWIN32_INCLUDE)\winconst.h

@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.10 1999-11-10 14:16:45 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.11 1999-11-24 19:32:21 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -9,6 +9,7 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  * TODO: Simply copy for now. Need to make a real translation
+ * TODO: Filter translation isn't correct for posted messages
  *
  */
 #define  INCL_WIN
@@ -123,13 +124,19 @@ void WinToOS2MsgTranslate(MSG *winMsg, QMSG *os2Msg, BOOL isUnicode)
 //******************************************************************************
 void OS2ToWinMsgTranslate(QMSG *os2Msg, MSG *winMsg, BOOL isUnicode)
 {
+  POSTMSG_PACKET *packet;
   int i;
 
   memcpy(winMsg, os2Msg, sizeof(MSG));
   winMsg->hwnd = Win32Window::OS2ToWin32Handle(os2Msg->hwnd);
 
-  if(os2Msg->msg >= WIN32APP_USERMSGBASE) {
-    	winMsg->message = os2Msg->msg - WIN32APP_USERMSGBASE;
+  if(os2Msg->msg == WIN32APP_POSTMSG) {
+	packet = (POSTMSG_PACKET *)os2Msg->mp2;
+	if(packet && (ULONG)os2Msg->mp1 == WIN32PM_MAGIC) {
+    		winMsg->message = packet->Msg;
+		winMsg->wParam  = packet->wParam;
+		winMsg->lParam  = packet->lParam;
+	}
 	return;
   }
   for(i=0;i<MAX_MSGTRANSTAB;i++)
@@ -149,6 +156,7 @@ void OS2ToWinMsgTranslate(QMSG *os2Msg, MSG *winMsg, BOOL isUnicode)
 //******************************************************************************
 ULONG TranslateWinMsg(ULONG msg)
 {
+ POSTMSG_PACKET *packet;
  THDB *thdb;
 
   thdb = GetThreadTHDB();
@@ -156,8 +164,8 @@ ULONG TranslateWinMsg(ULONG msg)
 	thdb->fMsgTranslated = TRUE;
   }
 
-  if(msg >= WINWM_USER)
-    return msg + WIN32APP_USERMSGBASE;
+  if(msg >= WIN32APP_USERMSGBASE) 
+    return WIN32APP_POSTMSG;
 
   for(int i=0;i<MAX_MSGTRANSTAB;i++)
   {

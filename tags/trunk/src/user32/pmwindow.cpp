@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.55 1999-11-23 19:34:19 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.56 1999-11-24 19:32:22 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -211,9 +211,10 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         dprintf(("Invalid win32wnd pointer for window %x!!", hwnd));
         goto RunDefWndProc;
   }
-  if(msg > WIN32APP_USERMSGBASE) {
-        //win32 app user message
-        return (MRESULT)win32wnd->SendMessageA((ULONG)msg-WIN32APP_USERMSGBASE, (ULONG)mp1, (ULONG)mp2);
+  if(msg == WIN32APP_POSTMSG && (ULONG)mp1 == WIN32PM_MAGIC) {
+        //win32 app user message      
+	win32wnd->PostMessage((POSTMSG_PACKET *)mp2);
+        return (MRESULT)0;
   }
   switch( msg )
   {
