@@ -1,4 +1,4 @@
-/* $Id: module.h,v 1.2 1999-06-19 13:57:50 sandervl Exp $ */
+/* $Id: module.h,v 1.3 1999-09-02 17:39:35 phaller Exp $ */
 
 /*
  * Module definitions
@@ -96,7 +96,7 @@ typedef struct
     FARPROC16 BootApp;       /* startup procedure */
     FARPROC16 LoadAppSeg;    /* procedure to load a segment */
     FARPROC16 reserved2;
-    FARPROC16 MyAlloc;       /* memory allocation procedure, 
+    FARPROC16 MyAlloc;       /* memory allocation procedure,
                               * wine must write this field */
     FARPROC16 EntryAddrProc;
     FARPROC16 ExitProc;      /* exit procedure */
@@ -113,7 +113,7 @@ typedef struct
     SEGPTR    reserved WINE_PACKED;
 } LOADPARAMS16;
 
-typedef struct 
+typedef struct
 {
     LPSTR lpEnvAddress;
     LPSTR lpCmdLine;
@@ -162,7 +162,7 @@ typedef struct _wine_modref
 #define WINE_MODREF_MARKER                0x80000000
 
 
-
+#ifndef __WIN32OS2__
 /* Resource types */
 typedef struct resource_typeinfo_s NE_TYPEINFO;
 typedef struct resource_nameinfo_s NE_NAMEINFO;
@@ -175,6 +175,7 @@ typedef struct resource_nameinfo_s NE_NAMEINFO;
 
 #define NE_MODULE_NAME(pModule) \
     (((OFSTRUCT *)((char*)(pModule) + (pModule)->fileinfo))->szPathName)
+#endif
 
 /* module.c */
 extern FARPROC MODULE_GetProcAddress( HMODULE hModule, LPCSTR function, BOOL snoop );
@@ -192,8 +193,9 @@ extern FARPROC16 WINAPI WIN32_GetProcAddress16( HMODULE hmodule, LPCSTR name );
 extern SEGPTR WINAPI HasGPHandler16( SEGPTR address );
 
 /* resource.c */
-extern INT       WINAPI AccessResource(HMODULE,HRSRC); 
+extern INT       WINAPI AccessResource(HMODULE,HRSRC);
 
+#ifndef __WIN32OS2__
 /* loader/ne/module.c */
 extern NE_MODULE *NE_GetPtr( HMODULE16 hModule );
 extern void NE_DumpModule( HMODULE16 hModule );
@@ -205,7 +207,7 @@ extern FARPROC16 NE_GetEntryPointEx( HMODULE16 hModule, WORD ordinal, BOOL16 sno
 extern BOOL16 NE_SetEntryPoint( HMODULE16 hModule, WORD ordinal, WORD offset );
 extern HANDLE NE_OpenFile( NE_MODULE *pModule );
 extern HINSTANCE16 MODULE_LoadModule16( LPCSTR name, BOOL implicit );
-extern BOOL NE_CreateProcess( HFILE hFile, OFSTRUCT *ofs, LPCSTR cmd_line, LPCSTR env, 
+extern BOOL NE_CreateProcess( HFILE hFile, OFSTRUCT *ofs, LPCSTR cmd_line, LPCSTR env,
                               LPSECURITY_ATTRIBUTES psa, LPSECURITY_ATTRIBUTES tsa,
                               BOOL inherit, LPSTARTUPINFOA startup,
                               LPPROCESS_INFORMATION info );
@@ -245,5 +247,6 @@ extern void BUILTIN32_UnloadLibrary(WINE_MODREF *wm);
 
 /* if1632/builtin.c */
 extern HMODULE16 (*fnBUILTIN_LoadModule)(LPCSTR name, BOOL force);
+#endif
 
 #endif  /* __WINE_MODULE_H */

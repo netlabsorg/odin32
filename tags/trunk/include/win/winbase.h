@@ -1,4 +1,4 @@
-/* $Id: winbase.h,v 1.4 1999-08-25 11:24:08 sandervl Exp $ */
+/* $Id: winbase.h,v 1.5 1999-09-02 17:39:36 phaller Exp $ */
 
 #ifndef __WINE_WINBASE_H
 #define __WINE_WINBASE_H
@@ -1082,15 +1082,6 @@ typedef struct {
 }CRITICAL_SECTION;
 
 typedef struct {
-        DWORD dwOSVersionInfoSize;
-        DWORD dwMajorVersion;
-        DWORD dwMinorVersion;
-        DWORD dwBuildNumber;
-        DWORD dwPlatformId;
-        CHAR szCSDVersion[128];
-} OSVERSIONINFO16;
-
-typedef struct {
 	DWORD dwOSVersionInfoSize;
 	DWORD dwMajorVersion;
 	DWORD dwMinorVersion;
@@ -1135,57 +1126,12 @@ typedef struct _COMMPROP {
     WCHAR wcProvChar[1];
 } COMMPROP,*LPCOMMPROP;
 
-typedef struct tagCOMSTAT16
-{
-    BYTE   status;
-    UINT16 cbInQue WINE_PACKED;
-    UINT16 cbOutQue WINE_PACKED;
-} COMSTAT16,*LPCOMSTAT16;
-
 typedef struct tagCOMSTAT
 {
     DWORD status;
     DWORD cbInQue;
     DWORD cbOutQue;
 } COMSTAT,*LPCOMSTAT;
-
-typedef struct tagDCB16
-{
-    BYTE   Id;
-    UINT16 BaudRate WINE_PACKED;
-    BYTE   ByteSize;
-    BYTE   Parity;
-    BYTE   StopBits;
-    UINT16 RlsTimeout;
-    UINT16 CtsTimeout;
-    UINT16 DsrTimeout;
-
-    unsigned fBinary        :1;
-    unsigned fRtsDisable    :1;
-    unsigned fParity        :1;
-    unsigned fOutxCtsFlow   :1;
-    unsigned fOutxDsrFlow   :1;
-    unsigned fDummy         :2;
-    unsigned fDtrDisable    :1;
-
-    unsigned fOutX          :1;
-    unsigned fInX           :1;
-    unsigned fPeChar        :1;
-    unsigned fNull          :1;
-    unsigned fChEvt         :1;
-    unsigned fDtrflow       :1;
-    unsigned fRtsflow       :1;
-    unsigned fDummy2        :1;
-
-    CHAR   XonChar;
-    CHAR   XoffChar;
-    UINT16 XonLim;
-    UINT16 XoffLim;
-    CHAR   PeChar;
-    CHAR   EofChar;
-    CHAR   EvtChar;
-    UINT16 TxDelay WINE_PACKED;
-} DCB16, *LPDCB16;
 
 typedef struct tagDCB
 {
@@ -1258,7 +1204,6 @@ BOOL      WINAPI TransmitCommChar(INT,CHAR);
 
 
 /*DWORD WINAPI GetVersion( void );*/
-BOOL16 WINAPI GetVersionEx16(OSVERSIONINFO16*);
 BOOL WINAPI GetVersionExA(OSVERSIONINFOA*);
 BOOL WINAPI GetVersionExW(OSVERSIONINFOW*);
 #define GetVersionEx WINELIB_NAME_AW(GetVersionEx)
@@ -1526,7 +1471,7 @@ BOOL      WINAPI IsProcessorFeaturePresent(DWORD);
 BOOL      WINAPI IsValidLocale(DWORD,DWORD);
 BOOL      WINAPI LocalFileTimeToFileTime(const FILETIME*,LPFILETIME);
 BOOL      WINAPI LockFile(HFILE,DWORD,DWORD,DWORD,DWORD);
-BOOL      WINAPI LockFileEx(HANDLE, DWORD, DWORD, DWORD, DWORD, LPOVERLAPPED);    
+BOOL      WINAPI LockFileEx(HANDLE, DWORD, DWORD, DWORD, DWORD, LPOVERLAPPED);
 BOOL        WINAPI LookupPrivilegeValueA(LPCSTR,LPCSTR,LPVOID);
 BOOL        WINAPI LookupPrivilegeValueW(LPCWSTR,LPCWSTR,LPVOID);
 #define     LookupPrivilegeValue WINELIB_NAME_AW(LookupPrivilegeValue)
