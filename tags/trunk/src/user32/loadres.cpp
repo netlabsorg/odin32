@@ -1,4 +1,4 @@
-/* $Id: loadres.cpp,v 1.35 2001-03-27 16:17:51 sandervl Exp $ */
+/* $Id: loadres.cpp,v 1.36 2001-03-28 16:20:32 sandervl Exp $ */
 
 /*
  * Win32 resource API functions for OS/2
@@ -93,15 +93,10 @@ int WIN32API LoadStringW(HINSTANCE hinst, UINT wID, LPWSTR lpBuffer, int cchBuff
         }
     }
 
-#ifdef DEBUG_ENABLELOG_LEVEL2
     if(i) {
-        char *astring = (char *)HEAP_strdupWtoA(GetProcessHeap(), 0, lpBuffer);
-        dprintf(("LoadStringW from %X, id %d %s\n", hinst, wID, astring));
-        HEAP_free(astring);
+         dprintf(("LoadStringW from %X, id %d %ls buffersize %d", hinst, wID, lpBuffer, cchBuffer));
     }
-#else
-    dprintf(("LoadStringW from %X, id %d buffersize %d\n", hinst, wID, cchBuffer));
-#endif
+    else dprintf(("LoadStringW from %X, id %d buffersize %d", hinst, wID, cchBuffer));
     return(i);
 }
 //******************************************************************************
@@ -118,7 +113,10 @@ HICON WIN32API LoadIconA(HINSTANCE hinst, LPCSTR lpszIcon)
 //******************************************************************************
 HICON WIN32API LoadIconW(HINSTANCE hinst, LPCWSTR lpszIcon)
 {
-    dprintf(("LoadIconA %x %x", hinst, lpszIcon));
+    if(HIWORD(lpszIcon)) {
+         dprintf(("LoadIconW %x %ls", hinst, lpszIcon));
+    }
+    else dprintf(("LoadIconW %x %x", hinst, lpszIcon));
     return LoadImageW(hinst, lpszIcon, IMAGE_ICON, 0, 0, LR_SHARED | LR_DEFAULTSIZE);
 }
 //******************************************************************************
@@ -343,7 +341,7 @@ HBITMAP WIN32API LoadBitmapW(HINSTANCE hinst, LPCWSTR lpszBitmap)
   hBitmap = LoadBitmapW((hinst == 0) ? hInstanceUser32:hinst, lpszBitmap, 0, 0, 0);
 
   if(HIWORD(lpszBitmap)) {
-        dprintf(("LoadBitmapW %x %s returned %08xh\n", hinst, lpszBitmap, hBitmap));
+        dprintf(("LoadBitmapW %x %ls returned %08xh\n", hinst, lpszBitmap, hBitmap));
   }
   else  dprintf(("LoadBitmapW %x %x returned %08xh\n", hinst, lpszBitmap, hBitmap));
 
@@ -381,7 +379,10 @@ HANDLE WIN32API LoadImageW(HINSTANCE hinst, LPCWSTR lpszName, UINT uType,
 {
  HANDLE hRet = 0;
 
-  dprintf(("LoadImageW %x %x %d (%d,%d)\n", hinst, lpszName, uType, cxDesired, cyDesired));
+  if(HIWORD(lpszName)) {
+        dprintf(("LoadImageW %x %ls %d (%d,%d)\n", hinst, lpszName, uType, cxDesired, cyDesired));
+  }
+  else  dprintf(("LoadImageW %x %x %d (%d,%d)\n", hinst, lpszName, uType, cxDesired, cyDesired));
 
   if (fuLoad & LR_DEFAULTSIZE) {
         if (uType == IMAGE_ICON) {
