@@ -154,6 +154,8 @@ extern const char * const debug_ch_name[];
 #  undef ERR_
 #  undef ERR_ON
 #  define ERR_ON(ch)   0
+#  undef DPRINTF
+#  undef MESSAGE
 #ifdef DEBUG
 #  define TRACE WriteLog
 #  define TRACE_(ch) WriteLog
@@ -163,6 +165,8 @@ extern const char * const debug_ch_name[];
 #  define WARN_(ch) WriteLog
 #  define ERR_(ch) WriteLog
 #  define ERR  WriteLog
+#  define DPRINTF WriteLog
+#  define MESSAGE WriteLog
 #else
 #  define TRACE 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
 #  define TRACE_(ch) 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
@@ -172,6 +176,8 @@ extern const char * const debug_ch_name[];
 #  define WARN_(ch) 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
 #  define ERR_(ch) 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
 #  define ERR  1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
+#  define DPRINTF   1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
+#  define MESSAGE   1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
 #endif
 #undef __GET_DEBUGGING
 #define __GET_DEBUGGING(dbcl,dbch)
