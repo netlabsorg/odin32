@@ -30,39 +30,12 @@ void CONTROLS_Register()
 void CONTROLS_Unregister()
 {
   dprintf(("Unregister BUTTON class"));
-  BUTTON_Unregister();
+  if (!BUTTON_Unregister()) dprintf(("failed!!!"));
 
   dprintf(("Unregister STATIC class"));
-  STATIC_Unregister();
+  if (!STATIC_Unregister()) dprintf(("failed!!!"));
 
   dprintf(("Unregister SCROLLBAR class"));
-  SCROLLBAR_Unregister();
+  if (!SCROLLBAR_Unregister()) dprintf(("failed!!!"));
 }
 
-/* Win32 <-> internal control name */
-
-char* Win32ToOdinControlName(char* name)
-{
-  if (!name) return NULL;
-
-  if (stricmp(name,WIN32BUTTONCLASSNAME))
-    return ODINBUTTONCLASSNAME;
-
-  if (stricmp(name,WIN32STATICCLASSNAME))
-    return ODINSTATICCLASSNAME;
-
-  return name; //original name
-}
-
-char* OdinToWin32ControlName(char* name)
-{
-  if (!name) return NULL;
-
-  if (stricmp(name,ODINBUTTONCLASSNAME))
-    return WIN32BUTTONCLASSNAME;
-
-  if (stricmp(name,ODINSTATICCLASSNAME))
-    return WIN32STATICCLASSNAME;
-
-  return name; //original name
-}

@@ -584,24 +584,24 @@ BOOL STATIC_Register()
 {
     WNDCLASSA wndClass;
 
-    if (GlobalFindAtomA (ODINSTATICCLASSNAME)) return FALSE;
+    if (GlobalFindAtomA(STATICCLASSNAME)) return FALSE;
 
-    ZeroMemory (&wndClass, sizeof(WNDCLASSA));
+    ZeroMemory(&wndClass,sizeof(WNDCLASSA));
     wndClass.style         = CS_GLOBALCLASS | CS_HREDRAW | CS_VREDRAW | CS_PARENTDC;
     wndClass.lpfnWndProc   = (WNDPROC)StaticWndProc;
     wndClass.cbClsExtra    = 0;
     wndClass.cbWndExtra    = sizeof(STATICINFO);
-    wndClass.hCursor       = LoadCursorA (0, IDC_ARROWA);
-    wndClass.hbrBackground = (HBRUSH)(COLOR_3DFACE + 1);
-    wndClass.lpszClassName = ODINSTATICCLASSNAME;
+    wndClass.hCursor       = LoadCursorA (0,IDC_ARROWA);
+    wndClass.hbrBackground = (HBRUSH)(COLOR_3DFACE+1);
+    wndClass.lpszClassName = STATICCLASSNAME;
 
-    return RegisterClassA (&wndClass);
+    return RegisterClassA(&wndClass);
 }
 
 
 BOOL STATIC_Unregister()
 {
-    if (GlobalFindAtomA (ODINSTATICCLASSNAME))
-        UnregisterClassA (ODINSTATICCLASSNAME, (HINSTANCE)NULL);
-    return TRUE; //always TRUE
+    if (GlobalFindAtomA (STATICCLASSNAME))
+        return UnregisterClassA(STATICCLASSNAME,(HINSTANCE)NULL);
+    else return FALSE;
 }
