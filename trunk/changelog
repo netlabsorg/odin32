@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1830 2001-11-14 18:55:30 sandervl Exp $ */
+/* $Id: changelog,v 1.1831 2001-11-15 15:00:15 phaller Exp $ */
+
+ 2001-11-14: Patrick Haller <patrick.haller@innotek.de>
+    - KERNEL32: o fixed infinite loop in PE loader for corrupted or
+                  misinterpreted PE images (Opera 6)
 
  2001-11-14: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32, USER32, COMCTL32, SHELL32, OLE32:

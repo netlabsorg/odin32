@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.90 2001-10-09 20:25:21 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.91 2001-11-15 14:59:06 phaller Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -179,7 +179,11 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
  ULONG  signature;
 
     hFile = OSLibDosOpen(szFileName, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
-
+  
+    dprintf((LOG, "KERNEL32-PELDR: Opening PE-image (%s) returned handle %08xh.\n",
+             szFileName,
+             hFile));
+  
     //default error:
     strcpy(szErrorModule, OSLibStripPath(szFileName));
     if(hFile == NULL) {
@@ -692,6 +696,17 @@ static inline APIRET _Optlink fastDosRead(HFILE hFile,
             *pulBytesRead = 0;
             return rc;
         }
+      
+      // PH 2001-11-15
+      // For corrupt or misinterpreted PE headers,
+      // the preceeding DosSetFilePtr may have moved the
+      // file pointer at or behind the file's end.
+      // DosRead will then return rc=0 and ulReadBytes=0.
+      // This must NOT lead to an infinite loop.
+      if (ulReadBytes == 0)
+      {
+        return ERROR_INTERNAL;
+      }
 
         ulSize -= ulReadBytes;
         p += ulReadBytes;
