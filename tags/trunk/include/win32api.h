@@ -121,6 +121,7 @@ BOOL    WIN32API EnumChildWindows(HWND hwnd, WNDENUMPROC lpfn, LPARAM lParam);
 BOOL    WIN32API UpdateWindow (HWND hwnd);
 BOOL    WIN32API GetViewportOrgEx(HDC hdc, LPPOINT pPoint);
 BOOL    WIN32API SetViewportOrgEx(HDC hdc, int xOrg, int yOrg, LPPOINT pPoint);
+BOOL    WIN32API GetWindowOrgEx(HDC,LPPOINT);
 
 LPCSTR  WIN32API GetCommandLineA(VOID);
 LPCWSTR WIN32API GetCommandLineW(VOID);
