@@ -43,7 +43,8 @@ EXPORTS
   ImageList_GetImageCount      = _ImageList_GetImageCount@4          @59
   ImageList_GetImageInfo       = _ImageList_GetImageInfo@12          @60
   ImageList_GetImageRect       = _ImageList_GetImageRect@12          @61
-  ImageList_LoadImageA         = _ImageList_LoadImageA@28            @62 ; ?????? 63?
+  ImageList_LoadImageA         = _ImageList_LoadImageA@28            @62
+  ImageList_LoadImageA         = _ImageList_LoadImageA@28            @63
   ImageList_LoadImageW         = _ImageList_LoadImageW@28            @64
   ImageList_Merge              = _ImageList_Merge@24                 @65
 
@@ -58,8 +59,10 @@ EXPORTS
   ImageList_SetOverlayImage    = _ImageList_SetOverlayImage@12       @79
 
   PropertySheetA               = _PropertySheetA@4                   @84
+  PropertySheetA               = _PropertySheetA@4                   @83
   PropertySheetW               = _PropertySheetW@4                   @85
   CreatePropertySheetPageA     = _CreatePropertySheetPageA@4         @19
+  CreatePropertySheetPageA     = _CreatePropertySheetPageA@4         @18
   CreatePropertySheetPageW     = _CreatePropertySheetPageW@4         @20
   DestroyPropertySheetPage     = _DestroyPropertySheetPage@4         @24
   
@@ -118,3 +121,13 @@ EXPORTS
   DPA_DestroyCallback = _DPA_DestroyCallback@12    @386
   DSA_EnumCallback    = _DSA_EnumCallback@12       @387
   DSA_DestroyCallback = _DSA_DestroyCallback@12    @388
+
+  StrCSpnA            = _COMCTL32_StrCSpnA@8       @356
+  StrChrW             = _COMCTL32_StrChrW@8        @358
+  StrCmpNA            = _COMCTL32_StrCmpNA@12      @352
+  StrCmpNW            = _COMCTL32_StrCmpNW@12      @360
+  StrRChrA            = _COMCTL32_StrRChrA@12      @351
+  StrRChrW            = _COMCTL32_StrRChrW@12      @359
+  StrStrA             = _COMCTL32_StrStrA@8        @354
+  StrStrW             = _COMCTL32_StrStrW@8        @362
+  StrSpnW             = _COMCTL32_StrSpnW@8        @364
