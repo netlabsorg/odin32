@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.50 2001-06-24 14:13:03 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.51 2001-07-07 13:58:36 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -249,21 +249,21 @@ ODINFUNCTION2(INT, CompareFileTime,
               FILETIME *, lpft2)
 {
    if (lpft1 == NULL || lpft2 == NULL) {
-  SetLastError(ERROR_INVALID_PARAMETER);
-  return -1;
+       SetLastError(ERROR_INVALID_PARAMETER);
+       return -1;
    }
 
    if(lpft1->dwHighDateTime > lpft2->dwHighDateTime)
-  return 1;
+       return 1;
 
    if(lpft1->dwHighDateTime < lpft2->dwHighDateTime)
-  return -1;
+       return -1;
 
    if(lpft1->dwLowDateTime > lpft2->dwLowDateTime)
-  return 1;
+       return 1;
 
    if(lpft1->dwLowDateTime < lpft2->dwLowDateTime)
-  return -1;
+       return -1;
 
    return 0; //equal
 }
