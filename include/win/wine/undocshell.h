@@ -1,4 +1,4 @@
-/* $Id: undocshell.h,v 1.2 1999-08-22 22:52:11 sandervl Exp $ */
+/* $Id: undocshell.h,v 1.3 1999-11-02 20:36:05 sandervl Exp $ */
 #ifndef __WINE_UNDOCSHELL_H
 #define __WINE_UNDOCSHELL_H
 
@@ -51,6 +51,8 @@ HRESULT WINAPI StrRetToStrNA (LPVOID dest, DWORD len, LPSTRRET src, LPITEMIDLIST
 HRESULT WINAPI StrRetToStrNW (LPVOID dest, DWORD len, LPSTRRET src, LPITEMIDLIST pidl);
 HRESULT WINAPI StrRetToStrNAW (LPVOID dest, DWORD len, LPSTRRET src, LPITEMIDLIST pidl);
 
+HRESULT WINAPI StrRetToBufA (LPSTRRET src, LPITEMIDLIST pidl, LPSTR dest, DWORD len);
+HRESULT WINAPI StrRetToBufW (LPSTRRET src, LPITEMIDLIST pidl, LPWSTR dest, DWORD len);
 #ifdef __cplusplus
 } /* extern "C" */
 #endif /* defined(__cplusplus) */
