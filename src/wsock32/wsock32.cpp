@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.35 2001-04-28 16:15:18 sandervl Exp $ */
+/* $Id: wsock32.cpp,v 1.36 2001-07-07 10:44:10 achimha Exp $ */
 
 /*
  *
@@ -153,7 +153,7 @@ void WIN32API WSASetLastError(int iError)
   // according to the docs, WSASetLastError() is just a call-through
   // to SetLastError()
   if(iError) {
-	dprintf(("WSASetLastError %x", iError));
+	dprintf(("WSASetLastError 0x%x", iError));
   }
   SetLastError(iError);
 }
@@ -235,7 +235,7 @@ ODINFUNCTION1(int,OS2closesocket,SOCKET, s)
       	return SOCKET_ERROR;
    }
    //Close WSAAsyncSelect thread if one was created for this socket
-   FindAndSetAsyncEvent(s, 0, 0, 0);
+   FindAndSetAsyncEvent(s, WSA_SELECT_HWND, 0, 0, 0);
 
    // wait thread termination
    DosSleep(10);
@@ -862,11 +862,13 @@ ODINFUNCTION5(int,OS2setsockopt,
   char             *safeoptval;
 
    if(!fWSAInitialized) {
+        dprintf(("WSA not initialized"));
       	WSASetLastError(WSANOTINITIALISED);
       	return SOCKET_ERROR;
    }
    else
    if(WSAIsBlocking()) {
+        dprintf(("WSA is blocking"));
       	WSASetLastError(WSAEINPROGRESS);
       	return SOCKET_ERROR;
    }
@@ -886,6 +888,7 @@ ODINFUNCTION5(int,OS2setsockopt,
 	case SO_DONTLINGER:
 	case SO_LINGER:
             	if(optlen < (int)sizeof(ws_linger)) {
+                        dprintf(("SOL_SOCKET, SO_LINGER, optlen too small"));
                		WSASetLastError(WSAEFAULT);
                		return SOCKET_ERROR;
             	}
@@ -898,6 +901,7 @@ ODINFUNCTION5(int,OS2setsockopt,
 	case SO_SNDBUF:
 	case SO_RCVBUF:
             	if(optlen < (int)sizeof(int)) {
+                        dprintf(("SOL_SOCKET, SO_RCVBUF, optlen too small"));
                		WSASetLastError(WSAEFAULT);
                		return SOCKET_ERROR;
             	}
@@ -922,6 +926,7 @@ tryagain:
 	case SO_OOBINLINE:
 	case SO_REUSEADDR:
             	if(optlen < (int)sizeof(int)) {
+                        dprintf(("SOL_SOCKET, SO_REUSEADDR, optlen too small"));
                		WSASetLastError(WSAEFAULT);
                		return SOCKET_ERROR;
             	}
@@ -937,6 +942,7 @@ tryagain:
    if(level == IPPROTO_TCP) {
        	if(optname == TCP_NODELAY) {
             	if(optlen < (int)sizeof(int)) {
+                        dprintf(("IPPROTO_TCP, TCP_NODELAY, optlen too small"));
                		WSASetLastError(WSAEFAULT);
                		return SOCKET_ERROR;
             	}
@@ -949,6 +955,7 @@ tryagain:
         }
    }
    else {
+        dprintf(("unknown level code!"));
        	WSASetLastError(WSAEINVAL);
 	return SOCKET_ERROR;
    }

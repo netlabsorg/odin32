@@ -1,4 +1,4 @@
-/* $Id: asyncthread.h,v 1.5 2000-05-18 22:54:21 sandervl Exp $ */
+/* $Id: asyncthread.h,v 1.6 2001-07-07 10:44:09 achimha Exp $ */
 
 /*
  * Async thread help functions
@@ -39,8 +39,8 @@ typedef struct _ASYNCTHREADPARM
         HANDLE          hThread; //handle of thread that started the async request
 	ASYNCTHREADPROC asyncProc;
         VMutex         *parmmutex;
-	HWND 		hwnd;
-	DWORD		msg;
+	int 		notifyHandle;
+	int		notifyData;
 	LPSTR		buf;
 	DWORD		buflen;
 	union {
@@ -71,6 +71,7 @@ typedef struct _ASYNCTHREADPARM
 			DWORD       lEvents;
                         DWORD       lEventsPending;
 			SOCKET      s;
+			int         mode;
 		} asyncselect;
         } u;
         _ASYNCTHREADPARM *next;
@@ -81,6 +82,6 @@ void  RemoveFromQueue(PASYNCTHREADPARM pThreadParm);
 
 void  EnableAsyncEvent(SOCKET s, ULONG flags);
 BOOL  QueryAsyncEvent(SOCKET s, HWND *pHwnd, int *pMsg, ULONG *plEvent);
-BOOL  FindAndSetAsyncEvent(SOCKET s, HWND hwnd, int msg, ULONG lEvent);
+BOOL FindAndSetAsyncEvent(SOCKET s, int mode, int notifyHandle, int notifyData, ULONG lEventMask);
 
 #endif  //__ASYNCTHREAD_H__
