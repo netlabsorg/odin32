@@ -1,4 +1,4 @@
-/* $Id: mmap.h,v 1.30 2003-12-12 11:09:37 sandervl Exp $ */
+/* $Id: mmap.h,v 1.31 2004-01-11 11:52:18 sandervl Exp $ */
 
 /*
  * Memory mapped class
@@ -45,6 +45,11 @@ typedef enum
     PAGEVIEW_VIEW,
     PAGEVIEW_GUARD
 } PAGEVIEW;
+
+#ifndef _DEF_PFNEXCEPTIONNOTIFY
+#define _DEF_PFNEXCEPTIONNOTIFY
+typedef BOOL (WIN32API * PFNEXCEPTIONNOTIFY)(LPVOID lpBase, ULONG offset, BOOL fWriteAccess, DWORD dwSize, DWORD dwUserData);
+#endif
 
 class Win32MemMapView;
 class Win32PeLdrImage;
@@ -246,6 +251,36 @@ private:
    friend class Win32MemMap;
 };
 //******************************************************************************
+//Notification memory mapped file Class
+//******************************************************************************
+class Win32MemMapNotify
+{
+public:
+   Win32MemMapNotify(PFNEXCEPTIONNOTIFY pfnNotify, LPVOID lpViewaddr, ULONG size, ULONG dwUserData);
+  ~Win32MemMapNotify();
+
+   LPVOID getViewAddr()                  { return pMapView; };
+   DWORD  getSize()                      { return mSize;    };
+   DWORD  getUserData()                  { return dwUserData; };
+
+   BOOL   notify(ULONG ulFaultAddr, ULONG offset, BOOL fWriteAccess);
+
+static Win32MemMapNotify *findMapByView(ULONG address,
+                                        ULONG *offset,
+                                        ULONG accessType);
+static Win32MemMapNotify *findView(ULONG address);
+
+
+protected:
+   ULONG  mSize, dwUserData;
+   LPVOID pMapView;
+   PFNEXCEPTIONNOTIFY pfnNotify;
+
+private:
+   static Win32MemMapNotify *mapviews;
+          Win32MemMapNotify *next;
+};
+//******************************************************************************
 //******************************************************************************
 
 #pragma data_seg(_GLOBALDATA)
@@ -253,5 +288,6 @@ extern CRITICAL_SECTION_OS2 globalmapcritsect;
 #pragma data_seg()
 
 void InitializeMemMaps();
+void FinalizeMemMaps();
 
 #endif //__MMAP_H__
