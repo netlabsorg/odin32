@@ -1,4 +1,4 @@
-# $Id: process.mak,v 1.31 2002-09-14 23:27:04 bird Exp $
+# $Id: process.mak,v 1.32 2002-09-20 03:39:41 bird Exp $
 
 #
 # Unix-like tools for OS/2
@@ -317,6 +317,39 @@ TARGET_PUB      = $(TARGET_PUB_DIR)\$(TARGET_PUB_NAME).$(TARGET_PUB_EXT)
 TARGET_PUB_DEB  = $(TARGET_PUB_DIR_DEB)\$(TARGET_PUB_NAME).$(TARGET_PUB_EXT)
 !endif
 
+# Default public book dirs
+!ifndef TARGET_BOOK_PUB_BASE
+TARGET_BOOK_PUB_BASE = $(PATH_PUB)
+!endif
+!ifndef TARGET_BOOK_PUB_SUB
+TARGET_BOOK_PUB_SUB = $(PATH_SUB_BOOK)
+!endif
+!ifndef TARGET_BOOK_PUB_DIR
+TARGET_BOOK_PUB_DIR = $(TARGET_BOOK_PUB_BASE)\$(TARGET_BOOK_PUB_SUB)
+!endif
+
+# Default public help dirs
+!ifndef TARGET_HELP_PUB_BASE
+TARGET_HELP_PUB_BASE = $(PATH_PUB)
+!endif
+!ifndef TARGET_HELP_PUB_SUB
+TARGET_HELP_PUB_SUB = $(PATH_SUB_HELP)
+!endif
+!ifndef TARGET_HELP_PUB_DIR
+TARGET_HELP_PUB_DIR = $(TARGET_HELP_PUB_BASE)\$(TARGET_HELP_PUB_SUB)
+!endif
+
+# Default public docs dirs
+!ifndef TARGET_DOC_PUB_BASE
+TARGET_DOC_PUB_BASE = $(PATH_PUB)
+!endif
+!ifndef TARGET_DOC_PUB_SUB
+TARGET_DOC_PUB_SUB = $(PATH_SUB_DOC)
+!endif
+!ifndef TARGET_DOC_PUB_DIR
+TARGET_DOC_PUB_DIR = $(TARGET_DOC_PUB_BASE)\$(TARGET_DOC_PUB_SUB)
+!endif
+
 # Default depend filename.
 !ifndef TARGET_DEPEND
 TARGET_DEPEND = $(PATH_TARGET)\.depend
@@ -428,7 +461,7 @@ $(ECHO) Target path $(CLRFIL)$(PATH_TARGET)$(CLRTXT) does NOT exist. Creating. $
 # Common inference rules
 # -----------------------------------------------------------------------------
 .SUFFIXES:
-.SUFFIXES: .c .cpp .orc .asm .$(EXT_OBJ) .$(EXT_RES) .rc .ii .s
+.SUFFIXES: .c .cpp .orc .asm .$(EXT_OBJ) .$(EXT_RES) .rc .ii .s .ipp .ipf .$(EXT_INF) .$(EXT_HLP)
 
 #
 # A workaround for SlickEdits inability to find the buggy files..
@@ -660,6 +693,88 @@ _CC_BASELINE = $(CC) \
     $(AS) $(AS_FLAGS) $(PATH_TARGET)\$(@B).asm $(AS_OBJ_OUT)$(_DST)
 
 
+# Compiling INFs.
+.ipf{$(PATH_TARGET)}.$(EXT_INF):
+    @$(ECHO) BOOK Compiler $(CLRFIL)$(_SRC)$(CLRRST)
+    \
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
+    $(INFC_CMD)
+
+.ipf.inf:
+    @$(ECHO) BOOK Compiler $(CLRFIL)$(_SRC)$(CLRRST)
+    \
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
+    $(INFC_CMD)
+
+
+# Compiling INFs with pre-compiling
+.ipp{$(PATH_TARGET)}.$(EXT_INF):
+    @$(ECHO) CC Pre + BOOK Compiler $(CLRFIL)$(_SRC)$(CLRRST)
+!ifndef CC_PC_2_STRIPPED_STDOUT
+    $(TOOL_ECHO) $(CLRERR)fatal error: CC_PC_2_STRIPPED_STDOUT isn't supported on this compiler. $(CLRRST) && false
+!endif
+    \
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
+    $(INFC_CMD_PRE)
+
+.ipp.inf:
+    @$(ECHO) CC Pre + BOOK Compiler $(CLRFIL)$(_SRC)$(CLRRST)
+!ifndef CC_PC_2_STRIPPED_STDOUT
+    $(TOOL_ECHO) $(CLRERR)fatal error: CC_PC_2_STRIPPED_STDOUT isn't supported on this compiler. $(CLRRST) && false
+!endif
+    \
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
+    $(INFC_CMD_PRE)
+
+
+# Compiling HLPs
+.ipf{$(PATH_TARGET)}.$(EXT_HLP):
+    @$(ECHO) HELP Compiler $(CLRFIL)$(_SRC)$(CLRRST)
+    \
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
+    $(HLPC_CMD)
+
+.ipf.hlp:
+    @$(ECHO) HELP Compiler $(CLRFIL)$(_SRC)$(CLRRST)
+    \
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
+    $(HLPC_CMD)
+
+
+# Compiling HLPs with pre-compiling
+.ipp{$(PATH_TARGET)}.$(EXT_HLP):
+    @$(ECHO) CC Pre + HELP Compiler $(CLRFIL)$(_SRC)$(CLRRST)
+!ifndef CC_PC_2_STRIPPED_STDOUT
+    $(TOOL_ECHO) $(CLRERR)fatal error: CC_PC_2_STRIPPED_STDOUT isn't supported on this compiler. $(CLRRST) && false
+!endif
+    \
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
+    $(HLPC_CMD_PRE)
+
+.ipp.hlp:
+    @$(ECHO) CC Pre + HELP Compiler $(CLRFIL)$(_SRC)$(CLRRST)
+!ifndef CC_PC_2_STRIPPED_STDOUT
+    $(TOOL_ECHO) $(CLRERR)fatal error: CC_PC_2_STRIPPED_STDOUT isn't supported on this compiler. $(CLRRST) && false
+!endif
+    \
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
+    $(HLPC_CMD_PRE)
 
 
 
@@ -675,7 +790,7 @@ all: build
 #   1. Make Dependencies
 #   2. Make Needed Tools (stuff required in the next steps)
 #   3. Make Libraries (all kinds)
-#   4. Make Executables
+#   4. Make Binaries (ie. executable files)
 #   5. Make Miscellaneous Targets
 #   6. Make Install
 # Note: In order to load dependencies we'll do a forwarding after making them.
@@ -702,8 +817,8 @@ _build:  _build_banner_dep dep
 _build_new_dependencies_: \
         _build_banner_needed        needed \
         _build_banner_lib           lib \
-        _build_banner_executable    executable \
-        _build_banner_miscellaneous miscellaneous \
+        _build_banner_binary        binary \
+        _build_banner_misc          misc \
         _build_banner_publish       publish
 
 
@@ -720,10 +835,10 @@ _build_banner_needed:
 _build_banner_lib:
     @$(ECHO)$(CLRMAK)[Start Pass 3 - Make Libraries] $(CLRRST)
     @SET _BUILD_PASS=3
-_build_banner_executable:
-    @$(ECHO)$(CLRMAK)[Start Pass 4 - Make Executables] $(CLRRST)
+_build_banner_binary:
+    @$(ECHO)$(CLRMAK)[Start Pass 4 - Make Binaries] $(CLRRST)
     @SET _BUILD_PASS=4
-_build_banner_miscellaneous:
+_build_banner_misc:
     @$(ECHO)$(CLRMAK)[Start Pass 5 - Make Miscellaneous Targets] $(CLRRST)
     @SET _BUILD_PASS=5
 _build_banner_publish:
@@ -754,21 +869,21 @@ pass1:  build
 pass2:  _build_new_dependencies_
 
 pass3:  _build_banner_lib           lib \
-        _build_banner_executable    executable \
-        _build_banner_miscellaneous miscellaneous \
+        _build_banner_binary        binary \
+        _build_banner_misc          misc \
         _build_banner_publish       publish
 
-pass4:  _build_banner_executable    executable \
-        _build_banner_miscellaneous miscellaneous \
+pass4:  _build_banner_binary        binary \
+        _build_banner_misc          misc \
         _build_banner_publish       publish
 
-pass5:  _build_banner_miscellaneous miscellaneous \
+pass5:  _build_banner_misc          misc \
         _build_banner_publish       publish
 
 pass6:  _build_banner_publish       publish
 
 quick:  _build_banner_lib           lib \
-        _build_banner_executable    executable \
+        _build_banner_binary        binary \
         _build_banner_publish       publish
 
 
@@ -809,22 +924,22 @@ clean:
 !ifdef SUBDIRS_CLEAN
     @$(TOOL_DODIRS) "$(SUBDIRS_CLEAN)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) NODEP=1 $@
 !else
-! if "$(SUBDIRS)$(SUBDIRS_NEEDED)$(SUBDIRS_LIB)$(SUBDIRS_EXECUTABLES)$(SUBDIRS_MISC)" != ""
-    @$(TOOL_DODIRS) "$(SUBDIRS) $(SUBDIRS_NEEDED) $(SUBDIRS_LIB) $(SUBDIRS_EXECUTABLES) $(SUBDIRS_MISC)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) NODEP=1 $@
+! if "$(SUBDIRS)$(SUBDIRS_NEEDED)$(SUBDIRS_LIB)$(SUBDIRS_BINARY)$(SUBDIRS_MISC)" != ""
+    @$(TOOL_DODIRS) "$(SUBDIRS) $(SUBDIRS_NEEDED) $(SUBDIRS_LIB) $(SUBDIRS_BINARY) $(SUBDIRS_MISC)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) NODEP=1 $@
 ! endif
 !endif
 !ifdef PREMAKEFILES_CLEAN
     @$(TOOL_DOMAKES) "$(PREMAKEFILES_CLEAN)" $(TOOL_MAKE) NODEP=1 $@
 !else
-! if "$(PREMAKEFILES)$(PREMAKEFILES_NEEDED)$(PREMAKEFILES_LIB)$(PREMAKEFILES_EXECUTABLES)$(PREMAKEFILES_MISC)" != ""
-    @$(TOOL_DOMAKES) "$(PREMAKEFILES) $(PREMAKEFILES_NEEDED) $(PREMAKEFILES_LIB) $(PREMAKEFILES_EXECUTABLES) $(PREMAKEFILES_MISC)" $(TOOL_MAKE) NODEP=1 $@
+! if "$(PREMAKEFILES)$(PREMAKEFILES_NEEDED)$(PREMAKEFILES_LIB)$(PREMAKEFILES_BINARY)$(PREMAKEFILES_MISC)" != ""
+    @$(TOOL_DOMAKES) "$(PREMAKEFILES) $(PREMAKEFILES_NEEDED) $(PREMAKEFILES_LIB) $(PREMAKEFILES_BINARY) $(PREMAKEFILES_MISC)" $(TOOL_MAKE) NODEP=1 $@
 ! endif
 !endif
 !ifdef POSTMAKEFILES_CLEAN
     @$(TOOL_DOMAKES) "$(POSTMAKEFILES_CLEAN)" $(TOOL_MAKE) NODEP=1 $@
 !else
-! if "$(POSTMAKEFILES)$(POSTMAKEFILES_NEEDED)$(POSTMAKEFILES_LIB)$(POSTMAKEFILES_EXECUTABLES)$(POSTMAKEFILES_MISC)" != ""
-    @$(TOOL_DOMAKES) "$(POSTMAKEFILES) $(POSTMAKEFILES_NEEDED) $(POSTMAKEFILES_LIB) $(POSTMAKEFILES_EXECUTABLES) $(POSTMAKEFILES_MISC)" $(TOOL_MAKE) NODEP=1 $@
+! if "$(POSTMAKEFILES)$(POSTMAKEFILES_NEEDED)$(POSTMAKEFILES_LIB)$(POSTMAKEFILES_BINARY)$(POSTMAKEFILES_MISC)" != ""
+    @$(TOOL_DOMAKES) "$(POSTMAKEFILES) $(POSTMAKEFILES_NEEDED) $(POSTMAKEFILES_LIB) $(POSTMAKEFILES_BINARY) $(POSTMAKEFILES_MISC)" $(TOOL_MAKE) NODEP=1 $@
 ! endif
 !endif
 
@@ -862,22 +977,22 @@ $(TOOL_DEP_FILES)
 !ifdef SUBDIRS_DEP
     @$(TOOL_DODIRS) "$(SUBDIRS_DEP)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) NODEP=1 $@
 !else
-! if "$(SUBDIRS)$(SUBDIRS_NEEDED)$(SUBDIRS_LIB)$(SUBDIRS_EXECUTABLES)$(SUBDIRS_MISC)" != ""
-    @$(TOOL_DODIRS) "$(SUBDIRS) $(SUBDIRS_NEEDED) $(SUBDIRS_LIB) $(SUBDIRS_EXECUTABLES) $(SUBDIRS_MISC)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) NODEP=1 $@
+! if "$(SUBDIRS)$(SUBDIRS_NEEDED)$(SUBDIRS_LIB)$(SUBDIRS_BINARY)$(SUBDIRS_MISC)" != ""
+    @$(TOOL_DODIRS) "$(SUBDIRS) $(SUBDIRS_NEEDED) $(SUBDIRS_LIB) $(SUBDIRS_BINARY) $(SUBDIRS_MISC)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) NODEP=1 $@
 ! endif
 !endif
 !ifdef PREMAKEFILES_DEP
     @$(TOOL_DOMAKES) "$(PREMAKEFILES_DEP)" $(TOOL_MAKE) NODEP=1 $@
 !else
-! if "$(PREMAKEFILES)$(PREMAKEFILES_NEEDED)$(PREMAKEFILES_LIB)$(PREMAKEFILES_EXECUTABLES)$(PREMAKEFILES_MISC)" != ""
-    @$(TOOL_DOMAKES) "$(PREMAKEFILES) $(PREMAKEFILES_NEEDED) $(PREMAKEFILES_LIB) $(PREMAKEFILES_EXECUTABLES) $(PREMAKEFILES_MISC)" $(TOOL_MAKE) NODEP=1 $@
+! if "$(PREMAKEFILES)$(PREMAKEFILES_NEEDED)$(PREMAKEFILES_LIB)$(PREMAKEFILES_BINARY)$(PREMAKEFILES_MISC)" != ""
+    @$(TOOL_DOMAKES) "$(PREMAKEFILES) $(PREMAKEFILES_NEEDED) $(PREMAKEFILES_LIB) $(PREMAKEFILES_BINARY) $(PREMAKEFILES_MISC)" $(TOOL_MAKE) NODEP=1 $@
 ! endif
 !endif
 !ifdef POSTMAKEFILES_DEP
     @$(TOOL_DOMAKES) "$(POSTMAKEFILES_DEP)" $(TOOL_MAKE) NODEP=1 $@
 !else
-! if "$(POSTMAKEFILES)$(POSTMAKEFILES_NEEDED)$(POSTMAKEFILES_LIB)$(POSTMAKEFILES_EXECUTABLES)$(POSTMAKEFILES_MISC)" != ""
-    @$(TOOL_DOMAKES) "$(POSTMAKEFILES) $(POSTMAKEFILES_NEEDED) $(POSTMAKEFILES_LIB) $(POSTMAKEFILES_EXECUTABLES) $(POSTMAKEFILES_MISC)" $(TOOL_MAKE) NODEP=1 $@
+! if "$(POSTMAKEFILES)$(POSTMAKEFILES_NEEDED)$(POSTMAKEFILES_LIB)$(POSTMAKEFILES_BINARY)$(POSTMAKEFILES_MISC)" != ""
+    @$(TOOL_DOMAKES) "$(POSTMAKEFILES) $(POSTMAKEFILES_NEEDED) $(POSTMAKEFILES_LIB) $(POSTMAKEFILES_BINARY) $(POSTMAKEFILES_MISC)" $(TOOL_MAKE) NODEP=1 $@
 ! endif
 !endif
 
@@ -971,40 +1086,40 @@ lib:    $(_SUBDIRS_LIB) $(_PREMAKEFILES_LIB) \
 
 
 # -----------------------------------------------------------------------------
-# Pass 4 - The executable rule - Build the executables.
+# Pass 4 - The binary rule - Build the binary.
 # -----------------------------------------------------------------------------
-!ifdef SUBDIRS_EXECUTABLE
-_SUBDIRS_EXECUTABLE = _subdir_executable
-$(_SUBDIRS_EXECUTABLE):
-    @$(TOOL_DODIRS) "$(SUBDIRS_EXECUTABLE)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) executable
+!ifdef SUBDIRS_BINARY
+_SUBDIRS_BINARY = _subdir_binary
+$(_SUBDIRS_BINARY):
+    @$(TOOL_DODIRS) "$(SUBDIRS_BINARY)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) binary
 !else
 ! ifdef SUBDIRS
-_SUBDIRS_EXECUTABLE = _subdir_executable
-$(_SUBDIRS_EXECUTABLE):
-    @$(TOOL_DODIRS) "$(SUBDIRS)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) executable
+_SUBDIRS_BINARY = _subdir_binary
+$(_SUBDIRS_BINARY):
+    @$(TOOL_DODIRS) "$(SUBDIRS)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) binary
 ! endif
 !endif
 
-!ifdef PREMAKEFILES_EXECUTABLE
-_PREMAKEFILES_EXECUTABLE = _premakefiles_executable
-$(_PREMAKEFILES_EXECUTABLE):
-    @$(TOOL_DOMAKES) "$(PREMAKEFILES_EXECUTABLE)" $(TOOL_MAKE) executable
+!ifdef PREMAKEFILES_BINARY
+_PREMAKEFILES_BINARY = _premakefiles_binary
+$(_PREMAKEFILES_BINARY):
+    @$(TOOL_DOMAKES) "$(PREMAKEFILES_BINARY)" $(TOOL_MAKE) binary
 !else
 ! ifdef PREMAKEFILES
-_PREMAKEFILES_EXECUTABLE = _premakefiles_executable
-$(_PREMAKEFILES_EXECUTABLE):
-    @$(TOOL_DOMAKES) "$(PREMAKEFILES)" $(TOOL_MAKE) executable
+_PREMAKEFILES_BINARY = _premakefiles_binary
+$(_PREMAKEFILES_BINARY):
+    @$(TOOL_DOMAKES) "$(PREMAKEFILES)" $(TOOL_MAKE) binary
 ! endif
 !endif
 
-executable: \
+binary executable: \
 !if "$(TARGET_MODE)" != "LIB" && "$(TARGET_MODE)" != "SYSLIB" && "$(TARGET_MODE)" != "IFSLIB" && !defined(TARGET_NEEDED)
-        $(_SUBDIRS_EXECUTABLE) $(_PREMAKEFILES_EXECUTABLE) $(TARGET) $(_TARGET_EARLY_PUBLISH)
+        $(_SUBDIRS_BINARY) $(_PREMAKEFILES_BINARY) $(TARGET) $(_TARGET_EARLY_PUBLISH)
 !else
-        $(_SUBDIRS_EXECUTABLE) $(_PREMAKEFILES_EXECUTABLE)
+        $(_SUBDIRS_BINARY) $(_PREMAKEFILES_BINARY)
 !endif
-!ifdef POSTMAKEFILES_EXECUTABLE
-    @$(TOOL_DOMAKES) "$(POSTMAKEFILES_EXECUTABLE)" $(TOOL_MAKE) $@
+!ifdef POSTMAKEFILES_BINARY
+    @$(TOOL_DOMAKES) "$(POSTMAKEFILES_BINARY)" $(TOOL_MAKE) $@
 !else
 ! ifdef POSTMAKEFILES
     @$(TOOL_DOMAKES) "$(POSTMAKEFILES)" $(TOOL_MAKE) $@
@@ -1014,37 +1129,37 @@ executable: \
 
 
 # -----------------------------------------------------------------------------
-# Pass 5 - The miscellaneous rule - Makes other miscellaneous stuff like
-#   documentations etc. This is experimental for the moment.
+# Pass 5 - The misc(ellaneous) rule - Makes miscellaneous stuff like
+#   help, documentations etc. This is experimental for the moment.
 # -----------------------------------------------------------------------------
 !ifdef SUBDIRS_MISC
 _SUBDIRS_MISC = _subdir_misc
 $(_SUBDIRS_MISC):
-    @$(TOOL_DODIRS) "$(SUBDIRS_MISC)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) miscellaneous
+    @$(TOOL_DODIRS) "$(SUBDIRS_MISC)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) misc
 !else
 ! ifdef SUBDIRS
 _SUBDIRS_MISC = _subdir_misc
 $(_SUBDIRS_MISC):
-    @$(TOOL_DODIRS) "$(SUBDIRS)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) miscellaneous
+    @$(TOOL_DODIRS) "$(SUBDIRS)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) misc
 ! endif
 !endif
 
 !ifdef PREMAKEFILES_MISC
 _PREMAKEFILES_MISC = _premakefiles_misc
 $(PREMAKEFILES_MISC):
-    @$(TOOL_DOMAKES) "$(PREMAKEFILES_MISC)" $(TOOL_MAKE) miscellaneous
+    @$(TOOL_DOMAKES) "$(PREMAKEFILES_MISC)" $(TOOL_MAKE) misc
 !else
 ! ifdef PREMAKEFILES
 _PREMAKEFILES_MISC = _premakefiles_misc
 $(_PREMAKEFILES_MISC):
-    @$(TOOL_DOMAKES) "$(PREMAKEFILES)" $(TOOL_MAKE) miscellaneous
+    @$(TOOL_DOMAKES) "$(PREMAKEFILES)" $(TOOL_MAKE) misc
 ! endif
 !endif
 
-miscellaneous:  $(_SUBDIRS_MISC) $(_PREMAKEFILES_MISC) \
-                $(TARGET_DOCS) $(TARGET_MISC)
-!if "$(TARGET_DOCS)$(TARGET_MISC)" != ""
-    @$(ECHO) Successfully Built $(CLRFIL)$(TARGET_DOCS) $(TARGET_MISC)$(CLRRST)
+misc miscellaneous: $(_SUBDIRS_MISC) $(_PREMAKEFILES_MISC) \
+                    $(TARGET_BOOKS) $(TARGET_HELPS) $(TARGET_DOCS) $(TARGET_MISC)
+!if "$(TARGET_BOOKS)$(TARGET_HELPS)$(TARGET_DOCS)$(TARGET_MISC)" != ""
+    @$(ECHO) Successfully Built $(CLRFIL)$(TARGET_BOOKS) $(TARGET_HELPS) $(TARGET_DOCS) $(TARGET_MISC)$(CLRRST)
 !endif
 !ifdef POSTMAKEFILES_MISC
     @$(TOOL_DOMAKES) "$(POSTMAKEFILES_MISC)" $(TOOL_MAKE) $@
@@ -1111,8 +1226,20 @@ publish_target:
 !  endif
 ! endif
 !endif
+!if "$(TARGET_BOOKS)" != ""
+    @$(ECHO) Publishing Book(s) $(CLRFIL)$(TARGET_BOOKS)$(CLRTXT) to directory $(CLRFIL)$(TARGET_BOOK_PUB_DIR)$(CLRRST)
+    @if not exist "$(TARGET_BOOK_PUB_DIR)" $(TOOL_CREATEPATH) $(TARGET_BOOK_PUB_DIR)
+    @$(TOOL_COPY) $(TARGET_BOOKS) $(TARGET_BOOK_PUB_DIR)
+!endif
+!if "$(TARGET_HELPS)" != ""
+    @$(ECHO) Publishing Help file(s) $(CLRFIL)$(TARGET_HELPS)$(CLRTXT) to directory $(CLRFIL)$(TARGET_HELP_PUB_DIR)$(CLRRST)
+    @if not exist "$(TARGET_HELP_PUB_DIR)" $(TOOL_CREATEPATH) $(TARGET_HELP_PUB_DIR)
+    @$(TOOL_COPY) $(TARGET_HELPS) $(TARGET_HELP_PUB_DIR)
+!endif
 !if "$(TARGET_DOCS)" != ""
-    $(TOOL_COPY) $(TARGET_DOCS) $(PATH_DOC)
+    @$(ECHO) Publishing Doc(s) $(CLRFIL)$(TARGET_DOCS)$(CLRTXT) to directory $(CLRFIL)$(TARGET_DOC_PUB_DIR)$(CLRRST)
+    @if not exist "$(TARGET_DOC_PUB_DIR)" $(TOOL_CREATEPATH) $(TARGET_DOC_PUB_DIR)
+    @$(TOOL_COPY) $(TARGET_DOCS) $(TARGET_DOC_PUB_DIR)
 !endif
 
 
