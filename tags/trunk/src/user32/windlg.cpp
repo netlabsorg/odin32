@@ -1,4 +1,4 @@
-/* $Id: windlg.cpp,v 1.35 2002-09-26 16:04:35 sandervl Exp $ */
+/* $Id: windlg.cpp,v 1.36 2002-12-17 14:16:47 sandervl Exp $ */
 /*
  * Win32 dialog apis for OS/2
  *
@@ -623,81 +623,32 @@ DWORD WIN32API GetDialogBaseUnits(void)
 }
 //******************************************************************************
 //******************************************************************************
-INT WIN32API DlgDirListA(HWND hDlg, LPSTR spec, INT idLBox, INT idStatic, UINT attrib )
-{
-    return DIALOG_DlgDirList( hDlg, spec, idLBox, idStatic, attrib, FALSE );
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API DlgDirListW(HWND hDlg, LPWSTR spec, INT idLBox, INT idStatic, UINT attrib )
-{
-    return DIALOG_DlgDirListW( hDlg, spec, idLBox, idStatic, attrib, FALSE );
-}
-//******************************************************************************
-//******************************************************************************
-INT WIN32API DlgDirListComboBoxA(HWND hDlg, LPSTR spec, INT idCBox, INT idStatic, UINT attrib )
-{
-    return DIALOG_DlgDirList( hDlg, spec, idCBox, idStatic, attrib, TRUE );
-}
-//******************************************************************************
-//******************************************************************************
-INT WIN32API DlgDirListComboBoxW( HWND hDlg, LPWSTR spec, INT idCBox, INT idStatic, UINT attrib )
-{
-    return DIALOG_DlgDirListW( hDlg, spec, idCBox, idStatic, attrib, TRUE );
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API DlgDirSelectComboBoxExA(HWND hwnd, LPSTR str, INT len, INT id )
-{
-    return DIALOG_DlgDirSelect( hwnd, str, len, id, TRUE, FALSE, TRUE );
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API DlgDirSelectComboBoxExW(HWND hwnd, LPWSTR str, INT len, INT id)
-{
-    return DIALOG_DlgDirSelect( hwnd, (LPSTR)str, len, id, TRUE, TRUE, TRUE );
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API DlgDirSelectExA(HWND hwnd, LPSTR str, INT len, INT id)
-{
-    return DIALOG_DlgDirSelect( hwnd, str, len, id, TRUE, FALSE, FALSE );
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API DlgDirSelectExW(HWND hwnd, LPWSTR str, INT len, INT id)
-{
-    return DIALOG_DlgDirSelect( hwnd, (LPSTR)str, len, id, TRUE, TRUE, FALSE );
-}
 /**********************************************************************
  *           DIALOG_DlgDirSelect
  *
  * Helper function for DlgDirSelect*
  */
 static BOOL DIALOG_DlgDirSelect( HWND hwnd, LPSTR str, INT len,
-                                 INT id, BOOL win32, BOOL unicode,
-                                 BOOL combo )
+                                 INT id, BOOL unicode, BOOL combo )
 {
     char *buffer, *ptr;
     INT item, size;
     BOOL ret;
     HWND listbox = GetDlgItem( hwnd, id );
 
+    dprintf(("%04x '%s' %d\n", hwnd, str, id ));
     if (!listbox) return FALSE;
 
-    item = SendMessageA(listbox, combo ? CB_GETCURSEL
-                                             : LB_GETCURSEL, 0, 0 );
+    item = SendMessageA(listbox, combo ? CB_GETCURSEL : LB_GETCURSEL, 0, 0 );
     if (item == LB_ERR) return FALSE;
-    size = SendMessageA(listbox, combo ? CB_GETLBTEXTLEN
-                                             : LB_GETTEXTLEN, 0, 0 );
+    size = SendMessageA(listbox, combo ? CB_GETLBTEXTLEN : LB_GETTEXTLEN, 0, 0 );
     if (size == LB_ERR) return FALSE;
 
-    if (!(buffer = (char *)malloc( size+1 ))) return FALSE;
+    if (!(buffer = (char *)HeapAlloc( GetProcessHeap(), 0, size+1 ))) return FALSE;
 
-    SendMessageA( listbox, combo ? CB_GETLBTEXT : LB_GETTEXT,
-                  item, (LPARAM)buffer );
+    SendMessageA( listbox, combo ? CB_GETLBTEXT : LB_GETTEXT, item, (LPARAM)buffer );
 
-    if ((ret = (buffer[0] == '[')) != 0)  /* drive or directory */
+    if ((ret = (buffer[0] == '[')))  /* drive or directory */
     {
         if (buffer[1] == '-')  /* drive */
         {
@@ -713,23 +664,26 @@ static BOOL DIALOG_DlgDirSelect( HWND hwnd, LPSTR str, INT len,
     }
     else ptr = buffer;
 
-    if (unicode) lstrcpynAtoW( (LPWSTR)str, ptr, len );
+    if (unicode)
+    {
+        if (len > 0 && !MultiByteToWideChar( CP_ACP, 0, ptr, -1, (LPWSTR)str, len ))
+            ((LPWSTR)str)[len-1] = 0;
+    }
     else lstrcpynA( str, ptr, len );
-
-    free( buffer );
+    HeapFree( GetProcessHeap(), 0, buffer );
+    dprintf(("Returning %d '%s'\n", ret, str ));
     return ret;
 }
 
 
 /**********************************************************************
- *      DIALOG_DlgDirList
+ *	    DIALOG_DlgDirList
  *
  * Helper function for DlgDirList*
  */
 static INT DIALOG_DlgDirList( HWND hDlg, LPSTR spec, INT idLBox,
-                              INT idStatic, UINT attrib, BOOL combo )
+                                INT idStatic, UINT attrib, BOOL combo )
 {
-    int drive;
     HWND hwnd;
     LPSTR orig_spec = spec;
 
@@ -737,27 +691,22 @@ static INT DIALOG_DlgDirList( HWND hDlg, LPSTR spec, INT idLBox,
     ((attrib & DDL_POSTMSGS) ? PostMessageA( hwnd, msg, wparam, lparam ) \
                              : SendMessageA( hwnd, msg, wparam, lparam ))
 
-    if (spec && spec[0] && (spec[1] == ':'))
-    {
-        drive = _toupper( spec[0] ) - 'A';
-        spec += 2;
-        if (!DRIVE_SetCurrentDrive( drive )) return FALSE;
-    }
-    else drive = DRIVE_GetCurrentDrive();
+    dprintf(("%04x '%s' %d %d %04x\n",
+                    hDlg, spec ? spec : "NULL", idLBox, idStatic, attrib ));
 
     /* If the path exists and is a directory, chdir to it */
-    if (!spec || !spec[0] || DRIVE_Chdir( drive, spec )) spec = "*.*";
+    if (!spec || !spec[0] || SetCurrentDirectoryA( spec )) spec = "*.*";
     else
     {
         char *p, *p2;
         p = spec;
-        if ((p2 = strrchr( p, '\\' )) != 0) p = p2;
-        if ((p2 = strrchr( p, '/' )) != 0) p = p2;
+        if ((p2 = strrchr( p, '\\' ))) p = p2;
+        if ((p2 = strrchr( p, '/' ))) p = p2;
         if (p != spec)
         {
             char sep = *p;
             *p = 0;
-            if (!DRIVE_Chdir( drive, spec ))
+            if (!SetCurrentDirectoryA( spec ))
             {
                 *p = sep;  /* Restore the original spec */
                 return FALSE;
@@ -765,6 +714,8 @@ static INT DIALOG_DlgDirList( HWND hDlg, LPSTR spec, INT idLBox,
             spec = p + 1;
         }
     }
+
+    dprintf(( "mask=%s\n", spec ));
 
     if (idLBox && ((hwnd = GetDlgItem( hDlg, idLBox )) != 0))
     {
@@ -793,11 +744,8 @@ static INT DIALOG_DlgDirList( HWND hDlg, LPSTR spec, INT idLBox,
 
     if (idStatic && ((hwnd = GetDlgItem( hDlg, idStatic )) != 0))
     {
-        char temp[512], curpath[512];
-        int drive = DRIVE_GetCurrentDrive();
-        strcpy( temp, "A:\\" );
-        temp[0] += drive;
-        lstrcpynA( temp + 3, DRIVE_GetDosCwd(curpath, drive, sizeof(curpath)), sizeof(temp)-3 );
+        char temp[MAX_PATH];
+        GetCurrentDirectoryA( sizeof(temp), temp );
         CharLowerA( temp );
         /* Can't use PostMessage() here, because the string is on the stack */
         SetDlgItemTextA( hDlg, idStatic, temp );
@@ -807,7 +755,7 @@ static INT DIALOG_DlgDirList( HWND hDlg, LPSTR spec, INT idLBox,
     {
         /* Update the original file spec */
         char *p = spec;
-        while ((*orig_spec++ = *p++) != 0);
+        while ((*orig_spec++ = *p++));
     }
 
     return TRUE;
@@ -816,24 +764,99 @@ static INT DIALOG_DlgDirList( HWND hDlg, LPSTR spec, INT idLBox,
 
 
 /**********************************************************************
- *      DIALOG_DlgDirListW
+ *	    DIALOG_DlgDirListW
  *
- * Helper function for DlgDirList*32W
+ * Helper function for DlgDirList*W
  */
 static INT DIALOG_DlgDirListW( HWND hDlg, LPWSTR spec, INT idLBox,
-                               INT idStatic, UINT attrib, BOOL combo )
+                                 INT idStatic, UINT attrib, BOOL combo )
 {
     if (spec)
     {
         LPSTR specA = HEAP_strdupWtoA( GetProcessHeap(), 0, spec );
         INT ret = DIALOG_DlgDirList( hDlg, specA, idLBox, idStatic,
                                        attrib, combo );
-        lstrcpyAtoW( spec, specA );
+        MultiByteToWideChar( CP_ACP, 0, specA, -1, spec, 0x7fffffff );
         HeapFree( GetProcessHeap(), 0, specA );
         return ret;
     }
     return DIALOG_DlgDirList( hDlg, NULL, idLBox, idStatic, attrib, combo );
 }
-//******************************************************************************
-//******************************************************************************
 
+
+/**********************************************************************
+ *		DlgDirSelectExA (USER32.@)
+ */
+BOOL WINAPI DlgDirSelectExA( HWND hwnd, LPSTR str, INT len, INT id )
+{
+    return DIALOG_DlgDirSelect( hwnd, str, len, id, FALSE, FALSE );
+}
+
+
+/**********************************************************************
+ *		DlgDirSelectExW (USER32.@)
+ */
+BOOL WINAPI DlgDirSelectExW( HWND hwnd, LPWSTR str, INT len, INT id )
+{
+    return DIALOG_DlgDirSelect( hwnd, (LPSTR)str, len, id, TRUE, FALSE );
+}
+
+
+/**********************************************************************
+ *		DlgDirSelectComboBoxExA (USER32.@)
+ */
+BOOL WINAPI DlgDirSelectComboBoxExA( HWND hwnd, LPSTR str, INT len,
+                                         INT id )
+{
+    return DIALOG_DlgDirSelect( hwnd, str, len, id, FALSE, TRUE );
+}
+
+
+/**********************************************************************
+ *		DlgDirSelectComboBoxExW (USER32.@)
+ */
+BOOL WINAPI DlgDirSelectComboBoxExW( HWND hwnd, LPWSTR str, INT len,
+                                         INT id)
+{
+    return DIALOG_DlgDirSelect( hwnd, (LPSTR)str, len, id, TRUE, TRUE );
+}
+
+
+/**********************************************************************
+ *		DlgDirListA (USER32.@)
+ */
+INT WINAPI DlgDirListA( HWND hDlg, LPSTR spec, INT idLBox,
+                            INT idStatic, UINT attrib )
+{
+    return DIALOG_DlgDirList( hDlg, spec, idLBox, idStatic, attrib, FALSE );
+}
+
+
+/**********************************************************************
+ *		DlgDirListW (USER32.@)
+ */
+INT WINAPI DlgDirListW( HWND hDlg, LPWSTR spec, INT idLBox,
+                            INT idStatic, UINT attrib )
+{
+    return DIALOG_DlgDirListW( hDlg, spec, idLBox, idStatic, attrib, FALSE );
+}
+
+
+/**********************************************************************
+ *		DlgDirListComboBoxA (USER32.@)
+ */
+INT WINAPI DlgDirListComboBoxA( HWND hDlg, LPSTR spec, INT idCBox,
+                                    INT idStatic, UINT attrib )
+{
+    return DIALOG_DlgDirList( hDlg, spec, idCBox, idStatic, attrib, TRUE );
+}
+
+
+/**********************************************************************
+ *		DlgDirListComboBoxW (USER32.@)
+ */
+INT WINAPI DlgDirListComboBoxW( HWND hDlg, LPWSTR spec, INT idCBox,
+                                    INT idStatic, UINT attrib )
+{
+    return DIALOG_DlgDirListW( hDlg, spec, idCBox, idStatic, attrib, TRUE );
+}
