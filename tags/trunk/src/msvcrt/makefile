@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 1999-09-28 13:26:06 sandervl Exp $
+# $Id: makefile,v 1.2 1999-10-28 09:59:37 achimha Exp $
 
 #
 # PD-Win32 API
@@ -30,7 +30,9 @@ $(TARGET).dll: $(OBJS) $(TARGET).def
 	$(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
               $(PDWIN32_LIB)/pmwinx.lib $(PDWIN32_LIB)/kernel32.lib \
 	      $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
-	$(CP) $@ $(PDWIN32_BIN)
+
+# Do not copy to release directory because it is not fully working yet
+#	$(CP) $@ $(PDWIN32_BIN)
 
 
 $(TARGET).lib: $(TARGET).dll
