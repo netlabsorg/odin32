@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.268 1999-10-04 19:11:04 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.269 1999-10-04 20:51:34 sandervl Exp $ */
 
  99-10-04: Patrick Haller <phaller@gmx.net>
 	- SHELL32\NEW: Compilation fix (indirectly included win32type.h)
@@ -12,6 +12,12 @@
  99-10-04: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Deleted dialog.cpp
                   Set last error to 0 if dialog creation succeeds.
+		  Added flag to distinguish between messages sent by PM and
+                  those sent by apps
+                  Handle WM_SETTEXT messages passed to default window handler
+                  (only if not sent by PM)
+	- VERSION: Fix for string compares in VersionInfo32_FindChild (has
+                   to be a lstrcmpniW)
 	- SHELL32: Removed nameid.h include in she.cpp & sh.cpp. Fixed makefile
                    addition for export library (extra ".." for tool path)
 	- DPLAY, MSACM32: Compilation fix (indirectly included win32type.h)
@@ -19,6 +25,11 @@
                     version data before)
 	            Fixed module name lookup for win32 images executed by the PE
                     loader. (can't use OSLibQueryModuleHandle for those)
+		    Added lstrcmpniW function
+		    Set full path for LX images
+                    Support for retrieving the first resource of a certain type
+                    (version ids no longer hardcoded as id 1; just get the first one
+                     present)
 
  99-10-04: Jens Wiessner <wiessnej@rfi.de>
 	- CRTDLL: Implemented functions + added stubs
