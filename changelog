@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1895 2001-12-08 15:36:52 sandervl Exp $ */
+/* $Id: changelog,v 1.1896 2001-12-08 16:06:13 sandervl Exp $ */
 
  2001-12-08: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Added read & write functions to custom driver interface
@@ -17,6 +17,8 @@
                   structure) added
                 o Added symbolic link for Windows 2000 device driver names
                   \\.\Global -> \\.
+                o Clear GENERIC_WRITE flag if application tries to open
+                  readonly device (e.g. cdrom). This is not allowed in OS/2.
     - INSTALL:  o Add font mapping for 'MS Shell Dlg 2' to WarpSans
 
  2001-12-07: Sander van Leeuwen <sandervl@xs4all.nl>
