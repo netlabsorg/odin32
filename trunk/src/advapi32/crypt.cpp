@@ -1,3 +1,4 @@
+/* $Id: crypt.cpp,v 1.2 1999-12-27 18:44:59 sandervl Exp $ */
 /*
  * dlls/advapi32/crypt.c
  */
