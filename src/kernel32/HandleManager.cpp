@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.20 1999-09-01 19:12:16 phaller Exp $ */
+/* $Id: HandleManager.cpp,v 1.21 1999-10-27 10:08:32 phaller Exp $ */
 
 /*
  *
@@ -715,6 +715,9 @@ BOOL HMDuplicateHandle(HANDLE  srcprocess,
     SetLastError(rc);          /* Hehe, OS/2 and NT are pretty compatible :) */
     return FALSE;                           /* signal error */
   }
+  else
+    SetLastError(ERROR_SUCCESS); //@@@PH 1999/10/27 rc5desg requires this?
+
   *desthandle = iIndexNew;
   return TRUE;                                   /* return valid handle */
 }
@@ -832,6 +835,8 @@ HFILE HMCreateFile(LPCSTR lpFileName,
   }
   else
   {
+    SetLastError(ERROR_SUCCESS); //@@@PH 1999/10/27 rc5desg requires this?
+
              /* copy data fields that might have been modified by CreateFile */
     memcpy(&TabWin32Handles[iIndexNew].hmHandleData,
            &HMHandleTemp,
@@ -955,6 +960,8 @@ HANDLE HMOpenFile(LPCSTR    lpFileName,
     SetLastError(rc);          /* Hehe, OS/2 and NT are pretty compatible :) */
     return (INVALID_HANDLE_VALUE);                           /* signal error */
   }
+  else
+    SetLastError(ERROR_SUCCESS); //@@@PH 1999/10/27 rc5desg requires this?
 
 #ifdef DEBUG_LOCAL
   dprintf(("KERNEL32/HandleManager: OpenFile(%s)=%08xh\n",
@@ -1015,7 +1022,10 @@ BOOL HMCloseHandle(HANDLE hObject)
   }
 
   if (fResult == TRUE)                   /* remove handle if close succeeded */
+  {
     pHMHandle->hmHandleData.hHMHandle = 0;            /* mark handle as free */
+    SetLastError(ERROR_SUCCESS); //@@@PH 1999/10/27 rc5desg requires this?
+  }
 
   return (fResult);                                   /* deliver return code */
 }
@@ -1872,6 +1882,8 @@ HANDLE HMCreateEvent(LPSECURITY_ATTRIBUTES lpsa,
     SetLastError(rc);          /* Hehe, OS/2 and NT are pretty compatible :) */
     return (INVALID_HANDLE_VALUE);                           /* signal error */
   }
+  else
+    SetLastError(ERROR_SUCCESS); //@@@PH 1999/10/27 rc5desg requires this?
 
   return iIndexNew;                                   /* return valid handle */
 }
@@ -1938,6 +1950,8 @@ HANDLE HMCreateMutex(LPSECURITY_ATTRIBUTES lpsa,
     SetLastError(rc);          /* Hehe, OS/2 and NT are pretty compatible :) */
     return (INVALID_HANDLE_VALUE);                           /* signal error */
   }
+  else
+    SetLastError(ERROR_SUCCESS); //@@@PH 1999/10/27 rc5desg requires this?
 
   return iIndexNew;                                   /* return valid handle */
 }
@@ -2003,6 +2017,8 @@ HANDLE HMOpenEvent(DWORD   fdwAccess,
     SetLastError(rc);          /* Hehe, OS/2 and NT are pretty compatible :) */
     return (INVALID_HANDLE_VALUE);                           /* signal error */
   }
+  else
+    SetLastError(ERROR_SUCCESS); //@@@PH 1999/10/27 rc5desg requires this?
 
   return iIndexNew;                                   /* return valid handle */
 }
@@ -2068,6 +2084,8 @@ HANDLE HMOpenMutex(DWORD   fdwAccess,
     SetLastError(rc);          /* Hehe, OS/2 and NT are pretty compatible :) */
     return (INVALID_HANDLE_VALUE);                           /* signal error */
   }
+  else
+    SetLastError(ERROR_SUCCESS); //@@@PH 1999/10/27 rc5desg requires this?
 
   return iIndexNew;                                   /* return valid handle */
 }
@@ -2136,6 +2154,8 @@ HANDLE HMCreateSemaphore(LPSECURITY_ATTRIBUTES lpsa,
     SetLastError(rc);          /* Hehe, OS/2 and NT are pretty compatible :) */
     return (INVALID_HANDLE_VALUE);                           /* signal error */
   }
+  else
+    SetLastError(ERROR_SUCCESS); //@@@PH 1999/10/27 rc5desg requires this?
 
   return iIndexNew;                                   /* return valid handle */
 }
@@ -2201,6 +2221,8 @@ HANDLE HMOpenSemaphore(DWORD   fdwAccess,
     SetLastError(rc);          /* Hehe, OS/2 and NT are pretty compatible :) */
     return (INVALID_HANDLE_VALUE);                           /* signal error */
   }
+  else
+    SetLastError(ERROR_SUCCESS); //@@@PH 1999/10/27 rc5desg requires this?
 
   return iIndexNew;                                   /* return valid handle */
 }
@@ -2233,6 +2255,8 @@ BOOL HMReleaseSemaphore(HANDLE hEvent,
     SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
     return (INVALID_HANDLE_ERROR);                         /* signal failure */
   }
+  else
+    SetLastError(ERROR_SUCCESS); //@@@PH 1999/10/27 rc5desg requires this?
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
   dwResult = pHMHandle->pDeviceHandler->ReleaseSemaphore(&pHMHandle->hmHandleData,
@@ -2314,6 +2338,8 @@ HANDLE HMCreateFileMapping(HANDLE                hFile,
     SetLastError(rc);          /* Hehe, OS/2 and NT are pretty compatible :) */
     return (NULL);                                           /* signal error */
   }
+  else
+    SetLastError(ERROR_SUCCESS); //@@@PH 1999/10/27 rc5desg requires this?
 
   return iIndexNew;                                   /* return valid handle */
 }
@@ -2380,6 +2406,8 @@ HANDLE HMOpenFileMapping(DWORD   fdwAccess,
     SetLastError(rc);          /* Hehe, OS/2 and NT are pretty compatible :) */
     return (NULL);                                           /* signal error */
   }
+  else
+    SetLastError(ERROR_SUCCESS); //@@@PH 1999/10/27 rc5desg requires this?
 
   return iIndexNew;                                   /* return valid handle */
 }

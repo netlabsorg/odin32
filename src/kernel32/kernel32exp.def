@@ -417,6 +417,7 @@ EXPORTS
     _ReadFileEx@20                            @578
     _ReadProcessMemory@20                     @579
     _RegisterServiceProcess@8                 @580
+    _ReinitializeCriticalSection@4            @581
     _ReleaseMutex@4                           @582
     _ReleaseSemaphore@12                      @583
     _RemoveDirectoryA@4                       @584
@@ -597,8 +598,8 @@ EXPORTS
     DebugErrorBox                             @1201
     WriteLog                                  @1202
     WriteLogError                             @1214
-    _RegisterPe2LxExe@48                      @1203
-    _RegisterPe2LxDll@48                      @1209
+    _RegisterPe2LxExe@12                      @1203
+    _RegisterPe2LxDll@12                      @1209
     _CreateWin32PeLdrExe@8                    @1236
     _RegisterLxExe@8                          @1237
     _RegisterLxDll@12                         @1238
@@ -643,7 +644,10 @@ EXPORTS
     _VIRTUAL_MapFileW@8                       @1252
     OS2SetExceptionHandler                    @1253
     OS2UnsetExceptionHandler                  @1254
-    __ct__12Win32MenuResFP14Win32ImageBaseUlN22  @1260
-    __ct__12Win32MenuResFP14Win32ImageBaseUlN22Pc  @1261
-    __ct__12Win32MenuResFUl                   @1262
-    __ct__12Win32MenuResFPv                   @1263
+    _PROFILE_GetOdinIniString@20              @1264
+    _PROFILE_SetOdinIniString@12              @1265
+    _PROFILE_GetOdinIniInt@12                 @1266
+    _PROFILE_SetOdinIniInt@12                 @1267
+    _PROFILE_GetOdinIniBool@12                @1268
+    _PROFILE_SetOdinIniBool@12                @1269
+    _PROFILE_SaveOdinIni@0                    @1270
