@@ -1,4 +1,13 @@
- /* $Id: changelog,v 1.436 1999-11-10 23:31:22 phaller Exp $ */
+ /* $Id: changelog,v 1.437 1999-11-11 13:14:46 sandervl Exp $ */
+
+ 99-11-11: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Implemented GetWindowContextHelpId & SetWindowContextHelpId
+                  Implemented GetKeyboardState (NOT TESTED)
+                  Ported SwitchToThisWindow, GetKeyboardLayout, TranslateCharsetInfo
+                  GetKeyboardLayoutNameA/W (991031)
+                  Fixed Win32Dialog::SetWindowLongA for dlg proc.
+	- GDI32: Implemented EnumFontsA/W. Fixed bugs in EnumFontFamiliesW
+                 (NEWTEXTMETRICW is different from NEWTEXTMETRICA)
 
  99-11-10: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: ShowScrollBar: create not existing scrollbars
