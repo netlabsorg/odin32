@@ -1,4 +1,4 @@
-/* $Id: Odin.ini.txt,v 1.9 2001-08-16 18:12:20 sandervl Exp $ */
+/* $Id: Odin.ini.txt,v 1.10 2001-12-08 12:01:10 sandervl Exp $ */
 
 Odin initialization file documentation
 
@@ -30,7 +30,11 @@ NOTE: Can interfere with windows applications that draw their own custom
       titlebar. (e.g. RealPlayer)
 
 [WinVersion]
-Version=Win98  (default = NT40)
+Version=Win98        -> Windows 98
+Version=WinME        -> Windows ME
+Version=NT4          -> Windows NT4  SP6 (default)
+Version=Win2000      -> Windows 2000 SP2
+Version=WinXP        -> Windows XP
 Used to override the version Odin reports to the application.
 
 [TWAIN]
