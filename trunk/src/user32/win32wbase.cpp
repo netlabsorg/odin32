@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.269 2001-06-14 11:30:56 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.270 2001-06-14 14:49:17 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2993,13 +2993,16 @@ BOOL Win32BaseWindow::EnumWindows(WNDENUMPROC lpfn, LPARAM lParam)
 //******************************************************************************
 HWND Win32BaseWindow::FindWindowById(int id)
 {
+    HWND hwnd;
+
     lock();
     for (Win32BaseWindow *child = (Win32BaseWindow *)getFirstChild(); child; child = (Win32BaseWindow *)child->getNextChild())
     {
         if (child->getWindowId() == id)
         {
+            hwnd = child->getWindowHandle();
             unlock();
-            return child->getWindowHandle();
+            return hwnd;
         }
     }
     unlock();
@@ -3701,16 +3704,16 @@ Win32BaseWindow *Win32BaseWindow::GetWindowFromHandle(HWND hwnd)
 {
  Win32BaseWindow *window;
 
-    lock(&critsect);
+////    lock(&critsect);
     if(HwGetWindowHandleData(hwnd, (DWORD *)&window) == TRUE) {
          if(window) {
 ////             dprintf(("addRef %x; refcount %d", hwnd, window->getRefCount()+1));
              window->addRef();
          }
-         unlock(&critsect);
+////         unlock(&critsect);
          return window;
     }
-    unlock(&critsect);
+////    unlock(&critsect);
 //    dprintf2(("Win32BaseWindow::GetWindowFromHandle: not a win32 window %x", hwnd));
     return NULL;
 }
