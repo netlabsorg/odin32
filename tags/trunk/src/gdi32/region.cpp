@@ -1,4 +1,4 @@
-/* $Id: region.cpp,v 1.20 2001-04-27 17:37:23 sandervl Exp $ */
+/* $Id: region.cpp,v 1.21 2001-05-19 19:43:54 sandervl Exp $ */
 
 /*
  * GDI32 region code
@@ -65,7 +65,7 @@ BOOL InitRegionSpace()
 }
 //******************************************************************************
 //******************************************************************************
-static LONG hdcHeight(HWND hwnd, pDCData pHps)
+LONG hdcHeight(HWND hwnd, pDCData pHps)
 {
     if(hwnd == 0 && pHps != 0)
         hwnd = pHps->hwnd;
@@ -110,7 +110,7 @@ static LONG hdcHeight(HWND hwnd, pDCData pHps)
 }
 //******************************************************************************
 //******************************************************************************
-static LONG hdcWidth(HWND hwnd, pDCData pHps)
+LONG hdcWidth(HWND hwnd, pDCData pHps)
 {
     if(hwnd == 0 && pHps != 0)
         hwnd = pHps->hwnd;
