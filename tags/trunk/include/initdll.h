@@ -70,6 +70,7 @@ void  APIENTRY cleanupKernel32(ULONG ulReason);
 
 ULONG APIENTRY inittermUser32(ULONG hModule, ULONG ulFlag);
 void  APIENTRY cleanupUser32(ULONG ulReason);
+ULONG APIENTRY inittermOdinCtrl(ULONG hModule, ULONG ulFlag);
 
 ULONG APIENTRY inittermWinmm(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermShell32(ULONG hModule, ULONG ulFlag);
