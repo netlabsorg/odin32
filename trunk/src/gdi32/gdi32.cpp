@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.61 2000-11-14 14:28:22 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.62 2000-11-15 16:10:41 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -117,6 +117,53 @@ HBRUSH WIN32API CreateDIBPatternBrushPt( const VOID * buffer, UINT usage)
 {
     dprintf(("GDI32: CreateDIBPatternBrushPt %x %x", buffer, usage));
     return O32_CreateDIBPatternBrushPt(buffer, usage);
+}
+/*****************************************************************************
+ * Name      : HBRUSH CreateDIBPatternBrush
+ * Purpose   : The CreateDIBPatternBrush function creates a logical brush that
+ *             has the pattern specified by the specified device-independent
+ *             bitmap (DIB). The brush can subsequently be selected into any
+ *             device context that is associated with a device that supports
+ *             raster operations.
+ *
+ *             This function is provided only for compatibility with applications
+ *             written for versions of Windows earlier than 3.0. For Win32-based
+ *             applications, use the CreateDIBPatternBrushPt function.
+ * Parameters: HGLOBAL hglbDIBPacked Identifies a global memory object containing
+ *             a packed DIB, which consists of a BITMAPINFO structure immediately
+ *             followed by an array of bytes defining the pixels of the bitmap.
+ *             UINT    fuColorSpec   color table data
+ * Variables :
+ * Result    : TRUE / FALSE
+ * Remark    :
+ * Status    : ODIN32 COMPLETELY UNTESTED
+ *
+ * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
+ *             Markus Montkowski [Wen, 1999/01/12 20:00]
+ *****************************************************************************/
+
+HBRUSH WIN32API CreateDIBPatternBrush( HGLOBAL hglbDIBPacked,
+                                       UINT    fuColorSpec)
+{
+  BITMAPINFO *lpMem;
+  HBRUSH ret = 0;
+
+  lpMem = (BITMAPINFO *)GlobalLock(hglbDIBPacked);
+  if(NULL!=lpMem)
+  {
+      dprintf(("GDI32: CreateDIBPatternBrush (%08xh, %08xh) %x (%d,%d) bpp %d",
+                hglbDIBPacked, fuColorSpec, lpMem, lpMem->bmiHeader.biWidth, 
+                lpMem->bmiHeader.biHeight, lpMem->bmiHeader.biBitCount));
+
+      ret = CreateDIBPatternBrushPt( lpMem,
+                                    fuColorSpec);
+      GlobalUnlock(hglbDIBPacked);
+  }
+  else {
+      dprintf(("ERROR: CreateDIBPatternBrush (%08xh, %08xh) -> INVALID memory handle!!",
+                hglbDIBPacked, fuColorSpec));
+  }
+  return (ret);
 }
 //******************************************************************************
 //******************************************************************************
@@ -794,24 +841,24 @@ UINT WIN32API GetOutlineTextMetricsW( HDC arg1, UINT arg2, LPOUTLINETEXTMETRICW 
 }
 //******************************************************************************
 //******************************************************************************
-INT WIN32API GetPath( HDC arg1, PPOINT arg2, PBYTE arg3, int  arg4)
+INT WIN32API GetPath( HDC hdc, PPOINT arg2, PBYTE arg3, int  arg4)
 {
-    dprintf(("GDI32: GetPath"));
-    return O32_GetPath(arg1, arg2, arg3, arg4);
+    dprintf(("GDI32: GetPath %x", hdc));
+    return O32_GetPath(hdc, arg2, arg3, arg4);
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API GetPolyFillMode( HDC arg1)
+int WIN32API GetPolyFillMode( HDC hdc)
 {
-    dprintf(("GDI32: GetPolyFillMode"));
-    return O32_GetPolyFillMode(arg1);
+    dprintf(("GDI32: GetPolyFillMode", hdc));
+    return O32_GetPolyFillMode(hdc);
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API GetROP2( HDC arg1)
+int WIN32API GetROP2( HDC hdc)
 {
-    dprintf(("GDI32: GetROP2"));
-    return O32_GetROP2(arg1);
+    dprintf(("GDI32: GetROP2 %x", hdc));
+    return O32_GetROP2(hdc);
 }
 //******************************************************************************
 //******************************************************************************
@@ -822,24 +869,24 @@ BOOL WIN32API GetRasterizerCaps(LPRASTERIZER_STATUS arg1, UINT  arg2)
 }
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API GetTextAlign( HDC arg1)
+UINT WIN32API GetTextAlign( HDC hdc)
 {
-    dprintf(("GDI32: GetTextAlign"));
-    return O32_GetTextAlign(arg1);
+    dprintf(("GDI32: GetTextAlign %x", hdc));
+    return O32_GetTextAlign(hdc);
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API GetTextCharacterExtra( HDC arg1)
+int WIN32API GetTextCharacterExtra( HDC hdc)
 {
-    dprintf(("GDI32: GetTextCharacterExtra"));
-    return O32_GetTextCharacterExtra(arg1);
+    dprintf(("GDI32: GetTextCharacterExtra", hdc));
+    return O32_GetTextCharacterExtra(hdc);
 }
 //******************************************************************************
 //******************************************************************************
-COLORREF WIN32API GetTextColor( HDC arg1)
+COLORREF WIN32API GetTextColor( HDC hdc)
 {
-    dprintf(("GDI32: GetTextColor"));
-    return O32_GetTextColor(arg1);
+    dprintf(("GDI32: GetTextColor %x", hdc));
+    return O32_GetTextColor(hdc);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1549,52 +1596,6 @@ BOOL WIN32API CombineTransform(LPXFORM lLPXFORMResult,
   return (TRUE);
 }
 
-
-
-/*****************************************************************************
- * Name      : HBRUSH CreateDIBPatternBrush
- * Purpose   : The CreateDIBPatternBrush function creates a logical brush that
- *             has the pattern specified by the specified device-independent
- *             bitmap (DIB). The brush can subsequently be selected into any
- *             device context that is associated with a device that supports
- *             raster operations.
- *
- *             This function is provided only for compatibility with applications
- *             written for versions of Windows earlier than 3.0. For Win32-based
- *             applications, use the CreateDIBPatternBrushPt function.
- * Parameters: HGLOBAL hglbDIBPacked Identifies a global memory object containing
- *             a packed DIB, which consists of a BITMAPINFO structure immediately
- *             followed by an array of bytes defining the pixels of the bitmap.
- *             UINT    fuColorSpec   color table data
- * Variables :
- * Result    : TRUE / FALSE
- * Remark    :
- * Status    : ODIN32 COMPLETELY UNTESTED
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *             Markus Montkowski [Wen, 1999/01/12 20:00]
- *****************************************************************************/
-
-HBRUSH WIN32API CreateDIBPatternBrush( HGLOBAL hglbDIBPacked,
-                                       UINT    fuColorSpec)
-{
-  LPVOID lpMem;
-  HBRUSH ret = 0;
-  dprintf(("GDI32: CreateDIBPatternBrush(%08xh, %08xh) \n",
-           hglbDIBPacked,
-           fuColorSpec));
-
-  lpMem = GlobalLock(hglbDIBPacked);
-  if(NULL!=lpMem)
-  {
-
-    ret = CreateDIBPatternBrushPt( lpMem,
-                                   fuColorSpec);
-    GlobalUnlock(hglbDIBPacked);
-  }
-
-  return (ret);
-}
 
 
 
