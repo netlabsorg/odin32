@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2316 2002-09-19 09:37:20 sandervl Exp $ */
+/* $Id: changelog,v 1.2317 2002-09-19 09:39:00 sandervl Exp $ */
+
+ 2002-09-19: Sander van Leeuwen <sandervl@innotek   >
+    - ODINCRT:  o Include new & delete in memory statistics
 
  2002-09-19: Platon Fomichev <platon@innotek   >
     - USER32:   o Put window on top of owner if owner is not in the foreground;
