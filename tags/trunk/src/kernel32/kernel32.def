@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.36 1999-09-07 20:27:43 phaller Exp $
+; $Id: kernel32.def,v 1.37 1999-09-13 14:57:07 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -943,6 +943,7 @@ EXPORTS
     memmove                    = _OS2memmove                      @906
 
     ConvertNameId                 = ConvertNameId                 @1200
+    DebugErrorBox                 = DebugErrorBox                 @1201
     WriteLog                      = WriteLog                      @1202
     WriteLogError                 = WriteLogError                 @1214
 

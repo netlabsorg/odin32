@@ -1,4 +1,4 @@
-/* $Id: winimage.cpp,v 1.19 1999-09-08 07:09:34 bird Exp $ */
+/* $Id: winimage.cpp,v 1.20 1999-09-13 14:57:08 phaller Exp $ */
 
 /*
  * Win32 PE Image class
@@ -1191,6 +1191,11 @@ BOOL Win32Image::isPEImage(char *szFileName)
 
   if (rc != NO_ERROR)
   {
+    //@@@PH message box !
+    DebugErrorBox(rc,
+                  "KERNEL32:Win32Image::isPeImage(%s) failed.",
+                  szFileName);
+
     	dprintf(("KERNEL32:Win32Image::isPEImage(%s) failed with %u\n",
              	  szFileName, rc));
     	return(FALSE);
