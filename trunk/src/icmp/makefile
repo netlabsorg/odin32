@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2000-05-19 18:48:59 jeroen Exp $
+# $Id: makefile,v 1.2 2000-05-25 16:12:57 jeroen Exp $
 #
 # icmp.dll makefile
 #
@@ -26,6 +26,9 @@ $(PDWIN32_LIB)\dllentry.obj
 
 # Target name - name of the dll without extention and path.
 TARGET = icmp
+
+CFLAGS   = $(CFLAGS) -DTCP40HDRS
+CXXFLAGS = $(CXXFLAGS) -DTCP40HDRS
 
 
 # All rule - build objs, target dll, copies dll to bin and makes libs.
