@@ -1,4 +1,4 @@
-/* $Id: probkrnl.h,v 1.17 2000-12-11 06:34:45 bird Exp $
+/* $Id: probkrnl.h,v 1.18 2001-02-11 15:12:23 bird Exp $
  *
  * Include file for ProbKrnl.
  *
@@ -15,7 +15,7 @@
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
 *******************************************************************************/
-#define NBR_OF_KRNLIMPORTS      52      /* When this is changed make sure to   */
+#define NBR_OF_KRNLIMPORTS      77      /* When this is changed make sure to   */
                                         /* update the aImportTab in probkrnl.c */
                                         /* and make test faker in test.h and   */
                                         /* the appropriate fake.c or fakea.asm.*/
@@ -40,20 +40,24 @@
 #define EPT_PROCIMPORT32        (EPT_PROCIMPORT | EPT_32BIT)
 #define EPT_PROCIMPORTNR32      (EPT_PROCIMPORT | EPT_32BIT | EPT_NOT_REQ)
 #define EPT_VARIMPORT32         (EPT_VARIMPORT | EPT_32BIT)
+#define EPT_VARIMPORTNR32       (EPT_VARIMPORT | EPT_32BIT | EPT_NOT_REQ)
 #define EPT32Proc(a)            (((a).fType & ~(EPT_WRAPPED)) == EPT_PROC32)
 #define EPT32ProcImport(a)      (((a).fType & ~(EPT_WRAPPED)) == EPT_PROCIMPORT32)
 #define EPT32ProcImportNR(a)    (((a).fType & ~(EPT_WRAPPED)) == EPT_PROCIMPORTNR32)
 #define EPT32VarImport(a)       (((a).fType & ~(EPT_WRAPPED)) == EPT_VARIMPORT32)
+#define EPT32VarImportNR(a)     (((a).fType & ~(EPT_WRAPPED)) == EPT_VARIMPORTNR32)
 
 /* 16bit types */
 #define EPT_PROC16              (EPT_PROC | EPT_16BIT)        /* no implemented yet! */
 #define EPT_PROCIMPORT16        (EPT_PROCIMPORT | EPT_16BIT)  /* far proc in calltab with a far jmp. */
 #define EPT_PROCIMPORTNR16      (EPT_PROCIMPORT | EPT_16BIT | EPT_NOT_REQ)
 #define EPT_VARIMPORT16         (EPT_VARIMPORT | EPT_16BIT)
+#define EPT_VARIMPORTNR16       (EPT_VARIMPORT | EPT_16BIT | EPT_NOT_REQ)
 #define EPT16Proc(a)            (((a).fType & ~(EPT_WRAPPED)) == EPT_PROC16)
 #define EPT16ProcImport(a)      (((a).fType & ~(EPT_WRAPPED)) == EPT_PROCIMPORT16)
 #define EPT16ProcImportNR(a)    (((a).fType & ~(EPT_WRAPPED)) == EPT_PROCIMPORTNR16)
 #define EPT16VarImport(a)       (((a).fType & ~(EPT_WRAPPED)) == EPT_VARIMPORT16)
+#define EPT16VarImportNR(a)     (((a).fType & ~(EPT_WRAPPED)) == EPT_VARIMPORTNR16)
 
 
 /* Kernel type: SMP/UNI/W4 (flags matches KF_* in options.h)  */
