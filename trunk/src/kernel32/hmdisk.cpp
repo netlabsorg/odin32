@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.40 2002-02-28 19:27:48 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.41 2002-04-06 14:58:35 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -596,6 +596,12 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
                 return FALSE;
             }
         }
+        if(drvInfo->driveType == DRIVE_CDROM) {
+            //TODO: check behaviour in NT
+            SetLastError(ERROR_WRITE_PROTECT);
+            return FALSE;
+        }
+
         OSLibDosDevIOCtl(pHMHandleData->hHMHandle,IOCTL_DISK,DSK_LOCKDRIVE,0,0,0,0,0,0);
           
         ULONG oldmode = SetErrorMode(SEM_FAILCRITICALERRORS);
