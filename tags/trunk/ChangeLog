@@ -1,4 +1,21 @@
- /* $Id: ChangeLog,v 1.922 2000-05-02 14:42:18 bird Exp $ */
+ /* $Id: ChangeLog,v 1.923 2000-05-02 20:48:55 sandervl Exp $ */
+
+ 2000-05-02: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: GetLocaleInfoA/W fix (size of buffer for i.e. LOCALE_IDATE
+                    should be >= 2, not > 2)
+                    VirtualFree: Check for ERROR_ALIAS return value
+
+                    Ported and changed/fixed XFolder stack dump code (symbol file only)
+                    When a win32 app crashes, a dump of the stack is written
+                    in odin32_0.log.
+	- USER32:   Merged some Wine dialog changes (setting focus + font size)
+                    Extra logging for some apis
+                    Added support for RDW_FRAME flag to GetDCEx
+	- INCLUDE\makefiles: Added rule for converting map to symfile
+                             A symbol file is now created for each exe/dll
+	- INCLUDE\ODINWRAP: Turned off profiling by default. 
+                            Our log is big enough as it is without even
+                            more logging.
 
  2000-05-02: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
         - makefile and tools/makefile:
