@@ -1,6 +1,5 @@
-/* $Id: shlwapiguid.c,v 1.2 2001-09-05 13:48:38 bird Exp $ */
 /*
- *  SHRegOpenStream
+ *	SHRegOpenStream
  */
 #ifdef __WIN32OS2__
 #include <odin.h>

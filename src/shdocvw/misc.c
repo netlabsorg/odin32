@@ -1,4 +1,3 @@
-/* $Id: misc.c,v 1.2 2001-09-05 13:39:12 bird Exp $ */
 /*
  * Implementation of miscellaneous interfaces for IE Web Browser control:
  *
@@ -67,7 +66,7 @@ static HRESULT WINAPI WBQA_GetContentExtent(LPQUICKACTIVATE iface, LPSIZEL pSize
  * IQuickActivate virtual function table for IE Web Browser component
  */
 
-static ICOM_VTABLE(IQuickActivate) WBQA_Vtbl =
+static ICOM_VTABLE(IQuickActivate) WBQA_Vtbl = 
 {
     ICOM_MSVTABLE_COMPAT_DummyRTTIVALUE
     WBQA_QueryInterface,

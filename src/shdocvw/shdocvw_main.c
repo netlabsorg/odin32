@@ -1,4 +1,3 @@
-/* $Id: shdocvw_main.c,v 1.2 2001-09-05 13:39:12 bird Exp $ */
 /*
  * SHDOCVW - Internet Explorer Web Control
  *
@@ -66,7 +65,7 @@ HRESULT WINAPI SHDOCVW_DllInstall(BOOL bInstall, LPCWSTR cmdline)
 }
 
 /***********************************************************************
- *      DllRegisterServer (SHDOCVW.124)
+ *		DllRegisterServer (SHDOCVW.124)
  */
 HRESULT WINAPI SHDOCVW_DllRegisterServer()
 {
@@ -75,7 +74,7 @@ HRESULT WINAPI SHDOCVW_DllRegisterServer()
 }
 
 /***********************************************************************
- *      DllUnregisterServer (SHDOCVW.127)
+ *		DllUnregisterServer (SHDOCVW.127)
  */
 HRESULT WINAPI SHDOCVW_DllUnregisterServer()
 {
