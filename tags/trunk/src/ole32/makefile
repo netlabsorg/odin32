@@ -19,11 +19,13 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 TARGET = ole32
 
 OBJS =  ole32.obj \
+        moniker.obj \
 	initterm.obj \
 	oString.obj \
 	clsid.obj \
 	guid.obj \
 	initialise.obj \
+	taskmem.obj \
 	stubs.obj
 
 all: $(TARGET).dll $(TARGET).lib
@@ -32,10 +34,10 @@ all: $(TARGET).dll $(TARGET).lib
 $(TARGET).dll: $(OBJS) $(TARGET).def 
 	$(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
               $(PDWIN32_LIB)\pmwinx.lib \
-              $(PDWIN32_LIB)\ntdll.lib \
               $(PDWIN32_LIB)\advapi32.lib \
               $(PDWIN32_LIB)\kernel32.lib
 	$(CP) $@ $(PDWIN32_BIN)
+#              $(PDWIN32_LIB)\ntdll.lib \
 
 
 $(TARGET).lib: $(TARGET).dll
@@ -50,6 +52,8 @@ clsid.obj:	clsid.cpp
 guid.obj:	guid.cpp 
 stubs.obj:	stubs.cpp 
 initterm.obj:	initterm.cpp
+moniker.obj:	moniker.cpp
+taskmem.obj:	taskmem.cpp
 
 
 clean:
