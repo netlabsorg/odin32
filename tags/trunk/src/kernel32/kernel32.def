@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.20 1999-08-16 13:54:32 sandervl Exp $
+; $Id: kernel32.def,v 1.21 1999-08-18 13:23:41 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -919,6 +919,11 @@ EXPORTS
     lstrlen                    = _lstrlenA@4                 @778
     lstrlenA                   = _lstrlenA@4                 @779
     lstrlenW                   = _lstrlenW@4                 @780
+    lstrcpynAtoW               = _lstrcpynAtoW@12            @781
+    lstrcpynWtoA               = _lstrcpynWtoA@12            @782
+    lstrcpyAtoW                = _lstrcpyAtoW@8              @783
+    lstrcpyWtoA                = _lstrcpyWtoA@8              @784
+
 
 
 ; ----------------------------------------------------------------------------
@@ -926,69 +931,70 @@ EXPORTS
 ; ----------------------------------------------------------------------------
 
 ;really belongs in NTDLL.DLL...
-    memmove                    = _OS2memmove                    @906
+    memmove                    = _OS2memmove                      @906
 
-    ConvertNameId                 = ConvertNameId                  @1200
-    UpCase                        = UpCase                         @1201
-    WriteLog                      = WriteLog                       @1202
-    WriteLogError                 = WriteLogError                  @1214
+    ConvertNameId                 = ConvertNameId                 @1200
+    UpCase                        = UpCase                        @1201
+    WriteLog                      = WriteLog                      @1202
+    WriteLogError                 = WriteLogError                 @1214
 
 ;Used by tibfix page in exe (change ordinal in lx.cpp too!!)
-    RegisterExe                   = _RegisterExe@48      	   @1203
+    RegisterExe                   = _RegisterExe@48               @1203
 ;VMutex
-   enter__6VMutexFUl                                               @1204
-   leave__6VMutexFv                                                @1205
-   __ct__6VMutexFv                                                 @1206
-   __dt__6VMutexFv                                                 @1207
+   enter__6VMutexFUl                                              @1204
+   leave__6VMutexFv                                               @1205
+   __ct__6VMutexFv                                                @1206
+   __dt__6VMutexFv                                                @1207
 ;Used by tibfix page in dll (change ordinal in lx.cpp too!!)
-;;;    DLLExitList                   = _DLLExitList@4                 @1208
-    RegisterDll                   = _RegisterDll@48                @1209
+;   DLLExitList                   = _DLLExitList@4                @1208
+    RegisterDll                   = _RegisterDll@48               @1209
 ;Unicode
-   UnicodeToAsciiString = _UnicodeToAsciiString@4                  @1210
-   UnicodeToAscii       = _UnicodeToAscii@8                        @1211
-   FreeAsciiString      = _FreeAsciiString@4                       @1212
-   AsciiToUnicode       = _AsciiToUnicode@8                        @1213
-   UnicodeToAsciiN      = _UnicodeToAsciiN@12                      @1215
-   AsciiToUnicodeN      = _AsciiToUnicodeN@12                      @1216
+   UnicodeToAsciiString = _UnicodeToAsciiString@4                 @1210
+   UnicodeToAscii       = _UnicodeToAscii@8                       @1211
+   FreeAsciiString      = _FreeAsciiString@4                      @1212
+   AsciiToUnicode       = _AsciiToUnicode@8                       @1213
+   UnicodeToAsciiN      = _UnicodeToAsciiN@12                     @1215
+   AsciiToUnicodeN      = _AsciiToUnicodeN@12                     @1216
 
 ;Win32Exe constructor
-   __ct__8Win32ExeFPc                                              @1220
+   __ct__8Win32ExeFPc                                             @1220
 
 ;Get version resource
-   GetVersionStruct     = GetVersionStruct                         @1221
-   GetVersionSize       = GetVersionSize                           @1222
+   GetVersionStruct     = GetVersionStruct                        @1221
+   GetVersionSize       = GetVersionSize                          @1222
 
 ;version functions
-   CheckVersionFromHMOD = CheckVersionFromHMOD                     @1223
-   CheckVersion         = CheckVersion                             @1224
+   CheckVersionFromHMOD = CheckVersionFromHMOD                    @1223
+   CheckVersion         = CheckVersion                            @1224
 
-   Win32QueryModuleName = Win32QueryModuleName                     @1225
+   Win32QueryModuleName = Win32QueryModuleName                    @1225
 
-   GetFS		= GetFS					   @1226
-   SetFS		= SetFS					   @1227
+   GetFS               = GetFS                                    @1226
+   SetFS               = SetFS                                    @1227
 
-   RestoreOS2TIB        = _RestoreOS2TIB@0                         @1228
-   SetWin32TIB          = _SetWin32TIB@0                           @1229
-   RestoreOS2FS         = RestoreOS2FS                             @1230
+   RestoreOS2TIB        = _RestoreOS2TIB@0                        @1228
+   SetWin32TIB          = _SetWin32TIB@0                          @1229
+   RestoreOS2FS         = RestoreOS2FS                            @1230
 
    ;SvL: HandleManager functions
-   HMHandleAllocate__FPUlUl				           @1231
-   HMHandleFree__FUl  	  	 	 	                   @1232
-   HMHandleTranslateToOS2__FUlPUl				   @1233
+   HMHandleAllocate__FPUlUl                                       @1231
+   HMHandleFree__FUl                                              @1232
+   HMHandleTranslateToOS2__FUlPUl                                 @1233
 
-   GetThreadTEB         = _GetThreadTEB@0                          @1234
-   GetThreadTHDB        = _GetThreadTHDB@0			   @1235
+   GetThreadTEB         = _GetThreadTEB@0                         @1234
+   GetThreadTHDB        = _GetThreadTHDB@0                        @1235
 
-   CreateWin32Exe       = _CreateWin32Exe@4                        @1236
+   CreateWin32Exe       = _CreateWin32Exe@4                       @1236
 
 ; HEAP Management (heap.cpp, heapstring.cpp)
-    HEAP_xalloc                = _HEAP_xalloc@12                   @1240
-    HEAP_xrealloc              = _HEAP_xrealloc@16		   @1241
-    HEAP_malloc                = _HEAP_malloc@4			   @1242
-    HEAP_realloc               = _HEAP_realloc@8		   @1243
-    HEAP_free                  = _HEAP_free@4			   @1244
-    HEAP_strdupWtoA            = _HEAP_strdupWtoA@12		   @1245
-    HEAP_strdupAtoW            = _HEAP_strdupAtoW@12		   @1246
-    HEAP_strdupA               = _HEAP_strdupA@12		   @1247
-    HEAP_strdupW               = _HEAP_strdupW@12		   @1248
+    HEAP_xalloc                = _HEAP_xalloc@12                  @1240
+    HEAP_xrealloc              = _HEAP_xrealloc@16                @1241
+    HEAP_malloc                = _HEAP_malloc@4                   @1242
+    HEAP_realloc               = _HEAP_realloc@8                  @1243
+    HEAP_free                  = _HEAP_free@4                     @1244
+    HEAP_strdupWtoA            = _HEAP_strdupWtoA@12              @1245
+    HEAP_strdupAtoW            = _HEAP_strdupAtoW@12              @1246
+    HEAP_strdupA               = _HEAP_strdupA@12                 @1247
+    HEAP_strdupW               = _HEAP_strdupW@12                 @1248
+
 
