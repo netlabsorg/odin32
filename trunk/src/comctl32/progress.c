@@ -1,4 +1,4 @@
-/* $Id: progress.c,v 1.5 1999-06-16 20:25:43 cbratschi Exp $ */
+/* $Id: progress.c,v 1.6 1999-06-26 14:20:31 cbratschi Exp $ */
 /*
  * Progress control
  *
@@ -55,28 +55,26 @@ PROGRESS_Draw (HWND hwnd, HDC hdc, INT lastVal, BOOL inUpdate)
   else hbrBar = CreateSolidBrush (infoPtr->ColorBar);
 
   /* get the required background brush */
-  if (infoPtr->ColorBk == CLR_DEFAULT) hbrBk = GetSysColorBrush (COLOR_3DFACE);
-  else hbrBk = CreateSolidBrush (infoPtr->ColorBk);
+  if (infoPtr->ColorBk == CLR_DEFAULT) hbrBk = GetSysColorBrush(COLOR_3DFACE);
+  else hbrBk = CreateSolidBrush(infoPtr->ColorBk);
 
   /* get client rectangle */
   GetClientRect (hwnd, &rect);
-  rect.right--;
-  rect.bottom--;
 
   /* draw the background */
   if (!inUpdate)
   {
     FillRect(hdc, &rect, hbrBk);
     //Border
-    hbrLight = GetSysColorBrush(COLOR_3DLIGHT);
-    hbrShadow = GetSysColorBrush(COLOR_3DSHADOW);
-    MoveToEx(hdc,rect.left,rect.bottom,NULL);
+    hbrLight = GetSysColorPen(COLOR_BTNHILIGHT);
+    hbrShadow = GetSysColorPen(COLOR_BTNSHADOW);
+    MoveToEx(hdc,rect.left,rect.bottom-1,NULL);
     hbrOld = SelectObject(hdc,hbrShadow);
     LineTo(hdc,rect.left,rect.top);
-    LineTo(hdc,rect.right,rect.top);
+    LineTo(hdc,rect.right-1,rect.top);
     SelectObject(hdc,hbrLight);
-    LineTo(hdc,rect.right,rect.bottom);
-    LineTo(hdc,rect.left,rect.bottom);
+    LineTo(hdc,rect.right-1,rect.bottom-1);
+    LineTo(hdc,rect.left,rect.bottom-1);
     SelectObject(hdc,hbrOld);
   }
 
