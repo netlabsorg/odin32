@@ -1,4 +1,4 @@
-/* $Id: glut_util.c,v 1.2 2000-02-09 08:46:19 jeroen Exp $ */
+/* $Id: glut_util.c,v 1.3 2000-03-11 15:07:45 sandervl Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1994. */
 
 /* This program is freely distributable without licensing fees
@@ -36,12 +36,13 @@ __glutWarning(char *format,...)
   va_start(args, format);
 
 #if defined(__WIN32OS2__)
-  dprintf(("GLUT32: Warning %s: \n",
+{
+  char errmsg[1024];
 
-    __glutProgramName ? __glutProgramName : "(unamed)"));
-  CHAR errmsg[1024];
+  dprintf(("GLUT32: Warning %s: \n",  __glutProgramName ? __glutProgramName : "(unnamed)"));
   sprintf(errmsg, format, args);
   dprintf(("GLUT32: %s\n",errmsg));
+}
 #endif
   fprintf(stderr, "GLUT: Warning in %s: ",
     __glutProgramName ? __glutProgramName : "(unamed)");
@@ -68,6 +69,7 @@ __glutFatalError(char *format,...)
 
   va_start(args, format);
 #if defined(__WIN32OS2__)
+{
   CHAR errmsg[1024];
 
   dprintf(("GLUT32: Fatal Error in %s:\n",
@@ -76,6 +78,7 @@ __glutFatalError(char *format,...)
   sprintf(errmsg, format, args);
 
   dprintf(("GLUT32: %s\n",errmsg));
+}
 #endif
 
   fprintf(stderr, "GLUT: Fatal Error in %s: ",
@@ -95,12 +98,14 @@ __glutFatalUsage(char *format,...)
   va_start(args, format);
 
 #if defined(__WIN32OS2__)
+{
+  char errmsg[1024];
   dprintf(("GLUT: Fatal API Usage in %s:\n",
     __glutProgramName ? __glutProgramName : "(unamed)"));
-  char errmsg[1024];
   sprintf(errmsg, format, args);
   dprintf(("GLUT32: %s",errmsg));
   putc('\n', stderr);
+}
 #endif
 
   fprintf(stderr, "GLUT: Fatal API Usage in %s: ",

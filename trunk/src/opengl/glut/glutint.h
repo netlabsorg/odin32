@@ -1,4 +1,4 @@
-/* $Id: glutint.h,v 1.5 2000-03-11 09:05:05 jeroen Exp $ */
+/* $Id: glutint.h,v 1.6 2000-03-11 15:07:47 sandervl Exp $ */
 #ifndef __glutint_h__
 #define __glutint_h__
 
@@ -234,18 +234,14 @@ typedef struct _FrameBufferMode {
 #define NUM_DM_CAPS     (DM_NUM+1)
 
 typedef struct _DisplayMode {
-#if defined(_WIN32)
+#if defined(_WIN32) || defined(__WIN32OS2__)
   DEVMODE devmode;
-#else
-#if defined(__WIN32OS2__)
-  DEVMODEA devmode;
 #else
   /* XXX The X Window System does not have a standard
      mechanism for display setting changes.  On SGI
      systems, GLUT could use the XSGIvc (SGI X video
      control extension).  Perhaps this can be done in
      a future release of GLUT. */
-#endif
 #endif
   int valid;
   int cap[NUM_DM_CAPS];

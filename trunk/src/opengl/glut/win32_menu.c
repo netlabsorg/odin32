@@ -1,4 +1,4 @@
-/* $Id: win32_menu.c,v 1.4 2000-03-11 09:05:05 jeroen Exp $ */
+/* $Id: win32_menu.c,v 1.5 2000-03-11 15:07:48 sandervl Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1994, 1997, 1998. */
 /* Copyright (c) Nate Robins, 1997. */
 
@@ -29,13 +29,13 @@ static int menuListSize = 0;
 static UINT uniqueMenuHandler = 1;
 
 /* DEPRICATED, use glutMenuStatusFunc instead. */
-void APIENTRY
+void GLAPIENTRY
 glutMenuStateFunc(GLUTmenuStateCB menuStateFunc)
 {
   __glutMenuStatusFunc = (GLUTmenuStatusCB) menuStateFunc;
 }
 
-void APIENTRY
+void GLAPIENTRY
 glutMenuStatusFunc(GLUTmenuStatusCB menuStatusFunc)
 {
   __glutMenuStatusFunc = menuStatusFunc;
@@ -232,7 +232,7 @@ menuModificationError(void)
   __glutFatalError("menu manipulation not allowed while menus in use.");
 }
 
-int APIENTRY
+int GLAPIENTRY
 glutCreateMenu(GLUTselectCB selectFunc)
 {
   GLUTmenu *menu;
@@ -260,7 +260,7 @@ glutCreateMenu(GLUTselectCB selectFunc)
   return menuid + 1;
 }
 
-void APIENTRY
+void GLAPIENTRY
 glutDestroyMenu(int menunum)
 {
   GLUTmenu *menu = __glutGetMenuByNum(menunum);
@@ -287,7 +287,7 @@ glutDestroyMenu(int menunum)
   free(menu);
 }
 
-int APIENTRY
+int GLAPIENTRY
 glutGetMenu(void)
 {
   if (__glutCurrentMenu) {
@@ -297,7 +297,7 @@ glutGetMenu(void)
   }
 }
 
-void APIENTRY
+void GLAPIENTRY
 glutSetMenu(int menuid)
 {
   GLUTmenu *menu;
@@ -329,22 +329,14 @@ setMenuItem(GLUTmenuItem * item, const char *label,
   item->len = (int) strlen(label);
   item->value = value;
   item->unique = uniqueMenuHandler++;
-#if defined(__WIN32OS2__)
-  if (isTrigger) {
-    AppendMenuA(menu->win, MF_POPUP, (UINT)item->win, label);
-  } else {
-    AppendMenuA(menu->win, MF_STRING, item->unique, label);
-  }
-#else
   if (isTrigger) {
     AppendMenu(menu->win, MF_POPUP, (UINT)item->win, label);
   } else {
     AppendMenu(menu->win, MF_STRING, item->unique, label);
   }
-#endif
 }
 
-void APIENTRY
+void GLAPIENTRY
 glutAddMenuEntry(const char *label, int value)
 {
   GLUTmenuItem *entry;
@@ -363,7 +355,7 @@ glutAddMenuEntry(const char *label, int value)
   __glutCurrentMenu->list = entry;
 }
 
-void APIENTRY
+void GLAPIENTRY
 glutAddSubMenu(const char *label, int menu)
 {
   GLUTmenuItem *submenu;
@@ -388,7 +380,7 @@ glutAddSubMenu(const char *label, int menu)
   __glutCurrentMenu->list = submenu;
 }
 
-void APIENTRY
+void GLAPIENTRY
 glutChangeToMenuEntry(int num, const char *label, int value)
 {
   GLUTmenuItem *item;
@@ -417,13 +409,8 @@ glutChangeToMenuEntry(int num, const char *label, int value)
       item->len = (int) strlen(label);
       item->value = value;
       item->unique = uniqueMenuHandler++;
-#if defined(__WIN32OS2__)
-      ModifyMenuA(__glutCurrentMenu->win, (UINT) i - 1,
-        MF_BYPOSITION | MFT_STRING, item->unique, label);
-#else
       ModifyMenu(__glutCurrentMenu->win, (UINT) i - 1,
         MF_BYPOSITION | MFT_STRING, item->unique, label);
-#endif
       return;
     }
     i--;
@@ -432,7 +419,7 @@ glutChangeToMenuEntry(int num, const char *label, int value)
   __glutWarning("Current menu has no %d item.", num);
 }
 
-void APIENTRY
+void GLAPIENTRY
 glutChangeToSubMenu(int num, const char *label, int menu)
 {
   GLUTmenu *popupmenu;
@@ -464,13 +451,8 @@ glutChangeToSubMenu(int num, const char *label, int menu)
       popupmenu = __glutGetMenuByNum(menu);
       if (popupmenu)
         item->win = popupmenu->win;
-#if defined(__WIN32OS2__)
-      ModifyMenuA(__glutCurrentMenu->win, (UINT) i - 1,
-        MF_BYPOSITION | MF_POPUP, (UINT) item->win, label);
-#else
       ModifyMenu(__glutCurrentMenu->win, (UINT) i - 1,
         MF_BYPOSITION | MF_POPUP, (UINT) item->win, label);
-#endif
       return;
     }
     i--;
@@ -479,7 +461,7 @@ glutChangeToSubMenu(int num, const char *label, int menu)
   __glutWarning("Current menu has no %d item.", num);
 }
 
-void APIENTRY
+void GLAPIENTRY
 glutRemoveMenuItem(int num)
 {
   GLUTmenuItem *item, **prev;
@@ -512,7 +494,7 @@ glutRemoveMenuItem(int num)
   __glutWarning("Current menu has no %d item.", num);
 }
 
-void APIENTRY
+void GLAPIENTRY
 glutAttachMenu(int button)
 {
   if (__glutCurrentWindow == __glutGameModeWindow) {
@@ -528,7 +510,7 @@ glutAttachMenu(int button)
   __glutCurrentWindow->menu[button] = __glutCurrentMenu->id + 1;
 }
 
-void APIENTRY
+void GLAPIENTRY
 glutDetachMenu(int button)
 {
   if (__glutMappedMenu) {

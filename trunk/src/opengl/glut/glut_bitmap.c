@@ -1,11 +1,9 @@
-/* $Id: glut_bitmap.c,v 1.2 2000-02-09 08:46:08 jeroen Exp $ */
+/* $Id: glut_bitmap.c,v 1.3 2000-03-11 15:07:44 sandervl Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1994. */
 
 /* This program is freely distributable without licensing fees
    and is provided without guarantee or warrantee expressed or
    implied. This program is -not- in the public domain. */
-
-#include <os2win.h>
 
 #include "glutint.h"
 #include "glutbitmap.h"

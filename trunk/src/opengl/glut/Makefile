@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.13 2000-03-08 09:07:24 bird Exp $
+# $Id: Makefile,v 1.14 2000-03-11 15:07:43 sandervl Exp $
 
 #
 # Odin32 API
@@ -20,8 +20,8 @@ PDWIN32_TOOLS   = ..\..\..\tools\bin
 # Flag overloads and local macros.
 CLEANEXTRAS = 32rsrc.asm
 
-CFLAGS      = -Tdp -I..\mesa\GL -I..\glu $(CFLAGS) -I..\mesa
-CXXFLAGS    = -Tdp -I..\mesa\GL -I..\glu $(CXXFLAGS) -I..\mesa
+CFLAGS      = -I..\mesa\GL -I..\glu $(CFLAGS_WIN32APP) -I..\mesa
+CXXFLAGS    = -I..\mesa\GL -I..\glu $(CXXFLAGS_WIN32APP) -I..\mesa
 
 
 # Object files. All objects should be prefixed with $(OBJDIR)!
