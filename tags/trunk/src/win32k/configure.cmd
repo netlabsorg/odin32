@@ -1,4 +1,4 @@
-/* $Id: configure.cmd,v 1.23 2002-04-29 11:35:24 bird Exp $
+/* $Id: configure.cmd,v 1.24 2002-04-29 11:57:59 bird Exp $
  *
  * Configuration script.
  * Generates makefile.inc and an empty .depend file.
@@ -38,7 +38,6 @@
                 when (ch = '-') then
                 do
                     parse var sArg sParm'='sOpt
-                    say sParm
                     select
                         when (sParm = '-WITH-KLIB') then
                             fWithKLib = 1;
