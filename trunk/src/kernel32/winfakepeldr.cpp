@@ -1,4 +1,4 @@
-/* $Id: winfakepeldr.cpp,v 1.1 1999-10-23 12:34:48 sandervl Exp $ */
+/* $Id: winfakepeldr.cpp,v 1.2 1999-11-24 19:31:23 sandervl Exp $ */
 
 /*
  * Win32 PE loader fake image class (RSRC_LOAD)
@@ -32,7 +32,7 @@
 //******************************************************************************
 Win32PeLdrRsrcImg::Win32PeLdrRsrcImg(char *szFileName) 
                         : Win32ImageBase(-1), 
-                          Win32PeLdrImage(szFileName, RSRC_LOAD)
+                          Win32PeLdrImage(szFileName, FALSE, RSRC_LOAD)
 {
 }
 //******************************************************************************

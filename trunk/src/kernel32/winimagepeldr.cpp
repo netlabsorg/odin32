@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.14 1999-11-22 20:35:52 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.15 1999-11-24 19:31:23 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -69,7 +69,7 @@ extern ULONG flAllocMem;    /*Tue 03.03.1998: knut */
 
 //******************************************************************************
 //******************************************************************************
-Win32PeLdrImage::Win32PeLdrImage(char *pszFileName, int loadtype) :
+Win32PeLdrImage::Win32PeLdrImage(char *pszFileName, BOOL isExe, int loadtype) :
     Win32ImageBase(-1),
     nrsections(0), imageSize(0),
     imageVirtBase(-1), realBaseAddress(0), imageVirtEnd(0),
@@ -82,17 +82,39 @@ Win32PeLdrImage::Win32PeLdrImage(char *pszFileName, int loadtype) :
 
   strcpy(szFileName, pszFileName);
   strupr(szFileName);
-  if(!strchr(szFileName, (int)'.')) {
-	strcat(szFileName,".DLL");
+  if(isExe) {
+  	dllfile = OSLibDosOpen(szFileName, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
+  	if(dllfile == NULL) {
+		if(!strstr(szFileName, ".EXE")) {
+			strcat(szFileName,".EXE");
+		}
+	}
+  	else	OSLibDosClose(dllfile);
   }
-  dllfile = OSLibDosOpen(szFileName, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
-  if(dllfile == NULL) {//search in libpath for dll
-	strcpy(szModule, kernel32Path);
-	strcat(szModule, szFileName);
-	strcpy(szFileName, szModule);
-  }
-  else	OSLibDosClose(dllfile);
+  else {
+  	dllfile = OSLibDosOpen(szFileName, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
+  	if(dllfile == NULL) {//search in libpath for dll
+		strcpy(szModule, kernel32Path);
+		strcat(szModule, szFileName);
+		strcpy(szFileName, szModule);
 
+  		dllfile = OSLibDosOpen(szFileName, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
+  		if(dllfile == NULL) {
+			if(!strstr(szFileName, ".DLL")) {
+				strcat(szFileName,".DLL");
+  				dllfile = OSLibDosOpen(szFileName, OSLIB_ACCESS_READONLY|OSLIB_ACCESS_SHAREDENYNONE);
+  				if(dllfile == NULL) {
+					strcpy(szModule, kernel32Path);
+					strcat(szModule, szFileName);
+					strcpy(szFileName, szModule);
+				}
+				else	OSLibDosClose(dllfile);
+			}
+		}
+		else	OSLibDosClose(dllfile);
+	}
+	else	OSLibDosClose(dllfile);
+  }
   strcpy(szModule, OSLibStripPath(szFileName));
   strupr(szModule);
   char *dot = strstr(szModule, ".");

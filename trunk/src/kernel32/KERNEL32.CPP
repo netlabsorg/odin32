@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.33 1999-11-23 19:31:34 sandervl Exp $ */
+/* $Id: KERNEL32.CPP,v 1.34 1999-11-24 19:31:22 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -520,7 +520,7 @@ BOOL WIN32API IsBadHugeWritePtr( PVOID arg1, UINT  arg2)
 //******************************************************************************
 BOOL WIN32API IsDBCSLeadByte(BYTE arg1)
 {
-    dprintf(("KERNEL32:  OS2IsDBCSLeadByte\n"));
+    dprintf2(("KERNEL32:  OS2IsDBCSLeadByte\n"));
     return O32_IsDBCSLeadByte(arg1);
 }
 //******************************************************************************

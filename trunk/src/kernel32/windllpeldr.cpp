@@ -1,4 +1,4 @@
-/* $Id: windllpeldr.cpp,v 1.2 1999-10-28 18:23:34 sandervl Exp $ */
+/* $Id: windllpeldr.cpp,v 1.3 1999-11-24 19:31:23 sandervl Exp $ */
 
 /*
  * Win32 PE loader Dll class
@@ -36,7 +36,7 @@
 Win32PeLdrDll::Win32PeLdrDll(char *szDllName, Win32ImageBase *parentImage) 
                 : Win32ImageBase(-1), 
                   Win32DllBase(-1, 0), 
-                  Win32PeLdrImage(szDllName)
+                  Win32PeLdrImage(szDllName, FALSE)
 {
   dprintf(("Win32PeLdrDll::Win32PeLdrDll %s %s loaded by %s", szFileName, szModule,
           (parentImage) ? parentImage->getModuleName() : "Unknown"));

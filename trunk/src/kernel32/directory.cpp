@@ -1,4 +1,4 @@
-/* $Id: directory.cpp,v 1.11 1999-11-11 19:10:08 sandervl Exp $ */
+/* $Id: directory.cpp,v 1.12 1999-11-24 19:31:22 sandervl Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
@@ -31,6 +31,7 @@
 #include <win\file.h>
 #include <string.h>
 #include "oslibdos.h"
+#include "profile.h"
 
 ODINDEBUGCHANNEL(KERNEL32-DIRECTORY)
 
@@ -218,7 +219,7 @@ ODINFUNCTION2(UINT,GetSystemDirectoryA,LPSTR,lpBuffer,
   {
     int len;
 
-    len = PROFILE_GetOdinIniString(ODINDIRECTORIES,"SYSTEM","",lpBuffer,uSize);
+    len = ODIN_PROFILE_GetOdinIniString(ODINDIRECTORIES,"SYSTEM","",lpBuffer,uSize);
     if (len > 2) {
 	if(lpBuffer[len-1] == '\\') {
 		lpBuffer[len-1] = 0; 
@@ -292,7 +293,7 @@ ODINFUNCTION2(UINT,GetWindowsDirectoryA,LPSTR,lpBuffer,
   {
     int len;
 
-    len = PROFILE_GetOdinIniString(ODINDIRECTORIES,"WINDOWS","",lpBuffer,uSize);
+    len = ODIN_PROFILE_GetOdinIniString(ODINDIRECTORIES,"WINDOWS","",lpBuffer,uSize);
     if (len > 2) {
 	if(lpBuffer[len-1] == '\\') {
 		lpBuffer[len-1] = 0; 
@@ -300,9 +301,21 @@ ODINFUNCTION2(UINT,GetWindowsDirectoryA,LPSTR,lpBuffer,
 	}
 	return len;
     }
-    else
-        /* if no override by environment is available */
-        return O32_GetWindowsDirectory(lpBuffer,uSize);
+    else {//SvL: Use path of kernel32.dll instead of calling Open32 api (which returns \OS2\SYSTEM)
+     CHAR buf[255];
+
+	lstrcpynA(buf, kernel32Path, sizeof(buf)-1);
+	strcat(buf, "WIN");
+	O32_CreateDirectory(buf, NULL);
+
+	lstrcpynA(lpBuffer, buf, uSize);
+	len = lstrlenA(lpBuffer);;
+	if(lpBuffer[len-1] == '\\') {
+		lpBuffer[len-1] = 0; 
+		len--;
+	}
+	return len;
+    }
   }
 }
 
