@@ -1,4 +1,4 @@
-/* $Id: hotkey.cpp,v 1.1 2000-02-23 17:09:42 cbratschi Exp $ */
+/* $Id: hotkey.cpp,v 1.2 2000-02-25 17:00:15 cbratschi Exp $ */
 /*
  * Hotkey control
  *
@@ -6,23 +6,24 @@
  * Copyright 1999 Achim Hasenmueller
  * Copyright 1999 Christoph Bratschi
  *
- * Status: Complete (perhaps some bugs)
+ * Status: Complete
  * Version: 5.00
  */
 
 #include "winbase.h"
 #include "commctrl.h"
+#include "ccbase.h"
 #include "hotkey.h"
 #include <string.h>
 
-#define HOTKEY_GetInfoPtr(hwnd) ((HOTKEY_INFO*)GetWindowLongA(hwnd,0))
+#define HOTKEY_GetInfoPtr(hwnd) ((HOTKEY_INFO*)getInfoPtr(hwnd))
 
 static VOID
 HOTKEY_Refresh(HWND hwnd,BOOL notify)
 {
   InvalidateRect(hwnd,NULL,FALSE);
 
-  if (notify) SendMessageA(GetParent(hwnd),WM_COMMAND,MAKEWPARAM(GetWindowLongA(hwnd,GWL_ID),EN_CHANGE),hwnd);
+  if (notify) sendCommand(hwnd,EN_CHANGE);
 }
 
 static char*
@@ -298,14 +299,14 @@ HOTKEY_Check(HOTKEY_INFO *infoPtr,BYTE bfMods)
 {
   BYTE mods = bfMods & ~HOTKEYF_EXT;
 
-  if ((infoPtr->fwCombInv & HKCOMB_A && mods == HOTKEYF_ALT) ||
-      (infoPtr->fwCombInv & HKCOMB_C && mods == HOTKEYF_CONTROL) ||
-      (infoPtr->fwCombInv & HKCOMB_CA && mods == HOTKEYF_CONTROL | HOTKEYF_ALT) ||
-      (infoPtr->fwCombInv & HKCOMB_NONE && mods == 0) ||
-      (infoPtr->fwCombInv & HKCOMB_S && mods == HOTKEYF_SHIFT) ||
-      (infoPtr->fwCombInv & HKCOMB_SA && mods == HOTKEYF_SHIFT | HOTKEYF_ALT) ||
-      (infoPtr->fwCombInv & HKCOMB_SC && mods == HOTKEYF_SHIFT | HOTKEYF_CONTROL) ||
-      (infoPtr->fwCombInv & HKCOMB_SCA && mods == HOTKEYF_SHIFT | HOTKEYF_CONTROL | HOTKEYF_ALT))
+  if (((infoPtr->fwCombInv & HKCOMB_A) && (mods == HOTKEYF_ALT)) ||
+      ((infoPtr->fwCombInv & HKCOMB_C) && (mods == HOTKEYF_CONTROL)) ||
+      ((infoPtr->fwCombInv & HKCOMB_CA) && (mods == HOTKEYF_CONTROL | HOTKEYF_ALT)) ||
+      ((infoPtr->fwCombInv & HKCOMB_NONE) && (mods == 0)) ||
+      ((infoPtr->fwCombInv & HKCOMB_S) && (mods == HOTKEYF_SHIFT)) ||
+      ((infoPtr->fwCombInv & HKCOMB_SA) && (mods == HOTKEYF_SHIFT | HOTKEYF_ALT)) ||
+      ((infoPtr->fwCombInv & HKCOMB_SC) && (mods == HOTKEYF_SHIFT | HOTKEYF_CONTROL)) ||
+      ((infoPtr->fwCombInv & HKCOMB_SCA) && (mods == HOTKEYF_SHIFT | HOTKEYF_CONTROL | HOTKEYF_ALT)))
     return infoPtr->fwModInv | bfMods;
   else
     return bfMods;
@@ -377,8 +378,8 @@ HOTKEY_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
     RECT rect;
 
     /* allocate memory for info structure */
-    infoPtr = (HOTKEY_INFO *)COMCTL32_Alloc (sizeof(HOTKEY_INFO));
-    SetWindowLongA(hwnd,0,(DWORD)infoPtr);
+    infoPtr = (HOTKEY_INFO*)initControl(hwnd,sizeof(HOTKEY_INFO));
+    if (!infoPtr) return (LRESULT)-1;
 
     /* initialize info structure */
 
@@ -407,10 +408,8 @@ HOTKEY_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
 static LRESULT
 HOTKEY_Destroy (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
-    HOTKEY_INFO *infoPtr = HOTKEY_GetInfoPtr (hwnd);
-
     /* free hotkey info data */
-    COMCTL32_Free (infoPtr);
+    doneControl(hwnd);
 
     return 0;
 }
@@ -471,7 +470,7 @@ HOTKEY_KeyDown (HWND hwnd, WPARAM wParam, LPARAM lParam,BOOL sysKey)
          break;
 
     default:
-         if (newKey != wParam && HOTKEY_ExtKey2Name(wParam))
+         if ((newKey != wParam) && HOTKEY_ExtKey2Name(wParam))
          {
            infoPtr ->bVKHotKey = wParam & 0xFF;
            newMods |= HOTKEYF_EXT;
@@ -762,7 +761,7 @@ HOTKEY_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 //          if (uMsg >= WM_USER)
 //              ERR (hotkey, "unknown msg %04x wp=%08x lp=%08lx\n",
 //                   uMsg, wParam, lParam);
-            return DefWindowProcA (hwnd, uMsg, wParam, lParam);
+            return defComCtl32ProcA (hwnd, uMsg, wParam, lParam);
     }
     return 0;
 }
@@ -772,9 +771,6 @@ VOID
 HOTKEY_Register (VOID)
 {
     WNDCLASSA wndClass;
-
-//SvL: Don't check this now
-//    if (GlobalFindAtomA (HOTKEY_CLASSA)) return;
 
     ZeroMemory (&wndClass, sizeof(WNDCLASSA));
     wndClass.style         = CS_GLOBALCLASS;
@@ -792,7 +788,6 @@ HOTKEY_Register (VOID)
 VOID
 HOTKEY_Unregister (VOID)
 {
-    if (GlobalFindAtomA (HOTKEY_CLASSA))
-        UnregisterClassA (HOTKEY_CLASSA, (HINSTANCE)NULL);
+    UnregisterClassA (HOTKEY_CLASSA, (HINSTANCE)NULL);
 }
 

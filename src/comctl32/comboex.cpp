@@ -1,4 +1,4 @@
-/* $Id: comboex.cpp,v 1.1 2000-02-23 17:09:40 cbratschi Exp $ */
+/* $Id: comboex.cpp,v 1.2 2000-02-25 17:00:15 cbratschi Exp $ */
 /*
  * ComboBoxEx control
  *
@@ -310,9 +310,6 @@ COMBOEX_Register (VOID)
 {
     WNDCLASSA wndClass;
 
-//SvL: Don't check this now
-//    if (GlobalFindAtomA (WC_COMBOBOXEXA)) return;
-
     ZeroMemory (&wndClass, sizeof(WNDCLASSA));
     wndClass.style         = CS_GLOBALCLASS;
     wndClass.lpfnWndProc   = (WNDPROC)COMBOEX_WindowProc;
@@ -329,7 +326,6 @@ COMBOEX_Register (VOID)
 VOID
 COMBOEX_Unregister (VOID)
 {
-    if (GlobalFindAtomA (WC_COMBOBOXEXA))
-        UnregisterClassA (WC_COMBOBOXEXA, (HINSTANCE)NULL);
+    UnregisterClassA (WC_COMBOBOXEXA, (HINSTANCE)NULL);
 }
 
