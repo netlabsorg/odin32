@@ -1,4 +1,4 @@
-/* $Id: pmkbdhk.cpp,v 1.6 2003-10-22 09:48:08 sandervl Exp $ */
+/* $Id: pmkbdhk.cpp,v 1.7 2003-10-22 09:51:00 sandervl Exp $ */
 /*
  * OS/2 native Presentation Manager hooks
  *
@@ -452,6 +452,8 @@ BOOL EXPENTRY hookPreAccelHook(HAB hab, PQMSG pqmsg, ULONG option)
             
             case PMSCAN_SHIFTLEFT:
             case PMSCAN_SHIFTRIGHT:
+                //PM layer switching doesn't work as it checks for the frame
+                //class name instead of the window type
                 if( SHORT1FROMMP(pqmsg->mp1) & KC_ALT )
                 {
                   BOOL      fsuccess;
