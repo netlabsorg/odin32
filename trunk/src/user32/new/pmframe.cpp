@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.13 2000-01-12 17:37:29 cbratschi Exp $ */
+/* $Id: pmframe.cpp,v 1.14 2000-01-12 22:07:28 cbratschi Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -211,7 +211,7 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
 
         if(!win32wnd->CanReceiveSizeMsgs())
            break;
-
+//CB: todo: adjust maximized window rect (how does WINE it?)
         WinQueryWindowPos(hwnd, &swpOld);
         if(pswp->fl & (SWP_MOVE | SWP_SIZE)) {
             if (win32wnd->isChild()) {
@@ -251,7 +251,7 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
 
     case WM_WINDOWPOSCHANGED:
     {
-      PSWP      pswp   = (PSWP)mp1;
+      PSWP      pswp   = (PSWP)mp1,pswpOld = pswp+1;
       SWP       swpOld = *(pswp + 1);
       WINDOWPOS wp;
       HWND      hParent = NULLHANDLE;
@@ -283,30 +283,93 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
         }
         OSLibMapSWPtoWINDOWPOSFrame(pswp, &wp, &swpOld, hParent, hwnd);
 
-        if(pswp->fl & (SWP_MOVE | SWP_SIZE)) {
-                win32wnd->setWindowRect(wp.x, wp.y, wp.x+wp.cx, wp.y+wp.cy);
+        if(pswp->fl & (SWP_MOVE | SWP_SIZE))
+        {
+          win32wnd->setWindowRect(wp.x, wp.y, wp.x+wp.cx, wp.y+wp.cy);
 
-                win32wnd->MsgFormatFrame();
-                //CB: todo: use result for WM_CALCVALIDRECTS
-                mapWin32ToOS2Rect(WinQueryWindow(hwnd,QW_PARENT),hwnd,win32wnd->getClientRectPtr(),(PRECTLOS2)&rect);
+          win32wnd->MsgFormatFrame();
+          //CB: todo: use result for WM_CALCVALIDRECTS
+          mapWin32ToOS2Rect(WinQueryWindow(hwnd,QW_PARENT),hwnd,win32wnd->getClientRectPtr(),(PRECTLOS2)&rect);
 
-                swpClient.hwnd = win32wnd->getOS2WindowHandle();
-                swpClient.hwndInsertBehind = 0;
-                swpClient.x  = rect.xLeft;
-                swpClient.y  = rect.yBottom;
-                swpClient.cx = rect.xRight-rect.xLeft;
-                swpClient.cy = rect.yTop-rect.yBottom;
-                //TODO: Get rid of SWP_SHOW; needed for winhlp32 button bar for now
-                swpClient.fl = (pswp->fl & ~SWP_ZORDER) | SWP_MOVE | SWP_SHOW;
-                WinSetMultWindowPos(thdb->hab, &swpClient, 1);
-        }
+          swpClient.hwnd = win32wnd->getOS2WindowHandle();
+          swpClient.hwndInsertBehind = 0;
+          swpClient.x  = rect.xLeft;
+          swpClient.y  = rect.yBottom;
+          swpClient.cx = rect.xRight-rect.xLeft;
+          swpClient.cy = rect.yTop-rect.yBottom;
+          //TODO: Get rid of SWP_SHOW; needed for winhlp32 button bar for now
+          swpClient.fl = (pswp->fl & ~SWP_ZORDER) | SWP_MOVE | SWP_SHOW;
+          WinSetMultWindowPos(thdb->hab, &swpClient, 1);
 
-        if(win32wnd->CanReceiveSizeMsgs())
-          win32wnd->MsgPosChanged((LPARAM)&wp);
+          //update child positions: rectWindow is in window coordinates
+          if(pswp->fl & (SWP_MOVE | SWP_SIZE)) {
+                  FrameUpdateChildPositions(win32wnd->getOS2WindowHandle());
+          }
 
-        //update child positions: rectWindow is in window coordinates
-        if(pswp->fl & (SWP_MOVE | SWP_SIZE)) {
-                FrameUpdateChildPositions(win32wnd->getOS2WindowHandle());
+          if(win32wnd->CanReceiveSizeMsgs())
+            win32wnd->MsgPosChanged((LPARAM)&wp);
+
+          if ((pswp->fl & SWP_SIZE) && ((pswp->cx != pswpOld->cx) || (pswp->cy != pswpOld->cy)))
+          {
+            //redraw the frame (to prevent unnecessary client updates)
+            BOOL redrawAll = FALSE;
+
+            if (win32wnd->getWindowClass())
+            {
+              DWORD dwStyle = win32wnd->getWindowClass()->getClassLongA(GCL_STYLE_W);
+
+              if ((dwStyle & CS_HREDRAW_W) && (pswp->cx != pswpOld->cx))
+                redrawAll = TRUE;
+              else if ((dwStyle & CS_VREDRAW_W) && (pswp->cy != pswpOld->cy))
+                redrawAll = TRUE;
+            } else redrawAll = TRUE;
+
+            if (redrawAll)
+            {
+              WinInvalidateRect(hwnd,NULL,TRUE);
+            } else
+            {
+              HPS hps = WinGetPS(hwnd);
+              RECTL frame,client,arcl[4];
+
+              WinQueryWindowRect(hwnd,&frame);
+               //top
+              arcl[0].xLeft = 0;
+              arcl[0].xRight = frame.xRight;
+              arcl[0].yBottom = rect.yTop;
+              arcl[0].yTop = frame.yTop;
+               //right
+              arcl[1].xLeft = rect.xRight;
+              arcl[1].xRight = frame.xRight;
+              arcl[1].yBottom = 0;
+              arcl[1].yTop = frame.yTop;
+               //left
+              arcl[2].xLeft = 0;
+              arcl[2].xRight = rect.xLeft;
+              arcl[2].yBottom = 0;
+              arcl[2].yTop = frame.yTop;
+               //bottom
+              arcl[3].xLeft = 0;
+              arcl[3].xRight = frame.xRight;
+              arcl[3].yBottom = 0;
+              arcl[3].yTop = rect.yBottom;
+
+              HRGN hrgn = GpiCreateRegion(hps,3,(PRECTL)&arcl);
+
+              WinInvalidateRegion(hwnd,hrgn,FALSE);
+              GpiDestroyRegion(hps,hrgn);
+              WinReleasePS(hps);
+            }
+          }
+        } else
+        {
+          //update child positions: rectWindow is in window coordinates
+          if(pswp->fl & (SWP_MOVE | SWP_SIZE)) {
+                  FrameUpdateChildPositions(win32wnd->getOS2WindowHandle());
+          }
+
+          if(win32wnd->CanReceiveSizeMsgs())
+            win32wnd->MsgPosChanged((LPARAM)&wp);
         }
 
 PosChangedEnd:
@@ -316,8 +379,9 @@ PosChangedEnd:
 
     case WM_CALCVALIDRECTS:
     {
+      //don't redraw here or PM redraw the whole frame (done in WM_WINDOWPOSCHANGED)
       RestoreOS2TIB();
-      return (MRESULT)CVR_REDRAW; //always redraw frame
+      return (MRESULT)(CVR_ALIGNLEFT | CVR_ALIGNTOP);
     }
 
     case WM_ACTIVATE:
