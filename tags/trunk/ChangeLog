@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.1187 2000-10-09 18:34:52 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1188 2000-10-09 22:50:48 sandervl Exp $ */
 
  2000-10-09: Yuri Dario <mc6530@mclink.it>
     - USER32: Corrected background brush for MDI windows
@@ -18,6 +18,8 @@
                 as a string pointer resulting in a crash in Quicken.
                 TLS sections must be read/write as they can contain the 
                 TLS index value (i.e. VACPPWIN ilink + ilib)
+                Rewrote GetCurrentDirectoryA due to bugs in Open32's version
+                (returns 0 if bufsize < 3 -> should return required length)
 
  2000-10-08: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32: GetMinMaxInfo fix for windows with both WS_THICKFRAME and
