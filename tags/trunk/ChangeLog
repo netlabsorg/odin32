@@ -1,4 +1,13 @@
-/* $Id: ChangeLog,v 1.1315 2001-03-22 18:15:04 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1316 2001-03-23 16:25:37 sandervl Exp $ */
+
+ 2001-03-23: Sander van Leeuwen <sandervl@xs4all.nl>
+    - WINMM:    o Wrong calling convention for timer thread handler (os2timer.cpp)
+                o Preliminary code for DirectAudio wave playback (new audio
+                  interface in the upcoming SB Live driver)
+                o Rewrote DART wave playback & recording classes
+                o Added support for more callback types (event, thread)
+                o Fixed wrong callback parameter (window callback) for waveIn/OutReset
+                  Note: Untested code. Will be tested & fixed tomorrow.
 
  2001-03-22: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Ported Wine's GetBinaryTypeA/W
