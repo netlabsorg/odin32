@@ -1,4 +1,4 @@
-/* $Id: treeview.cpp,v 1.8 2000-04-12 16:39:00 cbratschi Exp $ */
+/* $Id: treeview.cpp,v 1.9 2000-04-15 14:22:31 cbratschi Exp $ */
 /* Treeview control
  *
  * Copyright 1998 Eric Kohl <ekohl@abo.rhein-zeitung.de>
@@ -4119,8 +4119,7 @@ TREEVIEW_RButtonUp (HWND hwnd, LPPOINT pPt)
     return 0;
 }
 
-static LRESULT
-TREEVIEW_CreateDragImage (HWND hwnd, WPARAM wParam, LPARAM lParam)
+static LRESULT TREEVIEW_CreateDragImage (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
   TREEVIEW_INFO *infoPtr = TREEVIEW_GetInfoPtr(hwnd);
   TREEVIEW_ITEM *dragItem;
@@ -4134,7 +4133,7 @@ TREEVIEW_CreateDragImage (HWND hwnd, WPARAM wParam, LPARAM lParam)
   WCHAR *itemtxt;
   BOOL mustFree = FALSE;
 
-  if (!(infoPtr->himlNormal))  return 0;
+  if (!(infoPtr->himlNormal)) return 0;
   dragItem = TREEVIEW_ValidItem (infoPtr, (HTREEITEM) lParam);
 
   if (!dragItem) return 0;
