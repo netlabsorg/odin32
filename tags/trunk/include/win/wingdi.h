@@ -277,6 +277,86 @@ DECL_WINELIB_TYPE_AW(LOGCOLORSPACE)
 #define	POSTSCRIPT_PASSTHROUGH	4115
 #define	ENCAPSULATED_POSTSCRIPT	4116
 
+#define POSTSCRIPT_IDENTIFY          4117
+#define POSTSCRIPT_INJECTION         4118
+
+#define CHECKJPEGFORMAT              4119
+#define CHECKPNGFORMAT               4120
+
+#define GET_PS_FEATURESETTING        4121
+
+#define SPCLPASSTHROUGH2             4568
+
+#define PSIDENT_GDICENTRIC    0
+#define PSIDENT_PSCENTRIC     1
+
+typedef struct _PSINJECTDATA {
+    DWORD   DataBytes;      /* number of raw data bytes (NOT including this header) */
+    WORD    InjectionPoint; /* injection point */
+    WORD    PageNumber;     /* page number to apply the injection */
+    /* Followed by raw data to be injected */
+} PSINJECTDATA, *PPSINJECTDATA;
+
+#define PSINJECT_BEGINSTREAM                1
+#define PSINJECT_PSADOBE                    2
+#define PSINJECT_PAGESATEND                 3
+#define PSINJECT_PAGES                      4
+#define PSINJECT_DOCNEEDEDRES               5
+#define PSINJECT_DOCSUPPLIEDRES             6
+#define PSINJECT_PAGEORDER                  7
+#define PSINJECT_ORIENTATION                8
+#define PSINJECT_BOUNDINGBOX                9
+#define PSINJECT_DOCUMENTPROCESSCOLORS      10
+#define PSINJECT_COMMENTS                   11
+#define PSINJECT_BEGINDEFAULTS              12
+#define PSINJECT_ENDDEFAULTS                13
+#define PSINJECT_BEGINPROLOG                14
+#define PSINJECT_ENDPROLOG                  15
+#define PSINJECT_BEGINSETUP                 16
+#define PSINJECT_ENDSETUP                   17
+#define PSINJECT_TRAILER                    18
+#define PSINJECT_EOF                        19
+#define PSINJECT_ENDSTREAM                  20
+#define PSINJECT_DOCUMENTPROCESSCOLORSATEND 21
+
+#define PSINJECT_PAGENUMBER                 100
+#define PSINJECT_BEGINPAGESETUP             101
+#define PSINJECT_ENDPAGESETUP               102
+#define PSINJECT_PAGETRAILER                103
+#define PSINJECT_PLATECOLOR                 104
+#define PSINJECT_SHOWPAGE                   105
+#define PSINJECT_PAGEBBOX                   106
+#define PSINJECT_ENDPAGECOMMENTS            107
+
+#define PSINJECT_VMSAVE                     200
+#define PSINJECT_VMRESTORE                  201
+
+#define FEATURESETTING_NUP         0
+#define FEATURESETTING_OUTPUT      1
+#define FEATURESETTING_PSLEVEL     2
+#define FEATURESETTING_CUSTPAPER   3
+#define FEATURESETTING_MIRROR      4
+#define FEATURESETTING_NEGATIVE    5
+#define FEATURESETTING_PROTOCOL    6
+
+typedef struct _PSFEATURE_OUTPUT {
+    BOOL bPageIndependent;
+    BOOL bSetPageDevice;
+} PSFEATURE_OUTPUT, *PPSFEATURE_OUTPUT;
+
+typedef struct _PSFEATURE_CUSTPAPER {
+    LONG lOrientation;
+    LONG lWidth;
+    LONG lHeight;
+    LONG lWidthOffset;
+    LONG lHeightOffset;
+} PSFEATURE_CUSTPAPER, *PPSFEATURE_CUSTPAPER;
+
+#define PSPROTOCOL_ASCII             0
+#define PSPROTOCOL_BCP               1
+#define PSPROTOCOL_TBCP              2
+#define PSPROTOCOL_BINARY            3
+
 /* Spooler Error Codes */
 #define	SP_NOTREPORTED	0x4000
 #define	SP_ERROR	(-1)
@@ -1172,13 +1252,13 @@ typedef struct tagGCP_RESULTSW
 {
     DWORD  lStructSize;
     LPWSTR lpOutString;
-    UINT *lpOrder;
-    INT  *lpDx;
-    INT  *lpCaretPos;
-    LPWSTR lpClass;
-    UINT *lpGlyphs;
-    UINT nGlyphs;
-    UINT nMaxFit;
+    UINT   *lpOrder;
+    INT    *lpDx;
+    INT    *lpCaretPos;
+    LPSTR  lpClass;
+    LPWSTR lpGlyphs;
+    UINT   nGlyphs;
+    UINT   nMaxFit;
 } GCP_RESULTSW, *LPGCP_RESULTSW;
 
 DECL_WINELIB_TYPE_AW(GCP_RESULTS)
@@ -1270,6 +1350,8 @@ typedef struct tagEXTLOGPEN
 #define NULLREGION        1
 #define SIMPLEREGION      2
 #define COMPLEXREGION     3
+
+#define SYSRGN            4
 
 #define RGN_AND           1
 #define RGN_OR            2
@@ -3157,6 +3239,7 @@ INT       WINAPI GetPath(HDC,LPPOINT,LPBYTE,INT);
 COLORREF    WINAPI GetPixel(HDC,INT,INT);
 INT       WINAPI GetPixelFormat(HDC);
 INT       WINAPI GetPolyFillMode(HDC);
+INT       WINAPI GetRandomRgn(HDC hdc, HRGN hrgn, INT iNum);
 BOOL      WINAPI GetRasterizerCaps(LPRASTERIZER_STATUS,UINT);
 DWORD       WINAPI GetRegionData(HRGN,DWORD,LPRGNDATA);
 INT       WINAPI GetRelAbs(HDC);
@@ -3185,6 +3268,9 @@ INT       WINAPI GetTextFaceW(HDC,INT,LPWSTR);
 BOOL      WINAPI GetTextMetricsA(HDC,LPTEXTMETRICA);
 BOOL      WINAPI GetTextMetricsW(HDC,LPTEXTMETRICW);
 #define GetTextMetrics WINELIB_NAME_AW(GetTextMetrics)
+
+DWORD     WINAPI GetGlyphIndicesA(HDC,LPCSTR,INT,LPWORD,DWORD);
+DWORD     WINAPI GetGlyphIndicesW(HDC,LPCWSTR,INT,LPWORD,DWORD);
 
 BOOL      WINAPI GetViewportExtEx(HDC,LPSIZE);
 BOOL      WINAPI GetViewportOrgEx(HDC,LPPOINT);

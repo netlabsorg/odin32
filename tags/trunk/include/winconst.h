@@ -1038,6 +1038,8 @@
 #define SIMPLEREGION_W      2
 #define COMPLEXREGION_W     3
 
+#define SYSRGN_W            4
+
 #define RGN_AND_W           1
 #define RGN_OR_W            2
 #define RGN_XOR_W           3
@@ -2022,5 +2024,20 @@
 #define CTRL_CLOSE_EVENT_W    2
 #define CTRL_LOGOFF_EVENT_W   5
 #define CTRL_SHUTDOWN_EVENT_W 6
+
+/* Object Definitions for EnumObjects() */
+#define OBJ_PEN_W             1
+#define OBJ_BRUSH_W           2
+#define OBJ_DC_W              3
+#define OBJ_METADC_W          4
+#define OBJ_PAL_W             5
+#define OBJ_FONT_W            6
+#define OBJ_BITMAP_W          7
+#define OBJ_REGION_W          8
+#define OBJ_METAFILE_W        9
+#define OBJ_MEMDC_W           10
+#define OBJ_EXTPEN_W          11
+#define OBJ_ENHMETADC_W       12
+#define OBJ_ENHMETAFILE_W     13
 
 #endif //__WINCONST_H__

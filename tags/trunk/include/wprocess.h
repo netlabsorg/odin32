@@ -79,4 +79,6 @@ inline PDB * PROCESS_Current(void)
 ULONG InitCommandLine(const char *pszPeExe);
 BOOL  InitLoaders();
 
+UINT WIN32API GetProcModuleFileNameA(ULONG lpvAddress, LPSTR lpszFileName, UINT cchFileNameMax);
+
 #endif
