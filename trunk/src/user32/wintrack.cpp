@@ -443,7 +443,7 @@ void Frame_SysCommandSizeMove(Win32BaseWindow *win32wnd, WPARAM wParam )
     HDC hdc;
     HWND parent;
     LONG hittest = (LONG)(wParam & 0x0f);
-    HCURSOR16 hDragCursor = 0, hOldCursor = 0;
+    HCURSOR hDragCursor = 0, hOldCursor = 0;
     POINT minTrack, maxTrack;
     POINT capturePoint, pt;
     LONG style = GetWindowLongA( hwnd, GWL_STYLE );
@@ -723,7 +723,7 @@ void Frame_SysCommandSizeMove(Win32BaseWindow *win32wnd, WPARAM wParam )
         if (!((msg.message == WM_KEYDOWN) && (msg.wParam == VK_ESCAPE)) )
         {
             /* NOTE: SWP_NOACTIVATE prevents document window activation in Word 6 */
-            if(!DragFullWindows)
+            if( (!DragFullWindows) || iconic)
                 SetWindowPos( hwnd, 0, lastsizingRect.left, lastsizingRect.top,
                               lastsizingRect.right - lastsizingRect.left,
                               lastsizingRect.bottom - lastsizingRect.top,
