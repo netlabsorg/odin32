@@ -1,4 +1,4 @@
-/* $Id: winimgres.cpp,v 1.51 2001-04-04 10:12:05 sandervl Exp $ */
+/* $Id: winimgres.cpp,v 1.52 2001-07-16 19:30:08 sandervl Exp $ */
 
 /*
  * Win32 PE Image class (resource methods)
@@ -7,6 +7,7 @@
  *
  *
  * Language order based on Wine Code (loader\pe_resource.c)
+ * + find_entry_by_id & find_entry_by_name
  * Copyright 1995 Thomas Sandford
  * Copyright 1996 Martin von Loewis
  * 
@@ -331,6 +332,61 @@ BOOL Win32ImageBase::getVersionStruct(char *verstruct, ULONG bufLength)
     return TRUE;
 }
 
+/**********************************************************************
+ *  find_entry_by_id
+ *
+ * Find an entry by id in a resource directory
+ */
+IMAGE_RESOURCE_DIRECTORY *find_entry_by_id( const IMAGE_RESOURCE_DIRECTORY *dir,
+                                            WORD id, const void *root )
+{
+    const IMAGE_RESOURCE_DIRECTORY_ENTRY *entry;
+    int min, max, pos;
+
+    entry = (const IMAGE_RESOURCE_DIRECTORY_ENTRY *)(dir + 1);
+    min = dir->NumberOfNamedEntries;
+    max = min + dir->NumberOfIdEntries - 1;
+    while (min <= max)
+    {
+        pos = (min + max) / 2;
+        if (entry[pos].u1.Id == id)
+            return (IMAGE_RESOURCE_DIRECTORY *)((char *)root + entry[pos].u2.s.OffsetToDirectory);
+        if (entry[pos].u1.Id > id) max = pos - 1;
+        else min = pos + 1;
+    }
+    return NULL;
+}
+
+
+/**********************************************************************
+ *  find_entry_by_nameW
+ *
+ * Find an entry by name in a resource directory
+ */
+IMAGE_RESOURCE_DIRECTORY *find_entry_by_nameW( const IMAGE_RESOURCE_DIRECTORY *dir,
+                                               LPCWSTR name, const void *root )
+{
+    const IMAGE_RESOURCE_DIRECTORY_ENTRY *entry;
+    const IMAGE_RESOURCE_DIR_STRING_U *str;
+    int min, max, res, pos, namelen;
+
+    entry = (const IMAGE_RESOURCE_DIRECTORY_ENTRY *)(dir + 1);
+    namelen = strlenW(name);
+    min = 0;
+    max = dir->NumberOfNamedEntries - 1;
+    while (min <= max)
+    {
+        pos = (min + max) / 2;
+        str = (IMAGE_RESOURCE_DIR_STRING_U *)((char *)root + entry[pos].u1.s.NameOffset);
+        res = strncmpiW( name, str->NameString, str->Length );
+        if (!res && namelen == str->Length)
+            return (IMAGE_RESOURCE_DIRECTORY *)((char *)root + entry[pos].u2.s.OffsetToDirectory);
+        if (res < 0) max = pos - 1;
+        else min = pos + 1;
+    }
+    return NULL;
+}
+
 /**
  * This function finds a resource (sub)directory within a given resource directory.
  * @returns   Pointer to resource directory. NULL if not found or not a directory.
@@ -379,15 +435,23 @@ PIMAGE_RESOURCE_DIRECTORY Win32ImageBase::getResSubDirW(PIMAGE_RESOURCE_DIRECTOR
     {   /* idName */
         paResDirEntries += pResDirToSearch->NumberOfNamedEntries;
 
+#if 1
+        return find_entry_by_id(pResDirToSearch, idName, pResRootDir);
+#else
         for (i = 0; i < pResDirToSearch->NumberOfIdEntries; i++)
             if (paResDirEntries[i].u1.Id == (WORD)idName)
                 return paResDirEntries[i].u2.s.DataIsDirectory ?
                     (PIMAGE_RESOURCE_DIRECTORY) (paResDirEntries[i].u2.s.OffsetToDirectory + (ULONG)pResRootDir /*?*/
                                                  /*- ulRVAResourceSection*/)
                     : NULL;
+#endif
     }
     else
-    {   /* string name */
+    {
+#if 1
+        return find_entry_by_nameW(pResDirToSearch, lpszName, pResRootDir);
+#else
+        /* string name */
         int cusName = lstrlenW(lpszName);
 
         for (i = 0; i < pResDirToSearch->NumberOfNamedEntries; i++)
@@ -405,6 +469,7 @@ PIMAGE_RESOURCE_DIRECTORY Win32ImageBase::getResSubDirW(PIMAGE_RESOURCE_DIRECTOR
                     : NULL;
             }
         }
+#endif
     }
 
     return NULL;
