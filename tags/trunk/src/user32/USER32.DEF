@@ -1,4 +1,4 @@
-; $Id: USER32.DEF,v 1.42 2000-11-14 14:27:47 sandervl Exp $
+; $Id: USER32.DEF,v 1.43 2000-11-15 13:57:54 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
@@ -665,3 +665,4 @@ EXPORTS
     _TestWideLine@4                                              @2021
     _Calculate1PixelDelta@4                                      @2022
     _DIB_GetDIBWidthBytes@8                                      @2023
+    _selectClientArea@4                                          @2024
