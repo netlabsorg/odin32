@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.39 2001-06-14 11:30:55 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.40 2001-07-30 20:48:51 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -516,7 +516,11 @@ BOOL OSLibPostThreadMessage(ULONG threadid, UINT msg, WPARAM wParam, LPARAM lPar
     dprintf(("PostThreadMessageA %x %x %x %x", threadid, msg, wParam, lParam));
     packet->wParam   = wParam;
     packet->lParam   = lParam;
+#ifdef USING_OPEN32
     return O32_PostThreadMessage(threadid, WIN32APP_POSTMSG-OPEN32_MSGDIFF+msg, ((fUnicode) ? WIN32MSG_MAGICW : WIN32MSG_MAGICA), (LPARAM)packet);
+#else
+    return O32_PostThreadMessage(threadid, WIN32APP_POSTMSG+msg, ((fUnicode) ? WIN32MSG_MAGICW : WIN32MSG_MAGICA), (LPARAM)packet);
+#endif
 }
 //******************************************************************************
 //******************************************************************************
