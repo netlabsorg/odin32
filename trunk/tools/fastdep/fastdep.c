@@ -1,4 +1,4 @@
-/* $Id: fastdep.c,v 1.13 2000-03-17 10:42:22 bird Exp $
+/* $Id: fastdep.c,v 1.14 2000-03-17 19:26:50 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
@@ -292,6 +292,7 @@ int main(int argc, char **argv)
     int         argi = 1;
     int         i;
     const char *pszDepFile = pszDefaultDepFile;
+    char        achBuffer[4096];
 
     static char szObjectDir[CCHMAXPATH];
     static char szObjectExt[64] = "obj";
@@ -333,7 +334,8 @@ int main(int argc, char **argv)
         return -88;
     }
     strlwr(szCurDir);
-    for (i = 0, cSlashes; szCurDir[i] != '\0'; i++)
+    aiSlashes[0] = 0;
+    for (i = 1, cSlashes; szCurDir[i] != '\0'; i++)
     {
         if (szCurDir[i] == '/')
             szCurDir[i] = '\\';
@@ -505,10 +507,65 @@ int main(int argc, char **argv)
             }
 
         }
+        else if (argv[argi][0] == '@')
+        {   /*
+             * Parameter file (debugger parameter length restrictions led to this):
+             *    Create a textbuffer.
+             *    Parse the file and create a new parameter vector.
+             *    Set argv to the new parameter vector, argi to 0 and argc to
+             *    the parameter count.
+             *    Restrictions: Parameters enclosed in "" is not implemented.
+             *                  No commandline parameters are processed after the @file
+             */
+            char *pszBuffer = (char*)textbufferCreate(&argv[argi][1]); /* !ASSUMS! that pvBuffer is the file string! */
+            if (pszBuffer != NULL)
+            {
+                char **apszArgs = NULL;
+                char *psz = pszBuffer;
+                int  i = 0;
+
+                while (*psz != '\0')
+                {
+                    /* find end of parameter word */
+                    char *pszEnd = psz + 1;
+                    char  ch = *pszEnd;
+                    while (ch != ' ' && ch != '\t' && ch != '\n' && ch != '\r' && ch != '\0')
+                        ch = *++pszEnd;
+
+                    /* allocate more arg array space? */
+                    if ((i % 512) == 0)
+                    {
+                        apszArgs = realloc(apszArgs, sizeof(char*) * 512);
+                        if (apszArgs == NULL)
+                        {
+                            fprintf(stderr, "error: out of memory. (line=%d)\n", __LINE__);
+                            return -8;
+                        }
+                    }
+                    *pszEnd = '\0';
+                    apszArgs[i++] = psz;
+
+                    /* next */
+                    psz = pszEnd + 1;
+                    ch = *psz;
+                    while (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r')
+                        ch = *++psz;
+                }
+
+                argc = i;
+                argi = 0;
+                argv = apszArgs;
+                continue;
+            }
+            else
+            {
+                fprintf(stderr, "error: could not open parameter file\n");
+                return -1;
+            }
+        }
         else
         {   /* not a parameter! */
             ULONG           ulRc;
-            char            achBuffer[4096];
             PFILEFINDBUF3   pfindbuf3 = (PFILEFINDBUF3)(void*)&achBuffer[0];
             HDIR            hDir = HDIR_CREATE;
             ULONG           cFiles = ~0UL;
@@ -1406,7 +1463,7 @@ char *fileNormalize(char *pszFilename)
         char *  psz = szFile;
 
         strcpy(szFile, pszFilename);
-        iSlash = *psz == '\\' ? 0 : cSlashes;
+        iSlash = *psz == '\\' ? 1 : cSlashes;
         while (*psz != '\0')
         {
             if (*psz == '.' && psz[1] == '.'  && psz[2] == '\\')
@@ -1435,6 +1492,7 @@ char *fileNormalize(char *pszFilename)
 
 /**
  * Normalizes the path slashes for the filename. It will partially expand paths too.
+ * Makes name all lower case too.
  * @returns   pszFilename
  * @param     pszFilename  Pointer to filename string. Not empty string!
  *                         Much space to play with.
@@ -1442,14 +1500,18 @@ char *fileNormalize(char *pszFilename)
  */
 char *fileNormalize2(const char *pszFilename, char *pszBuffer)
 {
-    char    *psz = pszBuffer;
+    char *  psz = pszBuffer;
+    int     iSlash;
 
-    /* expand path? */
     if (pszFilename[1] != ':')
-    {   /* relative path */
-        int     iSlash;
+    {
+        /* iSlash */
+        if (*pszFilename == '\\' || *pszFilename == '/')
+            iSlash = 1;
+        else
+            iSlash = cSlashes;
 
-        iSlash = *pszFilename == '\\' || *pszFilename == '/' ? 0 : cSlashes;
+        /* interpret . and .. */
         while (*pszFilename != '\0')
         {
             if (*pszFilename == '.' && pszFilename[1] == '.'  && (pszFilename[2] == '\\' || pszFilename[1] == '/'))
@@ -1463,18 +1525,24 @@ char *fileNormalize2(const char *pszFilename, char *pszBuffer)
                 pszFilename += 2;
             }
             else
-            {   /* completed expantion! */
+            {   /* completed expantion! - TODO ..\ or .\ may appare within the remaining path too... */
                 strncpy(pszBuffer, szCurDir, aiSlashes[iSlash]+1);
                 strcpy(pszBuffer + aiSlashes[iSlash]+1, pszFilename);
                 break;
             }
         }
     }
-    /* else: assume full path */
+    else
+    {   /* have drive letter specified - assume ok (TODO)*/
+        strcpy(pszBuffer, pszFilename);
+    }
 
     /* correct slashes */
     while ((pszBuffer = strchr(pszBuffer, '//')) != NULL)
         *pszBuffer++ = '\\';
+
+    /* lower case it */
+    strlwr(psz);
 
     return psz;
 }
@@ -2160,20 +2228,18 @@ static BOOL  depReadFile(const char *pszFilename, POPTIONS pOptions)
                     && (psz[i+1] == ' '
                         || psz[i+1] == '\t'
                         || psz[i+1] == '\0'
-                        || psz[i+1] == '\\'
+                        || (psz[i+1] == '\\' && psz[i+2] == '\0')
                         )
                     )
+                {
+                    psz[i] = '\0';
+                    pvRule = depAddRule(trimR(psz), NULL, NULL);
+                    psz += i + 1;
+                    cch -= i + 1;
+                    fMoreDeps = TRUE;
                     break;
+                }
                 i++;
-            }
-
-            if (psz[i] == ':')
-            {   /* new rule! */
-                psz[i] = '\0';
-                pvRule = depAddRule(trimR(psz), NULL, NULL);
-                psz += i + 1;
-                cch -= i + 1;
-                fMoreDeps = TRUE;
             }
         }
 
