@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.354 2003-02-06 20:28:42 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.355 2003-02-07 15:34:48 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2568,10 +2568,10 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx,
         {
             NotifyFrameChanged(&wpos, &oldClientRect);
         }
-        if(!fShowWindow)
+        if(!fShowWindow && !(getStyle() & WS_MINIMIZE))
         {
             //Restore position always changes when the window position is changed
-            dprintf(("Save new restore position (%d,%d)(%d,%d)", rectWindow.left, rectWindow.top, rectWindow.right, rectWindow.bottom));
+            dprintf(("Save new restore position %x (%d,%d)(%d,%d)", getWindowHandle(), rectWindow.left, rectWindow.top, rectWindow.right, rectWindow.bottom));
             windowpos.rcNormalPosition = rectWindow;
         }
         return TRUE;
@@ -2643,10 +2643,10 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx,
     {
         NotifyFrameChanged(&wpos, &oldClientRect);
     }
-    if(!fShowWindow)
+    if(!fShowWindow && !(getStyle() & WS_MINIMIZE))
     {
         //Restore position always changes when the window position is changed
-        dprintf(("Save new restore position (%d,%d)(%d,%d)", rectWindow.left, rectWindow.top, rectWindow.right, rectWindow.bottom));
+        dprintf(("Save new restore position %x (%d,%d)(%d,%d)", getWindowHandle(), rectWindow.left, rectWindow.top, rectWindow.right, rectWindow.bottom));
         windowpos.rcNormalPosition = rectWindow;
     }
     //MSDN says the entire client area will be invalidated when SWP_NOCOPYBITS
