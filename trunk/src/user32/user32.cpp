@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.109 2001-07-15 14:58:07 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.110 2001-07-28 18:02:50 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -970,31 +970,6 @@ BOOL WIN32API SystemParametersInfoW(UINT uiAction, UINT uiParam, PVOID pvParam, 
     }
     dprintf(("USER32:  SystemParametersInfoW %d, returned %d\n", uiAction, rc));
     return(rc);
-}
-
-/* Process and Thread Functions */
-
-//******************************************************************************
-//DWORD idAttach;   /* thread to attach */
-//DWORD idAttachTo; /* thread to attach to  */
-//BOOL fAttach; /* attach or detach */
-//******************************************************************************
-BOOL WIN32API AttachThreadInput(DWORD idAttach, DWORD idAttachTo, BOOL fAttach)
-{
-  dprintf(("USER32:  AttachThreadInput, not implemented\n"));
-  return(TRUE);
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API WaitForInputIdle(HANDLE hProcess, DWORD dwTimeOut)
-{
-  dprintf(("USER32: WaitForInputIdle %x %d\n", hProcess, dwTimeOut));
-
-  if(fVersionWarp3) {
-        Sleep(1000);
-        return 0;        
-  }
-  else  return O32_WaitForInputIdle(hProcess, dwTimeOut);
 }
 
 /* Help Functions */

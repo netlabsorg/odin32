@@ -1,4 +1,4 @@
-/* $Id: os2heap.cpp,v 1.21 2001-07-19 20:00:56 sandervl Exp $ */
+/* $Id: os2heap.cpp,v 1.22 2001-07-28 18:03:38 sandervl Exp $ */
 
 /*
  * Heap class for OS/2
@@ -46,11 +46,10 @@ void _LNK_CONV   releaseHeapMem(Heap_t pHeap, void *block, size_t size);
 
 //******************************************************************************
 //******************************************************************************
-OS2Heap::OS2Heap(HANDLE hHeap, DWORD flOptions, DWORD dwInitialSize, DWORD dwMaximumSize)
+OS2Heap::OS2Heap(DWORD flOptions, DWORD dwInitialSize, DWORD dwMaximumSize)
 {
  OS2Heap *curheap = OS2Heap::heap;
 
-  hPrimaryHeap = hHeap;
   totalAlloc   = 0;
   fInitialized = 0;
   nrHeaps      = 0;
@@ -98,6 +97,7 @@ OS2Heap::OS2Heap(HANDLE hHeap, DWORD flOptions, DWORD dwInitialSize, DWORD dwMax
 	dprintf(("OS2Heap::OS2Heap: _ucreate failed!"));
         DebugInt3();
   }
+  hPrimaryHeap = (HANDLE)uheap;
 }
 //******************************************************************************
 //******************************************************************************

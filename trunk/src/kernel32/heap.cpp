@@ -1,4 +1,4 @@
-/* $Id: heap.cpp,v 1.32 2001-07-17 12:10:21 sandervl Exp $ */
+/* $Id: heap.cpp,v 1.33 2001-07-28 18:03:37 sandervl Exp $ */
 
 /*
  * Win32 heap API functions for OS/2
@@ -81,21 +81,16 @@ ODINFUNCTIONNODBG3(HANDLE, HeapCreate, DWORD, flOptions, DWORD, dwInitialSize,
 
   //Create Open32 heap for it's handle
   dprintf2(("HeapCreate dwInitialSize %X", dwInitialSize));
-  HANDLE hHeap = O32_HeapCreate(flOptions, 0, 4096);
-  if(hHeap == NULL)
-    return(NULL);
 
-  curheap = new OS2Heap(hHeap, flOptions, dwInitialSize, dwMaximumSize);
+  curheap = new OS2Heap(flOptions, dwInitialSize, dwMaximumSize);
 
   if(curheap == NULL)
   {
-      	O32_HeapDestroy(hHeap);
         return(NULL);
   }
 
   if(curheap->getHeapHandle() == NULL)
   {
-    O32_HeapDestroy(hHeap);
     delete(curheap);
     return(NULL);
   }
@@ -111,7 +106,6 @@ ODINFUNCTIONNODBG1(BOOL, HeapDestroy, HANDLE, hHeap)
   if(curheap == NULL)
         return(FALSE);
 
-  O32_HeapDestroy(curheap->getHeapHandle());
   delete(curheap);
   return(TRUE);
 }
@@ -177,16 +171,12 @@ ODINFUNCTIONNODBG0(HANDLE, GetProcessHeap)
 //    dprintf2(("KERNEL32: GetProcessHeap\n"));
     //SvL: Only one process heap per process
     if(processheap == NULL) {
-      //TODO: I haven't thought real hard about this.  I added it just to make "hdr.exe" happy.
-      hHeap = O32_HeapCreate(HEAP_GENERATE_EXCEPTIONS, 1, 0x4000);
-
-      OS2ProcessHeap = new OS2Heap(hHeap, HEAP_GENERATE_EXCEPTIONS, 0x4000, 0);
+      OS2ProcessHeap = new OS2Heap(HEAP_GENERATE_EXCEPTIONS, 0x4000, 0);
 
       if(OS2ProcessHeap == NULL) {
-         	O32_HeapDestroy(hHeap);
                	return(NULL);
       }
-      processheap = hHeap;
+      processheap = OS2ProcessHeap->getHeapHandle();
     }
     return(processheap);
 }

@@ -88,6 +88,7 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
     size_t i;
     APIRET rc;
     ULONG  ulSysinfo, version[2];
+    static BOOL fInit = FALSE;
     
     /*-------------------------------------------------------------------------*/
     /* If ulFlag is zero then the DLL is being loaded so initialization should */
@@ -95,6 +96,10 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
     /* termination should be performed.                                        */
     /*-------------------------------------------------------------------------*/
 
+    if(fInit == TRUE && ulFlag == 0) {
+        return 1; //already initialized
+    }
+    fInit = TRUE;
     switch (ulFlag)
     {
         case 0 :
@@ -228,3 +233,17 @@ void APIENTRY cleanupKernel32(ULONG ulReason)
     libWin32kTerm();
     return ;
 }
+//******************************************************************************
+ULONG APIENTRY O32__DLL_InitTerm(ULONG handle, ULONG flag);
+//******************************************************************************
+ULONG APIENTRY InitializeKernel32()
+{
+    HMODULE hModule;
+
+    DosQueryModuleHandle("WGSS50", &hModule);
+    O32__DLL_InitTerm(hModule, 0);
+    DosQueryModuleHandle("KERNEL32", &hModule);
+    return inittermKernel32(hModule, 0);
+}
+//******************************************************************************
+//******************************************************************************

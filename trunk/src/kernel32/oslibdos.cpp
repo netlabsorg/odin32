@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.71 2001-06-24 16:40:44 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.72 2001-07-28 18:03:38 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -2599,6 +2599,65 @@ ULONG OSLibDosQueryDir(DWORD length, LPSTR lpszCurDir)
 
    SetLastError(ERROR_SUCCESS_W);
    return len;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibDosBeep(DWORD ulFreq, DWORD ulDuration)
+{
+   APIRET   rc;
+
+   if (ulDuration == -1)
+   {
+      SetLastError(ERROR_NOT_SUPPORTED_W);
+      return FALSE;
+   }
+   rc = DosBeep(ulFreq, ulDuration);
+   SetLastError(error2WinError(rc,ERROR_INVALID_HANDLE));
+
+   return (rc == 0);
+}
+//******************************************************************************
+//******************************************************************************
+ULONG OSLibDosGetModuleFileName(HMODULE hModule, LPTSTR lpszPath, DWORD cchPath)
+{
+   PTIB pTIB;
+   PPIB pPIB;
+   APIRET rc;
+
+   if(hModule == -1 || hModule == 0)
+   {
+      DosGetInfoBlocks(&pTIB, &pPIB);
+      hModule = pPIB->pib_hmte;
+   }
+   *lpszPath = 0;
+   rc = DosQueryModuleName(hModule, cchPath, lpszPath);
+
+   DWORD len = strlen(lpszPath);
+   SetLastError(error2WinError(rc,ERROR_INVALID_HANDLE));
+   return len;
+}
+//******************************************************************************
+//******************************************************************************
+ULONG OSLibDosGetProcAddress(HMODULE hModule, LPCSTR lpszProc)
+{
+   APIRET  rc;
+   PFN     pfn = NULL;
+   ULONG   ordinal = (((ULONG)lpszProc) <= 0xFFFF) ? (ULONG)lpszProc : 0;
+   HMODULE hmod = (HMODULE)hModule;
+
+   rc = DosQueryProcAddr( hmod, ordinal, (PSZ)lpszProc, &pfn );
+   if(rc == ERROR_INVALID_HANDLE && pfn == NULL) {
+      CHAR pszError[32], pszModule[CCHMAXPATH];
+
+      if(DosQueryModuleName( hmod, CCHMAXPATH, pszModule ) == 0 && 
+         DosLoadModule( pszError, 32, pszModule, &hmod ) == 0) 
+      {
+          rc = DosQueryProcAddr(hmod, ordinal, (PSZ)lpszProc, &pfn);
+      }
+   }
+   SetLastError(error2WinError(rc,ERROR_INVALID_HANDLE));
+
+   return (ULONG)pfn;
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: os2heap.h,v 1.6 2001-07-17 12:10:22 sandervl Exp $ */
+/* $Id: os2heap.h,v 1.7 2001-07-28 18:03:38 sandervl Exp $ */
 
 /*
  *
@@ -36,7 +36,7 @@ typedef struct _tagHEAPELEM {
 class OS2Heap
 {
 public:
-    OS2Heap(HANDLE hHeap, DWORD flOptions, DWORD dwInitialSize, DWORD dwMaximumSize);
+    OS2Heap(DWORD flOptions, DWORD dwInitialSize, DWORD dwMaximumSize);
     ~OS2Heap();
 
     HANDLE getHeapHandle()  { return(hPrimaryHeap); };

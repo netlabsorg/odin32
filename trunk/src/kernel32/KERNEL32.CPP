@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.68 2001-06-03 08:49:29 sandervl Exp $ */
+/* $Id: KERNEL32.CPP,v 1.69 2001-07-28 18:03:36 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -128,10 +128,10 @@ BOOL WIN32API IsBadReadPtr(CONST VOID *lpvPtr, UINT cbBytes)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API IsBadCodePtr( FARPROC arg1)
+BOOL WIN32API IsBadCodePtr(FARPROC pCode)
 {
-    dprintf(("KERNEL32:  IsBadCodePtr\n"));
-    return O32_IsBadCodePtr(arg1);
+    dprintf(("KERNEL32: IsBadCodePtr %x", pCode));
+    return O32_IsBadCodePtr(pCode);
 }
 //******************************************************************************
 //******************************************************************************
@@ -225,50 +225,65 @@ VOID WIN32API GlobalMemoryStatus(MEMORYSTATUS *arg1)
     dprintf(("dwTotalVirtual  %X\n", arg1->dwTotalVirtual));
     dprintf(("dwAvailVirtual  %X\n", arg1->dwAvailVirtual));
 }
+//******************************************************************************
+//******************************************************************************
 BOOL WIN32API Beep( DWORD arg1, DWORD  arg2)
 {
-    dprintf(("KERNEL32:  OS2Beep\n"));
-    return O32_Beep(arg1, arg2);
+    dprintf(("KERNEL32: Beep %d %d", arg1, arg2));
+    return OSLibDosBeep(arg1, arg2);
 }
 //******************************************************************************
 //******************************************************************************
-VOID WIN32API FatalAppExitA( UINT arg1, LPCSTR  arg2)
-{
-    dprintf(("KERNEL32:  OS2FatalAppExitA\n"));
-    O32_FatalAppExit(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-VOID WIN32API FatalAppExitW(UINT arg1, LPCWSTR arg2)
-{
- char *astring;
 
-    dprintf(("KERNEL32: OS2FatalAppExitW %x", arg1));
-    astring = UnicodeToAsciiString((LPWSTR)arg2);
-    O32_FatalAppExit(arg1, astring);
-    //probably won't return, but who cares..
-    FreeAsciiString(astring);
+typedef INT (WINAPI *MessageBoxA_funcptr)(HWND,LPCSTR,LPCSTR,UINT);
+typedef INT (WINAPI *MessageBoxW_funcptr)(HWND,LPCWSTR,LPCWSTR,UINT);
+
+//******************************************************************************
+//******************************************************************************
+VOID WIN32API FatalAppExitA( UINT exitCode, LPCSTR  str)
+{
+    HMODULE mod = GetModuleHandleA( "user32.dll" );
+    MessageBoxA_funcptr pMessageBoxA = NULL;
+
+    dprintf(("KERNEL32: FatalAppExitA %d %s", exitCode, str));
+
+    if (mod) pMessageBoxA = (MessageBoxA_funcptr)GetProcAddress( mod, "MessageBoxA" );
+    if(pMessageBoxA) pMessageBoxA( 0, str, NULL, MB_SYSTEMMODAL | MB_OK );
+
+    ExitProcess(exitCode);
 }
 //******************************************************************************
 //******************************************************************************
-VOID WIN32API FatalExit( UINT arg1)
+VOID WIN32API FatalAppExitW(UINT exitCode, LPCWSTR str)
 {
-    dprintf(("KERNEL32: FatalExit %x", arg1));
-    O32_FatalExit(arg1);
+    HMODULE mod = GetModuleHandleA( "user32.dll" );
+    MessageBoxW_funcptr pMessageBoxW = NULL;
+
+    dprintf(("KERNEL32: FatalAppExitW %d %ls", exitCode, str));
+
+    if (mod) pMessageBoxW = (MessageBoxW_funcptr)GetProcAddress( mod, "MessageBoxW" );
+    if(pMessageBoxW) pMessageBoxW( 0, str, NULL, MB_SYSTEMMODAL | MB_OK );
+
+    ExitProcess(exitCode);
+}
+//******************************************************************************
+//******************************************************************************
+VOID WIN32API FatalExit( UINT exitCode)
+{
+    dprintf(("KERNEL32: FatalExit %x", exitCode));
+    ExitProcess(exitCode);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API IsBadHugeReadPtr( const void * arg1, UINT  arg2)
 {
-    dprintf(("KERNEL32:  OS2IsBadHugeReadPtr\n"));
-    return O32_IsBadHugeReadPtr(arg1, arg2);
+    return IsBadReadPtr(arg1, arg2);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API IsBadHugeWritePtr( PVOID arg1, UINT  arg2)
 {
-    dprintf(("KERNEL32: IsBadHugeWritePtr\n"));
-    return O32_IsBadHugeWritePtr(arg1, arg2);
+    return IsBadWritePtr(arg1, arg2);
 }
 //******************************************************************************
 //******************************************************************************
