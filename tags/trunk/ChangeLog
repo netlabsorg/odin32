@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.396 1999-11-02 20:35:01 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.397 1999-11-02 21:14:52 phaller Exp $ */
+
+ 99-11-02: Patrick Haller <phaller@gmx.net>
+	- SHELL32:	Up to current WINE level
+	- SHLWAPI:	Created (in WINE it mostly links to SHELL32)
 
  99-11-02: Sander van Leeuwen <sandervl@xs4all.nl>
 	- INCLUDE\odinwrap.h: 
