@@ -1,4 +1,4 @@
-/* $Id: richedit.c,v 1.3 2000-08-02 14:58:40 bird Exp $ */
+/* $Id: richedit.c,v 1.4 2000-10-02 13:36:39 sandervl Exp $ */
 /*
  * RichEdit32  functions
  *
@@ -139,6 +139,11 @@ static LRESULT WINAPI RICHED32_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
                       MessageBoxA (hwnd, "RichEdit control out of space.",
                                   "ERROR", MB_OK | MB_ICONSTOP) ;
             return 0 ;
+
+#ifdef __WIN32OS2__
+    case WM_SETTEXT:
+            return SetWindowTextA(hwndEdit, lParam);
+#endif
 
     case EM_STREAMIN:
 
