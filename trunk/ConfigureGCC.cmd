@@ -1,4 +1,4 @@
-/* $Id: ConfigureGCC.cmd,v 1.1 2003-01-06 13:21:40 sandervl Exp $
+/* $Id: ConfigureGCC.cmd,v 1.2 2003-04-08 12:46:04 sandervl Exp $
  *
  * Main configure file for Odin32. (For the New Build System.)
  *
@@ -195,21 +195,21 @@ if (rc = 0) then
    end
 
 say 'Checking compiler version.'
-rc = CheckCmdOutput('gcc --version', 0, 1,'3.0.3');
-if (rc = 0) then rc = CheckCmdOutput('g++ --version', 0, 1,'3.0.3');
+rc = CheckCmdOutput('gcc --version', 0, 1,'3.2.1');
+if (rc = 0) then rc = CheckCmdOutput('g++ --version', 0, 1,'3.2.1');
 if (rc = 0) then rc = CheckCmdOutput('as --version', 0, 1,'GNU assembler 2.11.2');
 if (rc = 99 ) then
    do 
       say ''
       say 'Version mistmatch, while checking Gnu Compiler Suite!'
-      say 'You should have GCC 3.0.3 installed. Also you should set it as an'
+      say 'You should have GCC 3.2.1 installed. Also you should set it as an'
       say 'active compiler before launching configure, if you have more than'
       say 'one GCC compiler available.'
       say ''
       exit(99)
    end
 
-say 'GCC compiler 3.0.3 found and it is active.'
+say 'GCC compiler 3.2.1 found and it is active.'
 say 'Building test samples:'
 call charout ,'C compiler - a.out mode ->'
 rc = CheckGCC('');
@@ -255,13 +255,13 @@ call charout ,'Weak symbol repository file:'
 say ''
 
 sOutput = emxPath
-sOutput = sOutput || 'lib\gcc-lib\i386-pc-os2_emx\3.0.3\weaksyms.omf';
+sOutput = sOutput || 'lib\gcc-lib\i386-pc-os2-emx\3.2.1\weaksyms.omf';
 if (\CfgVerifyFile(sOutput,0)) then
   do
       say ''
       say 'Error finding weak symbols file in GCC compiler suite structure.'
       say 'This file is critical for OMF files. Please check whether you did'
-      say ''make' command in ''...emx\lib\gcc-lib\i386-pc-os2_emx\3.0.3\'' directory'
+      say ''make' command in ''...emx\lib\gcc-lib\i386-pc-os2-emx\3.2.1\'' directory'
       say 'Configure aborted.'
       exit(99)
   end
