@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.64 1999-12-14 19:13:19 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.65 1999-12-16 00:11:45 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -213,8 +213,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
   }
   if(msg == WIN32APP_POSTMSG && (ULONG)mp1 == WIN32PM_MAGIC) {
         //win32 app user message
-        win32wnd->PostMessage((POSTMSG_PACKET *)mp2);
-        return (MRESULT)0;
+        return (MRESULT)win32wnd->PostMessage((POSTMSG_PACKET *)mp2);;
   }
   switch( msg )
   {
@@ -416,7 +415,11 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         dprintf(("OS2: WM_SIZE (%d,%d) (%d,%d)", SHORT1FROMMP(mp2), SHORT2FROMMP(mp2), SHORT1FROMMP(mp1), SHORT2FROMMP(mp2)));
         break;
     }
-
+    case WM_MINMAXFRAME:
+    {
+        dprintf(("OS2: WM_MINMAXFRAME"));
+	break;
+    }
     case WM_OWNERPOSCHANGE:
     {
         dprintf(("OS2: WM_OWNERPOSCHANGE"));

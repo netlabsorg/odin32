@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.58 1999-12-03 20:40:09 phaller Exp $ */
+/* $Id: user32.cpp,v 1.59 1999-12-16 00:11:45 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -2674,50 +2674,6 @@ VOID WIN32API SetDebugErrorLevel(DWORD dwLevel)
 }
 
 /* Hook Functions */
-
-/*****************************************************************************
- * Name      : BOOL WIN32API SetWindowsHookW
- * Purpose   : The SetWindowsHook function is not implemented in the Win32 API.
- *             Win32-based applications should use the SetWindowsHookEx function.
- * Parameters:
- * Variables :
- * Result    :
- * Remark    : ARGH ! MICROSOFT !
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-HHOOK WIN32API SetWindowsHookW(int nFilterType, HOOKPROC pfnFilterProc)
-
-{
-  return (FALSE);
-}
-
-/* CB: move to ShowWindow() */
-
-/*****************************************************************************
- * Name      : BOOL WIN32API ShowWindowAsync
- * Purpose   : The ShowWindowAsync function sets the show state of a window
- *             created by a different thread.
- * Parameters: HWND hwnd     handle of window
- *             int  nCmdShow show state of window
- * Variables :
- * Result    : If the window was previously visible, the return value is TRUE.
- *             If the window was previously hidden, the return value is FALSE.
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-BOOL WIN32API ShowWindowAsync (HWND hWnd,
-                               int  nCmdShow)
-{
-  dprintf(("USER32:ShowWindowAsync (%08xh,%08x) not implemented.\n",
-         hWnd,
-         nCmdShow));
-
-  return (FALSE);
-}
 
 /* CB: move to MDI */
 

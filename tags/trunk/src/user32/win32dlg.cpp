@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.36 1999-12-09 00:53:37 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.37 1999-12-16 00:11:46 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -216,7 +216,7 @@ ULONG Win32Dialog::MsgCreate(HWND hwndFrame, HWND hwndClient)
     }
 
     if (hUserFont)
-        SendMessageA(WM_SETFONT, (WPARAM)hUserFont, 0 );
+        SendInternalMessageA(WM_SETFONT, (WPARAM)hUserFont, 0 );
 
     /* Create controls */
     if (createControls(dlgTemplate, hInstance))
@@ -225,7 +225,7 @@ ULONG Win32Dialog::MsgCreate(HWND hwndFrame, HWND hwndClient)
         /* Send initialisation messages and set focus */
         hwndFocus = GetNextDlgTabItem( getWindowHandle(), 0, FALSE );
 
-        if (SendMessageA(WM_INITDIALOG, (WPARAM)hwndFocus, param))
+        if (SendInternalMessageA(WM_INITDIALOG, (WPARAM)hwndFocus, param))
              SetFocus(hwndFocus);
 
         if (dlgInfo.style & WS_VISIBLE && !(getStyle() & WS_VISIBLE))
@@ -261,7 +261,7 @@ INT Win32Dialog::doDialogBox()
 
     /* Owner must be a top-level window */
     if(getOwner() == NULL) {
-     topOwner = windowDesktop;
+         topOwner = windowDesktop;
     }
     else topOwner = getOwner()->GetTopParent();
 
@@ -294,22 +294,24 @@ INT Win32Dialog::doDialogBox()
         {
           if (!OSLibWinPeekMsg(&msg,0,0,0,MSG_NOREMOVE))
           {
-            if(!(getStyle() & DS_NOIDLEMSG))
-              topOwner->SendMessageA(WM_ENTERIDLE,MSGF_DIALOGBOX,getWindowHandle());
-            OSLibWinGetMsg(&msg,0,0,0);
-          } else OSLibWinPeekMsg(&msg,0,0,0,MSG_REMOVE);
+                if(!(getStyle() & DS_NOIDLEMSG))
+                    topOwner->SendMessageA(WM_ENTERIDLE,MSGF_DIALOGBOX,getWindowHandle());
+                OSLibWinGetMsg(&msg,0,0,0);
+          }
+          else  OSLibWinPeekMsg(&msg,0,0,0,MSG_REMOVE);
 
           if(msg.message == WM_QUIT)
           {
-            dprintf(("Win32Dialog::doDialogBox: received  WM_QUIT"));
-            break;
+                dprintf(("Win32Dialog::doDialogBox: received  WM_QUIT"));
+                break;
           }
           if (!IsDialogMessageA( getWindowHandle(), &msg))
           {
-            TranslateMessage( &msg );
-            DispatchMessageA( &msg );
+                TranslateMessage( &msg );
+                DispatchMessageA( &msg );
           }
-          if (dialogFlags & DF_END) break;
+          if (dialogFlags & DF_END)
+                break;
         }
 #else
         while (TRUE) {
@@ -331,7 +333,7 @@ INT Win32Dialog::doDialogBox()
             }
             else {
                 if(!(getStyle() & DS_NOIDLEMSG)) {
-                    topOwner->SendMessageA(WM_ENTERIDLE, MSGF_DIALOGBOX, getWindowHandle());
+                    topOwner->SendInternalMessageA(WM_ENTERIDLE, MSGF_DIALOGBOX, getWindowHandle());
                 }
             }
         }
@@ -1029,7 +1031,7 @@ LONG Win32Dialog::SetWindowLongA(int index, ULONG value, BOOL fUnicode)
     switch(index)
     {
     case DWL_DLGPROC:
-  	    oldval = (LONG)WINPROC_GetProc(Win32DlgProc, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A);
+        oldval = (LONG)WINPROC_GetProc(Win32DlgProc, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A);
         WINPROC_SetProc((HWINDOWPROC *)&Win32DlgProc, (WNDPROC)value, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A, WIN_PROC_WINDOW);
         return oldval;
     case DWL_MSGRESULT:
@@ -1052,7 +1054,7 @@ ULONG Win32Dialog::GetWindowLongA(int index, BOOL fUnicode)
     switch(index)
     {
     case DWL_DLGPROC:
-	    return (ULONG)WINPROC_GetProc(Win32DlgProc, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A);
+        return (ULONG)WINPROC_GetProc(Win32DlgProc, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A);
     case DWL_MSGRESULT:
         return msgResult;
     case DWL_USER:

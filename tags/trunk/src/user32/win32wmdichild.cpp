@@ -1,4 +1,4 @@
-/* $Id: win32wmdichild.cpp,v 1.11 1999-12-14 19:13:20 sandervl Exp $ */
+/* $Id: win32wmdichild.cpp,v 1.12 1999-12-16 00:11:48 sandervl Exp $ */
 /*
  * Win32 MDI Child Window Class for OS/2
  *
@@ -29,7 +29,6 @@
 #include <win32wmdichild.h>
 #include <spy.h>
 #include "wndmsg.h"
-#include "hooks.h"
 #include <oslibwin.h>
 #include <oslibutil.h>
 #include <oslibgdi.h>
@@ -230,7 +229,7 @@ LRESULT Win32MDIChildWindow::DefMDIChildProcA(UINT Msg, WPARAM wParam, LPARAM lP
     case WM_SYSCHAR:
         if (wParam == '-')
         {
-            SendMessageA(WM_SYSCOMMAND, (WPARAM)SC_KEYMENU, (LPARAM)(DWORD)VK_SPACE);
+            SendInternalMessageA(WM_SYSCOMMAND, (WPARAM)SC_KEYMENU, (LPARAM)(DWORD)VK_SPACE);
             return 0;
         }
     }
@@ -267,7 +266,7 @@ LRESULT Win32MDIChildWindow::DefMDIChildProcW(UINT Msg, WPARAM wParam, LPARAM lP
     case WM_SYSCHAR:
         if (wParam == '-')
         {
-            SendMessageW(WM_SYSCOMMAND, SC_KEYMENU, (LPARAM)(DWORD)VK_SPACE);
+            SendInternalMessageW(WM_SYSCOMMAND, SC_KEYMENU, (LPARAM)(DWORD)VK_SPACE);
             return 0;
         }
         break;

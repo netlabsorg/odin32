@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.110 1999-12-14 19:13:19 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.111 1999-12-16 00:11:46 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -10,8 +10,6 @@
  * Copyright 1993, 1994 Alexandre Julliard
  *
  * TODO: Not thread/process safe
- * TODO: Calling window handler directly from SendMessageA/W can cause problems
- *       for GetMessageTime/Pos & InSendMessage
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -27,7 +25,6 @@
 #include <win32wbase.h>
 #include <winres.h>
 #include "wndmsg.h"
-#include "hooks.h"
 #include "oslibwin.h"
 #include "oslibutil.h"
 #include "oslibgdi.h"
@@ -43,6 +40,7 @@
 #include "controls.h"
 #include <wprocess.h>
 #include "winmouse.h"
+#include <win\hook.h>
 
 #define HAS_DLGFRAME(style,exStyle) \
     (((exStyle) & WS_EX_DLGMODALFRAME) || \
@@ -80,6 +78,8 @@
 void PrintWindowStyle(DWORD dwStyle, DWORD dwExStyle);
 
 static fDestroyAll = FALSE;
+//For quick lookup of current process id
+static ULONG currentProcessId = -1;
 
 //******************************************************************************
 //******************************************************************************
@@ -144,6 +144,7 @@ void Win32BaseWindow::Init()
   fInternalMsg     = FALSE;
   fNoSizeMsg       = FALSE;
   fIsDestroyed     = FALSE;
+  fDestroyWindowCalled = FALSE;
   fCreated         = FALSE;
   fTaskList        = FALSE;
   fParentDC        = FALSE;
@@ -202,6 +203,13 @@ void Win32BaseWindow::Init()
   hwndVertScroll     = 0;
 
   ownDC              = 0;
+
+  if(currentProcessId == -1)
+  {
+        currentProcessId = GetCurrentProcessId();
+  }
+  dwThreadId         = GetCurrentThreadId();
+  dwProcessId        = currentProcessId;
 }
 //******************************************************************************
 //todo get rid of resources (menu, accel, icon etc)
@@ -460,6 +468,22 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   /* Increment class window counter */
   windowClass->IncreaseWindowCount();
 
+  if (HOOK_IsHooked( WH_CBT ))
+  {
+        CBT_CREATEWNDA cbtc;
+        LRESULT ret;
+
+        cbtc.lpcs = cs;
+        cbtc.hwndInsertAfter = hwndLinkAfter;
+        ret = HOOK_CallHooksA(WH_CBT, HCBT_CREATEWND, getWindowHandle(), (LPARAM)&cbtc);
+        if(ret)
+        {
+            dprintf(("CBT-hook returned 0!!"));
+            SetLastError(ERROR_CAN_NOT_COMPLETE); //todo: wrong error
+            return FALSE;
+        }
+  }
+
   /* Correct the window style */
   if (!(cs->style & WS_CHILD))
   {
@@ -509,9 +533,10 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         if (cs->cy <= 0) cs->cy = 1;
   }
 
-  if(((cs->style & 0xC0000000) == WS_OVERLAPPED) && ((cs->style & WS_CAPTION) == WS_CAPTION) && owner == NULL)
+  if(((dwStyle & 0xC0000000) == WS_OVERLAPPED) && ((dwStyle & WS_CAPTION) == WS_CAPTION) && owner == NULL
+     && dwStyle & WS_SYSMENU)
   {
-            fTaskList = TRUE;
+        fTaskList = TRUE;
   }
 
   DWORD dwOSWinStyle, dwOSFrameStyle;
@@ -696,36 +721,46 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
   //Note: Solitaire crashes when receiving WM_SIZE messages before WM_CREATE
   fNoSizeMsg = FALSE;
 
-  if(SendMessageA(WM_NCCREATE, 0, (LPARAM)cs) )
+  if(SendInternalMessageA(WM_NCCREATE, 0, (LPARAM)cs) )
   {
         fCreated = TRUE;
 
         SendNCCalcSize(FALSE, &rectWindow, NULL, NULL, 0, &rectClient );
 
 //        OffsetRect(&rectWindow, maxPos.x - rectWindow.left, maxPos.y - rectWindow.top);
-        if( (SendMessageA(WM_CREATE, 0, (LPARAM)cs )) != -1 )
+        if( (SendInternalMessageA(WM_CREATE, 0, (LPARAM)cs )) != -1 )
         {
             if(!(flags & WIN_NEED_SIZE)) {
-                SendMessageA(WM_SIZE, SIZE_RESTORED,
+                SendInternalMessageA(WM_SIZE, SIZE_RESTORED,
                                 MAKELONG(rectClient.right-rectClient.left,
                                          rectClient.bottom-rectClient.top));
-                SendMessageA(WM_MOVE, 0, MAKELONG( rectClient.left, rectClient.top ) );
+                SendInternalMessageA(WM_MOVE, 0, MAKELONG( rectClient.left, rectClient.top ) );
+            }
+
+            if( getStyle() & WS_CHILD && !(getExStyle() & WS_EX_NOPARENTNOTIFY) )
+            {
+                /* Notify the parent window only */
+                SendInternalMessageA(WM_PARENTNOTIFY, MAKEWPARAM(WM_CREATE, getWindowId()), (LPARAM)getWindowHandle());
+                if(!::IsWindow(getWindowHandle()))
+                {
+                    dprintf(("Createwindow: WM_PARENTNOTIFY destroyed window"));
+                    goto end;
+                }
             }
 
             if (cs->style & WS_VISIBLE) ShowWindow( sw );
 
-#if 0
             /* Call WH_SHELL hook */
+            if (!(getStyle() & WS_CHILD) && !owner)
+                HOOK_CallHooksA(WH_SHELL, HSHELL_WINDOWCREATED, getWindowHandle(), 0 );
 
-            if (!(dwStyle & WS_CHILD) && !owner)
-                HOOK_CallHooks16( WH_SHELL, HSHELL_WINDOWCREATED, hwnd, 0 );
-#endif
             SetLastError(0);
             return TRUE;
         }
   }
   dprintf(("Window creation FAILED (NCCREATE cancelled creation)"));
   SetLastError(ERROR_OUTOFMEMORY); //TODO: Better error
+end:
   return FALSE;
 }
 //******************************************************************************
@@ -754,15 +789,22 @@ ULONG Win32BaseWindow::MsgDestroy()
     if (isSubclassedOS2Wnd) OSLibWinSubclassWindow(OS2Hwnd,pOldWndProc);
 
     fIsDestroyed = TRUE;
-    //According to the SDK, WM_PARENTNOTIFY messages are sent to the parent (this window)
-    //before any window destruction has begun
-    child = (Win32BaseWindow *)getFirstChild();
-    while(child) {
-        child->NotifyParent(WM_DESTROY, 0, 0);
 
-        child = (Win32BaseWindow *)child->getNextChild();
+    if(fDestroyWindowCalled == FALSE)
+    {//this window was destroyed because DestroyWindow was called for it's parent
+     //so: send a WM_PARENTNOTIFY now as that hasn't happened yet
+        if((getStyle() & WS_CHILD) && !(getExStyle() & WS_EX_NOPARENTNOTIFY))
+        {
+            if(getParent())
+            {
+                    /* Notify the parent window only */
+                    getParent()->SendMessageA(WM_PARENTNOTIFY, MAKEWPARAM(WM_DESTROY, getWindowId()), (LPARAM)getWindowHandle());
+            }
+            else    DebugInt3();
+        }
     }
     SendInternalMessageA(WM_DESTROY, 0, 0);
+    SendInternalMessageA(WM_NCDESTROY, 0, 0);
 
     if (hwndHorzScroll && OSLibWinQueryWindow(hwndHorzScroll,QWOS_PARENT) == OSLibWinQueryObjectWindow()) OSLibWinDestroyWindow(hwndHorzScroll);
     if (hwndVertScroll && OSLibWinQueryWindow(hwndVertScroll,QWOS_PARENT) == OSLibWinQueryObjectWindow()) OSLibWinDestroyWindow(hwndVertScroll);
@@ -827,6 +869,14 @@ ULONG Win32BaseWindow::MsgMove(ULONG x, ULONG y)
 
     return SendInternalMessageA(WM_MOVE, 0, MAKELONG((USHORT)x, (USHORT)y));
 }
+//******************************************************************************
+//******************************************************************************
+#if 0
+ULONG Win32BaseWindow::MsgMinMax()
+{
+
+}
+#endif
 //******************************************************************************
 //******************************************************************************
 ULONG Win32BaseWindow::MsgTimer(ULONG TimerID)
@@ -900,6 +950,7 @@ ULONG Win32BaseWindow::MsgSize(ULONG width, ULONG height, BOOL fMinimize, BOOL f
 ULONG Win32BaseWindow::MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd)
 {
  ULONG rc, curprocid, procidhwnd = -1, threadidhwnd = 0;
+
 
     //According to SDK docs, if app returns FALSE & window is being deactivated,
     //default processing is cancelled
@@ -1150,19 +1201,19 @@ ULONG Win32BaseWindow::MsgButton(ULONG msg, ULONG ncx, ULONG ncy, ULONG clx, ULO
      HWND hwndTop;
 
         /* Activate the window if needed */
-    if(isSubclassedOS2Wnd()) {
-        Win32BaseWindow *parentwnd = GetWindowFromOS2FrameHandle(OSLibWinQueryWindow(OS2Hwnd, QWOS_PARENT));
-        if(parentwnd) {
-            hwndTop = (parentwnd->GetTopParent()) ? parentwnd->GetTopParent()->getWindowHandle() : 0;
+        if(isSubclassedOS2Wnd()) {
+                Win32BaseWindow *parentwnd = GetWindowFromOS2FrameHandle(OSLibWinQueryWindow(OS2Hwnd, QWOS_PARENT));
+                if(parentwnd) {
+                        hwndTop = (parentwnd->GetTopParent()) ? parentwnd->GetTopParent()->getWindowHandle() : 0;
+                }
+                else    hwndTop = 0;
         }
-        else    hwndTop = 0;
-    }
-    else    hwndTop = (GetTopParent()) ? GetTopParent()->getWindowHandle() : 0;
+        else    hwndTop = (GetTopParent()) ? GetTopParent()->getWindowHandle() : 0;
 
         if (hwndTop && getWindowHandle() != GetActiveWindow())
         {
-                LONG ret = SendMessageA(WM_MOUSEACTIVATE, hwndTop,
-                                        MAKELONG( HTCLIENT, win32msg ) );
+                LONG ret = SendInternalMessageA(WM_MOUSEACTIVATE, hwndTop,
+                                                MAKELONG( HTCLIENT, win32msg ) );
 
 #if 0
                 if ((ret == MA_ACTIVATEANDEAT) || (ret == MA_NOACTIVATEANDEAT))
@@ -1446,7 +1497,7 @@ LONG Win32BaseWindow::HandleSysCommand(WPARAM wParam, POINT *pt32)
         break;
 
     case SC_CLOSE:
-        return SendMessageA(WM_CLOSE, 0, 0);
+        return SendInternalMessageA(WM_CLOSE, 0, 0);
 
 #if 0
     case SC_VSCROLL:
@@ -1626,7 +1677,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         if(getStyle() & WS_CHILD && !(getExStyle() & WS_EX_NOPARENTNOTIFY) )
         {
             if(getParent()) {
-                LRESULT rc = getParent()->SendMessageA(WM_MOUSEACTIVATE, wParam, lParam );
+                LRESULT rc = getParent()->SendInternalMessageA(WM_MOUSEACTIVATE, wParam, lParam );
                 if(rc)  return rc;
             }
         }
@@ -1638,7 +1689,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         if(getStyle() & WS_CHILD && !(getExStyle() & WS_EX_NOPARENTNOTIFY) )
         {
             if(getParent()) {
-                LRESULT rc = getParent()->SendMessageA(WM_SETCURSOR, wParam, lParam);
+                LRESULT rc = getParent()->SendInternalMessageA(WM_SETCURSOR, wParam, lParam);
                 if(rc)  return rc;
             }
         }
@@ -1664,14 +1715,14 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         WPARAM     wp   = SIZE_RESTORED;
 
         if (!(wpos->flags & SWP_NOMOVE) && !(wpos->flags & SWP_NOCLIENTMOVE))
-            SendMessageA(WM_MOVE, 0, MAKELONG(rectClient.left, rectClient.top));
+            SendInternalMessageA(WM_MOVE, 0, MAKELONG(rectClient.left, rectClient.top));
 
         if (!(wpos->flags & SWP_NOSIZE) && !(wpos->flags & SWP_NOCLIENTSIZE))
         {
             if (dwStyle & WS_MAXIMIZE) wp = SIZE_MAXIMIZED;
             else if (dwStyle & WS_MINIMIZE) wp = SIZE_MINIMIZED;
 
-            SendMessageA(WM_SIZE, wp, MAKELONG(rectClient.right  - rectClient.left,
+            SendInternalMessageA(WM_SIZE, wp, MAKELONG(rectClient.right  - rectClient.left,
                                                rectClient.bottom - rectClient.top));
         }
         return 0;
@@ -1778,7 +1829,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 
           // key matches siblings mnemonic, send mouseclick
           if (mnemonic == (char) wParam) {
-            siblingWindow->SendMessageA (BM_CLICK, 0, 0);
+            siblingWindow->SendInternalMessageA (BM_CLICK, 0, 0);
           }
 
           sibling = siblingWindow->GetNextWindow (GW_HWNDNEXT);
@@ -1872,120 +1923,40 @@ LRESULT Win32BaseWindow::DefWindowProcW(UINT Msg, WPARAM wParam, LPARAM lParam)
 //******************************************************************************
 LRESULT Win32BaseWindow::SendMessageA(ULONG Msg, WPARAM wParam, LPARAM lParam)
 {
- LRESULT rc;
- BOOL    fInternalMsgBackup = fInternalMsg;
+ POSTMSG_PACKET *packet;
 
-  //SvL: Some Wine controls send WM_COMMAND messages when they receive the focus -> apps don't like to
-  //     receive those before they get their WM_CREATE message
-  //NOTE: May need to refuse more messages
-  if(fCreated == FALSE && Msg == WM_COMMAND) {
-        dprintf(("SendMessageA BEFORE creation! %s for %x %x %x", GetMsgText(Msg), getWindowHandle(), wParam, lParam));
-        return 0;
-  }
-
-  DebugPrintMessage(getWindowHandle(), Msg, wParam, lParam, FALSE, FALSE);
-
-  if(HkCBT::OS2HkCBTProc(getWindowHandle(), Msg, wParam, lParam) == TRUE) {//hook swallowed msg
-        return(0);
-  }
-  fInternalMsg = FALSE;
-  switch(Msg)
-  {
-        case WM_CREATE:
-        {
-                if(CallWindowProcA(win32wndproc, getWindowHandle(), WM_CREATE, 0, lParam) == -1) {
-                        dprintf(("WM_CREATE returned -1\n"));
-                        rc = -1; //don't create window
-                        break;
-                }
-                NotifyParent(Msg, wParam, lParam);
-
-                rc = 0;
-                break;
-        }
-        case WM_SETTEXT:
-                rc = CallWindowProcA(win32wndproc, getWindowHandle(), WM_SETTEXT, wParam, lParam);
-                break;
-
-        case WM_LBUTTONDOWN:
-        case WM_MBUTTONDOWN:
-        case WM_RBUTTONDOWN:
-                NotifyParent(Msg, wParam, lParam);
-                rc = win32wndproc(getWindowHandle(), Msg, wParam, lParam);
-                break;
-
-        case WM_DESTROY:
-                win32wndproc(getWindowHandle(), WM_NCDESTROY, 0, 0);
-                rc = win32wndproc(getWindowHandle(), WM_DESTROY, 0, 0);
-                break;
-
-        default:
-                rc = CallWindowProcA(win32wndproc, getWindowHandle(), Msg, wParam, lParam);
-                break;
-  }
-  fInternalMsg = fInternalMsgBackup;
-  return rc;
+    //if the destination window is created by this process & thread, call window proc directly
+    if(dwProcessId == currentProcessId && dwThreadId == GetCurrentThreadId()) {
+        return SendInternalMessageA(Msg, wParam, lParam);
+    }
+    //otherwise use WinSendMsg to send it to the right process/thread
+    packet = (POSTMSG_PACKET *)_smalloc(sizeof(POSTMSG_PACKET));
+    packet->Msg = Msg;
+    packet->wParam = wParam;
+    packet->lParam = lParam;
+    packet->fUnicode = FALSE;
+    return OSLibSendMessage(getOS2WindowHandle(), WIN32APP_POSTMSG, WIN32PM_MAGIC, (DWORD)packet);
 }
 //******************************************************************************
 //******************************************************************************
 LRESULT Win32BaseWindow::SendMessageW(ULONG Msg, WPARAM wParam, LPARAM lParam)
 {
- LRESULT rc;
- BOOL    fInternalMsgBackup = fInternalMsg;
+ POSTMSG_PACKET *packet;
 
-  //SvL: Some Wine controls send WM_COMMAND messages when they receive the focus -> apps don't like to
-  //     receive those before they get their WM_CREATE message
-  //NOTE: May need to refuse more messages
-  if(fCreated == FALSE && Msg == WM_COMMAND) {
-        dprintf(("SendMessageA BEFORE creation! %s for %x %x %x", GetMsgText(Msg), getWindowHandle(), wParam, lParam));
-        return 0;
-  }
-
-  DebugPrintMessage(getWindowHandle(), Msg, wParam, lParam, TRUE, FALSE);
-
-  if(HkCBT::OS2HkCBTProc(getWindowHandle(), Msg, wParam, lParam) == TRUE) {//hook swallowed msg
-        return(0);
-  }
-  fInternalMsg = FALSE;
-  switch(Msg)
-  {
-        case WM_CREATE:
-        {
-                if(CallWindowProcW(win32wndproc, getWindowHandle(), WM_CREATE, 0, lParam) == -1) {
-                        dprintf(("WM_CREATE returned -1\n"));
-                        rc = -1; //don't create window
-                        break;
-                }
-                NotifyParent(Msg, wParam, lParam);
-
-                rc = 0;
-                break;
-        }
-        case WM_SETTEXT:
-                rc = CallWindowProcW(win32wndproc, getWindowHandle(), WM_SETTEXT, wParam, lParam);
-                break;
-
-        case WM_LBUTTONDOWN:
-        case WM_MBUTTONDOWN:
-        case WM_RBUTTONDOWN:
-                NotifyParent(Msg, wParam, lParam);
-                rc = win32wndproc(getWindowHandle(), Msg, wParam, lParam);
-                break;
-
-        case WM_DESTROY:
-                win32wndproc(getWindowHandle(), WM_NCDESTROY, 0, 0);
-                rc = win32wndproc(getWindowHandle(), WM_DESTROY, 0, 0);
-                break;
-
-        default:
-                rc = CallWindowProcW(win32wndproc, getWindowHandle(), Msg, wParam, lParam);
-                break;
-  }
-  fInternalMsg = fInternalMsgBackup;
-  return rc;
+    //if the destination window is created by this process & thread, call window proc directly
+    if(dwProcessId == currentProcessId && dwThreadId == GetCurrentThreadId()) {
+        return SendInternalMessageA(Msg, wParam, lParam);
+    }
+    //otherwise use WinSendMsg to send it to the right process/thread
+    packet = (POSTMSG_PACKET *)_smalloc(sizeof(POSTMSG_PACKET));
+    packet->Msg = Msg;
+    packet->wParam = wParam;
+    packet->lParam = lParam;
+    packet->fUnicode = TRUE;
+    return OSLibSendMessage(getOS2WindowHandle(), WIN32APP_POSTMSG, WIN32PM_MAGIC, (DWORD)packet);
 }
 //******************************************************************************
-//Called as a result of an OS/2 message
+//Called as a result of an OS/2 message or called from a class method
 //******************************************************************************
 LRESULT Win32BaseWindow::SendInternalMessageA(ULONG Msg, WPARAM wParam, LPARAM lParam)
 {
@@ -1994,9 +1965,8 @@ LRESULT Win32BaseWindow::SendInternalMessageA(ULONG Msg, WPARAM wParam, LPARAM l
 
   DebugPrintMessage(getWindowHandle(), Msg, wParam, lParam, FALSE, TRUE);
 
-  if(HkCBT::OS2HkCBTProc(getWindowHandle(), Msg, wParam, lParam) == TRUE) {//hook swallowed msg
-        return(0);
-  }
+  CallWindowHookProc(WH_CALLWNDPROC, Msg, wParam, lParam, FALSE);
+
   fInternalMsg = TRUE;
   switch(Msg)
   {
@@ -2007,7 +1977,6 @@ LRESULT Win32BaseWindow::SendInternalMessageA(ULONG Msg, WPARAM wParam, LPARAM l
                         rc = -1; //don't create window
                         break;
                 }
-                NotifyParent(Msg, wParam, lParam);
                 rc = 0;
                 break;
         }
@@ -2019,7 +1988,6 @@ LRESULT Win32BaseWindow::SendInternalMessageA(ULONG Msg, WPARAM wParam, LPARAM l
                 break;
 
         case WM_DESTROY:
-                win32wndproc(getWindowHandle(), WM_NCDESTROY, 0, 0);
                 rc = win32wndproc(getWindowHandle(), WM_DESTROY, 0, 0);
                 break;
 
@@ -2031,8 +1999,7 @@ LRESULT Win32BaseWindow::SendInternalMessageA(ULONG Msg, WPARAM wParam, LPARAM l
   return rc;
 }
 //******************************************************************************
-//Called as a result of an OS/2 message
-//todo, unicode msgs (WM_SETTEXT etc)
+//Called as a result of an OS/2 message or called from a class method
 //******************************************************************************
 LRESULT Win32BaseWindow::SendInternalMessageW(ULONG Msg, WPARAM wParam, LPARAM lParam)
 {
@@ -2041,9 +2008,8 @@ LRESULT Win32BaseWindow::SendInternalMessageW(ULONG Msg, WPARAM wParam, LPARAM l
 
   DebugPrintMessage(getWindowHandle(), Msg, wParam, lParam, TRUE, TRUE);
 
-  if(HkCBT::OS2HkCBTProc(getWindowHandle(), Msg, wParam, lParam) == TRUE) {//hook swallowed msg
-        return(0);
-  }
+  CallWindowHookProc(WH_CALLWNDPROC, Msg, wParam, lParam, TRUE);
+
   fInternalMsg = TRUE;
   switch(Msg)
   {
@@ -2054,7 +2020,6 @@ LRESULT Win32BaseWindow::SendInternalMessageW(ULONG Msg, WPARAM wParam, LPARAM l
                         rc = -1; //don't create window
                         break;
                 }
-                NotifyParent(Msg, wParam, lParam);
                 rc = 0;
                 break;
         }
@@ -2066,7 +2031,6 @@ LRESULT Win32BaseWindow::SendInternalMessageW(ULONG Msg, WPARAM wParam, LPARAM l
                 break;
 
         case WM_DESTROY:
-                win32wndproc(getWindowHandle(), WM_NCDESTROY, 0, 0);
                 rc = win32wndproc(getWindowHandle(), WM_DESTROY, 0, 0);
                 break;
         default:
@@ -2075,6 +2039,26 @@ LRESULT Win32BaseWindow::SendInternalMessageW(ULONG Msg, WPARAM wParam, LPARAM l
   }
   fInternalMsg = fInternalMsgBackup;
   return rc;
+}
+//******************************************************************************
+//******************************************************************************
+void Win32BaseWindow::CallWindowHookProc(ULONG hooktype, ULONG Msg, WPARAM wParam, LPARAM lParam, BOOL fUnicode)
+{
+ CWPSTRUCT cwp;
+
+    cwp.lParam  = lParam;
+    cwp.wParam  = wParam;
+    cwp.message = Msg;
+    cwp.hwnd    = getWindowHandle();
+
+    switch(hooktype) {
+    case WH_CALLWNDPROC:
+        if(fUnicode) {
+             HOOK_CallHooksW(WH_CALLWNDPROC, HC_ACTION, 1, (LPARAM)&cwp);
+        }
+        else HOOK_CallHooksA(WH_CALLWNDPROC, HC_ACTION, 1, (LPARAM)&cwp);
+        break;
+    }
 }
 //******************************************************************************
 //******************************************************************************
@@ -2126,31 +2110,20 @@ BOOL Win32BaseWindow::PostThreadMessageW(ULONG threadid, UINT msg, WPARAM wParam
 }
 //******************************************************************************
 //******************************************************************************
-void Win32BaseWindow::PostMessage(POSTMSG_PACKET *packet)
+ULONG Win32BaseWindow::PostMessage(POSTMSG_PACKET *packet)
 {
+ ULONG rc;
+
     if(packet == NULL)
-        return;
+        return 0;
 
     if(packet->fUnicode) {
-            SendMessageW(packet->Msg, packet->wParam, packet->lParam);
+            rc = SendInternalMessageW(packet->Msg, packet->wParam, packet->lParam);
     }
-    else    SendMessageA(packet->Msg, packet->wParam, packet->lParam);
+    else    rc = SendInternalMessageA(packet->Msg, packet->wParam, packet->lParam);
 
     free(packet);
-}
-//******************************************************************************
-//Send message to window of another process
-//******************************************************************************
-LRESULT Win32BaseWindow::SendMessageToProcess(UINT msg, WPARAM wParam, LPARAM lParam, BOOL fUnicode)
-{
- POSTMSG_PACKET *packet = (POSTMSG_PACKET *)_smalloc(sizeof(POSTMSG_PACKET));
-
-    dprintf(("SendMessageToProcess %x %x %x %x", getOS2WindowHandle(), msg, wParam, lParam));
-    packet->Msg = msg;
-    packet->wParam = wParam;
-    packet->lParam = lParam;
-    packet->fUnicode = fUnicode;
-    return OSLibSendMessage(getOS2WindowHandle(), WIN32APP_POSTMSG, WIN32PM_MAGIC, (DWORD)packet);
+    return rc;
 }
 //******************************************************************************
 //TODO: Do this more efficiently
@@ -2159,10 +2132,8 @@ LRESULT Win32BaseWindow::BroadcastMessageA(int type, UINT msg, WPARAM wParam, LP
 {
  Win32BaseWindow *window;
  HWND hwnd = WNDHANDLE_MAGIC_HIGHWORD;
- DWORD processid, myprocessid;
 
     dprintf(("BroadCastMessageA %x %x %x", msg, wParam, lParam, GetFS()));
-    myprocessid = GetCurrentProcessId();
 
     for(int i=0;i<MAX_WINDOW_HANDLES;i++) {
         window = GetWindowFromHandle(hwnd++);
@@ -2171,13 +2142,7 @@ LRESULT Win32BaseWindow::BroadcastMessageA(int type, UINT msg, WPARAM wParam, LP
             {
 
                 if(type == BROADCAST_SEND) {
-                        GetWindowThreadProcessId(hwnd, &processid);
-                        if(processid == myprocessid) {
-                            window->SendMessageA(msg, wParam, lParam);
-                        }
-                        else {
-                            window->SendMessageToProcess(msg, wParam, lParam, FALSE);
-                        }
+                        window->SendInternalMessageA(msg, wParam, lParam);
                 }
                 else    window->PostMessageA(msg, wParam, lParam);
             }
@@ -2192,11 +2157,9 @@ LRESULT Win32BaseWindow::BroadcastMessageW(int type, UINT msg, WPARAM wParam, LP
 {
  Win32BaseWindow *window;
  HWND hwnd = WNDHANDLE_MAGIC_HIGHWORD;
- DWORD processid, myprocessid;
 
 
     dprintf(("BroadCastMessageW %x %x %x", msg, wParam, lParam));
-    myprocessid = GetCurrentProcessId();
 
     for(int i=0;i<MAX_WINDOW_HANDLES;i++) {
         window = GetWindowFromHandle(hwnd++);
@@ -2205,13 +2168,7 @@ LRESULT Win32BaseWindow::BroadcastMessageW(int type, UINT msg, WPARAM wParam, LP
             {
 
                 if(type == BROADCAST_SEND) {
-                        GetWindowThreadProcessId(hwnd, &processid);
-                        if(processid == myprocessid) {
-                            window->SendMessageW(msg, wParam, lParam);
-                        }
-                        else {
-                            window->SendMessageToProcess(msg, wParam, lParam, TRUE);
-                        }
+                        window->SendInternalMessageW(msg, wParam, lParam);
                 }
                 else    window->PostMessageW(msg, wParam, lParam);
             }
@@ -2220,7 +2177,6 @@ LRESULT Win32BaseWindow::BroadcastMessageW(int type, UINT msg, WPARAM wParam, LP
     return 0;
 }
 //******************************************************************************
-//TODO: do we need to inform the parent of the parent (etc) of the child window?
 //******************************************************************************
 void Win32BaseWindow::NotifyParent(UINT Msg, WPARAM wParam, LPARAM lParam)
 {
@@ -2234,10 +2190,7 @@ void Win32BaseWindow::NotifyParent(UINT Msg, WPARAM wParam, LPARAM lParam)
                 /* Notify the parent window only */
                 parentwindow = window->getParent();
                 if(parentwindow) {
-                        if(Msg == WM_CREATE || Msg == WM_DESTROY) {
-                                parentwindow->SendMessageA(WM_PARENTNOTIFY, MAKEWPARAM(Msg, getWindowId()), (LPARAM)getWindowHandle());
-                        }
-                        else    parentwindow->SendMessageA(WM_PARENTNOTIFY, MAKEWPARAM(Msg, getWindowId()), lParam );
+                        parentwindow->SendInternalMessageA(WM_PARENTNOTIFY, MAKEWPARAM(Msg, getWindowId()), lParam );
                 }
         }
         else    break;
@@ -2282,7 +2235,7 @@ BOOL Win32BaseWindow::SetIcon(HICON hIcon)
     dprintf(("Win32BaseWindow::SetIcon %x", hIcon));
     if(OSLibWinSetIcon(OS2HwndFrame, hIcon) == TRUE) {
 //TODO: Wine does't send these. Correct?
-//        SendMessageA(WM_SETICON, ICON_BIG, hIcon);
+//        SendInternalMessageA(WM_SETICON, ICON_BIG, hIcon);
         return TRUE;
     }
     return FALSE;
@@ -2308,18 +2261,18 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
         if (dwStyle & WS_MINIMIZE)
             wParam = SIZE_MINIMIZED;
 
-        SendMessageA(WM_SIZE, wParam,
+        SendInternalMessageA(WM_SIZE, wParam,
                      MAKELONG(rectClient.right-rectClient.left,
                               rectClient.bottom-rectClient.top));
-        SendMessageA(WM_MOVE, 0, MAKELONG( rectClient.left, rectClient.top ) );
+        SendInternalMessageA(WM_MOVE, 0, MAKELONG( rectClient.left, rectClient.top ) );
     }
 #else
     if(fFirstShow) {
         if(isFrameWindow() && IS_OVERLAPPED(getStyle()) && !isChild()) {
-                SendMessageA(WM_SIZE, SIZE_RESTORED,
+                SendInternalMessageA(WM_SIZE, SIZE_RESTORED,
                                 MAKELONG(rectClient.right-rectClient.left,
                                          rectClient.bottom-rectClient.top));
-                SendMessageA(WM_MOVE, 0, MAKELONG( rectClient.left, rectClient.top ) );
+                SendInternalMessageA(WM_MOVE, 0, MAKELONG( rectClient.left, rectClient.top ) );
 
         }
         fFirstShow = FALSE;
@@ -2490,10 +2443,36 @@ BOOL Win32BaseWindow::SetWindowPlacement(WINDOWPLACEMENT *winpos)
    return ShowWindow(winpos->showCmd);
 }
 //******************************************************************************
-//Also destroys all the child windows (destroy parent, destroy children)
+//Also destroys all the child windows (destroy children first, parent last)
 //******************************************************************************
 BOOL Win32BaseWindow::DestroyWindow()
 {
+    /* Call hooks */
+    if(HOOK_CallHooksA( WH_CBT, HCBT_DESTROYWND, getWindowHandle(), 0L))
+    {
+        return FALSE;
+    }
+
+    if(!(getStyle() & WS_CHILD) && getOwner() == NULL)
+    {
+        HOOK_CallHooksA(WH_SHELL, HSHELL_WINDOWDESTROYED, getWindowHandle(), 0L);
+        /* FIXME: clean up palette - see "Internals" p.352 */
+    }
+
+    if((getStyle() & WS_CHILD) && !(getExStyle() & WS_EX_NOPARENTNOTIFY))
+    {
+        if(getParent())
+        {
+             /* Notify the parent window only */
+             getParent()->SendMessageA(WM_PARENTNOTIFY, MAKEWPARAM(WM_DESTROY, getWindowId()), (LPARAM)getWindowHandle());
+             if( !::IsWindow(getWindowHandle()) )
+             {
+                return TRUE;
+             }
+        }
+        else DebugInt3();
+    }
+    fDestroyWindowCalled = TRUE;
     return OSLibWinDestroyWindow(OS2HwndFrame);
 }
 //******************************************************************************
@@ -2589,12 +2568,13 @@ BOOL Win32BaseWindow::UpdateWindow()
         hdc = O32_GetDC(OS2Hwnd);
         if (isIcon)
         {
-            SendMessageA(WM_ICONERASEBKGND, (WPARAM)hdc, 0);
-            SendMessageA(WM_PAINTICON, 0, 0);
-        } else
+            SendInternalMessageA(WM_ICONERASEBKGND, (WPARAM)hdc, 0);
+            SendInternalMessageA(WM_PAINTICON, 0, 0);
+        }
+        else
         {
-            SendMessageA(WM_ERASEBKGND, (WPARAM)hdc, 0);
-            SendMessageA(WM_PAINT, 0, 0);
+            SendInternalMessageA(WM_ERASEBKGND, (WPARAM)hdc, 0);
+            SendInternalMessageA(WM_PAINT, 0, 0);
         }
         O32_ReleaseDC(OS2Hwnd, hdc);
     }
@@ -2998,10 +2978,10 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value, BOOL fUnicode)
                 ss.styleOld = dwExStyle;
                 ss.styleNew = value;
                 dprintf(("SetWindowLong GWL_EXSTYLE %x old %x new style %x", getWindowHandle(), dwExStyle, value));
-                SendMessageA(WM_STYLECHANGING,GWL_EXSTYLE,(LPARAM)&ss);
+                SendInternalMessageA(WM_STYLECHANGING,GWL_EXSTYLE,(LPARAM)&ss);
                 setExStyle(ss.styleNew);
                 updateWindowStyle(ss.styleOld,getStyle());
-                SendMessageA(WM_STYLECHANGED,GWL_EXSTYLE,(LPARAM)&ss);
+                SendInternalMessageA(WM_STYLECHANGED,GWL_EXSTYLE,(LPARAM)&ss);
                 return ss.styleOld;
         }
         case GWL_STYLE:
@@ -3015,10 +2995,10 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value, BOOL fUnicode)
                 ss.styleOld = getStyle();
                         ss.styleNew = value | (ss.styleOld & (WS_VISIBLE | WS_CHILD));
                 dprintf(("SetWindowLong GWL_STYLE %x old %x new style %x", getWindowHandle(), getStyle(), value));
-                SendMessageA(WM_STYLECHANGING,GWL_STYLE,(LPARAM)&ss);
+                SendInternalMessageA(WM_STYLECHANGING,GWL_STYLE,(LPARAM)&ss);
                 setStyle(ss.styleNew);
                 updateWindowStyle(dwExStyle,ss.styleOld);
-                SendMessageA(WM_STYLECHANGED,GWL_STYLE,(LPARAM)&ss);
+                SendInternalMessageA(WM_STYLECHANGED,GWL_STYLE,(LPARAM)&ss);
 #ifdef DEBUG
                 PrintWindowStyle(ss.styleNew, 0);
 #endif
@@ -3026,7 +3006,8 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value, BOOL fUnicode)
         }
         case GWL_WNDPROC:
                 oldval = (LONG)WINPROC_GetProc(win32wndproc, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A);
-                WINPROC_SetProc((HWINDOWPROC *)&win32wndproc, (WNDPROC)value, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A, WIN_PROC_WINDOW);
+                //WINPROC_SetProc((HWINDOWPROC *)&win32wndproc, (WNDPROC)value, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A, WIN_PROC_WINDOW);
+                WINPROC_SetProc((HWINDOWPROC *)&win32wndproc, (WNDPROC)value, WINPROC_GetProcType(win32wndproc), WIN_PROC_WINDOW);
                 return oldval;
         case GWL_HINSTANCE:
                 oldval = hInstance;

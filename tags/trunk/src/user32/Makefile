@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.47 1999-12-09 00:53:36 sandervl Exp $
+# $Id: Makefile,v 1.48 1999-12-16 00:11:45 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -30,7 +30,7 @@ TARGET = user32
 
 OBJS =  user32.obj loadres.obj \
         dde.obj win32wndhandle.obj wsprintf.obj winmouse.obj \
-        icon.obj hook.obj hooks.obj winmenu.obj winkeyboard.obj \
+        icon.obj hook.obj winmenu.obj winkeyboard.obj \
         defwndproc.obj syscolor.obj char.obj initterm.obj \
         uitools.obj unknown.obj spy.obj wndmsg.obj display.obj \
         pmwindow.obj pmframe.obj win32class.obj win32wnd.obj win32dlg.obj \
@@ -95,9 +95,8 @@ icon.obj: icon.cpp $(PDWIN32_INCLUDE)\winicon.h
 winmenu.obj: winmenu.cpp user32.h $(PDWIN32_INCLUDE)\winres.h win32wbase.h winmenudef.h oslibwin.h oslibmenu.h
 syscolor.obj: syscolor.cpp syscolor.h
 dde.obj: dde.cpp
-hook.obj: hook.cpp hooks.h
+hook.obj: hook.cpp $(PDWIN32_INCLUDE)\win\hook.h
 defwndproc.obj: defwndproc.cpp syscolor.h win32wmdiclient.h win32wbase.h win32wnd.h win32dlg.h
-hooks.obj: hooks.cpp hooks.h
 initterm.obj: initterm.cpp $(PDWIN32_INCLUDE)\spy.h pmwindow.h initterm.h
 uitools.obj: uitools.cpp win32wbase.h
 unknown.obj: unknown.cpp
@@ -129,7 +128,7 @@ win32wndhandle.obj: win32wndhandle.cpp win32wndhandle.h
 pmwindow.obj:   pmwindow.cpp win32class.h win32wbase.h win32dlg.h pmwindow.h win32wndchild.h $(PDWIN32_INCLUDE)\wprocess.h oslibgdi.h oslibwin.h dc.h
 pmframe.obj: pmframe.cpp win32class.h win32wbase.h pmframe.h win32wndchild.h
 win32class.obj: win32class.cpp win32class.h win32wbase.h win32dlg.h gen_object.h $(PDWIN32_INCLUDE)\heapshared.h oslibwin.h win32wndchild.h $(PDWIN32_INCLUDE)\win\winproc.h
-win32wbase.obj:   win32wbase.cpp win32class.h win32wbase.h win32dlg.h gen_object.h $(PDWIN32_INCLUDE)\heapshared.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h win32wndhandle.h oslibdos.h dc.h pmframe.h win32wdesktop.h controls.h winmouse.h $(PDWIN32_INCLUDE)\win\winproc.h
+win32wbase.obj:   win32wbase.cpp win32class.h win32wbase.h win32dlg.h gen_object.h $(PDWIN32_INCLUDE)\heapshared.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h win32wndhandle.h oslibdos.h dc.h pmframe.h win32wdesktop.h controls.h winmouse.h $(PDWIN32_INCLUDE)\win\winproc.h $(PDWIN32_INCLUDE)\win\hook.h
 win32wbasepos.obj: win32wbasepos.cpp win32class.h win32wbase.h win32dlg.h gen_object.h $(PDWIN32_INCLUDE)\heapshared.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h win32wndhandle.h oslibdos.h dc.h pmframe.h win32wdesktop.h
 win32wnd.obj:   win32wnd.cpp win32class.h win32wbase.h win32wnd.h win32dlg.h gen_object.h $(PDWIN32_INCLUDE)\heapshared.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h win32wndhandle.h oslibdos.h oslibmenu.h
 win32dlg.obj:   win32dlg.cpp win32class.h win32wbase.h win32dlg.h gen_object.h $(PDWIN32_INCLUDE)\heapshared.h oslibwin.h win32wndchild.h oslibmsg.h controls.h $(PDWIN32_INCLUDE)\win\winproc.h
