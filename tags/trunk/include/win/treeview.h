@@ -1,4 +1,4 @@
-/* $Id: treeview.h,v 1.12 2000-02-20 18:26:07 cbratschi Exp $ */
+/* $Id: treeview.h,v 1.13 2000-02-22 17:05:17 cbratschi Exp $ */
 /*
  * Treeview class extra info
  *
@@ -50,63 +50,63 @@ typedef struct
 
 typedef struct tagTREEVIEW_INFO
 {
-  UINT          uInternalStatus;
-  INT           Timer;
-  UINT          uNumItems;      /* number of valid TREEVIEW_ITEMs */
-  UINT          uNumPtrsAlloced;
-  HTREEITEM     uMaxHandle;     /* needed for delete_item */
-  HTREEITEM     TopRootItem;    /* handle to first item in treeview */
-  INT           cdmode;         /* last custom draw setting */
-  UINT          uScrollTime;    /* max. time for scrolling in milliseconds*/
-  UINT          uItemHeight;    /* item height, -1 for default item height */
-  UINT          uRealItemHeight;// current item height in pixels
-  UINT          uVScrollStep;   // scroll step in pixels
-  UINT          uVisibleHeight; /* visible height of treeview in pixels */
-  UINT          uTotalHeight;   /* total height of treeview in pixels */
-  UINT          uVisibleWidth;
-  UINT          uTotalWidth;
-  UINT          uIndent;        /* indentation in pixels */
-  HTREEITEM     selectedItem;   /* handle to selected item or 0 if none */
-  HTREEITEM     hotItem;        /* handle currently under cursor, 0 if none */
-  HTREEITEM     tipItem;        // item with tooltip
-  HTREEITEM     editItem;       /* handle to item currently editted, 0 if none */
-  HTREEITEM     firstVisible;   /* handle to first visible item */
-  HTREEITEM     dropItem;       /* handle to item selected by drag cursor */
-  HTREEITEM     insertMarkItem; /* item after which insertion mark is placed */
-  BOOL          insertBeforeorAfter; /* flag used by TVM_SETINSERTMARK */
-  HIMAGELIST    dragList;       /* Bitmap of dragged item */
-  POINT         lefttop;        //in pixels
-  COLORREF      clrBk;
-  COLORREF      clrText;
-  COLORREF      clrLine;
-  COLORREF      clrInsertMark;
-  HFONT         hFont;
-  HFONT         hBoldFont;
-  HWND          hwndToolTip;
-  HWND          hwndEdit;
-  WNDPROC       wpEditOrig;     /* needed for subclassing edit control */
-  HIMAGELIST    himlNormal;
-  HIMAGELIST    himlState;
-  LPTVSORTCB    pCallBackSort; /* ptr to TVSORTCB struct for callback sorting */
-  TREEVIEW_ITEM *items;        /* itemlist */
-  INT           *freeList;     /* bitmap indicating which elements are valid */
-                               /* 1=valid, 0=free;   */
-                               /* size of list= uNumPtrsAlloced/32 */
-  LPWSTR        pszISearch;
-  UINT          uISearchLen;
+  COMCTL32_HEADER header;
+  UINT            uInternalStatus;
+  INT             Timer;
+  UINT            uNumItems;      /* number of valid TREEVIEW_ITEMs */
+  UINT            uNumPtrsAlloced;
+  HTREEITEM       uMaxHandle;     /* needed for delete_item */
+  HTREEITEM       TopRootItem;    /* handle to first item in treeview */
+  INT             cdmode;         /* last custom draw setting */
+  UINT            uScrollTime;    /* max. time for scrolling in milliseconds*/
+  UINT            uItemHeight;    /* item height, -1 for default item height */
+  UINT            uRealItemHeight;// current item height in pixels
+  UINT            uVScrollStep;   // scroll step in pixels
+  UINT            uVisibleHeight; /* visible height of treeview in pixels */
+  UINT            uTotalHeight;   /* total height of treeview in pixels */
+  UINT            uVisibleWidth;
+  UINT            uTotalWidth;
+  UINT            uIndent;        /* indentation in pixels */
+  HTREEITEM       selectedItem;   /* handle to selected item or 0 if none */
+  HTREEITEM       hotItem;        /* handle currently under cursor, 0 if none */
+  HTREEITEM       tipItem;        // item with tooltip
+  HTREEITEM       editItem;       /* handle to item currently editted, 0 if none */
+  HTREEITEM       firstVisible;   /* handle to first visible item */
+  HTREEITEM       dropItem;       /* handle to item selected by drag cursor */
+  HTREEITEM       insertMarkItem; /* item after which insertion mark is placed */
+  BOOL            insertBeforeorAfter; /* flag used by TVM_SETINSERTMARK */
+  HIMAGELIST      dragList;       /* Bitmap of dragged item */
+  POINT           lefttop;        //in pixels
+  COLORREF        clrBk;
+  COLORREF        clrText;
+  COLORREF        clrLine;
+  COLORREF        clrInsertMark;
+  HFONT           hFont;
+  HFONT           hBoldFont;
+  HWND            hwndToolTip;
+  HWND            hwndEdit;
+  WNDPROC         wpEditOrig;     /* needed for subclassing edit control */
+  HIMAGELIST      himlNormal;
+  HIMAGELIST      himlState;
+  LPTVSORTCB      pCallBackSort; /* ptr to TVSORTCB struct for callback sorting */
+  TREEVIEW_ITEM   *items;        /* itemlist */
+  INT             *freeList;     /* bitmap indicating which elements are valid */
+                                 /* 1=valid, 0=free;   */
+                                 /* size of list= uNumPtrsAlloced/32 */
+  LPWSTR          pszISearch;
+  UINT            uISearchLen;
 } TREEVIEW_INFO, *LPTREEVIEW_INFO;
 
 /* bitflags for infoPtr->uInternalStatus */
 
-#define TV_UNICODE      0x001    // for TVM_GETUNICODEFORMAT
-#define TV_HSCROLL      0x002    /* treeview too large to fit in window */
-#define TV_VSCROLL      0x004    /* (horizontal/vertical) */
-#define TV_LDRAG        0x008    /* Lbutton pushed to start drag */
-#define TV_LDRAGGING    0x010    /* Lbutton pushed, mouse moved.  */
-#define TV_RDRAG        0x020    /* dito Rbutton */
-#define TV_RDRAGGING    0x040
-#define TV_NOREDRAW     0x080
-#define TV_CALCALL      0x100
+#define TV_HSCROLL      0x001    /* treeview too large to fit in window */
+#define TV_VSCROLL      0x002    /* (horizontal/vertical) */
+#define TV_LDRAG        0x004    /* Lbutton pushed to start drag */
+#define TV_LDRAGGING    0x008    /* Lbutton pushed, mouse moved.  */
+#define TV_RDRAG        0x010    /* dito Rbutton */
+#define TV_RDRAGGING    0x020
+#define TV_NOREDRAW     0x040
+#define TV_CALCALL      0x080
 
 /* bitflags for infoPtr->timer */
 
