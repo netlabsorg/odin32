@@ -1,8 +1,10 @@
-/* $Id: changelog,v 1.1941 2002-01-07 11:19:03 sandervl Exp $ */
+/* $Id: changelog,v 1.1942 2002-01-07 14:32:34 sandervl Exp $ */
 
  2002-01-07: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Fixed restoring of windows after minimizing/maximizing
                 o Allocate more memory for 40x40 icon generation
+                o Fixed SetClipboardData for CF_UNICODETEXT (translate to
+                  ascii and use CF_TEXT
 
  2002-01-06: knut st. osmundsen <bird@anduin.net>
     - DailyBuild:
