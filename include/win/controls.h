@@ -1,4 +1,4 @@
-/* $Id: controls.h,v 1.5 1999-07-24 12:38:21 sandervl Exp $ */
+/* $Id: controls.h,v 1.6 1999-07-24 17:55:09 sandervl Exp $ */
 /*
  * Win32 common controls
  *
