@@ -1,4 +1,13 @@
- /* $Id: changelog,v 1.1073 2000-08-18 01:44:49 phaller Exp $ */
+ /* $Id: changelog,v 1.1074 2000-08-18 18:17:58 sandervl Exp $ */
+
+ 2000-08-18: Sander van Leeuwen <sandervl@xs4all.nl>
+    - GDI32:    Added support for level 2 debug logging
+                Ported Wine's CreateHalftonePalette
+                Added more logging
+                Added RGB565 -> RGB555 conversion in sync method of DIB class
+                (PowerDVD colors still wrong)
+    - KERNEL32: Added display driver keys for PowerDVD video tester applet
+                Extra logging for GetProcAddress
 
  2000-08-18: Patrick Haller <phaller@gmx.net>
     - NTDLL:    roughly synchronized with current WINE
