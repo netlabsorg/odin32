@@ -1,4 +1,4 @@
-; $Id: exceptutil.asm,v 1.5 2000-02-16 14:25:40 sandervl Exp $
+; $Id: exceptutil.asm,v 1.6 2000-03-29 17:17:18 sandervl Exp $
 
 ;/*
 ; * Project Odin Software License can be found in LICENSE.TXT
@@ -11,10 +11,10 @@
                 NAME    except
 
 CODE32          SEGMENT DWORD PUBLIC USE32 'CODE'
-        public  RaiseExceptionAsm
+        public  _RaiseException@16
         extrn   OS2RAISEEXCEPTION : near
 
-RaiseExceptionAsm proc near
+_RaiseException@16 proc near
         push dword ptr [esp+4]  ;DWORD dwExceptionCode
         push dword ptr [esp+12] ;DWORD dwExceptionFlags
         push dword ptr [esp+20] ;DWORD cArguments
@@ -46,12 +46,12 @@ RaiseExceptionAsm proc near
         call OS2RAISEEXCEPTION
 
         ret 20      ;__stdcall
-RaiseExceptionAsm endp
+_RaiseException@16 endp
 
-        public  RtlUnwindAsm
+        public  _RtlUnwind@16
         extrn   OS2RTLUNWIND : near
 
-RtlUnwindAsm proc near
+_RtlUnwind@16 proc near
         push dword ptr [esp+4]  ;PWINEXCEPTION_FRAME  pEndFrame
         push dword ptr [esp+12] ;LPVOID unusedEip
         push dword ptr [esp+20] ;PWINEXCEPTION_RECORD pRecord
@@ -83,7 +83,7 @@ RtlUnwindAsm proc near
         call OS2RTLUNWIND
 
         ret 20      ;__stdcall
-RtlUnwindAsm endp
+_RtlUnwind@16 endp
 
 
         PUBLIC QueryExceptionChain
