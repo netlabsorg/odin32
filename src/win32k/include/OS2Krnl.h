@@ -1,4 +1,4 @@
-/* $Id: OS2Krnl.h,v 1.11 2001-02-11 15:11:34 bird Exp $
+/* $Id: OS2Krnl.h,v 1.12 2001-02-19 05:52:14 bird Exp $
  *
  * OS/2 kernel structures, typedefs and macros.
  *
@@ -25,18 +25,26 @@
     #define PCHAR   char *
 #endif
 
-#ifndef PAGESHIFT
+/* undefine everything defined below to quite compiler */
+#undef  PAGESIZE
+#undef  PAGESUB1
+#undef  PAGEOFFSET
+#undef  PAGESTART
+#undef  PAGEALIGNUP
+#undef  PAGEALIGNDOWN
+#undef  PAGENEXT
+#undef  PAGESTART
+#undef  PAGESHIFT
+
 #define PAGESHIFT                   12      /* bytes to pages or pages to bytes shift value. */
-#endif
-#ifndef PAGESIZE
-#define PAGESIZE                    0x1000  /* pagesize on i386 */
-#endif
-#ifndef PAGEOFFSET
-#define PAGEOFFSET(addr) ((addr) &  (PAGESIZE-1)) /* Gets the offset into the page addr points into. */
-#endif
-#ifndef PAGESTART
-#define PAGESTART(addr)  ((addr) & ~(PAGESIZE-1)) /* Gets the address of the page addr points into. */
-#endif
+#define PAGESIZE                    0x1000UL/* pagesize on i386 */
+#define PAGESUB1                    0x0FFFUL
+#define PAGEALIGNMASK               0xFFFFF000UL
+#define PAGEOFFSET(addr)     ((addr) &  PAGESUB1) /* Gets the offset into the page addr points into. */
+#define PAGEALIGNUP(addr)    (((addr) + PAGESUB1) & PAGEALIGNMASK)  /* Aligns upwards */
+#define PAGEALIGNDOWN(addr)  ((addr) &  PAGEALIGNMASK)              /* Aligns downwards */
+#define PAGESTART(addr)      PAGEALIGNDOWN(addr)
+#define PAGENEXT(addr)       PAGEALIGNUP(addr)
 
 
 /*
