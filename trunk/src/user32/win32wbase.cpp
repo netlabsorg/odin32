@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.178 2000-04-10 19:40:45 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.179 2000-04-15 15:11:14 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2597,7 +2597,15 @@ HWND Win32BaseWindow::SetActiveWindow()
 //******************************************************************************
 BOOL Win32BaseWindow::EnableWindow(BOOL fEnable)
 {
-  return OSLibWinEnableWindow(OS2HwndFrame, fEnable);
+ BOOL rc;
+
+  //return true if previous state was disabled, else false (sdk docs)
+  rc = (getStyle() & WS_DISABLED) != 0;
+  if(rc && !fEnable) {
+    	SendMessageA(WM_CANCELMODE, 0, 0);
+  }
+  OSLibWinEnableWindow(OS2HwndFrame, fEnable);
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************

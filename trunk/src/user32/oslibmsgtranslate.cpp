@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.27 2000-04-02 15:11:50 cbratschi Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.28 2000-04-15 15:11:13 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -137,6 +137,7 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
   OSLIBPOINT       point, ClientPoint;
   POSTMSG_PACKET  *packet;
   THDB            *thdb = (THDB *)pThdb;
+  BOOL             fWasDisabled = FALSE;
   int i;
 
   memset(winMsg, 0, sizeof(MSG));
@@ -168,6 +169,12 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
         winMsg->wParam  = 0;
         winMsg->lParam  = MAKELONG(winMsg->pt.x,winMsg->pt.y);
 
+	if(!win32wnd->IsWindowEnabled()) {
+		if(win32wnd->getParent()) {
+			winMsg->hwnd = win32wnd->getParent()->getWindowHandle();
+		}
+		else	goto dummymessage; //don't send mouse messages to disabled windows
+	}
         return TRUE;
 
       case WM_BUTTON1DOWN:
@@ -180,6 +187,14 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
       case WM_BUTTON3UP:
       case WM_BUTTON3DBLCLK:
         //WM_NC*BUTTON* is posted when the cursor is in a non-client area of the window
+
+	//if a window is disabled, it's parent receives the mouse messages
+	if(!win32wnd->IsWindowEnabled()) {
+		if(win32wnd->getParent()) {
+			win32wnd = win32wnd->getParent();
+		}
+		fWasDisabled = TRUE;
+	}
 
         if (IsNCMouseMsg(win32wnd)) {
             winMsg->message = WINWM_NCLBUTTONDOWN + (os2Msg->msg - WM_BUTTON1DOWN);
@@ -202,7 +217,12 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
                 goto dummymessage; //dinput swallowed message
             }
         }
-
+	if(fWasDisabled) {
+		if(win32wnd) {
+			winMsg->hwnd = win32wnd->getWindowHandle();
+		}
+		else	goto dummymessage; //don't send mouse messages to disabled windows
+	}
         return TRUE;
 
       case WM_BUTTON2MOTIONSTART:
@@ -220,6 +240,13 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
       {
         //WM_NCMOUSEMOVE is posted when the cursor moves into a non-client area of the window
 
+	//if a window is disabled, it's parent receives the mouse messages
+	if(!win32wnd->IsWindowEnabled()) {
+		if(win32wnd->getParent()) {
+			win32wnd = win32wnd->getParent();
+		}
+		fWasDisabled = TRUE;
+	}
         if (IsNCMouseMsg(win32wnd))
         {
           winMsg->message = WINWM_NCMOUSEMOVE;
@@ -238,6 +265,12 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
                 goto dummymessage; //dinput swallowed message
             }
         }
+	if(fWasDisabled) {
+		if(win32wnd) {
+			winMsg->hwnd = win32wnd->getWindowHandle();
+		}
+		else	goto dummymessage; //don't send mouse messages to disabled windows
+	}
         //OS/2 Window coordinates -> Win32 Window coordinates
         return TRUE;
       }
@@ -428,6 +461,12 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
       winMsg->message = WINWM_NCHITTEST;
       winMsg->wParam  = 0;
       winMsg->lParam  = MAKELONG(winMsg->pt.x,winMsg->pt.y);
+      if(!win32wnd->IsWindowEnabled()) {
+		if(win32wnd->getParent()) {
+			winMsg->hwnd = win32wnd->getParent()->getWindowHandle();
+		}
+		else	goto dummymessage; //don't send mouse messages to disabled windows
+      }
       break;
 
     case WM_BUTTON1DOWN:
@@ -440,6 +479,14 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
     case WM_BUTTON3UP:
     case WM_BUTTON3DBLCLK:
         //WM_NC*BUTTON* is posted when the cursor is in a non-client area of the window
+
+	//if a window is disabled, it's parent receives the mouse messages
+	if(!win32wnd->IsWindowEnabled()) {
+		if(win32wnd->getParent()) {
+			win32wnd = win32wnd->getParent();
+		}
+		fWasDisabled = TRUE;
+	}
 
         if(IsNCMouseMsg(win32wnd)) {
             winMsg->message = WINWM_NCLBUTTONDOWN + (os2Msg->msg - WM_BUTTON1DOWN);
@@ -463,6 +510,12 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
             }
         }
 
+	if(fWasDisabled) {
+		if(win32wnd) {
+			winMsg->hwnd = win32wnd->getWindowHandle();
+		}
+		else	goto dummymessage; //don't send mouse messages to disabled windows
+	}
         break;
 
     case WM_BUTTON2MOTIONSTART:
@@ -480,6 +533,13 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
     {
         //WM_NCMOUSEMOVE is posted when the cursor moves into a non-client area of the window
 
+	//if a window is disabled, it's parent receives the mouse messages
+	if(!win32wnd->IsWindowEnabled()) {
+		if(win32wnd->getParent()) {
+			win32wnd = win32wnd->getParent();
+		}
+		fWasDisabled = TRUE;
+	}
         if(IsNCMouseMsg(win32wnd))
         {
           winMsg->message = WINWM_NCMOUSEMOVE;
@@ -498,6 +558,12 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
                 goto dummymessage; //dinput swallowed message
             }
         }
+	if(fWasDisabled) {
+		if(win32wnd) {
+			winMsg->hwnd = win32wnd->getWindowHandle();
+		}
+		else	goto dummymessage; //don't send mouse messages to disabled windows
+	}
         //OS/2 Window coordinates -> Win32 Window coordinates
         break;
     }

@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.88 2000-03-31 14:42:48 cbratschi Exp $ */
+/* $Id: pmwindow.cpp,v 1.89 2000-04-15 15:11:13 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -337,7 +337,11 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     //Mouse messages (OS/2 Window coordinates -> Win32 coordinates relative to screen
     //**************************************************************************
     case WM_HITTEST:
-        rc = win32wnd->MsgHitTest(pWinMsg);
+	if(win32wnd->getWindowHandle() != pWinMsg->hwnd) {
+		win32wnd = Win32BaseWindow::GetWindowFromHandle(pWinMsg->hwnd);
+	}
+        if(win32wnd)
+	        rc = win32wnd->MsgHitTest(pWinMsg);
         break;
 
 
@@ -350,7 +354,11 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     case WM_BUTTON3DOWN:
     case WM_BUTTON3UP:
     case WM_BUTTON3DBLCLK:
-        win32wnd->MsgButton(pWinMsg);
+	if(win32wnd->getWindowHandle() != pWinMsg->hwnd) {
+		win32wnd = Win32BaseWindow::GetWindowFromHandle(pWinMsg->hwnd);
+	}
+        if(win32wnd)
+	        win32wnd->MsgButton(pWinMsg);
         rc = TRUE;
         break;
 
@@ -368,8 +376,11 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
     case WM_MOUSEMOVE:
     {
-        //OS/2 Window coordinates -> Win32 Window coordinates
-        win32wnd->MsgMouseMove(pWinMsg);
+	if(win32wnd->getWindowHandle() != pWinMsg->hwnd) {
+		win32wnd = Win32BaseWindow::GetWindowFromHandle(pWinMsg->hwnd);
+	}
+        if(win32wnd)
+	        win32wnd->MsgMouseMove(pWinMsg);
         break;
     }
 

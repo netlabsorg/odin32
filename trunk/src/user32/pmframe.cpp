@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.50 2000-04-10 19:43:15 sandervl Exp $ */
+/* $Id: pmframe.cpp,v 1.51 2000-04-15 15:11:13 sandervl Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -167,7 +167,10 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
 
     case WM_HITTEST:
     {
-        if (win32wnd->IsWindowCreated())
+	if(win32wnd->getWindowHandle() != pWinMsg->hwnd) {
+		win32wnd = Win32BaseWindow::GetWindowFromHandle(pWinMsg->hwnd);
+	}
+        if(win32wnd && win32wnd->IsWindowCreated())
         {
           MRESULT rc;
 
@@ -188,7 +191,10 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
     case WM_BUTTON3UP:
     case WM_BUTTON3DBLCLK:
     {
-        if (win32wnd->IsWindowCreated())
+	if(win32wnd->getWindowHandle() != pWinMsg->hwnd) {
+		win32wnd = Win32BaseWindow::GetWindowFromHandle(pWinMsg->hwnd);
+	}
+        if(win32wnd && win32wnd->IsWindowCreated())
         {
           win32wnd->MsgButton(pWinMsg);
           RestoreOS2TIB();
@@ -210,9 +216,11 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
 
     case WM_MOUSEMOVE:
     {
-        //OS/2 Window coordinates -> Win32 Window coordinates
-        if (win32wnd->IsWindowCreated())
-          win32wnd->MsgMouseMove(pWinMsg);
+	if(win32wnd->getWindowHandle() != pWinMsg->hwnd) {
+		win32wnd = Win32BaseWindow::GetWindowFromHandle(pWinMsg->hwnd);
+	}
+        if(win32wnd && win32wnd->IsWindowCreated())
+          	win32wnd->MsgMouseMove(pWinMsg);
         RestoreOS2TIB();
         return (MRESULT)TRUE;
     }
