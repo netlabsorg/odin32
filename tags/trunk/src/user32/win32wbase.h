@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.38 1999-11-01 19:11:45 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.39 1999-11-03 18:00:29 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -147,7 +147,7 @@ Win32BaseWindow *getParent()                    { return (Win32BaseWindow *)Chil
 
          BOOL   ShowWindow(ULONG nCmdShow);
          BOOL   SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, int cy, UINT fuFlags);
-	 BOOL   SetWindowPlacement(WINDOWPLACEMENT *winpos);
+         BOOL   SetWindowPlacement(WINDOWPLACEMENT *winpos);
          BOOL   DestroyWindow();
          HWND   SetActiveWindow();
          HWND   GetParent();
@@ -164,6 +164,11 @@ Win32BaseWindow *GetTopParent();
          //Window handle has already been verified, so just return true
          BOOL   IsWindow()                    { return TRUE; };
          BOOL   IsDialog()                    { return fIsDialog; };
+         BOOL   IsModalDialog()               { return fIsModalDialog; };
+         BOOL   IsModalDialogOwner()          { return fIsModalDialogOwner; };
+         VOID   setModalDialogOwner(BOOL fMDO)    { fIsModalDialogOwner = fMDO; };
+         VOID   setOS2HwndModalDialog(HWND aHwnd) { OS2HwndModalDialog = aHwnd; };
+         HWND   getOS2HwndModalDialog()       { return OS2HwndModalDialog; };
          BOOL   CanReceiveSizeMsgs()          { return !fNoSizeMsg; };
          BOOL   IsWindowDestroyed()           { return fIsDestroyed; };
          BOOL   IsWindowEnabled();
@@ -222,9 +227,9 @@ static Win32BaseWindow *GetWindowFromOS2FrameHandle(HWND hwnd);
        ULONG getBorderWidth() { return borderWidth; };
        ULONG getBorderHeight() { return borderHeight; };
 
-static	void  NC_AdjustRectInner(LPRECT rect, DWORD style, DWORD exStyle);
-static	void  NC_AdjustRectOuter(LPRECT rect, DWORD style, BOOL menu, DWORD exStyle);
-static	BOOL  WindowNeedsWMBorder( DWORD style, DWORD exStyle );
+static  void  NC_AdjustRectInner(LPRECT rect, DWORD style, DWORD exStyle);
+static  void  NC_AdjustRectOuter(LPRECT rect, DWORD style, BOOL menu, DWORD exStyle);
+static  BOOL  WindowNeedsWMBorder( DWORD style, DWORD exStyle );
 
        PVOID getOldWndProc() { return pOldWndProc; }
        VOID  setOldWndProc(PVOID aOldWndProc) { pOldWndProc = aOldWndProc; }
@@ -264,6 +269,9 @@ protected:
         BOOL    isIcon;
         BOOL    fFirstShow;
         BOOL    fIsDialog;
+        BOOL    fIsModalDialog;
+        BOOL    fIsModalDialogOwner;
+        HWND    OS2HwndModalDialog;
         BOOL    fInternalMsg;           //Used to distinguish between messages
                                         //sent by PM and those sent by apps
         BOOL    fNoSizeMsg;
@@ -307,7 +315,7 @@ static GenericObject *windows;
 private:
 #ifndef OS2_INCLUDED
         void  GetMinMaxInfo(POINT *maxSize, POINT *maxPos, POINT *minTrack, POINT *maxTrack );
-	LONG  HandleWindowPosChanging(WINDOWPOS *winpos);
+        LONG  HandleWindowPosChanging(WINDOWPOS *winpos);
         LONG  HandleSysCommand(WPARAM wParam, POINT *pt32);
 
         LONG  SendNCCalcSize(BOOL calcValidRect,

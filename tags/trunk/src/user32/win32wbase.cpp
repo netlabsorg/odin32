@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.72 1999-11-02 17:07:25 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.73 1999-11-03 18:00:27 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -134,6 +134,8 @@ void Win32BaseWindow::Init()
   fIsSubclassedOS2Wnd = FALSE;
   fFirstShow       = TRUE;
   fIsDialog        = FALSE;
+  fIsModalDialogOwner = FALSE;
+  OS2HwndModalDialog  = 0;
   fInternalMsg     = FALSE;
   fNoSizeMsg       = FALSE;
   fIsDestroyed     = FALSE;
@@ -212,9 +214,9 @@ Win32BaseWindow::~Win32BaseWindow()
             setParent(NULL);  //or else we'll crash in the dtor of the ChildWindow class
         }
     }
-    else 
+    else
     if(fDestroyAll) {
-	dprintf(("Destroying window %x %s", getWindowHandle(), windowNameA));
+        dprintf(("Destroying window %x %s", getWindowHandle(), windowNameA));
         setParent(NULL);  //or else we'll crash in the dtor of the ChildWindow class
     }
 
@@ -432,12 +434,12 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   hwndLinkAfter = HWND_TOP;
   if(WIDGETS_IsControl(this, BUTTON_CONTROL) && ((dwStyle & 0x0f) == BS_GROUPBOX))
   {
-	hwndLinkAfter = HWND_BOTTOM;
-	dwStyle |= WS_CLIPSIBLINGS;
+        hwndLinkAfter = HWND_BOTTOM;
+        dwStyle |= WS_CLIPSIBLINGS;
   }
-  else 
+  else
   if(WIDGETS_IsControl(this, STATIC_CONTROL) && !(dwStyle & WS_GROUP)) {
-	dwStyle |= WS_CLIPSIBLINGS;
+        dwStyle |= WS_CLIPSIBLINGS;
   }
 
   /* Increment class window counter */
@@ -1991,7 +1993,7 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
 
     /* We can't activate a child window (WINE) */
     if(getStyle() & WS_CHILD)
-	showstate &= ~SWPOS_ACTIVATE;
+        showstate &= ~SWPOS_ACTIVATE;
 
     if(showstate & SWPOS_SHOW) {
             setStyle(getStyle() | WS_VISIBLE);

@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.17 1999-11-02 17:07:25 cbratschi Exp $ */
+/* $Id: pmframe.cpp,v 1.18 1999-11-03 18:00:25 cbratschi Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -240,6 +240,18 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
 
         dprintf(("PMFRAME: WM_ADJUSTWINDOWPOS %x %x %x (%d,%d) (%d,%d)", win32wnd->getWindowHandle(), pswp->hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
 
+        //CB: show dialog in front of owner
+        if (win32wnd->IsModalDialogOwner())
+        {
+          pswp->fl |= SWP_ZORDER;
+          pswp->hwndInsertBehind = win32wnd->getOS2HwndModalDialog();
+          if (pswp->fl & SWP_ACTIVATE)
+          {
+            pswp->fl &= ~SWP_ACTIVATE;
+            WinSetWindowPos(win32wnd->getOS2HwndModalDialog(),0,0,0,0,0,SWP_ACTIVATE);
+          }
+        }
+
         if ((pswp->fl & (SWP_SIZE | SWP_MOVE | SWP_ZORDER)) == 0)
             goto RunDefFrameProc;
 
@@ -393,6 +405,7 @@ PosChangedEnd:
         RestoreOS2TIB();
         return rc;
     }
+
     case WM_ACTIVATE:
     {
         HWND hwndTitle;
@@ -405,6 +418,13 @@ PosChangedEnd:
         WinSendMsg(WinWindowFromID(hwnd,FID_CLIENT),WM_ACTIVATE,mp1,mp2);
         WinSetWindowUShort(hwnd,QWS_FLAGS,mp1 ? (flags | FF_ACTIVE):(flags & ~FF_ACTIVE));
 
+        //CB: show owner behind the dialog
+        if (win32wnd->IsModalDialog())
+        {
+          Win32BaseWindow *topOwner = win32wnd->getOwner()->getTopParent();
+
+          if (topOwner) WinSetWindowPos(topOwner->getOS2FrameWindowHandle(),hwnd,0,0,0,0,SWP_ZORDER);
+        }
 
         RestoreOS2TIB();
         return 0;
@@ -432,6 +452,7 @@ PosChangedEnd:
       #ifdef PMFRAMELOG
        dprintf(("PMFRAME: WM_BUTTON1DOWN"));
       #endif
+
       if (InSizeBox(win32wnd,(POINTS*)&mp1))
       {
         WinSetActiveWindow(HWND_DESKTOP,hwnd);
