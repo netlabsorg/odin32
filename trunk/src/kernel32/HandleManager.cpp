@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.84 2001-12-07 14:13:36 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.85 2001-12-08 15:12:15 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -467,6 +467,8 @@ DWORD HMInitialize(void)
       free(pszDrive);
       free(pszDrive2);
       HandleNamesAddSymbolicLink("\\\\?\\UNC\\", "\\\\");
+      //SvL: Can be used in Windows 2000 to open device drivers
+      HandleNamesAddSymbolicLink("\\\\.\\Global", "\\\\.");
     }
 #endif
     
