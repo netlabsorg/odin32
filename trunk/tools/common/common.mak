@@ -1,4 +1,4 @@
-# $Id: common.mak,v 1.6 2002-02-24 02:47:23 bird Exp $
+# $Id: common.mak,v 1.7 2003-01-23 13:47:50 bird Exp $
 
 #
 # Odin32 API
@@ -12,7 +12,7 @@
 #
 LIBTARGET = 1
 EXETARGET = 1
-
+STATIC_CRT = 1
 
 #
 # Compiler, tools, and interference rules.
