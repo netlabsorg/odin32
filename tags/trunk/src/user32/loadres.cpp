@@ -1,15 +1,18 @@
-/* $Id: loadres.cpp,v 1.15 1999-11-09 17:07:21 cbratschi Exp $ */
+/* $Id: loadres.cpp,v 1.16 1999-11-14 23:29:25 sandervl Exp $ */
 
 /*
  * Win32 resource API functions for OS/2
  *
  * Copyright 1998 Sander van Leeuwen
  *
- * Parts based on Wine code (objects\bitmap.c, loader\resource.c):
+ * Parts based on Wine code (objects\bitmap.c, loader\resource.c, objects\cursoricon.c):
  *
  * Copyright 1993 Alexandre Julliard
- *           1998 Huw D M Davies
  *           1993 Robert J. Amstadt
+ *           1996 Martin Von Loewis
+ *           1997 Alex Korobka
+ *           1998 Turchanov Sergey
+ *           1998 Huw D M Davies
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -23,6 +26,7 @@
 #include <win\virtual.h>
 #include "dib.h"
 #include "initterm.h"
+#include <win\cursoricon.h>
 
 //******************************************************************************
 //******************************************************************************
@@ -88,7 +92,15 @@ int WIN32API LoadStringW(HINSTANCE hinst, UINT wID, LPWSTR lpBuffer, int cchBuff
     }
     delete winres;
 
+#ifdef DEBUG_ENABLELOG_LEVEL2
+    if(i) {
+    	char *astring = (char *)HEAP_strdupWtoA(GetProcessHeap(), 0, lpBuffer);
+    	dprintf(("LoadStringW from %X, id %d %s\n", hinst, wID, astring));
+    	HEAP_free(astring);
+    }
+#else
     dprintf(("LoadStringW from %X, id %d buffersize %d\n", hinst, wID, cchBuffer));
+#endif
     return(i);
 }
 //******************************************************************************
@@ -528,9 +540,10 @@ HICON WINAPI CopyImage( HANDLE hnd, UINT type, INT desiredx,
 //      case IMAGE_BITMAP:
 //              return BITMAP_CopyBitmap(hnd);
         case IMAGE_ICON:
-                return CopyIcon(hnd);
+		return CopyIcon(hnd);
         case IMAGE_CURSOR:
-                return CopyCursor(hnd);
+		return CopyCursor(hnd);
+//		return CopyCursorIcon(hnd,type, desiredx, desiredy, flags);
         default:
                 dprintf(("CopyImage: Unsupported type"));
     }
