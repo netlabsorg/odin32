@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.143 2001-08-09 08:45:41 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.144 2001-09-15 09:16:08 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -798,7 +798,8 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
         }
 
         if ((pswp->fl & (SWP_SIZE | SWP_MOVE | SWP_ZORDER)) == 0)
-            goto RunDefWndProc;
+//            goto RunDefWndProc;
+            goto RunDefFrameWndProc;
 
         if(!win32wnd->CanReceiveSizeMsgs())
             break;
@@ -923,15 +924,13 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
             if(pswp->fl & SWP_HIDE) {
                 WinShowWindow(win32wnd->getOS2WindowHandle(), 0);
             }
+
             if(pswp->fl & SWP_ACTIVATE)
             {
                 //Only send PM WM_ACTIVATE to top-level windows (frame windows)
                 if(!(WinQueryWindowULong(WinWindowFromID(hwnd,FID_CLIENT), OFFSET_WIN32FLAGS) & WINDOWFLAG_ACTIVE))
                 {
                     WinSendMsg(hwnd, WM_ACTIVATE, (MPARAM)TRUE, (MPARAM)hwnd);
-                    if(fOS2Look) {
-                        WinSendDlgItemMsg(hwnd, FID_TITLEBAR, TBM_SETHILITE, MPFROMSHORT(TRUE), 0);
-                    }
                 }
             }
             else
@@ -941,12 +940,10 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
                 if(WinQueryWindowULong(WinWindowFromID(hwnd,FID_CLIENT), OFFSET_WIN32FLAGS) & WINDOWFLAG_ACTIVE)
                 {
                     WinSendMsg(hwnd, WM_ACTIVATE, (MPARAM)FALSE, (MPARAM)hwnd);
-                    if(fOS2Look) {
-                        WinSendDlgItemMsg(hwnd, FID_TITLEBAR, TBM_SETHILITE, MPFROMSHORT(FALSE), 0);
-                    }
                 }
             }
-            goto RunDefWndProc;
+//            goto RunDefWndProc;
+            goto RunDefFrameWndProc;
         }
 
         if(pswp->fl & (SWP_MOVE | SWP_SIZE))
@@ -1086,9 +1083,6 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
              if(!(WinQueryWindowULong(WinWindowFromID(hwnd,FID_CLIENT), OFFSET_WIN32FLAGS) & WINDOWFLAG_ACTIVE))
              {
                 WinSendMsg(hwnd, WM_ACTIVATE, (MPARAM)TRUE, (MPARAM)hwnd);
-                if(fOS2Look) {
-                    WinSendDlgItemMsg(hwnd, FID_TITLEBAR, TBM_SETHILITE, MPFROMSHORT(TRUE), 0);
-                }
              }
         }
         else
@@ -1098,9 +1092,6 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
             if(WinQueryWindowULong(WinWindowFromID(hwnd,FID_CLIENT), OFFSET_WIN32FLAGS) & WINDOWFLAG_ACTIVE)
             {
                     WinSendMsg(hwnd, WM_ACTIVATE, (MPARAM)FALSE, (MPARAM)hwnd);
-                    if(fOS2Look) {
-                        WinSendDlgItemMsg(hwnd, FID_TITLEBAR, TBM_SETHILITE, MPFROMSHORT(FALSE), 0);
-                    }
             }
         }
 
@@ -1215,12 +1206,12 @@ PosChangedEnd:
 
 #ifdef DEBUG
     case WM_QUERYFOCUSCHAIN:
-        dprintf2(("PMFRAME:WM_QUERYFOCUSCHAIN %x fsCmd %x parent %x", win32wnd->getWindowHandle(), SHORT1FROMMP(mp1), mp2));
+        dprintf2(("PMFRAME:WM_QUERYFOCUSCHAIN %x fsCmd %x parent %x", win32wnd->getWindowHandle(), SHORT1FROMMP(mp1), (mp2) ? OS2ToWin32Handle((DWORD)mp2) : 0));
 
         RestoreOS2TIB();
         rc = pfnFrameWndProc(hwnd, msg, mp1, mp2);
         SetWin32TIB();
-        dprintf2(("PMFRAME:WM_QUERYFOCUSCHAIN %x fsCmd %x parent %x returned %x", win32wnd->getWindowHandle(), SHORT1FROMMP(mp1), mp2, rc));
+        dprintf2(("PMFRAME:WM_QUERYFOCUSCHAIN %x fsCmd %x parent %x returned %x", win32wnd->getWindowHandle(), SHORT1FROMMP(mp1), (mp2) ? OS2ToWin32Handle((DWORD)mp2) : 0, (rc) ? OS2ToWin32Handle((DWORD)rc) : 0));
         break;
 //        goto RunDefFrameWndProc;
 #endif
@@ -1233,24 +1224,31 @@ PosChangedEnd:
         USHORT usSetFocus = SHORT1FROMMP(mp2);
         USHORT fsFocusChange = SHORT2FROMMP(mp2);
 
-        dprintf(("PMFRAME:WM_FOCUSCHANGE %x %x %x %x", win32wnd->getWindowHandle(), hwndFocus, usSetFocus, fsFocusChange));
+        dprintf(("PMFRAME:WM_FOCUSCHANGE %x %x (%x) %x %x", win32wnd->getWindowHandle(), OS2ToWin32Handle(hwndFocus), hwndFocus, usSetFocus, fsFocusChange));
         goto RunDefFrameWndProc;
     }
 #endif
+
+    case WM_SETFOCUS:
+    {
+        dprintf(("PMFRAME: WM_SETFOCUS %x %x", win32wnd->getWindowHandle(), hwnd));
+        goto RunDefFrameWndProc;
+    }
 
     case WM_ACTIVATE:
     {
         HWND hwndTitle;
         USHORT flags = WinQueryWindowUShort(hwnd,QWS_FLAGS);
 
-        dprintf(("PMFRAME: WM_ACTIVATE %x %x %x", hwnd, mp1, mp2));
+        dprintf(("PMFRAME: WM_ACTIVATE %x %x %x", win32wnd->getWindowHandle(), mp1, OS2ToWin32Handle((DWORD)mp2)));
         if (win32wnd->IsWindowCreated())
         {
-            WinSendMsg(WinWindowFromID(hwnd,FID_CLIENT),WM_ACTIVATE,mp1,mp2);
+            WinSetWindowUShort(hwnd,QWS_FLAGS,mp1 ? (flags | FF_ACTIVE):(flags & ~FF_ACTIVE));
             if(fOS2Look) {
+                dprintf(("TBM_QUERYHILITE returned %d", WinSendDlgItemMsg(hwnd, FID_TITLEBAR, TBM_QUERYHILITE, 0, 0)));
                 WinSendDlgItemMsg(hwnd, FID_TITLEBAR, TBM_SETHILITE, mp1, 0);
             }
-            WinSetWindowUShort(hwnd,QWS_FLAGS,mp1 ? (flags | FF_ACTIVE):(flags & ~FF_ACTIVE));
+            WinSendDlgItemMsg(hwnd, FID_CLIENT, WM_ACTIVATE, mp1, mp2);
 
             //CB: show owner behind the dialog
             if (win32wnd->IsModalDialog())
@@ -1283,12 +1281,6 @@ PosChangedEnd:
         //show client window
         WinShowWindow(win32wnd->getOS2WindowHandle(), (BOOL)mp1);
         break;
-
-    case WM_SETFOCUS:
-    {
-        dprintf(("PMFRAME: WM_SETFOCUS %x %x", win32wnd->getWindowHandle(), hwnd));
-        goto RunDefFrameWndProc;
-    }
 
     case WM_QUERYTRACKINFO:
     {
@@ -1409,11 +1401,13 @@ PosChangedEnd:
     return (MRESULT)rc;
 
 RunDefFrameWndProc:
+    dprintf2(("RunDefFrameWndProc"));
     if(win32wnd) RELEASE_WNDOBJ(win32wnd);
     RestoreOS2TIB();
     return pfnFrameWndProc(hwnd, msg, mp1, mp2);
 
 RunDefWndProc:
+    dprintf2(("RunDefWndProc"));
     if(win32wnd) RELEASE_WNDOBJ(win32wnd);
     RestoreOS2TIB();
     //calling WinDefWindowProc here breaks Opera hotlist window (WM_ADJUSTWINDOWPOS)

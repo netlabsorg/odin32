@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.103 2001-07-28 18:02:50 sandervl Exp $ */
+/* $Id: window.cpp,v 1.104 2001-09-15 09:16:09 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -809,12 +809,13 @@ HWND WIN32API SetFocus(HWND hwnd)
         return lastFocus_W;
     }
     teb->o.odin.hwndFocus = 0;
-    if(activate) {
-        SetActiveWindow(hwndTopParent);
-    }
+////    if(activate) {
+////        SetActiveWindow(hwndTopParent);
+////    }
     if(!IsWindow(hwnd)) return FALSE;       //abort if window destroyed
 
-    return (OSLibWinSetFocus(OSLIB_HWND_DESKTOP, hwnd_O, 0)) ? lastFocus_W : 0;
+    //Always activate window (3rd par) -> seems to fix activation problems
+    return (OSLibWinSetFocus(OSLIB_HWND_DESKTOP, hwnd_O, 1)) ? lastFocus_W : 0;
 }
 //******************************************************************************
 //******************************************************************************
