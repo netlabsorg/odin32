@@ -1,4 +1,4 @@
-/* $Id: MapSym.cmd,v 1.5 2002-05-01 03:59:24 bird Exp $
+/* $Id: MapSym.cmd,v 1.6 2002-05-05 19:03:32 bird Exp $
  *
  * Helper script for calling MAPSYM.EXE.
  *
@@ -22,7 +22,7 @@ sLinkers = strip(sVAC40, 'T', ';')||strip(sIBMOld, 'T', ';')||strip(sWatcom, 'T'
 parse arg sLinker sMapfile sSymFile sDummy
 
 if (  (sDummy <> '') ,
-    | (sSymFile = '') ,
+    | (sMapFile = '') ,
     | (pos(';'translate(sLinker)';', translate(sLinkers)) <= 0) ,
     )
 then
@@ -36,6 +36,18 @@ do
     say 'error: the mapfile '''sMapFile''' doesn''t exist.';
     call syntax;
     exit(16);
+end
+
+sMapBaseName = filespec('name', sMapFile);
+if (pos('.', sMapBaseName) > 0) then
+    sMapBaseName = left(sMapBaseName, pos('.', sMapBaseName) - 1);
+
+if (sSymFile = '') then
+do
+    if (lastpos('.', filespec('name', sMapFile)) > 0) then
+        sSymFile = left(sMapFile, lastpos('.', sMapFile)) || 'sym';
+    else
+        sSymFile = sMapFile || '.sym';
 end
 
 
@@ -80,7 +92,7 @@ sTmp = strip(strip(sTmp, 'T', '\'), 'T','/');
  * (We'll make a workcopy, modified for some linkers, of the mapfile
  *  to this file. And call mapsym on it.)
  */
-sTmpMapFile = SysTempFileName(sTmp'\mapsym????.map');
+sTmpMapFile = SysTempFileName(sTmp'\'||sMapBaseName||'.???');
 if (sTmpMapFile = '') then
 do
     say 'error: failed to make temporary file!';
@@ -174,10 +186,11 @@ exit(0);
  * Display usage info.
  */
 syntax: procedure;
-    say 'syntax: MapSym.cmd <linker> <mapfile> <symfile>';
+    say 'syntax: MapSym.cmd <linker> <mapfile> [symfile]';
     say '   linker      watcom, vac3xx, link386 or vac40. All $(BUILD_ENV).';
     say '   mapfile     Name of the input map file.';
-    say '   symfile     Name of the output sym file.';
+    say '   symfile     Name of the output sym file. If not specified';
+    say '               mapfile is used as a base name.';
 return 0;
 
 
@@ -287,6 +300,7 @@ vac40conv: procedure;
             do
                 if (sState = sNewState) then
                 do
+                    sLine = translate(sLine, '', '"');
                     if ((strip(sLine) <> '') & (pos('|', sLine) <= 0) & (pos('@', sLine) <= 0)) then
                         call lineout sOutFile, sLine;
                 end
@@ -397,7 +411,10 @@ return sState;
 HexToDec: procedure
     parse arg sStringHex
 /*    say 'HexToDec('sStringHex'):' strip(strip(sStringHex), 'L', '0')*/
-return x2d(strip(strip(sStringHex), 'L', '0'));
+    sStringHex = strip(strip(sStringHex), 'L', '0');
+    if (sStringHex = '') then
+        sStringHex = 0;
+return x2d(sStringHex);
 
 
 /**
@@ -409,7 +426,10 @@ return x2d(strip(strip(sStringHex), 'L', '0'));
  */
 DecToHex: procedure
     parse arg sStringDec
-return d2x(strip(strip(sStringDec), 'L', '0'));
+    sStringDec = strip(strip(sStringDec), 'L', '0');
+    if (sStringDec = '') then
+        sStringDec = 0;
+return d2x(sStringDec);
 
 
 /* SCCSID = %W% %E% */
