@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.58 2000-11-04 16:29:23 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.59 2000-11-05 18:48:21 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -192,13 +192,6 @@ BOOL WIN32API GetDCOrgEx(HDC arg1, PPOINT arg2)
 {
     dprintf(("GDI32: GetDCOrgEx\n"));
     return O32_GetDCOrgEx(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetWindowExtEx(HDC arg1, PSIZE arg2)
-{
-    dprintf(("GDI32: GetWindowExtEx\n"));
-    return O32_GetWindowExtEx(arg1, arg2);
 }
 //******************************************************************************
 //******************************************************************************
@@ -598,8 +591,8 @@ int WIN32API Escape( HDC hdc, int nEscape, int cbInput, LPCSTR lpvInData, PVOID 
 
     rc = O32_Escape(hdc, nEscape, cbInput, lpvInData, lpvOutData);
     if(rc == 0) {
-    	 dprintf(("GDI32: Escape %x %d %d %x %x returned %d (WARNING: might not be implemented!!) ", hdc, nEscape, cbInput, lpvInData, lpvOutData, rc));
-    } 
+         dprintf(("GDI32: Escape %x %d %d %x %x returned %d (WARNING: might not be implemented!!) ", hdc, nEscape, cbInput, lpvInData, lpvOutData, rc));
+    }
     else dprintf(("GDI32: Escape %x %d %d %x %x returned %d ", hdc, nEscape, cbInput, lpvInData, lpvOutData, rc));
 
     return rc;
@@ -738,13 +731,6 @@ int WIN32API GetDeviceCaps(HDC hdc, int nIndex)
         return -1;
 
     return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API GetGraphicsMode(HDC arg1)
-{
-    dprintf(("GDI32: GetGraphicsMode"));
-    return O32_GetGraphicsMode(arg1);
 }
 //******************************************************************************
 //******************************************************************************
@@ -949,63 +935,9 @@ BOOL WIN32API GetTextMetricsW( HDC arg1, LPTEXTMETRICW pwtm)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GetViewportOrgEx( HDC hdc, PPOINT pPoint)
-{
- BOOL rc;
-
-    rc = O32_GetViewportOrgEx(hdc, pPoint);
-    if(pPoint) {
-    	 dprintf(("GDI32: GetViewportOrgEx %x returned %d (%d,%d)", hdc, rc, pPoint->x, pPoint->y));
-    }
-    else dprintf(("GDI32: GetViewportOrgEx %x NULL returned %d (%d,%d)", hdc, rc));
-    return rc;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetWindowOrgEx(HDC hdc, PPOINT pPoint)
-{
- BOOL rc;
-
-    rc = O32_GetWindowOrgEx(hdc, pPoint);
-    if(pPoint) {
-         dprintf(("GDI32: GetWindowOrgEx %x returned %d (%d,%d)", hdc, rc, pPoint->x, pPoint->y));
-    }
-    else dprintf(("GDI32: GetWindowOrgEx %x NULL returned %d", hdc, rc));
-    return rc;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetWorldTransform( HDC arg1, LPXFORM  arg2)
-{
-    dprintf(("GDI32: GetWorldTransform"));
-    return O32_GetWorldTransform(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
 ODINFUNCTION3(BOOL, LPtoDP, HDC, hdc, PPOINT, lpPoints, int, nCount)
 {
     return O32_LPtoDP(hdc, lpPoints, nCount);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API ModifyWorldTransform( HDC arg1, const XFORM *arg2, DWORD  arg3)
-{
-    dprintf(("GDI32: ModifyWorldTransform"));
-    return O32_ModifyWorldTransform(arg1, (LPXFORM)arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API OffsetViewportOrgEx( HDC arg1, int arg2, int arg3, PPOINT  arg4)
-{
-    dprintf(("GDI32: OffsetViewportOrgEx"));
-    return O32_OffsetViewportOrgEx(arg1, arg2, arg3, arg4);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API OffsetWindowOrgEx( HDC arg1, int arg2, int arg3, PPOINT  arg4)
-{
-    dprintf(("GDI32: OffsetWindowOrgEx"));
-    return O32_OffsetWindowOrgEx(arg1, arg2, arg3, arg4);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1115,20 +1047,6 @@ int WIN32API SaveDC( HDC arg1)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API ScaleViewportExtEx( HDC arg1, int arg2, int arg3, int arg4, int arg5, PSIZE  arg6)
-{
-    dprintf(("GDI32: ScaleViewportExtEx"));
-    return O32_ScaleViewportExtEx(arg1, arg2, arg3, arg4, arg5, arg6);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API ScaleWindowExtEx( HDC arg1, int arg2, int arg3, int arg4, int arg5, PSIZE  arg6)
-{
-    dprintf(("GDI32: ScaleWindowExtEx"));
-    return O32_ScaleWindowExtEx(arg1, arg2, arg3, arg4, arg5, arg6);
-}
-//******************************************************************************
-//******************************************************************************
 int WIN32API SetArcDirection( HDC arg1, int  arg2)
 {
     dprintf(("GDI32: SetArcDirection"));
@@ -1150,13 +1068,6 @@ BOOL WIN32API SetBrushOrgEx( HDC arg1, int arg2, int arg3, PPOINT  arg4)
     rc = O32_SetBrushOrgEx(arg1, arg2, arg3, arg4);
     dprintf(("GDI32: SetBrushOrgEx returned %d\n", rc));
     return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API SetGraphicsMode(HDC arg1, int  arg2)
-{
-    dprintf(("GDI32: SetGraphicsMode"));
-    return O32_SetGraphicsMode(arg1, arg2);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1193,37 +1104,6 @@ ODINFUNCTION2(int, SetTextCharacterExtra, HDC, hdc, int, nCharExtra)
 ODINFUNCTION3(BOOL, SetTextJustification, HDC, hdc, int, nBreakExtra, int, nBreakCount)
 {
     return O32_SetTextJustification(hdc, nBreakExtra, nBreakCount);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SetViewportOrgEx( HDC hdc, int x, int y, PPOINT lpPoint)
-{
-    if(lpPoint) {
-    	 dprintf(("GDI32: SetViewportOrgEx %x %d %d (%d,%d)", hdc, x, y, lpPoint->x, lpPoint->y));
-    }
-    else dprintf(("GDI32: SetViewportOrgEx %x %d %d NULL", hdc, x, y));
-    return O32_SetViewportOrgEx(hdc, x, y, lpPoint);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SetWindowExtEx( HDC arg1, int arg2, int arg3, PSIZE  arg4)
-{
-    dprintf(("GDI32: SetWindowExtEx"));
-    return O32_SetWindowExtEx(arg1, arg2, arg3, arg4);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SetWindowOrgEx( HDC arg1, int arg2, int arg3, PPOINT  arg4)
-{
-    dprintf(("GDI32: SetWindowOrgEx"));
-    return O32_SetWindowOrgEx(arg1, arg2, arg3, arg4);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SetWorldTransform( HDC arg1, const XFORM *arg2)
-{
-    dprintf(("GDI32: SetWorldTransform"));
-    return O32_SetWorldTransform(arg1, (LPXFORM)arg2);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1621,8 +1501,8 @@ BOOL WIN32API ColorMatchToTarget(HDC   hdc,
  *****************************************************************************/
 
 BOOL WIN32API CombineTransform(LPXFORM lLPXFORMResult,
-                                  CONST   XFORM *lLPXFORM1,
-                                  CONST   XFORM *lLPXFORM2)
+                               CONST   XFORM *lLPXFORM1,
+                               CONST   XFORM *lLPXFORM2)
 {
   dprintf(("GDI32: CombineTransform(%08xh,%08xh,%08xh).\n",
            lLPXFORMResult,
