@@ -1,4 +1,4 @@
-/* $Id: probkrnl.h,v 1.7 2001-11-19 03:06:06 bird Exp $
+/* $Id: probkrnl.h,v 1.8 2002-03-31 19:01:04 bird Exp $
  *
  * Include file for ProbKrnl.
  *
@@ -137,8 +137,8 @@ typedef struct
     struct
     {
         unsigned char   iObject;        /* Object number.  */
-        unsigned long   offObject;      /* offset into object of the symbol. */
         unsigned char   chOpcode;       /* The opcode of the function. 0 if not known. */
+        unsigned long   offObject;      /* offset into object of the symbol. */
     } aSyms[NBR_OF_KRNLIMPORTS];
 
 } KRNLDBENTRY, *PKRNLDBENTRY;

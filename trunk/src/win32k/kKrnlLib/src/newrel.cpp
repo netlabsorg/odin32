@@ -1,4 +1,4 @@
-/* $Id: newrel.cpp,v 1.1 2002-03-10 02:45:57 bird Exp $
+/* $Id: newrel.cpp,v 1.2 2002-03-31 19:01:17 bird Exp $
  *
  * new - new and delete operators.
  *
@@ -8,7 +8,7 @@
  *
  */
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: newrel.cpp,v 1.1 2002-03-10 02:45:57 bird Exp $";
+static const char szFileId[] = "$Id: newrel.cpp,v 1.2 2002-03-31 19:01:17 bird Exp $";
 #endif
 
 
@@ -25,8 +25,8 @@ static const char szFileId[] = "$Id: newrel.cpp,v 1.1 2002-03-10 02:45:57 bird E
 #include <os2.h>
 
 #include "devSegDf.h"                   /* Win32k segment definitions. */
-#include "kTypes.h"
-#include "kLog.h"
+#include <kLib/kTypes.h>
+#include <kLib/kLog.h>
 #include "kKLnew.h"
 #include "kKLrmalloc.h"
 

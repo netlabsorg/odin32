@@ -1,4 +1,4 @@
-/* $Id: kKrnlLib.h,v 1.5 2001-10-24 03:59:04 bird Exp $
+/* $Id: kKrnlLib.h,v 1.6 2002-03-31 19:01:04 bird Exp $
  *
  * Top level header file for kKrnlLib exports.
  *
@@ -29,7 +29,7 @@
 /*
  * Basis types and macros.
  */
-#include "kTypes.h"
+#include <kLib/kTypes.h>
 
 
 /*
@@ -60,7 +60,7 @@
  * Avl tree.
  */
 #ifdef INCL_KKL_AVL
-    #include "kAVL.h"
+    #include <kLib/kAVL.h>
 #endif
 
 
@@ -69,7 +69,7 @@
  */
 #ifdef INCL_KKL_LOG
     #include "kKLstdarg.h"
-    #include "kLog.h"
+    #include <kLib/kLog.h>
 #endif
 
 
@@ -85,7 +85,7 @@
  * Misc.
  */
 #ifdef INCL_KKL_MISC
-    #include "kKLasmutils.h"
+    #include <kLib/kMisc.h>
 #endif
 
 

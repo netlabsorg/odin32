@@ -1,4 +1,4 @@
-/* $Id: abort.c,v 1.1 2002-03-10 02:45:51 bird Exp $
+/* $Id: abort.c,v 1.2 2002-03-31 19:01:12 bird Exp $
  *
  * Abort replacement.
  *
@@ -8,7 +8,7 @@
  *
  */
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: abort.c,v 1.1 2002-03-10 02:45:51 bird Exp $";
+static const char szFileId[] = "$Id: abort.c,v 1.2 2002-03-31 19:01:12 bird Exp $";
 #endif
 
 
@@ -18,9 +18,8 @@ static const char szFileId[] = "$Id: abort.c,v 1.1 2002-03-10 02:45:51 bird Exp 
 #include <os2.h>
 #include "devSegDf.h"                   /* Win32k segment definitions. */
 #include "dev32.h"
-#include "kTypes.h"
-#include "kLog.h"
-#include "kKLasmutils.h"
+#include <kLib/kTypes.h>
+#include <kLib/kLog.h>
 
 #include <builtin.h>
 
@@ -34,6 +33,6 @@ void abort(void)
 {
     KLOGENTRY0("void");
     kprintf(("!Internal Processing Error! should not be here! - abort!\n"));
-    Int3();
+    INT3();
     KLOGEXITVOID();
 }

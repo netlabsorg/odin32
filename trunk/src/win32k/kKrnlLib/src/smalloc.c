@@ -1,4 +1,4 @@
-/* $Id: smalloc.c,v 1.1 2002-03-10 02:45:57 bird Exp $
+/* $Id: smalloc.c,v 1.2 2002-03-31 19:01:18 bird Exp $
  *
  * Swappable Heap - AVL.
  *
@@ -11,7 +11,7 @@
  *
  */
 #ifndef NOFILEID
-static const char szFileId[] = "$Id: smalloc.c,v 1.1 2002-03-10 02:45:57 bird Exp $";
+static const char szFileId[] = "$Id: smalloc.c,v 1.2 2002-03-31 19:01:18 bird Exp $";
 #endif
 
 
@@ -65,9 +65,9 @@ static const char szFileId[] = "$Id: smalloc.c,v 1.1 2002-03-10 02:45:57 bird Ex
 #ifdef RING0
     #include "dev32hlp.h"
 #endif
-#include "kTypes.h"
-#include "kAVL.h"
-#include "kLog.h"
+#include "kLib/kTypes.h"
+#include "kLib/kAVL.h"
+#include "kLib/kLog.h"
 #include "kKLsmalloc.h"
 #include "kKLrmalloc.h"
 #include "dev32.h"

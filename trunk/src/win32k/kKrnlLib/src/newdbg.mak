@@ -1,4 +1,4 @@
-# $Id: newdbg.mak,v 1.1 2002-03-10 02:45:57 bird Exp $
+# $Id: newdbg.mak,v 1.2 2002-03-31 19:01:17 bird Exp $
 
 #
 # newdbg - separate make file for the debug new.
@@ -12,7 +12,7 @@
 #
 # Setup.
 #
-ALL_INCLUDES= -I..\include\kLib -I..\include
+ALL_INCLUDES= -I../include
 ALL_DEFINES = -DKKRNLLIB
 PATH_ROOT   = ..\..\..\..
 !include $(PATH_ROOT)\tools\make\setup.mak
@@ -26,6 +26,7 @@ CXX_FLAGS_SYS = $(CXX_FLAGS_SYS) -Tm+
 #
 TARGET_MODE = SYSLIB
 TARGET_NAME = kKrnlLib_newdbg
+MAKEFILE    = newdbg.mak
 
 
 #

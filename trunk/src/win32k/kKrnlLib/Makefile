@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.23 2002-03-10 04:58:29 bird Exp $
+# $Id: Makefile,v 1.24 2002-03-31 19:01:03 bird Exp $
 
 #
 # kKrnlLib main file.
@@ -32,4 +32,6 @@ PREMAKEFILES= kKrnlLib.mak #kKrnlLibR3.mak
 needed:
     @$(TOOL_DODIRS) "tools" $(TOOL_MAKE) build
 #    @$(TOOL_DOMAKES) "" $(TOOL_MAKE) build
+
+
 

@@ -1,4 +1,4 @@
-/* $Id: vprntf16.c,v 1.1 2002-03-10 02:45:58 bird Exp $
+/* $Id: d16vprintf.c,v 1.1 2002-03-31 19:01:15 bird Exp $
  *
  * vprintf and printf - 16-bit.
  *
@@ -37,7 +37,7 @@
 
 #include "devSegDf.h"                   /* Win32k segment definitions. */
 #include "dev16.h"
-#include "vprntf16.h"
+#include "d16vprintf.h"
 #ifdef RING0
 #include "options.h"
 #include "conio.h"

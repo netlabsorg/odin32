@@ -1,4 +1,4 @@
-; $Id: devFirst.asm,v 1.1 2002-03-10 02:45:54 bird Exp $
+; $Id: devFirst.asm,v 1.2 2002-03-31 19:01:15 bird Exp $
 ;
 ; DevFirst - entrypoint and segment definitions
 ;
@@ -12,6 +12,7 @@
 ; Include files
 ;
     include devsegdf.inc
+    include devhdr.inc
     include sas.inc
 
 ;
@@ -65,7 +66,6 @@ DATA32 ends
     extrn R0Addr32bit:near
     .286p
     extrn _strategy:near
-
 
 CODE16 segment
     ASSUME CS:CODE16, DS:DATA16, ES:NOTHING, SS:NOTHING
@@ -450,6 +450,36 @@ CODE16_INIT ends
 
 DATA16 segment
 DATA16START label byte                  ; Note. no start string here!
+
+aDevHdrs: ;DDHDR aDevHdrs[2] /* This is the first piece data in the driver!!!!!!! */
+;
+; device 1
+;
+    dw size SysDev3                     ; NextHeader (offset)
+    dw seg aDevHdrs                     ; NextHeader (selector)
+    dw DEVLEV_3 or DEV_30 or DEV_CHAR_DEV ; SDevAtt
+    dw offset _strategyAsm0             ; StrategyEP
+    dw 0                                ; InterruptEP
+    db "$KrnlHlp"                       ; DevName
+    dw 0                                ; SDevProtCS
+    dw 0                                ; SDevProtDS
+    dw 0                                ; SDevRealCS
+    dw 0                                ; SDevRealDS
+    dd DEV_16MB or DEV_IOCTL2           ; SDevCaps
+;
+; device 2
+;
+    dw 0ffffh                           ; NextHeader (offset)
+    dw 0ffffh                           ; NextHeader (selector)
+    dw DEVLEV_3 or DEV_30 or DEV_CHAR_DEV ; SDevAtt
+    dw offset _strategyAsm1             ; StrategyEP
+    dw 0                                ; InterruptEP
+    db "$KrnlLib"                       ; DevName
+    dw 0                                ; SDevProtCS
+    dw 0                                ; SDevProtDS
+    dw 0                                ; SDevRealCS
+    dw 0                                ; SDevRealDS
+    dd DEV_16MB or DEV_IOCTL2           ; SDevCaps
 DATA16 ends
 
 DATA16_BSS segment

@@ -1,4 +1,4 @@
-/* $Id: d16Strat.c,v 1.1 2002-03-10 02:45:53 bird Exp $
+/* $Id: d16Strat.c,v 1.2 2002-03-31 19:01:15 bird Exp $
  *
  * d16strat.c - 16-bit strategy routine, device headers, device_helper (ptr)
  *              and 16-bit IOClts.
@@ -37,6 +37,7 @@
 /*******************************************************************************
 *   Global Variables                                                           *
 *******************************************************************************/
+#if 0 /* moved to devfirst.asm */
 extern DDHDR _far aDevHdrs[2];
 DDHDR aDevHdrs[2] = /* This is the first piece data in the driver!!!!!!! */
 {
@@ -65,7 +66,7 @@ DDHDR aDevHdrs[2] = /* This is the first piece data in the driver!!!!!!! */
         DEV_16MB | DEV_IOCTL2                       /* SDevCaps */
     }
 };
-
+#endif
 
 
 /*******************************************************************************

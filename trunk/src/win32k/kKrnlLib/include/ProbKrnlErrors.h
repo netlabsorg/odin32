@@ -1,4 +1,4 @@
-/* $Id: ProbKrnlErrors.h,v 1.3 2001-11-19 03:06:38 bird Exp $
+/* $Id: ProbKrnlErrors.h,v 1.4 2002-03-31 19:01:04 bird Exp $
  *
  * Error definitions for Win32k.sys
  *
@@ -21,7 +21,7 @@
  *
  * NOTE! ERROR_PROB_KRNL_*  <  ERROR_PROB_SYM_*  <  ERROR_PROB_SYMDB_*
  */
-#define ERROR_PROB_BASE                             10000
+#define ERROR_PROB_BASE                             0x3000
 #define ERROR_PROB_KRNL_FIRST                       ERROR_PROB_KRNL_OPEN_FAILED
 #define ERROR_PROB_KRNL_LAST                        ERROR_PROB_KRNL_OTE_READ
 #define ERROR_PROB_KRNL_OPEN_FAILED                 (ERROR_PROB_BASE + 0)

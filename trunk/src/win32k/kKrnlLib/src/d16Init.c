@@ -1,4 +1,4 @@
-/* $Id: d16Init.c,v 1.1 2002-03-10 02:45:53 bird Exp $
+/* $Id: d16Init.c,v 1.2 2002-03-31 19:01:13 bird Exp $
  *
  * d16init - init routines for both drivers.
  *
@@ -44,7 +44,7 @@
 #include "probkrnl.h"
 #include "dev1632.h"
 #include "dev16.h"
-#include "vprntf16.h"
+#include "d16vprintf.h"
 #include "kKLlog.h"
 #include "options.h"
 #include "ProbKrnlErrors.h"
@@ -148,9 +148,9 @@ USHORT NEAR dev1Init(PRPINITIN pRpIn, PRPINITOUT pRpOut)
     else
     {
         char *psz = GetErrorMsg(rc);
-        printf16("kKrnlLib.sys init failed with rc=%d (%x)\n", rc, rc);
+        printf16("kKrnlLib.sys init failed with rc=0x%x (%d)\n", rc, rc);
         if (psz)
-            printf16("    %s\n\n", psz);
+            printf16("Explanation: %s\n\n", psz);
         else
             printf16("\n");
         pRpOut->Status = pRpOut->rph.Status = STATUS_DONE | STERR | ERROR_I24_GEN_FAILURE;
