@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.128 2001-10-01 17:28:08 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.129 2001-10-03 22:34:32 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -476,9 +476,9 @@ private:
         VOID  AdjustRectOuter(LPRECT rect,BOOL menu);
         VOID  AdjustRectInner(LPRECT rect);
         LONG  HandleNCCalcSize(BOOL calcValidRects,RECT *winRect);
-        VOID  GetInsideRect(RECT *rect);
         VOID  DrawFrame(HDC hdc,RECT *rect,BOOL dlgFrame,BOOL active);
 public:
+        VOID  GetInsideRect(RECT *rect);
         LONG  HandleNCHitTest(POINT pt);
         BOOL  GetSysPopupPos(RECT* rect);
 private:
