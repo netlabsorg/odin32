@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.50 2000-06-07 14:51:29 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.51 2000-09-04 18:23:55 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -1061,9 +1061,19 @@ LONG Win32Dialog::SetWindowLongA(int index, ULONG value, BOOL fUnicode)
     switch(index)
     {
     case DWL_DLGPROC:
+    {
+	//Note: Type of SetWindowLong determines new window proc type
+        //      UNLESS the new window proc has already been registered
+        //      (use the old type in that case)
+        //      (VERIFIED in NT 4, SP6)
+        WINDOWPROCTYPE type = WINPROC_GetProcType((HWINDOWPROC)value);
+	if(type == WIN_PROC_INVALID) {
+		type = (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A;
+	}
         oldval = (LONG)WINPROC_GetProc(Win32DlgProc, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A);
-        WINPROC_SetProc((HWINDOWPROC *)&Win32DlgProc, (WNDPROC)value, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A, WIN_PROC_WINDOW);
+        WINPROC_SetProc((HWINDOWPROC *)&Win32DlgProc, (WNDPROC)value, type, WIN_PROC_WINDOW);
         return oldval;
+    }
     case DWL_MSGRESULT:
         oldval = msgResult;
         msgResult = value;

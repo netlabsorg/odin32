@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.73 2000-09-02 08:30:11 sandervl Exp $ */
+/* $Id: window.cpp,v 1.74 2000-09-04 18:23:58 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -801,8 +801,18 @@ int WIN32API GetWindowTextW(HWND hwnd, LPWSTR lpsz, int cch)
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
-    dprintf(("GetWindowTextW %x", hwnd));
+#ifdef DEBUG
+    int rc = window->GetWindowTextW(lpsz, cch);
+    if(rc) {
+    	LPSTR astring = UnicodeToAsciiString(lpsz);
+    	dprintf(("GetWindowTextW %x %s", hwnd, lpsz));
+    	free(astring);
+    }
+    else dprintf(("GetWindowTextW %x returned %d", hwnd, rc));
+    return rc;
+#else
     return window->GetWindowTextW(lpsz, cch);
+#endif
 }
 //******************************************************************************
 //******************************************************************************
@@ -831,7 +841,15 @@ BOOL WIN32API SetWindowTextW( HWND hwnd, LPCWSTR lpsz)
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
-    dprintf(("SetWindowTextW %x", hwnd));
+#ifdef DEBUG
+    LPSTR astring = UnicodeToAsciiString(lpsz);
+    dprintf(("SetWindowTextW %x %s", hwnd, astring));
+    free(astring);
+    if(hwnd == 0x68000008) {
+	int i;
+	i = 5;
+    }
+#endif
     return window->SetWindowTextW((LPWSTR)lpsz);
 }
 /*******************************************************************
