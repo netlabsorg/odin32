@@ -1,4 +1,4 @@
-/* $Id: OS2KSEC.h,v 1.1 2001-09-14 01:50:15 bird Exp $
+/* $Id: OS2KSEC.h,v 1.2 2001-09-26 03:52:36 bird Exp $
  *
  * OS/2 Kernel Security helpers : prototypes, typedefs and macros.
  *
@@ -16,6 +16,7 @@
  * @param       hFile   SFN filehandle.
  */
 PSZ SECCALL SecPathFromSFN(SFN hFile);
+PSZ SECCALL OrgSecPathFromSFN(SFN hFile);
 
 
 #endif
