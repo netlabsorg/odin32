@@ -1,4 +1,4 @@
-/* $Id: db.cpp,v 1.15 2000-07-18 17:56:50 bird Exp $ *
+/* $Id: db.cpp,v 1.16 2000-07-21 21:09:44 bird Exp $ *
  *
  * DB - contains all database routines.
  *
@@ -157,7 +157,7 @@ BOOL _System dbDisconnect(void)
  * @returns   Dll refid. -1 on error.
  * @param     pszDllName  Dll name.
  */
-signed short _System dbGetDll(const char *pszDllName)
+signed long _System dbGetDll(const char *pszDllName)
 {
     int         rc;
     char        szQuery[256];
@@ -172,25 +172,25 @@ signed short _System dbGetDll(const char *pszDllName)
     else
         rc = -1;
     mysql_free_result(pres);
-    return (short)rc;
+    return (signed long)rc;
 }
 
 
 /**
  * Count the function in a given dll.
  * @returns  Number of functions. -1 on error.
- * @param    usDll        Dll refcode.
+ * @param    lDll         Dll refcode.
  * @param    fNotAliases  TRUE: don't count aliased functions.
  */
-signed long     _System dbCountFunctionInDll(signed long ulDll, BOOL fNotAliases)
+signed long     _System dbCountFunctionInDll(signed long lDll, BOOL fNotAliases)
 {
     signed long rc;
     char        szQuery[256];
     MYSQL_RES * pres;
 
-    if (ulDll >= 0)
+    if (lDll >= 0)
     {
-        sprintf(&szQuery[0], "SELECT count(refcode) FROM function WHERE dll = %ld\n", ulDll);
+        sprintf(&szQuery[0], "SELECT count(refcode) FROM function WHERE dll = %ld\n", lDll);
         if (fNotAliases)
             strcat(&szQuery[0], " AND aliasfn < 0");
         rc   = mysql_query(pmysql, &szQuery[0]);
@@ -216,7 +216,7 @@ signed long     _System dbCountFunctionInDll(signed long ulDll, BOOL fNotAliases
  * @remark    This search must be case insensitive.
  *            (In the mysql-world everything is case insensitive!)
  */
-signed short _System dbCheckInsertDll(const char *pszDll)
+signed long _System dbCheckInsertDll(const char *pszDll, char fchType)
 {
     int         rc;
     char        szQuery[256];
@@ -232,8 +232,10 @@ signed short _System dbCheckInsertDll(const char *pszDll)
     {
         mysql_free_result(pres);
 
-        sprintf(&szQuery[0], "INSERT INTO dll(name) VALUES('%s')\n", pszDll);
+        sprintf(&szQuery[0], "INSERT INTO dll(name, type) VALUES('%s', '%c')\n", pszDll, fchType);
         rc = mysql_query(pmysql, &szQuery[0]);
+        if (rc < 0)
+            return -1;
 
         /* select row to get refcode */
         sprintf(&szQuery[0], "SELECT refcode, name FROM dll WHERE name = '%s'\n", pszDll);
@@ -247,7 +249,7 @@ signed short _System dbCheckInsertDll(const char *pszDll)
         rc = -1;
     mysql_free_result(pres);
 
-    return (short)rc;
+    return (long)rc;
 }
 
 
@@ -279,26 +281,29 @@ unsigned short _System dbGet(const char *pszTable, const char *pszGetColumn,
         rc = -1;
     mysql_free_result(pres);
 
-    return (short)rc;
+    return (unsigned short)rc;
 }
 
 
 /**
  * Updates or inserts a function name into the database.
- * @returns   Success indicator. TRUE / FALSE.
- * @param     usDll           Dll refcode.
- * @param     pszFunction     Function name.
- * @param     pszIntFunction  Internal function name. (required!)
- * @param     ulOrdinal       Ordinal value.
- * @param     fIgnoreOrdinal  Do not update ordinal value.
+ * The update flags is always updated.
+ * @returns     Success indicator. TRUE / FALSE.
+ * @param       lDll                Dll refcode.
+ * @param       pszFunction         Function name.
+ * @param       pszIntFunction      Internal function name. (required!)
+ * @param       ulOrdinal           Ordinal value.
+ * @param       fIgnoreOrdinal      Do not update ordinal value.
+ * @param       fchType             Function type flag. One of the FUNCTION_* defines.
  */
-BOOL _System dbInsertUpdateFunction(unsigned short usDll,
+BOOL _System dbInsertUpdateFunction(signed long lDll,
                                     const char *pszFunction, const char *pszIntFunction,
-                                    unsigned long ulOrdinal, BOOL fIgnoreOrdinal)
+                                    unsigned long ulOrdinal, BOOL fIgnoreOrdinal, char fchType)
 {
-    int  rc;
-    long lFunction = -1;
-    char szQuery[512];
+    int     rc;
+    long    lFunction = -1;
+    char    szQuery[512];
+    char *  pszQuery = &szQuery[0];
     MYSQL_RES *pres;
 
     /* when no internal name fail! */
@@ -306,43 +311,43 @@ BOOL _System dbInsertUpdateFunction(unsigned short usDll,
         return FALSE;
 
     /* try find function */
-    sprintf(&szQuery[0], "SELECT refcode, intname FROM function WHERE dll = %d AND name = '%s'", usDll, pszFunction);
-    rc = mysql_query(pmysql, &szQuery[0]);
+    sprintf(pszQuery, "SELECT refcode, intname FROM function WHERE dll = %d AND name = '%s'", lDll, pszFunction);
+    rc = mysql_query(pmysql, pszQuery);
     pres = mysql_store_result(pmysql);
     if (rc >= 0 && pres != NULL && mysql_num_rows(pres) != 0)
-    {   /* update function (function is found) */
+    {   /*
+         * Found the function. So now we'll update it.
+         */
         MYSQL_ROW parow;
         if (mysql_num_rows(pres) > 1)
         {
             fprintf(stderr, "internal database integrity error(%s): More function by the same name for the same dll. "
-                    "usDll = %d, pszFunction = %s\n", __FUNCTION__, usDll, pszFunction);
+                    "lDll = %d, pszFunction = %s\n", __FUNCTION__, lDll, pszFunction);
             return FALSE;
         }
 
         parow = mysql_fetch_row(pres);
-        if (parow != NULL)
-            lFunction = getvalue(0, parow);
+        lFunction = getvalue(0, parow);
         mysql_free_result(pres);
 
+        strcpy(pszQuery, "UPDATE function SET updated = updated + 1");
+        pszQuery += strlen(pszQuery);
         if (strcmp(parow[1], pszIntFunction) != 0)
-        {
-            sprintf(&szQuery[0], "UPDATE function SET intname = '%s' WHERE refcode = %ld",
-                    pszIntFunction, lFunction);
-            rc = mysql_query(pmysql, &szQuery[0]);
-        }
+            pszQuery += sprintf(pszQuery, ", intname = '%s'", pszIntFunction);
 
-        if (rc >= 0 && !fIgnoreOrdinal)
-        {
-            sprintf(&szQuery[0], "UPDATE function SET ordinal = %ld WHERE refcode = %ld",
-                    ulOrdinal, lFunction);
-            rc = mysql_query(pmysql, &szQuery[0]);
-        }
+        if (!fIgnoreOrdinal)
+            pszQuery += sprintf(pszQuery, ", ordinal = %ld", ulOrdinal);
 
+        sprintf(pszQuery, ", type = '%c' WHERE refcode = %ld", fchType, lFunction);
+        rc = mysql_query(pmysql, &szQuery[0]);
     }
     else
-    {   /* insert */
-        sprintf(&szQuery[0], "INSERT INTO function(dll, name, intname, ordinal) VALUES(%d, '%s', '%s', %ld)",
-                usDll, pszFunction, pszIntFunction, ulOrdinal);
+    {   /*
+         * The function was not found. (or maybe an error occured?)
+         * Insert it.
+         */
+        sprintf(&szQuery[0], "INSERT INTO function(dll, name, intname, ordinal, updated, type) VALUES(%d, '%s', '%s', %ld, 1, '%c')",
+                lDll, pszFunction, pszIntFunction, ulOrdinal, fchType);
         rc = mysql_query(pmysql, &szQuery[0]);
     }
 
@@ -354,7 +359,7 @@ BOOL _System dbInsertUpdateFunction(unsigned short usDll,
 /**
  * Inserts or updates (existing) file information.
  * @returns     Success indicator (TRUE / FALSE).
- * @param       usDll           Dll reference code.
+ * @param       lDll           Dll reference code.
  * @param       pszFilename     Filename.
  * @param       pszDescription  Pointer to file description.
  * @param       pszLastDateTime Date and time for last change (ISO).
@@ -363,7 +368,7 @@ BOOL _System dbInsertUpdateFunction(unsigned short usDll,
  * @sketch
  * @remark
  */
-BOOL            _System dbInsertUpdateFile(unsigned short usDll,
+BOOL            _System dbInsertUpdateFile(signed long lDll,
                                            const char *pszFilename,
                                            const char *pszDescription,
                                            const char *pszLastDateTime,
@@ -376,12 +381,12 @@ BOOL            _System dbInsertUpdateFile(unsigned short usDll,
     MYSQL_RES *pres;
 
     /* parameter assertions */
-    assert(usDll != 0);
+    assert(lDll != 0);
     assert(pszFilename != NULL);
     assert(*pszFilename != '\0');
 
     /* try find file */
-    sprintf(&szQuery[0], "SELECT refcode, name FROM file WHERE dll = %d AND name = '%s'", usDll, pszFilename);
+    sprintf(&szQuery[0], "SELECT refcode, name FROM file WHERE dll = %d AND name = '%s'", lDll, pszFilename);
     rc = mysql_query(pmysql, &szQuery[0]);
     pres = mysql_store_result(pmysql);
     if (rc >= 0 && pres != NULL && mysql_num_rows(pres) != 0)
@@ -390,7 +395,7 @@ BOOL            _System dbInsertUpdateFile(unsigned short usDll,
         if (mysql_num_rows(pres) > 1)
         {
             fprintf(stderr, "internal database integrity error(%s): More files by the same name in the same dll. "
-                    "usDll = %d, pszFilename = %s\n", __FUNCTION__, usDll, pszFilename);
+                    "lDll = %d, pszFilename = %s\n", __FUNCTION__, lDll, pszFilename);
             return FALSE;
         }
 
@@ -445,7 +450,7 @@ BOOL            _System dbInsertUpdateFile(unsigned short usDll,
     else
     {   /* insert */
         sprintf(&szQuery[0], "INSERT INTO file(dll, name, description, lastauthor, lastdatetime, revision) VALUES(%d, '%s', %ld, ",
-                usDll, pszFilename, lLastAuthor);
+                lDll, pszFilename, lLastAuthor);
         if (pszDescription != NULL && *pszDescription != '\0')
             sqlstrcat(&szQuery[0], NULL, pszDescription);
         else
@@ -985,7 +990,7 @@ unsigned long _System dbUpdateFunction(PFNDESC pFnDesc, signed long lDll, char *
             f = TRUE;
         }
 
-        /* Equiv */
+        /* Time */
         if (pFnDesc->pszTime != NULL)
         {
             if (f)  strcat(pszQuery, ", ");
@@ -1916,6 +1921,156 @@ signed long _System dbGetNumberOfUpdatedFunction(signed long lDll)
 }
 
 
+
+/**
+ * Clear the update flags for all file in a dll/module.
+ * @returns     Success indicator. (TRUE / FALSE)
+ * @param       lDll    Dll refcode.
+ * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @remark      Intended for use by APIImport.
+ */
+BOOL             _System dbClearUpdateFlagFile(signed long lDll)
+{
+    int         rc;
+    char        szQuery[128];
+
+    sprintf(&szQuery[0],
+            "UPDATE file SET updated = 0 WHERE dll = (%ld)",
+            lDll);
+    rc = mysql_query(pmysql, &szQuery[0]);
+    return rc == 0;
+}
+
+
+/**
+ * Clear update flag
+ * @returns     Success indicator.
+ * @param       lDll    Dll refcode.
+ * @param       fAll    All dll. If false only APIs and Internal APIs are cleared
+ * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @remark      Intended for use by APIImport.
+ */
+BOOL             _System dbClearUpdateFlagFunction(signed long lDll, BOOL fAll)
+{
+    int         rc;
+    char        szQuery[128];
+
+    sprintf(&szQuery[0],
+            "UPDATE function SET updated = 0 WHERE dll = (%ld)",
+            lDll);
+    if (!fAll)
+        strcat(&szQuery[0], " AND type IN ('A', 'I')");
+    rc = mysql_query(pmysql, &szQuery[0]);
+    return rc == 0;
+}
+
+
+
+/**
+ * Deletes all the files in a dll/module which was not found/updated.
+ * @returns     Success indicator.
+ * @param       lDll    Dll refcode.
+ * @sketch      Select all files which is to be deleted.
+ *                  Set all references to each file in function to -1.
+ *              Delete all files which is to be deleted.
+ * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @remark      Use with GRATE CARE!
+ */
+BOOL             _System dbDeleteNotUpdatedFiles(signed long lDll)
+{
+    MYSQL_RES * pres;
+    int         rc;
+    BOOL        fRc = TRUE;
+    char        szQuery[128];
+
+    sprintf(&szQuery[0],
+            "SELECT refcode FROM file WHERE dll = (%ld) AND updated = 0",
+            lDll);
+    rc = mysql_query(pmysql, &szQuery[0]);
+    pres = mysql_store_result(pmysql);
+    if (pres != NULL && mysql_num_rows(pres))
+    {
+        MYSQL_ROW  row;
+        while ((row = mysql_fetch_row(pres)) != NULL)
+        {
+            sprintf(&szQuery[0],
+                    "UPDATE function SET file = -1 WHERE file = %s",
+                    row[0]);
+            rc = mysql_query(pmysql, &szQuery[0]);
+            if (rc) fRc = FALSE;
+        }
+    }
+
+    sprintf(&szQuery[0],
+            "DELETE FROM file WHERE dll = %ld AND updated = 0",
+            lDll);
+    rc = mysql_query(pmysql, &szQuery[0]);
+    if (rc) fRc = FALSE;
+
+    return fRc;
+}
+
+
+/**
+ * Deletes all the functions which haven't been updated.
+ * All rows in other tables which references the functions are
+ * also delete.
+ *
+ * @returns     Success indicator. (TRUE / FALSE)
+ * @param       lDll    The refcode of the dll owning the functions.
+ * @param       fAll    All function. If FALSE then only APIs and Internal APIs.
+ * @sketch      Select all functions which has updated = 0 and dll = lDll.
+ *                  Delete the referenced to the functions in:
+ *                      parameters
+ *                      fnauthor
+ *              Delete all function which has updated = 0 and dll = lDll
+ *
+ * @remark      Use with GREATE CARE!
+ */
+BOOL             _System dbDeleteNotUpdatedFunctions(signed long lDll, BOOL fAll)
+{
+    MYSQL_RES * pres;
+    int         rc;
+    BOOL        fRc = TRUE;
+    char        szQuery[128];
+
+    sprintf(&szQuery[0],
+            "SELECT refcode FROM function WHERE dll = %ld AND updated = 0",
+            lDll);
+    if (!fAll)
+        strcat(&szQuery[0], " AND type IN ('A', 'I')");
+    rc = mysql_query(pmysql, &szQuery[0]);
+    pres = mysql_store_result(pmysql);
+    if (pres != NULL && mysql_num_rows(pres))
+    {
+        MYSQL_ROW  row;
+        while ((row = mysql_fetch_row(pres)) != NULL)
+        {
+            /* delete parameters */
+            sprintf(&szQuery[0], "DELETE FROM parameter WHERE function %s", row[0]);
+            rc = mysql_query(pmysql, &szQuery[0]);
+            if (rc) fRc = FALSE;
+
+            /* author relations */
+            sprintf(&szQuery[0], "DELETE FROM fnauthor WHERE function %s", row[0]);
+            rc = mysql_query(pmysql, &szQuery[0]);
+            if (rc) fRc = FALSE;
+        }
+    }
+
+    sprintf(&szQuery[0],
+            "DELETE FROM function WHERE dll = %ld AND updated = 0",
+            lDll);
+    if (!fAll)
+        strcat(&szQuery[0], " AND type IN ('A', 'I')");
+    rc = mysql_query(pmysql, &szQuery[0]);
+    if (rc) fRc = FALSE;
+
+    return fRc;
+}
+
+
+
 /**
  * Appends a set of strings to a query. The main string (pszStr) is enclosed in "'"s.
  * @returns   Pointer to end of the string.
@@ -1928,7 +2083,7 @@ signed long _System dbGetNumberOfUpdatedFunction(signed long lDll)
  */
 static char *sqlstrcat(char *pszQuery, const char *pszBefore, const char *pszStr, const char *pszAfter)
 {
-    char *          pszLineStart = pszQuery;    
+    char *          pszLineStart = pszQuery;
     register char   ch;
 
     pszQuery += strlen(pszQuery);
@@ -1981,7 +2136,7 @@ static char *sqlstrcat(char *pszQuery, const char *pszBefore, const char *pszStr
                 *pszQuery++ = '\\';
                 *pszQuery++ = 'n';
                 break;
-            
+
             case '\t':
                 *pszQuery++ = '\\';
                 *pszQuery++ = 't';
