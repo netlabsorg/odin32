@@ -1,4 +1,4 @@
-/* $Id: pidl.cpp,v 1.5 2000-01-08 02:28:54 phaller Exp $ */
+/* $Id: pidl.cpp,v 1.6 2000-03-26 16:34:42 cbratschi Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -13,6 +13,7 @@
  * NOTES
  *  a pidl == NULL means desktop and is legal
  *
+ * Corel WINE 20000324 level
  */
 
 /*****************************************************************************
@@ -91,6 +92,7 @@ void pdump (LPCITEMIDLIST pidl)
      {
        MESSAGE ("empty pidl (Desktop)\n");
      }
+     pcheck(pidl);
    }
 
    __SET_DEBUGGING(__DBCL_TRACE, dbch_shell, bIsShellDebug);
@@ -891,6 +893,9 @@ ODINFUNCTION3(HRESULT,SHGetSpecialFolderLocation,HWND,          hwndOwner,
 /*************************************************************************
  * SHGetDataFromIDListA [SHELL32.247]
  *
+ * NOTES
+ *  the pidl can be a simple one. since we cant get the path out of the pidl
+ *  we have to take all data from the pidl
  */
 
 ODINFUNCTION5(HRESULT,SHGetDataFromIDListA,LPSHELLFOLDER, psf,
@@ -899,6 +904,8 @@ ODINFUNCTION5(HRESULT,SHGetDataFromIDListA,LPSHELLFOLDER, psf,
                                            LPVOID,        dest,
                                            int,           len)
 {
+   DWORD type;
+
    TRACE_(shell)("sf=%p pidl=%p 0x%04x %p 0x%04x stub\n",psf,pidl,nFormat,dest,len);
 
    if (! psf || !dest )  return E_INVALIDARG;
@@ -907,19 +914,17 @@ ODINFUNCTION5(HRESULT,SHGetDataFromIDListA,LPSHELLFOLDER, psf,
    {
      case SHGDFIL_FINDDATA:
        {
-          WIN32_FIND_DATAA * pfd = (WIN32_FIND_DATAA*)dest;
-          CHAR pszPath[MAX_PATH];
-          HANDLE  handle;
+               WIN32_FIND_DATAA * pfd = (WIN32_FIND_DATAA*)dest;
 
-          if ( len < sizeof (WIN32_FIND_DATAA)) {
-       ERR_(shell)("%d does not find sizeof(finddata)\n",len);
-            return E_INVALIDARG;
-          }
+               if ( len < sizeof (WIN32_FIND_DATAA)) return E_INVALIDARG;
 
-          SHGetPathFromIDListA(pidl, pszPath);
-
-          if ((handle  = FindFirstFileA ( pszPath, pfd)))
-            FindClose (handle);
+               ZeroMemory(pfd, sizeof (WIN32_FIND_DATAA));
+               _ILGetFileDateTime( pidl, &(pfd->ftLastWriteTime));
+               pfd->dwFileAttributes = _ILGetFileAttributes(pidl, NULL, 0);
+               pfd->nFileSizeLow = _ILGetFileSize ( pidl, NULL, 0);
+               type   = _ILGetDataPointer(pidl)->type;
+               lstrcpynA(pfd->cFileName,_ILGetTextPointer(type,_ILGetDataPointer(pidl)), MAX_PATH);
+               lstrcpynA(pfd->cAlternateFileName,_ILGetSTextPointer(type,_ILGetDataPointer(pidl)), 14);
        }
        return NOERROR;
 
@@ -945,30 +950,37 @@ ODINFUNCTION5(HRESULT,SHGetDataFromIDListW,LPSHELLFOLDER, psf,
                                            LPVOID,        dest,
                                            int,           len)
 {
-   if (! psf || !dest )  return E_INVALIDARG;
+        DWORD type;
 
-   switch (nFormat)
-   {
-     case SHGDFIL_FINDDATA:
-       {
-          WIN32_FIND_DATAW * pfd = (WIN32_FIND_DATAW*)dest;
-          WCHAR   pszPath[MAX_PATH];
-          HANDLE  handle;
+        if (! psf || !dest )  return E_INVALIDARG;
 
-          if ( len < sizeof (WIN32_FIND_DATAW)) {
-       ERR_(shell)("%d does not find sizeof(finddata)\n",len);
-            return E_INVALIDARG;
-          }
-          SHGetPathFromIDListW(pidl, pszPath);
-          if ((handle  = FindFirstFileW ( pszPath, pfd)))
-            FindClose (handle);
-       }
-       return NOERROR;
-     default: /* fallthrough */
-       break;
-   }
-   FIXME_(shell)("(sf=%p pidl=%p nFormat=0x%04x %p 0x%04x), unhandled.\n",psf,pidl,nFormat,dest,len);
-   return SHGetDataFromIDListA( psf, pidl, nFormat, dest, len);
+        switch (nFormat)
+        {
+          case SHGDFIL_FINDDATA:
+            {
+               WIN32_FIND_DATAW * pfd = (WIN32_FIND_DATAW*)dest;
+
+               if ( len < sizeof (WIN32_FIND_DATAW)) return E_INVALIDARG;
+
+               ZeroMemory(pfd, sizeof (WIN32_FIND_DATAA));
+               _ILGetFileDateTime( pidl, &(pfd->ftLastWriteTime));
+               pfd->dwFileAttributes = _ILGetFileAttributes(pidl, NULL, 0);
+               pfd->nFileSizeLow = _ILGetFileSize ( pidl, NULL, 0);
+               type   = _ILGetDataPointer(pidl)->type;
+               lstrcpynAtoW(pfd->cFileName,_ILGetTextPointer(type,_ILGetDataPointer(pidl)), MAX_PATH);
+               lstrcpynAtoW(pfd->cAlternateFileName,_ILGetSTextPointer(type,_ILGetDataPointer(pidl)), 14);
+            }
+            return NOERROR;
+          case SHGDFIL_NETRESOURCE:
+          case SHGDFIL_DESCRIPTIONID:
+            FIXME_(shell)("SHGDFIL %i stub\n", nFormat);
+            break;
+
+          default:
+            ERR_(shell)("Unknown SHGDFIL %i, please report\n", nFormat);
+        }
+
+        return E_INVALIDARG;
 }
 
 /*************************************************************************
@@ -998,12 +1010,13 @@ ODINFUNCTION2(BOOL,SHGetPathFromIDListA,LPCITEMIDLIST, pidl,
    if (!pidl) return FALSE;
 
    pdump(pidl);
-
+#ifdef SHELL_NO_DESKTOP
    if(_ILIsDesktop(pidl))
    {
       SHGetSpecialFolderPathA(0, pszPath, CSIDL_DESKTOPDIRECTORY, FALSE);
    }
    else
+#endif
    {
      if (SHGetDesktopFolder(&shellfolder)==S_OK)
      {
@@ -1074,6 +1087,7 @@ ODINFUNCTION4(HRESULT,SHBindToParent,LPCITEMIDLIST, pidl,
        ILFree (pidlChild);
 
      SHFree (pidlParent);
+     if (psf) IShellFolder_Release(psf);
    }
 
 
@@ -1115,32 +1129,32 @@ ODINFUNCTION0(LPITEMIDLIST,_ILCreateDesktop)
 
 ODINFUNCTION0(LPITEMIDLIST,_ILCreateMyComputer)
 {
-  return _ILCreate(PT_MYCOMP, &IID_MyComputer, sizeof(GUID));
+  return _ILCreate(PT_MYCOMP, &CLSID_MyComputer, sizeof(GUID));
 }
 
 ODINFUNCTION0(LPITEMIDLIST,_ILCreateIExplore)
 {
-   return _ILCreate(PT_MYCOMP, &IID_IExplore, sizeof(GUID));
+   return _ILCreate(PT_MYCOMP, &CLSID_Internet, sizeof(GUID));
 }
 
 ODINFUNCTION0(LPITEMIDLIST,_ILCreateControl)
 {
-   return _ILCreate(PT_SPECIAL, &IID_Control, sizeof(GUID));
+   return _ILCreate(PT_SPECIAL, &CLSID_ControlPanel, sizeof(GUID));
 }
 
 ODINFUNCTION0(LPITEMIDLIST,_ILCreatePrinter)
 {
-   return _ILCreate(PT_SPECIAL, &IID_Printer, sizeof(GUID));
+   return _ILCreate(PT_SPECIAL, &CLSID_Printers, sizeof(GUID));
 }
 
 ODINFUNCTION0(LPITEMIDLIST,_ILCreateNetwork)
 {
-   return _ILCreate(PT_MYCOMP, &IID_Network, sizeof(GUID));
+   return _ILCreate(PT_MYCOMP, &CLSID_NetworkPlaces, sizeof(GUID));
 }
 
 ODINFUNCTION0(LPITEMIDLIST,_ILCreateBitBucket)
 {
-   return _ILCreate(PT_MYCOMP, &IID_BitBucket, sizeof(GUID));
+   return _ILCreate(PT_MYCOMP, &CLSID_RecycleBin, sizeof(GUID));
 }
 
 ODINFUNCTION1(LPITEMIDLIST,_ILCreateDrive,LPCSTR,lpszNew)
@@ -1356,7 +1370,7 @@ ODINFUNCTION1(BOOL,_ILIsMyComputer,LPCITEMIDLIST, pidl)
    TRACE_(pidl)("(%p)\n",pidl);
 
    if (iid)
-     return IsEqualIID(iid, &IID_MyComputer);
+     return IsEqualIID(iid, &CLSID_MyComputer);
    return FALSE;
 }
 
@@ -1439,7 +1453,7 @@ ODINFUNCTION3(DWORD, _ILSimpleGetText, LPCITEMIDLIST, pidl,
 
    pData = _ILGetDataPointer(pidl);
 
-   if (!pData)
+   if (_ILIsDesktop(pidl))
    {
     /* desktop */
      if (HCR_GetClassName(&CLSID_ShellDesktop, szTemp, MAX_PATH))
@@ -1620,13 +1634,27 @@ ODINFUNCTION3(BOOL, _ILGetFileDate, LPCITEMIDLIST, pidl,
                                     LPSTR,         pOut,
                                     UINT,          uOutSize)
 {
-   FILETIME ft;
-   SYSTEMTIME time;
+        FILETIME ft;
+        FILETIME lft;
+        SYSTEMTIME time;
+        char strTime[16];
+        UINT nTempSize=16;
 
-   if (! _ILGetFileDateTime( pidl, &ft )) return FALSE;
+        if (! _ILGetFileDateTime( pidl, &ft )) return FALSE;
 
-   FileTimeToSystemTime (&ft, &time);
-   return GetDateFormatA(LOCALE_USER_DEFAULT,DATE_SHORTDATE,&time, NULL,  pOut, uOutSize);
+        FileTimeToLocalFileTime(&ft, &lft);
+        FileTimeToSystemTime (&lft, &time);
+
+        if(GetDateFormatA(LOCALE_USER_DEFAULT,DATE_SHORTDATE,&time, NULL,  pOut, uOutSize) > 0)
+        {
+            if(GetTimeFormatA(LOCALE_USER_DEFAULT, TIME_NOSECONDS, &time, NULL, strTime, nTempSize) > 0)
+            {
+                strcat(pOut," ");
+                strcat(pOut, strTime);
+                return TRUE;
+            }
+        }
+        return FALSE;
 }
 
 /*************************************************************************
@@ -1664,7 +1692,76 @@ ODINFUNCTION3(BOOL,_ILGetFileSize,LPCITEMIDLIST, pidl,
    return 0;
 }
 
+/*************************************************************************
+ * _ILGetFileSizeKB
+ *
+ * Given the ItemIdList, get the FileSize in KiloByte
+ *
+ * PARAMS
+ *      pidl    [I] The ItemIDList
+ *      pOut    [I] The buffer to save the result
+ *      uOutsize [I] The size of the buffer
+ *
+ * RETURNS
+ *     The FileSize in KiloBytes
+ *
+ * NOTES
+ *      - pOut can be null when no string is needed
+ *      - Standard files in explorer or FileOpen have the file size in
+ *          Kilobyte
+ *
+ */
+DWORD _ILGetFileSizeKB (LPCITEMIDLIST pidl, LPSTR pOut, UINT uOutSize)
+{
+    LPPIDLDATA pdata =_ILGetDataPointer(pidl);
+    DWORD dwSize;
+    char tempSizeStr[24];
+    char kbStr[] = "KB";
+    int nTempSizeLen, nNumOfComma;
+    int i,j,k;
 
+    switch (pdata->type)
+    {
+        case PT_VALUE:
+        {
+            if(pdata->u.file.dwFileSize >= 1024)
+            {
+                dwSize = pdata->u.file.dwFileSize / 1024;
+            }
+            else if(pdata->u.file.dwFileSize > 0)
+            {
+                dwSize = 1;
+            }
+            else
+            {
+                dwSize = 0;
+            }
+
+            if (pOut)
+            {
+                sprintf(tempSizeStr,"%0ld",dwSize);
+                nTempSizeLen = strlen(tempSizeStr);
+                nNumOfComma = nTempSizeLen / 4;
+                uOutSize = nNumOfComma + strlen(tempSizeStr);
+                for(i=nTempSizeLen, j=uOutSize, k=0; j >= 0; j--, k++)
+                {
+                    if((k %4) == 0 && k != 0)
+                    {
+                        pOut[j] = ',';
+                        k = 0;
+                    }
+                    else
+                    {
+                        pOut[j] = tempSizeStr[i--];
+                    }
+                }
+                strcat(pOut,kbStr);
+            }
+            return dwSize;
+        }
+    }
+    return 0;
+}
 
 ODINFUNCTION3(BOOL,_ILGetExtension,LPCITEMIDLIST, pidl,
                                    LPSTR,         pOut,
@@ -1736,7 +1833,7 @@ ODINPROCEDURE3(_ILGetFileType,LPCITEMIDLIST, pidl,
 }
 
 /*************************************************************************
- * _ILGetAttributeStr
+ * _ILGetFileAttributes
  *
  * Given the ItemIdList, get the Attrib string format
  *
@@ -1746,24 +1843,19 @@ ODINPROCEDURE3(_ILGetFileType,LPCITEMIDLIST, pidl,
  *      uOutsize    [I] The size of the Buffer
  *
  * RETURNS
- *     True if successful
+ *     Attributes
  *
  * NOTES
  *
  */
-ODINFUNCTION3(BOOL, _ILGetAttributeStr, LPCITEMIDLIST, pidl,
+ODINFUNCTION3(BOOL, _ILGetFileAttributes, LPCITEMIDLIST, pidl,
                                         LPSTR,         pOut,
                                         UINT,          uOutSize)
 {
     LPPIDLDATA pData =_ILGetDataPointer(pidl);
-    WORD wAttrib;
+    WORD wAttrib = 0;
     int i;
 
-    /* Need At Least 6 characters to represent the Attrib String */
-    if(uOutSize < 6)
-    {
-        return FALSE;
-    }
     switch(pData->type)
     {
         case PT_FOLDER:
@@ -1772,31 +1864,32 @@ ODINFUNCTION3(BOOL, _ILGetAttributeStr, LPCITEMIDLIST, pidl,
         case PT_VALUE:
             wAttrib = pData->u.file.uFileAttribs;
             break;
-        default:
-            return FALSE;
     }
-    i=0;
-    if(wAttrib & FILE_ATTRIBUTE_READONLY)
+    if(uOutSize >= 6)
     {
-        pOut[i++] = 'R';
+      i=0;
+      if(wAttrib & FILE_ATTRIBUTE_READONLY)
+      {
+          pOut[i++] = 'R';
+      }
+      if(wAttrib & FILE_ATTRIBUTE_HIDDEN)
+      {
+          pOut[i++] = 'H';
+      }
+      if(wAttrib & FILE_ATTRIBUTE_SYSTEM)
+      {
+          pOut[i++] = 'S';
+      }
+      if(wAttrib & FILE_ATTRIBUTE_ARCHIVE)
+      {
+          pOut[i++] = 'A';
+      }
+      if(wAttrib & FILE_ATTRIBUTE_COMPRESSED)
+      {
+          pOut[i++] = 'C';
+      }
+      pOut[i] = 0x00;
     }
-    if(wAttrib & FILE_ATTRIBUTE_HIDDEN)
-    {
-        pOut[i++] = 'H';
-    }
-    if(wAttrib & FILE_ATTRIBUTE_SYSTEM)
-    {
-        pOut[i++] = 'S';
-    }
-    if(wAttrib & FILE_ATTRIBUTE_ARCHIVE)
-    {
-        pOut[i++] = 'A';
-    }
-    if(wAttrib & FILE_ATTRIBUTE_COMPRESSED)
-    {
-        pOut[i++] = 'C';
-    }
-    pOut[i] = 0x00;
-    return TRUE;
+    return wAttrib;
 }
 

@@ -1,7 +1,7 @@
 /*
  *  Implementation of IShellBrowser for the File Open common dialog
- * 
  *
+ *  Corel WINE 20000324 level
  */
 
 #ifndef SHBROWSER_H
@@ -20,8 +20,8 @@
 /* dialog internal property */
 
 #define FODPROP_SAVEDLG 0x0001  /* File dialog is a Save file dialog */
-#define FODPROP_USEVIEW 0x0002  /* Indicates the user selection must be taken 
-				   from the IShellView */
+#define FODPROP_USEVIEW 0x0002  /* Indicates the user selection must be taken
+                                   from the IShellView */
 
 /***********************************************************************
  * Data structure
@@ -40,10 +40,10 @@ typedef struct
 
 typedef struct
 {
-    
-    OPENFILENAMEA ofnInfos;
+
+    LPOPENFILENAMEA ofnInfos;
     struct {
-        IShellBrowser *FOIShellBrowser; 
+        IShellBrowser *FOIShellBrowser;
         IShellFolder *FOIShellFolder;
         IShellView *FOIShellView;
     } Shell;
@@ -61,9 +61,9 @@ typedef struct
         HWND hwndFileTypeCB;
         HWND hwndLookInCB;
         HWND hwndFileName;
-	HWND hwndTB;
+        HWND hwndTB;
         HWND hwndCustomDlg;
-	DWORD dwDlgProp;
+        DWORD dwDlgProp;
     } DlgInfos;
 
 } FileOpenDlgInfos;
@@ -71,26 +71,22 @@ typedef struct
 /***********************************************************************
  * Control ID's
  */
-#define IDS_ABOUTBOX                    101
-#define IDS_DOCUMENTFOLDERS             102
-#define IDS_PERSONAL                    103
-#define IDS_FAVORITES                   104
-#define IDS_PATH                        105
-#define IDS_DESKTOP                     106
-
-#define IDS_FONTS                       108
-#define IDS_MYCOMPUTER                  110
-#define IDS_SYSTEMFOLDERS               112
-#define IDS_LOCALHARDRIVES              113
 #define IDS_FILENOTFOUND                114
 #define IDS_VERIFYFILE                  115
 #define IDS_CREATEFILE                  116
 #define IDS_CREATEFOLDER_DENIED         117
 #define IDS_FILEOPEN_CAPTION            118
 
+/* File Dialog Tooltips string IDs */
+
+#define IDS_UPFOLDER                    150
+#define IDS_NEWFOLDER                   151
+#define IDS_LISTVIEW                    152
+#define IDS_REPORTVIEW                  153
+
 #define IDC_OPENREADONLY                chx1
 
-#define IDC_TOOLBARSTATIC		stc1
+#define IDC_TOOLBARSTATIC               stc1
 #define IDC_FILETYPESTATIC              stc2
 #define IDC_FILENAMESTATIC              stc3
 #define IDC_LOOKINSTATIC                stc4
@@ -102,7 +98,7 @@ typedef struct
 
 #define IDC_FILENAME                    edt1
 
-#define IDC_TOOLBAR			ctl1
+#define IDC_TOOLBAR                     ctl1
 
 /***********************************************************************
  * Prototypes for the methods of the IShellBrowserImpl class
@@ -112,7 +108,7 @@ IShellBrowser * IShellBrowserImpl_Construct(HWND hwndOwner);
 
 /* IUnknown */
 HRESULT WINAPI IShellBrowserImpl_QueryInterface(IShellBrowser *iface,
-                                            REFIID riid, 
+                                            REFIID riid,
                                             LPVOID *ppvObj);
 
 ULONG WINAPI IShellBrowserImpl_AddRef(IShellBrowser * iface);
@@ -120,7 +116,7 @@ ULONG WINAPI IShellBrowserImpl_AddRef(IShellBrowser * iface);
 ULONG WINAPI IShellBrowserImpl_Release(IShellBrowser * iface);
 
 /* IOleWindow */
-HRESULT WINAPI IShellBrowserImpl_GetWindow(IShellBrowser * iface,  
+HRESULT WINAPI IShellBrowserImpl_GetWindow(IShellBrowser * iface,
                                            HWND * phwnd);
 
 HRESULT WINAPI IShellBrowserImpl_ContextSensitiveHelp(IShellBrowser * iface,
@@ -128,19 +124,19 @@ HRESULT WINAPI IShellBrowserImpl_ContextSensitiveHelp(IShellBrowser * iface,
 
 /* IShellBrowser */
 
-HRESULT WINAPI IShellBrowserImpl_BrowseObject(IShellBrowser *iface, 
-                                          LPCITEMIDLIST pidl,   
+HRESULT WINAPI IShellBrowserImpl_BrowseObject(IShellBrowser *iface,
+                                          LPCITEMIDLIST pidl,
                                           UINT wFlags);
 
-HRESULT WINAPI IShellBrowserImpl_EnableModelessSB(IShellBrowser *iface,    
+HRESULT WINAPI IShellBrowserImpl_EnableModelessSB(IShellBrowser *iface,
                                               BOOL fEnable);
-                                              
-HRESULT WINAPI IShellBrowserImpl_GetControlWindow(IShellBrowser *iface,    
-                                              UINT id,    
+
+HRESULT WINAPI IShellBrowserImpl_GetControlWindow(IShellBrowser *iface,
+                                              UINT id,
                                               HWND *lphwnd);
 
 HRESULT WINAPI IShellBrowserImpl_GetViewStateStream(IShellBrowser *iface,
-                                                DWORD grfMode,    
+                                                DWORD grfMode,
                                                 LPSTREAM *ppStrm);
 
 HRESULT WINAPI IShellBrowserImpl_InsertMenusSB(IShellBrowser *iface,
@@ -149,7 +145,7 @@ HRESULT WINAPI IShellBrowserImpl_InsertMenusSB(IShellBrowser *iface,
 
 HRESULT WINAPI IShellBrowserImpl_OnViewWindowActive(IShellBrowser *iface,
                                                 IShellView *ppshv);
-                                              
+
 
 HRESULT WINAPI IShellBrowserImpl_QueryActiveShellView(IShellBrowser *iface,
                                                   IShellView **ppshv);
@@ -157,36 +153,36 @@ HRESULT WINAPI IShellBrowserImpl_QueryActiveShellView(IShellBrowser *iface,
 HRESULT WINAPI IShellBrowserImpl_RemoveMenusSB(IShellBrowser *iface,
                                            HMENU hmenuShared);
 
-HRESULT WINAPI IShellBrowserImpl_SendControlMsg(IShellBrowser *iface,    
-                                            UINT id,    
-                                            UINT uMsg,    
-                                            WPARAM wParam,    
+HRESULT WINAPI IShellBrowserImpl_SendControlMsg(IShellBrowser *iface,
+                                            UINT id,
+                                            UINT uMsg,
+                                            WPARAM wParam,
                                             LPARAM lParam,
                                             LRESULT *pret);
 
 HRESULT WINAPI IShellBrowserImpl_SetMenuSB(IShellBrowser *iface,
-                                       HMENU hmenuShared,    
+                                       HMENU hmenuShared,
                                        HOLEMENU holemenuReserved,
                                        HWND hwndActiveObject);
 
 HRESULT WINAPI IShellBrowserImpl_SetStatusTextSB(IShellBrowser *iface,
                                              LPCOLESTR lpszStatusText);
-                                                
+
 
 HRESULT WINAPI IShellBrowserImpl_SetToolbarItems(IShellBrowser *iface,
-                                             LPTBBUTTON lpButtons,    
-                                             UINT nButtons,    
+                                             LPTBBUTTON lpButtons,
+                                             UINT nButtons,
                                              UINT uFlags);
-                                              
+
 HRESULT WINAPI IShellBrowserImpl_TranslateAcceleratorSB(IShellBrowser *iface,
-                                                    LPMSG lpmsg,    
+                                                    LPMSG lpmsg,
                                                     WORD wID);
 
 
 /* ICommDlgBrowser */
 
 HRESULT WINAPI IShellBrowserImpl_ICommDlgBrowser_QueryInterface(ICommDlgBrowser *iface,
-                                            REFIID riid, 
+                                            REFIID riid,
                                             LPVOID *ppvObj);
 
 ULONG WINAPI IShellBrowserImpl_ICommDlgBrowser_AddRef(ICommDlgBrowser * iface);
@@ -200,12 +196,14 @@ HRESULT WINAPI IShellBrowserImpl_ICommDlgBrowser_OnStateChange(ICommDlgBrowser *
                                                                IShellView *ppshv,
                                                                ULONG uChange);
 
-HRESULT WINAPI IShellBrowserImpl_ICommDlgBrowser_IncludeObject(ICommDlgBrowser *iface, 
+HRESULT WINAPI IShellBrowserImpl_ICommDlgBrowser_IncludeObject(ICommDlgBrowser *iface,
                                                                IShellView * ppshv,
                                                                LPCITEMIDLIST pidl);
 
 
 
 LPITEMIDLIST GetSelectedPidl(IShellView *ppshv);
+BOOL EnumSelectedPidls(IShellView *ppshv, UINT nPidlIndex, LPITEMIDLIST *pidlSelected);
+UINT GetNumSelected(IShellView *ppshv);
 
 #endif /*SHBROWSER_H*/

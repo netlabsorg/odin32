@@ -1,4 +1,4 @@
-/* $Id: shell.cpp,v 1.4 2000-01-27 21:50:45 sandervl Exp $ */
+/* $Id: shell.cpp,v 1.5 2000-03-26 16:34:43 cbratschi Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -9,6 +9,8 @@
  *             Shell Library Functions
  *
  *  1998 Marcus Meissner
+ *
+ * Corel WINE 20000324 level
  */
 
 
@@ -47,6 +49,7 @@
 //#include "syslevel.h"
 #include "imagelist.h"
 #include "shell32_main.h"
+#include "winversion.h"
 
 #include <heapstring.h>
 #include <misc.h>
@@ -89,12 +92,11 @@ static const char* lpstrMsgWndCreated    = "OTHERWINDOWCREATED";
 static const char* lpstrMsgWndDestroyed  = "OTHERWINDOWDESTROYED";
 static const char* lpstrMsgShellActivate = "ACTIVATESHELLWINDOW";
 
-static HWND16  SHELL_hWnd = 0;
-static HHOOK   SHELL_hHook = 0;
-static UINT16  uMsgWndCreated = 0;
-static UINT16  uMsgWndDestroyed = 0;
-static UINT16  uMsgShellActivate = 0;
-HINSTANCE16 SHELL_hInstance = 0;
+static HWND  SHELL_hWnd = 0;
+static HHOOK SHELL_hHook = 0;
+static UINT  uMsgWndCreated = 0;
+static UINT  uMsgWndDestroyed = 0;
+static UINT  uMsgShellActivate = 0;
 HINSTANCE SHELL_hInstance32;
 static int SHELL_Attach = 0;
 
@@ -376,6 +378,23 @@ HINSTANCE SHELL_FindExecutable( LPCSTR lpFile,
    if (RegQueryValueA( HKEY_CLASSES_ROOT, filetype, command,
                              &commandlen ) == ERROR_SUCCESS )
    {
+       LPSTR tmp;
+       char param[256];
+       LONG paramlen = 256;
+
+       /* Get the parameters needed by the application
+          from the associated ddeexec key */
+       tmp = strstr(filetype,"command");
+       tmp[0] = '\0';
+       strcat(filetype,"ddeexec");
+
+       if(RegQueryValueA( HKEY_CLASSES_ROOT, filetype, param,&paramlen ) == ERROR_SUCCESS)
+       {
+         strcat(command," ");
+         strcat(command,param);
+         commandlen += paramlen;
+       }
+
        /* Is there a replace() function anywhere? */
        command[commandlen]='\0';
        strcpy( lpResult, command );
@@ -471,7 +490,7 @@ static DWORD SHELL_GetResourceTable(HFILE hFile,LPBYTE *retptr)
      size = ne_header.rname_tab_offset - ne_header.resource_tab_offset;
 
 //@@@PH no NE support
-#if 0
+#if 1
      if( size > sizeof(NE_TYPEINFO) )
      { pTypeInfo = (BYTE*)HeapAlloc( GetProcessHeap(), 0, size);
        if( pTypeInfo )
@@ -489,7 +508,347 @@ static DWORD SHELL_GetResourceTable(HFILE hFile,LPBYTE *retptr)
    }
    return 0; /* failed */
 }
+#if 0 //CB: DirectResAlloc16 not yet ported
+/*************************************************************************
+ *                      SHELL_LoadResource
+ */
+static HGLOBAL SHELL_LoadResource(HINSTANCE hInst, HFILE hFile, NE_NAMEINFO* pNInfo, WORD sizeShift)
+{       BYTE*  ptr;
+        HGLOBAL handle = DirectResAlloc( hInst, 0x10, (DWORD)pNInfo->length << sizeShift);
 
+        TRACE("\n");
+
+        if( (ptr = (BYTE*)GlobalLock( handle )) )
+        { _llseek( hFile, (DWORD)pNInfo->offset << sizeShift, SEEK_SET);
+          _lread( hFile, (char*)ptr, pNInfo->length << sizeShift);
+          return handle;
+        }
+        return 0;
+}
+
+/*************************************************************************
+ *                      ICO_LoadIcon
+ */
+static HGLOBAL ICO_LoadIcon(HINSTANCE hInst, HFILE hFile, LPicoICONDIRENTRY lpiIDE)
+{       BYTE*  ptr;
+        HGLOBAL handle = DirectResAlloc( hInst, 0x10, lpiIDE->dwBytesInRes);
+        TRACE("\n");
+        if( (ptr = (BYTE*)GlobalLock( handle )) )
+        { _llseek( hFile, lpiIDE->dwImageOffset, SEEK_SET);
+          _lread( hFile, (char*)ptr, lpiIDE->dwBytesInRes);
+          return handle;
+        }
+        return 0;
+}
+
+/*************************************************************************
+ *                      ICO_GetIconDirectory
+ *
+ *  Read .ico file and build phony ICONDIR struct for GetIconID
+ */
+static HGLOBAL ICO_GetIconDirectory(HINSTANCE hInst, HFILE hFile, LPicoICONDIR* lplpiID )
+{ WORD    id[3];  /* idReserved, idType, idCount */
+  LPicoICONDIR  lpiID;
+  int           i;
+
+  TRACE("\n");
+  _llseek( hFile, 0, SEEK_SET );
+  if( _lread(hFile,(char*)id,sizeof(id)) != sizeof(id) ) return 0;
+
+  /* check .ICO header
+   *
+   * - see http://www.microsoft.com/win32dev/ui/icons.htm
+   */
+
+  if( id[0] || id[1] != 1 || !id[2] ) return 0;
+
+  i = id[2]*sizeof(icoICONDIRENTRY) ;
+
+  lpiID = (LPicoICONDIR)HeapAlloc( GetProcessHeap(), 0, i + sizeof(id));
+
+  if( _lread(hFile,(char*)lpiID->idEntries,i) == i )
+  { HGLOBAL handle = DirectResAlloc( hInst, 0x10,
+                                     id[2]*sizeof(CURSORICONDIRENTRY) + sizeof(id) );
+     if( handle )
+    { CURSORICONDIR*     lpID = (CURSORICONDIR*)GlobalLock( handle );
+       lpID->idReserved = lpiID->idReserved = id[0];
+       lpID->idType = lpiID->idType = id[1];
+       lpID->idCount = lpiID->idCount = id[2];
+       for( i=0; i < lpiID->idCount; i++ )
+      { memcpy((void*)(lpID->idEntries + i),
+                   (void*)(lpiID->idEntries + i), sizeof(CURSORICONDIRENTRY) - 2);
+            lpID->idEntries[i].wResId = i;
+         }
+      *lplpiID = lpiID;
+       return handle;
+     }
+  }
+  /* fail */
+
+  HeapFree( GetProcessHeap(), 0, lpiID);
+  return 0;
+}
+#endif
+/*************************************************************************
+ *                      InternalExtractIcon             [SHELL.39]
+ *
+ * This abortion is called directly by Progman
+ */
+HGLOBAL WINAPI InternalExtractIcon(HINSTANCE hInstance,
+                                     LPCSTR lpszExeFileName, UINT nIconIndex, WORD n )
+{       HGLOBAL hRet = 0;
+        HGLOBAL*        RetPtr = NULL;
+        LPBYTE          pData;
+        OFSTRUCT        ofs;
+        DWORD           sig;
+        HFILE           hFile = OpenFile( lpszExeFileName, &ofs, OF_READ );
+        UINT            iconDirCount = 0,iconCount = 0;
+        LPBYTE          peimage;
+        HANDLE  fmapping;
+
+        TRACE("(%04x,file %s,start %d,extract %d\n",
+                       hInstance, lpszExeFileName, nIconIndex, n);
+
+        if( hFile == HFILE_ERROR || !n )
+          return 0;
+
+        hRet = GlobalAlloc( GMEM_FIXED | GMEM_ZEROINIT, sizeof(HICON16)*n);
+        RetPtr = (HGLOBAL*)GlobalLock(hRet);
+
+        *RetPtr = (n == 0xFFFF)? 0: 1;  /* error return values */
+
+        sig = SHELL_GetResourceTable(hFile,&pData);
+#if 0 //CB: some functions not (yet) supported
+        if( sig==IMAGE_OS2_SIGNATURE || sig==1 ) /* .ICO file */
+        { HICON  hIcon = 0;
+          NE_TYPEINFO* pTInfo = (NE_TYPEINFO*)(pData + 2);
+          NE_NAMEINFO* pIconStorage = NULL;
+          NE_NAMEINFO* pIconDir = NULL;
+          LPicoICONDIR lpiID = NULL;
+
+          if( pData == (BYTE*)-1 )
+          { hIcon = ICO_GetIconDirectory(hInstance, hFile, &lpiID);     /* check for .ICO file */
+            if( hIcon )
+            { iconDirCount = 1; iconCount = lpiID->idCount;
+            }
+          }
+          else while( pTInfo->type_id && !(pIconStorage && pIconDir) )
+          { if( pTInfo->type_id == NE_RSCTYPE_GROUP_ICON )      /* find icon directory and icon repository */
+            { iconDirCount = pTInfo->count;
+              pIconDir = ((NE_NAMEINFO*)(pTInfo + 1));
+              TRACE("\tfound directory - %i icon families\n", iconDirCount);
+            }
+            if( pTInfo->type_id == NE_RSCTYPE_ICON )
+            { iconCount = pTInfo->count;
+              pIconStorage = ((NE_NAMEINFO*)(pTInfo + 1));
+              TRACE("\ttotal icons - %i\n", iconCount);
+            }
+            pTInfo = (NE_TYPEINFO *)((char*)(pTInfo+1)+pTInfo->count*sizeof(NE_NAMEINFO));
+          }
+
+          /* load resources and create icons */
+
+          if( (pIconStorage && pIconDir) || lpiID )
+          { if( nIconIndex == (UINT16)-1 )
+            { RetPtr[0] = iconDirCount;
+            }
+            else if( nIconIndex < iconDirCount )
+            { UINT   i, icon;
+              if( n > iconDirCount - nIconIndex )
+                n = iconDirCount - nIconIndex;
+
+              for( i = nIconIndex; i < nIconIndex + n; i++ )
+              { /* .ICO files have only one icon directory */
+
+                if( lpiID == NULL )
+                  hIcon = SHELL_LoadResource( hInstance, hFile, pIconDir + i, *(WORD*)pData );
+                RetPtr[i-nIconIndex] = GetIconID( hIcon, 3 );
+                GlobalFree(hIcon);
+              }
+
+              for( icon = nIconIndex; icon < nIconIndex + n; icon++ )
+              { hIcon = 0;
+                if( lpiID )
+                { hIcon = ICO_LoadIcon( hInstance, hFile, lpiID->idEntries + RetPtr[icon-nIconIndex]);
+                }
+                else
+                { for( i = 0; i < iconCount; i++ )
+                  { if( pIconStorage[i].id == (RetPtr[icon-nIconIndex] | 0x8000) )
+                    { hIcon = SHELL_LoadResource( hInstance, hFile, pIconStorage + i,*(WORD*)pData );
+                    }
+                  }
+                }
+                if( hIcon )
+                { RetPtr[icon-nIconIndex] = LoadIconHandler16( hIcon, TRUE );
+                  FarSetOwner16( RetPtr[icon-nIconIndex], GetExePtr(hInstance) );
+                }
+                else
+                { RetPtr[icon-nIconIndex] = 0;
+                }
+              }
+            }
+          }
+          if( lpiID )
+            HeapFree( GetProcessHeap(), 0, lpiID);
+          else
+            HeapFree( GetProcessHeap(), 0, pData);
+        }
+#endif
+        if( sig == IMAGE_NT_SIGNATURE)
+        { LPBYTE                idata,igdata;
+          PIMAGE_DOS_HEADER     dheader;
+          PIMAGE_NT_HEADERS     pe_header;
+          PIMAGE_SECTION_HEADER pe_sections;
+          PIMAGE_RESOURCE_DIRECTORY     rootresdir,iconresdir,icongroupresdir;
+          PIMAGE_RESOURCE_DATA_ENTRY    idataent,igdataent;
+          int                   i,j;
+          PIMAGE_RESOURCE_DIRECTORY_ENTRY       xresent;
+          CURSORICONDIR         **cids;
+
+          fmapping = CreateFileMappingA(hFile,NULL,PAGE_READONLY|SEC_COMMIT,0,0,NULL);
+          if (fmapping == 0)
+          { /* FIXME, INVALID_HANDLE_VALUE? */
+            WARN("failed to create filemap.\n");
+            hRet = 0;
+            goto end_2; /* failure */
+          }
+          peimage = (BYTE*)MapViewOfFile(fmapping,FILE_MAP_READ,0,0,0);
+          if (!peimage)
+          { WARN("failed to mmap filemap.\n");
+            hRet = 0;
+            goto end_2; /* failure */
+          }
+          dheader = (PIMAGE_DOS_HEADER)peimage;
+
+          /* it is a pe header, SHELL_GetResourceTable checked that */
+          pe_header = (PIMAGE_NT_HEADERS)(peimage+dheader->e_lfanew);
+
+          /* probably makes problems with short PE headers... but I haven't seen
+          * one yet...
+          */
+          pe_sections = (PIMAGE_SECTION_HEADER)(((char*)pe_header)+sizeof(*pe_header));
+          rootresdir = NULL;
+
+          for (i=0;i<pe_header->FileHeader.NumberOfSections;i++)
+          { if (pe_sections[i].Characteristics & IMAGE_SCN_CNT_UNINITIALIZED_DATA)
+              continue;
+            /* FIXME: doesn't work when the resources are not in a seperate section */
+            if (pe_sections[i].VirtualAddress == pe_header->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_RESOURCE].VirtualAddress)
+            { rootresdir = (PIMAGE_RESOURCE_DIRECTORY)((char*)peimage+pe_sections[i].PointerToRawData);
+              break;
+            }
+          }
+
+          if (!rootresdir)
+          { WARN("haven't found section for resource directory.\n");
+            goto end_4; /* failure */
+          }
+
+          icongroupresdir = GetResDirEntryW(rootresdir,RT_GROUP_ICONW, (DWORD)rootresdir,FALSE);
+
+          if (!icongroupresdir)
+          { WARN("No Icongroupresourcedirectory!\n");
+            goto end_4; /* failure */
+          }
+
+          iconDirCount = icongroupresdir->NumberOfNamedEntries+icongroupresdir->NumberOfIdEntries;
+
+          if( nIconIndex == (UINT)-1 )
+          { RetPtr[0] = iconDirCount;
+            goto end_3; /* success */
+          }
+
+          if (nIconIndex >= iconDirCount)
+          { WARN("nIconIndex %d is larger than iconDirCount %d\n",nIconIndex,iconDirCount);
+            GlobalFree(hRet);
+            goto end_4; /* failure */
+          }
+
+          cids = (CURSORICONDIR**)HeapAlloc(GetProcessHeap(),0,n*sizeof(CURSORICONDIR*));
+
+          /* caller just wanted the number of entries */
+          xresent = (PIMAGE_RESOURCE_DIRECTORY_ENTRY)(icongroupresdir+1);
+
+          /* assure we don't get too much ... */
+          if( n > iconDirCount - nIconIndex )
+          { n = iconDirCount - nIconIndex;
+          }
+
+          /* starting from specified index ... */
+          xresent = xresent+nIconIndex;
+
+          for (i=0;i<n;i++,xresent++)
+          { CURSORICONDIR       *cid;
+            PIMAGE_RESOURCE_DIRECTORY   resdir;
+
+            /* go down this resource entry, name */
+            resdir = (PIMAGE_RESOURCE_DIRECTORY)((DWORD)rootresdir+(xresent->u2.s.OffsetToDirectory));
+
+            /* default language (0) */
+            resdir = GetResDirEntryW(resdir,(LPWSTR)0,(DWORD)rootresdir,TRUE);
+            igdataent = (PIMAGE_RESOURCE_DATA_ENTRY)resdir;
+
+            /* lookup address in mapped image for virtual address */
+            igdata = NULL;
+
+            for (j=0;j<pe_header->FileHeader.NumberOfSections;j++)
+            { if (igdataent->OffsetToData < pe_sections[j].VirtualAddress)
+                continue;
+              if (igdataent->OffsetToData+igdataent->Size > pe_sections[j].VirtualAddress+pe_sections[j].SizeOfRawData)
+                continue;
+              igdata = peimage+(igdataent->OffsetToData-pe_sections[j].VirtualAddress+pe_sections[j].PointerToRawData);
+            }
+
+            if (!igdata)
+            { WARN("no matching real address for icongroup!\n");
+              goto end_4;       /* failure */
+            }
+            /* found */
+            cid = (CURSORICONDIR*)igdata;
+            cids[i] = cid;
+            RetPtr[i] = LookupIconIdFromDirectoryEx(igdata,TRUE,GetSystemMetrics(SM_CXICON),GetSystemMetrics(SM_CYICON),0);
+          }
+
+          iconresdir=GetResDirEntryW(rootresdir,RT_ICONW,(DWORD)rootresdir,FALSE);
+
+          if (!iconresdir)
+          { WARN("No Iconresourcedirectory!\n");
+            goto end_4; /* failure */
+          }
+
+          for (i=0;i<n;i++)
+          { PIMAGE_RESOURCE_DIRECTORY   xresdir;
+            xresdir = GetResDirEntryW(iconresdir,(LPWSTR)(DWORD)RetPtr[i],(DWORD)rootresdir,FALSE);
+            xresdir = GetResDirEntryW(xresdir,(LPWSTR)0,(DWORD)rootresdir,TRUE);
+            idataent = (PIMAGE_RESOURCE_DATA_ENTRY)xresdir;
+            idata = NULL;
+
+            /* map virtual to address in image */
+            for (j=0;j<pe_header->FileHeader.NumberOfSections;j++)
+            { if (idataent->OffsetToData < pe_sections[j].VirtualAddress)
+                continue;
+              if (idataent->OffsetToData+idataent->Size > pe_sections[j].VirtualAddress+pe_sections[j].SizeOfRawData)
+                continue;
+              idata = peimage+(idataent->OffsetToData-pe_sections[j].VirtualAddress+pe_sections[j].PointerToRawData);
+            }
+            if (!idata)
+            { WARN("no matching real address found for icondata!\n");
+              RetPtr[i]=0;
+              continue;
+            }
+            RetPtr[i] = CreateIconFromResourceEx(idata,idataent->Size,TRUE,0x00030000,GetSystemMetrics(SM_CXICON),GetSystemMetrics(SM_CYICON),0);
+          }
+          goto end_3;   /* sucess */
+        }
+        goto end_1;     /* return array with icon handles */
+
+/* cleaning up (try & catch would be nicer) */
+end_4:  hRet = 0;       /* failure */
+end_3:  UnmapViewOfFile(peimage);       /* success */
+end_2:  CloseHandle(fmapping);
+end_1:  _lclose( hFile);
+        return hRet;
+}
 
 /*************************************************************************
  *          ExtractAssociatedIcon        [SHELL.36]
@@ -509,7 +868,7 @@ ODINFUNCTION3(HICON,     ExtractAssociatedIconA,
    if( hIcon < 2 )
    { if( hIcon == 1 ) /* no icons found in given file */
      { char  tempPath[0x104];
-       UINT16  uRet = FindExecutableA(lpIconPath,NULL,tempPath);
+       UINT  uRet = FindExecutableA(lpIconPath,NULL,tempPath);
 
        if( uRet > 32 && tempPath[0] )
        { strcpy(lpIconPath,tempPath);

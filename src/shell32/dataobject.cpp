@@ -1,4 +1,4 @@
-/* $Id: dataobject.cpp,v 1.2 2000-03-24 17:17:26 cbratschi Exp $ */
+/* $Id: dataobject.cpp,v 1.3 2000-03-26 16:34:40 cbratschi Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -6,6 +6,7 @@
  * Copyright 1999 Patrick Haller (haller@zebra.fh-weingarten.de)
  * Project Odin Software License can be found in LICENSE.TXT
  *
+ * Corel WINE 20000324 level
  */
 
 /*
@@ -808,4 +809,3 @@ LPDATAOBJECT IDataObject_Constructor(HWND hwndOwner, LPITEMIDLIST pMyPidl, LPITE
            cidl));
         return (LPDATAOBJECT)dto;
 }
-

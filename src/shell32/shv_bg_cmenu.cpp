@@ -1,9 +1,11 @@
-/* $Id: shv_bg_cmenu.cpp,v 1.2 1999-11-02 20:38:48 phaller Exp $ */
+/* $Id: shv_bg_cmenu.cpp,v 1.3 2000-03-26 16:34:56 cbratschi Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  * Win32 SHELL32 Subsystem for OS/2
  * 1998/05/19 PH Patrick Haller (haller@zebra.fh-weingarten.de)
+ *
+ * Corel WINE 20000324 level
  */
 
 /*

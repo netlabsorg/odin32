@@ -1,4 +1,4 @@
-/* $Id: shell32_main.cpp,v 1.8 2000-01-18 22:27:56 sandervl Exp $ */
+/* $Id: shell32_main.cpp,v 1.9 2000-03-26 16:34:49 cbratschi Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -10,6 +10,8 @@
  *
  *  1998 Marcus Meissner
  *  1998 Juergen Schmied (jsch)  *  <juergen.schmied@metronet.de>
+ *
+ * Corel WINE 20000324 level
  */
 
 /*****************************************************************************
@@ -60,6 +62,10 @@ ODINDEBUGCHANNEL(SHELL32-MAIN)
 
 #define MORE_DEBUG 1
 
+BOOL VERSION_OsIsUnicode(VOID)
+{
+  return FALSE;
+}
 
 /*************************************************************************
  * CommandLineToArgvW                          [SHELL32.7]
@@ -329,11 +335,7 @@ ODINFUNCTION3(HICON, ExtractIconA, HINSTANCE, hInstance,
                                    LPCSTR,    lpszExeFileName,
                                    UINT,      nIconIndex )
 {
-  dprintf(("SHELL32:Shell32_Main:ExtractIconA not implemented.\n"));
-
-#if 0
-//@@@PH
-HGLOBAL handle = InternalExtractIconA(hInstance,lpszExeFileName,nIconIndex, 1);
+  HGLOBAL handle = InternalExtractIcon(hInstance,lpszExeFileName,nIconIndex, 1);
     TRACE_(shell)("\n");
     if( handle )
     {
@@ -343,8 +345,7 @@ HGLOBAL handle = InternalExtractIconA(hInstance,lpszExeFileName,nIconIndex, 1);
    GlobalFree(handle);
    return hIcon;
     }
-#endif
-    return 0;
+   return 0;
 }
 
 /*************************************************************************
@@ -423,6 +424,10 @@ typedef struct
 #define     DROP_FIELD_TOP                  (-15)
 #define     DROP_FIELD_HEIGHT            15
 
+#if 0 //CB: not used
+extern HICON hIconTitleFont;
+#endif
+
 static BOOL __get_dropline( HWND hWnd, LPRECT lprect )
 { HWND hWndCtl = GetDlgItem(hWnd, IDC_WINE_TEXT);
     if( hWndCtl )
@@ -441,30 +446,50 @@ static BOOL __get_dropline( HWND hWnd, LPRECT lprect )
 ODINFUNCTION2(UINT, SHAppBarMessage, DWORD,       msg,
                                      PAPPBARDATA, data)
 {
-  dprintf(("SHELL32:Shell32_Main:SHAppBarMessage not implemented.\n"));
+  int width=data->rc.right - data->rc.left;
+  int height=data->rc.bottom - data->rc.top;
+  RECT rec=data->rc;
 
-   switch (msg)
-   { case ABM_GETSTATE:
-      return ABS_ALWAYSONTOP | ABS_AUTOHIDE;
-     case ABM_GETTASKBARPOS:
-      /* fake a taskbar on the bottom of the desktop */
-      { RECT rec;
-        GetWindowRect(GetDesktopWindow(), &rec);
-        rec.left = 0;
-        rec.top = rec.bottom - 2;
-      }
-      return TRUE;
-     case ABM_ACTIVATE:
-     case ABM_GETAUTOHIDEBAR:
-     case ABM_NEW:
-     case ABM_QUERYPOS:
-     case ABM_REMOVE:
-     case ABM_SETAUTOHIDEBAR:
-     case ABM_SETPOS:
-     case ABM_WINDOWPOSCHANGED:
+  dprintf(("SHELL32: SHAppBarMessage.\n"));
+
+        switch (msg)
+        { case ABM_GETSTATE:
+               return ABS_ALWAYSONTOP | ABS_AUTOHIDE;
+          case ABM_GETTASKBARPOS:
+               GetWindowRect(data->hWnd, &rec);
+               data->rc=rec;
+               return TRUE;
+          case ABM_ACTIVATE:
+               SetActiveWindow(data->hWnd);
+               return TRUE;
+          case ABM_GETAUTOHIDEBAR:
+               data->hWnd=GetActiveWindow();
+               return TRUE;
+          case ABM_NEW:
+               SetWindowPos(data->hWnd,HWND_TOP,rec.left,rec.top,
+                                        width,height,SWP_SHOWWINDOW);
+               return TRUE;
+          case ABM_QUERYPOS:
+               GetWindowRect(data->hWnd, &(data->rc));
+               return TRUE;
+          case ABM_REMOVE:
+               CloseHandle(data->hWnd);
+               return TRUE;
+          case ABM_SETAUTOHIDEBAR:
+               SetWindowPos(data->hWnd,HWND_TOP,rec.left+1000,rec.top,
+                                       width,height,SWP_SHOWWINDOW);
+               return TRUE;
+          case ABM_SETPOS:
+               data->uEdge=(ABE_RIGHT | ABE_LEFT);
+               SetWindowPos(data->hWnd,HWND_TOP,data->rc.left,data->rc.top,
+                                  width,height,SWP_SHOWWINDOW);
+               return TRUE;
+          case ABM_WINDOWPOSCHANGED:
+               SetWindowPos(data->hWnd,HWND_TOP,rec.left,rec.top,
+                                        width,height,SWP_SHOWWINDOW);
+               return TRUE;
+          }
       return FALSE;
-   }
-   return 0;
 }
 
 /*************************************************************************
@@ -483,13 +508,19 @@ ODINFUNCTION4(DWORD, SHHelpShortcuts_RunDLL, DWORD, dwArg1,
 
 /*************************************************************************
  * SHLoadInProc                                [SHELL32.225]
- *
+ * Create an instance of specified object class from within the shell process
  */
 
 ODINFUNCTION1(DWORD, SHLoadInProc, DWORD, dwArg1)
 {
-  dprintf(("SHELL32:Shell32_Main:SHLoadInProc not implemented.\n"));
-  return 0;
+  CLSID *id;
+
+  dprintf(("SHELL32: SHLoadInProc\n"));
+
+  CLSIDFromString((LPCOLESTR) dwArg1, id);
+  if (S_OK==SHCoCreateInstance( (LPSTR) dwArg1, id, NULL, &IID_IUnknown, NULL) )
+        return NOERROR;
+  return DISP_E_MEMBERNOTFOUND;
 }
 
 
@@ -517,6 +548,7 @@ ODINFUNCTION6(HINSTANCE, ShellExecuteA, HWND,   hWnd,
         SetCurrentDirectoryA( lpDirectory );
     }
 
+    cmd[0] = '\0';
     retval = SHELL_FindExecutable( lpFile, lpOperation, cmd );
 
     if (retval > 32)  /* Found */
@@ -530,6 +562,88 @@ ODINFUNCTION6(HINSTANCE, ShellExecuteA, HWND,   hWnd,
         dprintf(("starting %s\n",cmd));
         retval = WinExec( cmd, iShowCmd );
     }
+    else if(PathIsURLA((LPSTR)lpFile))    /* File not found, check for URL */
+    {
+      char lpstrProtocol[256];
+      LONG cmdlen = 512;
+      LPSTR lpstrRes;
+      INT iSize;
+
+      lpstrRes = strchr(lpFile,':');
+      iSize = lpstrRes - lpFile;
+
+      /* Looking for ...protocol\shell\lpOperation\command */
+      strncpy(lpstrProtocol,lpFile,iSize);
+      lpstrProtocol[iSize]='\0';
+      strcat( lpstrProtocol, "\\shell\\" );
+      strcat( lpstrProtocol, lpOperation );
+      strcat( lpstrProtocol, "\\command" );
+
+      /* Remove File Protocol from lpFile */
+      /* In the case file://path/file     */
+      if(!strnicmp(lpFile,"file",iSize))
+      {
+        lpFile += iSize;
+        while(*lpFile == ':') lpFile++;
+      }
+
+
+      /* Get the application for the protocol and execute it */
+      if (RegQueryValueA( HKEY_CLASSES_ROOT, lpstrProtocol, cmd,
+                           &cmdlen ) == ERROR_SUCCESS )
+      {
+          LPSTR tok;
+          LPSTR tmp;
+          char param[256] = "";
+          LONG paramlen = 256;
+
+          /* Get the parameters needed by the application
+             from the associated ddeexec key */
+          tmp = strstr(lpstrProtocol,"command");
+          tmp[0] = '\0';
+          strcat(lpstrProtocol,"ddeexec");
+
+          if(RegQueryValueA( HKEY_CLASSES_ROOT, lpstrProtocol, param,&paramlen ) == ERROR_SUCCESS)
+          {
+            strcat(cmd," ");
+            strcat(cmd,param);
+            cmdlen += paramlen;
+          }
+
+          /* Is there a replace() function anywhere? */
+          cmd[cmdlen]='\0';
+          tok=strstr( cmd, "%1" );
+          if (tok != NULL)
+          {
+            tok[0]='\0'; /* truncate string at the percent */
+            strcat( cmd, lpFile ); /* what if no dir in xlpFile? */
+            tok=strstr( cmd, "%1" );
+            if ((tok!=NULL) && (strlen(tok)>2))
+            {
+              strcat( cmd, &tok[2] );
+            }
+          }
+
+          retval = WinExec( cmd, iShowCmd );
+      }
+    }
+    /* Check if file specified is in the form www.??????.*** */
+    else if(!strnicmp(lpFile,"www",3))
+    {
+      /* if so, append lpFile http:// and call ShellExecute */
+      char lpstrTmpFile[256] = "http://" ;
+      strcat(lpstrTmpFile,lpFile);
+      retval = ShellExecuteA(hWnd,lpOperation,lpstrTmpFile,NULL,NULL,0);
+    }
+    /* Nothing was done yet, try to execute the cmdline directly,
+       maybe it's an OS/2 program */
+    else
+    {
+      strcpy(cmd,lpFile);
+      strcat(cmd,lpParameters ? lpParameters : "");
+      retval = WinExec( cmd, iShowCmd );
+    }
+
     if (lpDirectory)
       SetCurrentDirectoryA( old_dir );
     return retval;
@@ -584,12 +698,15 @@ BOOL WINAPI AboutDlgProc( HWND hWnd, UINT msg, WPARAM wParam,
 
             HWND hwndOdinLogo = GetDlgItem(hWnd, IDC_ODINLOGO);
             if(hwndOdinLogo) {
-		        HBITMAP hBitmap = LoadBitmapA(shell32_hInstance, MAKEINTRESOURCEA(IDB_ODINLOGO));
-		        SendMessageA(hwndOdinLogo, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap);
+                        HBITMAP hBitmap = LoadBitmapA(shell32_hInstance, MAKEINTRESOURCEA(IDB_ODINLOGO));
+                        SendMessageA(hwndOdinLogo, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap);
             }
 
             hWndCtl = GetDlgItem(hWnd, IDC_LISTBOX);
             SendMessageA( hWndCtl, WM_SETREDRAW, 0, 0 );
+#if 0 //CB: not used
+            SendMessageA( hWndCtl, WM_SETFONT, hIconTitleFont, 0 );
+#endif
             while (*pstr)
             {
                 SendMessageA( hWndCtl, LB_ADDSTRING, (WPARAM)-1, (LPARAM)*pstr );
@@ -729,7 +846,7 @@ ODINFUNCTION4(INT,ShellAboutA, HWND,   hWnd,
     info.szApp        = szApp;
     info.szOtherStuff = szOtherStuff;
     info.hIcon        = hIcon;
-    if (!hIcon) info.hIcon = LoadIconA( 0, (LPCSTR)OIC_ODINICON );
+    if (!hIcon) info.hIcon = LoadIconA( 0, MAKEINTRESOURCEA(OIC_ODINICON) );
     return DialogBoxIndirectParamA( GetWindowLongA( hWnd, GWL_HINSTANCE ),
                                     (DLGTEMPLATE*)dlgTemplate , hWnd, AboutDlgProc, (LPARAM)&info );
 }
@@ -755,56 +872,12 @@ ODINFUNCTION4(INT,ShellAboutW, HWND,    hWnd,
     info.szApp        = HEAP_strdupWtoA( GetProcessHeap(), 0, szApp );
     info.szOtherStuff = HEAP_strdupWtoA( GetProcessHeap(), 0, szOtherStuff );
     info.hIcon        = hIcon;
-    if (!hIcon) info.hIcon = LoadIconA( 0, (LPCSTR)OIC_ODINICON );
+    if (!hIcon) info.hIcon = LoadIconA( 0, MAKEINTRESOURCEA(OIC_ODINICON) );
     ret = DialogBoxIndirectParamA( GetWindowLongA( hWnd, GWL_HINSTANCE ),
                                    (DLGTEMPLATE*)dlgTemplate, hWnd, AboutDlgProc, (LPARAM)&info );
     HeapFree( GetProcessHeap(), 0, (LPSTR)info.szApp );
     HeapFree( GetProcessHeap(), 0, (LPSTR)info.szOtherStuff );
     return ret;
-}
-
-/*************************************************************************
- * Shell_NotifyIcon                            [SHELL32.297]
- * FIXME
- * This function is supposed to deal with the systray.
- * Any ideas on how this is to be implimented?
- */
-
-ODINFUNCTION2(BOOL, Shell_NotifyIconA, DWORD,            dwMessage,
-                                       PNOTIFYICONDATAA, pnid )
-{
-  dprintf(("SHELL32:Shell32_Main:Shell_NotifyIconA not implemented\n"));
-  return FALSE;
-}
-
-/*************************************************************************
- * Shell_NotifyIcon                            [SHELL32.?]
- * FIXME
- * This function is supposed to deal with the systray.
- * Any ideas on how this is to be implimented?
- */
-
-ODINFUNCTION2(BOOL, Shell_NotifyIconW, DWORD,            dwMessage,
-                                       PNOTIFYICONDATAW, pnid )
-{
-  dprintf(("SHELL32:Shell32_Main:Shell_NotifyIconA not implemented\n"));
-  return FALSE;
-}
-
-
-/*************************************************************************
- * Shell_NotifyIcon                            [SHELL32.296]
- * FIXME
- * This function is supposed to deal with the systray.
- * Any ideas on how this is to be implimented?
- */
-
-BOOL WINAPI Shell_NotifyIcon(DWORD dwMessage, PNOTIFYICONDATAA pnid )
-{
-  if (VERSION_OsIsUnicode())
-    return(Shell_NotifyIconW(dwMessage,(PNOTIFYICONDATAW)pnid));
-  else
-    return(Shell_NotifyIconA(dwMessage,pnid));
 }
 
 /*************************************************************************
@@ -983,6 +1056,7 @@ ODINFUNCTION3(BOOL, Shell32LibMain, HINSTANCE, hinstDLL,
        }
 
        SIC_Initialize();
+       SYSTRAY_Init();
 
        break;
 
@@ -1024,3 +1098,20 @@ ODINFUNCTION3(BOOL, Shell32LibMain, HINSTANCE, hinstDLL,
    }
    return TRUE;
 }
+
+/*************************************************************************
+ * DllInstall         [SHELL32.202]
+ *
+ * PARAMETERS
+ *
+ *    BOOL bInstall - TRUE for install, FALSE for uninstall
+ *    LPCWSTR pszCmdLine - command line (unused by shell32?)
+ */
+
+HRESULT WINAPI DllInstall(BOOL bInstall, LPCWSTR cmdline)
+{
+   FIXME("(%s, %s): stub!\n", bInstall ? "TRUE":"FALSE", debugstr_w(cmdline));
+
+   return S_OK;         /* indicate success */
+}
+
