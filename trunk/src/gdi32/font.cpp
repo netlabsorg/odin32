@@ -1,4 +1,4 @@
-/* $Id: font.cpp,v 1.3 1999-11-10 22:44:19 phaller Exp $ */
+/* $Id: font.cpp,v 1.4 1999-11-10 23:30:45 phaller Exp $ */
 
 /*
  * GDI32 font apis
@@ -24,6 +24,8 @@
 #include "misc.h"
 #include "unicode.h"
 #include <vmutex.h>
+#include <heapstring.h>
+#include <win\options.h>
 
 
 ODINDEBUGCHANNEL(GDI32-FONT)
@@ -33,6 +35,44 @@ VMutex mutexProcWinA;
 VMutex mutexProcWinW;
 FONTENUMPROCA FontEnumProcWinA;
 FONTENUMPROCW FontEnumProcWinW;
+
+
+/*****************************************************************************
+ * Name      : static void iFontRename
+ * Purpose   : font remapping table to map win32 fonts to OS/2 pendants
+ * Parameters: LPSTR lpstrFaceOriginal - the win32 face name
+ *             LPSTR lpstrFaceBuffer   - [LF_FACESIZE] buffer to new name
+ * Variables :
+ * Result    :
+ * Remark    : remapped name is passed back in the buffer
+ *             if no mapping pendant is available, return input parameter
+ *             as default.
+ * Status    :
+ *
+ * Author    : Patrick Haller [Fri, 1998/06/12 03:44]
+ *****************************************************************************/
+
+#define ODINFONTSECTION "Font Mapping"
+static void iFontRename(LPCSTR lpstrFaceOriginal,
+                        LPSTR  lpstrFaceTemp)
+{
+  int   iRet;
+
+  // NULL is a valid parameter
+  if (lpstrFaceOriginal == NULL)
+     return;
+
+  memcpy(lpstrFaceTemp, lpstrFaceOriginal, LF_FACESIZE);
+  strupr(lpstrFaceTemp);
+
+  //lookup table
+  iRet = PROFILE_GetOdinIniString(ODINFONTSECTION,
+                                  lpstrFaceTemp,
+                                  lpstrFaceOriginal,
+                                  lpstrFaceTemp,
+                                  LF_FACESIZE);
+}
+
 
 //******************************************************************************
 //******************************************************************************
@@ -52,9 +92,14 @@ ODINFUNCTION14(HFONT,  CreateFontA,
                DWORD,  fdwPitchAndFamily,
                LPCSTR, lpszFace)
 {
-  dprintf(("lpszFace = %s\n", lpszFace));
+  CHAR  lpstrFaceNew[LF_FACESIZE];
+  HFONT hFont;
 
-  return  O32_CreateFont(nHeight,
+  iFontRename(lpszFace, lpstrFaceNew);
+
+  dprintf(("lpszFace = %s -> %s\n", lpszFace, lpstrFaceNew));
+
+  hFont = O32_CreateFont(nHeight,
                          nWidth,
                          nEscapement,
                          nOrientation,
@@ -67,7 +112,8 @@ ODINFUNCTION14(HFONT,  CreateFontA,
                          fdwClipPrecision,
                          fdwQuality,
                          fdwPitchAndFamily,
-                         lpszFace);
+                         lpszFace != NULL ? lpstrFaceNew : NULL);
+  return hFont;
 }
 //******************************************************************************
 //******************************************************************************
@@ -119,28 +165,36 @@ ODINFUNCTION14(HFONT,  CreateFontW,
 
 //******************************************************************************
 //******************************************************************************
-HFONT WIN32API CreateFontIndirectA(const LOGFONTA *lplf)
+ODINFUNCTION1(HFONT,CreateFontIndirectA,const LOGFONTA*, lplf)
 {
- HFONT rc;
+  HFONT    hFont;
+  LOGFONTA afont;
 
-    dprintf(("GDI32: CreateFontIndirectA\n"));
-    dprintf(("GDI32: lfHeight        = %d\n", lplf->lfHeight));
-    dprintf(("GDI32: lfWidth          = %d\n", lplf->lfWidth));
-    dprintf(("GDI32: lfEscapement    = %d\n", lplf->lfEscapement));
-    dprintf(("GDI32: lfOrientation   = %d\n", lplf->lfOrientation));
-    dprintf(("GDI32: lfWeight        = %d\n", lplf->lfWeight));
-    dprintf(("GDI32: lfItalic        = %d\n", lplf->lfItalic));
-    dprintf(("GDI32: lfUnderline     = %d\n", lplf->lfUnderline));
-    dprintf(("GDI32: lfStrikeOut     = %d\n", lplf->lfStrikeOut));
-    dprintf(("GDI32: lfCharSet       = %X\n", lplf->lfCharSet));
-    dprintf(("GDI32: lfOutPrecision  = %X\n", lplf->lfOutPrecision));
-    dprintf(("GDI32: lfClipPrecision = %X\n", lplf->lfClipPrecision));
-    dprintf(("GDI32: lfQuality       = %X\n", lplf->lfQuality));
-    dprintf(("GDI32: lfPitchAndFamily= %X\n", lplf->lfPitchAndFamily));
-    dprintf(("GDI32: lfFaceName      = %s\n", lplf->lfFaceName));
-    rc = O32_CreateFontIndirect(lplf);
-    dprintf(("GDI32: OS2CreateFontIndirectA returned %X\n", rc));
-    return(rc);
+  // don't touch user buffer!
+  memcpy(&afont, lplf, sizeof(LOGFONTA));
+  iFontRename(lplf->lfFaceName, afont.lfFaceName);
+
+  dprintf(("lpszFace = %s -> %s\n", lplf->lfFaceName, afont.lfFaceName));
+
+  dprintf(("GDI32: CreateFontIndirectA\n"));
+  dprintf(("GDI32: lfHeight        = %d\n", lplf->lfHeight));
+  dprintf(("GDI32: lfWidth          = %d\n", lplf->lfWidth));
+  dprintf(("GDI32: lfEscapement    = %d\n", lplf->lfEscapement));
+  dprintf(("GDI32: lfOrientation   = %d\n", lplf->lfOrientation));
+  dprintf(("GDI32: lfWeight        = %d\n", lplf->lfWeight));
+  dprintf(("GDI32: lfItalic        = %d\n", lplf->lfItalic));
+  dprintf(("GDI32: lfUnderline     = %d\n", lplf->lfUnderline));
+  dprintf(("GDI32: lfStrikeOut     = %d\n", lplf->lfStrikeOut));
+  dprintf(("GDI32: lfCharSet       = %X\n", lplf->lfCharSet));
+  dprintf(("GDI32: lfOutPrecision  = %X\n", lplf->lfOutPrecision));
+  dprintf(("GDI32: lfClipPrecision = %X\n", lplf->lfClipPrecision));
+  dprintf(("GDI32: lfQuality       = %X\n", lplf->lfQuality));
+  dprintf(("GDI32: lfPitchAndFamily= %X\n", lplf->lfPitchAndFamily));
+  dprintf(("GDI32: lfFaceName      = %s\n", lplf->lfFaceName));
+
+  hFont = O32_CreateFontIndirect(&afont);
+
+  return(hFont);
 }
 //******************************************************************************
 //******************************************************************************
