@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.168 2002-12-20 12:40:44 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.169 2003-01-05 12:31:26 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -2283,6 +2283,55 @@ FARPROC WIN32API GetProcAddress(HMODULE hModule, LPCSTR lpszProc)
   else  dprintf(("KERNEL32:  GetProcAddress %x from %X returned %X\n", lpszProc, hModule, proc));
   SetLastError(ERROR_SUCCESS);
   return(proc);
+}
+//******************************************************************************
+// ODIN_SetProcAddress: Override a dll export
+// 
+// Parameters:
+//      HMODULE hModule		Module handle
+//      LPCSTR  lpszProc	Export name or ordinal
+//      FARPROC pfnNewProc	New export function address
+//
+// Returns: Success -> old address of export
+//          Failure -> -1
+//
+//******************************************************************************
+FARPROC WIN32API ODIN_SetProcAddress(HMODULE hModule, LPCSTR lpszProc, 
+                                     FARPROC pfnNewProc)
+{
+ Win32ImageBase *winmod;
+ FARPROC   proc;
+ ULONG     ulAPIOrdinal;
+
+  if(hModule == 0 || hModule == -1 || (WinExe && hModule == WinExe->getInstanceHandle())) {
+        winmod = WinExe;
+  }
+  else  winmod = (Win32ImageBase *)Win32DllBase::findModule((HINSTANCE)hModule);
+
+  if(winmod) {
+        ulAPIOrdinal = (ULONG)lpszProc;
+        if (ulAPIOrdinal <= 0x0000FFFF) {
+                proc = (FARPROC)winmod->setApi((int)ulAPIOrdinal, (ULONG)pfnNewProc);
+        }
+        else    proc = (FARPROC)winmod->setApi((char *)lpszProc, (ULONG)pfnNewProc);
+        if(proc == 0) {
+#ifdef DEBUG
+                if(ulAPIOrdinal <= 0x0000FFFF) {
+                        dprintf(("ODIN_SetProcAddress %x %x not found!", hModule, ulAPIOrdinal));
+                }
+                else    dprintf(("ODIN_SetProcAddress %x %s not found!", hModule, lpszProc));
+#endif
+                SetLastError(ERROR_PROC_NOT_FOUND);
+        }
+        if(HIWORD(lpszProc))
+                dprintf(("KERNEL32:  ODIN_SetProcAddress %s from %X returned %X\n", lpszProc, hModule, proc));
+        else    dprintf(("KERNEL32:  ODIN_SetProcAddress %x from %X returned %X\n", lpszProc, hModule, proc));
+
+        SetLastError(ERROR_SUCCESS);
+        return proc;
+  }
+  SetLastError(ERROR_INVALID_HANDLE);
+  return (FARPROC)-1;
 }
 //******************************************************************************
 //Retrieve the version

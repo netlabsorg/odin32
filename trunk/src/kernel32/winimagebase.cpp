@@ -1,4 +1,4 @@
-/* $Id: winimagebase.cpp,v 1.35 2002-04-29 17:05:30 sandervl Exp $ */
+/* $Id: winimagebase.cpp,v 1.36 2003-01-05 12:31:25 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -150,6 +150,18 @@ ULONG Win32ImageBase::getImageSize()
 {
   //dummy
   return 0;
+}
+//******************************************************************************
+//******************************************************************************
+ULONG Win32ImageBase::setApi(char *name, ULONG pfnNewProc)
+{
+    return -1; //only implemented for PE modules
+}
+//******************************************************************************
+//******************************************************************************
+ULONG Win32ImageBase::setApi(int ordinal, ULONG pfnNewProc)
+{
+    return -1; //only implemented for PE modules
 }
 //******************************************************************************
 //******************************************************************************

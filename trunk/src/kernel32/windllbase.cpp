@@ -1,4 +1,4 @@
-/* $Id: windllbase.cpp,v 1.31 2002-12-20 10:38:57 sandervl Exp $ */
+/* $Id: windllbase.cpp,v 1.32 2003-01-05 12:31:25 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
