@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.1 1999-06-23 22:17:52 phaller Exp $ */
+/* $Id: misc.cpp,v 1.2 1999-06-24 19:27:48 phaller Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -16,6 +16,9 @@
 
 #include <os2win.h>
 #include <shellapi.h>
+#include <wchar.h>
+#include <wcstr.h>
+#include <winnls.h>
 #include "shell32.h"
 #include <misc.h>
 #include <string.h>
@@ -349,5 +352,756 @@ HICON WIN32API ExtractAssociatedIconW(HINSTANCE hInst,
   FreeAsciiString(lpIconPathAscii);
 
   return (hIcon);
+}
+
+
+/*****************************************************************************
+ * Name      : ParseField
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.58
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
+ *****************************************************************************/
+
+DWORD WIN32API ParseFieldA(LPCSTR src,
+                           DWORD  field,
+                           LPSTR  dst,
+                           DWORD  len)
+{
+  dprintf(("SHELL32: ParseFieldA(%s,%08xh,%08xh,%08xh) not correctly implemented.\n",
+           src,
+           field,
+           dst,
+           len));
+
+  if (!src || !src[0] || !dst || !len)
+    return 0;
+
+  if (field >1)
+  {
+    field--;
+    while (field)
+    {
+      if (*src==0x0) return FALSE;
+      if (*src==',') field--;
+      src++;
+    }
+  }
+
+  while (*src!=0x00 && *src!=',' && len>0)
+  {
+    *dst=*src; dst++, src++; len--;
+  }
+  *dst=0x0;
+  return TRUE;
+}
+
+
+/*****************************************************************************
+ * Name      : PickIconDlg
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.62
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
+ *****************************************************************************/
+
+DWORD WIN32API PickIconDlg(DWORD x,DWORD y,DWORD z,DWORD a)
+{
+  dprintf(("SHELL32: PickIconDlg(%08xh,%08xh,%08xh,%08xh) not implemented.\n",
+           x,
+           y,
+           z,
+           a));
+
+  return 0xffffffff;
+}
+
+
+/*****************************************************************************
+ * Name      : GetFileNameFromBrowse
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.63
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
+ *****************************************************************************/
+
+DWORD WIN32API GetFileNameFromBrowse(HWND   howner,
+                                     LPSTR  targetbuf,
+                                     DWORD  len,
+                                     DWORD  x,
+                                     LPCSTR suffix,
+                                     LPCSTR y,
+                                     LPCSTR cmd)
+{
+  dprintf(("SHELL32: GetFileNameFromBrowse(%08xh,  %08xh,%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
+           howner,
+           targetbuf,
+           len,
+           x,
+           suffix,
+           y,
+           cmd));
+
+  /* puts up a Open Dialog and requests input into targetbuf */
+  /* OFN_HIDEREADONLY|OFN_NOCHANGEDIR|OFN_FILEMUSTEXIST|OFN_unknown */
+  strcpy(targetbuf,
+         "x:\\dummy.exe");
+
+  return 1;
+}
+
+
+/*****************************************************************************
+ * Name      : OleStrToStrN
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.78
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
+ *****************************************************************************/
+
+BOOL WIN32API OleStrToStrN (LPSTR   lpMulti,
+                            INT     nMulti,
+                            LPCWSTR lpWide,
+                            INT     nWide)
+{
+  dprintf(("SHELL32: OleStrToStrN(%08xh,%08xh,%08xh,%08xh)\n",
+           lpMulti,
+           nMulti,
+           lpWide,
+           nWide));
+
+  return WideCharToMultiByte (0,
+                              0,
+                              lpWide,
+                              nWide,
+                              lpMulti,
+                              nMulti,
+                              NULL,
+                              NULL);
+}
+
+
+/*****************************************************************************
+ * Name      : StrToOleStrN
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.79
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
+ *****************************************************************************/
+
+BOOL WIN32API StrToOleStrN (LPWSTR lpWide,
+                            INT    nWide,
+                            LPCSTR lpMulti,
+                            INT    nMulti)
+{
+  dprintf(("SHELL32: StrToOleStrN(%08xh,%08xh,%08xh,%08xh)\n",
+           lpWide,
+           nWide,
+           lpMulti,
+           nMulti));
+
+  return MultiByteToWideChar (0,
+                              0,
+                              lpMulti,
+                              nMulti,
+                              lpWide,
+                              nWide);
+}
+
+
+/*****************************************************************************
+ * Name      : RegisterShellHook
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.181
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
+ *
+ * PARAMS
+ *      hwnd [I]  window handle
+ *      y    [I]  flag ????
+ *
+ * NOTES
+ *     exported by ordinal
+ */
+
+void WIN32API RegisterShellHook(HWND  hwnd,
+                                DWORD y)
+{
+  dprintf(("SHELL32: RegisterShellHook(%08xh, %08xh) not implemented.\n",
+           hwnd,
+           y));
+}
+
+
+/*****************************************************************************
+ * Name      : RunFileDlg
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.61
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
+ *****************************************************************************/
+
+DWORD WIN32API RunFileDlg (HWND  hwndOwner,
+                           DWORD dwParam1,
+                           DWORD dwParam2,
+                           LPSTR lpszTitle,
+                           LPSTR lpszPrompt,
+                           UINT  uFlags)
+{
+  dprintf(("SHELL32: RunFileDlg(%08xh,%08xh,%08xh,%s,%s,%08xh) not implemented.\n",
+           hwndOwner,
+           dwParam1,
+           dwParam2,
+           lpszTitle,
+           lpszPrompt,
+           uFlags));
+
+  return 0;
+}
+
+
+/*****************************************************************************
+ * Name      : ExitWindowsDialog
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.60
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
+ *****************************************************************************/
+
+void WIN32API ExitWindowsDialog (HWND hWndOwner)
+{
+  dprintf(("SHELL32: ExitWindowsDialog(%08xh)\n",
+           hWndOwner));
+
+   if (MessageBoxA(hWndOwner,
+                   "Do you want to exit ODIN?",
+                   "Shutdown",
+                   MB_YESNO|MB_ICONQUESTION)
+       == IDOK)
+   {
+     SendMessageA (hWndOwner,
+                   WM_QUIT,
+                   0,
+                   0);
+   }
+}
+
+
+/*****************************************************************************
+ * Name      : ArrangeWindows
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.184
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
+ *****************************************************************************/
+
+DWORD WIN32API ArrangeWindows (DWORD dwParam1,
+                               DWORD dwParam2,
+                               DWORD dwParam3,
+                               DWORD dwParam4,
+                               DWORD dwParam5)
+{
+  dprintf(("SHELL32: ArrangeWindows(%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
+           dwParam1,
+           dwParam2,
+           dwParam3,
+           dwParam4,
+           dwParam5));
+
+  return 0;
+}
+
+
+/*****************************************************************************
+ * Name      : SignalFileOpen
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.103
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
+ *****************************************************************************/
+
+DWORD WIN32API SignalFileOpen (DWORD dwParam1)
+{
+  dprintf(("SHELL32: SignalFileOpen(%08xh) not implemented.\n",
+           dwParam1));
+
+  return 0;
+}
+
+
+/*****************************************************************************
+ * Name      : DAD_ShowDrawImage
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.137
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
+ *****************************************************************************/
+
+HRESULT WIN32API DAD_ShowDragImage (DWORD u)
+{
+  dprintf(("SHELL32: DAD_ShowDragImage(%08xh) not implemented.\n",
+           u));
+
+  return 0;
+}
+
+
+/*****************************************************************************
+ * Name      : ReadCabinetState
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.651
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
+ *****************************************************************************/
+
+HRESULT WIN32API ReadCabinetState(DWORD u,
+                                  DWORD v)
+{
+  dprintf(("SHELL32: ReadCabinetState(%08xh, %08xh) not implemented.\n",
+           u,
+           v));
+
+  return 0;
+}
+
+
+/*****************************************************************************
+ * Name      : WriteCabinetState
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.652
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
+ *****************************************************************************/
+
+HRESULT WIN32API WriteCabinetState(DWORD u)
+{
+  dprintf(("SHELL32: WriteCabinetState(%08xh) not implemented.\n",
+           u));
+
+  return 0;
+}
+
+
+/*****************************************************************************
+ * Name      : FileIconInit
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.660
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
+ *****************************************************************************/
+
+BOOL WIN32API FileIconInit(BOOL bFullInit)
+{
+  dprintf(("SHELL32: FileIconInit(%08xh) not implemented.\n",
+           bFullInit));
+
+  return 0;
+}
+
+
+/*****************************************************************************
+ * Name      : IsUserAdmin
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.680
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
+ *****************************************************************************/
+
+HRESULT WIN32API IsUserAdmin(void)
+{
+  dprintf(("SHELL32: IsUserAdmin() not implmented. Yes, user is admin ;-)\n"));
+
+  return TRUE;
+}
+
+
+/*****************************************************************************
+ * Name      : StrRetToStrN
+ * Purpose   : converts a STRRET to a normal string
+ * Parameters: the pidl is for STRRET OFFSET
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.96
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
+ *****************************************************************************/
+
+HRESULT WIN32API StrRetToStrN (LPVOID       dest,
+                               DWORD        len,
+                               LPSTRRET     src,
+                               LPITEMIDLIST pidl)
+{
+  dprintf(("SHELL32: StrRetToStrN(%08xh,%08xh,%08xh,%08xh) not implemented.\n",
+           dest,
+           len,
+           src,
+           pidl));
+
+  switch (src->uType)
+  {
+    case STRRET_WSTR:
+      WideCharToMultiByte(CP_ACP,
+                          0,
+                          src->u.pOleStr,
+                          -1,
+                          (LPSTR)dest,
+                          len,
+                          NULL,
+                          NULL);
+      SHFree(src->u.pOleStr);
+      break;
+
+    case STRRET_CSTRA:
+      //if (VERSION_OsIsUnicode())
+      //  lstrcpynAtoW((LPWSTR)dest, src->u.cStr, len);
+      //else
+        strncpy((LPSTR)dest,
+                src->u.cStr,
+                len);
+      break;
+
+    case STRRET_OFFSETA:
+      if (pidl)
+      {
+        //if(VERSION_OsIsUnicode())
+        //  lstrcpynAtoW((LPWSTR)dest, ((LPCSTR)&pidl->mkid)+src->u.uOffset, len);
+        //else
+          strncpy((LPSTR)dest,
+                  ((LPCSTR)&pidl->mkid)+src->u.uOffset,
+                  len);
+        break;
+      }
+
+    default:
+      dprintf(("SHELL32: StrRetToStrN: unknown type!\n"));
+
+      if (len)
+        *(LPSTR)dest = '\0';
+
+      return(FALSE);
+  }
+  return(TRUE);
+}
+
+/*****************************************************************************
+ * Name      : StrChrW
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.651
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
+ *****************************************************************************/
+
+LPWSTR WIN32API StrChrW (LPWSTR str,
+                         WCHAR  x)
+{
+  dprintf (("SHELL32: StrChrW(%08xh, %08xh)\n",
+            str,
+            x));
+
+  return ((LPWSTR)wcschr((const wchar_t*)str,
+                         x));
+}
+
+
+/*****************************************************************************
+ * Name      : StrChrNIW
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.?
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
+ *****************************************************************************/
+
+INT WIN32API StrCmpNIW (LPWSTR wstr1,
+                        LPWSTR wstr2,
+                        INT    len)
+{
+  dprintf(("SHELL32: StrCmpNIW(%08xh,%08xh,%08xh) not correctly implemented.\n",
+           wstr1,
+           wstr2,
+           len));
+
+  return (wcsncmp((const wchar_t*)wstr1,
+                  (const wchar_t*)wstr2,
+                  len));
+}
+
+
+/*****************************************************************************
+ * Name      : DriveType
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.64
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
+ *****************************************************************************/
+
+HRESULT WIN32API DriveType(DWORD u)
+{
+  dprintf(("SHELL32: DriveType(%08xh) not implemented.\n",
+           u));
+
+  return 0;
+}
+
+
+/*****************************************************************************
+ * Name      : StrRChrW
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.320, wcsrchr does not work?
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
+ *****************************************************************************/
+
+LPWSTR WIN32API StrRChrW(LPWSTR lpStart,
+                         LPWSTR lpEnd,
+                         DWORD  wMatch)
+{
+  LPWSTR wptr=NULL;
+
+  dprintf(("SHELL32: StrRChrW(%08xh,%08xh,%08xh)\n",
+           lpStart,
+           lpEnd,
+           wMatch));
+
+  /* if the end not given, search*/
+  if (!lpEnd)
+  {
+    lpEnd=lpStart;
+    while (*lpEnd)
+      lpEnd++;
+  }
+
+  do
+  {
+    if (*lpStart==(WCHAR)wMatch)
+      wptr = lpStart;
+    lpStart++;
+  }
+  while ( lpStart<=lpEnd );
+  return wptr;
+}
+
+
+/*****************************************************************************
+ * Name      : Control_FillCache_RunDLL
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.8
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
+ *****************************************************************************/
+
+HRESULT WIN32API Control_FillCache_RunDLL(HWND   hWnd,
+                                          HANDLE hModule,
+                                          DWORD  w,
+                                          DWORD  x)
+{
+  dprintf(("SHELL32: Control_FillCache_RunDLL(%08xh,%08xh,%08xh,%08xh) not implemented.\n",
+           hWnd,
+           hModule,
+           w,
+           x));
+
+  return 0;
+}
+
+
+/*****************************************************************************
+ * Name      : RunDLL_CallEntry16
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.122 - the name is propably wrong
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
+ *****************************************************************************/
+
+HRESULT WIN32API RunDLL_CallEntry16(DWORD v,
+                                    DWORD w,
+                                    DWORD x,
+                                    DWORD y,
+                                    DWORD z)
+{
+  dprintf(("SHELL32: RunDLL_CallEntry16(%08xh,%08xh,%08xh,%08xh,%08xh) not implemented.\n",
+           v,
+           w,
+           x,
+           y,
+           z));
+
+  return 0;
+}
+
+
+/*****************************************************************************
+ * Name      : SHELL32_654
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.654
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
+ *****************************************************************************/
+
+HRESULT WIN32API SHELL32_654 (DWORD x,
+                              DWORD y)
+{
+  dprintf(("SHELL32: SHELL32_654(%08xh,%08xh) not implemented.\n",
+           x,
+           y));
+  return 0;
+}
+
+
+/*****************************************************************************
+ * Name      : RLBuildListOfPaths
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.146 - builds a DPA
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
+ *****************************************************************************/
+
+DWORD WIN32API RLBuildListOfPaths ()
+{
+  dprintf(("SHELL32: RLBuildListOfPaths() not implemented.\n"));
+  return 0;
+}
+
+
+/*****************************************************************************
+ * Name      : StrToOleStr
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.163
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
+ *****************************************************************************/
+
+int WIN32API StrToOleStr (LPWSTR lpWideCharStr,
+                          LPCSTR lpMultiByteString)
+{
+  dprintf(("SHELL32: StrToOleStr(%08xh,%08xh)\n",
+           lpWideCharStr,
+           lpMultiByteString));
+
+  return MultiByteToWideChar(0,
+                             0,
+                             lpMultiByteString,
+                             -1,
+                             lpWideCharStr,
+                             MAX_PATH);
+}
+
+
+/*****************************************************************************
+ * Name      : SetAppStartingCursor
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.99
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
+ *****************************************************************************/
+
+HRESULT WIN32API SetAppStartingCursor(HWND  u,
+                                      DWORD v)
+{
+  dprintf(("SHELL32: SetAppStartingCursor (SHELL32.99): (%08xh,%08xh) not implemented.\n",
+           u,
+           v));
+
+  return 0;
 }
 

@@ -1,4 +1,4 @@
-/* $Id: unknown.cpp,v 1.2 1999-06-23 22:28:52 phaller Exp $ */
+/* $Id: unknown.cpp,v 1.3 1999-06-24 19:27:49 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -40,7 +40,7 @@
  *             INT     nShowCmd
  * Variables :
  * Result    :
- * Remark    :
+ * Remark    : SHELL32.229
  * Status    : UNTESTED UNKNOWN
  *
  * Author    : Patrick Haller [Tue, 1999/06/01 09:00]
@@ -76,7 +76,7 @@ HINSTANCE WIN32API RealShellExecuteA(HWND    hwnd,
  *             INT     nShowCmd
  * Variables :
  * Result    :
- * Remark    :
+ * Remark    : SHELL32.232
  * Status    : UNTESTED UNKNOWN
  *
  * Author    : Patrick Haller [Tue, 1999/06/01 09:00]
@@ -125,7 +125,7 @@ HINSTANCE WIN32API RealShellExecuteW(HWND    hwnd,
  * Parameters:
  * Variables :
  * Result    :
- * Remark    :
+ * Remark    : SHELL32.230
  * Status    : UNTESTED STUB UNKNOWN
  *
  * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
@@ -146,7 +146,7 @@ BOOL WIN32API RealShellExecuteExA(LPSHELLEXECUTEINFOA lpExecInfo)
  * Parameters:
  * Variables :
  * Result    :
- * Remark    :
+ * Remark    : SHELL32.231
  * Status    : UNTESTED STUB UNKNOWN
  *
  * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
@@ -159,4 +159,3 @@ BOOL WIN32API RealShellExecuteExW(LPSHELLEXECUTEINFOW lpExecInfo)
 
   return (0);
 }
-

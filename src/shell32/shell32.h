@@ -1,4 +1,4 @@
-/* $Id: shell32.h,v 1.3 1999-06-10 16:56:09 phaller Exp $ */
+/* $Id: shell32.h,v 1.4 1999-06-24 19:27:49 phaller Exp $ */
 
 #ifndef __shell32_H__
 #define __shell32_H__
@@ -68,6 +68,44 @@ typedef struct _browseinfoW
 
 
 typedef void *LPSHELLFOLDER;
+
+
+/****************************************************************************
+*  STRRET (temporary, move it away)
+*/
+#define STRRET_WSTR    0x0000
+#define STRRET_OFFSETA 0x0001
+#define STRRET_CSTRA   0x0002
+#define STRRET_ASTR    0X0003
+#define STRRET_OFFSETW 0X0004
+#define STRRET_CSTRW   0X0005
+
+
+typedef struct _STRRET
+{ UINT uType;              /* STRRET_xxx */
+  union
+  {
+    LPWSTR pOleStr;        /* OLESTR that will be freed */
+    LPSTR  pStr;
+    UINT   uOffset;        /* OffsetINT32o SHITEMID (ANSI) */
+    char   cStr[MAX_PATH]; /* Buffer to fill in */
+    WCHAR  cStrW[MAX_PATH];
+  }u;
+} STRRET,*LPSTRRET;
+
+
+
+/****************************************************************************
+ * Prototypes                                                               *
+ ****************************************************************************/
+
+HANDLE  WIN32API SHFreeShared(HANDLE hmem, DWORD  procID);
+DWORD   WIN32API SHFree(LPVOID x);
+LPVOID  WIN32API SHAlloc(DWORD len);
+HRESULT WIN32API SHGetSpecialFolderLocation(HWND hwndOwner, int nFolder, LPITEMIDLIST *ppidl);
+BOOL    WIN32API SHGetPathFromIDListW(LPCITEMIDLIST pidl, LPWSTR pszPath);
+BOOL    WIN32API SHGetPathFromIDListA(LPCITEMIDLIST pidl, LPSTR  pszPath);
+LPSTR   WIN32API PathCombineA(LPSTR szDest, LPCSTR lpszDir, LPCSTR lpszFile);
 
 
 #endif /* __shell32_h_ */
