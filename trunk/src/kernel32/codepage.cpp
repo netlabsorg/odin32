@@ -20,12 +20,22 @@ static UconvObject WindowsUconv = NULL;
 
 ULONG GetDisplayCodepage()
 {
-    return ODIN_PROFILE_GetOdinIniInt(CODEPAGE_SECTION, "DISPLAY", 0);
+ static ULONG codepage = -1;
+
+    if(codepage == -1) {
+    	codepage = ODIN_PROFILE_GetOdinIniInt(CODEPAGE_SECTION, "DISPLAY", 0);
+    }
+    return codepage;
 }
 
 ULONG GetWindowsCodepage()
 {
-    return ODIN_PROFILE_GetOdinIniInt(CODEPAGE_SECTION, "WINDOWS", 0);
+ static ULONG codepage = -1;
+
+    if(codepage == -1) {
+    	codepage = ODIN_PROFILE_GetOdinIniInt(CODEPAGE_SECTION, "WINDOWS", 0);
+    }
+    return codepage;
 }
 
 static UconvObject GetObjectByCP(ULONG codepage)
@@ -36,7 +46,7 @@ static UconvObject GetObjectByCP(ULONG codepage)
     BOOL ret = UniMapCpToUcsCp(codepage, codepage_str, sizeof(codepage_str));
     if ( ret == ULS_SUCCESS )
     {
-        ret = UniCreateUconvObject( (UniChar*)L"", &rc );
+	ret = UniCreateUconvObject( codepage_str, &rc );
         if ( ret != ULS_SUCCESS )
           	rc = 0;
     }
