@@ -1,4 +1,9 @@
- /* $Id: ChangeLog,v 1.632 2000-01-10 23:38:04 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.633 2000-01-11 10:39:26 sandervl Exp $ */
+
+ 2000-01-11: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32\NEW: Put nonclient code in win32wbasenonclient.cpp
+                      Removed hardcoded dependancy on shell32; load it on-demand
+                      Fixed LoadBitmap (OBM_RADIOCHECK was missing from system bitmap list)
 
  2000-01-10: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Fixed message translation for WM_TIMER with no window handle or timer proc
