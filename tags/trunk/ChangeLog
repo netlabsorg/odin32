@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.217 1999-09-21 08:23:13 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.218 1999-09-21 11:01:43 phaller Exp $ */
+
+ 99-09-21: Patrick Haller <phaller@gmx.net>
+        - KERNEL32: Add: GetFileAttributesExA/W implemented (ugly)
+
 
  99-09-21: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Fixed cursor group conversion
