@@ -1,4 +1,4 @@
-/* $Id: win32wnd.h,v 1.10 1999-07-18 14:39:35 sandervl Exp $ */
+/* $Id: win32wnd.h,v 1.11 1999-07-18 14:56:37 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -124,6 +124,7 @@ virtual	 WORD   GetWindowWord(int index);
 Win32WndClass  *getClass()  { return windowClass; };
 
 static Win32Window *GetWindowFromHandle(HWND hwnd);
+static Win32Window *GetWindowFromOS2Handle(HWND hwnd);
 
 protected:
        LRESULT  SendInternalMessageA(ULONG msg, WPARAM wParam, LPARAM lParam);

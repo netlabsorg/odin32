@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.11 1999-07-18 14:39:35 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.12 1999-07-18 14:56:36 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -183,7 +183,7 @@ BOOL  OSLibWinSetWindowPos(HWND hwnd, HWND hwndInsertBehind, LONG x, LONG y, LON
 BOOL  OSLibWinShowWindow(HWND hwnd, ULONG fl);
 
 BOOL  OSLibWinDestroyWindow(HWND hwnd);
-BOOL  OSLibWinQueryUpdateRect(HWND hwnd, PRECT pRect);
+BOOL  OSLibWinQueryUpdateRect(HWND hwnd, PVOID pRect);
 BOOL  OSLibWinIsIconic(HWND hwnd);
 BOOL  OSLibWinSetActiveWindow(HWND hwnd);
 BOOL  OSLibWinSetFocus(HWND hwnd);

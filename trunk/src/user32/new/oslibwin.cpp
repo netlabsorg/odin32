@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.12 1999-07-18 14:39:35 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.13 1999-07-18 14:56:36 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -255,14 +255,14 @@ BOOL OSLibWinDestroyWindow(HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibWinQueryUpdateRect(HWND hwnd, PRECT pRect)
+BOOL OSLibWinQueryUpdateRect(HWND hwnd, PVOID pRect)
 {
  BOOL rc;
  RECTLOS2 rectl;
 
   rc = WinQueryUpdateRect(hwnd, (PRECTL)&rectl);
   if(rc) {
-	MapOS2ToWin32Rectl(hwnd, &rectl, pRect);
+    MapOS2ToWin32Rectl(hwnd, &rectl, (PRECT)pRect);
   }
   return rc;
 }
