@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 1999-05-24 20:19:05 ktk Exp $ 
+# $Id: makefile,v 1.2 1999-06-01 08:43:08 phaller Exp $ 
 
 #
 # PD-Win32 API 
@@ -16,18 +16,27 @@
 #              
 # 
 
-all:
-	cd src
-	nmake -nologo all
+all:		odin_libraries
+		cd src
+		nmake -nologo all
 
-clean:
-	cd src
-	nmake -nologo clean
+clean:		odin_libraries
+		cd src
+		nmake -nologo clean
 
-debug:
-	cd src
-	nmake -nologo all DEBUG=1
+debug:		odin_libraries
+		cd src
+		nmake -nologo all DEBUG=1
 
-release:
-	cd src
-	nmake -nologo all 
+release:	odin_libraries
+		cd src
+		nmake -nologo all 
+
+
+
+# --- common section ---
+odin_libraries:
+	cd lib
+	nmake -nologo
+	cd ..
+
