@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.31 1999-11-12 14:57:12 sandervl Exp $ */
+/* $Id: KERNEL32.CPP,v 1.32 1999-11-19 14:32:55 achimha Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -631,7 +631,9 @@ VOID WIN32API GetSystemInfo(LPSYSTEM_INFO lpSystemInfo)
   lpSystemInfo->u.x.wProcessorArchitecture  = PROCESSOR_ARCHITECTURE_INTEL;
   lpSystemInfo->u.x.wReserved               = 0;
   lpSystemInfo->dwPageSize                  = 4096;
-  lpSystemInfo->lpMinimumApplicationAddress = (LPVOID)0;
+  // as of NT 4.0 SP3
+  lpSystemInfo->lpMinimumApplicationAddress = (LPVOID)0x00010000;
+  //TODO: detect Aurora and increase
   lpSystemInfo->lpMaximumApplicationAddress = (LPVOID)(512*1024*1024);
   lpSystemInfo->dwActiveProcessorMask       = 1;
   lpSystemInfo->dwNumberOfProcessors        = 1; //assuming non-SMP OS/2
