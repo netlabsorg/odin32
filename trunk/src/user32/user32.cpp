@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.102 2001-06-23 07:21:56 achimha Exp $ */
+/* $Id: user32.cpp,v 1.103 2001-06-23 09:14:06 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -628,7 +628,7 @@ BOOL WIN32API SystemParametersInfoA(UINT uiAction, UINT uiParam, PVOID pvParam, 
  BOOL rc = TRUE;
 
   dprintf(("USER32:  SystemParametersInfoA uiAction: %d, uiParam: %d, pvParam: %d, fWinIni: %d\n",
-           uiAction, uiParam, pvParam, fWinInit));
+           uiAction, uiParam, pvParam, fWinIni));
 
   switch(uiAction) {
 
