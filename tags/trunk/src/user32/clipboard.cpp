@@ -1,4 +1,4 @@
-/* $Id: clipboard.cpp,v 1.13 2001-07-08 15:51:41 sandervl Exp $ */
+/* $Id: clipboard.cpp,v 1.14 2002-01-07 14:32:21 sandervl Exp $ */
 
 /*
  * Win32 Clipboard API functions for OS/2
@@ -287,6 +287,38 @@ HANDLE WIN32API SetClipboardData( UINT uFormat, HANDLE hClipObj)
     return hClipObj;
 #else
     dprintf(("USER32: SetClipboardData %x %x", uFormat, hClipObj));
+
+    if(uFormat == CF_UNICODETEXT) 
+    {
+        //have to translate to CF_TEXT, because WGSS doesn't understand
+        //unicode text
+        LPWSTR lpTextUnicode;
+        LPSTR  lpTextAscii;
+        DWORD  length;
+        HANDLE hClipObjAscii;
+
+        lpTextUnicode = (LPWSTR)GlobalLock(hClipObj);
+        if(lpTextUnicode == NULL) {
+            dprintf(("!ERROR!: Invalid handle!!"));
+            SetLastError(ERROR_INVALID_HANDLE);
+            return 0;
+        }
+        length = GlobalSize(hClipObj)/sizeof(WCHAR);
+       	hClipObjAscii = GlobalAlloc(GMEM_DDESHARE | GMEM_MOVEABLE, length);
+        lpTextAscii = (LPSTR)GlobalLock(hClipObjAscii);
+        if(!hClipObjAscii || lpTextAscii == NULL || length == 0) {
+            dprintf(("!ERROR!: GlobalAlloc %d failed!!", length));
+            SetLastError(ERROR_INVALID_HANDLE);
+            return 0;
+        }
+        WideCharToMultiByte(CP_ACP, 0, lpTextUnicode, -1, lpTextAscii, length, 0, NULL);
+        
+        GlobalUnlock(hClipObjAscii);
+        GlobalUnlock(hClipObj);
+        HANDLE ret = O32_SetClipboardData(CF_TEXT, hClipObjAscii);
+        //hClipObjAscii will be freed when the clipboard is closed
+        return ret;
+    }
     return O32_SetClipboardData(uFormat, hClipObj);
 #endif
 }
