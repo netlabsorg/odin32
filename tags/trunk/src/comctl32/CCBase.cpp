@@ -1,4 +1,4 @@
-/* $Id: CCBase.cpp,v 1.5 2000-03-21 17:30:40 cbratschi Exp $ */
+/* $Id: CCBase.cpp,v 1.6 2000-03-30 15:39:08 cbratschi Exp $ */
 /*
  * COMCTL32 Base Functions and Macros for all Controls
  *
@@ -179,6 +179,17 @@ LRESULT sendNotify(HWND hwnd,UINT code)
   return SendMessageA(getNotifyWindow(hwnd),WM_NOTIFY,nmhdr.idFrom,(LPARAM)&nmhdr);
 }
 
+LRESULT sendNotify(HWND hwndFrom,HWND hwndTo,UINT code)
+{
+  NMHDR nmhdr;
+
+  nmhdr.hwndFrom = hwndFrom;
+  nmhdr.idFrom   = GetWindowLongA(hwndFrom,GWL_ID);
+  nmhdr.code     = code;
+
+  return SendMessageA(hwndTo,WM_NOTIFY,nmhdr.idFrom,(LPARAM)&nmhdr);
+}
+
 LRESULT sendNotify(HWND hwnd,UINT code,LPNMHDR nmhdr)
 {
   if (!nmhdr) return 0;
@@ -188,6 +199,17 @@ LRESULT sendNotify(HWND hwnd,UINT code,LPNMHDR nmhdr)
   nmhdr->code     = code;
 
   return SendMessageA(getNotifyWindow(hwnd),WM_NOTIFY,nmhdr->idFrom,(LPARAM)nmhdr);
+}
+
+LRESULT sendNotify(HWND hwndFrom,HWND hwndTo,UINT code,LPNMHDR nmhdr)
+{
+  if (!nmhdr) return 0;
+
+  nmhdr->hwndFrom = hwndFrom;
+  nmhdr->idFrom   = GetWindowLongA(hwndFrom,GWL_ID);
+  nmhdr->code     = code;
+
+  return SendMessageA(hwndTo,WM_NOTIFY,nmhdr->idFrom,(LPARAM)nmhdr);
 }
 
 LRESULT sendNotifyFormat(HWND hwnd,HWND hwndFrom,LPARAM command)
@@ -274,4 +296,26 @@ VOID drawStubControl(HWND hwnd,HDC hdc)
 
   DeleteObject(brush);
   DeleteObject(pen);
+}
+
+//string functions
+
+//compare ANSI with UNICODE string
+INT lstrcmpAtoW(CHAR* textA,WCHAR* textW)
+{
+  INT len,res;
+  WCHAR* tmp;
+
+  len = lstrlenA(textA);
+  if (len > 0)
+  {
+    len++;
+    tmp = (WCHAR*)COMCTL32_Alloc(len*sizeof(WCHAR));
+    lstrcpyAtoW(tmp,textA);
+  } else tmp = NULL;
+
+  res = lstrcmpW(tmp,textW);
+
+  if (tmp) COMCTL32_Free(tmp);
+  return res;
 }
