@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.37 2001-10-15 17:09:04 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.38 2002-02-05 17:59:01 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -154,11 +154,11 @@ VOID Win32BaseWindow::TrackMinMaxHelpBox(WORD wParam)
     return;
 
   if (wParam == HTMINBUTTON)
-    SendInternalMessageA(WM_SYSCOMMAND,SC_MINIMIZE,*(LPARAM*)&msg.pt);
+    SendMessageA(getWindowHandle(), WM_SYSCOMMAND,SC_MINIMIZE,*(LPARAM*)&msg.pt);
   else if (wParam == HTMAXBUTTON)
-    SendInternalMessageA(WM_SYSCOMMAND,IsZoomed(Win32Hwnd) ? SC_RESTORE:SC_MAXIMIZE,*(LPARAM*)&msg.pt);
+    SendMessageA(getWindowHandle(), WM_SYSCOMMAND,IsZoomed(Win32Hwnd) ? SC_RESTORE:SC_MAXIMIZE,*(LPARAM*)&msg.pt);
   else
-    SendInternalMessageA(WM_SYSCOMMAND,SC_CONTEXTHELP,*(LPARAM*)&msg.pt);
+    SendMessageA(getWindowHandle(), WM_SYSCOMMAND,SC_CONTEXTHELP,*(LPARAM*)&msg.pt);
 }
 //******************************************************************************
 //******************************************************************************
@@ -191,7 +191,7 @@ VOID Win32BaseWindow::TrackCloseButton(WORD wParam)
   ReleaseCapture();
   ReleaseDC(Win32Hwnd,hdc);
   if (!pressed) return;
-  SendInternalMessageA(WM_SYSCOMMAND,SC_CLOSE,*(LPARAM*)&msg.pt);
+  SendMessageA(getWindowHandle(), WM_SYSCOMMAND,SC_CLOSE,*(LPARAM*)&msg.pt);
 }
 //******************************************************************************
 //******************************************************************************
@@ -272,13 +272,13 @@ LONG Win32BaseWindow::HandleNCLButtonDown(WPARAM wParam,LPARAM lParam)
 ////            OSLibWinSetFocus(topparent->getOS2WindowHandle());
             }
             if (GetActiveWindow() == hwndTopParent)
-                 SendInternalMessageA(WM_SYSCOMMAND,SC_MOVE+HTCAPTION,lParam);
+                 SendMessageA(getWindowHandle(), WM_SYSCOMMAND,SC_MOVE+HTCAPTION,lParam);
             else dprintf(("ACtive window (%x) != toplevel wnd %x", OSLibWinQueryActiveWindow(), hwndTopParent));
         }
         else {
             SetActiveWindow();
             if (GetActiveWindow() == hwndTopParent)
-                 SendInternalMessageA(WM_SYSCOMMAND,SC_MOVE+HTCAPTION,lParam);
+                 SendMessageA(getWindowHandle(), WM_SYSCOMMAND,SC_MOVE+HTCAPTION,lParam);
             else dprintf(("ACtive window (%x) != wnd %x", OSLibWinQueryActiveWindow(), getWindowHandle()));
         }
         break;
@@ -287,20 +287,20 @@ LONG Win32BaseWindow::HandleNCLButtonDown(WPARAM wParam,LPARAM lParam)
     case HTSYSMENU:
         if(dwStyle & WS_SYSMENU )
         {
-            SendInternalMessageA(WM_SYSCOMMAND,SC_MOUSEMENU+HTSYSMENU,lParam);
+            SendMessageA(getWindowHandle(), WM_SYSCOMMAND,SC_MOUSEMENU+HTSYSMENU,lParam);
         }
         break;
 
     case HTMENU:
-        SendInternalMessageA(WM_SYSCOMMAND,SC_MOUSEMENU,lParam);
+        SendMessageA(getWindowHandle(), WM_SYSCOMMAND,SC_MOUSEMENU,lParam);
         break;
 
     case HTHSCROLL:
-        SendInternalMessageA(WM_SYSCOMMAND,SC_HSCROLL+HTHSCROLL,lParam);
+        SendMessageA(getWindowHandle(), WM_SYSCOMMAND,SC_HSCROLL+HTHSCROLL,lParam);
         break;
 
     case HTVSCROLL:
-        SendInternalMessageA(WM_SYSCOMMAND,SC_VSCROLL+HTVSCROLL,lParam);
+        SendMessageA(getWindowHandle(), WM_SYSCOMMAND,SC_VSCROLL+HTVSCROLL,lParam);
         break;
 
     case HTMINBUTTON:
@@ -322,7 +322,7 @@ LONG Win32BaseWindow::HandleNCLButtonDown(WPARAM wParam,LPARAM lParam)
     case HTBOTTOMLEFT:
     case HTBOTTOMRIGHT:
         /* make sure hittest fits into 0xf and doesn't overlap with HTSYSMENU */
-        SendInternalMessageA(WM_SYSCOMMAND,SC_SIZE+wParam-2,lParam);
+        SendMessageA(getWindowHandle(), WM_SYSCOMMAND,SC_SIZE+wParam-2,lParam);
         break;
     case HTBORDER:
         break;
@@ -1206,7 +1206,7 @@ LONG Win32BaseWindow::HandleNCLButtonDblClk(WPARAM wParam,LPARAM lParam)
    */
   if (dwStyle & WS_MINIMIZE)
   {
-    SendInternalMessageA(WM_SYSCOMMAND,SC_RESTORE,lParam);
+    SendMessageA(getWindowHandle(), WM_SYSCOMMAND,SC_RESTORE,lParam);
     return 0;
   }
 
@@ -1215,22 +1215,22 @@ LONG Win32BaseWindow::HandleNCLButtonDblClk(WPARAM wParam,LPARAM lParam)
     case HTCAPTION:
       /* stop processing if WS_MAXIMIZEBOX is missing */
       if (dwStyle & WS_MAXIMIZEBOX)
-        SendInternalMessageA(WM_SYSCOMMAND,
+        SendMessageA(getWindowHandle(), WM_SYSCOMMAND,
                       (dwStyle & WS_MAXIMIZE) ? SC_RESTORE : SC_MAXIMIZE,
                       lParam);
       break;
 
     case HTSYSMENU:
       if (!(GetClassWord(Win32Hwnd,GCW_STYLE) & CS_NOCLOSE))
-        SendInternalMessageA(WM_SYSCOMMAND,SC_CLOSE,lParam);
+        SendMessageA(getWindowHandle(), WM_SYSCOMMAND,SC_CLOSE,lParam);
       break;
 
     case HTHSCROLL:
-      SendInternalMessageA(WM_SYSCOMMAND,SC_HSCROLL+HTHSCROLL,lParam);
+      SendMessageA(getWindowHandle(), WM_SYSCOMMAND,SC_HSCROLL+HTHSCROLL,lParam);
       break;
 
     case HTVSCROLL:
-      SendInternalMessageA(WM_SYSCOMMAND,SC_VSCROLL+HTVSCROLL,lParam);
+      SendMessageA(getWindowHandle(), WM_SYSCOMMAND,SC_VSCROLL+HTVSCROLL,lParam);
       break;
   }
 
@@ -1248,7 +1248,7 @@ LONG Win32BaseWindow::HandleNCRButtonUp(WPARAM wParam,LPARAM lParam)
 
       if (((GetActiveWindow() == Win32Hwnd) || isMDIChild()) && (dwStyle & WS_SYSMENU))
       {
-        SendInternalMessageA(WM_SYSCOMMAND,SC_MOUSEMENU+HTCAPTION,lParam);
+        SendMessageA(getWindowHandle(), WM_SYSCOMMAND,SC_MOUSEMENU+HTCAPTION,lParam);
       }
       break;
 
@@ -1344,7 +1344,7 @@ LONG Win32BaseWindow::HandleSysCommand(WPARAM wParam,POINT *pt32)
         break;
 
     case SC_CLOSE:
-        return SendInternalMessageA(WM_CLOSE,0,0);
+        return SendMessageA(getWindowHandle(), WM_CLOSE,0,0);
 
     case SC_CONTEXTHELP:
         {
