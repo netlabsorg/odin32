@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.90 2001-12-07 14:13:37 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.91 2001-12-30 11:04:19 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -2412,7 +2412,7 @@ DWORD OSLibDosQueryVolumeFS(int drive, LPSTR lpFileSystemNameBuffer, DWORD nFile
    }
    else return ERROR_BUFFER_OVERFLOW_W;
    */
-   return 0;
+   return ERROR_SUCCESS_W;
 }
 //******************************************************************************
 typedef struct _FSINFOBUF

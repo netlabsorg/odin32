@@ -1,4 +1,4 @@
-/* $Id: disk.cpp,v 1.26 2001-12-17 16:23:19 sandervl Exp $ */
+/* $Id: disk.cpp,v 1.27 2001-12-30 11:04:19 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -272,6 +272,7 @@ ODINFUNCTION8(BOOL,    GetVolumeInformationA,
               DWORD,   nFileSystemNameSize)
 {
    CHAR   tmpstring[256];
+   CHAR   szOrgFileSystemName[256] = "";
    ULONG  drive;
    BOOL   rc;
 
@@ -303,12 +304,16 @@ ODINFUNCTION8(BOOL,    GetVolumeInformationA,
             dprintf2(("Volume name: %s", lpVolumeNameBuffer));
         }
     }
-    if(lpFileSystemNameBuffer || lpMaximumComponentLength || lpFileSystemFlags) {
+    if(lpFileSystemNameBuffer || lpMaximumComponentLength || lpFileSystemFlags) 
+    {
         if(!lpFileSystemNameBuffer) {
             lpFileSystemNameBuffer = tmpstring;
             nFileSystemNameSize    = sizeof(tmpstring);
         }
         rc = OSLibDosQueryVolumeFS(drive, lpFileSystemNameBuffer, nFileSystemNameSize);
+        //save original file system name
+        if(rc == ERROR_SUCCESS) strcpy(szOrgFileSystemName, lpFileSystemNameBuffer);
+
         if(lpFileSystemNameBuffer) 
         {
             dprintf2(("File system name: %s", lpFileSystemNameBuffer));
@@ -318,7 +323,9 @@ ODINFUNCTION8(BOOL,    GetVolumeInformationA,
             }
             else
             if(!strcmp(lpFileSystemNameBuffer, "CDFS") ||
-               !strcmp(lpFileSystemNameBuffer, "UDF")) 
+               !strcmp(lpFileSystemNameBuffer, "UDF") || 
+               !strcmp(lpFileSystemNameBuffer, "FAT32") ||
+               !strcmp(lpFileSystemNameBuffer, "NTFS")) //in case somebody ever writes one
             {
                 //do nothing
             }
@@ -330,25 +337,25 @@ ODINFUNCTION8(BOOL,    GetVolumeInformationA,
         }
     }
     if(lpMaximumComponentLength) {
-        if(!strcmp(lpFileSystemNameBuffer, "FAT16")) {
-            *lpMaximumComponentLength = 12;
+        if(!strcmp(szOrgFileSystemName, "FAT16") || !strcmp(szOrgFileSystemName, "FAT")) {
+             *lpMaximumComponentLength = 12;  //8.3
         }
-        else    *lpMaximumComponentLength = 255; //TODO: Always correct? (CDFS?)
+        else *lpMaximumComponentLength = 255; //TODO: Always correct? (CDFS?)
     }
     if(lpFileSystemFlags)
     {
         if(strcmp(lpFileSystemNameBuffer, "FAT16")) {
-            *lpFileSystemFlags = FS_CASE_IS_PRESERVED;
+             *lpFileSystemFlags = FS_CASE_IS_PRESERVED;
         }
         else
         if(!strcmp(lpFileSystemNameBuffer, "CDFS")) {
-            *lpFileSystemFlags = FS_CASE_SENSITIVE; //NT4 returns this
+             *lpFileSystemFlags = FS_CASE_SENSITIVE; //NT4 returns this
         }
         else
         if(!strcmp(lpFileSystemNameBuffer, "UDF")) {//TODO: correct?
-            *lpFileSystemFlags = FS_CASE_SENSITIVE | FS_UNICODE_STORED_ON_DISK;
+             *lpFileSystemFlags = FS_CASE_SENSITIVE | FS_UNICODE_STORED_ON_DISK;
         }
-        else    *lpFileSystemFlags = 0;
+        else *lpFileSystemFlags = 0;
 
         dprintf2(("File system flags: %x", lpFileSystemFlags));
     }
