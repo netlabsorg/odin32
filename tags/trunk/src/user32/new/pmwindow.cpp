@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.3 1999-07-14 21:05:58 cbratschi Exp $ */
+/* $Id: pmwindow.cpp,v 1.4 1999-07-15 18:03:02 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -13,6 +13,7 @@
 
 #include <os2.h>                        /* PM header file               */
 #include <os2wrap.h>
+#include <stdlib.h>
 #include "win32type.h"
 #include <wprocess.h>
 #include <misc.h>
@@ -67,6 +68,7 @@ BOOL InitPM()
 //******************************************************************************
 MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 {
+ POSTMSG_PACKET *postmsg;
  Win32Window  *win32wnd;
  ULONG         magic;
  APIRET        rc;
@@ -83,6 +85,28 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
   }
   switch( msg )
   {
+    //internal messages
+    case WM_WIN32_POSTMESSAGEA:
+	postmsg = (POSTMSG_PACKET *)mp1;
+	if(postmsg == NULL) {
+		dprintf(("WM_WIN32_POSTMESSAGEA, postmsg NULL!!"));
+		break;
+	}
+	win32wnd->SendMessageA(postmsg->Msg, postmsg->wParam, postmsg->lParam);
+	free(postmsg);
+	break;
+
+    case WM_WIN32_POSTMESSAGEW:
+	postmsg = (POSTMSG_PACKET *)mp1;
+	if(postmsg == NULL) {
+		dprintf(("WM_WIN32_POSTMESSAGEW, postmsg NULL!!"));
+		break;
+	}
+	win32wnd->SendMessageW(postmsg->Msg, postmsg->wParam, postmsg->lParam);
+	free(postmsg);
+	break;
+
+    //OS/2 msgs
     case WM_CREATE:
         //Processing is done in after WinCreateWindow returns
         break;

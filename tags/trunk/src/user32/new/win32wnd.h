@@ -1,4 +1,4 @@
-/* $Id: win32wnd.h,v 1.2 1999-07-14 08:35:37 sandervl Exp $ */
+/* $Id: win32wnd.h,v 1.3 1999-07-15 18:03:03 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -32,6 +32,16 @@ typedef struct {
 	Win32Window    *win32wnd;
 	ULONG           win32CreateStruct;	//or dialog create dword
 } CUSTOMWNDDATA;
+
+typedef struct
+{
+  	ULONG 		Msg;
+  	ULONG 		wParam;
+  	ULONG 		lParam;
+} POSTMSG_PACKET;
+
+#define WM_WIN32_POSTMESSAGEA	0x4000
+#define WM_WIN32_POSTMESSAGEW	0x4001
 
 class Win32Window : public GenericObject
 {
@@ -73,8 +83,13 @@ virtual	 WORD   GetWindowWord(int index);
         DWORD   getWindowId()                   { return windowId; };
          void   setWindowId(DWORD id)           { windowId = id; };
 
+	 DWORD  getFlags()			{ return flags; };
+	 void   setFlags(DWORD newflags)	{ flags = newflags; };
+
        LRESULT  SendMessageA(ULONG msg, WPARAM wParam, LPARAM lParam);
        LRESULT  SendMessageW(ULONG msg, WPARAM wParam, LPARAM lParam);
+       LRESULT  PostMessageA(ULONG msg, WPARAM wParam, LPARAM lParam);
+       LRESULT  PostMessageW(ULONG msg, WPARAM wParam, LPARAM lParam);
        LRESULT  DefWindowProcA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
        LRESULT  DefWindowProcW(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 1999-07-14 08:35:35 sandervl Exp $
+# $Id: makefile,v 1.2 1999-07-15 18:03:01 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -26,8 +26,8 @@ OBJS =  user32.obj resstring.obj dialog.obj loadres.obj \
         usrcall.obj defwndproc.obj syscolor.obj char.obj initterm.obj \
         uitools.obj unknown.obj spy.obj wndmsg.obj \
         pmwindow.obj win32class.obj win32wnd.obj win32dlg.obj \
- 	msgbox.obj window.obj windowmsg.obj windowclass.obj \
-        windowword.obj gen_object.obj oslibwin.obj
+ 	msgbox.obj window.obj windowmsg.obj windowclass.obj windlgmsg.obj \
+        windowword.obj gen_object.obj oslibwin.obj 
 
 
 all: $(TARGET).dll $(TARGET).lib
@@ -68,6 +68,7 @@ spy.obj: spy.cpp $(PDWIN32_INCLUDE)\spy.h
 msgbox.obj:    msgbox.cpp
 window.obj:    window.cpp win32class.h win32wnd.h
 windowmsg.obj: windowmsg.cpp win32class.h win32wnd.h
+windlgmsg.obj: windlgmsg.cpp win32class.h win32wnd.h win32dlg.h
 windowclass.obj: windowclass.cpp win32class.h win32wnd.h
 windowword.obj:  windowword.cpp win32class.h win32wnd.h win32dlg.h
 

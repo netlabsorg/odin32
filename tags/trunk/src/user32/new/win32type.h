@@ -46,8 +46,8 @@
 #define LPLONG  LONG *
 #define PDWORD  DWORD *
 #define LRESULT DWORD
-#define LPARAM  DWORD
-#define WPARAM  DWORD
+#define LPARAM  signed long
+#define WPARAM  unsigned int
 #define CONST   const
 #define LPTSTR  char *
 #define LPSTR   char *
