@@ -1,4 +1,4 @@
-/* $Id: pmwindow.h,v 1.16 2002-02-18 10:14:57 sandervl Exp $ */
+/* $Id: pmwindow.h,v 1.17 2002-06-20 14:18:15 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -28,6 +28,7 @@ extern BOOL  fOS2Look;
 extern BOOL  fForceMonoCursor;
 extern HWND  hwndCD;
 extern LONG CapsCharHeight;
+extern BOOL  fDragDropActive;
 
 #define TFOS_LEFT                    0x0001
 #define TFOS_TOP                     0x0002

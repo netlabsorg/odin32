@@ -1,4 +1,4 @@
-/* $Id: dragdrop.cpp,v 1.2 2002-06-02 19:34:25 sandervl Exp $ */
+/* $Id: dragdrop.cpp,v 1.3 2002-06-20 14:18:14 sandervl Exp $ */
 
 /*
  * Win32 Drag 'n Drop functions for OS/2
@@ -30,19 +30,20 @@ ULONG DragDropFiles(HWND hwnd, POINT point, UINT cFiles, LPSTR pszFiles, UINT cb
     HGLOBAL    hDropFile;
     DWORD      dwExStyle;
     HWND       orghwnd = hwnd;
-
+   
     dwExStyle = GetWindowLongA(hwnd, GWL_EXSTYLE);
-    
+
     //TODO: Is it correct if the window or parent accepts files or must we check the top parent?
     hwnd = (dwExStyle & WS_EX_ACCEPTFILES) ? hwnd : GetParent(hwnd);
-
     dwExStyle = GetWindowLongA(hwnd, GWL_EXSTYLE);
+
     if(!(dwExStyle & WS_EX_ACCEPTFILES)) {
         if(pfnDropFiles) {
-            return pfnDropFiles(hwnd);
+            return pfnDropFiles(orghwnd);
         }
         return FALSE;
     }
+
     cbszFiles++;    //extra terminating 0
     hDropFile = GlobalAlloc(0, sizeof(DROPFILES)+cbszFiles);
     pDropFile = (DROPFILES *)GlobalLock(hDropFile);
