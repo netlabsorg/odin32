@@ -1,4 +1,4 @@
-; $Id: ntdll.def,v 1.50 2003-04-07 18:40:49 sandervl Exp $
+; $Id: ntdll.def,v 1.51 2003-04-08 12:47:06 sandervl Exp $
 
 ;
 ; Based on NT 4.0 SP6: NTDLL.DLL
