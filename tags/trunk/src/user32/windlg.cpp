@@ -1,4 +1,4 @@
-/* $Id: windlg.cpp,v 1.1 1999-09-15 23:19:02 sandervl Exp $ */
+/* $Id: windlg.cpp,v 1.2 1999-09-26 14:44:58 sandervl Exp $ */
 /*
  * Win32 dialog apis for OS/2
  *
@@ -211,6 +211,7 @@ HWND WIN32API GetNextDlgTabItem(HWND hwndDlg, HWND hwndCtrl, BOOL fPrevious)
     dialog = (Win32Dialog *)Win32BaseWindow::GetWindowFromHandle(hwndDlg);
     if(!dialog || !dialog->IsDialog()) {
         dprintf(("GetNextDlgTabItem, window %x not found", hwndDlg));
+	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("USER32:  GetNextDlgTabItem\n"));
@@ -226,6 +227,7 @@ HWND WIN32API GetDlgItem(HWND hwnd, int id)
     dialog = (Win32Dialog *)Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!dialog || !dialog->IsDialog()) {
         dprintf(("GetDlgItem, window %x not found", hwnd));
+	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("USER32:  GetDlgItem\n"));
@@ -244,6 +246,7 @@ int WIN32API GetDlgCtrlID(HWND hwnd)
     dlgcontrol = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!dlgcontrol) {
         dprintf(("GetDlgCtrlID, control %x not found", hwnd));
+	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("USER32:  GetDlgCtrlID\n"));
@@ -258,6 +261,7 @@ BOOL WIN32API EndDialog(HWND hwnd, int retval)
     dialog = (Win32Dialog *)Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!dialog || !dialog->IsDialog()) {
         dprintf(("GetDlgItem, window %x not found", hwnd));
+	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("USER32: EndDialog\n"));

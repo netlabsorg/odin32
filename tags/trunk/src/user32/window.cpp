@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.9 1999-09-25 14:18:12 sandervl Exp $ */
+/* $Id: window.cpp,v 1.10 1999-09-26 14:44:58 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -300,6 +300,7 @@ HWND WIN32API CreateMDIWindowW(LPCWSTR lpszClassName, LPCWSTR lpszWindowName,
     window = Win32BaseWindow::GetWindowFromHandle(hwndParent);
     if(!window) {
         dprintf(("CreateMDIWindowW, window %x not found", hwndParent));
+	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
 
@@ -325,6 +326,7 @@ BOOL WIN32API DestroyWindow(HWND hwnd)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("DestroyWindow, window %x not found", hwnd));
+	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("DestroyWindow %x", hwnd));
@@ -339,6 +341,7 @@ HWND WIN32API SetActiveWindow( HWND hwnd)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("SetActiveWindow, window %x not found", hwnd));
+	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("SetActiveWindow %x", hwnd));
@@ -353,6 +356,7 @@ HWND WIN32API GetParent( HWND hwnd)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("GetParent, window %x not found", hwnd));
+	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("GetParent %x", hwnd));
@@ -367,6 +371,7 @@ HWND WIN32API SetParent( HWND hwndChild, HWND hwndNewParent)
     window = Win32BaseWindow::GetWindowFromHandle(hwndChild);
     if(!window) {
         dprintf(("SetParent, window %x not found", hwndChild));
+	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("SetParent %x %x", hwndChild, hwndNewParent));
@@ -381,6 +386,7 @@ BOOL WIN32API IsChild( HWND hwndParent, HWND hwnd)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("IsChild, window %x not found", hwnd));
+	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("IsChild %x %x", hwndParent, hwnd));
@@ -395,6 +401,7 @@ HWND WIN32API GetTopWindow( HWND hwnd)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("GetTopWindow, window %x not found", hwnd));
+	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("GetTopWindow %x", hwnd));
@@ -425,6 +432,7 @@ BOOL WIN32API IsIconic( HWND hwnd)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("IsIconic, window %x not found", hwnd));
+	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("IsIconic %x", hwnd));
@@ -439,6 +447,7 @@ HWND WIN32API GetWindow(HWND hwnd, UINT uCmd)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("GetWindow, window %x not found", hwnd));
+	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("GetWindow %x %d", hwnd, uCmd));
@@ -453,6 +462,7 @@ BOOL WIN32API EnableWindow( HWND hwnd, BOOL fEnable)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("EnableWindow, window %x not found", hwnd));
+	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("EnableWindow %x %d", hwnd, fEnable));
@@ -479,6 +489,7 @@ BOOL WIN32API ShowWindow(HWND hwnd, int nCmdShow)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("ShowWindow, window %x not found", hwnd));
+	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("ShowWindow %x", hwnd));
@@ -493,6 +504,7 @@ BOOL WIN32API SetWindowPos(HWND hwnd, HWND hwndInsertAfter, int x, int y, int cx
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("SetWindowPos, window %x not found", hwnd));
+	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("SetWindowPos %x %x x=%d y=%d cx=%d cy=%d %x", hwnd, hwndInsertAfter, x, y, cx, cy, fuFlags));
@@ -551,6 +563,7 @@ BOOL WIN32API IsWindowVisible( HWND hwnd)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("IsWindowVisible, window %x not found", hwnd));
+	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("IsWindowVisible %x", hwnd));
@@ -568,7 +581,7 @@ HWND WIN32API SetFocus (HWND hwnd)
     activate  = ((hwnd_O == lastFocus) || OSLibWinIsChild (lastFocus, hwnd_O));
     lastFocus_W = Win32BaseWindow::OS2ToWin32Handle (lastFocus);
 
-    dprintf(("USER32:  SetFocus %x (%x) -> %x (%x)\n", lastFocus_W, lastFocus, hwnd, hwnd_O));
+    dprintf(("SetFocus %x (%x) -> %x (%x)\n", lastFocus_W, lastFocus, hwnd, hwnd_O));
 
     return (OSLibWinSetFocus (OSLIB_HWND_DESKTOP, hwnd_O, activate)) ? lastFocus_W : 0;
 }
@@ -651,6 +664,7 @@ BOOL WIN32API GetWindowRect( HWND hwnd, PRECT pRect)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("GetWindowRect, window %x not found", hwnd));
+	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("GetWindowRect %x", hwnd));
@@ -665,6 +679,7 @@ int WIN32API GetWindowTextLengthA( HWND hwnd)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("GetWindowTextLength, window %x not found", hwnd));
+	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("GetWindowTextLength %x", hwnd));
@@ -680,6 +695,7 @@ int WIN32API GetWindowTextA( HWND hwnd, LPSTR lpsz, int cch)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("GetWindowTextA, window %x not found", hwnd));
+	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     rc = window->GetWindowTextA(lpsz, cch);
@@ -702,6 +718,7 @@ int WIN32API GetWindowTextW(HWND hwnd, LPWSTR lpsz, int cch)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("GetWindowTextW, window %x not found", hwnd));
+	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("GetWindowTextW %x", hwnd));
@@ -716,6 +733,7 @@ BOOL WIN32API SetWindowTextA(HWND hwnd, LPCSTR lpsz)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("SetWindowTextA, window %x not found", hwnd));
+	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("SetWindowTextA %x %s", hwnd, lpsz));
@@ -730,6 +748,7 @@ BOOL WIN32API SetWindowTextW( HWND hwnd, LPCWSTR lpsz)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("SetWindowTextA, window %x not found", hwnd));
+	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("SetWindowTextW %x", hwnd));
@@ -799,8 +818,8 @@ HWND WIN32API GetDesktopWindow(void)
 HWND WIN32API FindWindowA(LPCSTR lpszClass, LPCSTR lpszWindow)
 {
     if(!lpszClass) {
-    SetLastError(ERROR_INVALID_PARAMETER);
-    return 0;
+    	SetLastError(ERROR_INVALID_PARAMETER);
+    	return 0;
     }
     if(HIWORD(lpszClass)) {
          dprintf(("USER32:  FindWindow %s %s\n", lpszClass, lpszWindow));
@@ -814,8 +833,8 @@ HWND WIN32API FindWindowA(LPCSTR lpszClass, LPCSTR lpszWindow)
 HWND WIN32API FindWindowExA(HWND hwndParent, HWND hwndChildAfter, LPCSTR lpszClass, LPCSTR lpszWindow)
 {
     if(!lpszClass) {
-    SetLastError(ERROR_INVALID_PARAMETER);
-    return 0;
+    	SetLastError(ERROR_INVALID_PARAMETER);
+    	return 0;
     }
     if(HIWORD(lpszClass)) {
          dprintf(("USER32:  FindWindowExA (%x,%x) %s %s\n", hwndParent, hwndChildAfter, lpszClass, lpszWindow));
@@ -851,8 +870,8 @@ HWND WIN32API FindWindowExW(HWND    hwndParent,
                                LPCWSTR lpszWindow)
 {
     if(!lpszClass) {
-    SetLastError(ERROR_INVALID_PARAMETER);
-    return 0;
+    	SetLastError(ERROR_INVALID_PARAMETER);
+    	return 0;
     }
     dprintf(("USER32:  FindWindowExW (%x,%x) %x %s\n", hwndParent, hwndChildAfter, lpszClass, lpszWindow));
 
@@ -887,9 +906,15 @@ BOOL WIN32API ClientToScreen (HWND hwnd, PPOINT pt)
     Win32BaseWindow *wnd;
     PRECT rcl;
 
-    if (!hwnd) return (TRUE);
+    if (!hwnd) {
+	SetLastError(ERROR_INVALID_PARAMETER);
+	return (FALSE);
+    }
     wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
-    if (!wnd) return (TRUE);
+    if (!wnd) {
+	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+	return (FALSE);
+    }
 
     rcl  = wnd->getClientRect();
     pt->y = (rcl->bottom - rcl->top) - pt->y;
@@ -952,6 +977,7 @@ HWND WIN32API ChildWindowFromPointEx (HWND hwndParent, POINT pt, UINT uFlags)
 
         if (GetWindowRect (hwndParent, &rect) == 0) {
                 // oops, invalid handle
+		SetLastError(ERROR_INVALID_WINDOW_HANDLE);
                 return NULL;
         }
 
@@ -1015,6 +1041,7 @@ BOOL WIN32API CloseWindow(HWND hwnd)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("CloseWindow, window %x not found", hwnd));
+	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("CloseWindow %x\n", hwnd));
@@ -1043,6 +1070,7 @@ BOOL WIN32API IsWindowUnicode(HWND hwnd)
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("IsWindowUnicode, window %x not found", hwnd));
+	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     return window->IsUnicode();
@@ -1148,6 +1176,7 @@ BOOL WIN32API EnumChildWindows(HWND hwnd, WNDENUMPROC lpfn, LPARAM lParam)
   parentwindow = Win32BaseWindow::GetWindowFromHandle(hwnd);
   if(!parentwindow) {
         dprintf(("EnumChildWindows, window %x not found", hwnd));
+	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return FALSE;
   }
 
