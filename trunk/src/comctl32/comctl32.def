@@ -1,4 +1,4 @@
-; $Id: comctl32.def,v 1.18 2000-09-29 07:23:10 achimha Exp $
+; $Id: comctl32.def,v 1.19 2000-09-29 07:37:03 achimha Exp $
 LIBRARY COMCTL32 INITINSTANCE
 DESCRIPTION 'COMCTL32 Common Controls Library'
 DATA MULTIPLE NONSHARED
@@ -127,6 +127,8 @@ EXPORTS
   StrToIntA           = _COMCTL32_StrToIntA@4      @357
 
   COMCTL32_StrCmpNIW  = _COMCTL32_StrCmpNIW@12     @361
+
+  SmoothScrollWindow  = _SmoothScrollWindow@4      @382
 
   DPA_EnumCallback    = _DPA_EnumCallback@12       @385
   DPA_DestroyCallback = _DPA_DestroyCallback@12    @386

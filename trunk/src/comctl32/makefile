@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.26 2000-07-19 19:05:05 sandervl Exp $
+# $Id: makefile,v 1.27 2000-09-29 07:37:04 achimha Exp $
 
 #
 # Odin32 API
@@ -50,7 +50,8 @@ $(OBJDIR)\listview.obj \
 $(OBJDIR)\draglist.obj \
 $(OBJDIR)\ipaddress.obj \
 $(OBJDIR)\ccbase.obj \
-$(OBJDIR)\rsrc.obj
+$(OBJDIR)\rsrc.obj \
+$(OBJDIR)\smoothscroll.obj
 
 
 # Target name - name of the dll without extention and path.
