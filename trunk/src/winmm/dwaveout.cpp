@@ -1,4 +1,4 @@
-/* $Id: dwaveout.cpp,v 1.24 2000-04-09 11:29:07 sandervl Exp $ */
+/* $Id: dwaveout.cpp,v 1.25 2000-06-03 12:49:55 sandervl Exp $ */
 
 /*
  * Wave playback class
@@ -516,16 +516,20 @@ MMRESULT DartWaveOut::restart()
     if(State == STATE_PLAYING) {
 	return(MMSYSERR_NOERROR);
     }
-    wmutex->enter(VMUTEX_WAIT_FOREVER);
-    State     = STATE_PLAYING;
-    fUnderrun = FALSE;
-    wmutex->leave();
-    curbuf = curPlayBuf;
-    for(i=0;i<PREFILLBUF_DART;i++) {
-  	MixSetupParms->pmixWrite(MixSetupParms->ulMixHandle, &MixBuffer[curbuf], 1);
-	if(++curbuf == PREFILLBUF_DART) {
-		curbuf = 0;
-	}
+    //Only write buffers to dart if mixer has been initialized; if not, then
+    //the first buffer write will do this for us.
+    if(fMixerSetup == TRUE) {
+    	wmutex->enter(VMUTEX_WAIT_FOREVER);
+    	State     = STATE_PLAYING;
+    	fUnderrun = FALSE;
+    	wmutex->leave();
+    	curbuf = curPlayBuf;
+    	for(i=0;i<PREFILLBUF_DART;i++) {
+  		MixSetupParms->pmixWrite(MixSetupParms->ulMixHandle, &MixBuffer[curbuf], 1);
+		if(++curbuf == PREFILLBUF_DART) {
+			curbuf = 0;
+		}
+    	}
     }
     return(MMSYSERR_NOERROR);
 }
