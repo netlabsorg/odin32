@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.44 2000-09-02 21:07:52 bird Exp $
+# $Id: Makefile,v 1.45 2000-09-03 20:39:37 bird Exp $
 #
 # Win32k makefile.
 #
@@ -578,7 +578,7 @@ CLIBOBJS =  +$(WIN32KOBJ)\inp.obj       +$(WIN32KOBJ)\outp.obj \
             +$(WIN32KOBJ)\anfalrem.obj  +$(WIN32KOBJ)\anfauldi.obj \
             +$(WIN32KOBJ)\anuldiv.obj   +$(WIN32KOBJ)\fmemcpy.obj \
             +$(WIN32KOBJ)\anulrem.obj   +$(WIN32KOBJ)\anlmul.obj \
-            +$(WIN32KOBJ)\__AHINCR.obj
+            +$(WIN32KOBJ)\__AHINCR.obj  +$(WIN32KOBJ)\anlshl.obj
 
 $(WIN32KOBJ)\clib.lib: $(MSCPATH)\lib\clibcep.lib $(WIN32KBIN)\libconv.exe $(CLIBOBJS:+=)
     @$(RM) $@
