@@ -1,4 +1,4 @@
-/* $Id: OS2SURFACE.CPP,v 1.35 2001-10-05 12:33:09 sandervl Exp $ */
+/* $Id: OS2SURFACE.CPP,v 1.36 2001-10-07 08:25:30 sandervl Exp $ */
 
 /*
  * DirectDraw Surface class implementaion
@@ -2386,7 +2386,9 @@ HRESULT WIN32API SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lpD
   delete pIRectSrc;
 
   if(dest->diveBufNr == DIVE_BUFFER_SCREEN &&
-     !(dwFlags & (DDBLT_COLORFILL|DDBLT_DEPTHFILL|DDBLT_ROP) ) )
+     !(dwFlags & (DDBLT_COLORFILL|DDBLT_DEPTHFILL|DDBLT_ROP) ) &&
+     dest->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount > 8 && 
+     src->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount > 8)
   {
       int rc, temp, fChanged = FALSE;
       int destheight = RECT_HEIGHT(&DestRect);
