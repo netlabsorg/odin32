@@ -1,4 +1,4 @@
-/* $Id: security.cpp,v 1.5 2000-02-07 14:29:50 sandervl Exp $ */
+/* $Id: security.cpp,v 1.6 2000-10-21 14:29:49 sandervl Exp $ */
 /*
  * Win32 security API functions for OS/2
  *
@@ -112,11 +112,19 @@ OpenThreadToken( HANDLE ThreadHandle, DWORD DesiredAccess,
 
 BOOL WINAPI SetThreadToken(PHANDLE thread, HANDLE token)
 {
+#ifdef __WIN32OS2__
+
+    dprintf(("SetThreadToken %x %x NOT IMPLEMENTED (FAKED)", thread, token));
+
+    if (!Wine_HasSecurity()) return FALSE;
+    return TRUE; //pretend it succeeded
+#else
     FIXME(__FUNCTION__"(%p, %x): stub\n", thread, token);
 
     SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
 
     return FALSE;
+#endif
 }
 
 /******************************************************************************
@@ -410,6 +418,7 @@ LookupPrivilegeValueW( LPCWSTR lpSystemName, LPCWSTR lpName, LPVOID lpLuid )
 BOOL WINAPI
 LookupPrivilegeValueA( LPCSTR lpSystemName, LPCSTR lpName, LPVOID lpLuid )
 {
+    dprintf(("LookupPrivilegeValueA %s %s %x NOT IMPLEMENTED", lpSystemName, lpName, lpLuid));
     LPWSTR lpSystemNameW = HEAP_strdupAtoW(GetProcessHeap(), 0, lpSystemName);
     LPWSTR lpNameW = HEAP_strdupAtoW(GetProcessHeap(), 0, lpName);
     BOOL ret = LookupPrivilegeValueW( lpSystemNameW, lpNameW, lpLuid);
