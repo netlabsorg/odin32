@@ -3318,6 +3318,7 @@ INT       WINAPI EnumPropsExW(HWND,PROPENUMPROCEXW,LPARAM);
 #define     EnumPropsEx WINELIB_NAME_AW(EnumPropsEx)
 BOOL      WINAPI EnumThreadWindows(DWORD,WNDENUMPROC,LPARAM);
 BOOL      WINAPI ExitWindowsEx(UINT,DWORD);
+HWND      WINAPI GetAncestor( HWND hwnd, UINT type );
 BOOL      WINAPI GetGUIThreadInfo(DWORD dwThreadId, GUITHREADINFO *lpThreadInfo);
 BOOL      WINAPI GetIconInfo(HICON,LPICONINFO);
 HKL       WINAPI GetKeyboardLayout(DWORD);
@@ -3332,6 +3333,11 @@ BOOL      WINAPI GetMonitorInfoA(HMONITOR,LPMONITORINFO);
 BOOL      WINAPI GetMonitorInfoW(HMONITOR,LPMONITORINFO);
 #define     GetMonitorInfo WINELIB_NAME_AW(GetMonitorInfo)
 DWORD       WINAPI GetWindowContextHelpId(HWND);
+
+UINT WIN32API GetWindowModuleFileNameA(HWND hwnd, LPTSTR lpszFileName, UINT cchFileNameMax);
+UINT WIN32API GetWindowModuleFileNameW(HWND hwnd, LPWSTR lpszFileName, UINT cchFileNameMax);
+#define     GetWindowModuleFileName WINELIB_NAME_AW(GetWindowModuleFileName)
+
 DWORD       WINAPI GetWindowThreadProcessId(HWND,LPDWORD);
 BOOL      WINAPI IsWindowUnicode(HWND);
 HKL       WINAPI LoadKeyboardLayoutA(LPCSTR,UINT);
