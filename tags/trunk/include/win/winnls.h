@@ -134,6 +134,14 @@
 #define LOCALE_SISO639LANGNAME      0x00000059
 #define LOCALE_SISO3166CTRYNAME     0x0000005A
 
+#define LOCALE_IDEFAULTEBCDICCODEPAGE 0x00001012
+#define LOCALE_IPAPERSIZE             0x0000100A
+#define LOCALE_SENGCURRNAME           0x00001007
+#define LOCALE_SNATIVECURRNAME        0x00001008
+#define LOCALE_SYEARMONTH             0x00001006
+#define LOCALE_SSORTNAME              0x00001013
+#define LOCALE_IDIGITSUBSTITUTION     0x00001014
+
 #ifdef __WIN32OS2__
 #define LCID_INSTALLED            0x00000001  /* installed locale ids */
 #define LCID_SUPPORTED            0x00000002  /* supported locale ids */
@@ -354,30 +362,31 @@
 #define SUBLANG_SPANISH_URUGUAY          0x0e
 #define SUBLANG_SPANISH_PARAGUAY         0x0f
 #define SUBLANG_SPANISH_BOLIVIA          0x10
-#define SUBLANG_SPANISH_EL_SALVADOR       0x11
+#define SUBLANG_SPANISH_EL_SALVADOR      0x11
 #define SUBLANG_SPANISH_HONDURAS         0x12
 #define SUBLANG_SPANISH_NICARAGUA        0x13
 #define SUBLANG_SPANISH_PUERTO_RICO      0x14
 /* FIXME: I don't know the symbolic names for those */
-#define SUBLANG_ROMANIAN                     0x01
-#define SUBLANG_ROMANIAN_MOLDAVIA         0x02
-#define SUBLANG_RUSSIAN                         0x01
-#define SUBLANG_RUSSIAN_MOLDAVIA          0x02
-#define SUBLANG_CROATIAN                     0x01
-#define SUBLANG_SERBIAN                         0x02
-#define SUBLANG_SERBIAN_LATIN                0x03
-#define SUBLANG_SWEDISH                         0x01
-#define SUBLANG_SWEDISH_FINLAND              0x02
-#define SUBLANG_LITHUANIAN                   0x01
-#define SUBLANG_LITHUANIAN_CLASSIC        0x02
-#define SUBLANG_AZERI                           0x01
-#define SUBLANG_AZERI_CYRILLIC               0x02
-#define SUBLANG_GAELIC                          0x01
-#define SUBLANG_GAELIC_SCOTTISH              0x02
-#define SUBLANG_MALAY                           0x01
+#define SUBLANG_ROMANIAN                 0x01
+#define SUBLANG_ROMANIAN_MOLDAVIA        0x02
+#define SUBLANG_RUSSIAN                  0x01
+#define SUBLANG_RUSSIAN_MOLDAVIA         0x02
+#define SUBLANG_CROATIAN                 0x01
+#define SUBLANG_SERBIAN                  0x02
+#define SUBLANG_SERBIAN_LATIN            0x03
+#define SUBLANG_SWEDISH                  0x01
+#define SUBLANG_SWEDISH_FINLAND          0x02
+#define SUBLANG_LITHUANIAN               0x01
+#define SUBLANG_LITHUANIAN_CLASSIC       0x02
+#define SUBLANG_AZERI                    0x01
+#define SUBLANG_AZERI_CYRILLIC           0x02
+#define SUBLANG_GAELIC                   0x01
+#define SUBLANG_GAELIC_SCOTTISH          0x02
+#define SUBLANG_GAELIC_MANX              0x03
+#define SUBLANG_MALAY                    0x01
 #define SUBLANG_MALAY_BRUNEI_DARUSSALAM  0x02
-#define SUBLANG_UZBEK                           0x01
-#define SUBLANG_UZBEK_CYRILLIC               0x02
+#define SUBLANG_UZBEK                    0x01
+#define SUBLANG_UZBEK_CYRILLIC           0x02
 #define SUBLANG_URDU_PAKISTAN            0x01
 
 /* Sort definitions */
