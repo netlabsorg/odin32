@@ -1,4 +1,4 @@
-# $Id: setup.optional.vac3xx.mk,v 1.1 2002-04-30 06:11:23 bird Exp $
+# $Id: setup.optional.vac3xx.mk,v 1.2 2002-08-20 05:52:04 bird Exp $
 
 #
 #  Helper file for all the optional stuff which is common for
@@ -16,6 +16,7 @@ _CC_SEG_XCPT     =
 _CC_DEFAULT_LIBS = /Gn+
 _CC_PACK         =
 _CC_MODEL        =
+_CC_DBGMEM       = /Tm-
 
 !ifdef ALL_SEG_TEXT
 _CC_SEG_TEXT=/NT$(ALL_SEG_TEXT)
@@ -42,8 +43,14 @@ _CC_PACK        = /Sp$(CC_PACK)
 ! if [$(ECHO) warning: CC_MODEL/ALL_MODEL isn't supported by this compiler$(CLRRST)]
 ! endif
 !endif
+!if defined(CC_DBGMEM) || defined(ALL_DBGMEM)
+_CC_DBGMEM      = /Tm+
+!endif
+!if defined(CXX_NO_DBGMEM) || defined(ALL_NO_DBGMEM)
+_CXX_DBGMEM      = /Tm-
+!endif
 
-_CC_OPTIONAL = $(_CC_SEG_TEXT) $(_CC_SEG_DATA) $(_CC_SEG_XCPT) $(_CC_DEFAULT_LIBS) $(_CC_PACK) $(_CC_MODEL)
+_CC_OPTIONAL = $(_CC_SEG_TEXT) $(_CC_SEG_DATA) $(_CC_SEG_XCPT) $(_CC_DEFAULT_LIBS) $(_CC_PACK) $(_CC_MODEL) $(_CC_DBGMEM)
 
 
 
@@ -57,6 +64,7 @@ _CXX_DEFAULT_LIBS = /Gn+
 _CXX_PACK         =
 _CXX_XCPT         = /Gx+
 _CXX_MODEL        =
+_CXX_DBGMEM       = /Tm-
 
 !ifdef ALL_SEG_TEXT
 _CXX_SEG_TEXT=/NT$(ALL_SEG_TEXT)
@@ -95,7 +103,13 @@ _CXX_XCPT         = /Gx+
 ! if [$(ECHO) warning: CXX_MODEL/ALL_MODEL isn't supported by this compiler$(CLRRST)]
 ! endif
 !endif
+!if defined(CXX_DBGMEM) || defined(ALL_DBGMEM)
+_CXX_DBGMEM      = /Tm+
+!endif
+!if defined(CXX_NO_DBGMEM) || defined(ALL_NO_DBGMEM)
+_CXX_DBGMEM      = /Tm-
+!endif
 
-_CXX_OPTIONAL = $(_CXX_SEG_TEXT) $(_CXX_SEG_DATA) $(_CXX_SEG_XCPT) $(_CXX_DEFAULT_LIBS) $(_CXX_PACK) $(_CXX_XCPT) $(_CXX_MODEL)
 
+_CXX_OPTIONAL = $(_CXX_SEG_TEXT) $(_CXX_SEG_DATA) $(_CXX_SEG_XCPT) $(_CXX_DEFAULT_LIBS) $(_CXX_PACK) $(_CXX_XCPT) $(_CXX_MODEL) $(_CXX_DBGMEM)
 
