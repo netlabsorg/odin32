@@ -1,4 +1,10 @@
- /* $Id: ChangeLog,v 1.1026 2000-07-07 19:05:44 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1027 2000-07-09 22:38:25 phaller Exp $ */
+
+ 2000-07-09: Patrick Haller <phaller@gmx.net>
+    - doc:      Moved several documents to the new doc directory and
+                created initial version of "ToDo.txt". We should place
+                our open tasks in there for better overview and to be able
+                to assign priorities and people to them.
 
  2000-07-07: Sander van Leeuwen <sandervl@xs4all.nl>
     - NTDLL:    Bugfix for NtQueryInformationToken (TOKEN_USER); updated
