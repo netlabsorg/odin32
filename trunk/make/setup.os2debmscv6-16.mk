@@ -1,4 +1,4 @@
-# $Id: setup.os2debmscv6-16.mk,v 1.13 2002-08-30 18:27:23 bird Exp $
+# $Id: setup.os2debmscv6-16.mk,v 1.14 2002-08-30 21:48:18 bird Exp $
 
 # ---OS2, DEBUG, MSCV6-------------------------
 ENV_NAME="OS/2, Debug, Microsoft C v6.0a 16-bit"
@@ -26,6 +26,7 @@ ENV_16BIT = 16
 #
 # The tools
 #
+CC=echo . && set CL=$(CC_FLAGS) && cl.exe
 CC=cl.exe
 CXX=false
 
@@ -33,10 +34,10 @@ CXX=false
 #
 # The flags
 #
-CC_FLAGS=/nologo /c /DDEBUG /DOS2 /D__16BIT__ /W0 /G2s /Zi /Owis $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES) $(ALL_INCLUDES) /I$(PATH_INCLUDES)
+CC_FLAGS=/nologo /c /DDEBUG /DOS2 /D__16BIT__ /Zi $(_CC_OPTIONAL) $(CC_DEFINES) $(ALL_DEFINES) $(BUILD_DEFINES) $(CC_INCLUDES) $(ALL_INCLUDES) /I$(PATH_INCLUDES)
 CC_FLAGS_EXE=$(CC_FLAGS)
 CC_FLAGS_DLL=$(CC_FLAGS)
-CC_FLAGS_SYS=$(CC_FLAGS) /DRING0
+CC_FLAGS_SYS=$(CC_FLAGS) /DRING0 /Gs
 CC_FLAGS_IFS=$(CC_FLAGS_SYS)
 CC_OBJ_OUT=/Fo
 CC_LST_OUT=/Fa
