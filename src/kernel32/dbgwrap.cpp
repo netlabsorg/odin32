@@ -106,10 +106,6 @@ DEBUGWRAP24(SetTapePosition);
 DEBUGWRAP16(WriteTapemark);
 
 DEBUGWRAP4(SetErrorMode);
-DEBUGWRAP4_NORET(SetLastError);
-DEBUGWRAP0(GetLastError);
-
-
 
 #undef DBG_LOCALLOG
 #define DBG_LOCALLOG    DBG_registry

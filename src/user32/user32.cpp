@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.120 2002-02-11 13:48:41 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.121 2002-02-11 16:05:59 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -341,8 +341,7 @@ BOOL WIN32API UnionRect( PRECT lprcDst, const RECT *lprcSrc1, const RECT *lprcSr
  * Author    : Patrick Haller [Tue, 1999/10/20 21:24]
  *****************************************************************************/
 
-ODINFUNCTION2(BOOL, ExitWindowsEx, UINT,  uFlags,
-                                   DWORD, dwReserved)
+BOOL WIN32API ExitWindowsEx(UINT uFlags, DWORD dwReserved)
 {
   int rc = MessageBoxA(HWND_DESKTOP,
                        "Are you sure you want to shutdown the OS/2 system?",
