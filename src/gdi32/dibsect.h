@@ -1,4 +1,4 @@
-/* $Id: dibsect.h,v 1.15 2000-04-02 12:24:40 sandervl Exp $ */
+/* $Id: dibsect.h,v 1.16 2000-04-18 11:11:52 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -81,7 +81,7 @@ public:
                            int nXsrc, int nYSrc,
                            int nSrcWidth, int nSrcHeight,
                            DWORD Rop);
-
+              void  sync(HDC hdc, DWORD nYdest, DWORD nDestHeight);
                int  SetDIBColorTable(int startIdx, int cEntries, RGBQUAD *rgb);
 
                int  SetDIBits(HDC hdc, HBITMAP hbitmap, UINT startscan, UINT
