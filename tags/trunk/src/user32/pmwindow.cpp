@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.146 2001-09-17 13:31:30 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.147 2001-09-19 15:39:49 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -43,7 +43,7 @@
 #include <codepage.h>
 #include "syscolor.h"
 #include "options.h"
-
+#include "menu.h"
 
 #define DBG_LOCALLOG    DBG_pmwindow
 #include "dbglocal.h"
@@ -786,6 +786,7 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
 
         if(pswp->fl & SWP_NOADJUST) {
             //ignore weird messages (TODO: why are they sent?)
+            dprintf(("WARNING: WM_ADJUSTWINDOWPOS with SWP_NOADJUST flag!!"));
             break;
         }
         //CB: show dialog in front of owner
@@ -814,7 +815,7 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
                 if(win32wnd->getParent()) {
                         hParent = win32wnd->getParent()->getOS2WindowHandle();
                 }
-                else    goto RunDefWndProc;
+                else    goto RunDefFrameWndProc;
             }
         }
         hwndAfter = pswp->hwndInsertBehind;
@@ -838,7 +839,8 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
         wpOld = wp;
         win32wnd->MsgPosChanging((LPARAM)&wp);
 
-        if(win32wnd->getOldStyle() != win32wnd->getStyle()) {
+        if(win32wnd->getOldStyle() != win32wnd->getStyle()) 
+        {
              OSLibSetWindowStyle(win32wnd->getOS2FrameWindowHandle(), win32wnd->getOS2WindowHandle(), win32wnd->getStyle(), win32wnd->getExStyle());
              if(fOS2Look) {
                  DWORD dwOldStyle = win32wnd->getOldStyle();
@@ -900,8 +902,27 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
             if(ulFlags & SWP_DEACTIVATE) {
                 ret |= AWP_DEACTIVATE;
             }
-            if(ulFlags & SWP_ACTIVATE) {
-                ret |= AWP_ACTIVATE;
+            if(ulFlags & SWP_ACTIVATE) 
+            {
+                ULONG ulFrameFlags;
+
+                if(ulFlags & SWP_ZORDER) {
+                    ulFrameFlags = WinQueryWindowUShort(hwnd, QWS_FLAGS);
+                    WinSetWindowUShort(hwnd, QWS_FLAGS, ulFrameFlags | FF_NOACTIVATESWP);
+                }
+
+                if(!(ulFlags & SWP_SHOW))
+                {
+                    ret |= AWP_ACTIVATE;
+                }
+                else
+                {
+                    WinSetFocus(HWND_DESKTOP, WinWindowFromID(hwnd, FID_CLIENT));
+    
+                    ulFrameFlags  = WinQueryWindowUShort(hwnd, QWS_FLAGS);
+                    ulFrameFlags &= ~FF_NOACTIVATESWP;
+                    WinSetWindowUShort(hwnd, QWS_FLAGS, ulFrameFlags);
+                }
             }
             rc = (MRESULT)ret;
             break;
@@ -910,8 +931,27 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
         if(ulFlags & SWP_DEACTIVATE) {
             ret |= AWP_DEACTIVATE;
         }
-        if(ulFlags & SWP_ACTIVATE) {
-            ret |= AWP_ACTIVATE;
+        if(ulFlags & SWP_ACTIVATE) 
+        {
+            ULONG ulFrameFlags;
+
+            if(ulFlags & SWP_ZORDER) {
+                ulFrameFlags = WinQueryWindowUShort(hwnd, QWS_FLAGS);
+                WinSetWindowUShort(hwnd, QWS_FLAGS, ulFrameFlags | FF_NOACTIVATESWP);
+            }
+
+            if(!(ulFlags & SWP_SHOW))
+            {
+                ret |= AWP_ACTIVATE;
+            }
+            else
+            {
+                WinSetFocus(HWND_DESKTOP, WinWindowFromID(hwnd, FID_CLIENT));
+
+                ulFrameFlags  = WinQueryWindowUShort(hwnd, QWS_FLAGS);
+                ulFrameFlags &= ~FF_NOACTIVATESWP;
+                WinSetWindowUShort(hwnd, QWS_FLAGS, ulFrameFlags);
+            }
         }
         rc = (MRESULT)ret;
         break;

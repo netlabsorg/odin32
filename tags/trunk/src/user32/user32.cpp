@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.114 2001-09-01 12:41:42 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.115 2001-09-19 15:39:49 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -54,8 +54,6 @@
 #include "dbglocal.h"
 
 //undocumented stuff
-// WIN32API CalcChildScroll
-// WIN32API CascadeChildWindows
 // WIN32API ClientThreadConnect
 // WIN32API DragObject
 // WIN32API DrawFrame
@@ -82,7 +80,6 @@
 // WIN32API SetWindowFullScreenState
 // WIN32API SwitchToThisWindow
 // WIN32API SysErrorBox
-// WIN32API TileChildWindows
 // WIN32API UnlockWindowStation
 // WIN32API UserClientDllInitialize
 // WIN32API UserSignalProc
@@ -2240,4 +2237,3 @@ DWORD WIN32API GetGUIThreadInfo(DWORD arg1, DWORD arg2)
 
   return 0;
 }
-

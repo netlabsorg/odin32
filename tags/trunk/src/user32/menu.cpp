@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.35 2001-07-08 08:06:14 sandervl Exp $*/
+/* $Id: menu.cpp,v 1.36 2001-09-19 15:39:48 sandervl Exp $*/
 /*
  * Menu functions
  *
@@ -33,6 +33,7 @@
 #ifdef __WIN32OS2__
 #include <objhandle.h>
 #include "pmwindow.h"
+#include "win32wmisc.h"
 
 #define DBG_LOCALLOG    DBG_menu
 #include "dbglocal.h"
@@ -317,27 +318,6 @@ VOID setMenu(HWND hwnd,HMENU hMenu)
   }
 }
 
-HMENU getSysMenu(HWND hwnd)
-{
-  Win32BaseWindow *win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
-
-  if(win32wnd) {
-      HMENU hmenu = win32wnd->GetSysMenu();
-      RELEASE_WNDOBJ(win32wnd);
-      return hmenu;
-  }
-  return (HMENU)0;
-}
-
-VOID setSysMenu(HWND hwnd,HMENU hMenu)
-{
-  Win32BaseWindow *win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
-
-  if(win32wnd) {
-      win32wnd->SetSysMenu(hMenu);
-      RELEASE_WNDOBJ(win32wnd);
-  }
-}
 
 /***********************************************************************
  *           MENU_GetMenu
@@ -935,8 +915,8 @@ static void MENU_CalcItemSize( HDC hdc, MENUITEM *lpitem, HWND hwndOwner,
     }
 
 
-    /* If we get here, then it must be a text item */
-    if (IS_STRING_ITEM( lpitem->fType ))
+    /* it must be a text item - unless it's the system menu */
+    if (!(lpitem->fType & MF_SYSMENU) && IS_STRING_ITEM( lpitem->fType ))
     {   SIZE size;
 
         GetTextExtentPoint32A(hdc, lpitem->text,  strlen(lpitem->text), &size);
@@ -3516,7 +3496,7 @@ DWORD WINAPI CheckMenuItem( HMENU hMenu, UINT id, UINT flags )
 /**********************************************************************
  *         EnableMenuItem32    (USER32.170)
  */
-ULONG WINAPI EnableMenuItem( HMENU hMenu, UINT wItemID, UINT wFlags )
+UINT WINAPI EnableMenuItem( HMENU hMenu, UINT wItemID, UINT wFlags )
 {
     UINT    oldflags;
     MENUITEM *item;
@@ -4339,12 +4319,14 @@ static BOOL GetMenuItemInfo_common ( HMENU hmenu, UINT item, BOOL bypos,
         lpmii->fType = menu->fType;
         switch (MENU_ITEM_TYPE(menu->fType)) {
                 case MF_STRING:
-                    if (menu->text && lpmii->dwTypeData && lpmii->cch) {
+                    if (menu->text) {
                         if (unicode) {
-                            lstrcpynAtoW((LPWSTR) lpmii->dwTypeData, menu->text, lpmii->cch);
-                            lpmii->cch = lstrlenW((LPWSTR)menu->text);
+                            if(lpmii->dwTypeData && lpmii->cch)
+                                lstrcpynAtoW((LPWSTR) lpmii->dwTypeData, menu->text, lpmii->cch);
+                            lpmii->cch = lstrlenA(menu->text);
                         } else {
-                            lstrcpynA(lpmii->dwTypeData, menu->text, lpmii->cch);
+                            if(lpmii->dwTypeData && lpmii->cch)
+                                lstrcpynA(lpmii->dwTypeData, menu->text, lpmii->cch);
                             lpmii->cch = lstrlenA(menu->text);
                         }
                     }

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.124 2001-07-20 15:34:18 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.125 2001-09-19 15:39:50 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -222,6 +222,9 @@ Win32BaseWindow *getParent();
          DWORD  getFlags()                      { return flags; };
          void   setFlags(DWORD newflags)        { flags = newflags; };
 
+         DWORD  getCBExtra()                    { return cbExtra; };
+         PVOID  getExtraPtr()                   { return pExtra; };
+
          HMENU  GetMenu()                           { return dwIDMenu; };
          VOID   SetMenu(HMENU newMenu)              { dwIDMenu = newMenu; };
          void   SetSysMenu(HMENU hSystemMenu)       { hSysMenu = hSystemMenu; };
@@ -375,6 +378,8 @@ protected:
         ULONG   dwIDMenu;               //GWL_ID
         ULONG   userData;               //GWL_USERDATA
 
+        ULONG   cbExtra;
+        PVOID   pExtra;
 
          HWND   hwndLinkAfter;
         DWORD   flags;
