@@ -1,4 +1,4 @@
-/* $Id: winprocess.h,v 1.4 1999-11-30 14:32:34 sandervl Exp $ */
+/* $Id: winprocess.h,v 1.5 1999-11-30 19:38:24 sandervl Exp $ */
 /*
  * Process definitions
  *
@@ -97,6 +97,9 @@ typedef struct _PDB
     struct _PDB     *next;             /*    List reference - list of PDB's */
     WORD            winver;            /*    Windows version figured out by VERSION_GetVersion */
     struct _SERVICETABLE *service_table; /*  Service table for service thread */
+#ifdef __WIN32OS2__
+    DWORD           hInstance;         //instance handle of executable
+#endif
 } PDB;
 
 /* Process flags */
