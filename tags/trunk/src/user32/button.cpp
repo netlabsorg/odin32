@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.20 1999-11-24 18:21:34 cbratschi Exp $ */
+/* $Id: button.cpp,v 1.21 1999-12-02 16:34:42 cbratschi Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
@@ -1020,10 +1020,10 @@ static void BUTTON_CheckAutoRadioButton(HWND hwnd)
     if (!(dwStyle & WS_CHILD)) return;
     parent = GetParent(hwnd);
     /* assure that starting control is not disabled or invisible */
-    start = sibling = GetNextDlgGroupItem( parent, hwnd, TRUE );
+    //start = sibling = GetNextDlgGroupItem( parent, hwnd, TRUE );
     //@YD: bugfix
     //CB: doesn't work!
-    //start = sibling = GetNextDlgGroupItem( parent, hwnd, FALSE );
+    start = sibling = GetNextDlgGroupItem( parent, hwnd, FALSE );
     do
     {
         if (!sibling) break;
