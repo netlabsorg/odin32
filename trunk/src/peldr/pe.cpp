@@ -1,4 +1,4 @@
-/* $Id: pe.cpp,v 1.18 2000-07-15 09:13:54 sandervl Exp $ */
+/* $Id: pe.cpp,v 1.19 2000-07-15 17:12:02 sandervl Exp $ */
 
 /*
  * PELDR main exe loader code
@@ -84,9 +84,11 @@ int main(int argc, char *argv[])
  PPIB   ppib;
  char  *cmdline, *win32cmdline;
  BOOL   fQuote = FALSE;
+ int    nrTries = 1;
 
   if(argc >= 2) {
 	if(DosGetInfoBlocks(&ptib, &ppib) == 0) {
+tryagain:
 		cmdline = ppib->pib_pchcmd;
 		cmdline += strlen(cmdline)+1; 	//skip pe.exe
 		while(*cmdline == ' ')	cmdline++; //skip leading space
@@ -103,7 +105,13 @@ int main(int argc, char *argv[])
 			while(*p != '"' && *p != 0) p++;
 		}
 		else {
-			while(*p != ' ' && *p != 0) p++;
+			for(int i=0;i<nrTries;i++) {
+				while(*p != ' ' && *p != 0) p++;
+				if(*p == 0) break;
+				if(i != nrTries-1) {
+					while(*p == ' ' && *p != 0) p++;
+				}
+			}
 		}
 		*p = 0;
 		strupr(exeName);
@@ -134,8 +142,17 @@ int main(int argc, char *argv[])
 		if(DosQueryPathInfo(exeName, FIL_QUERYFULLNAME, (PVOID)fullpath, sizeof(fullpath)) == 0) {
 			strcpy(exeName, fullpath);
 		}
+		FILESTATUS3 fstat3;
+		if(DosQueryPathInfo(exeName, FIL_STANDARD, (PVOID)&fstat3, sizeof(fstat3))) 
+		{
+			nrTries++;
+			if(*win32cmdline != NULL) {
+				goto tryagain;
+			}
+		}
 	}
 	else {//should never happen!
+filenotfound:
 		DebugInt3();
   		rc = DosLoadModule(exeName, sizeof(exeName), "PMWIN.DLL", &hmodPMWin);
   		rc = DosQueryProcAddr(hmodPMWin, ORD_WIN32MESSAGEBOX, NULL, (PFN *)&MyWinMessageBox);
