@@ -1,4 +1,4 @@
-; $Id: rpcrt4.def,v 1.2 2000-04-04 19:50:43 davidr Exp $
+; $Id: rpcrt4.def,v 1.3 2000-10-16 17:59:22 sandervl Exp $
 
 ;
 ; Based on NT 4.0 SP4: RPCRT4
@@ -162,8 +162,8 @@ DceErrorInqTextW			= _DceErrorInqTextW@8				@0x000f
 ; NdrConvert2				= _NdrConvert2@0				@0x0093
 ; NdrDllCanUnloadNow			= _NdrDllCanUnloadNow@0				@0x0095
 ; NdrDllGetClassObject			= _NdrDllGetClassObject@0			@0x0096
-; NdrDllRegisterProxy			= _NdrDllRegisterProxy@0			@0x0097
-; NdrDllUnregisterProxy			= _NdrDllUnregisterProxy@0			@0x0098
+ NdrDllRegisterProxy			= _NdrDllRegisterProxy@12			@0x0097
+ NdrDllUnregisterProxy			= _NdrDllUnregisterProxy@12			@0x0098
 ; NdrEncapsulatedUnionBufferSize	= _NdrEncapsulatedUnionBufferSize@0		@0x0099
 ; NdrEncapsulatedUnionFree		= _NdrEncapsulatedUnionFree@0			@0x009a
 ; NdrEncapsulatedUnionMarshall		= _NdrEncapsulatedUnionMarshall@0		@0x009b
