@@ -1,4 +1,4 @@
-/* $Id: fastdep.c,v 1.29 2001-07-03 21:59:56 bird Exp $
+/* $Id: fastdep.c,v 1.30 2001-09-04 13:48:29 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
@@ -866,7 +866,7 @@ int main(int argc, char **argv)
 void syntax(void)
 {
     printf(
-        "FastDep v0.40\n"
+        "FastDep v0.41\n"
         "Dependency scanner. Creates a makefile readable depend file.\n"
         " - was quick and dirty, now it's just quick -\n"
         "\n"
@@ -2064,10 +2064,15 @@ int langCOBOL(const char *pszFilename, const char *pszNormFilename,
             strlwr(szFullname);
 
             /* add extention .cpy - hardcoded for the moment. */
-            strcat(szFullname, ".cpy");
+            strcpy(&szFullname[j], ".cpy");
 
             /* find include file! */
             psz = pathlistFindFile(options.pszInclude, szFullname, szBuffer);
+            if (!psz)
+            {
+                strcpy(&szFullname[j], ".cbl");
+                psz = pathlistFindFile(options.pszInclude, szFullname, szBuffer);
+            }
 
             /* did we find the include? */
             if (psz != NULL)
@@ -2079,7 +2084,8 @@ int langCOBOL(const char *pszFilename, const char *pszNormFilename,
             }
             else
             {
-                fprintf(stderr, "%s(%d): warning include file '%s' not found!\n",
+                szFullname[j] = '\0';
+                fprintf(stderr, "%s(%d): warning copybook '%s' was not found!\n",
                         pszFilename, iLine, szFullname);
                 depMarkNotFound(pvRule);
             }
