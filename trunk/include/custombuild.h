@@ -18,6 +18,10 @@
 #define MAX_REGISTER_DLLS         64
 
 #define INNOWIN_DLLNAME        	   "INNOWIN.DLL"
+#define INNOWIN_REGISTRY_BASE      "Software\\InnoTek\\INNOWIN\\"
+#define INNOWIN_REG_CURRENTUSER    "REGROOT_HKEY_CurrentUser"
+#define INNOWIN_REG_LOCAL_MACHINE  "REGROOT_HKEY_LocalMachine"
+#define INNOWIN_REG_USERS          "REGROOT_HKEY_Users"
 
 #define MAKE_BUILDNR(major, minor)	((major << 16) | minor)
 #define MAJOR_BUILDNR(buildnr)		(buildnr >> 16)
@@ -415,6 +419,8 @@ void WIN32API CustEnableCDPolling();
 
 void WIN32API SetFreeTypeIntegration(BOOL fEnabled);
 
+// Special function to change dwords in the startup structure of a process
+void WINAPI ODIN_SetProcessDword( DWORD dwProcessID, INT offset, DWORD value );
 
 //PE headers of system dlls
 #ifdef __cplusplus
