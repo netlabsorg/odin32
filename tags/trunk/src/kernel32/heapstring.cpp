@@ -1,4 +1,4 @@
-/* $Id: heapstring.cpp,v 1.22 1999-12-09 00:52:20 sandervl Exp $ */
+/* $Id: heapstring.cpp,v 1.23 1999-12-14 19:14:27 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -137,7 +137,10 @@ LPSTR WIN32API lstrcatA(LPSTR arg1, LPCSTR arg2)
            arg1,
            arg2));
 
-  return O32_lstrcat(arg1, arg2);
+  if(arg2 == NULL)
+    return arg1;
+  strcat(arg1, arg2);
+  return arg1;
 }
 
 
@@ -158,6 +161,9 @@ LPWSTR WIN32API lstrcatW(LPWSTR arg1, LPCWSTR arg2)
   dprintf2(("KERNEL32: OS2lstrcatW(%08xh,%08xh)\n",
            arg1,
            arg2));
+
+  if(arg2 == NULL)
+    return arg1;
 
   UniStrcat( (UniChar*) arg1, (UniChar*) arg2 );
   return arg1;
@@ -325,8 +331,7 @@ int WIN32API lstrncmpW(LPCWSTR arg1, LPCWSTR  arg2, int l)
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
-ODINFUNCTION2(LPSTR,lstrcpyA,LPSTR, dest,
-                             LPCSTR,src)
+LPSTR WIN32API lstrcpyA(LPSTR dest, LPCSTR src)
 {
   if ( (src == NULL) || (dest == NULL) ) // stupid parameter checking
      return NULL;
@@ -347,8 +352,7 @@ ODINFUNCTION2(LPSTR,lstrcpyA,LPSTR, dest,
  * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
  *****************************************************************************/
 
-ODINFUNCTION2(LPWSTR,lstrcpyW,LPWSTR, dest,
-                              LPCWSTR,src)
+LPWSTR WIN32API lstrcpyW(LPWSTR dest, LPCWSTR src)
 {
   if ( (src == NULL) || (dest == NULL) ) // stupid parameter checking
      return NULL;
