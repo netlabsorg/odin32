@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.6 2001-09-17 01:44:24 bird Exp $
+# $Id: Makefile,v 1.7 2001-09-17 01:47:35 bird Exp $
 
 #
 # kKrnlLib.sys makefile.
@@ -433,16 +433,16 @@ Extract.exe: $(WIN32KBIN)\Extract.exe
 dep:
     $(RM) .depend
     $(ODIN32_TOOLS)\fastdep @<<
-        -f+ -o$$(WIN32KOBJ) $(CINCLUDES) -xdev32\calltaba.asm -xtest\TstFakers.c
-        dev32\*.c* clib\*.c* kern\*.c* test\*.c*
+        -f+ -o$$(WIN32KOBJ) $(CINCLUDES) -xdev32\calltaba.asm -xtestcase\TstFakers.c
+        dev32\*.c* clib\*.c* kern\*.c* testcase\*.c*
         -objobj_tst
-        dev32\*.c* clib\*.c* kern\*.c* test\*.c*
+        dev32\*.c* clib\*.c* kern\*.c* testcase\*.c*
         $(WIN32KINCLUDE)\*.h
 <<
     $(ODIN32_TOOLS)\fastdep @<<
         -a+ -o$$(WIN32KOBJ) -I$(WIN32KINCLUDE) -I$(DDKPATH)\inc
-        -xdev32\calltaba.asm -xtest\TstFakers.c
-        dev16\*.asm dev32\*.asm clib\*.asm kern\*.asm test\*.asm
+        -xdev32\calltaba.asm -xtestcase\TstFakers.c
+        dev16\*.asm dev32\*.asm clib\*.asm kern\*.asm testcase\*.asm
         $(WIN32KINCLUDE)\*.inc
 <<
     $(ODIN32_TOOLS)\fastdep @<<
