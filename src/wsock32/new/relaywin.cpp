@@ -213,10 +213,16 @@ MRESULT EXPENTRY RelayWindowProc(HWND   hwnd,
   // if (fTerminate)
   //   WinDefWindowProc()
 
-  pHM = RelayQuery(ulMsg);                          // find registered message
-  if (pHM != NULL)                                  // message pair found
+  /* find registered message */
+  pHM = RelayQuery(ulMsg);
+  /* message pair found */
+  if (pHM != NULL)
   {
     rc = SHORT1FROMMP(mp2);                /* asynchronous operation result */
+
+    dprintf(("WSOCK32: RelayWindowProc, message %d for window %d with "
+             "mp1 = %d and mp2 = %d (rc = %d) received\n",
+             ulMsg, hwnd, mp1, mp2, rc));
 
     /* check request type for special handling */
     switch (pHM->ulRequestType)
@@ -269,6 +275,7 @@ MRESULT EXPENTRY RelayWindowProc(HWND   hwnd,
 
         if (rc == 0)
         {
+          dprintf(("WSOCK32:RelayWindowProc, hostent buffer: %d\n", pHM->pvUserData1));
           /* we need to convert the hostent structure here */
           Whostent *WinHostent             = (Whostent*)pHM->pvUserData1;
           hostent  *OS2Hostent             = (hostent*)pHM->pvUserData1;
@@ -376,6 +383,14 @@ MRESULT EXPENTRY RelayWindowProc(HWND   hwnd,
         }
         break;
       }
+
+      default:
+      {
+        dprintf(("WSOCK32:RelayWindowProc, Unknown request type!!!"
+                 "window: %d, msg: %d, mp1 %d, mp2%d\n", pHM->hwnd,
+                 pHM->ulMsg, mp1, mp2));
+        break;
+      }
     }
 
 
@@ -393,9 +408,15 @@ MRESULT EXPENTRY RelayWindowProc(HWND   hwnd,
     // if socket close or non-select call, free entry
     // @@@PH
     if (pHM->ulRequestType != ASYNCREQUEST_SELECT)
+    {
+      dprintf(("WSOCK32:RelayWindowProc, Free handle %d\n", pHM->ulMsg));
       RelayFree(pHM->ulMsg);
+    }
 
     return FALSE;                                   // OK, message sent
+  } else
+  {
+    dprintf(("WSOCK32:AsyncRelayWindowProc: Handle not found, message ignored\n"));
   }
 
   // default message processing
