@@ -1,4 +1,4 @@
-/* $Id: comctl32undoc.cpp,v 1.5 2000-05-22 19:30:53 sandervl Exp $ */
+/* $Id: comctl32undoc.cpp,v 1.6 2000-06-12 12:52:03 phaller Exp $ */
 /*
  * Undocumented functions from COMCTL32.DLL
  *
@@ -2533,14 +2533,81 @@ BOOL WINAPI InitMUILanguage( LANGID uiLang)
    return TRUE;
 }
 
-DWORD WINAPI comctl32_389(DWORD x1, DWORD x2)
+DWORD WINAPI COMCTL32_389(DWORD x1, DWORD x2)
 {
    dprintf(("comctl32_389: %x %X not implemented!!", x1, x2));
    return 0; //NT 4 comctl32 returns 0
 }
 
-DWORD WINAPI comctl32_390(DWORD x1, DWORD x2, DWORD x3, DWORD x4)
+DWORD WINAPI COMCTL32_390(DWORD x1, DWORD x2, DWORD x3, DWORD x4)
 {
-   dprintf(("comctl32_390: %x %x %x %x not implemented!!", x1, x2, x3, x4));
+  dprintf(("comctl32_390: %x %x %x %x not implemented!!", x1, x2, x3, x4));
+  
+  /* Pseudo Assembler
+   push [esp+arg_C]
+   mov  eax, [esp+4+arg_0]
+   push [esp+4+arg_8]
+   mov  dword ptr [eax+1A8h], 1
+   push [esp+8+arg_4]
+   push dword ptr [eax + 38h]
+   call ds:SetDIBColorTable
+   retn 10h
+  */
+  
    return 0;
+}
+
+
+/*****************************************************************************
+ * Name      : 
+ * Purpose   : 
+ * Parameters: 
+ * Variables :
+ * Result    : 
+ * Remark    : COMCTL32.9
+ *             Likely to have something to do with COM object.
+ * Status    : UNTESTED UNKNOWN
+ *
+ * Author    : Patrick Haller [Sun, 2000/06/09 09:00]
+ *****************************************************************************/
+
+DWORD WINAPI COMCTL32_9(DWORD arg0,
+                        DWORD arg1,
+                        DWORD arg2,
+                        DWORD arg3)
+{
+  dprintf(("COMCTL32: comctl32_9: %x %x %x %x not implemented!!",
+           arg0,
+           arg1,
+           arg2,
+           arg3));
+  
+  return 0;
+}
+
+/*****************************************************************************
+ * Name      : 
+ * Purpose   : 
+ * Parameters: 
+ * Variables :
+ * Result    : 
+ * Remark    : COMCTL32.10
+ *             Likely to have something to do with COM object.
+ * Status    : UNTESTED UNKNOWN
+ *
+ * Author    : Patrick Haller [Sun, 2000/06/09 09:00]
+ *****************************************************************************/
+
+DWORD WINAPI COMCTL32_10(DWORD arg0,
+                         DWORD arg1,
+                         DWORD arg2,
+                         DWORD arg3)
+{
+  dprintf(("COMCTL32: comctl32_10: %x %x %x %x not implemented!!",
+           arg0,
+           arg1,
+           arg2,
+           arg3));
+  
+  return 0;
 }

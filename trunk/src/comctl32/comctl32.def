@@ -1,4 +1,4 @@
-; $Id: comctl32.def,v 1.15 1999-12-18 20:56:57 achimha Exp $
+; $Id: comctl32.def,v 1.16 2000-06-12 12:52:03 phaller Exp $
 LIBRARY COMCTL32 INITINSTANCE
 DESCRIPTION 'COMCTL32 Common Controls Library'
 DATA MULTIPLE NONSHARED
@@ -73,7 +73,8 @@ EXPORTS
   DrawInsert                   = _DrawInsert@12                      @15
   LBItemFromPt                 = _LBItemFromPt@16                    @14
 
-
+                        _COMCTL32_9@16             @9
+                        _COMCTL32_10@16            @10
   DPA_Merge           = _DPA_Merge@24              @11
 
   COMCTL32_Alloc      = _COMCTL32_Alloc@4          @71
@@ -129,6 +130,8 @@ EXPORTS
   DPA_DestroyCallback = _DPA_DestroyCallback@12    @386
   DSA_EnumCallback    = _DSA_EnumCallback@12       @387
   DSA_DestroyCallback = _DSA_DestroyCallback@12    @388
+                        _COMCTL32_389@8            @389
+                        _COMCTL32_390@16           @390
 
   StrCSpnA            = _COMCTL32_StrCSpnA@8       @356
   StrChrW             = _COMCTL32_StrChrW@8        @358
