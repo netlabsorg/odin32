@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1814 2001-10-31 21:48:35 bird Exp $ */
+/* $Id: changelog,v 1.1815 2001-11-05 14:59:48 sandervl Exp $ */
+
+ 2001-11-05: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Call old DosOpen if DosOpenL not available
 
  2001-10-31: knut st. osmundsen <kosmunds@csc.com>
     - CmdQd:    o Dirty workaround for Ctrl-C on client waiting for output
