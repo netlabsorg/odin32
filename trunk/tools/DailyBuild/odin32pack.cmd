@@ -1,4 +1,4 @@
-/* $Id: odin32pack.cmd,v 1.19 2001-07-19 17:43:40 achimha Exp $
+/* $Id: odin32pack.cmd,v 1.20 2001-07-19 19:58:22 sandervl Exp $
  *
  * Make the two zip files.
  *
@@ -79,15 +79,17 @@ parse arg sDir, sType;
     'del /Q /Y /Z *' /* Perform some cleanup */
 
     /* Copy root files into the pack directory. */
-/*    call copy sRoot'\doc\odin.ini.txt' */
     call copy sRoot'\LICENSE.txt';
     call copy sRoot'\WGSS50.lic';
     call copy sRoot'\ChangeLog';
     call copy sRoot'\doc\Readme.txt';
+    call copy sRoot'\doc\odin.ini.txt'
     call copy sRoot'\doc\Logging.txt';
     call copy sRoot'\doc\ReportingBugs.txt';
+    call copy sRoot'\doc\ChangeLog-2001';
     call copy sRoot'\doc\ChangeLog-2000';
     call copy sRoot'\doc\ChangeLog-1999';
+    call copy sRoot'\doc\WGSS50.lic';
 
     /*
      * Move (=rename) the /bin/<release|debug> dir into /pack/system32
