@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.42 2001-07-08 08:06:15 sandervl Exp $ */
+/* $Id: scroll.cpp,v 1.43 2001-10-11 15:16:44 sandervl Exp $ */
 /*
  * Scrollbar control
  *
@@ -225,6 +225,8 @@ static BOOL SCROLL_GetScrollBarRect( HWND hwnd, INT nBar, RECT *lprect,
                  + pixels * (info->CurVal-info->MinVal) / (max - info->MinVal);
         }
     }
+    //testestest
+    dprintf(("SCROLL_GetScrollBarRect: thumbPos %d thumbSize %d", *thumbPos, *thumbSize));
     return vertical;
 }
 
@@ -725,6 +727,19 @@ static LRESULT SCROLL_Destroy(HWND hwnd,WPARAM wParam,LPARAM lParam)
   return 0;
 }
 
+#ifdef __WIN32OS2__
+static LRESULT SCROLL_Enable(HWND hwnd, WPARAM wParam)
+{
+  SCROLLBAR_INFO* infoPtr = (SCROLLBAR_INFO*)GetInfoPtr(hwnd);
+
+  if (!infoPtr) return 0;
+
+  EnableScrollBar(hwnd, SB_CTL, ESB_DISABLE_BOTH);
+
+  return 0;
+}
+#endif
+
 /***********************************************************************
  *           SCROLL_HandleScrollEvent
  *
@@ -1161,6 +1176,11 @@ LRESULT WINAPI ScrollBarWndProc( HWND hwnd, UINT message, WPARAM wParam,
     case WM_KEYDOWN:
       return SCROLL_KeyDown(hwnd,wParam,lParam);
 
+#ifdef __WIN32OS2__
+    case WM_ENABLE:
+      return SCROLL_Enable(hwnd, wParam);
+#endif
+
     case WM_ERASEBKGND:
       return 1;
 
@@ -1276,6 +1296,7 @@ INT WINAPI SetScrollInfo(HWND hwnd,INT nBar,const SCROLLINFO *info,BOOL bRedraw)
         if ((info->nMin > info->nMax) ||
             ((UINT)(info->nMax - info->nMin) >= 0x80000000))
         {
+            //NOTE: This does not fail in NT4 (unlike SetScrollRange)
             infoPtr->MinVal = 0;
             infoPtr->MaxVal = 0;
             bChangeParams = TRUE; 
@@ -1289,12 +1310,11 @@ INT WINAPI SetScrollInfo(HWND hwnd,INT nBar,const SCROLLINFO *info,BOOL bRedraw)
                 infoPtr->MinVal = info->nMin;
                 infoPtr->MaxVal = info->nMax;
                 bChangeParams = TRUE; 
-           }
+            }
         }
     }
 
     /* Make sure the page size is valid */
-
     if (infoPtr->Page < 0) infoPtr->Page = 0;
     else if (infoPtr->Page > infoPtr->MaxVal - infoPtr->MinVal + 1 )
         infoPtr->Page = infoPtr->MaxVal - infoPtr->MinVal + 1;
@@ -1306,9 +1326,10 @@ INT WINAPI SetScrollInfo(HWND hwnd,INT nBar,const SCROLLINFO *info,BOOL bRedraw)
     else if (infoPtr->CurVal > infoPtr->MaxVal - MAX( infoPtr->Page-1, 0 ))
         infoPtr->CurVal = infoPtr->MaxVal - MAX( infoPtr->Page-1, 0 );
 
-    //TRACE("    new values: page=%d pos=%d min=%d max=%d\n",
-    //             infoPtr->Page, infoPtr->CurVal,
-    //             infoPtr->MinVal, infoPtr->MaxVal );
+    //testestest
+    dprintf(("new values: page=%d pos=%d min=%d max=%d\n",
+                 infoPtr->Page, infoPtr->CurVal,
+                 infoPtr->MinVal, infoPtr->MaxVal ));
 
     /* don't change the scrollbar state if SetScrollInfo
      * is just called with SIF_DISABLENOSCROLL
@@ -1480,6 +1501,16 @@ BOOL WINAPI SetScrollRange(
   SCROLLINFO info;
 
     dprintf(("SetScrollRange %x %x %d %d %d", hwnd, nBar, MinVal, MaxVal, bRedraw));
+
+    //This is what NT4 does
+    if ((MinVal > MaxVal) ||
+        ((UINT)(MaxVal - MinVal) >= 0x80000000))
+    {
+        dprintf(("Invalid range"));
+        SetLastError(ERROR_INVALID_SCROLLBAR_RANGE);
+        return FALSE;
+    }
+
     info.cbSize = sizeof(info);
     info.nMin   = MinVal;
     info.nMax   = MaxVal;
