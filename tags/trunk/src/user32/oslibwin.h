@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.3 1999-09-21 17:04:27 dengert Exp $ */
+/* $Id: oslibwin.h,v 1.4 1999-09-25 09:27:07 dengert Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -239,5 +239,6 @@ HWND  OSLibWinGetNextWindow(HWND hwndEnum);
 HWND  OSLibWinQueryClientWindow(HWND hwndFrame);
 BOOL  OSLibWinEndEnumWindows(HWND hwndEnum);
 BOOL  OSLibWinQueryWindowProcess(HWND hwnd, ULONG *pid, ULONG *tid);
+BOOL  OSLibWinMapWindowPoints (HWND hwndFrom, HWND hwndTo, OSLIBPOINT *pptl, ULONG num);
 
 #endif //__OSLIBWIN_H__

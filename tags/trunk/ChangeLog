@@ -1,53 +1,56 @@
- /* $Id: ChangeLog,v 1.235 1999-09-24 22:47:48 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.236 1999-09-25 09:25:58 dengert Exp $ */
+
+ 99-09-25: Daniela Engert <dani@ngrt.de>
+	- USER32: ClientToScreen and ScreenToClient didn't work -> fixed.
 
  99-09-24: David Raison <djr@lemur.co.uk>
-        - OLE32: Ported remaining files pertaining to OLE32 from WINE
-        - OLEAUT32: Patched OaBuildVersion to level 0x1E...
+	- OLE32: Ported remaining files pertaining to OLE32 from WINE
+	- OLEAUT32: Patched OaBuildVersion to level 0x1E...
 
  99-09-24: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Rewrote menu code to use Open32 (==PM) menu handles
-                  Note: Uses mostly Open32 apis; they work fine, but maybe
-                        we should write our own someday.
-                  Cursor fixes. Not working in winhlp32 yet though.
+		  Note: Uses mostly Open32 apis; they work fine, but maybe
+			we should write our own someday.
+		  Cursor fixes. Not working in winhlp32 yet though.
 	- KERNEL32: Cursor & cursorgroup fixes
 
  99-09-23: Patrick Haller <phaller@gmx.net>
-	- KERNEL32:	Fix: WinImgRes:findResourceW erroneously tried to free 
+	- KERNEL32:	Fix: WinImgRes:findResourceW erroneously tried to free
 			numerical resource IDs instead of translated Unicode
 			strings.
 	- USER32:	Fix: in USER32:HeapShared:getmoreShared()
-			Fix: in USER32:WIN32WMDIClient:childActivate()	
-			Fix: in USER32:WinMenu:GetSubMenu 
+			Fix: in USER32:WIN32WMDIClient:childActivate()
+			Fix: in USER32:WinMenu:GetSubMenu
 				now returns Win32MenuRes object instead of PM handle
-			Fix: in USER32:WinMenu:GetSystemMenu 
+			Fix: in USER32:WinMenu:GetSystemMenu
 				now returns Win32MenuRes object instead of PM handle
 			Fix: in USER32:Char:CharPrevW intermixed arguments
 
  99-09-23: Jens Wiessner <wiessnej@rfi.de>
 	- CRTDLL: Added stubs, implemented some stubs
-	- IMAGEHLP, IMM32, MSACM32, MSVFW32, OLEDLG, 
-          OLECLI32, OLESVR32, PSAPI, RASPI32
-                  Added dprintfs.
+	- IMAGEHLP, IMM32, MSACM32, MSVFW32, OLEDLG,
+	  OLECLI32, OLESVR32, PSAPI, RASPI32
+		  Added dprintfs.
 
  99-09-23: Sander van Leeuwen <sandervl@xs4all.nl>
 	- WINMM: Changed WinPostMsg calls into PostMessageA as win32 window
-                 handles are not the same as PM handles anymore.
+		 handles are not the same as PM handles anymore.
 	- USER32: Adding desktop window class. When user32 is loaded, a desktop
-                  window object is created. 
-                  GetDesktopWindow returns handle of this window.
-                  Winhlp32 no longer crashes immediately, but briefly shows
-                  it's window before quitting.
-                  Create windows always with HWND_TOP. The if statement (hwndLinkAfter)
-                  in the CreateWindowExA method of Win32BaseWindow class messes
-                  up the Z-order of dialog controls (i.e. buttons in a group box)
+		  window object is created.
+		  GetDesktopWindow returns handle of this window.
+		  Winhlp32 no longer crashes immediately, but briefly shows
+		  it's window before quitting.
+		  Create windows always with HWND_TOP. The if statement (hwndLinkAfter)
+		  in the CreateWindowExA method of Win32BaseWindow class messes
+		  up the Z-order of dialog controls (i.e. buttons in a group box)
 	- COMDLG32: Fixed all common dialogs. (translate our handle to real PM handle)
-       
+
  99-09-22: David Raison <djr@lemur.co.uk>
 	- KERNEL32: Return "Service Pack 3" as CSD string in GetVersionExA/W
 
  99-09-22: Yuri Dario <mc6530@mclink.it>
 	- MISC: Fixed WINELIB macro's in wingdi.h, added fixes to headers
-                for VAC 3.6.5
+		for VAC 3.6.5
 	- ODINCRT: Also link with SOMLIB (VAC 3.6.5)
 	- CRTDLL: Compilation fix for VAC 3.6.5
 	- TOOLS\COMMON: Minor change to makefile
@@ -56,13 +59,13 @@
 
  99-09-22: Rene Pronk <R.Pronk@twi.tudelft.nl>
 	- USER32: Changed WM_CHAR PM handling to generate WM_(SYS)KEYUP/DOWN
-                  messages.
-                  Note: Not complete as TranslateMessage doesn't translate
-                        ascii keys to WM_CHAR messages.
+		  messages.
+		  Note: Not complete as TranslateMessage doesn't translate
+			ascii keys to WM_CHAR messages.
 
  99-09-22: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Removed GetDesktopWindow fix
-                  Ported getNextDlgTabItem & getDlgItem
+		  Ported getNextDlgTabItem & getDlgItem
 
  99-09-21: Daniela Engert <dani@ngrt.de>
 	- USER32:   background erasing/painting stuff hopefully finished.
