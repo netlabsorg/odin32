@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2000-02-09 23:50:13 bird Exp $
+# $Id: makefile,v 1.4 2000-05-13 17:18:39 bird Exp $
 
 #
 # PD-Win32 API
@@ -8,50 +8,55 @@
 #
 
 
-# include common definitions
+# Directory macros.
 PDWIN32_INCLUDE = ..\..\include
+PDWIN32_BIN     = ..\..\bin\$(OBJDIR)
+PDWIN32_LIB     = ..\..\lib
 PDWIN32_TOOLS   = ..\bin
+PDWIN32_TCOMMON = ..\common
+
+
+# Defines for the pdwin32.post and pdwin32.mk
+LOCALCLEAN  = 1
+CLEANEXTRAS = $(PDWIN32_TOOLS)\impdef.exe *.log
+EXETARGET   = 1
+
+
+# Compiler, tools, and interference rules.
 !include $(PDWIN32_INCLUDE)\pdwin32.mk
-
-# Addjust common definitions
-CINCLUDES= -I$(PDWIN32_INCLUDE) -I$(PDWIN32_INCLUDE)\win -I..\common
-!ifdef DEBUG
-CFLAGS   = $(CFLAGS)   -Ge+ -Tx+ $(CINCLUDES) -Wall+ppt-ppc-inl-cnv-gnr-vft-
-CXXFLAGS = $(CXXFLAGS) -Ge+ -Gx- -Tx+ $(CINCLUDES) -Wall+ppt-ppc-inl-cnv-gnr-vft-
-LDFLAGS  = $(LDFLAGS)  -Ge+ -Fe$@ /B"/MAP:full"
-!else
-CFLAGS   = $(CFLAGS)   -Ge+ -Tx+ $(CINCLUDES) -Wall+ppt-ppc-inl-cnv-gnr-vft-
-CXXFLAGS = $(CXXFLAGS) -Ge+ -Gx- -Tx+ $(CINCLUDES) -Wall+ppt-ppc-inl-cnv-gnr-vft-
-LDFLAGS  = $(LDFLAGS)  -Ge+ -Fe$@ /B"/MAP:full"
-!endif
+!include $(PDWIN32_TCOMMON)\common.mk
 
 
 
-all: ImpDef.exe ..\bin\ImpDef.exe
+# Flag overloads and local macros.
+CINCLUDES= -I$(PDWIN32_TCOMMON) -I$(PDWIN32_INCLUDE) -I$(PDWIN32_INCLUDE)\Win
+CFLAGS   = $(CFLAGS)   $(CINCLUDES) -Wall+ppt-ppc-inl-cnv-gnr-vft-
+CXXFLAGS = $(CXXFLAGS) $(CINCLUDES) -Wall+ppt-ppc-inl-cnv-gnr-vft-
 
 
-ImpDef.exe: ImpDef.obj ..\common\commonicc.lib
-   $(LD) $(LDFLAGS) $** $(RTLLIB) os2386.lib
+# Object files. All objects should be prefixed with $(OBJDIR)!
+OBJS= \
+$(OBJDIR)\ImpDef.obj
 
-..\bin\ImpDef.exe: ImpDef.exe
+
+# All rule - build objs, target dll, copies dll to bin and makes libs.
+all:    $(OBJDIR) \
+        $(PDWIN32_TOOLS)\ImpDef.exe
+
+
+ImpDef.exe: $(OBJS) $(COMMONLIB)
+   $(LD) $(LDFLAGS) -Fe$@ $** $(RTLLIB) os2386.lib
+
+$(PDWIN32_TOOLS)\ImpDef.exe: ImpDef.exe
    $(CP) $** $@
 
-..\common\commonicc.lib:
-   @cd ..\common
-   @nmake /nologo commonicc.lib
-   @cd ..\impdef
 
-
+# Dep rule - makes depenencies for C, C++ and Asm files.
 dep:
-    $(DEPEND) $(CINCLUDES) -I *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h \
+    $(DEPEND) $(CINCLUDES) *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h \
         *.c *.cpp
 
-!ifndef NODEP
-!include .depend
-!endif
 
-
-clean:
-    @$(RM) *.obj *.exe *.map *.pch *.log
-
-
+# Include common rules
+!include $(PDWIN32_INCLUDE)\pdwin32.post
+!include $(PDWIN32_TCOMMON)\common.mk.post
