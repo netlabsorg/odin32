@@ -1,4 +1,4 @@
-/* $Id: shres.orc,v 1.3 2000-03-26 16:34:55 cbratschi Exp $ */
+/* $Id: shres.orc,v 1.4 2000-08-09 15:58:53 cbratschi Exp $ */
 /*
  * Top level resource file for Common Dialogs
  *
@@ -1338,7 +1338,13 @@ ff 00 a4 a0 a0 00 80 80 80 00 00 00 ff 00 00 ff
  */
 #include "shell32_En.orc"
 
-/* CB: the new about dialog isn't implemented for these languages */
+/* 
+ CB: the new about dialog isn't implemented for these languages
+     other resources aren't translated so far
+     -> don't use these resources for now
+
+     do you want to translate them? just do it.
+*/
 
 //#include "shell32_Ca.orc"
 //#include "shell32_Cs.orc"
