@@ -1,4 +1,4 @@
-/* $Id: regsvr32.cpp,v 1.6 2001-09-28 07:49:05 sandervl Exp $ */
+/* $Id: regsvr32.cpp,v 1.7 2001-10-02 17:14:57 sandervl Exp $ */
 /* 
  * RegSvr32 for OS/2
  * 
@@ -179,9 +179,17 @@ static	HRESULT	parse_command(int argc, char * argv[])
 // ----------------------------------------------------------------------
 static	HRESULT	load_object(void)
 {
+//SvL: Use LoadLibrary here, not CoLoadLibrary
+//     Some dlls (divx codec) call CoFreeUnusedLibraries which unloads our dll 
+//     if we use CoLoadLibrary
+//     NT's regsvr32 doesn't use CoLoadLibrary either. 
+#if 1
+    hdlObject = LoadLibraryA(szFile);
+#else
     LPOLESTR libnameW = (LPOLESTR)HEAP_strdupAtoW(GetProcessHeap(), 0, szFile);
-    hdlObject = CoLoadLibrary(libnameW, TRUE);
+    hdlObject = LoadLibraryW(libnameW);
     HeapFree(GetProcessHeap(), 0, libnameW);
+#endif
     if (hdlObject == 0)
 	return report_err(S_FALSE, "Failed to load '%s'", szFile);
 
@@ -237,7 +245,11 @@ static	HRESULT	deregister_object(void)
 // ----------------------------------------------------------------------
 static	HRESULT	unload_object(void)
 {
+#if 1
+    FreeLibrary(hdlObject);
+#else
     CoFreeLibrary(hdlObject);
+#endif
     return S_OK;
 }
 
