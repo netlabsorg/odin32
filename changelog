@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2653 2003-12-01 13:33:09 sandervl Exp $ */
+/* $Id: changelog,v 1.2654 2003-12-12 11:09:50 sandervl Exp $ */
+
+ 2003-12-12: Dietrich Teickner <Dietrich_Teickner@t-online   >
+    - KERNEL32: o Fix for memory map offset
 
  2003-12-01: KO Myung-Hun <komh@chollian    >
     - GDI32:    o Use Warpsans Combined in DBCS environments
