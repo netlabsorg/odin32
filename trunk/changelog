@@ -1,7 +1,8 @@
-/* $Id: changelog,v 1.1348 2001-04-04 08:59:03 sandervl Exp $ */
+/* $Id: changelog,v 1.1349 2001-04-04 10:47:45 sandervl Exp $ */
 
  2001-04-04: Sander van Leeuwen <sandervl@xs4all.nl>   
     - KERNEL32: o Removed AsciiToUnicode* & UnicodeToAscii* functions
+                o lstrcpynWtoA & lstrcpynAtoW fixes
     - INCLUDE\unicode.h:
                 o AsciiToUnicode* & UnicodeToAscii* functions implemented
                   with functions in heapstring.h
