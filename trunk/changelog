@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2486 2003-02-16 18:28:38 sandervl Exp $ */
+/* $Id: changelog,v 1.2487 2003-02-17 11:32:06 sandervl Exp $ */
+
+ 2003-02-17: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o FindFirstFile: return ERROR_FILE_NOT_FOUND if DosFindFirst
+                  returns ERROR_PATH_NOT_FOUND
 
  2003-02-16: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o ToAscii: fixed wrong checks for VK_SHIFT/CONTROL/MENU
