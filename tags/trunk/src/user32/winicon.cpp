@@ -1,4 +1,4 @@
-/* $Id: winicon.cpp,v 1.36 2002-11-12 14:19:17 sandervl Exp $ */
+/* $Id: winicon.cpp,v 1.37 2002-11-13 14:54:58 sandervl Exp $ */
 /*
  * Win32 Icon Code for OS/2
  *
@@ -79,7 +79,7 @@ typedef struct tagICONCACHE
 } ICONCACHE;
 
 static ICONCACHE *IconAnchor = NULL;
-static CRITICAL_SECTION IconCrst = CRITICAL_SECTION_INIT;
+static CRITICAL_SECTION IconCrst = CRITICAL_SECTION_INIT("User32WinIcon");
 static WORD    ICON_HOTSPOT  = 0x4242;
 static HCURSOR hActiveCursor = 0;
 static HCURSOR hActiveCursorPM = 0;
