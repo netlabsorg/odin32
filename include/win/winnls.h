@@ -421,12 +421,6 @@
 /* use this in a WineLib program if you really want all types */
 #define LOCALE_TIMEDATEBOTH    0x00000300  /* full set */
 
-#ifndef HAVE_WCTYPE_H /* fight native wctype.h */
-/* Prototypes for Unicode case conversion routines */
-WCHAR towupper(WCHAR);
-WCHAR towlower(WCHAR);
-#endif
-
 /* Definitions for IsTextUnicode() function */
 #define IS_TEXT_UNICODE_ASCII16             0x0001
 #define IS_TEXT_UNICODE_SIGNATURE        0x0008
