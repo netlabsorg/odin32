@@ -1,4 +1,4 @@
-/* $Id: PerTaskW32kData.h,v 1.1 2001-07-08 02:58:36 bird Exp $
+/* $Id: PerTaskW32kData.h,v 1.2 2001-07-10 16:41:10 bird Exp $
  *
  * Per Task (Win32k) Data.
  *
@@ -19,14 +19,14 @@ typedef struct _PerTaskData
 {
     AVLNODECORE     core;
     ULONG           cUsage;             /* Usage counter. */
-    PID             pid;                /* Also in core.Key */
+    PPTDA           pPTDA;              /* Also in core.Key */
     PSZ             pszzOdin32Env;      /* Pointer to environment block. */
     LOCKHANDLE      lockOdin32Env;      /* VMLock handle for the environment block. */
 } PTD, *PPTD;
 
 
-PPTD _Optlink   GetTaskData(PID pid);
-void _Optlink   RemoveTaskData(PID pid);
+PPTD _Optlink   GetTaskData(PPTDA pPTDA, BOOL fCreate);
+void _Optlink   RemoveTaskData(PPTDA pPTDA);
 
 #endif
 
