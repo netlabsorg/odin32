@@ -1,4 +1,4 @@
-# $Id: first.mak,v 1.3 2002-04-07 22:39:44 bird Exp $
+# $Id: first.mak,v 1.4 2002-08-20 04:37:59 bird Exp $
 
 #
 # kKrnlLib/dev32 makefile.
@@ -18,7 +18,7 @@ PATH_ROOT = ..\..\..\..
 TARGET_MODE = SYSLIB
 TARGET_NAME = kKrnlLib_first
 MAKEFILE    = first.mak
-ALL_INCLUDES= -I../include
+ALL_INCLUDES= -I../include -I../kLib/include
 ALL_DEFINES = -DKKRNLLIB
 
 

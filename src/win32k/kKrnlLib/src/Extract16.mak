@@ -1,4 +1,4 @@
-# $Id: Extract16.mak,v 1.4 2002-04-07 22:39:44 bird Exp $
+# $Id: Extract16.mak,v 1.5 2002-08-20 04:37:59 bird Exp $
 
 #
 # Extract16 - 16-bit part of the kernel extract routine.
@@ -27,7 +27,7 @@ PATH_ROOT  = ..\..\..\..
 TARGET_MODE = LIB
 TARGET_NAME = Extract16
 MAKEFILE    = $(TARGET_NAME).mak
-ALL_INCLUDES= -I../include -I$(PATH_DDKBASE)/h -I$(PATH_MSC)/include -I$(PATH_TOOLKIT)/h
+ALL_INCLUDES= -I../include -I../kLib/include -I$(PATH_DDKBASE)/h -I$(PATH_MSC)/include -I$(PATH_TOOLKIT)/h
 ALL_DEFINES = -DEXTRACT
 
 

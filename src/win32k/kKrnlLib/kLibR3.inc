@@ -1,4 +1,4 @@
-# $Id: kLibR3.inc,v 1.2 2002-04-29 11:43:04 bird Exp $
+# $Id: kLibR3.inc,v 1.3 2002-08-20 04:37:58 bird Exp $
 
 #
 # kLib.mk - configuration overloader for kLib in kLibKrnl.sys.
@@ -18,7 +18,7 @@
 #
 # Some changes are to be done.. :-)
 #
-ALL_INCLUDES    = -I$(PATH_KKRNLLIB:\=/)/include -I$(PATH_KKRNLLIB:\=/)/include/kLib
+ALL_INCLUDES    = -I$(PATH_KKRNLLIB:\=/)/include -I$(PATH_KKRNLLIB:\=/)/kLib/include
 ALL_DEFINES     = -DKKRNLLIB
 KLIB_POSTFIX    = R3
 PATH_ROOT       = $(PATH_WIN32K)\..\..
