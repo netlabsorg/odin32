@@ -1,4 +1,4 @@
-/* $Id: region.cpp,v 1.30 2002-11-26 10:53:12 sandervl Exp $ */
+/* $Id: region.cpp,v 1.31 2002-12-04 10:24:02 sandervl Exp $ */
 
 /*
  * GDI32 region code
@@ -57,6 +57,27 @@ inline void convertDeviceRect(HWND hwnd, PRECTL pRectl, ULONG count)
 }
 
 HPS hpsRegion = 0;
+
+
+#ifdef DEBUG
+//#define dprintfRegion(a,b,c) if(DbgEnabledLvl2GDI32[DBG_LOCALLOG] == 1) dprintfRegion1(a,b,c)
+//#define dprintfRegion(a,b,c) dprintfRegion1(a,b,c)
+
+void dprintfRegion(HPS hps, HRGN hrgnClip)
+{
+ RGNRECT rgnRect = {0, 16, 0, RECTDIR_LFRT_TOPBOT};
+ RECTL   rectRegion[16];
+ APIRET  rc;
+
+   dprintf(("dprintfRegion %x", hps));
+   rc = GpiQueryRegionRects(hps, hrgnClip, NULL, &rgnRect, &rectRegion[0]);
+   for(int i=0;i<rgnRect.crcReturned;i++) {
+        dprintf(("(%d,%d)(%d,%d)", rectRegion[i].xLeft, rectRegion[i].yBottom, rectRegion[i].xRight, rectRegion[i].yTop));
+   }
+}
+#else
+#define dprintfRegion(a,c)
+#endif
 
 //******************************************************************************
 //******************************************************************************
@@ -1463,6 +1484,8 @@ BOOL WIN32API FillRgn(HDC hdc, HRGN hrgn, HBRUSH hBrush)
     dprintf(("FillRgn %x %x %x", hdc, hrgn1, hBrush));
 
     interpretRegionAs(pHps, NULL, hrgn, AS_WORLD);
+
+    dprintfRegion(pHps->hps, pHps->hrgnHDC);
 
     success = GpiPaintRegion(pHps->hps, pHps->hrgnHDC);
 
