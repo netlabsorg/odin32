@@ -1,4 +1,4 @@
-# $Id: process.mak,v 1.36 2003-03-07 09:35:24 bird Exp $
+# $Id: process.mak,v 1.37 2003-06-30 13:19:49 bird Exp $
 #
 # Generic Buildsystem
 #
@@ -597,6 +597,9 @@ _CC_BASELINE = $(CC) \
 !if "$(TARGET_MODE)" == "IFS" || "$(TARGET_MODE)" == "IFSLIB"
         $(CC_FLAGS_IFS) \
 !endif
+!if "$(TARGET_MODE)" == "VDD"
+        $(CC_FLAGS_VDD) \
+!endif
 
 # Compiling C source.
 .c{$(PATH_TARGET)}.$(EXT_OBJ):
@@ -655,7 +658,7 @@ _CC_BASELINE = $(CC) \
 !ifndef BUILD_VERBOSE
     @ \
 !endif
-    $(TOOL_JOB_SUB) $(RC) $(RC_FLAGS) $(_SRC) $(_DST)
+    $(TOOL_JOB_SUB) $(RC) $(RC_FLAGS) $(_SRC) $(RC_RES_OUT)$(_DST)
 
 .rc.res:
     @$(ECHO) RC Compiler $(CLRFIL)$(_SRC) $(CLRRST)
@@ -663,7 +666,7 @@ _CC_BASELINE = $(CC) \
 !ifndef BUILD_VERBOSE
     @ \
 !endif
-    $(RC) $(RC_FLAGS) $(_SRC) $(_DST)
+    $(RC) $(RC_FLAGS) $(_SRC) $(RC_RES_OUT)$(_DST)
 
 
 # Compiling Odin32 resources.
@@ -1490,7 +1493,7 @@ $(LINK_LNK5)
 ! ifndef BUILD_VERBOSE
     @ \
 ! endif
-    $(RL) $(RL_FLAGS) $(TARGET_RES) $@
+    $(RL) $(RL_FLAGS) $(TARGET_RES) $(RL_EXE_OUT)$@
 !endif
 !if "$(TARGET_DLLRNAME)" != ""
     @$(ECHO) Dll Rename $(TARGET_DLLRNAME)
