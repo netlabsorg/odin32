@@ -1,8 +1,9 @@
- /* $Id: ChangeLog,v 1.553 1999-12-19 12:26:48 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.554 1999-12-19 17:40:45 sandervl Exp $ */
 
  99-12-19: Sander van Leeuwen <sandervl@xs4all.nl>
 	- ADVAPI32/NTDLL: Forward sid apis to ntdll (need to check return
                           type of some Rtl SID apis (bool or status dword?))
+	- KERNEL32: Fix for loading images (RSRC_LOAD)
 
  99-12-18: Achim Hasenmueller <achimha@innotek.de>
         - COMCTL32: Merged with latest WINE 991212 code
