@@ -1,4 +1,4 @@
-/* $Id: vprintf.c,v 1.5 1999-11-10 01:45:37 bird Exp $
+/* $Id: vprintf.c,v 1.6 1999-11-10 09:11:28 bird Exp $
  *
  * vprintf and printf
  *
@@ -221,8 +221,10 @@ static char * numtostr(long lValue, unsigned int uiBase,
  */
 int vprintf(const char *pszFormat, va_list args)
 {
+    #ifdef RING0
     if (!options.fLogging)
         return 0;
+    #endif
     return vprintf2(pszFormat, args);
 }
 
