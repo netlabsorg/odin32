@@ -1,4 +1,4 @@
-/* $Id: wingdi16.h,v 1.3 2000-08-30 13:56:39 sandervl Exp $ */
+/* $Id: wingdi16.h,v 1.4 2002-06-02 10:10:33 sandervl Exp $ */
 #ifndef __WINE_WINE_WINGDI16_H
 #define __WINE_WINE_WINGDI16_H
 
@@ -530,5 +530,21 @@ BOOL16      WINAPI WidenPath16(HDC16);
 int         WINAPI WriteDialog16(HANDLE16,LPSTR,WORD);
 int         WINAPI WriteSpool16(HANDLE16,LPSTR,WORD);
 
+
+#define CONV_RECT16TO32( r16, r32 )  \
+{                                    \
+    (r32)->left   = ((LPRECT16)r16)->left;         \
+    (r32)->top    = ((LPRECT16)r16)->top;          \
+    (r32)->right  = ((LPRECT16)r16)->right;        \
+    (r32)->bottom = ((LPRECT16)r16)->bottom;       \
+}
+
+#define CONV_RECT32TO16( r32, r16 )   \
+{                                     \
+    ((LPRECT16)r16)->left   = (INT16)(r32)->left;   \
+    ((LPRECT16)r16)->top    = (INT16)(r32)->top;    \
+    ((LPRECT16)r16)->right  = (INT16)(r32)->right;  \
+    ((LPRECT16)r16)->bottom = (INT16)(r32)->bottom; \
+}
 
 #endif /* __WINE_WINE_WINGDI16_H */
