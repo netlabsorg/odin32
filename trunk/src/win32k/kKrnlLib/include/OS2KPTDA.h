@@ -1,8 +1,8 @@
-/* $Id: OS2KPTDA.h,v 1.1 2001-09-14 01:50:15 bird Exp $
+/* $Id: OS2KPTDA.h,v 1.2 2001-09-26 03:52:36 bird Exp $
  *
  * PTDA access functions.
  *
- * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 2000-2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -26,7 +26,11 @@ typedef struct _PTDA
 } PTDA, *PPTDA, **PPPTDA;
 
 
+#ifdef KKRNLLIB
 extern  PPPTDA      ppPTDACur;          /* Please access this only thru the ptdaGetCur() function. */
+#else
+extern  PPTDA       pPTDACur;           /* Please access this only thru the ptdaGetCur() function. */
+#endif
 
 
 /*******************************************************************************
@@ -38,7 +42,12 @@ extern  PPPTDA      ppPTDACur;          /* Please access this only thru the ptda
  * @remark      Using import stuff.
  */
 //PPTDA   ptdaGetCur(void);
+#ifdef KKRNLLIB
 #define ptdaGetCur()                    (*ppPTDACur)
+#else
+#define ptdaGetCur()                    (pPTDACur)
+#endif
+
 
 
 

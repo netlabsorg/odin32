@@ -1,4 +1,4 @@
-/* $Id: OS2KTK.h,v 1.1 2001-09-14 01:50:16 bird Exp $
+/* $Id: OS2KTK.h,v 1.2 2001-09-26 03:52:37 bird Exp $
  *
  * OS2KTK - OS/2 Kernel Task.
  *
@@ -97,6 +97,7 @@ extern "C" {
  * @param     fl     Flags.
  */
 extern ULONG KRNLCALL   TKFuBuff(PVOID pv, PVOID pvUsr, ULONG cb, ULONG fl);
+extern ULONG KRNLCALL   OrgTKFuBuff(PVOID pv, PVOID pvUsr, ULONG cb, ULONG fl);
 
 
 /**
@@ -108,6 +109,7 @@ extern ULONG KRNLCALL   TKFuBuff(PVOID pv, PVOID pvUsr, ULONG cb, ULONG fl);
  * @param     fl     Flags.
  */
 extern ULONG KRNLCALL   TKSuBuff(PVOID pvUsr, PVOID pv, ULONG cb, ULONG fl);
+extern ULONG KRNLCALL   OrgTKSuBuff(PVOID pvUsr, PVOID pv, ULONG cb, ULONG fl);
 
 
 /**
@@ -121,6 +123,7 @@ extern ULONG KRNLCALL   TKSuBuff(PVOID pvUsr, PVOID pv, ULONG cb, ULONG fl);
  *                      FALSE: Single string. (ie. one '\0').
  */
 extern ULONG KRNLCALL   TKFuBufLen(PLONG pcch, PVOID pvUsr, ULONG cchMax, ULONG fl, BOOL fDblNULL);
+extern ULONG KRNLCALL   OrgTKFuBufLen(PLONG pcch, PVOID pvUsr, ULONG cchMax, ULONG fl, BOOL fDblNULL);
 
 
 /**
@@ -132,6 +135,7 @@ extern ULONG KRNLCALL   TKFuBufLen(PLONG pcch, PVOID pvUsr, ULONG cchMax, ULONG 
  * @param     fl        Flags.
  */
 extern ULONG KRNLCALL   TKSuFuBuff(PVOID pvTarget, PVOID pvSource, ULONG cb, ULONG fl);
+extern ULONG KRNLCALL   OrgTKSuFuBuff(PVOID pvTarget, PVOID pvSource, ULONG cb, ULONG fl);
 
 
 #ifdef INCL_OS2KRNL_PTDA
@@ -143,6 +147,7 @@ extern ULONG KRNLCALL   TKSuFuBuff(PVOID pvTarget, PVOID pvSource, ULONG cb, ULO
  *                      the PTDA pointer on successful return.
  */
 extern ULONG KRNLCALL   TKPidToPTDA(PID pid, PPPTDA ppPTDA);
+extern ULONG KRNLCALL   OrgTKPidToPTDA(PID pid, PPPTDA ppPTDA);
 #endif
 
 
@@ -164,22 +169,24 @@ typedef TKSCANTASKWORKER * PTKSCANTASKWORKER;
  * @param   ulArg       User argument which is passed on as second parameter to worker
  */
 extern ULONG KRNLCALL   TKScanTasks(ULONG flFlags, ULONG id, PTKSCANTASKWORKER pfnWorker, ULONG ulArg);
+extern ULONG KRNLCALL   OrgTKScanTasks(ULONG flFlags, ULONG id, PTKSCANTASKWORKER pfnWorker, ULONG ulArg);
 #endif
 
 
 /**
  * Post signal to one or more processes.
- * @returns  NO_ERROR on success.
- *           On error ERROR_NOT_DESCENDANT, ERROR_SIGNAL_REFUSED,
- *           ERROR_INVALID_PROCID, ERROR_ZOMBIE_PROCESS, ERROR_SIGNAL_PENDING. (it seems)
- * @param    usSignal       Signal number.
- * @param    usAction       Action.
- *                          0 - the process and all children.
- *                          1 - only the process
- *                          2 - the process and all it's descendants.
- *                          3 - all processes in that screen group.
- * @param    usSignalArg    Signal argument.
- * @param    usPIDSGR       Process Id or Screen Group Id.
+ * @returns NO_ERROR on success.
+ *          On error ERROR_NOT_DESCENDANT, ERROR_SIGNAL_REFUSED,
+ *          ERROR_INVALID_PROCID, ERROR_ZOMBIE_PROCESS, ERROR_SIGNAL_PENDING. (it seems)
+ * @param   usSignal       Signal number.
+ * @param   usAction       Action.
+ *                         0 - the process and all children.
+ *                         1 - only the process
+ *                         2 - the process and all it's descendants.
+ *                         3 - all processes in that screen group.
+ * @param   usSignalArg    Signal argument.
+ * @param   usPIDSGR       Process Id or Screen Group Id.
+ * @remark  Win32k Internal call.
  */
 extern ULONG _Optlink POST_SIGNAL32(USHORT usSignal, USHORT usAction, USHORT usSignalArg, USHORT usPIDSGR);
 
@@ -195,6 +202,7 @@ extern ULONG _Optlink POST_SIGNAL32(USHORT usSignal, USHORT usAction, USHORT usS
  * @param   pTCB    Pointer to the thread control block of the thread to be forced.
  */
 extern void KRNLCALL TKForceThread(ULONG flFlag, PTCB pTCB);
+extern void KRNLCALL OrgTKForceThread(ULONG flFlag, PTCB pTCB);
 #endif
 
 #ifdef INCL_OS2KRNL_PTDA
@@ -206,6 +214,7 @@ extern void KRNLCALL TKForceThread(ULONG flFlag, PTCB pTCB);
  *                  TRUE    Force all threads ready by calling TKForceThread.
  */
 extern void KRNLCALL  TKForceTask(ULONG flFlag, PPTDA pPTDA, BOOL fForce);
+extern void KRNLCALL  OrgTKForceTask(ULONG flFlag, PPTDA pPTDA, BOOL fForce);
 #endif
 
 #ifdef INCL_OS2KRNL_TCB
@@ -215,6 +224,7 @@ extern void KRNLCALL  TKForceTask(ULONG flFlag, PPTDA pPTDA, BOOL fForce);
  * @param   pTCB    pointer to the TCB of the thread in question.
  */
 extern ULONG KRNLCALL TKGetPriority(PTCB pTCB);
+extern ULONG KRNLCALL OrgTKGetPriority(PTCB pTCB);
 #endif
 
 /**
@@ -230,6 +240,7 @@ extern ULONG KRNLCALL TKGetPriority(PTCB pTCB);
  * @param   flSleepType ???
  */
 extern ULONG KRNLCALL TKSleep(ULONG ulSleepId, ULONG ulTimeout, ULONG fUnInterruptable, ULONG flWakeupType);
+extern ULONG KRNLCALL OrgTKSleep(ULONG ulSleepId, ULONG ulTimeout, ULONG fUnInterruptable, ULONG flWakeupType);
 
 /**
  * Wakeup sleeping thread(s).
@@ -241,6 +252,7 @@ extern ULONG KRNLCALL TKSleep(ULONG ulSleepId, ULONG ulTimeout, ULONG fUnInterru
  *                          thread waked up.
  */
 extern ULONG KRNLCALL TKWakeup(ULONG ulSleepId, ULONG flWakeupType, PULONG cWakedUp);
+extern ULONG KRNLCALL OrgTKWakeup(ULONG ulSleepId, ULONG flWakeupType, PULONG cWakedUp);
 
 #ifdef INCL_OS2KRNL_TCB
 /**
@@ -250,6 +262,7 @@ extern ULONG KRNLCALL TKWakeup(ULONG ulSleepId, ULONG flWakeupType, PULONG cWake
  * @param   pTCB    Pointer to the TCB of the thread to be waken.
  */
 extern ULONG KRNLCALL TKWakeThread(PTCB pTCB);
+extern ULONG KRNLCALL OrgTKWakeThread(PTCB pTCB);
 #endif
 
 #ifdef INCL_OS2KRNL_TCB
@@ -261,6 +274,7 @@ extern ULONG KRNLCALL TKWakeThread(PTCB pTCB);
  * @param   flWakeUpType    How/what to wakeup.
  */
 extern PTCB  KRNLCALL TKQueryWakeup(ULONG ulSleepId, ULONG flWakeupType);
+extern PTCB  KRNLCALL OrgTKQueryWakeup(ULONG ulSleepId, ULONG flWakeupType);
 #endif
 
 #endif

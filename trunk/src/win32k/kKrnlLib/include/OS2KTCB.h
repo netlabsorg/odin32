@@ -1,4 +1,4 @@
-/* $Id: OS2KTCB.h,v 1.1 2001-09-14 01:50:16 bird Exp $
+/* $Id: OS2KTCB.h,v 1.2 2001-09-26 03:52:37 bird Exp $
  *
  * TCB - Thread Control Block access methods.
  *
@@ -148,7 +148,11 @@ typedef struct _TCB
     char    dummy;
 } TCB, *PTCB, **PPTCB;
 
+#ifdef KKRNLLIB
 extern PPTCB    ppTCBCur;
+#else
+extern PTCB     pTCBCur;
+#endif
 
 
 /*******************************************************************************
@@ -160,7 +164,11 @@ extern PPTCB    ppTCBCur;
  * @returns     Pointer to the current thread control block (TCB).
  *              NULL if not task-time.
  */
+#ifdef KKRNLLIB
 #define tcbGetCur()     *ppTCBCur
+#else
+#define tcbGetCur()     pTCBCur
+#endif
 
 
 USHORT  tcbGetTCBFailErr(PTCB pTCB);

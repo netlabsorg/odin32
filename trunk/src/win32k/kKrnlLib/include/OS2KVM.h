@@ -1,4 +1,4 @@
-/* $Id: OS2KVM.h,v 1.1 2001-09-14 01:50:16 bird Exp $
+/* $Id: OS2KVM.h,v 1.2 2001-09-26 03:52:37 bird Exp $
  *
  * OS/2 kernel VM functions.
  *
@@ -224,26 +224,44 @@ typedef struct vmah_s
 /**
  * Virtual Address Limit - this pointer might be NULL!
  */
+#ifdef KKRNLLIB
 extern ULONG *pVirtualAddressLimit;
-#define VirtualAddressLimit (pVirtualAddressLimit ? *pVirtualAddressLimit : 0x20000000)
+#define VirtualAddressLimit (pVirtualAddressLimit ? *pVirtualAddressLimit : 0x20000000UL)
+#else
+extern ULONG VirtualAddressLimit;
+#define VirtualAddressLimit (&VirtualAddressLimit ?  VirtualAddressLimit  : 0x20000000UL)
+#endif
 
 /**
  * System arena header.
  */
+#ifdef KKRNLLIB
 extern PVMAH pahvmSys;
 #define ahvmSys (*pahvmSys)
+#else
+extern VMAH ahvmSys;
+#endif
 
 /**
  * Shared arena header.
  */
+#ifdef KKRNLLIB
 extern PVMAH pahvmShr;
 #define ahvmShr (*pahvmShr)
+#else
+extern VMAH  ahvmShr;
+#endif
 
 /**
  * High Shread arena header - only aurora and Warp Server Advanced SMP.
+ * Check if &ahvmhShr is NULL!
  */
+#ifdef KKRNLLIB
 extern PVMAH pahvmhShr;
 #define ahvmhShr (*pahvmhShr)
+#else
+extern VMAH  ahvmhShr;
+#endif
 
 
 /*******************************************************************************
@@ -252,8 +270,21 @@ extern PVMAH pahvmhShr;
 HMTE KRNLCALL VMGetOwner(
     ULONG ulCS,
     ULONG ulEIP);
+HMTE KRNLCALL OrgVMGetOwner(
+    ULONG ulCS,
+    ULONG ulEIP);
 
 APIRET KRNLCALL VMAllocMem(
+    ULONG   cbSize,
+    ULONG   cbCommit,
+    ULONG   flFlags1,
+    HPTDA   hPTDA,
+    USHORT  usVMOwnerId,
+    HMTE    hMTE,
+    ULONG   flFlags2,
+    ULONG   SomeArg2,
+    PVMAC   pvmac);
+APIRET KRNLCALL OrgVMAllocMem(
     ULONG   cbSize,
     ULONG   cbCommit,
     ULONG   flFlags1,
@@ -268,8 +299,18 @@ APIRET KRNLCALL VMFreeMem(
     ULONG   ulAddress,
     HPTDA   hPTDA,
     ULONG   flFlags);
+APIRET KRNLCALL OrgVMFreeMem(
+    ULONG   ulAddress,
+    HPTDA   hPTDA,
+    ULONG   flFlags);
 
 APIRET KRNLCALL VMMapDebugAlias(
+    ULONG   flVMFlags,
+    ULONG   ulAddress,
+    ULONG   cbSize,
+    HPTDA   hPTDA,
+    PVMAC   pvmac);
+APIRET KRNLCALL OrgVMMapDebugAlias(
     ULONG   flVMFlags,
     ULONG   ulAddress,
     ULONG   cbSize,
@@ -280,9 +321,15 @@ APIRET KRNLCALL VMObjHandleInfo(
     USHORT  usHob,
     PULONG  pulAddr,
     PUSHORT pushPTDA);
+APIRET KRNLCALL OrgVMObjHandleInfo(
+    USHORT  usHob,
+    PULONG  pulAddr,
+    PUSHORT pushPTDA);
 
 #ifdef _OS2KLDR_H_
 PMTE KRNLCALL VMPseudoHandleMap(
+    HMTE    hMTE);
+PMTE KRNLCALL OrgVMPseudoHandleMap(
     HMTE    hMTE);
 #endif
 
@@ -298,6 +345,9 @@ PMTE KRNLCALL VMPseudoHandleMap(
  * @param   pulSentinelAddress  Pointer to return variable (optional).
  */
 VOID    KRNLCALL vmRecalcShrBound(
+    ULONG   flFlags,
+    PULONG  pulSentinelAddress);
+VOID    KRNLCALL OrgvmRecalcShrBound(
     ULONG   flFlags,
     PULONG  pulSentinelAddress);
 
@@ -316,6 +366,10 @@ APIRET KRNLCALL VMCreatePseudoHandle(
     PVOID   pvData,
     VMHOB   usOwner,
     PVMHOB  phob);
+APIRET KRNLCALL OrgVMCreatePseudoHandle(
+    PVOID   pvData,
+    VMHOB   usOwner,
+    PVMHOB  phob);
 
 
 /**
@@ -325,6 +379,8 @@ APIRET KRNLCALL VMCreatePseudoHandle(
  * @param   hob     Handle to be freed.
  */
 APIRET KRNLCALL VMFreePseudoHandle(
+    VMHOB   hob);
+APIRET KRNLCALL OrgVMFreePseudoHandle(
     VMHOB   hob);
 
 

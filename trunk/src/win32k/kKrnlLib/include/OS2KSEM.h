@@ -1,4 +1,4 @@
-/* $Id: OS2KSEM.h,v 1.1 2001-09-14 01:50:15 bird Exp $
+/* $Id: OS2KSEM.h,v 1.2 2001-09-26 03:52:36 bird Exp $
  *
  * OS/2 kernel Semaphore functions.
  *
@@ -155,8 +155,11 @@ typedef HKSEM * PHKSEM;
  * Mutex semaphores.
  */
 extern ULONG KRNLCALL KSEMRequestMutex(HKSEMMTX hkmtx, ULONG ulTimeout);
+extern ULONG KRNLCALL OrgKSEMRequestMutex(HKSEMMTX hkmtx, ULONG ulTimeout);
 extern VOID  KRNLCALL KSEMReleaseMutex(HKSEMMTX hkmtx);
+extern VOID  KRNLCALL OrgKSEMReleaseMutex(HKSEMMTX hkmtx);
 extern ULONG KRNLCALL KSEMQueryMutex(HKSEMMTX hkmtx, PUSHORT pcusNest);
+extern ULONG KRNLCALL OrgKSEMQueryMutex(HKSEMMTX hkmtx, PUSHORT pcusNest);
 
 
 #if 0
@@ -179,6 +182,7 @@ extern ULONG KRNLCALL KSEMRequestShared(HKSEM hksem, ULONG);
 extern VOID  KRNLCALL KSEMDestroy(HKSEM hksem);
 #endif
 extern VOID  KRNLCALL KSEMInit(PKSEM pksem, ULONG fulType, ULONG fulFlags);
+extern VOID  KRNLCALL OrgKSEMInit(PKSEM pksem, ULONG fulType, ULONG fulFlags);
 #if 0
 extern VOID  KRNLCALL KSEMQuery(HKSEM hksem, ULONG p2)
 extern VOID  KRNLCALL KSEMRelease(HKSEM hksem);

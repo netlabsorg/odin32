@@ -1,6 +1,8 @@
-/* $Id: OS2KIO.h,v 1.1 2001-09-14 01:50:14 bird Exp $
+/* $Id: OS2KIO.h,v 1.2 2001-09-26 03:52:35 bird Exp $
  *
- * OS/2 kernel IO: prototypes, typedefs and macros.
+ * OS/2 kernel I/O: prototypes, typedefs and macros.
+ *
+ * Copyright (c) 1999-2001 knut st. osmundsen (kosmunds@csc.com)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -26,6 +28,13 @@ APIRET KRNLCALL IOSftOpen(
     PSFN phFile,
     PULONG pulsomething
     );
+APIRET KRNLCALL OrgIOSftOpen(
+    PSZ pszFilename,
+    ULONG flOpenFlags,
+    ULONG fsOpenMode,
+    PSFN phFile,
+    PULONG pulsomething
+    );
 
 
 /**
@@ -34,6 +43,9 @@ APIRET KRNLCALL IOSftOpen(
  * @param    hFile      File handle - System File Number.
  */
 APIRET KRNLCALL IOSftClose(
+    SFN hFile
+    );
+APIRET KRNLCALL OrgIOSftClose(
     SFN hFile
     );
 
@@ -45,6 +57,9 @@ APIRET KRNLCALL IOSftClose(
  *                    This buffer should probably be of CCHMAXPATH length.
  */
 APIRET KRNLCALL IOSftTransPath(
+    PSZ pszPath
+    );
+APIRET KRNLCALL OrgIOSftTransPath(
     PSZ pszPath
     );
 
@@ -60,6 +75,13 @@ APIRET KRNLCALL IOSftTransPath(
  * @param    ulOffset   File offset to read from. (0=start of file)
  */
 APIRET KRNLCALL IOSftReadAt(
+    SFN hFile,
+    PULONG pcbActual,
+    PVOID pvBuffer,
+    ULONG flFlags,
+    ULONG ulOffset
+    );
+APIRET KRNLCALL OrgIOSftReadAt(
     SFN hFile,
     PULONG pcbActual,
     PVOID pvBuffer,
@@ -85,6 +107,13 @@ APIRET KRNLCALL IOSftWriteAt(
     ULONG flFlags,
     ULONG ulOffset
     );
+APIRET KRNLCALL OrgIOSftWriteAt(
+    SFN hFile,
+    PULONG pcbActual,
+    PVOID pvBuffer,
+    ULONG flFlags,
+    ULONG ulOffset
+    );
 
 
 /**
@@ -94,6 +123,10 @@ APIRET KRNLCALL IOSftWriteAt(
  * @param     pcbFile  Pointer to ULONG which will hold the file size upon return.
  */
 APIRET KRNLCALL SftFileSize(
+    SFN hFile,
+    PULONG pcbFile
+    );
+APIRET KRNLCALL OrgSftFileSize(
     SFN hFile,
     PULONG pcbFile
     );

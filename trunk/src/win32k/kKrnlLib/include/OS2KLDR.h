@@ -1,4 +1,4 @@
-/* $Id: OS2KLDR.h,v 1.1 2001-09-14 01:50:15 bird Exp $
+/* $Id: OS2KLDR.h,v 1.2 2001-09-26 03:52:35 bird Exp $
  *
  * OS/2 kernel Loader Stuff.
  *
@@ -28,7 +28,6 @@ typedef struct OTE
     ULONG    ote_flags;            /* Attribute flags */
     ULONG    ote_pagemap;          /* Object page map index */
     ULONG    ote_mapsize;          /* Num of entries in obj page map */
-  /*ULONG    ote_reserved;*/
     USHORT   ote_sel;              /* Object Selector */
     USHORT   ote_hob;              /* Object Handle */
 } OTE, *POTE;
@@ -225,6 +224,7 @@ typedef struct MTE
 /*******************************************************************************
 *   Global Variables                                                           *
 *******************************************************************************/
+#ifdef KKRNLLIB
 extern PSZ*    pLdrLibPath;             /* Pointer to the libpath pointer. */
 extern PPMTE   pmte_h;
 extern PPMTE   pprogram_h;
@@ -233,6 +233,16 @@ extern PPMTE   pglobal_h;
 extern PPMTE   pglobal_l;
 extern PPMTE   pspecific_h;
 extern PPMTE   pspecific_l;
+#else
+extern PSZ     LdrLibPath;             /* Pointer to the libpath. */
+extern PMTE    mte_h;
+extern PMTE    program_h;
+extern PMTE    program_l;
+extern PMTE    global_h;
+extern PMTE    global_l;
+extern PMTE    specific_h;
+extern PMTE    specific_l;
+#endif
 
 /*******************************************************************************
 *   Function Prototypes                                                        *
@@ -244,7 +254,7 @@ extern ULONG LDRCALL ldrClose(  /* retd  0x04 */
     SFN p1                      /* ebp + 0x08 */
     );
 
-ULONG LDRCALL myldrClose(SFN);
+extern ULONG LDRCALL OrgldrClose(SFN);
 
 
 /**
@@ -256,7 +266,7 @@ extern ULONG LDRCALL ldrOpen(   /* retd  0x0c */
     PULONG  p3                  /* ebp + 0x10 */
     );
 
-ULONG LDRCALL myldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl);
+extern ULONG LDRCALL OrgldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl);
 
 
 /**
@@ -271,7 +281,7 @@ extern ULONG LDRCALL ldrRead(   /* retd  0x18 */
     PMTE    pMTE                /* ebp + 0x1c */
     );
 
-ULONG LDRCALL myldrRead(
+extern ULONG LDRCALL OrgmyldrRead(
     SFN     hFile,
     ULONG   ulOffset,
     PVOID   pvBuffer,
@@ -279,7 +289,6 @@ ULONG LDRCALL myldrRead(
     ULONG   cbToRead,
     PMTE    pMTE
     );
-
 
 
 /**
@@ -290,7 +299,7 @@ extern ULONG LDRCALL LDRQAppType(   /* retd  0x08 */
     ULONG p2                        /* ebp + 0x0c */
     );
 
-ULONG LDRCALL myLDRQAppType(ULONG,ULONG);
+extern ULONG LDRCALL OrgLDRQAppType(ULONG,ULONG);
 
 
 /**
@@ -312,8 +321,7 @@ extern ULONG LDRCALL ldrEnum32bitRelRecs( /* retd 0x20 */
     PVOID pvPTDA                    /* ebp + 0x1c */
     );
 
-ULONG LDRCALL myldrEnum32bitRelRecs(PMTE, ULONG, ULONG, PVOID, ULONG, PVOID);
-
+extern ULONG LDRCALL OrgldrEnum32bitRelRecs(PMTE, ULONG, ULONG, PVOID, ULONG, PVOID);
 
 
 /**
@@ -371,6 +379,7 @@ typedef struct ldrlv_s /* #memb 12 size 39 (0x027) */
  *          if successfull then break the loop.
  *      endloop
  *  endif
+ * @remark  Win32k Internal stuff???
  */
 extern ULONG LDRCALL ldrOpenPath_old(   /* retd  0x10 */
     PCHAR       pachFilename,       /* ebp + 0x08 */
@@ -378,8 +387,6 @@ extern ULONG LDRCALL ldrOpenPath_old(   /* retd  0x10 */
     ldrlv_t *   plv,                /* ebp + 0x10 */
     PULONG      pful                /* ebp + 0x14 */
     );
-
-ULONG LDRCALL myldrOpenPath_old(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *plv, PULONG pful);
 
 
 /**
@@ -428,7 +435,7 @@ extern ULONG LDRCALL ldrOpenPath(  /* retd  0x14 */
     ULONG       lLibPath           /* ebp + 0x18 */
     );
 
-ULONG LDRCALL myldrOpenPath(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *plv, PULONG pful, ULONG lLibPath);
+extern ULONG LDRCALL OrgldrOpenPath(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *plv, PULONG pful, ULONG lLibPath);
 
 
 /**
@@ -441,14 +448,14 @@ ULONG LDRCALL myldrOpenPath(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *plv
  * @param       ppMTE           Pointer to pMTE found.
  * @sketch
  */
-ULONG LDRCALL ldrFindModule(        /* retd  0x10 */
+extern ULONG LDRCALL ldrFindModule( /* retd  0x10 */
     PCHAR       pachFilename,       /* ebp + 0x08 */
     USHORT      cchFilename,        /* ebp + 0x0c */
     USHORT      usClass,            /* ebp + 0x10 */
     PPMTE       ppMTE               /* ebp + 0x14 */
     );
 
-ULONG LDRCALL myldrFindModule(PCHAR pachFilename, USHORT cchFilename, USHORT usClass, PPMTE ppMTE);
+extern ULONG LDRCALL OrgldrFindModule(PCHAR pachFilename, USHORT cchFilename, USHORT usClass, PPMTE ppMTE);
 
 
 /**
@@ -468,7 +475,7 @@ ULONG LDRCALL ldrWasLoadModuled(        /* retd 0x0c */
     PPTDA       pptda,                  /* ebp + 0x0c */
     PULONG      pcUsage);               /* ebp + 0x10 */
 
-ULONG LDRCALL myldrWasLoadModuled(HMTE hmte, PPTDA pptda, PULONG pcUsage);
+extern ULONG LDRCALL OrgldrWasLoadModuled(HMTE hmte, PPTDA pptda, PULONG pcUsage);
 #endif
 
 
@@ -496,7 +503,7 @@ ULONG LDRCALL LDRGetProcAddr(           /* retd 0x14 */
     BOOL        fFlat,                  /* ebp + 0x18 */
     PULONG      pulProcType);           /* ebp + 0x1c */
 
-ULONG LDRCALL myLDRGetProcAddr(HMTE hmte, ULONG ulOrdinal, PCSZ pszName, PULONG pulAddress, BOOL fFlat, PULONG pulProcType);
+extern ULONG LDRCALL OrgLDRGetProcAddr(HMTE hmte, ULONG ulOrdinal, PCSZ pszName, PULONG pulAddress, BOOL fFlat, PULONG pulProcType);
 
 
 
@@ -507,6 +514,7 @@ ULONG LDRCALL myLDRGetProcAddr(HMTE hmte, ULONG ulOrdinal, PCSZ pszName, PULONG 
  *            OS/2 error on failure. (ERROR_INTERRUPT?)
  */
 extern ULONG LDRCALL LDRClearSem(void);
+extern ULONG LDRCALL OrgLDRClearSem(void);
 
 
 /**
@@ -514,14 +522,22 @@ extern ULONG LDRCALL LDRClearSem(void);
  * @returns   NO_ERROR if succesfully.
  *            OS2 errorcode on failure. (ERROR_INTERRUPT?)
  */
+#ifdef KKRNLLIB
 #define LDRRequestSem()   KSEMRequestMutex(pLdrSem, (ULONG)-1)
+#else
+#define LDRRequestSem()   KSEMRequestMutex(&LdrSem, (ULONG)-1)
+#endif
 
 
 /*
  * Pointer to the loader semaphore.
  */
 #ifdef _OS2KSEM_h_
+#ifdef KKRNLLIB
 extern PKSEMMTX    pLdrSem;
+#else
+extern KSEMMTX     LdrSem;
+#endif
 #endif
 
 
@@ -534,6 +550,7 @@ extern PKSEMMTX    pLdrSem;
  *              Use the hMTE as a HOB and get the HOB address (by using VMGetHandleInfo).
  */
 extern PMTE LDRCALL ldrValidateMteHandle(HMTE hMTE);
+extern PMTE LDRCALL OrgldrValidateMteHandle(HMTE hMTE);
 
 
 /**
@@ -543,6 +560,7 @@ extern PMTE LDRCALL ldrValidateMteHandle(HMTE hMTE);
  * @sketch
  */
 extern PMTE KRNLCALL ldrASMpMTEFromHandle(HMTE  hMTE);
+extern PMTE KRNLCALL OrgldrASMpMTEFromHandle(HMTE  hMTE);
 
 
 /**
@@ -552,6 +570,7 @@ extern PMTE KRNLCALL ldrASMpMTEFromHandle(HMTE  hMTE);
  * @param   pszFilename     Pointer to nullterminated filename.
  */
 extern ULONG LDRCALL ldrTransPath(PSZ pszFilename);
+extern ULONG LDRCALL OrgldrTransPath(PSZ pszFilename);
 
 
 /**
@@ -569,7 +588,7 @@ extern VOID LDRCALL  ldrSetVMflags( /* retd  0x10 */
     PULONG      pflFlags2           /* ebp + 0x14 */
     );
 
-VOID LDRCALL myldrSetVMflags(PMTE pMTE, ULONG flObj, PULONG pflFlags1, PULONG pflFlags2);
+extern VOID LDRCALL OrgldrSetVMflags(PMTE pMTE, ULONG flObj, PULONG pflFlags1, PULONG pflFlags2);
 
 
 /**
@@ -583,8 +602,7 @@ VOID LDRCALL myldrSetVMflags(PMTE pMTE, ULONG flObj, PULONG pflFlags1, PULONG pf
 extern ULONG LDRCALL    ldrCheckInternalName( /* retd  0x04 */
     PMTE        pMTE                /* ebp + 0x08 */
     );
-
-ULONG LDRCALL myldrCheckInternalName(PMTE pMTE);
+extern ULONG LDRCALL OrgldrCheckInternalName(PMTE pMTE);
 
 
 /**
@@ -595,6 +613,7 @@ ULONG LDRCALL myldrCheckInternalName(PMTE pMTE);
  * @param   ppachExt        Pointer to pointer which should hold the extention pointer upon successfull return.
  */
 extern ULONG LDRCALL    ldrGetFileName(PSZ pszFilename, PCHAR *ppchName, PCHAR *ppchExt);
+extern ULONG LDRCALL    OrgldrGetFileName(PSZ pszFilename, PCHAR *ppchName, PCHAR *ppchExt);
 
 
 /**
@@ -603,6 +622,7 @@ extern ULONG LDRCALL    ldrGetFileName(PSZ pszFilename, PCHAR *ppchName, PCHAR *
  * @param   pachFilename    Pointer to filename to parse - path not needed.
  * @param   ppachName       Pointer to pointer which should hold the name pointer upon successfull return.
  * @param   ppachExt        Pointer to pointer which should hold the extention pointer upon successfull return.
+ * @remark  Win32k internal function???
  */
 extern ULONG LDRCALL    ldrGetFileName2(PSZ pszFilename, PCHAR *ppchName, PCHAR *ppchExt);
 
@@ -614,6 +634,29 @@ extern ULONG LDRCALL    ldrGetFileName2(PSZ pszFilename, PCHAR *ppchName, PCHAR 
  * @param   cch     Length of string. (may include terminator)
  */
 extern VOID LDRCALL     ldrUCaseString(PCHAR pch, unsigned cch);
+extern VOID LDRCALL     OrgldrUCaseString(PCHAR pch, unsigned cch);
+
+
+
+/**
+ * Resolves the ordinal number of an name export.
+ * @returns OS2 return code. (I.e. ON_ERROR on success)
+ * @param   pMTE            Pointer to the module table entry for the
+ *                          module.
+ * @param   pszExportName   Name to resolve. This is case sensitive.
+ * @param   pusOrdinal      Pointer to variable which on success will hold
+ *                          the ordinal value found for the name export.
+ */
+extern ULONG LDRCALL    ldrGetOrdNum(PMTE pMTE, PSZ pszExportName, PUSHORT pusOrdinal);
+extern ULONG LDRCALL    OrgldrGetOrdNum(PMTE pMTE, PSZ pszExportName, PUSHORT pusOrdinal);
+
+
+/**
+ * Frees a task.
+ * @param   pPTDA   Pointer to per task data area of the task to be freed.
+ */
+extern void LDRCALL     LDRFreeTask(PPTDA pPTDA);
+extern void LDRCALL     OrgLDRFreeTask(PPTDA pPTDA);
 
 
 /**
@@ -621,8 +664,12 @@ extern VOID LDRCALL     ldrUCaseString(PCHAR pch, unsigned cch);
  * Upon return from ldrOpen (and ldrOpenPath which calls ldrOpen) this is
  * set to the fully qualified filename of the file last opened (successfully).
  */
-extern PSZ *pldrpFileNameBuf;
+#ifdef KKRNLLIB
+extern PSZ *    pldrpFileNameBuf;
 #define ldrpFileNameBuf (*pldrpFileNameBuf)
+#else
+extern PSZ      ldrpFileNameBuf;
+#endif
 
 
 
