@@ -88,7 +88,7 @@ int WIN32API GetLocaleInfoA(LCID lcid, LCTYPE LCType, LPSTR buf, int len)
 
   ret_len=GetLocaleInfoW(lcid, LCType, lpWStr, len);
 
-  if (buf)
+  if (ret_len && buf)
   {
     UnicodeToAscii(lpWStr,buf);
     free(lpWStr);
@@ -124,7 +124,8 @@ static BOOL LocaleFromUniChar(WCHAR wcUniChar, LPWSTR wbuf, ULONG *pLen)
 {
   if (wbuf)
   {
-    if (*pLen > sizeof(WCHAR))
+//    if (*pLen > sizeof(WCHAR))
+    if (*pLen > 2)
     {
       wbuf[0]=(WCHAR)'0'+wcUniChar;
       wbuf[1]=0;
