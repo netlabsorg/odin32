@@ -1,4 +1,4 @@
-/* $Id: codepage.cpp,v 1.6 2000-10-02 21:40:57 phaller Exp $
+/* $Id: codepage.cpp,v 1.7 2001-01-24 20:33:37 sandervl Exp $
 **
 ** Module   :CODEPAGE.CPP
 ** Abstract :
@@ -28,7 +28,8 @@ ULONG GetDisplayCodepage()
  static ULONG codepage = -1;
 
     if(codepage == -1) {
-    	codepage = PROFILE_GetOdinIniInt(CODEPAGE_SECTION, "DISPLAY", 0);
+        //default codepage is 1252 (same as default Windows codepage)
+    	codepage = PROFILE_GetOdinIniInt(CODEPAGE_SECTION, "DISPLAY", 1252);
     }
     return codepage;
 }
@@ -38,7 +39,8 @@ ULONG GetWindowsCodepage()
  static ULONG codepage = -1;
 
     if(codepage == -1) {
-    	codepage = PROFILE_GetOdinIniInt(CODEPAGE_SECTION, "WINDOWS", 0);
+        //default codepage is 1252 (same as default Windows codepage)
+    	codepage = PROFILE_GetOdinIniInt(CODEPAGE_SECTION, "WINDOWS", 1252);
     }
     return codepage;
 }
