@@ -1,4 +1,10 @@
- /* $Id: ChangeLog,v 1.735 2000-02-16 19:52:27 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.736 2000-02-17 14:08:12 sandervl Exp $ */
+
+ 2000-02-17: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: Fixed memory map view bug (main map deleted when there
+                    are still views left) -> fixes crash when playing Realplayer
+                    videos (.rm files)
+	- WINMM: Added new logging feature + fixed waveout query format bug
 
  2000-02-16: Christoph Bratschi <cbratschi@datacomm.ch>
 	- COMCTL32: treeview: switched to unicode, fixed many bugs
