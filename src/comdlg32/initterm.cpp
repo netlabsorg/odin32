@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.8 1999-11-02 19:09:42 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.9 2000-02-05 01:54:33 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -32,6 +32,7 @@
 #include <string.h>
 #include <odin.h>
 #include <win32type.h>
+#include <winconst.h>
 #include <odinlx.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
 
@@ -44,16 +45,24 @@ void CDECL _ctordtorTerm( void );
 
  BOOL WINAPI COMDLG32_DllEntryPoint(HINSTANCE hInstance, DWORD Reason, LPVOID Reserved);
 }
+//******************************************************************************
+//******************************************************************************
+BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
+{
+   switch (fdwReason)
+   {
+   case DLL_PROCESS_ATTACH:
+   case DLL_THREAD_ATTACH:
+   case DLL_THREAD_DETACH:
+	return COMDLG32_DllEntryPoint(hinstDLL, fdwReason, fImpLoad);
 
-/*-------------------------------------------------------------------*/
-/* A clean up routine registered with DosExitList must be used if    */
-/* runtime calls are required and the runtime is dynamically linked. */
-/* This will guarantee that this clean up routine is run before the  */
-/* library DLL is terminated.                                        */
-/*-------------------------------------------------------------------*/
-static void APIENTRY cleanup(ULONG reason);
-
-
+   case DLL_PROCESS_DETACH:
+	COMDLG32_DllEntryPoint(hinstDLL, fdwReason, fImpLoad);
+	_ctordtorTerm();
+	return TRUE;
+   }
+   return FALSE;
+}
 /****************************************************************************/
 /* _DLL_InitTerm is the function that gets called by the operating system   */
 /* loader when it loads and frees this DLL for each process that accesses   */
@@ -85,12 +94,8 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          /* are required and the runtime is dynamically linked.             */
          /*******************************************************************/
 
-	 if(RegisterLxDll(hModule, COMDLG32_DllEntryPoint, (PVOID)&_Resource_PEResTab) == FALSE) 
+	 if(RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab) == FALSE) 
 		return 0UL;
-
-         rc = DosExitList(0x0000F000|EXLST_ADD, cleanup);
-         if(rc)
-                return 0UL;
 
          break;
       case 1 :
@@ -104,12 +109,4 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
    /* A non-zero value must be returned to indicate success.  */
    /***********************************************************/
    return 1UL;
-}
-
-
-static void APIENTRY cleanup(ULONG ulReason)
-{
-   _ctordtorTerm();
-   DosExitList(EXLST_EXIT, cleanup);
-   return ;
 }
