@@ -1,4 +1,9 @@
- /* $Id: ChangeLog,v 1.516 1999-12-06 20:38:43 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.517 1999-12-06 21:30:35 sandervl Exp $ */
+
+ 99-12-06: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32/OLEAUT32: Renamed OLEAUT32 to OLAUTOS2 to avoid conflicts
+                             with Lotus SmartSuite (again..)
+	- KERNEL32: Fixed memory map bugs 
 
  99-12-06: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
 	- WINMM: Ported MMIO from Wine (now SoundRecorder can open wave files)
