@@ -1,4 +1,4 @@
-/* $Id: HOOK.CPP,v 1.18 2001-04-27 17:36:36 sandervl Exp $ */
+/* $Id: HOOK.CPP,v 1.19 2001-06-01 10:28:17 sandervl Exp $ */
 
 /*
  * Windows hook functions
@@ -44,6 +44,8 @@
 #include <vmutex.h>
 #include <wprocess.h>
 
+#include "win32wbase.h"
+
 #define DBG_LOCALLOG	DBG_hook
 #include "dbglocal.h"
 
@@ -82,10 +84,11 @@ typedef struct
 static HMTX hGlobalHookMutex = 0;
 
 //Global DLL Data
-#pragma data_seg(_GLOBALDATA)
+//SvL: Disabled global system hooks for now
+////#pragma data_seg(_GLOBALDATA)
 static HANDLE HOOK_systemHooks[WH_NB_HOOKS] = { 0 };
 static VMutex systemHookMutex(VMUTEX_SHARED, &hGlobalHookMutex);
-#pragma data_seg()
+////#pragma data_seg()
 static HANDLE HOOK_threadHooks[WH_NB_HOOKS] = { 0 };
 static VMutex threadHookMutex;
 
@@ -741,9 +744,32 @@ ODINFUNCTION2(BOOL, CallMsgFilterW,
     return HOOK_CallHooksW( WH_MSGFILTER, code, 0, (LPARAM)msg );
 }
 
+BOOL IsMenuActive(void);
 
 BOOL ProcessKbdHook(LPMSG msg, BOOL remove )
 {
+    /* Handle F1 key by sending out WM_HELP message */
+    if ((msg->message == WM_KEYUP) && 
+	(msg->wParam == VK_F1) &&
+	remove &&
+	(msg->hwnd != GetDesktopWindow()) &&
+	!IsMenuActive())
+    {   
+	HELPINFO hi;
+        Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle(msg->hwnd);
+
+	if (NULL != wnd)
+	{
+	    hi.cbSize = sizeof(HELPINFO);
+	    hi.iContextType = HELPINFO_WINDOW;
+	    hi.iCtrlId = wnd->getWindowId(); 
+	    hi.hItemHandle = msg->hwnd;
+	    hi.dwContextId = wnd->getWindowContextHelpId();
+	    hi.MousePos = msg->pt;
+	    SendMessageA(msg->hwnd, WM_HELP, 0, (LPARAM)&hi);
+	}
+    }
+
     return (HOOK_CallHooksA( WH_KEYBOARD, remove ? HC_ACTION : HC_NOREMOVE,
                              LOWORD (msg->wParam), msg->lParam )
                              ? TRUE : FALSE);
