@@ -1,8 +1,8 @@
-/* $Id: ignore.c,v 1.1 2001-10-14 22:52:34 bird Exp $
+/* $Id: ignore.c,v 1.2 2002-03-10 04:56:58 bird Exp $
  *
  * Ignores lines matching a certain pattern.
  *
- * Copyright (c) 2001 knut st. osmundsen (kosmunds@csc.com)
+ * Copyright (c) 2001-2002 knut st. osmundsen (bird@anduin.net)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -200,3 +200,4 @@ int main(int argc, char **argv)
         return Res.codeResult;
     return Res.codeResult != 0 ? Res.codeResult : 8;
 }
+
