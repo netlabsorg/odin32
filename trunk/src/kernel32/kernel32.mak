@@ -1,4 +1,4 @@
-# $Id: kernel32.mak,v 1.24 2002-02-09 17:27:31 sandervl Exp $
+# $Id: kernel32.mak,v 1.25 2002-02-11 13:46:36 sandervl Exp $
 
 #
 # Odin32 API
@@ -54,6 +54,7 @@ $(OBJDIR)\heapcode.obj \
 $(OBJDIR)\lfile.obj \
 $(OBJDIR)\npipe.obj \
 $(OBJDIR)\oslibdos.obj \
+$(OBJDIR)\char.obj \
 $(OBJDIR)\oslibmisc.obj \
 $(OBJDIR)\ole2nls.obj \
 $(OBJDIR)\misc.obj \
