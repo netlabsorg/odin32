@@ -58,52 +58,6 @@ LANGID WIN32API GetSystemDefaultLangID(void)
   return(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US));
 }
 
-/*****************************************************************************
- * Name      : DWORD GetLocaleInfoA
- * Purpose   : The GetLocaleInfoA function returns specific locale information
- * Parameters: LCID   lcid    locale identifier
- *             LCTYPE LCType  type of information
- *             LPSTR  buf     address of buffer for information
- *             int    len     size of buffer
- * Variables :
- * Result    : size of target buffer
- * Remark    : In this version LOCALE_SYSTEM_DEFAULT == LOCALE_USER_DEFAULT
- *             look into GetLocaleInfoW
- *
- * Status    : TESTED
- *
- * Author    : Przemyslaw Dobrowolski [Tue, 1999/07/21 12:18]
- *****************************************************************************/
-int WIN32API GetLocaleInfoA(LCID lcid, LCTYPE LCType, LPSTR buf, int len)
-{
-  LPWSTR lpWStr;
-  int    ret_len;
-
-  if (len && (! buf) )
-  {
-    SetLastError(ERROR_INSUFFICIENT_BUFFER);
-    return 0;
-  }
-
-  dprintf(("KERNEL32:  OS2GetLocaleInfoA lcID=%d,lcType=%x,buf=%X,len=%d\n",lcid,LCType,buf,len));
-
-  if (buf)
-    lpWStr=(LPWSTR)malloc(len*(sizeof(WCHAR)));
-  else
-    lpWStr=NULL; // Query for buffer size
-
-  ret_len=GetLocaleInfoW(lcid, LCType, lpWStr, len);
-
-  if (ret_len && buf)
-  {
-    UnicodeToAscii(lpWStr,buf);
-    free(lpWStr);
-  }
-
-  dprintf(("KERNEL32:  OS2GetLocaleInfoA returned %d\n",ret_len));
-
-  return (ret_len);
-}
 //******************************************************************************
 //******************************************************************************
 static BOOL LocaleFromUniStr(LPWSTR lpUniStr, LPWSTR wbuf, ULONG *pLen)
@@ -175,7 +129,8 @@ static BOOL LocaleFromUniChar(WCHAR wcUniChar, LPWSTR wbuf, ULONG *pLen)
  *
  * Author    : Przemyslaw Dobrowolski [Tue, 1999/07/22 17:07]
  *****************************************************************************/
-int WIN32API GetLocaleInfoW(LCID lcid, LCTYPE LCType, LPWSTR wbuf, int len)
+ODINFUNCTION4(int, GetLocaleInfoW, LCID, lcid, LCTYPE, LCType, LPWSTR, wbuf, 
+              int, len)
 {
   LocaleObject    locale_object = NULL;
   struct UniLconv *puni_lconv = NULL;
@@ -759,7 +714,53 @@ int WIN32API GetLocaleInfoW(LCID lcid, LCTYPE LCType, LPWSTR wbuf, int len)
 
   return (ulInfoLen);
 }
+/*****************************************************************************
+ * Name      : DWORD GetLocaleInfoA
+ * Purpose   : The GetLocaleInfoA function returns specific locale information
+ * Parameters: LCID   lcid    locale identifier
+ *             LCTYPE LCType  type of information
+ *             LPSTR  buf     address of buffer for information
+ *             int    len     size of buffer
+ * Variables :
+ * Result    : size of target buffer
+ * Remark    : In this version LOCALE_SYSTEM_DEFAULT == LOCALE_USER_DEFAULT
+ *             look into GetLocaleInfoW
+ *
+ * Status    : TESTED
+ *
+ * Author    : Przemyslaw Dobrowolski [Tue, 1999/07/21 12:18]
+ *****************************************************************************/
+ODINFUNCTION4(int, GetLocaleInfoA, LCID, lcid, LCTYPE, LCType, LPSTR, buf, 
+              int, len)
+{
+  LPWSTR lpWStr;
+  int    ret_len;
 
+  if (len && (! buf) )
+  {
+    SetLastError(ERROR_INSUFFICIENT_BUFFER);
+    return 0;
+  }
+
+  dprintf(("KERNEL32:  OS2GetLocaleInfoA lcID=%d,lcType=%x,buf=%X,len=%d\n",lcid,LCType,buf,len));
+
+  if (buf)
+    lpWStr=(LPWSTR)malloc(len*(sizeof(WCHAR)));
+  else
+    lpWStr=NULL; // Query for buffer size
+
+  ret_len = ODIN_GetLocaleInfoW(lcid, LCType, lpWStr, len);
+
+  if (ret_len && buf)
+  {
+    UnicodeToAscii(lpWStr,buf);
+    free(lpWStr);
+  }
+
+  dprintf(("KERNEL32:  OS2GetLocaleInfoA returned %d\n",ret_len));
+
+  return (ret_len);
+}
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API IsValidLocale(LCID Locale, DWORD dwFlags)
