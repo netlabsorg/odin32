@@ -1,4 +1,4 @@
-/* $Id: guid.c,v 1.1 2001-11-19 12:32:25 sandervl Exp $ */
+/* $Id: guid.c,v 1.2 2001-12-06 10:15:21 sandervl Exp $ */
 #define ICOM_CINTERFACE 1
 #include <odin.h>
 
@@ -12,6 +12,7 @@
 #include "shlobj.h"
 #include "docobj.h"
 #include "olectl.h"
+#include "dinput.h"
 //#include "..\shell32\shellfolder.h"
 
 #include "wine/obj_inplace.h"
