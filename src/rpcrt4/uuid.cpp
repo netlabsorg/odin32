@@ -1,16 +1,16 @@
-/* $Id: uuid.cpp,v 1.2 2000-04-04 19:49:03 davidr Exp $ */
+/* $Id: uuid.cpp,v 1.3 2000-04-06 11:54:03 bird Exp $ */
 /*
  * RPCRT4 library
  * UUID manipulation
  * Partially based on OSF sources (see below)
  *
  * 2000/02/05
- * 
+ *
  * Copyright 2000 David J. Raison
  *           2000 Edgar Buerkle
- * 
+ *
  * Project Odin Software License can be found in LICENSE.TXT
- * 
+ *
  */
 /*
  *
@@ -33,6 +33,8 @@
  *
  */
 
+
+#define TCPV40HDRS
 #include "rpcrt4.h"
 #include "uuidp.h"
 
@@ -116,7 +118,7 @@ extern	void	UuidInit(void )
 // gettimeofday
 // ----------------------------------------------------------------------
 static int
-gettimeofday(struct timeval* tp, void* tzp)
+__gettimeofday(struct timeval* tp, void* tzp)
 {
     struct timeb tb;
 
@@ -132,7 +134,7 @@ gettimeofday(struct timeval* tp, void* tzp)
 // Implemented according the DCE specification for UUID generation.
 // Code is based upon uuid library in e2fsprogs by Theodore Ts'o.
 // Copyright (C) 1996, 1997 Theodore Ts'o.
-// 
+//
 // Returns
 //  S_OK if successful.
 // ----------------------------------------------------------------------
@@ -163,7 +165,7 @@ UuidCreate (
     {
 	got_no_time = FALSE;
 
-	gettimeofday(&tv, 0);
+	__gettimeofday(&tv, 0);
 	if ((last.tv_sec == 0) && (last.tv_usec == 0))
 	{
 	    clock_seq = ((rand() & 0xff) << 8) + (rand() & 0xff);
