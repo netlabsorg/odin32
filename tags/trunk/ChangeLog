@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1345 2001-04-03 17:44:27 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1346 2001-04-03 18:41:27 sandervl Exp $ */
 
  2001-04-03: Sander van Leeuwen <sandervl@xs4all.nl>   
     - DDRAW:    o Only reset physical palette in DirectDraw destructor if 
@@ -9,8 +9,6 @@
                 o Ported Wine's codepage, string & unicode functions (codepage.cpp)
                 o Ported Wine's codepage unicode conversion functions & tables
                   (kernel32\unicode)
-                  TODO: Rewrite heapstring functions to use WideCharToMultiByte
-                        and MultiByteToWideChar
                 o Rewrote string functions (heapstring.cpp) to use new unicode
                   functions.
 
