@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.5 1999-09-26 10:09:58 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.6 1999-09-26 14:44:58 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -281,6 +281,7 @@ int     OPEN32API _O32_GetUpdateRgn (HWND hwnd, HRGN hrgn, BOOL erase);
 ULONG   OPEN32API _O32_GetRegionData (HRGN hrgn, ULONG count, PRGNDATA_W pData);
 BOOL    OPEN32API _O32_DeleteObject (LHANDLE hgdiobj);
 int     OPEN32API _O32_ReleaseDC (HWND hwnd, HDC hdc);
+VOID    OPEN32API _O32_SetLastError( DWORD );
 
 #ifndef DEVESC_SETPS
   #define DEVESC_SETPS  49149L
@@ -693,7 +694,7 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
    RECTL    rect;
    HPS      hPS_ownDC = NULLHANDLE;
 
-dprintf (("USER32: BeginPaint(%x)", hWnd));
+   dprintf (("USER32: BeginPaint(%x)", hWnd));
 
    if ( !lpps )
    {
@@ -760,6 +761,7 @@ dprintf (("USER32: BeginPaint(%x)", hWnd));
    WINRECT_FROM_PMRECT(lpps->rcPaint, rect);
 
    SetFS(sel);
+   _O32_SetLastError(0);
    return (HDC)pHps->hps;
 }
 
@@ -791,6 +793,7 @@ dprintf (("USER32: EndPaint(%x)", hwnd));
 
 exit:
    SetFS(sel);
+   _O32_SetLastError(0);
    return TRUE;
 }
 
