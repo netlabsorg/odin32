@@ -1,4 +1,4 @@
-/* $Id: comctl32undoc.c,v 1.17 2000-02-04 17:02:06 cbratschi Exp $ */
+/* $Id: comctl32undoc.c,v 1.18 2000-02-18 17:13:37 cbratschi Exp $ */
 /*
  * Undocumented functions from COMCTL32.DLL
  *
@@ -58,8 +58,8 @@ DPA_Merge (const HDPA hdpa1, const HDPA hdpa2, DWORD dwFlags,
     INT nNewItems;
 #endif
 
-//    TRACE (commctrl, "(%p %p %08lx %p %p %08lx): stub!\n",
-//         hdpa1, hdpa2, dwFlags, pfnCompare, pfnParam5, lParam);
+
+    dprintf(("COMCTL32: DPA_Merge"));
 
     if (IsBadWritePtr (hdpa1, sizeof(DPA)))
         return FALSE;
@@ -174,6 +174,8 @@ LPVOID WINAPI COMCTL32_Alloc (DWORD dwSize)
 {
     LPVOID lpPtr;
 
+    dprintf2(("COMCTL32: COMCTL32_Alloc"));
+
     lpPtr = HeapAlloc (COMCTL32_hHeap, HEAP_ZERO_MEMORY, dwSize);
 
     return lpPtr;
@@ -203,6 +205,8 @@ LPVOID WINAPI COMCTL32_ReAlloc (LPVOID lpSrc, DWORD dwSize)
 {
     LPVOID lpDest;
 
+    dprintf2(("COMCTL32: COMCTL32_ReAlloc"));
+
     if (lpSrc)
         lpDest = HeapReAlloc (COMCTL32_hHeap, HEAP_ZERO_MEMORY, lpSrc, dwSize);
     else
@@ -227,6 +231,8 @@ LPVOID WINAPI COMCTL32_ReAlloc (LPVOID lpSrc, DWORD dwSize)
 
 BOOL WINAPI COMCTL32_Free (LPVOID lpMem)
 {
+    dprintf2(("COMCTL32: COMCTL32_Free"));
+
     return HeapFree (COMCTL32_hHeap, 0, lpMem);
 }
 
@@ -247,6 +253,7 @@ BOOL WINAPI COMCTL32_Free (LPVOID lpMem)
 
 DWORD WINAPI COMCTL32_GetSize (LPVOID lpMem)
 {
+    dprintf2(("COMCTL32: COMCTL32_GetSize"));
 
     return HeapSize (COMCTL32_hHeap, 0, lpMem);
 }
@@ -312,6 +319,8 @@ CreateMRUListLazyA (LPCREATEMRULIST lpcml, DWORD dwParam2,
 HANDLE WINAPI
 CreateMRUListA (LPCREATEMRULIST lpcml)
 {
+     dprintf(("COMCTL32: CreateMRUListA"));
+
      return CreateMRUListLazyA (lpcml, 0, 0, 0);
 }
 
@@ -325,6 +334,7 @@ CreateMRUListA (LPCREATEMRULIST lpcml)
 DWORD WINAPI
 FreeMRUListA (HANDLE hMRUList)
 {
+    dprintf(("COMCTL32: FreeMRUListA"));
     //FIXME("(%08x) empty stub!\n", hMRUList);
 
 #if 0
@@ -362,7 +372,7 @@ FreeMRUListA (HANDLE hMRUList)
 INT WINAPI
 AddMRUData (HANDLE hList, LPCVOID lpData, DWORD cbData)
 {
-    //FIXME("(%08x, %p, %ld) empty stub!\n", hList, lpData, cbData);
+    dprintf(("COMCTL32: AddMRUData - empty stub!"));
 
     return 0;
 }
@@ -385,7 +395,7 @@ AddMRUData (HANDLE hList, LPCVOID lpData, DWORD cbData)
 INT WINAPI
 AddMRUStringA(HANDLE hList, LPCSTR lpszString)
 {
-    //FIXME("(%08x, %s) empty stub!\n", hList, debugstr_a(lpszString));
+    dprintf(("COMCTL32: AddMRUStringA - empty stub!"));
 
     return 0;
 }
@@ -405,7 +415,8 @@ AddMRUStringA(HANDLE hList, LPCSTR lpszString)
 BOOL WINAPI
 DelMRUString(HANDLE hList, INT nItemPos)
 {
-    //FIXME("(%08x, %d): stub\n", hList, nItemPos);
+    dprintf(("COMCTL32: DelMRUString - empty stub!"));
+
     return TRUE;
 }
 
@@ -428,8 +439,7 @@ DelMRUString(HANDLE hList, INT nItemPos)
 INT WINAPI
 FindMRUData (HANDLE hList, LPCVOID lpData, DWORD cbData, LPINT lpRegNum)
 {
-    //FIXME("(%08x, %p, %ld, %p) empty stub!\n",
-    //       hList, lpData, cbData, lpRegNum);
+    dprintf(("COMCTL32: FindMRUData - empty stub!"));
 
     return 0;
 }
@@ -452,8 +462,7 @@ FindMRUData (HANDLE hList, LPCVOID lpData, DWORD cbData, LPINT lpRegNum)
 INT WINAPI
 FindMRUStringA (HANDLE hList, LPCSTR lpszString, LPINT lpRegNum)
 {
-    //FIXME("(%08x, %s, %p) empty stub!\n", hList, debugstr_a(lpszString),
-    //      lpRegNum);
+    dprintf(("COMCTL32: FindMRUStringA - empty stub!"));
 
     return 0;
 }
@@ -473,7 +482,7 @@ CreateMRUListLazyA (LPCREATEMRULIST lpcml, DWORD dwParam2, DWORD dwParam3, DWORD
     /* internal variables */
     LPVOID ptr;
 
-    //FIXME("(%p) empty stub!\n", lpcml);
+    dprintf(("COMCTL32: CreateMRUListLazyA - empty stub!"));
 
     if (lpcml == NULL)
         return 0;
@@ -514,8 +523,8 @@ CreateMRUListLazyA (LPCREATEMRULIST lpcml, DWORD dwParam2, DWORD dwParam3, DWORD
 INT WINAPI EnumMRUListA(HANDLE hList, INT nItemPos, LPVOID lpBuffer,
 DWORD nBufferSize)
 {
-    //FIXME("(%08x, %d, %p, %ld): stub\n", hList, nItemPos, lpBuffer,
-    //      nBufferSize);
+    dprintf(("COMCTL32: EnumMRUListA - empty stub!"));
+
     return 0;
 }
 
@@ -537,7 +546,7 @@ Str_GetPtrA (LPCSTR lpSrc, LPSTR lpDest, INT nMaxLen)
 {
     INT len;
 
-//    TRACE (commctrl, "(%p %p %d)\n", lpSrc, lpDest, nMaxLen);
+    dprintf(("COMCTL32: Str_GetPtrA"));
 
     if (!lpDest && lpSrc)
         return lstrlenA (lpSrc);
@@ -574,7 +583,7 @@ Str_GetPtrA (LPCSTR lpSrc, LPSTR lpDest, INT nMaxLen)
 BOOL WINAPI
 Str_SetPtrA (LPSTR *lppDest, LPCSTR lpSrc)
 {
-//    TRACE (commctrl, "(%p %p)\n", lppDest, lpSrc);
+    dprintf(("COMCTL32: Str_SetPtrA"));
 
     if (lpSrc) {
         LPSTR ptr = COMCTL32_ReAlloc (*lppDest, lstrlenA (lpSrc) + 1);
@@ -610,7 +619,7 @@ Str_GetPtrW (LPCWSTR lpSrc, LPWSTR lpDest, INT nMaxLen)
 {
     INT len;
 
-//    TRACE (commctrl, "(%p %p %d)\n", lpSrc, lpDest, nMaxLen);
+    dprintf(("COMCTL32: Str_GetPtrW"));
 
     if (!lpDest && lpSrc)
         return lstrlenW (lpSrc);
@@ -647,7 +656,7 @@ Str_GetPtrW (LPCWSTR lpSrc, LPWSTR lpDest, INT nMaxLen)
 BOOL WINAPI
 Str_SetPtrW (LPWSTR *lppDest, LPCWSTR lpSrc)
 {
-//    TRACE (commctrl, "(%p %p)\n", lppDest, lpSrc);
+    dprintf(("COMCTL32: Str_SetPtrW"));
 
     if (lpSrc) {
         INT len = lstrlenW (lpSrc) + 1;
@@ -691,7 +700,7 @@ DSA_Create (INT nSize, INT nGrow)
 {
     HDSA hdsa;
 
-//    TRACE (commctrl, "(size=%d grow=%d)\n", nSize, nGrow);
+    dprintf(("COMCTL32: DSA_Create"));
 
     hdsa = (HDSA)COMCTL32_Alloc (sizeof(DSA));
     if (hdsa)
@@ -721,7 +730,7 @@ DSA_Create (INT nSize, INT nGrow)
 BOOL WINAPI
 DSA_Destroy (const HDSA hdsa)
 {
-//    TRACE (commctrl, "(%p)\n", hdsa);
+    dprintf(("COMCTL32: DSA_Destroy"));
 
     if (!hdsa)
         return FALSE;
@@ -751,7 +760,7 @@ DSA_GetItem (const HDSA hdsa, INT nIndex, LPVOID pDest)
 {
     LPVOID pSrc;
 
-//    TRACE (commctrl, "(%p %d %p)\n", hdsa, nIndex, pDest);
+    dprintf(("COMCTL32: DSA_GetItem"));
 
     if (!hdsa)
         return FALSE;
@@ -784,7 +793,7 @@ DSA_GetItemPtr (const HDSA hdsa, INT nIndex)
 {
     LPVOID pSrc;
 
-//    TRACE (commctrl, "(%p %d)\n", hdsa, nIndex);
+    dprintf(("COMCTL32: DSA_GetItemPtr"));
 
     if (!hdsa)
         return NULL;
@@ -820,7 +829,7 @@ DSA_SetItem (const HDSA hdsa, INT nIndex, LPVOID pSrc)
     INT  nSize, nNewItems;
     LPVOID pDest, lpTemp;
 
-//    TRACE("(%p %d %p)\n", hdsa, nIndex, pSrc);
+    dprintf(("COMCTL32: DSA_SetItem"));
 
     if ((!hdsa) || nIndex < 0)
         return FALSE;
@@ -877,7 +886,7 @@ DSA_InsertItem (const HDSA hdsa, INT nIndex, LPVOID pSrc)
     LPVOID  lpTemp, lpDest;
     LPDWORD p;
 
-//    TRACE("(%p %d %p)\n", hdsa, nIndex, pSrc);
+    dprintf(("COMCTL32: DSA_InsertItem"));
 
     if ((!hdsa) || nIndex < 0)
         return -1;
@@ -946,7 +955,7 @@ DSA_DeleteItem (const HDSA hdsa, INT nIndex)
     LPVOID lpDest,lpSrc;
     INT  nSize;
 
-//    TRACE (commctrl, "(%p %d)\n", hdsa, nIndex);
+    dprintf(("COMCTL32: DSA_DeleteItem"));
 
     if (!hdsa)
         return -1;
@@ -997,7 +1006,7 @@ DSA_DeleteItem (const HDSA hdsa, INT nIndex)
 BOOL WINAPI
 DSA_DeleteAllItems (const HDSA hdsa)
 {
-//    TRACE (commctrl, "(%p)\n", hdsa);
+    dprintf(("COMCTL32: DSA_DeleteAllItems"));
 
     if (!hdsa)
         return FALSE;
@@ -1033,7 +1042,7 @@ DPA_Create (INT nGrow)
 {
     HDPA hdpa;
 
-//    TRACE (commctrl, "(%d)\n", nGrow);
+    dprintf(("COMCTL32: DPA_Create"));
 
     hdpa = (HDPA)COMCTL32_Alloc (sizeof(DPA));
     if (hdpa) {
@@ -1064,7 +1073,7 @@ DPA_Create (INT nGrow)
 BOOL WINAPI
 DPA_Destroy (const HDPA hdpa)
 {
-//    TRACE (commctrl, "(%p)\n", hdpa);
+    dprintf(("COMCTL32: DPA_Destroy"));
 
     if (!hdpa)
         return FALSE;
@@ -1093,7 +1102,7 @@ DPA_Destroy (const HDPA hdpa)
 BOOL WINAPI
 DPA_Grow (const HDPA hdpa, INT nGrow)
 {
-//    TRACE (commctrl, "(%p %d)\n", hdpa, nGrow);
+    dprintf(("COMCTL32: DPA_Grow"));
 
     if (!hdpa)
         return FALSE;
@@ -1130,10 +1139,10 @@ DPA_Clone (const HDPA hdpa, const HDPA hdpaNew)
     INT nNewItems, nSize;
     HDPA hdpaTemp;
 
+    dprintf(("COMCTL32: DPA_Clone"));
+
     if (!hdpa)
         return NULL;
-
-//    TRACE (commctrl, "(%p %p)\n", hdpa, hdpaNew);
 
     if (!hdpaNew) {
         /* create a new DPA */
@@ -1187,7 +1196,7 @@ DPA_Clone (const HDPA hdpa, const HDPA hdpaNew)
 LPVOID WINAPI
 DPA_GetPtr (const HDPA hdpa, INT i)
 {
-//    TRACE (commctrl, "(%p %d)\n", hdpa, i);
+    dprintf(("COMCTL32: DPA_GetPtr"));
 
     if (!hdpa)
         return NULL;
@@ -1220,6 +1229,8 @@ INT WINAPI
 DPA_GetPtrIndex (const HDPA hdpa, LPVOID p)
 {
     INT i;
+
+    dprintf(("COMCTL32: DPA_GetPtrIndex"));
 
     if (!hdpa->ptrs)
         return -1;
@@ -1254,7 +1265,7 @@ DPA_InsertPtr (const HDPA hdpa, INT i, LPVOID p)
     INT   nNewItems, nSize, nIndex = 0;
     LPVOID  *lpTemp, *lpDest;
 
-//    TRACE (commctrl, "(%p %d %p)\n", hdpa, i, p);
+    dprintf(("COMCTL32: DPA_InsertPtr"));
 
     if ((!hdpa) || (i < 0))
         return -1;
@@ -1326,7 +1337,7 @@ DPA_SetPtr (const HDPA hdpa, INT i, LPVOID p)
 {
     LPVOID *lpTemp;
 
-//    TRACE (commctrl, "(%p %d %p)\n", hdpa, i, p);
+    dprintf(("COMCTL32: DPA_SetPtr"));
 
     if ((!hdpa) || i < 0)
         return FALSE;
@@ -1380,7 +1391,7 @@ DPA_DeletePtr (const HDPA hdpa, INT i)
     LPVOID *lpDest, *lpSrc, lpTemp = NULL;
     INT  nSize;
 
-//    TRACE (commctrl, "(%p %d)\n", hdpa, i);
+    dprintf(("COMCTL32: DPA_DeletePtr"));
 
     if ((!hdpa) || i < 0 || i >= hdpa->nItemCount)
         return NULL;
@@ -1433,7 +1444,7 @@ DPA_DeletePtr (const HDPA hdpa, INT i)
 BOOL WINAPI
 DPA_DeleteAllPtrs (const HDPA hdpa)
 {
-//    TRACE (commctrl, "(%p)\n", hdpa);
+    dprintf(("COMCTL32: DPA_DeleteAllPtrs"));
 
     if (!hdpa)
         return FALSE;
@@ -1511,10 +1522,10 @@ DPA_QuickSort (LPVOID *lpPtrs, INT l, INT r,
 BOOL WINAPI
 DPA_Sort (const HDPA hdpa, PFNDPACOMPARE pfnCompare, LPARAM lParam)
 {
+    dprintf(("COMCTL32: DPA_Sort"));
+
     if (!hdpa || !pfnCompare)
         return FALSE;
-
-//    TRACE (commctrl, "(%p %p 0x%lx)\n", hdpa, pfnCompare, lParam);
 
     if ((hdpa->nItemCount > 1) && (hdpa->ptrs))
         DPA_QuickSort (hdpa->ptrs, 0, hdpa->nItemCount - 1,
@@ -1551,11 +1562,10 @@ INT WINAPI
 DPA_Search (const HDPA hdpa, LPVOID pFind, INT nStart,
             PFNDPACOMPARE pfnCompare, LPARAM lParam, UINT uOptions)
 {
+    dprintf(("COMCTL32: DPA_Search"));
+
     if (!hdpa || !pfnCompare || !pFind)
         return -1;
-
-//    TRACE (commctrl, "(%p %p %d %p 0x%08lx 0x%08x)\n",
-//         hdpa, pFind, nStart, pfnCompare, lParam, uOptions);
 
     if (uOptions & DPAS_SORTED) {
         /* array is sorted --> use binary search */
@@ -1631,7 +1641,7 @@ DPA_CreateEx (INT nGrow, HANDLE hHeap)
 {
     HDPA hdpa;
 
-//    TRACE (commctrl, "(%d 0x%x)\n", nGrow, hHeap);
+    dprintf(("COMCTL32: DPA_CreateEx"));
 
     if (hHeap)
         hdpa = (HDPA)HeapAlloc (hHeap, HEAP_ZERO_MEMORY, sizeof(DPA));
@@ -1730,8 +1740,7 @@ COMCTL32_SendNotify (HWND hwndFrom, HWND hwndTo,
 {
     NOTIFYDATA notify;
 
-//    TRACE (commctrl, "(0x%04x 0x%04x %d %p)\n",
-//         hwndFrom, hwndTo, uCode, lpHdr);
+    dprintf(("COMCTL32: SendNotify"));
 
     notify.hwndFrom = hwndFrom;
     notify.hwndTo   = hwndTo;
@@ -1764,8 +1773,7 @@ COMCTL32_SendNotifyEx (HWND hwndTo, HWND hwndFrom, UINT uCode,
     NOTIFYDATA notify;
     HWND hwndNotify;
 
-//    TRACE (commctrl, "(0x%04x 0x%04x %d %p 0x%08lx)\n",
-//         hwndFrom, hwndTo, uCode, lpHdr, dwParam5);
+    dprintf(("COMCTL32: SendNotifyEx"));
 
     hwndNotify = hwndTo;
     if (!hwndTo) {
@@ -1793,6 +1801,8 @@ COMCTL32_SendNotifyEx (HWND hwndTo, HWND hwndFrom, UINT uCode,
 LPSTR WINAPI
 COMCTL32_StrChrA (LPCSTR lpString, CHAR cChar)
 {
+    dprintf(("COMCTL32: StrChrA"));
+
     return strchr (lpString, cChar);
 }
 
@@ -1806,6 +1816,8 @@ COMCTL32_StrStrIA (LPCSTR lpStr1, LPCSTR lpStr2)
 {
     INT len1, len2, i;
     CHAR  first;
+
+    dprintf(("COMCTL32: StrStrIA"));
 
     if (*lpStr2 == 0)
         return ((LPSTR)lpStr1);
@@ -1837,6 +1849,8 @@ COMCTL32_StrStrIA (LPCSTR lpStr1, LPCSTR lpStr2)
 INT WINAPI
 COMCTL32_StrToIntA (LPSTR lpString)
 {
+    dprintf(("COMCTL32: StrToIntA"));
+
     return atoi(lpString);
 }
 
@@ -1860,7 +1874,7 @@ DPA_EnumCallback (const HDPA hdpa, DPAENUMPROC enumProc, LPARAM lParam)
 {
     INT i;
 
-//    TRACE (commctrl, "(%p %p %08lx)\n", hdpa, enumProc, lParam);
+    dprintf(("COMCTL32: DPA_EnumCallback"));
 
     if (!hdpa)
         return;
@@ -1894,7 +1908,7 @@ DPA_EnumCallback (const HDPA hdpa, DPAENUMPROC enumProc, LPARAM lParam)
 BOOL WINAPI
 DPA_DestroyCallback (const HDPA hdpa, DPAENUMPROC enumProc, LPARAM lParam)
 {
-//    TRACE (commctrl, "(%p %p %08lx)\n", hdpa, enumProc, lParam);
+    dprintf(("COMCTL32: DPA_DestroyCallback"));
 
     DPA_EnumCallback (hdpa, enumProc, lParam);
 
@@ -1921,7 +1935,7 @@ DSA_EnumCallback (const HDSA hdsa, DSAENUMPROC enumProc, LPARAM lParam)
 {
     INT i;
 
-//    TRACE (commctrl, "(%p %p %08lx)\n", hdsa, enumProc, lParam);
+    dprintf(("COMCTL32: DSA_EnumCallback"));
 
     if (!hdsa)
         return;
@@ -1956,7 +1970,7 @@ DSA_EnumCallback (const HDSA hdsa, DSAENUMPROC enumProc, LPARAM lParam)
 BOOL WINAPI
 DSA_DestroyCallback (const HDSA hdsa, DSAENUMPROC enumProc, LPARAM lParam)
 {
-//    TRACE (commctrl, "(%p %p %08lx)\n", hdsa, enumProc, lParam);
+    dprintf(("COMCTL32: DSA_DestroyCallback"));
 
     DSA_EnumCallback (hdsa, enumProc, lParam);
 
@@ -1967,7 +1981,10 @@ DSA_DestroyCallback (const HDSA hdsa, DSAENUMPROC enumProc, LPARAM lParam)
  * StrCSpnA [COMCTL32.356]
  *
  */
-INT WINAPI COMCTL32_StrCSpnA( LPCSTR lpStr, LPCSTR lpSet) {
+INT WINAPI COMCTL32_StrCSpnA( LPCSTR lpStr, LPCSTR lpSet)
+{
+  dprintf(("COMCTL32: StrCSpnA"));
+
   return strcspn(lpStr, lpSet);
 }
 
@@ -1975,7 +1992,10 @@ INT WINAPI COMCTL32_StrCSpnA( LPCSTR lpStr, LPCSTR lpSet) {
  * StrChrW [COMCTL32.358]
  *
  */
-LPWSTR WINAPI COMCTL32_StrChrW( LPCWSTR lpStart, WORD wMatch) {
+LPWSTR WINAPI COMCTL32_StrChrW( LPCWSTR lpStart, WORD wMatch)
+{
+  dprintf(("COMCTL32: StrChrW"));
+
   return (unsigned short*)wcschr(lpStart, wMatch);
 }
 
@@ -1983,7 +2003,10 @@ LPWSTR WINAPI COMCTL32_StrChrW( LPCWSTR lpStart, WORD wMatch) {
  * StrCmpNA [COMCTL32.352]
  *
  */
-INT WINAPI COMCTL32_StrCmpNA( LPCSTR lpStr1, LPCSTR lpStr2, int nChar) {
+INT WINAPI COMCTL32_StrCmpNA( LPCSTR lpStr1, LPCSTR lpStr2, int nChar)
+{
+  dprintf(("COMCTL32: StrCmpNA"));
+
   return strncmp(lpStr1, lpStr2, nChar);
 }
 
@@ -1991,9 +2014,13 @@ INT WINAPI COMCTL32_StrCmpNA( LPCSTR lpStr1, LPCSTR lpStr2, int nChar) {
  * StrCmpNIA [COMCTL32.353]
  *
  */
-INT WINAPI COMCTL32_StrCmpNIA( LPCSTR lpStr1, LPCSTR lpStr2, int nChar) {
+INT WINAPI COMCTL32_StrCmpNIA( LPCSTR lpStr1, LPCSTR lpStr2, int nChar)
+{
   //AH: Inline helper function from WINE
     int res;
+
+    dprintf(("COMCTL32: StrCmpNIA"));
+
     if (!nChar) return 0;
     while ((--nChar > 0) && *lpStr1)
       if ((res = toupper(*lpStr1++) - toupper(*lpStr2++))) return res;
@@ -2004,7 +2031,10 @@ INT WINAPI COMCTL32_StrCmpNIA( LPCSTR lpStr1, LPCSTR lpStr2, int nChar) {
  * StrCmpNW [COMCTL32.360]
  *
  */
-INT WINAPI COMCTL32_StrCmpNW( LPCWSTR lpStr1, LPCWSTR lpStr2, int nChar) {
+INT WINAPI COMCTL32_StrCmpNW( LPCWSTR lpStr1, LPCWSTR lpStr2, int nChar)
+{
+  dprintf(("COMCTL32: StrCmpNW"));
+
   return wcsncmp(lpStr1, lpStr2, nChar);
 }
 
@@ -2012,9 +2042,10 @@ INT WINAPI COMCTL32_StrCmpNW( LPCWSTR lpStr1, LPCWSTR lpStr2, int nChar) {
  * StrCmpNIW [COMCTL32.361]
  *
  */
-INT WINAPI COMCTL32_StrCmpNIW( LPCWSTR lpStr1, LPCWSTR lpStr2, int nChar) {
-//  FIXME("(%s, %s, %i): stub\n", debugstr_w(lpStr1), debugstr_w(lpStr2), nChar);
+INT WINAPI COMCTL32_StrCmpNIW( LPCWSTR lpStr1, LPCWSTR lpStr2, int nChar)
+{
   dprintf(("COMCTL32: StrCmpNIW - unimplemented stub\n"));
+
   return 0;
 }
 
@@ -2036,8 +2067,11 @@ static BOOL ChrCmpA( WORD word1, WORD word2) {
  * StrRChrA [COMCTL32.351]
  *
  */
-LPSTR WINAPI COMCTL32_StrRChrA( LPCSTR lpStart, LPCSTR lpEnd, WORD wMatch) {
+LPSTR WINAPI COMCTL32_StrRChrA( LPCSTR lpStart, LPCSTR lpEnd, WORD wMatch)
+{
   LPCSTR lpGotIt = NULL;
+
+  dprintf(("COMCTL32: StrRChrA"));
 
   if (!lpEnd) lpEnd = lpStart + strlen(lpStart);
 
@@ -2067,6 +2101,8 @@ LPWSTR WINAPI COMCTL32_StrRChrW( LPCWSTR lpStart, LPCWSTR lpEnd, WORD wMatch)
   //AH: Inline Wine helper function
   LPCWSTR lpGotIt = NULL;
 
+  dprintf(("COMCTL32: StrRChrW"));
+
   if (!lpEnd) lpEnd = lpStart + lstrlenW(lpStart);
 
   for(; lpStart < lpEnd; lpStart = CharNextW(lpStart))
@@ -2081,7 +2117,10 @@ LPWSTR WINAPI COMCTL32_StrRChrW( LPCWSTR lpStart, LPCWSTR lpEnd, WORD wMatch)
  * StrStrA [COMCTL32.354]
  *
  */
-LPSTR WINAPI COMCTL32_StrStrA( LPCSTR lpFirst, LPCSTR lpSrch) {
+LPSTR WINAPI COMCTL32_StrStrA( LPCSTR lpFirst, LPCSTR lpSrch)
+{
+  dprintf(("COMCTL32: StrStrA"));
+
   return strstr(lpFirst, lpSrch);
 }
 
@@ -2089,7 +2128,10 @@ LPSTR WINAPI COMCTL32_StrStrA( LPCSTR lpFirst, LPCSTR lpSrch) {
  * StrStrW [COMCTL32.362]
  *
  */
-LPWSTR WINAPI COMCTL32_StrStrW( LPCWSTR lpFirst, LPCWSTR lpSrch) {
+LPWSTR WINAPI COMCTL32_StrStrW( LPCWSTR lpFirst, LPCWSTR lpSrch)
+{
+  dprintf(("COMCTL32: StrStrW"));
+
   return (unsigned short*)wcsstr(lpFirst, lpSrch);
 }
 
@@ -2097,8 +2139,11 @@ LPWSTR WINAPI COMCTL32_StrStrW( LPCWSTR lpFirst, LPCWSTR lpSrch) {
  * StrSpnW [COMCTL32.364]
  *
  */
-INT WINAPI COMCTL32_StrSpnW( LPWSTR lpStr, LPWSTR lpSet) {
+INT WINAPI COMCTL32_StrSpnW( LPWSTR lpStr, LPWSTR lpSet)
+{
   LPWSTR lpLoop = lpStr;
+
+  dprintf(("COMCTL32: StrSpnW"));
 
   /* validate ptr */
   if ((lpStr == 0) || (lpSet == 0)) return 0;
@@ -2119,9 +2164,9 @@ INT WINAPI COMCTL32_StrSpnW( LPWSTR lpStr, LPWSTR lpSet) {
  *        Parameter 1 is an HWND, you're on your own for the rest.
  */
 
-BOOL WINAPI comctl32_410( HWND hw, DWORD b, DWORD c, DWORD d) {
-
-   //FIXME("(%x, %lx, %lx, %lx): stub!\n", hw, b, c, d);
+BOOL WINAPI comctl32_410( HWND hw, DWORD b, DWORD c, DWORD d)
+{
+   dprintf(("COMCTL32: comctl32_410 - empty stub!"));
 
    return TRUE;
 }
@@ -2133,9 +2178,9 @@ BOOL WINAPI comctl32_410( HWND hw, DWORD b, DWORD c, DWORD d) {
  *        Parameter 1 is an HWND, you're on your own for the rest.
  */
 
-BOOL WINAPI comctl32_411( HWND hw, DWORD b, DWORD c) {
-
-   //FIXME("(%x, %lx, %lx): stub!\n", hw, b, c);
+BOOL WINAPI comctl32_411( HWND hw, DWORD b, DWORD c)
+{
+   dprintf(("COMCTL32: comctl32_411 - empty stub!"));
 
    return TRUE;
 }
@@ -2149,7 +2194,7 @@ BOOL WINAPI comctl32_411( HWND hw, DWORD b, DWORD c) {
 
 BOOL WINAPI comctl32_412( HWND hwnd, DWORD b, DWORD c)
 {
-    //FIXME("(%x, %lx, %lx): stub!\n", hwnd, b, c);
+    dprintf(("COMCTL32: comctl32_412 - empty stub!"));
 
     if (IsWindow (hwnd) == FALSE)
         return FALSE;
@@ -2168,9 +2213,9 @@ BOOL WINAPI comctl32_412( HWND hwnd, DWORD b, DWORD c)
  *        Parameter 1 is an HWND, you're on your own for the rest.
  */
 
-BOOL WINAPI comctl32_413( HWND hw, DWORD b, DWORD c, DWORD d) {
-
-   //FIXME("(%x, %lx, %lx, %lx): stub!\n", hw, b, c, d);
+BOOL WINAPI comctl32_413( HWND hw, DWORD b, DWORD c, DWORD d)
+{
+   dprintf(("COMCTL32: comctl32_413 - empty stub!"));
 
    return TRUE;
 }
@@ -2182,9 +2227,9 @@ BOOL WINAPI comctl32_413( HWND hw, DWORD b, DWORD c, DWORD d) {
  *
  */
 
-BOOL WINAPI InitMUILanguage( LANGID uiLang) {
-
-   //FIXME("(%04x): stub!\n", uiLang);
+BOOL WINAPI InitMUILanguage( LANGID uiLang)
+{
+   dprintf(("COMCTL32: InitMUILanguage - empty stub!"));
 
    return TRUE;
 }

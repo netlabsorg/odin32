@@ -1,4 +1,4 @@
-/* $Id: treeview.h,v 1.10 2000-02-17 17:26:07 cbratschi Exp $ */
+/* $Id: treeview.h,v 1.11 2000-02-18 17:12:43 cbratschi Exp $ */
 /*
  * Treeview class extra info
  *
@@ -14,6 +14,7 @@
 #define TV_REFRESH_DELAY     100     /* 100 ms delay between two refreshes */
 #define TV_DEFAULTITEMHEIGHT  16
 #define TVITEM_ALLOC          32      /* default nr of items to allocate at first try */
+#define TV_ISEARCH_DELAY     500
 
 
 /* internal structures */
@@ -88,6 +89,8 @@ typedef struct tagTREEVIEW_INFO
   INT           *freeList;     /* bitmap indicating which elements are valid */
                                /* 1=valid, 0=free;   */
                                /* size of list= uNumPtrsAlloced/32 */
+  LPWSTR        pszISearch;
+  UINT          uISearchLen;
 } TREEVIEW_INFO, *LPTREEVIEW_INFO;
 
 /* bitflags for infoPtr->uInternalStatus */
@@ -106,8 +109,11 @@ typedef struct tagTREEVIEW_INFO
 
 #define TV_REFRESH_TIMER 1
 #define TV_EDIT_TIMER    2
+#define TV_ISEARCH_TIMER 3
+
 #define TV_REFRESH_TIMER_SET 1
-#define TV_EDIT_TIMER_SET 2
+#define TV_EDIT_TIMER_SET    2
+#define TV_ISEARCH_TIMER_SET 3
 
 
 extern VOID TREEVIEW_Register (VOID);

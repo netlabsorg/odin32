@@ -1,4 +1,4 @@
-/* $Id: comctl32.c,v 1.14 2000-02-14 17:31:39 cbratschi Exp $ */
+/* $Id: comctl32.c,v 1.15 2000-02-18 17:13:37 cbratschi Exp $ */
 /*
  * Win32 common controls implementation
  *
@@ -224,8 +224,6 @@ ShowHideMenuCtl (HWND hwnd, UINT uFlags, LPINT lpInfo)
 {
     LPINT lpMenuId;
 
-//    TRACE (commctrl, "%x, %x, %p\n", hwnd, uFlags, lpInfo);
-
     dprintf(("COMCTL32: ShowHideMenuCtl"));
 
     if (lpInfo == NULL)
@@ -286,9 +284,6 @@ GetEffectiveClientRect (HWND hwnd, LPRECT lpRect, LPINT lpInfo)
     RECT rcCtrl;
     INT  *lpRun;
     HWND hwndCtrl;
-
-//    TRACE (commctrl, "(0x%08lx 0x%08lx 0x%08lx)\n",
-//         (DWORD)hwnd, (DWORD)lpRect, (DWORD)lpInfo);
 
     dprintf(("COMCTL32: GetEffectiveClientRect"));
 
@@ -822,6 +817,8 @@ CreateToolbar (HWND hwnd, DWORD style, UINT wID, INT nBitmaps,
 HRESULT WINAPI
 COMCTL32_DllGetVersion (DLLVERSIONINFO *pdvi)
 {
+    dprintf(("COMCTL32: COMCTL32_DllGetVersion"));
+
     if (pdvi->cbSize != sizeof(DLLVERSIONINFO)) {
 //        WARN (commctrl, "wrong DLLVERSIONINFO size from app");
         return E_INVALIDARG;
@@ -887,16 +884,17 @@ BOOL WINAPI
 _TrackMouseEvent (TRACKMOUSEEVENT *ptme)
 {
     DWORD flags = 0;
-        int i;
-        BOOL cancel = 0, hover = 0, leave = 0, query = 0;
-        if (ptme->cbSize != sizeof(TRACKMOUSEEVENT)) {
+    int i;
+    BOOL cancel = 0, hover = 0, leave = 0, query = 0;
+
+    dprintf(("COMCTL32: _TrackMouseEvent"));
+
+    if (ptme->cbSize != sizeof(TRACKMOUSEEVENT)) {
         //WARN("wrong TRACKMOUSEEVENT size from app");
         return E_INVALIDARG;
     }
 
-    //TRACE("%lx, %lx, %x, %lx\n", ptme->cbSize, ptme->dwFlags, ptme->hwndTrack, ptme->dwHoverTime);
-
-        flags = ptme->dwFlags;
+    flags = ptme->dwFlags;
     if ( flags & TME_CANCEL ) {
                 cancel = 1;
                 flags &= ~ TME_CANCEL;

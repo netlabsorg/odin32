@@ -15,14 +15,14 @@
 /* WINE 991212 level */
 
 #include "commctrl.h"
+#include <misc.h>
 
 static DWORD dwLastScrollTime = 0;
 
 
 BOOL WINAPI MakeDragList (HWND hwndLB)
 {
-    //FIXME("(0x%x)\n", hwndLB);
-
+    dprintf(("COMCTL32: MakeDragList - empty stub!"));
 
     return FALSE;
 }
@@ -30,9 +30,7 @@ BOOL WINAPI MakeDragList (HWND hwndLB)
 
 VOID WINAPI DrawInsert (HWND hwndParent, HWND hwndLB, INT nItem)
 {
-    //FIXME("(0x%x 0x%x %d)\n", hwndParent, hwndLB, nItem);
-
-
+    dprintf(("COMCTL32: DrawInsert - empty stub!"));
 }
 
 
@@ -42,8 +40,7 @@ INT WINAPI LBItemFromPt (HWND hwndLB, POINT pt, BOOL bAutoScroll)
     INT nIndex;
     DWORD dwScrollTime;
 
-    //FIXME("(0x%x %ld x %ld %s)\n",
-    //       hwndLB, pt.x, pt.y, bAutoScroll ? "TRUE" : "FALSE");
+    dprintf(("COMCTL32: LBItemFromPt"));
 
     ScreenToClient (hwndLB, &pt);
     GetClientRect (hwndLB, &rcClient);

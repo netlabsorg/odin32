@@ -1,4 +1,4 @@
-/* $Id: imagelist.c,v 1.11 2000-02-04 17:02:07 cbratschi Exp $ */
+/* $Id: imagelist.c,v 1.12 2000-02-18 17:13:37 cbratschi Exp $ */
 /*
  *  ImageList implementation
  *
@@ -457,6 +457,8 @@ ImageList_Add (HIMAGELIST himl, HBITMAP hbmImage, HBITMAP hbmMask)
     BITMAP  bmp;
     HBITMAP hOldBitmapImage, hOldBitmap;
 
+    dprintf(("COMCTL32: ImageList_Add"));
+
     if (!himl || !hbmImage)
       return -1;
 
@@ -538,6 +540,8 @@ ImageList_Add (HIMAGELIST himl, HBITMAP hbmImage, HBITMAP hbmMask)
 INT WINAPI
 ImageList_AddIcon (HIMAGELIST himl, HICON hIcon)
 {
+    dprintf(("COMCTL32: ImageList_AddIcon"));
+
     return ImageList_ReplaceIcon (himl, -1, hIcon);
 }
 
@@ -567,6 +571,8 @@ ImageList_AddMasked (HIMAGELIST himl, HBITMAP hBitmap, COLORREF clrMask)
     HBITMAP hOldBitmap, hOldBitmapMask, hOldBitmapImage;
     HBITMAP hMaskBitmap=0;
     COLORREF bkColor;
+
+    dprintf(("COMCTL32: ImageList_AddMasked"));
 
     if (himl == NULL)
         return -1;
@@ -679,7 +685,7 @@ ImageList_BeginDrag (HIMAGELIST himlTrack, INT iTrack,
 {
     HDC hdcSrc, hdcDst;
 
-//    FIXME(imagelist, "partially implemented!\n");
+    dprintf(("COMCTL32: ImageList_BeginDrag - partial implemented"));
 
     if (himlTrack == NULL)
         return FALSE;
@@ -751,7 +757,7 @@ ImageList_Copy (HIMAGELIST himlDst, INT iDst,   HIMAGELIST himlSrc,
 {
     HDC hdcSrc, hdcDst;
 
-//    TRACE(imagelist, "iDst=%d  iSrc=%d\n", iDst, iSrc);
+    dprintf(("COMCTL32: ImageList_Copy"));
 
     if ((himlSrc == NULL) || (himlDst == NULL))
         return FALSE;
@@ -879,7 +885,7 @@ ImageList_Create (INT cx, INT cy, UINT flags,
     static WORD aBitBlend50[] =
         {0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA, 0x55, 0xAA};
 
-//    TRACE (imagelist, "(%d %d 0x%x %d %d)\n", cx, cy, flags, cInitial, cGrow);
+    dprintf(("COMCTL32: ImageList_Create"));
 
     himl = (HIMAGELIST)COMCTL32_Alloc (sizeof(struct _IMAGELIST));
     if (!himl)
@@ -959,6 +965,8 @@ ImageList_Create (INT cx, INT cy, UINT flags,
 BOOL WINAPI
 ImageList_Destroy (HIMAGELIST himl)
 {
+    dprintf(("COMCTL32: ImageList_Destroy"));
+
     if (!himl)
         return FALSE;
 
@@ -1002,6 +1010,8 @@ ImageList_Destroy (HIMAGELIST himl)
 BOOL WINAPI
 ImageList_DragEnter (HWND hwndLock, INT x, INT y)
 {
+    dprintf(("COMCTL32: ImageList_DragEnter"));
+
     if (himlInternalDrag == NULL)
         return FALSE;
 
@@ -1039,6 +1049,8 @@ ImageList_DragEnter (HWND hwndLock, INT x, INT y)
 BOOL WINAPI
 ImageList_DragLeave (HWND hwndLock)
 {
+    dprintf(("COMCTL32: ImageList_DragLeave"));
+
     if (hwndLock)
         hwndInternalDrag = hwndLock;
     else
@@ -1074,6 +1086,8 @@ ImageList_DragLeave (HWND hwndLock)
 BOOL WINAPI
 ImageList_DragMove (INT x, INT y)
 {
+    dprintf(("COMCTL32: ImageList_DragMove"));
+
     ImageList_DragShowNolock (FALSE);
 
     xInternalPos = x;
@@ -1106,8 +1120,7 @@ ImageList_DragShowNolock (BOOL bShow)
 {
     HDC hdcDrag;
 
-//    FIXME (imagelist, "semi-stub!\n");
-//    TRACE (imagelist, "bShow=0x%X!\n", bShow);
+    dprintf(("COMCTL32: ImageList_DragShowNolock - semi-stub!"));
 
     hdcDrag = GetDCEx (hwndInternalDrag, 0,
                          DCX_WINDOW | DCX_CACHE | DCX_LOCKWINDOWUPDATE);
@@ -1160,6 +1173,8 @@ ImageList_Draw (HIMAGELIST himl, INT i, HDC hdc,
                 INT x, INT y, UINT fStyle)
 {
     IMAGELISTDRAWPARAMS imldp;
+
+    dprintf(("COMCTL32: ImageList_Draw"));
 
     imldp.cbSize  = sizeof(IMAGELISTDRAWPARAMS);
     imldp.himl    = himl;
@@ -1215,6 +1230,8 @@ ImageList_DrawEx (HIMAGELIST himl, INT i, HDC hdc, INT x, INT y,
 {
     IMAGELISTDRAWPARAMS imldp;
 
+    dprintf(("COMCTL32: ImageList_DrawEx"));
+
     imldp.cbSize  = sizeof(IMAGELISTDRAWPARAMS);
     imldp.himl    = himl;
     imldp.i       = i;
@@ -1251,6 +1268,9 @@ BOOL WINAPI
 ImageList_DrawIndirect (IMAGELISTDRAWPARAMS *pimldp)
 {
     INT      cx, cy;
+
+    dprintf(("COMCTL32: ImageList_DrawIndirect"));
+
     /*
         Do some Error Checking
     */
@@ -1315,6 +1335,8 @@ ImageList_Duplicate (HIMAGELIST himlSrc)
     HIMAGELIST himlDst;
     HDC hdcSrc, hdcDst;
 
+    dprintf(("COMCTL32: ImageList_Duplicate"));
+
     if (himlSrc == NULL) {
 //        ERR (imagelist, "Invalid image list handle!\n");
         return NULL;
@@ -1343,8 +1365,8 @@ ImageList_Duplicate (HIMAGELIST himlSrc)
         DeleteDC (hdcDst);
         DeleteDC (hdcSrc);
 
-	himlDst->cCurImage = himlSrc->cCurImage;
-	himlDst->cMaxImage = himlSrc->cMaxImage;
+        himlDst->cCurImage = himlSrc->cCurImage;
+        himlDst->cMaxImage = himlSrc->cMaxImage;
     }
 
     return himlDst;
@@ -1370,7 +1392,7 @@ ImageList_Duplicate (HIMAGELIST himlSrc)
 BOOL WINAPI
 ImageList_EndDrag (VOID)
 {
-//    FIXME (imagelist, "semi-stub!\n");
+    dprintf(("COMCTL32: ImageList_EndDrag - semi-stub"));
 
     if (himlInternalDrag)
     {
@@ -1403,6 +1425,8 @@ ImageList_EndDrag (VOID)
 COLORREF WINAPI
 ImageList_GetBkColor (HIMAGELIST himl)
 {
+    dprintf(("COMCTL32: ImageList_GetBkColor"));
+
     if (himl == NULL)
         return CLR_NONE;
 
@@ -1430,7 +1454,7 @@ ImageList_GetBkColor (HIMAGELIST himl)
 HIMAGELIST WINAPI
 ImageList_GetDragImage (POINT *ppt, POINT *pptHotspot)
 {
-//    FIXME (imagelist, "semi-stub!\n");
+    dprintf(("COMCTL32: ImageList_GetDragImage - semi-stub!"));
 
     if (himlInternalDrag)
         return (himlInternalDrag);
@@ -1461,6 +1485,8 @@ ImageList_GetIcon (HIMAGELIST himl, INT i, UINT fStyle)
     HICON  hIcon;
     HBITMAP hOldSrcBitmap,hOldDstBitmap;
     HDC    hdcSrc, hdcDst;
+
+    dprintf(("COMCTL32: ImageList_GetIcon"));
 
     if ((himl == NULL) || (i < 0) || (i >= himl->cCurImage))
         return 0;
@@ -1527,6 +1553,8 @@ ImageList_GetIcon (HIMAGELIST himl, INT i, UINT fStyle)
 BOOL WINAPI
 ImageList_GetIconSize (HIMAGELIST himl, INT *cx, INT *cy)
 {
+    dprintf(("COMCTL32: ImageList_GetIconSize"));
+
     if (himl == NULL)
         return FALSE;
     if ((himl->cx <= 0) || (himl->cy <= 0))
@@ -1557,6 +1585,8 @@ ImageList_GetIconSize (HIMAGELIST himl, INT *cx, INT *cy)
 INT WINAPI
 ImageList_GetImageCount (HIMAGELIST himl)
 {
+    dprintf(("COMCTL32: ImageList_GetImageCount"));
+
     if (himl == NULL)
         return 0;
 
@@ -1582,6 +1612,8 @@ ImageList_GetImageCount (HIMAGELIST himl)
 BOOL WINAPI
 ImageList_GetImageInfo (HIMAGELIST himl, INT i, IMAGEINFO *pImageInfo)
 {
+    dprintf(("COMCTL32: ImageList_GetImageInfo"));
+
     if ((himl == NULL) || (pImageInfo == NULL))
         return FALSE;
     if ((i < 0) || (i >= himl->cCurImage))
@@ -1620,6 +1652,8 @@ ImageList_GetImageInfo (HIMAGELIST himl, INT i, IMAGEINFO *pImageInfo)
 BOOL WINAPI
 ImageList_GetImageRect (HIMAGELIST himl, INT i, LPRECT lpRect)
 {
+    dprintf(("COMCTL32: ImageList_GetImageRect"));
+
     if ((himl == NULL) || (lpRect == NULL))
         return FALSE;
     if ((i < 0) || (i >= himl->cCurImage))
@@ -1663,6 +1697,8 @@ ImageList_LoadImageA (HINSTANCE hi, LPCSTR lpbmp, INT cx,       INT cGrow,
     HIMAGELIST himl = NULL;
     HANDLE   handle;
     INT      nImageCount;
+
+    dprintf(("COMCTL32: ImageList_LoadImageA"));
 
     handle = LoadImageA (hi, lpbmp, uType, 0, 0, uFlags);
     if (!handle) {
@@ -1741,6 +1777,8 @@ ImageList_LoadImageW (HINSTANCE hi, LPCWSTR lpbmp, INT cx, INT cGrow,
     HANDLE   handle;
     INT      nImageCount;
 
+    dprintf(("COMCTL32: ImageList_LoadImageW"));
+
     handle = LoadImageW (hi, lpbmp, uType, 0, 0, uFlags);
     if (!handle) {
 //        ERR (imagelist, "Error loading image!\n");
@@ -1803,6 +1841,8 @@ ImageList_Merge (HIMAGELIST himl1, INT i1, HIMAGELIST himl2, INT i2,
     INT      cxDst, cyDst;
     INT      xOff1, yOff1, xOff2, yOff2;
     INT      nX1, nX2;
+
+    dprintf(("COMCTL32: ImageList_Merge"));
 
     if ((himl1 == NULL) || (himl2 == NULL))
         return NULL;
@@ -1898,105 +1938,105 @@ ImageList_Merge (HIMAGELIST himl1, INT i1, HIMAGELIST himl2, INT i2,
 static int may_use_dibsection(HDC hdc) {
     int bitspixel = GetDeviceCaps(hdc,BITSPIXEL)*GetDeviceCaps(hdc,PLANES);
     if (bitspixel>8)
-	return TRUE;
+        return TRUE;
     if (bitspixel<=4)
-	return FALSE;
+        return FALSE;
     return GetDeviceCaps(hdc,94) & 0x10;
 }
 
 /* helper for ImageList_Read, see comments below */
 static HBITMAP _read_bitmap(LPSTREAM pstm,int ilcFlag,int cx,int cy) {
-    HDC			xdc = 0;
-    BITMAPFILEHEADER	bmfh;
-    BITMAPINFOHEADER	bmih;
-    int			bitsperpixel,palspace,longsperline,width,height;
-    LPBITMAPINFOHEADER	bmihc = NULL;
-    int			result = 0;
-    HBITMAP		hbitmap = 0;
-    LPBYTE		bits = NULL,nbits = NULL;
-    int			nbytesperline,bytesperline;
+    HDC                 xdc = 0;
+    BITMAPFILEHEADER    bmfh;
+    BITMAPINFOHEADER    bmih;
+    int                 bitsperpixel,palspace,longsperline,width,height;
+    LPBITMAPINFOHEADER  bmihc = NULL;
+    int                 result = 0;
+    HBITMAP             hbitmap = 0;
+    LPBYTE              bits = NULL,nbits = NULL;
+    int                 nbytesperline,bytesperline;
 
-    if (!SUCCEEDED(IStream_Read ( pstm, &bmfh, sizeof(bmfh), NULL))	||
-    	(bmfh.bfType != (('M'<<8)|'B'))					||
-    	!SUCCEEDED(IStream_Read ( pstm, &bmih, sizeof(bmih), NULL))	||
-    	(bmih.biSize != sizeof(bmih))
+    if (!SUCCEEDED(IStream_Read ( pstm, &bmfh, sizeof(bmfh), NULL))     ||
+        (bmfh.bfType != (('M'<<8)|'B'))                                 ||
+        !SUCCEEDED(IStream_Read ( pstm, &bmih, sizeof(bmih), NULL))     ||
+        (bmih.biSize != sizeof(bmih))
     )
-	return 0;
+        return 0;
 
     bitsperpixel = bmih.biPlanes * bmih.biBitCount;
     if (bitsperpixel<=8)
-    	palspace = (1<<bitsperpixel)*sizeof(RGBQUAD);
+        palspace = (1<<bitsperpixel)*sizeof(RGBQUAD);
     else
-    	palspace = 0;
+        palspace = 0;
     width = bmih.biWidth;
     height = bmih.biHeight;
     bmihc = (LPBITMAPINFOHEADER)LocalAlloc(LMEM_ZEROINIT,sizeof(bmih)+palspace);
     memcpy(bmihc,&bmih,sizeof(bmih));
-    longsperline	= ((width*bitsperpixel+31)&~0x1f)>>5;
-    bmihc->biSizeImage	= (longsperline*height)<<2;
+    longsperline        = ((width*bitsperpixel+31)&~0x1f)>>5;
+    bmihc->biSizeImage  = (longsperline*height)<<2;
 
     /* read the palette right after the end of the bitmapinfoheader */
     if (palspace)
-	if (!SUCCEEDED(IStream_Read ( pstm, bmihc+1, palspace, NULL)))
-	    goto ret1;
+        if (!SUCCEEDED(IStream_Read ( pstm, bmihc+1, palspace, NULL)))
+            goto ret1;
 
     xdc = GetDC(0);
 #if 0 /* Magic for NxM -> 1x(N*M) not implemented for DIB Sections */
     if ((bitsperpixel>1) &&
-	((ilcFlag!=ILC_COLORDDB) && (!ilcFlag || may_use_dibsection(xdc)))
+        ((ilcFlag!=ILC_COLORDDB) && (!ilcFlag || may_use_dibsection(xdc)))
      ) {
-	hbitmap = CreateDIBSection(xdc,(BITMAPINFO*)bmihc,0,(LPVOID*)&bits,0,0);
-	if (!hbitmap)
-	    goto ret1;
-	if (!SUCCEEDED(IStream_Read( pstm, bits, bmihc->biSizeImage, NULL)))
-	    goto ret1;
-	result = 1;
+        hbitmap = CreateDIBSection(xdc,(BITMAPINFO*)bmihc,0,(LPVOID*)&bits,0,0);
+        if (!hbitmap)
+            goto ret1;
+        if (!SUCCEEDED(IStream_Read( pstm, bits, bmihc->biSizeImage, NULL)))
+            goto ret1;
+        result = 1;
     } else
 #endif
     {
-	int i,nwidth,nheight;
+        int i,nwidth,nheight;
 
-	nwidth	= width*(height/cy);
-	nheight	= cy;
+        nwidth  = width*(height/cy);
+        nheight = cy;
 
-	if (bitsperpixel==1)
-	    hbitmap = CreateBitmap(nwidth,nheight,1,1,NULL);
-	else
-	    hbitmap = CreateCompatibleBitmap(xdc,nwidth,nheight);
+        if (bitsperpixel==1)
+            hbitmap = CreateBitmap(nwidth,nheight,1,1,NULL);
+        else
+            hbitmap = CreateCompatibleBitmap(xdc,nwidth,nheight);
 
-	/* Might be a bit excessive memory use here */
-	bits = (LPBYTE)LocalAlloc(LMEM_ZEROINIT,bmihc->biSizeImage);
-	nbits = (LPBYTE)LocalAlloc(LMEM_ZEROINIT,bmihc->biSizeImage);
-	if (!SUCCEEDED(IStream_Read ( pstm, bits, bmihc->biSizeImage, NULL)))
-		goto ret1;
+        /* Might be a bit excessive memory use here */
+        bits = (LPBYTE)LocalAlloc(LMEM_ZEROINIT,bmihc->biSizeImage);
+        nbits = (LPBYTE)LocalAlloc(LMEM_ZEROINIT,bmihc->biSizeImage);
+        if (!SUCCEEDED(IStream_Read ( pstm, bits, bmihc->biSizeImage, NULL)))
+                goto ret1;
 
-	/* Copy the NxM bitmap into a 1x(N*M) bitmap we need, linewise */
-	/* Do not forget that windows bitmaps are bottom->top */
-	bytesperline	= longsperline*4;
-	nbytesperline	= (height/cy)*bytesperline;
-	for (i=0;i<height;i++) {
-	    memcpy(
-		nbits+((height-i)%cy)*nbytesperline+(i/cy)*bytesperline,
-		bits+bytesperline*(height-i),
-		bytesperline
-	    );
-	}
-	bmihc->biWidth	= nwidth;
-	bmihc->biHeight	= nheight;
-	if (!SetDIBits(xdc,hbitmap,0,nheight,nbits,(BITMAPINFO*)bmihc,0))
-		goto ret1;
-	LocalFree((HLOCAL)nbits);
-	LocalFree((HLOCAL)bits);
-	result = 1;
+        /* Copy the NxM bitmap into a 1x(N*M) bitmap we need, linewise */
+        /* Do not forget that windows bitmaps are bottom->top */
+        bytesperline    = longsperline*4;
+        nbytesperline   = (height/cy)*bytesperline;
+        for (i=0;i<height;i++) {
+            memcpy(
+                nbits+((height-i)%cy)*nbytesperline+(i/cy)*bytesperline,
+                bits+bytesperline*(height-i),
+                bytesperline
+            );
+        }
+        bmihc->biWidth  = nwidth;
+        bmihc->biHeight = nheight;
+        if (!SetDIBits(xdc,hbitmap,0,nheight,nbits,(BITMAPINFO*)bmihc,0))
+                goto ret1;
+        LocalFree((HLOCAL)nbits);
+        LocalFree((HLOCAL)bits);
+        result = 1;
     }
 ret1:
-    if (xdc)	ReleaseDC(0,xdc);
-    if (bmihc)	LocalFree((HLOCAL)bmihc);
+    if (xdc)    ReleaseDC(0,xdc);
+    if (bmihc)  LocalFree((HLOCAL)bmihc);
     if (!result) {
-	if (hbitmap) {
-	    DeleteObject(hbitmap);
-	    hbitmap = 0;
-	}
+        if (hbitmap) {
+            DeleteObject(hbitmap);
+            hbitmap = 0;
+        }
     }
     return hbitmap;
 }
@@ -2014,76 +2054,78 @@ ret1:
  *     Failure: NULL
  *
  * The format is like this:
- * 	ILHEAD 			ilheadstruct;
+ *      ILHEAD                  ilheadstruct;
  *
  * for the color image part:
- * 	BITMAPFILEHEADER	bmfh;
- * 	BITMAPINFOHEADER	bmih;
+ *      BITMAPFILEHEADER        bmfh;
+ *      BITMAPINFOHEADER        bmih;
  * only if it has a palette:
- *	RGBQUAD		rgbs[nr_of_paletted_colors];
+ *      RGBQUAD         rgbs[nr_of_paletted_colors];
  *
- *	BYTE			colorbits[imagesize];
+ *      BYTE                    colorbits[imagesize];
  *
  * the following only if the ILC_MASK bit is set in ILHEAD.ilFlags:
- *	BITMAPFILEHEADER	bmfh_mask;
- *	BITMAPINFOHEADER	bmih_mask;
+ *      BITMAPFILEHEADER        bmfh_mask;
+ *      BITMAPINFOHEADER        bmih_mask;
  * only if it has a palette (it usually does not):
- *	RGBQUAD		rgbs[nr_of_paletted_colors];
+ *      RGBQUAD         rgbs[nr_of_paletted_colors];
  *
- *	BYTE			maskbits[imagesize];
+ *      BYTE                    maskbits[imagesize];
  *
  * CAVEAT: Those images are within a NxM bitmap, not the 1xN we expect.
  *         _read_bitmap needs to convert them.
  */
 HIMAGELIST WINAPI ImageList_Read (LPSTREAM pstm)
 {
-    ILHEAD	ilHead;
-    HIMAGELIST	himl;
-    HBITMAP	hbmColor=0,hbmMask=0;
-    int		i;
+    ILHEAD      ilHead;
+    HIMAGELIST  himl;
+    HBITMAP     hbmColor=0,hbmMask=0;
+    int         i;
+
+    dprintf(("COMCTL32: ImageList_Read"));
 
     if (!SUCCEEDED(IStream_Read (pstm, &ilHead, sizeof(ILHEAD), NULL)))
-    	return NULL;
+        return NULL;
     if (ilHead.usMagic != (('L' << 8) | 'I'))
-	return NULL;
+        return NULL;
     if (ilHead.usVersion != 0x101) /* probably version? */
-	return NULL;
+        return NULL;
 
 #if 0
-    FIXME("	ilHead.cCurImage = %d\n",ilHead.cCurImage);
-    FIXME("	ilHead.cMaxImage = %d\n",ilHead.cMaxImage);
-    FIXME("	ilHead.cGrow = %d\n",ilHead.cGrow);
-    FIXME("	ilHead.cx = %d\n",ilHead.cx);
-    FIXME("	ilHead.cy = %d\n",ilHead.cy);
-    FIXME("	ilHead.flags = %x\n",ilHead.flags);
-    FIXME("	ilHead.ovls[0] = %d\n",ilHead.ovls[0]);
-    FIXME("	ilHead.ovls[1] = %d\n",ilHead.ovls[1]);
-    FIXME("	ilHead.ovls[2] = %d\n",ilHead.ovls[2]);
-    FIXME("	ilHead.ovls[3] = %d\n",ilHead.ovls[3]);
+    FIXME("     ilHead.cCurImage = %d\n",ilHead.cCurImage);
+    FIXME("     ilHead.cMaxImage = %d\n",ilHead.cMaxImage);
+    FIXME("     ilHead.cGrow = %d\n",ilHead.cGrow);
+    FIXME("     ilHead.cx = %d\n",ilHead.cx);
+    FIXME("     ilHead.cy = %d\n",ilHead.cy);
+    FIXME("     ilHead.flags = %x\n",ilHead.flags);
+    FIXME("     ilHead.ovls[0] = %d\n",ilHead.ovls[0]);
+    FIXME("     ilHead.ovls[1] = %d\n",ilHead.ovls[1]);
+    FIXME("     ilHead.ovls[2] = %d\n",ilHead.ovls[2]);
+    FIXME("     ilHead.ovls[3] = %d\n",ilHead.ovls[3]);
 #endif
 
     hbmColor = _read_bitmap(pstm,ilHead.flags & ~ILC_MASK,ilHead.cx,ilHead.cy);
     if (!hbmColor)
-	return NULL;
+        return NULL;
     if (ilHead.flags & ILC_MASK) {
-	hbmMask = _read_bitmap(pstm,0,ilHead.cx,ilHead.cy);
-	if (!hbmMask) {
-	    DeleteObject(hbmColor);
-	    return NULL;
-	}
+        hbmMask = _read_bitmap(pstm,0,ilHead.cx,ilHead.cy);
+        if (!hbmMask) {
+            DeleteObject(hbmColor);
+            return NULL;
+        }
     }
 
     himl = ImageList_Create (
-		    ilHead.cx,
-		    ilHead.cy,
-		    ilHead.flags,
-		    1,		/* initial */
-		    ilHead.cGrow
+                    ilHead.cx,
+                    ilHead.cy,
+                    ilHead.flags,
+                    1,          /* initial */
+                    ilHead.cGrow
     );
     if (!himl) {
-	DeleteObject(hbmColor);
-	DeleteObject(hbmMask);
-	return NULL;
+        DeleteObject(hbmColor);
+        DeleteObject(hbmMask);
+        return NULL;
     }
     himl->hbmImage = hbmColor;
     himl->hbmMask = hbmMask;
@@ -2092,7 +2134,7 @@ HIMAGELIST WINAPI ImageList_Read (LPSTREAM pstm)
 
     ImageList_SetBkColor(himl,ilHead.bkcolor);
     for (i=0;i<4;i++)
-    	ImageList_SetOverlayImage(himl,ilHead.ovls[i],i+1);
+        ImageList_SetOverlayImage(himl,ilHead.ovls[i],i+1);
     return himl;
 }
 
@@ -2115,6 +2157,8 @@ ImageList_Remove (HIMAGELIST himl, INT i)
     HBITMAP hbmNewImage, hbmNewMask;
     HDC     hdcSrc, hdcDst;
     INT     cxNew, nCount;
+
+    dprintf(("COMCTL32: ImageList_Remove"));
 
     if ((i < -1) || (i >= himl->cCurImage)) {
 //        ERR (imagelist, "index out of range! %d\n", i);
@@ -2246,6 +2290,8 @@ ImageList_Replace (HIMAGELIST himl, INT i, HBITMAP hbmImage,
     HDC hdcImageList, hdcImage;
     BITMAP bmp;
 
+    dprintf(("COMCTL32: ImageList_Replace"));
+
     if (himl == NULL) {
 //        ERR (imagelist, "Invalid image list handle!\n");
         return FALSE;
@@ -2309,7 +2355,7 @@ ImageList_ReplaceIcon (HIMAGELIST himl, INT i, HICON hIcon)
     ICONINFO  ii;
     BITMAP  bmp;
 
-//    TRACE (imagelist, "(0x%lx 0x%x 0x%x)\n", (DWORD)himl, i, hIcon);
+    dprintf(("COMCTL32: ImageList_ReplaceIcon"));
 
     if (himl == NULL)
         return -1;
@@ -2399,6 +2445,8 @@ ImageList_SetBkColor (HIMAGELIST himl, COLORREF clrBk)
 {
     COLORREF clrOldBk;
 
+    dprintf(("COMCTL32: ImageList_SetBkColor"));
+
     if (himl == NULL)
         return CLR_NONE;
 
@@ -2433,7 +2481,7 @@ ImageList_SetDragCursorImage (HIMAGELIST himlDrag, INT iDrag,
 {
     HIMAGELIST himlTemp;
 
-//    FIXME (imagelist, "semi-stub!\n");
+    dprintf(("COMCTL32: ImageList_SetDragCursorImage - semi-stub"));
 
     if (himlInternalDrag == NULL)
         return FALSE;
@@ -2476,8 +2524,7 @@ ImageList_SetDragCursorImage (HIMAGELIST himlDrag, INT iDrag,
 BOOL WINAPI
 ImageList_SetFilter (HIMAGELIST himl, INT i, DWORD dwFilter)
 {
-//    FIXME (imagelist, "(%p 0x%x 0x%lx):empty stub!\n",
-//         himl, i, dwFilter);
+    dprintf(("COMCTL32: ImageList_SetFilter - empty stub!"));
 
     return FALSE;
 }
@@ -2502,6 +2549,8 @@ BOOL WINAPI
 ImageList_SetIconSize (HIMAGELIST himl, INT cx, INT cy)
 {
     INT nCount;
+
+    dprintf(("COMCTL32: ImageList_SetIconSize"));
 
     if (!himl)
         return FALSE;
@@ -2552,6 +2601,8 @@ ImageList_SetImageCount (HIMAGELIST himl, INT iImageCount)
     HDC     hdcImageList, hdcBitmap;
     HBITMAP hbmNewBitmap;
     INT     nNewCount, nCopyCount;
+
+    dprintf(("COMCTL32: ImageList_SetImageCount"));
 
     if (!himl)
         return FALSE;
@@ -2645,6 +2696,8 @@ ImageList_SetImageCount (HIMAGELIST himl, INT iImageCount)
 BOOL WINAPI
 ImageList_SetOverlayImage (HIMAGELIST himl, INT iImage, INT iOverlay)
 {
+    dprintf(("COMCTL32: ImageList_SetOverlayImage"));
+
     if (!himl)
         return FALSE;
     if ((iOverlay < 1) || (iOverlay > MAX_OVERLAYIMAGE))
@@ -2681,11 +2734,10 @@ BOOL WINAPI
 //ImageList_Write (HIMAGELIST himl, LPSTREAM pstm)
 ImageList_Write (HIMAGELIST himl, PVOID pstm)
 {
+    dprintf(("COMCTL32: ImageList_Write - empty stub!"));
+
     if (!himl)
       return FALSE;
-
-    dprintf(("ImageList_Write empty stub!\n"));
-
 
     return FALSE;
 }
