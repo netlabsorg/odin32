@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.2724 2004-04-15 16:19:24 sandervl Exp $ */
+/* $Id: changelog,v 1.2725 2004-04-20 10:13:15 sandervl Exp $ */
+
+ 2004-04-19: knut st. osmundsen <bird-changelog@innotek    >
+    - USER32:   o Changed some critical sections which weren't initiated to
+                  VMutex to get automatic initialization.
+    - LIBWRAP:  o DosVerifyPidTid.
 
  2004-04-15: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o SetWindowPos: do not check for position and size redundancy
