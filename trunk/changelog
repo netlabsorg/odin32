@@ -1,4 +1,15 @@
-/* $Id: changelog,v 1.1611 2001-07-20 15:31:23 sandervl Exp $ */
+/* $Id: changelog,v 1.1612 2001-07-21 09:11:59 sandervl Exp $ */
+
+ 2001-07-21: Sander van Leeuwen <sandervl@xs4all.nl>
+    - DINPUT, DPLAYX, ICMP, IMAGEHLP, IMM32, LZ32, 
+      MSVFW32, OLEPRO32, RICHED32, URLMON, VERSION, WININET
+                o Added Wine license
+
+    - AVIFIL32, SHELL32, COMCTL32, COMDLG32, MSACM32, NTDLL, OLE32, OLAUT32,
+      SHDOCVW, SETUPAPI, SHLWAPI, OLECLI32, OLEDLG, OLESVR32, RPCRT4
+                o Replaced Wine license with updated version
+    - COMCTL32: o Resync with Wine (20010720); comboex, comctl32undoc, rebar,
+                  imagelist, toolbar, pager
 
  2001-07-20: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Moved wsnprintf to user32
