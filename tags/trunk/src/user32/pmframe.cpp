@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.45 2000-03-13 13:10:47 sandervl Exp $ */
+/* $Id: pmframe.cpp,v 1.46 2000-03-31 14:42:47 cbratschi Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -163,6 +163,19 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
       size->y = 0;
       RestoreOS2TIB();
       return (MRESULT)TRUE;
+    }
+
+    case WM_HITTEST:
+    {
+        if (win32wnd->IsWindowCreated())
+        {
+          MRESULT rc;
+
+          rc = (MRESULT)win32wnd->MsgHitTest(pWinMsg);
+          RestoreOS2TIB();
+          return rc;
+        }
+        return (MRESULT)HT_NORMAL;
     }
 
     case WM_BUTTON1DOWN:
