@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2665 2004-01-20 18:10:59 sandervl Exp $ */
+/* $Id: changelog,v 1.2666 2004-01-21 12:16:34 sandervl Exp $ */
+
+ 2004-01-21: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o DrawIconEx: handle cyWidth == 0 case correctly
 
  2004-01-20: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Wrote wrapper for our exception handler to clear the direction
