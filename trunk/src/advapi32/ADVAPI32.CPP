@@ -1,4 +1,4 @@
-/* $Id: ADVAPI32.CPP,v 1.3 1999-06-10 14:23:33 phaller Exp $ */
+/* $Id: ADVAPI32.CPP,v 1.4 1999-06-11 13:00:21 phaller Exp $ */
 
 /*
  * Win32 advanced API functions for OS/2
@@ -54,111 +54,187 @@ HKEY ConvertKey(HKEY winkey)
 //******************************************************************************
 DWORD WIN32API RegCloseKey( HKEY arg1)
 {
-    dprintf(("RegCloseKey %X\n", arg1));
+    dprintf(("ADVAPI32: RegCloseKey %X\n", arg1));
     return O32_RegCloseKey(ConvertKey(arg1));
 }
 //******************************************************************************
 //******************************************************************************
 DWORD WIN32API RegCreateKeyA( HKEY arg1, LPCSTR arg2, PHKEY  arg3)
 {
-#ifdef DEBUG
-    WriteLog("RegCreateKey\n");
-#endif
-    return O32_RegCreateKey(ConvertKey(arg1), arg2, arg3);
+  dprintf(("ADVAPI32: RegCreateKey(%08xh,%s,%08xh)\n",
+           arg1,
+           arg2,
+           arg3));
+
+  return O32_RegCreateKey(ConvertKey(arg1),
+                          arg2,
+                          arg3);
 }
 //******************************************************************************
 //******************************************************************************
 DWORD WIN32API RegCreateKeyW(HKEY arg1, LPCWSTR arg2, PHKEY  arg3)
 {
- char *astring = UnicodeToAsciiString((LPWSTR)arg2);
- LONG  rc;
+  char *astring = UnicodeToAsciiString((LPWSTR)arg2);
+  LONG  rc;
 
-#ifdef DEBUG
-    WriteLog("RegCreateKeyW %s\n", astring);
-#endif
-    rc = O32_RegCreateKey(ConvertKey(arg1), astring, arg3);
-    FreeAsciiString(astring);
-    return(rc);
+  dprintf(("ADVAPI32: RegCreateKeyW(%08xh,%s,%08xh)\n",
+           arg1,
+           astring,
+           arg3));
+
+  rc = O32_RegCreateKey(ConvertKey(arg1),
+                        astring,
+                        arg3);
+  FreeAsciiString(astring);
+  return(rc);
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API RegCreateKeyExA( HKEY arg1, LPCSTR arg2, DWORD arg3, LPSTR arg4, DWORD arg5, REGSAM arg6, LPSECURITY_ATTRIBUTES arg7, PHKEY arg8, LPDWORD  arg9)
+DWORD WIN32API RegCreateKeyExA(HKEY   arg1,
+                               LPCSTR arg2,
+                               DWORD  arg3,
+                               LPSTR  arg4,
+                               DWORD  arg5,
+                               REGSAM arg6,
+                               LPSECURITY_ATTRIBUTES arg7,
+                               PHKEY   arg8,
+                               LPDWORD arg9)
 {
-#ifdef DEBUG
-    WriteLog("RegCreateKeyEx\n");
-#endif
-    return O32_RegCreateKeyEx(ConvertKey(arg1), arg2, arg3, arg4, arg5, arg6 | KEY_READ, arg7, arg8, arg9);
+  dprintf(("ADVAPI32: RegCreateKeyExA(%08xh,%s,%08xh,%s,%08xh,%08xh,%08xh,%08xh,%08xh)\n",
+           arg1,
+           arg2,
+           arg3,
+           arg4,
+           arg5,
+           arg6,
+           arg7,
+           arg8,
+           arg9));
+
+    return O32_RegCreateKeyEx(ConvertKey(arg1),
+                              arg2,
+                              arg3,
+                              arg4,
+                              arg5,
+                              arg6 | KEY_READ,
+                              arg7,
+                              arg8,
+                              arg9);
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API RegCreateKeyExW( HKEY arg1, LPCWSTR arg2, DWORD arg3, LPWSTR arg4, DWORD arg5, REGSAM arg6, LPSECURITY_ATTRIBUTES arg7, PHKEY arg8, LPDWORD  arg9)
+DWORD WIN32API RegCreateKeyExW(HKEY    arg1,
+                               LPCWSTR arg2,
+                               DWORD   arg3,
+                               LPWSTR  arg4,
+                               DWORD   arg5,
+                               REGSAM  arg6,
+                               LPSECURITY_ATTRIBUTES arg7,
+                               PHKEY   arg8,
+                               LPDWORD arg9)
 {
  char *astring1 = UnicodeToAsciiString((LPWSTR)arg2);
  char *astring2 = UnicodeToAsciiString(arg4);
  LONG  rc;
 
-#ifdef DEBUG
-    WriteLog("RegCreateKeyExW\n");
-#endif
-    rc = O32_RegCreateKeyEx(ConvertKey(arg1), astring1, arg3, astring2, arg5, arg6 | KEY_READ, arg7, arg8, arg9);
-    FreeAsciiString(astring1);
-    FreeAsciiString(astring2);
-    return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API RegDeleteKeyW(HKEY arg1, LPWSTR  arg2)
-{
- char *astring = UnicodeToAsciiString(arg2);
- LONG  rc;
+  dprintf(("ADVAPI32: RegCreateKeyExW(%08xh,%s,%08xh,%s,%08xh,%08xh,%08xh,%08xh,%08xh)\n",
+           arg1,
+           astring1,
+           arg3,
+           astring2,
+           arg5,
+           arg6,
+           arg7,
+           arg8,
+           arg9));
 
-#ifdef DEBUG
-    WriteLog("RegDeleteKeyW\n");
-#endif
-    rc = O32_RegDeleteKey(ConvertKey(arg1), astring);
-    FreeAsciiString(astring);
-    return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API RegDeleteKeyA(HKEY arg1, LPCSTR  arg2)
-{
-#ifdef DEBUG
-    WriteLog("RegDeleteKey\n");
-#endif
-    return O32_RegDeleteKey(ConvertKey(arg1), arg2);
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API RegDeleteValueA(HKEY arg1, LPSTR arg2)
-{
-#ifdef DEBUG
-    WriteLog("RegDeleteValue\n");
-#endif
-    return O32_RegDeleteValue(ConvertKey(arg1), arg2);
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API RegDeleteValueW(HKEY arg1, LPWSTR arg2)
-{
- char *astring = UnicodeToAsciiString(arg2);
- LONG  rc;
+  rc = O32_RegCreateKeyEx(ConvertKey(arg1),
+                          astring1,
+                          arg3,
+                          astring2,
+                          arg5,
+                          arg6 | KEY_READ,
+                          arg7,
+                          arg8,
+                          arg9);
 
-#ifdef DEBUG
-    WriteLog("RegDeleteValueW\n");
-#endif
-    rc = O32_RegDeleteValue(ConvertKey(arg1), astring);
-    FreeAsciiString(astring);
-    return(rc);
+  FreeAsciiString(astring1);
+  FreeAsciiString(astring2);
+  return(rc);
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API RegEnumKeyA(HKEY arg1, DWORD arg2, LPSTR arg3, DWORD  arg4)
+DWORD WIN32API RegDeleteKeyW(HKEY   arg1,
+                             LPWSTR arg2)
 {
-#ifdef DEBUG
-    WriteLog("RegEnumKey\n");
-#endif
-    return O32_RegEnumKey(ConvertKey(arg1), arg2, arg3, arg4);
+  char *astring = UnicodeToAsciiString(arg2);
+  LONG  rc;
+
+  dprintf(("ADVAPI32: RegDeleteKeyW(%08xh,%s)\n",
+           arg1,
+           astring));
+
+  rc = O32_RegDeleteKey(ConvertKey(arg1), astring);
+  FreeAsciiString(astring);
+  return(rc);
+}
+//******************************************************************************
+//******************************************************************************
+DWORD WIN32API RegDeleteKeyA(HKEY   arg1,
+                             LPCSTR arg2)
+{
+  dprintf(("ADVAPI32: RegDeleteKeyA(%08xh,%s)\n",
+           arg1,
+           arg2));
+
+  return O32_RegDeleteKey(ConvertKey(arg1), arg2);
+}
+//******************************************************************************
+//******************************************************************************
+DWORD WIN32API RegDeleteValueA(HKEY  arg1,
+                               LPSTR arg2)
+{
+  dprintf(("ADVAPI32: RegDeleteValueA(%08xh,%s)\n";
+           arg1,
+           arg2));
+
+  return O32_RegDeleteValue(ConvertKey(arg1),
+                            arg2);
+}
+//******************************************************************************
+//******************************************************************************
+DWORD WIN32API RegDeleteValueW(HKEY   arg1,
+                               LPWSTR arg2)
+{
+  char *astring = UnicodeToAsciiString(arg2);
+  LONG  rc;
+
+  dprintf(("ADVAPI32: RegDeleteValueW(%08xh,%s)\n",
+           arg1,
+           astring));
+
+  rc = O32_RegDeleteValue(ConvertKey(arg1),
+                          astring);
+  FreeAsciiString(astring);
+  return(rc);
+}
+//******************************************************************************
+//******************************************************************************
+DWORD WIN32API RegEnumKeyA(HKEY  arg1,
+                           DWORD arg2,
+                           LPSTR arg3,
+                           DWORD arg4)
+{
+  dprintf(("ADVAPI32: RegEnumKeyA(%08xh,%08xh,%08xh,%08xh)\n",
+           arg1,
+           arg2,
+           arg3,
+           arg4));
+
+  return O32_RegEnumKey(ConvertKey(arg1),
+                        arg2,
+                        arg3,
+                        arg4);
 }
 //******************************************************************************
 //******************************************************************************
@@ -168,14 +244,14 @@ DWORD WIN32API RegEnumKeyW(HKEY arg1, DWORD arg2, LPWSTR arg3, DWORD  arg4)
  LONG  rc;
 
 #ifdef DEBUG
-    WriteLog("RegEnumKeyW\n");
+    WriteLog("ADVAPI32: RegEnumKeyW\n");
 #endif
     rc = O32_RegEnumKey(ConvertKey(arg1), arg2, (char *)arg3, arg4);
     if(rc == ERROR_SUCCESS) {
-   	astring = (char *)malloc(arg4);
-   	strcpy(astring, (char *)arg3);
-   	AsciiToUnicode(astring, arg3);
-   	free(astring);
+      astring = (char *)malloc(arg4);
+      strcpy(astring, (char *)arg3);
+      AsciiToUnicode(astring, arg3);
+      free(astring);
     }
     return(rc);
 }
@@ -184,7 +260,7 @@ DWORD WIN32API RegEnumKeyW(HKEY arg1, DWORD arg2, LPWSTR arg3, DWORD  arg4)
 DWORD WIN32API RegEnumKeyExA(HKEY arg1, DWORD arg2, LPSTR arg3, LPDWORD arg4, LPDWORD arg5, LPSTR arg6, LPDWORD arg7, LPFILETIME  arg8)
 {
 #ifdef DEBUG
-    WriteLog("RegEnumKeyEx\n");
+    WriteLog("ADVAPI32: RegEnumKeyEx\n");
 #endif
     return O32_RegEnumKeyEx(ConvertKey(arg1), arg2, arg3, arg4, arg5, arg6, arg7, arg8);
 }
@@ -196,18 +272,18 @@ DWORD WIN32API RegEnumKeyExW(HKEY arg1, DWORD arg2, LPWSTR arg3, LPDWORD arg4, L
  LONG  rc;
 
 #ifdef DEBUG
-    WriteLog("RegEnumKeyExW\n");
+    WriteLog("ADVAPI32: RegEnumKeyExW\n");
 #endif
     rc = O32_RegEnumKeyEx(ConvertKey(arg1), arg2, (char *)arg3, arg4, arg5, (char *)arg6, arg7, arg8);
     if(rc == ERROR_SUCCESS) {
-   	astring = (char *)malloc(max(*arg4, *arg7));   //class & keyname
-   	strcpy(astring, (char *)arg3);
-   	AsciiToUnicode(astring, arg3);
-   	if(arg6 != NULL) {
-      		strcpy(astring, (char *)arg6);
-      		AsciiToUnicode(astring, arg6);
-   	}
-   	free(astring);
+      astring = (char *)malloc(max(*arg4, *arg7));   //class & keyname
+      strcpy(astring, (char *)arg3);
+      AsciiToUnicode(astring, arg3);
+      if(arg6 != NULL) {
+            strcpy(astring, (char *)arg6);
+            AsciiToUnicode(astring, arg6);
+      }
+      free(astring);
     }
     return(rc);
 }
@@ -216,7 +292,7 @@ DWORD WIN32API RegEnumKeyExW(HKEY arg1, DWORD arg2, LPWSTR arg3, LPDWORD arg4, L
 DWORD WIN32API RegEnumValueA(HKEY arg1, DWORD arg2, LPSTR arg3, LPDWORD arg4, LPDWORD arg5, LPDWORD arg6, LPBYTE arg7, LPDWORD  arg8)
 {
 #ifdef DEBUG
-    WriteLog("RegEnumValue\n");
+    WriteLog("ADVAPI32: RegEnumValue\n");
 #endif
     return O32_RegEnumValue(ConvertKey(arg1), arg2, arg3, arg4, arg5, arg6, arg7, arg8);
 }
@@ -228,14 +304,14 @@ DWORD WIN32API RegEnumValueW(HKEY arg1, DWORD arg2, LPWSTR arg3, LPDWORD arg4, L
  LONG  rc;
 
 #ifdef DEBUG
-    WriteLog("RegEnumValueW\n");
+    WriteLog("ADVAPI32: RegEnumValueW\n");
 #endif
     rc = O32_RegEnumValue(ConvertKey(arg1), arg2, (char *)arg3, arg4, arg5, arg6, arg7, arg8);
     if(rc == ERROR_SUCCESS) {
-   	astring = (char *)malloc(*arg4);
-   	strcpy(astring, (char *)arg3);
-   	AsciiToUnicode(astring, arg3);
-   	free(astring);
+      astring = (char *)malloc(*arg4);
+      strcpy(astring, (char *)arg3);
+      AsciiToUnicode(astring, arg3);
+      free(astring);
     }
     return(rc);
 }
@@ -249,11 +325,11 @@ DWORD WIN32API RegOpenKeyA(HKEY    arg1,
 
     rc = O32_RegOpenKey(ConvertKey(arg1), arg2, arg3);
     if(rc) {
-    	*arg3 = 0;
+      *arg3 = 0;
     }
 
 #ifdef DEBUG
-    WriteLog("RegOpenKey 0x%x\\%s returned %d (%d)\n", arg1, arg2, *arg3, rc);
+    WriteLog("ADVAPI32: RegOpenKey 0x%x\\%s returned %d (%d)\n", arg1, arg2, *arg3, rc);
 #endif
     return(rc);
 }
@@ -265,11 +341,11 @@ DWORD WIN32API RegOpenKeyW(HKEY arg1, LPCWSTR arg2, PHKEY  arg3)
  LONG  rc;
 
 #ifdef DEBUG
-    WriteLog("RegOpenKeyW\n");
+    WriteLog("ADVAPI32: RegOpenKeyW\n");
 #endif
     rc = O32_RegOpenKey(ConvertKey(arg1), astring, arg3);
     if(rc) {
-    	*arg3 = 0;
+      *arg3 = 0;
     }
 
     FreeAsciiString(astring);
@@ -283,12 +359,12 @@ DWORD WIN32API RegOpenKeyExA(HKEY arg1, LPCSTR arg2, DWORD arg3, REGSAM arg4, PH
 
     rc = O32_RegOpenKeyEx(ConvertKey(arg1), arg2, arg3, arg4, arg5);
 #ifdef DEBUG
-    WriteLog("RegOpenKeyExA %X %s returned %X (%d)\n", arg1, arg2, *arg5, rc);
+    WriteLog("ADVAPI32: RegOpenKeyExA %X %s returned %X (%d)\n", arg1, arg2, *arg5, rc);
 #endif
     //SvL: This fixes crashes in pmwinx.dll. (if an app doesn't check the
     //     return value and uses the whatever *arg5 contains)
     if(rc) {
-   	*arg5 = 0;
+      *arg5 = 0;
     }
     return(rc);
 }
@@ -300,13 +376,13 @@ DWORD WIN32API RegOpenKeyExW(HKEY arg1, LPCWSTR arg2, DWORD arg3, REGSAM arg4, P
  LONG  rc;
 
 #ifdef DEBUG
-    WriteLog("RegOpenKeyExW %X %s\n", arg1, astring);
+    WriteLog("ADVAPI32: RegOpenKeyExW %X %s\n", arg1, astring);
 #endif
     rc = O32_RegOpenKeyEx(ConvertKey(arg1), astring, arg3, arg4, arg5);
     //SvL: This fixes crashes in pmwinx.dll. (if an app doesn't check the
     //     return value and uses the whatever *arg5 contains)
     if(rc) {
-   	*arg5 = 0;
+      *arg5 = 0;
     }
     FreeAsciiString(astring);
     return(rc);
@@ -316,7 +392,7 @@ DWORD WIN32API RegOpenKeyExW(HKEY arg1, LPCWSTR arg2, DWORD arg3, REGSAM arg4, P
 DWORD WIN32API RegQueryInfoKeyA(HKEY arg1, LPSTR arg2, LPDWORD arg3, LPDWORD arg4, LPDWORD arg5, LPDWORD arg6, LPDWORD arg7, LPDWORD arg8, LPDWORD arg9, LPDWORD arg10, LPDWORD arg11, LPFILETIME  arg12)
 {
 #ifdef DEBUG
-    WriteLog("RegQueryInfoKey\n");
+    WriteLog("ADVAPI32: RegQueryInfoKey\n");
 #endif
     return O32_RegQueryInfoKey(ConvertKey(arg1), arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12);
 }
@@ -328,14 +404,14 @@ DWORD WIN32API RegQueryInfoKeyW(HKEY arg1, LPWSTR arg2, LPDWORD arg3, LPDWORD ar
  LONG  rc;
 
 #ifdef DEBUG
-    WriteLog("RegQueryInfoKeyW\n");
+    WriteLog("ADVAPI32: RegQueryInfoKeyW\n");
 #endif
     rc = O32_RegQueryInfoKey(ConvertKey(arg1), (char *)arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12);
     if(rc == ERROR_SUCCESS) {
-   	astring = (char *)malloc(*arg3);
-	strcpy(astring, (char *)arg2);
-	AsciiToUnicode(astring, arg2);
-	free(astring);
+      astring = (char *)malloc(*arg3);
+   strcpy(astring, (char *)arg2);
+   AsciiToUnicode(astring, arg2);
+   free(astring);
     }
     return(rc);
 }
@@ -344,7 +420,7 @@ DWORD WIN32API RegQueryInfoKeyW(HKEY arg1, LPWSTR arg2, LPDWORD arg3, LPDWORD ar
 DWORD WIN32API RegQueryValueA(HKEY arg1, LPCSTR arg2, LPSTR arg3, PLONG  arg4)
 {
 #ifdef DEBUG
-    WriteLog("RegQueryValue\n");
+    WriteLog("ADVAPI32: RegQueryValue\n");
 #endif
     return O32_RegQueryValue(ConvertKey(arg1), arg2, arg3, arg4);
 }
@@ -357,7 +433,7 @@ DWORD WIN32API RegQueryValueW(HKEY hkey, LPCWSTR lpszSubKey, LPWSTR lpszValue, P
  LONG  rc;
 
 #ifdef DEBUG
-    WriteLog("RegQueryValueW\n");
+    WriteLog("ADVAPI32: RegQueryValueW\n");
 #endif
     rc = O32_RegQueryValue(ConvertKey(hkey), astring1, (char *)lpszValue, pcbValue);
     if(rc == ERROR_SUCCESS) {
@@ -373,7 +449,7 @@ DWORD WIN32API RegQueryValueW(HKEY hkey, LPCWSTR lpszSubKey, LPWSTR lpszValue, P
 DWORD WIN32API RegQueryValueExA(HKEY arg1, LPSTR arg2, LPDWORD arg3, LPDWORD arg4, LPBYTE arg5, LPDWORD  arg6)
 {
 #ifdef DEBUG
-    WriteLog("RegQueryValueEx %s\n", arg2);
+    WriteLog("ADVAPI32: RegQueryValueEx %s\n", arg2);
 #endif
     return O32_RegQueryValueEx(ConvertKey(arg1), arg2, arg3, arg4, arg5, arg6);
 }
@@ -386,7 +462,7 @@ DWORD WIN32API RegQueryValueExW(HKEY arg1, LPWSTR arg2, LPDWORD arg3, LPDWORD ar
  LONG  rc;
 
 #ifdef DEBUG
-    WriteLog("RegQueryValueExW %s\n", astring);
+    WriteLog("ADVAPI32: RegQueryValueExW %s\n", astring);
 #endif
     rc = O32_RegQueryValueEx(ConvertKey(arg1), astring, arg3, arg4, arg5, arg6);
     FreeAsciiString(astring);
@@ -397,7 +473,7 @@ DWORD WIN32API RegQueryValueExW(HKEY arg1, LPWSTR arg2, LPDWORD arg3, LPDWORD ar
 DWORD WIN32API RegSetValueA(HKEY hkey, LPCSTR lpSubKey, DWORD dwType, LPCSTR lpData, DWORD cbData)
 {
 #ifdef DEBUG
-   WriteLog("RegSetValueA %d, %s, %d, %s, %d\n", hkey, lpSubKey, dwType, lpData, cbData);
+   WriteLog("ADVAPI32: RegSetValueA %d, %s, %d, %s, %d\n", hkey, lpSubKey, dwType, lpData, cbData);
 #endif
    //SvL: 8-11-'97: Bugfix: crash in pmwinx if size == 0 and string is large
    if(cbData == 0)
@@ -414,7 +490,7 @@ DWORD WIN32API RegSetValueW(HKEY hkey, LPCWSTR lpSubKey, DWORD dwType, LPCWSTR l
  LONG  rc;
 
 #ifdef DEBUG
-    WriteLog("RegSetValue\n");
+    WriteLog("ADVAPI32: RegSetValue\n");
 #endif
    //SvL: 8-11-'97: Bugfix: crash in pmwinx if size == 0 and string is large
    if(cbData == 0)
@@ -431,7 +507,7 @@ DWORD WIN32API RegSetValueW(HKEY hkey, LPCWSTR lpSubKey, DWORD dwType, LPCWSTR l
 DWORD WIN32API RegSetValueExA(HKEY arg1, LPSTR arg2, DWORD arg3, DWORD arg4, BYTE * arg5, DWORD  arg6)
 {
 #ifdef DEBUG
-    WriteLog("RegSetValueEx\n");
+    WriteLog("ADVAPI32: RegSetValueEx\n");
 #endif
     return O32_RegSetValueEx(ConvertKey(arg1), arg2, arg3, arg4, arg5, arg6);
 }
@@ -444,7 +520,7 @@ DWORD WIN32API RegSetValueExW(HKEY arg1, LPWSTR arg2, DWORD arg3, DWORD arg4, BY
  LONG  rc;
 
 #ifdef DEBUG
-    WriteLog("RegSetValueExW, NOT COMPLETE!!\n");
+    WriteLog("ADVAPI32: RegSetValueExW, NOT COMPLETE!!\n");
 #endif
     rc = O32_RegSetValueEx(ConvertKey(arg1), astring, arg3, arg4, arg5, arg6);
     FreeAsciiString(astring);
@@ -489,8 +565,8 @@ BOOL WIN32API GetFileSecurityW(LPCWSTR               lpFileName,
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API SetFileSecurityA(LPCSTR lpFileName,
-		               SECURITY_INFORMATION RequestedInformation,
-              		       PSECURITY_DESCRIPTOR pSecurityDescriptor)
+                     SECURITY_INFORMATION RequestedInformation,
+                         PSECURITY_DESCRIPTOR pSecurityDescriptor)
 {
 #ifdef DEBUG
   WriteLog("SetFileSecurityA %s, not implemented\n", lpFileName);
@@ -500,8 +576,8 @@ BOOL WIN32API SetFileSecurityA(LPCSTR lpFileName,
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API SetFileSecurityW(LPCWSTR lpFileName,
-              			SECURITY_INFORMATION RequestedInformation,
-              			PSECURITY_DESCRIPTOR pSecurityDescriptor)
+                                         SECURITY_INFORMATION RequestedInformation,
+                                         PSECURITY_DESCRIPTOR pSecurityDescriptor)
 {
 #ifdef DEBUG
   WriteLog("SetFileSecurityW %s, not implemented\n", lpFileName);
@@ -597,7 +673,7 @@ BOOL WIN32API SetSecurityDescriptorDacl( /*PLF Sat  98-03-07 02:48:45*/
 
 /*PLF Sat  98-03-07 02:59:20*/
 BOOL WIN32API InitializeSecurityDescriptor(PSECURITY_DESCRIPTOR pSecurityDescriptor,
-					   DWORD dwRevision)
+                  DWORD dwRevision)
 {
     dprintf(("InitializeSecurityDescriptor() NIY\n"));
     return FALSE;
@@ -606,14 +682,14 @@ BOOL WIN32API InitializeSecurityDescriptor(PSECURITY_DESCRIPTOR pSecurityDescrip
 /*PLF Sat  98-03-07 02:59:20*/
 HANDLE WIN32API RegisterEventSourceA(LPCSTR lpUNCServerName, LPCSTR lpSourceName)
 {
-    dprintf(("RegisterEventSourceA() NIY\n"));
+    dprintf(("ADVAPI32: RegisterEventSourceA() NIY\n"));
     return FALSE;
 }
 
 /*PLF Sat  98-03-07 02:59:20*/
 HANDLE WIN32API RegisterEventSourceW(LPCWSTR lpUNCServerName, LPCWSTR lpSourceName)
 {
-    dprintf(("RegisterEventSourceW() NIY\n"));
+    dprintf(("ADVAPI32: RegisterEventSourceW() NIY\n"));
     return FALSE;
 }
 
@@ -660,8 +736,8 @@ BOOL WIN32API LookupPrivilegeValueW(LPCWSTR lpSystemName,
 
 /*PLF Sat  98-03-07 02:59:20*/
 BOOL WIN32API OpenProcessToken(HANDLE ProcessHandle,
-			       DWORD DesiredAccess,
-			       PHANDLE TokenHandle
+                DWORD DesiredAccess,
+                PHANDLE TokenHandle
 )
 {
     dprintf(("OpenProcessToken() NIY\n"));
@@ -681,7 +757,7 @@ LONG WIN32API RegNotifyChangeKeyValue (
    BOOL fAsynchronus
                         )
 {
-   dprintf(("RegNotifyChangeKeyValue() NIY\n"));
+   dprintf(("ADVAPI32: RegNotifyChangeKeyValue() NIY\n"));
    return FALSE;
 }
 //******************************************************************************
