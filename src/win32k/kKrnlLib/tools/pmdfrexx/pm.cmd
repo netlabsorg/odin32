@@ -653,7 +653,7 @@ parse arg sMem
     say '            MP2:' d2x(smsMP2(sMem),8)
     say '      Reserved2:' d2x(smsReserved2(sMem),8)
     say '      Reserved3:' d2x(smsReserved3(sMem),8)
-    say '      Reserved4:' d2x(smsReserver4(sMem),8)
+    say '      Reserved4:' d2x(smsReserved4(sMem),8)
 return 0;
 
 
