@@ -1,4 +1,4 @@
--- $Id: CreateTables.sql,v 1.8 2000-07-18 07:15:57 bird Exp $
+-- $Id: CreateTables.sql,v 1.9 2000-07-18 07:28:01 bird Exp $
 --
 -- Create all tables.
 --
