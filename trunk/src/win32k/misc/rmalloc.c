@@ -1,4 +1,4 @@
-/* $Id: rmalloc.c,v 1.1 2000-01-22 18:21:03 bird Exp $
+/* $Id: rmalloc.c,v 1.2 2000-01-23 03:20:53 bird Exp $
  *
  * Resident Heap.
  *
@@ -17,7 +17,7 @@
 ******************************************************************************/
 #ifdef DEBUG
     #define DEBUG_ALLOC
-    #define ALLWAYS_HEAPCHECK
+    #undef ALLWAYS_HEAPCHECK
 #endif
 
 #define HEAPANCHOR_SIGNATURE    0xBEEFFEEB
@@ -552,6 +552,7 @@ void *rrealloc(void *pv, unsigned cbNew)
                 #endif
                 pmbNew->cbSize = pmb->cbSize - cbNew - CB_HDR;
                 pmbNew->pNext = NULL;
+                pha->cbUsed -= pmb->cbSize - cbNew;
                 pmb->cbSize = cbNew;
                 resInsertFree(pha, pmbNew);
             }
