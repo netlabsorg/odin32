@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2730 2004-05-07 10:28:24 sandervl Exp $ */
+/* $Id: changelog,v 1.2731 2004-05-11 09:08:38 sandervl Exp $ */
+
+ 2003-05-11: Dietrich Teickner <Dietrich_Teickner@t-online   >
+    - USER32:   o Added wrappers for calling window handlers
 
  2004-05-07: KO Myung-Hun <komh@chollian    >
     - GDI32:    o DBCS updates
