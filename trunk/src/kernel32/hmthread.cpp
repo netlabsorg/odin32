@@ -1,4 +1,4 @@
-/* $Id: hmthread.cpp,v 1.18 2003-02-04 11:29:00 sandervl Exp $ */
+/* $Id: hmthread.cpp,v 1.19 2003-03-27 15:27:37 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -29,7 +29,7 @@
 
 #include <HandleManager.H>
 #include "HMThread.h"
-#include "oslibdos.h"
+#include "oslibthread.h"
 
 #include <win\thread.h>
 #include "thread.h"
