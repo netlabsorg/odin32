@@ -32,7 +32,6 @@
 #include "debugtools.h"
 #include "winerror.h"
 
-#include "docobj.h"
 #include "pidl.h"
 #include "shell32_main.h"
 
