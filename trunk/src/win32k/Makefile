@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.68 2001-03-11 16:43:08 bird Exp $
+# $Id: Makefile,v 1.69 2001-04-14 07:24:01 bird Exp $
 
 #
 # Win32k makefile.
@@ -15,7 +15,7 @@
 #     If not newer this might be a fatal problem, so we'll fail.
 #
 !if [..\..\tools\bin\Exists.cmd makefile.inc] == 1
-!   if [echo No makefile.inc - Reconfiguring Win32k... & configure.cmd noninteractive]
+!   if [echo No makefile.inc - Reconfiguring Win32k... & configure.cmd -noninteractive]
 !   endif
 !endif
 !if [Check.cmd $(MAKE) -nologo -q -f Check.mk makefile.inc] != 0
@@ -29,7 +29,7 @@
 #
 !include makefile.inc
 !if [..\..\tools\bin\Exists.cmd $(WIN32KINCLUDE)\OS2Krnl.h] == 1
-!   if [echo Bad makefile.inc - Reconfiguring Win32k... & configure.cmd noninteractive]
+!   if [echo Bad makefile.inc - Reconfiguring Win32k... & configure.cmd -noninteractive]
 !   endif
 !   include makefile.inc
 !endif
