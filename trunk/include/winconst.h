@@ -1,4 +1,4 @@
-/* $Id: winconst.h,v 1.39 2001-02-17 19:55:39 sandervl Exp $ */
+/* $Id: winconst.h,v 1.40 2001-02-22 18:13:00 sandervl Exp $ */
 
 /*
  * Win32 constants
@@ -1469,3 +1469,13 @@
 #define GW_HWNDPREV_W     3
 #define GW_OWNER_W        4
 #define GW_CHILD_W        5
+
+/* WM_NCCALCSIZE return flags */
+#define WVR_ALIGNTOP_W        0x0010
+#define WVR_ALIGNLEFT_W       0x0020
+#define WVR_ALIGNBOTTOM_W     0x0040
+#define WVR_ALIGNRIGHT_W      0x0080
+#define WVR_HREDRAW_W         0x0100
+#define WVR_VREDRAW_W         0x0200
+#define WVR_REDRAW_W          (WVR_HREDRAW_W | WVR_VREDRAW_W)
+#define WVR_VALIDRECTS_W      0x0400
