@@ -56,10 +56,15 @@
 #include <odin.h>
 
 // ---------------------------------------------------------------------------
-extern unsigned long int WIN32API GetCurrentThreadId();     // kernel32
-extern unsigned long int WIN32API dbg_GetThreadCallDepth(); // kernel32
-extern void              WIN32API dbg_IncThreadCallDepth(); // kernel32
-extern void              WIN32API dbg_DecThreadCallDepth(); // kernel32
+#ifdef __WATCOMC__
+//this doens't work with watcom because doubly declared somewhere :-(
+//extern unsigned long int WIN32API GetCurrentThreadId(void);     // kernel32
+#else
+extern unsigned long int WIN32API GetCurrentThreadId(void);     // kernel32
+#endif
+extern unsigned long int WIN32API dbg_GetThreadCallDepth(void); // kernel32
+extern void              WIN32API dbg_IncThreadCallDepth(void); // kernel32
+extern void              WIN32API dbg_DecThreadCallDepth(void); // kernel32
 
 // ---------------------------------------------------------------------------
 //SvL: Only check the heap very frequently when there are problems
@@ -80,8 +85,8 @@ extern void              WIN32API dbg_DecThreadCallDepth(); // kernel32
      LARGE_INTEGER liEnd;         \
      unsigned long ulElapsed;     \
      QueryPerformanceCounter(&liStart);
-  
-  
+
+
 #  define PROFILE_STOP(a)            \
      QueryPerformanceCounter(&liEnd);\
      if (liStart.LowPart > liEnd.LowPart) \
@@ -113,8 +118,8 @@ extern void              WIN32API dbg_DecThreadCallDepth(); // kernel32
     SetFS(sel); \
     dprintf(("WARNING: FS: for thread %08xh corrupted by "a, GetCurrentThreadId())); \
   }
-  
-  
+
+
 /****************************************************************************
  * General Wrapper Macros (debug instrumented)                              *
  ****************************************************************************/
@@ -705,7 +710,7 @@ extern void              WIN32API dbg_DecThreadCallDepth(); // kernel32
  ****************************************************************************/
 
 #define FNPROLOGUE(a)   \
-  USHORT sel = GetFS(); 
+  USHORT sel = GetFS();
 
 #define FNEPILOGUE(a)   \
   SetFS(sel);
