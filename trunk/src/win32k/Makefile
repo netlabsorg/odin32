@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.58 2000-10-17 12:07:22 bird Exp $
+# $Id: Makefile,v 1.59 2000-10-27 09:55:52 bird Exp $
 #
 # Win32k makefile.
 #
@@ -327,6 +327,7 @@ OBJS  =\
     $(WIN32KOBJ)\d32hlp.obj \
     $(WIN32KOBJ)\d32globals.obj \
     $(WIN32KOBJ)\d16globl.obj \
+    $(WIN32KOBJ)\abort.obj \
     $(WIN32KOBJ)\asmutils.obj \
     $(WIN32KOBJ)\calltaba.obj \
     $(WIN32KOBJ)\malloc.obj \
@@ -392,6 +393,7 @@ TSTOBJS =\
     $(WIN32KOBJ)\d32hlp.obj \
     $(WIN32KOBJ)\d32globals.obj \
     $(WIN32KOBJ)\d16globl.obj \
+    $(WIN32KOBJ)\abort.obj \
     $(WIN32KOBJ)\asmutils.obj \
     $(WIN32KOBJ)\calltaba.obj \
     $(WIN32KOBJ)\malloc.obj_tst \
