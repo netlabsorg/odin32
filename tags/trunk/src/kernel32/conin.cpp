@@ -1,4 +1,4 @@
-/* $Id: conin.cpp,v 1.11 2000-08-10 16:54:23 phaller Exp $ */
+/* $Id: conin.cpp,v 1.12 2000-10-03 17:28:28 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -992,3 +992,7 @@ DWORD HMDeviceConsoleInClass::WriteConsoleInputW (PHMHANDLEDATA pHMHandleData,
 }
 
 
+DWORD HMDeviceConsoleInClass::GetFileType (PHMHANDLEDATA pHMHandleData)
+{
+   return FILE_TYPE_CHAR;
+}

@@ -1,4 +1,4 @@
-; $Id: cpuhlp.asm,v 1.3 2000-02-15 19:06:12 sandervl Exp $
+; $Id: cpuhlp.asm,v 1.4 2000-10-03 17:28:29 sandervl Exp $
 
 ;/*
 ; * Project Odin Software License can be found in LICENSE.TXT
@@ -107,6 +107,26 @@ _GetCPUSignature proc near
 	ret
 _GetCPUSignature endp
 
+
+_GetTSC proc near
+	push	ebp
+	mov	ebp, esp
+	push	edx
+	push	esi
+	push	edi
+	rdtsc
+
+	mov  	esi, [ebp+8]	;ptr to low dword 
+	mov	edi, [ebp+12]	;ptr to high dword
+	mov	[esi], eax
+	mov	[edi], edx
+
+	pop	edi
+	pop	esi
+	pop	edx
+	pop	ebp
+	ret
+_GetTSC endp
 
 CODE32          ENDS
 
