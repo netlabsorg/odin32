@@ -43,8 +43,8 @@ class OS2PrimBuff: public OS2IDirectSoundBuffer
     USHORT usDeviceID;
 
     long  rate;    // Samples per second
-    long  bps;     // Bits per sample 8 or 16 !!
-    long  channels;// Number of Channels 1 or 2 MONO/Stereo
+    WORD  bps;     // Bits per sample 8 or 16 !!
+    WORD  channels;// Number of Channels 1 or 2 MONO/Stereo
 
     OS2IDirectSound3DListener* listener;  // pointer to the associated 3DListener object
 

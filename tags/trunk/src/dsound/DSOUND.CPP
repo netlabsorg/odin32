@@ -1,4 +1,4 @@
-/* $Id: DSOUND.CPP,v 1.7 2000-03-13 12:47:44 sandervl Exp $ */
+/* $Id: DSOUND.CPP,v 1.8 2001-03-06 20:11:16 mike Exp $ */
 
 /*
  * DirectSound exported APIs
@@ -28,6 +28,8 @@
 #include <misc.h>
 
 OS2IDirectSound *DS = NULL;
+
+extern "C" {
 
 //******************************************************************************
 //******************************************************************************
@@ -240,4 +242,4 @@ HRESULT WINAPI DllCanUnloadNow(void)
   dprintf(("DSOUND:DllCanUnloadNow(void) stub\n"));
   return S_FALSE;
 }//******************************************************************************
-
+}

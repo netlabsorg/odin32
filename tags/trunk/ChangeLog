@@ -1,21 +1,24 @@
-/* $Id: ChangeLog,v 1.1294 2001-03-02 12:51:50 bird Exp $ */
- 
+/* $Id: ChangeLog,v 1.1295 2001-03-06 20:11:15 mike Exp $ */
+
+ 2000-03-06: Michal Necasek <michalnec@volny.cz>
+    - DSOUND:   o Cleaned up for building with Watcom
+
  2001-03-02: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Win32k:   o Fixed some 16-bit compiler problems.
-				o Fixed 4.51 toolkit problems.
+                o Fixed 4.51 toolkit problems.
 
  2001-02-28: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Added support for high memory override key in odin.ini:
                   [ODINSYSTEM]
                   HIGHMEM=0
-                  Turns off high memory usage in Odin. Useful for Warp 4 (>fp12) 
+                  Turns off high memory usage in Odin. Useful for Warp 4 (>fp12)
                   systems that still use the old 16 bits TCPIP stack.
                   (temporary workaround)
                   NOTE: Turning this option off will prevent Odin from running
-                        applications that must be loaded in high memory 
-                        (like MS Word). 
+                        applications that must be loaded in high memory
+                        (like MS Word).
     - NTDLL:    o Committed update from Jan. 25th:
-                  Ported latest NtQuerySystemInformation from Wine 
+                  Ported latest NtQuerySystemInformation from Wine
                   (includes fix for IE5 install)
     - include\odinwrap.h:
                 o Wrappers only detect FS problems when they should correct them.
@@ -77,8 +80,6 @@
                   Useful for creating an Odin window with an OS/2 window as
                   parent.
 
- 2000-02-21: Michal Necasek <michalnec@volny.cz>
-    - USER32:   o Translate WM_BUTTONxMOTIONSTART/END to WM_MOUSEMOVE
                   Applications don't expect WM_NULL when fetching mouse
                   messages from the queue.
                   (fixes mouse jumping in Unreal)
