@@ -1,4 +1,4 @@
-/* $Id: dsoundrsrc.orc,v 1.2 2000-03-13 12:47:52 sandervl Exp $ */
+/* $Id: dsoundrsrc.orc,v 1.3 2000-08-18 21:27:22 sandervl Exp $ */
 
 #include "winuser.h"
 #include "odinrsrc.h"
@@ -6,12 +6,12 @@
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Version (based on NT 4 SP3)
+// Version (based on NT 4 SP6)
 //
 
 1 VERSIONINFO
- FILEVERSION ODIN_FILEVERSION
- PRODUCTVERSION ODIN_PRODUCTVERSION
+ FILEVERSION 0x04, 0x04, 0x0565, 0x00A4
+ PRODUCTVERSION 0x04, 0x04, 0x0565, 0x00A4
  FILEFLAGSMASK 0x3fL
  FILEFLAGS 0xaL
  FILEOS 0x10001L
