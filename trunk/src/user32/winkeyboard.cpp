@@ -1,4 +1,4 @@
-/* $Id: winkeyboard.cpp,v 1.28 2001-12-12 12:51:09 sandervl Exp $ */
+/* $Id: winkeyboard.cpp,v 1.29 2002-01-02 18:37:09 sandervl Exp $ */
 /*
  * Win32 <-> PM key translation
  *
@@ -724,8 +724,8 @@ BYTE abPMScanToWinScan[256][2] =
 /* 0x7b PMSCAN_NLS1         */ , WINSCAN_NLS1               ,FALSE
 /* 0x7c PMSCAN_APPLICATION  */ , WINSCAN_APPLICATION        ,TRUE
 /* 0x7d PMSCAN_E13          */ , WINSCAN_YEN                ,FALSE
-/* 0x7e PMSCAN              */ , WINSCAN_WINLEFT            ,TRUE
-/* 0x7f PMSCAN              */ , WINSCAN_WINRIGHT           ,TRUE
+/* 0x7e PMSCAN_WINLEFT      */ , WINSCAN_WINLEFT            ,TRUE
+/* 0x7f PMSCAN_WINRIGHT     */ , WINSCAN_WINRIGHT           ,TRUE
 /* 0x80 PMSCAN_PA1          */ , WINSCAN_PA1                ,FALSE
 /* 0x81 PMSCAN_F13          */ , WINSCAN_F13                ,FALSE
 /* 0x82 PMSCAN_F14          */ , WINSCAN_F14                ,FALSE

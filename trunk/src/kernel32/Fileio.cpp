@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.62 2001-12-07 11:28:09 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.63 2002-01-02 18:37:51 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -1402,7 +1402,7 @@ DWORD WINAPI GetLongPathNameW( LPCWSTR lpszShortPath, LPWSTR lpszLongPath,
 //******************************************************************************
 ODINPROCEDURE0(SetFileApisToANSI)
 {
-    dprintf(("SetFileApisToANSI() stub\n"));
+    dprintf(("!WARNING! SetFileApisToANSI() stub\n"));
 }
 
 /*****************************************************************************
