@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2419 2003-01-03 21:42:38 sandervl Exp $ */
+/* $Id: changelog,v 1.2420 2003-01-04 12:21:21 sandervl Exp $ */
+
+ 2003-01-04: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Corrected drawing of menubar in OS/2 L&F mode (when highlighted)
+                o Fixed handling of single ALT to select menu
 
  2003-01-03: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Merged Rewind menu control
