@@ -1,4 +1,4 @@
-/* $Id: odin32ftp2.cmd,v 1.11 2001-03-24 19:22:02 bird Exp $
+/* $Id: odin32ftp2.cmd,v 1.12 2001-04-02 01:55:41 bird Exp $
  *
  * Uploads the relase and debug builds to the FTP sites.
  *
@@ -17,7 +17,7 @@ parse arg sLoc
 /*
  * Determin files to upload and files to delete.
  */
-if (DATE('B')//7 = 4) then              /* Thursdays only! */
+if (DATE('B')//7 = 3) then              /* Thursdays only! */
 do  /* weekly .wpi build */
     asUploads.0 = 3;
     asUploads.1 = 'ChangeLog';
