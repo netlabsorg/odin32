@@ -1,4 +1,4 @@
-/* $Id: fastdep.c,v 1.32 2001-10-26 20:50:06 bird Exp $
+/* $Id: fastdep.c,v 1.33 2001-11-14 11:13:26 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
@@ -283,7 +283,7 @@ static const char pszDefaultDepFile[] = ".depend";
 static const char *apszExtC_CPP[] = {"c", "sqc", "cpp", "h", "hpp", NULL};
 static const char *apszExtAsm[]   = {"asm", "inc", NULL};
 static const char *apszExtRC[]    = {"rc", "orc", "dlg", NULL};
-static const char *apszExtCOBOL[] = {"cbl", "cob", "sqb", NULL};
+static const char *apszExtCOBOL[] = {"cbl", "cob", "sqb", "wbl", NULL};
 static CONFIGENTRY aConfig[] =
 {
     {
@@ -306,7 +306,7 @@ static CONFIGENTRY aConfig[] =
 
     {
         apszExtCOBOL,
-        3,
+        4,
         langCOBOL,
     },
 
