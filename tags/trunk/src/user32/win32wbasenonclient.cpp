@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.47 2003-01-03 16:35:57 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.48 2003-02-13 10:12:27 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -269,7 +269,7 @@ LONG Win32BaseWindow::HandleNCLButtonDown(WPARAM wParam,LPARAM lParam)
             {
                 //SvL: Calling topparent->SetActiveWindow() causes focus problems
                 ::SetActiveWindow(hwndTopParent);
-////            OSLibWinSetFocus(topparent->getOS2WindowHandle());
+////            SetFocus(topparent->getWindowHandle());
             }
             if (GetActiveWindow() == hwndTopParent)
                  SendMessageA(getWindowHandle(), WM_SYSCOMMAND,SC_MOVE+HTCAPTION,lParam);
@@ -1070,10 +1070,10 @@ VOID Win32BaseWindow::DoNCPaint(HRGN clip,BOOL suppress_menupaint)
 
     dprintf(("DoNCPaint %x %x %d", getWindowHandle(), clip, suppress_menupaint));
 
-    if ( getStyle() & WS_MINIMIZE ||
+    if ( (getStyle() & WS_MINIMIZE) ||
          !IsWindowVisible( getWindowHandle() )) {
         return; /* Nothing to do */
-    }
+   }
 
     rect.top    = rect.left = 0;
     rect.right  = rectWindow.right - rectWindow.left;

@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.99 2003-02-06 20:28:38 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.100 2003-02-13 10:12:25 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -37,6 +37,7 @@
 #include <winscan.h>
 #include <winkeyboard.h>
 #include "hook.h"
+#include "user32api.h"
 
 #define DBG_LOCALLOG    DBG_oslibmsgtranslate
 #include "dbglocal.h"
@@ -661,7 +662,10 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             memcpy(&extramsg, winMsg, sizeof(MSG));
             // adjust our WM_CHAR code
             extramsg.lParam = 0x01460001;
-            extramsg.message = WINWM_CHAR;
+
+            //After SetFocus(0), all keystrokes are converted in WM_SYS*
+            extramsg.message = (fIgnoreKeystrokes) ? WINWM_SYSCHAR : WINWM_CHAR;
+
             setThreadQueueExtraCharMessage(teb, &extramsg);
             // and finally adjust our WM_KEYDOWN code
             winMsg->lParam = 0x01460001;
@@ -711,7 +715,8 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
                     MSG extramsg;
                     memcpy(&extramsg, winMsg, sizeof(MSG));
     
-                    extramsg.message = WINWM_CHAR;
+                    //After SetFocus(0), all keystrokes are converted in WM_SYS*
+                    extramsg.message = (fIgnoreKeystrokes) ? WINWM_SYSCHAR : WINWM_CHAR;
 
                     // insert message into the queue
                     setThreadQueueExtraCharMessage(teb, &extramsg);
@@ -728,7 +733,8 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
                     MSG extramsg;
                     memcpy(&extramsg, winMsg, sizeof(MSG));
     
-                    extramsg.message = WINWM_CHAR;
+                    //After SetFocus(0), all keystrokes are converted in WM_SYS*
+                    extramsg.message = (fIgnoreKeystrokes) ? WINWM_SYSCHAR : WINWM_CHAR;
 
                     // insert message into the queue
                     setThreadQueueExtraCharMessage(teb, &extramsg);
@@ -765,6 +771,16 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             // if the current window has keyboard focus
             winMsg->lParam |= WIN_KEY_ALTHELD;
           }
+        }
+        //After SetFocus(0), all keystrokes are converted in WM_SYS*
+        if(fIgnoreKeystrokes) {
+            if(winMsg->message == WINWM_KEYDOWN) {
+                winMsg->message = WINWM_SYSKEYDOWN;
+            }
+            else 
+            if(winMsg->message == WINWM_KEYUP) {
+                winMsg->message = WINWM_SYSKEYUP;
+            }
         }
         break;
     }
@@ -991,7 +1007,8 @@ BOOL OSLibWinTranslateMessage(MSG *msg)
       }
 
 
-      if(msg->message >= WINWM_SYSKEYDOWN) 
+      //After SetFocus(0), all keystrokes are converted in WM_SYS*
+      if(msg->message >= WINWM_SYSKEYDOWN || fIgnoreKeystrokes) 
         extramsg.message = WINWM_SYSCHAR;
       else    
         extramsg.message = WINWM_CHAR;
