@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.118 2001-02-20 17:22:05 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.119 2001-02-22 18:18:59 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -42,6 +42,9 @@
 
 #define DBG_LOCALLOG    DBG_pmwindow
 #include "dbglocal.h"
+
+//define this to use the new code for WM_CALCVALIDRECT handling
+//#define USE_CALCVALIDRECT
 
 HMQ  hmq = 0;                             /* Message queue handle         */
 HAB  hab = 0;
@@ -437,7 +440,8 @@ MRESULT ProcessPMMessage(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2, Win32Base
             else wp.hwndInsertAfter = HWND_TOP_W;
         }
 
-        if((pswp->fl & (SWP_MOVE | SWP_SIZE)) && !(win32wnd->getStyle() & WS_MINIMIZE_W))
+#ifndef USE_CALCVALIDRECT
+        if((pswp->fl & (SWP_MOVE | SWP_SIZE)))
         {
             //CB: todo: use result for WM_CALCVALIDRECTS
             //Get old client rectangle (for invalidation of frame window parts later on)
@@ -512,9 +516,12 @@ MRESULT ProcessPMMessage(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2, Win32Base
         }
         else
         {
+#endif //USE_CALCVALIDRECT
             if(win32wnd->CanReceiveSizeMsgs())
                 win32wnd->MsgPosChanged((LPARAM)&wp);
+#ifndef USE_CALCVALIDRECT
         }
+#endif
 
         if(pswp->fl & SWP_ACTIVATE)
         {
@@ -567,25 +574,147 @@ PosChangedEnd:
     }
 
     case WM_CALCVALIDRECTS:
-#if 0
+#ifdef USE_CALCVALIDRECT
     {
-      PRECTL oldRect = (PRECTL)mp1,newRect = oldRect+1;
-      UINT res = CVR_ALIGNLEFT | CVR_ALIGNTOP;
+        PRECTL    oldRect = (PRECTL)mp1, newRect = oldRect+1;
+        PSWP      pswp = (PSWP)mp2;
+        SWP       swpOld;
+        WINDOWPOS wp;
+        RECTL     newClientrect, oldClientRect;
+        ULONG     nccalcret;
+//        UINT      res = CVR_ALIGNLEFT | CVR_ALIGNTOP;
+        UINT      res = 0;
 
-//CB: todo: use WM_NCCALCSIZE result
-      if (win32wnd->getWindowClass())
-      {
-        DWORD dwStyle = win32wnd->getWindowClass()->getClassLongA(GCL_STYLE_W);
+        dprintf(("PMWINDOW: WM_CALCVALIDRECTS %x", win32wnd->getWindowHandle()));
 
-        if ((dwStyle & CS_HREDRAW_W) && (newRect->xRight-newRect->xLeft != oldRect->xRight-oldRect->xLeft))
-            res |= CVR_REDRAW;
-        else
-        if ((dwStyle & CS_VREDRAW_W) && (newRect->yTop-newRect->yBottom != oldRect->yTop-oldRect->yBottom))
-            res |= CVR_REDRAW;
-      }
-      else res |= CVR_REDRAW;
+        //Get old position info
+        WinQueryWindowPos(hwnd, &swpOld);
 
-      return (MRESULT)res;
+        if(win32wnd->getParent()) {
+             OSLibMapSWPtoWINDOWPOS(pswp, &wp, &swpOld, win32wnd->getParent()->getWindowHeight(),
+                                    win32wnd->getParent()->getClientRectPtr()->left,
+                                    win32wnd->getParent()->getClientRectPtr()->top,
+                                    hwnd);
+        }
+        else OSLibMapSWPtoWINDOWPOS(pswp, &wp, &swpOld, OSLibQueryScreenHeight(), 0, 0, hwnd);
+
+        wp.hwnd = win32wnd->getWindowHandle();
+        if ((pswp->fl & SWP_ZORDER) && (pswp->hwndInsertBehind > HWND_BOTTOM))
+        {
+            Win32BaseWindow *wndAfter = Win32BaseWindow::GetWindowFromOS2Handle(pswp->hwndInsertBehind);
+            if(wndAfter) {
+                 wp.hwndInsertAfter = wndAfter->getWindowHandle();
+            }
+            else wp.hwndInsertAfter = HWND_TOP_W;
+        }
+
+        //Get old client rectangle
+        mapWin32ToOS2Rect(oldRect->yTop - oldRect->yBottom, win32wnd->getClientRectPtr(), (PRECTLOS2)&oldClientRect);
+
+        //Note: Also updates the new window rectangle
+        nccalcret = win32wnd->MsgFormatFrame(&wp);
+
+        //Get new client rectangle
+        mapWin32ToOS2Rect(pswp->cy, win32wnd->getClientRectPtr(), (PRECTLOS2)&newClientrect);
+
+        if(nccalcret == 0) {
+            res = CVR_ALIGNTOP | CVR_ALIGNLEFT;
+        }
+        else {
+            if(nccalcret & WVR_ALIGNTOP_W) {
+                res |= CVR_ALIGNTOP;
+            }
+            else
+            if(nccalcret & WVR_ALIGNBOTTOM_W) {
+                res |= CVR_ALIGNBOTTOM;
+            }
+
+            if(nccalcret & WVR_ALIGNLEFT_W) {
+                res |= CVR_ALIGNLEFT;
+            }
+            else
+            if(nccalcret & WVR_ALIGNRIGHT_W) {
+                res |= CVR_ALIGNRIGHT;
+            }
+
+            if(nccalcret & WVR_REDRAW_W) {//WVR_REDRAW_W = (WVR_HREDRAW | WVR_VREDRAW)
+                res |= CVR_REDRAW;
+            }
+            else
+            if(nccalcret & WVR_VALIDRECTS_W) {
+                //TODO:
+                //res = 0;
+            }
+        }
+        if(res != 0) {
+
+        }
+
+#if 0
+            if((pswp->fl & SWP_SIZE) && ((pswp->cx != pswpOld->cx) || (pswp->cy != pswpOld->cy)))
+            {
+                //redraw the frame (to prevent unnecessary client updates)
+                BOOL redrawAll = FALSE;
+
+                if (win32wnd->getWindowClass())
+                {
+                    DWORD dwStyle = win32wnd->getWindowClass()->getClassLongA(GCL_STYLE_W);
+
+                    if ((dwStyle & CS_HREDRAW_W) && (pswp->cx != pswpOld->cx))
+                        redrawAll = TRUE;
+                    else
+                    if ((dwStyle & CS_VREDRAW_W) && (pswp->cy != pswpOld->cy))
+                        redrawAll = TRUE;
+                }
+                else redrawAll = TRUE;
+
+                if (redrawAll)
+                {
+                    //CB: redraw all children for now
+                    //    -> problems with update region if we don't do it
+                    //       todo: rewrite whole handling
+                    WinInvalidateRect(hwnd,NULL,TRUE);
+                }
+                else
+                {
+                    HPS hps = WinGetPS(hwnd);
+                    RECTL frame,client,arcl[4];
+
+                    WinQueryWindowRect(hwnd,&frame);
+
+                    //top
+                    arcl[0].xLeft = 0;
+                    arcl[0].xRight = frame.xRight;
+                    arcl[0].yBottom = rect.yTop;
+                    arcl[0].yTop = frame.yTop;
+                    //right
+                    arcl[1].xLeft = rect.xRight;
+                    arcl[1].xRight = frame.xRight;
+                    arcl[1].yBottom = 0;
+                    arcl[1].yTop = frame.yTop;
+                    //left
+                    arcl[2].xLeft = 0;
+                    arcl[2].xRight = rect.xLeft;
+                    arcl[2].yBottom = 0;
+                    arcl[2].yTop = frame.yTop;
+                    //bottom
+                    arcl[3].xLeft = 0;
+                    arcl[3].xRight = frame.xRight;
+                    arcl[3].yBottom = 0;
+                    arcl[3].yTop = rect.yBottom;
+
+                    HRGN hrgn = GpiCreateRegion(hps,4,(PRECTL)&arcl);
+
+                    WinInvalidateRegion(hwnd,hrgn,FALSE);
+                    GpiDestroyRegion(hps,hrgn);
+                    WinReleasePS(hps);
+                }
+            }
+
+        }
+#endif
+
+        return (MRESULT)res;
     }
 #else
       dprintf(("PMWINDOW: WM_CALCVALIDRECTS %x", win32wnd->getWindowHandle()));

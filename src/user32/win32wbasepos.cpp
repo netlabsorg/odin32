@@ -1,4 +1,4 @@
-/* $Id: win32wbasepos.cpp,v 1.20 2001-02-21 20:51:07 sandervl Exp $ */
+/* $Id: win32wbasepos.cpp,v 1.21 2001-02-22 18:18:59 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (nonclient/position methods)
  *
@@ -154,9 +154,9 @@ LONG Win32BaseWindow::SendNCCalcSize(BOOL calcValidRect, RECT *newWindowRect,
    /* Send WM_NCCALCSIZE message to get new client area */
    if((winpos->flags & (SWP_FRAMECHANGED | SWP_NOSIZE)) != SWP_NOSIZE )
    {
-    params.rgrc[0] = *newWindowRect;
-    if(calcValidRect)
-    {
+        params.rgrc[0] = *newWindowRect;
+        if(calcValidRect)
+        {
             winposCopy = *winpos;
             params.rgrc[1] = *oldWindowRect;
             params.rgrc[2] = *oldClientRect;
@@ -164,16 +164,16 @@ LONG Win32BaseWindow::SendNCCalcSize(BOOL calcValidRect, RECT *newWindowRect,
             OffsetRect(&params.rgrc[2], rectWindow.left, rectWindow.top);
 
             params.lppos = &winposCopy;
-    }
-    result = SendInternalMessageA(WM_NCCALCSIZE, calcValidRect, (LPARAM)&params );
+        }
+        result = SendInternalMessageA(WM_NCCALCSIZE, calcValidRect, (LPARAM)&params );
 
-    /* If the application send back garbage, ignore it */
-    if(params.rgrc[0].left <= params.rgrc[0].right && params.rgrc[0].top <= params.rgrc[0].bottom)
-    {
+        /* If the application send back garbage, ignore it */
+        if(params.rgrc[0].left <= params.rgrc[0].right && params.rgrc[0].top <= params.rgrc[0].bottom)
+        {
             *newClientRect = params.rgrc[0];
             //client rectangle now in parent coordinates; convert to 'frame' coordinates
             OffsetRect(newClientRect, -rectWindow.left, -rectWindow.top);
-    }
+        }
 
         /* FIXME: WVR_ALIGNxxx */
         if(newClientRect->left != rectClient.left || newClientRect->top  != rectClient.top)
@@ -210,6 +210,74 @@ LONG Win32BaseWindow::HandleWindowPosChanging(WINDOWPOS *winpos)
     }
     return 0;
 }
+/***********************************************************************
+ *           WINPOS_FindIconPos
+ *
+ * Find a suitable place for an iconic window.
+ */
+static void WINPOS_FindIconPos( HWND hwnd, POINT &pt )
+{
+    RECT rectParent;
+    int  x, y, xspacing, yspacing;
+    HWND hwndChild, hwndParent;
+
+    hwndParent = GetParent(hwnd);
+    if(hwndParent == 0) {
+        DebugInt3();
+        return;
+    }
+
+    GetClientRect(hwndParent, &rectParent );
+    if ((pt.x >= rectParent.left) && (pt.x + GetSystemMetrics(SM_CXICON) < rectParent.right) &&
+        (pt.y >= rectParent.top) && (pt.y + GetSystemMetrics(SM_CYICON) < rectParent.bottom))
+        return;  /* The icon already has a suitable position */
+
+    xspacing = GetSystemMetrics(SM_CXICONSPACING);
+    yspacing = GetSystemMetrics(SM_CYICONSPACING);
+
+    y = rectParent.bottom;
+    for (;;)
+    {
+        x = rectParent.left;
+        do
+        {
+            /* Check if another icon already occupies this spot */
+            hwndChild = GetWindow(hwndParent, GW_CHILD);
+
+            while(hwndChild)
+            {
+                Win32BaseWindow *child = NULL;
+                RECT *pRectWindow;
+
+                child = Win32BaseWindow::GetWindowFromHandle(hwndChild);
+                if(!child) {
+                    dprintf(("ERROR: WINPOS_FindIconPos, child %x not found", hwndChild));
+                    return;
+                }
+                if ((child->getStyle() & WS_MINIMIZE) && (child->getWindowHandle() != hwnd))
+                {
+                    pRectWindow = child->getWindowRect();
+                    if ((pRectWindow->left   < x + xspacing) &&
+                        (pRectWindow->right  >= x) &&
+                        (pRectWindow->top    <= y) &&
+                        (pRectWindow->bottom > y - yspacing))
+                        break;  /* There's a window in there */
+                }
+                hwndChild = GetWindow(hwndChild, GW_HWNDNEXT);
+            }
+
+            if (!hwndChild) /* No window was found, so it's OK for us */
+            {
+		        pt.x = x + (xspacing - GetSystemMetrics(SM_CXICON)) / 2;
+		        pt.y = y - (yspacing + GetSystemMetrics(SM_CYICON)) / 2;
+		        return;
+            }
+	        x += xspacing;
+        } while(x <= rectParent.right-xspacing);
+
+        y -= yspacing;
+    }
+}
 /******************************************************************************
  *           WINPOS_MinMaximize
  *
@@ -220,7 +288,7 @@ LONG Win32BaseWindow::HandleWindowPosChanging(WINDOWPOS *winpos)
 UINT Win32BaseWindow::MinMaximize(UINT cmd, LPRECT lpRect)
 {
     UINT swpFlags = 0;
-    POINT size;
+    POINT size, iconPos;
 
     size.x = rectWindow.left;
     size.y = rectWindow.top;
@@ -247,8 +315,10 @@ UINT Win32BaseWindow::MinMaximize(UINT cmd, LPRECT lpRect)
 
             setStyle(getStyle() | WS_MINIMIZE);
 
-            SetRect(lpRect, windowpos.ptMinPosition.x, windowpos.ptMinPosition.y,
-                    GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON) );
+            iconPos.x = windowpos.ptMinPosition.x;
+            iconPos.y = windowpos.ptMinPosition.y;
+            WINPOS_FindIconPos(getWindowHandle(), iconPos);
+            SetRect(lpRect, iconPos.x, iconPos.y, GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON) );
             break;
 
         case SW_MAXIMIZE:
