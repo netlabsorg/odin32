@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2062 2002-05-06 09:39:36 sandervl Exp $ */
+/* $Id: changelog,v 1.2063 2002-05-07 09:21:04 bird Exp $ */
+
+ 2002-05-07: knut st. osmundsen <bird@anduin.net>
+    - CmdQd:    o The daemon shouldn't inherit standard handles when started.
+                  (Hung the daily build, since we use tee to do logging.)
 
  2002-05-06: Sander van Leeuwen <sandervl@xs4all.nl>
     - WS2_32:   o WSAAccept added (Wine port (X11 license); todo LGPL)
@@ -17,7 +21,7 @@
     - KERNEL32: o Changes for debug heap (makefile + exception handler)
 
  2002-04-30: Platon Fomichev <platon@innotek.de>
-    - KERNEL32: o FileTimeToSystemTime, DosDateTimeToFileTime & 
+    - KERNEL32: o FileTimeToSystemTime, DosDateTimeToFileTime &
                   SystemTimeToFileTime bugfixes
     - USER32:   o Focus fix when minimizing window
 
@@ -26,7 +30,7 @@
 
  2002-04-29: Patrick Haller <patrick.haller@innotek.de>
     - OLEAUT32: o Clean up hash object during dll unload
-    - KERNEL32: o Fixed memory leaks in handlename class, Win32ImageBase::isPEImage 
+    - KERNEL32: o Fixed memory leaks in handlename class, Win32ImageBase::isPEImage
                   and DestroyTIB
                 o fixed unicode conversion for APIs that allow
                   NULL strings as input parameter (SearchPathW,
@@ -36,7 +40,7 @@
                     to start PE-clients inside a new debugger instance
                   - GetModuleFileName fixes (don't count zero termination)
                 o don't set last error in HeapFree()
-    - COMCTL32: o Draglist control bugfix (crash)                 
+    - COMCTL32: o Draglist control bugfix (crash)
 
  2002-04-28: knut st. osmundsen <bird@anduin.net>
     - Configure.cmd, Odincrt:
