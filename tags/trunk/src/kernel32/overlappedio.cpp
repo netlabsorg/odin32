@@ -1,4 +1,4 @@
-/* $Id: overlappedio.cpp,v 1.18 2002-07-05 17:58:26 sandervl Exp $ */
+/* $Id: overlappedio.cpp,v 1.19 2002-08-04 15:26:52 sandervl Exp $ */
 
 /*
  * Win32 overlapped IO class
@@ -536,6 +536,9 @@ BOOL OverlappedIOHandler::CancelIo(HANDLE hHandle)
                  //TODO: This doesn't work if multiple handles share the
                  //      same OverlappedIOHandler
                  lpRequest->fCancelled = TRUE;
+                 //GetOverlappedResult must return this error after the request
+                 //has been cancelled!
+                 lpRequest->lpOverlapped->Internal = ERROR_OPERATION_ABORTED;
                  ::SetEvent(hEventCancel);   //cancel pending operation
                  if(i != ASYNC_INDEX_BUSY) {//thread that handles the request will delete it
                     delete lpRequest;
