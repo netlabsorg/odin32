@@ -1,4 +1,4 @@
-/* $Id: critsection.cpp,v 1.9 2003-03-06 10:22:26 sandervl Exp $ */
+/* $Id: critsection.cpp,v 1.10 2003-08-01 16:25:47 sandervl Exp $ */
 /*
  * Win32 critical sections
  * 
@@ -38,6 +38,20 @@ void WINAPI InitializeCriticalSection( CRITICAL_SECTION *crit )
     crit->Reserved       = ODIN_GetCurrentProcessId();
 }
 
+/***********************************************************************
+ *           InitializeCriticalSectionAndSpinCount   (NTDLL.@)
+ * The InitializeCriticalSectionAndSpinCount (KERNEL32) function is
+ * available on NT4SP3 or later, and Win98 or later.
+ * I am assuming that this is the correct definition given the MSDN
+ * docs for the kernel32 functions.
+ */
+BOOL WINAPI InitializeCriticalSectionAndSpinCount( CRITICAL_SECTION *crit, DWORD spincount )
+{
+    if(spincount) dprintf(("critsection=%p: spincount=%ld not supported\n", crit, spincount));
+    crit->Reserved = spincount;
+    InitializeCriticalSection( crit );
+    return TRUE;
+}
 
 /***********************************************************************
  *           DeleteCriticalSection   (KERNEL32.185) (NTDLL.327)

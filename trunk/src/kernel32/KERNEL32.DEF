@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.156 2003-07-31 15:59:48 sandervl Exp $
+; $Id: KERNEL32.DEF,v 1.157 2003-08-01 16:25:46 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -593,7 +593,7 @@ EXPORTS
 
     InitAtomTable              = _InitAtomTable@4             @471
     InitializeCriticalSection  = _InitializeCriticalSection@4 @472
-;   InitializeCriticialSectionAndSpinCount = _InitializeCriticalSectionAndSpinCount@?? ;NT
+    InitializeCriticalSectionAndSpinCount = _InitializeCriticalSectionAndSpinCount@8 @1473
     InterlockedCompareExchange = _InterlockedCompareExchange@12 @787        ;NT
     InterlockedDecrement       = _InterlockedDecrement@4     @473
     InterlockedExchange        = _InterlockedExchange@8      @474
