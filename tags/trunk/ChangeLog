@@ -1,6 +1,7 @@
- /* $Id: ChangeLog,v 1.126 1999-08-23 14:00:32 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.127 1999-08-23 17:12:43 sandervl Exp $ */
 
  99-08-23: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: Dll load order bugfix (PE loader)
 	- USER32\NEW: Added two dummy exports so comdlg32 will load
           NOTE: This is a temporary hack and needs to be changed.
 	- USER32\NEW: Fix for OSLibWinCreateIcon (supports single icons now)
