@@ -1,4 +1,4 @@
-; $Id: shlwapi.def,v 1.20 2001-04-28 13:32:20 sandervl Exp $
+; $Id: shlwapi.def,v 1.21 2001-04-28 16:26:05 sandervl Exp $
 
 ; updated export ordinals to NT4 SP6 version of SHLWAPI.DLL
 ; Note: W95/W98 has DIFFERENT export ordinals
@@ -251,7 +251,6 @@ EXPORTS
                              _CreateProcessW@40                   @369 NONAME
                              _SHLWAPI_370@12                      @370 NONAME
 
-                             _SHLWAPI_364@12                      @364 NONAME
                              _SHLWAPI_376@0                       @376 NONAME ;kernel32.GetUserDefaultUILanguage
                              _SHLWAPI_377@12                      @377 NONAME
                              _SHLWAPI_378@12                      @378 NONAME
@@ -407,7 +406,7 @@ EXPORTS
   ; SHCreateStreamOnFileA  = _SHCreateStreamOnFileA@?             @563
   ; SHCreateStreamOnFileW  = _SHCreateStreamOnFileW@?             @564
   ; SHCreateStreamWrapper  = _SHCreateStreamWrapper@?             @565
-                             _SHCreateThread@16                   @566
+
   ; SHDeleteEmptyKeyA      = _SHDeleteEmptyKeyA@?                 @567
   ; SHDeleteEmptyKeyW      = _SHDeleteEmptyKeyW@?                 @568
     SHDeleteKeyA           = _SHDeleteKeyA@8                      @569
