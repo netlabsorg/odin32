@@ -1,4 +1,4 @@
-/* $Id: initwinmm.cpp,v 1.12 2004-04-06 11:51:05 sandervl Exp $
+/* $Id: initwinmm.cpp,v 1.13 2004-04-06 12:28:17 sandervl Exp $
  *
  * WINMM DLL entry point
  *
@@ -67,9 +67,9 @@ static HMODULE dllHandle = 0;
 static HMODULE MMPMLibraryHandle = 0;
 
 static char *szBuggyAudio[] = {
-"CWAUD1$",
-"BSAUD1$",
-"CRYSTAL$"
+"CWAUD",
+"BSAUD",
+"CRYSTAL"
 };
 
 BOOL fMMPMAvailable = TRUE;
@@ -188,7 +188,7 @@ BOOL WINAPI LibMainWinmm(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
             // Test for buggy audio drivers to turn off audio automagically
             for(int i=0;i<sizeof(szBuggyAudio)/sizeof(szBuggyAudio[0]);i++) 
             {
-                if(!strcmp(szPDDName, szBuggyAudio[i])) {
+                if(!strncmp(szPDDName, szBuggyAudio[i], sizeof(szBuggyAudio[i]-1))) {
                     dprintf(("Detected driver %s -> turning off audio!!", szPDDName));
                     fMMPMAvailable = FALSE;
                     break;
