@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.6 1999-11-08 13:43:12 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.7 1999-11-10 14:16:01 sandervl Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -31,10 +31,35 @@ DWORD OSLibDosAliasMem(LPVOID pb, ULONG cb, LPVOID *ppbAlias, ULONG fl)
   return DosAliasMem(pb, cb, ppbAlias, fl);
 }
 //******************************************************************************
+//NT returns addresses aligned at 64k, so we do too.
 //******************************************************************************
 DWORD OSLibDosAllocMem(LPVOID *lplpMemAddr, DWORD size, DWORD flags)
 {
-  return DosAllocMem(lplpMemAddr, size, flags | flAllocMem);
+ LPVOID memaddr;
+ DWORD  offset;
+ APIRET rc;
+
+  rc = DosAllocMem(&memaddr, size, PAG_READ | flAllocMem);
+  if(rc) {
+	return rc;
+  }
+  DosEnterCritSec();
+  DosFreeMem(memaddr);
+  offset = (DWORD)memaddr & 0xFFFF;
+  if(offset) {
+  	DosAllocMem(&memaddr, 64*1024 - offset, PAG_READ | flAllocMem);
+  }
+  rc = DosAllocMem(lplpMemAddr, size, flags | flAllocMem);
+  DosExitCritSec();
+  if((DWORD)*lplpMemAddr & 0xFFFF) {//still not at 64k boundary?
+	DosFreeMem(*lplpMemAddr);
+	rc = OSLibDosAllocMem(lplpMemAddr, size, flags);
+  }
+  if(offset) {
+	DosFreeMem(memaddr);
+  }
+
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************
