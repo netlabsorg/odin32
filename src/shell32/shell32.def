@@ -1,4 +1,4 @@
-; $Id: shell32.def,v 1.13 1999-08-05 23:19:55 phaller Exp $
+; $Id: shell32.def,v 1.14 1999-08-16 10:31:28 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 ;based on Windows 95
@@ -8,10 +8,10 @@ DATA MULTIPLE NONSHARED
 EXPORTS
 
     SHChangeNotifyRegister            = _SHChangeNotifyRegister@24            @2
-;   CheckEscapesA                     = _CheckEscapesA@8                      @3
+    CheckEscapesA                     = _CheckEscapesA@8                      @3
     SHChangeNotifyDeregister          = _SHChangeNotifyDeregister@4           @4
 ;   SHChangeNotifyUpdateEntryList     = _SHChangeNotifyUpdateEntryList@16     @5
-;   CheckEscapesW                     = _CheckEscapesW@8                      @6
+    CheckEscapesW                     = _CheckEscapesW@8                      @6
     CommandLineToArgvW                = _CommandLineToArgvW@8                 @7
     Control_FillCache_RunDLL          = _Control_FillCache_RunDLL@16          @8
 ;   PifMgr_OpenProperties             = _PifMgr_OpenProperties@16             @9
@@ -49,7 +49,7 @@ EXPORTS
 ;   Control_RunDLLA                   = _Control_RunDLLA@16                   @41
 ;   Control_RunDLLW                   = _Control_RunDLLW@16                   @42
     PathIsExe                         = _PathIsExeAW@4                        @43
-;   DoEnvironmentSubstA               = _DoEnvironmentSubstA@8                @44
+    DoEnvironmentSubstA               = _DoEnvironmentSubstA@8                @44
     PathFileExists                    = _PathFileExistsAW@4                   @45
     PathMatchSpec                     = _PathMatchSpecAW@8                    @46
 ;   PathMakeUniqueName                = _PathMakeUniqueNameAW@20              @47
@@ -58,7 +58,7 @@ EXPORTS
 ;   PathStripToRoot                   = _PathStripToRootAW@4                  @50
     PathResolve                       = _PathResolve@12                       @51
     PathGetArgs                       = _PathGetArgsAW@4                      @52
-;   DoEnvironmentSubstW               = _DoEnvironmentSubstW@?                @53
+    DoEnvironmentSubstW               = _DoEnvironmentSubstW@8                @53
     DragAcceptFiles                   = _DragAcceptFiles@8                    @54
     PathQuoteSpaces                   = _PathQuoteSpacesAW@4                  @55
     PathUnquoteSpaces                 = _PathUnquoteSpacesAW@4                @56
@@ -143,7 +143,7 @@ EXPORTS
     DragQueryPoint                    = _DragQueryPoint@8                     @135
 ;   DAD_SetDragImage                  = _DAD_SetDragImage@?                   @136
     DAD_ShowDragImage                 = _DAD_ShowDragImage@4                  @137
-;   DuplicateIcon                     = _DuplicateIcon@?                      @138
+    DuplicateIcon                     = _DuplicateIcon@4                      @138
 ;   Desktop_UpdateBriefcaseOnEvent    = _Desktop_UpdateBriefcaseOnEvent@?     @139
 ;   FileMenu_DeleteItemByIndex        = _FileMenu_DeleteItemByIndex@8         @140
 ;   FileMenu_DeleteItemByFirstID      = _FileMenu_DeleteItemByFirstID@8       @141
@@ -155,7 +155,7 @@ EXPORTS
 ;   SHCLSIDFromString                 = _SHCLSIDFromString@8                  @147
     ExtractAssociatedIconA            = _ExtractAssociatedIconA@12            @148
 ;   SHFind_InitMenuPopup              = _SHFind_InitMenuPopup@16              @149
-;   ExtractAssociatedIconExA          = _ExtractAssociatedIconExA@?           @150
+    ExtractAssociatedIconExA          = _ExtractAssociatedIconExA@12          @150
     SHLoadOLE                         = _SHLoadOLE@4                          @151
     ILGetSize                         = _ILGetSize@4                          @152
 ;   ILGetNext                         = _ILGetNext@4                          @153
@@ -191,14 +191,14 @@ EXPORTS
     ShellMessageBoxA                  = _ShellMessageBoxA                     @183 ;cdecl
     ArrangeWindows                    = _ArrangeWindows@20                    @184
 ;   SHHandleDiskFull                  = _SHHandleDiskFull@?                   @185
-;   ExtractAssociatedIconExW          = _ExtractAssociatedIconExW@?           @186
+    ExtractAssociatedIconExW          = _ExtractAssociatedIconExW@12          @186
     ExtractAssociatedIconW            = _ExtractAssociatedIconW@12            @187
     ExtractIconA                      = _ExtractIconA@12                      @188
     ExtractIconEx                     = _ExtractIconExA@20                    @189
     ExtractIconExA                    = _ExtractIconExA@20                    @190
     ExtractIconExW                    = _ExtractIconExW@20                    @191
-;   ExtractIconResInfoA               = _ExtractIconResInfoA@?                @192
-;   ExtractIconResInfoW               = _ExtractIconResInfoW@?                @193
+    ExtractIconResInfoA               = _ExtractIconResInfoA@0                @192
+    ExtractIconResInfoW               = _ExtractIconResInfoW@0                @193
     ExtractIconW                      = _ExtractIconW@12                      @194
     SHFree                            = _SHFree@4                             @195
     SHAlloc                           = _SHAlloc@4                            @196
@@ -225,9 +225,9 @@ EXPORTS
 ;   FindExeDlgProc                    = _FindExeDlgProc@?                     @217
     FindExecutableA                   = _FindExecutableA@12                   @218
     FindExecutableW                   = _FindExecutableW@12                   @219
-;   FreeIconList                      = _FreeIconList@4                       @220
-;   InternalExtractIconListA          = _InternalExtractIconListA@?           @221
-;   InternalExtractIconListW          = _InternalExtractIconListW@?           @222
+    FreeIconList                      = _FreeIconList@4                       @220
+    InternalExtractIconListA          = _InternalExtractIconListA@0           @221
+    InternalExtractIconListW          = _InternalExtractIconListW@0           @222
 ;   OpenAs_RunDLL                     = _OpenAs_RunDLL@?                      @223
 ;   OpenAs_RunDLLA                    = _OpenAs_RunDLLA@?                     @224
 ;   OpenAs_RunDLLW                    = _OpenAs_RunDLLW@?                     @225
@@ -287,8 +287,8 @@ EXPORTS
 ;   SheGetDirExW                      = _SheGetDirExW@?                       @279
     SheGetDirW                        = _SheGetDirW@8                         @280
 ;   SheGetPathOffsetW                 = _SheGetPathOffsetW@?                  @281
-;   SheRemoveQuotesA                  = _SheRemoveQuotesA@?                   @282
-;   SheRemoveQuotesW                  = _SheRemoveQuotesW@?                   @283
+    SheRemoveQuotesA                  = _SheRemoveQuotesA@0                   @282
+    SheRemoveQuotesW                  = _SheRemoveQuotesW@0                   @283
 ;   SheSetCurDrive                    = _SheSetCurDrive@?                     @284
     SheShortenPathA                   = _SheShortenPathA@8                    @285
     SheShortenPathW                   = _SheShortenPathW@8                    @286
@@ -315,13 +315,13 @@ EXPORTS
     StrCmpNIW                         = _StrCmpNIW@12                         @307
 ;   StrCmpNW                          = _StrCmpNW@?                           @308
 ;   StrCpyNA                          = _StrCpyNA@?                           @309
-;   StrCpyNW                          = _StrCpyNW@?                           @310
+    StrCpyNW                          = _StrCpyNW@12                          @310
 ;   StrNCmpA                          = _StrNCmpA@?                           @311
 ;   StrNCmpIA                         = _StrNCmpIA@?                          @312
 ;   StrNCmpIW                         = _StrNCmpIW@?                          @313
 ;   StrNCmpW                          = _StrNCmpW@?                           @314
 ;   StrCpyA                           = _StrCpyA@?                            @315
-;   StrCpyW                           = _StrCpyW@?                            @316
+    StrNCpyW                          = _StrNCpyW@8                           @316
 ;   StrRChrA                          = _StrRChrA@?                           @317
 ;   StrRChrIA                         = _StrRChrIA@?                          @318
 ;   StrRChrIW                         = _StrRChrIW@?                          @319

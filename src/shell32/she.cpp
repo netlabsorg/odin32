@@ -1,4 +1,4 @@
-/* $Id: she.cpp,v 1.4 1999-07-06 15:48:48 phaller Exp $ */
+/* $Id: she.cpp,v 1.5 1999-08-16 10:31:28 phaller Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -50,4 +50,38 @@ HRESULT WIN32API SheSetCurDrive(DWORD x1)
            x1));
 
   return 0;
+}
+
+/*****************************************************************************
+ * Name      : SheRemoveQuotesA
+ * Purpose   :
+ * Parameters: ???
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.282 - used by progman.exe
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Christoph Bratschi [Fri, 1999/08/6 19:00]
+ *****************************************************************************/
+
+void WIN32API SheRemoveQuotesA(VOID)
+{
+  dprintf(("SHELL32: undoc SheRemoveQuotesA\n"));
+}
+
+/*****************************************************************************
+ * Name      : SheRemoveQuotesW
+ * Purpose   :
+ * Parameters: ???
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.283 - used by progman.exe
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Christoph Bratschi [Fri, 1999/08/6 19:00]
+ *****************************************************************************/
+
+void WIN32API SheRemoveQuotesW(VOID)
+{
+  dprintf(("SHELL32: undoc SheRemoveQuotesW\n"));
 }
