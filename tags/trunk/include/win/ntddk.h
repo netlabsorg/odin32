@@ -866,6 +866,25 @@ VOID WINAPI RtlAcquirePebLock(void);
 VOID WINAPI RtlReleasePebLock(void);
 
 /*	mathematics */
+#if defined(__WIN32OS2__) && defined(__IBMC__)
+LARGE_INTEGER  WINAPI RtlpConvertLongToLargeInteger( LONG a );
+LARGE_INTEGER  WINAPI RtlpEnlargedIntegerMultiply( INT a, INT b );
+LARGE_INTEGER  WINAPI RtlpExtendedMagicDivide( LARGE_INTEGER *a, LARGE_INTEGER *b, INT shift );
+LARGE_INTEGER  WINAPI RtlpExtendedIntegerMultiply( LARGE_INTEGER *a, INT b );
+LARGE_INTEGER  WINAPI RtlpExtendedLargeIntegerDivide( LARGE_INTEGER *a, INT b, INT *rem );
+LARGE_INTEGER  WINAPI RtlpLargeIntegerAdd( LARGE_INTEGER *a, LARGE_INTEGER *b );
+LARGE_INTEGER  WINAPI RtlpLargeIntegerArithmeticShift( LARGE_INTEGER *a, INT count );
+LARGE_INTEGER  WINAPI RtlpLargeIntegerNegate( LARGE_INTEGER *a );
+LARGE_INTEGER  WINAPI RtlpLargeIntegerShiftLeft( LARGE_INTEGER *a, INT count );
+LARGE_INTEGER  WINAPI RtlpLargeIntegerShiftRight( LARGE_INTEGER *a, INT count );
+LARGE_INTEGER  WINAPI RtlpLargeIntegerSubtract( LARGE_INTEGER *a, LARGE_INTEGER b );
+ULARGE_INTEGER WINAPI RtlpEnlargedUnsignedMultiply( UINT a, UINT b );
+LARGE_INTEGER  WINAPI RtlpEnlargedUnsignedDivide( ULARGE_INTEGER a, UINT b, UINT *remptr );
+ULARGE_INTEGER WINAPI RtlpConvertUlongToLargeInteger( ULONG a );
+ULARGE_INTEGER WINAPI RtlpLargeIntegerDivide( ULARGE_INTEGER *a, ULARGE_INTEGER *b, ULARGE_INTEGER *rem );
+
+#else
+
 LONGLONG  WINAPI RtlConvertLongToLargeInteger( LONG a );
 LONGLONG  WINAPI RtlEnlargedIntegerMultiply( INT a, INT b );
 LONGLONG  WINAPI RtlExtendedMagicDivide( LONGLONG a, LONGLONG b, INT shift );
@@ -882,22 +901,6 @@ UINT      WINAPI RtlEnlargedUnsignedDivide( ULONGLONG a, UINT b, UINT *remptr );
 ULONGLONG WINAPI RtlConvertUlongToLargeInteger( ULONG a );
 ULONGLONG WINAPI RtlLargeIntegerDivide( ULONGLONG a, ULONGLONG b, ULONGLONG *rem );
 
-#ifdef __WIN32OS2__
-LARGE_INTEGER  WINAPI RtlpConvertLongToLargeInteger( LONG a );
-LARGE_INTEGER  WINAPI RtlpEnlargedIntegerMultiply( INT a, INT b );
-LARGE_INTEGER  WINAPI RtlpExtendedMagicDivide( LARGE_INTEGER *a, LARGE_INTEGER *b, INT shift );
-LARGE_INTEGER  WINAPI RtlpExtendedIntegerMultiply( LARGE_INTEGER *a, INT b );
-LARGE_INTEGER  WINAPI RtlpExtendedLargeIntegerDivide( LARGE_INTEGER *a, INT b, INT *rem );
-LARGE_INTEGER  WINAPI RtlpLargeIntegerAdd( LARGE_INTEGER *a, LARGE_INTEGER *b );
-LARGE_INTEGER  WINAPI RtlpLargeIntegerArithmeticShift( LARGE_INTEGER *a, INT count );
-LARGE_INTEGER  WINAPI RtlpLargeIntegerNegate( LARGE_INTEGER *a );
-LARGE_INTEGER  WINAPI RtlpLargeIntegerShiftLeft( LARGE_INTEGER *a, INT count );
-LARGE_INTEGER  WINAPI RtlpLargeIntegerShiftRight( LARGE_INTEGER *a, INT count );
-LARGE_INTEGER  WINAPI RtlpLargeIntegerSubtract( LARGE_INTEGER *a, LARGE_INTEGER b );
-ULARGE_INTEGER WINAPI RtlpEnlargedUnsignedMultiply( UINT a, UINT b );
-LARGE_INTEGER  WINAPI RtlpEnlargedUnsignedDivide( ULARGE_INTEGER a, UINT b, UINT *remptr );
-ULARGE_INTEGER WINAPI RtlpConvertUlongToLargeInteger( ULONG a );
-ULARGE_INTEGER WINAPI RtlpLargeIntegerDivide( ULARGE_INTEGER *a, ULARGE_INTEGER *b, ULARGE_INTEGER *rem );
 #endif
 
 /*	environment */
