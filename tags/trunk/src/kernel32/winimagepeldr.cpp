@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.17 1999-11-26 00:05:19 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.18 1999-11-27 00:05:39 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -450,12 +450,14 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
 	}
   	setTLSIndexAddr((LPDWORD)(sect->realvirtaddr + ((ULONG)tlsDir->AddressOfIndex - sect->virtaddr)));
 
-	sect = findSectionByAddr((ULONG)tlsDir->AddressOfCallBacks);
-	if(sect == NULL) {
-		fout << "Couldn't find TLS AddressOfCallBacks section!!" << endl;
-	    	goto failure;
+	if((ULONG)tlsDir->AddressOfCallBacks != 0) {
+		sect = findSectionByAddr((ULONG)tlsDir->AddressOfCallBacks);
+		if(sect == NULL) {
+			fout << "Couldn't find TLS AddressOfCallBacks section!!" << endl;
+		    	goto failure;
+		}
+		setTLSCallBackAddr((PIMAGE_TLS_CALLBACK *)(sect->realvirtaddr + ((ULONG)tlsDir->AddressOfCallBacks - sect->virtaddr)));
 	}
-  	setTLSCallBackAddr((PIMAGE_TLS_CALLBACK *)(sect->realvirtaddr + ((ULONG)tlsDir->AddressOfCallBacks - sect->virtaddr)));
    }
 
    if(realBaseAddress != oh.ImageBase) {
