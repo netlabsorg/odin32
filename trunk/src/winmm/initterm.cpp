@@ -1,4 +1,4 @@
-/*  $Id: initterm.cpp,v 1.19 2001-09-05 10:30:21 bird Exp $
+/* $Id: initterm.cpp,v 1.20 2001-09-05 10:30:39 bird Exp $
  *
  * WINMM DLL entry point
  *

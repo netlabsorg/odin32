@@ -1,4 +1,5 @@
-/*
+/* $Id: http.c,v 1.3 2001-09-05 10:31:45 bird Exp $
+ *
  * Wininet - Http Implementation
  *
  * Copyright 1999 Corel Corporation

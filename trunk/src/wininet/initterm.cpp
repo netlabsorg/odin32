@@ -1,4 +1,5 @@
-/*
+/* $Id: initterm.cpp,v 1.6 2001-09-05 10:31:45 bird Exp $
+ *
  * DLL entry point
  *
  * Copyright 1998 Sander van Leeuwen
@@ -55,12 +56,12 @@ BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
    case DLL_PROCESS_ATTACH:
    case DLL_THREAD_ATTACH:
    case DLL_THREAD_DETACH:
-	return WININET_LibMain(hinstDLL, fdwReason, fImpLoad);
+    return WININET_LibMain(hinstDLL, fdwReason, fImpLoad);
 
    case DLL_PROCESS_DETACH:
-   	ret = WININET_LibMain(hinstDLL, fdwReason, fImpLoad);
-   	ctordtorTerm();
-	return ret;
+    ret = WININET_LibMain(hinstDLL, fdwReason, fImpLoad);
+    ctordtorTerm();
+    return ret;
    }
    return FALSE;
 }
@@ -97,14 +98,14 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          /* are required and the runtime is dynamically linked.             */
          /*******************************************************************/
 
-	 dllHandle = RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab);
-         if(dllHandle == 0) 
-		return 0UL;
+     dllHandle = RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab);
+         if(dllHandle == 0)
+        return 0UL;
 
          break;
       case 1 :
          if(dllHandle) {
-	   	UnregisterLxDll(dllHandle);
+        UnregisterLxDll(dllHandle);
          }
          break;
 
