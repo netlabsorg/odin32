@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2167 2002-06-15 17:14:18 sandervl Exp $ */
+/* $Id: changelog,v 1.2168 2002-06-15 17:16:51 sandervl Exp $ */
 
  2002-06-15: Sander van Leeuwen <sandervl@innotek.de>
     - SETUPAPI: o Wine resync + added debug wrappers
@@ -7,6 +7,8 @@
                 o hmfile.cpp: ParsePath fix; check boundary
                 o LoadLibraryExA: expand library filename; might contain
                   environment variables
+                o RegSetValueExA: translate REG_EXPAND_SZ into REG_SZ; 
+                  registry.dll doesn't like this type for some reason
     - USER32:   o Do proper filtering for PeekMessage
     - NTDLL:    o Forward heap functions to kernel32
     - QUARTZ:   o Removed old code (stub dll now)
