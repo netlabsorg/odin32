@@ -1,4 +1,4 @@
-/* $Id: dinput.cpp,v 1.9 2000-06-27 21:32:41 mike Exp $ */
+/* $Id: dinput.cpp,v 1.10 2001-03-25 20:06:13 mike Exp $ */
 /*              DirectInput
  *
  * Copyright 1998 Marcus Meissner
@@ -620,54 +620,54 @@ static HRESULT WINAPI SysKeyboardAImpl_GetDeviceData(
   }                                                             \
 }
 
-BYTE scan2dinput(BYTE scan) {
+BYTE scan2dinput(WORD scan) {
    BYTE dscan;
 
    switch (scan) {
-      case 0x61:
+      case 0x148:
          dscan = DIK_UP;
          break;
-      case 0x63:
+      case 0x14b:
          dscan = DIK_LEFT;
          break;
-      case 0x64:
+      case 0x14d:
          dscan = DIK_RIGHT;
          break;
-      case 0x66:
+      case 0x150:
          dscan = DIK_DOWN;
          break;
-      case 0x5C:
+      case 0x135:
          dscan = DIK_NUMPADSLASH;
          break;
-      case 0x5A:
+      case 0x11c:
          dscan = DIK_NUMPADENTER;
          break;
-      case 0x68:
+      case 0x152:
          dscan = DIK_INSERT;
          break;
-      case 0x60:
+      case 0x147:
          dscan = DIK_HOME;
          break;
-      case 0x62:
+      case 0x149:
          dscan = DIK_PGUP;
          break;
-      case 0x69:
+      case 0x153:
          dscan = DIK_DELETE;
          break;
-      case 0x65:
+      case 0x14F:
          dscan = DIK_END;
          break;
-      case 0x67:
+      case 0x151:
          dscan = DIK_PGDN;
          break;
-      case 0x5B:
+      case 0x11D:
          dscan = DIK_RCONTROL;
          break;
       case 0x5E:
          dscan = DIK_RALT;
          break;
       default:
-         dscan = scan;
+         dscan = scan & 0xFF;
    }
    return dscan;
 }
@@ -676,7 +676,7 @@ LRESULT CALLBACK event_keyHandler(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPa
    TRACE("DINPUT-SKAI: keyHandler (msg=%x wParam=0x%X, lParam=0x%lX)\n", msg, wParam, lParam);
 
    SysKeyboardAImpl* This = (SysKeyboardAImpl*) current_keylock;
-   BYTE  scan = (lParam >> 16) & 0xFF;
+   WORD  scan = (lParam >> 16) & 0x1FF;
    /* fix the scancode, DInput only uses real scancodes in 90% cases */
    scan = scan2dinput(scan);
 
