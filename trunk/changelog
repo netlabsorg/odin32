@@ -1,7 +1,17 @@
-/* $Id: changelog,v 1.1890 2001-12-08 10:38:43 sandervl Exp $ */
+/* $Id: changelog,v 1.1891 2001-12-08 12:01:57 sandervl Exp $ */
 
  2001-12-08: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Added read & write functions to custom driver interface
+                o OdinSetVersion added to override windows version reported by
+                  Odin (Win98, WinME, NT4, Win2000, WinXP)
+                o New versions available for odin.ini version override
+                  [WinVersion]
+                  Version=Win98        -> Windows 98
+                  Version=WinME        -> Windows ME
+                  Version=NT4          -> Windows NT4  SP6 (default)
+                  Version=Win2000      -> Windows 2000 SP2
+                  Version=WinXP        -> Windows XP
+
 
  2001-12-07: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o GetFileType for parallel port device returns FILE_TYPE_PIPE
