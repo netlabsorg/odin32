@@ -1,4 +1,4 @@
-/* $Id: comdlg32.cpp,v 1.11 1999-10-09 09:38:45 sandervl Exp $ */
+/* $Id: comdlg32.cpp,v 1.12 1999-10-10 09:00:09 sandervl Exp $ */
 
 /*
  * COMDLG32 implementation
@@ -260,7 +260,7 @@ ODINFUNCTION1(BOOL, ChooseFontW,
                   LF_FACESIZE-1);
 
   // LPCFHOOKPROC != WNDPROC ?
-  COMDLG32_CHECKHOOK(lpcf, CF_ENABLEHOOK, WNDPROC)
+  COMDLG32_CHECKHOOK((&asciicf), CF_ENABLEHOOK, WNDPROC)
 
   // switch strings
   bResult = O32_ChooseFont((LPCHOOSEFONTA)&asciicf);        // call ASCII version
@@ -362,7 +362,7 @@ ODINFUNCTION1(HWND, FindTextW,
     fr.lpstrReplaceWith = UnicodeToAsciiString((WCHAR*)lpfr->lpstrReplaceWith);
 
 
-  COMDLG32_CHECKHOOK(lpfr, FR_ENABLEHOOK, WNDPROC)
+  COMDLG32_CHECKHOOK((&fr), FR_ENABLEHOOK, WNDPROC)
 
   bResult = O32_FindText(&fr);                         // call ASCII version
 
@@ -632,7 +632,7 @@ ODINFUNCTION1(BOOL, GetSaveFileNameW,
   ofn.lpstrFileTitle    = szFileTitle;
   ofn.lpstrCustomFilter = szCustFilter;
 
-  COMDLG32_CHECKHOOK(lpofn, OFN_ENABLEHOOK, WNDPROC)
+  COMDLG32_CHECKHOOK((&ofn), OFN_ENABLEHOOK, WNDPROC)
 
   bResult =  O32_GetSaveFileName(&ofn);
 
@@ -732,8 +732,8 @@ ODINFUNCTION1(BOOL, PrintDlgW,
   else
     pd.lpSetupTemplateName = NULL;
 
-  COMDLG32_CHECKHOOK2(lppd, PD_ENABLEPRINTHOOK, LPPRINTHOOKPROC,lpfnPrintHook)
-  COMDLG32_CHECKHOOK2(lppd, PD_ENABLESETUPHOOK, LPSETUPHOOKPROC,lpfnSetupHook)
+  COMDLG32_CHECKHOOK2((&pd), PD_ENABLEPRINTHOOK, LPPRINTHOOKPROC,lpfnPrintHook)
+  COMDLG32_CHECKHOOK2((&pd), PD_ENABLESETUPHOOK, LPSETUPHOOKPROC,lpfnSetupHook)
 
   bResult = O32_PrintDlg(&pd); // call ASCII API
 
@@ -816,7 +816,7 @@ ODINFUNCTION1(HWND, ReplaceTextW,
     fr.lpstrReplaceWith = UnicodeToAsciiString((WCHAR*)lpfr->lpstrReplaceWith);
 
 
-  COMDLG32_CHECKHOOK(lpfr, FR_ENABLEHOOK, WNDPROC)
+  COMDLG32_CHECKHOOK((&fr), FR_ENABLEHOOK, WNDPROC)
 
   bResult = O32_ReplaceText(&fr);                         // call ASCII version
 
