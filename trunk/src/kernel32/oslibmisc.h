@@ -1,4 +1,4 @@
-/* $Id: oslibmisc.h,v 1.4 2000-05-09 18:56:09 sandervl Exp $ */
+/* $Id: oslibmisc.h,v 1.5 2000-06-23 19:02:38 sandervl Exp $ */
 /*
  * Misc util. procedures
  *
@@ -57,6 +57,7 @@ ULONG OSLibWinQueryMsgQueue(ULONG hab);
 #define CC_DENMARK                    45
 #define CC_SWEDEN                     46
 #define CC_NORWAY                     47
+#define CC_POLAND                     48
 #define CC_WEST_GERMANY               49
 #define CC_MEXICO                     52
 #define CC_BRAZIL                     55
@@ -71,6 +72,8 @@ ULONG OSLibWinQueryMsgQueue(ULONG hab);
 #define CC_LUXEMBOURG                352
 #define CC_ICELAND                   354
 #define CC_FINLAND                   358
+#define CC_CZECH_REPUBLIC            421
+#define CC_SLOVAK_REPUBLIC           422
 
 ULONG OSLibQueryCountry();
 

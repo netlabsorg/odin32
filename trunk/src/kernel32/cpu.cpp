@@ -1,4 +1,4 @@
-/* $Id: cpu.cpp,v 1.8 2000-04-29 18:26:57 sandervl Exp $ */
+/* $Id: cpu.cpp,v 1.9 2000-06-23 19:02:37 sandervl Exp $ */
 /*
  * Odin win32 CPU apis
  *
@@ -118,20 +118,19 @@ VOID WINAPI GetSystemInfo(LPSYSTEM_INFO si)	/* [out] system information */
 
 		switch ((signature >> 8)&0xf) {
 		case 3: cachedsi.dwProcessorType = PROCESSOR_INTEL_386;
-			cachedsi.wProcessorLevel= 3;
 			break;
 		case 4: cachedsi.dwProcessorType = PROCESSOR_INTEL_486;
-			cachedsi.wProcessorLevel= 4;
 			break;
 		case 5: cachedsi.dwProcessorType = PROCESSOR_INTEL_PENTIUM;
-			cachedsi.wProcessorLevel= 5;
 			break;
 		case 6: cachedsi.dwProcessorType = PROCESSOR_INTEL_PENTIUM;
-			cachedsi.wProcessorLevel= 5;
 			break;
 		default:
 			break;
 		}
+		cachedsi.wProcessorRevision = signature & 0xff;
+		cachedsi.wProcessorLevel    = (signature >> 8)&0xf;
+
 		/* set the CPU type of the current processor */
 		sprintf(buf,"CPU %ld",cachedsi.dwProcessorType);
 		if (xhkey) {
@@ -140,7 +139,6 @@ VOID WINAPI GetSystemInfo(LPSYSTEM_INFO si)	/* [out] system information */
 			GetCPUVendorString(buf);
 			RegSetValueExA(xhkey,"VendorIdentifier",0,REG_SZ,(LPBYTE)buf,strlen(buf));
 		}
-		cachedsi.wProcessorRevision = signature & 0xf;
 
 //TODO: FPU fdiv bug
 #if 0
