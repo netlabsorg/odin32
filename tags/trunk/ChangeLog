@@ -1,4 +1,9 @@
- /* $Id: ChangeLog,v 1.732 2000-02-15 19:05:22 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.733 2000-02-16 14:16:33 sandervl Exp $ */
+
+ 2000-02-16: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32/USER32/GDI32: Added new logging feature which allows users
+                                 to disable or enable logging for separate source
+                                 files. (see Logging.txt for details)
 
  2000-02-15: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: SetWindowPos bugfix (returned before hiding or showing windows)
