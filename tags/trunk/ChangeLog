@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.2513 2003-03-05 14:48:08 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2514 2003-03-05 15:12:15 bird Exp $ */
+
+ 2003-03-05: knut st. osmundsen <bird-odin-spam@anduin   >
+    - MAKE:     o Experimental OTHERS variable.
+                o Full source path to compilers.
 
  2003-03-05: Sander van Leeuwen <sandervl@innotek   >
     - WINMM:    o timeBegin/EndPeriod: check for upper and lower boundaries
@@ -17,7 +21,7 @@
     - SHELL32:  o Minor updates
 
  2003-03-03: Sander van Leeuwen <sandervl@innotek   >
-    - WSOCK32:  o Removed wrong checks for invalid address parameters in 
+    - WSOCK32:  o Removed wrong checks for invalid address parameters in
                   sendto & recvfrom
 
  2003-03-01: Sander van Leeuwen <sandervl@innotek   >
@@ -25,18 +29,18 @@
                   calling O32_ExitProcess (release build only)
                 o DeleteFile: when deleting a .lnk file, verify if it's a shell
                   link object file. if so, delete WPS object
-                o ODIN_DisableFolderShellLink added: disable object creation in 
-                  Odin folder. Desktop shortcuts will still be created as WPS 
+                o ODIN_DisableFolderShellLink added: disable object creation in
+                  Odin folder. Desktop shortcuts will still be created as WPS
                   objects on the desktop.
                 o OSLibWinCreateObject: create shelllink file with WPS object id
-    - USER32/KERNEL32:   
+    - USER32/KERNEL32:
                 o Move OSLibWinCreateObject to KERNEL32
-    - SHELL32:  o Shelllink: use kernel32 file functions instead of those from 
+    - SHELL32:  o Shelllink: use kernel32 file functions instead of those from
                   the VAC crt
 
  2003-02-28: Sander van Leeuwen <sandervl@innotek   >
     - SRC\makefile:
-                o Skip msvcrt & crtdll for now. Causes too many problems with 
+                o Skip msvcrt & crtdll for now. Causes too many problems with
                   Odin builds.
     - KERNEL32: o Fixed CreateProcessA regression (Lotus Notes)
                 o Check for invalid data while measuring the CPU speed. DosTmrQueryTime
@@ -59,7 +63,7 @@
                   Configured this for EMX targets too. (state: Experimental)
 
  2003-02-28: Platon Fomichev <stauff@innotek   >
-    - USER32: o Wrong checks on restoration point remembering. Maximizing 
+    - USER32: o Wrong checks on restoration point remembering. Maximizing
                 window from PM icon using keyboard or menu produced wrong
                 controls.
 
@@ -75,7 +79,7 @@
                   PM window frame controls manipulation procedure.
 
  2000-02-27: Achim Hasenmueller <achimha@innotek   >
-    - KERNEL32: o MoveFile: detect if source and target file names are on a 
+    - KERNEL32: o MoveFile: detect if source and target file names are on a
                   different drive and use DosCopy/DosDelete instead of DosMove
                   in this case.
 
