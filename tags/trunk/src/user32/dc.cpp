@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.44 2000-02-07 14:30:18 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.45 2000-02-08 22:28:03 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -1086,7 +1086,9 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
 
    if (redraw & RDW_UPDATENOW_W) redraw &= ~RDW_ERASENOW_W;
 
-   if (redraw & RDW_NOERASE_W) {
+   //SvL: Should we check if there is already an invalidated window part before
+   //     deciding to skip erase?
+   if(redraw & RDW_NOERASE_W || ((redraw & (RDW_INVALIDATE_W|RDW_ERASE_W|RDW_ERASENOW_W)) == RDW_INVALIDATE_W)) {
       	wnd->setSuppressErase(TRUE);
    }
    else	wnd->setSuppressErase(FALSE);
