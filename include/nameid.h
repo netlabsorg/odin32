@@ -1,4 +1,4 @@
-/* $Id: nameid.h,v 1.5 1999-09-01 15:00:33 phaller Exp $ */
+/* $Id: nameid.h,v 1.6 1999-09-01 19:14:30 sandervl Exp $ */
 
 /*
  *
@@ -16,11 +16,9 @@
 
 int SYSTEM ConvertNameId(ULONG hModule, char *);
 
-//#ifndef ULONG
-//#define ULONG unsigned long
-//#endif
-//PH: raises problems with WINE headers
-typedef unsigned long ULONG;
+#ifndef ULONG
+#define ULONG unsigned long
+#endif
 
 #ifdef __cplusplus
         }
