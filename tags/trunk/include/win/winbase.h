@@ -1853,7 +1853,7 @@ BOOL      WINAPI SetStdHandle(DWORD,HANDLE);
 BOOL      WINAPI SetSystemPowerState(BOOL,BOOL);
 BOOL      WINAPI SetSystemTime(const SYSTEMTIME*);
 DWORD       WINAPI SetTapeParameters(HANDLE,DWORD,LPVOID);
-DWORD       WINAPI SetTapePosition(HANDLE,DWORD,DWORD,DWORD,DWORD,BOOL);
+BOOL        WINAPI SetTapePosition(HANDLE,DWORD,DWORD,DWORD,DWORD,BOOL);
 DWORD       WINAPI SetThreadAffinityMask(HANDLE,DWORD);
 BOOL        WINAPI SetThreadContext(HANDLE,const CONTEXT *);
 DWORD       WINAPI SetThreadExecutionState(EXECUTION_STATE);
@@ -2182,17 +2182,13 @@ VOID        WINAPI SetLastError(DWORD);
 
 
 BOOL WINAPI SetTokenInformation(HANDLE                  hToken,
-                                     TOKEN_INFORMATION_CLASS tic,
-                                     LPVOID                  lpvInformation,
-                                     DWORD                   cbInformation);
-BOOL WINAPI GetUserNameA(  /*PLF Wed  98-02-11 13:33:39*/
-    LPTSTR lpBuffer,        /* address of name buffer       */
-    LPDWORD lpcchBuffer);    /* address of size of name buffer       */
+                                TOKEN_INFORMATION_CLASS tic,
+                                LPVOID                  lpvInformation,
+                                DWORD                   cbInformation);
 
-BOOL WINAPI GetUserNameW( /*KSO Thu 21.05.1998 */
-   LPWSTR lpBuffer,
-   LPDWORD lpccBuffer
-   );
+BOOL WINAPI GetUserNameA(LPSTR lpBuffer, LPDWORD lpcchBuffer);
+BOOL WINAPI GetUserNameW(LPWSTR lpBuffer, LPDWORD lpccBuffer);
+#define     GetUserName WINELIB_NAME_AW(GetUserName)
 
 BOOL WINAPI AbortSystemShutdownA(LPTSTR lpMachineName);
 BOOL WINAPI AbortSystemShutdownW(LPWSTR lpMachineName);
