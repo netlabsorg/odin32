@@ -2001,4 +2001,20 @@
 #define IDCLOSE_W             8
 #define IDHELP_W              9
 
+/* wParam for WM_POWERBROADCAST */
+#define PBT_APMQUERYSUSPEND_W             0x0000
+#define PBT_APMQUERYSTANDBY_W             0x0001
+#define PBT_APMQUERYSUSPENDFAILED_W       0x0002
+#define PBT_APMQUERYSTANDBYFAILED_W       0x0003
+#define PBT_APMSUSPEND_W                  0x0004
+#define PBT_APMSTANDBY_W                  0x0005
+#define PBT_APMRESUMECRITICAL_W           0x0006
+#define PBT_APMRESUMESUSPEND_W            0x0007
+#define PBT_APMRESUMESTANDBY_W            0x0008
+#define PBTF_APMRESUMEFROMFAILURE_W       0x0001
+#define PBT_APMBATTERYLOW_W               0x0009
+#define PBT_APMPOWERSTATUSCHANGE_W        0x000A
+#define PBT_APMOEMEVENT_W                 0x000B
+#define PBT_APMRESUMEAUTOMATIC_W          0x0012
+
 #endif //__WINCONST_H__
