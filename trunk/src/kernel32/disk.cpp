@@ -1,4 +1,4 @@
-/* $Id: disk.cpp,v 1.18 2000-11-05 22:21:48 sandervl Exp $ */
+/* $Id: disk.cpp,v 1.19 2000-11-24 16:15:39 phaller Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -54,44 +54,54 @@ BOOL WIN32API SetVolumeLabelW(LPCWSTR lpRootPathName, LPCWSTR lpVolumeName)
 //******************************************************************************
 //SvL: 24-6-'97 - Added
 //******************************************************************************
-BOOL WIN32API GetDiskFreeSpaceA( LPCSTR arg1, PDWORD arg2, PDWORD arg3, PDWORD arg4, PDWORD  arg5)
+ODINFUNCTION5(BOOL, GetDiskFreeSpaceA,
+              LPCSTR, arg1, 
+              PDWORD, arg2,
+              PDWORD, arg3,
+              PDWORD, arg4,
+              PDWORD, arg5)
 {
-    BOOL rc;
-    DWORD dwSectorsPerCluster;	// address of sectors per cluster ter
-    DWORD dwBytesPerSector;	// address of bytes per sector
-    DWORD dwNumberOfFreeClusters;	// address of number of free clusters
-    DWORD dwTotalNumberOfClusters; 	// address of total number of clusters
-    dprintf(("KERNEL32:  GetDiskFreeSpaceA %s, 0x%08X, 0x%08X, 0x%08X, 0x%08X,\n",
+  BOOL rc;
+  DWORD dwSectorsPerCluster;	// address of sectors per cluster ter
+  DWORD dwBytesPerSector;	// address of bytes per sector
+  DWORD dwNumberOfFreeClusters;	// address of number of free clusters
+  DWORD dwTotalNumberOfClusters; 	// address of total number of clusters
+  
+  dprintf(("KERNEL32:  GetDiskFreeSpaceA %s, 0x%08X, 0x%08X, 0x%08X, 0x%08X,\n",
              arg1!=NULL?arg1:"NULL", arg2,arg3,arg4,arg5));
 
-    rc = OSLibGetDiskFreeSpace((LPSTR)arg1, &dwSectorsPerCluster, &dwBytesPerSector,
-                               &dwNumberOfFreeClusters, &dwTotalNumberOfClusters);
-    if(rc)
-    {
-      if (arg2!=NULL)
-        *arg2 = dwSectorsPerCluster;
-      if (arg3!=NULL)
-        *arg3 = dwBytesPerSector;
-      if (arg4!=NULL)
-        *arg4 = dwNumberOfFreeClusters;
-      if (arg5!=NULL)
-        *arg5 = dwTotalNumberOfClusters;
-    }
-    dprintf((" returned %d\n",rc));
-    return rc;
+  rc = OSLibGetDiskFreeSpace((LPSTR)arg1, &dwSectorsPerCluster, &dwBytesPerSector,
+                             &dwNumberOfFreeClusters, &dwTotalNumberOfClusters);
+  if(rc)
+  {
+    if (arg2!=NULL)
+      *arg2 = dwSectorsPerCluster;
+    if (arg3!=NULL)
+      *arg3 = dwBytesPerSector;
+    if (arg4!=NULL)
+      *arg4 = dwNumberOfFreeClusters;
+    if (arg5!=NULL)
+      *arg5 = dwTotalNumberOfClusters;
+  }
+  
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GetDiskFreeSpaceW(LPCWSTR arg1, PDWORD arg2, PDWORD arg3, PDWORD arg4, PDWORD  arg5)
+ODINFUNCTION5(BOOL, GetDiskFreeSpaceW,
+              LPCWSTR, arg1,
+              PDWORD, arg2,
+              PDWORD, arg3,
+              PDWORD, arg4,
+              PDWORD, arg5)
 {
- BOOL  rc;
- char *astring;
+  BOOL  rc;
+  char *astring;
 
-    dprintf(("KERNEL32:  OS2GetDiskFreeSpaceW\n"));
-    astring = UnicodeToAsciiString((LPWSTR)arg1);
-    rc = GetDiskFreeSpaceA(astring, arg2, arg3, arg4, arg5);
-    FreeAsciiString(astring);
-    return(rc);
+  astring = UnicodeToAsciiString((LPWSTR)arg1);
+  rc = GetDiskFreeSpaceA(astring, arg2, arg3, arg4, arg5);
+  FreeAsciiString(astring);
+  return(rc);
 }
 
 
