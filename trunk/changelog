@@ -1,10 +1,13 @@
-/* $Id: changelog,v 1.2120 2002-06-02 10:11:34 sandervl Exp $ */
+/* $Id: changelog,v 1.2121 2002-06-02 12:40:43 sandervl Exp $ */
 
  2002-06-02: Sander van Leeuwen <sandervl@innotek.de>
     - USER32\CONTROLS:
                 o New dll for user32 controls (latest Wine)
                   (not activated, not finished (resync))
     - USER32:   o Moved drag & drop code to seperate file
+    - KERNEL32: o LogExcpetion: check lockcount before changing it on entry
+                  (it is not always > 0 -> previously caused hang in exception
+                   handler (zombie process))
 
  2002-06-01: Sander van Leeuwen <sandervl@innotek.de>
     - SHELL32:  o IShellFolder_fnCompareIDs shortcut added to improve
