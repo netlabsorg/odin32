@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.46 2002-02-06 10:33:56 sandervl Exp $ */
+/* $Id: wsock32.cpp,v 1.47 2002-02-20 15:07:14 sandervl Exp $ */
 
 /*
  *
@@ -375,11 +375,12 @@ ODINFUNCTION3(int,OS2ioctlsocket,
    //check if app want to set a socket, which has an outstanding async select,
    //to blocking mode
    if (cmd == FIONBIO) {
-	HWND  hwnd;
-	int   msg;
+	ULONG ulNotifyHandle, ulNotifyData;
+	int   mode;
  	ULONG lEvent;
 
-	if(QueryAsyncEvent(s, &hwnd, &msg, &lEvent) == TRUE) {
+	if(QueryAsyncEvent(s, &mode, &ulNotifyHandle, &ulNotifyData, &lEvent) == TRUE) 
+        {
 		if(*argp != 0) {
 			//nothing to do; already non-blocking
 			return NO_ERROR;
@@ -520,9 +521,8 @@ ODINFUNCTION3(SOCKET,OS2accept, SOCKET,           s,
                                 struct sockaddr *,addr,
                                 int *,            addrlen)
 {
- int   ret, msg;
- HWND  hwnd;
- ULONG lEvent;
+ int   ret, mode;
+ ULONG lEvent, notifyData, notifyHandle;
 
    if(!fWSAInitialized) {
       	WSASetLastError(WSANOTINITIALISED);
@@ -548,8 +548,8 @@ ODINFUNCTION3(SOCKET,OS2accept, SOCKET,           s,
 
 	//if this socket has an active async. select pending, then call WSAAsyncSelect
         //with the same parameters for the new socket (see docs)
-	if(QueryAsyncEvent(s, &hwnd, &msg, &lEvent) == TRUE) {
-        	if(WSAAsyncSelect(ret, hwnd, msg, lEvent) == SOCKET_ERROR) {
+	if(QueryAsyncEvent(s, &mode, &notifyHandle, &notifyData, &lEvent) == TRUE) {
+        	if(WSAAsyncSelectWorker(s, mode, notifyHandle, notifyData, lEvent) == SOCKET_ERROR) {
             		ret = SOCKET_ERROR;
 		}
 	}
@@ -947,7 +947,7 @@ ODINFUNCTION5(int,OS2setsockopt,
 {
   struct ws_linger *yy;
   struct linger     xx;
-  int               ret;
+  int               ret, val;
   ULONG             size;
   char             *safeoptval;
 
@@ -1158,8 +1158,9 @@ tryagain:
                    WSASetLastError(WSAEFAULT);
                    return SOCKET_ERROR;
                }
-               dprintf(("IPPROTO_IP, IP_HDRINCL 0x%x", *optval));
-               ret = setsockopt(s, IPPROTO_IP, IP_HDRINCL_OS2, (char *)optval, optlen);
+               val = *optval;
+               dprintf(("IPPROTO_IP, IP_HDRINCL 0x%x", val));
+               ret = setsockopt(s, IPPROTO_IP, IP_HDRINCL_OS2, (char *)&val, optlen);
                break;
 
            default:
