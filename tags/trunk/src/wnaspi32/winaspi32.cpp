@@ -1,4 +1,4 @@
-/* $Id: winaspi32.cpp,v 1.12 2000-12-16 15:42:42 sandervl Exp $ */
+/* $Id: winaspi32.cpp,v 1.13 2001-10-20 09:49:01 achimha Exp $ */
 /*
  * WNASPI routines
  *
@@ -327,6 +327,13 @@ ODINFUNCTION0(DWORD, GetASPI32SupportInfo)
 
   bNumDrv = 0;
 
+  // first thing we do is check whether we have a successful ASPI setup
+  if (aspi == NULL)
+  {
+      dprintf(("ASPI was not initialized successfully, return error"));
+      return (SS_FAILED_INIT << 8);
+  }
+
   if(aspi->access(FALSE)) //'non-blocking' call
   {
         bNumDrv = aspi->getNumHosts();
@@ -390,6 +397,13 @@ DWORD CDECL SendASPI32Command(LPSRB lpSRB)
     ULONG ulParam, ulReturn;
     BYTE  bRC;
     LONG rc;
+
+    // first thing we do is check whether we have a successful ASPI setup
+    if (aspi == NULL)
+    {
+        dprintf(("SendASPI32Command: ASPI was not initialized successfully, return error"));
+        return SS_NO_ASPI;
+    }
 
     if(NULL==lpSRB)
       return SS_INVALID_SRB;  // Not sure what to return here but that is an error
