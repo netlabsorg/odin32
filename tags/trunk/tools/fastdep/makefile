@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2001-03-16 14:19:02 bird Exp $
+# $Id: makefile,v 1.11 2001-06-28 22:01:55 bird Exp $
 
 #
 # Odin32 API
@@ -37,7 +37,7 @@ NO_MAIN_BIN_COPY = 1
 !if "$(VAC3)" == "1" || "$(VAC36)" == "1"
 CFLAGS   = $(CFLAGS) -W3 -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext- \
 !ifdef DEBUG
-#        -O+ -Tm-
+        -O+ -Tm-
 !endif
 !endif
 
