@@ -1,4 +1,4 @@
-/* $Id: pmwindow.h,v 1.12 2001-10-03 18:37:52 sandervl Exp $ */
+/* $Id: pmwindow.h,v 1.13 2001-10-29 13:37:01 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -10,6 +10,7 @@
 
 #include <win32wbase.h>
 
+#define WIN32_CDCLASS       "Win32CDWindowClass"
 #define WIN32_STDCLASS      "Win32WindowClass"
 #define WIN32_STDFRAMECLASS "Win32FrameClass"
 
