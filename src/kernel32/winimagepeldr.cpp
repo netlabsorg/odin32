@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.82 2001-06-05 19:36:28 phaller Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.83 2001-06-05 21:38:42 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -110,8 +110,7 @@ Win32PeLdrImage::Win32PeLdrImage(char *pszFileName, BOOL isExe) :
     nrsections(0), imageSize(0), dwFlags(0), section(NULL),
     imageVirtBase(-1), realBaseAddress(0), imageVirtEnd(0),
     nrNameExports(0), nrOrdExports(0), nameexports(NULL), ordexports(NULL),
-    memmap(NULL), pFixups(NULL), dwFixupSize(0), curnameexport(NULL), curordexport(NULL),
-    nrOrdExportsRegistered(0)
+    memmap(NULL), pFixups(NULL), dwFixupSize(0), curnameexport(NULL), curordexport(NULL)
 {
  HFILE  dllfile;
 
@@ -1383,7 +1382,6 @@ BOOL Win32PeLdrImage::processExports(char *win32file)
         }
     }
   }
-  
   return(TRUE);
 }
 //******************************************************************************
@@ -1435,7 +1433,6 @@ void Win32PeLdrImage::AddOrdExport(ULONG virtaddr, ULONG ordinal, BOOL fAbsolute
 
     curordexport->ordinal  = ordinal;
     curordexport++;
-    nrOrdExportsRegistered++;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1884,73 +1881,100 @@ ULONG Win32PeLdrImage::getApi(char *name)
 //******************************************************************************
 ULONG Win32PeLdrImage::getApi(int ordinal)
 {
-  ULONG       apiaddr, i;
-  OrdExport  *curexport;
-  NameExport *nexport;
-  register int iDiff;
+ ULONG       apiaddr, i;
+ OrdExport  *curexport;
+ NameExport *nexport;
 
-  curexport = ordexports;
+    curexport = ordexports;
+
+  /* accelerated resolving of ordinal exports
+   * is based on the assumption the ordinal export
+   * table is always sorted ascending.
+   *
+   * When the step size is too small, we continue
+   * with the linear search.
+   */
   
-  i = 0;
-  if (nrOrdExportsRegistered > 1000)
-  {
-    for(i=0;i<nrOrdExportsRegistered;i+=1000) {
-      iDiff = curexport[i].ordinal - ordinal;
-      if(iDiff > 0) {
-        if(i) i -= 1000;
-        break;
-      }
-      else
-        if(iDiff == 0)
-          return(curexport[i].virtaddr);
-    }
-    if (i > nrOrdExportsRegistered) i -= 1000;
-  }
-
-  if (nrOrdExportsRegistered > 100)
-  {
-    for(i;i<nrOrdExportsRegistered;i+=100) {
-      iDiff = curexport[i].ordinal - ordinal;
-      if(iDiff > 0) {
-        if(i) i -= 100;
-        break;
-      }
-      else
-        if(iDiff == 0)
-          return(curexport[i].virtaddr);
-    }
-    if (i > nrOrdExportsRegistered) i -= 100;
-  }
-
-  if (nrOrdExportsRegistered > 10)
-  {
-    for(i;i<nrOrdExportsRegistered;i+=10) {
-      iDiff = curexport[i].ordinal - ordinal;
-      if(iDiff > 0) {
-        if(i) i -= 10;
-        break;
-      }
-      else
-        if(iDiff == 0)
-          return(curexport[i].virtaddr);
-    }
-    if (i > nrOrdExportsRegistered) i -= 10;
-  }
+  // start in the middle of the tree
+  i = nrOrdExports >> 1;
+  int iStep = i;
   
-  for(i;i<nrOrdExportsRegistered;i++) {
-    if(curexport[i].ordinal == ordinal)
-      return(curexport[i].virtaddr);
+  for(;;)
+  {
+    int iThisExport = curexport[i].ordinal;
+    
+    iStep >>= 1;                    // next step will be narrower
+
+    if (iThisExport < ordinal)
+      i += min(iStep, (ordinal-iThisExport)); // move farther down the list
+    else
+      if (iThisExport == ordinal)   // found the export?
+        return curexport[i].virtaddr;
+      else
+        i -= min(iStep, (iThisExport-ordinal));                 // move farther up the list
+
+    // if we're in the direct neighbourhood search linearly
+    if (iStep <= 1)
+    {
+      // decide if we're to search backward or forward
+      if (ordinal > curexport[i].ordinal)
+      {
+        // As a certain number of exports are 0 at the end
+        // of the array, this case will hit fairly often.
+        // the last comparison will send the loop off into the
+        // wrong direction!
+        if (curexport[i].ordinal == 0)
+        {
+          // start over with plain dump search
+          for(i = 0; i < nrOrdExports; i++)
+          {
+            if(curexport[i].ordinal == ordinal)
+              return(curexport[i].virtaddr);
+          }
+          break; // not found yet!
+        }
+        
+        for (;i<nrOrdExports;i++) // scan forward
+        {
+          iThisExport = curexport[i].ordinal;
+          if(iThisExport == ordinal)
+            return(curexport[i].virtaddr);
+          else
+            if (iThisExport > ordinal)
+            {
+              // Oops, cannot find the ordinal in the sorted list
+              break;
+            }
+        }
+      }
+      else
+      {
+        for (;i>=0;i--) // scan backward
+        {
+          iThisExport = curexport[i].ordinal;
+          if(curexport[i].ordinal == ordinal)
+            return(curexport[i].virtaddr);
+          else
+            if (iThisExport < ordinal)
+              // Oops, cannot find the ordinal in the sorted list
+              break;
+        }
+      }
+      
+      // not found yet.
+      break;
+    }
   }
 
-  //Name exports also contain an ordinal, so check this
-  nexport = nameexports;
-  for(i=0;i<nrNameExports;i++) {
-    if(nexport->ordinal == ordinal)
-      return(nexport->virtaddr);
+    //Name exports also contain an ordinal, so check this
+    nexport = nameexports;
+    for(i=0;i<nrNameExports;i++) {
+        if(nexport->ordinal == ordinal)
+            return(nexport->virtaddr);
 
-    nexport = (NameExport *)((ULONG)nexport->name + nexport->nlength);
-  }
-  return(0);
+        nexport = (NameExport *)((ULONG)nexport->name + nexport->nlength);
+    }
+    return(0);
 }
 //******************************************************************************
 //Returns required OS version for this image
