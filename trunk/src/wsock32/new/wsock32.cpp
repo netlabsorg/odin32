@@ -1,0 +1,666 @@
+/* $Id: wsock32.cpp,v 1.1 1999-11-22 08:18:04 phaller Exp $ */
+
+/*
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
+ * Win32 SOCK32 for OS/2
+ *
+ * Copyright (C) 1999 Patrick Haller <phaller@gmx.net>
+ *
+ */
+
+/* Remark:
+ * 1999/11/21 experimental rewrite using IBM's PMWSock only
+ *            -> some structural differences remain! (hostent)
+ *            -> this cannot work yet!
+ */
+
+
+/*****************************************************************************
+ * Includes                                                                  *
+ *****************************************************************************/
+
+#include <pmwsock.h>
+#include <odin.h>
+#include <odinwrap.h>
+#include <os2sel.h>
+#include <misc.h>
+
+#include <wsock32.h>
+
+
+ODINDEBUGCHANNEL(WSOCK32-WSOCK32)
+
+
+/*****************************************************************************
+ * Local variables                                                           *
+ *****************************************************************************/
+
+#define ERROR_SUCCESS 0
+
+
+#if 0
+static WSOCKTHREADDATA wstdFallthru; // for emergency only
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : free memory when thread dies
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+PWSOCKTHREADDATA iQueryWsockThreadData(void)
+{
+  struct _THDB*     pThreadDB = (struct _THDB*)GetThreadTHDB();
+  PWSOCKTHREADDATA pwstd;
+
+  // check for existing pointer
+  if (pThreadDB != NULL)
+  {
+    if (pThreadDB->pWsockData == NULL)
+    {
+      // allocate on demand + initialize
+      pwstd = (PWSOCKTHREADDATA)HEAP_malloc (sizeof(WSOCKTHREADDATA));
+      pThreadDB->pWsockData = (LPVOID)pwstd;
+    }
+    else
+      // use already allocated memory
+      pwstd = (PWSOCKTHREADDATA)pThreadDB->pWsockData;
+  }
+
+  if (pwstd == NULL)
+    pwstd = &wstdFallthru; // no memory and not allocated already
+
+  return pwstd;
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ *****************************************************************************/
+
+#define CASEERR2(a) case SOC##a: case a: return WSA##a;
+#define CASEERR1(a) case SOC##a: return WSA##a;
+
+int iTranslateSockErrToWSock(int iError)
+{
+  switch(iError)
+  {
+    CASEERR2(EINTR)
+    CASEERR2(EBADF)
+    CASEERR2(EACCES)
+    CASEERR2(EINVAL)
+    CASEERR2(EMFILE)
+
+    CASEERR1(EWOULDBLOCK)
+    CASEERR1(EINPROGRESS)
+    CASEERR1(EALREADY)
+    CASEERR1(ENOTSOCK)
+//  CASEERR1(EDESTADRREQ)
+    CASEERR1(EMSGSIZE)
+    CASEERR1(EPROTOTYPE)
+    CASEERR1(ENOPROTOOPT)
+    CASEERR1(EPROTONOSUPPORT)
+    CASEERR1(ESOCKTNOSUPPORT)
+    CASEERR1(EOPNOTSUPP)
+    CASEERR1(EPFNOSUPPORT)
+    CASEERR1(EAFNOSUPPORT)
+    CASEERR1(EADDRINUSE)
+    CASEERR1(EADDRNOTAVAIL)
+    CASEERR1(ENETDOWN)
+    CASEERR1(ENETUNREACH)
+    CASEERR1(ENETRESET)
+    CASEERR1(ECONNABORTED)
+    CASEERR1(ECONNRESET)
+    CASEERR1(ENOBUFS)
+    CASEERR1(EISCONN)
+    CASEERR1(ENOTCONN)
+    CASEERR1(ESHUTDOWN)
+    CASEERR1(ETOOMANYREFS)
+    CASEERR1(ETIMEDOUT)
+    CASEERR1(ECONNREFUSED)
+    CASEERR1(ELOOP)
+    CASEERR1(ENAMETOOLONG)
+    CASEERR1(EHOSTDOWN)
+    CASEERR1(EHOSTUNREACH)
+
+    CASEERR1(ENOTEMPTY)
+//    CASEERR(EPROCLIM)
+//    CASEERR(EUSERS)
+//    CASEERR(EDQUOT)
+//    CASEERR(ESTALE)
+//    CASEERR(EREMOTE)
+//    CASEERR(EDISCON)
+
+
+    default:
+      dprintf(("WSOCK32: Unknown error condition: %d\n",
+               iError));
+      return iError;
+  }
+}
+
+#endif
+
+
+
+
+
+
+
+
+ODINPROCEDURE1(OS2WSASetLastError,
+               int,iError)
+{
+  WSASetLastError(iError);
+}
+
+
+ODINFUNCTION0(int,OS2WSAGetLastError)
+{
+  return WSAGetLastError();
+}
+
+
+
+
+ODINFUNCTION2(int,OS2__WSAFDIsSet,SOCKET, s,
+                                  fd_set*,fds)
+{
+  return (__WSAFDIsSet(s,fds));
+}
+
+
+ODINFUNCTION3(SOCKET,OS2accept, SOCKET,           s,
+                                struct Wsockaddr *,addr,
+                                int *,            addrlen)
+{
+  //@@@PH translate Wsockaddr to sockaddr
+  return(accept(s,addr,addrlen));
+}
+
+
+ODINFUNCTION3(int,OS2bind,
+              SOCKET ,s,
+              const struct Wsockaddr *,addr,
+              int, namelen)
+{
+  //@@@PH translate Wsockaddr to sockaddr
+  return(bind(s,addr,namelen));
+}
+
+
+ODINFUNCTION1(int,OS2closesocket,SOCKET, s)
+{
+  return(closesocket(s));
+}
+
+
+ODINFUNCTION3(int,OS2connect,
+              SOCKET, s,
+              const struct Wsockaddr *,name,
+              int, namelen)
+{
+  //@@@PH translate Wsockaddr to sockaddr
+  return(connect(s,name,namelen));
+}
+
+
+ODINFUNCTION3(int,OS2ioctlsocket,
+              SOCKET,s,
+              long, cmd,
+              u_long *,argp)
+{
+  return(ioctlsocket(s,cmd,argp));
+}
+
+
+ODINFUNCTION3(int,OS2getpeername,
+              SOCKET, s,
+              struct Wsockaddr *,name,
+              int *, namelen)
+{
+  //@@@PH translate Wsockaddr to sockaddr
+  return(getpeername(s,name,namelen));
+}
+
+
+ODINFUNCTION3(int,OS2getsockname,
+              SOCKET,s,
+              struct Wsockaddr *,name,
+              int *, namelen)
+{
+  //@@@PH translate Wsockaddr to sockaddr
+  return(getsockname(s,name,namelen));
+}
+
+
+ODINFUNCTION5(int,OS2getsockopt,
+              SOCKET, s,
+              int, level,
+              int, optname,
+              char *, optval,
+              int *,optlen)
+{
+  return(getsockopt(s,
+                    level,
+                    optname,
+                    optval,
+                    optlen));
+}
+
+
+ODINFUNCTION1(u_long,OS2htonl,
+              u_long,hostlong)
+{
+  return(htonl(hostlong));
+}
+
+
+ODINFUNCTION1(u_short,OS2htons,
+              u_short,hostshort)
+{
+  return(htons(hostshort));
+}
+
+
+ODINFUNCTION1(unsigned long,OS2inet_addr,
+              const char *, cp)
+{
+  dprintf(("WSOCK32: OS2inet_addr(%s)\n",
+           cp));
+
+  return (inet_addr(cp));
+}
+
+
+ODINFUNCTION1(char *,OS2inet_ntoa,
+              struct in_addr, in)
+{
+  return(inet_ntoa(in));
+}
+
+
+ODINFUNCTION2(int,OS2listen,
+              SOCKET, s,
+              int, backlog)
+{
+  return(listen(s,backlog));
+}
+
+
+ODINFUNCTION1(u_long,OS2ntohl,
+              u_long,netlong)
+{
+  return(ntohl(netlong));
+}
+
+
+ODINFUNCTION1(u_short,OS2ntohs,
+              u_short,netshort)
+{
+  return(ntohs(netshort));
+}
+
+
+ODINFUNCTION4(int,OS2recv,
+              SOCKET,s,
+              char *,buf,
+              int,len,
+              int,flags)
+{
+  return(recv(s,
+              buf,
+              len,
+              flags));
+}
+
+
+ODINFUNCTION6(int,OS2recvfrom,
+              SOCKET,s,
+              char *,buf,
+              int,len,
+              int,flags,
+              struct sockaddr *,from,
+              int *,fromlen)
+{
+  return(recvfrom(s,
+                  buf,
+                  len,
+                  flags,
+                  from,
+                  fromlen));
+}
+
+
+ODINFUNCTION5(int,OS2select,
+              int,nfds,
+              fd_set *,readfds,
+              fd_set *,writefds,
+              fd_set *,exceptfds,
+              const struct timeval *,timeout)
+{
+  return(select(nfds,
+                readfds,
+                writefds,
+                exceptfds,
+                timeout));
+}
+
+
+ODINFUNCTION4(int,OS2send,
+              SOCKET,s,
+              const char *,buf,
+              int,len,
+              int,flags)
+{
+  return(send(s,
+              buf,
+              len,
+              flags));
+}
+
+
+ODINFUNCTION6(int,OS2sendto,
+              SOCKET,s,
+              const char *,buf,
+              int,len,
+              int,flags,
+              const struct sockaddr *,to,
+              int,tolen)
+{
+  return(sendto(s,
+                buf,
+                len,
+                flags,
+                to,
+                tolen));
+}
+
+
+ODINFUNCTION5(int,OS2setsockopt,
+              SOCKET,s,
+              int,level,
+              int,optname,
+              const char *,optval,
+              int,optlen)
+{
+  struct Wlinger *yy;
+  struct linger xx;
+  int    rc;
+
+  if(level   == SOL_SOCKET &&
+     optname == SO_LINGER)
+  {
+    yy = (struct Wlinger *)optval;
+    xx.l_onoff = (int)yy->l_onoff;
+    xx.l_linger = (int)yy->l_linger;
+
+    rc = setsockopt(s,level,optname,(char *)&xx,optlen);
+  }
+  else
+    rc = setsockopt(s,level,optname,(char *)optval,optlen);
+
+  if (rc == SOCKET_ERROR)
+    //OS2WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+    OS2WSASetLastError(WSAEINVAL);
+  else
+    OS2WSASetLastError(ERROR_SUCCESS);
+
+  return rc;
+}
+
+
+ODINFUNCTION2(int,OS2shutdown,
+              SOCKET,s,
+              int,how)
+{
+  return(shutdown(s,
+                  how));
+}
+
+
+ODINFUNCTION3(SOCKET,OS2socket,
+              int,af,
+              int,type,
+              int,protocol)
+{
+  return(socket(af,
+                type,
+                protocol));
+}
+
+
+/* Database function prototypes */
+ODINFUNCTION3(struct Whostent *,OS2gethostbyaddr,
+              const char *,addr,
+              int,len,
+              int,type)
+{
+  return(gethostbyaddr(addr,
+                       len,
+                       type));
+}
+
+
+ODINFUNCTION1(struct Whostent *,OS2gethostbyname,
+              const char *,name)
+{
+  return(gethostbyname(name));
+}
+
+
+ODINFUNCTION2(int,OS2gethostname,
+              char *,name,
+              int,namelen)
+{
+  return(gethostname(name,
+                     namelen));
+}
+
+
+ODINFUNCTION2(struct Wservent *,OS2getservbyport,
+              int,port,
+              const char *, proto)
+{
+  return(getservbyport(port,
+                       proto));
+}
+
+
+ODINFUNCTION2(struct Wservent *,OS2getservbyname,
+              const char *,name,
+              const char *,proto)
+{
+  return(getservbyname(name,
+                       proto));
+}
+
+
+ODINFUNCTION1(struct Wprotoent *,OS2getprotobynumber,
+              int,proto)
+{
+  return(getprotobynumber(proto));
+}
+
+
+ODINFUNCTION1(struct protoent *,OS2getprotobyname,
+              const char *,name)
+{
+  return(getprotobyname(name));
+}
+
+
+
+/* Microsoft Windows Extension function prototypes */
+ODINFUNCTION2(int,OS2WSAStartup,
+              USHORT,wVersionRequired,
+              LPWSADATA,lpWSAData)
+{
+  return(WSAStartup(wVersionRequired,
+                    lpWSAData));
+}
+
+
+ODINFUNCTION0(int,OS2WSACleanup)
+{
+  return(WSACleanup());
+}
+
+
+ODINFUNCTION0(BOOL,OS2WSAIsBlocking)
+{
+  return WSAIsBlocking();
+}
+
+
+ODINFUNCTION0(int,OS2WSAUnhookBlockingHook)
+{
+  return WSAUnhookBlockingHook();
+}
+
+
+ODINFUNCTION1(PFN,OS2WSASetBlockingHook,
+              PFN,lpBlockFunc)
+{
+  return(WSASetBlockingHook(lpBlockFunc));
+}
+
+
+ODINFUNCTION0(int,OS2WSACancelBlockingCall)
+{
+  return(WSACancelBlockingCall());
+}
+
+
+ODINFUNCTION6(LHANDLE,OS2WSAAsyncGetServByName,
+              HWND,hWnd,
+              u_int,wMsg,
+              const char *,name,
+              const char *,proto,
+              char *,buf,
+              int,buflen)
+{
+  return(WSAAsyncGetServByName(hWnd,
+                               wMsg,
+                               name,
+                               proto,
+                               buf,
+                               buflen));
+}
+
+
+ODINFUNCTION6(LHANDLE,OS2WSAAsyncGetServByPort,
+              HWND,hWnd,
+              u_int,wMsg,
+              int,port,
+              const char *,proto,
+              char *,buf,
+              int,buflen)
+{
+  return(WSAAsyncGetServByPort(hWnd,
+                               wMsg,
+                               port,
+                               proto,
+                               buf,
+                               buflen));
+}
+
+
+ODINFUNCTION5(LHANDLE,OS2WSAAsyncGetProtoByName,
+              HWND,hWnd,
+              u_int,wMsg,
+              const char *,name,
+              char *,buf,
+              int,buflen)
+{
+  return(WSAAsyncGetProtoByName(hWnd,
+                                wMsg,
+                                name,
+                                buf,
+                                buflen));
+}
+
+
+ODINFUNCTION5(LHANDLE,OS2WSAAsyncGetProtoByNumber,
+              HWND,hWnd,
+              u_int,wMsg,
+              int,number,
+              char *,buf,
+              int,buflen)
+{
+  return(WSAAsyncGetProtoByNumber(hWnd,
+                                  wMsg,
+                                  number,
+                                  buf,
+                                  buflen));
+}
+
+
+ODINFUNCTION5(LHANDLE,OS2WSAAsyncGetHostByName,
+              HWND,hWnd,
+              u_int,wMsg,
+              const char *,name,
+              char *,buf,
+              int,buflen)
+{
+  return(WSAAsyncGetHostByName(hWnd,
+                               wMsg,
+                               name,
+                               buf,
+                               buflen));
+}
+
+
+ODINFUNCTION7(LHANDLE,OS2WSAAsyncGetHostByAddr,
+              HWND,hWnd,
+              u_int,wMsg,
+              const char *,addr,
+              int,len,
+              int,type,
+              char *,buf,
+              int,buflen)
+{
+  return(WSAAsyncGetHostByAddr(hWnd,
+                               wMsg,
+                               addr,
+                               len,
+                               type,
+                               buf,
+                               buflen));
+}
+
+
+ODINFUNCTION1(int,OS2WSACancelAsyncRequest,
+              LHANDLE,hAsyncTaskHandle)
+{
+  return(WSACancelAsyncRequest(hAsyncTaskHandle));
+}
+
+
+ODINFUNCTION4(int,OS2WSAAsyncSelect,
+              SOCKET,s,
+              HWND,hWnd,
+              u_int,wMsg,
+              long,lEvent)
+{
+  return (WSAAsyncSelect(s,
+                         hWnd,
+                         wMsg,
+                         lEvent));
+}
