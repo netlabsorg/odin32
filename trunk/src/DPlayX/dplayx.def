@@ -1,22 +1,13 @@
-LIBRARY AVIFIL32 INITINSTANCE TERMINSTANCE
+LIBRARY DPLAYX INITINSTANCE TERMINSTANCE
 
 PROTMODE
 DATA MULTIPLE NONSHARED READWRITE LOADONCALL
 CODE LOADONCALL
 
 EXPORTS
-; AVIBuildFilter             = _AVIBuildFilter@?               @? ;0 not good
-name dplay
-type win32
-
-  1 stdcall DirectPlayCreate(ptr ptr ptr ptr) DirectPlayCreate
-  2 stdcall DirectPlayEnumerate(ptr ptr) DirectPlayEnumerateA
-name dplayx
-type win32
-
-  1 stdcall DirectPlayCreate(ptr ptr ptr ptr) DirectPlayCreate
-  2 stdcall DirectPlayEnumerateA(ptr ptr) DirectPlayEnumerateA
-  3 stdcall DirectPlayEnumerateW(ptr ptr) DirectPlayEnumerateW
-  4 stdcall DirectPlayLobbyCreateA(ptr ptr ptr ptr long) DirectPlayLobbyCreateA
-  5 stdcall DirectPlayLobbyCreateW(ptr ptr ptr ptr long) DirectPlayLobbyCreateW
-  9 stub DirectPlayEnumerate
+  DirectPlayCreate           = _DirectPlayCreate@16            @1
+  DirectPlayEnumerateA       = _DirectPlayEnumerateA@8         @2
+  DirectPlayEnumerateA       = _DirectPlayEnumerateA@8         @3
+  DirectPlayLobbyCreateA     = _DirectPlayLobbyCreateA@20      @4
+  DirectPlayLobbyCreateW     = _DirectPlayLobbyCreateW@20      @5
+; DirectPlayEnumerate        = _DirectPlayEnumerate@?          @? 
