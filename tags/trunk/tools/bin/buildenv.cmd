@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.27 2002-09-02 15:16:32 bird Exp $
+/* $Id: buildenv.cmd,v 1.28 2002-09-03 18:41:28 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -26,7 +26,7 @@
     /*
      * Version
      */
-    sVersion = '1.0.5 [2002-08-30]';
+    sVersion = '1.0.6 [2002-09-03]';
 
     /*
      * Create argument array with lowercase arguments.
@@ -1108,60 +1108,6 @@ return 0;
 
 
 /**
- * Execute a command and match output and return code.
- *
- * @returns  0 on match.
- *          49 on return code mismatch.
- *          99 on output mistmatch.
- * @param   sCmd                    The command to execute.
- * @param   rcCmdExepcted           The expected return code from the command.
- * @param   sOutputPartExpected     A 'needle' of the output 'haystack'.
- */
-CheckCmdOutput: procedure
-    parse arg sCmd, rcCmdExpected, fQuiet, sOutputPartExpected
-
-    /*
-     * Try execute the command
-     */
-    queTmp = RxQueue('Create');
-    queOld = RxQueue('Set', queTmp);
-    Address CMD sCmd || ' 2>&1 | RxQueue' queTmp;
-    rcCmd = rc;
-
-    /* get output */
-    sOutput = '';
-    do while (queued() > 0)
-        parse pull sLine
-        sOutput = sOutput || sLine || '0d0a'x
-    end
-    call RxQueue 'Delete', RxQueue('Set', queOld);
-
-    /*
-     * If command
-     */
-    rc = 0;
-    if (/*rcCmd = rcCmdExpected*/ 1) then /* doesn't work with cmd.exe */
-    do
-        if (pos(sOutputPartExpected, sOutput) <= 0) then
-        do
-            say 'Debug - start'
-            say 'Debug:' sOutputPartExpected
-            say 'Debug: not found in:'
-            say sOutput
-            say 'Debug - end'
-            rc = 99
-        end
-    end
-    else
-        rc = 49
-
-    if (\fQuiet & rc <> 0) then
-        say 'Debug:' sCmd 'rc='rc' rcCmd='rcCmd 'rcCmdExpected='rcCmdExpected;
-return rc;
-
-
-
-/**
  * Add sToAdd in front of sEnvVar.
  * Note: sToAdd now is allowed to be alist!
  *
@@ -1362,8 +1308,179 @@ FixCMDEnv: procedure
 return 0;
 
 
+/**
+ * Execute a command and match output and return code.
+ *
+ * @returns  0 on match.
+ *          49 on return code mismatch.
+ *          99 on output mistmatch.
+ * @param   sCmd                    The command to execute.
+ * @param   rcCmdExepcted           The expected return code from the command.
+ * @param   sOutputPartExpected     A 'needle' of the output 'haystack'.
+ */
+CheckCmdOutput: procedure
+    parse arg sCmd, rcCmdExpected, fQuiet, sOutputPartExpected
+
+    /*
+     * Try execute the command
+     */
+    queTmp = RxQueue('Create');
+    queOld = RxQueue('Set', queTmp);
+    Address CMD sCmd || ' 2>&1 | RxQueue' queTmp;
+    rcCmd = rc;
+
+    /* get output */
+    sOutput = '';
+    do while (queued() > 0)
+        parse pull sLine
+        sOutput = sOutput || sLine || '0d0a'x
+    end
+    call RxQueue 'Delete', RxQueue('Set', queOld);
+
+    /*
+     * If command
+     */
+    rc = 0;
+    if (/*rcCmd = rcCmdExpected*/ 1) then /* doesn't work with cmd.exe */
+    do
+        if (pos(sOutputPartExpected, sOutput) <= 0) then
+        do
+            say 'Debug - start'
+            say 'Debug:' sOutputPartExpected
+            say 'Debug: not found in:'
+            say sOutput
+            say 'Debug - end'
+            rc = 99
+        end
+    end
+    else
+        rc = 49
+
+    if (\fQuiet & rc <> 0) then
+        say 'Debug:' sCmd 'rc='rc' rcCmd='rcCmd 'rcCmdExpected='rcCmdExpected;
+return rc;
 
 
+/**
+ * Checks syslevel info.
+ * @returns 0 if match.
+ *          <>0 if mismatch.
+ * @param   sFile           Name of the syslevel file.
+ * @param   fQuiet          Quiet / verbose flag.
+ * @param   sMatchCid       Component id. (optional)
+ * @param   sMatchVer       Version id. (optional)
+ * @param   sMatchLevel     Current Level. (optional)
+ * @param   sMatchTitle     Product title. (optional)
+ * @param   sMatchKind      Product kind. (optional)
+ * @param   sMatchType      Product type. (optional)
+ */
+CheckSyslevel: procedure
+parse arg sFile, fQuiet, sMatchCId,sMatchVer,sMatchLevel,sMatchTitle,iMatchKind,sMatchType,dummy
+
+    iRc = -1;
+
+    /* Open the file */
+    rc = stream(sFile, 'c', 'open read');
+    if (pos('READY', rc) = 1) then
+    do
+        if (charin(sFile, 1, 11) = 'FF'x'FF'x'SYSLEVEL'||'00'x) then
+        do
+            /* read base offset (binary long) */
+            iBase = c2x(charin(sFile, 34, 4));
+            iBase = 1 + x2d(right(iBase,2)||substr(iBase,5,2)||substr(iBase,3,2)||left(iBase,2));
+
+            /* Read fields...
+             *
+             *  typedef struct _SYSLEVELDATA {      offset
+             *     unsigned char d_reserved1[2];     0
+             *     unsigned char d_kind;             2
+             *     unsigned char d_version[2];       3
+             *     unsigned char d_reserved2[2];     5
+             *     unsigned char d_clevel[7];        7
+             *     unsigned char d_reserved3;       14
+             *     unsigned char d_plevel[7];       15
+             *     unsigned char d_reserved4;       22
+             *     unsigned char d_title[80];       23
+             *     unsigned char d_cid[9];         103
+             *     unsigned char d_revision;       112
+             *     unsigned char d_type[1];        113
+             *  } SYSLEVELDATA;
+             */
+            iKind       =   c2d(charin(sFile, iBase+  2,  1));
+            iVer        =       charin(sFile, iBase+  3,  2);
+            sCurLevel   = strip(charin(sFile, iBase+  7,  7), 'T', '00'x);
+            sPreLevel   = strip(charin(sFile, iBase+ 15,  7), 'T', '00'x);
+            sTitle      = strip(charin(sFile, iBase+ 23, 80), 'T', '00'x);
+            sCId        =       charin(sFile, iBase+103,  9);
+            iRev        =       charin(sFile, iBase+112,  1);
+            sType       = strip(charin(sFile, iBase+113, 10), 'T', '00'x);
+
+            sVer = substr(c2x(substr(iVer, 1, 1)), 1, 1)||,
+                   '.'||,
+                   substr(c2x(substr(iVer, 1, 1)), 2, 1)||,
+                   d2c(c2d(substr(iVer, 2, 1)) + 48);
+            if (iRev <> 0) then
+                sVer = sVer ||'.'|| d2c(c2d(iRev) + 48);
+
+            /*
+             * Compare.
+             */
+            iRc = 0;
+            if (sMatchCId <> '' & sMatchCId <> sCid) then
+            do
+                if (\fQuiet) then
+                    say 'syslevel '''sFile''': cid '''sCId''' != '''sMatchCId'''.';
+                iRc = 2;
+            end
+            if (sMatchVer <> '' & sMatchVer <> sVer) then
+            do
+                if (\fQuiet) then
+                    say 'syslevel '''sFile''': ver '''sVer''' != '''sMatchVer'''.';
+                iRc = 3;
+            end
+            if (sMatchLevel <> '' & sMatchLevel <> sCurLevel) then
+            do
+                if (\fQuiet) then
+                    say 'syslevel '''sFile''': level '''sCurLevel''' != '''sMatchLevel'''.';
+                iRc = 4;
+            end
+            if (sMatchTitle <> '' & sMatchTitle <> sTitle) then
+            do
+                if (\fQuiet) then
+                    say 'syslevel '''sFile''': title '''sTitle''' != '''sMatchTitle'''.';
+                iRc = 5;
+            end
+            if (iMatchKind <> '' & iMatchKind <> iKind) then
+            do
+                if (\fQuiet) then
+                    say 'syslevel '''sFile''': kind '''iKind''' != '''iMatchKind'''.';
+                iRc = 6;
+            end
+            if (sMatchType <> '' & sMatchType <> sType) then
+            do
+                if (\fQuiet) then
+                    say 'syslevel '''sFile''': type '''sType''' != '''sMatchType'''.';
+                iRc = 7;
+            end
+            /*
+            say 'debug:'
+            say 'iKind       =' iKind
+            say 'sCurLevel   =' sCurLevel
+            say 'sPreLevel   =' sPreLevel
+            say 'sTitle      =' sTitle
+            say 'sCId        =' sCId
+            say 'sType       =' sType
+            say 'sVer        =' sVer
+            */
+        end
+        else
+            say 'bad signature';
+
+        /* finished, close file */
+        call stream sFile, 'c', 'close';
+    end
+    else say 'open failed, rc='rc;
+return iRc;
 
 
 
@@ -2570,7 +2687,10 @@ Toolkit40: procedure expose aCfg. aPath. sPathFile
         |   \CfgVerifyFile(sPathTK'\som\bin\sc.exe', fQuiet),
         ) then
         return 2;
-    rc = CheckCmdOutput('syslevel '||sPathTK||'\bin', 0, fQuiet, 'IBM Developer''s Toolkit for OS/2 Warp Version 4'||'0d0a'x||'Version 4.00.');
+
+    rc = CheckSyslevel(sPathTK||'\bin\syslevel.tlk', fQuiet,,,,,
+                       'IBM Developer''s Toolkit for OS/2 Warp Version 4',,
+                       15, '0');
     if (rc = 0) then
         rc = CheckCmdOutput('sc -V', -1, fQuiet, '", Version: 2.54.');
     if (rc = 0) then
@@ -2658,7 +2778,11 @@ Toolkit45: procedure expose aCfg. aPath. sPathFile
         |    FileExists(sPathTK'\som\bin\sc.exe'),
         ) then
         return 2;
-    rc = CheckCmdOutput('syslevel '||sPathTK||'\bin', 0, fQuiet, 'IBM OS/2 Developer''s Toolkit Version 4.5'||'0d0a'x||'Version 4.50     Component ID 5639F9300');
+
+    rc = CheckSyslevel(sPathTK||'\bin\syslevel.tlk', fQuiet,,
+                       '5639F9300', '4.50', 'XR04500',,
+                       'IBM OS/2 Developer''s Toolkit Version 4.5',,
+                       15, '0');
     if (rc = 0) then
         rc = CheckCmdOutput('rc', 0, fQuiet, 'IBM RC (Resource Compiler) Version 5.00.004');
     if (rc = 0) then
@@ -2744,7 +2868,11 @@ Toolkit451: procedure expose aCfg. aPath. sPathFile
         |   \CfgVerifyFile(sPathTK'\som\bin\sc.exe', fQuiet),
         ) then
         return 2;
-    rc = CheckCmdOutput('syslevel '||sPathTK||'\bin', 0, fQuiet, 'IBM OS/2 Developer''s Toolkit Version 4.5'||'0d0a'x||'Version 4.50.1     Component ID 5639F9300');
+
+    rc = CheckSyslevel(sPathTK||'\bin\syslevel.tlk', fQuiet,,
+                       '5639F9300', '4.50.1', 'XR04510',,
+                       'IBM OS/2 Developer''s Toolkit Version 4.5',,
+                       15, '0');
     if (rc = 0) then
         rc = CheckCmdOutput('sc -V', -1, fQuiet, '", Version: 2.54.');
     if (rc = 0) then
@@ -2839,7 +2967,11 @@ Toolkit452: procedure expose aCfg. aPath. sPathFile
         |   \CfgVerifyFile(sPathTK'\som\bin\sc.exe', fQuiet),
         ) then
         return 2;
-    rc = CheckCmdOutput('syslevel '||sPathTK||'\bin', 0, fQuiet, 'IBM OS/2 Developer''s Toolkit Version 4.5'||'0d0a'x||'Version 4.50.2     Component ID 5639F9300');
+
+    rc = CheckSyslevel(sPathTK||'\bin\syslevel.tlk', fQuiet,,
+                       '5639F9300', '4.50.2', 'XR04520',,
+                       'IBM OS/2 Developer''s Toolkit Version 4.5',,
+                       15, '0');
     if (rc = 0) then
         rc = CheckCmdOutput('sc -V', -1, fQuiet, '", Version: 2.54.');
     /*if (rc = 0) then
@@ -3008,17 +3140,21 @@ VAC308: procedure expose aCfg. aPath. sPathFile
         |   \CfgVerifyFile(sPathCPP'\help\cpplib.inf', fQuiet),
         ) then
         return 2;
-    rc = CheckCmdOutput('syslevel '||sPathCPP||'\syslevel', 0, fQuiet, 'Version 3.00     Component ID 562201703'||'0d0a'x||'Current CSD level: CTC308');
+
+
+    rc = CheckSyslevel(sPathCPP||'\syslevel\syslevel.ct3', fQuiet,'562201703',,'CTC308',);
     if (rc = 0) then
-        rc = CheckCmdOutput('syslevel '||sPathCPP||'\syslevel', 0, fQuiet, 'Version 3.00     Component ID 562201704'||'0d0a'x||'Current CSD level: CTU308');
+        rc = CheckSyslevel(sPathCPP||'\syslevel\syslevel.ct4', fQuiet,'562201704',,'CTU308',);
     /*if (rc = 0) then
         rc = CheckCmdOutput('syslevel '||sPathCPP||'\syslevel', 0, fQuiet, 'Version 3.00     Component ID 562201707'||'0d0a'x||'Current CSD level: CTV308');
     if (rc = 0) then
-        rc = CheckCmdOutput('syslevel '||sPathCPP||'\syslevel', 0, fQuiet, 'Version 3.00     Component ID 562201708'||'0d0a'x||'Current CSD level: CTD308');*/
+        rc = CheckSyslevel(sPathCPP||'\syslevel\syslevel.ct8', fQuiet,'562201708',,'CTD308',);
+        */
     if (rc = 0) then
-        rc = CheckCmdOutput('syslevel '||sPathCPP||'\syslevel', 0, fQuiet, 'Version 3.00     Component ID 562201605'||'0d0a'x||'Current CSD level: CTC308');
+        rc = CheckSyslevel(sPathCPP||'\syslevel\syslevel.wf5', fQuiet,'562201605',,'CTC308',);
     /*if (rc = 0) then
-        rc = CheckCmdOutput('syslevel '||sPathCPP||'\syslevel', 0, fQuiet, 'Version 3.00     Component ID 562201602'||'0d0a'x||'Current CSD level: CTO308');*/
+        rc = CheckSyslevel(sPathCPP||'\syslevel\syslevel.wf2', fQuiet,'562201602',,'CTO308',);
+        */
     if (rc = 0) then
         rc = CheckCmdOutput('icc', 0, fQuiet, 'IBM VisualAge C++ for OS/2, Version 3');
     if (rc = 0) then
