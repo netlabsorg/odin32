@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.2723 2004-04-13 14:12:36 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2724 2004-04-15 16:19:24 sandervl Exp $ */
+
+ 2004-04-15: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o SetWindowPos: do not check for position and size redundancy
 
  2004-04-08: knut st. osmundsen <bird-changelog@innotek    >
     - INCLUDE:  o Merged wingdi.h from current WINE CVS.
