@@ -1,4 +1,4 @@
-/* $Id: pidl.cpp,v 1.9 2000-08-18 02:01:17 phaller Exp $ */
+/* $Id: pidl.cpp,v 1.10 2000-08-24 09:35:06 sandervl Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -1977,4 +1977,23 @@ ODINFUNCTION2(LPITEMIDLIST*, _ILCopyCidaToaPidl,
 	  dst[i] = ILClone((LPITEMIDLIST)(&((LPBYTE)cida)[cida->aoffset[i + 1]]));
 
 	return dst;
+}
+
+/*************************************************************************
+ * SHGetFolderLocation [SHELL32]
+ *
+ * NOTES
+ *  the pidl can be a simple one. since we cant get the path out of the pidl
+ *  we have to take all data from the pidl
+ */
+HRESULT WINAPI SHGetFolderLocation(
+	HWND hwnd,
+	int csidl,
+	HANDLE hToken,
+	DWORD dwFlags,
+	LPITEMIDLIST *ppidl)
+{
+	FIXME("0x%04x 0x%08x 0x%08x 0x%08lx %p\n",
+	 hwnd, csidl, hToken, dwFlags, ppidl);
+	return SHGetSpecialFolderLocation(hwnd, csidl, ppidl);
 }

@@ -1,10 +1,12 @@
-/* $Id: shell32_main.h,v 1.4 2000-08-18 02:01:20 phaller Exp $ */
+/* $Id: shell32_main.h,v 1.5 2000-08-24 09:35:07 sandervl Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
  *
  * Copyright 1999 Patrick Haller (haller@zebra.fh-weingarten.de)
  * Project Odin Software License can be found in LICENSE.TXT
+ *
+ * Note: Odin changes marked by #ifdef __WIN32OS2__ !
  *
  * Corel WINE 20000324 level
  */
@@ -55,39 +57,39 @@ extern HDPA             sic_hdpa;
 /*******************************************
 * pointer to functions dynamically loaded
 */
-extern void     (WINAPI* pDLLInitComctl)(LPVOID);
-extern INT      (WINAPI* pImageList_AddIcon) (HIMAGELIST himl, HICON hIcon);
-extern INT      (WINAPI* pImageList_ReplaceIcon) (HIMAGELIST, INT, HICON);
-extern HIMAGELIST (WINAPI* pImageList_Create) (INT,INT,UINT,INT,INT);
-extern BOOL     (WINAPI* pImageList_Draw) (HIMAGELIST himl, int i, HDC hdcDest, int x, int y, UINT fStyle);
-extern HICON    (WINAPI* pImageList_GetIcon) (HIMAGELIST, INT, UINT);
-extern INT      (WINAPI* pImageList_GetImageCount)(HIMAGELIST);
-extern COLORREF (WINAPI *pImageList_SetBkColor)(HIMAGELIST, COLORREF);
+extern void     (* WINAPI  pDLLInitComctl)(LPVOID);
+extern INT      (* WINAPI  pImageList_AddIcon) (HIMAGELIST himl, HICON hIcon);
+extern INT      (* WINAPI  pImageList_ReplaceIcon) (HIMAGELIST, INT, HICON);
+extern HIMAGELIST (* WINAPI  pImageList_Create) (INT,INT,UINT,INT,INT);
+extern BOOL     (* WINAPI  pImageList_Draw) (HIMAGELIST himl, int i, HDC hdcDest, int x, int y, UINT fStyle);
+extern HICON    (* WINAPI  pImageList_GetIcon) (HIMAGELIST, INT, UINT);
+extern INT      (* WINAPI  pImageList_GetImageCount)(HIMAGELIST);
+extern COLORREF (* WINAPI pImageList_SetBkColor)(HIMAGELIST, COLORREF);
 
-extern LPVOID   (WINAPI* pCOMCTL32_Alloc) (INT);
-extern BOOL     (WINAPI* pCOMCTL32_Free) (LPVOID);
+extern LPVOID   (* WINAPI  pCOMCTL32_Alloc) (INT);
+extern BOOL     (* WINAPI  pCOMCTL32_Free) (LPVOID);
 
-extern HDPA     (WINAPI* pDPA_Create) (INT);
-extern INT      (WINAPI* pDPA_InsertPtr) (const HDPA, INT, LPVOID);
-extern BOOL     (WINAPI* pDPA_Sort) (const HDPA, PFNDPACOMPARE, LPARAM);
-extern LPVOID   (WINAPI* pDPA_GetPtr) (const HDPA, INT);
-extern BOOL     (WINAPI* pDPA_Destroy) (const HDPA);
-extern INT      (WINAPI* pDPA_Search) (const HDPA, LPVOID, INT, PFNDPACOMPARE, LPARAM, UINT);
-extern LPVOID   (WINAPI* pDPA_DeletePtr) (const HDPA hdpa, INT i);
+extern HDPA     (* WINAPI  pDPA_Create) (INT);
+extern INT      (* WINAPI  pDPA_InsertPtr) (const HDPA, INT, LPVOID);
+extern BOOL     (* WINAPI  pDPA_Sort) (const HDPA, PFNDPACOMPARE, LPARAM);
+extern LPVOID   (* WINAPI  pDPA_GetPtr) (const HDPA, INT);
+extern BOOL     (* WINAPI  pDPA_Destroy) (const HDPA);
+extern INT      (* WINAPI  pDPA_Search) (const HDPA, LPVOID, INT, PFNDPACOMPARE, LPARAM, UINT);
+extern LPVOID   (* WINAPI  pDPA_DeletePtr) (const HDPA hdpa, INT i);
 #define pDPA_GetPtrCount(hdpa)  (*(INT*)(hdpa))
 
-extern HICON (WINAPI *pLookupIconIdFromDirectoryEx)(LPBYTE dir, BOOL bIcon, INT width, INT height, UINT cFlag);
-extern HICON (WINAPI *pCreateIconFromResourceEx)(LPBYTE bits,UINT cbSize, BOOL bIcon, DWORD dwVersion, INT width, INT height,UINT cFlag);
+extern HICON (* WINAPI pLookupIconIdFromDirectoryEx)(LPBYTE dir, BOOL bIcon, INT width, INT height, UINT cFlag);
+extern HICON (* WINAPI pCreateIconFromResourceEx)(LPBYTE bits,UINT cbSize, BOOL bIcon, DWORD dwVersion, INT width, INT height,UINT cFlag);
 
 /* ole2 */
-extern HRESULT (WINAPI* pOleInitialize)(LPVOID reserved);
-extern void    (WINAPI* pOleUninitialize)(void);
-extern HRESULT (WINAPI* pRegisterDragDrop)(HWND hwnd, IDropTarget* pDropTarget);
-extern HRESULT (WINAPI* pRevokeDragDrop)(HWND hwnd);
-extern HRESULT (WINAPI* pDoDragDrop)(LPDATAOBJECT,LPDROPSOURCE,DWORD,DWORD*);
-extern void (WINAPI* pReleaseStgMedium)(STGMEDIUM* pmedium);
-extern HRESULT (WINAPI* pOleSetClipboard)(IDataObject* pDataObj);
-extern HRESULT (WINAPI* pOleGetClipboard)(IDataObject** ppDataObj);
+extern HRESULT (* WINAPI  pOleInitialize)(LPVOID reserved);
+extern void    (* WINAPI  pOleUninitialize)(void);
+extern HRESULT (* WINAPI  pRegisterDragDrop)(HWND hwnd, IDropTarget* pDropTarget);
+extern HRESULT (* WINAPI  pRevokeDragDrop)(HWND hwnd);
+extern HRESULT (* WINAPI  pDoDragDrop)(LPDATAOBJECT,LPDROPSOURCE,DWORD,DWORD*);
+extern void (* WINAPI  pReleaseStgMedium)(STGMEDIUM* pmedium);
+extern HRESULT (* WINAPI  pOleSetClipboard)(IDataObject* pDataObj);
+extern HRESULT (* WINAPI  pOleGetClipboard)(IDataObject** ppDataObj);
 
     
 BOOL WINAPI Shell_GetImageList(HIMAGELIST * lpBigList, HIMAGELIST * lpSmallList);
@@ -171,14 +173,14 @@ void FreeShellOle(void);
 BOOL GetShellOle(void);
     
 /* PH: This creates an auto variable just in any importer...
-HRESULT (WINAPI* pOleInitialize)(LPVOID reserved);
-void    (WINAPI* pOleUninitialize)(void);
-HRESULT (WINAPI* pRegisterDragDrop)(HWND hwnd, IDropTarget* pDropTarget);
-HRESULT (WINAPI* pRevokeDragDrop)(HWND hwnd);
-HRESULT (WINAPI* pDoDragDrop)(LPDATAOBJECT,LPDROPSOURCE,DWORD,DWORD*);
-void (WINAPI* pReleaseStgMedium)(STGMEDIUM* pmedium);
-HRESULT (WINAPI* pOleSetClipboard)(IDataObject* pDataObj);
-HRESULT (WINAPI* pOleGetClipboard)(IDataObject** ppDataObj);
+HRESULT (* WINAPI  pOleInitialize)(LPVOID reserved);
+void    (* WINAPI  pOleUninitialize)(void);
+HRESULT (* WINAPI  pRegisterDragDrop)(HWND hwnd, IDropTarget* pDropTarget);
+HRESULT (* WINAPI  pRevokeDragDrop)(HWND hwnd);
+HRESULT (* WINAPI  pDoDragDrop)(LPDATAOBJECT,LPDROPSOURCE,DWORD,DWORD*);
+void (* WINAPI  pReleaseStgMedium)(STGMEDIUM* pmedium);
+HRESULT (* WINAPI  pOleSetClipboard)(IDataObject* pDataObj);
+HRESULT (* WINAPI  pOleGetClipboard)(IDataObject** ppDataObj);
 */
     
 HGLOBAL RenderHDROP(LPITEMIDLIST pidlRoot, LPITEMIDLIST * apidl, UINT cidl);
@@ -196,11 +198,15 @@ void FreeChangeNotifications(void);
 /* file operation */
 BOOL SHELL_DeleteDirectoryA(LPCSTR pszDir, BOOL bShowUI);
 
+#ifdef __WIN32OS2__
+BOOL SHELL_OsIsUnicode(void);
+#else
 inline static BOOL SHELL_OsIsUnicode(void)
 {
 /* if high-bit of version is 0, we are emulating NT */
   return !(GetVersion() & 0x80000000);
 }
+#endif
     
 #ifdef __cplusplus
   }
