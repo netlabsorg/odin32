@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.168 2002-02-12 13:10:14 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.169 2002-02-18 10:14:57 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -64,6 +64,7 @@ ULONG   ScreenWidth  = 0;
 ULONG   ScreenHeight = 0;
 ULONG   ScreenBitsPerPel = 0;
 BOOL    fOS2Look = FALSE;
+BOOL    fForceMonoCursor = FALSE;
 HBITMAP hbmFrameMenu[3] = {0};
 
 static PFNWP pfnFrameWndProc = NULL;
@@ -251,6 +252,12 @@ void WIN32API SetWindowAppearance(int fLooks)
     }
     fOS2Look = fLooks;
     MENU_Init();
+}
+//******************************************************************************
+//******************************************************************************
+void WIN32API CustForceMonoCursor()
+{
+    fForceMonoCursor = TRUE;
 }
 //******************************************************************************
 //CD notification window class

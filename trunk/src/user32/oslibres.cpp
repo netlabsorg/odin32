@@ -1,4 +1,4 @@
-/* $Id: oslibres.cpp,v 1.29 2001-10-27 10:30:10 sandervl Exp $ */
+/* $Id: oslibres.cpp,v 1.30 2002-02-18 10:14:56 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -448,7 +448,7 @@ HANDLE OSLibWinCreatePointer(CURSORICONINFO *pInfo, char *pAndBits, BITMAP_W *pA
         }
         if(fCursor && pXorBmp->bmBitsPixel >= 8) 
         {
-            if(isMonoBitmap(pXorBmp, (PBYTE)os2rgb) == TRUE) 
+            if(fForceMonoCursor || isMonoBitmap(pXorBmp, (PBYTE)os2rgb) == TRUE) 
             {
                 pOS2XorBits = colorToMonoBitmap(hbmColor, pBmpColor);
                 if(pOS2XorBits) {

@@ -1,4 +1,4 @@
-; $Id: user32dbg.def,v 1.2 2002-02-12 12:00:03 sandervl Exp $
+; $Id: user32dbg.def,v 1.3 2002-02-18 10:14:58 sandervl Exp $
 
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
 DESCRIPTION 'Odin32 System Dll - User32'
@@ -708,3 +708,5 @@ EXPORTS
 
     _WinSetVisibleRgnNotifyProc@12                               @2033 NONAME
     _Win32ToOS2FrameHandle@4                                     @2034 NONAME
+
+    _CustForceMonoCursor@0                                       @2036 NONAME
