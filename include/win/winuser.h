@@ -1,4 +1,4 @@
-/* $Id: winuser.h,v 1.6 1999-08-05 19:47:22 phaller Exp $ */
+/* $Id: winuser.h,v 1.7 1999-09-02 19:07:17 phaller Exp $ */
 
 #ifndef __INCLUDE_WINUSER_H
 #define __INCLUDE_WINUSER_H
@@ -2332,6 +2332,12 @@ typedef struct
 #define MFS_BOTTOMGAPDROP   0x40000000L
 #define MFS_TOPGAPDROP      0x80000000L
 #define MFS_GAPDROP         0xC0000000L
+
+
+/* for GetMenuDefaultItem */
+#define GMDI_USEDISABLED    0x0001L
+#define GMDI_GOINTOPOPUPS   0x0002L
+
 
 #define DT_TOP 0
 #define DT_LEFT 0
