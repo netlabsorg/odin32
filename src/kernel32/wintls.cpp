@@ -1,4 +1,4 @@
-/* $Id: wintls.cpp,v 1.15 2000-10-11 07:22:29 sandervl Exp $ */
+/* $Id: wintls.cpp,v 1.16 2000-11-21 11:35:09 sandervl Exp $ */
 /*
  * Win32 TLS API functions
  *
@@ -139,12 +139,12 @@ void Win32ImageBase::tlsDetachThread()  //destroy TLS structures
 DWORD WIN32API TlsAlloc()
 {
  DWORD index = -1;
- THDB *thdb;
+ TEB  *teb;
  PDB  *pdb;
  DWORD mask, tibidx;
  int   i;
 
-  thdb = GetThreadTHDB();
+  teb  = GetThreadTEB();
   pdb  = PROCESS_Current();
 
   EnterCriticalSection(&pdb->crit_section);
@@ -166,7 +166,7 @@ DWORD WIN32API TlsAlloc()
         }
   }
   LeaveCriticalSection(&pdb->crit_section);
-  thdb->tls_array[index] = 0;
+  teb->tls_array[index] = 0;
 
   dprintf(("KERNEL32: TlsAlloc returned %d", index));
   return index;
@@ -175,7 +175,7 @@ DWORD WIN32API TlsAlloc()
 //******************************************************************************
 BOOL WIN32API TlsFree(DWORD index)
 {
- THDB  *thdb;
+ TEB   *teb;
  PDB   *pdb;
  int    tlsidx;
  DWORD  mask;
@@ -187,8 +187,8 @@ BOOL WIN32API TlsFree(DWORD index)
         return NULL;
   }
 
-  thdb = GetThreadTHDB();
-  pdb  = PROCESS_Current();
+  teb = GetThreadTEB();
+  pdb = PROCESS_Current();
 
   EnterCriticalSection(&pdb->crit_section);
   tlsidx = 0;
@@ -199,7 +199,7 @@ BOOL WIN32API TlsFree(DWORD index)
   if(pdb->tls_bits[tlsidx] & mask) {
         LeaveCriticalSection(&pdb->crit_section);
         pdb->tls_bits[tlsidx] &= ~mask;
-        thdb->tls_array[index] = 0;
+        teb->tls_array[index] = 0;
         SetLastError(ERROR_SUCCESS);
         return TRUE;
   }
@@ -212,7 +212,7 @@ BOOL WIN32API TlsFree(DWORD index)
 LPVOID WIN32API TlsGetValue(DWORD index)
 {
  LPVOID rc;
- THDB  *thdb;
+ TEB   *teb;
 
   if(index >= TLS_MINIMUM_AVAILABLE)
   {
@@ -221,8 +221,8 @@ LPVOID WIN32API TlsGetValue(DWORD index)
   }
   SetLastError(ERROR_SUCCESS);
 
-  thdb = GetThreadTHDB();
-  rc = thdb->tls_array[index];
+  teb = GetThreadTEB();
+  rc = teb->tls_array[index];
 
   dprintf2(("KERNEL32: TlsGetValue %d returned %X\n", index, rc));
   return(rc);
@@ -231,7 +231,7 @@ LPVOID WIN32API TlsGetValue(DWORD index)
 //******************************************************************************
 BOOL WIN32API TlsSetValue(DWORD index, LPVOID val)
 {
- THDB *thdb;
+ TEB *teb;
 
   dprintf2(("KERNEL32: TlsSetValue %d %x", index, val));
   if(index >= TLS_MINIMUM_AVAILABLE)
@@ -241,8 +241,8 @@ BOOL WIN32API TlsSetValue(DWORD index, LPVOID val)
   }
   SetLastError(ERROR_SUCCESS);
 
-  thdb = GetThreadTHDB();
-  thdb->tls_array[index] = val;
+  teb = GetThreadTEB();
+  teb->tls_array[index] = val;
   return TRUE;
 }
 //******************************************************************************

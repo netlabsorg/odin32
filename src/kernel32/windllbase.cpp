@@ -1,4 +1,4 @@
-/* $Id: windllbase.cpp,v 1.21 2000-10-30 16:38:54 sandervl Exp $ */
+/* $Id: windllbase.cpp,v 1.22 2000-11-21 11:35:09 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
@@ -386,7 +386,7 @@ BOOL Win32DllBase::attachProcess()
 {
  WINEXCEPTION_FRAME exceptFrame;
  USHORT sel;
- THDB *thdb;
+ TEB *teb;
  BOOL rc, fSetExceptionHandler;
 
     if(fAttachedToProcess || fSkipEntryCalls)
@@ -394,8 +394,8 @@ BOOL Win32DllBase::attachProcess()
 
     fAttachedToProcess = TRUE;
 
-    thdb = GetThreadTHDB();
-    fSetExceptionHandler = (!thdb || thdb->teb_sel != GetFS());
+    teb = GetThreadTEB();
+    fSetExceptionHandler = (!teb || teb->teb_sel != GetFS());
 
     //Note: The Win32 exception structure references by FS:[0] is the same
     //      in OS/2
@@ -439,8 +439,8 @@ BOOL Win32DllBase::attachProcess()
         OS2UnsetExceptionHandler((void *)&exceptFrame);
     }
     else
-    if(thdb) {
-        if(thdb->teb_sel != GetFS()) {
+    if(teb) {
+        if(teb->teb_sel != GetFS()) {
             dprintf(("Win32DllBase::attachProcess: FS was changed by dll entrypoint!!!!"));
             DebugInt3();
         }

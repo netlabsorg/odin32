@@ -1,4 +1,4 @@
-/* $Id: process.cpp,v 1.7 2000-10-18 17:09:33 sandervl Exp $ */
+/* $Id: process.cpp,v 1.8 2000-11-21 11:35:09 sandervl Exp $ */
 
 /*
  * Win32 process functions for OS/2
@@ -321,7 +321,7 @@ DWORD WINAPI GetProcessDword( DWORD dwProcessID, INT offset )
 
     case GPD_THDB:
         if ( process != PROCESS_Current() ) return 0;
-        return (DWORD)GetThreadTHDB();
+        return (DWORD)GetThreadTEB() + 0x30;
 
     case GPD_PDB:
         return (DWORD)process;

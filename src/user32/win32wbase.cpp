@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.223 2000-11-19 11:52:40 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.224 2000-11-21 11:36:09 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -495,15 +495,15 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   tmpcs = cs;
 
   //Store our window object pointer in thread local memory, so PMWINDOW.CPP can retrieve it
-  THDB *thdb = GetThreadTHDB();
+  TEB *teb = GetThreadTEB();
 
-  if(thdb == NULL) {
-        dprintf(("Window creation failed - thdb == NULL")); //this is VERY bad
+  if(teb == NULL) {
+        dprintf(("Window creation failed - teb == NULL")); //this is VERY bad
         ExitProcess(666);
         return FALSE;
   }
 
-  thdb->newWindow = (ULONG)this;
+  teb->o.odin.newWindow = (ULONG)this;
 
   DWORD dwOSWinStyle;
 

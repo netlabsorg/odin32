@@ -1,4 +1,4 @@
-/* $Id: oslibutil.cpp,v 1.5 2000-02-16 14:34:28 sandervl Exp $ */
+/* $Id: oslibutil.cpp,v 1.6 2000-11-21 11:36:08 sandervl Exp $ */
 /*
  * Window API utility functions for OS/2
  *
@@ -21,84 +21,84 @@
 //******************************************************************************
 HAB GetThreadHAB()
 {
- THDB *thdb;
+ TEB *teb;
 
-  thdb = GetThreadTHDB();
-  if(thdb)
+  teb = GetThreadTEB();
+  if(teb)
   {
-        return (HAB)thdb->hab;
+        return (HAB)teb->o.odin.hab;
   }
 
-  dprintf(("GetThreadHAB: thdb == NULL!!"));
+  dprintf(("GetThreadHAB: teb == NULL!!"));
   return 0;
 }
 //******************************************************************************
 //******************************************************************************
 void SetThreadHAB(HAB hab)
 {
- THDB *thdb;
+ TEB *teb;
 
-  thdb = GetThreadTHDB();
-  if(thdb)
+  teb = GetThreadTEB();
+  if(teb)
   {
-        thdb->hab = (ULONG)hab;
+        teb->o.odin.hab = (ULONG)hab;
   }
-  else  dprintf(("SetThreadHAB: thdb == NULL!!"));
+  else  dprintf(("SetThreadHAB: teb == NULL!!"));
 }
 //******************************************************************************
 //******************************************************************************
 HMQ GetThreadMessageQueue()
 {
- THDB *thdb;
+ TEB *teb;
 
-  thdb = GetThreadTHDB();
-  if(thdb)
+  teb = GetThreadTEB();
+  if(teb)
   {
-        return (HMQ)thdb->hmq;
+        return (HMQ)teb->o.odin.hmq;
   }
 
-  dprintf(("GetThreadMessageQueue: thdb == NULL!!"));
+  dprintf(("GetThreadMessageQueue: teb == NULL!!"));
   return 0;
 }
 //******************************************************************************
 //******************************************************************************
 void SetThreadMessageQueue(HMQ hmq)
 {
- THDB *thdb;
+ TEB *teb;
 
-  thdb = GetThreadTHDB();
-  if(thdb)
+  teb = GetThreadTEB();
+  if(teb)
   {
-        thdb->hmq = (ULONG)hmq;
+        teb->o.odin.hmq = (ULONG)hmq;
   }
-  else  dprintf(("SetThreadMessageQueue: thdb == NULL!!"));
+  else  dprintf(("SetThreadMessageQueue: teb == NULL!!"));
 }
 //******************************************************************************
 //******************************************************************************
 DWORD GetThreadMessageExtraInfo()
 {
- THDB *thdb;
+ TEB *teb;
 
-  thdb = GetThreadTHDB();
-  if(thdb)
+  teb = GetThreadTEB();
+  if(teb)
   {
-        return thdb->lParam;
+        return teb->o.odin.lParam;
   }
 
-  dprintf(("GetThreadMessageExtraInfo: thdb == NULL!!"));
+  dprintf(("GetThreadMessageExtraInfo: teb == NULL!!"));
   return 0;
 }
 //******************************************************************************
 //******************************************************************************
 DWORD SetThreadMessageExtraInfo(DWORD lParam)
 {
- THDB *thdb;
+ TEB *teb;
 
-  thdb = GetThreadTHDB();
-  if(thdb)
+  teb = GetThreadTEB();
+  if(teb)
   {
-        thdb->lParam = lParam;
+        teb->o.odin.lParam = lParam;
   }
-  else  dprintf(("SetThreadMessageExtraInfo: thdb == NULL!!"));
+  else  dprintf(("SetThreadMessageExtraInfo: teb == NULL!!"));
   return 0;
 }
