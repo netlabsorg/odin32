@@ -1,4 +1,4 @@
-/* $Id: tooltips.c,v 1.20 2000-02-04 17:02:09 cbratschi Exp $ */
+/* $Id: tooltips.c,v 1.21 2000-02-16 17:22:18 cbratschi Exp $ */
 /*
  * Tool tip control
  *
@@ -84,7 +84,7 @@ TOOLTIPS_GetTipText(HWND hwnd,TOOLTIPS_INFO *infoPtr,INT nTool)
     if ((toolPtr->hinst) && (HIWORD((UINT)toolPtr->lpszText) == 0))
     {
       /* load a resource */
-//    TRACE (tooltips,"load res string %x %x\n",toolPtr->hinst,(int)toolPtr->lpszText);
+
       LoadStringW(toolPtr->hinst,(UINT)toolPtr->lpszText,infoPtr->szTipText,INFOTIPSIZE);
     } else if (toolPtr->lpszText)
     {
@@ -100,7 +100,6 @@ TOOLTIPS_GetTipText(HWND hwnd,TOOLTIPS_INFO *infoPtr,INT nTool)
         ttnmdi.lpszText = (LPSTR)&ttnmdi.szText;
         ttnmdi.uFlags = toolPtr->uFlags;
         ttnmdi.lParam = toolPtr->lParam;
-        //          TRACE (tooltips, "hdr.idFrom = %x\n", ttnmdi.hdr.idFrom);
         SendMessageA (toolPtr->hwnd,WM_NOTIFY,(WPARAM)toolPtr->uId,(LPARAM)&ttnmdi);
 
         if ((ttnmdi.hinst) && (HIWORD((UINT)ttnmdi.szText) == 0))
@@ -137,7 +136,7 @@ TOOLTIPS_GetTipText(HWND hwnd,TOOLTIPS_INFO *infoPtr,INT nTool)
           }
         } else
         {
-//        ERR (tooltips, "recursive text callback!\n");
+          //ERR (tooltips, "recursive text callback!\n");
           infoPtr->szTipText[0] = '\0';
         }
       } else
