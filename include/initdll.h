@@ -65,6 +65,10 @@ extern DWORD _Resource_PEResTab;
 
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag);
 void  APIENTRY cleanupKernel32(ULONG ulReason);
 
@@ -90,7 +94,12 @@ ULONG APIENTRY inittermDInput(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermDSound(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermWinSpool(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermDDraw(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermNTDLL(ULONG hModule, ULONG ulFlag);
 
 ULONG APIENTRY InitializeKernel32();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif //__INITDLL_H__
