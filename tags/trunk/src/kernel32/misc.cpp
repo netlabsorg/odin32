@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.6 1999-08-06 12:15:25 phaller Exp $ */
+/* $Id: misc.cpp,v 1.7 1999-08-21 19:47:30 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -271,6 +271,14 @@ int SYSTEM EXPORT WriteLog(char *tekst, ...)
   SetFS(sel);
   return 1;
 }
+
+void CloseLogFile()
+{
+  USHORT  sel = RestoreOS2FS();
+  fclose(flog);
+  SetFS(sel);
+}
+
 
 int SYSTEM EXPORT WriteLogError(char *tekst, ...)
 {
