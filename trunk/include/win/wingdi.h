@@ -1,4 +1,4 @@
-/* $Id: wingdi.h,v 1.9 2000-01-26 23:17:51 sandervl Exp $ */
+/* $Id: wingdi.h,v 1.10 2000-01-29 15:00:01 sandervl Exp $ */
 
 #ifndef __WINE_WINGDI_H
 #define __WINE_WINGDI_H
@@ -2798,6 +2798,7 @@ BOOL      WINAPI FillRgn(HDC,HRGN,HBRUSH);
 BOOL      WINAPI FlattenPath(HDC);
 BOOL      WINAPI FloodFill(HDC,INT,INT,COLORREF);
 BOOL      WINAPI FrameRgn(HDC,HRGN,HBRUSH,INT,INT);
+void      WINAPI GdiFlush(void);
 INT       WINAPI GetArcDirection(HDC);
 BOOL      WINAPI GetAspectRatioFilterEx(HDC,LPSIZE);
 LONG        WINAPI GetBitmapBits(HBITMAP,LONG,LPVOID);
