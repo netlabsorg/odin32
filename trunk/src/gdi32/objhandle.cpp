@@ -1,4 +1,4 @@
-/* $Id: objhandle.cpp,v 1.8 2000-12-09 14:44:35 sandervl Exp $ */
+/* $Id: objhandle.cpp,v 1.9 2000-12-09 15:00:35 sandervl Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
@@ -46,7 +46,7 @@ BOOL ObjAllocateHandle(HANDLE *hObject, DWORD dwUserData, ObjectType type)
     if(lowestFreeIndex == -1) {
         //oops, out of handles
         objTableMutex.leave();
-        dprintf(("ERROR: GDI: HwAllocateWindowHandle OUT OF GDI OBJECT HANDLES!!"));
+        dprintf(("ERROR: GDI: ObjAllocateHandle OUT OF GDI OBJECT HANDLES!!"));
         DebugInt3();
         return FALSE;
     }
@@ -102,15 +102,24 @@ ObjectType ObjGetHandleType(HANDLE hObject)
     {
     case GDIOBJ_REGION:
         hObject &= OBJHANDLE_MAGIC_MASK;
-        if(hObject < MAX_OBJECT_HANDLES && objHandleTable[hObject].dwUserData != 0) {
-            return objHandleTable[hObject].type;
+        if(hObject < MAX_OBJECT_HANDLES && objHandleTable[hObject].type == GDIOBJ_REGION) {
+            return GDIOBJ_REGION;
         }
         break;
 
     case USEROBJ_MENU:
         hObject &= OBJHANDLE_MAGIC_MASK;
-        if(hObject < MAX_OBJECT_HANDLES && objHandleTable[hObject].dwUserData != 0) {
-            return objHandleTable[hObject].type;
+        if(hObject < MAX_OBJECT_HANDLES && objHandleTable[hObject].type == USEROBJ_MENU) {
+            return USEROBJ_MENU;
+        }
+        break;
+
+    case GDIOBJ_NONE:
+        //could be a cutoff menu handle, check this
+        //TODO: dangerous assumption! (need to rewrite object handle management)
+        hObject &= OBJHANDLE_MAGIC_MASK;
+        if(hObject < MAX_OBJECT_HANDLES && objHandleTable[hObject].dwUserData != 0 && objHandleTable[hObject].type == USEROBJ_MENU) {
+            return USEROBJ_MENU;
         }
         break;
 
