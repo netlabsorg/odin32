@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.52 1999-12-26 17:30:15 cbratschi Exp $ */
+/* $Id: oslibwin.cpp,v 1.53 1999-12-27 17:08:08 cbratschi Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -1198,4 +1198,10 @@ BOOL OSLibWinSetKeyboardStateTable(unsigned char *PMKeyState)
 BOOL OSLibWinEnableWindowUpdate(HWND hwnd,BOOL fEnable)
 {
   return WinEnableWindowUpdate(hwnd,fEnable);
+}
+//******************************************************************************
+//******************************************************************************
+ULONG OSLibWinGetLastError()
+{
+  return WinGetLastError(GetThreadHAB()) & 0xFFFF;
 }

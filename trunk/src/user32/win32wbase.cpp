@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.120 1999-12-27 14:41:42 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.121 1999-12-27 17:08:08 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -547,12 +547,6 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 
   OSLibWinConvertStyle(dwStyle, &dwExStyle, &dwOSWinStyle, &dwOSFrameStyle, &borderWidth, &borderHeight);
 
-  rectWindow.left   = cs->x;
-  rectWindow.top    = cs->y;
-  rectWindow.right  = cs->x + cs->cx;
-  rectWindow.bottom = cs->y + cs->cy;
-  rectClient        = rectWindow;
-
   if(HIWORD(cs->lpszName))
   {
     if (!isUnicode)
@@ -612,15 +606,9 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
 {
  POINT maxPos;
  CREATESTRUCTA  *cs = tmpcs;  //pointer to CREATESTRUCT used in CreateWindowExA method
- RECT rectWndTmp, rectClientTmp;
 
   OS2Hwnd      = hwndClient;
   OS2HwndFrame = hwndFrame;
-
-  //make backup copy of rectangles (some calls below result in WM_WINDOWPOSCHANGED with weird values since we haven't
-  //set our window size just yet)
-  rectWndTmp   = rectWindow;
-  rectClientTmp = rectClient;
 
   fNoSizeMsg = TRUE;
 
@@ -699,29 +687,14 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
   pOldFrameProc = FrameSubclassFrameWindow(this);
   if (isChild()) FrameSetBorderSize(this,TRUE);
 
-  //restore rectangles (some calls below result in WM_WINDOWPOSCHANGED with weird values since we haven't
-  //set our window size just yet)
-  rectWindow = rectWndTmp;
-  rectClient = rectClientTmp;
-
   /* Send the WM_CREATE message
    * Perhaps we shouldn't allow width/height changes as well.
    * See p327 in "Internals".
    */
   maxPos.x = rectWindow.left; maxPos.y = rectWindow.top;
 
-  if(getParent()) {
-        SetWindowPos(hwndLinkAfter, rectClient.left, rectClient.top,
-                     rectClient.right-rectClient.left,
-                     rectClient.bottom-rectClient.top,
-                     SWP_NOACTIVATE | SWP_NOREDRAW);
-  }
-  else {
-        SetWindowPos(hwndLinkAfter, rectClient.left, rectClient.top,
-                     rectClient.right-rectClient.left,
-                     rectClient.bottom-rectClient.top,
-                     SWP_NOACTIVATE | SWP_NOREDRAW);
-  }
+  SetWindowPos(hwndLinkAfter,cs->x,cs->y,cs->cx,cs->cy,SWP_NOACTIVATE | SWP_NOREDRAW);
+
   //Note: Solitaire crashes when receiving WM_SIZE messages before WM_CREATE
   fNoSizeMsg = FALSE;
 
@@ -730,7 +703,6 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
         fCreated = TRUE;
 
         SendNCCalcSize(FALSE, &rectWindow, NULL, NULL, 0, &rectClient );
-
 //        OffsetRect(&rectWindow, maxPos.x - rectWindow.left, maxPos.y - rectWindow.top);
         if( (SendInternalMessageA(WM_CREATE, 0, (LPARAM)cs )) != -1 )
         {
@@ -2469,7 +2441,7 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
     {
         Win32BaseWindow *wndBehind = Win32BaseWindow::GetWindowFromHandle(swp.hwndInsertBehind);
         if(wndBehind) {
-            swp.hwndInsertBehind   = wndBehind->getOS2WindowHandle();
+            swp.hwndInsertBehind   = wndBehind->getOS2FrameWindowHandle();
         }
         else {
             dprintf(("ERROR: SetWindowPos: hwndInsertBehind %x invalid!",swp.hwndInsertBehind));
@@ -2502,13 +2474,10 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
 
     if (rc == FALSE)
     {
-        dprintf(("OSLibWinSetMultWindowPos failed!"));
+        dprintf(("OSLibWinSetMultWindowPos failed! Error %x",OSLibWinGetLastError()));
     }
-    else
-    {
-        if (fuFlags & SWP_FRAMECHANGED_W)
-            OSLibSendMessage (OS2HwndFrame, 0x42 /*WM_UPDATEFRAME*/, -1, 0);
-    }
+
+    //SWP_FRAMECHANGED is ignored, not necessary for OS/2
 
     return (rc);
 }
