@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1427 2001-05-19 13:15:46 sandervl Exp $ */
+/* $Id: changelog,v 1.1428 2001-05-19 13:51:06 sandervl Exp $ */
 
  2001-05-19: Sander van Leeuwen <sandervl@xs4all.nl>
     - WS2_32:   o Added more exports
@@ -18,6 +18,8 @@
     - USER32:   o Added TrackMouseEvent, GetGUIThreadInfo & SendInput stubs
     - ADVAPI32: o Added undocumented SystemFunctionXXX functions (stubs)
                 o Set lasterror in EnumServicesStatusA/W stubs
+    - GDI32:    o GetTextExtentPointA now handles strings larger than 512
+                  characters.
 
  2001-05-19: Dietrich Teickner <Dietrich_Teickner@t-online.de>
     - KERNEL32: o LOCALE_IFIRSTDAYOFWEEK fix (GetLocaleInfo)
