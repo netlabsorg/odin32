@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2000-11-19 08:27:21 bird Exp $
+# $Id: makefile,v 1.7 2000-11-21 04:35:37 bird Exp $
 
 #
 # PD-Win32 API
@@ -9,21 +9,26 @@
 
 
 #
-# Tell buildenvironment that we're makeing an .exe.
+# Directory macro.
+#
+PDWIN32_BIN     = ..\bin
+
+
+#
+# Tell buildenvironment that we're making an VIO .exe.
+# Tell buildenvironment that we like to use static linked CRT.
 # Tell buildenvironment that we should not copy this into /bin.
 #
 EXETARGET = 1
+VIO = 1
+STATIC_CRT = 1
 NO_MAIN_BIN_COPY = 1
 
 
 #
 # include common definitions
 #
-PDWIN32_INCLUDE = ..\..\include
-PDWIN32_TOOLS   = ..\bin
-PDWIN32_BIN     = ..\bin
-PDWIN32_LIB     = ..\..\lib
-!include $(PDWIN32_INCLUDE)\pdwin32.mk
+!include ../../include/pdwin32.mk
 
 
 #
