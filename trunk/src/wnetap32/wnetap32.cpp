@@ -1,4 +1,4 @@
-/* $Id: wnetap32.cpp,v 1.10 2000-10-02 14:02:28 phaller Exp $ */
+/* $Id: wnetap32.cpp,v 1.11 2000-10-02 14:04:08 phaller Exp $ */
 
 /*
  *
@@ -2829,10 +2829,10 @@ ODINFUNCTION3(NET_API_STATUS, OS2NetWkstaGetInfo,
         int iSizeLangroup = (lstrlenA((LPCSTR)pOS2wki10->wki10_langroup) + 1) * 2;
         int iSize = sizeof(WKSTA_INFO_100) + iSizeComputername + iSizeLangroup;
 
-        // pointer to the data area
         rc = OS2NetApiBufferAllocate(iSize, (LPVOID*)&pwki100);
         if (!rc)
         {
+          // pointer to the data area
           PBYTE pData = (PBYTE)pwki100 + sizeof(WKSTA_INFO_100);
           
           pwki100->wki100_platform_id = 0; //@@@PH dummy
@@ -2861,10 +2861,10 @@ ODINFUNCTION3(NET_API_STATUS, OS2NetWkstaGetInfo,
         int iSizeLanroot  = (lstrlenA((LPCSTR)pOS2wki1->wki1_root) + 1) * 2;
         int iSize = sizeof(WKSTA_INFO_101) + iSizeComputername + iSizeLangroup + iSizeLanroot;
 
-        // pointer to the data area
         rc = OS2NetApiBufferAllocate(iSize, (LPVOID*)&pwki101);
         if (!rc)
         {
+          // pointer to the data area
           PBYTE pData = (PBYTE)pwki101 + sizeof(WKSTA_INFO_101);
         
           pwki101->wki101_platform_id = 0; //@@@PH dummy
@@ -2895,10 +2895,10 @@ ODINFUNCTION3(NET_API_STATUS, OS2NetWkstaGetInfo,
         int iSizeLanroot  = (lstrlenA((LPCSTR)pOS2wki1->wki1_root) + 1) * 2;
         int iSize = sizeof(WKSTA_INFO_102) + iSizeComputername + iSizeLangroup + iSizeLanroot;
 
-        // pointer to the data area
         rc = OS2NetApiBufferAllocate(iSize, (LPVOID*)&pwki102);
         if (!rc)
         {
+          // pointer to the data area
           PBYTE pData = (PBYTE)pwki102 + sizeof(WKSTA_INFO_102);
         
           pwki102->wki102_platform_id = 0; //@@@PH dummy
