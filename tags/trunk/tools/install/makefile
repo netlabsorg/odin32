@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2000-12-02 23:27:01 bird Exp $
+# $Id: makefile,v 1.6 2000-12-03 08:13:39 bird Exp $
 
 #
 # Odin32 API
@@ -14,6 +14,7 @@ EXETARGET = 1
 VIO = 1
 STATIC_CRT = 1
 NO_MAIN_BIN_COPY = 1
+CLEANEXTRAS = odin32inst.wis *.wpi
 
 
 #
