@@ -1,4 +1,4 @@
-/* $Id: dev16.h,v 1.4 2000-02-15 23:39:19 bird Exp $
+/* $Id: dev16.h,v 1.5 2000-02-19 23:52:00 bird Exp $
  * dev16 - 16-bit specific. Should not be used in 32-bit C/C++.
  *
  * Copyright (c) 1999 knut st. osmundsen
@@ -39,7 +39,7 @@ typedef D16R0INITPARAM FAR *PD16R0INITPARAM;
 
 
 /*
- * Get Kernel OTEs. No params. No data. aProcTab is used.
+ * Get Kernel OTEs. No params. No data. aImportTab is used.
  */
 #define D16_IOCTL_VERIFYPROCTAB     0x42
 
