@@ -1,4 +1,4 @@
-/* $Id: OS2DDRAW.CPP,v 1.26 2001-03-18 21:44:42 mike Exp $ */
+/* $Id: OS2DDRAW.CPP,v 1.27 2001-03-28 16:21:06 sandervl Exp $ */
 
 /*
  * DX Draw base class implementation
@@ -491,7 +491,7 @@ HRESULT WIN32API DrawCreateSurface(THIS This, LPDDSURFACEDESC lpDDSurfaceDesc,
     rc = newsurf->GetLastError();
     if(rc != DD_OK)
     {
-      dprintf(("DDRAW: Error createing Surface\n\n"));
+      dprintf(("DDRAW: Error createing Surface rc = %d\n\n", rc));
       *lplpDD = NULL;
       delete newsurf;
     }
