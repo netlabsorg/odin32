@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.207 2000-07-18 18:35:39 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.208 2000-07-20 18:08:13 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2076,7 +2076,7 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
  RECT  newPos = {0, 0, 0, 0};
 
     dprintf(("ShowWindow %x %x", getWindowHandle(), nCmdShow));
-    if(getWindowHandle() == 0x68000030 && nCmdShow == 0) {
+    if(getWindowHandle() == 0x6800001d && nCmdShow == 1) {
 	rc = 0;
     }
     wasVisible = (getStyle() & WS_VISIBLE) != 0;
@@ -2132,6 +2132,7 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
 	case SW_SHOWNORMAL:  /* same as SW_NORMAL: */
 	case SW_SHOWDEFAULT: /* FIXME: should have its own handler */
 	case SW_RESTORE:
+	    //TODO: WIN_RESTORE_MAX flag!!!!!!!!!!!!!!
 	    swp |= SWP_SHOWWINDOW | SWP_FRAMECHANGED;
 
             if( getStyle() & (WS_MINIMIZE | WS_MAXIMIZE) )
@@ -2323,6 +2324,9 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
     return (rc);
 }
 //******************************************************************************
+//TODO: Check how this api really works in NT
+//      This implemention doesn't make a lot of sense to me (compared to the
+//      description in the SDK docs)
 //******************************************************************************
 BOOL Win32BaseWindow::SetWindowPlacement(WINDOWPLACEMENT *wndpl)
 {
@@ -2347,10 +2351,14 @@ BOOL Win32BaseWindow::SetWindowPlacement(WINDOWPLACEMENT *wndpl)
               	             0, 0, SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
    }
    else {
-    	SetWindowPos(0, windowpos.rcNormalPosition.left, windowpos.rcNormalPosition.top,
+        //Papyrus calls this api with rcNormalPosition set to 0
+        //So the rcNormalPosition should probably not affect the current position
+#if 0
+        SetWindowPos(0, windowpos.rcNormalPosition.left, windowpos.rcNormalPosition.top,
 		     windowpos.rcNormalPosition.right - windowpos.rcNormalPosition.left,
 		     windowpos.rcNormalPosition.bottom - windowpos.rcNormalPosition.top,
 		     SWP_NOZORDER | SWP_NOACTIVATE );
+#endif
    }
    ShowWindow(wndpl->showCmd);
    if( ::IsWindow(getWindowHandle()) && getStyle() & WS_MINIMIZE )

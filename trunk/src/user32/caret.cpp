@@ -1,4 +1,4 @@
-/* $Id: caret.cpp,v 1.12 2000-02-16 14:34:04 sandervl Exp $ */
+/* $Id: caret.cpp,v 1.13 2000-07-20 18:08:12 sandervl Exp $ */
 
 /*
  * Caret functions for USER32
@@ -12,7 +12,8 @@
 #include <os2wrap.h>
 #include <os2sel.h>
 #include <stdlib.h>
-#include "win32type.h"
+#include <win32type.h>
+#include <win32api.h>
 #include <winconst.h>
 #include <wprocess.h>
 #include <misc.h>
@@ -61,7 +62,7 @@ BOOL WIN32API CreateCaret (HWND hwnd, HBITMAP hBmp, int width, int height)
 
        wnd->SetFakeOpen32();
 
-       rc = _O32_CreateCaret (wnd->getOS2WindowHandle(), hBmp, width, height);
+       rc = O32_CreateCaret (wnd->getOS2WindowHandle(), hBmp, width, height);
        if (rc)
        {
            hwndCaret      = hwnd;
@@ -97,7 +98,7 @@ BOOL WIN32API SetCaretBlinkTime (UINT mSecs)
 {
    BOOL rc;
 
-   dprintf(("USER32:  SetCaretBlinkTime"));
+   dprintf(("USER32: SetCaretBlinkTime %d ms", mSecs));
 
    rc = _SetCaretBlinkTime (mSecs);
 
@@ -122,7 +123,7 @@ BOOL WIN32API SetCaretPos (int x, int y)
    CURSORINFO cursorInfo;
    POINTL     caretPos = { x, y };
 
-   dprintf(("USER32:  SetCaretPos"));
+   dprintf(("USER32: SetCaretPos (%d,%d)", x, y));
 
    rc = WinQueryCursorInfo (HWND_DESKTOP, &cursorInfo);
    if (rc == TRUE)
@@ -137,7 +138,7 @@ BOOL WIN32API SetCaretPos (int x, int y)
            pDCData pHps = (pDCData)GpiQueryDCData(hps);
            if (!pHps)
            {
-              _O32_SetLastError (ERROR_INTERNAL_ERROR);
+              SetLastError(ERROR_INTERNAL_ERROR);
               return FALSE;
            }
            GpiConvert (pHps->hps, CVTC_WORLD, CVTC_DEVICE, 1, &caretPos);
@@ -150,7 +151,7 @@ BOOL WIN32API SetCaretPos (int x, int y)
         }
         else
         {
-           long height = wnd->getClientHeight();
+           long height = wnd->getWindowHeight();
            caretPos.y = height - caretPos.y - 1;
            xNew = caretPos.x;
            yNew = caretPos.y - cursorInfo.cy;
@@ -165,7 +166,7 @@ BOOL WIN32API SetCaretPos (int x, int y)
    }
    if (rc == FALSE)
    {
-      _O32_SetLastError (ERROR_INVALID_PARAMETER);
+      SetLastError (ERROR_INVALID_PARAMETER);
       result = FALSE;
    }
 
@@ -198,8 +199,9 @@ BOOL WIN32API GetCaretPos (PPOINT pPoint)
             GpiConvert (hps, CVTC_DEVICE, CVTC_WORLD, 1, &caretPos);
             cursorInfo.x = caretPos.x;
             cursorInfo.y = caretPos.y;
-         } else {
-            long height  = wnd->getClientHeight();
+         } 
+         else {
+            long height  = wnd->getWindowHeight();
             caretPos.y  += cursorInfo.cy;
             cursorInfo.y = height - caretPos.y - 1;
          }
