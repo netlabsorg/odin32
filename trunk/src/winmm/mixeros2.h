@@ -1,4 +1,4 @@
-/* $Id: mixeros2.h,v 1.2 2002-05-23 13:50:16 sandervl Exp $ */
+/* $Id: mixeros2.h,v 1.3 2002-05-23 20:42:06 sandervl Exp $ */
 
 /*
  * Mixer multimedia
@@ -73,10 +73,15 @@
 #define MIXER_SRC_MIDI		10
 #define MIXER_SRC_MAX          	11
 
+//max controls connected to a source line
+#define MAX_SOURCE_CONTROLS     8
+
 #define MIXER_DEST_LINEOUT      0
 #define MIXER_DEST_WAVEIN       1
 #define MIXER_DEST_SPDIFOUT     2
 #define MIXER_DEST_MAX          3
+
+#define MAX_MIXER_LINES         (MIXER_SRC_MAX+MIXER_DEST_MAX)
 
 #ifdef __cplusplus
 extern "C" {
