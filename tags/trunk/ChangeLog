@@ -1,8 +1,11 @@
-/* $Id: ChangeLog,v 1.2701 2004-03-15 14:00:34 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2702 2004-03-15 16:10:57 sandervl Exp $ */
 
  2004-03-15: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o GetKeyboardLayoutNameA; use only the low word returned by 
                   GetKeyboardLayout to build the keyboard layout string
+                o SystemParametersInfo: added SPI_ICONVERTICALSPACING &
+                  SPI_ICONHORIZONTALSPACING
+                o GetSystemMetrics: corrected SM_CXICONSPACING & SM_CYICONSPACING
 
  2004-03-12: Sander van Leeuwen <sandervl@innotek   >
     - SHELL32:  o Disabled Shell_NotifyIconA
