@@ -1,4 +1,4 @@
-/* $Id: hll.h,v 1.1 2000-03-24 18:13:45 bird Exp $
+/* $Id: hll.h,v 1.2 2000-03-25 21:09:59 bird Exp $
  *
  * HLL definitions.
  *
@@ -18,7 +18,7 @@
 *******************************************************************************/
 
 /*
- * Directory entry types.
+ * HLL Directory entry types.
  */
 #define HLL_DE_MODULES          0x0101  /* Filename */
 #define HLL_DE_PUBLICS          0x0102  /* Public symbols */
@@ -30,20 +30,46 @@
 #define HLL_DE_IBMSRC           0x010B  /* Line numbers - (IBM HLL) */
 
 
+/*
+ * HLL Module debug style
+ */
+#define HLL_MOD_STYLE           0x4C48  /* 'HL' */
+
+
+/*
+ * HLL Public symbol wide flag.
+ */
+#define HLL_PFS_WIDE            0x6e    /* Wide flag. */
+
+
 
 /*******************************************************************************
 *   Structures and Typedefs                                                    *
 *******************************************************************************/
 
 /*
- * HLL HDR Entry.
+ * HLL Header
+ */
+typedef struct _HLLHdr
+{
+    unsigned char   achSignature[4];    /* LX Debug Info Signature, 'NB04' */
+    unsigned long   offDirectory;       /* Offset to the HLL Directory.
+                                         * (Relative to start of this header.) */
+    unsigned long   ulReserved;         /* Unknown field. Seems to be 1. */
+} HLLHDR, *PHLLHDR;
+
+
+/*
+ * HLL Directory Entry.
  */
 typedef struct _HLLDirEntry
 {
-    unsigned short  usType;
-    unsigned short  iMod;
-    unsigned long   off;
-    unsigned long   cb;
+    unsigned short  usType;             /* Entry type. HLL_DE_* flag. */
+    unsigned short  iMod;               /* Module number data applies to. */
+    unsigned long   off;                /* Offset to data. This is based at
+                                         * the start of the start of the debug
+                                         * info. */
+    unsigned long   cb;                 /* Size of data. */
 } HLLDIRENTRY, *PHLLDIRENTRY;
 
 
@@ -53,10 +79,53 @@ typedef struct _HLLDirEntry
  */
 typedef struct _HLLDirectory
 {
-    unsigned long   cEntries;
-    HLLDIRENTRY     aEntries[1];
+    unsigned long   ulReserved;         /* Unknown. */
+    unsigned long   cEntries;           /* Count of directory entires. */
+    HLLDIRENTRY     aEntries[1];        /* Directory. */
 } HLLDIR, *PHLLDIR;
 
+
+/*
+ * HLL Object (LX Object = NE/OMF Segment)
+ */
+typedef struct _HLLObject /*segment*/
+{
+    unsigned short  iObj;               /* LX Object number. */
+    unsigned long   off;                /* Offset into the load image. */
+    unsigned long   cb;                 /* Object length. */
+} HLLOBJECT, *PHLLOBJECT;
+
+
+/*
+ * HLL Module (file)
+ */
+typedef struct _HLLModule
+{
+    HLLOBJECT       Object;             /* Description of an object. */
+    unsigned short  overlay;            /* unused. */
+    unsigned short  iLib;               /* Library number it came from. */
+    unsigned char   cObjects;           /* Number of objects.*/
+    unsigned char   pad;                /* 1 byte padding. */
+    unsigned short  usDebugStyle;       /* Debug style -'HL' */
+    unsigned char   chVerMinor;         /* HLL version - minor number. */
+    unsigned char   chVerMajor;         /* HLL version - major number. */
+    unsigned char   cchName;            /* Filename length. */
+    unsigned char   achName[1];         /* Filename. (*) */
+    /* HLLOBJECT     aObjects[] */      /* Array of object descriptions. (Starts at achName[cchName+1]) */
+} HLLMODULE, *PHLLMODULE;
+
+
+/*
+ * HLL Public Symbols
+ */
+typedef struct _HLLPublicSymbol
+{
+    unsigned long   off;                /* 32-bit offset (into the LX object) of the symbol location. */
+    unsigned short  iObj;               /* LX Object number. */
+    unsigned short  iType;              /* Symbol type index (into the type info data). */
+    unsigned char   cchName;            /* Size of name. */
+    unsigned char   achName[1];         /* Name (*) */
+} HLLPUBLICSYM, *PHLLPUBLICSYM;
 
 
 
