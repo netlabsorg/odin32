@@ -1,4 +1,4 @@
-/* $Id: heapshared.h,v 1.2 2000-01-18 20:47:30 sandervl Exp $ */
+/* $Id: heapshared.h,v 1.3 2001-02-09 18:32:06 sandervl Exp $ */
 /*
  * Shared heap functions for OS/2
  *
@@ -23,6 +23,6 @@ BOOL   InitializeSharedHeap();
 void   DestroySharedHeap();
 DWORD  HeapGetSharedMemBase();
 
-void  *_smalloc(size_t size);
+#define _smalloc(size)	_umalloc(sharedHeap, size)
 
 #endif
