@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.1867 2001-11-29 20:00:20 sandervl Exp $ */
+/* $Id: changelog,v 1.1868 2001-11-30 13:52:04 sandervl Exp $ */
+
+ 2001-11-30: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Changed menu hilite background to the color used by PM
+                  (OS/2 look)
+    - KERNEL32: o Partly implemented PurgeComm
 
  2001-11-29: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o Split dosdevice.cpp from stubs.cpp
