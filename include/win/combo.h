@@ -1,4 +1,4 @@
-/* $Id: combo.h,v 1.6 2001-04-26 16:59:55 sandervl Exp $ */
+/* $Id: combo.h,v 1.7 2002-04-24 08:57:00 sandervl Exp $ */
 
 /*
  * Combo box definitions
@@ -63,6 +63,7 @@ typedef struct
 #define CB_HWND( lphc )       ((lphc)->hwndself)
 
 BOOL 	COMBO_FlipListbox( LPHEADCOMBO, BOOL, BOOL );
+BOOL 	COMBO_RollupListbox(LPHEADCOMBO);
 LRESULT COMBO_Directory( LPHEADCOMBO, UINT, LPSTR, BOOL );
 
 #ifdef __cplusplus
