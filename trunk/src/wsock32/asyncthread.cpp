@@ -1,4 +1,4 @@
-/* $Id: asyncthread.cpp,v 1.10 2001-07-07 10:44:09 achimha Exp $ */
+/* $Id: asyncthread.cpp,v 1.11 2001-07-07 14:29:40 achimha Exp $ */
 
 /*
  * Async thread help functions
@@ -23,7 +23,7 @@
 #include "asyncthread.h"
 
 static PASYNCTHREADPARM threadList = NULL;
-static VMutex           asyncThreadMutex;
+VMutex asyncThreadMutex;
 
 static void AddToQueue(PASYNCTHREADPARM pThreadParm);
 
@@ -192,7 +192,7 @@ void DumpQueue(void)
 //******************************************************************************
 //Assumes caller owns async thread mutex!
 //******************************************************************************
-static PASYNCTHREADPARM FindAsyncEvent(SOCKET s)
+PASYNCTHREADPARM FindAsyncEvent(SOCKET s)
 {
  PASYNCTHREADPARM pThreadInfo;
 

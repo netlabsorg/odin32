@@ -1,4 +1,4 @@
-/* $Id: asyncapi.cpp,v 1.10 2001-07-07 10:44:08 achimha Exp $ */
+/* $Id: asyncapi.cpp,v 1.11 2001-07-07 14:29:40 achimha Exp $ */
 
 /*
  *
@@ -725,6 +725,46 @@ int WSAAsyncSelectWorker(SOCKET s, int mode, int notifyHandle, int notifyData, l
 	WSASetLastError(WSAEFAULT);
  	return SOCKET_ERROR;
    }
+   WSASetLastError(NO_ERROR);
+   return NO_ERROR;
+}
+//******************************************************************************
+//******************************************************************************
+int WSAEnumNetworkEventsWorker(SOCKET s, WSAEVENT hEvent, LPWSANETWORKEVENTS lpEvent)
+{
+   PASYNCTHREADPARM pThreadInfo;
+
+   asyncThreadMutex.enter();
+   pThreadInfo = FindAsyncEvent(s);
+   if (pThreadInfo)
+   {
+        // TODO return correct errors!!!
+        for (int i = 0; i < FD_MAX_EVENTS; i++)
+        {
+           lpEvent->iErrorCode[i] = 0;
+        }
+
+        lpEvent->lNetworkEvents = pThreadInfo->u.asyncselect.lEventsPending;
+
+        // TODO is this correct? API says they're cleared
+        pThreadInfo->u.asyncselect.lEventsPending = 0;
+   }
+   asyncThreadMutex.leave();
+   if (!pThreadInfo)
+   {
+      dprintf(("no async registration for socket %x", s));
+      // TODO: correct behavior?
+      WSASetLastError(WSAEINVAL);
+      return SOCKET_ERROR;
+   }
+
+   // post semaphore if present
+   if (hEvent)
+   {
+//      dprintf(("posting event semaphore 0x%x", hEvent));
+      SetEvent(hEvent);
+   }
+
    WSASetLastError(NO_ERROR);
    return NO_ERROR;
 }
