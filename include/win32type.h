@@ -1,4 +1,4 @@
-/* $Id: win32type.h,v 1.32 2000-01-05 19:35:52 sandervl Exp $ */
+/* $Id: win32type.h,v 1.33 2000-02-29 19:09:25 sandervl Exp $ */
 
 /*
  * Win32 type definitions for OS/2
@@ -340,6 +340,8 @@ typedef unsigned short  WCHAR;
 #define WNDPROC_O32 DWORD
 #define HRESULT DWORD
 #define HFILE   DWORD
+#define HQUEUE  HANDLE
+typedef HANDLE  HHOOK;
 
 //Wine types
 #define HMODULE32 HMODULE
@@ -444,6 +446,8 @@ typedef struct _WIN32_FILE_ATTRIBUTES_DATA {
 
 typedef LRESULT (* CALLBACK FARPROC)();
 typedef LRESULT (* CALLBACK FARPROC16)();
+
+typedef LRESULT (* CALLBACK HOOKPROC)(INT,WPARAM,LPARAM);
 
 typedef union _LARGE_INTEGER {
     struct {
