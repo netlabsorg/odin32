@@ -1,4 +1,9 @@
-/* $Id: ChangeLog,v 1.1475 2001-06-02 17:28:27 achimha Exp $ */
+/* $Id: ChangeLog,v 1.1476 2001-06-02 17:52:22 bird Exp $ */
+
+ 2001-06-02: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - Win32k/configure.cmd:
+                o Corrected search for the VAC compiler.
+                o Removed stupid messages when -w is specified.
 
  2001-06-02: Achim Hasenmueller <achimha@innotek.de>
     - COMDLG32: o fix crash due to uninitialized COM object pointer in
@@ -34,7 +39,7 @@
                   only. This doesn't seem to work (anymore) with GpiCharStringPosAt.
                   (fixes border between menu & button bar in Odin MFC app &
                    Acrobat Reader 4.05)
-                o StretchDIBits fix for RGB555 bitmaps 
+                o StretchDIBits fix for RGB555 bitmaps
                   (fixes pictures in pdf files shown by Acrobat Reader 4.05)
     - SHLWAPI:  o Added PathGetCharTypeA/W from Wine
 
@@ -43,8 +48,8 @@
                   old but slightly optimized loader (processExport usually
                   outweighs processImport, so lookup is less valuable than
                   add to export list)
-    - SHELL32:  o SIC_Initialize took extremely long to pre-initialize 
+    - SHELL32:  o SIC_Initialize took extremely long to pre-initialize
                   its icon cache. Revert to on-demand loading of the icons,
-                  speeds up loading of SHELL32 (therefore most apps) 
+                  speeds up loading of SHELL32 (therefore most apps)
                   by several seconds.
 
