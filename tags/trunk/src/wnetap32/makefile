@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.16 2000-12-02 23:44:57 bird Exp $
+# $Id: makefile,v 1.17 2000-12-12 02:43:26 phaller Exp $
 
 #
 # Odin32 API
@@ -18,6 +18,7 @@
 #
 OBJS = \
 $(OBJDIR)\wnetap32.obj \
+$(OBJDIR)\errorlog.obj \
 $(OBJDIR)\oslibnet.obj \
 $(OBJDIR)\netapi32rsrc.obj \
 $(DLLENTRY)
