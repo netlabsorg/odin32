@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.273 1999-10-05 23:26:02 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.274 1999-10-06 07:59:18 sandervl Exp $ */
+
+ 99-10-06: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Fixed memory leaks in SetWindowTextA/W window class methods
 
  99-10-06: Patrick Haller <phaller@gmx.net>
 	- KERNEL32:    Fix for DLLs without Resource Segment (pResDir == NULL)
