@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.46 2000-09-08 14:49:22 bird Exp $
+# $Id: Makefile,v 1.47 2000-09-08 15:20:09 bird Exp $
 #
 # Win32k makefile.
 #
@@ -36,7 +36,7 @@ NAME = Win32k
 ################################################################################
 # COMPILER/LINKER/ASSEMBLER
 ################################################################################
-CC16        = $(MSCPATH)\binp\cl
+CC16        = fhfix.exe $(MSCPATH)\binp\cl.exe
 CC          = icc
 !if "$(CCENV)" == "VAC36"
 ILIB        = ilib /nofree /nobackup /nologo
@@ -307,7 +307,7 @@ AINCLUDES  = -Fdi:$(WIN32KINCLUDE) \
 !if "$(DDKPATH)" == "" || "$(MSCPATH)" == ""  || "$(TOOLKIT)" == "" || "$(VACPATH)" == ""
 all: pe2lx.exe
 !else
-all: $(WIN32KBIN)\$(NAME).sys pe2lx.exe kRx.exe lib Win32kCC.exe
+all: fhfix.exe $(WIN32KBIN)\$(NAME).sys pe2lx.exe kRx.exe lib Win32kCC.exe
 !endif
 
 
@@ -427,6 +427,13 @@ TSTLIBS = $(LIBS)
 
 
 ################################################################################
+# fhfix.exe rule.
+################################################################################
+fhfix.exe:
+    icc $(@B).c
+
+
+################################################################################
 # extract.exe rule.
 ################################################################################
 EXTRACTOBJS = \
@@ -437,7 +444,7 @@ $(WIN32KOBJ)\vprntf16.obj_e
 
 {dev16}.c.obj_e:
     @$(ECHO) compiling 16bit (extract): $<
-    @$(CC16) -c -W3 -Asfw -G2s -Zp -Zl -nologo -Fo$@ -Fa -Zi -Od -Lp -DDEBUG -DEXTRACT \
+    $(CC16) -c -W3 -Asfw -G2s -Zp -Zl -nologo -Fo$@ -Fa -Zi -Od -Lp -DDEBUG -DEXTRACT \
         -Fa$(WIN32KLIST)\$(*B)_e.s -Fo$(WIN32KOBJ)\$(@B).obj_e $(CINCLUDES16) $<
 
 $(WIN32KBIN)\extract.exe: $(EXTRACTOBJS)
