@@ -1,0 +1,33 @@
+LIBRARY SHDOCVW INITINSTANCE TERMINSTANCE
+DESCRIPTION 'Odin SHDOCVW.DLL'
+DATA MULTIPLE NONSHARED
+
+EXPORTS
+
+  DllCanUnloadNow     = _SHDOCVW_DllCanUnloadNow@0          @108
+  DllGetClassObject   = _SHDOCVW_DllGetClassObject@12       @312
+  DllGetVersion       = _SHDOCVW_DllGetVersion@4            @113
+  DllInstall          = _SHDOCVW_DllInstall@8               @114
+  DllRegisterServer   = _SHDOCVW_DllRegisterServer@0        @124
+  DllUnregisterServer = _SHDOCVW_DllUnregisterServer@0      @127
+
+;108 stub AddUrlToFavorites
+;126 stub DllRegisterWindowClasses
+;128 stub DoAddToFavDlg
+;129 stub DoAddToFavDlgW
+;132 stub DoFileDownload
+;133 stub DoFileDownloadEx
+;134 stub DoOrganizeFavDlg
+;144 stub DoOrganizeFavDlgW
+;106 stub HlinkFindFrame
+;155 stub HlinkFrameNavigate
+;155 stub HlinkFrameNavigateNHL
+;156 stub IEWriteErrorLog
+;157 stub OpenURL
+;163 stub SHAddSubscribeFavorite
+;166 stub SHGetIDispatchForFolder
+;168 stub SetQueryNetSessionCount
+;107 stub SetShellOfflineState
+;182 stub SoftwareUpdateMessageBox
+;184 stub URLQualifyA
+;186 stub URLQualifyW

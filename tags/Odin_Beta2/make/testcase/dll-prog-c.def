@@ -1,0 +1,4 @@
+; $Id: dll-prog-c.def,v 1.1 2002-05-16 11:37:06 bird Exp $
+NAME dll-prog-c WINDOWCOMPAT
+DESCRIPTION "Testcase for makeing simple DLLs."
+
