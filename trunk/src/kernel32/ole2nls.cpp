@@ -1,4 +1,4 @@
-/* $Id: ole2nls.cpp,v 1.6 2000-10-09 17:47:22 sandervl Exp $ */
+/* $Id: ole2nls.cpp,v 1.7 2001-02-17 19:37:16 sandervl Exp $ */
 
 /*
  *	National Language Support library
@@ -3042,8 +3042,8 @@ static INT OLE_GetFormatW(LCID locale, DWORD flags, DWORD tflags,
  *
  */
 INT WINAPI GetDateFormatA(LCID locale,DWORD flags,
-			      LPSYSTEMTIME xtime,
-			      LPCSTR format, LPSTR date,INT datelen) 
+   	                  CONST SYSTEMTIME * xtime,
+		          LPCSTR format, LPSTR date,INT datelen) 
 {
    
   char format_buf[40];
@@ -3072,7 +3072,7 @@ INT WINAPI GetDateFormatA(LCID locale,DWORD flags,
      GetSystemTime(&t);
      thistime = &t;
   } else {
-     thistime = xtime;
+     thistime = (SYSTEMTIME *)xtime;
   };
 
   if (format == NULL) {
@@ -3105,9 +3105,9 @@ INT WINAPI GetDateFormatA(LCID locale,DWORD flags,
  *
  */
 INT WINAPI GetDateFormatW(LCID locale,DWORD flags,
-			      LPSYSTEMTIME xtime,
-			      LPCWSTR format,
-			      LPWSTR date, INT datelen)
+			  CONST SYSTEMTIME *xtime,
+ 	 	          LPCWSTR format,
+		          LPWSTR date, INT datelen)
 {
    unsigned short datearr[] = {'1','9','9','4','-','1','-','1',0};
 
@@ -4146,7 +4146,7 @@ static LCID OLE2NLS_CheckLocale (LCID locale)
 INT WINAPI 
 GetTimeFormatA(LCID locale,        /* in  */
 		 DWORD flags,        /* in  */
-		 LPSYSTEMTIME xtime, /* in  */ 
+		 CONST SYSTEMTIME (*xtime, /* in  */ 
 		 LPCSTR format,      /* in  */
 		 LPSTR timestr,      /* out */
 		 INT timelen       /* in  */) 
@@ -4184,7 +4184,7 @@ GetTimeFormatA(LCID locale,        /* in  */
     thistime = &t;
   } 
   else
-  { thistime = xtime;
+  { thistime = (SYSTEMTIME *)xtime;
   }
   ret = OLE_GetFormatA(thislocale, thisflags, flags, thistime, thisformat,
   			 timestr, timelen);
@@ -4199,7 +4199,7 @@ GetTimeFormatA(LCID locale,        /* in  */
 INT WINAPI 
 GetTimeFormatW(LCID locale,        /* in  */
 		 DWORD flags,        /* in  */
-		 LPSYSTEMTIME xtime, /* in  */ 
+		 CONST SYSTEMTIME *xtime, /* in  */ 
 		 LPCWSTR format,     /* in  */
 		 LPWSTR timestr,     /* out */
 		 INT timelen       /* in  */) 
@@ -4238,7 +4238,7 @@ GetTimeFormatW(LCID locale,        /* in  */
 	  thistime = &t;
 	} 
 	else
-	{ thistime = xtime;
+	{ thistime = (SYSTEMTIME *)xtime;;
 	}
 
 	ret = OLE_GetFormatW(thislocale, thisflags, flags, thistime, thisformat,

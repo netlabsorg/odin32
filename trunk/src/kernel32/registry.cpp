@@ -1,4 +1,4 @@
-/* $Id: registry.cpp,v 1.8 2001-01-18 19:38:10 sandervl Exp $ */
+/* $Id: registry.cpp,v 1.9 2001-02-17 19:37:17 sandervl Exp $ */
 
 /*
  * Win32 registry API functions for OS/2
@@ -1035,7 +1035,7 @@ ODINFUNCTION5(LONG,RegSetValueW,HKEY,   hkey,
  *****************************************************************************/
 
 ODINFUNCTION6(LONG,RegSetValueExA,HKEY,  hkey,
-                                  LPSTR, lpszValueName,
+                                  LPCSTR, lpszValueName,
                                   DWORD, dwReserved,
                                   DWORD, fdwType,
                                   BYTE*, lpbData,
@@ -1082,7 +1082,7 @@ ODINFUNCTION6(LONG,RegSetValueExA,HKEY,  hkey,
  *****************************************************************************/
 
 ODINFUNCTION6(LONG,RegSetValueExW,HKEY,  hkey,
-                                  LPWSTR,lpszValueName,
+                                  LPCWSTR,lpszValueName,
                                   DWORD, dwReserved,
                                   DWORD, fdwType,
                                   BYTE*, lpbData,
