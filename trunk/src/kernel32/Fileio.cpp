@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.24 2000-02-16 14:25:29 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.25 2000-03-13 20:39:09 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -377,7 +377,17 @@ ODINFUNCTION1(DWORD, GetFileAttributesA,
 {
  DWORD rc, error;
 
-    rc = O32_GetFileAttributes((LPSTR)lpszFileName);
+    if((NULL!=lpszFileName) && strlen(lpszFileName)==2 && lpszFileName[1] == ':')
+    {
+      	 char szDrive[4];
+      	 szDrive[0] = lpszFileName[0];
+      	 szDrive[1] = lpszFileName[1];
+      	 szDrive[2] = '\\';
+      	 szDrive[3] = 0x00;
+      	 rc = O32_GetFileAttributes((LPSTR)szDrive);
+    }
+    else rc = O32_GetFileAttributes((LPSTR)lpszFileName);
+
 #if 0 // need more tests, maybe there is also a better way to hide simulated b:
     if(rc == -1 && lpszFileName != NULL && !strnicmp(lpszFileName, "B:", 2))
     {
