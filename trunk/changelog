@@ -1,4 +1,8 @@
- /* $Id: changelog,v 1.115 1999-08-21 12:29:27 sandervl Exp $ */
+ /* $Id: changelog,v 1.116 1999-08-21 12:52:57 sandervl Exp $ */
+
+ 99-08-21: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32\NEW: Fixed window class bug. Freecell menu now properly
+                      loaded.
 
  99-08-21: Yuri Dario <mc6530@mclink.it>
 	- Makefiles: Link with predefined VAC lib (RTLLIB(_O))
@@ -10,8 +14,6 @@
 	- USER32/NEW: Put back LoadBitmap for now
 	              Rewrote LoadIconA/W & LoadCursorA/W + added
                       extra code to oslib.
-                      NOTE: Freecell is busted now; need to convert
-                            OS/2 1.3 bitmaps to 2.0 format
 
  99-08-20: Patrick Haller <phaller@gmx.net>
         - ODINWRAP: fixed invalid macros
