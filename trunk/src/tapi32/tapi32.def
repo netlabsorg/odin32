@@ -1,10 +1,10 @@
-; $Id: tapi32.def,v 1.2 1999-06-10 16:54:47 phaller Exp $
+; $Id: tapi32.def,v 1.3 1999-07-24 07:20:54 sandervl Exp $
 
 LIBRARY TAPI32 INITINSTANCE
 DATA MULTIPLE NONSHARED
 
 EXPORTS
-    lineAccept                   = _lineAccept@12                 @0
+    lineAccept                   = _lineAccept@12                 @150
     lineAddProvider              = _lineAddProvider@12            @1
     lineAddToConference          = _lineAddToConference@8         @2
     lineAnswer                   = _lineAnswer@12                 @3
