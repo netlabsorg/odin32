@@ -1,4 +1,4 @@
-/* $Id: sec.c,v 1.4 2003-04-07 18:40:52 sandervl Exp $ */
+/* $Id: sec.c,v 1.5 2003-04-08 12:47:07 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
