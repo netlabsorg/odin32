@@ -1,17 +1,20 @@
-/* $Id: win32class.h,v 1.1 1999-05-24 20:20:04 ktk Exp $ */
-
+/* $Id: win32class.h,v 1.2 1999-07-14 08:35:37 sandervl Exp $ */
+/*
+ * Win32 Window Class Managment Code for OS/2
+ *
+ *
+ * Copyright 1998-1999 Sander van Leeuwen (sandervl@xs4all.nl)
+ *
+ */
 #ifndef __WIN32CLASS_H__
 #define __WIN32CLASS_H__
 
-//SvL: 18-7-'98, Registers system window classes (button, listbox etc etc)
-extern "C" {
-void RegisterSystemClasses(ULONG hModule);
-}
+#include <gen_object.h>
 
-class Win32WndClass
+class Win32WndClass : public GenericObject
 {
 public:
-	Win32WndClass(WNDCLASSEXA wndclass, BOOL isUnicode);
+	Win32WndClass(WNDCLASSEXA *wndclass, BOOL isUnicode = FALSE);
        ~Win32WndClass();
 
  	 ULONG  getClassLongA(int index, BOOL isUnicode = FALSE);
@@ -35,6 +38,16 @@ public:
 	 ULONG  getClassName(LPSTR  lpszClassName, ULONG cchClassName);
 	 ULONG  getClassName(LPWSTR lpszClassName, ULONG cchClassName);
 
+       WNDPROC  getWindowProc() 	{ return windowProc; };
+	 LPSTR  getMenuNameA()  	{ return menuNameA; };
+	 DWORD  getExtraWndWords() 	{ return nrExtraWindowWords; };
+
+	  void  setMenuName(LPSTR newMenuName);
+
+	  void  IncreaseWindowCount()   { cWindows++; };
+	  void  DecreaseWindowCount()   { cWindows--; };
+	  DWORD GetWindowCount()        { return cWindows; };
+	  
  static  void	UnregisterClassA(HINSTANCE hinst, LPSTR id);
 
  static Win32WndClass *FindClass(HINSTANCE hinst, LPSTR id);
@@ -49,21 +62,23 @@ private:
  HCURSOR	hCursor;		//GCL_HCURSOR
  HICON		hIcon;			//GCL_HICON
  HINSTANCE	hInstance;		//GCL_HMODULE
- ULONG		menuName;		//GCL_MENUNAME
- ULONG          menuNameW;		//GCL_MENUNAME
+ PCHAR		menuNameA;		//GCL_MENUNAME
+ WCHAR         *menuNameW;		//GCL_MENUNAME
  ULONG		windowStyle;		//GCL_STYLE
- WINWNDPROC     windowProc;		//GCL_WNDPROC
+ WNDPROC        windowProc;		//GCL_WNDPROC
  ULONG          classAtom;		//GCW_ATOM
 
- ULONG          className;
- ULONG          classNameW;
+ PCHAR          classNameA;
+ WCHAR         *classNameW;
  HICON		hIconSm;
 
  //User data class words/longs
  ULONG	       *userClassLong;
+
+ //nr of windows created with this class
+ ULONG          cWindows;
  
- static	        Win32WndClass  *wndclasses;
-  	        Win32WndClass  *next;
+ static GenericObject *wndclasses;
 };
 
 #endif //__WIN32CLASS_H__
