@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1838 2001-11-17 17:52:58 sandervl Exp $ */
+/* $Id: changelog,v 1.1839 2001-11-18 16:03:37 sandervl Exp $ */
+
+ 2001-11-17: Sander van Leeuwen <sandervl@xs4all.nl>
+    - WS2_32:   o Compile fix
+    - OLEAUT32: o Don't include guid file in custom build library
 
  2000-11-17: Yuri Dario <mc6530@mclink.it>
     - USER32:   o WM_SETTEXT (unicode) fix 
