@@ -1,4 +1,4 @@
-/* $Id: wavein.cpp,v 1.7 2001-02-27 21:17:01 sandervl Exp $ */
+/* $Id: wavein.cpp,v 1.8 2001-03-19 19:28:38 sandervl Exp $ */
 
 /*
  * Wave in MM apis
@@ -67,8 +67,7 @@ ODINFUNCTION6(MMRESULT, waveInOpen,
   else
   if(fdwOpen == CALLBACK_FUNCTION)
   {
-        //@@@PH 1999/12/28 save valid FS: to win32 TIB
-        *phwi = (HWAVEOUT)new DartWaveIn(pwfx, dwCallback, dwInstance, GetFS());
+        *phwi = (HWAVEOUT)new DartWaveIn(pwfx, dwCallback, dwInstance);
   }
   else  *phwi = (HWAVEOUT)new DartWaveIn(pwfx);
 

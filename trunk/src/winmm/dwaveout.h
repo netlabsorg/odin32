@@ -1,4 +1,4 @@
-/* $Id: dwaveout.h,v 1.10 2000-07-18 18:34:43 sandervl Exp $ */
+/* $Id: dwaveout.h,v 1.11 2001-03-19 19:28:38 sandervl Exp $ */
 
 /*
  * Wave playback class
@@ -31,7 +31,7 @@
 class DartWaveOut
 {
 public:
-              DartWaveOut(LPWAVEFORMATEX pwfx, ULONG nCallback, ULONG dwInstance, USHORT usSel);
+              DartWaveOut(LPWAVEFORMATEX pwfx, ULONG nCallback, ULONG dwInstance);
               DartWaveOut(LPWAVEFORMATEX pwfx, HWND hwndCallback);
               DartWaveOut(LPWAVEFORMATEX pwfx);
              ~DartWaveOut();
@@ -39,6 +39,7 @@ public:
      MMRESULT getError();
      MMRESULT write(LPWAVEHDR pwh, UINT cbwh);
      MMRESULT pause();
+     MMRESULT stop();
      MMRESULT restart();
      MMRESULT setVolume(ULONG ulVol);
      ULONG    getVolume() 		{ return volume; };
@@ -65,6 +66,8 @@ protected:
          void handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags);
 
 private:
+         void writeBuffer();
+
         USHORT DeviceId;
         ULONG  ulBufferCount;             /* Current file buffer     */
         ULONG  ulBufSize;
@@ -76,15 +79,15 @@ private:
     MCI_MIXSETUP_PARMS *MixSetupParms;          /* Mixer parameters        */
     MCI_BUFFER_PARMS   *BufferParms;                /* Device buffer parms     */
 
-    int SampleRate;
-    int BitsPerSample;
-    int nChannels;
-    int curPlayBuf, curFillBuf;
-    int curFillPos, curPlayPos; //fillpos == pos in os2 mix buffer, bufpos == pos in win buffer
+    int   SampleRate;
+    int   BitsPerSample;
+    int   nChannels;
+    int   curPlayBuf, curFillBuf;
+    ULONG curFillPos, curPlayPos; //fillpos == pos in os2 mix buffer, bufpos == pos in win buffer
+    ULONG readPos, writePos;
 
     // callback interface
     LPDRVCALLBACK mthdCallback; // pointer to win32 routine for the callback
-    USHORT        selCallback;  // the win32 tib selector for the callback (saved at waveOutOpen)
     void          callback(HDRVR h, UINT uMessage, DWORD dwUser, DWORD dw1, DWORD dw2);
     HWND          hwndCallback;
     DWORD         dwInstance;
