@@ -1,4 +1,4 @@
-/* $Id: d32Globals.c,v 1.1 2002-03-10 02:45:54 bird Exp $
+/* $Id: d32Globals.c,v 1.2 2002-03-31 19:23:41 bird Exp $
  *
  * d32globals - global data (32-bit)
  *
@@ -17,6 +17,7 @@
 *   Header Files                                                               *
 *******************************************************************************/
 #include <os2.h>
+#include <odinbuild.h>
 
 /*******************************************************************************
 *   Global Variables                                                           *
@@ -27,4 +28,4 @@
  * based addressed.
  */
 PULONG          pulTKSSBase32 = 0;
-
+ULONG           kKrnlLibBuild = ODIN32_BUILD_NR;
