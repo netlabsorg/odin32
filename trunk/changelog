@@ -1,4 +1,13 @@
- /* $Id: changelog,v 1.812 2000-03-17 04:36:38 bird Exp $ */
+ /* $Id: changelog,v 1.813 2000-03-17 16:13:07 sandervl Exp $ */
+
+ 2000-03-17: Sander van Leeuwen <sandervl@xs4all.nl>
+	- WSOCK32: Semaphore protection for relay slot alloc/free
+                   Fixed bug in WSAAsyncSelect.  Allow more than one
+                   async call per window for RelayAlloc call. If it's not
+                   alloced, pmwsock will return an error. Previously it was
+                   overwriting slots for other async calls. (WSAAsyncGetHostName
+                   in RealPlayer 7)
+	- KERNEL32: Fixed handle creation for thread 0.
 
  2000-03-16: knut st. osmundsen <knut.stange.osmundse@pmsc.no>
     - TOOLS\FASTDEP:
@@ -13,6 +22,8 @@
 
  2000-03-16: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Fixed virtual keycode of return key
+                  TODO: Not done for all keys. Should probably looks at the
+                        scancode (not virtual char) to translate keys.
 	- GDI32:  RP7 calls CreateDIBSection with HDC 0; Call
                   GetWindowDC(GetDesktopWindow()) in that case
                   -> fixes crash (result of CreateDIBSection failure)
