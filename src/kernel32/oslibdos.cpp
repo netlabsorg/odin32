@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.2 1999-08-26 15:05:14 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.3 1999-08-27 16:51:00 sandervl Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -22,12 +22,19 @@
 #include "initterm.h"
 #include "oslibdos.h"
 
+APIRET APIENTRY DosAliasMem(PVOID pb, ULONG cb, PPVOID ppbAlias, ULONG fl);
+
+//******************************************************************************
+//******************************************************************************
+DWORD OSLibDosAliasMem(LPVOID pb, ULONG cb, LPVOID *ppbAlias, ULONG fl)
+{
+  return DosAliasMem(pb, cb, ppbAlias, fl);
+}
 //******************************************************************************
 //******************************************************************************
 DWORD OSLibDosAllocMem(LPVOID *lplpMemAddr, DWORD size, DWORD flags)
 {
-//  return DosAllocMem(lplpMemAddr, size, flags | flAllocMem);
-  return DosAllocMem(lplpMemAddr, size, flags);
+  return DosAllocMem(lplpMemAddr, size, flags | flAllocMem);
 }
 //******************************************************************************
 //******************************************************************************

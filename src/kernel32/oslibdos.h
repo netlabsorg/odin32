@@ -1,4 +1,4 @@
-/* $Id: oslibdos.h,v 1.2 1999-08-26 15:05:14 sandervl Exp $ */
+/* $Id: oslibdos.h,v 1.3 1999-08-27 16:51:00 sandervl Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -13,6 +13,7 @@
 #define __OSLIBDOS_H__
 
 
+DWORD OSLibDosAliasMem(LPVOID pb, ULONG cb, LPVOID *ppbAlias, ULONG fl);
 DWORD OSLibDosAllocMem(LPVOID *lplpMemAddr, DWORD size, DWORD flags);
 DWORD OSLibDosFreeMem(LPVOID lpMemAddr);
 DWORD OSLibDosQueryMem(LPVOID lpMemAddr, DWORD *lpRangeSize, DWORD *lpAttr);

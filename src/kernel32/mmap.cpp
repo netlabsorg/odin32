@@ -1,7 +1,7 @@
-/* $Id: mmap.cpp,v 1.16 1999-08-26 17:56:25 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.17 1999-08-27 16:51:00 sandervl Exp $ */
 
 /*
- * Win32 Memory mapped file class
+ * Win32 Memory mapped file & view classes
  *
  * Copyright 1999 Sander van Leeuwen (sandervl@xs4all.nl)
  *
@@ -27,14 +27,16 @@
 #include <vmutex.h>
 #include <handlemanager.h>
 #include "mmap.h"
+#include "oslibdos.h"
 
 VMutex globalmapMutex;
+VMutex globalviewMutex;
 
 //******************************************************************************
 //TODO: sharing between processes
 //******************************************************************************
 Win32MemMap::Win32MemMap(HFILE hfile, ULONG size, ULONG fdwProtect, LPSTR lpszName)
-               : fMapped(FALSE), pMapping(NULL), mMapAccess(0), referenced(0)
+               : nrMappings(0), pMapping(NULL), mMapAccess(0), referenced(0)
 {
   globalmapMutex.enter();
   next    = memmaps;
@@ -71,6 +73,8 @@ BOOL Win32MemMap::Init(HANDLE hMemMap)
 		goto fail;
 	}
   }
+
+  dprintf(("CreateFileMappingA for file %x, prot %x size %d, name %s", hMemFile, mProtFlags, mSize, lpszMapName));
   this->hMemMap = hMemMap;
   mapMutex.leave();
   return TRUE;
@@ -82,11 +86,13 @@ fail:
 //******************************************************************************
 Win32MemMap::~Win32MemMap()
 {
-  unmapViewOfFile();
+  for(int i=0;i<nrMappings;i++) {
+	Win32MemMapView::deleteView(this); //delete all views of our memory mapped file
+  }
+  mapMutex.enter();
   if(lpszMapName) {
 	free(lpszMapName);
   }
-  mapMutex.enter();
   if(pMapping) {
 	VirtualFree(pMapping, mSize, MEM_RELEASE);
 	pMapping = NULL;
@@ -117,63 +123,50 @@ Win32MemMap::~Win32MemMap()
   globalmapMutex.leave();
 }
 //******************************************************************************
-//******************************************************************************
-BOOL Win32MemMap::hasReadAccess()
-{
-  return TRUE; //should have at least this
-}
-//******************************************************************************
-//******************************************************************************
-BOOL Win32MemMap::hasWriteAccess()
-{
-  return !(mProtFlags & PAGE_READONLY);
-}
-//******************************************************************************
-//Might want to add this feature for memory mapping executable & dll files in 
-//the loader (done in Win32 with the SEC_IMAGE flag?)
-//******************************************************************************
-BOOL Win32MemMap::hasExecuteAccess()
-{
-  return FALSE;
-}
-//******************************************************************************
 //We determine whether a page has been modified by checking it's protection flags
 //If the write flag is set, this means commitPage had to enable this due to a pagefault
 //(all pages are readonly until the app tries to write to it)
 //******************************************************************************
-BOOL Win32MemMap::commitPage(LPVOID lpPageFaultAddr, ULONG nrpages, BOOL fWriteAccess)
+BOOL Win32MemMap::commitPage(ULONG offset, BOOL fWriteAccess)
 {
  MEMORY_BASIC_INFORMATION memInfo;
- DWORD pageAddr = (DWORD)lpPageFaultAddr & ~0xFFF;
- DWORD oldProt, newProt, nrBytesRead, offset, size;
- 
+ LPVOID lpPageFaultAddr = (LPVOID)((ULONG)pMapping + offset);
+ DWORD pageAddr         = (DWORD)lpPageFaultAddr & ~0xFFF;
+ DWORD oldProt, newProt, nrBytesRead, size;
+
 //  mapMutex.enter();
+  
   newProt  = mProtFlags & (PAGE_READONLY | PAGE_READWRITE | PAGE_WRITECOPY);
 
-  dprintf(("Win32MemMap::commitPage %x (faultaddr %x), nr of pages %d", pageAddr, lpPageFaultAddr, nrpages));
+  dprintf(("Win32MemMap::commitPage %x (faultaddr %x)", pageAddr, lpPageFaultAddr));
   if(hMemFile != -1) {
-	if(VirtualQuery((LPSTR)pageAddr, &memInfo, nrpages*PAGE_SIZE) == 0) {
-		dprintf(("Win32MemMap::commitPage: VirtualQuery (%x,%x) failed for %x", pageAddr, nrpages*PAGE_SIZE));
+	if(VirtualQuery((LPSTR)pageAddr, &memInfo, NRPAGES_TOCOMMIT*PAGE_SIZE) == 0) {
+		dprintf(("Win32MemMap::commitPage: VirtualQuery (%x,%x) failed for %x", pageAddr, NRPAGES_TOCOMMIT*PAGE_SIZE));
 		goto fail;
 	}
+	//Only changes the state of the pages with the same attribute flags
+	//(returned in memInfo.RegionSize)
+	//If it's smaller than the mNrPages, it simply means one or more of the
+        //other pages have already been committed
 	if(memInfo.State & MEM_COMMIT)
         {//if it's already committed, then the app tried to write to it
 		if(!fWriteAccess) {
-			dprintf(("Win32MemMap::commitPage: Huh? Already committed and not trying to write (%x,%x) failed for %x", pageAddr, nrpages*PAGE_SIZE));
+			dprintf(("Win32MemMap::commitPage: Huh? Already committed and not trying to write (%x,%x) failed for %x", pageAddr, memInfo.RegionSize));
 			goto fail;
 		}
-		if(VirtualProtect((LPVOID)pageAddr, nrpages*PAGE_SIZE, newProt, &oldProt) == FALSE) {
-			dprintf(("Win32MemMap::commitPage: Failed to set write flag on page (%x,%x) failed for %x", pageAddr, nrpages*PAGE_SIZE));
+		if(VirtualProtect((LPVOID)pageAddr, memInfo.RegionSize, newProt, &oldProt) == FALSE) {
+			dprintf(("Win32MemMap::commitPage: Failed to set write flag on page (%x,%x) failed for %x", pageAddr, memInfo.RegionSize));
 			goto fail;
 		}
 	}
 	else {
-  		if(VirtualAlloc((LPVOID)pageAddr, nrpages*PAGE_SIZE, MEM_COMMIT, PAGE_READWRITE) == FALSE) {
+  		if(VirtualAlloc((LPVOID)pageAddr, memInfo.RegionSize, MEM_COMMIT, PAGE_READWRITE) == FALSE) {
 			goto fail;
   		}
 		offset = pageAddr - (ULONG)pMapping;
-		size   = nrpages*PAGE_SIZE;
+		size   = memInfo.RegionSize;
 		if(offset + size > mSize) {
+			dprintf(("Adjusting size from %d to %d", size, mSize - offset));
 			size = mSize - offset;
 		}
 		if(SetFilePointer(hMemFile, offset, NULL, FILE_BEGIN) != offset) {
@@ -189,14 +182,18 @@ BOOL Win32MemMap::commitPage(LPVOID lpPageFaultAddr, ULONG nrpages, BOOL fWriteA
 			goto fail;
 		}
 		if(mProtFlags & PAGE_READONLY) {
-  			if(VirtualProtect((LPVOID)pageAddr, nrpages*PAGE_SIZE, newProt, &oldProt) == FALSE) {
+  			if(VirtualProtect((LPVOID)pageAddr, memInfo.RegionSize, newProt, &oldProt) == FALSE) {
 				goto fail;
 			}
 		}
 	}
   }
   else {
-  	if(VirtualAlloc((LPVOID)pageAddr, nrpages*PAGE_SIZE, MEM_COMMIT, newProt) == FALSE) {
+	if(VirtualQuery((LPSTR)pageAddr, &memInfo, NRPAGES_TOCOMMIT*PAGE_SIZE) == 0) {
+		dprintf(("Win32MemMap::commitPage: VirtualQuery (%x,%x) failed for %x", pageAddr, NRPAGES_TOCOMMIT*PAGE_SIZE));
+		goto fail;
+	}
+  	if(VirtualAlloc((LPVOID)pageAddr, memInfo.RegionSize, MEM_COMMIT, newProt) == FALSE) {
 		goto fail;
   	}
   }
@@ -208,21 +205,26 @@ fail:
   return FALSE;
 }
 //******************************************************************************
+//todo: unalias memory
 //******************************************************************************
-BOOL Win32MemMap::unmapViewOfFile()
+BOOL Win32MemMap::unmapViewOfFile(Win32MemMapView *view)
 {
-  if(fMapped == FALSE)
-	return FALSE;
-
-  flushView(pMapping, mSize);
   mapMutex.enter();
-  if(pMapping) {
+
+  if(nrMappings == 0)
+	goto fail;
+
+  delete view;
+
+  if(--nrMappings) {
 	VirtualFree(pMapping, mSize, MEM_RELEASE);
+	pMapping = NULL;
   }
-  pMapping = NULL;
-  fMapped = FALSE;
   mapMutex.leave();
   return TRUE;
+fail:
+  mapMutex.leave();
+  return FALSE;
 }
 //******************************************************************************
 //******************************************************************************
@@ -231,17 +233,21 @@ LPVOID Win32MemMap::mapViewOfFile(ULONG size, ULONG offset, ULONG fdwAccess)
   mapMutex.enter();
   ULONG memFlags = (mProtFlags & (PAGE_READONLY | PAGE_READWRITE | PAGE_WRITECOPY));
   ULONG fAlloc   = 0;
-  LPVOID mapview;
+  Win32MemMapView *mapview;
 
+  if(fdwAccess & ~(FILE_MAP_WRITE|FILE_MAP_READ|FILE_MAP_COPY)) 
+	goto parmfail;
   if((fdwAccess & FILE_MAP_WRITE) && !(mProtFlags & PAGE_READWRITE)) 
 	goto parmfail;
   if((fdwAccess & FILE_MAP_READ) && !(mProtFlags & (PAGE_READWRITE|PAGE_READONLY))) 
 	goto parmfail;
   if((fdwAccess & FILE_MAP_COPY) && !(mProtFlags & PAGE_WRITECOPY)) 
 	goto parmfail;
+  if(offset+size > mSize)
+	goto parmfail;
 
 //TODO: If committed, read file into memory
-#if 0  
+#if 0
   if(mProtFlags & SEC_COMMIT)
 	fAlloc |= MEM_COMMIT;
   else
@@ -251,9 +257,9 @@ LPVOID Win32MemMap::mapViewOfFile(ULONG size, ULONG offset, ULONG fdwAccess)
   fAlloc = MEM_RESERVE;
 #endif
 
-  if(fMapped == FALSE) {//if not mapped, reserve/commit entire view
+  if(nrMappings == 0) {//if not mapped, reserve/commit entire view
 	//SvL: Always read/write access or else ReadFile will crash once we
- 	//     start decommitting pages. 
+ 	//     start committing pages. 
 	//     This is most likely an OS/2 bug and doesn't happen in Aurora
         //     when allocating memory with the PAG_ANY bit set. (without this
         //     flag it will also crash)
@@ -262,11 +268,18 @@ LPVOID Win32MemMap::mapViewOfFile(ULONG size, ULONG offset, ULONG fdwAccess)
 		dprintf(("Win32MemMap::mapFileView: VirtualAlloc %x %x %x failed!", mSize, fAlloc, memFlags));
 		goto fail;
   	}
-	fMapped = TRUE;
   }
-  mapview = (LPVOID)((ULONG)pMapping + offset);
+  mapview = new Win32MemMapView(this, offset, (size == 0) ? mSize : size, fdwAccess);
+  if(mapview == NULL) {
+	goto fail;
+  }
+  if(mapview->everythingOk() == FALSE) {
+	delete mapview;
+	goto fail;
+  }
+  nrMappings++;
   mapMutex.leave();
-  return mapview;
+  return mapview->getViewAddr();
 
 parmfail:
   dprintf(("Win32MemMap::mapFileView: ERROR_INVALID_PARAMETER"));
@@ -278,20 +291,20 @@ fail:
 //******************************************************************************
 //We determine whether a page has been modified by checking it's protection flags
 //If the write flag is set, this means commitPage had to enable this due to a pagefault
-//(all pages are readonly until the app tries to modify it)
+//(all pages are readonly until the app tries to modify the contents of the page)
 //
 //TODO: Are apps allowed to change the protection flags of memory mapped pages?
 //      I'm assuming they aren't for now.
 //******************************************************************************
-BOOL Win32MemMap::flushView(LPVOID lpvBase, ULONG cbFlush)
+BOOL Win32MemMap::flushView(ULONG offset, ULONG cbFlush)
 {
+ LPVOID lpvBase = (LPVOID)((ULONG)pMapping+offset);
  MEMORY_BASIC_INFORMATION memInfo;
- ULONG nrpages, nrBytesWritten, offset, size;
+ ULONG nrBytesWritten, size;
  int   i;
 
-//  mapMutex.enter();
   dprintf(("Win32MemMap::flushView: %x %x", lpvBase, cbFlush));
-  if(fMapped == FALSE)
+  if(nrMappings == 0)
 	goto parmfail;
 
   if(cbFlush == 0) 
@@ -306,22 +319,20 @@ BOOL Win32MemMap::flushView(LPVOID lpvBase, ULONG cbFlush)
   if(hMemFile == -1)
 	goto success; //TODO: Return an error here?
 
-  nrpages = cbFlush/PAGE_SIZE;
-  if(cbFlush & 0xFFF)  nrpages++;
-
-  for(i=0;i<nrpages;i++) {
-	if(VirtualQuery((LPSTR)lpvBase+i*PAGE_SIZE, &memInfo, PAGE_SIZE) == 0) {
+  while(cbFlush) {
+	if(VirtualQuery((LPSTR)lpvBase, &memInfo, cbFlush) == 0) {
 		dprintf(("Win32MemMap::flushView: VirtualQuery (%x,%x) failed for %x", lpvBase, cbFlush, (ULONG)lpvBase+i*PAGE_SIZE));
 		goto fail;
 	}
-	//If a page is reserved or write protected, we won't bother flushing it to disk
+	//If a page (or range of pages) is reserved or write protected, we 
+        //won't bother flushing it to disk
 	if(memInfo.State & MEM_COMMIT && 
            memInfo.AllocationProtect & (PAGE_READWRITE|PAGE_WRITECOPY|PAGE_EXECUTE_READWRITE|PAGE_EXECUTE_WRITECOPY)) 
         {//committed and allowed for writing?
-		offset = (ULONG)lpvBase+i*PAGE_SIZE - (ULONG)pMapping;
-		size   = PAGE_SIZE;
-		if(offset + size > mSize) {
-			size = mSize - offset;
+		offset = (ULONG)lpvBase - (ULONG)pMapping;
+		size   = memInfo.RegionSize;
+		if(size > cbFlush) {
+			size = cbFlush;
 		}
 		dprintf(("Win32MemMap::flushView for offset %x, size %d", offset, size));
 
@@ -329,25 +340,28 @@ BOOL Win32MemMap::flushView(LPVOID lpvBase, ULONG cbFlush)
 			dprintf(("Win32MemMap::flushView: SetFilePointer failed to set pos to %x", offset));
 			goto fail;
 		}
-		if(WriteFile(hMemFile, (LPSTR)lpvBase+i*PAGE_SIZE, size, &nrBytesWritten, NULL) == FALSE) {
-			dprintf(("Win32MemMap::flushView: WriteFile failed for %x", (ULONG)lpvBase+i*PAGE_SIZE));
+		if(WriteFile(hMemFile, (LPSTR)lpvBase, size, &nrBytesWritten, NULL) == FALSE) {
+			dprintf(("Win32MemMap::flushView: WriteFile failed for %x", (ULONG)lpvBase));
 			goto fail;
 		}
 		if(nrBytesWritten != size) {
-			dprintf(("Win32MemMap::flushView: WriteFile didn't write all bytes for %x", (ULONG)lpvBase+i*PAGE_SIZE));
+			dprintf(("Win32MemMap::flushView: WriteFile didn't write all bytes for %x", (ULONG)lpvBase));
 			goto fail;
 		}
 	}
+	lpvBase = (LPVOID)((ULONG)lpvBase + memInfo.RegionSize);
+
+	if(cbFlush < memInfo.RegionSize)
+		break;
+
+	cbFlush -= memInfo.RegionSize;
   }
 success:
-//  mapMutex.leave();
   return TRUE;
 parmfail:
   SetLastError(ERROR_INVALID_PARAMETER);
-//  mapMutex.leave();
   return FALSE;
 fail:
-//  mapMutex.leave();
   return FALSE;
 }
 //******************************************************************************
@@ -389,6 +403,7 @@ Win32MemMap *Win32MemMap::findMap(ULONG address)
   return map;
 }
 //******************************************************************************
+//Assumes mutex has been acquired
 //******************************************************************************
 void Win32MemMap::deleteAll()
 {
@@ -399,3 +414,157 @@ void Win32MemMap::deleteAll()
 //******************************************************************************
 //******************************************************************************
 Win32MemMap *Win32MemMap::memmaps = NULL;
+
+//******************************************************************************
+//******************************************************************************
+Win32MemMapView::Win32MemMapView(Win32MemMap *map, ULONG offset, ULONG size, 
+                                 ULONG fdwAccess)
+{
+ LPVOID           viewaddr = (LPVOID)((ULONG)map->getMappingAddr()+offset);
+ ULONG            accessAttr = 0;
+ Win32MemMapView *tmpview  = mapviews;
+
+  errorState = 0;
+  mParentMap = map;
+  mSize    = size;
+  mOffset  = offset;
+
+  switch(fdwAccess) {
+  case FILE_MAP_READ:
+	accessAttr = PAG_READ;
+	mfAccess   = MEMMAP_ACCESS_READ;
+	break;
+  case FILE_MAP_WRITE:
+  case FILE_MAP_COPY:
+	accessAttr = (PAG_READ|PAG_WRITE);
+	mfAccess   = MEMMAP_ACCESS_WRITE;
+	break;
+  }
+  if(OSLibDosAliasMem(viewaddr, size, &pMapView, accessAttr) != OSLIB_NOERROR) {
+	dprintf(("new OSLibDosAliasMem FAILED"));
+	SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+	errorState = 1;
+  	return;
+  }
+
+  dprintf(("Win32MemMapView::Win32MemMapView: created %x (alias for %x), size %d", pMapView, viewaddr, size));
+
+  globalviewMutex.enter();
+  if(tmpview == NULL || tmpview->getViewAddr() > pMapView) {
+	next     = mapviews;
+	mapviews = this;
+  }
+  else {
+	while(tmpview->next) {
+		if(tmpview->next->getViewAddr() > pMapView) {
+			break;
+		}
+		tmpview = tmpview->next;
+	}
+	next          = tmpview->next;
+	tmpview->next = this;
+  }
+  globalviewMutex.leave();
+}
+//******************************************************************************
+//******************************************************************************
+Win32MemMapView::~Win32MemMapView()
+{
+  if(errorState != 0)
+	return;
+
+  if(mfAccess != MEMMAP_ACCESS_READ)
+  	mParentMap->flushView(mOffset, mSize);
+
+  OSLibDosFreeMem(pMapView);
+
+  globalviewMutex.enter();
+  Win32MemMapView *view = mapviews;
+
+  if(view == this) {
+	mapviews = next;
+  }
+  else {
+  	while(view->next) {
+		if(view->next == this)
+			break;
+		view = view->next;
+	}
+	if(view->next) {
+		view->next = next;
+	}
+	else	dprintf(("Win32MemMapView::~Win32MemMapView: map not found!! (%x)", this));
+  }
+  globalviewMutex.leave();
+}
+//******************************************************************************
+//******************************************************************************
+void Win32MemMapView::deleteView(Win32MemMap *map)
+{
+  globalviewMutex.enter();
+  Win32MemMapView *view = mapviews;
+
+  if(view != NULL) {
+  	while(view) {
+		if(view->getParentMap() == map)
+		{
+			globalviewMutex.leave();
+			delete view;
+			return;
+		}
+		view = view->next;
+	}
+  }
+  globalviewMutex.leave();
+}
+//******************************************************************************
+//******************************************************************************
+Win32MemMap *Win32MemMapView::findMapByView(ULONG address, ULONG *offset, 
+                                            ULONG accessType,
+                                            Win32MemMapView **pView)
+{
+  globalviewMutex.enter();
+  Win32MemMapView *view = mapviews;
+
+  *offset = 0;
+
+  if(view != NULL) {
+  	while(view && (ULONG)view->getViewAddr() <= address) {
+		if((ULONG)view->getViewAddr() <= address && 
+                   (ULONG)view->getViewAddr() + view->getSize() >= address &&
+                   view->getAccessFlags() >= accessType)
+		{
+			*offset = view->getOffset() + (address - (ULONG)view->getViewAddr());
+			goto success;
+		}
+		view = view->next;
+	}
+	//failure if we get here
+	view = NULL;
+  }
+success:
+  globalviewMutex.leave();
+  if(pView) *pView = view;
+  return (view) ? view->getParentMap() : NULL;
+}
+//******************************************************************************
+//******************************************************************************
+Win32MemMapView *Win32MemMapView::findView(LPVOID address)
+{
+  Win32MemMapView *view = mapviews;
+
+  if(view != NULL) {
+  	while(view) {
+		if(view->getViewAddr() == address)
+		{
+			break;
+		}
+		view = view->next;
+	}
+  }
+  return view;
+}
+//******************************************************************************
+//******************************************************************************
+Win32MemMapView *Win32MemMapView::mapviews = NULL;
+

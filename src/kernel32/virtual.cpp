@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.10 1999-08-26 17:56:26 sandervl Exp $ */
+/* $Id: virtual.cpp,v 1.11 1999-08-27 16:51:01 sandervl Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -148,18 +148,19 @@ BOOL WINAPI FlushViewOfFile(
 ) 
 {
  Win32MemMap *map;
+ DWORD offset;
 
     if (!base)
     {
         SetLastError( ERROR_INVALID_PARAMETER );
         return FALSE;
     }
-    map = Win32MemMap::findMap((ULONG)base);
+    map = Win32MemMapView::findMapByView((ULONG)base, &offset, MEMMAP_ACCESS_READ);
     if(map == NULL) {
         SetLastError( ERROR_FILE_NOT_FOUND );
         return FALSE;
     }
-    return map->flushView((LPVOID)base, cbFlush);
+    return map->flushView(offset, cbFlush);
 }
 
 
@@ -178,18 +179,21 @@ BOOL WINAPI UnmapViewOfFile(LPVOID addr /* [in] Address where mapped view begins
 ) 
 {
  Win32MemMap *map;
+ Win32MemMapView *view;
+
+ DWORD offset;
 
     if (!addr)
     {
         SetLastError( ERROR_INVALID_PARAMETER );
         return FALSE;
     }
-    map = Win32MemMap::findMap((ULONG)addr);
+    map = Win32MemMapView::findMapByView((ULONG)addr, &offset, MEMMAP_ACCESS_READ, &view);
     if(map == NULL) {
         SetLastError( ERROR_FILE_NOT_FOUND );
         return FALSE;
     }
-    return map->unmapViewOfFile();
+    return map->unmapViewOfFile(view);
 }
 
 /***********************************************************************
@@ -460,7 +464,11 @@ DWORD WIN32API VirtualQuery(LPCVOID lpvAddress, LPMEMORY_BASIC_INFORMATION pmbiB
   if(lpvAddress == NULL || pmbiBuffer == NULL || cbLength == 0) {
    	return 0;
   }
-  cbRangeSize = cbLength;
+  
+  cbRangeSize = cbLength & ~0xFFF;
+  if(cbLength & 0xFFF) {
+	cbRangeSize += PAGE_SIZE;
+  }
   rc = OSLibDosQueryMem((LPVOID)lpvAddress, &cbRangeSize, &dAttr);
   if(rc) {
    	dprintf(("VirtualQuery - DosQueryMem %x %x returned %d\n", lpvAddress, cbLength, rc));

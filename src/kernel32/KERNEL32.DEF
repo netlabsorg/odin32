@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.30 1999-08-25 14:27:06 sandervl Exp $
+; $Id: KERNEL32.DEF,v 1.31 1999-08-27 16:51:00 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -15,6 +15,8 @@ IMPORTS
    Dos32QueryModFromEIP        =  DOSCALLS.360
   _DosQueryModFromEIP          =  DOSCALLS.360
    DosQueryModFromEIP          =  DOSCALLS.360
+   DosAliasMem                 =  DOSCALLS.298
+  _DosAliasMem                 =  DOSCALLS.298
 
 
 EXPORTS
