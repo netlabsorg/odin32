@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.48 1999-11-25 19:22:02 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.49 1999-11-26 17:06:08 cbratschi Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -263,7 +263,7 @@ ULONG OSLibSendMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam)
 //******************************************************************************
 ULONG OSLibWinBroadcastMsg(ULONG msg, ULONG wParam, ULONG lParam, BOOL fSend)
 {
-  return WinBroadcastMsg(HWND_DESKTOP, msg, (MPARAM)wParam, (MPARAM)lParam, 
+  return WinBroadcastMsg(HWND_DESKTOP, msg, (MPARAM)wParam, (MPARAM)lParam,
                          (fSend) ? BMSG_SEND : BMSG_POST);
 }
 //******************************************************************************
@@ -402,7 +402,7 @@ BOOL OSLibWinQueryWindowRect(HWND hwnd, PRECT pRect, int RelativeTo)
         if(RelativeTo == RELATIVE_TO_SCREEN) {
                 MapOS2ToWin32Rectl(OSLIB_HWND_DESKTOP, hwnd, &rectl, pRect);
         }
-        else    MapOS2ToWin32Rectl(&rectl, pRect);
+        else    MapOS2ToWin32WindowRect(&rectl, pRect);
   }
   else  memset(pRect, 0, sizeof(RECT));
   return rc;

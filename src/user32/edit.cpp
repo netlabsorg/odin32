@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.17 1999-11-24 18:21:36 cbratschi Exp $ */
+/* $Id: edit.cpp,v 1.18 1999-11-26 17:06:06 cbratschi Exp $ */
 /*
  *      Edit control
  *
@@ -19,12 +19,11 @@
  */
 
 /* CB: todo
+  - WM_MOUSEMOVE: vert lines invalidate bug
   - EN_UPDATE: send before update
   - EN_CHANGE: send after update -> WM_PAINT isn't the right place
   - EN_HSCROLL/EN_VSCROLL: send before update
-  - still problems with caret
   - WS_BORDER -> bug in Win32BaseWindow::SetWindowLong
-  - clipping bug(s)
   - many messages, styles, notifications
 */
 
@@ -228,6 +227,7 @@ static LRESULT  EDIT_WM_KillFocus(HWND hwnd, EDITSTATE *es, HWND window_getting_
 static LRESULT  EDIT_WM_LButtonDblClk(HWND hwnd, EDITSTATE *es, DWORD keys, INT x, INT y);
 static LRESULT  EDIT_WM_LButtonDown(HWND hwnd, EDITSTATE *es, DWORD keys, INT x, INT y);
 static LRESULT  EDIT_WM_LButtonUp(HWND hwnd, EDITSTATE *es, DWORD keys, INT x, INT y);
+static LRESULT  EDIT_WM_CaptureChanged(HWND hwnd,EDITSTATE *es);
 static LRESULT  EDIT_WM_MouseMove(HWND hwnd, EDITSTATE *es, DWORD keys, INT x, INT y);
 static LRESULT  EDIT_WM_NCCreate(HWND hwnd, LPCREATESTRUCTA cs);
 static void     EDIT_WM_Paint(HWND hwnd, EDITSTATE *es,WPARAM wParam);
@@ -672,6 +672,10 @@ LRESULT WINAPI EditWndProc( HWND hwnd, UINT msg,
                 result = EDIT_WM_LButtonUp(hwnd, es, (DWORD)wParam, SLOWORD(lParam), SHIWORD(lParam));
                 break;
 
+        case WM_CAPTURECHANGED:
+                result = EDIT_WM_CaptureChanged(hwnd,es);
+                break;
+
         case WM_MOUSEACTIVATE:
                 /*
                  *      FIXME: maybe DefWindowProc() screws up, but it seems that
@@ -1013,7 +1017,7 @@ static void EDIT_ConfinePoint(HWND hwnd, EDITSTATE *es, LPINT x, LPINT y)
 static void EDIT_GetLineRect(HWND hwnd, EDITSTATE *es, INT line, INT scol, INT ecol, LPRECT rc)
 {
         INT line_index =  EDIT_EM_LineIndex(hwnd, es, line);
-
+//CB: fix
         if (es->style & ES_MULTILINE)
                 rc->top = es->format_rect.top + (line - es->y_offset) * es->line_height;
         else
@@ -1088,9 +1092,9 @@ static void EDIT_SL_InvalidateText(HWND hwnd, EDITSTATE *es, INT start, INT end)
         EDIT_GetLineRect(hwnd, es, 0, start, end, &line_rect);
         if (IntersectRect(&rc, &line_rect, &es->format_rect))
         {
-          if (es->flags & EF_FOCUSED) HideCaret(hwnd);
+          HideCaret(hwnd);
           InvalidateRect(hwnd, &rc, FALSE);
-          if (es->flags & EF_FOCUSED) ShowCaret(hwnd);
+          ShowCaret(hwnd);
         }
 }
 
@@ -1131,7 +1135,7 @@ static void EDIT_ML_InvalidateText(HWND hwnd, EDITSTATE *es, INT start, INT end)
         }
         GetClientRect(hwnd, &rc1);
         IntersectRect(&rcWnd, &rc1, &es->format_rect);
-        if (es->flags & EF_FOCUSED) HideCaret(hwnd);
+        HideCaret(hwnd);
         if (sl == el) {
                 EDIT_GetLineRect(hwnd, es, sl, sc, ec, &rcLine);
                 if (IntersectRect(&rcUpdate, &rcWnd, &rcLine))
@@ -1155,7 +1159,7 @@ static void EDIT_ML_InvalidateText(HWND hwnd, EDITSTATE *es, INT start, INT end)
                 if (IntersectRect(&rcUpdate, &rcWnd, &rcLine))
                         InvalidateRect(hwnd, &rcUpdate, FALSE);
         }
-        if (es->flags & EF_FOCUSED) ShowCaret(hwnd);
+        ShowCaret(hwnd);
 }
 
 
@@ -2086,7 +2090,7 @@ static BOOL EDIT_EM_LineScroll(HWND hwnd, EDITSTATE *es, INT dx, INT dy)
                 RECT rc;
                 GetClientRect(hwnd, &rc1);
                 IntersectRect(&rc, &rc1, &es->format_rect);
-                rc.top--; //CB: top line not moved/refreshed
+
                 ScrollWindowEx(hwnd, -dx, dy,
                                 NULL, &rc, (HRGN)NULL, NULL, SW_INVALIDATE);
                 es->y_offset = nyoff;
@@ -2850,7 +2854,7 @@ static LRESULT EDIT_WM_EraseBkGnd(HWND hwnd, EDITSTATE *es, HDC dc)
                 brush = (HBRUSH)GetStockObject(WHITE_BRUSH);
 
         GetClientRect(hwnd, &rc);
-        IntersectClipRect(dc, rc.left, rc.top, rc.right, rc.bottom);
+        IntersectClipRect(dc, rc.left, rc.top, rc.right, rc.bottom); CB:
         GetClipBox(dc, &rc);
         /*
          *      FIXME:  specs say that we should UnrealizeObject() the brush,
@@ -2875,7 +2879,6 @@ static INT EDIT_WM_GetText(HWND hwnd, EDITSTATE *es, INT count, LPSTR text)
   if (es->text == NULL)  // the only case of failure i can imagine
     return 0;
 
-  //SvL: Bugfix: +1
   len = min(count, lstrlenA(es->text)+1); // determine length
   lstrcpynA(text, es->text, len);       // copy as much as possible
   return len;
@@ -3261,15 +3264,23 @@ static LRESULT EDIT_WM_LButtonDown(HWND hwnd, EDITSTATE *es, DWORD keys, INT x, 
  */
 static LRESULT EDIT_WM_LButtonUp(HWND hwnd, EDITSTATE *es, DWORD keys, INT x, INT y)
 {
-        if (es->bCaptureState && GetCapture() == hwnd) {
-                KillTimer(hwnd, 0);
-                ReleaseCapture();
-        }
-        es->bCaptureState = FALSE;
+  if (es->bCaptureState)
+  {
+    KillTimer(hwnd,0);
+    ReleaseCapture();
+  }
+  es->bCaptureState = FALSE;
 
-        return 0;
+  return 0;
 }
 
+static LRESULT EDIT_WM_CaptureChanged(HWND hwnd,EDITSTATE *es)
+{
+  if (es->bCaptureState) KillTimer(hwnd,0);
+  es->bCaptureState = FALSE;
+
+  return 0;
+}
 
 /*********************************************************************
  *
@@ -3282,8 +3293,7 @@ static LRESULT EDIT_WM_MouseMove(HWND hwnd, EDITSTATE *es, DWORD keys, INT x, IN
         BOOL after_wrap;
         INT prex, prey;
 
-        if (GetCapture() != hwnd)
-                return 1; //SvL: Bugfix
+        if (!es->bCaptureState) return 0;
 
         /*
          *      FIXME: gotta do some scrolling if outside client
@@ -3400,7 +3410,7 @@ static VOID EDIT_Draw(HWND hwnd,EDITSTATE *es,HDC hdc,BOOL eraseBkGnd)
 
   if (es->flags & EF_UPDATE) EDIT_NOTIFY_PARENT(hwnd, EN_UPDATE);
 
-  if (es->flags & EF_FOCUSED) HideCaret(hwnd);
+  HideCaret(hwnd);
 
   if (eraseBkGnd)
   {
@@ -3472,7 +3482,7 @@ static VOID EDIT_Draw(HWND hwnd,EDITSTATE *es,HDC hdc,BOOL eraseBkGnd)
   if (es->flags & EF_FOCUSED)
     EDIT_SetCaretPos(hwnd, es, es->selection_end,es->flags & EF_AFTER_WRAP);
 
-  if (es->flags & EF_FOCUSED) ShowCaret(hwnd);
+  ShowCaret(hwnd);
 
   //CB: replace
   if (es->flags & EF_UPDATE)
@@ -3489,7 +3499,7 @@ static VOID EDIT_Refresh(HWND hwnd,EDITSTATE *es)
   RECT rect;
 
   //CB: original controls redraws many times, cache drawing
-  if (es->flags & EF_FOCUSED) HideCaret(hwnd);
+  HideCaret(hwnd);
   GetClientRect(hwnd,&rect);
   hdc = GetDC(hwnd);
   hdcCompatible = CreateCompatibleDC(hdc);
@@ -3502,7 +3512,7 @@ static VOID EDIT_Refresh(HWND hwnd,EDITSTATE *es)
   DeleteObject(bitmap);
   DeleteDC(hdcCompatible);
   ReleaseDC(hwnd,hdc);
-  if (es->flags & EF_FOCUSED) ShowCaret(hwnd);
+  ShowCaret(hwnd);
 }
 
 /*********************************************************************
