@@ -1,4 +1,4 @@
-/* $Id: shell32_main.cpp,v 1.7 2000-01-09 19:23:09 phaller Exp $ */
+/* $Id: shell32_main.cpp,v 1.8 2000-01-18 22:27:56 sandervl Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -558,48 +558,62 @@ ODINFUNCTION6(HINSTANCE, ShellExecuteW, HWND,    hWnd,
 /*************************************************************************
  * AboutDlgProc32                           (internal)
  */
+#define IDC_ODINLOGO 2001
+#define IDB_ODINLOGO 5555
+
 BOOL WINAPI AboutDlgProc( HWND hWnd, UINT msg, WPARAM wParam,
                               LPARAM lParam )
-{   HWND hWndCtl;
+{
+    HWND hWndCtl;
     char Template[512], AppTitle[512];
 
-    TRACE_(shell)("\n");
-
     switch(msg)
-    { case WM_INITDIALOG:
-      { ABOUT_INFO *info = (ABOUT_INFO *)lParam;
-            if (info)
-        { const char* const *pstr = SHELL_People;
-                SendDlgItemMessageA(hWnd, stc1, STM_SETICON,info->hIcon, 0);
-                GetWindowTextA( hWnd, Template, sizeof(Template) );
-                sprintf( AppTitle, Template, info->szApp );
-                SetWindowTextA( hWnd, AppTitle );
-                SetWindowTextA( GetDlgItem(hWnd, IDC_STATIC_TEXT),
-                                  info->szOtherStuff );
-                hWndCtl = GetDlgItem(hWnd, IDC_LISTBOX);
-                SendMessageA( hWndCtl, WM_SETREDRAW, 0, 0 );
-                while (*pstr)
-          { SendMessageA( hWndCtl, LB_ADDSTRING, (WPARAM)-1, (LPARAM)*pstr );
-                    pstr++;
-                }
-                SendMessageA( hWndCtl, WM_SETREDRAW, 1, 0 );
+    {
+    case WM_INITDIALOG:
+    {
+        ABOUT_INFO *info = (ABOUT_INFO *)lParam;
+        if(info)
+        {
+          const char* const *pstr = SHELL_People;
+
+            SendDlgItemMessageA(hWnd, stc1, STM_SETICON,info->hIcon, 0);
+            GetWindowTextA( hWnd, Template, sizeof(Template) );
+            sprintf( AppTitle, Template, info->szApp );
+            SetWindowTextA( hWnd, AppTitle );
+            SetWindowTextA( GetDlgItem(hWnd, IDC_STATIC_TEXT), info->szOtherStuff );
+
+            HWND hwndOdinLogo = GetDlgItem(hWnd, IDC_ODINLOGO);
+            if(hwndOdinLogo) {
+		        HBITMAP hBitmap = LoadBitmapA(shell32_hInstance, MAKEINTRESOURCEA(IDB_ODINLOGO));
+		        SendMessageA(hwndOdinLogo, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hBitmap);
             }
+
+            hWndCtl = GetDlgItem(hWnd, IDC_LISTBOX);
+            SendMessageA( hWndCtl, WM_SETREDRAW, 0, 0 );
+            while (*pstr)
+            {
+                SendMessageA( hWndCtl, LB_ADDSTRING, (WPARAM)-1, (LPARAM)*pstr );
+                pstr++;
+            }
+            SendMessageA( hWndCtl, WM_SETREDRAW, 1, 0 );
         }
         return 1;
+    }
 
     case WM_PAINT:
-      { RECT rect;
-       PAINTSTRUCT ps;
-       HDC hDC = BeginPaint( hWnd, &ps );
+    {
+        RECT rect;
+        PAINTSTRUCT ps;
+        HDC hDC = BeginPaint( hWnd, &ps );
 
-       if( __get_dropline( hWnd, &rect ) ) {
-           SelectObject( hDC, GetStockObject( BLACK_PEN ) );
-           MoveToEx( hDC, rect.left, rect.top, NULL );
-      LineTo( hDC, rect.right, rect.bottom );
-       }
-       EndPaint( hWnd, &ps );
+        if( __get_dropline( hWnd, &rect ) ) {
+            SelectObject( hDC, GetStockObject( BLACK_PEN ) );
+            MoveToEx( hDC, rect.left, rect.top, NULL );
+            LineTo( hDC, rect.right, rect.bottom );
+        }
+        EndPaint( hWnd, &ps );
+        break;
    }
-   break;
 
 #if 0
 // @@@PH turned off
@@ -681,13 +695,15 @@ BOOL WINAPI AboutDlgProc( HWND hWnd, UINT msg, WPARAM wParam,
 
     case WM_COMMAND:
         if (wParam == IDOK)
-    {  EndDialog(hWnd, TRUE);
+        {
+            EndDialog(hWnd, TRUE);
             return TRUE;
         }
         break;
+
     case WM_CLOSE:
-      EndDialog(hWnd, TRUE);
-      break;
+        EndDialog(hWnd, TRUE);
+        break;
     }
     return 0;
 }

@@ -1,4 +1,4 @@
-/* $Id: shres.rc,v 1.4 1999-10-23 23:02:58 sandervl Exp $ */
+/* $Id: shres.rc,v 1.5 2000-01-18 22:27:56 sandervl Exp $ */
 /*
  * Top level resource file for Common Dialogs
  *
@@ -21,6 +21,9 @@
  */
 
 LANGUAGE 0,0
+
+//SvL: Odin logo bitmap
+5555 BITMAP DISCARDABLE "Odinlogo.bmp"
 
 MENU_001 MENU DISCARDABLE
 BEGIN
