@@ -1,4 +1,4 @@
-/* $Id: commctrl.h,v 1.33 2000-07-18 18:30:29 sandervl Exp $ */
+/* $Id: commctrl.h,v 1.34 2000-08-06 09:30:47 sandervl Exp $ */
 /*
  * Common controls definitions
  */
@@ -3862,6 +3862,7 @@ LPVOID WINAPI COMCTL32_ReAlloc (LPVOID, DWORD);
 BOOL WINAPI COMCTL32_Free (LPVOID);
 DWORD  WINAPI COMCTL32_GetSize (LPVOID);
 
+LPWSTR WINAPI COMCTL32_StrChrW (LPCWSTR, WORD);
 
 INT  WINAPI Str_GetPtrA (LPCSTR, LPSTR, INT);
 BOOL WINAPI Str_SetPtrA (LPSTR *, LPCSTR);
