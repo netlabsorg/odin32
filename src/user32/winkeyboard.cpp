@@ -1,4 +1,4 @@
-/* $Id: winkeyboard.cpp,v 1.36 2002-05-29 11:47:18 sandervl Exp $ */
+/* $Id: winkeyboard.cpp,v 1.37 2003-01-14 13:17:25 sandervl Exp $ */
 /*
  * Win32 <-> PM key translation
  *
@@ -54,7 +54,7 @@ inline BOOL O32_GetKeyboardState(PBYTE lpKeyState)
 }
 
 
-BYTE abPMScanToWinVKey[256][2] =
+static BYTE abPMScanToWinVKey[256][2] =
 /****************************************************************************/
 /* PM Scancode              *    Win32 vkey                 Extended Key     */
 /****************************************************************************/
@@ -323,7 +323,7 @@ typedef struct tagWinVKeyToPMScan
   LPSTR lpstrName;
 } WINVKEYTOPMSCAN, *PWINVKEYTOPMSCAN;
 
-WINVKEYTOPMSCAN abWinVKeyToPMScan[256] =
+static WINVKEYTOPMSCAN abWinVKeyToPMScan[256] =
 /**********************************************************************/
 /* Vkey                   *    Scancode               * Name          */
 /**********************************************************************/
@@ -591,7 +591,7 @@ LPSTR lpstrNumEnter = "Num Enter";
 // @@@PH
 // Note: windows uses different scancodes if numlock is pressed
 // This is not (yet) reflected here!
-BYTE abPMScanToWinScan[256][2] =
+static BYTE abPMScanToWinScan[256][2] =
 /****************************************************************************/
 /* PM Scancode              *    Win32 Scancode             Extended Key     */
 /****************************************************************************/
