@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1791 2001-10-25 13:19:50 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1792 2001-10-25 16:01:03 sandervl Exp $ */
 
  2001-10-25: Patrick Haller <patrick.haller@innotek.de>
     - USER32:   o fixed scancodes for [Pause] and [PrtScr]
@@ -7,6 +7,8 @@
     - USER32:   o Fixed sending of WM_ACTIVATEAPP messages. Only send them
                   to top-level windows when application gains or loses focus
                   from/to a window of another process.
+                o Fix for window tracking with thin frame (moving/sizing
+                  window left tracks on the screen (fullscreen dragging disabled))
     - KERNEL32: o Never use DosError to disable hard errors! Use SetErrorMode
                   *and* restore old error mode afterwards.
                 o IOCTL_DISK_GET_DRIVE_GEOMETRY change:
@@ -14,6 +16,9 @@
                   been changed. OSLibDosGetDiskGeometry won't fail when that 
                   happens so we read one byte from the disk and return 
                   ERROR_MEDIA_CHANGED if it fails with ERROR_WRONG_DISK.
+    - COMCTL32: o ListView: LVM_SETITEMA: update item even when 'new' text is 
+                  the same.
+                  (CVP depends on this)
 
  2001-10-24: Patrick Haller <patrick.haller@innotek.de>
     - USER32:   o added translation between PM Scancodes and
