@@ -1,4 +1,4 @@
-; $Id: devSegDf.inc,v 1.1 2001-09-11 01:27:27 bird Exp $
+; $Id: devSegDf.inc,v 1.2 2001-09-26 04:00:57 bird Exp $
 ;
 ; Segment definitions for win32k.sys.
 ;
@@ -98,4 +98,5 @@ EH_DATA ends
 KKLENTRY segment dword public 'DATA' use32
 KKLENTRY ends
 
-
+CALLTAB16 segment para public 'CALLTAB16_DATA' use16
+CALLTAB16 ends
