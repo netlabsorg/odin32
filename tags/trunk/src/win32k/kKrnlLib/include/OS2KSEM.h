@@ -1,4 +1,4 @@
-/* $Id: OS2KSEM.h,v 1.3 2001-10-14 22:50:21 bird Exp $
+/* $Id: OS2KSEM.h,v 1.4 2001-11-19 03:04:52 bird Exp $
  *
  * OS/2 kernel Semaphore functions.
  *
@@ -40,7 +40,7 @@
 *******************************************************************************/
 /* (This is according to SG24-4640-00.) */
 
-typedef struct _KSEMSHR
+typedef union _KSEMSHR
 {
     /**
      * Astrict 16 is byte while retail 12 is bytes.
@@ -108,7 +108,7 @@ typedef union _KSEMMTX
 typedef HKSEMMTX * PHKSEMMTX;
 
 
-typedef struct _KSEMEVT
+typedef union _KSEMEVT
 {
     /**
      * Astrict is 16 byte while retail is 12 bytes.
