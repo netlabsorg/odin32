@@ -1,4 +1,4 @@
-/* $Id: initwinmm.cpp,v 1.11 2003-01-14 19:38:37 sandervl Exp $
+/* $Id: initwinmm.cpp,v 1.12 2004-04-06 11:51:05 sandervl Exp $
  *
  * WINMM DLL entry point
  *
@@ -66,6 +66,12 @@ void IRTMidiShutdown();  // IRTMidi shutdown routine
 static HMODULE dllHandle = 0;
 static HMODULE MMPMLibraryHandle = 0;
 
+static char *szBuggyAudio[] = {
+"CWAUD1$",
+"BSAUD1$",
+"CRYSTAL$"
+};
+
 BOOL fMMPMAvailable = TRUE;
 
 DWORD (APIENTRY *pfnmciSendCommand)(WORD   wDeviceID,
@@ -91,6 +97,7 @@ BOOL WINAPI LibMainWinmm(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 {
   static BOOL bInitDone = FALSE;
   char   szError[CCHMAXPATH];
+  char   szPDDName[128];
   HKEY   hKey;
 
   switch (fdwReason)
@@ -172,6 +179,21 @@ BOOL WINAPI LibMainWinmm(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
                 }
             }
             RegCloseKey(hKey);
+        }
+        if(OSLibGetAudioPDDName(szPDDName) == FALSE) {
+            fMMPMAvailable = FALSE;
+        }
+        else 
+        {
+            // Test for buggy audio drivers to turn off audio automagically
+            for(int i=0;i<sizeof(szBuggyAudio)/sizeof(szBuggyAudio[0]);i++) 
+            {
+                if(!strcmp(szPDDName, szBuggyAudio[i])) {
+                    dprintf(("Detected driver %s -> turning off audio!!", szPDDName));
+                    fMMPMAvailable = FALSE;
+                    break;
+                }
+            }
         }
         mixerInit();
         return TRUE;
