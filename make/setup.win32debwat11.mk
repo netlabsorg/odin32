@@ -1,13 +1,20 @@
-# $Id: setup.win32debwat11.mk,v 1.2 2002-04-22 00:30:10 bird Exp $
+# $Id: setup.win32debwat11.mk,v 1.3 2002-04-22 02:09:29 bird Exp $
 
-# ---OS2, DEBUG, VAC308-------------------------
-ENV_NAME="OS/2, Debug, IBM VisualAge for C++ 3.08"
+# ---WIN32, DEBUG, WAT11-------------------------
+ENV_NAME="Win32, Debug, Watcom C/C++ v11.0c"
 ENV_STATUS=OK
+!if "$(ENV_ENVS)" == ""
+ENV_ENVS=vac308 watcomc11c
+!else
+ENV_ENVS_FORCE=vac308 watcomc11c
+!endif
+
 
 #
 # Include some shared standard stuff: ALP.
 #
 !include $(PATH_MAKE)\setup.os2debalp.mk
+
 
 #
 # The tools
@@ -91,5 +98,5 @@ LIB_C_NRE   = clib3r.lib
 LIB_C_DMNGL =
 OBJ_PROFILE =
 
-# ---OS2, DEBUG, VAC308-------------------------
+# ---WIN32, DEBUG, WAT11-------------------------
 

@@ -1,7 +1,7 @@
-# $Id: setup.os2debwat11.mk,v 1.3 2002-04-22 01:59:34 bird Exp $
+# $Id: setup.os2debwat11.mk,v 1.4 2002-04-22 02:09:28 bird Exp $
 
-# ---OS2, DEBUG, VAC308-------------------------
-ENV_NAME="OS/2, Debug, Watcom 11.0c"
+# ---OS2, DEBUG, WAT11-------------------------
+ENV_NAME="OS/2, Debug, Watcom C/C++ v11.0c"
 ENV_STATUS=OK
 !if "$(ENV_ENVS)" == ""
 ENV_ENVS=vac308 watcomc11c
@@ -9,10 +9,12 @@ ENV_ENVS=vac308 watcomc11c
 ENV_ENVS_FORCE=vac308 watcomc11c
 !endif
 
+
 #
 # Include some shared standard stuff: ALP.
 #
 !include $(PATH_MAKE)\setup.os2debalp.mk
+
 
 #
 # The tools
@@ -83,6 +85,7 @@ LINK_LNK5=name $(PATH_TARGET)\$(TARGET_NAME).$(TARGET_EXT)
 RC_FLAGS=-r -n -i $(PATH_INCLUDES:;= -i ) $(RC_DEFINES) $(RC_INCLUDES)
 RL_FLAGS=-x2 -n
 
+
 #
 # Libraries and object files.
 #
@@ -94,5 +97,5 @@ LIB_C_NRE   = clib3r.lib
 LIB_C_DMNGL =
 OBJ_PROFILE =
 
-# ---OS2, DEBUG, VAC308-------------------------
+# ---OS2, DEBUG, WAT11-------------------------
 
