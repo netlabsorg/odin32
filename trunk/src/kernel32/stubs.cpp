@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.9 1999-11-29 20:43:01 sandervl Exp $ */
+/* $Id: stubs.cpp,v 1.10 1999-11-30 14:15:54 sandervl Exp $ */
 
 /*
  * Win32 KERNEL32 Subsystem for OS/2
@@ -2135,34 +2135,6 @@ BOOL WIN32API GetNamedPipeInfo(HANDLE  hNamedPipe,
   return (FALSE);
 }
 
-
-
-/*****************************************************************************
- * Name      : BOOL GetProcessShutdownParameters
- * Purpose   : The GetProcessShutdownParameters function retrieves shutdown
- *             parameters for the currently calling process.
- * Parameters: LPDWORD lpdwLevel
- *             LPDWORD lpdwFlags
- * Variables :
- * Result    : TRUE / FALSE
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-
-BOOL WIN32API GetProcessShutdownParameters(LPDWORD lpdwLevel,
-                                              LPDWORD lpdwFlags)
-{
-  dprintf(("Kernel32: GetProcessShutdownParameters(%08xh,%08xh) not implemented.\n",
-           lpdwLevel,
-           lpdwFlags));
-
-  return (FALSE);
-}
-
-
-
 /*****************************************************************************
  * Name      : BOOL GetProcessTimes
  * Purpose   : The GetProcessTimes function obtains timing information about a specified process.
@@ -2195,37 +2167,6 @@ BOOL WIN32API GetProcessTimes(HANDLE     hProcess,
   return (FALSE);
 }
 
-
-/*****************************************************************************
- * Name      : BOOL GetProcessWorkingSetSize
- * Purpose   : The GetProcessWorkingSetSize function obtains the minimum and
- *             maximum working set sizes of a specified process.
- * Parameters: HANDLE  hProcess                open handle to the process of interest
- *             LPDWORD lpMinimumWorkingSetSize points to variable to receive minimum working set size
- *             LPDWORD lpMaximumWorkingSetSize points to variable to receive maximum working set size
- * Variables :
- * Result    : TRUE / FALSE
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-
-BOOL WIN32API GetProcessWorkingSetSize(HANDLE  hProcess,
-                                          LPDWORD lpMinimumWorkingSetSize,
-                                          LPDWORD lpMaximumWorkingSetSize)
-{
-  dprintf(("Kernel32: GetProcessWorkingSetSize(%08xh,%08xh,%08xh) not implemented - dummy values, TRUE.\n",
-           hProcess,
-           lpMinimumWorkingSetSize,
-           lpMaximumWorkingSetSize));
-
-  /* PH: we're returning dummy values here */
-  *lpMinimumWorkingSetSize =   512 * 1024; /* 512k */
-  *lpMaximumWorkingSetSize = 65536 * 1024; /* 64M  */
-
-  return (TRUE);
-}
 
 
 /*****************************************************************************
@@ -2794,67 +2735,6 @@ BOOL WIN32API SetNamedPipeHandleState(HANDLE  hNamedPipe,
 
   return (FALSE);
 }
-
-
-/*****************************************************************************
- * Name      : BOOL SetProcessShutdownParameters
- * Purpose   : The SetProcessShutdownParameters function sets shutdown parameters
- *             for the currently calling process. This function sets a shutdown
- *             order for a process relative to the other processes in the system.
- * Parameters: DWORD dwLevel  shutdown priority
- *             DWORD dwFlags  shutdown flags
- * Variables :
- * Result    : TRUE / FALSE
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-
-BOOL WIN32API SetProcessShutdownParameters(DWORD dwLevel,
-                                              DWORD dwFlags)
-{
-  dprintf(("KERNEL32: SetProcessShutdownParameters(%08xh,%08xh) not implemented.\n",
-           dwLevel,
-           dwFlags));
-
-  return (FALSE);
-}
-
-
-/*****************************************************************************
- * Name      : BOOL SetProcessWorkingSetSize
- * Purpose   : The SetProcessWorkingSetSize function sets the minimum and
- *             maximum working set sizes for a specified process.
- *             The working set of a process is the set of memory pages currently
- *             visible to the process in physical RAM memory. These pages are
- *             resident and available for an application to use without triggering
- *             a page fault. The size of the working set of a process is specified
- *             in bytes. The minimum and maximum working set sizes affect the
- *             virtual memory paging behavior of a process.
- * Parameters: HANDLE hProcess                open handle to the process of interest
- *             DWORD  dwMinimumWorkingSetSize specifies minimum working set size
- *             DWORD  dwMaximumWorkingSetSize specifies maximum working set size
- * Variables :
- * Result    : TRUE / FALSE
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
- *****************************************************************************/
-
-BOOL WIN32API SetProcessWorkingSetSize(HANDLE hProcess,
-                                          DWORD  dwMinimumWorkingSetSize,
-                                          DWORD  dwMaximumWorkingSetSize)
-{
-  dprintf(("KERNEL32: SetProcessWorkingSetSize(%08xh,%08xh,%08xh) not implemented.\n",
-           hProcess,
-           dwMinimumWorkingSetSize,
-           dwMaximumWorkingSetSize));
-
-  return (FALSE);
-}
-
 
 /*****************************************************************************
  * Name      : BOOL SetSystemPowerState

@@ -1,5 +1,4 @@
-/* $Id: winprocess.h,v 1.2 1999-06-19 13:57:50 sandervl Exp $ */
-
+/* $Id: process.h,v 1.1 1999-11-30 14:19:02 sandervl Exp $ */
 /*
  * Process definitions
  *
@@ -10,10 +9,8 @@
 #define __WINE_PROCESS_H
 
 #include "windef.h"
-//#include "module.h"
-
-//TODO: Fix this
-typedef ULONG WINE_MODREF;
+#include "module.h"
+#include "thread.h"
 
 struct _NE_MODULE;
 struct _THREAD_ENTRY;
@@ -62,7 +59,7 @@ typedef struct _PDB
     WORD             module;           /* 2a IMTE for the process module */
     WORD             threads;          /* 2c Number of threads */
     WORD             running_threads;  /* 2e Number of running threads */
-    WORD             unknown3;         /* 30 Unknown */
+    WORD             free_lib_count;   /* 30 Recursion depth of FreeLibrary calls */
     WORD             ring0_threads;    /* 32 Number of ring 0 threads */
     HANDLE           system_heap;      /* 34 System heap to allocate handles */
     HTASK            task;             /* 38 Win16 task */
@@ -98,9 +95,12 @@ typedef struct _PDB
     void            *server_pid;       /*    Server id for this process */
     HANDLE          *dos_handles;      /*    Handles mapping DOS -> Win32 */
     struct _PDB     *next;             /*    List reference - list of PDB's */
+    WORD            winver;            /*    Windows version figured out by VERSION_GetVersion */
+    struct _SERVICETABLE *service_table; /*  Service table for service thread */
 } PDB;
 
 /* Process flags */
+#define PDB32_DEBUGGED      0x0001  /* Process is being debugged */
 #define PDB32_WIN16_PROC    0x0008  /* Win16 process */
 #define PDB32_DOS_PROC      0x0010  /* Dos process */
 #define PDB32_CONSOLE_PROC  0x0020  /* Console process */
@@ -149,24 +149,30 @@ extern DWORD WINAPI GetProcessDword( DWORD dwProcessID, INT offset );
 void WINAPI SetProcessDword( DWORD dwProcessID, INT offset, DWORD value );
 
 /* scheduler/environ.c */
-extern BOOL ENV_BuildEnvironment( PDB *pdb );
 extern BOOL ENV_InheritEnvironment( PDB *pdb, LPCSTR env );
 extern void ENV_FreeEnvironment( PDB *pdb );
 
 /* scheduler/process.c */
 extern BOOL PROCESS_Init( void );
-extern PDB *PROCESS_Current(void);
 extern BOOL PROCESS_IsCurrent( HANDLE handle );
 extern PDB *PROCESS_Initial(void);
 extern PDB *PROCESS_IdToPDB( DWORD id );
-extern void PROCESS_CallUserSignalProc( UINT uCode, DWORD dwThreadOrProcessId, HMODULE hModule );
+extern void PROCESS_CallUserSignalProc( UINT uCode, HMODULE hModule );
 extern PDB *PROCESS_Create( struct _NE_MODULE *pModule, 
                             LPCSTR cmd_line, LPCSTR env, 
-                            HINSTANCE16 hInstance, HINSTANCE16 hPrevInstance, 
                             LPSECURITY_ATTRIBUTES psa, LPSECURITY_ATTRIBUTES tsa,
-                            BOOL inherit,
+                            BOOL inherit, DWORD flags,
                             STARTUPINFOA *startup, PROCESS_INFORMATION *info );
 extern void PROCESS_FreePDB( PDB *pdb );
+extern void PROCESS_WalkProcess( void );
+
+/* scheduler/debugger.c */
+extern DWORD DEBUG_SendExceptionEvent( EXCEPTION_RECORD *rec, BOOL first_chance, CONTEXT *ctx );
+extern DWORD DEBUG_SendCreateProcessEvent( HFILE file, HMODULE module, void *entry );
+extern DWORD DEBUG_SendCreateThreadEvent( void *entry );
+extern DWORD DEBUG_SendLoadDLLEvent( HFILE file, HMODULE module, LPSTR *name );
+extern DWORD DEBUG_SendUnloadDLLEvent( HMODULE module );
+
+#include <wprocess.h>
 
 #endif  /* __WINE_PROCESS_H */
-

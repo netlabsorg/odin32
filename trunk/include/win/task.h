@@ -1,5 +1,4 @@
-/* $Id: task.h,v 1.1 1999-05-24 20:19:19 ktk Exp $ */
-
+/* $Id: task.h,v 1.2 1999-11-30 14:19:02 sandervl Exp $ */
 /*
  * Task definitions
  *
@@ -51,7 +50,7 @@ typedef struct
 
 #define THUNK_MAGIC  ('P' | ('T' << 8))
 
-struct _THDB;
+struct _TEB;
 struct _WSINFO;
 struct _NE_MODULE;
 
@@ -83,7 +82,7 @@ typedef struct _TDB
     HTASK16   hParent;                    /* 22 Selector of TDB of parent */
     WORD      signal_flags;               /* 24 Flags for signal handler */
     FARPROC16 sighandler WINE_PACKED;     /* 26 Signal handler */
-    USERSIGNALPROC userhandler WINE_PACKED; /* 2a USER signal handler */
+    FARPROC16 userhandler WINE_PACKED;    /* 2a USER signal handler */
     FARPROC16 discardhandler WINE_PACKED; /* 2e Handler for GlobalNotify() */
     DWORD     int0 WINE_PACKED;           /* 32 int 0 (divide by 0) handler */
     DWORD     int2 WINE_PACKED;           /* 36 int 2 (NMI) handler */
@@ -94,9 +93,8 @@ typedef struct _TDB
     DWORD     int75 WINE_PACKED;          /* 4a int 75 (80x87 error) handler */
     DWORD     compat_flags WINE_PACKED;   /* 4e Compatibility flags */
     BYTE      unused4[2];                 /* 52 */
-    struct _THDB   *thdb;                 /* 54 Pointer to thread database */
-    struct _WSINFO *pwsi;		  /* 58 Socket control struct */
-    BYTE      unused5[4];                 /* 5B */
+    struct _TEB *teb;                     /* 54 Pointer to thread database */
+    BYTE      unused5[8];                 /* 58 */
     HANDLE16  hPDB;                       /* 60 Selector of PDB (i.e. PSP) */
     SEGPTR    dta WINE_PACKED;            /* 62 Current DTA */
     BYTE      curdrive;                   /* 66 Current drive */
@@ -109,8 +107,8 @@ typedef struct _TDB
     WORD      more_thunks[6*4];           /* c2 Space for 6 more thunks */
     BYTE      module_name[8];             /* f2 Module name for task */
     WORD      magic;                      /* fa TDB signature */
-    DWORD     unused7;                    /* fc */
-    PDB16       pdb;                        /* 100 PDB for this task */
+    HANDLE    hEvent;                     /* fc scheduler event handle */
+    PDB16     pdb;                        /* 100 PDB for this task */
 } TDB;
 
 #define TDB_MAGIC    ('T' | ('D' << 8))
@@ -148,15 +146,13 @@ typedef struct _THHOOK
 extern THHOOK *pThhook;
 extern void (*TASK_AddTaskEntryBreakpoint)( HTASK16 hTask );
 
-extern BOOL TASK_Create( struct _THDB *thdb, struct _NE_MODULE *pModule,
-                         HINSTANCE16 hInstance, HINSTANCE16 hPrevInstance,
-                         UINT16 cmdShow );
-extern void TASK_StartTask( HTASK16 hTask );
+extern BOOL TASK_Create( struct _NE_MODULE *pModule, UINT16 cmdShow );
 extern void TASK_KillTask( HTASK16 hTask );
-extern void TASK_KillCurrentTask( INT16 exitCode );
 extern HTASK16 TASK_GetNextTask( HTASK16 hTask );
-extern BOOL TASK_Reschedule(void);
+extern void TASK_Reschedule(void);
+extern void TASK_CallToStart(void);
 extern void TASK_InstallTHHook( THHOOK *pNewThook );
+extern void TASK_CallTaskSignalProc( UINT16 uCode, HANDLE16 hTaskOrModule );
 
 extern HQUEUE16 WINAPI SetThreadQueue16( DWORD thread, HQUEUE16 hQueue );
 extern HQUEUE16 WINAPI GetThreadQueue16( DWORD thread );

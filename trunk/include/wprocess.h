@@ -1,4 +1,4 @@
-/* $Id: wprocess.h,v 1.9 1999-10-09 13:31:44 sandervl Exp $ */
+/* $Id: wprocess.h,v 1.10 1999-11-30 14:19:02 sandervl Exp $ */
 /*
  * Process help functions
  *
@@ -14,7 +14,7 @@
 #define WIN32_TIBSEL
 
 #ifndef OS2_INCLUDED
-#include <winprocess.h>
+#include <win\process.h>
 #endif
 #include <thread.h>
 
@@ -32,7 +32,15 @@ extern BOOL fIsOS2Image; //TRUE  -> Odin32 OS/2 application (not converted!)
 //Flat pointer to thread TIB structure
 extern DWORD  *TIBFlatPtr;
 
+extern PDB ProcessPDB;
+
+#define NtCurrentTeb GetThreadTEB
 TEB  *WIN32API GetThreadTEB();
 THDB *WIN32API GetThreadTHDB();
+
+inline PDB * WINE_UNUSED PROCESS_Current(void)
+{
+    return NtCurrentTeb()->process;
+}
 
 #endif 

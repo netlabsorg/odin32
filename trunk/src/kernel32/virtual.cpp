@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.23 1999-11-22 20:35:52 sandervl Exp $ */
+/* $Id: virtual.cpp,v 1.24 1999-11-30 14:15:55 sandervl Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -453,13 +453,14 @@ ODINFUNCTION4(BOOL, VirtualProtect, LPVOID, lpvAddress,
                                     DWORD*, pfdwOldProtect)
 {
   DWORD rc;
+  DWORD  cb = cbSize;
   ULONG  pageFlags = 0;
   int npages;
 
   if(pfdwOldProtect == NULL)
         return(FALSE);
 
-  rc = OSLibDosQueryMem(lpvAddress, &cbSize, &pageFlags);
+  rc = OSLibDosQueryMem(lpvAddress, &cb, &pageFlags);
   if(rc) {
         dprintf(("DosQueryMem returned %d\n", rc));
         return(FALSE);
@@ -501,11 +502,11 @@ ODINFUNCTION4(BOOL, VirtualProtect, LPVOID, lpvAddress,
   ULONG offset = ((ULONG)lpvAddress & 0xFFF);
   npages = (cbSize >> 12);
 
-  if( (cbSize & 0xFFF) + offset > 0 ) {
+  cb = (cbSize & 0xFFF) + offset; // !!! added, some optimization :)
+  if( cb > 0 ) { // changed
 	npages++;
   }
-
-  if( (cbSize & 0xFFF) + offset >= 4096 ) {
+  if( cb > 4096 ) { // changed, note '>' sign ( not '>=' ) 4096 is exactly one page
 	npages++;
   }
 

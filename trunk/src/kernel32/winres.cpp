@@ -1,4 +1,4 @@
-/* $Id: winres.cpp,v 1.21 1999-10-26 11:15:33 sandervl Exp $ */
+/* $Id: winres.cpp,v 1.22 1999-11-30 14:15:55 sandervl Exp $ */
 
 /*
  * Win32 resource class
@@ -114,7 +114,7 @@ Win32Resource::~Win32Resource()
 //******************************************************************************
 PVOID Win32Resource::lockResource()
 {
-  dprintf(("Win32Resource::lockResource %d\n", id));
+  dprintf(("Win32Resource::lockResource %d %x\n", id, winresdata));
 
   if(winresdata)
     return(winresdata);
