@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.35 1999-09-28 12:44:33 dengert Exp $ */
+/* $Id: user32.cpp,v 1.36 1999-09-28 16:35:06 cbratschi Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -474,10 +474,8 @@ int WIN32API wvsprintfW(LPWSTR lpOutput, LPCWSTR lpFormat, va_list arglist)
   FreeAsciiString(lpFmtA);
   return(rc);
 }
-//******************************************************************************
 
 #if 0
-//******************************************************************************
 /* Caret Functions */
 
 BOOL WIN32API CreateCaret( HWND hWnd, HBITMAP hBitmap, int nWidth, int nHeight)
@@ -732,8 +730,126 @@ int WIN32API ShowCursor( BOOL bShow)
     return O32_ShowCursor(bShow);
 }
 
-/* Other Functions */
+/* Mouse Input Functions */
 
+/*****************************************************************************
+ * Name      : BOOL WIN32API DragDetect
+ * Purpose   : The DragDetect function captures the mouse and tracks its movement
+ * Parameters: HWND  hwnd
+ *             POINT pt
+ * Variables :
+ * Result    : If the user moved the mouse outside of the drag rectangle while
+ *               holding the left button down, the return value is TRUE.
+ *             If the user did not move the mouse outside of the drag rectangle
+ *               while holding the left button down, the return value is FALSE.
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+BOOL WIN32API DragDetect(HWND  hwnd,
+                            POINT pt)
+{
+  dprintf(("USER32:DragDetect(%08xh,...) not implemented.\n",
+         hwnd));
+
+  return (FALSE);
+}
+//******************************************************************************
+//******************************************************************************
+HWND WIN32API GetCapture(void)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  GetCapture\n");
+#endif
+    return Win32Window::OS2ToWin32Handle(O32_GetCapture());
+}
+//******************************************************************************
+//******************************************************************************
+UINT WIN32API GetDoubleClickTime(void)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  GetDoubleClickTime\n");
+#endif
+    return O32_GetDoubleClickTime();
+}
+/*****************************************************************************
+ * Name      : VOID WIN32API mouse_event
+ * Purpose   : The mouse_event function synthesizes mouse motion and button clicks.
+ * Parameters: DWORD dwFlags     flags specifying various motion/click variants
+ *             DWORD dx          horizontal mouse position or position change
+ *             DWORD dy          vertical mouse position or position change
+ *             DWORD cButtons    unused, reserved for future use, set to zero
+ *             DWORD dwExtraInfo 32 bits of application-defined information
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+VOID WIN32API mouse_event(DWORD dwFlags,
+                             DWORD dx,
+                             DWORD dy,
+                             DWORD cButtons,
+                             DWORD dwExtraInfo)
+{
+  dprintf(("USER32:mouse_event (%08xh,%u,%u,%u,%08x) not implemented.\n",
+          dwFlags,
+          dx,
+          dy,
+          cButtons,
+          dwExtraInfo));
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API ReleaseCapture(void)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  ReleaseCapture\n");
+#endif
+    return O32_ReleaseCapture();
+}
+//******************************************************************************
+//******************************************************************************
+HWND WIN32API SetCapture( HWND hwnd)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  SetCapture\n");
+#endif
+    hwnd = Win32Window::Win32ToOS2Handle(hwnd);
+    return Win32Window::OS2ToWin32Handle(O32_SetCapture(hwnd));
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API SetDoubleClickTime( UINT uInterval)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  SetDoubleClickTime\n");
+#endif
+    return O32_SetDoubleClickTime(uInterval);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API SwapMouseButton( BOOL fSwap)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  SwapMouseButton\n");
+#endif
+    return O32_SwapMouseButton(fSwap);
+}
+
+/* Error Functions */
+
+BOOL WIN32API ExitWindowsEx( UINT uFlags, DWORD  dwReserved)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  ExitWindowsEx\n");
+#endif
+    return O32_ExitWindowsEx(uFlags,dwReserved);
+}
+//******************************************************************************
+//******************************************************************************
 BOOL WIN32API MessageBeep( UINT uType)
 {
     INT flStyle;
@@ -765,7 +881,18 @@ BOOL WIN32API MessageBeep( UINT uType)
     return OSLibWinAlarm(OSLIB_HWND_DESKTOP,flStyle);
 }
 //******************************************************************************
+//2nd parameter not used according to SDK (yet?)
 //******************************************************************************
+VOID WIN32API SetLastErrorEx(DWORD dwErrCode, DWORD dwType)
+{
+#ifdef DEBUG
+  WriteLog("USER32:  SetLastErrorEx\n");
+#endif
+  SetLastError(dwErrCode);
+}
+
+/* Accessibility Functions */
+
 int WIN32API GetSystemMetrics(int nIndex)
 {
    int rc = 0;
@@ -800,6 +927,11 @@ int WIN32API GetSystemMetrics(int nIndex)
     case SM_CYMINSPACING:
         //CB: replace with const
         rc = GetSystemMetrics(SM_CYMINIMIZED);
+        break;
+    case SM_CXICON:
+    case SM_CYICON:
+        rc = 32;  //CB: Win32: only 32x32, OS/2 32x32/40x40
+                  //    we must implement 32x32 for all screen resolutions
         break;
     case SM_CXSMICON: //recommended size of small icons (TODO: adjust to screen res.)
         rc = 16;
@@ -879,423 +1011,6 @@ int WIN32API GetSystemMetrics(int nIndex)
     return(rc);
 }
 //******************************************************************************
-//******************************************************************************
-#if 0
-UINT WIN32API SetTimer( HWND hwnd, UINT idTimer, UINT uTimeout, TIMERPROC  tmprc)
-{
-#ifdef DEBUG
-    WriteLog("USER32: SetTimer INCORRECT CALLING CONVENTION FOR HANDLER!!!!!\n");
-#endif
-    hwnd = Win32Window::Win32ToOS2Handle(hwnd);
-    //SvL: Write callback handler class for this one
-    //CB: replace
-    return O32_SetTimer(hwnd,idTimer,uTimeout,(TIMERPROC_O32)tmprc);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API KillTimer(HWND hWnd, UINT uIDEvent)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  KillTimer\n");
-#endif
-    hWnd = Win32Window::Win32ToOS2Handle(hWnd);
-    //WinStopTimer
-    //CB: replace
-    return O32_KillTimer(hWnd,uIDEvent);
-}
-#endif
-//******************************************************************************
-//******************************************************************************
-//******************************************************************************
-//TODO:How can we emulate this one in OS/2???
-//******************************************************************************
-DWORD WIN32API WaitForInputIdle(HANDLE hProcess, DWORD dwTimeOut)
-{
-#ifdef DEBUG
-  WriteLog("USER32:  WaitForInputIdle (Not Implemented) %d\n", dwTimeOut);
-#endif
-
-  if(dwTimeOut == INFINITE) return(0);
-
-//  DosSleep(dwTimeOut/16);
-  return(0);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API WinHelpA( HWND hwnd, LPCSTR lpszHelp, UINT uCommand, DWORD  dwData)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  WinHelp not implemented %s\n", lpszHelp);
-#endif
-//    hwnd = Win32Window::Win32ToOS2Handle(hwnd);
-//    return O32_WinHelp(arg1, arg2, arg3, arg4);
-
-    return(TRUE);
-}
-//******************************************************************************
-//SvL: 24-6-'97 - Added
-//TODO: Not implemented
-//******************************************************************************
-WORD WIN32API GetAsyncKeyState(INT nVirtKey)
-{
-#ifdef DEBUG
-////    WriteLog("USER32:  GetAsyncKeyState Not implemented\n");
-#endif
-    return 0;
-}
-//******************************************************************************
-//SvL: 24-6-'97 - Added
-//******************************************************************************
-WORD WIN32API VkKeyScanA( char ch)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  VkKeyScanA\n");
-#endif
-    return O32_VkKeyScan(ch);
-}
-//******************************************************************************
-//SvL: 24-6-'97 - Added
-//******************************************************************************
-SHORT WIN32API GetKeyState( int nVirtKey)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetKeyState %d\n", nVirtKey);
-#endif
-    return O32_GetKeyState(nVirtKey);
-}
-//******************************************************************************
-//******************************************************************************
-HWND WIN32API SetCapture( HWND arg1)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  SetCapture\n");
-#endif
-    return O32_SetCapture(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API ReleaseCapture(void)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  ReleaseCapture\n");
-#endif
-    return O32_ReleaseCapture();
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API MsgWaitForMultipleObjects( DWORD arg1, LPHANDLE arg2, BOOL arg3, DWORD arg4, DWORD  arg5)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  MsgWaitForMultipleObjects\n");
-#endif
-    return O32_MsgWaitForMultipleObjects(arg1, arg2, arg3, arg4, arg5);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API CheckRadioButton( HWND arg1, UINT arg2, UINT arg3, UINT  arg4)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  CheckRadioButton\n");
-#endif
-    //CB: check radio buttons in interval
-    if (arg2 > arg3) return (FALSE);
-    for (UINT x=arg2;x <= arg3;x++)
-    {
-     SendDlgItemMessageA(arg1,x,BM_SETCHECK,(x == arg4) ? BST_CHECKED : BST_UNCHECKED,0);
-    }
-    return (TRUE);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API EndDeferWindowPos( HDWP arg1)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  EndDeferWindowPos\n");
-#endif
-    return O32_EndDeferWindowPos(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-INT WIN32API ExcludeUpdateRgn( HDC arg1, HWND  arg2)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  ExcludeUpdateRgn\n");
-#endif
-    return O32_ExcludeUpdateRgn(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API ExitWindowsEx( UINT arg1, DWORD  arg2)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  ExitWindowsEx\n");
-#endif
-    return O32_ExitWindowsEx(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API FillRect(HDC arg1, const RECT * arg2, HBRUSH arg3)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  FillRect (%d,%d)(%d,%d) brush %X\n", arg2->left, arg2->top, arg2->right, arg2->bottom, arg3);
-#endif
-    return O32_FillRect(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-HWND WIN32API FindWindowW( LPCWSTR arg1, LPCWSTR arg2)
-{
- char *astring1 = UnicodeToAsciiString((LPWSTR)arg1);
- char *astring2 = UnicodeToAsciiString((LPWSTR)arg2);
- HWND rc;
-
-#ifdef DEBUG
-    WriteLog("USER32:  FindWindowW\n");
-#endif
-    rc = O32_FindWindow(astring1, astring2);
-    FreeAsciiString(astring1);
-    FreeAsciiString(astring2);
-    return rc;
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API FrameRect( HDC arg1, const RECT * arg2, HBRUSH  arg3)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  FrameRect\n");
-#endif
-    return O32_FrameRect(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-HWND WIN32API GetCapture(void)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetCapture\n");
-#endif
-    return O32_GetCapture();
-}
-//******************************************************************************
-//******************************************************************************
-UINT WIN32API GetDoubleClickTime(void)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetDoubleClickTime\n");
-#endif
-    return O32_GetDoubleClickTime();
-}
-//******************************************************************************
-//******************************************************************************
-HWND WIN32API GetForegroundWindow(void)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetForegroundWindow\n");
-#endif
-    return O32_GetForegroundWindow();
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API GetKeyNameTextA( LPARAM arg1, LPSTR arg2, int  arg3)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetKeyNameTextA\n");
-#endif
-    return O32_GetKeyNameText(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API GetKeyNameTextW( LPARAM arg1, LPWSTR arg2, int  arg3)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetKeyNameTextW DOES NOT WORK\n");
-#endif
-    // NOTE: This will not work as is (needs UNICODE support)
-    return 0;
-//    return O32_GetKeyNameText(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API GetKeyboardType( int arg1)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetKeyboardType\n");
-#endif
-    return O32_GetKeyboardType(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-HWND WIN32API GetLastActivePopup( HWND arg1)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetLastActivePopup\n");
-#endif
-    return O32_GetLastActivePopup(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API GetQueueStatus( UINT arg1)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetQueueStatus\n");
-#endif
-    return O32_GetQueueStatus(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API GetTabbedTextExtentA( HDC arg1, LPCSTR arg2, int arg3, int arg4, int * arg5)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetTabbedTextExtentA\n");
-#endif
-    return O32_GetTabbedTextExtent(arg1, arg2, arg3, arg4, arg5);
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API GetTabbedTextExtentW( HDC arg1, LPCWSTR arg2, int arg3, int arg4, int * arg5)
-{
- char *astring = UnicodeToAsciiString((LPWSTR)arg2);
- DWORD rc;
-
-#ifdef DEBUG
-    WriteLog("USER32:  GetTabbedTextExtentW\n");
-#endif
-    rc = O32_GetTabbedTextExtent(arg1, astring, arg3, arg4, arg5);
-    FreeAsciiString(astring);
-    return rc;
-}
-//******************************************************************************
-//******************************************************************************
-#if 0
-int WIN32API GetUpdateRgn( HWND arg1, HRGN arg2, BOOL  arg3)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetUpdateRgn\n");
-#endif
-    return O32_GetUpdateRgn(arg1, arg2, arg3);
-}
-#endif
-//******************************************************************************
-
-
-//******************************************************************************
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API GetWindowThreadProcessId(HWND arg1, PDWORD  arg2)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetWindowThreadProcessId\n");
-#endif
-    return O32_GetWindowThreadProcessId(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-#if 0
-BOOL WIN32API InvalidateRgn( HWND arg1, HRGN arg2, BOOL  arg3)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  InvalidateRgn\n");
-#endif
-    return O32_InvalidateRgn(arg1, arg2, arg3);
-}
-#endif
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API InvertRect( HDC arg1, const RECT * arg2)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  InvertRect\n");
-#endif
-    return O32_InvertRect(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API MapDialogRect( HWND arg1, PRECT  arg2)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  MapDialogRect\n");
-#endif
-    return O32_MapDialogRect(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-UINT WIN32API MapVirtualKeyA( UINT arg1, UINT  arg2)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  MapVirtualKeyA\n");
-#endif
-    return O32_MapVirtualKey(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-UINT WIN32API MapVirtualKeyW( UINT arg1, UINT  arg2)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  MapVirtualKeyW\n");
-#endif
-    // NOTE: This will not work as is (needs UNICODE support)
-    return O32_MapVirtualKey(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API MapWindowPoints( HWND arg1, HWND arg2, LPPOINT arg3, UINT arg4)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  MapWindowPoints\n");
-#endif
-    return O32_MapWindowPoints(arg1, arg2, arg3, arg4);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API ScreenToClient (HWND hwnd, LPPOINT pt)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  ScreenToClient\n");
-#endif
-    Win32BaseWindow *wnd;
-    PRECT rcl;
-
-    if (!hwnd) return (TRUE);
-    wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
-    if (!wnd) return (TRUE);
-
-    rcl   = wnd->getClientRect();
-    pt->y = ScreenHeight - pt->y;
-    OSLibWinMapWindowPoints (OSLIB_HWND_DESKTOP, wnd->getOS2WindowHandle(), (OSLIBPOINT *)pt, 1);
-    pt->y = (rcl->bottom - rcl->top) - pt->y;
-    return (TRUE);
-}
-//******************************************************************************
-//******************************************************************************
-#if 0
-BOOL WIN32API ScrollDC( HDC arg1, int arg2, int arg3, const RECT * arg4, const RECT * arg5, HRGN arg6, PRECT  arg7)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  ScrollDC\n");
-#endif
-    return O32_ScrollDC(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
-}
-#endif
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SetDoubleClickTime( UINT arg1)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  SetDoubleClickTime\n");
-#endif
-    return O32_SetDoubleClickTime(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SwapMouseButton( BOOL arg1)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  SwapMouseButton\n");
-#endif
-    return O32_SwapMouseButton(arg1);
-}
-//******************************************************************************
 /* Not support by Open32 (not included are the new win9x parameters):
       case SPI_GETFASTTASKSWITCH:
       case SPI_GETGRIDGRANULARITY:
@@ -1333,16 +1048,20 @@ BOOL WIN32API SystemParametersInfoA(UINT uiAction, UINT uiParam, PVOID pvParam, 
     case SPI_GETNONCLIENTMETRICS:
         memset(cmetric, 0, sizeof(NONCLIENTMETRICSA));
         cmetric->cbSize = sizeof(NONCLIENTMETRICSA);
-        //CB: font info not valid, needs improvements
-        O32_SystemParametersInfo(SPI_GETICONTITLELOGFONT, 0, (LPVOID)&(cmetric->lfCaptionFont),0);
-        O32_SystemParametersInfo(SPI_GETICONTITLELOGFONT, 0, (LPVOID)&(cmetric->lfMenuFont),0);
-        //CB: experimental change for statusbar (and tooltips)
 
-        //O32_SystemParametersInfo(SPI_GETICONTITLELOGFONT, 0, (LPVOID)&(cmetric->lfStatusFont),0);
+        //CB: fonts not handled by Open32, set to WarpSans
+        lstrcpyA(cmetric->lfCaptionFont.lfFaceName,"WarpSans");
+        cmetric->lfCaptionFont.lfHeight = 9;
+
+        lstrcpyA(cmetric->lfMenuFont.lfFaceName,"WarpSans");
+        cmetric->lfMenuFont.lfHeight = 9;
+
         lstrcpyA(cmetric->lfStatusFont.lfFaceName,"WarpSans");
         cmetric->lfStatusFont.lfHeight = 9;
 
-        O32_SystemParametersInfo(SPI_GETICONTITLELOGFONT, 0, (LPVOID)&(cmetric->lfMessageFont),0);
+        lstrcpyA(cmetric->lfMessageFont.lfFaceName,"WarpSans");
+        cmetric->lfMessageFont.lfHeight = 9;
+
         cmetric->iBorderWidth     = GetSystemMetrics(SM_CXBORDER);
         cmetric->iScrollWidth     = GetSystemMetrics(SM_CXHSCROLL);
         cmetric->iScrollHeight    = GetSystemMetrics(SM_CYHSCROLL);
@@ -1480,6 +1199,793 @@ BOOL WIN32API SystemParametersInfoW(UINT uiAction, UINT uiParam, PVOID pvParam, 
 #endif
     return(rc);
 }
+
+/* Timer Functions */
+
+#if 0
+BOOL WIN32API KillTimer(HWND hWnd, UINT uIDEvent)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  KillTimer\n");
+#endif
+    hWnd = Win32Window::Win32ToOS2Handle(hWnd);
+    //WinStopTimer
+    //CB: replace
+    return O32_KillTimer(hWnd,uIDEvent);
+}
+//******************************************************************************
+//******************************************************************************
+UINT WIN32API SetTimer( HWND hwnd, UINT idTimer, UINT uTimeout, TIMERPROC  tmprc)
+{
+#ifdef DEBUG
+    WriteLog("USER32: SetTimer INCORRECT CALLING CONVENTION FOR HANDLER!!!!!\n");
+#endif
+    hwnd = Win32Window::Win32ToOS2Handle(hwnd);
+    //SvL: Write callback handler class for this one
+    //CB: replace
+    return O32_SetTimer(hwnd,idTimer,uTimeout,(TIMERPROC_O32)tmprc);
+}
+#endif
+
+/* Process and Thread Functions */
+
+//******************************************************************************
+//DWORD idAttach;   /* thread to attach */
+//DWORD idAttachTo; /* thread to attach to  */
+//BOOL fAttach; /* attach or detach */
+//******************************************************************************
+BOOL WIN32API AttachThreadInput(DWORD idAttach, DWORD idAttachTo, BOOL fAttach)
+{
+#ifdef DEBUG
+  WriteLog("USER32:  AttachThreadInput, not implemented\n");
+#endif
+  return(TRUE);
+}
+//******************************************************************************
+//TODO:How can we emulate this one in OS/2???
+//******************************************************************************
+DWORD WIN32API WaitForInputIdle(HANDLE hProcess, DWORD dwTimeOut)
+{
+#ifdef DEBUG
+  WriteLog("USER32:  WaitForInputIdle (Not Implemented) %d\n", dwTimeOut);
+#endif
+
+  if(dwTimeOut == INFINITE) return(0);
+
+//  DosSleep(dwTimeOut/16);
+  return(0);
+}
+
+/* Help Functions */
+
+BOOL WIN32API WinHelpA( HWND hwnd, LPCSTR lpszHelp, UINT uCommand, DWORD  dwData)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  WinHelp not implemented %s\n", lpszHelp);
+#endif
+//    hwnd = Win32Window::Win32ToOS2Handle(hwnd);
+//    return O32_WinHelp(arg1, arg2, arg3, arg4);
+
+    return(TRUE);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API WinHelpW( HWND arg1, LPCWSTR arg2, UINT arg3, DWORD  arg4)
+{
+ char *astring = UnicodeToAsciiString((LPWSTR)arg2);
+ BOOL  rc;
+
+#ifdef DEBUG
+    WriteLog("USER32:  WinHelpW\n");
+#endif
+    rc = WinHelpA(arg1, astring, arg3, arg4);
+    FreeAsciiString(astring);
+    return rc;
+}
+
+/* Keyboard and Input Functions */
+
+BOOL WIN32API ActivateKeyboardLayout(HKL hkl, UINT fuFlags)
+{
+#ifdef DEBUG
+  WriteLog("USER32:  ActivateKeyboardLayout, not implemented\n");
+#endif
+  return(TRUE);
+}
+//******************************************************************************
+//SvL: 24-6-'97 - Added
+//TODO: Not implemented
+//******************************************************************************
+WORD WIN32API GetAsyncKeyState(INT nVirtKey)
+{
+#ifdef DEBUG
+////    WriteLog("USER32:  GetAsyncKeyState Not implemented\n");
+#endif
+    return 0;
+}
+/*****************************************************************************
+ * Name      : BOOL WIN32API GetKeyboardLayoutNameA
+ * Purpose   : The GetKeyboardLayoutName function retrieves the name of the
+ *             active keyboard layout.
+ * Parameters: LPTSTR pwszKLID address of buffer for layout name
+ * Variables :
+ * Result    : If the function succeeds, the return value is TRUE.
+ *             If the function fails, the return value is FALSE. To get extended
+ *               error information, call GetLastError.
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+// @@@PH Win32 BOOL's are casted to INTs
+INT WIN32API GetKeyboardLayoutNameA(LPTSTR pwszKLID)
+{
+  dprintf(("USER32:GetKeyboardLayoutNameA (%08x) not implemented.",
+         pwszKLID));
+
+  return(FALSE);
+}
+/*****************************************************************************
+ * Name      : BOOL WIN32API GetKeyboardLayoutNameW
+ * Purpose   : The GetKeyboardLayoutName function retrieves the name of the
+ *             active keyboard layout.
+ * Parameters: LPTSTR pwszKLID address of buffer for layout name
+ * Variables :
+ * Result    : If the function succeeds, the return value is TRUE.
+ *             If the function fails, the return value is FALSE. To get extended
+ *               error information, call GetLastError.
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+// @@@PH Win32 BOOL's are casted to INTs
+INT WIN32API GetKeyboardLayoutNameW(LPWSTR pwszKLID)
+{
+  dprintf(("USER32:GetKeyboardLayoutNameW (%08x) not implemented.",
+         pwszKLID));
+
+  return(FALSE);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API GetKeyboardState(PBYTE lpKeyState)
+{
+#ifdef DEBUG
+  WriteLog("USER32:  GetKeyboardState, not properly implemented\n");
+#endif
+  memset(lpKeyState, 0, 256);
+  return(TRUE);
+}
+//******************************************************************************
+//******************************************************************************
+int WIN32API GetKeyNameTextA( LPARAM lParam, LPSTR lpString, int  nSize)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  GetKeyNameTextA\n");
+#endif
+    return O32_GetKeyNameText(lParam,lpString,nSize);
+}
+//******************************************************************************
+//******************************************************************************
+int WIN32API GetKeyNameTextW( LPARAM lParam, LPWSTR lpString, int  nSize)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  GetKeyNameTextW DOES NOT WORK\n");
+#endif
+    // NOTE: This will not work as is (needs UNICODE support)
+    return 0;
+//    return O32_GetKeyNameText(arg1, arg2, arg3);
+}
+//******************************************************************************
+//SvL: 24-6-'97 - Added
+//******************************************************************************
+SHORT WIN32API GetKeyState( int nVirtKey)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  GetKeyState %d\n", nVirtKey);
+#endif
+    return O32_GetKeyState(nVirtKey);
+}
+/*****************************************************************************
+ * Name      : VOID WIN32API keybd_event
+ * Purpose   : The keybd_event function synthesizes a keystroke. The system
+ *             can use such a synthesized keystroke to generate a WM_KEYUP or
+ *             WM_KEYDOWN message. The keyboard driver's interrupt handler calls
+ *             the keybd_event function.
+ * Parameters: BYTE  bVk         virtual-key code
+
+ *             BYTE  bScan       hardware scan code
+ *             DWORD dwFlags     flags specifying various function options
+ *             DWORD dwExtraInfo additional data associated with keystroke
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+VOID WIN32API keybd_event (BYTE bVk,
+                           BYTE bScan,
+                           DWORD dwFlags,
+                           DWORD dwExtraInfo)
+{
+  dprintf(("USER32:keybd_event (%u,%u,%08xh,%08x) not implemented.\n",
+         bVk,
+         bScan,
+         dwFlags,
+         dwExtraInfo));
+}
+/*****************************************************************************
+ * Name      : HLK WIN32API LoadKeyboardLayoutA
+ * Purpose   : The LoadKeyboardLayout function loads a new keyboard layout into
+ *             the system. Several keyboard layouts can be loaded at a time, but
+ *             only one per process is active at a time. Loading multiple keyboard
+ *             layouts makes it possible to rapidly switch between layouts.
+ * Parameters:
+ * Variables :
+ * Result    : If the function succeeds, the return value is the handle of the
+ *               keyboard layout.
+ *             If the function fails, the return value is NULL. To get extended
+ *               error information, call GetLastError.
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+HKL WIN32API LoadKeyboardLayoutA(LPCTSTR pwszKLID,
+                                 UINT    Flags)
+{
+  dprintf(("USER32:LeadKeyboardLayoutA (%s,%u) not implemented.\n",
+         pwszKLID,
+         Flags));
+
+  return (NULL);
+}
+/*****************************************************************************
+ * Name      : HLK WIN32API LoadKeyboardLayoutW
+ * Purpose   : The LoadKeyboardLayout function loads a new keyboard layout into
+ *             the system. Several keyboard layouts can be loaded at a time, but
+ *             only one per process is active at a time. Loading multiple keyboard
+ *             layouts makes it possible to rapidly switch between layouts.
+ * Parameters:
+ * Variables :
+ * Result    : If the function succeeds, the return value is the handle of the
+ *               keyboard layout.
+ *             If the function fails, the return value is NULL. To get extended
+ *               error information, call GetLastError.
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+HKL WIN32API LoadKeyboardLayoutW(LPCWSTR pwszKLID,
+                                 UINT    Flags)
+{
+  dprintf(("USER32:LeadKeyboardLayoutW (%s,%u) not implemented.\n",
+         pwszKLID,
+         Flags));
+
+  return (NULL);
+}
+//******************************************************************************
+//******************************************************************************
+UINT WIN32API MapVirtualKeyA( UINT uCode, UINT  uMapType)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  MapVirtualKeyA\n");
+#endif
+    return O32_MapVirtualKey(uCode,uMapType);
+}
+//******************************************************************************
+//******************************************************************************
+UINT WIN32API MapVirtualKeyW( UINT uCode, UINT  uMapType)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  MapVirtualKeyW\n");
+#endif
+    // NOTE: This will not work as is (needs UNICODE support)
+    return O32_MapVirtualKey(uCode,uMapType);
+}
+/*****************************************************************************
+ * Name      : UINT WIN32API MapVirtualKeyExA
+ * Purpose   : The MapVirtualKeyEx function translates (maps) a virtual-key
+ *             code into a scan code or character value, or translates a scan
+ *             code into a virtual-key code. The function translates the codes
+ *             using the input language and physical keyboard layout identified
+ *             by the given keyboard layout handle.
+ * Parameters:
+ * Variables :
+ * Result    : The return value is either a scan code, a virtual-key code, or
+ *             a character value, depending on the value of uCode and uMapType.
+ *             If there is no translation, the return value is zero.
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+UINT WIN32API MapVirtualKeyExA(UINT uCode,
+                                  UINT uMapType,
+                                  HKL  dwhkl)
+{
+  dprintf(("USER32:MapVirtualKeyExA (%u,%u,%08x) not implemented.\n",
+         uCode,
+         uMapType,
+         dwhkl));
+
+  return (0);
+}
+/*****************************************************************************
+ * Name      : UINT WIN32API MapVirtualKeyExW
+ * Purpose   : The MapVirtualKeyEx function translates (maps) a virtual-key
+ *             code into a scan code or character value, or translates a scan
+ *             code into a virtual-key code. The function translates the codes
+ *             using the input language and physical keyboard layout identified
+ *             by the given keyboard layout handle.
+ * Parameters:
+ * Variables :
+ * Result    : The return value is either a scan code, a virtual-key code, or
+ *             a character value, depending on the value of uCode and uMapType.
+ *             If there is no translation, the return value is zero.
+ * Remark    :
+ * Status    : UNTESTED STUB
+
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+UINT WIN32API MapVirtualKeyExW(UINT uCode,
+                                  UINT uMapType,
+                                  HKL  dwhkl)
+{
+  dprintf(("USER32:MapVirtualKeyExW (%u,%u,%08x) not implemented.\n",
+         uCode,
+         uMapType,
+         dwhkl));
+
+  return (0);
+}
+/*****************************************************************************
+ * Name      : DWORD WIN32API OemKeyScan
+ * Purpose   : The OemKeyScan function maps OEM ASCII codes 0 through 0x0FF
+ *             into the OEM scan codes and shift states. The function provides
+ *             information that allows a program to send OEM text to another
+ *             program by simulating keyboard input.
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+DWORD WIN32API OemKeyScan(WORD wOemChar)
+{
+  dprintf(("USER32:OemKeyScan (%u) not implemented.\n",
+         wOemChar));
+
+  return (wOemChar);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API RegisterHotKey(HWND hwnd, int idHotKey, UINT fuModifiers, UINT uVirtKey)
+{
+#ifdef DEBUG
+  WriteLog("USER32:  RegisterHotKey, not implemented\n");
+#endif
+  hwnd = Win32Window::Win32ToOS2Handle(hwnd);
+  return(TRUE);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API SetKeyboardState(PBYTE lpKeyState)
+{
+#ifdef DEBUG
+  WriteLog("USER32:  SetKeyboardState, not implemented\n");
+#endif
+  return(TRUE);
+}
+/*****************************************************************************
+ * Name      : int WIN32API ToAscii
+ * Purpose   : The ToAscii function translates the specified virtual-key code
+ *             and keyboard state to the corresponding Windows character or characters.
+ * Parameters: UINT   uVirtKey    virtual-key code
+ *             UINT   uScanCode   scan code
+ *             PBYTE  lpbKeyState address of key-state array
+ *             LPWORD lpwTransKey buffer for translated key
+ *             UINT   fuState     active-menu flag
+ * Variables :
+ * Result    : 0 The specified virtual key has no translation for the current
+ *               state of the keyboard.
+ *             1 One Windows character was copied to the buffer.
+ *             2 Two characters were copied to the buffer. This usually happens
+ *               when a dead-key character (accent or diacritic) stored in the
+ *               keyboard layout cannot be composed with the specified virtual
+ *               key to form a single character.
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+int WIN32API ToAscii(UINT   uVirtKey,
+                        UINT   uScanCode,
+                        PBYTE  lpbKeyState,
+                        LPWORD lpwTransKey,
+                        UINT   fuState)
+{
+  dprintf(("USER32:ToAscii (%u,%u,%08xh,%08xh,%u) not implemented.\n",
+         uVirtKey,
+         uScanCode,
+         lpbKeyState,
+         lpwTransKey,
+         fuState));
+
+  return (0);
+}
+/*****************************************************************************
+ * Name      : int WIN32API ToAsciiEx
+ * Purpose   : The ToAscii function translates the specified virtual-key code
+ *             and keyboard state to the corresponding Windows character or characters.
+ * Parameters: UINT   uVirtKey    virtual-key code
+ *             UINT   uScanCode   scan code
+ *             PBYTE  lpbKeyState address of key-state array
+ *             LPWORD lpwTransKey buffer for translated key
+ *             UINT   fuState     active-menu flag
+ *             HLK    hlk         keyboard layout handle
+ * Variables :
+ * Result    : 0 The specified virtual key has no translation for the current
+ *               state of the keyboard.
+ *             1 One Windows character was copied to the buffer.
+ *             2 Two characters were copied to the buffer. This usually happens
+ *               when a dead-key character (accent or diacritic) stored in the
+ *               keyboard layout cannot be composed with the specified virtual
+ *               key to form a single character.
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+int WIN32API ToAsciiEx(UINT   uVirtKey,
+                          UINT   uScanCode,
+                          PBYTE  lpbKeyState,
+                          LPWORD lpwTransKey,
+                          UINT   fuState,
+                          HKL    hkl)
+{
+  dprintf(("USER32:ToAsciiEx (%u,%u,%08xh,%08xh,%u,%08x) not implemented.\n",
+         uVirtKey,
+         uScanCode,
+         lpbKeyState,
+         lpwTransKey,
+         fuState,
+         hkl));
+
+  return (0);
+}
+/*****************************************************************************
+ * Name      : int WIN32API ToUnicode
+ * Purpose   : The ToUnicode function translates the specified virtual-key code
+ *             and keyboard state to the corresponding Unicode character or characters.
+ * Parameters: UINT   wVirtKey   virtual-key code
+ *             UINT   wScanCode  scan code
+ *             PBYTE  lpKeyState address of key-state array
+ *             LPWSTR pwszBuff   buffer for translated key
+ *             int    cchBuff    size of translated key buffer
+ *             UINT   wFlags     set of function-conditioning flags
+ * Variables :
+ * Result    : - 1 The specified virtual key is a dead-key character (accent or
+ *                 diacritic). This value is returned regardless of the keyboard
+ *                 layout, even if several characters have been typed and are
+ *                 stored in the keyboard state. If possible, even with Unicode
+ *                 keyboard layouts, the function has written a spacing version of
+ *                 the dead-key character to the buffer specified by pwszBuffer.
+ *                 For example, the function writes the character SPACING ACUTE
+ *                 (0x00B4), rather than the character NON_SPACING ACUTE (0x0301).
+ *               0 The specified virtual key has no translation for the current
+ *                 state of the keyboard. Nothing was written to the buffer
+ *                 specified by pwszBuffer.
+ *               1 One character was written to the buffer specified by pwszBuffer.
+ *       2 or more Two or more characters were written to the buffer specified by
+ *                 pwszBuff. The most common cause for this is that a dead-key
+ *                 character (accent or diacritic) stored in the keyboard layout
+ *                 could not be combined with the specified virtual key to form a
+ *                 single character.
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+int WIN32API ToUnicode(UINT   uVirtKey,
+                          UINT   uScanCode,
+                          PBYTE  lpKeyState,
+                          LPWSTR pwszBuff,
+                          int    cchBuff,
+                          UINT   wFlags)
+{
+  dprintf(("USER32:ToUnicode (%u,%u,%08xh,%08xh,%u,%08x) not implemented.\n",
+         uVirtKey,
+         uScanCode,
+         lpKeyState,
+         pwszBuff,
+         cchBuff,
+         wFlags));
+
+  return (0);
+}
+/*****************************************************************************
+ * Name      : BOOL WIN32API UnloadKeyboardLayout
+ * Purpose   : The UnloadKeyboardLayout function removes a keyboard layout.
+ * Parameters: HKL hkl handle of keyboard layout
+ * Variables :
+ * Result    : If the function succeeds, the return value is the handle of the
+ *             keyboard layout; otherwise, it is NULL. To get extended error
+ *             information, use the GetLastError function.
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
+ *****************************************************************************/
+BOOL WIN32API UnloadKeyboardLayout (HKL hkl)
+{
+  dprintf(("USER32:UnloadKeyboardLayout (%08x) not implemented.\n",
+         hkl));
+
+  return (0);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API UnregisterHotKey(HWND hwnd, int idHotKey)
+{
+#ifdef DEBUG
+  WriteLog("USER32:  UnregisterHotKey, not implemented\n");
+#endif
+  hwnd = Win32Window::Win32ToOS2Handle(hwnd);
+
+  return(TRUE);
+}
+//******************************************************************************
+//SvL: 24-6-'97 - Added
+//******************************************************************************
+WORD WIN32API VkKeyScanA( char ch)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  VkKeyScanA\n");
+#endif
+    return O32_VkKeyScan(ch);
+}
+
+
+//CB: stopped here void aa(){};
+
+//******************************************************************************
+//******************************************************************************
+DWORD WIN32API MsgWaitForMultipleObjects( DWORD arg1, LPHANDLE arg2, BOOL arg3, DWORD arg4, DWORD  arg5)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  MsgWaitForMultipleObjects\n");
+#endif
+    return O32_MsgWaitForMultipleObjects(arg1, arg2, arg3, arg4, arg5);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API CheckRadioButton( HWND arg1, UINT arg2, UINT arg3, UINT  arg4)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  CheckRadioButton\n");
+#endif
+    //CB: check radio buttons in interval
+    if (arg2 > arg3) return (FALSE);
+    for (UINT x=arg2;x <= arg3;x++)
+    {
+     SendDlgItemMessageA(arg1,x,BM_SETCHECK,(x == arg4) ? BST_CHECKED : BST_UNCHECKED,0);
+    }
+    return (TRUE);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API EndDeferWindowPos( HDWP arg1)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  EndDeferWindowPos\n");
+#endif
+    return O32_EndDeferWindowPos(arg1);
+}
+//******************************************************************************
+//******************************************************************************
+INT WIN32API ExcludeUpdateRgn( HDC arg1, HWND  arg2)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  ExcludeUpdateRgn\n");
+#endif
+    return O32_ExcludeUpdateRgn(arg1, arg2);
+}
+//******************************************************************************
+//******************************************************************************
+int WIN32API FillRect(HDC arg1, const RECT * arg2, HBRUSH arg3)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  FillRect (%d,%d)(%d,%d) brush %X\n", arg2->left, arg2->top, arg2->right, arg2->bottom, arg3);
+#endif
+    return O32_FillRect(arg1, arg2, arg3);
+}
+//******************************************************************************
+//******************************************************************************
+HWND WIN32API FindWindowW( LPCWSTR arg1, LPCWSTR arg2)
+{
+ char *astring1 = UnicodeToAsciiString((LPWSTR)arg1);
+ char *astring2 = UnicodeToAsciiString((LPWSTR)arg2);
+ HWND rc;
+
+#ifdef DEBUG
+    WriteLog("USER32:  FindWindowW\n");
+#endif
+    rc = O32_FindWindow(astring1, astring2);
+    FreeAsciiString(astring1);
+    FreeAsciiString(astring2);
+    return rc;
+}
+//******************************************************************************
+//******************************************************************************
+int WIN32API FrameRect( HDC arg1, const RECT * arg2, HBRUSH  arg3)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  FrameRect\n");
+#endif
+    return O32_FrameRect(arg1, arg2, arg3);
+}
+//******************************************************************************
+//******************************************************************************
+HWND WIN32API GetForegroundWindow(void)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  GetForegroundWindow\n");
+#endif
+    return O32_GetForegroundWindow();
+}
+//******************************************************************************
+//******************************************************************************
+int WIN32API GetKeyboardType( int arg1)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  GetKeyboardType\n");
+#endif
+    return O32_GetKeyboardType(arg1);
+}
+//******************************************************************************
+//******************************************************************************
+HWND WIN32API GetLastActivePopup( HWND arg1)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  GetLastActivePopup\n");
+#endif
+    return O32_GetLastActivePopup(arg1);
+}
+//******************************************************************************
+//******************************************************************************
+//******************************************************************************
+//******************************************************************************
+DWORD WIN32API GetQueueStatus( UINT arg1)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  GetQueueStatus\n");
+#endif
+    return O32_GetQueueStatus(arg1);
+}
+//******************************************************************************
+//******************************************************************************
+DWORD WIN32API GetTabbedTextExtentA( HDC arg1, LPCSTR arg2, int arg3, int arg4, int * arg5)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  GetTabbedTextExtentA\n");
+#endif
+    return O32_GetTabbedTextExtent(arg1, arg2, arg3, arg4, arg5);
+}
+//******************************************************************************
+//******************************************************************************
+DWORD WIN32API GetTabbedTextExtentW( HDC arg1, LPCWSTR arg2, int arg3, int arg4, int * arg5)
+{
+ char *astring = UnicodeToAsciiString((LPWSTR)arg2);
+ DWORD rc;
+
+#ifdef DEBUG
+    WriteLog("USER32:  GetTabbedTextExtentW\n");
+#endif
+    rc = O32_GetTabbedTextExtent(arg1, astring, arg3, arg4, arg5);
+    FreeAsciiString(astring);
+    return rc;
+}
+//******************************************************************************
+//******************************************************************************
+#if 0
+int WIN32API GetUpdateRgn( HWND arg1, HRGN arg2, BOOL  arg3)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  GetUpdateRgn\n");
+#endif
+    return O32_GetUpdateRgn(arg1, arg2, arg3);
+}
+#endif
+//******************************************************************************
+
+
+//******************************************************************************
+//******************************************************************************
+//******************************************************************************
+DWORD WIN32API GetWindowThreadProcessId(HWND arg1, PDWORD  arg2)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  GetWindowThreadProcessId\n");
+#endif
+    return O32_GetWindowThreadProcessId(arg1, arg2);
+}
+//******************************************************************************
+//******************************************************************************
+#if 0
+BOOL WIN32API InvalidateRgn( HWND arg1, HRGN arg2, BOOL  arg3)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  InvalidateRgn\n");
+#endif
+    return O32_InvalidateRgn(arg1, arg2, arg3);
+}
+#endif
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API InvertRect( HDC arg1, const RECT * arg2)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  InvertRect\n");
+#endif
+    return O32_InvertRect(arg1, arg2);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API MapDialogRect( HWND arg1, PRECT  arg2)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  MapDialogRect\n");
+#endif
+    return O32_MapDialogRect(arg1, arg2);
+}
+//******************************************************************************
+//******************************************************************************
+int WIN32API MapWindowPoints( HWND arg1, HWND arg2, LPPOINT arg3, UINT arg4)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  MapWindowPoints\n");
+#endif
+    return O32_MapWindowPoints(arg1, arg2, arg3, arg4);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API ScreenToClient (HWND hwnd, LPPOINT pt)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  ScreenToClient\n");
+#endif
+    Win32BaseWindow *wnd;
+    PRECT rcl;
+
+    if (!hwnd) return (TRUE);
+    wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
+    if (!wnd) return (TRUE);
+
+    rcl   = wnd->getClientRect();
+    pt->y = ScreenHeight - pt->y;
+    OSLibWinMapWindowPoints (OSLIB_HWND_DESKTOP, wnd->getOS2WindowHandle(), (OSLIBPOINT *)pt, 1);
+    pt->y = (rcl->bottom - rcl->top) - pt->y;
+    return (TRUE);
+}
+//******************************************************************************
+//******************************************************************************
+#if 0
+BOOL WIN32API ScrollDC( HDC arg1, int arg2, int arg3, const RECT * arg4, const RECT * arg5, HRGN arg6, PRECT  arg7)
+{
+#ifdef DEBUG
+    WriteLog("USER32:  ScrollDC\n");
+#endif
+    return O32_ScrollDC(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+}
+#endif
 //******************************************************************************
 //******************************************************************************
 LONG WIN32API TabbedTextOutA( HDC arg1, int arg2, int arg3, LPCSTR arg4, int arg5, int arg6, int * arg7, int  arg8)
@@ -1530,20 +2036,6 @@ WORD WIN32API VkKeyScanW( WCHAR arg1)
 #endif
     // NOTE: This will not work as is (needs UNICODE support)
     return O32_VkKeyScan((char)arg1);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API WinHelpW( HWND arg1, LPCWSTR arg2, UINT arg3, DWORD  arg4)
-{
- char *astring = UnicodeToAsciiString((LPWSTR)arg2);
- BOOL  rc;
-
-#ifdef DEBUG
-    WriteLog("USER32:  WinHelpW\n");
-#endif
-    rc = WinHelpA(arg1, astring, arg3, arg4);
-    FreeAsciiString(astring);
-    return rc;
 }
 //******************************************************************************
 //TODO: Not complete
@@ -1630,44 +2122,6 @@ HANDLE WIN32API CopyImage(HANDLE hImage, UINT uType, int cxDesired, int cyDesire
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API GetKeyboardState(PBYTE lpKeyState)
-{
-#ifdef DEBUG
-  WriteLog("USER32:  GetKeyboardState, not properly implemented\n");
-#endif
-  memset(lpKeyState, 0, 256);
-  return(TRUE);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SetKeyboardState(PBYTE lpKeyState)
-{
-#ifdef DEBUG
-  WriteLog("USER32:  SetKeyboardState, not implemented\n");
-#endif
-  return(TRUE);
-}
-//******************************************************************************
-//2nd parameter not used according to SDK (yet?)
-//******************************************************************************
-VOID WIN32API SetLastErrorEx(DWORD dwErrCode, DWORD dwType)
-{
-#ifdef DEBUG
-  WriteLog("USER32:  SetLastErrorEx\n");
-#endif
-  SetLastError(dwErrCode);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API ActivateKeyboardLayout(HKL hkl, UINT fuFlags)
-{
-#ifdef DEBUG
-  WriteLog("USER32:  ActivateKeyboardLayout, not implemented\n");
-#endif
-  return(TRUE);
-}
-//******************************************************************************
-//******************************************************************************
 int WIN32API GetKeyboardLayoutList(int nBuff, HKL *lpList)
 {
 #ifdef DEBUG
@@ -1703,36 +2157,6 @@ int WIN32API LookupIconIdFromDirectoryEx(PBYTE presbits, BOOL  fIcon,
   WriteLog("USER32:  LookupIconIdFromDirectoryEx, not implemented\n");
 #endif
   return(0);
-}
-//******************************************************************************
-//DWORD idAttach;   /* thread to attach */
-//DWORD idAttachTo; /* thread to attach to  */
-//BOOL fAttach; /* attach or detach */
-//******************************************************************************
-BOOL WIN32API AttachThreadInput(DWORD idAttach, DWORD idAttachTo, BOOL fAttach)
-{
-#ifdef DEBUG
-  WriteLog("USER32:  AttachThreadInput, not implemented\n");
-#endif
-  return(TRUE);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API RegisterHotKey(HWND hwnd, int idHotKey, UINT fuModifiers, UINT uVirtKey)
-{
-#ifdef DEBUG
-  WriteLog("USER32:  RegisterHotKey, not implemented\n");
-#endif
-  return(TRUE);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API UnregisterHotKey(HWND hwnd, int idHotKey)
-{
-#ifdef DEBUG
-  WriteLog("USER32:  UnregisterHotKey, not implemented\n");
-#endif
-  return(TRUE);
 }
 //******************************************************************************
 //******************************************************************************
@@ -2110,33 +2534,6 @@ HWINSTA WIN32API CreateWindowStationW(LPWSTR lpWinSta,
 }
 
 /*****************************************************************************
- * Name      : BOOL WIN32API DragDetect
- * Purpose   : The DragDetect function captures the mouse and tracks its movement
- * Parameters: HWND  hwnd
- *             POINT pt
- * Variables :
- * Result    : If the user moved the mouse outside of the drag rectangle while
- *               holding the left button down, the return value is TRUE.
- *             If the user did not move the mouse outside of the drag rectangle
- *               while holding the left button down, the return value is FALSE.
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-BOOL WIN32API DragDetect(HWND  hwnd,
-                            POINT pt)
-{
-  dprintf(("USER32:DragDetect(%08xh,...) not implemented.\n",
-         hwnd));
-
-  return (FALSE);
-}
-
-
-
-/*****************************************************************************
  * Name      : BOOL WIN32API EnumDesktopWindows
  * Purpose   : The EnumDesktopWindows function enumerates all windows in a
  *             desktop by passing the handle of each window, in turn, to an
@@ -2369,58 +2766,6 @@ UINT WIN32API GetKBCodePage(VOID)
 
 
 /*****************************************************************************
- * Name      : BOOL WIN32API GetKeyboardLayoutNameA
- * Purpose   : The GetKeyboardLayoutName function retrieves the name of the
- *             active keyboard layout.
- * Parameters: LPTSTR pwszKLID address of buffer for layout name
- * Variables :
- * Result    : If the function succeeds, the return value is TRUE.
- *             If the function fails, the return value is FALSE. To get extended
- *               error information, call GetLastError.
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-// @@@PH Win32 BOOL's are casted to INTs
-INT WIN32API GetKeyboardLayoutNameA(LPTSTR pwszKLID)
-{
-  dprintf(("USER32:GetKeyboardLayoutNameA (%08x) not implemented.",
-         pwszKLID));
-
-  return(FALSE);
-}
-
-
-/*****************************************************************************
- * Name      : BOOL WIN32API GetKeyboardLayoutNameW
- * Purpose   : The GetKeyboardLayoutName function retrieves the name of the
- *             active keyboard layout.
- * Parameters: LPTSTR pwszKLID address of buffer for layout name
- * Variables :
- * Result    : If the function succeeds, the return value is TRUE.
- *             If the function fails, the return value is FALSE. To get extended
- *               error information, call GetLastError.
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-// @@@PH Win32 BOOL's are casted to INTs
-INT WIN32API GetKeyboardLayoutNameW(LPWSTR pwszKLID)
-{
-  dprintf(("USER32:GetKeyboardLayoutNameW (%08x) not implemented.",
-         pwszKLID));
-
-  return(FALSE);
-}
-
-
-
-
-/*****************************************************************************
  * Name      : HWINSTA WIN32API GetProcessWindowStation
  * Purpose   : The GetProcessWindowStation function returns a handle of the
  *             window station associated with the calling process.
@@ -2601,150 +2946,6 @@ int WIN32API GetWindowRgn (HWND hWnd,
   return (NULLREGION);
 }
 
-
-
-/*****************************************************************************
- * Name      : HLK WIN32API LoadKeyboardLayoutA
- * Purpose   : The LoadKeyboardLayout function loads a new keyboard layout into
- *             the system. Several keyboard layouts can be loaded at a time, but
- *             only one per process is active at a time. Loading multiple keyboard
- *             layouts makes it possible to rapidly switch between layouts.
- * Parameters:
- * Variables :
- * Result    : If the function succeeds, the return value is the handle of the
- *               keyboard layout.
- *             If the function fails, the return value is NULL. To get extended
- *               error information, call GetLastError.
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-HKL WIN32API LoadKeyboardLayoutA(LPCTSTR pwszKLID,
-                                 UINT    Flags)
-{
-  dprintf(("USER32:LeadKeyboardLayoutA (%s,%u) not implemented.\n",
-         pwszKLID,
-         Flags));
-
-  return (NULL);
-}
-
-
-/*****************************************************************************
- * Name      : HLK WIN32API LoadKeyboardLayoutW
- * Purpose   : The LoadKeyboardLayout function loads a new keyboard layout into
- *             the system. Several keyboard layouts can be loaded at a time, but
- *             only one per process is active at a time. Loading multiple keyboard
- *             layouts makes it possible to rapidly switch between layouts.
- * Parameters:
- * Variables :
- * Result    : If the function succeeds, the return value is the handle of the
- *               keyboard layout.
- *             If the function fails, the return value is NULL. To get extended
- *               error information, call GetLastError.
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-HKL WIN32API LoadKeyboardLayoutW(LPCWSTR pwszKLID,
-                                 UINT    Flags)
-{
-  dprintf(("USER32:LeadKeyboardLayoutW (%s,%u) not implemented.\n",
-         pwszKLID,
-         Flags));
-
-  return (NULL);
-}
-
-
-/*****************************************************************************
- * Name      : UINT WIN32API MapVirtualKeyExA
- * Purpose   : The MapVirtualKeyEx function translates (maps) a virtual-key
- *             code into a scan code or character value, or translates a scan
- *             code into a virtual-key code. The function translates the codes
- *             using the input language and physical keyboard layout identified
- *             by the given keyboard layout handle.
- * Parameters:
- * Variables :
- * Result    : The return value is either a scan code, a virtual-key code, or
- *             a character value, depending on the value of uCode and uMapType.
- *             If there is no translation, the return value is zero.
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-UINT WIN32API MapVirtualKeyExA(UINT uCode,
-                                  UINT uMapType,
-                                  HKL  dwhkl)
-{
-  dprintf(("USER32:MapVirtualKeyExA (%u,%u,%08x) not implemented.\n",
-         uCode,
-         uMapType,
-         dwhkl));
-
-  return (0);
-}
-
-
-/*****************************************************************************
- * Name      : UINT WIN32API MapVirtualKeyExW
- * Purpose   : The MapVirtualKeyEx function translates (maps) a virtual-key
- *             code into a scan code or character value, or translates a scan
- *             code into a virtual-key code. The function translates the codes
- *             using the input language and physical keyboard layout identified
- *             by the given keyboard layout handle.
- * Parameters:
- * Variables :
- * Result    : The return value is either a scan code, a virtual-key code, or
- *             a character value, depending on the value of uCode and uMapType.
- *             If there is no translation, the return value is zero.
- * Remark    :
- * Status    : UNTESTED STUB
-
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-UINT WIN32API MapVirtualKeyExW(UINT uCode,
-                                  UINT uMapType,
-                                  HKL  dwhkl)
-{
-  dprintf(("USER32:MapVirtualKeyExW (%u,%u,%08x) not implemented.\n",
-         uCode,
-         uMapType,
-         dwhkl));
-
-  return (0);
-}
-
-/*****************************************************************************
- * Name      : DWORD WIN32API OemKeyScan
- * Purpose   : The OemKeyScan function maps OEM ASCII codes 0 through 0x0FF
- *             into the OEM scan codes and shift states. The function provides
- *             information that allows a program to send OEM text to another
- *             program by simulating keyboard input.
- * Parameters:
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-DWORD WIN32API OemKeyScan(WORD wOemChar)
-{
-  dprintf(("USER32:OemKeyScan (%u) not implemented.\n",
-         wOemChar));
-
-  return (wOemChar);
-}
 
 
 /*****************************************************************************
@@ -3248,165 +3449,6 @@ WORD WIN32API TileWindows(HWND       hwndParent,
 
 
 /*****************************************************************************
- * Name      : int WIN32API ToAscii
- * Purpose   : The ToAscii function translates the specified virtual-key code
- *             and keyboard state to the corresponding Windows character or characters.
- * Parameters: UINT   uVirtKey    virtual-key code
- *             UINT   uScanCode   scan code
- *             PBYTE  lpbKeyState address of key-state array
- *             LPWORD lpwTransKey buffer for translated key
- *             UINT   fuState     active-menu flag
- * Variables :
- * Result    : 0 The specified virtual key has no translation for the current
- *               state of the keyboard.
- *             1 One Windows character was copied to the buffer.
- *             2 Two characters were copied to the buffer. This usually happens
- *               when a dead-key character (accent or diacritic) stored in the
- *               keyboard layout cannot be composed with the specified virtual
- *               key to form a single character.
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-int WIN32API ToAscii(UINT   uVirtKey,
-                        UINT   uScanCode,
-                        PBYTE  lpbKeyState,
-                        LPWORD lpwTransKey,
-                        UINT   fuState)
-{
-  dprintf(("USER32:ToAscii (%u,%u,%08xh,%08xh,%u) not implemented.\n",
-         uVirtKey,
-         uScanCode,
-         lpbKeyState,
-         lpwTransKey,
-         fuState));
-
-  return (0);
-}
-
-
-/*****************************************************************************
- * Name      : int WIN32API ToAsciiEx
- * Purpose   : The ToAscii function translates the specified virtual-key code
- *             and keyboard state to the corresponding Windows character or characters.
- * Parameters: UINT   uVirtKey    virtual-key code
- *             UINT   uScanCode   scan code
- *             PBYTE  lpbKeyState address of key-state array
- *             LPWORD lpwTransKey buffer for translated key
- *             UINT   fuState     active-menu flag
- *             HLK    hlk         keyboard layout handle
- * Variables :
- * Result    : 0 The specified virtual key has no translation for the current
- *               state of the keyboard.
- *             1 One Windows character was copied to the buffer.
- *             2 Two characters were copied to the buffer. This usually happens
- *               when a dead-key character (accent or diacritic) stored in the
- *               keyboard layout cannot be composed with the specified virtual
- *               key to form a single character.
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-int WIN32API ToAsciiEx(UINT   uVirtKey,
-                          UINT   uScanCode,
-                          PBYTE  lpbKeyState,
-                          LPWORD lpwTransKey,
-                          UINT   fuState,
-                          HKL    hkl)
-{
-  dprintf(("USER32:ToAsciiEx (%u,%u,%08xh,%08xh,%u,%08x) not implemented.\n",
-         uVirtKey,
-         uScanCode,
-         lpbKeyState,
-         lpwTransKey,
-         fuState,
-         hkl));
-
-  return (0);
-}
-
-
-/*****************************************************************************
- * Name      : int WIN32API ToUnicode
- * Purpose   : The ToUnicode function translates the specified virtual-key code
- *             and keyboard state to the corresponding Unicode character or characters.
- * Parameters: UINT   wVirtKey   virtual-key code
- *             UINT   wScanCode  scan code
- *             PBYTE  lpKeyState address of key-state array
- *             LPWSTR pwszBuff   buffer for translated key
- *             int    cchBuff    size of translated key buffer
- *             UINT   wFlags     set of function-conditioning flags
- * Variables :
- * Result    : - 1 The specified virtual key is a dead-key character (accent or
- *                 diacritic). This value is returned regardless of the keyboard
- *                 layout, even if several characters have been typed and are
- *                 stored in the keyboard state. If possible, even with Unicode
- *                 keyboard layouts, the function has written a spacing version of
- *                 the dead-key character to the buffer specified by pwszBuffer.
- *                 For example, the function writes the character SPACING ACUTE
- *                 (0x00B4), rather than the character NON_SPACING ACUTE (0x0301).
- *               0 The specified virtual key has no translation for the current
- *                 state of the keyboard. Nothing was written to the buffer
- *                 specified by pwszBuffer.
- *               1 One character was written to the buffer specified by pwszBuffer.
- *       2 or more Two or more characters were written to the buffer specified by
- *                 pwszBuff. The most common cause for this is that a dead-key
- *                 character (accent or diacritic) stored in the keyboard layout
- *                 could not be combined with the specified virtual key to form a
- *                 single character.
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-int WIN32API ToUnicode(UINT   uVirtKey,
-                          UINT   uScanCode,
-                          PBYTE  lpKeyState,
-                          LPWSTR pwszBuff,
-                          int    cchBuff,
-                          UINT   wFlags)
-{
-  dprintf(("USER32:ToUnicode (%u,%u,%08xh,%08xh,%u,%08x) not implemented.\n",
-         uVirtKey,
-         uScanCode,
-         lpKeyState,
-         pwszBuff,
-         cchBuff,
-         wFlags));
-
-  return (0);
-}
-
-
-/*****************************************************************************
- * Name      : BOOL WIN32API UnloadKeyboardLayout
- * Purpose   : The UnloadKeyboardLayout function removes a keyboard layout.
- * Parameters: HKL hkl handle of keyboard layout
- * Variables :
- * Result    : If the function succeeds, the return value is the handle of the
- *             keyboard layout; otherwise, it is NULL. To get extended error
- *             information, use the GetLastError function.
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-BOOL WIN32API UnloadKeyboardLayout (HKL hkl)
-{
-  dprintf(("USER32:UnloadKeyboardLayout (%08x) not implemented.\n",
-         hkl));
-
-  return (0);
-}
-
-
-/*****************************************************************************
  * Name      : SHORT WIN32API VkKeyScanExW
  * Purpose   : The VkKeyScanEx function translates a character to the
  *             corresponding virtual-key code and shift state. The function
@@ -3457,69 +3499,6 @@ WORD WIN32API VkKeyScanExA(CHAR uChar,
          hkl));
 
   return (uChar);
-}
-
-
-/*****************************************************************************
- * Name      : VOID WIN32API keybd_event
- * Purpose   : The keybd_event function synthesizes a keystroke. The system
- *             can use such a synthesized keystroke to generate a WM_KEYUP or
- *             WM_KEYDOWN message. The keyboard driver's interrupt handler calls
- *             the keybd_event function.
- * Parameters: BYTE  bVk         virtual-key code
-
- *             BYTE  bScan       hardware scan code
- *             DWORD dwFlags     flags specifying various function options
- *             DWORD dwExtraInfo additional data associated with keystroke
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-VOID WIN32API keybd_event (BYTE bVk,
-                           BYTE bScan,
-                           DWORD dwFlags,
-                           DWORD dwExtraInfo)
-{
-  dprintf(("USER32:keybd_event (%u,%u,%08xh,%08x) not implemented.\n",
-         bVk,
-         bScan,
-         dwFlags,
-         dwExtraInfo));
-}
-
-
-/*****************************************************************************
- * Name      : VOID WIN32API mouse_event
- * Purpose   : The mouse_event function synthesizes mouse motion and button clicks.
- * Parameters: DWORD dwFlags     flags specifying various motion/click variants
- *             DWORD dx          horizontal mouse position or position change
- *             DWORD dy          vertical mouse position or position change
- *             DWORD cButtons    unused, reserved for future use, set to zero
- *             DWORD dwExtraInfo 32 bits of application-defined information
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-VOID WIN32API mouse_event(DWORD dwFlags,
-                             DWORD dx,
-                             DWORD dy,
-                             DWORD cButtons,
-                             DWORD dwExtraInfo)
-{
-  dprintf(("USER32:mouse_event (%08xh,%u,%u,%u,%08x) not implemented.\n",
-          dwFlags,
-          dx,
-          dy,
-          cButtons,
-          dwExtraInfo));
 }
 
 
