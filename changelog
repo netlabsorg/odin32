@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2592 2003-06-02 16:25:52 sandervl Exp $ */
+/* $Id: changelog,v 1.2593 2003-06-03 09:51:29 sandervl Exp $ */
+
+ 2003-06-03: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Don't search for keyboard accelerators in the default
+                  WM_SYSKEYDOWN handler. That's already done in TranslateAccelerator
 
  2003-06-02: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o CreatePipe: create unique named pipe
