@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2059 2002-04-30 14:50:07 sandervl Exp $ */
+/* $Id: changelog,v 1.2060 2002-04-30 18:46:38 sandervl Exp $ */
 
  2002-04-30: Sander van Leeuwen <sandervl@xs4all.nl>
     - GDI32:    o Font renaming support added to EnumFontFamiliesA/W
@@ -12,6 +12,7 @@
  2002-04-30: Platon Fomichev <platon@innotek.de>
     - KERNEL32: o FileTimeToSystemTime, DosDateTimeToFileTime & 
                   SystemTimeToFileTime bugfixes
+    - USER32:   o Focus fix when minimizing window
 
  2002-04-29: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Export RegisterCustomDriver
