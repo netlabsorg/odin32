@@ -1,4 +1,4 @@
-# $Id: common.mk,v 1.1 2000-05-13 17:17:08 bird Exp $
+# $Id: common.mk,v 1.2 2000-11-19 08:29:54 bird Exp $
 #
 # Common definitions for tools.
 #
@@ -30,4 +30,9 @@ COMMONLIB = $(PDWIN32_TCOMMON)\commongcc.lib
     !endif
 !endif
 
+
+#
+# Add PDWIN32_TCOMMON to the C and C++ includes.
+#
+CINCLUDES = -I$(PDWIN32_TCOMMON) $(CINCLUDE)
 

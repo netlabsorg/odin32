@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2000-03-16 23:51:26 bird Exp $
+# $Id: makefile,v 1.6 2000-11-19 08:27:21 bird Exp $
 
 #
 # PD-Win32 API
@@ -8,37 +8,65 @@
 #
 
 
+#
+# Tell buildenvironment that we're makeing an .exe.
+# Tell buildenvironment that we should not copy this into /bin.
+#
+EXETARGET = 1
+NO_MAIN_BIN_COPY = 1
+
+
+#
 # include common definitions
+#
 PDWIN32_INCLUDE = ..\..\include
+PDWIN32_TOOLS   = ..\bin
+PDWIN32_BIN     = ..\bin
+PDWIN32_LIB     = ..\..\lib
 !include $(PDWIN32_INCLUDE)\pdwin32.mk
 
+
+#
 # Addjust common definitions
+#
+!if "$(VAC3)" == "1" || "$(VAC36)" == "1"
+CFLAGS   = $(CFLAGS) -W3 -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext- \
 !ifdef DEBUG
-CFLAGS   = $(CFLAGS)  -Ge+ -Tx+ -I..\common \
-           -W3 -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext- -O+ -Tm-
-#          -W3 -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext- -Gh+ -Tm- #-O+
-LDFLAGS  = $(LDFLAGS) -Ge+ -Fe$@ /B"/MAP:full"
-!else
-CFLAGS   = $(CFLAGS)  -Ge+ -Tx+ -I..\common      \
-           -W3 -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext-
-LDFLAGS  = $(LDFLAGS) -Ge+ -Fe$@ /B"/MAP:full"
+        -O+ -Tm-
+!endif
 !endif
 
 
-
-all: fastdep.exe ..\bin\fastdep.exe
-
-
-fastdep.exe: fastdep.obj avl.obj
-    $(LD) $(LDFLAGS) $** $(RTLLIB) os2386.lib
-#   $(LD) $(LDFLAGS) $** CPPOPA3.OBJ $(RTLLIB) _DOSCALL.LIB os2386.lib
-
-..\bin\fastdep.exe: fastdep.exe
-   $(CP) $** $@
+#
+# Object files. Prefix with OBJDIR and one space before the '\'.
+#
+OBJS = \
+$(OBJDIR)\fastdep.obj \
+$(OBJDIR)\avl.obj
 
 
-dep: # dummy rule
+#
+# Libraries. One space before the '\'.
+#
+LIBS = \
+$(RTLLIB) \
+os2386.lib
 
 
-clean:
-   -@$(RM) *.obj *.exe *.map *.pch *.log ..\bin\fastdep.exe
+#
+# Target name - name of the exe without extention and path.
+#
+TARGET = FastDep
+
+
+#
+# Includes the common rules.
+#
+!include $(PDWIN32_INCLUDE)/pdwin32.post
+
+
+#
+# We need all.
+#
+needed: all
+
