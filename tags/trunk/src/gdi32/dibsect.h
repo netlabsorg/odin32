@@ -1,4 +1,4 @@
-/* $Id: dibsect.h,v 1.7 1999-12-02 13:26:05 achimha Exp $ */
+/* $Id: dibsect.h,v 1.8 1999-12-04 13:53:14 hugh Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -9,7 +9,8 @@
 #define __DIBSECT_H__
 
 #ifdef OS2_ONLY
-typedef struct {
+typedef struct
+{
   BYTE rgbBlue;
   BYTE rgbGreen;
   BYTE rgbRed;
@@ -66,7 +67,7 @@ public:
 
               char *GetDIBObject()           { return bmpBits;  };
               void  SelectDIBObject(HDC hdc);
-
+              char  GetBitCount();
               void  UnSelectDIBObject()      { this->hdc = 0;   };
 
               BOOL  BitBlt(HDC hdcDest, int nXdest, int nYDest,
