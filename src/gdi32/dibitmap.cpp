@@ -1,4 +1,4 @@
-/* $Id: dibitmap.cpp,v 1.9 2000-09-01 01:36:14 phaller Exp $ */
+/* $Id: dibitmap.cpp,v 1.10 2000-10-16 11:01:47 sandervl Exp $ */
 
 /*
  * GDI32 dib & bitmap code
@@ -269,7 +269,22 @@ int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLine
 {
  int rc;
 
-    rc =  O32_GetDIBits(hdc, hBitmap, uStartScan, cScanLines, lpvBits, lpbi, uUsage);
+    rc = O32_GetDIBits(hdc, hBitmap, uStartScan, cScanLines, lpvBits, lpbi, uUsage);
+    // set proper color masks!
+    switch(lpbi->bmiHeader.biBitCount) {
+    case 16: //RGB 565
+       ((DWORD*)(lpbi->bmiColors))[0] = 0xF800;
+       ((DWORD*)(lpbi->bmiColors))[1] = 0x07E0;
+       ((DWORD*)(lpbi->bmiColors))[2] = 0x001F;
+       break;
+    case 24:
+    case 32:
+       ((DWORD*)(lpbi->bmiColors))[0] = 0x0000FF;
+       ((DWORD*)(lpbi->bmiColors))[1] = 0x00FF00;
+       ((DWORD*)(lpbi->bmiColors))[2] = 0xFF0000;
+       break; 
+    }
+
     dprintf(("GDI32: GetDIBits %x %x %d %d %x %x %d returned %d", hdc, hBitmap, uStartScan, cScanLines, lpvBits, lpbi, uUsage, rc));
     return rc;
 }
