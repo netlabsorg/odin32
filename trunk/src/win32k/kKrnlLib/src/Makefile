@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.2 2002-03-10 04:27:11 bird Exp $
+# $Id: Makefile,v 1.3 2002-03-10 04:52:30 bird Exp $
 
 #
 # kKrnlLib/dev32 makefile.
@@ -69,4 +69,9 @@ $(PATH_OBJ)\kKrnlLib_newrel.$(EXT_LIB)\kKrnlLib_newrel.$(EXT_LIB)
 # Load the build process rules.
 #
 !include $(MAKE_INCLUDE_PROCESS)
+
+
+# generated code.
+calltaba.asm:
+    $(TOOL_DOMAKES) "MkCallTab.mak" $(TOOL_MAKE) $@
 
