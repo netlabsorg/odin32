@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.324 2002-05-07 13:28:13 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.325 2002-06-01 17:26:31 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1264,6 +1264,64 @@ ULONG Win32BaseWindow::MsgMouseMove(MSG *msg)
 
     //translated message == WM_(NC)MOUSEMOVE
     return SendMessageA(getWindowHandle(),msg->message, msg->wParam, msg->lParam);
+}
+//******************************************************************************
+//******************************************************************************
+ULONG Win32BaseWindow::MsgDropFiles(UINT cFiles, POINT point, LPSTR pszFiles, UINT cbszFiles, BOOL fNonClient)
+{
+    DROPFILES *pDropFile;
+    HGLOBAL    hDropFile;
+    HWND       hwnd;
+
+    hwnd = (getExStyle() & WS_EX_ACCEPTFILES) ? getWindowHandle() : ::GetParent(getWindowHandle());
+    cbszFiles++;    //extra terminating 0
+
+    if(::IsWindowUnicode(hwnd)) {
+        dprintf(("unicode dropfiles"));
+        cbszFiles *= 2;
+    }
+
+    hDropFile = GlobalAlloc(0, sizeof(DROPFILES)+cbszFiles);
+    pDropFile = (DROPFILES *)GlobalLock(hDropFile);
+    if(pDropFile == NULL) {
+        DebugInt3();
+        return 0;
+    }
+    pDropFile->pFiles = sizeof(DROPFILES);
+    pDropFile->fNC    = fNonClient;
+    pDropFile->fWide  = ::IsWindowUnicode(hwnd);
+    pDropFile->pt     = point;
+    if(::IsWindowUnicode(hwnd)) {
+        LPWSTR lpszFilesW = (LPWSTR)(pDropFile+1);
+        while(*pszFiles) {
+            int len = strlen(pszFiles);
+            MultiByteToWideChar(CP_ACP, 0, pszFiles, -1, lpszFilesW, len);
+            pszFiles   += len + 1;
+            lpszFilesW += len + 1;
+        }
+        *lpszFilesW = 0;
+    }
+    else {
+        //copy strings (excluding terminating 0)
+        memcpy((pDropFile+1), pszFiles, cbszFiles-1);
+    }
+    GlobalUnlock(hDropFile);
+    ::SendMessageA(hwnd, WM_DROPFILES, hDropFile, 0);
+    return 0;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32BaseWindow::AcceptsDropFiles()
+{
+    //Is it correct if the window or parent accepts files or must we check the topparent parent?
+    if(getExStyle() & WS_EX_ACCEPTFILES) {
+        return TRUE;
+    }
+    DWORD dwStyle = GetWindowLongA(::GetParent(getWindowHandle()), GWL_EXSTYLE);
+    if(!(dwStyle & WS_EX_ACCEPTFILES)) {
+        return FALSE;
+    }
+    return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
