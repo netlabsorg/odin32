@@ -65,9 +65,14 @@ BOOL WIN32API UnRegisterCustomDriver(LPCSTR lpDriverName);
 #define HCUSTOM_PREDIALOGCREATION	0
 #define HCUSTOM_POSTDIALOGCREATION	1
 
-BOOL WIN32API SetDialogHook(HOOKPROC pfnDialogProc);
-BOOL WIN32API ClearDialogHook();
+BOOL WIN32API SetCustomDialogHook(HOOKPROC pfnDialogProc);
+BOOL WIN32API ClearCustomDialogHook();
 
+//Override FindResource function
+typedef void (* WIN32API PFNFINDRESOURCEEXA)(HINSTANCE *phModule, LPSTR *lplpszName, LPSTR *lplpszType, WORD *lpLanguage);
+typedef void (* WIN32API PFNFINDRESOURCEEXW)(HINSTANCE *phModule, LPWSTR *lplpszName, LPWSTR *lplpszType, WORD *lpLanguage);
+
+BOOL WIN32API SetCustomFindResource(PFNFINDRESOURCEEXA pfnFindResourceA, PFNFINDRESOURCEEXW pfnFindResourceW);
 
 //Set the default language in kernel32
 void WIN32API SetDefaultLanguage(DWORD deflang);
