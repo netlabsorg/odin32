@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.164 2000-02-16 17:21:06 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.165 2000-02-20 18:28:34 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -49,7 +49,7 @@
 #define INCL_TIMERWIN32
 #include "timer.h"
 
-#define DBG_LOCALLOG	DBG_win32wbase
+#define DBG_LOCALLOG    DBG_win32wbase
 #include "dbglocal.h"
 
 #define SC_ABOUTWINE            (SC_SCREENSAVE+1)
@@ -607,7 +607,10 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
         }
         else {
                 if (windowClass->getMenuNameA()) {
-                        cs->hMenu = LoadMenuA(cs->hInstance, windowClass->getMenuNameA());
+                        cs->hMenu = LoadMenuA(windowClass->getInstance(),windowClass->getMenuNameA());
+#if 0 //CB: hack for treeview test cases bug
+if (!cs->hMenu) cs->hMenu = LoadMenuA(windowClass->getInstance(),"MYAPP");
+#endif
                         if (cs->hMenu) ::SetMenu(getWindowHandle(), cs->hMenu );
                 }
         }
@@ -1586,6 +1589,13 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 
         return 0;
 
+#if 0 //CB: todo: MSDN docu: Windown handles these messages and not WM_SYSCHAR (the code below doesn't work)
+    case WM_KEYDOWN:
+    case WM_KEYUP:
+    case WM_SYSKEYDOWN:
+    case WM_SYSKEYUP:
+#endif
+
     case WM_SYSCHAR:
     {
             int iMenuSysKey = 0;
@@ -1607,6 +1617,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
             if (wParam != VK_ESCAPE) MessageBeep(0);
             break;
     }
+
     case WM_SETHOTKEY:
         hotkey = wParam;
         return 1; //CB: always successful

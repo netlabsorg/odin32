@@ -1,4 +1,4 @@
-/* $Id: win32class.h,v 1.9 2000-02-06 22:00:23 sandervl Exp $ */
+/* $Id: win32class.h,v 1.10 2000-02-20 18:28:34 cbratschi Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -46,10 +46,12 @@ public:
          HICON  getIcon()               { return hIcon; };
         HCURSOR getCursor()             { return hCursor; };
 
+      HINSTANCE getInstance()           { return hInstance; };
+
         HBRUSH  getBackgroundBrush()    { return backgroundBrush; };
          ULONG  getStyle()              { return windowStyle; };
 
-	   HDC  getClassDC()            { return hdcClass; };
+           HDC  getClassDC()            { return hdcClass; };
 
           void  setMenuName(LPSTR newMenuName);
 

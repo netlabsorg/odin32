@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.34 2000-02-16 14:34:32 sandervl Exp $ */
+/* $Id: scroll.cpp,v 1.35 2000-02-20 18:28:33 cbratschi Exp $ */
 /*
  * Scrollbar control
  *
@@ -22,7 +22,7 @@
 #include "initterm.h"
 #include "pmframe.h"
 
-#define DBG_LOCALLOG	DBG_scroll
+#define DBG_LOCALLOG    DBG_scroll
 #include "dbglocal.h"
 
 #define SCROLL_MIN_RECT  4 /* Minimum size of the rectangle between the arrows */
@@ -1195,7 +1195,7 @@ INT WINAPI SetScrollInfo(HWND hwnd,INT nBar,const SCROLLINFO *info,BOOL bRedraw)
     UINT new_flags;
     INT action = 0;
 
-    dprintf(("USER32: SetScrollInfo"));
+    dprintf(("USER32: SetScrollInfo %x %d",hwnd,nBar));
 
     if (!(infoPtr = SCROLL_GetInfoPtr(hwnd,nBar))) return 0;
     if (info->fMask & ~(SIF_ALL | SIF_DISABLENOSCROLL)) return 0;

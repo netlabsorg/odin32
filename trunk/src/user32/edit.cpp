@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.33 2000-02-16 14:34:17 sandervl Exp $ */
+/* $Id: edit.cpp,v 1.34 2000-02-20 18:28:31 cbratschi Exp $ */
 /*
  *      Edit control
  *
@@ -22,12 +22,13 @@
   - too many redraws and recalculations!
 */
 
+#include <stdlib.h>
 #include <os2win.h>
 #include <string.h>
 #include "controls.h"
 #include "combo.h"
 
-#define DBG_LOCALLOG	DBG_edit
+#define DBG_LOCALLOG    DBG_edit
 #include "dbglocal.h"
 
 #ifdef DEBUG
