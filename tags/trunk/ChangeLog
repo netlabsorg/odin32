@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.1500 2001-06-11 15:56:56 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1501 2001-06-12 08:03:05 sandervl Exp $ */
+
+ 2001-06-12: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Partly fixed position of PM frame controls
 
  2001-06-11: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Reference count bugfixes
