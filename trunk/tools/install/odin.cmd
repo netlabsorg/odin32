@@ -1,4 +1,4 @@
-/* $Id: odin.cmd,v 1.33 2001-07-19 19:59:22 sandervl Exp $
+/* $Id: odin.cmd,v 1.34 2001-07-19 20:17:02 sandervl Exp $
  *
  * Odin32 API WarpIn installation script generator.
  *
@@ -495,9 +495,9 @@ call SysFileDelete sInstallArchive
 /*
  * Packet 1
  */
-sWICCmd '1 -c'||sMainDir 'ChangeLog LICENSE.TXT';
+sWICCmd '1 -c'||sMainDir 'ChangeLog LICENSE.TXT WGSS50.lic';
 if (rc <> 0) then return rc;
-sWICCmd '1 -c'||sDocDir 'ChangeLog-1999 ChangeLog-2000 ChangeLog-2001 Readme.txt ReportingBugs.txt Logging.txt Odin.ini.txt WGSS50.lic';
+sWICCmd '1 -c'||sDocDir 'ChangeLog-1999 ChangeLog-2000 ChangeLog-2001 Readme.txt ReportingBugs.txt Logging.txt Odin.ini.txt';
 if (rc <> 0) then return rc;
 
 /*
