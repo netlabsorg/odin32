@@ -1,7 +1,13 @@
-/* $Id: changelog,v 1.2547 2003-04-09 10:39:14 sandervl Exp $ */
+/* $Id: changelog,v 1.2548 2003-04-09 11:59:08 sandervl Exp $ */
 
  2002-04-09: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Unmap memory view when deleting PE dll object. 
+                  (problem found by Dietrich)
+
+ 2003-04-09: Platon Fomichev <stauff@innotek   >
+    - COMCTL32: o Due to flaw in cdecl implementation of GCC temporary 
+                  correctly import _wtoi func from NTDLL
+    - EMXLIBS:  o Possible endless loop in OS2FS replacement funcs
                   (problem found by Dietrich)
 
  2003-04-08: Platon Fomichev <platon@innotek   >
