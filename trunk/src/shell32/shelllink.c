@@ -257,7 +257,7 @@ static BOOL SaveIconResAsOS2ICO(GRPICONDIR *pIconDir, HINSTANCE hInstance,
     void *lpOS2Icon;
     DWORD ressize;
 
-    if (!(fXPMFile = fopen(szXPMFileName, "w")))
+    if (!(fXPMFile = fopen(szXPMFileName, "wb")))
         return 0;
 
     lpOS2Icon = ConvertIconGroup((void *)pIconDir, hInstance, &ressize);
