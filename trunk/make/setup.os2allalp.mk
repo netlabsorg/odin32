@@ -1,4 +1,4 @@
-# $Id: setup.os2allalp.mk,v 1.1 2002-08-30 18:27:22 bird Exp $
+# $Id: setup.os2allalp.mk,v 1.2 2002-10-04 04:44:02 bird Exp $
 
 #
 # The tool(s)
@@ -28,10 +28,10 @@ _AS_MODE = -Sv:M600
 _AS_MODE = -Sv:ALP
 !endif
 
-_AS_DEBUG_TYPE = +Ods:IBM32
+_AS_DEBUG_TYPE = +Od:IBM32
 !ifdef AS_DEBUG_TYPE
 ! if "$(AS_DEBUG_TYPE)" == "Codeview"
-_AS_DEBUG_TYPE = +Ods:MS16
+_AS_DEBUG_TYPE = +Od:MS16
 ! else
 !  if "$(AS_DEBUG_TYPE)" != "HLL"
 !   if [$(ECHO) $(CLRERR)Error: Bad AS_DEBUG_TYPE ($(AS_DEBUG_TYPE)). Valid types are Codeview and HLL.$(CLRRST)]
