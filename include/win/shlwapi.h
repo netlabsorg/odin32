@@ -4,6 +4,11 @@
 #ifndef __WINE_SHLWAPI_H
 #define __WINE_SHLWAPI_H
 
+#include <stdarg.h>
+#include <wingdi.h>
+#include <winuser.h>
+#include <shell.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif /* defined(__cplusplus) */
@@ -650,14 +655,6 @@ INT WINAPIV wnsprintfW(LPWSTR lpOut, INT cchLimitIn, LPCWSTR lpFmt, ...);
 #define wnsprintf WINELIB_NAME_AW(wnsprintf)
 
 /* Undocumented */
-#if !defined(__WINE_WINE_OBJ_SHELLFOLDER_H) && !defined(__WINE_SHELL_H)
-//very ugly
-typedef struct _STRRET;
-typedef struct _ITEMIDLIST;
-
-#define LPSTRRET   struct _STRRET *
-#define ITEMIDLIST struct _ITEMIDLIST
-#endif
 HRESULT WINAPI StrRetToBufA (LPSTRRET src, const ITEMIDLIST *pidl, LPSTR dest, DWORD len);
 HRESULT WINAPI StrRetToBufW (LPSTRRET src, const ITEMIDLIST *pidl, LPWSTR dest, DWORD len);
 #define StrRetToBuf WINELIB_NAME_AW(StrRetToBuf)
@@ -680,7 +677,7 @@ VOID WINAPI ColorRGBToHLS(COLORREF,LPWORD,LPWORD,LPWORD);
 
 
 /* Stream functions */
-#ifndef NO_SHLWAPI_STREAM
+#ifdef SHLWAPI_STREAM
 
 IStream * WINAPI SHOpenRegStreamA(HKEY,LPCSTR,LPCSTR,DWORD);
 IStream * WINAPI SHOpenRegStreamW(HKEY,LPCWSTR,LPCWSTR,DWORD);
@@ -690,7 +687,7 @@ IStream * WINAPI SHOpenRegStream2A(HKEY,LPCSTR,LPCSTR,DWORD);
 IStream * WINAPI SHOpenRegStream2W(HKEY,LPCWSTR,LPCWSTR,DWORD);
 #define SHOpenRegStream2 WINELIB_NAME_AW(SHOpenRegStream2)
 
-#endif /* NO_SHLWAPI_STREAM */
+#endif /* SHLWAPI_STREAM */
 
 
 #ifndef __WIN32OS2__
@@ -706,9 +703,10 @@ typedef struct _DllVersionInfo {
 
 #define DLLVER_PLATFORM_WINDOWS 0x01 /* Win9x */
 #define DLLVER_PLATFORM_NT      0x02 /* WinNT */
-#endif
 
 typedef HRESULT (* CALLBACK DLLGETVERSIONPROC)(DLLVERSIONINFO *);
+
+#endif
 
 #ifdef __cplusplus
 } /* extern "C" */
