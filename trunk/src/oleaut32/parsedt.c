@@ -1,4 +1,3 @@
-/* $Id: parsedt.cpp,v 1.2 1999-08-22 22:08:48 sandervl Exp $ */
 /*
 PostgreSQL Data Base Management System (formerly known as Postgres, then
 as Postgres95).
@@ -39,7 +38,6 @@ PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 #include <math.h>
 #include <string.h>
 #include <sys/types.h>
-#include <errno.h>
 #include <limits.h>
 #include <sys/timeb.h>
 
@@ -59,14 +57,20 @@ static int	DecodeTimezone(char *str, int *tzp);
 #define USE_DATE_CACHE 1
 #define ROUND_ALL 0
 
-int			mdays[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 0};
+static const int mdays[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 0};
 
-char	   *months[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
+static const char * const months[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
 "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", NULL};
 
-char	   *days[] = {"Sunday", "Monday", "Tuesday", "Wednesday",
+static const char * const days[] = {"Sunday", "Monday", "Tuesday", "Wednesday",
 "Thursday", "Friday", "Saturday", NULL};
 
+/* those three vars are useless, and not even initialized, so 
+ * I'd rather remove them all (EPP)
+ */
+int	DateStyle; 
+bool	EuroDates;
+int	CTimeZone;
 
 #define UTIME_MINYEAR (1901)
 #define UTIME_MINMONTH (12)
@@ -83,9 +87,6 @@ char	   *days[] = {"Sunday", "Monday", "Tuesday", "Wednesday",
   || ((m == UTIME_MAXMONTH) && (d <= UTIME_MAXDAY))))))
 
 
-int	DateStyle = 0;
-bool EuroDates= 0;
-int	CTimeZone= 0;
 
 
 /*****************************************************************************

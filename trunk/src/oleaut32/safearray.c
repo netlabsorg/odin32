@@ -1,4 +1,3 @@
-/* $Id: safearray.cpp,v 1.2 1999-08-22 22:08:49 sandervl Exp $ */
 /*************************************************************************
  * OLE Automation
  * SafeArray Implementation
@@ -6,13 +5,13 @@
  * This file contains the implementation of the SafeArray interface.
  *
  * Copyright 1999 Sylvain St-Germain
- * Copyright 1999 Sander van Leeuwen (WINE OS/2 Port 990815)
- *
- * Project Odin Software License can be found in LICENSE.TXT
- *
  */
 
+#ifdef __WIN32OS2__
+#define HAVE_FLOAT_H
+#define WINE_LARGE_INTEGER
 #include "oleaut32.h"
+#endif
 #include <stdio.h>
 #include <string.h>
 #include "windef.h"
@@ -22,7 +21,7 @@
 #include "wine/obj_base.h"
 #include "debugtools.h"
 
-DEFAULT_DEBUG_CHANNEL(ole)
+DEFAULT_DEBUG_CHANNEL(ole);
 
 /* Localy used methods */
 static INT  
@@ -56,7 +55,7 @@ duplicateData(SAFEARRAY *psa, SAFEARRAY **ppsaOut);
    A size of zero is defined for the unsupported types.  */
 
 #define VARTYPE_NOT_SUPPORTED 0
-const static ULONG VARTYPE_SIZE[] =
+static const ULONG VARTYPE_SIZE[] =
 {
   /* this is taken from wtypes.h.  Only [S]es are supported by the SafeArray */
 VARTYPE_NOT_SUPPORTED,	/* VT_EMPTY    [V]   [P]    nothing			*/
@@ -105,10 +104,11 @@ VARTYPE_NOT_SUPPORTED,	/* VT_ARRAY    [V]          SAFEARRAY*			*/
 VARTYPE_NOT_SUPPORTED 	/* VT_BYREF    [V]          void* for local use	*/
 };
 
-const static int LAST_VARTYPE = sizeof(VARTYPE_SIZE)/sizeof(ULONG);
+static const int LAST_VARTYPE = sizeof(VARTYPE_SIZE)/sizeof(ULONG);
 
 
 /*************************************************************************
+ *		SafeArrayAllocDescriptor
  * Allocate the appropriate amount of memory for the SafeArray descriptor
  */
 HRESULT WINAPI SafeArrayAllocDescriptor( 
@@ -123,7 +123,7 @@ HRESULT WINAPI SafeArrayAllocDescriptor(
   allocSize = sizeof(**ppsaOut) + (sizeof(*sab) * (cDims-1));
 
   /* Allocate memory for SAFEARRAY struc */
-  if(( (*ppsaOut)=(SAFEARRAY *)HeapAlloc( 
+  if(( (*ppsaOut)=HeapAlloc( 
         GetProcessHeap(), HEAP_ZERO_MEMORY, allocSize)) == NULL){
     return(E_UNEXPECTED);
   }
@@ -133,6 +133,7 @@ HRESULT WINAPI SafeArrayAllocDescriptor(
 }
 
 /*************************************************************************
+ *		SafeArrayAllocData
  * Allocate the appropriate amount of data for the SafeArray data
  */
 HRESULT WINAPI SafeArrayAllocData(
@@ -157,6 +158,7 @@ HRESULT WINAPI SafeArrayAllocData(
 }
 
 /*************************************************************************
+ *		SafeArrayCreate
  * Create a SafeArray object by encapsulating AllocDescriptor and AllocData 
  */
 SAFEARRAY* WINAPI SafeArrayCreate(
@@ -201,6 +203,7 @@ SAFEARRAY* WINAPI SafeArrayCreate(
 }
 
 /*************************************************************************
+ *		SafeArrayDestroyDescriptor
  * Frees the memory associated with the descriptor.
  */
 HRESULT WINAPI SafeArrayDestroyDescriptor(
@@ -219,6 +222,7 @@ HRESULT WINAPI SafeArrayDestroyDescriptor(
 
 
 /*************************************************************************
+ *		SafeArrayLock
  * Increment the lock counter
  *
  * Doc says (MSDN Library ) that psa->pvData should be made available (!= NULL)
@@ -237,6 +241,7 @@ HRESULT WINAPI SafeArrayLock(
 }
 
 /*************************************************************************
+ *		SafeArrayUnlock
  * Decrement the lock counter
  */
 HRESULT WINAPI SafeArrayUnlock(
@@ -253,6 +258,7 @@ HRESULT WINAPI SafeArrayUnlock(
 
 
 /*************************************************************************
+ *		SafeArrayPutElement
  * Set the data at the given coordinate
  */
 HRESULT WINAPI SafeArrayPutElement(
@@ -309,6 +315,7 @@ HRESULT WINAPI SafeArrayPutElement(
 
 
 /*************************************************************************
+ *		SafeArrayGetElement
  * Return the data element corresponding the the given coordinate
  */
 HRESULT WINAPI SafeArrayGetElement(
@@ -357,6 +364,7 @@ HRESULT WINAPI SafeArrayGetElement(
 }
 
 /*************************************************************************
+ *		SafeArrayGetUBound
  * return the UP bound for a given array dimension
  */
 HRESULT WINAPI SafeArrayGetUBound(
@@ -377,6 +385,7 @@ HRESULT WINAPI SafeArrayGetUBound(
 }
 
 /*************************************************************************
+ *		SafeArrayGetLBound
  * Return the LO bound for a given array dimension 
  */
 HRESULT WINAPI SafeArrayGetLBound(
@@ -395,6 +404,7 @@ HRESULT WINAPI SafeArrayGetLBound(
 }
 
 /*************************************************************************
+ *		SafeArrayGetDim
  * returns the number of dimension in the array
  */
 UINT WINAPI SafeArrayGetDim(
@@ -411,6 +421,7 @@ UINT WINAPI SafeArrayGetDim(
 }
 
 /*************************************************************************
+ *		SafeArrayGetElemsize
  * Return the size of the element in the array
  */
 UINT WINAPI SafeArrayGetElemsize(
@@ -427,6 +438,7 @@ UINT WINAPI SafeArrayGetElemsize(
 }
 
 /*************************************************************************
+ *		SafeArrayAccessData
  * increment the access count and return the data 
  */
 HRESULT WINAPI SafeArrayAccessData(
@@ -454,6 +466,7 @@ HRESULT WINAPI SafeArrayAccessData(
 
 
 /*************************************************************************
+ *		SafeArrayUnaccessData
  * Decrement the access count
  */
 HRESULT WINAPI SafeArrayUnaccessData(
@@ -466,6 +479,7 @@ HRESULT WINAPI SafeArrayUnaccessData(
 }
 
 /************************************************************************ 
+ *		SafeArrayPtrOfIndex
  * Return a pointer to the element at rgIndices
  */
 HRESULT WINAPI SafeArrayPtrOfIndex(
@@ -491,6 +505,7 @@ HRESULT WINAPI SafeArrayPtrOfIndex(
 }
 
 /************************************************************************ 
+ *		SafeArrayDestroyData
  * Frees the memory data bloc
  */
 HRESULT WINAPI SafeArrayDestroyData(
@@ -532,7 +547,7 @@ HRESULT WINAPI SafeArrayDestroyData(
   /* check if this array is a Vector, in which case do not free the data 
      block since it has been allocated by AllocDescriptor and therefore
      deserve to be freed by DestroyDescriptor */
-  if(!(psa->fFeatures & FADF_FIXEDSIZE)) { /* Set when we do CreateVector */
+  if(!(psa->fFeatures & FADF_CREATEVECTOR)) { /* Set when we do CreateVector */
 
     /* free the whole chunk */
     if((hRes = HeapFree( GetProcessHeap(), 0, psa->pvData)) == 0) /*falied*/
@@ -545,6 +560,7 @@ HRESULT WINAPI SafeArrayDestroyData(
 }
 
 /************************************************************************ 
+ *		SafeArrayCopyData
  * Copy the psaSource's data block into psaTarget if dimension and size
  * permits it.
  */
@@ -597,6 +613,7 @@ HRESULT WINAPI SafeArrayCopyData(
 }
 
 /************************************************************************ 
+ *		SafeArrayDestroy
  * Deallocates all memory reserved for the SafeArray
  */
 HRESULT WINAPI SafeArrayDestroy(
@@ -618,6 +635,7 @@ HRESULT WINAPI SafeArrayDestroy(
 }
 
 /************************************************************************ 
+ *		SafeArrayCopy
  * Make a dupplicate of a SafeArray
  */
 HRESULT WINAPI SafeArrayCopy(
@@ -626,6 +644,7 @@ HRESULT WINAPI SafeArrayCopy(
 { 
   HRESULT hRes;
   DWORD   dAllocSize;
+  ULONG   ulWholeArraySize; /* size of the thing */
 
   if(! validArg(psa)) 
     return E_INVALIDARG;
@@ -637,12 +656,17 @@ HRESULT WINAPI SafeArrayCopy(
             sizeof(*psa)+(sizeof(*(psa->rgsabound))*(psa->cDims-1)));
 
     (*ppsaOut)->pvData = NULL; /* do not point to the same data area */
-  
+
+    /* make sure the new safe array doesn't have the FADF_CREATEVECTOR flag,
+       because the data has not been allocated with the descriptor. */
+    (*ppsaOut)->fFeatures &= ~FADF_CREATEVECTOR;  
+ 
     /* Get the allocated memory size for source and allocate it for target */ 
-    dAllocSize = HeapSize(GetProcessHeap(), 0, psa->pvData);
+    ulWholeArraySize = getArraySize(psa); /* Number of item in SA */
+    dAllocSize = ulWholeArraySize*psa->cbElements;
+
     (*ppsaOut)->pvData = 
       HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, dAllocSize);
-
     if( (*ppsaOut)->pvData != NULL) {   /* HeapAlloc succeed */
 
       if( (hRes=duplicateData(psa, ppsaOut)) != S_OK) { /* E_OUTOFMEMORY */
@@ -664,6 +688,7 @@ HRESULT WINAPI SafeArrayCopy(
 }
 
 /************************************************************************ 
+ *		SafeArrayCreateVector
  * Creates a one dimension safearray where the data is next to the 
  * SAFEARRAY structure.
  */
@@ -680,26 +705,27 @@ SAFEARRAY* WINAPI SafeArrayCreateVector(
     return NULL;
 
   /* Allocate memory for the array descriptor and data contiguously  */
-  if( FAILED( psa = (SAFEARRAY *)HeapAlloc( GetProcessHeap(), 
+  if( FAILED( psa = HeapAlloc( GetProcessHeap(), 
                       HEAP_ZERO_MEMORY, 
                       (sizeof(*psa) + (VARTYPE_SIZE[vt] * cElements))))) {
     return NULL;
   }
-
+										
   /* setup data members... */ 
   psa->cDims      = 1; /* always and forever */
-  psa->fFeatures  = getFeatures(vt) | FADF_FIXEDSIZE;
+  psa->fFeatures  = getFeatures(vt) | FADF_CREATEVECTOR;  /* undocumented flag used by Microsoft */
   psa->cLocks     = 0;
-  psa->pvData     = psa+sizeof(*psa);
+  psa->pvData     = (BYTE*)psa + sizeof(*psa);
   psa->cbElements = VARTYPE_SIZE[vt];
 
   psa->rgsabound[0].cElements = cElements;
   psa->rgsabound[0].lLbound   = lLbound;
-  
-  return(psa); 
+
+  return(psa); 				  
 } 
 
 /************************************************************************ 
+ *		SafeArrayRedim
  * Changes the caracteristics of the last dimension of the SafeArray
  */
 HRESULT WINAPI SafeArrayRedim(
@@ -762,10 +788,13 @@ static BOOL validArg(
   if (psa == NULL)
     return FALSE;
 
-  /* Check whether the size of the chunk make sens... That's the only thing
+  /* Check whether the size of the chunk makes sense... That's the only thing
      I can think of now... */
 
-  psaSize   = HeapSize(GetProcessHeap(), 0, psa);
+  psaSize = HeapSize(GetProcessHeap(), 0, psa);
+  if (psaSize == -1)
+    /* uh, foreign heap. Better don't mess with it ! */
+    return TRUE;
 
   /* size of the descriptor when the SA is not created with CreateVector */
   descSize = sizeof(*psa) + (sizeof(*sab) * (psa->cDims-1));
@@ -810,19 +839,32 @@ static BOOL resizeSafeArray(
       }
   }
 
-  /* Ok now, if we are enlarging the array, we *MUST* move the whole block 
-     pointed to by pvData.   If we are shorthening the array, this move is
-     optional but we do it anyway becuase the benefit is that we are 
-     releasing to the system the unused memory */
-  
-  if((pvNewBlock = HeapReAlloc(GetProcessHeap(), 0, psa->pvData, 
-     (ulWholeArraySize + lDelta) * psa->cbElements)) == NULL) 
-      return FALSE; /* TODO If we get here it means:
-                       SHRINK situation :  we've deleted the undesired
-                                           data and did not release the memory
-                       GROWING situation:  we've been unable to grow the array
-                    */
+  if (!(psa->fFeatures & FADF_CREATEVECTOR))
+  {
+    /* Ok now, if we are enlarging the array, we *MUST* move the whole block 
+       pointed to by pvData.   If we are shorthening the array, this move is
+       optional but we do it anyway becuase the benefit is that we are 
+       releasing to the system the unused memory */
 
+    if((pvNewBlock = HeapReAlloc(GetProcessHeap(), 0, psa->pvData, 
+       (ulWholeArraySize + lDelta) * psa->cbElements)) == NULL) 
+        return FALSE; /* TODO If we get here it means:
+                         SHRINK situation :  we've deleted the undesired
+                                             data and did not release the memory
+                         GROWING situation:  we've been unable to grow the array
+                      */
+  }
+  else
+  {
+    /* Allocate a new block, because the previous data has been allocated with 
+       the descriptor in SafeArrayCreateVector function. */
+
+    if((pvNewBlock = HeapAlloc(GetProcessHeap(), 0,
+       ulWholeArraySize * psa->cbElements)) == NULL) 
+        return FALSE;
+
+    psa->fFeatures &= ~FADF_CREATEVECTOR;
+  }
   /* reassign to the new block of data */
   psa->pvData = pvNewBlock;
   return TRUE;
@@ -1002,3 +1044,45 @@ static HRESULT duplicateData(
   return S_OK;
 }
 
+
+/************************************************************************ 
+ *		SafeArrayGetVarType
+ * Returns the VARTYPE stored in the given safearray
+ */
+HRESULT WINAPI SafeArrayGetVarType(
+  SAFEARRAY* psa,
+  VARTYPE*   pvt)
+{
+  HRESULT hr = E_INVALIDARG;
+  VARTYPE vt = VT_EMPTY;
+
+  /* const short VARTYPE_OFFSET = -4; */
+
+  if (psa->fFeatures & FADF_HAVEVARTYPE)
+  {
+    /* VT tag @ negative offset 4 in the array descriptor */
+    FIXME("Returning VT_BSTR instead of VT_...");
+    vt = VT_BSTR;
+  }
+  else if (psa->fFeatures & FADF_RECORD)
+  {
+    vt = VT_RECORD;
+  }
+  else if (psa->fFeatures & FADF_DISPATCH)
+  {
+    vt = VT_DISPATCH;
+  }
+  else if (psa->fFeatures & FADF_UNKNOWN)
+  {
+    vt = VT_UNKNOWN;
+  }
+
+  if (vt != VT_EMPTY)
+  {
+    *pvt = vt;
+    hr = S_OK;
+  }
+  
+  TRACE("HRESULT = %08lx", hr);
+  return hr;
+}
