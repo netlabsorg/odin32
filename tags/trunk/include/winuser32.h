@@ -1,4 +1,4 @@
-/* $Id: winuser32.h,v 1.9 2001-02-24 13:31:37 sandervl Exp $ */
+/* $Id: winuser32.h,v 1.10 2001-04-27 17:34:52 sandervl Exp $ */
 
 /*
  * Internal functions exported by user32
@@ -21,6 +21,7 @@ void WIN32API TestWideLine (pDCData pHps);
 BOOL WIN32API changePageXForm(pDCData pHps, POINTL *pValue, int x, int y, POINTL *pPrev);
 BOOL WIN32API setPageXForm(pDCData pHps);
 VOID WIN32API selectClientArea(pDCData pHps);
+VOID WIN32API checkOrigin(pDCData pHps);
 VOID WIN32API removeClientArea(pDCData pHps);
 LONG WIN32API clientHeight(HWND hwnd, pDCData pHps);
 int  WIN32API setMapMode(pDCData pHps, int mode);

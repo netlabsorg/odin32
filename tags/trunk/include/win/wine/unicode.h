@@ -110,6 +110,7 @@ static inline WCHAR *strcpyW( WCHAR *dst, const WCHAR *src )
     while(*src) {
        *p++ = *src++;
     }
+    *p = 0;
 #endif
     return dst;
 }
