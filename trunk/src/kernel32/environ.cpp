@@ -1,4 +1,4 @@
-/* $Id: environ.cpp,v 1.12 2001-11-14 12:30:34 phaller Exp $ */
+/* $Id: environ.cpp,v 1.13 2001-11-14 18:38:48 sandervl Exp $ */
 
 /*
  * Win32 environment file functions for OS/2
@@ -282,13 +282,7 @@ ODINFUNCTION3(DWORD,   ExpandEnvironmentStringsW,
               LPWSTR,  lpDst,
               DWORD,   nSize)
 {
-#ifdef __WIN32OS2__
-  LPSTR srcA;
-  STACK_strdupWtoA(lpSrc, srcA)
-#else
   LPSTR srcA = HEAP_strdupWtoA( GetProcessHeap(), 0, lpSrc );
-#endif
-  
   LPSTR dstA = lpDst ? (LPSTR)HeapAlloc( GetProcessHeap(), 0, nSize ) : NULL;
 
   dprintf(("KERNEL32:ExpandEnvironmentStringsW(%08x,%08x,%08x)", lpSrc, lpDst, nSize));
@@ -299,9 +293,7 @@ ODINFUNCTION3(DWORD,   ExpandEnvironmentStringsW,
       lstrcpyAtoW( lpDst, dstA );
       HeapFree( GetProcessHeap(), 0, dstA );
     }
-#ifndef __WIN32OS2__
   HeapFree( GetProcessHeap(), 0, srcA );
-#endif
   return ret;
 }
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: msgbox.c,v 1.5 2001-11-14 12:57:28 phaller Exp $ */
+/* $Id: msgbox.c,v 1.6 2001-11-14 18:33:03 sandervl Exp $ */
 /*
  * Message boxes (based on Wine code)
  *
@@ -297,24 +297,13 @@ INT WINAPI MessageBoxA(HWND hWnd, LPCSTR text, LPCSTR title, UINT type)
 INT WINAPI MessageBoxW( HWND hwnd, LPCWSTR text, LPCWSTR title,
                             UINT type )
 {
-    INT ret;
-  
-#ifdef __WIN32OS2__
-    LPSTR titleA;
-    LPSTR textA;
-    STACK_strdupWtoA(title, titleA)
-    STACK_strdupWtoA(text, textA)
-#else
     LPSTR titleA = HEAP_strdupWtoA( GetProcessHeap(), 0, title );
     LPSTR textA  = HEAP_strdupWtoA( GetProcessHeap(), 0, text );
-#endif
+    INT ret;
 
     ret = MessageBoxA( hwnd, textA, titleA, type );
-
-#ifndef __WIN32OS2__
     HeapFree( GetProcessHeap(), 0, titleA );
     HeapFree( GetProcessHeap(), 0, textA );
-#endif
     return ret;
 }
 

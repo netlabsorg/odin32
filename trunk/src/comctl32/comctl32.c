@@ -440,16 +440,9 @@ DrawStatusTextA (HDC hdc, LPRECT lprc, LPCSTR text, UINT style)
 VOID WINAPI
 DrawStatusTextW (HDC hdc, LPRECT lprc, LPCWSTR text, UINT style)
 {
-#ifdef __WIN32OS2__
-    LPSTR p;
-    STACK_strdupWtoA(text, p)
-#else
     LPSTR p = HEAP_strdupWtoA (GetProcessHeap (), 0, text);
-#endif
     DrawStatusTextA (hdc, lprc, p, style);
-#ifndef __WIN32OS2__
     HeapFree (GetProcessHeap (), 0, p );
-#endif
 }
 
 
