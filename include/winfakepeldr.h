@@ -1,4 +1,4 @@
-/* $Id: winfakepeldr.h,v 1.1 1999-10-23 12:36:09 sandervl Exp $ */
+/* $Id: winfakepeldr.h,v 1.2 1999-11-26 00:04:32 sandervl Exp $ */
 
 /*
  * Win32 PE loader fake image class (RSRC_LOAD)
@@ -20,6 +20,9 @@ class Win32PeLdrRsrcImg : public Win32PeLdrImage
 public:
 	Win32PeLdrRsrcImg(char *szFileName);
 virtual ~Win32PeLdrRsrcImg();
+
+virtual	ULONG     getApi(char *name);
+virtual ULONG     getApi(int ordinal);
 
 virtual BOOL  isDll();
 

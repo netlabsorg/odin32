@@ -1,4 +1,4 @@
-/* $Id: windllpeldr.h,v 1.1 1999-09-15 23:29:37 sandervl Exp $ */
+/* $Id: windllpeldr.h,v 1.2 1999-11-26 00:04:32 sandervl Exp $ */
 
 /*
  * Win32 PE loader Dll class
@@ -22,8 +22,6 @@ public:
 virtual ~Win32PeLdrDll();
 
 virtual BOOL  init(ULONG reservedMem);
-virtual	ULONG getApi(char *name);
-virtual ULONG getApi(int ordinal);
 
 virtual BOOL  isLxDll();
 
