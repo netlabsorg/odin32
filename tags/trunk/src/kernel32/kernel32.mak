@@ -1,4 +1,4 @@
-# $Id: kernel32.mak,v 1.6 2001-05-30 01:36:07 phaller Exp $
+# $Id: kernel32.mak,v 1.7 2001-06-21 21:07:54 sandervl Exp $
 
 #
 # Odin32 API
@@ -15,6 +15,12 @@ MAKEFILE=kernel32.mak
 # Compiler, tools, and interference rules.
 #
 !include ../../makefile.inc
+
+#
+# Overrides.
+#
+##CDEFINES    = $(CDEFINES) -DUSE_OS2SEMAPHORES
+
 
 #
 # Object files. Prefix with OBJDIR and one space before the '\'.

@@ -1,4 +1,4 @@
-/* $Id: hmdevice.h,v 1.26 2001-04-26 13:22:44 sandervl Exp $ */
+/* $Id: hmdevice.h,v 1.27 2001-06-21 21:07:53 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -208,15 +208,27 @@ public:
                              DWORD         nNumberOfBytesToLockHigh,
                              LPOVERLAPPED  lpOverlapped);
 
-                /* this is a handler method for calls to WaitForSingleObject */
+  /* this is a handler method for calls to WaitForSingleObject */
   virtual DWORD WaitForSingleObject  (PHMHANDLEDATA pHMHandleData,
                                       DWORD  dwTimeout);
 
-              /* this is a handler method for calls to WaitForSingleObjectEx */
+  /* this is a handler method for calls to WaitForSingleObjectEx */
   virtual DWORD WaitForSingleObjectEx(PHMHANDLEDATA pHMHandleData,
                                       DWORD  dwTimeout,
                                       BOOL   fAlertable);
 
+  virtual DWORD MsgWaitForMultipleObjects(PHMHANDLEDATA pHMHandleData,
+                                          DWORD      nCount,
+                                          PHANDLE       pHandles,
+                                          BOOL       fWaitAll,
+                                          DWORD      dwMilliseconds,
+                                          DWORD      dwWakeMask);
+
+  virtual DWORD WaitForMultipleObjects (PHMHANDLEDATA pHMHandleData,
+                                        DWORD   cObjects,
+                                        PHANDLE lphObjects,
+                                        BOOL    fWaitAll,
+                                        DWORD   dwTimeout);
 
   /***************************************************************************
    * Events                                                                  *
