@@ -1,4 +1,4 @@
-/* $Id: odininst.cpp,v 1.4 2001-04-22 10:55:25 sandervl Exp $ */
+/* $Id: odininst.cpp,v 1.5 2001-05-17 11:26:29 sandervl Exp $ */
 /*
  * Odin WarpIn installation app
  *
@@ -524,6 +524,14 @@ BOOL InitSystemAndRegistry()
    RegSetValueEx(hkey, "NtfsDisable8dot3NameCreation",0,REG_DWORD, (LPBYTE)&val, sizeof(DWORD));
    val = 0x1;
    RegSetValueEx(hkey, "Win95TruncatedExtensions",0,REG_DWORD, (LPBYTE)&val, sizeof(DWORD));
+   RegCloseKey(hkey);
+
+//[HKEY_LOCAL_MACHINE\HARDWARE\DEVICEMAP\SERIALCOMM]
+//"Serial1"="COM2"
+   if(RegCreateKey(HKEY_LOCAL_MACHINE,"HARDWARE\\DEVICEMAP\\SERIALCOMM",&hkey)!=ERROR_SUCCESS) {
+    goto initreg_error;
+   }
+   RegSetValueEx(hkey, "Serial1",0,REG_SZ, (LPBYTE)"COM2", 5);
    RegCloseKey(hkey);
 
 
