@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2000-11-19 08:26:36 bird Exp $
+# $Id: makefile,v 1.4 2000-11-21 04:33:25 bird Exp $
 
 #
 # PD-Win32 API
@@ -20,12 +20,6 @@ EXETARGET = 1
 
 
 #
-# Overrides
-#
-LD2FLAGS = $(LD2FLAGS_ODINCRT) /PMTYPE:pm /STACK:0x100000 /NOBASE
-
-
-#
 # Object files. Prefix with OBJDIR and one space before the '\'.
 #
 OBJS = \
@@ -37,6 +31,7 @@ $(OBJDIR)\odininst.obj
 #
 LIBS = \
 os2386.lib \
+$(RTLLIB) \
 $(PDWIN32_LIB)\kernel32.lib
 
 
