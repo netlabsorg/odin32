@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2543 2003-04-07 18:39:25 sandervl Exp $ */
+/* $Id: changelog,v 1.2544 2003-04-08 12:31:30 sandervl Exp $ */
+
+ 2002-04-08: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o Menu control: do not paint default menu item strings in bold
+                                if in OS/2 GUI mode
 
  2003-04-04: Platon Fomichev <platon@innotek   >
     - NTDLL:    o Massive update. NTDLL internal tests, almost all
