@@ -1,4 +1,4 @@
-; $Id: user32dbg.def,v 1.10 2003-02-24 17:02:43 sandervl Exp $
+; $Id: user32dbg.def,v 1.11 2003-03-03 16:36:26 sandervl Exp $
 
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
 DESCRIPTION 'Odin32 System Dll - User32'
@@ -714,7 +714,6 @@ EXPORTS
     ; Do NOT change this ordinal
     _SetWindowAppearance@4                                       @2030 NONAME
 
-    _OSLibWinCreateObject@32                                     @2031 NONAME
     _ConvertIconGroup@12                                         @2032 NONAME
     _ConvertIconGroupIndirect@12                                 @2037 NONAME
 
