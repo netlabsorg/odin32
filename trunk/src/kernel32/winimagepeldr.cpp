@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.22 1999-12-12 14:32:38 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.23 1999-12-13 19:28:15 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -48,6 +48,11 @@
 #include "oslibdos.h"
 #include "mmap.h"
 #include <wprocess.h>
+
+//Define COMMIT_ALL to let the pe loader commit all sections of the image
+//This is very useful during debugging as you'll get lots of exceptions
+//otherwise.
+#define COMMIT_ALL
 
 char szErrorTitle[]     = "Odin";
 char szMemErrorMsg[]    = "Memory allocation failure";
@@ -477,17 +482,34 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
 	pFixups = (PIMAGE_BASE_RELOCATION)ImageDirectoryOffset(win32file, IMAGE_DIRECTORY_ENTRY_BASERELOC);
 	commitPage((ULONG)pFixups, FALSE);
    }
-//   if(fh.Characteristics & IMAGE_FILE_DLL) {
-    	if(processExports((char *)win32file) == FALSE) {
-        	dprintf((LOG, "Failed to process exported apis" ));
-	    	goto failure;
-    	}
-//   }
-  }
-
-  for (i=0; i<nSections; i++) {
+#ifdef COMMIT_ALL
+   for (i=0; i<nSections; i++) {
 	commitPage((ULONG)section[i].realvirtaddr, FALSE, COMPLETE_SECTION);
+   }
+#else
+   for (i=0; i<nSections; i++) {
+	switch(section[i].type)
+	{
+	case SECTION_IMPORT:
+	case SECTION_RELOC:
+	case SECTION_EXPORT:
+		commitPage((ULONG)section[i].realvirtaddr, FALSE, COMPLETE_SECTION);
+		break;
+	}
+   }
+#endif
+   if(processExports((char *)win32file) == FALSE) {
+       	dprintf((LOG, "Failed to process exported apis" ));
+    	goto failure;
+   }
   }
+#ifdef COMMIT_ALL
+  else {
+   for (i=0; i<nSections; i++) {
+	commitPage((ULONG)section[i].realvirtaddr, FALSE, COMPLETE_SECTION);
+   }
+  }
+#endif
 
   //SvL: Use pointer to image header as module handle now. Some apps needs this
   hinstance = (HINSTANCE)realBaseAddress;
@@ -894,7 +916,7 @@ BOOL Win32PeLdrImage::setFixups(ULONG virtAddress, ULONG size)
 					return FALSE;
     				}
 				//SvL: Read page from disk
-				commitPage(newpage, TRUE, SINGLE_PAGE);
+				commitPage(newpage, FALSE, SINGLE_PAGE);
 
     				//SvL: Enable write access
     				DosSetMem((PVOID)newpage, PAGE_SIZE, PAG_READ|PAG_WRITE);
@@ -1413,7 +1435,7 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
         ulCurFixup += sizeof(IMAGE_THUNK_DATA);
         j++;
 	if((ulCurFixup & 0xfff) == 0) {
-    		commitPage(ulCurFixup & ~0xfff, TRUE, SINGLE_PAGE);
+    		commitPage(ulCurFixup & ~0xfff, FALSE, SINGLE_PAGE);
     		DosSetMem((PVOID)(ulCurFixup & ~0xfff), PAGE_SIZE, PAG_READ|PAG_WRITE);
     		nrPages++;
 	}
