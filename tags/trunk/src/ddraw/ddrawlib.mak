@@ -1,4 +1,4 @@
-# $Id: ddrawlib.mak,v 1.1 2001-09-25 18:23:41 sandervl Exp $
+# $Id: ddrawlib.mak,v 1.2 2001-10-15 17:20:33 sandervl Exp $
 
 #
 # Odin32 API
@@ -42,6 +42,7 @@ $(OBJDIR)\os2surface.obj \
 $(OBJDIR)\os2palette.obj \
 $(OBJDIR)\os2palset.obj \
 $(OBJDIR)\os2fsdd.obj \
+$(OBJDIR)\oslibgpi.obj \
 $(OBJDIR)\rectangle.obj \
 $(OBJDIR)\initterm.obj \
 $(OBJDIR)\os2util.obj \
