@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.1160 2000-10-02 18:57:14 sandervl Exp $ */
+ /* $Id: changelog,v 1.1161 2000-10-02 19:07:53 sandervl Exp $ */
 
  2000-10-02: Sander van Leeuwen <sandervl@xs4all.nl>
     - SHLWAPI:  Rewrote VERSION_OsIsUnicode (same as SHELL_OsIsUnicode now)
@@ -12,7 +12,7 @@
                 [WinVersion]
                 Version=Win98   
     - OLE32:    Added stubs for CoGetInstanceFromFile & CoGetInstanceFromIStorage
-    - KERNEL32, WSOCK32, WINMM, include\odinwrap.h
+    - KERNEL32, WSOCK32, WINMM, include\odinwrap.h, SHLWAPI, WNASPI32
                 Changes/fixes for new ODINFUNCTION macros
 
  2000-10-02: Patrick Haller <phaller@gmx.net>
