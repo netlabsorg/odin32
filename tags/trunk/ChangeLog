@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1496 2001-06-10 21:58:07 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1497 2001-06-10 22:00:40 sandervl Exp $ */
 
  2001-06-10: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o SetParent bugfix (caused crashes in user32 after yesterday's changes)
@@ -14,7 +14,7 @@
     - WIN16LDR: o Preliminary version of winos2 loader for 16 bits installers
                   Overrides GetVersion & WinExec functions to return the
                   version NT returns and to launch 32 bits programs (using pe).
-                  (NOT FINISHED)
+                  (NOT FINISHED and not included in daily build)
     - PELDR:    o Execute win16 loader for NE executables.
 
  2001-06-09: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
