@@ -1,4 +1,4 @@
-/* $Id: trackbar.c,v 1.23 1999-11-17 17:06:23 cbratschi Exp $ */
+/* $Id: trackbar.c,v 1.24 1999-12-27 22:54:49 cbratschi Exp $ */
 /*
  * Trackbar control
  *
@@ -94,7 +94,7 @@ static void TRACKBAR_RecalculateTics (HWND hwnd,TRACKBAR_INFO *infoPtr,BOOL rest
 
       for (i = 0;i < infoPtr->uNumTics;i++)
       {
-        if (infoPtr->tics[i] >= infoPtr->nRangeMin && infoPtr->tics[i] <= infoPtr->nRangeMax)
+        if ((infoPtr->tics[i] >= infoPtr->nRangeMin) && (infoPtr->tics[i] <= infoPtr->nRangeMax))
         {
           oldTics[count] = infoPtr->tics[i];
           count++;
@@ -108,7 +108,7 @@ static void TRACKBAR_RecalculateTics (HWND hwnd,TRACKBAR_INFO *infoPtr,BOOL rest
       return;
     }
 
-    if (infoPtr->uTicFreq && infoPtr->nRangeMax > infoPtr->nRangeMin && (dwStyle & TBS_AUTOTICKS))
+    if (infoPtr->uTicFreq && (infoPtr->nRangeMax > infoPtr->nRangeMin) && (dwStyle & TBS_AUTOTICKS))
     {
       //Tics without start and end tic
       nrTics = (infoPtr->nRangeMax-infoPtr->nRangeMin)/infoPtr->uTicFreq-1;
@@ -190,7 +190,7 @@ TRACKBAR_CalcChannel (HWND hwnd,TRACKBAR_INFO *infoPtr)
       channel->top    = lpRect.top+CHANNEL_SPACE;
       channel->bottom = lpRect.bottom-CHANNEL_SPACE;
 
-      if (dwStyle & TBS_BOTH || dwStyle & TBS_NOTICKS)
+      if ((dwStyle & TBS_BOTH) || (dwStyle & TBS_NOTICKS))
       { //center
         channel->left  = (lpRect.right-channelSize)/2;
         channel->right = (lpRect.right+channelSize)/2;
@@ -207,7 +207,7 @@ TRACKBAR_CalcChannel (HWND hwnd,TRACKBAR_INFO *infoPtr)
     {
       channel->left = lpRect.left+CHANNEL_SPACE;
       channel->right = lpRect.right-CHANNEL_SPACE;
-      if (dwStyle & TBS_BOTH || dwStyle & TBS_NOTICKS)
+      if ((dwStyle & TBS_BOTH) || (dwStyle & TBS_NOTICKS))
       { //center
         channel->top    = (lpRect.bottom-channelSize)/2;
         channel->bottom = (lpRect.bottom+channelSize)/2;
@@ -280,7 +280,7 @@ TRACKBAR_CalcSelection (HWND hwnd, TRACKBAR_INFO *infoPtr)
     selection = &infoPtr->rcSelection;
     range = infoPtr->nRangeMax-infoPtr->nRangeMin;
 
-    if (range <= 0 || selMin == selMax) SetRectEmpty(selection);
+    if ((range <= 0) || (selMin == selMax)) SetRectEmpty(selection);
     else
         if (!(GetWindowLongA(hwnd, GWL_STYLE) & TBS_VERT))
         {   //Horizontal
@@ -493,7 +493,7 @@ static VOID TRACKBAR_DrawThumb(TRACKBAR_INFO *infoPtr,HWND hwnd,HDC hdc,DWORD dw
       HBRUSH hbr,hbrOld;
       RECT thumb = infoPtr->rcThumb;
 
-      if (infoPtr->flags & TB_DRAG_MODE || !IsWindowEnabled(hwnd)) hbr = CreateSolidBrush(GetSysColor(COLOR_3DHILIGHT));
+      if ((infoPtr->flags & TB_DRAG_MODE) || !IsWindowEnabled(hwnd)) hbr = CreateSolidBrush(GetSysColor(COLOR_3DHILIGHT));
       else hbr = CreateSolidBrush(GetSysColor(COLOR_3DFACE));
       hbrOld = SelectObject(hdc,hbr);
 
@@ -802,7 +802,7 @@ static VOID TRACKBAR_Draw(HWND hwnd,HDC hdc)
         INT width = (dwStyle & TBS_VERT) ? rcChannel.bottom-rcChannel.top:rcChannel.right-rcChannel.left;
 
         //check if maximum of visible marks is reached
-        if (dwStyle & TBS_AUTOTICKS && infoPtr->uNumTics > 1 && (INT)(width*infoPtr->tics[0]/range) == (INT)(width*infoPtr->tics[1]/range))
+        if ((dwStyle & TBS_AUTOTICKS) && (infoPtr->uNumTics > 1) && ((INT)(width*infoPtr->tics[0]/range) == (INT)(width*infoPtr->tics[1]/range)))
         {
           //draw all pixels at once -> much faster
           if (dwStyle & TBS_VERT)
@@ -901,7 +901,7 @@ static VOID TRACKBAR_UpdateThumbPosition(HWND hwnd,INT lastPos,BOOL mustRedraw)
      infoPtr->nPos = infoPtr->dragPos;
      infoPtr->flags &= ~TB_DRAGPOSVALID;
    }
-   if (!mustRedraw && infoPtr->nPos == lastPos) return;
+   if (!mustRedraw && (infoPtr->nPos == lastPos)) return;
 
    if (dwStyle & TBS_NOTHUMB) return;
 
@@ -930,9 +930,9 @@ static VOID TRACKBAR_UpdateThumbPosition(HWND hwnd,INT lastPos,BOOL mustRedraw)
    TRACKBAR_Draw(hwnd,hdcCompatible);
    if (dwStyle & TBS_VERT)
    {
-     if (lastRect.top > newRect.top && lastRect.top < newRect.bottom)
+     if ((lastRect.top > newRect.top) && (lastRect.top < newRect.bottom))
        BitBlt(hdc,newRect.left,newRect.top,newRect.right-newRect.left,lastRect.bottom-newRect.top,hdcCompatible,newRect.left,newRect.top,SRCCOPY);
-     else if (lastRect.bottom < newRect.bottom && lastRect.bottom > newRect.top)
+     else if ((lastRect.bottom < newRect.bottom) && (lastRect.bottom > newRect.top))
        BitBlt(hdc,lastRect.left,lastRect.top,lastRect.right-lastRect.left,newRect.bottom-lastRect.top,hdcCompatible,lastRect.left,lastRect.top,SRCCOPY);
      else
      {
@@ -941,9 +941,9 @@ static VOID TRACKBAR_UpdateThumbPosition(HWND hwnd,INT lastPos,BOOL mustRedraw)
      }
    } else
    {
-     if (lastRect.right > newRect.left && lastRect.right < newRect.right)
+     if ((lastRect.right > newRect.left) && (lastRect.right < newRect.right))
        BitBlt(hdc,lastRect.left,lastRect.top,newRect.right-lastRect.left,lastRect.bottom-lastRect.top,hdcCompatible,lastRect.left,lastRect.top,SRCCOPY);
-     else if (lastRect.left < newRect.right && lastRect.left > newRect.left)
+     else if ((lastRect.left < newRect.right) && (lastRect.left > newRect.left))
        BitBlt(hdc,newRect.left,newRect.top,lastRect.right-newRect.left,newRect.bottom-newRect.top,hdcCompatible,newRect.left,newRect.top,SRCCOPY);
      else
      {
@@ -1326,7 +1326,7 @@ TRACKBAR_SetRange (HWND hwnd, WPARAM wParam, LPARAM lParam)
       newMin = newMax;
       newMax = x;
     }
-    if (newMin == infoPtr->nRangeMin && newMax == infoPtr->nRangeMax) return 0;
+    if ((newMin == infoPtr->nRangeMin) && (newMax == infoPtr->nRangeMax)) return 0;
 
     infoPtr->nRangeMin = newMin;
     infoPtr->nRangeMax = newMax;
@@ -1453,7 +1453,7 @@ TRACKBAR_SetSel(HWND hwnd,WPARAM wParam,LPARAM lParam)
     newMin = (INT)LOWORD(lParam);
     newMax = (INT)HIWORD(lParam);
 
-    if (infoPtr->nSelMin == newMin && infoPtr->nSelMax == newMax) return 0;
+    if ((infoPtr->nSelMin == newMin) && (infoPtr->nSelMax == newMax)) return 0;
     infoPtr->nSelMin = newMin;
     infoPtr->nSelMax = newMax;
 
@@ -1466,7 +1466,7 @@ TRACKBAR_SetSel(HWND hwnd,WPARAM wParam,LPARAM lParam)
 
     if (!GetWindowLongA(hwnd, GWL_STYLE) & TBS_ENABLESELRANGE) return 0;
 
-    if (oldMin != newMin || oldMax != newMax)
+    if ((oldMin != newMin) || (oldMax != newMax))
     {
       infoPtr->flags |= TB_SELECTIONCHANGED;
       if (wParam) TRACKBAR_Refresh(hwnd);
@@ -1612,10 +1612,10 @@ TRACKBAR_SetTipSide (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     if (dwStyle & TBS_VERT)
     {
-      if (wParam == TBTS_LEFT || wParam == TBTS_RIGHT) infoPtr->fLocation = (INT)wParam;
+      if ((wParam == TBTS_LEFT) || (wParam == TBTS_RIGHT)) infoPtr->fLocation = (INT)wParam;
     } else
     {
-      if (wParam == TBTS_TOP || wParam == TBTS_BOTTOM) infoPtr->fLocation = (INT)wParam;
+      if ((wParam == TBTS_TOP) || (wParam == TBTS_BOTTOM)) infoPtr->fLocation = (INT)wParam;
     }
 
     return fTemp;
@@ -1814,56 +1814,56 @@ TRACKBAR_LButtonDown (HWND hwnd, WPARAM wParam, LPARAM lParam)
     thumb = infoPtr->rcThumb;
     fullThumb = infoPtr->rcFullThumb;
     if ((vertical &&
-         clickPoint.y >= thumb.top &&
-         clickPoint.y <= thumb.bottom &&
-         ((dwStyle & TBS_BOTH &&
-           clickPoint.x >= thumb.left &&
-           clickPoint.x <= thumb.right
+         (clickPoint.y >= thumb.top) &&
+         (clickPoint.y <= thumb.bottom) &&
+         (((dwStyle & TBS_BOTH) &&
+           (clickPoint.x >= thumb.left) &&
+           (clickPoint.x <= thumb.right)
           ) ||
-          (dwStyle & TBS_LEFT &&
-           clickPoint.x <= thumb.right &&
-           (clickPoint.x >= thumb.left ||
-            (clickPoint.x >= fullThumb.left &&
-             (thumb.left-clickPoint.x <= clickPoint.y-thumb.top &&
-              thumb.left-clickPoint.x <= thumb.bottom-clickPoint.y
+          ((dwStyle & TBS_LEFT) &&
+           (clickPoint.x <= thumb.right) &&
+           ((clickPoint.x >= thumb.left) ||
+            ((clickPoint.x >= fullThumb.left) &&
+             ((thumb.left-clickPoint.x <= clickPoint.y-thumb.top) &&
+              (thumb.left-clickPoint.x <= thumb.bottom-clickPoint.y)
              )
             )
            )
           ) ||
           (!(dwStyle & (TBS_BOTH | TBS_LEFT)) &&
-           clickPoint.x >= thumb.left &&
-           (clickPoint.x <= thumb.right ||
-            (clickPoint.x <= fullThumb.right &&
-             (clickPoint.x-thumb.right <= clickPoint.y-thumb.top &&
-              clickPoint.x-thumb.right <= thumb.bottom-clickPoint.y
+           (clickPoint.x >= thumb.left) &&
+           ((clickPoint.x <= thumb.right) ||
+            ((clickPoint.x <= fullThumb.right) &&
+             ((clickPoint.x-thumb.right <= clickPoint.y-thumb.top) &&
+              (clickPoint.x-thumb.right <= thumb.bottom-clickPoint.y)
              )
             )
            )
          ))
         ) ||
         (!vertical &&
-         clickPoint.x >= thumb.left &&
-         clickPoint.x <= thumb.right &&
-         ((dwStyle & TBS_BOTH &&
-           clickPoint.y >= thumb.top &&
-           clickPoint.y <= thumb.bottom
+         (clickPoint.x >= thumb.left) &&
+         (clickPoint.x <= thumb.right) &&
+         (((dwStyle & TBS_BOTH) &&
+           (clickPoint.y >= thumb.top) &&
+           (clickPoint.y <= thumb.bottom)
           ) ||
-          (dwStyle & TBS_TOP &&
-           clickPoint.y <= thumb.bottom &&
-           (clickPoint.y >= thumb.top ||
-            (clickPoint.y >= fullThumb.top &&
-             (thumb.top-clickPoint.y <= clickPoint.x-thumb.left &&
-              thumb.top-clickPoint.y <= thumb.right-clickPoint.x
+          ((dwStyle & TBS_TOP) &&
+           (clickPoint.y <= thumb.bottom) &&
+           ((clickPoint.y >= thumb.top) ||
+            ((clickPoint.y >= fullThumb.top) &&
+             ((thumb.top-clickPoint.y <= clickPoint.x-thumb.left) &&
+              (thumb.top-clickPoint.y <= thumb.right-clickPoint.x)
              )
             )
            )
           ) ||
           (!(dwStyle & (TBS_BOTH | TBS_TOP)) &&
-           clickPoint.y >= thumb.top &&
-           (clickPoint.y <= thumb.bottom ||
-            (clickPoint.y <= fullThumb.bottom &&
-             (clickPoint.y-thumb.bottom <= clickPoint.x-thumb.left &&
-              clickPoint.y-thumb.bottom <= thumb.right-clickPoint.x
+           (clickPoint.y >= thumb.top) &&
+           ((clickPoint.y <= thumb.bottom) ||
+            ((clickPoint.y <= fullThumb.bottom) &&
+             ((clickPoint.y-thumb.bottom <= clickPoint.x-thumb.left) &&
+              (clickPoint.y-thumb.bottom <= thumb.right-clickPoint.x)
              )
             )
            )

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.121 1999-12-27 17:08:08 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.122 1999-12-27 22:53:53 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -361,7 +361,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   }
 
   /* Fix the coordinates */
-  if (cs->x == CW_USEDEFAULT || cs->x == CW_USEDEFAULT16)
+  if ((cs->x == CW_USEDEFAULT) || (cs->x == CW_USEDEFAULT16))
   {
 //        PDB *pdb = PROCESS_Current();
 
@@ -381,7 +381,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         * calc.exe that comes with Win98 (only Win98, it's different from
         * the one that comes with Win95 and NT)
         */
-        if (cs->y != CW_USEDEFAULT && cs->y != CW_USEDEFAULT16) sw = cs->y;
+        if ((cs->y != CW_USEDEFAULT) && (cs->y != CW_USEDEFAULT16)) sw = cs->y;
 
         /* We have saved cs->y, now we can trash it */
 #if 0
@@ -396,7 +396,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
             cs->y = 0;
 //        }
   }
-  if (cs->cx == CW_USEDEFAULT || cs->cx == CW_USEDEFAULT16)
+  if ((cs->cx == CW_USEDEFAULT) || (cs->cx == CW_USEDEFAULT16))
   {
 #if 0
         PDB *pdb = PROCESS_Current();
@@ -438,7 +438,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   else
   {
         SetParent(0);
-        if (!cs->hwndParent || cs->hwndParent == windowDesktop->getWindowHandle()) {
+        if (!cs->hwndParent || (cs->hwndParent == windowDesktop->getWindowHandle())) {
             owner = NULL;
         }
         else
@@ -783,8 +783,8 @@ ULONG Win32BaseWindow::MsgDestroy()
     }
     SendInternalMessageA(WM_NCDESTROY, 0, 0);
 
-    if (hwndHorzScroll && OSLibWinQueryWindow(hwndHorzScroll,QWOS_PARENT) == OSLibWinQueryObjectWindow()) OSLibWinDestroyWindow(hwndHorzScroll);
-    if (hwndVertScroll && OSLibWinQueryWindow(hwndVertScroll,QWOS_PARENT) == OSLibWinQueryObjectWindow()) OSLibWinDestroyWindow(hwndVertScroll);
+    if (hwndHorzScroll && (OSLibWinQueryWindow(hwndHorzScroll,QWOS_PARENT) == OSLibWinQueryObjectWindow())) OSLibWinDestroyWindow(hwndHorzScroll);
+    if (hwndVertScroll && (OSLibWinQueryWindow(hwndVertScroll,QWOS_PARENT) == OSLibWinQueryObjectWindow())) OSLibWinDestroyWindow(hwndVertScroll);
 
     TIMER_KillTimerFromWindow(OS2Hwnd);
 
@@ -990,7 +990,7 @@ ULONG Win32BaseWindow::MsgButton(MSG *msg)
         else    hwndTop = (GetTopParent()) ? GetTopParent()->getWindowHandle() : 0;
 
         HWND hwndActive = GetActiveWindow();
-        if (hwndTop && getWindowHandle() != hwndActive)
+        if (hwndTop && (getWindowHandle() != hwndActive))
         {
                 LONG ret = SendInternalMessageA(WM_MOUSEACTIVATE, hwndTop,
                                                 MAKELONG( lastHitTestVal, msg->message) );
@@ -1341,7 +1341,7 @@ LONG Win32BaseWindow::HandleSysCommand(WPARAM wParam, POINT *pt32)
 {
     UINT uCommand = wParam & 0xFFF0;
 
-    if (getStyle() & WS_CHILD && uCommand != SC_KEYMENU )
+    if ((getStyle() & WS_CHILD) && (uCommand != SC_KEYMENU))
         ScreenToClient(getParent()->getWindowHandle(), pt32 );
 
     switch (uCommand)
@@ -2201,7 +2201,7 @@ LRESULT Win32BaseWindow::BroadcastMessageA(int type, UINT msg, WPARAM wParam, LP
     for(int i=0;i<MAX_WINDOW_HANDLES;i++) {
         window = GetWindowFromHandle(hwnd++);
         if(window) {
-            if (window->getStyle() & WS_POPUP || (window->getStyle() & WS_CAPTION) == WS_CAPTION)
+            if ((window->getStyle() & WS_POPUP) || ((window->getStyle() & WS_CAPTION) == WS_CAPTION))
             {
 
                 if(type == BROADCAST_SEND) {
@@ -2227,7 +2227,7 @@ LRESULT Win32BaseWindow::BroadcastMessageW(int type, UINT msg, WPARAM wParam, LP
     for(int i=0;i<MAX_WINDOW_HANDLES;i++) {
         window = GetWindowFromHandle(hwnd++);
         if(window) {
-            if (window->getStyle() & WS_POPUP || (window->getStyle() & WS_CAPTION) == WS_CAPTION)
+            if ((window->getStyle() & WS_POPUP) || ((window->getStyle() & WS_CAPTION) == WS_CAPTION))
             {
 
                 if(type == BROADCAST_SEND) {
@@ -3011,10 +3011,13 @@ VOID Win32BaseWindow::updateWindowStyle(DWORD oldExStyle,DWORD oldStyle)
 {
   if(IsWindowDestroyed()) return;
 
-  //CB: todo: dwExStyle, creating new frame controls, destroy not used, WS_VISIBLE, ...
+  //CB: todo: dwExStyle, creating new frame controls, destroy not used controls, WS_VISIBLE, WS_CHILD, ...
   //    write test cases
-  if (dwStyle & 0xFFFF0000 != oldStyle & 0xFFFF0000)
+  if ((dwStyle & 0xFFFF0000) != (oldStyle & 0xFFFF0000))
+  {
+    //dprintf(("updateWindowStyle: %x %x",oldStyle,dwStyle));
     OSLibSetWindowStyle(OS2HwndFrame, dwStyle, fTaskList);
+  }
 }
 //******************************************************************************
 //******************************************************************************
@@ -3270,7 +3273,7 @@ HWND Win32BaseWindow::getNextDlgTabItem(HWND hwndCtrl, BOOL fPrevious)
             if(child == NULL) break;
         }
 
-        if (!child || child->getParent() != this)
+        if (!child || (child->getParent() != this))
         {
             retvalue = 0;
             goto END;
@@ -3338,7 +3341,7 @@ HWND Win32BaseWindow::getNextDlgGroupItem(HWND hwndCtrl, BOOL fPrevious)
             if(child == NULL) break;
         }
 
-        if (!child || child->getParent() != this)
+        if (!child || (child->getParent() != this))
         {
             retvalue = 0;
             goto END;
@@ -3367,7 +3370,7 @@ HWND Win32BaseWindow::getNextDlgGroupItem(HWND hwndCtrl, BOOL fPrevious)
     nextchild = (Win32BaseWindow *)child->getNextChild();
     while (TRUE)
     {
-        if (!nextchild || nextchild->getStyle() & WS_GROUP)
+        if (!nextchild || (nextchild->getStyle() & WS_GROUP))
         {
             /* Wrap-around to the beginning of the group */
             Win32BaseWindow *pWndTemp;

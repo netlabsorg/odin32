@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.26 1999-12-27 17:08:07 cbratschi Exp $ */
+/* $Id: edit.cpp,v 1.27 1999-12-27 22:53:52 cbratschi Exp $ */
 /*
  *      Edit control
  *
@@ -1937,7 +1937,7 @@ static INT EDIT_EM_GetLine(HWND hwnd, EDITSTATE *es, INT line, LPSTR lpch)
         INT len;
         INT i;
 
-        if (!lpch || *(WORD*)lpch == 0) return 0;
+        if (!lpch || (*(WORD*)lpch == 0)) return 0;
 
         if (es->style & ES_MULTILINE) {
                 if (line >= es->line_count)
@@ -2329,7 +2329,7 @@ static void EDIT_EM_ReplaceSel(HWND hwnd, EDITSTATE *es, BOOL can_undo, LPCSTR l
         }
         if (strl)
         {
-          if (es->style & ES_NUMBER && !EDIT_CheckNumber((CHAR*)lpsz_replace))
+          if ((es->style & ES_NUMBER) && !EDIT_CheckNumber((CHAR*)lpsz_replace))
             MessageBeep(MB_ICONEXCLAMATION);
           else
           {
@@ -2534,7 +2534,7 @@ static void EDIT_EM_SetHandle(HWND hwnd, EDITSTATE *es, HLOCAL hloc)
         es->buffer_size = LocalSize(es->hloc) - 1;
         EDIT_LockBuffer(hwnd, es);
 
-        if (es->text && es->text[0] != 0)
+        if (es->text && (es->text[0] != 0))
         {
           if (es->style & ES_NUMBER)
           {
@@ -2622,7 +2622,7 @@ static void EDIT_EM_SetMargins(HWND hwnd, EDITSTATE *es, INT action,
         }
         //TRACE_(edit)("left=%d, right=%d\n", es->left_margin, es->right_margin);
 
-        if (oldLeft != es->left_margin || oldRight != es->right_margin)
+        if ((oldLeft != es->left_margin) || (oldRight != es->right_margin))
         {
           GetClientRect(hwnd, &r);
           EDIT_SetRectNP(hwnd, es, &r);
@@ -2737,7 +2737,7 @@ static void EDIT_EM_SetSel(HWND hwnd, EDITSTATE *es, UINT start, UINT end, BOOL 
         ORDER_UINT(end, old_end);
         ORDER_UINT(start, old_start);
         ORDER_UINT(old_start, old_end);
-        if (start == old_start && end == old_end) return;
+        if ((start == old_start) && (end == old_end)) return;
         if (end != old_start)
         {
 /*
@@ -2894,7 +2894,7 @@ static void EDIT_WM_Char(HWND hwnd, EDITSTATE *es, CHAR c, DWORD key_data)
 
                   if (es->style & ES_NUMBER)
                   {
-                    if ((BYTE)c < '0' || (BYTE)c > '9') MessageBeep(MB_ICONEXCLAMATION);
+                    if (((BYTE)c < '0') || ((BYTE)c > '9')) MessageBeep(MB_ICONEXCLAMATION);
                     return;
                   }
                   str[0] = c;
@@ -3917,7 +3917,7 @@ static LRESULT EDIT_WM_SysKeyDown(HWND hwnd, EDITSTATE *es, INT key, DWORD key_d
                 if (EDIT_EM_CanUndo(hwnd, es))
                         EDIT_EM_Undo(hwnd, es);
                 return 0;
-        } else if (key == VK_UP || key == VK_DOWN)
+        } else if ((key == VK_UP) || (key == VK_DOWN))
                 if (EDIT_CheckCombo(hwnd, WM_SYSKEYDOWN, key, key_data))
                         return 0;
         return DefWindowProcA(hwnd, WM_SYSKEYDOWN, (WPARAM)key, (LPARAM)key_data);
