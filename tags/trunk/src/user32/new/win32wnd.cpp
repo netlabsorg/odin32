@@ -1,4 +1,4 @@
-/* $Id: win32wnd.cpp,v 1.22 1999-07-25 15:51:56 sandervl Exp $ */
+/* $Id: win32wnd.cpp,v 1.23 1999-07-26 09:01:34 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -39,6 +39,9 @@
 #define HAS_THICKFRAME(style) \
     (((style) & WS_THICKFRAME) && \
      !(((style) & (WS_DLGFRAME|WS_BORDER)) == WS_DLGFRAME))
+
+#define HAS_BORDER(style, exStyle) \
+    ((style & WS_BORDER) || HAS_THICKFRAME(style) || HAS_DLGFRAME(style,exStyle))
 
 //******************************************************************************
 //******************************************************************************
@@ -234,6 +237,9 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 //        }
   }
 
+  if (cs->x < 0) cs->x = 0;
+  if (cs->y < 0) cs->y = 0;
+
   //Allocate window words
   nrUserWindowLong = windowClass->getExtraWndWords();
   if(nrUserWindowLong) {
@@ -344,11 +350,18 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 
   DWORD dwOSWinStyle, dwOSFrameStyle;
 
-  OSLibWinConvertStyle(cs->style, &dwOSWinStyle, &dwOSFrameStyle);
+  OSLibWinConvertStyle(cs->style, cs->dwExStyle, &dwOSWinStyle, &dwOSFrameStyle);
 
-  OS2Hwnd = OSLibWinCreateWindow((getParent()) ? getParent()->getOS2WindowHandle() : 0,
+  //TODO: Test
+#if 1
+  if(cs->style & WS_CHILD) {
+        dwOSFrameStyle = 0;
+  }
+#endif
+
+  OS2Hwnd = OSLibWinCreateWindow((getParent()) ? getParent()->getOS2FrameWindowHandle() : OSLIB_HWND_DESKTOP,
                                  dwOSWinStyle, dwOSFrameStyle, (char *)cs->lpszName,
-                                 (owner) ? owner->getOS2WindowHandle() : 0,
+                                 (owner) ? owner->getOS2FrameWindowHandle() : OSLIB_HWND_DESKTOP,
                                  (hwndLinkAfter == HWND_BOTTOM) ? TRUE : FALSE,
                                  &OS2HwndFrame);
 
@@ -377,6 +390,7 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
     }
   }
 #endif
+
   /* Set the window menu */
   if ((dwStyle & (WS_CAPTION | WS_CHILD)) == WS_CAPTION )
   {
@@ -395,6 +409,21 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   if(windowClass->getIcon())
         SetIcon(windowClass->getIcon());
 
+  if(getParent()) {
+        SetWindowPos(getParent()->getWindowHandle(), rectClient.left, rectClient.top,
+                     rectClient.right-rectClient.left,
+                     rectClient.bottom-rectClient.top,
+                     SWP_NOACTIVATE);
+  }
+  else {
+        SetWindowPos(HWND_TOP, rectClient.left, rectClient.top,
+                     rectClient.right-rectClient.left,
+                     rectClient.bottom-rectClient.top,
+                     SWP_NOACTIVATE);
+  }
+  //Get the client window rectangle
+  GetClientRect(Win32Hwnd, &rectClient);
+
   /* Send the WM_CREATE message
    * Perhaps we shouldn't allow width/height changes as well.
    * See p327 in "Internals".
@@ -403,7 +432,10 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 
   if(SendInternalMessage(WM_NCCREATE, 0, (LPARAM)cs) )
   {
+  //doesn't work right, messes up client rectangle
+#if 0
         SendNCCalcSize(FALSE, &rectWindow, NULL, NULL, 0, &rectClient );
+#endif
         OffsetRect(&rectWindow, maxPos.x - rectWindow.left, maxPos.y - rectWindow.top);
         dprintf(("Sending WM_CREATE"));
         if( (SendInternalMessage(WM_CREATE, 0, (LPARAM)cs )) != -1 )
@@ -414,10 +446,6 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
                                          rectClient.bottom-rectClient.top));
                 SendMessageA(WM_MOVE, 0, MAKELONG( rectClient.left, rectClient.top ) );
             }
-            SetWindowPos(HWND_TOP, rectClient.left, rectClient.top,
-                         rectClient.right-rectClient.left,
-                         rectClient.bottom-rectClient.top,
-                         SWP_NOACTIVATE);
             if (cs->style & WS_VISIBLE) ShowWindow( sw );
 
 #if 0
@@ -431,6 +459,9 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
             return TRUE;
         }
   }
+  OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32WNDPTR, 0);
+  OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32PM_MAGIC, 0);
+  DestroyWindow();
   return FALSE;
 }
 #if 0
@@ -468,7 +499,7 @@ UINT Win32Window::MinMaximize(UINT16 cmd, LPRECT16 lpRect )
                  }
                  else
              flags &= ~WIN_RESTORE_MAX;
-         dwStyle |= WS_MINIMIZE;
+             dwStyle |= WS_MINIMIZE;
 
 #if 0
          if( flags & WIN_NATIVE )
@@ -679,21 +710,25 @@ ULONG Win32Window::MsgDestroy()
 //******************************************************************************
 ULONG Win32Window::MsgEnable(BOOL fEnable)
 {
-  return SendInternalMessageA(WM_ENABLE, fEnable, 0);
+    return SendInternalMessageA(WM_ENABLE, fEnable, 0);
 }
 //******************************************************************************
 //TODO: SW_PARENTCLOSING/OPENING flag (lParam)
 //******************************************************************************
 ULONG Win32Window::MsgShow(BOOL fShow)
 {
-  return SendInternalMessageA(WM_SHOWWINDOW, fShow, 0);
+    return SendInternalMessageA(WM_SHOWWINDOW, fShow, 0);
 }
 //******************************************************************************
 //******************************************************************************
 ULONG Win32Window::MsgMove(ULONG x, ULONG y)
 {
-  dprintf(("MsgMove to (%d,%d)", x, y));
-  return SendInternalMessageA(WM_MOVE, 0, MAKELONG((USHORT)x, (USHORT)y));
+    dprintf(("MsgMove to (%d,%d)", x, y));
+    if(fCreated == FALSE) {
+        return 1;
+    }
+
+    return SendInternalMessageA(WM_MOVE, 0, MAKELONG((USHORT)x, (USHORT)y));
 }
 //******************************************************************************
 //******************************************************************************
@@ -1351,7 +1386,7 @@ BOOL Win32Window::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, int c
  Win32Window *window;
  ULONG        setstate = 0;
 
-  switch(hwndInsertAfter) {
+    switch(hwndInsertAfter) {
     case HWND_BOTTOM:
         hwndInsertAfter = HWNDOS_BOTTOM;
         break;
@@ -1364,37 +1399,68 @@ BOOL Win32Window::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, int c
         window = GetWindowFromHandle(hwndInsertAfter);
         if(window) {
             hwndInsertAfter = window->getOS2WindowHandle();
+            PRECT clientRect = window->getClientRect();
+
+#if 0
+            if(x+cx > clientRect->right - clientRect->left) {
+                cx = (clientRect->right - clientRect->left) - x;
+            }
+            if(y+cy > clientRect->bottom - clientRect->top) {
+                cy = (clientRect->bottom - clientRect->top) - y;
+            }
+#endif
+            //TODO: Not quite right (Solitaire child window placement slightly wrong)
+            if (HAS_DLGFRAME(window->getStyle(), window->getExStyle() ))
+            {
+                x += GetSystemMetrics(SM_CXDLGFRAME);
+                y -= GetSystemMetrics(SM_CYDLGFRAME);
+            }
+            else
+            {
+                if (HAS_THICKFRAME(window->getStyle()))
+                {
+                    x += GetSystemMetrics(SM_CXFRAME);
+                    y -= GetSystemMetrics(SM_CYFRAME);
+                }
+                if (window->getStyle() & WS_BORDER)
+                {
+                    x += GetSystemMetrics(SM_CXBORDER);
+                    y -= GetSystemMetrics(SM_CYBORDER);
+                }
+            }
         }
         else {
             dprintf(("Win32Window::SetWindowPos, unknown hwndInsertAfter %x", hwndInsertAfter));
             hwndInsertAfter = 0;
         }
+
         break;
 
-  }
-  setstate = SWPOS_MOVE | SWPOS_SIZE | SWPOS_ACTIVATE | SWPOS_ZORDER;
-  if(fuFlags & SWP_DRAWFRAME)
-    setstate |= 0; //TODO
-  if(fuFlags & SWP_FRAMECHANGED)
-    setstate |= 0; //TODO
-  if(fuFlags & SWP_HIDEWINDOW)
-    setstate &= ~SWPOS_ZORDER;
-  if(fuFlags & SWP_NOACTIVATE)
-    setstate &= ~SWPOS_ACTIVATE;
-  if(fuFlags & SWP_NOCOPYBITS)
-    setstate |= 0;      //TODO
-  if(fuFlags & SWP_NOMOVE)
-    setstate &= ~SWPOS_MOVE;
-  if(fuFlags & SWP_NOSIZE)
-    setstate &= ~SWPOS_SIZE;
-  if(fuFlags & SWP_NOREDRAW)
-    setstate |= SWPOS_NOREDRAW;
-  if(fuFlags & SWP_NOZORDER)
-    setstate &= ~SWPOS_ZORDER;
-  if(fuFlags & SWP_SHOWWINDOW)
-    setstate |= SWPOS_SHOW;
+    }
+    setstate = SWPOS_MOVE | SWPOS_SIZE | SWPOS_ACTIVATE | SWPOS_ZORDER;
+    if(fuFlags & SWP_DRAWFRAME)
+        setstate |= 0; //TODO
+    if(fuFlags & SWP_FRAMECHANGED)
+        setstate |= 0; //TODO
+    if(fuFlags & SWP_HIDEWINDOW)
+        setstate &= ~SWPOS_ZORDER;
+    if(fuFlags & SWP_NOACTIVATE)
+        setstate &= ~SWPOS_ACTIVATE;
+    if(fuFlags & SWP_NOCOPYBITS)
+        setstate |= 0;      //TODO
+    if(fuFlags & SWP_NOMOVE)
+        setstate &= ~SWPOS_MOVE;
+    if(fuFlags & SWP_NOSIZE)
+        setstate &= ~SWPOS_SIZE;
+    if(fuFlags & SWP_NOREDRAW)
+        setstate |= SWPOS_NOREDRAW;
+    if(fuFlags & SWP_NOZORDER)
+        setstate &= ~SWPOS_ZORDER;
+    if(fuFlags & SWP_SHOWWINDOW)
+        setstate |= SWPOS_SHOW;
 
-  return OSLibWinSetWindowPos(OS2HwndFrame, hwndInsertAfter, x, y, cx, cy, setstate);
+    //TODO send NCCREATE if size changed or SWP_FRAMECHANGED flag specified.
+    return OSLibWinSetWindowPos(OS2HwndFrame, hwndInsertAfter, x, y, cx, cy, setstate);
 }
 //******************************************************************************
 //Also destroys all the child windows (destroy parent, destroy children)
