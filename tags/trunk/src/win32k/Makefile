@@ -1,5 +1,7 @@
 ################################################################################
-# $Id: Makefile,v 1.37 2000-03-09 16:52:56 bird Exp $
+# $Id: Makefile,v 1.38 2000-03-09 20:36:57 bird Exp $
+#
+# Win32k makefile.
 #
 # Copyright 1998-2000 knut st. osmundsen
 #
@@ -7,25 +9,29 @@
 #
 ################################################################################
 
+
+################################################################################
+# Check that makefile.inc exists, If it doesn't we'll try make it.
+# Check that makefile.inc is newer than configure.cmd.
+#     If not newer this might be a fatal problem, so we'll fail.
+################################################################################
+!if [..\..\tools\bin\Exists.cmd makefile.inc] == 1
+!   if [configure.cmd noninteractive]
+!   endif
+!endif
+!if [Check.cmd $(MAKE) -nologo -q -f Check.mk makefile.inc] != 0
+!   error makefile.inc is older than configure.cmd. Re-run configure.cmd!
+!endif
+
+
 ################################################################################
 # Include path definitions
 ################################################################################
-# Note! This crazy !ifdef stuff handles the case when makefile.inc don't exist
-# and someone is trying to make dependencies. A makefile.inc is then generated
-# and we'll try again making dependencies by the dep2 rule.
-!ifdef NODEP
-!   ifdef MAKEFILE_INC
-!       include makefile.inc
-!   else
-PDWIN32_INCLUDE = ..\..\include
-PDWIN32_TOOLS = ..\..\tools\bin
-!   endif
-!else
-!   include makefile.inc
-!endif
+!include makefile.inc
 !include $(PDWIN32_INCLUDE)\pdwin32.tools
 
-NAME = win32k
+NAME = Win32k
+
 
 ################################################################################
 # COMPILER/LINKER/ASSEMBLER
@@ -325,7 +331,6 @@ lib:
     $(MAKE_CMD)
     cd ..
 
-
 ################################################################################
 # Libraries - segments are renamed for the 16-bit libraries.
 ################################################################################
@@ -395,26 +400,27 @@ clean:
 # DEPENDENCIES - c and c++ deps are autogenereated.
 #                asm deps must be updated by hand
 ################################################################################
-# If makefile.inc doesn't exist we'll make a quit and dirty one.
-# So when we are sure that makefile.inc exist we'll invoke nmake and
-# ask it to make dependencies again using the dep2 rule.
 dep:
-    IF NOT EXIST makefile.inc configure.cmd noninteractive
-    $(MAKE_CMD) NODEP=1 MAKEFILE_INC=1 dep2
-    cd pe2lx
-    $(MAKE_CMD) NODEP=1 dep
-    cd ..\lib
-    $(MAKE_CMD) NODEP=1 dep
-    cd ..
-
-dep2:
     $(PDWIN32_TOOLS)\fastdep -o$$(WIN32KOBJ) $(CINCLUDES) misc\*.c* ldr\*.c* \
         dev32\*.c* dev16\*.c* pe2lx\*.c* k32\*.c* lib\*.c elf2lx\*.c* \
         $(WIN32KINCLUDE)\*.h
     $(PDWIN32_TOOLS)\fastdep -a+ -o$$(WIN32KOBJ) $(CINCLUDES16) dev16\*.c*
     $(PDWIN32_TOOLS)\fastdep -a+ -o$$(WIN32KOBJ) -I$(WIN32KINCLUDE) \
         -I$(DDKPATH)\inc dev32\*.asm ldr\*.asm misc\*.asm include\*.inc
+    cd pe2lx
+    $(MAKE_CMD) dep
+    cd ..\lib
+    $(MAKE_CMD) dep
+    cd ..
 
-!ifndef NODEP
-!include .depend
+
+################################################################################
+# Include the .depend file.
+################################################################################
+!if [$(EXISTS) .depend] == 0
+!   include .depend
+!else
+!   if [$(ECHO) .depend doesn't exist]
+!   endif
 !endif
+
