@@ -1,4 +1,4 @@
-/* $Id: icontitle.cpp,v 1.5 2000-02-16 14:34:20 sandervl Exp $ */
+/* $Id: icontitle.cpp,v 1.6 2001-04-12 14:04:32 sandervl Exp $ */
 /*
  * Icontitle window class.
  *
@@ -68,7 +68,7 @@ HWND ICONTITLE_Create(Win32BaseWindow *parent)
 static BOOL ICONTITLE_GetTitlePos(Win32BaseWindow *wnd,LPRECT lpRect)
 {
     LPSTR str;
-    int length = wnd->getOwner()->GetWindowTextLength();
+    int length = wnd->getOwner()->GetWindowTextLengthA();
 
     if( length )
     {

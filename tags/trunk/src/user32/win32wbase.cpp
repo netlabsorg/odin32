@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.249 2001-04-02 17:30:58 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.250 2001-04-12 14:04:32 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -108,7 +108,6 @@ void Win32BaseWindow::Init()
 
   windowNameA      = NULL;
   windowNameW      = NULL;
-  wndNameLength    = 0;
 
   userWindowBytes  = NULL;;
   nrUserWindowBytes= 0;
@@ -544,7 +543,7 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndOS2)
     {
         if (!isUnicode)
         {
-            wndNameLength = strlen(cs->lpszName);
+            int wndNameLength = strlen(cs->lpszName);
             windowNameA = (LPSTR)_smalloc(wndNameLength+1);
             strcpy(windowNameA,cs->lpszName);
             windowNameW = (LPWSTR)_smalloc((wndNameLength+1)*sizeof(WCHAR));
@@ -554,13 +553,23 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndOS2)
         }
         else
         {
-            wndNameLength = lstrlenW((LPWSTR)cs->lpszName);
-            windowNameA = (LPSTR)_smalloc(wndNameLength+1);
-            lstrcpyWtoA(windowNameA,(LPWSTR)cs->lpszName);
+            // Wide
+            int wndNameLength = lstrlenW((LPWSTR)cs->lpszName);
             windowNameW = (LPWSTR)_smalloc((wndNameLength+1)*sizeof(WCHAR));
             lstrcpyW(windowNameW,(LPWSTR)cs->lpszName);
-            windowNameA[wndNameLength] = 0;
-            windowNameW[wndNameLength] = 0;
+            windowNameW[lstrlenW((LPWSTR)cs->lpszName)] = 0; // need ?
+            // Ascii
+            LPSTR tmp = HEAP_strdupWtoA(GetProcessHeap(), 0, (LPWSTR)cs->lpszName);
+            if(tmp) {
+                long tmpLength = strlen( tmp );
+                windowNameA = (LPSTR)_smalloc(tmpLength+1);
+                strcpy(windowNameA,tmp);
+                windowNameA[tmpLength] = 0; // need ?
+                HEAP_free(tmp);
+            } else {
+                windowNameA = (LPSTR)_smalloc(1);
+                windowNameA[0] = 0;
+            }
         }
     }
 
@@ -1379,13 +1388,18 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         return 0;
 
     case WM_GETTEXTLENGTH:
-        return wndNameLength;
+        if(windowNameA) {
+          return strlen(windowNameA);
+        }
+        else {
+          return 0;
+        }
 
     case WM_GETTEXT:
         if (!lParam || !wParam) return 0;
         if (!windowNameA) ((LPSTR)lParam)[0] = 0;
         else lstrcpynA((LPSTR)lParam, windowNameA, wParam);
-        return min(wndNameLength, wParam);
+        return min((windowNameA ? strlen(windowNameA) : 0), wParam);
 
     case WM_SETTEXT:
     {
@@ -1395,7 +1409,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         if(windowNameW) free(windowNameW);
         if (lParam)
         {
-            wndNameLength = strlen(lpsz);
+            int wndNameLength = strlen(lpsz);
             windowNameA = (LPSTR)_smalloc(wndNameLength+1);
             strcpy(windowNameA, lpsz);
             windowNameW = (LPWSTR)_smalloc((wndNameLength+1)*sizeof(WCHAR));
@@ -1405,7 +1419,6 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         {
             windowNameA = NULL;
             windowNameW = NULL;
-            wndNameLength = 0;
         }
         dprintf(("WM_SETTEXT of %x to %s\n", Win32Hwnd, lParam));
         if ((dwStyle & WS_CAPTION) == WS_CAPTION)
@@ -1688,26 +1701,30 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         // search all sibling to see it this key is their mnemonic
         sibling = GetWindow (GW_HWNDFIRST);
         while (sibling != 0) {
-          siblingWindow = GetWindowFromHandle (sibling);
-          nameLength = siblingWindow->GetWindowTextA (nameBuffer, 40);
+            siblingWindow = GetWindowFromHandle (sibling);
+            nameLength = siblingWindow->GetWindowTextA (nameBuffer, 40);
 
-          // find the siblings mnemonic
-          mnemonic = '\0';
-          for (int i=0 ; i<nameLength ; i++) {
-            if (nameBuffer [i] == '&') {
-              mnemonic = nameBuffer [i+1];
-              if ((mnemonic >= 'a') && (mnemonic <= 'z'))
-                mnemonic -= 32; // make it uppercase
-              break;  // stop searching
+            // find the siblings mnemonic
+            mnemonic = '\0';
+            for (int i=0 ; i<nameLength ; i++) {
+                if (IsDBCSLeadByte(nameBuffer[i])) {
+                    // Skip DBCS
+                    continue;
+                }
+                if (nameBuffer [i] == '&') {
+                    mnemonic = nameBuffer [i+1];
+                    if ((mnemonic >= 'a') && (mnemonic <= 'z'))
+                        mnemonic -= 32; // make it uppercase
+                    break;  // stop searching
+                }
             }
-          }
 
-          // key matches siblings mnemonic, send mouseclick
-          if (mnemonic == (char) wParam) {
-            siblingWindow->SendInternalMessageA (BM_CLICK, 0, 0);
-          }
+            // key matches siblings mnemonic, send mouseclick
+            if (mnemonic == (char) wParam) {
+                siblingWindow->SendInternalMessageA (BM_CLICK, 0, 0);
+            }
 
-          sibling = siblingWindow->GetNextWindow (GW_HWNDNEXT);
+            sibling = siblingWindow->GetNextWindow (GW_HWNDNEXT);
         }
 
         return 0;
@@ -1844,13 +1861,16 @@ LRESULT Win32BaseWindow::DefWindowProcW(UINT Msg, WPARAM wParam, LPARAM lParam)
     switch(Msg)
     {
     case WM_GETTEXTLENGTH:
-        return wndNameLength;
+        if(windowNameW) {
+             return lstrlenW(windowNameW);
+        }
+        else return 0;
 
     case WM_GETTEXT:
         if (!lParam || !wParam) return 0;
         if (!windowNameW) ((LPWSTR)lParam)[0] = 0;
         else lstrcpynW((LPWSTR)lParam,windowNameW,wParam);
-        return min(wndNameLength,wParam);
+        return min((windowNameW ? lstrlenW(windowNameW) : 0),wParam);
 
     case WM_SETTEXT:
     {
@@ -1860,17 +1880,28 @@ LRESULT Win32BaseWindow::DefWindowProcW(UINT Msg, WPARAM wParam, LPARAM lParam)
         if(windowNameW) free(windowNameW);
         if (lParam)
         {
-          wndNameLength = lstrlenW(lpsz);
-          windowNameA = (LPSTR)_smalloc(wndNameLength+1);
-          lstrcpyWtoA(windowNameA,lpsz);
-          windowNameW = (LPWSTR)_smalloc((wndNameLength+1)*sizeof(WCHAR));
-          lstrcpyW(windowNameW,lpsz);
+            // Wide
+            int wndNameLength = lstrlenW(lpsz);
+            windowNameW = (LPWSTR)_smalloc((wndNameLength+1)*sizeof(WCHAR));
+            lstrcpyW(windowNameW,lpsz);
+            // Ascii
+            LPSTR tmp = HEAP_strdupWtoA(GetProcessHeap(), 0, lpsz);
+            if(tmp) {
+                long tmpLength = strlen( tmp );
+                windowNameA = (LPSTR)_smalloc(tmpLength+1);
+                strcpy(windowNameA,tmp);
+                windowNameA[tmpLength] = 0; // need ?
+                HEAP_free(tmp);
+            }
+            else {
+                windowNameA = (LPSTR)_smalloc(1);
+                windowNameA[0] = 0;
+            }
         }
         else
         {
-          windowNameA = NULL;
-          windowNameW = NULL;
-          wndNameLength = 0;
+            windowNameA = NULL;
+            windowNameW = NULL;
         }
         dprintf(("WM_SETTEXT of %x\n",Win32Hwnd));
         if ((dwStyle & WS_CAPTION) == WS_CAPTION)
@@ -2297,7 +2328,7 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
     }
 //testestest
     //temporary workaround for file dialogs with template dialog child
-    //they don't redraw when switching directories 
+    //they don't redraw when switching directories
     //For some reason the new child's (syslistview32) update rectangle stays
     //empty after its parent is made visible with ShowWindow
     //TODO: find real cause
@@ -3237,27 +3268,28 @@ BOOL Win32BaseWindow::IsWindowVisible()
 //******************************************************************************
 BOOL Win32BaseWindow::hasWindowName(LPSTR wndname, BOOL fUnicode)
 {
-    INT len = GetWindowTextLength();
+    INT len = GetWindowTextLength(fUnicode);
     BOOL res;
 
     if (wndname == NULL)
-      return (len == 0);
+        return (len == 0);
 
     len++;
     if (fUnicode)
     {
-      WCHAR *text = (WCHAR*)malloc(len*sizeof(WCHAR));
+        WCHAR *text = (WCHAR*)malloc(len*sizeof(WCHAR));
 
-      GetWindowTextW(text,len);
-      res = (lstrcmpW(text,(LPWSTR)wndname) == 0);
-      free(text);
-    } else
+        GetWindowTextW(text,len);
+        res = (lstrcmpW(text,(LPWSTR)wndname) == 0);
+        free(text);
+    }
+    else
     {
-      CHAR *text = (CHAR*)malloc(len*sizeof(CHAR));
+        CHAR *text = (CHAR*)malloc(len*sizeof(CHAR));
 
-      GetWindowTextA(text,len);
-      res = (strcmp(text,wndname) == 0);
-      free(text);
+        GetWindowTextA(text,len);
+        res = (strcmp(text,wndname) == 0);
+        free(text);
     }
 
     return res;
@@ -3266,7 +3298,7 @@ BOOL Win32BaseWindow::hasWindowName(LPSTR wndname, BOOL fUnicode)
 //******************************************************************************
 CHAR *Win32BaseWindow::getWindowNamePtrA()
 {
-    INT len = GetWindowTextLength();
+    INT len = GetWindowTextLength(FALSE);
     CHAR *text;
 
     if (len == 0) return NULL;
@@ -3280,7 +3312,7 @@ CHAR *Win32BaseWindow::getWindowNamePtrA()
 //******************************************************************************
 WCHAR *Win32BaseWindow::getWindowNamePtrW()
 {
-    INT len = GetWindowTextLength();
+    INT len = GetWindowTextLength(TRUE);
     WCHAR *text;
 
     if (len == 0) return NULL;
@@ -3300,14 +3332,29 @@ VOID Win32BaseWindow::freeWindowNamePtr(PVOID namePtr)
 //When using this API for a window that was created by a different process, NT
 //does NOT send WM_GETTEXTLENGTH.
 //******************************************************************************
-int Win32BaseWindow::GetWindowTextLength()
+int Win32BaseWindow::GetWindowTextLength(BOOL fUnicode)
 {
     //if the destination window is created by this process, send message
     if(dwProcessId == currentProcessId) {
-        return SendInternalMessageA(WM_GETTEXTLENGTH,0,0);
+        if(fUnicode) {
+             return SendInternalMessageW(WM_GETTEXTLENGTH,0,0);
+        }
+        else return SendInternalMessageA(WM_GETTEXTLENGTH,0,0);
     }
     //else get data directory from window structure
-    return wndNameLength;
+    //TODO: must lock window structure.... (TODO)
+    if(fUnicode) {
+        if(windowNameW) {
+             return strlenW(windowNameW);
+        }
+        else return 0;
+    }
+    else {
+        if(windowNameA) {
+             return strlen(windowNameA);
+        }
+        else return 0;
+    }
 }
 //******************************************************************************
 //When using this API for a window that was created by a different process, NT
@@ -3323,7 +3370,7 @@ int Win32BaseWindow::GetWindowTextA(LPSTR lpsz, int cch)
     if (!lpsz || !cch) return 0;
     if (!windowNameA) lpsz[0] = 0;
     else lstrcpynA(lpsz, windowNameA, cch);
-    return min(wndNameLength, cch);
+    return min((windowNameA ? strlen(windowNameA) : 0), cch);
 }
 //******************************************************************************
 //When using this API for a window that was created by a different process, NT
@@ -3339,7 +3386,7 @@ int Win32BaseWindow::GetWindowTextW(LPWSTR lpsz, int cch)
     if (!lpsz || !cch) return 0;
     if (!windowNameW) lpsz[0] = 0;
     else lstrcpynW(lpsz, windowNameW, cch);
-    return min(wndNameLength, cch);
+    return min((windowNameW ? strlenW(windowNameW) : 0), cch);
 }
 //******************************************************************************
 //TODO: How does this work when the target window belongs to a different process???

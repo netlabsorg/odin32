@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.112 2001-03-30 11:14:36 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.113 2001-04-12 14:04:33 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -260,7 +260,10 @@ Win32BaseWindow *GetTopParent();
          BOOL   IsWindowUnicode();
          BOOL   IsMixMaxStateChanging()       { return fMinMaxChange; };
 
-         int    GetWindowTextLength();
+         int    GetWindowTextLength(BOOL fUnicode);
+         int    GetWindowTextLengthA() { return GetWindowTextLength(FALSE); };
+         int    GetWindowTextLengthW() { return GetWindowTextLength(TRUE);  };
+
          int    GetWindowTextA(LPSTR lpsz, int cch);
          int    GetWindowTextW(LPWSTR lpsz, int cch);
          BOOL   SetWindowTextA(LPSTR lpsz);
@@ -388,7 +391,6 @@ protected:
 
         char   *windowNameA;
         WCHAR  *windowNameW;
-        ULONG   wndNameLength; //including 0 terminator
 
         char   *userWindowBytes;
         ULONG   nrUserWindowBytes;

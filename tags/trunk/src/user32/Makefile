@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.81 2001-03-30 11:14:35 sandervl Exp $
+# $Id: Makefile,v 1.82 2001-04-12 14:04:32 sandervl Exp $
 
 #
 # Odin32 API
@@ -93,6 +93,7 @@ $(OBJDIR)\windlgmsg.obj \
 $(OBJDIR)\windlg.obj \
 $(OBJDIR)\win32wdesktop.obj \
 $(OBJDIR)\win32wbasenonclient.obj \
+$(OBJDIR)\oldnls32.obj \
 $(OBJDIR)\user32rsrc.obj
 
 
