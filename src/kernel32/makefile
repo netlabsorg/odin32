@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.48 1999-10-27 12:38:48 phaller Exp $
+# $Id: makefile,v 1.49 1999-10-27 18:11:39 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -131,7 +131,7 @@ os2heap.OBJ: \
     $(PDWIN32_INCLUDE)\win32type.h \
     os2heap.h
 
-initterm.OBJ: .\initterm.cpp initterm.h  heapshared.h
+initterm.OBJ: .\initterm.cpp initterm.h  heapshared.h  mmap.h
 
 thunk.OBJ: \
     .\thunk.cpp \

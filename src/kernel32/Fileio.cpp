@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.11 1999-10-25 22:45:17 phaller Exp $ */
+/* $Id: Fileio.cpp,v 1.12 1999-10-27 18:11:38 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -43,6 +43,7 @@ ODINFUNCTION7(HFILE,  CreateFileA,
               DWORD,  fdwAttrsAndFlags,
               HANDLE, hTemplateFile)
 {
+  dprintf(("CreateFileA %s", lpszName));
   return(HMCreateFile(lpszName,
                       fdwAccess,
                       fdwShareMode,

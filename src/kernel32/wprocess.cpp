@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.42 1999-10-27 10:35:42 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.43 1999-10-27 18:11:40 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -651,6 +651,22 @@ BOOL WIN32API CreateProcessW(LPCWSTR arg1, LPWSTR arg2,
     FreeAsciiString(astring2);
     FreeAsciiString(astring1);
     return(rc);
+}
+//******************************************************************************
+//******************************************************************************
+HINSTANCE WIN32API WinExec(LPCSTR lpCmdLine, UINT nCmdShow)
+{
+ STARTUPINFOA        startinfo = {0};
+ PROCESS_INFORMATION procinfo;
+
+    dprintf(("KERNEL32: WinExec %s\n", lpCmdLine));
+    startinfo.dwFlags = nCmdShow;
+    if(CreateProcessA(NULL, (LPSTR)lpCmdLine, NULL, NULL, FALSE, 0, NULL, NULL,
+                      &startinfo, &procinfo) == FALSE) 
+    {
+	return 0;
+    }
+    return procinfo.hProcess; //correct?
 }
 //******************************************************************************
 //******************************************************************************
