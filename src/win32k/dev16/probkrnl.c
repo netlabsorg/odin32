@@ -1,4 +1,4 @@
-/* $Id: probkrnl.c,v 1.20.4.8 2000-08-21 22:59:34 bird Exp $
+/* $Id: probkrnl.c,v 1.20.4.9 2000-08-22 03:00:16 bird Exp $
  *
  * Description:   Autoprobes the os2krnl file and os2krnl[*].sym files.
  *                Another Hack!
@@ -102,29 +102,32 @@ IMPORTKRNLSYM aImportTab[NBR_OF_KRNLIMPORTS] =
     {FALSE, -1, 11, "_VMAllocMem",          -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 11 */
     {FALSE, -1, 11, "_VMGetOwner",          -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 12 */
     {FALSE, -1, 11, "g_tkExecPgm",          -1,  -1,  -1,  -1, EPT_PROC32},        /* 13 */
-    {FALSE, -1, 11, "f_FuStrLenZ",          -1,  -1,  -1,  -1, EPT_PROCIMPORT16},  /* 14 */
-    {FALSE, -1, 10, "f_FuStrLen",           -1,  -1,  -1,  -1, EPT_PROCIMPORT16},  /* 15 */
-    {FALSE, -1,  8, "f_FuBuff",             -1,  -1,  -1,  -1, EPT_PROCIMPORT16},  /* 16 */
-    {FALSE, -1, 16, "_VMObjHandleInfo",     -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 17 */
-    {FALSE, -1, 18, "_VMPseudoHandleMap",   -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 18 */
-    {FALSE, -1, 12, "_ldrOpenPath",         -1,  -1,  -1,  -1, EPT_PROC32},        /* 19 */
-    {FALSE, -1, 12, "_LDRClearSem",         -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 20 */
-    {FALSE, -1, 14, "_ldrFindModule",       -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 21 */
-    {FALSE, -1, 17, "_KSEMRequestMutex",    -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 22 */
-    {FALSE, -1, 17, "_KSEMReleaseMutex",    -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 23 */
-    {FALSE, -1,  7, "_LdrSem",              -1,  -1,  -1,  -1, EPT_VARIMPORT32},   /* 24 */
-    {FALSE, -1, 11, "_LDRLibPath",          -1,  -1,  -1,  -1, EPT_VARIMPORT32},   /* 25 */
-    {FALSE, -1,  9, "_TKSuBuff",            -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 26 */
-    {FALSE, -1,  9, "_TKFuBuff",            -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 27 */
-    {FALSE, -1, 11, "_TKFuBufLen",          -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 28 */
-    {FALSE, -1, 21, "_ldrValidateMteHandle",-1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 29 */
-    {FALSE, -1,  8, "_pTCBCur",             -1,  -1,  -1,  -1, EPT_VARIMPORT16},   /* 30 */
-    {FALSE, -1,  9, "_pPTDACur",            -1,  -1,  -1,  -1, EPT_VARIMPORT16},   /* 31 */
-    {FALSE, -1, 10, "ptda_start",           -1,  -1,  -1,  -1, EPT_VARIMPORT16},   /* 32 */
-    {FALSE, -1, 12, "ptda_environ",         -1,  -1,  -1,  -1, EPT_VARIMPORT16},   /* 33 */
-    {FALSE, -1, 11, "ptda_module",          -1,  -1,  -1,  -1, EPT_VARIMPORT16},   /* 34 */
-    {FALSE, -1, 18, "ptda_pBeginLIBPATH",   -1,  -1,  -1,  -1, EPT_VARIMPORT16},   /* 35 */
-    {FALSE, -1, 16, "_ldrpFileNameBuf",     -1,  -1,  -1,  -1, EPT_VARIMPORT32},   /* 36 */
+    {FALSE, -1, 16, "g_tkStartProcess",     -1,  -1,  -1,  -1, EPT_PROC32},        /* 14 */
+    {FALSE, -1, 11, "f_FuStrLenZ",          -1,  -1,  -1,  -1, EPT_PROCIMPORT16},  /* 15 */
+    {FALSE, -1, 10, "f_FuStrLen",           -1,  -1,  -1,  -1, EPT_PROCIMPORT16},  /* 16 */
+    {FALSE, -1,  8, "f_FuBuff",             -1,  -1,  -1,  -1, EPT_PROCIMPORT16},  /* 17 */
+    {FALSE, -1, 16, "_VMObjHandleInfo",     -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 18 */
+    {FALSE, -1, 18, "_VMPseudoHandleMap",   -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 19 */
+    {FALSE, -1, 12, "_ldrOpenPath",         -1,  -1,  -1,  -1, EPT_PROC32},        /* 20 */
+    {FALSE, -1, 12, "_LDRClearSem",         -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 21 */
+    {FALSE, -1, 14, "_ldrFindModule",       -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 22 */
+    {FALSE, -1, 17, "_KSEMRequestMutex",    -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 23 */
+    {FALSE, -1, 17, "_KSEMReleaseMutex",    -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 24 */
+    {FALSE, -1, 15, "_KSEMQueryMutex",      -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 25 */
+    {FALSE, -1,  9, "_KSEMInit",            -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 26 */
+    {FALSE, -1,  7, "_LdrSem",              -1,  -1,  -1,  -1, EPT_VARIMPORT32},   /* 27 */
+    {FALSE, -1, 11, "_LDRLibPath",          -1,  -1,  -1,  -1, EPT_VARIMPORT32},   /* 28 */
+    {FALSE, -1,  9, "_TKSuBuff",            -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 29 */
+    {FALSE, -1,  9, "_TKFuBuff",            -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 30 */
+    {FALSE, -1, 11, "_TKFuBufLen",          -1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 31 */
+    {FALSE, -1, 21, "_ldrValidateMteHandle",-1,  -1,  -1,  -1, EPT_PROCIMPORT32},  /* 32 */
+    {FALSE, -1,  8, "_pTCBCur",             -1,  -1,  -1,  -1, EPT_VARIMPORT16},   /* 33 */
+    {FALSE, -1,  9, "_pPTDACur",            -1,  -1,  -1,  -1, EPT_VARIMPORT16},   /* 34 */
+    {FALSE, -1, 10, "ptda_start",           -1,  -1,  -1,  -1, EPT_VARIMPORT16},   /* 35 */
+    {FALSE, -1, 12, "ptda_environ",         -1,  -1,  -1,  -1, EPT_VARIMPORT16},   /* 36 */
+    {FALSE, -1, 11, "ptda_module",          -1,  -1,  -1,  -1, EPT_VARIMPORT16},   /* 37 */
+    {FALSE, -1, 18, "ptda_pBeginLIBPATH",   -1,  -1,  -1,  -1, EPT_VARIMPORT16},   /* 38 */
+    {FALSE, -1, 16, "_ldrpFileNameBuf",     -1,  -1,  -1,  -1, EPT_VARIMPORT32},   /* 39 */
 
 };
 
@@ -1666,7 +1669,7 @@ int main(int argc, char **argv)
         FILEFINDBUF ffb;
         int         i;
 
-        printf16("/* $Id: probkrnl.c,v 1.20.4.8 2000-08-21 22:59:34 bird Exp $\n"
+        printf16("/* $Id: probkrnl.c,v 1.20.4.9 2000-08-22 03:00:16 bird Exp $\n"
                  "*\n"
                  "* Autogenerated kernel symbol database.\n"
                  "*\n"

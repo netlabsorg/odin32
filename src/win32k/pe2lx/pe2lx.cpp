@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.18.4.5 2000-08-21 22:59:40 bird Exp $
+/* $Id: pe2lx.cpp,v 1.18.4.6 2000-08-22 03:00:22 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -169,6 +169,10 @@ struct Pe2Lx::LieListEntry Pe2Lx::paLieList[] =
     {"WINSPOOL.DRV",                       "WINSPOOL.DLL"},
     {NULL,                                 NULL} /* end-of-list entry */
 };
+
+LONG            Pe2Lx::cLoadedModules;  /* Count of existing objects. Updated by constructor and destructor. */
+const char *    Pe2Lx::pszOdin32Path;   /* Odin32 base path (include a slash). */
+SFN             Pe2Lx::sfnKernel32;     /* Odin32 Kernel32 filehandle. */
 
 
 
@@ -4691,6 +4695,7 @@ PCSZ Pe2Lx::queryOdin32ModuleName(PCSZ pszWin32ModuleName)
  */
 BOOL Pe2Lx::initOdin32Path()
 {
+    #if 0
     APIRET rc;
     PMTE   pMTE;
 
@@ -4753,6 +4758,9 @@ BOOL Pe2Lx::initOdin32Path()
     }
 
     return rc == NO_ERROR;
+    #else
+    return FALSE;
+    #endif
 }
 
 

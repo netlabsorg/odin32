@@ -1,4 +1,4 @@
-/* $Id: ldr.h,v 1.5.4.4 2000-08-21 22:59:38 bird Exp $
+/* $Id: ldr.h,v 1.5.4.5 2000-08-22 03:00:19 bird Exp $
  *
  * ldr - Our loader "subsystem" public header file.
  *
@@ -216,7 +216,6 @@ ULONG       removeModule(SFN hFile);
  */
 #define CCHFILENAME     261             /* This is defined in mytkExecPgm.asm too. */
 #define CCHARGUMENTS   1536             /* This is defined in mytkExecPgm.asm too. */
-extern char         fLdrSemTaken;
 extern const char   fTkExecPgm;
 extern char         achTkExecPgmFilename[CCHFILENAME];
 extern char         achTkExecPgmArguments[CCHARGUMENTS];
