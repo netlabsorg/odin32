@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.1102 2000-09-04 02:16:18 bird Exp $ */
+ /* $Id: changelog,v 1.1103 2000-09-04 02:33:54 bird Exp $ */
 
  2000-09-04: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - doc/readme.txt: Updated Win32k sections.
@@ -7,6 +7,8 @@
                 Support for comport 3 and 4.
     - Win32kCC: Updated dialog to show all information provided by the
                 Win32k IOCtl interface.
+    - Include/HandleManager.h:
+                Added prototype for HMDeviceIoControl which Sander forgot.
 
  2000-09-03: Patrick Haller <phaller@gmx.net>
     - KERNEL32: - NLS sync with WINE
