@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.77 2000-11-09 18:15:17 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.78 2000-11-15 13:57:56 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -360,7 +360,7 @@ VOID removeClientArea(Win32BaseWindow *window, pDCData pHps)
                    0,
                    SETUPDC_ORIGIN | SETUPDC_VISRGN | SETUPDC_RECALCCLIP);
    }
-   else dprintf2(("removeClientArea: %x (%d,%d)", window->getWindowHandle(), point.x, point.y));
+   else dprintf2(("removeClientArea: %x (%d,%d) (%d,%d)", window->getWindowHandle(), point.x, point.y, pHps->ptlOrigin.x, pHps->ptlOrigin.y));
 
 }
 //******************************************************************************
@@ -510,7 +510,20 @@ VOID   WIN32API removeClientArea(pDCData pHps)
  Win32BaseWindow *wnd;
 
    wnd = Win32BaseWindow::GetWindowFromOS2Handle(pHps->hwnd);
-   removeClientArea(wnd, pHps);
+   if(wnd) {
+      removeClientArea(wnd, pHps);
+   }
+}
+//******************************************************************************
+//******************************************************************************
+VOID WIN32API selectClientArea(pDCData pHps)
+{
+ Win32BaseWindow *wnd;
+
+   wnd = Win32BaseWindow::GetWindowFromOS2Handle(pHps->hwnd);
+   if(wnd) {
+      selectClientArea(wnd, pHps);
+   }
 }
 //******************************************************************************
 //******************************************************************************

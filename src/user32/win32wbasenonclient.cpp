@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.25 2000-10-17 17:11:08 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.26 2000-11-15 13:57:57 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -423,6 +423,12 @@ LONG Win32BaseWindow::HandleNCCalcSize(BOOL calcValidRects,RECT *winRect)
         winRect->top    -= tmpRect.top;
         winRect->right  -= tmpRect.right;
         winRect->bottom -= tmpRect.bottom;
+
+        if (winRect->top > winRect->bottom)
+            winRect->bottom = winRect->top;
+
+        if (winRect->left > winRect->right)
+            winRect->right = winRect->left;
     }
 
     return result;
