@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.103 2001-01-10 20:39:15 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.104 2001-02-15 00:33:01 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -48,6 +48,10 @@ typedef struct tagPROPERTY
 //(0xc00 added)
 #define OPEN32_MSGDIFF            0xC00
 #define WIN32APP_POSTMSG          (0x1000+OPEN32_MSGDIFF)
+
+//PM doesn't allow SetFocus during WM_SETFOCUS message processing; must delay
+//this by posting a message
+#define WIN32APP_SETFOCUSMSG      (0x1001+OPEN32_MSGDIFF)
 
 #define WIN32MSG_MAGICA           0x12345678
 #define WIN32MSG_MAGICW           0x12345679

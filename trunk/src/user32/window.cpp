@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.87 2001-02-03 18:52:02 sandervl Exp $ */
+/* $Id: window.cpp,v 1.88 2001-02-15 00:33:01 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -33,6 +33,7 @@
 #include <oslibgdi.h>
 #include "user32.h"
 #include "winicon.h"
+#include "oslibmsg.h"
 #include <win\winpos.h>
 #include <win\win.h>
 #include <heapstring.h>
@@ -667,8 +668,15 @@ BOOL WIN32API IsWindowVisible( HWND hwnd)
 //******************************************************************************
 HWND WIN32API SetFocus (HWND hwnd)
 {
-    HWND lastFocus, lastFocus_W, hwnd_O;
-    BOOL activate;
+ HWND lastFocus, lastFocus_W, hwnd_O;
+ BOOL activate;
+ TEB *teb;
+
+    teb = GetThreadTEB();
+    if(teb == NULL) {
+        DebugInt3();
+        return 0;
+    }
 
     hwnd_O    = Win32ToOS2Handle (hwnd);
     lastFocus = OSLibWinQueryFocus (OSLIB_HWND_DESKTOP);
@@ -677,13 +685,38 @@ HWND WIN32API SetFocus (HWND hwnd)
 
     dprintf(("SetFocus %x (%x) -> %x (%x)\n", lastFocus_W, lastFocus, hwnd, hwnd_O));
 
+    //PM doesn't allow SetFocus calls during WM_SETFOCUS message processing; 
+    //must delay this function call
+    if(teb->o.odin.fWM_SETFOCUS) {
+        dprintf(("USER32: Delay SetFocus call!"));
+        teb->o.odin.hwndFocus = hwnd;
+        //mp1 = win32 window handle
+        //mp2 = activate flag
+        OSLibPostMessageDirect(hwnd_O, WIN32APP_SETFOCUSMSG, hwnd, activate);
+        return lastFocus_W;
+    }
     return (OSLibWinSetFocus (OSLIB_HWND_DESKTOP, hwnd_O, activate)) ? lastFocus_W : 0;
 }
 //******************************************************************************
 //******************************************************************************
 HWND WIN32API GetFocus(void)
 {
-    HWND hwnd;
+ TEB *teb;
+ HWND hwnd;
+
+    teb = GetThreadTEB();
+    if(teb == NULL) {
+        DebugInt3();
+        return 0;
+    }
+    //PM doesn't allow SetFocus calls during WM_SETFOCUS message processing; 
+    //If focus was changed during WM_SETFOCUS, the focus window handle is
+    //stored in teb->o.odin.hwndFocus (set back to 0 when delayed SetFocus
+    //is activated)
+    if(teb->o.odin.hwndFocus) {
+        dprintf(("USER32: GetFocus %x (DURING WM_SETFOCUS PROCESSING)", teb->o.odin.hwndFocus));
+        return teb->o.odin.hwndFocus;
+    }
 
     hwnd = OSLibWinQueryFocus(OSLIB_HWND_DESKTOP);
     hwnd = OS2ToWin32Handle(hwnd);
