@@ -1,3 +1,5 @@
+/* $Id: opengl.cpp,v 1.3 1999-06-10 17:09:04 phaller Exp $ */
+
 /*
  * GDI32 OpenGl stubs
  *

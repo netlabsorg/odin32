@@ -1,3 +1,5 @@
+/* $Id: strings.cpp,v 1.3 1999-06-10 17:08:55 phaller Exp $ */
+
 /*
  * PE2LX String conversion
  *

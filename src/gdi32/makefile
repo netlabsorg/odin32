@@ -1,8 +1,10 @@
+# $Id: makefile,v 1.3 1999-06-10 17:09:04 phaller Exp $
+
 #
-# PD-Win32 API 
+# PD-Win32 API
 #
 #	gdi32.dll makefile
-# 
+#
 
 PDWIN32_INCLUDE = ..\..\include
 PDWIN32_LIB = ..\..\lib
@@ -24,7 +26,7 @@ OBJS =  gdi32.obj opengl.obj callback.obj dibsect.obj initterm.obj
 all: $(TARGET).dll $(TARGET).lib
 
 
-$(TARGET).dll: $(OBJS) $(TARGET).def 
+$(TARGET).dll: $(OBJS) $(TARGET).def
 	$(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
               $(PDWIN32_LIB)/pmwinx.lib $(PDWIN32_LIB)/kernel32.lib
 	$(CP) $@ $(PDWIN32_BIN)

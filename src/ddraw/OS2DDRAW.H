@@ -1,3 +1,5 @@
+/* $Id: OS2DDRAW.H,v 1.3 1999-06-10 17:10:56 phaller Exp $ */
+
 /*
  * DirectDraw main class
  *

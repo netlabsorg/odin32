@@ -1,3 +1,5 @@
+/* $Id: LX.H,v 1.3 1999-06-10 17:08:51 phaller Exp $ */
+
 /*
  * PE2LX LX
  *

@@ -1,3 +1,5 @@
+/* $Id: mpr.h,v 1.3 1999-06-10 17:06:06 phaller Exp $ */
+
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT

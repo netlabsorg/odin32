@@ -1,3 +1,5 @@
+/* $Id: DSOUND.CPP,v 1.3 1999-06-10 17:09:29 phaller Exp $ */
+
 /*
  * DirectSound exported APIs
  *

@@ -1,3 +1,5 @@
+/* $Id: OS2SNDBUFFER.H,v 1.3 1999-06-10 17:09:30 phaller Exp $ */
+
 /*
  * DirectSound SoundBuffer class
  *

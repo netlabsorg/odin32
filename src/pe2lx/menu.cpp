@@ -1,3 +1,5 @@
+/* $Id: menu.cpp,v 1.3 1999-06-10 17:08:54 phaller Exp $ */
+
 /*
  * PE2LX menu conversion code
  *

@@ -1,3 +1,5 @@
+# $Id: makefile.wat,v 1.2 1999-06-10 17:08:54 phaller Exp $
+
 #===================================================================
 #
 #   Setup the environment properly
@@ -7,10 +9,10 @@ PDWIN32_INCLUDE = ..\..\include
 PDWIN32_LIB = ..\..\lib
 PDWIN32_BIN = ..\..\bin
 INC     = $(%WATCOM)\h;f:\toolkit\h;.;..\..\include;..\..\include\win
-DEF     = 
+DEF     =
 !ifndef %RELEASE
 #DBGFLG   = -dDEBUG=1
-DBGFLG = 
+DBGFLG =
 !endif
 
 #===================================================================
@@ -59,9 +61,9 @@ FILE3   = rcdata.obj icongrp.obj
 FILE4   = strings.obj bitmap.obj
 FILE5   = accelerator.obj
 FILE6   = cursor.obj cursorgrp.obj
-FILE7   = 
-FILE8   = 
-FILE9   = 
+FILE7   =
+FILE8   =
+FILE9   =
 FILES   = $(FILE0) $(FILE1) $(FILE2) $(FILE3) $(FILE4) $(FILE5) $(FILE6) $(FILE7) $(FILE8) $(FILE9)
 TARGET  = PE2LX
 

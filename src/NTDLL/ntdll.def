@@ -1,3 +1,5 @@
+; $Id: ntdll.def,v 1.4 1999-06-10 17:06:45 phaller Exp $
+
 ;Created by BLAST for IBM's compiler
 ;Basis is NT4.0's NTDLL.DLL
 LIBRARY NTDLL INITINSTANCE TERMINSTANCE
@@ -53,7 +55,7 @@ EXPORTS
     ZwCreateTimer                 = _NtCreateTimer@16
     NtSetTimer                    = _NtSetTimer@28                    @221
     ZwSetTimer                    = _NtSetTimer@28
-    NtQueryTimerResolution        = _NtQueryTimerResolution@12        
+    NtQueryTimerResolution        = _NtQueryTimerResolution@12
     ZwQueryTimerResolution        = _NtQueryTimerResolution@12
     NtTerminateProcess            = _NtTerminateProcess@8
     ZwTerminateProcess            = _NtTerminateProcess@8
@@ -219,12 +221,12 @@ EXPORTS
     RtlMultiByteToUnicodeN        = _RtlMultiByteToUnicodeN@20        @446
     RtlOemToUnicodeN              = _RtlOemToUnicodeN@20              @448
     RtlInitAnsiString             = _RtlInitAnsiString@8              @399
-    RtlInitOemString              = _RtlInitOemString@8              
+    RtlInitOemString              = _RtlInitOemString@8
     RtlInitString                 = _RtlInitString@8                  @402
     RtlInitUnicodeString          = _RtlInitUnicodeString@8           @403
     RtlFreeUnicodeString          = _RtlFreeUnicodeString@4           @377
     RtlFreeAnsiString             = _RtlFreeAnsiString@4              @373
-    RtlFreeOemString              = _RtlFreeOemString@4              
+    RtlFreeOemString              = _RtlFreeOemString@4
     RtlUnicodeToOemN              = _RtlUnicodeToOemN@20              @515
     RtlUnicodeStringToOemString   = _RtlUnicodeStringToOemString@12   @511
     RtlUnicodeStringToAnsiString  = _RtlUnicodeStringToAnsiString@12  @507

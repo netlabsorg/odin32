@@ -1,10 +1,9 @@
+/* $Id: dibsect.h,v 1.3 1999-06-10 17:09:03 phaller Exp $ */
+
 /*
  * GDI32 DIB sections
- *
  * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
- *
  * Project Odin Software License can be found in LICENSE.TXT
- *
  */
 #ifndef __DIBSECT_H__
 #define __DIBSECT_H__

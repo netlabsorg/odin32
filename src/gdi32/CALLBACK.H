@@ -1,3 +1,5 @@
+/* $Id: CALLBACK.H,v 1.3 1999-06-10 17:09:03 phaller Exp $ */
+
 /*
  * GDI32 support code for Line DDA callbacks
  *
