@@ -1,4 +1,4 @@
-/* $Id: oslibgdi.h,v 1.8 2000-11-19 11:52:39 sandervl Exp $ */
+/* $Id: oslibgdi.h,v 1.9 2001-05-11 08:39:43 sandervl Exp $ */
 /*
  * Window GDI wrapper functions for OS/2
  *
@@ -79,8 +79,10 @@ BOOL mapScreenPoint(INT screenH,OSLIBPOINT *screenPt);
 BOOL mapOS2ToWin32Rect(int height, PRECTLOS2 rectOS2, PRECT rectWin32);
 BOOL mapWin32ToOS2Rect(int height, PRECT rectWin32,PRECTLOS2 rectOS2);
 
+#ifndef CLIENTFRAME
 BOOL mapWin32ToOS2RectClientToFrame(Win32BaseWindow *window, PRECT rectWin32,PRECTLOS2 rectOS2);
 BOOL mapOS2ToWin32RectFrameToClient(Win32BaseWindow *window, PRECTLOS2 rectOS2, PRECT rectWin32);
+#endif
 
 #define mapWin32ToOS2RectFrame(window, rectWin32, rectOS2) \
         if(window->getParent()) { \

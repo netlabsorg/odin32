@@ -1,4 +1,4 @@
-/* $Id: win32wdesktop.cpp,v 1.15 2000-12-05 13:05:52 sandervl Exp $ */
+/* $Id: win32wdesktop.cpp,v 1.16 2001-05-11 08:39:46 sandervl Exp $ */
 /*
  * Win32 Desktop Window for OS/2
  *
@@ -51,6 +51,7 @@ Win32Desktop::Win32Desktop() : Win32BaseWindow(OBJTYPE_WINDOW)
   rectWindow.bottom = OSLibQueryScreenHeight();
 
   OS2Hwnd      = OSLIB_HWND_DESKTOP;
+  OS2HwndFrame = OSLIB_HWND_DESKTOP;
   rectClient   = rectWindow;
 
   if(HwAllocateWindowHandle(&Win32Hwnd, (ULONG)this) == FALSE)

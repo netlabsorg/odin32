@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.115 2001-04-27 17:36:39 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.116 2001-05-11 08:39:45 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -133,10 +133,7 @@ virtual  ULONG  MsgEnable(BOOL fEnable);
          ULONG  MsgChar(MSG *msg);
          ULONG  MsgPaint(ULONG tmp1, BOOL select = TRUE);
          ULONG  MsgEraseBackGround(HDC hdc);
-#ifndef ODIN_HITTEST
-         ULONG  MsgHitTest(MSG *msg);
-#endif
-         ULONG  MsgNCPaint();
+         ULONG  MsgNCPaint(PRECT pUpdateRect);
          ULONG  MsgFormatFrame(WINDOWPOS *lpWndPos);
          ULONG  DispatchMsgA(MSG *msg);
          ULONG  DispatchMsgW(MSG *msg);
@@ -159,6 +156,7 @@ virtual  WORD   GetWindowWord(int index);
          void   setInstance(ULONG newinstance)  { hInstance = newinstance; };
          HWND   getWindowHandle()               { return Win32Hwnd; };
          HWND   getOS2WindowHandle()            { return OS2Hwnd; };
+         HWND   getOS2FrameWindowHandle()       { return OS2HwndFrame; };
 
  Win32WndClass *getWindowClass()                { return windowClass; };
 
@@ -259,6 +257,9 @@ Win32BaseWindow *GetTopParent();
          BOOL   IsWindowUnicode();
          BOOL   IsMixMaxStateChanging()       { return fMinMaxChange; };
 
+         void   SetVisibleRegionChanged(BOOL changed) { fVisibleRegionChanged = changed; };
+         BOOL   IsVisibleRegionChanged()              { return fVisibleRegionChanged; };
+
          int    GetWindowTextLength(BOOL fUnicode);
          int    GetWindowTextLengthA() { return GetWindowTextLength(FALSE); };
          int    GetWindowTextLengthW() { return GetWindowTextLength(TRUE);  };
@@ -316,6 +317,7 @@ Win32BaseWindow *FindWindowById(int id);
 
 static Win32BaseWindow *GetWindowFromHandle(HWND hwnd);
 static Win32BaseWindow *GetWindowFromOS2Handle(HWND hwnd);
+static Win32BaseWindow *GetWindowFromOS2FrameHandle(HWND hwnd);
 
     static void DestroyAll();
 
@@ -333,7 +335,7 @@ protected:
         void    removeWindowProps();
     PROPERTY   *findWindowProperty(LPCSTR str);
 
-        HWND    OS2Hwnd;
+        HWND    OS2Hwnd, OS2HwndFrame;
         HMENU   hSysMenu;
         HWND    Win32Hwnd;
 
@@ -357,28 +359,29 @@ protected:
 
         HWND    OS2HwndModalDialog;
 
-        unsigned fFirstShow:1;
-        unsigned fIsDialog:1;
-        unsigned fIsModalDialog:1;
-        unsigned fIsModalDialogOwner:1;
-        unsigned fInternalMsg:1;         //Used to distinguish between messages
+        ULONG    fFirstShow:1,
+                 fIsDialog:1,
+                 fIsModalDialog:1,
+                 fIsModalDialogOwner:1,
+                 fInternalMsg:1,         //Used to distinguish between messages
                                          //sent by PM and those sent by apps
-        unsigned fNoSizeMsg:1;
-        unsigned fIsDestroyed:1;
-        unsigned fDestroyWindowCalled:1; //DestroyWindow was called for this window
-        unsigned fCreated:1;
-        unsigned fCreationFinished:1;    //True when window or dialog has been created successfully
+                 fNoSizeMsg:1,
+                 fIsDestroyed:1,
+                 fDestroyWindowCalled:1, //DestroyWindow was called for this window
+                 fCreated:1,
+                 fCreationFinished:1,    //True when window or dialog has been created successfully
                                          //Needed to prevent DestroyWindow from deleting the window
                                          //object during construction
-        unsigned fTaskList:1;            //should be listed in PM tasklist or not
-        unsigned fXDefault:1;
-        unsigned fCXDefault:1;
-        unsigned fParentDC:1;
-	unsigned fComingToTop:1;
-        unsigned fCreateSetWindowPos:1;  //FALSE -> SetWindowPos in Win32BaseWindow::MsgCreate not yet called
-        unsigned isUnicode:1;
-        unsigned fMinMaxChange:1;        //set when switching between min/max/restored state
-        unsigned fOwnDCDirty:1;          //set when selectClientArea must reset the origin + visible region
+                 fTaskList:1,            //should be listed in PM tasklist or not
+                 fXDefault:1,
+                 fCXDefault:1,
+                 fParentDC:1,
+	         fComingToTop:1,
+                 fCreateSetWindowPos:1,  //FALSE -> SetWindowPos in Win32BaseWindow::MsgCreate not yet called
+                 isUnicode:1,
+                 fMinMaxChange:1,        //set when switching between min/max/restored state
+                 fVisibleRegionChanged:1, //set when visible region has changed -> erase background must be sent during next BeginPaint
+                 fEraseBkgndFlag:1;
 
         HRGN    hWindowRegion;
         HRGN    hClipRegion;
@@ -468,20 +471,15 @@ public:
 #else
          BOOL   isOwnDC() { return (windowClass && windowClass->getStyle() & CS_OWNDC_W); }
 #endif
-         void   invalidateOwnDC() { fOwnDCDirty = TRUE; };
-         void   validateOwnDC()   { fOwnDCDirty = FALSE; };
-         BOOL   isOwnDCDirty()    { return fOwnDCDirty; };
 
          HDC    getOwnDC() { return ownDC; }
          void   setOwnDC(HDC hdc) { ownDC = hdc; }
 protected:
          HDC    ownDC;
 
-         ULONG  EraseBkgndFlag:1,
-                filler:31;
 public:
-         VOID   setEraseBkgnd (BOOL erase)      { EraseBkgndFlag = erase; }
-         BOOL   needsEraseBkgnd()               { return EraseBkgndFlag; }
+         VOID   setEraseBkgnd (BOOL erase)      { fEraseBkgndFlag = erase; }
+         BOOL   needsEraseBkgnd()               { return fEraseBkgndFlag; }
 };
 
 #endif //__cplusplus

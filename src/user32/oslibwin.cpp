@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.91 2001-04-15 17:05:29 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.92 2001-05-11 08:39:43 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -52,44 +52,51 @@ BOOL OSLibWinSetOwner(HWND hwnd, HWND hwndOwner)
 //******************************************************************************
 //******************************************************************************
 HWND OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle,
-                          char *pszName, HWND Owner, ULONG fHWND_BOTTOM, 
+                          char *pszName, HWND Owner, ULONG fHWND_BOTTOM,
                           ULONG id, BOOL fTaskList,BOOL fShellPosition,
-                          int classStyle)
+                          int classStyle, HWND *hwndFrame)
 {
  HWND  hwndClient;
  ULONG dwFrameStyle = 0;
 
-  if(pszName && *pszName == 0) {
+    if(pszName && *pszName == 0) {
         pszName = NULL;
-  }
-  if(hwndParent == OSLIB_HWND_DESKTOP) {
+    }
+    if(hwndParent == OSLIB_HWND_DESKTOP) {
         hwndParent = HWND_DESKTOP;
-  }
-  if(Owner == OSLIB_HWND_DESKTOP) {
+    }
+    if(Owner == OSLIB_HWND_DESKTOP) {
         Owner = HWND_DESKTOP;
-  }
+    }
 
-  if(classStyle & CS_SAVEBITS_W) dwWinStyle |= WS_SAVEBITS;
-  if(classStyle & CS_PARENTDC_W) dwWinStyle |= WS_PARENTCLIP;
+    if(classStyle & CS_SAVEBITS_W) dwWinStyle |= WS_SAVEBITS;
+    if(classStyle & CS_PARENTDC_W) dwWinStyle |= WS_PARENTCLIP;
 
-  dwWinStyle = dwWinStyle & ~(WS_TABSTOP | WS_GROUP);
+    dwWinStyle = dwWinStyle & ~(WS_TABSTOP | WS_GROUP);
 
-  if(fTaskList)
-  {
-    	dwFrameStyle |= FCF_NOMOVEWITHOWNER;
-  }
-  if (fShellPosition) dwFrameStyle |= FCF_SHELLPOSITION;
+    if(fTaskList)
+    {
+        dwFrameStyle |= FCF_NOMOVEWITHOWNER;
+    }
+    if (fShellPosition) dwFrameStyle |= FCF_SHELLPOSITION;
 
-  FRAMECDATA FCData = {sizeof (FRAMECDATA), 0, 0, 0};
-  FCData.flCreateFlags = dwFrameStyle;
+    FRAMECDATA FCData = {sizeof (FRAMECDATA), 0, 0, 0};
+    FCData.flCreateFlags = dwFrameStyle;
 
-  dprintf(("WinCreateWindow %x %s %x task %d shell %d classstyle %x winstyle %x bottom %d", hwndParent, pszName, id, fTaskList, fShellPosition, classStyle, dwWinStyle, fHWND_BOTTOM));
+    dprintf(("WinCreateWindow %x %s %x task %d shell %d classstyle %x winstyle %x bottom %d", hwndParent, pszName, id, fTaskList, fShellPosition, classStyle, dwWinStyle, fHWND_BOTTOM));
 
-  return WinCreateWindow (hwndParent,
-                          (hwndParent == HWND_DESKTOP) ? WIN32_STDFRAMECLASS : WIN32_STDCLASS,
-                          pszName, dwWinStyle, 0, 0, 0, 0,
-                          Owner, (fHWND_BOTTOM) ? HWND_BOTTOM : HWND_TOP,
-                          id, NULL, NULL);
+    //Must not use WS_CLIPCHILDREN style with frame window. Transparency won't work otherwise.
+    //Eg: dialog parent, groupbox; invalidate part of groupbox -> painting algorithm stops when it finds
+    //    a window with WS_CLIPCHILDREN -> result: dialog window won't update groupbox background as groupbox only draws the border
+    *hwndFrame = WinCreateWindow(hwndParent,
+                           WIN32_STDFRAMECLASS,
+                           pszName, (dwWinStyle & ~WS_CLIPCHILDREN), 0, 0, 0, 0,
+                           Owner, (fHWND_BOTTOM) ? HWND_BOTTOM : HWND_TOP,
+                           id, NULL, NULL);
+    hwndClient = WinCreateWindow (*hwndFrame, WIN32_STDCLASS,
+                              NULL, dwWinStyle | WS_VISIBLE, 0, 0, 0, 0,
+                              *hwndFrame, HWND_TOP, FID_CLIENT, NULL, NULL);
+    return hwndClient;
 }
 //******************************************************************************
 //Note: Also check OSLibSetWindowStyle when changing this!!
@@ -293,7 +300,7 @@ BOOL OSLibWinSetActiveWindow(HWND hwnd)
 
   rc = WinSetActiveWindow(HWND_DESKTOP, hwnd);
   if(rc == FALSE) {
-	dprintf(("WinSetActiveWindow %x failure: %x", hwnd, OSLibWinGetLastError()));
+    dprintf(("WinSetActiveWindow %x failure: %x", hwnd, OSLibWinGetLastError()));
   }
   return rc;
 }
@@ -393,14 +400,13 @@ BOOL OSLibWinQueryWindowPos (HWND hwnd, PSWP pswp)
 }
 //******************************************************************************
 //******************************************************************************
-void OSLibMapSWPtoWINDOWPOS(PSWP pswp, PWINDOWPOS pwpos, PSWP pswpOld, 
-                            int parentHeight, int clientOrgX, int clientOrgY, 
-                            HWND hwnd)
+void OSLibMapSWPtoWINDOWPOS(PSWP pswp, PWINDOWPOS pwpos, PSWP pswpOld,
+                            int parentHeight, HWND hwnd)
 {
    HWND hWindow            = pswp->hwnd;
    HWND hWndInsertAfter    = pswp->hwndInsertBehind;
-   long x                  = pswp->x - clientOrgX;
-   long y                  = pswp->y + clientOrgY;
+   long x                  = pswp->x;
+   long y                  = pswp->y;
    long cx                 = pswp->cx;
    long cy                 = pswp->cy;
    UINT fuFlags            = (UINT)pswp->fl;
@@ -466,15 +472,15 @@ void OSLibMapSWPtoWINDOWPOS(PSWP pswp, PWINDOWPOS pwpos, PSWP pswpOld,
 }
 //******************************************************************************
 //******************************************************************************
-void OSLibMapWINDOWPOStoSWP(struct tagWINDOWPOS *pwpos, PSWP pswp, PSWP pswpOld, 
-                            int parentHeight, int clientOrgX, int clientOrgY, HWND hFrame)
+void OSLibMapWINDOWPOStoSWP(struct tagWINDOWPOS *pwpos, PSWP pswp, PSWP pswpOld,
+                            int parentHeight, HWND hFrame)
 {
  BOOL fCvt = FALSE;
 
    HWND hWnd            = pwpos->hwnd;
    HWND hWndInsertAfter = pwpos->hwndInsertAfter;
-   long x               = pwpos->x + clientOrgX;
-   long y               = pwpos->y + clientOrgY;
+   long x               = pwpos->x;
+   long y               = pwpos->y;
    long cx              = pwpos->cx;
    long cy              = pwpos->cy;
    UINT fuFlags         = pwpos->flags;
@@ -545,7 +551,28 @@ void OSLibMapWINDOWPOStoSWP(struct tagWINDOWPOS *pwpos, PSWP pswp, PSWP pswpOld,
    pswp->ulReserved2      = 0;
 }
 //******************************************************************************
-//Position in screen coordinates
+//******************************************************************************
+void OSLibWinSetClientPos(HWND hwnd, int x, int y, int cx, int cy, int parentHeight)
+{
+ SWP swp;
+ BOOL rc;
+
+   swp.hwnd = hwnd;
+   swp.hwndInsertBehind = 0;
+   swp.x  = x;
+   swp.y  = parentHeight - y - cy;
+   swp.cx = cx;
+   swp.cy = cy;
+   swp.fl = SWP_MOVE | SWP_SIZE;
+
+   dprintf(("OSLibWinSetClientPos (%d,%d) (%d,%d) -> (%d,%d) (%d,%d)", x, y, x+cx, y+cy, swp.x, swp.y, swp.x+swp.cx, swp.y+swp.cy));
+
+   rc = WinSetMultWindowPos(GetThreadHAB(), &swp, 1);
+   if(rc == FALSE) {
+        dprintf(("OSLibWinSetClientPos: WinSetMultWindowPos %x failed %x", hwnd, WinGetLastError(GetThreadHAB())));
+   }
+}
+//******************************************************************************
 //******************************************************************************
 BOOL OSLibWinCalcFrameRect(HWND hwndFrame, RECT *pRect, BOOL fClient)
 {
@@ -715,127 +742,138 @@ void OSLibWinShowTaskList(HWND hwndFrame)
 }
 //******************************************************************************
 //******************************************************************************
-void OSLibSetWindowStyle(HWND hwnd, ULONG dwStyle, ULONG dwExStyle)
+void OSLibSetWindowStyle(HWND hwndFrame, HWND hwndClient, ULONG dwStyle, ULONG dwExStyle)
 {
-  ULONG dwWinStyle = WinQueryWindowULong(hwnd, QWL_STYLE);
-  ULONG dwOldWinStyle = dwWinStyle;
+    ULONG dwWinStyle;
+    ULONG dwOldWinStyle;
 
-  if(dwStyle & WS_DISABLED_W) {
-        dwWinStyle |= WS_DISABLED;
-  }
-  else  dwWinStyle &= ~WS_DISABLED;
+    //client window:
+    dwWinStyle    = WinQueryWindowULong(hwndClient, QWL_STYLE);
+    dwOldWinStyle = dwWinStyle;
 
-  if(dwStyle & WS_CLIPSIBLINGS_W) {
-        dwWinStyle |= WS_CLIPSIBLINGS;
-  }
-  else  dwWinStyle &= ~WS_CLIPSIBLINGS;
+    if(dwStyle & WS_CLIPCHILDREN_W) {
+         dwWinStyle |= WS_CLIPCHILDREN;
+    }
+    else dwWinStyle &= ~WS_CLIPCHILDREN;
 
-  if(dwStyle & WS_CLIPCHILDREN_W) {
-        dwWinStyle |= WS_CLIPCHILDREN;
-  }
-  else  dwWinStyle &= ~WS_CLIPCHILDREN;
+    if(dwWinStyle != dwOldWinStyle) {
+        WinSetWindowULong(hwndClient, QWL_STYLE, dwWinStyle);
+    }
 
-  if(dwWinStyle != dwOldWinStyle) {
-      WinSetWindowULong(hwnd, QWL_STYLE, dwWinStyle);
-  }
+    //Frame window
+    dwWinStyle    = WinQueryWindowULong(hwndFrame, QWL_STYLE);
+    dwOldWinStyle = dwWinStyle;
+    if(dwStyle & WS_DISABLED_W) {
+         dwWinStyle |= WS_DISABLED;
+    }
+    else dwWinStyle &= ~WS_DISABLED;
+
+    if(dwStyle & WS_CLIPSIBLINGS_W) {
+         dwWinStyle |= WS_CLIPSIBLINGS;
+    }
+    else dwWinStyle &= ~WS_CLIPSIBLINGS;
+
+    if(dwWinStyle != dwOldWinStyle) {
+      WinSetWindowULong(hwndFrame, QWL_STYLE, dwWinStyle);
+    }
 }
 //******************************************************************************
 //******************************************************************************
 DWORD OSLibQueryWindowStyle(HWND hwnd)
 {
-  return WinQueryWindowULong(hwnd, QWL_STYLE);
+    return WinQueryWindowULong(hwnd, QWL_STYLE);
 }
 //******************************************************************************
 //******************************************************************************
 void OSLibWinSetVisibleRegionNotify(HWND hwnd, BOOL fNotify)
 {
-  WinSetVisibleRegionNotify(hwnd, fNotify);
+    WinSetVisibleRegionNotify(hwnd, fNotify);
 }
 //******************************************************************************
 //******************************************************************************
 HWND OSLibWinQueryCapture()
 {
-  return WinQueryCapture(HWND_DESKTOP);
+    return WinQueryCapture(HWND_DESKTOP);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL OSLibWinSetCapture(HWND hwnd)
 {
-  return WinSetCapture(HWND_DESKTOP, hwnd);
+    return WinSetCapture(HWND_DESKTOP, hwnd);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL OSLibWinRemoveFromTasklist(HANDLE hTaskList)
 {
-  return (WinRemoveSwitchEntry(hTaskList)) ? FALSE : TRUE;
+    return (WinRemoveSwitchEntry(hTaskList)) ? FALSE : TRUE;
 }
 //******************************************************************************
 //******************************************************************************
 HANDLE OSLibWinAddToTaskList(HWND hwndFrame, char *title, BOOL fVisible)
 {
- SWCNTRL swctrl;
- ULONG   tid;
+    SWCNTRL swctrl;
+    ULONG   tid;
 
-  swctrl.hwnd          = hwndFrame;
-  swctrl.hwndIcon      = 0;
-  swctrl.hprog         = 0;
-  WinQueryWindowProcess(hwndFrame, (PPID)&swctrl.idProcess, (PTID)&tid);
-  swctrl.idSession     = 0;
-  swctrl.uchVisibility = (fVisible) ? SWL_VISIBLE : SWL_INVISIBLE;
-  swctrl.fbJump        = SWL_JUMPABLE;
-  swctrl.bProgType     = PROG_PM;
-  if(title) {
-	strncpy(swctrl.szSwtitle, title, MAXNAMEL+4);
-	swctrl.szSwtitle[MAXNAMEL+4-1] = 0;
-  }
-  else {
-	swctrl.szSwtitle[0] = 0;
-	swctrl.uchVisibility    = SWL_INVISIBLE;
-  }
-  return WinAddSwitchEntry(&swctrl);
+    swctrl.hwnd          = hwndFrame;
+    swctrl.hwndIcon      = 0;
+    swctrl.hprog         = 0;
+    WinQueryWindowProcess(hwndFrame, (PPID)&swctrl.idProcess, (PTID)&tid);
+    swctrl.idSession     = 0;
+    swctrl.uchVisibility = (fVisible) ? SWL_VISIBLE : SWL_INVISIBLE;
+    swctrl.fbJump        = SWL_JUMPABLE;
+    swctrl.bProgType     = PROG_PM;
+    if(title) {
+        strncpy(swctrl.szSwtitle, title, MAXNAMEL+4);
+        swctrl.szSwtitle[MAXNAMEL+4-1] = 0;
+    }
+    else {
+        swctrl.szSwtitle[0] = 0;
+        swctrl.uchVisibility    = SWL_INVISIBLE;
+    }
+    return WinAddSwitchEntry(&swctrl);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL OSLibWinChangeTaskList(HANDLE hTaskList, HWND hwndFrame, char *title, BOOL fVisible)
 {
- SWCNTRL swctrl;
- ULONG   tid;
- 
-  swctrl.hwnd          = hwndFrame;
-  swctrl.hwndIcon      = 0;
-  swctrl.hprog         = 0;
-  WinQueryWindowProcess(hwndFrame, (PPID)&swctrl.idProcess, (PTID)&tid);
-  swctrl.idSession     = 0;
-  swctrl.uchVisibility = (fVisible) ? SWL_VISIBLE : SWL_INVISIBLE;
-  swctrl.fbJump        = SWL_JUMPABLE;
-  swctrl.bProgType     = PROG_PM;
-  if(title) {
-	strncpy(swctrl.szSwtitle, title, MAXNAMEL+4);
-	swctrl.szSwtitle[MAXNAMEL+4-1] = 0;
-  }
-  else {
-	swctrl.szSwtitle[0] = 0;
-	swctrl.uchVisibility    = SWL_INVISIBLE;
-  }
-  return (WinChangeSwitchEntry(hTaskList, &swctrl)) ? FALSE : TRUE;
+    SWCNTRL swctrl;
+    ULONG   tid;
+
+    swctrl.hwnd          = hwndFrame;
+    swctrl.hwndIcon      = 0;
+    swctrl.hprog         = 0;
+    WinQueryWindowProcess(hwndFrame, (PPID)&swctrl.idProcess, (PTID)&tid);
+    swctrl.idSession     = 0;
+    swctrl.uchVisibility = (fVisible) ? SWL_VISIBLE : SWL_INVISIBLE;
+    swctrl.fbJump        = SWL_JUMPABLE;
+    swctrl.bProgType     = PROG_PM;
+    if(title) {
+        strncpy(swctrl.szSwtitle, title, MAXNAMEL+4);
+        swctrl.szSwtitle[MAXNAMEL+4-1] = 0;
+    }
+    else {
+        swctrl.szSwtitle[0] = 0;
+        swctrl.uchVisibility    = SWL_INVISIBLE;
+    }
+    return (WinChangeSwitchEntry(hTaskList, &swctrl)) ? FALSE : TRUE;
 }
 //******************************************************************************
 //******************************************************************************
 BOOL OSLibWinLockWindowUpdate(HWND hwnd)
 {
-  return WinLockWindowUpdate(HWND_DESKTOP, (HWND)hwnd);
+    return WinLockWindowUpdate(HWND_DESKTOP, (HWND)hwnd);
 }
 //******************************************************************************
 //******************************************************************************
 ULONG OSLibGetScreenHeight()
 {
-  return ScreenHeight;
+    return ScreenHeight;
 }
 //******************************************************************************
 //******************************************************************************
 ULONG OSLibGetScreenWidth()
 {
-  return ScreenWidth;
+    return ScreenWidth;
 }
 //******************************************************************************
 //Returns the maximum position for a window
@@ -844,22 +882,22 @@ ULONG OSLibGetScreenWidth()
 BOOL OSLibWinGetMaxPosition(HWND hwndOS2, RECT *rect)
 {
  SWP  swp;
- 
-  if(!WinGetMaxPosition(hwndOS2, &swp)) {
- 	dprintf(("WARNING: WinGetMaxPosition %x returned FALSE", hwndOS2));
-	return FALSE;
-  }
-  rect->left   = swp.x;
-  rect->right  = swp.x + swp.cx;
-  rect->top    = ScreenHeight - (swp.y + swp.cy);
-  rect->bottom = ScreenHeight - swp.y;
-  return TRUE;
+
+    if(!WinGetMaxPosition(hwndOS2, &swp)) {
+        dprintf(("WARNING: WinGetMaxPosition %x returned FALSE", hwndOS2));
+        return FALSE;
+    }
+    rect->left   = swp.x;
+    rect->right  = swp.x + swp.cx;
+    rect->top    = ScreenHeight - (swp.y + swp.cy);
+    rect->bottom = ScreenHeight - swp.y;
+    return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
 BOOL OSLibWinShowPointer(BOOL fShow)
 {
-  return WinShowPointer(HWND_DESKTOP, fShow);
+    return WinShowPointer(HWND_DESKTOP, fShow);
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.53 2001-04-15 17:05:29 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.54 2001-05-11 08:39:43 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -39,10 +39,11 @@ BOOL  OSLibWinSetOwner(HWND hwnd, HWND hwndOwner);
 
 HWND  OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle,
                            char *pszName, HWND Owner, ULONG fBottom,
-                           ULONG id, BOOL fTaskList,BOOL fShellPosition, int classStyle);
+                           ULONG id, BOOL fTaskList,BOOL fShellPosition, 
+                           int classStyle, HWND *hwndFrame);
 
 BOOL  OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle);
-void  OSLibSetWindowStyle(HWND hwnd, ULONG dwStyle, ULONG dwExStyle);
+void  OSLibSetWindowStyle(HWND hwndFrame, HWND hwndClient, ULONG dwStyle, ULONG dwExStyle);
 DWORD OSLibQueryWindowStyle(HWND hwnd);
 
 #define OSLIB_QWL_USER -4
@@ -249,10 +250,11 @@ BOOL  OSLibWinSetIcon(HWND hwnd, HANDLE hIcon);
 
 BOOL  OSLibWinQueryWindowPos (HWND hwnd, PSWP pswp);
 void  OSLibMapSWPtoWINDOWPOS(PSWP pswp, PWINDOWPOS pwpos, PSWP pswpOld, 
-                            int parentHeight, int clientOrgX, int clientOrgY, 
-                            HWND hwnd);
+                            int parentHeight, HWND hwnd);
 void  OSLibMapWINDOWPOStoSWP(struct tagWINDOWPOS *pwpos, PSWP pswp, PSWP pswpOld, 
-                             int parentHeight, int clientOrgX, int clientOrgY, HWND hFrame);
+                             int parentHeight, HWND hFrame);
+
+void  OSLibWinSetClientPos(HWND hwnd, int x, int y, int cx, int cy, int parentHeight);
 
 HWND  OSLibWinBeginEnumWindows(HWND hwnd);
 HWND  OSLibWinGetNextWindow(HWND hwndEnum);
