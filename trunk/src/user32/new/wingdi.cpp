@@ -1,4 +1,4 @@
-/* $Id: wingdi.cpp,v 1.12 1999-09-01 18:48:50 sandervl Exp $ */
+/* $Id: wingdi.cpp,v 1.13 1999-09-04 17:56:41 dengert Exp $ */
 /*
  * Win32 Window graphics apis for OS/2
  *
@@ -31,7 +31,7 @@ HDC WIN32API BeginPaint(HWND hwnd, PPAINTSTRUCT lps)
     dprintf(("GetDC, window %x not found", hwnd));
     return 0;
     }
-    window->MsgEraseBackGround(hdc);
+// !! there is no HDC to paint on !!!    window->MsgEraseBackGround(hdc);
 #ifdef OPEN32_GDI
     hdc = O32_BeginPaint(window->getOS2WindowHandle(),lps);
     //CB: conflict with Open32 mechanism
