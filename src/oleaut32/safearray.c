@@ -1,4 +1,3 @@
-/* $Id: safearray.c,v 1.3 2001-09-05 13:19:01 bird Exp $ */
 /*************************************************************************
  * OLE Automation
  * SafeArray Implementation
