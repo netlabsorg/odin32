@@ -1,9 +1,13 @@
-/* $Id: ChangeLog,v 1.1433 2001-05-20 08:50:26 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1434 2001-05-20 10:45:02 sandervl Exp $ */
 
  2001-05-20: Sander van Leeuwen <sandervl@xs4all.nl>
+    - GDI32:    o Fixed LPtoDP/DPtoLP again.
     - USER32:   o Paint menu item first before destroying it
                   (prevents menu control from painting selected item on
                    desktop)
+                o Don't show or hide scrollbar in SetScrollInfo if
+                  scroll parameters didn't change.
+                  (fixes loop in VirtualPC settings dialog)
 
  2001-05-20: Dietrich Teickner <Dietrich_Teickner@t-online.de>
     - KERNEL32: o LOCALE_IFIRSTDAYOFWEEK fixes (Get/SetLocaleInfo)
