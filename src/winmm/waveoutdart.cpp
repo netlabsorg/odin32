@@ -1,4 +1,4 @@
-/* $Id: waveoutdart.cpp,v 1.14 2002-08-14 19:02:10 sandervl Exp $ */
+/* $Id: waveoutdart.cpp,v 1.15 2002-08-16 10:09:49 sandervl Exp $ */
 
 /*
  * Wave playback class (DART)
@@ -367,9 +367,29 @@ MMRESULT DartWaveOut::resume()
     State = STATE_PLAYING;
     wmutex.leave();
 
-    // Resume playback.
-    mymciSendCommand(DeviceId, MCI_RESUME, MCI_WAIT, (PVOID)&Params, 0);
+    //Only write buffers to dart if mixer has been initialized; if not, then
+    //the first buffer write will do this for us.
+    if(fMixerSetup == TRUE)
+    {
+        wmutex.enter();
+        State     = STATE_PLAYING;
+        fUnderrun = FALSE;
+        curbuf = curPlayBuf;
+        writeBuffer();  //must be called before (re)starting playback
+        wmutex.leave();
 
+        // MCI_MIXSETUP_PARMS->pMixWrite does alter FS: selector!
+        USHORT selTIB = GetFS(); // save current FS selector
+
+        for(i=0;i<PREFILLBUF_DART;i++)
+        {
+            dprintf(("restart: write buffer at %x size %d", MixBuffer[curbuf].pBuffer, MixBuffer[curbuf].ulBufferLength));
+            MixSetupParms->pmixWrite(MixSetupParms->ulMixHandle, &MixBuffer[curbuf], 1);
+            if(++curbuf == PREFILLBUF_DART)
+                curbuf = 0;
+        }
+        SetFS(selTIB);           // switch back to the saved FS selector
+    }
     return(MMSYSERR_NOERROR);
 }
 /******************************************************************************/
