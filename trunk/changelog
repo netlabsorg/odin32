@@ -1,4 +1,13 @@
-/* $Id: changelog,v 1.1224 2001-01-19 02:48:08 bird Exp $ */
+/* $Id: changelog,v 1.1225 2001-01-19 23:05:34 sandervl Exp $ */
+
+ 2001-01-19: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o GetCaretPos & SetCaretPos bugfixes. Did not take client
+                  window origin into account.
+                  (fixes cursor position problems in e.g. Notepad)
+
+ 2000-01-19: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
+    - WNASPI32: o DosCreateMutexSem call bugfix. 
+                  (CDRWIN works again)
 
  2001-01-19: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Win32k:   o Added support for kernel revisions. (like 14062A)
@@ -10,7 +19,8 @@
                 o Use StretchDIBits in SetDIBitsToDevice instead of Open32
                   function. (which doesn't work for compressed bitmaps)
                   (MS Excel 97 startup bitmap displays correctly now)
-                  (MS Developer startup bitmap overlay correct now (Visual C++ part))
+                  Also solves y inversion related problems.
+                  (MS Developer startup bitmap overlay correct now (Visual C++ logo))
     - WGSS50:   o Reported problems with SaveDC/RestoreDC and StretchDIBits
                   (Modelator graphics corruption fixed)
     - KERNEL32: o Create system.ini with '[mci] cdaudio=mcicda.drv' section
