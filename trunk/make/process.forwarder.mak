@@ -1,4 +1,4 @@
-# $Id: process.forwarder.mak,v 1.15 2002-09-12 03:22:12 bird Exp $
+# $Id: process.forwarder.mak,v 1.16 2002-09-20 03:38:43 bird Exp $
 
 #
 # Generic makefile system.
@@ -64,7 +64,7 @@ $(ECHO) Forwarding to another (shell) environment setup...$(CLRRST)
 # -----------------------------------------------------------------------------
 
 .SUFFIXES:
-.SUFFIXES: .c .cpp .asm .$(EXT_OBJ) .rc .$(EXT_RES) .ii .s
+.SUFFIXES: .c .cpp .asm .$(EXT_OBJ) .rc .$(EXT_RES) .ii .s .ipp .ipf .$(EXT_INF) .$(EXT_HLP)
 
 
 # Assembling assembly source.
@@ -152,7 +152,7 @@ $(ECHO) Forwarding to another (shell) environment setup...$(CLRRST)
 
 
 # Compiling resources.
-.rc{$(PATH_TARGET)}.res:
+.rc{$(PATH_TARGET)}.$(EXT_RES):
     \
 !ifndef BUILD_VERBOSE
     @ \
@@ -167,6 +167,69 @@ $(ECHO) Forwarding to another (shell) environment setup...$(CLRRST)
     $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
 
 
+# Compiling INFs.
+.ipf{$(PATH_TARGET)}.$(EXT_INF):
+    \
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
+    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
+
+.ipf.inf:
+    \
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
+    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
+
+
+# Compiling INFs with pre-compiling
+.ipp{$(PATH_TARGET)}.$(EXT_INF):
+    \
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
+    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
+
+.ipp.inf:
+    \
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
+    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
+
+
+# Compiling HLPs
+.ipf{$(PATH_TARGET)}.$(EXT_HLP):
+    \
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
+    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
+
+.ipf.hlp:
+    \
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
+    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
+
+
+# Compiling HLPs with pre-compiling
+.ipp{$(PATH_TARGET)}.$(EXT_HLP):
+    \
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
+    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
+
+.ipp.hlp:
+    \
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
+    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
+
 
 
 
@@ -180,14 +243,16 @@ all: build
 # -----------------------------------------------------------------------------
 # Generic forwarder
 # -----------------------------------------------------------------------------
-build rebuild clean dep needed lib executable miscellaneous \
+build rebuild clean dep needed lib binary misc \
 !if "$(TARGET_MODE)" == "DEPEND"
 $(TARGET) \
 !endif
 $(TARGET_ILIB) \
 $(RULES_FORWARD) \
 publish publish_target testcase nothing target packing \
-pass1 pass2 pass3 pass4 pass5 pass6 quick:
+pass1 pass2 pass3 pass4 pass5 pass6 quick \
+# obsoletes:
+miscellaneous executable :
     \
 !ifndef BUILD_VERBOSE
     @ \
