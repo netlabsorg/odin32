@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.35 2001-02-11 23:44:38 bird Exp $
+/* $Id: d32init.c,v 1.36 2001-02-20 04:58:33 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -776,7 +776,11 @@ int interpretFunctionProlog32(char *pach, BOOL fOverload)
      *  or
      *     push edi
      *     mov eax, dword ptr [xxxxxxxx]
-     *
+     *  or
+     *     movzx esp, sp
+     *  or
+     *     call rel32
+     *     popf
      */
     if ((pach[0] == 0x55 && (pach[1] == 0x8b || pach[1] == 0xa1)) /* the two first prologs */
         ||
@@ -800,7 +804,11 @@ int interpretFunctionProlog32(char *pach, BOOL fOverload)
         ||
         (pach[0] == 0xa1 && !fOverload) /* the next prolog */
         ||
-        (pach[0] == 0x57 &&  pach[1] == 0x8b && !fOverload) /* the last prolog */
+        (pach[0] == 0x57 &&  pach[1] == 0x8b && !fOverload) /* the next prolog */
+        ||
+        (pach[0] == 0x0f &&  pach[1] == 0xb7 && pach[2] == 0xe4 && !fOverload) /* the next prolog */
+        ||
+        (pach[0] == 0xe8 &&  pach[5] == 0x9d && !fOverload) /* the last prolog */
         )
     {
         BOOL fForce = FALSE;
@@ -814,6 +822,17 @@ int interpretFunctionProlog32(char *pach, BOOL fOverload)
             fForce = FALSE;
             switch (*pach)
             {
+                case 0x0f:
+                    if (pach[1] != 0xb7 && pach[2] != 0xe4) /* movzx esp, sp */
+                    {
+                        kprintf(("interpretFunctionProlog32: unknown instruction 0x%x 0x%x 0x%x\n", pach[0], pach[1], pach[2]));
+                        return -11;
+                    }
+                    pach += 2;
+                    cb += 2;
+                    break;
+
+
                 /* simple one byte prefixes */
                 case 0x2e:              /* cs segment override */
                 case 0x36:              /* ss segment override */
@@ -838,6 +857,10 @@ int interpretFunctionProlog32(char *pach, BOOL fOverload)
                 case 0x55:              /* push bp */
                 case 0x56:              /* push si */
                 case 0x57:              /* push di */
+                case 0x06:              /* push es */
+                case 0x0e:              /* push cs */
+                case 0x1e:              /* push ds */
+                case 0x16:              /* push ss */
                     break;
 
                 /* simple two byte instructions */
@@ -876,6 +899,12 @@ int interpretFunctionProlog32(char *pach, BOOL fOverload)
                 case 0xa3:              /* mov moffs16, eax */
                     pach += cbWord;
                     cb += cbWord;
+                    break;
+
+                /* fixed five byte instructions */
+                case 0xe8:              /* call imm32 */
+                    pach =+ 4;
+                    cb =+ 4;
                     break;
 
                 /* complex sized instructions -  "/r" */
