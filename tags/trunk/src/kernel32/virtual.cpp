@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.8 1999-08-26 12:55:37 sandervl Exp $ */
+/* $Id: virtual.cpp,v 1.9 1999-08-26 15:05:14 sandervl Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -405,7 +405,7 @@ BOOL WIN32API VirtualProtect(LPVOID lpvAddress, DWORD cbSize, DWORD fdwNewProtec
   if(pageFlags & (PAG_WRITE))
         *pfdwOldProtect |= PAGE_READWRITE;
 
-  if(pageFlags & (PAG_WRITE | PAG_EXECUTE))
+  if((pageFlags & (PAG_WRITE | PAG_EXECUTE)) == (PAG_WRITE | PAG_EXECUTE))
         *pfdwOldProtect |= PAGE_EXECUTE_READWRITE;
   else
   if(pageFlags & PAG_EXECUTE)
@@ -470,7 +470,7 @@ DWORD WIN32API VirtualQuery(LPCVOID lpvAddress, LPMEMORY_BASIC_INFORMATION pmbiB
   if(dAttr & PAG_WRITE)
         pmbiBuffer->Protect |= PAGE_READWRITE;
 
-  if(dAttr & (PAG_WRITE | PAG_EXECUTE))
+  if((dAttr & (PAG_WRITE | PAG_EXECUTE)) == (PAG_WRITE | PAG_EXECUTE))
         pmbiBuffer->Protect |= PAGE_EXECUTE_READWRITE;
   else
   if(dAttr & PAG_EXECUTE)

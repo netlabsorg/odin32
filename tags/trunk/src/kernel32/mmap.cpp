@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.14 1999-08-26 12:55:36 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.15 1999-08-26 15:05:14 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file class
@@ -30,7 +30,6 @@
 
 VMutex globalmapMutex;
 
-
 //******************************************************************************
 //TODO: sharing between processes
 //******************************************************************************
@@ -60,14 +59,12 @@ BOOL Win32MemMap::Init(HANDLE hMemMap)
   mapMutex.enter();
   if(hMemFile != -1) 
   {
-#if 0
      	if(DuplicateHandle(GetCurrentProcess(), hMemFile, GetCurrentProcess(),
                            &hMemFile, 0, FALSE, DUPLICATE_SAME_ACCESS) == FALSE) 
      	{
 		dprintf(("Win32MemMap::Init: DuplicateHandle failed!"));
 		goto fail;
      	}
-#endif
 	mSize = SetFilePointer(hMemFile, 0, NULL, FILE_END);
 	if(mSize == -1) {
 		dprintf(("Win32MemMap::init: SetFilePointer failed to set pos end"));
@@ -179,7 +176,6 @@ BOOL Win32MemMap::commitPage(LPVOID lpPageFaultAddr, ULONG nrpages, BOOL fWriteA
 		if(offset + size > mSize) {
 			size = mSize - offset;
 		}
-		*(char *)pageAddr = 0;  //testestestest
 		if(SetFilePointer(hMemFile, offset, NULL, FILE_BEGIN) != offset) {
 			dprintf(("Win32MemMap::commitPage: SetFilePointer failed to set pos to %x", offset));
 			goto fail;

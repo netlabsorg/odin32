@@ -1,4 +1,4 @@
-/* $Id: oslibdos.h,v 1.1 1999-08-26 12:56:02 sandervl Exp $ */
+/* $Id: oslibdos.h,v 1.2 1999-08-26 15:05:14 sandervl Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -21,6 +21,7 @@ DWORD OSLibDosSetMem(LPVOID lpMemAddr, DWORD size, DWORD flags);
 #define OSLIB_NOERROR			0
 #define OSLIB_ERROR_INVALID_ADDRESS	1
 #define OSLIB_ERROR_ACCESS_DENIED       2
+#define OSLIB_ERROR_INVALID_PARAMETER   3
 
 #ifndef __OS2_H__
 
@@ -47,5 +48,23 @@ DWORD OSLibDosSetMem(LPVOID lpMemAddr, DWORD size, DWORD flags);
 #define PAG_BASE          0x00010000U     /* first page in object             */
 
 #endif
+
+#define OSLIB_ACCESS_READONLY		1
+#define OSLIB_ACCESS_READWRITE		2
+#define OSLIB_ACCESS_SHAREDENYNONE	4
+#define OSLIB_ACCESS_SHAREDENYREAD	8
+#define OSLIB_ACCESS_SHAREDENYWRITE	16
+
+DWORD OSLibDosOpen(char *lpszFileName, DWORD flags);
+DWORD OSLibDosClose(DWORD hFile);
+DWORD OSLibDosGetFileSize(DWORD hFile);
+DWORD OSLibDosRead(DWORD hFile, LPVOID lpBuffer, DWORD size, DWORD *nrBytesRead);
+DWORD OSLibDosWrite(DWORD hFile, LPVOID lpBuffer, DWORD size, DWORD *nrBytesWritten);
+
+#define OSLIB_SETPTR_FILE_CURRENT	1
+#define OSLIB_SETPTR_FILE_BEGIN		2
+#define OSLIB_SETPTR_FILE_END		3
+
+DWORD OSLibDosSetFilePtr(DWORD hFile, DWORD offset, DWORD method);
 
 #endif
