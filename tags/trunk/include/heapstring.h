@@ -91,14 +91,14 @@ INT WIN32API LocalToWideChar(LPWSTR pWide, LPSTR pLocal, INT dwChars);
   {                                                                      \
     int iLength = lstrlenA(strSrc) + 1;                                  \
     strDest = (LPSTR)_alloca( iLength );                                 \
-    memcpy( strDest, strSrc, iLength );                                  \
+    memcpy( strDest, strSrc, iLength);                                   \
   }
 
 #define STACK_strdupW(strDest, strSrc)                                   \
   {                                                                      \
     int iLength = lstrlenW(strSrc) + 1;                                  \
     strDest = (LPWSTR)_alloca( iLength * sizeof(WCHAR) );                \
-    memcpy( strDest, strSrc, iLength );                                  \
+    memcpy( strDest, strSrc, iLength * sizeof(WCHAR) );                  \
   }
 
 
