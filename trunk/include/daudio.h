@@ -1,4 +1,4 @@
-/* $Id: daudio.h,v 1.4 2001-04-27 17:34:51 sandervl Exp $ */
+/* $Id: daudio.h,v 1.5 2001-04-30 21:05:51 sandervl Exp $ */
 #ifndef __DAUDIO_H__
 #define __DAUDIO_H__
 
@@ -23,7 +23,7 @@
 #define DAUDIO_DEREGISTER_THREAD	0x4C
 #define DAUDIO_QUERYCAPS                0x4D
 #define DAUDIO_QUERYVERSION             0x4E
-#define DAUDIO_ADDLOOPINGBUFFER		0x4F
+#define DAUDIO_SETPROPERTY              0x4F
 
 #define DAUDIO_VERSION                  0x00000002  //highword = major, lowword = minor version
 
@@ -42,12 +42,8 @@ typedef struct {
       } Buffer;
     struct 
       {
-      ULONG   lpBuffer;
-      ULONG   ulBufferLength;
-      } LoopingBuffer;
-    struct 
-      {
       ULONG   ulCurrentPos;
+      ULONG   ulWritePos;
       } Pos;
     struct 
       {
@@ -57,6 +53,11 @@ typedef struct {
       {
       ULONG   ulVersion;
       } Version;
+    struct 
+      {
+      ULONG   type;
+      ULONG   value;
+      } SetProperty;
     };
   
 } DAUDIO_CMD, FAR *LPDAUDIO_CMD;
@@ -104,5 +105,15 @@ typedef struct _DAUDIOCAPS
 #define SBLIVECAPS_MINSAMPLERATE	5000
 #define SBLIVECAPS_MAXSAMPLERATE	48000
 #define SBLIVECAPS_MAXSTREAMS           32
+
+
+// property types
+#define PROPERTY_LOOPING	0
+#define PROPERTY_FREQUENCY	1
+#define PROPERTY_VOLUME         2
+#define PROPERTY_BALANCE        3
+#define PROPERTY_MASTERVOL      4
+#define PROPERTY_INPUTSRC       5
+#define PROPERTY_INPUTGAIN      6
 
 #endif //__DAUDIO_H__
