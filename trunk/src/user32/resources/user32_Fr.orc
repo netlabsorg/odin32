@@ -17,6 +17,23 @@ SYSMENU MENU LOADONCALL MOVEABLE DISCARDABLE
  MENUITEM "Insérer une marque dans le flux de déboguage", 61762
 }
 
+SYSMENUWARP MENU LOADONCALL MOVEABLE DISCARDABLE
+{
+ MENUITEM "&Restauration\tAlt-F5", 61728
+ MENUITEM "&Déplacement\tAlt-F7", 61456
+ MENUITEM "Di&mension\tAlt-F8", 61440
+ MENUITEM "Réduct&ion\tAlt-F9", 61472
+ MENUITEM "&Agrandissement\tAlt-F10", 61488
+ MENUITEM SEPARATOR
+ MENUITEM "&Fermeture\tAlt-F4", 61536
+ MENUITEM SEPARATOR
+ MENUITEM "&Basculer vers ...\tCtrl-Echap", 61744
+ MENUITEM SEPARATOR
+ MENUITEM "A propos de &Odin ...", 61761
+ MENUITEM SEPARATOR
+ MENUITEM "Insérer une marque dans le flux de déboguage", 61762
+}
+
 EDITMENU MENU LOADONCALL MOVEABLE DISCARDABLE
 {
 	POPUP ""
