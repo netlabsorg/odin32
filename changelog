@@ -1,7 +1,8 @@
-/* $Id: changelog,v 1.2465 2003-02-04 11:27:56 sandervl Exp $ */
+/* $Id: changelog,v 1.2466 2003-02-04 13:40:14 sandervl Exp $ */
 
  2003-02-04: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Support DuplicateHandle for threads
+                o Fixed command line parsing regression
 
  2003-02-02: Sander van Leeuwen <sandervl@innotek   >
     - INCLUDE\makefiles:
