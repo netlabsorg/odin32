@@ -1,8 +1,8 @@
-/* $Id: devErrors.c,v 1.1 2002-12-16 01:50:51 bird Exp $
+/* $Id: devErrors.c,v 1.2 2002-12-16 01:53:55 bird Exp $
  *
  * Error message from rc.
  *
- * Copyright (c) 2002 knut st. osmundsen <bird@anduin.net>
+ * Copyright (c) 2000-2002 knut st. osmundsen <bird@anduin.net>
  *
  *
  * This file is part of kKrnlLib.
@@ -104,7 +104,6 @@ static struct
  * @returns Pointer to error text. NULL if not found.
  * @param   sErr  Error code id.
  * @status  completely implemented.
- * @author  knut st. osmundsen (kosmunds@csc.com)
  */
 const char *devGetErrorMsg(int sErr)
 {
