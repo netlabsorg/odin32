@@ -1,4 +1,4 @@
-; $Id: devfirst.asm,v 1.5 2000-02-25 18:15:03 bird Exp $
+; $Id: devfirst.asm,v 1.5.4.1 2000-08-13 09:23:58 bird Exp $
 ;
 ; DevFirst - entrypoint and segment definitions
 ;
@@ -59,11 +59,13 @@ CODE16START label byte
     .286p
 ;$win32ki entry point
 _strategyAsm0:
+    int 3
     push    0
     jmp     _strategyAsm
 
 ;$win32k entry point
 _strategyAsm1:
+    int 3
     push    1
     jmp     _strategyAsm
 
