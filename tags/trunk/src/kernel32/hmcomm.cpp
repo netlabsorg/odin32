@@ -1,4 +1,4 @@
-/* $Id: hmcomm.cpp,v 1.30 2001-12-07 14:33:34 sandervl Exp $ */
+/* $Id: hmcomm.cpp,v 1.31 2001-12-08 15:44:30 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -24,7 +24,7 @@
 #define DBG_LOCALLOG  DBG_hmcomm
 #include "dbglocal.h"
 
-#define TESTING_COMM
+//#define TESTING_COMM
 #ifdef TESTING_COMM
 #undef dprintf
 #define dprintf(a) WriteLog a
