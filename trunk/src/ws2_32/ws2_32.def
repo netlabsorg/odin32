@@ -1,4 +1,4 @@
-; $Id: ws2_32.def,v 1.5 2001-05-19 11:15:38 sandervl Exp $
+; $Id: ws2_32.def,v 1.6 2001-07-07 10:43:42 achimha Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY WS2_32 INITINSTANCE
@@ -45,6 +45,7 @@ IMPORTS
   setsockopt                                       = WSOCK32.21
   shutdown                                         = WSOCK32.22
   socket                                           = WSOCK32.23
+  WSAEventSelect                                   = WSOCK32.3001
          
 EXPORTS
   accept                                           @1
@@ -87,7 +88,7 @@ EXPORTS
   WSAEnumNetworkEvents = _WSAEnumNetworkEvents@12  @36
 ; WSAEnumProtocolsA                                @37
 ; WSAEnumProtocolsW                                @38
-  WSAEventSelect = _WSAEventSelect@12              @39
+  WSAEventSelect                                   @39
 ; WSAGetOverlappedResult                           @40
 ; WSAGetQOSByName                                  @41
 ; WSAGetServiceClassInfoA                          @42
