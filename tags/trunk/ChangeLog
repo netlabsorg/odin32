@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1551 2001-06-27 19:10:03 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1552 2001-06-29 20:14:29 sandervl Exp $ */
 
  2001-06-27: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o CreateProcess fixes for finding executables
@@ -7,8 +7,12 @@
                   (model & stepping were reversed)
                 o Make sure stack is not aligned at 8 byte boundary before
                   calling executable entrypoint. Some applications rely on
-                  this NT feature and will suffer a performance penalty
+                  this NT 'feature' and will suffer a performance penalty
                   otherwise.
+                  (e.g. a certain Fortran compiler has startup code
+                   that pushes an uneven number of dwords on the stack
+                   before calling the Fortran code; FPU instructions
+                   don't like to access memory at misaligned addresses)
 
  2001-06-25: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - include\odin.h:
