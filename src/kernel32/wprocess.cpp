@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.68 2000-02-16 14:25:46 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.69 2000-02-24 19:17:51 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -387,9 +387,9 @@ BOOL WIN32API FreeLibrary(HINSTANCE hinstance)
  Win32DllBase *winmod;
  BOOL rc;
 
-  dprintf(("FreeLibrary"));
   winmod = Win32DllBase::findModule(hinstance);
   if(winmod) {
+  	dprintf(("FreeLibrary %s", winmod->getName()));
         winmod->Release();
         return(TRUE);
   }
