@@ -1,4 +1,4 @@
-/* $Id: objhandle.cpp,v 1.15 2001-07-08 10:59:23 sandervl Exp $ */
+/* $Id: objhandle.cpp,v 1.16 2001-07-09 07:57:38 sandervl Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
@@ -39,7 +39,7 @@ typedef struct {
 } GdiObject;
 
 static GdiObject objHandleTable[MAX_OBJECT_HANDLES] = {0};
-static ULONG     lowestFreeIndex = 0;
+static ULONG     lowestFreeIndex = 1;
 static VMutex    objTableMutex;
 
 //******************************************************************************
@@ -53,6 +53,11 @@ BOOL ObjAllocateHandle(HANDLE *hObject, DWORD dwUserData, ObjectType type)
         dprintf(("ERROR: GDI: ObjAllocateHandle OUT OF GDI OBJECT HANDLES!!"));
         DebugInt3();
         return FALSE;
+    }
+    if(objHandleTable[0].type == 0) {
+        //first handle can never be used
+        objHandleTable[0].type       = GDIOBJ_INVALID;
+        objHandleTable[0].dwUserData = -1;
     }
     *hObject  = lowestFreeIndex;
     *hObject |= MAKE_HANDLE(type);
