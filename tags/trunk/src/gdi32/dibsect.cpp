@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.9 1999-11-24 19:30:18 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.10 1999-12-02 13:26:04 achimha Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -227,8 +227,9 @@ int DIBSection::SetDIBColorTable(int startIdx, int cEntries, RGBQUAD *rgb)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nWidth,
-                        int nHeight, int nXsrc, int nYsrc, DWORD Rop)
+BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
+                        int nDestHeight, int nXsrc, int nYsrc,
+                        int nSrcWidth, int nSrcHeight, DWORD Rop)
 {
  HPS    hps = (HPS)hdcDest;
  POINTL point[4];
@@ -236,52 +237,64 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nWidth,
 
   HWND hwndDest = WindowFromDC(hdcDest);
   hwndDest = Win32ToOS2Handle(hwndDest);
-  if(hwndDest != 0) {
-         hps = WinGetPS(hwndDest);
+  if(hwndDest != 0)
+  {
+    hps = WinGetPS(hwndDest);
   }
-  if(hps == 0) {
-        eprintf(("DIBSection::BitBlt, hps == 0 hwndDest = %X", hwndDest));
-        return(FALSE);
+  if(hps == 0)
+  {
+    eprintf(("DIBSection::BitBlt, hps == 0 hwndDest = %X", hwndDest));
+    return(FALSE);
   }
 
-  dprintf(("DIBSection::BitBlt %X %x (%d,%d) to (%d,%d) (%d,%d) rop %x\n", hdcDest, hwndDest, nXdest, nYdest, nWidth, nHeight, nXsrc, nYsrc, Rop));
+  dprintf(("DIBSection::BitBlt %X %x to(%d,%d)(%d,%d) from (%d,%d)(%d,%d) rop %x\n",
+          hdcDest, hwndDest, nXdest, nYdest, nDestWidth, nDestHeight,
+          nXsrc, nYsrc, nSrcWidth, nSrcHeight, Rop));
 
   point[0].x = nXdest;
   point[0].y = nYdest;
-  point[1].x = nXdest + nWidth - 1;
-  point[1].y = nYdest + nHeight - 1;
+  point[1].x = nXdest + nDestWidth - 1;
+  point[1].y = nYdest + nDestHeight - 1;
   point[2].x = nXsrc;
   point[2].y = nYsrc;
-  if(nXsrc + nWidth > pOS2bmp->cx) {
-        point[3].x = pOS2bmp->cx;
+  if(nXsrc + nSrcWidth > pOS2bmp->cx)
+  {
+    point[3].x = pOS2bmp->cx;
   }
-  else  point[3].x = nXsrc + nWidth;
+  else
+    point[3].x = nXsrc + nSrcWidth;
 
-  if(nYsrc + nHeight > pOS2bmp->cy) {
-        point[3].y = pOS2bmp->cy;
+  if(nYsrc + nSrcHeight > pOS2bmp->cy)
+  {
+    point[3].y = pOS2bmp->cy;
   }
-  else  point[3].y = nYsrc + nHeight;
+  else
+    point[3].y = nYsrc + nSrcHeight;
 
 #if 1
-  if(fFlip & FLIP_VERT) {
-	GpiEnableYInversion(hps, nHeight);
+  if(fFlip & FLIP_VERT)
+  {
+    GpiEnableYInversion(hps, nDestHeight);
   }
 
-  if(fFlip & FLIP_HOR) {
+  if(fFlip & FLIP_HOR)
+  {
     ULONG x;
-        x = point[0].x;
-        point[0].x = point[1].x;
-        point[1].x = x;
+    x = point[0].x;
+    point[0].x = point[1].x;
+    point[1].x = x;
   }
 #endif
 
   rc = GpiDrawBits(hps, bmpBits, pOS2bmp, 4, &point[0], ROP_SRCCOPY, BBO_OR);
 
-  if(hwndDest != 0) {
-          WinReleasePS(hps);
+  if(hwndDest != 0)
+  {
+    WinReleasePS(hps);
   }
   if(rc == GPI_OK)
-        return(TRUE);
+    return(TRUE);
+
   dprintf(("DIBSection::BitBlt %X (%d,%d) (%d,%d) to (%d,%d) (%d,%d) returned %d\n", hps, point[0].x, point[0].y, point[1].x, point[1].y, point[2].x, point[2].y, point[3].x, point[3].y, rc));
   dprintf(("WinGetLastError returned %X\n", WinGetLastError(WinQueryAnchorBlock(hwndDest)) & 0xFFFF));
   return(FALSE);
@@ -346,8 +359,8 @@ int DIBSection::GetDIBSection(int iSize , DIBSECTION *pDIBSection){
     pDIBSection->dsBm.bmPlanes     = pOS2bmp->cPlanes;
     pDIBSection->dsBm.bmBitsPixel  = pOS2bmp->cBitCount;
     pDIBSection->dsBm.bmBits       = bmpBits;
-  	// BITMAPINFOHEADER	data
-  	pDIBSection->dsBmih.biSize = sizeof(BITMAPINFOHEADER);
+    // BITMAPINFOHEADER data
+    pDIBSection->dsBmih.biSize = sizeof(BITMAPINFOHEADER);
     pDIBSection->dsBmih.biWidth       = pOS2bmp->cx;
     pDIBSection->dsBmih.biHeight      = pOS2bmp->cy;
     pDIBSection->dsBmih.biPlanes      = pOS2bmp->cPlanes;
@@ -363,11 +376,11 @@ int DIBSection::GetDIBSection(int iSize , DIBSECTION *pDIBSection){
     pDIBSection->dsBitfields[1] = 0;
     pDIBSection->dsBitfields[2] = 0;
 
-  	pDIBSection->dshSection = this->handle;
-  	
-  	pDIBSection->dsOffset = 0; // TODO: put the correct value here
-  	
-  	return 0; //ERROR_SUCCESS
+    pDIBSection->dshSection = this->handle;
+
+    pDIBSection->dsOffset = 0; // TODO: put the correct value here
+
+    return 0; //ERROR_SUCCESS
   }
   return 87;    //ERROR_INVALID_PARAMETER
 

@@ -1,4 +1,4 @@
-/* $Id: dibsect.h,v 1.6 1999-11-24 19:30:18 sandervl Exp $ */
+/* $Id: dibsect.h,v 1.7 1999-12-02 13:26:05 achimha Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -50,11 +50,11 @@ typedef struct
 #ifdef OS2_ONLY
 typedef struct
 {
-	WINBITMAP		dsBm;
-	WINBITMAPINFOHEADER	dsBmih;
-	DWORD			dsBitfields[3];
-	HANDLE		dshSection;
-	DWORD			dsOffset;
+  WINBITMAP   dsBm;
+  WINBITMAPINFOHEADER dsBmih;
+  DWORD     dsBitfields[3];
+  HANDLE    dshSection;
+  DWORD     dsOffset;
 } DIBSECTION,*LPDIBSECTION;
 #endif
 
@@ -70,11 +70,14 @@ public:
               void  UnSelectDIBObject()      { this->hdc = 0;   };
 
               BOOL  BitBlt(HDC hdcDest, int nXdest, int nYDest,
-                           int nWidth, int nHeight, int nXsrc, int nYSrc, DWORD Rop);
+                           int nDestWidth, int nDestHeight,
+                           int nXsrc, int nYSrc,
+                           int nSrcWidth, int nSrcHeight,
+                           DWORD Rop);
 
                int  SetDIBColorTable(int startIdx, int cEntries, RGBQUAD *rgb);
 
-	       int  SetDIBits(HDC hdc, HBITMAP hbitmap, UINT startscan, UINT
+         int  SetDIBits(HDC hdc, HBITMAP hbitmap, UINT startscan, UINT
                               lines, const VOID *bits, WINBITMAPINFOHEADER *pbmi,
                               UINT coloruse);
 
@@ -100,4 +103,5 @@ private:
 };
 
 #endif
+
 
