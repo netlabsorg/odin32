@@ -1,4 +1,4 @@
-/* $Id: initcomdlg32.cpp,v 1.3 2001-09-05 12:12:02 bird Exp $ */
+/* $Id: initcomdlg32.cpp,v 1.4 2002-10-29 15:37:07 sandervl Exp $ */
 /*
  * DLL entry point
  *
@@ -25,12 +25,14 @@
 /* Include files */
 #define  INCL_DOSMODULEMGR
 #define  INCL_DOSPROCESS
+#define  INCL_WINSHELLDATA
 #include <os2wrap.h>    //Odin32 OS/2 api wrappers
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <odin.h>
 #include <win32type.h>
+#include <win32api.h>
 #include <winconst.h>
 #include <odinlx.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
@@ -52,13 +54,27 @@ BOOL WINAPI LibMainComdlg32(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad
    switch (fdwReason)
    {
    case DLL_PROCESS_ATTACH:
+   {
+       //Write default printer name to win.ini
+       char achDefPrnName[256];
+       if(PrfQueryProfileString(HINI_PROFILE, "PM_SPOOLER", "PRINTER", "", achDefPrnName,
+                                 sizeof(achDefPrnName)) > 1) 
+       {
+            int len = strlen(achDefPrnName);
+            if(achDefPrnName[len-1] == ';') {
+                achDefPrnName[len-1] = 0;
+            }
+            strcat(achDefPrnName, ",");
+            WriteProfileStringA("windows", "device", achDefPrnName);
+       }
+       return COMDLG32_DllEntryPoint(hinstDLL, fdwReason, fImpLoad);
+   }
+
    case DLL_THREAD_ATTACH:
    case DLL_THREAD_DETACH:
-    return COMDLG32_DllEntryPoint(hinstDLL, fdwReason, fImpLoad);
-
    case DLL_PROCESS_DETACH:
-    COMDLG32_DllEntryPoint(hinstDLL, fdwReason, fImpLoad);
-    return TRUE;
+       COMDLG32_DllEntryPoint(hinstDLL, fdwReason, fImpLoad);
+       return TRUE;
    }
    return FALSE;
 }
@@ -83,16 +99,16 @@ ULONG APIENTRY inittermComdlg32(ULONG hModule, ULONG ulFlag)
 
    switch (ulFlag) {
       case 0 :
-     dllHandle = RegisterLxDll(hModule, LibMainComdlg32, (PVOID)&comdlg32_PEResTab,
+         dllHandle = RegisterLxDll(hModule, LibMainComdlg32, (PVOID)&comdlg32_PEResTab,
                                    COMDLG32_MAJORIMAGE_VERSION, COMDLG32_MINORIMAGE_VERSION,
                                    IMAGE_SUBSYSTEM_WINDOWS_GUI);
          if(dllHandle == 0)
-        return 0UL;
-
+             return 0UL;
+ 
          break;
       case 1 :
          if(dllHandle) {
-        UnregisterLxDll(dllHandle);
+             UnregisterLxDll(dllHandle);
          }
          break;
       default  :
