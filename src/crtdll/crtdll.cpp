@@ -1,4 +1,4 @@
-/* $Id: crtdll.cpp,v 1.22 2000-02-03 21:37:48 sandervl Exp $ */
+/* $Id: crtdll.cpp,v 1.23 2000-02-21 10:34:01 sandervl Exp $ */
 
 /*
  * The C RunTime DLL
@@ -44,6 +44,7 @@
 #include <heap.h>
 #include <errno.h>
 #include <sys\utime.h>
+#include <sys\timeb.h>
 #include <sys\stat.h>
 #include "signal.h"
 
@@ -980,12 +981,42 @@ INT CDECL CRTDLL__flushall(void)
 
 
 /*********************************************************************
+ *	_fpreset				(CRTDLL.107)
+ */
+void CDECL CRTDLL__fpreset(void)
+{
+  dprintf(("CRTDLL: _fpreset\n"));
+  _fpreset();
+}
+
+
+/*********************************************************************
  *                  _fputchar     (CRTDLL.108)
  */
 INT CDECL CRTDLL__fputchar( int c )
 {
   dprintf2(("CRTDLL: _fputchar\n"));
   return(_fputchar(c));
+}
+
+
+/*********************************************************************
+ *	_fstat					(CRTDLL.111)
+ */
+int CDECL CRTDLL__fstat(int file, struct stat* buf)
+{
+  dprintf(("CRTDLL: _fstat\n"));
+  return (_fstat(file, buf));
+}
+
+
+/*********************************************************************
+ *	_ftime					(CRTDLL.112)
+ */
+void CDECL CRTDLL__ftime( struct timeb *timebuf )
+{
+  dprintf(("CRTDLL: _ftime\n"));
+  _ftime(timebuf);
 }
 
 
@@ -1675,6 +1706,16 @@ VOID CDECL CRTDLL__sleep(unsigned long timeout)
 {
   dprintf2(("_sleep for %ld milliseconds\n",timeout));
   Sleep((timeout)?timeout:1);
+}
+
+
+/*********************************************************************
+ *	_sopen					(CRTDLL.268)
+ */
+int CDECL CRTDLL__sopen( const char *s, int i1, int i2, va_list arg )
+{
+  dprintf(("CRTDLL: _sopen\n"));
+  return (_sopen(s, i1, i2, arg));
 }
 
 
@@ -3094,6 +3135,16 @@ int CDECL CRTDLL_toupper(int c)
            c));
 
   return (toupper(c));
+}
+
+
+/*********************************************************************
+ *	ungetc					(CRTDLL.492)
+ */
+INT CDECL CRTDLL_ungetc(int c, FILE *f)
+{
+  dprintf(("CRTDLL: ungetc\n"));
+  return (ungetc(c, f));
 }
 
 
