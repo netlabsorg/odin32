@@ -295,6 +295,7 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
   ImplicitSurface = Implicit;
 
   hDive                      = lpDirectDraw->GetDiveInstance();
+  hDiveCC                    = lpDirectDraw->GetCCDiveInstance();
   surfaceType                = DDSCAPS_OFFSCREENPLAIN;
   memcpy((char *)&DDSurfaceDesc, (char *)lpDDSurfaceDesc, sizeof(DDSURFACEDESC2));
 
@@ -1075,7 +1076,7 @@ void OS2IDirectDrawSurface::ColorConversion(LPRECT lpRect)
 {
   SETUP_BLITTER sBlt;
   ULONG ulDN1, ulDN2;
-
+  ULONG rc;
   ulDN1 = ulDN2 = 0;
 
   memset(&sBlt,0,sizeof(sBlt));
@@ -1102,24 +1103,43 @@ void OS2IDirectDrawSurface::ColorConversion(LPRECT lpRect)
   sBlt.lDstPosY          = sBlt.ulSrcPosY;
   sBlt.ulNumDstRects     = DIVE_FULLY_VISIBLE;
 
-  DiveAllocImageBuffer( hDiveCC,
-                        &ulDN1,
-                        sBlt.fccSrcColorFormat,
-                        width,
-                        height,
-                        dwPitchFB,
-                        (PBYTE)pFrameBuffer);
-  DiveAllocImageBuffer( hDiveCC,
-                        &ulDN2,
-                        sBlt.fccDstColorFormat,
-                        width,
-                        height,
-                        dwPitchDB,
-                        (PBYTE)pDiveBuffer);
-  DiveSetupBlitter(hDiveCC,&sBlt);
-  DiveBlitImage(hDiveCC,ulDN1,ulDN2);
-  DiveFreeImageBuffer(hDiveCC,ulDN1);
-  DiveFreeImageBuffer(hDiveCC,ulDN2);
+  rc = DiveAllocImageBuffer( hDiveCC,
+                             &ulDN1,
+                             sBlt.fccSrcColorFormat,
+                             width,
+                             height,
+                             dwPitchFB,
+                             (PBYTE)pFrameBuffer);
+  WriteLog("AllocDiveSrc Buffer rc= %X\n",rc);
+
+  rc = DiveAllocImageBuffer( hDiveCC,
+                             &ulDN2,
+                             sBlt.fccDstColorFormat,
+                             width,
+                             height,
+                             dwPitchDB,
+                             (PBYTE)pDiveBuffer);
+  WriteLog("AllocDiveDst Buffer rc= %Xd\n",rc);
+
+  rc = DiveSetupBlitter( hDiveCC,
+                         &sBlt);
+  WriteLog("SetupBlitter rc= %X\n",rc);
+
+  rc = DiveBlitImage( hDiveCC,
+                      ulDN1,
+                      ulDN2);
+
+  WriteLog("Blit rc= %X\n",rc);
+
+  rc = DiveFreeImageBuffer( hDiveCC,
+                            ulDN1);
+  WriteLog("Free Src rc= %X\n",rc);
+
+  rc = DiveFreeImageBuffer( hDiveCC,
+                            ulDN2);
+
+  WriteLog("Free dst rc= %X\n",rc);
+
 }
 //******************************************************************************
 //******************************************************************************
@@ -1581,9 +1601,11 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
 
   #ifdef DEBUG
     if ( (NULL!=lpDestRect)&& (NULL!=lpSrcRect))
-      WriteLog("SurfBlt4 to (%d,%d)(%d,%d) from (%d,%d)(%d,%d)\n", lpDestRect->left, lpDestRect->top,
-               lpDestRect->right, lpDestRect->bottom, lpSrcRect->left, lpSrcRect->top,
-               lpSrcRect->right, lpSrcRect->bottom);
+      WriteLog("SurfBlt4 to (%d,%d)(%d,%d) at %08X from (%d,%d)(%d,%d) at %08X\n", lpDestRect->left, lpDestRect->top,
+               lpDestRect->right, lpDestRect->bottom, dest, lpSrcRect->left, lpSrcRect->top,
+               lpSrcRect->right, lpSrcRect->bottom, src);
+
+    _dump_DDBLT(dwFlags);
   #endif
 
   if (NULL!=lpDestRect)
@@ -1646,6 +1668,7 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
 
   if(dwFlags & DDBLT_COLORFILL)
   {
+    WriteLog("ColorFill\n");
     if((NULL==lpDDBltFx)||(lpDDBltFx->dwSize!=sizeof(DDBLTFX)) )
       return DDERR_INVALIDPARAMS;
 
@@ -1659,6 +1682,7 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
 
   if (dwFlags & DDBLT_DEPTHFILL)
   {
+    WriteLog("DepthFill\n");
   #ifdef USE_OPENGL
     GLboolean ztest;
     // Todo support more than one Z-Buffer
@@ -1787,14 +1811,19 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
     )
   {
     // Stretching not supported
+    WriteLog("No stretched blits\n");
+
     return DDERR_NOSTRETCHHW;
   }
 
   if (dest->DDSurfaceDesc.ddsCaps.dwCaps & DDSCAPS_PRIMARYSURFACE)
   {
+    WriteLog("Dest is Primary Surface\n");
     if(src->DDSurfaceDesc.ddsCaps.dwCaps & DDSCAPS_PRIMARYSURFACE)
     {
       // special Type 1 : Bliting between parts of the screen
+
+      WriteLog("Src is Primary Surface\n");
 
       if( *pIRectDest == *pIRectSrc)
         return DD_OK; // rects are the same => no blit needed
@@ -2413,15 +2442,19 @@ HRESULT __stdcall SurfBltFast4( THIS This,
   RECTL SrcRect;
   char *pBltPos, *pSrcPos;
   DWORD dwDestColor, dwSrcColor, BlitWidth, BlitHeight,x,y;
+
   #ifdef DEBUG
-    WriteLog("SurfBltFast (%d, %d)\n",dwX,dwY);
+    WriteLog("SurfBltFast4 %08X at(%d/%d) onto %08X with flags %08X\n",src, dwX,dwY, dest, dwTrans);
   #endif
 
   if( (NULL==lpDDSrcSurface) ||
       (dwX<0) || (dwY<0) ||
       (dwX>dest->width) ||
       (dwY>dest->height))
+  {
+    WriteLog("Invalid Parameters %08X, %d %d", lpDDSrcSurface ,dest->width , dest->height);
     return DDERR_INVALIDPARAMS;
+  }
 
   if (NULL!=lpSrcRect)
   {
@@ -2448,25 +2481,28 @@ HRESULT __stdcall SurfBltFast4( THIS This,
 
   if(dwTrans & DDBLTFAST_NOCOLORKEY)
   {
+    WriteLog("Solid Blit");
     #ifdef USE_ASM
-    BltRec(pBltPos, pSrcPos, BlitWidth, BlitHeight,
-           dest->dwPitchDB,
-           src->dwPitchDB);
+      BltRec(pBltPos, pSrcPos, BlitWidth, BlitHeight,
+             dest->dwPitchDB,
+             src->dwPitchDB);
     #else
-    // Solid Blit
-    while(1)
-    {
-      memcpy(pBltPos,pSrcPos,BlitWidth);
-      pBltPos += dest->dwPitchDB;
-      pSrcPos += src->dwPitchDB;
-      if(! (--BlitHeight))
-        break;
-    }
+      // Solid Blit
+      while(1)
+      {
+        memcpy(pBltPos,pSrcPos,BlitWidth);
+        pBltPos += dest->dwPitchDB;
+        pSrcPos += src->dwPitchDB;
+        if(! (--BlitHeight))
+          break;
+      }
     #endif
 
   }
   else
   {
+    WriteLog("TransBlit");
+
     if(dwTrans & DDBLTFAST_SRCCOLORKEY)
     {
       // transparent source
@@ -3626,7 +3662,7 @@ HRESULT __stdcall SurfLock4( THIS This,
   static int times = 0;
 
   #ifdef DEBUG
-    WriteLog("SurfLock4 %d %08X %d %d\n", (int)lpRect, (int)lpSurfaceDesc, dwFlags, hEvent);
+    WriteLog("SurfLock4 %08X %08X %d %d\n", (int)lpRect, (int)lpSurfaceDesc, dwFlags, hEvent);
   #endif
 
   if( (NULL==lpSurfaceDesc) ||
@@ -3651,7 +3687,7 @@ HRESULT __stdcall SurfLock4( THIS This,
     if (NULL==lpRect)
     {
       // If anything is locked we can't locke the complete surface
-      WriteLog("Surface has locked Rectangles, and we want to complete lock it");
+      WriteLog("Surface has locked Rectangles, and we want to complete lock it\n");
       Found = TRUE;
     }
     else
@@ -3659,7 +3695,7 @@ HRESULT __stdcall SurfLock4( THIS This,
       // If the new Rectangle intersects with any of the already locked rectangles it can't
       // be locked so check for this
 
-      WriteLog("Surface has locked Rectangles, check if the overlap");
+      WriteLog("Surface has locked Rectangles, check if the overlap\n");
 
       i=0;
       Found = FALSE;
@@ -3682,7 +3718,7 @@ HRESULT __stdcall SurfLock4( THIS This,
     {
       delete pIRectNew;
       #ifdef DEBUG
-        WriteLog("SurfLock4: Surface already locked\n");
+        WriteLog("SurfLock4: Surface already locked\n\n");
       #endif
       return(DDERR_SURFACEBUSY);
     }
@@ -3696,13 +3732,13 @@ HRESULT __stdcall SurfLock4( THIS This,
                                 (lpRect->top * me->dwPitchFB) +
                                 (lpRect->left * (lpSurfaceDesc->ddpfPixelFormat.dwRGBBitCount>>3)));
     #ifdef DEBUG
-      WriteLog("SurfLock4 %08X (x,y) = (%d,%d)\n", lpSurfaceDesc->lpSurface, lpRect->top, lpRect->left);
+      WriteLog("SurfLock4 %08X (x,y) = (%d,%d)\n\n", lpSurfaceDesc->lpSurface, lpRect->top, lpRect->left);
     #endif
   }
   else
   {
     #ifdef DEBUG
-      WriteLog("SurfLock4 %08X \n", lpSurfaceDesc->lpSurface);
+      WriteLog("SurfLock4 %08X \n\n", lpSurfaceDesc->lpSurface);
     #endif
   }
   // Add the rectangle to the list of locked rectangles
