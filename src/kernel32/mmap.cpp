@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.37 2000-03-23 19:23:47 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.38 2000-03-28 17:11:49 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -194,10 +194,11 @@ BOOL Win32MemMap::commitPage(ULONG offset, BOOL fWriteAccess, int nrpages)
   dprintf(("Win32MemMap::commitPage %x (faultaddr %x)", pageAddr, lpPageFaultAddr));
   if(hMemFile != -1) {
 //	for(i=0;i<nrpages;i++) {
-		if(VirtualQuery((LPSTR)pageAddr, &memInfo, nrpages*PAGE_SIZE) == 0) {
+		if(VirtualQuery((LPSTR)pageAddr, &memInfo, sizeof(MEMORY_BASIC_INFORMATION)) == 0) {
 			dprintf(("Win32MemMap::commitPage: VirtualQuery (%x,%x) failed for %x", pageAddr, nrpages*PAGE_SIZE));
 			goto fail;
 		}
+		memInfo.RegionSize = min(memInfo.RegionSize, nrpages*PAGE_SIZE);
 		//Only changes the state of the pages with the same attribute flags
 		//(returned in memInfo.RegionSize)
 		//If it's smaller than the mNrPages, it simply means one or more of the
@@ -249,10 +250,13 @@ BOOL Win32MemMap::commitPage(ULONG offset, BOOL fWriteAccess, int nrpages)
   else {
 	ULONG sizeleft = nrpages*PAGE_SIZE;
 	while(sizeleft) {
-		if(VirtualQuery((LPSTR)pageAddr, &memInfo, sizeleft) == 0) {
+
+		if(VirtualQuery((LPSTR)pageAddr, &memInfo, sizeof(MEMORY_BASIC_INFORMATION)) == 0) {
 			dprintf(("Win32MemMap::commitPage: VirtualQuery (%x,%x) failed", pageAddr, sizeleft));
 			goto fail;
 		}
+		memInfo.RegionSize = min(memInfo.RegionSize, sizeleft);
+
 		if(!(memInfo.State & MEM_COMMIT))
 	        {//if it's already committed, then the app tried to write to it
 		  	if(VirtualAlloc((LPVOID)pageAddr, memInfo.RegionSize, MEM_COMMIT, newProt) == FALSE) 

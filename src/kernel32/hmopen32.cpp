@@ -1,4 +1,4 @@
-/* $Id: hmopen32.cpp,v 1.19 2000-03-24 19:25:32 sandervl Exp $ */
+/* $Id: hmopen32.cpp,v 1.20 2000-03-28 17:11:49 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -699,23 +699,44 @@ DWORD HMDeviceOpen32Class::LockFileEx(PHMHANDLEDATA pHMHandleData,
 DWORD HMDeviceOpen32Class::OpenFile (LPCSTR        lpFileName,
                                      PHMHANDLEDATA pHMHandleData,
                                      OFSTRUCT      *pOFStruct,
-                                     UINT          arg3)
+                                     UINT          fuMode)
 {
   HFILE hFile;
   FILETIME filetime;
   WORD filedatetime[2];
+  char filepath[260];
 
   dprintfl(("KERNEL32: HandleManager::Open32::OpenFile %s(%s,%08x,%08x,%08x) - stub?\n",
            lpHMDeviceName,
            lpFileName,
            pHMHandleData,
            pOFStruct,
-           arg3));
+           fuMode));
 
-  if (strcmp(lpFileName,       // "support" for local unc names
+  if(strcmp(lpFileName,       // "support" for local unc names
              "\\\\.\\") == 0)
+  {
     lpFileName+=4;
+  }
+  else 
+  if(!strchr(lpFileName, ':') && !strchr(lpFileName, '\\')) 
+  {
+	//filename only; search for file in following order
+	//1: dir from which the app loaded
+	//2: current dir
+	//3: windows system dir
+	//4: windows dir
+	//5: dirs in path path environment variable
+	//SearchPath does exactly that
+	LPSTR filenameinpath;
 
+	if(SearchPathA(NULL, lpFileName, NULL, sizeof(filepath), filepath, &filenameinpath) == 0
+           && !(fuMode & OF_CREATE) ) {
+		SetLastError(ERROR_FILE_NOT_FOUND);
+		return HFILE_ERROR;
+	}
+	lpFileName = filepath;
+  }
   // filling OFSTRUCT
   memset(pOFStruct, 0, sizeof(OFSTRUCT));
   pOFStruct->cBytes = sizeof(OFSTRUCT);
@@ -724,7 +745,7 @@ DWORD HMDeviceOpen32Class::OpenFile (LPCSTR        lpFileName,
 
   hFile = O32_OpenFile(lpFileName,
                        pOFStruct,
-                       arg3);
+                       fuMode);
   if (hFile != INVALID_HANDLE_ERROR)
   {
     pHMHandleData->hHMHandle = hFile;
