@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2681 2004-02-18 14:06:05 sandervl Exp $ */
+/* $Id: changelog,v 1.2682 2004-02-19 13:03:30 sandervl Exp $ */
+
+ 2004-02-19: KO Myung-Hun <komh@chollian    >
+    - KERNEL32: o DBCS fixes for console & resource functions
 
  2004-02-17: Sander van Leeuwen <sandervl@innotek   >
     - GDI32:    o CreateDCA: special handling of FILE and FILE: ports
