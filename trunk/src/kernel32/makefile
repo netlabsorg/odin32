@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.30 1999-08-25 10:28:40 sandervl Exp $
+# $Id: makefile,v 1.31 1999-08-25 11:40:18 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -304,7 +304,7 @@ async.OBJ: \
         $(PDWIN32_INCLUDE)\misc.h \
         $(PDWIN32_INCLUDE)\unicode.h
 
-virtual.obj:   virtual.cpp $(PDWIN32_INCLUDE)\win\virtual.h $(PDWIN32_INCLUDE)\handlemanager.h
+virtual.obj:   virtual.cpp $(PDWIN32_INCLUDE)\win\virtual.h $(PDWIN32_INCLUDE)\handlemanager.h mmap.h
 mmap.obj:      mmap.cpp mmap.h $(PDWIN32_INCLUDE)\vmutex.h
 
 pefile.OBJ:    pefile.cpp $(PDWIN32_INCLUDE)\pefile.h

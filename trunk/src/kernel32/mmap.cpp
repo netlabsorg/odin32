@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.9 1999-08-25 10:28:40 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.10 1999-08-25 11:40:18 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file class
@@ -253,11 +253,17 @@ BOOL Win32MemMap::flushView(LPVOID lpvBase, ULONG cbFlush)
   if(fMapped == FALSE)
 	goto parmfail;
 
+  if(cbFlush == 0) 
+ 	cbFlush = mSize;
+
   if(lpvBase < pMapping || (ULONG)lpvBase+cbFlush > (ULONG)pMapping+mSize)
 	goto parmfail;
 
   if(mProtFlags & PAGE_READONLY)
 	goto parmfail;
+
+  if(hMemFile == -1)
+	goto success; //TODO: Return an error here?
 
   nrpages = cbFlush/PAGE_SIZE;
   if(cbFlush & 0xFFF)  nrpages++;
@@ -292,6 +298,7 @@ BOOL Win32MemMap::flushView(LPVOID lpvBase, ULONG cbFlush)
 		}
 	}
   }
+success:
 //  mapMutex.leave();
   return TRUE;
 parmfail:
