@@ -1,4 +1,8 @@
+#ifndef MSC6
 #include <windows.h>
+#else
+#include "msc60win.h"
+#endif
 #include <string.h>
 #include "peexe.h"
 
@@ -8,7 +12,7 @@ UINT FAR _loadds PASCAL MyWinExec(LPCSTR lpszCmdLine, UINT fuShowCmd);
 BOOL GetPEFileHeader (LPVOID lpFile, PIMAGE_FILE_HEADER pHeader);
 BOOL GetPEOptionalHeader (LPVOID lpFile, PIMAGE_OPTIONAL_HEADER pHeader);
 
-#ifdef __WATCOMC__
+#if defined(__WATCOMC__)
 typedef DWORD (FAR * WINAPI * FUNC_GetVersion)(void);
 typedef UINT  (FAR * WINAPI * FUNC_WinExec)(LPCSTR, UINT);
 #else
