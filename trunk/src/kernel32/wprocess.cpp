@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.99 2000-10-03 17:28:32 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.100 2000-10-03 20:17:20 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -1554,6 +1554,7 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
     if(lpApplicationName) {
         if(lpCommandLine) {
             //skip exe name in lpCommandLine
+            //TODO: doesn't work for directories with spaces!
             while(*lpCommandLine != 0 && *lpCommandLine != ' ')
                 lpCommandLine++;
 
@@ -1572,6 +1573,31 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
         cmdline = (char *)malloc(strlen(lpCommandLine) + 16);
         sprintf(cmdline, "PE.EXE %s", lpCommandLine);
     }
+    char szAppName[255];
+    char *exename = szAppName;
+    strncpy(szAppName, &cmdline[7], sizeof(szAppName)); //skip pe.exe
+    szAppName[254] = 0;
+    if(*exename == '"') {
+         exename++;
+    }
+
+    //TODO: doesn't work for directories with spaces!
+    while(*exename != 0 && *exename != ' ' && *exename != '"')
+         exename++;
+
+    if(*exename != 0) {
+         *exename = 0;
+    }
+    if(szAppName[0] == '"') {
+	 exename = &szAppName[1];
+    }
+    else exename = szAppName;
+
+    if(GetFileAttributesA(exename) == -1) { 
+	dprintf(("CreateProcess: can't find executable!"));
+	SetLastError(ERROR_FILE_NOT_FOUND);
+	return FALSE;
+    }    
     dprintf(("KERNEL32:  CreateProcess %s\n", cmdline));
     rc = O32_CreateProcess("PE.EXE", (LPCSTR)cmdline,lpProcessAttributes,
                          lpThreadAttributes, bInheritHandles, dwCreationFlags,
