@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.61 2001-04-26 13:22:48 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.62 2001-06-02 18:48:27 achimha Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -944,7 +944,11 @@ DWORD OSLibDosCreateFile(CHAR *lpszFile,
 
    if(rc)
    {
-      SetLastError(error2WinError(rc));
+      // @@@AH 2001-06-02 Win2k SP2 returns error 2 in this case
+      int winError = error2WinError(rc);
+      if (winError == ERROR_OPEN_FAILED_W)
+        winError = ERROR_FILE_NOT_FOUND_W;
+      SetLastError(winError);
       return INVALID_HANDLE_VALUE_W;
    }
    SetLastError(ERROR_SUCCESS_W);
