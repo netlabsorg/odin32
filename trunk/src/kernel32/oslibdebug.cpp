@@ -1,9 +1,11 @@
-/* $Id: oslibdebug.cpp,v 1.4 2000-10-02 18:39:35 sandervl Exp $ */
+/* $Id: oslibdebug.cpp,v 1.5 2000-11-20 09:52:37 sandervl Exp $ */
 
 /*
  * OS/2 debug apis
  *
- * Copyright 1999 Edgar Buerkle
+ * Copyright 2000 Sander van Leeuwen
+ * Copyright 2000 Edgar Buerkle
+ * Copyright 2000 Michal Necasek
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -35,17 +37,20 @@
 //******************************************************************************
 VOID _Optlink DebugThread(VOID *argpid)
 {
-  CHAR   QueueName[30]=DEBUG_QUEUENAME;
-  CHAR   SemName[30]=DEBUG_SEMNAME;
-  CHAR   QSemName[30]=DEBUG_QSEMNAME;
-  HQUEUE QueueHandle=0;
-  HEV    hevSem=0, hevQSem=0;
+  BOOL   fTerminate    = FALSE;
+  CHAR   QueueName[30] = DEBUG_QUEUENAME;
+  CHAR   SemName[30]   = DEBUG_SEMNAME;
+  CHAR   QSemName[30]  = DEBUG_QSEMNAME;
+  HQUEUE QueueHandle   = 0;
+  HEV    hevSem        = 0,
+         hevQSem       = 0;
+  uDB_t  DbgBuf        = {0};
   int    rc;
-  uDB_t  DbgBuf={0};
   char   path[CCHMAXPATH];
   Win32DllBase *winmod;
   LPDEBUG_EVENT lpde;
   ULONG  *pid = (ULONG*)argpid;
+  ULONG  staticPid = *pid;
   char   tmp[12];
 
   dprintf(("KERNEL32: DebugThread pid:%d", *pid));
@@ -90,7 +95,7 @@ VOID _Optlink DebugThread(VOID *argpid)
     return;
   }
 
-  while(rc == 0)
+  while (rc == 0)
   {
     DosWaitEventSem(hevSem, SEM_INDEFINITE_WAIT);
 
@@ -103,11 +108,15 @@ VOID _Optlink DebugThread(VOID *argpid)
     if (rc != 0)
       dprintf(("DosDebug error: rc = %d", rc));
 
+    if (fTerminate) // break out of the while loop
+       break;
+
     switch (DbgBuf.Cmd)
     {
       case DBG_N_Success:
         dprintf(("DosDebug: GO ok"));
         goto DosDebug_GO;
+
       case DBG_N_Error:
         dprintf(("DosDebug: Error %d", DbgBuf.Value));
         // if(DbgBuf.Value == ERROR_INVALID_PROCID) connect ?
@@ -117,15 +126,24 @@ VOID _Optlink DebugThread(VOID *argpid)
           goto DosDebug_GO;
         }
         break;    // end thread !!!
+
       case DBG_N_ProcTerm:
-        dprintf(("DosDebug: Process terminated with rc %d\n",DbgBuf.Value));
+        dprintf(("DosDebug: Process terminated with rc %d\n", DbgBuf.Value));
         lpde = (LPDEBUG_EVENT) malloc(sizeof(DEBUG_EVENT));
         lpde->dwDebugEventCode = EXIT_PROCESS_DEBUG_EVENT_W;
         lpde->dwProcessId = *pid;
         lpde->dwThreadId = 0;
         lpde->u.ExitThread.dwExitCode = DbgBuf.Value;
         DosWriteQueue(QueueHandle, 0, sizeof(DEBUG_EVENT), lpde, 0);
+        // We should now fire final DBG_C_Go and end processing. We shouldn't
+        // get any more debug events.
+        fTerminate = TRUE;
+        // goto DosDebug_GO; *pid is invalid?!?
+        DbgBuf.Cmd = DBG_C_Go;
+        DbgBuf.Pid = staticPid;
+        goto DebugApi;
         break;
+
       case DBG_N_Exception:
         dprintf(("DosDebug: Exception"));
         // lpde = malloc(sizeof(DEBUG_EVENT));
@@ -135,6 +153,7 @@ VOID _Optlink DebugThread(VOID *argpid)
         DbgBuf.Cmd = DBG_C_Continue;
         DbgBuf.Value = XCPT_CONTINUE_SEARCH;
         goto DebugApi;
+
       case DBG_N_ModuleLoad:
         DosQueryModuleName(DbgBuf.Value, CCHMAXPATH, path);
         dprintf(("DosDebug: module loaded [%s]", path));
@@ -160,11 +179,13 @@ VOID _Optlink DebugThread(VOID *argpid)
         lpde->u.LoadDll.fUnicode = FALSE;
         DosWriteQueue(QueueHandle, 0, sizeof(DEBUG_EVENT), lpde, 0);
         break;
+
       case DBG_N_CoError:
         dprintf(("DosDebug: Coprocessor Error"));
         // TODO: create an exception ?
         goto DosDebug_GO;
         break;
+
       case DBG_N_ThreadTerm:
         dprintf(("DosDebug: Thread %d terminated with rc %d", DbgBuf.Tid,DbgBuf.Value));
         lpde = (LPDEBUG_EVENT) malloc(sizeof(DEBUG_EVENT));
@@ -174,10 +195,12 @@ VOID _Optlink DebugThread(VOID *argpid)
         lpde->u.ExitThread.dwExitCode = DbgBuf.Value;
         DosWriteQueue(QueueHandle, 0, sizeof(DEBUG_EVENT), lpde, 0);
         break;
+
       case DBG_N_AsyncStop:
         dprintf(("DosDebug: Async stop"));
         goto DosDebug_GO;
         break;
+
       case DBG_N_NewProc:
         dprintf(("DosDebug: Debuggee started new Pid %d",DbgBuf.Value));
         lpde = (LPDEBUG_EVENT) malloc(sizeof(DEBUG_EVENT));
@@ -197,16 +220,41 @@ VOID _Optlink DebugThread(VOID *argpid)
         lpde->u.CreateProcessInfo.fUnicode = FALSE;
         DosWriteQueue(QueueHandle, 0, sizeof(DEBUG_EVENT), lpde, 0);
         break;
+
       case DBG_N_AliasFree:
         dprintf(("DosDebug: AliasFree"));
         goto DosDebug_GO;
         break;
+
       case DBG_N_Watchpoint:
         dprintf(("DosDebug: WatchPoint"));
         goto DosDebug_GO;
         break;
+
       case DBG_N_ThreadCreate:
+        // Note: Win32 debuggers expect a process creation event first!
         dprintf(("DosDebug: Thread %d created",DbgBuf.Tid));
+
+        if (DbgBuf.Tid == 1) { // Is this the first thread of a process?
+            // If so, fake a process creation event
+            dprintf(("DosDebug: Faking process creation event"));
+            lpde = (LPDEBUG_EVENT) malloc(sizeof(DEBUG_EVENT));
+            lpde->dwDebugEventCode = CREATE_PROCESS_DEBUG_EVENT_W;
+            lpde->dwProcessId = *pid;
+            lpde->dwThreadId = 0;
+            //TODO: fill union
+            lpde->u.CreateProcessInfo.hFile = 0;
+            lpde->u.CreateProcessInfo.hProcess = 0;
+            lpde->u.CreateProcessInfo.hThread = 0;
+            lpde->u.CreateProcessInfo.lpBaseOfImage = NULL;
+            lpde->u.CreateProcessInfo.dwDebugInfoFileOffset = 0;
+            lpde->u.CreateProcessInfo.nDebugInfoSize = 0;
+            lpde->u.CreateProcessInfo.lpThreadLocalBase = NULL;
+            lpde->u.CreateProcessInfo.lpStartAddress = NULL;
+            lpde->u.CreateProcessInfo.lpImageName = NULL;
+            lpde->u.CreateProcessInfo.fUnicode = FALSE;
+            DosWriteQueue(QueueHandle, 0, sizeof(DEBUG_EVENT), lpde, 0);
+        }
         lpde = (LPDEBUG_EVENT) malloc(sizeof(DEBUG_EVENT));
         lpde->dwDebugEventCode = CREATE_THREAD_DEBUG_EVENT_W;
         lpde->dwProcessId = *pid;
@@ -217,6 +265,7 @@ VOID _Optlink DebugThread(VOID *argpid)
         lpde->u.CreateThread.lpStartAddress = NULL;
         DosWriteQueue(QueueHandle, 0, sizeof(DEBUG_EVENT), lpde, 0);
         break;
+
       case DBG_N_ModuleFree:
         DosQueryModuleName(DbgBuf.Value, CCHMAXPATH, path);
         dprintf(("DosDebug: ModuleFree [%s]", path));
@@ -234,10 +283,12 @@ VOID _Optlink DebugThread(VOID *argpid)
         lpde->u.UnloadDll.lpBaseOfDll = WINIMAGE_LOOKUPADDR(winmod);
         DosWriteQueue(QueueHandle, 0, sizeof(DEBUG_EVENT), lpde, 0);
         break;
+
       case DBG_N_RangeStep:
         dprintf(("DosDebug: RangeStep"));
         goto DosDebug_GO;
         break;
+
       default:
         dprintf(("DosDebug: Unkown Notify %d", DbgBuf.Cmd));
         goto DosDebug_GO;
@@ -245,12 +296,13 @@ VOID _Optlink DebugThread(VOID *argpid)
     }
   }
 
+  dprintf(("DosDebug - ending the service thread"));
   DosCloseQueue(QueueHandle);
   DosCloseEventSem(hevSem);
   DosCloseEventSem(hevQSem);
-  *pid = 0;
-
+//  *pid = 0;  No can do - for some reason *pid is invalid by now
 }
+
 //******************************************************************************
 //******************************************************************************
 BOOL OSLibWaitForDebugEvent(LPDEBUG_EVENT lpde, DWORD dwTimeout)
@@ -388,9 +440,9 @@ VOID OSLibStartDebugger(ULONG *pid)
  TID tid;
 
    tid = _beginthread(DebugThread, NULL, 1024, (PVOID) pid);
-   if(tid == 0)
+   if (tid == 0)
    {
-      dprintf(("OSLibStartDebugger: Could create debug thread"));
+      dprintf(("OSLibStartDebugger: Could not create debug thread!"));
       SetFS(sel);
       return;
    }
