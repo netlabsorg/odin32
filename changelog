@@ -1,17 +1,14 @@
- /* $Id: changelog,v 1.168 1999-09-02 20:57:43 phaller Exp $ */
+ /* $Id: changelog,v 1.169 1999-09-03 12:01:04 phaller Exp $ */
 
  99-09-01: Patrick Haller <phaller@gmx.net>
 	- *:	Cleanup of include files, some ICOM issues in particular, 
 		also fixes LONGLONG problem (now names LONGLONG_W)
 	- SHELL32\NEW:	introduction of a straight port of WINE's SHELL32 implementation
 		18 of 22 files are ported already
-
- 99-09-01: Patrick Haller <phaller@gmx.net>
 	- *:	Cleanup of include files. Warning: OS/2's BOOL is ULONG, WIN32 is INT.
 		Causes C++ compilers to complain here and there. Plus many WINE prototypes
 		are just plain wrong.
 		This change should help porting shell32/new.
-
 
  99-09-01: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: Fixed GetWindowDC (Freecell 'Cards Left' string drawn
