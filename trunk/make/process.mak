@@ -1,4 +1,4 @@
-# $Id: process.mak,v 1.21 2002-08-22 03:25:48 bird Exp $
+# $Id: process.mak,v 1.22 2002-08-24 04:49:17 bird Exp $
 
 #
 # Unix-like tools for OS/2
@@ -96,7 +96,16 @@
 
 # Default target mode is executable.
 !ifndef TARGET_MODE
+! if "$(BUILD_PROJECT)" != "Odin32"
 TARGET_MODE = EXE
+! else
+# Odin32 defaults.
+!  ifndef CUSTOMBUILD
+TARGET_MODE = DLL
+!  else
+TARGET_MODE = LIB
+!  endif
+! endif
 !endif
 
 # Default extension corresponds to the target mode.
@@ -182,7 +191,17 @@ TARGET_DEF_LINK = $(PATH_TARGET)\$(TARGET_NAME)_link.def
 
 # Default definition file for generating the import library. (input)
 !ifndef TARGET_IDEF
+! if "$(BUILD_PROJECT)" != "Odin32"
 TARGET_IDEF = $(TARGET_DEF)
+! else
+!  ifdef TARGET_IDEF_CONV
+TARGET_IDEF = $(PATH_TARGET)\$(TARGET_NAME)_implib.def
+TARGET_IDEF_ORG = $(TARGET_DEF)
+!  else
+TARGET_IDEF = $(TARGET_DEF)
+TARGET_IDEF_ORG = $(TARGET_DEF)
+!  endif
+! endif
 !endif
 
 # Default map file. (output)
@@ -314,7 +333,7 @@ $(ECHO) Target path $(CLRFIL)$(PATH_TARGET)$(CLRTXT) does NOT exist. Creating. $
 # Common inference rules
 # -----------------------------------------------------------------------------
 .SUFFIXES:
-.SUFFIXES: .c .cpp .asm .$(EXT_OBJ) .$(EXT_RES) .rc .ii .s
+.SUFFIXES: .c .cpp .orc .asm .$(EXT_OBJ) .$(EXT_RES) .rc .ii .s
 
 #
 # A workaround for SlickEdits inability to find the buggy files..
@@ -501,6 +520,34 @@ _CC_BASELINE = $(CC) \
     $(RC) $(RC_FLAGS) $(_SRC) $(PATH_TARGET)\$(@F)
 
 
+# Compiling Odin32 resources.
+.orc{$(PATH_TARGET)}.obj:
+    @$(ECHO) ORC Compiler $(CLRFIL)$(_SRC) $(CLRTXT)$(TOOL_JOB_SUB_MSG)$(CLRRST)
+    \
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
+    $(ORC) $(ORC_FLAGS) $(ORC_ASM_OUT)$(PATH_TARGET)\$(@B).asm $(_SRC)
+    \
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
+    $(AS) $(AS_FLAGS) $(PATH_TARGET)\$(@B).asm $(AS_OBJ_OUT)$(PATH_TARGET)\$(@F)
+
+.orc.obj:
+    @$(ECHO) ORC Compiler $(CLRFIL)$(_SRC) $(CLRRST)
+    \
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
+    $(ORC) $(ORC_FLAGS) $(ORC_ASM_OUT)$(PATH_TARGET)\$(@B).asm $(_SRC)
+    \
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
+    $(AS) $(AS_FLAGS) $(PATH_TARGET)\$(@B).asm $(AS_OBJ_OUT)$(PATH_TARGET)\$(@F)
+
+
 
 
 
@@ -593,46 +640,32 @@ rebuild: \
 !if "$(TARGET_MODE)" != "TESTCASE"
 clean:
     @$(ECHO) Cleaning... $(CLRRST)
-!if "$(PATH_TARGET)" != ""              # paranoia
     \
 ! ifndef BUILD_VERBOSE
     @ \
 ! endif
-    $(TOOL_RM) \
-        $(PATH_TARGET)\*.$(EXT_OBJ) \
-        $(PATH_TARGET)\*.$(EXT_ILIB) \
-        $(PATH_TARGET)\*.$(EXT_EXE) \
-        $(PATH_TARGET)\*.$(EXT_DLL) \
-        $(PATH_TARGET)\*.$(EXT_RES)
-    \
-! ifndef BUILD_VERBOSE
-    @ \
-! endif
-    $(TOOL_RM) \
-        $(PATH_TARGET)\*.$(EXT_SYS) \
-        $(PATH_TARGET)\*.$(EXT_LIB) \
-        $(PATH_TARGET)\*.$(EXT_IFS) \
-        $(PATH_TARGET)\*.$(EXT_MAP) \
-        $(PATH_TARGET)\*.$(EXT_SYM)
-    \
-! ifndef BUILD_VERBOSE
-    @ \
-! endif
-    $(TOOL_RM) \
-        $(PATH_TARGET)\*.s \
-        $(PATH_TARGET)\*.lst \
-        $(PATH_TARGET)\*.lnk \
-        $(PATH_TARGET)\*.ii \
-        $(PATH_TARGET)\.depend"
-    \
-! ifndef BUILD_VERBOSE
-    @ \
-! endif
-    $(TOOL_RM) \
-        .\*.ii \
-        .\*.err \
-        .\.depend
-!endif
+    $(TOOL_RM) @<<
+"$(PATH_TARGET)\*.$(EXT_OBJ)"
+"$(PATH_TARGET)\*.$(EXT_ILIB)"
+"$(PATH_TARGET)\*.$(EXT_EXE)"
+"$(PATH_TARGET)\*.$(EXT_DLL)"
+"$(PATH_TARGET)\*.$(EXT_RES)"
+"$(PATH_TARGET)\*.$(EXT_SYS)"
+"$(PATH_TARGET)\*.$(EXT_LIB)"
+"$(PATH_TARGET)\*.$(EXT_IFS)"
+"$(PATH_TARGET)\*.$(EXT_MAP)"
+"$(PATH_TARGET)\*.$(EXT_SYM)"
+"$(PATH_TARGET)\*.$(EXT_DEF)"
+"$(PATH_TARGET)\*.s"
+"$(PATH_TARGET)\*.lst"
+"$(PATH_TARGET)\*.lnk"
+"$(PATH_TARGET)\*.ii"
+"$(PATH_TARGET)\.depend"
+"$(TARGET_DEPEND)"
+.\*.ii
+.\*.err
+.\.depend
+<<
 !ifdef SUBDIRS_CLEAN
     @$(TOOL_DODIRS) "$(SUBDIRS_CLEAN)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) NODEP=1 $@
 !else
@@ -1099,7 +1132,7 @@ $(TARGET): $(TARGET_OBJS) $(TARGET_RES) $(TARGET_DEF_LINK) $(TARGET_LNK) $(TARGE
 #
 $(TARGET_LNK): $(MAKE_INCLUDE_PROCESS) $(MAKE_INCLUDE_SETUP) $(PATH_MAKE)\setup.mak $(MAKEFILE)
 !ifndef TOOL_DEFCONV
-    @$(TOOL_ECHO) Creating Linker Input File $(CLRRST)<<$@
+    @$(TOOL_ECHOTXT) Creating Linker Input File $(CLRRST)<<$@
 $(LINK_LNK1)
 $(LINK_LNK2)
 $(LINK_LNK3)
@@ -1176,7 +1209,7 @@ $(TARGET): $(TARGET_OBJS) $(TARGET_LNK) $(TARGET_DEPS)
 # Lib parameter file.
 #
 $(TARGET_LNK): $(MAKE_INCLUDE_PROCESS) $(MAKE_INCLUDE_SETUP) $(PATH_MAKE)\setup.mak $(MAKEFILE)
-    @$(TOOL_ECHO) Creating Lib Input File $(CLRRST)<<$@
+    @$(TOOL_ECHOTXT) Creating Lib Input File $(CLRRST)<<$@
 $(AR_LNK1)
 $(AR_LNK2)
 $(AR_LNK3)
@@ -1237,6 +1270,26 @@ $(TARGET_ILIB): $(TARGET_IDEF)
     @ \
 !endif
     $(IMPLIB) $(IMPLIB_FLAGS) $@ $(TARGET_IDEF)
+
+
+#
+# Conversion rule for converting the .def file before passing along to implib.
+#
+! if "$(TARGET_IDEF_ORG)" != "" && "$(TARGET_IDEF_ORG)" != "$(TARGET_IDEF)"
+$(TARGET_IDEF): $(TARGET_IDEF_ORG)
+    @$(ECHO) Making Import Definition File $(CLRFIL)$@ $(CLRRST)
+    \
+!ifndef BUILD_VERBOSE
+    @if not exist $(@D) $(ECHO) Target .def path $(CLRFIL)$(@D)$(CLRTXT) does NOT exist. Creating. $(CLRRST)
+!endif
+    @if not exist $(@D) $(TOOL_CREATEPATH) $(@D)
+    \
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
+    $(TOOL_IDEFCONV) $(TOOL_IDEFCONV_FLAGS) $(TARGET_IDEF_ORG) $@
+! endif
+
 !endif
 
 
