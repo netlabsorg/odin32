@@ -60,8 +60,7 @@ THEY HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 Odin management team
 
-The board of Odin managers is currently consisting of the
-following members:
+The board of Odin managers currently consists of the following members:
 
 Patrick Haller
 Achim Hasenmueller
