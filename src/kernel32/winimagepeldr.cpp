@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.7 1999-10-14 09:57:35 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.8 1999-10-23 12:34:48 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -7,6 +7,14 @@
  * Copyright 1998 Knut St. Osmundsen
  *
  * Project Odin Software License can be found in LICENSE.TXT
+ *
+ *
+ * NOTE: RSRC_LOAD is a special flag to only load the resource directory
+ *       of a PE image. Processing imports, sections etc is not done.
+ *       Nor is it put into the linked list of dlls (if it's a dll).
+ *       This is useful for GetVersionSize/Resource in case it wants to
+ *       get version info of an image that is not loaded.
+ *       So an instance of this type can't be used for anything but resource lookup!
  *
  */
 
@@ -58,13 +66,15 @@ extern ULONG flAllocMem;    /*Tue 03.03.1998: knut */
 
 //******************************************************************************
 //******************************************************************************
-Win32PeLdrImage::Win32PeLdrImage(char *szFileName) :
+Win32PeLdrImage::Win32PeLdrImage(char *szFileName, int loadtype) :
     Win32ImageBase(-1),
     nrsections(0), imageSize(0),
     imageVirtBase(-1), realBaseAddress(0), imageVirtEnd(0),
     nrNameExports(0), nrOrdExports(0), nameexports(NULL), ordexports(NULL),
-    pResSection(NULL)
+    pResSection(NULL), fImgMapping(0)
 {
+  loadType = loadtype;
+
   strcpy(this->szFileName, szFileName);
 
   strcpy(szModule, OSLibStripPath(szFileName));
@@ -82,6 +92,10 @@ Win32PeLdrImage::Win32PeLdrImage(char *szFileName) :
     char logname[32];
 	sprintf(logname, "pe_%d.log", loadNr);
     	fout.open(logname, ios::out | ios::trunc);
+	if(fout.good() == FALSE) {
+		sprintf(logname, "%spe_%d.log", kernel32Path, loadNr);
+	    	fout.open(logname, ios::out | ios::trunc);
+	}
 	dprintf(("PE LOGFILE for %s: %s", szModule, logname));
     	foutInit = TRUE;
   }
@@ -98,12 +112,15 @@ Win32PeLdrImage::~Win32PeLdrImage()
 
   if(ordexports)
     	free(ordexports);
+
+  //SvL: Only happens for images that aren't really loaded (RSRC_LOAD)
+  if(fImgMapping) CloseHandle(fImgMapping);
+  fImgMapping = 0;
 }
 //******************************************************************************
 //******************************************************************************
 BOOL Win32PeLdrImage::init(ULONG reservedMem)
 {
- HANDLE fImgMapping = 0;
  char   szErrorMsg[64];
  LPVOID win32file     = NULL;
  ULONG  filesize, ulRead;
@@ -171,7 +188,9 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
 
   nSections = NR_SECTIONS(win32file);
 
-  if ((psh = (PIMAGE_SECTION_HEADER)SECTIONHDROFF (win32file)) != NULL) {
+  if(loadType == REAL_LOAD) 
+  {
+   if ((psh = (PIMAGE_SECTION_HEADER)SECTIONHDROFF (win32file)) != NULL) {
     fout << endl << "*************************PE SECTIONS START**************************" << endl;
     for (i=0; i<nSections; i++) {
         fout << "Raw data size:       " << hex(psh[i].SizeOfRawData) << endl;
@@ -280,37 +299,37 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
         fout << "Unknown section" << endl;
     	goto failure;
      }
-  }
-  fout << "*************************PE SECTIONS END **************************" << endl;
-  imageSize += imageVirtBase - oh.ImageBase;
-  fout << "Total size of Image " << imageSize << endl;
-  fout << "imageVirtBase       " << imageVirtBase << endl;
-  fout << "imageVirtEnd        " << imageVirtEnd << endl;
+   }
+   fout << "*************************PE SECTIONS END **************************" << endl;
+   imageSize += imageVirtBase - oh.ImageBase;
+   fout << "Total size of Image " << imageSize << endl;
+   fout << "imageVirtBase       " << imageVirtBase << endl;
+   fout << "imageVirtEnd        " << imageVirtEnd << endl;
 
-  //In case there are any gaps between sections, adjust size
-  if(imageSize != imageVirtEnd - oh.ImageBase) {
+   //In case there are any gaps between sections, adjust size
+   if(imageSize != imageVirtEnd - oh.ImageBase) {
     	fout << "imageSize != imageVirtEnd - oh.ImageBase!" << endl;
     	imageSize = imageVirtEnd - oh.ImageBase;
-  }
-  if(allocSections(reservedMem) == FALSE) {
+   }
+   if(allocSections(reservedMem) == FALSE) {
     	fout << "Failed to allocate image memory, rc " << errorState << endl;
     	goto failure;
-  }
-  fout << "OS/2 base address " << realBaseAddress << endl;
-  if(storeSections((char *)win32file) == FALSE) {
+   }
+   fout << "OS/2 base address " << realBaseAddress << endl;
+   if(storeSections((char *)win32file) == FALSE) {
     	fout << "Failed to store sections, rc " << errorState << endl;
     	goto failure;
-  }
-  if(oh.AddressOfEntryPoint) {
+   }
+   if(oh.AddressOfEntryPoint) {
   	entryPoint = realBaseAddress + oh.AddressOfEntryPoint;
-  }
-  else {
-	fout << "EntryPoint == NULL" << endl;
+   }
+   else {
+	fout << "EntryPoint == NULL" << endl; 
 	entryPoint = NULL;
-  }
+   }
 
-  if(tlsDir != NULL) {
-   Section *sect = findSection(SECTION_TLS);
+   if(tlsDir != NULL) {
+    Section *sect = findSection(SECTION_TLS);
 
 	if(sect == NULL) {
 		fout << "Couldn't find TLS section!!" << endl;
@@ -333,23 +352,24 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
 	    	goto failure;
 	}
   	setTLSCallBackAddr((PIMAGE_TLS_CALLBACK *)(sect->realvirtaddr + ((ULONG)tlsDir->AddressOfCallBacks - sect->virtaddr)));
-  }
+   }
 
-  if(realBaseAddress != oh.ImageBase) {
+   if(realBaseAddress != oh.ImageBase) {
   	if(setFixups((PIMAGE_BASE_RELOCATION)ImageDirectoryOffset(win32file, IMAGE_DIRECTORY_ENTRY_BASERELOC)) == FALSE) {
     		fout << "Failed to set fixups" << endl;
 	    	goto failure;
 	}
-  }
-  if(fh.Characteristics & IMAGE_FILE_DLL) {
+   }
+   if(fh.Characteristics & IMAGE_FILE_DLL) {
     	if(processExports((char *)win32file) == FALSE) {
         	fout << "Failed to process exported apis" << endl;
 	    	goto failure;
     	}
-  }
+   }
 
-  //SvL: Use pointer to image header as module handle now. Some apps needs this
-  hinstance = (HINSTANCE)realBaseAddress;
+   //SvL: Use pointer to image header as module handle now. Some apps needs this
+   hinstance = (HINSTANCE)realBaseAddress;
+  }
 
   //PH: get pResDir pointer correct first, since processImports may
   //    implicitly call functions depending on it.
@@ -360,21 +380,25 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
         pResourceSectionStart = (ULONG)pResSection->virtaddr - oh.ImageBase;
   }
 
-  if(processImports((char *)win32file) == FALSE) {
+  if (loadType == REAL_LOAD) 
+  {
+   if(processImports((char *)win32file) == FALSE) {
     	fout << "Failed to process imports!" << endl;
-    	goto failure;
-  }
+     	goto failure;
+   }
 
-  //set final memory protection flags (storeSections sets them to read/write)
-  if(setMemFlags() == FALSE) {
+   //set final memory protection flags (storeSections sets them to read/write)
+   if(setMemFlags() == FALSE) {
     	fout << "Failed to set memory protection" << endl;
     	goto failure;
+   }
+   CloseHandle(fImgMapping);
+   fImgMapping = 0;
   }
-
-  CloseHandle(fImgMapping);
   return(TRUE);
 failure:
   if(fImgMapping) CloseHandle(fImgMapping);
+  fImgMapping = 0;
   errorState = ERROR_INTERNAL;
   return FALSE;
 }

@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.39 1999-10-22 18:07:24 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.40 1999-10-23 12:34:48 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -23,6 +23,7 @@
 #include <windllbase.h>
 #include <winexebase.h>
 #include <windllpeldr.h>
+#include <winfakepeldr.h>
 
 #ifdef __IBMCPP__
 #include <builtin.h>
@@ -604,17 +605,24 @@ BOOL WIN32API CreateProcessA(LPCSTR lpszImageName, LPSTR lpszCommandLine,
     if(lpszImageName) {
      	 if(lpszCommandLine) {
         	cmdline = (char *)malloc(strlen(lpszImageName)+strlen(lpszCommandLine) + 16);
-        	sprintf(cmdline, "%s %s", lpszImageName, lpszCommandLine);
+        	sprintf(cmdline, "PE.EXE %s %s", lpszImageName, lpszCommandLine);
         	fAllocStr = TRUE;
      	 }
-     	 else   cmdline = (char *)lpszImageName;
+     	 else {
+        	cmdline = (char *)malloc(strlen(lpszImageName) + 16);
+        	sprintf(cmdline, "PE.EXE %s", lpszImageName);
+        	fAllocStr = TRUE;
+	 }
     }
-    else cmdline = (char *)lpszCommandLine;
-
+    else {
+       	cmdline = (char *)malloc(strlen(lpszCommandLine) + 16);
+       	sprintf(cmdline, "PE.EXE %s", lpszCommandLine);
+       	fAllocStr = TRUE;
+    }
     dprintf(("KERNEL32:  CreateProcess %s\n", cmdline));
     rc = O32_CreateProcess("PE.EXE", (LPCSTR)cmdline, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
     if(fAllocStr)
-    free(cmdline);
+    	free(cmdline);
 
     dprintf(("KERNEL32:  CreateProcess returned %d\n", rc));
     return(rc);
@@ -673,6 +681,7 @@ FARPROC WIN32API GetProcAddress(HMODULE hModule, LPCSTR lpszProc)
 BOOL SYSTEM GetVersionStruct(char *modname, char *verstruct, ULONG bufLength)
 {
  Win32ImageBase *winimage;
+ Win32PeLdrRsrcImg *rsrcimg;
 
   dprintf(("GetVersionStruct"));
   if(WinExe && !stricmp(WinExe->getFullPath(), modname)) {
@@ -680,9 +689,37 @@ BOOL SYSTEM GetVersionStruct(char *modname, char *verstruct, ULONG bufLength)
   }
   else {
     	winimage = (Win32ImageBase *)Win32DllBase::findModule(modname);
-    	if(winimage == NULL) {
-        	dprintf(("GetVersionStruct can't find Win32Image for %s\n", modname));
-        	return(FALSE);
+    	if(winimage == NULL) 
+        {
+		if(Win32ImageBase::isPEImage(modname) == FALSE) 
+                {
+		 HINSTANCE hInstance;
+                  
+			//must be an LX dll, just load it (app will probably load it anyway)
+			hInstance = LoadLibraryA(modname);
+			if(hInstance == 0)
+				return 0;
+		    	winimage = (Win32ImageBase *)Win32DllBase::findModule(hInstance);
+		    	if(winimage) {
+				return winimage->getVersionStruct(verstruct, bufLength);
+			}
+			return 0;
+		}
+		//SvL: Try to load it
+		rsrcimg = new Win32PeLdrRsrcImg(modname);
+		if(rsrcimg == NULL)
+			return 0;
+
+	    	rsrcimg->init(0);
+		if(rsrcimg->getError() != NO_ERROR)
+		{
+	        	dprintf(("GetVersionStruct can't load %s\n", modname));
+			delete rsrcimg;
+	        	return(FALSE);
+		}
+		BOOL rc = rsrcimg->getVersionStruct(verstruct, bufLength);
+		delete rsrcimg;
+		return rc;
     	}
   }
   return winimage->getVersionStruct(verstruct, bufLength);
@@ -692,6 +729,7 @@ BOOL SYSTEM GetVersionStruct(char *modname, char *verstruct, ULONG bufLength)
 ULONG SYSTEM GetVersionSize(char *modname)
 {
  Win32ImageBase *winimage;
+ Win32PeLdrRsrcImg *rsrcimg;
 
   dprintf(("GetVersionSize of %s\n", modname));
 
@@ -700,9 +738,39 @@ ULONG SYSTEM GetVersionSize(char *modname)
   }
   else {
     	winimage = (Win32ImageBase *)Win32DllBase::findModule(modname);
-    	if(winimage == NULL) {
-        	dprintf(("GetVersionSize can't find Win32Image for %s\n", modname));
-        	return(FALSE);
+    	if(winimage == NULL) 
+        {
+		if(Win32ImageBase::isPEImage(modname) == FALSE) 
+                {
+		 HINSTANCE hInstance;
+                  
+			//must be an LX dll, just load it (app will probably load it anyway)
+			hInstance = LoadLibraryA(modname);
+			if(hInstance == 0)
+				return 0;
+		    	winimage = (Win32ImageBase *)Win32DllBase::findModule(hInstance);
+		    	if(winimage) {
+				return winimage->getVersionSize();
+			}
+			return 0;
+		}
+
+		//SvL: Try to load it
+		rsrcimg = new Win32PeLdrRsrcImg(modname);
+		if(rsrcimg == NULL)
+			return 0;
+
+	    	rsrcimg->init(0);
+		if(rsrcimg->getError() != NO_ERROR)
+		{
+        		dprintf(("GetVersionSize can't load %s\n", modname));
+			delete rsrcimg;
+	        	return(FALSE);
+		}
+	    	rsrcimg->init(0);
+		int size = rsrcimg->getVersionSize();
+		delete rsrcimg;
+		return size;
     	}
   }
   return winimage->getVersionSize();

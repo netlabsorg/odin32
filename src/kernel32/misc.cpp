@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.11 1999-09-13 14:57:07 phaller Exp $ */
+/* $Id: misc.cpp,v 1.12 1999-10-23 12:34:47 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -256,6 +256,10 @@ int SYSTEM EXPORT WriteLog(char *tekst, ...)
 
 	sprintf(logname, "odin32_%d.log", loadNr);
       	flog = fopen(logname, "w");
+	if(flog == NULL) {//probably running exe on readonly device
+		sprintf(logname, "%sodin32_%d.log", kernel32Path, loadNr);
+	      	flog = fopen(logname, "w");
+	}
     }
     else
       fLogging = FALSE;
