@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.2490 2003-02-18 18:49:08 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2491 2003-02-20 09:47:46 sandervl Exp $ */
+
+ 2003-02-20: knut st. osmundsen <Knut.Osmundsen@innotek   >
+    - KERNEL32: o Added custombuild API for registering a callback for LX Dll 
+                  loading thru LoadLibrary*().
 
  2003-02-18: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Touch last stack page using ESP. (just in case)
