@@ -1,4 +1,4 @@
-; $Id: fakea.asm,v 1.1.4.5 2000-08-25 04:47:28 bird Exp $
+; $Id: fakea.asm,v 1.1.4.6 2000-08-28 22:44:25 bird Exp $
 ;
 ; Fake assembly imports.
 ;
@@ -30,6 +30,8 @@
     public fakeptda_start
     public fakeptda_environ
     public fakeptda_module
+    public fakeptda_ptdasem
+    public fakeptda_pBeginLIBPATH
     public fakef_FuStrLenZ
     public fakef_FuStrLen
     public fakef_FuBuff
@@ -59,6 +61,7 @@ fakeptda_pPTDAFirstChild    dd      0
 fakeptda_pPTDAExecChild     dd      offset FLAT:fakeptda_start
 fakeptda_dummy              db  123 dup (0)
 fakeptda_environ            dw      1   ; 1 is the hardcoded HOB of the win32ktst.exe's environment.
+fakeptda_ptda_sem           db  20  dup (0) ; PTDA semaphore - Intra-Process serialisation mutex KSEM (sg244640).
 fakeptda_module             dw      1   ; 1 is the hardcoded HMTE of the current executable module.
 fakeptda_pBeginLIBPATH      dd      0   ; BEGINLIBPATH not implemented.
                             dd      0   ; ENDLIBPATH not implemented.

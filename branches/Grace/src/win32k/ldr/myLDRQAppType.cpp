@@ -1,4 +1,4 @@
-/* $Id: myLDRQAppType.cpp,v 1.3.4.2 2000-08-19 14:37:14 bird Exp $
+/* $Id: myLDRQAppType.cpp,v 1.3.4.3 2000-08-28 22:44:24 bird Exp $
  *
  * _myLDRQAppType - _LDRQAppType overload.
  *
@@ -14,6 +14,7 @@
 #define INCL_DOSERRORS
 #define INCL_NOPMAPI
 
+#define INCL_OS2KRNL_PTDA
 #define INCL_OS2KRNL_SEM
 
 /*******************************************************************************
@@ -45,7 +46,12 @@ ULONG LDRCALL myLDRQAppType(ULONG p1, ULONG p2)
     APIRET rc;
 
     kprintf(("myLDRQAppType: entry\n"));
-
+    rc = KSEMRequestMutex(ptda_ptda_ptdasem(ptdaGetCur()), KSEM_INDEFINITE_WAIT);
+    if (rc != NO_ERROR)
+    {
+        kprintf(("myLDRQAppType: failed to get intra-process semaphore.\n"));
+        return rc;
+    }
     rc = LDRRequestSem();
     if (rc != NO_ERROR)
     {
@@ -62,6 +68,7 @@ ULONG LDRCALL myLDRQAppType(ULONG p1, ULONG p2)
     setLdrStateUnknown();
 
     LDRClearSem();
+    KSEMReleaseMutex(ptda_ptda_ptdasem(ptdaGetCur()));
     kprintf(("myLDRQAppType: exit\n"));
 
     return rc;

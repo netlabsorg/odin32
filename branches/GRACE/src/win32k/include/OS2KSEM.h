@@ -1,4 +1,4 @@
-/* $Id: OS2KSEM.h,v 1.1.2.2 2000-08-23 04:25:44 bird Exp $
+/* $Id: OS2KSEM.h,v 1.1.2.3 2000-08-28 22:44:22 bird Exp $
  *
  * OS/2 kernel Semaphore functions.
  *
@@ -15,8 +15,8 @@
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
 *******************************************************************************/
-#define KSEM_INDEFINITE_WAIT       -1L
-#define KSEM_IMMEDIATE_RETURN       0L
+#define KSEM_INDEFINITE_WAIT       -1UL
+#define KSEM_IMMEDIATE_RETURN       0UL
 
 /*
  * Semaphore type. ( Used with the generic KSEM routines. )
