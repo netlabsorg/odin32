@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.171 2003-01-10 15:19:54 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.172 2003-01-15 10:42:19 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -161,6 +161,7 @@ TEB *WIN32API CreateTEB(HANDLE hThread, DWORD dwThreadId)
         return NULL;
     }
     memset(winteb, 0, sizeof(TEB));
+    dprintf(("TIB selector %x; linaddr 0x%x", tibsel, winteb));
 
     threadListMutex.enter();
     TEB *teblast   = threadList;
