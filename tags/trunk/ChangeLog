@@ -1,4 +1,15 @@
- /* $Id: ChangeLog,v 1.303 1999-10-10 11:27:41 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.304 1999-10-11 15:27:08 sandervl Exp $ */
+
+ 99-10-11: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Disabling the desktop window is a very bad idea.
+                  (desktop no longer responds to mouse clicks)
+                  Enable method in desktop window class that does nothing.
+                  Added support for extra messages in msg printf code
+		  Ported almost all Wine code for CTLCOLOR messages.
+                  Return -1 in DefWindowProc for WM_VKEYTOITEM & WM_CHARTOITEM
+
+ 99-10-11: Christoph Bratschi <cbratschi@datacomm.ch>
+	- GDI32: Bugfix for Pie Open32 api
 
  99-10-10: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: fixed radio buttons, disabled text output
