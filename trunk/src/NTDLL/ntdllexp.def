@@ -5,7 +5,7 @@ EXPORTS
     _RtlMoveMemory@12                         @589
     RtlUnwindAsm                              @590
     _RtlZeroMemory@8                          @591
-    _RtlLargeIntegerToChar@12                 @425
+    _RtlLargeIntegerToChar@16                 @425
     _NtAlertThread@8                          @57
     _ZwAlertThread@8                          @700
     _NtAllocateUuids@16                       @59
@@ -152,12 +152,15 @@ EXPORTS
     _RtlAllocateAndInitializeSid@44           @265
     _RtlConvertSidToUnicodeString@12          @296
     _RtlEqualSid@8                            @352
+    _RtlEqualPrefixSid@8                      @351
     _RtlFreeSid@4                             @376
+    _RtlValidSid@4                            @523
     _RtlLengthRequiredSid@4                   @427
     _RtlLengthSid@4                           @429
     _RtlInitializeSid@12                      @410
     _RtlSubAuthoritySid@8                     @497
     _RtlSubAuthorityCountSid@4                @496
+    _RtlIdentifierAuthoritySid@4              @395
     _RtlCopySid@12                            @302
     _RtlCreateSecurityDescriptor@8            @313
     _RtlValidSecurityDescriptor@4             @600
@@ -227,7 +230,3 @@ EXPORTS
     _RtlLargeIntegerSubtract@16               @466
     _RtlConvertLongToLargeInteger@4           @316
     _RtlConvertUlongToLargeInteger@4          @320
-    _chkstk                                   @946
-    DbgBreakPoint                             @20
-    DbgUserBreakPoint                         @28
-    _DbgPrint                                 @21
