@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.2673 2004-02-11 15:38:47 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2674 2004-02-12 12:44:37 sandervl Exp $ */
+
+ 2004-02-12: Sander van Leeuwen <sandervl@innotek   >
+    - GDI32:    o PathToRegion failure bugfix + leak fixed
+                o SelectClipPath can fail in printer DCs. Pretend success.
 
  2004-02-11: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o HODIN_PREWINDOWCREATEDA extension added
