@@ -1,4 +1,4 @@
-/* $Id: crtdll.cpp,v 1.2 1999-09-13 09:05:13 sandervl Exp $ */
+/* $Id: crtdll.cpp,v 1.3 1999-09-18 10:36:34 sandervl Exp $ */
 
 /*
  * The C RunTime DLL
@@ -30,6 +30,15 @@
 #include <math.h>
 #include <locale.h>
 #include <signal.h>
+#include <io.h>
+#include <assert.h>
+#include <process.h>
+#include <float.h>
+#include <conio.h>
+#include <direct.h>
+#include <malloc.h>
+#include <sys\utime.h>
+#include <sys\stat.h>
 
 #include <crtdll.h>
 #include "crtinc.h"
@@ -137,6 +146,40 @@ DWORD CDECL CRTDLL__GetMainArgs(LPDWORD argc,LPSTR **argv,
 	return 0;
 }
 
+
+/*********************************************************************
+ *           CRTDLL___isascii   (CRTDLL.28)
+ */
+int CDECL CRTDLL___isascii(int i)
+{
+  dprintf(("CRTDLL: __isascii\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           CRTDLL___iscsym   (CRTDLL.29)
+ */
+int CDECL CRTDLL___iscsym(int i)
+{
+  dprintf(("CRTDLL: __iscsym\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           CRTDLL___iscsymf   (CRTDLL.30)
+ */
+int CDECL CRTDLL___iscsymf(int i)
+{
+  dprintf(("CRTDLL: __iscsymf\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
 /*********************************************************************
  *                  __mb_cur_max_dll    (CRTDLL.31)
  *	FIXME - Could not find anything about it
@@ -147,6 +190,50 @@ INT CDECL CRTDLL___mb_cur_max_dll(DWORD ret)
 
 	return 0;
 }
+
+
+/*********************************************************************
+ *           CRTDLL___threadhandle   (CRTDLL.32)
+ */
+unsigned long CDECL CRTDLL___threadhandle( void )
+{
+  dprintf(("CRTDLL: __threadhandle\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           CRTDLL___threadid   (CRTDLL.33)
+ */
+int * CDECL CRTDLL___threadid(void)
+{
+  dprintf(("CRTDLL: __threadid\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__abnormal_termination   (CRTDLL.36)
+ */
+int CDECL CRTDLL__abnormal_termination(void)
+{
+  dprintf(("CRTDLL: _abnormal_termination\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__access   (CRTDLL.37)
+ */
+int CDECL CRTDLL__access(const char *path,int mode)
+{
+  dprintf(("CRTDLL: _access\n"));
+  return (_access(path, mode));
+}
+
 
 /*********************************************************************
  *                  _aexit_rtn_dll    (CRTDLL.39)
@@ -159,6 +246,7 @@ INT CDECL CRTDLL__aexit_rtn_dll(DWORD ret)
 	return 0;
 }
 
+
 /*********************************************************************
  *                  _amsg_exit    (CRTDLL.40)
  *	FIXME - Could not find anything about it
@@ -169,6 +257,29 @@ INT CDECL CRTDLL__amsg_exit(DWORD ret)
 
 	return 0;
 }
+
+
+/*********************************************************************
+ *           CRTDLL__assert   (CRTDLL.41)
+ */
+void CDECL CRTDLL__assert( char *s1, char *s2, int i)
+{
+  dprintf(("CRTDLL: _assert\n"));
+  _assert(s1, s2, i);
+}
+
+
+/*********************************************************************
+ *           CRTDLL__beginthread   (CRTDLL.46)
+ */
+unsigned long CDECL CRTDLL__beginthread(  register void (*start_address)(void *),
+		unsigned stack_size, void *arglist )
+{
+  dprintf(("CRTDLL: _beginthread\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
 
 /*********************************************************************
  *                  _chdir           (CRTDLL.51)
@@ -181,6 +292,87 @@ INT CDECL CRTDLL__chdir(LPCSTR newdir)
 	return 0;
 }
 
+
+/*********************************************************************
+ *           CRTDLL__close   (CRTDLL.57)
+ */
+int CDECL CRTDLL__close(int handle)
+{
+  dprintf(("CRTDLL: _close\n"));
+  return (_close(handle));
+}
+
+
+/*********************************************************************
+ *           CRTDLL__control87   (CRTDLL.60)
+ */
+unsigned CDECL CRTDLL__control87(unsigned i1,unsigned i2)
+{
+  dprintf(("CRTDLL: _control87\n"));
+  return (_control87(i1, i2));
+}
+
+
+/*********************************************************************
+ *           CRTDLL__cwait   (CRTDLL.69)
+ */
+int CDECL CRTDLL__cwait( int *status, int process_id, int action_code )
+{
+  dprintf(("CRTDLL: _cwait\n"));
+  return (_cwait(status, process_id, action_code));
+}
+
+
+/*********************************************************************
+ *           CRTDLL__dup   (CRTDLL.71)
+ */
+int CDECL CRTDLL__dup(int handle)
+{
+  dprintf(("CRTDLL: _dup\n"));
+  return (_dup(handle));
+}
+
+
+/*********************************************************************
+ *           CRTDLL__dup2  (CRTDLL.72)
+ */
+int CDECL CRTDLL__dup2(int handle1,int handle2)
+{
+  dprintf(("CRTDLL: _dup2\n"));
+  return (_dup2(handle1, handle2));
+}
+
+
+/*********************************************************************
+ *           CRTDLL__ecvt  (CRTDLL.73)
+ */
+char * CDECL CRTDLL__ecvt( double val, int ndig, int *dec, int *sign )
+{
+  dprintf(("CRTDLL: _ecvt\n"));
+  return (_ecvt(val, ndig, dec, sign));
+}
+
+
+/*********************************************************************
+ *           CRTDLL__endthread  (CRTDLL.74)
+ */
+void CDECL CRTDLL__endthread(void)
+{
+  dprintf(("CRTDLL: _endthread\n"));
+  _endthread ();
+}
+
+
+/*********************************************************************
+ *           CRTDLL__errno  (CRTDLL.77)
+ */
+int * CDECL CRTDLL__errno(void)
+{
+  dprintf(("CRTDLL: _errno\n"));
+  return (_errno());
+}
+
+
 /*********************************************************************
  *                  _except_handler2    (CRTDLL.78)
  *	FIXME - Could not find anything about it
@@ -192,6 +384,7 @@ INT CDECL CRTDLL__except_handler2(DWORD ret)
 	return 0;
 }
 
+
 /*********************************************************************
  *                  _exit          (CRTDLL.87)
  */
@@ -200,6 +393,28 @@ VOID CDECL CRTDLL__exit(DWORD ret)
 	dprintf(("CRTDLL: exit\n"));
 	ExitProcess(ret);
 }
+
+
+/*********************************************************************
+ *           CRTDLL__expand   (CRTDLL.88)
+ */
+void * CDECL CRTDLL__expand( void *ptr, size_t size )
+{
+  dprintf(("CRTDLL: _expand\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__fcvt  (CRTDLL.90)
+ */
+char * CDECL CRTDLL__fcvt( double val, int ndig, int *dec, int *sign )
+{
+  dprintf(("CRTDLL: _fcvt\n"));
+  return (_fcvt(val, ndig, dec, sign));
+}
+
 
 /*********************************************************************
  *                  _fdopen     (CRTDLL.91)
@@ -231,41 +446,240 @@ CRTDLL_FILE * CDECL CRTDLL__fdopen(INT handle, LPCSTR mode)
   return file;
 }
 
+
+/*********************************************************************
+ *           CRTDLL__fgetchar  (CRTDLL.92)
+ */
+int CDECL CRTDLL__fgetchar( void )
+{
+  dprintf(("CRTDLL: _fgetchar\n"));
+  return (_fgetchar());
+}
+
+
+/*********************************************************************
+ *           CRTDLL__fgetwchar  (CRTDLL.93)
+ */
+wint_t CDECL CRTDLL__fgetwchar( void *i )
+{
+  dprintf(("CRTDLL: _fgetwchar\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+ /*********************************************************************
+ *                  _findclose    (CRTDLL.098)
+ */
+int CDECL CRTDLL__findclose( long handle )
+{
+  dprintf(("CRTDLL: _findclose\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
  /*********************************************************************
  *                  _findfirst    (CRTDLL.099)
- * 
- * BUGS
- *   Unimplemented
  */
 DWORD CDECL CRTDLL__findfirst(LPCSTR fname,  struct find_t * x2)
 {
+  dprintf(("CRTDLL: _findfirst\n"));
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
+
 
 /*********************************************************************
  *                  _findnext     (CRTDLL.100)
- * 
- * BUGS
- *   Unimplemented
  */
 INT CDECL CRTDLL__findnext(DWORD hand, struct find_t * x2)
 {
+  dprintf(("CRTDLL: _findnext\n"));
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
+
 /*********************************************************************
- *                  _fstat        (CRTDLL.111)
- * 
- * BUGS
- *   Unimplemented
+ *                  _finite     (CRTDLL.101)
  */
-int CDECL CRTDLL__fstat(int file, struct stat* buf)
+INT CDECL CRTDLL__finite(double x)
 {
+  dprintf(("CRTDLL: _finite\n"));
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
+
+
+/*********************************************************************
+ *                  _fpreset     (CRTDLL.107)
+ */
+INT CDECL CRTDLL__fpreset(void)
+{
+  dprintf(("CRTDLL: _fpreset\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _fputchar     (CRTDLL.108)
+ */
+INT CDECL CRTDLL__fputchar( int c )
+{
+  dprintf(("CRTDLL: _fputchar\n"));
+  return(_fputchar(c));
+}
+
+
+/*********************************************************************
+ *                  _fputwchar     (CRTDLL.109)
+ */
+wint_t CDECL CRTDLL__fputwchar( wint_t )
+{
+  dprintf(("CRTDLL: _fputwchar\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _fsopen     (CRTDLL.110)
+ */
+FILE * CDECL CRTDLL__fsopen( const char *filename, const char *mode, int shflag )
+{
+  dprintf(("CRTDLL: _fsopen\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _fstat        (CRTDLL.111)
+ */
+int CDECL CRTDLL__fstat(int file, struct stat* buf)
+{
+  dprintf(("CRTDLL: _fstat\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _ftime        (CRTDLL.112)
+ */
+int CDECL CRTDLL__ftime( struct timeb *timeptr )
+{
+  dprintf(("CRTDLL: _ftime\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _fullpath     (CRTDLL.114)
+ */
+char * CDECL CRTDLL__fullpath( char *buf, char *path, size_t size )
+{
+  dprintf(("CRTDLL: _fullpath\n"));
+  return (_fullpath(buf, path, size));
+}
+
+
+/*********************************************************************
+ *                  _gcvt     (CRTDLL.116)
+ */
+char * CDECL CRTDLL__gcvt( double val, int ndig, char *buf )
+{
+  dprintf(("CRTDLL: _gcvt\n"));
+  return (_gcvt(val, ndig, buf));
+}
+
+
+/*********************************************************************
+ *                  _get_osfhandle     (CRTDLL.117)
+ */
+long CDECL CRTDLL__get_osfhandle( int posixhandle )
+{
+  dprintf(("CRTDLL: _gcvt\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _getch     (CRTDLL.118)
+ */
+int CDECL CRTDLL__getch(void)
+{
+  dprintf(("CRTDLL: _getch\n"));
+  return (_getch());
+}
+
+
+/*********************************************************************
+ *                  _getche     (CRTDLL.119)
+ */
+int CDECL CRTDLL__getche(void)
+{
+  dprintf(("CRTDLL: _getche\n"));
+  return (_getche());
+}
+
+
+/*********************************************************************
+ *                  _getcwd     (CRTDLL.120)
+ */
+char * CDECL CRTDLL__getcwd( char *buf, size_t size )
+{
+  dprintf(("CRTDLL: _getcwd\n"));
+  return (_getcwd(buf, size));
+}
+
+
+/*********************************************************************
+ *                  _getdcwd     (CRTDLL.121)
+ */
+char * CDECL CRTDLL__getdcwd( int drive, char *buffer, size_t maxlen )
+{
+  dprintf(("CRTDLL: _getdcwd\n"));
+  return (_getdcwd(drive, buffer, maxlen));
+}
+
+
+/*********************************************************************
+ *                  _getdiskfree     (CRTDLL.122)
+ */
+unsigned CDECL CRTDLL__getdiskfree( unsigned drive, struct _diskfree_t *diskspace)
+{
+  dprintf(("CRTDLL: _getdiskfree\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _getdrive    (CRTDLL.124)
+ */
+unsigned CDECL CRTDLL__getdrive( void )
+{
+  dprintf(("CRTDLL: _getdrive\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _getw     (CRTDLL.128)
+ */
+int CDECL CRTDLL__getw( FILE *fp )
+{
+  dprintf(("CRTDLL: _getw\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
 
 /*******************************************************************
  *         _global_unwind2  (CRTDLL.129)
@@ -275,6 +689,48 @@ void CDECL CRTDLL__global_unwind2( PEXCEPTION_FRAME frame )
     dprintf(("CRTDLL: global_undwind2\n"));
     RtlUnwind( frame, 0, NULL, 0 );
 }
+
+
+/*********************************************************************
+ *                  _heapchk    (CRTDLL.130)
+ */
+int CDECL CRTDLL__heapchk( void )
+{
+  dprintf(("CRTDLL: _heapchk\n"));
+  return (_heapchk());
+}
+
+
+/*********************************************************************
+ *                  _heapmin    (CRTDLL.131)
+ */
+int CDECL CRTDLL__heapmin( void )
+{
+  dprintf(("CRTDLL: _heapmin\n"));
+  return (_heapmin());
+}
+
+
+/*********************************************************************
+ *                  _heapset    (CRTDLL.132)
+ */
+int CDECL CRTDLL__heapset( unsigned int fill )
+{
+  dprintf(("CRTDLL: _heapset\n"));
+  return (_heapset(fill));
+}
+
+
+/*********************************************************************
+ *                  _heapwalk     (CRTDLL.133)
+ */
+int CDECL CRTDLL__heapwalk( struct _heapinfo *entry )
+{
+  dprintf(("CRTDLL: _heapwalk\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
 
 /*********************************************************************
  *                  _initterm     (CRTDLL.135)
@@ -291,6 +747,7 @@ DWORD CDECL CRTDLL__initterm(_INITTERMFUN *start,_INITTERMFUN *end)
 	}
 	return 0;
 }
+
 
 /*********************************************************************
  *                  _isctype           (CRTDLL.138)
@@ -316,6 +773,259 @@ BOOL CDECL CRTDLL__isctype(CHAR x,CHAR type)
 	return FALSE;
 }
 
+
+/*********************************************************************
+ *                  _ismbbalnum     (CRTDLL.139)
+ */
+int CDECL CRTDLL__ismbbalnum( unsigned int ch )
+{
+  dprintf(("CRTDLL: _ismbbalnum\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _ismbbalpha     (CRTDLL.140)
+ */
+int CDECL CRTDLL__ismbbalpha( unsigned int ch )
+{
+  dprintf(("CRTDLL: _ismbbalpha\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _ismbbgraph     (CRTDLL.141)
+ */
+int CDECL CRTDLL__ismbbgraph( unsigned int ch )
+{
+  dprintf(("CRTDLL: _ismbbgraph\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _ismbbkalnum     (CRTDLL.142)
+ */
+int CDECL CRTDLL__ismbbkalnum( unsigned int ch )
+{
+  dprintf(("CRTDLL: _ismbbkalnum\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _ismbbkana     (CRTDLL.143)
+ */
+int CDECL CRTDLL__ismbbkana( unsigned int ch )
+{
+  dprintf(("CRTDLL: _ismbbkana\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _ismbbkpunct     (CRTDLL.144)
+ */
+int CDECL CRTDLL__ismbbkpunct( unsigned int ch )
+{
+  dprintf(("CRTDLL: _ismbbkpunct\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _ismbblead     (CRTDLL.145)
+ */
+int CDECL CRTDLL__ismbblead( unsigned int ch )
+{
+  dprintf(("CRTDLL: _ismbblead\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _ismbbprint     (CRTDLL.146)
+ */
+int CDECL CRTDLL__ismbbprint( unsigned int ch )
+{
+  dprintf(("CRTDLL: _ismbbprint\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _ismbbpunct     (CRTDLL.147)
+ */
+int CDECL CRTDLL__ismbbpunct( unsigned int ch )
+{
+  dprintf(("CRTDLL: _ismbbpunct\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _ismbbtrail     (CRTDLL.148)
+ */
+int CDECL CRTDLL__ismbbtrail( unsigned int ch )
+{
+  dprintf(("CRTDLL: _ismbbtrail\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _ismbcalpha     (CRTDLL.149)
+ */
+int CDECL CRTDLL__ismbcalpha( unsigned int ch )
+{
+  dprintf(("CRTDLL: _ismbcalpha\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _ismbcdigit     (CRTDLL.150)
+ */
+int CDECL CRTDLL__ismbcdigit( unsigned int ch )
+{
+  dprintf(("CRTDLL: _ismbcdigit\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _ismbchira     (CRTDLL.151)
+ */
+int CDECL CRTDLL__ismbchira( unsigned int ch )
+{
+  dprintf(("CRTDLL: _ismbchira\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _ismbckata     (CRTDLL.152)
+ */
+int CDECL CRTDLL__ismbckata( unsigned int ch )
+{
+  dprintf(("CRTDLL: _ismbckata\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+/*********************************************************************
+ *                  _ismbcl0     (CRTDLL.153)
+ */
+int CDECL CRTDLL__ismbcl0( unsigned int ch )
+{
+  dprintf(("CRTDLL: _ismbcl0\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _ismbcl1     (CRTDLL.154)
+ */
+int CDECL CRTDLL__ismbcl1( unsigned int ch )
+{
+  dprintf(("CRTDLL: _ismbcl1\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _ismbcl2     (CRTDLL.155)
+ */
+int CDECL CRTDLL__ismbcl2( unsigned int ch )
+{
+  dprintf(("CRTDLL: _ismbcl2\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _ismbclegal     (CRTDLL.156)
+ */
+int CDECL CRTDLL__ismbclegal( unsigned int ch )
+{
+  dprintf(("CRTDLL: _ismbclegal\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _ismbclower     (CRTDLL.157)
+ */
+int CDECL CRTDLL__ismbclower( unsigned int ch )
+{
+  dprintf(("CRTDLL: _ismbclower\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _ismbcprint     (CRTDLL.158)
+ */
+int CDECL CRTDLL__ismbcprint( unsigned int ch )
+{
+  dprintf(("CRTDLL: _ismbcprint\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _ismbcspace     (CRTDLL.159)
+ */
+int CDECL CRTDLL__ismbcspace( unsigned int ch )
+{
+  dprintf(("CRTDLL: _ismbcspace\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _ismbcsymbol     (CRTDLL.160)
+ */
+int CDECL CRTDLL__ismbcsymbol( unsigned int ch )
+{
+  dprintf(("CRTDLL: _ismbcsymbol\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _ismbcupper     (CRTDLL.161)
+ */
+int CDECL CRTDLL__ismbcupper( unsigned int ch )
+{
+  dprintf(("CRTDLL: _ismbcupper\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
 /*******************************************************************
  *         _local_unwind2  (CRTDLL.172)
  */
@@ -323,6 +1033,255 @@ void CDECL CRTDLL__local_unwind2( PEXCEPTION_FRAME endframe, DWORD nr )
 {
 	dprintf(("CRTDLL: local_undwind2\n"));
 }
+
+
+/*********************************************************************
+ *                  _locking        (CRTDLL.173)
+ */
+int CDECL CRTDLL__locking(int handle,int mode,unsigned long nbyte)
+{
+  dprintf(("CRTDLL: _locking\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _lrotl	(CRTDLL.175)
+ */
+unsigned long CDECL CRTDLL__lrotl( unsigned long value, unsigned int shift )
+{
+  dprintf(("CRTDLL: _lrotl\n"));
+  return (_lrotl(value, shift));
+}
+
+
+/*********************************************************************
+ *                  _lrotr	(CRTDLL.176)
+ */
+unsigned long CDECL CRTDLL__lrotr( unsigned long value, unsigned int shift )
+{
+  dprintf(("CRTDLL: _lrotr\n"));
+  return (_lrotr(value, shift));
+}
+
+
+/*********************************************************************
+ *                  _lseek	(CRTDLL.178)
+ */
+long CDECL CRTDLL__lseek(int handle,long offset,int origin)
+{
+  dprintf(("CRTDLL: _lssek\n"));
+  return (_lseek(handle, offset, origin));
+}
+
+
+/*********************************************************************
+ *                  _makepath	(CRTDLL.180)
+ */
+void CDECL CRTDLL__makepath( char *path, char *drive,
+                    char *dir, char *fname, char *ext )
+{
+  dprintf(("CRTDLL: _makepath\n"));
+  _makepath(path, drive, dir, fname, ext);
+}
+
+
+/*********************************************************************
+ *                  _matherr	(CRTDLL.181)
+ */
+double CDECL CRTDLL__matherr( struct exception * excep )
+{
+  dprintf(("CRTDLL: _matherr\n"));
+  return (_matherr(excep));
+}
+
+
+/*********************************************************************
+ *                  _mbbtombc        (CRTDLL.182)
+ */
+unsigned int CDECL CRTDLL__mbbtombc( unsigned int ch )
+{
+  dprintf(("CRTDLL: _mbbtombc\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _mbbtype        (CRTDLL.183)
+ */
+int CDECL CRTDLL__mbbtype( unsigned char s, int i )
+{
+  dprintf(("CRTDLL: _mbbtype\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _mbccpy        (CRTDLL.184)
+ */
+void CDECL CRTDLL__mbccpy( unsigned char *dest, const unsigned char *ch )
+{
+  dprintf(("CRTDLL: _mbccpy\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+}
+
+
+/*********************************************************************
+ *                  _mbcjistojms     (CRTDLL.185)
+ */
+int CDECL CRTDLL__mbcjistojms( unsigned int ch )
+{
+  dprintf(("CRTDLL: _mbcjistojms\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _mbcjmstojis     (CRTDLL.186)
+ */
+int CDECL CRTDLL__mbcjmstojis( unsigned int ch )
+{
+  dprintf(("CRTDLL: _mbcjmstojis\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _mbclen    (CRTDLL.187)
+ */
+size_t CDECL CRTDLL__mbclen( const unsigned char *ch )
+{
+  dprintf(("CRTDLL: _mbclen\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _mbctohira     (CRTDLL.188)
+ */
+int CDECL CRTDLL__mbctohira( unsigned int ch )
+{
+  dprintf(("CRTDLL: _mbctohira\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _mbctokata     (CRTDLL.189)
+ */
+int CDECL CRTDLL__mbctokata( unsigned int ch )
+{
+  dprintf(("CRTDLL: _mbctokata\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _mbctolower     (CRTDLL.190)
+ */
+unsigned int CDECL CRTDLL__mbctolower( unsigned int ch )
+{
+  dprintf(("CRTDLL: _mbctolower\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _mbctombb        (CRTDLL.191)
+ */
+unsigned int CDECL CRTDLL__mbctombb( unsigned int ch )
+{
+  dprintf(("CRTDLL: _mbctombb\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _mbctoupper     (CRTDLL.192)
+ */
+unsigned int CDECL CRTDLL__mbctoupper( unsigned int ch )
+{
+  dprintf(("CRTDLL: _mbctoupper\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _mbsbtype     (CRTDLL.194)
+ */
+int CDECL CRTDLL__mbsbtype( const unsigned char *s1, int ch )
+{
+  dprintf(("CRTDLL: _mbsbtype\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _mbscat       (CRTDLL.195)
+ */
+unsigned char * CDECL CRTDLL__mbscat( unsigned char *s1, const unsigned char *s2 )
+{
+  dprintf(("CRTDLL: _mbscat\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _mbschr       (CRTDLL.196)
+ */
+unsigned char * CDECL CRTDLL__mbschr( const unsigned char *s, unsigned int ch )
+{
+  dprintf(("CRTDLL: _mbschr\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _mbscmp       (CRTDLL.197)
+ */
+int CDECL CRTDLL__mbscmp( const unsigned char *s1, const unsigned char *s2 )
+{
+  dprintf(("CRTDLL: _mbscmp\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _mbscpy       (CRTDLL.198)
+ */
+unsigned char * CDECL CRTDLL__mbscpy( unsigned char *s1, const unsigned char *s2 )
+{
+  dprintf(("CRTDLL: _mbscpy\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _mbscspn        (CRTDLL.199)
+ */
+size_t CDECL CRTDLL__mbscspn( const unsigned char *s, const unsigned char *charset )
+{
+  dprintf(("CRTDLL: _mbscspn\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
 
 /*********************************************************************
  *           CRTDLL__mbsinc    (CRTDLL.203)
@@ -349,6 +1308,304 @@ INT CDECL CRTDLL__mbslen( LPCSTR str )
     return total;
 }
 
+
+/*********************************************************************
+ *           CRTDLL__mbsdec    (CRTDLL.200)
+ */
+unsigned char * CDECL CRTDLL__mbsdec( const unsigned char *s, const unsigned char *ch )
+{
+  dprintf(("CRTDLL: _mbsdec\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__mbsdec    (CRTDLL.201)
+ */
+unsigned char * CDECL CRTDLL__mbsdup( unsigned char *src )
+{
+  dprintf(("CRTDLL: _mbsdup\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__mbsicmp   (CRTDLL.202)
+ */
+int CDECL CRTDLL__mbsicmp( const unsigned char *s1, const unsigned char *s2 )
+{
+  dprintf(("CRTDLL: _mbsicmp\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__mbslwr    (CRTDLL.205)
+ */
+unsigned char * CDECL CRTDLL__mbslwr( unsigned char *s )
+{
+  dprintf(("CRTDLL: _mbslwr\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__mbsnbcat  (CRTDLL.206)
+ */
+unsigned char * CDECL CRTDLL__mbsnbcat( unsigned char *s1, const unsigned char *s2, size_t n )
+{
+  dprintf(("CRTDLL: _mbsnbcat\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__mbsnbcmp  (CRTDLL.207)
+ */
+int CDECL CRTDLL__mbsnbcmp( const unsigned char *s1, const unsigned char *s2, size_t n )
+{
+  dprintf(("CRTDLL: _mbsnbcmp\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__mbsnbcnt  (CRTDLL.208)
+ */
+size_t CDECL CRTDLL__mbsnbcnt( const unsigned char *s, size_t n )
+{
+  dprintf(("CRTDLL: _mbsnbcnt\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__mbsnbcpy  (CRTDLL.209)
+ */
+unsigned char * CDECL CRTDLL__mbsnbcpy( unsigned char *s1, const unsigned char *s2, size_t n )
+{
+  dprintf(("CRTDLL: _mbsnbcpy\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__mbsnbicmp (CRTDLL.210)
+ */
+int CDECL CRTDLL__mbsnbicmp( const unsigned char *s1, const unsigned char *s2, size_t n )
+{
+  dprintf(("CRTDLL: _mbsnbicmp\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__mbsnbset (CRTDLL.211)
+ */
+unsigned char * CDECL CRTDLL__mbsnbset( unsigned char *s, unsigned int ch, size_t n )
+{
+  dprintf(("CRTDLL: _mbsnbset\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__mbsncat (CRTDLL.212)
+ */
+unsigned char * CDECL CRTDLL__mbsncat( unsigned char *s1, const unsigned char *s2, size_t n )
+{
+  dprintf(("CRTDLL: _mbsncat\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__mbsnccnt (CRTDLL.213)
+ */
+size_t CDECL CRTDLL__mbsnccnt( const unsigned char *s, size_t n )
+{
+  dprintf(("CRTDLL: _mbsnccnt\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__mbsncmp (CRTDLL.214)
+ */
+int CDECL CRTDLL__mbsncmp( const unsigned char *s1, const unsigned char *s2, size_t n )
+{
+  dprintf(("CRTDLL: _mbsncmp\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__mbsncpy (CRTDLL.215)
+ */
+unsigned char * CDECL CRTDLL__mbsncpy( unsigned char *s1, const unsigned char *s2, size_t n )
+{
+  dprintf(("CRTDLL: _mbsncpy\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__mbsnextc (CRTDLL.216)
+ */
+unsigned int CDECL CRTDLL__mbsnextc( const unsigned char *s )
+{
+  dprintf(("CRTDLL: _mbsnextc\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__mbsnicmp (CRTDLL.217)
+ */
+int CDECL CRTDLL__mbsnicmp( const unsigned char *s1, const unsigned char *s2, size_t n )
+{
+  dprintf(("CRTDLL: _mbsnicmp\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__mbsninc (CRTDLL.218)
+ */
+unsigned char * CDECL CRTDLL__mbsninc( const unsigned char *s, size_t count )
+{
+  dprintf(("CRTDLL: _mbsninc\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__mbsnset (CRTDLL.219)
+ */
+unsigned char * CDECL CRTDLL__mbsnset( unsigned char *s, unsigned int ch, size_t n )
+{
+  dprintf(("CRTDLL: _mbsnset\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__mbspbrk   (CRTDLL.220)
+ */
+unsigned char * CDECL CRTDLL__mbspbrk( const unsigned char *s, const unsigned char *charset )
+{
+  dprintf(("CRTDLL: _mbspbrk\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__mbsrchr   (CRTDLL.221)
+ */
+unsigned char * CDECL CRTDLL__mbsrchr( const unsigned char *s, unsigned int ch )
+{
+  dprintf(("CRTDLL: _mbsrchr\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__mbsrev    (CRTDLL.222)
+ */
+unsigned char * CDECL CRTDLL__mbsrev( unsigned char *s )
+{
+  dprintf(("CRTDLL: _mbsrev\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__mbsset    (CRTDLL.223)
+ */
+unsigned char * CDECL CRTDLL__mbsset( unsigned char *s, unsigned int ch )
+{
+  dprintf(("CRTDLL: _mbsset\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__mbsspn   (CRTDLL.224)
+ */
+size_t CDECL CRTDLL__mbsspn( const unsigned char *s, const unsigned char *charset )
+{
+  dprintf(("CRTDLL: _mbsspn\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__mbsspnp   (CRTDLL.225)
+ */
+unsigned char * CDECL CRTDLL__mbsspnp( const unsigned char *s, const unsigned char *charset )
+{
+  dprintf(("CRTDLL: _mbsspnp\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__mbsstr    (CRTDLL.226)
+ */
+unsigned char * CDECL CRTDLL__mbsstr( const unsigned char *s1, const unsigned char *s2 )
+{
+  dprintf(("CRTDLL: _mbsstr\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__mbstok    (CRTDLL.227)
+ */
+unsigned char * CDECL CRTDLL__mbstok( unsigned char *s, const unsigned char *delim )
+{
+  dprintf(("CRTDLL: _mbstok\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__mbsupr    (CRTDLL.229)
+ */
+unsigned char * CDECL CRTDLL__mbsupr( unsigned char *s )
+{
+  dprintf(("CRTDLL: _mbsupr\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
 /*********************************************************************
  *                  _mkdir           (CRTDLL.232)
  */
@@ -362,6 +1619,60 @@ INT CDECL CRTDLL__mkdir(LPCSTR newdir)
 
 
 /*********************************************************************
+ *                  _mktemp        (CRTDLL.233)
+ */
+char * CDECL CRTDLL__mktemp( char * templt )
+{
+  dprintf(("CRTDLL: _mktemp\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _msize        (CRTDLL.234)
+ */
+size_t CDECL CRTDLL__msize( void *ptr )
+{
+  dprintf(("CRTDLL: _msize\n"));
+  return (_msize(ptr));
+}
+
+
+/*********************************************************************
+ *                  _open        (CRTDLL.237)
+ */
+INT CDECL CRTDLL__open(const char *path,int oflag,...)
+{
+  dprintf(("CRTDLL: _open\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _open_osfhandle  (CRTDLL.238)
+ */
+INT CDECL CRTDLL__open_osfhandle( long osfhandle, int flags )
+{
+  dprintf(("CRTDLL: _open_osfhandle\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _pclose     (CRTDLL.244)
+ */
+INT CDECL CRTDLL__pclose( FILE *fp )
+{
+  dprintf(("CRTDLL: _pclose\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
  *                  _pctype_dll    (CRTDLL.245)
  *	FIXME - Could not find anything about it
  */
@@ -370,6 +1681,28 @@ INT CDECL CRTDLL__pctype_dll(DWORD ret)
         dprintf(("CRTDLL: _pctype_dll\n"));
 
 	return 0;
+}
+
+
+/*********************************************************************
+ *                  _pipe     (CRTDLL.247)
+ */
+INT CDECL CRTDLL__pipe( int *phandles, unsigned psize, int textmode )
+{
+  dprintf(("CRTDLL: _pipe\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _popen    (CRTDLL.248)
+ */
+FILE * CDECL CRTDLL__popen( const char *command, const char *mode )
+{
+  dprintf(("CRTDLL: _popen\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
 }
 
 /*********************************************************************
@@ -385,6 +1718,277 @@ INT CDECL CRTDLL__read(INT fd, LPVOID buf, UINT count)
   return FALSE;
 }
 
+
+/*********************************************************************
+ *                  _putw     (CRTDLL.252)
+ */
+INT CDECL CRTDLL__putw( int binint, FILE *fp )
+{
+  dprintf(("CRTDLL: _putw\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__rotl 	 (CRTDLL.257)
+ */
+unsigned int CDECL CRTDLL__rotl( unsigned int value, unsigned int shift )
+{
+  dprintf(("CRTDLL: _rotl\n"));
+  return (_rotl(value, shift));
+}
+
+
+/*********************************************************************
+ *           CRTDLL__rotr 	 (CRTDLL.258)
+ */
+unsigned int CDECL CRTDLL__rotr( unsigned int value, unsigned int shift )
+{
+  dprintf(("CRTDLL: _rotr\n"));
+  return (_rotr(value, shift));
+}
+ 
+
+/*********************************************************************
+ *           CRTDLL__searchenv 	 (CRTDLL.260)
+ */
+void CDECL CRTDLL__searchenv( const char *name, const char *env_var, char *buf )
+{
+  dprintf(("CRTDLL: _searchenv\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+}
+
+
+/*********************************************************************
+ *           CRTDLL__setjmp 	 (CRTDLL.262)
+ */
+int CDECL CRTDLL__setjmp( jmp_buf env )
+{
+  dprintf(("CRTDLL: _setjmp -> setjmp\n"));
+  return(setjmp( env));
+}
+
+
+/*********************************************************************
+ *           CRTDLL__stat   	 (CRTDLL.278)
+ */
+int CDECL CRTDLL__stat( const char *s1, struct stat * n )
+{
+  dprintf(("CRTDLL: _stat\n"));
+  return(_stat(s1, n));
+}
+
+
+/*********************************************************************
+ *           CRTDLL__strdate   	 (CRTDLL.281)
+ */
+char * CDECL CRTDLL__strdate( char *buf )
+{
+  dprintf(("CRTDLL: _strdate\n"));
+  return(_strdate(buf));
+}
+
+
+/*********************************************************************
+ *           CRTDLL__strdec    	 (CRTDLL.282)
+ */
+char * CDECL CRTDLL__strdec( const char *, const char *p ) 
+{
+  dprintf(("CRTDLL: _strdec\n"));
+  return( (char *)(p-1) );
+}
+
+
+/*********************************************************************
+ *           CRTDLL__strdup    	 (CRTDLL.283)
+ */
+char * CDECL CRTDLL__strdup( const char *string )
+{
+  dprintf(("CRTDLL: _strdup\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__stricoll  	 (CRTDLL.286)
+ */
+int CDECL CRTDLL__stricoll( const char *s1, const char *s2 )
+{
+  dprintf(("CRTDLL: _stricoll\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__strinc  	 (CRTDLL.287)
+ */
+char * CDECL CRTDLL__strinc( const char *p )
+{
+    dprintf(("CRTDLL: _strinc\n"));
+    return( (char *)(p+1) );
+}
+
+
+/*********************************************************************
+ *           CRTDLL__strncnt	 (CRTDLL.289)
+ */
+size_t CDECL CRTDLL__strncnt( const char *p, size_t l ) 
+{
+    dprintf(("CRTDLL: _strncnt\n"));
+    size_t i;
+    i = strlen(p);
+    return( (i>l) ? l : i );
+}
+
+/*********************************************************************
+ *           CRTDLL__strnextc	 (CRTDLL.290)
+ */
+unsigned int CDECL CRTDLL__strnextc( const char *p )
+{
+    dprintf(("CRTDLL: _strnextc\n"));
+    return( (unsigned int)*p );
+}
+
+
+/*********************************************************************
+ *           CRTDLL__strninc	 (CRTDLL.292)
+ */
+char * CDECL CRTDLL__strninc( const char *p, size_t l )
+{
+    dprintf(("CRTDLL: _strninc\n"));
+    return( (char *)(p+l) );
+}
+
+
+/*********************************************************************
+ *           CRTDLL__strnset	 (CRTDLL.293)
+ */
+char * CDECL CRTDLL__strnset( char *string, int c, size_t len )
+{
+  dprintf(("CRTDLL: _strnset\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__strrev	 (CRTDLL.294)
+ */
+char * CDECL CRTDLL__strrev( char *string )
+{
+  dprintf(("CRTDLL: _strrev\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__strset	 (CRTDLL.295)
+ */
+char * CDECL CRTDLL__strset( char *string, int c )
+{
+  dprintf(("CRTDLL: _strset\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__strspnp	 (CRTDLL.296)
+ */
+char * CDECL CRTDLL__strspnp( const char *p1, const char *p2 ) 
+{
+    dprintf(("CRTDLL: _strspnp\n"));
+    return( (*(p1 += strspn(p1,p2))!='\0') ? (char*)p1 : NULL );
+}
+
+
+/*********************************************************************
+ *           CRTDLL__strtime	 (CRTDLL.297)
+ */
+char * CDECL CRTDLL__strtime( char *buf )
+{
+  dprintf(("CRTDLL: _strtime\n"));
+  return (_strtime(buf));
+}
+
+
+/*********************************************************************
+ *           CRTDLL__tempnam	 (CRTDLL.303)
+ */
+char * CDECL CRTDLL__tempnam( char *dir, char *prefix )
+{
+  dprintf(("CRTDLL: _tempnam\n"));
+  return (_tempnam(dir, prefix));
+}
+	
+
+/*********************************************************************
+ *           CRTDLL__tolower	 (CRTDLL.305)
+ */
+int CDECL CRTDLL__tolower(int n)
+{
+  dprintf(("CRTDLL: _tolower\n"));
+  return (_tolower(n));
+}
+
+
+/*********************************************************************
+ *           CRTDLL__toupper	 (CRTDLL.306)
+ */
+int CDECL CRTDLL__toupper(int n)
+{
+  dprintf(("CRTDLL: _toupper\n"));
+  return (_toupper(n));
+}
+
+
+/*********************************************************************
+ *           CRTDLL__utime	 (CRTDLL.314)
+ */
+int CDECL CRTDLL__utime( char *path, struct utimbuf * times )
+{
+  dprintf(("CRTDLL: _utime\n"));
+  return (_utime(path, times));
+}
+
+
+/*********************************************************************
+ *           CRTDLL__vsnwprintf	 (CRTDLL.316)
+ */
+int CDECL CRTDLL__vsnwprintf( wchar_t *s1, size_t n, const wchar_t *s2, va_list arg )
+{
+  dprintf(("CRTDLL: _vsnwprintf\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__wcsdup	 (CRTDLL.317)
+ */
+wchar_t * CDECL CRTDLL__wcsdup( const wchar_t *s1 )
+{
+  dprintf(("CRTDLL: _wcsdup\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__wcsicoll	 (CRTDLL.319)
+ */
+int CDECL CRTDLL__wcsicoll( const wchar_t *s1, const wchar_t *s2 )
+{
+  dprintf(("CRTDLL: _wcsicoll\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
 /*********************************************************************
  *           CRTDLL__wcsnset    (CRTDLL.322)
  */
@@ -394,6 +1998,18 @@ LPWSTR CDECL CRTDLL__wcsnset( LPWSTR str, WCHAR c, INT n )
     while ((n-- > 0) && *str) *str++ = c;
     return ret;
 }
+
+
+/*********************************************************************
+ *           CRTDLL__wcsrev	 (CRTDLL.323)
+ */
+wchar_t * CDECL CRTDLL__wcsrev( wchar_t *s1 )
+{
+  dprintf(("CRTDLL: _wcsrev\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
 
 /*********************************************************************
  *           CRTDLL__wcsset    (CRTDLL.324)
