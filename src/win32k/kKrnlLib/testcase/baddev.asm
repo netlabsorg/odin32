@@ -1,4 +1,4 @@
-; $Id: baddev.asm,v 1.1 2001-12-03 00:04:52 bird Exp $
+; $Id: baddev.asm,v 1.2 2002-01-08 23:25:59 bird Exp $
 ;
 ; DevFirst - entrypoint and segment definitions
 ;
@@ -13,31 +13,10 @@
 ;
     include devsegdf.inc
 
-;
-; Exported symbols
-;
-    public CODE16START
-    public CODE16_INITSTART
-    public DATA16START
-    public DATA16START
-    public DATA16_BSSSTART
-    public DATA16_CONSTSTART
-    public DATA16_GLOBALSTART
-    public DATA16_INITSTART
-    public CODE16START
-    public CODE32START
-    public DATA32START
-    public BSS32START
-    public CONST32_ROSTART
-    public _VFTSTART
-    public EH_DATASTART
-
-
 CODE16 segment
     ASSUME CS:CODE16, DS:DATA16, ES:NOTHING, SS:NOTHING
 
 CODE16START db 'CODE16START',0
-
     .286p
 ;;
 ; Stub which pushes parameters onto the stack and call the 16-bit C strategy routine.
@@ -70,9 +49,7 @@ error:
     mov     word ptr es:[bx+3], 8103h
     retf
 _strategyAsm endp
-
     .386p
-
 CODE16 ends
 
 CODE16_INIT segment
@@ -81,6 +58,7 @@ CODE16_INIT ends
 
 CODE32 segment
 CODE32START db 'CODE32START',0
+    db 010000h dup(90)                  ; FILLER
 CODE32 ends
 
 DATA16 segment
@@ -128,7 +106,12 @@ DATA16_INIT ends
 
 DATA32 segment
 DATA32START db 'DATA32START',0
+    db 10h dup(90)                      ; FILLER
 DATA32 ends
+
+_VFT segment
+    db 0ch dup(90)
+_VFT ends
 
 BSS32 segment
 BSS32START db 'BSS32START',0
@@ -146,29 +129,9 @@ EH_DATA segment
 EH_DATASTART db 'EH_DATASTART', 0
 EH_DATA ends
 
-
-;
-; Segment Fill
-;
-DATA16 segment
-    db 10h dup(90)
-DATA16 ends
-
 CALLTAB16 segment para public 'CALLTAB16_DATA' use16
     db 0d6h dup(90)
 CALLTAB16 ends
-
-CODE32 segment
-    db 010000h dup(90)
-CODE32 ends
-
-DATA32 segment
-    db 10h dup(90)
-DATA32 ends
-
-_VFT segment
-    db 0ch dup(90)
-_VFT ends
 
 LOGDATA_16BIT segment word public 'LOGDATA_16BIT' use16
 ulfpBuffers LABEL DWORD
@@ -180,6 +143,8 @@ LOGDATA_16BIT ends
 SYMBOLDB32 segment
     db 10h dup(90)
 SYMBOLDB32 ends
+
+
 
 END
 
