@@ -1,4 +1,4 @@
-/* $Id: objhandle.cpp,v 1.2 2000-08-18 18:14:57 sandervl Exp $ */
+/* $Id: objhandle.cpp,v 1.3 2000-09-07 22:14:51 phaller Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
@@ -13,6 +13,15 @@
  *
  */
 
+/*****************************************************************************
+ * Includes                                                                  *
+ *****************************************************************************/
+
+#include <odin.h>
+#include <odinwrap.h>
+#include <os2sel.h>
+
+
 #include <os2win.h>
 #include <vmutex.h>
 #include <objhandle.h>
@@ -23,6 +32,13 @@
 #include "dbglocal.h"
 
 //******************************************************************************
+
+/*****************************************************************************
+ * Defines                                                                   *
+ *****************************************************************************/
+
+ODINDEBUGCHANNEL(GDI32-REGION)
+
 
 static ULONG  objHandleTable[MAX_OBJECT_HANDLES] = {0};
 static ULONG  lowestFreeIndex = 0;
@@ -201,14 +217,15 @@ DWORD WIN32API GetObjectType( HGDIOBJ hObj)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API DeleteObject(HANDLE hObj)
+ODINFUNCTION1(BOOL, DeleteObject,
+              HANDLE, hObj)
 {
-  dprintf(("GDI32: DeleteObject %x", hObj));
-  if(ObjGetHandleType(hObj) == GDIOBJ_REGION) {
-	OSLibDeleteRegion(ObjGetHandleData(hObj));
-	ObjFreeHandle(hObj);
-        SetLastError(ERROR_SUCCESS);
-	return OBJ_REGION;
+  if(ObjGetHandleType(hObj) == GDIOBJ_REGION) 
+  {
+    OSLibDeleteRegion(ObjGetHandleData(hObj));
+    ObjFreeHandle(hObj);
+    SetLastError(ERROR_SUCCESS);
+    return OBJ_REGION;
   }
   DIBSection::deleteSection((DWORD)hObj);
   return O32_DeleteObject(hObj);
