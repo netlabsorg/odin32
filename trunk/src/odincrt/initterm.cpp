@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.1 1999-08-09 11:21:45 phaller Exp $ */
+/* $Id: initterm.cpp,v 1.2 1999-11-29 00:11:47 bird Exp $ */
 
 /*
  * DLL entry point
@@ -99,7 +99,18 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          rc = DosExitList(0x0000FF00|EXLST_ADD, cleanup);
          if(rc)
                 return 0UL;
-
+         #if 1 /*
+                * Experimental console hack. Sets apptype to PM anyhow.
+                * First Dll to be initiated should now allways be OdinCrt!
+                * So include odincrt first!
+                */
+            PPIB pPIB;
+            PTIB pTIB;
+            rc = DosGetInfoBlocks(&pTIB, &pPIB);
+            if (rc != NO_ERROR)
+                return 0UL;
+            pPIB->pib_ultype = 3;
+         #endif
          break;
       case 1 :
          break;
