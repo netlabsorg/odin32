@@ -1,4 +1,4 @@
-/* $Id: loadres.cpp,v 1.5 1999-08-20 11:52:18 sandervl Exp $ */
+/* $Id: loadres.cpp,v 1.6 1999-08-20 15:03:41 sandervl Exp $ */
 
 /*
  * Win32 resource API functions for OS/2
@@ -10,7 +10,6 @@
  *
  */
 #include <os2win.h>
-#include <string.h>
 #include <user32.h>
 #include <winres.h>
 #include <heapstring.h>
@@ -33,8 +32,9 @@ int WIN32API LoadStringA(HINSTANCE hinst, UINT wID, LPSTR lpBuffer, int cchBuffe
     if(resstring) {
 	resstrlen = min(lstrlenW(resstring)+1, cchBuffer);
 	lstrcpynWtoA(lpBuffer, resstring, resstrlen);
-	lpBuffer[cchBuffer-1] = 0;
-	dprintf(("LoadStringA %s", lpBuffer));
+	lpBuffer[resstrlen-1] = 0;
+	resstrlen--;
+	dprintf(("LoadStringA (%d) %s", resstrlen, lpBuffer));
     }
     delete winres;
 
@@ -59,7 +59,8 @@ int WIN32API LoadStringW(HINSTANCE hinst, UINT wID, LPWSTR lpBuffer, int cchBuff
     if(resstring) {
 	resstrlen = min(lstrlenW(resstring)+1, cchBuffer);
 	lstrcpynW(lpBuffer, resstring, resstrlen);
-	lpBuffer[cchBuffer-1] = 0;
+	lpBuffer[resstrlen-1] = 0;
+	resstrlen--;
     }
     delete winres;
 
@@ -67,79 +68,108 @@ int WIN32API LoadStringW(HINSTANCE hinst, UINT wID, LPWSTR lpBuffer, int cchBuff
     return(resstrlen);
 }
 //******************************************************************************
-//TODO: Standard windows icons!
 //******************************************************************************
 HICON WIN32API LoadIconA(HINSTANCE hinst, LPCSTR lpszIcon)
 {
  HICON rc;
 
     rc = (HICON)FindResourceA(hinst, lpszIcon, RT_ICONA);
-    if(rc == 0) {
-    	rc = (HICON)FindResourceA(hinst, lpszIcon, RT_GROUP_ICONA);
-    }
     dprintf(("LoadIconA (%X) returned %d\n", hinst, rc));
     return(rc);
 }
 //******************************************************************************
-//TODO: Standard windows icons!
 //******************************************************************************
 HICON WIN32API LoadIconW(HINSTANCE hinst, LPCWSTR lpszIcon)
 {
  HICON rc;
 
     rc = (HICON)FindResourceW(hinst, lpszIcon, RT_ICONW);
-    if(rc == 0) {
-    	rc = (HICON)FindResourceW(hinst, lpszIcon, RT_GROUP_ICONW);
-    }
     dprintf(("LoadIconW (%X) returned %d\n", hinst, rc));
     return(rc);
 }
 //******************************************************************************
-//TODO: Standard windows cursors!
 //******************************************************************************
 HCURSOR WIN32API LoadCursorA(HINSTANCE hinst, LPCSTR lpszCursor)
 {
  HCURSOR rc;
 
-    rc = (HCURSOR) FindResourceA(hinst, lpszCursor, RT_CURSORA);
+    if((int)lpszCursor >> 16 != 0) {//convert string name identifier to numeric id
+         dprintf(("LoadCursor %s\n", lpszCursor));
+	 lpszCursor = (LPCSTR)ConvertNameId(hinst, (char *)lpszCursor);
+    }
+    else dprintf(("LoadCursor %d\n", (int)lpszCursor));
+
+    rc = O32_LoadCursor(hinst, lpszCursor);
 
     dprintf(("LoadCursor from %X returned %d\n", hinst, rc));
     return(rc);
 }
 //******************************************************************************
-//TODO: Standard windows cursors!
-//******************************************************************************
-HCURSOR WIN32API LoadCursorW(HINSTANCE hinst, LPCWSTR lpszCursor)
-{
- HCURSOR rc;
-
-    rc = (HCURSOR) FindResourceW(hinst, lpszCursor, RT_CURSORW);
-
-    dprintf(("LoadCursorW from %X returned %d\n", hinst, rc));
-    return(rc);
-}
-//******************************************************************************
-//TODO: Standard windows bitmaps!
 //******************************************************************************
 HBITMAP WIN32API LoadBitmapA(HINSTANCE hinst, LPCSTR lpszBitmap)
 {
  HBITMAP rc;
 
-    rc = (HBITMAP) FindResourceA(hinst, lpszBitmap, RT_BITMAPA);
+  if((int)lpszBitmap >> 16 != 0) 
+  {  //convert string name identifier to numeric id
+    dprintf(("lpszBitmap [%s]\n",
+             lpszBitmap));
+    
+    lpszBitmap = (LPCSTR)ConvertNameId(hinst, 
+                                       (char *)lpszBitmap);
+  }
+  else 
+    dprintf(("lpszBitmap %08xh\n",
+             (int)lpszBitmap));
 
-    dprintf(("LoadBitmapA from %X returned %d\n", hinst, rc));
-    return(rc);
+  rc = O32_LoadBitmap(hinst, lpszBitmap);
+
+  dprintf(("LoadBitmapA returned %08xh\n",
+           rc));
+  
+  return(rc);
 }
 //******************************************************************************
-//TODO: Standard windows bitmaps!
 //******************************************************************************
 HBITMAP WIN32API LoadBitmapW(HINSTANCE hinst, LPCWSTR lpszBitmap)
 {
+ char   *astring = NULL;
  HBITMAP rc;
 
-    rc = (HBITMAP) FindResourceW(hinst, lpszBitmap, RT_BITMAPW);
+    if((int)lpszBitmap >> 16 != 0) {//convert string name identifier to numeric id
+	 astring = UnicodeToAsciiString((LPWSTR)lpszBitmap);
+         dprintf(("lpszBitmap %s\n", astring));
 
-    dprintf(("LoadBitmapW from %X returned %d\n", hinst, rc));
+	 lpszBitmap = (LPWSTR)ConvertNameId(hinst, (char *)astring);
+    }
+    else dprintf(("lpszBitmap %d\n", (int)lpszBitmap));
+
+    rc = O32_LoadBitmap(hinst, (char *)lpszBitmap);
+    if(astring)
+	FreeAsciiString(astring);
+
+    dprintf(("LoadBitmapW returned %d\n", rc));
+    return(rc);
+}
+//******************************************************************************
+//******************************************************************************
+HCURSOR WIN32API LoadCursorW(HINSTANCE hinst, LPCWSTR lpszCursor)
+{
+ char   *astring = NULL;
+ HCURSOR rc;
+
+    if((int)lpszCursor >> 16 != 0) {//convert string name identifier to numeric id
+	 astring = UnicodeToAsciiString((LPWSTR)lpszCursor);
+         dprintf(("lpszCursor %s\n", astring));
+	 lpszCursor = (LPWSTR)ConvertNameId(hinst, (char *)astring);
+    }
+    else dprintf(("lpszCursor %d\n", (int)lpszCursor));
+
+    rc = O32_LoadCursor(hinst, (char *)lpszCursor);
+    if(astring)
+	FreeAsciiString(astring);
+
+    dprintf(("LoadCursorW returned %d\n", rc));
     return(rc);
 }
 //******************************************************************************
