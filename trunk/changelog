@@ -1,11 +1,10 @@
-/* $Id: changelog,v 1.2335 2002-10-07 10:25:36 sandervl Exp $ */
+/* $Id: changelog,v 1.2336 2002-10-07 16:27:39 sandervl Exp $ */
+
+ 2002-10-07: Sander van Leeuwen <sandervl@innotek   >
+    - ODINCRT:  o Minor updates for critical section functions
 
  2002-10-07: Platon Fomichev <platon@innotek   >
     - IPHLPAPI: o GetAdaptersInfo bugfix
-
- 2002-10-04: knut st. osmundsen <bird@anduin   >
-    - MAKE:     o Force no memory debugging for Ring-0 target modes. (VAC)
-                o Corrected ALP debuginfo option so source level deubgging works again.
 
  2002-10-03: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Added IP logging (define WIN32_IP_LOGGING in dbglog.cpp)
