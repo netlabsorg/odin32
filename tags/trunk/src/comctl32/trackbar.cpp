@@ -1,4 +1,4 @@
-/* $Id: trackbar.cpp,v 1.2 2000-03-17 17:13:26 cbratschi Exp $ */
+/* $Id: trackbar.cpp,v 1.3 2000-03-18 16:17:33 cbratschi Exp $ */
 /*
  * Trackbar control
  *
@@ -986,11 +986,11 @@ TRACKBAR_AlignBuddies (HWND hwnd, TRACKBAR_INFO *infoPtr)
       if (dwStyle & TBS_VERT)
       { //above
         x = (infoPtr->rcChannel.right+infoPtr->rcChannel.left)/2-(rcBuddy.right-rcBuddy.left)/2+rcSelf.left;
-	y = rcSelf.top-(rcBuddy.bottom-rcBuddy.top);
+        y = rcSelf.top-(rcBuddy.bottom-rcBuddy.top);
       } else
       { //left
-	x = rcSelf.left-(rcBuddy.right-rcBuddy.left);
-	y = (infoPtr->rcChannel.bottom+infoPtr->rcChannel.top)/2-(rcBuddy.bottom-rcBuddy.top)/2+rcSelf.top;
+        x = rcSelf.left-(rcBuddy.right-rcBuddy.left);
+        y = (infoPtr->rcChannel.bottom+infoPtr->rcChannel.top)/2-(rcBuddy.bottom-rcBuddy.top)/2+rcSelf.top;
       }
 
       SetWindowPos(infoPtr->hwndBuddyLA,0,x,y,0,0,SWP_NOZORDER | SWP_NOSIZE);
@@ -1004,8 +1004,8 @@ TRACKBAR_AlignBuddies (HWND hwnd, TRACKBAR_INFO *infoPtr)
 
       if (dwStyle & TBS_VERT)
       { //below
-	x = (infoPtr->rcChannel.right+infoPtr->rcChannel.left)/2-(rcBuddy.right-rcBuddy.left)/2+rcSelf.left;
-	y = rcSelf.bottom;
+        x = (infoPtr->rcChannel.right+infoPtr->rcChannel.left)/2-(rcBuddy.right-rcBuddy.left)/2+rcSelf.left;
+        y = rcSelf.bottom;
       } else
       { //right
         x = rcSelf.right;
@@ -1716,7 +1716,7 @@ TRACKBAR_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
         else
           uFlags |= TTF_ALIGNBOTTOM | TTF_HCENTER;
 
-      infoPtr->hwndToolTip = createToolTip(hwnd,uFlags);
+      infoPtr->hwndToolTip = createToolTip(hwnd,uFlags,TRUE);
     }
 
     return 0;
@@ -2146,7 +2146,7 @@ TRACKBAR_MouseMove (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     TRACKBAR_UpdateThumbPosition(hwnd,infoPtr->nPos,FALSE); //infoPtr->nPos now set
 
-    TRACKBAR_SendNotify(hwnd,TB_THUMBTRACK | (infoPtr->nPos >> 16));
+    TRACKBAR_SendNotify(hwnd,TB_THUMBTRACK | (infoPtr->nPos << 16));
 
     if (infoPtr->flags & TB_SHOW_TOOLTIP)
     {

@@ -1,4 +1,4 @@
-/* $Id: comctl32undoc.cpp,v 1.1 2000-02-23 17:09:40 cbratschi Exp $ */
+/* $Id: comctl32undoc.cpp,v 1.2 2000-03-18 16:17:22 cbratschi Exp $ */
 /*
  * Undocumented functions from COMCTL32.DLL
  *
@@ -12,8 +12,8 @@
  */
 
 /*
- - Corel 20000212 level
- - WINE 20000130 level
+ - Corel 20000317 level
+ - (WINE 20000130 level)
 */
 
 /* CB: todo
@@ -763,7 +763,7 @@ DSA_GetItem (const HDSA hdsa, INT nIndex, LPVOID pDest)
 {
     LPVOID pSrc;
 
-    dprintf(("COMCTL32: DSA_GetItem"));
+    dprintf2(("COMCTL32: DSA_GetItem"));
 
     if (!hdsa)
         return FALSE;
@@ -796,7 +796,7 @@ DSA_GetItemPtr (const HDSA hdsa, INT nIndex)
 {
     LPVOID pSrc;
 
-    dprintf(("COMCTL32: DSA_GetItemPtr"));
+    dprintf2(("COMCTL32: DSA_GetItemPtr"));
 
     if (!hdsa)
         return NULL;
@@ -832,7 +832,7 @@ DSA_SetItem (const HDSA hdsa, INT nIndex, LPVOID pSrc)
     INT  nSize, nNewItems;
     LPVOID pDest, lpTemp;
 
-    dprintf(("COMCTL32: DSA_SetItem"));
+    dprintf2(("COMCTL32: DSA_SetItem"));
 
     if ((!hdsa) || nIndex < 0)
         return FALSE;
@@ -889,7 +889,7 @@ DSA_InsertItem (const HDSA hdsa, INT nIndex, LPVOID pSrc)
     LPVOID  lpTemp, lpDest;
     LPDWORD p;
 
-    dprintf(("COMCTL32: DSA_InsertItem"));
+    dprintf2(("COMCTL32: DSA_InsertItem"));
 
     if ((!hdsa) || nIndex < 0)
         return -1;
@@ -958,7 +958,7 @@ DSA_DeleteItem (const HDSA hdsa, INT nIndex)
     LPVOID lpDest,lpSrc;
     INT  nSize;
 
-    dprintf(("COMCTL32: DSA_DeleteItem"));
+    dprintf2(("COMCTL32: DSA_DeleteItem"));
 
     if (!hdsa)
         return -1;
@@ -1199,7 +1199,7 @@ DPA_Clone (const HDPA hdpa, const HDPA hdpaNew)
 LPVOID WINAPI
 DPA_GetPtr (const HDPA hdpa, INT i)
 {
-    dprintf(("COMCTL32: DPA_GetPtr"));
+    dprintf2(("COMCTL32: DPA_GetPtr"));
 
     if (!hdpa)
         return NULL;
@@ -1233,7 +1233,7 @@ DPA_GetPtrIndex (const HDPA hdpa, LPVOID p)
 {
     INT i;
 
-    dprintf(("COMCTL32: DPA_GetPtrIndex"));
+    dprintf2(("COMCTL32: DPA_GetPtrIndex"));
 
     if (!hdpa->ptrs)
         return -1;
@@ -1268,7 +1268,7 @@ DPA_InsertPtr (const HDPA hdpa, INT i, LPVOID p)
     INT   nNewItems, nSize, nIndex = 0;
     LPVOID  *lpTemp, *lpDest;
 
-    dprintf(("COMCTL32: DPA_InsertPtr"));
+    dprintf2(("COMCTL32: DPA_InsertPtr"));
 
     if ((!hdpa) || (i < 0))
         return -1;
@@ -1340,7 +1340,7 @@ DPA_SetPtr (const HDPA hdpa, INT i, LPVOID p)
 {
     LPVOID *lpTemp;
 
-    dprintf(("COMCTL32: DPA_SetPtr"));
+    dprintf2(("COMCTL32: DPA_SetPtr"));
 
     if ((!hdpa) || i < 0)
         return FALSE;
@@ -1394,7 +1394,7 @@ DPA_DeletePtr (const HDPA hdpa, INT i)
     LPVOID *lpDest, *lpSrc, lpTemp = NULL;
     INT  nSize;
 
-    dprintf(("COMCTL32: DPA_DeletePtr"));
+    dprintf2(("COMCTL32: DPA_DeletePtr"));
 
     if ((!hdpa) || i < 0 || i >= hdpa->nItemCount)
         return NULL;
@@ -1478,6 +1478,10 @@ DPA_DeleteAllPtrs (const HDPA hdpa)
  *
  * RETURNS
  *     NONE
+ *
+ * NOTES:
+ *          Reverted back to the orginal quick sort, because the existing sort did not sort.
+ *          Kudos to the orginal author of the quick sort.
  */
 
 static VOID
@@ -1491,44 +1495,19 @@ DPA_QuickSort (LPVOID *lpPtrs, INT l, INT r,
 
     i = l;
     j = r;
-
-    if ( i >= j )
-        return;
-    else if ( i == (j - 1) )
-    {
-        if ( (pfnCompare)( lpPtrs[i], lpPtrs[j], lParam ) > 0 )
-        {
-            t = lpPtrs[i];
-            lpPtrs[i] = lpPtrs[j];
-            lpPtrs[j] = t;
-        }
-        return;
-    }
-
     v = lpPtrs[(int)(l+r)/2];
-
-    while ( i < j)
-    {
-        while ( (pfnCompare)( lpPtrs[i], v, lParam ) <= 0 && i < j )
-            i++;
-
-        while ( (pfnCompare)( v, lpPtrs[j], lParam ) <= 0 && i < j )
-            j--;
-
-        if ( i < j )
+    do {
+        while ((pfnCompare)(lpPtrs[i], v, lParam) < 0) i++;
+        while ((pfnCompare)(lpPtrs[j], v, lParam) > 0) j--;
+        if (i <= j)
         {
-            /* Swap the values; increment i and decrement j to avoid
-               infinite conditions where i and j swap forever */
             t = lpPtrs[i];
             lpPtrs[i++] = lpPtrs[j];
             lpPtrs[j--] = t;
         }
-    }
-
-    if ( i - 1 > l )
-        DPA_QuickSort (lpPtrs, l, i - 1, pfnCompare, lParam);
-    if ( j + 1 < r )
-        DPA_QuickSort (lpPtrs, j + 1, r, pfnCompare, lParam);
+    } while (i <= j);
+    if (l < j) DPA_QuickSort (lpPtrs, l, j, pfnCompare, lParam);
+    if (i < r) DPA_QuickSort (lpPtrs, i, r, pfnCompare, lParam);
 }
 
 

@@ -1,4 +1,4 @@
-/* $Id: status.cpp,v 1.1 2000-02-23 17:09:48 cbratschi Exp $ */
+/* $Id: status.cpp,v 1.2 2000-03-18 16:17:29 cbratschi Exp $ */
 /*
  * Interface code to StatusWindow widget/control
  *
@@ -13,6 +13,7 @@
 #include "winbase.h"
 #include "commctrl.h"
 #include "comctl32.h"
+#include "ccbase.h"
 #include "status.h"
 #include <string.h>
 
@@ -43,7 +44,7 @@
 #define ICON_SPACE  2
 #define TEXT_SPACE  3
 
-#define STATUSBAR_GetInfoPtr(hwnd) ((STATUSWINDOWINFO *)GetWindowLongA (hwnd, 0))
+#define STATUSBAR_GetInfoPtr(hwnd) ((STATUSWINDOWINFO*)getInfoPtr(hwnd))
 
 
 static RECT STATUSBAR_GetSizeBox(HWND hwnd)
@@ -490,14 +491,6 @@ STATUSBAR_GetTipTextW (HWND hwnd, WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
-
-static LRESULT
-STATUSBAR_GetUnicodeFormat (HWND hwnd)
-{
-    STATUSWINDOWINFO *infoPtr = STATUSBAR_GetInfoPtr (hwnd);
-    return infoPtr->bUnicode;
-}
-
 static LRESULT
 STATUSBAR_IsSimple (HWND hwnd)
 {
@@ -792,7 +785,6 @@ STATUSBAR_SetTipTextW (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
     STATUSWINDOWINFO *infoPtr = STATUSBAR_GetInfoPtr (hwnd);
 
-//    TRACE (statusbar, "part %d: \"%s\"\n", (INT)wParam, (LPSTR)lParam);
     if (infoPtr->hwndToolTip) {
         TTTOOLINFOW ti;
         ti.cbSize = sizeof(TTTOOLINFOW);
@@ -807,34 +799,16 @@ STATUSBAR_SetTipTextW (HWND hwnd, WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
-
-static LRESULT
-STATUSBAR_SetUnicodeFormat (HWND hwnd, WPARAM wParam)
-{
-    STATUSWINDOWINFO *infoPtr = STATUSBAR_GetInfoPtr (hwnd);
-    BOOL bTemp = infoPtr->bUnicode;
-
-//    TRACE (statusbar, "(0x%x)\n", (BOOL)wParam);
-    infoPtr->bUnicode = (BOOL)wParam;
-
-    return bTemp;
-}
-
-
 static LRESULT
 STATUSBAR_Simple (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
     STATUSWINDOWINFO *infoPtr = STATUSBAR_GetInfoPtr (hwnd);
     HDC  hdc;
-    NMHDR  nmhdr;
 
     infoPtr->simple = (BOOL)wParam;
 
     /* send notification */
-    nmhdr.hwndFrom = hwnd;
-    nmhdr.idFrom = GetWindowLongA (hwnd, GWL_ID);
-    nmhdr.code = SBN_SIMPLEMODECHANGE;
-    SendMessageA (GetParent (hwnd), WM_NOTIFY, 0, (LPARAM)&nmhdr);
+    sendNotify(hwnd,SBN_SIMPLEMODECHANGE);
 
     hdc = GetDC (hwnd);
     STATUSBAR_Refresh (hwnd, hdc);
@@ -854,8 +828,7 @@ STATUSBAR_WMCreate (HWND hwnd, WPARAM wParam, LPARAM lParam)
     HDC hdc;
     STATUSWINDOWINFO *infoPtr;
 
-    infoPtr = (STATUSWINDOWINFO*)COMCTL32_Alloc (sizeof(STATUSWINDOWINFO));
-    SetWindowLongA (hwnd, 0, (DWORD)infoPtr);
+    infoPtr = (STATUSWINDOWINFO*)initControl(hwnd,sizeof(STATUSWINDOWINFO));
 
     infoPtr->numParts = 1;
     infoPtr->parts = 0;
@@ -883,20 +856,20 @@ STATUSBAR_WMCreate (HWND hwnd, WPARAM wParam, LPARAM lParam)
     infoPtr->parts[0].style = 0;
     infoPtr->parts[0].hIcon = 0;
 
-    if (IsWindowUnicode (hwnd)) {
-        infoPtr->bUnicode = TRUE;
-        if (lpCreate->lpszName &&
-            (len = lstrlenW ((LPCWSTR)lpCreate->lpszName))) {
-            infoPtr->parts[0].text = (WCHAR*)COMCTL32_Alloc ((len + 1)*sizeof(WCHAR));
-            lstrcpyW (infoPtr->parts[0].text, (LPCWSTR)lpCreate->lpszName);
-        }
-    }
-    else {
-        if (lpCreate->lpszName &&
-            (len = lstrlenA ((LPCSTR)lpCreate->lpszName))) {
-            infoPtr->parts[0].text = (WCHAR*)COMCTL32_Alloc ((len + 1)*sizeof(WCHAR));
-            lstrcpyAtoW (infoPtr->parts[0].text, (char*)lpCreate->lpszName);
-        }
+    if (infoPtr->header.fUnicode)
+    {
+      if (lpCreate->lpszName && (len = lstrlenW ((LPCWSTR)lpCreate->lpszName)))
+      {
+        infoPtr->parts[0].text = (WCHAR*)COMCTL32_Alloc ((len + 1)*sizeof(WCHAR));
+        lstrcpyW (infoPtr->parts[0].text, (LPCWSTR)lpCreate->lpszName);
+      }
+    } else
+    {
+      if (lpCreate->lpszName && (len = lstrlenA ((LPCSTR)lpCreate->lpszName)))
+      {
+        infoPtr->parts[0].text = (WCHAR*)COMCTL32_Alloc ((len + 1)*sizeof(WCHAR));
+        lstrcpyAtoW (infoPtr->parts[0].text, (char*)lpCreate->lpszName);
+      }
     }
 
     hdc = GetDC(hwnd);
@@ -911,26 +884,8 @@ STATUSBAR_WMCreate (HWND hwnd, WPARAM wParam, LPARAM lParam)
         ReleaseDC(hwnd, hdc);
     }
 
-    if (GetWindowLongA (hwnd, GWL_STYLE) & SBT_TOOLTIPS) {
-        infoPtr->hwndToolTip =
-            CreateWindowExA (0, TOOLTIPS_CLASSA, NULL, 0,
-                               CW_USEDEFAULT, CW_USEDEFAULT,
-                               CW_USEDEFAULT, CW_USEDEFAULT,
-                             hwnd, 0,
-                             GetWindowLongA (hwnd, GWL_HINSTANCE), NULL);
-
-        if (infoPtr->hwndToolTip) {
-            NMTOOLTIPSCREATED nmttc;
-
-            nmttc.hdr.hwndFrom = hwnd;
-            nmttc.hdr.idFrom = GetWindowLongA (hwnd, GWL_ID);
-            nmttc.hdr.code = NM_TOOLTIPSCREATED;
-            nmttc.hwndToolTips = infoPtr->hwndToolTip;
-
-            SendMessageA (GetParent (hwnd), WM_NOTIFY,
-                            (WPARAM)nmttc.hdr.idFrom, (LPARAM)&nmttc);
-        }
-    }
+    if (GetWindowLongA(hwnd,GWL_STYLE) & SBT_TOOLTIPS)
+      infoPtr->hwndToolTip = createToolTip(hwnd,0,FALSE);
 
     GetClientRect (GetParent (hwnd), &rect);
     width = rect.right - rect.left;
@@ -947,26 +902,25 @@ infoPtr->height += 4;
 static LRESULT
 STATUSBAR_WMDestroy (HWND hwnd)
 {
-    STATUSWINDOWINFO *self = STATUSBAR_GetInfoPtr (hwnd);
+    STATUSWINDOWINFO *infoPtr = STATUSBAR_GetInfoPtr (hwnd);
     int i;
 
-    for (i = 0; i < self->numParts; i++) {
-        if (self->parts[i].text && !(self->parts[i].style & SBT_OWNERDRAW))
-            COMCTL32_Free (self->parts[i].text);
+    for (i = 0; i < infoPtr->numParts; i++) {
+        if (infoPtr->parts[i].text && !(infoPtr->parts[i].style & SBT_OWNERDRAW))
+            COMCTL32_Free (infoPtr->parts[i].text);
     }
-    if (self->part0.text && !(self->part0.style & SBT_OWNERDRAW))
-        COMCTL32_Free (self->part0.text);
-    COMCTL32_Free (self->parts);
+    if (infoPtr->part0.text && !(infoPtr->part0.style & SBT_OWNERDRAW))
+        COMCTL32_Free (infoPtr->part0.text);
+    COMCTL32_Free (infoPtr->parts);
 
     /* delete default font */
-    if (self->hDefaultFont)
-        DeleteObject (self->hDefaultFont);
+    if (infoPtr->hDefaultFont)
+        DeleteObject (infoPtr->hDefaultFont);
 
     /* delete tool tip control */
-    if (self->hwndToolTip)
-        DestroyWindow (self->hwndToolTip);
+    destroyToolTip(infoPtr->hwndToolTip);
 
-    COMCTL32_Free (self);
+    doneControl(hwnd);
 
     return 0;
 }
@@ -989,12 +943,13 @@ STATUSBAR_WMGetText (HWND hwnd, WPARAM wParam, LPARAM lParam)
     if (!(infoPtr->parts[0].text))
         return 0;
     len = lstrlenW (infoPtr->parts[0].text);
-    if (wParam > len) {
-        if (infoPtr->bUnicode)
-            lstrcpyW ((LPWSTR)lParam, infoPtr->parts[0].text);
-        else
-            lstrcpyWtoA ((LPSTR)lParam, infoPtr->parts[0].text);
-        return len;
+    if (wParam > len)
+    {
+      if (infoPtr->header.fUnicode)
+        lstrcpyW ((LPWSTR)lParam, infoPtr->parts[0].text);
+      else
+        lstrcpyWtoA ((LPSTR)lParam, infoPtr->parts[0].text);
+      return len;
     }
 
     return -1;
@@ -1108,7 +1063,7 @@ STATUSBAR_WMSetText (HWND hwnd, WPARAM wParam, LPARAM lParam)
     if (part->text)
         COMCTL32_Free (part->text);
     part->text = 0;
-    if (infoPtr->bUnicode) {
+    if (infoPtr->header.fUnicode) {
         if (lParam && (len = lstrlenW((LPCWSTR)lParam))) {
             part->text = (WCHAR*)COMCTL32_Alloc ((len+1)*sizeof(WCHAR));
             lstrcpyW (part->text, (LPCWSTR)lParam);
@@ -1159,21 +1114,6 @@ STATUSBAR_WMSize (HWND hwnd, WPARAM wParam, LPARAM lParam)
     return 0;
 }
 
-
-static LRESULT
-STATUSBAR_SendNotify (HWND hwnd, UINT code)
-{
-    NMHDR  nmhdr;
-
-    nmhdr.hwndFrom = hwnd;
-    nmhdr.idFrom = GetWindowLongA (hwnd, GWL_ID);
-    nmhdr.code = code;
-    SendMessageA (GetParent (hwnd), WM_NOTIFY, 0, (LPARAM)&nmhdr);
-    return 0;
-}
-
-
-
 static LRESULT WINAPI
 StatusWindowProc (HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
@@ -1206,9 +1146,6 @@ StatusWindowProc (HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         case SB_GETTIPTEXTW:
             return STATUSBAR_GetTipTextW (hwnd, wParam, lParam);
 
-        case SB_GETUNICODEFORMAT:
-            return STATUSBAR_GetUnicodeFormat (hwnd);
-
         case SB_ISSIMPLE:
             return STATUSBAR_IsSimple (hwnd);
 
@@ -1236,9 +1173,6 @@ StatusWindowProc (HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         case SB_SETTIPTEXTW:
             return STATUSBAR_SetTipTextW (hwnd, wParam, lParam);
 
-        case SB_SETUNICODEFORMAT:
-            return STATUSBAR_SetUnicodeFormat (hwnd, wParam);
-
         case SB_SIMPLE:
             return STATUSBAR_Simple (hwnd, wParam, lParam);
 
@@ -1259,10 +1193,10 @@ StatusWindowProc (HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             return STATUSBAR_GetTextLength (hwnd, 0);
 
         case WM_LBUTTONDBLCLK:
-            return STATUSBAR_SendNotify (hwnd, NM_DBLCLK);
+            return sendNotify(hwnd,NM_DBLCLK);
 
         case WM_LBUTTONUP:
-            return STATUSBAR_SendNotify (hwnd, NM_CLICK);
+            return sendNotify(hwnd,NM_CLICK);
 
         case WM_MOUSEMOVE:
             return STATUSBAR_WMMouseMove (hwnd, wParam, lParam);
@@ -1280,10 +1214,10 @@ StatusWindowProc (HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             return STATUSBAR_WMPaint (hwnd, wParam);
 
         case WM_RBUTTONDBLCLK:
-            return STATUSBAR_SendNotify (hwnd, NM_RDBLCLK);
+            return sendNotify(hwnd,NM_RDBLCLK);
 
         case WM_RBUTTONUP:
-            return STATUSBAR_SendNotify (hwnd, NM_RCLICK);
+            return sendNotify(hwnd,NM_RCLICK);
 
         case WM_SETFONT:
             return STATUSBAR_WMSetFont (hwnd, wParam, lParam);
@@ -1298,7 +1232,7 @@ StatusWindowProc (HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 //            if (msg >= WM_USER)
 //              ERR (statusbar, "unknown msg %04x wp=%04x lp=%08lx\n",
 //                   msg, wParam, lParam);
-            return DefWindowProcA (hwnd, msg, wParam, lParam);
+            return defComCtl32ProcA (hwnd, msg, wParam, lParam);
     }
     return 0;
 }
@@ -1314,9 +1248,6 @@ VOID
 STATUS_Register (VOID)
 {
     WNDCLASSA wndClass;
-
-//SvL: Don't check this now
-//    if (GlobalFindAtomA (STATUSCLASSNAMEA)) return;
 
     ZeroMemory (&wndClass, sizeof(WNDCLASSA));
     wndClass.style         = CS_GLOBALCLASS | CS_DBLCLKS | CS_HREDRAW;
@@ -1340,7 +1271,6 @@ STATUS_Register (VOID)
 VOID
 STATUS_Unregister (VOID)
 {
-    if (GlobalFindAtomA (STATUSCLASSNAMEA))
-        UnregisterClassA (STATUSCLASSNAMEA, (HINSTANCE)NULL);
+    UnregisterClassA (STATUSCLASSNAMEA, (HINSTANCE)NULL);
 }
 

@@ -1,4 +1,4 @@
-/* $Id: updown.cpp,v 1.1 2000-02-23 17:09:51 cbratschi Exp $ */
+/* $Id: updown.cpp,v 1.2 2000-03-18 16:17:35 cbratschi Exp $ */
 /*
  * Updown control
  *
@@ -36,6 +36,7 @@
 #include "winuser.h"
 #include "commctrl.h"
 #include "winnls.h"
+#include "ccbase.h"
 #include "updown.h"
 
 /* Control configuration constants */
@@ -69,7 +70,7 @@ static int accelIndex = -1;
 //      "(%04x): wp=%04x lp=%08lx\n", msg, wParam, lParam);
 #define UNKNOWN_PARAM(msg, wParam, lParam)
 
-#define UPDOWN_GetInfoPtr(hwnd) ((UPDOWN_INFO *)GetWindowLongA(hwnd,0))
+#define UPDOWN_GetInfoPtr(hwnd) ((UPDOWN_INFO*)getInfoPtr(hwnd))
 
 static LRESULT CALLBACK
 UPDOWN_Buddy_SubclassProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
@@ -713,8 +714,7 @@ static LRESULT UPDOWN_Create(HWND hwnd,WPARAM wParam,LPARAM lParam)
   UPDOWN_INFO *infoPtr;
   DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
 
-  infoPtr = (UPDOWN_INFO*)COMCTL32_Alloc(sizeof(UPDOWN_INFO));
-  SetWindowLongA (hwnd, 0, (DWORD)infoPtr);
+  infoPtr = (UPDOWN_INFO*)initControl(hwnd,sizeof(UPDOWN_INFO));
 
   /* initialize the info struct */
   infoPtr->AccelCount = 0;
@@ -743,9 +743,7 @@ static LRESULT UPDOWN_Destroy(HWND hwnd,WPARAM wParam,LPARAM lParam)
   if ( IsWindow(infoPtr->Buddy) ) /* Cleanup */
         RemovePropA(infoPtr->Buddy, BUDDY_UPDOWN_HWND);
 
-  COMCTL32_Free (infoPtr);
-
-//      TRACE(updown, "UpDown Ctrl destruction, hwnd=%04x\n", hwnd);
+  doneControl(hwnd);
 
   return 0;
 }
@@ -1093,7 +1091,7 @@ static LRESULT WINAPI UpDownWindowProc(HWND hwnd, UINT message, WPARAM wParam,
 //      if (message >= WM_USER)
 //      ERR (updown, "unknown msg %04x wp=%04x lp=%08lx\n",
 //           message, wParam, lParam);
-      return DefWindowProcA(hwnd,message,wParam,lParam);
+      return defComCtl32ProcA(hwnd,message,wParam,lParam);
     }
 
     return 0;
@@ -1158,9 +1156,6 @@ UPDOWN_Register(void)
 {
     WNDCLASSA wndClass;
 
-//SvL: Don't check this now
-//    if( GlobalFindAtomA( UPDOWN_CLASSA ) ) return;
-
     ZeroMemory( &wndClass, sizeof( WNDCLASSA ) );
     wndClass.style         = CS_GLOBALCLASS | CS_VREDRAW;
     wndClass.lpfnWndProc   = (WNDPROC)UpDownWindowProc;
@@ -1183,7 +1178,6 @@ UPDOWN_Register(void)
 VOID
 UPDOWN_Unregister (VOID)
 {
-    if (GlobalFindAtomA (UPDOWN_CLASSA))
-        UnregisterClassA (UPDOWN_CLASSA, (HINSTANCE)NULL);
+    UnregisterClassA (UPDOWN_CLASSA, (HINSTANCE)NULL);
 }
 

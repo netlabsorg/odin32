@@ -1,4 +1,4 @@
-/*$Id: listview.cpp,v 1.2 2000-02-25 17:00:16 cbratschi Exp $*/
+/*$Id: listview.cpp,v 1.3 2000-03-18 16:17:24 cbratschi Exp $*/
 /*
  * Listview control
  *
@@ -38,17 +38,19 @@
  */
 
 /*
- - Corel 20000212 level
- - WINE 20000130 level
+ - Corel 20000317 level
+ - (WINE 20000130 level)
 */
 
 #include <string.h>
 #include <wcstr.h>
+#include <stdio.h>
 #include "winbase.h"
 #include "commctrl.h"
 #include "ccbase.h"
 #include "listview.h"
 #include "comctl32.h"
+#include "ctype.h"
 
 /*
  * constants
@@ -95,6 +97,10 @@ HWND CreateEditLabel(LPCSTR text, DWORD style, INT x, INT y,
         EditlblCallback EditLblCb, DWORD param);
 
 #define LISTVIEW_GetInfoPtr(hwnd) ((LISTVIEW_INFO*)getInfoPtr(hwnd))
+
+INT WINAPI COMCTL32_StrCmpNIA(LPCSTR,LPCSTR,INT);
+
+#define strncasecmp COMCTL32_StrCmpNIA
 
 /*
  * forward declarations
@@ -2031,6 +2037,10 @@ static VOID LISTVIEW_DrawLargeItem(HWND hwnd, HDC hdc, INT nItem, RECT rcItem)
     }
   }
 
+  /* Don't bother painting item being edited */
+  if (infoPtr->hwndEdit && lvItem.state & LVIS_FOCUSED)
+      return;
+
   rcItem.top += infoPtr->iconSize.cy + ICON_BOTTOM_PADDING;
   nLabelWidth = ListView_GetStringWidthW(hwnd, lvItem.pszText);
   nDrawPosX = infoPtr->iconSpacing.cx - nLabelWidth;
@@ -2068,7 +2078,7 @@ static VOID LISTVIEW_DrawLargeItem(HWND hwnd, HDC hdc, INT nItem, RECT rcItem)
  * RETURN:
  * None
  */
-static VOID LISTVIEW_RefreshReport(HWND hwnd, HDC hdc)
+static VOID LISTVIEW_DrawReport(HWND hwnd, HDC hdc)
 {
   LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO *)LISTVIEW_GetInfoPtr(hwnd);
   SCROLLINFO scrollInfo;
@@ -2241,7 +2251,7 @@ static INT LISTVIEW_GetColumnCount(HWND hwnd)
  * RETURN:
  * None
  */
-static VOID LISTVIEW_RefreshList(HWND hwnd, HDC hdc)
+static VOID LISTVIEW_DrawList(HWND hwnd, HDC hdc)
 {
   LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO *)LISTVIEW_GetInfoPtr(hwnd);
   RECT rcItem;
@@ -2249,8 +2259,8 @@ static VOID LISTVIEW_RefreshList(HWND hwnd, HDC hdc)
   INT nItem;
   INT nColumnCount;
   INT nCountPerColumn;
-  INT nItemWidth = LISTVIEW_GetItemWidth(hwnd);
-  INT nItemHeight = LISTVIEW_GetItemHeight(hwnd);
+  INT nItemWidth = infoPtr->nItemWidth;
+  INT nItemHeight = infoPtr->nItemHeight;
 
   /* get number of fully visible columns */
   nColumnCount = LISTVIEW_GetColumnCount(hwnd);
@@ -2284,7 +2294,7 @@ static VOID LISTVIEW_RefreshList(HWND hwnd, HDC hdc)
  * RETURN:
  * None
  */
-static VOID LISTVIEW_RefreshIcon(HWND hwnd, HDC hdc, BOOL bSmall)
+static VOID LISTVIEW_DrawIcon(HWND hwnd, HDC hdc, BOOL bSmall)
 {
   LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO *)LISTVIEW_GetInfoPtr(hwnd);
   POINT ptPosition;
@@ -2337,7 +2347,7 @@ static VOID LISTVIEW_RefreshIcon(HWND hwnd, HDC hdc, BOOL bSmall)
  * RETURN:
  * NoneX
  */
-static VOID LISTVIEW_Refresh(HWND hwnd, HDC hdc)
+static VOID LISTVIEW_Draw(HWND hwnd, HDC hdc)
 {
   LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO *)LISTVIEW_GetInfoPtr(hwnd);
   UINT uView = GetWindowLongA(hwnd, GWL_STYLE) & LVS_TYPEMASK;
@@ -2356,19 +2366,19 @@ static VOID LISTVIEW_Refresh(HWND hwnd, HDC hdc)
 
   if (uView == LVS_LIST)
   {
-    LISTVIEW_RefreshList(hwnd, hdc);
+    LISTVIEW_DrawList(hwnd, hdc);
   }
   else if (uView == LVS_REPORT)
   {
-    LISTVIEW_RefreshReport(hwnd, hdc);
+    LISTVIEW_DrawReport(hwnd, hdc);
   }
   else if (uView == LVS_SMALLICON)
   {
-    LISTVIEW_RefreshIcon(hwnd, hdc, TRUE);
+    LISTVIEW_DrawIcon(hwnd, hdc, TRUE);
   }
   else if (uView == LVS_ICON)
   {
-    LISTVIEW_RefreshIcon(hwnd, hdc, FALSE);
+    LISTVIEW_DrawIcon(hwnd, hdc, FALSE);
   }
 
   /* unselect objects */
@@ -5171,8 +5181,6 @@ static LRESULT LISTVIEW_InsertItem(HWND hwnd, LPLVITEMW lpLVItem,BOOL unicode)
   INT nItemWidth = 0;
   LISTVIEW_ITEM *lpItem = NULL;
 
-//  TRACE("(hwnd=%x,lpLVItem=%p)\n", hwnd, lpLVItem);
-
   if (lpLVItem != NULL)
   {
     /* make sure it's not a subitem; cannot insert a subitem */
@@ -5213,7 +5221,12 @@ static LRESULT LISTVIEW_InsertItem(HWND hwnd, LPLVITEMW lpLVItem,BOOL unicode)
                 /* manage item focus */
                 if (lpLVItem->mask & LVIF_STATE)
                 {
-                  if (lpLVItem->stateMask & LVIS_FOCUSED)
+                  lpItem->state &= ~(LVIS_FOCUSED|LVIS_SELECTED);
+                  if (lpLVItem->stateMask & LVIS_SELECTED)
+                  {
+                    LISTVIEW_SetSelection(hwnd, nItem);
+                  }
+                  else if (lpLVItem->stateMask & LVIS_FOCUSED)
                   {
                     LISTVIEW_SetItemFocus(hwnd, nItem);
                   }
@@ -5939,6 +5952,9 @@ static INT WINAPI LISTVIEW_CallBackCompare(
   HWND hwnd = (HWND)lParam;
   LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO *)LISTVIEW_GetInfoPtr(hwnd);
 
+  if (first == second)
+    return 0;
+
   rv = (infoPtr->pfnCompare)( ((LISTVIEW_ITEM*) first)->lParam,
           ((LISTVIEW_ITEM*) second)->lParam, infoPtr->lParamSort );
 
@@ -6522,6 +6538,246 @@ static LRESULT LISTVIEW_KeyDown(HWND hwnd, INT nVirtualKey, LONG lKeyData)
   return 0;
 }
 
+/************************ Defines that LISTVIEW_ProcessLetterKeys uses *******************************/
+#define KEY_DELAY       900
+#define LISTVIEW_InitLvItemStruct(item,idx,TEXT)  \
+                    ZeroMemory(&(item), sizeof(LVITEMA)); \
+                    (item).mask = LVIF_TEXT; \
+                    (item).iItem = (idx); \
+                    (item).iSubItem = 0; \
+                    (item).pszText = (CHAR*)&(TEXT); \
+                    (item).cchTextMax = MAX_PATH
+
+/************************************************************************************************************************
+* DESCRIPTION:
+*       Processes keyboard messages generated by pressing the letter keys on the keyboard.
+*       Assumes the list is sorted alphabetically, without regard to case.
+*
+* PARAMETERS:
+*       [ I ]   HWND: handle to the window
+*       [ I ]   WPARAM: the character code, the actual character
+*       [ I ]   LPARAM: key data
+*
+*
+* RETURN:
+*       Zero.
+*
+* CHANGE LOG:
+*       Feb 17, 2000 -------------> Creation of function.
+*       Feb 22, 2000 -------------> Added macros.
+* TODO:
+*
+*
+************************************************************************************************************************/
+static INT LISTVIEW_ProcessLetterKeys( HWND hwnd, WPARAM charCode, LPARAM keyData )
+{
+    LISTVIEW_INFO *infoPtr = NULL;
+    INT nItem = -1;
+    BOOL bRedraw;
+    INT nSize = 0;
+    INT idx = 0;
+    BOOL bFoundMatchingFiles = FALSE;
+    LVITEMA item;
+    CHAR TEXT[ MAX_PATH ];
+    CHAR szCharCode[ 2 ];
+    DWORD timeSinceLastKeyPress = 0;
+
+    sprintf( szCharCode, "%c", charCode );
+
+    /* simple parameter checking  */
+    if ( !hwnd || !charCode || !keyData )
+        return 0;
+
+    infoPtr = (LISTVIEW_INFO *)GetWindowLongA(hwnd, 0);
+
+    if ( !infoPtr )
+        return 0;
+
+    /* only allow the valid WM_CHARs through */
+    if ( isalnum( charCode ) || charCode == '.' || charCode == '`' || charCode == '!'
+          || charCode == '@' || charCode == '#' || charCode == '$' || charCode == '%'
+          || charCode == '^' || charCode == '&' || charCode == '*' || charCode == '('
+          || charCode == ')' || charCode == '-' || charCode == '_' || charCode == '+'
+          || charCode == '=' || charCode == '\\'|| charCode == ']' || charCode == '}'
+          || charCode == '[' || charCode == '{' || charCode == '/' || charCode == '?'
+          || charCode == '>' || charCode == '<' || charCode == ',' || charCode == '~')
+    {
+        timeSinceLastKeyPress = GetTickCount();
+
+        nSize = GETITEMCOUNT( infoPtr );
+        /* if there are 0 items, there is no where to go */
+        if ( nSize == 0 )
+            return 0;
+        /*
+         * If the last charCode equals the current charCode then look
+         * to the next element in list to see if it matches the previous
+         * charCode.
+         */
+        if ( infoPtr->charCode == charCode )
+        {
+            if ( timeSinceLastKeyPress - infoPtr->timeSinceLastKeyPress < KEY_DELAY )
+            {    /* append new character to search string */
+                strcat( infoPtr->szSearchParam, szCharCode );
+                infoPtr->nSearchParamLength++;
+
+                /* loop from start of list view */
+                for( idx = infoPtr->nFocusedItem; idx < nSize; idx++ )
+                {   /* get item */
+                    LISTVIEW_InitLvItemStruct( item, idx, TEXT );
+                    ListView_GetItemA( hwnd, &item );
+
+                    /* compare items */
+                    if ( strncasecmp( item.pszText, infoPtr->szSearchParam,
+                                      infoPtr->nSearchParamLength ) == 0 )
+                    {
+                        nItem = idx;
+                        break;
+                    }
+                }
+            }
+            else if ( infoPtr->timeSinceLastKeyPress > timeSinceLastKeyPress )
+            { /* The DWORD went over it's boundery?? Ergo assuming too slow??. */
+                for ( idx = 0; idx < nSize; idx++ )
+                {
+                    LISTVIEW_InitLvItemStruct( item, idx, TEXT );
+                    ListView_GetItemA( hwnd, &item );
+
+                    if ( strncasecmp( &( item.pszText[ 0 ] ), szCharCode, 1 ) == 0 )
+                    {
+                        nItem = idx;
+                        break;
+                    }
+                }
+                strcpy( infoPtr->szSearchParam, szCharCode );
+                infoPtr->nSearchParamLength = 1;
+            }
+            else
+            {   /* Save szCharCode for use in later searches */
+                strcpy( infoPtr->szSearchParam, szCharCode );
+                infoPtr->nSearchParamLength = 1;
+
+                LISTVIEW_InitLvItemStruct( item, infoPtr->nFocusedItem + 1, TEXT );
+                ListView_GetItemA( hwnd, &item );
+
+                if ( strncasecmp( &( item.pszText[ 0 ] ), szCharCode, 1 ) == 0 )
+                    nItem = infoPtr->nFocusedItem + 1;
+                else
+                {   /*
+                     * Ok so there are no more folders that match
+                     * now we look for files.
+                     */
+                    for ( idx = infoPtr->nFocusedItem + 1; idx < nSize; idx ++ )
+                    {
+                        LISTVIEW_InitLvItemStruct( item, idx, TEXT );
+                        ListView_GetItemA( hwnd, &item );
+
+                        if ( strncasecmp( &( item.pszText[ 0 ] ), szCharCode, 1 ) == 0 )
+                        {
+                            nItem = idx;
+                            bFoundMatchingFiles = TRUE;
+                            break;
+                        }
+                    }
+                    if ( !bFoundMatchingFiles )
+                    {  /* go back to first instance */
+                        for ( idx = 0; idx < nSize; idx ++ )
+                        {
+                            LISTVIEW_InitLvItemStruct( item,idx, TEXT );
+                            ListView_GetItemA( hwnd, &item );
+
+                            if ( strncasecmp( &( item.pszText[ 0 ] ), szCharCode, 1 ) == 0 )
+                            {
+                                nItem = idx;
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        } /*END: if ( infoPtr->charCode == charCode )*/
+
+        else /* different keypressed */
+        {
+            /* could be that they are spelling the file/directory for us */
+            if ( timeSinceLastKeyPress - infoPtr->timeSinceLastKeyPress > KEY_DELAY )
+            {   /*
+                 * Too slow, move to the first instance of the
+                 * charCode.
+                 */
+                for ( idx = 0; idx < nSize; idx++ )
+                {
+                    LISTVIEW_InitLvItemStruct( item,idx, TEXT );
+                    ListView_GetItemA( hwnd, &item );
+
+                    if ( strncasecmp( &( item.pszText[ 0 ] ), szCharCode, 1 ) == 0 )
+                    {
+                        nItem = idx;
+                        break;
+                    }
+                }
+                strcpy( infoPtr->szSearchParam, szCharCode );
+                infoPtr->nSearchParamLength = 1;
+            }
+            else if ( infoPtr->timeSinceLastKeyPress > timeSinceLastKeyPress )
+            {  /* The DWORD went over it's boundery?? Ergo assuming too slow??. */
+                for ( idx = 0; idx < nSize; idx++ )
+                {
+                    LISTVIEW_InitLvItemStruct( item,idx, TEXT );
+                    ListView_GetItemA( hwnd, &item );
+
+                    if ( strncasecmp( &( item.pszText[ 0 ] ), szCharCode, 1 ) == 0 )
+                    {
+                        nItem = idx;
+                        break;
+                    }
+                }
+                strcpy( infoPtr->szSearchParam, szCharCode );
+                infoPtr->nSearchParamLength = 1;
+            }
+            else /* Search for the string the user is typing */
+            {
+                /* append new character to search string */
+                strcat( infoPtr->szSearchParam, szCharCode );
+                infoPtr->nSearchParamLength++;
+
+                /* loop from start of list view */
+                for( idx = 0; idx < nSize; idx++ )
+                {   /* get item */
+                    LISTVIEW_InitLvItemStruct( item, idx, TEXT );
+                    ListView_GetItemA( hwnd, &item );
+
+                    /* compare items */
+                    if ( strncasecmp( item.pszText, infoPtr->szSearchParam,
+                                      infoPtr->nSearchParamLength ) == 0 )
+                    {
+                        nItem = idx;
+                        break;
+                    }
+                }
+            }
+        }/*END: else */
+    }
+    else
+        return 0;
+
+    bRedraw = LISTVIEW_KeySelection(hwnd, nItem );
+    if (bRedraw != FALSE)
+    {
+        /* refresh client area */
+        InvalidateRect(hwnd, NULL, TRUE);
+        UpdateWindow(hwnd);
+    }
+
+    /* Store the WM_CHAR for next time */
+    infoPtr->charCode = charCode;
+
+    /* Store time */
+    infoPtr->timeSinceLastKeyPress = timeSinceLastKeyPress;
+
+    return 0;
+
+}/*END:LISTVIEW_ProcessLetterKeys( HWND hwndParent, INT nVirtualKey, LONG lKeyData ) */
+
 /***
  * DESCRIPTION:
  * Kills the focus.
@@ -6865,12 +7121,12 @@ static LRESULT LISTVIEW_Paint(HWND hwnd, HDC hdc)
   if (hdc == 0)
   {
     hdc = BeginPaint(hwnd, &ps);
-    LISTVIEW_Refresh(hwnd, hdc);
+    LISTVIEW_Draw(hwnd, hdc);
     EndPaint(hwnd, &ps);
   }
   else
   {
-    LISTVIEW_Refresh(hwnd, hdc);
+    LISTVIEW_Draw(hwnd, hdc);
   }
 
   return 0;
@@ -7306,6 +7562,17 @@ static INT LISTVIEW_StyleChanged(HWND hwnd, WPARAM wStyleType,
     LISTVIEW_UnsupportedStyles(lpss->styleNew);
   }
 
+  /* If they change the view and we have an active edit control
+     we will need to kill the control since the redraw will
+     misplace the edit control.
+   */
+  if (infoPtr->hwndEdit &&
+        ((uNewView & (LVS_ICON|LVS_LIST|LVS_SMALLICON)) !=
+        ((LVS_ICON|LVS_LIST|LVS_SMALLICON) & uOldView)))
+  {
+     SendMessageA(infoPtr->hwndEdit, WM_KILLFOCUS, 0, 0);
+  }
+
   return 0;
 }
 
@@ -7567,7 +7834,9 @@ static LRESULT WINAPI LISTVIEW_WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam,
   case LVM_UPDATE:
     return LISTVIEW_Update(hwnd, (INT)wParam);
 
-/*      case WM_CHAR: */
+  case WM_CHAR:
+    return LISTVIEW_ProcessLetterKeys( hwnd, wParam, lParam );
+
   case WM_COMMAND:
     return LISTVIEW_Command(hwnd, wParam, lParam);
 

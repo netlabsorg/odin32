@@ -1,4 +1,4 @@
-/* $Id: treeview.cpp,v 1.2 2000-02-25 17:00:18 cbratschi Exp $ */
+/* $Id: treeview.cpp,v 1.3 2000-03-18 16:17:34 cbratschi Exp $ */
 /* Treeview control
  *
  * Copyright 1998 Eric Kohl <ekohl@abo.rhein-zeitung.de>
@@ -68,6 +68,7 @@ static BOOL    TREEVIEW_SendTreeviewDnDNotify (HWND hwnd, UINT code, HTREEITEM d
 static BOOL    TREEVIEW_SendDispInfoNotify (HWND hwnd, TREEVIEW_ITEM *wineItem, UINT code, UINT what);
 static BOOL    TREEVIEW_SendCustomDrawNotify (HWND hwnd, DWORD dwDrawStage, HDC hdc, RECT rc);
 static BOOL    TREEVIEW_SendCustomDrawItemNotify (HWND hwnd, HDC hdc, TREEVIEW_ITEM *tvItem, UINT uItemDrawState);
+static LRESULT TREEVIEW_RButtonUp (HWND hwnd, LPPOINT pPt);
 static LRESULT TREEVIEW_SelectItem (HWND hwnd, WPARAM wParam, LPARAM lParam);
 static LRESULT TREEVIEW_DoSelectItem(HWND hwnd,INT action,HTREEITEM newSelect,INT cause);
 static void    TREEVIEW_Refresh(HWND hwnd);
@@ -1985,7 +1986,7 @@ static INT WINAPI TREEVIEW_SortOnName(LPVOID first,LPVOID second,LPARAM tvInfoPt
 
   txt2 = item->pszText;
 
-  return lstrcmpW(txt1,txt2);
+  return lstrcmpiW(txt1,txt2); //CB: or lstrcmpW?
 }
 
 /***************************************************************************
@@ -2428,6 +2429,7 @@ TVI_LAST_CASE:
   }
 
   wineItem->calculated = FALSE;
+  //TREEVIEW_Sort(hwnd,0,NULL,NULL); //CB: the Corel people do this, I think it's wrong
   TREEVIEW_QueueRefresh(hwnd);
 
   return (LRESULT) iItem;
@@ -2733,7 +2735,7 @@ TREEVIEW_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
   infoPtr->tipItem = 0;
   infoPtr->hwndToolTip = 0;
   if (!(dwStyle & TVS_NOTOOLTIPS))
-    infoPtr->hwndToolTip = createToolTip(hwnd,TTF_TRACK | TTF_ABSOLUTE);
+    infoPtr->hwndToolTip = createToolTip(hwnd,TTF_TRACK | TTF_ABSOLUTE,TRUE);
 
   if (dwStyle & TVS_CHECKBOXES)
   {
@@ -2796,8 +2798,13 @@ TREEVIEW_SetFocus (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
   sendNotify(hwnd,NM_SETFOCUS);
 
-  if (!(dwStyle & TVS_SHOWSELALWAYS) && infoPtr->selectedItem)
-    TREEVIEW_RefreshItem(hwnd,TREEVIEW_ValidItem(infoPtr,infoPtr->selectedItem),FALSE);
+  if (!(dwStyle & TVS_SHOWSELALWAYS))
+  {
+    if (infoPtr->selectedItem)
+      TREEVIEW_RefreshItem(hwnd,TREEVIEW_ValidItem(infoPtr,infoPtr->selectedItem),FALSE);
+    else if (infoPtr->firstVisible)
+      TREEVIEW_DoSelectItem(hwnd,TVGN_CARET,infoPtr->firstVisible,TVC_UNKNOWN);
+  }
 
   return 0;
 }
@@ -3198,6 +3205,28 @@ return FALSE; //CB: to check
       return FALSE;
   }
 
+  /* If item was collapsed we probably need to change selection */
+  if (flag & TVE_COLLAPSE)
+  {
+     HTREEITEM hItem = infoPtr->selectedItem;
+
+     if (!TREEVIEW_ValidItem (infoPtr, hItem))
+        hItem = wineItem->hItem;
+     else
+     {
+        while ( hItem )
+        {
+           hItem = infoPtr->items[(INT)hItem].parent;
+
+           if (hItem == wineItem->hItem)
+              break;
+        }
+     }
+
+     if (hItem)
+        TREEVIEW_DoSelectItem(hwnd, TVGN_CARET, hItem, TVC_UNKNOWN);
+  }
+
   //CB: todo: optimize!
   TREEVIEW_UnqueueRefresh(hwnd,FALSE,FALSE);
   //CB: todo: precalc expanded items here
@@ -3485,6 +3514,8 @@ static LRESULT TREEVIEW_TrackMouse(HWND hwnd, POINT pt)
          else if (msg.message >= WM_LBUTTONDOWN &&
                   msg.message <= WM_RBUTTONDBLCLK)
          {
+            if (msg.message == WM_RBUTTONUP)
+              TREEVIEW_RButtonUp (hwnd, &pt);
             break;
          }
 
@@ -3731,6 +3762,22 @@ static LRESULT TREEVIEW_RButtonDoubleClick(HWND hwnd,WPARAM wParam,LPARAM lParam
   sendNotify(hwnd,NM_RDBLCLK);
 
   return DefWindowProcA(hwnd,WM_RBUTTONDBLCLK,wParam,lParam);
+}
+
+static LRESULT
+TREEVIEW_RButtonUp (HWND hwnd, LPPOINT pPt)
+{
+    POINT pt;
+
+    pt.x = pPt->x;
+    pt.y = pPt->y;
+
+    /* Change to screen coordinate for WM_CONTEXTMENU */
+    ClientToScreen(hwnd, &pt);
+
+    /* Send the WM_CONTEXTMENU on a right click */
+    SendMessageA( hwnd, WM_CONTEXTMENU, (WPARAM) hwnd, MAKELPARAM(pt.x, pt.y));
+    return 0;
 }
 
 static LRESULT
@@ -4218,7 +4265,7 @@ TREEVIEW_KeyDown (HWND hwnd, WPARAM wParam, LPARAM lParam)
       {
         newItem = (& infoPtr->items[(INT)prevItem->parent]);
 
-        hNewSelection = newItem->hItem;
+        hNewSelection = newItem->hItem; //CB: what does Win32??? Please not the Corel hack!!!
       }
 
       break;
