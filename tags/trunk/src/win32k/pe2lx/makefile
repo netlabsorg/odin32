@@ -1,5 +1,5 @@
 ##############################################################################
-# $Id: makefile,v 1.12 2000-01-29 11:01:55 sandervl Exp $
+# $Id: makefile,v 1.13 2000-01-29 16:20:12 bird Exp $
 #
 # PD-Win32 API
 #
@@ -107,7 +107,9 @@ OBJS     =  $(PE2LXOBJ)\pe2lx.$(OBJEXT)         \
 
 
 
-all: $(TARGET).exe
+#all: $(TARGET).exe
+all: depend
+    $(MAKE) /nologo DEPENDEXISTS=1 $(TARGET).exe
 
 $(TARGET).exe: $(OBJS)
     @echo linking $@
@@ -120,7 +122,7 @@ $(TARGET).exe: $(OBJS)
     nmake fastdep.exe
     cd pe2lx
 
-depend:
+depend: ..\fastdep.exe
     ..\fastdep.exe -obj$(OBJEXT) -o..\Object $(CINCLUDES) ..\misc\*.c* ..\include\*.h
 
 ##############################################################################
@@ -131,4 +133,6 @@ clean:
     @$(ECHO) #do nmake depend > .depend
 
 
-#!include .depend
+!ifdef DEPENDEXISTS
+!include .depend
+!endif
