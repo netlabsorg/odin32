@@ -1,4 +1,4 @@
-/* $Id: env.h,v 1.2 2000-04-17 02:26:04 bird Exp $
+/* $Id: env.h,v 1.2.4.1 2000-07-16 22:43:29 bird Exp $
  *
  * Environment access functions
  *
@@ -20,7 +20,7 @@ extern "C" {
 *   Prototypes                                                                 *
 *******************************************************************************/
 const char *ScanEnv(const char *paszEnv, const char *pszVar);
-const char *GetEnv(void);
+const char *GetEnv(BOOL fExecChild);
 
 
 #ifdef __cplusplus

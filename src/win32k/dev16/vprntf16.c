@@ -1,4 +1,4 @@
-/* $Id: vprntf16.c,v 1.2 2000-02-26 17:49:28 bird Exp $
+/* $Id: vprntf16.c,v 1.2.4.1 2000-07-16 22:43:24 bird Exp $
  *
  * vprintf and printf - 16-bit.
  *
@@ -45,8 +45,9 @@
 /*******************************************************************************
 *   Global Variables                                                           *
 *******************************************************************************/
-static char chNewLine = '\n';
 static char chReturn  = '\r';
+static char chNewLine = '\n';
+static char chReturnWithNewLine[2] = "\r\n";
 
 /*******************************************************************************
 *   Internal Functions                                                         *
@@ -412,17 +413,13 @@ int printf16(const char *pszFormat, ...)
  */
 static void choutconsole(int ch)
 {
-    USHORT usWrote;
-
     if (ch != '\r')
     {
+        USHORT  usWrote;                /* Bytes written (ignored). */
         if (ch == '\n')
-        {
-            usWrote = 1;
-            DosWrite(1, (PVOID)&chReturn, 1, &usWrote);
-        }
-        usWrote = 1;
-        DosWrite(1, (PVOID)&ch, 1, &usWrote);
+            DosWrite(1, (PVOID)&chReturnWithNewLine, 2, &usWrote);
+        else
+            DosWrite(1, (PVOID)&ch, 1, &usWrote);
     }
 }
 
@@ -437,31 +434,30 @@ static void choutconsole(int ch)
  * @remark    At inittime the text is outputed to both screen and com-port.
  *            At runtime the text is only sendt to com-port.
  */
-static char *stroutconsole(char *psz, signed cchMax)
+static char *stroutconsole(register char *psz, signed cchMax)
 {
+    register CHAR   ch;
+
     while (cchMax > 0 && *psz != '\0')
     {
-        USHORT cch = 0;
-        USHORT us;
+        register signed cch = 0;
+        USHORT          us;             /* Bytes written (ignored). */
 
-        while (cchMax - cch > 0 && psz[cch] != '\0' && psz[cch] != '\r' && psz[cch] != '\n')
+        while (cchMax > cch && (ch = psz[cch]) != '\0' && ch != '\r' && ch != '\n')
             cch++;
 
         /* write string part */
-        us = cch;
         DosWrite(1, (PVOID)psz, cch, &us);
 
-        /* cr and lf check + skip */
-        if (psz[cch] == '\n' || psz[cch] == '\r')
+        /* cr and lf: expand lf to cr+lf and ignore cr. */
+        while (cchMax > cch)
         {
-            if (psz[cch] == '\n')
-            {
-                DosWrite(1, (PVOID)&chReturn, 1, &us);
-                DosWrite(1, (PVOID)&chNewLine, 1, &us);
-            }
-
-            while (cchMax - cch > 0 && (psz[cch] == '\r' || psz[cch] == '\n'))
-                cch++;
+            if ((ch = psz[cch]) == '\n')
+                DosWrite(1, (PVOID)&chReturnWithNewLine, 2, &us);
+            else
+                if (ch != '\r')
+                    break;
+            cch++;
         }
 
         /* next */
@@ -480,7 +476,7 @@ static char *stroutconsole(char *psz, signed cchMax)
  */
 static void chout(int ch)
 {
-    #ifdef RING0
+    #if defined(RING0) && !defined(R3TST)
         if (fInitTime)
             choutconsole(ch);
         if (!options.fLogging)
@@ -513,7 +509,7 @@ static void chout(int ch)
  */
 static char *strout(char *psz, signed cchMax)
 {
-    #ifdef RING0
+    #if defined(RING0) && !defined(R3TST)
         int cchYield = 0;
 
         if (fInitTime)
@@ -538,7 +534,7 @@ static char *strout(char *psz, signed cchMax)
             }
 
             /* cr and lf check + skip */
-            if (psz[cch] == '\n' || psz[cch] == '\r')
+            if (cch < cchMax && (psz[cch] == '\n' || psz[cch] == '\r'))
             {
                 if (psz[cch] == '\n')
                 {

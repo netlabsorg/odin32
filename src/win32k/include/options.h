@@ -1,4 +1,4 @@
-/* $Id: options.h,v 1.10 2000-02-25 18:15:06 bird Exp $
+/* $Id: options.h,v 1.10.4.1 2000-07-16 22:43:32 bird Exp $
  *
  * Options.
  *
@@ -15,8 +15,13 @@
 *   Defined Constants And Macros                                               *
 *******************************************************************************/
 /* fKernel */
-#define KF_UNI              0x00000000UL
-#define KF_SMP              0x00000001UL
+#define KF_UNI              0x0000
+#define KF_SMP              0x0001
+#define KF_W4               0x0002
+#define KF_DEBUG            0x1000
+#define KF_HAS_DEBUGTYPE    0x2000
+#define KF_ALLSTRICT        0x3000
+#define KF_HALFSTRICT       0x7000
 
 /* fPE */
 #define FLAGS_PE_NOT        0x00000000UL
@@ -32,10 +37,10 @@
 #define INFOLEVEL_INFOALL   0x00000004UL
 
 /* default heapsizes */
-#define CB_SWP_INIT         (1024*512)      /* 512KB */
-#define CB_SWP_MAX          (1024*1024*16)  /*  16MB  */
-#define CB_RES_INIT         (1024*256)      /* 256KB */
-#define CB_RES_MAX          (1024*1024*10)  /*  10MB  */
+#define CB_SWP_INIT         ((unsigned long)1024*512)      /* 512KB */
+#define CB_SWP_MAX          ((unsigned long)1024*1024*16)  /*  16MB  */
+#define CB_RES_INIT         ((unsigned long)1024*256)      /* 256KB */
+#define CB_RES_MAX          ((unsigned long)1024*1024*10)  /*  10MB  */
 
 /* default assignments */
 #define DEFAULT_OPTION_ASSIGMENTS                           \
@@ -49,13 +54,33 @@
             FLAGS_PE_PE2LX,         /* fPE           */     \
             INFOLEVEL_QUIET,        /* ulInfoLevel   */     \
             FALSE,                  /* fElf          */     \
-            TRUE,                   /* fScript       */     \
+            TRUE,                   /* fUNIXScript   */     \
+            TRUE,                   /* fREXXScript   */     \
+            TRUE,                   /* fJava         */     \
             FALSE,                  /* fNoLoader     */     \
             CB_SWP_INIT,            /* cbSwpHeapInit */     \
             CB_SWP_MAX,             /* cbSwpHeapMax  */     \
             CB_RES_INIT,            /* cbResHeapInit */     \
             CB_RES_MAX}             /* cbResHeapMax  */
 
+#define isAnyLoaderEnabled()        (!options.fNoLoader && \
+                                    (isPELoaderEnabled() || isELFEnabled() || isUNIXScriptEnabled() || isREXXScriptEnabled() || isJAVAEnabled()))
+#define isPELoaderEnabled()         (options.fPE != FLAGS_PE_NOT)
+#define isPELoaderDisabled()        (options.fPE == FLAGS_PE_NOT)
+#define isPe2LxLoaderEnabled()      (options.fPE == FLAGS_PE_PE2LX)
+#define isMixedPeLoaderEnabled()    (options.fPE == FLAGS_PE_MIXED)
+
+#define isELFDisabled()             (!options.fElf)
+#define isELFEnabled()              (options.fElf)
+#define isUNIXScriptDisabled()      (!options.fUNIXScript)
+#define isUNIXScriptEnabled()       (options.fUNIXScript)
+#define isREXXScriptDisabled()      (!options.fREXXScript)
+#define isREXXScriptEnabled()       (options.fREXXScript)
+#define isJAVADisabled()            (!options.fJava)
+#define isJAVAEnabled()             (options.fJava)
+
+#define isSMPKernel()               (options.fKernel & KF_SMP)
+#define isUNIKernel()               !(options.fKernel & KF_SMP)
 
 
 /*******************************************************************************
@@ -85,11 +110,17 @@ struct options
     /** @cat Options affecting the generated ELF executables */
     ULONG       fElf;                   /* Elf flags. */
 
-    /** @cat Options affecting the script executables */
-    ULONG       fScript;                /* Script flags. */
+    /** @cat Options affecting the UNIX script executables */
+    ULONG       fUNIXScript;            /* UNIX script flags. */
 
-    /** @cat Options affecting the script executables */
-    ULONG       fNoLoader;              /* No loader stuff. */
+    /** @cat Options affecting the REXX script executables */
+    ULONG       fREXXScript;            /* REXX script flags. */
+
+    /** @cat Options affecting the JAVA executables */
+    ULONG       fJava;                  /* Java flags. */
+
+    /** @cat Options affecting the  executables */
+    ULONG       fNoLoader;              /* No loader stuff. !FIXME! We should import / functions even if this flag is set!!! */
 
     /** @cat Options affecting the heap. */
     ULONG       cbSwpHeapInit;          /* Initial heapsize. */

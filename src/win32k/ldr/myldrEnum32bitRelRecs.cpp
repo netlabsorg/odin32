@@ -1,4 +1,4 @@
-/* $Id: myldrEnum32bitRelRecs.cpp,v 1.2 2000-01-27 23:43:07 bird Exp $
+/* $Id: myldrEnum32bitRelRecs.cpp,v 1.2.4.1 2000-07-16 22:43:36 bird Exp $
  *
  * myldrEnum32bitRelRecs - ldrEnum32bitRelRecs
  *
@@ -23,14 +23,14 @@
 #include <memory.h>
 #include <stdlib.h>
 
+#include "avl.h"
 #include "log.h"
 #include <peexe.h>
 #include <exe386.h>
 #include "OS2Krnl.h"
-#include "avl.h"
-#include "ModuleBase.h"
 #include "ldr.h"
 #include "ldrCalls.h"
+#include "ModuleBase.h"
 
 
 /**
@@ -62,7 +62,7 @@ ULONG LDRCALL myldrEnum32bitRelRecs(
     {
         APIRET rc;
         #if 1
-        kprintf(("ldrEnum32BitRelRecs: pMTE=0x%08x iObject=0x%02x iPageTable=0x%03x pvPage=0x%08x\n"
+        kprintf(("myldrEnum32BitRelRecs: pMTE=0x%08x iObject=0x%02x iPageTable=0x%03x pvPage=0x%08x\n"
                  "                     ulPageAddress=0x%08x pvPTDA=0x%08x\n",
                  pMTE, iObject, iPageTable, pvPage, ulPageAddress, pvPTDA
                  ));

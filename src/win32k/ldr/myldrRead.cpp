@@ -1,8 +1,8 @@
-/* $Id: myldrRead.cpp,v 1.6 2000-01-22 18:21:02 bird Exp $
+/* $Id: myldrRead.cpp,v 1.6.4.1 2000-07-16 22:43:38 bird Exp $
  *
  * myldrRead - ldrRead.
  *
- * Copyright (c) 1998-1999 knut st. osmundsen
+ * Copyright (c) 1998-2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -23,25 +23,45 @@
 #include <stdlib.h>
 
 #include "log.h"
+#include "avl.h"
 #include "dev32.h"
 #include <peexe.h>
 #include <exe386.h>
 #include "OS2Krnl.h"
-#include "ModuleBase.h"
-#include "pe2lx.h"
-#include "avl.h"
 #include "ldrCalls.h"
 #include "ldr.h"
+#include "ModuleBase.h"
+#include "pe2lx.h"
 
 
+/**
+ * Overloads ldrRead.
+ * @returns   OS/2 return code.
+ * @param     hFile     Filehandle to read from.
+ * @param     pvBuffer  Buffer to read into.
+ * @param     fpBuffer  This is not flags as I first though, but probably a far 16-bit pointer
+ *                      to the buffer.
+ * @param     cbToRead  Count of bytes to read.
+ * @param     pMTE
+ * @sketch    IF it's our module THEN
+ *                Get module pointer. (complain if this failes and backout to ldrRead.)
+ *                Currently - verify that it's a Pe2Lx module. (complain and fail if not.)
+ *                Invoke the read method of the module do the requested read operation.
+ *                Save pMTE if present and not save allready.
+ *            ENDIF
+ *            - backout or not our module -
+ *            forward request to the original ldrRead.
+ * @status    Completely implemented.
+ * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ */
 ULONG LDRCALL myldrRead(
-                       SFN hFile,
-                       ULONG ulOffset,
-                       PVOID pBuffer,
-                       ULONG ulFlags ,
-                       ULONG ulBytesToRead,
-                       PMTE pMTE
-                       )
+    SFN     hFile,
+    ULONG   ulOffset,
+    PVOID   pvBuffer,
+    ULONG   fpBuffer,
+    ULONG   cbToRead,
+    PMTE    pMTE
+    )
 {
     ULONG   rc;
 
@@ -49,7 +69,8 @@ ULONG LDRCALL myldrRead(
     if (GetState(hFile) == HSTATE_OUR)
     {
         PMODULE pMod;
-        kprintf(("ldrRead+: hF=%+04x off=%+08x pB=%+08x fl=%+08x cb=%+04x pMTE=%+08x\n",hFile,ulOffset,pBuffer,ulFlags,ulBytesToRead,pMTE));
+        kprintf(("myldrRead: hF=%+04x off=%+08x pB=%+08x fp=%+08x cb=%+04x pMTE=%+08x\n",
+                 hFile, ulOffset, pvBuffer, fpBuffer, cbToRead, pMTE));
 
         pMod = getModuleBySFN(hFile);
         if (pMod != NULL)
@@ -58,28 +79,27 @@ ULONG LDRCALL myldrRead(
             if (pMod->pMTE == NULL && pMTE != NULL)
                 pMod->pMTE = pMTE;
 
-            /* debug */
-            if (ulFlags != 0)
-                kprintf(("ldrRead: Warning ulFlags = 0x%x (!= 0)\n", ulFlags));
-
             if ((pMod->fFlags & MOD_TYPE_MASK) == MOD_TYPE_PE2LX)
-                rc = pMod->Data.pModule->read(ulOffset, pBuffer, ulBytesToRead, ulFlags, pMTE);
+                rc = pMod->Data.pModule->read(ulOffset, pvBuffer, fpBuffer, cbToRead, pMTE);
             else
             {
-                kprintf(("ldrRead: Invalid module type, %#x\n", pMod->fFlags & MOD_TYPE_MASK));
+                kprintf(("myldrRead: Invalid module type, %#x\n", pMod->fFlags & MOD_TYPE_MASK));
                 rc = ERROR_READ_FAULT;
             }
-            return rc;
         }
         else
-            kprintf(("ldrRead:  DON'T PANIC! - but I can't get Node ptr! - This is really an IPE!\n"));
+        {
+            kprintf(("myldrRead:  DON'T PANIC! - but I can't get Node ptr! - This is really an IPE!\n"));
+            rc = ERROR_READ_FAULT;
+        }
     }
-
-    rc = ldrRead(hFile, ulOffset, pBuffer, ulFlags, ulBytesToRead, pMTE);
-
+    else
+    {
+        rc = ldrRead(hFile, ulOffset, pvBuffer, fpBuffer, cbToRead, pMTE);
+    }
     #if 0
-    kprintf(("ldrRead:  hF=%+04x off=%+08x pB=%+08x fl=%+08x cb=%+04x pMTE=%+08x rc=%d\n",
-             hFile,ulOffset,pBuffer,ulFlags,ulBytesToRead,pMTE,rc));
+    kprintf(("myldrRead:  hF=%+04x off=%+08x pB=%+08x fp=%+08x cb=%+04x pMTE=%+08x rc=%d\n",
+             hFile, ulOffset, pvBuffer, fpBuffer, cbToRead, pMTE, rc));
     #endif
 
     return rc;

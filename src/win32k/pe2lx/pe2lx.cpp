@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.18 2000-02-27 02:18:10 bird Exp $
+/* $Id: pe2lx.cpp,v 1.18.4.1 2000-07-16 22:43:41 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -669,13 +669,13 @@ ULONG Pe2Lx::init(PCSZ pszFilename)
  * @param     offLXFile  Offset (into the virtual lx file) of the data to read
  * @param     pvBuffer   Pointer to buffer where data is to be put.
  * @param     cbToRead   Bytes to be read.
- * @param     flFlag     Flags which was spesified to the ldrRead call.
+ * @param     fpBuffer   Flags which was spesified to the ldrRead call.
  * @parma     pMTE       Pointer to MTE which was specified to the ldrRead call.
  * @return    NO_ERROR if successful something else if not.
  * @status    completely implmented; tested.
  * @author    knut st. osmundsen
  */
-ULONG Pe2Lx::read(ULONG offLXFile, PVOID pvBuffer, ULONG cbToRead, ULONG flFlags, PMTE pMTE)
+ULONG Pe2Lx::read(ULONG offLXFile, PVOID pvBuffer, ULONG fpBuffer, ULONG cbToRead, PMTE pMTE)
 {
     APIRET rc = NO_ERROR;   /* Return code. */
     ULONG  cbReadVar;       /* Number of bytes in a read operation. */
@@ -695,7 +695,7 @@ ULONG Pe2Lx::read(ULONG offLXFile, PVOID pvBuffer, ULONG cbToRead, ULONG flFlags
     }
     #endif
 
-    printInf(("read(%d, 0x%08x, %d, 0x%08x)\n", offLXFile, pvBuffer, cbToRead, flFlags));
+    printInf(("Pe2Lx::read(%d, 0x%08x, 0x%08x, %d)\n", offLXFile, pvBuffer, fpBuffer, cbToRead));
 
     /* Could we skip right to the datapages? */
     if (offLXFile < LXHdr.e32_datapage)
@@ -930,14 +930,14 @@ ULONG Pe2Lx::read(ULONG offLXFile, PVOID pvBuffer, ULONG cbToRead, ULONG flFlags
         {   /* not TIB object OR after the TIBFix code */
             /* calc PE offset and size of read. */
             cbReadVar = min(paObjects[iObj].cbPhysical - offObject, cbToRead);
-            rc = ReadAtF(hFile, offPEFile, pvBuffer, cbReadVar, flFlags, pMTE);
+            rc = ReadAtF(hFile, offPEFile, pvBuffer, fpBuffer, cbReadVar, pMTE);
         }
         else
         {   /* before or in the TIBFix code. */
             if (offObject < paObjects[iObj].Misc.offTIBFix)
             {   /* before TIBFix code. */
                 cbReadVar = min(paObjects[iObj].Misc.offTIBFix - offObject, cbToRead);
-                rc = ReadAtF(hFile, offPEFile, pvBuffer, cbReadVar, flFlags, pMTE);
+                rc = ReadAtF(hFile, offPEFile, pvBuffer, fpBuffer, cbReadVar, pMTE);
             }
             else
             {   /* TIBFix code.*/
@@ -958,7 +958,7 @@ ULONG Pe2Lx::read(ULONG offLXFile, PVOID pvBuffer, ULONG cbToRead, ULONG flFlags
                       rc, offPEFile, cbReadVar, iObj));
     }
 
-    NOREF(flFlags);
+    NOREF(fpBuffer);
     NOREF(pMTE);
     return rc;
 }
@@ -1280,6 +1280,291 @@ ULONG  Pe2Lx::applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID pvPa
 
 
 
+/**
+ * openPath - opens file eventually searching loader specific paths.
+ * This method is only called for DLLs. DosLoadModule and Imports.
+ *
+ * This base implementation simply calls ldrOpenPath.
+ *
+ * @returns   OS2 return code.
+ *            pLdrLv->lv_sfn  is set to filename handle.
+ * @param     pachModname   Pointer to modulename. Not zero terminated!
+ * @param     cchModname    Modulename length.
+ * @param     pLdrLv        Loader local variables? (Struct from KERNEL.SDF)
+ * @param     pfl           Pointer to flags which are passed on to ldrOpen.
+ * @sketch
+ * This is roughly what the original ldrOpenPath does:
+ *      if !CLASS_GLOBAL or miniifs then
+ *          ldrOpen(pachModName)
+ *      else
+ *          loop until no more libpath elements
+ *              get next libpath element and add it to the modname.
+ *              try open the modname
+ *              if successfull then break the loop.
+ *          endloop
+ *      endif
+ */
+ULONG  Pe2Lx::openPath(PCHAR pachModname, USHORT cchModname, ldrlv_t *pLdrLv, PULONG pfl) /* (ldrOpenPath) */
+{
+    #ifdef RING0
+
+    /* These defines sets the order the paths and pathlists are examined. */
+    #define FINDDLL_EXECUTABLEDIR   1
+    #define FINDDLL_CURRENTDIR      2
+    #define FINDDLL_SYSTEM32DIR     3
+    #define FINDDLL_SYSTEM16DIR     4
+    #define FINDDLL_WINDIR          5
+    #define FINDDLL_PATH            6
+    #define FINDDLL_BEGINLIBPATH    7
+    #define FINDDLL_LIBPATH         8
+    #define FINDDLL_ENDLIBPATH      9
+    #define FINDDLL_FIRST           FINDDLL_EXECUTABLEDIR
+    #define FINDDLL_LAST            FINDDLL_ENDLIBPATH
+
+    struct
+    {
+        char    sz[CCHMAXPATH];
+    } *pVars;
+
+
+    /*
+     * Mark the SFN invalid in the case of error.
+     * Initiate the Odin32 Path static variable.
+     * Allocate memory for local variables.
+     */
+    pLdrLv->lv_sfn = 0xffff;
+    initOdin32Path();
+    pVar = rmalloc(sizeof(*pVars));
+    if (pVar == NULL)
+        return ERROR_NOT_ENOUGH_MEMORY;
+
+    /* init stuff */
+
+
+
+
+    /** @sketch
+     * Loop thru the paths and pathlists searching them for the filename.
+     */
+    for (iPath = FINDDLL_FIRST; iPath <= FINDDLL_LAST; iPath++)
+    {
+        APIRET          rc;             /* Returncode from OS/2 APIs. */
+        const char  *   pszPath;        /* Pointer to the path being examined. */
+
+        /** @sketch
+         * Get the path/dir to examin. (This is determined by the value if iPath.)
+         */
+        switch (iPath)
+        {
+            case FINDDLL_EXECUTABLEDIR:
+                if (pszAltPath)
+                    pszPath = strcpy(plv->szPath, pszAltPath);
+                else
+                {
+                    /* ASSUMES: getFullPath allways returns a fully qualified
+                     *      path, ie. with at least one backslash. and that all
+                     *      slashes are backslashes!
+                     */
+                    if (!WinExe) continue;
+                    pszPath = strcpy(plv->szPath, WinExe->getFullPath());
+                }
+                psz = strrchr(plv->szPath, '\\');
+                dassert(psz, ("KERNEL32:Win32ImageBase::findDll(%s, 0x%08x, %d): "
+                        "WinExe->getFullPath returned a path not fully qualified: %s",
+                        pszFileName, pszFullName, cchFullName, pszPath));
+                if (psz)
+                    *psz = '\0';
+                else
+                    continue;
+                break;
+
+            case FINDDLL_CURRENTDIR:
+                pszPath = ".";
+                break;
+
+            case FINDDLL_SYSTEM32DIR:
+                pszPath = InternalGetSystemDirectoryA();
+                break;
+
+            case FINDDLL_SYSTEM16DIR:
+                #if 1
+                continue;               /* Skip this index */
+                #else
+                pszPath = InternalGetWindowsDirectoryA();
+                strcpy(plv->sz2, InternalGetWindowsDirectoryA());
+                strcat(plv->sz2, "\SYSTEM");
+                break;
+                #endif
+
+            case FINDDLL_WINDIR:
+                pszPath = InternalGetWindowsDirectoryA();
+                break;
+
+            case FINDDLL_PATH:
+                pszPath = getenv("PATH");
+                break;
+
+            case FINDDLL_BEGINLIBPATH:
+                rc = DosQueryExtLIBPATH(plv->szPath, BEGIN_LIBPATH);
+                if (rc != NO_ERROR)
+                {
+                    dassert(rc == NO_ERROR, ("KERNEL32:Win32ImageBase::findDll(%s, 0x%08x, %d): "
+                             "DosQueryExtLIBPATH failed with rc=%d, iPath=%d",
+                             pszFileName, pszFullName, cchFullName, rc, iPath));
+                    continue;
+                }
+                pszPath = plv->szPath;
+                break;
+
+            case FINDDLL_LIBPATH:
+                rc = DosQueryHeaderInfo(NULLHANDLE, 0, plv->szPath, sizeof(plv->szPath), QHINF_LIBPATH);
+                if (rc != NO_ERROR)
+                {
+                    dassert(rc == NO_ERROR, ("KERNEL32:Win32ImageBase::findDll(%s, 0x%08x, %d): "
+                             "DosQueryHeaderInfo failed with rc=%d, iPath=%d",
+                             pszFileName, pszFullName, cchFullName, rc, iPath));
+                    continue;
+                }
+                pszPath = plv->szPath;
+                break;
+
+            case FINDDLL_ENDLIBPATH:
+                rc = DosQueryExtLIBPATH(plv->szPath, END_LIBPATH);
+                if (rc != NO_ERROR)
+                {
+                    dassert(rc == NO_ERROR, ("KERNEL32:Win32ImageBase::findDll(%s, 0x%08x, %d): "
+                             "DosQueryExtLIBPATH failed with rc=%d, iPath=%d",
+                             pszFileName, pszFullName, cchFullName, rc, iPath));
+                    continue;
+                }
+                pszPath = plv->szPath;
+                break;
+
+            default: /* !internalerror! */
+                goto end;
+        }
+
+
+        /** @sketch
+         * pszPath is now set to the pathlist to be searched.
+         * So we'll loop thru all the paths in the list.
+         */
+        while (pszPath != NULL && *pszPath != '\0')
+        {
+            HDIR    hDir;               /* Find handle used when calling FindFirst. */
+            ULONG   culFiles;           /* Number of files to find / found. */
+            char *  pszNext;            /* Pointer to the next pathlist path */
+            int     cch;                /* Length of path (including the slash after the slash is added). */
+
+            /** @sketch
+             * Find the end of the path.
+             * Copy the path into the plv->sz buffer.
+             * Set pszNext.
+             */
+            pszNext = strchr(pszPath, ';');
+            if (pszNext != NULL)
+            {
+                cch = pszNext - pszPath;
+                pszNext++;
+            }
+            else
+                cch = strlen(pszPath);
+
+            if (cch + cchFileName + 1 >= sizeof(plv->sz)) /* assertion */
+            {
+                dassert(cch + cchFileName + 1 < sizeof(plv->sz), ("KERNEL32:Win32ImageBase::findDll(%s, 0x%08x, %d): "
+                        "cch (%d) + cchFileName (%d) + 1 < sizeof(plv->sz) (%d) - paths too long!, iPath=%d",
+                        pszFileName, pszFullName, cchFullName, cch, cchFileName, sizeof(plv->sz), iPath));
+                pszPath = pszNext;
+                continue;
+            }
+            memcpy(plv->sz, pszPath, cch); //arg! Someone made strncpy not work as supposed!
+
+
+            /** @sketch
+             * Add a '\\' and the filename (pszFullname) to the path;
+             * then we'll have a fullpath.
+             */
+            plv->sz[cch++] = '\\';
+            strcpy(&plv->sz[cch], pszFullName);
+
+
+            /** @sketch
+             *  Use DosFindFirst to check if the file exists.
+             *  IF the file exists THEN
+             *      Query Fullpath using OS/2 API.
+             *      IF unsuccessful THEN return relative name.
+             *          Check that the fullname buffer is large enough.
+             *          Copy the filename found to the fullname buffer.
+             *      ENDIF
+             *      IF successful THEN uppercase the fullname buffer.
+             *      goto end
+             *  ENDIF
+             */
+            hDir = HDIR_CREATE;
+            culFiles = 1;
+            rc = DosFindFirst(plv->sz, &hDir, FILE_NORMAL,
+                              &plv->findbuf3, sizeof(plv->findbuf3),
+                              &culFiles, FIL_STANDARD);
+            DosFindClose(hDir);
+            if (culFiles >= 1 && rc == NO_ERROR)
+            {
+                /* Return full path - we'll currently return a relative path. */
+                rc = DosQueryPathInfo(plv->sz, FIL_QUERYFULLNAME, pszFullName, cchFullName);
+                fRet = rc == NO_ERROR;
+                if (!fRet)
+                {
+                    /* Return a relative path - probably better that failing... */
+                    dassert(rc == NO_ERROR, ("KERNEL32:Win32ImageBase::findDll(%s, 0x%08x, %d): "
+                            "rc = %d",
+                            pszFileName, pszFullName, cchFullName, rc));
+
+                    if (cch + cchFileName + 1 <= cchFullName)
+                    {
+                        strcpy(pszFullName, plv->sz);
+                        strcpy(pszFullName + cch, plv->findbuf3.achName);
+                        fRet = TRUE;
+                    }
+                    else
+                    {
+                        dassert(cch + cchFileName + 1 > cchFullName, ("KERNEL32:Win32ImageBase::findDll(%s, 0x%08x, %d): "
+                                "cch (%d) + cchFileName (%d) + 1 < cchFullName (%d); %s",
+                                pszFileName, pszFullName, cchFullName, cch, cchFileName, cchFullName, plv->sz));
+                    }
+                }
+                if (fRet) strupr(pszFullName);
+                goto end;
+            }
+
+            pszPath = pszNext;
+        }
+    } /* for iPath */
+
+
+end:
+    /*
+     * Cleanup: free local variables.
+     */
+    free(plv);
+    return fRet;
+
+
+
+
+
+    return ldrOpenPath(pachModname, cchModname, pLdrLv, pfl);
+    #else
+    NOREF(pachModname);
+    NOREF(cchModname);
+    NOREF(pLdrLv);
+    NOREF(pfl);
+    return ERROR_NOT_SUPPORTED;
+    #endif
+}
+
+
+
+
 #ifndef RING0
 /**
  * This method test the applyFixups method.
@@ -1410,6 +1695,32 @@ ULONG Pe2Lx::writeFile(PCSZ pszLXFilename)
     return rc;
 }
 #endif
+
+
+/**
+ * Is this module an executable?
+ * @returns   TRUE if executable.
+ *            FALSE if not an executable.
+ * @sketch
+ * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ */
+BOOL    Pe2Lx::isExe()
+{
+    return ((this->LXHdr.e32_mflags & E32MODMASK) == E32MODEXE);
+}
+
+
+/**
+ * Is this module an dynamic link library.
+ * @returns   TRUE if dynamic link library.
+ *            FALSE if not a dynamic link library.
+ * @sketch
+ * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ */
+BOOL    Pe2Lx::isDll()
+{
+    return ((this->LXHdr.e32_mflags & E32MODMASK) == E32MODDLL);
+}
 
 
 /**

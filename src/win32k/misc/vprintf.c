@@ -1,4 +1,4 @@
-/* $Id: vprintf.c,v 1.7 2000-01-22 18:21:03 bird Exp $
+/* $Id: vprintf.c,v 1.7.4.1 2000-07-16 22:43:41 bird Exp $
  *
  * vprintf and printf
  *
@@ -24,7 +24,15 @@
 #define NTSF_BLANK      0x0040
 
 
-#ifdef RING0
+
+#if defined(RING0) && !defined(R3TST)
+    #define COMOUTPUT
+#endif
+#if !defined(RING0) || defined(R3TST)
+    #define DOSWRITEOUTPUT
+#endif
+
+#ifndef DOSWRITEOUTPUT
     #define INCL_NOAPI
 #else
     #define INCL_DOSPROCESS
@@ -40,8 +48,10 @@
 
 #include "dev32.h"
 #include "vprintf.h"
-#ifdef RING0
+#ifdef COMOUTPUT
     #include <builtin.h>
+#endif
+#ifdef RING0
     #include "options.h"
 #endif
 #include "Yield.h"
@@ -221,7 +231,7 @@ static char * numtostr(long lValue, unsigned int uiBase,
  */
 int vprintf(const char *pszFormat, va_list args)
 {
-    #ifdef RING0
+    #if defined(RING0) && !defined(R3TST)
     if (!options.fLogging)
         return 0;
     #endif
@@ -238,21 +248,17 @@ int vprintf(const char *pszFormat, va_list args)
  */
 int vprintf2(const char *pszFormat, va_list args)
 {
-    #ifndef RING0
-        int cch = 0;
-    #endif
+    int cch = 0;
 
     while (*pszFormat != '\0')
     {
         if (*pszFormat == '%')
         {
-            #ifndef RING0
-                if (cch > 0)
-                {
-                    strout((char*)(pszFormat - cch), cch);
-                    cch = 0;
-                }
-            #endif
+            if (cch > 0)
+            {
+                strout((char*)(pszFormat - cch), cch);
+                cch = 0;
+            }
 
             pszFormat++;  /* skip '%' */
             if (*pszFormat == '%')    /* '%%'-> '%' */
@@ -395,22 +401,16 @@ int vprintf2(const char *pszFormat, va_list args)
         }
         else
         {
-            #ifdef RING0
-                chout(*pszFormat++);
-            #else
-                cch++;
-                pszFormat++;
-            #endif
+            cch++;
+            pszFormat++;
         }
     }
 
-    #ifndef RING0
-        if (cch > 0)
-        {
-            strout((char*)(pszFormat - cch), cch);
-            cch = 0;
-        }
-    #endif
+    if (cch > 0)
+    {
+        strout((char*)(pszFormat - cch), cch);
+        cch = 0;
+    }
 
     return 0UL;
 }
@@ -478,32 +478,34 @@ int _printf_ansi(const char *pszFormat, ...)
  */
 static void chout(int ch)
 {
-    #ifndef RING0
-        ULONG ulWrote;
-    #endif
+#ifdef DOSWRITEOUTPUT
+    ULONG ulWrote;
+#endif
 
     if (ch != '\r')
     {
         if (ch == '\n')
         {
-            #ifdef RING0
-                #pragma info(noeff)
-                while (!(_inp(options.usCom + 5) & 0x20));  /* Waits for the port to be ready. */
-                _outp(options.usCom, chReturn);             /* Put the char. */
-                #pragma info(restore)
-            #else
-                DosWrite(1, (void*)&chReturn, 1, &ulWrote);
-            #endif
-        }
-        #ifdef RING0
+        #ifdef COMOUTPUT
             #pragma info(noeff)
             while (!(_inp(options.usCom + 5) & 0x20));  /* Waits for the port to be ready. */
-            _outp(options.usCom, ch);                   /* Put the char. */
+            _outp(options.usCom, chReturn);             /* Put the char. */
             #pragma info(restore)
-            Yield();
-        #else
-            DosWrite(1, (void*)&ch, 1, &ulWrote);
         #endif
+        #ifdef DOSWRITEOUTPUT
+            DosWrite(1, (void*)&chReturn, 1, SSToDS(&ulWrote));
+        #endif
+        }
+    #ifdef COMOUTPUT
+        #pragma info(noeff)
+        while (!(_inp(options.usCom + 5) & 0x20));  /* Waits for the port to be ready. */
+        _outp(options.usCom, ch);                   /* Put the char. */
+        #pragma info(restore)
+        Yield();
+    #endif
+    #ifdef DOSWRITEOUTPUT
+        DosWrite(1, SSToDS(&ch), 1, SSToDS(&ulWrote));
+    #endif
     }
 }
 
@@ -528,34 +530,36 @@ static char *strout(char *psz, signed cchMax)
             cch++;
 
         /* write string part */
-        #ifdef RING0
-            for (ul = 0; ul < cch; ul++)
-            {
-                #pragma info(noeff)
-                while (!(_inp(options.usCom + 5) & 0x20));  /* Waits for the port to be ready. */
-                _outp(options.usCom, psz[ul]);              /* Put the char. */
-                #pragma info(restore)
-            }
-        #else
-            DosWrite(1, (void*)psz, cch, &ul);
-        #endif
+    #ifdef COMOUTPUT
+        for (ul = 0; ul < cch; ul++)
+        {
+            #pragma info(noeff)
+            while (!(_inp(options.usCom + 5) & 0x20));  /* Waits for the port to be ready. */
+            _outp(options.usCom, psz[ul]);              /* Put the char. */
+            #pragma info(restore)
+        }
+    #endif
+    #ifdef DOSWRITEOUTPUT
+        DosWrite(1, psz, cch, SSToDS(&ul));
+    #endif
 
         /* cr and lf check + skip */
-        if (psz[cch] == '\n' || psz[cch] == '\r')
+        if (cch < cchMax && (psz[cch] == '\n' || psz[cch] == '\r'))
         {
             if (psz[cch] == '\n')
             {
-            #ifdef RING0
+            #ifdef COMOUTPUT
                 #pragma info(noeff)
                 while (!(_inp(options.usCom + 5) & 0x20));  /* Waits for the port to be ready. */
                 _outp(options.usCom, chReturn);             /* Put the char. */
                 while (!(_inp(options.usCom + 5) & 0x20));  /* Waits for the port to be ready. */
                 _outp(options.usCom, chNewLine);            /* Put the char. */
-                cchYield ++;
+                cchYield++;
                 #pragma info(restore)
-            #else
-                DosWrite(1, (void*)&chReturn, 1, &ul);
-                DosWrite(1, (void*)&chNewLine, 1, &ul);
+            #endif
+            #ifdef DOSWRITEOUTPUT
+                DosWrite(1, (void*)&chReturn, 1, SSToDS(&ul));
+                DosWrite(1, (void*)&chNewLine, 1, SSToDS(&ul));
             #endif
 
             }
