@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.357 1999-10-23 16:42:53 cbratschi Exp $ */
+ /* $Id: changelog,v 1.358 1999-10-23 22:59:00 sandervl Exp $ */
 
  99-10-23: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: added more metrics for GetSystemMetrics
@@ -9,12 +9,18 @@
 	- USER32: Put back WM_ADJUSTWINDOWPOS/WINDOWPOSCHANGED into pmwindow.cpp
                   Put message logging procedure in wndmsg.cpp.
                   Don't log WM_KICKIDLE & WM_NCHITTEST messages. (sent too often)
+                  Don't set capture to listbox window in comboboxes (after lbuttonup)
+                  Use wrc to compile USER32 resources + added version resource
+                  Fixed PMFRAME window position handlers and put them back.
+                  (comboboxes now displayed properly)
+
 	- KERNEL32: Write logfiles to directory of kernel32 if executable is on
                     readonly device.
                     Fixed CreateProcess.
                     Added support for GetVersionSize/GetVersionStruct for images
                     that aren't loaded. (LX or PE; PE not tested!)
 	- DSOUND: Made it compile again. (always pretends there's no soundcard in the system)
+	- SHELL32/COMCTL32: Changed file description in version resource
 
  99-10-22: Daniela Engert <dani@ngrt.de>
 	- KERNEL32: fixed bad icon masks
