@@ -1,4 +1,4 @@
-/* $Id: StateUpd.cpp,v 1.20 2000-03-14 16:28:29 bird Exp $
+/* $Id: StateUpd.cpp,v 1.21 2000-03-14 16:31:17 bird Exp $
  *
  * StateUpd - Scans source files for API functions and imports data on them.
  *
@@ -138,7 +138,7 @@ int main(int argc, char **argv)
             {
                 case 'd':
                 case 'D':
-                    if (strnicmp(argv[argi], "dll:", 4) == 0 )
+                    if (&strnicmp(argv[argi][1], "dll:", 4) == 0 )
                         options.pszDLLName = &argv[argi][5];
                     else
                     {
