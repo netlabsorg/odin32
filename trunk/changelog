@@ -1,4 +1,14 @@
- /* $Id: changelog,v 1.307 1999-10-11 20:57:55 sandervl Exp $ */
+ /* $Id: changelog,v 1.308 1999-10-12 14:48:26 sandervl Exp $ */
+
+ 99-10-11: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: DrawMenuBar & DrawCaptionTempA bugfix (window handle translation)
+                  Added Win32ToOS2FrameHandle method
+                  Set default mouse pointer back if app doesn't process WM_MOUSEMOVE
+                  message.
+                  Added support for extra messages in default window handler.
+                  Partial support for WM_SYSCOMMAND in default window handler.
+                  MDI child bugfix (window now displayed correctly)
+                  Only subclass frame when it has a 3d border.
 
  99-10-11: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: pmframe finished

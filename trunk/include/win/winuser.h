@@ -1,4 +1,4 @@
-/* $Id: winuser.h,v 1.10 1999-10-04 09:55:52 sandervl Exp $ */
+/* $Id: winuser.h,v 1.11 1999-10-12 14:47:58 sandervl Exp $ */
 
 #ifndef __INCLUDE_WINUSER_H
 #define __INCLUDE_WINUSER_H
@@ -919,6 +919,10 @@ typedef struct tagWINDOWPOS
 #define WA_INACTIVE             0
 #define WA_ACTIVE               1
 #define WA_CLICKACTIVE          2
+
+/* WM_GETICON/WM_SETICON params values */
+#define ICON_SMALL              0
+#define ICON_BIG                1
 
   /* WM_NCCALCSIZE parameter structure */
 typedef struct
