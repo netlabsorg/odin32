@@ -1,4 +1,4 @@
-/* $Id: wsock32.h,v 1.5 1999-10-20 10:03:54 phaller Exp $ */
+/* $Id: wsock32.h,v 1.6 1999-10-25 23:17:19 phaller Exp $ */
 
 /* WSOCK32.H--definitions & conversions for Odin's wsock32.dll.
  * Unused/unneeded Microsoft declarations removed.
@@ -72,24 +72,6 @@ typedef unsigned long   u_long;
  * instances which refer to sockets.
  */
 typedef u_int           SOCKET;
-
-
-
-
-typedef struct AsyncStatus {
-    HWND hwnd;     // owner's hwindow
-    u_int msg;     // message to send when event occurs
-    ULONG event;    // event that may occur
-    SOCKET socket; // the socket
-    int status;    // blocking yes/no
-    TID threadID;  // Thread ID for async
-    int MsgStat;   // has message been sent yet?
-    struct AsyncStatus *Next; // pointer to next AsyncStatus in the list
-    struct AsyncStatus *Prev; // pointer to previous AsyncStatus in the list
-} AsyncStatus;
-
-
-
 
 
 
@@ -200,45 +182,6 @@ struct Wtimeval {
 #define WSIOCSLOWAT  _IOW('s',  2, u_long)  /* set low watermark */
 #define WSIOCGLOWAT  _IOR('s',  3, u_long)  /* get low watermark */
 #define WSIOCATMARK  _IOR('s',  7, u_long)  /* at oob mark? */
-
-/*
- * Structures returned by network data base library, taken from the
- * BSD file netdb.h.  All addresses are supplied in host order, and
- * returned in network order (suitable for use in system calls).
- */
-
-struct  Whostent {
-        char     * h_name;           /* official name of host */
-        char     *  * h_aliases;  /* alias list */
-        short   h_addrtype;             /* host address type */
-        short   h_length;               /* length of address */
-        char     *  * h_addr_list; /* list of addresses */
-#define h_addr  h_addr_list[0]          /* address, for backward compat */
-};
-
-/*
- * It is assumed here that a network number
- * fits in 32 bits.
- */
-struct  Wnetent {
-        char     * n_name;           /* official name of net */
-        char     *  * n_aliases;  /* alias list */
-        short   n_addrtype;             /* net address type */
-        u_long  n_net;                  /* network # */
-};
-
-struct  Wservent {
-        char     * s_name;           /* official service name */
-        char     *  * s_aliases;  /* alias list */
-        short   s_port;                 /* port # */
-        char     * s_proto;          /* protocol to use */
-};
-
-struct  Wprotoent {
-        char     * p_name;           /* official protocol name */
-        char     *  * p_aliases;  /* alias list */
-        short   p_proto;                /* protocol # */
-};
 
 /*
  * Constants and structures defined by the internet system,
