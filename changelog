@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2672 2004-02-10 15:38:24 sandervl Exp $ */
+/* $Id: changelog,v 1.2673 2004-02-11 15:38:47 sandervl Exp $ */
+
+ 2004-02-11: Sander van Leeuwen <sandervl@innotek   >
+    - USER32:   o HODIN_PREWINDOWCREATEDA extension added
 
  2004-02-10: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Added ODIN_SetProcessDword function to change the startup
