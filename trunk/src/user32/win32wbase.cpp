@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.151 2000-02-04 17:17:56 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.152 2000-02-05 14:08:53 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -125,8 +125,6 @@ void Win32BaseWindow::Init()
   contextHelpId    = 0;
 
   pOldFrameProc = NULL;
-  borderWidth   = 0;
-  borderHeight  = 0;
 
   hwndLinkAfter    = HWND_BOTTOM;
   flags            = 0;
@@ -482,9 +480,9 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         fTaskList = TRUE;
   }
 
-  DWORD dwOSWinStyle, dwOSFrameStyle;
+  DWORD dwOSWinStyle;
 
-  OSLibWinConvertStyle(dwStyle, &dwExStyle, &dwOSWinStyle, &dwOSFrameStyle, &borderWidth, &borderHeight);
+  OSLibWinConvertStyle(dwStyle, &dwExStyle, &dwOSWinStyle);
 
   if(HIWORD(cs->lpszName))
   {
@@ -2732,6 +2730,8 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value, BOOL fUnicode)
                 SendInternalMessageA(WM_STYLECHANGING,GWL_STYLE,(LPARAM)&ss);
                 setStyle(ss.styleNew);
                 SendInternalMessageA(WM_STYLECHANGED,GWL_STYLE,(LPARAM)&ss);
+    		OSLibSetWindowStyle(getOS2FrameWindowHandle(), getStyle(), getExStyle(),
+                                    windowClass->getStyle() & CS_SAVEBITS);
 #ifdef DEBUG
                 PrintWindowStyle(ss.styleNew, 0);
 #endif
@@ -2739,23 +2739,27 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value, BOOL fUnicode)
         }
         case GWL_WNDPROC:
                 oldval = (LONG)WINPROC_GetProc(win32wndproc, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A);
-                //WINPROC_SetProc((HWINDOWPROC *)&win32wndproc, (WNDPROC)value, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A, WIN_PROC_WINDOW);
                 WINPROC_SetProc((HWINDOWPROC *)&win32wndproc, (WNDPROC)value, WINPROC_GetProcType(win32wndproc), WIN_PROC_WINDOW);
                 return oldval;
+
         case GWL_HINSTANCE:
                 oldval = hInstance;
                 hInstance = value;
                 return oldval;
+
         case GWL_HWNDPARENT:
                 return SetParent((HWND)value);
+
         case GWL_ID:
                 oldval = getWindowId();
                 setWindowId(value);
                 return oldval;
+
         case GWL_USERDATA:
                 oldval = userData;
                 userData = value;
                 return oldval;
+
         default:
                 if(index >= 0 && index/4 < nrUserWindowLong)
                 {
