@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.2470 2003-02-06 12:03:36 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2471 2003-02-06 13:10:12 sandervl Exp $ */
 
  2002-02-06: Dietrich Teickner <Dietrich_Teickner@t-online   >
     - USER32:   o Edit control: fixed heap corruption in undo buffer
@@ -7,6 +7,9 @@
     - ODINCRT:  o Rewrote critical sections to be safe on SMP systems
                   (previous implementation had one flaw that happened
                    to be triggered often on my SMP machine)
+    - USER32:   o Edit control: Always kill the timer if in captured state. 
+                  The app can call ReleaseCapture before we get the WM_LBUTTONUP
+                  message.
 
  2003-02-05: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Check ESP when calling the entrypoint of a newly created thread.
