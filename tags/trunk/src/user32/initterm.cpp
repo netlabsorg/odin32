@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.10 1999-09-23 10:33:59 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.11 1999-10-20 13:46:25 sandervl Exp $ */
 
 /*
  * USER32 DLL entry point
@@ -26,6 +26,7 @@
 /* Include files */
 #define  INCL_DOSMODULEMGR
 #define  INCL_DOSPROCESS
+#define  INCL_DOSSEMAPHORES
 #include <os2wrap.h>    //Odin32 OS/2 api wrappers
 #include <stdlib.h>
 #include <stdio.h>

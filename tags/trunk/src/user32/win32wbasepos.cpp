@@ -1,4 +1,4 @@
-/* $Id: win32wbasepos.cpp,v 1.3 1999-10-17 15:46:10 sandervl Exp $ */
+/* $Id: win32wbasepos.cpp,v 1.4 1999-10-20 13:46:28 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (nonclient/position methods)
  *
@@ -185,7 +185,7 @@ UINT Win32BaseWindow::MinMaximize(UINT cmd, LPRECT lpRect )
  * Get the minimized and maximized information for a window.
  */
 void Win32BaseWindow::GetMinMaxInfo(POINT *maxSize, POINT *maxPos,
-                                POINT *minTrack, POINT *maxTrack )
+                                    POINT *minTrack, POINT *maxTrack )
 {
     MINMAXINFO MinMax;
     INT xinc, yinc;
@@ -369,15 +369,15 @@ void Win32BaseWindow::NC_AdjustRectOuter(LPRECT rect, DWORD style, BOOL menu, DW
 
         if ((style & WS_CAPTION) == WS_CAPTION)
         {
-	        if (exStyle & WS_EX_TOOLWINDOW)
-		        rect->top -= GetSystemMetrics(SM_CYSMCAPTION);
-	        else
-		        rect->top -= GetSystemMetrics(SM_CYCAPTION);
+            if (exStyle & WS_EX_TOOLWINDOW)
+                rect->top -= GetSystemMetrics(SM_CYSMCAPTION);
+            else
+                rect->top -= GetSystemMetrics(SM_CYCAPTION);
         }
 //    }
 
     if (menu)
-	    rect->top -= GetSystemMetrics(SM_CYMENU);
+        rect->top -= GetSystemMetrics(SM_CYMENU);
 }
 /******************************************************************************
  * NC_AdjustRectInner95
@@ -409,13 +409,40 @@ void Win32BaseWindow::NC_AdjustRectInner(LPRECT rect, DWORD style, DWORD exStyle
     if(style & WS_ICONIC) return;
 
     if (exStyle & WS_EX_CLIENTEDGE)
-	    InflateRect(rect, GetSystemMetrics(SM_CXEDGE), GetSystemMetrics(SM_CYEDGE));
+        InflateRect(rect, GetSystemMetrics(SM_CXEDGE), GetSystemMetrics(SM_CYEDGE));
 
     if (exStyle & WS_EX_STATICEDGE)
-	    InflateRect(rect, GetSystemMetrics(SM_CXBORDER), GetSystemMetrics(SM_CYBORDER));
+        InflateRect(rect, GetSystemMetrics(SM_CXBORDER), GetSystemMetrics(SM_CYBORDER));
 
     if (style & WS_VSCROLL) rect->right  += GetSystemMetrics(SM_CXVSCROLL);
     if (style & WS_HSCROLL) rect->bottom += GetSystemMetrics(SM_CYHSCROLL);
+}
+/***********************************************************************
+ *           WINPOS_HandleWindowPosChanging16
+ *
+ * Default handling for a WM_WINDOWPOSCHANGING. Called from DefWindowProc().
+ */
+LONG Win32BaseWindow::HandleWindowPosChanging(WINDOWPOS *winpos)
+{
+ POINT maxSize, minTrack;
+
+    if (winpos->flags & SWP_NOSIZE)
+        return 1;
+
+    if ((getStyle() & WS_THICKFRAME) ||
+	    ((getStyle() & (WS_POPUP | WS_CHILD)) == 0))
+    {
+	    GetMinMaxInfo(&maxSize, NULL, &minTrack, NULL );
+	    if (maxSize.x < winpos->cx) winpos->cx = maxSize.x;
+	    if (maxSize.y < winpos->cy) winpos->cy = maxSize.y;
+	    if (!(getStyle() & WS_MINIMIZE))
+	    {
+    	    if (winpos->cx < minTrack.x ) winpos->cx = minTrack.x;
+    	    if (winpos->cy < minTrack.y ) winpos->cy = minTrack.y;
+    	}
+    	return 0;
+    }
+    return 1;
 }
 //******************************************************************************
 //******************************************************************************

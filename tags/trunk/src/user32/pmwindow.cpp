@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.36 1999-10-19 12:32:13 dengert Exp $ */
+/* $Id: pmwindow.cpp,v 1.37 1999-10-20 13:46:26 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -21,6 +21,7 @@
 #include <misc.h>
 #include <win32wbase.h>
 #include <win32dlg.h>
+#include "win32wdesktop.h"
 #include "pmwindow.h"
 #include "oslibwin.h"
 #include "oslibutil.h"
@@ -250,13 +251,13 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
       PSWP     pswp = (PSWP)mp1;
       SWP      swpOld;
       WINDOWPOS wp;
-      ULONG    parentHeight = 0;
+      ULONG     parentHeight = 0;
       HWND      hParent = NULLHANDLE, hFrame = NULLHANDLE;
 
-        dprintf(("OS2: WM_ADJUSTWINDOWPOS %x %x (%d,%d) (%d,%d)", hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
+        dprintf(("OS2: WM_ADJUSTWINDOWPOS %x %x %x (%d,%d) (%d,%d)", hwnd, pswp->hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
 
         if ((pswp->fl & (SWP_SIZE | SWP_MOVE | SWP_ZORDER)) == 0) break;
-        if (!win32wnd->CanReceiveSizeMsgs())    break;
+        if(!win32wnd->CanReceiveSizeMsgs()) break;
 
         WinQueryWindowPos(hwnd, &swpOld);
 
@@ -267,9 +268,8 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                 }
                 else    break;
             }
-            else
-                hFrame = win32wnd->getOS2FrameWindowHandle();
         }
+        hFrame = win32wnd->getOS2FrameWindowHandle();
         OSLibMapSWPtoWINDOWPOS(pswp, &wp, &swpOld, hParent, hFrame);
 
         wp.hwnd = win32wnd->getWindowHandle();
@@ -278,25 +278,32 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
            Win32BaseWindow *wndAfter = Win32BaseWindow::GetWindowFromOS2Handle(pswp->hwndInsertBehind);
            if(wndAfter) wp.hwndInsertAfter = wndAfter->getWindowHandle();
         }
-        win32wnd->MsgPosChanging((LPARAM)&wp);
+        if(win32wnd->MsgPosChanging((LPARAM)&wp) == 0)
+        {//app or default window handler changed wp
+            dprintf(("OS2: WM_ADJUSTWINDOWPOS, app changed windowpos struct"));
+            dprintf(("%x (%d,%d), (%d,%d)", pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
+            OSLibMapWINDOWPOStoSWP(&wp, pswp, &swpOld, hParent, hFrame);
+            dprintf(("%x (%d,%d), (%d,%d)", pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
+            //TODO: What should we return here? 0 means no changes, but the AWP flags
+            //      aren't very useful either
+        }
         break;
     }
 
     case WM_WINDOWPOSCHANGED:
     {
-      PSWP      pswp  = (PSWP)mp1;
-      PSWP      pswpo = pswp + 1;
+      PSWP      pswp   = (PSWP)mp1;
+      SWP       swpOld = *(pswp + 1);
       WINDOWPOS wp;
       ULONG     parentHeight = 0;
       HWND      hParent = NULLHANDLE, hFrame = NULLHANDLE;
-      LONG      yDelta = pswp->cy - pswpo->cy;
-      LONG      xDelta = pswp->cx - pswpo->cx;
-      ULONG     classStyle;
+      LONG      yDelta = pswp->cy - swpOld.cy;
+      LONG      xDelta = pswp->cx - swpOld.cx;
 
         dprintf(("OS2: WM_WINDOWPOSCHANGED %x %x (%d,%d) (%d,%d)", hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
 
         if ((pswp->fl & (SWP_SIZE | SWP_MOVE | SWP_ZORDER)) == 0) break;
-        if (!win32wnd->CanReceiveSizeMsgs())    break;
+        if(!win32wnd->CanReceiveSizeMsgs()) break;
 
         if(pswp->fl & (SWP_MOVE | SWP_SIZE)) {
             if (win32wnd->isChild()) {
@@ -305,28 +312,12 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                 }
                 else    goto RunDefWndProc; //parent has just been destroyed
             }
-            else
-                hFrame = WinQueryWindow(hwnd, QW_PARENT);
         }
-        OSLibMapSWPtoWINDOWPOS(pswp, &wp, pswpo, hParent, hFrame);
+        hFrame = WinQueryWindow(hwnd, QW_PARENT);
+        OSLibMapSWPtoWINDOWPOS(pswp, &wp, &swpOld, hParent, hFrame);
 
-        SWP swpFrame;
-        WinQueryWindowPos(WinQueryWindow(hwnd, QW_PARENT), &swpFrame);
-        dprintf(("WINDOWPOSCHANGE %x %x %x (%d,%d) (%d,%d)", win32wnd->getWindowHandle(), win32wnd->getOS2FrameWindowHandle(),
-                         swpFrame.fl,swpFrame.x, swpFrame.y, swpFrame.cx, swpFrame.cy));
-        POINTL point;
-
-        point.x = swpFrame.x;
-        point.y = swpFrame.y;
-        if(win32wnd->getParent() != NULL)
-        {
-                WinMapWindowPoints(WinQueryWindow(hwnd, QW_PARENT), HWND_DESKTOP,
-                                   &point, 1);
-        }
-        point.y = OSLibQueryScreenHeight() - point.y - swpFrame.cy;
-
-        win32wnd->setWindowRect(point.x, point.y, point.x+swpFrame.cx, point.y+swpFrame.cy);
-        win32wnd->setClientRect(pswpo->x, pswpo->y, pswpo->x + pswpo->cx, pswpo->y + pswpo->cy);
+        win32wnd->setWindowRect(wp.x, wp.y, wp.x+wp.cx, wp.y+wp.cy);
+        win32wnd->setClientRect(swpOld.x, swpOld.y, swpOld.x + swpOld.cx, swpOld.y + swpOld.cy);
 
         wp.hwnd = win32wnd->getWindowHandle();
         if ((pswp->fl & SWP_ZORDER) && (pswp->hwndInsertBehind > HWND_BOTTOM))
@@ -334,7 +325,6 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
            Win32BaseWindow *wndAfter = Win32BaseWindow::GetWindowFromOS2Handle(pswp->hwndInsertBehind);
            wp.hwndInsertAfter = wndAfter->getWindowHandle();
         }
-        classStyle = win32wnd->getClass()->getStyle();
 
         if (yDelta != 0 || xDelta != 0)
         {
@@ -394,8 +384,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         }
         win32wnd->MsgPosChanged((LPARAM)&wp);
 
-    goto RunDefWndProc;
-//        break;
+        goto RunDefWndProc;
     }
 
     case WM_MOVE:
@@ -610,28 +599,6 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         }
         break;
     }
-
-    //**************************************************************************
-    //Slider messages
-    //**************************************************************************
-/* CB: handled internally
-    case WM_VSCROLL:
-    case WM_HSCROLL:
-    {
-     ULONG scrollPos, scrollCode, scrollMsg;
-
-    scrollCode = SHORT2FROMMP(mp2);
-    scrollPos  = SHORT1FROMMP(mp2);
-    scrollMsg  = msg;
-
-    OSLibTranslateScrollCmdAndMsg(&scrollMsg, &scrollCode);
-
-        if(win32wnd->MsgScroll(scrollMsg, scrollCode, scrollPos)) {
-            goto RunDefWndProc;
-        }
-    break;
-    }
-*/
 
     case WM_CONTROL:
 
@@ -852,6 +819,7 @@ VirtualKeyFound:
             BOOL erased = sendEraseBkgnd (win32wnd);
             win32wnd->setEraseBkgnd (!erased, !erased);
         }
+
         break;
     }
 
@@ -859,7 +827,7 @@ VirtualKeyFound:
         dprintf(("OS2: WM_PAINT %x", hwnd));
 
         if (WinQueryUpdateRect (hwnd, NULL)) {
-            if (win32wnd->isEraseBkgnd() && !win32wnd->isSupressErase()) {
+            if (!win32wnd->isSupressErase()) {
                 BOOL erased = sendEraseBkgnd (win32wnd);
                 win32wnd->setEraseBkgnd (!erased, !erased);
             }
@@ -938,7 +906,7 @@ MRESULT EXPENTRY Win32SubclassWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARA
     case WM_WINDOWPOSCHANGED:
       {
         PSWP      pswp  = (PSWP)mp1;
-        PSWP      pswpo = pswp + 1;
+        SWP       swpOld = *(pswp + 1);
         WINDOWPOS wp;
         HWND      hParent = NULLHANDLE, hFrame = NULLHANDLE;
 
@@ -947,20 +915,10 @@ MRESULT EXPENTRY Win32SubclassWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARA
         if(pswp->fl & (SWP_MOVE | SWP_SIZE))
           hFrame = WinQueryWindow(hwnd, QW_PARENT);
 
-        OSLibMapSWPtoWINDOWPOS(pswp,&wp,pswpo,hParent,hFrame);
+        OSLibMapSWPtoWINDOWPOS(pswp,&wp, &swpOld,hParent,hFrame);
 
-        SWP swpFrame;
-        WinQueryWindowPos(WinQueryWindow(hwnd, QW_PARENT), &swpFrame);
-        POINTL point;
-
-        point.x = swpFrame.x;
-        point.y = swpFrame.y;
-        WinMapWindowPoints(WinQueryWindow(hwnd, QW_PARENT), HWND_DESKTOP,
-                           &point, 1);
-        point.y = OSLibQueryScreenHeight() - point.y - swpFrame.cy;
-
-        win32wnd->setWindowRect(point.x, point.y, point.x+swpFrame.cx, point.y+swpFrame.cy);
-        win32wnd->setClientRect(pswpo->x, pswpo->y, pswpo->x + pswpo->cx, pswpo->y + pswpo->cy);
+        win32wnd->setWindowRect(wp.x, wp.y, wp.x+wp.cx, wp.y+wp.cy);
+        win32wnd->setClientRect(swpOld.x, swpOld.y, swpOld.x + swpOld.cx, swpOld.y + swpOld.cy);
 
         win32wnd->MsgPosChanged((LPARAM)&wp);
 
