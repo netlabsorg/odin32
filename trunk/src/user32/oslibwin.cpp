@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.125 2002-08-21 16:41:36 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.126 2002-08-27 09:30:50 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -32,6 +32,9 @@
 
 #define DBG_LOCALLOG    DBG_oslibwin
 #include "dbglocal.h"
+
+//Undocumented PM WS_TOPMOST style; similar to WS_EX_TOPMOST in Windows
+#define WS_TOPMOST                 0x00200000L
 
 //******************************************************************************
 //******************************************************************************
@@ -123,6 +126,8 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle, ULO
         *OSWinStyle |= WS_CLIPSIBLINGS;
   if(dwStyle & WS_CLIPCHILDREN_W)
         *OSWinStyle |= WS_CLIPCHILDREN;
+  if(dwExStyle & WS_EX_TOPMOST_W)
+        *OSWinStyle |= WS_TOPMOST;
 
   if(fOS2Look) {
       if((dwStyle & WS_CAPTION_W) == WS_CAPTION_W) {
@@ -995,6 +1000,11 @@ void OSLibSetWindowStyle(HWND hwndFrame, HWND hwndClient, ULONG dwStyle, ULONG d
          dwWinStyle |= WS_DISABLED;
     }
     else dwWinStyle &= ~WS_DISABLED;
+
+    if(dwExStyle & WS_EX_TOPMOST_W) {
+         dwWinStyle |= WS_TOPMOST;
+    }
+    else dwWinStyle &= ~WS_TOPMOST;
 
     if(dwStyle & WS_CLIPSIBLINGS_W) {
          dwWinStyle |= WS_CLIPSIBLINGS;
