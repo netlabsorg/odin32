@@ -1,13 +1,13 @@
 /*
   Copyright (C) 1997-2001 Shigeru Chiba, Tokyo Institute of Technology.
 
-  Permission to use, copy, distribute and modify this software and   
-  its documentation for any purpose is hereby granted without fee,        
-  provided that the above copyright notice appear in all copies and that 
-  both that copyright notice and this permission notice appear in 
+  Permission to use, copy, distribute and modify this software and
+  its documentation for any purpose is hereby granted without fee,
+  provided that the above copyright notice appear in all copies and that
+  both that copyright notice and this permission notice appear in
   supporting documentation.
 
-  Shigeru Chiba makes no representations about the suitability of this 
+  Shigeru Chiba makes no representations about the suitability of this
   software for any purpose.  It is provided "as is" without express or
   implied warranty.
 */
@@ -154,10 +154,23 @@ void Program::Replace(char* startpos, char* endpos, Ptree* text)
     }
 }
 
+#ifdef SDS
+uint Program::LineNumber(char* ptr, char*& filename, int& filename_length)
+{
+   int col_num, abs_pos;
+   return LineNumber(ptr, filename, filename_length, col_num, abs_pos);
+}
+#endif
+
 /*
   LineNumber() returns the line number of the line pointed to by PTR.
 */
+#ifdef SDS
+uint Program::LineNumber(char* ptr, char*& filename, int& filename_length,
+			             int &col_num, int &abs_pos)
+#else
 uint Program::LineNumber(char* ptr, char*& filename, int& filename_length)
+#endif
 {
     sint n;
     int  len;
@@ -165,6 +178,12 @@ uint Program::LineNumber(char* ptr, char*& filename, int& filename_length)
 
     int nline = 0;
     uint pos = uint(ptr - buf);
+
+    #ifdef SDS
+    int column = -1;
+    uint start = pos;
+    #endif
+
     if(pos > size){
 	// error?
 	filename = defaultname;
@@ -172,13 +191,21 @@ uint Program::LineNumber(char* ptr, char*& filename, int& filename_length)
 	return 0;
     }
 
+    #ifdef SDS
+    abs_pos = pos;
+    #endif
+
     sint line_number = -1;
     filename_length = 0;
 
     while(pos > 0){
 	switch(Ref(--pos)){
 	case '\n' :
-	    ++nline;
+            #ifdef SDS
+            if (column == -1)
+                column = start - pos;
+            #endif
+            ++nline;
 	    break;
 	case '#' :
 	    len = 0;
@@ -196,7 +223,14 @@ uint Program::LineNumber(char* ptr, char*& filename, int& filename_length)
 	}
 
 	if(line_number >= 0 && filename_length > 0)
+        #ifdef SDS
+        {
+            col_num = column;
+            return line_number;
+        }
+        #else
 	    return line_number;
+        #endif
     }
 
     if(filename_length == 0){
@@ -206,6 +240,10 @@ uint Program::LineNumber(char* ptr, char*& filename, int& filename_length)
 
     if(line_number < 0)
 	line_number = nline + 1;
+
+    #ifdef SDS
+    col_num = column;
+    #endif
 
     return line_number;
 }
@@ -255,7 +293,7 @@ void Program::Write(ostream& out, const char* file_name)
 	    ++nlines;
 	}
 
-#if defined(_MSC_VER) || defined(IRIX_CC)
+#if defined(_MSC_VER) || defined(IRIX_CC) || defined(__IBMCPP__)
 	out << "#line " << nlines + 1 << " \"" << file_name << "\"\n";
 #else
 	out << "# " << nlines + 1 << " \"" << file_name << "\"\n";
@@ -286,7 +324,7 @@ void Program::Write(ostream& out, const char* file_name)
 	    }
 	}
 
-#if defined(_MSC_VER) || defined(IRIX_CC)
+#if defined(_MSC_VER) || defined(IRIX_CC) || defined(__IBMCPP__)
 	out << "\n#line " << line_number << ' ';
 #else
 	out << "\n# " << line_number << ' ';
@@ -308,7 +346,7 @@ void Program::Write(ostream& out, const char* file_name)
 	    ++nlines;
     }
 
-#if defined(_MSC_VER) || defined(IRIX_CC)
+#if defined(_MSC_VER) || defined(IRIX_CC) || defined(OS2)
     out << "\n#line " << nlines + 2 << " \"" << file_name << "\"\n";
 #else
     out << "\n# " << nlines + 2 << " \"" << file_name << "\"\n";

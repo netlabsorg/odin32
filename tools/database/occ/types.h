@@ -52,7 +52,7 @@
 typedef int bool;
 #endif
 
-#if defined(OS2) && defined(__IBMCPP__)
+#if defined(OS2) && defined(__IBMCPP__)// && !defined(__opencxx)
 typedef int bool;
 #define true  TRUE
 #define false FALSE

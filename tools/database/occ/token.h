@@ -69,8 +69,14 @@ public:
 
     Ptree* GetComments();
     Ptree* GetComments2();
+    #ifdef SDS
+    Ptree* GetAllComments();
+    #endif
 
     uint LineNumber(char*, char*&, int&);
+    #ifdef SDS
+    uint LineNumber(char*, char*&, int&, int&, int&);
+    #endif
 
     static bool RecordKeyword(char*, int);
     static bool Reify(Ptree*, unsigned int&);
@@ -138,6 +144,9 @@ private:
 
     static HashTable* user_keywords;
     static Ptree* comments;
+    #ifdef SDS
+    static Ptree* all_comments;
+    #endif
 };
 
 // convenient functions
