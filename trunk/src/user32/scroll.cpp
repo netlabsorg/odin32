@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.10 1999-10-17 18:09:22 sandervl Exp $ */
+/* $Id: scroll.cpp,v 1.11 1999-10-18 10:54:03 sandervl Exp $ */
 /*
  * Scrollbar control
  *
@@ -691,19 +691,37 @@ void SCROLL_DrawScrollBar( HWND hwnd, HDC hdc, INT nBar,
 static void SCROLL_RefreshScrollBar( HWND hwnd, INT nBar,
                                      BOOL arrows, BOOL interior )
 {
-    //HDC hdc = GetDCEx( hwnd, 0,
-    //                       DCX_CACHE | ((nBar == SB_CTL) ? 0 : DCX_WINDOW) );
-HDC hdc;
+  Win32BaseWindow *window;
+  HWND hwndScroll;
+  HDC hdc;
 
-return;
-//CB: bug: paints in client window!
-//    GetClientRect returns wrong window size after GetDC
-//    why?!?
+    //SvL: Get scrollbar handle from parent window
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if(!window && nBar != SB_CTL) {
+        dprintf(("SCROLL_RefreshScrollBar window %x not found!", hwnd));
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        return;
+    }
+    if(nBar == SB_VERT) 
+    {
+    	hwndScroll = Win32BaseWindow::OS2ToWin32Handle(window->getVertScrollHandle());
+    }
+    else 
+    if(nBar == SB_HORZ)
+    {
+	hwndScroll = Win32BaseWindow::OS2ToWin32Handle(window->getHorzScrollHandle());
+    }
+    else hwndScroll = hwnd;
+
+    if(hwndScroll == 0)
+	return;
+
+    hdc = GetDCEx( hwndScroll, 0, DCX_CACHE | ((nBar == SB_CTL) ? 0 : DCX_WINDOW));
 
     if (!hdc) return;
 
-    SCROLL_DrawScrollBar( hwnd, hdc, nBar, arrows, interior );
-    ReleaseDC( hwnd, hdc );
+    SCROLL_DrawScrollBar( hwndScroll, hdc, nBar, arrows, interior );
+    ReleaseDC( hwndScroll, hdc );
 }
 /***********************************************************************
  *           SCROLL_HandleKbdEvent
@@ -1300,18 +1318,6 @@ INT WINAPI SetScrollInfo(
   Win32BaseWindow *window;
   INT action;
   INT retVal;
-
-/* CB: handled here, todo: hide/show
-    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
-    if(!window && nBar != SB_CTL) {
-        dprintf(("SetScrollInfo window not found!"));
-        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
-        return FALSE;
-    }
-    if(window) {
-        return window->setScrollInfo(nBar, (SCROLLINFO *)info, bRedraw);
-    }
-*/
 
     retVal = SCROLL_SetScrollInfo( hwnd, nBar, info, &action );
     if( action & SA_SSI_HIDE )

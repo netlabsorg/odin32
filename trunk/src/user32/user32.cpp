@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.43 1999-10-17 15:46:08 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.44 1999-10-18 10:54:04 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -686,15 +686,6 @@ BOOL WIN32API DragDetect(HWND  hwnd,
 }
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API GetCapture(void)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetCapture\n");
-#endif
-    return Win32Window::OS2ToWin32Handle(O32_GetCapture());
-}
-//******************************************************************************
-//******************************************************************************
 UINT WIN32API GetDoubleClickTime(void)
 {
 #ifdef DEBUG
@@ -734,17 +725,25 @@ VOID WIN32API mouse_event(DWORD dwFlags,
 //******************************************************************************
 BOOL WIN32API ReleaseCapture(void)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  ReleaseCapture\n");
-#endif
+    dprintf(("USER32:  ReleaseCapture"));
     return O32_ReleaseCapture();
+}
+//******************************************************************************
+//******************************************************************************
+HWND WIN32API GetCapture(void)
+{
+ HWND hwnd;
+
+    hwnd = Win32Window::OS2ToWin32Handle(O32_GetCapture());
+    dprintf(("USER32: GetCapture returned %x", hwnd));
+    return hwnd;
 }
 //******************************************************************************
 //******************************************************************************
 HWND WIN32API SetCapture( HWND hwnd)
 {
 #ifdef DEBUG
-    WriteLog("USER32:  SetCapture\n");
+    WriteLog("USER32: SetCapture %x", hwnd);
 #endif
     hwnd = Win32Window::Win32ToOS2Handle(hwnd);
     return Win32Window::OS2ToWin32Handle(O32_SetCapture(hwnd));

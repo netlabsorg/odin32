@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.52 1999-10-17 20:18:45 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.53 1999-10-18 10:54:04 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -606,12 +606,12 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
   if (dwStyle & WS_HSCROLL)
   {
         hwndHorzScroll = OSLibWinQueryScrollBarHandle(OS2HwndFrame, OSLIB_HSCROLL);
-//        OSLibWinShowScrollBar(OS2HwndFrame, hwndHorzScroll, OSLIB_HSCROLL, FALSE, TRUE);
+        OSLibWinShowScrollBar(OS2HwndFrame, hwndHorzScroll, OSLIB_HSCROLL, FALSE, TRUE);
   }
 
   if (dwStyle & WS_VSCROLL) {
         hwndVertScroll = OSLibWinQueryScrollBarHandle(OS2HwndFrame, OSLIB_VSCROLL);
-//        OSLibWinShowScrollBar(OS2HwndFrame, hwndVertScroll, OSLIB_VSCROLL, FALSE, TRUE);
+        OSLibWinShowScrollBar(OS2HwndFrame, hwndVertScroll, OSLIB_VSCROLL, FALSE, TRUE);
   }
 
   //CB: switch off -> OS/2 scrollbars
@@ -642,13 +642,9 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
         setWindowId((DWORD)cs->hMenu);
   }
 
-  //Subclass frame
-//  if(isFrameWindow() && (HAS_3DFRAME(dwExStyle) ||
-//     (!HAS_DLGFRAME(dwStyle, dwExStyle) && (dwStyle & (WS_DLGFRAME|WS_BORDER|WS_THICKFRAME)) == WS_BORDER)))
-//  {
-        pOldFrameProc = FrameSubclassFrameWindow(this);
-        if (isChild()) FrameSetBorderSize(this,TRUE);
-//  }
+  // Subclass frame
+  pOldFrameProc = FrameSubclassFrameWindow(this);
+  if (isChild()) FrameSetBorderSize(this,TRUE);
 
   /* Send the WM_CREATE message
    * Perhaps we shouldn't allow width/height changes as well.
@@ -1947,11 +1943,11 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
         break;
     }
 
-#if 0
-    if(showstate & SWPOS_SHOW && (getStyle() & WS_VISIBLE) == 0) {
-        SetWindowLongA(GWL_STYLE, getStyle() | WS_VISIBLE);
+    if(showstate & SWPOS_SHOW) {
+            setStyle(getStyle() | WS_VISIBLE);
     }
-#endif
+    else    setStyle(getStyle() & ~WS_VISIBLE);
+
     BOOL rc = OSLibWinShowWindow(OS2HwndFrame, showstate);
     return rc;
 }
@@ -2485,6 +2481,9 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value)
         {
            STYLESTRUCT ss;
 
+                if(dwExStyle == value)
+                    return value;
+
                 ss.styleOld = dwExStyle;
                 ss.styleNew = value;
                 dprintf(("SetWindowLong GWL_EXSTYLE %x new style %x", getWindowHandle(), value));
@@ -2496,6 +2495,9 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value)
         case GWL_STYLE:
         {
            STYLESTRUCT ss;
+
+                if(dwStyle == value)
+                    return value;
 
                 ss.styleOld = dwStyle;
                 ss.styleNew = value;
@@ -2670,7 +2672,8 @@ HWND Win32BaseWindow::OS2ToWin32Handle(HWND hwnd)
     if(window) {
             return window->getWindowHandle();
     }
-    else    return hwnd;    //OS/2 window handle
+    else    return 0;
+//    else    return hwnd;    //OS/2 window handle
 }
 //******************************************************************************
 //******************************************************************************
