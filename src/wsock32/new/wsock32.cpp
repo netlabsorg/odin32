@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.7 1999-12-02 07:47:26 phaller Exp $ */
+/* $Id: wsock32.cpp,v 1.8 1999-12-02 07:58:54 phaller Exp $ */
 
 /*
  *
@@ -13,7 +13,9 @@
 /* Remark:
  * 1999/11/21 experimental rewrite using IBM's PMWSock only
  *            -> some structural differences remain! (hostent)
- *            -> this cannot work yet!
+ * 1999/12/01 experimental rewrite works (TELNET)
+ *            -> open issue: WSASetLastError / WSAGetLastError
+ *               call SetLastError / GetLastError according to docs
  *
  * identical structures:
  * - sockaddr_in
