@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 1999-08-21 12:29:29 sandervl Exp $
+# $Id: makefile,v 1.7 1999-10-23 12:35:14 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -20,7 +20,8 @@ CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 TARGET = dsound
 
-OBJS =  dsound.obj os2dsound.obj initterm.obj misc.obj os2sndbuffer.obj
+#OBJS =  dsound.obj os2dsound.obj initterm.obj misc.obj os2sndbuffer.obj
+OBJS =  dsound.obj initterm.obj
 
 all: $(TARGET).dll $(TARGET).lib
 
