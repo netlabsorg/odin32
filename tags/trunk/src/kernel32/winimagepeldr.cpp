@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.24 1999-12-14 12:50:46 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.25 1999-12-19 17:41:15 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -300,12 +300,14 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
    imageSize = 0;
    if ((psh = (PIMAGE_SECTION_HEADER)SECTIONHDROFF (win32file)) != NULL) {
     dprintf((LOG, "*************************PE SECTIONS START**************************" ));
-    for (i=0; i<nSections; i++) {
-        dprintf((LOG, "Raw data size:       %x", psh[i].SizeOfRawData ));
-        dprintf((LOG, "Virtual Address:     %x", psh[i].VirtualAddress ));
-        dprintf((LOG, "Virtual Size:        %x", psh[i].Misc.VirtualSize ));
-        dprintf((LOG, "Pointer to raw data: %x", psh[i].PointerToRawData ));
-        dprintf((LOG, "Section flags:       %x\n\n", psh[i].Characteristics ));
+    for (i=0; i<nSections; i++) { 
+        dprintf((LOG, "Raw data size:        %x", psh[i].SizeOfRawData ));
+        dprintf((LOG, "Virtual Address:      %x", psh[i].VirtualAddress ));
+        dprintf((LOG, "Virtual Address Start:%x", psh[i].VirtualAddress+oh.ImageBase ));
+        dprintf((LOG, "Virtual Address End:  %x", psh[i].VirtualAddress+oh.ImageBase+psh[i].Misc.VirtualSize ));
+        dprintf((LOG, "Virtual Size:         %x", psh[i].Misc.VirtualSize ));
+        dprintf((LOG, "Pointer to raw data:  %x", psh[i].PointerToRawData ));
+        dprintf((LOG, "Section flags:        %x\n\n", psh[i].Characteristics ));
         if(strcmp(psh[i].Name, ".reloc") == 0) {
             dprintf((LOG, ".reloc" ));
             addSection(SECTION_RELOC, psh[i].PointerToRawData,
@@ -504,9 +506,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
   }
 #ifdef COMMIT_ALL
   else {
-   for (i=0; i<nSections; i++) {
-	commitPage((ULONG)section[i].realvirtaddr, FALSE, COMPLETE_SECTION);
-   }
+	commitPage((ULONG)section[0].realvirtaddr, FALSE, COMPLETE_SECTION);
   }
 #endif
 
@@ -558,7 +558,7 @@ BOOL Win32PeLdrImage::commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPage
 
   rc = DosQueryMem((PVOID)virtAddress, &range, &attr);
   if(rc) {
-	dprintf((LOG, "Win32PeLdrImage::commitPage: DosQueryMem returned %d", rc));
+	dprintf((LOG, "Win32PeLdrImage::commitPage: DosQueryMem for %x returned %d", virtAddress, rc));
 	return FALSE;
   }
   if(attr & PAG_COMMIT) {
