@@ -1,4 +1,12 @@
-/* $Id: changelog,v 1.1542 2001-06-23 19:43:19 sandervl Exp $ */
+/* $Id: changelog,v 1.1543 2001-06-24 04:49:13 bird Exp $ */
+
+ 2001-06-24: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - src/makefile:
+                o Added empty subdir oslib to the NOTTOBEMADE list.
+                  (Please don't forget this when you create empty directories.
+                   All subdirs excluding the one mentioned in the lists in
+                   makefile is made. So don't add a new directory without
+                   either a makefile in it or updating /src/makefile.)
 
  2001-06-23: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o HeapSize must return -1 for invalid pointer
