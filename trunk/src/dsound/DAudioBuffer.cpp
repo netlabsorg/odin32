@@ -1,4 +1,4 @@
-/* $Id: DAudioBuffer.cpp,v 1.2 2001-04-30 21:06:37 sandervl Exp $ */
+/* $Id: DAudioBuffer.cpp,v 1.3 2002-04-08 11:23:10 sandervl Exp $ */
 
 /*
  * DirectSound SoundBuffer (secondary) class (DirectAudio)
@@ -90,7 +90,7 @@ IDirectAudioBuffer::IDirectAudioBuffer(OS2IDirectSound *DSound, const DSBUFFERDE
         return;
     }
 
-    wmutex.enter(VMUTEX_WAIT_FOREVER);
+    wmutex.enter();
     next = dsbroot;
     dsbroot = this;
     wmutex.leave();
@@ -139,7 +139,7 @@ IDirectAudioBuffer::IDirectAudioBuffer(OS2IDirectSound *DSound, IDirectAudioBuff
         return;
     }
 
-    wmutex.enter(VMUTEX_WAIT_FOREVER);
+    wmutex.enter();
     next = dsbroot;
     dsbroot = this;
     wmutex.leave();
@@ -169,7 +169,7 @@ IDirectAudioBuffer::~IDirectAudioBuffer()
     IDirectAudioBuffer *cur  = dsbroot;
     IDirectAudioBuffer *prev = NULL;
 
-    wmutex.enter(VMUTEX_WAIT_FOREVER);
+    wmutex.enter();
     if (this == dsbroot)  // is this the first DAudioBuffer?
         dsbroot = next;
     else {                // walk the chain
@@ -314,6 +314,7 @@ HRESULT IDirectAudioBuffer::GetCurrentPosition(LPDWORD lpdwCurrentPlayCursor,
     }
 
     *lpdwCurrentPlayCursor  = daudio->getPosition(lpdwCurrentWriteCursor);
+    *lpdwCurrentPlayCursor = *lpdwCurrentPlayCursor % bufferdesc.dwBufferBytes;
     dprintf(("  PlayPos %d, WritePos %d", *lpdwCurrentPlayCursor, *lpdwCurrentWriteCursor));
     return DS_OK;
 }
