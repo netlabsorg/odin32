@@ -1,4 +1,4 @@
-/* $Id: caret.cpp,v 1.15 2000-12-29 18:39:58 sandervl Exp $ */
+/* $Id: caret.cpp,v 1.16 2001-01-19 23:03:45 sandervl Exp $ */
 
 /*
  * Caret functions for USER32
@@ -157,8 +157,8 @@ BOOL WIN32API SetCaretPos (int x, int y)
         else
         {
            long height = wnd->getWindowHeight();
-           caretPos.y = height - caretPos.y - 1;
-           xNew = caretPos.x;
+           caretPos.y = height - (caretPos.y + wnd->getClientRectPtr()->top) - 1;
+           xNew = caretPos.x + wnd->getClientRectPtr()->left;
            yNew = caretPos.y - cursorInfo.cy;
         }
 
@@ -182,7 +182,7 @@ BOOL WIN32API GetCaretPos (PPOINT pPoint)
 {
    CURSORINFO cursorInfo;
 
-   dprintf(("USER32:  GetCaretPos"));
+   dprintf(("USER32: GetCaretPos"));
 
    if (WinQueryCursorInfo (HWND_DESKTOP, &cursorInfo))
    {
@@ -194,9 +194,10 @@ BOOL WIN32API GetCaretPos (PPOINT pPoint)
 
          if (wnd && wnd->isOwnDC())
             hps = wnd->getOwnDC();
-         else
-         {
-           return FALSE;
+
+         if(wnd == NULL) {
+            dprintf(("ERROR: GetCaretPos: wnd == NULL!"));
+            return FALSE;
          }
 
          POINTL caretPos = {cursorInfo.x,cursorInfo.y} ;
@@ -206,9 +207,10 @@ BOOL WIN32API GetCaretPos (PPOINT pPoint)
             cursorInfo.y = caretPos.y;
          } 
          else {
-            long height  = wnd->getWindowHeight();
-            caretPos.y  += cursorInfo.cy;
-            cursorInfo.y = height - caretPos.y - 1;
+            long height   = wnd->getWindowHeight();
+            caretPos.y   += cursorInfo.cy;
+            cursorInfo.y  = height - caretPos.y - wnd->getClientRectPtr()->top - 1;
+            cursorInfo.x -= wnd->getClientRectPtr()->left;
          }
       }
       pPoint->x = cursorInfo.x;
