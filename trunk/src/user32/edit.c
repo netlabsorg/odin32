@@ -3151,7 +3151,11 @@ static BOOL EDIT_EM_LineScroll_internal(HWND hwnd, EDITSTATE *es, INT dx, INT dy
         GetClientRect(hwnd, &rc1);
         IntersectRect(&rc, &rc1, &es->format_rect);
         ScrollWindowEx(hwnd, -dx, dy,
+#ifdef __WIN32OS2__
+                NULL, &rc, (HRGN)NULL, NULL, SW_INVALIDATE|SW_ERASE);
+#else
                 NULL, &rc, (HRGN)NULL, NULL, SW_INVALIDATE);
+#endif
         /* force scroll info update */
         EDIT_UpdateScrollInfo(hwnd, es);
     }
