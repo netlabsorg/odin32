@@ -1,4 +1,4 @@
-/* $Id: winaspi32.cpp,v 1.6 2000-09-03 08:20:10 sandervl Exp $ */
+/* $Id: winaspi32.cpp,v 1.7 2000-09-13 21:00:51 sandervl Exp $ */
 /*
  * WNASPI routines
  *
@@ -28,6 +28,7 @@
 //#include "callback.h"
 
 DEFAULT_DEBUG_CHANNEL(aspi)
+ODINDEBUGCHANNEL(WNASPI32)
 
 static void
 ASPI_DebugPrintCmd(SRB_ExecSCSICmd *prb)
@@ -119,12 +120,11 @@ ASPI_DebugPrintResult(SRB_ExecSCSICmd *prb)
     ASPI_PrintSenseArea(prb);
     break;
   }
+  dprintf(("Result code: %x", prb->SRB_Status));
 }
 
 
-static WORD
-ASPI_ExecScsiCmd( scsiObj *aspi,
-                  SRB_ExecSCSICmd *lpPRB)
+static WORD ASPI_ExecScsiCmd( scsiObj *aspi, SRB_ExecSCSICmd *lpPRB)
 {
   int   status;
   int   error_code = 0;
@@ -136,21 +136,21 @@ ASPI_ExecScsiCmd( scsiObj *aspi,
 
   if (!lpPRB->SRB_CDBLen)
   {
-      WARN("Failed: lpPRB->SRB_CDBLen = 0.\n");
+      dprintf(("Failed: lpPRB->SRB_CDBLen = 0."));
       lpPRB->SRB_Status = SS_ERR;
       return SS_ERR;
   }
 
   if(MaxCDBStatus<lpPRB->SRB_CDBLen)
   {
-    WARN("Failed: lpPRB->SRB_CDBLen > 64.\n");
+    dprintf(("Failed: lpPRB->SRB_CDBLen > 64."));
     lpPRB->SRB_Status = SS_ERR;
     return SS_ERR;
   }
 
   if(lpPRB->SRB_BufLen>65536)    // Check Max 64k!!
   {
-    WARN("Failed: lpPRB->SRB_BufLen > 65536.\n");
+    dprintf(("Failed: lpPRB->SRB_BufLen > 65536."));
     lpPRB->SRB_Status = SS_BUFFER_TO_BIG;
     return SS_BUFFER_TO_BIG;
   }
@@ -213,13 +213,13 @@ ASPI_ExecScsiCmd( scsiObj *aspi,
       {
         if (ASPI_POSTING(lpPRB))
         {
-          TRACE("Post Routine (%lx) called\n", (DWORD) lpPRB->SRB_PostProc);
+          dprintf(("Post Routine (%lx) called\n", (DWORD) lpPRB->SRB_PostProc));
           (*lpPRB->SRB_PostProc)();
         }
         else
         if (lpPRB->SRB_Flags & SRB_EVENT_NOTIFY)
         {
-          TRACE("Setting event %04x\n", (HANDLE)lpPRB->SRB_PostProc);
+          dprintf(("Setting event %04x\n", (HANDLE)lpPRB->SRB_PostProc));
           SetEvent((HANDLE)lpPRB->SRB_PostProc); /* FIXME: correct ? */
         }
       }
@@ -235,7 +235,6 @@ ASPI_ExecScsiCmd( scsiObj *aspi,
   ASPI_DebugPrintResult(lpPRB);
 
   return lpPRB->SRB_Status;
-
 }
 
 /*******************************************************************
@@ -248,7 +247,7 @@ ASPI_ExecScsiCmd( scsiObj *aspi,
  *    HIBYTE of LOWORD: status (SS_COMP or SS_FAILED_INIT)
  *    LOBYTE of LOWORD: # of host adapters.
  */
-DWORD WINAPI GetASPI32SupportInfo()
+ODINFUNCTION0(DWORD, GetASPI32SupportInfo)
 {
   LONG rc;
   scsiObj *aspi;
@@ -333,7 +332,7 @@ DWORD WINAPI GetASPI32SupportInfo()
 /***********************************************************************
  *             SendASPI32Command32 (WNASPI32.1)
  */
-DWORD __cdecl SendASPI32Command(LPSRB lpSRB)
+DWORD SendASPICommand(LPSRB lpSRB)
 {
     DWORD dwRC;
     ULONG ulParam, ulReturn;
@@ -354,8 +353,11 @@ DWORD __cdecl SendASPI32Command(LPSRB lpSRB)
         (SC_GET_DEV_TYPE!=lpSRB->common.SRB_Cmd) &&
         (SC_EXEC_SCSI_CMD!=lpSRB->common.SRB_Cmd) &&
         (SC_ABORT_SRB!=lpSRB->common.SRB_Cmd) &&
-        (SC_RESET_DEV!=lpSRB->common.SRB_Cmd) )
-      return SS_INVALID_SRB; // shoud be invalid command
+        (SC_RESET_DEV!=lpSRB->common.SRB_Cmd) ) 
+    {
+	dprintf(("Invalid command!"));
+     	return SS_INVALID_SRB; // shoud be invalid command
+    }
 
     dwRC = SS_ERR;
 
@@ -430,6 +432,17 @@ DWORD __cdecl SendASPI32Command(LPSRB lpSRB)
     delete aspi;
 
     return dwRC;
+}
+
+DWORD CDECL SendASPI32Command(LPSRB lpSRB)
+{
+ DWORD yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = SendASPICommand(lpSRB);
+    SetFS(sel);
+
+    return yyrc;
 }
 
 
