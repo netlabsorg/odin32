@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.142 2002-06-02 10:07:59 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.143 2002-06-02 19:34:36 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -182,6 +182,8 @@ virtual  WORD   GetWindowWord(int index);
          HWND   getLastActive()                 { return hwndLastActive; };
          void   setLastActive(HWND _hwndLastActive)
                                                 { hwndLastActive = _hwndLastActive; };
+         BOOL   isDragDropActive()              { return fIsDragDropActive; };
+         void   setDragDropActive(BOOL fActive) { fIsDragDropActive = fActive; };
 
  Win32WndClass *getWindowClass()                { return windowClass; };
 
@@ -421,6 +423,7 @@ protected:
                  fMinMaxChange:1,        //set when switching between min/max/restored state
                  fVisibleRegionChanged:1, //set when visible region has changed -> erase background must be sent during next BeginPaint
                  fEraseBkgndFlag:1,
+                 fIsDragDropActive:1,
                  fFakeWindow:1;
 
         ULONG   state;
