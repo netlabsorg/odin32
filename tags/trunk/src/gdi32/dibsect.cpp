@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.28 2000-04-18 11:11:52 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.29 2000-04-23 15:34:10 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -319,6 +319,11 @@ int DIBSection::SetDIBits(HDC hdc, HBITMAP hbitmap, UINT startscan, UINT
                	dibinfo.dsBitfields[0] = (pbmi->biCompression == BI_BITFIELDS) ? *(DWORD *)pColors : 0x7c00;
                	dibinfo.dsBitfields[1] = (pbmi->biCompression == BI_BITFIELDS) ? *((DWORD *)pColors + 1) : 0x03e0;
                	dibinfo.dsBitfields[2] = (pbmi->biCompression == BI_BITFIELDS) ? *((DWORD *)pColors + 2) : 0x001f;
+		if(dibinfo.dsBitfields[1] == 0x03e0) {
+			if(bmpBitsRGB565)
+				DosFreeMem(bmpBitsRGB565);
+			DosAllocMem((PPVOID)&bmpBitsRGB565, bmpsize*pbmi->biHeight, PAG_READ|PAG_WRITE|PAG_COMMIT);
+		}
                	break;
 
            case 24:
@@ -433,8 +438,8 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
   }
   point[2].x = nXsrc;
   point[2].y = pOS2bmp->cy - nYsrc - nSrcHeight;
-  point[3].x = nXsrc + nSrcWidth - 1;
-  point[3].y = pOS2bmp->cy - nYsrc - 1;
+  point[3].x = nXsrc + nSrcWidth;
+  point[3].y = pOS2bmp->cy - nYsrc;
 
   oldyinversion = GpiQueryYInversion(hps);
   if(fFlip & FLIP_VERT)
