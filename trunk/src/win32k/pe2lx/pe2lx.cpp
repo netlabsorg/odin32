@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.12 1999-11-29 00:33:38 bird Exp $
+/* $Id: pe2lx.cpp,v 1.13 1999-11-29 21:28:00 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -3314,11 +3314,12 @@ ULONG  Pe2Lx::addResName(ULONG ulOrdinal, PCSZ pszName, ULONG cchName)
  * @sketch    Validate input. (ulOrdinal)
  *            Find object and offObject corresponding to the entrypoint RVA.
  *            IF no enough memory THEN (try) allocate more.
- *            IF last ordinal + 1 != new ordinal THEN
+ *            LOOP WHILE last ordinal + 1 != new ordinal
  *            BEGIN
  *                Add unused entry which skips to the new ordinal - 1.
  *                Update offCurEntryBundle
  *                Set offLastEntryBundle to offLastEntryBundle.
+ *                IF no enough memory THEN (try) allocate more.
  *            END
  *            IF offCurEntryBundle == offLastEntryBundle OR last bundle type != 32-bit entry
  *               OR last bundle object != this object OR bundle is full THEN
@@ -3438,15 +3439,21 @@ ULONG  Pe2Lx::addEntry(ULONG ulOrdinal, ULONG ulRVA)
                        pEntryBundles, struct b32_bundle *, cbEBAllocated , 512, 256)
 
     /* Add unused entry to skip ordinals? */
-    if (ulOrdinal > ulLastOrdinal + 1)
+    while (ulOrdinal > ulLastOrdinal + 1)
     {
         /* Add unused entry which skips to the new ordinal - 1.*/
         pBundle = (struct b32_bundle *)((ULONG)pEntryBundles + offCurEntryBundle);
-        pBundle->b32_cnt = (UCHAR)(ulOrdinal - ulLastOrdinal - 1);
+        pBundle->b32_cnt = (ulOrdinal - ulLastOrdinal - 1) < 0x100 ?
+            (UCHAR)(ulOrdinal - ulLastOrdinal - 1) : (UCHAR)0xff;
         pBundle->b32_type = EMPTY;
+        ulLastOrdinal += pBundle->b32_cnt;
 
         /* Update offCurEntryBundle and offLastEntryBundle */
         offLastEntryBundle = offCurEntryBundle += 2UL;
+
+        /* IF no enough memory THEN (try) allocate more. */
+        AllocateMoreMemory(offCurEntryBundle + 4 + 2 + 5  > cbEBAllocated /* max memory uasage! Should detect more exact memory usage! */,
+                           pEntryBundles, struct b32_bundle *, cbEBAllocated , 512, 256)
     }
 
     /* new entry32 bundle? */
@@ -3635,15 +3642,21 @@ ULONG  Pe2Lx::addForwarderEntry(ULONG ulOrdinal, PCSZ pszDllName, PCSZ pszFnName
     }
 
     /* Add unused entry to skip ordinals? */
-    if (ulOrdinal > ulLastOrdinal + 1)
+    while (ulOrdinal > ulLastOrdinal + 1)
     {
         /* Add unused entry which skips to the new ordinal - 1.*/
         pBundle = (struct b32_bundle *)((ULONG)pEntryBundles + offCurEntryBundle);
-        pBundle->b32_cnt = (UCHAR)(ulOrdinal - ulLastOrdinal - 1);
+        pBundle->b32_cnt = (ulOrdinal - ulLastOrdinal - 1) < 0x100 ?
+            (UCHAR)(ulOrdinal - ulLastOrdinal - 1) : (UCHAR)0xff;
         pBundle->b32_type = EMPTY;
+        ulLastOrdinal += pBundle->b32_cnt;
 
         /* Update offCurEntryBundle and offLastEntryBundle */
         offLastEntryBundle = offCurEntryBundle += 2UL;
+
+        /* IF no enough memory THEN (try) allocate more. */
+        AllocateMoreMemory(offCurEntryBundle + 4 + 2 + 7  > cbEBAllocated /* max memory uasage! Should detect more exact memory usage! */,
+                           pEntryBundles, struct b32_bundle *, cbEBAllocated , 512, 256)
     }
 
     /* new forwarder bundle? */
