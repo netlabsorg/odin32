@@ -1,4 +1,4 @@
-; $Id: odincrtd.def,v 1.3 2000-12-31 12:32:13 sandervl Exp $
+; $Id: odincrtd.def,v 1.4 2001-07-20 15:40:30 sandervl Exp $
 ; Odin VAC++ 3.08 shared multithreaded runtime
 LIBRARY ODINCRTD INITINSTANCE TERMINSTANCE
 DESCRIPTION 'Odin32 System DLL - VAC++ 3.08 Debug OdinCRT'
@@ -946,3 +946,10 @@ EXPORTS
 ;    __ctordtorTerm                                    @916
     _Exception_CPP                                    @917  NONAME
 ;    __ctdtused                                        @918
+
+    __modi64                                           @1027 NONAME
+    __modu64                                           @1028 NONAME
+    __multi64                                          @1029 NONAME
+    __u64toflt                                         @1030 NONAME
+    __divi64                                           @1031 NONAME
+    __divu64                                           @1032 NONAME
