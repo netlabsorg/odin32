@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.39 2001-06-23 07:38:51 bird Exp $ */
+/* $Id: misc.cpp,v 1.40 2001-07-08 04:19:52 bird Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -696,6 +696,7 @@ int SYSTEM DebugErrorBox(ULONG  iErrorCode,
  */
 int     WIN32API Odin32GetBuildNumber(void)
 {
+    dprintf(("Odin32GetBuildNumber returned %d\n", ODIN32_BUILD_NR));
     return ODIN32_BUILD_NR;
 }
 
