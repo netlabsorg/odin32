@@ -1,4 +1,4 @@
-/* $Id: surface.cpp,v 1.3 2002-12-29 14:11:02 sandervl Exp $ */
+/* $Id: surface.cpp,v 1.4 2002-12-30 14:05:43 sandervl Exp $ */
 
 /*
  * DirectDraw Surface class implementaion
@@ -669,7 +669,11 @@ OS2IDirectDrawSurface::OS2IDirectDrawSurface(OS2IDirectDraw *lpDirectDraw,
           DDSurfaceDesc.dwFlags      = DDSurfaceDesc.dwFlags;
 
           dwPitchFB = DDSurfaceDesc.dwWidth * (dwBpp<8?1:dwBpp/8);
-          dwPitchFB = (dwPitchFB +7) & ~7;  // Align on QWords
+//SvL:
+//align on dword boundary; makes it easier to deal with GetDIBits/SetDIBits (they
+//expect dword alignment)
+          dwPitchFB = (dwPitchFB + 3) & ~3;  // Align on DWords
+////          dwPitchFB = (dwPitchFB +7) & ~7;  // Align on QWords
           DDSurfaceDesc.lPitch = dwPitchFB;
             if(dwBpp<8)
             {
@@ -2128,194 +2132,6 @@ HRESULT WIN32API SurfGetColorKey(THIS This, DWORD dwFlags, LPDDCOLORKEY lpDDColK
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT WIN32API SurfGetDC(THIS This, HDC FAR *hdc)
-{
- OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
- DDSURFACEDESC2        LockedSurfaceDesc;
- HRESULT               rc;
- BITMAP bmpSurface;
- struct
- {
-   BITMAPINFOHEADER  bmiHead;
-   RGBQUAD           bmiCols[256];
- } BitmapInfo;
-
-  dprintf(("DDRAW: SurfGetDC\n"));
-
-  if (hdc == NULL)
-    return(DDERR_INVALIDPARAMS);
-
-  LockedSurfaceDesc.dwSize = sizeof(DDSURFACEDESC2);
-
-  if(DD_OK != me->Vtbl.Lock(me,NULL,&LockedSurfaceDesc,0,0))
-  {
-    return(DDERR_DCALREADYCREATED);
-  }
-
-  rc = DD_OK;
-
-  if(me->hdcImage == NULL)
-  {
-    // Create a Device context
-    me->hdcImage = CreateCompatibleDC(NULL);
-    if(me->hdcImage == NULL)
-    {
-      dprintf(("DDRAW: Can't create compatible DC!\n"));
-      me->Vtbl.Unlock(me,NULL);
-      rc = DDERR_GENERIC;
-    }
-  }
-
-  if( (DD_OK==rc) && (me->hbmImage == NULL) )
-  {
-    OS2IDirectDrawPalette *ddpal = NULL;
-
-    dprintf( ("Trying to create Bitmap (%d/%d) at %d Bit\n",
-              LockedSurfaceDesc.dwWidth,
-              LockedSurfaceDesc.dwHeight,
-              LockedSurfaceDesc.ddpfPixelFormat.dwRGBBitCount
-            ));
-    memset(&BitmapInfo, 0, sizeof(BitmapInfo));
-    BitmapInfo.bmiHead.biSize     = sizeof(BITMAPINFOHEADER);
-    BitmapInfo.bmiHead.biWidth    = LockedSurfaceDesc.dwWidth;
-    BitmapInfo.bmiHead.biHeight   = LockedSurfaceDesc.dwHeight;
-    BitmapInfo.bmiHead.biPlanes   = 1;
-    BitmapInfo.bmiHead.biBitCount = (WORD)LockedSurfaceDesc.ddpfPixelFormat.dwRGBBitCount;
-
-    switch(LockedSurfaceDesc.ddpfPixelFormat.dwRGBBitCount)
-    {
-      case 1:
-      case 4:
-        dprintf(("DDRAW: 1/4 Bit Not yet supported\n"));
-        break;
-      case 8:
-        BitmapInfo.bmiHead.biCompression = BI_RGB;
-        if (me->lpPalette != NULL)
-           ddpal = me->lpPalette;
-        if ((me->FrontBuffer != NULL) && (me->FrontBuffer->lpPalette != NULL))
-           ddpal = me->FrontBuffer->lpPalette;
-        if (ddpal != NULL) {
-           ddpal->Vtbl.GetEntries((IDirectDrawPalette*)ddpal,
-              0, 0, 256, (PPALETTEENTRY)&BitmapInfo.bmiCols[0]);
-        }
-        else {
-           dprintf(("DDRAW: Using default palette\n"));
-           for (DWORD i = 0; i < 256; i++) {
-              BitmapInfo.bmiCols[i].rgbBlue  = DefaultPalette[i*3+2];
-              BitmapInfo.bmiCols[i].rgbGreen = DefaultPalette[i*3+1];
-              BitmapInfo.bmiCols[i].rgbRed   = DefaultPalette[i*3];
-              BitmapInfo.bmiCols[i].rgbReserved = 0;
-           }
-        }
-        me->hbmImage = CreateDIBitmap( me->hdcImage,
-                                       &BitmapInfo.bmiHead,
-                                       CBM_INIT,
-                                       LockedSurfaceDesc.lpSurface,
-                                       (PBITMAPINFO)&BitmapInfo,
-                                       DIB_RGB_COLORS);
-        break;
-
-      case 16:
-      case 24:
-      case 32:
-        BitmapInfo.bmiHead.biCompression = BI_BITFIELDS;
-        BitmapInfo.bmiHead.biClrUsed     = 3;
-        *((DWORD *) &(BitmapInfo.bmiCols[0])) = me->DDSurfaceDesc.ddpfPixelFormat.dwRBitMask;
-        *((DWORD *) &(BitmapInfo.bmiCols[1])) = me->DDSurfaceDesc.ddpfPixelFormat.dwGBitMask;
-        *((DWORD *) &(BitmapInfo.bmiCols[2])) = me->DDSurfaceDesc.ddpfPixelFormat.dwBBitMask;
-        me->hbmImage = CreateDIBitmap( me->hdcImage,
-                                       &BitmapInfo.bmiHead,
-                                       CBM_INIT,
-                                       LockedSurfaceDesc.lpSurface,
-                                       (PBITMAPINFO)&BitmapInfo,
-                                       DIB_RGB_COLORS );
-        break;
-
-      default:
-        dprintf( ("Unexpected BitCount %d \n",
-                    LockedSurfaceDesc.ddpfPixelFormat.dwRGBBitCount));
-        me->hbmImage=NULL;
-    } // end switch (me->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount)
-
-    if(me->hbmImage == NULL)
-    {
-      dprintf(("DDRAW: Can't create bitmap!\n"));
-      DeleteDC(me->hdcImage);
-      me->hdcImage = NULL;
-      me->Vtbl.Unlock(me,NULL);
-      rc = DDERR_GENERIC;
-    }
-  }
-  else
-  {
-    if( (DD_OK==rc) && (me->dwLastDCUnique != me->dwUniqueValue) )
-    {
-      dprintf(("DDRAW: The Surface was locked/unlocked after the last DC was created =>Update Bitmap!\n"));
-
-      memset(&BitmapInfo,0, sizeof(BitmapInfo));
-      BitmapInfo.bmiHead.biSize     = sizeof(BITMAPINFOHEADER);
-      BitmapInfo.bmiHead.biWidth    = LockedSurfaceDesc.dwWidth;
-      BitmapInfo.bmiHead.biHeight   = LockedSurfaceDesc.dwHeight;
-      BitmapInfo.bmiHead.biPlanes   = 1;
-      BitmapInfo.bmiHead.biBitCount = (WORD)LockedSurfaceDesc.ddpfPixelFormat.dwRGBBitCount;
-
-      switch(LockedSurfaceDesc.ddpfPixelFormat.dwRGBBitCount)
-      {
-        case 1:
-        case 4:
-        case 8:
-          BitmapInfo.bmiHead.biCompression = BI_RGB;
-          GetSystemPaletteEntries(me->hdcImage,0,255,(PPALETTEENTRY)&BitmapInfo.bmiCols[0]);
-          SetDIBits(me->hdcImage, me->hbmImage, 0, LockedSurfaceDesc.dwHeight,
-                    me->DDSurfaceDesc.lpSurface,(PBITMAPINFO)&BitmapInfo,DIB_RGB_COLORS);
-          break;
-        case 16:
-        case 32:
-          BitmapInfo.bmiHead.biCompression = BI_BITFIELDS;
-          BitmapInfo.bmiHead.biClrUsed     = 3;
-          *((DWORD *) &(BitmapInfo.bmiCols[0])) = me->DDSurfaceDesc.ddpfPixelFormat.dwRBitMask;
-          *((DWORD *) &(BitmapInfo.bmiCols[1])) = me->DDSurfaceDesc.ddpfPixelFormat.dwGBitMask;
-          *((DWORD *) &(BitmapInfo.bmiCols[2])) = me->DDSurfaceDesc.ddpfPixelFormat.dwBBitMask;
-          SetDIBits(me->hdcImage, me->hbmImage, 0, me->DDSurfaceDesc.dwHeight,
-                    me->DDSurfaceDesc.lpSurface,(PBITMAPINFO)&BitmapInfo,DIB_RGB_COLORS);
-          break;
-        case 24:
-          BitmapInfo.bmiHead.biCompression = BI_RGB;
-          SetDIBits(me->hdcImage, me->hbmImage, 0, me->DDSurfaceDesc.dwHeight,
-                    me->DDSurfaceDesc.lpSurface,(PBITMAPINFO)&BitmapInfo,DIB_RGB_COLORS);
-          break;
-        default:
-          dprintf(("DDRAW: Unexpected BitCount %d => Bitmap not updated!\n",LockedSurfaceDesc.ddpfPixelFormat.dwRGBBitCount));
-          break;
-      } // end switch (me->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount)
-
-    }
-  }
-
-  // Allways select the bitmap into the DC! No matter if the old or a new one
-
-  if (DD_OK==rc)
-  {
-    if ((me->hgdiOld = SelectObject(me->hdcImage, me->hbmImage)) == NULL)
-    {
-      dprintf(("DDRAW: Can't select bitmap into DC!\n"));
-      DeleteDC(me->hdcImage);
-      me->hdcImage = NULL;
-      DeleteObject(me->hbmImage);
-      me->hbmImage = NULL;
-      me->Vtbl.Unlock(me,NULL);
-      rc = DDERR_GENERIC;
-    }
-    else
-    {
-      *hdc = me->hdcImage;
-    }
-  }
-
-  return rc;
-}
-//******************************************************************************
-//******************************************************************************
 HRESULT WIN32API SurfGetFlipStatus(THIS This, DWORD dwFlags)
 {
   dprintf(("DDRAW: SurfGetFlipStatus\n"));
@@ -2600,6 +2416,194 @@ HRESULT WIN32API SurfLock4( THIS This,
 }
 //******************************************************************************
 //******************************************************************************
+HRESULT WIN32API SurfGetDC(THIS This, HDC FAR *hdc)
+{
+ OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
+ DDSURFACEDESC2        LockedSurfaceDesc;
+ HRESULT               rc;
+ BITMAP bmpSurface;
+ struct
+ {
+   BITMAPINFOHEADER  bmiHead;
+   RGBQUAD           bmiCols[256];
+ } BitmapInfo;
+
+  dprintf(("DDRAW: SurfGetDC\n"));
+
+  if (hdc == NULL)
+    return(DDERR_INVALIDPARAMS);
+
+  LockedSurfaceDesc.dwSize = sizeof(DDSURFACEDESC2);
+
+  if(DD_OK != me->Vtbl.Lock(me,NULL,&LockedSurfaceDesc,0,0))
+  {
+    return(DDERR_DCALREADYCREATED);
+  }
+
+  rc = DD_OK;
+
+  if(me->hdcImage == NULL)
+  {
+    // Create a Device context
+    me->hdcImage = CreateCompatibleDC(NULL);
+    if(me->hdcImage == NULL)
+    {
+      dprintf(("DDRAW: Can't create compatible DC!\n"));
+      me->Vtbl.Unlock(me,NULL);
+      rc = DDERR_GENERIC;
+    }
+  }
+
+  if( (DD_OK==rc) && (me->hbmImage == NULL) )
+  {
+    OS2IDirectDrawPalette *ddpal = NULL;
+
+    dprintf( ("Trying to create Bitmap (%d/%d) at %d Bit\n",
+              LockedSurfaceDesc.dwWidth,
+              LockedSurfaceDesc.dwHeight,
+              LockedSurfaceDesc.ddpfPixelFormat.dwRGBBitCount
+            ));
+    memset(&BitmapInfo, 0, sizeof(BitmapInfo));
+    BitmapInfo.bmiHead.biSize     = sizeof(BITMAPINFOHEADER);
+    BitmapInfo.bmiHead.biWidth    = LockedSurfaceDesc.dwWidth;
+    BitmapInfo.bmiHead.biHeight   = -LockedSurfaceDesc.dwHeight;
+    BitmapInfo.bmiHead.biPlanes   = 1;
+    BitmapInfo.bmiHead.biBitCount = (WORD)LockedSurfaceDesc.ddpfPixelFormat.dwRGBBitCount;
+
+    switch(LockedSurfaceDesc.ddpfPixelFormat.dwRGBBitCount)
+    {
+      case 1:
+      case 4:
+        dprintf(("DDRAW: 1/4 Bit Not yet supported\n"));
+        break;
+      case 8:
+        BitmapInfo.bmiHead.biCompression = BI_RGB;
+        if (me->lpPalette != NULL)
+           ddpal = me->lpPalette;
+        if ((me->FrontBuffer != NULL) && (me->FrontBuffer->lpPalette != NULL))
+           ddpal = me->FrontBuffer->lpPalette;
+        if (ddpal != NULL) {
+           ddpal->Vtbl.GetEntries((IDirectDrawPalette*)ddpal,
+              0, 0, 256, (PPALETTEENTRY)&BitmapInfo.bmiCols[0]);
+        }
+        else {
+           dprintf(("DDRAW: Using default palette\n"));
+           for (DWORD i = 0; i < 256; i++) {
+              BitmapInfo.bmiCols[i].rgbBlue  = DefaultPalette[i*3+2];
+              BitmapInfo.bmiCols[i].rgbGreen = DefaultPalette[i*3+1];
+              BitmapInfo.bmiCols[i].rgbRed   = DefaultPalette[i*3];
+              BitmapInfo.bmiCols[i].rgbReserved = 0;
+           }
+        }
+        me->hbmImage = CreateDIBitmap( me->hdcImage,
+                                       &BitmapInfo.bmiHead,
+                                       CBM_INIT,
+                                       LockedSurfaceDesc.lpSurface,
+                                       (PBITMAPINFO)&BitmapInfo,
+                                       DIB_RGB_COLORS);
+        break;
+
+      case 16:
+      case 24:
+      case 32:
+        BitmapInfo.bmiHead.biCompression = BI_BITFIELDS;
+        BitmapInfo.bmiHead.biClrUsed     = 3;
+        *((DWORD *) &(BitmapInfo.bmiCols[0])) = me->DDSurfaceDesc.ddpfPixelFormat.dwRBitMask;
+        *((DWORD *) &(BitmapInfo.bmiCols[1])) = me->DDSurfaceDesc.ddpfPixelFormat.dwGBitMask;
+        *((DWORD *) &(BitmapInfo.bmiCols[2])) = me->DDSurfaceDesc.ddpfPixelFormat.dwBBitMask;
+        me->hbmImage = CreateDIBitmap( me->hdcImage,
+                                       &BitmapInfo.bmiHead,
+                                       CBM_INIT,
+                                       LockedSurfaceDesc.lpSurface,
+                                       (PBITMAPINFO)&BitmapInfo,
+                                       DIB_RGB_COLORS );
+        break;
+
+      default:
+        dprintf( ("Unexpected BitCount %d \n",
+                    LockedSurfaceDesc.ddpfPixelFormat.dwRGBBitCount));
+        me->hbmImage=NULL;
+    } // end switch (me->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount)
+
+    if(me->hbmImage == NULL)
+    {
+      dprintf(("DDRAW: Can't create bitmap!\n"));
+      DeleteDC(me->hdcImage);
+      me->hdcImage = NULL;
+      me->Vtbl.Unlock(me,NULL);
+      rc = DDERR_GENERIC;
+    }
+  }
+  else
+  {
+    if( (DD_OK==rc) && (me->dwLastDCUnique != me->dwUniqueValue) )
+    {
+      dprintf(("DDRAW: The Surface was locked/unlocked after the last DC was created =>Update Bitmap!\n"));
+
+      memset(&BitmapInfo,0, sizeof(BitmapInfo));
+      BitmapInfo.bmiHead.biSize     = sizeof(BITMAPINFOHEADER);
+      BitmapInfo.bmiHead.biWidth    = LockedSurfaceDesc.dwWidth;
+      BitmapInfo.bmiHead.biHeight   = -LockedSurfaceDesc.dwHeight;
+      BitmapInfo.bmiHead.biPlanes   = 1;
+      BitmapInfo.bmiHead.biBitCount = (WORD)LockedSurfaceDesc.ddpfPixelFormat.dwRGBBitCount;
+
+      switch(LockedSurfaceDesc.ddpfPixelFormat.dwRGBBitCount)
+      {
+        case 1:
+        case 4:
+        case 8:
+          BitmapInfo.bmiHead.biCompression = BI_RGB;
+          GetSystemPaletteEntries(me->hdcImage,0,255,(PPALETTEENTRY)&BitmapInfo.bmiCols[0]);
+          SetDIBits(me->hdcImage, me->hbmImage, 0, LockedSurfaceDesc.dwHeight,
+                    me->DDSurfaceDesc.lpSurface,(PBITMAPINFO)&BitmapInfo,DIB_RGB_COLORS);
+          break;
+        case 16:
+        case 32:
+          BitmapInfo.bmiHead.biCompression = BI_BITFIELDS;
+          BitmapInfo.bmiHead.biClrUsed     = 3;
+          *((DWORD *) &(BitmapInfo.bmiCols[0])) = me->DDSurfaceDesc.ddpfPixelFormat.dwRBitMask;
+          *((DWORD *) &(BitmapInfo.bmiCols[1])) = me->DDSurfaceDesc.ddpfPixelFormat.dwGBitMask;
+          *((DWORD *) &(BitmapInfo.bmiCols[2])) = me->DDSurfaceDesc.ddpfPixelFormat.dwBBitMask;
+          SetDIBits(me->hdcImage, me->hbmImage, 0, me->DDSurfaceDesc.dwHeight,
+                    me->DDSurfaceDesc.lpSurface,(PBITMAPINFO)&BitmapInfo,DIB_RGB_COLORS);
+          break;
+        case 24:
+          BitmapInfo.bmiHead.biCompression = BI_RGB;
+          SetDIBits(me->hdcImage, me->hbmImage, 0, me->DDSurfaceDesc.dwHeight,
+                    me->DDSurfaceDesc.lpSurface,(PBITMAPINFO)&BitmapInfo,DIB_RGB_COLORS);
+          break;
+        default:
+          dprintf(("DDRAW: Unexpected BitCount %d => Bitmap not updated!\n",LockedSurfaceDesc.ddpfPixelFormat.dwRGBBitCount));
+          break;
+      } // end switch (me->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount)
+
+    }
+  }
+
+  // Allways select the bitmap into the DC! No matter if the old or a new one
+
+  if (DD_OK==rc)
+  {
+    if ((me->hgdiOld = SelectObject(me->hdcImage, me->hbmImage)) == NULL)
+    {
+      dprintf(("DDRAW: Can't select bitmap into DC!\n"));
+      DeleteDC(me->hdcImage);
+      me->hdcImage = NULL;
+      DeleteObject(me->hbmImage);
+      me->hbmImage = NULL;
+      me->Vtbl.Unlock(me,NULL);
+      rc = DDERR_GENERIC;
+    }
+    else
+    {
+      *hdc = me->hdcImage;
+    }
+  }
+
+  return rc;
+}
+//******************************************************************************
+//******************************************************************************
 HRESULT WIN32API SurfReleaseDC(THIS This, HDC hdc)
 {
  OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
@@ -2623,7 +2627,7 @@ HRESULT WIN32API SurfReleaseDC(THIS This, HDC hdc)
   BitmapInfo.bmiHead.biBitCount = me->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount;
   BitmapInfo.bmiHead.biPlanes   = 1;
   BitmapInfo.bmiHead.biWidth    = me->DDSurfaceDesc.dwWidth; /// (me->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount>>3);
-  BitmapInfo.bmiHead.biHeight   = me->DDSurfaceDesc.dwHeight;
+  BitmapInfo.bmiHead.biHeight   = -me->DDSurfaceDesc.dwHeight;
 
   switch(me->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount)
   {
@@ -2639,7 +2643,7 @@ HRESULT WIN32API SurfReleaseDC(THIS This, HDC hdc)
                       NULL,
                       (PBITMAPINFO)&BitmapInfo,
                       DIB_RGB_COLORS);
-//      BitmapInfo.bmiHead.biHeight = -BitmapInfo.bmiHead.biHeight;
+      BitmapInfo.bmiHead.biHeight = -BitmapInfo.bmiHead.biHeight;
       dprintf( ("GetDIBits rc=%d\n Size   :%d\n Width  :%d\n Height :%d\n"
                 " Planes :%d\n BitCount :%d\nLastEror = %d\nPixel[0,0] = 0x%02X\n",
                 rc,
