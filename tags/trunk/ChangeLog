@@ -1,10 +1,9 @@
-/* $Id: ChangeLog,v 1.1750 2001-10-14 20:17:42 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1751 2001-10-15 05:47:41 achimha Exp $ */
 
  2001-10-14: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Convert color cursor to monochrome if it only uses two colors.
                   This overcomes a silly limitation in some less advanced 
-                  display drivers. (SDD; IBM doesn't seem to require such a 
-                  basic feature and Scitech management couldn't care less)
+                  display drivers. (SDD still has no support for color cursors!)
                   (fixes mouse cursor flickering & screen distortion when
                    accessing the frame buffer directly)
                   NOTE: This is a partial solution only. Real color cursors
