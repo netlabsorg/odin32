@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.949 2000-05-19 18:42:36 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.950 2000-05-19 18:52:46 jeroen Exp $ */
+
+ 2000-05-19: Jeroen van den Horn <J.vandenHorn@fibre.a2000.nl>
+    - ICMP: Initial release of ICMP.DLL and header files
 
  2000-05-19: Yuri Dario <mc6530@mclink.it>
     - USER32:   Don't send WM_PARENTNOTIFY if parent has already been destroyed
