@@ -1,4 +1,4 @@
-/* $Id: directory.cpp,v 1.9 1999-11-08 13:43:12 sandervl Exp $ */
+/* $Id: directory.cpp,v 1.10 1999-11-08 21:24:24 sandervl Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
@@ -103,9 +103,16 @@ ODINFUNCTION2(UINT, GetCurrentDirectoryW, UINT,   nBufferLength,
  * Author    : Patrick Haller [Wed, 1999/09/28 20:44]
  *****************************************************************************/
 
+
 ODINFUNCTION1(BOOL,SetCurrentDirectoryA,LPCSTR,lpPathName)
 {
-  return O32_SetCurrentDirectory((LPSTR)lpPathName);
+  int len = strlen(lpPathName);
+  char *tmp=(char *)alloca(len + 1);
+
+  strcpy(tmp, lpPathName);
+  if(tmp[len -1] == '\\')
+    tmp[len -1] = 0;
+  return O32_SetCurrentDirectory((LPSTR)tmp);
 }
 
 
@@ -145,13 +152,16 @@ ODINFUNCTION1(BOOL,SetCurrentDirectoryW,LPCWSTR,lpPathName)
  * Author    : Patrick Haller [Wed, 1999/09/28 20:44]
  *****************************************************************************/
 
-ODINFUNCTION2(BOOL,CreateDirectoryA,LPCSTR,              arg1,
-                                    PSECURITY_ATTRIBUTES,arg2)
+ODINFUNCTION2(BOOL,CreateDirectoryA,LPCSTR, arg1,PSECURITY_ATTRIBUTES,arg2)
 {
-  dprintf(("CreateDirectory %s", arg1));
-  return O32_CreateDirectory(arg1, arg2);
-}
+  int len = strlen(arg1);
+  char *tmp=(char *)alloca(len + 1);
 
+  strcpy(tmp, arg1);
+  if(tmp[len -1] == '\\')
+    tmp[len -1] = 0;
+  return O32_CreateDirectory(tmp, arg2);
+}
 
 /*****************************************************************************
  * Name      : CreateDirectoryW
@@ -332,9 +342,16 @@ ODINFUNCTION2(UINT,GetWindowsDirectoryW,LPWSTR,lpBuffer,
  * Author    : Patrick Haller [Wed, 1999/09/28 20:44]
  *****************************************************************************/
 
+
 ODINFUNCTION1(BOOL,RemoveDirectoryA,LPCSTR,arg1)
 {
-  return O32_RemoveDirectory(arg1);
+  int len = strlen(arg1);
+  char *tmp=(char *)alloca(len + 1);
+
+  strcpy(tmp, arg1);
+  if(tmp[len -1] == '\\')
+    tmp[len -1] = 0;
+  return O32_RemoveDirectory(tmp);
 }
 
 
