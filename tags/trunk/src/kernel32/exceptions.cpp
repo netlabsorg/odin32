@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.3 1999-06-10 20:47:51 phaller Exp $ */
+/* $Id: exceptions.cpp,v 1.4 1999-06-17 21:51:59 phaller Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -22,21 +22,21 @@
  *  __try{...}__except(..){....}  and
  *  __try{...}__finally{...}
  *  statements is simply not documented by Microsoft. There could be different
- *  reasons for this: 
- *  One reason could be that they try to hide the fact that exception 
- *  handling in Win32 looks almost the same as in OS/2 2.x.  
+ *  reasons for this:
+ *  One reason could be that they try to hide the fact that exception
+ *  handling in Win32 looks almost the same as in OS/2 2.x.
  *  Another reason could be that Microsoft does not want others to write
- *  binary compatible implementations of the Win32 API (like us).  
+ *  binary compatible implementations of the Win32 API (like us).
  *
- *  Whatever the reason, THIS SUCKS!! Ensuring portabilty or future 
- *  compatability may be valid reasons to keep some things undocumented. 
- *  But exception handling is so basic to Win32 that it should be 
+ *  Whatever the reason, THIS SUCKS!! Ensuring portabilty or future
+ *  compatability may be valid reasons to keep some things undocumented.
+ *  But exception handling is so basic to Win32 that it should be
  *  documented!
  *
  * Fixmes:
  *  -Most functions need better parameter checking.
  *  -I do not know how to handle exceptions within an exception handler.
- *   or what is done when ExceptionNestedException is returned from an 
+ *   or what is done when ExceptionNestedException is returned from an
  *   exception handler
  *  -Real exceptions are not yet implemented. only the exception functions
  *   are implemented. A real implementation needs some new code in
@@ -309,7 +309,7 @@ void dprintfException(PEXCEPTIONREPORTRECORD pERepRec,
     case XCPT_GUARD_PAGE_VIOLATION:
       pszExceptionName = "Guard Page Violation";
       sprintf(szData,
-              "R/W %08x at %08x.",
+              "R/W %08xh at %08xh.",
               pERepRec->ExceptionInfo[0],
               pERepRec->ExceptionInfo[1]);
       fExcptSoftware   = TRUE;
@@ -333,7 +333,7 @@ void dprintfException(PEXCEPTIONREPORTRECORD pERepRec,
       {
         case XCPT_READ_ACCESS:
            sprintf (szData,
-                    "Read Access at address %08x",
+                    "Read Access at address %08xh",
                     pERepRec->ExceptionInfo[1]);
            break;
 
@@ -566,7 +566,7 @@ void dprintfException(PEXCEPTIONREPORTRECORD pERepRec,
            pERepRec->ExceptionAddress));
 
   if (rc == NO_ERROR)
-    dprintf(("%s (#%u), Obj #%u, Offset %08x\n",
+    dprintf(("%s (#%u), obj #%u:%08x\n",
              szModule,
              ulModule,
              ulObject,
@@ -601,22 +601,18 @@ dprintf(("   SS:ESP=%04x:%08x EFLAGS=%08x\n"
              pCtxRec->ctx_RegEbp));
 
   if (pCtxRec->ContextFlags & CONTEXT_INTEGER)         /* check flags */
-    dprintf(("   EAX=%08x ESI=%08x\n"
-             "   EBX=%08x EDI=%08x\n"
-             "   ECX=%08x\n"
-             "   EDX=%08x\n",
+    dprintf(("   EAX=%08x EBX=%08x ESI=%08x\n"
+             "   ECX=%08x EDX=%08x EDI=%08x\n",
              pCtxRec->ctx_RegEax,
-             pCtxRec->ctx_RegEsi,
              pCtxRec->ctx_RegEbx,
-             pCtxRec->ctx_RegEdi,
+             pCtxRec->ctx_RegEsi,
              pCtxRec->ctx_RegEcx,
-             pCtxRec->ctx_RegEdx));
+             pCtxRec->ctx_RegEdx,
+             pCtxRec->ctx_RegEdi));
 
   if (pCtxRec->ContextFlags & CONTEXT_SEGMENTS)        /* check flags */
-    dprintf(("   DS=%08x\n"
-             "   ES=%08x\n"
-             "   FS=%08x\n"
-             "   GS=%08x\n",
+    dprintf(("   DS=%04x     ES=%08x"
+             "   FS=%04x     GS=%04x\n",
               pCtxRec->ctx_SegDs,
               pCtxRec->ctx_SegEs,
               pCtxRec->ctx_SegFs,

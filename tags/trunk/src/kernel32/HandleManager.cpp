@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.3 1999-06-17 18:21:35 phaller Exp $ */
+/* $Id: HandleManager.cpp,v 1.4 1999-06-17 21:52:00 phaller Exp $ */
 
 /*
  *
@@ -893,8 +893,17 @@ BOOL HMCloseHandle(HANDLE hObject)
   iIndex = _HMHandleQuery(hObject);                         /* get the index */
   if (-1 == iIndex)                                               /* error ? */
   {
-    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
-    return (FALSE);                                        /* signal failure */
+    //@@@PH it may occur someone closes e.g. a semaphore handle
+    // which is not registered through the HandleManager yet.
+    // so we try to pass on to Open32 instead.
+    dprintf(("KERNEL32: HandleManager:HMCloseHandle(%08xh) passed on to Open32.\n",
+             hObject));
+
+    fResult = O32_CloseHandle(hObject);
+    return (fResult);
+
+    //SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    //return (FALSE);                                        /* signal failure */
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
