@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.52 2004-03-09 15:24:00 bird Exp $
+/* $Id: buildenv.cmd,v 1.53 2004-08-01 03:25:25 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -26,7 +26,7 @@
     /*
      * Version
      */
-    sVersion = '1.1.1 [2004-03-08]';
+    sVersion = '1.1.2 [2004-08-01]';
 
     /*
      * Create argument array with lowercase arguments.
@@ -138,6 +138,8 @@
     aCfg.i.sId = 'perl580';         aCfg.i.sGrp = 'script';     aCfg.i.sSet = 'Perl580';                aCfg.i.sDesc = 'Perl v5.8.0'; i = i + 1;
     aCfg.i.sId = 'perl50053';       aCfg.i.sGrp = 'script';     aCfg.i.sSet = 'Perl50xxx';              aCfg.i.sDesc = 'Perl v5.0053'; i = i + 1;
     aCfg.i.sId = 'python';          aCfg.i.sGrp = 'script';     aCfg.i.sSet = 'Python';                 aCfg.i.sDesc = 'Python v1.5'; i = i + 1;
+    aCfg.i.sId = 'svn';             aCfg.i.sGrp = 'version';    aCfg.i.sSet = 'Subversion';             aCfg.i.sDesc = 'Subversion 1.0.6 or later.';  i = i + 1;
+    aCfg.i.sId = 'toolkit40';       aCfg.i.sGrp = 'tlktos2';    aCfg.i.sSet = 'Toolkit40';              aCfg.i.sDesc = 'Toolkit v4.0 CSD 4'; i = i + 1;
     aCfg.i.sId = 'toolkit40';       aCfg.i.sGrp = 'tlktos2';    aCfg.i.sSet = 'Toolkit40';              aCfg.i.sDesc = 'Toolkit v4.0 CSD 4'; i = i + 1;
     aCfg.i.sId = 'toolkit45';       aCfg.i.sGrp = 'tlktos2';    aCfg.i.sSet = 'Toolkit45';              aCfg.i.sDesc = 'Toolkit v4.5'; i = i + 1;
     aCfg.i.sId = 'toolkit451';      aCfg.i.sGrp = 'tlktos2';    aCfg.i.sSet = 'Toolkit451';             aCfg.i.sDesc = 'Toolkit v4.5.1'; i = i + 1;
@@ -901,6 +903,7 @@ PathSetDefault: procedure expose aCfg. aPath.
         aPath.i.sPId = 'perl50xxx';                 aPath.i.sPath = 'f:\perl\v5.005_53_os2';        i = i + 1;
         aPath.i.sPId = 'perl580';                   aPath.i.sPath = 'f:\perl\v5.8.0_os2';           i = i + 1;
         aPath.i.sPId = 'python';                    aPath.i.sPath = 'f:\python\v1.5.2_os2';         i = i + 1;
+        aPath.i.sPId = 'svn';                       aPath.i.sPath = 'f:\subversion\v1.0.6_os2';     i = i + 1;
         aPath.i.sPId = 'toolkit40';                 aPath.i.sPath = 'f:\toolkit\v4.0csd4';          i = i + 1;
         aPath.i.sPId = 'toolkit45';                 aPath.i.sPath = 'f:\toolkit\v4.5';              i = i + 1;
         aPath.i.sPId = 'toolkit451';                aPath.i.sPath = 'f:\toolkit\v4.51';             i = i + 1;
@@ -1006,6 +1009,7 @@ PathSetDefault: procedure expose aCfg. aPath.
         aPath.i.sPId = 'perl50xxx';                 aPath.i.sPath = 'd:\dev\perl\v5.00455';         i = i + 1;
         aPath.i.sPId = 'perl580';                   aPath.i.sPath = 'd:\dev\perl\v5.8.0';           i = i + 1;
       /*aPath.i.sPId = 'python';                    aPath.i.sPath = 'e:\python';                    i = i + 1;*/
+        aPath.i.sPId = 'svn';                       aPath.i.sPath = 'd:\dev\subversion\v1.0.6';     i = i + 1;
         aPath.i.sPId = 'toolkit40';                 aPath.i.sPath = 'd:\dev\toolkit\v40csd1';       i = i + 1;
       /*aPath.i.sPId = 'toolkit45';                 aPath.i.sPath = 'e:\toolkit45';                 i = i + 1;
         aPath.i.sPId = 'toolkit451';                aPath.i.sPath = 'e:\toolkit451';                i = i + 1; */
@@ -3076,6 +3080,52 @@ Python: procedure expose aCfg. aPath.
         return 2;
     rc = CheckCmdOutput('echo print "hello world" | python', 0, fQuiet, 'hello world');
 return rc;
+
+
+/*
+ * Subversion (svn)
+ */
+Subversion: procedure expose aCfg. aPath.
+    parse arg sToolId,sOperation,fRM,fQuiet
+
+
+    /*
+     * The directories.
+     */
+    sPathCVS = PathQuery('svn', sToolId, sOperation);
+    if (sPathCVS = '') then
+        return 1;
+    sPathHome = PathQuery('home', sToolId, sOperation);
+    if (sPathHome = '') then
+        return 1;
+    /* If config operation we're done now. */
+    if (pos('config', sOperation) > 0) then
+        return 0;
+
+    /*
+     * Installing the environment variables.
+     */
+    call EnvSet      fRM, 'PATH_SVN',    sPathCVS;
+    call EnvAddFront fRM, 'path',        sPathCVS';'
+    call EnvSet      fRM, 'home',        translate(sPathHome, '/','\');
+
+    /*
+     * Verify.
+     */
+    if (pos('verify', sOperation) <= 0) then
+        return 0;
+
+    if (\CfgVerifyFile(sPathCVS'\svn.exe',fQuiet)) then
+            return 2;
+    if (length(sPathHome) <= 2) then
+    do
+        if (\fQuiet) then
+            say 'Error: The home directory is to short!';
+        return 2;
+    end
+    if (\CfgVerifyDir(sPathHome, fQuiet)) then
+        return 2;
+return CheckCmdOutput('svn.exe --version', 0, fQuiet, 'svn, version 1.');
 
 
 
