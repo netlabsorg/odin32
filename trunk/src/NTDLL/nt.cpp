@@ -1,4 +1,4 @@
-/* $Id: nt.cpp,v 1.10 2000-10-02 13:10:10 phaller Exp $ */
+/* $Id: nt.cpp,v 1.11 2001-02-28 20:24:17 sandervl Exp $ */
 
 
 /*
@@ -765,14 +765,33 @@ NTSTATUS WINAPI NtQuerySystemInformation(SYSTEM_INFORMATION_CLASS SystemInformat
                                          ULONG                    Length,
                                          PULONG                   ResultLength)
 {
-  dprintf(("NTDLL: NtQuerySystemInformation(%08xh,%08xh,%08xh,%08xh) not implemented.\n",
-           SystemInformationClass,
-           SystemInformation,
-           Length,
-           ResultLength));
+    dprintf(("NTDLL: NtQuerySystemInformation(%08xh,%08xh,%08xh,%08xh) not implemented.\n",
+             SystemInformationClass,
+             SystemInformation,
+             Length,
+             ResultLength));
 
-  ZeroMemory (SystemInformation, Length);
-  return 0;
+    switch(SystemInformationClass)
+    {
+    case 0x25:
+	/* Something to do with the size of the registry             *
+	 * Since we don't have a size limitation, fake it            *
+	 * This is almost certainly wrong.                           *
+	 * This sets each of the three words in the struct to 32 MB, *
+	 * which is enough to make the IE 5 installer happy.         */
+	dprintf(("(0x%08x,%p,0x%08lx,%p) faking max registry size of 32 MB\n",
+	      SystemInformationClass,SystemInformation,Length,ResultLength));
+	*(DWORD *)SystemInformation = 0x2000000;
+	*(((DWORD *)SystemInformation)+1) = 0x200000;
+	*(((DWORD *)SystemInformation)+2) = 0x200000;
+	break;
+
+    default:
+	dprintf(("(0x%08x,%p,0x%08lx,%p) stub\n",
+	      SystemInformationClass,SystemInformation,Length,ResultLength));
+	ZeroMemory (SystemInformation, Length);
+    }
+    return STATUS_SUCCESS;
 }
 
 
