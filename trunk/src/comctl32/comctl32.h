@@ -345,6 +345,16 @@ void UPDOWN_Register(void);
 void UPDOWN_Unregister(void);
 
 
+/* undocumented functions */
+
+LPVOID WINAPI COMCTL32_Alloc (DWORD);
+#define Alloc(a) COMCTL32_Alloc(a)
+
+LPVOID WINAPI COMCTL32_ReAlloc (LPVOID, DWORD);
+BOOL   WINAPI COMCTL32_Free (LPVOID);
+#define Free(a) COMCTL32_Free(a)
+DWORD  WINAPI COMCTL32_GetSize (LPVOID);
+
 #ifdef __cplusplus
 }
 #endif
