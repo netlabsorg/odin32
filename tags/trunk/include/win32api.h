@@ -1,4 +1,4 @@
-/* $Id: win32api.h,v 1.18 2000-09-12 19:00:31 sandervl Exp $ */
+/* $Id: win32api.h,v 1.19 2000-10-06 15:14:11 sandervl Exp $ */
 
 /*
  *
@@ -120,5 +120,8 @@ BOOL    WIN32API EnumChildWindows(HWND hwnd, WNDENUMPROC lpfn, LPARAM lParam);
 
 LPCSTR  WIN32API GetCommandLineA(VOID);
 LPCWSTR WIN32API GetCommandLineW(VOID);
+
+BOOL    WIN32API SetCurrentDirectoryA(LPCSTR lpstrDirectory);
+UINT    WIN32API GetCurrentDirectoryA(UINT nBufferLength, LPSTR lpBuffer);
 
 #endif
