@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.31 2001-12-12 16:40:44 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.32 2001-12-21 18:43:59 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -1129,8 +1129,7 @@ DWORD WIN32API MsgWaitForMultipleObjects(DWORD nCount, LPHANDLE pHandles, BOOL f
         }
         return WAIT_TIMEOUT;
   }
-  //SvL: Call handlemanager function as we need to translate handles
-  //TODO: doesn't work at all if waiting for message
+  //Call handlemanager function as we need to translate handles (KERNEL32)
   ret = HMMsgWaitForMultipleObjects(nCount,pHandles,fWaitAll,dwMilliseconds,dwWakeMask);
   return ret;
 }
