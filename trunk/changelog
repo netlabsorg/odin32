@@ -1,4 +1,9 @@
- /* $Id: changelog,v 1.1155 2000-10-01 21:19:41 phaller Exp $ */
+ /* $Id: changelog,v 1.1156 2000-10-02 04:07:03 bird Exp $ */
+
+ 2000-10-02: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - KERNEL32: Fixed Pe2Lx (ie. Win32k) TLS problem. Beyond Compare works.
+    - Common:   Added very limited dump capability to kFilePE. (Used to
+                understand TLS.)
 
  2000-10-01: Patrick Haller <phaller@gmx.net>
     - KERNEL32: Optimization of PROFILE calls
