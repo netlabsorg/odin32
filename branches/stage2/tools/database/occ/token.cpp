@@ -69,6 +69,9 @@ static void InitializeOtherKeywords();
 
 HashTable* Lex::user_keywords = nil;
 Ptree* Lex::comments = nil;
+#ifdef SDS
+Ptree* Lex::all_comments = nil;
+#endif
 
 Lex::Lex(Program* prog) : fifo(this)
 {
@@ -110,6 +113,13 @@ uint Lex::LineNumber(char* pos, char*& ptr, int& len)
 {
     return file->LineNumber(pos, ptr, len);
 }
+
+#ifdef SDS
+uint Lex::LineNumber(char* pos, char*& ptr, int& len, int& col_num, int& abs_pos)
+{
+    return file->LineNumber(pos, ptr, len, col_num, abs_pos);
+}
+#endif
 
 int Lex::GetToken(Token& t)
 {
@@ -766,7 +776,7 @@ static struct rw_table {
 #endif
     { "asm",		token(ATTRIBUTE) },
     { "auto",		token(AUTO) },
-#if !defined(_MSC_VER) || (_MSC_VER >= 1100)
+#if (!defined(_MSC_VER) || (_MSC_VER >= 1100)) && !defined(__IBMCPP__)
     { "bool",		token(BOOLEAN) },
 #endif
     { "break",		token(BREAK) },
@@ -875,6 +885,9 @@ static void InitializeOtherKeywords()
     fRc = Lex::RecordKeyword("_Pascal", Ignore); assert(fRc);   //kso
     fRc = Lex::RecordKeyword("_Seg16", Ignore);  assert(fRc);   //kso
     fRc = Lex::RecordKeyword("_System", Ignore); assert(fRc);   //kso
+    #ifdef __IBMCPP__
+    fRc = Lex::RecordKeyword("_Builtin", Ignore); assert(fRc);  //kso
+    #endif
 #endif                                                          //kso
 }
 
@@ -1012,6 +1025,9 @@ int Lex::SingleCharOp(unsigned char c)
 
 int Lex::ReadComment(char c, uint top) {
     uint len = 0;
+    #ifdef SDS
+    bool foneliner = false;
+    #endif
     if (c == '*')	// a nested C-style comment is prohibited.
 	do {
 	    c = file->Get();
@@ -1026,14 +1042,31 @@ int Lex::ReadComment(char c, uint top) {
 	    }
 	}while(c != '\0');
     else /* if (c == '/') */
+    #ifdef SDS
+    {
+        foneliner = true;
+        do
+        {
+            c = file->Get();
+        } while (c && c != '\n');
+    }
+    #else
 	do {
 	    c = file->Get();
 	}while(c != '\n' && c != '\0');
+    #endif
 
     len += file->GetCurPos() - top;
+    #ifdef SDS
+    if (foneliner)
+        file->Unget();
+    #endif
     token_len = int(len);
     Leaf* node = new Leaf((char*)file->Read(top), int(len));
     comments = Ptree::Snoc(comments, node);
+    #ifdef SDS
+    all_comments = Ptree::Snoc(all_comments, node);
+    #endif
     return Ignore;
 }
 
@@ -1042,6 +1075,12 @@ Ptree* Lex::GetComments() {
     comments = nil;
     return c;
 }
+
+#ifdef SDS
+Ptree *Lex::GetAllComments() {
+   return all_comments;
+}
+#endif
 
 Ptree* Lex::GetComments2() {
     return comments;

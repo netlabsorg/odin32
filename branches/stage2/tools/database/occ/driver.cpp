@@ -146,7 +146,7 @@ static void ReadFile(const char* src)
     if(doPreprocess){
         char* cppfile = RunPreprocessor(src);
 	occfile = RunOpencxx(cppfile);
-	unlink(cppfile);
+	//unlink(cppfile);
 	delete cppfile;
     }
     else

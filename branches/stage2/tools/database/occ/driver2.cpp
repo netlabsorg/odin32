@@ -147,7 +147,11 @@ char *RunPreprocessor(const char *file_in)
 	    AddCppOption("-D__opencxx");
     AddCppOption("-P");                 /* preprocess the file. */
     AddCppOption("-Pe+");               /* #line */
-    AddCppOption("-Tp"); // Consider source file as C++ file,
+    AddCppOption("-Tdp");               /* Consider source file as C++ file. */
+
+    #ifdef SDS
+    AddCppOption("-Pc+");               /* Preserve comments. */
+    #endif
 
     #else
 
@@ -199,11 +203,19 @@ void BaseClassUsed(char *name, int len)
 
 void RunCompiler(const char* org_src, const char *file_in)
 {
+    #ifdef OS2
+    AddCcOption("-Q+");
+    #else
     AddCcOption("-nologo");
+    #endif
     if(!makeExecutable)
 	AddCcOption("-c");
 
+    #ifdef OS2
+    AddCcOption("-Tdp");
+    #else
     AddCcOption("-Tp");
+    #endif
     AddCcOption(file_in);
     if (makeExecutable && makeSharedLibrary) {
         // Add superclass libraries

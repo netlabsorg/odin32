@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.1.2.1 2001-09-20 03:12:05 bird Exp $
+# $Id: Makefile,v 1.1.2.2 2001-09-20 03:55:26 bird Exp $
 
 #
 # Odin32 API
@@ -41,9 +41,9 @@ SUBDIRS = \
 #
 CINCLUDES = -Igc
 !ifdef DEBUG
-CDEFINES = -DOS2 -DOPERATOR_NEW_ARRAY -DDEBUG
+CDEFINES = -DOS2 -DOPERATOR_NEW_ARRAY -DSDS -DDEBUG
 !else
-CDEFINES = -DOS2 -DOPERATOR_NEW_ARRAY
+CDEFINES = -DOS2 -DOPERATOR_NEW_ARRAY -DSDS
 !endif
 !if "$(VAC3)" == "1" || "$(VAC36)" == "1"
 !ifdef DEBUG
