@@ -1,7 +1,8 @@
-/* $Id: changelog,v 1.2264 2002-08-14 10:36:21 sandervl Exp $ */
+/* $Id: changelog,v 1.2265 2002-08-14 17:37:14 sandervl Exp $ */
 
  2002-08-14: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o CUSTOM_TRACKFRAME code is the default now. removed old code
+    - WINMM:    o Dart wave playback bugfix
 
  2002-08-14: Yuri Dario <mc6530@mclink   >
     - USER32:   o RMB on system menu icon pops up system menu (OS/2 look)
