@@ -1,4 +1,4 @@
-/* $Id: Porting.txt,v 1.1 1999-12-12 12:13:14 sandervl Exp $ */
+/* $Id: Porting.txt,v 1.2 1999-12-14 12:52:51 sandervl Exp $ */
 
             Porting Win32 applications to OS/2 using Odin - 991212
             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -150,8 +150,8 @@ GLOBAL_DEP = generic.h resource.h
 RC_DEP     = resource.h
 
 
-CFLAGS           = -Q  -Si -Ti -Tm+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLUDE)\Win -D__WIN32OS2__ -DDEBUG
-CXXFLAGS         = -Q  -Si -Ti -Tm+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLUDE)\Win -D__WIN32OS2__ -DDEBUG
+CFLAGS           = -Q  -Si -Ti -Tm+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLUDE)\Win -D__WIN32OS2__ -DDEBUG -D__i386__
+CXXFLAGS         = -Q  -Si -Ti -Tm+ -Ge- -Ss+ -W3 -Gm+ /Gn+ -I$(PDWIN32_INCLUDE)\Win -D__WIN32OS2__ -DDEBUG -D__i386__
 
 CFLAGS = $(CFLAGS) /Ge+ -I$(PDWIN32_INCLUDE)
 CXXFLAGS = $(CXXFLAGS) /Ge+ -I$(PDWIN32_INCLUDE)
