@@ -1,14 +1,14 @@
- /* $Id: ChangeLog,v 1.219 1999-09-21 17:00:06 dengert Exp $ */
+ /* $Id: ChangeLog,v 1.220 1999-09-21 18:34:35 sandervl Exp $ */
 
- 99-09-17: Daniela Engert <dani@ngrt.de>
+ 99-09-21: Daniela Engert <dani@ngrt.de>
 	- USER32:   background erasing/painting stuff hopefully finished.
 
  99-09-21: Patrick Haller <phaller@gmx.net>
 	- KERNEL32: Add: GetFileAttributesExA/W implemented (ugly)
 
-
  99-09-21: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Fixed cursor group conversion
+	- PELDR:    Committed my latest sources. (rewrite for new kernel32 image classes)
 
  99-09-21: Edgar Buerkle <100566.557@compuserve.com>
 	- USER32:   Fixed GetDesktopWindow, added message handling for WM_TIMER
