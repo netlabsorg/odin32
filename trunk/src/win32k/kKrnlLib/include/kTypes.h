@@ -1,13 +1,51 @@
-/* $Id: kTypes.h,v 1.4 2001-10-19 01:47:27 bird Exp $
+/* $Id: kTypes.h,v 1.5 2001-12-14 21:36:31 bird Exp $
  *
  * Common typedefinitions for kLib.
  *
- * Copyright (c) 2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 2001 knut st. osmundsen (kosmunds@csc.com)
  *
  */
 
 #ifndef _kTypes_h_
 #define _kTypes_h_
+
+
+
+/*******************************************************************************
+*   IBM C Compilers                                                            *
+*******************************************************************************/
+#ifdef __IBMC__
+
+    #define INLINE      _Inline
+    #define KLIBCALL    _Optlink
+    #ifndef __builtin_h
+    void _Builtin       __interrupt( const unsigned int );
+    #endif
+    #define INT3()      __interrupt(3)
+
+    typedef unsigned long KSIZE;
+    typedef unsigned long KBOOL;
+
+#endif
+
+
+/*******************************************************************************
+*   IBM C++ Compilers                                                          *
+*******************************************************************************/
+#ifdef __IBMCPP__
+
+    #define INLINE      inline
+    #define KLIBCALL    _Optlink
+    #ifndef __builtin_h
+    void _Builtin       __interrupt( const unsigned int );
+    #endif
+    #define INT3()      __interrupt(3)
+
+    typedef unsigned long KSIZE;
+    typedef unsigned long KBOOL;
+
+#endif
+
 
 /*******************************************************************************
 *   Common stuff                                                               *
@@ -133,41 +171,15 @@
 #endif
 
 
-/*******************************************************************************
-*   IBM C Compilers                                                            *
-*******************************************************************************/
-#ifdef __IBMC__
+/*
+ * Assert macro and function.
+ */
+#define kASSERT(expr) \
+    ((expr) ? (void)0 : (kAssertMsg(#expr, __FILE__, __LINE__, __FUNCTION__) ? INT3() : (void)0))
 
-    #define INLINE      _Inline
-    #define KLIBCALL    _Optlink
-    #ifndef __builtin_h
-    void _Builtin       __interrupt( const unsigned int );
-    #endif
-    #define INT3()      __interrupt(3)
-
-    typedef unsigned long KSIZE;
-    typedef unsigned long KBOOL;
-
-#endif
-
-
-/*******************************************************************************
-*   IBM C++ Compilers                                                          *
-*******************************************************************************/
-#ifdef __IBMCPP__
-
-    #define INLINE      inline
-    #define KLIBCALL    _Optlink
-    #ifndef __builtin_h
-    void _Builtin       __interrupt( const unsigned int );
-    #endif
-    #define INT3()      __interrupt(3)
-
-    typedef unsigned long KSIZE;
-    typedef unsigned long KBOOL;
-
-#endif
+KBOOL KLIBCALL kAssertMsg(const char *pszExpr, const char *pszFilename, unsigned uLine, const char *pszFunction);
 
 
 
 #endif
+
