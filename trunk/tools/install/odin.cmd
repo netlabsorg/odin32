@@ -1,4 +1,4 @@
-/* $Id: odin.cmd,v 1.31 2001-04-18 08:23:00 bird Exp $
+/* $Id: odin.cmd,v 1.32 2001-05-10 17:21:23 sandervl Exp $
  *
  * Odin32 API WarpIn installation script generator.
  *
@@ -218,10 +218,12 @@ rc = lineout(sInstFile, '     Knut Stange Osmundsen');
 rc = lineout(sInstFile, '     Vitali E. Pelenyov');
 rc = lineout(sInstFile, '     Rene Pronk');
 rc = lineout(sInstFile, '     David Raison');
+rc = lineout(sInstFile, '     Dietrich Teickner');
 rc = lineout(sInstFile, '     Kai Sommerfeld');
 rc = lineout(sInstFile, '     Carsten Tenbrink');
 rc = lineout(sInstFile, '     Vit Timchishin');
 rc = lineout(sInstFile, '     Joel Troster');
+rc = lineout(sInstFile, '     Shingo Tsuda');
 rc = lineout(sInstFile, '     Jens Wiessner');
 rc = lineout(sInstFile, '     Chris Wohlgemuth');
 rc = lineout(sInstFile, '     Vince Vielhaber');
