@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.23 2001-05-27 19:01:14 sandervl Exp $ */
+/* $Id: text.cpp,v 1.24 2001-06-01 19:59:00 sandervl Exp $ */
 
 /*
  * GDI32 text apis
@@ -450,7 +450,7 @@ INT SYSTEM EXPORT InternalDrawTextExA(HDC hdc,LPCSTR lpchText,INT cchText,LPRECT
 //******************************************************************************
 INT SYSTEM EXPORT InternalDrawTextExW(HDC hdc,LPCWSTR lpchText,INT cchText,LPRECT lprc,UINT dwDTFormat,LPDRAWTEXTPARAMS lpDTParams,BOOL isDrawTextEx)
 {
-  char *astring;
+  char *astring = NULL;
   INT  rc;
 
   if(cchText == -1) {
@@ -710,9 +710,21 @@ BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR
   {
     if (fuOptions & ETO_OPAQUE)
     {
+//SvL: This doesn't seem to work (anymore). Look at MFC apps for the missing border
+//     between menu & button bar (all white). (e.g. odin app & acrobat reader 4.05)
+#if 0
         lpszString = " ";
         cbCount = 1;
         flOptions |= CHSOS_CLIP;
+#else
+        HBRUSH hbrush = CreateSolidBrush(GetBkColor(hdc));
+        HBRUSH oldbrush;
+
+        oldbrush = SelectObject(hdc, hbrush);
+        FillRect(hdc, lprc, hbrush);
+        SelectObject(hdc, oldbrush);
+        return TRUE;
+#endif
     }
     else {
         dprintf(("InternalTextOutA: cbCount == 0"));
