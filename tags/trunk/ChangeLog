@@ -1,4 +1,16 @@
- /* $Id: ChangeLog,v 1.312 1999-10-13 11:22:40 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.313 1999-10-13 14:29:11 sandervl Exp $ */
+
+ 99-10-13: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Fixed shrinking listbox in shell about dialog.
+                  (add border size to size during window creation & SetWindowPos)
+                  Support for WM_NCCALCSIZE. Not completely working yet.
+                  Fixed crash in Winhlp32 (annotate creates multiline edit
+                  control that received PM messages too early -> divide by 0)
+                  -> Don't allow WM_WINDOWPOSCHANGED messages until after WM_NCCREATE.
+                  Removed previous OSLibMapWINDOWPOStoSWP bugfix.
+                  
+                  Default dialog xBaseUnit = 10, yBaseUnit = 20.
+	- COMCTL32: Check infoPtr in toolbar during WM_ERASEBKGND
 
  99-10-13: Patrick Haller <phaller@gmx.net>
 	- KERNEL32: Fix: XCPT_GUARD_PAGE_VIOLATION are now supported.
