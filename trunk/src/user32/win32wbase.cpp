@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.89 1999-11-21 18:46:36 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.90 1999-11-21 18:50:06 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -518,7 +518,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 
   if(HIWORD(cs->lpszName))
   {
-    if (isUnicode)
+    if (!isUnicode)
     {
       windowNameA = (LPSTR)_smalloc(strlen(cs->lpszName)+1);
       strcpy(windowNameA,cs->lpszName);
