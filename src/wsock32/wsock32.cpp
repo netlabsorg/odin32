@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.13 1999-11-10 16:39:46 phaller Exp $ */
+/* $Id: wsock32.cpp,v 1.14 1999-11-21 15:22:18 phaller Exp $ */
 
 /*
  *
@@ -92,10 +92,6 @@ ODINDEBUGCHANNEL(WSOCK32-WSOCK32)
 #endif
 
 
-// forwarder prototypes
-void _System SetLastError(int iError);
-int  _System GetLastError(void);
-
 
 /*****************************************************************************
  * Structures                                                                *
@@ -127,11 +123,6 @@ typedef struct sockaddr* PSOCKADDR;
 /*****************************************************************************
  * Local variables                                                           *
  *****************************************************************************/
-
-// @@@PH not reentrancy proof
-//<_sandervl> phs: I already have a rewrite of the error support in wsock. Use the
-//            GetThreadTHDB export in kernel32 and add a DWORD to the thread
-//            structure in include\win\thread.h
 
 typedef struct tagWsockThreadData
 {
@@ -982,7 +973,14 @@ ODINFUNCTION1(WHOSTENT*,OS2gethostbyname,const char*,name)
 ODINFUNCTION2(int,OS2gethostname,char *,name,
                                  int,   namelen)
 {
-  return gethostname(name,namelen);
+  int rc = gethostname(name,namelen);
+  
+  if (rc == SOCKET_ERROR)
+    WSASetLastError(ERROR_SUCCESS);
+  else
+    WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+  
+  return (rc);
 }
 
 
@@ -1191,7 +1189,10 @@ ODINFUNCTION2(int,OS2WSAStartup,USHORT,   wVersionRequired,
     return 0;
   }
   else
-    return(iTranslateSockErrToWSock(sock_errno()));
+  {
+    WSASetLastError(iTranslateSockErrToWSock(sock_errno()));
+    return(WSASYSNOTREADY);
+  }
 }
 
 
@@ -1209,6 +1210,7 @@ ODINFUNCTION2(int,OS2WSAStartup,USHORT,   wVersionRequired,
 
 ODINFUNCTION0(int,OS2WSACleanup)
 {
+  WSASetLastError(ERROR_SUCCESS);
   return 0;
 }
 
