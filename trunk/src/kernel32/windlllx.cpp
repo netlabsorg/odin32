@@ -1,4 +1,4 @@
-/* $Id: windlllx.cpp,v 1.13 2000-08-11 21:45:23 sandervl Exp $ */
+/* $Id: windlllx.cpp,v 1.14 2000-08-12 16:58:39 sandervl Exp $ */
 
 /*
  * Win32 LX Dll class (compiled in OS/2 using Odin32 api)
@@ -227,10 +227,11 @@ ULONG Win32LxDll::Release()
  HINSTANCE hinst;
  ULONG     ret;
  APIRET    rc;
+ BOOL      fNoUnload = fDisableUnload; //only set for kernel32.dll
 
   hinst = hinstanceOS2;
   ret = Win32DllBase::Release();
-  if(ret == 0 && !fDisableUnload) {//only set for kernel32.dll (fDisableUnload)
+  if(ret == 0 && !fNoUnload) {//only set for kernel32.dll (fDisableUnload)
 	//DosFreeModule sends a termination message to the dll.
         //The LX dll informs us when it's removed (UnregisterDll call)
 	rc = DosFreeModule(hinst);
@@ -264,13 +265,16 @@ Win32LxDll *Win32LxDll::findModuleByOS2Handle(HINSTANCE hinstance)
 {
    dlllistmutex.enter();
 
-   Win32LxDll *mod = (Win32LxDll*)Win32DllBase::head;
+   Win32DllBase *mod = Win32DllBase::getFirst();
    while(mod != NULL) {
-	if(mod->isLxDll() && mod->hinstanceOS2 == hinstance) {
-		dlllistmutex.leave();
-		return(mod);
+	if(mod->isLxDll()) {
+		Win32LxDll *lxdll = (Win32LxDll *)mod;
+		if(lxdll->hinstanceOS2 == hinstance) {
+			dlllistmutex.leave();
+			return(lxdll);
+		}
         }
-	mod = (Win32LxDll*)mod->next;
+	mod = mod->getNext();
    }
    dlllistmutex.leave();
    return(NULL);
