@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.358 1999-10-23 22:59:00 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.359 1999-10-24 09:42:32 sandervl Exp $ */
+
+ 99-10-24: Daniela Engert <dani@ngrt.de>
+	- KERNEL32: Fixed cursor in VPBuddy (invalid size)
 
  99-10-23: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: added more metrics for GetSystemMetrics
