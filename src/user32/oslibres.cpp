@@ -1,4 +1,4 @@
-/* $Id: oslibres.cpp,v 1.25 2001-10-15 17:09:03 sandervl Exp $ */
+/* $Id: oslibres.cpp,v 1.26 2001-10-16 14:49:46 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -307,7 +307,7 @@ char *colorToMonoBitmap(HBITMAP bmpsrc, BITMAPINFO2 *pBmpDest)
     lHits = GpiQueryBitmapBits(hpsDest, 0, pBmpDest->cy, bmpbuffer, bmpinfo);
     if(lHits == GPI_ERROR) goto fail;
 
-//DEBUG_CURSOR
+//#define DEBUG_CURSOR
 #ifdef DEBUG_CURSOR
  {
     dprintf(("colorToMonoBitmap %d %d (%x,%x,%x)(%x,%x,%x)", pBmpDest->cx, pBmpDest->cy, bmpinfo->argbColor[0].bRed, bmpinfo->argbColor[0].bGreen, bmpinfo->argbColor[0].bBlue, bmpinfo->argbColor[1].bRed, bmpinfo->argbColor[1].bGreen, bmpinfo->argbColor[1].bBlue));
@@ -456,9 +456,9 @@ HANDLE OSLibWinCreatePointer(CURSORICONINFO *pInfo, char *pAndBits, BITMAP_W *pA
             }
         }
         if(hbmColor) {
-             dprintf2(("OSLibWinCreatePointer: using real color cursor/icon"));
+             dprintf2(("OSLibWinCreatePointer: using real color cursor/icon (fCursor %d)", fCursor));
         }
-        else dprintf2(("OSLibWinCreatePointer: converted color cursor/icon to mono"));
+        else dprintf2(("OSLibWinCreatePointer: converted color cursor/icon to mono (fCursor %d)", fCursor));
     }
 
     //SvL: 2*sizeof(RGB2) is enough, but GpiCreateBitmap seems to touch more
@@ -503,7 +503,7 @@ HANDLE OSLibWinCreatePointer(CURSORICONINFO *pInfo, char *pAndBits, BITMAP_W *pA
         goto fail;
     }
 
-    pointerInfo.fPointer   = fCursor; //FALSE = icon
+    pointerInfo.fPointer   = !fCursor; //TRUE = icon
     pointerInfo.xHotspot   = pInfo->ptHotSpot.x;
     pointerInfo.yHotspot   = mapY(pInfo->nHeight, pInfo->ptHotSpot.y);
     pointerInfo.hbmColor   = hbmColor;
