@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.20 1999-10-27 18:11:39 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.21 1999-11-08 20:53:24 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -77,6 +77,12 @@ BOOL Win32MemMap::Init(HANDLE hMemMap)
 	if(mSize == -1) {
 		dprintf(("Win32MemMap::init: SetFilePointer failed to set pos end"));
 		goto fail;
+	}
+	//SvL: Temporary limitation of size (Warp Server Advanced doesn't allow
+        //     one to reserve more than 450 MB of continuous memory; (Warp 4
+        //     much less))
+	if(mSize > 64*1024*1024) {
+		mSize = 64*1024*1024;
 	}
   }
 
