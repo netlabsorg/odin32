@@ -1,4 +1,4 @@
-/* $Id: datetime.c,v 1.6 1999-12-18 20:56:58 achimha Exp $ */
+/* $Id: datetime.c,v 1.7 2000-02-04 17:02:07 cbratschi Exp $ */
 /*
  * Date and time picker control
  *
@@ -14,7 +14,7 @@
  *
  */
 
-/* WINE 991212 level */
+/* WINE 20000130 level */
 
 #include "winbase.h"
 #include "commctrl.h"
