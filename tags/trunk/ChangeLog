@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1708 2001-09-30 04:58:18 bird Exp $ */
+/* $Id: ChangeLog,v 1.1709 2001-09-30 05:32:47 bird Exp $ */
 
  2001-09-30: knut st. osmundsen <kosmunds@csc.com>
     - Makefiles:
@@ -13,6 +13,7 @@
                 o Did some cleanup of the main Makefile and added some missing rules.
                 o Made separate .depend file for the include files in the /include dir.
                   This will speedup the 'dep' rule somewhat.
+                o Autostart CmdQd with 7 workers if not started and MULTIJOBS are defined.
     - Fastdep:  o Corrected processing of C/C++ #include "someheader.h" to
                   start the search in the source code directory.
                 o Corrected handling of deleted files.
