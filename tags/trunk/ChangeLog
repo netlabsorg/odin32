@@ -1,12 +1,17 @@
-/* $Id: ChangeLog,v 1.1788 2001-10-24 22:48:08 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1789 2001-10-25 10:40:08 sandervl Exp $ */
+
+ 2001-10-25: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Fixed sending of WM_ACTIVATEAPP messages. Only send them
+                  to top-level windows when application gains or loses focus
+                  from/to a window of another process.
 
  2001-10-24: Patrick Haller <patrick.haller@innotek.de>
     - USER32:   o added translation between PM Scancodes and
                   Windows Scancodes
                   Note: Open32 uses always PM Scancodes!
                 o fixed GetKeyNameText as far as possible
-                Despite we'll have to implement a flexible keyboard
-                layout scheme in the future.
+                  Despite we'll have to implement a flexible keyboard
+                  layout scheme in the future.
 
  2001-10-24: Achim Hasenmueller <achimha@innotek.de>
     - PMKBDHK:  o link statically with C runtime
@@ -24,7 +29,7 @@
                 o Double mouse click sent two up messages
                 o Double click on system menu now closes window
                   (SetCapture interferes with double click message generation)
-    - WINMM:    o Dynamically load MMPM/2; Windows applications (that don't
+    - WINMM:    o Dynamically load MDM; Windows applications (that don't
                   require sound) will no longer fail when MMPM/2 isn't available.
 
  2001-10-23: Sander van Leeuwen <sandervl@xs4all.nl>
