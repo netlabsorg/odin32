@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.40 2001-07-08 04:19:52 bird Exp $ */
+/* $Id: misc.cpp,v 1.41 2001-08-17 11:18:37 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -327,7 +327,7 @@ int SYSTEM WriteLog(char *tekst, ...)
   }
 
   if(!tekst) {
-    fflush( flog);
+    if(flog) fflush( flog);
     SetFS(sel);
     return 1;
   }
