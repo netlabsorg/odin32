@@ -1,4 +1,8 @@
- /* $Id: changelog,v 1.54 1999-07-20 17:49:51 sandervl Exp $ */
+ /* $Id: changelog,v 1.55 1999-07-21 11:44:33 sandervl Exp $ */
+ 99-07-21: Edgar Buerkle <100566.557@compuserve.com>
+	- KERNEL32: Fix for LoadResource; should return pointer to resource data
+                    LockResource just returns the pointer returned by LoadResource
+
  99-07-20: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32/NEW: Added support for window icons and accelerators. 
 		      Accelerators don't work yet.
