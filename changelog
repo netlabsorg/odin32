@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2265 2002-08-14 17:37:14 sandervl Exp $ */
+/* $Id: changelog,v 1.2266 2002-08-15 15:44:01 sandervl Exp $ */
+
+ 2002-08-15: Yuri Dario <mc6530@mclink   >
+    - USER32:   o SPI_GETNONCLIENTMETRICS size check extended
+                o Fixed RMB on icon of minimized mdi window
 
  2002-08-14: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o CUSTOM_TRACKFRAME code is the default now. removed old code
