@@ -1,4 +1,4 @@
-; $Id: ws2_32.def,v 1.7 2001-07-07 14:29:22 achimha Exp $
+; $Id: ws2_32.def,v 1.8 2001-09-18 16:59:00 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY WS2_32 INITINSTANCE
@@ -100,7 +100,7 @@ EXPORTS
 ; WSAHtons                                         @47
 ; WSAInstallServiceClassA                          @48
 ; WSAInstallServiceClassW                          @49
-; WSAIoctl                                         @50
+  WSAIoctl                    = _WSAIoctl@36       @50
 
   gethostbyaddr                                    @51
   gethostbyname                                    @52
