@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.14 1999-09-06 20:50:35 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.15 1999-09-13 19:18:23 dengert Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -36,7 +36,7 @@
 #include "syscolor.h"
 #include "win32wndhandle.h"
 #include "heapshared.h"
-
+#include "dc.h"
 
 #define HAS_DLGFRAME(style,exStyle) \
     (((exStyle) & WS_EX_DLGMODALFRAME) || \
@@ -123,6 +123,9 @@ Win32BaseWindow::~Win32BaseWindow()
 {
   OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32WNDPTR, 0);
   OSLibWinSetWindowULong(OS2Hwnd, OFFSET_WIN32PM_MAGIC, 0);
+
+  if (isOwnDC())
+        releaseOwnDC (ownDC);
 
   if(Win32Hwnd)
         HwFreeWindowHandle(Win32Hwnd);
