@@ -1,4 +1,4 @@
-/* $Id: OS2SURFACE.CPP,v 1.43 2002-07-01 16:02:04 sandervl Exp $ */
+/* $Id: OS2SURFACE.CPP,v 1.44 2002-07-01 19:15:24 sandervl Exp $ */
 
 /*
  * DirectDraw Surface class implementaion
@@ -37,6 +37,9 @@
 #include "fillfunc.h"
 #include <winerror.h>
 #include <os2win.h>
+#include <cpuhlp.h>
+#include "asmutil.h"
+
 #ifndef __WATCOMC__
   #include <builtin.h>
 #endif
@@ -1568,10 +1571,12 @@ HRESULT OS2IDirectDrawSurface::DoColorFill(LPRECT lpDestRect,DWORD dwFillColor)
     }
   }
 
-  if(NULL!=ColorFill)
+  if(NULL!=ColorFill) {
     ColorFill( pDiveBuffer, pFrameBuffer, Top, Left,
               FillWidth, FillHeight, dwPitchDB,dwPitchFB,
               dwFillColor,(16==lpDraw->dCaps.ulDepth)?(VOID*)pPal16:(VOID*)pPal24);
+    SurfChangeUniquenessValue(this);
+  }
   else
   {
     dprintf(("DDRAW: ColorFill function is NULL!!"));
@@ -2537,6 +2542,7 @@ dodiveblit:
               else  average = (average + (liEnd.LowPart - liStart.LowPart))/2;
           }
 #endif
+          SurfChangeUniquenessValue(dest);
           return DD_OK;
       }
   }
@@ -3057,8 +3063,7 @@ HRESULT WIN32API SurfDoBlt(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
                 }
                 break;
             }  // end switch
-            //if(dest->lpVtbl == dest->Vtbl4)
-            //  dest->Vtbl4->ChangeUniquenessValue(dest);
+            SurfChangeUniquenessValue(dest);
             return DD_OK;
           }
 
@@ -3303,8 +3308,7 @@ HRESULT WIN32API SurfDoBlt(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
             }  // End switch
             // Only Source colorkey
           }
-          // if(dest->lpVtbl == dest->Vtbl4)
-          //  dest->Vtbl4->ChangeUniquenessValue(dest);
+          SurfChangeUniquenessValue(dest);
           return DD_OK;
         }
 
@@ -3418,8 +3422,7 @@ HRESULT WIN32API SurfDoBlt(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
 
   }// end handling destination not framebuffer
 
-  // if(dest->lpVtbl == dest->Vtbl4)
-  //   dest->Vtbl4->ChangeUniquenessValue(dest);
+  SurfChangeUniquenessValue(dest);
   return(DD_OK);
 }
 //******************************************************************************
@@ -4404,7 +4407,6 @@ HRESULT WIN32API SurfGetDC(THIS This, HDC FAR *hdc)
  OS2IDirectDrawSurface *me = (OS2IDirectDrawSurface *)This;
  DDSURFACEDESC2        LockedSurfaceDesc;
  HRESULT               rc;
- BITMAPINFOHEADER      bmihHdr;
  BITMAP bmpSurface;
  struct
  {
@@ -4453,12 +4455,6 @@ HRESULT WIN32API SurfGetDC(THIS This, HDC FAR *hdc)
     BitmapInfo.bmiHead.biHeight   = LockedSurfaceDesc.dwHeight;
     BitmapInfo.bmiHead.biPlanes   = 1;
     BitmapInfo.bmiHead.biBitCount = (WORD)LockedSurfaceDesc.ddpfPixelFormat.dwRGBBitCount;
-    memset(&bmihHdr, 0, sizeof(bmihHdr));
-    bmihHdr.biSize     = sizeof(BITMAPINFOHEADER);
-    bmihHdr.biWidth    = LockedSurfaceDesc.dwWidth;
-    bmihHdr.biHeight   = LockedSurfaceDesc.dwHeight;
-    bmihHdr.biPlanes   = 1;
-    bmihHdr.biBitCount = (WORD)LockedSurfaceDesc.ddpfPixelFormat.dwRGBBitCount;
 
     switch(LockedSurfaceDesc.ddpfPixelFormat.dwRGBBitCount)
     {
@@ -4486,7 +4482,7 @@ HRESULT WIN32API SurfGetDC(THIS This, HDC FAR *hdc)
            }
         }
         me->hbmImage = CreateDIBitmap( me->hdcImage,
-                                       &bmihHdr,
+                                       &BitmapInfo.bmiHead,
                                        CBM_INIT,
                                        LockedSurfaceDesc.lpSurface,
                                        (PBITMAPINFO)&BitmapInfo,
@@ -4502,7 +4498,7 @@ HRESULT WIN32API SurfGetDC(THIS This, HDC FAR *hdc)
         *((DWORD *) &(BitmapInfo.bmiCols[1])) = me->DDSurfaceDesc.ddpfPixelFormat.dwGBitMask;
         *((DWORD *) &(BitmapInfo.bmiCols[2])) = me->DDSurfaceDesc.ddpfPixelFormat.dwBBitMask;
         me->hbmImage = CreateDIBitmap( me->hdcImage,
-                                       &bmihHdr,
+                                       &BitmapInfo.bmiHead,
                                        CBM_INIT,
                                        LockedSurfaceDesc.lpSurface,
                                        (PBITMAPINFO)&BitmapInfo,
@@ -4907,7 +4903,6 @@ HRESULT WIN32API SurfReleaseDC(THIS This, HDC hdc)
    BITMAPINFOHEADER  bmiHead;
    RGBQUAD           bmiCols[256];
  } BitmapInfo;
-// BITMAP bmpData;
  int rc;
 
   dprintf(("DDRAW: SurfReleaseDC\n"));
@@ -4915,17 +4910,16 @@ HRESULT WIN32API SurfReleaseDC(THIS This, HDC hdc)
   if(hdc != me->hdcImage)
     return(DDERR_INVALIDOBJECT);
 
-  #if 1
   //unselect our bitmap
   SelectObject(me->hdcImage, me->hgdiOld);
+
   memset(&BitmapInfo,0, sizeof(BitmapInfo));
   BitmapInfo.bmiHead.biSize     = sizeof(BITMAPINFOHEADER);
-  /*
-  BitmapInfo.bmiHead.biWidth    = me->DDSurfaceDesc.lPitch/ (me->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount>>3);
-  BitmapInfo.bmiHead.biHeight   = me->DDSurfaceDesc.dwHeight;
+  BitmapInfo.bmiHead.biBitCount = me->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount;
   BitmapInfo.bmiHead.biPlanes   = 1;
-  BitmapInfo.bmiHead.biBitCount = 0; // me->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount;
-  */
+  BitmapInfo.bmiHead.biWidth    = me->DDSurfaceDesc.dwWidth; /// (me->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount>>3);
+  BitmapInfo.bmiHead.biHeight   = me->DDSurfaceDesc.dwHeight;
+
   switch(me->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount)
   {
     case 1:
@@ -4965,6 +4959,25 @@ HRESULT WIN32API SurfReleaseDC(THIS This, HDC hdc)
                 ((char*)me->DDSurfaceDesc.lpSurface)[0]));
       break;
     case 16:
+      BitmapInfo.bmiHead.biCompression = BI_BITFIELDS;
+      BitmapInfo.bmiHead.biClrUsed     = 3;
+      *((DWORD *) &(BitmapInfo.bmiCols[0])) = me->DDSurfaceDesc.ddpfPixelFormat.dwRBitMask;
+      *((DWORD *) &(BitmapInfo.bmiCols[1])) = me->DDSurfaceDesc.ddpfPixelFormat.dwGBitMask;
+      *((DWORD *) &(BitmapInfo.bmiCols[2])) = me->DDSurfaceDesc.ddpfPixelFormat.dwBBitMask;
+      GetDIBits(hdc, me->hbmImage, 0, me->DDSurfaceDesc.dwHeight,
+                me->DDSurfaceDesc.lpSurface,(PBITMAPINFO)&BitmapInfo,DIB_RGB_COLORS);
+
+      //GetDIBits returns data in RGB555 format; convert if surface is in RGB565 format
+      if(me->DDSurfaceDesc.ddpfPixelFormat.dwGBitMask == 0x7E0) {
+        int imgsize = BitmapInfo.bmiHead.biWidth*BitmapInfo.bmiHead.biHeight*2;
+
+        if(CPUFeatures & CPUID_MMX) {
+             DDrawRGB555to565MMX((char *)me->DDSurfaceDesc.lpSurface, (char *)me->DDSurfaceDesc.lpSurface, imgsize/sizeof(WORD));
+        }
+        else DDrawRGB555to565((char *)me->DDSurfaceDesc.lpSurface, (char *)me->DDSurfaceDesc.lpSurface, imgsize/sizeof(WORD));
+      }
+      break;
+
     case 32:
       BitmapInfo.bmiHead.biCompression = BI_BITFIELDS;
       BitmapInfo.bmiHead.biClrUsed     = 3;
@@ -4974,6 +4987,7 @@ HRESULT WIN32API SurfReleaseDC(THIS This, HDC hdc)
       GetDIBits(hdc, me->hbmImage, 0, me->DDSurfaceDesc.dwHeight,
                 me->DDSurfaceDesc.lpSurface,(PBITMAPINFO)&BitmapInfo,DIB_RGB_COLORS);
       break;
+
     case 24:
       BitmapInfo.bmiHead.biCompression = BI_RGB;
       GetDIBits(hdc, me->hbmImage, 0, me->DDSurfaceDesc.dwHeight,
@@ -4984,18 +4998,7 @@ HRESULT WIN32API SurfReleaseDC(THIS This, HDC hdc)
       // we might could keep the surface locked and return an error but this is more "safe"
       break;
   } // end switch (me->DDSurfaceDesc.ddpfPixelFormat.dwRGBBitCount)
-  #else
 
-  rc = GetObjectA( me->hbmImage,
-                  sizeof(BITMAP),
-                  &bmpData);
-  dprintf( ("GetObject returned rc=%d\n BitmapInfo:\n Size:(%dx%d)\n Pitch: %d\n Bits %d\n @mem %08X",
-            rc,
-            bmpData.bmWidth, bmpData.bmHeight,
-            bmpData.bmWidthBytes,
-            bmpData.bmBitsPixel,
-            bmpData.bmBits));
-  #endif
   me->Vtbl.Unlock(me,NULL);
   me->dwLastDCUnique = me->dwUniqueValue; // Store this to see if the surface was locked after we released the DC
 
