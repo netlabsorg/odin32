@@ -1,4 +1,11 @@
- /* $Id: ChangeLog,v 1.848 2000-03-29 15:14:46 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.849 2000-03-29 17:13:41 sandervl Exp $ */
+
+ 2000-03-29: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: Throw exception when critical section times out
+	- USER32:   Fixed bugs in PeekMessageA/W (fixes connection failures
+                    & hangs after warning dialogs in RealPlayer 7)
+	- GDI32:    Check for NULL region in GetRgnBox; can cause a crash
+                    in Open32
 
  2000-03-29: Christoph Bratschi <cbratschi@datacomm.ch>
 	- KERNEL32: added FindFileFirstMultiA for internal usage
