@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.14 2000-02-21 09:24:00 bird Exp $
+/* $Id: d32init.c,v 1.15 2000-02-23 23:01:00 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -40,6 +40,7 @@
 #include "ldrCalls.h"
 #include "macros.h"
 
+
 /*******************************************************************************
 *   Global Variables                                                           *
 *******************************************************************************/
@@ -75,6 +76,7 @@ extern char     DATA16START;
 extern char     DATA16_CONSTEND;
 
 
+#ifndef DEBUGR3
 /**
  * Ring-0, 32-bit, init function.
  * @returns   Status word.
@@ -428,9 +430,29 @@ USHORT _loadds _Far32 _Pascal GetOTEs32(PKRNLOBJTABLE pOTEBuf)
                 pOTE = pSMTE->smte_objtab;
                 if (pOTE != NULL)
                 {
+                    /* Copy OTEs */
                     for (i = 0; i < pOTEBuf->cObjects; i++)
                         memcpy((void*)&pOTEBuf->aObjects[i], &pOTE[i], sizeof(OTE));
                     usRc = 0;
+
+                    /*
+                     * Search for internal revision stuff in the two first objects.
+                     */
+                    #if 0
+                    for (i = 0; i < 2; i++)
+                    {
+                        const char *psz = (const char*)pOTE[i].ote_base;
+                        const char *pszEnd = psz + pOTE[i].ote_size;
+
+                        while (psz + 100 < pszEnd)
+                        {
+                            strncmp(psz, "Internal revision");
+
+                            /* next */
+                            psz++;
+                        }
+                    }
+                    #endif
                 }
                 else
                     usRc = 4;
@@ -449,6 +471,7 @@ USHORT _loadds _Far32 _Pascal GetOTEs32(PKRNLOBJTABLE pOTEBuf)
 
     return (USHORT)(usRc | (usRc != NO_ERROR ? STATUS_DONE | STERR : STATUS_DONE));
 }
+#endif /* !DEBUGR3*/
 
 
 
@@ -505,7 +528,7 @@ static int interpretFunctionProlog32(char *pach, BOOL fOverload)
      *     mov ebp,esp
      *  or
      *     push ebp
-     *     mov ecx, dword ptr [xxxxxxxx]
+     *     mov eax, dword ptr [xxxxxxxx]
      *
      * These are allowed when not overloading:
      *     mov eax, imm32
@@ -513,10 +536,15 @@ static int interpretFunctionProlog32(char *pach, BOOL fOverload)
      *  or
      *     mov eax, imm32
      *     push ebp
+     *  or
+     *     mov eax, msoff32
+     *
      */
     if ((pach[0] == 0x55 && (pach[1] == 0x8b || pach[1] == 0xa1)) /* two first prologs */
         ||
-        (pach[0] == 0xB8 && (pach[5] == 0xEB || pach[5] == 0x55) && !fOverload) /* two last prologs */
+        (pach[0] == 0xB8 && (pach[5] == 0xEB || pach[5] == 0x55 ) && !fOverload) /* two next prologs */
+        ||
+        (pach[0] == 0xa1 && !fOverload) /* last prolog */
         )
     {
         BOOL fForce;
@@ -561,6 +589,8 @@ static int interpretFunctionProlog32(char *pach, BOOL fOverload)
                 case 0x34:              /* xor al, imm8 */
                 case 0x3c:              /* cmp al, imm8 */
                 case 0x6a:              /* push <byte> */
+                case 0xa0:              /* mov al, moffs8 */
+                case 0xa2:              /* mov moffs8, al */
                     pach++;
                     cb++;
                     break;
@@ -578,6 +608,8 @@ static int interpretFunctionProlog32(char *pach, BOOL fOverload)
                 case 0x35:              /* xor eax, imm32 */
                 case 0x3d:              /* cmp eax, imm32 */
                 case 0x68:              /* push <dword> */
+                case 0xa1:              /* mov eax, moffs16 */
+                case 0xa3:              /* mov moffs16, eax */
                     pach += 4;
                     cb += 4;
                     break;
@@ -680,12 +712,23 @@ static int interpretFunctionProlog16(char *pach, BOOL fOverload)
     if (*pach == 0x6A)                  /* push 2 (don't check for the 2) */
     {
         BOOL fForce;
+        int  cOpPrefix = 0;
         cb = 0;
         while (cb < 8 || fForce)        /* 8 is the size of a 66h prefixed far jump instruction. */
         {
             fForce = FALSE;
             switch (*pach)
             {
+                case 0x0f:              /* push gs and push fs */
+                    if (pach[1] != 0xA0 && pach[1] != 0xA8)
+                    {
+                        kprintf(("interpretFunctionProlog16: unknown instruction 0x%x 0x%x 0x%x\n", pach[0], pach[1], pach[2]));
+                        return -11;
+                    }
+                    pach++;
+                    cb++;
+                    break;
+
                 case 0x50:              /* push ax */
                 case 0x51:              /* push cx */
                 case 0x52:              /* push dx */
@@ -703,6 +746,13 @@ static int interpretFunctionProlog16(char *pach, BOOL fOverload)
                 case 0x64:              /* fs segment override */
                 case 0x65:              /* gs segment override */
                     fForce = TRUE;
+                    if (cOpPrefix > 0)
+                        cOpPrefix++;
+                    break;
+
+                case 0x66:
+                    cOpPrefix = 2;      /* it's decremented once before it's used. */
+                    fForce = TRUE;
                     break;
 
                 case 0x6a:              /* push <byte> */
@@ -711,6 +761,11 @@ static int interpretFunctionProlog16(char *pach, BOOL fOverload)
                     break;
 
                 case 0x68:              /* push <word> */
+                    if (cOpPrefix > 0)
+                    {
+                        pach += 2;
+                        cb += 2;
+                    }
                     pach += 2;
                     cb += 2;
                     break;
@@ -719,6 +774,11 @@ static int interpretFunctionProlog16(char *pach, BOOL fOverload)
                     if ((pach[1] & 0xc0) == 0x80  /* ex. mov ax,bp+1114h */
                         || ((pach[1] & 0xc0) == 0 && (pach[1] & 0x7) == 6)) /* ex. mov bp,0ff23h */
                     {   /* 16-bit displacement */
+                        if (cOpPrefix > 0)
+                        {
+                            pach += 2;
+                            cb += 2;
+                        }
                         pach += 3;
                         cb += 3;
                     }
@@ -741,6 +801,8 @@ static int interpretFunctionProlog16(char *pach, BOOL fOverload)
             }
             pach++;
             cb++;
+            if (cOpPrefix > 0)
+                cOpPrefix--;
         }
     }
 
@@ -749,7 +811,7 @@ static int interpretFunctionProlog16(char *pach, BOOL fOverload)
 }
 
 
-
+#ifndef DEBUGR3
 /**
  * Verifies the aImportTab.
  * @returns   0 if ok. !0 if not ok.
@@ -1060,4 +1122,156 @@ static int importTabInit(void)
 
     return NO_ERROR;
 }
+#endif /* !DEBUGR3 */
 
+
+
+
+/*******************************************************************************
+*   Ring-3 Debug Stuff
+*******************************************************************************/
+#ifdef DEBUGR3
+#include <stdio.h>
+
+void main(void)
+{
+    char ach_ldrRead[] = {
+        0x55, 0x8b, 0xec, 0x8d, 0x65, 0xf8, 0x53, 0x56,
+        0x57, 0x33, 0xd2, 0x42, 0x89, 0x55, 0xf8, 0x38,
+        0x35, 0xce, 0x70, 0x00, 0x00, 0x75, 0x4d, 0x8b,
+        0x55, 0x08, 0x66, 0x83, 0xfa, 0xff, 0x74, 0x62
+    };
+    char ach_ldrOpen[] = {
+        0x55, 0x8b, 0xec, 0x33, 0xc0, 0x38, 0x05, 0xce,
+        0x70, 0x00, 0x00, 0x75, 0x4b, 0x50, 0xff, 0x75,
+        0x08, 0x6a, 0x01, 0x68, 0xa3, 0x00, 0x00, 0x00,
+        0xff, 0x75, 0x0c, 0xff, 0x15, 0xc4, 0xc1, 0x0d
+    };
+    char ach_ldrClose[] = {
+        0x55, 0x8b, 0xec, 0x33, 0xc0, 0x38, 0x05, 0xce,
+        0x70, 0x00, 0x00, 0x75, 0x13, 0x8b, 0x55, 0x08,
+        0x0f, 0xb7, 0xd2, 0x66, 0x83, 0xfa, 0xff, 0x74,
+        0x07, 0x52, 0xff, 0x15, 0xcc, 0xc1, 0x0d, 0x00
+    };
+    char ach_LDRQAppType[] = {
+        0x55, 0x8b, 0x0d, 0xa0, 0x0a, 0x00, 0x00, 0x8b,
+        0xec, 0x83, 0xec, 0x3c, 0x53, 0x81, 0xc1, 0x24,
+        0x06, 0x00, 0x00, 0x57, 0x56, 0x6a, 0xff, 0x66,
+        0xc7, 0x45, 0xc6, 0x00, 0x00, 0x51, 0xe8, 0x38
+    };
+    char ach_ldrEnum32bitRelRecs[] = {
+        0x55, 0xa1, 0xe8, 0xcf, 0x0d, 0x00, 0x8b, 0xec,
+        0x83, 0xec, 0x5c, 0x53, 0x8b, 0x55, 0x08, 0x57,
+        0x56, 0x8b, 0x52, 0x04, 0xf6, 0x40, 0x04, 0x80,
+        0x89, 0x55, 0xfc, 0x0f, 0x84, 0x10, 0x01, 0x00
+    };
+    char ach_IOSftOpen[] = {
+        0x55, 0x8b, 0xec, 0x8d, 0xa5, 0xa0, 0xfe, 0xff,
+        0xff, 0xf6, 0x05, 0x95, 0x2d, 0x00, 0x00, 0x80,
+        0x74, 0x13, 0x66, 0x68, 0x50, 0x30, 0xff, 0x75,
+        0x08, 0x6a, 0x3c, 0x6a, 0x06, 0xe8, 0x5a, 0x03
+    };
+    char ach_IOSftClose[] = {
+        0x55, 0x8b, 0xec, 0x8d, 0xa5, 0x28, 0xff, 0xff,
+        0xff, 0xf6, 0x05, 0x95, 0x2d, 0x00, 0x00, 0x80,
+        0x74, 0x16, 0x50, 0x66, 0x68, 0x51, 0x30, 0x8b,
+        0x45, 0x08, 0x50, 0x6a, 0x0c, 0x6a, 0x06, 0xe8
+    };
+    char ach_IOSftTransPath[] = {
+        0x55, 0x8b, 0xec, 0x8d, 0xa5, 0xd8, 0xfd, 0xff,
+        0xff, 0x53, 0x56, 0x57, 0x1e, 0x06, 0xa1, 0xa4,
+        0x0a, 0x00, 0x00, 0x66, 0x8d, 0x9d, 0xe2, 0xfe,
+        0xff, 0xff, 0x66, 0x89, 0x98, 0xf6, 0x01, 0x00
+    };
+    char ach_IOSftReadAt[] = {
+        0xb8, 0xc4, 0x68, 0x14, 0x00, 0xeb, 0x05, 0xb8,
+        0xcc, 0x68, 0x14, 0x00, 0x55, 0x8b, 0xec, 0x8d,
+        0xa5, 0x20, 0xff, 0xff, 0xff, 0xf6, 0x05, 0x95,
+        0x2d, 0x00, 0x00, 0x80, 0x74, 0x28, 0x50, 0x66
+    };
+    char ach_IOSftWriteAt[] = {
+        0xb8, 0xcc, 0x68, 0x14, 0x00, 0x55, 0x8b, 0xec,
+        0x8d, 0xa5, 0x20, 0xff, 0xff, 0xff, 0xf6, 0x05,
+        0x95, 0x2d, 0x00, 0x00, 0x80, 0x74, 0x28, 0x50,
+        0x66, 0x68, 0x52, 0x30, 0x8b, 0x45, 0x08, 0x25
+    };
+    char ach_SftFileSize[] = {
+        0x55, 0x8b, 0xec, 0x8d, 0xa5, 0x28, 0xff, 0xff,
+        0xff, 0x57, 0x56, 0x53, 0xc6, 0x85, 0x2b, 0xff,
+        0xff, 0xff, 0x00, 0x8b, 0x35, 0xa4, 0x0a, 0x00,
+        0x00, 0xf6, 0x46, 0x04, 0x01, 0x74, 0x0a, 0x80
+    };
+    char ach_VMAllocMem[] = {
+        0xa1, 0xe8, 0xcf, 0x0d, 0x00, 0x55, 0x8b, 0xec,
+        0x83, 0xec, 0x44, 0x53, 0x57, 0xf6, 0x40, 0x04,
+        0x80, 0x56, 0x0f, 0x84, 0x34, 0x01, 0x00, 0x00,
+        0xf6, 0x00, 0x40, 0x74, 0x44, 0xa1, 0xcc, 0x02
+    };
+    char ach_VMGetOwner[] = {
+        0x55, 0x8b, 0xec, 0x83, 0xec, 0x30, 0x57, 0x66,
+        0x8b, 0x4d, 0x08, 0x66, 0x89, 0x4d, 0xd8, 0xf6,
+        0xc1, 0x04, 0x75, 0x39, 0x80, 0x3d, 0x40, 0x8c,
+        0x00, 0x00, 0x00, 0x74, 0x07, 0xa1, 0xac, 0x0a
+    };
+    char achg_tkExecPgm[] = {
+        0x55, 0x8b, 0xec, 0x8d, 0x65, 0xa4, 0x66, 0x89,
+        0x5d, 0xf4, 0x66, 0x8c, 0x45, 0xf6, 0x66, 0x89,
+        0x55, 0xfc, 0x66, 0x8c, 0x5d, 0xfe, 0x66, 0x89,
+        0x75, 0xf0, 0x66, 0x89, 0x7d, 0xf2, 0xc7, 0x45
+    };
+    char achf_FuStrLenZ[] = {
+        0x6a, 0x02, 0x52, 0x66, 0x55, 0x0f, 0xa8, 0x68,
+        0x0c, 0x00, 0x0f, 0xa9, 0x65, 0x67, 0x66, 0x8b,
+        0x2d, 0xa8, 0x0a, 0x00, 0x00, 0x65, 0x67, 0xff,
+        0xb5, 0xb4, 0x1f, 0x00, 0x00, 0x65, 0x67, 0x66
+    };
+    char achf_FuStrLen[] = {
+        0x6a, 0x02, 0x52, 0x66, 0x55, 0x0f, 0xa8, 0x68,
+        0x0c, 0x00, 0x0f, 0xa9, 0x65, 0x67, 0x66, 0x8b,
+        0x2d, 0xa8, 0x0a, 0x00, 0x00, 0x65, 0x67, 0xff,
+        0xb5, 0xb4, 0x1f, 0x00, 0x00, 0x65, 0x67, 0x66
+    };
+    char achf_FuBuff[] = {
+        0x6a, 0x02, 0x52, 0x66, 0x55, 0x0f, 0xa8, 0x68,
+        0x0c, 0x00, 0x0f, 0xa9, 0x65, 0x67, 0x66, 0x8b,
+        0x2d, 0xa8, 0x0a, 0x00, 0x00, 0x65, 0x67, 0xff,
+        0xb5, 0xb4, 0x1f, 0x00, 0x00, 0x65, 0x67, 0x66
+    };
+
+
+    char *aProcs[] =
+    {
+        ach_ldrRead            ,
+        ach_ldrOpen            ,
+        ach_ldrClose           ,
+        ach_LDRQAppType        ,
+        ach_ldrEnum32bitRelRecs,
+        ach_IOSftOpen          ,
+        ach_IOSftClose         ,
+        ach_IOSftTransPath     ,
+        ach_IOSftReadAt        ,
+        ach_IOSftWriteAt       ,
+        ach_SftFileSize        ,
+        ach_VMAllocMem         ,
+        ach_VMGetOwner         ,
+        achg_tkExecPgm         ,
+        achf_FuStrLenZ         ,
+        achf_FuStrLen          ,
+        achf_FuBuff            ,
+        NULL
+    };
+    int i;
+
+    /* loop thru procs */
+    for (i = 0; aProcs[i] != NULL; i++)
+    {
+        unsigned cb;
+        printf("Proc.no.%i\n", i);
+        if (i < 14 )
+            cb = interpretFunctionProlog32(aProcs[i], i < 5 || i == 13);
+        else
+            cb = interpretFunctionProlog16(aProcs[i], FALSE);
+        printf(" cb=%d\n\n", cb);
+    }
+}
+#endif
