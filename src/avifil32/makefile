@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2001-07-21 17:38:50 sandervl Exp $
+# $Id: makefile,v 1.13 2002-06-15 12:14:26 sandervl Exp $
 
 #
 # Odin32 API
@@ -17,17 +17,9 @@
 # Object files. Prefix with OBJDIR and one space before the '\'.
 #
 OBJS = \
-$(OBJDIR)\initterm.obj \
-$(OBJDIR)\initavifil32.obj \
-$(OBJDIR)\api.obj \
-$(OBJDIR)\string.obj \
-$(OBJDIR)\comentry.obj \
-$(OBJDIR)\iafile.obj \
-$(OBJDIR)\iastream.obj \
-$(OBJDIR)\igframe.obj \
-$(OBJDIR)\main.obj \
-$(OBJDIR)\guid.obj \
-$(OBJDIR)\avifil32.obj 
+$(OBJDIR)\avifile.obj \
+$(OBJDIR)\avifil32.obj \
+$(DLLENTRY) 
 
 
 #
@@ -38,6 +30,7 @@ $(ODIN32_LIB)/kernel32.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
 $(ODIN32_LIB)/ole32.lib \
 $(ODIN32_LIB)/msvfw32.lib \
+$(ODIN32_LIB)/guidlib.lib \
 OS2386.LIB \
 $(RTLLIB_O) 
 
