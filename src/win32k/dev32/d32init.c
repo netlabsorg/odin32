@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.25 2000-10-01 02:58:15 bird Exp $
+/* $Id: d32init.c,v 1.26 2000-12-11 06:22:14 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -148,6 +148,17 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
                     case 3: options.usCom = OUTPUT_COM3; break;
                     case 4: options.usCom = OUTPUT_COM4; break;
                 }
+                break;
+
+            case 'd':
+            case 'D':
+                pszTmp2 = strpbrk(pszTmp, ":=/- ");
+                if (pszTmp2 != NULL
+                    && (pszTmp2[1] == 'N' ||pszTmp2[1] == 'n' || pszTmp2[1] == 'D' || pszTmp2[1] == 'd')
+                    )
+                    options.fDllFixes = FALSE;
+                else
+                    options.fDllFixes = TRUE;
                 break;
 
             case 'e':
@@ -618,7 +629,7 @@ USHORT _loadds _Far32 _Pascal GetKernelInfo32(PKRNLINFO pKrnlInfo)
  * @returns   Number of bytes to add to cb and pach.
  * @param     bModRM  ModR/M byte.
  * @status    completely implemented.
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
 int ModR_M_32bit(char bModRM)
 {
@@ -641,7 +652,7 @@ int ModR_M_32bit(char bModRM)
  * @returns   Number of bytes to add to cb and pach.
  * @param     bModRM  ModR/M byte.
  * @status    completely implemented.
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author    knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
 int ModR_M_16bit(char bModRM)
 {
@@ -1425,7 +1436,7 @@ int importTabInit(void)
  * Creates a fake kernel MTE, SMTE and OTE for use while testing in Ring3.
  * @returns Pointer to the fake kernel MTE.
  * @status  completely implemented.
- * @author  knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  */
 PMTE GetOS2KrnlMTETst(void)
 {
@@ -1445,7 +1456,7 @@ PMTE GetOS2KrnlMTETst(void)
  * @returns void
  * @param   void
  * @status  completely implemented.
- * @author  knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  * @remark  Called before the aImportTab array is used/verified.
  */
 VOID R3TstFixImportTab(VOID)
