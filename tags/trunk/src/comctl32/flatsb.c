@@ -1,4 +1,4 @@
-/* $Id: flatsb.c,v 1.4 1999-08-14 16:13:10 cbratschi Exp $ */
+/* $Id: flatsb.c,v 1.5 1999-10-24 22:49:43 sandervl Exp $ */
 /*
  * Flat Scrollbar control
  *
@@ -154,7 +154,8 @@ FLATSB_Register (VOID)
 {
     WNDCLASSA wndClass;
 
-    if (GlobalFindAtomA (FLATSB_CLASSA)) return;
+//SvL: Don't check this now
+//    if (GlobalFindAtomA (FLATSB_CLASSA)) return;
 
     ZeroMemory (&wndClass, sizeof(WNDCLASSA));
     wndClass.style         = CS_GLOBALCLASS;

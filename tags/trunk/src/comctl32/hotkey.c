@@ -1,4 +1,4 @@
-/* $Id: hotkey.c,v 1.12 1999-10-01 15:53:32 cbratschi Exp $ */
+/* $Id: hotkey.c,v 1.13 1999-10-24 22:49:43 sandervl Exp $ */
 /*
  * Hotkey control
  *
@@ -773,7 +773,8 @@ HOTKEY_Register (VOID)
 {
     WNDCLASSA wndClass;
 
-    if (GlobalFindAtomA (HOTKEY_CLASSA)) return;
+//SvL: Don't check this now
+//    if (GlobalFindAtomA (HOTKEY_CLASSA)) return;
 
     ZeroMemory (&wndClass, sizeof(WNDCLASSA));
     wndClass.style         = CS_GLOBALCLASS;

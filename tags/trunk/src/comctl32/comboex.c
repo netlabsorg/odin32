@@ -1,4 +1,4 @@
-/* $Id: comboex.c,v 1.4 1999-08-14 16:13:09 cbratschi Exp $ */
+/* $Id: comboex.c,v 1.5 1999-10-24 22:49:42 sandervl Exp $ */
 /*
  * ComboBoxEx control
  *
@@ -312,7 +312,8 @@ COMBOEX_Register (VOID)
 {
     WNDCLASSA wndClass;
 
-    if (GlobalFindAtomA (WC_COMBOBOXEXA)) return;
+//SvL: Don't check this now
+//    if (GlobalFindAtomA (WC_COMBOBOXEXA)) return;
 
     ZeroMemory (&wndClass, sizeof(WNDCLASSA));
     wndClass.style         = CS_GLOBALCLASS;

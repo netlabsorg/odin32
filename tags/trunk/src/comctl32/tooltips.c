@@ -1,4 +1,4 @@
-/* $Id: tooltips.c,v 1.14 1999-09-26 11:01:11 achimha Exp $ */
+/* $Id: tooltips.c,v 1.15 1999-10-24 22:49:49 sandervl Exp $ */
 /*
  * Tool tip control
  *
@@ -2381,7 +2381,8 @@ TOOLTIPS_Register (VOID)
 {
     WNDCLASSA wndClass;
 
-    if (GlobalFindAtomA (TOOLTIPS_CLASSA)) return;
+//SvL: Don't check this now
+//    if (GlobalFindAtomA (TOOLTIPS_CLASSA)) return;
 
     ZeroMemory (&wndClass, sizeof(WNDCLASSA));
     wndClass.style         = CS_GLOBALCLASS | CS_DBLCLKS | CS_SAVEBITS;

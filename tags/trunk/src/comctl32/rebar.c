@@ -1,4 +1,4 @@
-/* $Id: rebar.c,v 1.8 1999-08-14 16:13:12 cbratschi Exp $ */
+/* $Id: rebar.c,v 1.9 1999-10-24 22:49:46 sandervl Exp $ */
 /*
  * Rebar control
  *
@@ -2030,7 +2030,8 @@ REBAR_Register (VOID)
 {
     WNDCLASSA wndClass;
 
-    if (GlobalFindAtomA (REBARCLASSNAMEA)) return;
+//SvL: Don't check this now
+//    if (GlobalFindAtomA (REBARCLASSNAMEA)) return;
 
     ZeroMemory (&wndClass, sizeof(WNDCLASSA));
     wndClass.style         = CS_GLOBALCLASS | CS_DBLCLKS;

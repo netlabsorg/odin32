@@ -7004,8 +7004,9 @@ VOID LISTVIEW_Register(VOID)
 {
   WNDCLASSA wndClass;
 
-  if (!GlobalFindAtomA(WC_LISTVIEWA))
-  {
+//SvL: Don't check this now
+//  if (!GlobalFindAtomA(WC_LISTVIEWA))
+//  {
     ZeroMemory(&wndClass, sizeof(WNDCLASSA));
     wndClass.style = CS_GLOBALCLASS | CS_DBLCLKS;
     wndClass.lpfnWndProc = (WNDPROC)LISTVIEW_WindowProc;
@@ -7015,7 +7016,7 @@ VOID LISTVIEW_Register(VOID)
     wndClass.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
     wndClass.lpszClassName = WC_LISTVIEWA;
     RegisterClassA(&wndClass);
-  }
+//  }
 }
 
 /***

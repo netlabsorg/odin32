@@ -1,4 +1,4 @@
-/* $Id: treeview.c,v 1.10 1999-08-14 16:13:16 cbratschi Exp $ */
+/* $Id: treeview.c,v 1.11 1999-10-24 22:49:50 sandervl Exp $ */
 /* Treeview control
  *
  * Copyright 1998 Eric Kohl <ekohl@abo.rhein-zeitung.de>
@@ -3764,7 +3764,8 @@ TREEVIEW_Register (VOID)
 
 //    TRACE (treeview,"\n");
 
-    if (GlobalFindAtomA (WC_TREEVIEWA)) return;
+//SvL: Don't check this now
+//    if (GlobalFindAtomA (WC_TREEVIEWA)) return;
 
     ZeroMemory (&wndClass, sizeof(WNDCLASSA));
     wndClass.style         = CS_GLOBALCLASS | CS_DBLCLKS;

@@ -1,4 +1,4 @@
-/* $Id: status.c,v 1.11 1999-09-26 11:01:10 achimha Exp $ */
+/* $Id: status.c,v 1.12 1999-10-24 22:49:46 sandervl Exp $ */
 /*
  * Interface code to StatusWindow widget/control
  *
@@ -1295,7 +1295,8 @@ STATUS_Register (VOID)
 {
     WNDCLASSA wndClass;
 
-    if (GlobalFindAtomA (STATUSCLASSNAMEA)) return;
+//SvL: Don't check this now
+//    if (GlobalFindAtomA (STATUSCLASSNAMEA)) return;
 
     ZeroMemory (&wndClass, sizeof(WNDCLASSA));
     wndClass.style         = CS_GLOBALCLASS | CS_DBLCLKS | CS_VREDRAW;
