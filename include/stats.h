@@ -20,7 +20,8 @@ void _LNK_CONV getcrtstat(unsigned long *pnrcalls_malloc,
 #ifdef DEBUG
 void STATS_GetDCEx(HWND hwnd, HDC hdc, HRGN hrgn, ULONG flags);
 void STATS_ReleaseDC(HWND hwnd, HDC hdc);
-void STATS_DumpStats();
+void STATS_DumpStatsGDI32();
+void STATS_DumpStatsUSER32();
 void STATS_CreateFontIndirect(HFONT hFont, LOGFONTA* lplf);
 void STATS_CreateCompatibleDC(HDC hdc, HDC newHdc);
 void STATS_DeleteDC(HDC hdc);
@@ -59,7 +60,8 @@ void STATS_CreateBitmapIndirect(HBITMAP hBitmap, const BITMAP *pBitmap);
 #else
 #define STATS_GetDCEx(a, b, c, d)
 #define STATS_ReleaseDC(a,b)
-#define STATS_DumpStats()
+#define STATS_DumpStatsGDI32()
+#define STATS_DumpStatsUSER32()
 #define STATS_CreateFontIndirect(a,b)
 #define STATS_CreateCompatibleDC(a,b)
 #define STATS_DeleteDC(a)
