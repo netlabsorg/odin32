@@ -1,4 +1,4 @@
-/* $Id: winexebase.cpp,v 1.1 1999-09-15 23:39:07 sandervl Exp $ */
+/* $Id: winexebase.cpp,v 1.2 1999-11-09 19:22:32 sandervl Exp $ */
 
 /*
  * Win32 exe base class
@@ -38,6 +38,12 @@ Win32ExeBase *WinExe = NULL;
 
 //******************************************************************************
 //******************************************************************************
+BOOL IsExeStarted()
+{
+    return fExeStarted;
+}
+//******************************************************************************
+//******************************************************************************
 Win32ExeBase::Win32ExeBase(HINSTANCE hInstance) 
                  : Win32ImageBase(hInstance),
                    fConsoleApp(FALSE),
@@ -66,15 +72,15 @@ ULONG Win32ExeBase::start()
 
   fExeStarted  = TRUE;
 
+  //Note: The Win32 exception structure references by FS:[0] is the same
+  //      in OS/2
+  OS2SetExceptionHandler((void *)&exceptFrame);
+  SetWin32TIB();
+
   //Allocate TLS index for this module
   tlsAlloc();
   tlsAttachThread();	//setup TLS (main thread)
 
-  //Note: The Win32 exception structure references by FS:[0] is the same
-  //      in OS/2
-  OS2SetExceptionHandler((void *)&exceptFrame);
-
-  SetWin32TIB();
   rc = ((WIN32EXEENTRY)entryPoint)();
   RestoreOS2TIB();
 

@@ -1,4 +1,4 @@
-/* $Id: heapstring.cpp,v 1.18 1999-11-09 14:19:46 sandervl Exp $ */
+/* $Id: heapstring.cpp,v 1.19 1999-11-09 19:22:32 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -11,7 +11,6 @@
 /*****************************************************************************
  * Includes                                                                  *
  *****************************************************************************/
-#undef DEBUG
 
 #include <odin.h>
 #include <odinwrap.h>
@@ -68,7 +67,7 @@ static BOOL getUconvObject( void )
       uconv_object = NULL;  // to make sure
       return FALSE;
     }
-    dprintf(("KERNEL32: HeapString: UniCreateUconvObject(%d)\n",
+    dprintf2(("KERNEL32: HeapString: UniCreateUconvObject(%d)\n",
              rc));
   }
   return ret;
@@ -89,7 +88,7 @@ static BOOL getUconvObject( void )
 
 int WIN32API lstrlenA(LPCSTR arg1)
 {
-  dprintf(("KERNEL32: lstrlenA(%s)\n",
+  dprintf2(("KERNEL32: lstrlenA(%s)\n",
            arg1));
 
   return O32_lstrlen(arg1);
@@ -113,7 +112,7 @@ int WIN32API lstrlenW(LPCWSTR arg1)
   int rc;
 
   rc = UniStrlen( (UniChar*)arg1);
-  dprintf(("KERNEL32: lstrlenW(%08xh) returns %d\n",
+  dprintf2(("KERNEL32: lstrlenW(%08xh) returns %d\n",
            arg1,
            rc));
   return rc;
@@ -134,7 +133,7 @@ int WIN32API lstrlenW(LPCWSTR arg1)
 
 LPSTR WIN32API lstrcatA(LPSTR arg1, LPCSTR arg2)
 {
-  dprintf(("KERNEL32: lstrcat(%s,%s)\n",
+  dprintf2(("KERNEL32: lstrcat(%s,%s)\n",
            arg1,
            arg2));
 
@@ -156,7 +155,7 @@ LPSTR WIN32API lstrcatA(LPSTR arg1, LPCSTR arg2)
 
 LPWSTR WIN32API lstrcatW(LPWSTR arg1, LPCWSTR arg2)
 {
-  dprintf(("KERNEL32: OS2lstrcatW(%08xh,%08xh)\n",
+  dprintf2(("KERNEL32: OS2lstrcatW(%08xh,%08xh)\n",
            arg1,
            arg2));
 
@@ -179,7 +178,7 @@ LPWSTR WIN32API lstrcatW(LPWSTR arg1, LPCWSTR arg2)
 
 int WIN32API lstrcmpA(LPCSTR arg1, LPCSTR  arg2)
 {
-  dprintf(("KERNEL32: OS2lstrcmpA(%s,%s)\n",
+  dprintf2(("KERNEL32: OS2lstrcmpA(%s,%s)\n",
            arg1,
            arg2));
 
@@ -201,7 +200,7 @@ int WIN32API lstrcmpA(LPCSTR arg1, LPCSTR  arg2)
 
 int WIN32API lstrncmpA(LPCSTR arg1, LPCSTR  arg2, int l)
 {
-  dprintf(("KERNEL32: OS2lstrncmpA(%s,%s,%d)\n",
+  dprintf2(("KERNEL32: OS2lstrncmpA(%s,%s,%d)\n",
            arg1,
            arg2,
            l));
@@ -276,7 +275,7 @@ int WIN32API lstrncmpiW(LPCWSTR str1, LPCWSTR str2, int n)
 
 int WIN32API lstrcmpW(LPCWSTR arg1, LPCWSTR arg2)
 {
-    dprintf(("KERNEL32: lstrcmpW (%08xh-%ls, %08xh-%ls)\n",
+    dprintf2(("KERNEL32: lstrcmpW (%08xh-%ls, %08xh-%ls)\n",
              arg1,
              arg1,
              arg2,
@@ -306,7 +305,7 @@ int WIN32API lstrcmpW(LPCWSTR arg1, LPCWSTR arg2)
 
 int WIN32API lstrncmpW(LPCWSTR arg1, LPCWSTR  arg2, int l)
 {
-  dprintf(("KERNEL32: OS2lstrncmpW(%08xh,%08xh,%d)\n",
+  dprintf2(("KERNEL32: OS2lstrncmpW(%08xh,%08xh,%d)\n",
            arg1,
            arg2,
            l));
@@ -379,7 +378,7 @@ LPSTR WIN32API lstrcpynA(LPSTR arg1, LPCSTR  arg2, int arg3)
   register LPSTR p1 = arg1;
   register LPSTR p2 = (LPSTR)arg2;
 
-  dprintf(("KERNEL32: OS2lstrcpyA(%08xh, %08xh, %08xh)\n",
+  dprintf2(("KERNEL32: OS2lstrcpyA(%08xh, %08xh, %08xh)\n",
            arg1,
            arg2,
            arg3));
@@ -412,7 +411,7 @@ LPSTR WIN32API lstrcpynA(LPSTR arg1, LPCSTR  arg2, int arg3)
 
 LPWSTR WIN32API lstrcpynW(LPWSTR dest, LPCWSTR src, int arg3)
 {
-  dprintf(("KERNEL32: lstrcpynW(%08xh,%08xh,%08xh)",
+  dprintf2(("KERNEL32: lstrcpynW(%08xh,%08xh,%08xh)",
            dest,
            src,
            arg3));
@@ -442,7 +441,7 @@ LPWSTR WIN32API lstrcpynW(LPWSTR dest, LPCWSTR src, int arg3)
 
 int WIN32API lstrcmpiA(LPCSTR arg1, LPCSTR  arg2)
 {
-  dprintf(("KERNEL32: lstrcmpiA(%s,%s)\n",
+  dprintf2(("KERNEL32: lstrcmpiA(%s,%s)\n",
            arg1,
            arg2));
 
@@ -473,7 +472,7 @@ int WIN32API lstrcmpiW(LPCWSTR arg1, LPCWSTR arg2)
   char *astr1, *astr2;
   int   rc;
 
-  dprintf(("KERNEL32: lstrcmpiW(%08xh,%08xh)\n",
+  dprintf2(("KERNEL32: lstrcmpiW(%08xh,%08xh)\n",
            arg1,
            arg2));
 
@@ -599,7 +598,7 @@ int WIN32API lstrcpynAtoW(LPWSTR unicode,
   UniChar* out_buf;
   char*    in_buf;
 
-  dprintf(("KERNEL32: HeapString: lstrcpynAtoW(%s,%08xh,%d)\n",
+  dprintf2(("KERNEL32: HeapString: lstrcpynAtoW(%s,%08xh,%d)\n",
            ascii,
            unicode,
            asciilen));
@@ -750,7 +749,7 @@ LPVOID WIN32API HEAP_xalloc( HANDLE heap, DWORD flags, DWORD size )
   LPVOID p = HeapAlloc( heap, flags, size );
   if (!p)
   {
-    dprintf(("KERNEL32: HEAP_xalloc(%08xh,%08xh,%08xh) out of memory.\n",
+    dprintf2(("KERNEL32: HEAP_xalloc(%08xh,%08xh,%08xh) out of memory.\n",
              heap,
              flags,
              size));
@@ -776,7 +775,7 @@ LPVOID WIN32API HEAP_xrealloc( HANDLE heap, DWORD flags, LPVOID lpMem, DWORD siz
   LPVOID p = HeapReAlloc( heap, flags, lpMem, size );
   if (!p)
   {
-    dprintf(("KERNEL32: HEAP_xrealloc(%08xh,%08xh,%08xh,%08xh) out of memory.\n",
+    dprintf2(("KERNEL32: HEAP_xrealloc(%08xh,%08xh,%08xh,%08xh) out of memory.\n",
              heap,
              flags,
              lpMem,
@@ -803,7 +802,7 @@ LPVOID WIN32API HEAP_malloc(DWORD size )
   LPVOID p = HeapAlloc( GetProcessHeap(), 0, size );
   if (!p)
   {
-    dprintf(("KERNEL32: HEAP_malloc(%08xh) out of memory.\n",
+    dprintf2(("KERNEL32: HEAP_malloc(%08xh) out of memory.\n",
              size));
   }
   return p;
@@ -827,7 +826,7 @@ LPVOID WIN32API HEAP_realloc(LPVOID lpMem, DWORD size )
   LPVOID p = HeapReAlloc( GetProcessHeap(), 0, lpMem, size );
   if (!p)
   {
-    dprintf(("KERNEL32: HEAP_realloc(%08xh,%08xh) out of memory.\n",
+    dprintf2(("KERNEL32: HEAP_realloc(%08xh,%08xh) out of memory.\n",
              lpMem,
              size));
   }
@@ -849,7 +848,7 @@ LPVOID WIN32API HEAP_realloc(LPVOID lpMem, DWORD size )
 
 VOID WIN32API HEAP_free(LPVOID lpMem)
 {
-  dprintf(("KERNEL32: HEAP_free(%08xh)\n",
+  dprintf2(("KERNEL32: HEAP_free(%08xh)\n",
            lpMem));
 
   HeapFree( GetProcessHeap(), 0, lpMem);
@@ -957,7 +956,7 @@ LPSTR WIN32API HEAP_strdupWtoA( HANDLE heap, DWORD flags, LPCWSTR str )
 
 INT WIN32API WideCharToLocal(LPSTR pLocal, LPWSTR pWide, INT dwChars)
 {
-  dprintf(("KERNEL32: WideCharToLocal(%08xh,%08xh,%08xh)\n",
+  dprintf2(("KERNEL32: WideCharToLocal(%08xh,%08xh,%08xh)\n",
            pLocal,
            pWide,
            dwChars));
@@ -992,7 +991,7 @@ INT WIN32API LocalToWideChar(LPWSTR pWide, LPSTR pLocal, INT dwChars)
 {
   *pWide = 0;
 
-  dprintf(("KERNEL32: LocalToWideChar(%08xh,%08xh,%08xh)\n",
+  dprintf2(("KERNEL32: LocalToWideChar(%08xh,%08xh,%08xh)\n",
            pLocal,
            pWide,
            dwChars));
