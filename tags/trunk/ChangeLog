@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.1137 2000-09-22 03:54:39 bird Exp $ */
+ /* $Id: ChangeLog,v 1.1138 2000-09-22 04:37:10 bird Exp $ */
 
  2000-09-22: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Win32k/Pe2Lx: Always apply all-in-one-object aligment fix. This will
@@ -8,6 +8,8 @@
                 as expected but I get IPEs during process cleanup...)
                 Corrected bug in applyFixups. Fixups was not applied when
                 the all-in-one-object aligment fix was applied.
+    - KERNEL32: Changed Pe2Lx to use module address (address of the header
+                object) as hinstance. Some programs depends on this.
 
  2000-09-21: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - INCLUDE\makefiles: Made cleanrule omittable by defining NOCLEAN.
