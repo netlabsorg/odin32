@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.1 2000-02-01 12:53:29 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.2 2000-02-02 23:45:06 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -70,6 +70,7 @@ BOOL WIN32API BitBlt(HDC hdcDest, int arg2, int arg3, int arg4, int arg5, HDC hd
 				GetDIBits(hdcDest, dest->GetBitmapHandle(), 0, 300, dest->GetDIBObject(), &bmpinfo, dest->GetRGBUsage());
 			}
 		}
+		return rc;
         }
     }
     dprintf(("GDI32: BitBlt to hdc %X from (%d,%d) to (%d,%d), (%d,%d) rop %X\n", hdcDest, arg7, arg8, arg2, arg3, arg4, arg5, arg9));
@@ -84,6 +85,8 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
 {
     INT result, imgsize, palsize, height, width;
     char *ptr;
+    ULONG compression = 0;
+    WORD *newbits = 0;
 
     SetLastError(0);
     if(info == NULL) {
@@ -125,13 +128,33 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
     // EB: <<<-
 
     //SvL: Ignore BI_BITFIELDS type (SetDIBitsToDevice fails otherwise)
-    if(info->bmiHeader.biCompression == BI_BITFIELDS)
+    if(info->bmiHeader.biCompression == BI_BITFIELDS) {
+	DWORD *bitfields = (DWORD *)info->bmiColors;
+
+	dprintf(("BI_BITFIELDS compression %x %x %x", *bitfields, *(bitfields+1), *(bitfields+2))); 
     	((BITMAPINFO *)info)->bmiHeader.biCompression = 0;
+	compression = BI_BITFIELDS;
+	if(*(bitfields+1) == 0x3E0) {//RGB 555?
+	  WORD *dstbits, *srcbits;
+	  WORD  pixel;
+
+		newbits = dstbits = (WORD *)malloc(imgsize);
+		srcbits = (WORD *)bits;
+		for(int i=0;i<imgsize/sizeof(WORD);i++) {
+			pixel     = *dstbits = *srcbits++;
+			*dstbits &= 0x1F;
+			pixel    &= 0x7FE0;
+			pixel   <<= 1;
+			*dstbits  = *dstbits | pixel;
+			dstbits++;
+		}
+		bits = newbits;
+	}
+    }
+
     if(info->bmiHeader.biHeight < 0)
 	((BITMAPINFO *)info)->bmiHeader.biHeight = -info->bmiHeader.biHeight;
 
-//    result = OSLibSetDIBitsToDevice(hdc, xDest, yDest, cx, cy, xSrc, ySrc, startscan, lines, (PVOID) bits, (WINBITMAPINFOHEADER *)info, coloruse);
-//    result = 1;
     result = O32_SetDIBitsToDevice(hdc, xDest, yDest, cx, cy, xSrc, ySrc, startscan, lines, (PVOID) bits, (PBITMAPINFO)info, coloruse);
     //SvL: Wrong Open32 return value
     result = (result == TRUE) ? lines : 0;
@@ -140,6 +163,10 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
                  hdc, xDest, yDest, cx, cy, xSrc, ySrc, startscan, lines, (LPVOID) bits, (PBITMAPINFO)info, coloruse, result));
     dprintf(("GDI32: SetDIBitsToDevice %d %d %d %d %x %d", info->bmiHeader.biWidth, info->bmiHeader.biHeight, info->bmiHeader.biPlanes, info->bmiHeader.biBitCount, info->bmiHeader.biCompression, info->bmiHeader.biSizeImage));
 
+    if(compression == BI_BITFIELDS) {
+    	((BITMAPINFO *)info)->bmiHeader.biCompression = BI_BITFIELDS;
+	if(newbits) free(newbits);
+    }
     return result;
 
 invalid_parameter:

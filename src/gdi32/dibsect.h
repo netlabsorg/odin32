@@ -1,4 +1,4 @@
-/* $Id: dibsect.h,v 1.10 2000-02-01 12:53:29 sandervl Exp $ */
+/* $Id: dibsect.h,v 1.11 2000-02-02 23:45:06 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -35,7 +35,7 @@ typedef struct {
         LONG     biYPelsPerMeter;
         DWORD    biClrUsed;
         DWORD    biClrImportant;
-} WINBITMAPINFOHEADER;
+} BITMAPINFOHEADER_W;
 
 typedef struct
 {
@@ -46,13 +46,13 @@ typedef struct
     WORD   bmPlanes;
     WORD   bmBitsPixel;
     LPVOID bmBits;
-} WINBITMAP, *LPWINBITMAP;
+} BITMAP_W, *LPBITMAP_W;
 
 #ifdef OS2_ONLY
 typedef struct
 {
-  WINBITMAP   dsBm;
-  WINBITMAPINFOHEADER dsBmih;
+  BITMAP_W   dsBm;
+  BITMAPINFOHEADER_W dsBmih;
   DWORD     dsBitfields[3];
   HANDLE    dshSection;
   DWORD     dsOffset;
@@ -62,7 +62,7 @@ typedef struct
 class DIBSection
 {
 public:
-              DIBSection(WINBITMAPINFOHEADER *pbmi, DWORD iUsage, DWORD handle, int fFlip);
+              DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DWORD handle, int fFlip);
              ~DIBSection();
 
               char *GetDIBObject()           { return bmpBits;  };
@@ -82,7 +82,7 @@ public:
                int  SetDIBColorTable(int startIdx, int cEntries, RGBQUAD *rgb);
 
          int  SetDIBits(HDC hdc, HBITMAP hbitmap, UINT startscan, UINT
-                              lines, const VOID *bits, WINBITMAPINFOHEADER *pbmi,
+                              lines, const VOID *bits, BITMAPINFOHEADER_W *pbmi,
                               UINT coloruse);
 
                int  GetDIBSection(int iSize , void *lpBuffer);
@@ -100,6 +100,8 @@ private:
           char *bmpBits;
           BOOL  fFlip;
           int   bmpsize;
+    DIBSECTION  dibinfo;
+
     BITMAPINFO2 *pOS2bmp;
                              // Linked list management
               DIBSection*    next;                   // Next DIB section
