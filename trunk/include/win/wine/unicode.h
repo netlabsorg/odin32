@@ -7,6 +7,8 @@
 #ifndef __WINE_UNICODE_H
 #define __WINE_UNICODE_H
 
+#ifndef RC_INVOKED
+
 #if !defined(OS2_INCLUDED) && !defined(__WIN32TYPE_H__)
 #include <windef.h>
 #endif
@@ -176,5 +178,7 @@ extern int strcmpiW( const WCHAR *str1, const WCHAR *str2 );
 extern int strncmpiW( const WCHAR *str1, const WCHAR *str2, int n );
 extern WCHAR *strstrW( const WCHAR *str, const WCHAR *sub );
 extern unsigned short get_char_typeW( WCHAR ch );
+
+#endif //RC_INVOKED
 
 #endif  /* __WINE_UNICODE_H */
