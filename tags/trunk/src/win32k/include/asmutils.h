@@ -1,4 +1,4 @@
-/* $Id: asmutils.h,v 1.1 1999-09-06 02:19:57 bird Exp $
+/* $Id: asmutils.h,v 1.2 1999-10-27 02:02:55 bird Exp $
  *
  * Assembly utilities.
  *
@@ -27,10 +27,6 @@ extern int _System Int3(void);
 
 //Negative offsets don't work yet?
 extern void __stdcall memmov(void *p, signed int off, unsigned int len);
-
-#ifdef _OS2Krnl_h_
-extern PMTE _System GetOS2KrnlMTE(void);
-#endif
 
 #ifdef __cplusplus
 }

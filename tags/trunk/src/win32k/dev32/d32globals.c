@@ -1,4 +1,4 @@
-/* $Id: d32globals.c,v 1.1 1999-09-06 02:19:56 bird Exp $
+/* $Id: d32globals.c,v 1.2 1999-10-27 02:02:53 bird Exp $
  *
  * d32globals - global data (32-bit)
  *
@@ -20,6 +20,6 @@
 /*******************************************************************************
 *   Global Variables                                                           *
 *******************************************************************************/
-ULONG           TKSSBase32;
+PULONG          pulTKSSBase32;
 struct options  options;
 

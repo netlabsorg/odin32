@@ -1,8 +1,10 @@
-; $Id: d32hlp.asm,v 1.1 1999-09-06 02:19:56 bird Exp $
+; $Id: d32hlp.asm,v 1.2 1999-10-27 02:02:54 bird Exp $
 ;
 ; d32hlp - 32-bit Device Driver Helper Function.
 ;
 ; Copyright (c) 1999 knut st. osmundsen
+;
+; Project Odin Software License can be found in LICENSE.TXT
 ;
     .386p
 

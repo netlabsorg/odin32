@@ -1,4 +1,4 @@
-/* $Id: probkrnl.h,v 1.1 1999-09-06 02:19:59 bird Exp $
+/* $Id: probkrnl.h,v 1.2 1999-10-27 02:02:57 bird Exp $
  *
  * Include file for ProbKrnl.
  *
@@ -56,6 +56,9 @@ extern unsigned long int _fInitSuccess;     /* 'fInitSuccess'    in PrbKrnl.c */
 extern unsigned long int _usVerMajor;       /* 'usVerMajor'      in PrbKrnl.c */
 extern unsigned long int _usVerMinor;       /* 'usVerMinor'      in PrbKrnl.c */
 
+#ifdef INCL_16 /* 16-bit only */
+int ProbeKernel(PRPINITIN pReqPack);
+#endif
 
 #endif
 

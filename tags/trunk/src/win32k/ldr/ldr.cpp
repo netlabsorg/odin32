@@ -1,6 +1,6 @@
-/* $Id: ldr.cpp,v 1.2 1999-10-14 01:25:38 bird Exp $
+/* $Id: ldr.cpp,v 1.3 1999-10-27 02:02:58 bird Exp $
  *
- * ldr.cpp - Loader helper functions a structures.
+ * ldr.cpp - Loader helpers.
  *
  * Copyright (c)  1999 knut  St.  osmundsen
  *
@@ -22,67 +22,158 @@
 #include "new.h"
 #include <memory.h>
 #include <stdlib.h>
+#include <stddef.h>
 
 #include "log.h"
 #include <peexe.h>
 #include <exe386.h>
 #include "OS2Krnl.h"
 #include "pe2lx.h"
+#include "avl.h"
 #include "ldr.h"
+
 
 
 /*******************************************************************************
 *   Global Variables                                                           *
 *******************************************************************************/
-PPENODE         pPE;
+PAVLNODECORE    pSFNRoot = NULL;
+PAVLNODECORE    pMTERoot = NULL;
+
 unsigned char   achHandleStates[MAX_FILE_HANDLES/8];
 
 
-/*******************************************************************************
-*   Internal Functions                                                         *
-*******************************************************************************/
-static PPENODE  findNodePtr2(PPENODE pRoot, const char *pszFilename);
-static ULONG    depth(PPENODE pNode);
+/**
+ * Gets a module by the give hFile.
+ * @returns   Pointer to module node. If not found NULL.
+ * @param     hFile  File handle of the module to be found.
+ * @sketch    return a AVLGet on the pSFNRoot-tree.
+ * @status    completely implemented.
+ * @author    knut st. osmundsen
+ */
+PMODULE     getModuleBySFN(SFN hFile)
+{
+    return (PMODULE)AVLGet(&pSFNRoot, (AVLKEY)hFile);
+}
 
 
 /**
- * Inserts a PENode into the pPE tree.
- * @returns    NO_ERROR on success. !0 on error.
- * @param      pNode  Pointer to node to insert.
+ * Gets a module by the MTE.
+ * @returns   Pointer to module node. If not found NULL.
+ * @param     pMTE  Pointer an Module Table Entry.
+ * @sketch    Try find it in the MTE tree.
+ *            IF not found THEN
+ *            BEGIN
+ *                DEBUG: validate pMTE pointer.
+ *                Get the SFN from the MTE.
+ *                IF found in the SFN-tree THEN
+ *                BEGIN
+ *                    Update the pMTE in the node.
+ *                    Add the node to the MTE-tree.
+ *                END
+ *                ELSE return NULL
+ *            END
+ *            return pointer to module node.
+ * @status    completely implemented.
+ * @author    knut st. osmundsen
  */
-ULONG insertNode(PPENODE pNode)
+PMODULE     getModuleByMTE(PMTE pMTE)
 {
-    int level;
-    PPENODE pPrev;
-    PPENODE pTmp;
-
-    if (pPE == NULL)
+    PMODULE pMod = (PMODULE)AVLGet(&pMTERoot, (AVLKEY)pMTE);
+    if (pMod == NULL)
     {
-        pPE = pNode;
-        pNode->left = pNode->right = NULL;
+        #ifdef DEBUG
+        if (pMTE <= (PMTE)0x10000)
+        {
+            kprintf(("getModuleByMTE: invalid pMTE pointer - %#8x\n", pMTE));
+            return NULL;
+        }
+        #endif
+        pMod = (PMODULE)AVLGet(&pSFNRoot, (AVLKEY)pMTE->mte_sfn);
+        if (pMod != NULL)
+        {
+            pMod->coreMTE.Key = (AVLKEY)pMTE;
+            pMod->fFlags |= MOD_FLAGS_IN_MTETREE;
+            AVLInsert(&pMTERoot, (PAVLNODECORE)((unsigned)pMod + offsetof(MODULE, coreMTE)));
+        }
     }
     else
-    {
-        level = 0;
-        pPrev = NULL;
-        pTmp = pPE;
-        while (pTmp != NULL)
-        {
-            level = 0;
-            pPrev = pTmp;
-            pTmp = AdjustKey(pNode->hFile) < AdjustKey(pTmp->hFile) ? pTmp->left : pTmp->right;
-        }
+        pMod = (PMODULE)((unsigned)pMod - offsetof(MODULE, coreMTE));
+    return pMod;
+}
 
-        if (pNode->hFile != pPrev->hFile)
+
+/**
+ * Get a module by filename.
+ * @returns   Pointer to module node. If not found NULL.
+ * @param     pszFilename  Pointer to the filename which we are search by.
+ * @sketch    Not implemented.
+ * @status    Stub.
+ * @author    knut st. osmundsen
+ */
+PMODULE     getModuleByFilename(PCSZ pszFilename)
+{
+    pszFilename = pszFilename;
+    return NULL;
+}
+
+
+/**
+ * Adds a module to the SFN-tree, if pMTE is not NULL it is added to the MTE-tree too.
+ * @returns   NO_ERROR on success. Appropriate errorcode on failiure.
+ * @param     hFile   System file number for the module.
+ * @param     pMTE    Pointer to MTE. NULL is valid.
+ * @param     fFlags  Type flags for the fFlags field in the node.
+ * @param     pvData  Pointer to data.
+ * @sketch    DEBUG: check that the module doesn't exists and parameter check.
+ *            (try) Allocate a new node. (return errorcode on failure)
+ *            Fill in the node.
+ *            Add the node to the SFN-tree.
+ *            IF valid MTE pointer THEN add it to the MTE tree and set the in MTE-tree flag.
+ *            return successfully.
+ * @status    completely implemented.
+ * @author    knut st. osmundsen
+ */
+ULONG       addModule(SFN hFile, PMTE pMTE, ULONG fFlags, void *pvData)
+{
+    PMODULE pMod;
+    #ifdef DEBUG
+        if (AVLGet(&pSFNRoot, (AVLKEY)hFile) != NULL)
+            kprintf(("addModule: Module allready present in the SFN-tree!\n"));
+        if (hFile == 0)
         {
-            if (AdjustKey(pNode->hFile) < AdjustKey(pPrev->hFile))
-                pPrev->left = pNode;
-            else
-                pPrev->right = pNode;
-            pNode->left = pNode->right = NULL;
+            kprintf(("addModule: invalid parameter: hFile = 0\n"));
+            return ERROR_INVALID_PARAMETER;
         }
-        else
-            return -1;
+        if ((fFlags & MOD_TYPE_MASK) == 0 || (fFlags  & ~MOD_TYPE_MASK) != 0)
+        {
+            kprintf(("addModule: invalid parameter: fFlags = 0x%#8x\n", fFlags));
+            return ERROR_INVALID_PARAMETER;
+        }
+    #endif
+
+    /* try allocate memory for the node. */
+    pMod = (PMODULE)malloc(sizeof(MODULE));
+    if (pMod == NULL)
+    {
+        kprintf(("addModule: out of memory!\n"));
+        return ERROR_NOT_ENOUGH_MEMORY;
+    }
+
+    /* fill in the module node. */
+    pMod->coreKey.Key = (AVLKEY)hFile;
+    pMod->hFile = hFile;
+    pMod->pMTE = pMTE;
+    pMod->fFlags = fFlags;
+    pMod->Data.pv = pvData;
+
+    /* insert the module node into the tree(s) */
+    AVLInsert(&pSFNRoot, (PAVLNODECORE)pMod);
+    if (pMTE != NULL)
+    {
+        pMod->coreMTE.Key = (AVLKEY)pMTE;
+        pMod->fFlags |= MOD_FLAGS_IN_MTETREE;
+        AVLInsert(&pMTERoot, (PAVLNODECORE)((unsigned)pMod + offsetof(MODULE, coreMTE)));
     }
 
     return NO_ERROR;
@@ -90,246 +181,53 @@ ULONG insertNode(PPENODE pNode)
 
 
 /**
- * Deletes a node from the pPE tree.
- * @returns   NO_ERROR on success. !0 on error.
- * @param     key  Filehandle, which is the key.
+ * Removes and frees a module node (including the data pointer).
+ * @returns   NO_ERROR on success. Appropriate error code on failure.
+ * @param     hFile  System filehandle of the module.
+ * @sketch    Remove the node from the SFN-tree.
+ *            IF present in the MTE-tree THEN remove it from the tree.
+ *            Delete the datapointer.
+ *            Free the module node.
+ *            return successfully.
+ * @status    completely implemented.
+ * @author    knut st. osmundsen
  */
-ULONG deleteNode(SFN key)
+ULONG      removeModule(SFN hFile)
 {
-    int     level,level2;
-    ULONG   rc;
-    PPENODE pTmp,pTmp2;
-    PPENODE pPrev,pPrev2;
-    int     left;
-
-    if (pPE != NULL)
+    PMODULE pMod = (PMODULE)AVLRemove(&pSFNRoot, (AVLKEY)hFile);
+    if (pMod == NULL)
     {
-        /* find node to delete */
-        level = 1;
-        pPrev = NULL;
-        pTmp = pPE;
-        while (pTmp != NULL  &&  key != pTmp->hFile)
-        {
-            pPrev = pTmp;
-            pTmp = (left = (AdjustKey(key) < AdjustKey(pTmp->hFile))) == TRUE ? pTmp->left : pTmp->right;
-            level ++;
-        }
-
-        if (pTmp != NULL)
-        {
-            /*found it: pTmp -> node to delete  -  pPrev -> parent node*/
-            level--;
-            rc = -1;
-            if (pTmp->left != NULL && pTmp->right != NULL)
-            {
-                /* hard case - fetch the leftmost node in the right subtree */
-                level2 = level;
-                pPrev2 = pTmp;
-                pTmp2 = pTmp->right;
-                while (pTmp2->left != NULL)
-                {
-                    pPrev2 = pTmp2;
-                    pTmp2 = pTmp2->left;
-                    level2++;
-                }
-                /* pTmp2 -> new root  -  pPrev2 -> parent node */
-
-                /* left child of pTmp2 */
-                pTmp2->left = pTmp->left;
-
-                /* parent of pTmp2 and pTmp2->right */
-                if (pPrev2 != pTmp)
-                {
-                    pPrev2->left = pTmp2->right;
-                    pTmp2->right = pTmp->right;
-                }
-                //else pTmp2->right = pTmp2->right;
-
-                /* link in pTmp2 */
-                if (pTmp != pPE)
-                {
-                    if (left)
-                        pPrev->left = pTmp2;
-                    else
-                        pPrev->right = pTmp2;
-                }
-                else
-                    pPE = pTmp2;
-                rc = NO_ERROR;
-            }
-
-            /* leaf */
-            if (rc!=0 && pTmp->left == NULL && pTmp->right == NULL)
-            {
-                if (pTmp != pPE)
-                {
-                    if (left)
-                        pPrev->left = NULL;
-                    else
-                        pPrev->right = NULL;
-                }
-                else
-                    pPE = NULL;
-                rc = NO_ERROR;
-            }
-
-            /* left is NULL */
-            if (rc!=0 && pTmp->left == NULL && pTmp->right != NULL)
-            {
-                /* move up right node */
-                if (pTmp != pPE)
-                {
-                    if (left)
-                        pPrev->left = pTmp->right;
-                    else
-                        pPrev->right = pTmp->right;
-                }
-                else
-                    pPE = pTmp->right;
-                rc = NO_ERROR;
-            }
-
-            /* right is NULL */
-            if (rc!=0 && pTmp->left != NULL && pTmp->right == NULL)
-            {
-                /* move up left node */
-                if (pTmp != pPE)
-                {
-                    if (left)
-                        pPrev->left = pTmp->left;
-                    else
-                        pPrev->right = pTmp->left;
-                }
-                else
-                    pPE = pTmp->left;
-                rc = NO_ERROR;
-            }
-
-            /* free node */
-            if (rc == NO_ERROR)
-                rc = freeNode( pTmp );
-        }
-        else
-            rc  = 1;      //not found
+        kprintf(("removeModule: Module not found! hFile=%#4x\n", hFile));
+        return ERROR_INVALID_PARAMETER;
     }
-    else
-        rc  = 1; //not found
-    return rc;
-}
 
-
-/**
- * Get the pointer to a node in the pPE tree.
- * @returns   Pointer to node on success. NULL if not found or error occured.
- * @param     key  Filehandle, which is the key for the pPE tree.
- */
-PPENODE getNodePtr(SFN key)
-{
-    PPENODE pTmp = pPE;
-    int level = 1;
-    while (pTmp != NULL && pTmp->hFile != key)
+    /* In MTE-tree too? */
+    if (pMod->fFlags & MOD_FLAGS_IN_MTETREE)
     {
-        pTmp = AdjustKey(key) < AdjustKey(pTmp->hFile) ? pTmp->left : pTmp->right;
-        level++;
+        if (AVLRemove(&pMTERoot, (AVLKEY)pMod->pMTE) == NULL)
+        {
+            kprintf(("removeModule: MOD_FLAGS_IN_MTETREE set but AVLRemove returns NULL\n"));
+        }
     }
-    return pTmp;
-}
 
+    /* Delete the datapointer. */
+    switch (pMod->fFlags & MOD_TYPE_MASK)
+    {
+        case MOD_TYPE_PE2LX:
+            delete pMod->Data.pPe2Lx;
+            break;
 
-/**
- * Find a PENode by filename in the node tree.
- * @returns   Pointer to PENode if found, NULL if not found.
- * @param     pszFilename  Pointer to filename.
- */
-PPENODE findNodePtr(const char *pszFilename)
-{
-    /*depth first search thru the whole tree */
-    return findNodePtr2(pPE, pszFilename);
-}
+        case MOD_TYPE_ELF2LX:
+        case MOD_TYPE_SCRIPT:
+        case MOD_TYPE_PE:
+        default:
+            kprintf(("removeModule: Unknown type, %#x\n", pMod->fFlags & MOD_TYPE_MASK));
+    }
 
-
-/**
- * Find a PENode by filename in the given tree.
- * Depth first search thru the whole tree.
- * @returns   Pointer to matching PENode.
- * @param     pRoot        Tree root.
- * @param     pszFilename  Pointer to filename.
- * @remark    sub-function of findNodePtr.
- */
-static PPENODE findNodePtr2(PPENODE pRoot, const char *pszFilename)
-{
-    PPENODE pNode = NULL;
-
-    /*depth first search thru the whole tree */
-    if (pRoot == NULL || pRoot->pPe2Lx->queryIsModuleName(pszFilename))
-        return pRoot;
-
-    //search subtrees
-    if (pRoot->left != NULL)
-        pNode = findNodePtr2(pRoot->left,pszFilename);
-    if (pNode == NULL && pRoot->right != NULL)
-        pNode = findNodePtr2(pRoot->right,pszFilename);
-    return pNode;
-}
-
-
-/**
- * Allocate memory for a PENode.
- * @returns   Pointer to new PENode on success. NULL pointer on error.
- */
-PPENODE allocateNode(void)
-{
-    PPENODE pNode;
-
-    pNode = new PENODE;
-    if (pNode == NULL)
-        kprintf(("allocateNode: new returned a NULL-pointer\n"));
-
-    return pNode;
-}
-
-
-/**
- * Frees node.
- * @returns   NO_ERROR on success.
- * @param     pNode  Pointer to node which is to be freed.
- */
-ULONG freeNode(PPENODE pNode)
-{
-    if (pNode != NULL)
-        delete pNode;
+    /* Free the module node. */
+    free(pMod);
 
     return NO_ERROR;
-}
-
-
-/**
- * Gets the depth of the pPE tree.
- * @returns   Number of levels in the the pPE tree.
- */
-ULONG depthPE(void)
-{
-    return depth(pPE);
-}
-
-
-
-/**
- * Gets the depth of the pPE tree.
- * @returns   Number of levels in the the pPE tree.
- * @param     pNode  Node to start at. (root node...)
- */
-static ULONG depth(PPENODE pNode)
-{
-    if (pNode != NULL)
-    {
-        int l, r;
-        l = depth(pNode->left);
-        r = depth(pNode->right);
-        return 1 + (l > r ? l : r);
-    }
-    else
-        return 0;
 }
 
 
@@ -345,8 +243,9 @@ ULONG ldrInit(void)
     /* init state table */
     memset(&achHandleStates[0], 0, sizeof(achHandleStates));
 
-    /* init pPEFiles* */
-    pPE = NULL;
+    /* init the tree roots */
+    pSFNRoot = NULL;
+    pMTERoot = NULL;
 
     return rc;
 }

@@ -1,8 +1,12 @@
-/* $Id: cout.cpp,v 1.1 1999-09-06 02:20:02 bird Exp $
+/* $Id: cout.cpp,v 1.2 1999-10-27 02:02:59 bird Exp $
  *
  * cout - cout replacement.
  *
+ * Note: use of cout is discurraged.
+ *
  * Copyright (c) 1998-1999 knut st. osmundsen
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 

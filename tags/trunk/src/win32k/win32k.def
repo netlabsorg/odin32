@@ -3,7 +3,7 @@
 ; Definition file for Win32k
 ;******************************************************************************
 PHYSICAL DEVICE WIN32K
-DESCRIPTION "$@#knut st. osmundsen:v0.5.0alpha#@Win32k - Odin32, Ring-0 part - Copyright (c) 1998-1998 knut st. osmundsen"
+DESCRIPTION "$@#knut st. osmundsen:v0.5.0alpha#@Win32k - Odin32, Ring-0 part - Copyright (c) 1998-1999 knut st. osmundsen"
 
 CODE PRELOAD EXECUTEREAD
 DATA PRELOAD
@@ -14,7 +14,7 @@ SEGMENTS
     DATA16_CONST    class 'FAR_DATA'
     CODE16          class 'CODE'
     CODE32          class 'CODE'
-    CALLTAB         class 'CODE'
+    CALLTAB         class 'DATA'
     DATA32          class 'DATA'
     c_common        class 'DATA'
     BSS32           class 'BSS'
