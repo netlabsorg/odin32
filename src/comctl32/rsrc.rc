@@ -928,7 +928,7 @@ IDB_HIST_LARGE BITMAP LOADONCALL DISCARDABLE
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Version
+// Version (based on NT 4 SP3 user32.dll)
 //
 
 1 VERSIONINFO
@@ -946,14 +946,14 @@ BEGIN
         BEGIN
             VALUE "Comments", "Odin32 System Dll\0"
             VALUE "CompanyName", "Odin Team\0"
-            VALUE "FileDescription", "\0"
-            VALUE "FileVersion", "0.0\0"
-            VALUE "InternalName", "Odin32 - COMCTL32\0"
+            VALUE "FileDescription", "COMCTL32 System Dll\0"
+            VALUE "FileVersion", "4.72.3110.1\0"
+            VALUE "InternalName", "COMCTL32\0"
             VALUE "LegalCopyright", "Copyright (C) 1999\0"
             VALUE "LegalTrademarks", "\0"
-            VALUE "OriginalFilename", "\0"
+            VALUE "OriginalFilename", "COMCTL32.DLL\0"
             VALUE "ProductName", "Odin32 - COMCTL32\0"
-            VALUE "ProductVersion", "1.0\0"
+            VALUE "ProductVersion", "4.72.3110.1\0"
         END
     END
     BLOCK "VarFileInfo"
