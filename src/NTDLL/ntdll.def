@@ -1,4 +1,4 @@
-; $Id: ntdll.def,v 1.37 2001-04-22 10:38:58 sandervl Exp $
+; $Id: ntdll.def,v 1.38 2001-06-13 14:45:15 bird Exp $
 
 ;
 ; Based on NT 4.0 SP6: NTDLL.DLL
@@ -156,7 +156,7 @@ EXPORTS
     NtOpenSection                 = _NtOpenSection@12                   @144
     NtOpenSemaphore               = _NtOpenSemaphore@12                 @145
     NtOpenSymbolicLinkObject      = _NtQuerySymbolicLinkObject@12       @146 ; JW: Is that correct ???
-;   NtOpenThread                            @147
+    NtOpenThread                  = _NtOpenThread@16                    @147
     NtOpenThreadToken             = _NtOpenThreadToken@16               @148
 ;   NtOpenTimer                             @149
 ;   NtPlugPlayControl                           @150
