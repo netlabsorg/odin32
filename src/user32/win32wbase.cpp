@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.219 2000-10-22 16:07:48 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.220 2000-10-23 18:28:53 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -3063,24 +3063,52 @@ VOID Win32BaseWindow::freeWindowNamePtr(PVOID namePtr)
     if (namePtr) free(namePtr);
 }
 //******************************************************************************
+//When using this API for a window that was created by a different process, NT
+//does NOT send WM_GETTEXTLENGTH.
 //******************************************************************************
 int Win32BaseWindow::GetWindowTextLength()
 {
-    return SendInternalMessageA(WM_GETTEXTLENGTH,0,0);
+    //if the destination window is created by this process, send message
+    if(dwProcessId == currentProcessId) {
+        return SendInternalMessageA(WM_GETTEXTLENGTH,0,0);
+    }
+    //else get data directory from window structure
+    return wndNameLength;
 }
 //******************************************************************************
+//When using this API for a window that was created by a different process, NT
+//does NOT send WM_GETTEXT.
 //******************************************************************************
 int Win32BaseWindow::GetWindowTextA(LPSTR lpsz, int cch)
 {
-    return SendInternalMessageA(WM_GETTEXT,(WPARAM)cch,(LPARAM)lpsz);
+    //if the destination window is created by this process, send message
+    if(dwProcessId == currentProcessId) {
+        return SendInternalMessageA(WM_GETTEXT,(WPARAM)cch,(LPARAM)lpsz);
+    }
+    //else get data directory from window structure
+    if (!lpsz || !cch) return 0;
+    if (!windowNameA) lpsz[0] = 0;
+    else lstrcpynA(lpsz, windowNameA, cch);
+    return min(wndNameLength, cch);
 }
 //******************************************************************************
+//When using this API for a window that was created by a different process, NT
+//does NOT send WM_GETTEXT.
 //******************************************************************************
 int Win32BaseWindow::GetWindowTextW(LPWSTR lpsz, int cch)
 {
-    return SendInternalMessageW(WM_GETTEXT,(WPARAM)cch,(LPARAM)lpsz);
+    //if the destination window is created by this process, send message
+    if(dwProcessId == currentProcessId) {
+        return SendInternalMessageW(WM_GETTEXT,(WPARAM)cch,(LPARAM)lpsz);
+    }
+    //else get data directory from window structure
+    if (!lpsz || !cch) return 0;
+    if (!windowNameW) lpsz[0] = 0;
+    else lstrcpynW(lpsz, windowNameW, cch);
+    return min(wndNameLength, cch);
 }
 //******************************************************************************
+//TODO: How does this work when the target window belongs to a different process???
 //******************************************************************************
 BOOL Win32BaseWindow::SetWindowTextA(LPSTR lpsz)
 {
