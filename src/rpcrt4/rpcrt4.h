@@ -1,4 +1,4 @@
-/* $Id: rpcrt4.h,v 1.1 2000-04-02 22:02:56 davidr Exp $ */
+/* $Id: rpcrt4.h,v 1.2 2001-04-04 09:02:15 sandervl Exp $ */
 /* Definitions for the OLE RPCRT4
  *
  * Copyright 2000 D.J.Raison
@@ -36,7 +36,8 @@
 #include "wine/obj_oleview.h"
 #include "wine/obj_cache.h"
 
-
 #include <rpcdce.h>
+
+#include <unicode.h>
 
 #endif /* __ODIN_RPCRT4_H */

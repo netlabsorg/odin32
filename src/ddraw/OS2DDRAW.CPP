@@ -1,4 +1,4 @@
-/* $Id: OS2DDRAW.CPP,v 1.27 2001-03-28 16:21:06 sandervl Exp $ */
+/* $Id: OS2DDRAW.CPP,v 1.28 2001-04-04 09:02:14 sandervl Exp $ */
 
 /*
  * DX Draw base class implementation
@@ -12,6 +12,7 @@
  *
  */
 
+#include <odin.h>
 #include <stdlib.h>
 #include <string.h>
 #include <memory.h>

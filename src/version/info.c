@@ -1,4 +1,4 @@
-/* $Id: info.c,v 1.2 2000-01-08 14:27:33 sandervl Exp $ */
+/* $Id: info.c,v 1.3 2001-04-04 09:02:15 sandervl Exp $ */
 /* 
  * Implementation of VERSION.DLL - Version Info access (Wine 991212)
  * 
@@ -18,6 +18,7 @@
 #include "crtdll.h"
 #include "debugtools.h"
 #include <misc.h>
+#include <unicode.h>
 
 DEFAULT_DEBUG_CHANNEL(ver)
 

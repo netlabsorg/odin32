@@ -1,4 +1,4 @@
-/* $Id: objhandle.cpp,v 1.12 2001-03-27 20:47:53 sandervl Exp $ */
+/* $Id: objhandle.cpp,v 1.13 2001-04-04 09:02:15 sandervl Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
@@ -23,6 +23,7 @@
 #include "oslibgpi.h"
 #include "dibsect.h"
 #include "region.h"
+#include <unicode.h>
 
 #define DBG_LOCALLOG    DBG_objhandle
 #include "dbglocal.h"

@@ -1,4 +1,4 @@
-/* $Id: winspool.cpp,v 1.5 2000-11-15 10:54:24 sandervl Exp $ */
+/* $Id: winspool.cpp,v 1.6 2001-04-04 09:02:16 sandervl Exp $ */
 
 /*
  *
@@ -33,6 +33,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stddef.h>
 #include <string.h>
 #include <misc.h>
 #include "oslibspl.h"
