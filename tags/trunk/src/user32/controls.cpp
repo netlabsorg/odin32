@@ -1,4 +1,4 @@
-/* $Id: controls.cpp,v 1.8 2000-01-18 20:10:32 sandervl Exp $ */
+/* $Id: controls.cpp,v 1.9 2000-01-31 22:30:51 sandervl Exp $ */
 /* File: controls.cpp -- Win32 common controls
  *
  * Copyright (c) 1999 Christoph Bratschi
@@ -27,6 +27,13 @@ ATOM  controlAtoms[MAX_CONTROLS] = {0};
 
 void CONTROLS_Register()
 {
+  dprintf(("Register DESKTOP class"));
+  controlAtoms[DESKTOP_CONTROL] = DESKTOP_Register();
+  if (!controlAtoms[DESKTOP_CONTROL]) dprintf(("failed!!!"));
+
+  //SvL: Create Desktop Window
+  CreateWin32Desktop();
+
   dprintf(("Register BUTTON class"));
   controlAtoms[BUTTON_CONTROL] = BUTTON_Register();
   if (!controlAtoms[BUTTON_CONTROL]) dprintf(("failed!!!"));
@@ -62,10 +69,6 @@ void CONTROLS_Register()
   dprintf(("Register DIALOG class"));
   controlAtoms[DIALOG_CONTROL] = DIALOG_Register();
   if (!controlAtoms[DIALOG_CONTROL]) dprintf(("failed!!!"));
-
-  dprintf(("Register DESKTOP class"));
-  controlAtoms[DESKTOP_CONTROL] = DESKTOP_Register();
-  if (!controlAtoms[DESKTOP_CONTROL]) dprintf(("failed!!!"));
 
   dprintf(("Register WINSWITCH class"));
   controlAtoms[WINSWITCH_CONTROL] = WINSWITCH_Register();
