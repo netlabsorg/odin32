@@ -1,9 +1,11 @@
- /* $Id: ChangeLog,v 1.897 2000-04-16 10:46:18 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.898 2000-04-16 18:06:17 sandervl Exp $ */
 
  2000-04-16: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Put back dll search method, fixed bug in LoadLibraryEx
                     (no return after error detection)
-
+                    Set FPU control word to 0x27F before calling exe entrypoint
+                    (fixes some FPU exception problems in RealPlayer 7)
+                     
  2000-04-16: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
         - KERNEL32: Reorganized/reworte LoadLibrary/LoadLibraryEx code.
                     isPEImage was changed to return 1 if DLL and 2 if EXE.
