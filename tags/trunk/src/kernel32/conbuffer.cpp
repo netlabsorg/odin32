@@ -1,4 +1,4 @@
-/* $Id: conbuffer.cpp,v 1.13 2000-10-20 11:46:44 sandervl Exp $ */
+/* $Id: conbuffer.cpp,v 1.14 2000-10-23 19:35:09 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -2537,11 +2537,11 @@ DWORD HMDeviceConsoleBufferClass::WriteConsoleW(PHMHANDLEDATA pHMHandleData,
 #endif
 
   /* Ascii -> unicode translation */
-  pszAscii = (LPSTR)HEAP_malloc(cchToWrite);
+  pszAscii = (LPSTR)HEAP_malloc(cchToWrite+1);
   if (pszAscii == NULL)
      return ERROR_NOT_ENOUGH_MEMORY;
 
-  lstrcpynWtoA(pszAscii, (LPWSTR)lpvBuffer, cchToWrite);
+  lstrcpynWtoA(pszAscii, (LPWSTR)lpvBuffer, cchToWrite+1);
 
   /* simply forward the request to that routine */
   rc = HMDeviceConsoleBufferClass::WriteFile(pHMHandleData,

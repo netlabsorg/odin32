@@ -1,4 +1,4 @@
-/* $Id: conin.cpp,v 1.13 2000-10-20 11:46:45 sandervl Exp $ */
+/* $Id: conin.cpp,v 1.14 2000-10-23 19:35:10 sandervl Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -36,6 +36,7 @@
 #include <win32api.h>
 #include <misc.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include "conwin.h"          // Windows Header for console only
 #include "HandleManager.h"
@@ -744,7 +745,7 @@ DWORD HMDeviceConsoleInClass::ReadConsoleW(PHMHANDLEDATA pHMHandleData,
                                               NULL);
   /* Ascii -> unicode translation */
   if (dwResult == TRUE)
-    lstrcpynAtoW((LPWSTR)lpvBuffer, lpstrAscii, *lpcchRead);
+    lstrcpynAtoW((LPWSTR)lpvBuffer, lpstrAscii, min(cchToRead, *lpcchRead+1));
 
   HEAP_free(lpstrAscii);
 
