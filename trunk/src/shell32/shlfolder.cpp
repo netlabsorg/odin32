@@ -1,3 +1,4 @@
+/* $Id: shlfolder.cpp,v 1.2 1999-10-09 11:17:05 sandervl Exp $ */
 /*
  *	Shell Folder stuff
  *

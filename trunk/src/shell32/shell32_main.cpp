@@ -1,3 +1,4 @@
+/* $Id: shell32_main.cpp,v 1.2 1999-10-09 11:17:03 sandervl Exp $ */
 /*
  * 				Shell basics
  *

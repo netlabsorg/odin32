@@ -1,3 +1,4 @@
+/* $Id: shlview.cpp,v 1.2 1999-10-09 11:17:06 sandervl Exp $ */
 /*
  *	ShellView
  *
