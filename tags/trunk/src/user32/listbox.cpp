@@ -1,4 +1,4 @@
-/* $Id: listbox.cpp,v 1.21 2000-03-14 15:00:59 sandervl Exp $ */
+/* $Id: listbox.cpp,v 1.22 2000-03-14 18:27:25 cbratschi Exp $ */
 /*
  * Listbox controls
  *
@@ -17,6 +17,7 @@
 #include "winerror.h"
 #include "combo.h"
 #include <misc.h>
+#include "heapstring.h"
 
 #define DBG_LOCALLOG    DBG_listbox
 #include "dbglocal.h"
@@ -51,10 +52,10 @@ BOOL DRIVE_IsValid( int drive )
 /* Item structure */
 typedef struct
 {
-    LPSTR     str;       /* Item text */
+    LPSTR   str;       /* Item text */
     BOOL    selected;  /* Is item selected? */
     UINT    height;    /* Item height (only for OWNERDRAWVARIABLE) */
-    DWORD     data;      /* User data */
+    DWORD   data;      /* User data */
 } LB_ITEMDATA;
 
 /* Listbox structure */
@@ -82,8 +83,8 @@ typedef struct
     BOOL        captured;       /* Is mouse captured? */
     BOOL        in_focus;
     HFONT       font;           /* Current font */
-    LCID          locale;         /* Current locale for string comparisons */
-    LPHEADCOMBO   lphc;           /* ComboLBox */
+    LCID        locale;         /* Current locale for string comparisons */
+    LPHEADCOMBO lphc;           /* ComboLBox */
 } LB_DESCR;
 
 
@@ -92,6 +93,9 @@ typedef struct
 
 #define HAS_STRINGS(descr) \
     (!IS_OWNERDRAW(descr) || ((descr)->style & LBS_HASSTRINGS))
+
+#define HAS_NODATA(descr) \
+    ((descr)->style & LBS_NODATA)
 
 #define IS_MULTISELECT(descr) \
     ((descr)->style & LBS_MULTIPLESEL || ((descr)->style & LBS_EXTENDEDSEL))
@@ -1364,17 +1368,6 @@ static LRESULT LISTBOX_InsertItem( HWND hwnd, LB_DESCR *descr, INT index,
     return LB_OKAY;
 }
 
-//CB: helper from wine/memory/heap.c
-
-LPSTR HEAP_strdupA( HANDLE heap, DWORD flags, LPCSTR str )
-{
-    LPSTR p = (LPSTR)HeapAlloc(heap,flags,strlen(str)+1);
-
-    strcpy(p,str);
-    return p;
-}
-
-
 /***********************************************************************
  *           LISTBOX_InsertString
  */
@@ -1531,20 +1524,62 @@ static LRESULT LISTBOX_SetCount( HWND hwnd, LB_DESCR *descr, INT count )
 {
     LRESULT ret;
 
-    if (HAS_STRINGS(descr)) return LB_ERR;
-    /* FIXME: this is far from optimal... */
+    if (HAS_STRINGS(descr) || !HAS_NODATA(descr)) return LB_ERR;
+
     if (count > descr->nb_items)
     {
-        while (count > descr->nb_items)
-            if ((ret = LISTBOX_InsertString( hwnd, descr, -1, 0 )) < 0)
-                return ret;
-    }
-    else if (count < descr->nb_items)
+      LB_ITEMDATA *item;
+      INT max_items,index;
+      UINT id = (descr->lphc) ? ID_CB_LISTBOX:GetWindowLongA(hwnd,GWL_ID);
+
+      max_items = count+LB_ARRAY_GRANULARITY-(count % LB_ARRAY_GRANULARITY);
+      if (!(item = (LB_ITEMDATA*)HeapReAlloc(descr->heap,0,descr->items,max_items*sizeof(LB_ITEMDATA))))
+      {
+        SEND_NOTIFICATION( hwnd, descr, LBN_ERRSPACE );
+        return LB_ERRSPACE;
+      }
+      descr->items = item;
+
+      /* Insert the item structure */
+
+      index = descr->nb_items-1;
+      while (count > descr->nb_items)
+      {
+        index++;
+        item = &descr->items[index];
+
+        item->str      = "";
+        item->data     = 0;
+        item->height   = 0;
+        item->selected = FALSE;
+        descr->nb_items++;
+
+        /* Get item height */
+
+        if (descr->style & LBS_OWNERDRAWVARIABLE)
+        {
+          MEASUREITEMSTRUCT mis;
+
+          mis.CtlType    = ODT_LISTBOX;
+          mis.CtlID      = id;
+          mis.itemID     = index;
+          mis.itemData   = descr->items[index].data;
+          mis.itemHeight = descr->item_height;
+          SendMessageA( descr->owner, WM_MEASUREITEM, id, (LPARAM)&mis );
+          item->height = mis.itemHeight ? mis.itemHeight : 1;
+        }
+      }
+    } else if (count < descr->nb_items)
     {
-        while (count < descr->nb_items)
-            if ((ret = LISTBOX_RemoveItem( hwnd, descr, -1 )) < 0)
-                return ret;
+      descr->nb_items = count;
+      if (descr->selected_item >= count) descr->selected_item = count-1;
+      if (descr->focus_item >= count) descr-> focus_item = count-1;
     }
+    /* Repaint the items */
+
+    LISTBOX_UpdateScroll( hwnd, descr );
+    InvalidateRect(hwnd,NULL,TRUE);
+
     return LB_OKAY;
 }
 
