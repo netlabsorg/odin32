@@ -1,4 +1,4 @@
-/* $Id: Odin.ini.txt,v 1.7 2001-06-03 08:43:50 sandervl Exp $ */
+/* $Id: Odin.ini.txt,v 1.8 2001-06-10 12:08:08 sandervl Exp $ */
 
 Odin initialization file documentation
 
@@ -22,6 +22,12 @@ WNETAP32=NETAPI32
 HIGHMEM=0      (default = 1)
 Turns off high memory usage in Odin. Useful for Warp 4 (>fp12) systems
 that still use the old 16 bits TCPIP stack.
+
+OS2Look=1      (default = 0)
+Creates OS/2 Titlebar, system menu & min/max/close buttons. Also overrides
+UseWinColors option (uses OS/2 colors).
+NOTE: Can interfere with windows applications that draw their own custom
+      titlebar. (e.g. RealPlayer)
 
 [WinVersion]
 Version=Win98  (default = NT40)
