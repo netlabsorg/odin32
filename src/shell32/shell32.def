@@ -1,4 +1,4 @@
-; $Id: shell32.def,v 1.6 1999-06-23 22:17:52 phaller Exp $
+; $Id: shell32.def,v 1.7 1999-06-23 22:28:52 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 ;based on Windows NT4, SP3
@@ -86,12 +86,12 @@ EXPORTS
 ;   InternalExtractIconListW   = _InternalExtractIconListW@?        @188
 ;   OpenAs_RunDLL              = _OpenAs_RunDLL@?                   @189
 ;   PrintersGetCommand_RunDLL  = _PrintersGetCommand_RunDLL@?       @190
-;   RealShellExecuteA          = _RealShellExecuteA@?               @191
-;   RealShellExecuteExA        = _RealShellExecuteExA@?             @192
+    RealShellExecuteA          = _RealShellExecuteA@24              @191
+    RealShellExecuteExA        = _RealShellExecuteExA@4             @192
                                  _SHELL32_195@4                     @195
                                  _SHELL32_196@4                     @196
-;   RealShellExecuteExW        = _RealShellExecuteExW@?             @201
-;   RealShellExecuteW          = _RealShellExecuteW@?               @202
+    RealShellExecuteExW        = _RealShellExecuteExW@4             @201
+    RealShellExecuteW          = _RealShellExecuteW@24              @202
 ;   RegenerateUserEnvironment  = _RegenerateUserEnvironment@?       @203
     SHAddToRecentDocs          = _SHAddToRecentDocs@8               @204
 ;   SHAppBarMessage            = _SHAppBarMessage@?                 @205
@@ -138,7 +138,7 @@ EXPORTS
     ShellExecuteEx             = _ShellExecuteExA@4                 @244
     ShellExecuteExA            = _ShellExecuteExA@4                 @245
     ShellExecuteExW            = _ShellExecuteExW@4                        ; NT4 doesn't use it!
-;   ShellExecuteW              = _ShellExecuteW@24                  @246
+    ShellExecuteW              = _ShellExecuteW@24                  @246
     ShellExecute               = _ShellExecuteA@24                         ; NT4 doesn't use it!
     Shell_NotifyIcon           = _Shell_NotifyIconA@8               @247
     Shell_NotifyIconA          = _Shell_NotifyIconA@8               @248
