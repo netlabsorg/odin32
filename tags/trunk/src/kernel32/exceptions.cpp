@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.52 2001-04-21 09:10:13 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.53 2001-06-04 21:18:39 sandervl Exp $ */
 
 /*
  * Win32 Exception functions for OS/2
@@ -1107,7 +1107,7 @@ ULONG APIENTRY OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
 
   case XCPT_PROCESS_TERMINATE:
   case XCPT_ASYNC_PROCESS_TERMINATE:
-        dprintfException(pERepRec, pERegRec, pCtxRec, p);
+////        dprintfException(pERepRec, pERegRec, pCtxRec, p);
         SetExceptionChain((ULONG)-1);
         goto continuesearch;
 
@@ -1120,6 +1120,7 @@ ULONG APIENTRY OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
         if(pERepRec->ExceptionInfo[1] == 0 && pERepRec->ExceptionInfo[1] == XCPT_DATA_UNKNOWN) {
                 goto continueFail;
         }
+
 //------------->>> WARNING: potentially dangerous workaround!!
         /* Some apps set ES = FS and Odin doesn't like that!       */
         /* Note: maybe we could even check for ES != DS? But maybe */
