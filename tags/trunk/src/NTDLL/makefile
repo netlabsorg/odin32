@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.14 1999-11-30 19:42:09 sandervl Exp $
+# $Id: makefile,v 1.15 1999-12-20 11:47:01 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -34,7 +34,7 @@ OBJS = NTDLL.obj\
        time.obj\
        unknown.obj\
        arith64.obj\
-       regfunc.obj
+       regfunc.obj qsort.obj
 
 
 TARGET = NTDLL
@@ -88,6 +88,8 @@ exception.obj: .\exception.cpp .\ntdll.h
 arith64.obj: .\arith64.asm
 
 regfunc.obj: .\regfunc.asm
+
+qsort.obj: qsort.c
 
 clean:
         $(RM) *.obj *.lib *.dll *.map *.pch

@@ -1,4 +1,4 @@
-; $Id: ntdll.def,v 1.29 1999-12-19 12:25:55 sandervl Exp $
+; $Id: ntdll.def,v 1.30 1999-12-20 11:47:01 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is NT4.0's NTDLL.DLL
@@ -334,6 +334,11 @@ EXPORTS
     RtlConvertLongToLargeInteger   = _RtlConvertLongToLargeInteger@4    @316
     RtlConvertUlongToLargeInteger  = _RtlConvertUlongToLargeInteger@4   @320
 
+    RtlDeleteCriticalSection       = _DeleteCriticalSection@4           @327
+    RtlLeaveCriticalSection        = _LeaveCriticalSection@4            @426
+    RtlEnterCriticalSection        = _EnterCriticalSection@4            @344
+    RtlInitializeCriticalSection   = _InitializeCriticalSection@4       @406
+
 ; ------------------
 ; Register Functions
 ; ------------------
@@ -398,7 +403,7 @@ EXPORTS
     memmove                       = _OS2memmove                              @906
     memset                        = _NTDLL_memset                    @907
     pow                           = _NTDLL_pow                       @908
-    qsort                         = _NTDLL_qsort                     @909
+    qsort                         = _qsort                           @909
     sin                           = _NTDLL_sin                       @910
     sprintf                       = _OS2sprintf                       @911
     sqrt                         = _NTDLL_sqrt                       @912

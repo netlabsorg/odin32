@@ -1,4 +1,4 @@
-/* $Id: crt.cpp,v 1.12 1999-12-03 11:56:26 sandervl Exp $ */
+/* $Id: crt.cpp,v 1.13 1999-12-20 11:47:00 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -22,6 +22,7 @@
 
 #include "ntdll.h"
 #include <heapstring.h>
+#include "arith64.h"
 
 /*
 NTDLL.sprintf
@@ -1309,11 +1310,12 @@ char * CDECL OS2_itow(int i, char *s, int r)
  * Author    : Jens Wiessner
  *****************************************************************************/
 
-LONG CDECL NTDLL__CIpow(double x, double y)
+LONG CDECL NTDLL__CIpow()
 {
-  dprintf(("NTDLL: _CIpow\n"));
-  dprintf(("should be register function\n"));
-  return pow(x, y);
+	double x,y;
+	POP_FPU(y);
+	POP_FPU(x);
+	return pow(x,y);
 }
 
 
@@ -1331,9 +1333,11 @@ LONG CDECL NTDLL__CIpow(double x, double y)
 
 LONG CDECL NTDLL__ftol(void)
 {
-  dprintf(("NTDLL: _ftol not implemented.\n"));
-
-  return 0;
+	/* don't just do DO_FPU("fistp",retval), because the rounding
+	 * mode must also be set to "round towards zero"... */
+	double fl;
+	POP_FPU(fl);
+	return (LONG)fl;
 }
 
 
@@ -1351,12 +1355,7 @@ LONG CDECL NTDLL__ftol(void)
 
 LPSTR  CDECL NTDLL__ltoa(long x,LPSTR buf,INT radix)
 {
-  dprintf(("NTDLL: _ltoa(%08xh, %08xh, %08xh) not implemented\n",
-           x,
-           buf,
-           radix));
-
-  return 0;
+    return ltoa(x,buf,radix);
 }
 
 
@@ -1618,12 +1617,7 @@ LPSTR CDECL NTDLL__strupr(LPSTR x)
 
 LPSTR  CDECL NTDLL__ultoa(long x,LPSTR buf,INT radix)
 {
-  dprintf(("NTDLL: _ultoa(%08xh, %08xh, %08xh) not implemented\n",
-           x,
-           buf,
-           radix));
-
-  return 0;
+    return ultoa(x,buf,radix);
 }
 
 
@@ -1861,25 +1855,6 @@ double CDECL NTDLL_pow( double x, double y )
     return pow( x, y );
 }
 
-
-/*****************************************************************************
- * Name      :
- * Purpose   :
- * Parameters:
- * Variables :
- * Result    :
- * Remark    : NTDLL.909
- * Status    :
- *
- * Author    : Jens Wiessner
- *****************************************************************************/
-
-void CDECL NTDLL_qsort( void *base, size_t nmemb, size_t size,
-			int (*compar)( const void *s1, const void *s2 ))
-{
-    dprintf(("NTDLL: qsort(%08xh, %08xh, %08xh, %08xh) not implemented.\n",
-		base, nmemb, size, compar));
-}
 
 
 /*****************************************************************************
