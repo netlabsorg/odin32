@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.54 2000-11-14 14:26:55 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.55 2000-11-24 16:16:18 phaller Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -1369,19 +1369,22 @@ DWORD HMGetFileType(HANDLE hFile)
   DWORD     dwResult;                /* result from the device handler's API */
   PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
 
-  //Must return FILE_TYPE_CHAR here; (used to fail index check)
-  if((hFile == GetStdHandle(STD_INPUT_HANDLE)) ||
-     (hFile == GetStdHandle(STD_OUTPUT_HANDLE)) ||
-     (hFile == GetStdHandle(STD_ERROR_HANDLE)))
-  {
-      return FILE_TYPE_CHAR;
-  }
                                                           /* validate handle */
   iIndex = _HMHandleQuery(hFile);                           /* get the index */
   if (-1 == iIndex)                                               /* error ? */
   {
-    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
-    return FILE_TYPE_UNKNOWN;                         /* signal failure */
+    //Must return FILE_TYPE_CHAR here; (used to fail index check)
+    if((hFile == GetStdHandle(STD_INPUT_HANDLE)) ||
+       (hFile == GetStdHandle(STD_OUTPUT_HANDLE)) ||
+       (hFile == GetStdHandle(STD_ERROR_HANDLE)))
+    {
+        return FILE_TYPE_CHAR;
+    }
+    else
+    {
+      SetLastError(ERROR_INVALID_HANDLE);     /* set win32 error information */
+      return FILE_TYPE_UNKNOWN;                            /* signal failure */
+    }
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
