@@ -1,4 +1,4 @@
-# $Id: kernel32.mak,v 1.43 2003-03-27 14:00:52 sandervl Exp $
+# $Id: kernel32.mak,v 1.44 2003-08-08 15:52:58 sandervl Exp $
 
 #
 # Odin32 API
@@ -66,7 +66,6 @@ $(OBJDIR)\dbglog.obj \
 $(OBJDIR)\exceptutil.obj \
 $(OBJDIR)\asmutil.obj \
 $(OBJDIR)\lang.obj \
-$(OBJDIR)\map.obj \
 $(OBJDIR)\win32util.obj \
 $(OBJDIR)\heap.obj \
 $(OBJDIR)\heapstring.obj \
@@ -163,6 +162,7 @@ $(OBJDIR)\kernelrsrc.obj
 #
 LIBS = \
 $(ODIN32_LIB)/$(ODINCRT).lib \
+$(ODIN32_LIB)/libwrap.lib \
 $(ODIN32_LIB)\wgss50.LIB \
 $(ODIN32_LIB)\WIN32K.LIB \
 $(ODIN32_LIB)\UNICODE.LIB \

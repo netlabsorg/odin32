@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.15 2002-06-08 11:42:02 sandervl Exp $
+# $Id: makefile,v 1.16 2003-08-08 15:55:20 sandervl Exp $
 
 #
 # Odin32 API
@@ -30,6 +30,7 @@ $(OBJDIR)\initterm.obj
 #
 LIBS = \
 $(ODIN32_LIB)/kernel32.lib \
+$(ODIN32_LIB)/libwrap.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
 OS2386.LIB \
 $(RTLLIB_O)

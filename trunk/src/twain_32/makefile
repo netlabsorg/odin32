@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2000-12-02 23:56:55 bird Exp $
+# $Id: makefile,v 1.9 2003-08-08 15:54:12 sandervl Exp $
 
 #
 # Odin32 API
@@ -34,6 +34,7 @@ $(OBJDIR)\twain_32rsrc.obj
 LIBS = \
 $(ODIN32_LIB)/kernel32.lib \
 $(ODIN32_LIB)/user32.lib \
+$(ODIN32_LIB)/libwrap.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
 $(ODIN32_LIB)/pmwinx.lib \
 OS2386.LIB \
