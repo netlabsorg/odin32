@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.19 2000-04-02 15:11:50 cbratschi Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.20 2000-04-07 10:01:18 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -1306,9 +1306,12 @@ LONG Win32BaseWindow::HandleSysCommand(WPARAM wParam,POINT *pt32)
             }
             ShellAboutA(Win32Hwnd,"Odin","Odin alpha release compiled with IBM VAC++",0);
         }
+#ifdef DEBUG
+	//SvL: Do NOT turn this into a dprintf. 
         else
         if (wParam == SC_PUTMARK)
-            dprintf(("Mark requested by user\n"));
+            WriteLog(("Mark requested by user\n"));
+#endif
         break;
 
     case SC_HOTKEY:
