@@ -1,4 +1,4 @@
-/* $Id: objhandle.cpp,v 1.22 2002-07-15 10:02:29 sandervl Exp $ */
+/* $Id: objhandle.cpp,v 1.23 2002-07-15 12:44:27 sandervl Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
@@ -43,15 +43,22 @@ typedef struct {
   DWORD      dwType;
 } GdiObject;
 
-static GdiObject objHandleTable[MAX_OBJECT_HANDLES] = {0};
-static ULONG     lowestFreeIndex = 1;
-static VMutex    objTableMutex;
+static GdiObject *objHandleTable  = NULL;
+static ULONG      lowestFreeIndex = 1;
+static VMutex     objTableMutex;
 
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API ObjAllocateHandle(HANDLE *hObject, DWORD dwUserData, DWORD dwType)
 {
     objTableMutex.enter();
+    if(objHandleTable == NULL) {
+        objHandleTable = (GdiObject *)malloc(MAX_OBJECT_HANDLES*sizeof(GdiObject));
+        if(objHandleTable == NULL) {
+            DebugInt3();
+        }
+    }
+
     if(lowestFreeIndex == -1) {
         //oops, out of handles
         objTableMutex.leave();
