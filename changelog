@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2410 2003-01-01 18:15:22 sandervl Exp $ */
+/* $Id: changelog,v 1.2411 2003-01-02 11:50:26 sandervl Exp $ */
+
+ 2003-01-02: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Set the codepage of the message queue for each new thread
+                  that is created. (done for the main thread in user32)
 
  2003-01-01: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Fixes for windows with an iconless class and WS_EX_DLGMODALFRAME
