@@ -147,6 +147,7 @@ typedef struct tagLISTVIEW_INFO
     POINT             scrollPage;   //in scroll units
     POINT             scrollStep;   //in pixels
     DWORD             internalFlags;
+    BOOL              bDragInProcess;
 #endif
   HWND hwndSelf;
   COLORREF clrBk;
@@ -2422,7 +2423,15 @@ static LRESULT LISTVIEW_MouseMove(HWND hwnd, WPARAM wParam, LPARAM lParam)
        _TrackMouseEvent(&trackinfo);
     }
   }
-  
+#ifdef __WIN32OS2__
+  else 
+  if(!infoPtr->bDragInProcess && (infoPtr->bLButtonDown || infoPtr->bRButtonDown) && infoPtr->nSelectionMark != -1) {
+      NMLISTVIEW nml = {0};
+      nml.iItem = infoPtr->nSelectionMark;
+      listview_notify(hwnd, (infoPtr->bLButtonDown) ? LVN_BEGINDRAG : LVN_BEGINRDRAG, &nml);
+      infoPtr->bDragInProcess = TRUE;
+  }
+#endif  
   return 0;
 }
 
@@ -3747,9 +3756,18 @@ static VOID LISTVIEW_RefreshReport(HWND hwnd, HDC hdc, DWORD cdmode)
   infoPtr->nColumnCount = nColumnCount; /* update nColumnCount */
   FullSelected = infoPtr->dwExStyle & LVS_EX_FULLROWSELECT;
 
-  /* clear the background of any part of the control that doesn't contain items */
-  SubtractRect(&rcTemp, &infoPtr->rcList, &infoPtr->rcView);
-  LISTVIEW_FillBackground(hwnd, hdc, &rcTemp);
+#ifdef __WIN32OS2__
+  //@PF OwnerDraw does not need background clearing, it is supposed to be
+  //done by application itself.
+  if (!(lStyle & LVS_OWNERDRAWFIXED))
+  {
+#endif
+    /* clear the background of any part of the control that doesn't contain items */
+    SubtractRect(&rcTemp, &infoPtr->rcList, &infoPtr->rcView);
+    LISTVIEW_FillBackground(hwnd, hdc, &rcTemp);
+#ifdef __WIN32OS2__
+  }
+#endif
 
   /* nothing to draw */
   if(GETITEMCOUNT(infoPtr) == 0)
@@ -9206,6 +9224,11 @@ static LRESULT LISTVIEW_LButtonUp(HWND hwnd, WORD wKey, WORD wPosX,
       infoPtr->nEditLabelItem = -1;
     }
   }
+#ifdef __WIN32OS2__
+  if(infoPtr->bDragInProcess) {
+      infoPtr->bDragInProcess = FALSE;
+  }
+#endif  
 
   return 0;
 }
@@ -9555,6 +9578,12 @@ static LRESULT LISTVIEW_RButtonUp(HWND hwnd, WORD wKey, WORD wPosX,
     /* Send a WM_CONTEXTMENU message in response to the RBUTTONUP */
     SendMessageW( hwnd, WM_CONTEXTMENU, (WPARAM) hwnd, MAKELPARAM(pt.x, pt.y));
   }
+
+#ifdef __WIN32OS2__
+  if(infoPtr->bDragInProcess) {
+      infoPtr->bDragInProcess = FALSE;
+  }
+#endif  
   
   return 0;
 }
