@@ -1,4 +1,4 @@
-/* $Id: winexepeldr.cpp,v 1.13 2000-10-06 15:16:03 sandervl Exp $ */
+/* $Id: winexepeldr.cpp,v 1.14 2000-10-20 11:46:48 sandervl Exp $ */
 
 /*
  * Win32 PE loader Exe class
@@ -53,7 +53,8 @@ BOOL fPeLoader = FALSE;
 //******************************************************************************
 BOOL WIN32API CreateWin32PeLdrExe(char *szFileName, char *szCmdLine,
                                   char *peoptions, 
-                                  ULONG reservedMem, BOOL fConsoleApp)
+                                  ULONG reservedMem, BOOL fConsoleApp,
+                                  BOOL  fVioConsole)
 {
  APIRET  rc;
  PPIB   ppib;
@@ -120,7 +121,7 @@ BOOL WIN32API CreateWin32PeLdrExe(char *szFileName, char *szCmdLine,
   {
    	dprintf(("Console application!\n"));
 
-   	APIRET rc = iConsoleInit();                     /* initialize console subsystem */
+   	APIRET rc = iConsoleInit(fVioConsole);                /* initialize console subsystem */
    	if (rc != NO_ERROR)                                  /* check for errors */
             	dprintf(("KERNEL32:Win32Image:Init ConsoleInit failed with %u.\n", rc));
   }

@@ -1,4 +1,4 @@
-/* $Id: winexepe2lx.cpp,v 1.7 2000-09-22 04:35:08 bird Exp $ */
+/* $Id: winexepe2lx.cpp,v 1.8 2000-10-20 11:46:48 sandervl Exp $ */
 
 /*
  * Win32 PE2LX Exe class
@@ -32,7 +32,7 @@
 #include "conwin.h"         // Windows Header for console only
 #include "console.h"
 
-#define DBG_LOCALLOG	DBG_winexepe2lx
+#define DBG_LOCALLOG    DBG_winexepe2lx
 #include "dbglocal.h"
 
 
@@ -145,7 +145,7 @@ BOOL Win32Pe2LxExe::init()
 
             dprintf(("Console application!\n"));
 
-            rc = iConsoleInit();    /* initialize console subsystem */
+            rc = iConsoleInit(FALSE);    /* initialize console subsystem */
             if (rc != NO_ERROR)     /* check for errors */
                 dprintf(("KERNEL32:Win32Image:Init ConsoleInit failed with %u.\n", rc));
         }

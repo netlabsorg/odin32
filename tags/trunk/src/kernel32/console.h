@@ -1,4 +1,4 @@
-/* $Id: console.h,v 1.3 1999-10-08 09:52:33 sandervl Exp $ */
+/* $Id: console.h,v 1.4 2000-10-20 11:46:46 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -26,8 +26,9 @@ extern "C" {
 #define TABVIRTUALKEYCODES 0x6D
 extern char tabVirtualKeyCodes[TABVIRTUALKEYCODES];
 
+extern BOOL flVioConsole;
 
-DWORD iConsoleInit(void);       /* creation of the console subsystem */
+DWORD iConsoleInit(BOOL fVioConsole);       /* creation of the console subsystem */
 
 DWORD iConsoleDevicesRegister(void);       /* create console devices */
 

@@ -1,4 +1,4 @@
-/* $Id: console2.h,v 1.9 2000-08-10 02:19:56 phaller Exp $ */
+/* $Id: console2.h,v 1.10 2000-10-20 11:46:47 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -459,10 +459,12 @@ APIRET iConsoleInputEventPushMenu  (DWORD dwCommandId);
 
 APIRET iConsoleInputEventPushFocus (BOOL bSetFocus);
 
-ULONG  iConsoleInputQueryEvents    (void);
+#define QUERY_EVENT_PEEK	0
+#define QUERY_EVENT_WAIT	1
+ULONG  iConsoleInputQueryEvents    (PICONSOLEINPUT pConsoleInput, int fWait);
 
 void   iConsoleCursorShow          (PCONSOLEBUFFER pConsoleBuffer,
-                                          ULONG          ulCursorMode);
+                                    ULONG          ulCursorMode);
 
 APIRET iConsoleFontQuery           (void);
 
