@@ -1,15 +1,19 @@
- /* $Id: ChangeLog,v 1.498 1999-12-02 17:51:58 hugh Exp $ */
+ /* $Id: ChangeLog,v 1.499 1999-12-02 19:32:48 sandervl Exp $ */
+
+ 99-12-02: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Rewrote EnumThreadWindows/EnumWindows
+                  Fixed GetParent
 
  99-12-02  Markus Montkowski <mmontkowski@gmx.de>
-       - GDI32:  Implemented:
-                 CombineTransform, CreateDIBPatternBrush, CreateDCW, 
-                 CreateEnhMetaFileW, CreateICW
-                 Fixed memory leak in GetTextFaceW (didn't free ASCII buffer)
-                 Enhanced StretchBlt to support DIBSections
+        - GDI32:  Implemented:
+                  CombineTransform, CreateDIBPatternBrush, CreateDCW, 
+                  CreateEnhMetaFileW, CreateICW
+                  Fixed memory leak in GetTextFaceW (didn't free ASCII buffer)
+                  Enhanced StretchBlt to support DIBSections
 
  99-12-02: Achim Hasenmueller <achimha@innotek.de>
-       - WSOCK32\NEW: Not really working :(
-                      Fixed WSAAsyncGetHostByName, added request data to table
+        - WSOCK32\NEW: Not really working :(
+                       Fixed WSAAsyncGetHostByName, added request data to table
 
  99-12-01: Patrick Haller <phaller@gmx.net>
 	- WSOCK32\NEW: Working now :)
