@@ -1,4 +1,4 @@
-/* $Id: hmthread.cpp,v 1.2 2000-03-17 16:08:40 sandervl Exp $ */
+/* $Id: hmthread.cpp,v 1.3 2000-03-17 16:28:59 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -51,7 +51,8 @@ HANDLE HMDeviceThreadClass::CreateThread(PHMHANDLEDATA          pHMHandleData,
   //SvL: This doesn't really create a thread, but only sets up the
   //     handle of thread 0
   if(fFirstThread) {
-	return O32_GetCurrentThread(); //return Open32 handle of thread	0
+	pHMHandleData->hHMHandle = O32_GetCurrentThread(); //return Open32 handle of thread
+	return pHMHandleData->hHMHandle;
   }
   winthread = new Win32Thread(lpStartAddr, lpvThreadParm, fdwCreate, pHMHandleData->hHMHandle);
 
@@ -66,12 +67,13 @@ HANDLE HMDeviceThreadClass::CreateThread(PHMHANDLEDATA          pHMHandleData,
      cbStack = 1048576; // per default 1MB stack per thread
 #endif
 
-  return(O32_CreateThread(lpsa,
-                          cbStack,
-                          winthread->GetOS2Callback(),
-                          (LPVOID)winthread,
-                          fdwCreate,
-                          lpIDThread));
+  pHMHandleData->hHMHandle = O32_CreateThread(lpsa,
+                                              cbStack,
+                                              winthread->GetOS2Callback(),
+                                              (LPVOID)winthread,
+                                              fdwCreate,
+                                              lpIDThread);
+  return pHMHandleData->hHMHandle;
 }
 //******************************************************************************
 //******************************************************************************
