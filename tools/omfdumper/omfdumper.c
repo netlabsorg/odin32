@@ -1,4 +1,4 @@
-/* $Id: omfdumper.c,v 1.1 1999-09-05 02:34:31 bird Exp $ */
+/* $Id: omfdumper.c,v 1.2 2000-08-19 01:03:45 bird Exp $ */
 /*
  * Very simple OMF/LIB dumper.
  *
@@ -220,8 +220,10 @@ void *processRecord(void *pvRecord, void *pvBase, FILE *phDef)
             break;
 
         default:
-            printf("oops: Record type not implemented yet. 0x%02x\n", *(unsigned char*)pvRecord);
             cbRecord = *((unsigned short*)((int)pvRecord+1)) + 3;
+            printf("oops: Record type not implemented yet. 0x%02x %d\n",
+                   *(unsigned char*)pvRecord,
+                   cbRecord);
             break;
     }
 
