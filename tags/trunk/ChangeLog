@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.693 2000-02-03 23:06:34 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.694 2000-02-04 16:59:27 cbratschi Exp $ */
+
+ 2000-02-04: Christoph Bratschi <cbratschi@datacomm.ch>
+	- COMCTL32: merged with WINE 20000130
 
  2000-02-03: Jens Wiessner <wiessnej@rfi.de>
 	- NTDLL: Ported Wine security apis
