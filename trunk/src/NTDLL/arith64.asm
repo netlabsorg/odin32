@@ -1,4 +1,4 @@
-; $Id: arith64.asm,v 1.1 1999-11-09 00:44:01 phaller Exp $
+; $Id: arith64.asm,v 1.2 1999-11-09 09:54:46 phaller Exp $
 
 ;/*
 ; * 64-bit integer apis
@@ -17,21 +17,21 @@ CODE32         SEGMENT DWORD PUBLIC USE32 'CODE'
 
 ; ----------------------------------------------------------------------------
 
-	public	_RtlLargeIntegerDivide@20
-	public	_RtlLargeIntegerAdd@16
-	public	_RtlEnlargedIntegerMultiply@8
-	public	_RtlEnlargedUnsignedMultiply@8
-	public	_RtlEnlargedUnsignedDivide@16
-	public	_RtlExtendedLargeIntegerDivide@16
-	public	_RtlExtendedMagicDivide@20
-	public	_RtlExtendedIntegerMultiply@12
-	public	_RtlLargeIntegerShiftLeft@12
-	public	_RtlLargeIntegerShiftRight@12
-	public	_RtlLargeIntegerArithmeticShift@12
-	public	_RtlLargeIntegerNegate@8
-	public	_RtlLargeIntegerSubtract@16
-	public	_RtlConvertLongToLargeInteger@4
-	public	_RtlConvertUlongToLargeInteger@4
+       public  _RtlLargeIntegerDivide@20
+       public  _RtlLargeIntegerAdd@16
+       public  _RtlEnlargedIntegerMultiply@8
+       public  _RtlEnlargedUnsignedMultiply@8
+       public  _RtlEnlargedUnsignedDivide@16
+       public  _RtlExtendedLargeIntegerDivide@16
+       public  _RtlExtendedMagicDivide@20
+       public  _RtlExtendedIntegerMultiply@12
+       public  _RtlLargeIntegerShiftLeft@12
+       public  _RtlLargeIntegerShiftRight@12
+       public  _RtlLargeIntegerArithmeticShift@12
+       public  _RtlLargeIntegerNegate@8
+       public  _RtlLargeIntegerSubtract@16
+       public  _RtlConvertLongToLargeInteger@4
+       public  _RtlConvertUlongToLargeInteger@4
 
 ; ----------------------------------------------------------------------------
 
@@ -48,7 +48,7 @@ CODE32         SEGMENT DWORD PUBLIC USE32 'CODE'
 ; Variables :
 ; Result    :
 ; Remark    : NTDLL.462
-; Status    :
+; Status    : VERIFIED
 ;
 ; Author    : Patrick Haller [Mon, 1999/11/08 23:44]
 ; ----------------------------------------------------------------------------
@@ -157,7 +157,7 @@ _RtlLargeIntegerDivide@20 endp
 ; Variables :
 ; Result    :
 ; Remark    : NTDLL.460
-; Status    :
+; Status    : VERIFIED
 ;
 ; Author    : Patrick Haller [Mon, 1999/11/08 23:44]
 ; ----------------------------------------------------------------------------
@@ -183,7 +183,7 @@ _RtlLargeIntegerAdd@16 endp
 ; Variables :
 ; Result    :
 ; Remark    : NTDLL.371
-; Status    :
+; Status    : VERIFIED
 ;
 ; Author    : Patrick Haller [Mon, 1999/11/08 23:44]
 ; ----------------------------------------------------------------------------
@@ -205,7 +205,7 @@ _RtlEnlargedIntegerMultiply@8 endp
 ; Variables :
 ; Result    :
 ; Remark    : NTDLL.373
-; Status    :
+; Status    : VERIFIED
 ;
 ; Author    : Patrick Haller [Mon, 1999/11/08 23:44]
 ; ----------------------------------------------------------------------------
@@ -226,7 +226,7 @@ _RtlEnlargedUnsignedMultiply@8 endp
 ; Variables :
 ; Result    :
 ; Remark    : NTDLL.372
-; Status    :
+; Status    : VERIFIED
 ;
 ; Author    : Patrick Haller [Mon, 1999/11/08 23:44]
 ; ----------------------------------------------------------------------------
@@ -258,7 +258,7 @@ _RtlEnlargedUnsignedDivide@16 endp
 ; Variables :
 ; Result    :
 ; Remark    : NTDLL.390
-; Status    :
+; Status    : VERIFIED
 ;
 ; Author    : Patrick Haller [Mon, 1999/11/08 23:44]
 ; ----------------------------------------------------------------------------
@@ -328,7 +328,7 @@ _RtlExtendedLargeIntegerDivide@16 endp
 ; Variables :
 ; Result    :
 ; Remark    : NTDLL.391
-; Status    :
+; Status    : VERIFIED
 ;
 ; Author    : Patrick Haller [Mon, 1999/11/08 23:44]
 ; ----------------------------------------------------------------------------
@@ -412,7 +412,7 @@ _RtlExtendedMagicDivide@20 endp
 ; Variables :
 ; Result    :
 ; Remark    : NTDLL.389
-; Status    :
+; Status    : VERIFIED
 ;
 ; Author    : Patrick Haller [Mon, 1999/11/08 23:44]
 ; ----------------------------------------------------------------------------
@@ -470,7 +470,7 @@ _RtlExtendedIntegerMultiply@12 endp
 ; Variables :
 ; Result    :
 ; Remark    : NTDLL.464
-; Status    :
+; Status    : VERIFIED
 ;
 ; Author    : Patrick Haller [Mon, 1999/11/08 23:44]
 ; ----------------------------------------------------------------------------
@@ -505,7 +505,7 @@ _RtlLargeIntegerShiftLeft@12 endp
 ; Variables :
 ; Result    :
 ; Remark    : NTDLL.465
-; Status    :
+; Status    : VERIFIED
 ;
 ; Author    : Patrick Haller [Mon, 1999/11/08 23:44]
 ; ----------------------------------------------------------------------------
@@ -540,7 +540,7 @@ _RtlLargeIntegerShiftRight@12 endp
 ; Variables :
 ; Result    :
 ; Remark    : NTDLL.461
-; Status    :
+; Status    : VERIFIED
 ;
 ; Author    : Patrick Haller [Mon, 1999/11/08 23:44]
 ; ----------------------------------------------------------------------------
@@ -577,7 +577,7 @@ _RtlLargeIntegerArithmeticShift@12 endp
 ; Variables :
 ; Result    :
 ; Remark    : NTDLL.463
-; Status    :
+; Status    : VERIFIED
 ;
 ; Author    : Patrick Haller [Mon, 1999/11/08 23:44]
 ; ----------------------------------------------------------------------------
@@ -602,7 +602,7 @@ _RtlLargeIntegerNegate@8 endp
 ; Variables :
 ; Result    :
 ; Remark    : NTDLL.466
-; Status    :
+; Status    : VERIFIED
 ;
 ; Author    : Patrick Haller [Mon, 1999/11/08 23:44]
 ; ----------------------------------------------------------------------------
@@ -628,7 +628,7 @@ _RtlLargeIntegerSubtract@16        endp
 ; Variables :
 ; Result    :
 ; Remark    : NTDLL.316
-; Status    :
+; Status    : VERIFIED
 ;
 ; Author    : Patrick Haller [Mon, 1999/11/08 23:44]
 ; ----------------------------------------------------------------------------
@@ -649,7 +649,7 @@ _RtlConvertLongToLargeInteger@4 endp
 ; Variables :
 ; Result    :
 ; Remark    : NTDLL.320
-; Status    :
+; Status    : VERIFIED
 ;
 ; Author    : Patrick Haller [Mon, 1999/11/08 23:44]
 ; ----------------------------------------------------------------------------
