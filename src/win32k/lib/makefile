@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2001-02-21 07:47:59 bird Exp $
+# $Id: makefile,v 1.13 2001-07-08 02:51:24 bird Exp $
 
 #
 # Odin32 API
@@ -40,6 +40,7 @@ $(OBJDIR)\libTerm.obj \
 $(OBJDIR)\libWin32kInstalled.obj \
 $(OBJDIR)\libWin32kQueryOptionsStatus.obj \
 $(OBJDIR)\libWin32kSetOptions.obj \
+$(OBJDIR)\libWin32kSetEnvironment.obj \
 $(OBJDIR)\libDosAllocMemEx.obj \
 $(OBJDIR)\libW32kHandleSystemEvent.obj \
 $(OBJDIR)\libW32kQueryOTEs.obj \
