@@ -1,4 +1,4 @@
-# $Id: process.mak,v 1.16 2002-08-19 15:00:25 bird Exp $
+# $Id: process.mak,v 1.17 2002-08-20 04:05:40 bird Exp $
 
 #
 # Unix-like tools for OS/2
@@ -510,51 +510,210 @@ all: build
 
 
 # -----------------------------------------------------------------------------
-# The build rule - Build the target.
-#   Must take into account any subdirectories and makefiles which is is to be
-#   made before and after the target. That makes it kind of messy, sorry.
+# The build rule - This runs all passes:
+#   1. Make Dependencies
+#   2. Make Libraries (all kinds)
+#   3. Make Executables
+#   4. Make Miscellaneous Targets
+#   5. Make Install
+# Note: In order to load dependencies we'll do a forwarding after making them.
 # -----------------------------------------------------------------------------
-!ifdef SUBDIRS
-SUBDIRS_BUILD = subbuild
-$(SUBDIRS_BUILD):
-    @$(TOOL_DODIRS) "$(SUBDIRS)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) build
+build: _build
+!if "$(MAKEFLAGS:I=_)" == "$(MAKEFLAGS)" # this is of course broken in nmake v5.0 for OS/2.
+    @$(ECHO)$(CLRMAK)[Successfully Built Everything!] $(CLRRST)
+!else
+    @$(ECHO)$(CLRMAK)[Built Everything! (Ignore option specified)] $(CLRRST)
 !endif
 
+# internal rule shared by rebuild and build.
+_build:  _build_banner_dep dep
+!ifndef BUILD_QUIET
+    @$(ECHO) Restarting $(CLRFIL)$(MAKEFILE)$(CLRTXT) with new dependencies. $(CLRRST)
+!endif
+    \
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
+    $(TOOL_MAKE) -f $(MAKEFILE) _build_new_dependencies_
+
+# internal rule used to reload dependencies.
+_build_new_dependencies_: \
+        _build_banner_lib           lib \
+        _build_banner_executable    executable \
+        _build_banner_miscellaneous miscellaneous \
+        _build_banner_install       install
+
+# Banners for rebuild and build.
+_build_banner_clean:
+    @$(ECHO)$(CLRMAK)[Start Pass 0 - Make Clean] $(CLRRST)
+    @SET _BUILD_PASS=0
+_build_banner_dep:
+    @$(ECHO)$(CLRMAK)[Start Pass 1 - Make Dependencies] $(CLRRST)
+    @SET _BUILD_PASS=1
+_build_banner_lib:
+    @$(ECHO)$(CLRMAK)[Start Pass 2 - Make Libraries] $(CLRRST)
+    @SET _BUILD_PASS=2
+_build_banner_executable:
+    @$(ECHO)$(CLRMAK)[Start Pass 3 - Make Executables] $(CLRRST)
+    @SET _BUILD_PASS=3
+_build_banner_miscellaneous:
+    @$(ECHO)$(CLRMAK)[Start Pass 4 - Make Miscellaneous Targets] $(CLRRST)
+    @SET _BUILD_PASS=4
+_build_banner_install:
+    @$(ECHO)$(CLRMAK)[Start Pass 5 - Make Install] $(CLRRST)
+    @SET _BUILD_PASS=5
+
+
+
+# -----------------------------------------------------------------------------
+# The rebuild rule - Same as build but does a clean first (as Pass 0).
+# -----------------------------------------------------------------------------
+rebuild: \
+        _build_banner_clean clean \
+        _build
+!if "$(MAKEFLAGS:i=_)" == "$(MAKEFLAGS)"
+    @$(ECHO)$(CLRMAK)[Successfully Rebuilt Everything!] $(CLRRST)
+!else
+    @$(ECHO)$(CLRMAK)[Rebuilt Everything! (Ignore option specified)] $(CLRRST)
+!endif
+
+
+
+# -----------------------------------------------------------------------------
+# Pass 0 - The clean rule - Clean up output files.
+#   The current setup doesn't clean the installed ones.
+# -----------------------------------------------------------------------------
+!if "$(TARGET_MODE)" != "TESTCASE"
+clean:
+    @$(ECHO) Cleaning... $(CLRRST)
+!if "$(PATH_TARGET)" != ""              # paranoia
+    \
+! ifndef BUILD_VERBOSE
+    @ \
+! endif
+    $(TOOL_RM) \
+        $(PATH_TARGET)\*.$(EXT_OBJ) \
+        $(PATH_TARGET)\*.$(EXT_ILIB) \
+        $(PATH_TARGET)\*.$(EXT_EXE) \
+        $(PATH_TARGET)\*.$(EXT_DLL) \
+        $(PATH_TARGET)\*.$(EXT_RES)
+    \
+! ifndef BUILD_VERBOSE
+    @ \
+! endif
+    $(TOOL_RM) \
+        $(PATH_TARGET)\*.$(EXT_SYS) \
+        $(PATH_TARGET)\*.$(EXT_LIB) \
+        $(PATH_TARGET)\*.$(EXT_IFS) \
+        $(PATH_TARGET)\*.$(EXT_MAP) \
+        $(PATH_TARGET)\*.$(EXT_SYM)
+    \
+! ifndef BUILD_VERBOSE
+    @ \
+! endif
+    $(TOOL_RM) \
+        $(PATH_TARGET)\*.s \
+        $(PATH_TARGET)\*.lst \
+        $(PATH_TARGET)\*.lnk \
+        $(PATH_TARGET)\*.ii \
+        $(PATH_TARGET)\.depend
+    \
+! ifndef BUILD_VERBOSE
+    @ \
+! endif
+    $(TOOL_RM) \
+        .\*.ii \
+        .\*.err \
+        .\.depend
+!endif
+!ifdef SUBDIRS
+    @$(TOOL_DODIRS) "$(SUBDIRS)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) NODEP=1 $@
+!endif
 !ifdef PREMAKEFILES
-PREMAKEFILES_BUILD = premakefiles_build
-$(PREMAKEFILES_BUILD):
-    @$(TOOL_DOMAKES) "$(PREMAKEFILES)" $(TOOL_MAKE) build
+    @$(TOOL_DOMAKES) "$(PREMAKEFILES)" $(TOOL_MAKE) NODEP=1 $@
 !endif
-
-build: $(SUBDIRS_BUILD) $(PREMAKEFILES_BUILD) $(TARGET) $(TARGET_ILIB) $(TARGET_PUBNAME)
-    @$(ECHO) Successfully Built $(CLRFIL)$(TARGET) $(TARGET_ILIB)$(CLRRST)
 !ifdef POSTMAKEFILES
-    @$(TOOL_DOMAKES) "$(POSTMAKEFILES)" $(TOOL_MAKE) $@
+    @$(TOOL_DOMAKES) "$(POSTMAKEFILES)" $(TOOL_MAKE) NODEP=1 $@
+!endif
+!endif #!TESTCASE
+
+
+
+# -----------------------------------------------------------------------------
+# Pass 1 - The dep rule - Make dependencies.
+# -----------------------------------------------------------------------------
+dep:
+    @$(ECHO) Making dependencies... $(CLRRST)
+    \
+!ifndef BUILD_VERBOSE
+    @ \
+!endif
+!if "$(TARGET_MODE)" != "EMPTY" && "$(TARGET_MODE)" != "TESTCASE"
+    $(TOOL_DEP) $(TOOL_DEP_FLAGS) -o$$(PATH_TARGET) -d$(TARGET_DEPEND)\
+! ifdef TARGET_NO_DEP
+        -x$(TARGET_NO_DEP: =;)\
+! endif
+        $(TOOL_DEP_FILES)
+!endif
+!ifdef SUBDIRS
+    @$(TOOL_DODIRS) "$(SUBDIRS)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) NODEP=1 $@
+!endif
+!ifdef PREMAKEFILES
+    @$(TOOL_DOMAKES) "$(PREMAKEFILES)" $(TOOL_MAKE) NODEP=1 $@
+!endif
+!ifdef POSTMAKEFILES
+    @$(TOOL_DOMAKES) "$(POSTMAKEFILES)" $(TOOL_MAKE) NODEP=1 $@
 !endif
 
 
 
 # -----------------------------------------------------------------------------
-# The lib rule - Make Public libraries.
-#   Must take into account any subdirectories and makefiles which is is to be
-#   made before and after the target. That makes it kind of messy, sorry.
+# Pass 2 - The lib rule - Make libraries.
 # -----------------------------------------------------------------------------
 !ifdef SUBDIRS
-SUBDIRS_LIB = subdir_lib
+SUBDIRS_LIB = _subdir_lib
 $(SUBDIRS_LIB):
     @$(TOOL_DODIRS) "$(SUBDIRS)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) lib
 !endif
 
 !ifdef PREMAKEFILES
-PREMAKEFILES_LIB = premakefiles_lib
+PREMAKEFILES_LIB = _premakefiles_lib
 $(PREMAKEFILES_LIB):
     @$(TOOL_DOMAKES) "$(PREMAKEFILES)" $(TOOL_MAKE) lib
 !endif
 
-!if "$(TARGET_PUBLIC_PART)" != "" && ("$(TARGET_MODE)" == "LIB" || "$(TARGET_MODE)" == "SYSLIB" || "$(TARGET_MODE)" == "IFSLIB")
-lib: $(SUBDIRS_LIB) $(TARGET_ILIB) $(TARGET) $(TARGET_PUBNAME)
+lib:    $(SUBDIRS_LIB) $(PREMAKEFILES_LIB) \
+!if "$(TARGET_MODE)" == "LIB" || "$(TARGET_MODE)" == "SYSLIB" || "$(TARGET_MODE)" == "IFSLIB"
+        $(TARGET) $(TARGET_PUBNAME) \
+!endif
+        $(TARGET_ILIB)
+!ifdef POSTMAKEFILES
+    @$(TOOL_DOMAKES) "$(POSTMAKEFILES)" $(TOOL_MAKE) $@
+!endif
+
+
+
+# -----------------------------------------------------------------------------
+# Pass 3 - The executable rule - Build the executables.
+# -----------------------------------------------------------------------------
+!ifdef SUBDIRS
+SUBDIRS_EXECUTABLE = _subdir_executable
+$(SUBDIRS_EXECUTABLE):
+    @$(TOOL_DODIRS) "$(SUBDIRS)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) executable
+!endif
+
+!ifdef PREMAKEFILES
+PREMAKEFILES_EXECUTABLE = _premakefiles_executable
+$(PREMAKEFILES_EXECUTABLE):
+    @$(TOOL_DOMAKES) "$(PREMAKEFILES)" $(TOOL_MAKE) executable
+!endif
+
+executable: \
+!if "$(TARGET_MODE)" != "LIB" && "$(TARGET_MODE)" != "SYSLIB" && "$(TARGET_MODE)" != "IFSLIB"
+        $(SUBDIRS_EXECUTABLE) $(PREMAKEFILES_EXECUTABLE) $(TARGET) $(TARGET_PUBNAME)
+    @$(ECHO) Successfully Built $(CLRFIL)$(TARGET)$(CLRRST)
 !else
-lib: $(SUBDIRS_LIB) $(TARGET_ILIB)
+        $(SUBDIRS_EXECUTABLE) $(PREMAKEFILES_EXECUTABLE)
 !endif
 !ifdef POSTMAKEFILES
     @$(TOOL_DOMAKES) "$(POSTMAKEFILES)" $(TOOL_MAKE) $@
@@ -563,7 +722,35 @@ lib: $(SUBDIRS_LIB) $(TARGET_ILIB)
 
 
 # -----------------------------------------------------------------------------
-# The install rule - Copies target to main binary directory.
+# Pass 4 - The miscellaneous rule - Makes other miscellaneous stuff like
+#   documentations etc. This is experimental for the moment.
+# -----------------------------------------------------------------------------
+!ifdef SUBDIRS
+SUBDIRS_MISC = _subdir_misc
+$(SUBDIRS_MISC):
+    @$(TOOL_DODIRS) "$(SUBDIRS)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) miscellaneous
+!endif
+
+!ifdef PREMAKEFILES
+PREMAKEFILES_MISC = _premakefiles_misc
+$(PREMAKEFILES_MISC):
+    @$(TOOL_DOMAKES) "$(PREMAKEFILES)" $(TOOL_MAKE) miscellaneous
+!endif
+
+miscellaneous:  $(SUBDIRS_MISC) $(PREMAKEFILES_MISC) \
+                $(TARGET_DOCS) $(TARGET_MISC)
+!if "$(TARGET_DOCS)$(TARGET_MISC)" != ""
+    @$(ECHO) Successfully Built $(CLRFIL)$(TARGET_DOCS) $(TARGET_MISC)$(CLRRST)
+!else
+!endif
+!ifdef POSTMAKEFILES
+    @$(TOOL_DOMAKES) "$(POSTMAKEFILES)" $(TOOL_MAKE) $@
+!endif
+
+
+
+# -----------------------------------------------------------------------------
+# Pass 5 - The install rule - Copies target to main binary directory.
 #   Installation order is not concidered vital, so subdirectories and
 #   pre-makefiles are processed after this directory. This might be changed.
 # -----------------------------------------------------------------------------
@@ -615,6 +802,10 @@ install:
 
 
 
+# -----------------------------------------------------------------------------
+# Pass x - The testcase rule - Execute testcases when present.
+#   Testcases are either a testcase.mak file or a testcase subdirectory.
+# -----------------------------------------------------------------------------
 !if "$(TARGET_MODE)" != "TESTCASE"
 !ifndef BUILD_OWN_TESTCASE_RULE
 !ifndef MAKEVER
@@ -624,11 +815,9 @@ _TESTCASE_TST2 = [$(TOOL_EXISTS) testcase.mak] == 0
 _TESTCASE_TST1 = exists(testcase) != 0
 _TESTCASE_TST2 = exists(testcase.mak) != 0
 !endif
-# -----------------------------------------------------------------------------
-# The testcase rule - Execute testcases when present.
-#   Testcases are either a testcase.mak file or a testcase subdirectory.
-# -----------------------------------------------------------------------------
+
 testcase:
+    @$(ECHO) Executing testcases $(CLRRST)
 !if $(_TESTCASE_TST1)
     @$(TOOL_DODIRS) "testcase" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) $@
 !endif
@@ -650,9 +839,34 @@ testcase:
 
 
 # -----------------------------------------------------------------------------
+# The target rule - Build the target.
+#   Note: This also builds libraries in subdirectories and submakefiles.
+# -----------------------------------------------------------------------------
+!ifdef SUBDIRS
+SUBDIRS_TARGET = _subdir_target
+$(SUBDIRS_TARGET):
+    @$(TOOL_DODIRS) "$(SUBDIRS)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) target
+!endif
+
+!ifdef PREMAKEFILES
+PREMAKEFILES_TARGET = _premakefiles_target
+$(PREMAKEFILES_TARGET):
+    @$(TOOL_DOMAKES) "$(PREMAKEFILES)" $(TOOL_MAKE) target
+!endif
+
+target: $(SUBDIRS_TARGET) $(PREMAKEFILES_TARGET) $(TARGET) $(TARGET_ILIB) $(TARGET_PUBNAME)
+    @$(ECHO) Successfully Built $(CLRFIL)$(TARGET) $(TARGET_ILIB)$(CLRRST)
+!ifdef POSTMAKEFILES
+    @$(TOOL_DOMAKES) "$(POSTMAKEFILES)" $(TOOL_MAKE) $@
+!endif
+
+
+
+# -----------------------------------------------------------------------------
 # The shell rule - Setup the correcte shell environment and start a shell.
 # -----------------------------------------------------------------------------
 shell:
+    @$(ECHO) Creating work shell $(CLRRST)
     \
 !ifndef BUILD_VERBOSE
     @ \
@@ -663,80 +877,10 @@ shell:
 
 
 # -----------------------------------------------------------------------------
-# The dep rule - Make dependencies.
-# -----------------------------------------------------------------------------
-dep:
-    @$(ECHO) Building dependencies $(CLRRST)
-    \
-!ifndef BUILD_VERBOSE
-    @ \
-!endif
-!if "$(TARGET_MODE)" != "EMPTY" && "$(TARGET_MODE)" != "TESTCASE"
-    $(TOOL_DEP) $(TOOL_DEP_FLAGS) -o$$(PATH_TARGET) -d$(TARGET_DEPEND)\
-! ifdef TARGET_NO_DEP
-        -x$(TARGET_NO_DEP: =;)\
-! endif
-        $(TOOL_DEP_FILES)
-!endif
-!ifdef SUBDIRS
-    @$(TOOL_DODIRS) "$(SUBDIRS)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) NODEP=1 $@
-!endif
-!ifdef PREMAKEFILES
-    @$(TOOL_DOMAKES) "$(PREMAKEFILES)" $(TOOL_MAKE) NODEP=1 $@
-!endif
-!ifdef POSTMAKEFILES
-    @$(TOOL_DOMAKES) "$(POSTMAKEFILES)" $(TOOL_MAKE) NODEP=1 $@
-!endif
-
-
-
-# -----------------------------------------------------------------------------
-# The clean rule - Clean up output files.
-#   The current setup doesn't clean the installed ones.
-# -----------------------------------------------------------------------------
-!if "$(TARGET_MODE)" != "TESTCASE"
-clean:
-!if "$(PATH_TARGET)" != ""              # paranoia
-    $(TOOL_RM) \
-        $(PATH_TARGET)\*.$(EXT_OBJ) \
-        $(PATH_TARGET)\*.$(EXT_ILIB) \
-        $(PATH_TARGET)\*.$(EXT_EXE) \
-        $(PATH_TARGET)\*.$(EXT_DLL) \
-        $(PATH_TARGET)\*.$(EXT_RES)
-    $(TOOL_RM) \
-        $(PATH_TARGET)\*.$(EXT_SYS) \
-        $(PATH_TARGET)\*.$(EXT_LIB) \
-        $(PATH_TARGET)\*.$(EXT_IFS) \
-        $(PATH_TARGET)\*.$(EXT_MAP) \
-        $(PATH_TARGET)\*.$(EXT_SYM)
-    $(TOOL_RM) \
-        $(PATH_TARGET)\*.s \
-        $(PATH_TARGET)\*.lst \
-        $(PATH_TARGET)\*.lnk \
-        $(PATH_TARGET)\*.ii \
-        $(PATH_TARGET)\.depend
-    $(TOOL_RM) \
-        .\*.ii \
-        .\*.err \
-        .\.depend
-!endif
-!ifdef SUBDIRS
-    @$(TOOL_DODIRS) "$(SUBDIRS)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) NODEP=1 $@
-!endif
-!ifdef PREMAKEFILES
-    @$(TOOL_DOMAKES) "$(PREMAKEFILES)" $(TOOL_MAKE) NODEP=1 $@
-!endif
-!ifdef POSTMAKEFILES
-    @$(TOOL_DOMAKES) "$(POSTMAKEFILES)" $(TOOL_MAKE) NODEP=1 $@
-!endif
-!endif #!TESTCASE
-
-
-
-# -----------------------------------------------------------------------------
 # The nothing rule - Rule for testing the makefile structure.
 # -----------------------------------------------------------------------------
 nothing:
+    @$(ECHO) Doing nothing in $(MAKEFILE).
 !ifdef SUBDIRS
     @$(TOOL_DODIRS) "$(SUBDIRS)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) $@
 !endif
@@ -908,9 +1052,10 @@ $(AR_LNK5)
 !endif
 
 
-#
+# -----------------------------------------------------------------------------
 # Copy rule for public targets.
-#
+#   Normally used for public libraries, but may be used for other purposes...
+# -----------------------------------------------------------------------------
 !if "$(TARGET_PUBNAME)" != ""
 $(TARGET_PUBNAME): $(TARGET)
     @$(ECHO) Copying $(CLRFIL)$(TARGET)$(CLRTXT) to $(CLRFIL)$(@D)$(CLRRST)
@@ -930,13 +1075,8 @@ $(TARGET_PUBNAME): $(TARGET)
 
 
 # -----------------------------------------------------------------------------
-# The $(TARGET) rule - For EMPTY targets.
+# The $(TARGET) rule - For DEPEND targets.
 # -----------------------------------------------------------------------------
-# this doesn't work as we don't have a target name. Hence not needed.
-#!if "$(TARGET_MODE)" == "EMPTY"
-#$(TARGET):
-#    @$(ECHO) .
-#!endif
 !if "$(TARGET_MODE)" == "DEPEND"
 $(TARGET):
     @$(ECHO) .
