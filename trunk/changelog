@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.2475 2003-02-07 15:34:30 sandervl Exp $ */
+/* $Id: changelog,v 1.2476 2003-02-10 16:05:18 sandervl Exp $ */
+
+ 2003-02-10: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Touch all stack pages we skip in the out of stack workaround for
+                  16 bits code. Jumping over the guard page causes a protection
+                  violation exception.
 
  2003-02-07: Sander van Leeuwen <sandervl@innotek   >
     - DDRAW/NTDLL:
