@@ -1,4 +1,4 @@
-# $Id: odin32.post.wat.mk,v 1.13 2001-07-30 08:18:01 sandervl Exp $
+# $Id: odin32.post.wat.mk,v 1.14 2001-07-30 22:50:52 bird Exp $
 
 #
 # Odin32 API
@@ -40,6 +40,14 @@
 #    makes internal libraries in the subdirectories. The libs rule is one of the
 #    dependencies of the main target.
 #
+
+# Sanity check
+!ifndef ODIN32_LIB
+!   error "ODIN32_LIB is not defined"
+!endif ODIN32_LIB
+!ifndef ODIN32_TOOLS
+!   error "ODIN32_TOOLS is not defined"
+!endif ODIN32_TOOLS
 
 
 !ifndef TARGET_EXTENSION
@@ -184,7 +192,9 @@ $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS) $(OS2RES) $(OBJDIR)\$(TARGET).l
     $(OS2RC) $(OS2RCLFLAGS) $(OS2RES) $@
 !endif
 !ifndef DEBUG
+!ifndef NO_LXLITE
     $(LXLITE) $@
+!endif
 !endif
 !endif
 
@@ -211,7 +221,7 @@ library {$(LIBS)}
 !endif # !ifndef EXETARGET !else
 !else # !ifndef LIBTARGET
 ###############################################################################
-# LIB target (internal object library)
+# LIB target (internal or public object library)
 ###############################################################################
 
 #
@@ -371,13 +381,8 @@ $(OBJDIR)\$(TARGET).lib: $(DEFFILE)
 #
 !ifndef LIBTARGET
 !ifndef NOTEXPDEF
-!ifdef NOINTERNALFUNCTIONS
 $(OBJDIR)\$(ORGTARGET)exp.def: $(DEFFILE)
-    $(IMPDEF) -I:20000 $[@ $@
-!else
-$(OBJDIR)\$(ORGTARGET)exp.def: $(DEFFILE)
-    $(IMPDEF) $[@ $@
-!endif
+    $(IMPDEF) $(IMPDEF_FLAGS) $[@ $@
 !endif
 !endif
 
