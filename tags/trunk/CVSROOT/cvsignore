@@ -9,3 +9,4 @@
 *.pch
 *.map
 *.exe
+*.res
