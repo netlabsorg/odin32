@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.82 2004-01-11 12:03:17 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.83 2004-03-18 15:38:42 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -909,7 +909,7 @@ LRESULT Win32Dialog::DefDlgProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
     }
 
     if (Win32DlgProc) {      /* Call dialog procedure */
-        result = Win32DlgProc(getWindowHandle(), Msg, wParam, lParam);
+        result = CallWindowProcA((WNDPROC)Win32DlgProc, getWindowHandle(), Msg, wParam, lParam);
     }
 
     if (!result && IsWindow())
@@ -963,7 +963,7 @@ LRESULT Win32Dialog::DefDlgProcW(UINT Msg, WPARAM wParam, LPARAM lParam)
     }
 
     if (Win32DlgProc) {      /* Call dialog procedure */
-        result = Win32DlgProc(getWindowHandle(), Msg, wParam, lParam);
+        result = CallWindowProcW((WNDPROC)Win32DlgProc, getWindowHandle(), Msg, wParam, lParam);
     }
 
     if (!result && IsWindow())
