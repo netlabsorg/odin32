@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.4 1999-10-04 10:39:42 bird Exp $
+# $Id: Makefile,v 1.5 1999-10-08 00:28:51 bird Exp $
 #
 # Copyright 1998-1999 knut st. osmundsen
 #
@@ -281,7 +281,7 @@ clean:
 #                asm deps must be updated by hand
 ################################################################################
 depend: fastdep.exe
-    @fastdep -oObject $(CINCLUDES) misc\*.c* ldr\*.c* dev32\*.c* dev16\*.c* pe2lx\*.c* -o include\*.h pe2lx\*.h*
+    @fastdep -oObject $(CINCLUDES) misc\*.c* ldr\*.c* dev32\*.c* dev16\*.c* pe2lx\*.c* include\*.h pe2lx\*.h*
 
 fastdep.exe: fastdep.c
     @icc -Q+ -O+ fastdep.c
