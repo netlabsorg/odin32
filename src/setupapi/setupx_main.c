@@ -61,6 +61,7 @@
 #include "winreg.h"
 #include "winerror.h"
 #include "wine/winuser16.h"
+#include "wownt32.h"
 #include "setupapi.h"
 #include "setupx16.h"
 #include "setupapi_private.h"
@@ -69,12 +70,13 @@
 
 WINE_DEFAULT_DEBUG_CHANNEL(setupapi);
 
+
 /***********************************************************************
  *		SURegOpenKey (SETUPX.47)
  */
-DWORD WINAPI SURegOpenKey( HKEY hkey, LPCSTR lpszSubKey, LPHKEY retkey )
+DWORD WINAPI SURegOpenKey( HKEY hkey, LPCSTR lpszSubKey, PHKEY retkey )
 {
-    FIXME("(%x,%s,%p), semi-stub.\n",hkey,debugstr_a(lpszSubKey),retkey);
+    FIXME("(%p,%s,%p), semi-stub.\n",hkey,debugstr_a(lpszSubKey),retkey);
     return RegOpenKeyA( hkey, lpszSubKey, retkey );
 }
 
@@ -85,7 +87,7 @@ DWORD WINAPI SURegQueryValueEx( HKEY hkey, LPSTR lpszValueName,
                                 LPDWORD lpdwReserved, LPDWORD lpdwType,
                                 LPBYTE lpbData, LPDWORD lpcbData )
 {
-    FIXME("(%x,%s,%p,%p,%p,%ld), semi-stub.\n",hkey,debugstr_a(lpszValueName),
+    FIXME("(%p,%s,%p,%p,%p,%ld), semi-stub.\n",hkey,debugstr_a(lpszValueName),
           lpdwReserved,lpdwType,lpbData,lpcbData?*lpcbData:0);
     return RegQueryValueExA( hkey, lpszValueName, lpdwReserved, lpdwType,
                                lpbData, lpcbData );
@@ -202,7 +204,7 @@ RETERR16 WINAPI InstallHinfSection16( HWND16 hwnd, HINSTANCE16 hinst, LPCSTR lps
 	    break;
 	case HOW_ALWAYS_PROMPT_REBOOT:
 	case HOW_PROMPT_REBOOT:
-            if (MessageBoxA(hwnd, "You must restart Wine before the new settings will take effect.\n\nDo you want to exit Wine now ?", "Systems Settings Change", MB_YESNO|MB_ICONQUESTION) == IDYES)
+            if (MessageBoxA(HWND_32(hwnd), "You must restart Wine before the new settings will take effect.\n\nDo you want to exit Wine now ?", "Systems Settings Change", MB_YESNO|MB_ICONQUESTION) == IDYES)
                 reboot = TRUE;
 	    break;
 	default:
@@ -501,7 +503,7 @@ RETERR16 SETUPX_DelLdd(LOGDISKID16 ldid)
  */
 RETERR16 WINAPI CtlDelLdd16(LOGDISKID16 ldid)
 {
-    FIXME("(%d); - please report to a.mohr@mailto.de !!!\n", ldid);
+    FIXME("(%d); - please report this!\n", ldid);
     return SETUPX_DelLdd(ldid);
 }
 
@@ -678,7 +680,7 @@ static RETERR16 SETUPX_GetLdd(LPLOGDISKDESC pldd)
 
 RETERR16 WINAPI CtlGetLdd16(LPLOGDISKDESC pldd)
 {
-    FIXME("(%p); - please report to a.mohr@mailto.de !!!\n", pldd);
+    FIXME("(%p); - please report this!\n", pldd);
     return SETUPX_GetLdd(pldd);
 }
 
