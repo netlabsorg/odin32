@@ -2,6 +2,10 @@
 #define __INITDLL_H__
 
 #if (defined(__IBMCPP__) || defined(__IBMC__))
+
+#define DLLENTRYPOINT_CCONV SYSTEM
+#define DLLENTRYPOINT_NAME  _DLL_InitTerm
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -42,6 +46,14 @@ void _Optlink _CRT_term(void);
 #ifdef __cplusplus
 }
 #endif
+
+#elif defined(__WATCOMC__)
+
+#define DLLENTRYPOINT_CCONV APIENTRY
+#define DLLENTRYPOINT_NAME  LibMain
+
+#define ctordtorInit()
+#define ctordtorTerm()
 
 #endif
 

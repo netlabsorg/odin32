@@ -57,9 +57,7 @@ BOOL WINAPI OdinLibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
         return TRUE;
 
    case DLL_PROCESS_DETACH:
-#ifdef __IBMCPP__
         ctordtorTerm();
-#endif
         return TRUE;
    }
    return FALSE;
@@ -72,11 +70,7 @@ BOOL WINAPI OdinLibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 /* linkage convention MUST be used because the operating system loader is   */
 /* calling this function.                                                   */
 /****************************************************************************/
-#ifdef __IBMCPP__
-unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long ulFlag)
-#else
-unsigned long APIENTRY LibMain(unsigned long hModule, unsigned long ulFlag)
-#endif
+ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
 {
 
    /*-------------------------------------------------------------------------*/
@@ -91,9 +85,9 @@ unsigned long APIENTRY LibMain(unsigned long hModule, unsigned long ulFlag)
          DosQueryModuleName(hModule, CCHMAXPATH, dsoundPath);
          char *endofpath = strrchr(dsoundPath, '\\');
          if(endofpath) *(endofpath+1) = 0;
-#ifdef __IBMCPP__
+
          ctordtorInit();
-#endif
+
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
          dllHandle = RegisterLxDll(hModule, OdinLibMain, (PVOID)&_Resource_PEResTab);
