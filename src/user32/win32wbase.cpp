@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.83 1999-11-14 13:07:02 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.84 1999-11-14 16:35:56 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2762,33 +2762,33 @@ ULONG Win32BaseWindow::GetWindowLongA(int index)
     switch(index) {
         case GWL_EXSTYLE:
                 value = dwExStyle;
-		break;
+        break;
         case GWL_STYLE:
                 value = dwStyle;
-		break;
+        break;
         case GWL_WNDPROC:
                 value = (ULONG)getWindowProc();
-		break;
+        break;
         case GWL_HINSTANCE:
                 value = hInstance;
-		break;
+        break;
         case GWL_HWNDPARENT:
                 if(getParent()) {
                         value = getParent()->getWindowHandle();
                 }
                 else    value = 0;
-		break;
+        break;
         case GWL_ID:
                 value = getWindowId();
-		break;
+        break;
         case GWL_USERDATA:
                 value = userData;
-		break;
+        break;
         default:
                 if(index >= 0 && index/4 < nrUserWindowLong)
                 {
                         value = userWindowLong[index/4];
-			break;
+            break;
                 }
                 SetLastError(ERROR_INVALID_PARAMETER);
                 return 0;
