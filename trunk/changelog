@@ -1,4 +1,15 @@
- /* $Id: changelog,v 1.604 2000-01-02 22:53:18 sandervl Exp $ */
+ /* $Id: changelog,v 1.605 2000-01-03 10:25:01 sandervl Exp $ */
+
+ 2000-01-03: Jens Wiessner <wiessnej@rfi.de>
+	- LZ32/TAPI32: Updated def files to match NT 4 SP6
+	- MSVCRT: Updated def files + MSVCRT40 version info
+	- WINMM: Added Wine's MCI dlls (not compiled as this requires
+                 a working MCI subsystem in winmm and a redesign of
+                 wave & midi)
+
+ 2000-01-03: Sander van Leeuwen <sandervl@xs4all.nl>
+	- LZ32: Cleaned up .def file (don't import directly) & removed
+                debugtools.h
 
  2000-01-02: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
 	- KERNEL32: Started implementing named pipe apis
