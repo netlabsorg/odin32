@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.20 2000-02-09 23:40:53 bird Exp $
+# $Id: makefile,v 1.21 2000-02-09 23:47:02 bird Exp $
 
 #
 # PD-Win32 API
@@ -61,7 +61,7 @@ resource.asm: shres.rc shell32_en.rc
 
 dep:
     $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
-    *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
+        *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
 
 !ifndef NODEP
 !include .depend
