@@ -1,4 +1,4 @@
-/* $Id: winreg.h,v 1.2 1999-09-02 17:39:37 phaller Exp $ */
+/* $Id: winreg.h,v 1.3 1999-10-20 17:18:30 phaller Exp $ */
 
 /*
  * 				Shell Library definitions
@@ -34,17 +34,17 @@
 #define REG_RESOURCE_LIST	8	/* resource list? huh? */
 #define REG_FULL_RESOURCE_DESCRIPTOR	9	/* full resource descriptor? huh? */
 
-#define HEX_REG_NONE                     0x80000000  
-#define HEX_REG_SZ                       0x80000001  
-#define HEX_REG_EXPAND_SZ                0x80000002  
-#define HEX_REG_BINARY                   0x80000003  
-#define HEX_REG_DWORD                    0x80000004  
-#define HEX_REG_DWORD_LITTLE_ENDIAN      0x80000004  
-#define HEX_REG_DWORD_BIG_ENDIAN         0x80000005  
-#define HEX_REG_LINK                     0x80000006  
-#define HEX_REG_MULTI_SZ                 0x80000007  
-#define HEX_REG_RESOURCE_LIST            0x80000008  
-#define HEX_REG_FULL_RESOURCE_DESCRIPTOR 0x80000009  
+#define HEX_REG_NONE                     0x80000000
+#define HEX_REG_SZ                       0x80000001
+#define HEX_REG_EXPAND_SZ                0x80000002
+#define HEX_REG_BINARY                   0x80000003
+#define HEX_REG_DWORD                    0x80000004
+#define HEX_REG_DWORD_LITTLE_ENDIAN      0x80000004
+#define HEX_REG_DWORD_BIG_ENDIAN         0x80000005
+#define HEX_REG_LINK                     0x80000006
+#define HEX_REG_MULTI_SZ                 0x80000007
+#define HEX_REG_RESOURCE_LIST            0x80000008
+#define HEX_REG_FULL_RESOURCE_DESCRIPTOR 0x80000009
 
 #define HKEY_CLASSES_ROOT       ((HKEY) 0x80000000)
 #define HKEY_CURRENT_USER       ((HKEY) 0x80000001)
@@ -96,7 +96,7 @@ typedef ULONG_PTR DWORD_PTR, *PDWORD_PTR;
 /*
  *	registry provider structs
  */
-typedef struct value_entA 
+typedef struct value_entA
 {   LPSTR	ve_valuename;
     DWORD	ve_valuelen;
     DWORD_PTR	ve_valueptr;
@@ -134,9 +134,9 @@ BOOL      WINAPI LookupPrivilegeValueW(LPCWSTR,LPCWSTR,LPVOID);
 HANDLE    WINAPI RegisterEventSourceA(LPCSTR,LPCSTR);
 HANDLE    WINAPI RegisterEventSourceW(LPCWSTR,LPCWSTR);
 #define     RegisterEventSource WINELIB_NAME_AW(RegisterEventSource)
-DWORD       WINAPI RegCreateKeyExA(HKEY,LPCSTR,DWORD,LPSTR,DWORD,REGSAM,
+LONG       WINAPI RegCreateKeyExA(HKEY,LPCSTR,DWORD,LPSTR,DWORD,REGSAM,
                                      LPSECURITY_ATTRIBUTES,LPHKEY,LPDWORD);
-DWORD       WINAPI RegCreateKeyExW(HKEY,LPCWSTR,DWORD,LPWSTR,DWORD,REGSAM,
+LONG       WINAPI RegCreateKeyExW(HKEY,LPCWSTR,DWORD,LPWSTR,DWORD,REGSAM,
                                      LPSECURITY_ATTRIBUTES,LPHKEY,LPDWORD);
 #define     RegCreateKeyEx WINELIB_NAME_AW(RegCreateKeyEx)
 LONG        WINAPI RegSaveKeyA(HKEY,LPCSTR,LPSECURITY_ATTRIBUTES);
@@ -157,9 +157,9 @@ BOOL      WINAPI OpenProcessToken(HANDLE,DWORD,HANDLE*);
 LONG        WINAPI RegConnectRegistryA(LPCSTR,HKEY,LPHKEY);
 LONG        WINAPI RegConnectRegistryW(LPCWSTR,HKEY,LPHKEY);
 #define     RegConnectRegistry WINELIB_NAME_AW(RegConnectRegistry)
-DWORD       WINAPI RegEnumKeyExA(HKEY,DWORD,LPSTR,LPDWORD,LPDWORD,LPSTR,
+LONG        WINAPI RegEnumKeyExA(HKEY,DWORD,LPSTR,LPDWORD,LPDWORD,LPSTR,
                                    LPDWORD,LPFILETIME);
-DWORD       WINAPI RegEnumKeyExW(HKEY,DWORD,LPWSTR,LPDWORD,LPDWORD,LPWSTR,
+LONG        WINAPI RegEnumKeyExW(HKEY,DWORD,LPWSTR,LPDWORD,LPDWORD,LPWSTR,
                                    LPDWORD,LPFILETIME);
 #define     RegEnumKeyEx WINELIB_NAME_AW(RegEnumKeyEx)
 LONG        WINAPI RegGetKeySecurity(HKEY,SECURITY_INFORMATION,PSECURITY_DESCRIPTOR,LPDWORD);
@@ -167,13 +167,13 @@ LONG        WINAPI RegLoadKeyA(HKEY,LPCSTR,LPCSTR);
 LONG        WINAPI RegLoadKeyW(HKEY,LPCWSTR,LPCWSTR);
 #define     RegLoadKey WINELIB_NAME_AW(RegLoadKey)
 LONG        WINAPI RegNotifyChangeKeyValue(HKEY,BOOL,DWORD,HANDLE,BOOL);
-DWORD       WINAPI RegOpenKeyExW(HKEY,LPCWSTR,DWORD,REGSAM,LPHKEY);
-DWORD       WINAPI RegOpenKeyExA(HKEY,LPCSTR,DWORD,REGSAM,LPHKEY);
+LONG        WINAPI RegOpenKeyExW(HKEY,LPCWSTR,DWORD,REGSAM,LPHKEY);
+LONG        WINAPI RegOpenKeyExA(HKEY,LPCSTR,DWORD,REGSAM,LPHKEY);
 #define     RegOpenKeyEx WINELIB_NAME_AW(RegOpenKeyEx)
-DWORD       WINAPI RegQueryInfoKeyW(HKEY,LPWSTR,LPDWORD,LPDWORD,LPDWORD,
+LONG        WINAPI RegQueryInfoKeyW(HKEY,LPWSTR,LPDWORD,LPDWORD,LPDWORD,
                                       LPDWORD,LPDWORD,LPDWORD,LPDWORD,LPDWORD,
                                       LPDWORD,LPFILETIME);
-DWORD       WINAPI RegQueryInfoKeyA(HKEY,LPSTR,LPDWORD,LPDWORD,LPDWORD,
+LONG        WINAPI RegQueryInfoKeyA(HKEY,LPSTR,LPDWORD,LPDWORD,LPDWORD,
                                       LPDWORD,LPDWORD,LPDWORD,LPDWORD,LPDWORD,
                                       LPDWORD,LPFILETIME);
 #define     RegQueryInfoKey WINELIB_NAME_AW(RegQueryInfoKey)
@@ -195,38 +195,38 @@ BOOL      WINAPI StartServiceW(HANDLE,DWORD,LPCWSTR*);
 
 /* Declarations for functions that are the same in Win16 and Win32 */
 
-DWORD       WINAPI RegCloseKey(HKEY);
-DWORD       WINAPI RegFlushKey(HKEY);
+LONG       WINAPI RegCloseKey(HKEY);
+LONG       WINAPI RegFlushKey(HKEY);
 
-DWORD       WINAPI RegCreateKeyA(HKEY,LPCSTR,LPHKEY);
-DWORD       WINAPI RegCreateKeyW(HKEY,LPCWSTR,LPHKEY);
+LONG       WINAPI RegCreateKeyA(HKEY,LPCSTR,LPHKEY);
+LONG       WINAPI RegCreateKeyW(HKEY,LPCWSTR,LPHKEY);
 #define     RegCreateKey WINELIB_NAME_AW(RegCreateKey)
-DWORD       WINAPI RegDeleteKeyA(HKEY,LPCSTR);
-DWORD       WINAPI RegDeleteKeyW(HKEY,LPWSTR);
+LONG       WINAPI RegDeleteKeyA(HKEY,LPCSTR);
+LONG       WINAPI RegDeleteKeyW(HKEY,LPWSTR);
 #define     RegDeleteKey WINELIB_NAME_AW(RegDeleteKey)
-DWORD       WINAPI RegDeleteValueA(HKEY,LPSTR);
-DWORD       WINAPI RegDeleteValueW(HKEY,LPWSTR);
+LONG       WINAPI RegDeleteValueA(HKEY,LPSTR);
+LONG       WINAPI RegDeleteValueW(HKEY,LPWSTR);
 #define     RegDeleteValue WINELIB_NAME_AW(RegDeleteValue)
-DWORD       WINAPI RegEnumKeyA(HKEY,DWORD,LPSTR,DWORD);
-DWORD       WINAPI RegEnumKeyW(HKEY,DWORD,LPWSTR,DWORD);
+LONG       WINAPI RegEnumKeyA(HKEY,DWORD,LPSTR,DWORD);
+LONG       WINAPI RegEnumKeyW(HKEY,DWORD,LPWSTR,DWORD);
 #define     RegEnumKey WINELIB_NAME_AW(RegEnumKey)
-DWORD       WINAPI RegEnumValueA(HKEY,DWORD,LPSTR,LPDWORD,LPDWORD,LPDWORD,LPBYTE,LPDWORD);
-DWORD       WINAPI RegEnumValueW(HKEY,DWORD,LPWSTR,LPDWORD,LPDWORD,LPDWORD,LPBYTE,LPDWORD);
+LONG       WINAPI RegEnumValueA(HKEY,DWORD,LPSTR,LPDWORD,LPDWORD,LPDWORD,LPBYTE,LPDWORD);
+LONG       WINAPI RegEnumValueW(HKEY,DWORD,LPWSTR,LPDWORD,LPDWORD,LPDWORD,LPBYTE,LPDWORD);
 #define     RegEnumValue WINELIB_NAME_AW(RegEnumValue)
-DWORD       WINAPI RegOpenKeyA(HKEY,LPCSTR,LPHKEY);
-DWORD       WINAPI RegOpenKeyW(HKEY,LPCWSTR,LPHKEY);
+LONG       WINAPI RegOpenKeyA(HKEY,LPCSTR,LPHKEY);
+LONG       WINAPI RegOpenKeyW(HKEY,LPCWSTR,LPHKEY);
 #define     RegOpenKey WINELIB_NAME_AW(RegOpenKey)
-DWORD       WINAPI RegQueryValueA(HKEY,LPCSTR,LPSTR,LPLONG);
-DWORD       WINAPI RegQueryValueW(HKEY,LPCWSTR,LPWSTR,LPLONG);
+LONG       WINAPI RegQueryValueA(HKEY,LPCSTR,LPSTR,LPLONG);
+LONG       WINAPI RegQueryValueW(HKEY,LPCWSTR,LPWSTR,LPLONG);
 #define     RegQueryValue WINELIB_NAME_AW(RegQueryValue)
 LONG        WINAPI RegQueryValueExA(HKEY,LPSTR,LPDWORD,LPDWORD,LPBYTE,LPDWORD);
 LONG        WINAPI RegQueryValueExW(HKEY,LPWSTR,LPDWORD,LPDWORD,LPBYTE,LPDWORD);
 #define     RegQueryValueEx WINELIB_NAME_AW(RegQueryValueEx)
-DWORD       WINAPI RegSetValueA(HKEY,LPCSTR,DWORD,LPCSTR,DWORD);
-DWORD       WINAPI RegSetValueW(HKEY,LPCWSTR,DWORD,LPCWSTR,DWORD);
+LONG       WINAPI RegSetValueA(HKEY,LPCSTR,DWORD,LPCSTR,DWORD);
+LONG       WINAPI RegSetValueW(HKEY,LPCWSTR,DWORD,LPCWSTR,DWORD);
 #define     RegSetValue WINELIB_NAME_AW(RegSetValue)
-DWORD       WINAPI RegSetValueExA(HKEY,LPSTR,DWORD,DWORD,LPBYTE,DWORD);
-DWORD       WINAPI RegSetValueExW(HKEY,LPWSTR,DWORD,DWORD,LPBYTE,DWORD);
+LONG       WINAPI RegSetValueExA(HKEY,LPSTR,DWORD,DWORD,LPBYTE,DWORD);
+LONG       WINAPI RegSetValueExW(HKEY,LPWSTR,DWORD,DWORD,LPBYTE,DWORD);
 #define     RegSetValueEx WINELIB_NAME_AW(RegSetValueEx)
 
 #endif  /* __WINE_WINREG_H */
