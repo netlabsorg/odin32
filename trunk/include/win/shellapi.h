@@ -195,8 +195,6 @@ DWORD	WINAPI SHFileOperationW (LPSHFILEOPSTRUCTW lpFileOp);
  * code that is shared with shlobj.h *
  *************************************/
 
-#ifndef __WINE_SHLOBJ_H
-
 /******************************************
  * ShellExecute
  */
@@ -210,53 +208,6 @@ DWORD	WINAPI SHFileOperationW (LPSHFILEOPSTRUCTW lpFileOp);
 HINSTANCE	WINAPI ShellExecuteA(HWND,LPCSTR,LPCSTR,LPCSTR,LPCSTR,INT);
 HINSTANCE	WINAPI ShellExecuteW(HWND,LPCWSTR,LPCWSTR,LPCWSTR,LPCWSTR,INT);
 #define ShellExecute WINELIB_NAME_AW(ShellExecute)
-
-HINSTANCE16 WINAPI ShellExecute16( HWND16 hWnd, LPCSTR lpOperation,
-                                   LPCSTR lpFile, LPCSTR lpParameters,
-                                   LPCSTR lpDirectory, INT16 iShowCmd );
-
-
-typedef struct _SHELLEXECUTEINFOA
-{
-        DWORD cbSize;
-        ULONG fMask;
-        HWND hwnd;
-        LPCSTR   lpVerb;
-        LPCSTR   lpFile;
-        LPCSTR   lpParameters;
-        LPCSTR   lpDirectory;
-        int nShow;
-        HINSTANCE hInstApp;
-        // Optional fields
-        LPVOID lpIDList;
-        LPCSTR   lpClass;
-        HKEY hkeyClass;
-        DWORD dwHotKey;
-        HANDLE hIcon;
-        HANDLE hProcess;
-} SHELLEXECUTEINFOA, *LPSHELLEXECUTEINFOA;
-
-typedef struct _SHELLEXECUTEINFOW
-{
-        DWORD cbSize;
-        ULONG fMask;
-        HWND hwnd;
-        LPCWSTR  lpVerb;
-        LPCWSTR  lpFile;
-        LPCWSTR  lpParameters;
-        LPCWSTR  lpDirectory;
-        int nShow;
-        HINSTANCE hInstApp;
-        // Optional fields
-        LPVOID lpIDList;
-        LPCWSTR  lpClass;
-        HKEY hkeyClass;
-        DWORD dwHotKey;
-        HANDLE hIcon;
-        HANDLE hProcess;
-} SHELLEXECUTEINFOW, *LPSHELLEXECUTEINFOW;
-
-#endif
 
 
 
