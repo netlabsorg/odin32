@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.87 2000-10-02 13:05:36 phaller Exp $
+; $Id: KERNEL32.DEF,v 1.88 2000-10-06 11:04:00 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -1032,7 +1032,7 @@ EXPORTS
     _RegisterPe2LxExe@12                                          @1203
     _RegisterPe2LxDll@12                                          @1209
 
-    _CreateWin32PeLdrExe@12                                       @1236
+    _CreateWin32PeLdrExe@16                                       @1236
 
     _RegisterLxExe@8                                              @1237
     _RegisterLxDll@24                                             @1238
