@@ -1,4 +1,4 @@
-/* $Id: odin32env.cmd,v 1.31 2003-04-14 22:08:04 bird Exp $
+/* $Id: odin32env.cmd,v 1.32 2003-04-14 22:23:47 bird Exp $
  *
  * Sets the build environment.
  *
@@ -15,8 +15,9 @@ parse source . . sSrc
 sDir = filespec('drive', sSrc) || filespec('path', sSrc);
 
 /* base env */
+'Set PATH='||sDir||'bin'||';%PATH%';
 sOldDir = directory();
-call directory sDir||'\bin';
+call directory sDir||'bin';
 call BuildEnv 'warpin mysql perl~ cvs ddkbase mscv6-16 emx gcc321 vac365õ watcomc11cõ vac40õ vac308 toolkit40 debug'
 call directory sOldDir;
 
