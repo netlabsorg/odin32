@@ -1,4 +1,4 @@
-/* $Id: os2heap.h,v 1.8 2001-10-06 18:53:11 sandervl Exp $ */
+/* $Id: os2heap.h,v 1.9 2001-10-17 13:38:50 phaller Exp $ */
 
 /*
  *
@@ -35,7 +35,7 @@ public:
     OS2Heap(DWORD flOptions, DWORD dwInitialSize, DWORD dwMaximumSize);
     ~OS2Heap();
 
-    HANDLE getHeapHandle()  { return(hPrimaryHeap); };
+    HANDLE INLINE getHeapHandle()  { return(hPrimaryHeap); };
 
     LPVOID Alloc(DWORD dwFlags, DWORD dwBytes);
     LPVOID ReAlloc(DWORD dwFlags, LPVOID lpMem, DWORD dwBytes);
