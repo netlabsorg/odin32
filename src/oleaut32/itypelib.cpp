@@ -1,4 +1,4 @@
-/* $Id: itypelib.cpp,v 1.2 2000-03-21 08:17:22 davidr Exp $ */
+/* $Id: itypelib.cpp,v 1.3 2000-04-05 22:28:48 davidr Exp $ */
 /* 
  * ITypelib interface
  * 
@@ -587,7 +587,10 @@ HRESULT WIN32API ITypeLib2Impl_GetAllCustData(LPTYPELIB iface,
 
     if ((pItem = (CUSTDATAITEM *)HeapAlloc(GetProcessHeap(), 0,
 			    sizeof(CUSTDATAITEM) * This->pCustData.Count())) == 0)
+    {
+	dprintf(("OLEAUT32: ITypeLib2Impl_GetAllCustData: E_OUTOFMEMORY"));
         return E_OUTOFMEMORY;
+    }
 
     pCustData->prgCustData = pItem;
     pCustData->cCustData = This->pCustData.Count();
