@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.18 1999-08-10 12:43:22 phaller Exp $
+; $Id: kernel32.def,v 1.19 1999-08-13 18:38:19 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -925,18 +925,6 @@ EXPORTS
 ;   KERNEL32 / WINE support functions that do not exist in real Win32
 ; ----------------------------------------------------------------------------
 
-; HEAP Management (heap.cpp, heapstring.cpp)
-    HEAP_xalloc                = _HEAP_xalloc@12
-    HEAP_xrealloc              = _HEAP_xrealloc@16
-    HEAP_malloc                = _HEAP_malloc@4
-    HEAP_realloc               = _HEAP_realloc@8
-    HEAP_free                  = _HEAP_free@4
-    HEAP_strdupWtoA            = _HEAP_strdupWtoA@12
-    HEAP_strdupAtoW            = _HEAP_strdupAtoW@12
-    HEAP_strdupA               = _HEAP_strdupA@12
-    HEAP_strdupW               = _HEAP_strdupW@12
-
-
 ;really belongs in NTDLL.DLL...
     memmove                    = _OS2memmove                    @906
 
@@ -990,3 +978,15 @@ EXPORTS
 
    GetThreadTEB         = _GetThreadTEB@0                          @1234
    GetThreadTHDB        = _GetThreadTHDB@0			   @1235
+
+; HEAP Management (heap.cpp, heapstring.cpp)
+    HEAP_xalloc                = _HEAP_xalloc@12                   @1240
+    HEAP_xrealloc              = _HEAP_xrealloc@16		   @1241
+    HEAP_malloc                = _HEAP_malloc@4			   @1242
+    HEAP_realloc               = _HEAP_realloc@8		   @1243
+    HEAP_free                  = _HEAP_free@4			   @1244
+    HEAP_strdupWtoA            = _HEAP_strdupWtoA@12		   @1245
+    HEAP_strdupAtoW            = _HEAP_strdupAtoW@12		   @1246
+    HEAP_strdupA               = _HEAP_strdupA@12		   @1247
+    HEAP_strdupW               = _HEAP_strdupW@12		   @1248
+

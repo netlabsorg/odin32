@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 1999-08-11 17:15:46 sandervl Exp $
+# $Id: makefile,v 1.7 1999-08-13 18:38:50 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -44,8 +44,6 @@ all:
         $(MAKE_CMD)
         cd ..\mpr
         $(MAKE_CMD)
-        cd ..\version
-        $(MAKE_CMD)
         cd ..\winmm
         $(MAKE_CMD)
         cd ..\winspool
@@ -55,6 +53,8 @@ all:
         cd ..\NTDLL
         $(MAKE_CMD)
         cd ..\LZ32
+        $(MAKE_CMD)
+        cd ..\version
         $(MAKE_CMD)
         cd ..\peldr
         $(MAKE_CMD)
