@@ -1,4 +1,4 @@
-; $Id: comctl32dbg.def,v 1.2 2002-05-08 11:24:59 sandervl Exp $
+; $Id: comctl32dbg.def,v 1.3 2002-10-29 12:18:25 sandervl Exp $
 LIBRARY COMCTL32 INITINSTANCE
 DESCRIPTION 'Odin32 System DLL - ComCtl32 - Common Controls Library'
 DATA MULTIPLE NONSHARED
@@ -189,5 +189,11 @@ EXPORTS
                         _COMCTL32_413@16           @413 NONAME
                         _COMCTL32_415@20           @415 NONAME
 
+                        _COMCTL32_417@32           @417 NONAME
                         _COMCTL32_419@16           @419 NONAME
 
+; These are only available in comctrl 6
+  DefSubclassProc      = _DefSubclassProc@16        @500
+  GetWindowSubclass    = _GetWindowSubclass@16      @501
+  RemoveWindowSubclass = _RemoveWindowSubclass@12   @502
+  SetWindowSubclass    = _SetWindowSubclass@16      @503

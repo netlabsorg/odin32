@@ -1,4 +1,4 @@
-/*		
+/*
  * Common controls functions
  *
  * Copyright 1997 Dimitrie O. Paun
@@ -17,6 +17,41 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ * NOTES
+ * 
+ * This code was audited for completeness against the documented features
+ * of Comctl32.dll version 6.0 on Oct. 21, 2002, by Christian Neumair.
+ *
+ * Unless otherwise noted, we belive this code to be complete, as per
+ * the specification mentioned above.
+ * If you discover missing features, or bugs, please note them below.
+ *
+ * TODO
+ *   -- implement GetMUILanguage + InitMUILanguage
+ *   -- LibMain => DLLMain ("DLLMain takes over the functionality of both the
+ *                           LibMain and the WEP function.", MSDN)
+ *   -- finish NOTES for MenuHelp, GetEffectiveClientRect and GetStatusTextW
+ *   -- FIXMEs + BUGS (search for them)
+ *
+ * Control Classes
+ *   -- ICC_ANIMATE_CLASS
+ *   -- ICC_BAR_CLASSES
+ *   -- ICC_COOL_CLASSES
+ *   -- ICC_DATE_CLASSES
+ *   -- ICC_HOTKEY_CLASS
+ *   -- ICC_INTERNET_CLASSES
+ *   -- ICC_LINK_CLASS (not yet implemented)
+ *   -- ICC_LISTVIEW_CLASSES
+ *   -- ICC_NATIVEFNTCTL_CLASS
+ *   -- ICC_PAGESCROLLER_CLASS
+ *   -- ICC_PROGRESS_CLASS
+ *   -- ICC_STANDARD_CLASSES (not yet implemented)
+ *   -- ICC_TAB_CLASSES
+ *   -- ICC_TREEVIEW_CLASSES
+ *   -- ICC_UPDOWN_CLASS
+ *   -- ICC_USEREX_CLASSES
+ *   -- ICC_WIN95_CLASSES
  */
 
 #include <string.h>
@@ -107,7 +142,7 @@ static const WORD wPattern55AA[] =
 BOOL WINAPI
 COMCTL32_LibMain (HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 {
-    TRACE("%x,%lx,%p\n", hinstDLL, fdwReason, lpvReserved);
+    TRACE("%p,%lx,%p\n", hinstDLL, fdwReason, lpvReserved);
 
     switch (fdwReason) {
 	case DLL_PROCESS_ATTACH:
@@ -115,7 +150,7 @@ COMCTL32_LibMain (HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 
             /* create private heap */
             COMCTL32_hHeap = HeapCreate (0, 0x10000, 0);
-            TRACE("Heap created: 0x%x\n", COMCTL32_hHeap);
+            TRACE("Heap created: %p\n", COMCTL32_hHeap);
 
             /* add global subclassing atom (used by 'tooltip' and 'updown') */
             COMCTL32_aSubclass = (LPSTR)(DWORD)GlobalAddAtomA ("CC32SubclassInfo");
@@ -180,7 +215,7 @@ COMCTL32_LibMain (HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 
             /* destroy private heap */
             HeapDestroy (COMCTL32_hHeap);
-            TRACE("Heap destroyed: 0x%x\n", COMCTL32_hHeap);
+            TRACE("Heap destroyed: %p\n", COMCTL32_hHeap);
             COMCTL32_hHeap = (HANDLE)NULL;
             break;
     }
@@ -218,7 +253,7 @@ COMCTL32_LibMain (HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 
 VOID WINAPI
 MenuHelp (UINT uMsg, WPARAM wParam, LPARAM lParam, HMENU hMainMenu,
-	  HINSTANCE hInst, HWND hwndStatus, LPUINT lpwIDs)
+	  HINSTANCE hInst, HWND hwndStatus, UINT* lpwIDs)
 {
     UINT uMenuID = 0;
 
@@ -274,7 +309,7 @@ MenuHelp (UINT uMsg, WPARAM wParam, LPARAM lParam, HMENU hMainMenu,
 
 
 /***********************************************************************
- * ShowHideMenuCtl [COMCTL32.3] 
+ * ShowHideMenuCtl [COMCTL32.3]
  *
  * Shows or hides controls and updates the corresponding menu item.
  *
@@ -308,7 +343,7 @@ ShowHideMenuCtl (HWND hwnd, UINT uFlags, LPINT lpInfo)
 {
     LPINT lpMenuId;
 
-    TRACE("%x, %x, %p\n", hwnd, uFlags, lpInfo);
+    TRACE("%p, %x, %p\n", hwnd, uFlags, lpInfo);
 
     if (lpInfo == NULL)
 	return FALSE;
@@ -321,9 +356,9 @@ ShowHideMenuCtl (HWND hwnd, UINT uFlags, LPINT lpInfo)
     while (*lpMenuId != uFlags)
 	lpMenuId += 2;
 
-    if (GetMenuState (lpInfo[1], uFlags, MF_BYCOMMAND) & MFS_CHECKED) {
+    if (GetMenuState ((HMENU)lpInfo[1], uFlags, MF_BYCOMMAND) & MFS_CHECKED) {
 	/* uncheck menu item */
-	CheckMenuItem (lpInfo[0], *lpMenuId, MF_BYCOMMAND | MF_UNCHECKED);
+	CheckMenuItem ((HMENU)lpInfo[0], *lpMenuId, MF_BYCOMMAND | MF_UNCHECKED);
 
 	/* hide control */
 	lpMenuId++;
@@ -332,7 +367,7 @@ ShowHideMenuCtl (HWND hwnd, UINT uFlags, LPINT lpInfo)
     }
     else {
 	/* check menu item */
-	CheckMenuItem (lpInfo[0], *lpMenuId, MF_BYCOMMAND | MF_CHECKED);
+	CheckMenuItem ((HMENU)lpInfo[0], *lpMenuId, MF_BYCOMMAND | MF_CHECKED);
 
 	/* show control */
 	lpMenuId++;
@@ -360,7 +395,7 @@ ShowHideMenuCtl (HWND hwnd, UINT uFlags, LPINT lpInfo)
  *     This is the correct documentation:
  *
  *     lpInfo
- *     (will be written...)
+ *     (will be written ...)
  */
 
 VOID WINAPI
@@ -394,7 +429,7 @@ GetEffectiveClientRect (HWND hwnd, LPRECT lpRect, LPINT lpInfo)
 
 
 /***********************************************************************
- * DrawStatusTextW [COMCTL32.28]
+ * DrawStatusTextW [COMCTL32.@]
  *
  * Draws text with borders, like in a status bar.
  *
@@ -438,7 +473,7 @@ void WINAPI DrawStatusTextW (HDC hdc, LPRECT lprc, LPCWSTR text, UINT style)
         }
         r.left += 3;
         if (style & SBT_RTLREADING)
-	    FIXME("Usupported RTL style!");
+	    FIXME("Unsupported RTL style!\n");
         DrawTextW (hdc, text, -1, &r, align|DT_VCENTER|DT_SINGLELINE);
 	SetBkMode(hdc, oldbkmode);
     }
@@ -446,7 +481,7 @@ void WINAPI DrawStatusTextW (HDC hdc, LPRECT lprc, LPCWSTR text, UINT style)
 
 
 /***********************************************************************
- * DrawStatusText  [COMCTL32.27]
+ * DrawStatusText  [COMCTL32.@]
  * DrawStatusTextA [COMCTL32.5]
  *
  * Draws text with borders, like in a status bar.
@@ -478,7 +513,7 @@ void WINAPI DrawStatusTextA (HDC hdc, LPRECT lprc, LPCSTR text, UINT style)
 
 
 /***********************************************************************
- * CreateStatusWindow  [COMCTL32.21]
+ * CreateStatusWindow  [COMCTL32.@]
  * CreateStatusWindowA [COMCTL32.6]
  *
  * Creates a status bar
@@ -497,15 +532,15 @@ void WINAPI DrawStatusTextA (HDC hdc, LPRECT lprc, LPCSTR text, UINT style)
 HWND WINAPI
 CreateStatusWindowA (INT style, LPCSTR text, HWND parent, UINT wid)
 {
-    return CreateWindowA(STATUSCLASSNAMEA, text, style, 
+    return CreateWindowA(STATUSCLASSNAMEA, text, style,
 			   CW_USEDEFAULT, CW_USEDEFAULT,
-			   CW_USEDEFAULT, CW_USEDEFAULT, 
-			   parent, wid, 0, 0);
+			   CW_USEDEFAULT, CW_USEDEFAULT,
+			   parent, (HMENU)wid, 0, 0);
 }
 
 
 /***********************************************************************
- * CreateStatusWindowW [COMCTL32.22] Creates a status bar control
+ * CreateStatusWindowW [COMCTL32.@] Creates a status bar control
  *
  * PARAMS
  *     style  [I] window style
@@ -524,7 +559,7 @@ CreateStatusWindowW (INT style, LPCWSTR text, HWND parent, UINT wid)
     return CreateWindowW(STATUSCLASSNAMEW, text, style,
 			   CW_USEDEFAULT, CW_USEDEFAULT,
 			   CW_USEDEFAULT, CW_USEDEFAULT,
-			   parent, wid, 0, 0);
+			   parent, (HMENU)wid, 0, 0);
 }
 
 
@@ -557,11 +592,11 @@ CreateUpDownControl (DWORD style, INT x, INT y, INT cx, INT cy,
 {
     HWND hUD =
 	CreateWindowA (UPDOWN_CLASSA, 0, style, x, y, cx, cy,
-			 parent, id, inst, 0);
+			 parent, (HMENU)id, inst, 0);
     if (hUD) {
-	SendMessageA (hUD, UDM_SETBUDDY, buddy, 0);
+	SendMessageA (hUD, UDM_SETBUDDY, (WPARAM)buddy, 0);
 	SendMessageA (hUD, UDM_SETRANGE, 0, MAKELONG(maxVal, minVal));
-	SendMessageA (hUD, UDM_SETPOS, 0, MAKELONG(curVal, 0));     
+	SendMessageA (hUD, UDM_SETPOS, 0, MAKELONG(curVal, 0));
     }
 
     return hUD;
@@ -592,7 +627,7 @@ InitCommonControls (void)
 
 
 /***********************************************************************
- * InitCommonControlsEx [COMCTL32.84]
+ * InitCommonControlsEx [COMCTL32.@]
  *
  * Registers the common controls.
  *
@@ -606,6 +641,11 @@ InitCommonControls (void)
  * NOTES
  *     Only the additional common controls are registered by this function.
  *     The Win95 controls are registered at the DLL's initialization.
+ *
+ * FIXME
+ *     implement the following control classes:
+ *       ICC_LINK_CLASS
+ *       ICC_STANDARD_CLASSES
  */
 
 BOOL WINAPI
@@ -675,7 +715,7 @@ InitCommonControlsEx (LPINITCOMMONCONTROLSEX lpInitCtrls)
 
 
 /***********************************************************************
- * CreateToolbarEx [COMCTL32.23] Creates a tool bar window
+ * CreateToolbarEx [COMCTL32.@] Creates a tool bar window
  *
  * PARAMS
  *     hwnd
@@ -896,7 +936,7 @@ CreateToolbar (HWND hwnd, DWORD style, UINT wID, INT nBitmaps,
 
 
 /***********************************************************************
- * DllGetVersion [COMCTL32.25]
+ * DllGetVersion [COMCTL32.@]
  *
  * Retrieves version information of the 'COMCTL32.DLL'
  *
@@ -932,18 +972,18 @@ COMCTL32_DllGetVersion (DLLVERSIONINFO *pdvi)
 }
 
 /***********************************************************************
- *		DllInstall (COMCTL32.26)
+ *		DllInstall (COMCTL32.@)
  */
 HRESULT WINAPI COMCTL32_DllInstall(BOOL bInstall, LPCWSTR cmdline)
 {
-  FIXME("(%s, %s): stub\n", bInstall?"TRUE":"FALSE", 
+  FIXME("(%s, %s): stub\n", bInstall?"TRUE":"FALSE",
 	debugstr_w(cmdline));
 
   return S_OK;
 }
 
 /***********************************************************************
- * _TrackMouseEvent [COMCTL32.91]
+ * _TrackMouseEvent [COMCTL32.@]
  *
  * Requests notification of mouse events
  *
@@ -973,9 +1013,10 @@ _TrackMouseEvent (TRACKMOUSEEVENT *ptme)
 }
 
 /*************************************************************************
- * GetMUILanguage [COMCTL32.39]
+ * GetMUILanguage [COMCTL32.@]
  *
- * FIXME: What's this supposed to do?  Apparently some i18n thing.
+ * FIXME: "Returns the language currently in use by the common controls
+ * for a particular process." (MSDN)
  *
  */
 LANGID WINAPI GetMUILanguage (VOID)
@@ -985,15 +1026,286 @@ LANGID WINAPI GetMUILanguage (VOID)
 
 
 /*************************************************************************
- * InitMUILanguage [COMCTL32.85]
+ * InitMUILanguage [COMCTL32.@]
  *
- * FIXME: What's this supposed to do?  Apparently some i18n thing.
+ * FIXME: "Enables an application to specify a language to be used with
+ * the common controls that is different than the system language." (MSDN)
  *
  */
 
 VOID WINAPI InitMUILanguage (LANGID uiLang)
 {
    COMCTL32_uiLang = uiLang;
+}
+
+
+/***********************************************************************
+ * SetWindowSubclass [COMCTL32.@]
+ *
+ * Starts a window subclass
+ *
+ * PARAMS
+ *     hWnd [in] handle to window subclass.
+ *     pfnSubclass [in] Pointer to new window procedure.
+ *     uIDSubclass [in] Unique identifier of sublass together with pfnSubclass.
+ *     dwRef [in] Reference data to pass to window procedure.
+ *
+ * RETURNS
+ *     Success: non-zero
+ *     Failure: zero
+ *
+ * BUGS
+ *     If an application manually subclasses a window after subclassing it with
+ *     this API and then with this API again, then none of the previous 
+ *     subclasses get called or the origional window procedure.
+ */
+
+BOOL WINAPI SetWindowSubclass (HWND hWnd, SUBCLASSPROC pfnSubclass,
+                        UINT_PTR uIDSubclass, DWORD_PTR dwRef)
+{
+   LPSUBCLASS_INFO stack;
+   int newnum, n;
+
+   TRACE ("(%p, %p, %x, %lx)\n", hWnd, pfnSubclass, uIDSubclass, dwRef);
+
+   /* Since the window procedure that we set here has two additional arguments,
+    * we can't simply set it as the new window procedure of the window. So we
+    * set our own window procedure and then calculate the other two arguments
+    * from there. */
+
+   /* See if we have been called for this window */
+   stack = (LPSUBCLASS_INFO)GetPropA (hWnd, COMCTL32_aSubclass);
+   if (!stack) {
+      /* allocate stack */
+      stack = (LPSUBCLASS_INFO)HeapAlloc (GetProcessHeap(), HEAP_ZERO_MEMORY,
+                                         sizeof(SUBCLASS_INFO));
+      if (!stack) {
+         ERR ("Failed to allocate our Subclassing stack");
+         return FALSE;
+      }
+      SetPropA (hWnd, COMCTL32_aSubclass, (HANDLE)stack);
+
+      /* set window procedure to our own and save the current one */
+      if (IsWindowUnicode (hWnd))
+         stack->origproc = (WNDPROC)SetWindowLongW (hWnd, GWL_WNDPROC,
+                                                   (LONG)DefSubclassProc);
+      else
+         stack->origproc = (WNDPROC)SetWindowLongA (hWnd, GWL_WNDPROC,
+                                                   (LONG)DefSubclassProc);
+   } else {
+      WNDPROC current;
+      if (IsWindowUnicode (hWnd))
+         current = (WNDPROC)GetWindowLongW (hWnd, GWL_WNDPROC);
+      else
+         current = (WNDPROC)GetWindowLongA (hWnd, GWL_WNDPROC);
+
+      if (current != DefSubclassProc) {
+         ERR ("Application has subclassed with our procedure, then manually, then with us again.  The current implementation can't handle this.\n");
+         return FALSE;
+      }
+   }
+
+   /* Check to see if we have called this function with the same uIDSubClass
+    * and pfnSubclass */
+   for (n = 0; n <= stack->stacknum + stack->stacknew - 1; n++)
+      if ((stack->SubclassProcs[n].id == uIDSubclass) && 
+         (stack->SubclassProcs[n].subproc == pfnSubclass)) {
+         stack->SubclassProcs[n].ref = dwRef;
+         return TRUE;
+      }
+
+   if ((stack->stacknum + stack->stacknew) >= 32) {
+      ERR ("We have a Subclass stack overflow, please increment size");
+      return FALSE;
+   }
+
+   /* we can't simply increment both stackpos and stacknum because there might
+    * be a window procedure running lower in the stack, we can only get them
+    * up to date once the last window procedure has run */
+   if (stack->stacknum == stack->stackpos) {
+      stack->stacknum++;
+      stack->stackpos++;
+   } else
+      stack->stacknew++;
+
+   newnum = stack->stacknew + stack->stacknum - 1;
+
+   stack->SubclassProcs[newnum].subproc = pfnSubclass;
+   stack->SubclassProcs[newnum].ref = dwRef;
+   stack->SubclassProcs[newnum].id = uIDSubclass;
+   
+   return TRUE;
+}
+
+
+/***********************************************************************
+ * GetWindowSubclass [COMCTL32.@]
+ *
+ * Gets the Reference data from a subclass.
+ *
+ * PARAMS
+ *     hWnd [in] Handle to window which were subclassing
+ *     pfnSubclass [in] Pointer to the subclass procedure
+ *     iID [in] Unique indentifier of the subclassing procedure
+ *     pdwRef [out] Pointer to the reference data
+ *
+ * RETURNS
+ *     Success: non-sero
+ *     Failure: zero
+ */
+
+BOOL WINAPI GetWindowSubclass (HWND hWnd, SUBCLASSPROC pfnSubclass,
+                              UINT_PTR uID, DWORD_PTR *pdwRef)
+{
+   LPSUBCLASS_INFO stack;
+   int n;
+
+   TRACE ("(%p, %p, %x, %p)\n", hWnd, pfnSubclass, uID, pdwRef);
+
+   /* See if we have been called for this window */
+   stack = (LPSUBCLASS_INFO)GetPropA (hWnd, COMCTL32_aSubclass);
+   if (!stack)
+      return FALSE;
+
+   for (n = 0; n <= stack->stacknum + stack->stacknew - 1; n++)
+      if ((stack->SubclassProcs[n].id == uID) &&
+         (stack->SubclassProcs[n].subproc == pfnSubclass)) {
+         *pdwRef = stack->SubclassProcs[n].ref;
+         return TRUE;
+      }
+
+   return FALSE;
+}
+
+
+/***********************************************************************
+ * RemoveWindowSubclass [COMCTL32.@]
+ *
+ * Removes a window subclass.
+ *
+ * PARAMS
+ *     hWnd [in] Handle to the window were subclassing
+ *     pfnSubclass [in] Pointer to the subclass procedure
+ *     uID [in] Unique identifier of this subclass
+ *
+ * RETURNS
+ *     Success: non-zero
+ *     Failure: zero
+ */
+
+BOOL WINAPI RemoveWindowSubclass(HWND hWnd, SUBCLASSPROC pfnSubclass, UINT_PTR uID)
+{
+   LPSUBCLASS_INFO stack;
+   int n;
+
+   TRACE ("(%p, %p, %x)\n", hWnd, pfnSubclass, uID);
+
+   /* Find the Subclass to remove */
+   stack = (LPSUBCLASS_INFO)GetPropA (hWnd, COMCTL32_aSubclass);
+   if (!stack)
+      return FALSE;
+
+   if ((stack->stacknum == stack->stackpos == 1) && !stack->stacknew) {
+      TRACE("Last Subclass removed, cleaning up\n");
+      /* clean up our heap and reset the origional window procedure */
+      if (IsWindowUnicode (hWnd))
+         SetWindowLongW (hWnd, GWL_WNDPROC, (LONG)stack->origproc);
+      else
+         SetWindowLongA (hWnd, GWL_WNDPROC, (LONG)stack->origproc);
+      HeapFree (GetProcessHeap (), 0, stack);
+      RemovePropA( hWnd, COMCTL32_aSubclass );
+      return TRUE;
+   }
+ 
+   for (n = stack->stacknum + stack->stacknew - 1; n >= 0; n--)
+      if ((stack->SubclassProcs[n].id == uID) &&
+         (stack->SubclassProcs[n].subproc == pfnSubclass)) {
+         if (n != (stack->stacknum + stack->stacknew))
+            /* Fill the hole in the stack */
+            memmove (&stack->SubclassProcs[n], &stack->SubclassProcs[n + 1],
+                    sizeof(stack->SubclassProcs[0]) * (stack->stacknew + stack->stacknum - n));
+         stack->SubclassProcs[n].subproc = NULL;
+         stack->SubclassProcs[n].ref = 0;
+         stack->SubclassProcs[n].id = 0;
+
+         /* If we are currently running a window procedure we have to manipulate
+          * the stack position pointers so that we don't corrupt the stack */
+         if ((n < stack->stackpos) || (stack->stackpos == stack->stacknum)) {
+            stack->stacknum--;
+            stack->stackpos--;
+         } else if (n >= stack->stackpos)
+            stack->stacknew--;
+         return TRUE;
+      }
+
+   return FALSE;
+}
+
+
+/***********************************************************************
+ * DefSubclassProc [COMCTL32.@]
+ *
+ * Calls the next window procedure (ie. the one before this subclass)
+ *
+ * PARAMS
+ *     hWnd [in] The window that we're subclassing
+ *     uMsg [in] Message
+ *     wParam [in] WPARAM
+ *     lParam [in] LPARAM
+ *
+ * RETURNS
+ *     Success: non-zero
+ *     Failure: zero
+ */
+
+LRESULT WINAPI DefSubclassProc (HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+   LPSUBCLASS_INFO stack;
+   int stackpos;
+   LRESULT ret;
+
+   /* retrieve our little stack from the Properties */
+   stack = (LPSUBCLASS_INFO)GetPropA (hWnd, COMCTL32_aSubclass);
+   if (!stack) {
+      ERR ("Our sub classing stack got erased for %p!! Nothing we can do\n", hWnd);
+      return 0;
+   }
+
+   /* If we are at pos 0 then we have to call the origional window procedure */
+   if (stack->stackpos == 0) {
+      if (IsWindowUnicode (hWnd))
+         return CallWindowProcW (stack->origproc, hWnd, uMsg, wParam, lParam);
+      else
+         return CallWindowProcA (stack->origproc, hWnd, uMsg, wParam, lParam);
+   }
+
+   stackpos = --stack->stackpos;
+   /* call the Subclass procedure from the stack */
+   ret = stack->SubclassProcs[stackpos].subproc (hWnd, uMsg, wParam, lParam,
+         stack->SubclassProcs[stackpos].id, stack->SubclassProcs[stackpos].ref);
+   stack->stackpos++;
+
+   if ((stack->stackpos == stack->stacknum) && stack->stacknew) {
+      stack->stacknum += stack->stacknew;
+      stack->stackpos += stack->stacknew;
+      stack->stacknew = 0;
+   }
+
+   /* If we removed the last entry in our stack while a window procedure was
+    * running then we have to clean up */
+   if (stack->stackpos == stack->stacknum == 0) {
+      TRACE("Last Subclass removed, cleaning up\n");
+      /* clean up our heap and reset the origional window procedure */
+      if (IsWindowUnicode (hWnd))
+         SetWindowLongW (hWnd, GWL_WNDPROC, (LONG)stack->origproc);
+      else
+         SetWindowLongA (hWnd, GWL_WNDPROC, (LONG)stack->origproc);
+      HeapFree (GetProcessHeap (), 0, stack);
+      RemovePropA( hWnd, COMCTL32_aSubclass );
+      return TRUE;
+   }
+
+   return ret;
 }
 
 
@@ -1010,6 +1322,7 @@ VOID WINAPI InitMUILanguage (LANGID uiLang)
  *     Success: Handle of tool tip window.
  *     Failure: NULL
  */
+
 HWND
 COMCTL32_CreateToolTip(HWND hwndOwner)
 {
@@ -1052,6 +1365,7 @@ COMCTL32_CreateToolTip(HWND hwndOwner)
  * RETURNS
  *     none
  */
+
 VOID
 COMCTL32_RefreshSysColors(void)
 {
