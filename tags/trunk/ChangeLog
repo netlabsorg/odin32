@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.541 1999-12-17 17:15:59 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.542 1999-12-18 10:14:33 sandervl Exp $ */
+
+ 99-12-18: Jens Wiessner <wiessnej@rfi.de>
+	- MSACM32: Updated with latest Wine code (991212)
 
  99-12-17: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: WM_NOTIFYPARENT: map cursor pos
