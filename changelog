@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1851 2001-11-23 18:04:44 phaller Exp $ */
+/* $Id: changelog,v 1.1852 2001-11-24 13:56:18 sandervl Exp $ */
+
+ 2001-11-24: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Custom build fix; check for double call for inittermKernel32
 
  2001-11-23: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o minor work in parallel port support (ioctls)
