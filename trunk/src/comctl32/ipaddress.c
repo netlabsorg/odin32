@@ -1,4 +1,4 @@
-/* $Id: ipaddress.c,v 1.4 1999-06-10 16:21:59 achimha Exp $ */
+/* $Id: ipaddress.c,v 1.5 1999-06-25 15:49:01 achimha Exp $ */
 /*
  * IP Address control
  *
@@ -29,7 +29,7 @@
 #include "winbase.h"
 #include "commctrl.h"
 #include "ipaddress.h"
-#include "heap.h"
+//#include "heap.h"
 
 
 #define IPADDRESS_GetInfoPtr(hwnd) ((IPADDRESS_INFO *)GetWindowLongA (hwnd, 0))
