@@ -1,4 +1,9 @@
-/* $Id: ChangeLog,v 1.1368 2001-04-20 13:22:17 phaller Exp $ */
+/* $Id: ChangeLog,v 1.1369 2001-04-20 17:34:09 sandervl Exp $ */
+
+ 2001-04-20: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Commented out RestoreCursor call in user32 exitlist handler.
+                  Seems to cause PM hangs on some (a lot?) of machines for
+                  reasons unknown.
 
  2001-04-20: Patrick Haller <patrick.haller@innotek.de>
     - DSOUND:   o Fixes / Workaround for PowerDVD 3.0
