@@ -840,7 +840,7 @@ class CVSFile
         while ($i++ < 256 && list($sRevision, $aasRev) = each($this->aaasRevs))
         {
             echo "<tr><td bgcolor=#d0dce0><a name=\"$sRevision\">Rev. </a>",
-                 "<a href=\"cvs.php?sFile=$this->sDir/$this->sName,v&sRevision=$sRevision\"",
+                 "<a href=\"cvs.php?sFile=$this->sDir/$this->sName,v&sRevision=$sRevision\">",
                  "$sRevision</a> by ",
                  $this->getAuthor($sRevision) ,"</td></tr>\n",
                  "<tr><td bgcolor=#f0f0f0>";
