@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2533 2003-03-31 02:56:21 bird Exp $ */
+/* $Id: changelog,v 1.2534 2003-03-31 10:28:36 sandervl Exp $ */
+
+ 2003-03-31: Dietrich Teickner <Dietrich_Teickner@t-online   >
+    - SHELL32:  o Shell file operations update
 
  2003-03-31: knut st. osmundsen <bird-odin-spam@anduin   >
     - PE2LX/WIN32K:
