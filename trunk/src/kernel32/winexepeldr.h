@@ -1,4 +1,4 @@
-/* $Id: winexepeldr.h,v 1.7 2002-07-23 13:51:48 sandervl Exp $ */
+/* $Id: winexepeldr.h,v 1.8 2002-12-20 11:39:41 sandervl Exp $ */
 
 /*
  * Win32 PE loader Exe class
@@ -14,8 +14,6 @@
 
 #include <winexebase.h>
 #include <winimagepeldr.h>
-
-typedef BOOL (* WIN32API WIN32CTOR)(char *, char *, char *, ULONG, ULONG, BOOL, BOOL);
 
 //Class for executables run by the ring 3 PE loader
 class Win32PeLdrExe : public Win32PeLdrImage, public Win32ExeBase

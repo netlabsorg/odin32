@@ -1,4 +1,4 @@
-/* $Id: winexepeldr.cpp,v 1.20 2002-12-20 10:38:58 sandervl Exp $ */
+/* $Id: winexepeldr.cpp,v 1.21 2002-12-20 11:39:41 sandervl Exp $ */
 
 /*
  * Win32 PE loader Exe class
@@ -45,7 +45,6 @@
 #endif /* PROFILE */
 
 
-extern char szErrorTitle[];
 extern char szErrorModule[];
 
 BOOL fPeLoader = FALSE;
@@ -57,10 +56,11 @@ BOOL fPeLoader = FALSE;
 //   x = CURDIR    -> set current directory to y
 //   (not other options available at this time)
 //******************************************************************************
-BOOL WIN32API CreateWin32PeLdrExe(char *szFileName, char *szCmdLine,
-                                  char *peoptions, 
-                                  ULONG reservedMem, ULONG ulPEOffset,
-                                  BOOL fConsoleApp, BOOL fVioConsole)
+DWORD WIN32API CreateWin32PeLdrExe(char *szFileName, char *szCmdLine,
+                                   char *peoptions, 
+                                   ULONG reservedMem, ULONG ulPEOffset,
+                                   BOOL fConsoleApp, BOOL fVioConsole,
+                                   char *pszErrorModule, ULONG cbErrorModule)
 {
  APIRET  rc;
  PPIB   ppib;
@@ -75,9 +75,8 @@ BOOL WIN32API CreateWin32PeLdrExe(char *szFileName, char *szCmdLine,
 
   rc = DosGetInfoBlocks(&ptib, &ppib);
   if(rc) {
-        WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szInteralErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
-        delete WinExe;
-        return FALSE;
+      delete WinExe;
+      return LDRERROR_INTERNAL;
   }
   //Handle special pe cmd line options here (/OPT:[x1=y,x2=z,..])
   if(peoptions) {
@@ -122,25 +121,24 @@ BOOL WIN32API CreateWin32PeLdrExe(char *szFileName, char *szCmdLine,
   //something on the console while being loaded
   if(WinExe->isConsoleApp()) 
   {
-   	dprintf(("Console application!\n"));
+      dprintf(("Console application!\n"));
 
-   	APIRET rc = iConsoleInit(fVioConsole);                /* initialize console subsystem */
-   	if (rc != NO_ERROR)                                  /* check for errors */
-            	dprintf(("KERNEL32:Win32Image:Init ConsoleInit failed with %u.\n", rc));
+      rc = iConsoleInit(fVioConsole);                /* initialize console subsystem */
+      if (rc != NO_ERROR)                                  /* check for errors */
+          dprintf(("KERNEL32:Win32Image:Init ConsoleInit failed with %u.\n", rc));
   }
 
   OS2SetExceptionHandler(&exceptFrame);
-  if(WinExe->init(reservedMem, ulPEOffset) == FALSE) 
+  rc = WinExe->init(reservedMem, ulPEOffset);
+  if(rc != LDRERROR_SUCCESS)
   {
 	if(szErrorModule[0] != 0) {
-   	        char szErrorMsg[128];
-
-		sprintf(szErrorMsg, "Can't execute %s due to bad or missing %s", OSLibStripPath(szFileName), szErrorModule);
-        	WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
+            strncpy(pszErrorModule, szErrorModule, cbErrorModule-1);
+            pszErrorModule[cbErrorModule-1] = 0;
 	}
         delete WinExe;
 	OS2UnsetExceptionHandler(&exceptFrame);
-        return FALSE;
+        return rc;
   }
   OS2UnsetExceptionHandler(&exceptFrame);
   
@@ -157,7 +155,7 @@ BOOL WIN32API CreateWin32PeLdrExe(char *szFileName, char *szCmdLine,
 
   delete WinExe;
 
-  return TRUE;
+  return LDRERROR_SUCCESS;
 }
 //******************************************************************************
 //******************************************************************************
@@ -166,11 +164,11 @@ Win32PeLdrExe::Win32PeLdrExe(char *szFileName, BOOL fConsoleApp) :
 		   Win32ExeBase(-1),
 		   Win32PeLdrImage(szFileName, TRUE)
 {
-  dprintf(("Win32PeLdrExe ctor: %s", szFileName));
-  this->fConsoleApp = fConsoleApp;
+    dprintf(("Win32PeLdrExe ctor: %s", szFileName));
+    this->fConsoleApp = fConsoleApp;
 
-  //SvL: set temporary full path here as console init needs it
-  setFullPath(szFileName);
+    //SvL: set temporary full path here as console init needs it
+    setFullPath(szFileName);
 }
 //******************************************************************************
 //******************************************************************************

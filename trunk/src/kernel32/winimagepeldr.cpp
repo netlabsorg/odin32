@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.101 2002-07-26 10:46:56 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.102 2002-12-20 11:39:42 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -65,14 +65,7 @@
 #define COMMIT_ALL
 //#endif
 
-char szErrorTitle[]     = "Odin";
-char szMemErrorMsg[]    = "Memory allocation failure";
-char szFileErrorMsg[]   = "File IO error";
-char szPEErrorMsg[]     = "Not a valid win32 exe. (perhaps 16 bits windows)";
-char szCPUErrorMsg[]    = "Executable doesn't run on x86 machines";
-char szExeErrorMsg[]    = "File isn't an executable";
-char szInteralErrorMsg[]= "Internal Error";
-char szErrorModule[128] = "";
+char szErrorModule[260] = "";
 
 #ifdef DEBUG
 static FILE *_privateLogFile = NULL;
@@ -174,7 +167,7 @@ Win32PeLdrImage::~Win32PeLdrImage()
 }
 //******************************************************************************
 //******************************************************************************
-BOOL Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
+DWORD Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
 {
  LPVOID win32file = NULL;
  ULONG  filesize, ulRead, ulNewPos;
@@ -185,6 +178,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
  char   szFullPath[CCHMAXPATH] = "";
  IMAGE_DOS_HEADER doshdr;
  ULONG  signature;
+ DWORD  lasterror = LDRERROR_INTERNAL;
 
     //offset in executable image where real PE file starts (default 0)
     this->ulPEOffset = ulPEOffset;
@@ -198,6 +192,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
     //change to PE image start if necessary
     if(ulPEOffset) {
         if(OSLibDosSetFilePtr(hFile, ulPEOffset, OSLIB_SETPTR_FILE_BEGIN) == -1) {
+            lasterror = LDRERROR_INVALID_MODULE;
             goto failure;
         }
     }
@@ -205,30 +200,36 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
     //default error:
     strcpy(szErrorModule, OSLibStripPath(szFileName));
     if(hFile == NULL) {
+        lasterror = LDRERROR_INTERNAL;
         goto failure;
     }
     //read dos header
     if(DosRead(hFile, (LPVOID)&doshdr, sizeof(doshdr), &ulRead)) {
+        lasterror = LDRERROR_INVALID_MODULE;
         goto failure;
     }
     if(OSLibDosSetFilePtr(hFile, ulPEOffset+doshdr.e_lfanew, OSLIB_SETPTR_FILE_BEGIN) == -1) {
+        lasterror = LDRERROR_INVALID_MODULE;
         goto failure;
     }
     //read signature dword
     if(DosRead(hFile, (LPVOID)&signature, sizeof(signature), &ulRead)) {
+        lasterror = LDRERROR_INVALID_MODULE;
         goto failure;
     }
     //read pe header
     if(DosRead(hFile, (LPVOID)&fh, sizeof(fh), &ulRead)) {
+        lasterror = LDRERROR_INVALID_MODULE;
         goto failure;
     }
     //read optional header
     if(DosRead(hFile, (LPVOID)&oh, sizeof(oh), &ulRead)) {
+        lasterror = LDRERROR_INVALID_MODULE;
         goto failure;
     }
     if(doshdr.e_magic != IMAGE_DOS_SIGNATURE || signature != IMAGE_NT_SIGNATURE) {
         dprintf((LOG, "Not a valid PE file (probably a 16 bits windows exe/dll)!"));
-        WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szPEErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
+        lasterror = LDRERROR_INVALID_MODULE;
         goto failure;
     }
 
@@ -240,11 +241,13 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
     //Allocate memory to hold the entire image
     if(allocSections(reservedMem) == FALSE) {
         dprintf((LOG, "Failed to allocate image memory for %s at %x, rc %d", szFileName, oh.ImageBase, errorState));;
+        lasterror = LDRERROR_MEMORY;
         goto failure;
     }
 
     memmap = new Win32MemMap(this, realBaseAddress, imageSize);
     if(memmap == NULL || !memmap->Init()) {
+        lasterror = LDRERROR_MEMORY;
         goto failure;
     }
     win32file = memmap->mapViewOfFile(0, 0, 2);
@@ -255,18 +258,18 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
 
     if(!(fh.Characteristics & IMAGE_FILE_EXECUTABLE_IMAGE)) {//not valid
         dprintf((LOG, "Not a valid PE file!"));
-        WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szPEErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
+        lasterror = LDRERROR_INVALID_MODULE;
         goto failure;
     }
     if(fh.Machine != IMAGE_FILE_MACHINE_I386) {
         dprintf((LOG, "Doesn't run on x86 processors!"));
-        WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szCPUErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
+        lasterror = LDRERROR_INVALID_CPU;
         goto failure;
     }
     //IMAGE_FILE_SYSTEM == only drivers (device/file system/video etc)?
     if(fh.Characteristics & IMAGE_FILE_SYSTEM) {
         dprintf((LOG, "Can't convert system files"));
-        WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szExeErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
+        lasterror = LDRERROR_FILE_SYSTEM;
         goto failure;
     }
 
@@ -302,6 +305,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
     section = (Section *)malloc(nSections*sizeof(Section));
     if(section == NULL) {
         DebugInt3();
+        lasterror = LDRERROR_MEMORY;
         goto failure;
     }
     memset(section, 0, nSections*sizeof(Section));
@@ -422,6 +426,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
                 continue;
             }
             dprintf((LOG, "Unknown section" ));
+            lasterror = LDRERROR_INVALID_SECTION;
             goto failure;
         }
     }
@@ -454,7 +459,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
     //set memory protection flags
     if(setMemFlags() == FALSE) {
         dprintf((LOG, "Failed to set memory protection" ));
-        goto failure;
+        lasterror = LDRERROR_MEMORY;
     }
 
     if(realBaseAddress != oh.ImageBase && !(dwFlags & FLAG_PELDR_LOADASDATAFILE)) {
@@ -485,6 +490,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
             dprintf((LOG, "TLS Characteristics      %x", tlsDir->Characteristics ));
             if(sect == NULL) {
                 dprintf((LOG, "Couldn't find TLS section!!" ));
+                lasterror = LDRERROR_INVALID_HEADER;
                 goto failure;
             }
             setTLSAddress((char *)sect->realvirtaddr);
@@ -501,6 +507,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
             }
             if(sect == NULL) {
                 dprintf((LOG, "Couldn't find TLS AddressOfIndex section!!" ));
+                lasterror = LDRERROR_INVALID_HEADER;
                 goto failure;
             }
             if(fTLSFixups) {
@@ -523,6 +530,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
                 }
                 if(sect == NULL) {
                     dprintf((LOG, "Couldn't find TLS AddressOfCallBacks section!!" ));
+                    lasterror = LDRERROR_INVALID_HEADER;
                     goto failure;
                 }
                 if(fTLSFixups) {
@@ -546,6 +554,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
                     }
                     if(sect == NULL) {
                         dprintf((LOG, "Couldn't find TLS callback section!!" ));
+                        lasterror = LDRERROR_INVALID_HEADER;
                         goto failure;
                     }
                     if(fTLSFixups) {
@@ -608,6 +617,7 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
 #endif
         if(processExports((char *)win32file) == FALSE) {
             dprintf((LOG, "Failed to process exported apis" ));
+            lasterror = LDRERROR_EXPORTS;
             goto failure;
         }
     }
@@ -648,10 +658,11 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem, ULONG ulPEOffset)
     {
         if(processImports((char *)win32file) == FALSE) {
             dprintf((LOG, "Failed to process imports!" ));
+            lasterror = LDRERROR_IMPORTS;
             goto failure;
         }
     }
-    return(TRUE);
+    return LDRERROR_SUCCESS;
 
 failure:
     if(memmap) {
@@ -663,7 +674,7 @@ failure:
         hFile = 0;
     }
     errorState = ERROR_INTERNAL;
-    return FALSE;
+    return lasterror;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1605,14 +1616,13 @@ Win32DllBase *Win32PeLdrImage::loadDll(char *pszCurModule)
             pedll = new Win32PeLdrDll(modname, this);
             if(pedll == NULL) {
                 dprintf((LOG, "pedll: Error allocating memory" ));
-                WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szMemErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
                 errorState = ERROR_INTERNAL;
                 return NULL;
             }
             dprintf((LOG, "**********************************************************************" ));
             dprintf((LOG, "**********************     Loading Module        *********************" ));
             dprintf((LOG, "**********************************************************************" ));
-            if(pedll->init(0) == FALSE) {
+            if(pedll->init(0) != LDRERROR_SUCCESS) {
                 dprintf((LOG, "Internal WinDll error ", pedll->getError() ));
                 delete pedll;
                 return NULL;
@@ -2068,7 +2078,7 @@ ULONG WIN32API MissingApi(char *message)
 
     do {
         r = WinMessageBox(HWND_DESKTOP, NULLHANDLE, message,
-                          "Internal Odin Error", 0, MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION | MB_MOVEABLE);
+                          "Internal Error", 0, MB_ABORTRETRYIGNORE | MB_ICONEXCLAMATION | MB_MOVEABLE);
     }
     while(r == MBID_RETRY); //giggle
 
