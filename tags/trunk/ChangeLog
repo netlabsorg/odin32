@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.1563 2001-07-04 17:46:43 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1564 2001-07-05 10:45:02 sandervl Exp $ */
+
+ 2001-07-04: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o WM_WINDOWPOSCHANGED dispatch bugfix (introduced yesterday)
 
  2001-07-04: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Partial implementation of ToAsciiEx (just calls ToAscii)
