@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1466 2001-06-01 10:28:33 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1467 2001-06-01 12:29:06 sandervl Exp $ */
 
  2001-06-01: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Send WM_HELP if F1 pressed & no menu active
@@ -8,6 +8,10 @@
     - OLE32:    o Added OleLoadPictureEx stub
     - GDI32:    o GetDIBits fix for querying the bitmap information
                   WGSS returns 0, but we should return the nr of scan lines requested
+                o GetDIBits fix for memory dcs. WGSS messes things up if
+                  it's a memory DC.
+                  (fixes lower right button in AIM's logon window when typing
+                   in new name)
     - SHLWAPI:  o Added PathGetCharTypeA/W from Wine
 
  2001-06-01: Patrick Haller <patrick.haller@innotek.de>
