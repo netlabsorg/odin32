@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.16 1999-06-26 15:07:00 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.17 1999-06-30 16:08:40 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -562,20 +562,20 @@ HWND WIN32API CreateWindowExA(DWORD     dwExStyle,
 
   //SvL: Correct window style (like Wine does)
   if(dwStyle & WS_CHILD) {
-	dwStyle |= WS_CLIPSIBLINGS;
-	if(!(dwStyle & WS_POPUP)) {
-		dwStyle |= WS_CAPTION;
-	}
+        dwStyle |= WS_CLIPSIBLINGS;
+        if(!(dwStyle & WS_POPUP)) {
+                dwStyle |= WS_CAPTION;
+        }
   }
   if(dwExStyle & WS_EX_DLGMODALFRAME)
   {
-	dwStyle &= ~WS_THICKFRAME;
+        dwStyle &= ~WS_THICKFRAME;
   }
 
 #ifdef DEBUG
     WriteLog("USER32:  CreateWindow: dwExStyle = %X\n", dwExStyle);
     if((int)arg2 >> 16 != 0)
-     	 WriteLog("USER32:  CreateWindow: classname = %s\n", arg2);
+         WriteLog("USER32:  CreateWindow: classname = %s\n", arg2);
     else WriteLog("USER32:  CreateWindow: classname = %X\n", arg2);
     WriteLog("USER32:  CreateWindow: windowname= %s\n", arg3);
     WriteLog("USER32:  CreateWindow: dwStyle   = %X\n", dwStyle);
@@ -625,7 +625,7 @@ HWND WIN32API CreateWindowExA(DWORD     dwExStyle,
         window = 0;
     }
     if(window) {
-       	window->SetWindowHandle(hwnd);
+        window->SetWindowHandle(hwnd);
     }
 
     dprintf(("USER32:  ************CreateWindowExA %s (%d,%d,%d,%d), hwnd = %X\n", arg2, x, y, nWidth, nHeight, hwnd));
@@ -2434,6 +2434,7 @@ BOOL WIN32API IsDialogMessageW( HWND arg1, LPMSG  arg2)
     // NOTE: This will not work as is (needs UNICODE support)
     return O32_IsDialogMessage(arg1, arg2);
 }
+
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API IsRectEmpty( const RECT * arg1)
@@ -2939,9 +2940,15 @@ BOOL WIN32API SystemParametersInfoA(UINT uiAction, UINT uiParam, PVOID pvParam, 
     case SPI_GETNONCLIENTMETRICS:
         memset(cmetric, 0, sizeof(NONCLIENTMETRICSA));
         cmetric->cbSize = sizeof(NONCLIENTMETRICSA);
+        //CB: font info not valid, needs improvements
         O32_SystemParametersInfo(SPI_GETICONTITLELOGFONT, 0, (LPVOID)&(cmetric->lfCaptionFont),0);
         O32_SystemParametersInfo(SPI_GETICONTITLELOGFONT, 0, (LPVOID)&(cmetric->lfMenuFont),0);
-        O32_SystemParametersInfo(SPI_GETICONTITLELOGFONT, 0, (LPVOID)&(cmetric->lfStatusFont),0);
+        //CB: experimental change for statusbar (and tooltips)
+
+        //O32_SystemParametersInfo(SPI_GETICONTITLELOGFONT, 0, (LPVOID)&(cmetric->lfStatusFont),0);
+        lstrcpyA(cmetric->lfStatusFont.lfFaceName,"WarpSans");
+        cmetric->lfStatusFont.lfHeight = 9;
+
         O32_SystemParametersInfo(SPI_GETICONTITLELOGFONT, 0, (LPVOID)&(cmetric->lfMessageFont),0);
         cmetric->iBorderWidth     = GetSystemMetrics(SM_CXBORDER);
         cmetric->iScrollWidth     = GetSystemMetrics(SM_CXHSCROLL);
@@ -4795,6 +4802,7 @@ UINT WIN32API MapVirtualKeyExA(UINT uCode,
  *             If there is no translation, the return value is zero.
  * Remark    :
  * Status    : UNTESTED STUB
+
  *
  * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
@@ -5103,6 +5111,7 @@ HWINSTA WIN32API OpenWindowStationA(LPCTSTR lpszWinStaName,
  *               specified window station.
  *             If the function fails, the return value is NULL. To get extended
  *               error information, call GetLastError.
+
 
  * Remark    :
  * Status    : UNTESTED STUB
@@ -6230,6 +6239,7 @@ HWND WIN32API GetShellWindow(void)
 }
 
 
+
 /***********************************************************************
  *           RegisterTasklist32                [USER32.436]
  */
@@ -6461,3 +6471,4 @@ BOOL WIN32API DrawCaptionTempW (HWND       hwnd,
 
   return res;
 }
+
