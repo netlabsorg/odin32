@@ -1,125 +1,130 @@
-##############################################################################
-# $Id: makefile,v 1.2 2000-02-27 02:15:35 bird Exp $
+# $Id: makefile,v 1.3 2000-12-02 23:32:38 bird Exp $
+
 #
-# PD-Win32 API
+# Odin32 API
 #
 #       elf2lx.exe makefile
 #
-##############################################################################
 
-##############################################################################
-# Include
-##############################################################################
+
+#
+# Tell buildenvironment that we're making an vio exe and to invoke additional dep rule
+#
+VIO=1
+EXETARGET=1
+ADDITIONAL_DEP = mydep
+
+
+#
+# Compiler, tools, and interference rules thru the win32k makefile.inc file.
+#
+!include ..\..\..\makefile.inc
 !include ..\makefile.inc
-!include $(PDWIN32_INCLUDE)\pdwin32.mk
 
-##############################################################################
-# Object extention
-##############################################################################
-OBJEXT          = elf_obj
 
-##############################################################################
+#
+# Sanity check
+#
+!ifndef WIN32KINCLUDE
+!error "Fatal error! WIN32KINCLUDE is undefined!"
+!endif
+
+
+#
 # Tools and Flags Addjustments
-##############################################################################
-CINCLUDES  = -I$(WIN32KINCLUDE) -I$(PDWIN32_INCLUDE)
-CFLAGS     = $(CINCLUDES) $(CFLAGS) -DRING3 -DELF2LX \
-             -Ge+ -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext- -Gm- -Gn- -Ti+ -Rn
-CXXFLAGS   = $(CINCLUDES) $(CXXFLAGS) -DRING3 -DELF2LX \
-             -Ge+ -Wall+ppt-ppc-inl-cnv-gnr-vft- -Gm- -Gn- -Ti+ -Gx -Rn
-
-LD         = ilink
-LDFLAGS    = /nologo /NOI /A:16 /NOE /O:$@ /packcode /packdata \
-             /MAP:$(WIN32KLIST)\$(@B).map /pmtype:vio /Stack:4096 \
-!ifdef DEBUG
-!ifndef NODEBUGINFO
-    /debug /dbgpack
-!endif
+#
+CINCLUDES   = -I$(WIN32KINCLUDE) $(CINCLUDES)
+CDEFINES    = $(CDEFINES) -DRING3 -DELF2LX
+!if "$(VAC3)" == "1" || "$(VAC36)" == "1"
+CFLAGS      = $(CFLAGS)   -Ge+ -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext- -Gm- -Gn- -Ti+ -Rn
+CXXFLAGS    = $(CXXFLAGS) -Ge+ -Wall+ppt-ppc-inl-cnv-gnr-vft-             -Gm- -Gn- -Ti+ -Rn -Gx
+CLISTING    = -Fa$(OBJDIR)\$(@B).s
+COBJOUT     = -Fo$(OBJDIR)\$(@B).obj
+LD2FLAGS    = $(LD2FLAGS) /A:16 /Stack:4096
 !else
-    /exepack:2
+!error  "Compiler is not yet supported."
 !endif
 
 
-##############################################################################
-# Interference rules. Note: -Fo is IBMCPP specific.
-##############################################################################
-{$(WIN32KMISC)}.c{$(WIN32KOBJ)}.$(OBJEXT):
-    @echo compiling: $(@B).c
-    @$(CC) $(CFLAGS) -c -Fa$(WIN32KLIST)\$(@B).asm -Fo$@ $<
-
-{$(WIN32KMISC)}.cpp{$(WIN32KOBJ)}.$(OBJEXT):
-    @echo compiling: $(@B).cpp
-    @$(CXX) $(CXXFLAGS) -c -Fa$(WIN32KLIST)\$(@B).asm -Fo$@ $<
-
-{$(WIN32KLDR)}.cpp{$(WIN32KOBJ)}.$(OBJEXT):
-    @echo compiling: $(@B).cpp
-    @$(CXX) $(CXXFLAGS) -c -Fa$(WIN32KLIST)\$(@B).asm -Fo$@ $<
-
-.cpp{$(WIN32KOBJ)}.$(OBJEXT):
-    @echo compiling: $(@B).cpp
-    @$(CXX) $(CXXFLAGS) -c -Fa$(WIN32KLIST)\$(@B).asm -Fo$@ $<
-
-
 #
-# Visual slick edit!
+# Interference rules.
 #
+!if "$(VAC3)" == "1" || "$(VAC36)" == "1"
 {$(WIN32KMISC)}.c.obj:
     @echo compiling: $(@B).c
-    @$(CC) $(CFLAGS) -c -Fa$(WIN32KLIST)\$(@B).asm -Fo$(WIN32KOBJ)\$(@B).$(OBJEXT) $<
+    @$(CC)  $(CFLAGS)   $(CINCLUDES) $(CDEFINES) -c $(CLISTING) $(COBJOUT) $<
 
 {$(WIN32KMISC)}.cpp.obj:
     @echo compiling: $(@B).cpp
-    @$(CXX) $(CXXFLAGS) -c -Fa$(WIN32KLIST)\$(@B).asm -Fo$(WIN32KOBJ)\$(@B).$(OBJEXT) $<
+    @$(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -c $(CLISTING) $(COBJOUT) $<
 
 {$(WIN32KLDR)}.cpp.obj:
     @echo compiling: $(@B).cpp
-    @$(CXX) $(CXXFLAGS) -c -Fa$(WIN32KLIST)\$(@B).asm -Fo$(WIN32KOBJ)\$(@B).$(OBJEXT) $<
+    @$(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -c $(CLISTING) $(COBJOUT) $<
 
-.cpp.obj:
+.cpp{$(OBJDIR)}.obj:
     @echo compiling: $(@B).cpp
-    @$(CXX) $(CXXFLAGS) -c -Fa$(WIN32KLIST)\$(@B).asm -Fo$(WIN32KOBJ)\$(@B).$(OBJEXT) $<
-
-
-##############################################################################
-# Main targets.
-##############################################################################
-TARGET   =  Elf2Lx
-
-OBJS     =  $(WIN32KOBJ)\elf2lx.$(OBJEXT) \
-            $(WIN32KOBJ)\elf2lxmain.$(OBJEXT) \
-            $(WIN32KOBJ)\modulebase.$(OBJEXT) \
-            $(WIN32KOBJ)\malloc.$(OBJEXT) \
-            $(WIN32KOBJ)\smalloc_avl.$(OBJEXT) \
-            $(WIN32KOBJ)\avl.$(OBJEXT) \
-            $(WIN32KOBJ)\rmalloc_avl.$(OBJEXT) \
-            $(WIN32KOBJ)\new.$(OBJEXT) \
-            $(WIN32KOBJ)\stricmp.$(OBJEXT) \
-            $(WIN32KOBJ)\vprintf.$(OBJEXT)
-
-all: ELFDumper.exe $(TARGET).exe
-
-$(TARGET).exe: $(OBJS)
-    @echo linking $@
-    $(LD) $(LDFLAGS) $**
-    $(CP) $@ $(PDWIN32_BIN)
-
-ELFDumper.exe: ELFDumper.cpp ..\include\elf.h
-    $(CXX) $(CXXFLAGS) -Re -Gn- -Fa$(WIN32KLIST)\ELFDumper.asm \
-        -Fo$(WIN32KOBJ)\ELFDumper.$(OBJEXT) -Fe$@ ELFDumper.cpp
-
-
-##############################################################################
-# Dependencies.
-##############################################################################
-dep:
-    $(DEPEND) -obj$(OBJEXT) -o..\Object $(CINCLUDES) ..\misc\*.c* ..\include\*.h
-
-!ifndef NODEP
-!include .depend
+    @$(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -c $(CLISTING) $(COBJOUT) $<
+!else
+!error  "Compiler is not yet supported."
 !endif
 
-##############################################################################
-# Cleanup
-##############################################################################
-clean:
-    @-$(RM) $(OBJS) $(TARGET).exe $(PE2LXLIST)\$(TARGET).map *.pch
+
+#
+# Object files. Prefix with OBJDIR and one space before the '\'.
+#
+OBJS = \
+$(OBJDIR)\elf2lx.obj \
+$(OBJDIR)\elf2lxmain.obj \
+$(OBJDIR)\modulebase.obj \
+$(OBJDIR)\malloc.obj \
+$(OBJDIR)\smalloc_avl.obj \
+$(OBJDIR)\avl.obj \
+$(OBJDIR)\rmalloc_avl.obj \
+$(OBJDIR)\new.obj \
+$(OBJDIR)\stricmp.obj \
+$(OBJDIR)\vprintf.obj
+
+
+#
+# Libraries. One space before the '\'.
+#
+LIBS = \
+$(RTLLIB_NRE) \
+os2386.lib
+
+
+#
+# Target name - name of the exe without extention and path.
+#
+TARGET  = Elf2Lx
+
+
+#
+# Includes the common rules.
+#
+!include $(ODIN32_POST_INC)
+
+
+#
+# Additional dependencies.
+#
+mydep:
+    $(DEPEND) @<<
+        -a -o$$(OBJDIR) $(CINCLUDES)
+        $(WIN32KMISC)\*.c*
+        $(WIN32KLDR)\*.c*
+        $(WIN32KINCLUDE)\*.h
+<<
+
+
+#
+# Elfdumper.
+#
+!if "$(VAC3)" == "1" || "$(VAC36)" == "1"
+ELFDumper.exe: ELFDumper.cpp ..\include\elf.h
+    $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) $(CLISTING) $(COBJOUT) -Re -Gn- -Fe$@ ELFDumper.cpp
+!else
+!error  "Compiler is not yet supported."
+!endif
 

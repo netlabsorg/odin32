@@ -1,58 +1,68 @@
-##############################################################################
-# $Id: makefile,v 1.3 2000-11-19 09:02:05 bird Exp $
+# $Id: makefile,v 1.4 2000-12-02 23:32:41 bird Exp $
+
 #
-# PD-Win32 API
+# Odin32 API
 #
 #       kRx.exe makefile
 #
-##############################################################################
 
-##############################################################################
-# Include
-##############################################################################
+
+#
+# Tell the buildenvironment to make an VIO exe.
+#
+VIO = 0
 EXETARGET=1
-NO_DEP_RULE=1
-!include ..\makefile.inc
-!include $(PDWIN32_INCLUDE)\pdwin32.mk
 
-##############################################################################
-# Tools and Flags Addjustments
-##############################################################################
+
+#
+# Compiler, tools, and interference rules.
+#
+!include ..\..\..\makefile.inc
+
+
+#
+# Tools and Flags Addjustments.
+#
 LD2FLAGS = $(LD2FLAGS) /BASE:0x10000 /Stack:0xee00
 
 
-##############################################################################
-# Interference rules. Note: -Fo is IBMCPP specific.
-##############################################################################
-.asm{$(OBJDIR)}.obj:
-    @$(ECHO) assembling:      $<
-    @$(AS) $(ASFLAGS) $(ADEFINES) $(AINCLUDES) $< -Fo:$@ -Fl:$(WIN32KLIST)\$(*B).lst
+#
+# Interference rule. Note: ALP specific; enables listing.
+# (For Debug)
+#
+#.asm{$(OBJDIR)}.obj:
+#    $(AS) $(ASFLAGS) $< -Fo:$@ -Fl:$(OBJDIR)\$(*B).lst
 
 
-##############################################################################
-# Main targets.
-##############################################################################
-TARGET  = kRx
-
-OBJS    = \
+#
+# Object files. Prefix with OBJDIR and one space before the '\'.
+#
+OBJS = \
 $(OBJDIR)\kRxa.obj
 
-LIBS    = \
+
+#
+# Libraries. One space before the '\'.
+#
+LIBS = \
 os2386.lib \
 rexx.lib
 
+
+#
+# Say that we actually have an definition file.
+#
 DEFFILE = $(TARGET).def
 
 
-##############################################################################
+#
+# Target name - name of the exe without extention and path.
+#
+TARGET  = kRx
+
+
+#
 # Includes the common rules.
-##############################################################################
-!include $(PDWIN32_INCLUDE)\pdwin32.post
-
-
-##############################################################################
-# Dependencies.
-##############################################################################
-dep:
-    $(DEPEND) -o$$(OBJDIR) $(CINCLUDES) *.c *.cpp *.asm *.h
+#
+!include $(ODIN32_POST_INC)
 

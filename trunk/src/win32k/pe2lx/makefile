@@ -1,144 +1,119 @@
-##############################################################################
-# $Id: makefile,v 1.24 2000-11-19 09:02:05 bird Exp $
+# $Id: makefile,v 1.25 2000-12-02 23:32:40 bird Exp $
+
 #
-# PD-Win32 API
+# Odin32 API
 #
 #       pe2lx.exe makefile
 #
-##############################################################################
 
-##############################################################################
-# Include
-##############################################################################
-NOCLEAN=1
+
+#
+# Tell buildenvironment that we're making an vio exe and to invoke additional dep rule
+#
+VIO=1
 EXETARGET=1
-OLD_STYLE=1
+ADDITIONAL_DEP = mydep
+
+
+#
+# Compiler, tools, and interference rules thru the win32k makefile.inc file.
+#
+!include ..\..\..\makefile.inc
 !include ..\makefile.inc
-!include $(PDWIN32_INCLUDE)\pdwin32.mk
 
-##############################################################################
-# Object extention
-##############################################################################
-OBJEXT          = pe_obj
 
-##############################################################################
+#
+# Sanity check
+#
+!ifndef WIN32KINCLUDE
+!error "Fatal error! WIN32KINCLUDE is undefined!"
+!endif
+
+
+#
 # Tools and Flags Addjustments
-##############################################################################
-OBJDIR     = $(WIN32KOBJ)
-CINCLUDES  = -I$(WIN32KINCLUDE) $(CINCLUDES)
-CDEFINES   = $(CDEFINES) -DRING3 -DPE2LX
-CFLAGS     = $(CFLAGS)   -Ge+ -Gm- -Gn- -Ti+ -Rn -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext-
-CXXFLAGS   = $(CXXFLAGS) -Ge+ -Gm- -Gn- -Ti+ -Rn -Gx -Wall+ppt-ppc-inl-cnv-gnr-vft-
-LD2FLAGS   = /nologo /NOI /A:16 /NOE /NOD /packcode /packdata /pmtype:vio /Stack:4096 \
-!ifdef DEBUG
-!ifndef NODEBUGINFO
-    /debug /dbgpack
-!endif
+#
+CINCLUDES   = -I$(WIN32KINCLUDE) $(CINCLUDES)
+CDEFINES    = $(CDEFINES) -DRING3 -DPE2LX
+!if "$(VAC3)" == "1" || "$(VAC36)" == "1"
+CFLAGS      = $(CFLAGS)   -Ge+ -Gm- -Gn- -Ti+ -Rn     -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext-
+CXXFLAGS    = $(CXXFLAGS) -Ge+ -Gm- -Gn- -Ti+ -Rn -Gx -Wall+ppt-ppc-inl-cnv-gnr-vft-
+CLISTING    = -Fa$(OBJDIR)\$(@B).s
+COBJOUT     = -Fo$(OBJDIR)\$(@B).obj
+LD2FLAGS    = $(LD2FLAGS) /A:16 /Stack:4096
 !else
-    /exepack:2
+!error  "Compiler is not yet supported."
 !endif
 
 
-##############################################################################
-# Interference rules. Note: -Fo is IBMCPP specific.
-##############################################################################
-{$(WIN32KMISC)}.c{$(OBJDIR)}.$(OBJEXT):
-    @echo compiling: $(@B).c
-    @$(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES) -c -Fa$(WIN32KLIST)\$(@B)_pe.asm -Fo$@ $<
-
-{$(WIN32KMISC)}.cpp{$(OBJDIR)}.$(OBJEXT):
-    @echo compiling: $(@B).cpp
-    @$(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -c -Fa$(WIN32KLIST)\$(@B)_pe.asm -Fo$@ $<
-
-{$(WIN32KLDR)}.cpp{$(OBJDIR)}.$(OBJEXT):
-    @echo compiling: $(@B).cpp
-    @$(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -c -Fa$(WIN32KLIST)\$(@B)_pe.asm -Fo$@ $<
-
-.cpp{$(OBJDIR)}.$(OBJEXT):
-    @echo compiling: $(@B).cpp
-    @$(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -c -Fa$(WIN32KLIST)\$(@B)_pe.asm -Fo$@ $<
-
-
 #
-# Visual slick edit!
+# Interference rules.
 #
+!if "$(VAC3)" == "1" || "$(VAC36)" == "1"
 {$(WIN32KMISC)}.c.obj:
     @echo compiling: $(@B).c
-    @$(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES) -c -Fa$(WIN32KLIST)\$(@B)_pe.asm -Fo$(OBJDIR)\$(@B).$(OBJEXT) $<
+    @$(CC)  $(CFLAGS)   $(CINCLUDES) $(CDEFINES) -c $(CLISTING) $(COBJOUT) $<
 
 {$(WIN32KMISC)}.cpp.obj:
     @echo compiling: $(@B).cpp
-    @$(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -c -Fa$(WIN32KLIST)\$(@B)_pe.asm -Fo$(OBJDIR)\$(@B).$(OBJEXT) $<
+    @$(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -c $(CLISTING) $(COBJOUT) $<
 
 {$(WIN32KLDR)}.cpp.obj:
     @echo compiling: $(@B).cpp
-    @$(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -c -Fa$(WIN32KLIST)\$(@B)_pe.asm -Fo$(OBJDIR)\$(@B).$(OBJEXT) $<
+    @$(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -c $(CLISTING) $(COBJOUT) $<
 
-.cpp.obj:
+.cpp{$(OBJDIR)}.obj:
     @echo compiling: $(@B).cpp
-    @$(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -c -Fa$(WIN32KLIST)\$(@B)_pe.asm -Fo$(OBJDIR)\$(@B).$(OBJEXT) $<
-
-
-##############################################################################
-# Main targets.
-##############################################################################
-TARGET = pe2lx
-
-OBJS =\
-$(OBJDIR)\pe2lx.$(OBJEXT)\
-$(OBJDIR)\pe2lxmain.$(OBJEXT)\
-$(OBJDIR)\modulebase.$(OBJEXT)\
-$(OBJDIR)\malloc.$(OBJEXT)\
-$(OBJDIR)\smalloc_avl.$(OBJEXT)\
-$(OBJDIR)\avl.$(OBJEXT)\
-$(OBJDIR)\rmalloc_avl.$(OBJEXT)\
-$(OBJDIR)\new.$(OBJEXT)\
-$(OBJDIR)\stricmp.$(OBJEXT)\
-$(OBJDIR)\vprintf.$(OBJEXT)
-
-LIBS =\
-!if "$(CCENV)" == "VAC36"
-    $(VACPATH)\lib\cpprni36.lib \
+    @$(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -c $(CLISTING) $(COBJOUT) $<
 !else
-    $(VACPATH)\lib\cppon30.lib  \
+!error  "Compiler is not yet supported."
 !endif
 
 
-all:    $(WIN32KBIN)\$(TARGET).exe
+#
+# Object files. Prefix with OBJDIR and one space before the '\'.
+#
+OBJS =\
+$(OBJDIR)\pe2lx.obj\
+$(OBJDIR)\pe2lxmain.obj\
+$(OBJDIR)\modulebase.obj\
+$(OBJDIR)\malloc.obj\
+$(OBJDIR)\smalloc_avl.obj\
+$(OBJDIR)\avl.obj\
+$(OBJDIR)\rmalloc_avl.obj\
+$(OBJDIR)\new.obj\
+$(OBJDIR)\stricmp.obj\
+$(OBJDIR)\vprintf.obj
 
 
-$(WIN32KBIN)\$(TARGET).exe: $(OBJS) makefile
-    @echo linking $@
-    $(LD2) @<<$(OBJDIR)\$(@B).lnk
-$(LD2FLAGS)
-/OUT:$@
-/MAP:$*.map
-$(OBJS: =^
-)
-$(LIBS)
+#
+# Libraries. One space before the '\'.
+#
+LIBS = \
+$(RTLLIB_NRE) \
 os2386.lib
-<<KEEP
-    $(CP) $@ $(PDWIN32_BIN)
 
 
-##############################################################################
-# Dependencies.
-##############################################################################
-dep:
+#
+# Target name - name of the exe without extention and path.
+#
+TARGET = pe2lx
+
+
+#
+# Includes the common rules.
+#
+!include $(ODIN32_POST_INC)
+
+
+#
+# Additional dependencies.
+#
+mydep:
     $(DEPEND) @<<
-        -obj$(OBJEXT) -o$$(OBJDIR)
-        $(CINCLUDES) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win
-        *.c* ..\misc\*.c* ..\include\*.h
+        -a -o$$(OBJDIR) $(CINCLUDES)
+        $(WIN32KMISC)\*.c*
+        $(WIN32KLDR)\*.c*
+        $(WIN32KINCLUDE)\*.h
 <<
 
-
-##############################################################################
-# Cleanup
-##############################################################################
-clean:
-    @$(RM) $(OBJDIR)\*.$(OBJEXT) $(WIN32KBIN)\$(TARGET).exe \
-        $(WIN32KBIN)\$(TARGET).lnk $(WIN32KBIN)\$(TARGET).map
-
-
-# Includes the common rules.
-!include $(PDWIN32_INCLUDE)\pdwin32.post
