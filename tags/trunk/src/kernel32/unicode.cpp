@@ -1,4 +1,4 @@
-/* $Id: unicode.cpp,v 1.8 1999-06-23 19:36:24 phaller Exp $ */
+/* $Id: unicode.cpp,v 1.9 1999-06-28 16:59:17 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -6,6 +6,7 @@
  * Copyright 1998 Joel Troster
  * Copyright 1999 Patrick haller
  * Copyright 1999 Achim Hasenmueller
+ * Copyright 1999 Christoph Bratschi
  */
 #include <os2win.h>
 #include <winnls.h>
@@ -185,10 +186,14 @@ void WIN32API AsciiToUnicodeN(char *ascii, WCHAR *unicode, int asciilen)
            ascii,
            unicode));
 
-  /* @@@PH 98/06/07 */
-  if ( (ascii   == NULL) ||                     /* garbage in, garbage out ! */
-       (unicode == NULL) )
+  //CB: no input, set at least 0
+  if (ascii == NULL)
+  {
+    if (unicode != NULL && asciilen > 0) unicode[0] = 0;
     return;
+  }
+
+  if (unicode == NULL || asciilen <= 0) return; //nothing to do
 
 //  dprintf(("KERNEL32: AsciiToUnicodeN %s\n", ascii));
   if (getUconvObject())
@@ -204,8 +209,7 @@ void WIN32API AsciiToUnicodeN(char *ascii, WCHAR *unicode, int asciilen)
                         (void**)&in_buf, &in_bytes_left,
                         &out_buf,        &uni_chars_left,
                         &num_subs );
-  }
-  else
+  } else
   {
     for(i=0;
         i < asciilen;
@@ -229,4 +233,5 @@ void WIN32API AsciiToUnicode(char *ascii, WCHAR *unicode)
   /* forward to call with length parameter */
   AsciiToUnicodeN(ascii, unicode, strlen(ascii));
 }
+
 
