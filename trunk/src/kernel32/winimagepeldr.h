@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.h,v 1.4 2000-06-27 12:20:46 sandervl Exp $ */
+/* $Id: winimagepeldr.h,v 1.5 2000-10-04 19:36:25 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -117,8 +117,11 @@ protected:
         BOOL  processImports(char *win32file);
 
         BOOL  processExports(char *win32file);
-        void  AddNameExport(ULONG virtaddr, char *apiname, ULONG ordinal);
-        void  AddOrdExport(ULONG virtaddr, ULONG ordinal);
+        void  AddNameExport(ULONG virtaddr, char *apiname, ULONG ordinal, BOOL fAbsoluteAddress=FALSE);
+        void  AddOrdExport(ULONG virtaddr, ULONG ordinal, BOOL fAbsoluteAddress=FALSE);
+        BOOL  AddForwarder(ULONG virtaddr, char *apiname, ULONG ordinal);
+
+Win32DllBase *loadDll(char *pszCurModule);
 
  	IMAGE_OPTIONAL_HEADER oh;
 	IMAGE_FILE_HEADER     fh;

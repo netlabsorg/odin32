@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.54 2000-10-03 17:28:31 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.55 2000-10-04 19:36:25 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -10,6 +10,8 @@
  *
  * TODO: Check psh[i].Characteristics for more than only the code section
  * TODO: Make resource section readonly when GDI32 is fixed
+ * TODO: Loading of forwarder dlls before handling imports might not be correct
+ *       (circular dependencies; have to check what NT does)
  *
  * NOTE: RSRC_LOAD is a special flag to only load the resource directory
  *       of a PE image. Processing imports, sections etc is not done.
@@ -105,7 +107,7 @@ Win32PeLdrImage::Win32PeLdrImage(char *pszFileName, BOOL isExe, int loadtype) :
     nrsections(0), imageSize(0),
     imageVirtBase(-1), realBaseAddress(0), imageVirtEnd(0),
     nrNameExports(0), nrOrdExports(0), nameexports(NULL), ordexports(NULL),
-    memmap(NULL), pFixups(NULL), dwFixupSize(0)
+    memmap(NULL), pFixups(NULL), dwFixupSize(0), curnameexport(NULL), curordexport(NULL)
 {
  HFILE  dllfile;
 
@@ -1124,6 +1126,7 @@ BOOL Win32PeLdrImage::processExports(char *win32file)
  PIMAGE_EXPORT_DIRECTORY ped;
  ULONG *ptrNames, *ptrAddress;
  USHORT *ptrOrd;
+ BOOL fForwarder;
  int i;
 
   /* get section header and pointer to data directory for .edata section */
@@ -1143,51 +1146,50 @@ BOOL Win32PeLdrImage::processExports(char *win32file)
 
     int   ord, RVAExport;
     char *name;
-    for(i=0;i<ped->NumberOfNames;i++) {
-        ord       = ptrOrd[i] + ped->Base;
-        name      = (char *)((ULONG)ptrNames[i] + (ULONG)win32file);
-        RVAExport = ptrAddress[ptrOrd[i]];
-#ifdef FORWARDERS
-        if(RVAExport < sh.VirtualAddress || RVAExport > sh.VirtualAddress + sh.SizeOfRawData) {
-#endif
+    for(i=0;i<ped->NumberOfNames;i++) 
+    {
+	fForwarder = FALSE;
+        ord        = ptrOrd[i] + ped->Base;
+        name       = (char *)((ULONG)ptrNames[i] + (ULONG)win32file);
+        RVAExport  = ptrAddress[ptrOrd[i]];
+
+        /* forwarder? ulRVA within export directory. */
+        if(RVAExport > oh.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress &&
+           RVAExport < oh.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress
+                       + oh.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size) 
+        {
+            fForwarder = AddForwarder(oh.ImageBase + RVAExport, name, ord);
+        }
+	if(!fForwarder) {
             //points to code (virtual address relative to oh.ImageBase
             AddNameExport(oh.ImageBase + RVAExport, name, ord);
-            dprintf((LOG, "address 0x%x %s @%d", RVAExport, name, ord));
-#ifdef FORWARDERS
-
+            dprintf((LOG, "address 0x%x %s @%d (0x%08x)", RVAExport, name, ord, realBaseAddress + RVAExport));
         }
-        else {//forwarder
-            char *forward = (char *)((ULONG)RVAExport + (ULONG)win32file);
-            fout << RVAExport << " ", name << " @", ord << " is forwarder to ", (int)forward ));
-        }
-#endif
     }
-    for(i=0;i<max(ped->NumberOfNames,ped->NumberOfFunctions);i++) {
+    for(i=0;i<max(ped->NumberOfNames,ped->NumberOfFunctions);i++) 
+    {
+	fForwarder = FALSE;
         ord = ped->Base + i;  //Correct??
         RVAExport = ptrAddress[i];
-#ifdef FORWARDERS
-        if(RVAExport < sh.VirtualAddress || RVAExport > sh.VirtualAddress + sh.SizeOfRawData) {
-#endif
-            if(RVAExport) {
-              //points to code (virtual address relative to oh.ImageBase
-              dprintf((LOG, "ord %d at 0x%x", ord, RVAExport));
-              AddOrdExport(oh.ImageBase + RVAExport, ord);
-            }
-#ifdef FORWARDERS
+        /* forwarder? ulRVA within export directory. */
+        if(RVAExport > oh.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress &&
+           RVAExport < oh.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress
+                       + oh.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size) 
+        {
+            fForwarder = AddForwarder(oh.ImageBase + RVAExport, NULL, ord);
         }
-        else {//forwarder or empty
-            char *forward = (char *)((ULONG)RVAExport + (ULONG)win32file);
-            dprintf((LOG, "ord ", ord << " at 0x";
-            fout << RVAExport << " is forwarder to 0x", (int)forward ));
+	if(!fForwarder && RVAExport) {
+            //points to code (virtual address relative to oh.ImageBase
+            dprintf((LOG, "ord %d at 0x%08x (0x%08x)", ord, RVAExport, realBaseAddress + RVAExport));
+            AddOrdExport(oh.ImageBase + RVAExport, ord);
         }
-#endif
     }
   }
   return(TRUE);
 }
 //******************************************************************************
 //******************************************************************************
-void Win32PeLdrImage::AddNameExport(ULONG virtaddr, char *apiname, ULONG ordinal)
+void Win32PeLdrImage::AddNameExport(ULONG virtaddr, char *apiname, ULONG ordinal, BOOL fAbsoluteAddress)
 {
  ULONG nsize;
 
@@ -1205,7 +1207,10 @@ void Win32PeLdrImage::AddNameExport(ULONG virtaddr, char *apiname, ULONG ordinal
     	curnameexport = (NameExport *)((ULONG)nameexports + nsize);
     	free(tmp);
   }
-  curnameexport->virtaddr = realBaseAddress + (virtaddr - oh.ImageBase);
+  if(fAbsoluteAddress) {//forwarders use absolute address
+	curnameexport->virtaddr = virtaddr;
+  }
+  else 	curnameexport->virtaddr = realBaseAddress + (virtaddr - oh.ImageBase);
   curnameexport->ordinal  = ordinal;
   *(ULONG *)curnameexport->name = 0;
   strcpy(curnameexport->name, apiname);
@@ -1218,15 +1223,156 @@ void Win32PeLdrImage::AddNameExport(ULONG virtaddr, char *apiname, ULONG ordinal
 }
 //******************************************************************************
 //******************************************************************************
-void Win32PeLdrImage::AddOrdExport(ULONG virtaddr, ULONG ordinal)
+void Win32PeLdrImage::AddOrdExport(ULONG virtaddr, ULONG ordinal, BOOL fAbsoluteAddress)
 {
   if(ordexports == NULL) {
     	ordexports   = (OrdExport *)malloc(nrOrdExports * sizeof(OrdExport));
     	curordexport = ordexports;
   }
-  curordexport->virtaddr = realBaseAddress + (virtaddr - oh.ImageBase);
+  if(fAbsoluteAddress) {//forwarders use absolute address
+	curordexport->virtaddr = virtaddr;
+  }
+  else 	curordexport->virtaddr = realBaseAddress + (virtaddr - oh.ImageBase);
   curordexport->ordinal  = ordinal;
   curordexport++;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32PeLdrImage::AddForwarder(ULONG virtaddr, char *apiname, ULONG ordinal)
+{
+ char         *forward = (char *)(realBaseAddress + (virtaddr - oh.ImageBase));
+ char         *forwarddll, *forwardapi;
+ Win32DllBase *WinDll;
+ DWORD         exportaddr;
+ int           forwardord;
+  
+  forwarddll = strdup(forward);
+  if(forwarddll == NULL) {
+	return FALSE;
+  }
+  forwardapi = strchr(forwarddll, '.');
+  if(forwardapi == NULL) {
+	goto fail;
+  }
+  *forwardapi++ = 0;
+  if(strlen(forwarddll) == 0 || strlen(forwardapi) == 0) {
+	goto fail;
+  }
+  WinDll = Win32DllBase::findModule(forwarddll);
+  if(WinDll == NULL) {
+	WinDll = loadDll(forwarddll);
+	if(WinDll == NULL) {
+		dprintf((LOG, "ERROR: couldn't find forwarder %s.%s", forwarddll, forwardapi));
+		goto fail;
+	}
+  }
+  //check if name or ordinal forwarder
+  forwardord = 0;
+  if(*forwardapi >= '0' && *forwardapi <= '9') {
+	forwardord = atoi(forwardapi);
+  }
+  if(forwardord != 0 || (strlen(forwardapi) == 1 && *forwardapi == '0')) {
+	exportaddr = WinDll->getApi(forwardord);
+  }
+  else	exportaddr = WinDll->getApi(forwardapi);
+
+  if(apiname) {
+        dprintf((LOG, "address 0x%x %s @%d (0x%08x) forwarder %s.%s", virtaddr - oh.ImageBase, apiname, ordinal, virtaddr, forwarddll, forwardapi));
+	AddNameExport(exportaddr, apiname, ordinal, TRUE);
+  }
+  else {
+        dprintf((LOG, "address 0x%x @%d (0x%08x) forwarder %s.%s", virtaddr - oh.ImageBase, ordinal, virtaddr, forwarddll, forwardapi));
+        AddOrdExport(exportaddr, ordinal, TRUE);
+  }
+  free(forwarddll);
+  return TRUE;
+
+fail:
+  free(forwarddll);
+  return FALSE;
+}
+//******************************************************************************
+//******************************************************************************
+Win32DllBase *Win32PeLdrImage::loadDll(char *pszCurModule)
+{
+ Win32DllBase *WinDll = NULL;
+ char modname[CCHMAXPATH];
+
+	strcpy(modname, pszCurModule);
+  	//rename dll if necessary (i.e. OLE32 -> OLE32OS2)
+  	Win32DllBase::renameDll(modname);
+
+	if(isPEImage(modname) != ERROR_SUCCESS_W)
+	{//LX image, so let OS/2 do all the work for us
+		APIRET rc;
+  		char   szModuleFailure[CCHMAXPATH] = "";
+		ULONG  hInstanceNewDll;
+                Win32LxDll *lxdll;
+
+		char *dot = strchr(modname, '.');
+		if(dot) {
+			*dot = 0;
+		}
+		strcat(modname, ".DLL");
+  		rc = DosLoadModule(szModuleFailure, sizeof(szModuleFailure), modname, (HMODULE *)&hInstanceNewDll);
+  		if(rc) {
+			dprintf((LOG, "DosLoadModule returned %X for %s\n", rc, szModuleFailure));
+			sprintf(szErrorModule, "%s.DLL", szModuleFailure);
+			errorState = rc;
+			return NULL;
+  		}
+		lxdll = Win32LxDll::findModuleByOS2Handle(hInstanceNewDll);
+		if(lxdll == NULL) {//shouldn't happen!
+			dprintf((LOG, "Just loaded the dll, but can't find it anywhere?!!?"));
+			errorState = ERROR_INTERNAL;
+			return NULL;
+		}
+		lxdll->setDllHandleOS2(hInstanceNewDll);
+		if(lxdll->AddRef() == -1) {//-1 -> load failed (attachProcess)
+			dprintf((LOG, "Dll %s refused to be loaded; aborting", modname));
+			delete lxdll;
+			errorState = ERROR_INTERNAL;
+			return NULL;
+		}
+                WinDll = (Win32DllBase*)lxdll;
+	}
+	else {
+         Win32PeLdrDll *pedll;
+
+        	pedll = new Win32PeLdrDll(modname, this);
+        	if(pedll == NULL) {
+	            dprintf((LOG, "pedll: Error allocating memory" ));
+	            WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szMemErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
+	            errorState = ERROR_INTERNAL;
+ 		    return NULL;
+	        }
+	        dprintf((LOG, "**********************************************************************" ));
+	        dprintf((LOG, "**********************     Loading Module        *********************" ));
+	        dprintf((LOG, "**********************************************************************" ));
+	        if(pedll->init(0) == FALSE) {
+	            dprintf((LOG, "Internal WinDll error ", pedll->getError() ));
+		    delete pedll;
+ 	  	    return NULL;
+	        }
+#ifdef DEBUG
+    		pedll->AddRef(getModuleName());
+#else
+    		pedll->AddRef();
+#endif
+	        if(pedll->attachProcess() == FALSE) {
+        	    dprintf((LOG, "attachProcess failed!" ));
+		    delete pedll;
+	            errorState = ERROR_INTERNAL;
+   	 	    return NULL;
+	        }
+		WinDll = (Win32DllBase*)pedll;
+	}
+
+	dprintf((LOG, "**********************************************************************" ));
+	dprintf((LOG, "**********************  Finished Loading Module %s ", modname ));
+        dprintf((LOG, "**********************************************************************" ));
+
+	return WinDll;
 }
 //******************************************************************************
 /** All initial processing of imports is done here
@@ -1330,6 +1476,7 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
   for (i = 0; i < cModules; i++)
   {
     dprintf((LOG, "Module %s", pszCurModule ));
+    dprintf((LOG, "ForwarderChain: %x", pID[i].ForwarderChain));
     //  a) check that OriginalFirstThunk not is 0 and look for Borland-styled PE
     if (i == 0)
     {
@@ -1372,81 +1519,10 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
 
     if(WinDll == NULL)
     {  //not found, so load it
-	char modname[CCHMAXPATH];
-
-	strcpy(modname, pszCurModule);
-  	//rename dll if necessary (i.e. OLE32 -> OLE32OS2)
-  	Win32DllBase::renameDll(modname);
-
-	if(isPEImage(modname) != ERROR_SUCCESS_W)
-	{//LX image, so let OS/2 do all the work for us
-		APIRET rc;
-  		char   szModuleFailure[CCHMAXPATH] = "";
-		ULONG  hInstanceNewDll;
-                Win32LxDll *lxdll;
-
-		char *dot = strchr(modname, '.');
-		if(dot) {
-			*dot = 0;
-		}
-		strcat(modname, ".DLL");
-  		rc = DosLoadModule(szModuleFailure, sizeof(szModuleFailure), modname, (HMODULE *)&hInstanceNewDll);
-  		if(rc) {
-			dprintf((LOG, "DosLoadModule returned %X for %s\n", rc, szModuleFailure));
-			sprintf(szErrorModule, "%s.DLL", szModuleFailure);
-			errorState = rc;
-			return(FALSE);
-  		}
-		lxdll = Win32LxDll::findModuleByOS2Handle(hInstanceNewDll);
-		if(lxdll == NULL) {//shouldn't happen!
-			dprintf((LOG, "Just loaded the dll, but can't find it anywhere?!!?"));
-			errorState = ERROR_INTERNAL;
-			return(FALSE);
-		}
-		lxdll->setDllHandleOS2(hInstanceNewDll);
-		if(lxdll->AddRef() == -1) {//-1 -> load failed (attachProcess)
-			dprintf((LOG, "Dll %s refused to be loaded; aborting", modname));
-			delete lxdll;
-			errorState = ERROR_INTERNAL;
-			return(FALSE);
-		}
-                WinDll = (Win32DllBase*)lxdll;
+	WinDll = loadDll(pszCurModule);
+	if(WinDll == NULL) {
+		return FALSE;
 	}
-	else {
-         Win32PeLdrDll *pedll;
-
-        	pedll = new Win32PeLdrDll(modname, this);
-        	if(pedll == NULL) {
-	            dprintf((LOG, "pedll: Error allocating memory" ));
-	            WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, szMemErrorMsg, szErrorTitle, 0, MB_OK | MB_ERROR | MB_MOVEABLE);
-	            errorState = ERROR_INTERNAL;
-	            return(FALSE);
-	        }
-	        dprintf((LOG, "**********************************************************************" ));
-	        dprintf((LOG, "**********************     Loading Module        *********************" ));
-	        dprintf((LOG, "**********************************************************************" ));
-	        if(pedll->init(0) == FALSE) {
-	            dprintf((LOG, "Internal WinDll error ", pedll->getError() ));
-		    delete pedll;
-	            return(FALSE);
-	        }
-#ifdef DEBUG
-    		pedll->AddRef(getModuleName());
-#else
-    		pedll->AddRef();
-#endif
-	        if(pedll->attachProcess() == FALSE) {
-        	    dprintf((LOG, "attachProcess failed!" ));
-		    delete pedll;
-	            errorState = ERROR_INTERNAL;
-	            return(FALSE);
-	        }
-		WinDll = (Win32DllBase*)pedll;
-	}
-
-	dprintf((LOG, "**********************************************************************" ));
-	dprintf((LOG, "**********************  Finished Loading Module  *********************" ));
-        dprintf((LOG, "**********************************************************************" ));
     }
     else {
 	WinDll->AddRef();
@@ -1492,7 +1568,7 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
             }
             //KSO - Aug 6 1998 1:15am:this eases comparing...
             char *pszFunctionName = (char*)(pulImport[j] + (ULONG)win32file + 2);
-            dprintf((LOG, "0x%08x Imported function %s", ulCurFixup,  pszFunctionName ));
+            dprintf((LOG, "0x%08x Imported function %s (0x%08x)", ulCurFixup,  pszFunctionName, WinDll->getApi(pszFunctionName)));
             StoreImportByName(WinDll, pszFunctionName, ulCurFixup);
         }
         ulCurFixup += sizeof(IMAGE_THUNK_DATA);
