@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.1678 2001-09-10 11:02:19 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1679 2001-09-11 01:32:31 bird Exp $ */
+
+ 2001-09-11: knut st. osmundsen <kosmunds@csc.com>
+    - kKrnlLib: o FYI: Win32k revamp/split-up. Not yet completed.
 
  2001-09-10: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o VirtualQuery fix; DosQueryMem doesn't always return region
