@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.25 1999-10-30 18:40:47 cbratschi Exp $ */
+/* $Id: win32dlg.cpp,v 1.26 1999-10-31 01:14:42 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -45,8 +45,17 @@ Win32Dialog::Win32Dialog(HINSTANCE hInst, LPCSTR dlgTemplate, HWND owner,
     memset(&dlgInfo, 0, sizeof(dlgInfo));
 
     dprintf(("********* CREATE DIALOG ************"));
-    xUnit = getXBaseUnit();
-    yUnit = getYBaseUnit();
+    if(fInitialized == FALSE) {
+        if(DIALOG_Init() == FALSE) {
+            dprintf(("DIALOG_Init FAILED!"));
+            DebugInt3();
+            SetLastError(ERROR_GEN_FAILURE);
+            return;
+        }
+        fInitialized = TRUE;
+    }
+    xUnit = xBaseUnit;
+    yUnit = yBaseUnit;
 
     /* Parse dialog template */
     dlgTemplate = parseTemplate(dlgTemplate, &dlgInfo);
@@ -227,6 +236,16 @@ ULONG Win32Dialog::MsgCreate(HWND hwndFrame, HWND hwndClient)
     dprintf(("********* DIALOG CREATION FAILED! ************"));
     return FALSE;
 }
+//******************************************************************************
+//******************************************************************************
+BOOL Win32Dialog::MapDialogRect(LPRECT rect)
+{
+    rect->left   = (rect->left * xUnit) / 4;
+    rect->right  = (rect->right * xUnit) / 4;
+    rect->top    = (rect->top * yUnit) / 8;
+    rect->bottom = (rect->bottom * yUnit) / 8;
+    return TRUE;
+}
 /***********************************************************************
  *           DIALOG_DoDialogBox
  */
@@ -309,6 +328,95 @@ INT Win32Dialog::doDialogBox()
     retval = idResult;
     DestroyWindow();
     return retval;
+}
+/***********************************************************************
+ *           DIALOG_Init
+ *
+ * Initialisation of the dialog manager.
+ */
+BOOL Win32Dialog::DIALOG_Init(void)
+{
+    HDC hdc;
+    SIZE size;
+
+    /* Calculate the dialog base units */
+    if (!(hdc = CreateDCA( "DISPLAY", NULL, NULL, NULL ))) return FALSE;
+    if (!getCharSizeFromDC( hdc, 0, &size )) return FALSE;
+    DeleteDC( hdc );
+    xBaseUnit = size.cx;
+    yBaseUnit = size.cy;
+
+    return TRUE;
+}
+/***********************************************************************
+ *           DIALOG_GetCharSizeFromDC
+ *
+ *
+ *  Calculates the *true* average size of English characters in the
+ *  specified font as oppposed to the one returned by GetTextMetrics.
+ */
+BOOL Win32Dialog::getCharSizeFromDC( HDC hDC, HFONT hUserFont, SIZE * pSize )
+{
+    BOOL Success = FALSE;
+    HFONT hUserFontPrev = 0;
+    pSize->cx = xBaseUnit;
+    pSize->cy = yBaseUnit;
+
+    if ( hDC )
+    {
+        /* select the font */
+        TEXTMETRICA tm;
+        memset(&tm,0,sizeof(tm));
+        if (hUserFont) hUserFontPrev = SelectFont(hDC,hUserFont);
+        if (GetTextMetricsA(hDC,&tm))
+        {
+            pSize->cx = tm.tmAveCharWidth;
+            pSize->cy = tm.tmHeight;
+
+            /* if variable width font */
+            if (tm.tmPitchAndFamily & TMPF_FIXED_PITCH)
+            {
+                SIZE total;
+                static const char szAvgChars[53] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+                /* Calculate a true average as opposed to the one returned
+                 * by tmAveCharWidth. This works better when dealing with
+                 * proportional spaced fonts and (more important) that's
+                 * how Microsoft's dialog creation code calculates the size
+                 * of the font
+                 */
+                if (GetTextExtentPointA(hDC,szAvgChars,sizeof(szAvgChars),&total))
+                {
+                   /* round up */
+                    pSize->cx = ((2*total.cx/sizeof(szAvgChars)) + 1)/2;
+                    Success = TRUE;
+                }
+            }
+            else
+            {
+                Success = TRUE;
+            }
+        }
+
+        /* select the original font */
+        if (hUserFontPrev) SelectFont(hDC,hUserFontPrev);
+    }
+    return (Success);
+}
+/***********************************************************************
+ *           DIALOG_GetCharSize
+ *
+ *
+ *  Calculates the *true* average size of English characters in the
+ *  specified font as oppposed to the one returned by GetTextMetrics.
+ *  A convenient variant of DIALOG_GetCharSizeFromDC.
+ */
+BOOL Win32Dialog::getCharSize( HFONT hUserFont, SIZE * pSize )
+{
+    HDC  hDC = GetDC(0);
+    BOOL Success = getCharSizeFromDC( hDC, hUserFont, pSize );
+    ReleaseDC(0, hDC);
+    return Success;
 }
 /***********************************************************************
  *           DIALOG_ParseTemplate32
@@ -512,7 +620,7 @@ BOOL Win32Dialog::createControls(LPCSTR dlgtemplate, HINSTANCE hInst)
             hwndCtrl = ::CreateWindowExW( info.exStyle | WS_EX_NOPARENTNOTIFY,
                                         (LPCWSTR)info.className,
                                         (LPCWSTR)info.windowName,
-                                        info.style | WS_CHILD | WS_CLIPSIBLINGS,
+                                        info.style | WS_CHILD,
                                         info.x * xUnit / 4,
                                         info.y * yUnit / 8,
                                         info.cx * xUnit / 4,
@@ -536,7 +644,7 @@ BOOL Win32Dialog::createControls(LPCSTR dlgtemplate, HINSTANCE hInst)
             hwndCtrl = ::CreateWindowExA( info.exStyle | WS_EX_NOPARENTNOTIFY,
                                         classNameA,
                                         windowNameA,
-                                        info.style | WS_CHILD | WS_CLIPSIBLINGS,
+                                        info.style | WS_CHILD,
                                         info.x * xUnit / 4,
                                         info.y * yUnit / 8,
                                         info.cx * xUnit / 4,
@@ -977,4 +1085,6 @@ BOOL DIALOG_Unregister()
 }
 //******************************************************************************
 //******************************************************************************
-
+BOOL Win32Dialog::fInitialized = FALSE;
+int  Win32Dialog::xBaseUnit    = 10;
+int  Win32Dialog::yBaseUnit    = 20;
