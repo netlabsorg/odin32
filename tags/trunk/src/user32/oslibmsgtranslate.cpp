@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.40 2000-12-29 18:39:58 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.41 2001-02-21 20:51:06 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -374,16 +374,20 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
 	}
         break;
 
-    case WM_BUTTON2MOTIONSTART:
-    case WM_BUTTON2MOTIONEND:
     case WM_BUTTON2CLICK:
-    case WM_BUTTON1MOTIONSTART:
-    case WM_BUTTON1MOTIONEND:
     case WM_BUTTON1CLICK:
-    case WM_BUTTON3MOTIONSTART:
-    case WM_BUTTON3MOTIONEND:
     case WM_BUTTON3CLICK:
         goto dummymessage;
+
+    case WM_BUTTON2MOTIONSTART:
+    case WM_BUTTON2MOTIONEND:
+    case WM_BUTTON1MOTIONSTART:
+    case WM_BUTTON1MOTIONEND:
+    case WM_BUTTON3MOTIONSTART:
+    case WM_BUTTON3MOTIONEND:
+        //no break; translate to WM_MOUSEMOVE
+        //Some applications (e.g. Unreal) retrieve all mouse messages
+        //when a mouse button is pressed and don't expect WM_NULL
 
     case WM_MOUSEMOVE:
     {
