@@ -1,4 +1,4 @@
-/* $Id: dibitmap.cpp,v 1.36 2002-12-30 14:05:21 sandervl Exp $ */
+/* $Id: dibitmap.cpp,v 1.37 2003-01-03 21:42:55 sandervl Exp $ */
 
 /*
  * GDI32 dib & bitmap code
@@ -37,12 +37,6 @@ HBITMAP WIN32API CreateDIBitmap(HDC hdc, const BITMAPINFOHEADER *lpbmih,
     HBITMAP rc;
     DWORD bitfields[3];
     WORD *newbits = NULL;
-
-    //SvL: Completely wrong result when creating a 1bpp bitmap here (converted
-    //     to 8bpp by Open32)
-    if(lpbmih->biBitCount == 1) {
-        dprintf(("WARNING: CreateDIBitmap doesn't handle 1bpp bitmaps very well!!!!!"));
-    }
 
     //TEMPORARY HACK TO PREVENT CRASH IN OPEN32 (WSeB GA)
     iHeight = lpbmih->biHeight;
