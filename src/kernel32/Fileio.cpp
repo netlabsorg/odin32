@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.7 1999-07-13 10:38:33 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.8 1999-08-24 23:46:36 phaller Exp $ */
 
 /*
  *
@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "unicode.h"
+#include <heapstring.h>
 #include "handlemanager.h"
 #include "devio.h"
 
@@ -73,7 +74,9 @@ HFILE  WIN32API CreateFileW(LPCWSTR  arg1,
 //******************************************************************************
 HANDLE WIN32API FindFirstFileA(LPCSTR arg1, WIN32_FIND_DATAA * arg2)
 {
-    dprintf(("KERNEL32:  FindFirstFile %s\n", arg1));
+    dprintf(("KERNEL32:  FindFirstFile(%s,%08xh)\n",
+             arg1,
+             arg2));
 
     return O32_FindFirstFile(arg1, arg2);
 }
@@ -81,16 +84,32 @@ HANDLE WIN32API FindFirstFileA(LPCSTR arg1, WIN32_FIND_DATAA * arg2)
 //******************************************************************************
 HANDLE WIN32API FindFirstFileW(LPCWSTR arg1, WIN32_FIND_DATAW *  arg2)
 {
- HANDLE rc;
- char  *astring;
+  HANDLE           rc;
+  char             *astring;
+  WIN32_FIND_DATAA wfda;
 
-    dprintf(("KERNEL32: FindFirstFileW: not implemented!!"));
+  dprintf(("KERNEL32: FindFirstFileW(%08xh, %08xh)",
+           arg1,
+           arg2));
 
-    astring = UnicodeToAsciiString((LPWSTR)arg1);
-//    rc = O32_FindFirstFile(astring, arg2);
-    rc = 0;
-    FreeAsciiString(astring);
-    return(rc);
+  astring = UnicodeToAsciiString((LPWSTR)arg1);
+  rc = FindFirstFileA(astring, &wfda);
+
+  // convert back the result structure
+  memcpy(arg2,
+         &wfda,
+         sizeof(WIN32_FIND_DATAA));
+
+  lstrcpynAtoW (arg2->cFileName,
+                wfda.cFileName,
+                sizeof(wfda.cFileName));
+
+  lstrcpynAtoW (arg2->cAlternateFileName,
+                wfda.cAlternateFileName,
+                sizeof(wfda.cAlternateFileName));
+
+  FreeAsciiString(astring);
+  return(rc);
 }
 //******************************************************************************
 //******************************************************************************
@@ -104,9 +123,29 @@ BOOL WIN32API FindNextFileA(HANDLE arg1, WIN32_FIND_DATAA * arg2)
 //******************************************************************************
 BOOL WIN32API FindNextFileW(HANDLE arg1, WIN32_FIND_DATAW * arg2)
 {
-    dprintf(("KERNEL32:  FindNextFileW Not properly implemented!\n"));
-//    return O32_FindNextFile(arg1, arg2);
-    return 0;
+  WIN32_FIND_DATAA wfda;
+  BOOL             rc;
+
+  dprintf(("KERNEL32:  FindNextFileW(%08xh, %08xh)\n",
+           arg1,
+           arg2));
+
+  rc = FindNextFileA(arg1, &wfda);
+
+  // convert back the result structure
+  memcpy(arg2,
+         &wfda,
+         sizeof(WIN32_FIND_DATAA));
+
+  lstrcpynAtoW (arg2->cFileName,
+                wfda.cFileName,
+                sizeof(wfda.cFileName));
+
+  lstrcpynAtoW (arg2->cAlternateFileName,
+                wfda.cAlternateFileName,
+                sizeof(wfda.cAlternateFileName));
+
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************
