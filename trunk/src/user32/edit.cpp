@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.22 1999-12-03 17:30:15 cbratschi Exp $ */
+/* $Id: edit.cpp,v 1.23 1999-12-16 16:53:56 cbratschi Exp $ */
 /*
  *      Edit control
  *
@@ -11,7 +11,7 @@
  * WINE version: 991031
  *
  * Status:  complete
- * Version: 5.00 (without undocumented specs)
+ * Version: 5.00
  */
 
 /* CB: todo
@@ -19,10 +19,6 @@
   - text alignment for single and multi line (ES_LEFT, ES_RIGHT, ES_CENTER)
     new in Win98, Win2k: for single line too
   - WinNT/Win2k: higher size limits (single: 0x7FFFFFFE, multi: none)
-  - problems with selection update: perhaps an Open32 bug
-    TextOutA: draws at wrong position
-    I've removed the workarounds, it makes no sense to fix GDI32 bugs here
-    -> rewrite TextOut and TabbedTextOut
 */
 
 #include <os2win.h>
@@ -1149,25 +1145,25 @@ static void EDIT_ML_InvalidateText(HWND hwnd, EDITSTATE *es, INT start, INT end)
                 EDIT_GetLineRect(hwnd, es, sl, sc, ec, &rcLine);
 
                 if (IntersectRect(&rcUpdate, &rcWnd, &rcLine))
-                        InvalidateRect(hwnd, &rcUpdate, FALSE);
+                        InvalidateRect(hwnd, &rcUpdate, TRUE);
         } else {
                 EDIT_GetLineRect(hwnd, es, sl, sc,
                                 EDIT_EM_LineLength(hwnd, es,
                                         EDIT_EM_LineIndex(hwnd, es, sl)),
                                 &rcLine);
                 if (IntersectRect(&rcUpdate, &rcWnd, &rcLine))
-                        InvalidateRect(hwnd, &rcUpdate, FALSE);
+                        InvalidateRect(hwnd, &rcUpdate, TRUE);
                 for (l = sl + 1 ; l < el ; l++) {
                         EDIT_GetLineRect(hwnd, es, l, 0,
                                 EDIT_EM_LineLength(hwnd, es,
                                         EDIT_EM_LineIndex(hwnd, es, l)),
                                 &rcLine);
                         if (IntersectRect(&rcUpdate, &rcWnd, &rcLine))
-                                InvalidateRect(hwnd, &rcUpdate, FALSE);
+                                InvalidateRect(hwnd, &rcUpdate, TRUE);
                 }
                 EDIT_GetLineRect(hwnd, es, el, 0, ec, &rcLine);
                 if (IntersectRect(&rcUpdate, &rcWnd, &rcLine))
-                        InvalidateRect(hwnd, &rcUpdate, FALSE);
+                        InvalidateRect(hwnd, &rcUpdate, TRUE);
         }
         ShowCaret(hwnd);
 }
@@ -1573,12 +1569,60 @@ static void EDIT_PaintLine(HWND hwnd, EDITSTATE *es, HDC dc, INT line, BOOL rev)
         s = MIN(li + ll, MAX(li, s));
         e = MIN(li + ll, MAX(li, e));
 
-        if (rev && (s != e) &&
-                        ((es->flags & EF_FOCUSED) || (es->style & ES_NOHIDESEL)))
+        if (rev && (s != e) && ((es->flags & EF_FOCUSED) || (es->style & ES_NOHIDESEL)))
         {
-          x += EDIT_PaintText(hwnd, es, dc, x, y, line, 0, s - li, FALSE);
-          x += EDIT_PaintText(hwnd, es, dc, x, y, line, s - li, e - s, TRUE);
-          x += EDIT_PaintText(hwnd, es, dc, x, y, line, e - li, li + ll - e, FALSE);
+          HRGN oldRgn,newRgn,combRgn;
+          RECT rect;
+          //CB: OS/2 has problems with relative string positions (i.e. Communicator)
+          //    fix: always calculate string from starting point, tab bugs fixed too
+          //    otherwise we have 'dancing characters'
+
+          if (!(es->style & ES_MULTILINE))
+          {
+            SIZE size;
+
+            rect.top = y;
+            rect.bottom = y+es->line_height;
+            GetTextExtentPoint32A(dc,es->text+li,s-li,&size);
+            rect.left = x+size.cx;
+            GetTextExtentPoint32A(dc,es->text+li,e-li,&size);
+            rect.right = x+size.cx;
+
+            oldRgn = CreateRectRgnIndirect(&rect); //dummy parameter
+            GetClipRgn(dc,oldRgn);
+            newRgn = CreateRectRgnIndirect(&rect);
+            combRgn = CreateRectRgnIndirect(&rect); //dummy parameter
+            CombineRgn(combRgn,oldRgn,newRgn,RGN_XOR);
+            SelectClipRgn(dc,combRgn);
+            EDIT_PaintText(hwnd,es,dc,x,y,line,0,ll,FALSE);
+            CombineRgn(combRgn,oldRgn,newRgn,RGN_AND);
+            SelectClipRgn(dc,combRgn);
+            EDIT_PaintText(hwnd,es,dc,x,y,line,0,e-li,TRUE);
+            DeleteObject(oldRgn);
+            DeleteObject(newRgn);
+            DeleteObject(combRgn);
+          } else
+          {
+            rect.top = y;
+            rect.bottom = y+es->line_height;
+            rect.left = x+LOWORD(TabbedTextOutA(dc,x,y,es->text+li,s-li,es->tabs_count,es->tabs,es->format_rect.left-es->x_offset));
+            rect.right = x+LOWORD(TabbedTextOutA(dc,x,y,es->text+li,e-li,es->tabs_count,es->tabs,es->format_rect.left-es->x_offset));
+
+            oldRgn = CreateRectRgnIndirect(&rect); //dummy parameter
+            GetClipRgn(dc,oldRgn);
+            newRgn = CreateRectRgnIndirect(&rect);
+            combRgn = CreateRectRgnIndirect(&rect); //dummy parameter
+            CombineRgn(combRgn,oldRgn,newRgn,RGN_XOR);
+            SelectClipRgn(dc,combRgn);
+            EDIT_PaintText(hwnd,es,dc,x,y,line,0,ll,FALSE);
+            CombineRgn(combRgn,oldRgn,newRgn,RGN_AND);
+            SelectClipRgn(dc,combRgn);
+            EDIT_PaintText(hwnd,es,dc,x,y,line,0,e-li,TRUE);
+            SelectClipRgn(dc,oldRgn);
+            DeleteObject(oldRgn);
+            DeleteObject(newRgn);
+            DeleteObject(combRgn);
+          }
         } else  EDIT_PaintText(hwnd, es, dc, x, y, line, 0, ll, FALSE);
 }
 
@@ -1599,12 +1643,14 @@ static INT EDIT_PaintText(HWND hwnd, EDITSTATE *es, HDC dc, INT x, INT y, INT li
                 return 0;
         BkColor = GetBkColor(dc);
         TextColor = GetTextColor(dc);
-        if (rev) {
+        if (rev)
+        {
                 SetBkColor(dc, GetSysColor(COLOR_HIGHLIGHT));
                 SetTextColor(dc, GetSysColor(COLOR_HIGHLIGHTTEXT));
         }
         li = EDIT_EM_LineIndex(hwnd, es, line);
-        if (es->style & ES_MULTILINE) {
+        if (es->style & ES_MULTILINE)
+        {
                 ret = (INT)LOWORD(TabbedTextOutA(dc, x, y, es->text + li + col, count,
                                         es->tabs_count, es->tabs, es->format_rect.left - es->x_offset));
         } else
@@ -1623,7 +1669,8 @@ static INT EDIT_PaintText(HWND hwnd, EDITSTATE *es, HDC dc, INT x, INT y, INT li
           if (es->style & ES_PASSWORD)
             HeapFree(es->heap, 0, text);
         }
-        if (rev) {
+        if (rev)
+        {
                 SetBkColor(dc, BkColor);
                 SetTextColor(dc, TextColor);
         }

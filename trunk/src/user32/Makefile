@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.48 1999-12-16 00:11:45 sandervl Exp $
+# $Id: Makefile,v 1.49 1999-12-16 16:53:56 cbratschi Exp $
 
 #
 # PD-Win32 API
@@ -41,7 +41,7 @@ OBJS =  user32.obj loadres.obj \
         oslibutil.obj oslibmsg.obj dib.obj oslibdos.obj win32wmdichild.obj \
         winprop.obj wingdi.obj oslibgdi.obj winaccel.obj win32wbasepos.obj \
         oslibres.obj dummy.obj oslibmenu.obj dc.obj timer.obj \
-        caret.obj resource.obj winproc.obj \
+        caret.obj resource.obj winproc.obj text.obj \
         windlgmsg.obj windlg.obj win32wdesktop.obj
 
 
@@ -51,23 +51,23 @@ all: $(TARGET).dll $(TARGET).lib
 $(TARGET).dll: $(OBJS) $(TARGET).def $(TARGET).lrf
 !ifdef DEBUG
 !ifdef NODEBUGINFO
-	ilink /nodeb /map /noe /NOD /NoLogo /NOFREE @$(TARGET).lrf
+        ilink /nodeb /map /noe /NOD /NoLogo /NOFREE @$(TARGET).lrf
 !else
-	ilink /de /map  /noe /NOD /dbgpack /NoLogo /NOFREE @$(TARGET).lrf
+        ilink /de /map  /noe /NOD /dbgpack /NoLogo /NOFREE @$(TARGET).lrf
 !endif
 !else
-	ilink /map  /noe /NOD /NoLogo /FREE @$(TARGET).lrf
+        ilink /map  /noe /NOD /NoLogo /FREE @$(TARGET).lrf
 !endif
         $(CP) $@ $(PDWIN32_BIN)
 
 $(TARGET).lrf: makefile
         @echo Creating file <<$(@B).lrf
 $(OBJS)
-$(PDWIN32_LIB)/pmwinx.lib 
-$(PDWIN32_LIB)/gdi32.lib 
-$(PDWIN32_LIB)/kernel32.lib 
+$(PDWIN32_LIB)/pmwinx.lib
+$(PDWIN32_LIB)/gdi32.lib
+$(PDWIN32_LIB)/kernel32.lib
 $(PDWIN32_LIB)/libuls.lib
-$(PDWIN32_LIB)/odincrt.lib 
+$(PDWIN32_LIB)/odincrt.lib
 OS2386.LIB
 $(RTLLIB_O)
 $(TARGET).def
@@ -81,8 +81,8 @@ $(TARGET)exp.def: $(TARGET).def
         $(IMPDEF) $** $@
 
 
-resource.asm: user32.rc 
-    $(RC) $(RCFLAGS) -o resource.asm user32.rc 
+resource.asm: user32.rc
+    $(RC) $(RCFLAGS) -o resource.asm user32.rc
 
 resource.obj: resource.asm
 
@@ -147,6 +147,7 @@ oslibdos.obj:   oslibdos.cpp oslibdos.h
 dc.obj:         dc.cpp win32wbase.h dc.h dcdata.h
 timer.obj:      timer.cpp win32wbase.h timer.h
 caret.obj:      caret.cpp win32wbase.h caret.h dcdata.h
+text.obj:       text.cpp
 
 clipboard.obj:  clipboard.cpp
 dib.obj:        dib.cpp dib.h
