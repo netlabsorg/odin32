@@ -1,4 +1,4 @@
-/* $Id: dcscroll.cpp,v 1.2 2001-09-05 13:53:50 bird Exp $ */
+/* $Id: dcscroll.cpp,v 1.3 2003-01-10 17:11:18 sandervl Exp $ */
 /*
  * ScrollDC implementation
  *
@@ -33,11 +33,11 @@ BOOL WINAPI ScrollDC( HDC hdc, INT dx, INT dy, const RECT *rc,
     /* compute device clipping region (in device coordinates) */
 
     if ( rc )
-    rect = *rc;
+        rect = *rc;
     else /* maybe we should just return FALSE? */
     {
         DebugInt3();
-    GetClipBox( hdc, &rect );
+        GetClipBox( hdc, &rect );
     }
 
     LPtoDP( hdc, (LPPOINT)&rect, 2 );
@@ -46,13 +46,15 @@ BOOL WINAPI ScrollDC( HDC hdc, INT dx, INT dy, const RECT *rc,
     {
         rClip = *prLClip;
         LPtoDP( hdc, (LPPOINT)&rClip, 2 );
-    IntersectRect( &rClip, &rect, &rClip );
+        IntersectRect( &rClip, &rect, &rClip );
     }
     else
         rClip = rect;
 
     //limit scrolling to DC's clip rectangle
     GetClipBox( hdc, &rSrc );
+    LPtoDP(hdc, (LPPOINT)&rSrc, 2);
+
     IntersectRect( &rClip, &rSrc, &rClip );
     IntersectRect( &rect, &rSrc, &rect );
 
@@ -103,19 +105,17 @@ BOOL WINAPI ScrollDC( HDC hdc, INT dx, INT dy, const RECT *rc,
             CombineRgn( hrgn, hrgn, hrgn2, RGN_DIFF );
 
             if( rcUpdate )
-        {
-        GetRgnBox( hrgn, rcUpdate );
+            {
+                GetRgnBox( hrgn, rcUpdate );
 
-        /* Put the rcUpdate in logical coordinate */
-        DPtoLP( hdc, (LPPOINT)rcUpdate, 2 );
-        }
+                /* Put the rcUpdate in logical coordinate */
+                DPtoLP( hdc, (LPPOINT)rcUpdate, 2 );
+            }
             if (!hrgnUpdate) DeleteObject( hrgn );
             DeleteObject( hrgn2 );
 
     }
-
     return TRUE;
-
 }
 //******************************************************************************
 //******************************************************************************
