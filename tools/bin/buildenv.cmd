@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.36 2002-10-15 12:31:47 bird Exp $
+/* $Id: buildenv.cmd,v 1.37 2002-11-01 19:40:59 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -26,7 +26,7 @@
     /*
      * Version
      */
-    sVersion = '1.0.9 [2002-10-15]';
+    sVersion = '1.0.10 [2002-11-01]';
 
     /*
      * Create argument array with lowercase arguments.
@@ -121,6 +121,7 @@
     aCfg.i.sId = 'ida40';           aCfg.i.sGrp = 'misc';       aCfg.i.sSet = 'IDA40';                  aCfg.i.sDesc = 'Interactive DisAssembler (IDA) v4.0 (historical)'; i = i + 1;
     aCfg.i.sId = 'ida414';          aCfg.i.sGrp = 'misc';       aCfg.i.sSet = 'IDA414';                 aCfg.i.sDesc = 'Interactive DisAssembler (IDA) v4.14'; i = i + 1;
     aCfg.i.sId = 'idasdk';          aCfg.i.sGrp = 'misc';       aCfg.i.sSet = 'IDASDK';                 aCfg.i.sDesc = 'Interactive DisAssembler (IDA) SDK'; i = i + 1;
+    aCfg.i.sId = 'java131';         aCfg.i.sGrp = 'java';       aCfg.i.sSet = 'Java131';                aCfg.i.sDesc = 'Java v1.3.1 (co131-20020710)'; i = i + 1;
     aCfg.i.sId = 'mode12050';       aCfg.i.sGrp = 'misc';       aCfg.i.sSet = 'Mode,120,50';            aCfg.i.sDesc = 'mode 120,50';               i = i + 1;
     aCfg.i.sId = 'mode8050';        aCfg.i.sGrp = 'misc';       aCfg.i.sSet = 'Mode,80,50';             aCfg.i.sDesc = 'mode 80,50';                i = i + 1;
     aCfg.i.sId = 'mscv6';           aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'MSCV6_32';               aCfg.i.sDesc = 'MicroSoft C v6.0 32-bit';   i = i + 1;
@@ -580,7 +581,7 @@ return (iRc = 0);
  * Checks if a file exists.
  * @param   sFile       Name of the file to look for.
  * @param   fQuiet      Flag which tells whether to be quiet or not.
- * @param   fOptional   Flag to say that this file is optiona.
+ * @param   fOptional   Flag to say that this file is optional.
  * @returns TRUE if file exists.
  *          FALSE if file doesn't exists.
  */
@@ -841,6 +842,7 @@ PathSetDefault: procedure expose aCfg. aPath. sPathFile
         aPath.i.sPId = 'ida40';                     aPath.i.sPath = 'f:\ida401';                    i = i + 1;
         aPath.i.sPId = 'ida414';                    aPath.i.sPath = 'f:\ida414';                    i = i + 1;
         aPath.i.sPId = 'idasdk';                    aPath.i.sPath = 'f:\idasdk';                    i = i + 1;
+        aPath.i.sPId = 'java131';                   aPath.i.sPath = 'e:\java131';                   i = i + 1;
         aPath.i.sPId = 'ddk';                       aPath.i.sPath = 'f:\ddk\april02';               i = i + 1;
         aPath.i.sPId = 'ddkbase';                   aPath.i.sPath = 'f:\ddk\april02\base';          i = i + 1;
         aPath.i.sPId = 'ddkvideo';                  aPath.i.sPath = 'f:\ddk\april02\video';         i = i + 1;
@@ -940,6 +942,7 @@ PathSetDefault: procedure expose aCfg. aPath. sPathFile
         aPath.i.sPId = 'ida40';                     aPath.i.sPath = 'e:\ida401';                    i = i + 1; */
         aPath.i.sPId = 'ida414';                    aPath.i.sPath = 'd:\dev\ida\v414';              i = i + 1;
       /*aPath.i.sPId = 'idasdk';                    aPath.i.sPath = 'e:\idasdk';                    i = i + 1; */
+        aPath.i.sPId = 'java131';                   aPath.i.sPath = 'd:\java131';                   i = i + 1;
         aPath.i.sPId = 'ddk';                       aPath.i.sPath = 'd:\dev\ddk\june02';            i = i + 1;
         aPath.i.sPId = 'ddkbase';                   aPath.i.sPath = 'd:\dev\ddk\june02\base';       i = i + 1;
         aPath.i.sPId = 'ddkvideo';                  aPath.i.sPath = 'd:\dev\ddk\june02\video';      i = i + 1;
@@ -2187,6 +2190,104 @@ IDA414: procedure expose aCfg. aPath. sPathFile
         |   \CfgVerifyFile(sPathIDA'\pc.dll', fQuiet),
         ) then
         return 2;
+return 0;
+
+
+/*
+ * Interactive Disassembler (IDA) Plugin SDK (v5.0?)
+ */
+IDASDK: procedure expose aCfg. aPath. sPathFile
+    parse arg sToolId,sOperation,fRM,fQuiet
+    /*
+     * IDA main directory.
+     */
+    sPathIDASDK = PathQuery('idasdk', sToolId, sOperation);
+    if (sPathIDASDK = '') then
+        return 1;
+    /* If config operation we're done now. */
+    if (pos('config', sOperation) > 0) then
+        return 0;
+
+    /*
+     * Installing the environment variables.
+     */
+    call EnvSet      fRM, 'PATH_IDASDK',    sPathIDASDK
+    call EnvAddFront fRM, 'include',        sPathIDASDK'\include;'
+    call EnvAddFront fRM, 'lib',            sPathIDASDK'\libwat.os2;'
+    call EnvAddFront fRM, 'path',           sPathIDASDK'\bin\os2;'
+    call EnvAddFront fRM, 'beginlibpath',   sPathIDASDK'\bin\os2;'
+
+    /*
+     * Verify.
+     */
+    if (pos('verify', sOperation) <= 0) then
+        return 0;
+    if (    \CfgVerifyFile(sPathIDASDK'\os2wat.cfg', fQuiet),
+        |   \CfgVerifyFile(sPathIDASDK'\d32wat.cfg', fQuiet),
+        |   \CfgVerifyFile(sPathIDASDK'\include\exehdr.h', fQuiet),
+        |   \CfgVerifyFile(sPathIDASDK'\include\ida.hpp', fQuiet),
+        |   \CfgVerifyFile(sPathIDASDK'\include\vm.hpp', fQuiet),
+        |   \CfgVerifyFile(sPathIDASDK'\libwat.os2\ida.lib', fQuiet),
+        |   \CfgVerifyFile(sPathIDASDK'\libwat.d32\ida.lib', fQuiet),
+        |   \CfgVerifyFile(sPathIDASDK'\libwat.d32\INIRT386.OBJ', fQuiet),
+      /*  |   \CfgVerifyFile(sPathIDASDK'\libbor.d32\ida.lib', fQuiet)*/,
+        ) then
+        return 2;
+return 0;
+
+
+/*
+ * JAVA v1.3.1 (latest)
+ */
+Java131: procedure expose aCfg. aPath. sPathFile
+    parse arg sToolId,sOperation,fRM,fQuiet
+    /*
+     * JAVA main directory.
+     */
+    sPathJava = PathQuery('java131', sToolId, sOperation);
+    if (sPathJava = '') then
+        return 1;
+    /* If config operation we're done now. */
+    if (pos('config', sOperation) > 0) then
+        return 0;
+
+    /*
+     * Installing the environment variables.
+     */
+    call EnvSet      fRM, 'PATH_JAVA',      sPathJava
+    call EnvSet      fRM, 'PATH_JAVA131',   sPathJava
+    call EnvAddFront fRM, 'path',           sPathJava'\bin;'sPathJava'\jre\bin;'
+    call EnvAddFront fRM, 'beginlibpath',   sPathJava'\jre\dll;'sPathJava'\jre\bin;'sPathJava'\icatjava\dll;'
+/*    call EnvAddFront fRM, 'classpath',      sPathJava'\jre\dll;'sPathJava'\jre\bin;'sPathJava'\icatjava\dll;'
+*/
+    /*
+     * Verify.
+     */
+    if (pos('verify', sOperation) <= 0) then
+        return 0;
+    if (    \CfgVerifyFile(sPathJava'\bin\javac.exe', fQuiet),
+        |   \CfgVerifyFile(sPathJava'\bin\jar.exe', fQuiet),
+        |   \CfgVerifyFile(sPathJava'\lib\tools.jar', fQuiet),
+        |   \CfgVerifyFile(sPathJava'\lib\javai.lib', fQuiet),
+        |   \CfgVerifyFile(sPathJava'\jre\dll\jv12mi36.dll', fQuiet),
+        |   \CfgVerifyFile(sPathJava'\jre\bin\java.exe', fQuiet),
+        |   \CfgVerifyFile(sPathJava'\jre\bin\jitc.dll', fQuiet),
+        |   \CfgVerifyFile(sPathJava'\jre\bin\javaw.exe', fQuiet),
+        |   \CfgVerifyFile(sPathJava'\jre\bin\rmid.exe', fQuiet),
+        |   \CfgVerifyFile(sPathJava'\jre\bin\classic\jvm.dll', fQuiet),
+        |   \CfgVerifyFile(sPathJava'\include\int64_md.h', fQuiet),
+        |   \CfgVerifyFile(sPathJava'\include\jawt.h', fQuiet),
+        |   \CfgVerifyFile(sPathJava'\include\jawt_md.h', fQuiet),
+        |   \CfgVerifyFile(sPathJava'\include\jni.h', fQuiet),
+        |   \CfgVerifyFile(sPathJava'\include\jniproto_md.h', fQuiet),
+        |   \CfgVerifyFile(sPathJava'\include\jni_md.h', fQuiet),
+        |   \CfgVerifyFile(sPathJava'\include\jvmdi.h', fQuiet),
+        |   \CfgVerifyFile(sPathJava'\include\jvmpi.h', fQuiet),
+        |   \CfgVerifyFile(sPathJava'\jre\bin\jitc_g.dll', fQuiet, 1),
+        |   \CfgVerifyFile(sPathJava'\jre\bin\classic\jvm_g.dll', fQuiet, 1),
+        ) then
+        return 2;
+
 return 0;
 
 
