@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.92 2000-04-10 19:40:46 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.93 2000-04-18 11:13:01 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -283,6 +283,7 @@ Win32BaseWindow *FindWindowById(int id);
     static HWND Win32ToOS2Handle(HWND hwnd);
     static HWND Win32ToOS2FrameHandle(HWND hwnd);
     static HWND OS2ToWin32Handle(HWND hwnd);
+    static BOOL IsOS2FrameWindowHandle(HWND hwndWin32, HWND hwndOS2);
 
 static Win32BaseWindow *GetWindowFromHandle(HWND hwnd);
 static Win32BaseWindow *GetWindowFromOS2Handle(HWND hwnd);

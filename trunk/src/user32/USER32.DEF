@@ -1,4 +1,4 @@
-; $Id: USER32.DEF,v 1.29 2000-02-23 17:05:15 cbratschi Exp $
+; $Id: USER32.DEF,v 1.30 2000-04-18 11:12:59 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
@@ -634,6 +634,7 @@ EXPORTS
 
     Win32ToOS2Handle__FUl      = Win32ToOS2Handle__15Win32BaseWindowFUl @2006
     OS2ToWin32Handle__FUl      = OS2ToWin32Handle__15Win32BaseWindowFUl @2012
+;    IsOS2FrameWindowHandle__FUlUl = IsOS2FrameWindowHandle__15Win32BaseWindowFUlUl @2013
 
     _MOUSE_Enable@4                                              @2007
     _KeyTranslatePMToWin@4                                       @2008
