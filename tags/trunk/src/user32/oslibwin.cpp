@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.141 2003-03-27 11:02:26 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.142 2003-04-11 15:22:33 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -61,7 +61,7 @@ BOOL OSLibWinSetOwner(HWND hwnd, HWND hwndOwner)
 HWND OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle, ULONG dwOSFrameStyle,
                           char *pszName, HWND Owner, ULONG fHWND_BOTTOM,
                           ULONG id, BOOL fTaskList,BOOL fShellPosition,
-                          int classStyle, HWND *hwndFrame)
+                          DWORD classStyle, HWND *hwndFrame)
 {
  HWND  hwndClient;
  ULONG dwFrameStyle = 0;
@@ -100,6 +100,7 @@ HWND OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle, ULONG dwOSFrameStyle
                            pszName, (dwWinStyle & ~WS_CLIPCHILDREN), 0, 0, 0, 0,
                            Owner, (fHWND_BOTTOM) ? HWND_BOTTOM : HWND_TOP,
                            id, (PVOID)&FCData, NULL);
+
     if(fOS2Look && *hwndFrame) {
         FCData.flCreateFlags = dwOSFrameStyle;
         WinCreateFrameControls(*hwndFrame, &FCData, NULL);
@@ -141,7 +142,9 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle,
   if(dwExStyle & WS_EX_TOPMOST_W)
         *OSWinStyle |= WS_TOPMOST;
 
-  if(fOS2Look) {
+  //WS_EX_TOOLWINDOW is incompatible with the OS2Look (titlebar thinner + smaller font)
+  if(fOS2Look && !(dwExStyle & WS_EX_TOOLWINDOW_W)) 
+  {
       if((dwStyle & WS_CAPTION_W) == WS_CAPTION_W) {
           *OSFrameStyle = FCF_TITLEBAR;
 
@@ -175,6 +178,12 @@ BOOL OSLibWinPositionFrameControls(HWND hwndFrame, RECTLOS2 *pRect, DWORD dwStyl
   static int minmaxheight = 0;
 
   dprintf(("OSLibWinPositionFrameControls %x (%x,%x) %x %d", hwndFrame, dwStyle, dwExStyle, hSysMenuIcon, drawCloseButton));
+
+  //WS_EX_TOOLWINDOW is incompatible with the OS2Look (titlebar thinner + smaller font)
+  if(dwExStyle & WS_EX_TOOLWINDOW_W) {
+      DebugInt3();
+      return FALSE;
+  }
 
   if(minmaxwidth == 0) {
       minmaxwidth  = WinQuerySysValue(HWND_DESKTOP, SV_CXMINMAXBUTTON);
@@ -1074,7 +1083,8 @@ void OSLibSetWindowStyle(HWND hwndFrame, HWND hwndClient, ULONG dwStyle,
     else 
       dwWinStyle &= ~WS_MAXIMIZED;
 
-    if(fOS2Look) {
+    //WS_EX_TOOLWINDOW is incompatible with the OS2Look (titlebar thinner + smaller font)
+    if(fOS2Look && !(dwExStyle & WS_EX_TOOLWINDOW_W)) {
         ULONG OSFrameStyle = 0;
         SWP rc1,rc2,rc3;
         int totalwidth = 0;
@@ -1163,8 +1173,8 @@ void OSLibSetWindowStyle(HWND hwndFrame, HWND hwndClient, ULONG dwStyle,
    } // os2look
 
    if(dwWinStyle != dwOldWinStyle) {
-          dprintf(("Setting new window U long"));
-          WinSetWindowULong(hwndFrame, QWL_STYLE, dwWinStyle);
+       dprintf(("Setting new window U long"));
+       WinSetWindowULong(hwndFrame, QWL_STYLE, dwWinStyle);
    }
 
 }

@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.74 2003-03-27 11:02:26 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.75 2003-04-11 15:22:33 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -43,7 +43,7 @@ BOOL  OSLibWinSetOwner(HWND hwnd, HWND hwndOwner);
 HWND  OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle, ULONG dwOSFrameStyle,
                            char *pszName, HWND Owner, ULONG fBottom,
                            ULONG id, BOOL fTaskList,BOOL fShellPosition, 
-                           int classStyle, HWND *hwndFrame);
+                           DWORD classStyle, HWND *hwndFrame);
 
 BOOL  OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle, 
                            ULONG *OSFrameStyle);
