@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.973 2000-06-07 14:46:25 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.974 2000-06-07 21:46:52 sandervl Exp $ */
 
  2000-06-07: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:       Fixed wrong dispatch of WM_NCHITTEST
@@ -20,6 +20,7 @@
                     Manual minimize, maximize & restore in ShowWindow + fixes
                     TODO: Repaint problems, move child windows when client position/size
                           changes
+                    SetParent/GetParent fixes for desktop parent.
     - SHELL32:      Disabled system tray window for now. (appears in top/right
                     of the desktop otherwise)
 
