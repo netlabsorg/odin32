@@ -1,4 +1,4 @@
-/* $Id: oledlg.cpp,v 1.1 1999-08-30 22:16:48 sandervl Exp $ */
+/* $Id: oledlg.cpp,v 1.2 1999-09-23 09:38:05 sandervl Exp $ */
 /*
  *	OLEDLG library
  *
@@ -56,217 +56,286 @@
 DEFAULT_DEBUG_CHANNEL(ole)
 
 /***********************************************************************
- *           OleUIAddVerbMenu32A (OLEDLG.1)
+ *           OleUIAddVerbMenuA (OLEDLG.1)
  */
 BOOL WINAPI OleUIAddVerbMenuA( LPOLEOBJECT lpOleObj, LPCSTR lpszShortType,
   HMENU hMenu, UINT uPos, UINT uIDVerbMin, UINT uIDVerbMax,
   BOOL bAddConvert, UINT idConvert, HMENU *lphMenu)
 {
+#ifdef DEBUG
+  dprintf(("OLEDLG: OleUIAddVerbMenuA not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
 /***********************************************************************
- *           OleUICanConvertOrActivateAs32 (OLEDLG.2)
+ *           OleUICanConvertOrActivateAs (OLEDLG.2)
  */
 BOOL WINAPI OleUICanConvertOrActivateAs(REFCLSID rClsid, BOOL fIsLinkedObject, WORD wFormat)
 {
+#ifdef DEBUG
+  dprintf(("OLEDLG: OleUICanConvertOrActivateAs not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
 /***********************************************************************
- *           OleUIInsertObject32A (OLEDLG.3)
+ *           OleUIInsertObjectA (OLEDLG.3)
  */
 UINT WINAPI OleUIInsertObjectA(LPOLEUIINSERTOBJECTA lpOleUIInsertObject)
 {
+#ifdef DEBUG
+  dprintf(("OLEDLG: OleUIInsertObjectA not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return OLEUI_FALSE;
 }
 
 /***********************************************************************
- *           OleUIPasteSpecial32A (OLEDLG.4)
+ *           OleUIPasteSpecialA (OLEDLG.4)
  */
 UINT WINAPI OleUIPasteSpecialA(LPOLEUIPASTESPECIALA lpOleUIPasteSpecial)
 {
+#ifdef DEBUG
+  dprintf(("OLEDLG: OleUIPasteSpecialA not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return OLEUI_FALSE;
 }
 
 /***********************************************************************
- *           OleUIEditLinks32A (OLEDLG.5)
+ *           OleUIEditLinksA (OLEDLG.5)
  */
 UINT WINAPI OleUIEditLinksA(LPOLEUIEDITLINKSA lpOleUIEditLinks)
 {
+#ifdef DEBUG
+  dprintf(("OLEDLG: OleUIEditLinksA not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return OLEUI_FALSE;
 }
 
 
 /***********************************************************************
- *           OleUIChangeIcon32A (OLEDLG.6)
+ *           OleUIChangeIconA (OLEDLG.6)
  */
 UINT WINAPI OleUIChangeIconA(LPOLEUICHANGEICONA lpOleUIChangeIcon)
 {
+#ifdef DEBUG
+  dprintf(("OLEDLG: OleUIChangeIconA not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return OLEUI_FALSE;
 }
 
 
 /***********************************************************************
- *           OleUIConvert32A (OLEDLG.7)
+ *           OleUIConvertA (OLEDLG.7)
  */
 UINT WINAPI OleUIConvertA(LPOLEUICONVERTA lpOleUIConvert)
 {
+#ifdef DEBUG
+  dprintf(("OLEDLG: OleUIConvertA not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return OLEUI_FALSE;
 }
 
 
 /***********************************************************************
- *           OleUIBusy32A (OLEDLG.8)
+ *           OleUIBusyA (OLEDLG.8)
  */
 UINT WINAPI OleUIBusyA(LPOLEUIBUSYA lpOleUIBusy)
 {
+#ifdef DEBUG
+  dprintf(("OLEDLG: OleUIBusyA not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return OLEUI_FALSE;
 }
 
 /***********************************************************************
- *           OleUIUpdateLinks32A (OLEDLG.9)
+ *           OleUIUpdateLinksA (OLEDLG.9)
  */
 BOOL WINAPI OleUIUpdateLinksA(LPOLEUILINKCONTAINERA lpOleUILinkCntr,
   HWND hwndParent, LPSTR lpszTitle, INT cLinks)
 {
+#ifdef DEBUG
+  dprintf(("OLEDLG: OleUIUpdateLinksA not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
 /***********************************************************************
- *           OleUIPromptUser32A (OLEDLG.10)
+ *           OleUIPromptUserA (OLEDLG.10)
  */
-INT __cdecl OleUIPromptUserA(INT nTemplate, HWND hwndParent, ...)
+INT CDECL OleUIPromptUserA(INT nTemplate, HWND hwndParent, ...)
 {
+#ifdef DEBUG
+  dprintf(("OLEDLG: OleUIPromptUserA not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return OLEUI_FALSE;
 }
 
 /***********************************************************************
- *           OleUIObjectProperties32A (OLEDLG.11)
+ *           OleUIObjectPropertiesA (OLEDLG.11)
  */
 UINT WINAPI OleUIObjectPropertiesA( LPOLEUIOBJECTPROPSA lpOleUIObjectProps)
 {
+#ifdef DEBUG
+  dprintf(("OLEDLG: OleUIObjectPropertiesA not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return OLEUI_FALSE;
 }
 
 /***********************************************************************
- *           OleUIChangeSource32A (OLEDLG.12)
+ *           OleUIChangeSourceA (OLEDLG.12)
  */
 UINT WINAPI OleUIChangeSourceA( LPOLEUICHANGESOURCEA lpOleUIChangeSource)
 {
+#ifdef DEBUG
+  dprintf(("OLEDLG: OleUIChangeSourceA not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return OLEUI_FALSE;
 }
 
 /***********************************************************************
- *           OleUIPromptUser32W (OLEDLG.13)
+ *           OleUIPromptUserW (OLEDLG.13)
  */
-INT __cdecl OleUIPromptUserW(INT nTemplate, HWND hwndParent, ...)
+INT CDECL OleUIPromptUserW(INT nTemplate, HWND hwndParent, ...)
 {
+#ifdef DEBUG
+  dprintf(("OLEDLG: OleUIPromptUserW not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return OLEUI_FALSE;
 }
 
 /***********************************************************************
- *           OleUIAddVerbMenu32W (OLEDLG.14)
+ *           OleUIAddVerbMenuW (OLEDLG.14)
  */
 BOOL WINAPI OleUIAddVerbMenuW( LPOLEOBJECT lpOleObj, LPCWSTR lpszShortType,
   HMENU hMenu, UINT uPos, UINT uIDVerbMin, UINT uIDVerbMax,
   BOOL bAddConvert, UINT idConvert, HMENU *lphMenu)
 {
+#ifdef DEBUG
+  dprintf(("OLEDLG: OleUIAddVerbMenuW not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
 /***********************************************************************
- *           OleUIBusy32W (OLEDLG.15)
+ *           OleUIBusyW (OLEDLG.15)
  */
 UINT WINAPI OleUIBusyW(LPOLEUIBUSYW lpOleUIBusy)
 {
+#ifdef DEBUG
+  dprintf(("OLEDLG: OleUIBusyW not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return OLEUI_FALSE;
 }
 
 /***********************************************************************
- *           OleUIChangeIcon32W (OLEDLG.16)
+ *           OleUIChangeIconW (OLEDLG.16)
  */
 UINT WINAPI OleUIChangeIconW( LPOLEUICHANGEICONW lpOleUIChangeIcon)
 {
+#ifdef DEBUG
+  dprintf(("OLEDLG: OleUIChangeIconW not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return OLEUI_FALSE;
 }
 
 /***********************************************************************
- *           OleUIChangeSource32W (OLEDLG.17)
+ *           OleUIChangeSourceW (OLEDLG.17)
  */
 UINT WINAPI OleUIChangeSourceW( LPOLEUICHANGESOURCEW lpOleUIChangeSource)
 {
+#ifdef DEBUG
+  dprintf(("OLEDLG: OleUIChangeSourceW not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return OLEUI_FALSE;
 }
 
 /***********************************************************************
- *           OleUIConvert32W (OLEDLG.18)
+ *           OleUIConvertW (OLEDLG.18)
  */
 UINT WINAPI OleUIConvertW(LPOLEUICONVERTW lpOleUIConvert)
 {
+#ifdef DEBUG
+  dprintf(("OLEDLG: OleUIConvertW not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return OLEUI_FALSE;
 }
 
 /***********************************************************************
- *           OleUIEditLinks32W (OLEDLG.19)
+ *           OleUIEditLinksW (OLEDLG.19)
  */
 UINT WINAPI OleUIEditLinksW(LPOLEUIEDITLINKSW lpOleUIEditLinks)
 {
+#ifdef DEBUG
+  dprintf(("OLEDLG: OleUIEditLinksW not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return OLEUI_FALSE;
 }
 
 /***********************************************************************
- *           OleUIInsertObject32W (OLEDLG.20)
+ *           OleUIInsertObjectW (OLEDLG.20)
  */
 UINT WINAPI OleUIInsertObjectW(LPOLEUIINSERTOBJECTW lpOleUIInsertObject)
 {
+#ifdef DEBUG
+  dprintf(("OLEDLG: OleUIInsertObjectW not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return OLEUI_FALSE;
 }
 
 /***********************************************************************
- *           OleUIObjectProperties32W (OLEDLG.21)
+ *           OleUIObjectPropertiesW (OLEDLG.21)
  */
 UINT WINAPI OleUIObjectPropertiesW( LPOLEUIOBJECTPROPSW lpOleUIObjectProps)
 {
+#ifdef DEBUG
+  dprintf(("OLEDLG: OleUIObjectPropertiesW not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return OLEUI_FALSE;
 }
 
 /***********************************************************************
- *           OleUIPasteSpecial32W (OLEDLG.22)
+ *           OleUIPasteSpecialW (OLEDLG.22)
  */
 UINT WINAPI OleUIPasteSpecialW(LPOLEUIPASTESPECIALW lpOleUIPasteSpecial)
 {
+#ifdef DEBUG
+  dprintf(("OLEDLG: OleUIPasteSpecialW not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return OLEUI_FALSE;
 }
 
 /***********************************************************************
- *           OleUIUpdateLinks32W (OLEDLG.23)
+ *           OleUIUpdateLinksW (OLEDLG.23)
  */
 BOOL WINAPI OleUIUpdateLinksW( LPOLEUILINKCONTAINERW lpOleUILinkCntr,
   HWND hwndParent, LPWSTR lpszTitle, INT cLinks)
 {
+#ifdef DEBUG
+  dprintf(("OLEDLG: OleUIUpdateLinksW not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }

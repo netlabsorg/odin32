@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 1999-08-25 11:26:16 sandervl Exp $
+# $Id: makefile,v 1.8 1999-09-23 09:38:05 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -29,7 +29,7 @@ OBJS =  odincrt.obj initterm.obj
 all: $(TARGET).dll $(TARGET).lib
 
 $(TARGET).dll: $(OBJS) $(RUNTIMELIBDEF)
-        $(LD) $(LDFLAGS_ODINCRT) -Fm -Fe$@ $(OBJS) $(RUNTIMELIBDEF)
+        $(LD) $(LDFLAGS_ODINCRT) -Fm -Fe$@ $(OBJS) $(RUNTIMELIBDEF) $(SOMLIB)
         $(CP) $@ $(PDWIN32_BIN)
 
 

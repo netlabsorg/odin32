@@ -1,4 +1,4 @@
-; $Id: crtdll.def,v 1.4 1999-09-18 15:58:35 sandervl Exp $
+; $Id: crtdll.def,v 1.5 1999-09-23 09:38:04 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY CRTDLL INITINSTANCE TERMINSTANCE
@@ -24,7 +24,7 @@ IMPORTS
 	NTDLL__strupr		= NTDLL._strupr
 	NTDLL__ultoa		= NTDLL._ultoa
 	NTDLL__vsnprintf	= NTDLL._vsnprintf
-	NTDLL__wcsicmp		= NTDLL._wcsicmp
+	_NTDLL__wcsicmp		= NTDLL._wcsicmp
 	NTDLL__wcslwr		= NTDLL._wcslwr
 	NTDLL__wcsnicmp		= NTDLL._wcsnicmp
 	NTDLL__wcsupr		= NTDLL._wcsupr
@@ -100,9 +100,9 @@ IMPORTS
 
 
 EXPORTS
-;   ??2@YAPAXI@Z						@1
-;   ??3@YAXPAX@Z						@2
-;   ?_set_new_handler@@YAP6AHI@ZP6AHI@Z@Z			@3
+    ??2@YAPAXI@Z		= _CRTDLL_new			@1
+    ??3@YAXPAX@Z		= _CRTDLL_delete		@2
+    ?_set_new_handler@@YAP6AHI@ZP6AHI@Z@Z = _CRTDLL_set_new_handler @3
 ;   _CIacos							@4
 ;   _CIasin							@5
 ;   _CIatan							@6
@@ -124,7 +124,7 @@ EXPORTS
     __GetMainArgs		= _CRTDLL__GetMainArgs		@22
     __argc_dll			= CRTDLL_argc_dll		@23
     __argv_dll			= CRTDLL_argv_dll		@24
-;   __dllonexit							@25
+    __dllonexit			= _CRTDLL___dllonexit		@25
 ;   __doserrno							@26
 ;   __fpecode							@27
     __isascii			= _CRTDLL___isascii		@28
@@ -146,12 +146,12 @@ EXPORTS
     _baseversion_dll		= CRTDLL_baseversion_dll	@44
 ;   _beep							@45
     _beginthread		= _CRTDLL__beginthread		@46
-;   _c_exit							@47
+    _c_exit			= _CRTDLL__c_exit		@47
 ;   _cabs							@48
-;   _cexit							@49
+    _cexit			= _CRTDLL__cexit		@49
 ;   _cgets							@50
     _chdir			= _CRTDLL__chdir		@51
-;   _chdrive							@52
+    _chdrive			= _CRTDLL__chdrive		@52
 ;   _chgsign							@53
 ;   _chmod							@54
 ;   _chsize							@55
@@ -238,7 +238,7 @@ EXPORTS
 ;    _initterm			= _CRTDLL__initterm		@135
     _initterm			= _DLL_InitTerm			@135
     _iob			= CRTDLL_iob			@136
-;   _isatty							@137
+    _isatty			= _CRTDLL__isatty		@137
     _isctype			= _CRTDLL__isctype		@138
     _ismbbalnum			= _CRTDLL__ismbbalnum		@139
     _ismbbalpha			= _CRTDLL__ismbbalpha		@140
@@ -283,7 +283,23 @@ EXPORTS
     _ltoa			= NTDLL__ltoa			@179
     _makepath			= _CRTDLL__makepath		@180
     _matherr			= _CRTDLL__matherr		@181
-
+    _mbbtombc			= _CRTDLL__mbbtombc		@182
+    _mbbtype			= _CRTDLL__mbbtype		@183
+    _mbccpy			= _CRTDLL__mbccpy		@184
+    _mbcjistojms		= _CRTDLL__mbcjistojms		@185
+    _mbcjmstojis		= _CRTDLL__mbcjmstojis		@186
+    _mbclen			= _CRTDLL__mbclen		@187
+    _mbctohira			= _CRTDLL__mbctohira		@188
+    _mbctokata			= _CRTDLL__mbctokata		@189
+    _mbctolower			= _CRTDLL__mbctolower		@190
+    _mbctombb			= _CRTDLL__mbctombb		@191
+    _mbctoupper			= _CRTDLL__mbctoupper		@192
+;   _mbctype							@193
+    _mbsbtype			= _CRTDLL__mbsbtype		@194
+    _mbscat			= _CRTDLL__mbscat		@195
+    _mbschr			= _CRTDLL__mbschr		@196
+    _mbscmp			= _CRTDLL__mbscmp		@197
+    _mbscpy			= _CRTDLL__mbscpy		@198
     _mbscspn			= _CRTDLL__mbscspn		@199
 
     _mbsdec			= _CRTDLL__mbsdec		@200
@@ -349,9 +365,9 @@ EXPORTS
     _searchenv			= _CRTDLL__searchenv		@260
 ;   _seterrormode						@261
     _setjmp			= _CRTDLL__setjmp		@262
-;   _setmode							@263
+    _setmode							@263
 ;   _setsystime							@264
-;   _sleep							@265
+    _sleep			= _CRTDLL__sleep		@265
     _snprintf			= NTDLL__snprintf		@266
     _snwprintf			= NTDLL__snwprintf		@267
 ;   _sopen							@268
@@ -399,13 +415,13 @@ EXPORTS
     _ultoa			= NTDLL__ultoa			@309
 ;   _umask							@310
 ;   _ungetch							@311
-;   _unlink							@312
+    _unlink			= _CRTDLL__unlink		@312
 ;   _unloaddll							@313
     _utime			= _CRTDLL__utime		@314
     _vsnprintf			= NTDLL__vsnprintf		@315
     _vsnwprintf			= _CRTDLL__vsnwprintf		@316
     _wcsdup			= _CRTDLL__wcsdup		@317
-    _wcsicmp			= NTDLL__wcsicmp		@318
+    _wcsicmp			= _NTDLL__wcsicmp		@318
     _wcsicoll			= _CRTDLL__wcsicoll		@319
     _wcslwr			= NTDLL__wcslwr			@320
     _wcsnicmp			= NTDLL__wcsnicmp		@321
@@ -416,7 +432,7 @@ EXPORTS
     _winmajor_dll		= CRTDLL_winmajor_dll		@326
     _winminor_dll 		= CRTDLL_winminor_dll		@327
     _winver_dll 		= CRTDLL_winver_dll		@328
-;   _write							@329
+    _write			= _CRTDLL__write		@329
     _wtoi			= NTDLL__wtoi			@330
     _wtol			= NTDLL__wtol			@331
 ;   _y0								@332

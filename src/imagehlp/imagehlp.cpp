@@ -1,4 +1,4 @@
-/* $Id: imagehlp.cpp,v 1.1 1999-08-29 14:54:54 sandervl Exp $ */
+/* $Id: imagehlp.cpp,v 1.2 1999-09-23 09:38:04 sandervl Exp $ */
 /*
  *	IMAGEHLP library
  *
@@ -71,218 +71,289 @@ BOOL WINAPI IMAGEHLP_LibMain(
 
 
 /***********************************************************************
- *           BindImage32 (IMAGEHLP.1)
+ *           BindImage (IMAGEHLP.1)
  */
 BOOL WINAPI BindImage(
   LPSTR ImageName, LPSTR DllPath, LPSTR SymbolPath)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: BindImage\n"));
+#endif
   return BindImageEx(0, ImageName, DllPath, SymbolPath, NULL);
 }
 
+
 /***********************************************************************
- *           BindImageEx32 (IMAGEHLP.2)
+ *           BindImageEx (IMAGEHLP.2)
  */
 BOOL WINAPI BindImageEx(
   DWORD Flags, LPSTR ImageName, LPSTR DllPath, LPSTR SymbolPath,
   PIMAGEHLP_STATUS_ROUTINE StatusRoutine)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: BindImageEx not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
 /***********************************************************************
- *           CheckSumMappedFile32 (IMAGEHLP.3)
+ *           CheckSumMappedFile (IMAGEHLP.3)
  */
 PIMAGE_NT_HEADERS WINAPI CheckSumMappedFile(
   LPVOID BaseAddress, DWORD FileLength, 
   LPDWORD HeaderSum, LPDWORD CheckSum)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: CheckSumMappedFile not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return NULL;
 }
 
+
 /***********************************************************************
- *           EnumerateLoadedModules32 (IMAGEHLP.4)
+ *           EnumerateLoadedModules (IMAGEHLP.4)
  */
 BOOL WINAPI EnumerateLoadedModules(
   HANDLE hProcess,
   PENUMLOADED_MODULES_CALLBACK EnumLoadedModulesCallback,
   PVOID UserContext)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: EnumerateLoadedModules not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
+
 /***********************************************************************
- *           FindDebugInfoFile32 (IMAGEHLP.5)
+ *           FindDebugInfoFile (IMAGEHLP.5)
  */
 HANDLE WINAPI FindDebugInfoFile(
   LPSTR FileName, LPSTR SymbolPath, LPSTR DebugFilePath)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: FindDebugInfoFile not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return (HANDLE) NULL;
 }
 
+
 /***********************************************************************
- *           FindExecutableImage32 (IMAGEHLP.6)
+ *           FindExecutableImage (IMAGEHLP.6)
  */
 HANDLE WINAPI FindExecutableImage(
   LPSTR FileName, LPSTR SymbolPath, LPSTR ImageFilePath)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: FindExecutableImage not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return (HANDLE) NULL;
 }
 
+
 /***********************************************************************
- *           GetImageConfigInformation32 (IMAGEHLP.7)
+ *           GetImageConfigInformation (IMAGEHLP.7)
  */
 BOOL WINAPI GetImageConfigInformation(
   PLOADED_IMAGE LoadedImage,
   PIMAGE_LOAD_CONFIG_DIRECTORY ImageConfigInformation)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: GetImageConfigInformation not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
+
 /***********************************************************************
- *           GetImageUnusedHeaderBytes32 (IMAGEHLP.8)
+ *           GetImageUnusedHeaderBytes (IMAGEHLP.8)
  */
 DWORD WINAPI GetImageUnusedHeaderBytes(
   PLOADED_IMAGE LoadedImage,
   LPDWORD SizeUnusedHeaderBytes)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: GetImageUnusedHeaderBytes not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return 0;
 }
 
+
 /***********************************************************************
- *           GetTimestampForLoadedLibrary32 (IMAGEHLP.9)
+ *           GetTimestampForLoadedLibrary (IMAGEHLP.9)
  */
 DWORD WINAPI GetTimestampForLoadedLibrary(HMODULE Module)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: GetTimestampForLoadedLibrary not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return 0;
 }
 
+
 /***********************************************************************
- *           ImageAddCertificate32 (IMAGEHLP.10)
+ *           ImageAddCertificate (IMAGEHLP.10)
  */
 
 BOOL WINAPI ImageAddCertificate(
   HANDLE FileHandle, PWIN_CERTIFICATE Certificate, PDWORD Index)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: ImageAddCertificate not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
 /***********************************************************************
- *           ImageDirectoryEntryToData32 (IMAGEHLP.11)
+ *           ImageDirectoryEntryToData (IMAGEHLP.11)
  */
 PVOID WINAPI ImageDirectoryEntryToData(
   PVOID Base, BOOLEAN MappedAsImage, USHORT DirectoryEntry, PULONG Size)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: ImageDirectoryEntryToData not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return NULL;
 }
 
 /***********************************************************************
- *           ImageEnumerateCertificates32 (IMAGEHLP.12)
+ *           ImageEnumerateCertificates (IMAGEHLP.12)
  */
 BOOL WINAPI ImageEnumerateCertificates(
   HANDLE FileHandle, WORD TypeFilter, PDWORD CertificateCount,
   PDWORD Indices, DWORD IndexCount)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: ImageEnumerateCertificates not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
 /***********************************************************************
- *           ImageGetCertificateData32 (IMAGEHLP.13)
+ *           ImageGetCertificateData (IMAGEHLP.13)
  */
 BOOL WINAPI ImageGetCertificateData(
   HANDLE FileHandle, DWORD CertificateIndex,
   PWIN_CERTIFICATE Certificate, PDWORD RequiredLength)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: ImageGetCertificateData not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
 /***********************************************************************
- *           ImageGetCertificateHeader32 (IMAGEHLP.14)
+ *           ImageGetCertificateHeader (IMAGEHLP.14)
  */
 BOOL WINAPI ImageGetCertificateHeader(
   HANDLE FileHandle, DWORD CertificateIndex,
   PWIN_CERTIFICATE Certificateheader)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: ImageGetCertificateHeader not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
 /***********************************************************************
- *           ImageGetDigestStream32 (IMAGEHLP.15)
+ *           ImageGetDigestStream (IMAGEHLP.15)
  */
 BOOL WINAPI ImageGetDigestStream(
   HANDLE FileHandle, DWORD DigestLevel,
   DIGEST_FUNCTION DigestFunction, DIGEST_HANDLE DigestHandle)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: ImageGetDigestStream not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
 /***********************************************************************
- *           ImageLoad32 (IMAGEHLP.16)
+ *           ImageLoad (IMAGEHLP.16)
  */
 PLOADED_IMAGE WINAPI ImageLoad(LPSTR DllName, LPSTR DllPath)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: ImageLoad not implemented\n"));
+#endif
 // FIXME-JW  PLOADED_IMAGE pLoadedImage = HeapAlloc (IMAGEHLP_hHeap, 0, sizeof(LOADED_IMAGE));
 // FIXME-JW  return pLoadedImage;
   return NULL;
 }
 
 /***********************************************************************
- *           ImageNtHeader32 (IMAGEHLP.17)
+ *           ImageNtHeader (IMAGEHLP.17)
  */
 PIMAGE_NT_HEADERS WINAPI ImageNtHeader(PVOID Base)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: ImageNtHeader\n"));
+#endif
   return (PIMAGE_NT_HEADERS)
     ((LPBYTE) Base + ((PIMAGE_DOS_HEADER) Base)->e_lfanew);
 }
 
 /***********************************************************************
- *           ImageRemoveCertificate32 (IMAGEHLP.18)
+ *           ImageRemoveCertificate (IMAGEHLP.18)
  */
 BOOL WINAPI ImageRemoveCertificate(HANDLE FileHandle, DWORD Index)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: ImageRemoveCertificate not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
 /***********************************************************************
- *           ImageRvaToSection32 (IMAGEHLP.19)
+ *           ImageRvaToSection (IMAGEHLP.19)
  */
 PIMAGE_SECTION_HEADER WINAPI ImageRvaToSection(
   PIMAGE_NT_HEADERS NtHeaders, PVOID Base, ULONG Rva)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: ImageRvaToSection not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return NULL;
 }
 
 /***********************************************************************
- *           ImageRvaToVa32 (IMAGEHLP.20)
+ *           ImageRvaToVa (IMAGEHLP.20)
  */
 PVOID WINAPI ImageRvaToVa(
   PIMAGE_NT_HEADERS NtHeaders, PVOID Base, ULONG Rva,
   PIMAGE_SECTION_HEADER *LastRvaSection)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: ImageRvaToVa not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return NULL;
 }
 
 /***********************************************************************
- *           ImageUnload32 (IMAGEHLP.21)
+ *           ImageUnload (IMAGEHLP.21)
  */
 BOOL WINAPI ImageUnload(PLOADED_IMAGE pLoadedImage)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: ImageUnload\n"));
+#endif
   LIST_ENTRY *pCurrent, *pFind;
   if(!IMAGEHLP_pFirstLoadedImage || !pLoadedImage)
     {
@@ -320,18 +391,24 @@ BOOL WINAPI ImageUnload(PLOADED_IMAGE pLoadedImage)
 
 
 /***********************************************************************
- *           ImagehlpApiVersion32 (IMAGEHLP.22)
+ *           ImagehlpApiVersion (IMAGEHLP.22)
  */
 PAPI_VERSION WINAPI ImagehlpApiVersion()
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: ImagehlpApiVersion\n"));
+#endif
   return &IMAGEHLP_ApiVersion;
 }
 
 /***********************************************************************
- *           ImagehlpApiVersionEx32 (IMAGEHLP.23)
+ *           ImagehlpApiVersionEx (IMAGEHLP.23)
  */
 PAPI_VERSION WINAPI ImagehlpApiVersionEx(PAPI_VERSION AppVersion)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: ImagehlpApiVersionEx\n"));
+#endif
   if(!AppVersion)
     return NULL;
 
@@ -344,21 +421,27 @@ PAPI_VERSION WINAPI ImagehlpApiVersionEx(PAPI_VERSION AppVersion)
 }
 
 /***********************************************************************
- *           MakeSureDirectoryPathExists32 (IMAGEHLP.24)
+ *           MakeSureDirectoryPathExists (IMAGEHLP.24)
  */
 BOOL WINAPI MakeSureDirectoryPathExists(LPCSTR DirPath)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: MakeSureDirectoryPathExists not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
 /***********************************************************************
- *           MapAndLoad32 (IMAGEHLP.25)
+ *           MapAndLoad (IMAGEHLP.25)
  */
 BOOL WINAPI MapAndLoad(
   LPSTR pszImageName, LPSTR pszDllPath, PLOADED_IMAGE pLoadedImage,
   BOOL bDotDll, BOOL bReadOnly)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: MapAndLoad\n"));
+#endif
   CHAR szFileName[MAX_PATH];
   HANDLE hFile = (HANDLE) NULL;
   HANDLE hFileMapping = (HANDLE) NULL;
@@ -381,7 +464,9 @@ BOOL WINAPI MapAndLoad(
     hFile, NULL, PAGE_READONLY | SEC_COMMIT, 0, 0, NULL)))
     {
       DWORD dwLastError = GetLastError();
-//      WARN("CreateFileMapping: Error = %ld\n", dwLastError);
+#ifdef DEBUG
+      dprintf(("CreateFileMapping: Error = %ld\n", dwLastError));
+#endif
       SetLastError(dwLastError);
       goto Error;
     }
@@ -392,7 +477,9 @@ BOOL WINAPI MapAndLoad(
     hFileMapping, FILE_MAP_READ, 0, 0, 0)))
     {
       DWORD dwLastError = GetLastError();
-//      WARN("MapViewOfFile: Error = %ld\n", dwLastError);
+#ifdef DEBUG
+      dprintf(("MapViewOfFile: Error = %ld\n", dwLastError));
+#endif
       SetLastError(dwLastError);
       goto Error;
     }
@@ -447,32 +534,41 @@ Error:
 }
 
 /***********************************************************************
- *           MapDebugInformation32 (IMAGEHLP.26)
+ *           MapDebugInformation (IMAGEHLP.26)
  */
 PIMAGE_DEBUG_INFORMATION WINAPI MapDebugInformation(
   HANDLE FileHandle, LPSTR FileName,
   LPSTR SymbolPath, DWORD ImageBase)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: MapDebugInformation not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return NULL;
 }
 
 /***********************************************************************
- *           MapFileAndCheckSum32A (IMAGEHLP.27)
+ *           MapFileAndCheckSumA (IMAGEHLP.27)
  */
 DWORD WINAPI MapFileAndCheckSumA(
   LPSTR Filename, LPDWORD HeaderSum, LPDWORD CheckSum)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: MapFileAndCheckSumA not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return CHECKSUM_OPEN_FAILURE;
 }
 
 /***********************************************************************
- *           MapFileAndCheckSum32W (IMAGEHLP.28)
+ *           MapFileAndCheckSumW (IMAGEHLP.28)
  */
 DWORD WINAPI MapFileAndCheckSumW(
   LPWSTR Filename, LPDWORD HeaderSum, LPDWORD CheckSum)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: MapFileAndCheckSumW not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return CHECKSUM_OPEN_FAILURE;
 }
@@ -484,7 +580,7 @@ DWORD WINAPI MapFileAndCheckSumW(
  */
 
 /***********************************************************************
- *           ReBaseImage32 (IMAGEHLP.30)
+ *           ReBaseImage (IMAGEHLP.30)
  */
 BOOL WINAPI ReBaseImage(
   LPSTR CurrentImageName, LPSTR SymbolPath, BOOL fReBase,
@@ -492,63 +588,81 @@ BOOL WINAPI ReBaseImage(
   ULONG *OldImageSize, ULONG *OldImageBase, ULONG *NewImageSize,
   ULONG *NewImageBase, ULONG TimeStamp)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: ReBaseImage not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
 /***********************************************************************
- *           RemovePrivateCvSymbolic32 (IMAGEHLP.31)
+ *           RemovePrivateCvSymbolic (IMAGEHLP.31)
  */
 BOOL WINAPI RemovePrivateCvSymbolic(
   PCHAR DebugData, PCHAR *NewDebugData, ULONG *NewDebugSize)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: RemovePrivateCvSymbolic not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
 /***********************************************************************
- *           RemoveRelocations32 (IMAGEHLP.32)
+ *           RemoveRelocations (IMAGEHLP.32)
  */
 VOID WINAPI RemoveRelocations(PCHAR ImageName)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: RemoveRelocations not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
 }
 
 
 /***********************************************************************
- *           SearchTreeForFile32 (IMAGEHLP.33)
+ *           SearchTreeForFile (IMAGEHLP.33)
  */
 BOOL WINAPI SearchTreeForFile(
   LPSTR RootPath, LPSTR InputPathName, LPSTR OutputPathBuffer)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: SearchTreeForFile not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
 /***********************************************************************
- *           SetImageConfigInformation32 (IMAGEHLP.34)
+ *           SetImageConfigInformation (IMAGEHLP.34)
  */
 BOOL WINAPI SetImageConfigInformation(
   PLOADED_IMAGE LoadedImage,
   PIMAGE_LOAD_CONFIG_DIRECTORY ImageConfigInformation)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: SetImageConfigInformation not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
 /***********************************************************************
- *           SplitSymbols32 (IMAGEHLP.35)
+ *           SplitSymbols (IMAGEHLP.35)
  */
 BOOL WINAPI SplitSymbols(
   LPSTR ImageName, LPSTR SymbolsPath, 
   LPSTR SymbolFilePath, DWORD Flags)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: SplitSymbols not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
 /***********************************************************************
- *           StackWalk32 (IMAGEHLP.36)
+ *           StackWalk (IMAGEHLP.36)
  */
 BOOL WINAPI StackWalk(
   DWORD MachineType, HANDLE hProcess, HANDLE hThread,
@@ -558,257 +672,332 @@ BOOL WINAPI StackWalk(
   PGET_MODULE_BASE_ROUTINE GetModuleBaseRoutine,
   PTRANSLATE_ADDRESS_ROUTINE TranslateAddress)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: StackWalk not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
 /***********************************************************************
- *           SymCleanup32 (IMAGEHLP.37)
+ *           SymCleanup (IMAGEHLP.37)
  */
 BOOL WINAPI SymCleanup(HANDLE hProcess)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: SymCleanup not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
 /***********************************************************************
- *           SymEnumerateModules32 (IMAGEHLP.38)
+ *           SymEnumerateModules (IMAGEHLP.38)
  */
 
 BOOL WINAPI SymEnumerateModules(
   HANDLE hProcess, PSYM_ENUMMODULES_CALLBACK EnumModulesCallback,
   PVOID UserContext)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: SymEnumerateModules not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
 /***********************************************************************
- *           SymEnumerateSymbols32 (IMAGEHLP.39)
+ *           SymEnumerateSymbols (IMAGEHLP.39)
  */
 BOOL WINAPI SymEnumerateSymbols(
   HANDLE hProcess, DWORD BaseOfDll,
   PSYM_ENUMSYMBOLS_CALLBACK EnumSymbolsCallback, PVOID UserContext)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: SymEnumerateSymbols not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
 /***********************************************************************
- *           SymFunctionTableAccess32 (IMAGEHLP.40)
+ *           SymFunctionTableAccess (IMAGEHLP.40)
  */
 PVOID WINAPI SymFunctionTableAccess(HANDLE hProcess, DWORD AddrBase)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: SymFunctionTableAccess not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
 /***********************************************************************
- *           SymGetModuleBase32 (IMAGEHLP.41)
+ *           SymGetModuleBase (IMAGEHLP.41)
  */
 DWORD WINAPI SymGetModuleBase(HANDLE hProcess, DWORD dwAddr)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: SymGetModuleBase not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return 0;
 }
 
 /***********************************************************************
- *           SymGetModuleInfo32 (IMAGEHLP.42)
+ *           SymGetModuleInfo (IMAGEHLP.42)
  */
 BOOL WINAPI SymGetModuleInfo(
   HANDLE hProcess, DWORD dwAddr,
   PIMAGEHLP_MODULE ModuleInfo)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: SymGetModuleInfo not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
 /***********************************************************************
- *           SymGetOptions32 (IMAGEHLP.43)
+ *           SymGetOptions (IMAGEHLP.43)
  */
 DWORD WINAPI SymGetOptions()
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: SymGetOptions not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return 0;
 }
 
 /***********************************************************************
- *           SymGetSearchPath32 (IMAGEHLP.44)
+ *           SymGetSearchPath (IMAGEHLP.44)
  */
 BOOL WINAPI SymGetSearchPath(
   HANDLE hProcess, LPSTR szSearchPath, DWORD SearchPathLength)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: SymGetSearchPath not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
 /***********************************************************************
- *           SymGetSymFromAddr32 (IMAGEHLP.45)
+ *           SymGetSymFromAddr (IMAGEHLP.45)
  */
 BOOL WINAPI SymGetSymFromAddr(
   HANDLE hProcess, DWORD dwAddr, 
   PDWORD pdwDisplacement, PIMAGEHLP_SYMBOL Symbol)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: SymGetSymFromAddr not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
 /***********************************************************************
- *           SymGetSymFromName32 (IMAGEHLP.46)
+ *           SymGetSymFromName (IMAGEHLP.46)
  */
 BOOL WINAPI SymGetSymFromName(
   HANDLE hProcess, LPSTR Name, PIMAGEHLP_SYMBOL Symbol)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: SymGetSymFromName not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
 /***********************************************************************
- *           SymGetSymNext32 (IMAGEHLP.47)
+ *           SymGetSymNext (IMAGEHLP.47)
  */
 BOOL WINAPI SymGetSymNext(
   HANDLE hProcess, PIMAGEHLP_SYMBOL Symbol)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: SymGetSymNext not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
 /***********************************************************************
- *           SymGetSymPrev32 (IMAGEHLP.48)
+ *           SymGetSymPrev (IMAGEHLP.48)
  */
 
 BOOL WINAPI SymGetSymPrev(
   HANDLE hProcess, PIMAGEHLP_SYMBOL Symbol)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: SymGetSymPrev not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
 /***********************************************************************
- *           SymInitialize32 (IMAGEHLP.49)
+ *           SymInitialize (IMAGEHLP.49)
  */
 BOOL WINAPI SymInitialize(
   HANDLE hProcess, LPSTR UserSearchPath, BOOL fInvadeProcess)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: SymInitialize not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
 /***********************************************************************
- *           SymLoadModule32 (IMAGEHLP.50)
+ *           SymLoadModule (IMAGEHLP.50)
  */
 
 BOOL WINAPI SymLoadModule(
   HANDLE hProcess, HANDLE hFile, LPSTR ImageName, LPSTR ModuleName,
   DWORD BaseOfDll, DWORD SizeOfDll)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: SymLoadModule not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
 /***********************************************************************
- *           SymRegisterCallback32 (IMAGEHLP.51)
+ *           SymRegisterCallback (IMAGEHLP.51)
  */
 BOOL WINAPI SymRegisterCallback(
   HANDLE hProcess, PSYMBOL_REGISTERED_CALLBACK CallbackFunction,
   PVOID UserContext)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: SymRegisterCallback not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
 /***********************************************************************
- *           SymSetOptions32 (IMAGEHLP.52)
+ *           SymSetOptions (IMAGEHLP.52)
  */
 DWORD WINAPI SymSetOptions(DWORD SymOptions)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: SymSetOptions not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return 0;
 }
 
 /***********************************************************************
- *           SymSetSearchPath32 (IMAGEHLP.53)
+ *           SymSetSearchPath (IMAGEHLP.53)
  */
 BOOL WINAPI SymSetSearchPath(HANDLE hProcess, LPSTR szSearchPath)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: SymSetSearchPath not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
 /***********************************************************************
- *           SymUnDName32 (IMAGEHLP.54)
+ *           SymUnDName (IMAGEHLP.54)
  */
 BOOL WINAPI SymUnDName(
   PIMAGEHLP_SYMBOL sym, LPSTR UnDecName, DWORD UnDecNameLength)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: SymUnDName not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
 /***********************************************************************
- *           SymUnloadModule32 (IMAGEHLP.55)
+ *           SymUnloadModule (IMAGEHLP.55)
  */
 BOOL WINAPI SymUnloadModule(
   HANDLE hProcess, DWORD BaseOfDll)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: SymUnloadModule not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
 /***********************************************************************
- *           TouchFileTimes32 (IMAGEHLP.56)
+ *           TouchFileTimes (IMAGEHLP.56)
  */
 BOOL WINAPI TouchFileTimes(
   HANDLE FileHandle, LPSYSTEMTIME lpSystemTime)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: TouchFileTimes not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
 /***********************************************************************
- *           UnDecorateSymbolName32 (IMAGEHLP.57)
+ *           UnDecorateSymbolName (IMAGEHLP.57)
  */
 DWORD WINAPI UnDecorateSymbolName(
   LPCSTR DecoratedName, LPSTR UnDecoratedName,
   DWORD UndecoratedLength, DWORD Flags)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: UnDecorateSymbolName not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return 0;
 }
 
 /***********************************************************************
- *           UnMapAndLoad32 (IMAGEHLP.58)
+ *           UnMapAndLoad (IMAGEHLP.58)
  */
 BOOL WINAPI UnMapAndLoad(PLOADED_IMAGE LoadedImage)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: UnMapAndLoad not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
 /***********************************************************************
- *           UnmapDebugInformation32 (IMAGEHLP.59)
+ *           UnmapDebugInformation (IMAGEHLP.59)
  */
 
 BOOL WINAPI UnmapDebugInformation(
   PIMAGE_DEBUG_INFORMATION DebugInfo)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: UnmapDebugInformation not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
 /***********************************************************************
- *           UpdateDebugInfoFile32 (IMAGEHLP.60)
+ *           UpdateDebugInfoFile (IMAGEHLP.60)
  */
 BOOL WINAPI UpdateDebugInfoFile(
   LPSTR ImageFileName, LPSTR SymbolPath,
   LPSTR DebugFilePath, PIMAGE_NT_HEADERS NtHeaders)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: UpdateDebugInfoFile not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
 
 /***********************************************************************
- *           UpdateDebugInfoFileEx32 (IMAGEHLP.?)
+ *           UpdateDebugInfoFileEx (IMAGEHLP.?)
  * FIXME
  *   Function has no ordinal.
  */
@@ -816,6 +1005,9 @@ BOOL WINAPI UpdateDebugInfoFileEx(
   LPSTR ImageFileName, LPSTR SymbolPath, LPSTR DebugFilePath,
   PIMAGE_NT_HEADERS NtHeaders, DWORD OldChecksum)
 {
+#ifdef DEBUG
+  dprintf(("IMAGEHLP: UpdateDebugInfoFileEx not implemented\n"));
+#endif
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
