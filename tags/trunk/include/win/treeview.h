@@ -1,4 +1,4 @@
-/* $Id: treeview.h,v 1.13 2000-02-22 17:05:17 cbratschi Exp $ */
+/* $Id: treeview.h,v 1.14 2000-02-22 19:34:59 cbratschi Exp $ */
 /*
  * Treeview class extra info
  *
@@ -9,6 +9,8 @@
 
 #ifndef __WINE_TREEVIEW_H
 #define __WINE_TREEVIEW_H
+
+#include "ccbase.h"
 
 #define MINIMUM_INDENT        10
 #define ITEM_VSPACE            2
