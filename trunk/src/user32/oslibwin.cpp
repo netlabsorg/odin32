@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.47 1999-11-24 19:32:21 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.48 1999-11-25 19:22:02 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -37,7 +37,10 @@ BOOL OSLibWinSetParent(HWND hwnd, HWND hwndParent, ULONG fRedraw)
   {
         hwndParent = HWND_DESKTOP;
   }
-
+  else
+  if(hwndParent == OSLIB_HWND_OBJECT) {
+        hwndParent = HWND_OBJECT;
+  }
   return (WinSetParent(hwnd, hwndParent, fRedraw) == 0);
 }
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: win32wndhandle.h,v 1.1 1999-09-15 23:19:02 sandervl Exp $ */
+/* $Id: win32wndhandle.h,v 1.2 1999-11-25 19:22:04 sandervl Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
@@ -11,6 +11,10 @@
  */
 #ifndef __WIN32WNDHANDLE_H__
 #define __WIN32WNDHANDLE_H__
+
+#define MAX_WINDOW_HANDLES	 1024
+#define WNDHANDLE_MAGIC_HIGHWORD 0x68000000
+#define WNDHANDLE_MAGIC_MASK     0x0000FFFF
 
 BOOL  HwAllocateWindowHandle(HWND *hwnd, DWORD dwUserData);
 void  HwFreeWindowHandle(HWND hwnd);

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.94 1999-11-24 20:28:20 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.95 1999-11-25 19:22:02 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -633,7 +633,6 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
   }
   else
   {
-        dprintf(("Set window ID to %x", cs->hMenu));
         setWindowId((DWORD)cs->hMenu);
   }
 
@@ -1543,12 +1542,17 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
     }
 
     case WM_SETREDRAW:
+    {
+     DWORD oldStyle = getStyle();
+
         if(wParam)
-                SetWindowLongA (GWL_STYLE, GetWindowLongA (GWL_STYLE) | WS_VISIBLE);
-        else    SetWindowLongA (GWL_STYLE, GetWindowLongA (GWL_STYLE) & ~WS_VISIBLE);
+                setStyle(getStyle() | WS_VISIBLE);
+        else    setStyle(getStyle() & ~WS_VISIBLE);
+
+        updateWindowStyle(getExStyle(), oldStyle);
 
         return 0; //TODO
-
+    }
     case WM_NCCREATE:
         return(TRUE);
 
@@ -2067,38 +2071,85 @@ void Win32BaseWindow::PostMessage(POSTMSG_PACKET *packet)
     free(packet);
 }
 //******************************************************************************
-//TODO: Probably not complete compatible with win32 implementation
+//Send message to window of another process
+//******************************************************************************
+LRESULT Win32BaseWindow::SendMessageToProcess(UINT msg, WPARAM wParam, LPARAM lParam, BOOL fUnicode)
+{
+ POSTMSG_PACKET *packet = (POSTMSG_PACKET *)_smalloc(sizeof(POSTMSG_PACKET));
+
+    dprintf(("SendMessageToProcess %x %x %x %x", getOS2WindowHandle(), msg, wParam, lParam));
+    packet->Msg = msg;
+    packet->wParam = wParam;
+    packet->lParam = lParam;
+    packet->fUnicode = fUnicode;
+    return OSLibSendMessage(getOS2WindowHandle(), WIN32APP_POSTMSG, WIN32PM_MAGIC, (DWORD)packet);
+}
+//******************************************************************************
+//TODO: Do this more efficiently
 //******************************************************************************
 LRESULT Win32BaseWindow::BroadcastMessageA(int type, UINT msg, WPARAM wParam, LPARAM lParam)
 {
- POSTMSG_PACKET *packet = (POSTMSG_PACKET *)_smalloc(sizeof(POSTMSG_PACKET));
+ Win32BaseWindow *window;
+ HWND hwnd = WNDHANDLE_MAGIC_HIGHWORD;
+ DWORD processid, myprocessid;
 
-    dprintf(("BroadCastMessageA %x %x %x", msg, wParam, lParam));
+    dprintf(("BroadCastMessageA %x %x %x", msg, wParam, lParam, GetFS()));
+    myprocessid = GetCurrentProcessId();
+
+    for(int i=0;i<MAX_WINDOW_HANDLES;i++) {
+        window = GetWindowFromHandle(hwnd++);
+        if(window) {
+            if (window->getStyle() & WS_POPUP || (window->getStyle() & WS_CAPTION) == WS_CAPTION)
+            {
+
+                if(type == BROADCAST_SEND) {
+                        GetWindowThreadProcessId(hwnd, &processid);
+                        if(processid == myprocessid) {
+                            window->SendMessageA(msg, wParam, lParam);
+                        }
+                        else {
+                            window->SendMessageToProcess(msg, wParam, lParam, FALSE);
+                        }
+                }
+                else    window->PostMessageA(msg, wParam, lParam);
+            }
+        }
+    }
     return 0;
-
-    packet->Msg = msg;
-    packet->wParam = wParam;
-    packet->lParam = lParam;
-    packet->fUnicode = FALSE;
-
-    return OSLibWinBroadcastMsg(WIN32APP_POSTMSG, WIN32PM_MAGIC, (DWORD)packet, type == BROADCAST_SEND);
 }
 //******************************************************************************
-//TODO: Probably not complete compatible with win32 implementation
+//TODO: Do this more efficiently
 //******************************************************************************
 LRESULT Win32BaseWindow::BroadcastMessageW(int type, UINT msg, WPARAM wParam, LPARAM lParam)
 {
- POSTMSG_PACKET *packet = (POSTMSG_PACKET *)_smalloc(sizeof(POSTMSG_PACKET));
+ Win32BaseWindow *window;
+ HWND hwnd = WNDHANDLE_MAGIC_HIGHWORD;
+ DWORD processid, myprocessid;
+
 
     dprintf(("BroadCastMessageW %x %x %x", msg, wParam, lParam));
+    myprocessid = GetCurrentProcessId();
+
+    for(int i=0;i<MAX_WINDOW_HANDLES;i++) {
+        window = GetWindowFromHandle(hwnd++);
+        if(window) {
+            if (window->getStyle() & WS_POPUP || (window->getStyle() & WS_CAPTION) == WS_CAPTION)
+            {
+
+                if(type == BROADCAST_SEND) {
+                        GetWindowThreadProcessId(hwnd, &processid);
+                        if(processid == myprocessid) {
+                            window->SendMessageW(msg, wParam, lParam);
+                        }
+                        else {
+                            window->SendMessageToProcess(msg, wParam, lParam, TRUE);
+                        }
+                }
+                else    window->PostMessageW(msg, wParam, lParam);
+            }
+        }
+    }
     return 0;
-
-    packet->Msg = msg;
-    packet->wParam = wParam;
-    packet->lParam = lParam;
-    packet->fUnicode = TRUE;
-
-    return OSLibWinBroadcastMsg(WIN32APP_POSTMSG, WIN32PM_MAGIC, (DWORD)packet, type == BROADCAST_SEND);
 }
 //******************************************************************************
 //TODO: do we need to inform the parent of the parent (etc) of the child window?
@@ -2402,8 +2453,12 @@ HWND Win32BaseWindow::SetParent(HWND hwndNewParent)
         OSLibWinSetParent(getOS2FrameWindowHandle(), getParent()->getOS2WindowHandle());
         return oldhwnd;
    }
-   SetLastError(ERROR_INVALID_PARAMETER);
-   return 0;
+   else {
+    setParent(windowDesktop);
+        getParent()->AddChild(this);
+        OSLibWinSetParent(getOS2FrameWindowHandle(), OSLIB_HWND_DESKTOP);
+        return oldhwnd;
+   }
 }
 //******************************************************************************
 //******************************************************************************
@@ -2813,7 +2868,7 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value)
                 dprintf(("SetWindowLong GWL_EXSTYLE %x old %x new style %x", getWindowHandle(), dwExStyle, value));
                 SendMessageA(WM_STYLECHANGING,GWL_EXSTYLE,(LPARAM)&ss);
                 setExStyle(ss.styleNew);
-                updateWindowStyle(ss.styleOld,dwStyle);
+                updateWindowStyle(ss.styleOld,getStyle());
                 SendMessageA(WM_STYLECHANGED,GWL_EXSTYLE,(LPARAM)&ss);
                 return ss.styleOld;
         }
@@ -2824,13 +2879,17 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value)
                 if(dwStyle == value)
                     return value;
 
-                ss.styleOld = dwStyle;
-                ss.styleNew = value;
-                dprintf(("SetWindowLong GWL_STYLE %x old %x new style %x", getWindowHandle(), dwStyle, value));
+		        value &= ~(WS_VISIBLE | WS_CHILD);	/* Some bits can't be changed this way (WINE) */
+                ss.styleOld = getStyle();
+		        ss.styleNew = value | (ss.styleOld & (WS_VISIBLE | WS_CHILD));
+                dprintf(("SetWindowLong GWL_STYLE %x old %x new style %x", getWindowHandle(), getStyle(), value));
                 SendMessageA(WM_STYLECHANGING,GWL_STYLE,(LPARAM)&ss);
                 setStyle(ss.styleNew);
                 updateWindowStyle(dwExStyle,ss.styleOld);
                 SendMessageA(WM_STYLECHANGED,GWL_STYLE,(LPARAM)&ss);
+#ifdef DEBUG
+                PrintWindowStyle(ss.styleNew, 0);
+#endif
                 return ss.styleOld;
         }
         case GWL_WNDPROC:
@@ -2936,6 +2995,7 @@ WORD Win32BaseWindow::GetWindowWord(int index)
 void Win32BaseWindow::setWindowId(DWORD id)
 {
     windowId = id;
+    dprintf(("Set window ID to %x", id));
     OSLibSetWindowID(OS2HwndFrame, id);
 }
 //******************************************************************************
