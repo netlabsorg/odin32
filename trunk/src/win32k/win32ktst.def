@@ -24,7 +24,6 @@ SEGMENTS
     CODE16_INIT         class 'CODE'
 
     CODE32              class 'CODE'
-    CALLTAB             class 'DATA'
     DATA32              class 'DATA'
     c_common            class 'DATA'
     DDE4_DATA32         class 'DATA'

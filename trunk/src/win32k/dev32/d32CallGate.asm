@@ -1,4 +1,4 @@
-; $Id: d32CallGate.asm,v 1.2 2001-02-21 07:44:57 bird Exp $
+; $Id: d32CallGate.asm,v 1.3 2001-02-23 02:57:53 bird Exp $
 ;
 ; 32-bit CallGate used to communitcate fast between Ring-3 and Ring-0.
 ; This module contains all assembly workers for this.
@@ -49,7 +49,7 @@
     extrn  k32QueryOptionsStatus:near
     extrn  k32SetOptions:near
     extrn  k32ProcessReadWrite:near
-    ;extrn  k32HandleSystemEvent:near
+    extrn  k32HandleSystemEvent:near
     extrn  k32QuerySystemMemInfo:near
     extrn  k32QueryCallGate:near
 
@@ -95,8 +95,7 @@ apfnK32APIs:
     dd  FLAT:k32QueryOptionsStatus      ; K32_QUERYOPTIONSSTATUS  0x03
     dd  FLAT:k32SetOptions              ; K32_SETOPTIONS          0x04
     dd  FLAT:k32ProcessReadWrite        ; K32_PROCESSREADWRITE    0x05
-    ;dd  FLAT:k32HandleSystemEvent       ; K32_HANDLESYSTEMEVENT   0x06
-    dd  FLAT:k32APIStub
+    dd  FLAT:k32HandleSystemEvent       ; K32_HANDLESYSTEMEVENT   0x06
     dd  FLAT:k32QuerySystemMemInfo      ; K32_QUERYSYSTEMMEMINFO  0x07
     dd  FLAT:k32QueryCallGate           ; K32_QUERYCALLGATE       0x08
 DATA32 ends
@@ -256,7 +255,7 @@ Win32kCallGate proc near
     mov     edx, [esp + 48h]            ; pParameter (parameter 1)
     mov     eax, [esp + 44h]            ; ulFunctionCode (parameter 2)
     sub     esp, 8h                     ; (Even when using _Oplink we have to reserve space for parameters.)
-    call    Win32kAPIRouter             ; This is my Ring-0 api. (d32Win32kIOCtl.c)
+    call    Win32kAPIRouter             ; This is my Ring-0 api router.
     add     esp, 8h
 
     jmp     KMExitKmodeSEF8             ; This a an OS2 kernel function which does
@@ -286,8 +285,8 @@ Win32kAPIRouter proc near
     ;
     ; Validate function number.
     ;
-    cmp     eax, 0
-    jne     APIR_notnull                ; This code should be faster (though it may look stupid to
+    test    eax,eax
+    jnz     APIR_notnull                ; This code should be faster (though it may look stupid to
                                         ; jump around like this). IIRC branch prediction allways
                                         ; takes a branch. And btw there are 4 NOPs after this jump!
     jmp     APIR_InvalidFunction
@@ -309,9 +308,9 @@ APIR_ValidFunction:
     mov     [ebp+8], eax                ; Save eax on the stack (reserved by caller according to _Optlink)
     mov     ecx, acbK32Params[eax*4]    ; ecx <- size of parameter packet.
     sub     esp, ecx                    ; Reserve stack space for the parameter packet.
-    mov     eax, [pulTKSSBase32]
+    mov     eax, [pulTKSSBase32]        ; Calculate the FLAT address of esp.
     mov     eax, [eax]
-    add     eax, esp                    ; Calculate the FLAT address of esp.
+    add     eax, esp                    ; eax <- flat address of ss:esp
     push    ecx                         ; Save the size.
     ; TKFuBuff(pv, pvParam, acbParams[ulFunction], TK_FUSU_NONFATAL);
     push    0                           ; TK_FUSU_NOFATAL

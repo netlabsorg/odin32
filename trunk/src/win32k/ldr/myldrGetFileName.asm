@@ -1,4 +1,4 @@
-; $Id: myldrGetFileName.asm,v 1.1 2000-12-11 06:33:00 bird Exp $
+; $Id: myldrGetFileName.asm,v 1.2 2001-02-23 02:57:54 bird Exp $
 ;
 ; myldrGetFileName2 - assembly helper for ldrGetFileName.
 ;           This makes ldrGetFileName work for filenames which
@@ -60,7 +60,7 @@ lgfn_call:
     push    dword ptr [esp + 0ch]
     push    dword ptr [esp + 0ch]
     push    dword ptr [esp + 0ch]
-    call    near ptr FLAT:CALLTAB:_ldrGetFileName@12
+    call    _ldrGetFileName@12
 
     ;
     ; Check if the extention pointer is pointer after the terminator ('\0') char.

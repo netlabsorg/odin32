@@ -1,4 +1,4 @@
-# $Id: win32k.mak,v 1.7 2001-02-21 07:53:25 bird Exp $
+# $Id: win32k.mak,v 1.8 2001-02-23 02:57:51 bird Exp $
 
 #
 # Win32k.sys makefile.
@@ -66,7 +66,7 @@ OBJS  =\
     $(WIN32KOBJ)\myldrFindModule.obj \
     $(WIN32KOBJ)\myldrCheckInternalName.obj \
     $(WIN32KOBJ)\myldrGetFileName.obj \
-#    $(WIN32KOBJ)\d32Events.obj \
+    $(WIN32KOBJ)\d32Events.obj \
     $(WIN32KOBJ)\OS2KTCB.obj \
     $(WIN32KOBJ)\OS2KPTDA.obj \
     $(WIN32KOBJ)\pe2lx.obj \
@@ -74,7 +74,7 @@ OBJS  =\
     $(WIN32KOBJ)\d32ElfIOCtl.obj \
     $(WIN32KOBJ)\d32Win32kIOCtl.obj \
     $(WIN32KOBJ)\k32AllocMemEx.obj \
-#    $(WIN32KOBJ)\k32HandleSystemEvent.obj \
+    $(WIN32KOBJ)\k32HandleSystemEvent.obj \
     $(WIN32KOBJ)\k32ProcessReadWrite.obj \
     $(WIN32KOBJ)\k32QueryCallGate.obj \
     $(WIN32KOBJ)\k32QueryOTEs.obj \
@@ -199,7 +199,7 @@ TSTOBJS =\
     $(WIN32KOBJ)\myldrFindModule.obj \
     $(WIN32KOBJ)\myldrCheckInternalName.obj \
     $(WIN32KOBJ)\myldrGetFileName.obj \
-#    $(WIN32KOBJ)\d32Events.obj \
+    $(WIN32KOBJ)\d32Events.obj \
     $(WIN32KOBJ)\OS2KTCB.obj \
     $(WIN32KOBJ)\OS2KPTDA.obj \
     $(WIN32KOBJ)\pe2lx.obj \
@@ -207,7 +207,7 @@ TSTOBJS =\
     $(WIN32KOBJ)\d32ElfIOCtl.obj \
     $(WIN32KOBJ)\d32Win32kIOCtl.obj \
     $(WIN32KOBJ)\k32AllocMemEx.obj \
-#    $(WIN32KOBJ)\k32HandleSystemEvent.obj \
+    $(WIN32KOBJ)\k32HandleSystemEvent.obj \
     $(WIN32KOBJ)\k32ProcessReadWrite.obj \
     $(WIN32KOBJ)\k32QueryCallGate.obj \
     $(WIN32KOBJ)\k32QueryOTEs.obj \

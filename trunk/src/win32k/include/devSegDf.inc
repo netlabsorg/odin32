@@ -1,4 +1,4 @@
-; $Id: devSegDf.inc,v 1.7 2001-02-21 07:46:33 bird Exp $
+; $Id: devSegDf.inc,v 1.8 2001-02-23 02:57:54 bird Exp $
 ;
 ; Segment definitions for win32k.sys.
 ;
@@ -90,8 +90,4 @@ _VFT ends
 
 EH_DATA segment byte public 'CONST' use32
 EH_DATA ends
-
-
-CALLTAB segment dword public 'CODE' use32
-CALLTAB ends
 

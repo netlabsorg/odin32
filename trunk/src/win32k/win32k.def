@@ -23,7 +23,6 @@ SEGMENTS
     CODE16_INIT         class 'CODE'
 
     CODE32              class 'CODE'
-    CALLTAB             class 'CODE'
 
     DATA32              class 'DATA'
     c_common            class 'DATA'
