@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 1999-07-15 18:03:01 sandervl Exp $
+# $Id: makefile,v 1.3 1999-07-16 11:32:08 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -27,7 +27,7 @@ OBJS =  user32.obj resstring.obj dialog.obj loadres.obj \
         uitools.obj unknown.obj spy.obj wndmsg.obj \
         pmwindow.obj win32class.obj win32wnd.obj win32dlg.obj \
  	msgbox.obj window.obj windowmsg.obj windowclass.obj windlgmsg.obj \
-        windowword.obj gen_object.obj oslibwin.obj 
+        windowword.obj gen_object.obj oslibwin.obj win32wndchild.obj
 
 
 all: $(TARGET).dll $(TARGET).lib
@@ -66,16 +66,17 @@ wndmsg.obj: wndmsg.cpp wndmsg.h
 spy.obj: spy.cpp $(PDWIN32_INCLUDE)\spy.h
 
 msgbox.obj:    msgbox.cpp
-window.obj:    window.cpp win32class.h win32wnd.h
-windowmsg.obj: windowmsg.cpp win32class.h win32wnd.h
-windlgmsg.obj: windlgmsg.cpp win32class.h win32wnd.h win32dlg.h
-windowclass.obj: windowclass.cpp win32class.h win32wnd.h
-windowword.obj:  windowword.cpp win32class.h win32wnd.h win32dlg.h
+window.obj:    window.cpp win32class.h win32wnd.h win32wndchild.h
+windowmsg.obj: windowmsg.cpp win32class.h win32wnd.h win32wndchild.h
+windlgmsg.obj: windlgmsg.cpp win32class.h win32wnd.h win32dlg.h win32wndchild.h
+windowclass.obj: windowclass.cpp win32class.h win32wnd.h win32wndchild.h
+windowword.obj:  windowword.cpp win32class.h win32wnd.h win32dlg.h win32wndchild.h
 
-pmwindow.obj:   pmwindow.cpp win32class.h win32wnd.h win32dlg.h pmwindow.h
-win32class.obj: win32class.cpp win32class.h win32wnd.h win32dlg.h gen_object.h oslibwin.h
-win32wnd.obj:   win32wnd.cpp win32class.h win32wnd.h win32dlg.h gen_object.h oslibwin.h
-win32dlg.obj:   win32dlg.cpp win32class.h win32wnd.h win32dlg.h gen_object.h oslibwin.h
+pmwindow.obj:   pmwindow.cpp win32class.h win32wnd.h win32dlg.h pmwindow.h win32wndchild.h
+win32class.obj: win32class.cpp win32class.h win32wnd.h win32dlg.h gen_object.h oslibwin.h win32wndchild.h
+win32wnd.obj:   win32wnd.cpp win32class.h win32wnd.h win32dlg.h gen_object.h oslibwin.h win32wndchild.h
+win32dlg.obj:   win32dlg.cpp win32class.h win32wnd.h win32dlg.h gen_object.h oslibwin.h win32wndchild.h
+win32wndchild.obj: win32wndchild.cpp win32wndchild.h
 gen_object.obj: gen_object.cpp gen_object.h
 oslibwin.obj:   oslibwin.cpp oslibwin.h
 

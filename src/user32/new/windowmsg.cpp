@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.4 1999-07-15 18:41:46 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.5 1999-07-16 11:32:10 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -15,7 +15,6 @@
 #include <os2win.h>
 #include <misc.h>
 #include <win32wnd.h>
-#include <handlemanager.h>
 #include <win.h>
 #include <hooks.h>
 
@@ -46,7 +45,8 @@ LONG WIN32API DispatchMessageA( const MSG * msg)
 
     if (!msg->hwnd) return 0;
 
-    if(HMHandleTranslateToOS2(msg->hwnd, (PULONG)&window) != NO_ERROR) {
+    window = Win32Window::GetWindowFromHandle(msg->hwnd);
+    if(!window) {
 	dprintf(("DispatchMessageA, window %x not found", msg->hwnd));
 	return 0;
     }
@@ -57,7 +57,8 @@ LONG WIN32API DispatchMessageA( const MSG * msg)
     retval = window->SendMessageA(msg->message, msg->wParam, msg->lParam );
 
 #if 0
-    if(HMHandleTranslateToOS2(msg->hwnd, (PULONG)&window) != NO_ERROR) {
+    window = Win32Window::GetWindowFromHandle(msg->hwnd);
+    if(!window) {
 	dprintf(("DispatchMessageA, window %x not found", msg->hwnd));
 	return 0;
     }
@@ -92,7 +93,8 @@ LONG WIN32API DispatchMessageW( const MSG * msg)
 
     if (!msg->hwnd) return 0;
 
-    if(HMHandleTranslateToOS2(msg->hwnd, (PULONG)&window) != NO_ERROR) {
+    window = Win32Window::GetWindowFromHandle(msg->hwnd);
+    if(!window) {
 	dprintf(("DispatchMessageW, window %x not found", msg->hwnd));
 	return 0;
     }
@@ -103,7 +105,8 @@ LONG WIN32API DispatchMessageW( const MSG * msg)
     retval = window->SendMessageW(msg->message, msg->wParam, msg->lParam );
 
 #if 0
-    if(HMHandleTranslateToOS2(msg->hwnd, (PULONG)&window) != NO_ERROR) {
+    window = Win32Window::GetWindowFromHandle(msg->hwnd);
+    if(!window) {
 	dprintf(("DispatchMessageW, window %x not found", msg->hwnd));
 	return 0;
     }
@@ -135,7 +138,8 @@ LRESULT WIN32API SendMessageA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
   Win32Window *window;
 
-    if(HMHandleTranslateToOS2(hwnd, (PULONG)&window) != NO_ERROR) {
+    window = Win32Window::GetWindowFromHandle(hwnd);
+    if(!window) {
 	dprintf(("SendMessageA, window %x not found", hwnd));
 	return 0;
     }
@@ -148,7 +152,8 @@ LRESULT WIN32API SendMessageW(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
   Win32Window *window;
 
-    if(HMHandleTranslateToOS2(hwnd, (PULONG)&window) != NO_ERROR) {
+    window = Win32Window::GetWindowFromHandle(hwnd);
+    if(!window) {
 	dprintf(("SendMessageW, window %x not found", hwnd));
 	return 0;
     }
@@ -164,7 +169,8 @@ BOOL WIN32API PostMessageA(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     if(hwnd == NULL)
 	return PostThreadMessageA(GetCurrentThreadId(), msg, wParam, lParam);
 
-    if(HMHandleTranslateToOS2(hwnd, (PULONG)&window) != NO_ERROR) {
+    window = Win32Window::GetWindowFromHandle(hwnd);
+    if(!window) {
 	dprintf(("PostMessageA, window %x not found", hwnd));
 	return 0;
     }
@@ -180,7 +186,8 @@ BOOL WIN32API PostMessageW(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     if(hwnd == NULL)
 	return PostThreadMessageW(GetCurrentThreadId(), msg, wParam, lParam);
 
-    if(HMHandleTranslateToOS2(hwnd, (PULONG)&window) != NO_ERROR) {
+    window = Win32Window::GetWindowFromHandle(hwnd);
+    if(!window) {
 	dprintf(("PostMessageW, window %x not found", hwnd));
 	return 0;
     }
