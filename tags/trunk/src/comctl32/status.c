@@ -1,4 +1,4 @@
-/* $Id: status.c,v 1.14 1999-11-17 17:06:23 cbratschi Exp $ */
+/* $Id: status.c,v 1.15 1999-11-21 18:13:44 cbratschi Exp $ */
 /*
  * Interface code to StatusWindow widget/control
  *
@@ -1131,6 +1131,8 @@ STATUSBAR_WMSetText (HWND hwnd, WPARAM wParam, LPARAM lParam)
     STATUSWINDOWPART *part;
     int len;
     HDC hdc;
+
+    if (!infoPtr) return DefWindowProcA(hwnd,WM_SETTEXT,wParam,lParam);
 
     if (infoPtr->numParts == 0)
         return FALSE;
