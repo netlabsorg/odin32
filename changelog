@@ -1,4 +1,9 @@
- /* $Id: changelog,v 1.278 1999-10-07 09:29:11 sandervl Exp $ */
+ /* $Id: changelog,v 1.279 1999-10-07 11:03:09 achimha Exp $ */
+
+ 99-10-07: Rene Pronk <R.Pronk@twi.tudelft.nl>
+        - USER32: Fixed WM_WINDOWPOSCHANGED behavior so that
+                  client windows are properly resized. This fixes
+                  the Winhlp32 history resize problem
 
  99-10-07: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- USER32: Set window PM id for Odin windows.
