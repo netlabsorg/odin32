@@ -1,4 +1,4 @@
-/* $Id: wsock32.h,v 1.20 2001-11-16 16:55:20 sandervl Exp $ */
+/* $Id: wsock32.h,v 1.21 2002-02-20 15:07:14 sandervl Exp $ */
 
 /* WSOCK32.H--definitions & conversions for Odin's wsock32.dll.
  * Unused/unneeded Microsoft declarations removed.
@@ -247,7 +247,7 @@ typedef HANDLE WSAEVENT;
 #define WSA_SELECT_HWND   1
 #define WSA_SELECT_HEVENT 2
 // async select worker routine
-int WSAAsyncSelectWorker(SOCKET s, int mode, int notifyHandle, int notifyData, long lEventMask);
+int WSAAsyncSelectWorker(SOCKET s, int mode, DWORD notifyHandle, DWORD notifyData, DWORD lEventMask);
 
 typedef struct _WSANETWORKEVENTS 
 {
