@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.17 2001-10-10 15:06:06 phaller Exp $ */
+/* $Id: hmdisk.cpp,v 1.18 2001-10-25 13:19:05 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -103,7 +103,7 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
 
     //Disable error popus. NT allows an app to open a cdrom/dvd drive without a disk inside
     //OS/2 fails in that case with error ERROR_NOT_READY
-    OSLibDosDisableHardError(TRUE);
+    ULONG oldmode = SetErrorMode(SEM_FAILCRITICALERRORS);
     hFile = OSLibDosCreateFile((LPSTR)lpFileName,
                                pHMHandleData->dwAccess,
                                pHMHandleData->dwShare,
@@ -111,7 +111,7 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
                                pHMHandleData->dwCreation,
                                pHMHandleData->dwFlags,
                                hTemplate);
-    OSLibDosDisableHardError(FALSE);
+    SetErrorMode(oldmode);
 
     if (hFile != INVALID_HANDLE_ERROR || GetLastError() == ERROR_NOT_READY)
     {
@@ -502,6 +502,28 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
         if(lpBytesReturned) {
             *lpBytesReturned = 0;
         }
+
+        char   temp;
+        ULONG  bytesread, oldmode;
+        APIRET rc;
+
+        //Applications can use this IOCTL to check if the floppy has been changed
+        //OSLibDosGetDiskGeometry won't fail when that happens so we read one
+        //byte from the disk and return ERROR_MEDIA_CHANGED if it fails with
+        //ERROR_WRONG_DISK
+        oldmode = SetErrorMode(SEM_FAILCRITICALERRORS);
+        rc = OSLibDosRead(pHMHandleData->hHMHandle, (PVOID)&temp,
+                          1, &bytesread);
+        SetErrorMode(oldmode);
+        if(rc == FALSE) {
+            dprintf(("IOCTL_DISK_GET_DRIVE_GEOMETRY: DosRead failed with rc %d", GetLastError()));
+            if(GetLastError() == ERROR_WRONG_DISK) {
+                SetLastError(ERROR_MEDIA_CHANGED);
+                return FALSE;
+            }
+        }
+        else OSLibDosSetFilePtr(pHMHandleData->hHMHandle, -1, OSLIB_SETPTR_FILE_CURRENT);
+
         if(OSLibDosGetDiskGeometry(pHMHandleData->hHMHandle, drvInfo->driveLetter, pGeom) == FALSE) {
             return FALSE;
         }
