@@ -1,4 +1,4 @@
-# $Id: Extract.mak,v 1.8 2002-08-20 05:47:53 bird Exp $
+# $Id: Extract.mak,v 1.9 2002-08-22 02:55:48 bird Exp $
 
 #
 # kKrnlLib/krnl makefile.
@@ -9,28 +9,22 @@
 #
 
 #
-# Load the build setup.
+# Setup config
 #
 !include ..\..\makefile.inc
 PATH_ROOT = ..\..\..\..
-!include $(PATH_ROOT)\make\setup.mak
-PATH_BIN   = $(PATH_TOOLS)
-
+!include $(PATH_ROOT)\$(BUILD_SETUP_MAK)
 
 #
-# Config.
+# Target config
 #
-TARGET_NAME = Extract
-MAKEFILE    = $(TARGET_NAME).mak
-ALL_INCLUDES= -I../include -I../kLib/include
-ALL_DEFINES = -DEXTRACT -DLOGGING_DISABLED
-TARGET_STACKSIZE = 0x2000
-
-
-#
-# Object files.
-#
-PREMAKEFILES = Extract16.mak
+TARGET_NAME     = Extract
+TARGET_PUBNAME  = $(PATH_TOOLS)\$(TARGET_NAME).$(TARGET_EXT)
+TARGET_STACKSIZE= 0x2000
+ALL_INCLUDES    = -I../include -I../kLib/include
+ALL_DEFINES     = -DEXTRACT -DLOGGING_DISABLED
+MAKEFILE        = $(TARGET_NAME).mak
+PREMAKEFILES    = Extract16.mak
 
 TARGET_OBJS =\
 $(PATH_ROOT)\obj\$(SHT_TRGPLTFRM)$(SHT_BLDMD)mscv6-16\Extract16.$(EXT_LIB)\Extract.$(EXT_OBJ)\
@@ -52,9 +46,8 @@ $(LIB_C_OBJ)\
 !endif
 $(LIB_OS)\
 
-
 #
-# Load the build process rules.
+# Rules config
 #
 !include $(MAKE_INCLUDE_PROCESS)
 
