@@ -1,4 +1,4 @@
-; $Id: regfunc.asm,v 1.2 1999-11-09 09:54:47 phaller Exp $
+; $Id: regfunc.asm,v 1.3 2000-01-31 22:31:25 sandervl Exp $
 
 ;/*
 ; * register functions in NTDLL
@@ -17,7 +17,8 @@ CODE32         SEGMENT DWORD PUBLIC USE32 'CODE'
 
 ; ----------------------------------------------------------------------------
 
-       public  _chkstk      ; _alloca_probe seems to be the same
+       public  _chkstk      
+       public  _alloca_probe; _alloca_probe seems to be the same as _chkstk
        public  DbgBreakPoint
 
 
@@ -28,12 +29,12 @@ CODE32         SEGMENT DWORD PUBLIC USE32 'CODE'
 
 
 ; ----------------------------------------------------------------------------
-; Name      : _alloca_probe, _chkstk
+; Name      : _chkstk
 ; Purpose   :
 ; Parameters:
 ; Variables :
 ; Result    :
-; Remark    : NTDLL.938, NTDLL.946
+; Remark    : 
 ; Status    : VERIFIED
 ;
 ; Author    : Patrick Haller [Mon, 1999/11/08 23:44]
@@ -64,6 +65,45 @@ _chkstk_1:
                push    eax
                retn
 _chkstk        endp
+
+
+; ----------------------------------------------------------------------------
+; Name      : _alloca_probe
+; Purpose   :
+; Parameters:
+; Variables :
+; Result    :
+; Remark    : 
+; Status    : VERIFIED
+;
+; Author    : Patrick Haller [Mon, 1999/11/08 23:44]
+; ----------------------------------------------------------------------------
+_alloca_probe proc near
+
+arg_0          = byte ptr  8
+
+               push    ecx             ; _alloca_probe
+               cmp     eax, 1000h
+               lea     ecx, [esp+arg_0]
+               jb      short _alloca_probe_1
+
+_alloca_probe_2:
+               sub     ecx, 1000h
+               sub     eax, 1000h
+               test    [ecx], eax
+               cmp     eax, 1000h
+               jnb     short _alloca_probe_2
+
+_alloca_probe_1:
+               sub     ecx, eax
+               mov     eax, esp
+               test    [ecx], eax
+               mov     esp, ecx
+               mov     ecx, [eax]
+               mov     eax, [eax+4]
+               push    eax
+               retn
+_alloca_probe  endp
 
 
 ; ----------------------------------------------------------------------------
