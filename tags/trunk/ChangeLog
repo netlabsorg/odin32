@@ -1,4 +1,17 @@
- /* $Id: ChangeLog,v 1.324 1999-10-15 09:23:18 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.325 1999-10-15 10:03:55 sandervl Exp $ */
+
+ 99-10-15: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: CBT Hook bugfix. Only respond to WM_NCCREATE msg to send
+                  HCBT_CREATEWND.
+                  Scrollbar bugfix. Pass all msgs we don't use to default
+                  window handler. (used to do this only for > WM_USER -->
+                  return value of 0 for WM_NCCREATE cancels window creation)
+		  GetWindow bugfix. (related window can be frame window)
+	- KERNEL32: Fixed VirtualQuery bug.
+
+ 99-10-15: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+	- USER32: Basic message translation to fix problems in win apps
+                  that wait for a specific message. (NOT COMPLETE)
 
  99-10-14: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Fixed WM_WINDOWPOSCHANGED (frame window rectangle)
@@ -7,12 +20,6 @@
                   Removed FillRect during WM_PAINT in subclassed frame handler.
                   (still some redraw problems with i.e. button.exe; a little
                    worse than before)
-	          CBT Hook bugfix. Only respond to WM_NCCREATE msg to send
-                  HCBT_CREATEWND.
-                  Scrollbar bugfix. Pass all msgs we don't use to default
-                  window handler. (used to do this only for > WM_USER -->
-                  return value of 0 for WM_NCCREATE cancels window creation)
-	- KERNEL32: Fixed VirtualQuery bug.
 
  99-10-14: Patrick Haller <phaller@gmx.net>
 	- KERNEL32:	Fix: threads might need more memory in debug mode (thread.cpp)
