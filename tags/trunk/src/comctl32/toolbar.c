@@ -1,4 +1,4 @@
-/* $Id: toolbar.c,v 1.22 1999-12-20 18:44:08 cbratschi Exp $ */
+/* $Id: toolbar.c,v 1.23 1999-12-21 17:01:37 cbratschi Exp $ */
 /*
  * Toolbar control
  *
@@ -855,6 +855,8 @@ static BOOL TBCUSTOMIZE_FillData(HWND hwnd,TOOLBAR_INFO* infoPtr)
   INT rightCount = 0;
   INT nItem;
 
+  SendDlgItemMessageA(hwnd,IDC_AVAILBTN_LBOX,WM_SETREDRAW,FALSE,0);
+  SendDlgItemMessageA(hwnd,IDC_TOOLBARBTN_LBOX,WM_SETREDRAW,FALSE,0);
   SendDlgItemMessageA(hwnd,IDC_AVAILBTN_LBOX,LB_RESETCONTENT,0,0);
   SendDlgItemMessageA(hwnd,IDC_TOOLBARBTN_LBOX,LB_RESETCONTENT,0,0);
 
@@ -934,10 +936,15 @@ static BOOL TBCUSTOMIZE_FillData(HWND hwnd,TOOLBAR_INFO* infoPtr)
     }
   }
 
-  if (leftCount == 0 && rightCount == 0) return FALSE;
-
   SendDlgItemMessageA(hwnd,IDC_AVAILBTN_LBOX,LB_SETCURSEL,0,0);
   SendDlgItemMessageA(hwnd,IDC_TOOLBARBTN_LBOX,LB_SETCURSEL,(rightCount > 0) ? 0:(WPARAM)-1,0);
+
+  SendDlgItemMessageA(hwnd,IDC_AVAILBTN_LBOX,WM_SETREDRAW,TRUE,0);
+  SendDlgItemMessageA(hwnd,IDC_TOOLBARBTN_LBOX,WM_SETREDRAW,TRUE,0);
+  InvalidateRect(GetDlgItem(hwnd,IDC_AVAILBTN_LBOX),NULL,TRUE);
+  InvalidateRect(GetDlgItem(hwnd,IDC_TOOLBARBTN_LBOX),NULL,TRUE);
+
+  if (leftCount == 0 && rightCount == 0) return FALSE;
 
   TBCUSTOMIZE_AvailSelChange(hwnd);
   TBCUSTOMIZE_VisSelChange(hwnd);
