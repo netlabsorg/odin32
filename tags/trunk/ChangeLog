@@ -1,7 +1,8 @@
- /* $Id: ChangeLog,v 1.485 1999-11-30 14:20:47 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.486 1999-11-30 15:06:24 sandervl Exp $ */
 
  99-11-29: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Ported Wine process apis (not done) (kernel32\process.cpp)
+                    Unitialized data section bugfix. 
 
  99-11-29: Jens Wiessner <wiessnej@rfi.de>
 	- CRTDLL: Completed GetMainArgs
