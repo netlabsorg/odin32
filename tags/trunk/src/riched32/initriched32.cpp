@@ -1,4 +1,4 @@
-/* $Id: initriched32.cpp,v 1.4 2002-11-13 12:17:18 sandervl Exp $ */
+/* $Id: initriched32.cpp,v 1.5 2003-01-07 13:21:55 sandervl Exp $ */
 /*
  * DLL entry point
  *
@@ -60,7 +60,6 @@ static BOOL WINAPI OdinLibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpL
 
    case DLL_PROCESS_DETACH:
        ret = RICHED32_LibMain(hinstDLL, fdwReason, fImpLoad);
-       ctordtorTerm();
        return ret;
    }
    return FALSE;
