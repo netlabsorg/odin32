@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.41 2002-04-06 14:58:35 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.42 2002-04-13 06:21:39 bird Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -29,7 +29,7 @@
 #define BIT_2     (4)
 #define BIT_11    (1<<11)
 
-typedef struct 
+typedef struct
 {
     HINSTANCE hInstAspi;
     DWORD (WIN32API *GetASPI32SupportInfo)();
@@ -78,7 +78,7 @@ BOOL HMDeviceDiskClass::FindDevice(LPCSTR lpClassDevName, LPCSTR lpDeviceName, i
 
     return TRUE;
   }
-  
+
     //\\.\x:                -> length 6
     //\\.\PHYSICALDRIVEn    -> length 18
     if(namelength != 6 && namelength != 18) {
@@ -122,7 +122,11 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
         return ERROR_INVALID_PARAMETER;
     }
 
-    dwDriveType = GetDriveTypeA(lpFileName);
+    char szDrive[4];
+    szDrive[0] = *lpFileName;
+    szDrive[1] = ':';
+    szDrive[2] = '\0';
+    dwDriveType = GetDriveTypeA(szDrive);
 
     //Disable error popus. NT allows an app to open a cdrom/dvd drive without a disk inside
     //OS/2 fails in that case with error ERROR_NOT_READY
@@ -135,12 +139,12 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
                                pHMHandleData->dwFlags,
                                hTemplate);
 
-    //It is not allowed to open a readonly device with GENERIC_WRITE in OS/2; 
+    //It is not allowed to open a readonly device with GENERIC_WRITE in OS/2;
     //try with readonly again if that happened
     //NOTE: Some applications open it with GENERIC_WRITE as Windows 2000 requires
     //      this for some aspi functions
-    if(hFile == INVALID_HANDLE_ERROR && dwDriveType == DRIVE_CDROM && 
-       (pHMHandleData->dwAccess & GENERIC_WRITE)) 
+    if(hFile == INVALID_HANDLE_ERROR && dwDriveType == DRIVE_CDROM &&
+       (pHMHandleData->dwAccess & GENERIC_WRITE))
     {
         pHMHandleData->dwAccess &= ~GENERIC_WRITE;
         hFile = OSLibDosCreateFile((LPSTR)lpFileName,
@@ -184,7 +188,7 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
         }
 
         drvInfo->driveType = dwDriveType;
-        if(drvInfo->driveType == DRIVE_CDROM) 
+        if(drvInfo->driveType == DRIVE_CDROM)
         {
             drvInfo->hInstAspi = LoadLibraryA("WNASPI32.DLL");
             if(drvInfo->hInstAspi == NULL) {
@@ -199,7 +203,7 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
                 FreeLibrary(drvInfo->hInstAspi);
                 drvInfo->hInstAspi = 0;
             }
-   
+
             //get cdrom signature
             DWORD parsize = 4;
             DWORD datasize = 4;
@@ -247,7 +251,7 @@ DWORD HMDeviceDiskClass::OpenDisk(PVOID pDrvInfo)
     {
         if(hFile == INVALID_HANDLE_ERROR) {
              dprintf(("Drive not ready"));
-             return 0; 
+             return 0;
         }
         OSLibDosQueryVolumeSerialAndName(1 + drvInfo->driveLetter - 'A', &drvInfo->dwVolumelabel, NULL, 0);
         return hFile;
@@ -318,14 +322,14 @@ static BOOL ioctlDISKUnlockEject(PHMHANDLEDATA pHMHandleData,
     BYTE ucHandle;
   } ParameterBlock;
 #pragma pack()
-  
+
   DWORD dwParameterSize = sizeof( ParameterBlock );
   DWORD dwDataSize      = 0;
   DWORD ret;
-  
+
   ParameterBlock.ucCommand = dwCommand;
   ParameterBlock.ucHandle  = dwDiskHandle;
-  
+
   if(lpBytesReturned)
     *lpBytesReturned = 0;
 
@@ -587,7 +591,7 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
         ULONG  ulLocal        = 0;      /* File pointer position after DosSetFilePtr */
         UCHAR  uchFileData[1] = {'0'};    /* Data to write to file */
 
-        if(!pHMHandleData->hHMHandle) 
+        if(!pHMHandleData->hHMHandle)
         {
             pHMHandleData->hHMHandle = OpenDisk(drvInfo);
             if(!pHMHandleData->hHMHandle) {
@@ -603,7 +607,7 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
         }
 
         OSLibDosDevIOCtl(pHMHandleData->hHMHandle,IOCTL_DISK,DSK_LOCKDRIVE,0,0,0,0,0,0);
-          
+
         ULONG oldmode = SetErrorMode(SEM_FAILCRITICALERRORS);
 
         /* Read the first byte of the disk */
@@ -628,7 +632,7 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
             SetLastError(ERROR_ACCESS_DENIED);
             goto writecheckfail;
         }
-  
+
         rc =  OSLibDosWrite(pHMHandleData->hHMHandle,   /* File handle */
                             (PVOID) uchFileData,        /* String to be written */
                             1,                          /* Size of string to be written */
@@ -677,7 +681,7 @@ writecheckfail:
                 return FALSE;
             }
         }
-        
+
         //Applications can use this IOCTL to check if the floppy has been changed
         //OSLibDosGetDiskGeometry won't fail when that happens so we read the
         //volume label from the disk and return ERROR_MEDIA_CHANGED if the volume
@@ -717,8 +721,8 @@ writecheckfail:
     case IOCTL_DISK_VERIFY:
     case IOCTL_SERIAL_LSRMST_INSERT:
         break;
-      
-      
+
+
     // -----------
     // CDROM class
     // -----------
@@ -736,7 +740,7 @@ writecheckfail:
             DWORD ulTrackAddr;
             BYTE  ucTrackControl;
         } AudioTrackInfo;
-        typedef struct 
+        typedef struct
         {
             BYTE  signature[4];
             BYTE  ucTrack;
@@ -777,7 +781,7 @@ writecheckfail:
         dprintf(("first %d, last %d, num %d", pTOC->FirstTrack, pTOC->LastTrack, numtracks));
 
         //numtracks+1, because we have to add a track at the end
-        int length = 4 + (numtracks+1)*sizeof(TRACK_DATA); 
+        int length = 4 + (numtracks+1)*sizeof(TRACK_DATA);
         //big endian format
         pTOC->Length[0] = HIBYTE((length-2));  //minus length itself;
         pTOC->Length[1] = LOBYTE((length-2));  //minus length itself;
@@ -786,8 +790,8 @@ writecheckfail:
             SetLastError(ERROR_INSUFFICIENT_BUFFER);
             return FALSE;
         }
-        
-        for(int i=0;i<numtracks;i++) 
+
+        for(int i=0;i<numtracks;i++)
         {
             parsize = sizeof(parm);
             memcpy(parm.signature, drvInfo->signature, 4);
@@ -838,11 +842,11 @@ writecheckfail:
     case IOCTL_CDROM_UNLOAD_DRIVER:
     case IOCTL_CDROM_GET_CONTROL:
         break;
-    
+
     case IOCTL_CDROM_PLAY_AUDIO_MSF:
     {
       dprintf(("Play CDROM audio playback"));
-      
+
 #pragma pack(1)
       struct
       {
@@ -852,14 +856,14 @@ writecheckfail:
         DWORD ulEndingMSF;
       } ParameterBlock;
 #pragma pack()
-      
+
       PCDROM_PLAY_AUDIO_MSF pPlay = (PCDROM_PLAY_AUDIO_MSF)lpInBuffer;
-      
+
       // setup the parameter block
-      
+
       memcpy(&ParameterBlock.ucSignature, drvInfo->signature, 4);
       ParameterBlock.ucAddressingMode = 1;     // MSF format
-      
+
       // @@@PH unknown if this kind of MSF conversion is correct!
       ParameterBlock.ulStartingMSF    = pPlay->StartingM << 16 |
                                         pPlay->StartingS << 8  |
@@ -867,14 +871,14 @@ writecheckfail:
       ParameterBlock.ulEndingMSF      = pPlay->EndingM << 16 |
                                         pPlay->EndingS << 8  |
                                         pPlay->EndingF;
-        
+
       DWORD dwParameterSize = sizeof( ParameterBlock );
       DWORD dwDataSize      = 0;
       DWORD ret;
-    
+
       if(lpBytesReturned)
         *lpBytesReturned = 0;
-    
+
       ret = OSLibDosDevIOCtl(pHMHandleData->hHMHandle,
                              0x81,  // IOCTL_CDROMAUDIO
                              0x50,  // CDROMAUDIO_PLAYAUDIO
@@ -886,27 +890,27 @@ writecheckfail:
                              &dwDataSize);
       return (ret == ERROR_SUCCESS);
     }
-      
+
     case IOCTL_CDROM_SEEK_AUDIO_MSF:
         break;
 
     case IOCTL_CDROM_PAUSE_AUDIO:
       // NO BREAK CASE
       // Note: for OS/2, pause and stop seems to be the same!
-      
+
     case IOCTL_CDROM_STOP_AUDIO:
     {
       dprintf(("Stop / pause CDROM audio playback"));
-      return ioctlCDROMSimple(pHMHandleData, 
+      return ioctlCDROMSimple(pHMHandleData,
                               0x81,   // IOCTL_CDROMAUDIO
                               0x51,   // CDROMAUDIO_STOPAUDIO
                               lpBytesReturned, drvInfo);
     }
-      
+
     case IOCTL_CDROM_RESUME_AUDIO:
     {
       dprintf(("Resume CDROM audio playback"));
-      return ioctlCDROMSimple(pHMHandleData, 
+      return ioctlCDROMSimple(pHMHandleData,
                               0x81,   // IOCTL_CDROMAUDIO
                               0x52,   // CDROMAUDIO_RESUMEAUDIO
                               lpBytesReturned, drvInfo);
@@ -984,35 +988,35 @@ writecheckfail:
     case IOCTL_CDROM_GET_DRIVE_GEOMETRY:
     case IOCTL_CDROM_MEDIA_REMOVAL:
         break;
-      
+
     case IOCTL_CDROM_EJECT_MEDIA:
     {
       dprintf(("Eject CDROM media"));
-      return ioctlCDROMSimple(pHMHandleData, 
+      return ioctlCDROMSimple(pHMHandleData,
                               0x80,   // IOCTL_CDROM
                               0x44,   // CDROMDISK_EJECTDISK
                               lpBytesReturned, drvInfo);
     }
-      
+
     case IOCTL_CDROM_LOAD_MEDIA:
     {
       dprintf(("Loading CDROM media"));
-      return ioctlCDROMSimple(pHMHandleData, 
+      return ioctlCDROMSimple(pHMHandleData,
                               0x80,   // IOCTL_CDROM
                               0x45,   // CDROMDISK_CLOSETRAY
                               lpBytesReturned, drvInfo);
     }
-      
+
     case IOCTL_CDROM_RESERVE:
     case IOCTL_CDROM_RELEASE:
     case IOCTL_CDROM_FIND_NEW_DEVICES:
         break;
-      
-      
+
+
     // -------------
     // STORAGE class
     // -------------
-      
+
     case IOCTL_CDROM_CHECK_VERIFY:
         if(drvInfo->driveType != DRIVE_CDROM) {
             SetLastError(ERROR_GEN_FAILURE); //TODO: right error?
@@ -1079,7 +1083,7 @@ writecheckfail:
                                   -1,
                                   lpBytesReturned);
     }
-           
+
     case IOCTL_STORAGE_LOAD_MEDIA:
     // case IOCTL_STORAGE_LOAD_MEDIA2:
     {
@@ -1089,16 +1093,16 @@ writecheckfail:
                                   -1,
                                   lpBytesReturned);
     }
-      
+
     // case IOCTL_STORAGE_EJECTION_CONTROL:
     case IOCTL_STORAGE_MEDIA_REMOVAL:
          break;
-      
-      
+
+
     // -------------------
     // SCSI passthru class
     // -------------------
-      
+
     case IOCTL_SCSI_PASS_THROUGH:
     case IOCTL_SCSI_MINIPORT:
     case IOCTL_SCSI_GET_INQUIRY_DATA:
@@ -1110,7 +1114,7 @@ writecheckfail:
         PSCSI_PASS_THROUGH_DIRECT pPacket = (PSCSI_PASS_THROUGH_DIRECT)lpOutBuffer;
         SRB_ExecSCSICmd *psrb;
 
-        if(drvInfo->hInstAspi == NULL) 
+        if(drvInfo->hInstAspi == NULL)
         {
             SetLastError(ERROR_ACCESS_DENIED);
             return FALSE;
