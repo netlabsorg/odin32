@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.148 2003-01-05 12:31:22 sandervl Exp $
+; $Id: KERNEL32.DEF,v 1.149 2003-01-22 17:06:18 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -1066,7 +1066,6 @@ EXPORTS
 
     DebugErrorBox                 = DebugErrorBox                 @1201 NONAME
     WriteLog                                                      @1202 NONAME
-    WriteLogError                                                 @1214 NONAME
     WriteLogNoEOL                                                 @1218 NONAME
     WritePrivateLog                                               @1208 NONAME
     DecreaseLogCount                                              @1273 NONAME

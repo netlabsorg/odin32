@@ -1,4 +1,4 @@
-; $Id: kernel32dbg.def,v 1.23 2003-01-05 12:31:23 sandervl Exp $
+; $Id: kernel32dbg.def,v 1.24 2003-01-22 17:06:19 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -1066,7 +1066,6 @@ EXPORTS
 
     DebugErrorBox                 = DebugErrorBox                 @1201 NONAME
     WriteLog                                                      @1202 NONAME
-    WriteLogError                                                 @1214 NONAME
     WriteLogNoEOL                                                 @1218 NONAME
     WritePrivateLog                                               @1208 NONAME
     DecreaseLogCount                                              @1273 NONAME
