@@ -1,4 +1,10 @@
-/* $Id: ChangeLog,v 1.1725 2001-10-07 11:49:03 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1726 2001-10-08 12:18:48 sandervl Exp $ */
+
+ 2001-10-08: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o WM_WINDOWPOSCHANGED: activation fix; must clear FF_NOACTIVATESWP
+                  if mp2 & AWP_ACTIVATE
+                  (fixes activation of some inactive windows; used to be
+                   activated but not brought to the top)
 
  2001-10-07: Sander van Leeuwen <sandervl@xs4all.nl>
     - DDRAW:    o Don't use Dive for blitting to/from 8 bpp surfaces
