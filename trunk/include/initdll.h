@@ -83,6 +83,8 @@ ULONG APIENTRY inittermRpcrt4(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermAvifil32(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermQuartz(ULONG hModule, ULONG ulFlag);
 ULONG APIENTRY inittermRiched32(ULONG hModule, ULONG ulFlag);
+ULONG APIENTRY inittermWnaspi32(ULONG hModule, ULONG ulFlag);
+
 ULONG APIENTRY InitializeKernel32();
 
 #endif //__INITDLL_H__
