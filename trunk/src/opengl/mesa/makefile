@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2000-03-01 18:49:31 jeroen Exp $
+# $Id: makefile,v 1.4 2000-03-04 19:10:17 jeroen Exp $
 #
 # PD-Win32
 #
@@ -25,6 +25,8 @@ CXXFLAGS = -I. -IGL $(CXXFLAGS_WIN32APP) -I$(PDWIN32_INCLUDE) -I..\glut $(MESADE
 TARGET = OPENGL32
 
 all: $(TARGET).DLL $(TARGET).LIB
+
+lib: $(TARGET).lib
 
 OBJS = \
   wgl.obj \

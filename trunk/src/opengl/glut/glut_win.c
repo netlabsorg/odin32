@@ -1,4 +1,4 @@
-/* $Id: glut_win.c,v 1.2 2000-02-09 08:46:19 jeroen Exp $ */
+/* $Id: glut_win.c,v 1.3 2000-03-04 19:10:16 jeroen Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1994, 1997.  */
 
 /* This program is freely distributable without licensing fees
@@ -16,9 +16,9 @@
 
 #include "glutint.h"
 
-#if defined(__WIN32OS2__)
-#include "wgl.h"
-#endif
+//#if defined(__WIN32OS2__)
+//#include "wgl.h"
+//#endif
 
 GLUTwindow *__glutCurrentWindow = NULL;
 GLUTwindow **__glutWindowList = NULL;
@@ -130,7 +130,7 @@ __glutGetWindow(Window win)
 }
 
 /* CENTRY */
-int APIENTRY
+int GLAPIENTRY
 glutGetWindow(void)
 {
   if (__glutCurrentWindow) {
@@ -177,7 +177,7 @@ __glutSetWindow(GLUTwindow * window)
 }
 
 /* CENTRY */
-void APIENTRY
+void GLAPIENTRY
 glutSetWindow(int win)
 {
   GLUTwindow *window;
@@ -402,7 +402,7 @@ __glutDetermineVisual(
   return vis;
 }
 
-void APIENTRY
+void GLAPIENTRY
 __glutDefaultDisplay(void)
 {
   /* XXX Remove the warning after GLUT 3.0. */
@@ -412,7 +412,7 @@ __glutDefaultDisplay(void)
     __glutCurrentWindow->num + 1);
 }
 
-void APIENTRY
+void GLAPIENTRY
 __glutDefaultReshape(int width, int height)
 {
   GLUToverlay *overlay;
@@ -717,7 +717,7 @@ __glutCreateWindow(GLUTwindow * parent,
 }
 
 /* CENTRY */
-int APIENTRY
+int GLAPIENTRY
 glutCreateWindow(const char *title)
 {
   static int firstWindow = 1;
@@ -767,7 +767,7 @@ glutCreateWindow(const char *title)
   return window->num + 1;
 }
 
-int APIENTRY
+int GLAPIENTRY
 glutCreateSubWindow(int win, int x, int y, int width, int height)
 {
   GLUTwindow *window;
@@ -859,7 +859,7 @@ __glutDestroyWindow(GLUTwindow * window,
 }
 
 /* CENTRY */
-void APIENTRY
+void GLAPIENTRY
 glutDestroyWindow(int win)
 {
   GLUTwindow *window = __glutWindowList[win - 1];
@@ -902,7 +902,7 @@ __glutChangeWindowEventMask(long eventMask, Bool add)
   }
 }
 
-void APIENTRY
+void GLAPIENTRY
 glutDisplayFunc(GLUTdisplayCB displayFunc)
 {
   /* XXX Remove the warning after GLUT 3.0. */
@@ -911,7 +911,7 @@ glutDisplayFunc(GLUTdisplayCB displayFunc)
   __glutCurrentWindow->display = displayFunc;
 }
 
-void APIENTRY
+void GLAPIENTRY
 glutMouseFunc(GLUTmouseCB mouseFunc)
 {
   if (__glutCurrentWindow->mouse) {
@@ -933,7 +933,7 @@ glutMouseFunc(GLUTmouseCB mouseFunc)
   __glutCurrentWindow->mouse = mouseFunc;
 }
 
-void APIENTRY
+void GLAPIENTRY
 glutMotionFunc(GLUTmotionCB motionFunc)
 {
   /* Hack.  Some window managers (4Dwm by default) will mask
@@ -964,7 +964,7 @@ glutMotionFunc(GLUTmotionCB motionFunc)
   __glutCurrentWindow->motion = motionFunc;
 }
 
-void APIENTRY
+void GLAPIENTRY
 glutPassiveMotionFunc(GLUTpassiveCB passiveMotionFunc)
 {
   __glutChangeWindowEventMask(PointerMotionMask,
@@ -979,7 +979,7 @@ glutPassiveMotionFunc(GLUTpassiveCB passiveMotionFunc)
   __glutCurrentWindow->passive = passiveMotionFunc;
 }
 
-void APIENTRY
+void GLAPIENTRY
 glutEntryFunc(GLUTentryCB entryFunc)
 {
   __glutChangeWindowEventMask(EnterWindowMask | LeaveWindowMask,
@@ -990,7 +990,7 @@ glutEntryFunc(GLUTentryCB entryFunc)
   }
 }
 
-void APIENTRY
+void GLAPIENTRY
 glutWindowStatusFunc(GLUTwindowStatusCB windowStatusFunc)
 {
   __glutChangeWindowEventMask(VisibilityChangeMask,
@@ -1002,10 +1002,7 @@ glutWindowStatusFunc(GLUTwindowStatusCB windowStatusFunc)
   }
 }
 
-static void
-#ifdef __WIN32OS2__
-_Optlink
-#endif
+static void GLAPIENTRY
 visibilityHelper(int status)
 {
   if (status == GLUT_HIDDEN || status == GLUT_FULLY_COVERED)
@@ -1014,7 +1011,7 @@ visibilityHelper(int status)
     __glutCurrentWindow->visibility(GLUT_VISIBLE);
 }
 
-void APIENTRY
+void GLAPIENTRY
 glutVisibilityFunc(GLUTvisibilityCB visibilityFunc)
 {
   __glutCurrentWindow->visibility = visibilityFunc;
@@ -1024,9 +1021,10 @@ glutVisibilityFunc(GLUTvisibilityCB visibilityFunc)
     glutWindowStatusFunc(NULL);
 }
 
-void APIENTRY
+void GLAPIENTRY
 glutReshapeFunc(GLUTreshapeCB reshapeFunc)
 {
+  WriteLog("GLUT32: Setting reshapeFunc to @%08X\n",reshapeFunc);
   if (reshapeFunc) {
     __glutCurrentWindow->reshape = reshapeFunc;
   } else {

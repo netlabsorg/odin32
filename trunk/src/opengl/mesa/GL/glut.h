@@ -1,4 +1,4 @@
-/* $Id: glut.h,v 1.3 2000-02-29 13:56:51 sandervl Exp $ */
+/* $Id: glut.h,v 1.1 2000-03-04 19:10:18 jeroen Exp $ */
 #ifndef __glut_h__
 #define __glut_h__
 
@@ -56,7 +56,8 @@ typedef unsigned short wchar_t;
 
 #endif
 
-#include "gl.h"
+#include <windows.h>
+#include "GL\gl.h"
 #include "glu.h"
 
 #include "glutstroke.h"
@@ -465,36 +466,36 @@ extern void GLAPIENTRY glutAttachMenu(int button);
 extern void GLAPIENTRY glutDetachMenu(int button);
 
 /* GLUT window callback sub-API. */
-extern void GLAPIENTRY glutDisplayFunc(void (*func)(void));
-extern void GLAPIENTRY glutReshapeFunc(void (*func)(int width, int height));
-extern void GLAPIENTRY glutKeyboardFunc(void (*func)(unsigned char key, int x, int y));
-extern void GLAPIENTRY glutMouseFunc(void (*func)(int button, int state, int x, int y));
-extern void GLAPIENTRY glutMotionFunc(void (*func)(int x, int y));
-extern void GLAPIENTRY glutPassiveMotionFunc(void (*func)(int x, int y));
-extern void GLAPIENTRY glutEntryFunc(void (*func)(int state));
-extern void GLAPIENTRY glutVisibilityFunc(void (*func)(int state));
-extern void GLAPIENTRY glutIdleFunc(void (*func)(void));
-extern void GLAPIENTRY glutTimerFunc(unsigned int millis, void (*func)(int value), int value);
-extern void GLAPIENTRY glutMenuStateFunc(void (*func)(int state));
+extern void GLAPIENTRY glutDisplayFunc(void (* GLAPIENTRY func)(void));
+extern void GLAPIENTRY glutReshapeFunc(void (* GLAPIENTRY func)(int width, int height));
+extern void GLAPIENTRY glutKeyboardFunc(void (* GLAPIENTRY func)(unsigned char key, int x, int y));
+extern void GLAPIENTRY glutMouseFunc(void (* GLAPIENTRY func)(int button, int state, int x, int y));
+extern void GLAPIENTRY glutMotionFunc(void (* GLAPIENTRY func)(int x, int y));
+extern void GLAPIENTRY glutPassiveMotionFunc(void (* GLAPIENTRY func)(int x, int y));
+extern void GLAPIENTRY glutEntryFunc(void (* GLAPIENTRY func)(int state));
+extern void GLAPIENTRY glutVisibilityFunc(void (* GLAPIENTRY func)(int state));
+extern void GLAPIENTRY glutIdleFunc(void (* GLAPIENTRY func)(void));
+extern void GLAPIENTRY glutTimerFunc(unsigned int millis, void (* GLAPIENTRY func)(int value), int value);
+extern void GLAPIENTRY glutMenuStateFunc(void (* GLAPIENTRY func)(int state));
 #if (GLUT_API_VERSION >= 2)
-extern void GLAPIENTRY glutSpecialFunc(void (*func)(int key, int x, int y));
-extern void GLAPIENTRY glutSpaceballMotionFunc(void (*func)(int x, int y, int z));
-extern void GLAPIENTRY glutSpaceballRotateFunc(void (*func)(int x, int y, int z));
-extern void GLAPIENTRY glutSpaceballButtonFunc(void (*func)(int button, int state));
-extern void GLAPIENTRY glutButtonBoxFunc(void (*func)(int button, int state));
-extern void GLAPIENTRY glutDialsFunc(void (*func)(int dial, int value));
-extern void GLAPIENTRY glutTabletMotionFunc(void (*func)(int x, int y));
-extern void GLAPIENTRY glutTabletButtonFunc(void (*func)(int button, int state, int x, int y));
+extern void GLAPIENTRY glutSpecialFunc(void (* GLAPIENTRY func)(int key, int x, int y));
+extern void GLAPIENTRY glutSpaceballMotionFunc(void (* GLAPIENTRY func)(int x, int y, int z));
+extern void GLAPIENTRY glutSpaceballRotateFunc(void (* GLAPIENTRY func)(int x, int y, int z));
+extern void GLAPIENTRY glutSpaceballButtonFunc(void (* GLAPIENTRY func)(int button, int state));
+extern void GLAPIENTRY glutButtonBoxFunc(void (* GLAPIENTRY func)(int button, int state));
+extern void GLAPIENTRY glutDialsFunc(void (* GLAPIENTRY func)(int dial, int value));
+extern void GLAPIENTRY glutTabletMotionFunc(void (* GLAPIENTRY func)(int x, int y));
+extern void GLAPIENTRY glutTabletButtonFunc(void (* GLAPIENTRY func)(int button, int state, int x, int y));
 #if (GLUT_API_VERSION >= 3)
-extern void GLAPIENTRY glutMenuStatusFunc(void (*func)(int status, int x, int y));
-extern void GLAPIENTRY glutOverlayDisplayFunc(void (*func)(void));
+extern void GLAPIENTRY glutMenuStatusFunc(void (* GLAPIENTRY func)(int status, int x, int y));
+extern void GLAPIENTRY glutOverlayDisplayFunc(void (* GLAPIENTRY func)(void));
 #if (GLUT_API_VERSION >= 4 || GLUT_XLIB_IMPLEMENTATION >= 9)
-extern void GLAPIENTRY glutWindowStatusFunc(void (*func)(int state));
+extern void GLAPIENTRY glutWindowStatusFunc(void (* GLAPIENTRY func)(int state));
 #endif
 #if (GLUT_API_VERSION >= 4 || GLUT_XLIB_IMPLEMENTATION >= 13)
-extern void GLAPIENTRY glutKeyboardUpFunc(void (*func)(unsigned char key, int x, int y));
-extern void GLAPIENTRY glutSpecialUpFunc(void (*func)(int key, int x, int y));
-extern void GLAPIENTRY glutJoystickFunc(void (*func)(unsigned int buttonMask, int x, int y, int z), int pollInterval);
+extern void GLAPIENTRY glutKeyboardUpFunc(void (* GLAPIENTRY func)(unsigned char key, int x, int y));
+extern void GLAPIENTRY glutSpecialUpFunc(void (* GLAPIENTRY func)(int key, int x, int y));
+extern void GLAPIENTRY glutJoystickFunc(void (* GLAPIENTRY func)(unsigned int buttonMask, int x, int y, int z), int pollInterval);
 #endif
 #endif
 #endif

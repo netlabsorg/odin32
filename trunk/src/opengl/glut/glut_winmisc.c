@@ -1,4 +1,4 @@
-/* $Id: glut_winmisc.c,v 1.2 2000-02-09 08:46:19 jeroen Exp $ */
+/* $Id: glut_winmisc.c,v 1.3 2000-03-04 19:10:16 jeroen Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1994.  */
 
 /* This program is freely distributable without licensing fees
@@ -19,7 +19,7 @@
 #include "glutint.h"
 
 /* CENTRY */
-void APIENTRY
+void GLAPIENTRY
 glutSetWindowTitle(const char *title)
 {
   XTextProperty textprop;
@@ -36,7 +36,7 @@ glutSetWindowTitle(const char *title)
   XFlush(__glutDisplay);
 }
 
-void APIENTRY
+void GLAPIENTRY
 glutSetIconTitle(const char *title)
 {
   XTextProperty textprop;
@@ -52,7 +52,7 @@ glutSetIconTitle(const char *title)
   XFlush(__glutDisplay);
 }
 
-void APIENTRY
+void GLAPIENTRY
 glutPositionWindow(int x, int y)
 {
   IGNORE_IN_GAME_MODE();
@@ -62,9 +62,10 @@ glutPositionWindow(int x, int y)
   __glutPutOnWorkList(__glutCurrentWindow, GLUT_CONFIGURE_WORK);
 }
 
-void APIENTRY
+void GLAPIENTRY
 glutReshapeWindow(int w, int h)
 {
+  WriteLog("glutReshapeWindow (glut_winmisc)\n");
   IGNORE_IN_GAME_MODE();
   if (w <= 0 || h <= 0)
     __glutWarning("glutReshapeWindow: non-positive width or height not allowed");
@@ -75,7 +76,7 @@ glutReshapeWindow(int w, int h)
   __glutPutOnWorkList(__glutCurrentWindow, GLUT_CONFIGURE_WORK);
 }
 
-void APIENTRY
+void GLAPIENTRY
 glutPopWindow(void)
 {
   IGNORE_IN_GAME_MODE();
@@ -84,7 +85,7 @@ glutPopWindow(void)
   __glutPutOnWorkList(__glutCurrentWindow, GLUT_CONFIGURE_WORK);
 }
 
-void APIENTRY
+void GLAPIENTRY
 glutPushWindow(void)
 {
   IGNORE_IN_GAME_MODE();
@@ -93,7 +94,7 @@ glutPushWindow(void)
   __glutPutOnWorkList(__glutCurrentWindow, GLUT_CONFIGURE_WORK);
 }
 
-void APIENTRY
+void GLAPIENTRY
 glutIconifyWindow(void)
 {
   IGNORE_IN_GAME_MODE();
@@ -102,7 +103,7 @@ glutIconifyWindow(void)
   __glutPutOnWorkList(__glutCurrentWindow, GLUT_MAP_WORK);
 }
 
-void APIENTRY
+void GLAPIENTRY
 glutShowWindow(void)
 {
   IGNORE_IN_GAME_MODE();
@@ -110,7 +111,7 @@ glutShowWindow(void)
   __glutPutOnWorkList(__glutCurrentWindow, GLUT_MAP_WORK);
 }
 
-void APIENTRY
+void GLAPIENTRY
 glutHideWindow(void)
 {
   IGNORE_IN_GAME_MODE();

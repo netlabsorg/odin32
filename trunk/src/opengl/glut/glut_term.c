@@ -1,4 +1,4 @@
-/* $Id: glut_term.c,v 1.1 2000-02-09 08:46:18 jeroen Exp $ */
+/* $Id: glut_term.c,v 1.2 2000-03-04 19:10:15 jeroen Exp $ */
 /*
  * GLUT Termination - on exit cleanup any open windows
  *
@@ -10,14 +10,8 @@
 #include "glutint.h"
 
 
-ODINDEBUGCHANNEL (GLUT32-MAIN)
-
-ODINFUNCTION3(BOOL, Glut32LibMain, HINSTANCE, hinstDLL,
-                                   DWORD,     fdwReason,
-                                   LPVOID,    ImpLoad)
+void CDECL Glut32Terminate(void)
 {
-  if(fdwReason==DLL_PROCESS_DETACH)
-    {
       /* Our app has ended - close all the open windows! */
       dprintf(("GLUT internal cleanup - numwins %d\n",__glutWindowListSize));
 
@@ -29,7 +23,4 @@ ODINFUNCTION3(BOOL, Glut32LibMain, HINSTANCE, hinstDLL,
             dprintf(("GLUT32 internal cleanup: dtr %d com\n",i));
           }
       }
-    }
-
-  return TRUE;
 }
