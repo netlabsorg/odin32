@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2136 2002-06-08 07:13:33 sandervl Exp $ */
+/* $Id: changelog,v 1.2137 2002-06-08 07:28:06 sandervl Exp $ */
+
+ 2002-06-08: Sander van Leeuwen <sandervl@innotek.de>
+    - SHELL32:  o Moved resource files to subdir
+    - COMDLG32: o Compile fix + moved resource files to subdir
 
  2002-06-07: Sander van Leeuwen <sandervl@innotek.de>
     - SHLWAPI:  o Resync with latest Wine & added LGPL license
