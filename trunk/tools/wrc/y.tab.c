@@ -1,105 +1,104 @@
 
 /*  A Bison parser, made from parser.y
- by  GNU Bison version 1.25
-  */
+    by GNU Bison version 1.28  */
 
 #define YYBISON 1  /* Identify Bison output.  */
 
-#define	tIF	258
-#define	tIFDEF	259
-#define	tIFNDEF	260
-#define	tELSE	261
-#define	tELIF	262
-#define	tENDIF	263
-#define	tDEFINED	264
-#define	tNL	265
-#define	tTYPEDEF	266
-#define	tEXTERN	267
-#define	NUMBER	268
-#define	LNUMBER	269
-#define	tSTRING	270
-#define	IDENT	271
-#define	FILENAME	272
-#define	RAWDATA	273
-#define	ACCELERATORS	274
-#define	tBITMAP	275
-#define	CURSOR	276
-#define	DIALOG	277
-#define	DIALOGEX	278
-#define	MENU	279
-#define	MENUEX	280
-#define	MESSAGETABLE	281
-#define	RCDATA	282
-#define	VERSIONINFO	283
-#define	STRINGTABLE	284
-#define	FONT	285
-#define	ICON	286
-#define	AUTO3STATE	287
-#define	AUTOCHECKBOX	288
-#define	AUTORADIOBUTTON	289
-#define	CHECKBOX	290
-#define	DEFPUSHBUTTON	291
-#define	PUSHBUTTON	292
-#define	RADIOBUTTON	293
-#define	STATE3	294
-#define	GROUPBOX	295
-#define	COMBOBOX	296
-#define	LISTBOX	297
-#define	SCROLLBAR	298
-#define	CONTROL	299
-#define	EDITTEXT	300
-#define	RTEXT	301
-#define	CTEXT	302
-#define	LTEXT	303
-#define	BLOCK	304
-#define	VALUE	305
-#define	SHIFT	306
-#define	ALT	307
-#define	ASCII	308
-#define	VIRTKEY	309
-#define	GRAYED	310
-#define	CHECKED	311
-#define	INACTIVE	312
-#define	NOINVERT	313
-#define	tPURE	314
-#define	IMPURE	315
-#define	DISCARDABLE	316
-#define	LOADONCALL	317
-#define	PRELOAD	318
-#define	tFIXED	319
-#define	MOVEABLE	320
-#define	CLASS	321
-#define	CAPTION	322
-#define	CHARACTERISTICS	323
-#define	EXSTYLE	324
-#define	STYLE	325
-#define	VERSION	326
-#define	LANGUAGE	327
-#define	FILEVERSION	328
-#define	PRODUCTVERSION	329
-#define	FILEFLAGSMASK	330
-#define	FILEOS	331
-#define	FILETYPE	332
-#define	FILEFLAGS	333
-#define	FILESUBTYPE	334
-#define	MENUBARBREAK	335
-#define	MENUBREAK	336
-#define	MENUITEM	337
-#define	POPUP	338
-#define	SEPARATOR	339
-#define	HELP	340
-#define	TOOLBAR	341
-#define	BUTTON	342
-#define	tBEGIN	343
-#define	tEND	344
-#define	DLGINIT	345
-#define	LOGOR	346
-#define	LOGAND	347
-#define	EQ	348
-#define	NE	349
-#define	LTE	350
-#define	GTE	351
-#define	NOT	352
+#define	tIF	257
+#define	tIFDEF	258
+#define	tIFNDEF	259
+#define	tELSE	260
+#define	tELIF	261
+#define	tENDIF	262
+#define	tDEFINED	263
+#define	tNL	264
+#define	tTYPEDEF	265
+#define	tEXTERN	266
+#define	NUMBER	267
+#define	LNUMBER	268
+#define	tSTRING	269
+#define	IDENT	270
+#define	FILENAME	271
+#define	RAWDATA	272
+#define	ACCELERATORS	273
+#define	tBITMAP	274
+#define	CURSOR	275
+#define	DIALOG	276
+#define	DIALOGEX	277
+#define	MENU	278
+#define	MENUEX	279
+#define	MESSAGETABLE	280
+#define	RCDATA	281
+#define	VERSIONINFO	282
+#define	STRINGTABLE	283
+#define	FONT	284
+#define	ICON	285
+#define	AUTO3STATE	286
+#define	AUTOCHECKBOX	287
+#define	AUTORADIOBUTTON	288
+#define	CHECKBOX	289
+#define	DEFPUSHBUTTON	290
+#define	PUSHBUTTON	291
+#define	RADIOBUTTON	292
+#define	STATE3	293
+#define	GROUPBOX	294
+#define	COMBOBOX	295
+#define	LISTBOX	296
+#define	SCROLLBAR	297
+#define	CONTROL	298
+#define	EDITTEXT	299
+#define	RTEXT	300
+#define	CTEXT	301
+#define	LTEXT	302
+#define	BLOCK	303
+#define	VALUE	304
+#define	SHIFT	305
+#define	ALT	306
+#define	ASCII	307
+#define	VIRTKEY	308
+#define	GRAYED	309
+#define	CHECKED	310
+#define	INACTIVE	311
+#define	NOINVERT	312
+#define	tPURE	313
+#define	IMPURE	314
+#define	DISCARDABLE	315
+#define	LOADONCALL	316
+#define	PRELOAD	317
+#define	tFIXED	318
+#define	MOVEABLE	319
+#define	CLASS	320
+#define	CAPTION	321
+#define	CHARACTERISTICS	322
+#define	EXSTYLE	323
+#define	STYLE	324
+#define	VERSION	325
+#define	LANGUAGE	326
+#define	FILEVERSION	327
+#define	PRODUCTVERSION	328
+#define	FILEFLAGSMASK	329
+#define	FILEOS	330
+#define	FILETYPE	331
+#define	FILEFLAGS	332
+#define	FILESUBTYPE	333
+#define	MENUBARBREAK	334
+#define	MENUBREAK	335
+#define	MENUITEM	336
+#define	POPUP	337
+#define	SEPARATOR	338
+#define	HELP	339
+#define	TOOLBAR	340
+#define	BUTTON	341
+#define	tBEGIN	342
+#define	tEND	343
+#define	DLGINIT	344
+#define	LOGOR	345
+#define	LOGAND	346
+#define	EQ	347
+#define	NE	348
+#define	LTE	349
+#define	GTE	350
+#define	NOT	351
 
 #line 1 "parser.y"
 
@@ -109,11 +108,11 @@
  *           1999 Juergen Schmied (JS)
  *
  * 6-Nov-1999 JS        - see CHANGES
- * 
+ *
  * 29-Dec-1998 AdH	- Grammar and function extensions.
- *			     grammar: TOOLBAR resources, Named ICONs in 
+ *			     grammar: TOOLBAR resources, Named ICONs in
  *				DIALOGS
- *			     functions: semantic actions for the grammar 
+ *			     functions: semantic actions for the grammar
  *				changes, resource files can now be anywhere
  *				on the include path instead of just in the
  *				current directory
@@ -213,6 +212,9 @@
 #include "windef.h"
 #include "wingdi.h"
 #include "winuser.h"
+/* kso Sun 19.11.2000 */
+#undef strcasecmp
+#define strcasecmp stricmp
 
 #ifdef __BORLANDC__
 #pragma warn -sig
@@ -346,7 +348,7 @@ typedef union{
 #define	YYFLAG		-32768
 #define	YYNTBASE	112
 
-#define YYTRANSLATE(x) ((unsigned)(x) <= 352 ? yytranslate[x] : 191)
+#define YYTRANSLATE(x) ((unsigned)(x) <= 351 ? yytranslate[x] : 191)
 
 static const char yytranslate[] = {     0,
      2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -374,17 +376,17 @@ static const char yytranslate[] = {     0,
      2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
      2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
      2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
-     2,     2,     2,     2,     2,     1,     2,     3,     4,     5,
-     6,     7,     8,     9,    10,    11,    12,    13,    14,    15,
-    16,    17,    18,    19,    20,    21,    22,    23,    24,    25,
-    26,    27,    28,    29,    30,    31,    32,    33,    34,    35,
-    36,    37,    38,    39,    40,    41,    42,    43,    44,    45,
-    46,    47,    48,    49,    50,    51,    52,    53,    54,    55,
-    56,    57,    58,    59,    60,    61,    62,    63,    64,    65,
-    66,    67,    68,    69,    70,    71,    72,    73,    74,    75,
-    76,    77,    78,    79,    80,    81,    82,    83,    84,    85,
-    86,    87,    88,    89,    90,    91,    92,    96,    97,    99,
-   101,   108
+     2,     2,     2,     2,     2,     1,     3,     4,     5,     6,
+     7,     8,     9,    10,    11,    12,    13,    14,    15,    16,
+    17,    18,    19,    20,    21,    22,    23,    24,    25,    26,
+    27,    28,    29,    30,    31,    32,    33,    34,    35,    36,
+    37,    38,    39,    40,    41,    42,    43,    44,    45,    46,
+    47,    48,    49,    50,    51,    52,    53,    54,    55,    56,
+    57,    58,    59,    60,    61,    62,    63,    64,    65,    66,
+    67,    68,    69,    70,    71,    72,    73,    74,    75,    76,
+    77,    78,    79,    80,    81,    82,    83,    84,    85,    86,
+    87,    88,    89,    90,    91,    92,    96,    97,    99,   101,
+   108
 };
 
 #if YYDEBUG != 0
@@ -981,7 +983,8 @@ static const short yycheck[] = {     2,
    101,   102,   103,    98,    99,   100,   101,   102,   103
 };
 /* -*-C-*-  Note some compilers choke on comments on `#line' lines.  */
-#line 3 "bison.simple"
+#line 3 "/emx/share/bison.simple"
+/* This file comes from bison-1.28.  */
 
 /* Skeleton output parser for bison,
    Copyright (C) 1984, 1989, 1990 Free Software Foundation, Inc.
@@ -998,46 +1001,66 @@ static const short yycheck[] = {     2,
 
    You should have received a copy of the GNU General Public License
    along with this program; if not, write to the Free Software
-   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+   Foundation, Inc., 59 Temple Place - Suite 330,
+   Boston, MA 02111-1307, USA.  */
 
 /* As a special exception, when this file is copied by Bison into a
    Bison output file, you may use that output file without restriction.
    This special exception was added by the Free Software Foundation
    in version 1.24 of Bison.  */
 
-#ifndef alloca
-#ifdef __GNUC__
-#define alloca __builtin_alloca
-#else /* not GNU C.  */
-#if (!defined (__STDC__) && defined (sparc)) || defined (__sparc__) || defined (__sparc) || defined (__sgi)
-#include <alloca.h>
-#else /* not sparc */
-#if defined (MSDOS) && !defined (__TURBOC__)
-#include <malloc.h>
-#else /* not MSDOS, or __TURBOC__ */
-#if defined(_AIX)
-#include <malloc.h>
- #pragma alloca
-#else /* not MSDOS, __TURBOC__, or _AIX */
-#ifdef __hpux
-#ifdef __cplusplus
-extern "C" {
-void *alloca (unsigned int);
-};
-#else /* not __cplusplus */
-void *alloca ();
-#endif /* not __cplusplus */
-#endif /* __hpux */
-#endif /* not _AIX */
-#endif /* not MSDOS, or __TURBOC__ */
-#endif /* not sparc.  */
-#endif /* not GNU C.  */
-#endif /* alloca not defined.  */
-
 /* This is the parser code that is written into each bison parser
   when the %semantic_parser declaration is not specified in the grammar.
   It was written by Richard Stallman by simplifying the hairy parser
   used when %semantic_parser is specified.  */
+
+#ifndef YYSTACK_USE_ALLOCA
+#ifdef alloca
+#define YYSTACK_USE_ALLOCA
+#else /* alloca not defined */
+#ifdef __GNUC__
+#define YYSTACK_USE_ALLOCA
+#define alloca __builtin_alloca
+#else /* not GNU C.  */
+#if (!defined (__STDC__) && defined (sparc)) || defined (__sparc__) || defined (__sparc) || defined (__sgi) || (defined (__sun) && defined (__i386))
+#define YYSTACK_USE_ALLOCA
+#include <alloca.h>
+#else /* not sparc */
+/* We think this test detects Watcom and Microsoft C.  */
+/* This used to test MSDOS, but that is a bad idea
+   since that symbol is in the user namespace.  */
+#if (defined (_MSDOS) || defined (_MSDOS_)) && !defined (__TURBOC__)
+#if 0 /* No need for malloc.h, which pollutes the namespace;
+	 instead, just don't use alloca.  */
+#include <malloc.h>
+#endif
+#else /* not MSDOS, or __TURBOC__ */
+#if defined(_AIX)
+/* I don't know what this was needed for, but it pollutes the namespace.
+   So I turned it off.   rms, 2 May 1997.  */
+/* #include <malloc.h>  */
+ #pragma alloca
+#define YYSTACK_USE_ALLOCA
+#else /* not MSDOS, or __TURBOC__, or _AIX */
+#if 0
+#ifdef __hpux /* haible@ilog.fr says this works for HPUX 9.05 and up,
+		 and on HPUX 10.  Eventually we can turn this on.  */
+#define YYSTACK_USE_ALLOCA
+#define alloca __builtin_alloca
+#endif /* __hpux */
+#endif
+#endif /* not _AIX */
+#endif /* not MSDOS, or __TURBOC__ */
+#endif /* not sparc */
+#endif /* not GNU C */
+#endif /* alloca not defined */
+#endif /* YYSTACK_USE_ALLOCA not defined */
+
+#ifdef YYSTACK_USE_ALLOCA
+#define YYSTACK_ALLOC alloca
+#else
+#define YYSTACK_ALLOC malloc
+#endif
 
 /* Note: there must be only one dollar sign in this file.
    It is replaced by the list of actions, each action
@@ -1047,8 +1070,8 @@ void *alloca ();
 #define yyclearin	(yychar = YYEMPTY)
 #define YYEMPTY		-2
 #define YYEOF		0
-#define YYACCEPT	return(0)
-#define YYABORT 	return(1)
+#define YYACCEPT	goto yyacceptlab
+#define YYABORT 	goto yyabortlab
 #define YYERROR		goto yyerrlab1
 /* Like YYERROR except do call yyerror.
    This remains here temporarily to ease the
@@ -1129,12 +1152,12 @@ int yydebug;			/*  nonzero means print parse trace	*/
 #ifndef YYMAXDEPTH
 #define YYMAXDEPTH 10000
 #endif
-
-/* Prevent warning if -Wstrict-prototypes.  */
-#ifdef __GNUC__
-int yyparse (void);
-#endif
 
+/* Define __yy_memcpy.  Note that the size argument
+   should be passed with type unsigned int, because that is what the non-GCC
+   definitions require.  With GCC, __builtin_memcpy takes an arg
+   of type size_t, but it can handle unsigned int.  */
+
 #if __GNUC__ > 1		/* GNU C and GNU C++ define this.  */
 #define __yy_memcpy(TO,FROM,COUNT)	__builtin_memcpy(TO,FROM,COUNT)
 #else				/* not GNU C or C++ */
@@ -1146,7 +1169,7 @@ static void
 __yy_memcpy (to, from, count)
      char *to;
      char *from;
-     int count;
+     unsigned int count;
 {
   register char *f = from;
   register char *t = to;
@@ -1161,10 +1184,10 @@ __yy_memcpy (to, from, count)
 /* This is the most reliable way to avoid incompatibilities
    in available built-in functions on various systems.  */
 static void
-__yy_memcpy (char *to, char *from, int count)
+__yy_memcpy (char *to, char *from, unsigned int count)
 {
-  register char *f = from;
   register char *t = to;
+  register char *f = from;
   register int i = count;
 
   while (i-- > 0)
@@ -1174,7 +1197,7 @@ __yy_memcpy (char *to, char *from, int count)
 #endif
 #endif
 
-#line 196 "bison.simple"
+#line 217 "/emx/share/bison.simple"
 
 /* The user can define YYPARSE_PARAM as the name of an argument to be passed
    into yyparse.  The argument should have type void *.
@@ -1194,6 +1217,15 @@ __yy_memcpy (char *to, char *from, int count)
 #define YYPARSE_PARAM_ARG
 #define YYPARSE_PARAM_DECL
 #endif /* not YYPARSE_PARAM */
+
+/* Prevent warning if -Wstrict-prototypes.  */
+#ifdef __GNUC__
+#ifdef YYPARSE_PARAM
+int yyparse (void *);
+#else
+int yyparse (void);
+#endif
+#endif
 
 int
 yyparse(YYPARSE_PARAM_ARG)
@@ -1223,6 +1255,7 @@ yyparse(YYPARSE_PARAM_ARG)
 #endif
 
   int yystacksize = YYINITDEPTH;
+  int yyfree_stacks = 0;
 
 #ifdef YYPURE
   int yychar;
@@ -1307,18 +1340,32 @@ yynewstate:
       if (yystacksize >= YYMAXDEPTH)
 	{
 	  yyerror("parser stack overflow");
+	  if (yyfree_stacks)
+	    {
+	      free (yyss);
+	      free (yyvs);
+#ifdef YYLSP_NEEDED
+	      free (yyls);
+#endif
+	    }
 	  return 2;
 	}
       yystacksize *= 2;
       if (yystacksize > YYMAXDEPTH)
 	yystacksize = YYMAXDEPTH;
-      yyss = (short *) alloca (yystacksize * sizeof (*yyssp));
-      __yy_memcpy ((char *)yyss, (char *)yyss1, size * sizeof (*yyssp));
-      yyvs = (YYSTYPE *) alloca (yystacksize * sizeof (*yyvsp));
-      __yy_memcpy ((char *)yyvs, (char *)yyvs1, size * sizeof (*yyvsp));
+#ifndef YYSTACK_USE_ALLOCA
+      yyfree_stacks = 1;
+#endif
+      yyss = (short *) YYSTACK_ALLOC (yystacksize * sizeof (*yyssp));
+      __yy_memcpy ((char *)yyss, (char *)yyss1,
+		   size * (unsigned int) sizeof (*yyssp));
+      yyvs = (YYSTYPE *) YYSTACK_ALLOC (yystacksize * sizeof (*yyvsp));
+      __yy_memcpy ((char *)yyvs, (char *)yyvs1,
+		   size * (unsigned int) sizeof (*yyvsp));
 #ifdef YYLSP_NEEDED
-      yyls = (YYLTYPE *) alloca (yystacksize * sizeof (*yylsp));
-      __yy_memcpy ((char *)yyls, (char *)yyls1, size * sizeof (*yylsp));
+      yyls = (YYLTYPE *) YYSTACK_ALLOC (yystacksize * sizeof (*yylsp));
+      __yy_memcpy ((char *)yyls, (char *)yyls1,
+		   size * (unsigned int) sizeof (*yylsp));
 #endif
 #endif /* no yyoverflow */
 
@@ -3095,7 +3142,7 @@ case 230:
 		if(yyvsp[-7].iptr)
 		{
 			yyval.tlbar->memopt = *(yyvsp[-7].iptr);
-			free(yyvsp[-7].iptr); 
+			free(yyvsp[-7].iptr);
 		}
 		else
 		{
@@ -3118,18 +3165,18 @@ case 231:
     break;}
 case 232:
 #line 1513 "parser.y"
-{         
+{
 		toolbar_item_t *idrec = new_toolbar_item();
 		idrec->id = yyvsp[0].num;
-		yyval.tlbarItems = ins_tlbr_button(yyvsp[-2].tlbarItems, idrec); 
+		yyval.tlbarItems = ins_tlbr_button(yyvsp[-2].tlbarItems, idrec);
 		;
     break;}
 case 233:
 #line 1518 "parser.y"
-{         
+{
 		toolbar_item_t *idrec = new_toolbar_item();
 		idrec->id = 0;
-		yyval.tlbarItems = ins_tlbr_button(yyvsp[-1].tlbarItems, idrec); 
+		yyval.tlbarItems = ins_tlbr_button(yyvsp[-1].tlbarItems, idrec);
 	;
     break;}
 case 234:
@@ -3344,7 +3391,7 @@ case 275:
     break;}
 }
    /* the action file gets copied in in place of this dollarsign */
-#line 498 "bison.simple"
+#line 543 "/emx/share/bison.simple"
 
   yyvsp -= yylen;
   yyssp -= yylen;
@@ -3539,6 +3586,30 @@ yyerrhandle:
 
   yystate = yyn;
   goto yynewstate;
+
+ yyacceptlab:
+  /* YYACCEPT comes here.  */
+  if (yyfree_stacks)
+    {
+      free (yyss);
+      free (yyvs);
+#ifdef YYLSP_NEEDED
+      free (yyls);
+#endif
+    }
+  return 0;
+
+ yyabortlab:
+  /* YYABORT comes here.  */
+  if (yyfree_stacks)
+    {
+      free (yyss);
+      free (yyvs);
+#ifdef YYLSP_NEEDED
+      free (yyls);
+#endif
+    }
+  return 1;
 }
 #line 1647 "parser.y"
 
@@ -3995,7 +4066,7 @@ raw_data_t *load_file(string_t *name)
 	raw_data_t *rd;
 	if(name->type != str_char)
 		yyerror("Filename must be ASCII string");
-		
+
 	fp = open_include(name->str.cstr, 1);
 	if(!fp)
 		yyerror("Cannot open file %s", name->str.cstr);
@@ -4459,7 +4530,7 @@ toolbar_item_t *get_tlbr_buttons_head(toolbar_item_t *p, int *nitems)
 	{
 		*nitems = 0;
 		return NULL;
-	} 
+	}
 
 	*nitems = 1;
 
