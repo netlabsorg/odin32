@@ -1,4 +1,4 @@
-/* $Id: kHll.cpp,v 1.4 2000-03-26 21:56:37 bird Exp $
+/* $Id: kHll.cpp,v 1.5 2000-03-27 07:26:54 bird Exp $
  *
  * kHll - Implementation of the class kHll.
  *        That class is used to create HLL debuginfo.
@@ -649,7 +649,7 @@ int         kHll::write(FILE *phFile)
     if (cch != sizeof(hllHdr))
         return -1;
 
-    return cch;
+    return cchWritten;
 }
 
 
