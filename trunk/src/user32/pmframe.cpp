@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.11 1999-10-23 23:04:36 sandervl Exp $ */
+/* $Id: pmframe.cpp,v 1.12 1999-10-28 12:00:34 sandervl Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -376,6 +376,7 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
         win32wnd->MsgPosChanged((LPARAM)&wp);
 
 PosChangedEnd:
+  	RestoreOS2TIB();
         return rc;
     }
 #if 0

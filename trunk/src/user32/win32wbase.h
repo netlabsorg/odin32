@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.34 1999-10-23 23:04:39 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.35 1999-10-28 12:00:35 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -27,8 +27,7 @@ class Win32BaseWindow;
 
 #define OFFSET_WIN32WNDPTR        0
 #define OFFSET_WIN32PM_MAGIC      4
-#define OFFSET_WIN32PM_SHAREDMEM  8
-#define NROF_WIN32WNDBYTES        12
+#define NROF_WIN32WNDBYTES        8
 
 #define WIN32PM_MAGIC           0x12345678
 #define CheckMagicDword(a)      (a==WIN32PM_MAGIC)

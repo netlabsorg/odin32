@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.37 1999-10-26 11:14:51 sandervl Exp $
+# $Id: Makefile,v 1.38 1999-10-28 12:00:33 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -24,7 +24,7 @@ RCFLAGS = -s -I. -I$(CPPMAIN)\include -I$(PDWIN32_INCLUDE) -I$(PDWIN32_INCLUDE)\
 TARGET = user32
 
 OBJS =  user32.obj loadres.obj \
-        dde.obj heapshared.obj win32wndhandle.obj \
+        dde.obj win32wndhandle.obj \
         icon.obj hook.obj hooks.obj winmenu.obj \
         defwndproc.obj syscolor.obj char.obj initterm.obj \
         uitools.obj unknown.obj spy.obj wndmsg.obj \
@@ -90,7 +90,7 @@ dde.obj: dde.cpp
 hook.obj: hook.cpp hooks.h
 defwndproc.obj: defwndproc.cpp syscolor.h win32wmdiclient.h win32wbase.h win32wnd.h win32dlg.h
 hooks.obj: hooks.cpp hooks.h
-initterm.obj: initterm.cpp $(PDWIN32_INCLUDE)\spy.h pmwindow.h heapshared.h initterm.h
+initterm.obj: initterm.cpp $(PDWIN32_INCLUDE)\spy.h pmwindow.h initterm.h
 uitools.obj: uitools.cpp win32wbase.h
 unknown.obj: unknown.cpp
 wndmsg.obj: wndmsg.cpp wndmsg.h $(PDWIN32_INCLUDE)\spy.h
@@ -120,16 +120,16 @@ win32wndhandle.obj: win32wndhandle.cpp win32wndhandle.h
 
 pmwindow.obj:   pmwindow.cpp win32class.h win32wbase.h win32dlg.h pmwindow.h win32wndchild.h $(PDWIN32_INCLUDE)\wprocess.h oslibgdi.h oslibwin.h dc.h
 pmframe.obj: pmframe.cpp win32class.h win32wbase.h pmframe.h win32wndchild.h
-win32class.obj: win32class.cpp win32class.h win32wbase.h win32dlg.h gen_object.h heapshared.h oslibwin.h win32wndchild.h
-win32wbase.obj:   win32wbase.cpp win32class.h win32wbase.h win32dlg.h gen_object.h heapshared.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h win32wndhandle.h oslibdos.h dc.h pmframe.h win32wdesktop.h
-win32wbasepos.obj: win32wbasepos.cpp win32class.h win32wbase.h win32dlg.h gen_object.h heapshared.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h win32wndhandle.h oslibdos.h dc.h pmframe.h win32wdesktop.h
-win32wnd.obj:   win32wnd.cpp win32class.h win32wbase.h win32wnd.h win32dlg.h gen_object.h heapshared.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h win32wndhandle.h oslibdos.h oslibmenu.h
-win32dlg.obj:   win32dlg.cpp win32class.h win32wbase.h win32dlg.h gen_object.h heapshared.h oslibwin.h win32wndchild.h oslibmsg.h controls.h
+win32class.obj: win32class.cpp win32class.h win32wbase.h win32dlg.h gen_object.h $(PDWIN32_INCLUDE)\heapshared.h oslibwin.h win32wndchild.h
+win32wbase.obj:   win32wbase.cpp win32class.h win32wbase.h win32dlg.h gen_object.h $(PDWIN32_INCLUDE)\heapshared.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h win32wndhandle.h oslibdos.h dc.h pmframe.h win32wdesktop.h
+win32wbasepos.obj: win32wbasepos.cpp win32class.h win32wbase.h win32dlg.h gen_object.h $(PDWIN32_INCLUDE)\heapshared.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h win32wndhandle.h oslibdos.h dc.h pmframe.h win32wdesktop.h
+win32wnd.obj:   win32wnd.cpp win32class.h win32wbase.h win32wnd.h win32dlg.h gen_object.h $(PDWIN32_INCLUDE)\heapshared.h oslibwin.h win32wndchild.h  $(PDWIN32_INCLUDE)\winres.h oslibres.h win32wndhandle.h oslibdos.h oslibmenu.h
+win32dlg.obj:   win32dlg.cpp win32class.h win32wbase.h win32dlg.h gen_object.h $(PDWIN32_INCLUDE)\heapshared.h oslibwin.h win32wndchild.h oslibmsg.h controls.h
 win32wndchild.obj: win32wndchild.cpp win32wndchild.h gen_object.h
 win32wmdiclient.obj: win32wmdiclient.cpp win32wbase.h win32wmdiclient.h win32wmdichild.h gen_object.h
 win32wmdichild.obj: win32wmdichild.cpp win32wbase.h win32wmdiclient.h win32wmdichild.h gen_object.h
 win32wdesktop.obj: win32wdesktop.cpp win32wbase.h win32wdesktop.h gen_object.h
-gen_object.obj: gen_object.cpp gen_object.h heapshared.h
+gen_object.obj: gen_object.cpp gen_object.h $(PDWIN32_INCLUDE)\heapshared.h
 oslibwin.obj:   oslibwin.cpp oslibwin.h oslibutil.h oslibgdi.h $(PDWIN32_INCLUDE)\winconst.h
 oslibutil.obj:  oslibutil.cpp oslibutil.h $(PDWIN32_INCLUDE)\wprocess.h oslibmsg.h
 oslibmsg.obj:   oslibmsg.cpp oslibmsg.h timer.h
@@ -143,8 +143,6 @@ caret.obj:      caret.cpp win32wbase.h caret.h dcdata.h
 
 clipboard.obj:  clipboard.cpp
 dib.obj:        dib.cpp dib.h
-
-heapshared.obj: heapshared.cpp heapshared.h
 
 clean:
         $(RM) *.obj *.lib *.dll *.map *.pch *.res
