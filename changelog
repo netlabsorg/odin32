@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.612 2000-01-05 20:03:32 achimha Exp $ */
+ /* $Id: changelog,v 1.613 2000-01-05 21:29:42 cbratschi Exp $ */
+
+ 2000-01-05: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32/NEW: single window works now
 
  2000-01-05: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32/NTDLL: Partially implemented NtOpenThreadToken
