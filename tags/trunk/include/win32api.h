@@ -235,4 +235,9 @@ BOOL      WINAPI IsWindowUnicode(HWND);
 INT       WINAPI WideCharToMultiByte(UINT,DWORD,LPCWSTR,INT,LPSTR,INT,LPCSTR,BOOL*);
 INT       WINAPI MultiByteToWideChar(UINT,DWORD,LPCSTR,INT,LPWSTR,INT);
 
+HDC       WIN32API CreateCompatibleDC( HDC hdc);
+BOOL      WIN32API DeleteDC(HDC hdc);
+
+HANDLE    WINAPI GetCurrentObject(HDC,UINT);
+
 #endif
