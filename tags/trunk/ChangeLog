@@ -1,7 +1,8 @@
- /* $Id: ChangeLog,v 1.878 2000-04-09 11:10:06 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.879 2000-04-09 11:29:33 sandervl Exp $ */
 
  2000-04-09: Sander van Leeuwen <sandervl@xs4all.nl>
         - GDI32: Y inversion fix for dib sections blits
+	- WINMM: GetPosition fix (don't return 0 when stream not active)
 
  2000-04-09: Yuri Dario <mc6530@mclink.it>
 	- INCLUDE(\WIN): 
