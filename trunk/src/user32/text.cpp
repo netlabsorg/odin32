@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.11 2001-05-24 19:26:59 sandervl Exp $ */
+/* $Id: text.cpp,v 1.12 2001-05-27 19:01:35 sandervl Exp $ */
 
 /*
  * Font and Text Functions
@@ -13,6 +13,7 @@
 #include "winuser.h"
 #include "user32.h"
 #include "syscolor.h"
+#include <winnls.h>
 
 #define DBG_LOCALLOG    DBG_text
 #include "dbglocal.h"
@@ -49,6 +50,156 @@ int WIN32API DrawTextExW(HDC hdc,LPWSTR lpchText,INT cchText,LPRECT lprc,UINT dw
 
   return InternalDrawTextExW(hdc,lpchText,cchText,lprc,dwDTFormat,lpDTParams,TRUE);
 }
+#if 1
+//Based on Wine version 20010510
+/***********************************************************************
+ *           TEXT_TabbedTextOut
+ *
+ * Helper function for TabbedTextOut() and GetTabbedTextExtent().
+ * Note: this doesn't work too well for text-alignment modes other
+ *       than TA_LEFT|TA_TOP. But we want bug-for-bug compatibility :-)
+ */
+static LONG TEXT_TabbedTextOut( HDC hdc, INT x, INT y, LPCSTR lpstr,
+                                INT count, INT cTabStops, const INT16 *lpTabPos16,
+                                const INT *lpTabPos32, INT nTabOrg,
+                                BOOL fDisplayText )
+{
+    INT defWidth;
+    SIZE extent;
+    int i, tabPos = x;
+    int start = x;
+
+    extent.cx = 0;
+    extent.cy = 0;
+
+    if (cTabStops == 1)
+    {
+        defWidth = lpTabPos32 ? *lpTabPos32 : *lpTabPos16;
+        cTabStops = 0;
+    }
+    else
+    {
+        TEXTMETRICA tm;
+        GetTextMetricsA( hdc, &tm );
+        defWidth = 8 * tm.tmAveCharWidth;
+    }
+
+    while (count > 0)
+    {
+        for (i = 0; i < count; i++)
+            if (lpstr[i] == '\t') break;
+        GetTextExtentPointA( hdc, lpstr, i, &extent );
+        if (lpTabPos32)
+        {
+            while ((cTabStops > 0) &&
+                   (nTabOrg + *lpTabPos32 <= x + extent.cx))
+            {
+                lpTabPos32++;
+                cTabStops--;
+            }
+        }
+        else
+        {
+            while ((cTabStops > 0) &&
+                   (nTabOrg + *lpTabPos16 <= x + extent.cx))
+            {
+                lpTabPos16++;
+                cTabStops--;
+            }
+        }
+        if (i == count)
+            tabPos = x + extent.cx;
+        else if (cTabStops > 0)
+            tabPos = nTabOrg + (lpTabPos32 ? *lpTabPos32 : *lpTabPos16);
+        else
+            tabPos = nTabOrg + ((x + extent.cx - nTabOrg) / defWidth + 1) * defWidth;
+        if (fDisplayText)
+        {
+            RECT r;
+            r.left   = x;
+            r.top    = y;
+            r.right  = tabPos;
+            r.bottom = y + extent.cy;
+            ExtTextOutA( hdc, x, y,
+                           GetBkMode(hdc) == OPAQUE ? ETO_OPAQUE : 0,
+                           &r, lpstr, i, NULL );
+        }
+        x = tabPos;
+        count -= i+1;
+        lpstr += i+1;
+    }
+    return MAKELONG(tabPos - start, extent.cy);
+}
+
+
+
+/***********************************************************************
+ *           TabbedTextOutA    (USER32.@)
+ */
+LONG WINAPI TabbedTextOutA( HDC hdc, INT x, INT y, LPCSTR lpstr, INT count,
+                            INT cTabStops, INT *lpTabPos, INT nTabOrg )
+{
+    dprintf(("USER32: TabbedTextOutA %x (%d,%d) %s %d %d %x %d", hdc, x, y, lpstr, count, cTabStops, lpTabPos, nTabOrg));
+    return TEXT_TabbedTextOut( hdc, x, y, lpstr, count, cTabStops,
+                               NULL, lpTabPos, nTabOrg, TRUE );
+}
+
+
+/***********************************************************************
+ *           TabbedTextOutW    (USER32.@)
+ */
+LONG WINAPI TabbedTextOutW( HDC hdc, INT x, INT y, LPCWSTR str, INT count,
+                            INT cTabStops, INT *lpTabPos, INT nTabOrg )
+{
+    LONG ret;
+    LPSTR p;
+    INT acount;
+    UINT codepage = CP_ACP; /* FIXME: get codepage of font charset */
+
+    acount = WideCharToMultiByte(codepage,0,str,count,NULL,0,NULL,NULL);
+    p = (LPSTR)HeapAlloc( GetProcessHeap(), 0, acount );
+    if(p == NULL) return 0; /* FIXME: is this the correct return on failure */ 
+    acount = WideCharToMultiByte(codepage,0,str,count,p,acount,NULL,NULL);
+    ret = TabbedTextOutA( hdc, x, y, p, acount, cTabStops, lpTabPos, nTabOrg );
+    HeapFree( GetProcessHeap(), 0, p );
+    return ret;
+}
+
+
+
+/***********************************************************************
+ *           GetTabbedTextExtentA    (USER32.@)
+ */
+DWORD WINAPI GetTabbedTextExtentA( HDC hdc, LPCSTR lpstr, INT count,
+                                   INT cTabStops, INT *lpTabPos )
+{
+    dprintf(("USER32: GetTabbedTextExtentA %x %s %d %d %x",hdc, lpstr, count, cTabStops, lpTabPos));
+
+    return TEXT_TabbedTextOut( hdc, 0, 0, lpstr, count, cTabStops,
+                               NULL, lpTabPos, 0, FALSE );
+}
+
+
+/***********************************************************************
+ *           GetTabbedTextExtentW    (USER32.@)
+ */
+DWORD WINAPI GetTabbedTextExtentW( HDC hdc, LPCWSTR lpstr, INT count,
+                                   INT cTabStops, INT *lpTabPos )
+{
+    LONG ret;
+    LPSTR p;
+    INT acount;
+    UINT codepage = CP_ACP; /* FIXME: get codepage of font charset */
+
+    acount = WideCharToMultiByte(codepage,0,lpstr,count,NULL,0,NULL,NULL);
+    p = (LPSTR)HeapAlloc( GetProcessHeap(), 0, acount );
+    if(p == NULL) return 0; /* FIXME: is this the correct failure value? */
+    acount = WideCharToMultiByte(codepage,0,lpstr,count,p,acount,NULL,NULL);
+    ret = GetTabbedTextExtentA( hdc, p, acount, cTabStops, lpTabPos );
+    HeapFree( GetProcessHeap(), 0, p );
+    return ret;
+}
+#else
 //******************************************************************************
 //******************************************************************************
 DWORD WIN32API GetTabbedTextExtentA( HDC hDC, LPCSTR lpString, int nCount, int nTabPositions, LPINT lpnTabStopPositions)
@@ -81,6 +232,7 @@ LONG WIN32API TabbedTextOutW( HDC hdc, int x, int y, LPCWSTR lpString, int nCoun
 
   return InternalTabbedTextOutW(hdc,x,y,lpString,nCount,nTabPositions,lpnTabStopPositions,nTabOrigin);
 }
+#endif
 //******************************************************************************
 // WINE/objects/text.c
 //******************************************************************************
