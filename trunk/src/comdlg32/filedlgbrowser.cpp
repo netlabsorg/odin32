@@ -1,4 +1,4 @@
-/* $Id: filedlgbrowser.cpp,v 1.3 1999-11-02 20:38:15 sandervl Exp $ */
+/* $Id: filedlgbrowser.cpp,v 1.4 1999-11-28 12:32:28 sandervl Exp $ */
 /*
  *  Implementation of IShellBrowser for the File Open common dialog
  * 
@@ -102,6 +102,7 @@ extern BOOL    FILEDLG95_SHELL_FillIncludedItemList(HWND hwnd,
 
 extern int     FILEDLG95_LOOKIN_SelectItem(HWND hwnd,LPITEMIDLIST pidl);
 extern BOOL    FILEDLG95_OnOpen(HWND hwnd);
+extern HRESULT SendCustomDlgNotificationMessage(HWND hwndParentDlg, UINT uCode);
 
 
 /**************************************************************************
@@ -511,11 +512,21 @@ HRESULT WINAPI IShellBrowserImpl_SendControlMsg(IShellBrowser *iface,
                                               
 {
     ICOM_THIS(IShellBrowserImpl, iface);
+    LRESULT lres;
+    
+//    TRACE("(%p)->(0x%08x 0x%08x 0x%08x 0x%08lx %p)\n", This, id, uMsg, wParam, lParam, pret);
 
-    TRACE("(%p)\n", This);
-
-    /* Feature not implemented */
-    return E_NOTIMPL;
+    switch (id)
+    {
+      case FCW_TOOLBAR:
+        lres = SendDlgItemMessageA( This->hwndOwner, IDC_TOOLBAR, uMsg, wParam, lParam);
+	break;
+      default:
+        FIXME("ctrl id: %x\n", id);
+        return E_NOTIMPL;
+    }
+    if (pret) *pret = lres;
+    return S_OK;
 }
 /**************************************************************************
 *  IShellBrowserImpl_SetMenuSB
@@ -768,6 +779,7 @@ HRESULT IShellBrowserImpl_ICommDlgBrowser_OnSelChange(ICommDlgBrowser *iface, IS
 	fodInfos->DlgInfos.dwDlgProp |= FODPROP_USEVIEW;
 
         COMDLG32_SHFree((LPVOID)pidl);
+        SendCustomDlgNotificationMessage(This->hwndOwner, CDN_SELCHANGE);
         return hRes;
     }
     if(fodInfos->DlgInfos.dwDlgProp & FODPROP_SAVEDLG)
