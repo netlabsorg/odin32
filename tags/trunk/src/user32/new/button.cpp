@@ -1,15 +1,15 @@
-/* $Id: button.cpp,v 1.9 1999-07-24 17:10:24 cbratschi Exp $ */
-/* File: button.c -- Button type widgets
- *
- * Copyright (c) 1999 Christoph Bratschi (ported from WINE)
+/* $Id: button.cpp,v 1.10 1999-07-27 16:14:22 cbratschi Exp $ */
+/* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
  * Copyright (C) 1993 David Metcalfe
  * Copyright (C) 1994 Alexandre Julliard
+ * Copyright (c) 1999 Christoph Bratschi
  */
 
 /* CB: todo
    - update checkboxes.bmp to Win9x style
+     + color and transparent mask
 */
 
 #include <string.h>
@@ -30,6 +30,7 @@ static void GB_Paint(HWND hwnd,HDC hDC,WORD action);
 static void UB_Paint(HWND hwnd,HDC hDC,WORD action);
 static void OB_Paint(HWND hwnd,HDC hDC,WORD action);
 static void BUTTON_CheckAutoRadioButton(HWND hwnd);
+static LRESULT BUTTON_LButtonDown(HWND hwnd,WPARAM wParam,LPARAM lParam);
 
 #define MAX_BTN_TYPE  12
 
@@ -87,13 +88,23 @@ static LRESULT BUTTON_GetDlgCode(HWND hwnd,WPARAM wParam,LPARAM lParam)
 
   switch (dwStyle & 0x0f)
   {
+    case BS_AUTOCHECKBOX:
+    case BS_CHECKBOX:
+     return DLGC_WANTCHARS | DLGC_BUTTON;
+
     case BS_PUSHBUTTON:
-      return DLGC_BUTTON | DLGC_UNDEFPUSHBUTTON;
+      return DLGC_UNDEFPUSHBUTTON;
+
     case BS_DEFPUSHBUTTON:
-      return DLGC_BUTTON | DLGC_DEFPUSHBUTTON;
-    case BS_RADIOBUTTON:
+      return DLGC_DEFPUSHBUTTON;
+
     case BS_AUTORADIOBUTTON:
-      return DLGC_BUTTON | DLGC_RADIOBUTTON;
+    case BS_RADIOBUTTON:
+      return DLGC_RADIOBUTTON;
+
+    case BS_GROUPBOX:;
+      return DLGC_STATIC;
+
     default:
       return DLGC_BUTTON;
   }
@@ -118,9 +129,11 @@ static LRESULT BUTTON_Create(HWND hwnd,WPARAM wParam,LPARAM lParam)
     BITMAP bmp;
 
     hbitmapCheckBoxes = NativeLoadBitmap(0,MAKEINTRESOURCEA(OBM_CHECKBOXES));
-    GetObjectA( hbitmapCheckBoxes, sizeof(bmp), &bmp );
-    checkBoxWidth  = bmp.bmWidth / 4;
-    checkBoxHeight = bmp.bmHeight / 3;
+    if (GetObjectA(hbitmapCheckBoxes,sizeof(bmp),&bmp))
+    {
+      checkBoxWidth  = bmp.bmWidth / 4;
+      checkBoxHeight = bmp.bmHeight / 3;
+    } else checkBoxWidth = checkBoxHeight = 0;
   }
   if (style < 0L || style >= MAX_BTN_TYPE) return -1; /* abort */
 
@@ -159,6 +172,26 @@ static LRESULT BUTTON_Paint(HWND hwnd,WPARAM wParam,LPARAM lParam)
     SetBkMode(hdc,OPAQUE);
     (btnPaintFunc[style])(hwnd,hdc,ODA_DRAWENTIRE);
     if(!wParam) EndPaint(hwnd,&ps);
+  }
+
+  return 0;
+}
+
+static LRESULT BUTTON_LButtonDblClk(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
+
+  switch(dwStyle & 0x0f)
+  {
+    case BS_RADIOBUTTON:
+    case BS_AUTORADIOBUTTON:
+    case BS_OWNERDRAW:
+      SendMessageA(GetParent(hwnd),WM_COMMAND,MAKEWPARAM(GetWindowLongA(hwnd,GWL_ID),BN_DOUBLECLICKED),hwnd);
+      break;
+
+    default:
+      BUTTON_LButtonDown(hwnd,wParam,lParam);
+      break;
   }
 
   return 0;
@@ -265,6 +298,57 @@ static LRESULT BUTTON_GetFont(HWND hwnd,WPARAM wParam,LPARAM lParam)
   return infoPtr->hFont;
 }
 
+static LRESULT BUTTON_KeyDown(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  if (wParam == VK_SPACE)
+  {
+    SendMessageA(hwnd,BM_SETSTATE,TRUE,0);
+    SetFocus(hwnd);
+    SetCapture(hwnd);
+  }
+
+  return 0;
+}
+
+static LRESULT BUTTON_KeyUp(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  if (wParam == VK_SPACE)
+  {
+    BUTTONINFO* infoPtr = (BUTTONINFO*)GetInfoPtr(hwnd);
+    DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
+    DWORD id = GetWindowLongA(hwnd,GWL_ID);
+
+    ReleaseCapture();
+    if (!(infoPtr->state & BUTTON_HIGHLIGHTED)) return 0;
+    SendMessageA(hwnd,BM_SETSTATE,FALSE,0);
+
+    switch(dwStyle & 0x0f)
+    {
+      case BS_AUTOCHECKBOX:
+        SendMessageA(hwnd,BM_SETCHECK,!(infoPtr->state & BUTTON_CHECKED),0);
+        break;
+      case BS_AUTORADIOBUTTON:
+        SendMessageA(hwnd,BM_SETCHECK,TRUE,0);
+        break;
+      case BS_AUTO3STATE:
+        SendMessageA(hwnd,BM_SETCHECK,
+                     (infoPtr->state & BUTTON_3STATE) ? 0 :
+                     ((infoPtr->state & 3)+1),0);
+        break;
+    }
+    SendMessageA(GetParent(hwnd),WM_COMMAND,MAKEWPARAM(id,BN_CLICKED),hwnd);
+  } else if (wParam != VK_TAB) ReleaseCapture();
+
+  return 0;
+}
+
+static LRESULT BUTTON_SysKeyUp(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  if (wParam != VK_TAB) ReleaseCapture();
+
+  return 0;
+}
+
 static LRESULT BUTTON_SetFocus(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   BUTTONINFO* infoPtr = (BUTTONINFO*)GetInfoPtr(hwnd);
@@ -274,7 +358,12 @@ static LRESULT BUTTON_SetFocus(HWND hwnd,WPARAM wParam,LPARAM lParam)
   if (style == BS_AUTORADIOBUTTON)
   {
     SendMessageA(hwnd,BM_SETCHECK,1,0);
+    SendMessageA(GetParent(hwnd),WM_COMMAND,MAKEWPARAM(GetWindowLongA(hwnd,GWL_ID),BN_CLICKED),hwnd);
+  } else if (style == BS_RADIOBUTTON)
+  {
+    SendMessageA(GetParent(hwnd),WM_COMMAND,MAKEWPARAM(GetWindowLongA(hwnd,GWL_ID),BN_CLICKED),hwnd);
   }
+
   PAINT_BUTTON(hwnd,style,ODA_FOCUS);
 
   return 0;
@@ -285,9 +374,12 @@ static LRESULT BUTTON_KillFocus(HWND hwnd,WPARAM wParam,LPARAM lParam)
   BUTTONINFO* infoPtr = (BUTTONINFO*)GetInfoPtr(hwnd);
   DWORD style = GetWindowLongA(hwnd,GWL_STYLE) & 0x0f;
 
-  infoPtr->state &= ~BUTTON_HASFOCUS;
-  PAINT_BUTTON(hwnd,style,ODA_FOCUS);
-  InvalidateRect(hwnd,NULL,TRUE);
+  if (infoPtr->state & BUTTON_HASFOCUS)
+  {
+    infoPtr->state &= ~BUTTON_HASFOCUS;
+    PAINT_BUTTON(hwnd,style,ODA_FOCUS);
+    InvalidateRect(hwnd,NULL,TRUE);
+  }
 
   return 0;
 }
@@ -295,6 +387,20 @@ static LRESULT BUTTON_KillFocus(HWND hwnd,WPARAM wParam,LPARAM lParam)
 static LRESULT BUTTON_SysColorChange(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   InvalidateRect(hwnd,NULL,FALSE);
+
+  return 0;
+}
+
+static LRESULT BUTTON_Click(HWND hwnd,WPARAM wParam,LPARAM lParam)
+{
+  RECT rect;
+  LPARAM point;
+
+  GetClientRect(hwnd,&rect);
+  point = MAKELPARAM(rect.right/2,rect.bottom/2);
+  SendMessageA(hwnd,WM_LBUTTONDOWN,0,point);
+  Sleep(100);
+  SendMessageA(hwnd,WM_LBUTTONUP,0,point);
 
   return 0;
 }
@@ -416,8 +522,10 @@ LRESULT WINAPI ButtonWndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
     case WM_PAINT:
       return BUTTON_Paint(hwnd,wParam,lParam);
 
-    case WM_LBUTTONDOWN:
     case WM_LBUTTONDBLCLK:
+      return BUTTON_LButtonDblClk(hwnd,wParam,lParam);
+
+    case WM_LBUTTONDOWN:
       return BUTTON_LButtonDown(hwnd,wParam,lParam);
 
     case WM_LBUTTONUP:
@@ -438,6 +546,15 @@ LRESULT WINAPI ButtonWndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
     case WM_GETFONT:
       return BUTTON_GetFont(hwnd,wParam,lParam);
 
+    case WM_KEYDOWN:
+      return BUTTON_KeyDown(hwnd,wParam,lParam);
+
+    case WM_KEYUP:
+      return BUTTON_KeyUp(hwnd,wParam,lParam);
+
+    case WM_SYSKEYUP:
+      return BUTTON_SysKeyUp(hwnd,wParam,lParam);
+
     case WM_SETFOCUS:
       return BUTTON_SetFocus(hwnd,wParam,lParam);
 
@@ -446,6 +563,9 @@ LRESULT WINAPI ButtonWndProc(HWND hwnd,UINT uMsg,WPARAM wParam,LPARAM lParam)
 
     case WM_SYSCOLORCHANGE:
       return BUTTON_SysColorChange(hwnd,wParam,lParam);
+
+    case BM_CLICK:
+      return BUTTON_Click(hwnd,wParam,lParam);
 
     case BM_SETSTYLE:
       return BUTTON_SetStyle(hwnd,wParam,lParam);
@@ -909,7 +1029,7 @@ BOOL BUTTON_Register()
     if (GlobalFindAtomA(BUTTONCLASSNAME)) return FALSE;
 
     ZeroMemory(&wndClass,sizeof(WNDCLASSA));
-    wndClass.style         = CS_GLOBALCLASS | CS_HREDRAW | CS_VREDRAW | CS_PARENTDC;
+    wndClass.style         = CS_GLOBALCLASS | CS_HREDRAW | CS_VREDRAW | CS_PARENTDC | CS_DBLCLKS;
     wndClass.lpfnWndProc   = (WNDPROC)ButtonWndProc;
     wndClass.cbClsExtra    = 0;
     wndClass.cbWndExtra    = sizeof(BUTTONINFO);
