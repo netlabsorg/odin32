@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.234 1999-09-24 21:58:13 davidr Exp $ */
+ /* $Id: changelog,v 1.235 1999-09-24 22:47:48 sandervl Exp $ */
 
  99-09-24: David Raison <djr@lemur.co.uk>
         - OLE32: Ported remaining files pertaining to OLE32 from WINE
@@ -8,6 +8,8 @@
 	- USER32: Rewrote menu code to use Open32 (==PM) menu handles
                   Note: Uses mostly Open32 apis; they work fine, but maybe
                         we should write our own someday.
+                  Cursor fixes. Not working in winhlp32 yet though.
+	- KERNEL32: Cursor & cursorgroup fixes
 
  99-09-23: Patrick Haller <phaller@gmx.net>
 	- KERNEL32:	Fix: WinImgRes:findResourceW erroneously tried to free 
