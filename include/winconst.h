@@ -1,4 +1,4 @@
-/* $Id: winconst.h,v 1.29 2000-03-16 19:16:36 sandervl Exp $ */
+/* $Id: winconst.h,v 1.30 2000-03-22 18:47:01 sandervl Exp $ */
 
 /*
  * Win32 constants
@@ -1305,3 +1305,16 @@
 #define VK_BRACKETRIGHT_W    0xDD
 #define VK_QUOTESINGLE_W     0xDE
 #define VK_EXTRA_W           0xE2
+
+/* Heap flags */
+
+#define HEAP_NO_SERIALIZE               0x00000001
+#define HEAP_GROWABLE                   0x00000002
+#define HEAP_GENERATE_EXCEPTIONS        0x00000004
+#define HEAP_ZERO_MEMORY                0x00000008
+#define HEAP_REALLOC_IN_PLACE_ONLY      0x00000010
+#define HEAP_TAIL_CHECKING_ENABLED      0x00000020
+#define HEAP_FREE_CHECKING_ENABLED      0x00000040
+#define HEAP_DISABLE_COALESCE_ON_FREE   0x00000080
+#define HEAP_CREATE_ALIGN_16            0x00010000
+#define HEAP_CREATE_ENABLE_TRACING      0x00020000
