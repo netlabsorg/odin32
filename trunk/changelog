@@ -1,4 +1,12 @@
-/* $Id: changelog,v 1.1325 2001-03-27 20:46:51 sandervl Exp $ */
+/* $Id: changelog,v 1.1326 2001-03-28 16:19:34 sandervl Exp $ */
+
+ 2001-03-28: Sander van Leeuwen <sandervl@xs4all.nl>   
+    - KERNEL32: o GetSystemPowerStatus fix; SYSTEM_POWER_STATUS structure
+                  definition was wrong.
+                  (fixes crash in WinDVD)
+                o Added translation for ERROR_NOT_READY to error2WinError
+    - DDRAW:    o Return proper error code for unsupported FOURCC surface 
+                  creation
 
  2001-03-27: Sander van Leeuwen <sandervl@xs4all.nl>   
     - USER32:   o Rewrote cursor handling. No longer use Open32, but convert
