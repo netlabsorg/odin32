@@ -1,6 +1,8 @@
- /* $Id: ChangeLog,v 1.982 2000-06-12 08:08:24 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.983 2000-06-12 12:18:48 phaller Exp $ */
 
  2000-06-11: Patrick Haller <phaller@gmx.net>
+    - KERNEL32:     moved GetNumberFormat to different source file and enhanced
+                    it a little (WinRAR shows file sizes)
     - SHLWAPI:      Added a whole lot of missing functions, forwarders, stubs
                     Only 50 more to go for IE4 ...
 
