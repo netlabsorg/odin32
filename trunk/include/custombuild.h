@@ -87,6 +87,12 @@ void WIN32API DisableDragDrop(BOOL fDisabled);
 //Turn off wave audio in winmm
 void WIN32API DisableWaveAudio();
 
+//Call to tell winmm to expect simple fixed size buffers, so
+//it doesn't have to use very small DART buffers; this will
+//only work in very specific cases; it is not a good general
+//purpose solution)
+void WIN32API SetFixedWaveBufferSize();
+
 //Override shared semaphore name used to synchronize global window handle 
 //array access (to avoid name clash with Odin)
 void WIN32API SetCustomWndHandleSemName(LPSTR pszSemName);
