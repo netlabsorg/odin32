@@ -1,4 +1,4 @@
-/* $Id: asyncapi.cpp,v 1.20 2002-02-23 16:39:09 sandervl Exp $ */
+/* $Id: asyncapi.cpp,v 1.21 2004-01-30 22:02:11 bird Exp $ */
 
 /*
  *
@@ -406,7 +406,7 @@ void AsyncSelectNotifyEvent(PASYNCTHREADPARM pThreadParm, ULONG event, ULONG soc
     // for the semaphore notification...
     ULONG eventReply = WSAMAKESELECTREPLY(event, socket_error);
 
-#ifdef DEBUG
+#ifdef DEBUG_LOGGING
     char *pszEvent = NULL;
 
     switch(event) {
@@ -575,7 +575,7 @@ asyncloopstart:
         	state = ioctl(s, FIOBSTATUS, (char *)&tmp, sizeof(tmp));
 
                 //Don't send FD_CONNECT is socket was already connected (accept returns connected socket)
-         	if(!pThreadParm->fConnected && (lEventsPending & FD_CONNECT)) 
+         	if(!pThreadParm->fConnected && (lEventsPending & FD_CONNECT))
                 {
 	    		if(state & SS_ISCONNECTED) {
 				AsyncSelectNotifyEvent(pThreadParm, FD_CONNECT, NO_ERROR);
@@ -635,12 +635,12 @@ asyncloopstart:
 			AsyncSelectNotifyEvent(pThreadParm, FD_READ, NO_ERROR);
 		}
        		else
-		if((lEventsPending & FD_CLOSE) && (state == 0 && bytesread == 0)) 
+		if((lEventsPending & FD_CLOSE) && (state == 0 && bytesread == 0))
                 {
                         state = ioctl(s, FIOBSTATUS, (char *)&tmp, sizeof(tmp));
 
-                        //Have to make sure this doesn't generates FD_CLOSE 
-                        //messages when the connection is just fine (recv 
+                        //Have to make sure this doesn't generates FD_CLOSE
+                        //messages when the connection is just fine (recv
                         //executed in another thread when select returns)
                         if(state & (SS_CANTRCVMORE|SS_CANTSENDMORE|SS_ISDISCONNECTING|SS_ISDISCONNECTED)) {
                             dprintf(("FD_CLOSE; state == 0 && bytesread == 0, state = %x", state));
@@ -693,7 +693,7 @@ int WSAAsyncSelectWorker(SOCKET s, int mode, DWORD notifyHandle, DWORD notifyDat
     if (lEventMask & FD_WRITE)
         strcat(tmpbuf, " FD_WRITE");
     if (lEventMask & FD_OOB)
-        strcat(tmpbuf, " FD_OOB");    
+        strcat(tmpbuf, " FD_OOB");
     if (lEventMask & FD_ACCEPT)
         strcat(tmpbuf, " FD_ACCEPT");
     if (lEventMask & FD_CONNECT)
@@ -808,7 +808,7 @@ int WSAEnumNetworkEventsWorker(SOCKET s, WSAEVENT hEvent, LPWSANETWORKEVENTS lpE
 	memcpy(&lpEvent->iErrorCode, &pThreadInfo->u.asyncselect.iErrorCode, sizeof(int) * FD_MAX_EVENTS);
 	// return our internal event bit representation
         lpEvent->lNetworkEvents = InterlockedExchange((LPLONG)&pThreadInfo->u.asyncselect.lLastEvent, 0);
-   } 
+   }
    else
    {
       asyncThreadMutex.leave();

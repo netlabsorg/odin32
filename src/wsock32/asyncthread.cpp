@@ -1,4 +1,4 @@
-/* $Id: asyncthread.cpp,v 1.16 2003-01-06 13:05:40 sandervl Exp $ */
+/* $Id: asyncthread.cpp,v 1.17 2004-01-30 22:02:12 bird Exp $ */
 
 /*
  * Async thread help functions
@@ -32,7 +32,7 @@ static void AddToQueue(PASYNCTHREADPARM pThreadParm);
 static void _Optlink AsyncThread(void *arg)
 {
  PASYNCTHREADPARM pThreadParm = (PASYNCTHREADPARM)arg;
-#ifdef DEBUG
+#ifdef DEBUG_LOGGING
  ULONG ulSocket    = pThreadParm->u.asyncselect.s;
  ULONG hTaskHandle = pThreadParm->hAsyncTaskHandle;
 #endif
@@ -112,7 +112,7 @@ void RemoveFromQueue(PASYNCTHREADPARM pThreadParm)
 		dprintf(("RemoveFromQueue: parm %x not found!!", pThreadParm));
 		DebugInt3();
 	}
-   }   
+   }
    memset(pThreadParm, 0, sizeof(*pThreadParm));
    asyncThreadMutex.leave();
 }
@@ -219,7 +219,7 @@ void DumpQueue(void)
    pThreadInfo = threadList;
 
    while(pThreadInfo) {
-	dprintf(( "SOCKET %08xh thread#%d events %xh pending %xh, select %d", 
+	dprintf(( "SOCKET %08xh thread#%d events %xh pending %xh, select %d",
 		pThreadInfo->u.asyncselect.s,
 		pThreadInfo->hAsyncTaskHandle,
 		pThreadInfo->u.asyncselect.lEvents,
@@ -254,7 +254,7 @@ BOOL FindAndSetAsyncEvent(SOCKET s, int mode, int notifyHandle, int notifyData, 
 
    asyncThreadMutex.enter();
    pThreadInfo = FindAsyncEvent(s);
-   if(pThreadInfo) 
+   if(pThreadInfo)
    {
         int size, state, tmp;
         state = ioctl(s, FIOBSTATUS, (char *)&tmp, sizeof(tmp));
@@ -308,7 +308,7 @@ void EnableAsyncEvent(SOCKET s, ULONG flags)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL QueryAsyncEvent(SOCKET s, int *pMode, ULONG *pNofityHandle, ULONG *pNofityData, 
+BOOL QueryAsyncEvent(SOCKET s, int *pMode, ULONG *pNofityHandle, ULONG *pNofityData,
                      ULONG *plEvent)
 {
  PASYNCTHREADPARM pThreadInfo;
