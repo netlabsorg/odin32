@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.248 2001-04-01 22:13:27 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.249 2001-04-02 17:30:58 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1424,6 +1424,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         if (wParam)
         {
             setStyle(getStyle() | WS_VISIBLE);
+            dprintf(("Enable window update for %x", getWindowHandle()));
             OSLibWinEnableWindowUpdate(OS2Hwnd,TRUE);
         }
         else
@@ -1431,6 +1432,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
             if (getStyle() & WS_VISIBLE)
             {
                 setStyle(getStyle() & ~WS_VISIBLE);
+                dprintf(("Disable window update for %x", getWindowHandle()));
                 OSLibWinEnableWindowUpdate(OS2Hwnd,FALSE);
             }
         }
@@ -2293,6 +2295,16 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
                               rectClient.bottom-rectClient.top));
         SendInternalMessageA(WM_MOVE,0,MAKELONG(rectClient.left,rectClient.top));
     }
+//testestest
+    //temporary workaround for file dialogs with template dialog child
+    //they don't redraw when switching directories 
+    //For some reason the new child's (syslistview32) update rectangle stays
+    //empty after its parent is made visible with ShowWindow
+    //TODO: find real cause
+    if(!wasVisible) {
+        InvalidateRect(getWindowHandle(), NULL, TRUE);
+    }
+//testestest
 END:
     fMinMaxChange = FALSE;
     return wasVisible;
