@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2000-02-29 10:48:11 bird Exp $
+# $Id: makefile,v 1.3 2000-03-11 18:07:48 bird Exp $
 
 #
 # PD-Win32 API
@@ -15,7 +15,7 @@ PDWIN32_INCLUDE = ..\..\include
 # Addjust common definitions
 !ifdef DEBUG
 CFLAGS   = $(CFLAGS)  -Ge+ -Tx+ -I$(PDWIN32_INCLUDE) -I..\common  \
-           -W3 -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext- #-O+
+           -W3 -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext- -O+
 LDFLAGS  = $(LDFLAGS) -Ge+ -Fe$@ /B"/MAP:full"
 !else
 CFLAGS   = $(CFLAGS)  -Ge+ -Tx+ -I$(PDWIN32_INCLUDE) -I..\common      \
