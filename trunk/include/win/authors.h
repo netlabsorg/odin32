@@ -1,4 +1,4 @@
-/* $Id: authors.h,v 1.14 2001-04-01 10:31:09 sandervl Exp $ */
+/* $Id: authors.h,v 1.15 2001-04-18 19:48:54 sandervl Exp $ */
 #ifndef __WINE_AUTHORS_H
 #define __WINE_AUTHORS_H
 
@@ -34,6 +34,7 @@ static const char * const SHELL_People[] =
     "Carsten Tenbrink",
     "Vit Timchishin",
     "Joel Troster",
+    "Shingo Tsuda",
     "Jens Wiessner",
     "Chris Wohlgemuth",
     "Vince Vielhaber",
