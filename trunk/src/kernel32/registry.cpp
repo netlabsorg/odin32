@@ -1,4 +1,4 @@
-/* $Id: registry.cpp,v 1.18 2002-06-25 10:27:00 sandervl Exp $ */
+/* $Id: registry.cpp,v 1.19 2002-12-10 18:52:16 sandervl Exp $ */
 
 /*
  * Win32 registry API functions for OS/2
@@ -111,7 +111,15 @@ void WIN32API SetRegistryRootKey(HKEY hRootkey, HKEY hKey)
 
 LONG WIN32API RegCloseKey(HKEY hKey)
 {
-  return O32_RegCloseKey(ConvertKey(hKey));
+    switch(hKey) 
+    {//Closing a root key should just return success (matters for custom builds)
+    case HKEY_CLASSES_ROOT:
+    case HKEY_CURRENT_USER:
+    case HKEY_LOCAL_MACHINE:
+    case HKEY_USERS:
+        return 0;
+    }
+    return O32_RegCloseKey(ConvertKey(hKey));
 }
 
 
@@ -842,6 +850,12 @@ LONG WIN32API RegQueryValueW(HKEY    hkey,
             free(astring2);
     }
   }
+
+  if((rc == ERROR_SUCCESS || rc == ERROR_MORE_DATA) && 
+     lpszValue == NULL && pcbValue) 
+  {
+      *pcbValue = *pcbValue * sizeof(WCHAR); //size in bytes!!
+  }
   
   if (NULL != astring1)
     FreeAsciiString(astring1);
@@ -970,7 +984,20 @@ LONG WIN32API RegQueryValueExW(HKEY   hkey,
           break;
       }
   }
-  
+
+  if((rc == ERROR_SUCCESS || rc == ERROR_MORE_DATA) && 
+     lpbData == NULL && lpcbData) 
+  {
+      switch(*lpdwType) {
+      case REG_SZ:
+      case REG_EXPAND_SZ:
+      case REG_MULTI_SZ:
+      case REG_LINK: //???
+          *lpcbData = *lpcbData * sizeof(WCHAR); //size in bytes!!
+          break;
+      }
+  }
+
   if (NULL != astring)
     FreeAsciiString(astring);
   
