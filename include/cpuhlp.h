@@ -1,7 +1,9 @@
-/* $Id: cpuhlp.h,v 1.5 2001-02-11 10:35:29 sandervl Exp $ */
+/* $Id: cpuhlp.h,v 1.6 2001-07-08 07:19:26 sandervl Exp $ */
 
 #ifndef _CPUHLP_H_
 #define _CPUHLP_H_
+
+#include <float.h>
 
 #ifdef __cplusplus
 extern "C" {
