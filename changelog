@@ -1,4 +1,22 @@
- /* $Id: changelog,v 1.809 2000-03-14 20:03:36 sandervl Exp $ */
+ /* $Id: changelog,v 1.810 2000-03-16 19:17:43 sandervl Exp $ */
+
+ 2000-03-16: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Fixed virtual keycode of return key
+	- GDI32:  RP7 calls CreateDIBSection with HDC 0; Call
+                  GetWindowDC(GetDesktopWindow()) in that case
+                  -> fixes crash (result of CreateDIBSection failure)
+                  TODO: Looks like this is allowed in NT, but need to check
+                        this to be sure nothing else caused this problem.
+                  (Note: most recent RealPlayer 7 version only)
+	- KERNEL32: Semaphore protection of handle alloc
+                    Added handlemanager class for thread handles
+                    Added workaround for Open32 WaitForSingleObject bug
+                    (if thread is terminated and WaitForSingleObject is 
+                     called with the thread's handle -> never returns
+                     (new rp7 hang at exit))
+                    TODO: WaitForMultipleObjects can still hang ->
+                          Event, semaphore, mutex & wait apis need to
+                          be redesigned (not using Open32)
 
  2000-03-14: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: implemented much faster LB_SETCOUNT
@@ -17,10 +35,15 @@
                   -> fixes wrong resolution changes in Quake 2
                   Don't clear WS_CHILD flag either. (HAS_THICKFRAME depends on it)
 
+	- KERNEL32: Clear FILE_SHARE_DELETE flag before calling Open32's
+                    CreateFile. (otherwise it fails) -> fixes RealPlayer 7 
+                    Basic (new update).
+
         - WSOCK32: Changed workaround for setsockopt bug (SO_SNDBUF/SO_RCVBUF (OS/2's
                    winsock returns WSAEINVAL if size > 64k))
                    Only change size if setsockopt returns WSAINVAL (32 bits stack
-                   should support > 64 kb buffer (?))
+                   should support size > 64 kb (?))
+                   Added selective logging feature.
 
  2000-03-12: Markus Montkowski <mmontkowski@gmx.de>
 	- KERNEL32: Added fix for GetFileAttributes. Open32 doesn't like 
@@ -71,7 +94,6 @@
  2000-03-10: Michal Necasek <mike@mendelu.cz>
         - dsound\new: Changed DART buffer size calcualation, hopefully
                       WinAmp will sound better now.
-
 
  2000-03-09: knut st. osmundsen <knut.stange.osmundse@pmsc.no>
         - include\pdwin32.tools: New tool, EXISTS --> \tools\bin\Exists.cmd
