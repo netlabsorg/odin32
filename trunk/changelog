@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.2734 2004-09-27 08:52:15 cinc Exp $ */
+/* $Id: changelog,v 1.2735 2004-10-08 08:50:10 cinc Exp $ */
+
+2004-10-08: Chris Wohlgemuth <cinc@innotek.de>
+    - KERNEL32: Added RegOpenCurrentUser() to registry.cpp.
+    - OLE32:    ifs.c, Added some more comprehensive debug output to the IMalloc interface.
+                compobj.c, Added stub for CLSIDFromProgIDEx().
 
 2004-09-23: Chris Wohlgemuth <cinc@innotek.de>
     -SHLWAPI:   Fix for PathSetDlgItemPathW() by D. Teickner so import of reg files with
