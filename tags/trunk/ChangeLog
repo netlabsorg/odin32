@@ -1,4 +1,10 @@
- /* $Id: ChangeLog,v 1.582 1999-12-28 19:17:33 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.583 1999-12-28 22:15:23 sandervl Exp $ */
+
+ 99-12-28: Vit Timchishin <tvv@sbs.kiev.ua>
+	- USER32: Listbox fix; Commented out 'if (index == oldsel) return LB_OKAY;'
+                  in LISTBOX_SetSelection as this may prevent the control from
+                  sending a notification after a change with notify disabled.
+                  (i.e. MoveCarret)
 
  99-12-28: Sander van Leeuwen <sandervl@xs4all.nl>
 	- WININET: Created stub dll
