@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.52 2003-03-06 12:49:08 sandervl Exp $ */
+/* $Id: thread.cpp,v 1.53 2003-03-27 14:00:54 sandervl Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -31,6 +31,7 @@
 #include "exceptutil.h"
 #include "oslibmisc.h"
 #include "oslibdos.h"
+#include "oslibthread.h"
 #include <handlemanager.h>
 #include <codepage.h>
 

@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.118 2003-03-03 16:39:11 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.119 2003-03-27 14:00:52 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -3292,63 +3292,9 @@ BOOL OSLibDosQueryAffinity(DWORD fMaskType, DWORD *pdwThreadAffinityMask)
 }
 //******************************************************************************
 //******************************************************************************
-DWORD OSLibDosSetPriority(ULONG tid, int priority)
-{
-    DWORD  ret, os2priorityclass;
-    LONG   os2prioritydelta;
-    APIRET rc;
-
-    switch(priority)
-    {
-    case THREAD_PRIORITY_IDLE_W:
-        os2priorityclass = PRTYC_IDLETIME;
-        os2prioritydelta = 0;
-        break;
-    case THREAD_PRIORITY_LOWEST_W:
-        os2priorityclass = PRTYC_REGULAR;
-        os2prioritydelta = PRTYD_MINIMUM;
-        break;
-    case THREAD_PRIORITY_BELOW_NORMAL_W:
-        os2priorityclass = PRTYC_REGULAR;
-        os2prioritydelta = -15;
-        break;
-    case THREAD_PRIORITY_NORMAL_W:
-        os2priorityclass = PRTYC_REGULAR;
-        os2prioritydelta = 0;
-        break;
-    case THREAD_PRIORITY_ABOVE_NORMAL_W:
-        os2priorityclass = PRTYC_REGULAR;
-        os2prioritydelta = 15;
-        break;
-    case THREAD_PRIORITY_HIGHEST_W:
-        os2priorityclass = PRTYC_REGULAR;
-        os2prioritydelta = PRTYD_MAXIMUM;
-        break;
-    case THREAD_PRIORITY_TIME_CRITICAL_W:
-        os2priorityclass = PRTYC_TIMECRITICAL;
-        os2prioritydelta = 0;
-        break;
-    default:
-        dprintf(("!WARNING!: Invalid priority!!"));
-        SetLastError(ERROR_INVALID_PARAMETER_W);
-        return ERROR_INVALID_PARAMETER_W;
-    }
-    rc = DosSetPriority(PRTYS_THREAD, os2priorityclass, os2prioritydelta, tid);
-    ret = error2WinError(rc, ERROR_INVALID_PARAMETER);
-    SetLastError(ret);
-    return ret;
-}
-//******************************************************************************
-//******************************************************************************
 void  OSLibDosSleep(ULONG msecs)
 {
   DosSleep(msecs);
-}
-//******************************************************************************
-//******************************************************************************
-void OSLibDosExitThread(ULONG retcode)
-{
-  DosExit(EXIT_THREAD, retcode);
 }
 //******************************************************************************
 //******************************************************************************
