@@ -14,7 +14,7 @@
 #define __OLE32_H__
 
 // ><DJR 17.05.99 Force to use C-interfaces for now to prevent CALLBACK definition compiler error
-#define CINTERFACE
+#define CINTERFACE 1
 
 // ><DJR 17.05.99 Move standard includes to before os2win.h [memcmp]
 #include <stdarg.h>
@@ -22,8 +22,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <memory.h>
+#include <wchar.h>
 
 // ><DJR 17.05.99 Prevent CALLCONV becoming _System
+#include <win/wtypes.h>
 #include <winbase.h>
 #include <uconv.h>
 #undef CALLCONV
