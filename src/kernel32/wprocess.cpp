@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.135 2001-10-11 01:00:12 phaller Exp $ */
+/* $Id: wprocess.cpp,v 1.136 2001-10-12 00:49:23 phaller Exp $ */
 
 /*
  * Win32 process functions
@@ -46,6 +46,11 @@
 
 #define DBG_LOCALLOG    DBG_wprocess
 #include "dbglocal.h"
+
+#ifdef PROFILE
+#include <perfview.h>
+#endif /* PROFILE */
+
 
 ODINDEBUGCHANNEL(KERNEL32-WPROCESS)
 

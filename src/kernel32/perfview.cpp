@@ -1,4 +1,4 @@
-/* $Id: perfview.cpp,v 1.1 2001-10-11 17:31:12 phaller Exp $ */
+/* $Id: perfview.cpp,v 1.2 2001-10-12 00:49:24 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -17,6 +17,7 @@
 #ifndef PROFILE
 
 // insert "nullified" dummies here to save space in the executable image
+void PerfView_Initialize(void) {}
 void PerfView_RegisterCall(char* pszFunctionName, 
                            unsigned long int nTicks) {}
 
@@ -26,7 +27,7 @@ void PerfView_Write() {}
 #else
 
 #include <ccollection.h>
-#include <win32type.h>
+#include <winbase.h>
 
 // imported from the kernel loader (initterm)
 extern int loadNr;
@@ -39,12 +40,50 @@ typedef struct tagFUNCTION
   char* pszFunctionName;
   unsigned long int nCalled;
   unsigned long int nTotalTicks;
+  unsigned long int nMinimumTicks;
+  unsigned long int nMaximumTicks;
 } PERFVIEW_FUNCTION, *PPERFVIEW_FUNCTION;
 
 
 // the map keeps track of all called methods and functions
 static CHashtableLookup* pProfileMap = new CHashtableLookup(1021);
 static BOOL flagLock = FALSE;
+static unsigned long int tsCompensation = 0;
+
+
+// measure the measurement overhead itself
+void PerfView_Initialize(void) 
+{
+#define CALIBRATION_RUNS 100
+  
+  LARGE_INTEGER liStart;
+  LARGE_INTEGER liEnd;
+  unsigned long ulElapsed;
+  
+  // initialize this
+  tsCompensation = 0;
+  
+  for (int i = 0;
+       i < CALIBRATION_RUNS;
+       i++)
+  {
+    QueryPerformanceCounter(&liStart);
+    QueryPerformanceCounter(&liEnd);
+
+    if (liStart.LowPart > liEnd.LowPart)
+      ulElapsed = 0xFFFFFFFF - liStart.LowPart + liEnd.LowPart;
+    else
+      ulElapsed = liEnd.LowPart - liStart.LowPart;
+  
+    // save the determined amount of elapsed ticks
+    // as compensatory factor
+    tsCompensation += ulElapsed;
+  }
+
+  // now calculate back to real value
+  tsCompensation /= CALIBRATION_RUNS;
+}
+
 
 // register a call to a function
 void _Optlink PerfView_RegisterCall(char* pszFunctionName, 
@@ -53,6 +92,11 @@ void _Optlink PerfView_RegisterCall(char* pszFunctionName,
   // don't record call if currently locked
   if (flagLock)
     return;
+  
+  // subtract the measurement overhead factor.
+  // Note: this should rather be done where the times are taken,
+  // however this would spread the code just too far.
+  nTicks -= tsCompensation;
   
   // check if that particular function is registered already
   PPERFVIEW_FUNCTION p = (PPERFVIEW_FUNCTION)pProfileMap->getElement(pszFunctionName);
@@ -63,6 +107,8 @@ void _Optlink PerfView_RegisterCall(char* pszFunctionName,
     p->pszFunctionName = strdup( pszFunctionName );
     p->nCalled = 0;
     p->nTotalTicks = 0;
+    p->nMinimumTicks = 0xffffffff;
+    p->nMaximumTicks = 0;
     
     // add to the hashtable
     pProfileMap->addElement(pszFunctionName, p);
@@ -71,6 +117,12 @@ void _Optlink PerfView_RegisterCall(char* pszFunctionName,
   // update statistical data
   p->nCalled++;
   p->nTotalTicks += nTicks;
+  
+  if (nTicks < p->nMinimumTicks)
+    p->nMinimumTicks = nTicks;
+  
+  if (nTicks > p->nMaximumTicks)
+    p->nMaximumTicks = nTicks;
 }
 
 
@@ -134,6 +186,13 @@ void _Optlink PerfView_DumpProfile(FILE *file)
   PHASHTABLEENTRY arrEntries = (PHASHTABLEENTRY)malloc( iEntries * sizeof(HASHTABLEENTRY) );
   iEntries = pProfileMap->getElementMap(arrEntries);
   
+  fprintf(file,
+          "ODIN Performance Analysis\n"
+          "%d entries available, compensated measure overhead is %d ticks.\n\n",
+          iEntries,
+          tsCompensation);
+  
+  
   // sort the list by function name
   qsort(arrEntries,
         iEntries,
@@ -143,17 +202,19 @@ void _Optlink PerfView_DumpProfile(FILE *file)
   // write to file
   fprintf(file,
           "Sorted by function name\n"
-          "Ticks ---- Called --- Average -- Function ---------------------------------\n");
+          "Ticks ---- Called --- Average -- Minimum -- Maximum -- Function -----------\n");
   for(int i = 0;
       i < iEntries;
       i++)
   {
     PPERFVIEW_FUNCTION p = (PPERFVIEW_FUNCTION)arrEntries[i].pObject;
     fprintf(file,
-            "%10d %10d %10d %s\n",
+            "%10d %10d %10d %10d %10d %s\n",
             p->nTotalTicks,
             p->nCalled,
             p->nTotalTicks / p->nCalled,
+            p->nMinimumTicks,
+            p->nMaximumTicks,
             p->pszFunctionName);
   }
   
