@@ -430,7 +430,7 @@ class CVSFile
         echo "<table><tr><td bgcolor=#f0f0f0>\n<table>";
         //file info
         echo "<tr><td valign=top><font size=-1>File:</font></td>\n",
-             "<td><font size=-1>", $this->getDirUrls(), " / <a href=\"cvs.php?sFile=$this->sDir/$this->sName,v\">$this->sName</a></font></td></tr>\n";
+             "<td><font size=-1>", $this->getDirUrls(), " / <a href=\"cvs.php3?sFile=$this->sDir/$this->sName,v\">$this->sName</a></font></td></tr>\n";
 
         //revision info
         echo "<tr><td valign=top><font size=-1>Revision:</font></td>\n",
@@ -840,7 +840,7 @@ class CVSFile
         while ($i++ < 256 && list($sRevision, $aasRev) = each($this->aaasRevs))
         {
             echo "<tr><td bgcolor=#d0dce0><a name=\"$sRevision\">Rev. </a>",
-                 "<a href=\"cvs.php?sFile=$this->sDir/$this->sName,v&sRevision=$sRevision\">",
+                 "<a href=\"cvs.php3?sFile=$this->sDir/$this->sName,v&sRevision=$sRevision\">",
                  "$sRevision</a> by ",
                  $this->getAuthor($sRevision) ,"</td></tr>\n",
                  "<tr><td bgcolor=#f0f0f0>";
@@ -904,10 +904,10 @@ function CVSGetDirUrls($sDir)
         $sDir .= "/";
 
     $iPrev = 2;
-    $sRet = "<a href=\"cvs.php?sDir=.\">[root]</a>";
+    $sRet = "<a href=\"cvs.php3?sDir=.\">[root]</a>";
     while ($i = @strpos($sDir, "/", $iPrev))
     {
-        $sRet .= " / <a href=\"cvs.php?sDir=".substr($sDir, 0, $i)."\">".
+        $sRet .= " / <a href=\"cvs.php3?sDir=".substr($sDir, 0, $i)."\">".
                     substr($sDir, $iPrev, $i - $iPrev)."</a>";
         $iPrev = $i + 1;
     }
@@ -1211,11 +1211,11 @@ function ListDirectory($sDir, $iSortColumn)
     $aColumnColors = array("#d0dce0","#d0dce0","#d0dce0","#d0dce0", "#d0dcff","#d0dce0","#d0dce0","#d0dce0","#d0dce0");
     echo "<table border=0 width=100% cellspacing=1 cellpadding=2>\n",
          "  <tr>\n",
-         "    <th bgcolor=",$aColumnColors[4+0-$iSortColumn],"><font size=-1><b><a href=cvs.php?sDir=$sDir&iSortColumn=0>Filename</a></b></font></th>\n",
-         "    <th bgcolor=",$aColumnColors[4+1-$iSortColumn],"><font size=-1><b><a href=cvs.php?sDir=$sDir&iSortColumn=1>Rev</a></b></font></th>\n",
-         "    <th bgcolor=",$aColumnColors[4+2-$iSortColumn],"><font size=-1><b><a href=cvs.php?sDir=$sDir&iSortColumn=2>Age</a></b></font></th>\n",
-         "    <th bgcolor=",$aColumnColors[4+3-$iSortColumn],"><font size=-1><b><a href=cvs.php?sDir=$sDir&iSortColumn=3>Author</a></b></font></th>\n",
-         "    <th bgcolor=",$aColumnColors[4+4-$iSortColumn],"><font size=-1><b><a href=cvs.php?sDir=$sDir&iSortColumn=4>Last Log Entry</a></b></font></th>\n",
+         "    <th bgcolor=",$aColumnColors[4+0-$iSortColumn],"><font size=-1><b><a href=cvs.php3?sDir=$sDir&iSortColumn=0>Filename</a></b></font></th>\n",
+         "    <th bgcolor=",$aColumnColors[4+1-$iSortColumn],"><font size=-1><b><a href=cvs.php3?sDir=$sDir&iSortColumn=1>Rev</a></b></font></th>\n",
+         "    <th bgcolor=",$aColumnColors[4+2-$iSortColumn],"><font size=-1><b><a href=cvs.php3?sDir=$sDir&iSortColumn=2>Age</a></b></font></th>\n",
+         "    <th bgcolor=",$aColumnColors[4+3-$iSortColumn],"><font size=-1><b><a href=cvs.php3?sDir=$sDir&iSortColumn=3>Author</a></b></font></th>\n",
+         "    <th bgcolor=",$aColumnColors[4+4-$iSortColumn],"><font size=-1><b><a href=cvs.php3?sDir=$sDir&iSortColumn=4>Last Log Entry</a></b></font></th>\n",
          "  </tr>\n";
     $i = 0;
     /* directories */
@@ -1228,7 +1228,7 @@ function ListDirectory($sDir, $iSortColumn)
         $sBgColor = ($i++ % 2) ? "" : " bgcolor=#f0f0f0";
         echo "<tr>\n",
              " <td", $sBgColor , ">",
-               "<font size=-1><a href=\"cvs.php?sDir=",$sParentDir,"\"><img src=\"$sIconsUrl/back.gif\" border=0> Parent Directory</a></font></td>\n",
+               "<font size=-1><a href=\"cvs.php3?sDir=",$sParentDir,"\"><img src=\"$sIconsUrl/back.gif\" border=0> Parent Directory</a></font></td>\n",
              " <td$sBgColor>&nbsp;</td>\n",
              " <td$sBgColor>&nbsp;</td>\n",
              " <td$sBgColor>&nbsp;</td>\n",
@@ -1239,7 +1239,7 @@ function ListDirectory($sDir, $iSortColumn)
     {
         $sBgColor = ($i++ % 2) ? "" : " bgcolor=#f0f0f0";
         echo "<tr>\n",
-             " <td$sBgColor><font size=-1><a href=\"cvs.php?sDir=$sDir/$sVal\"><img src=\"$sIconsUrl/dir.gif\" border=0> $sVal</a></font></td>\n",
+             " <td$sBgColor><font size=-1><a href=\"cvs.php3?sDir=$sDir/$sVal\"><img src=\"$sIconsUrl/dir.gif\" border=0> $sVal</a></font></td>\n",
              " <td$sBgColor>&nbsp;</td>\n",
              " <td$sBgColor>&nbsp;</td>\n",
              " <td$sBgColor>&nbsp;</td>\n",
@@ -1257,8 +1257,8 @@ function ListDirectory($sDir, $iSortColumn)
         $sLog   = isset($asLog[$sKey])  ? $asLog[$sKey]             : "<i> error </i>";
         $sIcon  = isset($asIcon[$sKey]) ? $asIcon[$sKey]            : "<i> error </i>";
         echo "<tr>\n",
-             " <td$sBgColor><font size=-1><a href=\"cvs.php?sFile=$sDir/$sKey\"><img src=\"$sIconsUrl/$sIcon\" border=0>",substr($sKey, 0, -2),"</a></font></td>\n",
-             " <td$sBgColor><font size=-1><a href=\"cvs.php?sFile=$sDir/$sKey&sRevision=$sRev\">$sRev</a></font></td>\n",
+             " <td$sBgColor><font size=-1><a href=\"cvs.php3?sFile=$sDir/$sKey\"><img src=\"$sIconsUrl/$sIcon\" border=0>",substr($sKey, 0, -2),"</a></font></td>\n",
+             " <td$sBgColor><font size=-1><a href=\"cvs.php3?sFile=$sDir/$sKey&sRevision=$sRev\">$sRev</a></font></td>\n",
              " <td$sBgColor><font size=-1>$sAge</font></td>\n",
              " <td$sBgColor><font size=-1>$sAuthor</font></td>\n",
              " <td$sBgColor><font size=-2>$sLog</font></td>\n",
