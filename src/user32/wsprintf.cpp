@@ -1,4 +1,4 @@
-/* $Id: wsprintf.cpp,v 1.7 2000-03-23 23:06:54 sandervl Exp $ */
+/* $Id: wsprintf.cpp,v 1.8 2000-06-23 19:04:13 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -267,7 +267,10 @@ static UINT WPRINTF_GetLen( WPRINTF_FORMAT *format, WPRINTF_DATA *arg,
         len = sprintf( number,
                         (format->flags & WPRINTF_UPPER_HEX) ? "%X" : "%x",
                         (UINT)arg->int_view);
-        if (format->flags & WPRINTF_PREFIX_HEX) len += 2;
+        if (format->flags & WPRINTF_PREFIX_HEX) {
+            len += 2;
+            format->width += 2;
+        }
         break;
     default:
         return 0;

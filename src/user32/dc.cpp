@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.62 2000-06-17 09:45:00 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.63 2000-06-23 19:04:10 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -983,6 +983,14 @@ HDC WIN32API GetWindowDC (HWND hwnd)
   return GetDCEx (hwnd, NULL, DCX_WINDOW_W);
 }
 //******************************************************************************
+//Helper for RedrawWindow (RDW_ALLCHILDREN_W)
+//******************************************************************************
+LRESULT WIN32API RedrawChildEnumProc(HWND hwnd, LPARAM lParam)
+{
+  RedrawWindow(hwnd, NULL, 0, lParam);
+  return TRUE;
+}
+//******************************************************************************
 // This implementation of RedrawWindow supports
 // RDW_ERASE
 // RDW_NOERASE
@@ -1144,6 +1152,9 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
 //        if((redraw & RDW_ERASE_W) && (redraw & RDW_ERASENOW_W))
         if(redraw & RDW_ERASENOW_W && wnd->needsEraseBkgnd())
                 wnd->setEraseBkgnd(sendEraseBkgnd(wnd) == 0);
+	if(redraw & RDW_ALLCHILDREN_W) {
+		EnumChildWindows(wnd->getWindowHandle(), RedrawChildEnumProc, redraw);
+	}
    }
    else if((redraw & RDW_INTERNALPAINT_W) && !(redraw & RDW_INVALIDATE_W))
    {
@@ -1179,9 +1190,12 @@ BOOL WIN32API UpdateWindow (HWND hwnd)
    }
 
    dprintf (("User32: UpdateWindow hwnd %x", hwnd));
-////SvL: This doesn't work right (Wine uses RDW_NOCHILDREN_W -> doesn't work here)
-////     Breaks vpbuddy
-////   return RedrawWindow( hwnd, NULL, 0, RDW_UPDATENOW_W | RDW_ALLCHILDREN_W);
+//SvL: This doesn't work right (Wine uses RDW_NOCHILDREN_W -> doesn't work here)
+//     Breaks vpbuddy
+//   return RedrawWindow(hwnd, NULL, 0, RDW_UPDATENOW_W | RDW_ALLCHILDREN_W);
+//   -> RDW_UPDATENOW causes WM_PAINT messages to be directy posted to window
+//   handler; possibly bypassing queued WM_PAINT messages for parent window(s)
+//   -> out of sync painting (i.e. parent paints over child)
    WinUpdateWindow(wnd->getOS2WindowHandle());
    return TRUE;
 }
@@ -1195,6 +1209,9 @@ BOOL WIN32API InvalidateRect (HWND hwnd, const RECT *pRect, BOOL erase)
    	dprintf(("InvalidateRect %x (%d,%d)(%d,%d) erase=%d", hwnd, pRect->left, pRect->top, pRect->right, pRect->bottom, erase));
    }
    else dprintf(("InvalidateRect %x NULL erase=%d", hwnd, erase));
+   if(hwnd == 0x6800000f) {
+	result = 0;
+   }
    result = RedrawWindow (hwnd, pRect, NULLHANDLE,
                           RDW_ALLCHILDREN_W | RDW_INVALIDATE_W |
                           (erase ? RDW_ERASE_W : RDW_NOERASE_W) |
