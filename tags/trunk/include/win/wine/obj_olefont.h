@@ -1,4 +1,4 @@
-/* $Id: obj_olefont.h,v 1.5 1999-08-22 22:52:09 sandervl Exp $ */
+/* $Id: obj_olefont.h,v 1.6 2001-09-15 09:58:36 sandervl Exp $ */
 /*
  * Defines the COM interfaces and APIs related to OLE font support.
  *
@@ -9,6 +9,7 @@
 #define __WINE_WINE_OBJ_OLEFONT_H
 
 #include "wine/obj_base.h"
+#include "wine/obj_oleaut.h"
 #include "wingdi.h"	/* TEXTMETRIC*/
 
 #ifdef __cplusplus
@@ -56,7 +57,7 @@ typedef TEXTMETRICW TEXTMETRICOLE;
   ICOM_METHOD1(HRESULT, ReleaseHfont, HFONT, hfont) \
   ICOM_METHOD1(HRESULT, SetHdc, HDC, hdc)     
 #define IFont_IMETHODS \
-	IUnknown_IMEHTODS \
+	IUnknown_IMETHODS \
 	IFont_METHODS
 ICOM_DEFINE(IFont,IUnknown)
 #undef ICOM_INTERFACE
@@ -100,7 +101,7 @@ ICOM_DEFINE(IFont,IUnknown)
 #define ICOM_INTERFACE IFontDisp
 #define IFontDisp_METHODS 
 #define IFontDisp_IMETHODS \
-  IUnknown_IMETHODS \
+        IUnknown_IMETHODS \
 	IFontDisp_METHODS
 ICOM_DEFINE(IFontDisp,IDispatch)
 #undef ICOM_INTERFACE
