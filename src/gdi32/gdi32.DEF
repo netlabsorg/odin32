@@ -1,4 +1,4 @@
-; $Id: gdi32.DEF,v 1.13 2000-12-05 13:04:05 sandervl Exp $
+; $Id: gdi32.DEF,v 1.14 2001-01-02 18:17:13 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY GDI32 INITINSTANCE
@@ -355,21 +355,21 @@ EXPORTS
 ;
 ; Internal functions. (starts at 1200)
 ;
-    ObjAllocateHandle__FPUlUl10ObjectType                       @1201
-    ObjFreeHandle__FUl                                          @1202
-    ObjGetHandleData__FUl10ObjectType                           @1203
-    ObjGetHandleType__FUl                                       @1204
+    ObjAllocateHandle__FPUlUl10ObjectType                       @1201 NONAME
+    ObjFreeHandle__FUl                                          @1202 NONAME
+    ObjGetHandleData__FUl10ObjectType                           @1203 NONAME
+    ObjGetHandleType__FUl                                       @1204 NONAME
 
 ;
 ; Function exported to USER32
 ;
-    InternalDrawTextExA                                         @1205
-    InternalDrawTextExW                                         @1206
-    InternalTabbedTextOutA                                      @1207
-    InternalTabbedTextOutW                                      @1208
-    InternalGetTabbedTextExtentA                                @1209
-    InternalGetTabbedTextExtentW                                @1210
-    _setWinDeviceRegionFromPMDeviceRegion@16                    @1211
+    InternalDrawTextExA                                         @1205 NONAME
+    InternalDrawTextExW                                         @1206 NONAME
+    InternalTabbedTextOutA                                      @1207 NONAME
+    InternalTabbedTextOutW                                      @1208 NONAME
+    InternalGetTabbedTextExtentA                                @1209 NONAME
+    InternalGetTabbedTextExtentW                                @1210 NONAME
+    _setWinDeviceRegionFromPMDeviceRegion@16                    @1211 NONAME
 
 
 
