@@ -89,15 +89,15 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
-//	 dllHandle = RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab);
-//         if(dllHandle == 0) 
-//		return 0UL;
+	 dllHandle = RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab);
+         if(dllHandle == 0)
+		return 0UL;
 
          break;
       case 1 :
-//         if(dllHandle) {
-//	 	UnregisterLxDll(dllHandle);
-//         }
+         if(dllHandle) {
+	 	UnregisterLxDll(dllHandle);
+         }
          break;
 
       default  :
