@@ -23,11 +23,11 @@ SEGMENTS
     CODE16_INIT         class 'CODE'
 
     CODE32              class 'CODE'
+    CALLTAB             class 'CODE'
 
     DATA32              class 'DATA'
     c_common            class 'DATA'
     BSS32               class 'BSS'
     _VFT                class 'CONST'
     CONST32_RO          class 'CONST'
-    CALLTAB             class 'DATA'
 
