@@ -575,6 +575,125 @@ static VOID LISTVIEW_UpdateHeaderSize(HWND hwnd, INT nNewScrollPos)
  * RETURN:
  * None
  */
+#ifdef __WIN32OS2__
+static VOID LISTVIEW_UpdateScroll(HWND hwnd)
+{
+  LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO *)GetWindowLongA(hwnd, 0);
+  INT nListHeight = infoPtr->rcList.bottom - infoPtr->rcList.top;
+  INT nListWidth = infoPtr->rcList.right - infoPtr->rcList.left;
+  SCROLLINFO scrollInfo;
+  LONG dwStyle = GetWindowLongA(hwnd, GWL_STYLE);
+  UINT uView =  dwStyle & LVS_TYPEMASK;
+
+  if (dwStyle & LVS_NOSCROLL)
+  {
+    infoPtr->lefttop.x = 0;
+    infoPtr->lefttop.y = 0;
+    infoPtr->maxScroll = infoPtr->lefttop;
+    infoPtr->scrollPage = infoPtr->lefttop;
+    infoPtr->scrollStep = infoPtr->lefttop;
+    ShowScrollBar(hwnd,SB_BOTH,FALSE);
+    return;
+  }
+
+  ZeroMemory(&scrollInfo, sizeof(SCROLLINFO));
+  scrollInfo.cbSize = sizeof(SCROLLINFO);
+
+  if (uView == LVS_LIST)
+  {
+    /* update horizontal scrollbar */
+    INT nCountPerColumn = LISTVIEW_GetCountPerColumn(hwnd);
+    INT nCountPerRow = LISTVIEW_GetCountPerRow(hwnd);
+    INT nNumOfItems = GETITEMCOUNT(infoPtr);
+
+    infoPtr->maxScroll.x = nNumOfItems/nCountPerColumn;
+    if (nNumOfItems % nCountPerColumn)
+      infoPtr->maxScroll.x++;
+
+    infoPtr->lefttop.x = ListView_GetTopIndex(hwnd)/nCountPerColumn;
+    infoPtr->scrollPage.x = nCountPerRow;
+    infoPtr->scrollStep.x = infoPtr->nItemWidth;
+
+    scrollInfo.nMin  = 0;
+    scrollInfo.nMax  = infoPtr->maxScroll.x-1;
+    scrollInfo.nPos  = infoPtr->lefttop.x;
+    scrollInfo.nPage = infoPtr->scrollPage.x;
+    scrollInfo.fMask = SIF_RANGE | SIF_POS | SIF_PAGE;
+    SetScrollInfo(hwnd,SB_HORZ,&scrollInfo,TRUE);
+  } else if (uView == LVS_REPORT)
+  {
+    /* update vertical scrollbar */
+    infoPtr->maxScroll.y = GETITEMCOUNT(infoPtr);
+    infoPtr->lefttop.y = ListView_GetTopIndex(hwnd);
+    infoPtr->scrollPage.y = LISTVIEW_GetCountPerColumn(hwnd);
+    infoPtr->scrollStep.y = infoPtr->nItemHeight;
+
+    scrollInfo.nMin  = 0;
+    scrollInfo.nMax  = infoPtr->maxScroll.y-1;
+    scrollInfo.nPos  = infoPtr->lefttop.y;
+    scrollInfo.nPage = infoPtr->scrollPage.y;
+    scrollInfo.fMask = SIF_RANGE | SIF_POS | SIF_PAGE;
+    SetScrollInfo(hwnd,SB_VERT,&scrollInfo,TRUE);
+
+    /* update horizontal scrollbar */
+    nListWidth = infoPtr->rcList.right - infoPtr->rcList.left;
+    if (!(dwStyle & WS_HSCROLL) || !GETITEMCOUNT(infoPtr))
+      infoPtr->lefttop.x = 0;
+
+    infoPtr->scrollPage.x = nListWidth / LISTVIEW_SCROLL_DIV_SIZE;
+    infoPtr->maxScroll.x = max(infoPtr->nItemWidth / LISTVIEW_SCROLL_DIV_SIZE, 0);
+    infoPtr->scrollStep.x = LISTVIEW_SCROLL_DIV_SIZE;
+
+    scrollInfo.nMin  = 0;
+    scrollInfo.nMax  = infoPtr->maxScroll.x-1;
+    scrollInfo.nPos  = infoPtr->lefttop.x;
+    scrollInfo.nPage = infoPtr->scrollPage.x;
+    scrollInfo.fMask = SIF_RANGE | SIF_POS | SIF_PAGE;
+    SetScrollInfo(hwnd,SB_HORZ,&scrollInfo,TRUE);
+
+    /* Update the Header Control */
+    LISTVIEW_UpdateHeaderSize(hwnd,infoPtr->lefttop.x);
+  } else
+  {
+    RECT rcView;
+
+    if (LISTVIEW_GetViewRect(hwnd,&rcView))
+    {
+      INT nViewWidth = rcView.right - rcView.left;
+      INT nViewHeight = rcView.bottom - rcView.top;
+
+      /* Update Horizontal Scrollbar */
+      if (!(dwStyle & WS_HSCROLL) || !GETITEMCOUNT(infoPtr))
+        infoPtr->lefttop.x = 0;
+      infoPtr->maxScroll.x = max(nViewWidth / LISTVIEW_SCROLL_DIV_SIZE, 0);
+      infoPtr->scrollPage.x = nListWidth / LISTVIEW_SCROLL_DIV_SIZE;
+      infoPtr->scrollStep.x = LISTVIEW_SCROLL_DIV_SIZE;
+
+      scrollInfo.nMin  = 0;
+      scrollInfo.nMax  = infoPtr->maxScroll.x-1;
+      scrollInfo.nPos  = infoPtr->lefttop.x;
+      scrollInfo.nPage = infoPtr->scrollPage.x;
+      scrollInfo.fMask = SIF_RANGE | SIF_POS | SIF_PAGE;
+      SetScrollInfo(hwnd,SB_HORZ,&scrollInfo,TRUE);
+
+      /* Update Vertical Scrollbar */
+      nListHeight = infoPtr->rcList.bottom - infoPtr->rcList.top;
+      if (!(dwStyle & WS_VSCROLL) || !GETITEMCOUNT(infoPtr))
+        infoPtr->lefttop.x = 0;
+      infoPtr->maxScroll.y = max(nViewHeight / LISTVIEW_SCROLL_DIV_SIZE,0);
+      infoPtr->scrollPage.y = nListHeight / LISTVIEW_SCROLL_DIV_SIZE;
+      infoPtr->scrollStep.y = LISTVIEW_SCROLL_DIV_SIZE;
+
+      scrollInfo.nMin  = 0;
+      scrollInfo.nMax  = infoPtr->maxScroll.y-1;
+      scrollInfo.nPos  = infoPtr->lefttop.y;
+      scrollInfo.nPage = infoPtr->scrollPage.y;
+      scrollInfo.fMask = SIF_RANGE | SIF_POS | SIF_PAGE;
+      SetScrollInfo(hwnd,SB_VERT,&scrollInfo,TRUE);
+    }
+  }
+}
+#else
 static VOID LISTVIEW_UpdateScroll(HWND hwnd)
 {
   LISTVIEW_INFO *infoPtr = (LISTVIEW_INFO *)GetWindowLongA(hwnd, 0);
@@ -583,6 +702,7 @@ static VOID LISTVIEW_UpdateScroll(HWND hwnd)
   INT nListHeight = infoPtr->rcList.bottom - infoPtr->rcList.top;
   INT nListWidth = infoPtr->rcList.right - infoPtr->rcList.left;
   SCROLLINFO scrollInfo;
+
 
   ZeroMemory(&scrollInfo, sizeof(SCROLLINFO));
   scrollInfo.cbSize = sizeof(SCROLLINFO);
@@ -673,6 +793,7 @@ static VOID LISTVIEW_UpdateScroll(HWND hwnd)
     }
   }
 }
+#endif
 
 /***
  * DESCRIPTION:
