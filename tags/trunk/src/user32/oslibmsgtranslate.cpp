@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.34 2000-06-07 14:51:26 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.35 2000-06-23 19:04:11 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -608,6 +608,9 @@ VirtualKeyFound:
                 if (keyWasPressed)
                     winMsg->lParam |= 1 << 30;                          // bit 30, previous state, 1 means key was pressed
             }
+	    if(winMsg->wParam == VK_MENU_W) {
+                winMsg->message = 0; //WM_SYS* already implies Alt
+            }
         }
         if(ISKDB_CAPTURED())
         {
@@ -736,7 +739,7 @@ BOOL OSLibWinTranslateMessage(MSG *msg)
             extramsg.wParam = SHORT1FROMMP(thdb->os2msg.mp2);
             extramsg.lParam = 0;
 
-            if(!(fl & KC_CHAR)) {
+            if(!(fl & KC_CHAR) && msg->message < WINWM_SYSKEYDOWN) {
                 return FALSE;
             }
 
@@ -745,6 +748,7 @@ BOOL OSLibWinTranslateMessage(MSG *msg)
                         extramsg.wParam = msg->wParam;
                 else    extramsg.wParam = SHORT2FROMMP(thdb->os2msg.mp2);
             }
+
 
             if(msg->message >= WINWM_SYSKEYDOWN) {
                     extramsg.message = WINWM_SYSCHAR;
