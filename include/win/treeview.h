@@ -1,4 +1,4 @@
-/* $Id: treeview.h,v 1.7 2000-02-12 18:08:23 cbratschi Exp $ */
+/* $Id: treeview.h,v 1.8 2000-02-14 17:27:55 cbratschi Exp $ */
 /*
  * Treeview class extra info
  *
@@ -9,17 +9,16 @@
 #ifndef __WINE_TREEVIEW_H
 #define __WINE_TREEVIEW_H
 
-#include "commctrl.h"
-
-#define MINIMUM_INDENT 10
-#define TV_DEFAULTITEMHEIGHT 16
-#define TV_REFRESH_DELAY 100     /* 100 ms delay between two refreshes */
-#define TVITEM_ALLOC    16      /* default nr of items to allocate at first try */
+#define MINIMUM_INDENT        10
+#define TV_REFRESH_DELAY     100     /* 100 ms delay between two refreshes */
+#define TV_DEFAULTITEMHEIGHT  16
+#define TVITEM_ALLOC          32      /* default nr of items to allocate at first try */
 
 
 /* internal structures */
 
-typedef struct {
+typedef struct
+{
   UINT      mask;
   HTREEITEM hItem;
   UINT      state;
@@ -44,8 +43,7 @@ typedef struct {
   RECT      bitmap;
   RECT      statebitmap;
   BOOL      calculated;
-} TREEVIEW_ITEM;
-
+} TREEVIEW_ITEM, *LPTREEVIEW_ITEM;
 
 typedef struct tagTREEVIEW_INFO
 {
@@ -66,7 +64,6 @@ typedef struct tagTREEVIEW_INFO
   UINT          uTotalWidth;
   UINT          uIndent;        /* indentation in pixels */
   HTREEITEM     selectedItem;   /* handle to selected item or 0 if none */
-  HTREEITEM     focusItem;      /* handle to item that has focus, 0 if none */
   HTREEITEM     hotItem;        /* handle currently under cursor, 0 if none */
   HTREEITEM     editItem;       /* handle to item currently editted, 0 if none */
   HTREEITEM     firstVisible;   /* handle to first visible item */
@@ -91,9 +88,7 @@ typedef struct tagTREEVIEW_INFO
   INT           *freeList;     /* bitmap indicating which elements are valid */
                                /* 1=valid, 0=free;   */
                                /* size of list= uNumPtrsAlloced/32 */
-} TREEVIEW_INFO;
-
-
+} TREEVIEW_INFO, *LPTREEVIEW_INFO;
 
 /* bitflags for infoPtr->uInternalStatus */
 
@@ -108,11 +103,10 @@ typedef struct tagTREEVIEW_INFO
 
 /* bitflags for infoPtr->timer */
 
-#define TV_EDIT_TIMER    1
-#define TV_REFRESH_TIMER 2
-
-#define TV_EDIT_TIMER_SET    1
-#define TV_REFRESH_TIMER_SET 2
+#define TV_REFRESH_TIMER 1
+#define TV_EDIT_TIMER    2
+#define TV_REFRESH_TIMER_SET 1
+#define TV_EDIT_TIMER_SET 2
 
 
 extern VOID TREEVIEW_Register (VOID);
