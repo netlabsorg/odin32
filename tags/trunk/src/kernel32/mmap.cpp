@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.50 2001-01-25 20:18:05 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.51 2001-05-28 11:26:06 phaller Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -708,35 +708,64 @@ void Win32MemMapView::deleteViews(Win32MemMap *map)
 }
 //******************************************************************************
 //******************************************************************************
-Win32MemMap *Win32MemMapView::findMapByView(ULONG address, ULONG *offset,
+Win32MemMap *Win32MemMapView::findMapByView(ULONG address,
+                                            ULONG *offset,
                                             ULONG accessType,
                                             Win32MemMapView **pView)
 {
   globalviewMutex.enter();
   Win32MemMapView *view = mapviews;
+  ULONG ulViewAddr;
 
   *offset = 0;
 
-  if(view != NULL) {
-    while(view && (ULONG)view->getViewAddr() <= address) {
-        if((ULONG)view->getViewAddr() <= address &&
-                   (ULONG)view->getViewAddr() + view->getSize() > address &&
-                   view->getAccessFlags() >= accessType)
+  if(view != NULL)
+  {
+    do
+    {
+      ulViewAddr = (ULONG)view->getViewAddr();
+
+      // if ulViewAddr is > address, we've exhausted
+      // the sorted list already and can abort search.
+      if(ulViewAddr <= address)
+      {
+        if(ulViewAddr + view->getSize() > address &&
+           view->getAccessFlags() >= accessType)
         {
-            *offset = view->getOffset() + (address - (ULONG)view->getViewAddr());
-            goto success;
+          *offset = view->getOffset() + (address - ulViewAddr);
+          goto success;
         }
+
+        // Not found yet, continue search with next map
         view = view->next;
+      }
+      else
+      {
+          // list is exhausted, abort loop
+          view = NULL;
+      }
     }
+    while(view);
+  
     //failure if we get here
     view = NULL;
   }
+
 success:
+#ifdef DEBUG
   if(view && !view->getParentMap()->isImageMap())
-    dprintf(("findMapByView %x %x -> %x off %x", address, accessType, view->getViewAddr(), *offset));
+      dprintf(("findMapByView %x %x -> %x off %x",
+               address,
+               accessType,
+               view->getViewAddr(),
+               *offset));
+#endif
 
   globalviewMutex.leave();
-  if(pView) *pView = view;
+
+  if(pView)
+      *pView = view;
+
   return (view) ? view->getParentMap() : NULL;
 }
 //******************************************************************************

@@ -1,7 +1,8 @@
-/* $Id: ChangeLog,v 1.1450 2001-05-28 09:21:40 phaller Exp $ */
+/* $Id: ChangeLog,v 1.1451 2001-05-28 11:26:50 phaller Exp $ */
 
  2001-05-28: Patrick Haller <patrick.haller@innotek.de>
     - GDI32:    o Split GDI32.CPP into ICM.CPP and GDI32.CPP
+    - KERNEL32: o mmap.cpp: slightly accelerated ::findMapByView()
 
  2001-05-27: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMCTL32: o Listview: merged old LISTVIEW_EnsureVisible
