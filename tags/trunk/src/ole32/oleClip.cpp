@@ -1,4 +1,4 @@
-/* $Id: oleClip.cpp,v 1.4 2000-09-17 10:31:05 davidr Exp $ */
+/* $Id: oleClip.cpp,v 1.5 2000-11-24 10:29:40 sandervl Exp $ */
 /* 
  * 
  * Project Odin Software License can be found in LICENSE.TXT
@@ -1233,6 +1233,9 @@ static HRESULT WIN32API OLEClipbrd_IDataObject_GetData(
 	    STGMEDIUM*       pmedium)
 {
   HANDLE      hData = 0;
+  BOOL bClipboardOpen = FALSE;
+  HRESULT hr = S_OK;
+  
   /*
    * Declare "This" pointer 
    */
@@ -1266,6 +1269,9 @@ static HRESULT WIN32API OLEClipbrd_IDataObject_GetData(
   /* 
    * Otherwise, delegate to the Windows clipboard function GetClipboardData
    */
+  if ( !(bClipboardOpen = OpenClipboard(theOleClipboard->hWndClipboard)) )
+     HANDLE_ERROR( CLIPBRD_E_CANT_OPEN );
+
   hData = GetClipboardData(pformatetcIn->cfFormat);
 
   /* 
@@ -1274,7 +1280,18 @@ static HRESULT WIN32API OLEClipbrd_IDataObject_GetData(
   pmedium->tymed = (hData == 0) ? TYMED_NULL : TYMED_HGLOBAL;
   pmedium->u.hGlobal = (HGLOBAL)hData;
   pmedium->pUnkForRelease = NULL;
-  
+
+  hr = S_OK;
+
+CLEANUP:
+  /*
+   * Close Windows clipboard
+   */
+  if ( bClipboardOpen && !CloseClipboard() )
+     hr = CLIPBRD_E_CANT_CLOSE;
+
+  if ( FAILED(hr) )
+      return hr;
   return (hData == 0) ? DV_E_FORMATETC : S_OK;
 }
 
