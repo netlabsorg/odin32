@@ -1,4 +1,4 @@
-/* $Id: icongrp.cpp,v 1.3 1999-06-10 17:08:54 phaller Exp $ */
+/* $Id: icongrp.cpp,v 1.4 1999-07-20 17:50:19 sandervl Exp $ */
 
 /*
  * PE2LX Icon group code
@@ -40,7 +40,7 @@ void ShowGroupIcon(int id, IconHeader *ihdr, int size)
 {
  ResourceDirectory *rdir = (ResourceDirectory *)(ihdr + 1);
  int i, groupsize = 0;
- BITMAPARRAYFILEHEADER *bafh, *orgbafh;
+ BITMAPARRAYFILEHEADER2 *bafh, *orgbafh;
  OS2Icon *icon;
 
   cout << "Icon Group id   :" << id << endl;
@@ -58,13 +58,13 @@ void ShowGroupIcon(int id, IconHeader *ihdr, int size)
                 groupsize += icon->QueryIconSize();
         rdir++;
   }
-  bafh    = (BITMAPARRAYFILEHEADER *)malloc(groupsize+ihdr->wCount*sizeof(BITMAPARRAYFILEHEADER));
+  bafh    = (BITMAPARRAYFILEHEADER2 *)malloc(groupsize+ihdr->wCount*sizeof(BITMAPARRAYFILEHEADER2));
   orgbafh = bafh;
 
   rdir = (ResourceDirectory *)(ihdr + 1);
   for(i=0;i<ihdr->wCount;i++) {
         bafh->usType    = BFT_BITMAPARRAY;
-        bafh->cbSize    = sizeof(BITMAPARRAYFILEHEADER);
+        bafh->cbSize    = sizeof(BITMAPARRAYFILEHEADER2);
         bafh->cxDisplay = 0;
         bafh->cyDisplay = 0;
         icon            = OS2Icon::GetIcon(rdir->wNameOrdinal);
@@ -74,17 +74,17 @@ void ShowGroupIcon(int id, IconHeader *ihdr, int size)
                 continue;
         }
         if(i != ihdr->wCount -1) {
-                bafh->offNext = (int)&bafh->bfh - (int)orgbafh + icon->QueryIconSize();
+                bafh->offNext = (int)&bafh->bfh2 - (int)orgbafh + icon->QueryIconSize();
         }
         else    bafh->offNext = 0;
 
-        icon->SetIconHdrOffset((int)bafh - (int)orgbafh + sizeof(BITMAPARRAYFILEHEADER)-sizeof(BITMAPFILEHEADER));
+        icon->SetIconHdrOffset((int)bafh - (int)orgbafh + sizeof(BITMAPARRAYFILEHEADER2)-sizeof(BITMAPFILEHEADER2));
 
-        memcpy((char *)&bafh->bfh, (char *)icon->GetIconHeader(), icon->QueryIconSize());
-        bafh = (BITMAPARRAYFILEHEADER *)((int)&bafh->bfh + icon->QueryIconSize());
+        memcpy((char *)&bafh->bfh2, (char *)icon->GetIconHeader(), icon->QueryIconSize());
+        bafh = (BITMAPARRAYFILEHEADER2 *)((int)&bafh->bfh2 + icon->QueryIconSize());
         rdir++;
   }
-  OS2Exe.StoreResource(id, RT_POINTER, groupsize+ihdr->wCount*sizeof(BITMAPARRAYFILEHEADER), (char *)orgbafh);
+  OS2Exe.StoreResource(id, RT_POINTER, groupsize+ihdr->wCount*sizeof(BITMAPARRAYFILEHEADER2), (char *)orgbafh);
   free((char *)orgbafh);
 }
 //******************************************************************************

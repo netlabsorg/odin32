@@ -1,6 +1,6 @@
-/* $Id: icon.h,v 1.3 1999-06-10 17:08:53 phaller Exp $ */
+/* $Id: icon.h,v 1.4 1999-07-20 17:50:19 sandervl Exp $ */
 
-/* $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/pe2lx/icon.h,v 1.3 1999-06-10 17:08:53 phaller Exp $
+/* $Header: /home/ktk/tmp/odin/2007/netlabs.cvs/odin32/src/pe2lx/icon.h,v 1.4 1999-07-20 17:50:19 sandervl Exp $
  *
  * Declarations, protypes and defintions for conversion of icons.
  *
@@ -197,7 +197,7 @@ public:
 
         int                QueryIconSize();
         void               SetIconHdrOffset(int offset);
-        BITMAPFILEHEADER  *GetIconHeader();
+        BITMAPFILEHEADER2 *GetIconHeader();
 
         static OS2Icon    *GetIcon(int id);
         static void        DestroyAll();
@@ -206,8 +206,8 @@ protected:
 
 private:
         int                       id, iconsize, prevoffset;
-        BITMAPFILEHEADER         *iconhdr;
-        BITMAPFILEHEADER         *iconhdr2;
+        BITMAPFILEHEADER2        *iconhdr;
+        BITMAPFILEHEADER2        *iconhdr2;
 
         //@KSO: This may need to be changed later. Statics work fine for one single file,
         //      but not necessarily for concurrent files. But for the time beeing, it is
