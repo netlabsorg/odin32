@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1487 2001-06-08 11:02:41 sandervl Exp $ */
+/* $Id: changelog,v 1.1488 2001-06-09 07:31:11 sandervl Exp $ */
 
  2001-06-08: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o WinExec fixes
@@ -7,7 +7,7 @@
                 o GetDIBits fix; RGB conversion was not always performed;
                   now only for requested scanlines.
 
- 2001-06-05: Patrick Haller <patrick.haller@innotek.de>
+ 2001-06-08: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o Optimizations for loading of PE images
 
  2001-06-07: Sander van Leeuwen <sandervl@xs4all.nl>
