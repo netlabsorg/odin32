@@ -1,4 +1,9 @@
- /* $Id: ChangeLog,v 1.561 1999-12-20 11:46:07 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.562 1999-12-20 16:44:18 cbratschi Exp $ */
+
+ 99-12-20: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32: changed icon title font size in SystemParametersInfo to 12
+		  fixed DrawIcon/DrawIconEx
+		  fixed GetIconInfo (still bugs in load/create code)
 
  99-12-19: Sander van Leeuwen <sandervl@xs4all.nl>
 	- CRTDLL: Added bsearch from EMX
