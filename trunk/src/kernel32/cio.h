@@ -1,4 +1,4 @@
-/* $Id: cio.h,v 1.1 1999-05-24 20:19:43 ktk Exp $ */
+/* $Id: cio.h,v 1.2 1999-05-31 23:22:40 phaller Exp $ */
 
 /* Copyright (C) 1995 by Holger Veit (Holger.Veit@gmd.de) */
 /* Use at your own risk! No Warranty! The author is not responsible for
@@ -12,6 +12,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include <odin.h>
+#include <builtin.h>
 
 extern int CDECL io_init(void);
 extern int CDECL io_exit(void);
