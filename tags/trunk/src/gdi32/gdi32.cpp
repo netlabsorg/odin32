@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.83 2002-10-28 17:53:40 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.84 2002-11-04 13:30:36 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -231,6 +231,8 @@ HDC WIN32API CreateCompatibleDC( HDC hdc)
 
     if(newHdc) STATS_CreateCompatibleDC(hdc, newHdc);
     OSLibGpiSetCp(newHdc, oldcp);
+    //PF Open32 seems not to move coordinates to 0,0 in newHdc
+    MoveToEx(newHdc, 0, 0 , NULL);
     dprintf(("CreateCompatibleDC %X returned %x", hdc, newHdc));
     return newHdc;
 }
