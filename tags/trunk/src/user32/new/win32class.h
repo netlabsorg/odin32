@@ -1,4 +1,4 @@
-/* $Id: win32class.h,v 1.4 1999-08-22 08:30:52 sandervl Exp $ */
+/* $Id: win32class.h,v 1.5 1999-08-28 14:09:30 sandervl Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -51,6 +51,8 @@ public:
 	  void  IncreaseWindowCount()   { cWindows++; };
 	  void  DecreaseWindowCount()   { cWindows--; };
 	  DWORD GetWindowCount()        { return cWindows; };
+
+          BOOL  hasClassName(LPSTR classname, BOOL fUnicode = 0);
 	  
  static  void	UnregisterClassA(HINSTANCE hinst, LPSTR id);
 

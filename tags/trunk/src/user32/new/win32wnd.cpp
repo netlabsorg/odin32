@@ -1,4 +1,4 @@
-/* $Id: win32wnd.cpp,v 1.31 1999-08-27 17:50:56 dengert Exp $ */
+/* $Id: win32wnd.cpp,v 1.32 1999-08-28 14:09:30 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -10,6 +10,7 @@
  *
  * Copyright 1993, 1994 Alexandre Julliard
  *
+ * TODO: Not thread/process safe
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -22,6 +23,7 @@
 #include <assert.h>
 #include <misc.h>
 #include <handlemanager.h>
+#include <heapstring.h>
 #include <win32wnd.h>
 #include <spy.h>
 #include "wndmsg.h"
@@ -70,8 +72,8 @@ void Win32Window::Init()
   fCreated         = FALSE;
   fFirstShow       = TRUE;
 
-  memset(windowNameA, 0, MAX_WINDOW_NAMELENGTH);
-  memset(windowNameW, 0, MAX_WINDOW_NAMELENGTH*sizeof(WCHAR));
+  windowNameA      = NULL;
+  windowNameW      = NULL;
   wndNameLength    = 0;
 
   userWindowLong   = NULL;;
@@ -124,6 +126,14 @@ Win32Window::~Win32Window()
         HMHandleFree(Win32Hwnd & 0xFFFF);
   if(userWindowLong)
         free(userWindowLong);
+  if(windowNameA) {
+        free(windowNameA);
+        windowNameA = NULL;
+  }
+  if(windowNameW) {
+        free(windowNameW);
+        windowNameW = NULL;
+  }
 }
 //******************************************************************************
 //******************************************************************************
@@ -248,7 +258,7 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   //Allocate window words
   nrUserWindowLong = windowClass->getExtraWndWords();
   if(nrUserWindowLong) {
-        userWindowLong = (ULONG *)malloc(nrUserWindowLong);
+        userWindowLong = (ULONG *)_smalloc(nrUserWindowLong);
         memset(userWindowLong, 0, nrUserWindowLong);
   }
 
@@ -370,8 +380,11 @@ BOOL Win32Window::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
   }
 #endif
 
+  if(cs->lpszName)
+        SetWindowText((LPSTR)cs->lpszName);
+
   OS2Hwnd = OSLibWinCreateWindow((getParent()) ? getParent()->getOS2WindowHandle() : OSLIB_HWND_DESKTOP,
-                                 dwOSWinStyle, dwOSFrameStyle, (char *)cs->lpszName,
+                                 dwOSWinStyle, dwOSFrameStyle, (char *)windowNameA,
                                  (owner) ? owner->getOS2WindowHandle() : OSLIB_HWND_DESKTOP,
                                  (hwndLinkAfter == HWND_BOTTOM) ? TRUE : FALSE,
                                  &OS2HwndFrame);
@@ -984,10 +997,10 @@ ULONG Win32Window::MsgGetTextLength()
 char *Win32Window::MsgGetText()
 {
     if(isUnicode) {
-        SendInternalMessageW(WM_GETTEXT, MAX_WINDOW_NAMELENGTH, (LPARAM)windowNameW);
+        SendInternalMessageW(WM_GETTEXT, wndNameLength, (LPARAM)windowNameW);
     }
     else {
-        SendInternalMessageA(WM_GETTEXT, MAX_WINDOW_NAMELENGTH, (LPARAM)windowNameA);
+        SendInternalMessageA(WM_GETTEXT, wndNameLength, (LPARAM)windowNameA);
     }
     return windowNameA;
 }
@@ -1655,7 +1668,83 @@ BOOL Win32Window::IsIconic()
     return OSLibWinIsIconic(OS2Hwnd);
 }
 //******************************************************************************
-//TODO: not complete nor correct (distinction between top-level, top-most & child windows)
+//TODO:
+//We assume (for now) that if hwndParent or hwndChildAfter are real window handles, that
+//the current process owns them.
+//******************************************************************************
+HWND Win32Window::FindWindowEx(HWND hwndParent, HWND hwndChildAfter, LPSTR lpszClass, LPSTR lpszWindow,
+                               BOOL fUnicode)
+{
+ Win32Window *parent = GetWindowFromHandle(hwndParent);
+ Win32Window *child  = GetWindowFromHandle(hwndChildAfter);
+
+    if((hwndParent != OSLIB_HWND_DESKTOP && !parent) ||
+       (hwndChildAfter != 0 && !child) ||
+       (hwndParent == OSLIB_HWND_DESKTOP && hwndChildAfter != 0))
+    {
+        dprintf(("Win32Window::FindWindowEx: parent or child not found %x %x", hwndParent, hwndChildAfter));
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        return 0;
+    }
+    if(hwndParent != OSLIB_HWND_DESKTOP)
+    {//if the current process owns the window, just do a quick search
+        child = (Win32Window *)parent->GetFirstChild();
+        if(hwndChildAfter != 0)
+        {
+            while(child)
+            {
+                if(child->getWindowHandle() == hwndChildAfter)
+                {
+                    child = (Win32Window *)child->GetNextChild();
+                    break;
+                }
+                child = (Win32Window *)child->GetNextChild();
+            }
+        }
+        while(child)
+        {
+            if(child->getWindowClass()->hasClassName(lpszClass, fUnicode) &&
+               (!lpszWindow || child->hasWindowName(lpszWindow, fUnicode)))
+            {
+                dprintf(("FindWindowEx: Found window %x", child->getWindowHandle()));
+                return child->getWindowHandle();
+            }
+            child = (Win32Window *)child->GetNextChild();
+        }
+    }
+    else {
+        Win32Window *wnd;
+        HWND henum, hwnd;
+
+        henum = OSLibWinBeginEnumWindows(OSLIB_HWND_DESKTOP);
+        hwnd = OSLibWinGetNextWindow(henum);
+
+        while(hwnd)
+        {
+            HWND hwndClient;
+
+            wnd = GetWindowFromOS2Handle(hwnd);
+            if(wnd == NULL) {
+                hwndClient = OSLibWinQueryClientWindow(hwnd);
+                if(hwndClient)  wnd = GetWindowFromOS2Handle(hwndClient);
+            }
+
+            if(wnd && wnd->getWindowClass()->hasClassName(lpszClass, fUnicode) &&
+               (!lpszWindow || wnd->hasWindowName(lpszWindow, fUnicode)))
+            {
+                OSLibWinEndEnumWindows(henum);
+                dprintf(("FindWindowEx: Found window %x", wnd->getWindowHandle()));
+                return wnd->getWindowHandle();
+            }
+            hwnd = OSLibWinGetNextWindow(henum);
+        }
+        OSLibWinEndEnumWindows(henum);
+    }
+    SetLastError(ERROR_CANNOT_FIND_WND_CLASS); //TODO: not always correct
+    return 0;
+}
+//******************************************************************************
+//TODO: not complete nor correct (distinction be    tween top-level, top-most & child windows)
 //******************************************************************************
 HWND Win32Window::GetWindow(UINT uCmd)
 {
@@ -1769,6 +1858,15 @@ BOOL Win32Window::GetWindowRect(PRECT pRect)
 }
 //******************************************************************************
 //******************************************************************************
+BOOL Win32Window::hasWindowName(LPSTR wndname, BOOL fUnicode)
+{
+    if(fUnicode) {
+            return (lstrcmpW(windowNameW, (LPWSTR)wndname) == 0);
+    }
+    else    return (strcmp(windowNameA, wndname) == 0);
+}
+//******************************************************************************
+//******************************************************************************
 int Win32Window::GetWindowTextLengthA()
 {
     return OSLibWinQueryWindowTextLength(OS2Hwnd);
@@ -1781,9 +1879,29 @@ int Win32Window::GetWindowTextA(LPSTR lpsz, int cch)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL Win32Window::SetWindowTextA(LPCSTR lpsz)
+BOOL Win32Window::SetWindowText(LPSTR lpsz)
 {
-  return OSLibWinSetWindowText(OS2Hwnd, (LPSTR)lpsz);
+    if(lpsz == NULL)
+        return FALSE;
+
+    if(isUnicode == FALSE) {
+        windowNameA = (LPSTR)_smalloc(strlen(lpsz)+1);
+        strcpy(windowNameA, lpsz);
+        windowNameW = (LPWSTR)_smalloc((strlen(lpsz)+1)*sizeof(WCHAR));
+        lstrcpyAtoW(windowNameW, windowNameA);
+    }
+    else {
+        windowNameW = (LPWSTR)_smalloc((lstrlenW((LPWSTR)lpsz)+1)*sizeof(WCHAR));
+        lstrcpyW(windowNameW, (LPWSTR)lpsz);
+        windowNameA = (LPSTR)_smalloc(lstrlenW((LPWSTR)lpsz)+1);
+        lstrcpyWtoA(windowNameA, windowNameW);
+    }
+    wndNameLength = strlen(windowNameA)+1; //including 0 terminator
+
+    if(OS2Hwnd)
+        return OSLibWinSetWindowText(OS2Hwnd, (LPSTR)windowNameA);
+
+    return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1809,7 +1927,7 @@ LONG Win32Window::SetWindowLongA(int index, ULONG value)
                 hInstance = value;
                 return oldval;
         case GWL_HWNDPARENT:
-        return SetParent((HWND)value);
+                return SetParent((HWND)value);
 
         case GWL_ID:
                 oldval = getWindowId();
@@ -1894,11 +2012,11 @@ Win32Window *Win32Window::GetWindowFromHandle(HWND hwnd)
  Win32Window *window;
 
    if(HIWORD(hwnd) != 0x6800) {
-    return NULL;
+        return NULL;
    }
 
    if(HMHandleTranslateToOS2(LOWORD(hwnd), (PULONG)&window) == NO_ERROR) {
-    return window;
+        return window;
    }
    else return NULL;
 }
@@ -1913,7 +2031,7 @@ Win32Window *Win32Window::GetWindowFromOS2Handle(HWND hwnd)
   magic    = OSLibWinGetWindowULong(hwnd, OFFSET_WIN32PM_MAGIC);
 
   if(win32wnd && CheckMagicDword(magic)) {
-    return win32wnd;
+        return win32wnd;
   }
   return 0;
 }

@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.5 1999-08-16 16:55:33 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.6 1999-08-28 14:09:29 sandervl Exp $ */
 
 /*
  * USER32 DLL entry point
@@ -35,6 +35,7 @@
 #include <win32type.h>
 #include <spy.h>
 #include "pmwindow.h"
+#include "heapshared.h"
 
 /*-------------------------------------------------------------------*/
 /* A clean up routine registered with DosExitList must be used if    */
@@ -92,6 +93,9 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
          //SvL: Try to start communication with our message spy queue server
          InitSpyQueue();
 
+	 if(InitializeSharedHeap() == FALSE) 
+		return 0UL;
+
          //SvL: Init win32 PM classes
          if(InitPM() == FALSE) {
                 return 0UL;
@@ -124,6 +128,7 @@ static void APIENTRY cleanup(ULONG ulReason)
 {
    dprintf(("user32 exit\n"));
    UnregisterSystemClasses();
+   DestroySharedHeap();
    _ctordtorTerm();
    dprintf(("user32 exit done\n"));
    DosExitList(EXLST_EXIT, cleanup);

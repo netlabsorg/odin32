@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.25 1999-08-27 17:50:56 dengert Exp $ */
+/* $Id: oslibwin.cpp,v 1.26 1999-08-28 14:09:29 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -674,4 +674,34 @@ void OSLibMapWINDOWPOStoSWP(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, HWND hPar
 }
 //******************************************************************************
 //******************************************************************************
+HWND OSLibWinBeginEnumWindows(HWND hwnd)
+{
+   if(hwnd == OSLIB_HWND_DESKTOP)	hwnd = HWND_DESKTOP;
 
+   return WinBeginEnumWindows(hwnd);
+}
+//******************************************************************************
+//******************************************************************************
+HWND OSLibWinGetNextWindow(HWND hwndEnum)
+{
+   return WinGetNextWindow(hwndEnum);
+}
+//******************************************************************************
+//******************************************************************************
+HWND OSLibWinQueryClientWindow(HWND hwndFrame)
+{
+ HWND hwndClient = 0;
+
+   if(((ULONG)WinSendMsg(hwndFrame, WM_QUERYFRAMEINFO, NULL, NULL)) & FI_FRAME)
+          hwndClient = WinWindowFromID(hwndFrame, FID_CLIENT);
+
+   return hwndClient;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinEndEnumWindows(HWND hwndEnum)
+{
+   return WinEndEnumWindows(hwndEnum);
+}
+//******************************************************************************
+//******************************************************************************

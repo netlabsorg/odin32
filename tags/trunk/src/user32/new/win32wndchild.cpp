@@ -1,4 +1,4 @@
-/* $Id: win32wndchild.cpp,v 1.1 1999-07-16 11:32:09 sandervl Exp $ */
+/* $Id: win32wndchild.cpp,v 1.2 1999-08-28 14:09:30 sandervl Exp $ */
 /*
  * Win32 Child/Parent window class for OS/2
  *
@@ -34,14 +34,25 @@ ChildWindow::~ChildWindow()
   }
 }
 //******************************************************************************
-//LIFO insertion
+//FIFO insertion
 //******************************************************************************
 BOOL ChildWindow::AddChild(ChildWindow *child)
 {
+ ChildWindow *curchild;
+
    mutex.enter();
 
-   child->SetNextChild(children);
-   children = child;
+   curchild = children;
+   if(curchild == NULL) {
+   	children = child;
+   }
+   else {
+	while(curchild->GetNextChild()) {
+		curchild = curchild->GetNextChild();
+	}
+	curchild->SetNextChild(this);
+   }
+   child->SetNextChild(NULL);
 
    mutex.leave();
    return TRUE;
