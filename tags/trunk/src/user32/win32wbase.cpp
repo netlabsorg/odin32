@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.279 2001-08-02 14:50:43 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.280 2001-09-15 09:16:08 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -972,15 +972,18 @@ ULONG Win32BaseWindow::MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd, H
     if(hwndOS2Win) {
         threadidhwnd = O32_GetWindowThreadProcessId(hwndOS2Win, &procidhwnd);
     }
+#if 0
     //Warning: temporary hack to force focus to newly created window
     //RealPlayer 8 does not pass WM_ACTIVATE to defwindowproc and doesn't call
     //setfocus -> keyboard focus not set
     //TODO: Find real cause!!
-    if(GetFocus() == 0 && fActivate) {
-        if(!(getStyle() & WS_MINIMIZE))
-            SetFocus(getWindowHandle());
-    }
+//    if(GetFocus() == 0 && fActivate) {
+//        if(!(getStyle() & WS_MINIMIZE))
+//            SetFocus(getWindowHandle());
+//    }
     //Warning: temporary hack to force focus to newly created window
+    //SvL: No longer appears to happen with rp8
+#endif
 
     if(fActivate) {
          SendInternalMessageA(WM_ACTIVATEAPP, 1, dwThreadId);    //activate; specify window thread id
