@@ -1,4 +1,4 @@
-/* $Id: char.cpp,v 1.7 1999-09-23 15:57:24 phaller Exp $ */
+/* $Id: char.cpp,v 1.8 1999-10-15 11:28:28 phaller Exp $ */
 
 /*
  * Win32 character API functions for OS/2
@@ -12,10 +12,17 @@
  *
  */
 
+
+#include <odin.h>
+#include <odinwrap.h>
+#include <os2sel.h>
+
 #include "user32.h"
 
 #include <wctype.h> /* towupper, towlower support */
 
+
+ODINDEBUGCHANNEL(USER32-CHAR)
 
 //******************************************************************************
 //******************************************************************************
@@ -203,11 +210,8 @@ DWORD WIN32API CharUpperBuffW(LPWSTR x, DWORD buflen)
 }
 //******************************************************************************
 //******************************************************************************
-LPWSTR WIN32API CharUpperW( LPWSTR x)
+ODINFUNCTION1(LPWSTR,CharUpperW,LPWSTR,x)
 {
-  dprintf(("USER32: OS2CharUpperW(%08xh)\n",
-           x));
-
   if (HIWORD(x))
   {
     LPWSTR s = x;
