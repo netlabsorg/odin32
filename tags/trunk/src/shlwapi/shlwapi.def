@@ -1,4 +1,4 @@
-; $Id: shlwapi.def,v 1.23 2001-05-19 11:14:01 sandervl Exp $
+; $Id: shlwapi.def,v 1.24 2001-05-19 13:17:33 sandervl Exp $
 
 ; updated export ordinals to NT4 SP6 version of SHLWAPI.DLL
 ; Note: W95/W98 has DIFFERENT export ordinals
@@ -159,9 +159,10 @@ EXPORTS
                              _VkKeyScanW@4                        @148 NONAME
                              _WinHelpW@16                         @149 NONAME
                              _wvsprintfW@12                       @150 NONAME
-                             _SHLWAPI_151@0                       @151 NONAME
+                             _SHLWAPI_151@12                      @151 NONAME
                              _SHLWAPI_152@12                      @152 NONAME
                              _SHLWAPI_153@12                      @153 NONAME
+                             _SHLWAPI_154@12                      @154 NONAME
 
                              _SHLWAPI_156@8                       @156 NONAME
                              _SHLWAPI_158@8                       @158 NONAME

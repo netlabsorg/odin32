@@ -28,6 +28,15 @@
 #include "debugtools.h"
 
 
+#ifdef __WIN32OS2__
+#undef FIXME
+#ifdef DEBUG
+#define FIXME WriteLog("FIXME %s", __FUNCTION__); WriteLog
+#else
+#define FIXME 1 ? (void)0 : (void)((int (*)(char *, ...)) NULL)
+#endif
+#endif
+
 DEFAULT_DEBUG_CHANNEL(shell);
 
 #define isSlash(x) ((x)=='\\' || (x)=='/')
