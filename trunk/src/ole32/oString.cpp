@@ -1,3 +1,16 @@
+/* 
+ * 
+ * Project Odin Software License can be found in LICENSE.TXT
+ * 
+ */
+/* 
+ * ClassID Manipulation.
+ * 
+ * 12/7/99
+ * 
+ * Copyright 1999 David J. Raison
+ * 
+ */
 
 #include "ole32.h"
 

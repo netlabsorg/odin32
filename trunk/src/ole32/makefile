@@ -26,6 +26,8 @@ OBJS =  ole32.obj \
 	guid.obj \
 	initialise.obj \
 	taskmem.obj \
+	library.obj \
+	iunknown.obj \
 	stubs.obj
 
 all: $(TARGET).dll $(TARGET).lib
@@ -55,6 +57,8 @@ stubs.obj:	stubs.cpp
 initterm.obj:	initterm.cpp
 moniker.obj:	moniker.cpp
 taskmem.obj:	taskmem.cpp
+library.obj:	library.cpp
+iunknown.obj:	iunknown.cpp
 
 
 clean:

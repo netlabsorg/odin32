@@ -29,28 +29,6 @@ HRESULT WIN32API CoDisconnectObject(IUnknown *pUnk, DWORD dwReserved)
     return S_OK;
 }
 //*******************************************************************************
-//Frees all libs loaded with CoLoadLibrary
-//*******************************************************************************
-void WIN32API CoFreeAllLibraries()
-{
-    dprintf(("OLE32: CoFreeAllLibraries - stub"));
-    return ;
-}
-//*******************************************************************************
-//*******************************************************************************
-void WIN32API CoFreeLibrary(HINSTANCE hInst)
-{
-    dprintf(("OLE32: CoFreeLibrary"));
-   FreeLibrary(hInst);
-}
-//*******************************************************************************
-//*******************************************************************************
-void WIN32API CoFreeUnusedLibraries()
-{
-    dprintf(("OLE32: CoFreeUnusedLibraries - stub"));
-    return ;
-}
-//*******************************************************************************
 //*******************************************************************************
 HRESULT WIN32API CoGetCallerTID()
 {
@@ -141,20 +119,6 @@ BOOL WIN32API CoIsOle1Class(REFCLSID rclsid)
 }
 //*******************************************************************************
 //*******************************************************************************
-HINSTANCE WIN32API CoLoadLibrary(LPSTR lpszLibName, BOOL bAutoFree)
-{
-    dprintf(("OLE32: CoLoadLibrary"));
-    return LoadLibraryA(lpszLibName);
-}
-//*******************************************************************************
-//*******************************************************************************
-HRESULT WIN32API CoLockObjectExternal(IUnknown *pUnk, BOOL fLock, BOOL fLastUnlockReleases)
-{
-    dprintf(("OLE32: CoLockObjectExternal - stub"));
-    return E_OUTOFMEMORY;
-}
-//*******************************************************************************
-//*******************************************************************************
 HRESULT WIN32API CoMarshalHresult(IStream *pStm, HRESULT hresult)
 {
     dprintf(("OLE32: CoMarshalHresult - stub"));
@@ -187,15 +151,6 @@ HRESULT WIN32API CoQueryReleaseObject()
 }
 //*******************************************************************************
 //*******************************************************************************
-HRESULT WIN32API CoRegisterClassObject(REFCLSID rclsid, IUnknown *pUnk,
-                                          DWORD dwClsContext, DWORD flags,
-                                          LPDWORD lpdwRegister)
-{
-    dprintf(("OLE32: CoRegisterClassObject - stub"));
-    return E_OUTOFMEMORY;
-}
-//*******************************************************************************
-//*******************************************************************************
 HRESULT WIN32API CoRegisterMallocSpy(LPMALLOCSPY pMallocSpy)
 {
     dprintf(("OLE32: CoRegisterMallocSpy - stub"));
@@ -214,13 +169,6 @@ HRESULT WIN32API CoRegisterMessageFilter(LPMESSAGEFILTER lpMessageFilter,
 HRESULT WIN32API CoReleaseMarshalData(IStream *pStm)
 {
     dprintf(("OLE32: CoReleaseMarshalData - stub"));
-    return E_OUTOFMEMORY;
-}
-//*******************************************************************************
-//*******************************************************************************
-HRESULT WIN32API CoRevokeClassObject(DWORD dwRegister)
-{
-    dprintf(("OLE32: CoRevokeClassObject - stub"));
     return E_OUTOFMEMORY;
 }
 //*******************************************************************************
