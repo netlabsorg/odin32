@@ -348,6 +348,12 @@ BOOL SYSTRAY_Init(void)
  */
 BOOL WINAPI Shell_NotifyIconA(DWORD dwMessage, PNOTIFYICONDATAA pnid )
 {
+#ifdef __WIN32OS2__
+  //SvL: Disabled system tray for now
+  //     Integrate with OS/2 WPS (WarpCenter tray?)
+  dprintf(("Shell_NotifyIconA %x: ignored", dwMessage));
+  return TRUE;
+#else
   BOOL flag=FALSE;
   TRACE("enter %d %d %ld\n", pnid->hWnd, pnid->uID, dwMessage);
   switch(dwMessage) {
@@ -363,6 +369,7 @@ BOOL WINAPI Shell_NotifyIconA(DWORD dwMessage, PNOTIFYICONDATAA pnid )
   }
   TRACE("leave %d %d %ld=%d\n", pnid->hWnd, pnid->uID, dwMessage, flag);
   return flag;
+#endif
 }
 
 /*************************************************************************
