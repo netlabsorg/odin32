@@ -1,4 +1,4 @@
-/* $Id: sdf.c,v 1.1 1999-12-09 00:38:32 bird Exp $
+/* $Id: sdf.c,v 1.2 2001-04-17 04:24:17 bird Exp $
  *
  * SDF dumper. SDF == Structur Definition Files.
  * SDF files are found with the PMDF utility.
@@ -28,49 +28,50 @@
 *******************************************************************************/
 typedef struct _SDFType
 {
-    CHAR szName[33];
-    CHAR szStruct[34];
-    ULONG cb;
-    ULONG ulPointerLevel;
-    ULONG aul[8];
+    char            szName[33];
+    char            szStruct[34];
+    unsigned long   cb;
+    unsigned long   ulPointerLevel;
+    unsigned long   aul[8];
 } SDFTYPE, *PSDFTYPE;
 
 typedef struct _SDFMember
 {
-    CHAR  szName[33];
-    CHAR  szType[33];
-    CHAR  szType2[34];
-    ULONG cb;
-    ULONG offset;
-    UCHAR ch1;
-    UCHAR ch2;
-    UCHAR ch3;
-    UCHAR chPointerLevel;
-    ULONG aul[5];
+    char            szName[33];
+    char            szType[33];
+    char            szType2[34];
+    unsigned long   cb;
+    unsigned long   offset;
+    unsigned char   ch1;
+    unsigned char   ch2;
+    unsigned char   ch3;
+    unsigned char   chPointerLevel;
+    unsigned long   aul[5];
 } SDFMEMBER, *PSDFMEMBER;
 
 
 typedef struct _SDFStruct
 {
-    CHAR   szName[68];
-    ULONG  cb;
-    ULONG  cMembers;
-    ULONG  ul1;
-    USHORT us2a;
-    USHORT us2b;
-    ULONG  ul3;
-    ULONG  ul4;
-    ULONG  ul5;
-    ULONG  ul6;
+    char            szName[33];
+    char            szDescription[35];
+    unsigned long   cb;
+    unsigned long   cMembers;
+    unsigned long   ul1;
+    unsigned short  us2a;
+    unsigned short  us2b;
+    unsigned long   ul3;
+    unsigned long   ul4;
+    unsigned long   ul5;
+    unsigned long   ul6;
     SDFMEMBER aMembers[1];
 } SDFSTRUCT, *PSDFSTRUCT;
 
 
 typedef struct _SDFHeader
 {
-    ULONG cStructs;
-    ULONG cTypes;
-    ULONG ul[12];
+    unsigned long   cStructs;
+    unsigned long   cTypes;
+    unsigned long   ul[12];
 } SDFHEADER, *PSDFHEADER;
 
 
@@ -140,7 +141,11 @@ void dumpSDF(void *pvFile, unsigned cbFile)
     int i;
 
     printf("Header:\n"
-           "-------\n");
+           "-------\n"
+           "cStructs=%d\n"
+           "cTypes=%d\n",
+           pHdr->cStructs,
+           pHdr->cTypes);
     for (i = 0; i < sizeof(pHdr->ul) / sizeof(pHdr->ul[0]); i++)
         printf("ul[%#x] = 0x%08x\n",
                i, pHdr->ul[i]);
@@ -153,9 +158,9 @@ void dumpSDF(void *pvFile, unsigned cbFile)
         int j;
         if (i > 0)
             printf("\n");
-        printf("%3d struct: %-20s  #members: %3d cb: 0x%04x ",
-               i,  pStruct->szName, pStruct->cMembers, pStruct->cb);
-        printf("ul1=%08x us2a=%04x us2b=%04x ul3=%08x ul4=%08x ul5=%08x ul6=%08x\n",
+        printf("%3d struct: %-20s  #members: %3d  cb: 0x%04x  offset: %08x  description: %s\n",
+               i,  pStruct->szName, pStruct->cMembers, pStruct->cb, (unsigned)pStruct - (unsigned)pvFile, pStruct->szDescription);
+        printf("(ul1=%08x us2a=%04x us2b=%04x ul3=%08x ul4=%08x ul5=%08x ul6=%08x)\n",
                pStruct->ul1, pStruct->us2a, pStruct->us2b, pStruct->ul3, pStruct->ul4, pStruct->ul5, pStruct->ul6);
         fprintf(phOut, "struct %s /* #memb %d size %d (0x%03x) */\n{\n",
                 pStruct->szName, pStruct->cMembers, pStruct->cb, pStruct->cb);
@@ -164,7 +169,7 @@ void dumpSDF(void *pvFile, unsigned cbFile)
         {
             int k, cchName;
             char szName[80];
-            printf("\tname: %-18s type: %-14s size: %02x  offset: %02x  chPointerLevel: %d ch1-3:",
+            printf("\tname: %-18s type: %-14s size: %04x  offset: %02x  chPointerLevel: %d ch1-3:",
                    pStruct->aMembers[j].szName,
                    pStruct->aMembers[j].szType,
                    pStruct->aMembers[j].cb,
@@ -295,6 +300,7 @@ PSDFTYPE sdfGetTypeArray(PSDFHEADER pHdr)
     for (i = 0; i < pHdr->cStructs; i++)
         pStruct = (PSDFSTRUCT)((unsigned)(pStruct+1) + sizeof(SDFMEMBER)*(pStruct->cMembers - 1));
 
+    printf("typearray offset: 0x%08x\n\n", (unsigned)pStruct - (unsigned)pHdr);
     return (PSDFTYPE)(unsigned)pStruct;
 }
 
