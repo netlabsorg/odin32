@@ -1,4 +1,4 @@
-# $Id: setup.os2prfvac365.mk,v 1.12 2002-08-20 21:20:10 bird Exp $
+# $Id: setup.os2prfvac365.mk,v 1.13 2002-08-24 04:59:48 bird Exp $
 
 # ---OS2, PROFILE, VAC365-------------------------
 ENV_NAME="OS/2, Profile, IBM VisualAge for C++ 3.6.5"
@@ -15,6 +15,7 @@ ENV_ENVS_FORCE=vac365
 # Include some shared standard stuff: ALP, VAC optional stuff.
 #
 !include $(PATH_MAKE)\setup.os2prfalp.mk
+!include $(PATH_MAKE)\setup.os2prfwrc.mk
 !include $(PATH_MAKE)\setup.optional.vac3xx.mk
 
 
@@ -89,7 +90,7 @@ CXX_FLAGS_IFS=$(CC_FLAGS_IFS) /Tdc
 
 IMPLIB_FLAGS=/NOI /Nologo
 
-LINK_FLAGS=/nofree /nologo /de /map /linenumbers /NOIgnorecase /NOE /NOD /Optfunc /PACKCODE /PACKDATA
+LINK_FLAGS=/nofree /nologo /de /map /linenumbers /NOIgnorecase /NOE /NOD /PACKCODE /PACKDATA
 LINK_FLAGS_EXE=$(LINK_FLAGS) /EXECutable /STACK:$(TARGET_STACKSIZE)
 LINK_FLAGS_DLL=$(LINK_FLAGS) /DLL
 LINK_FLAGS_SYS=$(LINK_FLAGS) /PDD /Align:16

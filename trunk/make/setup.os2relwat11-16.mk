@@ -1,4 +1,4 @@
-# $Id: setup.os2relwat11-16.mk,v 1.6 2002-08-20 21:20:10 bird Exp $
+# $Id: setup.os2relwat11-16.mk,v 1.7 2002-08-24 04:59:48 bird Exp $
 
 # ---OS2, RELEASE, WAT11-------------------------
 ENV_NAME="OS/2, Release, Watcom C/C++ v11.0c 16-bit"
@@ -12,9 +12,10 @@ ENV_16BIT = 16
 
 
 #
-# Include some shared standard stuff: ALP, VAC optional stuff.
+# Include some shared standard stuff: ALP, WRC, VAC optional stuff.
 #
-!include $(PATH_MAKE)\setup.os2debalp.mk
+!include $(PATH_MAKE)\setup.os2relalp.mk
+!include $(PATH_MAKE)\setup.os2relwrc.mk
 !include $(PATH_MAKE)\setup.optional.watcom11x.mk
 
 

@@ -1,4 +1,4 @@
-# $Id: setup.os2relmscv6-16.mk,v 1.6 2002-08-20 21:16:48 bird Exp $
+# $Id: setup.os2relmscv6-16.mk,v 1.7 2002-08-24 04:59:48 bird Exp $
 
 # ---OS2, RELEASE, MSCV6-------------------------
 ENV_NAME="OS/2, Release, Microsoft C v6.0a 16-bit"
@@ -15,6 +15,7 @@ ENV_16BIT = 16
 # Include some shared standard stuff: ALP.
 #
 !include $(PATH_MAKE)\setup.os2relalp.mk
+!include $(PATH_MAKE)\setup.os2relwrc.mk
 
 
 #
@@ -136,7 +137,7 @@ CXX_PC_2_STDOUT=
 
 IMPLIB_FLAGS=/NOI /Nologo
 
-LINK_FLAGS=/nofree /nologo /map /linenumbers /NOIgnorecase /NOE /NOD /Optfunc /PACKCODE /PACKDATA /EXEPACK:2 /NODEBUG
+LINK_FLAGS=/nofree /nologo /map /linenumbers /NOIgnorecase /NOE /NOD /PACKCODE /PACKDATA /EXEPACK:2 /NODEBUG
 LINK_FLAGS_EXE=$(LINK_FLAGS) /EXECutable /BASE:0x10000 /STACK:$(TARGET_STACKSIZE)
 LINK_FLAGS_DLL=$(LINK_FLAGS) /DLL
 LINK_FLAGS_SYS=$(LINK_FLAGS) /PDD /Align:16
