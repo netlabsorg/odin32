@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.40 1999-11-03 19:51:44 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.41 1999-11-03 22:04:24 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -91,6 +91,7 @@ virtual  ULONG  MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd);
          ULONG  MsgSetText(LPSTR lpsz, LONG cch);
          ULONG  MsgGetTextLength();
          char  *MsgGetText();
+         ULONG  MsgContextMenu(ULONG x,ULONG y);
 
 virtual  LONG   SetWindowLongA(int index, ULONG value);
 virtual  ULONG  GetWindowLongA(int index);

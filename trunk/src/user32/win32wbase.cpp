@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.74 1999-11-03 19:51:43 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.75 1999-11-03 22:04:22 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1225,6 +1225,12 @@ char *Win32BaseWindow::MsgGetText()
         SendInternalMessageA(WM_GETTEXT, wndNameLength, (LPARAM)windowNameA);
     }
     return windowNameA;
+}
+//******************************************************************************
+//******************************************************************************
+ULONG  Win32BaseWindow::MsgContextMenu(ULONG x,ULONG y)
+{
+  return SendInternalMessageA(WM_CONTEXTMENU,Win32Hwnd,MAKELPARAM(x,y));
 }
 //******************************************************************************
 //******************************************************************************

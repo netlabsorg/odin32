@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.50 1999-11-02 19:13:01 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.51 1999-11-03 22:04:22 cbratschi Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -876,13 +876,28 @@ VirtualKeyFound:
     case WM_HITTEST:
     // Only send this message if the window is enabled
         if (WinIsWindowEnabled(hwnd))
-    	{
+        {
             if(win32wnd->MsgHitTest((*(POINTS *)&mp1).x, MapOS2ToWin32Y(OSLIB_HWND_DESKTOP, hwnd, (*(POINTS *)&mp1).y))) {
                     goto RunDefWndProc;
             }
         }
         else    goto RunDefWndProc;
         break;
+
+    case WM_CONTEXTMENU:
+      {
+        POINTL pt;
+
+        dprintf(("OS2: WM_CONTEXTMENU %x", hwnd));
+        pt.x = (*(POINTS *)&mp1).x;
+        pt.y = (*(POINTS *)&mp1).y;
+        WinMapWindowPoints(hwnd,HWND_DESKTOP,&pt,1);
+        pt.y = WinQuerySysValue(HWND_DESKTOP,SV_CYSCREEN)-pt.y-1;
+        win32wnd->MsgContextMenu(pt.x,pt.y);
+
+        RestoreOS2TIB();
+        return (MRESULT)TRUE;
+      }
 
     case WM_SYSCOLORCHANGE:
     case WM_SYSVALUECHANGED:
