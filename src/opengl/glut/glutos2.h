@@ -1,4 +1,4 @@
-/* $Id: glutos2.h,v 1.4 2000-03-11 17:24:28 bird Exp $ */
+/* $Id: glutos2.h,v 1.5 2000-03-11 21:52:50 sandervl Exp $ */
 #ifndef __glutos2_h__
 #define __glutos2_h__
 
@@ -24,28 +24,6 @@
 
 /* Win32 "equivalent" cursors - eventually, the X glyphs should be
    converted to Win32 cursors -- then they will look the same */
-#if defined(__WIN32OS2__)
-#define XC_arrow               IDC_ARROWA
-#define XC_top_left_arrow      IDC_ARROWA
-#define XC_hand1               IDC_SIZEALLA
-#define XC_pirate              IDC_NOA
-#define XC_question_arrow      IDC_HELPA
-#define XC_exchange            IDC_NOA
-#define XC_spraycan            IDC_SIZEALLA
-#define XC_watch               IDC_WAITA
-#define XC_xterm               IDC_IBEAMA
-#define XC_crosshair           IDC_CROSSA
-#define XC_sb_v_double_arrow   IDC_SIZENSA
-#define XC_sb_h_double_arrow   IDC_SIZEWEA
-#define XC_top_side            IDC_UPARROWA
-#define XC_bottom_side         IDC_SIZENSA
-#define XC_left_side           IDC_SIZEWEA
-#define XC_right_side          IDC_SIZEWEA
-#define XC_top_left_corner     IDC_SIZENWSEA
-#define XC_top_right_corner    IDC_SIZENESWA
-#define XC_bottom_right_corner IDC_SIZENWSEA
-#define XC_bottom_left_corner  IDC_SIZENESWA
-#else
 #define XC_arrow               IDC_ARROW
 #define XC_top_left_arrow      IDC_ARROW
 #define XC_hand1               IDC_SIZEALL
@@ -66,7 +44,6 @@
 #define XC_top_right_corner    IDC_SIZENESW
 #define XC_bottom_right_corner IDC_SIZENWSE
 #define XC_bottom_left_corner  IDC_SIZENESW
-#endif
 #define XA_STRING 0
 
 /* Private routines from win32_util.c */
