@@ -1,6 +1,8 @@
- /* $Id: changelog,v 1.378 1999-10-28 15:24:27 sandervl Exp $ */
+ /* $Id: changelog,v 1.379 1999-10-28 18:24:55 sandervl Exp $ */
 
  99-10-28: Sander van Leeuwen <sandervl@xs4all.nl>
+	- ADVAPI32: Fixed dprintf bugs in OpenSCManagerA/W (%s instead of %d)
+
 	- makefiles: Added nodebuginfo build option to build debug binaries
                      without debug information. (for upcoming alpha release)
                     
@@ -9,6 +11,9 @@
                     Shared heap fixes.
                     GetWindowsDirectory & GetSystemDirectory return string that don't end with
                     a backslash.                    
+                    Fixed loading of dlls without .dll extension.
+                    Fixed OSLibStripPath.
+
 	- USER32: Fixed style conversion (use dwStyle, not cs->style, same for dwExStyle)
                   -> title bar in prof. minesweeper
                   Fixed bug in pmframe WM_WINDOWPOSCHANGED handler (didn't restore OS/2
@@ -17,6 +22,9 @@
 		  Removed shared heap, use the one in kernel32 instead.
                   Fixed OSLibSetStyle & SetWindowLong for GWL_STYLE (wrong style used)
 		  Fixed win32 to OS/2 style conversion (DLG frame)
+                  Fix for timer messages in apps that use PeekMessage/DispatchMessage
+                  instead of GetMessage/DispatchMessage.
+                  Translation of extra messages.
 
  99-10-28: Jens Wiessner <wiessnej@rfi.de>
 	- MSVCRT: Added stubs
