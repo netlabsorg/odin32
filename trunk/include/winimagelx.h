@@ -1,4 +1,4 @@
-/* $Id: winimagelx.h,v 1.2 1999-09-18 17:45:23 sandervl Exp $ */
+/* $Id: winimagelx.h,v 1.3 1999-11-26 00:04:33 sandervl Exp $ */
 
 /*
  * Win32 LX Image base class
@@ -19,6 +19,9 @@ class Win32LxImage : public virtual Win32ImageBase
 public:
          Win32LxImage(HINSTANCE hInstance, PVOID pResData);
 virtual ~Win32LxImage();
+
+virtual	ULONG     getApi(char *name);
+virtual ULONG     getApi(int ordinal);
 
 protected:
 private:

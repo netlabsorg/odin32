@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.h,v 1.6 1999-11-24 19:33:34 sandervl Exp $ */
+/* $Id: winimagepeldr.h,v 1.7 1999-11-26 00:04:33 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -80,6 +80,9 @@ virtual ~Win32PeLdrImage();
         //any dlls are loaded, so that exes without fixups can be loaded at a low
         //address)
 virtual BOOL  init(ULONG reservedMem);
+
+    virtual ULONG getApi(char *name);
+    virtual ULONG getApi(int ordinal);
 
         //commits image page(s) when an access violation exception is dispatched
 	BOOL  commitPage(ULONG virtAddress, BOOL fWriteAccess, int fPageCmd = SECTION_PAGES);
