@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.510 1999-12-05 16:39:58 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.511 1999-12-05 21:10:49 sandervl Exp $ */
+
+ 99-12-05: Christoph Bratschi <cbratschi@datacomm.ch>
+	- KERNEL32: Only convert the string and not everything in UnicodeToAsciiStringN
 
  99-12-05: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- KERNEL32: Better logging for CreateProcessA
