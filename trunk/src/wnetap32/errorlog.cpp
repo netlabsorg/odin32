@@ -1,4 +1,4 @@
-/* $Id: errorlog.cpp,v 1.1 2000-12-12 02:43:25 phaller Exp $ */
+/* $Id: errorlog.cpp,v 1.2 2001-09-06 22:23:38 phaller Exp $ */
 
 /*
  *
@@ -43,13 +43,6 @@ ODINDEBUGCHANNEL(WNETAP32-ERRORLOG)
 /****************************************************************************
  * Module Global Variables                                                  *
  ****************************************************************************/
-
-#define NERR_OK   0
-#define NERR_BASE 1 /* @@@PH DUMMY ! */
-
-
-#undef NET_API_STATUS
-#define NET_API_STATUS DWORD
 
 typedef unsigned long LPHLOG;
 

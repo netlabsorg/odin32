@@ -1,4 +1,4 @@
-/*  $Id: oslibnet.cpp,v 1.4 2001-09-05 10:27:54 bird Exp $
+/*  $Id: oslibnet.cpp,v 1.5 2001-09-06 22:23:40 phaller Exp $
  *
  * Wrappers for OS/2 Netbios/Network/LAN API
  *
@@ -28,6 +28,7 @@
 #include <wksta.h>
 #include <neterr.h>
 #include <netstats.h>
+#include <server.h>
 
 
 //******************************************************************************
@@ -260,6 +261,42 @@ DWORD OSLibNetStatisticsGet(const unsigned char * pszServer,
                                   pbBuffer,
                                   ulBuffer,
                                   pulTotalAvail));
+  SetFS(sel);
+  return rc;
+}
+
+
+/*****************************************************************************
+ * Name      : NET_API_STATUS OSLibNetStatisticsGet
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller 2000/01/10 01:42
+ *****************************************************************************/
+
+DWORD OSLibNetServerEnum(const unsigned char * pszServer,
+                         unsigned long         ulLevel,
+                         unsigned char       * pbBuffer,
+                         unsigned long         ulBufferLength,
+                         unsigned long       * pulEntriesReturned,
+                         unsigned long       * pulEntriesAvail,
+                         unsigned long         ulServerType,
+                         unsigned char       * pszDomain)
+{
+  USHORT sel = RestoreOS2FS();
+  
+  APIRET rc = error2WinError(Net32ServerEnum2(pszServer,
+                                              ulLevel,
+                                              pbBuffer,
+                                              ulBufferLength,
+                                              pulEntriesReturned,
+                                              pulEntriesAvail,
+                                              ulServerType,
+                                              pszDomain));
   SetFS(sel);
   return rc;
 }
