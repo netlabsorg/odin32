@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 1999-06-10 16:24:34 phaller Exp $
+# $Id: makefile,v 1.4 1999-06-29 15:54:58 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -23,7 +23,7 @@ TARGET = winmm
 OBJS =  winmm.obj os2timer.obj waveout.obj dwaveout.obj timegettime.obj \
         wavein.obj aux.obj auxos2.obj mixer.obj \
         midi.obj irtmidi.obj midistrm.obj initterm.obj mci.obj joy.obj \
-        mmio.obj driver.obj playsound.obj
+        mmio.obj driver.obj playsound.obj joyos2.obj
 
 
 all: $(TARGET).dll $(TARGET).lib
@@ -49,7 +49,7 @@ waveout.obj:    waveout.cpp  dwaveout.h
 wavein.obj:     wavein.cpp
 mixer.obj:      mixer.cpp  midi.hpp
 mci.obj:        mci.cpp
-joy.obj:        joy.cpp
+joy.obj:        joy.cpp joyos2.h
 mmio.obj:       mmio.cpp
 aux.obj:        aux.cpp  aux.h
 auxos2.obj:     auxos2.cpp aux.h
@@ -60,6 +60,7 @@ dwaveout.obj:   dwaveout.cpp dwaveout.h $(PDWIN32_INCLUDE)\vmutex.h
 timegettime.obj: timegettime.cpp
 initterm.obj:   initterm.cpp aux.h
 playsound.obj:  playsound.cpp
+joyos2.obj:     joyos2.cpp joyos2.h
 
 clean:
         $(RM) *.obj *.lib *.dll *~ *.map *.pch
