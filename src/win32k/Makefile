@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.31 2000-02-27 00:58:22 bird Exp $
+# $Id: Makefile,v 1.32 2000-02-27 02:19:05 bird Exp $
 #
 # Copyright 1998-1999 knut st. osmundsen
 #
@@ -380,8 +380,9 @@ dep:
     cd ..
 
 dep2:
-    $(PDWIN32_TOOLS)\fastdep -o$(WIN32KOBJ) $(CINCLUDES) misc\*.c* ldr\*.c* dev32\*.c* \
-        dev16\*.c* pe2lx\*.c* k32\*.c* lib\*.c $(WIN32KINCLUDE)\*.h
+    $(PDWIN32_TOOLS)\fastdep -o$(WIN32KOBJ) $(CINCLUDES) misc\*.c* ldr\*.c* \
+        dev32\*.c* dev16\*.c* pe2lx\*.c* k32\*.c* lib\*.c elf2lx\*.c* \
+        $(WIN32KINCLUDE)\*.h
     $(PDWIN32_TOOLS)\fastdep -a+ -o$(WIN32KOBJ) $(CINCLUDES16) dev16\*.c*
 
 
