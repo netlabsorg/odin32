@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.86 2000-08-11 10:56:20 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.87 2000-08-11 18:42:55 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -430,6 +430,11 @@ BOOL WIN32API FreeLibrary(HINSTANCE hinstance)
  Win32DllBase *winmod;
  BOOL rc;
 
+    //SvL: Ignore FreeLibary for executable
+    if(WinExe && hinstance == WinExe->getInstanceHandle()) {
+	return TRUE;
+    }
+
     winmod = Win32DllBase::findModule(hinstance);
     if(winmod) {
         dprintf(("FreeLibrary %s", winmod->getName()));
@@ -697,6 +702,20 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
      *      RETURN instance handle.
      *  Endif
      */
+    if(WinExe) {
+      char  szDllName[CCHMAXPATH];
+      char *dot;
+
+        strcpy(szDllName, OSLibStripPath((char *)lpszLibFile));
+        strupr(szDllName);
+        dot = strstr(szDllName, ".");
+        if(dot)
+            *dot = 0;
+
+        if(!strcmp(szDllName, WinExe->getModuleName())) {
+		return WinExe->getInstanceHandle();
+	}
+    }
     pModule = Win32DllBase::findModule((LPSTR)lpszLibFile);
     if (pModule)
     {
@@ -1051,10 +1070,10 @@ LPCWSTR WIN32API GetCommandLineW(void)
 
     if(WinExe) {
         if(WinExe->getCommandLineW())
-        return WinExe->getCommandLineW();
+             return WinExe->getCommandLineW();
     }
     if(asciicmdline == NULL) //not used for converted exes
-      asciicmdline = O32_GetCommandLine();
+        asciicmdline = O32_GetCommandLine();
 
     if(asciicmdline) {
         UnicodeCmdLine = (WCHAR *)malloc(strlen(asciicmdline)*2 + 2);

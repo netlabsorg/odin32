@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.45 2000-08-04 21:12:05 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.46 2000-08-11 18:42:53 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -738,7 +738,7 @@ BOOL HMDuplicateHandle(HANDLE  srcprocess,
   else
     pHMHandleData->dwAccess    = fdwAccess;
 
-  if(fdwOdinOptions & DUPLICATE_ACCESS_READWRITE) {
+  if((fdwOdinOptions & DUPLICATE_ACCESS_READWRITE) == DUPLICATE_ACCESS_READWRITE) {
 	pHMHandleData->dwAccess = GENERIC_READ | GENERIC_WRITE;
   }
   else 
