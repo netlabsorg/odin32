@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.15 1999-07-17 09:18:38 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.16 1999-08-05 19:50:34 phaller Exp $ */
 
 /*
  * Win32 process functions
@@ -33,7 +33,7 @@ BOOL      fExeStarted = FALSE;
 BOOL      fFreeLibrary = FALSE;
 
 //Process database
-PDB       ProcessPDB = {0};  
+PDB       ProcessPDB = {0};
 USHORT	  ProcessTIBSel = 0;
 DWORD    *TIBFlatPtr    = 0;
 
@@ -84,7 +84,7 @@ TEB *InitializeTIB(BOOL fMainThread)
 	return NULL;
    }
    winteb = (TEB *)OS2SelToFlat(tibsel);
-   if(winteb == NULL) 
+   if(winteb == NULL)
    {
 	dprintf(("InitializeTIB: DosSelToFlat failed!!"));
 	DebugInt3();
@@ -111,7 +111,7 @@ TEB *InitializeTIB(BOOL fMainThread)
    thdb->teb_sel         = tibsel;
    thdb->OrgTIBSel       = GetFS();
 
-   if(OS2GetPIB(PIB_TASKTYPE) == TASKTYPE_PM) 
+   if(OS2GetPIB(PIB_TASKTYPE) == TASKTYPE_PM)
    {
 	thdb->flags      = 0;  //todo gui
    }
@@ -190,14 +190,15 @@ USHORT WIN32API SetWin32TIB()
 	//Restore our win32 FS selector
    	return SetReturnFS(win32tibsel);
    }
-   else DebugInt3();
+   // nested calls are OK, OS2ToWinCallback for instance
+   //else DebugInt3();
 
    return GetFS();
 }
 /******************************************************************************/
 //******************************************************************************
-void WIN32API RegisterExe(WIN32EXEENTRY EntryPoint, PIMAGE_TLS_CALLBACK *TlsCallbackAddr, 
-			  LPDWORD TlsIndexAddr, ULONG TlsInitSize, 
+void WIN32API RegisterExe(WIN32EXEENTRY EntryPoint, PIMAGE_TLS_CALLBACK *TlsCallbackAddr,
+			  LPDWORD TlsIndexAddr, ULONG TlsInitSize,
 			  ULONG TlsTotalSize, LPVOID TlsAddress,
 	         	  LONG Win32TableId, LONG NameTableId, LONG VersionResId,
                  	  LONG Pe2lxVersion, HINSTANCE hinstance, ULONG dwReserved)
@@ -246,8 +247,8 @@ void WIN32API RegisterExe(WIN32EXEENTRY EntryPoint, PIMAGE_TLS_CALLBACK *TlsCall
 }
 //******************************************************************************
 //******************************************************************************
-ULONG WIN32API RegisterDll(WIN32DLLENTRY pfnDllEntry, PIMAGE_TLS_CALLBACK *TlsCallbackAddr, 
-			   LPDWORD TlsIndexAddr, ULONG TlsInitSize, 
+ULONG WIN32API RegisterDll(WIN32DLLENTRY pfnDllEntry, PIMAGE_TLS_CALLBACK *TlsCallbackAddr,
+			   LPDWORD TlsIndexAddr, ULONG TlsInitSize,
 			   ULONG TlsTotalSize, LPVOID TlsAddress,
 	          	   LONG Win32TableId, LONG NameTableId, LONG VersionResId,
                  	   LONG Pe2lxVersion, HINSTANCE hinstance, ULONG dwAttachType)
@@ -255,7 +256,7 @@ ULONG WIN32API RegisterDll(WIN32DLLENTRY pfnDllEntry, PIMAGE_TLS_CALLBACK *TlsCa
  char *name;
 
   Win32Dll *winmod = Win32Dll::findModule(hinstance);
-  if(dwAttachType == 0) 
+  if(dwAttachType == 0)
   { //Process attach
   	if(getenv("WIN32_IOPL2")) {
     		io_init1();
