@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.189 2004-01-11 11:59:04 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.190 2004-01-11 12:12:34 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -2449,6 +2449,39 @@ FARPROC WIN32API ODIN_SetProcAddress(HMODULE hModule, LPCSTR lpszProc,
   }
   SetLastError(ERROR_INVALID_HANDLE);
   return (FARPROC)-1;
+}
+//******************************************************************************
+//******************************************************************************
+UINT WIN32API GetProcModuleFileNameA(ULONG lpvAddress, LPSTR lpszFileName, UINT cchFileNameMax)
+{
+    LPSTR lpszModuleName;
+    Win32ImageBase *image = NULL;
+    int len;
+
+    dprintf(("GetProcModuleFileNameA %x %x %d", lpvAddress, lpszFileName, cchFileNameMax));
+
+    if(WinExe && WinExe->insideModule(lpvAddress) && WinExe->insideModuleCode(lpvAddress)) {
+        image = WinExe;
+    }
+    else {
+        Win32DllBase *dll = Win32DllBase::findModuleByAddr(lpvAddress);
+        if(dll && dll->insideModuleCode(lpvAddress)) {
+            image = dll;
+        }
+    }
+    if(image == NULL) {
+        dprintf(("GetProcModuleFileNameA: address not found!!"));
+        return 0;
+    }
+    len = strlen(image->getFullPath());
+    if(len < cchFileNameMax) {
+        strcpy(lpszFileName, image->getFullPath());
+        return len+1; //??
+    }
+    else {
+        dprintf(("GetProcModuleFileNameA: destination string too small!!"));
+        return 0;
+    }
 }
 //******************************************************************************
 //******************************************************************************
