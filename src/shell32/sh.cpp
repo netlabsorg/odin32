@@ -1,4 +1,4 @@
-/* $Id: sh.cpp,v 1.2 1999-06-10 16:56:09 phaller Exp $ */
+/* $Id: sh.cpp,v 1.3 1999-06-24 09:02:08 phaller Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -304,5 +304,84 @@ LPITEMIDLIST WIN32API SHBrowseForFolder(LPBROWSEINFOA lpbi)
            lpbi));
 
   return(NULL);
+}
+
+
+
+/*****************************************************************************
+ * Name      : LPVOID SHLockShared
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.521
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1999/06/09 20:02]
+ *
+ * NOTES
+ *  parameter1 is return value from SHAllocShared
+ *  parameter2 is return value from GetCurrentProcessId
+ *  the receiver of (WM_USER+2) trys to lock the HANDLE (?)
+ *  the returnvalue seems to be a memoryadress
+ */
+LPVOID WIN32API SHLockShared(HANDLE hmem,
+                             DWORD  procID)
+{
+  dprintf(("SHELL32: SHLockShared(%08xh,%08xh).\n",
+           hmem,
+           procID));
+
+  return GlobalLock(hmem);
+}
+
+
+/*****************************************************************************
+ * Name      : LPVOID SHUnlockShared
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.522
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1999/06/09 20:02]
+ *
+ * NOTES
+ *  parameter1 is return value from SHLockShared
+ */
+
+BOOL WIN32API SHUnlockShared(HANDLE pmem)
+{
+  dprintf(("SHELL32: SHUnlockShared(%08xh)\n",
+           pmem));
+
+  return GlobalUnlock(pmem);
+}
+
+
+/*****************************************************************************
+ * Name      : LPVOID SHFreeShared
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.523
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1999/06/09 20:02]
+ *
+ * NOTES
+ *  parameter1 is return value from SHAllocShared
+ *  parameter2 is return value from GetCurrentProcessId
+ */
+HANDLE WIN32API SHFreeShared(HANDLE hmem,
+                             DWORD  procID)
+{
+  dprintf(("SHELL32: SHFreeShared(%08xh,%08xh)\n",
+           hmem,
+           procID));
+
+  return GlobalFree(hmem);
 }
 

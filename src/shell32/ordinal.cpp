@@ -1,4 +1,4 @@
-/* $Id: ordinal.cpp,v 1.1 1999-06-23 22:17:52 phaller Exp $ */
+/* $Id: ordinal.cpp,v 1.2 1999-06-24 09:02:07 phaller Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -1023,6 +1023,29 @@ DWORD WIN32API SHELL32_55(DWORD x1)
            x1));
 
   return (0);
+}
+
+
+/*****************************************************************************
+ * Name      : SetAppStartingCursor
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : SHELL32.99
+ * Status    : UNTESTED UNKNOWN STUB
+ *
+ * Author    : Patrick Haller [Tue, 1998/06/15 03:00]
+ *****************************************************************************/
+
+HRESULT WIN32API SetAppStartingCursor(HWND  u,
+                                      DWORD v)
+{
+  dprintf(("SHELL32: SetAppStartingCursor (SHELL32.99): (%08xh,%08xh) not implemented.\n",
+           u,
+           v));
+
+  return 0;
 }
 
 

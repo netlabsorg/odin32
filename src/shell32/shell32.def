@@ -1,4 +1,4 @@
-; $Id: shell32.def,v 1.7 1999-06-23 22:28:52 phaller Exp $
+; $Id: shell32.def,v 1.8 1999-06-24 09:02:08 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 ;based on Windows NT4, SP3
@@ -54,10 +54,11 @@ EXPORTS
                                  _SHELL32_77@12                     @77
 ;   DuplicateIcon              = _DuplicateIcon@?                   @78
                                  _SHELL32_79@8                      @79
-   ExtractAssociatedIconA     = _ExtractAssociatedIconA@12          @80
+    ExtractAssociatedIconA     = _ExtractAssociatedIconA@12         @80
                                  _SHELL32_85@16                     @85
                                  _SHELL32_89@12                     @89
 ;   ExtractAssociatedIconExA   = _ExtractAssociatedIconExA@?        @99
+   SetAppStartingCursor        = _SetAppStartingCursor@8            @99
                                  _SHELL32_100@4                     @100
                                  _SHELL32_102@20                    @102
                                  _SHELL32_119@4                     @119
@@ -146,6 +147,9 @@ EXPORTS
 ;   Shl1632_ThunkData32        = _Shl1632_ThunkData32@?             @249
 ;   Shl3216_ThunkData32        = _Shl3216_ThunkData32@?             @250
 
+    SHLockShared               = _SHLockShared@8                    @521
+    SHUnlockShared             = _SHUnlockShared@4                  @522
+    SHFreeShared               = _SHFreeShared@8                    @523
 
 
     ShellMessageBoxW         = _ShellMessageBoxW@24       @182
