@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.1789 2001-10-25 10:40:08 sandervl Exp $ */
+/* $Id: changelog,v 1.1790 2001-10-25 13:17:40 phaller Exp $ */
+
+ 2001-10-25: Patrick Haller <patrick.haller@innotek.de>
+    - USER32:   o fixed scancodes for [Pause] and [PrtScr]
 
  2001-10-25: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Fixed sending of WM_ACTIVATEAPP messages. Only send them

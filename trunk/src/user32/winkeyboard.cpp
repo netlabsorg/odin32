@@ -1,4 +1,4 @@
-/* $Id: winkeyboard.cpp,v 1.21 2001-10-24 13:19:00 phaller Exp $ */
+/* $Id: winkeyboard.cpp,v 1.22 2001-10-25 13:16:57 phaller Exp $ */
 /*
  * Win32 <-> PM key translation
  *
@@ -143,7 +143,7 @@ BYTE abPMScanToWinVKey[256][2] =
 /* 0x5A PMSCAN_PADENTER     */ , VK_RETURN                  ,TRUE
 /* 0x5B PMSCAN_CTRLRIGHT    */ , VK_RCONTROL                ,TRUE
 /* 0x5C PMSCAN_PADSLASH     */ , VK_DIVIDE                  ,TRUE
-/* 0x5D PMSCAN_PRINT        */ , VK_PRINT                   ,FALSE
+/* 0x5D PMSCAN_PRINT        */ , VK_PRINT                   ,TRUE
 /* 0x5E PMSCAN_ALTRIGHT     */ , VK_RMENU                   ,TRUE
 /* 0x5F PMSCAN_PAUSE        */ , VK_PAUSE                   ,FALSE
 /* 0x60 PMSCAN_HOME         */ , VK_HOME                    ,TRUE
@@ -363,7 +363,7 @@ WINVKEYTOPMSCAN abWinVKeyToPMScan[256] =
 /* 0x29 VK_SELECT         */ , 0x00                   , NULL
 /* 0x2A VK_PRINT          */ , PMSCAN_PRINT           , "Print"
 /* 0x2B VK_EXECUTE        */ , 0x00                   , NULL
-/* 0x2C VK_SNAPSHOT       */ , 0x00                   , NULL
+/* 0x2C VK_SNAPSHOT       */ , PMSCAN_PRINT           , "Print"  // NT4SP6: appears to be printscreen!
 /* 0x2D VK_INSERT         */ , PMSCAN_INSERT          , "Insert"
 /* 0x2E VK_DELETE         */ , PMSCAN_DELETE          , "Delete"
 /* 0x2F VK_HELP           */ , PMSCAN_HELP            , "Help"
@@ -628,8 +628,6 @@ BYTE abPMScanToWinScan[256][2] =
 /* 0x28 PMSCAN_QUOTESINGLE  */ , WINSCAN_QUOTESINGLE        ,FALSE
 /* 0x29 PMSCAN_GRAVE        */ , WINSCAN_GRAVE              ,FALSE
 /* 0x2A PMSCAN_SHIFTLEFT    */ , WINSCAN_SHIFTLEFT          ,FALSE
-  
-  // @@@PH not verified below
 /* 0x2B PMSCAN_BACKSLASH    */ , WINSCAN_BACKSLASH          ,FALSE
 /* 0x2C PMSCAN_Z            */ , WINSCAN_Z                  ,FALSE
 /* 0x2D PMSCAN_X            */ , WINSCAN_X                  ,FALSE
@@ -680,7 +678,7 @@ BYTE abPMScanToWinScan[256][2] =
 /* 0x5A PMSCAN_PADENTER     */ , WINSCAN_PADENTER           ,TRUE
 /* 0x5B PMSCAN_CTRLRIGHT    */ , WINSCAN_CTRLRIGHT          ,TRUE
 /* 0x5C PMSCAN_PADSLASH     */ , WINSCAN_PADSLASH           ,TRUE
-/* 0x5D PMSCAN_PRINT        */ , WINSCAN_PRINT              ,FALSE
+/* 0x5D PMSCAN_PRINT        */ , WINSCAN_PRINT              ,TRUE
 /* 0x5E PMSCAN_ALTRIGHT     */ , WINSCAN_ALTRIGHT           ,TRUE
 /* 0x5F PMSCAN_PAUSE        */ , WINSCAN_PAUSE              ,FALSE
 /* 0x60 PMSCAN_HOME         */ , WINSCAN_HOME               ,TRUE
