@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.54 2003-04-02 12:58:31 sandervl Exp $ */
+/* $Id: thread.cpp,v 1.55 2004-05-24 08:56:07 sandervl Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -14,7 +14,6 @@
 /*****************************************************************************
  * Includes                                                                  *
  *****************************************************************************/
-
 #include <odin.h>
 #include <odinwrap.h>
 #include <os2sel.h>
@@ -34,10 +33,11 @@
 #include "oslibthread.h"
 #include <handlemanager.h>
 #include <codepage.h>
+#include <heapstring.h>
 
 #include <FastInfoBlocks.h>
 
-#define DBG_LOCALLOG	DBG_thread
+#define DBG_LOCALLOG    DBG_thread
 #include "dbglocal.h"
 
 ODINDEBUGCHANNEL(KERNEL32-THREAD)
@@ -68,8 +68,8 @@ HANDLE WIN32API GetCurrentThread()
     teb = GetThreadTEB();
     if(teb == 0) {
         DebugInt3();
-    	SetLastError(ERROR_INVALID_HANDLE); //todo
-    	return 0;
+        SetLastError(ERROR_INVALID_HANDLE); //todo
+        return 0;
     }
     return teb->o.odin.hThread;
 }
@@ -204,7 +204,7 @@ VOID WIN32API ExitThread(DWORD exitcode)
 
     teb = GetThreadTEB();
     if(teb != 0) {
-	     exceptFrame = (EXCEPTION_FRAME *)teb->o.odin.exceptFrame;
+         exceptFrame = (EXCEPTION_FRAME *)teb->o.odin.exceptFrame;
     }
     else DebugInt3();
 
@@ -277,8 +277,8 @@ BOOL WIN32API SetPriorityClass(HANDLE hProcess, DWORD dwPriority)
 //******************************************************************************
 /*****************************************************************************
  * Name      : BOOL SetThreadPriorityBoost
- * Purpose   : The SetThreadPriorityBoost function disables or enables 
- *             the ability of the system to temporarily boost the priority 
+ * Purpose   : The SetThreadPriorityBoost function disables or enables
+ *             the ability of the system to temporarily boost the priority
  *             of a thread.
  * Parameters: Unknown (wrong)
  * Variables :
@@ -311,6 +311,8 @@ Win32Thread::Win32Thread(LPTHREAD_START_ROUTINE pUserCallback, LPVOID lpData, DW
         DebugInt3();
     }
 }
+
+#define MQP_INSTANCE_PERMQ              0x00000001 // from os2im.h
 //******************************************************************************
 //******************************************************************************
 DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
@@ -325,9 +327,9 @@ DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
     delete(me);    //only called once
 
     if(InitializeThread(winteb) == FALSE) {
-	    dprintf(("Win32ThreadProc: InitializeTIB failed!!"));
-	    DebugInt3();
-	    return 0;
+        dprintf(("Win32ThreadProc: InitializeTIB failed!!"));
+        DebugInt3();
+        return 0;
     }
     dprintf(("Win32ThreadProc: Thread handle 0x%x, thread id %d", GetCurrentThread(), GetCurrentThreadId()));
 
@@ -340,10 +342,14 @@ DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
     dprintf(("Thread HAB %x", winteb->o.odin.hab));
     winteb->o.odin.hmq = OSLibWinQueryMsgQueue(winteb->o.odin.hab);
     rc = OSLibWinSetCp(winteb->o.odin.hmq, GetDisplayCodepage());
-    dprintf(("WinSetCP was %sOK", rc ? "" : "not "));
+    dprintf(("WinSetCP was %sOK(%d, %d)", rc ? "" : "not "));
 
     dprintf(("Win32ThreadProc: hab %x hmq %x", winteb->o.odin.hab, winteb->o.odin.hmq));
     dprintf(("Stack top 0x%x, stack end 0x%x", winteb->stack_top, winteb->stack_low));
+
+    if( IsDBCSEnv())
+        /* IM instace is created per message queue, that is, thread */
+        OSLibImSetMsgQueueProperty( winteb->o.odin.hmq, MQP_INSTANCE_PERMQ );
 
     //Note: The Win32 exception structure referenced by FS:[0] is the same
     //      in OS/2
@@ -368,7 +374,7 @@ DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
         SetThreadAffinityMask(GetCurrentThread(), dwProcessAffinityMask);
     }
 
-    if(WinExe) WinExe->tlsAttachThread();	    //setup TLS structure of main exe
+    if(WinExe) WinExe->tlsAttachThread();       //setup TLS structure of main exe
     Win32DllBase::tlsAttachThreadToAllDlls(); //setup TLS structures of all dlls
     Win32DllBase::attachThreadToAllDlls();    //send DLL_THREAD_ATTACH message to all dlls
 
@@ -386,7 +392,7 @@ DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
         winteb->o.odin.exceptFrame = 0;
         Win32DllBase::detachThreadFromAllDlls();  //send DLL_THREAD_DETACH message to all dlls
         Win32DllBase::tlsDetachThreadFromAllDlls(); //destroy TLS structures of all dlls
-        if(WinExe) WinExe->tlsDetachThread();		  //destroy TLS structure of main exe
+        if(WinExe) WinExe->tlsDetachThread();         //destroy TLS structure of main exe
         DestroyTEB(winteb);  //destroys TIB and restores FS
         OS2UnsetExceptionHandler((void *)&exceptFrame);
     }

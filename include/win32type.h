@@ -232,18 +232,18 @@ typedef const WORD          * LPCWORD;
 
 // strings
 /* Some systems might have wchar_t, but we really need 16 bit characters */
-typedef unsigned short  WCHAR;
-#define LPTSTR  char *
-#define LPSTR   char *
-#define LPCSTR  const char *
-#define LPCTSTR const char *
-#define LPWSTR  WCHAR *
-#define PWSTR   WCHAR *
-#define LPCWSTR const WCHAR *
+typedef         unsigned short   WCHAR;
+typedef         char            *LPTSTR;
+typedef         char            *LPSTR;
+typedef const   char            *LPCSTR;
+typedef const   char            *LPCTSTR;
+typedef         WCHAR           *LPWSTR;
+typedef         WCHAR           *PWSTR;
+typedef const   WCHAR           *LPCWSTR;
 
 // handles
 #define HANDLE  ULONG
-#define PHANDLE HANDLE *
+typedef HANDLE *PHANDLE;
 #define HINSTANCE ULONG
 #define HGLOBAL DWORD
 #define HGDIOBJ DWORD
@@ -267,7 +267,7 @@ typedef HANDLE  HHOOK;
 #define HMODULE32 HMODULE
 #define HWND16  WORD
 #define HWND32  DWORD
-#define LPUINT16 WORD *
+typedef WORD *LPUINT16;
 #define HTASK16  WORD
 #define HMMIO16  WORD
 #define HTASK32  DWORD
@@ -1263,9 +1263,9 @@ typedef CONTEXT *PCONTEXT;
 #endif //__WINE_WINNT_H
 
 typedef struct _UNICODE_STRING {
-	USHORT	Length;		/* bytes */
-	USHORT	MaximumLength;	/* bytes */
-	PWSTR	Buffer;
+    USHORT  Length;     /* bytes */
+    USHORT  MaximumLength;  /* bytes */
+    PWSTR   Buffer;
 } UNICODE_STRING,*PUNICODE_STRING;
 
 typedef DWORD COLORREF, *LPCOLORREF;
@@ -1345,11 +1345,11 @@ typedef struct
 
 typedef struct
 {
-    UINT	gmBlackBoxX;
-    UINT	gmBlackBoxY;
-    POINT	gmptGlyphOrigin;
-    INT16	gmCellIncX;
-    INT16	gmCellIncY;
+    UINT    gmBlackBoxX;
+    UINT    gmBlackBoxY;
+    POINT   gmptGlyphOrigin;
+    INT16   gmCellIncX;
+    INT16   gmCellIncY;
 } GLYPHMETRICS, *LPGLYPHMETRICS;
 
 typedef struct
