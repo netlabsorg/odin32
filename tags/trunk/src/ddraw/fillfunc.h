@@ -1,4 +1,4 @@
-/* $Id: fillfunc.h,v 1.3 2002-07-01 19:15:26 sandervl Exp $ */
+/* $Id: fillfunc.h,v 1.4 2002-07-03 15:44:39 sandervl Exp $ */
 
 /*
  * Colorfill function definitions
@@ -14,7 +14,7 @@
 
 
 // without ColorConversion
-extern void __cdecl Fill8on8( char *pDBDst,
+extern void CDECL Fill8on8( char *pDBDst,
                               char *pFBDst,
                               DWORD dwDstTop,
                               DWORD dwDstLeft,
@@ -26,7 +26,7 @@ extern void __cdecl Fill8on8( char *pDBDst,
                               VOID  *pPalette
                              );
 
-extern void __cdecl Fill16on16( char *pDBDst,
+extern void CDECL Fill16on16( char *pDBDst,
                                 char *pFBDst,
                                 DWORD dwDstTop,
                                 DWORD dwDstLeft,
@@ -37,18 +37,7 @@ extern void __cdecl Fill16on16( char *pDBDst,
                                 DWORD dwColor,
                                 VOID  *pPalette
                               );
-extern void __cdecl Fill24on24( char *pDBDst,
-                                char *pFBDst,
-                                DWORD dwDstTop,
-                                DWORD dwDstLeft,
-                                DWORD dwWidth,
-                                DWORD dwHeight,
-                                DWORD dwPitchDBDst,
-                                DWORD dwPitchFBDst,
-                                DWORD dwColor,
-                                VOID  *pPalette
-                               );
-extern void __cdecl Fill32on32( char *pDBDst,
+extern void CDECL Fill24on24( char *pDBDst,
                                 char *pFBDst,
                                 DWORD dwDstTop,
                                 DWORD dwDstLeft,
@@ -59,8 +48,19 @@ extern void __cdecl Fill32on32( char *pDBDst,
                                 DWORD dwColor,
                                 VOID  *pPalette
                                );
+extern void CDECL Fill32on32( char *pDBDst,
+                                char *pFBDst,
+                                DWORD dwDstTop,
+                                DWORD dwDstLeft,
+                                DWORD dwWidth,
+                                DWORD dwHeight,
+                                DWORD dwPitchDBDst,
+                                DWORD dwPitchFBDst,
+                                DWORD dwColor,
+                                VOID  *pPalette
+                               );
 
-extern void __cdecl Fill8on16( char *pDBDst,
+extern void CDECL Fill8on16( char *pDBDst,
                                char *pFBDst,
                                DWORD dwDstTop,
                                DWORD dwDstLeft,
@@ -72,7 +72,7 @@ extern void __cdecl Fill8on16( char *pDBDst,
                                VOID  *pPalette
                               );
 
-extern void __cdecl Fill8on24( char *pDBDst,
+extern void CDECL Fill8on24( char *pDBDst,
                                char *pFBDst,
                                DWORD dwDstTop,
                                DWORD dwDstLeft,
@@ -84,7 +84,7 @@ extern void __cdecl Fill8on24( char *pDBDst,
                                VOID  *pPalette
                               );
 
-extern void __cdecl Fill8on32( char *pDBDst,
+extern void CDECL Fill8on32( char *pDBDst,
                                char *pFBDst,
                                DWORD dwDstTop,
                                DWORD dwDstLeft,
@@ -96,7 +96,7 @@ extern void __cdecl Fill8on32( char *pDBDst,
                                VOID  *pPalette
                               );
 
-extern void __cdecl Fill16on8( char *pDBDst,
+extern void CDECL Fill16on8( char *pDBDst,
                                char *pFBDst,
                                DWORD dwDstTop,
                                DWORD dwDstLeft,
@@ -108,7 +108,7 @@ extern void __cdecl Fill16on8( char *pDBDst,
                                VOID  *pPalette
                               );
 
-extern void __cdecl Fill16on24( char *pDBDst,
+extern void CDECL Fill16on24( char *pDBDst,
                                 char *pFBDst,
                                 DWORD dwDstTop,
                                 DWORD dwDstLeft,
@@ -120,7 +120,7 @@ extern void __cdecl Fill16on24( char *pDBDst,
                                 VOID  *pPalette
                               );
 
-extern void __cdecl Fill16on32( char *pDBDst,
+extern void CDECL Fill16on32( char *pDBDst,
                                char *pFBDst,
                                DWORD dwDstTop,
                                DWORD dwDstLeft,
@@ -132,7 +132,7 @@ extern void __cdecl Fill16on32( char *pDBDst,
                                VOID  *pPalette
                               );
 
-extern void __cdecl Fill24on8( char *pDBDst,
+extern void CDECL Fill24on8( char *pDBDst,
                                char *pFBDst,
                                DWORD dwDstTop,
                                DWORD dwDstLeft,
@@ -144,7 +144,7 @@ extern void __cdecl Fill24on8( char *pDBDst,
                                VOID  *pPalette
                               );
 
-extern void __cdecl Fill24on16( char *pDBDst,
+extern void CDECL Fill24on16( char *pDBDst,
                                 char *pFBDst,
                                 DWORD dwDstTop,
                                 DWORD dwDstLeft,
@@ -156,7 +156,7 @@ extern void __cdecl Fill24on16( char *pDBDst,
                                 VOID  *pPalette
                               );
 
-extern void __cdecl Fill24on32( char *pDBDst,
+extern void CDECL Fill24on32( char *pDBDst,
                                char *pFBDst,
                                DWORD dwDstTop,
                                DWORD dwDstLeft,
@@ -168,7 +168,7 @@ extern void __cdecl Fill24on32( char *pDBDst,
                                VOID  *pPalette
                               );
 
-extern void __cdecl Fill32on8( char *pDBDst,
+extern void CDECL Fill32on8( char *pDBDst,
                                char *pFBDst,
                                DWORD dwDstTop,
                                DWORD dwDstLeft,
@@ -180,7 +180,7 @@ extern void __cdecl Fill32on8( char *pDBDst,
                                VOID  *pPalette
                               );
 
-extern void __cdecl Fill32on16( char *pDBDst,
+extern void CDECL Fill32on16( char *pDBDst,
                                 char *pFBDst,
                                 DWORD dwDstTop,
                                 DWORD dwDstLeft,
@@ -192,7 +192,7 @@ extern void __cdecl Fill32on16( char *pDBDst,
                                 VOID  *pPalette
                               );
 
-extern void __cdecl Fill32on24( char *pDBDst,
+extern void CDECL Fill32on24( char *pDBDst,
                                char *pFBDst,
                                DWORD dwDstTop,
                                DWORD dwDstLeft,

@@ -1,4 +1,4 @@
-/* $Id: fillfunc.cpp,v 1.7 2002-07-02 09:55:13 sandervl Exp $ */
+/* $Id: fillfunc.cpp,v 1.8 2002-07-03 15:44:39 sandervl Exp $ */
 
 /*
  * ColorFill functions
@@ -15,181 +15,133 @@
 #include <memory.h>
 #include <misc.h>
 #include "fillfunc.h"
+#include "asmutil.h"
 
 //
 // Blt Functions
 //
 
-#ifndef USE_ASM
-void __cdecl Fill8( char* pDst,
-                    DWORD dwWidth,
-                    DWORD dwHeight,
-                    DWORD dwPitch,
-                    DWORD dwColor)
+//*****************************************************************************
+//*****************************************************************************
+void CDECL Fill8(char* pDst, DWORD dwWidth, DWORD dwHeight, DWORD dwPitch, DWORD dwColor)
 {
-  DWORD *pColor;
-  char  *pFillPos;
-  int i;
-  dprintf(("DDRAW:Fill8 with %08X\n",dwColor));
+    DWORD *pColor;
+    char  *pFillPos;
+    
+    dprintf(("DDRAW:Fill8 %x (%d,%d) %d with %x \n", pDst, dwWidth, dwHeight, dwPitch, dwColor));
 
-  // First Fill First row with the color
-
-  for( i=0,pColor = (DWORD*)pDst;i<(dwWidth/4);i++)
-    pColor[i] = dwColor;
-
-  if(dwWidth % 4)
-  {
-    if(i==0) i = 1;	//or else next line will corrupt heap
-    pFillPos = (char*) (&pColor[i-1]);
-    for(i=0;i<dwWidth % 4;i++)
-      pFillPos[i] = (UCHAR) dwColor;
-  }
-
-  dwHeight--;
-
-  if(dwWidth == dwPitch)
-  {
-    // Width = Pitch => fill buffer so no need to take care of lines
-    memcpy(pDst+dwPitch, pDst, dwWidth*dwHeight);
-  }
-  else
-  {
-    pFillPos = pDst+dwPitch;
-    while(dwHeight)
+    if(dwWidth == dwPitch)
     {
-      memcpy(pFillPos,pDst,dwWidth);
-      pFillPos += dwPitch;
-      dwHeight--;
+        // Width = Pitch => fill buffer so no need to take care of lines
+        memset(pDst, dwColor, dwWidth*dwHeight);
     }
+    else
+    {
+        pFillPos = pDst;
+
+        while(dwHeight)
+        {
+            memset(pFillPos, dwColor, dwWidth);
+            pFillPos += dwPitch;
+            dwHeight--;
+        }
+    }
+}
+//*****************************************************************************
+//*****************************************************************************
+void CDECL Fill16(char* pDst, DWORD dwWidth, DWORD dwHeight, DWORD dwPitch, DWORD dwColor)
+{
+    DWORD *pColor;
+    char  *pFillPos;
+    
+    dprintf(("DDRAW:Fill16 %x (%d,%d) %d with %x \n", pDst, dwWidth, dwHeight, dwPitch, dwColor));
+
+    dwWidth *=2;
+
+    if(dwWidth == dwPitch)
+    {
+        // Width = Pitch => fill buffer so no need to take care of lines
+        ddmemfill16(pDst, dwColor, dwWidth*dwHeight);
+    }
+    else
+    {
+        pFillPos = pDst;
+
+        while(dwHeight)
+        {
+            ddmemfill16(pFillPos, dwColor, dwWidth);
+            pFillPos += dwPitch;
+            dwHeight--;
+        }
+    }
+}
+//*****************************************************************************
+//*****************************************************************************
+void CDECL Fill24(char* pDst, DWORD dwWidth, DWORD dwHeight, DWORD dwPitch, DWORD dwColor)
+{
+    DWORD *pColor;
+    char  *pFillPos;
+    int i;
+
+    dprintf(("DDRAW:Fill24 %x (%d,%d) %d with %x \n", pDst, dwWidth, dwHeight, dwPitch, dwColor));
+
+    // First Fill First row with the color
+
+    for(i=0 ; i<dwWidth ; i++)
+    {
+        pColor = (DWORD*)(pDst+(i*3));
+        *pColor = dwColor;
+    }
+    dwWidth *=3;
+    dwHeight--;
+
+    if(dwWidth == dwPitch)
+    {
+        // Width = Pitch => fill buffer so no need to take care of lines
+        memcpy(pDst+dwPitch, pDst, dwWidth*dwHeight);
+    }
+    else
+    {
+        pFillPos = pDst+dwPitch;
+        while(dwHeight)
+        {
+            memcpy(pFillPos,pDst,dwWidth);
+            pFillPos += dwPitch;
+            dwHeight--;
+        }
+    }
+}
+//*****************************************************************************
+//*****************************************************************************
+void CDECL Fill32(char* pDst, DWORD dwWidth, DWORD dwHeight, DWORD dwPitch, DWORD dwColor)
+{
+    DWORD *pColor;
+    char  *pFillPos;
+    
+    dprintf(("DDRAW:Fill32 %x (%d,%d) %d with %x \n", pDst, dwWidth, dwHeight, dwPitch, dwColor));
+
+    dwWidth *= 4;
+
+    if(dwWidth == dwPitch)
+    {
+        // Width = Pitch => fill buffer so no need to take care of lines
+        ddmemfill32(pDst, dwColor, dwWidth*dwHeight);
+    }
+    else
+    {
+        pFillPos = pDst;
+
+        while(dwHeight)
+        {
+            ddmemfill32(pFillPos, dwColor, dwWidth);
+            pFillPos += dwPitch;
+            dwHeight--;
+        }
   }
 }
-void __cdecl Fill16( char* pDst,
-                     DWORD dwWidth,
-                     DWORD dwHeight,
-                     DWORD dwPitch,
-                     DWORD dwColor)
-{
-  DWORD *pColor;
-  char  *pFillPos;
-  int i;
-  dprintf(("DDRAW:Fill16 with %08X \n",dwColor));
-
-  // First Fill First row with the color
-
-  for( i=0,pColor = (DWORD*)pDst;i<(dwWidth/2);i++)
-    pColor[i] = dwColor;
-
-  if(dwWidth % 2)
-  {
-     if(i==0) i = 1;	//or else next line will corrupt heap
-     pFillPos = (char*)(&pColor[i-1]);
-    *((USHORT*)pFillPos) = (USHORT)dwColor;
-  }
-
-  dwWidth *=2;
-  dwHeight--;
-
-  if(dwWidth == dwPitch)
-  {
-    // Width = Pitch => fill buffer so no need to take care of lines
-    memcpy(pDst+dwPitch, pDst, dwWidth*dwHeight);
-  }
-  else
-  {
-    pFillPos = pDst+dwPitch;
-    while(dwHeight)
-    {
-      memcpy(pFillPos,pDst,dwWidth);
-      pFillPos += dwPitch;
-      dwHeight--;
-    }
-  }
-}
-void __cdecl Fill24( char* pDst,
-                     DWORD dwWidth,
-                     DWORD dwHeight,
-                     DWORD dwPitch,
-                     DWORD dwColor)
-{
-  DWORD *pColor;
-  char  *pFillPos;
-  int i;
-  dprintf(("DDRAW:Fill24 with %08X \n",dwColor));
-
-  // First Fill First row with the color
-
-  for(i=0 ; i<dwWidth ; i++)
-  {
-    pColor = (DWORD*)(pDst+(i*3));
-    *pColor = dwColor;
-  }
-  dwWidth *=3;
-  dwHeight--;
-
-  if(dwWidth == dwPitch)
-  {
-    // Width = Pitch => fill buffer so no need to take care of lines
-    memcpy(pDst+dwPitch, pDst, dwWidth*dwHeight);
-  }
-  else
-  {
-    pFillPos = pDst+dwPitch;
-    while(dwHeight)
-    {
-      memcpy(pFillPos,pDst,dwWidth);
-      pFillPos += dwPitch;
-      dwHeight--;
-    }
-  }
-}
-
-void __cdecl Fill32( char* pDst,
-                     DWORD dwWidth,
-                     DWORD dwHeight,
-                     DWORD dwPitch,
-                     DWORD dwColor)
-{
-  DWORD *pColor;
-  char  *pFillPos;
-  int i;
-  dprintf(("DDRAW:Fill24 with %08X \n",dwColor));
-
-  // First Fill First row with the color
-
-  for(i=0 ; i<dwWidth ; i++)
-  {
-    pColor[i] = dwColor;
-  }
-  dwWidth *=4;
-  dwHeight--;
-
-  if(dwWidth == dwPitch)
-  {
-    // Width = Pitch => fill buffer so no need to take care of lines
-    memcpy(pDst+dwPitch, pDst, dwWidth*dwHeight);
-  }
-  else
-  {
-    pFillPos = pDst+dwPitch;
-    while(dwHeight)
-    {
-      memcpy(pFillPos,pDst,dwWidth);
-      pFillPos += dwPitch;
-      dwHeight--;
-    }
-  }
-}
-#else
-  #define Fill8  Fill8ASM
-  #define Fill16 Fill16ASM
-  #define Fill24 Fill24ASM
-  #define Fill32 Fill32ASM
-#endif
-
-
-
-// without ColorConversion
- void __cdecl Fill8on8( char *pDB,
+//*****************************************************************************
+//*****************************************************************************
+void CDECL Fill8on8( char *pDB,
                         char *pFB,
                         DWORD dwTop,
                         DWORD dwLeft,
@@ -211,7 +163,9 @@ void __cdecl Fill32( char* pDst,
          dwPitchDB,
          dwColor);
 }
- void __cdecl Fill16on16( char *pDB,
+//*****************************************************************************
+//*****************************************************************************
+void CDECL Fill16on16( char *pDB,
                           char *pFB,
                           DWORD dwTop,
                           DWORD dwLeft,
@@ -233,7 +187,9 @@ void __cdecl Fill32( char* pDst,
           dwPitchDB,
           dwColor);
 }
- void __cdecl Fill24on24( char *pDB,
+//*****************************************************************************
+//*****************************************************************************
+void CDECL Fill24on24( char *pDB,
                           char *pFB,
                           DWORD dwTop,
                           DWORD dwLeft,
@@ -255,7 +211,9 @@ void __cdecl Fill32( char* pDst,
           dwColor);
 
 }
- void __cdecl Fill32on32( char *pDB,
+//*****************************************************************************
+//*****************************************************************************
+void CDECL Fill32on32( char *pDB,
                           char *pFB,
                           DWORD dwTop,
                           DWORD dwLeft,
@@ -274,8 +232,9 @@ void __cdecl Fill32( char* pDst,
           dwPitchDB,
           dwColor);
 }
-
- void __cdecl Fill8on16( char *pDB,
+//*****************************************************************************
+//*****************************************************************************
+void CDECL Fill8on16( char *pDB,
                          char *pFB,
                          DWORD dwTop,
                          DWORD dwLeft,
@@ -306,8 +265,9 @@ void __cdecl Fill32( char* pDst,
           dwPitchDB,
           dwCol);
 }
-
- void __cdecl Fill8on24( char *pDB,
+//*****************************************************************************
+//*****************************************************************************
+void CDECL Fill8on24( char *pDB,
                          char *pFB,
                          DWORD dwTop,
                          DWORD dwLeft,
@@ -338,7 +298,9 @@ void __cdecl Fill32( char* pDst,
           dwPitchDB,
           dwCol);
 }
- void __cdecl Fill8on32( char *pDB,
+//*****************************************************************************
+//*****************************************************************************
+void CDECL Fill8on32( char *pDB,
                          char *pFB,
                          DWORD dwTop,
                          DWORD dwLeft,
@@ -368,7 +330,9 @@ void __cdecl Fill32( char* pDst,
           dwPitchDB,
           dwCol);
 }
- void __cdecl Fill16on8( char *pDB,
+//*****************************************************************************
+//*****************************************************************************
+void CDECL Fill16on8( char *pDB,
                          char *pFB,
                          DWORD dwTop,
                          DWORD dwLeft,
@@ -380,9 +344,12 @@ void __cdecl Fill32( char* pDst,
                          VOID  *pPalette
                         )
 {
-  dprintf(("Fill16on8 NOT Implemented \n"));
+    dprintf(("Fill16on8 NOT Implemented \n"));
+    DebugInt3();
 }
- void __cdecl Fill16on24( char *pDB,
+//*****************************************************************************
+//*****************************************************************************
+void CDECL Fill16on24( char *pDB,
                           char *pFB,
                           DWORD dwTop,
                           DWORD dwLeft,
@@ -413,7 +380,9 @@ void __cdecl Fill32( char* pDst,
           dwPitchDB,
           dwCol);
 }
- void __cdecl Fill16on32( char *pDB,
+//*****************************************************************************
+//*****************************************************************************
+void CDECL Fill16on32( char *pDB,
                           char *pFB,
                           DWORD dwTop,
                           DWORD dwLeft,
@@ -444,8 +413,9 @@ void __cdecl Fill32( char* pDst,
           dwPitchDB,
           dwCol);
 }
-
- void __cdecl Fill24on8( char *pDB,
+//*****************************************************************************
+//*****************************************************************************
+void CDECL Fill24on8( char *pDB,
                          char *pFB,
                          DWORD dwTop,
                          DWORD dwLeft,
@@ -457,9 +427,12 @@ void __cdecl Fill32( char* pDst,
                          VOID  *pPalette
                         )
 {
-  dprintf(("Fill24on8 NOT implemented\n"));
+    dprintf(("Fill24on8 NOT implemented\n"));
+    DebugInt3();
 }
- void __cdecl Fill24on16( char *pDB,
+//*****************************************************************************
+//*****************************************************************************
+void CDECL Fill24on16( char *pDB,
                           char *pFB,
                           DWORD dwTop,
                           DWORD dwLeft,
@@ -492,7 +465,9 @@ void __cdecl Fill32( char* pDst,
           dwPitchDB,
           dwCol);
 }
- void __cdecl Fill24on32( char *pDB,
+//*****************************************************************************
+//*****************************************************************************
+void CDECL Fill24on32( char *pDB,
                           char *pFB,
                           DWORD dwTop,
                           DWORD dwLeft,
@@ -518,7 +493,9 @@ void __cdecl Fill32( char* pDst,
           dwPitchDB,
           dwColor);
 }
- void __cdecl Fill32on8( char *pDB,
+//*****************************************************************************
+//*****************************************************************************
+void CDECL Fill32on8( char *pDB,
                          char *pFB,
                          DWORD dwTop,
                          DWORD dwLeft,
@@ -530,9 +507,12 @@ void __cdecl Fill32( char* pDst,
                          VOID  *pPalette
                         )
 {
-  dprintf(("Fill32on8 NOT implemented\n"));
+    dprintf(("Fill32on8 NOT implemented\n"));
+    DebugInt3();
 }
- void __cdecl Fill32on16( char *pDB,
+//*****************************************************************************
+//*****************************************************************************
+void CDECL Fill32on16( char *pDB,
                           char *pFB,
                           DWORD dwTop,
                           DWORD dwLeft,
@@ -564,7 +544,9 @@ void __cdecl Fill32( char* pDst,
           dwPitchDB,
           dwCol);
 }
- void __cdecl Fill32on24( char *pDB,
+//*****************************************************************************
+//*****************************************************************************
+void CDECL Fill32on24( char *pDB,
                           char *pFB,
                           DWORD dwTop,
                           DWORD dwLeft,
@@ -589,4 +571,6 @@ void __cdecl Fill32( char* pDst,
           dwPitchDB,
           dwColor);
 }
+//*****************************************************************************
+//*****************************************************************************
 
