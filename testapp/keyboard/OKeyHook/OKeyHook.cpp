@@ -1,6 +1,7 @@
 	// OKeyHook.cpp : Defines the entry point for the DLL application.
 //
 
+#include "stdafx.h"
 #include "OKeyHook.h"
 
 
@@ -139,15 +140,19 @@ LRESULT CALLBACK hook_Standard(int nCode, WPARAM wParam, LPARAM lParam)
 	// get the extra info
 	DWORD dwExtra = GetMessageExtraInfo();
 
-	// log the message
+	// get the key's name
+	CHAR szBufKey[40];
+	GetKeyNameText(lParam, szBufKey, sizeof(szBufKey));
+	
 	// log the message
 	CHAR szBuf[512];
 	wsprintf(szBuf, 
-		"nCode=%08xh, wParam=%08xh, lParam=%08xh, extra=%08xh",
+		"nCode=%08xh, wParam=%08xh, lParam=%08xh, extra=%08xh, name=%s",
 		nCode,
 		wParam,
 		lParam,
-		dwExtra);
+		dwExtra,
+		szBufKey);
 
     pfnLogString("KeyHook", szBuf);
 

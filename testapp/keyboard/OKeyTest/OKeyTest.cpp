@@ -244,12 +244,17 @@ OKEYTEST_EXPORT void logMessage(LPSTR lpstrOrigin, HWND hwnd, UINT msg, WPARAM w
 		case WM_SYSKEYDOWN:	pszMsg = "WM_SYSKEYDOWN"; break;
 		default: pszMsg = "unknown"; break;
 	}
+
+	// get key name
+	CHAR szBufKey[40];
+	GetKeyNameText(lParam, szBufKey, sizeof(szBufKey));
 	
-	wsprintf(szBuf, "%08xh %16s (%08xh, %08xh)",
+	wsprintf(szBuf, "%08xh %16s (%08xh, %08xh) name=[%s]",
 		hwnd,
 		pszMsg,
 		wParam,
-		lParam);
+		lParam,
+		szBufKey);
 
 	logString(lpstrOrigin, szBuf);
 }
