@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2638 2003-10-22 12:41:56 sandervl Exp $ */
+/* $Id: changelog,v 1.2639 2003-10-24 12:48:53 sandervl Exp $ */
+
+ 2003-10-24: Sander van Leeuwen <sandervl@innotek   >
+    - SHLWAPI:  o Removed wrong debug wrappers for forwarders
 
  2003-10-22: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Use WC_FRAME for the Odin frame window and subclass it. There's
