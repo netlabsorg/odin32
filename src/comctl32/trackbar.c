@@ -1,4 +1,4 @@
-/* $Id: trackbar.c,v 1.12 1999-08-14 16:13:15 cbratschi Exp $ */
+/* $Id: trackbar.c,v 1.13 1999-08-17 21:13:57 cbratschi Exp $ */
 /*
  * Trackbar control
  *
@@ -11,8 +11,7 @@
  * TODO:
  *
  *   - more notifications. (CB: should be complete)
- *   - TRACKBAR_UpdateThumb, TRACKBAR_UpdateThumbPosition:
- *     use a memory dc to avoid flickering by short movements
+ *   - Status: ready to use
  */
 
 #include "winbase.h"
@@ -21,7 +20,7 @@
 #include <stdio.h>
 
 
-#define TRACKBAR_GetInfoPtr(wndPtr) ((TRACKBAR_INFO *)GetWindowLongA (hwnd,0))
+#define TRACKBAR_GetInfoPtr(hwnd) ((TRACKBAR_INFO*)GetWindowLongA(hwnd,0))
 
 
 /* Used by TRACKBAR_Draw to find out which parts of the control
@@ -729,13 +728,14 @@ static VOID TRACKBAR_Draw(HWND hwnd,HDC hdc)
 
 //update thumb position
 
-static VOID TRACKBAR_UpdateThumbPosition(HWND hwnd,INT lastPos)
+static VOID TRACKBAR_UpdateThumbPosition(HWND hwnd,INT lastPos,BOOL mustRedraw)
 {
    HDC hdc;
    TRACKBAR_INFO *infoPtr = TRACKBAR_GetInfoPtr(hwnd);
    DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
-   RECT lastRect,newRect;
-   HRGN hrgn,hrgnLast,hrgnNew;
+   RECT lastRect,newRect,windowRect;
+   HDC hdcCompatible;
+   HBITMAP bitmap,oldbmp;
 
    //last
    lastRect = infoPtr->rcFullThumb;
@@ -754,6 +754,8 @@ static VOID TRACKBAR_UpdateThumbPosition(HWND hwnd,INT lastPos)
    infoPtr->flags &= ~TB_THUMBCHANGED;
    newRect = infoPtr->rcFullThumb;
 
+   //same rect?
+   if (!mustRedraw && EqualRect(&lastRect,&newRect)) return;
 
    //3D frame adjustation
    lastRect.right++;
@@ -761,17 +763,39 @@ static VOID TRACKBAR_UpdateThumbPosition(HWND hwnd,INT lastPos)
    newRect.right++;
    newRect.bottom++;
 
+   //BitBlt from memory -> no flickering
+   GetClientRect(hwnd,&windowRect);
    hdc = GetDC(hwnd);
-   hrgnLast = CreateRectRgnIndirect(&lastRect);
-   hrgnNew = CreateRectRgnIndirect(&newRect);
-   hrgn = CreateRectRgn(0,0,0,0);
-   CombineRgn(hrgn,hrgnLast,hrgnNew,RGN_OR);
-   SelectClipRgn(hdc,hrgn);
-   TRACKBAR_Draw(hwnd,hdc);
-   SelectClipRgn(hdc,0);
-   DeleteObject(hrgnLast);
-   DeleteObject(hrgnNew);
-   DeleteObject(hrgn);
+   hdcCompatible = CreateCompatibleDC(hdc);
+   bitmap = CreateCompatibleBitmap(hdc,windowRect.right,windowRect.bottom);
+   oldbmp = SelectObject(hdcCompatible,bitmap);
+   TRACKBAR_Draw(hwnd,hdcCompatible);
+   if (dwStyle & TBS_VERT)
+   {
+     if (lastRect.top > newRect.top && lastRect.top < newRect.bottom)
+       BitBlt(hdc,newRect.left,newRect.top,newRect.right-newRect.left,lastRect.bottom-newRect.top,hdcCompatible,newRect.left,newRect.top,SRCCOPY);
+     else if (lastRect.bottom < newRect.bottom && lastRect.bottom > newRect.top)
+       BitBlt(hdc,lastRect.left,lastRect.top,lastRect.right-lastRect.left,newRect.bottom-lastRect.top,hdcCompatible,lastRect.left,lastRect.top,SRCCOPY);
+     else
+     {
+       BitBlt(hdc,lastRect.left,lastRect.top,lastRect.right-lastRect.left,lastRect.bottom-lastRect.top,hdcCompatible,lastRect.left,lastRect.top,SRCCOPY);
+       BitBlt(hdc,newRect.left,newRect.top,newRect.right-newRect.left,newRect.bottom-newRect.top,hdcCompatible,newRect.left,newRect.top,SRCCOPY);
+     }
+   } else
+   {
+     if (lastRect.right > newRect.left && lastRect.right < newRect.right)
+       BitBlt(hdc,lastRect.left,lastRect.top,newRect.right-lastRect.left,lastRect.bottom-lastRect.top,hdcCompatible,lastRect.left,lastRect.top,SRCCOPY);
+     else if (lastRect.left < newRect.right && lastRect.left > newRect.left)
+       BitBlt(hdc,newRect.left,newRect.top,lastRect.right-newRect.left,newRect.bottom-newRect.top,hdcCompatible,newRect.left,newRect.top,SRCCOPY);
+     else
+     {
+       BitBlt(hdc,lastRect.left,lastRect.top,lastRect.right-lastRect.left,lastRect.bottom-lastRect.top,hdcCompatible,lastRect.left,lastRect.top,SRCCOPY);
+       BitBlt(hdc,newRect.left,newRect.top,newRect.right-newRect.left,newRect.bottom-newRect.top,hdcCompatible,newRect.left,newRect.top,SRCCOPY);
+     }
+   }
+   SelectObject(hdcCompatible,oldbmp);
+   DeleteObject(bitmap);
+   DeleteDC(hdcCompatible);
    ReleaseDC(hwnd,hdc);
 }
 
@@ -1142,7 +1166,7 @@ TRACKBAR_SetPos (HWND hwnd, WPARAM wParam, LPARAM lParam)
         infoPtr->nPos = infoPtr->nRangeMax;
     infoPtr->flags |= TB_THUMBPOSCHANGED;
 
-    if (wParam) TRACKBAR_UpdateThumbPosition(hwnd,lastPos);
+    if (wParam) TRACKBAR_UpdateThumbPosition(hwnd,lastPos,FALSE);
 
     return 0;
 }
@@ -1694,7 +1718,7 @@ TRACKBAR_LButtonDown (HWND hwnd, WPARAM wParam, LPARAM lParam)
     if (prevPos != infoPtr->nPos)
     {
       infoPtr->flags |= TB_THUMBPOSCHANGED;
-      TRACKBAR_UpdateThumbPosition(hwnd,prevPos);
+      TRACKBAR_UpdateThumbPosition(hwnd,prevPos,TRUE);
     }
 
     //ScrollMode
@@ -1780,7 +1804,7 @@ static LRESULT TRACKBAR_Timer(HWND hwnd,WPARAM wParam,LPARAM lParam)
     if (prevPos != infoPtr->nPos)
     {
       infoPtr->flags |= TB_THUMBPOSCHANGED;
-      TRACKBAR_UpdateThumbPosition(hwnd,prevPos);
+      TRACKBAR_UpdateThumbPosition(hwnd,prevPos,FALSE);
     }
 
   return 0;
@@ -1795,7 +1819,7 @@ TRACKBAR_CaptureChanged (HWND hwnd, WPARAM wParam, LPARAM lParam)
     {
       int lastPos = infoPtr->nPos;
       infoPtr->nPos = infoPtr->dragPos;
-      if (lastPos != infoPtr->nPos) TRACKBAR_UpdateThumbPosition(hwnd,lastPos);
+      if (lastPos != infoPtr->nPos) TRACKBAR_UpdateThumbPosition(hwnd,lastPos,TRUE);
     }
 
     infoPtr->flags &= ~ TB_DRAGPOSVALID;
@@ -1918,7 +1942,7 @@ TRACKBAR_MouseMove (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     infoPtr->flags |= TB_DRAGPOSVALID;
 
-    TRACKBAR_UpdateThumbPosition(hwnd,infoPtr->nPos); //infoPtr->nPos now set
+    TRACKBAR_UpdateThumbPosition(hwnd,infoPtr->nPos,FALSE); //infoPtr->nPos now set
 
     TRACKBAR_SendNotify(hwnd,TB_THUMBTRACK | (infoPtr->nPos >> 16));
 
@@ -2002,7 +2026,7 @@ TRACKBAR_KeyDown (HWND hwnd, WPARAM wParam, LPARAM lParam)
     if (pos != infoPtr->nPos)
     {
       infoPtr->flags |= TB_THUMBPOSCHANGED;
-      TRACKBAR_UpdateThumbPosition(hwnd,pos);
+      TRACKBAR_UpdateThumbPosition(hwnd,pos,FALSE);
     }
 
     return TRUE;
