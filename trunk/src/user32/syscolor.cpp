@@ -1,4 +1,4 @@
-/* $Id: syscolor.cpp,v 1.20 2000-02-23 17:05:16 cbratschi Exp $ */
+/* $Id: syscolor.cpp,v 1.21 2000-05-12 18:09:41 sandervl Exp $ */
 
 /*
  * Win32 system color API functions for OS/2
@@ -228,7 +228,8 @@ BOOL WIN32API SetSysColors(INT nChanges, const INT *lpSysColor,
         SYSCOLOR_SetColor(lpSysColor[i], lpColorValues[i]);
     }
 
-    return SetSysColors(nChanges, lpSysColor, lpColorValues);
+//SvL: ???
+////////    return SetSysColors(nChanges, lpSysColor, lpColorValues);
 
     /* Send WM_SYSCOLORCHANGE message to all windows */
 

@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.52 2000-04-29 18:28:38 sandervl Exp $ */
+/* $Id: pmframe.cpp,v 1.53 2000-05-12 18:09:41 sandervl Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -228,10 +228,11 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
     case WM_PAINT:
     {
         dprintf(("PMFRAME: WM_PAINT"));
-        if (win32wnd->getStyle() & WS_MINIMIZE_W)
-         goto RunDefFrameProc;
-        if (win32wnd->IsWindowCreated())
-          win32wnd->MsgNCPaint();
+        if(win32wnd->getStyle() & WS_MINIMIZE_W)
+         	goto RunDefFrameProc;
+        if(win32wnd->IsWindowCreated())
+          	win32wnd->MsgNCPaint();
+
         goto RunDefWndProc;
     }
 
@@ -443,7 +444,11 @@ PosChangedEnd:
         break;
 
     case WM_ERASEBACKGROUND:
-        break;
+    {
+        dprintf(("PMFRAME: WM_ERASEBACKGROUND %x", win32wnd->getWindowHandle()));
+        RestoreOS2TIB();
+        return (MRESULT)FALSE;
+    }
 
     case WM_CALCVALIDRECTS:
     {

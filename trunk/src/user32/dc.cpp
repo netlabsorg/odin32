@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.56 2000-05-03 20:59:41 achimha Exp $ */
+/* $Id: dc.cpp,v 1.57 2000-05-12 18:09:39 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -1125,8 +1125,9 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
    if (redraw & RDW_INVALIDATE_W)
    {
         //TODO: SvL: pingpong.exe doesn't have RDW_NOERASE, but doesn't want WM_ERASEBKGND msgs
-        if (redraw & RDW_ERASE_W)
-            wnd->setEraseBkgnd (TRUE);
+        if (redraw & RDW_ERASE_W) {
+             wnd->setEraseBkgnd(TRUE);
+        }
 
         if (!pRect && !hrgn)
             success = WinInvalidateRect (hwnd, NULL, IncludeChildren);
@@ -1211,6 +1212,10 @@ BOOL WIN32API InvalidateRect (HWND hwnd, const RECT *pRect, BOOL erase)
 {
    BOOL result;
 
+   if(pRect) {
+   	dprintf(("InvalidateRect %x (%d,%d)(%d,%d) erase=%d", hwnd, pRect->left, pRect->top, pRect->right, pRect->bottom, erase));
+   }
+   else dprintf(("InvalidateRect %x NULL erase=%d", hwnd, erase));
    result = RedrawWindow (hwnd, pRect, NULLHANDLE,
                           RDW_ALLCHILDREN_W | RDW_INVALIDATE_W |
                           (erase ? RDW_ERASE_W : 0) |
@@ -1223,6 +1228,7 @@ BOOL WIN32API InvalidateRgn (HWND hwnd, HRGN hrgn, BOOL erase)
 {
    BOOL result;
 
+   dprintf(("InvalidateRgn %x %x erase=%d", hwnd, hrgn, erase));
    result = RedrawWindow (hwnd, NULL, hrgn,
                           RDW_ALLCHILDREN_W | RDW_INVALIDATE_W |
                           (erase ? RDW_ERASE_W : 0) |
