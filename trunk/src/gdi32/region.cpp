@@ -1,4 +1,4 @@
-/* $Id: region.cpp,v 1.19 2000-12-29 18:40:44 sandervl Exp $ */
+/* $Id: region.cpp,v 1.20 2001-04-27 17:37:23 sandervl Exp $ */
 
 /*
  * GDI32 region code
@@ -357,12 +357,16 @@ BOOL WIN32API setWinDeviceRegionFromPMDeviceRegion(HRGN winHrgn, HRGN pmHrgn, pD
    return success;
 }
 //******************************************************************************
+int WIN32API GetRgnBox( HRGN hrgn, PRECT pRect);
 //******************************************************************************
 ODINFUNCTIONNODBG2(int, SelectClipRgn, HDC, hdc, HRGN, hrgn)
 {
  LONG lComplexity = RGN_NULL;
  HRGN hrgnNewClip;
  HRGN hrgnOldClip;
+#ifdef DEBUG
+ HRGN hrgn1 = hrgn;
+#endif
 
     pDCData  pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
     if(!pHps)
@@ -373,12 +377,11 @@ ODINFUNCTIONNODBG2(int, SelectClipRgn, HDC, hdc, HRGN, hrgn)
     }
 
     dprintf(("SelectClipRgn: %x %x", hdc, hrgn));
-
     if(hrgn)
     {
         hrgn = ObjGetHandleData(hrgn, GDIOBJ_REGION);
         if(hrgn == HANDLE_OBJ_ERROR) {
-            dprintf(("WARNING: SelectClipRgn: invalid region!", hdc, hrgn));
+            dprintf(("WARNING: SelectClipRgn: invalid region!", hdc, hrgn1));
             SetLastError(ERROR_INVALID_HANDLE_W);
             return ERROR_W;
         }
@@ -412,13 +415,12 @@ ODINFUNCTIONNODBG2(int, SelectClipRgn, HDC, hdc, HRGN, hrgn)
 
             //SvL: Must check if origin changed here. Sometimes happens when
             //     window looses focus. (don't know why....)
-            if(pHps->isClient)
-                selectClientArea(pHps);
+            checkOrigin(pHps);
             return lComplexity;
         }
     }
 
-    dprintf(("WARNING: SelectClipRgn: RGN_ERROR!", hdc, hrgn));
+    dprintf(("WARNING: SelectClipRgn: RGN_ERROR!", hdc, hrgn1));
     if(hrgnNewClip)
         GpiDestroyRegion(pHps->hps, hrgnNewClip);
 
@@ -429,6 +431,10 @@ ODINFUNCTIONNODBG2(int, SelectClipRgn, HDC, hdc, HRGN, hrgn)
 //******************************************************************************
 ODINFUNCTIONNODBG3(int, ExtSelectClipRgn, HDC, hdc, HRGN, hrgn, int, mode)
 {
+#ifdef DEBUG
+ HRGN hrgn1 = hrgn;
+#endif
+
    pDCData    pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
    if (!pHps)
    {
@@ -443,7 +449,7 @@ ODINFUNCTIONNODBG3(int, ExtSelectClipRgn, HDC, hdc, HRGN, hrgn, int, mode)
    if(!hrgn && mode != RGN_COPY_W)
    {
         SetLastError(ERROR_INVALID_PARAMETER_W);
-        dprintf(("WARNING: ExtSelectRgn %x %x %d invalid parameter", hdc, hrgn, mode));
+        dprintf(("WARNING: ExtSelectRgn %x %x %d invalid parameter", hdc, hrgn1, mode));
         return ERROR_W;
    }
 
@@ -458,7 +464,7 @@ ODINFUNCTIONNODBG3(int, ExtSelectClipRgn, HDC, hdc, HRGN, hrgn, int, mode)
         default:
         {
             SetLastError(ERROR_INVALID_PARAMETER_W);
-            dprintf(("WARNING: ExtSelectRgn %x %x %d invalid parameter", hdc, hrgn, mode));
+            dprintf(("WARNING: ExtSelectRgn %x %x %d invalid parameter", hdc, hrgn1, mode));
             return ERROR_W;
         }
    }
@@ -467,13 +473,13 @@ ODINFUNCTIONNODBG3(int, ExtSelectClipRgn, HDC, hdc, HRGN, hrgn, int, mode)
    {
         hrgn = ObjGetHandleData(hrgn, GDIOBJ_REGION);
         if(hrgn == HANDLE_OBJ_ERROR) {
-            dprintf(("WARNING: ExtSelectRgn %x %x %d invalid region handle", hdc, hrgn, mode));
+            dprintf(("WARNING: ExtSelectRgn %x %x %d invalid region handle", hdc, hrgn1, mode));
             SetLastError(ERROR_INVALID_HANDLE_W);
             return 0;
         }
    }
 
-   dprintf(("WARNING: ExtSelectRgn %x %x %d", hdc, hrgn, mode));
+   dprintf(("ExtSelectRgn %x %x %d", hdc, hrgn1, mode));
    //TODO: metafile recording
    if(hrgn)
    {
@@ -525,8 +531,7 @@ ODINFUNCTIONNODBG3(int, ExtSelectClipRgn, HDC, hdc, HRGN, hrgn, int, mode)
 
         //SvL: Must check if origin changed here. Sometimes happens when
         //     window looses focus. (don't know why....)
-        if(pHps->isClient)
-            selectClientArea(pHps);
+        checkOrigin(pHps);
 
         if (lComplexity != RGN_ERROR)
             return lComplexity;
@@ -611,10 +616,13 @@ ODINFUNCTIONNODBG2(int, GetClipRgn, HDC, hdc, HRGN, hrgn)
    BOOL       success;
    LONG       lComplexity = RGN_RECT;
    HRGN       hrgnClip = NULL, hrgnTemp;
+#ifdef DEBUG
+   HRGN       hrgn1 = hrgn;
+#endif
 
     hrgn = ObjGetHandleData(hrgn, GDIOBJ_REGION);
     if(hrgn == HANDLE_OBJ_ERROR || !pHps) {
-        dprintf(("WARNING: GetClipRgn %x %x invalid handle", hdc, hrgn));
+        dprintf(("WARNING: GetClipRgn %x %x invalid handle", hdc, hrgn1));
         SetLastError(ERROR_INVALID_HANDLE_W);
         return 0;
     }
@@ -640,7 +648,7 @@ ODINFUNCTIONNODBG2(int, GetClipRgn, HDC, hdc, HRGN, hrgn)
     }
     else lComplexity = RGN_NULL;
 
-    dprintf(("GetClipRgn %x %x returned %d", hdc, hrgn, lComplexity != RGN_NULL));
+    dprintf(("GetClipRgn %x %x returned %d", hdc, hrgn1, lComplexity != RGN_NULL));
     SetLastError(ERROR_SUCCESS_W);
     if(lComplexity == RGN_NULL)
          return 0;
@@ -1054,6 +1062,11 @@ ODINFUNCTIONNODBG4(int, CombineRgn, HRGN, hrgnDest, HRGN, hrgnSrc1, HRGN, hrgnSr
 {
     ULONG lComplexity;
     LONG  mode;
+#ifdef DEBUG
+   HRGN hrgn1 = hrgnDest;
+   HRGN hrgn2 = hrgnSrc1;
+   HRGN hrgn3 = hrgnSrc2;
+#endif
 
     switch(combineMode) {
     case RGN_AND_W:
@@ -1081,17 +1094,18 @@ ODINFUNCTIONNODBG4(int, CombineRgn, HRGN, hrgnDest, HRGN, hrgnSrc1, HRGN, hrgnSr
     hrgnSrc1 = ObjGetHandleData(hrgnSrc1, GDIOBJ_REGION);
     hrgnSrc2 = ObjGetHandleData(hrgnSrc2, GDIOBJ_REGION);
     if(hrgnDest == HANDLE_OBJ_ERROR || hrgnSrc1 == HANDLE_OBJ_ERROR  || (hrgnSrc2 == HANDLE_OBJ_ERROR && combineMode != RGN_COPY_W)) {
-        dprintf(("WARNING: CombineRgn %x %x %x %d invalid region", hrgnDest, hrgnSrc1, hrgnSrc2, combineMode));
+        dprintf(("WARNING: CombineRgn %x %x %x %d invalid region", hrgn1, hrgn2, hrgn3, combineMode));
         SetLastError(ERROR_INVALID_HANDLE_W);
         return ERROR_W;
     }
 
     lComplexity = GpiCombineRegion(hpsRegion, hrgnDest, hrgnSrc1, hrgnSrc2, mode);
     if(lComplexity == RGN_ERROR) {
-        dprintf(("WARNING: CombineRgn %x %x %x %d GpiCombineRegion failed (%x)", hrgnDest, hrgnSrc1, hrgnSrc2, mode, WinGetLastError(0)));
+        dprintf(("WARNING: CombineRgn %x %x %x %d GpiCombineRegion failed (%x)", hrgn1, hrgn2, hrgn3, mode, WinGetLastError(0)));
         SetLastError(ERROR_INVALID_HANDLE_W);
         return ERROR_W;
     }
+    dprintf(("CombineRgn %x %x %x %d", hrgn1, hrgn2, hrgn3, mode));
     SetLastError(ERROR_SUCCESS_W);
     return lComplexity;
 }
@@ -1100,17 +1114,21 @@ ODINFUNCTIONNODBG4(int, CombineRgn, HRGN, hrgnDest, HRGN, hrgnSrc1, HRGN, hrgnSr
 ODINFUNCTIONNODBG2(BOOL, EqualRgn, HRGN, hrgn1, HRGN, hrgn2)
 {
    LONG lEquality;
+#ifdef DEBUG
+   HRGN hrgnt1 = hrgn1;
+   HRGN hrgnt2 = hrgn2;
+#endif
 
    hrgn1 = ObjGetHandleData(hrgn1, GDIOBJ_REGION);
    hrgn2 = ObjGetHandleData(hrgn2, GDIOBJ_REGION);
    if(hrgn1 == HANDLE_OBJ_ERROR || hrgn2 == HANDLE_OBJ_ERROR) {
-        dprintf(("WARNING: EqualRgn %x %x invalid region", hrgn1, hrgn2));
+        dprintf(("WARNING: EqualRgn %x %x invalid region", hrgnt1, hrgnt2));
         SetLastError(ERROR_INVALID_HANDLE_W);
         return FALSE;
    }
    lEquality = GpiEqualRegion(hpsRegion, hrgn1, hrgn2);
 
-   dprintf(("EqualRgn %x %x = %d", hrgn1, hrgn2, lEquality));
+   dprintf(("EqualRgn %x %x = %d", hrgnt1, hrgnt2, lEquality));
    SetLastError(ERROR_SUCCESS_W);
 
    if(lEquality == EQRGN_EQUAL)
@@ -1127,34 +1145,41 @@ ODINFUNCTIONNODBG2(BOOL, EqualRgn, HRGN, hrgn1, HRGN, hrgn2)
 ODINFUNCTIONNODBG5(BOOL, SetRectRgn, HRGN, hrgn, int, left, int, top, int, right, int, bottom)
 {
    BOOL    result = FALSE;
+#ifdef DEBUG
+   HRGN      hrgn1 = hrgn;
+#endif
 
     hrgn = ObjGetHandleData(hrgn, GDIOBJ_REGION);
     if(hrgn == HANDLE_OBJ_ERROR) {
-        dprintf(("WARNING: SetRectRgn %x (%d,%d)(%d,%d) invalid region handle", hrgn, left, top, right, bottom));
+        dprintf(("WARNING: SetRectRgn %x (%d,%d)(%d,%d) invalid region handle", hrgn1, left, top, right, bottom));
         SetLastError(ERROR_INVALID_HANDLE_W);
         return 0;
     }
     RECTL rectl = { left, top, right, bottom }; //reversed y coordinates
     if(GpiSetRegion(hpsRegion, hrgn, 1, &rectl)) {
-        dprintf(("SetRectRgn %x (%d,%d)(%d,%d)", hrgn, left, top, right, bottom));
+        dprintf(("SetRectRgn %x (%d,%d)(%d,%d)", hrgn1, left, top, right, bottom));
         return TRUE;
     }
-    dprintf(("WARNING: SetRectRgn %x (%d,%d)(%d,%d) GpiSetRegion failed %x", hrgn, left, top, right, bottom, WinGetLastError(0)));
+    dprintf(("WARNING: SetRectRgn %x (%d,%d)(%d,%d) GpiSetRegion failed %x", hrgn1, left, top, right, bottom, WinGetLastError(0)));
     return FALSE;
 }
 //******************************************************************************
 //******************************************************************************
 ODINFUNCTIONNODBG3(ULONG, GetRegionData, HRGN, hrgn, ULONG, count, PRGNDATA, pData)
 {
+#ifdef DEBUG
+   HRGN      hrgn1 = hrgn;
+#endif
+
     if(!count && pData)
     {
-        dprintf(("WARNING: GetRegionData %x %d %x; invalid parameter", hrgn, count, pData));
+        dprintf(("WARNING: GetRegionData %x %d %x; invalid parameter", hrgn1, count, pData));
         SetLastError(ERROR_INVALID_PARAMETER_W);
         return 0;
     }
     hrgn = ObjGetHandleData(hrgn, GDIOBJ_REGION);
     if(hrgn == HANDLE_OBJ_ERROR) {
-        dprintf(("WARNING: GetRegionData %x %d %x; invalid region handle", hrgn, count, pData));
+        dprintf(("WARNING: GetRegionData %x %d %x; invalid region handle", hrgn1, count, pData));
         SetLastError(ERROR_INVALID_HANDLE_W);
         return 0;
     }
@@ -1164,11 +1189,11 @@ ODINFUNCTIONNODBG3(ULONG, GetRegionData, HRGN, hrgn, ULONG, count, PRGNDATA, pDa
     rgnRect.ulDirection = RECTDIR_LFRT_TOPBOT;
     if(!GpiQueryRegionRects(hpsRegion, hrgn, NULL, &rgnRect, NULL))
     {
-        dprintf(("WARNING: GetRegionData %x %d %x: GpiQueryRegionRects failed! (%x)", hrgn, count, pData, WinGetLastError(0)));
+        dprintf(("WARNING: GetRegionData %x %d %x: GpiQueryRegionRects failed! (%x)", hrgn1, count, pData, WinGetLastError(0)));
         return 0;
     }
 
-    dprintf(("GetRegionData %x %d %x", hrgn, count, pData));
+    dprintf(("GetRegionData %x %d %x", hrgn1, count, pData));
 
     ULONG bufSizeNeeded = rgnRect.crcReturned * sizeof(RECT) + sizeof (RGNDATAHEADER);
 
@@ -1209,15 +1234,16 @@ ODINFUNCTIONNODBG2(int, GetRgnBox, HRGN, hrgn, PRECT, pRect)
 {
    BOOL      success;
    LONG      lComplexity;
+#ifdef DEBUG
+   HRGN      hrgn1 = hrgn;
+#endif
 
     hrgn = ObjGetHandleData(hrgn, GDIOBJ_REGION);
     if(hrgn == HANDLE_OBJ_ERROR) {
-        dprintf(("WARNING: GetRgnBox %x %x invalid region!", hrgn, pRect));
+        dprintf(("WARNING: GetRgnBox %x %x invalid region!", hrgn1, pRect));
         SetLastError(ERROR_INVALID_HANDLE_W);
         return FALSE;
     }
-
-    dprintf(("GetRgnBox %x %x", hrgn, pRect));
 
     RECTL  rectl;
     lComplexity = GpiQueryRegionBox(hpsRegion, hrgn, &rectl);
@@ -1234,6 +1260,7 @@ ODINFUNCTIONNODBG2(int, GetRgnBox, HRGN, hrgn, PRECT, pRect)
             lComplexity = ERROR_W;
             dprintf(("WARNING: GetRgnBox error in region!"));
     }
+    dprintf(("GetRgnBox %x (%d,%d)(%d,%d)", hrgn1, pRect->left, pRect->bottom, pRect->right, pRect->top));
 
     SetLastError(ERROR_SUCCESS_W);
     return lComplexity;
@@ -1242,6 +1269,9 @@ ODINFUNCTIONNODBG2(int, GetRgnBox, HRGN, hrgn, PRECT, pRect)
 //******************************************************************************
 ODINFUNCTIONNODBG2(BOOL, InvertRgn, HDC, hdc, HRGN, hrgn)
 {
+#ifdef DEBUG
+    HRGN      hrgn1 = hrgn;
+#endif
     pDCData pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
 
     hrgn = ObjGetHandleData(hrgn, GDIOBJ_REGION);
@@ -1252,7 +1282,7 @@ ODINFUNCTIONNODBG2(BOOL, InvertRgn, HDC, hdc, HRGN, hrgn)
     }
     //todo metafile recording
 
-    dprintf(("InvertRgn %x %x", hdc, hrgn));
+    dprintf(("InvertRgn %x %x", hdc, hrgn1));
 
     interpretRegionAs(pHps, NULL, hrgn, AS_WORLD);
 
@@ -1291,6 +1321,9 @@ ODINFUNCTIONNODBG2(BOOL, InvertRgn, HDC, hdc, HRGN, hrgn)
 ODINFUNCTIONNODBG3(int, OffsetRgn, HRGN, hrgn, int, xOffset, int, yOffset)
 {
    LONG   lComplexity;
+#ifdef DEBUG
+   HRGN      hrgn1 = hrgn;
+#endif
 
     hrgn = ObjGetHandleData(hrgn, GDIOBJ_REGION);
     if(hrgn == HANDLE_OBJ_ERROR) {
@@ -1298,7 +1331,7 @@ ODINFUNCTIONNODBG3(int, OffsetRgn, HRGN, hrgn, int, xOffset, int, yOffset)
         SetLastError(ERROR_INVALID_HANDLE_W);
         return ERROR_W;
     }
-    dprintf(("OffsetRgn %x %d %d", hrgn, xOffset, yOffset));
+    dprintf(("OffsetRgn %x %d %d", hrgn1, xOffset, yOffset));
 
     POINTL   ptlOffset = {xOffset, yOffset};
     GpiOffsetRegion(hpsRegion, hrgn, &ptlOffset);
@@ -1336,6 +1369,9 @@ ODINFUNCTIONNODBG3(int, OffsetRgn, HRGN, hrgn, int, xOffset, int, yOffset)
 ODINFUNCTIONNODBG5(BOOL, FrameRgn, HDC, hdc, HRGN, hrgn, HBRUSH, hBrush, int, width, int, height)
 {
     HBRUSH hbrushRestore = 0;
+#ifdef DEBUG
+    HRGN   hrgn1 = hrgn;
+#endif
     pDCData  pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
 
     hrgn = ObjGetHandleData(hrgn, GDIOBJ_REGION);
@@ -1358,7 +1394,7 @@ ODINFUNCTIONNODBG5(BOOL, FrameRgn, HDC, hdc, HRGN, hrgn, HBRUSH, hBrush, int, wi
             return FALSE;
         }
     }
-    dprintf(("FrameRgn %x %x %x (%d,%d)", hdc, hrgn, hBrush, width, height));
+    dprintf(("FrameRgn %x %x %x (%d,%d)", hdc, hrgn1, hBrush, width, height));
     interpretRegionAs(pHps, NULL, hrgn, AS_WORLD);
 
     SIZEL  thickness = { width, height };
@@ -1379,12 +1415,15 @@ ODINFUNCTIONNODBG3(BOOL, FillRgn, HDC, hdc, HRGN, hrgn, HBRUSH, hBrush)
 {
  BOOL   success;
  HBRUSH hbrushRestore = 0;
+#ifdef DEBUG
+ HRGN   hrgn1 = hrgn;
+#endif
 
     pDCData  pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
 
     hrgn = ObjGetHandleData(hrgn, GDIOBJ_REGION);
     if(!pHps || hrgn == HANDLE_OBJ_ERROR) {
-        dprintf(("WARNING: FillRgn %x %x %x invalid handle!", hdc, hrgn, hBrush));
+        dprintf(("WARNING: FillRgn %x %x %x invalid handle!", hdc, hrgn1, hBrush));
         SetLastError(ERROR_INVALID_HANDLE_W);
         return FALSE;
     }
@@ -1394,12 +1433,12 @@ ODINFUNCTIONNODBG3(BOOL, FillRgn, HDC, hdc, HRGN, hrgn, HBRUSH, hBrush)
         hbrushRestore = SelectObject(hdc, hBrush);
         if (!hbrushRestore)
         {
-            dprintf(("WARNING: FillRgn %x %x %x invalid brush!", hdc, hrgn, hBrush));
+            dprintf(("WARNING: FillRgn %x %x %x invalid brush!", hdc, hrgn1, hBrush));
             SetLastError(ERROR_INVALID_HANDLE_W);
             return FALSE;
         }
     }
-    dprintf(("FillRgn %x %x %x", hdc, hrgn, hBrush));
+    dprintf(("FillRgn %x %x %x", hdc, hrgn1, hBrush));
 
     interpretRegionAs(pHps, NULL, hrgn, AS_WORLD);
 
@@ -1432,10 +1471,13 @@ ODINFUNCTIONNODBG3(BOOL, PtInRegion, HRGN, hrgn, int, x, int, y)
 {
    BOOL      success;
    LONG      lInside;
+#ifdef DEBUG
+   HRGN      hrgn1 = hrgn;
+#endif
 
     hrgn = ObjGetHandleData(hrgn, GDIOBJ_REGION);
     if(hrgn == HANDLE_OBJ_ERROR) {
-        dprintf(("WARNING: PtInRgn %x (%d,%d) invalid region!", hrgn, x, y));
+        dprintf(("WARNING: PtInRgn %x (%d,%d) invalid region!", hrgn1, x, y));
         SetLastError(ERROR_INVALID_HANDLE_W);
         return FALSE;
     }
@@ -1449,7 +1491,7 @@ ODINFUNCTIONNODBG3(BOOL, PtInRegion, HRGN, hrgn, int, x, int, y)
 
     SetLastError(ERROR_SUCCESS_W);
 
-    dprintf(("WARNING: PtInRgn %x (%d,%d) returned %d", hrgn, x, y, (success && lInside == PRGN_INSIDE) ? 1 : 0));
+    dprintf(("PtInRgn %x (%d,%d) returned %d", hrgn1, x, y, (success && lInside == PRGN_INSIDE) ? 1 : 0));
 
     if(success && lInside == PRGN_INSIDE)
         return TRUE;
@@ -1462,15 +1504,18 @@ ODINFUNCTIONNODBG2(BOOL, RectInRegion, HRGN, hrgn, const RECT *, pRect)
 {
    BOOL      success;
    LONG      lInside;
+#ifdef DEBUG
+   HRGN      hrgn1 = hrgn;
+#endif
 
     if(!pRect) {
-        dprintf(("WARNING: RectInRgn %x %x invalid parameter!", hrgn, pRect));
+        dprintf(("WARNING: RectInRgn %x %x invalid parameter!", hrgn1, pRect));
         SetLastError(ERROR_INVALID_PARAMETER_W);
         return FALSE;
     }
     hrgn = ObjGetHandleData(hrgn, GDIOBJ_REGION);
     if(hrgn == HANDLE_OBJ_ERROR) {
-        dprintf(("WARNING: RectInRgn %x %x invalid region", hrgn, pRect));
+        dprintf(("WARNING: RectInRgn %x %x invalid region", hrgn1, pRect));
         SetLastError(ERROR_INVALID_HANDLE_W);
         return FALSE;
     }
@@ -1490,7 +1535,7 @@ ODINFUNCTIONNODBG2(BOOL, RectInRegion, HRGN, hrgn, const RECT *, pRect)
 
     SetLastError(ERROR_SUCCESS_W);
 
-    dprintf(("WARNING: RectInRgn %x %x returned %d", hrgn, pRect, (success && (lInside == RRGN_INSIDE || lInside == RRGN_PARTIAL)) ? 1 : 0));
+    dprintf(("RectInRgn %x %x returned %d", hrgn1, pRect, (success && (lInside == RRGN_INSIDE || lInside == RRGN_PARTIAL)) ? 1 : 0));
 
     if(success && (lInside == RRGN_INSIDE || lInside == RRGN_PARTIAL))
         return TRUE;
