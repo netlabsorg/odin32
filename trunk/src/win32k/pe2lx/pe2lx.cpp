@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.33 2001-09-28 07:43:02 sandervl Exp $
+/* $Id: pe2lx.cpp,v 1.34 2001-10-15 20:46:20 sandervl Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -605,9 +605,11 @@ ULONG Pe2Lx::init(PCSZ pszFilename)
     else
     {
         LXHdr.e32_mflags |= E32MODEXE;
+#if 0
         if (    pNtHdrs->FileHeader.Characteristics & IMAGE_FILE_RELOCS_STRIPPED     /* Force location if possible. */
             ||  ulImageBase < 0x04000000 && ulImageBase + pNtHdrs->OptionalHeader.SizeOfImage < 0x04000000)
             LXHdr.e32_mflags |= E32NOINTFIX;
+#endif
     }
 
     /* 13.Convert exports. */
@@ -3914,7 +3916,7 @@ ULONG  Pe2Lx::add32OrdImportFixup(WORD offSource, ULONG ulModuleOrdinal, ULONG u
         char  searchstring[256];
         char *found;
 
-        sprintf(searchstring, "%s.%d", pszModuleName, ulFunctionOrdinal);
+        sprintf(searchstring, "%s.%d ", pszModuleName, ulFunctionOrdinal);
         found = strstr(options.pszCustomExports, searchstring);
         if(found) {
             while(*found != '@') {
@@ -4067,7 +4069,7 @@ ULONG  Pe2Lx::add32NameImportFixup(WORD offSource, ULONG ulModuleOrdinal, PCSZ p
         char *found;
         int   ordinal;
 
-        sprintf(searchstring, "%s.%s", pszModuleName, pszFnName);
+        sprintf(searchstring, "%s.%s ", pszModuleName, pszFnName);
         found = strstr(options.pszCustomExports, searchstring);
         if(found) {
             while(*found != '@') {
