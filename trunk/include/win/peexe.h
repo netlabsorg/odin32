@@ -1,4 +1,4 @@
-/* $Id: peexe.h,v 1.1 1999-05-24 20:19:17 ktk Exp $ */
+/* $Id: peexe.h,v 1.2 2003-04-02 11:02:36 sandervl Exp $ */
 
 /*
  * Copyright  Eric Youngdale (1994)
@@ -80,30 +80,28 @@ typedef struct _IMAGE_OPTIONAL_HEADER
 	/*
 	 * NT additional fields.
 	 */
-
-	DWORD	ImageBase;			/* 1C */
-	DWORD	SectionAlignment;		/* 20 */
-	DWORD	FileAlignment;			/* 24 */
-	WORD	MajorOperatingSystemVersion;	/* 28 */
-	WORD	MinorOperatingSystemVersion;	/* 2A */
-	WORD	MajorImageVersion;		/* 2C */
-	WORD	MinorImageVersion;		/* 2E */
-	WORD	MajorSubsystemVersion;		/* 30 */
-	WORD	MinorSubsystemVersion;		/* 32 */
-	DWORD	Reserved1;			/* 34 */
-	DWORD	SizeOfImage;			/* 38 */
-	DWORD	SizeOfHeaders;			/* 3C */
-	DWORD	CheckSum;			/* 40 */
-	WORD	Subsystem;			/* 44 */
-	WORD	DllCharacteristics;		/* 46 */
-	DWORD	SizeOfStackReserve;		/* 48 */
-	DWORD	SizeOfStackCommit;		/* 4C */
-	DWORD	SizeOfHeapReserve;		/* 50 */
-	DWORD	SizeOfHeapCommit;		/* 54 */
-	DWORD	LoaderFlags;			/* 58 */
-	DWORD	NumberOfRvaAndSizes;		/* 5C */
-						/* 60: */
-	IMAGE_DATA_DIRECTORY DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES];
+        DWORD ImageBase;
+        DWORD SectionAlignment;		/* 0x20 */
+        DWORD FileAlignment;
+        WORD  MajorOperatingSystemVersion;
+        WORD  MinorOperatingSystemVersion;
+        WORD  MajorImageVersion;
+        WORD  MinorImageVersion;
+        WORD  MajorSubsystemVersion;		/* 0x30 */
+        WORD  MinorSubsystemVersion;
+        DWORD Win32VersionValue;
+        DWORD SizeOfImage;
+        DWORD SizeOfHeaders;
+        DWORD CheckSum;			/* 0x40 */
+        WORD  Subsystem;
+        WORD  DllCharacteristics;
+        DWORD SizeOfStackReserve;
+        DWORD SizeOfStackCommit;
+        DWORD SizeOfHeapReserve;		/* 0x50 */
+        DWORD SizeOfHeapCommit;
+        DWORD LoaderFlags;
+        DWORD NumberOfRvaAndSizes;
+        IMAGE_DATA_DIRECTORY DataDirectory[IMAGE_NUMBEROF_DIRECTORY_ENTRIES]; /* 0x60 */
 } IMAGE_OPTIONAL_HEADER,*PIMAGE_OPTIONAL_HEADER;
 
 /* Possible Magic values */
@@ -353,7 +351,7 @@ typedef struct _IMAGE_BASE_RELOCATION
 {
 	DWORD	VirtualAddress;
 	DWORD	SizeOfBlock;
-	WORD	TypeOffset[1];
+	WORD	TypeOffset[1]; 
 } IMAGE_BASE_RELOCATION,*PIMAGE_BASE_RELOCATION;
 
 typedef struct _IMAGE_LOAD_CONFIG_DIRECTORY {
@@ -370,7 +368,11 @@ typedef struct _IMAGE_LOAD_CONFIG_DIRECTORY {
 	DWORD	MaximumAllocationSize;
 	DWORD	VirtualMemoryThreshold;
 	DWORD	ProcessHeapFlags;
-	DWORD	Reserved[ 4 ];
+        DWORD ProcessAffinityMask;
+        WORD  CSDVersion;
+        WORD  Reserved1;
+        PVOID EditList;
+        DWORD Reserved[1];
 } IMAGE_LOAD_CONFIG_DIRECTORY,*PIMAGE_LOAD_CONFIG_DIRECTORY;
 
 typedef VOID (* CALLBACK PIMAGE_TLS_CALLBACK)(
@@ -582,7 +584,8 @@ typedef struct _IMAGE_SEPARATE_DEBUG_HEADER {
 	DWORD	NumberOfSections;
 	DWORD	ExportedNamesSize;
 	DWORD	DebugDirectorySize;
-	DWORD	Reserved[ 3 ];
+	DWORD	SectionAlignment;
+	DWORD	Reserved[ 2 ];
 } IMAGE_SEPARATE_DEBUG_HEADER,*PIMAGE_SEPARATE_DEBUG_HEADER;
 
 #define IMAGE_SEPARATE_DEBUG_SIGNATURE 0x4944

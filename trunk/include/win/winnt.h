@@ -9,7 +9,6 @@
 
 #include "windef.h"
 
-#include "pshpack1.h"
 /* Defines */
 
 #define UNREFERENCED_PARAMETER(a)
@@ -73,6 +72,20 @@
 #define CONTAINING_RECORD(address, type, field) \
   ((type *)((PCHAR)(address) - (PCHAR)(&((type *)0)->field)))
 
+/* C99 restrict support */
+
+#if defined(ENABLE_RESTRICTED) && !defined(MIDL_PASS) && !defined(RC_INVOKED)
+# if defined(_MSC_VER) && defined(_M_MRX000)
+#  define RESTRICTED_POINTER __restrict
+# elif defined(__GNUC__) && ((__GNUC__ > 2) || ((__GNUC__ == 2) && (__GNUC_MINOR__ >= 95)))
+#  define RESTRICTED_POINTER __restrict
+# else
+#  define RESTRICTED_POINTER
+# endif
+#else
+# define RESTRICTED_POINTER
+#endif
+
 /* Types */
 
 /* TCHAR data types definitions for Winelib. */
@@ -97,14 +110,38 @@ typedef BYTE		BOOLEAN;
 typedef BOOLEAN         *PBOOLEAN;
 typedef DWORD		EXECUTION_STATE;
 
+typedef CHAR           *PCH,        *LPCH;
+typedef const CHAR     *PCCH,       *LPCCH;
+
+/* Unicode string types */
+typedef WCHAR          *PWCH,       *LPWCH;
+typedef const WCHAR    *PCWCH,      *LPCWCH;
+
+# ifdef UNICODE
+typedef WCHAR           TCHAR,      *PTCHAR;
+typedef LPWSTR          PTSTR,       LPTSTR;
+typedef LPCWSTR         PCTSTR,      LPCTSTR;
+#  define __TEXT(string) L##string
+# else  /* UNICODE */
+typedef CHAR            TCHAR,      *PTCHAR;
+typedef LPSTR           PTSTR;
+typedef LPCSTR          PCTSTR;
+#  define __TEXT(string) string
+# endif /* UNICODE */
+# define TEXT(quote) __TEXT(quote)
+
+/* Types */
+
 typedef struct _LIST_ENTRY {
   struct _LIST_ENTRY *Flink;
   struct _LIST_ENTRY *Blink;
-} LIST_ENTRY, *PLIST_ENTRY;
+} LIST_ENTRY, *PLIST_ENTRY, * RESTRICTED_POINTER PRLIST_ENTRY;
 
 typedef struct _SINGLE_LIST_ENTRY {
   struct _SINGLE_LIST_ENTRY *Next;
 } SINGLE_LIST_ENTRY, *PSINGLE_LIST_ENTRY;
+
+
 
 /* Heap flags */
 
@@ -1525,7 +1562,6 @@ typedef struct __EXCEPTION_FRAME
   PEXCEPTION_HANDLER       Handler;
 } EXCEPTION_FRAME, *PEXCEPTION_FRAME;
 
-#include "poppack.h"
 
 /*
  * function pointer to a exception filter
@@ -1613,8 +1649,6 @@ typedef enum _TOKEN_INFORMATION_CLASS {
 
 #ifndef _SECURITY_DEFINED
 #define _SECURITY_DEFINED
-
-#include "pshpack1.h"
 
 typedef DWORD ACCESS_MASK, *PACCESS_MASK;
 
@@ -1724,15 +1758,14 @@ typedef struct {
 
 #define SECURITY_DESCRIPTOR_MIN_LENGTH   (sizeof(SECURITY_DESCRIPTOR)) 
 
-#include "poppack.h"
 
 #endif /* _SECURITY_DEFINED */
 
-#include "pshpack1.h"
 
 /* 
  * SID_AND_ATTRIBUTES
  */
+
 
 typedef struct _SID_AND_ATTRIBUTES {
   PSID  Sid; 
@@ -1899,10 +1932,12 @@ typedef struct _TOKEN_DEFAULT_DACL {
  * TOKEN_SOURCEL
  */
 
+#define TOKEN_SOURCE_LENGTH 8
+
 typedef struct _TOKEN_SOURCE {
-  char Sourcename[8]; 
-  LUID SourceIdentifier; 
-} TOKEN_SOURCE; 
+  char SourceName[TOKEN_SOURCE_LENGTH];
+  LUID SourceIdentifier;
+} TOKEN_SOURCE;
 
 /*
  * TOKEN_TYPE
@@ -2236,15 +2271,124 @@ typedef enum _CM_ERROR_CONTROL_TYPE
   CriticalError = SERVICE_ERROR_CRITICAL
 } SERVICE_ERROR_TYPE;
 
+/* archive format */
 
-#if 0
-ndef __WINE__
-#define RtlEqualMemory(Destination, Source, Length) (!memcmp((Destination),(Source),(Length)))
-#define RtlMoveMemory(Destination, Source, Length) memmove((Destination),(Source),(Length))
-#define RtlCopyMemory(Destination, Source, Length) memcpy((Destination),(Source),(Length))
-#define RtlFillMemory(Destination, Length, Fill) memset((Destination),(Fill),(Length))
-#define RtlZeroMemory(Destination, Length) memset((Destination),0,(Length))
-#endif
+#define IMAGE_ARCHIVE_START_SIZE             8
+#define IMAGE_ARCHIVE_START                  "!<arch>\n"
+#define IMAGE_ARCHIVE_END                    "`\n"
+#define IMAGE_ARCHIVE_PAD                    "\n"
+#define IMAGE_ARCHIVE_LINKER_MEMBER          "/               "
+#define IMAGE_ARCHIVE_LONGNAMES_MEMBER       "//              "
+
+typedef struct _IMAGE_ARCHIVE_MEMBER_HEADER
+{
+    BYTE     Name[16];
+    BYTE     Date[12];
+    BYTE     UserID[6];
+    BYTE     GroupID[6];
+    BYTE     Mode[8];
+    BYTE     Size[10];
+    BYTE     EndHeader[2];
+} IMAGE_ARCHIVE_MEMBER_HEADER, *PIMAGE_ARCHIVE_MEMBER_HEADER;
+
+#define IMAGE_SIZEOF_ARCHIVE_MEMBER_HDR 60
+
+typedef struct _IMAGE_BOUND_IMPORT_DESCRIPTOR
+{
+    DWORD   TimeDateStamp;
+    WORD    OffsetModuleName;
+    WORD    NumberOfModuleForwarderRefs;
+/* Array of zero or more IMAGE_BOUND_FORWARDER_REF follows */
+} IMAGE_BOUND_IMPORT_DESCRIPTOR,  *PIMAGE_BOUND_IMPORT_DESCRIPTOR;
+
+typedef struct _IMAGE_BOUND_FORWARDER_REF
+{
+    DWORD   TimeDateStamp;
+    WORD    OffsetModuleName;
+    WORD    Reserved;
+} IMAGE_BOUND_FORWARDER_REF, *PIMAGE_BOUND_FORWARDER_REF;
+
+#define IMAGE_DEBUG_MISC_EXENAME    1
+
+typedef struct _IMAGE_DEBUG_MISC {
+    DWORD       DataType;
+    DWORD       Length;
+    BYTE        Unicode;
+    BYTE        Reserved[ 3 ];
+    BYTE        Data[ 1 ];
+} IMAGE_DEBUG_MISC, *PIMAGE_DEBUG_MISC;
+
+
+#include "pshpack2.h"
+
+typedef struct _IMAGE_SYMBOL {
+    union {
+        BYTE    ShortName[8];
+        struct {
+            DWORD   Short;
+            DWORD   Long;
+        } Name;
+        DWORD   LongName[2];
+    } N;
+    DWORD   Value;
+    SHORT   SectionNumber;
+    WORD    Type;
+    BYTE    StorageClass;
+    BYTE    NumberOfAuxSymbols;
+} IMAGE_SYMBOL;
+typedef IMAGE_SYMBOL *PIMAGE_SYMBOL;
+
+#define IMAGE_SIZEOF_SYMBOL 18
+
+typedef struct _IMAGE_LINENUMBER {
+    union {
+        DWORD   SymbolTableIndex;
+        DWORD   VirtualAddress;
+    } Type;
+    WORD    Linenumber;
+} IMAGE_LINENUMBER;
+typedef IMAGE_LINENUMBER *PIMAGE_LINENUMBER;
+
+#define IMAGE_SIZEOF_LINENUMBER  6
+
+typedef union _IMAGE_AUX_SYMBOL {
+    struct {
+        DWORD    TagIndex;
+        union {
+            struct {
+                WORD    Linenumber;
+                WORD    Size;
+            } LnSz;
+           DWORD    TotalSize;
+        } Misc;
+        union {
+            struct {
+                DWORD    PointerToLinenumber;
+                DWORD    PointerToNextFunction;
+            } Function;
+            struct {
+                WORD     Dimension[4];
+            } Array;
+        } FcnAry;
+        WORD    TvIndex;
+    } Sym;
+    struct {
+        BYTE    Name[IMAGE_SIZEOF_SYMBOL];
+    } File;
+    struct {
+        DWORD   Length;
+        WORD    NumberOfRelocations;
+        WORD    NumberOfLinenumbers;
+        DWORD   CheckSum;
+        SHORT   Number;
+        BYTE    Selection;
+    } Section;
+} IMAGE_AUX_SYMBOL;
+typedef IMAGE_AUX_SYMBOL *PIMAGE_AUX_SYMBOL;
+
+#define IMAGE_SIZEOF_AUX_SYMBOL 18
+
+#include "poppack.h"
 
 //#include "guiddef.h"
 
@@ -2270,6 +2414,51 @@ typedef struct _RTL_CRITICAL_SECTION {
 
 #include <peexe.h>
 
+#include "pshpack2.h"
+
+typedef struct _IMAGE_RELOCATION
+{
+    union {
+        DWORD   VirtualAddress;
+        DWORD   RelocCount;
+    } DUMMYUNIONNAME;
+    DWORD   SymbolTableIndex;
+    WORD    Type;
+} IMAGE_RELOCATION, *PIMAGE_RELOCATION;
+
 #include "poppack.h"
 
-#endif  /* __WINE_WINNT_H */
+typedef struct _NT_TIB
+{
+	struct _EXCEPTION_REGISTRATION_RECORD *ExceptionList;
+	PVOID StackBase;
+	PVOID StackLimit;
+	PVOID SubSystemTib;
+	union {
+          PVOID FiberData;
+          DWORD Version;
+	} DUMMYUNIONNAME;
+	PVOID ArbitraryUserPointer;
+	struct _NT_TIB *Self;
+} NT_TIB, *PNT_TIB;
+
+typedef struct _MEMORY_BASIC_INFORMATION
+{
+    LPVOID   BaseAddress;
+    LPVOID   AllocationBase;
+    DWORD    AllocationProtect;
+    DWORD    RegionSize;
+    DWORD    State;
+    DWORD    Protect;
+    DWORD    Type;
+} MEMORY_BASIC_INFORMATION,*LPMEMORY_BASIC_INFORMATION,*PMEMORY_BASIC_INFORMATION;
+
+#ifdef __IBMC__
+typedef void (* __stdcall WAITORTIMERCALLBACKFUNC) (PVOID, BOOLEAN );
+#else
+typedef void (__stdcall *WAITORTIMERCALLBACKFUNC) (PVOID, BOOLEAN );
+#endif
+
+
+
+#endif  

@@ -1,4 +1,4 @@
-/* $Id: imagehlp.h,v 1.2 2002-02-21 22:59:08 sandervl Exp $ */
+/* $Id: imagehlp.h,v 1.3 2003-04-02 11:02:35 sandervl Exp $ */
 
 /*
  *      imagehlp.h   -       Declarations for IMAGEHLP
@@ -327,7 +327,7 @@ typedef struct _IMAGEHLP_DUPLICATE_SYMBOL {
 } IMAGEHLP_DUPLICATE_SYMBOL, *PIMAGEHLP_DUPLICATE_SYMBOL;
 
 
-
+#include "pshpack2.h"
 typedef struct _IMAGE_VXD_HEADER {
   WORD  e32_magic;
   BYTE  e32_border;
@@ -381,6 +381,7 @@ typedef struct _IMAGE_VXD_HEADER {
   WORD  e32_devid;
   WORD  e32_ddkver;
 } IMAGE_VXD_HEADER, *PIMAGE_VXD_HEADER;
+#include "poppack.h"
 
 /***********************************************************************
  * Callbacks

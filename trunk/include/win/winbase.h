@@ -957,17 +957,6 @@ typedef struct _SYSTEM_POWER_STATUS {
 }   SYSTEM_POWER_STATUS, *LPSYSTEM_POWER_STATUS;
 
 
-typedef struct _MEMORY_BASIC_INFORMATION
-{
-    LPVOID   BaseAddress;
-    LPVOID   AllocationBase;
-    DWORD    AllocationProtect;
-    DWORD    RegionSize;
-    DWORD    State;
-    DWORD    Protect;
-    DWORD    Type;
-} MEMORY_BASIC_INFORMATION,*LPMEMORY_BASIC_INFORMATION;
-
 typedef struct tagSYSTEM_INFO
 {
     union {
@@ -1578,7 +1567,7 @@ HRSRC     WINAPI FindResourceExA(HMODULE,LPCSTR,LPCSTR,WORD);
 HRSRC     WINAPI FindResourceExW(HMODULE,LPCWSTR,LPCWSTR,WORD);
 #define     FindResourceEx WINELIB_NAME_AW(FindResourceEx)
 BOOL      WINAPI FlushConsoleInputBuffer(HANDLE);
-BOOL      WINAPI FlushFileBuffers(HFILE);
+BOOL      WINAPI FlushFileBuffers(HANDLE);
 BOOL      WINAPI FlushViewOfFile(LPCVOID, DWORD);
 DWORD       WINAPI FormatMessageA(DWORD,LPCVOID,DWORD,DWORD,LPSTR,
                                     DWORD,LPDWORD);
@@ -1625,13 +1614,13 @@ DWORD       WINAPI GetEnvironmentVariableW(LPCWSTR,LPWSTR,DWORD);
 BOOL      WINAPI GetFileAttributesExA(LPCSTR,GET_FILEEX_INFO_LEVELS,LPVOID);
 BOOL      WINAPI GetFileAttributesExW(LPCWSTR,GET_FILEEX_INFO_LEVELS,LPVOID);
 #define     GetFileattributesEx WINELIB_NAME_AW(GetFileAttributesEx)
-DWORD       WINAPI GetFileInformationByHandle(HFILE,BY_HANDLE_FILE_INFORMATION*);
+DWORD       WINAPI GetFileInformationByHandle(HANDLE,BY_HANDLE_FILE_INFORMATION*);
 BOOL        WINAPI GetFileSecurityA(LPCSTR,SECURITY_INFORMATION,PSECURITY_DESCRIPTOR,DWORD,LPDWORD);
 BOOL        WINAPI GetFileSecurityW(LPCWSTR,SECURITY_INFORMATION,PSECURITY_DESCRIPTOR,DWORD,LPDWORD);
 #define     GetFileSecurity WINELIB_NAME_AW(GetFileSecurity)
-DWORD       WINAPI GetFileSize(HFILE,LPDWORD);
-BOOL      WINAPI GetFileTime(HFILE,LPFILETIME,LPFILETIME,LPFILETIME);
-DWORD       WINAPI GetFileType(HFILE);
+DWORD       WINAPI GetFileSize(HANDLE,LPDWORD);
+BOOL      WINAPI GetFileTime(HANDLE,LPFILETIME,LPFILETIME,LPFILETIME);
+DWORD       WINAPI GetFileType(HANDLE);
 DWORD       WINAPI GetFullPathNameA(LPCSTR,DWORD,LPSTR,LPSTR*);
 DWORD       WINAPI GetFullPathNameW(LPCWSTR,DWORD,LPWSTR,LPWSTR*);
 #define     GetFullPathName WINELIB_NAME_AW(GetFullPathName)
@@ -1667,12 +1656,12 @@ PUCHAR      WINAPI GetSidSubAuthorityCount(PSID);
 DWORD       WINAPI GetShortPathNameA(LPCSTR,LPSTR,DWORD);
 DWORD       WINAPI GetShortPathNameW(LPCWSTR,LPWSTR,DWORD);
 #define     GetShortPathName WINELIB_NAME_AW(GetShortPathName)
-HFILE     WINAPI GetStdHandle(DWORD);
-BOOL      WINAPI GetStringTypeExA(LCID,DWORD,LPCSTR,INT,LPWORD);
-BOOL      WINAPI GetStringTypeExW(LCID,DWORD,LPCWSTR,INT,LPWORD);
+HANDLE      WINAPI GetStdHandle(DWORD);
+BOOL        WINAPI GetStringTypeExA(LCID,DWORD,LPCSTR,INT,LPWORD);
+BOOL        WINAPI GetStringTypeExW(LCID,DWORD,LPCWSTR,INT,LPWORD);
 #define     GetStringTypeEx WINELIB_NAME_AW(GetStringTypeEx)
 VOID        WINAPI GetSystemInfo(LPSYSTEM_INFO);
-BOOL      WINAPI GetSystemPowerStatus(LPSYSTEM_POWER_STATUS);
+BOOL        WINAPI GetSystemPowerStatus(LPSYSTEM_POWER_STATUS);
 VOID        WINAPI GetSystemTime(LPSYSTEMTIME);
 VOID        WINAPI GetSystemTimeAsFileTime(LPFILETIME);
 DWORD       WINAPI GetTapeParameters(HANDLE,DWORD,LPDWORD,LPVOID);
@@ -1725,7 +1714,7 @@ BOOL      WINAPI IsDBCSLeadByteEx(UINT,BYTE);
 BOOL      WINAPI IsProcessorFeaturePresent(DWORD);
 BOOL      WINAPI IsValidLocale(DWORD,DWORD);
 BOOL      WINAPI LocalFileTimeToFileTime(const FILETIME*,LPFILETIME);
-BOOL      WINAPI LockFile(HFILE,DWORD,DWORD,DWORD,DWORD);
+BOOL      WINAPI LockFile(HANDLE,DWORD,DWORD,DWORD,DWORD);
 BOOL      WINAPI LockFileEx(HANDLE, DWORD, DWORD, DWORD, DWORD, LPOVERLAPPED);
 BOOL        WINAPI LookupPrivilegeValueA(LPCSTR,LPCSTR,LPVOID);
 BOOL        WINAPI LookupPrivilegeValueW(LPCWSTR,LPCWSTR,LPVOID);
@@ -1835,7 +1824,7 @@ BOOL      WINAPI SetConsoleTitleW(LPCWSTR);
 BOOL        WINAPI SetDefaultCommConfigA(LPCSTR,LPCOMMCONFIG,DWORD);
 BOOL        WINAPI SetDefaultCommConfigW(LPCWSTR,LPCOMMCONFIG,DWORD);
 #define     SetDefaultCommConfig WINELIB_NAME_AW(SetDefaultCommConfig)
-BOOL      WINAPI SetEndOfFile(HFILE);
+BOOL      WINAPI SetEndOfFile(HANDLE);
 BOOL      WINAPI DeviceIoControl(HANDLE hDevice, DWORD dwIoControlCode,
                                  LPVOID lpInBuffer, DWORD nInBufferSize,
                                  LPVOID lpOutBuffer, DWORD nOutBufferSize,
@@ -1847,11 +1836,11 @@ BOOL      WINAPI SetEnvironmentVariableW(LPCWSTR,LPCWSTR);
 BOOL      WINAPI SetEvent(HANDLE);
 VOID        WINAPI SetFileApisToANSI(void);
 VOID        WINAPI SetFileApisToOEM(void);
-DWORD       WINAPI SetFilePointer(HFILE,LONG,LPLONG,DWORD);
+DWORD       WINAPI SetFilePointer(HANDLE,LONG,LPLONG,DWORD);
 BOOL        WINAPI SetFileSecurityA(LPCSTR,SECURITY_INFORMATION,PSECURITY_DESCRIPTOR);
 BOOL        WINAPI SetFileSecurityW(LPCWSTR,SECURITY_INFORMATION,PSECURITY_DESCRIPTOR);
 #define     SetFileSecurity WINELIB_NAME_AW(SetFileSecurity)
-BOOL        WINAPI SetFileTime(HFILE,const FILETIME*,const FILETIME*,const FILETIME*);
+BOOL        WINAPI SetFileTime(HANDLE,const FILETIME*,const FILETIME*,const FILETIME*);
 BOOL        WINAPI SetHandleInformation(HANDLE,DWORD,DWORD);
 BOOL        WINAPI SetLocalTime(const SYSTEMTIME*);
 BOOL        WINAPI SetPriorityClass(HANDLE,DWORD);
@@ -1883,7 +1872,7 @@ DWORD       WINAPI TlsAlloc(void);
 BOOL      WINAPI TlsFree(DWORD);
 LPVOID      WINAPI TlsGetValue(DWORD);
 BOOL      WINAPI TlsSetValue(DWORD,LPVOID);
-BOOL      WINAPI UnlockFile(HFILE,DWORD,DWORD,DWORD,DWORD);
+BOOL      WINAPI UnlockFile(HANDLE,DWORD,DWORD,DWORD,DWORD);
 BOOL      WINAPI UnmapViewOfFile(LPVOID);
 BOOL      WINAPI FlushInstructionCache(HANDLE,LPCVOID,DWORD);
 LPVOID      WINAPI VirtualAlloc(LPVOID,DWORD,DWORD,DWORD);
@@ -2135,7 +2124,7 @@ BOOL        WINAPI SetVolumeLabelA(LPCSTR,LPCSTR);
 BOOL        WINAPI SetVolumeLabelW(LPCWSTR,LPCWSTR);
 #define     SetVolumeLabel WINELIB_NAME_AW(SetVolumeLabel)
 DWORD       WINAPI SizeofResource(HMODULE,HRSRC);
-BOOL        WINAPI UnlockFileEx(HFILE,DWORD,DWORD,DWORD,LPOVERLAPPED);
+BOOL        WINAPI UnlockFileEx(HANDLE,DWORD,DWORD,DWORD,LPOVERLAPPED);
 #define     UnlockSegment(handle) GlobalUnfix((HANDLE)(handle))
 DWORD WINAPI VerLanguageNameA( UINT wLang, LPSTR szLang, UINT nSize );
 DWORD WINAPI VerLanguageNameW( UINT wLang, LPWSTR szLang, UINT nSize );
