@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.190 2002-11-27 13:56:26 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.191 2002-12-04 15:23:39 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -20,6 +20,7 @@
 #define INCL_WINTRACKRECT
 
 #include <os2wrap.h>
+#include <odinwrap.h>
 #include <stdlib.h>
 #include <string.h>
 #include <win32type.h>
@@ -490,6 +491,10 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     // restore our FS selector
     SetWin32TIB();
 
+#ifdef DEBUG
+    dbg_ThreadPushCall("Win32WindowProc");
+#endif
+
     // BEGIN NOTE-------------->>>>>> If this is changed, also change Win32FrameWindowProc!! <<<<<<<<<<<-------------------- BEGIN
     teb = GetThreadTEB();
     win32wnd = Win32BaseWindow::GetWindowFromOS2Handle(hwnd);
@@ -556,6 +561,10 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         }
         RELEASE_WNDOBJ(win32wnd);
         RestoreOS2TIB();
+
+#ifdef DEBUG
+        dbg_ThreadPopCall();
+#endif
         return rc;
     }
 
@@ -669,6 +678,16 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         //suspend window drawing
         win32wnd->callVisibleRgnNotifyProc(FALSE);
         goto RunDefWndProc;
+
+    case WIN32APP_DDRAWFULLSCREEN:
+        //Changing the size of the win32 window in SetCooperativeLevel can
+        //fail if this happens during WM_ADJUSTWINDOWPOS
+        //NOTE: This is not a good solution, but a proper fix is more difficult
+        //      with the current window mess
+        dprintf(("WIN32APP_DDRAWFULLSCREEN %x (%d,%d)", win32wnd->getWindowHandle(), mp1, mp2));
+        SetWindowPos(win32wnd->getWindowHandle(), HWND_TOP_W, 0, 0, (DWORD)mp1, (DWORD)mp2, 0);
+        ShowWindow(win32wnd->getWindowHandle(), SW_SHOW_W);
+        break;
 
     case WIN32APP_SETFOCUSMSG:
         //PM doesn't allow SetFocus calls during WM_SETFOCUS message processing;
@@ -1032,12 +1051,20 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     }
     if(win32wnd) RELEASE_WNDOBJ(win32wnd);
     RestoreOS2TIB();
+
+#ifdef DEBUG
+    dbg_ThreadPopCall();
+#endif
     return (MRESULT)rc;
 
 RunDefWndProc:
 //  dprintf(("OS2: RunDefWndProc msg %x for %x", msg, hwnd));
     if(win32wnd) RELEASE_WNDOBJ(win32wnd);
     RestoreOS2TIB();
+
+#ifdef DEBUG
+    dbg_ThreadPopCall();
+#endif
     return WinDefWindowProc( hwnd, msg, mp1, mp2 );
 } /* End of Win32WindowProc */
 //******************************************************************************
@@ -1050,6 +1077,10 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
  TEB             *teb;
  MRESULT          rc = 0;
  MSG              winMsg, *pWinMsg;
+
+#ifdef DEBUG
+    dbg_ThreadPushCall("Win32FrameWindowProc");
+#endif
 
     //Restore our FS selector
     SetWin32TIB();
@@ -1405,6 +1436,12 @@ adjustend:
             }
         }
         dprintf(("WM_ADJUSTWINDOWPOS ret %x flags %x", ret, WinQueryWindowUShort(hwnd, QWS_FLAGS)));
+//testestset
+        if(ret == 0x0f) {
+            dprintf(("PMFRAME:WM_ADJUSTWINDOWPOS, app changed windowpos struct"));
+            dprintf(("%x (%s) (%d,%d), (%d,%d)", pswp->fl, DbgGetStringSWPFlags(pswp->fl), pswp->x, pswp->y, pswp->cx, pswp->cy));
+        }
+//testestset
         rc = (MRESULT)ret;
         break;
     }
@@ -1953,12 +1990,20 @@ PosChangedEnd:
     }
     if(win32wnd) RELEASE_WNDOBJ(win32wnd);
     RestoreOS2TIB();
+
+#ifdef DEBUG
+    dbg_ThreadPopCall();
+#endif
     return (MRESULT)rc;
 
 RunDefFrameWndProc:
     dprintf2(("RunDefFrameWndProc"));
     if(win32wnd) RELEASE_WNDOBJ(win32wnd);
     RestoreOS2TIB();
+
+#ifdef DEBUG
+    dbg_ThreadPopCall();
+#endif
     return pfnFrameWndProc(hwnd, msg, mp1, mp2);
 
 RunDefWndProc:
@@ -1967,6 +2012,10 @@ RunDefWndProc:
     RestoreOS2TIB();
     //calling WinDefWindowProc here breaks Opera hotlist window (WM_ADJUSTWINDOWPOS)
 //    return pfnFrameWndProc(hwnd, msg, mp1, mp2);
+
+#ifdef DEBUG
+    dbg_ThreadPopCall();
+#endif
     return WinDefWindowProc( hwnd, msg, mp1, mp2 );
 }
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.343 2002-11-20 12:59:06 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.344 2002-12-04 15:23:40 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2498,9 +2498,12 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx,
     {//don't allow size changes if the window is minimized
      //we will update the restore position at the end of this method
         if(!(wpos.flags & SWP_NOSIZE)) {
+            //TODO: updating the window rectangle doesn't look right
             wpos.flags |= SWP_NOSIZE;
             rectWindow.right  = rectWindow.left + wpos.cx;
             rectWindow.bottom = rectWindow.top + wpos.cy;
+            dprintf(("WARNING: Don't allow size change for minimized window; only save new restore position"));
+            dprintf(("new window rectangle (%d,%d)(%d,%d)", rectWindow.left, rectWindow.top, rectWindow.right, rectWindow.bottom));
         }
     }
 

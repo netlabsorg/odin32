@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.129 2002-10-15 09:18:10 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.130 2002-12-04 15:23:38 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -681,6 +681,8 @@ void OSLibMapSWPtoWINDOWPOS(PSWP pswp, PWINDOWPOS pwpos, PSWP pswpOld,
     pwpos->y                = y;
     pwpos->hwndInsertAfter  = hWinAfter;
     pwpos->hwnd             = hWindow;
+
+    dprintf2(("OSLibMapSWPtoWINDOWPOS %x (%d,%d)(%d,%d) -> %x (%d,%d)(%d,%d) parent height %d", pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy, flags, x, y, cx, cy, parentHeight));
 }
 //******************************************************************************
 //******************************************************************************
@@ -761,6 +763,8 @@ void OSLibMapWINDOWPOStoSWP(struct tagWINDOWPOS *pwpos, PSWP pswp, PSWP pswpOld,
    pswp->hwnd             = hWindow;
    pswp->ulReserved1      = 0;
    pswp->ulReserved2      = 0;
+
+   dprintf2(("OSLibMapWINDOWPOStoSWP %x (%d,%d)(%d,%d) -> %x (%d,%d)(%d,%d) parent height %d", pwpos->flags, pwpos->x, pwpos->y, pwpos->cx, pwpos->cy, flags, x, y, cx, cy, parentHeight));
 }
 //******************************************************************************
 //******************************************************************************
