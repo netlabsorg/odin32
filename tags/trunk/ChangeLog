@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.2609 2003-07-28 11:33:03 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2610 2003-07-31 12:25:22 sandervl Exp $ */
+
+ 2002-07-31: Dmitry Froloff <froloff@os2   >
+    - USER32:   o Convert WM_CHAR characters to UTF-16 for unicode windows
 
  2003-07-28: Platon Fomichev <stauff@innotek   >
     - WMC:      o Port of Wine Windows Message Compiler
