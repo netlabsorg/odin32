@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.300 2001-11-17 17:49:38 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.301 2001-11-21 11:51:38 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -3704,6 +3704,7 @@ LONG Win32BaseWindow::SetWindowLong(int index, ULONG value, BOOL fUnicode)
                 break;
 
         case GWL_ID:
+                dprintf(("GWL_ID old %x, new %x", getWindowId(), value));
                 oldval = getWindowId();
                 setWindowId(value);
                 break;

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.133 2001-11-14 14:36:03 phaller Exp $ */
+/* $Id: win32wbase.h,v 1.134 2001-11-21 11:51:38 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -119,7 +119,7 @@ typedef struct
 #define IS_OVERLAPPED(style) \
     !(style & (WS_CHILD | WS_POPUP))
 
-#define HAS_MENU() (!(getStyle() & WS_CHILD) && (GetMenu() != 0))
+#define HAS_MENU() (!(getStyle() & WS_CHILD) && (getWindowId() != 0))
 
 #define STATE_INIT	         0   //initial state
 #define STATE_PRE_WMNCCREATE     1   //before WM_NCCREATE
@@ -238,8 +238,6 @@ Win32BaseWindow *getParent();
          DWORD  getCBExtra()                    { return cbExtra; };
          PVOID  getExtraPtr()                   { return pExtra; };
 
-         HMENU  GetMenu()                           { return dwIDMenu; };
-         VOID   SetMenu(HMENU newMenu)              { dwIDMenu = newMenu; };
          void   SetSysMenu(HMENU hSystemMenu)       { hSysMenu = hSystemMenu; };
          HMENU  GetSysMenu()                        { return hSysMenu; }
 

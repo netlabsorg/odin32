@@ -1,4 +1,4 @@
-/* $Id: winaccel.cpp,v 1.9 2001-09-19 15:39:52 sandervl Exp $ */
+/* $Id: winaccel.cpp,v 1.10 2001-11-21 11:51:39 sandervl Exp $ */
 /*
  * Win32 accelerator key functions for OS/2
  *
@@ -90,7 +90,7 @@ static BOOL KBD_translate_accelerator(HWND hWnd,LPMSG msg,
                         return FALSE; //should never happen! (already checked)
                     }
 
-                    hMenu = (window->getStyle() & WS_CHILD) ? 0 : (HMENU)window->GetMenu();
+                    hMenu = GetMenu(hWnd);
 
                     iSysStat = (window->GetSysMenu()) ? GetMenuState(GetSubMenu(window->GetSysMenu(), 0),
                                                                      cmd, MF_BYCOMMAND) : -1 ;

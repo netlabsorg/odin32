@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.39 2001-10-24 15:41:53 sandervl Exp $*/
+/* $Id: menu.cpp,v 1.40 2001-11-21 11:51:37 sandervl Exp $*/
 /*
  * Menu functions
  *
@@ -300,28 +300,6 @@ static void do_debug_print_menuitem(const char *prefix, MENUITEM * mp,
 
 //#define USER_HEAP_ALLOC(size) HeapAlloc(GetProcessHeap(),0,size)
 //#define USER_HEAP_FREE(handle) HeapFree(GetProcessHeap(),0,(LPVOID)handle)
-
-HMENU getMenu(HWND hwnd)
-{
-  Win32BaseWindow *win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
-  
-  if(win32wnd) {
-      HMENU hmenu = win32wnd->GetMenu();
-      RELEASE_WNDOBJ(win32wnd);
-      return hmenu;
-  }
-  return (HMENU)0;
-}
-
-VOID setMenu(HWND hwnd,HMENU hMenu)
-{
-  Win32BaseWindow *win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
-
-  if (win32wnd) {
-      win32wnd->SetMenu(hMenu);
-      RELEASE_WNDOBJ(win32wnd);
-  }
-}
 
 
 /***********************************************************************
@@ -1467,7 +1445,7 @@ UINT MENU_DrawMenuBar( HDC hDC, LPRECT lprect, HWND hwnd,
     UINT i,retvalue;
     HFONT hfontOld = 0;
 
-    lppop = MENU_GetMenu(getMenu(hwnd));
+    lppop = MENU_GetMenu(GetMenu(hwnd));
     if (lppop == NULL || lprect == NULL)
     {
         retvalue = GetSystemMetrics(SM_CYMENU);
@@ -1517,7 +1495,7 @@ UINT MENU_DrawMenuBar( HDC hDC, LPRECT lprect, HWND hwnd,
       for (i = 0; i < lppop->nItems; i++)
       {
         OffsetRect(&lppop->items[i].rect,-lprect->left,-lprect->top);
-        MENU_DrawMenuItem( hwnd,getMenu(hwnd), GetWindow(hwnd,GW_OWNER),
+        MENU_DrawMenuItem( hwnd,GetMenu(hwnd), GetWindow(hwnd,GW_OWNER),
                          memDC, &lppop->items[i], lppop->Height, TRUE, ODA_DRAWENTIRE );
         OffsetRect(&lppop->items[i].rect,lprect->left,lprect->top);
       }
@@ -2265,7 +2243,7 @@ static HMENU MENU_PtMenu(HMENU hMenu,POINT pt,BOOL inMenuBar)
         else
         {
             ht = ((ht == HTSYSMENU) && !inMenuBar) ? (UINT)(getSysMenu(menu->hWnd))
-                 : ((ht == HTMENU) && inMenuBar) ? (UINT)(getMenu(menu->hWnd)) : 0;
+                 : ((ht == HTMENU) && inMenuBar) ? (UINT)(GetMenu(menu->hWnd)) : 0;
         }
    }
    return (HMENU)ht;
@@ -2560,12 +2538,12 @@ static LRESULT MENU_DoNextMenu( MTRACKER* pmt, UINT vk )
             {
                 /* switch to the menu bar */
 
-                if( (GetWindowLongA(pmt->hOwnerWnd,GWL_STYLE) & WS_CHILD) || !getMenu(pmt->hOwnerWnd) )
+                if( (GetWindowLongA(pmt->hOwnerWnd,GWL_STYLE) & WS_CHILD) || !GetMenu(pmt->hOwnerWnd) )
                 {
                     return FALSE;
                 }
 
-                hNewMenu = getMenu(pmt->hOwnerWnd);
+                hNewMenu = GetMenu(pmt->hOwnerWnd);
                 if( vk == VK_LEFT )
                 {
                     menu = MENU_GetMenu(hNewMenu);
@@ -2595,7 +2573,7 @@ static LRESULT MENU_DoNextMenu( MTRACKER* pmt, UINT vk )
                     /* get the real system menu */
                     hNewMenu =  getSysMenu(hNewWnd);
                 }
-                else if( (GetWindowLongA(hNewWnd,GWL_STYLE) & WS_CHILD) || (getMenu(hNewWnd) != hNewMenu) )
+                else if( (GetWindowLongA(hNewWnd,GWL_STYLE) & WS_CHILD) || (GetMenu(hNewWnd) != hNewMenu) )
                 {
                     /* FIXME: Not sure what to do here, perhaps,
                      * try to track hNewMenu as a popup? */
@@ -3162,7 +3140,7 @@ static BOOL MENU_ExitTracking(HWND hWnd)
  */
 void MENU_TrackMouseMenuBar( HWND hWnd, INT ht, POINT pt )
 {
-    HMENU hMenu = (ht == 0) ? getMenu(hWnd):getSysMenu(hWnd);
+    HMENU hMenu = (ht == 0) ? GetMenu(hWnd):getSysMenu(hWnd);
     UINT wFlags = TPM_ENTERIDLEEX | TPM_BUTTONDOWN | TPM_LEFTALIGN | TPM_LEFTBUTTON;
 
     //TRACE("pwnd=%p ht=0x%04x (%ld,%ld)\n", wndPtr, ht, pt.x, pt.y);
@@ -3184,7 +3162,7 @@ POPUPMENU *MENU_HighlightedMenu=NULL;
 
 void MENU_TrackMouseMenuBar_MouseMove(HWND hwnd,POINT pt,BOOL OnMenu)
 {
-    HMENU hMenu = getMenu(hwnd);
+    HMENU hMenu = GetMenu(hwnd);
     MENUITEM *item = NULL;
     RECT rect;
     HDC hdc;
@@ -3261,7 +3239,7 @@ void MENU_TrackKbdMenuBar( HWND hWnd, UINT wParam, INT vkey)
     /* check if we have to track a system menu */
 
     if( (GetWindowLongA(hWnd,GWL_STYLE) & (WS_CHILD | WS_MINIMIZE)) ||
-        !getMenu(hWnd) || vkey == VK_SPACE )
+        !GetMenu(hWnd) || vkey == VK_SPACE )
     {
         if( !(GetWindowLongA(hWnd,GWL_STYLE) & WS_SYSMENU) ) return;
         hTrackMenu = getSysMenu(hWnd);
@@ -3269,7 +3247,7 @@ void MENU_TrackKbdMenuBar( HWND hWnd, UINT wParam, INT vkey)
         wParam |= HTSYSMENU;    /* prevent item lookup */
     }
     else
-        hTrackMenu = getMenu(hWnd);
+        hTrackMenu = GetMenu(hWnd);
 
     if (IsMenu( hTrackMenu ))
     {
@@ -3455,7 +3433,7 @@ UINT MENU_GetMenuBarHeight(HWND hwnd,UINT menubarWidth,INT orgX,INT orgY)
     //TRACE("HWND 0x%x, width %d, at (%d, %d).\n",
     //             hwnd, menubarWidth, orgX, orgY );
 
-    if (!(lppop = MENU_GetMenu(getMenu(hwnd))))
+    if (!(lppop = MENU_GetMenu(GetMenu(hwnd))))
     {
         return 0;
     }
@@ -4142,10 +4120,17 @@ HMENU WINAPI GetMenu( HWND hWnd )
 {
     HMENU retvalue;
 
-    dprintf(("USER32: GetMenu %x", hWnd));
+    dprintf(("USER32: GetMenu %x %x", hWnd, GetWindowLongA( hWnd, GWL_ID )));
 
-    if (GetWindowLongA(hWnd,GWL_STYLE) & WS_CHILD) return 0;
-    else return getMenu(hWnd);
+    if (GetWindowLongA(hWnd,GWL_STYLE) & WS_CHILD) {
+        dprintf(("WARNING: window is child; no menu"));
+        return 0;
+    }
+    retvalue = (HMENU)GetWindowLongA( hWnd, GWL_ID );
+    if(MENU_GetMenu(retvalue) != NULL) {
+        return retvalue;
+    }
+    return 0;
 }
 
 /**********************************************************************
@@ -4168,7 +4153,6 @@ BOOL WINAPI SetMenu( HWND hWnd, HMENU hMenu )
     {
         if (GetCapture() == hWnd) ReleaseCapture();
 
-        setMenu(hWnd,hMenu);
         if (hMenu != 0)
         {
             LPPOPUPMENU lpmenu;
@@ -4181,9 +4165,13 @@ BOOL WINAPI SetMenu( HWND hWnd, HMENU hMenu )
             lpmenu->wFlags &= ~MF_POPUP;  /* Can't be a popup */
             lpmenu->Height = 0;  /* Make sure we recalculate the size */
         }
+        SetWindowLongA( hWnd, GWL_ID, hMenu );
+
+#ifdef __WIN32OS2__
 //SvL: This fixes the menu in standard mine sweeper (window isn't visible
 //     when SetMenu is called)
 //        if (IsWindowVisible(hWnd))
+#endif
             SetWindowPos( hWnd, 0, 0, 0, 0, 0, SWP_NOSIZE | SWP_NOMOVE |
                         SWP_NOACTIVATE | SWP_NOZORDER | SWP_FRAMECHANGED );
         return TRUE;
@@ -4201,7 +4189,15 @@ HMENU WINAPI GetSubMenu( HMENU hMenu, INT nPos )
 
     dprintf(("USER32: GetSubMenu %x %d", hMenu, nPos));
 
+#ifdef __WIN32OS2__
+    if (!(lpmi = MENU_FindItem(&hMenu,(UINT*)&nPos,MF_BYPOSITION)))  {
+        SetLastError(ERROR_INVALID_HANDLE);
+        return 0;
+    }
+#else
     if (!(lpmi = MENU_FindItem(&hMenu,(UINT*)&nPos,MF_BYPOSITION))) return 0;
+#endif
+
     if (!(lpmi->fType & MF_POPUP)) return 0;
     return lpmi->hSubMenu;
 }
@@ -4216,9 +4212,9 @@ BOOL WINAPI DrawMenuBar( HWND hWnd )
 
     dprintf(("USER32: DrawMenuBar %x", hWnd));
 
-    if (!(GetWindowLongA(hWnd,GWL_STYLE) & WS_CHILD) && getMenu(hWnd))
+    if (!(GetWindowLongA(hWnd,GWL_STYLE) & WS_CHILD) && GetMenu(hWnd))
     {
-        lppop = MENU_GetMenu(getMenu(hWnd));
+        lppop = MENU_GetMenu(GetMenu(hWnd));
         if (lppop == NULL)
         {
             return FALSE;
