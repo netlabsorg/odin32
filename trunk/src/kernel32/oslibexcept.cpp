@@ -1,4 +1,4 @@
-/* $Id: oslibexcept.cpp,v 1.6 2001-05-19 11:14:38 sandervl Exp $ */
+/* $Id: oslibexcept.cpp,v 1.7 2001-06-04 21:18:40 sandervl Exp $ */
 /*
  * Exception handler util. procedures
  *
@@ -170,12 +170,17 @@ BOOL APIENTRY OSLibDispatchException(PEXCEPTIONREPORTRECORD pReportRec,
 
   case XCPT_ILLEGAL_INSTRUCTION:
   case XCPT_PRIVILEGED_INSTRUCTION:
+#ifndef DEBUG
+  case XCPT_BREAKPOINT:
+#endif
         rc = RtlDispatchException(&winreportrec, &wincontextrec);
         break;
 
+#ifdef DEBUG
+  case XCPT_BREAKPOINT:
+#endif
   case XCPT_INTEGER_DIVIDE_BY_ZERO:
   case XCPT_INTEGER_OVERFLOW:
-  case XCPT_BREAKPOINT:
   case XCPT_SINGLE_STEP:
   case XCPT_ARRAY_BOUNDS_EXCEEDED:
   case XCPT_DATATYPE_MISALIGNMENT:
