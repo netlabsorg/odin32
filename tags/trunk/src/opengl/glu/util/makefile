@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2000-02-09 08:47:12 jeroen Exp $
+# $Id: makefile,v 1.2 2000-02-09 23:40:51 bird Exp $
 #
 # PD-Win32 API
 #
@@ -13,24 +13,24 @@ PDWIN32_TOOLS = ..\..\..\..\tools\bin
 
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 
-CINCLUDE=-I.. -I..\..\mesa
+CINCLUDE=-I.. -I..\..\mesa -I$(PDWIN32_INCLUDE) -I..\include
 
-CFLAGS = $(CFLAGS) $(CINCLUDE) -I$(PDWIN32_INCLUDE) -I..\include -Tdp -DNDEBUG
-CXXFLAGS = $(CXXFLAGS) $(CINCLUDE) -I$(PDWIN32_INCLUDE) -I..\include -Tdp -DNDEBUG
+CFLAGS = $(CFLAGS) $(CINCLUDE) -Tdp -DNDEBUG
+CXXFLAGS = $(CXXFLAGS) $(CINCLUDE)  -Tdp -DNDEBUG
 
 OBJS= error.obj glue.obj mipmap.obj project.obj quad.obj registry.obj
 
 all: $(OBJS)
 
-#
-# Dependencies
-#
-error.obj: error.c
-glue.obj: glue.c gluint.h
-mipmap.obj: mipmap.c gluint.h
-project.obj: project.c gluint.h
-quad.obj: quad.c gluint.h
-registry.obj: registry.c
+
+dep:
+    $(DEPEND) $(CINCLUDE) *.c *.cpp *.h *.asm *.inc \
+        ..\include\*.h ..\..\mesa\*.h ..\*.h
+
+!ifndef NODEP
+!include .depend
+!endif
+
 
 clean:
     $(RM) *.obj *.lib *.map

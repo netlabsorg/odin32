@@ -44,7 +44,7 @@ EXPORTS
     _CoReleaseMarshalData@4                   @39
     _CoRevokeClassObject@4                    @40
     _CoRevokeMallocSpy@0                      @41
-    _CoSetState@0                             @42
+    _CoSetState@4                             @42
     _CoTaskMemAlloc@4                         @43
     _CoTaskMemFree@4                          @44
     _CoTaskMemRealloc@8                       @45

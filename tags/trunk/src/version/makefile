@@ -1,9 +1,9 @@
-# $Id: makefile,v 1.10 2000-02-05 02:13:02 sandervl Exp $
+# $Id: makefile,v 1.11 2000-02-09 23:40:54 bird Exp $
 
 #
 # PD-Win32 API
 #
-#	version.dll makefile
+#       version.dll makefile
 #
 
 PDWIN32_INCLUDE = ..\..\include
@@ -27,37 +27,43 @@ all: $(TARGET).dll $(TARGET).lib
 
 
 $(TARGET).dll: $(OBJS) $(TARGET).def $(TARGET)exp.def
-	$(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
-              $(PDWIN32_LIB)/kernel32.lib \
-              $(PDWIN32_LIB)/user32.lib $(PDWIN32_LIB)/odincrt.lib \
-              $(PDWIN32_LIB)/crtdll.lib \
-              $(PDWIN32_LIB)/lz32.lib OS2386.LIB $(RTLLIB_O)
-	$(CP) $@ $(PDWIN32_BIN)
+    $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
+          $(PDWIN32_LIB)/kernel32.lib \
+          $(PDWIN32_LIB)/user32.lib $(PDWIN32_LIB)/odincrt.lib \
+          $(PDWIN32_LIB)/crtdll.lib \
+          $(PDWIN32_LIB)/lz32.lib OS2386.LIB $(RTLLIB_O)
+    $(CP) $@ $(PDWIN32_BIN)
 
 
-$(TARGET)exp.def: $(TARGET).def
-        $(IMPDEF) $** $@
+
+lib: $(TARGET).lib $(PDWIN32_LIB)\$(TARGET).lib
+
+$(PDWIN32_LIB)\$(TARGET).lib: $(TARGET).lib
+    $(CP) $** $@
 
 $(TARGET).lib: $(TARGET)exp.def
-	$(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
-	$(CP) $@ $(PDWIN32_LIB)
+    $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
+    $(CP) $@ $(PDWIN32_LIB)
+
+$(TARGET)exp.def: $(TARGET).def
+    $(IMPDEF) $** $@
+
 
 resource.asm: $(TARGET).rc
     $(RC) $(RCFLAGS) -o resource.asm $(TARGET).rc
 
-resource.obj: resource.asm
 
+dep:
+    $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
+    *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
 
-version.obj: version.cpp
-install.obj: install.c
-info.obj: info.c
+!ifndef NODEP
+!include .depend
+!endif
+
 
 clean:
-	$(RM) *.obj *.lib *.dll *.map *.pch	
-	$(RM) $(PDWIN32_BIN)\$(TARGET).dll
-	$(RM) $(PDWIN32_LIB)\$(TARGET).lib
-
-
-
-
+    $(RM) *.obj *.lib *.dll *.map *.pch \
+        $(PDWIN32_BIN)\$(TARGET).dll $(PDWIN32_LIB)\$(TARGET).lib \
+        resource.asm $(TARGET)exp.def
 

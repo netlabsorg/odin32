@@ -1,3 +1,5 @@
+# $Id: makefile,v 1.5 2000-02-09 23:40:55 bird Exp $
+
 #
 # PD-Win32 API
 #
@@ -27,31 +29,39 @@ all: $(TARGET).dll $(TARGET).lib
 
 
 $(TARGET).dll: $(OBJS) $(TARGET).def
-        $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def $(LIBS)
-  $(CP) $@ $(PDWIN32_BIN)
+    $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def $(LIBS)
+    $(CP) $@ $(PDWIN32_BIN)
 
-$(TARGET)exp.def: $(TARGET).def
-    $(IMPDEF) $** $@
+
+
+lib: $(TARGET).lib $(PDWIN32_LIB)\$(TARGET).lib
+
+$(PDWIN32_LIB)\$(TARGET).lib: $(TARGET).lib
+    $(CP) $** $@
 
 $(TARGET).lib: $(TARGET)exp.Def
     $(IMPLIB) $(IMPLIBFLAGS) $@ $**
     $(CP) $@ $(PDWIN32_LIB)\$@
 
-
-wing32.obj: wing32.cpp\
-    wing32impl.h\
-    $(PDWIN32_INCLUDE)\win\wingdi.h \
-    $(PDWIN32_INCLUDE)\win\winuser.h
+$(TARGET)exp.def: $(TARGET).def
+    $(IMPDEF) $** $@
 
 
 resource.asm: $(TARGET).rc
     $(RC) $(RCFLAGS) -o resource.asm $(TARGET).rc
 
-resource.obj: resource.asm
 
-initterm.obj: initterm.cpp wing32impl.h
+dep:
+    $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
+    *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
+
+!ifndef NODEP
+!include .depend
+!endif
+
 
 clean:
-  $(RM) *.obj *.lib *.dll *.map *.pch
-  $(RM) $(PDWIN32_BIN)\$(TARGET).dll
-  $(RM) $(PDWIN32_LIB)\$(TARGET).lib
+    $(RM) *.obj *.lib *.dll *.map *.pch \
+        $(PDWIN32_BIN)\$(TARGET).dll $(PDWIN32_LIB)\$(TARGET).lib \
+        resource.asm $(TARGET)exp.def
+

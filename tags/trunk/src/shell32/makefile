@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.19 2000-02-05 02:10:16 sandervl Exp $
+# $Id: makefile,v 1.20 2000-02-09 23:40:53 bird Exp $
 
 #
 # PD-Win32 API
@@ -33,60 +33,43 @@ all: $(TARGET).dll $(TARGET).lib
 
 
 $(TARGET).dll: $(OBJS) $(TARGET).def
-        $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
-              $(PDWIN32_LIB)/pmwinx.lib $(PDWIN32_LIB)/kernel32.lib \
-              $(PDWIN32_LIB)/user32.lib $(PDWIN32_LIB)/advapi32.lib \
-              $(PDWIN32_LIB)/gdi32.lib $(PDWIN32_LIB)/ole32.lib  \
-              $(PDWIN32_LIB)/version.lib $(PDWIN32_LIB)/comctl32.lib   \
-              $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
-        $(CP) $@ $(PDWIN32_BIN)
+    $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def \
+          $(PDWIN32_LIB)/pmwinx.lib $(PDWIN32_LIB)/kernel32.lib \
+          $(PDWIN32_LIB)/user32.lib $(PDWIN32_LIB)/advapi32.lib \
+          $(PDWIN32_LIB)/gdi32.lib $(PDWIN32_LIB)/ole32.lib  \
+          $(PDWIN32_LIB)/version.lib $(PDWIN32_LIB)/comctl32.lib   \
+          $(PDWIN32_LIB)/odincrt.lib OS2386.LIB $(RTLLIB_O)
+    $(CP) $@ $(PDWIN32_BIN)
 
+
+lib: $(TARGET).lib $(PDWIN32_LIB)\$(TARGET).lib
+
+$(PDWIN32_LIB)\$(TARGET).lib: $(TARGET).lib
+    $(CP) $** $@
 
 $(TARGET).lib: $(TARGET)exp.def
-        $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
-        $(CP) $@ $(PDWIN32_LIB)
+    $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
+    $(CP) $@ $(PDWIN32_LIB)
 
 $(TARGET)exp.def: $(TARGET).def
-        $(IMPDEF) $** $@
+    $(IMPDEF) $** $@
+
 
 resource.asm: shres.rc shell32_en.rc
     $(RC) $(RCFLAGS) -o resource.asm shres.rc
 
-resource.obj: resource.asm
 
+dep:
+    $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
+    *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
 
-initterm.obj:     initterm.cpp $(PDWIN32_INCLUDE)\exitlist.h
-brsfolder.obj:    brsfolder.cpp
-classes.obj:      classes.cpp
-contmenu.obj:     contmenu.cpp
-dataobject.obj:   dataobject.cpp
-enumidlist.obj:   enumidlist.cpp
-folders.obj:      folders.cpp
-iconcache.obj:    iconcache.cpp
-memorystream.obj: memorystream.cpp
-pidl.obj:         pidl.cpp
-regstream.obj:    regstream.cpp
-shell32_main.obj: shell32_main.cpp
-shell.obj:        shell.cpp
-shellguid.obj:    shellguid.cpp
-shelllink.obj:    shelllink.cpp
-shlmenu.obj:      shlmenu.cpp
-shellole.obj:     shellole.cpp
-shellord.obj:     shellord.cpp
-shellpath.obj:    shellpath.cpp
-shlfolder.obj:    shlfolder.cpp
-shlview.obj:      shlview.cpp
-shv_bg_cmenu.obj: shv_bg_cmenu.cpp
-unknown.obj:      unknown.cpp
-misc.obj:         misc.cpp
-she.obj:          she.cpp
-sh.obj:           sh.cpp
-shpolicy.obj:     shpolicy.cpp shpolicy.h
+!ifndef NODEP
+!include .depend
+!endif
+
 
 clean:
-        $(RM) *.obj *.lib *.dll *.map *.pch
-        $(RM) $(PDWIN32_BIN)\$(TARGET).dll
-        $(RM) $(PDWIN32_LIB)\$(TARGET).lib
-
-
+    $(RM) *.obj *.lib *.dll *.map *.pch \
+        $(PDWIN32_BIN)\$(TARGET).dll $(PDWIN32_LIB)\$(TARGET).lib \
+        resource.asm $(TARGET)exp.def
 

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.20 2000-02-09 15:55:56 sandervl Exp $
+# $Id: makefile,v 1.21 2000-02-09 23:40:43 bird Exp $
 #
 # ddraw.dll makefile
 #
@@ -37,87 +37,39 @@ all: $(TARGET).dll $(TARGET).lib
 
 
 $(TARGET).dll: $(OBJS) $(TARGET).def
-        $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def $(LIBS)
-  $(CP) $@ $(PDWIN32_BIN)
+    $(LD) $(LDFLAGS) -Fm -Fe$@ $(OBJS) $(TARGET).def $(LIBS)
+    $(CP) $@ $(PDWIN32_BIN)
 
+
+lib: $(TARGET).lib $(PDWIN32_LIB)\$(TARGET).lib
+
+$(PDWIN32_LIB)\$(TARGET).lib: $(TARGET).lib
+    $(CP) $** $@
 
 $(TARGET).lib: $(TARGET)exp.def
-  $(IMPLIB) $(IMPLIBFLAGS) $@ $**
-  $(CP) $@ $(PDWIN32_LIB)
+    $(IMPLIB) $(IMPLIBFLAGS) $@ $**
+    $(CP) $@ $(PDWIN32_LIB)
 
 $(TARGET)exp.def: $(TARGET).def
-  $(IMPDEF) $** $@
+    $(IMPDEF) $** $@
 
-
-ddraw.obj: ddraw.cpp  \
-    os2ddraw.h        \
-    $(PDWIN32_INCLUDE)\win\ddraw.h
-
-os2ddraw.obj: os2ddraw.cpp  \
-    os2palette.h \
-    os2clipper.h \
-    os2surface.h \
-    os2ddraw.h\
-    $(PDWIN32_INCLUDE)\win\ddraw.h \
-    $(PDWIN32_INCLUDE)\win\d3d.h
-
-os2d3d.obj: os2d3d.cpp \
-    os2ddraw.h\
-    $(PDWIN32_INCLUDE)\win\ddraw.h \
-    $(PDWIN32_INCLUDE)\win\d3d.h
-
-os2palette.obj: os2palette.cpp  \
-    os2palette.h \
-    os2clipper.h \
-    os2surface.h \
-    os2palset.h \
-    os2ddraw.h
-
-os2palset.obj: os2palset.cpp  \
-    os2palset.h
-
-os2clipper.obj: os2clipper.cpp  \
-    os2palette.h \
-    os2clipper.h \
-    os2surface.h \
-    os2ddraw.h\
-    $(PDWIN32_INCLUDE)\win\ddraw.h \
-    $(PDWIN32_INCLUDE)\win\d3d.h
-
-os2surface.obj: os2surface.cpp  \
-    os2palette.h \
-    os2clipper.h \
-    os2surface.h \
-    os2ddraw.h\
-    rectangle.h \
-    $(PDWIN32_INCLUDE)\win\ddraw.h \
-    $(PDWIN32_INCLUDE)\win\d3d.h
 
 resource.asm: $(TARGET).rc
     $(RC) $(RCFLAGS) -o resource.asm $(TARGET).rc
 
-resource.obj: resource.asm
 
-rectangle.obj: rectangle.cpp rectangle.h
+dep:
+    $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
+    *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
 
-initterm.obj: initterm.cpp initterm.h $(PDWIN32_INCLUDE)\exitlist.h
+!ifndef NODEP
+!include .depend
+!endif
 
-os2util.obj:  os2util.cpp os2util.h
-
-bltFunc.obj: bltFunc.cpp bltFunc.h \
-    $(PDWIN32_INCLUDE)\misc.h
-
-fillfunc.obj: fillfunc.cpp fillfunc.h \
-    $(PDWIN32_INCLUDE)\misc.h
-
-colorconv.obj: colorconv.cpp colorconv.h \
-    $(PDWIN32_INCLUDE)\misc.h
-
-iccio1.obj: iccio1.asm
-
-asmutil.obj: asmutil.asm
 
 clean:
-  $(RM) *.obj *.lib *.dll *.map *.pch
-  $(RM) $(PDWIN32_BIN)\$(TARGET).dll
-  $(RM) $(PDWIN32_LIB)\$(TARGET).lib
+    $(RM) *.obj *.lib *.dll *.map *.pch \
+        $(PDWIN32_BIN)\$(TARGET).dll \
+        $(PDWIN32_LIB)\$(TARGET).lib \
+        resource.asm $(TARGET)exp.def
+

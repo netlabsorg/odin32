@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.20 2000-02-01 08:07:26 bird Exp $
+# $Id: Makefile,v 1.21 2000-02-09 23:40:54 bird Exp $
 #
 # Copyright 1998-1999 knut st. osmundsen
 #
@@ -275,12 +275,8 @@ clean:
 # DEPENDENCIES - c and c++ deps are autogenereated.
 #                asm deps must be updated by hand
 ################################################################################
-depend: fastdep.exe
-    fastdep -oObject $(CINCLUDES) misc\*.c* ldr\*.c* dev32\*.c* dev16\*.c* pe2lx\*.c* include\*.h
-
-fastdep.exe: fastdep.c
-    @$(ECHO) making fastdep.exe
-    @icc -Q+ -Ti+ fastdep.c
+dep:
+    $(PDWIN32_TOOLS)\fastdep -oObject $(CINCLUDES) misc\*.c* ldr\*.c* dev32\*.c* dev16\*.c* pe2lx\*.c* include\*.h
 
 object\asmutils.obj:            misc\asmutils.asm     include\devsegdf.inc
 object\calltab.obj:             ldr\calltab.asm
@@ -288,4 +284,6 @@ object\d32hlp.obj:              dev32\d32hlp.asm      include\devsegdf.inc
 object\devfirst.obj:            dev32\devfirst.asm    include\devsegdf.inc
 object\devlast.obj:             dev32\devlast.asm     include\devsegdf.inc
 
-!include .depend
+!ifndef NODEP
+!include .dep
+!endif

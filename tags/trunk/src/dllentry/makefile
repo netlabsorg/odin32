@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2000-02-05 01:49:48 sandervl Exp $
+# $Id: makefile,v 1.2 2000-02-09 23:40:44 bird Exp $
 
 #
 # PD-Win32 API
@@ -23,15 +23,19 @@ TARGET = dllentry
 all: $(PDWIN32_LIB)\$(TARGET).obj
 
 $(PDWIN32_LIB)\$(TARGET).obj: dllentry.obj
-        $(CP) $(TARGET).obj $(PDWIN32_LIB)
+    $(CP) $(TARGET).obj $(PDWIN32_LIB)
 
-$(TARGET).obj: dllentry.cpp
+lib: $(PDWIN32_LIB)\$(TARGET).obj
+
+dep:
+    $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
+    *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
+
+!ifndef NODEP
+!include .depend
+!endif
+
 
 clean:
-        $(RM) *.obj
-        $(RM) $(PDWIN32_LIB)\$(TARGET).obj
-
-
-
-
+    $(RM) *.obj $(PDWIN32_LIB)\$(TARGET).obj *.pch
 

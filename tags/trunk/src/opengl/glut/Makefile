@@ -1,4 +1,5 @@
-# $Id: Makefile,v 1.5 2000-02-09 14:46:26 sandervl Exp $
+# $Id: Makefile,v 1.6 2000-02-09 23:40:52 bird Exp $
+
 #
 # PD-Win32 API
 #
@@ -40,76 +41,15 @@ OBJS = glut_8x13.obj glut_9x15.obj glut_bitmap.obj glut_bwidth.obj glut_cindex.o
        glut_winmisc.obj win32_glx.obj win32_menu.obj win32_util.obj win32_winproc.obj \
        win32_x11.obj glut_term.obj initterm.obj resource.obj
 
-all     : $(TARGET).DLL
+all: $(TARGET).DLL
 
 $(TARGET).DLL: $(OBJS) $(TARGET).def $(TARGET).lrf
-        ILINK /FREE /NOE $(L) @$(TARGET).lrf
-        $(CP) $@ $(PDWIN32_BIN)
+    ILINK /FREE /NOE $(L) @$(TARGET).lrf
+    $(CP) $@ $(PDWIN32_BIN)
 
-$(TARGET).lib: $(TARGET)exp.def
-        $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
-        $(CP) $@ $(PDWIN32_LIB)
-
-$(TARGET)exp.def: $(TARGET).def
-        $(IMPDEF) $** $@
-
-resource.asm: $(TARGET).rc
-    $(RC) $(RCFLAGS) -o resource.asm $(TARGET).rc
-
-resource.obj: resource.asm
-
-initterm.obj: initterm.cpp
-win32_glx.obj: win32_glx.c os2_glx.h
-win32_x11.obj: win32_x11.c os2_x11.h
-win32_menu.obj: win32_menu.c glutint.h glut.h
-win32_util.obj: win32_util.c glutint.h
-win32_winproc.obj: win32_winproc.c glutint.h
-
-glut_mroman.obj: glut_mroman.c glutint.h
-glut_roman.obj: glut_roman.c glutint.h
-glut_hel12.obj: glut_hel12.c glutint.h
-glut_8x13.obj: glut_8x13.c glutint.h
-glut_hel18.obj: glut_hel18.c glutint.h
-glut_9x15.obj: glut_9x15.c glutint.h
-glut_tr10.obj: glut_tr10.c glutint.h
-glut_hel10.obj: glut_hel10.c glutint.h
-glut_tr24.obj: glut_tr24.c glutint.h
-
-glut_bitmap.obj: glut_bitmap.c glutint.h glut.h glutos2.h os2_glx.h os2_x11.h
-glut_bwidth.obj: glut_bwidth.c glutint.h glut.h glutos2.h os2_glx.h os2_x11.h
-glut_cindex.obj: glut_cindex.c glutint.h glut.h glutos2.h os2_glx.h os2_x11.h
-glut_cmap.obj: glut_cmap.c glutint.h glut.h glutos2.h os2_glx.h os2_x11.h
-glut_cursor.obj: glut_cursor.c glutint.h glut.h glutos2.h os2_glx.h os2_x11.h
-glut_dials.obj: glut_dials.c glutint.h glut.h glutos2.h os2_glx.h os2_x11.h
-glut_dstr.obj: glut_dstr.c glutint.h glut.h glutos2.h os2_glx.h os2_x11.h
-glut_event.obj: glut_event.c glutint.h glut.h glutos2.h os2_glx.h os2_x11.h
-glut_ext.obj: glut_ext.c glutint.h glut.h glutos2.h os2_glx.h os2_x11.h
-glut_fullscrn.obj: glut_fullscrn.c glutint.h glut.h glutos2.h os2_glx.h os2_x11.h
-glut_gamemode.obj: glut_gamemode.c glutint.h glut.h glutos2.h os2_glx.h os2_x11.h
-glut_get.obj: glut_get.c glutint.h glut.h glutos2.h os2_glx.h os2_x11.h
-glut_init.obj: glut_init.c glutint.h glut.h glutos2.h os2_glx.h os2_x11.h
-glut_input.obj: glut_input.c glutint.h glut.h glutos2.h os2_glx.h os2_x11.h
-glut_joy.obj: glut_joy.c glutint.h glut.h glutos2.h os2_glx.h os2_x11.h
-glut_key.obj: glut_key.c glutint.h glut.h glutos2.h os2_glx.h os2_x11.h
-glut_keyctrl.obj: glut_keyctrl.c glutint.h glut.h glutos2.h os2_glx.h os2_x11.h
-glut_keyup.obj: glut_keyup.c glutint.h glut.h glutos2.h os2_glx.h os2_x11.h
-glut_mesa.obj: glut_mesa.c glutint.h glut.h glutos2.h os2_glx.h os2_x11.h
-glut_modifier.obj: glut_modifier.c glutint.h glut.h glutos2.h os2_glx.h os2_x11.h
-glut_overlay.obj: glut_overlay.c glutint.h glut.h glutos2.h os2_glx.h os2_x11.h
-glut_shapes.obj: glut_shapes.c glutint.h glut.h glutos2.h os2_glx.h os2_x11.h
-glut_space.obj: glut_space.c glutint.h glut.h glutos2.h os2_glx.h os2_x11.h
-glut_swap.obj: glut_swap.c glutint.h glut.h glutos2.h os2_glx.h os2_x11.h
-glut_swidth.obj: glut_swidth.c glutint.h glut.h glutos2.h os2_glx.h os2_x11.h
-glut_tablet.obj: glut_tablet.c glutint.h glut.h glutos2.h os2_glx.h os2_x11.h
-glut_teapot.obj: glut_teapot.c glutint.h glut.h glutos2.h os2_glx.h os2_x11.h
-glut_util.obj: glut_util.c glutint.h glut.h glutos2.h os2_glx.h os2_x11.h
-glut_vidresize.obj: glut_vidresize.c glutint.h glut.h glutos2.h os2_glx.h os2_x11.h
-glut_warp.obj: glut_warp.c glutint.h glut.h glutos2.h os2_glx.h os2_x11.h
-glut_win.obj: glut_win.c glutint.h glut.h glutos2.h
-glut_winmisc.obj: glut_winmisc.c glutint.h glut.h glutos2.h os2_glx.h os2_x11.h
 
 $(TARGET).lrf: makefile
-   @echo Creating file <<$(@B).lrf
+    @echo Creating file <<$(@B).lrf
 $(OBJS)
 /OUT:$(TARGET).DLL /DLL
 $(PDWIN32_LIB)\ODINCRT.LIB
@@ -124,7 +64,28 @@ OS2386.LIB
 $(TARGET).def
 <<keep
 
+
+$(TARGET).lib: $(TARGET)exp.def
+    $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
+    $(CP) $@ $(PDWIN32_LIB)
+
+$(TARGET)exp.def: $(TARGET).def
+    $(IMPDEF) $** $@
+
+
+resource.asm: $(TARGET).rc
+    $(RC) $(RCFLAGS) -o resource.asm $(TARGET).rc
+
+
+dep:
+    $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
+        *.c *.cpp *.asm *.inc $(PDWIN32_INCLUDE)\*.h
+
+!ifndef NODEP
+!include .depend
+!endif
+
+
 clean:
-        $(RM) *.obj *.lib *.dll *.map *.lrf *exp.def resource.asm
-        $(RM) $(PDWIN32_BIN)\$(TARGET).dll
-        $(RM) $(PDWIN32_LIB)\$(TARGET).lib
+    $(RM) *.obj *.lib *.dll *.map *.lrf *exp.def resource.asm \
+        $(PDWIN32_BIN)\$(TARGET).dll $(PDWIN32_LIB)\$(TARGET).lib
