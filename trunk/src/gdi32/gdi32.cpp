@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.88 2003-11-12 14:12:01 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.89 2003-11-14 17:31:47 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -47,7 +47,9 @@ int WIN32API FillRect(HDC hDC, const RECT * lprc, HBRUSH hbr)
 	hbr = GetSysColorBrush( (INT) hbr - 1 );
     }
     dprintf(("USER32:  FillRect %x (%d,%d)(%d,%d) brush %X", hDC, lprc->left, lprc->top, lprc->right, lprc->bottom, hbr));
+    DIBSECTION_CHECK_IF_DIRTY(hDC);
     ret = O32_FillRect(hDC,lprc,hbr);
+    DIBSECTION_MARK_INVALID(hDC);
     return ret;
 }
 //******************************************************************************
@@ -57,7 +59,9 @@ int WIN32API FrameRect( HDC hDC, const RECT * lprc, HBRUSH  hbr)
     int ret;
 
     dprintf(("USER32: FrameRect %x (%d,%d)(%d,%d) brush %x", hDC, lprc->top, lprc->left, lprc->bottom, lprc->right, hbr));
+    DIBSECTION_CHECK_IF_DIRTY(hDC);
     ret = O32_FrameRect(hDC,lprc,hbr);
+    DIBSECTION_MARK_INVALID(hDC);
     return ret;
 }
 //******************************************************************************
@@ -70,7 +74,9 @@ BOOL WIN32API InvertRect( HDC hDC, const RECT * lprc)
          dprintf(("USER32: InvertRect %x (%d,%d)(%d,%d)", hDC, lprc->left, lprc->top, lprc->right, lprc->bottom));
     }
     else dprintf(("USER32: InvertRect %x NULL", hDC));
+    DIBSECTION_CHECK_IF_DIRTY(hDC);
     ret = O32_InvertRect(hDC,lprc);
+    DIBSECTION_MARK_INVALID(hDC);
     return ret;
 }
 //******************************************************************************
