@@ -1,4 +1,4 @@
-/* $Id: probkrnl.c,v 1.25 2000-09-08 21:34:09 bird Exp $
+/* $Id: probkrnl.c,v 1.26 2000-09-12 21:13:34 bird Exp $
  *
  * Description:   Autoprobes the os2krnl file and os2krnl[*].sym files.
  *                Another Hack!
@@ -1058,7 +1058,8 @@ void ShowResult(int rc)
      */
     if (!options.fQuiet || rc != NO_ERROR)
     {
-        printf16("Win32k - Odin32 support driver.\n");
+        printf16("Win32k - Odin32 support driver. (Built %s %s)\n",
+                 (NPSZ)szBuildTime, (NPSZ)szBuildDate);
 
         /*
          * kernel stuff
