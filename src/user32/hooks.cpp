@@ -1,4 +1,4 @@
-/* $Id: hooks.cpp,v 1.5 1999-09-15 23:18:50 sandervl Exp $ */
+/* $Id: hooks.cpp,v 1.6 1999-10-15 09:26:21 sandervl Exp $ */
 
 /*
  * Win32 hook class for OS/2
@@ -238,7 +238,7 @@ LRESULT HkCBT::CBTCallback(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam
  RECT              rect;
 
   switch(message) {
-	case WM_CREATE:
+//	case WM_CREATE:
 	case WM_NCCREATE:
 #ifdef DEBUG
 		WriteLog("HkCBT: WM_CREATE\n");
@@ -246,6 +246,8 @@ LRESULT HkCBT::CBTCallback(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam
 		createwnd.lpcs            = (CREATESTRUCTA *)lParam;
 		createwnd.hwndInsertAfter = createwnd.lpcs->hwndParent; //TODO: not correct
 		return(pCallback(HCBT_CREATEWND, hwnd, (LPARAM)&createwnd));
+//SvL: Only send it once during WM_NCCREATE
+#if 0
 	case WM_INITDIALOG:
 #ifdef DEBUG
 		WriteLog("HkCBT: WM_INITDIALOG\n");
@@ -260,13 +262,15 @@ LRESULT HkCBT::CBTCallback(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam
 		createwnd.lpcs            = (CREATESTRUCTA *)lParam; //==CLIENTCREATESTRUCT *
 		createwnd.hwndInsertAfter = GetParent(hwnd); //TODO: not correct
 		return(pCallback(HCBT_CREATEWND, hwnd, (LPARAM)&createwnd));
-	case WM_DESTROY:
+#endif
+
+//	case WM_DESTROY:
 	case WM_NCDESTROY:
 #ifdef DEBUG
 		WriteLog("HkCBT: WM_DESTROY\n");
 #endif
 		return(pCallback(HCBT_DESTROYWND, hwnd, 0));
-	case WM_ACTIVATE:
+//	case WM_ACTIVATE:
 	case WM_NCACTIVATE:
 #ifdef DEBUG
 		WriteLog("HkCBT: WM_ACTIVATE\n");
@@ -822,9 +826,7 @@ static LRESULT OS2HkMsgFilterProc(int code, WPARAM wParam, LPARAM lParam)
  HkMsgFilter *hook = HkMsgFilter::hooks;
  LRESULT   rc;
 
-#ifdef DEBUG
-  WriteLog("MsgFilterProc\n");
-#endif
+//  dprintf(("MsgFilterProc\n"));
   while(hook != NULL) {
 	if(hook->fRecursive == FALSE) {
 		if(hook->dwThreadId == 0 || hook->dwThreadId == GetCurrentThreadId()) {

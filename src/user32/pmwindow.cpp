@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.28 1999-10-14 19:31:31 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.29 1999-10-15 09:26:22 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -201,7 +201,6 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
         if(win32wnd->MsgCreate(WinQueryWindow(hwnd, QW_PARENT), hwnd) == FALSE)
         {
-            delete win32wnd;
             RestoreOS2TIB();
             return (MRESULT)TRUE; //discontinue window creation
         }

@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.7 1999-10-08 21:25:47 cbratschi Exp $ */
+/* $Id: scroll.cpp,v 1.8 1999-10-15 09:26:23 sandervl Exp $ */
 /*
  * Scrollbar control
  *
@@ -1113,7 +1113,8 @@ LRESULT WINAPI ScrollBarWndProc( HWND hwnd, UINT message, WPARAM wParam,
         break;
 
     default:
-        if (message >= WM_USER)
+//SvL: BUGFIX: Send WM_NCCREATE to defwndproc, return value 0 cancels window creation!
+//        if (message >= WM_USER)
             //WARN("unknown msg %04x wp=%04x lp=%08lx\n",
             //             message, wParam, lParam );
         return DefWindowProcA( hwnd, message, wParam, lParam );
