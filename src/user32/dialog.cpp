@@ -1,4 +1,4 @@
-/* $Id: dialog.cpp,v 1.4 1999-06-10 16:50:35 phaller Exp $ */
+/* $Id: dialog.cpp,v 1.5 1999-06-26 13:46:21 sandervl Exp $ */
 
 /*
  * Win32 dialog API functions for OS/2
@@ -13,7 +13,6 @@
 #include <nameid.h>
 #include "user32.h"
 #include "wndproc.h"
-#include "wndsubproc.h"
 #include "wndclass.h"
 #include "dlgconvert.h"
 
