@@ -1,4 +1,4 @@
-/* $Id: hotkey.h,v 1.3 1999-09-19 13:26:47 cbratschi Exp $ */
+/* $Id: hotkey.h,v 1.4 1999-09-23 15:49:57 cbratschi Exp $ */
 
 /*
  * Hotkey class extra info
@@ -20,6 +20,7 @@ typedef struct tagHOTKEY_INFO
     INT   fwCombInv;
     INT   fwModInv;
     POINT cursorPos;
+    BYTE  bfModsDown;
 } HOTKEY_INFO;
 
 
