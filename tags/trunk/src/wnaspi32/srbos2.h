@@ -1,10 +1,13 @@
+#ifndef _SRBOS2_H_
+#define _SRBOS2_H_
+
 #pragma pack(1)
 
         /* SRB command */
 #define SRB_Inquiry     0x00
 #define SRB_Device      0x01
 #define SRB_Command     0x02
-#define SRB_Abort       0x03
+#define SRBOS2_Abort    0x03
 #define SRB_Reset       0x04
 #define SRB_Param       0x05
 
@@ -33,7 +36,7 @@
 
         /* SRB host adapter status */
 #define SRB_NoError     0x00    /* No host adapter detected error */
-#define SRB_Timeout     0x11    /* Selection timeout */
+#define SRBOS2_Timeout     0x11    /* Selection timeout */
 #define SRB_DataLength  0x12    /* Data over/underrun */
 #define SRB_BusFree     0x13    /* Unexpected bus free */
 #define SRB_BusSequence 0x14    /* Target bus sequence failure */
@@ -140,4 +143,5 @@ typedef struct SRBOS2 {
 #define SK_MisComp      0x0E;   // Miscompare
 #define SK_Reserved     0x0F;   // Reserved
 
-
+#pragma pack()
+#endif // _SRBOS2_H_
