@@ -1,4 +1,4 @@
-/* $Id: dsound.h,v 1.1 1999-05-24 20:19:12 ktk Exp $ */
+/* $Id: dsound.h,v 1.2 1999-10-23 22:59:39 sandervl Exp $ */
 
 #ifndef __WINE_DSOUND_H
 #define __WINE_DSOUND_H
@@ -189,7 +189,8 @@ extern HRESULT WINAPI DirectSoundCreate(REFGUID lpGUID,LPDIRECTSOUND * ppDS,IUnk
 /*****************************************************************************
  * IDirectSound interface
  */
-#define ICOM_INTERFACE IDirectSound
+//#define ICOM_INTERFACE IDirectSound
+#define ICOM_INTERFACE VOID
 #define IDirectSound_METHODS \
     ICOM_METHOD3(HRESULT,CreateSoundBuffer,    LPDSBUFFERDESC,lpcDSBufferDesc, LPLPDIRECTSOUNDBUFFER,lplpDirectSoundBuffer, IUnknown*,pUnkOuter) \
     ICOM_METHOD1(HRESULT,GetCaps,              LPDSCAPS,lpDSCaps) \
@@ -225,7 +226,8 @@ ICOM_DEFINE(IDirectSound,IUnknown)
 /*****************************************************************************
  * IDirectSoundBuffer interface
  */
-#define ICOM_INTERFACE IDirectSoundBuffer
+//#define ICOM_INTERFACE IDirectSoundBuffer
+#define ICOM_INTERFACE VOID
 #define IDirectSoundBuffer_METHODS \
     ICOM_METHOD1(HRESULT,GetCaps,              LPDSBCAPS,lpDSBufferCaps) \
     ICOM_METHOD2(HRESULT,GetCurrentPosition,   LPDWORD,lpdwCurrentPlayCursor, LPDWORD,lpdwCurrentWriteCursor) \
