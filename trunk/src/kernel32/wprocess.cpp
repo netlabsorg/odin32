@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.151 2002-05-10 14:55:13 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.152 2002-05-21 12:07:11 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -175,8 +175,13 @@ TEB * WIN32API InitializeTIB(BOOL fMainThread)
     *TIBFlatPtr = (DWORD)winteb;
 
     winteb->except      = (PVOID)-1;               /* 00 Head of exception handling chain */
+
     winteb->stack_top   = (PVOID)OSLibGetTIB(TIB_STACKTOP); /* 04 Top of thread stack */
+    winteb->stack_top   = (PVOID)(((ULONG)winteb->stack_top + 0xFFF) & ~0xFFF);
+    //round to next page (OS/2 doesn't return a nice rounded value)
     winteb->stack_low   = (PVOID)OSLibGetTIB(TIB_STACKLOW); /* 08 Stack low-water mark */
+    //round to page boundary (OS/2 doesn't return a nice rounded value)
+    winteb->stack_low   = (PVOID)((ULONG)winteb->stack_low & ~0xFFF);
     winteb->htask16     = (USHORT)OSLibGetPIB(PIB_TASKHNDL); /* 0c Win16 task handle */
     winteb->stack_sel   = getSS();                 /* 0e 16-bit stack selector */
     winteb->self        = winteb;                  /* 18 Pointer to this structure */
