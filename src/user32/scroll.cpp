@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.16 1999-10-29 16:06:56 cbratschi Exp $ */
+/* $Id: scroll.cpp,v 1.17 1999-10-30 18:40:45 cbratschi Exp $ */
 /*
  * Scrollbar control
  *
@@ -8,6 +8,9 @@
  * Copyright 1994, 1996 Alexandre Julliard
  *
  * WINE version: 990923
+ *
+ * Status:  complete
+ * Version: 5.00
  */
 
 #include <stdlib.h>
@@ -878,7 +881,7 @@ LRESULT SCROLL_HandleScrollEvent(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar,
       case SCROLL_TOP_ARROW:
         if (msg == WM_LBUTTONUP)
           KillSystemTimer(hwnd,SCROLL_TIMER);
-        else if (msg == WM_LBUTTONDOWN || !timerRunning)
+        else if (msg == WM_LBUTTONDOWN || (!timerRunning && msg == WM_SYSTIMER))
         {
           SetSystemTimer( hwnd, SCROLL_TIMER, (msg == WM_LBUTTONDOWN) ?
                           SCROLL_FIRST_DELAY : SCROLL_REPEAT_DELAY,
@@ -899,7 +902,7 @@ LRESULT SCROLL_HandleScrollEvent(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar,
       case SCROLL_TOP_RECT:
         if (msg == WM_LBUTTONUP)
           KillSystemTimer(hwnd,SCROLL_TIMER);
-        else if (msg == WM_LBUTTONDOWN || !timerRunning)
+        else if (msg == WM_LBUTTONDOWN || (!timerRunning && msg == WM_SYSTIMER))
         {
           SetSystemTimer( hwnd, SCROLL_TIMER, (msg == WM_LBUTTONDOWN) ?
                           SCROLL_FIRST_DELAY : SCROLL_REPEAT_DELAY,
@@ -973,7 +976,7 @@ LRESULT SCROLL_HandleScrollEvent(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar,
       case SCROLL_BOTTOM_RECT:
         if (msg == WM_LBUTTONUP)
           KillSystemTimer(hwnd,SCROLL_TIMER);
-        else if (msg == WM_LBUTTONDOWN || !timerRunning)
+        else if (msg == WM_LBUTTONDOWN || (!timerRunning && msg == WM_SYSTIMER))
         {
           SetSystemTimer( hwnd, SCROLL_TIMER, (msg == WM_LBUTTONDOWN) ?
                           SCROLL_FIRST_DELAY : SCROLL_REPEAT_DELAY,
@@ -997,7 +1000,7 @@ LRESULT SCROLL_HandleScrollEvent(HWND hwnd,WPARAM wParam,LPARAM lParam,INT nBar,
       case SCROLL_BOTTOM_ARROW:
         if (msg == WM_LBUTTONUP)
           KillSystemTimer(hwnd,SCROLL_TIMER);
-        else if (msg == WM_LBUTTONDOWN || !timerRunning)
+        else if (msg == WM_LBUTTONDOWN || (!timerRunning && msg == WM_SYSTIMER))
         {
           SetSystemTimer( hwnd, SCROLL_TIMER, (msg == WM_LBUTTONDOWN) ?
                           SCROLL_FIRST_DELAY : SCROLL_REPEAT_DELAY,
@@ -1605,6 +1608,7 @@ BOOL WINAPI ShowScrollBar(
 
     return TRUE;
 }
+
 /*************************************************************************
  *           EnableScrollBar   (USER32.171)
  */
@@ -1676,6 +1680,52 @@ BOOL WINAPI EnableScrollBar( HWND hwnd, INT nBar, UINT flags)
       return rc;
     }
   }
+
+  return TRUE;
+}
+
+//CB: not listed in user32.exp -> don't know the id!
+
+BOOL WINAPI GetScrollBarInfo(HWND hwnd,LONG idObject,PSCROLLBARINFO psbi)
+{
+  if (!psbi || psbi->cbSize != sizeof(SCROLLBARINFO))
+  {
+    SetLastError(ERROR_INVALID_PARAMETER);
+
+    return FALSE;
+  }
+
+  HWND hwndScroll;
+  INT nBar,arrowSize;
+
+  switch (idObject)
+  {
+    case OBJID_CLIENT:
+      nBar = SB_CTL;
+      hwndScroll = hwnd;
+      break;
+
+    case OBJID_HSCROLL:
+      nBar = SB_HORZ;
+      hwndScroll = SCROLL_GetScrollHandle(hwnd,SB_HORZ);
+      break;
+
+    case OBJID_VSCROLL:
+      nBar = SB_VERT;
+      hwndScroll = SCROLL_GetScrollHandle(hwnd,SB_VERT);
+      break;
+
+    default:
+      return FALSE;
+  }
+
+  if (!hwndScroll) return FALSE;
+
+  SCROLL_GetScrollBarRect(hwndScroll,nBar,&psbi->rcScrollBar,&arrowSize,&psbi->dxyLineButton,&psbi->xyThumbTop);
+  psbi->xyThumbBottom = psbi->xyThumbTop+psbi->dxyLineButton;
+  psbi->bogus = 0; //CB: undocumented!
+  psbi->rgstate[0] = IsWindowVisible(hwndScroll) ? STATE_SYSTEM_INVISIBLE:0;
+  psbi->rgstate[1] = psbi->rgstate[2] = psbi->rgstate[3] = psbi->rgstate[4] = psbi->rgstate[5] = psbi->rgstate[0]; //CB: todo
 
   return TRUE;
 }

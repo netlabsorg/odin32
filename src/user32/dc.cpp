@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.17 1999-10-22 18:11:43 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.18 1999-10-30 18:40:43 cbratschi Exp $ */
 
 /*
  * DC functions for USER32
@@ -1340,6 +1340,14 @@ INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, cons
 
     RECTL rectlUpdate;
     HRGN  hrgn;
+
+    if (scrollFlag & SW_SMOOTHSCROLL_W)
+    {
+      INT time = (scrollFlag >> 16) & 0xFFFF;
+
+      //CB: todo, scroll in several steps
+      //    is time in ms? time <-> iteration count?
+    }
 
     LONG lComplexity = WinScrollWindow (window->getOS2WindowHandle(), dx, dy,
                                         (pScroll) ? &scrollRect : NULL,

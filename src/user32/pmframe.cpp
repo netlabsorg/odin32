@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.13 1999-10-29 16:06:55 cbratschi Exp $ */
+/* $Id: pmframe.cpp,v 1.14 1999-10-30 18:40:44 cbratschi Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -386,7 +386,7 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
         win32wnd->MsgPosChanged((LPARAM)&wp);
 
 PosChangedEnd:
-  	RestoreOS2TIB();
+        RestoreOS2TIB();
         return rc;
     }
 #if 0
@@ -425,8 +425,14 @@ PosChangedEnd:
     }
 #else
     case WM_ACTIVATE:
+      {
+        RestoreOS2TIB();
+        MRESULT rc = OldFrameProc(hwnd,msg,mp1,mp2);
+        //CB: overwrite OS/2's default frame
         DrawActivate(win32wnd, hwnd);
-        goto RunDefFrameProc;
+        return rc;
+      }
+
 #endif
 #else
     case WM_ADJUSTWINDOWPOS:

@@ -1,4 +1,4 @@
-/* $Id: win32dlg.h,v 1.5 1999-10-30 10:55:16 sandervl Exp $ */
+/* $Id: win32dlg.h,v 1.6 1999-10-30 18:40:47 cbratschi Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -68,58 +68,45 @@ virtual ~Win32Dialog();
 
 Win32BaseWindow *getDlgItem(int id) { return FindWindowById(id); };
 
-         HWND   getNextDlgTabItem(HWND hwndCtrl, BOOL fPrevious);
-         HWND   getNextDlgGroupItem(HWND hwndCtrl, BOOL fPrevious);
          BOOL   endDialog(int retval);
-
-         BOOL   MapDialogRect(LPRECT rect);
 
 virtual  ULONG  MsgCreate(HWND hwndFrame, HWND hwndClient);
 
-virtual	 LONG   SetWindowLongA(int index, ULONG value);
-virtual	 ULONG  GetWindowLongA(int index);
+virtual  LONG   SetWindowLongA(int index, ULONG value);
+virtual  ULONG  GetWindowLongA(int index);
 
-static	 ULONG  GetDialogBaseUnits()  { return MAKELONG(xBaseUnit, yBaseUnit); };
-
-	   INT  doDialogBox();
+           INT  doDialogBox();
 
 protected:
-	BOOL    DIALOG_Init(void);
-	BOOL    getCharSizeFromDC( HDC hDC, HFONT hFont, SIZE * pSize );
-	BOOL    getCharSize( HFONT hFont, SIZE * pSize);
-	LPCSTR  parseTemplate( LPCSTR dlgtemplate, DLG_TEMPLATE *result);
+        LPCSTR  parseTemplate( LPCSTR dlgtemplate, DLG_TEMPLATE *result);
         WORD   *getControl(const WORD *p, DLG_CONTROL_INFO *info, BOOL dialogEx);
-	BOOL    createControls(LPCSTR dlgtemplate, HINSTANCE hInst);
-	
-	LRESULT DefDlg_Proc(UINT msg, WPARAM wParam, LPARAM lParam);
+        BOOL    createControls(LPCSTR dlgtemplate, HINSTANCE hInst);
+
+        LRESULT DefDlg_Proc(UINT msg, WPARAM wParam, LPARAM lParam);
         LRESULT DefDlg_Epilog(UINT msg, BOOL fResult);
 
-	BOOL    setDefButton(HWND hwndNew );
-	HWND    findDefButton();
-	BOOL    saveFocus();
-	BOOL    restoreFocus();
-	void    setFocus(HWND hwndCtrl );
+        BOOL    setDefButton(HWND hwndNew );
+        HWND    findDefButton();
+        BOOL    saveFocus();
+        BOOL    restoreFocus();
+        void    setFocus(HWND hwndCtrl );
 
-	// values normally contained in the standard dialog words
-      DLGPROC	Win32DlgProc;	//DWL_WNDPROC
-	ULONG	msgResult;	//DWL_MSGRESULT
-	ULONG	userDlgData;	//DWL_USER
+        // values normally contained in the standard dialog words
+      DLGPROC   Win32DlgProc;   //DWL_WNDPROC
+        ULONG   msgResult;      //DWL_MSGRESULT
+        ULONG   userDlgData;    //DWL_USER
 
    DLG_TEMPLATE dlgInfo;
-	WORD    xUnit;
-	WORD    yUnit;
-	HWND    hwndFocus;
-	HFONT   hUserFont;
-	HMENU   hMenu;
-	DWORD   idResult;
-	DWORD   dialogFlags;
+        WORD    xUnit;
+        WORD    yUnit;
+        HWND    hwndFocus;
+        HFONT   hUserFont;
+        HMENU   hMenu;
+        DWORD   idResult;
+        DWORD   dialogFlags;
 
-	DWORD   tmpParam;       //set in ctor, used in MsgCreate method
-	LPSTR   tmpDlgTemplate; //set in ctor, used in MsgCreate method
-private:
- static BOOL    fInitialized;
- static int     xBaseUnit;
- static int     yBaseUnit;
+        DWORD   tmpParam;       //set in ctor, used in MsgCreate method
+        LPSTR   tmpDlgTemplate; //set in ctor, used in MsgCreate method
 };
 
 /* Built-in class names (see _Undocumented_Windows_ p.418) */
