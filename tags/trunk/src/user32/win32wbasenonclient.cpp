@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.17 2000-03-18 16:13:39 cbratschi Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.18 2000-04-01 11:35:00 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -856,6 +856,10 @@ VOID Win32BaseWindow::DrawCaption(HDC hdc,RECT *rect,BOOL active)
   HPEN  hPrevPen;
   HDC memDC;
   HBITMAP memBmp,oldBmp;
+  SYSTEMTIME time; //WYSIWYGOFOA
+
+  GetSystemTime(&time);
+
 
   memDC = CreateCompatibleDC(hdc);
   r.right -= r.left;
@@ -874,6 +878,12 @@ VOID Win32BaseWindow::DrawCaption(HDC hdc,RECT *rect,BOOL active)
   if (SYSCOLOR_GetUseWinColors())
   {
     COLORREF startColor = GetSysColor(active ? COLOR_ACTIVECAPTION:COLOR_INACTIVECAPTION),endColor = GetSysColor(active ? COLOR_GRADIENTACTIVECAPTION:COLOR_GRADIENTINACTIVECAPTION);
+
+    if ((time.wMonth == 4) && (time.wDay == 1))
+    {
+      startColor = RGB(rand() & 0xFF,rand() & 0xFF,rand() & 0xFF);
+      endColor = RGB(rand() & 0xFF,rand() & 0xFF,rand() & 0xFF);
+    }
 
     if (startColor == endColor)
       FillRect(memDC,&r,GetSysColorBrush(startColor));
@@ -954,10 +964,12 @@ VOID Win32BaseWindow::DrawCaption(HDC hdc,RECT *rect,BOOL active)
     }
   }
 
-  if (GetWindowTextA(buffer, sizeof(buffer) ))
+  if (GetWindowTextA(buffer, sizeof(buffer)-2 )) //WYSIWYGOFOA: -2
   {
     NONCLIENTMETRICSA nclm;
     HFONT hFont, hOldFont;
+
+    if ((time.wMonth == 4) && (time.wDay == 1)) strcat(buffer,"/2"); //WYSIWYGOFOA
 
     nclm.cbSize = sizeof(NONCLIENTMETRICSA);
     SystemParametersInfoA (SPI_GETNONCLIENTMETRICS, 0, &nclm, 0);
@@ -1384,7 +1396,7 @@ BOOL WIN32API DrawCaptionTemp(HWND hwnd,HDC hdc,const RECT *rect,HFONT hFont,HIC
       Win32BaseWindow *win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
 
       if (!win32wnd) return 0;
-	
+
       DrawIconEx (hdc, pt.x, pt.y, win32wnd->IconForWindow(ICON_SMALL),
                   GetSystemMetrics(SM_CXSMICON),
                   GetSystemMetrics(SM_CYSMICON), 0, 0, DI_NORMAL);
