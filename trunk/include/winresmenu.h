@@ -1,4 +1,4 @@
-/* $Id: winresmenu.h,v 1.2 1999-08-31 17:15:53 sandervl Exp $ */
+/* $Id: winresmenu.h,v 1.3 1999-09-15 23:29:09 sandervl Exp $ */
 
 /*
  * Win32 Menu resource class
@@ -19,8 +19,8 @@ class Win32MenuRes : public Win32Resource
 public:
                    // Constructors and destructors
                    Win32MenuRes(HWND hwndObjectMenu);
-                   Win32MenuRes(Win32Image *module, HRSRC hRes, ULONG id, ULONG type);
-                   Win32MenuRes(Win32Image *module, ULONG id, ULONG type,
+                   Win32MenuRes(Win32ImageBase *module, HRSRC hRes, ULONG id, ULONG type);
+                   Win32MenuRes(Win32ImageBase *module, ULONG id, ULONG type,
 	                        ULONG size, char *resdata);
 		   Win32MenuRes(LPVOID menutemplate);
 
