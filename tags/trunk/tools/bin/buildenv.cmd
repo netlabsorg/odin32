@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.42 2003-01-22 17:33:14 bird Exp $
+/* $Id: buildenv.cmd,v 1.43 2003-01-23 14:08:07 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -26,7 +26,7 @@
     /*
      * Version
      */
-    sVersion = '1.0.15 [2003-01-22]';
+    sVersion = '1.0.16 [2003-01-23]';
 
     /*
      * Create argument array with lowercase arguments.
@@ -891,6 +891,7 @@ PathSetDefault: procedure expose aCfg. aPath. sPathFile
         aPath.i.sPId = 'cvs';                       aPath.i.sPath = 'e:\dev\cvs\v11.1';             i = i + 1;
         aPath.i.sPId = 'emx';                       aPath.i.sPath = 'e:\emx';                       i = i + 1;
         aPath.i.sPId = 'emxpgcc';                   aPath.i.sPath = 'e:\dev\emxpgcc\v2.95.2';       i = i + 1;
+        aPath.i.sPId = 'gcc303';                    aPath.i.sPath = 'e:\dev\v3.0.3beta\emx';        i = i + 1;
       /*aPath.i.sPId = 'db2v52';                    aPath.i.sPath = 'e:\sqllib52';                  i = i + 1;
         aPath.i.sPId = 'icatgam';                   aPath.i.sPath = 'e:\icatos2';                   i = i + 1;
         aPath.i.sPId = 'icatgam406rc1';             aPath.i.sPath = 'e:\icatos2.4.0.6.rc1';         i = i + 1;
@@ -940,6 +941,7 @@ PathSetDefault: procedure expose aCfg. aPath. sPathFile
         aPath.i.sPId = 'cvs';                       aPath.i.sPath = 'd:\dev\cvs\v11.1';             i = i + 1;
         aPath.i.sPId = 'emx';                       aPath.i.sPath = 'd:\emx';                       i = i + 1;
         aPath.i.sPId = 'emxpgcc';                   aPath.i.sPath = 'd:\dev\emxpgcc\v2.95.2';       i = i + 1;
+        aPath.i.sPId = 'gcc303';                    aPath.i.sPath = 'e:\dev\gcc\v3.0.3beta\emx';    i = i + 1;
       /*aPath.i.sPId = 'db2v52';                    aPath.i.sPath = 'e:\sqllib52';                  i = i + 1;
         aPath.i.sPId = 'icatgam';                   aPath.i.sPath = 'e:\icatos2';                   i = i + 1;
         aPath.i.sPId = 'icatgam406rc1';             aPath.i.sPath = 'e:\icatos2.4.0.6.rc1';         i = i + 1;
