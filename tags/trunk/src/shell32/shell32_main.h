@@ -185,12 +185,7 @@ void FreeChangeNotifications(void);
 
 BOOL SHELL_DeleteDirectoryA(LPCSTR pszDir, BOOL bShowUI);
 BOOL SHELL_DeleteFileA(LPCSTR pszFile, BOOL bShowUI);
-#ifdef __WIN32OS2__
-#define SHELL_WarnItemDelete SHELL_ConfirmDialog
 BOOL SHELL_ConfirmDialog(int nKindOfDialog, LPCSTR szDir);
-#else
-BOOL SHELL_WarnItemDelete(int nKindOfDialog, LPCSTR szDir);
-#endif
 
 #ifdef __WIN32OS2__
 #ifdef __cplusplus
