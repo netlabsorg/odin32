@@ -1,4 +1,4 @@
-/* $Id: odin32.e,v 1.10 2001-10-23 02:30:54 bird Exp $
+/* $Id: odin32.e,v 1.11 2001-10-24 04:00:28 bird Exp $
  *
  * Visual SlickEdit Documentation Macros.
  *
@@ -357,7 +357,7 @@ void odin32_modulebox()
     _begin_line();
     if (file_eq(p_extension, 'asm'))
     {
-        _insert_text("; $Id: odin32.e,v 1.10 2001-10-23 02:30:54 bird Exp $\n");
+        _insert_text("; $Id: odin32.e,v 1.11 2001-10-24 04:00:28 bird Exp $\n");
         _insert_text("; \n");
         _insert_text("; \n");
         _insert_text("; \n");
@@ -370,7 +370,7 @@ void odin32_modulebox()
     }
     else
     {
-        _insert_text("/* $Id: odin32.e,v 1.10 2001-10-23 02:30:54 bird Exp $\n");
+        _insert_text("/* $Id: odin32.e,v 1.11 2001-10-24 04:00:28 bird Exp $\n");
         _insert_text(" * \n");
         _insert_text(" * \n");
         _insert_text(" * \n");
@@ -774,6 +774,7 @@ static void odin32_klog_file_int(boolean fAsk)
  */
 int odin32_func_goto_nearest()
 {
+    boolean fFix = false;               /* cursor at function fix. (last function) */
     cur_line = p_line;
     prev_line = -1;
     next_line = -1;
@@ -791,7 +792,10 @@ int odin32_func_goto_nearest()
         _save_pos2(org_pos);
     }
     else
+    {
         p_col++;                        /* fixes problem with single function files. */
+        fFix = true;
+    }
 
     if (!prev_proc(1))
     {
@@ -808,6 +812,8 @@ int odin32_func_goto_nearest()
 
     if (prev_line != -1 && (next_line == -1 || cur_line - prev_line <= next_line - cur_line))
     {
+        if (fFix)
+            p_col++;
         prev_proc(1);
         return 0;
     }
@@ -1108,13 +1114,36 @@ static _str odin32_getreturntype(boolean fPureType = false)
                 sTypeRaw = stranslate(sTypeRaw, "", "__cdecl", "I");
                 sTypeRaw = stranslate(sTypeRaw, "", "_cdecl", "I");
                 sTypeRaw = stranslate(sTypeRaw, "", "cdecl", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "__PASCAL", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "_PASCAL", "I");
                 sTypeRaw = stranslate(sTypeRaw, "", "PASCAL", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "__Far32__", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "__Far32", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "Far32__", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "_Far32_", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "_Far32", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "Far32_", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "Far32", "I");
                 sTypeRaw = stranslate(sTypeRaw, "", "__far", "I");
                 sTypeRaw = stranslate(sTypeRaw, "", "_far", "I");
                 sTypeRaw = stranslate(sTypeRaw, "", "far", "I");
                 sTypeRaw = stranslate(sTypeRaw, "", "__near", "I");
                 sTypeRaw = stranslate(sTypeRaw, "", "_near", "I");
                 sTypeRaw = stranslate(sTypeRaw, "", "near", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "__loadds__", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "__loadds", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "loadds__", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "_loadds_", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "_loadds", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "loadds_", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "loadds", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "__loades__", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "__loades", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "loades__", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "_loades_", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "_loades", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "loades_", "I");
+                sTypeRaw = stranslate(sTypeRaw, "", "loades", "I");
                 sTypeRaw = stranslate(sTypeRaw, "", "WIN32API", "I");
                 sTypeRaw = stranslate(sTypeRaw, "", "WINAPI", "I");
                 sTypeRaw = stranslate(sTypeRaw, "", "__operator__", "I"); /* operator fix */
