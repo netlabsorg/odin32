@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1376 2001-04-23 10:47:02 sandervl Exp $ */
+/* $Id: changelog,v 1.1377 2001-04-24 19:45:39 sandervl Exp $ */
+
+ 2001-04-24: Sander van Leeuwen <sandervl@xs4all.nl>
+    - COMDLG32, DPLAYX, OLE32, OLEAUT32:
+                o Compile fixes for VAC 3.6.5 (nameless unions & structs)
 
  2001-04-23: Dietrich Teickner <Dietrich_Teickner@t-online.de>
     - SHELL32:  o Updates and fixes for SHFileOperationA (FO_COPY)
