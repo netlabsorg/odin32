@@ -1,4 +1,4 @@
-/* $Id: exceptutil.h,v 1.12 2001-06-27 19:09:35 sandervl Exp $ */
+/* $Id: exceptutil.h,v 1.13 2002-05-10 14:55:11 sandervl Exp $ */
 
 /*
  * Exception + misc functions for OS/2
@@ -30,19 +30,6 @@ void  PrintExceptionChain();
 #else
 #define PrintExceptionChain()
 #endif
-
-ULONG  getEAX();
-ULONG  getEBX();
-ULONG  getESP();
-USHORT getSS();
-USHORT getDS();
-USHORT getCS();
-USHORT getSS();
-USHORT getES();
-USHORT getFS();
-USHORT getGS();
-
-void CDECL Mul32x32to64(PVOID result, DWORD op1, DWORD op2);
 
 ULONG CDECL AsmCallThreadHandler(ULONG handler, LPVOID parameter);
 

@@ -1,4 +1,4 @@
-/* $Id: hmthread.cpp,v 1.10 2002-02-26 11:11:17 sandervl Exp $ */
+/* $Id: hmthread.cpp,v 1.11 2002-05-10 14:55:12 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -28,7 +28,7 @@
 
 #include <win\thread.h>
 #include "thread.h"
-#include "exceptutil.h"
+#include "asmutil.h"
 
 #define DBG_LOCALLOG	DBG_hmthread
 #include "dbglocal.h"

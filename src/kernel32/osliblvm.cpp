@@ -1,4 +1,4 @@
-/* $Id: osliblvm.cpp,v 1.1 2002-05-09 13:55:34 sandervl Exp $ */
+/* $Id: osliblvm.cpp,v 1.2 2002-05-10 14:55:13 sandervl Exp $ */
 
 /*
  * OS/2 LVM (Logical Volume Management) functions
@@ -328,9 +328,9 @@ BOOL OSLibLVMQueryVolumeName(HANDLE hVolumeControlData, ULONG volindex,
 }
 //******************************************************************************
 //******************************************************************************
-static Volume_Information_Record OSLibLVMFindVolumeFromDriveLetter(ULONG driveLetter,
-                                                                   Volume_Control_Record *pVolRec,
-                                                                   CARDINAL32 *lasterror) 
+static Volume_Information_Record OSLibLVMFindVolumeByDriveLetter(ULONG driveLetter,
+                                                                 Volume_Control_Record *pVolRec,
+                                                                 CARDINAL32 *lasterror) 
 {
     Volume_Control_Array      *volctrl;
     Volume_Information_Record  volinfo;
@@ -366,9 +366,9 @@ fail:
 }
 //******************************************************************************
 //******************************************************************************
-static Volume_Information_Record OSLibLVMFindVolumeFromName(LPSTR pszVolName,
-                                                            Volume_Control_Record *pVolRec,
-                                                            CARDINAL32 *lasterror) 
+static Volume_Information_Record OSLibLVMFindVolumeByName(LPSTR pszVolName,
+                                                          Volume_Control_Record *pVolRec,
+                                                          CARDINAL32 *lasterror) 
 {
     Volume_Control_Array      *volctrl;
     Volume_Information_Record volinfo;
@@ -404,27 +404,24 @@ fail:
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibLVMGetPartitionInfo(ULONG driveLetter, PPARTITION_INFORMATION pPartition)
+BOOL OSLibLVMGetPartitionInfo(ULONG driveLetter, LPSTR lpszVolumeName, PPARTITION_INFORMATION pPartition)
 {
     Volume_Information_Record  volinfo;
     Volume_Control_Record      volctrl;
     Partition_Information_Array partctrl;
     CARDINAL32                 lasterror;
 
-    volinfo = OSLibLVMFindVolumeFromDriveLetter(driveLetter, &volctrl, &lasterror);
+    if(lpszVolumeName && lpszVolumeName[0]) {
+         volinfo = OSLibLVMFindVolumeByName(lpszVolumeName, &volctrl, &lasterror);
+    }
+    else volinfo = OSLibLVMFindVolumeByDriveLetter(driveLetter, &volctrl, &lasterror);
     if(lasterror != LVM_ENGINE_NO_ERROR) {
         DebugInt3();
         return FALSE;
     }
 
-    //We will not return information about LVM volumes (too dangerous as
-    //they contain extra information in the volume and can be spanned)
-    if(volinfo.Compatibility_Volume == FALSE) {
-        return FALSE;
-    }
-
     partctrl = Get_Partitions(volctrl.Volume_Handle, &lasterror);
-    if(lasterror != LVM_ENGINE_NO_ERROR) {
+    if(lasterror != LVM_ENGINE_NO_ERROR || partctrl.Count == 0) {
         return FALSE;
     }
 
@@ -444,26 +441,27 @@ BOOL OSLibLVMGetPartitionInfo(ULONG driveLetter, PPARTITION_INFORMATION pPartiti
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibLVMGetVolumeExtents(ULONG driveLetter, PVOLUME_DISK_EXTENTS pVolExtent)
+BOOL OSLibLVMGetVolumeExtents(ULONG driveLetter, LPSTR lpszVolumeName, PVOLUME_DISK_EXTENTS pVolExtent,
+                              BOOL *pfLVMVolume)
 {
     Volume_Information_Record  volinfo;
     Volume_Control_Record      volctrl;
+    Drive_Control_Array        diskinfo;
     Partition_Information_Array partctrl;
     CARDINAL32                 lasterror;
+    BOOL                       ret = TRUE;
 
-    volinfo = OSLibLVMFindVolumeFromDriveLetter(driveLetter, &volctrl, &lasterror);
+    if(lpszVolumeName && lpszVolumeName[0]) {
+         volinfo = OSLibLVMFindVolumeByName(lpszVolumeName, &volctrl, &lasterror);
+    }
+    else volinfo = OSLibLVMFindVolumeByDriveLetter(driveLetter, &volctrl, &lasterror);
     if(lasterror != LVM_ENGINE_NO_ERROR) {
         DebugInt3();
         return FALSE;
     }
-    //We will not return information about LVM volumes (too dangerous as
-    //they contain extra information in the volume and can be spanned)
-    if(volinfo.Compatibility_Volume == FALSE) {
-        return FALSE;
-    }
 
     partctrl = Get_Partitions(volctrl.Volume_Handle, &lasterror);
-    if(lasterror != LVM_ENGINE_NO_ERROR) {
+    if(lasterror != LVM_ENGINE_NO_ERROR || partctrl.Count == 0) {
         return FALSE;
     }
 
@@ -474,8 +472,31 @@ BOOL OSLibLVMGetVolumeExtents(ULONG driveLetter, PVOLUME_DISK_EXTENTS pVolExtent
     pVolExtent->Extents[0].ExtentLength.u.HighPart   = partctrl.Partition_Array[0].Usable_Partition_Size >> 23;
     pVolExtent->Extents[0].ExtentLength.u.LowPart    = partctrl.Partition_Array[0].Usable_Partition_Size << 9;
 
+    dprintf(("pVolExtent->NumberOfDiskExtents       %d", pVolExtent->NumberOfDiskExtents));
+    dprintf(("pVolExtent->Extents[0].DiskNumber     %d",  pVolExtent->Extents[0].DiskNumber));
+    dprintf(("pVolExtent->Extents[0].StartingOffset %08x%08x", pVolExtent->Extents[0].StartingOffset.u.HighPart, pVolExtent->Extents[0].StartingOffset.u.LowPart));
+    dprintf(("pVolExtent->Extents[0].ExtentLength   %08x%08x", pVolExtent->Extents[0].ExtentLength.u.HighPart, pVolExtent->Extents[0].ExtentLength.u.LowPart));
+
+    //find number of disk on which this volume is located
+    diskinfo = Get_Drive_Control_Data(&lasterror);
+    if(lasterror != LVM_ENGINE_NO_ERROR) {
+        return FALSE;
+    }
+    for(int i=0;i<diskinfo.Count;i++) {
+        if(diskinfo.Drive_Control_Data[i].Drive_Handle == partctrl.Partition_Array[0].Drive_Handle) {
+            pVolExtent->Extents[0].DiskNumber = diskinfo.Drive_Control_Data[i].Drive_Number;
+            break;
+        }
+    }
+    if(i == diskinfo.Count) {
+        ret = FALSE;
+    }
+    if(pfLVMVolume) {
+        *pfLVMVolume = (volinfo.Compatibility_Volume == FALSE);
+    }
+    Free_Engine_Memory((ULONG)diskinfo.Drive_Control_Data);
     Free_Engine_Memory((ULONG)partctrl.Partition_Array);
-    return TRUE;
+    return ret;
 }
 //******************************************************************************
 //******************************************************************************
@@ -486,7 +507,7 @@ ULONG OSLibLVMGetDriveType(LPCSTR lpszVolume)
     ULONG                      drivetype;
     CARDINAL32                 lasterror;
 
-    volinfo = OSLibLVMFindVolumeFromName((char *)lpszVolume, &volctrl, &lasterror);
+    volinfo = OSLibLVMFindVolumeByName((char *)lpszVolume, &volctrl, &lasterror);
     if(lasterror != LVM_ENGINE_NO_ERROR) {
         DebugInt3();
         return DRIVE_NO_ROOT_DIR_W; //return value checked in NT4, SP6 (GetDriveType(""), GetDriveType("4");
@@ -511,6 +532,13 @@ ULONG OSLibLVMGetDriveType(LPCSTR lpszVolume)
     return drivetype;
 }
 //******************************************************************************
+// OSLibLVMQueryDriveFromVolumeName
+//
+//   Returns:
+//            - drive letter corresponding to volume name
+//            - -1 if volume wasn't found
+//            - 0 if volume is present, but not mounted
+//   
 //******************************************************************************
 CHAR OSLibLVMQueryDriveFromVolumeName(LPCSTR lpszVolume)
 {
@@ -518,10 +546,10 @@ CHAR OSLibLVMQueryDriveFromVolumeName(LPCSTR lpszVolume)
     ULONG                      drivetype;
     CARDINAL32                 lasterror;
 
-    volinfo = OSLibLVMFindVolumeFromName((char *)lpszVolume, NULL, &lasterror);
+    volinfo = OSLibLVMFindVolumeByName((char *)lpszVolume, NULL, &lasterror);
     if(lasterror != LVM_ENGINE_NO_ERROR) {
         DebugInt3();
-        return 0;
+        return -1;  //not found
     }
     return volinfo.Current_Drive_Letter;
 }
@@ -532,7 +560,7 @@ DWORD OSLibLVMQueryVolumeFS(LPSTR lpszVolume, LPSTR lpFileSystemNameBuffer, DWOR
     Volume_Information_Record volinfo;
     CARDINAL32                lasterror;
 
-    volinfo = OSLibLVMFindVolumeFromName(lpszVolume, NULL, &lasterror);
+    volinfo = OSLibLVMFindVolumeByName(lpszVolume, NULL, &lasterror);
     if(lasterror != LVM_ENGINE_NO_ERROR) {
         DebugInt3();
         return ERROR_FILE_NOT_FOUND_W;
@@ -550,7 +578,7 @@ DWORD OSLibLVMQueryVolumeSerialAndName(LPSTR lpszVolume, LPDWORD lpVolumeSerialN
     CARDINAL32                 lasterror;
     int                        i;
 
-    volinfo = OSLibLVMFindVolumeFromName(lpszVolume, &volctrl, &lasterror);
+    volinfo = OSLibLVMFindVolumeByName(lpszVolume, &volctrl, &lasterror);
     if(lasterror != LVM_ENGINE_NO_ERROR) {
         DebugInt3();
         return ERROR_FILE_NOT_FOUND_W;
@@ -575,11 +603,11 @@ BOOL OSLibLVMGetVolumeNameForVolumeMountPoint(LPCSTR lpszVolumeMountPoint,
 
     //We only support drive letters as mountpoint names
     if('A' <= *lpszVolumeMountPoint && *lpszVolumeMountPoint <= 'Z') {
-        drive = *lpszVolumeMountPoint - 'A' + 1;
+        drive = *lpszVolumeMountPoint - 'A';
     }
     else
     if('a' <= *lpszVolumeMountPoint && *lpszVolumeMountPoint <= 'z') {
-        drive = *lpszVolumeMountPoint - 'a' + 1;
+        drive = *lpszVolumeMountPoint - 'a';
     }
     else {
         return FALSE;
@@ -591,7 +619,7 @@ BOOL OSLibLVMGetVolumeNameForVolumeMountPoint(LPCSTR lpszVolumeMountPoint,
     Volume_Information_Record volinfo;
     CARDINAL32                lasterror;
 
-    volinfo = OSLibLVMFindVolumeFromDriveLetter(drive, NULL, &lasterror);
+    volinfo = OSLibLVMFindVolumeByDriveLetter(drive, NULL, &lasterror);
     if(lasterror != LVM_ENGINE_NO_ERROR) {
         DebugInt3();
         return FALSE;
@@ -599,6 +627,30 @@ BOOL OSLibLVMGetVolumeNameForVolumeMountPoint(LPCSTR lpszVolumeMountPoint,
 
     strncpy(lpszVolumeName, volinfo.Volume_Name, cchBufferLength-1);
     return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibLVMStripVolumeName(LPCSTR lpszWin32VolumeName, LPSTR lpszOS2VolumeName, DWORD cchBufferLength)
+{
+    int length;
+
+    //strip volume name prefix (\\\\?\\Volume\\)
+    length = strlen(lpszWin32VolumeName);
+
+    strncpy(lpszOS2VolumeName, &lpszWin32VolumeName[sizeof(VOLUME_NAME_PREFIX)-1+1], cchBufferLength-1);  //-zero term + starting '{'
+    length -= sizeof(VOLUME_NAME_PREFIX)-1+1;
+    if(lpszOS2VolumeName[length-2] == '}') 
+    {
+        lpszOS2VolumeName[length-2] = 0;
+        return TRUE;
+    }
+    else
+    if(lpszOS2VolumeName[length-1] == '}') 
+    {
+        lpszOS2VolumeName[length-1] = 0;
+        return TRUE;
+    }
+    return FALSE;
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,9 +1,9 @@
-/* $Id: hmdisk.cpp,v 1.43 2002-05-09 13:55:33 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.44 2002-05-10 14:55:11 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
  *
- * Copyright 2000 Sander van Leeuwen
+ * Copyright 2000-2002 Sander van Leeuwen
  *
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -11,6 +11,7 @@
  */
 #include <os2win.h>
 #include <string.h>
+#include <stdio.h>
 #include <versionos2.h>
 
 #include <misc.h>
@@ -22,6 +23,7 @@
 #include <win\aspi.h>
 #include "oslibdos.h"
 #include "osliblvm.h"
+#include "asmutil.h"
 
 #define DBG_LOCALLOG    DBG_hmdisk
 #include "dbglocal.h"
@@ -34,8 +36,8 @@
 typedef struct
 {
     HINSTANCE hInstAspi;
-    DWORD (WIN32API *GetASPI32SupportInfo)();
-    DWORD (CDECL *SendASPI32Command)(LPSRB lpSRB);
+    DWORD     (WIN32API *GetASPI32SupportInfo)();
+    DWORD     (CDECL *SendASPI32Command)(LPSRB lpSRB);
     ULONG     driveLetter;
     ULONG     driveType;
     ULONG     dwVolumelabel;
@@ -46,6 +48,11 @@ typedef struct
     DWORD     dwFlags;
     LPSECURITY_ATTRIBUTES lpSecurityAttributes;
     HFILE     hTemplate;
+    BOOL      fPhysicalDisk;
+    LARGE_INTEGER StartingOffset;
+    LARGE_INTEGER PartitionSize;
+    LARGE_INTEGER CurrentFilePointer;
+    CHAR      szVolumeName[256];
 } DRIVE_INFO;
 
 HMDeviceDiskClass::HMDeviceDiskClass(LPCSTR lpDeviceName) : HMDeviceKernelObjectClass(lpDeviceName)
@@ -69,18 +76,20 @@ HMDeviceDiskClass::HMDeviceDiskClass(LPCSTR lpDeviceName) : HMDeviceKernelObject
  *****************************************************************************/
 BOOL HMDeviceDiskClass::FindDevice(LPCSTR lpClassDevName, LPCSTR lpDeviceName, int namelength)
 {
-  // check for "x:"
-  if (namelength == 2)
-  {
-    if (lpDeviceName[1] != ':')
-      return FALSE;
+    // check for "x:"
+    if (namelength == 2)
+    {
+        if (lpDeviceName[1] != ':')
+            return FALSE;
 
-    if ( (lpDeviceName[0] < 'A') ||
-         (lpDeviceName[0] > 'Z') )
-      return FALSE;
+        if (!( ((lpDeviceName[0] >= 'A') &&
+                (lpDeviceName[0] <= 'Z')) ||
+               ((lpDeviceName[0] >= 'a') &&
+                (lpDeviceName[0] <= 'z')) ))
+            return FALSE;
 
-    return TRUE;
-  }
+        return TRUE;
+    }
 
     //\\.\x:                -> length 6
     //\\.\PHYSICALDRIVEn    -> length 18
@@ -93,8 +102,8 @@ BOOL HMDeviceDiskClass::FindDevice(LPCSTR lpClassDevName, LPCSTR lpDeviceName, i
         return FALSE;
     }
 
-    //SvL: \\.\x:             -> drive x (i.e. \\.\C:)
-    //     \\.\PHYSICALDRIVEn -> drive n (n>=0)
+    // \\.\x:             -> drive x (i.e. \\.\C:)
+    // \\.\PHYSICALDRIVEn -> drive n (n>=0)
     if((strncmp(lpDeviceName, "\\\\.\\", 4) == 0) &&
         namelength == 6 && lpDeviceName[5] == ':')
     {
@@ -106,23 +115,22 @@ BOOL HMDeviceDiskClass::FindDevice(LPCSTR lpClassDevName, LPCSTR lpDeviceName, i
     return FALSE;
 }
 //******************************************************************************
-//TODO: PHYSICALDRIVEn!!
 //******************************************************************************
 DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
                                      PHMHANDLEDATA pHMHandleData,
                                      PVOID         lpSecurityAttributes,
                                      PHMHANDLEDATA pHMHandleDataTemplate)
 {
-    HFILE hFile;
-    HFILE hTemplate;
-    DWORD dwDriveType;
+    HFILE               hFile;
+    HFILE               hTemplate;
+    DWORD               dwDriveType;
+    CHAR                szDiskName[256];
+    CHAR                szVolumeName[256] = "";
+    VOLUME_DISK_EXTENTS volext = {0};
+    BOOL                fPhysicalDisk = FALSE;
 
     dprintf2(("KERNEL32: HMDeviceDiskClass::CreateFile %s(%s,%08x,%08x,%08x)\n",
-             lpHMDeviceName,
-             lpFileName,
-             pHMHandleData,
-             lpSecurityAttributes,
-             pHMHandleDataTemplate));
+             lpHMDeviceName, lpFileName, pHMHandleData, lpSecurityAttributes, pHMHandleDataTemplate));
 
     //TODO: check in NT if CREATE_ALWAYS is allowed!!
     if(pHMHandleData->dwCreation != OPEN_EXISTING) {
@@ -135,32 +143,78 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
     szDrive[2] = '\0';
 
     //if volume name, query 
-    if(VERSION_IS_WIN2000_OR_HIGHER() && !strncmp(lpFileName, VOLUME_NAME_PREFIX, sizeof(VOLUME_NAME_PREFIX)-1)) {
-        char *pszVolume;
-        int   length;
+    if(!strncmp(lpFileName, VOLUME_NAME_PREFIX, sizeof(VOLUME_NAME_PREFIX)-1)) 
+    {
+        int length;
 
-        //strip volume name prefix (\\\\?\\Volume\\)
-        length = strlen(lpFileName);
-        pszVolume = (char *)alloca(length);
+        if(!VERSION_IS_WIN2000_OR_HIGHER()) {
+            return ERROR_FILE_NOT_FOUND;    //not allowed
+        }
+        if(OSLibLVMStripVolumeName(lpFileName, szVolumeName, sizeof(szVolumeName))) 
+        {
+            BOOL fLVMVolume;
 
-        strcpy(pszVolume, &lpFileName[sizeof(VOLUME_NAME_PREFIX)-1+1]);  //-zero term + starting '{'
-        length -= sizeof(VOLUME_NAME_PREFIX)-1+1;
-        if(pszVolume[length-2] == '}') {
-            pszVolume[length-2] = 0;
-            szDrive[0] = OSLibLVMQueryDriveFromVolumeName(pszVolume);
+            dwDriveType = GetDriveTypeA(lpFileName);
+
+            szDrive[0] = OSLibLVMQueryDriveFromVolumeName(szVolumeName);
+            if(szDrive[0] == -1) {
+                return ERROR_FILE_NOT_FOUND;    //not found
+            }
+            if((dwDriveType == DRIVE_FIXED) && OSLibLVMGetVolumeExtents(szDrive[0], szVolumeName, &volext, &fLVMVolume) == FALSE) {
+                return ERROR_FILE_NOT_FOUND;    //not found
+            }
+            if(szDrive[0] == 0) 
+            {
+                //volume isn't mounted
+                
+                //Note: this only works on Warp 4.5 and up
+                sprintf(szDiskName, "\\\\.\\Physical_Disk%d", volext.Extents[0].DiskNumber); 
+                fPhysicalDisk = TRUE;
+
+                if(fLVMVolume && (pHMHandleData->dwAccess & GENERIC_WRITE)) {
+                    //no write access allowed for LVM volumes
+                    dprintf(("CreateFile: WARNING: Write access to LVM volume denied!!"));
+                    pHMHandleData->dwAccess &= ~GENERIC_WRITE;
+                }
+            }
+            else {
+                //mounted drive, make sure access requested is readonly, else fail
+                if(pHMHandleData->dwAccess & GENERIC_WRITE) {
+                    //no write access allowed for mounted partitions
+                    dprintf(("CreateFile: WARNING: Write access to mounted partition denied!!"));
+                    pHMHandleData->dwAccess &= ~GENERIC_WRITE;
+                }
+                strcpy(szDiskName, szDrive);
+            }
         }
         else return ERROR_FILE_NOT_FOUND;
+    }
+    else 
+    if(strncmp(lpFileName, "\\\\.\\PHYSICALDRIVE", 17) == 0) 
+    {
+        //Note: this only works on Warp 4.5 and up
+        sprintf(szDiskName, "\\\\.\\Physical_Disk%c", lpFileName[17]);
+        fPhysicalDisk = TRUE;
 
+        //TODO: could be removable in theory
+        dwDriveType = DRIVE_FIXED;
+
+        if(pHMHandleData->dwAccess & GENERIC_WRITE) {
+            //no write access allowed for whole disks
+            dprintf(("CreateFile: WARNING: Write access to whole disk denied!!"));
+            pHMHandleData->dwAccess &= ~GENERIC_WRITE;
+        }
     }
     else {
+        strcpy(szDiskName, lpFileName);
         szDrive[0] = *lpFileName;
+        dwDriveType = GetDriveTypeA(szDrive);
     }
-    dwDriveType = GetDriveTypeA(szDrive);
 
     //Disable error popus. NT allows an app to open a cdrom/dvd drive without a disk inside
     //OS/2 fails in that case with error ERROR_NOT_READY
     ULONG oldmode = SetErrorMode(SEM_FAILCRITICALERRORS);
-    hFile = OSLibDosCreateFile((LPSTR)lpFileName,
+    hFile = OSLibDosCreateFile(szDiskName,
                                pHMHandleData->dwAccess,
                                pHMHandleData->dwShare,
                                (LPSECURITY_ATTRIBUTES)lpSecurityAttributes,
@@ -176,7 +230,7 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
        (pHMHandleData->dwAccess & GENERIC_WRITE))
     {
         pHMHandleData->dwAccess &= ~GENERIC_WRITE;
-        hFile = OSLibDosCreateFile((LPSTR)lpFileName,
+        hFile = OSLibDosCreateFile((LPSTR)szDiskName,
                                    pHMHandleData->dwAccess,
                                    pHMHandleData->dwShare,
                                    (LPSECURITY_ATTRIBUTES)lpSecurityAttributes,
@@ -211,6 +265,15 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
         drvInfo->dwAccess  = pHMHandleData->dwFlags;
         drvInfo->hTemplate = hTemplate;
 
+        //save volume start & length if volume must be accessed through the physical disk 
+        //(no other choice for unmounted volumes)
+        drvInfo->fPhysicalDisk  = fPhysicalDisk;
+        drvInfo->StartingOffset = volext.Extents[0].StartingOffset;
+        drvInfo->PartitionSize  = volext.Extents[0].ExtentLength;
+
+        //save volume name for later (IOCtls)
+        strncpy(drvInfo->szVolumeName, szVolumeName, sizeof(drvInfo->szVolumeName)-1);
+
         drvInfo->driveLetter = *lpFileName; //save drive letter
         if(drvInfo->driveLetter >= 'a') {
             drvInfo->driveLetter = drvInfo->driveLetter - ((int)'a' - (int)'A');
@@ -241,10 +304,17 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
                              &drvInfo->signature[0], 4, &datasize);
         }
 
-        if(hFile) {
+        if(hFile && drvInfo->driveType != DRIVE_FIXED) {
             OSLibDosQueryVolumeSerialAndName(1 + drvInfo->driveLetter - 'A', &drvInfo->dwVolumelabel, NULL, 0);
         }
 
+        //for an unmounted partition we open the physical disk that contains it, so we
+        //must set the file pointer to the correct beginning
+        if(drvInfo->fPhysicalDisk && (drvInfo->StartingOffset.HighPart != 0 ||
+           drvInfo->StartingOffset.LowPart != 0))
+        {
+            SetFilePointer(pHMHandleData, 0, NULL, FILE_BEGIN);
+        }
         return (NO_ERROR);
     }
     else {
@@ -617,7 +687,7 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
     case IOCTL_DISK_IS_WRITABLE:
     {
         APIRET rc;
-	DWORD ret;
+	    DWORD ret;
         ULONG  ulBytesRead    = 0;      /* Number of bytes read by DosRead */
         ULONG  ulWrote        = 0;      /* Number of bytes written by DosWrite */
         ULONG  ulLocal        = 0;      /* File pointer position after DosSetFilePtr */
@@ -636,6 +706,11 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
             //TODO: check behaviour in NT
             SetLastError(ERROR_WRITE_PROTECT);
             return FALSE;
+        }
+        else
+        if(drvInfo->driveType == DRIVE_FIXED) {
+            SetLastError(ERROR_SUCCESS);
+            return TRUE;
         }
 
         OSLibDosDevIOCtl(pHMHandleData->hHMHandle,IOCTL_DISK,DSK_LOCKDRIVE,0,0,0,0,0,0);
@@ -719,18 +794,21 @@ writecheckfail:
         //volume label from the disk and return ERROR_MEDIA_CHANGED if the volume
         //label has changed
         //TODO: Find better way to determine if floppy was removed or switched
-        rc = OSLibDosQueryVolumeSerialAndName(1 + drvInfo->driveLetter - 'A', &volumelabel, NULL, 0);
-        if(rc) {
-            dprintf(("IOCTL_DISK_GET_DRIVE_GEOMETRY: OSLibDosQueryVolumeSerialAndName failed with rc %d", GetLastError()));
-            if(pHMHandleData->hHMHandle) OSLibDosClose(pHMHandleData->hHMHandle);
-            pHMHandleData->hHMHandle = 0;
-            SetLastError(ERROR_MEDIA_CHANGED);
-            return FALSE;
-        }
-        if(volumelabel != drvInfo->dwVolumelabel) {
-            dprintf(("IOCTL_DISK_GET_DRIVE_GEOMETRY: volume changed %x -> %x", drvInfo->dwVolumelabel, volumelabel));
-            SetLastError(ERROR_MEDIA_CHANGED);
-            return FALSE;
+        if(drvInfo->driveType != DRIVE_FIXED) 
+        {
+            rc = OSLibDosQueryVolumeSerialAndName(1 + drvInfo->driveLetter - 'A', &volumelabel, NULL, 0);
+            if(rc) {
+                dprintf(("IOCTL_DISK_GET_DRIVE_GEOMETRY: OSLibDosQueryVolumeSerialAndName failed with rc %d", GetLastError()));
+                if(pHMHandleData->hHMHandle) OSLibDosClose(pHMHandleData->hHMHandle);
+                pHMHandleData->hHMHandle = 0;
+                SetLastError(ERROR_MEDIA_CHANGED);
+                return FALSE;
+            }
+            if(volumelabel != drvInfo->dwVolumelabel) {
+                dprintf(("IOCTL_DISK_GET_DRIVE_GEOMETRY: volume changed %x -> %x", drvInfo->dwVolumelabel, volumelabel));
+                SetLastError(ERROR_MEDIA_CHANGED);
+                return FALSE;
+            }
         }
 
         if(OSLibDosGetDiskGeometry(pHMHandleData->hHMHandle, drvInfo->driveLetter, pGeom) == FALSE) {
@@ -753,7 +831,7 @@ writecheckfail:
         if(lpBytesReturned) {
             *lpBytesReturned = sizeof(PARTITION_INFORMATION);
         }
-        if(OSLibLVMGetPartitionInfo(drvInfo->driveLetter, pPartition)) {
+        if(OSLibLVMGetPartitionInfo(drvInfo->driveLetter, drvInfo->szVolumeName, pPartition) == FALSE) {
             SetLastError(ERROR_NOT_ENOUGH_MEMORY); //wrong error, but who cares
             return FALSE;
         }
@@ -780,7 +858,7 @@ writecheckfail:
             SetLastError(ERROR_INSUFFICIENT_BUFFER);
             return FALSE;
         }
-        if(OSLibLVMGetVolumeExtents(drvInfo->driveLetter, pVolExtent)) {
+        if(OSLibLVMGetVolumeExtents(drvInfo->driveLetter, drvInfo->szVolumeName, pVolExtent) == FALSE) {
             SetLastError(ERROR_NOT_ENOUGH_MEMORY); //wrong error, but who cares
             return FALSE;
         }
@@ -815,7 +893,6 @@ writecheckfail:
             BYTE  ucTrack;
         } ParameterBlock;
 #pragma pack()
-
         PCDROM_TOC pTOC = (PCDROM_TOC)lpOutBuffer;
         DWORD rc, numtracks;
         DWORD parsize = 4;
@@ -914,8 +991,6 @@ writecheckfail:
 
     case IOCTL_CDROM_PLAY_AUDIO_MSF:
     {
-      dprintf(("Play CDROM audio playback"));
-
 #pragma pack(1)
       struct
       {
@@ -925,6 +1000,7 @@ writecheckfail:
         DWORD ulEndingMSF;
       } ParameterBlock;
 #pragma pack()
+      dprintf(("Play CDROM audio playback"));
 
       PCDROM_PLAY_AUDIO_MSF pPlay = (PCDROM_PLAY_AUDIO_MSF)lpInBuffer;
 
@@ -1095,6 +1171,14 @@ writecheckfail:
     case IOCTL_DISK_CHECK_VERIFY:
     case IOCTL_STORAGE_CHECK_VERIFY:
     {
+#pragma pack(1)
+      typedef struct
+      {
+        BYTE  ucCommandInfo;
+        WORD  usDriveUnit;
+      } ParameterBlock;
+#pragma pack()
+
         dprintf(("IOCTL_CDROM(DISK/STORAGE)CHECK_VERIFY %s", drvInfo->signature));
         if(lpBytesReturned) {
             *lpBytesReturned = 0;
@@ -1108,14 +1192,6 @@ writecheckfail:
                 return FALSE;
             }
         }
-
-#pragma pack(1)
-      typedef struct
-      {
-        BYTE  ucCommandInfo;
-        WORD  usDriveUnit;
-      } ParameterBlock;
-#pragma pack()
 
         DWORD parsize = sizeof(ParameterBlock);
         DWORD datasize = 2;
@@ -1353,83 +1429,78 @@ BOOL HMDeviceDiskClass::ReadFile(PHMHANDLEDATA pHMHandleData,
                                  LPOVERLAPPED  lpOverlapped,
                                  LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
 {
-  LPVOID       lpRealBuf;
-  Win32MemMap *map;
-  DWORD        offset, bytesread;
-  BOOL         bRC;
+    LPVOID       lpRealBuf;
+    Win32MemMap *map;
+    DWORD        offset, bytesread;
+    BOOL         bRC;
 
-  dprintf2(("KERNEL32: HMDeviceDiskClass::ReadFile %s(%08x,%08x,%08x,%08x,%08x)",
-           lpHMDeviceName,
-           pHMHandleData,
-           lpBuffer,
-           nNumberOfBytesToRead,
-           lpNumberOfBytesRead,
-           lpOverlapped));
+    dprintf2(("KERNEL32: HMDeviceDiskClass::ReadFile %s(%08x,%08x,%08x,%08x,%08x)",
+               lpHMDeviceName, pHMHandleData, lpBuffer, nNumberOfBytesToRead, lpNumberOfBytesRead, lpOverlapped));
 
-  //SvL: It's legal for this pointer to be NULL
-  if(lpNumberOfBytesRead)
-    *lpNumberOfBytesRead = 0;
-  else
-    lpNumberOfBytesRead = &bytesread;
+    //It's legal for this pointer to be NULL
+    if(lpNumberOfBytesRead)
+        *lpNumberOfBytesRead = 0;
+    else
+        lpNumberOfBytesRead = &bytesread;
 
-  if((pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && !lpOverlapped) {
-    dprintf(("FILE_FLAG_OVERLAPPED flag set, but lpOverlapped NULL!!"));
-    SetLastError(ERROR_INVALID_PARAMETER);
-    return FALSE;
-  }
+    if((pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && !lpOverlapped) {
+        dprintf(("FILE_FLAG_OVERLAPPED flag set, but lpOverlapped NULL!!"));
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return FALSE;
+    }
 
-  if(lpCompletionRoutine) {
-      dprintf(("!WARNING!: lpCompletionRoutine not supported -> fall back to sync IO"));
-  }
+    if(lpCompletionRoutine) {
+        dprintf(("!WARNING!: lpCompletionRoutine not supported -> fall back to sync IO"));
+    }
 
-  //If we didn't get an OS/2 handle for the disk before, get one now
-  if(!pHMHandleData->hHMHandle) {
-      DRIVE_INFO *drvInfo = (DRIVE_INFO*)pHMHandleData->dwUserData;
-      pHMHandleData->hHMHandle = OpenDisk(drvInfo);
-      if(!pHMHandleData->hHMHandle) {
-          dprintf(("No disk inserted; aborting"));
-          SetLastError(ERROR_NOT_READY);
-          return FALSE;
-      }
-  }
+    //If we didn't get an OS/2 handle for the disk before, get one now
+    if(!pHMHandleData->hHMHandle) {
+        DRIVE_INFO *drvInfo = (DRIVE_INFO*)pHMHandleData->dwUserData;
+        pHMHandleData->hHMHandle = OpenDisk(drvInfo);
+        if(!pHMHandleData->hHMHandle) {
+            dprintf(("No disk inserted; aborting"));
+            SetLastError(ERROR_NOT_READY);
+            return FALSE;
+        }
+    }
 
-  if(!(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && lpOverlapped) {
-    dprintf(("Warning: lpOverlapped != NULL & !FILE_FLAG_OVERLAPPED; sync operation"));
-  }
+    if(!(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && lpOverlapped) {
+        dprintf(("Warning: lpOverlapped != NULL & !FILE_FLAG_OVERLAPPED; sync operation"));
+    }
 
-  //SvL: DosRead doesn't like writing to memory addresses returned by
-  //     DosAliasMem -> search for original memory mapped pointer and use
-  //     that one + commit pages if not already present
-  map = Win32MemMapView::findMapByView((ULONG)lpBuffer, &offset, MEMMAP_ACCESS_WRITE);
-  if(map) {
-    lpRealBuf = (LPVOID)((ULONG)map->getMappingAddr() + offset);
-    DWORD nrpages = nNumberOfBytesToRead/4096;
-    if(offset & 0xfff)
-        nrpages++;
-    if(nNumberOfBytesToRead & 0xfff)
-        nrpages++;
+    //SvL: DosRead doesn't like writing to memory addresses returned by
+    //     DosAliasMem -> search for original memory mapped pointer and use
+    //     that one + commit pages if not already present
+    map = Win32MemMapView::findMapByView((ULONG)lpBuffer, &offset, MEMMAP_ACCESS_WRITE);
+    if(map) {
+        lpRealBuf = (LPVOID)((ULONG)map->getMappingAddr() + offset);
+        DWORD nrpages = nNumberOfBytesToRead/4096;
+        if(offset & 0xfff)
+            nrpages++;
+        if(nNumberOfBytesToRead & 0xfff)
+            nrpages++;
+    
+        map->commitPage(offset & ~0xfff, TRUE, nrpages);
+    }
+    else  lpRealBuf = (LPVOID)lpBuffer;
 
-    map->commitPage(offset & ~0xfff, TRUE, nrpages);
-  }
-  else  lpRealBuf = (LPVOID)lpBuffer;
-
-  if(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) {
-    dprintf(("ERROR: Overlapped IO not yet implememented!!"));
-  }
-//  else {
+    if(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) {
+        dprintf(("ERROR: Overlapped IO not yet implememented!!"));
+    }
+    //  else {
     bRC = OSLibDosRead(pHMHandleData->hHMHandle,
                            (PVOID)lpRealBuf,
                            nNumberOfBytesToRead,
                            lpNumberOfBytesRead);
 //  }
 
-  if(bRC == 0) {
-      dprintf(("KERNEL32: HMDeviceDiskClass::ReadFile returned %08xh %x", bRC, GetLastError()));
-      dprintf(("%x -> %d", lpBuffer, IsBadWritePtr((LPVOID)lpBuffer, nNumberOfBytesToRead)));
-  }
-  else dprintf2(("KERNEL32: HMDeviceDiskClass::ReadFile read %x bytes pos %x", *lpNumberOfBytesRead, SetFilePointer(pHMHandleData, 0, NULL, FILE_CURRENT)));
+    if(bRC == 0) {
+        dprintf(("KERNEL32: HMDeviceDiskClass::ReadFile returned %08xh %x", bRC, GetLastError()));
+        dprintf(("%x -> %d", lpBuffer, IsBadWritePtr((LPVOID)lpBuffer, nNumberOfBytesToRead)));
+    }
+    else dprintf2(("KERNEL32: HMDeviceDiskClass::ReadFile read %x bytes pos %x", *lpNumberOfBytesRead, SetFilePointer(pHMHandleData, 0, NULL, FILE_CURRENT)));
 
-  return bRC;
+    return bRC;
 }
 /*****************************************************************************
  * Name      : DWORD HMDeviceDiskClass::SetFilePointer
@@ -1445,40 +1516,110 @@ BOOL HMDeviceDiskClass::ReadFile(PHMHANDLEDATA pHMHandleData,
  *
  * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
  *****************************************************************************/
-
 DWORD HMDeviceDiskClass::SetFilePointer(PHMHANDLEDATA pHMHandleData,
                                         LONG          lDistanceToMove,
                                         PLONG         lpDistanceToMoveHigh,
                                         DWORD         dwMoveMethod)
 {
-  DWORD ret;
+    DWORD ret;
 
-  dprintf2(("KERNEL32: HMDeviceDiskClass::SetFilePointer %s(%08xh,%08xh,%08xh,%08xh)\n",
-           lpHMDeviceName,
-           pHMHandleData,
-           lDistanceToMove,
-           lpDistanceToMoveHigh,
-           dwMoveMethod));
+    if(lpDistanceToMoveHigh) {
+        dprintf(("KERNEL32: HMDeviceDiskClass::SetFilePointer %s %08x%08x %d",
+                 lpHMDeviceName, *lpDistanceToMoveHigh, lDistanceToMove, dwMoveMethod));
+    }
 
-  if(!pHMHandleData->hHMHandle) {
-      DRIVE_INFO *drvInfo = (DRIVE_INFO*)pHMHandleData->dwUserData;
-      pHMHandleData->hHMHandle = OpenDisk(drvInfo);
-      if(!pHMHandleData->hHMHandle) {
-          dprintf(("No disk inserted; aborting"));
-          SetLastError(ERROR_NOT_READY);
-          return -1;
-      }
-  }
+    DRIVE_INFO *drvInfo = (DRIVE_INFO*)pHMHandleData->dwUserData;
+    if(drvInfo == NULL) {
+        dprintf(("ERROR: SetFilePointer: drvInfo == NULL!!!"));
+        DebugInt3();
+        SetLastError(ERROR_INVALID_HANDLE);
+        return FALSE;
+    }
 
-  ret = OSLibDosSetFilePointer(pHMHandleData->hHMHandle,
-                               lDistanceToMove,
-                               (DWORD *)lpDistanceToMoveHigh,
-                               dwMoveMethod);
+    if(!pHMHandleData->hHMHandle) {
+        DRIVE_INFO *drvInfo = (DRIVE_INFO*)pHMHandleData->dwUserData;
+        pHMHandleData->hHMHandle = OpenDisk(drvInfo);
+        if(!pHMHandleData->hHMHandle) {
+            dprintf(("No disk inserted; aborting"));
+            SetLastError(ERROR_NOT_READY);
+            return -1;
+        }
+    }
 
-  if(ret == -1) {
-      dprintf(("SetFilePointer failed (error = %d)", GetLastError()));
-  }
-  return ret;
+    //if unmounted volume, add starting offset to position as we're accessing the entire physical drive
+    //instead of just the volume
+    if(drvInfo->fPhysicalDisk && (drvInfo->StartingOffset.HighPart != 0 ||
+       drvInfo->StartingOffset.LowPart != 0))
+    {
+        LARGE_INTEGER distance, result, endpos;
+        LARGE_INTEGER position;
+
+        if(lpDistanceToMoveHigh) {
+            distance.HighPart =  *lpDistanceToMoveHigh;
+        }
+        else {
+            if(lDistanceToMove < 0) {
+                 distance.HighPart = -1;
+            }
+            else distance.HighPart = 0;
+        }
+        distance.LowPart = lDistanceToMove;
+
+        //calculate end position in partition
+        Add64(&drvInfo->StartingOffset, &drvInfo->PartitionSize, &endpos);
+        result.HighPart = 0;
+        result.LowPart  = 1;
+        Sub64(&endpos, &result, &endpos);
+
+        switch(dwMoveMethod) {
+        case FILE_BEGIN:
+            Add64(&distance, &drvInfo->StartingOffset, &result);
+            break;
+        case FILE_CURRENT:
+            Add64(&distance, &drvInfo->CurrentFilePointer, &result);
+            break;
+        case FILE_END:
+            Add64(&distance, &endpos, &result);
+            break;
+        }
+        //check upper boundary
+        if(result.HighPart > endpos.HighPart ||
+           (result.HighPart == endpos.HighPart && result.LowPart > endpos.LowPart) )
+        {
+            SetLastError(ERROR_INVALID_PARAMETER);
+            return -1;
+        }
+        //check lower boundary
+        if(result.HighPart < drvInfo->StartingOffset.HighPart ||
+           (result.HighPart == drvInfo->StartingOffset.HighPart && result.LowPart < drvInfo->StartingOffset.LowPart))
+        {
+            SetLastError(ERROR_NEGATIVE_SEEK);
+            return -1;
+        }
+
+        dprintf(("SetFilePointer (unmounted partition) %08x%08x -> %08x%08x", distance.HighPart, distance.LowPart, result.HighPart, result.LowPart));
+        ret = OSLibDosSetFilePointer(pHMHandleData->hHMHandle,
+                                     result.LowPart,
+                                     (DWORD *)&result.HighPart,
+                                     FILE_BEGIN);
+
+        Sub64(&result, &drvInfo->StartingOffset, &drvInfo->CurrentFilePointer);
+        ret = drvInfo->CurrentFilePointer.LowPart;
+        if(lpDistanceToMoveHigh) {
+            *lpDistanceToMoveHigh = drvInfo->CurrentFilePointer.HighPart;
+        }
+    }
+    else {
+        ret = OSLibDosSetFilePointer(pHMHandleData->hHMHandle,
+                                     lDistanceToMove,
+                                     (DWORD *)lpDistanceToMoveHigh,
+                                     dwMoveMethod);
+    }
+
+    if(ret == -1) {
+        dprintf(("SetFilePointer failed (error = %d)", GetLastError()));
+    }
+    return ret;
 }
 
 /*****************************************************************************
@@ -1498,91 +1639,83 @@ DWORD HMDeviceDiskClass::SetFilePointer(PHMHANDLEDATA pHMHandleData,
  *****************************************************************************/
 
 BOOL HMDeviceDiskClass::WriteFile(PHMHANDLEDATA pHMHandleData,
-                                    LPCVOID       lpBuffer,
-                                    DWORD         nNumberOfBytesToWrite,
-                                    LPDWORD       lpNumberOfBytesWritten,
-                                    LPOVERLAPPED  lpOverlapped,
-                                    LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
+                                  LPCVOID       lpBuffer,
+                                  DWORD         nNumberOfBytesToWrite,
+                                  LPDWORD       lpNumberOfBytesWritten,
+                                  LPOVERLAPPED  lpOverlapped,
+                                  LPOVERLAPPED_COMPLETION_ROUTINE  lpCompletionRoutine)
 {
-  LPVOID       lpRealBuf;
-  Win32MemMap *map;
-  DWORD        offset, byteswritten;
-  BOOL         bRC;
+    LPVOID       lpRealBuf;
+    Win32MemMap *map;
+    DWORD        offset, byteswritten;
+    BOOL         bRC;
 
-   dprintf2(("KERNEL32: HMDeviceDiskClass::WriteFile %s(%08x,%08x,%08x,%08x,%08x) - stub?\n",
-           lpHMDeviceName,
-           pHMHandleData,
-           lpBuffer,
-           nNumberOfBytesToWrite,
-           lpNumberOfBytesWritten,
-           lpOverlapped));
+    dprintf2(("KERNEL32: HMDeviceDiskClass::WriteFile %s(%08x,%08x,%08x,%08x,%08x) - stub?\n",
+              lpHMDeviceName, pHMHandleData, lpBuffer, nNumberOfBytesToWrite, lpNumberOfBytesWritten,
+              lpOverlapped));
 
-  DRIVE_INFO *drvInfo = (DRIVE_INFO*)pHMHandleData->dwUserData;
-  if(drvInfo == NULL) {
-      dprintf(("ERROR: DeviceIoControl: drvInfo == NULL!!!"));
-      DebugInt3();
-      SetLastError(ERROR_INVALID_HANDLE);
-      return FALSE;
-  }
+    DRIVE_INFO *drvInfo = (DRIVE_INFO*)pHMHandleData->dwUserData;
+    if(drvInfo == NULL) {
+        dprintf(("ERROR: WriteFile: drvInfo == NULL!!!"));
+        DebugInt3();
+        SetLastError(ERROR_INVALID_HANDLE);
+        return FALSE;
+    }
+    if(!(drvInfo->dwAccess & GENERIC_WRITE)) {
+        dprintf(("ERROR: WriteFile: write access denied!"));
+        SetLastError(ERROR_ACCESS_DENIED);
+        return FALSE;
+    }
+    //It's legal for this pointer to be NULL
+    if(lpNumberOfBytesWritten)
+        *lpNumberOfBytesWritten = 0;
+    else
+        lpNumberOfBytesWritten = &byteswritten;
 
-  //SvL: It's legal for this pointer to be NULL
-  if(lpNumberOfBytesWritten)
-    *lpNumberOfBytesWritten = 0;
-  else
-    lpNumberOfBytesWritten = &byteswritten;
+    if((pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && !lpOverlapped) {
+        dprintf(("FILE_FLAG_OVERLAPPED flag set, but lpOverlapped NULL!!"));
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return FALSE;
+    }
+    if(!(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && lpOverlapped) {
+        dprintf(("Warning: lpOverlapped != NULL & !FILE_FLAG_OVERLAPPED; sync operation"));
+    }
+    if(lpCompletionRoutine) {
+        dprintf(("!WARNING!: lpCompletionRoutine not supported -> fall back to sync IO"));
+    }
 
-  if((pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && !lpOverlapped) {
-    dprintf(("FILE_FLAG_OVERLAPPED flag set, but lpOverlapped NULL!!"));
-    SetLastError(ERROR_INVALID_PARAMETER);
-    return FALSE;
-  }
-  if(!(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && lpOverlapped) {
-      dprintf(("Warning: lpOverlapped != NULL & !FILE_FLAG_OVERLAPPED; sync operation"));
-  }
-  if(lpCompletionRoutine) {
-      dprintf(("!WARNING!: lpCompletionRoutine not supported -> fall back to sync IO"));
-  }
+    //If we didn't get an OS/2 handle for the disk before, get one now
+    if(!pHMHandleData->hHMHandle) {
+        DRIVE_INFO *drvInfo = (DRIVE_INFO*)pHMHandleData->dwUserData;
+        pHMHandleData->hHMHandle = OpenDisk(drvInfo);
+        if(!pHMHandleData->hHMHandle) {
+            dprintf(("No disk inserted; aborting"));
+            SetLastError(ERROR_NOT_READY);
+            return FALSE;
+        }
+    }
 
-  //If we didn't get an OS/2 handle for the disk before, get one now
-  if(!pHMHandleData->hHMHandle) {
-      DRIVE_INFO *drvInfo = (DRIVE_INFO*)pHMHandleData->dwUserData;
-      pHMHandleData->hHMHandle = OpenDisk(drvInfo);
-      if(!pHMHandleData->hHMHandle) {
-          dprintf(("No disk inserted; aborting"));
-          SetLastError(ERROR_NOT_READY);
-          return FALSE;
-      }
-  }
-  //NOTE: For now only allow an application to write to drive A
-  //      Might want to extend this to all removable media, but it's
-  //      too dangerous to allow win32 apps to write to the harddisk directly
-  if(drvInfo->driveLetter != 'A') {
-      SetLastError(ERROR_ACCESS_DENIED);
-      return FALSE;
-  }
+    //SvL: DosWrite doesn't like reading from memory addresses returned by
+    //     DosAliasMem -> search for original memory mapped pointer and use
+    //     that one + commit pages if not already present
+    map = Win32MemMapView::findMapByView((ULONG)lpBuffer, &offset, MEMMAP_ACCESS_READ);
+    if(map) {
+        lpRealBuf = (LPVOID)((ULONG)map->getMappingAddr() + offset);
+        DWORD nrpages = nNumberOfBytesToWrite/4096;
+        if(offset & 0xfff)
+            nrpages++;
+        if(nNumberOfBytesToWrite & 0xfff)
+            nrpages++;
+    
+        map->commitPage(offset & ~0xfff, TRUE, nrpages);
+    }
+    else  lpRealBuf = (LPVOID)lpBuffer;
 
+    OSLibDosDevIOCtl(pHMHandleData->hHMHandle,IOCTL_DISK,DSK_LOCKDRIVE,0,0,0,0,0,0);
 
-  //SvL: DosWrite doesn't like reading from memory addresses returned by
-  //     DosAliasMem -> search for original memory mapped pointer and use
-  //     that one + commit pages if not already present
-  map = Win32MemMapView::findMapByView((ULONG)lpBuffer, &offset, MEMMAP_ACCESS_READ);
-  if(map) {
-    lpRealBuf = (LPVOID)((ULONG)map->getMappingAddr() + offset);
-    DWORD nrpages = nNumberOfBytesToWrite/4096;
-    if(offset & 0xfff)
-        nrpages++;
-    if(nNumberOfBytesToWrite & 0xfff)
-        nrpages++;
-
-    map->commitPage(offset & ~0xfff, TRUE, nrpages);
-  }
-  else  lpRealBuf = (LPVOID)lpBuffer;
-
-  OSLibDosDevIOCtl(pHMHandleData->hHMHandle,IOCTL_DISK,DSK_LOCKDRIVE,0,0,0,0,0,0);
-
-  if(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) {
-    dprintf(("ERROR: Overlapped IO not yet implememented!!"));
-  }
+    if(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) {
+        dprintf(("ERROR: Overlapped IO not yet implememented!!"));
+    }
 //  else {
     bRC = OSLibDosWrite(pHMHandleData->hHMHandle,
                             (PVOID)lpRealBuf,
@@ -1590,13 +1723,75 @@ BOOL HMDeviceDiskClass::WriteFile(PHMHANDLEDATA pHMHandleData,
                             lpNumberOfBytesWritten);
 //  }
 
-  OSLibDosDevIOCtl(pHMHandleData->hHMHandle,IOCTL_DISK,DSK_UNLOCKDRIVE,0,0,0,0,0,0);
-  dprintf2(("KERNEL32: HMDeviceDiskClass::WriteFile returned %08xh\n",
-           bRC));
+    OSLibDosDevIOCtl(pHMHandleData->hHMHandle,IOCTL_DISK,DSK_UNLOCKDRIVE,0,0,0,0,0,0);
+    dprintf2(("KERNEL32: HMDeviceDiskClass::WriteFile returned %08xh\n",
+               bRC));
 
-  return bRC;
+    return bRC;
 }
 
+/*****************************************************************************
+ * Name      : DWORD HMDeviceDiskClass::GetFileSize
+ * Purpose   : set file time
+ * Parameters: PHMHANDLEDATA pHMHandleData
+ *             PDWORD        pSize
+ * Variables :
+ * Result    : API returncode
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
+ *****************************************************************************/
+
+DWORD HMDeviceDiskClass::GetFileSize(PHMHANDLEDATA pHMHandleData,
+                                     PDWORD        lpdwFileSizeHigh)
+{
+    DRIVE_INFO *drvInfo = (DRIVE_INFO*)pHMHandleData->dwUserData;
+    if(drvInfo == NULL) {
+        dprintf(("ERROR: GetFileSize: drvInfo == NULL!!!"));
+        DebugInt3();
+        SetLastError(ERROR_INVALID_HANDLE);
+        return -1; //INVALID_SET_FILE_POINTER
+    }
+
+    dprintf2(("KERNEL32: HMDeviceDiskClass::GetFileSize %s(%08xh,%08xh)\n",
+              lpHMDeviceName, pHMHandleData, lpdwFileSizeHigh)); 
+
+    //If we didn't get an OS/2 handle for the disk before, get one now
+    if(!pHMHandleData->hHMHandle) {
+        pHMHandleData->hHMHandle = OpenDisk(drvInfo);
+        if(!pHMHandleData->hHMHandle) {
+            dprintf(("No disk inserted; aborting"));
+            SetLastError(ERROR_NOT_READY);
+            return -1; //INVALID_SET_FILE_POINTER
+        }
+    }
+
+    if(drvInfo->PartitionSize.HighPart || drvInfo->PartitionSize.LowPart) {
+        if(lpdwFileSizeHigh)
+            *lpdwFileSizeHigh = drvInfo->PartitionSize.HighPart;
+
+        return drvInfo->PartitionSize.LowPart;
+    }
+    else {
+        LARGE_INTEGER position, size;
+
+        //get current position
+        position.HighPart = 0;
+        position.LowPart  = SetFilePointer(pHMHandleData, 0, (PLONG)&position.HighPart, FILE_CURRENT);
+        SetFilePointer(pHMHandleData, 0, NULL, FILE_BEGIN);
+        size.HighPart     = 0;
+        size.LowPart      = SetFilePointer(pHMHandleData, 0, (PLONG)&size.HighPart, FILE_END);
+
+        //restore old position
+        SetFilePointer(pHMHandleData, position.LowPart, (PLONG)&position.HighPart, FILE_BEGIN);
+
+        if(lpdwFileSizeHigh)
+            *lpdwFileSizeHigh = size.HighPart;
+
+        return size.LowPart;
+    }
+}
 
 /*****************************************************************************
  * Name      : DWORD HMDeviceDiskClass::GetFileType
@@ -1612,11 +1807,10 @@ BOOL HMDeviceDiskClass::WriteFile(PHMHANDLEDATA pHMHandleData,
 
 DWORD HMDeviceDiskClass::GetFileType(PHMHANDLEDATA pHMHandleData)
 {
-  dprintf2(("KERNEL32: HMDeviceDiskClass::GetFileType %s(%08x)\n",
-             lpHMDeviceName,
-             pHMHandleData));
+    dprintf2(("KERNEL32: HMDeviceDiskClass::GetFileType %s(%08x)\n",
+               lpHMDeviceName, pHMHandleData));
 
-  return FILE_TYPE_DISK;
+    return FILE_TYPE_DISK;
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.87 2002-02-15 19:14:50 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.88 2002-05-10 14:55:09 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -1666,7 +1666,7 @@ DWORD HMGetFileSize (HANDLE hFile,
   if (-1 == iIndex)                                               /* error ? */
   {
     SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
-    return (INVALID_HANDLE_ERROR);                         /* signal failure */
+    return -1; //INVALID_SET_FILE_POINTER
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
