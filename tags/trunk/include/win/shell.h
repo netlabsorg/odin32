@@ -1,5 +1,3 @@
-/* $Id: shell.h,v 1.4 2000-08-18 02:04:05 phaller Exp $ */
-
 /*
  *                              Shell Library definitions
  */
@@ -80,13 +78,6 @@ DWORD WINAPI SHGetPathFromIDListA (LPCITEMIDLIST pidl,LPSTR pszPath);
 DWORD WINAPI SHGetPathFromIDListW (LPCITEMIDLIST pidl,LPWSTR pszPath);
 #define  SHGetPathFromIDList WINELIB_NAME_AW(SHGetPathFromIDList)
 
-/****************************************************************************
-* SHAddToRecentDocs API
-*/
-#define SHARD_PIDL      0x00000001L
-#define SHARD_PATH      0x00000002L
-
-DWORD WINAPI SHAddToRecentDocs(UINT uFlags, LPCVOID pv);
 
 /****************************************************************************
 *  other functions
