@@ -1,10 +1,11 @@
-/* $Id: oslibdos.cpp,v 1.23 2000-03-29 15:17:28 cbratschi Exp $ */
+/* $Id: oslibdos.cpp,v 1.24 2000-04-02 15:11:12 cbratschi Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
  * Copyright 1998-2000 Sander van Leeuwen (sandervl@xs4all.nl)
  * Copyright 1999-2000 Edgar Buerkle <Edgar.Buerkle@gmx.net>
  * Copyright 2000 Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
+ * Copyright 2000 Christoph Bratschi (cbratschi@datacomm.ch)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -19,6 +20,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include <win32api.h>
 #include <winconst.h>
 #include <misc.h>
@@ -29,6 +31,99 @@
 #define DBG_LOCALLOG    DBG_oslibdos
 #include "dbglocal.h"
 
+//******************************************************************************
+// translate OS/2 error codes to Windows codes
+// NOTE: add all codes you need, list is not complete!
+//******************************************************************************
+DWORD error2WinError(APIRET rc,DWORD defaultCode = ERROR_NOT_ENOUGH_MEMORY_W)
+{
+  switch (rc)
+  {
+    case NO_ERROR: //0
+      return ERROR_SUCCESS_W;
+
+    case ERROR_FILE_NOT_FOUND: //2
+      return ERROR_FILE_NOT_FOUND_W;
+
+    case ERROR_PATH_NOT_FOUND: //3
+      return ERROR_PATH_NOT_FOUND_W;
+
+    case ERROR_ACCESS_DENIED: //5
+      return ERROR_ACCESS_DENIED_W;
+
+    case ERROR_INVALID_HANDLE: //6
+      return ERROR_INVALID_HANDLE_W;
+
+    case ERROR_NOT_ENOUGH_MEMORY: //8
+      return ERROR_NOT_ENOUGH_MEMORY_W;
+
+    case ERROR_BAD_FORMAT: //11
+      return ERROR_BAD_FORMAT_W;
+
+    case ERROR_NO_MORE_FILES: //18
+      return ERROR_NO_MORE_FILES_W;
+
+    case ERROR_NOT_DOS_DISK: //26
+      return ERROR_NOT_DOS_DISK_W;
+
+    case ERROR_OUT_OF_STRUCTURES: //84
+      return ERROR_OUT_OF_STRUCTURES_W;
+
+    case ERROR_INVALID_PARAMETER: //87
+      return ERROR_INVALID_PARAMETER_W;
+
+    case ERROR_INTERRUPT: //95
+      return ERROR_INVALID_AT_INTERRUPT_TIME_W; //CB: right???
+
+    case ERROR_DRIVE_LOCKED: //108
+      return ERROR_DRIVE_LOCKED_W;
+
+    case ERROR_BROKEN_PIPE: //109
+      return ERROR_BROKEN_PIPE_W;
+
+    case ERROR_BUFFER_OVERFLOW: //111
+      return ERROR_BUFFER_OVERFLOW_W;
+
+    case ERROR_NO_MORE_SEARCH_HANDLES: //113
+      return ERROR_NO_MORE_SEARCH_HANDLES_W;
+
+    case ERROR_SEM_TIMEOUT: //121
+      return ERROR_SEM_TIMEOUT_W;
+
+    case ERROR_DISCARDED: //157
+      return ERROR_DISCARDED_W;
+
+    case ERROR_FILENAME_EXCED_RANGE: //206
+      return ERROR_FILENAME_EXCED_RANGE_W;
+
+    case ERROR_META_EXPANSION_TOO_LONG: //208
+      return ERROR_META_EXPANSION_TOO_LONG_W;
+
+    case ERROR_BAD_PIPE: //230
+      return ERROR_BAD_PIPE_W;
+
+    case ERROR_PIPE_BUSY: //231
+      return ERROR_PIPE_BUSY_W;
+
+    case ERROR_PIPE_NOT_CONNECTED: //233
+      return ERROR_PIPE_NOT_CONNECTED_W;
+
+    case ERROR_MORE_DATA: //234
+      return ERROR_MORE_DATA_W;
+
+    case ERROR_INVALID_EA_NAME: //254
+      return ERROR_INVALID_EA_NAME_W;
+
+    case ERROR_EA_LIST_INCONSISTENT: //255
+      return ERROR_EA_LIST_INCONSISTENT_W;
+
+    case ERROR_EAS_DIDNT_FIT: //275
+      return ERROR_EAS_DIDNT_FIT;
+
+    default:
+      return defaultCode;
+  }
+}
 //******************************************************************************
 //TODO: Assumes entire memory range has the same protection flags!
 //TODO: Check if this works for code aliases...
@@ -335,6 +430,34 @@ BOOL pmDateTimeToFileTime(FDATE *pDate,FTIME *pTime,FILETIME *pFT)
 }
 //******************************************************************************
 //******************************************************************************
+#define NOT_NORMAL (FILE_ATTRIBUTE_READONLY_W | \
+                    FILE_ATTRIBUTE_HIDDEN_W |   \
+                    FILE_ATTRIBUTE_SYSTEM_W |   \
+                    FILE_ATTRIBUTE_ARCHIVE_W)
+
+inline DWORD pm2WinFileAttributes(DWORD attrFile)
+{
+  DWORD res = 0;
+
+  if (!(attrFile & NOT_NORMAL))
+    res |= FILE_ATTRIBUTE_NORMAL_W;
+  if (attrFile & FILE_READONLY)
+    res |= FILE_ATTRIBUTE_READONLY_W;
+  if (attrFile & FILE_HIDDEN)
+    res |= FILE_ATTRIBUTE_HIDDEN_W;
+  if (attrFile & FILE_SYSTEM)
+    res |= FILE_ATTRIBUTE_SYSTEM_W;
+  if (attrFile & FILE_DIRECTORY)
+    res |= FILE_ATTRIBUTE_DIRECTORY_W;
+  if (attrFile & FILE_ARCHIVED)
+    res |= FILE_ATTRIBUTE_ARCHIVE_W;
+
+  //CB: not used: FILE_ATTRIBUTE_COMPRESSED_W
+
+  return res;
+}
+//******************************************************************************
+//******************************************************************************
 BOOL OSLibDosGetFileAttributesEx(PSZ   pszName,
                                  ULONG ulDummy,
                                  PVOID pBuffer)
@@ -352,7 +475,7 @@ BOOL OSLibDosGetFileAttributesEx(PSZ   pszName,
     return FALSE;                                   /* raise error condition */
 
   // convert structure
-  lpFad->dwFileAttributes = fs3.attrFile; // directly interchangeable
+  lpFad->dwFileAttributes = pm2WinFileAttributes(fs3.attrFile);
   pmDateTimeToFileTime(&fs3.fdateCreation,   &fs3.ftimeCreation,   &lpFad->ftCreationTime);
   pmDateTimeToFileTime(&fs3.fdateLastAccess, &fs3.ftimeLastAccess, &lpFad->ftLastAccessTime);
   pmDateTimeToFileTime(&fs3.fdateLastWrite,  &fs3.ftimeLastWrite,  &lpFad->ftLastWriteTime);
@@ -667,19 +790,8 @@ DWORD OSLibDosCreateNamedPipe(LPCTSTR lpName,
   dprintf(("DosCreateNPipe rc=%d",rc));
   if (rc)
   {
-     if ( rc == ERROR_PIPE_BUSY         ) SetLastError(ERROR_PIPE_BUSY_W);
-       else
-     if ( rc == ERROR_PATH_NOT_FOUND    ) SetLastError(ERROR_PATH_NOT_FOUND_W);
-       else
-     if ( rc == ERROR_NOT_ENOUGH_MEMORY ) SetLastError(ERROR_NOT_ENOUGH_MEMORY_W);
-       else
-     if ( rc == ERROR_INVALID_PARAMETER ) SetLastError(ERROR_INVALID_PARAMETER_W);
-       else
-     if ( rc == ERROR_OUT_OF_STRUCTURES ) SetLastError(ERROR_OUT_OF_STRUCTURES_W);
-       else
-         // Unknown error
-         SetLastError(ERROR_INVALID_PARAMETER_W); // fixme!
-     return -1; // INVALID_HANDLE_VALUE
+    SetLastError(error2WinError(rc,ERROR_INVALID_PARAMETER_W));
+    return -1; // INVALID_HANDLE_VALUE
   }
   return hPipe;
 }
@@ -695,16 +807,7 @@ BOOL OSLibDosConnectNamedPipe(DWORD hNamedPipe, LPOVERLAPPED lpOverlapped)
   dprintf(("DosConnectNPipe rc=%d",rc));
 
   if (!rc) return (TRUE);
-    else
-  if (rc==ERROR_BROKEN_PIPE) SetLastError(ERROR_BROKEN_PIPE_W);
-    else
-  if (rc==ERROR_BAD_PIPE) SetLastError(ERROR_BAD_PIPE_W);
-    else
-  if (rc==ERROR_PIPE_NOT_CONNECTED) SetLastError(ERROR_PIPE_NOT_CONNECTED_W);
-    else
-  // TODO: Implemnt this using Windows Errors
-  // if (rc==ERROR_INTERRUPT)
-  SetLastError(ERROR_PIPE_NOT_CONNECTED_W);
+  SetLastError(error2WinError(rc,ERROR_PIPE_NOT_CONNECTED_W));
 
   return (FALSE);
 }
@@ -742,28 +845,7 @@ BOOL OSLibDosCallNamedPipe( LPCTSTR lpNamedPipeName,
 
 
   if (!rc) return (TRUE);
-   else
-  if ( rc==ERROR_FILE_NOT_FOUND     ) SetLastError(ERROR_FILE_NOT_FOUND_W);
-    else
-  if ( rc==ERROR_PATH_NOT_FOUND     ) SetLastError(ERROR_PATH_NOT_FOUND_W);
-    else
-  if ( rc==ERROR_ACCESS_DENIED      ) SetLastError(ERROR_ACCESS_DENIED_W);
-    else
-  if ( rc==ERROR_MORE_DATA          ) SetLastError(ERROR_MORE_DATA_W);
-    else
-  if ( rc==ERROR_PIPE_BUSY          ) SetLastError(ERROR_PIPE_BUSY_W);
-    else
-  if ( rc==ERROR_BAD_FORMAT         ) SetLastError(ERROR_BAD_FORMAT_W);
-    else
-  if ( rc==ERROR_BROKEN_PIPE        ) SetLastError(ERROR_BROKEN_PIPE_W);
-    else
-  if ( rc==ERROR_BAD_PIPE           ) SetLastError(ERROR_BAD_PIPE_W);
-    else
-  if ( rc==ERROR_PIPE_NOT_CONNECTED ) SetLastError(ERROR_PIPE_NOT_CONNECTED_W);
-    else
-  // TODO: Implemnt this using Windows Errors
-  // if (rc==ERROR_INTERRUPT)
-  SetLastError(ERROR_PIPE_NOT_CONNECTED_W);
+  SetLastError(error2WinError(rc,ERROR_PIPE_NOT_CONNECTED_W));
 
   return (FALSE);
 }
@@ -789,23 +871,7 @@ BOOL OSLibDosTransactNamedPipe( DWORD  hNamedPipe,
 
   dprintf(("DosTransactNPipe returned rc=%d");)
   if (!rc) return (TRUE);
-   else
-  if ( rc==ERROR_ACCESS_DENIED      ) SetLastError(ERROR_ACCESS_DENIED_W);
-    else
-  if ( rc==ERROR_MORE_DATA          ) SetLastError(ERROR_MORE_DATA_W);
-    else
-  if ( rc==ERROR_PIPE_BUSY          ) SetLastError(ERROR_PIPE_BUSY_W);
-    else
-  if ( rc==ERROR_BAD_FORMAT         ) SetLastError(ERROR_BAD_FORMAT_W);
-    else
-  if ( rc==ERROR_BROKEN_PIPE        ) SetLastError(ERROR_BROKEN_PIPE_W);
-    else
-  if ( rc==ERROR_BAD_PIPE           ) SetLastError(ERROR_BAD_PIPE_W);
-    else
-  if ( rc==ERROR_PIPE_NOT_CONNECTED ) SetLastError(ERROR_PIPE_NOT_CONNECTED_W);
-    else
-  // Unknown error
-  SetLastError(ERROR_PIPE_NOT_CONNECTED_W);
+  SetLastError(error2WinError(rc,ERROR_PIPE_NOT_CONNECTED_W));
 
   return (FALSE);
 }
@@ -833,17 +899,7 @@ BOOL OSLibDosPeekNamedPipe(DWORD   hPipe,
     *lpcbMessage = availData.cbmessage;
     return (TRUE);
   }
-   else
-  if ( rc==ERROR_ACCESS_DENIED      ) SetLastError(ERROR_ACCESS_DENIED_W);
-    else
-  if ( rc==ERROR_PIPE_BUSY          ) SetLastError(ERROR_PIPE_BUSY_W);
-    else
-  if ( rc==ERROR_BAD_PIPE           ) SetLastError(ERROR_BAD_PIPE_W);
-    else
-  if ( rc==ERROR_PIPE_NOT_CONNECTED ) SetLastError(ERROR_PIPE_NOT_CONNECTED_W);
-    else
-  // Unknown error
-  SetLastError(ERROR_PIPE_NOT_CONNECTED_W);
+  SetLastError(error2WinError(rc,ERROR_PIPE_NOT_CONNECTED_W));
 
   return (FALSE);
 }
@@ -858,13 +914,7 @@ BOOL OSLibDosDisconnectNamedPipe(DWORD hPipe)
   dprintf(("DosDisConnectNPipe returned rc=%d",rc));
 
   if (!rc) return TRUE;
-    else
-  if ( rc==ERROR_BROKEN_PIPE        ) SetLastError(ERROR_BROKEN_PIPE_W);
-    else
-  if ( rc==ERROR_BAD_PIPE           ) SetLastError(ERROR_BAD_PIPE_W);
-    else
-     // Unknown error
-     SetLastError(ERROR_PIPE_NOT_CONNECTED_W); // Maybe another?
+  SetLastError(error2WinError(rc,ERROR_PIPE_NOT_CONNECTED_W));
 
   return (FALSE);
 }
@@ -891,43 +941,104 @@ BOOL OSLibDosWaitNamedPipe(LPCSTR lpszNamedPipeName,
   dprintf(("DosWaitNPipe returned rc=%d",rc));
 
   if (!rc) return TRUE;
-    else
-  if ( rc == ERROR_PATH_NOT_FOUND ) SetLastError(ERROR_PATH_NOT_FOUND_W);
-    else
-  if ( rc==ERROR_BAD_PIPE         ) SetLastError(ERROR_BAD_PIPE_W);
-    else
-  if ( rc == ERROR_PIPE_BUSY      ) SetLastError(ERROR_PIPE_BUSY_W);
-    else
-  if ( rc == ERROR_SEM_TIMEOUT_W  ) SetLastError(ERROR_SEM_TIMEOUT_W);
-    else
-  // TODO: Implemnt this using Windows Errors
-  // if (rc==ERROR_INTERRUPT)
-  SetLastError(ERROR_PIPE_NOT_CONNECTED_W);
+  SetLastError(error2WinError(rc,ERROR_PIPE_NOT_CONNECTED_W));
 
   return (FALSE);
 }
 //******************************************************************************
 //******************************************************************************
-#define NOT_NORMAL (FILE_ATTRIBUTE_READONLY_W | \
-                    FILE_ATTRIBUTE_HIDDEN_W |   \
-                    FILE_ATTRIBUTE_SYSTEM_W |   \
-                    FILE_ATTRIBUTE_ARCHIVE_W)
+BOOL isRoot(CHAR* name)
+{
+  if (name[1] == ':')
+  {
+    //local name (x:\)
+    return (name[2] == 0) || !strchr(&name[3],'\\');
+  } else if (name[0] == '\\')
+  {
+    //UNC name (\\resource\drive\)
+    CHAR *drive,*dir;
 
+    drive = strchr(&name[2],'\\');
+    if (!drive) return FALSE;
+    dir = strchr(&drive[1],'\\');
+    if (!dir) return TRUE;
+    return !strchr(&dir[1],'\\');
+  } else return FALSE; //unknown
+}
+//******************************************************************************
+//******************************************************************************
+inline CHAR system2DOSCharacter(CHAR ch)
+{
+  switch(ch)
+  {
+    case ' ':
+    case '.':
+    case '~':
+      return '_';
+
+    default:
+      return toupper(ch);
+  }
+}
+
+VOID long2ShortName(CHAR* longName,CHAR* shortName)
+{
+  INT x;
+  CHAR *source = longName,*dest = shortName,*ext = strrchr(longName,'.');
+
+  if ((strcmp(longName,".") == 0) || (strcmp(longName,"..") == 0))
+  {
+    strcpy(shortName,longName);
+    return;
+  }
+
+  //CB: quick and dirty, real FILE~12.EXT is too slow
+
+  //8 character file name
+  for (x = 0;x < 8;x++)
+  {
+    if ((source == ext) || (source[0] == 0)) break;
+    dest[0] = system2DOSCharacter(source[0]);
+    source++;
+    dest++;
+  }
+
+  if (source[0] == 0)
+  {
+    dest[0] = 0;
+    return;
+  }
+
+  if (source != ext)
+  {
+    //longName > 8 characters, insert ~1
+    shortName[6] = '~';
+    shortName[7] = '1';
+  }
+
+  if (ext)
+  {
+    //add extension, 3 characters
+    dest[0] = ext[0];
+    dest++;
+    ext++;
+    for (x = 0;x < 3;x++)
+    {
+      if (ext[0] == 0) break;
+      dest[0] = system2DOSCharacter(ext[0]);
+      ext++;
+      dest++;
+    }
+  }
+  dest[0] = 0;
+}
+//******************************************************************************
+//******************************************************************************
 VOID translateFileResults(FILESTATUS3 *pResult,LPWIN32_FIND_DATAA pFind,CHAR* achName)
 {
-  pFind->dwFileAttributes = 0;
-  if (!(pResult->attrFile & NOT_NORMAL))
-    pFind->dwFileAttributes |= FILE_ATTRIBUTE_NORMAL_W;
-  if (pResult->attrFile & FILE_READONLY)
-    pFind->dwFileAttributes |= FILE_ATTRIBUTE_READONLY_W;
-  if (pResult->attrFile & FILE_HIDDEN)
-    pFind->dwFileAttributes |= FILE_ATTRIBUTE_HIDDEN_W;
-  if (pResult->attrFile & FILE_SYSTEM)
-    pFind->dwFileAttributes |= FILE_ATTRIBUTE_SYSTEM_W;
-  if (pResult->attrFile & FILE_DIRECTORY)
-    pFind->dwFileAttributes |= FILE_ATTRIBUTE_DIRECTORY_W;
-  if (pResult->attrFile & FILE_ARCHIVED)
-    pFind->dwFileAttributes |= FILE_ATTRIBUTE_ARCHIVE_W;
+  CHAR* name;
+
+  pFind->dwFileAttributes = pm2WinFileAttributes(pResult->attrFile);
 
   pmDateTimeToFileTime(&pResult->fdateCreation,&pResult->ftimeCreation,&pFind->ftCreationTime);
   pmDateTimeToFileTime(&pResult->fdateLastAccess,&pResult->ftimeLastAccess,&pFind->ftLastAccessTime);
@@ -935,25 +1046,18 @@ VOID translateFileResults(FILESTATUS3 *pResult,LPWIN32_FIND_DATAA pFind,CHAR* ac
 
   pFind->nFileSizeHigh = 0; //CB: fixme
   pFind->nFileSizeLow = pResult->cbFile;
-  strcpy(pFind->cFileName,achName);
-  pFind->cAlternateFileName[0] = 0; //CB: fixme: store 8.3 file name
+  name = strrchr(achName,'\\');
+  if (name)
+  {
+    name++;
+    strcpy(pFind->cFileName,name);
+  } else pFind->cFileName[0] = 0;
+  long2ShortName(pFind->cFileName,pFind->cAlternateFileName);
 }
 
 VOID translateFindResults(FILEFINDBUF3 *pResult,LPWIN32_FIND_DATAA pFind)
 {
-  pFind->dwFileAttributes = 0;
-  if (!(pResult->attrFile & NOT_NORMAL))
-    pFind->dwFileAttributes |= FILE_ATTRIBUTE_NORMAL_W;
-  if (pResult->attrFile & FILE_READONLY)
-    pFind->dwFileAttributes |= FILE_ATTRIBUTE_READONLY_W;
-  if (pResult->attrFile & FILE_HIDDEN)
-    pFind->dwFileAttributes |= FILE_ATTRIBUTE_HIDDEN_W;
-  if (pResult->attrFile & FILE_SYSTEM)
-    pFind->dwFileAttributes |= FILE_ATTRIBUTE_SYSTEM_W;
-  if (pResult->attrFile & FILE_DIRECTORY)
-    pFind->dwFileAttributes |= FILE_ATTRIBUTE_DIRECTORY_W;
-  if (pResult->attrFile & FILE_ARCHIVED)
-    pFind->dwFileAttributes |= FILE_ATTRIBUTE_ARCHIVE_W;
+  pFind->dwFileAttributes = pm2WinFileAttributes(pResult->attrFile);
 
   pmDateTimeToFileTime(&pResult->fdateCreation,&pResult->ftimeCreation,&pFind->ftCreationTime);
   pmDateTimeToFileTime(&pResult->fdateLastAccess,&pResult->ftimeLastAccess,&pFind->ftLastAccessTime);
@@ -962,7 +1066,7 @@ VOID translateFindResults(FILEFINDBUF3 *pResult,LPWIN32_FIND_DATAA pFind)
   pFind->nFileSizeHigh = 0; //CB: fixme
   pFind->nFileSizeLow = pResult->cbFile;
   strcpy(pFind->cFileName,pResult->achName);
-  pFind->cAlternateFileName[0] = 0; //CB: fixme: store 8.3 file name
+  long2ShortName(pFind->cFileName,pFind->cAlternateFileName);
 }
 //******************************************************************************
 //******************************************************************************
@@ -978,18 +1082,32 @@ DWORD OSLibDosFindFirst(LPCSTR lpFileName,WIN32_FIND_DATAA* lpFindFileData)
   DosError(FERR_DISABLEHARDERR | FERR_DISABLEEXCEPTION);
   APIRET rc = DosFindFirst((PSZ)lpFileName,&hDir,attrs,&result,sizeof(result),&searchCount,FIL_STANDARD);
   DosError(FERR_ENABLEHARDERR | FERR_ENABLEEXCEPTION);
-  if (rc)
+
+  //check root: skip "." and ".." (HPFS, not on FAT)
+  //check in OSLibDosFindNext not necessary: "." and ".." are the first two entries
+  if ((rc == 0) && isRoot((LPSTR)lpFileName))
   {
-    SetLastError(ERROR_PATH_NOT_FOUND_W);  //CB: fixme: better error handling
+    while ((strcmp(result.achName,".") == 0) || (strcmp(result.achName,"..") == 0))
+    {
+      DosError(FERR_DISABLEHARDERR | FERR_DISABLEEXCEPTION);
+      searchCount = 1;
+      APIRET rc = DosFindNext(hDir,&result,sizeof(result),&searchCount);
+      DosError(FERR_ENABLEHARDERR | FERR_ENABLEEXCEPTION);
+      if (rc)
+      {
+        DosFindClose(hDir);
+        SetLastError(error2WinError(rc));
 
-    return INVALID_HANDLE_VALUE_W;
+        return INVALID_HANDLE_VALUE_W;
+      }
+    }
   }
-
   translateFindResults(&result,lpFindFileData);
 
   return hDir;
 }
 //******************************************************************************
+// NOTE: returns "." and ".." in root
 //******************************************************************************
 DWORD OSLibDosFindFirstMulti(LPCSTR lpFileName,WIN32_FIND_DATAA *lpFindFileData,DWORD *count)
 {
@@ -1008,7 +1126,7 @@ DWORD OSLibDosFindFirstMulti(LPCSTR lpFileName,WIN32_FIND_DATAA *lpFindFileData,
   {
     free(result);
     *count = 0;
-    SetLastError(ERROR_PATH_NOT_FOUND_W);  //CB: fixme: better error handling
+    SetLastError(error2WinError(rc));
 
     return INVALID_HANDLE_VALUE_W;
   }
@@ -1034,7 +1152,7 @@ BOOL  OSLibDosFindNext(DWORD hFindFile,WIN32_FIND_DATAA *lpFindFileData)
   APIRET rc = DosFindNext((HDIR)hFindFile,&result,sizeof(result),&searchCount);
   if (rc)
   {
-    SetLastError(ERROR_INVALID_HANDLE_W); //CB: fixme: better error code
+    SetLastError(error2WinError(rc));
 
     return FALSE;
   }
@@ -1056,7 +1174,7 @@ BOOL  OSLibDosFindNextMulti(DWORD hFindFile,WIN32_FIND_DATAA *lpFindFileData,DWO
   {
     free(result);
     *count = 0;
-    SetLastError(ERROR_INVALID_HANDLE_W); //CB: fixme: better error code
+    SetLastError(error2WinError(rc));
 
     return FALSE;
   }
@@ -1079,7 +1197,7 @@ BOOL  OSLibDosFindClose(DWORD hFindFile)
   APIRET rc = DosFindClose((HDIR)hFindFile);
   if (rc)
   {
-    SetLastError(ERROR_INVALID_HANDLE_W);
+    SetLastError(error2WinError(rc));
 
     return FALSE;
   }

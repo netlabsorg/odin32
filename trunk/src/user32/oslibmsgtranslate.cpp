@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.26 2000-03-31 14:42:47 cbratschi Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.27 2000-04-02 15:11:50 cbratschi Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -428,8 +428,7 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
       winMsg->message = WINWM_NCHITTEST;
       winMsg->wParam  = 0;
       winMsg->lParam  = MAKELONG(winMsg->pt.x,winMsg->pt.y);
-
-      return TRUE;
+      break;
 
     case WM_BUTTON1DOWN:
     case WM_BUTTON1UP:
