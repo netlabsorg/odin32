@@ -1,4 +1,12 @@
- /* $Id: ChangeLog,v 1.661 2000-01-20 16:47:13 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.662 2000-01-20 21:46:04 sandervl Exp $ */
+
+ 2000-01-20: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: Disabled creation of pe_x.log if logging disabled
+	            Only get codepage once from odin.ini.
+ 
+ 2000-01-20: Vit Timchishin <tvv@sbs.kiev.ua>
+	- KERNEL32: Codepage bugfix & unicode translation changes (heapstring.cpp)
+	- GDI32:    Added codepage support for CreateCompatibleDC
 
  2000-01-20: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: fixed WM_CONTEXTMENU
