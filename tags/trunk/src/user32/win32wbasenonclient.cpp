@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.6 2000-01-27 17:21:09 cbratschi Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.7 2000-01-30 18:48:29 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -1024,6 +1024,8 @@ VOID Win32BaseWindow::DoNCPaint(HRGN clip,BOOL suppress_menupaint)
      Now, how is the "system" supposed to tell what happened?
    */
 
+  dprintf(("DoNCPaint %x %x %d", getWindowHandle(), clip, suppress_menupaint));
+
   if (!(hdc = GetDCEx( Win32Hwnd, (clip > 1) ? clip : 0, DCX_USESTYLE | DCX_WINDOW |
                       ((clip > 1) ?(DCX_INTERSECTRGN /*| DCX_KEEPCLIPRGN*/) : 0) ))) return;
 
@@ -1035,7 +1037,8 @@ VOID Win32BaseWindow::DoNCPaint(HRGN clip,BOOL suppress_menupaint)
   {
     //CB: unknown WINE handling (clip == 1), clip client?
     GetRgnBox( clip, &rectClip );
-  } else
+  } 
+  else
   {
     clip = 0;
     rectClip = rect;
@@ -1138,6 +1141,7 @@ VOID Win32BaseWindow::DoNCPaint(HRGN clip,BOOL suppress_menupaint)
   }
 
   ReleaseDC(Win32Hwnd,hdc);
+  dprintf(("**DoNCPaint %x DONE", getWindowHandle()));
 }
 //******************************************************************************
 //******************************************************************************
