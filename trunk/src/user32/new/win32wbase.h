@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.25 2000-01-12 12:40:49 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.26 2000-01-13 13:54:54 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -106,7 +106,7 @@ virtual  ULONG  MsgEnable(BOOL fEnable);
          ULONG  MsgShow(BOOL fShow);
          ULONG  MsgPosChanging(LPARAM lp);
          ULONG  MsgPosChanged(LPARAM lp);
-virtual  ULONG  MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd);
+virtual  ULONG  MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd, HWND hwndOS2Win);
          ULONG  MsgSetFocus(HWND hwnd);
          ULONG  MsgKillFocus(HWND hwnd);
          ULONG  MsgScroll(ULONG msg, ULONG scrollCode, ULONG scrollPos);
@@ -116,7 +116,7 @@ virtual  ULONG  MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd);
          ULONG  MsgEraseBackGround(HDC hdc);
 	 ULONG  MsgHitTest(ULONG x, ULONG y);
          ULONG  MsgNCPaint();
-         ULONG  MsgFormatFrame();
+         ULONG  MsgFormatFrame(WINDOWPOS *lpWndPos);
          ULONG  DispatchMsgA(MSG *msg);
          ULONG  DispatchMsgW(MSG *msg);
 

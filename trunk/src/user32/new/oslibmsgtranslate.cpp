@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.12 2000-01-12 15:14:15 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.13 2000-01-13 13:54:52 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -22,7 +22,8 @@
 #include <string.h>
 #include <misc.h>
 #include "oslibmsg.h"
-#include <win32wnd.h>
+#include "win32wnd.h"
+#include "win32wdesktop.h"
 #include "oslibutil.h"
 #include "timer.h"
 #include <thread.h>
@@ -103,7 +104,7 @@ USHORT virtualKeyTable [66] = {
 //******************************************************************************
 ULONG GetMouseKeyState()
 {
-  ULONG keystate;
+  ULONG keystate = 0;
 
   if(WinGetKeyState(HWND_DESKTOP, VK_BUTTON1) & 0x8000)
     keystate |= MK_LBUTTON_W;
@@ -348,8 +349,8 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
 
         if(WinQueryWindowULong(hwndActivate, OFFSET_WIN32PM_MAGIC) != WIN32PM_MAGIC) {
                 //another (non-win32) application's window
-                //set to NULL (allowed according to win32 SDK) to avoid problems
-                hwndActivate = NULL;
+                //set to desktop window handle
+                hwndActivate = windowDesktop->getWindowHandle();
         }
         else    hwndActivate = Win32BaseWindow::OS2ToWin32Handle(hwndActivate);
 
@@ -440,7 +441,8 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
           winMsg->message = WINWM_NCMOUSEMOVE;
           winMsg->wParam  = (WPARAM)hittest;
           winMsg->lParam  = MAKELONG(winMsg->pt.x,winMsg->pt.y);
-        } else
+        } 
+        else
         {
           winMsg->message = WINWM_MOUSEMOVE;
           winMsg->wParam  = GetMouseKeyState();
