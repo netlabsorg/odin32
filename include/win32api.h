@@ -132,4 +132,6 @@ BOOL    WIN32API IntersectRect( PRECT lprcDst, const RECT * lprcSrc1, const RECT
 DWORD   WIN32API GetTickCount(void);
 DWORD   WIN32API GetCurrentThreadId();
 
+INT     WIN32API ShowCursor(BOOL);
+
 #endif
