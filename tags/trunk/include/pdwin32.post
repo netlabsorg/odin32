@@ -1,37 +1,87 @@
-# $Id: pdwin32.post,v 1.1 2000-03-04 23:46:24 sandervl Exp $
+# $Id: pdwin32.post,v 1.2 2000-03-06 23:42:11 bird Exp $
 #
-# PD-Win32 Project
+# Odin32 API
 #
-# Common dll makefile rules (must be included at the last line of the makefile
+# Common dll makefile rules (must be included at the last line of the makefile)
+#
+# If ORGTARGET is defined it is used to generate the importlibrary.
+#
+# Define NOTEXPDEF to remove the $(TARGET).lib and $(TARGET)exp.def rules.
+# Define EXETARGET to make an executable. (This also applies to pdwin32.mk.)
+# Define LOCALCLEAN if only the local directory is to be clean.
+# Define CLEAN2 to invoke a second clean rule named 'clean2'.
 #
 
+
+# Copy library rule.
+!ifndef ORGTARGET
+$(PDWIN32_LIB)\$(TARGET).lib: $(TARGET).lib
+!else
+$(PDWIN32_LIB)\$(ORGTARGET).lib: $(ORGTARGET).lib
+!endif
+    $(CP) $** $@
+
+
+# Copy dll rule.
+!ifndef EXETARGET
+$(PDWIN32_BIN)\$(TARGET).dll: $(OBJDIR)\$(TARGET).dll
+!else
+$(PDWIN32_BIN)\$(TARGET).exe: $(OBJDIR)\$(TARGET).exe
+!endif
+    $(CP) $** $@
+    $(CP) $** $@..\..
+
+
+!ifndef NOTEXPDEF
+# make library from the <>exp.def file.
+!ifndef ORGTARGET
+$(TARGET).LIB: $(TARGET)exp.def
+!else
+$(ORGTARGET).LIB: $(ORGTARGET)exp.def
+!endif
+    $(IMPLIB) $(IMPLIBFLAGS) $@ $**
+    $(CP) $@ $(PDWIN32_LIB)
+
+
+# make the <>exp.def file.
+!ifndef ORGTARGET
+$(TARGET)exp.def: $(TARGET).def
+!else
+$(ORGTARGET)exp.def: $(ORGTARGET).def
+!endif
+    $(IMPDEF) $** $@
+!endif
+
+
+# Create the object directory.
+$(OBJDIR):
+    @if not exist bin $(MKDIR) bin
+    @if not exist $(OBJDIR) $(MKDIR) $(OBJDIR)
+
+
+#
+# General clean rule. To clean more add it to CLEANEXTRAS!
+#
+!ifndef CLEAN2
+clean:
+!else
+clean:  clean2
+!endif
+    $(RM) $(OBJDIR)\* *.LIB *.res *.map *.pch \
+!ifndef LOCALCLEAN
+        $(PDWIN32_LIB)\$(TARGET).LIB \
+!ifndef EXETARGET
+        $(PDWIN32_BIN)\$(TARGET).dll $(TARGET)exp.def *.dll \
+!else
+        $(PDWIN32_BIN)\$(TARGET).exe *.exe \
+!endif
+        $(CLEANEXTRAS)
+!else
+        $(CLEANEXTRAS)
+!endif
+
+
+# Include the dependencies.
 !ifndef NODEP
 !include .depend
 !endif
-
-$(PDWIN32_LIB)\$(TARGET).lib: $(TARGET).lib
-    $(CP) $** $@
-
-$(TARGET).LIB: $(TARGET)exp.def
-    $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
-    $(CP) $@ $(PDWIN32_LIB)
-
-$(TARGET)exp.def: $(TARGET).def
-    $(IMPDEF) $** $@
-
-$(OBJDIR):
-    @if not exist bin mkdir bin
-    @if not exist $(OBJDIR) mkdir $(OBJDIR)
-
-clean:
-    $(RM) $(OBJDIR)\*.OBJ 
-    $(RM) $(OBJDIR)\*.lrf 
-    $(RM) *.LIB 
-    $(RM) *.dll 
-    $(RM) *.res 
-    $(RM) *.map 
-    $(RM) *.pch 
-    $(RM) $(RESOURCES).asm 
-    $(RM) $(PDWIN32_LIB)\$(TARGET).LIB
-    $(RM) $(PDWIN32_BIN)\$(TARGET).dll 
-    $(RM) $(TARGET)exp.def

@@ -1,4 +1,4 @@
-# $Id: pdwin32.tools,v 1.8 2000-03-04 23:45:30 sandervl Exp $
+# $Id: pdwin32.tools,v 1.9 2000-03-06 23:42:12 bird Exp $
 # ODIN / win32os2 Project
 #
 # makefile for the build system tools and standard rules
@@ -16,11 +16,10 @@ CP          = copy
 MKDIR       = mkdir
 ECHO        = echo
 IMPDEF      = $(PDWIN32_TOOLS)\impdef.exe
-#SvL: Remove this when everything has been converted to the new build rules
-!ifdef NEWBUILD
 DEPEND      = $(PDWIN32_TOOLS)\fastdep.exe -o$$(OBJDIR)
-!else
-DEPEND      = $(PDWIN32_TOOLS)\fastdep.exe 
+#SvL: Remove this when everything has been converted to the new build rules
+!ifdef OLDBUILD
+DEPEND      = $(PDWIN32_TOOLS)\fastdep.exe
 !endif
 
 DOWITHDIRS  = $(PDWIN32_TOOLS)\dowithdirs.cmd
@@ -39,6 +38,8 @@ MAKE_CMD    = $(MAKE_CMD) NODEP=1
 #
 # Targets
 #
+.SUFFIXES: .orc
+
 .c{$(OBJDIR)}.obj:
     $(CC) $(CFLAGS) -c -Fo$(OBJDIR)\$(@B).obj $<
 
@@ -48,7 +49,20 @@ MAKE_CMD    = $(MAKE_CMD) NODEP=1
 .asm{$(OBJDIR)}.obj:
     $(AS) $(ASFLAGS) -Fdo:$(OBJDIR) $<
 
+.orc{$(OBJDIR)}.asm:
+    $(RC) $(RCFLAGS) -o $(OBJDIR)\$(@B).asm $<
 
+.orc{$(OBJDIR)}.obj:
+    $(RC) $(RCFLAGS) -o $(OBJDIR)\$(@B).asm $<
+    $(AS) $(ASFLAGS) -Fdo:$(OBJDIR) $(OBJDIR)\$(@B).asm
+
+.rc{$(OBJDIR)}.res:
+    $(OS2RC) $(OS2RCFLAGS) $< $@
+
+
+#
+# Old Targets
+#
 .c.obj:
     $(CC) $(CFLAGS) -c $<
 
@@ -58,4 +72,9 @@ MAKE_CMD    = $(MAKE_CMD) NODEP=1
 .asm.obj:
     $(AS) $(ASFLAGS) $<
 
+.orc.asm:
+    $(RC) $(RCFLAGS) -o $@ $<
+
+.rc.res:
+    $(OS2RC) $(OS2RCFLAGS) $< $@
 
