@@ -1,4 +1,4 @@
-/* $Id: time.cpp,v 1.5 1999-10-22 18:09:16 sandervl Exp $ */
+/* $Id: time.cpp,v 1.6 1999-10-26 23:38:25 phaller Exp $ */
 
 /*
  * Timer MM apis
@@ -160,6 +160,14 @@ ODINFUNCTION5(MMRESULT,       timeSetEvent,
               UINT,           fuEvent)
 {
   OS2Timer *timer;
+
+// @@@PH 1999/10/26 hack for RA95
+  if (wDelay      < OS2TIMER_RESOLUTION_MINIMUM)
+    wDelay = OS2TIMER_RESOLUTION_MINIMUM;
+
+  if (wResolution < OS2TIMER_RESOLUTION_MINIMUM)
+    wResolution = OS2TIMER_RESOLUTION_MINIMUM;
+
 
   // check parameters
   if ((wDelay < OS2TIMER_RESOLUTION_MINIMUM) ||
