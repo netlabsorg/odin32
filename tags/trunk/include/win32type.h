@@ -1,4 +1,4 @@
-/* $Id: win32type.h,v 1.19 1999-09-04 19:20:44 sandervl Exp $ */
+/* $Id: win32type.h,v 1.20 1999-09-09 18:01:10 dengert Exp $ */
 
 /*
  * Win32 type definitions for OS/2
@@ -125,6 +125,11 @@ typedef       unsigned char  BYTE;
 typedef       unsigned char* PBYTE;
 typedef const unsigned char* PCBYTE;
 
+// floats
+#undef FLOAT
+#undef PFLOAT
+#undef LPFLOAT
+typedef float FLOAT, *PFLOAT, *LPFLOAT;
 
 #endif
 
@@ -248,6 +253,12 @@ typedef const   signed char*  LPCINT8;
 #undef LPCBYTE
 typedef       unsigned char* LPBYTE;
 typedef const unsigned char* LPCBYTE;
+
+// floats
+#undef FLOAT
+#undef PFLOAT
+#undef LPFLOAT
+typedef float FLOAT, *PFLOAT, *LPFLOAT;
 
 // doubles
 typedef double          DOUBLE;
