@@ -111,7 +111,7 @@ SafeArrayRedim(struct tagSAFEARRAY *psa, struct tagSAFEARRAYBOUND *psaboundNew);
 
 /* These are macros that help accessing the VARIANT date type.
  */
-#ifdef __cplusplus
+#if defined(__cplusplus) && !defined(NONAMELESSUNION)
 #define V_UNION(A, B)	((A)->B)
 #define V_VT(A) 		((A)->vt)
 #else
