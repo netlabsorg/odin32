@@ -1,4 +1,10 @@
- /* $Id: ChangeLog,v 1.504 1999-12-04 13:54:17 hugh Exp $ */
+ /* $Id: ChangeLog,v 1.505 1999-12-04 18:56:44 achimha Exp $ */
+
+ 99-12-04 Achim Hasenmueller <achimha@innotek.de>
+        - WSOCK32\NEW: Fixed bugs with incorrect relay window invocation
+                       Improved debugging messages, better error handling
+                       Works very well now, VP Buddy does not crash anymore
+                       Please test well, then it can be promoted
 
  99-12-04  Markus Montkowski <mmontkowski@gmx.de>
         - GDI32: Implemented DEFAULT_GUI_FONT for GetStockObject
