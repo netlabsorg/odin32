@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.990 2000-06-14 14:27:28 sandervl Exp $ */
+ /* $Id: changelog,v 1.991 2000-06-14 18:31:32 sandervl Exp $ */
 
  2000-06-14: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:       Rewrote ExcludeUpdateRgn & GetUpdateRgn
@@ -7,6 +7,7 @@
                     -> fixes excessive redrawing in Lotus Notes
     - GDI32:        Put back region apis
                     Rewrote region functions
+                    DIB section reversal bugs fixed (as seen in Starcraft install)
 
  2000-06-14: Patrick Haller <phaller@gmx.net>
     - KERNEL32:     Altered calling of dllEntryPoint() depending on
