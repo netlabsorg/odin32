@@ -1,4 +1,4 @@
-/* $Id: combo.cpp,v 1.5 1999-10-19 19:26:07 sandervl Exp $ */
+/* $Id: combo.cpp,v 1.6 1999-10-20 06:38:08 sandervl Exp $ */
 /*
  * Combo controls
  *
@@ -11,8 +11,7 @@
  */
 
 #include <string.h>
-#include "winbase.h"
-#include "winuser.h"
+#include <os2win.h>
 #include "controls.h"
 #include "combo.h"
 

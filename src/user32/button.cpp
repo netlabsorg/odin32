@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.12 1999-10-17 19:32:04 cbratschi Exp $ */
+/* $Id: button.cpp,v 1.13 1999-10-20 06:38:08 sandervl Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
@@ -12,8 +12,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "winuser.h"
-#include "winbase.h"
+#include <os2win.h>
 #include "controls.h"
 #include "button.h"
 #include <misc.h>
@@ -1056,6 +1055,7 @@ static void OB_Paint(HWND hwnd,HDC hDC,WORD action)
     SetBkColor( hDC, GetSysColor( COLOR_BTNFACE ) );
     FillRect( hDC,  &dis.rcItem, GetSysColorBrush( COLOR_BTNFACE ) );
 
+    dprintf(("OWNERDRAW button %x, enabled %d", hwnd, !(dwStyle & WS_DISABLED)));
     SendMessageA( GetParent(hwnd), WM_DRAWITEM,
                     GetWindowLongA(hwnd,GWL_ID), (LPARAM)&dis );
 }
