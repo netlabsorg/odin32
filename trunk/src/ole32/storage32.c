@@ -1177,7 +1177,6 @@ static ULONG getFreeProperty(
     ULARGE_INTEGER newSize;
     ULONG          propertyIndex;
     ULONG          lastProperty  = 0;
-
     ULONG          blockCount    = 0;
 
     /* 
@@ -7048,15 +7047,10 @@ HRESULT WINAPI StgIsStorageFile16(LPCOLESTR16 fn) {
 HRESULT WINAPI 
 StgIsStorageFile(LPCOLESTR fn) 
 {
-#ifdef __WIN32OS2__
-        LPOLESTR16 xfn;
-        STACK_strdupWtoA(fn, xfn)
-	return StgIsStorageFile16((LPOLESTR16)xfn);
-#else
 	LPOLESTR16	xfn = HEAP_strdupWtoA(GetProcessHeap(),0,fn);
 	HRESULT	ret = StgIsStorageFile16(xfn);
+
 	HeapFree(GetProcessHeap(),0,xfn);
 	return ret;
-#endif
 }
 #endif
