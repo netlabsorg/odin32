@@ -1481,3 +1481,16 @@
 #define WVR_VREDRAW_W         0x0200
 #define WVR_REDRAW_W          (WVR_HREDRAW_W | WVR_VREDRAW_W)
 #define WVR_VALIDRECTS_W      0x0400
+
+
+#define STATUS_WAIT_0_W                    0x00000000
+#define STATUS_ABANDONED_WAIT_0_W          0x00000080
+#define STATUS_USER_APC_W                  0x000000C0
+#define STATUS_TIMEOUT_W                   0x00000102
+
+#define WAIT_FAILED_W             0xffffffff
+#define WAIT_OBJECT_0_W           0
+#define WAIT_ABANDONED_W          STATUS_ABANDONED_WAIT_0_W
+#define WAIT_ABANDONED_0_W        STATUS_ABANDONED_WAIT_0_W
+#define WAIT_IO_COMPLETION_W      STATUS_USER_APC_W
+#define WAIT_TIMEOUT_W            STATUS_TIMEOUT_W
