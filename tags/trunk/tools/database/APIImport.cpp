@@ -1,4 +1,4 @@
-/* $Id: APIImport.cpp,v 1.3 2000-02-12 23:54:28 bird Exp $ */
+/* $Id: APIImport.cpp,v 1.4 2000-02-14 13:49:12 bird Exp $ */
 /*
  *
  * APIImport - imports a DLL or Dll-.def with functions into the Odin32 database.
@@ -289,7 +289,7 @@ static long processFile(const char *pszFilename, const POPTIONS pOptions, long &
                             if (export.achName == '\0')
                                 sprintf(&szName[0], "Ordinal%04ld", export.ulOrdinal);
                             else
-                                strcpy(&szName[0], &export.achName[0]);
+                                demangle(&szName[0], &export.achName[0]);
 
                             /* internal name */
                             if (export.achIntName[0] == '\0')
