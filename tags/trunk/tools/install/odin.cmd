@@ -1,4 +1,4 @@
-/* $Id: odin.cmd,v 1.18 2000-12-03 08:12:59 bird Exp $
+/* $Id: odin.cmd,v 1.19 2000-12-03 11:40:57 sandervl Exp $
  *
  * Odin32 API WarpIn installation script generator.
  *
@@ -58,7 +58,7 @@ do while ((asArg.i <> '') & (i < 9))
         say 'failed to create WarpIn script.'
         exit(2);
     end
-    if (PackFiles('odininst.wis', asArg.i, MakeArchiveName(asArg.i)) <> 0) then
+    if (PackFiles('odin32inst.wis', asArg.i, MakeArchiveName(asArg.i)) <> 0) then
     do
         say 'failed to create WarpIn script.'
         exit(3);
@@ -115,10 +115,10 @@ rc = lineout(sInstFile, '');
 rc = lineout(sInstFile, '<PCK INDEX=3');
 rc = lineout(sInstFile, '     PACKAGEID="Odin\Odin\Add Win32k.sys to Config.sys\0\0\5"');
 rc = lineout(sInstFile, '     TARGET="C:\ODIN\SYSTEM32"');
-rc = lineout(sInstFile, '     FIXED SELECT');
+rc = lineout(sInstFile, '     FIXED');
 title = "     TITLE=""Add Win32k.sys to Config.sys""";
 rc = lineout(sInstFile, title);
-rc = lineout(sInstFile, '     CONFIGSYS="DEVICE=$(1)\SYSTEM32\Win32k.sys | UNIQUE ADDBEFORE(PROTSHELL)"');
+rc = lineout(sInstFile, '     CONFIGSYS="DEVICE=$(1)\SYSTEM32\Win32k.sys -pe:pe | UNIQUE ADDBEFORE(PROTSHELL)"');
 rc = lineout(sInstFile, '     >Add Win32k.sys to Config.sys .</PCK>');
 rc = lineout(sInstFile, '');
 rc = lineout(sInstFile, '<PCK INDEX=4');
@@ -364,7 +364,7 @@ if (rc <> 0) then return rc;
  * Packet 2
  */
 say sWICCmd '2 -c'||sBinDir' *.ini 2 -c'||sDllDir '*.dll pe.exe pec.exe odininst.exe regsvr32.exe win32k.sys win32k.ddp Win32kCC.exe kRx.exe';
-sWICCmd '2 -c'||sBinDir' *.ini';
+sWICCmd '2 -c'||sBinDir' odin.ini';
 if (rc <> 0) then return rc;
 sWICCmd '2 -c'||sDllDir 'pe.exe *.dll pec.exe odininst.exe regsvr32.exe win32k.sys win32k.ddp Win32kCC.exe kRx.exe';
 if (rc <> 0) then return rc;
