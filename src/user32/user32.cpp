@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.86 2000-11-05 13:39:50 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.87 2000-11-09 18:15:18 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -366,71 +366,6 @@ BOOL WIN32API GetCursorPos( PPOINT lpPoint)
       mapScreenPoint((OSLIBPOINT*)lpPoint);
       return TRUE;
     } else return FALSE;
-}
-/*****************************************************************************
- * Name      : HCURSOR WIN32API LoadCursorFromFileA
- * Purpose   : The LoadCursorFromFile function creates a cursor based on data
- *             contained in a file. The file is specified by its name or by a
- *             system cursor identifier. The function returns a handle to the
- *             newly created cursor. Files containing cursor data may be in
- *             either cursor (.CUR) or animated cursor (.ANI) format.
- * Parameters: LPCTSTR  lpFileName pointer to cursor file, or system cursor id
- * Variables :
- * Result    : If the function is successful, the return value is a handle to
- *               the new cursor.
- *             If the function fails, the return value is NULL. To get extended
- *               error information, call GetLastError. GetLastError may return
- *               the following
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-HCURSOR WIN32API LoadCursorFromFileA(LPCTSTR lpFileName)
-{
-  if (!HIWORD(lpFileName))
-  {
-    return LoadCursorA(NULL,lpFileName);
-  }
-  else
-  {
-    dprintf(("USER32:LoadCursorFromFileA (%s) not implemented.\n",
-           lpFileName));
-
-    return (NULL);
-  }
-}
-/*****************************************************************************
- * Name      : HCURSOR WIN32API LoadCursorFromFileW
- * Purpose   : The LoadCursorFromFile function creates a cursor based on data
- *             contained in a file. The file is specified by its name or by a
- *             system cursor identifier. The function returns a handle to the
- *             newly created cursor. Files containing cursor data may be in
- *             either cursor (.CUR) or animated cursor (.ANI) format.
- * Parameters: LPCTSTR  lpFileName pointer to cursor file, or system cursor id
- * Variables :
- * Result    : If the function is successful, the return value is a handle to
- *               the new cursor.
- *             If the function fails, the return value is NULL. To get extended
- *               error information, call GetLastError. GetLastError may return
- *               the following
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-HCURSOR WIN32API LoadCursorFromFileW(LPCWSTR lpFileName)
-{
-  if (!HIWORD(lpFileName))
-  {
-    return LoadCursorW(NULL,lpFileName);
-  } else
-  {
-    dprintf(("USER32:LoadCursorFromFileW (%s) not implemented.\n",
-           lpFileName));
-
-    return (NULL);
-  }
 }
 //******************************************************************************
 //******************************************************************************

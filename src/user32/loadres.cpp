@@ -1,4 +1,4 @@
-/* $Id: loadres.cpp,v 1.32 2000-11-05 18:49:07 sandervl Exp $ */
+/* $Id: loadres.cpp,v 1.33 2000-11-09 18:15:18 sandervl Exp $ */
 
 /*
  * Win32 resource API functions for OS/2
@@ -106,222 +106,79 @@ int WIN32API LoadStringW(HINSTANCE hinst, UINT wID, LPWSTR lpBuffer, int cchBuff
 }
 //******************************************************************************
 //******************************************************************************
-HICON LoadIconA(HINSTANCE hinst, LPCSTR lpszIcon, DWORD cxDesired,
-                DWORD cyDesired, DWORD fuLoad)
-{
- HICON          hIcon;
- HANDLE 	hMapping = 0;
- char 	       *ptr = NULL;
- HRSRC          hRes;
- LPSTR     	restype = RT_ICONA;
-
-    dprintf(("USER32: LoadIconA %x %x (%d,%d) %x", hinst, lpszIcon, cxDesired, cyDesired, fuLoad));
-
-    if(fuLoad & LR_LOADFROMFILE) 
-    {
-        hMapping = VIRTUAL_MapFileA( lpszIcon, (LPVOID *)&ptr, TRUE);
-        if(hMapping == INVALID_HANDLE_VALUE) 
-		return 0;
-       	hIcon = OSLibWinCreatePointer(ptr);
-	CloseHandle(hMapping);    
-    }
-    else
-    {
-    	if(!hinst)
-    	{
-	      	hRes = FindResourceA(hInstanceUser32,lpszIcon,RT_ICONA);
-	      	if(!hRes)  {
-			hRes = FindResourceA(hInstanceUser32,lpszIcon,RT_GROUP_ICONA);
-			restype = RT_GROUP_ICONA;
-		}
-	      	if(hRes)
-	      	{
-	                hIcon = OSLibWinCreateIcon(ConvertResourceToOS2(hInstanceUser32, restype, hRes));
-	      	} 
-		else 	hIcon = OSLibWinQuerySysIcon((ULONG)lpszIcon,GetSystemMetrics(SM_CXICON),GetSystemMetrics(SM_CYICON));
-    	} 
-    	else
-    	{ //not a system icon
-	      	hRes = FindResourceA(hinst,lpszIcon,RT_ICONA);
-	      	if(!hRes)  {
-			hRes = FindResourceA(hinst,lpszIcon,RT_GROUP_ICONA);
-			restype = RT_GROUP_ICONA;
-		}
-	        if(hRes) {
-	                hIcon = OSLibWinCreateIcon(ConvertResourceToOS2(hinst, restype, hRes));
-	        } 
-		else 	hIcon = 0;
-	}
-    }
-    dprintf(("LoadIconA (%X) returned %x\n", hinst, hIcon));
-
-    return(hIcon);
-}
-//******************************************************************************
-//******************************************************************************
-HICON LoadIconW(HINSTANCE hinst, LPCWSTR lpszIcon, DWORD cxDesired,
-                DWORD cyDesired, DWORD fuLoad)
-{
- HICON          hIcon;
- HANDLE 	hMapping = 0;
- char 	       *ptr = NULL;
- HRSRC          hRes;
- LPSTR     	restype = RT_ICONA;
-
-    if(fuLoad & LR_LOADFROMFILE) 
-    {
-        hMapping = VIRTUAL_MapFileW( lpszIcon, (LPVOID *)&ptr, TRUE);
-        if(hMapping == INVALID_HANDLE_VALUE) 
-		return 0;
-       	hIcon = OSLibWinCreatePointer(ptr);
-	CloseHandle(hMapping);    
-    }
-    else
-    {
-    	if (!hinst)
-    	{
-	      	hRes = FindResourceW(hInstanceUser32,lpszIcon,RT_ICONW);
-	      	if(!hRes)  {
-			hRes = FindResourceW(hInstanceUser32,lpszIcon,RT_GROUP_ICONW);
-			restype = RT_GROUP_ICONA;
-		}
-	      	if(hRes)
-	      	{
-	                hIcon = OSLibWinCreateIcon(ConvertResourceToOS2(hInstanceUser32, restype, hRes));
-	      	} 
-		else 	hIcon = OSLibWinQuerySysIcon((ULONG)lpszIcon,GetSystemMetrics(SM_CXICON),GetSystemMetrics(SM_CYICON));
-	} 
-	else
-    	{//not a system icon
-	      	hRes = FindResourceW(hinst,lpszIcon,RT_ICONW);
-	      	if(!hRes)  {
-			hRes = FindResourceW(hinst,lpszIcon,RT_GROUP_ICONW);
-			restype = RT_GROUP_ICONA;
-		}
-	        if(hRes) {
-	                hIcon = OSLibWinCreateIcon(ConvertResourceToOS2(hinst, restype, hRes));
-	        } 
-		else 	hIcon = 0;
-	}
-    }
-    dprintf(("LoadIconW (%X) returned %x\n", hinst, hIcon));
-
-    return(hIcon);
-}
-//******************************************************************************
-//******************************************************************************
 HICON WIN32API LoadIconA(HINSTANCE hinst, LPCSTR lpszIcon)
 {
-    return LoadIconA(hinst, lpszIcon, 0, 0, 0);
+    if(HIWORD(lpszIcon)) {
+         dprintf(("LoadIconA %x %s", hinst, lpszIcon));
+    }
+    else dprintf(("LoadIconA %x %x", hinst, lpszIcon));
+    return LoadImageA(hinst, lpszIcon, IMAGE_ICON, 0, 0, LR_SHARED | LR_DEFAULTSIZE);
 }
 //******************************************************************************
 //******************************************************************************
 HICON WIN32API LoadIconW(HINSTANCE hinst, LPCWSTR lpszIcon)
 {
-    return LoadIconW(hinst, lpszIcon, 0, 0, 0);
+    dprintf(("LoadIconA %x %x", hinst, lpszIcon));
+    return LoadImageW(hinst, lpszIcon, IMAGE_ICON, 0, 0, LR_SHARED | LR_DEFAULTSIZE);
 }
 //******************************************************************************
 //******************************************************************************
-HCURSOR LoadCursorA(HINSTANCE hinst, LPCSTR lpszCursor, DWORD cxDesired, 
+HCURSOR LoadCursorW(HINSTANCE hinst, LPCWSTR lpszCursor, DWORD cxDesired,
                     DWORD cyDesired, DWORD fuLoad)
 {
- HCURSOR        hCursor;
- HANDLE 	hMapping = 0;
- char 	       *ptr = NULL;
- HRSRC          hRes;
- LPSTR     	restype = RT_CURSORA;
+ HCURSOR    hCursor;
+ HANDLE     hMapping = 0;
+ char      *ptr = NULL;
+ HRSRC      hRes;
+ LPSTR      restype = RT_CURSORA;
+ LPVOID     lpOS2Resdata = NULL;
 
-    if(fuLoad & LR_LOADFROMFILE) 
-    {
-        hMapping = VIRTUAL_MapFileA( lpszCursor, (LPVOID *)&ptr, TRUE);
-        if(hMapping == INVALID_HANDLE_VALUE) 
-		return 0;
-       	hCursor = OSLibWinCreatePointer(ptr);
-	CloseHandle(hMapping);    
-    }
-    else
-    {
-    	if(!hinst)
-    	{
-	      	hRes = FindResourceA(hInstanceUser32,lpszCursor,RT_CURSORA);
-	      	if(!hRes)  {
-			hRes = FindResourceA(hInstanceUser32,lpszCursor,RT_GROUP_CURSORA);
-			restype = RT_GROUP_CURSORA;
-		}
-	      	if(hRes)
-	      	{
-	                hCursor = OSLibWinCreatePointer(ConvertResourceToOS2(hInstanceUser32, restype, hRes));
-	      	} 
-		else 	hCursor = OSLibWinQuerySysPointer((ULONG)lpszCursor,GetSystemMetrics(SM_CXCURSOR),GetSystemMetrics(SM_CYCURSOR));
-    	} 
-    	else
-    	{ //not a system icon
-	      	hRes = FindResourceA(hinst,lpszCursor,RT_CURSORA);
-	      	if(!hRes)  {
-			hRes = FindResourceA(hinst,lpszCursor,RT_GROUP_CURSORA);
-			restype = RT_GROUP_CURSORA;
-		}
-	        if(hRes) {
-	                hCursor = OSLibWinCreatePointer(ConvertResourceToOS2(hinst, restype, hRes));
-	        } 
-		else 	hCursor = 0;
-	}
-    }
-    if(HIWORD(lpszCursor)) {
-         dprintf(("LoadCursorA %s from %x returned %x\n", lpszCursor, hinst, hCursor));
-    }
-    else dprintf(("LoadCursorA %x from %x returned %x\n", lpszCursor, hinst, hCursor));
-
-    return(hCursor);
-}
-//******************************************************************************
-//******************************************************************************
-HCURSOR LoadCursorW(HINSTANCE hinst, LPCWSTR lpszCursor, DWORD cxDesired, 
-                    DWORD cyDesired, DWORD fuLoad)
-{
- HCURSOR        hCursor;
- HANDLE 	hMapping = 0;
- char 	       *ptr = NULL;
- HRSRC          hRes;
- LPSTR     	restype = RT_CURSORA;
-
-    if(fuLoad & LR_LOADFROMFILE) 
+    if(fuLoad & LR_LOADFROMFILE)
     {
         hMapping = VIRTUAL_MapFileW( lpszCursor, (LPVOID *)&ptr, TRUE);
-        if(hMapping == INVALID_HANDLE_VALUE) 
-		return 0;
-       	hCursor = OSLibWinCreatePointer(ptr);
-	CloseHandle(hMapping);    
+        if(hMapping == INVALID_HANDLE_VALUE)
+            return 0;
+
+        lpOS2Resdata = ConvertCursorToOS2(ptr);
+        hCursor = OSLibWinCreatePointer(lpOS2Resdata, cxDesired, cyDesired);
+        FreeOS2Resource(lpOS2Resdata);
+
+        UnmapViewOfFile(ptr);
+        CloseHandle(hMapping);
     }
     else
     {
-    	if(!hinst)
-    	{
-	      	hRes = FindResourceW(hInstanceUser32,lpszCursor,RT_CURSORW);
-	      	if(!hRes)  {
-			hRes = FindResourceW(hInstanceUser32,lpszCursor,RT_GROUP_CURSORW);
-			restype = RT_GROUP_CURSORA;
-		}
-	      	if(hRes)
-	      	{
-	                hCursor = OSLibWinCreatePointer(ConvertResourceToOS2(hInstanceUser32, restype, hRes));
-	      	} 
-		else 	hCursor = OSLibWinQuerySysPointer((ULONG)lpszCursor,GetSystemMetrics(SM_CXCURSOR),GetSystemMetrics(SM_CYCURSOR));
-    	} 
-    	else
-    	{ //not a system icon
-	      	hRes = FindResourceW(hinst,lpszCursor,RT_CURSORW);
-	      	if(!hRes)  {
-			hRes = FindResourceW(hinst,lpszCursor,RT_GROUP_CURSORW);
-			restype = RT_GROUP_CURSORA;
-		}
-	        if(hRes) {
-	                hCursor = OSLibWinCreatePointer(ConvertResourceToOS2(hinst, restype, hRes));
-	        } 
-		else 	hCursor = 0;
-	}
+        if(!hinst)
+        {
+            hRes = FindResourceW(hInstanceUser32,lpszCursor,RT_CURSORW);
+            if(!hRes)  {
+                hRes = FindResourceW(hInstanceUser32,lpszCursor,RT_GROUP_CURSORW);
+                restype = RT_GROUP_CURSORA;
+            }
+            if(hRes)
+            {
+                 lpOS2Resdata = ConvertResourceToOS2(hInstanceUser32, restype, hRes);
+                 hCursor = OSLibWinCreatePointer(lpOS2Resdata, cxDesired, cyDesired);
+                 FreeOS2Resource(lpOS2Resdata);
+            }
+            else hCursor = OSLibWinQuerySysPointer((ULONG)lpszCursor, cxDesired, cyDesired);
+        }
+        else
+        { //not a system icon
+            hRes = FindResourceW(hinst,lpszCursor,RT_CURSORW);
+            if(!hRes)  {
+                hRes = FindResourceW(hinst,lpszCursor,RT_GROUP_CURSORW);
+                restype = RT_GROUP_CURSORA;
+            }
+            if(hRes) {
+                 lpOS2Resdata = ConvertResourceToOS2(hinst, restype, hRes);
+                 hCursor = OSLibWinCreatePointer(lpOS2Resdata, cxDesired, cyDesired);
+                 FreeOS2Resource(lpOS2Resdata);
+            }
+            else hCursor = 0;
+        }
     }
-    dprintf(("LoadCursorW (%X) returned %x\n", hinst, hCursor));
+    dprintf(("LoadCursorA %x from %x returned %x\n", lpszCursor, hinst, hCursor));
 
     return(hCursor);
 }
@@ -329,69 +186,36 @@ HCURSOR LoadCursorW(HINSTANCE hinst, LPCWSTR lpszCursor, DWORD cxDesired,
 //******************************************************************************
 HCURSOR WIN32API LoadCursorA(HINSTANCE hinst, LPCSTR lpszCursor)
 {
-    return LoadCursorA(hinst, lpszCursor, 0, 0, 0);
+    return LoadImageA(hinst, lpszCursor, IMAGE_CURSOR, 0, 0,
+                      LR_SHARED | LR_DEFAULTSIZE );
 }
 //******************************************************************************
 //******************************************************************************
 HCURSOR WIN32API LoadCursorW(HINSTANCE hinst, LPCWSTR lpszCursor)
 {
-    return LoadCursorW(hinst, lpszCursor, 0, 0, 0);
+    return LoadImageW(hinst, lpszCursor, IMAGE_CURSOR, 0, 0,
+                      LR_SHARED | LR_DEFAULTSIZE );
 }
-//******************************************************************************
-//******************************************************************************
-BOOL IsSystemBitmap(ULONG id)
+/***********************************************************************
+*            LoadCursorFromFileW    (USER32.361)
+*/
+HCURSOR WIN32API LoadCursorFromFileW (LPCWSTR name)
 {
-   switch(id)
-   {
-        case OBM_UPARROW:
-        case OBM_DNARROW:
-        case OBM_RGARROW:
-        case OBM_LFARROW:
-        case OBM_RESTORE:
-        case OBM_RESTORED:
-        case OBM_UPARROWD:
-        case OBM_DNARROWD:
-        case OBM_RGARROWD:
-        case OBM_LFARROWD:
-        case OBM_OLD_UPARROW:
-        case OBM_OLD_DNARROW:
-        case OBM_OLD_RGARROW:
-        case OBM_OLD_LFARROW:
-        case OBM_CHECK:
-        case OBM_RADIOCHECK:
-        case OBM_CHECKBOXES:
-        case OBM_BTNCORNERS:
-        case OBM_COMBO:
-        case OBM_REDUCE:
-        case OBM_REDUCED:
-        case OBM_ZOOM:
-        case OBM_ZOOMD:
-        case OBM_SIZE:
-        case OBM_CLOSE:
-        case OBM_MNARROW:
-        case OBM_UPARROWI:
-        case OBM_DNARROWI:
-        case OBM_RGARROWI:
-        case OBM_LFARROWI:
-        case OBM_CLOSED:
-        case OBM_OLD_CLOSE:
-        case OBM_BTSIZE:
-        case OBM_OLD_REDUCE:
-        case OBM_OLD_ZOOM:
-        case OBM_OLD_RESTORE:
-        case OBM_CONTEXTHELP:
-        case OBM_CONTEXTHELPD:
-        case OBM_TRTYPE:
-                return TRUE;
-
-        default:
-                return FALSE;
-   }
+    return LoadImageW(0, name, IMAGE_CURSOR, 0, 0,
+                      LR_LOADFROMFILE | LR_DEFAULTSIZE );
+}
+/***********************************************************************
+*            LoadCursorFromFileA    (USER32.360)
+*/
+HCURSOR WIN32API LoadCursorFromFileA (LPCSTR name)
+{
+    return LoadImageA(0, name, IMAGE_CURSOR, 0, 0,
+                      LR_LOADFROMFILE | LR_DEFAULTSIZE );
 }
 //******************************************************************************
-//NOTE: LR_CREATEDIBSECTION flag doesn't work (crash in GDI32)!
+//NOTE: LR_CREATEDIBSECTION flag doesn't work (crash in GDI32)! (still??)
 //******************************************************************************
-HANDLE LoadBitmapA(HINSTANCE hinst, LPCSTR lpszName, int cxDesired, int cyDesired,
+HANDLE LoadBitmapW(HINSTANCE hinst, LPCWSTR lpszName, int cxDesired, int cyDesired,
                    UINT fuLoad)
 {
     HBITMAP hbitmap = 0;
@@ -403,20 +227,32 @@ HANDLE LoadBitmapA(HINSTANCE hinst, LPCSTR lpszName, int cxDesired, int cyDesire
     HGLOBAL hFix;
     int size;
 
-    if (!(fuLoad & LR_LOADFROMFILE)) {
-      if (!(hRsrc = FindResourceA( hinst, lpszName, RT_BITMAPA ))) return 0;
-      if (!(handle = LoadResource( hinst, hRsrc ))) return 0;
+    if (!(fuLoad & LR_LOADFROMFILE))
+    {
+        handle = 0;
+        if(!hinst)
+        {
+            hRsrc = FindResourceW( hInstanceUser32, lpszName, RT_BITMAPW );
+            if(hRsrc) {
+                handle = LoadResource( hInstanceUser32, hRsrc );
+            }
+        }
+        if(handle == 0)
+        {
+            if (!(hRsrc = FindResourceW( hinst, lpszName, RT_BITMAPW ))) return 0;
+            if (!(handle = LoadResource( hinst, hRsrc ))) return 0;
+        }
 
-      if ((info = (BITMAPINFO *)LockResource( handle )) == NULL) return 0;
+        if ((info = (BITMAPINFO *)LockResource( handle )) == NULL) return 0;
     }
     else
     {
-        hMapping = VIRTUAL_MapFileA( lpszName, (LPVOID *)&ptr, TRUE);
+        hMapping = VIRTUAL_MapFileW( lpszName, (LPVOID *)&ptr, TRUE);
         if (hMapping == INVALID_HANDLE_VALUE) {
-		//TODO: last err set to ERROR_OPEN_FAILED if file not found; correct??
-		dprintf(("LoadBitmapA: failed to load file %s (lasterr=%x)", lpszName, GetLastError()));
-		return 0;
-	}
+            //TODO: last err set to ERROR_OPEN_FAILED if file not found; correct??
+            dprintf(("LoadBitmapW: failed to load file %x (lasterr=%x)", lpszName, GetLastError()));
+            return 0;
+        }
         info = (BITMAPINFO *)(ptr + sizeof(BITMAPFILEHEADER));
     }
 
@@ -481,9 +317,9 @@ HANDLE LoadBitmapA(HINSTANCE hinst, LPCSTR lpszName, int cxDesired, int cyDesire
 //        else {
                 hbitmap = CreateDIBitmap(hdc, &fix_info->bmiHeader, CBM_INIT,
                                          bits, fix_info, DIB_RGB_COLORS );
-		if(hbitmap == 0) {
-			dprintf(("LoadBitmapA: CreateDIBitmap failed!!"));
-		}
+        if(hbitmap == 0) {
+            dprintf(("LoadBitmapW: CreateDIBitmap failed!!"));
+        }
 //        }
         }
         ReleaseDC( 0, hdc );
@@ -491,8 +327,37 @@ HANDLE LoadBitmapA(HINSTANCE hinst, LPCSTR lpszName, int cxDesired, int cyDesire
       GlobalUnlock(hFix);
       GlobalFree(hFix);
     }
-    if (fuLoad & LR_LOADFROMFILE) CloseHandle( hMapping );
+    if(fuLoad & LR_LOADFROMFILE) {
+        UnmapViewOfFile(ptr);
+        CloseHandle(hMapping);
+    }
     return hbitmap;
+}
+//******************************************************************************
+//TODO: scale bitmap
+//******************************************************************************
+HANDLE CopyBitmap(HANDLE hBitmap, DWORD desiredx, DWORD desiredy)
+{
+    HBITMAP res = 0;
+    BITMAP bm;
+
+    if(GetObjectA(hBitmap, sizeof(BITMAP), &bm) == FALSE) {
+        dprintf(("CopyBitmap: GetObject failed!!"));
+        return 0;
+    }
+
+    bm.bmBits = NULL;
+    res = CreateBitmapIndirect(&bm);
+
+    if(res)
+    {
+        char *buf = (char *)HeapAlloc( GetProcessHeap(), 0, bm.bmWidthBytes *
+                                       bm.bmHeight );
+        GetBitmapBits (hBitmap, bm.bmWidthBytes * bm.bmHeight, buf);
+        SetBitmapBits (res, bm.bmWidthBytes * bm.bmHeight, buf);
+        HeapFree( GetProcessHeap(), 0, buf );
+    }
+    return res;
 }
 //******************************************************************************
 //TODO: No support for RT_NEWBITMAP
@@ -501,18 +366,10 @@ HBITMAP WIN32API LoadBitmapA(HINSTANCE hinst, LPCSTR lpszBitmap)
 {
  HBITMAP hBitmap = 0;
 
-  if (!hinst)
-  {
-    if(IsSystemBitmap((ULONG)lpszBitmap))
-    {
-         hBitmap =  LoadBitmapA(hInstanceUser32, lpszBitmap, 0, 0, 0);
-    }
-  }
-  if(!hBitmap)
-        hBitmap = LoadBitmapA(hinst, lpszBitmap, 0, 0, 0);
+  hBitmap = LoadImageA(hinst, lpszBitmap, IMAGE_BITMAP, 0, 0, 0);
 
   if(HIWORD(lpszBitmap)) {
-  	dprintf(("LoadBitmapA %x %s returned %08xh\n", hinst, lpszBitmap, hBitmap));
+        dprintf(("LoadBitmapA %x %s returned %08xh\n", hinst, lpszBitmap, hBitmap));
   }
   else  dprintf(("LoadBitmapA %x %x returned %08xh\n", hinst, lpszBitmap, hBitmap));
 
@@ -525,73 +382,48 @@ HBITMAP WIN32API LoadBitmapW(HINSTANCE hinst, LPCWSTR lpszBitmap)
 {
  HBITMAP hBitmap = 0;
 
-  if(HIWORD(lpszBitmap) != 0)
-    lpszBitmap = (LPWSTR)UnicodeToAsciiString((LPWSTR)lpszBitmap);
-
-  hBitmap = LoadBitmapA((hinst == 0) ? hInstanceUser32:hinst, (LPSTR)lpszBitmap, 0, 0, 0);
-
-  if(HIWORD(lpszBitmap) != 0)
-    FreeAsciiString((LPSTR)lpszBitmap);
+  hBitmap = LoadBitmapW((hinst == 0) ? hInstanceUser32:hinst, lpszBitmap, 0, 0, 0);
 
   if(HIWORD(lpszBitmap)) {
-  	dprintf(("LoadBitmapW %x %s returned %08xh\n", hinst, lpszBitmap, hBitmap));
+        dprintf(("LoadBitmapW %x %s returned %08xh\n", hinst, lpszBitmap, hBitmap));
   }
   else  dprintf(("LoadBitmapW %x %x returned %08xh\n", hinst, lpszBitmap, hBitmap));
 
   return(hBitmap);
 }
 //******************************************************************************
-//TODO: Far from complete, but works for loading resources from exe
-//fuLoad flag ignored
 //******************************************************************************
 HANDLE WIN32API LoadImageA(HINSTANCE hinst, LPCSTR lpszName, UINT uType,
                            int cxDesired, int cyDesired, UINT fuLoad)
 {
- HANDLE hRet = 0;
+ HANDLE res = 0;
+ LPCWSTR u_name;
 
   if(HIWORD(lpszName)) {
-        dprintf(("LoadImageA NOT COMPLETE %x %s %d (%d,%d)\n", hinst, lpszName, uType, cxDesired, cyDesired));
+        dprintf(("LoadImageA %x %s %d (%d,%d)\n", hinst, lpszName, uType, cxDesired, cyDesired));
   }
-  else  dprintf(("LoadImageA NOT COMPLETE %x %x %d (%d,%d)\n", hinst, lpszName, uType, cxDesired, cyDesired));
+  else  dprintf(("LoadImageA %x %x %d (%d,%d)\n", hinst, lpszName, uType, cxDesired, cyDesired));
 
-  if(fuLoad & LR_DEFAULTSIZE) {
-        if (uType == IMAGE_ICON) {
-            if (!cxDesired) cxDesired = GetSystemMetrics(SM_CXICON);
-            if (!cyDesired) cyDesired = GetSystemMetrics(SM_CYICON);
-        }
-        else if (uType == IMAGE_CURSOR) {
-            if (!cxDesired) cxDesired = GetSystemMetrics(SM_CXCURSOR);
-            if (!cyDesired) cyDesired = GetSystemMetrics(SM_CYCURSOR);
-        }
+  if (HIWORD(lpszName)) {
+        u_name = HEAP_strdupAtoW(GetProcessHeap(), 0, lpszName);
   }
-  if (fuLoad & LR_LOADFROMFILE) fuLoad &= ~LR_SHARED;
+  else  u_name=(LPWSTR)lpszName;
 
-  switch(uType) {
-        case IMAGE_BITMAP:
-                hRet = (HANDLE)LoadBitmapA(hinst, lpszName, cxDesired, cyDesired, fuLoad);
-                break;
-        case IMAGE_CURSOR:
-                hRet = (HANDLE)LoadCursorA(hinst, lpszName, cxDesired, cyDesired, fuLoad);
-                break;
-        case IMAGE_ICON:
-                hRet = (HANDLE)LoadIconA(hinst, lpszName, cxDesired, cyDesired, fuLoad);
-                break;
-        default:
-                dprintf(("LoadImageA: unsupported type %d!!", uType));
-                return 0;
-  }
-  dprintf(("LoadImageA returned %x\n", (int)hRet));
+  res = LoadImageW(hinst, u_name, uType, cxDesired, cyDesired, fuLoad);
 
-  return(hRet);
+  if (HIWORD(lpszName))
+        HeapFree(GetProcessHeap(), 0, (LPVOID)u_name);
+
+  return res;
 }
 //******************************************************************************
 //******************************************************************************
 HANDLE WIN32API LoadImageW(HINSTANCE hinst, LPCWSTR lpszName, UINT uType,
-                              int cxDesired, int cyDesired, UINT fuLoad)
+                           int cxDesired, int cyDesired, UINT fuLoad)
 {
  HANDLE hRet = 0;
 
-  dprintf(("LoadImageW NOT COMPLETE (%d,%d)\n", cxDesired, cyDesired));
+  dprintf(("LoadImageW %x %x %d (%d,%d)\n", hinst, lpszName, uType, cxDesired, cyDesired));
 
   if (fuLoad & LR_DEFAULTSIZE) {
         if (uType == IMAGE_ICON) {
@@ -605,16 +437,30 @@ HANDLE WIN32API LoadImageW(HINSTANCE hinst, LPCWSTR lpszName, UINT uType,
   }
   if (fuLoad & LR_LOADFROMFILE) fuLoad &= ~LR_SHARED;
 
-  switch(uType) {
+  switch (uType)
+  {
         case IMAGE_BITMAP:
-                hRet = (HANDLE)LoadBitmapW(hinst, lpszName);
-                break;
-        case IMAGE_CURSOR:
-                hRet = (HANDLE)LoadCursorW(hinst, lpszName, cxDesired, cyDesired, fuLoad);
-                break;
+        {
+            hRet = (HANDLE)LoadBitmapW(hinst, lpszName, cxDesired, cyDesired, fuLoad);
+            break;
+        }
         case IMAGE_ICON:
-                hRet = (HANDLE)LoadIconW(hinst, lpszName, cxDesired, cyDesired, fuLoad);
-                break;
+        {
+            HDC hdc = GetDC(0);
+            UINT palEnts = GetSystemPaletteEntries(hdc, 0, 0, NULL);
+            if (palEnts == 0)
+                palEnts = 256;
+            ReleaseDC(0, hdc);
+
+            hRet = CURSORICON_Load(hinst, lpszName, cxDesired, cyDesired,  palEnts, FALSE, fuLoad);
+            break;
+        }
+
+        case IMAGE_CURSOR:
+            hRet = (HANDLE)LoadCursorW(hinst, lpszName, cxDesired, cyDesired, fuLoad);
+            break;
+//            return CURSORICON_Load(hinst, name, desiredx, desiredy, 1, TRUE, loadflags);
+
         default:
                 dprintf(("LoadImageW: unsupported type %d!!", uType));
                 return 0;
@@ -641,18 +487,21 @@ HANDLE WIN32API LoadImageW(HINSTANCE hinst, LPCWSTR lpszName, UINT uType,
  * defines in windows.h
  *
  */
-HICON WINAPI CopyImage( HANDLE hnd, UINT type, INT desiredx,
-                             INT desiredy, UINT flags )
+HICON WINAPI CopyImage(HANDLE hnd, UINT type, INT desiredx,
+                       INT desiredy, UINT flags )
 {
     dprintf(("CopyImage %x %d (%d,%d) %x", hnd, type, desiredx, desiredy, flags));
     switch (type)
     {
-//      case IMAGE_BITMAP:
-//              return BITMAP_CopyBitmap(hnd);
+        case IMAGE_BITMAP:
+                return CopyBitmap(hnd, desiredx, desiredy);
         case IMAGE_ICON:
-                return CopyIcon(hnd);
+                return (HANDLE)CURSORICON_ExtCopy(hnd, type, desiredx, desiredy, flags);
         case IMAGE_CURSOR:
-                return CopyCursor(hnd);
+        /* Should call CURSORICON_ExtCopy but more testing
+         * needs to be done before we change this
+         */
+                return O32_CopyCursor(hnd);
 //              return CopyCursorIcon(hnd,type, desiredx, desiredy, flags);
         default:
                 dprintf(("CopyImage: Unsupported type"));

@@ -1,4 +1,4 @@
-/* $Id: dib.cpp,v 1.5 2000-02-16 14:34:16 sandervl Exp $ */
+/* $Id: dib.cpp,v 1.6 2000-11-09 18:15:18 sandervl Exp $ */
 
 /*
  * Win32 DIB functions for OS/2
@@ -19,6 +19,7 @@
 #include <os2win.h>
 #include <stdlib.h>
 #include <misc.h>
+#include "dib.h"
 
 #define DBG_LOCALLOG	DBG_dib
 #include "dbglocal.h"
@@ -206,4 +207,38 @@ void DIB_FixColorsToLoadflags(BITMAPINFO * bmi, UINT loadflags, BYTE pix)
     	}
   }
 
+}
+
+/***********************************************************************
+ *           BITMAP_GetWidthBytes
+ *
+ * Return number of bytes taken by a scanline of 16-bit aligned Windows DDB
+ * data.
+ */
+int BITMAP_GetWidthBytes( INT bmWidth, INT bpp )
+{
+    switch(bpp)
+    {
+    case 1:
+	return 2 * ((bmWidth+15) >> 4);
+
+    case 24:
+	bmWidth *= 3; /* fall through */
+    case 8:
+	return bmWidth + (bmWidth & 1);
+
+    case 32:
+	return bmWidth * 4;
+
+    case 16:
+    case 15:
+	return bmWidth * 2;
+
+    case 4:
+	return 2 * ((bmWidth+3) >> 2);
+
+    default:
+	dprintf(("BITMAP_GetWidthBytes: Unknown depth %d, please report.\n", bpp ));
+    }
+    return -1;
 }

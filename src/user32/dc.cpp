@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.76 2000-11-05 18:49:07 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.77 2000-11-09 18:15:17 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -740,10 +740,6 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
    HideCaret(hwnd);
    WinShowTrackRect(wnd->getOS2WindowHandle(), FALSE);
 
-   //testestest
-   if(hwnd == 0x68000019) {
-	lpps->fErase = 1;
-   }
    if(wnd->needsEraseBkgnd() && lComplexity != RGN_NULL) {
         wnd->setEraseBkgnd(FALSE);
         lpps->fErase = (wnd->MsgEraseBackGround(pHps->hps) != 0);
