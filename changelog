@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.1194 2000-12-24 11:21:20 sandervl Exp $ */
+/* $Id: changelog,v 1.1195 2000-12-27 23:07:45 sandervl Exp $ */
+
+ 2000-12-27: Jeroen van den Horn <J.vandenHorn@chello.nl>
+    - WININET:  o Resync with latest Wine + fixes/additions
+
+ 2000-12-27: Yuri Dario <mc6530@mclink.it>
+    - USER32:   o Wrong flag check in SetWindowPos (didn't include e.g. SWP_NOSENDCHANGING)
 
  2000-12-21: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Fixed two FS bugs in main PM window handler. (FS not restored
