@@ -1,4 +1,4 @@
-/* $Id: shellpath.cpp,v 1.8 2000-03-28 15:28:52 cbratschi Exp $ */
+/* $Id: shellpath.cpp,v 1.9 2000-04-30 23:28:42 phaller Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -252,18 +252,24 @@ ODINFUNCTION1(LPVOID, PathRemoveBlanksAW,
  */
 ODINFUNCTION1(LPCSTR, PathFindFilenameA,
               LPCSTR, aptr)
-{  LPCSTR aslash;
-   aslash = aptr;
-
-   TRACE("%s\n",aslash);
-   while (aptr[0])
-   { if (((aptr[0]=='\\') || (aptr[0]==':')) && aptr[1] && aptr[1]!='\\')
-         aslash = aptr+1;
-     aptr++;
-   }
-   return aslash;
-
+{
+  int iLength = strlen(aptr);
+  LPSTR strSlash = (LPSTR)aptr + iLength - 1;
+  
+  while (iLength--)
+  {
+    if ( (*strSlash == '/' ) ||
+         (*strSlash == '\\') )
+      return strSlash + 1;
+  }
+  
+  // no slash found, look for ":"
+  if (aptr[1] == ':')
+    return aptr+2;
+  
+  return aptr; // no slash and no drive found
 }
+
 ODINFUNCTION1(LPCWSTR, PathFindFilenameW,
               LPCWSTR, wptr)
 {  LPCWSTR wslash;
