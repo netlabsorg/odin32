@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.20 2001-11-19 02:56:47 bird Exp $
+# $Id: Makefile,v 1.21 2001-11-20 03:41:29 bird Exp $
 
 #
 # kKrnlLib.sys makefile.
@@ -29,8 +29,7 @@ TARGET = kKrnlLib
 # Main rules.
 #
 !if "$(DDKPATH)" != "" && "$(MSCPATH)" != ""  && "$(TOOLKIT)" != "" && "$(VACPATH)" != ""
-all:    $(WIN32KBIN)\ignore.exe \
-        $(WIN32KBIN)\$(TARGET).sys \
+all:    $(WIN32KBIN)\$(TARGET).sys \
         $(ODIN32_BIN)\TRC00FD.TFF \
         lib
 lib:    $(ODIN32_LIB)\$(TARGET).lib \
@@ -103,8 +102,8 @@ LIBS =\
 #
 $(TARGET).sys: $(WIN32KBIN)\$(TARGET).sys
 
-$(WIN32KBIN)\$(TARGET).sys: $(WIN32KBIN)\clfix.exe \
-                            $(WIN32KBIN)\ignore.exe \
+$(WIN32KBIN)\$(TARGET).sys: $(WIN32KBIN)\ignore.exe \
+                            $(WIN32KBIN)\clfix.exe \
                             $(WIN32KINCLUDE)\options.inc \
                             $(OBJS) \
                             $(LIBS) \
