@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1718 2001-10-03 18:36:19 sandervl Exp $ */
+/* $Id: changelog,v 1.1719 2001-10-03 19:21:31 sandervl Exp $ */
 
  2001-10-03: Sander van Leeuwen <sandervl@xs4all.nl>
     - WINMM:    o Allocate handle for new timer and verify handle
@@ -19,6 +19,7 @@
                   TODO: Must display size/move cursor when starting action
                         from system menu
                 o GetDCEx change; always call WinGetClipPS (!CS_OWNDC)
+    - OLEAUT32: o Wine update
 
  2001-10-02: Sander van Leeuwen <sandervl@xs4all.nl>
     - REGSVR32: o Must use LoadLibrary, not CoLoadLibrary
