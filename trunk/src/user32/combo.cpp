@@ -1,4 +1,4 @@
-/* $Id: combo.cpp,v 1.34 2002-04-24 08:56:16 sandervl Exp $ */
+/* $Id: combo.cpp,v 1.35 2002-09-16 16:17:08 sandervl Exp $ */
 /*
  * Combo controls
  *
@@ -1253,6 +1253,23 @@ static void CBRollUp( LPHEADCOMBO lphc, BOOL ok, BOOL bButton )
            CB_NOTIFY( lphc, CBN_CLOSEUP );
        }
    }
+
+#ifdef __WIN32OS2__
+   //@PF Of course when we rollup box it is time to sync it with listview.
+   //Obvious Wine bug and even not fixed in latest versions.
+   if( CB_GETTYPE(lphc) == CBS_DROPDOWN )
+   {
+       lphc->droppedIndex = CBUpdateLBox( lphc,TRUE );
+   }
+   else
+   {
+       lphc->droppedIndex = SendMessageA( lphc->hWndLBox, LB_GETCURSEL, 0, 0 );
+
+       if( lphc->droppedIndex == LB_ERR )
+         lphc->droppedIndex = 0;
+   }
+#endif
+
 }
 
 /***********************************************************************
