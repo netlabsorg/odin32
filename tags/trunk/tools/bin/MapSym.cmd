@@ -1,4 +1,4 @@
-/* $Id: MapSym.cmd,v 1.7 2002-08-24 04:33:52 bird Exp $
+/* $Id: MapSym.cmd,v 1.8 2002-08-29 10:04:10 bird Exp $
  *
  * Helper script for calling MAPSYM.EXE.
  *
@@ -11,10 +11,10 @@
 /*
  * Configuration.
  */
-sWatcom = ';wat11c;wat11;watcom;wat11c-16;wat11-16;'
-sIBMOld = ';vac3xx;vac365;vac308;link386;emx;emxpgcc;mscv6;mscv6-16;ibmold;'
+sWatcom = ';wat11c;wat11;watcom;wat11c-16;wat11-16;wlink;wlink.exe;'
+sIBMOld = ';vac3xx;vac365;vac308;emx;emxpgcc;mscv6;mscv6-16;ilink;ilink.exe;link386;link386.exe;link;link.exe;ibmold;'
 sVAC40  = ';vac40;'
-sLinkers= strip(sVAC40, 'T', ';')||strip(sIBMOld, 'T', ';')||strip(sWatcom, 'T', ';')||';'
+sLinkers = strip(sVAC40, 'T', ';')||strip(sIBMOld, 'T', ';')||strip(sWatcom, 'T', ';')||';'
 /* look for 4os2 */
 f4OS2   = 0;
 Address CMD 'set 4os2test_env=%@eval[2 + 2]';
@@ -124,7 +124,7 @@ select
 
     when (sLinker = 'WATCOM') then
     do
-        /*sTmpMapFile = watos2.map*/
+        /*sTmpMapFile = 'watos2.map'*/
         rc = wat2map(sMapFile, sTmpMapFile);
         if (rc <> 0) then
         do
@@ -294,7 +294,7 @@ vac40conv: procedure;
                         /*say 'SegLn: seg='iSeg 'off='iSegOffset 'name='sSegName 'class='sSegClass; say sSegment*/
                         if (length(sSegName) < 22) then sSegName = left(sSegName, 22, ' ');
                         call lineout sOutFile, ' '||strip(iSeg)':'iSegOffset right(DecToHex(cbSegment), 9, '0'),
-                                     ||'H '||sSegName||' '||strip(sSegClass);
+                                     ||'H     '||sSegName||' '||strip(sSegClass);
                         sSegment = '';
                         cbSegment = 0;
                     end
@@ -589,6 +589,11 @@ Do While Lines( mapFile ) <> 0
    do
       seg = '0001';
       Parse Value watcomText With ofs 9 . 16 declaration
+   end
+   else
+   do  /* kso: more workarounds */
+       if (is_Hex(seg) & length(ofs) > 4 & \is_Hex(substr(ofs,5,1))) then
+           ofs = '0000'||left(ofs,4);
    end
    /*say ofs  '-'declaration*/
    is_Adress = (is_Hex(seg) = 1) & (is_Hex(ofs) = 1)
