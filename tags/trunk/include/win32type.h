@@ -1,4 +1,4 @@
-/* $Id: win32type.h,v 1.23 1999-09-29 08:26:39 sandervl Exp $ */
+/* $Id: win32type.h,v 1.24 1999-10-04 12:12:43 phaller Exp $ */
 
 /*
  * Win32 type definitions for OS/2
@@ -609,6 +609,8 @@ typedef struct _MEMORY_BASIC_INFORMATION
 #endif
 
 /* Could this type be considered opaque? */
+#ifndef __WINE_WINBASE_H
+
 typedef struct {
 	LPVOID	DebugInfo;
 	LONG LockCount;
@@ -618,7 +620,10 @@ typedef struct {
 	DWORD Reserved;
 }CRITICAL_SECTION;
 
+#endif
+
 /* Scrollbar info */
+#ifndef __INCLUDE_WINUSER_H
 typedef struct
 {
     UINT    cbSize;
@@ -630,6 +635,7 @@ typedef struct
     INT     nTrackPos;
 } SCROLLINFO, *LPSCROLLINFO;
 typedef SCROLLINFO CONST *LPCSCROLLINFO;
+#endif
 
 #pragma pack()
 
