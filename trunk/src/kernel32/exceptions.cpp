@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.58 2002-04-30 09:36:09 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.59 2002-06-02 12:42:09 sandervl Exp $ */
 
 /*
  * Win32 Exception functions for OS/2
@@ -1132,7 +1132,7 @@ ULONG APIENTRY OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
 {
   //SvL: Check if exception inside debug fprintf -> if so, clear lock so
   //     next dprintf won't wait forever
-  LogException(ENTER_EXCEPTION);
+  int prevlock = LogException(ENTER_EXCEPTION);
 
   /* Access violation at a known location */
   switch(pERepRec->ExceptionNum)
@@ -1327,11 +1327,11 @@ CrashAndBurn:
         goto continuesearch;
   }
 continuesearch:
-  LogException(LEAVE_EXCEPTION);
+  LogException(LEAVE_EXCEPTION, prevlock);
   return XCPT_CONTINUE_SEARCH;
 
 continueexecution:
-  LogException(LEAVE_EXCEPTION);
+  LogException(LEAVE_EXCEPTION, prevlock);
   return XCPT_CONTINUE_EXECUTION;
 }
 
