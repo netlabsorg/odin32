@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.34 2000-06-01 11:28:45 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.35 2000-06-13 07:11:37 phaller Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -470,12 +470,6 @@ ODINFUNCTION4(DWORD, SetFilePointer,
               PLONG, lpDistanceToMoveHigh,
               DWORD, dwMoveMethod)
 {
-  dprintf(("KERNEL32: SetFilePointer(%08xh,%08xh,%08xh,%08xh)\n",
-           hFile,
-           lDistanceToMove,
-           lpDistanceToMoveHigh,
-           dwMoveMethod));
-
   return(HMSetFilePointer(hFile,
                          lDistanceToMove,
                          lpDistanceToMoveHigh,
@@ -530,14 +524,13 @@ ODINFUNCTION1(DWORD, GetFileAttributesA,
 ODINFUNCTION1(DWORD, GetFileAttributesW,
               LPCWSTR, arg1)
 {
- DWORD rc;
- char *astring;
+  DWORD rc;
+  char *astring;
 
-    dprintf(("KERNEL32:  GetFileAttributesW\n"));
-    astring = UnicodeToAsciiString((LPWSTR)arg1);
-    rc = ODIN_GetFileAttributesA(astring);
-    FreeAsciiString(astring);
-    return(rc);
+  astring = UnicodeToAsciiString((LPWSTR)arg1);
+  rc = ODIN_GetFileAttributesA(astring);
+  FreeAsciiString(astring);
+  return(rc);
 }
 //******************************************************************************
 //******************************************************************************
@@ -554,14 +547,13 @@ ODINFUNCTION2(BOOL, SetFileAttributesW,
               LPCWSTR, lpFileName,
               DWORD, dwFileAttributes)
 {
- char *asciifile;
- BOOL  rc;
+  char *asciifile;
+  BOOL  rc;
 
-    dprintf(("KERNEL32:  SetFileAttributesW\n"));
-    asciifile = UnicodeToAsciiString((LPWSTR)lpFileName);
-    rc = O32_SetFileAttributes(asciifile, dwFileAttributes);
-    FreeAsciiString(asciifile);
-    return(rc);
+  asciifile = UnicodeToAsciiString((LPWSTR)lpFileName);
+  rc = O32_SetFileAttributes(asciifile, dwFileAttributes);
+  FreeAsciiString(asciifile);
+  return(rc);
 }
 //******************************************************************************
 //******************************************************************************
@@ -620,13 +612,6 @@ ODINFUNCTION5(BOOL, LockFile,
               DWORD, arg4,
               DWORD, arg5)
 {
-  dprintf(("KERNEL32: LockFile (%08xh,%08xh,%08xh,%08xh,%08xh)\n",
-           arg1,
-           arg2,
-           arg3,
-           arg4,
-           arg5));
-
   return HMLockFile(arg1,
                     arg2,
                     arg3,
@@ -660,14 +645,6 @@ ODINFUNCTION6(BOOL, LockFileEx,
               DWORD, nNumberOfBytesToLockHigh,
               LPOVERLAPPED, lpOverlapped)
 {
-  dprintf(("Kernel32: LockFileEx(%08xh,%08xh,%08xh,%08xh,%08xh,%08xh)\n",
-           hFile,
-           dwFlags,
-           dwReserved,
-           nNumberOfBytesToLockLow,
-           nNumberOfBytesToLockHigh,
-           lpOverlapped));
-
   return(HMLockFile(hFile,
                     lpOverlapped->Offset,
                     lpOverlapped->OffsetHigh,
@@ -703,16 +680,15 @@ ODINFUNCTION2(BOOL, MoveFileW,
               LPCWSTR, lpSrc,
               LPCWSTR, lpDest)
 {
- char *asciisrc, *asciidest;
- BOOL  rc;
+  char *asciisrc, *asciidest;
+  BOOL  rc;
 
-    dprintf(("KERNEL32:  MoveFileW\n"));
-    asciisrc  = UnicodeToAsciiString((LPWSTR)lpSrc);
-    asciidest = UnicodeToAsciiString((LPWSTR)lpDest);
-    rc = O32_MoveFile(asciisrc, asciidest);
-    FreeAsciiString(asciisrc);
-    FreeAsciiString(asciidest);
-    return(rc);
+  asciisrc  = UnicodeToAsciiString((LPWSTR)lpSrc);
+  asciidest = UnicodeToAsciiString((LPWSTR)lpDest);
+  rc = O32_MoveFile(asciisrc, asciidest);
+  FreeAsciiString(asciisrc);
+  FreeAsciiString(asciidest);
+  return(rc);
 }
 //******************************************************************************
 //******************************************************************************
@@ -766,13 +742,6 @@ ODINFUNCTION5(BOOL, UnlockFile,
               DWORD, arg4,
               DWORD, arg5)
 {
-  dprintf(("KERNEL32: UnlockFile(%08xh,%08xh,%08xh,%08xh,%08xh)\n",
-           arg1,
-           arg2,
-           arg3,
-           arg4,
-           arg5));
-
   return HMUnlockFile(arg1,
                       arg2,
                       arg3,
@@ -804,13 +773,6 @@ ODINFUNCTION5(BOOL, UnlockFileEx,
               DWORD, nNumberOfBytesToLockHigh,
               LPOVERLAPPED, lpOverlapped)
 {
-  dprintf(("Kernel32: UnlockFileEx(%08xh,%08xh,%08xh,%08xh,%08xh,%08xh)\n",
-           hFile,
-           dwReserved,
-           nNumberOfBytesToLockLow,
-           nNumberOfBytesToLockHigh,
-           lpOverlapped));
-
   return(HMUnlockFileEx(hFile, dwReserved,
                         nNumberOfBytesToLockLow,
                         nNumberOfBytesToLockHigh,
@@ -880,7 +842,7 @@ ODINFUNCTION2(DWORD, GetCompressedFileSizeA,
            lpFileName,
            lpFileSizeHigh));
 
-  /* PH: simply return the standard filesize */
+  /* @@@PH: simply return the standard filesize */
   return 0;
 }
 
