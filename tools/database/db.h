@@ -1,4 +1,4 @@
-/* $Id: db.h,v 1.7 2000-02-18 12:42:07 bird Exp $ */
+/* $Id: db.h,v 1.8 2000-07-18 07:16:00 bird Exp $ */
 /*
  * DB - contains all database routines
  *
@@ -18,6 +18,7 @@ extern "C" {
 /*******************************************************************************
 *   Defined Constants                                                          *
 *******************************************************************************/
+#define NBR_PARAMETERS      30
 #define NBR_FUNCTIONS       20
 #define NBR_AUTHORS         20
 #define ALIAS_NULL          -1
@@ -42,9 +43,9 @@ extern "C" {
 
         /* parameters */
         int   cParams;
-        char *apszParamType[30];
-        char *apszParamName[30];
-        char *apszParamDesc[30];
+        char *apszParamType[NBR_PARAMETERS];
+        char *apszParamName[NBR_PARAMETERS];
+        char *apszParamDesc[NBR_PARAMETERS];
 
         /* authors */
         int   cAuthors;
@@ -70,7 +71,8 @@ extern "C" {
         unsigned long cFns;
         signed long   alRefCode[NBR_FUNCTIONS];
         signed long   alDllRefCode[NBR_FUNCTIONS];
-        signed long   alAliasFn[NBR_FUNCTIONS]; /* -1 is SQL-NULL, -2 is do not mind, >= 0 ref to function. */
+        signed long   alAliasFn[NBR_FUNCTIONS];     /* -1 is SQL-NULL, -2 is "do not mind", >= 0 ref to function. */
+        signed long   alFileRefCode[NBR_FUNCTIONS]; /* -1 is SQL-NULL, -2 is "do not mind", >= 0 ref to file. */
     } FNFINDBUF, *PFNFINDBUF;
 
     typedef long (_System DBCALLBACKFETCH)(const char*, const char *, void *);
@@ -98,14 +100,28 @@ extern "C" {
                                                    const char *pszIntFunction,
                                                    unsigned long ulOrdinal,
                                                    BOOL fIgnoreOrdinal);
+    BOOL            _System dbInsertUpdateFile(unsigned short usDll,
+                                               const char *pszFilename,
+                                               const char *pszDescription,
+                                               const char *pszLastDateTime,
+                                               signed long lLastAuthor,
+                                               const char *pszRevision);
     BOOL            _System dbFindFunction(const char *pszFunctionName,
                                            PFNFINDBUF pFnFindBuf,
                                            signed long lDll);
+    signed long     _System dbFindFile(signed long lDll, const char *pszFilename);
     signed long     _System dbFindAuthor(const char *pszAuthor, const char *pszEmail);
     signed long     _System dbGetFunctionState(signed long lRefCode);
     unsigned long   _System dbUpdateFunction(PFNDESC pFnDesc,
                                              signed long lDll,
                                              char *pszError);
+    BOOL            _System dbRemoveDesignNotes(signed long lFile);
+    BOOL            _System dbAddDesignNote(signed long lDll,
+                                            signed long lFile,
+                                            const char *pszTitle,
+                                            const char *pszText,
+                                            signed long lSeqNbr,
+                                            signed long lSeqNbrFile);
     unsigned long   _System dbCreateHistory(char *pszError);
     unsigned long   _System dbCheckIntegrity(char *pszError);
 

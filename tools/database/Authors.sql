@@ -1,4 +1,4 @@
--- $Id: Authors.sql,v 1.2 2000-02-10 22:42:33 bird Exp $
+-- $Id: Authors.sql,v 1.3 2000-07-18 07:15:56 bird Exp $
 --
 -- Insert authors.
 --
@@ -8,9 +8,9 @@ USE odin32;
 
 DELETE FROM author;
 --                         refcode name               initials alias        email                           country              city/location
-INSERT INTO author VALUES ( 1, 'Sander van Leeuwen',    'SvL', NULL,       'sandervl@xs4all.nl',            'the Netherlands',   'Delft');
+INSERT INTO author VALUES ( 1, 'Sander van Leeuwen',    'SvL', 'sandervl', 'sandervl@xs4all.nl',            'the Netherlands',   'Delft');
 INSERT INTO author VALUES ( 2, 'Peter Fitzsimmons',     'PF',  NULL,       'pfitzsim@home.com',             'Canada',            'Mississauga, Ontario');
-INSERT INTO author VALUES ( 3, 'Patrick Haller',        'PT',  NULL,       'haller@zebra.fh-weingarten.de', 'Germany',           NULL);
+INSERT INTO author VALUES ( 3, 'Patrick Haller',        'PT',  'phaller',  'haller@zebra.fh-weingarten.de', 'Germany',           NULL);
 INSERT INTO author VALUES ( 4, 'Joel Troster',          'JT',  NULL,       'jtroster@atitech.ca',           'Canada',            'Thornhill, Ontario');
 INSERT INTO author VALUES ( 5, 'Vince Vielhaber',       'VV',  NULL,       'vev@michvhf.com',               'USA',               'Oxford, MI');
 INSERT INTO author VALUES ( 6, 'Chris McKillop',        'CMK', NULL,       'cdmckill@engmail.uwaterloo.ca', 'Canada',            'Waterloo, Ontario');
