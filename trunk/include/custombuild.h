@@ -17,11 +17,7 @@
 #define MAX_FONT_MAPPINGS	  8
 #define MAX_REGISTER_DLLS         64
 
-#define INNOWIN_REGISTRY_BASE      "Software\\InnoTek\\INNOWIN\\"
 #define INNOWIN_DLLNAME        	   "INNOWIN.DLL"
-#define INNOWIN_REG_CURRENTUSER    "REGROOT_HKEY_CurrentUser"
-#define INNOWIN_REG_LOCAL_MACHINE  "REGROOT_HKEY_LocalMachine"
-#define INNOWIN_REG_USERS          "REGROOT_HKEY_Users"
 
 #define MAKE_BUILDNR(major, minor)	((major << 16) | minor)
 #define MAJOR_BUILDNR(buildnr)		(buildnr >> 16)
@@ -459,6 +455,7 @@ extern IMAGE_FILE_HEADER nt_avifil32_header;
 extern IMAGE_FILE_HEADER nt_dinput_header;
 extern IMAGE_FILE_HEADER nt_dsound_header;
 extern IMAGE_FILE_HEADER nt_uxtheme_header;
+extern IMAGE_FILE_HEADER nt_mciwave_header;
 #ifdef __cplusplus
 }
 #endif
