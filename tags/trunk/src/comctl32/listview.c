@@ -441,7 +441,11 @@ static inline LPWSTR textdupTtoW(LPCWSTR text, BOOL isW)
     if (!isW && is_textT(text, isW))
     {
 	INT len = MultiByteToWideChar(CP_ACP, 0, (LPCSTR)text, -1, NULL, 0);
+#ifdef __WIN32OS2__
 	wstr = HeapAlloc(GetProcessHeap(), 0, len * sizeof(WCHAR));
+#else
+	wstr = Alloc(len * sizeof(WCHAR));
+#endif
 	if (wstr) MultiByteToWideChar(CP_ACP, 0, (LPCSTR)text, -1, wstr, len);
     }
     TRACE("   wstr=%s\n", text == LPSTR_TEXTCALLBACKW ?  "(callback)" : debugstr_w(wstr));
@@ -450,7 +454,11 @@ static inline LPWSTR textdupTtoW(LPCWSTR text, BOOL isW)
 
 static inline void textfreeT(LPWSTR wstr, BOOL isW)
 {
+#ifdef __WIN32OS2__
     if (!isW && is_textT(wstr, isW)) HeapFree(GetProcessHeap(), 0, wstr);
+#else
+    if (!isW && is_textT(wstr, isW)) Free (wstr);
+#endif
 }
 
 /*
@@ -739,9 +747,6 @@ static LRESULT notify_hdr(LISTVIEW_INFO *infoPtr, INT code, LPNMHDR pnmh)
     pnmh->hwndFrom = infoPtr->hwndSelf;
     pnmh->idFrom = GetWindowLongW(infoPtr->hwndSelf, GWL_ID);
     pnmh->code = code;
-#ifdef __WIN32OS2__
-//    if (code == -150) return FALSE;
-#endif
     result = SendMessageW(infoPtr->hwndNotify, WM_NOTIFY,
 			  (WPARAM)pnmh->idFrom, (LPARAM)pnmh);
 
@@ -876,8 +881,12 @@ static BOOL notify_dispinfoT(LISTVIEW_INFO *infoPtr, INT notificationCode, LPNML
  	    *pdi->item.pszText = 0; /* make sure we don't process garbage */
  	}
 
+#ifdef __WIN32OS2__
 	pszTempBuf = HeapAlloc(GetProcessHeap(), 0,
 	    (convertToUnicode ? sizeof(WCHAR) : sizeof(CHAR)) * cchTempBufMax);
+#else
+	pszTempBuf = Alloc( (convertToUnicode ? sizeof(WCHAR) : sizeof(CHAR)) * cchTempBufMax);
+#endif
         if (!pszTempBuf) return FALSE;
 
 	if (convertToUnicode)
@@ -910,7 +919,11 @@ static BOOL notify_dispinfoT(LISTVIEW_INFO *infoPtr, INT notificationCode, LPNML
 	                        savPszText, savCchTextMax);
         pdi->item.pszText = savPszText; /* restores our buffer */
         pdi->item.cchTextMax = savCchTextMax;
+#ifdef __WIN32OS2__
         HeapFree(GetProcessHeap(), 0, pszTempBuf);
+#else
+        Free (pszTempBuf);
+#endif
     }
     return bResult;
 }
@@ -3540,7 +3553,10 @@ static INT LISTVIEW_GetTopIndex(LISTVIEW_INFO *infoPtr)
     UINT uView = infoPtr->dwStyle & LVS_TYPEMASK;
     INT nItem = 0;
     SCROLLINFO scrollInfo;
-
+#if 0
+    if (0 == infoPtr->nItemCount)
+      return -1;
+#endif
     scrollInfo.cbSize = sizeof(SCROLLINFO);
     scrollInfo.fMask = SIF_POS;
 
@@ -8427,6 +8443,7 @@ static LRESULT LISTVIEW_HeaderNotification(LISTVIEW_INFO *infoPtr, const NMHEADE
 
 		lpColumnInfo->rcHeader.right += dx;
 		LISTVIEW_ScrollColumns(infoPtr, lpnmh->iItem + 1, dx);
+		LISTVIEW_UpdateItemSize(infoPtr);
 		if (uView == LVS_REPORT && is_redrawing(infoPtr))
 		{
 		    /* this trick works for left aligned columns only */

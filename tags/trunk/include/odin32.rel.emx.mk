@@ -1,4 +1,4 @@
-# $Id: odin32.rel.emx.mk,v 1.10 2003-02-28 10:28:11 sandervl Exp $
+# $Id: odin32.rel.emx.mk,v 1.11 2005-03-27 09:38:51 sao2l02 Exp $
 
 #
 # Odin32 API
@@ -24,15 +24,15 @@ RTLLIB   = \
 #$(EMX)\lib\gcc.lib \
 $(ODIN32_BASE)\src\msvcrt\libs\m.lib \
 $(EMX)\lib\iberty_s.lib \
-$(EMX)\lib\gcc-lib\i386-pc-os2_emx\3.0.3\mt\gcc.lib \
+$(EMX)\lib\gcc-lib\i386-pc-os2_emx\3.2.1\mt\gcc.lib \
 $(EMX)\lib\mt\c.lib \
 $(EMX)\lib\mt\c_dllso.lib \
 $(EMX)\lib\mt\sys.lib \
 $(EMX)\lib\c_alias.lib \
 $(EMX)\lib\mt\emx.lib \
 $(EMX)\lib\emx2.lib \
-$(EMX)\lib\gcc-lib\i386-pc-os2_emx\3.0.3\mt\stdcxx.lib \
-$(EMX)\lib\gcc-lib\i386-pc-os2_emx\3.0.3\mt\gpp.lib \
+$(EMX)\lib\gcc-lib\i386-pc-os2_emx\3.2.1\mt\stdcxx.lib \
+$(EMX)\lib\gcc-lib\i386-pc-os2_emx\3.2.1\mt\gpp.lib \
 #$(EMX)\lib\stdcpp.lib \
 #$(EMX)\lib\mt\c_app.lib makes trouble for crtdll \
 

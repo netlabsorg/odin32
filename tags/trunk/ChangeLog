@@ -1,13 +1,17 @@
-/* $Id: ChangeLog,v 1.2761 2005-03-12 18:04:58 sao2l02 Exp $ */
+/* $Id: ChangeLog,v 1.2762 2005-03-27 09:38:39 sao2l02 Exp $ */
+2005-03-27: Dietrich Teickner <dietrich_teickner@arcor   >
+    - comctl32: o src\comctl32\listview.c
+                  some resyncs with wine for flashfxp 3.02.
+    - user32:   o src\user32\message.cpp
+                  stop the recursive callback at SendMessageTimeoutA.
+                  workaround for flashfxp 3.02, we can remove them,
+                  if we have a better solution in src\comctl32\listview.c from wine.
 2005-03-12: Dietrich Teickner <dietrich_teickner@arcor   >
     - shell32:  o src\shell32\shell32_main.c
                   some repairs for setup flashfxp 3.02.  
 2005-03-02: Dietrich Teickner <dietrich_teickner@arcor   >
     - makefile: o new cleanrule for cleaning only maintargets (dll+exe) for faster switch in debugbuild.
                   with and without debuginfo. 
-;    - comctl32: o src\comctl32\listview.c
-;                  partialy switch of the message WM_NOTIFY to parent,
-;                  cause of stackoverflow with flashfxp 3.02. new problem, no text will seen.
     - shell32:  o src\shell32\shell32_main.c
                   some resyncs with wine for setup flashfxp 3.02.  
     - advapi32: o src\advapi32\ADVAPI32.DEF
