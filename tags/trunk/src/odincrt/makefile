@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.11 1999-12-01 18:41:46 sandervl Exp $
+# $Id: makefile,v 1.12 1999-12-09 10:58:14 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -24,7 +24,7 @@ RUNTIMELIBDEF=odin36.def
 RUNTIMELIBDEF=odincrt.def
 !endif
 
-OBJS =  odincrt.obj initterm.obj malloc.obj
+OBJS =  odincrt.obj initterm.obj malloc.obj string.obj
 
 all: $(TARGET).dll $(TARGET).lib
 
@@ -38,6 +38,8 @@ $(TARGET).lib: $(TARGET).def
         $(CP) $@ $(PDWIN32_LIB)
 
 initterm.obj: initterm.cpp
+
+string.obj: string.cpp
 
 odincrt.obj: odincrt.asm
 
