@@ -1,4 +1,18 @@
-/* $Id: ChangeLog,v 1.1568 2001-07-06 19:04:05 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1569 2001-07-07 05:03:16 bird Exp $ */
+
+ 2001-07-03: knut st. osmundsen <kosmunds@csc.com>:
+    - URLMON:   o Stubbed HlinkSimpleNavigateToString and RegisterBindStatusCallback
+                  to fix SYS2048 during RealPlayer install.
+    - WIN32K:   o Fixed the DBExpert bug in the longdllname code.
+                  BTW. Thanks to Randell at Sunnidal Systems and Alex Newman
+                  for reporting this and begin very helpful tracking it down.
+                o The longdllname feature now differs from the OS/2 loader on
+                  one points: <br>
+                  It is able to find (DosQueryModuleHandle) for dlls using
+                  internal names which includes the .DLL extention. <br>
+                  The longdllname feature don't currently support names with
+                  extention .DLL like extentions with base name lengths from
+                  4-7 chars. I will fix this some day.<br>
 
  2001-07-06: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o HeapAlloc must return pointers aligned at 8 byte boundary
@@ -27,9 +41,9 @@
     - USER32:   o Partial implementation of ToAsciiEx (just calls ToAscii)
                 o VkKeyScanExA/W: call VkKeyScanA/W
                 o MapVirtualKeyExA/W: call MapVirtualKeyA/W
-                o SetParent bugfix; even though the win32 coordinates might 
-                  not change, the PM coordinates can. We must make sure the 
-                  child stays at the same position (y) relative to the 
+                o SetParent bugfix; even though the win32 coordinates might
+                  not change, the PM coordinates can. We must make sure the
+                  child stays at the same position (y) relative to the
                   (new) parent.
                   (Cool Edit Pro LE play buttons now at the right position)
                 o Send WM_SETICON to frame window with converted win32 icon
