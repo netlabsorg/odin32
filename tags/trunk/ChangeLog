@@ -1,4 +1,15 @@
- /* $Id: ChangeLog,v 1.614 2000-01-05 23:31:09 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.615 2000-01-06 20:03:58 sandervl Exp $ */
+
+ 2000-01-06: Sander van Leeuwen <sandervl@xs4all.nl>
+	- ADVAPI32: Implemented StartServiceCtrlDispatcherA/W
+                    Faked RegisterServiceCtrlHandlerA/W (TODO)
+                    Partly implemented SetServiceBits/SetServiceStatus
+                    Improved QueryServiceStatus
+                    Call RtlCreateAcl in InitializeAcl
+	- LZ32: Create correct library
+	- CRTDLL: Fixed CRTDLL__wcsnicmp (use Wine version)
+	- VERSION: Fixed VerQueryValue32A and merged with latest Wine sources
+                   (991212) (-> fixes errors in RealPlayer)
 
  2000-01-05: Jens Wiessner <wiessnej@rfi.de>
 	- TWAIN_32: Update
