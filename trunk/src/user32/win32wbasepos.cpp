@@ -1,4 +1,4 @@
-/* $Id: win32wbasepos.cpp,v 1.28 2002-03-07 19:41:18 sandervl Exp $ */
+/* $Id: win32wbasepos.cpp,v 1.29 2002-03-20 10:30:08 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (nonclient/position methods)
  *
@@ -314,9 +314,8 @@ UINT Win32BaseWindow::MinMaximize(UINT cmd, LPRECT lpRect)
 
             if(getParent() == NULL) {
 // @@PF : for now disable windows style - it messes with WV minimize - will fix it soon
-                 SetRect(lpRect, -32000, -32000, GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON));
+//                SetRect(lpRect, -32000, -32000, getWindowWidth(), getWindowHeight());
 //                OSLibSetWindowStyle(getOS2FrameWindowHandle(), getOS2WindowHandle(), getStyle(), getExStyle());
-                CloseWindow(); 
             }
             else {
                 iconPos.x = windowpos.ptMinPosition.x;

@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.169 2002-02-18 10:14:57 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.170 2002-03-20 10:30:06 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -984,6 +984,14 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
         if(win32wnd->IsParentChanging()) {
             rc = 0;
             break;
+        }
+
+        //@@PF all commands from minimized window viewer or from Ctrl-Esc
+        //are 'pure' and should be handled only by DeFrameProc - this is weird
+        //but without them we will not have results. Pure = plain flag of restore/minimize/maximize
+        if((pswp->fl == SWP_MINIMIZE) || (pswp->fl & SWP_RESTORE)) {
+          // note the purity of SWP no other SWP_FLAGS allowed
+           goto RunDefFrameWndProc;
         }
 
         if(pswp->fl & SWP_NOADJUST) {

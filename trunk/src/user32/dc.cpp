@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.115 2001-12-30 10:47:43 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.116 2002-03-20 10:30:06 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -659,6 +659,7 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
  LONG     lComplexity;
  RECTL    rectlClient;
  RECTL    rectlClip;
+ BOOL     bIcon;
 
     if(lpps == NULL) {
         //BeginPaint does NOT change last error in this case
@@ -674,9 +675,12 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
         SetLastError(ERROR_INVALID_WINDOW_HANDLE_W); //(verified in NT4, SP6)
         return (HDC)0;
     }
-    HWND hwndClient = wnd->getOS2WindowHandle();
+//    bIcon = (IsIconic(hwnd) && GetClassLongA(hWnd, GCL_HICON_W));
+    bIcon = IsIconic(hwnd);
 
-    if(hwnd != HWND_DESKTOP && wnd->isOwnDC())
+    HWND hwndClient = (bIcon) ? wnd->getOS2FrameWindowHandle() : wnd->getOS2WindowHandle();
+
+    if(hwnd != HWND_DESKTOP && !bIcon && wnd->isOwnDC())
     {
         hPS_ownDC = wnd->getOwnDC();
         //SvL: Hack for memory.exe (doesn't get repainted properly otherwise)
@@ -693,7 +697,7 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
         }
     }
     if(!hpsPaint) {
-        hpsPaint = GetDCEx(hwnd, 0, (DCX_CACHE_W|DCX_USESTYLE_W));
+        hpsPaint = GetDCEx(hwnd, 0, (DCX_CACHE_W|DCX_USESTYLE_W | ((bIcon) ? DCX_WINDOW_W : 0)));
         pHps = (pDCData)GpiQueryDCData(hpsPaint);
         if (!pHps)
         {
@@ -709,6 +713,14 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
         memset(&rectl, 0, sizeof(rectl));
         dprintf (("USER32: WARNING: WinQueryUpdateRect failed (error or no update rectangle)!!"));
 
+        if(bIcon) {
+            //WinBeginPaint messes this up for icon windows; this isn't
+            //a good solution, but it does the job
+            //Use the entire frame window as clip region
+            rectl.xRight = wnd->getWindowWidth();
+            rectl.yTop   = wnd->getWindowHeight();
+        }
+
         HRGN hrgnClip = GpiCreateRegion(pHps->hps, 1, &rectl);
         GpiSetClipRegion(pHps->hps, hrgnClip, &hrgnOldClip);
 
@@ -716,7 +728,10 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
 
         //save old clip region (restored for CS_OWNDC windows in EndPaint)
         wnd->SetClipRegion(hrgnOldClip);
-        lComplexity = RGN_NULL;
+        if(bIcon) {
+              lComplexity = RGN_RECT;
+        }
+        else  lComplexity = RGN_NULL;
     }
     else {
         rectlClip.yBottom = rectlClip.xLeft = 0;
