@@ -1,4 +1,4 @@
-/* $Id: win32class.cpp,v 1.23 2001-02-22 10:37:30 sandervl Exp $ */
+/* $Id: win32class.cpp,v 1.24 2001-04-04 09:01:25 sandervl Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -23,6 +23,7 @@
 #include <win32class.h>
 #include <win32wnd.h>
 #include <win\winproc.h>
+#include <unicode.h>
 
 #define DBG_LOCALLOG    DBG_win32class
 #include "dbglocal.h"

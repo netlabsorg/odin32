@@ -1,4 +1,4 @@
-/* $Id: clipboard.cpp,v 1.9 2000-11-15 20:30:45 sandervl Exp $ */
+/* $Id: clipboard.cpp,v 1.10 2001-04-04 09:01:24 sandervl Exp $ */
 
 /*
  * Win32 Clipboard API functions for OS/2
@@ -16,6 +16,7 @@
 
 #include <os2win.h>
 #include "win32wbase.h"
+#include <unicode.h>
 
 #define DBG_LOCALLOG    DBG_clipboard
 #include "dbglocal.h"

@@ -1,4 +1,4 @@
-/* $Id: unknown.cpp,v 1.9 2000-08-02 17:53:34 bird Exp $ */
+/* $Id: unknown.cpp,v 1.10 2001-04-04 09:02:15 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -15,6 +15,8 @@
 #include <os2win.h>
 #include <shellapi.h>
 #include <winreg.h>
+#include <unicode.h>
+
 //#include "shell32.h"
 
 

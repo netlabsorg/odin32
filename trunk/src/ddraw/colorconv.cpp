@@ -1,4 +1,4 @@
-/* $Id: colorconv.cpp,v 1.5 2001-03-18 21:44:44 mike Exp $ */
+/* $Id: colorconv.cpp,v 1.6 2001-04-04 09:02:14 sandervl Exp $ */
 
 /*
  * ColorConversion routines
@@ -9,6 +9,9 @@
  *
  */
 
+#define INCL_BASE
+#include <os2wrap.h>
+#include <win32type.h>
 #include <memory.h>
 #include <misc.h>
 #include "colorconv.h"

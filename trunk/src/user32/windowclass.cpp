@@ -1,4 +1,4 @@
-/* $Id: windowclass.cpp,v 1.19 2001-04-01 22:13:28 sandervl Exp $ */
+/* $Id: windowclass.cpp,v 1.20 2001-04-04 09:01:25 sandervl Exp $ */
 /*
  * Win32 Window Class Code for OS/2
  *
@@ -16,6 +16,7 @@
 #include <stdarg.h>
 #include <assert.h>
 #include <misc.h>
+#include <unicode.h>
 #include <win32class.h>
 #include <win32wbase.h>
 #include <controls.h>

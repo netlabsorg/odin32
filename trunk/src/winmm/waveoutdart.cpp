@@ -1,4 +1,4 @@
-/* $Id: waveoutdart.cpp,v 1.2 2001-04-01 12:31:01 sandervl Exp $ */
+/* $Id: waveoutdart.cpp,v 1.3 2001-04-04 09:02:16 sandervl Exp $ */
 
 /*
  * Wave playback class (DART)
@@ -22,9 +22,11 @@
 
 #define  INCL_BASE
 #define  INCL_OS2MM
+#define  INCL_DOSPROCESS
 #include <os2wrap.h>   //Odin32 OS/2 api wrappers
 #include <os2mewrap.h> //Odin32 OS/2 MMPM/2 api wrappers
 #include <stdlib.h>
+#include <stddef.h>
 #include <string.h>
 #define  OS2_ONLY
 #include <win32api.h>

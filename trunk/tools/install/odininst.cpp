@@ -1,4 +1,4 @@
-/* $Id: odininst.cpp,v 1.2 2001-04-01 14:34:19 sandervl Exp $ */
+/* $Id: odininst.cpp,v 1.3 2001-04-04 09:00:04 sandervl Exp $ */
 /*
  * Odin WarpIn installation app
  *
@@ -45,6 +45,7 @@
 #include <odininst.h>
 #include <win\options.h>
 #include <versionos2.h>
+#include <time.h>
 
 BOOL CreateSystemDirectories();
 BOOL SetupControlPanelKeys();

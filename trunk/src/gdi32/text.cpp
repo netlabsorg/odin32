@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.14 2000-11-16 16:34:49 sandervl Exp $ */
+/* $Id: text.cpp,v 1.15 2001-04-04 09:02:15 sandervl Exp $ */
 
 /*
  * GDI32 text apis
@@ -18,6 +18,7 @@
 #include <float.h>
 #include "oslibgpi.h"
 #include <dcdata.h>
+#include <unicode.h>
 
 #define DBG_LOCALLOG    DBG_text
 #include "dbglocal.h"
@@ -449,8 +450,17 @@ INT SYSTEM EXPORT InternalDrawTextExA(HDC hdc,LPCSTR lpchText,INT cchText,LPRECT
 //******************************************************************************
 INT SYSTEM EXPORT InternalDrawTextExW(HDC hdc,LPCWSTR lpchText,INT cchText,LPRECT lprc,UINT dwDTFormat,LPDRAWTEXTPARAMS lpDTParams,BOOL isDrawTextEx)
 {
-  char *astring = (cchText == -1) ? UnicodeToAsciiString((LPWSTR)lpchText):UnicodeToAsciiStringN((LPWSTR)lpchText,cchText);
+  char *astring;
   INT  rc;
+
+  if(cchText == -1) {
+     UnicodeToAsciiString((LPWSTR)lpchText);
+  }
+  else {
+     astring = (char *)HEAP_malloc(cchText+1);
+     UnicodeToAscii((LPWSTR)lpchText, astring);
+     astring[cchText] = 0;
+  }
 
   dprintf(("InternalDrawTextExW %x %s %d %x", hdc, astring, cchText, dwDTFormat));
   rc = InternalDrawTextExA(hdc,astring,cchText,lprc,dwDTFormat,lpDTParams,isDrawTextEx);
@@ -507,8 +517,17 @@ DWORD SYSTEM EXPORT InternalGetTabbedTextExtentA(HDC hDC,LPCSTR lpString,INT nCo
 //******************************************************************************
 DWORD SYSTEM EXPORT InternalGetTabbedTextExtentW(HDC hDC,LPCWSTR lpString,INT nCount,INT nTabPositions,LPINT lpnTabStopPositions)
 {
-  char *astring = (nCount == -1) ? UnicodeToAsciiString((LPWSTR)lpString):UnicodeToAsciiStringN((LPWSTR)lpString,nCount);
+  char *astring;
   DWORD rc;
+
+  if(nCount == -1) {
+     UnicodeToAsciiString((LPWSTR)lpString);
+  }
+  else {
+     astring = (char *)HEAP_malloc(nCount+1);
+     UnicodeToAscii((LPWSTR)lpString, astring);
+     astring[nCount] = 0;
+  }
 
   rc = InternalGetTabbedTextExtentA(hDC,astring,nCount,nTabPositions,lpnTabStopPositions);
   FreeAsciiString(astring);
@@ -586,8 +605,17 @@ LONG SYSTEM EXPORT InternalTabbedTextOutA(HDC hdc,INT x,INT y,LPCSTR lpString,IN
 //******************************************************************************
 LONG SYSTEM EXPORT InternalTabbedTextOutW(HDC hdc,INT x,INT y,LPCWSTR lpString,INT nCount,INT nTabPositions,LPINT lpnTabStopPositions,INT nTabOrigin)
 {
-  char *astring = (nCount == -1) ? UnicodeToAsciiString((LPWSTR)lpString):UnicodeToAsciiStringN((LPWSTR)lpString,nCount);
+  char *astring;
   LONG rc;
+
+  if(nCount == -1) {
+     UnicodeToAsciiString((LPWSTR)lpString);
+  }
+  else {
+     astring = (char *)HEAP_malloc(nCount+1);
+     UnicodeToAscii((LPWSTR)lpString, astring);
+     astring[nCount] = 0;
+  }
 
   rc = InternalTabbedTextOutA(hdc,x,y,astring,nCount,nTabPositions,lpnTabStopPositions,nTabOrigin);
   FreeAsciiString(astring);
@@ -748,9 +776,17 @@ BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR
 //******************************************************************************
 BOOL InternalTextOutW(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCWSTR lpszString,INT cbCount,CONST INT *lpDx,BOOL IsExtTextOut)
 {
-  char *astring = (cbCount == -1) ? UnicodeToAsciiString((LPWSTR)lpszString):UnicodeToAsciiStringN((LPWSTR)lpszString,cbCount);
+  char *astring;
   BOOL  rc;
 
+  if(cbCount == -1) {
+     UnicodeToAsciiString((LPWSTR)lpszString);
+  }
+  else {
+     astring = (char *)HEAP_malloc(cbCount+1);
+     UnicodeToAscii((LPWSTR)lpszString, astring);
+     astring[cbCount] = 0;
+  }
   rc = InternalTextOutA(hdc,X,Y,fuOptions,lprc,(LPCSTR)astring,cbCount,lpDx,IsExtTextOut);
   FreeAsciiString(astring);
 

@@ -1,5 +1,3 @@
-/* $Id: crtdll.cpp,v 1.28 2000-11-22 00:49:54 phaller Exp $ */
-
 /*
  * The C RunTime DLL
  * 
@@ -56,6 +54,7 @@
 #include <sys\timeb.h>
 #include <sys\stat.h>
 #include "signal.h"
+#include <time.h>
 
 #include <crtdll.h>
 // #include <ieee.h>
@@ -65,7 +64,7 @@
 
 ODINDEBUGCHANNEL(CRTDLL)
 
-
+#undef dprintf2
 #define dprintf2 dprintf
 
 

@@ -1,4 +1,4 @@
-/* $Id: shlwapi.cpp,v 1.9 2000-10-02 13:37:10 sandervl Exp $ */
+/* $Id: shlwapi.cpp,v 1.10 2001-04-04 09:05:50 sandervl Exp $ */
 
 /*
  * Win32 URL-handling APIs for OS/2
@@ -39,6 +39,7 @@
 
 #include <heapstring.h>
 #include <misc.h>
+#include <unicode.h>
 #include <win\shell.h>
 #include <win\winerror.h>
 

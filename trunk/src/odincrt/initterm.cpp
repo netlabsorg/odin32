@@ -24,6 +24,7 @@
 /* Include files */
 #define  INCL_DOSMODULEMGR
 #define  INCL_DOSPROCESS
+#define  INCL_DOSERRORS
 #include <os2wrap.h>    //Odin32 OS/2 api wrappers
 #include <stdlib.h>
 #include <stdio.h>
