@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.580 1999-12-28 10:30:13 sandervl Exp $ */
+ /* $Id: changelog,v 1.581 1999-12-28 13:03:51 sandervl Exp $ */
+
+ 99-12-28: Sander van Leeuwen <sandervl@xs4all.nl>
+	- WININET: Created stub dll
 
  99-12-28: Jens Wiessner <wiessnej@rfi.de>
 	- avifil32, comdlg32, crtdll, ddraw, dinput, dplay, dplayx, imagehlp,
