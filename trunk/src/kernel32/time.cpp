@@ -1,4 +1,4 @@
-/* $Id: time.cpp,v 1.14 2000-12-28 17:10:47 phaller Exp $ */
+/* $Id: time.cpp,v 1.15 2001-05-28 14:47:49 phaller Exp $ */
 
 /*
  * Win32 time/date API functions
@@ -140,9 +140,9 @@ ODINFUNCTION3(BOOL,DosDateTimeToFileTime,
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API GetTimeZoneInformation( LPTIME_ZONE_INFORMATION arg1)
+ODINFUNCTION1(DWORD, GetTimeZoneInformation,
+              LPTIME_ZONE_INFORMATION, arg1)
 {
-    dprintf(("KERNEL32:  GetTimeZoneInformation\n"));
     return O32_GetTimeZoneInformation(arg1);
 }
 //******************************************************************************
