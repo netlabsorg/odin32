@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.27 2000-01-09 17:13:39 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.28 2000-01-10 17:18:09 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -31,7 +31,6 @@
 #include "oslibutil.h"
 #include "oslibgdi.h"
 #include "oslibres.h"
-#include "oslibmenu.h"
 #include "oslibdos.h"
 #include "syscolor.h"
 #include "win32wndhandle.h"
@@ -44,6 +43,7 @@
 #include "winmouse.h"
 #include <win\hook.h>
 #include <shellapi.h>
+#include <menu.h>
 #define INCL_TIMERWIN32
 #include "timer.h"
 
@@ -80,7 +80,7 @@
 #define IS_OVERLAPPED(style) \
     !(style & (WS_CHILD | WS_POPUP))
 
-#define HAS_MENU(w) (!((w)->getStyle() & WS_CHILD) && ((w)->getWindowId() != 0))
+#define HAS_MENU() (!(getStyle() & WS_CHILD) && (GetMenu() != 0))
 
 /* bits in the dwKeyData */
 #define KEYDATA_ALT         0x2000
@@ -673,7 +673,6 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
   /* Set the window menu */
   if ((dwStyle & (WS_CAPTION | WS_CHILD)) == WS_CAPTION )
   {
-#if 0 //CB: todo
         if (cs->hMenu) {
             SetMenu(cs->hMenu);
         }
@@ -683,12 +682,12 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
                         if (cs->hMenu) SetMenu(cs->hMenu );
                 }
         }
-#endif
   }
   else
   {
         setWindowId((DWORD)cs->hMenu);
   }
+  hSysMenu = (dwStyle & WS_SYSMENU) ? MENU_GetSysMenu(Win32Hwnd,0):0;
 
   // Subclass frame
   pOldFrameProc = FrameSubclassFrameWindow(this);
@@ -1256,18 +1255,14 @@ VOID Win32BaseWindow::TrackMinMaxBox(WORD wParam)
     if (!(dwStyle & WS_MINIMIZEBOX))
       return;
     /* Check if the sysmenu item for minimize is there  */
-#if 0 //CB: todo
     state = GetMenuState(hSysMenu,SC_MINIMIZE,MF_BYCOMMAND);
-#endif
   } else
   {
     /* If the style is not present, do nothing */
     if (!(dwStyle & WS_MAXIMIZEBOX))
       return;
     /* Check if the sysmenu item for maximize is there  */
-#if 0 //CB: todo
     state = GetMenuState(hSysMenu, SC_MAXIMIZE, MF_BYCOMMAND);
-#endif
   }
   SetCapture(Win32Hwnd);
   hdc = GetWindowDC(Win32Hwnd);
@@ -1313,13 +1308,9 @@ VOID Win32BaseWindow::TrackCloseButton(WORD wParam)
   BOOL pressed = TRUE;
   UINT state;
 
-#if 0 //CB: todo
   if (hSysMenu == 0)
     return;
   state = GetMenuState(hSysMenu, SC_CLOSE, MF_BYCOMMAND);
-#else
-state = 0;
-#endif
   /* If the item close of the sysmenu is disabled or not there do nothing */
   if((state & MF_DISABLED) || (state & MF_GRAYED) || (state == 0xFFFFFFFF))
     return;
@@ -1531,21 +1522,19 @@ LONG Win32BaseWindow::HandleNCCalcSize(BOOL calcValidRects,RECT *winRect)
 
   if(!(dwStyle & WS_MINIMIZE))
   {
-    AdjustRectOuter(&tmpRect,FALSE); //CB: todo: menu
+    AdjustRectOuter(&tmpRect,FALSE);
 
     clientRect->left   -= tmpRect.left;
     clientRect->top    -= tmpRect.top;
     clientRect->right  -= tmpRect.right;
     clientRect->bottom -= tmpRect.bottom;
 
-    if (HAS_MENU(this))
+    if (HAS_MENU())
     {
-#if 0 //CB: todo
-      winRect->top +=
+      clientRect->top +=
                 MENU_GetMenuBarHeight(Win32Hwnd,
                                        winRect->right - winRect->left,
                                        -tmpRect.left, -tmpRect.top ) + 1;
-#endif
     }
 
     SetRect (&tmpRect, 0, 0, 0, 0);
@@ -1692,7 +1681,7 @@ LONG Win32BaseWindow::HandleNCHitTest(POINT pt)
 
   /* Check menu bar */
 
-  if (HAS_MENU(this))
+  if (HAS_MENU())
   {
     if ((pt.y < 0) && (pt.x >= 0) && (pt.x < rect.right))
       return HTMENU;
@@ -1794,6 +1783,27 @@ BOOL Win32BaseWindow::DrawSysButton(HDC hdc,BOOL down)
                   0, 0, DI_NORMAL);
 
     return (hIcon != 0);
+  }
+  return FALSE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32BaseWindow::GetSysPopupPos(RECT* rect)
+{
+  if(hSysMenu)
+  {
+      if(dwStyle & WS_MINIMIZE )
+        *rect = rectWindow;
+      else
+      {
+          GetInsideRect(rect );
+          OffsetRect( rect, rectWindow.left, rectWindow.top);
+          if ((dwStyle & WS_CHILD) && getParent())
+              ClientToScreen(getParent()->getWindowHandle(), (POINT *)rect );
+          rect->right = rect->left + GetSystemMetrics(SM_CYCAPTION) - 1;
+          rect->bottom = rect->top + GetSystemMetrics(SM_CYCAPTION) - 1;
+      }
+      return TRUE;
   }
   return FALSE;
 }
@@ -1937,7 +1947,6 @@ VOID Win32BaseWindow::DrawCaption(HDC hdc,RECT *rect,BOOL active)
   RECT  r = *rect;
   char  buffer[256];
   HPEN  hPrevPen;
-  HMENU hSysMenu;
 
   if (flags & WIN_MANAGED) return;
 
@@ -1946,11 +1955,6 @@ VOID Win32BaseWindow::DrawCaption(HDC hdc,RECT *rect,BOOL active)
   LineTo( hdc, r.right, r.bottom - 1 );
   SelectObject( hdc, hPrevPen );
   r.bottom--;
-
-  //CB: todo:
-   //COLOR_GRADIENTACTIVECAPTION
-   //COLOR_GRADIENTINACTIVECAPTION
-   //-> end color
 
   if (SYSCOLOR_GetUseWinColors())
   {
@@ -2005,12 +2009,10 @@ VOID Win32BaseWindow::DrawCaption(HDC hdc,RECT *rect,BOOL active)
   if (dwStyle & WS_SYSMENU)
   {
     UINT state;
-#if 0 //CB: todo
+
     /* Go get the sysmenu */
     state = GetMenuState(hSysMenu, SC_CLOSE, MF_BYCOMMAND);
-#else
-state = 0;
-#endif
+
     /* Draw a grayed close button if disabled and a normal one if SC_CLOSE is not there */
     DrawCloseButton(hdc, FALSE,
                     ((((state & MF_DISABLED) || (state & MF_GRAYED))) && (state != 0xFFFFFFFF)));
@@ -2114,15 +2116,13 @@ VOID Win32BaseWindow::DoNCPaint(HRGN clip,BOOL suppress_menupaint)
         DrawCaption(hdc, &r, active);
     }
   }
-#if 0 //CB: todo
-  if (HAS_MENU(wndPtr))
+  if (HAS_MENU())
   {
     RECT r = rect;
     r.bottom = rect.top + GetSystemMetrics(SM_CYMENU);
 
-    rect.top += MENU_DrawMenuBar( hdc, &r, hwnd, suppress_menupaint ) + 1;
+    rect.top += MENU_DrawMenuBar( hdc, &r, Win32Hwnd, suppress_menupaint ) + 1;
   }
-#endif
 
   if (dwExStyle & WS_EX_CLIENTEDGE)
     DrawEdge (hdc, &rect, EDGE_SUNKEN, BF_RECT | BF_ADJUST);
@@ -2318,15 +2318,15 @@ LONG Win32BaseWindow::HandleSysCommand(WPARAM wParam,POINT *pt32)
     case SC_HSCROLL:
         TrackScrollBar(wParam,*pt32);
         break;
-#if 0
+
     case SC_MOUSEMENU:
-        MENU_TrackMouseMenuBar( wndPtr, wParam & 0x000F, pt32 );
+        MENU_TrackMouseMenuBar(Win32Hwnd,wParam & 0x000F,*pt32);
         break;
 
     case SC_KEYMENU:
-        MENU_TrackKbdMenuBar( wndPtr , wParam , pt.x );
+        MENU_TrackKbdMenuBar(Win32Hwnd,wParam,pt32->x);
         break;
-#endif
+
     case SC_TASKLIST:
         WinExec("taskman.exe",SW_SHOWNORMAL);
         break;
@@ -2572,6 +2572,10 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 
           switch(LOWORD(lParam))
           {
+            case HTCLIENT:
+              hCursor = windowClass ? windowClass->getCursor():LoadCursorA(0,IDC_ARROWA);
+              break;
+
             case HTLEFT:
             case HTRIGHT:
               hCursor = LoadCursorA(0,IDC_SIZEWEA);
@@ -2593,7 +2597,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
               break;
 
             default:
-              hCursor = windowClass ? windowClass->getCursor():LoadCursorA(0,IDC_ARROWA);
+              hCursor = LoadCursorA(0,IDC_ARROWA);
               break;
           }
 
@@ -2768,7 +2772,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         return 0;
 
     case WM_CANCELMODE:
-        //if (getParent() == windowDesktop) EndMenu();
+        if (getParent() == windowDesktop) EndMenu();
         if (GetCapture() == Win32Hwnd) ReleaseCapture();
         return 0;
 

@@ -1,4 +1,4 @@
-/* $Id: controls.h,v 1.2 2000-01-02 19:30:42 cbratschi Exp $ */
+/* $Id: controls.h,v 1.3 2000-01-10 17:18:07 cbratschi Exp $ */
 /*
  * Win32 common controls
  *
@@ -30,7 +30,8 @@ void CONTROLS_Unregister();
 #define DESKTOP_CONTROL         9
 #define WINSWITCH_CONTROL       10
 #define ICONTITLE_CONTROL       11
-#define MAX_CONTROLS            12
+#define POPUPMENU_CONTROL       12
+#define MAX_CONTROLS            13
 
 BOOL CONTROLS_IsControl(Win32BaseWindow *window, int control);
 

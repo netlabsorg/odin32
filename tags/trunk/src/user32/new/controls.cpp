@@ -1,4 +1,4 @@
-/* $Id: controls.cpp,v 1.14 2000-01-02 19:30:42 cbratschi Exp $ */
+/* $Id: controls.cpp,v 1.15 2000-01-10 17:18:07 cbratschi Exp $ */
 /* File: controls.cpp -- Win32 common controls
  *
  * Copyright (c) 1999 Christoph Bratschi
@@ -18,6 +18,7 @@
 #include "win32wdesktop.h"
 #include "winswitch.h"
 #include "icontitle.h"
+#include "menu.h"
 #include "controls.h"
 
 ATOM  controlAtoms[MAX_CONTROLS] = {0};
@@ -73,6 +74,10 @@ void CONTROLS_Register()
   dprintf(("Register ICONTITLE class"));
   controlAtoms[ICONTITLE_CONTROL] = ICONTITLE_Register();
   if (!controlAtoms[ICONTITLE_CONTROL]) dprintf(("failed!!!"));
+
+  dprintf(("Register POPUPMENU class"));
+  controlAtoms[POPUPMENU_CONTROL] = POPUPMENU_Register();
+  if (!controlAtoms[POPUPMENU_CONTROL]) dprintf(("failed!!!"));
 }
 
 void CONTROLS_Unregister()
@@ -112,6 +117,10 @@ void CONTROLS_Unregister()
 
   dprintf(("Unregister ICONTITLE class"));
   if (!ICONTITLE_Unregister()) dprintf(("failed!!!"));
+
+  dprintf(("Unregister POPUPMENU class"));
+  if (!POPUPMENU_Unregister()) dprintf(("failed!!!"));
+
 }
 
 

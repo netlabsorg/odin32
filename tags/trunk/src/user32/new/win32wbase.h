@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.20 2000-01-09 14:14:25 cbratschi Exp $ */
+/* $Id: win32wbase.h,v 1.21 2000-01-10 17:18:10 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -364,10 +364,13 @@ private:
         VOID  AdjustRectOuter(LPRECT rect,BOOL menu);
         VOID  AdjustRectInner(LPRECT rect);
         LONG  HandleNCCalcSize(BOOL calcValidRects,RECT *winRect);
-        LONG  HandleNCHitTest(POINT pt);
         VOID  GetInsideRect(RECT *rect);
         VOID  DrawFrame(HDC hdc,RECT *rect,BOOL dlgFrame,BOOL active);
+public:
+        LONG  HandleNCHitTest(POINT pt);
         BOOL  DrawSysButton(HDC hdc,BOOL down);
+        BOOL  GetSysPopupPos(RECT* rect);
+private:
         BOOL  DrawGrayButton(HDC hdc,int x,int y);
         VOID  DrawCloseButton(HDC hdc,BOOL down,BOOL bGrayed);
         VOID  DrawMaxButton(HDC hdc,BOOL down,BOOL bGrayed);
