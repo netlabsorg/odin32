@@ -1,4 +1,4 @@
-/* $Id: oslibdos.h,v 1.13 2000-03-29 15:17:29 cbratschi Exp $ */
+/* $Id: oslibdos.h,v 1.14 2000-05-22 19:07:59 sandervl Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -70,6 +70,7 @@ DWORD OSLibDosClose(DWORD hFile);
 DWORD OSLibDosGetFileSize(DWORD hFile);
 DWORD OSLibDosRead(DWORD hFile, LPVOID lpBuffer, DWORD size, DWORD *nrBytesRead);
 DWORD OSLibDosWrite(DWORD hFile, LPVOID lpBuffer, DWORD size, DWORD *nrBytesWritten);
+DWORD OSLibDosDelete(char *lpszFileName);
 
 #define OSLIB_SETPTR_FILE_CURRENT       1
 #define OSLIB_SETPTR_FILE_BEGIN         2

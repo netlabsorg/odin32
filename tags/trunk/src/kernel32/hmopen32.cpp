@@ -1,4 +1,4 @@
-/* $Id: hmopen32.cpp,v 1.21 2000-05-09 18:56:08 sandervl Exp $ */
+/* $Id: hmopen32.cpp,v 1.22 2000-05-22 19:07:56 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -184,11 +184,13 @@ DWORD HMDeviceOpen32Class::CreateFile (LPCSTR        lpFileName,
                          hTemplate);
   if (hFile != INVALID_HANDLE_ERROR)
   {
-     pHMHandleData->hHMHandle = hFile;
-     return (NO_ERROR);
+     	pHMHandleData->hHMHandle = hFile;
+     	return (NO_ERROR);
   }
-  else
-    return(O32_GetLastError());
+  else {
+	dprintf(("CreateFile failed; error %x", O32_GetLastError()));
+    	return(O32_GetLastError());
+  }
 #else
 
   rc = OSLibDosCreate((char *)lpFileName,
@@ -515,6 +517,32 @@ BOOL HMDeviceOpen32Class::SetFileTime(PHMHANDLEDATA pHMHandleData,
                          pFT3);
 }
 
+/*****************************************************************************
+ * Name      : BOOL HMDeviceOpen32Class::GetFileTime
+ * Purpose   : get file time
+ * Parameters: PHMHANDLEDATA pHMHandleData
+ *             PFILETIME     pFT1
+ *             PFILETIME     pFT2
+ *             PFILETIME     pFT3
+ * Variables :
+ * Result    : API returncode
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+
+BOOL HMDeviceOpen32Class::GetFileTime(PHMHANDLEDATA pHMHandleData,
+                                      LPFILETIME pFT1,
+                                      LPFILETIME pFT2,
+                                      LPFILETIME pFT3)
+{
+  return O32_GetFileTime(pHMHandleData->hHMHandle,
+                         pFT1,
+                         pFT2,
+                         pFT3);
+}
+
 
 /*****************************************************************************
  * Name      : DWORD HMDeviceOpen32Class::GetFileSize
@@ -757,10 +785,10 @@ DWORD HMDeviceOpen32Class::OpenFile (LPCSTR        lpFileName,
   {
     pHMHandleData->hHMHandle = hFile;
 
-    GetFileTime(hFile,
-                NULL,
-                NULL,
-                &filetime );
+    ::GetFileTime(hFile,
+                  NULL,
+                  NULL,
+                  &filetime );
     FileTimeToDosDateTime(&filetime,
                           &filedatetime[0],
                           &filedatetime[1] );

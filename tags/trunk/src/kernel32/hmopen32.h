@@ -1,4 +1,4 @@
-/* $Id: hmopen32.h,v 1.4 1999-12-09 19:08:29 sandervl Exp $ */
+/* $Id: hmopen32.h,v 1.5 2000-05-22 19:07:56 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -90,6 +90,12 @@ public:
 
                       /* this is a handler method for calls to SetFileTime() */
   virtual BOOL  SetFileTime (PHMHANDLEDATA pHMHandleData,
+                             LPFILETIME    pFT1,
+                             LPFILETIME    pFT2,
+                             LPFILETIME    pFT3);
+
+                      /* this is a handler method for calls to GetFileTime() */
+  virtual BOOL  GetFileTime (PHMHANDLEDATA pHMHandleData,
                              LPFILETIME    pFT1,
                              LPFILETIME    pFT2,
                              LPFILETIME    pFT3);

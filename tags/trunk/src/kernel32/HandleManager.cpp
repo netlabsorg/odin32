@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.38 2000-03-24 23:14:59 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.39 2000-05-22 19:07:52 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -1338,6 +1338,44 @@ BOOL HMSetFileTime (HANDLE         hFile,
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
   bResult = pHMHandle->pDeviceHandler->SetFileTime(&pHMHandle->hmHandleData,
+                                                   (LPFILETIME)pFT1,
+                                                   (LPFILETIME)pFT2,
+                                                   (LPFILETIME)pFT3);
+
+  return (bResult);                                   /* deliver return code */
+}
+
+/*****************************************************************************
+ * Name      : HMDeviceHandler::GetFileTime
+ * Purpose   : router function for SetFileTime
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+
+BOOL HMGetFileTime (HANDLE         hFile,
+                    const FILETIME *pFT1,
+                    const FILETIME *pFT2,
+                    const FILETIME *pFT3)
+{
+  int       iIndex;                           /* index into the handle table */
+  BOOL      bResult;                 /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hFile);                           /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return FALSE;                         /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  bResult = pHMHandle->pDeviceHandler->GetFileTime(&pHMHandle->hmHandleData,
                                                    (LPFILETIME)pFT1,
                                                    (LPFILETIME)pFT2,
                                                    (LPFILETIME)pFT3);

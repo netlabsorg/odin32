@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.26 2000-04-09 15:08:25 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.27 2000-05-22 19:07:58 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -416,6 +416,12 @@ DWORD OSLibDosSetFilePtr(DWORD hFile, DWORD offset, DWORD method)
         return -1;
   }
   else  return newoffset;
+}
+//******************************************************************************
+//******************************************************************************
+DWORD OSLibDosDelete(char *lpszFileName)
+{
+  return DosDelete(lpszFileName);
 }
 //******************************************************************************
 //******************************************************************************
