@@ -1,4 +1,4 @@
-#/* $Id: makefile,v 1.2 1999-08-22 22:08:47 sandervl Exp $ */
+#/* $Id: makefile,v 1.3 1999-09-02 16:23:18 sandervl Exp $ */
 #
 # PD-Win32 API 
 #
@@ -13,8 +13,8 @@ PDWIN32_BIN = ..\..\bin
 !include $(PDWIN32_INCLUDE)/pdwin32.mk
 
 
-CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE) /DNONAMELESSUNION
-CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE) /DNONAMELESSUNION
+CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE)
+CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 
 TARGET = oleaut32
