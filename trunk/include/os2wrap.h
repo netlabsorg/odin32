@@ -1,4 +1,4 @@
-/* $Id: os2wrap.h,v 1.12 1999-12-13 17:45:32 achimha Exp $ */
+/* $Id: os2wrap.h,v 1.13 1999-12-15 09:25:12 achimha Exp $ */
 #ifndef __OS2WRAP_H__
 #define __OS2WRAP_H__
 
@@ -1964,7 +1964,6 @@ inline ULONG _DosRawReadNPipe(PCSZ a, ULONG b, PULONG c, PVOID d)
 
 #undef  DosRawReadNPipe
 #define DosRawReadNPipe _DosRawReadNPipe
-#endif
 
 inline ULONG _DosRawWriteNPipe(PCSZ a, ULONG b)
 {
@@ -1979,6 +1978,8 @@ inline ULONG _DosRawWriteNPipe(PCSZ a, ULONG b)
 
 #undef  DosRawWriteNPipe
 #define DosRawWriteNPipe _DosRawWriteNPipe
+
+#endif
 
 inline ULONG _DosSetNPHState(HPIPE a, ULONG b)
 {
