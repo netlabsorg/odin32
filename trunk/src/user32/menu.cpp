@@ -1,4 +1,4 @@
-/* $Id: menu.cpp,v 1.50 2002-10-15 09:18:09 sandervl Exp $*/
+/* $Id: menu.cpp,v 1.51 2002-11-05 18:59:49 sandervl Exp $*/
 /*
  * Menu functions
  *
@@ -4208,7 +4208,11 @@ BOOL WINAPI SetMenu( HWND hWnd, HMENU hMenu )
                 return FALSE;
             }
             lpmenu->hWnd = hWnd;
+#if 0
+            //Dangerous and incorrect assumption! Checked in Win2k and recent
+            //Wine has this bug also fixed
             lpmenu->wFlags &= ~MF_POPUP;  /* Can't be a popup */
+#endif
             lpmenu->Height = 0;  /* Make sure we recalculate the size */
         }
         SetWindowLongA( hWnd, GWL_ID, hMenu );
