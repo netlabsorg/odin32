@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.2147 2002-06-09 19:52:53 sandervl Exp $ */
+/* $Id: changelog,v 1.2148 2002-06-10 09:15:43 sandervl Exp $ */
+
+ 2002-06-10: Sander van Leeuwen <sandervl@xs4all.nl>
+    - OLE32:    o Fixed bug in StgStreamImpl_Seek
+    - USER32:   o Don't repaint groupbox in WM_SETFONT if control isn't visible
+                  (fixes crash in Java 1.4 install)
 
  2002-06-09: knut st. osmundsen <bird@anduin.net>
     - Makefiles:
