@@ -23,7 +23,12 @@ ODINDEBUGCHANNEL(SHELL32-SHELLORD)
 #include "winreg.h"
 #include "debugtools.h"
 #include "winnls.h"
+
+#ifdef __WIN32OS2__
+#include "heapstring.h"
+#else
 #include "heap.h"
+#endif
 
 #include "shlwapi.h"
 #include "shellapi.h"
@@ -346,7 +351,12 @@ ODINPROCEDURE1(SHFree,
 #else
 	TRACE("%p\n",x);
 #endif
-	HeapFree(GetProcessHeap(), 0, x);
+  
+#if __WIN32OS2_
+  HEAP_free(x);
+#else
+  HeapFree(GetProcessHeap(), 0, x);
+#endif
 }
 
 /*************************************************************************
@@ -360,11 +370,19 @@ ODINFUNCTION1(LPVOID, SHAlloc,
               DWORD, len)
 {
 	LPBYTE ret;
-
+  
+#ifdef __WIN32OS2__
+#if MEM_DEBUG
+	ret = (LPVOID) HEAP_malloc(len+6);
+#else
+	ret = (LPVOID) HEAP_malloc(len);
+#endif
+#else
 #if MEM_DEBUG
 	ret = (LPVOID) HeapAlloc(GetProcessHeap(),0,len+6);
 #else
 	ret = (LPVOID) HeapAlloc(GetProcessHeap(),0,len);
+#endif
 #endif
 
 #if MEM_DEBUG

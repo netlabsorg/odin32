@@ -40,6 +40,15 @@ DEFAULT_DEBUG_CHANNEL(storage);
 #undef FIXME
 #undef TRACE
 #ifdef DEBUG
+// PH 2001-11-30
+// this macro definition causes the control leave the scope of a
+// non-curly-braced preceeding if statement. Therefore,
+//   if (p!=NULL) 
+//      TRACE("p->a=%d", p->a)
+// crashes.
+//
+// !!! ENSURE TRACES AND FIXMES WITH PRECEEDING IF STATEMENT 
+// !!! ARE PUT INTO CURLY BRACES
 #define TRACE WriteLog("OLE32: %s", __FUNCTION__); WriteLog
 #define FIXME WriteLog("FIXME OLE32: %s", __FUNCTION__); WriteLog
 #else
@@ -1378,7 +1387,9 @@ HRESULT WINAPI StorageImpl_CopyTo(
   IStream      *pstrTmp, *pstrChild;
 
   if ((ciidExclude != 0) || (rgiidExclude != NULL) || (snbExclude != NULL))
+  {
     FIXME("Exclude option not implemented\n");
+  }
 
   TRACE("(%p, %ld, %p, %p, %p)\n", 
 	iface, ciidExclude, rgiidExclude, 
@@ -5347,7 +5358,9 @@ HRESULT WINAPI StgCreateDocfile(
     fileAttributes = FILE_ATTRIBUTE_NORMAL | FILE_FLAG_RANDOM_ACCESS;
 
   if (grfMode & STGM_TRANSACTED)
+  {
     FIXME("Transacted mode not implemented.\n");
+  }
 
   /*
    * Initialize the "out" parameter.
@@ -5953,7 +5966,9 @@ static DWORD GetCreationModeFromSTGM(DWORD stgm)
   }
   /* All other cases */
   if (stgm & ~ (STGM_CREATE|STGM_CONVERT))
-  	FIXME("unhandled storage mode : 0x%08lx\n",stgm & ~ (STGM_CREATE|STGM_CONVERT));
+  {
+    FIXME("unhandled storage mode : 0x%08lx\n",stgm & ~ (STGM_CREATE|STGM_CONVERT));
+  }
   return CREATE_NEW;
 }
 
