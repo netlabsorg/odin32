@@ -1,4 +1,4 @@
-/* $Id: winimgres.cpp,v 1.23 1999-10-14 01:37:56 bird Exp $ */
+/* $Id: winimgres.cpp,v 1.24 1999-10-19 12:51:25 sandervl Exp $ */
 
 /*
  * Win32 PE Image class (resource methods)
@@ -11,6 +11,7 @@
  * TODO: Check created resource objects before loading the resource!
  * TODO: Once the resource handling in PE2LX/win32k is changed,
  *       getVersionStruct/Size can be moved into the Win32ImageBase class
+ * TODO: Support for 'DIB' resource type (VPBuddy)
  *
  */
 #include <os2win.h>
@@ -29,6 +30,9 @@
 #include <heapstring.h>
 #include "pefile.h"
 #include "oslibmisc.h"
+
+//SvL: VPBuddy bugfix, seems to load bitmaps with type name 'DIB'
+#define BITMAP_TYPENAME2    "DIB"
 
 //******************************************************************************
 //Assuming names are case insensitive
@@ -62,9 +66,16 @@ PIMAGE_RESOURCE_DATA_ENTRY
   fNumType = TRUE;    //assume numeric
   if(HIWORD(type) != 0) {//string id?
     for(i=0;i<MAX_RES;i++) {
-         if(stricmp((char *)type, ResTypes[i]) == 0)
+        if(stricmp((char *)type, ResTypes[i]) == 0)
                 break;
     }
+//TODO:
+#if 0
+    if(stricmp((char *)type, BITMAP_TYPENAME2) == 0) {
+        i = (int)RT_BITMAPA;
+    }
+#endif
+
     if(i == MAX_RES) {//custom resource type
          fNumType = FALSE;
     }
@@ -78,12 +89,12 @@ PIMAGE_RESOURCE_DATA_ENTRY
     if(i < pResDir->NumberOfNamedEntries)
     {//name or id entry?
         //SvL: 30-10-'97, high bit is set, so clear to get real offset
-    nameOffset = prde->u1.Name & ~0x80000000;
+        nameOffset = prde->u1.Name & ~0x80000000;
 
         pstring = (PIMAGE_RESOURCE_DIR_STRING_U)((ULONG)pResDir + nameOffset);
-    char *typename = (char *)malloc(pstring->Length+1);
+        char *typename = (char *)malloc(pstring->Length+1);
         lstrcpynWtoA(typename, pstring->NameString, pstring->Length+1);
-    typename[pstring->Length] = 0;
+        typename[pstring->Length] = 0;
 
         if(!fNumType) {
             if(stricmp(typename, (char *)type) == 0) {
@@ -99,7 +110,7 @@ PIMAGE_RESOURCE_DATA_ENTRY
                 fFound = TRUE;
             }
         }
-    free(typename);
+        free(typename);
     }
     else {
         if(prde->u1.Id == type) {
@@ -170,33 +181,33 @@ PIMAGE_RESOURCE_DATA_ENTRY
     }
     else
         if(!fNumId) {//name or id entry?
-        nameOffset = prde->u1.Name;
+            nameOffset = prde->u1.Name;
             if(prde->u1.s.NameIsString) //unicode directory string /*PLF Sat  97-06-21 22:30:35*/
                     nameOffset &= ~0x80000000;
 
             pstring = (PIMAGE_RESOURCE_DIR_STRING_U)((ULONG)pResDir + nameOffset);
 
-        resname = (char *)malloc(pstring->Length+1);
+            resname = (char *)malloc(pstring->Length+1);
             lstrcpynWtoA(resname, pstring->NameString, pstring->Length+1);
-        resname[pstring->Length] = 0;
+            resname[pstring->Length] = 0;
             if(stricmp(resname, (char *)*nodeData) == 0) {
                     fFound = TRUE;
             }
-        free(resname);
+            free(resname);
         }
         else {
             if(*nodeData == prde->u1.Id)
                     fFound = TRUE;
         }
 
-    if(fFound) {
+        if(fFound) {
             if((ULONG)prdType2 & 0x80000000) {//subdirectory?
                     return ProcessResSubDir(prdType2, nodeData+1, 3);
             }
             else {
                     pData = (PIMAGE_RESOURCE_DATA_ENTRY)prdType2;
                     if(pData->Size) {//winamp17 winzip archive has resource with size 0
-                        return(pData);
+                            return(pData);
                     }
                     else    return(NULL);
             }
@@ -211,12 +222,12 @@ ULONG Win32ImageBase::getPEResourceSize(ULONG id, ULONG type, ULONG lang)
 {
  PIMAGE_RESOURCE_DATA_ENTRY      pData = NULL;
 
-  pData = getPEResourceEntry(id, type, lang);
-  if(pData == NULL) {
-    dprintf(("Win32ImageBase::getPEResourceSize: couldn't find resource %d (type %d, lang %d)", id, type, lang));
-    return 0;
-  }
-  return pData->Size;
+    pData = getPEResourceEntry(id, type, lang);
+    if(pData == NULL) {
+        dprintf(("Win32ImageBase::getPEResourceSize: couldn't find resource %d (type %d, lang %d)", id, type, lang));
+        return 0;
+    }
+    return pData->Size;
 }
 //******************************************************************************
 //******************************************************************************
@@ -229,51 +240,57 @@ HRSRC Win32ImageBase::findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang)
  ULONG  id, type;
  int    i, stringid = -1, j;
 
-  fNumType = TRUE;    //assume numeric
-  if(HIWORD(lpszType) != 0) {//string id?
+    fNumType = TRUE;    //assume numeric
+    if(HIWORD(lpszType) != 0) {//string id?
         for(i=0;i<MAX_RES;i++) {
             if(stricmp(lpszType, ResTypes[i]) == 0)
                     break;
         }
+//TODO:
+#if 0
+        if(stricmp((char *)lpszType, BITMAP_TYPENAME2) == 0) {
+            i = (int)RT_BITMAPA;
+        }
+#endif
         if(i == MAX_RES) {//custom resource type
             fNumType = FALSE;
-        type = (ULONG)lpszType;
+            type = (ULONG)lpszType;
         }
-        else    type = i;
-  }
-  else  type = (ULONG)lpszType;
-
-  //String format: tables of 16 strings stored as one resource
-  //upper 12 bits of resource id passed by user determines block (res id)
-  //lower 4 bits are an index into the string table
-  if(fNumType) {
-    if(type == NTRT_STRING) {
-         stringid = (ULONG)lpszName & 0xF;
-         id       = (((ULONG)lpszName) >> 4)+1;
+        else type = i;
     }
-    else id = (ULONG)lpszName;
-  }
-  else {
-    if(stricmp((char *)type, ResTypes[NTRT_STRING]) == 0) {
-         stringid = (ULONG)lpszName & 0xF;
-         id       = (((ULONG)lpszName) >> 4)+1;
-    }
-    else id = (ULONG)lpszName;
-  }
+    else  type = (ULONG)lpszType;
 
-  pData = getPEResourceEntry(id, type, lang);
-  if(pData == NULL) {
-    if(HIWORD(id)) {
+    //String format: tables of 16 strings stored as one resource
+    //upper 12 bits of resource id passed by user determines block (res id)
+    //lower 4 bits are an index into the string table
+    if(fNumType) {
+        if(type == NTRT_STRING) {
+            stringid = (ULONG)lpszName & 0xF;
+            id       = (((ULONG)lpszName) >> 4)+1;
+        }
+        else id = (ULONG)lpszName;
+    }
+    else {
+        if(stricmp((char *)type, ResTypes[NTRT_STRING]) == 0) {
+            stringid = (ULONG)lpszName & 0xF;
+            id       = (((ULONG)lpszName) >> 4)+1;
+        }
+        else id = (ULONG)lpszName;
+    }
+
+    pData = getPEResourceEntry(id, type, lang);
+    if(pData == NULL) {
+        if(HIWORD(id)) {
                 dprintf(("Win32ImageBase::getPEResource %s: couldn't find resource %s (type %d, lang %d)", szModule, id, type, lang));
-    }
+        }
         else    dprintf(("Win32ImageBase::getPEResource %s: couldn't find resource %d (type %d, lang %d)", szModule, id, type, lang));
-    return 0;
-  }
-  //pResourceSectionStart contains the virtual address of the imagebase in the PE header
-  //for the resource section (images loaded by the pe.exe)
-  //For LX images, this is 0 as OffsetToData contains a relative offset
-  char *resdata = (char *)((char *)pResDir + pData->OffsetToData - pResourceSectionStart);
-  if(stringid != -1) {//search for string in table
+        return 0;
+    }
+    //pResourceSectionStart contains the virtual address of the imagebase in the PE header
+    //for the resource section (images loaded by the pe.exe)
+    //For LX images, this is 0 as OffsetToData contains a relative offset
+    char *resdata = (char *)((char *)pResDir + pData->OffsetToData - pResourceSectionStart);
+    if(stringid != -1) {//search for string in table
         USHORT *unicodestr = (USHORT *)resdata;
 
         for(i=0;i<stringid;i++) {
@@ -285,105 +302,22 @@ HRSRC Win32ImageBase::findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang)
             dprintf(("new Win32Resource failed!\n"));
             return(NULL);
         }
-  }
-  else {
-    switch(type) {
-    case NTRT_MENU:
-            res = new Win32MenuRes(this, id, type, pData->Size, resdata);
-        break;
-    default:
-            res = new Win32Resource(this, id, type, pData->Size, resdata);
-        break;
     }
-
-  }
-
-  return (HRSRC) res;
-}
-//******************************************************************************
-//******************************************************************************
-#if 0
-HRSRC Win32Pe2LxImage::findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang)
-{
- Win32Resource *res = NULL;
- HRSRC hres;
- int   i;
- LPSTR szType = (LPSTR)lpszType;
-
-    if(HIWORD(lpszType) != 0) {//type name, translate to id
-        for(i=0;i<MAX_RES;i++) {
-            if(strcmp(lpszType, ResTypes[i]) == 0)
-                break;
-        }
-        if(i == MAX_RES) {//custom resource type, stored as rcdata
-                dprintf(("FindResourceA custom type %s\n", lpszType));
-               lpszType = (LPSTR)NTRT_RCDATA;
-        }
-        else    lpszType = (LPSTR)i;
-
-        szType = (LPSTR)lpszType;
-    }
-    switch((int)szType) {
-    case NTRT_GROUP_ICON:
-        szType = (LPSTR)NTRT_ICON;
-        break;
-    case NTRT_GROUP_CURSOR:
-        szType = (LPSTR)NTRT_CURSOR;
-        break;
-    case NTRT_VERSION:
-        szType = (LPSTR)NTRT_RCDATA;
-        break;
-    case NTRT_STRING:
-    case NTRT_MENU:
-    case NTRT_ICON:
-    case NTRT_BITMAP:
-    case NTRT_CURSOR:
-    case NTRT_DIALOG:
-    case NTRT_RCDATA:
-    case NTRT_ACCELERATORS:
-        szType = lpszType;
-        break;
-    default: //unknown are stored as rcdata
-        szType = (LPSTR)NTRT_RCDATA;
-        break;
-    }
-    dprintf(("FindResourceA from %X type %d (%X)\n", hinstance, szType, lpszType));
-
-    if(HIWORD(lpszName) != 0) {//convert string name identifier to numeric id
-        dprintf(("FindResource %s\n", lpszName));
-        if(lpszName[0] == '#') {// #344
-                lpszName = (LPCSTR)atoi(&lpszName[1]);
-        }
-        else    lpszName = (LPCSTR)convertNameId((char *)lpszName);
-    }
-    else dprintf(("FindResource %d\n", (int)lpszName));
-
-    hres = O32_FindResource(hinstance, lpszName, szType);
-    if(hres)
+    else
     {
-    switch((ULONG)szType) {
-    case NTRT_MENU:
-            res = new Win32MenuRes(this, hres, (ULONG)lpszName, (ULONG)szType);
-        break;
-    default:
-            res = new Win32Resource(this, hres, (ULONG)lpszName, (ULONG)szType);
-        break;
-    }
-    }
-
-    if(hres == NULL && HIWORD(lpszName) == 0 && (int)szType == NTRT_STRING) {
-        hres = O32_FindResource(hinstance, (LPCSTR)(((int)lpszName - 1)*16), (LPCSTR)NTRT_RCDATA);
-        if(hres)
-        {
-            res = new Win32Resource(this, hres, (ULONG)lpszName, (ULONG)szType);
+        switch(type) {
+        case NTRT_MENU:
+            res = new Win32MenuRes(this, id, type, pData->Size, resdata);
+            break;
+        default:
+            res = new Win32Resource(this, id, type, pData->Size, resdata);
+            break;
         }
-        else    dprintf(("FindResourceA can't find string %d\n", (int)lpszName));
-    }
-    dprintf(("FindResourceA returned %X (%X)\n", hres, GetLastError()));
 
-    return (HRSRC)res;
+    }
+
+    return (HRSRC) res;
 }
-#endif
 //******************************************************************************
 //******************************************************************************
 HRSRC Win32ImageBase::findResourceW(LPWSTR lpszName, LPWSTR lpszType, ULONG lang)
@@ -482,18 +416,18 @@ BOOL Win32ImageBase::getVersionStruct(char *verstruct, ULONG bufLength)
 {
  PIMAGE_RESOURCE_DATA_ENTRY      pData = NULL;
 
-  if(verstruct == NULL || bufLength == 0) {
-    SetLastError(ERROR_INVALID_PARAMETER);
-    return FALSE;
-  }
-  pData = getPEResourceEntry(ID_GETFIRST, NTRT_VERSION);
-  if(pData == NULL) {
-    dprintf(("Win32PeLdrImage::getVersionStruct: couldn't find version resource!"));
-    return 0;
-  }
-  char *resdata = (char *)((char *)pResDir + pData->OffsetToData - pResourceSectionStart);
-  memcpy(verstruct, resdata, min(bufLength, pData->Size));
-  return TRUE;
+    if(verstruct == NULL || bufLength == 0) {
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return FALSE;
+    }
+    pData = getPEResourceEntry(ID_GETFIRST, NTRT_VERSION);
+    if(pData == NULL) {
+        dprintf(("Win32PeLdrImage::getVersionStruct: couldn't find version resource!"));
+        return 0;
+    }
+    char *resdata = (char *)((char *)pResDir + pData->OffsetToData - pResourceSectionStart);
+    memcpy(verstruct, resdata, min(bufLength, pData->Size));
+    return TRUE;
 }
 //******************************************************************************
 //******************************************************************************
