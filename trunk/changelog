@@ -1,8 +1,11 @@
-/* $Id: changelog,v 1.2175 2002-06-19 17:36:52 sandervl Exp $ */
+/* $Id: changelog,v 1.2176 2002-06-20 01:11:44 bird Exp $ */
+
+ 2002-06-20: knut st. osmundsen <bird@anduin.net>
+    - INSTALL:  o Corrected quoting typos. ('User's Guide' -> 'User''s Guide')
 
  2002-06-19: Sander van Leeuwen <sandervl@innotek.de>
     - OLE32:    o Drag 'n drop fixes
-                
+
  2002-06-18: Sander van Leeuwen <sandervl@innotek.de>
     - DINPUT:   o SysMouseAImpl_GetDeviceData: check if internal dinput
                   mouse state is out of sync and update if necessary
