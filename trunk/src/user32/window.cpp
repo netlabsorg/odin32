@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.15 1999-10-14 18:27:59 sandervl Exp $ */
+/* $Id: window.cpp,v 1.16 1999-10-15 10:03:16 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -399,6 +399,7 @@ BOOL WIN32API IsIconic( HWND hwnd)
 HWND WIN32API GetWindow(HWND hwnd, UINT uCmd)
 {
   Win32BaseWindow *window;
+  HWND rc;
 
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
@@ -406,8 +407,9 @@ HWND WIN32API GetWindow(HWND hwnd, UINT uCmd)
 	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
-    dprintf(("GetWindow %x %d", hwnd, uCmd));
-    return window->GetWindow(uCmd);
+    rc = window->GetWindow(uCmd);
+    dprintf(("GetWindow %x %d returned %x", hwnd, uCmd, rc));
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
