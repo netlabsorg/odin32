@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.311 1999-10-12 20:15:25 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.312 1999-10-13 11:22:40 phaller Exp $ */
+
+ 99-10-13: Patrick Haller <phaller@gmx.net>
+	- KERNEL32: Fix: XCPT_GUARD_PAGE_VIOLATION are now supported.
+			 (helps PROGMAN.EXE)
 
  99-10-12: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: DrawMenuBar & DrawCaptionTempA bugfix (window handle translation)
