@@ -1,4 +1,4 @@
-/* $Id: win32api.h,v 1.6 2000-03-22 18:47:01 sandervl Exp $ */
+/* $Id: win32api.h,v 1.7 2000-03-29 15:16:09 cbratschi Exp $ */
 
 /*
  *
@@ -77,5 +77,7 @@ LPVOID WIN32API HeapReAlloc(HANDLE,DWORD,LPVOID,DWORD);
 DWORD  WIN32API HeapSize(HANDLE,DWORD,LPVOID);
 BOOL   WIN32API HeapUnlock(HANDLE);
 BOOL   WIN32API HeapValidate(HANDLE,DWORD,LPCVOID);
+
+BOOL   WIN32API DosDateTimeToFileTime(WORD,WORD,LPFILETIME);
 
 #endif
