@@ -1,10 +1,12 @@
-/* $Id: changelog,v 1.1794 2001-10-26 10:04:13 phaller Exp $ */
+/* $Id: changelog,v 1.1795 2001-10-26 10:12:21 phaller Exp $ */
 
  2001-10-26: Patrick Haller <patrick.haller@innotek.de>
     - USER32:   o fixed ESC keyboard event
                 o fixed passing thru special key events to the frame window
                 o partial fix for shift key processing
-                  remaining issues: AltGr, Right Shift
+                o fixed right shift processing (and possibly numerous
+                  other extended keys)
+                  remaining issues: AltGr
 
  2001-10-25: Patrick Haller <patrick.haller@innotek.de>
     - USER32:   o fixed scancodes for [Pause] and [PrtScr]
