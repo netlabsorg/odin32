@@ -1,4 +1,4 @@
-/* $Id: cctl_xx.orc,v 1.2 2000-08-19 18:35:56 sandervl Exp $ */
+/* $Id: cctl_xx.orc,v 1.1 2002-05-08 11:23:20 sandervl Exp $ */
 /*
  * Language neutral resources for Common Controls
  */
