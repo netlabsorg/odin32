@@ -1,4 +1,4 @@
-/* $Id: cvticongrp.cpp,v 1.4 1999-09-21 08:24:53 sandervl Exp $ */
+/* $Id: cvticongrp.cpp,v 1.5 1999-12-29 12:39:09 sandervl Exp $ */
 
 /*
  * PE2LX Icon group code
@@ -43,12 +43,12 @@ void *ConvertIconGroup(IconHeader *ihdr, int size, Win32ImageBase *module)
   dprintf(("Icon Group type :%d", ihdr->wType));
   dprintf(("Icon Group count:%d", ihdr->wCount));
   for(i=0;i<ihdr->wCount;i++) {
-        dprintf(("Icon    : %d", rdir->wNameOrdinal));
-        dprintf(("Width   : %d", (int)rdir->bWidth));
-        dprintf(("Height  : %d", (int)rdir->bHeight));
-        dprintf(("Colors  : %d", (int)rdir->bColorCount));
-        dprintf(("Bits    : %d", rdir->wBitCount));
-        dprintf(("ResBytes: %d", rdir->lBytesInRes));
+        dprintf2(("Icon    : %d", rdir->wNameOrdinal));
+        dprintf2(("Width   : %d", (int)rdir->bWidth));
+        dprintf2(("Height  : %d", (int)rdir->bHeight));
+        dprintf2(("Colors  : %d", (int)rdir->bColorCount));
+        dprintf2(("Bits    : %d", rdir->wBitCount));
+        dprintf2(("ResBytes: %d", rdir->lBytesInRes));
 	winres     = (Win32Resource *)FindResourceA(module->getInstanceHandle(), 
                                                    (LPCSTR)rdir->wNameOrdinal, 
                                                    (LPSTR)NTRT_ICON);

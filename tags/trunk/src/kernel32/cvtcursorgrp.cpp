@@ -1,4 +1,4 @@
-/* $Id: cvtcursorgrp.cpp,v 1.6 1999-09-25 14:11:31 sandervl Exp $ */
+/* $Id: cvtcursorgrp.cpp,v 1.7 1999-12-29 12:39:09 sandervl Exp $ */
 
 /*
  * PE2LX cursor group code
@@ -44,11 +44,11 @@ void *ConvertCursorGroup(CursorHeader *chdr, int size, Win32ImageBase *module)
   dprintf(("Cursor Group type : %d", chdr->wType));
   dprintf(("Cursor Group count: %d", chdr->cwCount));
   for(i=0;i<chdr->cwCount;i++) {
-        dprintf(("Cursor  : %d", rdir->wNameOrdinal));
-        dprintf(("Width   : %d", (int)rdir->wWidth));
-        dprintf(("Height  : %d", (int)rdir->wHeight));
-        dprintf(("Bits    : %d", rdir->wBitCount));
-        dprintf(("ResBytes: %d", rdir->lBytesInRes));
+        dprintf2(("Cursor  : %d", rdir->wNameOrdinal));
+        dprintf2(("Width   : %d", (int)rdir->wWidth));
+        dprintf2(("Height  : %d", (int)rdir->wHeight));
+        dprintf2(("Bits    : %d", rdir->wBitCount));
+        dprintf2(("ResBytes: %d", rdir->lBytesInRes));
 	winres     = (Win32Resource *)FindResourceA(module->getInstanceHandle(), 
                                                     (LPCSTR)rdir->wNameOrdinal, 
                                                     (LPSTR)NTRT_CURSOR);
