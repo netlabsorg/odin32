@@ -1,4 +1,4 @@
-/* $Id: loadres.cpp,v 1.19 2000-01-09 15:56:02 sandervl Exp $ */
+/* $Id: loadres.cpp,v 1.20 2000-01-09 16:52:53 sandervl Exp $ */
 
 /*
  * Win32 resource API functions for OS/2
@@ -22,7 +22,6 @@
 #include <winres.h>
 #include <heapstring.h>
 #include <oslibres.h>
-#include <winconst.h>
 #include <win\virtual.h>
 #include "dib.h"
 #include "initterm.h"
@@ -236,56 +235,41 @@ BOOL IsSystemBitmap(ULONG *id)
 {
    switch(*id)
    {
-        case OBM_UPARROW_W:
-        case OBM_DNARROW_W:
-        case OBM_RGARROW_W:
-        case OBM_LFARROW_W:
-        case OBM_RESTORE_W:
-        case OBM_RESTORED_W:
-        case OBM_UPARROWD_W:
-        case OBM_DNARROWD_W:
-        case OBM_RGARROWD_W:
-        case OBM_LFARROWD_W:
-        case OBM_OLD_UPARROW_W:
-        case OBM_OLD_DNARROW_W:
-        case OBM_OLD_RGARROW_W:
-        case OBM_OLD_LFARROW_W:
-        case OBM_CHECK_W:
-        case OBM_CHECKBOXES_W:
-        case OBM_BTNCORNERS_W:
-        case OBM_COMBO_W:
-        case OBM_REDUCE_W:
-        case OBM_REDUCED_W:
-        case OBM_ZOOM_W:
-        case OBM_ZOOMD_W:
-        case OBM_SIZE_W:
-        case OBM_CLOSE_W:
-        case OBM_MNARROW_W:
-        case OBM_UPARROWI_W:
-        case OBM_DNARROWI_W:
-        case OBM_RGARROWI_W:
-        case OBM_LFARROWI_W:
-                return TRUE;
-
-        //TODO: Not supported by Open32. Replacement may not be accurate
-        case OBM_OLD_CLOSE_W:
-                *id = OBM_CLOSE_W;
-                return TRUE;
-
-        case OBM_BTSIZE_W:
-                *id = OBM_SIZE_W;
-                return TRUE;
-
-        case OBM_OLD_REDUCE_W:
-                *id = OBM_REDUCE_W;
-                return TRUE;
-
-        case OBM_OLD_ZOOM_W:
-                *id = OBM_ZOOM_W;
-                return TRUE;
-
-        case OBM_OLD_RESTORE_W:
-                *id = OBM_RESTORE_W;
+        case OBM_UPARROW:
+        case OBM_DNARROW:
+        case OBM_RGARROW:
+        case OBM_LFARROW:
+        case OBM_RESTORE:
+        case OBM_RESTORED:
+        case OBM_UPARROWD:
+        case OBM_DNARROWD:
+        case OBM_RGARROWD:
+        case OBM_LFARROWD:
+        case OBM_OLD_UPARROW:
+        case OBM_OLD_DNARROW:
+        case OBM_OLD_RGARROW:
+        case OBM_OLD_LFARROW:
+        case OBM_CHECK:
+        case OBM_CHECKBOXES:
+        case OBM_BTNCORNERS:
+        case OBM_COMBO:
+        case OBM_REDUCE:
+        case OBM_REDUCED:
+        case OBM_ZOOM:
+        case OBM_ZOOMD:
+        case OBM_SIZE:
+        case OBM_CLOSE:
+        case OBM_MNARROW:
+        case OBM_UPARROWI:
+        case OBM_DNARROWI:
+        case OBM_RGARROWI:
+        case OBM_LFARROWI:
+	case OBM_CLOSED:
+        case OBM_OLD_CLOSE:
+        case OBM_BTSIZE:
+        case OBM_OLD_REDUCE:
+        case OBM_OLD_ZOOM:
+        case OBM_OLD_RESTORE:
                 return TRUE;
 
         default:
@@ -395,9 +379,9 @@ HBITMAP WIN32API LoadBitmapA(HINSTANCE hinst, LPCSTR lpszBitmap)
     {
       	 hBitmap =  LoadBitmapA(hInstanceUser32, lpszBitmap, 0, 0, 0);
     } 
-    else hBitmap = 0;
   } 
-  else hBitmap = LoadBitmapA(hinst, lpszBitmap, 0, 0, 0);
+  if(!hBitmap) 
+  	hBitmap = LoadBitmapA(hinst, lpszBitmap, 0, 0, 0);
 
   dprintf(("LoadBitmapA returned %08xh\n", hBitmap));
 

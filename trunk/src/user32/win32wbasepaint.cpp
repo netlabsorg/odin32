@@ -1,4 +1,4 @@
-/* $Id: win32wbasepaint.cpp,v 1.2 2000-01-09 15:56:05 sandervl Exp $ */
+/* $Id: win32wbasepaint.cpp,v 1.3 2000-01-09 16:52:55 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -120,8 +120,8 @@ VOID Win32BaseWindow::TrackMinMaxBox(WORD wParam)
     /* Check if the sysmenu item for maximize is there  */
     state = GetMenuState(hSysMenu, SC_MAXIMIZE, MF_BYCOMMAND);
   }
-  SetCapture(Win32Hwnd);
-  hdc = GetWindowDC(Win32Hwnd);
+  SetCapture(getWindowHandle());
+  hdc = GetWindowDC(getWindowHandle());
   if (wParam == HTMINBUTTON)
     DrawMinButton(hdc,TRUE,FALSE);
   else
@@ -131,7 +131,7 @@ VOID Win32BaseWindow::TrackMinMaxBox(WORD wParam)
   {
     BOOL oldstate = pressed;
 
-    GetMessageA(&msg,Win32Hwnd,0,0);
+    GetMessageA(&msg, getWindowHandle(), 0, 0);
     pressed = (HandleNCHitTest(msg.pt) == wParam);
     if (pressed != oldstate)
     {
@@ -142,7 +142,7 @@ VOID Win32BaseWindow::TrackMinMaxBox(WORD wParam)
     }
   }
 
-  while (msg.message != WM_LBUTTONUP);
+  while (msg.message != WM_NCLBUTTONUP);
 
   if (wParam == HTMINBUTTON)
     DrawMinButton(hdc,FALSE,FALSE);
@@ -150,7 +150,7 @@ VOID Win32BaseWindow::TrackMinMaxBox(WORD wParam)
     DrawMaxButton(hdc,FALSE,FALSE);
 
   ReleaseCapture();
-  ReleaseDC(Win32Hwnd,hdc);
+  ReleaseDC(getWindowHandle(), hdc);
   /* If the item minimize or maximize of the sysmenu are not there */
   /* or if the style is not present, do nothing */
   if ((!pressed) || (state == 0xFFFFFFFF))
@@ -178,22 +178,28 @@ VOID Win32BaseWindow::TrackCloseButton(WORD wParam)
   /* If the item close of the sysmenu is disabled or not there do nothing */
   if((state & MF_DISABLED) || (state & MF_GRAYED) || (state == 0xFFFFFFFF))
     return;
-  hdc = GetWindowDC(Win32Hwnd);
-  SetCapture(Win32Hwnd);
+  hdc = GetWindowDC(getWindowHandle());
+  SetCapture(getWindowHandle());
   DrawCloseButton(hdc,TRUE,FALSE);
   do
   {
     BOOL oldstate = pressed;
 
-    GetMessageA(&msg,Win32Hwnd,0,0);
+    GetMessageA(&msg, getWindowHandle(), 0, 0);
     pressed = (HandleNCHitTest(msg.pt) == wParam);
+
     if (pressed != oldstate)
       DrawCloseButton(hdc, pressed, FALSE);
-  } while (msg.message != WM_LBUTTONUP);
+  }
+  while (msg.message != WM_NCLBUTTONUP);
+
   DrawCloseButton(hdc,FALSE,FALSE);
   ReleaseCapture();
-  ReleaseDC(Win32Hwnd,hdc);
-  if (!pressed) return;
+  ReleaseDC(getWindowHandle(), hdc);
+
+  if (!pressed)
+        return;
+
   SendInternalMessageA(WM_SYSCOMMAND,SC_CLOSE,*(LPARAM*)&msg.pt);
 }
 //******************************************************************************
@@ -550,7 +556,7 @@ BOOL Win32BaseWindow::DrawSysButton(HDC hdc,BOOL down)
     /* get the default one.                                          */
     if(hIcon == 0)
       if (!(dwStyle & DS_MODALFRAME))
-        hIcon = LoadImageA(0, MAKEINTRESOURCEA(OIC_WINEICON), IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
+        hIcon = LoadImageA(0, MAKEINTRESOURCEA(OIC_ODINICON), IMAGE_ICON, 0, 0, LR_DEFAULTCOLOR);
 
     if (hIcon)
       DrawIconEx (hdc, rect.left + 2, rect.top + 2, hIcon,
@@ -593,8 +599,6 @@ VOID Win32BaseWindow::DrawCloseButton(HDC hdc,BOOL down,BOOL bGrayed)
   RECT rect;
   HDC hdcMem;
 
-  if( !(flags & WIN_MANAGED) )
-  {
     BITMAP bmp;
     HBITMAP hBmp, hOldBmp;
 
@@ -615,7 +619,6 @@ VOID Win32BaseWindow::DrawCloseButton(HDC hdc,BOOL down,BOOL bGrayed)
 
     SelectObject (hdcMem, hOldBmp);
     DeleteDC (hdcMem);
-  }
 }
 //******************************************************************************
 //******************************************************************************
@@ -624,8 +627,6 @@ VOID Win32BaseWindow::DrawMaxButton(HDC hdc,BOOL down,BOOL bGrayed)
   RECT rect;
   HDC hdcMem;
 
-  if( !(flags & WIN_MANAGED))
-  {
     BITMAP  bmp;
     HBITMAP  hBmp,hOldBmp;
 
@@ -651,7 +652,6 @@ VOID Win32BaseWindow::DrawMaxButton(HDC hdc,BOOL down,BOOL bGrayed)
 
     SelectObject (hdcMem, hOldBmp);
     DeleteDC( hdcMem );
-  }
 }
 //******************************************************************************
 //******************************************************************************
@@ -660,9 +660,6 @@ VOID Win32BaseWindow::DrawMinButton(HDC hdc,BOOL down,BOOL bGrayed)
   RECT rect;
   HDC hdcMem;
 
-  if( !(flags & WIN_MANAGED))
-
-  {
     BITMAP  bmp;
     HBITMAP  hBmp,hOldBmp;
 
@@ -691,7 +688,6 @@ VOID Win32BaseWindow::DrawMinButton(HDC hdc,BOOL down,BOOL bGrayed)
 
     SelectObject (hdcMem, hOldBmp);
     DeleteDC( hdcMem );
-  }
 }
 //******************************************************************************
 //******************************************************************************
