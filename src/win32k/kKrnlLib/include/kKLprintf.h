@@ -1,4 +1,4 @@
-/* $Id: kKLprintf.h,v 1.1 2001-09-14 01:50:18 bird Exp $
+/* $Id: kKLprintf.h,v 1.2 2001-09-27 03:04:32 bird Exp $
  *
  * printf/vprintf header file.
  *
@@ -16,7 +16,7 @@ extern "C" {
 #endif
 
 #ifndef va_arg
-    #error "must include stdarg.h"
+#include <stdarg.h>                     /* C library stdarg.h. */
 #endif
 
 
