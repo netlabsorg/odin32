@@ -1,4 +1,4 @@
-/* $Id: odin.cmd,v 1.30 2001-03-24 18:14:43 bird Exp $
+/* $Id: odin.cmd,v 1.31 2001-04-18 08:23:00 bird Exp $
  *
  * Odin32 API WarpIn installation script generator.
  *
@@ -399,7 +399,7 @@ if (rc <> 0) then return rc;
  */
 /* sWICCmd '2 -c'||sBinDir' odin.ini'; */
 /* if (rc <> 0) then return rc; */
-sWICCmd '2 -c'||sDllDir||' pe.exe *.dll pec.exe odininst.exe regsvr32.exe win32k.sys win32k.ddp Win32kCC.exe kRx.exe';
+sWICCmd '2 -c'||sDllDir||' pe.exe *.dll pec.exe odininst.exe regsvr32.exe win32k.sys win32k.ddp Win32kCC.exe kRx.exe Xx2Lx.exe';
 if (rc <> 0) then return rc;
 sWICCmd '2 -c'||sBinDir||' wgss50.dll';
 if (rc <> 0) then return rc;
