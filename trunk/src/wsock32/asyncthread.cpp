@@ -1,4 +1,4 @@
-/* $Id: asyncthread.cpp,v 1.7 2001-04-28 16:15:18 sandervl Exp $ */
+/* $Id: asyncthread.cpp,v 1.8 2001-04-29 15:42:26 sandervl Exp $ */
 
 /*
  * Async thread help functions
@@ -40,8 +40,6 @@ static void _Optlink AsyncThread(void *arg)
 ////	WSASetBlocking(FALSE, pThreadParm->hThread);
 
   free((PVOID)pThreadParm);
-
-  DosExit(EXIT_THREAD, 0);
 }
 //******************************************************************************
 //******************************************************************************
