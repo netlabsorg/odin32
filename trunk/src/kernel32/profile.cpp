@@ -1,4 +1,4 @@
-/* $Id: profile.cpp,v 1.36 2004-03-16 13:33:00 sandervl Exp $ */
+/* $Id: profile.cpp,v 1.37 2004-04-07 09:13:53 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -1340,9 +1340,15 @@ BOOL WIN32API WritePrivateProfileStringA(LPCSTR section,
     if (PROFILE_Open( filename ))
     {
         if (!section && !entry && !string)
+        {
+            PROFILE_FlushFile();
             PROFILE_ReleaseFile();  /* always return FALSE in this case */
+        }
         else
+        {
             ret = PROFILE_SetString( section, entry, string );
+            PROFILE_FlushFile();
+        }
     }
 
     LeaveCriticalSection( &PROFILE_CritSect );
@@ -1388,7 +1394,10 @@ BOOL WIN32API WritePrivateProfileSectionA(LPCSTR section,
         if (!section && !string)
             PROFILE_ReleaseFile();  /* always return FALSE in this case */
         else if (!string) /* delete the named section*/
+        {
 	    ret = PROFILE_SetString(section,NULL,NULL);
+            PROFILE_FlushFile();
+        }
         else {
 	    PROFILE_DeleteAllKeys(section);
 	    ret = TRUE;
@@ -1402,7 +1411,7 @@ BOOL WIN32API WritePrivateProfileSectionA(LPCSTR section,
                 HeapFree( GetProcessHeap(), 0, buf );
                 string += strlen(string)+1;
             }
-            
+            PROFILE_FlushFile();
         }
     }
 
@@ -1559,8 +1568,10 @@ BOOL WIN32API WritePrivateProfileStructA(LPCSTR section,
     EnterCriticalSection( &PROFILE_CritSect );
 
     if (PROFILE_Open( filename ))
+    {
         ret = PROFILE_SetString( section, key, (LPCSTR)buf );
-
+        PROFILE_FlushFile();
+    }
     LeaveCriticalSection( &PROFILE_CritSect );
 
     return ret;
