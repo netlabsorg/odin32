@@ -1,9 +1,11 @@
-/* $Id: ChangeLog,v 1.2579 2003-05-15 14:21:28 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2580 2003-05-15 15:45:07 sandervl Exp $ */
 
  2003-05-15: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Window creation: updated the coordinate fix code with the latest Rewind version
                 o ReleaseDC: always verify window associated with DC
     - COMCTL32: o Complete resync with latest Wine (except draglist)
+                o Implemented LVM_APPROXIMATEVIEWRECT for LVS_REPORT controls 
+                  (needed to get rid of a crash; very likely to be incorrect)
 
  2003-05-14: Sander van Leeuwen <sandervl@innotek   >
     - GDI32:    o DIB section: do not fetch more colors from a bitmap header than 
