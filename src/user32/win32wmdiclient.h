@@ -1,4 +1,4 @@
-/* $Id: win32wmdiclient.h,v 1.4 1999-10-24 12:30:29 sandervl Exp $ */
+/* $Id: win32wmdiclient.h,v 1.5 1999-12-17 17:18:04 cbratschi Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -17,7 +17,7 @@
 #define MDICLIENTCLASSNAMEA "MDICLIENT"
 #define MDICLIENTCLASSNAMEW L"MDICLIENT"
 
-#define MDIF_NEEDUPDATE		0x0001
+#define MDIF_NEEDUPDATE         0x0001
 
 //******************************************************************************
 //******************************************************************************
@@ -29,10 +29,10 @@ virtual        ~Win32MDIClientWindow();
 
 virtual  BOOL   isMDIClient();
 
-	   int  incTotalCreated()                { return ++nTotalCreated; };
-	   int  getFirstChildId()                { return idFirstChild;    };
+           int  incTotalCreated()                { return ++nTotalCreated; };
+           int  getFirstChildId()                { return idFirstChild;    };
 
-	   HWND getMDIMenu()                     { return hWindowMenu;     };
+           HWND getMDIMenu()                     { return hWindowMenu;     };
 
 Win32MDIChildWindow *getMaximizedChild()         { return maximizedChild;  };
                void  setMaximizedChild(Win32MDIChildWindow *newchild) { maximizedChild = newchild; };
@@ -45,37 +45,43 @@ Win32MDIChildWindow *getWindow(Win32MDIChildWindow *actchild, BOOL bNext, DWORD 
 Win32MDIChildWindow *getChildByID(INT id);
                void postUpdate(WORD recalc);
 
-	   int  getNrOfChildren()                { return nActiveChildren; };
-	   int  incNrActiveChildren()            { return ++nActiveChildren; };
-	   int  decNrActiveChildren()            { return --nActiveChildren; };
+           int  getNrOfChildren()                { return nActiveChildren; };
+           int  incNrActiveChildren()            { return ++nActiveChildren; };
+           int  decNrActiveChildren()            { return --nActiveChildren; };
 
-	   int  getMdiFlags()                    { return mdiFlags; };
+           int  getMdiFlags()                    { return mdiFlags; };
            void setMdiFlags(int newflags)        { mdiFlags = newflags; };
 
            void updateFrameText(BOOL repaint, LPCSTR lpTitle );
 
-	   LONG childActivate(Win32MDIChildWindow *child);
+           LONG childActivate(Win32MDIChildWindow *child);
            void switchActiveChild(Win32MDIChildWindow *nextActiveChild, BOOL bNextWindow );
         LRESULT destroyChild(Win32MDIChildWindow *child, BOOL flagDestroy );
 
-	LRESULT setMDIMenu(HMENU hmenuFrame, HMENU hmenuWindow);
-	LRESULT refreshMDIMenu(HMENU hmenuFrame, HMENU hmenuWindow);
-	BOOL    restoreFrameMenu(Win32BaseWindow *child);
+        LRESULT setMDIMenu(HMENU hmenuFrame, HMENU hmenuWindow);
+        LRESULT refreshMDIMenu(HMENU hmenuFrame, HMENU hmenuWindow);
+        BOOL    restoreFrameMenu(Win32BaseWindow *child);
 
        LRESULT  MDIClientWndProc(UINT message, WPARAM wParam, LPARAM lParam);
+
+Win32BaseWindow** buildWindowArray(UINT bwaFlags,PUINT total);
+        void    releaseWindowArray(Win32BaseWindow **wndArray);
+        void    calcDefaultChildPos(WORD n,LPPOINT lpPos,INT delta);
+        BOOL    cascade(UINT fuCascade);
+        BOOL    tile(UINT fuTile);
 
 private:
   Win32MDIChildWindow *maximizedChild;
   Win32MDIChildWindow *activeChild;
 
- 	HWND    hWindowMenu;
+        HWND    hWindowMenu;
         int     idFirstChild;
 
-        int 	nActiveChildren;
-        int 	nTotalCreated;
-	int     sbRecalc;
-        LPSTR 	frameTitle;
-        DWORD 	mdiFlags;
+        int     nActiveChildren;
+        int     nTotalCreated;
+        int     sbRecalc;
+        LPSTR   frameTitle;
+        DWORD   mdiFlags;
 
 };
 //******************************************************************************

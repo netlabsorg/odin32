@@ -1,4 +1,4 @@
-/* $Id: win32wmdichild.cpp,v 1.12 1999-12-16 00:11:48 sandervl Exp $ */
+/* $Id: win32wmdichild.cpp,v 1.13 1999-12-17 17:18:04 cbratschi Exp $ */
 /*
  * Win32 MDI Child Window Class for OS/2
  *
@@ -293,7 +293,7 @@ HWND Win32MDIChildWindow::createChild(Win32MDIClientWindow *client, LPMDICREATES
              cs->x, cs->y, cs->cx, cs->cy, (unsigned)cs->style));
 
     /* calculate placement */
-    calcDefaultChildPos(client, client->incTotalCreated(), pos, 0);
+    calcDefaultChildPos(client, client->incTotalCreated()-1, pos, 0);
 
     if (cs->cx == CW_USEDEFAULT || !cs->cx) cs->cx = pos[1].x;
     if (cs->cy == CW_USEDEFAULT || !cs->cy) cs->cy = pos[1].y;
