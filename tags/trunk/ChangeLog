@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1268 2001-02-18 17:04:05 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1269 2001-02-18 17:59:27 sandervl Exp $ */
 
  2001-02-18: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Restore window origin in SetWindowPos for parent window with
@@ -7,6 +7,9 @@
                   (fixes paint offset problems in Opera windows)
                 o Bug in yesterday's ScrollWindowEx fix
                   (fixes smooth scrolling of child windows in Opera html window)
+                o Detect DestroyWindow call during CreateWindowEx and delay
+                  deleting the window/dialog object.
+                  (fixes crash in Opera when going to fullscreen mode)
 
  2000-02-17: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Win32kCC: o Rewrote to notebook. (fixes size problem)
