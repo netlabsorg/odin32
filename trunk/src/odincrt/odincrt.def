@@ -961,4 +961,5 @@ EXPORTS
     _Exception                                        @914
     __ctordtorInit                                    @915
     __ctordtorTerm                                    @916
+    _Exception_CPP                                    @917
 
