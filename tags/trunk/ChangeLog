@@ -1,4 +1,13 @@
- /* $Id: ChangeLog,v 1.1136 2000-09-21 15:41:15 bird Exp $ */
+ /* $Id: ChangeLog,v 1.1137 2000-09-22 03:54:39 bird Exp $ */
+
+ 2000-09-22: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - Win32k/Pe2Lx: Always apply all-in-one-object aligment fix. This will
+                solve lots of problems. (Hopefully temporary; I will explore
+                a VMAllocMem flag for VDMs which allows allocation of
+                pagealigned objects in the tiled arenas. The flag works
+                as expected but I get IPEs during process cleanup...)
+                Corrected bug in applyFixups. Fixups was not applied when
+                the all-in-one-object aligment fix was applied.
 
  2000-09-21: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - INCLUDE\makefiles: Made cleanrule omittable by defining NOCLEAN.
