@@ -59,6 +59,13 @@
 
 BOOL  fVersionWarp3 = FALSE;
 
+//Global DLL Data
+#pragma data_seg(_GLOBALDATA)
+int globLoadNr = 0;
+#pragma data_seg()
+
+static BOOL fInit = FALSE;
+
 /*-------------------------------------------------------------------*/
 /* A clean up routine registered with DosExitList must be used if    */
 /* runtime calls are required and the runtime is dynamically linked. */
@@ -87,6 +94,10 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
     /* termination should be performed.                                        */
     /*-------------------------------------------------------------------------*/
 
+    if(fInit == TRUE && ulFlag == 0) {
+        return 1; //already initialized
+    }
+    fInit = TRUE;
     switch (ulFlag)
     {
         case 0 :
@@ -146,10 +157,13 @@ ULONG APIENTRY InitializeKernel32()
 {
     HMODULE hModule;
 
+    if(!fInit) {
+        loadNr = globLoadNr++;
+    }
     DosQueryModuleHandle("WGSS50", &hModule);
     O32__DLL_InitTerm(hModule, 0);
     DosQueryModuleHandle("KERNEL32", &hModule);
-    return inittermKernel32(hModule, 0);
+    return DLLENTRYPOINT_NAME(hModule, 0);
 }
 //******************************************************************************
 //******************************************************************************

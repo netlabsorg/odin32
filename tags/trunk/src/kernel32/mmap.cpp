@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.51 2001-05-28 11:26:06 phaller Exp $ */
+/* $Id: mmap.cpp,v 1.52 2001-08-06 16:01:11 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -65,7 +65,7 @@ Win32MemMap::Win32MemMap(HFILE hfile, ULONG size, ULONG fdwProtect, LPSTR lpszNa
 
     mSize      = size;
     mProtFlags = fdwProtect;
-    mProcessId  = GetCurrentProcess();
+    mProcessId  = GetCurrentProcessId();
 
     if(lpszName) {
         lpszMapName = (char *)_smalloc(strlen(lpszName)+1);
@@ -88,7 +88,7 @@ Win32MemMap::Win32MemMap(Win32PeLdrImage *pImage, ULONG baseAddress, ULONG size)
 
     mSize      = size;
     mProtFlags = PAGE_READWRITE;
-    mProcessId = GetCurrentProcess();
+    mProcessId = GetCurrentProcessId();
 
     pMapping   = (LPVOID)baseAddress;
 
@@ -103,7 +103,7 @@ BOOL Win32MemMap::Init()
     if(hMemFile != -1)
     {
 #if 0
-        if(DuplicateHandle(mProcessId, hMemFile, GetCurrentProcess(),
+        if(DuplicateHandle(GetCurrentProcess(), hMemFile, GetCurrentProcess(),
                            &hMemFile, 0, FALSE, DUPLICATE_SAME_ACCESS) == FALSE)
 #else
         DWORD dwOdinOptions;
@@ -113,7 +113,7 @@ BOOL Win32MemMap::Init()
         }
         else    dwOdinOptions = DUPLICATE_ACCESS_READWRITE | DUPLICATE_SHARE_DENYNONE;
 
-        if(HMDuplicateHandleOdin(mProcessId, hMemFile, GetCurrentProcess(),
+        if(HMDuplicateHandleOdin(GetCurrentProcess(), hMemFile, GetCurrentProcess(),
                            &hMemFile, 0, FALSE, DUPLICATE_SAME_ACCESS, dwOdinOptions) == FALSE)
 #endif
         {
@@ -193,9 +193,7 @@ Win32MemMap::~Win32MemMap()
 //******************************************************************************
 void Win32MemMap::Release()
 {
-#ifdef DEBUG
     dprintf(("Win32MemMap::Release %s (%d)", lpszMapName, referenced-1));
-#endif
     --referenced;
     if(nrMappings == 0 && referenced == 0) {
         delete this;
@@ -336,7 +334,7 @@ fail:
 //******************************************************************************
 LPVOID Win32MemMap::mapViewOfFile(ULONG size, ULONG offset, ULONG fdwAccess)
 {
- DWORD processId = GetCurrentProcess();
+ DWORD processId = GetCurrentProcessId();
 
     mapMutex.enter();
     ULONG memFlags = (mProtFlags & (PAGE_READONLY | PAGE_READWRITE | PAGE_WRITECOPY));
@@ -550,7 +548,7 @@ Win32MemMap *Win32MemMap::findMap(ULONG address)
 void Win32MemMap::deleteAll()
 {
  Win32MemMap *map = memmaps, *nextmap;
- DWORD processId = GetCurrentProcess();
+ DWORD processId = GetCurrentProcessId();
 
   //delete all maps created by this process
   globalviewMutex.enter();
@@ -586,7 +584,7 @@ Win32MemMapView::Win32MemMapView(Win32MemMap *map, ULONG offset, ULONG size,
     mParentMap = map;
     mSize    = size;
     mOffset  = offset;
-    mProcessId = GetCurrentProcess();
+    mProcessId = GetCurrentProcessId();
     pShareViewAddr = NULL;
 
     switch(fdwAccess) {
