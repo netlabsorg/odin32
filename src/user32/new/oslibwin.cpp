@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.9 1999-07-17 18:30:51 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.10 1999-07-18 10:39:51 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -21,6 +21,7 @@
 #include "oslibstyle.h"
 #include "oslibutil.h"
 #include "oslibmsg.h"
+#include "oslibgdi.h"
 #include "pmwindow.h"
 
 //******************************************************************************
@@ -40,7 +41,6 @@ HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
                           char *pszName, HWND Owner, ULONG fHWND_BOTTOM, HWND *hwndFrame)
 {
  HWND  hwndClient;
- RECTL rectl;
 
   dprintf(("WinCreateWindow %x %x %x %s", hwndParent, dwWinStyle, dwFrameStyle, pszName));
 
@@ -52,13 +52,16 @@ HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
   }
   if(dwFrameStyle) {
         dwWinStyle &= ~WS_CLIPCHILDREN; //invalid style according to docs
+	if(pszName)
+		dwFrameStyle |= FCF_TITLEBAR;
+
         *hwndFrame = WinCreateStdWindow(hwndParent, dwWinStyle,
                                        &dwFrameStyle, WIN32_STDCLASS,
-                                       "", 0, 0, 0, &hwndClient) != 0;
+                                       "", 0, 0, 0, &hwndClient);
         if(*hwndFrame) {
-                if(pszName) {
-                        WinSetWindowText(*hwndFrame, pszName);
-                }
+		if(pszName) {
+			WinSetWindowText(*hwndFrame, pszName);
+		}
                 return hwndClient;
         }
         dprintf(("OSLibWinCreateWindow: WinCreateStdWindow failed (%x)", WinGetLastError(GetThreadHAB())));
@@ -157,16 +160,6 @@ APIRET OSLibDosBeep(ULONG freg,ULONG dur)
 }
 //******************************************************************************
 //******************************************************************************
-LONG OSLibWinQueryWindowTextLength(HWND hwnd)
-{
-  return WinQueryWindowTextLength(hwnd);
-}
-//******************************************************************************
-//******************************************************************************
-LONG OSLibWinQueryWindowText(HWND hwnd,LONG lLength,char* pun)
-{
-  return WinQueryWindowText(hwnd,lLength,pun);
-}
 //******************************************************************************
 //******************************************************************************
 HWND OSLibWinQueryWindow(HWND hwnd, ULONG lCode)
@@ -178,12 +171,10 @@ HWND OSLibWinQueryWindow(HWND hwnd, ULONG lCode)
 BOOL OSLibWinSetWindowPos(HWND hwnd, HWND hwndInsertBehind, LONG x, LONG y, LONG cx,
                           LONG cy, ULONG fl)
 {
- RECTL rectl;
- HWND  hwndParent;
-
   if(fl & SWP_MOVE) {
-	y = MapOS2ToWin32Y(hwnd, y);
+	y = MapOS2ToWin32Y(hwnd, cy, y);
   }
+  dprintf(("WinSetWindowPos %x %x %d %d %d %d %x", hwnd, hwndInsertBehind, x, y, cx, cy, fl));
   return WinSetWindowPos(hwnd, hwndInsertBehind, x, y, cx, cy, fl);
 }
 //******************************************************************************
@@ -197,7 +188,7 @@ BOOL OSLibWinShowWindow(HWND hwnd, ULONG fl)
   }
   if(rc == 0)
 	dprintf(("WinShowWindow %x failed %x", hwnd, WinGetLastError(GetThreadHAB())));
-  rc = WinSetWindowPos(hwnd, 0, 0, 0, 0, 0, fl);
+  rc = WinSetWindowPos(hwnd, HWND_TOP, 0, 0, 0, 0, fl);
   if(rc == 0)
 	dprintf(("WinShowWindow %x failed %x", hwnd, WinGetLastError(GetThreadHAB())));
   return rc;
@@ -210,9 +201,16 @@ BOOL OSLibWinDestroyWindow(HWND hwnd)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibWinQueryUpdateRect(HWND hwnd, PVOID pRect)
+BOOL OSLibWinQueryUpdateRect(HWND hwnd, PRECT pRect)
 {
-  return WinQueryUpdateRect(hwnd, (RECTL *)pRect);
+ BOOL rc;
+ RECTLOS2 rectl;
+
+  rc = WinQueryUpdateRect(hwnd, (PRECTL)&rectl);
+  if(rc) {
+	MapOS2ToWin32Rectl(hwnd, &rectl, pRect);
+  }
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -295,59 +293,21 @@ BOOL OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMa
 }
 //******************************************************************************
 //******************************************************************************
-inline ULONG OS2TOWIN32POINT(RECTL *parent, RECTL *child, ULONG y)
+LONG OSLibWinQueryWindowTextLength(HWND hwnd)
 {
-  return (parent->yTop - parent->yBottom - (child->yTop - child->yBottom) - y - 1);
+  return WinQueryWindowTextLength(hwnd);
 }
 //******************************************************************************
 //******************************************************************************
-ULONG MapOS2ToWin32Y(HWND hwndChild)
+LONG OSLibWinQueryWindowText(HWND hwnd, LONG length, LPSTR lpsz)
 {
- HWND  hwndParent;
- RECTL rectParent = {0}, rectChild = {0};
-
-   WinQueryWindowRect(hwndChild, &rectChild);
-   hwndParent = WinQueryWindow(hwndChild, QW_PARENT);
-   WinQueryWindowRect(hwndParent, &rectParent);
-   return OS2TOWIN32POINT(&rectParent, &rectChild, rectChild.yBottom);
+  return WinQueryWindowText(hwnd, length, lpsz);
 }
 //******************************************************************************
 //******************************************************************************
-ULONG MapOS2ToWin32Y(HWND hwndChild, ULONG y)
+BOOL OSLibWinSetWindowText(HWND hwnd, LPSTR lpsz)
 {
- HWND  hwndParent;
- RECTL rectParent = {0}, rectChild = {0};
-
-   WinQueryWindowRect(hwndChild, &rectChild);
-   hwndParent = WinQueryWindow(hwndChild, QW_PARENT);
-   WinQueryWindowRect(hwndParent, &rectParent);
-   return OS2TOWIN32POINT(&rectParent, &rectChild, y);
-}
-//******************************************************************************
-//******************************************************************************
-ULONG MapOS2ToWin32Y(PRECTL rectParent, PRECTL rectChild, ULONG y)
-{
-   return OS2TOWIN32POINT(rectParent, rectChild, y);
-}
-//******************************************************************************
-//******************************************************************************
-ULONG MapOS2ToWin32Y(PRECTL rectParent, HWND hwndChild, ULONG y)
-{
- RECTL rectChild = {0};
-
-   WinQueryWindowRect(hwndChild, &rectChild);
-   return OS2TOWIN32POINT(rectParent, &rectChild, y);
-}
-//******************************************************************************
-//******************************************************************************
-ULONG MapOS2ToWin32Y(HWND hwndChild, PRECTL rectChild, ULONG y)
-{
- HWND  hwndParent;
- RECTL rectParent = {0};
-
-   hwndParent = WinQueryWindow(hwndChild, QW_PARENT);
-   WinQueryWindowRect(hwndParent, &rectParent);
-   return OS2TOWIN32POINT(&rectParent, rectChild, y);
+  return WinSetWindowText(hwnd, lpsz);
 }
 //******************************************************************************
 //******************************************************************************

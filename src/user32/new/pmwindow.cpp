@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.7 1999-07-17 18:30:51 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.8 1999-07-18 10:39:51 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -22,6 +22,7 @@
 #include "pmwindow.h"
 #include "oslibwin.h"
 #include "oslibutil.h"
+#include "oslibgdi.h"
 
 HMQ  hmq = 0;                             /* Message queue handle         */
 HAB  hab = 0;
@@ -40,7 +41,6 @@ BOOL InitPM()
   if(!hab || !hmq) 
   {
         UINT error;
-
         //CB: only fail on real error
         error = WinGetLastError(hab) & 0xFFFF; //error code
         if (!hab || error != PMERR_MSG_QUEUE_ALREADY_EXISTS)
@@ -163,12 +163,12 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
     case WM_MOVE:
     {
-      RECTL rectChild;
+      RECTLOS2 rectChild;
       ULONG xParent, yParent;
 
 	dprintf(("OS2: WM_MOVE %x", hwnd));
 
-	WinQueryWindowRect(hwnd, &rectChild);
+	WinQueryWindowRect(hwnd, (PRECTL)&rectChild);
 
         //Calculate position relative to parent window (real window or desktop)
         xParent = rectChild.xLeft;
@@ -345,6 +345,19 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     case WM_TIMER:
         break;
 
+    case WM_SETWINDOWPARAMS:
+    {
+      WNDPARAMS *wndParams = (WNDPARAMS *)mp1;
+
+	dprintf(("OS2: WM_SETWINDOWPARAMS %x", hwnd));
+	if(wndParams->fsStatus & WPM_TEXT) {
+	        if(win32wnd->MsgSetText(wndParams->pszText, wndParams->cchText)) {
+        	        goto RunDefWndProc;
+        	}
+	}
+	goto RunDefWndProc;
+    }
+
     case WM_PAINT:
 	dprintf(("OS2: WM_PAINT %x", hwnd));
         if(win32wnd->MsgPaint(0, 0)) {
@@ -357,7 +370,6 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         break;
 
     case WM_CALCVALIDRECTS:
-    case WM_SETWINDOWPARAMS:
     case WM_QUERYWINDOWPARAMS:
     case WM_HITTEST:
     case WM_SETSELECTION:

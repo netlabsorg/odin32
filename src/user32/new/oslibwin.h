@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.8 1999-07-17 18:30:51 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.9 1999-07-18 10:39:51 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -35,8 +35,6 @@ HWND  OSLibWinCreateMenu(HWND hwndParent, PVOID menutemplate);
 
 BOOL OSLibWinAlarm(HWND hwndDeskTop,ULONG flStyle);
 ULONG OSLibDosBeep(ULONG freg,ULONG dur);
-LONG OSLibWinQueryWindowTextLength(HWND hwnd);
-LONG OSLibWinQueryWindowText(HWND hwnd,LONG lLength,char* pun);
 
 #define SWPOS_SIZE                   0x0001
 #define SWPOS_MOVE                   0x0002
@@ -62,7 +60,7 @@ BOOL  OSLibWinSetWindowPos(HWND hwnd, HWND hwndInsertBehind, LONG x, LONG y, LON
 BOOL  OSLibWinShowWindow(HWND hwnd, ULONG fl);
 
 BOOL  OSLibWinDestroyWindow(HWND hwnd);
-BOOL  OSLibWinQueryUpdateRect(HWND hwnd, PVOID pRect); //must be RECTL pointer!
+BOOL  OSLibWinQueryUpdateRect(HWND hwnd, PRECT pRect);
 BOOL  OSLibWinIsIconic(HWND hwnd);
 BOOL  OSLibWinSetActiveWindow(HWND hwnd);
 BOOL  OSLibWinSetFocus(HWND hwnd);
@@ -89,11 +87,8 @@ LONG  OSLibWinDispatchMsg(MSG *msg, BOOL isUnicode = FALSE);
 
 BOOL  OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax, BOOL isUnicode = FALSE);
 
-
-ULONG MapOS2ToWin32Y(HWND hwndChild);
-ULONG MapOS2ToWin32Y(HWND hwndChild, ULONG y);
-ULONG MapOS2ToWin32Y(PRECTL rectParent, PRECTL rectChild, ULONG y);
-ULONG MapOS2ToWin32Y(PRECTL rectParent, HWND hwndChild, ULONG y);
-ULONG MapOS2ToWin32Y(HWND hwndChild, PRECTL rectChild, ULONG y);
+LONG  OSLibWinQueryWindowTextLength(HWND hwnd);
+LONG  OSLibWinQueryWindowText(HWND hwnd, LONG length, LPSTR lpsz);
+BOOL  OSLibWinSetWindowText(HWND hwnd, LPSTR lpsz);
 
 #endif //__OSLIBWIN_H__

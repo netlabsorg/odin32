@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.4 1999-07-17 12:49:41 cbratschi Exp $ */
+/* $Id: user32.cpp,v 1.5 1999-07-18 10:39:51 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -215,34 +215,6 @@ BOOL WIN32API MessageBeep( UINT arg1)
     return OSLibWinAlarm(HWND_DESKTOP,flStyle);
 }
 //******************************************************************************
-//******************************************************************************
-BOOL WIN32API IsDlgButtonChecked( HWND arg1, UINT  arg2)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  IsDlgButtonChecked\n");
-#endif
-    //CB: get button state
-    return (BOOL)SendDlgItemMessageA(arg1,arg2,BM_GETCHECK,0,0);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API GetWindowTextLengthA( HWND arg1)
-{
-    dprintf(("USER32:  GetWindowTextLength\n"));
-    //win32 to OS/2 handle
-    //return OSLibWinQueryWindowTextLength(arg1);
-    return O32_GetWindowTextLength(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API GetWindowTextA( HWND arg1, LPSTR arg2, int  arg3)
-{
-    dprintf(("USER32:  GetWindowTextA\n"));
-    //win32 to OS/2 handle
-    //return OSLibWinQueryWindowText(arg1,arg3,arg2);
-    return O32_GetWindowText(arg1, arg2, arg3);
-}
-//******************************************************************************
 
 /*******************************************************************
  *      InternalGetWindowText    (USER32.326)
@@ -263,38 +235,11 @@ int WIN32API InternalGetWindowText(HWND   hwnd,
 //******************************************************************************
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API GetNextDlgTabItem( HWND arg1, HWND arg2, BOOL  arg3)
-{
-    dprintf(("USER32:  GetNextDlgTabItem\n"));
-    //get next WS_TABSTOP
-    return O32_GetNextDlgTabItem(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
 HWND WIN32API GetFocus(void)
 {
 //    dprintf(("USER32:  GetFocus\n"));
     //return OS2LibWinQueryFocus(HWND_DESKTOP);
     return O32_GetFocus();
-}
-//******************************************************************************
-//******************************************************************************
-HWND WIN32API GetDlgItem(HWND arg1, int  arg2)
-{
- HWND rc;
-    //return OSLibWinWindowFromID(arg1,arg2);
-    rc = O32_GetDlgItem(arg1, arg2);
-    dprintf(("USER32:  GetDlgItem %d returned %d\n", arg2, rc));
-    return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API GetDlgCtrlID( HWND arg1)
-{
-    dprintf(("USER32:  GetDlgCtrlID\n"));
-    //return OSLibWinQueryWindowUShort(arg1,QWS_ID);
-    //use internal ID -> DWORD
-    return O32_GetDlgCtrlID(arg1);
 }
 //******************************************************************************
 //******************************************************************************
@@ -317,17 +262,6 @@ BOOL WIN32API EnumThreadWindows(DWORD dwThreadId, WNDENUMPROC lpfn, LPARAM lPara
   if(callback)
     delete callback;
   return(rc);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API EndDialog( HWND arg1, int  arg2)
-{
- BOOL rc;
-
-    dprintf(("USER32:  EndDialog\n"));
-    //return OSLibDismissDialog(arg1,arg2);
-    rc = O32_EndDialog(arg1, arg2);
-    return(rc);
 }
 //******************************************************************************
 //******************************************************************************
@@ -360,31 +294,11 @@ BOOL WIN32API CopyRect( PRECT lprcDst, const RECT * lprcSrc)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API CheckDlgButton( HWND arg1, int arg2, UINT  arg3)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  CheckDlgButton\n");
-#endif
-    //CB: set button state
-    return (BOOL)SendDlgItemMessageA(arg1,arg2,BM_SETCHECK,arg3,0);
-}
-//******************************************************************************
-//******************************************************************************
 HWND WIN32API SetFocus( HWND arg1)
 {
     dprintf(("USER32:  SetFocus\n"));
     //return OSLibWinSetFocus(HWND_DESKTOP,arg1);
     return O32_SetFocus(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API ReleaseDC( HWND arg1, HDC  arg2)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  ReleaseDC\n");
-#endif
-    //return OSLibWinReleasePS(arg2);
-    return O32_ReleaseDC(arg1, arg2);
 }
 //******************************************************************************
 //******************************************************************************
@@ -411,49 +325,6 @@ BOOL WIN32API GetUpdateRect( HWND arg1, PRECT arg2, BOOL  arg3)
 }
 //******************************************************************************
 //******************************************************************************
-HDC WIN32API GetDC( HWND arg1)
-{
- HDC hdc;
-
-   //hdc = OSLibWinGetPS(arg1);
-   hdc = O32_GetDC(arg1);
-#ifdef DEBUG
-   WriteLog("USER32:  GetDC of %X returns %X\n", arg1, hdc);
-#endif
-   return(hdc);
-}
-//******************************************************************************
-//******************************************************************************
-HDC WIN32API GetDCEx(HWND arg1, HRGN arg2, DWORD arg3)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetDCEx\n");
-#endif
-    //return OSLibGetDC(arg1);
-    //change values
-    return O32_GetDCEx(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API EndPaint( HWND arg1, const PAINTSTRUCT * arg2)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  EndPaint\n");
-#endif
-    //return OSLibWinEndPaint(arg2->hdc);
-    return O32_EndPaint(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-//******************************************************************************
-//******************************************************************************
-HDC WIN32API BeginPaint(HWND arg1, PPAINTSTRUCT  arg2)
-{
-    dprintf(("USER32: BeginPaint %X\n", arg2));
-    //return OSLibWinBeginPaint(arg1,);
-    //CB: emulate
-    return O32_BeginPaint(arg1, arg2);
-}
 //******************************************************************************
 //******************************************************************************
 int WIN32API GetSystemMetrics(int arg1)
@@ -609,21 +480,6 @@ DWORD WIN32API WaitForInputIdle(HANDLE hProcess, DWORD dwTimeOut)
 }
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API GetDlgItemTextA(HWND arg1, int arg2, LPSTR arg3, UINT arg4)
-{
- UINT rc;
-
-    //WinQueryDlgItemText(arg1,arg2,arg4,arg3);
-    rc = O32_GetDlgItemText(arg1, arg2, arg3, arg4);
-#ifdef DEBUG
-    if(rc)
-        WriteLog("USER32:  GetDlgItemTextA returned %s\n", arg3);
-    else    WriteLog("USER32:  GetDlgItemTextA returned 0 (%d)\n", GetLastError());
-#endif
-    return(rc);
-}
-//******************************************************************************
-//******************************************************************************
 int WIN32API ShowCursor( BOOL arg1)
 {
 #ifdef DEBUG
@@ -646,26 +502,6 @@ BOOL WIN32API SetRect( PRECT lprc, int nLeft, int nTop, int nRight, int  nBottom
     lprc->bottom = nBottom;
 
     return TRUE;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SetDlgItemInt( HWND arg1, int arg2, UINT arg3, BOOL  arg4)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  SetDlgItemInt\n");
-#endif
-    //get item text and translate to int
-    return O32_SetDlgItemInt(arg1, arg2, arg3, arg4);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SetDlgItemTextA( HWND arg1, int arg2, LPCSTR  arg3)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  SetDlgItemText to %s\n", arg3);
-#endif
-    //WinSetDlgItemText(arg1,arg2,arg3);
-    return O32_SetDlgItemText(arg1, arg2, arg3);
 }
 //******************************************************************************
 //******************************************************************************
@@ -999,86 +835,6 @@ BOOL WIN32API DestroyIcon( HICON arg1)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API DlgDirListA( HWND arg1, LPSTR arg2, int arg3, int arg4, UINT  arg5)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  DlgDirListA\n");
-#endif
-    return O32_DlgDirList(arg1, arg2, arg3, arg4, arg5);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API DlgDirListComboBoxA( HWND arg1, LPSTR arg2, int arg3, int arg4, UINT  arg5)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  DlgDirListComboBoxA\n");
-#endif
-    return O32_DlgDirListComboBox(arg1, arg2, arg3, arg4, arg5);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API DlgDirListComboBoxW( HWND arg1, LPWSTR arg2, int arg3, int arg4, UINT  arg5)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  DlgDirListComboBoxW NOT WORKING\n");
-#endif
-    // NOTE: This will not work as is (needs UNICODE support)
-    return 0;
-//    return O32_DlgDirListComboBox(arg1, arg2, arg3, arg4, arg5);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API DlgDirListW( HWND arg1, LPWSTR arg2, int arg3, int arg4, UINT  arg5)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  DlgDirListW NOT WORKING\n");
-#endif
-    // NOTE: This will not work as is (needs UNICODE support)
-    return 0;
-//    return O32_DlgDirList(arg1, arg2, arg3, arg4, arg5);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API DlgDirSelectComboBoxExA( HWND arg1, LPSTR arg2, int arg3, int  arg4)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  DlgDirSelectComboBoxExA\n");
-#endif
-    return O32_DlgDirSelectComboBoxEx(arg1, arg2, arg3, arg4);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API DlgDirSelectComboBoxExW( HWND arg1, LPWSTR arg2, int arg3, int  arg4)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  DlgDirSelectComboBoxExW NOT WORKING\n");
-#endif
-    // NOTE: This will not work as is (needs UNICODE support)
-    return 0;
-//    return O32_DlgDirSelectComboBoxEx(arg1, arg2, arg3, arg4);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API DlgDirSelectExA( HWND arg1, LPSTR arg2, int arg3, int  arg4)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  DlgDirSelectExA\n");
-#endif
-    return O32_DlgDirSelectEx(arg1, arg2, arg3, arg4);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API DlgDirSelectExW( HWND arg1, LPWSTR arg2, int arg3, int  arg4)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  DlgDirSelectExW NOT WORKING\n");
-#endif
-    // NOTE: This will not work as is (needs UNICODE support)
-    return 0;
-//    return O32_DlgDirSelectEx(arg1, arg2, arg3, arg4);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API EmptyClipboard(void)
 {
 #ifdef DEBUG
@@ -1118,52 +874,6 @@ UINT WIN32API EnumClipboardFormats(UINT arg1)
     WriteLog("USER32:  EnumClipboardFormats\n");
 #endif
     return O32_EnumClipboardFormats(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API EnumPropsA(HWND arg1, PROPENUMPROCA arg2)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  EnumPropsA DOES NOT WORK\n");
-#endif
-    //calling convention problems
-    return 0;
-//    return O32_EnumProps(arg1, (PROPENUMPROC_O32)arg2);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API EnumPropsExA( HWND arg1, PROPENUMPROCEXA arg2, LPARAM  arg3)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  EnumPropsExA DOES NOT WORK\n");
-#endif
-    //calling convention problems
-    return 0;
-//    return O32_EnumPropsEx(arg1, arg2, (PROPENUMPROCEX_O32)arg3);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API EnumPropsExW( HWND arg1, PROPENUMPROCEXW arg2, LPARAM  arg3)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  EnumPropsExW\n");
-#endif
-    // NOTE: This will not work as is (needs UNICODE support)
-    //calling convention problems
-    return 0;
-//    return O32_EnumPropsEx(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API EnumPropsW( HWND arg1, PROPENUMPROCW  arg2)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  EnumPropsW\n");
-#endif
-    // NOTE: This will not work as is (needs UNICODE support)
-    //calling convention problems
-    return 0;
-//    return O32_EnumProps(arg1, arg2);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1329,72 +1039,6 @@ HWND WIN32API GetClipboardViewer(void)
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API GetDialogBaseUnits(void)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetDialogBaseUnits\n");
-#endif
-    return O32_GetDialogBaseUnits();
-}
-//******************************************************************************
-//******************************************************************************
-UINT WIN32API GetDlgItemInt( HWND arg1, int arg2, PBOOL arg3, BOOL  arg4)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetDlgItemInt\n");
-#endif
-    return O32_GetDlgItemInt(arg1, arg2, arg3, arg4);
-}
-
-
-/*****************************************************************************
- * Name      : UINT WIN32API GetDlgItemTextW
- * Purpose   : Determine the text of a window control
- * Parameters: HWND   arg1
- *             int    arg2
- *             LPWSTR arg3
- *             UINT   arg4
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED UNKNOWN STUB
- *
- * Author    : Patrick Haller [Wed, 1998/06/16 11:55]
- *****************************************************************************/
-
-UINT WIN32API GetDlgItemTextW(HWND   arg1,
-                              int    arg2,
-                              LPWSTR arg3,
-                              UINT   arg4)
-{
-  LPSTR lpBuffer;                   /* temporary buffer for the ascii result */
-  UINT  uiResult;                   /* return value of the ascii variant     */
-
-  dprintf(("USER32: GetDlgItemTextW(%08xh,%08xh,%08xh,%08xh)\n",
-           arg1,
-           arg2,
-           arg3,
-           arg4));
-
-
-  lpBuffer = (LPSTR)malloc(arg4);              /* allocate temporary buffer */
-  uiResult = GetDlgItemTextA(arg1,             /* call ascii variant        */
-                             arg2,
-                             lpBuffer,
-                             arg4);
-
-  AsciiToUnicodeN(lpBuffer,                /* now convert result to unicode */
-                  arg3,
-                  arg4);
-
-  free(lpBuffer);                              /* free the temporary buffer */
-
-  return (uiResult);                                       /* OK, that's it */
-}
-
-
-//******************************************************************************
-//******************************************************************************
 UINT WIN32API GetDoubleClickTime(void)
 {
 #ifdef DEBUG
@@ -1462,15 +1106,6 @@ HWND WIN32API GetLastActivePopup( HWND arg1)
 //******************************************************************************
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API GetNextDlgGroupItem( HWND arg1, HWND arg2, BOOL  arg3)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetNextDlgGroupItem\n");
-#endif
-    return O32_GetNextDlgGroupItem(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
 HWND WIN32API GetOpenClipboardWindow(void)
 {
 #ifdef DEBUG
@@ -1486,38 +1121,6 @@ int WIN32API GetPriorityClipboardFormat( PUINT arg1, int  arg2)
     WriteLog("USER32:  GetPriorityClipboardFormat\n");
 #endif
     return O32_GetPriorityClipboardFormat(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-HANDLE WIN32API GetPropA( HWND arg1, LPCSTR  arg2)
-{
-#ifdef DEBUG
-    if((int)arg2 >> 16 != 0)
-     WriteLog("USER32:  GetPropA %s\n", arg2);
-    else WriteLog("USER32:  GetPropA %X\n", arg2);
-#endif
-    return O32_GetProp(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-HANDLE WIN32API GetPropW(HWND arg1, LPCWSTR arg2)
-{
- BOOL  handle;
- char *astring;
-
-    if((int)arg2 >> 16 != 0)
-         astring = UnicodeToAsciiString((LPWSTR)arg2);
-    else astring = (char *)arg2;
-#ifdef DEBUG
-    if((int)arg2 >> 16 != 0)
-         WriteLog("USER32:  GetPropW %s\n", astring);
-    else WriteLog("USER32:  GetPropW %X\n", astring);
-#endif
-    handle = GetPropA(arg1, (LPCSTR)astring);
-    if((int)arg2 >> 16 != 0)
-        FreeAsciiString(astring);
-
-    return(handle);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1765,29 +1368,6 @@ UINT WIN32API RegisterClipboardFormatW(LPCWSTR arg1)
 }
 //******************************************************************************
 //******************************************************************************
-HANDLE WIN32API RemovePropA( HWND arg1, LPCSTR  arg2)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  RemovePropA\n");
-#endif
-    return O32_RemoveProp(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-HANDLE WIN32API RemovePropW( HWND arg1, LPCWSTR  arg2)
-{
- char *astring = UnicodeToAsciiString((LPWSTR)arg2);
- HANDLE rc;
-
-#ifdef DEBUG
-    WriteLog("USER32:  RemovePropW\n");
-#endif
-    rc = O32_RemoveProp(arg1, astring);
-    FreeAsciiString(astring);
-    return rc;
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API ScreenToClient( HWND arg1, LPPOINT  arg2)
 {
 #ifdef DEBUG
@@ -1854,59 +1434,12 @@ HWND WIN32API SetClipboardViewer( HWND arg1)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API SetDlgItemTextW( HWND arg1, int arg2, LPCWSTR  arg3)
-{
-char *astring = UnicodeToAsciiString((LPWSTR)arg3);
-BOOL  rc;
-
-#ifdef DEBUG
-    WriteLog("USER32:  SetDlgItemTextW\n");
-#endif
-    // NOTE: This will not work as is (needs UNICODE support)
-    rc = O32_SetDlgItemText(arg1, arg2, astring);
-    FreeAsciiString(astring);
-    return rc;
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API SetDoubleClickTime( UINT arg1)
 {
 #ifdef DEBUG
     WriteLog("USER32:  SetDoubleClickTime\n");
 #endif
     return O32_SetDoubleClickTime(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SetPropA( HWND arg1, LPCSTR arg2, HANDLE  arg3)
-{
-#ifdef DEBUG
-    if((int)arg2 >> 16 != 0)
-     WriteLog("USER32:  SetPropA %S\n", arg2);
-    else WriteLog("USER32:  SetPropA %X\n", arg2);
-#endif
-    return O32_SetProp(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SetPropW(HWND arg1, LPCWSTR arg2, HANDLE arg3)
-{
- BOOL  rc;
- char *astring;
-
-    if((int)arg2 >> 16 != 0)
-         astring = UnicodeToAsciiString((LPWSTR)arg2);
-    else astring = (char *)arg2;
-
-#ifdef DEBUG
-    if((int)arg2 >> 16 != 0)
-         WriteLog("USER32:  SetPropW %S\n", astring);
-    else WriteLog("USER32:  SetPropW %X\n", astring);
-#endif
-    rc = O32_SetProp(arg1, astring, arg3);
-    if((int)astring >> 16 != 0)
-        FreeAsciiString(astring);
-    return(rc);
 }
 //******************************************************************************
 //******************************************************************************
