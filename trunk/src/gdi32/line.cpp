@@ -1,4 +1,4 @@
-/* $Id: line.cpp,v 1.11 2001-11-16 15:51:00 phaller Exp $ */
+/* $Id: line.cpp,v 1.12 2001-11-16 16:27:54 sandervl Exp $ */
 /*
  * Line API's
  *
@@ -20,7 +20,7 @@
 
 #define ROUND_FLOAT(x) ((INT)((x < 0) ? x-0.5:x+0.5))
 
-static VOID INLINE toWin32LineEnd(PPOINTLOS2 startPt,INT nXEnd,INT nYEnd,PPOINTLOS2 pt)
+VOID toWin32LineEnd(PPOINTLOS2 startPt,INT nXEnd,INT nYEnd,PPOINTLOS2 pt)
 {
   if ((startPt->x != nXEnd) || (startPt->y != nYEnd))
   {
@@ -48,7 +48,7 @@ static VOID INLINE toWin32LineEnd(PPOINTLOS2 startPt,INT nXEnd,INT nYEnd,PPOINTL
   }
 }
 
-static BOOL INLINE drawSingleLinePoint(HDC hdc,pDCData pHps,PPOINTLOS2 pt)
+BOOL drawSingleLinePoint(HDC hdc,pDCData pHps,PPOINTLOS2 pt)
 {
   LOGPEN penInfo;
 
