@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.120 2004-03-10 09:21:09 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.121 2004-03-11 13:42:00 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -481,7 +481,6 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         if(fMsgRemoved == MSG_REMOVE)
         {
             MSLLHOOKSTRUCT hook;
-            MOUSEHOOKSTRUCT mousehk;
             ULONG          msg;
 
             if(winMsg->message >= WINWM_NCLBUTTONDOWN && winMsg->message <= WINWM_NCMBUTTONDBLCLK) {
@@ -502,8 +501,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             }
 
             // First the low-level mouse hook
-            hook.pt.x        = os2Msg->ptl.x & 0xFFFF;
-            hook.pt.y        = mapScreenY(os2Msg->ptl.y);
+            hook.pt          = winMsg->pt;
             hook.mouseData   = 0;  //todo: XBUTTON1/2 (XP feature) or wheel data
             hook.flags       = 0;  //todo: injected (LLMHF_INJECTED)
             hook.time        = winMsg->time;
@@ -512,16 +510,18 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             if(HOOK_CallHooksW( WH_MOUSE_LL, HC_ACTION, msg, (LPARAM)&hook)) {
                 goto dummymessage; //hook swallowed message
             }
+        }
+        MOUSEHOOKSTRUCT mousehk;
 
-            // Now inform the WH_MOUSE hook
-            mousehk.pt           = hook.pt;
-            mousehk.hwnd         = winMsg->hwnd;
-            mousehk.wHitTestCode = win32wnd->getLastHitTestVal();
-            mousehk.dwExtraInfo  = 0;
+        // Now inform the WH_MOUSE hook
+        mousehk.pt           = winMsg->pt;
+        mousehk.hwnd         = winMsg->hwnd;
+        mousehk.wHitTestCode = win32wnd->getLastHitTestVal();
+        mousehk.dwExtraInfo  = 0;
 
-            if(HOOK_CallHooksW( WH_MOUSE_W, HC_ACTION, msg, (LPARAM)&mousehk)) {
-                goto dummymessage; //hook swallowed message
-            }
+        if(HOOK_CallHooksW( WH_MOUSE_W, (fMsgRemoved == MSG_REMOVE) ? HC_ACTION : HC_NOREMOVE, winMsg->message, (LPARAM)&mousehk)) {
+            //TODO: WH_CBT HCBT_CLICKSKIPPED
+            goto dummymessage; //hook swallowed message
         }
         break;
     }
@@ -599,12 +599,10 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
                 goto dummymessage; //don't send mouse messages to disabled windows
             }
         }
+        MSLLHOOKSTRUCT hook;
         if(fMsgRemoved == MSG_REMOVE)
         {
-            MSLLHOOKSTRUCT hook;
-
-            hook.pt.x        = os2Msg->ptl.x & 0xFFFF;
-            hook.pt.y        = mapScreenY(os2Msg->ptl.y);
+            hook.pt          = winMsg->pt;
             hook.mouseData   = 0;
             hook.flags       = 0;  //todo: injected (LLMHF_INJECTED)
             hook.time        = winMsg->time;
@@ -613,6 +611,18 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             if(HOOK_CallHooksW( WH_MOUSE_LL, HC_ACTION, winMsg->message, (LPARAM)&hook)) {
                 goto dummymessage; //hook swallowed message
             }
+        }
+        MOUSEHOOKSTRUCT mousehk;
+
+        // Now inform the WH_MOUSE hook
+        mousehk.pt           = winMsg->pt;
+        mousehk.hwnd         = winMsg->hwnd;
+        mousehk.wHitTestCode = win32wnd->getLastHitTestVal();
+        mousehk.dwExtraInfo  = 0;
+
+        if(HOOK_CallHooksW( WH_MOUSE_W, (fMsgRemoved == MSG_REMOVE) ? HC_ACTION : HC_NOREMOVE, winMsg->message, (LPARAM)&mousehk)) 
+        {
+            goto dummymessage; //hook swallowed message
         }
         break;
     }
@@ -1040,6 +1050,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             if (fMsgRemoved == MSG_REMOVE)
             {
                     MSLLHOOKSTRUCT hook;
+                    MOUSEHOOKSTRUCT mousehk;
 
                     hook.pt.x       = os2Msg->ptl.x & 0xFFFF;
                     hook.pt.y       = mapScreenY(os2Msg->ptl.y);
