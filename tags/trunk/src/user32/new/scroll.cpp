@@ -1,3 +1,4 @@
+/* $Id: scroll.cpp,v 1.3 1999-07-23 16:46:29 cbratschi Exp $ */
 /*
  * Scrollbar control
  *
