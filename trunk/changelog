@@ -1,4 +1,9 @@
- /* $Id: changelog,v 1.1147 2000-09-26 09:08:26 bird Exp $ */
+ /* $Id: changelog,v 1.1148 2000-09-27 22:27:38 bird Exp $ */
+
+ 2000-09-28: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - INCLUDE\pdwin32.wat.tools:
+                Placed .asm and .orc before .cpp in the .SUFFIXES list
+                to be able to make resource objectfiles.
 
  2000-09-26: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - Win32k: Corrected H2INC path in the makefile.
