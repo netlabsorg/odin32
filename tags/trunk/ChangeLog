@@ -1,5 +1,13 @@
- /* $Id: ChangeLog,v 1.332 1999-10-17 12:19:13 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.333 1999-10-17 15:28:44 sandervl Exp $ */
 
+ 99-10-17: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Ported AdjustWindowRectEx from Wine (990815)
+                  Changed GetClientRect to return rectangle stored in 
+                  window object.
+                  Ported (Begin/End)DeferWindowPos from Wine (990815)
+                  Ported GetWindow from Wine (990815)
+                  Fixed dialog control creation bug (create ascii controls when
+                  parent window is ascii)
  99-10-17: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: replaced OS/2 scrollbars by WINE scrollbars
 		  BUG: SCROLL_RefreshScrollBar doesn't work
@@ -8,8 +16,8 @@
 		  pmframe: removed WinFillRect
 
  99-10-17: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
-    - KERNEL32: Removed exception throwing from Pe2Lx classes.
-                Implemented TLS support in Pe2Lx classes.
+     	- KERNEL32: Removed exception throwing from Pe2Lx classes.
+                    Implemented TLS support in Pe2Lx classes.
 
  99-10-16: Yuri Dario <mc6530@mclink.it>
 	- USER32: Button bugfix (BUTTON_CheckAutoRadioButton)
@@ -88,7 +96,7 @@
                   Only set FCF_TASKLIST bit when parent == desktop & window
                   has titlebar. (too many Opera windows in tasklist)
 		  Clear unsupported frame styles (i.e. no titlebar & minimize/maximize button)
-                  Fixed MapOS2ToWin32Rectl & GetWindowRect.
+                  Fixed MapOS2ToWin32Rectl & GetWindowRect. 
                   Removed code that adds bordersize during SetWindowPos & window
                   creation. Fixed listbox code instead. (use window rectangle
                   for SetWindowPos call, not client rectangle)
