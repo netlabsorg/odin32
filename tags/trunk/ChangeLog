@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.741 2000-02-21 17:17:35 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.742 2000-02-21 23:10:50 sandervl Exp $ */
+
+ 2000-02-21: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
+	- CRTDLL: Added wtol, wtoi, setsystime, getsystime
 
  2000-02-21: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: merged controls and nc code with Corel WINE 20000212
