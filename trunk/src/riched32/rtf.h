@@ -2,8 +2,13 @@
 #define _RTF
 
 #include <stdio.h>
-#include <windows.h>
-#include <richedit.h>
+
+#include "windef.h"
+#include "winbase.h"
+#include "wingdi.h"
+#include "winuser.h"
+#include "richedit.h"
+
 void RTFSetEditStream(EDITSTREAM *es);
 
 
@@ -427,6 +432,7 @@ extern int	rtfClass;		/* token class */
 extern int	rtfMajor;		/* token major number */
 extern int	rtfMinor;		/* token minor number */
 extern int	rtfParam;		/* control symbol parameter */
+extern int	rtfFormat;		/* either SF_RTF or SF_TEXT */
 
 # ifdef THINK_C
 # define	rtfNoParam	(-32768)	/* 16-bit max. neg. value */
@@ -1420,7 +1426,7 @@ RTFStyle	*RTFGetStyle ();
 char		*_RTFAlloc ();
 char		*RTFStrSave ();
 void		RTFFree ();
-int		RTFCharToHex ();
+int		RTFCharToHex (char);
 int		RTFHexToChar ();
 void		RTFSetMsgProc ();
 void		RTFSetPanicProc ();
