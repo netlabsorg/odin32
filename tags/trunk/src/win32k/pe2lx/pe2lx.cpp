@@ -1,4 +1,4 @@
-/* $Id: pe2lx.cpp,v 1.3 1999-10-14 01:15:13 bird Exp $
+/* $Id: pe2lx.cpp,v 1.4 1999-10-14 02:36:51 bird Exp $
  *
  * Pe2Lx class implementation. Ring 0 and Ring 3
  *
@@ -104,7 +104,7 @@
  */
 #ifdef RING0
     #define ReadAt(hFile, ulOffset, pvBuffer, cbToRead) \
-        _ldrRead(hFile, ulOffset, pvBuffer, 0UL, cbToRead)
+        _ldrRead(hFile, ulOffset, pvBuffer, 0UL, cbToRead, NULL)
     #define ReadAtF(hFile, ulOffset, pvBuffer, cbToRead, flFlags, pMTE) \
         _ldrRead(hFile, ulOffset, pvBuffer, flFlags, cbToRead, pMTE)
 #else
