@@ -1,4 +1,4 @@
-/* $Id: os2timer.cpp,v 1.6 1999-08-24 16:12:04 phaller Exp $ */
+/* $Id: os2timer.cpp,v 1.7 1999-08-24 21:21:11 phaller Exp $ */
 
 /*
  * OS/2 Timer class
@@ -21,6 +21,7 @@
 #include <process.h>
 #include "win32type.h"
 #include "wintimer.h"
+#include <wprocess.h>
 #include "os2timer.h"
 #include "misc.h"
 
@@ -162,43 +163,44 @@ void OS2Timer::KillTimer()
 //******************************************************************************
 void OS2Timer::TimerHandler()
 {
- ULONG   Count = 0;
- APIRET  rc = 0;       /* Return code  */
+  ULONG   Count = 0;
+  APIRET  rc = 0;       /* Return code  */
+  USHORT  selTIB;
 
-#ifdef DEBUG
-    WriteLog("TimerHandler thread created\n");
-#endif
-    rc = DosSetPriority (PRTYS_THREAD,        /* Change a single thread */
-                         PRTYC_TIMECRITICAL,  /* Time critical class    */
-                         0L,                  /* Increase by 15         */
-                         0L);                 /* Assume current thread  */
+  dprintf(("WINMM: TimerHandler thread created\n"));
 
-    rc = DosCreateEventSem(NULL, &TimerSem, DC_SEM_SHARED, 0);
+  rc = DosSetPriority (PRTYS_THREAD,        /* Change a single thread */
+                       PRTYC_TIMECRITICAL,  /* Time critical class    */
+                       0L,                  /* Increase by 15         */
+                       0L);                 /* Assume current thread  */
 
-    if(rc != 0)
-        _endthread();
+  rc = DosCreateEventSem(NULL, &TimerSem, DC_SEM_SHARED, 0);
 
-#ifdef DEBUG
-    WriteLog("Semaphore created\n");
-#endif
-    TimerStatus = Stopped;
+  if(rc != 0)
+      _endthread();
 
-    while(!fFatal) {
-        DosWaitEventSem(TimerSem, SEM_INDEFINITE_WAIT);
-        DosResetEventSem(TimerSem, &Count);
-        if(!fFatal) {
-#ifdef DEBUG
-////        WriteLog("T");
-#endif
+  dprintf(("WINMM: OS2Timer:Semaphore created\n"));
+
+  TimerStatus = Stopped;
+
+  while(!fFatal)
+  {
+    DosWaitEventSem(TimerSem, SEM_INDEFINITE_WAIT);
+    DosResetEventSem(TimerSem, &Count);
+    if(!fFatal)
+    {
         // @@@PH: we're calling the client with PRTYC_TIMECRITICAL !!!
         //        It'd be much nicer to call with original priority!
         // @@@PH: plus the original thread is supposed to stop while the
         //        time event is scheduled (DosSuspendThread()) ? It's
         //        much like raising a signal (SIGALARM)
+
+        selTIB = SetWin32TIB();
         clientCallback((UINT)this, 0, userData, 0, 0);
+        SetFS(selTIB);
     }
-    }
-    DosCloseEventSem(TimerSem);
+  }
+  DosCloseEventSem(TimerSem);
 }
 //******************************************************************************
 //******************************************************************************
