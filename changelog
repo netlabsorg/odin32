@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2360 2002-11-20 12:58:18 sandervl Exp $ */
+/* $Id: changelog,v 1.2361 2002-11-21 11:39:08 sandervl Exp $ */
+
+ 2002-11-21: Sander van Leeuwen <sandervl@innotek   >
+    - GDI32:    o Fixed bugs in MMX RGB 555<->565 conversion (leftovers)
 
  2002-11-20: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Ignore size changes when a window is minimized; save them
