@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.73 2001-10-26 15:53:22 phaller Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.74 2001-10-27 09:06:02 phaller Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -660,7 +660,7 @@ VirtualKeyFound:
           if (flags & KC_KEYUP)
           {
             winMsg->message = WINWM_SYSKEYUP;
-            winMsg->lParam |= 1 << 29;                              // bit 29, alt was pressed
+//            winMsg->lParam |= 1 << 29;                              // bit 29, alt was pressed
             winMsg->lParam |= 1 << 30;                              // bit 30, previous state, always 1 for a WM_KEYUP message
             winMsg->lParam |= 1 << 31;                              // bit 31, transition state, always 1 for WM_KEYUP
           }
@@ -924,6 +924,8 @@ BOOL OSLibWinTranslateMessage(MSG *msg)
     extramsg.lParam &= (0xDC00FFFF);
     extramsg.lParam |= (WINSCAN_ALTRIGHT & 0x1FF) << 16;
     extramsg.lParam |= WIN_KEY_EXTENDED;
+    if (!(fl & KC_KEYUP))
+      extramsg.lParam |= WIN_KEY_ALTHELD;
     
     // insert message into the queue
     setThreadQueueExtraCharMessage(teb, &extramsg);
