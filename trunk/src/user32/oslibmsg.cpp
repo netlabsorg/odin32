@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.69 2003-05-16 10:59:26 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.70 2003-05-27 10:52:25 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -306,15 +306,15 @@ BOOL OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMa
 continuegetmsg:
     if(hwnd) {
         filtermin = TranslateWinMsg(uMsgFilterMin, TRUE);
-            filtermax = TranslateWinMsg(uMsgFilterMax, FALSE);
-            if(filtermin > filtermax) {
-                ULONG tmp = filtermin;
-                    filtermin = filtermax;
-                    filtermax = filtermin;
-            }
+        filtermax = TranslateWinMsg(uMsgFilterMax, FALSE);
+        if(filtermin > filtermax) {
+            ULONG tmp = filtermin;
+            filtermin = filtermax;
+            filtermax = filtermin;
+        }
         do {
-                WinWaitMsg(teb->o.odin.hab, filtermin, filtermax);
-                rc = OSLibWinPeekMsg(pMsg, hwnd, uMsgFilterMin, uMsgFilterMax, PM_REMOVE_W, isUnicode);
+            WinWaitMsg(teb->o.odin.hab, filtermin, filtermax);
+            rc = OSLibWinPeekMsg(pMsg, hwnd, uMsgFilterMin, uMsgFilterMax, PM_REMOVE_W, isUnicode);
         }
         while(rc == FALSE);
 
@@ -470,21 +470,19 @@ continuepeekmsg:
         //to do so, we will translate each win32 message in the filter range and call WinPeekMsg
         ULONG ulPMFilter;
 
-        for(int i=0;i<uMsgFilterMax-uMsgFilterMin+1;i++) {
+        for(int i=0;i<uMsgFilterMax-uMsgFilterMin+1;i++) 
+        {
             rc = 0;
 
             ulPMFilter = TranslateWinMsg(uMsgFilterMin+i, TRUE, TRUE);
             if(ulPMFilter) {
-                do {
-                    rc = WinPeekMsg(teb->o.odin.hab, &os2msg, hwndOS2, ulPMFilter, ulPMFilter,
-                                    (fRemove & PM_REMOVE_W) ? PM_REMOVE : PM_NOREMOVE);
-                    //Sadly indeed WinPeekMsg sometimes does not filter well!
-                    if (rc && (os2msg.msg != ulPMFilter)) {// drop this message
-                       dprintf(("WARNING: WinPeekMsg returns %x even though we filter for %x", os2msg.msg, ulPMFilter));
-                       rc = 0;
-                    }
+                rc = WinPeekMsg(teb->o.odin.hab, &os2msg, hwndOS2, ulPMFilter, ulPMFilter,
+                                (fRemove & PM_REMOVE_W) ? PM_REMOVE : PM_NOREMOVE);
+                //Sadly indeed WinPeekMsg sometimes does not filter well!
+                if (rc && (os2msg.msg != ulPMFilter)) {// drop this message
+                   dprintf(("WARNING: WinPeekMsg returns %x even though we filter for %x", os2msg.msg, ulPMFilter));
+                   rc = 0;
                 }
-                while (rc);
             }
             if(rc) {
                 break;
