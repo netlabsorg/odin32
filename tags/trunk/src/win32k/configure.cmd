@@ -1,4 +1,4 @@
-/* $Id: configure.cmd,v 1.13 2000-12-11 06:27:57 bird Exp $
+/* $Id: configure.cmd,v 1.14 2000-12-12 19:09:48 bird Exp $
  *
  * Configuration script.
  * Generates makefile.inc and an empty .depend file.
@@ -26,7 +26,8 @@
     call SysFileDelete sIncFile;
 
     /* create empty .depend file */
-    'echo #run nmake dep > .depend'
+    call lineout '.depend', '# Run nmake dep'
+    call lineout '.depend'
 
     /* open target file */
     if (stream(sIncFile, 'c', 'open write' ) <> '') then
@@ -65,7 +66,7 @@
         call lineout sIncFile, '################################################################################'
         call lineout sIncFile, '# DDKPATH: base directory of ddk base. (ie. \DDK\BASE not \DDK for DDK v4.0+)'
         call lineout sIncFile, '################################################################################'
-        sDDK = SearchPaths('INCLUDE', '..\h\dhcalls.h', 'PATH', '..\h\dhcalls.h', 'BOOKSHELF', '..\h\dhcalls.h', 'Path to DDK "\BASE" directory (ie. F:\DDK\BASE):');
+        sDDK = SearchPaths('INCLUDE', '..\h\dhcalls.h', 'PATH', '..\h\dhcalls.h', 'BOOKSHELF', '..\base\.\h\dhcalls.h', 'Path to DDK "\BASE" directory (ie. F:\DDK\BASE):');
         call lineout sIncFile, 'DDKPATH          =' sDDK
         call lineout sIncFile, ''
 
@@ -154,44 +155,47 @@
  */
 SearchPaths: procedure expose fInteractive;
     i = 1;
-    sEnv  = arg(i);
-    sFile = arg(i+1);
     sPath = '';
-    do while (sPath == '' & sEnv <> '' & sFile <> '')
+
+    /*
+     * Search for the given environments/files combinations.
+     */
+    do i = 2 to arg() by 2
+        sEnv  = arg(i-1);
+        sFile = arg(i);
+        say i':' sEnv '-' sFile;
         sPath = SysSearchPath(sEnv, sFile);
-        /* debug: say 'sEnv:'sEnv 'sFile:'sFile 'sPath:'sPath 'i:'i */
-        i = i + 2;
-        if (arg() > i + 1) then
-        do
-            sEnv  = arg(i);
-            sFile = arg(i+1);
-        end
+        say 'SysSearchPath('sEnv',' sFile') ->' sPath;
+        if (sPath <> '') then
+           leave;
     end
 
-    if (sPath == '' & sEnv <> '' & sFile == '') then
-    do
-        say sEnv;
+    /* did we find it? */
+    if (sPath = '') then
+    do  /*
+         * If interactive mode, we'll ask for the the path, else skip it.
+         */
+        say arg(arg());
         if (fInteractive = 1) then
             sPath = linein();
         else
             say '!ignored!';
     end
     else
-    do
-        if (sPath <> '') then
-        do
-            /* look for ..\. */
-            i = lastpos('..\', sFile);
-            if (i <> 0) then
-                sFile = substr(sFile, i + 2);
+    do  /*
+         * Trim the result for the file part.
+         */
+        /* look for .\ or ..\ */
+        i = lastpos('.\', sFile);
+        if (i <> 0) then
+            sFile = substr(sFile, i + 1);
 
-            /* cut equally */
-            i = lastpos(sFile, sPath);
-            if i == 0 then
-                say '!error! sFile:'sFile  'sPath:'sPath;
-            /* debug: say 'sPath:'sPath  'sFile:'sFile */
-            sPath = substr(sPath, 1, i-1);
-        end
+        /* cut equally */
+        i = lastpos(sFile, sPath);
+        if (i = 0) then
+            say '!error! sFile:'sFile  'sPath:'sPath;
+        /* debug: say 'sPath:'sPath  'sFile:'sFile */
+        sPath = substr(sPath, 1, i-1);
     end
 
     return sPath;
