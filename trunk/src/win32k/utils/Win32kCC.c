@@ -1,4 +1,4 @@
-/* $Id: Win32kCC.c,v 1.12 2001-02-11 23:41:46 bird Exp $
+/* $Id: Win32kCC.c,v 1.13 2001-02-17 20:25:44 bird Exp $
  *
  * Win32CC - Win32k Control Center.
  *
@@ -21,18 +21,42 @@
 
 
 /*
+ * Notebook page constants.
+ */
+#define W32KCCPG_STATUS         0
+#define W32KCCPG_LOADERS        1
+#define W32KCCPG_LOGGING        2
+#define W32KCCPG_HEAPS          3
+#define W32KCCPG_LDRFIX         4
+#define W32KCCPG_MEMINFO        5
+#define W32KCCPG_PAGES          (W32KCCPG_MEMINFO+1)
+
+
+/*
  * Include defines
  */
 #define INCL_DOSERRORS
 #define INCL_DOSFILEMGR
 #define INCL_DOSRESOURCES
+#define INCL_DOSMISC
+
 #define INCL_WINERRORS
 #define INCL_WINDIALOGS
 #define INCL_WINMESSAGEMGR
 #define INCL_WINSTDSPIN
 #define INCL_WINBUTTONS
 #define INCL_WINWINDOWMGR
-#define INCL_DOSMISC
+#define INCL_WINSTDBOOK
+#define INCL_WINSYS
+#define INCL_WINTIMER
+
+#define INCL_WINACCELERATORS
+#define INCL_WINFRAMEMGR
+
+#define INCL_GPIPRIMITIVES
+#define INCL_GPILCIDS
+
+
 
 /*******************************************************************************
 *   Header Files                                                               *
@@ -52,19 +76,30 @@
 #include "Win32kCC.h"
 
 
-
 /*******************************************************************************
 *   Structures and Typedefs                                                    *
 *******************************************************************************/
-typedef struct _WIN32KCC
+typedef struct _Win32kCCPage
 {
+    ULONG   ulId;
     HWND    hwnd;
-    HAB     hab;
-    BOOL    fDirty;
+} WIN32KCCPAGE, *PWIN32KCCPAGE;
 
-    K32OPTIONS Options;
-    K32OPTIONS NewOptions;
-    K32STATUS  Status;
+typedef struct _Win32kCC
+{
+    HWND            hwnd;
+    HWND            hwndNtbk;
+    HAB             hab;
+    BOOL            fDirty;
+
+    K32OPTIONS      Options;
+    K32OPTIONS      NewOptions;
+    K32STATUS       Status;
+
+    ULONG           idMemTimer;         /* The Timer ID of the MemInfo Refresh Timer. */
+    K32SYSTEMMEMINFO MemInfo;           /* Current displayed meminfo. */
+
+    WIN32KCCPAGE    aPages[W32KCCPG_PAGES]; /* Array containing generic page info. */
 
 } WIN32KCC, *PWIN32KCC;
 
@@ -77,12 +112,25 @@ BOOL    fNotExit;                       /* Global variable used to stop WM_QUITS
                                          * loop will never exit, but ignore all
                                          * WM_QUITs.
                                          */
-
+BOOL    fOldNtbk;                       /* Set if we must use the old notebook
+                                         * style.
+                                         */
 
 /*******************************************************************************
 *   Internal Functions                                                         *
 *******************************************************************************/
-MRESULT EXPENTRY    Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
+MRESULT EXPENTRY    Win32kCCDlgProc (HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
+
+MRESULT EXPENTRY    LoadersDlgProc  (HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
+MRESULT EXPENTRY    LoggingDlgProc  (HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
+MRESULT EXPENTRY    StatusDlgProc   (HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
+MRESULT EXPENTRY    HeapsDlgProc    (HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
+MRESULT EXPENTRY    LdrFixDlgProc   (HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
+MRESULT EXPENTRY    MemInfoDlgProc  (HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
+
+MRESULT EXPENTRY    NtbkDefPageDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
+
+BOOL                SetDlgItemTextF(HWND hwndDlg, ULONG idItem, PSZ pszFormat, ...);
 ULONG               ShowMessage(HWND hwndOwner, int id, ULONG flStyle);
 BOOL                Complain(HWND hwndOwner, int id, ...);
 PCSZ                getLastErrorMsg(HAB hab);
@@ -107,6 +155,7 @@ int main(void)
     HMQ     hmq;
     ULONG   rc = 0;
     HWND    hwnd;
+    ULONG   aulVer[2];
 
     /*
      * Initialize PM.
@@ -145,12 +194,18 @@ int main(void)
     }
 
     /*
+     * Check version and set fOldNtbk accordingly.
+     */
+    fOldNtbk = (DosQuerySysInfo(QSV_VERSION_MAJOR, QSV_VERSION_MINOR, &aulVer, sizeof(aulVer))
+                || (aulVer[1] <= 20 && aulVer[0] < 40));
+
+    /*
      * Load the dialog.
      */
     hwnd = WinLoadDlg(HWND_DESKTOP, HWND_DESKTOP,
                       Win32kCCDlgProc,
                       NULLHANDLE,
-                      DL_WIN32KCC,
+                      fOldNtbk ? DL_WIN32KCC_OLD : DL_WIN32KCC,
                       NULL);
 
     /*
@@ -192,12 +247,13 @@ int main(void)
 #pragma info(noord) /*remove annoying (and possible incorrect) messages on the MP* macros */
 
 /**
- * Dialog procedure for the DL_WIN32KCC dialog.
+ * Dialog procedure for the DL_WIN32KCC notebook dialog.
  * (See PMREF for the general specifications of this function.)
  */
 MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 {
     PWIN32KCC   pThis;
+    int         i;
 
 
     /*
@@ -217,7 +273,7 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     switch (msg)
     {
         /*
-         * Sets the controls according to the data from win32k.
+         * Initialize the controls and trigger a setcontrol event.
          *
          * mr:  Focus changed or not.
          * mp1: hwnd of dialog
@@ -225,23 +281,31 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
          */
         case WM_INITDLG:
         {
-
-            /*
-             * Initiate controls (ie. behaviour not data).
-             *  - Ranges of the info level spinbuttons.
-             *  - Max length of the max heap size entry fields.
-             */
-            WinSendDlgItemMsg(hwnd, SB_LDR_PE_INFOLEVEL, SPBM_SETLIMITS, (MPARAM)4, (MPARAM)0);
-            WinSendDlgItemMsg(hwnd, SB_LDR_ELF_INFOLEVEL, SPBM_SETLIMITS, (MPARAM)4, (MPARAM)0);
-
-            WinSendDlgItemMsg(hwnd, SB_HEAP_RES_MAX, SPBM_SETLIMITS, (MPARAM)32678, (MPARAM)128);
-            WinSendDlgItemMsg(hwnd, SB_HEAP_SWP_MAX, SPBM_SETLIMITS, (MPARAM)32678, (MPARAM)128);
-
+            static struct _NtbkPage
+            {
+                PFNWP   pfnDlgProc;
+                ULONG   idDlg;
+                ULONG   idPage;
+            }   aPages[W32KCCPG_PAGES] =
+            {
+                { StatusDlgProc ,  PG_WIN32K_INFO_PAGE, W32KCCPG_STATUS },
+                { LoadersDlgProc,  DL_LOADERS_PAGE,     W32KCCPG_LOADERS},
+                { LoggingDlgProc,  DL_LOGGING_PAGE,     W32KCCPG_LOGGING},
+                { HeapsDlgProc  ,  DL_HEAPS_PAGE,       W32KCCPG_HEAPS  },
+                { LdrFixDlgProc ,  DL_LDRFIX_PAGE,      W32KCCPG_LDRFIX },
+                { MemInfoDlgProc , DL_MEMINFO_PAGE,     W32KCCPG_MEMINFO }
+            };
+            CHAR            szTabText[128];
+            PDLGTEMPLATE    pdlgt;
+            APIRET          rc;
+            RECTL           rectl;
+            SWP             swp;
+            SWP             swp2;
 
             /*
              * Init and set instance data.
              */
-            pThis = malloc(sizeof(*pThis));
+            pThis = calloc(sizeof(*pThis), 1);
             if (pThis == NULL)
             {
                 /* complain, dismiss and return. */
@@ -251,10 +315,11 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
             }
             pThis->hwnd = hwnd;
             pThis->hab = WinQueryAnchorBlock(hwnd);
+            pThis->hwndNtbk = WinWindowFromID(hwnd, DL_WIN32KCC_NTBK);
             if (!WinSetWindowPtr(hwnd, QWL_USER, pThis))
             {
                 /* complain, dismiss and return. */
-                Complain(hwnd, IDS_ERR_SET_INSTACEDATA,
+                Complain(hwnd, IDS_ERR_SET_INSTANCEDATA,
                          WinGetLastError(pThis->hab),
                          getLastErrorMsg(pThis->hab));
                 WinDismissDlg(hwnd, 0);
@@ -262,6 +327,172 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                 free(pThis);
                 return FALSE;
             }
+
+
+            /*
+             * Load and set accellerator table.
+             */
+            WinSetAccelTable(pThis->hab, WinLoadAccelTable(pThis->hab, NULLHANDLE, DL_WIN32KCC), hwnd);
+
+
+            /*
+             * Insert notebooks pages.
+             */
+            for (i = 0; i < W32KCCPG_PAGES; i++)
+            {
+                ULONG ulErrId = 0;
+                ULONG iPage = aPages[i].idPage;
+
+                rc = DosGetResource(NULLHANDLE, RT_DIALOG, aPages[i].idDlg, (PPVOID)(void*)&pdlgt);
+                if (rc)
+                {
+                    Complain(hwnd, IDS_ERR_FAILED_TO_LOAD_DLGT, aPages[i].idDlg, rc);
+                    WinPostMsg(hwnd, WM_QUIT, NULL, NULL);
+                    WinSendMsg(hwnd, WM_DESTROY, NULL, NULL);
+                    return FALSE;
+                }
+
+                pThis->aPages[iPage].hwnd =
+                    (HWND)WinLoadDlg(hwnd, HWND_DESKTOP, aPages[i].pfnDlgProc,
+                                     NULLHANDLE, aPages[i].idDlg, pThis);
+                if (pThis->aPages[iPage].hwnd != NULLHANDLE)
+                {
+                    /*
+                     * Resize the notebook according to the first page.
+                     *  Get the size of the page we're inserting
+                     *  Calc notebook size according to that page.
+                     *  Resize the notebook controll.
+                     *  Resize the dialog.
+                     *  Recalc page rectangle.
+                     */
+                    if (i == 0)
+                    {
+                        WinQueryWindowPos(pThis->aPages[iPage].hwnd, &swp);
+                        rectl.xLeft = rectl.yBottom = 0;
+                        rectl.xRight = swp.cx;
+                        rectl.yTop = swp.cy;
+                        WinSendMsg(pThis->hwndNtbk, BKM_CALCPAGERECT, &rectl, (MPARAM)FALSE);
+
+                        WinQueryWindowPos(pThis->hwndNtbk, &swp);
+                        WinSetWindowPos(pThis->hwndNtbk, NULLHANDLE,
+                                        0, 0,
+                                        rectl.xRight - rectl.xLeft,
+                                        rectl.yTop - rectl.yBottom,
+                                        SWP_SIZE);
+
+                        WinQueryWindowPos(hwnd, &swp2);
+                        WinSetWindowPos(hwnd, NULLHANDLE,
+                                        0, 0,
+                                        swp2.cx + (rectl.xRight - rectl.xLeft) - swp.cx,
+                                        swp2.cy + (rectl.yTop - rectl.yBottom) - swp.cy,
+                                        SWP_SIZE);
+                    }
+
+                    /*
+                     * Insert page.
+                     */
+                    pThis->aPages[iPage].ulId =
+                        (ULONG)WinSendMsg(pThis->hwndNtbk, BKM_INSERTPAGE, NULL,
+                                          MPFROM2SHORT(BKA_MAJOR | BKA_AUTOPAGESIZE, BKA_LAST));
+                    if (pThis->aPages[iPage].ulId != 0)
+                    {
+                        /*
+                         * Place the dialog into the page.
+                         */
+                        if (WinSendMsg(pThis->hwndNtbk, BKM_SETPAGEWINDOWHWND,
+                                       (MPARAM)pThis->aPages[iPage].ulId, (MPARAM)pThis->aPages[iPage].hwnd))
+                        {
+                            /*
+                             * Set tab text - use the title of the dialog.
+                             */
+                            szTabText[0] = '\0';
+                            if (   pdlgt != NULL && pdlgt->adlgti[0].cchText != 0
+                                && pdlgt->adlgti[0].offText != 0xFFFF && pdlgt->adlgti[0].offText != 0)
+                                strncat(szTabText, (char*)((unsigned)(pdlgt) + pdlgt->adlgti[0].offText), pdlgt->adlgti[0].cchText);
+                            WinSendMsg(pThis->hwndNtbk, BKM_SETTABTEXT, (MPARAM)pThis->aPages[iPage].ulId, &szTabText[0]);
+                        }
+                        else
+                            ulErrId = IDS_ERR_ADD_NTBK_PAGE_SET;
+                    }
+                    else
+                        ulErrId = IDS_ERR_ADD_NTBK_PAGE_INSERT;
+                }
+                else
+                    ulErrId = IDS_ERR_ADD_NTBK_PAGE_LOAD;
+
+                /* Check for error */
+                if (ulErrId)
+                {
+                    Complain(hwnd, ulErrId, aPages[i].idDlg,  WinGetLastError(pThis->hab), getLastErrorMsg(pThis->hab));
+                    WinPostMsg(hwnd, WM_QUIT, NULL, NULL);
+                    WinSendMsg(hwnd, WM_DESTROY, NULL, NULL);
+                    return FALSE;
+                }
+            }
+
+            if (fOldNtbk)
+            {
+                POINTL      ptl;
+                FONTMETRICS fm;
+
+                /*
+                 * If it's an old style dialog we'll have to resize the tabs.
+                 *      Hackish!!! Seems like I don't do this right!
+                 */
+                for (i = 0, ptl.x = 7, ptl.y = 7; i < W32KCCPG_PAGES; i++)
+                {
+                    BOOKTEXT    booktxt = {&szTabText[0], sizeof(szTabText)};
+                    if (pThis->aPages[i].hwnd == NULLHANDLE) continue;
+
+                    if (WinSendMsg(pThis->hwndNtbk, BKM_QUERYTABTEXT, (MPARAM)pThis->aPages[i].ulId, &booktxt))
+                    {
+                        POINTL aptl[TXTBOX_COUNT];
+                        if (GpiQueryTextBox(WinGetPS(pThis->hwndNtbk), strlen(booktxt.pString)+1, booktxt.pString, TXTBOX_COUNT, aptl))
+                        {
+                            if (ptl.x < abs(aptl[TXTBOX_BOTTOMRIGHT].x - aptl[TXTBOX_BOTTOMLEFT].x))
+                                ptl.x = abs(aptl[TXTBOX_BOTTOMRIGHT].x - aptl[TXTBOX_BOTTOMLEFT].x);
+                        }
+                    }
+                }
+                if (GpiQueryFontMetrics(WinGetPS(pThis->hwndNtbk), sizeof(fm), &fm))
+                    ptl.y = fm.lXHeight + fm.lEmHeight;
+
+
+                /*
+                 * Before we resize anything, we'll have to get the size of a page.
+                 * Change the tab size. This may effect the notebook page size.
+                 * Recalc new notebook size using old page size.
+                 * Addjust dialog window.
+                 * Addjust notebook control.
+                 */
+                WinQueryWindowPos(pThis->aPages[aPages[0].idPage].hwnd, &swp);
+
+                WinSendMsg(pThis->hwndNtbk, BKM_SETDIMENSIONS, MPFROM2SHORT(ptl.x, ptl.y), (MPARAM)BKA_MAJORTAB);
+
+                rectl.xLeft = swp.x;
+                rectl.yBottom = swp.y;
+                rectl.xRight = swp.cx - swp.x;
+                rectl.yTop = swp.cy - swp.y;
+                WinSendMsg(pThis->hwndNtbk, BKM_CALCPAGERECT, &rectl, (MPARAM)FALSE);
+                WinQueryWindowPos(hwnd, &swp);
+                WinQueryWindowPos(pThis->hwndNtbk, &swp2);
+                WinSetWindowPos(hwnd, NULLHANDLE, 0, 0,
+                                swp.cx + rectl.xRight - rectl.xLeft - swp2.cx,
+                                swp.cy + rectl.yTop - rectl.yBottom - swp2.cy,
+                                SWP_SIZE);
+                WinSetWindowPos(pThis->hwndNtbk, NULLHANDLE, 0, 0,
+                                rectl.xRight - rectl.xLeft,
+                                rectl.yTop - rectl.yBottom,
+                                SWP_SIZE);
+
+                /*
+                 * Set Status text background color to dialog background color.
+                 */
+                WinSendMsg(pThis->hwndNtbk, BKM_SETNOTEBOOKCOLORS,
+                           (MPARAM)SYSCLR_DIALOGBACKGROUND,
+                           (MPARAM)BKA_BACKGROUNDPAGECOLORINDEX);
+            }
+
 
             /*
              * Send a set controls message which gets data from
@@ -453,16 +684,20 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
             fNotExit = TRUE;
             WinSendMsg(hwnd, WM_COMMAND,
                        MPFROMSHORT(DID_OK), MPFROM2SHORT(CMDSRC_MENU, FALSE));
-            break;
+            return NULL;
 
 
         /*
          * Window is destroyed (last message which ever should reach us!)
+         *  -Free acceltable if present.
          *  -Free instance data
          *  -Set the instance data pointer to NULL (just in case).
          */
         case WM_DESTROY:
         {
+            HACCEL haccel = WinQueryAccelTable(pThis->hab, hwnd);
+            if (haccel)
+                WinDestroyAccelTable(haccel);
             free(pThis);
             WinSetWindowPtr(hwnd, QWL_USER, NULL);
             break;
@@ -480,9 +715,6 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         case WM_SETCONTROLS:
         {
             APIRET  rc;
-            CHAR    szNumber[32];
-            CHAR    szBuffer[100];
-
 
             /*
              * Call Win32k.sys to get options and statuses.
@@ -502,83 +734,15 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
             }
 
             /*
-             * Set the controls.
+             * Update the individual pages.
              */
-            /* win32k */
-            sprintf(szBuffer, "%d.%d", 0, pThis->Status.ulVersion);
-            WinSetDlgItemText(hwnd, TX_W32K_VERSION_VAL,        szBuffer);
-            sprintf(szBuffer, "%s %s", pThis->Status.szBuildTime, pThis->Status.szBuildDate);
-            WinSetDlgItemText(hwnd, TX_W32K_BUILD_DATETIME_VAL, szBuffer);
-            WinSetDlgItemText(hwnd, TX_W32K_SYMBOLFILE_VAL,     pThis->Status.szSymFile);
-            sprintf(szBuffer, "%d - ", pThis->Status.ulBuild);
-            if (GetFixpackDesc(pThis->Status.ulBuild, pThis->Status.fKernel, szBuffer + strlen(szBuffer)))
-                sprintf(szBuffer, "%d", pThis->Status.ulBuild);
-            WinSetDlgItemText(hwnd, TX_W32K_KERNELBUILD_VAL,    szBuffer);
+            for (i = 0; i < W32KCCPG_PAGES; i++)
+            {
+                if (pThis->aPages[i].hwnd != NULLHANDLE)
+                    WinSendMsg(pThis->aPages[i].hwnd, msg, mp1, mp2);
+            }
 
-            /* logging */
-            WinSendDlgItemMsg(hwnd, CB_LOGGING_ENABLED,     BM_SETCHECK,    (MPARAM)(pThis->Options.fLogging),                  NULL);
-            WinSendDlgItemMsg(hwnd, RB_LOGGING_COM1,        BM_SETCHECK,    (MPARAM)(pThis->Options.usCom == 0x3f8),            NULL);
-            WinSendDlgItemMsg(hwnd, RB_LOGGING_COM2,        BM_SETCHECK,    (MPARAM)(pThis->Options.usCom == 0x2f8),            NULL);
-            WinSendDlgItemMsg(hwnd, RB_LOGGING_COM3,        BM_SETCHECK,    (MPARAM)(pThis->Options.usCom == 0x3e8),            NULL);
-            WinSendDlgItemMsg(hwnd, RB_LOGGING_COM4,        BM_SETCHECK,    (MPARAM)(pThis->Options.usCom == 0x2e8),            NULL);
-
-            /* loaders */
-            WinSendDlgItemMsg(hwnd, CB_LDR_DISABLE_ALL,     BM_SETCHECK,    (MPARAM)(pThis->Options.fNoLoader),                  NULL);
-            /* PE */
-            WinSendDlgItemMsg(hwnd, RB_LDR_PE_PURE,         BM_SETCHECK,    (MPARAM)(pThis->Options.fPE == FLAGS_PE_PE2LX),     NULL);
-            WinSendDlgItemMsg(hwnd, RB_LDR_PE_MIXED,        BM_SETCHECK,    (MPARAM)(pThis->Options.fPE == FLAGS_PE_MIXED),     NULL);
-            WinSendDlgItemMsg(hwnd, RB_LDR_PE_PE,           BM_SETCHECK,    (MPARAM)(pThis->Options.fPE == FLAGS_PE_PE),        NULL);
-            WinSendDlgItemMsg(hwnd, RB_LDR_PE_NOT,          BM_SETCHECK,    (MPARAM)(pThis->Options.fPE == FLAGS_PE_NOT),       NULL);
-            WinSendDlgItemMsg(hwnd, CK_LDR_PE_ONEOBJECT,    BM_SETCHECK,    (MPARAM)(pThis->Options.fPEOneObject),              NULL);
-            WinSendDlgItemMsg(hwnd, SB_LDR_PE_INFOLEVEL,    SPBM_SETCURRENTVALUE, (MPARAM)(pThis->Options.ulInfoLevel),         NULL); /* FIXME to be changed */
-            sprintf(szNumber, "%d", pThis->Status.cPe2LxModules);
-            WinSetDlgItemText(hwnd, TX_LDR_PE_MODULES_VAL, szNumber);
-            /* Elf */
-            WinSendDlgItemMsg(hwnd, CB_LDR_ELF_ENABLED,     BM_SETCHECK,    (MPARAM)(pThis->Options.fElf),                      NULL);
-            WinSendDlgItemMsg(hwnd, SB_LDR_ELF_INFOLEVEL,   SPBM_SETCURRENTVALUE, (MPARAM)(pThis->Options.ulInfoLevel),         NULL); /* FIXME to be changed */
-            sprintf(szNumber, "%d", pThis->Status.cElf2LxModules);
-            WinSetDlgItemText(hwnd, TX_LDR_ELF_MODULES_VAL, szNumber);
-            /* UNIX Shell Scripts */
-            WinSendDlgItemMsg(hwnd, CB_LDR_SHELL_SCRIPTS,   BM_SETCHECK,    (MPARAM)(pThis->Options.fUNIXScript),               NULL);
-            /* JAVA */
-            WinSendDlgItemMsg(hwnd, CB_LDR_JAVA,            BM_SETCHECK,    (MPARAM)(pThis->Options.fJava),                     NULL);
-            /* REXX Scripts */
-            WinSendDlgItemMsg(hwnd, CB_LDR_REXX,            BM_SETCHECK,    (MPARAM)(pThis->Options.fREXXScript),               NULL);
-
-            /* OS/2 Loader Fixes */
-            WinSendDlgItemMsg(hwnd, CB_LDRFIX_DLLFIXES,     BM_SETCHECK,    (MPARAM)(pThis->Options.fDllFixes),                 NULL);
-            WinSendDlgItemMsg(hwnd, CB_LDRFIX_FORCEPRELOAD, BM_SETCHECK,    (MPARAM)(pThis->Options.fForcePreload),             NULL);
-
-            /* heaps */
-            /* Resident */
-            WinSendDlgItemMsg(hwnd, SB_HEAP_RES_MAX,        SPBM_SETCURRENTVALUE, (MPARAM)(pThis->Options.cbResHeapMax / 1024), NULL);
-            sprintf(szNumber, "%d", pThis->Status.cbResHeapInit / 1024);
-            WinSetDlgItemText(hwnd, TX_HEAP_RES_INIT_VAL,   szNumber);
-            sprintf(szNumber, "%d", pThis->Status.cbResHeapSize / 1024);
-            WinSetDlgItemText(hwnd, TX_HEAP_RES_SIZE_VAL,   szNumber);
-            sprintf(szNumber, "%d", pThis->Status.cbResHeapUsed / 1024);
-            WinSetDlgItemText(hwnd, TX_HEAP_RES_USED_VAL,   szNumber);
-            sprintf(szNumber, "%d", pThis->Status.cbResHeapFree / 1024);
-            WinSetDlgItemText(hwnd, TX_HEAP_RES_FREE_VAL,   szNumber);
-            sprintf(szNumber, "%d", pThis->Status.cResBlocksUsed);
-            WinSetDlgItemText(hwnd, TX_HEAP_RES_USED_BLOCKS_VAL,   szNumber);
-            sprintf(szNumber, "%d", pThis->Status.cResBlocksFree);
-            WinSetDlgItemText(hwnd, TX_HEAP_RES_FREE_BLOCKS_VAL,   szNumber);
-            /* Swappable */
-            WinSendDlgItemMsg(hwnd, SB_HEAP_SWP_MAX,        SPBM_SETCURRENTVALUE, (MPARAM)(pThis->Options.cbSwpHeapMax / 1024), NULL);
-            sprintf(szNumber, "%d", pThis->Status.cbSwpHeapInit / 1024);
-            WinSetDlgItemText(hwnd, TX_HEAP_SWP_INIT_VAL,   szNumber);
-            sprintf(szNumber, "%d", pThis->Status.cbSwpHeapSize / 1024);
-            WinSetDlgItemText(hwnd, TX_HEAP_SWP_SIZE_VAL,   szNumber);
-            sprintf(szNumber, "%d", pThis->Status.cbSwpHeapUsed / 1024);
-            WinSetDlgItemText(hwnd, TX_HEAP_SWP_USED_VAL,   szNumber);
-            sprintf(szNumber, "%d", pThis->Status.cbSwpHeapFree / 1024);
-            WinSetDlgItemText(hwnd, TX_HEAP_SWP_FREE_VAL,   szNumber);
-            sprintf(szNumber, "%d", pThis->Status.cSwpBlocksUsed);
-            WinSetDlgItemText(hwnd, TX_HEAP_SWP_USED_BLOCKS_VAL,   szNumber);
-            sprintf(szNumber, "%d", pThis->Status.cSwpBlocksFree);
-            WinSetDlgItemText(hwnd, TX_HEAP_SWP_FREE_BLOCKS_VAL,   szNumber);
-
+            /* Since all fields are update now - we can't be dirty any longer. */
             pThis->fDirty = FALSE;
             return NULL;
         }
@@ -600,9 +764,6 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
          */
         case WM_QUERYCONTROLS:
         {
-            BOOL        fComplain = (BOOL)mp1;
-            ULONG       ul;
-
             /*
              * Init temporary option struct.
              */
@@ -610,27 +771,138 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
             pThis->NewOptions.cb = sizeof(K32OPTIONS);
 
             /*
-             * Logging.
+             * Query the individual pages.
              */
-            pThis->NewOptions.fLogging = WinSendDlgItemMsg(hwnd, CB_LOGGING_ENABLED, BM_QUERYCHECK, NULL, NULL) != 0;
-            if (WinSendDlgItemMsg(hwnd, RB_LOGGING_COM1, BM_QUERYCHECK, NULL, NULL))
-                pThis->NewOptions.usCom = 0x3f8;
-            else if (WinSendDlgItemMsg(hwnd, RB_LOGGING_COM2, BM_QUERYCHECK, NULL, NULL))
-                pThis->NewOptions.usCom = 0x2f8;
-            else if (WinSendDlgItemMsg(hwnd, RB_LOGGING_COM3, BM_QUERYCHECK, NULL, NULL))
-                pThis->NewOptions.usCom = 0x3e8;
-            else if (WinSendDlgItemMsg(hwnd, RB_LOGGING_COM4, BM_QUERYCHECK, NULL, NULL))
-                pThis->NewOptions.usCom = 0x2e8;
-            else
+            for (i = 0; i < W32KCCPG_PAGES; i++)
             {
-                if (fComplain)
-                    Complain(hwnd, IDS_ERR_NO_COM_RADIOBUTTON);
-                return (MPARAM)FALSE;
+                if (pThis->aPages[i].hwnd != NULLHANDLE)
+                if (!WinSendMsg(pThis->aPages[i].hwnd, msg, mp1, mp2))
+                {
+                    WinSendMsg(pThis->hwndNtbk, BKM_TURNTOPAGE, (MPARAM)pThis->aPages[i].ulId, NULL);
+                    return (MPARAM)FALSE;
+                }
             }
 
             /*
-             * Loaders
+             * Check if there is any change and set the fDirty flag accordingly.
              */
+            pThis->fDirty = memcmp(&pThis->NewOptions, &pThis->Options, sizeof(K32OPTIONS)) != 0;
+            return (MPARAM)TRUE;
+        }
+
+        case WM_TRANSLATEACCEL:
+        {
+            break;
+        }
+    }
+
+    /*
+     * Return thru the default dialog procedure.
+     */
+    return WinDefDlgProc(hwnd, msg, mp1, mp2);
+}
+
+
+/**
+ * Dialog procedure for the DL_ dialog.
+ * (See PMREF for the general specifications of this function.)
+ */
+MRESULT EXPENTRY    LoadersDlgProc  (HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
+{
+    PWIN32KCC   pThis;
+
+
+    /*
+     * Get instance data pointer (pThis).
+     */
+    if (msg != WM_INITDLG)
+    {
+        pThis = (PWIN32KCC)WinQueryWindowPtr(hwnd, QWL_USER);
+        if (pThis == NULL)
+            return WinDefDlgProc(hwnd, msg, mp1, mp2);
+    }
+
+
+    /*
+     * Message switch.
+     */
+    switch (msg)
+    {
+        /*
+         * Initialize controls.
+         *
+         * mr:  Focus changed or not.
+         * mp1: hwnd of dialog
+         * mp2: (user data) (NULL)
+         */
+        case WM_INITDLG:
+        {
+            /*
+             * Initiate controls (ie. behaviour not data).
+             *  - Ranges of the info level spinbuttons.
+             */
+            WinSendDlgItemMsg(hwnd, SB_LDR_PE_INFOLEVEL, SPBM_SETLIMITS, (MPARAM)4, (MPARAM)0);
+            WinSendDlgItemMsg(hwnd, SB_LDR_ELF_INFOLEVEL, SPBM_SETLIMITS, (MPARAM)4, (MPARAM)0);
+            break;
+        }
+
+
+        /*
+         * Gets data from win32k.
+         * Sets the controls according to the data from win32k.
+         *
+         * mr:  reserved
+         * mp1: reserved
+         * mp2: reserved
+         */
+        case WM_SETCONTROLS:
+        {
+            CHAR    szNumber[32];
+
+            WinSendDlgItemMsg(hwnd, CB_LDR_DISABLE_ALL,     BM_SETCHECK,    (MPARAM)(pThis->Options.fNoLoader),                  NULL);
+            /* PE */
+            WinSendDlgItemMsg(hwnd, RB_LDR_PE_PURE,         BM_SETCHECK,    (MPARAM)(pThis->Options.fPE == FLAGS_PE_PE2LX),     NULL);
+            WinSendDlgItemMsg(hwnd, RB_LDR_PE_MIXED,        BM_SETCHECK,    (MPARAM)(pThis->Options.fPE == FLAGS_PE_MIXED),     NULL);
+            WinSendDlgItemMsg(hwnd, RB_LDR_PE_PE,           BM_SETCHECK,    (MPARAM)(pThis->Options.fPE == FLAGS_PE_PE),        NULL);
+            WinSendDlgItemMsg(hwnd, RB_LDR_PE_NOT,          BM_SETCHECK,    (MPARAM)(pThis->Options.fPE == FLAGS_PE_NOT),       NULL);
+            WinSendDlgItemMsg(hwnd, CK_LDR_PE_ONEOBJECT,    BM_SETCHECK,    (MPARAM)(pThis->Options.fPEOneObject),              NULL);
+            WinSendDlgItemMsg(hwnd, SB_LDR_PE_INFOLEVEL,    SPBM_SETCURRENTVALUE, (MPARAM)(pThis->Options.ulInfoLevel),         NULL); /* FIXME to be changed */
+            sprintf(szNumber, "%d", pThis->Status.cPe2LxModules);
+            WinSetDlgItemText(hwnd, TX_LDR_PE_MODULES_VAL, szNumber);
+            /* Elf */
+            WinSendDlgItemMsg(hwnd, CB_LDR_ELF_ENABLED,     BM_SETCHECK,    (MPARAM)(pThis->Options.fElf),                      NULL);
+            WinSendDlgItemMsg(hwnd, SB_LDR_ELF_INFOLEVEL,   SPBM_SETCURRENTVALUE, (MPARAM)(pThis->Options.ulInfoLevel),         NULL); /* FIXME to be changed */
+            sprintf(szNumber, "%d", pThis->Status.cElf2LxModules);
+            WinSetDlgItemText(hwnd, TX_LDR_ELF_MODULES_VAL, szNumber);
+            /* UNIX Shell Scripts */
+            WinSendDlgItemMsg(hwnd, CB_LDR_SHELL_SCRIPTS,   BM_SETCHECK,    (MPARAM)(pThis->Options.fUNIXScript),               NULL);
+            /* JAVA */
+            WinSendDlgItemMsg(hwnd, CB_LDR_JAVA,            BM_SETCHECK,    (MPARAM)(pThis->Options.fJava),                     NULL);
+            /* REXX Scripts */
+            WinSendDlgItemMsg(hwnd, CB_LDR_REXX,            BM_SETCHECK,    (MPARAM)(pThis->Options.fREXXScript),               NULL);
+            return NULL;
+        }
+
+
+        /*
+         * Validate data in the controls. Complains accoring to mp1.
+         * Put the data into the win32k option struct.
+         *
+         * mr:  Valid indicator.
+         *      TRUE:   Valid data.
+         *      FALSE:  Not valid data.
+         * mp1: BOOL fComplain.
+         *      TRUE:   Do complain about errors. The pThis->Options struct
+         *              is updated on successful return.
+         *      FALSE:  Do not complain about errors, and don't update the
+         *              pThis->Options struct.
+         * mp2: reserved.
+         */
+        case WM_QUERYCONTROLS:
+        {
+            BOOL    fComplain = (BOOL)mp1;
+            ULONG   ul;
+
             pThis->NewOptions.fNoLoader = WinSendDlgItemMsg(hwnd, CB_LDR_DISABLE_ALL, BM_QUERYCHECK, NULL, NULL) != 0;
             /* PE */
             if (WinSendDlgItemMsg(hwnd, RB_LDR_PE_PURE, BM_QUERYCHECK, NULL, NULL))
@@ -683,16 +955,261 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
             pThis->NewOptions.fJava = WinSendDlgItemMsg(hwnd, CB_LDR_JAVA, BM_QUERYCHECK, NULL, NULL) != 0;
             /* REXX Scripts */
             pThis->NewOptions.fREXXScript = WinSendDlgItemMsg(hwnd, CB_LDR_REXX, BM_QUERYCHECK, NULL, NULL) != 0;
+            return (MRESULT)TRUE;
+        }
+    }
+
+    return NtbkDefPageDlgProc(hwnd, msg, mp1, mp2);
+}
+
+
+/**
+ * Dialog procedure for the DL_ dialog.
+ * (See PMREF for the general specifications of this function.)
+ */
+MRESULT EXPENTRY    LoggingDlgProc  (HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
+{
+    PWIN32KCC   pThis;
+
+
+    /*
+     * Get instance data pointer (pThis).
+     */
+    if (msg != WM_INITDLG)
+    {
+        pThis = (PWIN32KCC)WinQueryWindowPtr(hwnd, QWL_USER);
+        if (pThis == NULL)
+            return WinDefDlgProc(hwnd, msg, mp1, mp2);
+    }
+
+
+    /*
+     * Message switch.
+     */
+    switch (msg)
+    {
+        /*
+         * Gets data from win32k.
+         * Sets the controls according to the data from win32k.
+         *
+         * mr:  reserved
+         * mp1: reserved
+         * mp2: reserved
+         */
+        case WM_SETCONTROLS:
+        {
+            WinSendDlgItemMsg(hwnd, CB_LOGGING_ENABLED,     BM_SETCHECK,    (MPARAM)(pThis->Options.fLogging),                  NULL);
+            WinSendDlgItemMsg(hwnd, RB_LOGGING_COM1,        BM_SETCHECK,    (MPARAM)(pThis->Options.usCom == 0x3f8),            NULL);
+            WinSendDlgItemMsg(hwnd, RB_LOGGING_COM2,        BM_SETCHECK,    (MPARAM)(pThis->Options.usCom == 0x2f8),            NULL);
+            WinSendDlgItemMsg(hwnd, RB_LOGGING_COM3,        BM_SETCHECK,    (MPARAM)(pThis->Options.usCom == 0x3e8),            NULL);
+            WinSendDlgItemMsg(hwnd, RB_LOGGING_COM4,        BM_SETCHECK,    (MPARAM)(pThis->Options.usCom == 0x2e8),            NULL);
+            return NULL;
+        }
+
+
+        /*
+         * Validate data in the controls. Complains accoring to mp1.
+         * Put the data into the win32k option struct.
+         *
+         * mr:  Valid indicator.
+         *      TRUE:   Valid data.
+         *      FALSE:  Not valid data.
+         * mp1: BOOL fComplain.
+         *      TRUE:   Do complain about errors. The pThis->Options struct
+         *              is updated on successful return.
+         *      FALSE:  Do not complain about errors, and don't update the
+         *              pThis->Options struct.
+         * mp2: reserved.
+         */
+        case WM_QUERYCONTROLS:
+        {
+            BOOL    fComplain = (BOOL)mp1;
+
+            pThis->NewOptions.fLogging = WinSendDlgItemMsg(hwnd, CB_LOGGING_ENABLED, BM_QUERYCHECK, NULL, NULL) != 0;
+            if (WinSendDlgItemMsg(hwnd, RB_LOGGING_COM1, BM_QUERYCHECK, NULL, NULL))
+                pThis->NewOptions.usCom = 0x3f8;
+            else if (WinSendDlgItemMsg(hwnd, RB_LOGGING_COM2, BM_QUERYCHECK, NULL, NULL))
+                pThis->NewOptions.usCom = 0x2f8;
+            else if (WinSendDlgItemMsg(hwnd, RB_LOGGING_COM3, BM_QUERYCHECK, NULL, NULL))
+                pThis->NewOptions.usCom = 0x3e8;
+            else if (WinSendDlgItemMsg(hwnd, RB_LOGGING_COM4, BM_QUERYCHECK, NULL, NULL))
+                pThis->NewOptions.usCom = 0x2e8;
+            else
+            {
+                if (fComplain)
+                    Complain(hwnd, IDS_ERR_NO_COM_RADIOBUTTON);
+                return (MPARAM)FALSE;
+            }
+            return (MRESULT)TRUE;
+        }
+    }
+
+    return NtbkDefPageDlgProc(hwnd, msg, mp1, mp2);
+}
+
+
+/**
+ * Dialog procedure for the DL_ dialog.
+ * (See PMREF for the general specifications of this function.)
+ */
+MRESULT EXPENTRY    StatusDlgProc   (HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
+{
+    PWIN32KCC   pThis;
+
+    /*
+     * Get instance data pointer (pThis).
+     */
+    if (msg != WM_INITDLG)
+    {
+        pThis = (PWIN32KCC)WinQueryWindowPtr(hwnd, QWL_USER);
+        if (pThis == NULL)
+            return WinDefDlgProc(hwnd, msg, mp1, mp2);
+    }
+
+
+    /*
+     * Message switch.
+     */
+    switch (msg)
+    {
+        /*
+         * Gets data from win32k.
+         * Sets the controls according to the data from win32k.
+         *
+         * mr:  reserved
+         * mp1: reserved
+         * mp2: reserved
+         */
+        case WM_SETCONTROLS:
+        {
+            CHAR    szBuffer[100];
 
             /*
-             * OS/2 Loader Fixes.
+             * Set the controls
              */
-            pThis->NewOptions.fDllFixes = WinSendDlgItemMsg(hwnd, CB_LDRFIX_DLLFIXES, BM_QUERYCHECK, NULL, NULL) != 0;
-            pThis->NewOptions.fForcePreload = WinSendDlgItemMsg(hwnd, CB_LDRFIX_FORCEPRELOAD, BM_QUERYCHECK, NULL, NULL) != 0;
+            sprintf(szBuffer, "%d.%d", 0, pThis->Status.ulVersion);
+            WinSetDlgItemText(hwnd, TX_W32K_VERSION_VAL,        szBuffer);
+            sprintf(szBuffer, "%s %s", pThis->Status.szBuildTime, pThis->Status.szBuildDate);
+            WinSetDlgItemText(hwnd, TX_W32K_BUILD_DATETIME_VAL, szBuffer);
+            WinSetDlgItemText(hwnd, TX_W32K_SYMBOLFILE_VAL,     pThis->Status.szSymFile);
+            sprintf(szBuffer, "%d - ", pThis->Status.ulBuild);
+            if (GetFixpackDesc(pThis->Status.ulBuild, pThis->Status.fKernel, szBuffer + strlen(szBuffer)))
+                sprintf(szBuffer, "%d", pThis->Status.ulBuild);
+            WinSetDlgItemText(hwnd, TX_W32K_KERNELBUILD_VAL,    szBuffer);
+            return NULL;
+        }
+    }
 
+    return NtbkDefPageDlgProc(hwnd, msg, mp1, mp2);
+}
+
+/**
+ * Dialog procedure for the DL_ dialog.
+ * (See PMREF for the general specifications of this function.)
+ */
+MRESULT EXPENTRY    HeapsDlgProc    (HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
+{
+    PWIN32KCC   pThis;
+
+
+    /*
+     * Get instance data pointer (pThis).
+     */
+    if (msg != WM_INITDLG)
+    {
+        pThis = (PWIN32KCC)WinQueryWindowPtr(hwnd, QWL_USER);
+        if (pThis == NULL)
+            return WinDefDlgProc(hwnd, msg, mp1, mp2);
+    }
+
+
+    /*
+     * Message switch.
+     */
+    switch (msg)
+    {
+        /*
+         * Initialize controls.
+         *
+         * mr:  Focus changed or not.
+         * mp1: hwnd of dialog
+         * mp2: (user data) (NULL)
+         */
+        case WM_INITDLG:
+        {
             /*
-             * Heaps
+             * Initiate controls (ie. behaviour not data).
+             *  - Max length of the max heap size entry fields.
              */
+            WinSendDlgItemMsg(hwnd, SB_HEAP_RES_MAX, SPBM_SETLIMITS, (MPARAM)32678, (MPARAM)128);
+            WinSendDlgItemMsg(hwnd, SB_HEAP_SWP_MAX, SPBM_SETLIMITS, (MPARAM)32678, (MPARAM)128);
+            break;
+        }
+
+
+        /*
+         * Gets data from win32k.
+         * Sets the controls according to the data from win32k.
+         *
+         * mr:  reserved
+         * mp1: reserved
+         * mp2: reserved
+         */
+        case WM_SETCONTROLS:
+        {
+            CHAR    szNumber[32];
+
+            /* Resident */
+            WinSendDlgItemMsg(hwnd, SB_HEAP_RES_MAX,        SPBM_SETCURRENTVALUE, (MPARAM)(pThis->Options.cbResHeapMax / 1024), NULL);
+            sprintf(szNumber, "%d", pThis->Status.cbResHeapInit / 1024);
+            WinSetDlgItemText(hwnd, TX_HEAP_RES_INIT_VAL,   szNumber);
+            sprintf(szNumber, "%d", pThis->Status.cbResHeapSize / 1024);
+            WinSetDlgItemText(hwnd, TX_HEAP_RES_SIZE_VAL,   szNumber);
+            sprintf(szNumber, "%d", pThis->Status.cbResHeapUsed / 1024);
+            WinSetDlgItemText(hwnd, TX_HEAP_RES_USED_VAL,   szNumber);
+            sprintf(szNumber, "%d", pThis->Status.cbResHeapFree / 1024);
+            WinSetDlgItemText(hwnd, TX_HEAP_RES_FREE_VAL,   szNumber);
+            sprintf(szNumber, "%d", pThis->Status.cResBlocksUsed);
+            WinSetDlgItemText(hwnd, TX_HEAP_RES_USED_BLOCKS_VAL,   szNumber);
+            sprintf(szNumber, "%d", pThis->Status.cResBlocksFree);
+            WinSetDlgItemText(hwnd, TX_HEAP_RES_FREE_BLOCKS_VAL,   szNumber);
+            /* Swappable */
+            WinSendDlgItemMsg(hwnd, SB_HEAP_SWP_MAX,        SPBM_SETCURRENTVALUE, (MPARAM)(pThis->Options.cbSwpHeapMax / 1024), NULL);
+            sprintf(szNumber, "%d", pThis->Status.cbSwpHeapInit / 1024);
+            WinSetDlgItemText(hwnd, TX_HEAP_SWP_INIT_VAL,   szNumber);
+            sprintf(szNumber, "%d", pThis->Status.cbSwpHeapSize / 1024);
+            WinSetDlgItemText(hwnd, TX_HEAP_SWP_SIZE_VAL,   szNumber);
+            sprintf(szNumber, "%d", pThis->Status.cbSwpHeapUsed / 1024);
+            WinSetDlgItemText(hwnd, TX_HEAP_SWP_USED_VAL,   szNumber);
+            sprintf(szNumber, "%d", pThis->Status.cbSwpHeapFree / 1024);
+            WinSetDlgItemText(hwnd, TX_HEAP_SWP_FREE_VAL,   szNumber);
+            sprintf(szNumber, "%d", pThis->Status.cSwpBlocksUsed);
+            WinSetDlgItemText(hwnd, TX_HEAP_SWP_USED_BLOCKS_VAL,   szNumber);
+            sprintf(szNumber, "%d", pThis->Status.cSwpBlocksFree);
+            WinSetDlgItemText(hwnd, TX_HEAP_SWP_FREE_BLOCKS_VAL,   szNumber);
+            return NULL;
+        }
+
+
+        /*
+         * Validate data in the controls. Complains accoring to mp1.
+         * Put the data into the win32k option struct.
+         *
+         * mr:  Valid indicator.
+         *      TRUE:   Valid data.
+         *      FALSE:  Not valid data.
+         * mp1: BOOL fComplain.
+         *      TRUE:   Do complain about errors. The pThis->Options struct
+         *              is updated on successful return.
+         *      FALSE:  Do not complain about errors, and don't update the
+         *              pThis->Options struct.
+         * mp2: reserved.
+         */
+        case WM_QUERYCONTROLS:
+        {
+            BOOL    fComplain = (BOOL)mp1;
+            ULONG   ul;
+
             /* Resident */
             if (!WinSendDlgItemMsg(hwnd, SB_HEAP_RES_MAX, SPBM_QUERYVALUE, (MPARAM)&ul, MPFROM2SHORT(0, SPBQ_UPDATEIFVALID)))
             {
@@ -715,21 +1232,381 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                 return (MPARAM)FALSE;
             }
             pThis->NewOptions.cbSwpHeapMax = ul*1024;
+            return (MRESULT)TRUE;
+        }
+    }
 
-            /*
-             * Check if there is any change and set the fDirty flag accordingly.
-             */
-            pThis->fDirty = memcmp(&pThis->NewOptions, &pThis->Options, sizeof(K32OPTIONS)) != 0;
-            return (MPARAM)TRUE;
+    return NtbkDefPageDlgProc(hwnd, msg, mp1, mp2);
+}
+
+
+/**
+ * Dialog procedure for the DL_ dialog.
+ * (See PMREF for the general specifications of this function.)
+ */
+MRESULT EXPENTRY    LdrFixDlgProc   (HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
+{
+    PWIN32KCC   pThis;
+
+
+    /*
+     * Get instance data pointer (pThis).
+     */
+    if (msg != WM_INITDLG)
+    {
+        pThis = (PWIN32KCC)WinQueryWindowPtr(hwnd, QWL_USER);
+        if (pThis == NULL)
+            return WinDefDlgProc(hwnd, msg, mp1, mp2);
+    }
+
+
+    /*
+     * Message switch.
+     */
+    switch (msg)
+    {
+        /*
+         * Gets data from win32k.
+         * Sets the controls according to the data from win32k.
+         *
+         * mr:  reserved
+         * mp1: reserved
+         * mp2: reserved
+         */
+        case WM_SETCONTROLS:
+        {
+            WinSendDlgItemMsg(hwnd, CB_LDRFIX_DLLFIXES,     BM_SETCHECK,    (MPARAM)(pThis->Options.fDllFixes),                 NULL);
+            WinSendDlgItemMsg(hwnd, CB_LDRFIX_FORCEPRELOAD, BM_SETCHECK,    (MPARAM)(pThis->Options.fForcePreload),             NULL);
+            return NULL;
         }
 
 
+        /*
+         * Validate data in the controls. Complains accoring to mp1.
+         * Put the data into the win32k option struct.
+         *
+         * mr:  Valid indicator.
+         *      TRUE:   Valid data.
+         *      FALSE:  Not valid data.
+         * mp1: BOOL fComplain.
+         *      TRUE:   Do complain about errors. The pThis->Options struct
+         *              is updated on successful return.
+         *      FALSE:  Do not complain about errors, and don't update the
+         *              pThis->Options struct.
+         * mp2: reserved.
+         */
+        case WM_QUERYCONTROLS:
+        {
+            pThis->NewOptions.fDllFixes = WinSendDlgItemMsg(hwnd, CB_LDRFIX_DLLFIXES, BM_QUERYCHECK, NULL, NULL) != 0;
+            pThis->NewOptions.fForcePreload = WinSendDlgItemMsg(hwnd, CB_LDRFIX_FORCEPRELOAD, BM_QUERYCHECK, NULL, NULL) != 0;
+            pThis->NewOptions.fExeFixes = pThis->Options.fExeFixes;
+            return (MRESULT)TRUE;
+        }
     }
 
+    return NtbkDefPageDlgProc(hwnd, msg, mp1, mp2);
+}
+
+
+/**
+ * Dialog procedure for the DL_ dialog.
+ * (See PMREF for the general specifications of this function.)
+ */
+MRESULT EXPENTRY    MemInfoDlgProc  (HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
+{
+    PWIN32KCC   pThis;
+
+
     /*
-     * Return thru the default dialog procedure.
+     * Get instance data pointer (pThis).
      */
+    if (msg != WM_INITDLG)
+    {
+        pThis = (PWIN32KCC)WinQueryWindowPtr(hwnd, QWL_USER);
+        if (pThis == NULL)
+            return WinDefDlgProc(hwnd, msg, mp1, mp2);
+    }
+
+
+    /*
+     * Message switch.
+     */
+    switch (msg)
+    {
+        /*
+         * Start timer.
+         *
+         * mr:  Focus changed or not.
+         * mp1: hwnd of dialog
+         * mp2: (user data) (pThis for notebook)
+         */
+        case WM_INITDLG:
+        {
+            pThis = (PWIN32KCC)mp2;
+            WinEnableWindow(WinWindowFromID(hwnd, TX_MEMINFO_PAGE_ENABLED), FALSE);
+            pThis->idMemTimer = WinStartTimer(pThis->hab, hwnd, 42, 1000);
+            if (!pThis->idMemTimer)
+                Complain(hwnd, IDS_ERR_TIMER_START, WinGetLastError(pThis->hab), getLastErrorMsg(pThis->hab));
+            memset(&pThis->MemInfo, -1, sizeof(pThis->MemInfo)); /* Force update of everything. */
+            break;                      /* not return, break thru the ntbk page default procedure. */
+        }
+
+
+        /*
+         * We've started a timer for refreshing the memory data.
+         *
+         * mr:  reserved
+         * mp1: Id of the timer which is ticking.
+         * mp2: reserved
+         */
+        case WM_TIMER:
+        {
+            if ((ULONG)mp1 != pThis->idMemTimer)
+                return NULL;
+
+            /* intented fallthru to WM_SETCONTROLS */
+        }
+
+
+        /*
+         * Save old data.
+         * Gets system meminfo data from win32k.
+         * Updated changed values.
+         * Update pThis with new meminfo.
+         *
+         * mr:  reserved
+         * mp1: reserved
+         * mp2: reserved
+         */
+        case WM_SETCONTROLS:
+        {
+            K32SYSTEMMEMINFO    MemInfo;
+            K32SYSTEMMEMINFO    OldMemInfo;
+            APIRET              rc;
+
+            OldMemInfo = pThis->MemInfo;
+            MemInfo.cb = sizeof(MemInfo);
+            MemInfo.flFlags = 0;
+            rc = W32kQuerySystemMemInfo(&MemInfo);
+            if (rc)
+            {
+                WinStopTimer(pThis->hab, hwnd, pThis->idMemTimer);
+                break;
+            }
+
+            if (MemInfo.cbSwapFileSize != OldMemInfo.cbSwapFileSize)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_SWAP_SIZE       , "%d", MemInfo.cbSwapFileSize / 1024);
+            if (MemInfo.cbSwapFileAvail != OldMemInfo.cbSwapFileAvail)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_SWAP_AVAIL      , "%d", MemInfo.cbSwapFileAvail / 1024);
+            if (MemInfo.cbSwapFileUsed != OldMemInfo.cbSwapFileUsed)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_SWAP_USED       , "%d", MemInfo.cbSwapFileUsed / 1024);
+            if (MemInfo.cbSwapFileMinFree != OldMemInfo.cbSwapFileMinFree)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_SWAP_MINFREE    , "%d", MemInfo.cbSwapFileMinFree / 1024);
+            if (MemInfo.cbSwapFileCFGMinFree != OldMemInfo.cbSwapFileCFGMinFree)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_SWAP_CFG_MINFREE, "%d", MemInfo.cbSwapFileCFGMinFree / 1024);
+            if (MemInfo.cbSwapFileCFGSwapSize != OldMemInfo.cbSwapFileCFGSwapSize)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_SWAP_CFG_SIZE   , "%d", MemInfo.cbSwapFileCFGSwapSize / 1024);
+            if (MemInfo.cSwapFileBrokenDF != OldMemInfo.cSwapFileBrokenDF)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_SWAP_BROKEN_DFS , "%d", MemInfo.cSwapFileBrokenDF);
+            if (MemInfo.cSwapFileGrowFails != OldMemInfo.cSwapFileGrowFails)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_SWAP_GROW_FAILS , "%d", MemInfo.cSwapFileGrowFails);
+            if (MemInfo.cSwapFileInMemFile != OldMemInfo.cSwapFileInMemFile)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_SWAP_DFS_IN_MEMFILE, "%d", MemInfo.cSwapFileInMemFile);
+
+            if (MemInfo.cbPhysSize != OldMemInfo.cbPhysSize)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_PHYS_SIZE , "%d", MemInfo.cbPhysSize / 1024);
+            if (MemInfo.cbPhysAvail != OldMemInfo.cbPhysAvail)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_PHYS_AVAIL, "%d", MemInfo.cbPhysAvail / 1024);
+            if (MemInfo.cbPhysUsed != OldMemInfo.cbPhysUsed)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_PHYS_USED , "%d", MemInfo.cbPhysUsed / 1024);
+            if (MemInfo.fPagingSwapEnabled != OldMemInfo.fPagingSwapEnabled)
+                WinSendDlgItemMsg(hwnd, TX_MEMINFO_PAGE_ENABLED, BM_SETCHECK, (MPARAM)MemInfo.fPagingSwapEnabled, NULL);
+            if (MemInfo.cPagingPageFaults != OldMemInfo.cPagingPageFaults)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_PAGE_FAULTS   , "%d", MemInfo.cPagingPageFaults);
+            if (MemInfo.cPagingPageFaultsActive != OldMemInfo.cPagingPageFaultsActive)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_PAGE_FAULTS_ACTIVE, "%d", MemInfo.cPagingPageFaultsActive);
+            if (MemInfo.cPagingPhysPages != OldMemInfo.cPagingPhysPages)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_PAGE_PHYSPAGES, "%d", MemInfo.cPagingPhysPages);
+            if (MemInfo.cPagingResidentPages != OldMemInfo.cPagingResidentPages)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_PAGE_RESPAGES , "%d", MemInfo.cPagingResidentPages);
+            if (MemInfo.cPagingSwappablePages != OldMemInfo.cPagingSwappablePages)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_PAGE_SWAPPAGES, "%d", MemInfo.cPagingSwappablePages);
+            if (MemInfo.cPagingDiscardablePages != OldMemInfo.cPagingDiscardablePages)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_PAGE_DISCPAGES, "%d", MemInfo.cPagingDiscardablePages);
+            if (MemInfo.cPagingDiscardableInmem != OldMemInfo.cPagingDiscardableInmem)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_PAGE_DISCINMEM, "%d", MemInfo.cPagingDiscardableInmem);
+
+            if (MemInfo.ulAddressLimit != OldMemInfo.ulAddressLimit)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_VM_ADDRESSLIMIT, "%08xh", MemInfo.ulAddressLimit);
+            if (MemInfo.ulVMArenaSharedMin != OldMemInfo.ulVMArenaSharedMin)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_VM_SHARED_MIN  , "%08xh", MemInfo.ulVMArenaSharedMin);
+            if (MemInfo.ulVMArenaSharedMax != OldMemInfo.ulVMArenaSharedMax)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_VM_SHARED_MAX  , "%08xh", MemInfo.ulVMArenaSharedMax);
+            if (MemInfo.ulVMArenaPrivMax != OldMemInfo.ulVMArenaPrivMax)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_VM_PRIVATE_MAX , "%08xh", MemInfo.ulVMArenaPrivMax);
+            if (MemInfo.ulVMArenaSystemMin != OldMemInfo.ulVMArenaSystemMin)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_VM_SYSTEM_MIN  , "%08xh", MemInfo.ulVMArenaSystemMin);
+            if (MemInfo.ulVMArenaSystemMax != OldMemInfo.ulVMArenaSystemMax)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_VM_SYSTEM_MAX  , "%08xh", MemInfo.ulVMArenaSystemMax);
+            if (MemInfo.ulVMArenaHighPrivMax != OldMemInfo.ulVMArenaHighPrivMax)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_VM_PRIVATE_HMAX, "%08xh", MemInfo.ulVMArenaHighPrivMax);
+            if (MemInfo.ulVMArenaHighSharedMin != OldMemInfo.ulVMArenaHighSharedMin)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_VM_SHARED_HMIN , "%08xh", MemInfo.ulVMArenaHighSharedMin);
+            if (MemInfo.ulVMArenaHighSharedMax != OldMemInfo.ulVMArenaHighSharedMax)
+                SetDlgItemTextF(hwnd, TX_MEMINFO_VM_SHARED_HMAX , "%08xh", MemInfo.ulVMArenaHighSharedMax);
+
+            pThis->MemInfo = MemInfo;
+            return NULL;
+        }
+
+        /*
+         * Cleanup.
+         *
+         * mr:  reserved
+         * mp1: reserved
+         * mp2: reserved
+         */
+        case WM_DESTROY:
+        {
+            WinStopTimer(pThis->hab, hwnd, pThis->idMemTimer);
+            break;
+        }
+
+    }
+
+    return NtbkDefPageDlgProc(hwnd, msg, mp1, mp2);
+}
+
+
+
+/**
+ * Default notebook page dialog procedure.
+ * (See PMREF for the general specifications of this function.)
+ */
+MRESULT EXPENTRY    NtbkDefPageDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
+{
+    /*
+     * Message switch.
+     */
+    switch (msg)
+    {
+        /*
+         * Sets the controls according to the data from win32k.
+         *
+         * mr:  Focus changed or not.
+         * mp1: hwnd of dialog
+         * mp2: (user data) (pThis for notebook)
+         */
+        case WM_INITDLG:
+        {
+            PWIN32KCC   pThis = (PWIN32KCC)mp2;
+
+            if (!WinSetWindowPtr(hwnd, QWL_USER, mp2))
+            {
+                /* complain, dismiss and return. */
+                Complain(hwnd, IDS_ERR_SET_INSTANCEDATA,
+                         WinGetLastError(pThis->hab),
+                         getLastErrorMsg(pThis->hab));
+                WinPostMsg(hwnd, WM_QUIT, NULL, NULL);
+                return FALSE;
+            }
+
+            /*
+             * Install same acceltable as the notebook - Don't work.
+             */
+            WinSetAccelTable(pThis->hab, WinQueryAccelTable(pThis->hab, pThis->hwnd), hwnd);
+            break;
+        }
+
+
+        /*
+         * Gets data from win32k.
+         * Sets the controls according to the data from win32k.
+         *
+         * mr:  reserved
+         * mp1: reserved
+         * mp2: reserved
+         */
+        case WM_SETCONTROLS:
+        {
+            return NULL;
+        }
+
+
+        /*
+         * Validate data in the controls. Complains accoring to mp1.
+         * Put the data into the win32k option struct.
+         *
+         * mr:  Valid indicator.
+         *      TRUE:   Valid data.
+         *      FALSE:  Not valid data.
+         * mp1: BOOL fComplain.
+         *      TRUE:   Do complain about errors. The pThis->Options struct
+         *              is updated on successful return.
+         *      FALSE:  Do not complain about errors, and don't update the
+         *              pThis->Options struct.
+         * mp2: reserved.
+         */
+        case WM_QUERYCONTROLS:
+        {
+            return (MRESULT)TRUE;
+        }
+
+
+        #if 0
+        /*
+         * Nice little hack to get global notebook accelerators to work.
+         *
+         * mr:
+         *
+         */
+        case WM_TRANSLATEACCEL:
+        {
+            static BOOL fSem = FALSE;
+            MRESULT     mr;
+            PWIN32KCC   pThis = (PWIN32KCC)WinQueryWindowPtr(hwnd, QWL_USER);
+            if (fSem || !pThis)
+                return FALSE;
+            fSem = TRUE;
+            mr = WinSendMsg(pThis->hwnd, msg, mp1, mp2);
+            fSem = FALSE;
+            return mr;
+        }
+        #endif
+    }
+
     return WinDefDlgProc(hwnd, msg, mp1, mp2);
+}
+
+/**
+ * Spirintf version of WinSetDlgItemText.
+ * @returns Same as WinSetDlgItemText.
+ * @param   hwndDlg     Dialog Window Handle.
+ * @param   idItem      Control ID.
+ * @param   pszFormat   Pointer to format string. (input to sprintf)
+ * @param   ..          Additional parameters.
+ * @status  completly implemented.
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ */
+BOOL    SetDlgItemTextF(HWND hwndDlg, ULONG idItem, PSZ pszFormat, ...)
+{
+    BOOL    fRc;
+    char    sz[64];
+    va_list arg;
+
+    #pragma info(none)
+    va_start(arg, pszFormat);
+    #pragma info(restore)
+    vsprintf(sz, pszFormat, arg);
+    va_end(arg);
+
+    fRc = WinSetDlgItemText(hwndDlg, idItem, sz);
+    #ifdef DEBUG
+    if (!fRc)
+        Complain(hwndDlg, IDS_ERR_ASSERT, __FILE__, __LINE__, __FUNCTION__);
+    #endif
+
+    return fRc;
 }
 
 
@@ -952,6 +1829,8 @@ static char *stristr(const char *pszStr, const char *pszSubStr)
         pszStr++;
     }
 
+    #pragma info(none)
     return (char*)(*pszStr != '\0' ? (const char*)pszStr - 1 : (const char*)NULL);
+    #pragma info(restore)
 }
 
