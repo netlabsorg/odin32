@@ -1,4 +1,4 @@
-/* $Id: shell32_En.orc,v 1.1 2002-06-08 07:27:00 sandervl Exp $ */
+/* $Id: shell32_En.orc,v 1.2 2002-06-11 06:30:56 sandervl Exp $ */
 LANGUAGE LANG_ENGLISH, SUBLANG_DEFAULT
 
 #if 1
@@ -28,6 +28,20 @@ FONT 10, "System"
  LTEXT "Odin was brought to you by:", 98, 8, 55, 137, 10
 }
 #endif
+
+SHELL_RUN_DLG DIALOG LOADONCALL MOVEABLE DISCARDABLE 0, 0, 227, 95
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION ""
+FONT 8, "Helv"
+{
+ ICON "", 12297, 7, 11, 18, 20, WS_VISIBLE
+ LTEXT "Type the name of a program, folder, document, or Internet resource, and Wine will open it for you.", 12289, 36, 11, 182, 18
+ LTEXT "&Open:", 12305, 7, 39, 24, 10
+ CONTROL "", 12298, "COMBOBOX", WS_GROUP | WS_VSCROLL | WS_VISIBLE | CBS_DISABLENOSCROLL | CBS_AUTOHSCROLL | CBS_DROPDOWN, 36, 37, 183, 100
+ DEFPUSHBUTTON "OK", IDOK, 62, 63, 50, 14, WS_TABSTOP
+ PUSHBUTTON "Cancel", IDCANCEL, 116, 63, 50, 14, WS_TABSTOP
+ PUSHBUTTON "&Browse...", 12288, 170, 63, 50, 14, WS_TABSTOP
+}
 
 /*      columns in the shellview        */
 STRINGTABLE LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
