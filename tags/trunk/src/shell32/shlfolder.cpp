@@ -1,4 +1,4 @@
-/* $Id: shlfolder.cpp,v 1.12 2000-03-29 15:24:06 cbratschi Exp $ */
+/* $Id: shlfolder.cpp,v 1.13 2000-04-02 15:12:48 cbratschi Exp $ */
 /*
  * Shell Folder stuff
  *
@@ -811,7 +811,7 @@ static HRESULT WINAPI  IShellFolder_fnCompareIDs(
      {
        _ILSimpleGetText(pidl1, szTemp1, MAX_PATH);
        _ILSimpleGetText(pidl2, szTemp2, MAX_PATH);
-       nReturn = strcmp(szTemp1, szTemp2);
+       nReturn = strcmpi(szTemp1, szTemp2);
 
        if (nReturn == 0)                          /* first pidl different ? */
        {
