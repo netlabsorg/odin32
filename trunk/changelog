@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.1970 2002-02-11 14:02:55 sandervl Exp $ */
+/* $Id: changelog,v 1.1971 2002-02-12 11:58:38 sandervl Exp $ */
+
+ 2002-02-11: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32/USER32:
+                o Moved Char*, IsChar*, Oem* functions to kernel32
+                  (forwarders in user32)
 
  2002-02-10: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Extended logging added
