@@ -1,4 +1,11 @@
- /* $Id: changelog,v 1.481 1999-11-29 00:07:58 bird Exp $ */
+ /* $Id: changelog,v 1.482 1999-11-29 00:37:09 bird Exp $ */
+
+ 99-11-29: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
+    - ODINCRT:  Added experimental console hack in initterm.cpp.
+    - PE2LX:    Kernel32.dll is the first entry import module name table.
+                This makes kernel32.dll init first.
+    - KERNEL32: Odincrt.lib is the first library to be included during linking.
+                This hopefully will make odincrt init first.
 
  99-11-29: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
     - KERNEL32: Implemented EnumResourceNamesA/W. Added a test
