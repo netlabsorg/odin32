@@ -1,4 +1,4 @@
-# $Id: odin32.tools.vac3.mk,v 1.7 2001-09-30 09:46:17 bird Exp $
+# $Id: odin32.tools.vac3.mk,v 1.8 2002-04-11 22:47:49 bird Exp $
 
 #
 # Odin32 API
@@ -25,7 +25,11 @@ MAKE_CMD    = nmake /nologo CUSTOMBUILD=1
 MAKE_CMD    = $(MAKE_CMD) DEBUG=1
 !endif
 !ifdef PROFILE
-MAKE_CMD    = $(MAKE_CMD) DEBUG=1 PROFILE=1
+!ifdef DEBUG
+MAKE_CMD    = $(MAKE_CMD) PROFILE=1 DEBUG=1
+!else
+MAKE_CMD    = $(MAKE_CMD) PROFILE=1
+!endif
 !endif
 !ifdef NODEBUGINFO
 MAKE_CMD    = $(MAKE_CMD) NODEBUGINFO=1
