@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.17 2000-03-06 23:38:49 bird Exp $
+# $Id: makefile,v 1.18 2000-07-19 19:05:11 sandervl Exp $
 
 #
 # Odin32 API
@@ -25,9 +25,17 @@ CXXFLAGS    = $(CXXFLAGS_ODINCRT)
 IMPLIBFLAGS = $(IMPLIBFLAGS) /NOIgnoreCase
 
 !ifdef VAC36
+!ifdef DEBUG
+RUNTIMELIBDEF   = odin36d.def
+!else
 RUNTIMELIBDEF   = odin36.def
+!endif
+!else
+!ifdef DEBUG
+RUNTIMELIBDEF   = odincrtd.def
 !else
 RUNTIMELIBDEF   = odincrt.def
+!endif
 !endif
 
 
@@ -41,7 +49,7 @@ $(OBJDIR)\file.obj
 
 
 # Target name - name of the dll without extention and path.
-TARGET = odincrt
+TARGET = $(ODINCRT)
 
 
 # All rule - build objs, target dll, copies dll to bin and makes libs.

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.26 2000-06-14 13:17:50 sandervl Exp $
+# $Id: makefile,v 1.27 2000-07-19 19:05:06 sandervl Exp $
 
 #
 # Odin32 API
@@ -19,7 +19,6 @@ PDWIN32_TOOLS   = ..\..\tools\bin
 
 # Flag overloads and local macros.
 CLEANEXTRAS = gdi32rsrc.asm
-
 
 # Object files. All objects should be prefixed with $(OBJDIR)!
 OBJS = \
@@ -74,7 +73,7 @@ $(OBJS)
 $(PDWIN32_LIB)/pmwinx.lib
 $(PDWIN32_LIB)/kernel32.lib
 $(PDWIN32_LIB)/user32.lib
-$(PDWIN32_LIB)/odincrt.lib
+$(PDWIN32_LIB)/$(ODINCRT).lib
 OS2386.LIB
 $(RTLLIB_O)
 $(TARGET).def

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.23 2000-03-06 23:38:34 bird Exp $
+# $Id: makefile,v 1.24 2000-07-19 19:05:05 sandervl Exp $
 #
 # ddraw.dll makefile
 #
@@ -76,7 +76,7 @@ $(PDWIN32_LIB)/advapi32.lib
 $(PDWIN32_LIB)/gdi32.lib
 $(PDWIN32_LIB)/comctl32.lib
 $(PDWIN32_LIB)/kernel32.lib
-$(PDWIN32_LIB)/odincrt.lib
+$(PDWIN32_LIB)/$(ODINCRT).lib
 $(PDWIN32_LIB)/user32.lib
 mmpm2.lib
 OS2386.LIB
