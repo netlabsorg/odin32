@@ -1,4 +1,4 @@
-# $Id: makefile.smp,v 1.7 2000-02-10 01:17:06 sandervl Exp $
+# $Id: makefile.smp,v 1.8 2000-05-10 13:16:08 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -50,6 +50,8 @@ all:
         $(MAKE_CMD)
         cd ..\msacm32
         $(MAKE_CMD)
+        cd ..\opengl
+        $(MAKE_CMD)
         cd ..\capi2032
         $(MAKE_CMD)
         cd ..\wsock32
@@ -92,9 +94,13 @@ all:
         $(MAKE_CMD)
         cd ..\olecli32
         $(MAKE_CMD)
+        cd ..\olepro32
+        $(MAKE_CMD)
         cd ..\oledlg
         $(MAKE_CMD)
         cd ..\ole32
         $(MAKE_CMD)
         cd ..\twain_32
+        $(MAKE_CMD)
+        cd ..\riched32
         $(MAKE_CMD)
