@@ -1,4 +1,4 @@
-# $Id: process.mak,v 1.19 2002-08-20 19:38:10 bird Exp $
+# $Id: process.mak,v 1.20 2002-08-20 21:17:45 bird Exp $
 
 #
 # Unix-like tools for OS/2
@@ -1094,6 +1094,11 @@ $(TARGET):
 !ifdef TARGET_ILIB
 $(TARGET_ILIB): $(TARGET_IDEF)
     @$(ECHO) Creating Import Library $(CLRFIL)$@ $(CLRRST)
+    \
+!ifndef BUILD_VERBOSE
+    @if not exist $(@D) $(ECHO) Target implib path $(CLRFIL)$(@D)$(CLRTXT) does NOT exist. Creating. $(CLRRST)
+!endif
+    @if not exist $(@D) $(TOOL_CREATEPATH) $(@D)
     \
 !ifndef BUILD_VERBOSE
     @ \
