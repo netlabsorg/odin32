@@ -1,4 +1,4 @@
-/* $Id: disk.cpp,v 1.19 2000-11-24 16:15:39 phaller Exp $ */
+/* $Id: disk.cpp,v 1.20 2000-12-03 10:12:33 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -99,7 +99,7 @@ ODINFUNCTION5(BOOL, GetDiskFreeSpaceW,
   char *astring;
 
   astring = UnicodeToAsciiString((LPWSTR)arg1);
-  rc = GetDiskFreeSpaceA(astring, arg2, arg3, arg4, arg5);
+  rc = CALL_ODINFUNC(GetDiskFreeSpaceA)(astring, arg2, arg3, arg4, arg5);
   FreeAsciiString(astring);
   return(rc);
 }

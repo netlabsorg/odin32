@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.55 2000-11-24 16:16:18 phaller Exp $ */
+/* $Id: HandleManager.cpp,v 1.56 2000-12-03 10:12:32 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -293,7 +293,8 @@ DWORD HMHandleGetUserData(ULONG  hHandle)
  * Parameters: HANDLE hHandle
  * Variables :
  * Result    : index or -1 in case of error
- * Remark    :
+ * Remark    : Should fail for standard handles (in/out/err)!!!!!!!!!!
+ *             HMGetFileType depends on this!!!
  * Status    :
  *
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
@@ -1374,6 +1375,7 @@ DWORD HMGetFileType(HANDLE hFile)
   if (-1 == iIndex)                                               /* error ? */
   {
     //Must return FILE_TYPE_CHAR here; (used to fail index check)
+    //---------->>> ASSUMES that _HMHandleQuery failes!!!!!!!!!!!!!!!!
     if((hFile == GetStdHandle(STD_INPUT_HANDLE)) ||
        (hFile == GetStdHandle(STD_OUTPUT_HANDLE)) ||
        (hFile == GetStdHandle(STD_ERROR_HANDLE)))
