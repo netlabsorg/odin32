@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.137 2003-11-12 14:10:21 sandervl Exp $ */
+/* $Id: window.cpp,v 1.138 2003-11-15 18:03:50 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -2191,7 +2191,8 @@ UINT WIN32API GetWindowModuleFileNameA(HWND hwnd, LPTSTR lpszFileName, UINT cchF
         return 0;
     }
     lpfnWindowProc = (WNDPROC)GetWindowLongA(hwnd, GWL_WNDPROC);
-    return GetProcModuleFileNameA((ULONG)lpfnWindowProc, lpszFileName, cchFileNameMax);
+//    return GetProcModuleFileNameA((ULONG)lpfnWindowProc, lpszFileName, cchFileNameMax);
+    return 0;
 }
 //******************************************************************************
 //******************************************************************************
