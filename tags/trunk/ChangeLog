@@ -1,7 +1,15 @@
- /* $Id: ChangeLog,v 1.372 1999-10-27 09:54:31 bird Exp $ */
+ /* $Id: ChangeLog,v 1.373 1999-10-27 10:34:17 sandervl Exp $ */
  99-10-27: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
         - WIN32K: It's working! At least on my testmachine running
                   the WSeB astrict UNI kernel and the Warp 4 astrict kernel.
+
+ 99-10-27: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: If dll can't be found, look in directory of kernel32 (PE loader)
+                    Fixed iLoadLibrary (added .dll if it couldn't find this string in
+                    the module name; now only does that if it can't find a '.')
+	- KERNEL32: Fixed bug in icon conversion (rgb only for <= 8bpp)
+                    Added support for color cursors (needs more testing but seems to work)
+     	- USER32: Added support for color cursors
 
  99-10-26: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Fixed bugs in menu apis (Append/InsertMenuA/W)
