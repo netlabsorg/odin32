@@ -1,9 +1,9 @@
-/* $Id: changelog,v 1.1929 2001-12-30 11:04:42 sandervl Exp $ */
+/* $Id: changelog,v 1.1930 2001-12-30 12:41:17 sandervl Exp $ */
 
  2001-12-30: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Fixed some wrong return values for disk functions (hmdisk)
-                o GetVolumeInformation: report FAT32 as FAT32, use original
-                  volume name to determine maximum file name length
+                o GetVolumeInformation: use original volume name to 
+                  determine maximum file name length
 
  2001-12-28: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Do not send WM_SETCURSOR when mouse is captured (SDK docs)
