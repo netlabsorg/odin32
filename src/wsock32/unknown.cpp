@@ -1,4 +1,4 @@
-/* $Id: unknown.cpp,v 1.8 2000-05-02 13:09:43 bird Exp $ */
+/* $Id: unknown.cpp,v 1.9 2000-08-02 16:19:28 bird Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -32,7 +32,7 @@ ODINDEBUGCHANNEL(WSOCK32-UNKNOWN)
  * Variables :
  * Result    :
  * Remark    : WSOCK32.1102
- * Status    : UNTESTED
+ * Status    : UNTESTED STUB
  *
  * Author    : Patrick Haller [Tue, 1999/06/01 09:00]
  *****************************************************************************/
@@ -62,7 +62,7 @@ ODINFUNCTION6(int, OS2rexec, LPSTR*, lppArg1,
  * Variables, :,
  * Result    :
  * Remark    : WSOCK32.1103
- * Status    : UNTESTED
+ * Status    : UNTESTED STUB
  *
  * Author    : Patrick Haller [Tue, 1999/06/01 09:00]
  *****************************************************************************/
