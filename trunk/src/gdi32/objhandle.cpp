@@ -1,4 +1,4 @@
-/* $Id: objhandle.cpp,v 1.5 2000-10-26 17:20:29 sandervl Exp $ */
+/* $Id: objhandle.cpp,v 1.6 2000-11-15 13:56:45 sandervl Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
@@ -18,6 +18,9 @@
 #include <string.h>
 #include <vmutex.h>
 #include <objhandle.h>
+#include <dcdata.h>
+#include <winuser32.h>
+#include "oslibgpi.h"
 #include "dibsect.h"
 #include "region.h"
 
@@ -216,7 +219,7 @@ HGDIOBJ WIN32API SelectObject(HDC hdc, HGDIOBJ hObj)
     dprintf2(("GDI32: SelectObject %x %x", hdc, hObj));
 
     if(ObjGetHandleType(hObj) == GDIOBJ_REGION) {
-    //Return complexity here; not previously selected clip region
+        //Return complexity here; not previously selected clip region
         return (HGDIOBJ)SelectClipRgn(hdc, hObj);
     }
 
@@ -245,6 +248,20 @@ HGDIOBJ WIN32API SelectObject(HDC hdc, HGDIOBJ hObj)
         dsect->UnSelectDIBObject();
       }
     }
+#ifdef USING_OPEN32
+    if(O32_GetObjectType(hObj) == OBJ_BITMAP) 
+    {
+	//SvL: Open32 messes up the height of the hdc (for windows)
+        pDCData  pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
+        if(pHps && pHps->hwnd) {
+      	      dprintf2(("change back origin"));
+              selectClientArea(pHps);
+              setPageXForm(pHps);
+        }
+    }
+#endif
+    dprintf2(("GDI32: SelectObject %x %x returned %x", hdc, hObj, rc));
+
     return(rc);
 }
 //******************************************************************************

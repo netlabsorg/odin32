@@ -1,4 +1,4 @@
-/* $Id: oslibgpi.h,v 1.7 2000-08-14 15:51:20 cbratschi Exp $ */
+/* $Id: oslibgpi.h,v 1.8 2000-11-15 13:56:45 sandervl Exp $ */
 
 /*
  * GPI interface code
@@ -10,6 +10,13 @@
  */
 #ifndef __OSLIBGPI_H__
 #define __OSLIBGPI_H__
+
+
+#ifdef DEBUG
+void dprintfOrigin(HDC hdc);
+#else
+#define dprintfOrigin(a)
+#endif
 
 #define APIENTRYOS2 _System
 
@@ -187,6 +194,7 @@ BOOL doesYAxisGrowNorth(PVOID pHps);
 
 LONG OSLibWinDrawTabbedText(PVOID pHps,LONG cchText,LONG lTabs,LPCSTR lpchText,PVOID prcl,LONG clrFore,LONG clrBack,ULONG flCmd);
 
+int OSLibGpiQueryFontMaxHeight(HDC hdc);
 
 BOOL OSLibGpiMove(PVOID pHps,PPOINTLOS2 pptlPoint);
 LONG OSLibGpiLine(PVOID pHps,PPOINTLOS2 pptlEndPoint);

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.29 2000-11-05 18:48:22 sandervl Exp $
+# $Id: makefile,v 1.30 2000-11-15 13:56:45 sandervl Exp $
 
 #
 # Odin32 API
@@ -23,8 +23,8 @@ CLEANEXTRAS = gdi32rsrc.asm
 #CFLAGS   = $(CFLAGS) -DSTDCALL_ENUMPROCS -DINVERT
 #CXXFLAGS = $(CXXFLAGS) -DSTDCALL_ENUMPROCS -DINVERT
 
-CFLAGS   = $(CFLAGS) -DINVERT
-CXXFLAGS = $(CXXFLAGS) -DINVERT
+CFLAGS   = $(CFLAGS) -DINVERT -DUSING_OPEN32
+CXXFLAGS = $(CXXFLAGS) -DINVERT -DUSING_OPEN32
 
 # Object files. All objects should be prefixed with $(OBJDIR)!
 OBJS = \
