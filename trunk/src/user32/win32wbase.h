@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.29 1999-10-17 20:18:46 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.30 1999-10-18 11:59:58 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -201,6 +201,8 @@ Win32BaseWindow *FindWindowById(int id);
 
     static HWND FindWindowEx(HWND hwndParent, HWND hwndChildAfter, LPSTR lpszClass, LPSTR lpszWindow,
                              BOOL fUnicode = 0);
+
+           BOOL EnumChildWindows(WNDENUMPROC lpfn, LPARAM lParam);
 
     static HWND Win32ToOS2Handle(HWND hwnd);
     static HWND Win32ToOS2FrameHandle(HWND hwnd);
