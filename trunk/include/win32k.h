@@ -1,4 +1,4 @@
-/* $Id: win32k.h,v 1.2 2000-10-01 02:59:18 bird Exp $
+/* $Id: win32k.h,v 1.3 2000-12-11 06:17:20 bird Exp $
  *
  * Top level make file for the Win32k library.
  * Contains library and 32-bit IOCtl definition.
@@ -95,6 +95,9 @@ typedef struct _K32Options
 
     /** @cat Options affecting the  executables */
     ULONG       fNoLoader;              /* No loader stuff. !FIXME! We should import / functions even if this flag is set!!! */
+
+    /** @cat Options affecting the behaviour changes in the OS/2 loader */
+    ULONG       fDllFixes;              /* Enables the long DLL name and non .DLL extention fixes. */
 
     /** @cat Options affecting the heap. */
     ULONG       cbSwpHeapMax;           /* Maximum heapsize. */
