@@ -1,4 +1,4 @@
-; $Id: KERNEL32.DEF,v 1.140 2002-06-15 10:41:43 sandervl Exp $
+; $Id: KERNEL32.DEF,v 1.141 2002-07-21 09:20:55 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -27,12 +27,6 @@ IMPORTS
   WinXxReallocMem               = PMMERGE.5429
 
   Win32WaitForIdleThread        = PMMERGE.5474
-  WinXxCreateHeap2              = PMMERGE.5475
-  WinMspInit                    = PMMERGE.5420
-  pSharedHeap                   = PMMERGE.6205
-  WinXxAllocMem                 = PMMERGE.5424
-  WinXxCreateHeap               = PMMERGE.5425
-  WinXxDestroyHeap              = PMMERGE.5426
   LookupAtom                    = PMMERGE.10020
 
   _O32_RegCloseKey              = REGISTRY.1
@@ -1164,17 +1158,13 @@ EXPORTS
     _PROFILE_SaveOdinIni@0                                        @1270 NONAME
 
 ;shared memory allocation
-    sharedHeap                                                    @1271 NONAME
+    _smalloc                                                      @1271 NONAME
+    _smallocfill                                                  @1275 NONAME
+    InitializeSharedHeap                                          @1276 NONAME
+    DestroySharedHeap                                             @1277 NONAME
 
 ;code memory allocation
     codeHeap                                                      @1272 NONAME
-
-;VSemaphore
-   wait__10VSemaphoreFUlPUl                                       @1280 NONAME
-   post__10VSemaphoreFPUl                                         @1281 NONAME
-   reset__10VSemaphoreFPUl                                        @1282 NONAME
-   __ct__10VSemaphoreFiPUl                                        @1283 NONAME
-   __dt__10VSemaphoreFv                                           @1284 NONAME
 
 ;fast file API's
     FindFirstFileMultiA        = _FindFirstFileMultiA@12          @1290 NONAME
