@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.53 2000-10-06 15:15:00 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.54 2000-11-24 10:30:36 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -48,6 +48,7 @@ Win32Dialog::Win32Dialog(HINSTANCE hInst, LPCSTR dlgTemplate, HWND owner,
     userDlgData  = 0;
     idResult     = 0;
     dialogFlags  = 0;
+    fDialogInit  = FALSE;
     memset(&dlgInfo, 0, sizeof(dlgInfo));
 
     dprintf(("********* CREATE DIALOG ************"));
@@ -75,12 +76,12 @@ Win32Dialog::Win32Dialog(HINSTANCE hInst, LPCSTR dlgTemplate, HWND owner,
     /* Create custom font if needed */
     if (dlgInfo.style & DS_SETFONT)
     {
-	  /* The font height must be negative as it is a point size */
-	  /* and must be converted to pixels first */
-          /* (see CreateFont() documentation in the Windows SDK).   */
-	HDC dc = GetDC(0);
-	int pixels = dlgInfo.pointSize * GetDeviceCaps(dc , LOGPIXELSY)/72;
-	ReleaseDC(0, dc);
+        /* The font height must be negative as it is a point size */
+        /* and must be converted to pixels first */
+        /* (see CreateFont() documentation in the Windows SDK).   */
+        HDC dc = GetDC(0);
+        int pixels = dlgInfo.pointSize * GetDeviceCaps(dc , LOGPIXELSY)/72;
+        ReleaseDC(0, dc);
 
         hUserFont = CreateFontW(-pixels, 0, 0, 0,
                             dlgInfo.weight, dlgInfo.italic, FALSE,
@@ -237,24 +238,26 @@ ULONG Win32Dialog::MsgCreate(HWND hwndOS2)
         hwndFocus = GetNextDlgTabItem( getWindowHandle(), 0, FALSE );
         dprintf(("dlg ctor: GetNextDlgTabItem returned %x, capture hwnd = %x", hwndFocus, GetCapture()));
 
-	HWND hwndPreInitFocus = GetFocus();
+        fDialogInit = TRUE; //WM_NCCALCSIZE can now be sent to dialog procedure
+
+        HWND hwndPreInitFocus = GetFocus();
         if(SendInternalMessageA(WM_INITDIALOG, (WPARAM)hwndFocus, param)) {
-          	SetFocus(hwndFocus);
-	}
-	else
-	{
-   	    	/* If the dlgproc has returned FALSE (indicating handling of keyboard focus)
-	       	   but the focus has not changed, set the focus where we expect it. */
-            	if ( (getStyle() & WS_VISIBLE) && ( GetFocus() == hwndPreInitFocus ) )
-                	SetFocus( hwndFocus );
-	}
+            SetFocus(hwndFocus);
+        }
+        else
+        {
+            /* If the dlgproc has returned FALSE (indicating handling of keyboard focus)
+               but the focus has not changed, set the focus where we expect it. */
+                if ( (getStyle() & WS_VISIBLE) && ( GetFocus() == hwndPreInitFocus ) )
+                    SetFocus( hwndFocus );
+        }
 
         if (dlgInfo.style & WS_VISIBLE && !(getStyle() & WS_VISIBLE))
         {
             ShowWindow( SW_SHOWNORMAL );    /* SW_SHOW doesn't always work */
             UpdateWindow( getWindowHandle() );
         }
-        SetLastError(0);
+        SetLastError(ERROR_SUCCESS);
         dprintf(("********* DIALOG CREATED ************"));
         return TRUE;
     }
@@ -857,6 +860,16 @@ LRESULT Win32Dialog::DefDlgProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 
     msgResult = 0;
 
+    //Dialogs never receive these messages
+    if (Msg == WM_CREATE || Msg == WM_NCCREATE) {
+        return (LRESULT)1;
+    }
+    //Never send a WM_NCCALCSIZE to a dialog before it has received it's WM_INITDIALOG message
+    //(causes problems for sysinf32.exe)
+    if(!fDialogInit && Msg == WM_NCCALCSIZE) {
+        return DefWindowProcA(Msg, wParam, lParam );
+    }
+
     if (Win32DlgProc) {      /* Call dialog procedure */
         result = Win32DlgProc(getWindowHandle(), Msg, wParam, lParam);
     }
@@ -900,6 +913,16 @@ LRESULT Win32Dialog::DefDlgProcW(UINT Msg, WPARAM wParam, LPARAM lParam)
     BOOL result = FALSE;
 
     msgResult = 0;
+
+    //Dialogs never receive these messages
+    if (Msg == WM_CREATE || Msg == WM_NCCREATE) {
+        return (LRESULT)1;
+    }
+    //Never send a WM_NCCALCSIZE to a dialog before it has received it's WM_INITDIALOG message
+    //(causes problems for sysinf32.exe)
+    if(!fDialogInit && Msg == WM_NCCALCSIZE) {
+        return DefWindowProcW(Msg, wParam, lParam );
+    }
 
     if (Win32DlgProc) {      /* Call dialog procedure */
         result = Win32DlgProc(getWindowHandle(), Msg, wParam, lParam);
@@ -1068,14 +1091,14 @@ LONG Win32Dialog::SetWindowLongA(int index, ULONG value, BOOL fUnicode)
     {
     case DWL_DLGPROC:
     {
-	//Note: Type of SetWindowLong determines new window proc type
+    //Note: Type of SetWindowLong determines new window proc type
         //      UNLESS the new window proc has already been registered
         //      (use the old type in that case)
         //      (VERIFIED in NT 4, SP6)
         WINDOWPROCTYPE type = WINPROC_GetProcType((HWINDOWPROC)value);
-	if(type == WIN_PROC_INVALID) {
-		type = (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A;
-	}
+    if(type == WIN_PROC_INVALID) {
+        type = (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A;
+    }
         oldval = (LONG)WINPROC_GetProc(Win32DlgProc, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A);
         WINPROC_SetProc((HWINDOWPROC *)&Win32DlgProc, (WNDPROC)value, type, WIN_PROC_WINDOW);
         return oldval;
