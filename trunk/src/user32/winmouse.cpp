@@ -1,4 +1,4 @@
-/* $Id: winmouse.cpp,v 1.25 2002-06-18 09:32:26 sandervl Exp $ */
+/* $Id: winmouse.cpp,v 1.26 2002-08-16 16:49:05 sandervl Exp $ */
 /*
  * Win32 mouse functions
  *
@@ -68,13 +68,27 @@ BOOL WIN32API GetCursorPos( PPOINT lpPoint)
 //******************************************************************************
 BOOL WIN32API SetCursorPos( int X, int Y)
 {
-    BOOL ret;
-    dprintf(("USER32: SetCursorPos (%d,%d)", X,Y));
+    BOOL           ret;
+    POINT          point;
+    MSLLHOOKSTRUCT hook;
+
+    GetCursorPos(&point);
+    dprintf(("USER32: SetCursorPos (%d,%d)->(%d,%d)", point.x, point.y, X,Y));
+
+    //The current cursor position may not have been passed to the application
+    //just yet. The position change discards any previous events which may
+    //lead to inconsistent mouse behaviour (like in DirectInput).
+    //To fix this, we pass down a mouse move event to any hook handlers.
+    hook.pt.x        = point.x;
+    hook.pt.y        = point.y;
+    hook.mouseData   = 0;
+    hook.flags       = 0;
+    hook.time        = GetCurrentTime();
+    hook.dwExtraInfo = 0;
+    HOOK_CallHooksW( WH_MOUSE_LL, HC_ACTION, WM_MOUSEMOVE, (LPARAM)&hook);
 
     ret = OSLibWinSetPointerPos(X, mapScreenY(Y));
     if(ret == TRUE) {
-        MSLLHOOKSTRUCT hook;
-
         hook.pt.x        = X;
         hook.pt.y        = Y;
         hook.mouseData   = 0;
