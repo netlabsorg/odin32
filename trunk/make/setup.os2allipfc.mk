@@ -1,4 +1,4 @@
-# $Id: setup.os2allipfc.mk,v 1.2 2002-09-20 04:35:45 bird Exp $
+# $Id: setup.os2allipfc.mk,v 1.3 2003-06-30 13:13:21 bird Exp $
 
 MAKE_INCLUDE_IPFC = $(PATH_MAKE)\setup.os2allipfc.mk
 
@@ -112,6 +112,6 @@ INFC_CMD        = $(INFC) $(INFC_FLAGS) $(_SRC) $(_DST)
 HLPC_CMD        = $(HLPC) $(HLPC_FLAGS) $(_SRC) $(_DST)
 
 INFC_CMD_PRE    = $(CC) $(CC_FLAGS_EXE) $(CC_PC_2_STRIPPED_STDOUT) $(_SRC) > $(_DST).ipf && $(INFC) $(INFC_FLAGS) $(_DST).ipf $(_DST)
-HLPC_CMD_PRE    = $(CC) $(CC_FLAGS_EXE) $(CC_PC_2_STRIPPED_STDOUT) $(_SRC) > $(_DST).ipf && $(HLPC) $(INFC_FLAGS) $(_DST).ipf $(_DST)
+HLPC_CMD_PRE    = $(CC) $(CC_FLAGS_EXE) $(CC_PC_2_STRIPPED_STDOUT) $(_SRC) > $(_DST).ipf && $(HLPC) $(HLPC_FLAGS) $(_DST).ipf $(_DST)
 
 
