@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2000-02-25 00:37:33 sandervl Exp $
+# $Id: makefile,v 1.2 2000-02-26 19:09:37 bird Exp $
 #
 # PD-Win32 API
 #
@@ -23,7 +23,7 @@ OBJS =	initterm.obj \
 	texus\texus.lib \
 	init\init.lib \
         glide\glide.lib \
- 
+
 all: ..\swlibs\pcilib\pcilib.lib init\init.lib texus\texus.lib glide\glide.lib $(TARGET).dll $(TARGET).lib
 
 ..\swlibs\pcilib\pcilib.lib:
@@ -68,6 +68,10 @@ glideres.asm: glide\glide.rc
 
 initterm.obj: initterm.cpp
 
+
+#
+# Please check this rule. I had to add the statments from 'cd cvs\init'.
+#
 dep:
     $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
         *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
@@ -76,6 +80,11 @@ dep:
     cd ..\..\sst1\glide
     $(MAKE_CMD) NODEP=1 dep
     cd ..\init
+    $(MAKE_CMD) NODEP=1 dep
+    cd ..\texus
+    $(MAKE_CMD) NODEP=1 dep
+    cd ..
+    cd ..\cvg\init
     $(MAKE_CMD) NODEP=1 dep
     cd ..\texus
     $(MAKE_CMD) NODEP=1 dep
