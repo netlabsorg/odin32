@@ -1,4 +1,4 @@
-/* $Id: Sym2Hll.cpp,v 1.4 2000-04-07 02:49:36 bird Exp $
+/* $Id: Sym2Hll.cpp,v 1.5 2000-04-24 21:38:11 bird Exp $
  *
  * Sym2Hll - Symbol file to HLL debuginfo converter.
  *
@@ -37,6 +37,7 @@
 /*******************************************************************************
 *   Internal Functions                                                         *
 *******************************************************************************/
+void            syntax(void);
 void *          readfile(const char *pszFilename);
 signed long     fsize(FILE *phFile);
 
@@ -59,6 +60,7 @@ int main(int argc, char **argv)
      */
     if (argc != 3)
     {
+        syntax();
         fprintf(stderr, "syntax error\n");
         return -87;
     }
@@ -82,15 +84,15 @@ int main(int argc, char **argv)
     PBYTE pbSym = (PBYTE)readfile(argv[1]);
     if (pbSym != NULL)
     {
-        int             rc;
-        kHllModuleEntry*pModule;
-        PMAPDEF         pMapDef;             /* Mapfile header */
+        APIRET              rc;
+        kHllModuleEntry *   pModule;
+        PMAPDEF             pMapDef;        /* Mapfile header */
 
         pMapDef = (PMAPDEF)pbSym;
         while (pMapDef != NULL)
         {
             int         iSegment;
-            PSEGDEF     pSegDef;             /* Segment header */
+            PSEGDEF     pSegDef;            /* Segment header */
 
             /*
              * Map definition.
@@ -185,10 +187,10 @@ int main(int argc, char **argv)
                 /*
                  * Add segment to the module - FIXME - need info from the LX Object table...
                  */
-                pLXObject = pFileLX->getObject(iSegment-1);
+                pLXObject = pFileLX->getObject((USHORT)iSegment-1);
                 if (pLXObject)
                 {
-                    if (!pModule->addSegInfo(iSegment, 0, pLXObject->o32_size))
+                    if (!pModule->addSegInfo((USHORT)iSegment, 0, pLXObject->o32_size))
                         fprintf(stderr, "warning: addseginfo failed!\n");
                 }
                 else
@@ -227,7 +229,7 @@ int main(int argc, char **argv)
                     /*
                      * Add symbol - currently we define it as public - it's a symbol local to this module really.
                      */
-                    pModule->addPublicSymbol(pachName, cchName, offset, iSegment, 0);
+                    pModule->addPublicSymbol(pachName, cchName, offset, (USHORT)iSegment, 0);
                 }
 
 
@@ -292,6 +294,14 @@ int main(int argc, char **argv)
 }
 
 
+/**
+ * Syntax.
+ */
+void syntax(void)
+{
+    printf("Sym2Hll.exe <symfile> <lxfile>\n");
+}
+
 
 
 
@@ -313,11 +323,11 @@ void *readfile(const char *pszFilename)
         signed long cbFile = fsize(phFile);
         if (cbFile > 0)
         {
-            pvFile = malloc(cbFile + 1);
+            pvFile = malloc((size_t)cbFile + 1);
             if (pvFile != NULL)
             {
-                memset(pvFile, 0, cbFile + 1);
-                if (fread(pvFile, 1, cbFile, phFile) == 0)
+                memset(pvFile, 0, (size_t)cbFile + 1);
+                if (fread(pvFile, 1, (size_t)cbFile, phFile) == 0)
                 {   /* failed! */
                     free(pvFile);
                     pvFile = NULL;
