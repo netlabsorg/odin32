@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1871 2001-11-30 19:08:05 phaller Exp $ */
+/* $Id: changelog,v 1.1872 2001-11-30 19:18:07 sandervl Exp $ */
 
  2001-11-30: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o heapstring.cpp: improvement on HEAP_malloc, HEAP_free,
@@ -15,7 +15,11 @@
     - USER32:   o Changed menu hilite background to the color used by PM
                   (OS/2 look)
                 o DIALOG_IsAccelerator resync (Wine)
-    - KERNEL32: o Partly implemented PurgeComm
+    - KERNEL32: o Partly implemented PurgeComm 
+    - *         o Removed all the TRACE, FIXME & WARN redefinitions
+                  (temporary hack for better logging; didn't affect the release
+                   build anyway)
+                  TODO: we need better logging in Wine code
 
  2001-11-29: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o Split dosdevice.cpp from stubs.cpp
