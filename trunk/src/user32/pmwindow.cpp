@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.229 2004-03-12 18:19:50 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.230 2004-05-24 09:01:59 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -60,6 +60,10 @@
 #include "menu.h"
 #include "user32api.h"
 #include <kbdhook.h>
+#include <heapstring.h>
+
+#include <os2im.h>
+#include <im32.h>
 
 #define DBG_LOCALLOG    DBG_pmwindow
 #include "dbglocal.h"
@@ -139,6 +143,8 @@ static char *DbgGetStringSWPFlags(ULONG flags);
 static char *DbgPrintQFCFlags(ULONG flags);
 #endif
 
+extern "C" ULONG OSLibImSetMsgQueueProperty( ULONG, ULONG );
+
 //******************************************************************************
 // Initialize PM; create hab, message queue and register special Win32 window classes
 //
@@ -193,6 +199,10 @@ BOOL InitPM()
 
     BOOL rc = WinSetCp(hmq, GetDisplayCodepage());
     dprintf(("InitPM: WinSetCP was %sOK", rc ? "" : "not "));
+
+    /* IM instace is created per message queue, that is, thread */
+    if( IsDBCSEnv())
+        OSLibImSetMsgQueueProperty( hmq, MQP_INSTANCE_PERMQ );
 
     //CD polling window class
     if(!WinRegisterClass(                    /* Register window class        */
@@ -1005,6 +1015,29 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         win32wnd->DispatchMsgA(pWinMsg);
         break;
 
+    case WM_IMEREQUEST:
+    case WM_IMECONTROL:
+    case WM_IMENOTIFY:
+        if( pWinMsg->message )
+        {
+            win32wnd->DispatchMsgA( pWinMsg );
+
+            if(( pWinMsg->message = WM_IME_NOTIFY_W ) &&
+               ( pWinMsg->wParam == IMN_SETOPENSTATUS_W ))
+            {
+                MSG m;
+
+                m.message = WM_IME_NOTIFY_W;
+                m.wParam = IMN_SETCONVERSIONMODE_W;
+                m.lParam = 0;
+
+                win32wnd->DispatchMsgA( &m );
+            }
+        }
+        else
+            goto RunDefWndProc;
+        break;
+
     case DM_DRAGOVER:
     {
         PDRAGINFO pDragInfo = (PDRAGINFO)mp1;
@@ -1015,18 +1048,18 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         dprintf(("OS2: DM_DRAGOVER %x (%d,%d)", win32wnd->getWindowHandle(), sxDrop, syDrop));
 
         if(fDragDropDisabled) {
-	        rc = (MRFROM2SHORT (DOR_NEVERDROP, 0));
+            rc = (MRFROM2SHORT (DOR_NEVERDROP, 0));
             break;
         }
 
         //does this window accept dropped files?
         if(!DragDropAccept(win32wnd->getWindowHandle())) {
-	        rc = (MRFROM2SHORT (DOR_NEVERDROP, 0));
+            rc = (MRFROM2SHORT (DOR_NEVERDROP, 0));
             break;
         }
 
         if(PMDragValidate(pDragInfo) == FALSE) {
-	        rc = (MRFROM2SHORT (DOR_NEVERDROP, 0));
+            rc = (MRFROM2SHORT (DOR_NEVERDROP, 0));
             break;
         }
         if(win32wnd->isDragDropActive() == FALSE) {
@@ -2209,6 +2242,30 @@ PosChangedEnd:
             win32wnd->DispatchMsgA(pWinMsg);
         break;
 
+    case WM_IMEREQUEST:
+    case WM_IMECONTROL:
+    case WM_IMENOTIFY:
+        if( pWinMsg->message )
+        {
+            dprintf(("Frame window received IME message"));
+            win32wnd->DispatchMsgA( pWinMsg );
+
+            if(( pWinMsg->message = WM_IME_NOTIFY_W ) &&
+               ( pWinMsg->wParam == IMN_SETOPENSTATUS_W ))
+            {
+                MSG m;
+
+                m.message = WM_IME_NOTIFY_W;
+                m.wParam = IMN_SETCONVERSIONMODE_W;
+                m.lParam = 0;
+
+                win32wnd->DispatchMsgA( &m );
+            }
+        }
+        else
+            goto RunDefWndProc;
+        break;
+
 #ifdef DEBUG
     case WM_DDE_INITIATE:
     case WM_DDE_INITIATEACK:
@@ -2325,10 +2382,10 @@ RunDefWndProc:
 //
 // Parameters
 //
-//     HWND hwndOS2		- PM handle of fake window
+//     HWND hwndOS2     - PM handle of fake window
 //
 // Returns
-//     NULL			- Failure
+//     NULL         - Failure
 //     else                     - Old PM window procedure
 //
 //******************************************************************************
