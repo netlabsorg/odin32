@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.476 1999-11-27 00:08:20 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.477 1999-11-27 14:15:15 cbratschi Exp $ */
+
+ 99-11-27: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32: fixed edit bugs
+		  ported WINE monitor code and implemented PM driver		  
 
  99-11-26: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Implemented GetInputState and GetQueueStatus
