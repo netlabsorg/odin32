@@ -1,4 +1,4 @@
-# $Id: newdbgR3Tst.mak,v 1.1 2002-03-31 19:30:40 bird Exp $
+# $Id: newdbgR3Tst.mak,v 1.2 2002-04-07 22:39:45 bird Exp $
 
 #
 # newdbgR3Tst - separate make file for the debug new (R3Tst build).
@@ -15,7 +15,7 @@
 ALL_INCLUDES= -I../include
 ALL_DEFINES = -DKKRNLLIB -DR3TST
 PATH_ROOT   = ..\..\..\..
-!include $(PATH_ROOT)\tools\make\setup.mak
+!include $(PATH_ROOT)\make\setup.mak
 !if "$(BUILD_ENV)" == "VAC308" || "$(BUILD_ENV)" == "VAC365"
 CXX_FLAGS_SYS = $(CXX_FLAGS_SYS) -Tm+
 !endif

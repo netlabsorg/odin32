@@ -1,4 +1,4 @@
-# $Id: MkCallTab.mak,v 1.4 2002-03-31 19:01:06 bird Exp $
+# $Id: MkCallTab.mak,v 1.5 2002-04-07 22:39:45 bird Exp $
 
 #
 # MkCallTab - 16-bit source generator.
@@ -13,7 +13,7 @@
 !endif
 BUILD_ENV  = MSCV6
 PATH_ROOT  = ..\..\..\..
-!include $(PATH_ROOT)\tools\make\setup.mak
+!include $(PATH_ROOT)\make\setup.mak
 !include ..\..\makefile.inc
 PATH_BIN   = $(PATH_TOOLS)
 

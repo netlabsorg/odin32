@@ -1,4 +1,4 @@
-# $Id: clib16.mak,v 1.2 2002-04-01 12:42:46 bird Exp $
+# $Id: clib16.mak,v 1.3 2002-04-07 22:40:15 bird Exp $
 
 #
 # clib16
@@ -11,7 +11,7 @@
 # Setup.
 #
 PATH_ROOT = ..\..\..
-!include $(PATH_ROOT)\tools\make\setup.mak
+!include $(PATH_ROOT)\make\setup.mak
 !include ..\makefile.inc
 
 

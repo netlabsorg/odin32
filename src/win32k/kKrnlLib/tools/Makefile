@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.1 2002-03-10 04:57:19 bird Exp $
+# $Id: Makefile,v 1.2 2002-04-07 22:40:16 bird Exp $
 
 #
 # Makefile for all tools.
@@ -11,7 +11,7 @@
 # Setup.
 #
 PATH_ROOT = ..\..\..\..
-!include $(PATH_ROOT)\tools\make\setup.mak
+!include $(PATH_ROOT)\make\setup.mak
 
 
 #
