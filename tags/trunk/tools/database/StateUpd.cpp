@@ -1,4 +1,4 @@
-/* $Id: StateUpd.cpp,v 1.13 2000-02-14 17:18:31 bird Exp $
+/* $Id: StateUpd.cpp,v 1.14 2000-02-14 17:24:47 bird Exp $
  *
  * StateUpd - Scans source files for API functions and imports data on them.
  *
@@ -197,7 +197,8 @@ int main(int argc, char **argv)
                 case 's':
                 case 'S':
                     options.fRecursive = TRUE;
-                    break;
+                    fprintf(stderr, "This option (-s) is currently broken\n");
+                    return -1;
 
                 case 'u':
                 case 'U':
@@ -299,6 +300,8 @@ int main(int argc, char **argv)
         fprintf(phLog,"Number of function in this DLL:        %4ld (%ld)\n", ul1, ul0);
         fprintf(phLog,"Number of successfully processed APIs: %4ld (%ld)\n", (long)(0x0000FFFF & ulRc), ul2);
         fprintf(phLog,"Number of signals:                     %4ld\n", (long)(ulRc >> 16));
+        if (ul0 > ul2)
+            fprintf(phSignal, "%d functions where not found (found=%d, total=%d).\n", ul0 - ul2, ul2, ul0);
 
         /* close the logs */
         closeLogs();
