@@ -1,4 +1,4 @@
-/* $Id: asyncapi.cpp,v 1.4 2000-03-28 17:13:05 sandervl Exp $ */
+/* $Id: asyncapi.cpp,v 1.5 2000-03-28 19:10:09 sandervl Exp $ */
 
 /*
  *
@@ -459,15 +459,15 @@ asyncloopstart:
 	ret = select((int *)sockets, nr(noread), nr(nowrite), nr(noexcept), -1);
 	if(ret == SOCKET_ERROR) {
 		int selecterr = sock_errno();
-        	dprintf(("WSAsyncSelectThreadProc %x rds=%d, wrs=%d, oos =%d, pending = %x select returned %x", pThreadParm->u.asyncselect.s, noread, nowrite, noexcept, lEventsPending, selecterr));
+////        	dprintf(("WSAsyncSelectThreadProc %x rds=%d, wrs=%d, oos =%d, pending = %x select returned %x", pThreadParm->u.asyncselect.s, noread, nowrite, noexcept, lEventsPending, selecterr));
 		if(selecterr && selecterr < SOCBASEERR) {
 			selecterr += SOCBASEERR;
 		}
 		switch(selecterr) 
 		{
 		case SOCEINTR:
-        		state = ioctl(s, FIOBSTATUS, (char *)&tmp, sizeof(tmp));
-			dprintf(("SOCEINTR; state = %x", state));
+////        		state = ioctl(s, FIOBSTATUS, (char *)&tmp, sizeof(tmp));
+////			dprintf(("SOCEINTR; state = %x", state));
 			goto asyncloopstart;	//so_cancel was called
 
 		case SOCECONNRESET:
@@ -519,7 +519,8 @@ asyncloopstart:
       	if(ready(noread))
       	{
          	state = ioctl(s, FIONREAD, (CHAR *) &bytesread, sizeof(bytesread));
-         	if(state == SOCKET_ERROR) {
+         	if(state == SOCKET_ERROR) 
+ 		{
             		if(lEventsPending & FD_CLOSE) 
 			{
 				AsyncNotifyEvent(pThreadParm, FD_CLOSE, NO_ERROR);
@@ -549,6 +550,10 @@ asyncloopstart:
 		}
 		if((lEventsPending & FD_READ) && bytesread > 0) {
 			AsyncNotifyEvent(pThreadParm, FD_READ, NO_ERROR);
+		}
+       		else 
+		if((lEventsPending & FD_CLOSE) && (state == 0 && bytesread == 0)) {
+			AsyncNotifyEvent(pThreadParm, FD_CLOSE, NO_ERROR);
 		}
 	}
       	if(ready(noexcept))
