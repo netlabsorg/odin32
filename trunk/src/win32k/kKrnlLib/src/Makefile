@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.8 2002-08-20 05:04:44 bird Exp $
+# $Id: Makefile,v 1.9 2002-08-20 05:47:53 bird Exp $
 
 #
 # kKrnlLib/dev32 makefile.
@@ -58,7 +58,7 @@ $(PATH_TARGET)\vsprintf.$(EXT_OBJ)\
 $(PATH_OBJ)\kKrnlLib_newdbg.$(EXT_LIB)\kKrnlLib_newdbg.$(EXT_LIB)\
 $(PATH_OBJ)\kKrnlLib_newrel.$(EXT_LIB)\kKrnlLib_newrel.$(EXT_LIB)\
 \
-$(PATH_ROOT)\obj\$(NAME_1)$(NAME_2)mscv6\kKrnlLib_dev16.$(EXT_LIB)\kKrnlLib_dev16.$(EXT_LIB)\
+$(PATH_ROOT)\obj\$(SHT_TRGPLTFRM)$(SHT_BLDMD)mscv6-16\kKrnlLib_dev16.$(EXT_LIB)\kKrnlLib_dev16.$(EXT_LIB)\
 \
 $(PATH_TARGET)\SymDB32.$(EXT_OBJ)\
 $(PATH_TARGET)\calltaba.$(EXT_OBJ)\
@@ -67,7 +67,7 @@ $(PATH_TARGET)\calltaba.$(EXT_OBJ)\
 TARGET_DEPS =\
 $(PATH_OBJ)\kKrnlLib_newdbg.$(EXT_LIB)\kKrnlLib_newdbg.$(EXT_LIB)\
 $(PATH_OBJ)\kKrnlLib_newrel.$(EXT_LIB)\kKrnlLib_newrel.$(EXT_LIB)\
-$(PATH_ROOT)\obj\$(NAME_1)$(NAME_2)mscv6\kKrnlLib_dev16.$(EXT_LIB)\kKrnlLib_dev16.$(EXT_LIB)\
+$(PATH_ROOT)\obj\$(SHT_TRGPLTFRM)$(SHT_BLDMD)mscv6-16\kKrnlLib_dev16.$(EXT_LIB)\kKrnlLib_dev16.$(EXT_LIB)\
 
 TARGET_NO_DEP=\
 calltaba.c

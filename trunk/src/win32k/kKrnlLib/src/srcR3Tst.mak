@@ -1,4 +1,4 @@
-# $Id: srcR3Tst.mak,v 1.5 2002-08-20 05:04:43 bird Exp $
+# $Id: srcR3Tst.mak,v 1.6 2002-08-20 05:47:53 bird Exp $
 
 #
 # kKrnlLib/srcR3Tst makefile.
@@ -68,7 +68,7 @@ $(PATH_TARGET)\tstkKrnlLib.$(EXT_OBJ)\
 $(PATH_OBJ)\kKrnlLib_newdbgR3Tst.$(EXT_LIB)\kKrnlLib_newdbgR3Tst.$(EXT_LIB)\
 $(PATH_OBJ)\kKrnlLib_newrelR3Tst.$(EXT_LIB)\kKrnlLib_newrelR3Tst.$(EXT_LIB)\
 \
-$(PATH_ROOT)\obj\$(NAME_1)$(NAME_2)mscv6\kKrnlLib_dev16R3Tst.$(EXT_LIB)\kKrnlLib_dev16R3Tst.$(EXT_LIB)\
+$(PATH_ROOT)\obj\$(SHT_TRGPLTFRM)$(SHT_BLDMD)mscv6-16\kKrnlLib_dev16R3Tst.$(EXT_LIB)\kKrnlLib_dev16R3Tst.$(EXT_LIB)\
 \
 $(PATH_TARGET)\SymDB32.$(EXT_OBJ)\
 $(PATH_TARGET)\calltaba.$(EXT_OBJ)\
@@ -78,7 +78,7 @@ $(PATH_TARGET)\TstFakers.$(EXT_OBJ)\
 TARGET_DEPS =\
 $(PATH_OBJ)\kKrnlLib_newdbgR3Tst.$(EXT_LIB)\kKrnlLib_newdbgR3Tst.$(EXT_LIB)\
 $(PATH_OBJ)\kKrnlLib_newrelR3Tst.$(EXT_LIB)\kKrnlLib_newrelR3Tst.$(EXT_LIB)\
-$(PATH_ROOT)\obj\$(NAME_1)$(NAME_2)mscv6\kKrnlLib_dev16.$(EXT_LIB)\kKrnlLib_dev16.$(EXT_LIB)\
+$(PATH_ROOT)\obj\$(SHT_TRGPLTFRM)$(SHT_BLDMD)mscv6-16\kKrnlLib_dev16.$(EXT_LIB)\kKrnlLib_dev16.$(EXT_LIB)\
 
 
 TARGET_NO_DEP=\

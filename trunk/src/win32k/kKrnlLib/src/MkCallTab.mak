@@ -1,4 +1,4 @@
-# $Id: MkCallTab.mak,v 1.7 2002-08-20 05:04:43 bird Exp $
+# $Id: MkCallTab.mak,v 1.8 2002-08-20 05:47:53 bird Exp $
 
 #
 # MkCallTab - 16-bit source generator.
@@ -14,7 +14,7 @@
 #
 !if [SET INCLUDE=]
 !endif
-BUILD_ENV  = MSCV6
+BUILD_ENV_FORCE = MSCV6-16
 PATH_ROOT  = ..\..\..\..
 !include $(PATH_ROOT)\make\setup.mak
 !include ..\..\makefile.inc

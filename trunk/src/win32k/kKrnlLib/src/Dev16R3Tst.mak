@@ -1,4 +1,4 @@
-# $Id: Dev16R3Tst.mak,v 1.4 2002-08-20 05:04:42 bird Exp $
+# $Id: Dev16R3Tst.mak,v 1.5 2002-08-20 05:47:52 bird Exp $
 
 #
 # kKrnlLib/Dev16R3Tst
@@ -14,7 +14,7 @@
 #
 !if [SET INCLUDE=]
 !endif
-BUILD_ENV  = MSCV6
+BUILD_ENV_FORCE = MSCV6
 PATH_ROOT  = ..\..\..\..
 !include $(PATH_ROOT)\make\setup.mak
 !include ..\..\makefile.inc
