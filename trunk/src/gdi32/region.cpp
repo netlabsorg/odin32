@@ -1,4 +1,4 @@
-/* $Id: region.cpp,v 1.12 2000-09-08 18:06:33 sandervl Exp $ */
+/* $Id: region.cpp,v 1.13 2000-10-02 16:01:57 phaller Exp $ */
 
 /*
  * GDI32 region code
@@ -960,7 +960,7 @@ ODINFUNCTIONNODBG4(HRGN, CreateEllipticRgn, int, left, int, top, int, right, int
 //******************************************************************************
 ODINFUNCTIONNODBG1(HRGN, CreateEllipticRgnIndirect, const RECT *, pRect)
 {
-   return ODIN_CreateEllipticRgn(pRect->left, pRect->top, pRect->right, pRect->bottom);
+   return CreateEllipticRgn(pRect->left, pRect->top, pRect->right, pRect->bottom);
 }
 //******************************************************************************
 //******************************************************************************
