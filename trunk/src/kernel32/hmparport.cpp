@@ -1,4 +1,4 @@
-/* $Id: hmparport.cpp,v 1.6 2001-11-23 16:07:19 phaller Exp $ */
+/* $Id: hmparport.cpp,v 1.7 2001-11-23 18:58:24 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -14,6 +14,7 @@
 #include <os2win.h>
 #include <string.h>
 #include <handlemanager.h>
+#include "handlenames.h"
 #include <heapstring.h>
 #include <winioctl.h>
 #include "hmdevice.h"
@@ -149,9 +150,10 @@ HMDeviceParPortClass::HMDeviceParPortClass(LPCSTR lpDeviceName) : HMDeviceHandle
   if(pData!= NULL)
     HMDeviceRegisterEx("LPT1", this, pData);
   
-  // @@@PH
-  // Note: also register \Device\ParallelPort1...
-  // -> we need the kernel object name space mapping
+  // add symbolic links to the "real name" of the device
+  HandleNamesAddSymbolicLink("\\Device\\ParallelPort1", "LPT1");
+  HandleNamesAddSymbolicLink("\\Device\\ParallelPort2", "LPT2");
+  HandleNamesAddSymbolicLink("\\Device\\ParallelPort3", "LPT3");
 }
 
 /*****************************************************************************

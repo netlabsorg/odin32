@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.74 2001-11-08 14:49:26 phaller Exp $ */
+/* $Id: HandleManager.cpp,v 1.75 2001-11-23 18:58:24 phaller Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -48,6 +48,7 @@
 #include "misc.h"
 
 #include "HandleManager.H"
+#include "handlenames.h"
 #include "HMDevice.h"
 #include "HMDisk.h"
 #include "HMOpen32.h"
@@ -983,6 +984,18 @@ HFILE HMCreateFile(LPCSTR lpFileName,
   }
   else
   {
+    // name resolving
+    CHAR szFilename[260];
+    if (TRUE == HandleNamesResolveName((PSZ)lpFileName,
+                            szFilename,
+                            sizeof(szFilename),
+                                       TRUE))
+    {
+      // use the resolved name
+      lpFileName = szFilename;
+    }
+      
+    
     pDeviceHandler = _HMDeviceFind((LPSTR)lpFileName);        /* find device */
     if (NULL == pDeviceHandler)                /* this name is unknown to us */
     {
@@ -1122,7 +1135,19 @@ HANDLE HMOpenFile(LPCSTR    lpFileName,
   VOID            *pDevData;
   PHMHANDLEDATA   pHMHandleData;
   DWORD           rc;                                     /* API return code */
-
+  
+  // name resolving
+  CHAR szFilename[260];
+  if (TRUE == HandleNamesResolveName((PSZ)lpFileName,
+                          szFilename,
+                          sizeof(szFilename),
+                                     TRUE))
+  {
+    // use the resolved name
+    lpFileName = szFilename;
+  }
+  
+  
   if(fuMode & OF_REOPEN) {
        pDeviceHandler = _HMDeviceFind((LPSTR)pOFStruct->szPathName);          /* find device */
   }
