@@ -1,4 +1,4 @@
-/* $Id: treeview.cpp,v 1.6 2000-03-31 14:44:25 cbratschi Exp $ */
+/* $Id: treeview.cpp,v 1.7 2000-04-08 18:32:55 cbratschi Exp $ */
 /* Treeview control
  *
  * Copyright 1998 Eric Kohl <ekohl@abo.rhein-zeitung.de>
@@ -11,7 +11,6 @@
  * TODO:
  *   Using DPA to store the item ptr would be good.
  *  -check custom draw
-                        uHotItem
  *   use separate routine to get item text/image.
  *
  * FIXMEs  (for personal use)
@@ -19,7 +18,7 @@
    -DblClick:   ctlmacro.exe's NM_DBLCLK seems to go wrong (returns FALSE).
    -treehelper: stack corruption makes big window.
  *
- * Status: in progress
+ * Status: complete (many things untested)
  * Version: 5.80
  */
 
@@ -34,8 +33,6 @@
  - bug in SetScrollInfo/ShowScrollBar: WM_SIZE and WM_NCPAINT problems (i.e. RegEdit)
  - VK_LEFT in WinHlp32 displays expanded icon
  - expand not finished
- - TVS_FULLROWSELECT
- - TVS_TRACKSELECT (called hottrack)
  - WM_ENABLE: draw disabled control
 */
 
@@ -660,6 +657,25 @@ static void TREEVIEW_DrawVLines(HDC hdc,TREEVIEW_INFO *infoPtr,TREEVIEW_ITEM *it
   }
 }
 
+static VOID TREEVIEW_DrawHottrackLine(HDC hdc,TREEVIEW_ITEM *item)
+{
+  HPEN hPen,hOldPen;
+  INT rop;
+
+  if (!item->visible) return;
+
+  rop = SetROP2(hdc,R2_XORPEN);
+  hPen = CreatePen(PS_SOLID,2,RGB(0,0,0));
+  hOldPen = SelectObject(hdc,hPen);
+
+  MoveToEx(hdc,item->text.left,item->text.bottom-1,NULL);
+  LineTo(hdc,item->text.right,item->text.bottom-1);
+
+  DeleteObject(hPen);
+  SelectObject(hdc,hOldPen);
+  SetROP2(hdc,rop);
+}
+
 static void
 TREEVIEW_DrawItem(HWND hwnd,HDC hdc,TREEVIEW_ITEM *item,DWORD dwStyle,TREEVIEW_INFO *infoPtr)
 {
@@ -934,9 +950,6 @@ TREEVIEW_DrawItem(HWND hwnd,HDC hdc,TREEVIEW_ITEM *item,DWORD dwStyle,TREEVIEW_I
 
   /* Draw insertion mark if necessary */
 
-  //if (infoPtr->insertMarkItem)
-  //              TRACE ("item:%d,mark:%d\n", (int)wineItem->hItem,
-  //                             (int) infoPtr->insertMarkItem);
   if (item->hItem == infoPtr->insertMarkItem)
   {
     HPEN hNewPen, hOldPen;
@@ -963,6 +976,10 @@ TREEVIEW_DrawItem(HWND hwnd,HDC hdc,TREEVIEW_ITEM *item,DWORD dwStyle,TREEVIEW_I
 
     SelectObject(hdc, hOldPen);
   }
+
+  //draw hot item if necessary
+  if (item->hItem == infoPtr->hotItem)
+    TREEVIEW_DrawHottrackLine(hdc,item);
 
   if (cditem & CDRF_NOTIFYPOSTPAINT)
     cditem = TREEVIEW_SendCustomDrawItemNotify(hwnd, hdc, item, CDDS_ITEMPOSTPAINT);
@@ -1290,7 +1307,7 @@ static void TREEVIEW_CalcItem(HWND hwnd,HDC hdc,DWORD dwStyle,TREEVIEW_INFO *inf
   }
 
   r.left = xpos;
-  if ((item->mask & TVIF_TEXT) && (item->pszText))
+  if ((item->mask & TVIF_TEXT) && item->pszText)
   {
     UINT  uTextJustify = DT_LEFT;
     HFONT hOldFont;
@@ -3284,6 +3301,9 @@ TREEVIEW_Expand (HWND hwnd, WPARAM wParam, LPARAM lParam)
   switch (flag & 0xF)
   {
     case TVE_COLLAPSE:
+    {
+      POINT oldLeftTop = infoPtr->lefttop;
+
       if (!wineItem->state & TVIS_EXPANDED)
         return 0;
 
@@ -3292,15 +3312,47 @@ TREEVIEW_Expand (HWND hwnd, WPARAM wParam, LPARAM lParam)
         wineItem->state &= ~(TVIS_EXPANDEDONCE | TVIS_EXPANDED);
         TREEVIEW_RemoveAllChildren (hwnd, wineItem);
       } else wineItem->state &= ~TVIS_EXPANDED;
+
+      //update window
+      //CB: todo: optimize!
+      TREEVIEW_UnqueueRefresh(hwnd,FALSE,FALSE);
+      //CB: todo: precalc expanded items here
+      TREEVIEW_CalcItems(hwnd,0,infoPtr);
+      TREEVIEW_Refresh(hwnd);
+      //CB: todo: check cx and cy to fit ranges!
+
+      //check selection
+      HTREEITEM hItem = infoPtr->selectedItem;
+
+      if (!TREEVIEW_ValidItem (infoPtr, hItem))
+        hItem = wineItem->hItem;
+      else
+      {
+        while (hItem)
+        {
+          hItem = infoPtr->items[(INT)hItem].parent;
+
+          if (hItem == wineItem->hItem)
+            break;
+        }
+      }
+
+      if (hItem)
+        TREEVIEW_DoSelectItem(hwnd,TVGN_CARET,hItem,TVC_UNKNOWN);
+
       break;
+    }
 
     case TVE_EXPAND:
+    {
+      POINT oldLeftTop = infoPtr->lefttop;
+
       if (wineItem->state & TVIS_EXPANDED)
         return 0;
 
       if (flag & TVE_EXPANDPARTIAL)
       {
-return FALSE; //CB: to check
+return FALSE; //CB: how does this work??? (only display one level? nonsense in MSDN docu)
         wineItem->state ^=TVIS_EXPANDED;
         wineItem->state |=TVIS_EXPANDEDONCE;
         break;
@@ -3334,52 +3386,28 @@ return FALSE; //CB: to check
         }
 
         wineItem->state |= TVIS_EXPANDEDONCE;
-        //TRACE(treeview, "  TVN_ITEMEXPANDING sent...\n");
 
         TREEVIEW_SendTreeviewNotify (hwnd,isUnicodeNotify(&infoPtr->header) ? TVN_ITEMEXPANDEDW:TVN_ITEMEXPANDEDA,TVE_EXPAND,0,(HTREEITEM)expand);
-
-        //TRACE(treeview, "  TVN_ITEMEXPANDED sent...\n");
-
       } else
       {
         /* this item has already been expanded */
         wineItem->state |= TVIS_EXPANDED;
       }
+
+      //update window
+      //CB: todo: optimize!
+      TREEVIEW_UnqueueRefresh(hwnd,FALSE,FALSE);
+      //CB: todo: precalc expanded items here
+      TREEVIEW_CalcItems(hwnd,0,infoPtr);
+      TREEVIEW_Refresh(hwnd);
+      //CB: todo: check cx and cy to fit ranges!
+
       break;
+    }
 
     default:
       return FALSE;
   }
-
-  /* If item was collapsed we probably need to change selection */
-  if (flag & TVE_COLLAPSE)
-  {
-     HTREEITEM hItem = infoPtr->selectedItem;
-
-     if (!TREEVIEW_ValidItem (infoPtr, hItem))
-        hItem = wineItem->hItem;
-     else
-     {
-        while ( hItem )
-        {
-           hItem = infoPtr->items[(INT)hItem].parent;
-
-           if (hItem == wineItem->hItem)
-              break;
-        }
-     }
-
-     if (hItem)
-        TREEVIEW_DoSelectItem(hwnd, TVGN_CARET, hItem, TVC_UNKNOWN);
-  }
-
-  //CB: todo: optimize!
-  TREEVIEW_UnqueueRefresh(hwnd,FALSE,FALSE);
-  //CB: todo: precalc expanded items here
-  infoPtr->uInternalStatus |= TV_CALCALL;
-  TREEVIEW_CalcItems(hwnd,0,infoPtr);
-  TREEVIEW_Refresh(hwnd);
-  //CB: todo: check cx and cy to fit ranges!
 
   return TRUE;
 }
@@ -3878,6 +3906,16 @@ static VOID TREEVIEW_CheckInfoTip(HWND hwnd)
     TREEVIEW_HideInfoTip(hwnd,infoPtr);
 }
 
+HTREEITEM TREEVIEW_GetHottrackItem(HWND hwnd,TREEVIEW_INFO *infoPtr,POINT pt)
+{
+  TVHITTESTINFO ht;
+
+  ht.pt = pt;
+  TREEVIEW_HitTest(hwnd,&ht,FALSE);
+
+  return (ht.hItem && (ht.flags & TVHT_ONITEM)) ? ht.hItem:0;
+}
+
 static LRESULT TREEVIEW_MouseMove(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   TREEVIEW_INFO *infoPtr = TREEVIEW_GetInfoPtr(hwnd);
@@ -3905,7 +3943,30 @@ static LRESULT TREEVIEW_MouseMove(HWND hwnd,WPARAM wParam,LPARAM lParam)
 
   if (dwStyle & TVS_TRACKSELECT)
   {
-    //CB: todo: hottracking
+    HTREEITEM hItem = TREEVIEW_GetHottrackItem(hwnd,infoPtr,pt);
+
+    if (infoPtr->hotItem != hItem)
+    {
+      TREEVIEW_ITEM *item;
+      HDC hdc = 0;
+
+      item =  TREEVIEW_ValidItem(infoPtr,infoPtr->hotItem);
+      if (item)
+      {
+        if (!hdc) hdc = GetDC(hwnd);
+        TREEVIEW_DrawHottrackLine(hdc,item);
+      }
+      if (hItem)
+      {
+        item = &infoPtr->items[(INT)hItem];
+        if (item)
+        {
+          if (!hdc) hdc = GetDC(hwnd);
+          TREEVIEW_DrawHottrackLine(hdc,item);
+        }
+      }
+      if (hdc) ReleaseDC(hwnd,hdc);
+    }
   }
 
   return 0;
@@ -4130,6 +4191,7 @@ TREEVIEW_DoSelectItem (HWND hwnd, INT action, HTREEITEM newSelect, INT cause)
   TREEVIEW_ITEM *prevItem,*wineItem;
   DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
   INT prevSelect;
+  BOOL refreshPrev = FALSE,refreshNew = FALSE;
 
   wineItem = TREEVIEW_ValidItem (infoPtr, (HTREEITEM)newSelect);
 
@@ -4163,9 +4225,15 @@ TREEVIEW_DoSelectItem (HWND hwnd, INT action, HTREEITEM newSelect, INT cause)
           return FALSE;       /* FIXME: OK? */
 
       if (prevItem)
+      {
+        refreshPrev = prevItem->state & TVIS_SELECTED;
         prevItem->state &= ~TVIS_SELECTED;
+      }
       if (wineItem)
+      {
+        refreshNew = !(wineItem->state & TVIS_SELECTED);
         wineItem->state |=  TVIS_SELECTED;
+      }
 
       infoPtr->selectedItem = (HTREEITEM)newSelect;
 
@@ -4181,8 +4249,78 @@ TREEVIEW_DoSelectItem (HWND hwnd, INT action, HTREEITEM newSelect, INT cause)
       }
 
       TREEVIEW_UnqueueRefresh(hwnd,TRUE,TRUE);
-      TREEVIEW_RefreshItem(hwnd,prevItem,FALSE);
-      TREEVIEW_RefreshItem(hwnd,wineItem,FALSE);
+      if (dwStyle & TVS_FULLROWSELECT)
+      {
+        TREEVIEW_ITEM *item;
+
+        //deselect last selected row
+        if (prevItem)
+        {
+          if (refreshPrev) TREEVIEW_RefreshItem(hwnd,prevItem,FALSE);
+          if (prevItem->upsibling)
+          {
+            item = &infoPtr->items[(INT)prevItem->upsibling];
+            while (item)
+            {
+              if (item->state & TVIS_SELECTED)
+              {
+                item->state &= ~TVIS_SELECTED;
+                TREEVIEW_RefreshItem(hwnd,item,FALSE);
+              }
+              item = &infoPtr->items[(INT)item->upsibling];
+            }
+          }
+          if (prevItem->sibling)
+          {
+            item = &infoPtr->items[(INT)prevItem->sibling];
+            while (item)
+            {
+              if (item->state & TVIS_SELECTED)
+              {
+                item->state &= ~TVIS_SELECTED;
+                TREEVIEW_RefreshItem(hwnd,item,FALSE);
+              }
+              item = &infoPtr->items[(INT)item->sibling];
+            }
+          }
+        }
+
+        //select new row
+        if (wineItem)
+        {
+          if (refreshNew) TREEVIEW_RefreshItem(hwnd,wineItem,FALSE);
+          if (wineItem->upsibling)
+          {
+            item = &infoPtr->items[(INT)wineItem->upsibling];
+            while (item)
+            {
+              if (!(item->state & TVIS_SELECTED))
+              {
+                item->state |= TVIS_SELECTED;
+                TREEVIEW_RefreshItem(hwnd,item,FALSE);
+              }
+              item = &infoPtr->items[(INT)item->upsibling];
+            }
+          }
+          if (wineItem->sibling)
+          {
+            item =  &infoPtr->items[(INT)wineItem->sibling];
+            while (item)
+            {
+              if (!(item->state & TVIS_SELECTED))
+              {
+                item->state |= TVIS_SELECTED;
+                TREEVIEW_RefreshItem(hwnd,item,FALSE);
+              }
+              item = &infoPtr->items[(INT)item->sibling];
+            }
+          }
+        }
+      } else
+      {
+        if (refreshPrev) TREEVIEW_RefreshItem(hwnd,prevItem,FALSE);
+        if (refreshNew) TREEVIEW_RefreshItem(hwnd,wineItem,FALSE);
+      }
 
       TREEVIEW_SendTreeviewNotify(hwnd,isUnicodeNotify(&infoPtr->header) ? TVN_SELCHANGEDW:TVN_SELCHANGEDA,cause,(HTREEITEM)prevSelect,(HTREEITEM)newSelect);
 
@@ -4192,16 +4330,22 @@ TREEVIEW_DoSelectItem (HWND hwnd, INT action, HTREEITEM newSelect, INT cause)
       prevItem = TREEVIEW_ValidItem (infoPtr, infoPtr->dropItem);
 
       if (prevItem)
+      {
+        refreshPrev = prevItem->state & TVIS_DROPHILITED;
         prevItem->state &= ~TVIS_DROPHILITED;
+      }
 
       infoPtr->dropItem = (HTREEITEM)newSelect;
 
       if (wineItem)
+      {
+        refreshNew = !(wineItem->state & TVIS_DROPHILITED);
         wineItem->state |=TVIS_DROPHILITED;
+      }
 
       TREEVIEW_UnqueueRefresh(hwnd,TRUE,TRUE);
-      TREEVIEW_RefreshItem(hwnd,prevItem,FALSE);
-      TREEVIEW_RefreshItem(hwnd,wineItem,FALSE);
+      if (refreshPrev) TREEVIEW_RefreshItem(hwnd,prevItem,FALSE);
+      if (refreshNew) TREEVIEW_RefreshItem(hwnd,wineItem,FALSE);
 
       break;
 
@@ -4241,16 +4385,15 @@ TREEVIEW_DoSelectItem (HWND hwnd, INT action, HTREEITEM newSelect, INT cause)
 static LRESULT
 TREEVIEW_SelectItem (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
- return TREEVIEW_DoSelectItem (hwnd, wParam, (HTREEITEM) lParam, TVC_UNKNOWN);
+  return TREEVIEW_DoSelectItem (hwnd, wParam, (HTREEITEM) lParam, TVC_UNKNOWN);
 }
 
 static LRESULT
 TREEVIEW_GetFont (HWND hwnd, WPARAM wParam, LPARAM lParam)
 {
- TREEVIEW_INFO *infoPtr = TREEVIEW_GetInfoPtr(hwnd);
+  TREEVIEW_INFO *infoPtr = TREEVIEW_GetInfoPtr(hwnd);
 
-// TRACE (treeview,"%x\n",infoPtr->hFont);
- return infoPtr->hFont;
+  return infoPtr->hFont;
 }
 
 static LRESULT
