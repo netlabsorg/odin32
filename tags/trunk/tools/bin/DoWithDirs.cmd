@@ -1,12 +1,13 @@
-/* $Id: DoWithDirs.cmd,v 1.3 2000-02-27 00:40:21 bird Exp $
+/* $Id: DoWithDirs.cmd,v 1.4 2000-03-11 17:11:30 bird Exp $
  *
- * Syntax: dowithdirs.cmd [-e<list of excludes>] [-cp] [-i] <cmd with args...>
+ * Syntax: dowithdirs.cmd [-e<list of excludes>] [-c] [-i] [-l] [-r] <cmd with args...>
  *    -e      Exclude directories.
  *    <list of excludes> is a INCLUDE-path styled list of directories.
- *    -cp     CD into the directory and execute the command.
+ *    -c      CD into the directory and execute the command.
  *            Default action is to pass the directory name as last argument.
  *    -i      Ignore command failure (rc=0)
  *    -r      Process diretories in reverse order.
+ *    -l      Lock directories for other dowithdirs.cmd processes. (-c required!)
  */
 
     call RxFuncAdd 'SysLoadFuncs', 'RexxUtil', 'SysLoadFuncs'
@@ -16,11 +17,12 @@
     fIgnoreFailure = 0;
     asIgnore.0 = 0;
     fCD = 0;
+    fLocking = 0;
     fReverse = 0;
 
     /* parse arguments */
-    parse arg sArg.1 sArg.2 sArg.3 sArg.4 sArg.5 sArg.6
-    sArg.0 = 6;
+    parse arg sArg.1 sArg.2 sArg.3 sArg.4 sArg.5 sArg.6 sArg.7
+    sArg.0 = 7;
     do i = 1 to sArg.0
         if (sArg.i <> '') then
         do
@@ -67,6 +69,11 @@
                         fReverse = 1;
                     end
 
+                    when ch = 'L' then
+                    do
+                        fLocking = 1;
+                    end
+
                     otherwise
                         say 'unknown argument:' sArg.i;
                         call syntax;
@@ -87,6 +94,13 @@
             say 'missing cmd.';
             call syntax;
         end
+    end
+
+    /* sanity check */
+    if (fLocking & \fCD) then
+    do
+        say '-l (Locking) requires -cd to be specified!';
+        call syntax;
     end
 
     /* process directories */
@@ -115,37 +129,93 @@
         end
 
         if \fFound then
-        do  /* execute the command */
+        do
+            /* switch execution type. */
             if (fCD) then
             do
+                /* exectute the command in the directory */
                 say '# entering directory:' asDirs.i;
+                /* save old dir and enter the new dir. */
                 sOldDir = directory();
                 call directory asDirs.i;
-                sCmds;
+
+                /* Lock the directory? */
+                fOK = 1;
+                if (fLocking) then
+                    if (\lockdir()) then
+                    do
+                        say '# - warning: Skipping '|| asDirs.i || ' - directory was locked.';
+                        fOK = 0;
+                    end
+
+                /* continue only if locking was successful. */
+                if (fOK) then
+                do
+                    /* execute command */
+                    sCmds;
+                    ret = rc;
+
+                    /* unlock directory */
+                    if (fLocking & fOk) then
+                        call unlockdir;
+
+                    /* check for return? */
+                    if (ret <> 0) then
+                    do
+                        /* complain and fail if errors aren't ignored. */
+                        say '# - rc = 'ret;
+                        if (\fIgnoreFailure) then
+                            exit(rc);
+                    end
+                end
+
+                /* restore old directory */
+                call directory sOldDir;
             end
             else
-                sCmds filespec('name', asDirs.i);
-
-            if (rc <> 0) then
             do
-                say 'rc='rc;
-                if (\fIgnoreFailure) then
-                    exit(rc);
+                /* execute the command with the directory as the last parameter */
+                sCmds filespec('name', asDirs.i);
+                if (rc <> 0) then
+                do
+                    say '# - rc = ' || rc;
+                    if (\fIgnoreFailure) then
+                        exit(rc);
+                end
             end
-
-            if (fCD) then
-                call directory sOldDir;
-        end
+        end /* loop */
     end
 
     exit(rc);
 
 
 syntax:
-    say 'Syntax: dowithdirs.cmd [-e<list of excludes>] [-cp] [-i] <cmd with args...>';
+    say 'Syntax: dowithdirs.cmd [-e<list of excludes>] [-c] [-i] [-l] [-r] <cmd with args...>';
     say '   -e      Exclude directories.';
     say '   <list of excludes> is a INCLUDE-path styled list of directories.';
-    say '   -cp     CD into the directory and execute the command.';
+    say '   -c      CD into the directory and execute the command.';
     say '           Default action is to pass the directory name as last argument.';
     say '   -i      Ignore command failure (rc=0)';
     say '   -r      Process diretories in reverse order.';
+    say '   -l      Lock directories for other dowithdirs.cmd processes. (-c required!)';
+    exit(-1)
+
+
+/*
+ * Locks the directory by creating a .dirlocked file in the directory.
+ * Returns  1 on success
+ *          0 on error
+ */
+lockdir: procedure
+    rc = stream('.dirlocked', 'c', 'open write');
+    return substr(rc, 1, 5) = 'READY';
+
+
+/*
+ * Unlocks thedirectory by deleting the .dirlocked file.
+ */
+unlockdir: procedure
+    rc = stream('.dirlocked', 'c', 'close');
+    call SysFileDelete '.dirlocked';
+    return 0;
+
