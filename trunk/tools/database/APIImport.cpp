@@ -1,4 +1,4 @@
-/* $Id: APIImport.cpp,v 1.2 2000-02-11 18:35:53 bird Exp $ */
+/* $Id: APIImport.cpp,v 1.3 2000-02-12 23:54:28 bird Exp $ */
 /*
  *
  * APIImport - imports a DLL or Dll-.def with functions into the Odin32 database.
@@ -34,7 +34,7 @@ static void syntax(void);
 static void openLog(void);
 static void closeLog(void);
 static long processFile(const char *pszFilename, const POPTIONS pOptions, long &cFunctions);
-static void demangle(const char *pszMangledName, char *pszDemangled);
+static void demangle(char *pszDemangled, const char *pszMangledName);
 
 
 /**
@@ -285,11 +285,17 @@ static long processFile(const char *pszFilename, const POPTIONS pOptions, long &
                             char szIntName[64];
                             char szName[64];
 
-                            demangle(export.achIntName, &szIntName[0]);
+                            /* exported name */
                             if (export.achName == '\0')
                                 sprintf(&szName[0], "Ordinal%04ld", export.ulOrdinal);
                             else
                                 strcpy(&szName[0], &export.achName[0]);
+
+                            /* internal name */
+                            if (export.achIntName[0] == '\0')
+                                demangle(&szIntName[0], &szName[0]);
+                            else
+                                demangle(&szIntName[0], export.achIntName);
 
                             fprintf(phLog, "%s: %08ld %-30s %s\n",
                                     pszFilename, export.ulOrdinal, &szName[0], &szIntName[0]);
@@ -341,10 +347,10 @@ static long processFile(const char *pszFilename, const POPTIONS pOptions, long &
 
 /**
  * Demangles stdcall functions.
- * @param       pszMangledName  Mangled name
  * @param       pszDemangled    Pointer to buffer which will hold the demangled name upon return.
+ * @param       pszMangledName  Mangled name
  */
-static void demangle(const char *pszMangledName, char *pszDemangled)
+static void demangle(char *pszDemangled, const char *pszMangledName)
 {
     int iEnd;
     /* check for @ */

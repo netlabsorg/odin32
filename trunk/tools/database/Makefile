@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.7 2000-02-11 23:54:25 bird Exp $
+# $Id: Makefile,v 1.8 2000-02-12 23:54:29 bird Exp $
 
 #
 # Common makefile for database utils. ICC edition
@@ -125,17 +125,10 @@ dep:
 # clean
 #
 clean:
-   -@$(RM) *.obj
-   -@$(RM) *.lib
-   -@$(RM) *.o
-   -@$(RM) *.a
-   -@$(RM) *.dll
-   -@$(RM) *.exe
-   -@$(RM) *.pch
-   -@$(RM) *.log
-   -@$(RM) *.map
-   @cd gd
-   @nmake /nologo clean
+   $(RM) *.obj *.lib *.o *.a *.dll *.exe *.pch *.log *.map *.html
+   cd gd
+   $(MAKE) /nologo clean
+   cd ..
 
 force:
     @$(ECHO) ...

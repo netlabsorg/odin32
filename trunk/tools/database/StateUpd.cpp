@@ -1,4 +1,4 @@
-/* $Id: StateUpd.cpp,v 1.10 2000-02-12 17:55:02 bird Exp $
+/* $Id: StateUpd.cpp,v 1.11 2000-02-12 23:54:29 bird Exp $
  *
  * StateUpd - Scans source files for API functions and imports data on them.
  *
@@ -12,6 +12,7 @@
 #define INCL_DOSFILEMGR
 #define INCL_DOSERRORS
 #define INCL_DOSMISC
+#define INCL_DOSPROCESS
 #include <os2.h>
 #include <stdio.h>
 #include <string.h>
@@ -53,6 +54,7 @@ static char *trim(char *psz);
 static void copy(char *psz, int jFrom, int iFrom, int jTo, int iTo, char **papszLines);
 static void copy(char *psz, char *pszFrom, int iFrom, char *pszTo, int iTo, char **papszLines);
 static char *stristr(const char *pszStr, const char *pszSubStr);
+static char *skipBackwards(const char *pszStopAt, const char *pszFrom, int &iLine, char **papszLines);
 
 
 /**
@@ -74,8 +76,10 @@ int main(int argc, char **argv)
     char          *pszDatabase = "Odin32";
     char          *pszUser     = "root";
     char          *pszPasswd   = "";
-    ULONG          ul1, ul2;
+    ULONG          ul0, ul1, ul2;
+
     DosError(0x3);
+    DosSetPriority(PRTYS_PROCESSTREE, PRTYC_REGULAR, 1, 0);
 
     /* get dll name from directory */
     ul1 = ul2 = 0;
@@ -285,13 +289,14 @@ int main(int argc, char **argv)
 
         /* write status to log */
         ul2 = dbGetNumberOfUpdatedFunction(options.lDllRefcode);
-        ul1 = dbCountFunctionInDll(options.lDllRefcode);
+        ul1 = dbCountFunctionInDll(options.lDllRefcode, FALSE);
+        ul0 = dbCountFunctionInDll(options.lDllRefcode, TRUE);
         fprintf(phLog, "-------------------------------------------------\n");
         fprintf(phLog, "-------- Functions which was not updated --------\n");
         dbGetNotUpdatedFunction(options.lDllRefcode, dbNotUpdatedCallBack);
         fprintf(phLog, "-------------------------------------------------\n");
         fprintf(phLog, "-------------------------------------------------\n\n");
-        fprintf(phLog,"Number of function in this DLL:        %4ld\n", ul1);
+        fprintf(phLog,"Number of function in this DLL:        %4ld (%ld)\n", ul1, ul0);
         fprintf(phLog,"Number of successfully processed APIs: %4ld (%ld)\n", (long)(0x0000FFFF & ulRc), ul2);
         fprintf(phLog,"Number of signals:                     %4ld\n", (long)(ulRc >> 16));
 
@@ -302,7 +307,7 @@ int main(int argc, char **argv)
         dbDisconnect();
 
         /* warn if error during processing. */
-        fprintf(stdout,"Number of function in this DLL:        %4ld\n", ul1);
+        fprintf(stdout,"Number of function in this DLL:        %4ld (%ld)\n", ul1, ul0);
         fprintf(stdout,"Number of successfully processed APIs: %4ld (%ld)\n", (long)(0x0000FFFF & ulRc), ul2);
         fprintf(stdout,"Number of signals:                     %4ld\n", (long)(ulRc >> 16));
         if ((int)(ulRc >> 16) > 0)
@@ -743,6 +748,8 @@ static unsigned long analyseFnDcl2(PFNDESC pFnDesc, char **papszLines, int i, in
     char *  psz, *pszEnd;
     int     cArgs;
     char *  apszArgs[30];
+    int     iClass;
+    char *  pszClass, *pszClassEnd;
 
     /* 1.*/
     iP1 = i;
@@ -752,7 +759,7 @@ static unsigned long analyseFnDcl2(PFNDESC pFnDesc, char **papszLines, int i, in
     if (papszLines[iP1] == NULL)
     {
         fprintf(phSignal, "%d: oops! didn't find end of function!, %d\n", pszFilename, __LINE__);
-        iRet = iP1;
+        iRet = iP1+1;
         return 0x00010000;
     }
 
@@ -763,50 +770,52 @@ static unsigned long analyseFnDcl2(PFNDESC pFnDesc, char **papszLines, int i, in
     else
     {
         pszFn = papszLines[--iFn];
-        pszFn += strlen(pszFn);
+        pszFn += strlen(pszFn) - (*pszFn != '\0');
     }
-    while (iFn >= i && *pszFn == ' ')
+    while (iFn >= 0 && *pszFn == ' ')
     {
         if (pszFn != papszLines[iFn])
             pszFn--;
         else
         {
             pszFn = papszLines[--iFn];
-            pszFn += strlen(pszFn);
+            pszFn += strlen(pszFn) - (*pszFn != '\0');
         }
     }
-    if (*pszFn == ' ' || *pszFn == '\0')
+    if (iFn < 0 || *pszFn == ' ' || *pszFn == '\0')
     {
         fprintf(phSignal, "%s: internal error!, %d\n", pszFilename, __LINE__);
-        iRet = iP1;
+        iRet = iP1+1;
         return 0x00010000;
     }
     pszFnEnd = pszFn;
-    pszFn = findStartOfWord(pszFn, papszLines[i]);
+    pszFn = findStartOfWord(pszFn, papszLines[iFn]);
 
     /* 2a. */
-    psz = pszFn;
-    while (psz >= papszLines[i] && *psz == ' ')
-        psz--;
-    if (psz > papszLines[i] && *psz == ':')
+    /* operators are not supported (BOOL kTime::operator > (const kTime &time) const) */
+    if (pszFn > papszLines[iFn])
     {
-        while (psz >= papszLines[i] && *psz == ' ')
-            psz--;
-        if (psz > papszLines[i] && *psz == ':')
-        {
-            while (psz >= papszLines[i] && *psz == ' ')
-                psz--;
-            if (psz > papszLines[i])
-                pszFn = findStartOfWord(psz, papszLines[i]);
-            else
-                fprintf(phLog, "%.*s: class name is not at same line as the ::\n", pszFnEnd - psz-1, psz+1);
-        }
-        else
-        {
-            fprintf(phLog, "%.*s: invalid class '::'\n", pszFnEnd - psz, psz);
-            return 0;
-        }
+        pszClassEnd = pszFn - 1;
+        iClass = iFn;
     }
+    else
+    {
+        pszClassEnd = pszFn - 1;
+        iClass = iFn - 1;
+    }
+    c = 2;
+    while (iClass >= 0 && c >= 0)
+    {
+        if (*pszClassEnd == ':')
+            c--;
+        else if (*pszClassEnd != ' ')
+            break;
+        pszClassEnd--;
+    }
+    if (*pszClassEnd != ' ' && c == 0)
+        pszClass = findStartOfWord(pszClassEnd, papszLines[iClass]);
+    else
+        pszClass = pszClassEnd = NULL;
 
     /* 3. */
     c = 1;
@@ -859,21 +868,26 @@ static unsigned long analyseFnDcl2(PFNDESC pFnDesc, char **papszLines, int i, in
     }
 
     /* 6. */
-    if (strnicmp(pszFn, "ODINFUNCTION", 12) == 0)
+    if (strnicmp(pszFn, "ODINFUNCTION", 12) == 0 || strnicmp(pszFn, "ODINPROCEDURE", 13) == 0)
     {
-        if (cArgs < 2)
+        BOOL fProc = strnicmp(pszFn, "ODINPROCEDURE", 13) == 0;
+        j = 0;
+        if (cArgs < (fProc ? 1 : 2))
         {
             fprintf(phSignal, "%s: Invalid ODINFUNCTION function too few parameters!\n", pszFilename);
             return 0x00010000;
         }
+
         /* return type */
-        pFnDesc->pszReturnType = apszArgs[0];
+        if (fProc)
+            pFnDesc->pszReturnType = "void";
+        else
+            pFnDesc->pszReturnType = apszArgs[j++];
 
         /* function name */
-        pFnDesc->pszName = apszArgs[1];
+        pFnDesc->pszName = apszArgs[j++];
 
         /* arguments */
-        j = 2;
         pFnDesc->cParams = 0;
         while (j+1 < cArgs)
         {
@@ -885,9 +899,30 @@ static unsigned long analyseFnDcl2(PFNDESC pFnDesc, char **papszLines, int i, in
     }
     else
     {
-        /* return type - not implemented TODO/FIXME! */
+        /* return type */
+        int     iReturn = pszClass != NULL ? iClass : iFn;
+        char *  pszReturn = pszClass != NULL ? pszClass : pszFn;
+
+        if (pszReturn != papszLines[iReturn])
+            pszReturn--;
+        else
+        {
+            pszReturn = papszLines[--iReturn];
+            pszReturn += strlen(pszReturn) - (*pszReturn != '\0');
+        }
+        pszReturn = skipBackwards("{};-+#:\"\'", pszReturn, iReturn, papszLines);
         *pszEnd = '\0';
-        copy(pszEnd, papszLines[i], i, pszFn-1, iFn, papszLines);
+        copy(pszEnd, pszReturn, iReturn, pszFn-1, iFn, papszLines);
+        if (strlen(pszEnd) > 1024)
+        {
+            fprintf(phSignal,"Fatal error! return statement is too larget. len=%d", strlen(pszEnd));
+            fprintf(phLog,   "Fatal error! return statement is too larget. len=%d", strlen(pszEnd));
+            fprintf(stderr,  "Fatal error! return statement is too larget. len=%d", strlen(pszEnd));
+            fflush(phLog);
+            fflush(phSignal);
+            fflush(stderr);
+        }
+        pszEnd = trim(pszEnd);
         pFnDesc->pszReturnType = *pszEnd == '\0' ? NULL : pszEnd;
         pszEnd = strlen(pszEnd) + pszEnd + 1;
         *pszEnd = '\0';
@@ -897,10 +932,13 @@ static unsigned long analyseFnDcl2(PFNDESC pFnDesc, char **papszLines, int i, in
             && stristr(pFnDesc->pszReturnType, "cdecl") != NULL)
         {   /* cdecl function is prefixed with an '_' */
             strcpy(pszEnd, "_");
-            strncat(pszEnd + 1, pszFn, pszFnEnd - pszFn+1);
         }
-        else
-            strncat(pszEnd, pszFn, pszFnEnd - pszFn+1);
+        if (pszClass != NULL)
+        {
+            strncat(pszEnd,pszClass, pszClassEnd - pszClass + 1);
+            strcat(pszEnd, "::");
+        }
+        strncat(pszEnd, pszFn, pszFnEnd - pszFn + 1);
         pFnDesc->pszName = pszEnd;
         pszEnd = strlen(pszEnd) + pszEnd + 1;
         *pszEnd = '\0';
@@ -1243,15 +1281,15 @@ static BOOL isFunction(char **papszLines, int i, POPTIONS pOptions)
             && *pszP1 != '{' && *pszP1 != '}')
         {
             pszP1 = strchr(papszLines[i], '(');
-            if (pszP1 != NULL && pszP1 > papszLines[i])
+            if (pszP1 != NULL && pszP1 >= papszLines[i])
             {
                 int  cchFnName  = 0;
                 char *pszFnName = pszP1 - 1;
 
-                while (pszFnName - cchFnName > papszLines[i] && pszFnName[cchFnName] == ' ')
+                while (pszFnName - cchFnName > papszLines[0] && pszFnName[cchFnName] == ' ')
                     cchFnName--, pszFnName--;
 
-                pszFnName = findStartOfWord(pszFnName, papszLines[i]);
+                pszFnName = findStartOfWord(pszFnName, papszLines[0]);
                 cchFnName += pszP1 - pszFnName;
                 if (cchFnName >= 0)
                 {
@@ -1293,6 +1331,7 @@ static BOOL isFunction(char **papszLines, int i, POPTIONS pOptions)
                                     fprintf(phLog, "Function found: %.*s\n", cchFnName, pszFnName);
                                     return TRUE;
                                 }
+                                /* FIXME: constructors with ':' afterwards are not supported !TODO! */
                             }
                         }
                     }
@@ -1525,7 +1564,7 @@ static char **createLineArray(char *pszFile)
 {
     char *psz = pszFile;
     char **papszLines = NULL;
-    int  cLines = 0;
+    int  cLines = 1;
 
     while (*psz != '\0')
     {
@@ -1543,8 +1582,8 @@ static char **createLineArray(char *pszFile)
     papszLines = (char**)calloc(cLines + 1, sizeof(char *));
     if (papszLines != NULL)
     {
-        cLines = 0;
-        psz = pszFile;
+        cLines = 1;
+        papszLines[0] = psz = pszFile;
         while (*psz != '\0')
         {
             if (*psz == '\r')
@@ -1627,7 +1666,7 @@ static void copy(char *psz, char *pszFrom, int iFrom, char *pszTo, int iTo, char
     copy(psz, pszFrom - papszLines[iFrom], iFrom, pszTo - papszLines[iTo], iTo, papszLines);
 }
 
-
+#if 0
 static void copy(char *psz, int jFrom, int iFrom, int jTo, int iTo, char **papszLines)
 {
     char chPrev = '\n';
@@ -1638,8 +1677,8 @@ static void copy(char *psz, int jFrom, int iFrom, int jTo, int iTo, char **papsz
     j = jFrom;
     while (i < iTo || (i == iTo && j <= jTo))
     {
-        if (papszLines[i][j] != '\0' &&
-            !(papszLines[i][j] == '/' && papszLines[i][j+1] == '/')  /* '//' coments */
+        if (papszLines[i][j] != '\0'
+            && !(papszLines[i][j] == '/' && papszLines[i][j+1] == '/')  /* '//' coments */
             )
         {
             /* copy char ? */
@@ -1677,6 +1716,64 @@ static void copy(char *psz, int jFrom, int iFrom, int jTo, int iTo, char **papsz
     *psz = '\0';
 }
 
+#else
+static void copy(char *psz, int jFrom, int iFrom, int jTo, int iTo, char **papszLines)
+{
+    char chPrev = '\n';
+    int i, j;
+    int fComment = FALSE;
+    int fFirst = TRUE;
+
+    i = iFrom;
+    j = jFrom;
+    while (i < iTo || (i == iTo && j <= jTo))
+    {
+        if (papszLines[i][j] != '\0'
+            && !(papszLines[i][j] == '/' && papszLines[i][j+1] == '/')  /* '//' coments */
+            && !(!fComment && fFirst && papszLines[i][j] == '#')
+            )
+        {
+            fFirst = papszLines[i][j] == ' ';
+
+            /* copy char ? */
+            if (!fComment)
+            {
+                fComment = papszLines[i][j] == '/' && papszLines[i][j+1] == '*';
+
+                if (!fComment && !(chPrev == ' ' && papszLines[i][j] == ' ') /* only one space char */
+                    && !(chPrev == '(' && papszLines[i][j] == ' ') /* no space after '(' */
+                    )
+                {
+                    if (chPrev == ' ' && (papszLines[i][j] == ',' || papszLines[i][j] == ')'))
+                        psz[-1] = papszLines[i][j]; /* no space before ',' and ')' */
+                    else
+                    {
+                        chPrev = *psz++ = papszLines[i][j];
+                        if (chPrev == '*')                  /* ensure ' ' after '*' */
+                            chPrev = *psz++ = ' ';
+                    }
+                }
+
+            }
+            else
+                if ((fComment = papszLines[i][j] != '*' || papszLines[i][j+1] != '/') == FALSE)
+                    j++;
+            j++;
+        }
+        else
+        {
+            /* next */
+            j = 0;
+            fFirst = TRUE;
+            i++;
+            if (chPrev != ' ' && chPrev != '(')
+                chPrev = *psz++ = ' ';
+        }
+    }
+    *psz = '\0';
+}
+#endif
+
 
 /**
  * Upcases a char.
@@ -1711,5 +1808,75 @@ static char *stristr(const char *pszStr, const char *pszSubStr)
     }
 
     return (char*)(*pszStr != '\0' ? pszStr - 1 : NULL);
+}
+
+
+
+/**
+ * Skips backwards until one of the chars in pszStopAt or star of file is reached.
+ * @returns   Pointer to end.
+ * @param     pszStopAt   Array of chars which we should stop at.
+ * @param     pszFrom     Start pointer.
+ * @param     iLine       Reference to index to array of lines. input: start line, output: result line.
+ * @param     papszLines  Array lines.
+ * @sketch
+ * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * @remark    Comments are skipped.
+ *            No tests for strings ("...asdf").
+ */
+static char *skipBackwards(const char *pszStopAt, const char *pszFrom, int &iLine, char **papszLines)
+{
+    BOOL        fComment = FALSE;
+    int         i = iLine;
+    const char *psz = pszFrom;
+
+    while (i >= 0)
+    {
+        /* check for stop char */
+        const char *psz1 = pszStopAt;
+        while (*psz1 != '\0')
+            if (*psz1++ == *psz)
+                break;
+        if (*psz1 != '\0')
+            break;
+
+        /* comment check */
+        if (!fComment && psz > papszLines[i] && *psz == '/' && psz[-1] == '*')
+            fComment = TRUE;
+        else if (fComment && *psz == '/' && psz[1] == '*')
+            fComment = FALSE;
+
+        /* ok position to return? */
+        if (!fComment)
+        {
+            iLine = i;
+            pszFrom = psz;
+        }
+
+        /* prev */
+        if (psz > papszLines[i])
+            psz--;
+        else
+        {   /* try find line comment */
+            do
+            {
+                char *pszStart = papszLines[--i];
+                while (*pszStart == ' ')
+                    pszStart++;
+                if (*pszStart != '\0' && *pszStart != '#'
+                    && !(*pszStart == '/' && pszStart[1] == '/'))
+                {   /* find '//' */
+                    pszStart = strstr(pszStart, "//");
+                    if (pszStart != NULL)
+                        psz = pszStart-1;
+                    else
+                        psz = papszLines[i] + strlen(papszLines[i]) - 1;
+                    break;
+                }
+            } while (i > 0);
+        }
+    }
+
+    return (char*)pszFrom;
 }
 
