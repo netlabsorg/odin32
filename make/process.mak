@@ -1,4 +1,4 @@
-# $Id: process.mak,v 1.20 2002-08-20 21:17:45 bird Exp $
+# $Id: process.mak,v 1.21 2002-08-22 03:25:48 bird Exp $
 
 #
 # Unix-like tools for OS/2
@@ -197,7 +197,7 @@ TARGET_LNK  = $(PATH_TARGET)\$(TARGET_NAME).lnk
 
 # Default import library file. (output)
 !ifndef TARGET_ILIB
-! if "$(TARGET_MODE)" == "DLL"
+! if "$(TARGET_MODE)" == "DLL" || "$(TARGET_ILIB_YES)" != ""
 TARGET_ILIB =$(PATH_LIB)\$(TARGET_NAME).$(EXT_ILIB)
 ! endif
 !endif
@@ -514,10 +514,11 @@ all: build
 # -----------------------------------------------------------------------------
 # The build rule - This runs all passes:
 #   1. Make Dependencies
-#   2. Make Libraries (all kinds)
-#   3. Make Executables
-#   4. Make Miscellaneous Targets
-#   5. Make Install
+#   2. Make Needed Tools (stuff required in the next steps)
+#   3. Make Libraries (all kinds)
+#   4. Make Executables
+#   5. Make Miscellaneous Targets
+#   6. Make Install
 # Note: In order to load dependencies we'll do a forwarding after making them.
 # -----------------------------------------------------------------------------
 build: _build
@@ -540,6 +541,7 @@ _build:  _build_banner_dep dep
 
 # internal rule used to reload dependencies.
 _build_new_dependencies_: \
+        _build_banner_needed        needed \
         _build_banner_lib           lib \
         _build_banner_executable    executable \
         _build_banner_miscellaneous miscellaneous \
@@ -552,18 +554,21 @@ _build_banner_clean:
 _build_banner_dep:
     @$(ECHO)$(CLRMAK)[Start Pass 1 - Make Dependencies] $(CLRRST)
     @SET _BUILD_PASS=1
-_build_banner_lib:
-    @$(ECHO)$(CLRMAK)[Start Pass 2 - Make Libraries] $(CLRRST)
+_build_banner_needed:
+    @$(ECHO)$(CLRMAK)[Start Pass 2 - Make Needed Tools] $(CLRRST)
     @SET _BUILD_PASS=2
-_build_banner_executable:
-    @$(ECHO)$(CLRMAK)[Start Pass 3 - Make Executables] $(CLRRST)
+_build_banner_lib:
+    @$(ECHO)$(CLRMAK)[Start Pass 3 - Make Libraries] $(CLRRST)
     @SET _BUILD_PASS=3
-_build_banner_miscellaneous:
-    @$(ECHO)$(CLRMAK)[Start Pass 4 - Make Miscellaneous Targets] $(CLRRST)
+_build_banner_executable:
+    @$(ECHO)$(CLRMAK)[Start Pass 4 - Make Executables] $(CLRRST)
     @SET _BUILD_PASS=4
-_build_banner_install:
-    @$(ECHO)$(CLRMAK)[Start Pass 5 - Make Install] $(CLRRST)
+_build_banner_miscellaneous:
+    @$(ECHO)$(CLRMAK)[Start Pass 5 - Make Miscellaneous Targets] $(CLRRST)
     @SET _BUILD_PASS=5
+_build_banner_install:
+    @$(ECHO)$(CLRMAK)[Start Pass 6 - Make Install] $(CLRRST)
+    @SET _BUILD_PASS=6
 
 
 
@@ -628,15 +633,28 @@ clean:
         .\*.err \
         .\.depend
 !endif
-!ifdef SUBDIRS
-    @$(TOOL_DODIRS) "$(SUBDIRS)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) NODEP=1 $@
+!ifdef SUBDIRS_CLEAN
+    @$(TOOL_DODIRS) "$(SUBDIRS_CLEAN)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) NODEP=1 $@
+!else
+! ifdef SUBDIRS
+    @$(TOOL_DODIRS) "$(SUBDIRS) $(SUBDIRS_NEEDED) $(SUBDIRS_LIB) $(SUBDIRS_EXECUTABLES) $(SUBDIRS_MISC)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) NODEP=1 $@
+! endif
 !endif
-!ifdef PREMAKEFILES
-    @$(TOOL_DOMAKES) "$(PREMAKEFILES)" $(TOOL_MAKE) NODEP=1 $@
+!ifdef PREMAKEFILES_CLEAN
+    @$(TOOL_DOMAKES) "$(PREMAKEFILES_CLEAN)" $(TOOL_MAKE) NODEP=1 $@
+!else
+! ifdef PREMAKEFILES
+    @$(TOOL_DOMAKES) "$(PREMAKEFILES) $(PREMAKEFILES_NEEDED) $(PREMAKEFILES_LIB) $(PREMAKEFILES_EXECUTABLES) $(PREMAKEFILES_MISC)" $(TOOL_MAKE) NODEP=1 $@
+! endif
 !endif
-!ifdef POSTMAKEFILES
-    @$(TOOL_DOMAKES) "$(POSTMAKEFILES)" $(TOOL_MAKE) NODEP=1 $@
+!ifdef POSTMAKEFILES_CLEAN
+    @$(TOOL_DOMAKES) "$(POSTMAKEFILES_CLEAN)" $(TOOL_MAKE) NODEP=1 $@
+!else
+! ifdef POSTMAKEFILES
+    @$(TOOL_DOMAKES) "$(POSTMAKEFILES) $(POSTMAKEFILES_NEEDED) $(POSTMAKEFILES_LIB) $(POSTMAKEFILES_EXECUTABLES) $(POSTMAKEFILES_MISC)" $(TOOL_MAKE) NODEP=1 $@
+! endif
 !endif
+
 !endif #!TESTCASE
 
 
@@ -657,109 +675,213 @@ dep:
 ! endif
         $(TOOL_DEP_FILES)
 !endif
-!ifdef SUBDIRS
-    @$(TOOL_DODIRS) "$(SUBDIRS)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) NODEP=1 $@
+!ifdef SUBDIRS_DEP
+    @$(TOOL_DODIRS) "$(SUBDIRS_DEP)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) NODEP=1 $@
+!else
+! ifdef SUBDIRS
+    @$(TOOL_DODIRS) "$(SUBDIRS) $(SUBDIRS_NEEDED) $(SUBDIRS_LIB) $(SUBDIRS_EXECUTABLES) $(SUBDIRS_MISC)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) NODEP=1 $@
+! endif
 !endif
-!ifdef PREMAKEFILES
-    @$(TOOL_DOMAKES) "$(PREMAKEFILES)" $(TOOL_MAKE) NODEP=1 $@
+!ifdef PREMAKEFILES_DEP
+    @$(TOOL_DOMAKES) "$(PREMAKEFILES_DEP)" $(TOOL_MAKE) NODEP=1 $@
+!else
+! ifdef PREMAKEFILES
+    @$(TOOL_DOMAKES) "$(PREMAKEFILES) $(PREMAKEFILES_NEEDED) $(PREMAKEFILES_LIB) $(PREMAKEFILES_EXECUTABLES) $(PREMAKEFILES_MISC)" $(TOOL_MAKE) NODEP=1 $@
+! endif
 !endif
-!ifdef POSTMAKEFILES
-    @$(TOOL_DOMAKES) "$(POSTMAKEFILES)" $(TOOL_MAKE) NODEP=1 $@
+!ifdef POSTMAKEFILES_DEP
+    @$(TOOL_DOMAKES) "$(POSTMAKEFILES_DEP)" $(TOOL_MAKE) NODEP=1 $@
+!else
+! ifdef POSTMAKEFILES
+    @$(TOOL_DOMAKES) "$(POSTMAKEFILES) $(POSTMAKEFILES_NEEDED) $(POSTMAKEFILES_LIB) $(POSTMAKEFILES_EXECUTABLES) $(POSTMAKEFILES_MISC)" $(TOOL_MAKE) NODEP=1 $@
+! endif
 !endif
 
 
 
 # -----------------------------------------------------------------------------
-# Pass 2 - The lib rule - Make libraries.
+# Pass 2 - The needed rule - Make need tools.
+#   That is tools and stuff that is required for the next passes.
+#   WARNING! These tools and stuff shouldn't rely on libraries and other
+#            results of later passes.
 # -----------------------------------------------------------------------------
-!ifdef SUBDIRS
-SUBDIRS_LIB = _subdir_lib
-$(SUBDIRS_LIB):
+!ifdef SUBDIRS_NEEDED
+_SUBDIRS_NEEDED = _subdir_needed
+$(_SUBDIRS_NEEDED):
+    @$(TOOL_DODIRS) "$(SUBDIRS_NEEDED)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) needed
+!else
+! ifdef SUBDIRS
+_SUBDIRS_NEEDED = _subdir_needed
+$(_SUBDIRS_NEEDED):
+    @$(TOOL_DODIRS) "$(SUBDIRS)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) needed
+! endif
+!endif
+
+!ifdef PREMAKEFILES_NEEDED
+_PREMAKEFILES_NEEDED = _premakefiles_needed
+$(_PREMAKEFILES_NEEDED):
+    @$(TOOL_DOMAKES) "$(PREMAKEFILES_NEEDED)" $(TOOL_MAKE) needed
+!else
+! ifdef PREMAKEFILES
+_PREMAKEFILES_NEEDED = _premakefiles_needed
+$(_PREMAKEFILES_NEEDED):
+    @$(TOOL_DOMAKES) "$(PREMAKEFILES)" $(TOOL_MAKE) needed
+! endif
+!endif
+
+!if "$(TARGET_NEEDED)" != ""
+needed:    $(_SUBDIRS_NEEDED) $(_PREMAKEFILES_NEEDED) target
+!else
+needed:    $(_SUBDIRS_NEEDED) $(_PREMAKEFILES_NEEDED)
+!endif
+!ifdef POSTMAKEFILES_NEEDED
+    @$(TOOL_DOMAKES) "$(POSTMAKEFILES_NEEDED)" $(TOOL_MAKE) $@
+!else
+! ifdef POSTMAKEFILES
+    @$(TOOL_DOMAKES) "$(POSTMAKEFILES)" $(TOOL_MAKE) $@
+! endif
+!endif
+
+
+
+# -----------------------------------------------------------------------------
+# Pass 3 - The lib rule - Make libraries.
+# -----------------------------------------------------------------------------
+!ifdef SUBDIRS_LIB
+_SUBDIRS_LIB = _subdir_lib
+$(_SUBDIRS_LIB):
+    @$(TOOL_DODIRS) "$(SUBDIRS_LIB)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) lib
+!else
+! ifdef SUBDIRS
+_SUBDIRS_LIB = _subdir_lib
+$(_SUBDIRS_LIB):
     @$(TOOL_DODIRS) "$(SUBDIRS)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) lib
+! endif
 !endif
 
-!ifdef PREMAKEFILES
-PREMAKEFILES_LIB = _premakefiles_lib
-$(PREMAKEFILES_LIB):
+!ifdef PREMAKEFILES_LIB
+_PREMAKEFILES_LIB = _premakefiles_lib
+$(_PREMAKEFILES_LIB):
+    @$(TOOL_DOMAKES) "$(PREMAKEFILES_LIB)" $(TOOL_MAKE) lib
+!else
+! ifdef PREMAKEFILES
+_PREMAKEFILES_LIB = _premakefiles_lib
+$(_PREMAKEFILES_LIB):
     @$(TOOL_DOMAKES) "$(PREMAKEFILES)" $(TOOL_MAKE) lib
+! endif
 !endif
 
-lib:    $(SUBDIRS_LIB) $(PREMAKEFILES_LIB) \
+lib:    $(_SUBDIRS_LIB) $(_PREMAKEFILES_LIB) \
 !if "$(TARGET_MODE)" == "LIB" || "$(TARGET_MODE)" == "SYSLIB" || "$(TARGET_MODE)" == "IFSLIB"
         $(TARGET) $(TARGET_PUBNAME) \
 !endif
         $(TARGET_ILIB)
-!ifdef POSTMAKEFILES
+!ifdef POSTMAKEFILES_LIB
+    @$(TOOL_DOMAKES) "$(POSTMAKEFILES_LIB)" $(TOOL_MAKE) $@
+!else
+! ifdef POSTMAKEFILES
     @$(TOOL_DOMAKES) "$(POSTMAKEFILES)" $(TOOL_MAKE) $@
+! endif
 !endif
 
 
 
 # -----------------------------------------------------------------------------
-# Pass 3 - The executable rule - Build the executables.
+# Pass 4 - The executable rule - Build the executables.
 # -----------------------------------------------------------------------------
-!ifdef SUBDIRS
-SUBDIRS_EXECUTABLE = _subdir_executable
-$(SUBDIRS_EXECUTABLE):
+!ifdef SUBDIRS_EXECUTABLE
+_SUBDIRS_EXECUTABLE = _subdir_executable
+$(_SUBDIRS_EXECUTABLE):
+    @$(TOOL_DODIRS) "$(SUBDIRS_EXECUTABLE)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) executable
+!else
+! ifdef SUBDIRS
+_SUBDIRS_EXECUTABLE = _subdir_executable
+$(_SUBDIRS_EXECUTABLE):
     @$(TOOL_DODIRS) "$(SUBDIRS)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) executable
+! endif
 !endif
 
-!ifdef PREMAKEFILES
-PREMAKEFILES_EXECUTABLE = _premakefiles_executable
-$(PREMAKEFILES_EXECUTABLE):
+!ifdef PREMAKEFILES_EXECUTABLE
+_PREMAKEFILES_EXECUTABLE = _premakefiles_executable
+$(_PREMAKEFILES_EXECUTABLE):
+    @$(TOOL_DOMAKES) "$(PREMAKEFILES_EXECUTABLE)" $(TOOL_MAKE) executable
+!else
+! ifdef PREMAKEFILES
+_PREMAKEFILES_EXECUTABLE = _premakefiles_executable
+$(_PREMAKEFILES_EXECUTABLE):
     @$(TOOL_DOMAKES) "$(PREMAKEFILES)" $(TOOL_MAKE) executable
+! endif
 !endif
 
 executable: \
-!if "$(TARGET_MODE)" != "LIB" && "$(TARGET_MODE)" != "SYSLIB" && "$(TARGET_MODE)" != "IFSLIB"
-        $(SUBDIRS_EXECUTABLE) $(PREMAKEFILES_EXECUTABLE) $(TARGET) $(TARGET_PUBNAME)
+!if "$(TARGET_MODE)" != "LIB" && "$(TARGET_MODE)" != "SYSLIB" && "$(TARGET_MODE)" != "IFSLIB" && "$(TARGET_NEEDED)" == ""
+        $(_SUBDIRS_EXECUTABLE) $(_PREMAKEFILES_EXECUTABLE) $(TARGET) $(TARGET_PUBNAME)
 ! if "$(TARGET)" != ""
     @$(ECHO) Successfully Built $(CLRFIL)$(TARGET)$(CLRRST)
 ! endif
 !else
-        $(SUBDIRS_EXECUTABLE) $(PREMAKEFILES_EXECUTABLE)
+        $(_SUBDIRS_EXECUTABLE) $(_PREMAKEFILES_EXECUTABLE)
 !endif
-!ifdef POSTMAKEFILES
+!ifdef POSTMAKEFILES_EXECUTABLE
+    @$(TOOL_DOMAKES) "$(POSTMAKEFILES_EXECUTABLE)" $(TOOL_MAKE) $@
+!else
+! ifdef POSTMAKEFILES
     @$(TOOL_DOMAKES) "$(POSTMAKEFILES)" $(TOOL_MAKE) $@
+! endif
 !endif
 
 
 
 # -----------------------------------------------------------------------------
-# Pass 4 - The miscellaneous rule - Makes other miscellaneous stuff like
+# Pass 5 - The miscellaneous rule - Makes other miscellaneous stuff like
 #   documentations etc. This is experimental for the moment.
 # -----------------------------------------------------------------------------
-!ifdef SUBDIRS
-SUBDIRS_MISC = _subdir_misc
+!ifdef SUBDIRS_MISC
+_SUBDIRS_MISC = _subdir_misc
 $(SUBDIRS_MISC):
+    @$(TOOL_DODIRS) "$(SUBDIRS_MISC)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) miscellaneous
+!else
+! ifdef SUBDIRS
+_SUBDIRS_MISC = _subdir_misc
+$(_SUBDIRS_MISC):
     @$(TOOL_DODIRS) "$(SUBDIRS)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) miscellaneous
+! endif
 !endif
 
-!ifdef PREMAKEFILES
-PREMAKEFILES_MISC = _premakefiles_misc
+!ifdef PREMAKEFILES_MISC
+_PREMAKEFILES_MISC = _premakefiles_misc
 $(PREMAKEFILES_MISC):
+    @$(TOOL_DOMAKES) "$(PREMAKEFILES_MISC)" $(TOOL_MAKE) miscellaneous
+!else
+! ifdef PREMAKEFILES
+_PREMAKEFILES_MISC = _premakefiles_misc
+$(_PREMAKEFILES_MISC):
     @$(TOOL_DOMAKES) "$(PREMAKEFILES)" $(TOOL_MAKE) miscellaneous
+! endif
 !endif
 
-miscellaneous:  $(SUBDIRS_MISC) $(PREMAKEFILES_MISC) \
+miscellaneous:  $(_SUBDIRS_MISC) $(_PREMAKEFILES_MISC) \
                 $(TARGET_DOCS) $(TARGET_MISC)
 !if "$(TARGET_DOCS)$(TARGET_MISC)" != ""
     @$(ECHO) Successfully Built $(CLRFIL)$(TARGET_DOCS) $(TARGET_MISC)$(CLRRST)
-!else
 !endif
-!ifdef POSTMAKEFILES
+!ifdef POSTMAKEFILES_MISC
+    @$(TOOL_DOMAKES) "$(POSTMAKEFILES_MISC)" $(TOOL_MAKE) $@
+!else
+! ifdef POSTMAKEFILES
     @$(TOOL_DOMAKES) "$(POSTMAKEFILES)" $(TOOL_MAKE) $@
+! endif
 !endif
 
 
 
 # -----------------------------------------------------------------------------
-# Pass 5 - The install rule - Copies target to main binary directory.
+# Pass 6 - The install rule - Copies target to main binary directory.
 #   Installation order is not concidered vital, so subdirectories and
 #   pre-makefiles are processed after this directory. This might be changed.
 # -----------------------------------------------------------------------------
 install:
-!if "$(TARGET_PUBLIC)" == ""
+!if "$(TARGET_PUBLIC)" == "" && "$(TARGET_PUBNAME)" == "" && "$(TARGET_PRIVATE)" == ""
 ! if "$(TARGET_MODE)" == "EXE"
     @$(ECHO) Installing $(CLRFIL)$(TARGET)$(CLRTXT) in directory $(CLRFIL)$(PATH_BIN)$(CLRRST)
     @if not exist $(TARGET) $(ECHO) $(CLRERR)WARNING: $(CLRFIL)$(TARGET)$(CLRERR) doesn't exist. $(CLRRST)
@@ -794,14 +916,26 @@ install:
 !if "$(TARGET_DOCS)" != ""
     $(TOOL_COPY) $(TARGET_DOCS) $(PATH_DOC)
 !endif
-!ifdef SUBDIRS
+!ifdef SUBDIRS_INSTALL
+    @$(TOOL_DODIRS) "$(SUBDIRS_INSTALL)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) $@
+!else
+! ifdef SUBDIRS
     @$(TOOL_DODIRS) "$(SUBDIRS)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) $@
+! endif
 !endif
-!ifdef PREMAKEFILES
+!ifdef PREMAKEFILES_INSTALL
+    @$(TOOL_DOMAKES) "$(PREMAKEFILES_INSTALL)" $(TOOL_MAKE) $@
+!else
+! ifdef PREMAKEFILES
     @$(TOOL_DOMAKES) "$(PREMAKEFILES)" $(TOOL_MAKE) $@
+! endif
 !endif
-!ifdef POSTMAKEFILES
+!ifdef POSTMAKEFILES_INSTALL
+    @$(TOOL_DOMAKES) "$(POSTMAKEFILES_INSTALL)" $(TOOL_MAKE) $@
+!else
+! ifdef POSTMAKEFILES
     @$(TOOL_DOMAKES) "$(POSTMAKEFILES)" $(TOOL_MAKE) $@
+! endif
 !endif
 
 
@@ -812,6 +946,7 @@ install:
 # -----------------------------------------------------------------------------
 !if "$(TARGET_MODE)" != "TESTCASE"
 !ifndef BUILD_OWN_TESTCASE_RULE
+
 !ifndef MAKEVER
 _TESTCASE_TST1 = [$(TOOL_EXISTS) testcase] == 0
 _TESTCASE_TST2 = [$(TOOL_EXISTS) testcase.mak] == 0
@@ -828,41 +963,39 @@ testcase:
 !if $(_TESTCASE_TST2)
     @$(TOOL_DOMAKES) "testcase.mak" $(TOOL_MAKE) $@
 !endif
-!ifdef SUBDIRS
+!ifdef SUBDIRS_TESTCASE
+    @$(TOOL_DODIRS) "$(SUBDIRS_TESTCASE)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) $@
+!else
+! ifdef SUBDIRS
     @$(TOOL_DODIRS) "$(SUBDIRS)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) $@
+! endif
 !endif
-!ifdef PREMAKEFILES
+!ifdef PREMAKEFILES_TESTCASE
+    @$(TOOL_DOMAKES) "$(PREMAKEFILES_TESTCASE)" $(TOOL_MAKE) $@
+!else
+! ifdef PREMAKEFILES
     @$(TOOL_DOMAKES) "$(PREMAKEFILES)" $(TOOL_MAKE) $@
+! endif
 !endif
-!ifdef POSTMAKEFILES
+!ifdef POSTMAKEFILES_TESTCASE
+    @$(TOOL_DOMAKES) "$(POSTMAKEFILES_TESTCASE)" $(TOOL_MAKE) $@
+!else
+! ifdef POSTMAKEFILES
     @$(TOOL_DOMAKES) "$(POSTMAKEFILES)" $(TOOL_MAKE) $@
+! endif
 !endif
-!endif
+
+!endif # BUILD_OWN_TESTCASE_RULE
 !endif #!TESTCASE
 
 
 
 # -----------------------------------------------------------------------------
 # The target rule - Build the target.
-#   Note: This also builds libraries in subdirectories and submakefiles.
+#   NOTE! NO SUBDIRS OR POST/PREMAKED INVOLVED!
 # -----------------------------------------------------------------------------
-!ifdef SUBDIRS
-SUBDIRS_TARGET = _subdir_target
-$(SUBDIRS_TARGET):
-    @$(TOOL_DODIRS) "$(SUBDIRS)" $(TOOL_MAKE) -f $(BUILD_MAKEFILE) target
-!endif
-
-!ifdef PREMAKEFILES
-PREMAKEFILES_TARGET = _premakefiles_target
-$(PREMAKEFILES_TARGET):
-    @$(TOOL_DOMAKES) "$(PREMAKEFILES)" $(TOOL_MAKE) target
-!endif
-
-target: $(SUBDIRS_TARGET) $(PREMAKEFILES_TARGET) $(TARGET) $(TARGET_ILIB) $(TARGET_PUBNAME)
+target: $(TARGET) $(TARGET_ILIB) $(TARGET_PUBNAME)
     @$(ECHO) Successfully Built $(CLRFIL)$(TARGET) $(TARGET_ILIB)$(CLRRST)
-!ifdef POSTMAKEFILES
-    @$(TOOL_DOMAKES) "$(POSTMAKEFILES)" $(TOOL_MAKE) $@
-!endif
 
 
 
