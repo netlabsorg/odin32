@@ -1,4 +1,4 @@
-/* $Id: db.cpp,v 1.16 2000-07-21 21:09:44 bird Exp $ *
+/* $Id: db.cpp,v 1.17 2000-07-29 14:12:47 bird Exp $ *
  *
  * DB - contains all database routines.
  *
@@ -904,16 +904,6 @@ unsigned long _System dbUpdateFunction(PFNDESC pFnDesc, signed long lDll, char *
      */
     for (k = 0; k < pFnDesc->cRefCodes; k++)
     {
-        BOOL    f = FALSE;
-
-        /*
-         * Set updated flag
-         */
-        sprintf(pszQuery, "UPDATE function SET updated = updated + 1 WHERE refcode = %ld",
-                pFnDesc->alRefCode[k]);
-        rc = mysql_queryu1(pmysql, pszQuery2);
-
-
         /*
          * Get current status
          */
@@ -921,6 +911,12 @@ unsigned long _System dbUpdateFunction(PFNDESC pFnDesc, signed long lDll, char *
         if (lCurrentState == -1 && dbGetLastErrorDesc() != NULL && strlen(dbGetLastErrorDesc()) != 0)
         {
             strcpy(pszError, dbGetLastErrorDesc());
+            /*
+             * Set updated flag
+             */
+            sprintf(pszQuery, "UPDATE function SET updated = updated + 1 WHERE refcode = %ld",
+                    pFnDesc->alRefCode[k]);
+            rc = mysql_queryu1(pmysql, pszQuery2);
             free(pszQuery2);
             return 1;
         }
@@ -929,89 +925,74 @@ unsigned long _System dbUpdateFunction(PFNDESC pFnDesc, signed long lDll, char *
         /*
          * Update function table first
          */
-        strcpy(pszQuery, "UPDATE function SET ");
+        strcpy(pszQuery, "UPDATE function SET updated = updated + 1");
         pszQuery += strlen(pszQuery);
 
         /* Status */
         if (lCurrentState != pFnDesc->lStatus
             && pFnDesc->lStatus != 0
-            && (lCurrentState == 0 || pFnDesc->lStatus != 99))
-        {
-            sprintf(pszQuery, "state = %ld", pFnDesc->lStatus);
-            f = TRUE;
-        }
-        pszQuery += strlen(pszQuery);
+            && (lCurrentState == 0 || pFnDesc->lStatus != 99)
+            )
+            pszQuery += sprintf(pszQuery, ", state = %ld", pFnDesc->lStatus);
+
+        /* File */
+        if (pFnDesc->lFile >= 0)
+            pszQuery += sprintf(pszQuery, ", file = %ld", pFnDesc->lFile);
+        else
+            pszQuery += sprintf(pszQuery, ", file = -1");
 
         /* return type */
         if (pFnDesc->pszReturnType != NULL)
-        {
-            if (f)  strcat(pszQuery, ", ");
-            pszQuery = sqlstrcat(pszQuery, "return = ",  pFnDesc->pszReturnType);
-            f = TRUE;
-        }
+            pszQuery = sqlstrcat(pszQuery, ", return = ",  pFnDesc->pszReturnType);
+        else
+            pszQuery += sprintf(pszQuery, ", return = NULL");
 
         /* Description */
         if (pFnDesc->pszDescription != NULL)
-        {
-            if (f)  strcat(pszQuery, ", ");
-            pszQuery = sqlstrcat(pszQuery, "description  = ", pFnDesc->pszDescription);
-            f = TRUE;
-        }
+            pszQuery = sqlstrcat(pszQuery, ", description  = ", pFnDesc->pszDescription);
+        else
+            pszQuery += sprintf(pszQuery, ", description = NULL");
 
         /* Remark */
         if (pFnDesc->pszRemark != NULL)
-        {
-            if (f)  strcat(pszQuery, ", ");
-            pszQuery = sqlstrcat(pszQuery,  "remark = ", pFnDesc->pszRemark);
-            f = TRUE;
-        }
+            pszQuery = sqlstrcat(pszQuery, ", remark = ", pFnDesc->pszRemark);
+        else
+            pszQuery += sprintf(pszQuery, ", remark = NULL");
 
         /* Description */
         if (pFnDesc->pszReturnDesc != NULL)
-        {
-            if (f)  strcat(pszQuery, ", ");
-            pszQuery = sqlstrcat(pszQuery,  "returndesc = ", pFnDesc->pszReturnDesc);
-            f = TRUE;
-        }
+            pszQuery = sqlstrcat(pszQuery,  ", returndesc = ", pFnDesc->pszReturnDesc);
+        else
+            pszQuery += sprintf(pszQuery, ", returndesc = NULL");
 
         /* Sketch */
         if (pFnDesc->pszSketch != NULL)
-        {
-            if (f)  strcat(pszQuery, ", ");
-            pszQuery = sqlstrcat(pszQuery,  "sketch = ", pFnDesc->pszSketch);
-            f = TRUE;
-        }
+            pszQuery = sqlstrcat(pszQuery,  ", sketch = ", pFnDesc->pszSketch);
+        else
+            pszQuery += sprintf(pszQuery, ", sketch = NULL");
 
         /* Equiv */
         if (pFnDesc->pszEquiv != NULL)
-        {
-            if (f)  strcat(pszQuery, ", ");
-            pszQuery = sqlstrcat(pszQuery,  "equiv = ", pFnDesc->pszEquiv);
-            f = TRUE;
-        }
+            pszQuery = sqlstrcat(pszQuery,  ", equiv = ", pFnDesc->pszEquiv);
+        else
+            pszQuery += sprintf(pszQuery, ", equiv = NULL");
 
         /* Time */
         if (pFnDesc->pszTime != NULL)
-        {
-            if (f)  strcat(pszQuery, ", ");
-            pszQuery = sqlstrcat(pszQuery,  "time = ", pFnDesc->pszTime);
-            f = TRUE;
-        }
+            pszQuery = sqlstrcat(pszQuery,  ", time = ", pFnDesc->pszTime);
+        else
+            pszQuery += sprintf(pszQuery, ", time = NULL");
 
         /* Execute update query? */
-        if (f)
+        sprintf(pszQuery + strlen(pszQuery), " WHERE refcode = %ld", pFnDesc->alRefCode[k]);
+        rc = mysql_queryu2(pmysql, pszQuery2);
+        if (rc < 0)
         {
-            sprintf(pszQuery + strlen(pszQuery), " WHERE refcode = %ld", pFnDesc->alRefCode[k]);
-            rc = mysql_queryu2(pmysql, pszQuery2);
-            if (rc < 0)
-            {
-                sprintf(pszError, "Updating functiontable failed with error: %s - (sql=%s) ",
-                        dbGetLastErrorDesc(), pszQuery2);
-                pszError += strlen(pszError) - 1;
-                ulRc++;
-            }
+            sprintf(pszError, "Updating functiontable failed with error: %s - (sql=%s) ",
+                    dbGetLastErrorDesc(), pszQuery2);
+            pszError += strlen(pszError) - 1;
+            ulRc++;
         }
-
 
 
         /*
@@ -1043,7 +1024,7 @@ unsigned long _System dbUpdateFunction(PFNDESC pFnDesc, signed long lDll, char *
                         {
                             if (*pszError == ' ')
                                 strcpy(pszError++, "\n\t");
-                            sprintf(pszError, "Updateing parameter %i failed with error: %s - (sql=%s) ",
+                            sprintf(pszError, "Updating parameter %i failed with error: %s - (sql=%s) ",
                                     i, dbGetLastErrorDesc(), pszQuery);
                             pszError += strlen(pszError) - 1;
                             ulRc++;
@@ -2019,12 +2000,13 @@ BOOL             _System dbDeleteNotUpdatedFiles(signed long lDll)
  * @returns     Success indicator. (TRUE / FALSE)
  * @param       lDll    The refcode of the dll owning the functions.
  * @param       fAll    All function. If FALSE then only APIs and Internal APIs.
- * @sketch      Select all functions which has updated = 0 and dll = lDll.
+ * @sketch      Select all functions which wan't updated (ie. updated = 0 and dll = lDll).
+ *              If anyone Then
  *                  Delete the referenced to the functions in:
  *                      parameters
  *                      fnauthor
- *              Delete all function which has updated = 0 and dll = lDll
- *
+ *                  Delete all function which wasn't updated.
+ *              EndIf
  * @remark      Use with GREATE CARE!
  */
 BOOL             _System dbDeleteNotUpdatedFunctions(signed long lDll, BOOL fAll)
@@ -2041,6 +2023,7 @@ BOOL             _System dbDeleteNotUpdatedFunctions(signed long lDll, BOOL fAll
         strcat(&szQuery[0], " AND type IN ('A', 'I')");
     rc = mysql_query(pmysql, &szQuery[0]);
     pres = mysql_store_result(pmysql);
+
     if (pres != NULL && mysql_num_rows(pres))
     {
         MYSQL_ROW  row;
@@ -2056,15 +2039,24 @@ BOOL             _System dbDeleteNotUpdatedFunctions(signed long lDll, BOOL fAll
             rc = mysql_query(pmysql, &szQuery[0]);
             if (rc) fRc = FALSE;
         }
-    }
 
-    sprintf(&szQuery[0],
-            "DELETE FROM function WHERE dll = %ld AND updated = 0",
-            lDll);
-    if (!fAll)
-        strcat(&szQuery[0], " AND type IN ('A', 'I')");
-    rc = mysql_query(pmysql, &szQuery[0]);
-    if (rc) fRc = FALSE;
+        /*
+         * Delete the functions only if above completed without errors.
+         *
+         * Deleting the functions before all the references has successfully be
+         * deleted causes database corruption!
+         */
+        if (fRc)
+        {
+            sprintf(&szQuery[0],
+                    "DELETE FROM function WHERE dll = %ld AND updated = 0",
+                    lDll);
+            if (!fAll)
+                strcat(&szQuery[0], " AND type IN ('A', 'I')");
+            rc = mysql_query(pmysql, &szQuery[0]);
+            if (rc) fRc = FALSE;
+        }
+    }
 
     return fRc;
 }

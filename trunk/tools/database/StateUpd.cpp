@@ -1,4 +1,4 @@
-/* $Id: StateUpd.cpp,v 1.26 2000-07-21 21:09:43 bird Exp $
+/* $Id: StateUpd.cpp,v 1.27 2000-07-29 14:12:46 bird Exp $
  *
  * StateUpd - Scans source files for API functions and imports data on them.
  *
@@ -893,8 +893,9 @@ static unsigned long processAPI(char **papszLines, int i, int &iRet, const char 
     FNDESC        FnDesc;
     memset(&FnDesc, 0, sizeof(FnDesc));
 
-    /* default value */
+    /* default value and file number. */
     FnDesc.lStatus = 99;
+    FnDesc.lFile = pOptions->lFileRefcode;
 
     /* precondition: isFunction is true.
      * brief algorithm:

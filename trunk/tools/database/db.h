@@ -1,4 +1,4 @@
-/* $Id: db.h,v 1.11 2000-07-21 21:09:45 bird Exp $ */
+/* $Id: db.h,v 1.12 2000-07-29 14:12:47 bird Exp $ */
 /*
  * DB - contains all database routines
  *
@@ -43,48 +43,52 @@ extern "C" {
     typedef struct _FunctionDescription
     {
         /* buffers */
-        char  szFnDclBuffer[2048];
-        char  szFnHdrBuffer[10240];
+        char        szFnDclBuffer[2048];
+        char        szFnHdrBuffer[10240];
 
         /* function name and type */
-        char *pszName;
-        char *pszReturnType;
-        long  cRefCodes;
-        long  alRefCode[NBR_FUNCTIONS];
-        signed long  lImpDll; /* -1 is SQL-NULL, -2 is do not mind, >= 0 ref to dll. */
+        char *      pszName;
+        char *      pszReturnType;
+        long        cRefCodes;
+        long        alRefCode[NBR_FUNCTIONS];
+        signed long lImpDll; /* -1 is SQL-NULL, -2 is do not mind, >= 0 ref to dll. */
 
         /* parameters */
-        int   cParams;
-        char *apszParamType[NBR_PARAMETERS];
-        char *apszParamName[NBR_PARAMETERS];
-        char *apszParamDesc[NBR_PARAMETERS];
+        int         cParams;
+        char *      apszParamType[NBR_PARAMETERS];
+        char *      apszParamName[NBR_PARAMETERS];
+        char *      apszParamDesc[NBR_PARAMETERS];
 
         /* authors */
-        int   cAuthors;
-        char *apszAuthor[NBR_AUTHORS];
-        long  alAuthorRefCode[NBR_AUTHORS];
+        int         cAuthors;
+        char *      apszAuthor[NBR_AUTHORS];
+        long        alAuthorRefCode[NBR_AUTHORS];
 
         /* other description fields */
-        char *pszDescription;
-        char *pszRemark;
-        char *pszReturnDesc;
-        char *pszSketch;
-        char *pszEquiv;
-        char *pszTime;
+        char *      pszDescription;
+        char *      pszRemark;
+        char *      pszReturnDesc;
+        char *      pszSketch;
+        char *      pszEquiv;
+        char *      pszTime;
 
         /* status */
-        char *pszStatus;
-        long  lStatus;
+        char *      pszStatus;
+        long        lStatus;
+
+        /* file */
+        long        lFile;              /* File refcode which this function is implemented in. */
+                                        /* -1 if not valid. */
     } FNDESC, *PFNDESC;
 
 
     typedef struct _FunctionFindBuffer
     {
-        unsigned long cFns;
-        signed long   alRefCode[NBR_FUNCTIONS];
-        signed long   alDllRefCode[NBR_FUNCTIONS];
-        signed long   alAliasFn[NBR_FUNCTIONS];     /* -1 is SQL-NULL, -2 is "do not mind", >= 0 ref to function. */
-        signed long   alFileRefCode[NBR_FUNCTIONS]; /* -1 is SQL-NULL, -2 is "do not mind", >= 0 ref to file. */
+        unsigned long   cFns;
+        signed long     alRefCode[NBR_FUNCTIONS];
+        signed long     alDllRefCode[NBR_FUNCTIONS];
+        signed long     alAliasFn[NBR_FUNCTIONS];     /* -1 is SQL-NULL, -2 is "do not mind", >= 0 ref to function. */
+        signed long     alFileRefCode[NBR_FUNCTIONS]; /* -1 is SQL-NULL, -2 is "do not mind", >= 0 ref to file. */
     } FNFINDBUF, *PFNFINDBUF;
 
     typedef long (_System DBCALLBACKFETCH)(const char*, const char *, void *);
