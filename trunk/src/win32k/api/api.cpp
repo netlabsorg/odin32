@@ -1,4 +1,4 @@
-/* $Id: api.cpp,v 1.2 2001-01-20 23:51:06 bird Exp $
+/* $Id: api.cpp,v 1.3 2001-01-21 07:52:46 bird Exp $
  *
  * API Overload Init and Helper Function.
  *
@@ -13,9 +13,7 @@
 *******************************************************************************/
 #define INCL_DOSERRORS
 #define INCL_NOPMAPI
-#define INCL_OS2KRNL_SEM
-#define INCL_OS2KRNL_PTDA
-#define INCL_OS2KRNL_IO
+#define INCL_OS2KRNL_ALL
 
 
 /*******************************************************************************
@@ -34,9 +32,11 @@
 
 #include "log.h"
 #include "OS2Krnl.h"
+#include "ldrCalls.h"
 #include "dev32.h"
 #include "api.h"
 #include "options.h"
+#include "locks.h"
 
 
 
@@ -63,8 +63,9 @@ typedef struct _ApiDataEntry
 /*******************************************************************************
 *   Global Variables                                                           *
 *******************************************************************************/
-APIDATAENTRY    aApiData[API_MAX];      /* Array of api info. */
+APIDATAENTRY    aApiData[API_CENTRIES]; /* Array of api info. */
 PSZ             pszFile;                /* Pointer to entire file mapping. */
+RWLOCK          ApiInfoRWLock;          /* Read/Write lock for api data. */
 
 
 /*******************************************************************************
@@ -75,8 +76,11 @@ APIRET  apiParseIniFile(PSZ pszFile);
 PSZ     apiStripIniLine(PSZ pszFile, PSZ * ppszFile);
 int     apiInterpretApiNo(PSZ pszSection);
 void    apiFreeApiData(PAPIDATAENTRY paNewApiData);
-
-
+void    apiSortApiData(PAPIDATAENTRY paApiData);
+void    apiSortMaskArray(PMASKARRAY pMasks);
+BOOL    apiFindNameInMaskArray(PSZ pszName, PMASKARRAY pMasks);
+APIRET  apiGetProccessName(PSZ pszName);
+APIRET  apiGetModuleName(PSZ pszName, USHORT usCS, ULONG ulEIP);
 
 
 /**
@@ -196,7 +200,7 @@ APIRET  apiParseIniFile(PSZ pszFile)
             if (ch == '[')
             {
                 int iApi = apiInterpretApiNo(pszLine);
-                if (iApi >= 0 && iApi < API_MAX)
+                if (iApi >= 0 && iApi < API_CENTRIES)
                 {
                     PMASKARRAY pMaskArray = &paNewApiData[iApi].ModuleExc;
 
@@ -270,10 +274,11 @@ APIRET  apiParseIniFile(PSZ pszFile)
      */
     if (rc == NO_ERROR)
     {
-        /* add spin lock */
+        apiSortApiData(paNewApiData);
+        RWLockAcquireWrite(&ApiInfoRWLock);
         apiFreeApiData(&aApiData[0]);
         memcpy(&aApiData[0], paNewApiData, sizeof(aApiData));
-        /* remove spin lock */
+        RWLockReleaseWrite(&ApiInfoRWLock);
     }
     else
         apiFreeApiData(paNewApiData);
@@ -390,31 +395,222 @@ int     apiInterpretApiNo(PSZ pszSection)
 
 /**
  * Frees internal data in a api data structure.
- * @param   paNewApiData    Pointer to api data table.
+ * @param   paApiData   Pointer to api data table.
  * @sketch  Loop thru all api entries and free mask array pointers.
  * @status  Completely implemented.
  * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  * @remark  Any serialization is not my problem.
  */
-void    apiFreeApiData(PAPIDATAENTRY paNewApiData)
+void    apiFreeApiData(PAPIDATAENTRY paApiData)
 {
     int i;
 
-    for (i = 0; i < API_MAX; i++)
+    for (i = 0; i < API_CENTRIES; i++)
     {
-        if (paNewApiData[i].ProcessInc.cMasks)
-            rfree(paNewApiData[i].ProcessInc.papszMasks);
-        if (paNewApiData[i].ProcessExc.cMasks)
-            rfree(paNewApiData[i].ProcessExc.papszMasks);
-        if (paNewApiData[i].ModuleInc.cMasks)
-            rfree(paNewApiData[i].ModuleInc.papszMasks);
-        if (paNewApiData[i].ModuleExc.cMasks)
-            rfree(paNewApiData[i].ModuleExc.papszMasks);
+        if (paApiData[i].ProcessInc.cMasks)
+            rfree(paApiData[i].ProcessInc.papszMasks);
+        if (paApiData[i].ProcessExc.cMasks)
+            rfree(paApiData[i].ProcessExc.papszMasks);
+        if (paApiData[i].ModuleInc.cMasks)
+            rfree(paApiData[i].ModuleInc.papszMasks);
+        if (paApiData[i].ModuleExc.cMasks)
+            rfree(paApiData[i].ModuleExc.papszMasks);
     }
 }
 
 
+/**
+ * Sort the entire api data structure.
+ * @param   paApiData   Pointer to api data to sort.
+ * @sketch  Loop thru all entries and sort all four mask arrays.
+ * @status  completely implemented.
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @remark  See apiSortMaskArray.
+ */
+void    apiSortApiData(PAPIDATAENTRY paApiData)
+{
+    int i;
 
+    for (i = 0; i < API_CENTRIES; i++)
+    {
+        apiSortMaskArray(&paApiData[i].ProcessInc);
+        apiSortMaskArray(&paApiData[i].ProcessExc);
+        apiSortMaskArray(&paApiData[i].ModuleInc);
+        apiSortMaskArray(&paApiData[i].ModuleExc);
+    }
+}
+
+
+/**
+ * Sorts the content of an mask array.
+ * Duplicates are removed.
+ * @param   pMasks  Pointer to a mask array structure.
+ * @sketch  Use bouble sort.
+ * @status  partially implemented.
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @remark  Duplicate submasks aren't tested for.
+ *          example: "DOSCALL1.DLL" is equal to "DOS*"
+ */
+void    apiSortMaskArray(PMASKARRAY pMasks)
+{
+    int i;
+    PSZ pszTmp;
+
+    do
+    {
+        for (i = 1, pszTmp = NULL; i < pMasks->cMasks; i++)
+        {
+            int iDiff = strcmp(pMasks->papszMasks[i], pMasks->papszMasks[i-1]);
+            if (iDiff == 0)
+            {   /* remove entry */
+                memmove(&pMasks->papszMasks[i], &pMasks->papszMasks[i+1],
+                        (pMasks->cMasks - i - 1) * sizeof(pMasks->papszMasks[0]));
+                i--;
+            }
+            else if (iDiff < 0)
+            {   /* Swap entries. */
+                PSZ pszTmp = pMasks->papszMasks[i];
+                pMasks->papszMasks[i] = pMasks->papszMasks[i-1];
+                pMasks->papszMasks[i-1] = pszTmp;
+            }
+        }
+    } while (pszTmp != NULL);
+}
+
+
+/**
+ * Searches a mask array if there is any match for the given name.
+ * @returns TRUE if found.
+ *          FALSE if not found.
+ * @param   pszName     Pointer to name.
+ * @param   pMasks      Pointer to mask array.
+ * @sketch
+ * @status
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @remark
+ */
+BOOL    apiFindNameInMaskArray(PSZ pszName, PMASKARRAY pMasks)
+{
+    return FALSE;
+}
+
+
+/**
+ * Get the current process executable name.
+ * @returns OS/2 return code.
+ * @param   pszName     Pointer to output name buffer.
+ * @sketch  Get current ptda.
+ *          Get module handle (hmte) from current ptda.
+ *          Get pmte and smte from the hmte.
+ *          Check if there is any path (full filename).
+ *          Parse out filename+ext from full filename and copy it to pszName.
+ *          return.
+ * @status  completely implemented.
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ */
+APIRET  apiGetProccessName(PSZ pszName)
+{
+    PPTDA pPTDA = ptdaGetCur();
+    if (pPTDA)
+    {
+        HMTE hmte = ptdaGet_ptda_module(pPTDA);
+        if (hmte)
+        {
+            PMTE    pmte = ldrASMpMTEFromHandle(hmte);
+            PSMTE   psmte;
+            if (    pmte
+                && (psmte = pmte->mte_swapmte)
+                &&  psmte->smte_path
+                &&  *psmte->smte_path)
+            {
+                /*
+                 * Get executable name from swap mte.
+                 * We parse out the filename+ext and copies it to the output buffer.
+                 */
+                PCHAR   psz;
+                PCHAR   pszExt;
+                ldrGetFileName2(psmte->smte_path, (PCHAR*)SSToDS(&psz), (PCHAR*)SSToDS(&pszExt));
+                if (!psz) psz = psmte->smte_path;
+                strcpy(pszName, psz);
+                return NO_ERROR;
+            }
+            else
+                kprintf(("apiGetProcessName: failed to get pmte(0x%08x) from hmte(0x%04x) or no path.\n", pmte, hmte));
+        }
+        else
+            kprintf(("apiGetProcessName: This PTDA has no module handle. (pptda=0x%08x, hptda=0x%04)\n", pPTDA, ptdaGet_ptda_handle(pPTDA)));
+    }
+    else
+        kprintf(("apiGetProcessName: No current PTDA!\n"));
+
+    return ERROR_INVALID_PARAMETER;
+}
+
+/**
+ * Gets the module name from a given CS:EIP pair.
+ * @returns OS/2 return code.
+ * @param   pszName     Output buffer.
+ * @param   usCS        CS (code segment).
+ * @param   ulEIP       EIP (Extended Instruction Pointer).
+ * @sketch  Get hmte from cs:eip.
+ *          Get pmte and smte from the hmte.
+ *          Check if there is any path (full filename).
+ *          Parse out filename+ext from full filename and copy it to pszName.
+ *          return.
+ * @status  completely implemented.
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ */
+APIRET  apiGetModuleName(PSZ pszName, USHORT usCS, ULONG ulEIP)
+{
+    HMTE hmte = VMGetOwner(usCS, ulEIP);
+    if (hmte)
+    {
+        PMTE    pmte = ldrASMpMTEFromHandle(hmte);
+        PSMTE   psmte;
+        if (    pmte
+            && (psmte = pmte->mte_swapmte)
+            &&  psmte->smte_path
+            &&  *psmte->smte_path)
+        {
+            /*
+             * Get executable name from swap mte.
+             * We parse out the filename+ext and copies it to the output buffer.
+             */
+            PCHAR   psz;
+            PCHAR   pszExt;
+            ldrGetFileName2(psmte->smte_path, (PCHAR*)SSToDS(&psz), (PCHAR*)SSToDS(&pszExt));
+            if (!psz) psz = psmte->smte_path;
+            strcpy(pszName, psz);
+            return NO_ERROR;
+        }
+        else
+            kprintf(("apiGetModuleName: failed to get pmte(0x%08x) from hmte(0x%04x) or no path.\n", pmte, hmte));
+    }
+    else
+        kprintf(("apiGetModuleName: failed to get hmte from cs=%04x eip=%08x\n", usCS, ulEIP));
+
+    /*
+     * We failed.
+     */
+    return ERROR_INVALID_PARAMETER;
+}
+
+
+
+/**
+ * Checks if an api enhancement is enabled for this process or/and module.
+ * Exclusion lists rulez over inclusion.
+ * Excluded processes rulez over included modules.
+ * @returns TRUE (!0) if it's enabled.
+ *          FALSE (0) if it's disabled.
+ * @param   iApi    Api data id/index.
+ * @param   usCS    CS of the API caller.
+ * @param   ulEIP   EIP of the API caller.
+ * @sketch
+ * @status
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @remark
+ */
 BOOL _Optlink   APIQueryEnabled(int iApi, USHORT usCS, LONG ulEIP)
 {
     PAPIDATAENTRY   pEntry;
@@ -426,28 +622,51 @@ BOOL _Optlink   APIQueryEnabled(int iApi, USHORT usCS, LONG ulEIP)
         return FALSE;
 
     /*
-     * Aquire read lock - TODO.
+     * Aquire read lock.
      */
-
+    RWLockAcquireRead(&ApiInfoRWLock);
 
     /*
      * Get data entry pointer.
      * Check if entry is enabled.
      */
-    pEntry = &aApiInfo[iApi];
+    BOOL    fRet = FALSE;
+    pEntry = &aApiData[iApi];
     if (pEntry->fEnabled)
     {
         CHAR    szName[CCHMAXPATH];
+        PSZ     pszName = (PSZ)SSToDS(&szName[0]);
 
+        if (pEntry->ProcessExc.cMasks > 0 || pEntry->ProcessInc.cMasks > 0)
+        {
+            if (!apiGetProccessName(pszName))
+            {                           /* TODO - fix this priority - it's probably wrong */
+                if (pEntry->ProcessExc.cMasks)
+                    fRet = !apiFindNameInMaskArray(pszName, &pEntry->ProcessExc);
+                else if (pEntry->ProcessInc.cMasks)
+                    fRet = apiFindNameInMaskArray(pszName, &pEntry->ProcessInc);
+            }
+        }
+
+        if (    !pEntry->ProcessExc.cMasks
+            &&  !fRet
+            &&  (pEntry->ModuleExc.cMasks > 0 || pEntry->ModuleInc.cMasks > 0))
+        {
+            if (!apiGetModuleName(pszName, usCS, ulEIP))
+            {                           /* TODO - fix this priority - it's probably wrong */
+                if (pEntry->ModuleExc.cMasks)
+                    fRet = !apiFindNameInMaskArray(pszName, &pEntry->ModuleExc);
+                else if (pEntry->ProcessInc.cMasks)
+                    fRet = apiFindNameInMaskArray(pszName, &pEntry->ModuleInc);
+            }
+        }
     }
-    else
-        fRet = FALSE;
 
 
     /*
-     * Release read lock - TODO.
+     * Release read lock.
      */
-
+    RWLockReleaseRead(&ApiInfoRWLock);
 
     return fRet;
 }

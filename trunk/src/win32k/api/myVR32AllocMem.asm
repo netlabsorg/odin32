@@ -1,4 +1,4 @@
-; $Id: myVR32AllocMem.asm,v 1.2 2001-01-20 15:48:54 bird Exp $
+; $Id: myVR32AllocMem.asm,v 1.3 2001-01-21 07:52:46 bird Exp $
 ;
 ; VR32AllocMem over loader which adds the OBJ_ANY flag.
 ;
@@ -22,6 +22,7 @@ ARG_FLAGS   EQU     50h
 ; Include files
 ;
     include devsegdf.inc
+    include api.inc
     include bsememf.inc
     ifndef OBJ_ANY
     OBJ_ANY	EQU	00000400H
@@ -37,7 +38,7 @@ ARG_FLAGS   EQU     50h
 ;
 ; Externs
 ;
-    extrn apiApplyChange:PROC           ; system call?
+    extrn APIQueryEnabled:PROC
     extrn _VR32AllocMem@50:PROC
 
 
@@ -57,12 +58,13 @@ _myVR32AllocMem@50 proc near
     ;
     ; It was not - check if we're to set it for this calling module.
     ;
+    movzx   ecx, word  ptr [esp + SEF_CS]
+    mov     edx, dword ptr [esp + SEF_EIP]
     push    eax
-    push    dword ptr [esp + SEF_CS]
-    push    dword ptr [esp + SEF_EIP]
-    push    1
-    call    apiApplyChange
     sub     esp, 0ch
+    mov     eax, API_DOSALLOCMEM_ANY_OBJ
+    call    APIQueryEnabled
+    add     esp, 0ch
     test    eax, eax
     pop     eax
     jz      FLAT:call_vr
