@@ -1,4 +1,4 @@
-/* $Id: pmwindow.h,v 1.13 2001-10-29 13:37:01 sandervl Exp $ */
+/* $Id: pmwindow.h,v 1.14 2001-11-20 09:53:57 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -14,6 +14,8 @@
 #define WIN32_STDCLASS      "Win32WindowClass"
 #define WIN32_STDFRAMECLASS "Win32FrameClass"
 
+#define TIMERID_DRIVEPOLL 	0x1717
+
 BOOL InitPM();
 
 void RegisterSystemClasses(ULONG hModule);
@@ -23,6 +25,7 @@ extern ULONG ScreenWidth;
 extern ULONG ScreenHeight;
 extern ULONG ScreenBitsPerPel;
 extern BOOL  fOS2Look;
+extern HWND  hwndCD;
 
 #define TFOS_LEFT                    0x0001
 #define TFOS_TOP                     0x0002

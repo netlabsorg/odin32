@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.164 2001-11-07 15:36:09 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.165 2001-11-20 09:53:56 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -68,7 +68,7 @@ HBITMAP hbmFrameMenu[3] = {0};
 
 static PFNWP pfnFrameWndProc = NULL;
 static HWND  hwndFocusChange = 0;
-static HWND  hwndCD = 0;
+       HWND  hwndCD = 0;
 
 // Note:
 // For a "lonekey"-press of AltGr, we only receive WM_KEYUP
@@ -246,7 +246,6 @@ void WIN32API SetWindowAppearance(int fLooks)
 }
 //******************************************************************************
 //CD notification window class
-#define TIMERID_DRIVEPOLL 	0x1717
 //******************************************************************************
 MRESULT EXPENTRY Win32CDWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 {
@@ -373,6 +372,7 @@ MRESULT EXPENTRY Win32CDWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     }
 
     case WM_DESTROY:
+        dprintf(("WM_DESTROY for CD notification window"));
         WinStopTimer(hab, hwnd, TIMERID_DRIVEPOLL);
         break;
 
