@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.7 1999-10-09 16:28:24 cbratschi Exp $ */
+/* $Id: button.cpp,v 1.8 1999-10-10 11:26:34 cbratschi Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
@@ -8,11 +8,6 @@
  *
  * WINE version: 990923
  */
-
-/* CB: todo
-   - update checkboxes.bmp to Win9x style
-     + color and transparent mask
-*/
 
 #include <string.h>
 #include <stdlib.h>
@@ -25,7 +20,7 @@
 
 //Prototypes
 
-static void PaintGrayOnGray(HDC hDC,HFONT hFont,RECT *rc,char *text,UINT format);
+static void DrawDisabledText(HDC hdc,char* text,RECT* rtext,UINT format);
 
 static void PB_Paint(HWND hwnd,HDC hDC,WORD action);
 static void CB_Paint(HWND hwnd,HDC hDC,WORD action);
@@ -692,25 +687,13 @@ static void BUTTON_DrawPushButton(
     textLen = GetWindowTextLengthA(hwnd);
     if (textLen > 0 && (!(dwStyle & (BS_ICON|BS_BITMAP))))
     {
-        LOGBRUSH lb;
-
         textLen++;
         text = (char*)malloc(textLen);
         GetWindowTextA(hwnd,text,textLen);
-        GetObjectA( GetSysColorBrush(COLOR_BTNFACE), sizeof(lb), &lb );
-        if (dwStyle & WS_DISABLED && GetSysColor(COLOR_GRAYTEXT)==lb.lbColor)
+
+        if (dwStyle & WS_DISABLED) DrawDisabledText(hDC,text,&rc,DT_SINGLELINE | DT_CENTER | DT_VCENTER); else
         {
-	    dprintf(("Disable button"));
-            /* don't write gray text on gray background */
-            PaintGrayOnGray( hDC,infoPtr->hFont,&rc,text,
-                               DT_CENTER | DT_VCENTER );
-        }
-        else
-        {
-	    dprintf(("Enable button"));
-            SetTextColor( hDC, (dwStyle & WS_DISABLED) ?
-                                 GetSysColor(COLOR_GRAYTEXT) :
-                                 GetSysColor(COLOR_BTNTEXT) );
+            SetTextColor( hDC, GetSysColor(COLOR_BTNTEXT) );
             DrawTextA( hDC, text, -1, &rc,
                          DT_SINGLELINE | DT_CENTER | DT_VCENTER );
             /* do we have the focus?
@@ -801,71 +784,32 @@ static void BUTTON_DrawPushButton(
         }
     }
 
+    SelectObject( hDC, hOldPen );
+    SelectObject( hDC, hOldBrush );
+
     if (infoPtr->state & BUTTON_HASFOCUS)
     {
         InflateRect( &focus_rect, -1, -1 );
         DrawFocusRect( hDC, &focus_rect );
     }
-
-
-    SelectObject( hDC, hOldPen );
-    SelectObject( hDC, hOldBrush );
 }
 
-/**********************************************************************
- *   PB_Paint & CB_Paint sub function                        [internal]
- *   Paint text using a raster brush to avoid gray text on gray
- *   background. 'format' can be a combination of DT_CENTER and
- *   DT_VCENTER to use this function in both PB_PAINT and
- *   CB_PAINT.   - Dirk Thierbach
- *
- *   FIXME: This and TEXT_GrayString should be eventually combined,
- *   so calling one common function from PB_Paint, CB_Paint and
- *   TEXT_GrayString will be enough. Also note that this
- *   function ignores the CACHE_GetPattern funcs.
- */
 
-static void PaintGrayOnGray(HDC hDC,HFONT hFont,RECT *rc,char *text,
-                            UINT format)
+static void DrawDisabledText(HDC hdc,char* text,RECT* rtext,UINT format)
 {
-/*  This is the standard gray on gray pattern:
-    static const WORD Pattern[] = {0xAA,0x55,0xAA,0x55,0xAA,0x55,0xAA,0x55};
-*/
-/*  This pattern gives better readability with X Fonts.
-    FIXME: Maybe the user should be allowed to decide which he wants. */
-    static const WORD Pattern[] = {0x55,0xFF,0xAA,0xFF,0x55,0xFF,0xAA,0xFF};
+  COLORREF textColor = (GetSysColor(COLOR_GRAYTEXT) == GetBkColor(hdc)) ? COLOR_BTNTEXT:COLOR_GRAYTEXT;
+  RECT rect = *rtext;
+  COLORREF oldMode;
 
-    HBITMAP hbm  = CreateBitmap( 8, 8, 1, 1, Pattern );
-    HDC hdcMem = CreateCompatibleDC(hDC);
-    HBITMAP hbmMem;
-    HBRUSH hBr;
-    RECT rect,rc2;
-
-    rect=*rc;
-    DrawTextA( hDC, text, -1, &rect, DT_SINGLELINE | DT_CALCRECT);
-    /* now text width and height are in rect.right and rect.bottom */
-    rc2=rect;
-    rect.left = rect.top = 0; /* drawing pos in hdcMem */
-    if (format & DT_CENTER) rect.left=(rc->right-rect.right)/2;
-    if (format & DT_VCENTER) rect.top=(rc->bottom-rect.bottom)/2;
-    hbmMem = CreateCompatibleBitmap( hDC,rect.right,rect.bottom );
-    SelectObject( hdcMem, hbmMem);
-    PatBlt( hdcMem,0,0,rect.right,rect.bottom,WHITENESS);
-      /* will be overwritten by DrawText, but just in case */
-    if (hFont) SelectObject( hdcMem, hFont);
-    DrawTextA( hdcMem, text, -1, &rc2, DT_SINGLELINE);
-      /* After draw: foreground = 0 bits, background = 1 bits */
-    hBr = SelectObject( hdcMem, CreatePatternBrush(hbm) );
-    DeleteObject( hbm );
-    PatBlt( hdcMem,0,0,rect.right,rect.bottom,0xAF0229);
-      /* only keep the foreground bits where pattern is 1 */
-    DeleteObject( SelectObject( hdcMem,hBr) );
-    BitBlt(hDC,rect.left,rect.top,rect.right,rect.bottom,hdcMem,0,0,SRCAND);
-      /* keep the background of the dest */
-    DeleteDC( hdcMem);
-    DeleteObject( hbmMem );
+  //CB: bug in Open32 DrawText: underscore is always black! -> two black lines!
+  SetTextColor(hdc,GetSysColor(COLOR_3DHILIGHT));
+  DrawTextA(hdc,text,-1,&rect,format);
+  SetTextColor(hdc,GetSysColor(COLOR_GRAYTEXT));
+  oldMode = SetBkMode(hdc,TRANSPARENT);
+  OffsetRect(&rect,-1,-1);
+  DrawTextA(hdc,text,-1,&rect,format);
+  SetBkMode(hdc,oldMode);
 }
-
 
 /**********************************************************************
  *       Check Box & Radio Button Functions
@@ -954,32 +898,9 @@ static void CB_Paint(HWND hwnd,HDC hDC,WORD action)
 
         if( text && action != ODA_SELECT )
         {
-          if (dwStyle & WS_DISABLED &&
-              GetSysColor(COLOR_GRAYTEXT) == GetBkColor(hDC)) {
-            /* don't write gray text on gray background */
-            PaintGrayOnGray( hDC, infoPtr->hFont, &rtext, text,
-                             DT_VCENTER);
-          } else {
-            if (dwStyle & WS_DISABLED)
-            {
-              RECT rect = rtext;
-              COLORREF oldMode;
-              HPEN oldPen;
 
-//CB: bug in Open32 DrawText: underscore is always black!, need workaround
-//    extract to PaintText(HDC hdc,char* text,RECT* rect);
-              SetTextColor(hDC,GetSysColor(COLOR_3DHILIGHT));
-              oldPen = SelectObject(hDC,GetSysColorPen(COLOR_3DHIGHLIGHT));
-              DrawTextA(hDC,text,-1,&rect,DT_SINGLELINE | DT_VCENTER);
-              SetTextColor(hDC,GetSysColor(COLOR_GRAYTEXT));
-              SelectObject(hDC,GetSysColorPen(COLOR_GRAYTEXT));
-              oldMode = SetBkMode(hDC,TRANSPARENT);
-              OffsetRect(&rect,-1,-1);
-              DrawTextA(hDC,text,-1,&rect,DT_SINGLELINE | DT_VCENTER);
-              SetBkMode(hDC,oldMode);
-              SelectObject(hDC,oldPen);
-            } else DrawTextA(hDC,text,-1,&rtext,DT_SINGLELINE | DT_VCENTER);
-          }
+          if (dwStyle & WS_DISABLED) DrawDisabledText(hDC,text,&rtext,DT_SINGLELINE | DT_VCENTER);
+          else DrawTextA(hDC,text,-1,&rtext,DT_SINGLELINE | DT_VCENTER);
         }
     }
 
@@ -1064,14 +985,10 @@ static void GB_Paint(HWND hwnd,HDC hDC,WORD action)
         GetWindowTextA(hwnd,text,textLen);
         if (infoPtr->hFont) SelectObject( hDC, infoPtr->hFont );
         rc.left += 10;
-        if (dwStyle & WS_DISABLED &&
-            GetSysColor(COLOR_GRAYTEXT) == GetBkColor(hDC))
-            PaintGrayOnGray( hDC,infoPtr->hFont,&rc,text,DT_SINGLELINE | DT_NOCLIP );
-         else
+
+        if (dwStyle & WS_DISABLED) DrawDisabledText(hDC,text,&rc,DT_SINGLELINE | DT_NOCLIP); else
         {
-            SetTextColor( hDC, (dwStyle & WS_DISABLED) ?
-                                 GetSysColor(COLOR_GRAYTEXT) :
-                                 GetSysColor(COLOR_BTNTEXT) );
+            SetTextColor( hDC, GetSysColor(COLOR_BTNTEXT) );
             DrawTextA( hDC, text, -1, &rc,
                          DT_SINGLELINE | DT_NOCLIP );
         }
