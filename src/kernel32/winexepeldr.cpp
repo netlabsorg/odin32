@@ -1,4 +1,4 @@
-/* $Id: winexepeldr.cpp,v 1.16 2001-10-12 00:49:23 phaller Exp $ */
+/* $Id: winexepeldr.cpp,v 1.17 2001-11-22 10:41:29 phaller Exp $ */
 
 /*
  * Win32 PE loader Exe class
@@ -42,6 +42,7 @@
 
 #ifdef PROFILE
 #include <perfview.h>
+#include <profiler.h>
 #endif /* PROFILE */
 
 
@@ -151,6 +152,8 @@ BOOL WIN32API CreateWin32PeLdrExe(char *szFileName, char *szCmdLine,
   // Note: after this point, we might start collecting performance
   // information about the called functions.
   PerfView_Initialize();
+  ProfilerInitialize();
+  ProfilerEnable(TRUE);
 #endif /* PROFILE */
   
   

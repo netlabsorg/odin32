@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.136 2001-10-12 00:49:23 phaller Exp $ */
+/* $Id: wprocess.cpp,v 1.137 2001-11-22 10:41:29 phaller Exp $ */
 
 /*
  * Win32 process functions
@@ -49,6 +49,7 @@
 
 #ifdef PROFILE
 #include <perfview.h>
+#include <profiler.h>
 #endif /* PROFILE */
 
 
@@ -440,6 +441,8 @@ VOID WIN32API ExitProcess(DWORD exitcode)
   // so this is probably the best time to dump the gathered profiling
   // information
   PerfView_Write();
+  ProfilerWrite();
+  ProfilerTerminate();
 #endif /* PROFILE */
   
 
