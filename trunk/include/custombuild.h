@@ -89,6 +89,10 @@ void WIN32API DisableWaveAudio();
 //array access (to avoid name clash with Odin)
 void WIN32API SetCustomWndHandleSemName(LPSTR pszSemName);
 
+//Override shared semaphore name used to synchronize global memory map  
+//list access (to avoid name clash with Odin)
+void WIN32API SetCustomMMapSemName(LPSTR pszSemName);
+
 //Turn off ASPI
 void WIN32API DisableASPI();
 
