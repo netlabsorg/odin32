@@ -1,4 +1,4 @@
-/* $Id: winimage.h,v 1.5 1999-08-18 12:24:53 sandervl Exp $ */
+/* $Id: winimage.h,v 1.6 1999-08-18 17:16:05 sandervl Exp $ */
 
 /*
  *
@@ -26,6 +26,9 @@ extern char *ResTypes[MAX_RES];
 #define MAGIC_WINIMAGE          0x11223344
 #endif
 
+#ifndef CCHMAXPATH
+#define CCHMAXPATH 260
+#endif
 
 //SvL: Amount of memory the peldr dll reserves for win32 exes without fixups
 //(most of them need to be loaded at 4 MB; except MS Office apps of course)
@@ -124,6 +127,8 @@ virtual BOOL  init(ULONG reservedMem);
 virtual void setFullPath(char *name);
         char *getFullPath()           { return fullpath; };
 
+	char *getModuleName()	      { return szModule; };
+
         HRSRC   findResourceA(LPCSTR lpszName, LPSTR lpszType);
         HRSRC   findResourceW(LPWSTR lpszName, LPWSTR lpszType);
 
@@ -162,7 +167,7 @@ protected:
      Section *findSection(ULONG type);
      Section *findSectionByAddr(ULONG addr);
 
-        BOOL  storeSections();
+        BOOL  storeSections(char *win32file);
         BOOL  setMemFlags();
         BOOL  setFixups(PIMAGE_BASE_RELOCATION prel);
         void  AddOff32Fixup(ULONG fixupaddr);
@@ -181,8 +186,8 @@ protected:
         Section                  *pResSection;
         Win32Resource            *winres;
 
-        IMAGE_OPTIONAL_HEADER oh;
-        IMAGE_FILE_HEADER     fh;
+ 	IMAGE_OPTIONAL_HEADER oh;
+	IMAGE_FILE_HEADER     fh;
 
         ULONG                 errorState, entryPoint;
         ULONG                 nrNameExports, nameExportSize;
@@ -192,10 +197,11 @@ protected:
 
         ULONG                 nrsections, imageSize, imageVirtBase, imageVirtEnd;
         //OS/2 virtual base address
-        ULONG                 baseAddress, realBaseAddress;
+        ULONG                 realBaseAddress;
         Section               section[MAX_SECTION];
 
         char                 *szFileName, *fullpath;
+	char      	      szModule[CCHMAXPATH];
 
         HINSTANCE             hinstance;
 
@@ -224,6 +230,17 @@ private:
 #include <iostream.h>
 #include <fstream.h>
 extern ofstream fout;
+
+//SvL: This structure is placed at the end of the first page of the image (header 
+//     page), so we can determine the Win32Image pointer from a HINSTANCE variable
+//     (which is actually the address of the win32 module)
+typedef struct 
+{
+  Win32Image *image;
+  ULONG       magic; 
+} WINIMAGE_LOOKUP;
+
+#define WINIMAGE_LOOKUPADDR(a)	(WINIMAGE_LOOKUP *)((ULONG)a + PAGE_SIZE - sizeof(WINIMAGE_LOOKUP))
 
 #endif //__PE2LX__
 

@@ -1,4 +1,4 @@
-/* $Id: windll.h,v 1.4 1999-08-18 12:24:52 sandervl Exp $ */
+/* $Id: windll.h,v 1.5 1999-08-18 17:16:05 sandervl Exp $ */
 
 /*
  *
@@ -16,9 +16,6 @@
 
 #include "winimage.h"
 
-#ifndef CCHMAXPATH
-#define CCHMAXPATH 260
-#endif
 #ifndef HINSTANCE
 #define HINSTANCE ULONG
 #endif
@@ -88,9 +85,6 @@ protected:
 	WIN32DLLENTRY dllEntryPoint;
 private:
 	ULONG     referenced;
-	char      szModule[CCHMAXPATH];
-
-	char     *StripPath(char *path);
 
 
 static  Win32Dll *head;

@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.14 1999-08-17 17:04:51 sandervl Exp $ */
+/* $Id: KERNEL32.CPP,v 1.15 1999-08-18 17:17:59 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -61,31 +61,6 @@ BOOL WIN32API CloseHandle(HANDLE hHandle)
 
   return HMCloseHandle(hHandle);
 }
-
-
-//******************************************************************************
-HANDLE WIN32API GetModuleHandleA(LPCTSTR lpszModule)
-{
- HANDLE hMod;
-
-  hMod = OS2iGetModuleHandleA( (PSZ) lpszModule);
-  eprintf(("KERNEL32:  GetModuleHandle %s returned %X\n", lpszModule, hMod));
-  return(hMod);
-}
-//******************************************************************************
-//******************************************************************************
-HMODULE WIN32API GetModuleHandleW(LPCWSTR arg1)
-{
- HMODULE rc;
- char   *astring;
-
-    astring = UnicodeToAsciiString((LPWSTR)arg1);
-    rc = O32_GetModuleHandle(astring);
-    dprintf(("KERNEL32:  OS2GetModuleHandleW %s returned %X\n", astring, rc));
-    FreeAsciiString(astring);
-    return(rc);
-}
-//******************************************************************************
 //******************************************************************************
 HANDLE WIN32API GetStdHandle(DWORD fdwDevice)
 {

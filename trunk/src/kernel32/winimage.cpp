@@ -1,11 +1,10 @@
-/* $Id: winimage.cpp,v 1.10 1999-08-18 12:24:16 sandervl Exp $ */
+/* $Id: winimage.cpp,v 1.11 1999-08-18 17:18:01 sandervl Exp $ */
 
 /*
  * Win32 PE Image class
  *
  * Copyright 1998-1999 Sander van Leeuwen (sandervl@xs4all.nl)
  * Copyright 1998 Knut St. Osmundsen
- *
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -34,6 +33,7 @@
 #include "pefile.h"
 #include "unicode.h"
 #include "winres.h"
+#include "os2util.h"
 
 char szErrorTitle[]     = "Win32 for OS/2";
 char szMemErrorMsg[]    = "Memory allocation failure";
@@ -57,7 +57,7 @@ char *hex(ULONG num);
 //******************************************************************************
 Win32Image::Win32Image(char *szFileName) :
     errorState(NO_ERROR), entryPoint(0), nrsections(0), imageSize(0),
-    imageVirtBase(-1), baseAddress(0), realBaseAddress(0), imageVirtEnd(0),
+    imageVirtBase(-1), realBaseAddress(0), imageVirtEnd(0),
     nrNameExports(0), nrOrdExports(0), nameexports(NULL), ordexports(NULL),
     szFileName(NULL), NameTable(NULL), Win32Table(NULL), fullpath(NULL),
     tlsAddress(0), tlsIndexAddr(0), tlsInitSize(0), tlsTotalSize(0), tlsCallBackAddr(0), tlsIndex(-1),
@@ -72,8 +72,19 @@ Win32Image::Win32Image(char *szFileName) :
     fout.open("pe.log", ios::out | ios::trunc);
     foutInit = TRUE;
   }
-  hinstance = (HINSTANCE)this;
   this->szFileName = szFileName;
+
+  strcpy(szModule, StripPath(szFileName));
+  strupr(szModule);
+  char *dot = strstr(szModule, ".");
+  while(dot) {
+	char *newdot = strstr(dot+1, ".");
+	if(newdot == NULL)	break;
+	dot = newdot;
+  }
+  if(dot)
+	*dot = 0;
+
 #ifdef DEBUG
   magic = MAGIC_WINIMAGE;
 #endif
@@ -82,7 +93,7 @@ Win32Image::Win32Image(char *szFileName) :
 //******************************************************************************
 Win32Image::Win32Image(HINSTANCE hinstance, int NameTableId, int Win32TableId) :
     errorState(NO_ERROR), entryPoint(0), nrsections(0), imageSize(0),
-    imageVirtBase(-1), baseAddress(0), realBaseAddress(0), imageVirtEnd(0),
+    imageVirtBase(-1), realBaseAddress(0), imageVirtEnd(0),
     nrNameExports(0), nrOrdExports(0), nameexports(NULL), ordexports(NULL),
     szFileName(NULL), NameTable(NULL), Win32Table(NULL), fullpath(NULL),
     tlsAddress(0), tlsIndexAddr(0), tlsInitSize(0), tlsTotalSize(0), tlsCallBackAddr(0), tlsIndex(-1),
@@ -92,6 +103,18 @@ Win32Image::Win32Image(HINSTANCE hinstance, int NameTableId, int Win32TableId) :
   magic = MAGIC_WINIMAGE;
 #endif
   OS2ImageInit(hinstance, NameTableId, Win32TableId);
+
+  char *name = OS2GetDllName(hinstance);
+  strcpy(szModule, name);
+  strupr(szModule);
+  char *dot = strstr(szModule, ".");
+  while(dot) {
+	char *newdot = strstr(dot+1, ".");
+	if(newdot == NULL)	break;
+	dot = newdot;
+  }
+  if(dot)
+	*dot = 0;
 }
 //******************************************************************************
 //******************************************************************************
@@ -377,11 +400,12 @@ BOOL Win32Image::init(ULONG reservedMem)
         }
   }
   fout << "*************************PE SECTIONS END **************************" << endl;
-  imageSize += (imageVirtBase - oh.ImageBase);
+  imageSize += imageVirtBase - oh.ImageBase;
   fout << "Total size of Image " << imageSize << endl;
   fout << "imageVirtBase       " << imageVirtBase << endl;
   fout << "imageVirtEnd        " << imageVirtEnd << endl;
 
+  //In case there are any gaps between sections, adjust size
   if(imageSize != imageVirtEnd - oh.ImageBase) {
     	fout << "imageSize != imageVirtEnd - oh.ImageBase!" << endl;
     	imageSize = imageVirtEnd - oh.ImageBase;
@@ -390,12 +414,12 @@ BOOL Win32Image::init(ULONG reservedMem)
     	fout << "Failed to allocate image memory, rc " << errorState << endl;
     	return(FALSE);
   }
-  fout << "OS/2 base address " << baseAddress << endl;
-  if(storeSections() == FALSE) {
+  fout << "OS/2 base address " << realBaseAddress << endl;
+  if(storeSections((char *)win32file) == FALSE) {
     	fout << "Failed to store sections, rc " << errorState << endl;
     	return(FALSE);
   }
-  entryPoint = baseAddress + oh.AddressOfEntryPoint;
+  entryPoint = realBaseAddress + oh.AddressOfEntryPoint;
 
   if(tlsDir != NULL) {
    Section *sect = findSection(SECTION_TLS);
@@ -446,6 +470,10 @@ BOOL Win32Image::init(ULONG reservedMem)
     	//get offset in resource object of directory entry
     	pResDir = (PIMAGE_RESOURCE_DIRECTORY)ImageDirectoryOffset(win32file, IMAGE_DIRECTORY_ENTRY_RESOURCE);
   }
+
+  //SvL: Use pointer to image header as module handle now. Some apps needs this
+  hinstance = (HINSTANCE)realBaseAddress;
+
   //set final memory protection flags (storeSections sets them to read/write)
   if(setMemFlags() == FALSE) {
     	fout << "Failed to set memory protection" << endl;
@@ -473,12 +501,12 @@ void Win32Image::addSection(ULONG type, char *rawdata, ULONG rawsize, ULONG virt
   }
   virtsize   = ((virtsize - 1) & ~0xFFF) + PAGE_SIZE;
   imageSize += virtsize;
-  section[nrsections].virtualsize    = virtsize;
+  section[nrsections].virtualsize = virtsize;
 
   if(virtaddress < imageVirtBase)
     	imageVirtBase = virtaddress;
   if(virtaddress + virtsize > imageVirtEnd)
-    	imageVirtEnd = virtaddress + virtsize;
+    	imageVirtEnd  = virtaddress + virtsize;
 
   nrsections++;
 }
@@ -487,6 +515,7 @@ void Win32Image::addSection(ULONG type, char *rawdata, ULONG rawsize, ULONG virt
 BOOL Win32Image::allocSections(ULONG reservedMem)
 {
  APIRET rc;
+ ULONG  baseAddress;
 
   if(fh.Characteristics & IMAGE_FILE_RELOCS_STRIPPED) {
     	fout << "No fixups, might not run!" << endl;
@@ -524,44 +553,48 @@ Section *Win32Image::findSectionByAddr(ULONG addr)
 }
 //******************************************************************************
 #define FALLOC_SIZE (1024*1024)
+//NOTE: Needs testing (while loop)
+//TODO: Free unused (parts of) reservedMem
 //******************************************************************************
 BOOL Win32Image::allocFixedMem(ULONG reservedMem)
 {
  ULONG  address = 0;
- ULONG  lastaddress = 0;
- ULONG  firstaddress = 0;
- ULONG  diff, i;
+ ULONG  *memallocs;
+ ULONG  alloccnt = 0;
+ ULONG  diff, i, baseAddress;
  APIRET rc;
 
-  baseAddress = realBaseAddress = 0;
+  realBaseAddress = 0;
   
   if(reservedMem && reservedMem <= oh.ImageBase && 
      ((oh.ImageBase - reservedMem) + imageSize < PELDR_RESERVEDMEMSIZE)) 
   {
 	//ok, it fits perfectly
        	realBaseAddress = oh.ImageBase;
-       	baseAddress = oh.ImageBase;
 	return TRUE;
+  }
+
+  //Reserve enough space to store 4096 pointers to 1MB memory chunks
+  memallocs = (ULONG *)malloc(4096*sizeof(ULONG *));
+  if(memallocs == NULL) {
+	fout << "allocFixedMem: MALLOC FAILED for memallocs" << endl;
+	return FALSE;
   }
 
   while(TRUE) {
     	rc = DosAllocMem((PPVOID)&address, FALLOC_SIZE, PAG_READ);
     	if(rc) break;
 
-    	if(firstaddress == 0)
-        	firstaddress = address;
-
     	fout << "DosAllocMem returned " << address << endl;
     	if(address + FALLOC_SIZE >= oh.ImageBase) {
         	if(address > oh.ImageBase) {//we've passed it!
             		DosFreeMem((PVOID)address);
-            		return(FALSE);
+            		break;
         	}
         	//found the right address
         	DosFreeMem((PVOID)address);
-        	//align at 64 kb boundary
-        	realBaseAddress = oh.ImageBase & 0xFFFF0000;
-        	diff = realBaseAddress - address;
+
+        	diff = address - oh.ImageBase;
         	if(diff) {
             		rc = DosAllocMem((PPVOID)&address, diff, PAG_READ);
             		if(rc) break;
@@ -569,38 +602,63 @@ BOOL Win32Image::allocFixedMem(ULONG reservedMem)
         	rc = DosAllocMem((PPVOID)&baseAddress, imageSize, PAG_READ);
         	if(rc) break;
 
-        	if(baseAddress != realBaseAddress) {
-            		fout << "baseAddress != realBaseAddress!!" << endl;
-            		break;
-        	}
         	if(diff) DosFreeMem((PVOID)address);
 
-        	address = realBaseAddress;
         	realBaseAddress = baseAddress;
-        	baseAddress = oh.ImageBase;
         	break;
     	}
-    	lastaddress = address;
+	memallocs[alloccnt++] = address;
   }
-  while(firstaddress <= lastaddress) {
-    	DosFreeMem((PVOID)firstaddress);
-    	firstaddress += FALLOC_SIZE;
+  for(i=0;i<alloccnt;i++) {
+    	DosFreeMem((PVOID)memallocs[i]);
   }
-  if(baseAddress == 0) //Let me guess.. MS Office app?
+  free(memallocs);
+
+  if(realBaseAddress == 0) //Let me guess.. MS Office app?
     	return(FALSE);
 
   return(TRUE);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL Win32Image::storeSections()
+BOOL Win32Image::storeSections(char *win32file)
 {
  int i;
  APIRET rc;
  ULONG  pagFlags = PAG_COMMIT;
+ ULONG  headersize;
+ WINIMAGE_LOOKUP *imgLookup;
 
+  //Commit memory for image header
+  headersize = sizeof(IMAGE_DOS_HEADER) + sizeof(IMAGE_NT_HEADERS) + 
+	       sizeof(IMAGE_SECTION_HEADER) * fh.NumberOfSections;
+
+  if(headersize + sizeof(WINIMAGE_LOOKUP) < PAGE_SIZE) {
+	headersize = PAGE_SIZE;
+  }
+  else {//ooops, just in case this doesn't work
+	fout << "ERROR: storeSections: header too big!!!!!! Fatal error" << endl;
+	return FALSE;
+  }
+
+  rc = DosSetMem((PVOID)realBaseAddress, headersize, pagFlags | PAG_WRITE | PAG_READ);
+  if(rc) {
+	fout << "DosSetMem failed for Image header! " << rc << endl;
+	return FALSE;
+  }
+  // Store the NT header at the load addr 
+  memcpy((char *)realBaseAddress, win32file, sizeof(IMAGE_DOS_HEADER));
+  memcpy((char *)PE_HEADER(realBaseAddress), PE_HEADER(win32file), sizeof(IMAGE_NT_HEADERS));
+  memcpy(PE_SECTIONS(realBaseAddress), PE_SECTIONS(win32file),
+         sizeof(IMAGE_SECTION_HEADER) * fh.NumberOfSections );
+
+  imgLookup = WINIMAGE_LOOKUPADDR(realBaseAddress);
+  imgLookup->image = this;
+  imgLookup->magic = MAGIC_WINIMAGE;
+
+  // Process all the image sections
   for(i=0;i<nrsections;i++) {
-    	section[i].realvirtaddr = baseAddress + (section[i].virtaddr - oh.ImageBase);
+    	section[i].realvirtaddr = realBaseAddress + (section[i].virtaddr - oh.ImageBase);
   }
   for(i=0;i<nrsections;i++) {
     	pagFlags = PAG_COMMIT;
@@ -734,9 +792,9 @@ void Win32Image::AddOff32Fixup(ULONG fixupaddr)
  ULONG orgaddr;
  ULONG *fixup;
 
-  fixup   = (ULONG *)(fixupaddr - oh.ImageBase + baseAddress);
+  fixup   = (ULONG *)(fixupaddr - oh.ImageBase + realBaseAddress);
   orgaddr = *fixup;
-  *fixup  = baseAddress + (*fixup - oh.ImageBase);
+  *fixup  = realBaseAddress + (*fixup - oh.ImageBase);
 }
 //******************************************************************************
 //******************************************************************************
@@ -745,13 +803,13 @@ void Win32Image::AddOff16Fixup(ULONG fixupaddr, BOOL fHighFixup)
  ULONG   orgaddr;
  USHORT *fixup;
 
-  fixup   = (USHORT *)(fixupaddr - oh.ImageBase + baseAddress);
+  fixup   = (USHORT *)(fixupaddr - oh.ImageBase + realBaseAddress);
   orgaddr = *fixup;
   if(fHighFixup) {
-  	*fixup  += (USHORT)((baseAddress - oh.ImageBase) >> 16);
+  	*fixup  += (USHORT)((realBaseAddress - oh.ImageBase) >> 16);
   }
   else {
-  	*fixup  += (USHORT)((baseAddress - oh.ImageBase) & 0xFFFF);
+  	*fixup  += (USHORT)((realBaseAddress - oh.ImageBase) & 0xFFFF);
   }
 }
 //******************************************************************************
@@ -761,7 +819,7 @@ void Win32Image::StoreImportByOrd(Win32Dll *WinDll, ULONG ordinal, ULONG impaddr
  ULONG *import;
  ULONG  apiaddr;
 
-  import  = (ULONG *)(impaddr - oh.ImageBase + baseAddress);
+  import  = (ULONG *)(impaddr - oh.ImageBase + realBaseAddress);
   apiaddr = WinDll->getApi(ordinal);
   if(apiaddr == 0) {
     fout << "--->>> NOT FOUND!";
@@ -776,7 +834,7 @@ void Win32Image::StoreImportByName(Win32Dll *WinDll, char *impname, ULONG impadd
  ULONG *import;
  ULONG  apiaddr;
 
-  import = (ULONG *)(impaddr - oh.ImageBase + baseAddress);
+  import = (ULONG *)(impaddr - oh.ImageBase + realBaseAddress);
   apiaddr = WinDll->getApi(impname);
   if(apiaddr == 0) {
     fout << "--->>> NOT FOUND!";
@@ -892,7 +950,7 @@ void Win32Image::AddNameExport(ULONG virtaddr, char *apiname, ULONG ordinal)
     	curnameexport = (NameExport *)((ULONG)nameexports + nsize);
     	free(tmp);
   }
-  curnameexport->virtaddr = baseAddress + (virtaddr - oh.ImageBase);
+  curnameexport->virtaddr = realBaseAddress + (virtaddr - oh.ImageBase);
   curnameexport->ordinal  = ordinal;
   *(ULONG *)curnameexport->name = 0;
   strcpy(curnameexport->name, apiname);
@@ -911,7 +969,7 @@ void Win32Image::AddOrdExport(ULONG virtaddr, ULONG ordinal)
     	ordexports   = (OrdExport *)malloc(nrOrdExports * sizeof(OrdExport));
     	curordexport = ordexports;
   }
-  curordexport->virtaddr = baseAddress + (virtaddr - oh.ImageBase);
+  curordexport->virtaddr = realBaseAddress + (virtaddr - oh.ImageBase);
   curordexport->ordinal  = ordinal;
   curordexport++;
 }
@@ -1240,8 +1298,8 @@ ULONG MissingApi()
   fIgnore = TRUE;
   return(0);
 }
-//******************************************************************************
-//******************************************************************************
+/******************************************************************************/
+/******************************************************************************/
 /*heximal(decimal) KSO Sun 24.05.1998*/
 char szHexBuffer[30];
 
