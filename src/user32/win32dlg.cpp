@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.46 2000-02-24 19:19:08 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.47 2000-03-09 19:05:39 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -167,10 +167,10 @@ Win32Dialog::Win32Dialog(HINSTANCE hInst, LPCSTR dlgTemplate, HWND owner,
                 cs.lpszName  = UnicodeToAsciiString((LPWSTR)dlgInfo.caption);
         }
         else    cs.lpszName  = 0;
-        if(HIWORD(cs.lpszClass)) {
+        if(dlgInfo.className) {
                 cs.lpszClass = UnicodeToAsciiString((LPWSTR)dlgInfo.className);
         }
-        else    cs.lpszClass = dlgInfo.className;
+        else    cs.lpszClass = 0;
     }
     else {
         cs.lpszName       = dlgInfo.caption;
