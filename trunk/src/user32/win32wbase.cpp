@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.277 2001-07-20 15:34:17 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.278 2001-07-28 12:57:57 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -3629,9 +3629,31 @@ WORD Win32BaseWindow::SetWindowWord(int index, WORD value)
         SetLastError(ERROR_SUCCESS);
         return oldval;
     }
-    dprintf(("WARNING: SetWindowWord %x %d %x returned %x INVALID index!", getWindowHandle(), index, value));
-    SetLastError(ERROR_INVALID_INDEX);  //verified in NT4, SP6
-    return 0;
+    switch(index)
+    {
+    case GWW_HINSTANCE:
+        oldval = hInstance;
+        hInstance = value;
+        break;
+
+    case GWW_HWNDPARENT:
+        oldval = SetParent((HWND)(WNDHANDLE_MAGIC_HIGHWORD | value));
+        break;
+
+    case GWW_ID:
+        oldval = getWindowId();
+        setWindowId(value);
+        break;
+
+    default:
+        dprintf(("WARNING: SetWindowWord %x %d %x returned %x INVALID index!", getWindowHandle(), index, value));
+        SetLastError(ERROR_INVALID_INDEX);  //verified in NT4, SP6
+        return 0;
+    }
+    //Note: NT4, SP6 does not set the last error to 0
+    SetLastError(ERROR_SUCCESS);
+    dprintf2(("SetWindowWord %x %d %x returned %x", getWindowHandle(), index, value, oldval));
+    return oldval;
 }
 //******************************************************************************
 //******************************************************************************
@@ -3644,6 +3666,23 @@ WORD Win32BaseWindow::GetWindowWord(int index)
         dprintf2(("GetWindowWord %x %d %x", getWindowHandle(), index, *(WORD *)(userWindowBytes + index)));
         return *(WORD *)(userWindowBytes + index);
     }
+    switch(index)
+    {
+    case GWW_ID:         
+    	if(HIWORD(getWindowId()))
+            dprintf(("WARNING: GWW_ID: discards high bits of 0x%08x!\n", getWindowId()));
+        return (WORD)getWindowId();
+
+    case GWW_HWNDPARENT: 
+        dprintf(("WARNING: GWW_HWNDPARENT: discards high bits of 0x%08x!\n", GetParent()));
+    	return (WORD) GetParent();
+
+    case GWW_HINSTANCE:  
+    	if (HIWORD(hInstance))
+            dprintf(("WARNING: GWW_HINSTANCE: discards high bits of 0x%08x!\n", hInstance));
+        return (WORD)hInstance;
+    }
+
     dprintf(("WARNING: GetWindowWord %x %d returned %x INVALID index!", getWindowHandle(), index));
     SetLastError(ERROR_INVALID_INDEX);  //verified in NT4, SP6
     return 0;
