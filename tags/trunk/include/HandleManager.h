@@ -1,4 +1,4 @@
-/* $Id: HandleManager.h,v 1.10 1999-09-01 15:01:53 phaller Exp $ */
+/* $Id: HandleManager.h,v 1.11 1999-09-01 19:14:30 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -30,6 +30,10 @@
 /*****************************************************************************
  * Includes                                                                  *
  *****************************************************************************/
+
+#ifdef _OS2WIN_H
+#include <winos2def.h>
+#endif
 
 #ifndef __WINE_WINDEF_H
 typedef struct
