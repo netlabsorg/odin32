@@ -1,4 +1,4 @@
-/* $Id: datetime.c,v 1.5 1999-10-24 22:49:42 sandervl Exp $ */
+/* $Id: datetime.c,v 1.6 1999-12-18 20:56:58 achimha Exp $ */
 /*
  * Date and time picker control
  *
@@ -13,6 +13,8 @@
  *   - All notifications.
  *
  */
+
+/* WINE 991212 level */
 
 #include "winbase.h"
 #include "commctrl.h"
@@ -132,7 +134,7 @@ static void DATETIME_Refresh (HWND hwnd, HDC hdc)
   SYSTEMTIME date = infoPtr->date;
   SIZE size;
   BOOL prssed=FALSE;
-  COLORREF oldBk;
+  COLORREF oldBk = 0;
 
 
 
