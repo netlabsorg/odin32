@@ -1,4 +1,4 @@
-/* $Id: pe.cpp,v 1.29 2001-07-06 13:47:40 sandervl Exp $ */
+/* $Id: pe.cpp,v 1.30 2001-07-08 11:00:48 sandervl Exp $ */
 
 /*
  * PELDR main exe loader code
@@ -131,7 +131,7 @@ tryagain:
 					while(*p == ' ' && *p != 0) p++;
 				}
 			}
-                        if(nrTries && *p == 0) {
+                        if(nrTries > 1 && *p == 0) {
                             pszErrorMsg = szFileNotFound;
                             goto failerror;
                         }
