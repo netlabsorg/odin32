@@ -1,4 +1,4 @@
-/* $Id: relaywin.h,v 1.2 1999-12-02 07:47:26 phaller Exp $ */
+/* $Id: relaywin.h,v 1.3 1999-12-02 15:22:05 achimha Exp $ */
 
 /*
  *
@@ -35,17 +35,25 @@
  * Structures                                                                *
  *****************************************************************************/
 
+/* these are the request types so we can interpret the messages and convert the results */
+#define ASYNCREQUEST_SELECT 0
+#define ASYNCREQUEST_GETHOSTBYNAME 1
+
 typedef struct tagHwndMsgPair
 {
   HWND  hwnd;  /* target window            */
   ULONG ulMsg; /* the message code to send */
+  ULONG ulRequestType; /* the type of request that this belongs to */
+  PVOID pvUserData1; /* request specific data field */
+  PVOID pvUserData2; /* request specific data field */
 } HWNDMSGPAIR, *PHWNDMSGPAIR;
 
 /*****************************************************************************
  * Prototypes                                                                *
  *****************************************************************************/
 
-ULONG        RelayAlloc     (HWND  hwnd, ULONG ulMsg);
+ULONG RelayAlloc(HWND hwnd, ULONG ulMsg, ULONG ulRequestType,
+                 PVOID pvUserData1 = 0, PVOID pvUserData2 = 0);
 ULONG        RelayFree      (ULONG ulID);
 ULONG        RelayFreeByHwnd(HWND  hwnd);
 PHWNDMSGPAIR RelayQuery     (ULONG ulID);

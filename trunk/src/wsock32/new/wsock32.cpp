@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.8 1999-12-02 07:58:54 phaller Exp $ */
+/* $Id: wsock32.cpp,v 1.9 1999-12-02 15:22:05 achimha Exp $ */
 
 /*
  *
@@ -62,6 +62,7 @@ ODINDEBUGCHANNEL(WSOCK32-WSOCK32)
 
 static WSOCKTHREADDATA wstdFallthru; // for emergency only
 
+static HWND hwndRelay; // handle to our relay window
 
 /*****************************************************************************
  * Name      :
@@ -1267,11 +1268,32 @@ ODINFUNCTION5(LHANDLE,OS2WSAAsyncGetHostByName,
               char *,buf,
               int,buflen)
 {
-  return(WSAAsyncGetHostByName(hWnd,
-                               wMsg,
-                               name,
-                               buf,
-                               buflen));
+  int   rc;
+  HWND  hwndOS2 = Win32ToOS2Handle(hWnd);
+  ULONG ulNewID;
+  char *OS2Hostent = (char*)malloc(MAXGETHOSTSTRUCT);
+
+  if (hwndRelay == NULL) // already initialized ?
+    hwndRelay = RelayInitialize(hwndOS2);
+
+  // TODO: Is this the original behaviour?
+  if ((name == NULL) || (buf == NULL))
+  {
+    // remove entry from list
+    RelayFreeByHwnd(hWnd);
+  }
+  else
+    // add entry to list, we need to store both our temp buffer and the apps buffer
+    ulNewID = RelayAlloc(hWnd, wMsg, ASYNCREQUEST_GETHOSTBYNAME, buf, OS2Hostent);
+
+  // call pmwsock function, will fill our temp buffer
+  rc = WSAAsyncGetHostByName(hwndRelay,
+                             ulNewID,
+                             name,
+                             OS2Hostent,
+                             buflen);
+
+  return rc;
 }
 
 
@@ -1348,8 +1370,6 @@ ODINFUNCTION4(int,OS2WSAAsyncSelect,
   HWND  hwndOS2 = Win32ToOS2Handle(hWnd);
   ULONG ulNewID;
 
-  static HWND hwndRelay; // handle to our relay window
-
   if (hwndRelay == NULL) // already initialized ?
     hwndRelay = RelayInitialize(hwndOS2);
 
@@ -1379,7 +1399,7 @@ ODINFUNCTION4(int,OS2WSAAsyncSelect,
   }
   else
     // add entry to list
-    ulNewID = RelayAlloc(hWnd, wMsg);
+    ulNewID = RelayAlloc(hWnd, wMsg, ASYNCREQUEST_SELECT);
 
   rc = WSAAsyncSelect(s,
                       hwndRelay,

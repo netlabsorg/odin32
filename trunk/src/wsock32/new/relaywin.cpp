@@ -1,4 +1,4 @@
-/* $Id: relaywin.cpp,v 1.3 1999-12-02 07:47:26 phaller Exp $ */
+/* $Id: relaywin.cpp,v 1.4 1999-12-02 15:22:05 achimha Exp $ */
 
 /*
  *
@@ -37,6 +37,13 @@
 
 #include "relaywin.h"
 
+#include <pmwsock.h>
+#include <os2sel.h>
+#include <wprocess.h>
+#include <heapstring.h>
+#include <win32wnd.h>
+#include "wsock32.h"
+
 ODINDEBUGCHANNEL(WSOCK32-RELAYWIN)
 
 
@@ -52,7 +59,6 @@ static char*       ODIN_WSOCK_RELAY_CLASS = "ODIN_WSOCK_RELAY";
 
 
 // prototype for PostMessageA
-//BOOL _Stdcall PostMessageA(HWND,UINT,WPARAM,LPARAM);
 BOOL __stdcall PostMessageA(HWND,UINT,ULONG,ULONG);
 
 
@@ -68,7 +74,8 @@ BOOL __stdcall PostMessageA(HWND,UINT,ULONG,ULONG);
  * Author    : Patrick Haller [Tue, 1999/11/30 23:00]
  *****************************************************************************/
 
-ULONG RelayAlloc(HWND hwnd, ULONG ulMsg)
+ULONG RelayAlloc(HWND hwnd, ULONG ulMsg, ULONG ulRequestType,
+                 PVOID pvUserData1, PVOID pvUserData2)
 {
   ULONG ulCounter;
 
@@ -81,6 +88,9 @@ ULONG RelayAlloc(HWND hwnd, ULONG ulMsg)
       // occupy slot
       arrHwndMsgPair[ulCounter].hwnd  = hwnd;
       arrHwndMsgPair[ulCounter].ulMsg = ulMsg;
+      arrHwndMsgPair[ulCounter].ulRequestType = ulRequestType;
+      arrHwndMsgPair[ulCounter].pvUserData1 = pvUserData1;
+      arrHwndMsgPair[ulCounter].pvUserData2 = pvUserData2;
       return ulCounter; // return "id"
     }
 
@@ -189,14 +199,31 @@ MRESULT EXPENTRY RelayWindowProc(HWND   hwnd,
   // if (fTerminate)
   //   WinDefWindowProc()
   
-  //@@@PH: 1999/11/31 PROBLEM
-  // hwnd and ulMsg passed in have been converted by our USER32 code
-  // here, we ultimatively need to translate it back.
-  // under the debugger, things WORK now !:)
-  
   pHM = RelayQuery(ulMsg);                          // find registered message
   if (pHM != NULL)                                  // message pair found
   {
+    /* check request type for special handling */
+    if (pHM->ulRequestType == ASYNCREQUEST_GETHOSTBYNAME)
+    {
+      dprintf(("WSOCK32:RelayWindowProc, Converting hostent for WSAAyncGetHostByName\n"));
+      /* we need to convert the hostent structure here */
+      Whostent *WinHostent = (Whostent*)pHM->pvUserData1;
+      hostent *OS2Hostent = (hostent*)pHM->pvUserData2;
+      WinHostent->h_name = OS2Hostent->h_name;
+      WinHostent->h_aliases = OS2Hostent->h_aliases;
+      WinHostent->h_addrtype = (short)OS2Hostent->h_addrtype;
+      WinHostent->h_length = (short)OS2Hostent->h_length;
+      WinHostent->h_addr_list = OS2Hostent->h_addr_list;
+      /* free our temporary OS2 hostent buffer */
+//TODO: how can we free this? we will end up with a memory leak :(
+// this memory block not only contains the hostent structure but also the strings it points to
+//      free(pHM->pvUserData2);
+
+dprintf(("Size of Window hostent: %d, OS/2 hostent: %d, mp1: %d, mp2 %d\n", sizeof(Whostent), sizeof(hostent), mp1, mp2));
+
+    }
+
+    dprintf(("WSOCK32:RelayWinProc, Posting %d to %d\n", pHM->ulMsg, pHM->hwnd));
     PostMessageA(pHM->hwnd,
                  pHM->ulMsg,
                  (ULONG)mp1,
