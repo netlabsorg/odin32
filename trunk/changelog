@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.70 1999-08-05 11:44:02 sandervl Exp $ */
+ /* $Id: changelog,v 1.71 1999-08-05 13:14:18 phaller Exp $ */
+
+ 99-08-05: Patrick Haller <phaller@gmx.net>
+	- KERNEL32: interactive control over UnhandledExceptionFilter
 
  99-08-05: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Bitmap conversion bugfix; always recalculate bitmap size
