@@ -1,5 +1,5 @@
 /                                          sandervl phaller achimha cbratschi hugh davidr vince jtroster bird
-/CVSROOT                                   ktk
+/CVSROOT                                   ktk sandervl
 /bin                                       sandervl phaller achimha bird
 /include                                   sandervl phaller achimha bird
 /lib                                       sandervl phaller achimha bird
@@ -18,6 +18,7 @@
 /src/mpr                                   sandervl phaller achimha bird
 /src/NTDLL                                 sandervl phaller achimha
 /src/ole32                                 sandervl davidr achimha
+/src/oleaut32                              sandervl davidr
 /src/odincrt                               sandervl phaller achimha hugh$
 /src/OMFDUMP                               sandervl phaller achimha bird
 /src/pe2lx                                 sandervl bird achimha
