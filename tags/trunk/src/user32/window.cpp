@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.82 2000-11-04 16:28:26 sandervl Exp $ */
+/* $Id: window.cpp,v 1.83 2000-11-09 18:15:22 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -265,7 +265,6 @@ HWND WIN32API CreateMDIWindowA(LPCSTR lpszClassName, LPCSTR lpszWindowName,
         return 0;
     }
 
-    dprintf(("USER32:  CreateMDIWindowA\n"));
     cs.szClass        = lpszClassName;
     cs.szTitle        = lpszWindowName;
     cs.hOwner         = hInstance;
@@ -275,6 +274,11 @@ HWND WIN32API CreateMDIWindowA(LPCSTR lpszClassName, LPCSTR lpszWindowName,
     cs.cy             = nWidth;
     cs.style          = dwStyle;
     cs.lParam         = lParam;
+
+    if(HIWORD(lpszClassName)) {
+         dprintf(("CreateMDIWindowA: class %s parent %x (%d,%d) (%d,%d), %x %x lParam=%x", lpszClassName, hwndParent, x, y, nWidth, nHeight, dwStyle, lParam));
+    }
+    else dprintf(("CreateMDIWindowA: class %d parent %x (%d,%d) (%d,%d), %x %x lParam=%x", lpszClassName, hwndParent, x, y, nWidth, nHeight, dwStyle, lParam));
 
     return window->SendMessageA(WM_MDICREATE, 0, (LPARAM)&cs);
 }

@@ -1,4 +1,4 @@
-/* $Id: oslibres.cpp,v 1.10 2000-03-13 13:10:47 sandervl Exp $ */
+/* $Id: oslibres.cpp,v 1.11 2000-11-09 18:15:18 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -23,7 +23,7 @@
 #include "oslibgdi.h"
 #include "pmwindow.h"
 
-#define DBG_LOCALLOG	DBG_oslibres
+#define DBG_LOCALLOG    DBG_oslibres
 #include "dbglocal.h"
 
 //******************************************************************************
@@ -45,8 +45,10 @@ HANDLE OSLibWinSetAccelTable(HWND hwnd, HANDLE hAccel, PVOID acceltemplate)
     else    return 0;
 }
 //******************************************************************************
+//TODO: change search method for icon array (cxDesired, cyDesired)
+//TODO: PM rescales the icon internally!!! ($W(#*&$(*%&)
 //******************************************************************************
-HANDLE OSLibWinCreateIcon(PVOID iconbitmap)
+HANDLE OSLibWinCreateIcon(PVOID iconbitmap, ULONG cxDesired, ULONG cyDesired)
 {
  POINTERINFO pointerInfo = {0};
  HBITMAP     hbmColor, hbmMask;
@@ -101,17 +103,43 @@ HANDLE OSLibWinCreateIcon(PVOID iconbitmap)
     }
     hps = WinGetScreenPS(HWND_DESKTOP);
 
-    hbmColor = GpiCreateBitmap(hps, &bfhColor->bmp2, CBM_INIT,
-                               (char *)bafh + bfhColor->offBits,
-                               (BITMAPINFO2 *)&bfhColor->bmp2);
+    //Resize icon bitmap if requested size is different
+    if(cxDesired != bfhColor->bmp2.cx|| cyDesired != bfhColor->bmp2.cy)
+    {
+        BITMAPINFOHEADER2 infohdr = bfhColor->bmp2;
+
+        infohdr.cx = cxDesired;
+        infohdr.cy = cyDesired;
+        hbmColor = GpiCreateBitmap(hps, &infohdr, CBM_INIT,
+                                   (char *)bafh + bfhColor->offBits,
+                                   (BITMAPINFO2 *)&bfhColor->bmp2);
+    }
+    else {
+        hbmColor = GpiCreateBitmap(hps, &bfhColor->bmp2, CBM_INIT,
+                                   (char *)bafh + bfhColor->offBits,
+                                   (BITMAPINFO2 *)&bfhColor->bmp2);
+    }
     if(hbmColor == GPI_ERROR) {
         dprintf(("OSLibWinCreateIcon: GpiCreateBitmap failed!"));
         WinReleasePS(hps);
         return 0;
     }
-    hbmMask = GpiCreateBitmap(hps, &bfhBW->bmp2, CBM_INIT,
-                              (char *)bafh + bfhBW->offBits,
-                              (BITMAPINFO2 *)&bfhBW->bmp2);
+    //Resize icon mask if requested size is different
+    if(cxDesired != bfhBW->bmp2.cx|| cyDesired*2 != bfhBW->bmp2.cy)
+    {
+        BITMAPINFOHEADER2 infohdr = bfhBW->bmp2;
+
+        infohdr.cx = cxDesired;
+        infohdr.cy = cyDesired;
+        hbmMask = GpiCreateBitmap(hps, &infohdr, CBM_INIT,
+                                  (char *)bafh + bfhBW->offBits,
+                                  (BITMAPINFO2 *)&bfhBW->bmp2);
+    }
+    else {
+        hbmMask = GpiCreateBitmap(hps, &bfhBW->bmp2, CBM_INIT,
+                                  (char *)bafh + bfhBW->offBits,
+                                  (BITMAPINFO2 *)&bfhBW->bmp2);
+    }
     if(hbmMask == GPI_ERROR) {
         dprintf(("OSLibWinCreateIcon: GpiCreateBitmap hbmMask failed!"));
         GpiDeleteBitmap(hbmColor);
@@ -131,11 +159,13 @@ HANDLE OSLibWinCreateIcon(PVOID iconbitmap)
     GpiDeleteBitmap(hbmMask);
     GpiDeleteBitmap(hbmColor);
     WinReleasePS(hps);
+
     return hIcon;
 }
 //******************************************************************************
+//TODO: change cursor size if required!! (cxDesired, cyDesired)
 //******************************************************************************
-HANDLE OSLibWinCreatePointer(PVOID cursorbitmap)
+HANDLE OSLibWinCreatePointer(PVOID cursorbitmap, ULONG cxDesired, ULONG cyDesired)
 {
  POINTERINFO pointerInfo = {0};
  HBITMAP     hbmColor = 0, hbmMask = 0;

@@ -1,4 +1,4 @@
-/* $Id: dib.h,v 1.3 2000-01-18 20:08:09 sandervl Exp $ */
+/* $Id: dib.h,v 1.4 2000-11-09 18:15:18 sandervl Exp $ */
 
 /*
  * Win32 DIB functions for OS/2
@@ -24,5 +24,6 @@ int DIB_BitmapInfoSize( BITMAPINFO * info, WORD coloruse );
 int DIB_GetBitmapInfo( const BITMAPINFOHEADER *header, DWORD *width,
                               int *height, WORD *bpp, WORD *compr );
 void DIB_FixColorsToLoadflags(BITMAPINFO * bmi, UINT loadflags, BYTE pix);
+int  BITMAP_GetWidthBytes( INT width, INT depth );
 
 #endif
