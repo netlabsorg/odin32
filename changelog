@@ -1,9 +1,15 @@
-/* $Id: changelog,v 1.2485 2003-02-16 15:30:38 sandervl Exp $ */
+/* $Id: changelog,v 1.2486 2003-02-16 18:28:38 sandervl Exp $ */
 
  2003-02-16: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o ToAscii: fixed wrong checks for VK_SHIFT/CONTROL/MENU
                 o Fixed broken implementation of GetKeyState, GetAsyncKeyState
                   and GetKeyboardState
+                o Do not translate WM_KEYUP to WM_SYSKEYUP if AltGr released
+                  and KC_LONEKEY flag is set. (only for Alt)
+                o GetKeyboardState, GetKeyState, GetAsyncKeyState:
+                  pretend left Ctrl key is pressed if AltGr down.
+    - PMKBDHK:  o Special handling of AltGr key. Must send Ctrl key messages
+                  like Windows.
 
  2003-02-14: Dietrich Teickner <Dietrich_Teickner@t-online   >
     - SHELL32:  o Shell file operation updates
