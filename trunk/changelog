@@ -1,4 +1,16 @@
-/* $Id: changelog,v 1.1323 2001-03-25 22:41:29 sandervl Exp $ */
+/* $Id: changelog,v 1.1324 2001-03-27 16:15:00 sandervl Exp $ */
+
+ 2001-03-27: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Rewrote cursor handling. No longer use Open32, but convert
+                  cursor to OS/2 format during creation.
+                  (also fixes crash during WinDVD startup)
+                o Ported Wine's cursor/icon cache code. Odin no longer
+                  leaks a memory when apps reload icons/cursors.
+    - KERNEL32: o Removed cursor & cursor group conversion code
+
+ 2001-03-27: Michal Necasek <michalnec@volny.cz>
+    - OPENGL:   o Less stict parameter checking in wglSetPixelFormat
+                  (fixes the game Hitman)
 
  2001-03-25: Michal Necasek <michalnec@volny.cz>
     - KERNEL32: o Turn off all optimizations for exceptions.cpp in release build (!)
