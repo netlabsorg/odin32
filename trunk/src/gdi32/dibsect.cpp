@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.27 2000-04-13 18:47:16 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.28 2000-04-18 11:11:52 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -380,60 +380,67 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
 {
  HPS    hps = (HPS)hdcDest;
  POINTL point[4];
- LONG   rc;
+ LONG   rc, hdcHeight, hdcWidth;
  PVOID  bitmapBits = NULL;
  int    oldyinversion = 0;
- BOOL   fRestoryYInversion = FALSE;
+ BOOL   fRestoryYInversion = FALSE, fFrameWindowDC = FALSE;
+ HWND   hwndDest;
 
-#if 1
-  HWND hwndDest = WindowFromDC(hdcDest);
-  hwndDest = Win32ToOS2Handle(hwndDest);
-  if(hwndDest != 0)
-  {
-    	hps = WinGetPS(hwndDest);
-  }
-  if(hps == 0)
-  {
-    dprintf(("ERROR: DIBSection::BitBlt, hps == 0 hwndDest = %X", hwndDest));
-    return(FALSE);
-  }
-#endif
-
-  if(nDestWidth == 160 && nDestHeight == 120) {
-	nSrcWidth = 160;
-  }
+  hwndDest = WindowFromDC(hdcDest);
+  //TODO: Test whether dc is for the client or frame window
+//  if(hwndDest && IsOS2FrameWindowHandle(hwndDest)) {
+//	fFrameWindowDC = TRUE;
+//  }
 
   dprintf(("DIBSection::BitBlt %x %X (hps %x) %x to(%d,%d)(%d,%d) from (%d,%d)(%d,%d) rop %x flip %x",
           handle, hdcDest, hps, hwndDest, nXdest, nYdest, nDestWidth, nDestHeight,
-//          handle, hdcDest, hps, 0, nXdest, nYdest, nDestWidth, nDestHeight,
           nXsrc, nYsrc, nSrcWidth, nSrcHeight, Rop, fFlip));
 
+  if(hwndDest) {
+	RECT rect;
+
+	if(fFrameWindowDC) {
+		GetWindowRect(hwndDest, &rect);
+	}
+	else	GetClientRect(hwndDest, &rect);
+	hdcHeight = rect.bottom - rect.top;
+	hdcWidth  = rect.right - rect.left;
+  }
+  else {
+	hdcHeight = pOS2bmp->cy;
+	hdcWidth  = pOS2bmp->cx;
+  }
+
   //win32 coordinates are of the left top, OS/2 expects left bottom
+  //source rectangle is non-inclusive (top, right not included)
+  if(nXdest + nDestWidth > hdcWidth) {
+	nDestWidth  = hdcWidth - nXdest;
+  }
+  if(nYdest + nDestHeight > hdcHeight) {
+	nDestHeight = hdcHeight - nYdest;
+  }
   point[0].x = nXdest;
-  point[0].y = pOS2bmp->cy - nYdest - nDestHeight;
-  point[1].x = nXdest + nDestWidth - 1;
-  point[1].y = pOS2bmp->cy - nYdest - 1;
-  point[2].x = nXsrc;
-  point[2].y = pOS2bmp->cy - nYsrc - nSrcHeight;
-  if(nXsrc + nSrcWidth > pOS2bmp->cx)
-  {
-    	point[3].x = pOS2bmp->cx;
+  point[0].y = hdcHeight - nYdest - nDestHeight;
+  point[1].x = nXdest + nDestWidth;
+  point[1].y = hdcHeight - nYdest;
+
+  //target rectangle is inclusive-inclusive
+  if(nXsrc + nSrcWidth > pOS2bmp->cx) {
 	nSrcWidth  = pOS2bmp->cx - nXsrc;
   }
-  else  point[3].x = nXsrc + nSrcWidth;
-
-  if(nYsrc + nSrcHeight > pOS2bmp->cy)
-  {
-    	point[3].y = pOS2bmp->cy;
+  if(nYsrc + nSrcHeight > pOS2bmp->cy) {
 	nSrcHeight = pOS2bmp->cy - nYsrc;
   }
-  else  point[3].y = pOS2bmp->cy - nYsrc;
+  point[2].x = nXsrc;
+  point[2].y = pOS2bmp->cy - nYsrc - nSrcHeight;
+  point[3].x = nXsrc + nSrcWidth - 1;
+  point[3].y = pOS2bmp->cy - nYsrc - 1;
 
   oldyinversion = GpiQueryYInversion(hps);
   if(fFlip & FLIP_VERT)
   {
-  	if(oldyinversion != pOS2bmp->cy-1) {
-    		GpiEnableYInversion(hps, pOS2bmp->cy-1);
+  	if(oldyinversion != hdcHeight-1) {
+    		GpiEnableYInversion(hps, hdcHeight-1);
 		fRestoryYInversion = TRUE;
 	}
   }
@@ -453,7 +460,7 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
 
   //SvL: Optimize this.. (don't convert entire bitmap if only a part will be blitted to the dc)
   if(dibinfo.dsBitfields[1] == 0x3E0) {//RGB 555?
-       	dprintf(("DIBSection::BitBlt; convert rgb 555 to 565 (old y inv. = %d", oldyinversion));
+       	dprintf(("DIBSection::BitBlt; convert rgb 555 to 565 (old y inv. = %d)", oldyinversion));
 
 	if(bmpBitsRGB565 == NULL)
 		DebugInt3();
@@ -469,47 +476,48 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
   if(rc == GPI_OK) {
    	DIBSection *destdib = DIBSection::findHDC(hdcDest);
         if(destdib) {
-		dprintf(("Sync destination dibsection %x (%x) (%d)", destdib->handle, hdcDest, oldyinversion));
-
-		//todo: rgb 565 to 555 conversion if bpp == 16
-		BITMAPINFO2 *tmphdr = (BITMAPINFO2 *)malloc(destdib->os2bmphdrsize);
-		memcpy(tmphdr, destdib->pOS2bmp, destdib->os2bmphdrsize);
-		rc = GpiQueryBitmapBits(hps, nYdest, nDestHeight, destdib->GetDIBObject(),
-                                        tmphdr);
-		free(tmphdr);
-		if(rc != nDestHeight) {
-			DebugInt3();
-		}
+		destdib->sync(hps, nYdest, nDestHeight);
         }
 	//restore old y inversion height
 	if(fRestoryYInversion) GpiEnableYInversion(hps, oldyinversion);
-#if 1
-  	if(hwndDest != 0)
-	{
-    		WinReleasePS(hps);
-  	}
-#endif
     	return(TRUE);
   }
   if(fRestoryYInversion) GpiEnableYInversion(hps, oldyinversion);
-#if 1
-  if(hwndDest != 0)
-  {
-    	WinReleasePS(hps);
-  }
-#endif
+
   dprintf(("DIBSection::BitBlt %X (%d,%d) (%d,%d) to (%d,%d) (%d,%d) returned %d\n", hps, point[0].x, point[0].y, point[1].x, point[1].y, point[2].x, point[2].y, point[3].x, point[3].y, rc));
-#if 1
   dprintf(("WinGetLastError returned %X\n", WinGetLastError(WinQueryAnchorBlock(hwndDest)) & 0xFFFF));
-#endif
   return(FALSE);
+}
+//******************************************************************************
+//******************************************************************************
+void DIBSection::sync(HDC hdc, DWORD nYdest, DWORD nDestHeight) 
+{
+ APIRET rc;
+ char  *destBuf;
+
+  dprintf(("Sync destination dibsection %x (%x)", handle, hdc));
+
+  //todo: rgb 565 to 555 conversion if bpp == 16
+  if(GetBitCount() == 16) {
+ 	dprintf(("WARNING: need to convert RGB 565 to RGB 555!!"));
+  }
+
+  BITMAPINFO2 *tmphdr = (BITMAPINFO2 *)malloc(os2bmphdrsize);
+  memcpy(tmphdr, pOS2bmp, os2bmphdrsize);
+  destBuf = GetDIBObject() + nYdest*dibinfo.dsBm.bmWidthBytes;
+  rc = GpiQueryBitmapBits(hdc, nYdest, nDestHeight, destBuf,
+                          tmphdr);
+  free(tmphdr);
+  if(rc != nDestHeight) {
+	DebugInt3();
+  }
 }
 //******************************************************************************
 //******************************************************************************
 void DIBSection::SelectDIBObject(HDC hdc)
 {
   this->hdc  = hdc;
-  hwndParent = WinWindowFromDC(hdc);
+  hwndParent = WindowFromDC(hdc);
   dprintf(("SelectDIBObject %x into %x hwndParent = %x", handle, hdc, hwndParent));
 }
 //******************************************************************************
