@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.22 2001-10-26 19:22:15 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.23 2001-10-27 08:26:06 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -25,6 +25,8 @@
 #include "dbglocal.h"
 
 #define BIT_0     (1)
+#define BIT_1     (2)
+#define BIT_2     (4)
 #define BIT_11    (1<<11)
 
 typedef struct 
@@ -901,7 +903,39 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
             return TRUE;
         }
         else {
-            dprintf(("IOCTL_STORAGE_CHECK_VERIFY incompletely implemented"));
+#pragma pack(1)
+      typedef struct
+      {
+        BYTE  ucCommandInfo;
+        WORD  usDriveUnit;
+      } ParameterBlock;
+#pragma pack()
+
+            DWORD parsize = sizeof(ParameterBlock);
+            DWORD datasize = 2;
+            WORD status = 0;
+            DWORD rc;
+            ParameterBlock parm;
+
+            parm.ucCommandInfo = 0;
+            parm.usDriveUnit = drvInfo->driveLetter - 'A';
+            //IOCTL_DISK (0x08), DSK_GETLOCKSTATUS (0x66)
+            rc = OSLibDosDevIOCtl(pHMHandleData->hHMHandle, 0x08, 0x66, &parm, sizeof(parm), &parsize,
+                                  &status, sizeof(status), &datasize);
+            if(rc != NO_ERROR) {
+                dprintf(("OSLibDosDevIOCtl failed with rc %d", rc));
+                return FALSE;
+            }
+            dprintf(("Disk status 0x%x", status));
+            dprintf(("WARNING: IOCTL_DISK_CHECK_VERIFY not properly implemented!!"));
+            //TODO: this doesn't seem to work
+            //if no disk present, return FALSE
+//            if(!(status & (BIT_2))) {
+//                SetLastError(ERROR_NOT_READY);  //NT4, SP6 returns this
+//                return FALSE;
+//            }
+            SetLastError(NO_ERROR);
+            return TRUE;
         }
         SetLastError(NO_ERROR);
         return TRUE;
@@ -1036,11 +1070,8 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
         addr->PathId     = 0;
 
         if(drvInfo->hInstAspi == NULL) {
-            //Don't fail if wnaspi32 not loaded
-            addr->TargetId   = 0;
-            addr->Lun        = 0;
-            SetLastError(ERROR_SUCCESS);
-            return TRUE;
+            SetLastError(ERROR_ACCESS_DENIED);
+            return FALSE;
         }
 
         numAdapters = drvInfo->GetASPI32SupportInfo();
