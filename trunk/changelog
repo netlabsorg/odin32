@@ -1,4 +1,9 @@
- /* $Id: changelog,v 1.1065 2000-08-13 17:13:36 cbratschi Exp $ */
+ /* $Id: changelog,v 1.1066 2000-08-14 08:11:48 sandervl Exp $ */
+
+ 2000-08-14: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: Fixed sharing violations errors in OSLibDosCreateFile
+                (FILE_SHARE_DELETE now included in share flag var)
+                (fixes error messages when playing files in RealPlayer 7)
 
  2000-08-13: Christoph Bratschi <cbratschi@datacomm.ch>
     - COMCTL32: added propsheet, treeview Corel WINE 20000807 changes
