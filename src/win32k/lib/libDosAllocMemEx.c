@@ -1,4 +1,4 @@
-/* $Id: libDosAllocMemEx.c,v 1.5 2000-12-11 06:53:53 bird Exp $
+/* $Id: libDosAllocMemEx.c,v 1.6 2001-02-19 05:42:57 bird Exp $
  *
  * DosAllocMemEx - Extened Edition of DosAllocMem.
  *                 Allows you to suggest an address of the memory.
@@ -57,7 +57,7 @@ APIRET APIENTRY  DosAllocMemEx(PPVOID ppv, ULONG cb, ULONG flag)
                          "", 1, &cbData);
         if (rc == NO_ERROR)
         {
-            ppv = Param.pv;
+            *ppv = Param.pv;
             rc = Param.rc;
         }
     }
