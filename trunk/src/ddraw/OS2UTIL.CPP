@@ -1,4 +1,4 @@
-/* $Id: OS2UTIL.CPP,v 1.5 1999-08-17 12:44:46 sandervl Exp $ */
+/* $Id: OS2UTIL.CPP,v 1.6 1999-10-28 22:39:28 hugh Exp $ */
 
 /*
  * OS/2 Utility functions
@@ -10,7 +10,7 @@
  */
 #define INCL_DOSMEMMGR
 #include <os2wrap.h>
-#include "misc.h"
+#include <misc.h>
 #include "os2util.h"
 
 

@@ -5,7 +5,7 @@
 #include "os2clipper.h"
 #define _OS2WIN_H
 #define FAR
-#include "misc.h"
+#include <misc.h>
 #include <winerror.h>
 
 //******************************************************************************
@@ -40,7 +40,7 @@ OS2IDirectDrawClipper::~OS2IDirectDrawClipper()
 HRESULT __stdcall ClipQueryInterface(THIS This, REFIID riid, LPVOID FAR * ppvObj)
 {
   #ifdef DEBUG
-    WriteLog("ClipQueryInterface\n");
+    dprintf(("ClipQueryInterface\n"));
   #endif
 
   *ppvObj = NULL;
@@ -62,7 +62,7 @@ ULONG   __stdcall ClipAddRef(THIS This)
  OS2IDirectDrawClipper *me = (OS2IDirectDrawClipper *)This;
 
   #ifdef DEBUG
-    WriteLog("OS2IDirectDrawClipper::AddRef %d\n", me->Referenced+1);
+    dprintf(("OS2IDirectDrawClipper::AddRef %d\n", me->Referenced+1));
   #endif
 
   return ++me->Referenced;
@@ -74,7 +74,7 @@ ULONG   __stdcall ClipRelease(THIS This)
  OS2IDirectDrawClipper *me = (OS2IDirectDrawClipper *)This;
 
   #ifdef DEBUG
-    WriteLog("OS2IDirectDrawClipper::Release %d\n", me->Referenced-1);
+    dprintf(("OS2IDirectDrawClipper::Release %d\n", me->Referenced-1));
   #endif
 
   if(me->Referenced)
@@ -96,7 +96,7 @@ ULONG   __stdcall ClipRelease(THIS This)
 HRESULT __stdcall ClipGetClipList(THIS, LPRECT, LPRGNDATA, LPDWORD)
 {
   #ifdef DEBUG
-    WriteLog("ClipGetClipList\n");
+    dprintf(("ClipGetClipList\n"));
   #endif
 
   return(DD_OK);
@@ -108,7 +108,7 @@ HRESULT __stdcall ClipGetHWnd(THIS This, HWND FAR *pHwnd)
  OS2IDirectDrawClipper *me = (OS2IDirectDrawClipper *)This;
 
   #ifdef DEBUG
-    WriteLog("ClipGetHWnd\n");
+    dprintf(("ClipGetHWnd\n"));
   #endif
 
   *pHwnd = me->clipWindow;
@@ -119,7 +119,7 @@ HRESULT __stdcall ClipGetHWnd(THIS This, HWND FAR *pHwnd)
 HRESULT __stdcall ClipInitialize(THIS, LPDIRECTDRAW, DWORD)
 {
   #ifdef DEBUG
-    WriteLog("ClipInitialize\n");
+    dprintf(("ClipInitialize\n"));
   #endif
 
   return(DDERR_ALREADYINITIALIZED); // Init is done during creation see M$ Doc
@@ -129,7 +129,7 @@ HRESULT __stdcall ClipInitialize(THIS, LPDIRECTDRAW, DWORD)
 HRESULT __stdcall ClipIsClipListChanged(THIS, BOOL FAR *)
 {
   #ifdef DEBUG
-    WriteLog("ClipIsClipListChanged\n");
+    dprintf(("ClipIsClipListChanged\n"));
   #endif
 
   return(DD_OK);
@@ -139,7 +139,7 @@ HRESULT __stdcall ClipIsClipListChanged(THIS, BOOL FAR *)
 HRESULT __stdcall ClipSetClipList(THIS, LPRGNDATA,DWORD)
 {
   #ifdef DEBUG
-    WriteLog("ClipSetClipList\n");
+    dprintf(("ClipSetClipList\n"));
   #endif
 
   return(DD_OK);
@@ -152,7 +152,7 @@ HRESULT __stdcall ClipSetHWnd(THIS This, DWORD reserved, HWND hwnd)
  OS2IDirectDrawClipper *me = (OS2IDirectDrawClipper *)This;
 
   #ifdef DEBUG
-    WriteLog("ClipSetHWnd\n");
+    dprintf(("ClipSetHWnd\n"));
   #endif
 
   me->clipWindow = hwnd;
