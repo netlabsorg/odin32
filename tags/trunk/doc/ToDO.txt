@@ -1,9 +1,13 @@
-/* $Id: ToDO.txt,v 1.15 2001-10-19 09:33:36 phaller Exp $ */
+/* $Id: ToDO.txt,v 1.16 2001-10-19 09:36:06 phaller Exp $ */
 
 To Do list for ODIN:
 
 
 Assigned Status Topic -------------------------------------------------------
+
+                Update Mesa to latest stable build (might fix Parsec)
+
+                Eventually start porting over D3D support from WINE
 
                 Implement support for Parallel Port Devices
 
