@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 2000-11-21 23:48:52 phaller Exp $
+# $Id: makefile,v 1.1 2000-11-21 23:49:04 phaller Exp $
 
 #
 # Odin32 API
@@ -17,20 +17,13 @@
 # Object files. Prefix with OBJDIR and one space before the '\'.
 #
 OBJS = \
-$(OBJDIR)\crtdll_main.obj \
-$(OBJDIR)\dir.obj \
-$(OBJDIR)\exit.obj \
-$(OBJDIR)\file.obj \
-$(OBJDIR)\mbstring.obj \
-$(OBJDIR)\memory.obj \
-$(OBJDIR)\spawn.obj \
-                     \
 $(OBJDIR)\crtdll.obj \
 $(OBJDIR)\asmhlp.obj \
 $(OBJDIR)\stubs.obj \
 $(OBJDIR)\internal.obj \
 $(OBJDIR)\crt_string.obj \
 $(OBJDIR)\crt_memory.obj \
+$(OBJDIR)\crt_mb.obj \
 $(OBJDIR)\crt_wc.obj \
 $(OBJDIR)\initterm.obj \
 $(OBJDIR)\crtdllrsrc.obj
@@ -58,3 +51,4 @@ TARGET = crtdll
 # Includes the common rules.
 #
 !include $(PDWIN32_INCLUDE)/pdwin32.post
+

@@ -1,4 +1,4 @@
-/* $Id: crt_wc.cpp,v 1.3 2000-11-21 23:48:49 phaller Exp $ */
+/* $Id: crt_wc.cpp,v 1.1 2000-11-21 23:48:55 phaller Exp $ */
 
 /*
  * The C RunTime DLL
@@ -252,7 +252,6 @@ wint_t CDECL CRTDLL_fputwc( wint_t wc, FILE *strm )
 int CDECL CRTDLL_iswalnum(wint_t i)
 {
   dprintf2(("CRTDLL: iswalnum(%08xh)\n", i));
-  //return get_char_typeW(wc) & (C1_ALPHA|C1_DIGIT|C1_LOWER|C1_UPPER);
   return (iswalnum(i));
 }
 
@@ -264,7 +263,16 @@ int CDECL CRTDLL_iswalpha(wint_t i)
 {
   dprintf2(("CRTDLL: iswalpha(%08xh)\n", i));
   return (iswalpha(i));
-  //return get_char_typeW(wc) & (C1_ALPHA|C1_LOWER|C1_UPPER);
+}
+
+
+/*********************************************************************
+ *                  iswascii    (CRTDLL.404)
+ */
+int CDECL CRTDLL_iswascii(wint_t c)
+{
+  dprintf2(("CRTDLL: iswascii\n", c));
+  return  (!((c)&(~0x7f)));
 }
 
 
@@ -274,7 +282,6 @@ int CDECL CRTDLL_iswalpha(wint_t i)
 int CDECL CRTDLL_iswcntrl(wint_t i)
 {
   dprintf2(("CRTDLL: iswcntrl(%08xh)\n", i));
-  //return get_char_typeW(wc) & C1_CNTRL;
   return (iswcntrl(i));
 }
 
@@ -295,7 +302,6 @@ int CDECL CRTDLL_iswctype(wint_t i, wctype_t wct)
 int CDECL CRTDLL_iswdigit(wint_t i)
 {
   dprintf2(("CRTDLL: iswdigit(%08xh)\n", i));
-  //return get_char_typeW(wc) & C1_DIGIT;
   return (iswdigit(i));
 }
 
@@ -306,7 +312,6 @@ int CDECL CRTDLL_iswdigit(wint_t i)
 int CDECL CRTDLL_iswgraph(wint_t i)
 {
   dprintf2(("CRTDLL: iswgraph(%08xh)\n", i));
-  //return get_char_typeW(wc) & (C1_ALPHA|C1_PUNCT|C1_DIGIT|C1_LOWER|C1_UPPER);
   return (iswgraph(i));
 }
 
@@ -317,7 +322,6 @@ int CDECL CRTDLL_iswgraph(wint_t i)
 int CDECL CRTDLL_iswlower(wint_t i)
 {
   dprintf2(("CRTDLL: iswlower(%08xh)\n", i));
-  //return get_char_typeW(wc) & C1_LOWER;
   return (iswlower(i));
 }
 
@@ -328,7 +332,6 @@ int CDECL CRTDLL_iswlower(wint_t i)
 int CDECL CRTDLL_iswprint(wint_t i)
 {
   dprintf2(("CRTDLL: iswprint(%08xh)\n", i));
-  //return get_char_typeW(wc) & (C1_ALPHA|C1_BLANK|C1_PUNCT|C1_DIGIT|C1_LOWER|C1_UPPER);
   return (iswprint(i));
 }
 
@@ -339,7 +342,6 @@ int CDECL CRTDLL_iswprint(wint_t i)
 int CDECL CRTDLL_iswpunct(wint_t i)
 {
   dprintf2(("CRTDLL: iswpunct(%08xh)\n", i));
-  //return get_char_typeW(wc) & C1_PUNCT;
   return (iswpunct(i));
 }
 
@@ -350,7 +352,6 @@ int CDECL CRTDLL_iswpunct(wint_t i)
 int CDECL CRTDLL_iswspace(wint_t i)
 {
   dprintf2(("CRTDLL: iswspace(%08xh)\n", i));
-  //return get_char_typeW(wc) & C1_SPACE;
   return (iswspace(i));
 }
 
@@ -361,7 +362,6 @@ int CDECL CRTDLL_iswspace(wint_t i)
 int CDECL CRTDLL_iswupper(wint_t i)
 {
   dprintf2(("CRTDLL: iswupper(%08xh)\n", i));
-  //return get_char_typeW(wc) & C1_UPPER;
   return (iswupper(i));
 }
 
@@ -372,7 +372,6 @@ int CDECL CRTDLL_iswupper(wint_t i)
 int CDECL CRTDLL_iswxdigit(wint_t i)
 {
   dprintf2(("CRTDLL: iswxdigit(%08xh)\n", i));
-  //return get_char_typeW(wc) & C1_XDIGIT;
   return (iswxdigit(i));
 }
 
@@ -444,6 +443,16 @@ wint_t CDECL CRTDLL_ungetwc( wint_t wc, FILE *strm )
 {
   dprintf2(("CRTDLL: ungetwc\n"));
   return (ungetwc(wc, strm));
+}
+
+
+/*********************************************************************
+ *                  vswprintf       (CRTDLL.498)
+ */
+int CDECL CRTDLL_vswprintf( wchar_t *s , size_t t, const wchar_t *format, va_list arg )
+{
+  dprintf2(("CRTDLL: vswprintf\n"));
+  return (vswprintf(s, t, format, arg));
 }
 
 
@@ -721,6 +730,5 @@ size_t CDECL CRTDLL_wcsxfrm( wchar_t *s1, const wchar_t *s2, size_t n )
 int CDECL CRTDLL_wctomb( LPSTR dst, WCHAR ch )
 {
   dprintf2(("CRTDLL: wctomb\n"));
-  //return WideCharToMultiByte( CP_ACP, 0, &ch, 1, dst, 6, NULL, NULL );
   return (wctomb((char*)dst,ch));
 }

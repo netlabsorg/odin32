@@ -1,4 +1,4 @@
-/* $Id: crt_string.cpp,v 1.3 2000-11-21 23:48:49 phaller Exp $ */
+/* $Id: crt_string.cpp,v 1.1 2000-11-21 23:48:54 phaller Exp $ */
 
 /*
  * The C RunTime DLL
@@ -12,8 +12,8 @@
  * Copyright 1997 Uwe Bonnes
  * Copyright 1999-2000 Jens Wiessner
  *
- * Implementation Notes:
- * MT Safe.
+ * CRTDLL - string functions
+ *
  */
 
 #include <odin.h>
@@ -22,11 +22,6 @@
 #include <heapstring.h>
 #include <string.h>
 
-
-#include "crtdll.h"
-
-
-DEFAULT_DEBUG_CHANNEL(crtdll);
 
 /*********************************************************************
  *           _strcmpi   	 (CRTDLL.280)
@@ -48,6 +43,36 @@ char * CDECL CRTDLL__strdate( char *buf )
 {
   dprintf2(("CRTDLL: _strdate\n"));
   return(_strdate(buf));
+}
+
+
+/*********************************************************************
+ *           CRTDLL__strdec    	 (CRTDLL.282)
+ */
+char * CDECL CRTDLL__strdec( const char *, const char *p ) 
+{
+  dprintf2(("CRTDLL: _strdec\n"));
+  return( (char *)(p-1) );
+}
+
+
+/*********************************************************************
+ *           CRTDLL__strdup    	 (CRTDLL.283)
+ */
+LPSTR CDECL CRTDLL__strdup(LPCSTR ptr)
+{
+  dprintf2(("CRTDLL: _strdup\n"));
+  return HEAP_strdupA(GetProcessHeap(),0,ptr);
+}
+
+
+/*********************************************************************
+ *           _strerror  	 (CRTDLL.284)
+ */
+char * CDECL CRTDLL__strerror(const char *s)
+{
+  dprintf(("CRTDLL: _strerror\n"));
+  return (_strerror((char*)s));
 }
 
 
@@ -77,6 +102,16 @@ int CDECL CRTDLL__stricoll( const char *s1, const char *s2 )
 
 
 /*********************************************************************
+ *           CRTDLL__strinc  	 (CRTDLL.287)
+ */
+char * CDECL CRTDLL__strinc( const char *p )
+{
+    dprintf2(("CRTDLL: _strinc\n"));
+    return( (char *)(p+1) );
+}
+
+
+/*********************************************************************
  *           _strlwr  	 (CRTDLL.288)
  */
 CHAR * CDECL CRTDLL__strlwr(char *x)
@@ -96,6 +131,28 @@ CHAR * CDECL CRTDLL__strlwr(char *x)
 
 
 /*********************************************************************
+ *           CRTDLL__strncnt	 (CRTDLL.289)
+ */
+size_t CDECL CRTDLL__strncnt( const char *p, size_t l ) 
+{
+    dprintf2(("CRTDLL: _strncnt\n"));
+    size_t i;
+    i = strlen(p);
+    return( (i>l) ? l : i );
+}
+
+
+/*********************************************************************
+ *           CRTDLL__strnextc	 (CRTDLL.290)
+ */
+unsigned int CDECL CRTDLL__strnextc( const char *p )
+{
+    dprintf2(("CRTDLL: _strnextc\n"));
+    return( (unsigned int)*p );
+}
+
+
+/*********************************************************************
  *           CRTDLL__strnicmp	 (CRTDLL.291)
  */
 int  CDECL CRTDLL__strnicmp( LPCSTR s1, LPCSTR s2, INT n )
@@ -109,6 +166,79 @@ int  CDECL CRTDLL__strnicmp( LPCSTR s1, LPCSTR s2, INT n )
   return (lstrncmpiA(s1,s2,n));
 }
 
+
+/*********************************************************************
+ *           CRTDLL__strninc	 (CRTDLL.292)
+ */
+char * CDECL CRTDLL__strninc( const char *p, size_t l )
+{
+    dprintf2(("CRTDLL: _strninc\n"));
+    return( (char *)(p+l) );
+}
+
+
+/*********************************************************************
+ *           CRTDLL__strnset	 (CRTDLL.293)
+ */
+char * CDECL CRTDLL__strnset(char *string, int c, size_t count)
+{
+  dprintf2(("CRTDLL: _strnset\n"));
+  char *dst;
+
+  dst = string;
+  while (count > 0 && *dst != 0)
+    {
+      *dst++ = (char)c;
+      --count;
+    }
+  return string;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__strrev	 (CRTDLL.294)
+ */
+char * CDECL CRTDLL__strrev( char *string )
+{
+  dprintf2(("CRTDLL: _strrev\n"));
+  char *p, *q, c;
+
+  p = q = string;
+  while (*q != 0)
+    ++q;
+  --q;                                  /* Benign, as string must be != 0 */
+  while ((size_t)q > (size_t)p)
+    {
+      c = *p; *p = *q; *q = c;
+      ++p; --q;
+    }
+  return string;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__strset	 (CRTDLL.295)
+ */
+char * CDECL CRTDLL__strset(char *string, int c)
+{
+  dprintf2(("CRTDLL: _strset\n"));
+  char *dst;
+
+  dst = string;
+  while (*dst != 0)
+    *dst++ = (char)c;
+  return string;
+}
+
+
+/*********************************************************************
+ *           CRTDLL__strspnp	 (CRTDLL.296)
+ */
+char * CDECL CRTDLL__strspnp( const char *p1, const char *p2 ) 
+{
+    dprintf2(("CRTDLL: _strspnp\n"));
+    return( (*(p1 += strspn(p1,p2))!='\0') ? (char*)p1 : NULL );
+}
 
 
 /*********************************************************************
@@ -213,6 +343,16 @@ size_t CDECL CRTDLL_strcspn(const LPSTR str1,
            str2));
 
   return (strcspn(str1, str2));
+}
+
+
+/*********************************************************************
+ *                  strerror        (CRTDLL.465)
+ */
+char * CDECL CRTDLL_strerror( int errnum )
+{
+  dprintf2(("CRTDLL: strerror\n"));
+  return strerror(errnum);
 }
 
 
@@ -389,194 +529,4 @@ size_t CDECL CRTDLL_strxfrm( char *s1, const char *s2, size_t n )
 {
   dprintf2(("CRTDLL: strxfrm\n"));
   return strxfrm(s1, s2, n);
-}
-
-
-/* INTERNAL: CRTDLL_malloc() based strndup */
-LPSTR __CRTDLL__strndup(LPSTR buf, INT size);
-LPSTR __CRTDLL__strndup(LPSTR buf, INT size)
-{
-  char* ret;
-  int len = strlen(buf);
-  int max_len;
-
-  max_len = size <= len? size : len + 1;
-
-  ret = (char*)CRTDLL_malloc(max_len);
-  if (ret)
-  {
-    memcpy(ret,buf,max_len);
-    ret[max_len] = 0;
-  }
-  return ret;
-}
-
-
-/*********************************************************************
- *                  _strdec           (CRTDLL.282)
- *
- * Return the byte before str2 while it is >= to str1. 
- *
- * PARAMS
- *   str1 [in]  Terminating string
- *
- *   sre2 [in]  string to start searching from
- *
- * RETURNS
- *   The byte before str2, or str1, whichever is greater
- *
- * NOTES
- * This function is implemented as tested with windows, which means
- * it does not have a terminating condition. It always returns
- * the byte before str2. Use with extreme caution!
- */
-LPSTR CDECL CRTDLL__strdec(LPSTR str1, LPSTR str2)
-{
-  /* Hmm. While the docs suggest that the following should work... */
-  /*  return (str2<=str1?0:str2-1); */
-  /* ...Version 2.50.4170 (NT) from win98 constantly decrements! */
-  return str2-1;
-}
-
-
-/*********************************************************************
- *                  _strdup          (CRTDLL.285)
- *
- * Duplicate a string.
- */
-LPSTR CDECL CRTDLL__strdup(LPCSTR ptr)
-{
-    LPSTR ret = (LPSTR)CRTDLL_malloc(strlen(ptr)+1);
-    if (ret) strcpy( ret, ptr );
-    return ret;
-}
-
-
-/*********************************************************************
- *                  _strinc           (CRTDLL.287)
- *
- * Return a pointer to the next character in a string
- */
-LPSTR CDECL CRTDLL__strinc(LPSTR str)
-{
-  return str+1;
-}
-
-
-/*********************************************************************
- *                   _strnextc         (CRTDLL.290)
- *
- * Return an unsigned int from a string.
- */
-UINT CDECL CRTDLL__strnextc(LPCSTR str)
-{
-  return (UINT)*str;
-}
-
-
-/*********************************************************************
- *                  _strninc           (CRTDLL.292)
- *
- * Return a pointer to the 'n'th character in a string
- */
-LPSTR CDECL CRTDLL__strninc(LPSTR str, INT n)
-{
-  return str+n;
-}
-
-
-/*********************************************************************
- *                  _strnset           (CRTDLL.293)
- *
- * Fill a string with a character up to a certain length
- */
-LPSTR CDECL CRTDLL__strnset(LPSTR str, INT c, INT len)
-{
-  if (len > 0 && str)
-    while (*str && len--)
-      *str++ = c;
-  return str;
-}
-
-
-/*********************************************************************
- *                  _strrev              (CRTDLL.294)
- *
- * Reverse a string in place
- */
-LPSTR CDECL CRTDLL__strrev (LPSTR str)
-{
-  LPSTR p1;
-  LPSTR p2;
- 
-  if (str && *str)
-    for (p1 = str, p2 = str + strlen(str) - 1; p2 > p1; ++p1, --p2)
-    {
-      *p1 ^= *p2;
-      *p2 ^= *p1;
-      *p1 ^= *p2;
-    }
-
-  return str;
-}
-
-/*********************************************************************
- *                  _strset          (CRTDLL.295)
- *
- * Fill a string with a value.
- */
-LPSTR  CDECL CRTDLL__strset (LPSTR str, INT set)
-{
-  char *ptr = str;
-
-  while (*ptr)
-    *ptr++ = set;
-
-  return str;
-}
-
-
-/*********************************************************************
- *                  _strncnt           (CRTDLL.289)
- *
- * Return the length of a string or the maximum given length.
- */
-LONG CDECL CRTDLL__strncnt(LPSTR str, LONG max)
-{
-  LONG len = strlen(str);
-  return (len > max? max : len);
-}
-
-
-/*********************************************************************
- *                  _strspnp           (CRTDLL.296)
- *
- */
-LPSTR CDECL CRTDLL__strspnp(LPSTR str1, LPSTR str2)
-{
-  str1 += strspn(str1,str2);
-  return *str1? str1 : 0;
-}
-
-
-/*********************************************************************
- *                  _swab           (CRTDLL.299)
- *
- * Copy from source to dest alternating bytes (i.e 16 bit big-to-little
- * endian or vice versa).
- */
-void CDECL CRTDLL__swab(LPSTR src, LPSTR dst, INT len)
-{
-  //_swab(s1, s2, i);
-  
-  if (len > 1)
-  {
-    len = (unsigned)len >> 1;
-
-    while (len--) {
-      *dst++ = src[1];
-      *dst++ = *src++;
-      src++;
-    }
-  }
 }
