@@ -1,4 +1,8 @@
- /* $Id: changelog,v 1.79 1999-08-12 23:33:36 phaller Exp $ */
+ /* $Id: changelog,v 1.80 1999-08-13 18:40:02 sandervl Exp $ */
+
+ 99-08-13: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: Export heap functions by ordinal
+	- src\makefile: compile lz32 before version (dependency)
 
  99-08-12: Patrick Haller <phaller@gmx.net>
 	- VERSION: enhanced plus odinwrap macros
