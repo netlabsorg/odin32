@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1795 2001-10-26 10:12:21 phaller Exp $ */
+/* $Id: changelog,v 1.1796 2001-10-26 12:47:59 phaller Exp $ */
 
  2001-10-26: Patrick Haller <patrick.haller@innotek.de>
     - USER32:   o fixed ESC keyboard event
@@ -6,7 +6,9 @@
                 o partial fix for shift key processing
                 o fixed right shift processing (and possibly numerous
                   other extended keys)
-                  remaining issues: AltGr
+                o fixed this &%$&%! Alt-Gr-Key-Emulation
+                  remaining issues: 
+                    AltGr won't toggle GetAsyncKeyState() or GetKeyState()
 
  2001-10-25: Patrick Haller <patrick.haller@innotek.de>
     - USER32:   o fixed scancodes for [Pause] and [PrtScr]

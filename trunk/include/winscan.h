@@ -61,6 +61,7 @@
 #define WINSCAN_PADASTERISK     0x37  
 #define WINSCAN_PRINT           0x37
 #define WINSCAN_ALTLEFT         0x38  
+#define WINSCAN_ALTRIGHT        0x38
 #define WINSCAN_SPACE           0x39  
 #define WINSCAN_CAPSLOCK        0x3a  
 #define WINSCAN_F1              0x3b  
@@ -108,7 +109,6 @@
 #define WINSCAN_WINLEFT         0x5b
 #define WINSCAN_WINRIGHT        0x5c
 #define WINSCAN_APPLICATION     0x5d
-#define WINSCAN_ALTRIGHT        0x5e  
 #define WINSCAN_F23             0x6a  
 #define WINSCAN_F24             0x6b  
 #define WINSCAN_SYSMEM          0x6c  
