@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.2458 2003-01-23 13:52:14 bird Exp $ */
+/* $Id: ChangeLog,v 1.2459 2003-01-23 15:06:24 sandervl Exp $ */
 
  2003-01-23: knut st. osmundsen <bird-odin-spam@anduin.net>
     - TOOLS\COMMON, TOOLS\WRC\U:
@@ -13,6 +13,9 @@
                 o Link with static CRT library
     - MAKE\setup.mak:
                 o Only add include\incl_vac if not building an odin32 app
+
+ 2003-01-23: Platon Fomichev <platon@innotek   >
+    - DOC:      o Added build instructions for GCC
 
  2003-01-22: Sander van Leeuwen <sandervl@innotek   >
     - ODINCRT:  o Renamed wrapper functions
