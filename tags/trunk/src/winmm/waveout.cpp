@@ -1,4 +1,4 @@
-/* $Id: waveout.cpp,v 1.26 2003-03-06 15:42:33 sandervl Exp $ */
+/* $Id: waveout.cpp,v 1.27 2003-07-16 15:47:24 sandervl Exp $ */
 //#undef DEBUG
 /*
  * Wave out MM apis
@@ -38,7 +38,7 @@
 
 /******************************************************************************/
 /******************************************************************************/
-MMRESULT WINAPI waveOutOpen(LPHWAVEOUT phwo, UINT uDeviceID, const LPWAVEFORMATEX pwfx, 
+MMRESULT WINAPI waveOutOpen(LPHWAVEOUT phwo, UINT uDeviceID, const LPWAVEFORMATEX pwfx,
                             DWORD dwCallback, DWORD dwInstance, DWORD fdwOpen)
 {
   MMRESULT rc;
@@ -48,7 +48,7 @@ MMRESULT WINAPI waveOutOpen(LPHWAVEOUT phwo, UINT uDeviceID, const LPWAVEFORMATE
     if(pwfx == NULL)
         return(WAVERR_BADFORMAT);
 
-    if(fdwOpen & WAVE_FORMAT_QUERY) 
+    if(fdwOpen & WAVE_FORMAT_QUERY)
     {
         if(DartWaveOut::queryFormat(pwfx->wFormatTag, pwfx->nChannels, pwfx->nSamplesPerSec,
                                     pwfx->wBitsPerSample) == TRUE) {
@@ -331,13 +331,13 @@ MMRESULT WINAPI waveOutGetErrorTextW(MMRESULT wError, LPWSTR lpText, UINT cchTex
 {
     char * theMsg = getWinmmMsg( wError );
     if(theMsg) {
-        AsciiToUnicode( theMsg, lpText );
+        AsciiToUnicodeN( theMsg, lpText, cchText );
     }
     else
     {
         char errMsg[100];
         sprintf( errMsg, "Unknown error number %d", wError );
-        AsciiToUnicode( errMsg, lpText );
+        AsciiToUnicodeN( errMsg, lpText, cchText );
     }
     return MMSYSERR_NOERROR;
 }
@@ -418,7 +418,7 @@ MMRESULT WINAPI waveOutGetPlaybackRate(HWAVEOUT hwo, LPDWORD pdwRate)
 MMRESULT WINAPI waveOutSetPlaybackRate(HWAVEOUT hwo, DWORD dwRate)
 {
     WaveOut *dwave = (WaveOut *)hwo;
-    
+
     dprintf(("waveOutSetPlaybackRate: NOT IMPLEMENTED!!"));
     if(WaveOut::find(dwave) == TRUE)
     {

@@ -1,4 +1,4 @@
-/* $Id: wavein.cpp,v 1.12 2002-05-28 14:09:24 sandervl Exp $ */
+/* $Id: wavein.cpp,v 1.13 2003-07-16 15:47:24 sandervl Exp $ */
 
 /*
  * Wave in MM apis
@@ -46,10 +46,10 @@ MMRESULT WINAPI waveInOpen(LPHWAVEIN phwi, UINT uDeviceID, const LPWAVEFORMATEX 
     if(pwfx == NULL)
         return(WAVERR_BADFORMAT);
 
-    if(fdwOpen & WAVE_FORMAT_QUERY) 
+    if(fdwOpen & WAVE_FORMAT_QUERY)
     {
         if(DartWaveIn::queryFormat(pwfx->wFormatTag, pwfx->nChannels, pwfx->nSamplesPerSec,
-                                   pwfx->wBitsPerSample) == TRUE) 
+                                   pwfx->wBitsPerSample) == TRUE)
         {
              return(MMSYSERR_NOERROR);
         }
@@ -303,12 +303,12 @@ MMRESULT WINAPI waveInGetErrorTextW(MMRESULT wError, LPWSTR lpText, UINT cchText
     dprintf(("WINMM:waveInGetErrorTextW(%d) - stub\n", wError ));
     char * theMsg = getWinmmMsg( wError );
     if ( theMsg )
-        AsciiToUnicode( theMsg, lpText );
+        AsciiToUnicodeN( theMsg, lpText, cchText );
     else
     {
         char errMsg[100];
         sprintf( errMsg, "Unknown error number %d", wError );
-        AsciiToUnicode( errMsg, lpText );
+        AsciiToUnicodeN( errMsg, lpText, cchText );
     }
     return MMSYSERR_NOERROR;
 }
