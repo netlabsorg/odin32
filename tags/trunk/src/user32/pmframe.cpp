@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.23 1999-11-11 13:17:30 sandervl Exp $ */
+/* $Id: pmframe.cpp,v 1.24 1999-11-11 17:13:45 cbratschi Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -642,7 +642,7 @@ BOOL FrameShowScrollBars(Win32BaseWindow *win32wnd,BOOL changeHorz,BOOL changeVe
     if ((fShow && hwndCurPar == hwndObj) || (!fShow && hwndCurPar != hwndObj))
     {
       WinSetParent(win32wnd->getHorzScrollHandle(),fShow ? win32wnd->getOS2FrameWindowHandle():HWND_OBJECT,FALSE);
-      updateFlags = FCF_HORZSCROLL;
+      updateFlags |= FCF_HORZSCROLL;
     }
   }
 
