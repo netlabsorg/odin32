@@ -1,4 +1,3 @@
-/* $Id: fontdlg.c,v 1.4 2001-09-05 12:12:02 bird Exp $ */
 /*
  * COMMDLG - Font Dialog
  *

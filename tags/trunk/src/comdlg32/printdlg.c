@@ -1,4 +1,3 @@
-/* $Id: printdlg.c,v 1.2 2001-09-05 12:12:02 bird Exp $ */
 /*
  * COMMDLG - Print Dialog
  *

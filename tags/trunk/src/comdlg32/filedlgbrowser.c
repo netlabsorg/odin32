@@ -1,4 +1,3 @@
-/* $Id: filedlgbrowser.c,v 1.9 2001-09-05 12:12:01 bird Exp $ */
 /*
  *  Implementation of IShellBrowser for the File Open common dialog
  *

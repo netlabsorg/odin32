@@ -1,4 +1,3 @@
-/* $Id: filedlg.c,v 1.6 2001-09-05 12:12:00 bird Exp $ */
 /*
  * COMMDLG - File Dialogs
  *
