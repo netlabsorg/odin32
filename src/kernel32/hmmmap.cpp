@@ -1,4 +1,4 @@
-/* $Id: hmmmap.cpp,v 1.11 2000-03-02 19:17:21 sandervl Exp $ */
+/* $Id: hmmmap.cpp,v 1.12 2000-05-24 01:56:08 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -168,17 +168,28 @@ LPVOID HMDeviceMemMapClass::MapViewOfFileEx(PHMHANDLEDATA pHMHandleData,
 {
  Win32MemMap *map;
 
-  dprintf(("KERNEL32: HMDeviceMemMapClass::MapViewOfFile(%08xh,%08xh,%08xh,%08xh,%08xh,%08xh)\n",
+  dprintf(("KERNEL32: HMDeviceMemMapClass::MapViewOfFileEx(%08xh,%08xh,%08xh,%08xh,%08xh,%08xh)\n",
            pHMHandleData->hHMHandle,
            dwDesiredAccess,
            dwFileOffsetHigh,
            dwFileOffsetLow,
-           dwNumberOfBytesToMap, lpBaseAddress));
+           dwNumberOfBytesToMap, 
+           lpBaseAddress));
 
-  if(lpBaseAddress != NULL) {//No can do. Let us choose the address
-	dprintf(("Can't create view to virtual address %x", lpBaseAddress));
-	SetLastError(ERROR_OUTOFMEMORY);
-	return NULL;
+  if(lpBaseAddress != NULL) 
+  {
+#if 0
+     //No can do. Let us choose the address
+     dprintf(("Can't create view to virtual address %x", lpBaseAddress));
+     SetLastError(ERROR_OUTOFMEMORY);
+     return NULL;
+#else
+    // PH 2000/05/24 IBM VAJ3 uses this function.
+    // I don't think we'll ever succeed in EXACTLY copying the original
+    // behaviour of the function. Maybe ignoring the base address helps?
+    dprintf(("WARNING: suggested virtual address %x IGNORED! (experimental API violation)",
+             lpBaseAddress));
+#endif
   }
 
   if(pHMHandleData->dwUserData == NULL || pHMHandleData->dwInternalType != HMTYPE_MEMMAP) {
