@@ -1,4 +1,4 @@
-/* $Id: windef.h,v 1.17 1999-11-30 20:19:02 sandervl Exp $ */
+/* $Id: windef.h,v 1.18 1999-12-01 18:36:47 sandervl Exp $ */
 
 /*
  * Basic types definitions
@@ -184,6 +184,7 @@ typedef unsigned long   ULONG_PTR;
 typedef double          DOUBLE;
 typedef double          LONGLONG;
 typedef double          ULONGLONG;
+typedef double          ULONGULONG;
 
 /* FIXME: Wine does not compile with strict on, therefore strict
  * handles are presently only usable on machines where sizeof(UINT) ==

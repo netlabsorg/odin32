@@ -1,4 +1,4 @@
-/* $Id: winprocess.h,v 1.5 1999-11-30 19:38:24 sandervl Exp $ */
+/* $Id: winprocess.h,v 1.6 1999-12-01 18:36:47 sandervl Exp $ */
 /*
  * Process definitions
  *
@@ -99,6 +99,7 @@ typedef struct _PDB
     struct _SERVICETABLE *service_table; /*  Service table for service thread */
 #ifdef __WIN32OS2__
     DWORD           hInstance;         //instance handle of executable
+    SYSTEMTIME      creationTime;      //time of process creation
 #endif
 } PDB;
 
