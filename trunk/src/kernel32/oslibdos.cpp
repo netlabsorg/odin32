@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.79 2001-10-15 05:51:34 phaller Exp $ */
+/* $Id: oslibdos.cpp,v 1.80 2001-10-25 13:19:05 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -1549,12 +1549,6 @@ DWORD OSLibDosDupHandle(DWORD hFile, DWORD *hNew)
    return DosDupHandle(hFile, hNew);
 }
 //******************************************************************************
-//******************************************************************************
-void OSLibDosDisableHardError(BOOL fTurnOff)
-{
-   DosError((fTurnOff) ? FERR_DISABLEHARDERR : FERR_ENABLEHARDERR);
-}
-//******************************************************************************
 //Returns time spent in kernel & user mode in milliseconds
 //******************************************************************************
 BOOL OSLibDosQueryProcTimes(DWORD procid, ULONG *kerneltime, ULONG *usertime)
@@ -2189,9 +2183,8 @@ DWORD OSLibDosFindFirst(LPCSTR lpFileName,WIN32_FIND_DATAA* lpFindFileData)
   attrs = FILE_READONLY | FILE_HIDDEN | FILE_SYSTEM | FILE_DIRECTORY | FILE_ARCHIVED;
   result.achName[0] = 0;
 
-  DosError(FERR_DISABLEHARDERR | FERR_DISABLEEXCEPTION);
+  ULONG oldmode = SetErrorMode(SEM_FAILCRITICALERRORS_W);
   APIRET rc = DosFindFirst((PSZ)lpFileName,&hDir,attrs,&result,sizeof(result),&searchCount,FIL_STANDARD);
-  //PH: DosError(FERR_ENABLEHARDERR | FERR_ENABLEEXCEPTION);
 
   //check root: skip "." and ".." (HPFS, not on FAT)
   //check in OSLibDosFindNext not necessary: "." and ".." are the first two entries
@@ -2201,23 +2194,21 @@ DWORD OSLibDosFindFirst(LPCSTR lpFileName,WIN32_FIND_DATAA* lpFindFileData)
            (strcmp(result.achName,"..") == 0))
     {
       result.achName[0] = 0;
-      //PH: DosError(FERR_DISABLEHARDERR | FERR_DISABLEEXCEPTION);
       searchCount = 1;
       APIRET rc = DosFindNext(hDir,&result,sizeof(result),&searchCount);
-      //PH: DosError(FERR_ENABLEHARDERR | FERR_ENABLEEXCEPTION);
       if (rc)
       {
         DosFindClose(hDir);
         SetLastError(error2WinError(rc));
 
-        DosError(FERR_ENABLEHARDERR | FERR_ENABLEEXCEPTION);
+        SetErrorMode(oldmode);
         return INVALID_HANDLE_VALUE_W;
       }
     }
   }
 
   // enable i/o kernel exceptions again
-  DosError(FERR_ENABLEHARDERR | FERR_ENABLEEXCEPTION);
+  SetErrorMode(oldmode);
 
   if(rc)
   {
@@ -2242,9 +2233,9 @@ DWORD OSLibDosFindFirstMulti(LPCSTR lpFileName,WIN32_FIND_DATAA *lpFindFileData,
   attrs = FILE_READONLY | FILE_HIDDEN | FILE_SYSTEM | FILE_DIRECTORY | FILE_ARCHIVED;
   result = (FILEFINDBUF3*)malloc(searchCount*sizeof(FILEFINDBUF3));
 
-  DosError(FERR_DISABLEHARDERR | FERR_DISABLEEXCEPTION);
+  ULONG oldmode = SetErrorMode(SEM_FAILCRITICALERRORS_W);
   APIRET rc = DosFindFirst((PSZ)lpFileName,&hDir,attrs,result,searchCount*sizeof(FILEFINDBUF3),&searchCount,FIL_STANDARD);
-  DosError(FERR_ENABLEHARDERR | FERR_ENABLEEXCEPTION);
+  SetErrorMode(oldmode);
   if (rc)
   {
     free(result);
@@ -2346,9 +2337,9 @@ DWORD OSLibDosQueryVolumeFS(int drive, LPSTR lpFileSystemNameBuffer, DWORD nFile
    }
    drv[0] = (char)('A' + drive - 1);
 
-   DosError(FERR_DISABLEHARDERR);
+   ULONG oldmode = SetErrorMode(SEM_FAILCRITICALERRORS_W);
    rc = DosQueryFSAttach(drv, 1, FSAIL_QUERYNAME, fsinfo, &cb);
-   DosError(FERR_ENABLEHARDERR);
+   SetErrorMode(oldmode);
 
    switch(rc) {
    case ERROR_INVALID_DRIVE:
@@ -2390,9 +2381,9 @@ DWORD OSLibDosQueryVolumeSerialAndName(int drive, LPDWORD lpVolumeSerialNumber,
  FSINFOBUF fsi;
  APIRET    rc;
 
-   DosError(FERR_DISABLEHARDERR);
+   ULONG oldmode = SetErrorMode(SEM_FAILCRITICALERRORS_W);
    rc = DosQueryFSInfo(drive, FSIL_VOLSER, &fsi, sizeof(fsi));
-   DosError(FERR_ENABLEHARDERR);
+   SetErrorMode(oldmode);
 
    switch(rc) {
    case ERROR_INVALID_DRIVE:
@@ -2439,9 +2430,9 @@ BOOL OSLibGetDiskFreeSpace(LPSTR lpRootPathName, LPDWORD lpSectorsPerCluster,
    else
       diskNum = 0;
 
-   DosError(FERR_DISABLEHARDERR);
+   ULONG oldmode = SetErrorMode(SEM_FAILCRITICALERRORS_W);
    rc = DosQueryFSInfo(diskNum, FSIL_ALLOC, &fsAlloc, sizeof(fsAlloc));
-   DosError(FERR_ENABLEHARDERR);
+   SetErrorMode(oldmode);
 
    if(rc == 0)
    {
@@ -2466,6 +2457,7 @@ BOOL  OSLibDosGetDiskGeometry(HANDLE hDisk, DWORD cDisk, PVOID pdiskgeom)
    ULONG datasize = sizeof(bpb);
    APIRET rc;
 
+   dprintf(("OSLibDosGetDiskGeometry %x %d %x", hDisk, cDisk, pdiskgeom));
    param[1] = cDisk - 'A';
    rc = DosDevIOCtl((hDisk) ? hDisk : -1, IOCTL_DISK, DSK_GETDEVICEPARAMS, param, 2, &parsize, &bpb, sizeof(bpb), &datasize);
    if(rc == 0)
@@ -2508,6 +2500,7 @@ BOOL  OSLibDosGetDiskGeometry(HANDLE hDisk, DWORD cDisk, PVOID pdiskgeom)
         SetLastError(ERROR_SUCCESS_W);
         return TRUE;
    }
+   dprintf(("OSLibDosGetDiskGeometry: error %d -> %d", rc, error2WinError(rc)));
    SetLastError(error2WinError(rc));
    return FALSE;
 }

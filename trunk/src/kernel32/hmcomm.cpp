@@ -1,4 +1,4 @@
-/* $Id: hmcomm.cpp,v 1.10 2001-04-26 13:22:43 sandervl Exp $ */
+/* $Id: hmcomm.cpp,v 1.11 2001-10-25 13:19:05 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -186,12 +186,12 @@ DWORD HMDeviceCommClass::CreateFile(LPCSTR lpFileName,
   comname[4] = 0;   //get rid of : (if present) (eg COM1:)
 
   //AH: TODO parse Win32 security handles
-  OSLibDosDisableHardError(TRUE);
+  ULONG oldmode = SetErrorMode(SEM_FAILCRITICALERRORS);
   pHMHandleData->hHMHandle = OSLibDosOpen(comname,
                                           OSLIB_ACCESS_READWRITE |
                                           OSLIB_ACCESS_SHAREDENYREAD |
                                           OSLIB_ACCESS_SHAREDENYWRITE);
-  OSLibDosDisableHardError(FALSE);
+  SetErrorMode(oldmode);
   if (pHMHandleData->hHMHandle != 0)
   {
     ULONG ulLen;
