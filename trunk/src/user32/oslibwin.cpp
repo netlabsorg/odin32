@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.119 2002-04-28 15:47:09 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.120 2002-04-30 18:47:46 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -549,15 +549,21 @@ BOOL OSLibWinMinimizeWindow(HWND hwnd)
     on desktop, this func also works with MDI */
 
     BOOL rc;
+    HWND hwndNext;
 
     rc = WinSetWindowPos(hwnd, 0, 0, 0, 0, 0, SWP_MINIMIZE);
     if (rc) {
         rc = WinSetWindowPos(hwnd, HWND_BOTTOM, 0, 0, 0, 0, SWP_DEACTIVATE | SWP_ZORDER);
         if (rc)
         {
-          HWND activeHandle = (HWND)WinSendMsg(hwnd, WM_QUERYFOCUSCHAIN, MPFROMSHORT(QFC_ACTIVE), MPFROMHWND(hwnd));
-          if (activeHandle != NULLHANDLE)
-           rc = WinSetWindowPos(activeHandle, HWND_TOP, 0, 0, 0, 0, SWP_ACTIVATE | SWP_ZORDER);
+          HENUM henum;
+          henum = WinBeginEnumWindows(HWND_DESKTOP);
+          while ((hwndNext = WinGetNextWindow(henum)) != NULLHANDLE)
+          {
+           if (WinIsWindowVisible(hwndNext) && WinIsWindowShowing(hwndNext)) break;
+          }
+          WinEndEnumWindows (henum);
+          rc = WinSetWindowPos(hwndNext, HWND_TOP, 0, 0, 0, 0, SWP_ACTIVATE | SWP_ZORDER);
         }
     }
     return (rc);
