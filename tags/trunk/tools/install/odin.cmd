@@ -187,6 +187,8 @@ do while lines(changelog) > 0
 rc = lineout(instfile, logline);
 logline = linein(changelog);
 end
+call stream changelog, 'c', 'close';
+
 rc = lineout(instfile, '</README>');
 rc = lineout(instfile, '</PAGE>');
 rc = lineout(instfile, '<PAGE INDEX=4 TYPE=CONTAINER>');
