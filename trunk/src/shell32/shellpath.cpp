@@ -1,4 +1,4 @@
-/* $Id: shellpath.cpp,v 1.4 1999-11-02 20:05:35 phaller Exp $ */
+/* $Id: shellpath.cpp,v 1.5 1999-12-28 23:16:33 sandervl Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -98,12 +98,19 @@ ODINFUNCTION1(BOOL, PathIsRootAW,
 /*************************************************************************
  * PathBuildRoot [SHELL32.30]
  */
-ODINFUNCTION2(LPSTR, PathBuildRootA,
-              LPSTR, root,
-              BYTE, drive)
+LPSTR WINAPI PathBuildRootA(LPSTR root, BYTE drive)
 {
   TRACE("%p %i\n",root, drive);
    strcpy(root,"A:\\");
+   root[0]+=drive;
+   return root;
+}
+
+/*************************************************************************
+ */
+LPWSTR WINAPI PathBuildRootW(LPWSTR root, BYTE drive)
+{
+   lstrcpyW(root, (LPWSTR)L"A:\\");
    root[0]+=drive;
    return root;
 }
@@ -328,13 +335,24 @@ ODINFUNCTION1(DWORD, PathRemoveFileSpecA,
  *     concat_paths(char*target,const char*add);
  *     concats "target\\add" and writes them to target
  */
-ODINFUNCTION2(LPSTR, PathAppendA,
-              LPSTR, x1,
-              LPSTR, x2)
+LPSTR WINAPI PathAppendA(LPSTR x1, LPSTR x2)
 {
   TRACE("%s %s\n",x1,x2);
   while (x2[0]=='\\') x2++;
   return PathCombineA(x1,x1,x2);
+}
+
+/*************************************************************************
+ * PathAppend [SHELL32.36]
+ *
+ * NOTES
+ *     concat_paths(char*target,const char*add);
+ *     concats "target\\add" and writes them to target
+ */
+LPWSTR WINAPI PathAppendW(LPWSTR x1, LPWSTR x2)
+{
+  while (x2[0] == (WCHAR)'\\') x2++;
+  return PathCombineW(x1,x1,x2);
 }
 
 /*************************************************************************
@@ -490,6 +508,20 @@ ODINFUNCTION1(BOOL, PathFileExistsA,
 {
   TRACE("%s\n",fn);
    if (GetFileAttributesA(fn)==-1)
+      return FALSE;
+    else
+      return TRUE;
+}
+/*************************************************************************
+ * PathFileExists [SHELL32.45]
+ *
+ * NOTES
+ *     file_exists(char *fn);
+ */
+ODINFUNCTION1(BOOL, PathFileExistsW,
+              LPWSTR, fn)
+{
+   if (GetFileAttributesW(fn)==-1)
       return FALSE;
     else
       return TRUE;
@@ -762,9 +794,29 @@ ODINPROCEDURE1(PathUnquoteSpacesAW,
  * PathGetDriveNumber32 [SHELL32.57]
  *
  */
-ODINFUNCTION1(HRESULT, PathGetDriveNumber,
+ODINFUNCTION1(HRESULT, PathGetDriveNumberAW,
               LPSTR, u)
 {  FIXME("%s stub\n",debugstr_a(u));
+   return 0;
+}
+
+/*************************************************************************
+ * PathGetDriveNumber32 [SHELL32.57]
+ *
+ */
+ODINFUNCTION1(HRESULT, PathGetDriveNumberA,
+              LPSTR, u)
+{  FIXME("%s stub\n",debugstr_a(u));
+   return 0;
+}
+
+/*************************************************************************
+ * PathGetDriveNumber32 [SHELL32.57]
+ *
+ */
+ODINFUNCTION1(HRESULT, PathGetDriveNumberW,
+              LPWSTR, u)
+{  
    return 0;
 }
 
@@ -1152,7 +1204,7 @@ ODINFUNCTION4(BOOL, SHGetSpecialFolderPathAW,
  * the address of the last character is returned.
  *
  */
-ODINFUNCTION1(LPSTR,PathRemoveBackslashA,LPSTR,lpPath)
+LPSTR WINAPI PathRemoveBackslashA(LPSTR lpPath)
 {
 	LPSTR temp = lpPath;
 	LPSTR prev = lpPath;
@@ -1169,71 +1221,20 @@ ODINFUNCTION1(LPSTR,PathRemoveBackslashA,LPSTR,lpPath)
 	return prev;
 }
 
-ODINFUNCTION1(LPWSTR,PathRemoveBackslashW,LPWSTR,lpPath)
+LPWSTR WINAPI PathRemoveBackslashW(LPWSTR lpPath)
 {
-    dprintf(("(%p),stub!\n", lpPath));
-	return lpPath;
+	LPWSTR temp = lpPath;
+	LPWSTR prev = lpPath;
+	
+	while (*temp)
+	{
+		prev = temp++;
+	}
+	if ( *prev == (WCHAR)'\\')
+	{
+		*prev = (WCHAR)'\0';
+	}
+
+	return prev;
 }
 
-/*
-   shlwapi functions that have found their way in because most of
-   shlwapi is unimplemented and doesn't have a home.
-
-   FIXME: move to a more appropriate file( when one exists )
-*/
-
- /* SHGetValue: Gets a value from the registry */
-
-ODINFUNCTION6(DWORD,SHGetValueA,HKEY,     hkey,
-                                LPCSTR,   pSubKey,
-                                LPCSTR,   pValue,
-                                LPDWORD,  pwType,
-                                LPVOID,   pvData,
-                                LPDWORD,  pbData)
-{
-    dprintf(("(%p),stub!\n", pSubKey));
-
-	return ERROR_SUCCESS;  /* return success */
-}
-
-ODINFUNCTION6(DWORD,SHGetValueW,HKEY,     hkey,
-                                LPCWSTR,  pSubKey,
-                                LPCWSTR,  pValue,
-                                LPDWORD,  pwType,
-                                LPVOID,   pvData,
-                                LPDWORD,  pbData)
-{
-    dprintf(("(%p),stub!\n", pSubKey));
-
-	return ERROR_SUCCESS;  /* return success */
-}
-
-/* gets a user-specific registry value. */
-
-ODINFUNCTION8(LONG,SHRegGetUSValueA,LPCSTR,   pSubKey,
-                                    LPCSTR,   pValue,
-                                    LPDWORD,  pwType,
-                                    LPVOID,   pvData,
-                                    LPDWORD,  pbData,
-                                    BOOL,     fIgnoreHKCU,
-                                    LPVOID,   pDefaultData,
-                                    DWORD,    wDefaultDataSize)
-{
-    FIXME("(%p),stub!\n", pSubKey);
-
-	return ERROR_SUCCESS;  /* return success */
-}
-
-ODINFUNCTION8(LONG,SHRegGetUSValueW,LPCWSTR, pSubKey,
-                                    LPCWSTR, pValue,
-                                    LPDWORD, pwType,
-                                    LPVOID,  pvData,
-                                    LPDWORD, pbData,
-                                    BOOL,    flagIgnoreHKCU,
-                                    LPVOID,  pDefaultData,
-                                    DWORD,   wDefaultDataSize)
-{
-    dprintf(("(%p),stub!\n", pSubKey));
-
-	return ERROR_SUCCESS;  /* return success */
-}

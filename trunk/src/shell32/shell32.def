@@ -1,4 +1,4 @@
-; $Id: shell32.def,v 1.20 1999-11-10 22:13:09 phaller Exp $
+; $Id: shell32.def,v 1.21 1999-12-28 23:16:33 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;based on Windows 95
@@ -67,7 +67,7 @@ EXPORTS
     DragAcceptFiles                   = _DragAcceptFiles@8                    @54
     PathQuoteSpaces                   = _PathQuoteSpacesAW@4                  @55
     PathUnquoteSpaces                 = _PathUnquoteSpacesAW@4                @56
-    PathGetDriveNumber                = _PathGetDriveNumber@4                 @57
+    PathGetDriveNumber                = _PathGetDriveNumberAW@4               @57
     ParseField                        = _ParseFieldA@16                       @58
     RestartDialog                     = _RestartDialog@12                     @59
     ExitWindowsDialog                 = _ExitWindowsDialog@4                  @60
@@ -313,12 +313,12 @@ EXPORTS
     Shell_NotifyIconW                 = _Shell_NotifyIconW@8                  @298
 ;   Shl1632_ThunkData32               = _Shl1632_ThunkData32@?                @299
 ;   Shl3216_ThunkData32               = _Shl3216_ThunkData32@?                @300
-;   StrChrA                           = _StrChrA@?                            @301
+    StrChrA                           = _StrChrA@8                            @301
 ;   StrChrIA                          = _StrChrIA@?                           @302
 ;   StrChrIW                          = _StrChrIW@?                           @303
     StrChrW                           = _StrChrW@8                            @304
 ;   StrCmpNA                          = _StrCmpNA@?                           @305
-;   StrCmpNIA                         = _StrCmpNIA@?                          @306
+    StrCmpNIA                         = _StrCmpNIA@12                         @306
     StrCmpNIW                         = _StrCmpNIW@12                         @307
 ;   StrCmpNW                          = _StrCmpNW@?                           @308
 ;   StrCpyNA                          = _StrCpyNA@?                           @309
@@ -329,7 +329,7 @@ EXPORTS
 ;   StrNCmpW                          = _StrNCmpW@?                           @314
 ;   StrCpyA                           = _StrCpyA@?                            @315
     StrNCpyW                          = _StrNCpyW@8                           @316
-;   StrRChrA                          = _StrRChrA@?                           @317
+    StrRChrA                          = _StrRChrA@12                          @317
 ;   StrRChrIA                         = _StrRChrIA@?                          @318
 ;   StrRChrIW                         = _StrRChrIW@?                          @319
     StrRChrW                          = _StrRChrW@12                          @320
@@ -377,18 +377,46 @@ EXPORTS
 
 ;   FOOBAR1217                        = _FOOBAR1217@?                         @1217
 
-    StrRetToBufA                      = _StrRetToBufA@16	              @1000
-    StrRetToBufW                      = _StrRetToBufW@16                      @1001
-    PathMatchSpecA                    = _PathMatchSpecA@8                     @1002
-    PathMatchSpecW                    = _PathMatchSpecW@8                     @1003
-    StrRetToStrNA                     = _StrRetToStrNA@16                     @1004
-    StrRetToStrNW                     = _StrRetToStrNW@16                     @1005
-    PathAddBackslashA                 = _PathAddBackslashA@4                  @1006
-    PathAddBackslashW                 = _PathAddBackslashW@4	              @1007
-    PathFindFilenameA                 = _PathFindFilenameA@4                  @1008
-    PathFindFilenameW                 = _PathFindFilenameW@4                  @1009
-    PathIsRootA                       = _PathIsRootA@4                        @1010
-    PathIsRootW                       = _PathIsRootW@4                        @1011
-    PathRemoveBackslashA              = _PathRemoveBackslashA@4               @1012
-    PathRemoveBackslashW              = _PathRemoveBackslashW@4               @1013
-    PathRemoveFileSpecA               = _PathRemoveFileSpecA@4                @1014
+    _PathMatchSpecA@8                     @1002
+    _PathMatchSpecW@8                     @1003
+    _StrRetToStrNA@16                     @1004
+    _StrRetToStrNW@16                     @1005
+    _PathAddBackslashA@4                  @1006
+    _PathAddBackslashW@4	          @1007
+    _PathFindFilenameA@4                  @1008
+    _PathFindFilenameW@4                  @1009
+    _PathIsRootA@4                        @1010
+    _PathIsRootW@4                        @1011
+    _PathRemoveBackslashA@4               @1012
+    _PathRemoveBackslashW@4               @1013
+    _PathRemoveFileSpecA@4                @1014
+
+    _PathCombineA@12                      @1015
+    _PathCombineW@12                      @1016
+    _PathGetArgsA@4                       @1019
+    _PathGetArgsW@4                       @1020
+
+    _PathBuildRootA@8                     @1021
+    _PathBuildRootW@8                     @1022
+    _PathUnquoteSpacesA@4                 @1023
+    _PathUnquoteSpacesW@4                 @1024
+    _PathFindOnPathA@8                    @1025
+    _PathFindOnPathW@8                    @1026
+    _PathFileExistsA@4                    @1027
+    _PathFileExistsW@4                    @1028
+    _PathIsRelativeA@4                    @1029
+    _PathIsRelativeW@4                    @1030
+    _PathRemoveBlanksA@4                  @1031
+    _PathRemoveBlanksW@4                  @1032
+    _PathQuoteSpacesA@4                   @1033
+    _PathQuoteSpacesW@4                   @1034
+    _PathSetDlgItemPathA@12               @1035
+    _PathSetDlgItemPathW@12               @1036
+    _PathGetDriveNumberA@4                @1037
+    _PathGetDriveNumberW@4                @1038
+    _PathIsUNCA@4                         @1039
+    _PathIsUNCW@4                         @1040
+    _StrFormatByteSizeA@12                @1041
+    _StrFormatByteSizeW@12                @1042
+    _PathAppendA@8                        @1043
+    _PathAppendW@8                        @1044
