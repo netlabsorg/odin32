@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.13 1999-11-27 00:10:20 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.14 1999-12-05 00:31:47 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -25,6 +25,7 @@
 #include "timer.h"
 #include <thread.h>
 #include <wprocess.h>
+#include "pmwindow.h"
 
 typedef BOOL (EXPENTRY FNTRANS)(MSG *, QMSG *);
 typedef FNTRANS *PFNTRANS;
@@ -270,6 +271,38 @@ ULONG OSLibWinQueryQueueStatus()
 	statusWin32 |= QS_SENDMESSAGE_W;
 
    return statusWin32;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinInSendMessage()
+{
+   return WinInSendMsg(GetThreadHAB());
+}
+//******************************************************************************
+//******************************************************************************
+DWORD OSLibWinGetMessagePos()
+{
+ APIRET rc;
+ POINTL ptl;
+
+   rc = WinQueryMsgPos(GetThreadHAB(), &ptl);
+   if(!rc) {
+      return 0;
+   }
+   //convert to windows coordinates
+   return MAKEULONG(ptl.x, ScreenHeight - ptl.y - 1);
+}
+//******************************************************************************
+//******************************************************************************
+LONG OSLibWinGetMessageTime()
+{
+   return (LONG)WinQueryMsgTime(GetThreadHAB());
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinReplyMessage(ULONG result)
+{
+   return (BOOL)WinReplyMsg( NULLHANDLE, NULLHANDLE, HMQ_CURRENT, (MRESULT)result);
 }
 //******************************************************************************
 //******************************************************************************

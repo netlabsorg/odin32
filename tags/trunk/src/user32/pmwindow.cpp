@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.61 1999-12-04 00:04:19 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.62 1999-12-05 00:31:47 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -276,7 +276,15 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         }
         break;
 
-#if 0
+#if 1
+    case WM_ADJUSTWINDOWPOS:
+    {
+      PSWP     pswp = (PSWP)mp1;
+
+        dprintf(("OS2: WM_ADJUSTWINDOWPOS %x %x %x (%d,%d) (%d,%d)", hwnd, pswp->hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
+        goto RunDefWndProc;
+    }
+#else
     case WM_ADJUSTWINDOWPOS:
     {
       PSWP     pswp = (PSWP)mp1;
@@ -330,7 +338,9 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         }
         break;
     }
+#endif
 
+#if 1
     case WM_WINDOWPOSCHANGED:
     {
       PSWP      pswp  = (PSWP)mp1;
@@ -340,9 +350,9 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
       LONG      yDelta = pswp->cy - swpOld.cy;
       LONG      xDelta = pswp->cx - swpOld.cx;
 
-        dprintf(("OS2: WM_WINDOWPOSCHANGED %x %x (%d,%d) (%d,%d)", hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
+        dprintf(("OS2: WM_WINDOWPOSCHANGED %x %x (%d,%d) (%d,%d)", win32wnd->getWindowHandle(), pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
 
-        if ((pswp->fl & (SWP_SIZE | SWP_MOVE | SWP_ZORDER)) == 0) break;
+        if ((pswp->fl & (SWP_SIZE | SWP_MOVE | SWP_ZORDER)) == 0) goto RunDefWndProc;
 
         if(pswp->fl & (SWP_MOVE | SWP_SIZE)) {
             if (win32wnd->isChild()) {
@@ -354,9 +364,9 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         }
         OSLibMapSWPtoWINDOWPOS(pswp, &wp, &swpOld, hParent, win32wnd->getOS2FrameWindowHandle());
 
-        if (!win32wnd->CanReceiveSizeMsgs())    break;
+        if (!win32wnd->CanReceiveSizeMsgs())    goto RunDefWndProc;
 
-        win32wnd->setWindowRect(wp.x, wp.y, wp.x+wp.cx, wp.y+wp.cy);
+        dprintf(("Set client rectangle to (%d,%d)(%d,%d)", swpOld.x, swpOld.y, swpOld.x + swpOld.cx, swpOld.y + swpOld.cy));
         win32wnd->setClientRect(swpOld.x, swpOld.y, swpOld.x + swpOld.cx, swpOld.y + swpOld.cy);
 
         wp.hwnd = win32wnd->getWindowHandle();
@@ -365,63 +375,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
            Win32BaseWindow *wndAfter = Win32BaseWindow::GetWindowFromOS2Handle(pswp->hwndInsertBehind);
            wp.hwndInsertAfter = wndAfter->getWindowHandle();
         }
-
-        if (yDelta != 0 || xDelta != 0)
-        {
-            HENUM henum = WinBeginEnumWindows(pswp->hwnd);
-            SWP swp[10];
-            int i = 0;
-            HWND hwnd;
-
-            while ((hwnd = WinGetNextWindow(henum)) != NULLHANDLE)
-            {
-#if 0
-                if (mdiClient )
-                {
-                  continue;
-                }
-#endif
-                WinQueryWindowPos(hwnd, &(swp[i]));
-
-#ifdef DEBUG
-                Win32BaseWindow *window = Win32BaseWindow::GetWindowFromOS2Handle(hwnd);
-                dprintf(("ENUMERATE %x delta %d (%d,%d) (%d,%d) %x", (window) ? window->getWindowHandle() : hwnd,
-                         yDelta, swp[i].x, swp[i].y, swp[i].cx, swp[i].cy, swp[i].fl));
-#endif
-
-                if(swp[i].y != 0) {
-                    //child window at offset <> 0 from client area -> offset now changes
-                    swp[i].y  += yDelta;
-                    swp[i].fl &= ~(SWP_NOREDRAW);
-                }
-                //else child window with the same start coorindates as the client area
-                //The app should resize it.
-
-               if (i == 9)
-                {
-                    WinSetMultWindowPos(GetThreadHAB(), swp, 10);
-                    i = 0;
-                }
-                else
-                {
-                    i++;
-                }
-            }
-
-            WinEndEnumWindows(henum);
-
-            if (i)
-               WinSetMultWindowPos(GetThreadHAB(), swp, i);
-        }
-        if (yDelta != 0)
-        {
-            POINT pt;
-            if(GetCaretPos (&pt) == TRUE)
-            {
-                pt.y -= yDelta;
-                SetCaretPos (pt.x, pt.y);
-            }
-        }
+        //SvL: Can be sent twice now (once in pmframe, once here); shouldn't really matter though...
         win32wnd->MsgPosChanged((LPARAM)&wp);
 
         goto RunDefWndProc;
@@ -880,7 +834,7 @@ VirtualKeyFound:
     {
         dprintf(("OS2: WM_ERASEBACKGROUND %x", win32wnd->getWindowHandle()));
 #if 1
-	break;
+        break;
 #else
 
         if (WinQueryUpdateRect (hwnd, NULL) && !win32wnd->isSupressErase()) {
@@ -970,6 +924,7 @@ VirtualKeyFound:
 RunDefWndProc:
 //  dprintf(("OS2: RunDefWndProc msg %x for %x", msg, hwnd));
   RestoreOS2TIB();
+
   return WinDefWindowProc( hwnd, msg, mp1, mp2 );
 } /* End of Win32WindowProc */
 //******************************************************************************
