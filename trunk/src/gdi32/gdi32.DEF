@@ -1,4 +1,4 @@
-; $Id: gdi32.DEF,v 1.21 2001-12-26 11:33:10 sandervl Exp $
+; $Id: gdi32.DEF,v 1.22 2002-07-15 10:02:28 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY GDI32 INITINSTANCE
@@ -357,9 +357,12 @@ EXPORTS
 ; Internal functions. (starts at 1200)
 ;
     _ObjAllocateHandle@12                                       @1201 NONAME
-    _ObjFreeHandle@4                                            @1202 NONAME
-    _ObjGetHandleData@8                                         @1203 NONAME
-    _ObjGetHandleType@4                                         @1204 NONAME
+    _ObjDeleteHandle@8                                          @1202 NONAME
+    _ObjQueryHandleData@8                                       @1203 NONAME
+    _ObjQueryHandleType@4                                       @1204 NONAME
+    _ObjSetHandleFlag@12                                        @1205 NONAME
+    _ObjSetHandleData@12                                        @1206 NONAME
+    _ObjQueryHandleFlags@4                                      @1207 NONAME
 
 ;
 ; Function exported to USER32

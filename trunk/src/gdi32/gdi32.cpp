@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.81 2002-04-30 13:09:55 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.82 2002-07-15 10:02:29 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -25,6 +25,7 @@
 #include <winuser32.h>
 #include "font.h"
 #include <stats.h>
+#include <objhandle.h>
 
 #define DBG_LOCALLOG    DBG_gdi32
 #include "dbglocal.h"
@@ -59,13 +60,16 @@ HGDIOBJ WIN32API GetStockObject(int arg1)
     switch(arg1)
     {
         case DEFAULT_GUI_FONT:
-                if(NULL==hFntDefaultGui)
-                  hFntDefaultGui = CreateFontA( -9, 0, 0, 0, FW_MEDIUM, FALSE,
-                                                FALSE, FALSE, ANSI_CHARSET,
-                                                OUT_DEFAULT_PRECIS,
-                                                CLIP_DEFAULT_PRECIS,
-                                                DEFAULT_QUALITY,
-                                                FIXED_PITCH|FF_MODERN, "WarpSans");
+                if(NULL==hFntDefaultGui) {
+                    hFntDefaultGui = CreateFontA( -9, 0, 0, 0, FW_MEDIUM, FALSE,
+                                                 FALSE, FALSE, ANSI_CHARSET,
+                                                 OUT_DEFAULT_PRECIS,
+                                                 CLIP_DEFAULT_PRECIS,
+                                                 DEFAULT_QUALITY,
+                                                 FIXED_PITCH|FF_MODERN, "WarpSans");
+                    //This object can't be deleted by applications
+                    ObjSetHandleFlag(hFntDefaultGui, OBJHANDLE_FLAG_NODELETE, TRUE);
+                }
                 obj = hFntDefaultGui;
                 break;
         default:

@@ -1,13 +1,14 @@
-/* $Id: objhandle.cpp,v 1.21 2002-04-07 14:38:08 sandervl Exp $ */
+/* $Id: objhandle.cpp,v 1.22 2002-07-15 10:02:29 sandervl Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
  *
- * Copyright 2000 Sander van Leeuwen (sandervl@xs4all.nl)
- *
+ * Copyright 2000-2002 Sander van Leeuwen (sandervl@xs4all.nl)
  *
  * TODO: The table should be dynamically increased when necessary
  *       This is just a quick and dirty implementation
+ *
+ *       System objects can't be deleted (TODO: any others?? (fonts?))!!!!)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -36,23 +37,19 @@
 //******************************************************************************
 
 typedef struct {
-  ULONG      dwUserData;
-  ObjectType type;
+  DWORD      dwUserData;
+  DWORD      dwGDI32Data;
+  DWORD      dwFlags;
+  DWORD      dwType;
 } GdiObject;
 
 static GdiObject objHandleTable[MAX_OBJECT_HANDLES] = {0};
 static ULONG     lowestFreeIndex = 1;
 static VMutex    objTableMutex;
 
-#ifdef DEBUG
-static DWORD GetObjectTypeNoDbg( HGDIOBJ hObj);
-#else
-#define GetObjectTypeNoDbg GetObjectType
-#endif
-
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API ObjAllocateHandle(HANDLE *hObject, DWORD dwUserData, ObjectType type)
+BOOL WIN32API ObjAllocateHandle(HANDLE *hObject, DWORD dwUserData, DWORD dwType)
 {
     objTableMutex.enter();
     if(lowestFreeIndex == -1) {
@@ -62,16 +59,17 @@ BOOL WIN32API ObjAllocateHandle(HANDLE *hObject, DWORD dwUserData, ObjectType ty
         DebugInt3();
         return FALSE;
     }
-    if(objHandleTable[0].type == 0) {
+    if(objHandleTable[0].dwType == HNDL_NONE) {
         //first handle can never be used
-        objHandleTable[0].type       = GDIOBJ_INVALID;
+        objHandleTable[0].dwType     = HNDL_INVALID;
         objHandleTable[0].dwUserData = -1;
     }
-    *hObject  = lowestFreeIndex;
-    *hObject |= MAKE_HANDLE(type);
-    objHandleTable[lowestFreeIndex].dwUserData = dwUserData;
-    objHandleTable[lowestFreeIndex].type       = type;
-
+    *hObject = lowestFreeIndex;
+    *hObject = MAKE_HANDLE(*hObject);
+    objHandleTable[lowestFreeIndex].dwUserData  = dwUserData;
+    objHandleTable[lowestFreeIndex].dwType      = dwType;
+    objHandleTable[lowestFreeIndex].dwGDI32Data = 0;
+    objHandleTable[lowestFreeIndex].dwFlags     = 0;
     lowestFreeIndex = -1;
 
     //find next free handle
@@ -86,151 +84,220 @@ BOOL WIN32API ObjAllocateHandle(HANDLE *hObject, DWORD dwUserData, ObjectType ty
 }
 //******************************************************************************
 //******************************************************************************
-void WIN32API ObjFreeHandle(HANDLE hObject)
+BOOL WIN32API ObjDeleteHandle(HANDLE hObject, DWORD dwType)
 {
     hObject &= OBJHANDLE_MAGIC_MASK;
     if(hObject < MAX_OBJECT_HANDLES) {
         objTableMutex.enter();
-        objHandleTable[hObject].dwUserData = 0;
-        objHandleTable[hObject].type = GDIOBJ_NONE;
-        if(lowestFreeIndex == -1 || hObject < lowestFreeIndex)
-            lowestFreeIndex = hObject;
-
+        if(!(objHandleTable[hObject].dwFlags & OBJHANDLE_FLAG_NODELETE)) 
+        {
+            objHandleTable[hObject].dwUserData = 0;
+            objHandleTable[hObject].dwType     = HNDL_NONE;
+            if(lowestFreeIndex == -1 || hObject < lowestFreeIndex)
+                lowestFreeIndex = hObject;
+        }
+        else {
+            dprintf(("ObjDeleteHandle: unable to delete system object %x", MAKE_HANDLE(hObject)));
+        }
         objTableMutex.leave();
+        return TRUE;
     }
+    return FALSE;
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API ObjGetHandleData(HANDLE hObject, ObjectType type)
+DWORD WIN32API ObjQueryHandleData(HANDLE hObject, DWORD dwType)
 {
+    DWORD dwUserData = HANDLE_INVALID_DATA;
+
+    objTableMutex.enter();
     hObject &= OBJHANDLE_MAGIC_MASK;
-    if(hObject < MAX_OBJECT_HANDLES && type == objHandleTable[hObject].type) {
-        return objHandleTable[hObject].dwUserData;
+    if(hObject < MAX_OBJECT_HANDLES && 
+       ((dwType == HNDL_ANY && objHandleTable[hObject].dwType != HNDL_NONE) || 
+       dwType == objHandleTable[hObject].dwType)) 
+    {
+        dwUserData = objHandleTable[hObject].dwUserData;
     }
-    return HANDLE_OBJ_ERROR;
+    objTableMutex.leave();
+    return dwUserData;
 }
 //******************************************************************************
 //******************************************************************************
-ObjectType WIN32API ObjGetHandleType(HANDLE hObject)
+BOOL WIN32API ObjSetHandleData(HANDLE hObject, DWORD dwType, DWORD dwUserData)
 {
- DWORD objtype;
+    BOOL fSuccess = FALSE;
 
-    switch(OBJHANDLE_MAGIC(hObject))
+    objTableMutex.enter();
+    hObject &= OBJHANDLE_MAGIC_MASK;
+    if(hObject < MAX_OBJECT_HANDLES && 
+       ((dwType == HNDL_ANY && objHandleTable[hObject].dwType != HNDL_NONE) || 
+       dwType == objHandleTable[hObject].dwType)) 
     {
-    case GDIOBJ_REGION:
-        hObject &= OBJHANDLE_MAGIC_MASK;
-        if(hObject < MAX_OBJECT_HANDLES && objHandleTable[hObject].type == GDIOBJ_REGION) {
-            return GDIOBJ_REGION;
-        }
-        break;
-
-    case USEROBJ_MENU:
-        hObject &= OBJHANDLE_MAGIC_MASK;
-        if(hObject < MAX_OBJECT_HANDLES && objHandleTable[hObject].type == USEROBJ_MENU) {
-            return USEROBJ_MENU;
-        }
-        break;
-
-    case GDIOBJ_NONE:
-        //could be a cutoff menu handle, check this
-        //TODO: dangerous assumption! (need to rewrite object handle management)
-        hObject &= OBJHANDLE_MAGIC_MASK;
-        if(hObject < MAX_OBJECT_HANDLES && objHandleTable[hObject].dwUserData != 0 && objHandleTable[hObject].type == USEROBJ_MENU) {
-            return USEROBJ_MENU;
-        }
-        break;
-
-    case GDIOBJ_BITMAP:
-    case GDIOBJ_BRUSH:
-    case GDIOBJ_PALETTE:
-    case GDIOBJ_FONT:
-    case USEROBJ_ACCEL:
-    default:
-        break;
+        objHandleTable[hObject].dwUserData = dwUserData;
+        fSuccess = TRUE;
     }
-    return GDIOBJ_NONE;
+    objTableMutex.leave();
+    return fSuccess;
+}
+//******************************************************************************
+//******************************************************************************
+DWORD WIN32API ObjQueryHandleGDI32Data(HANDLE hObject, DWORD dwType)
+{
+    DWORD dwGDI32Data = HANDLE_INVALID_DATA;
+
+    objTableMutex.enter();
+    hObject &= OBJHANDLE_MAGIC_MASK;
+    if(hObject < MAX_OBJECT_HANDLES && 
+       ((dwType == HNDL_ANY && objHandleTable[hObject].dwType != HNDL_NONE) || 
+       dwType == objHandleTable[hObject].dwType)) 
+    {
+        dwGDI32Data = objHandleTable[hObject].dwGDI32Data;
+    }
+    objTableMutex.leave();
+    return dwGDI32Data;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API ObjSetHandleGDI32Data(HANDLE hObject, DWORD dwType, DWORD dwGDI32Data)
+{
+    BOOL fSuccess = FALSE;
+
+    objTableMutex.enter();
+    hObject &= OBJHANDLE_MAGIC_MASK;
+    if(hObject < MAX_OBJECT_HANDLES && 
+       ((dwType == HNDL_ANY && objHandleTable[hObject].dwType != HNDL_NONE) || 
+       dwType == objHandleTable[hObject].dwType)) 
+    {
+        objHandleTable[hObject].dwGDI32Data = dwGDI32Data;
+        fSuccess = TRUE;
+    }
+    objTableMutex.leave();
+    return fSuccess;
+}
+//******************************************************************************
+//******************************************************************************
+DWORD WIN32API ObjQueryHandleFlags(OBJHANDLE hObject)
+{
+    DWORD dwFlags = HANDLE_INVALID_DATA;
+
+    objTableMutex.enter();
+    hObject &= OBJHANDLE_MAGIC_MASK;
+    if(hObject < MAX_OBJECT_HANDLES && objHandleTable[hObject].dwType != HNDL_NONE) 
+    {
+        dwFlags = objHandleTable[hObject].dwFlags;
+    }
+    objTableMutex.leave();
+    return dwFlags;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API ObjSetHandleFlag(HANDLE hObject, DWORD dwFlag, BOOL fSet)
+{
+    BOOL fSuccess = FALSE;
+
+    objTableMutex.enter();
+    hObject &= OBJHANDLE_MAGIC_MASK;
+    if(hObject < MAX_OBJECT_HANDLES && objHandleTable[hObject].dwType != HNDL_NONE) {
+        if(fSet) {
+             objHandleTable[hObject].dwFlags |= dwFlag;
+        }
+        else objHandleTable[hObject].dwFlags &= ~dwFlag;
+
+        dprintf(("ObjSetHandleFlag %x -> %x", MAKE_HANDLE(hObject), dwFlag));
+
+        fSuccess = TRUE;
+    }
+    objTableMutex.leave();
+    return fSuccess;
+}
+//******************************************************************************
+//******************************************************************************
+DWORD WIN32API ObjQueryHandleType(HANDLE hObject)
+{
+    DWORD objtype = 0;
+
+    objTableMutex.enter();
+    hObject &= OBJHANDLE_MAGIC_MASK;
+    if(hObject < MAX_OBJECT_HANDLES && objHandleTable[hObject].dwType != HNDL_NONE) {
+        objtype = objHandleTable[hObject].dwType;
+    }
+    objTableMutex.leave();
+    return objtype;
 }
 //******************************************************************************
 //******************************************************************************
 int WIN32API GetObjectA( HGDIOBJ hObject, int size, void *lpBuffer)
 {
- int rc;
+    int rc;
 
-  dprintf(("GDI32: GetObject %X %X %X\n", hObject, size, lpBuffer));
-  //TODO: must use 16 bits gdi object handles
-  if(HIWORD(hObject) == 0) {
-        hObject |= GDIOBJ_PREFIX;
-  }
-  if(lpBuffer == NULL)
-  { //return required size if buffer pointer == NULL
-    int objtype = GetObjectTypeNoDbg(hObject);
-    switch(objtype)
-    {
-    case OBJ_PEN:
-        return sizeof(LOGPEN);
-
-    case OBJ_EXTPEN:
-        return sizeof(EXTLOGPEN);
-
-    case OBJ_BRUSH:
-        return sizeof(LOGBRUSH);
-
-    case OBJ_PAL:
-        return sizeof(USHORT);
-
-    case OBJ_FONT:
-        return sizeof(LOGFONTA);
-
-    case OBJ_BITMAP:
-        return sizeof(BITMAP); //also default for dib sections??? (TODO: NEED TO CHECK THIS)
-
-    case OBJ_DC:
-    case OBJ_METADC:
-    case OBJ_REGION:
-    case OBJ_METAFILE:
-    case OBJ_MEMDC:
-    case OBJ_ENHMETADC:
-    case OBJ_ENHMETAFILE:
-        dprintf(("warning: GetObjectA not defined for object type %d", objtype));
-        return 0;
+    dprintf(("GDI32: GetObject %X %X %X\n", hObject, size, lpBuffer));
+    
+    if(lpBuffer == NULL)
+    { //return required size if buffer pointer == NULL
+        int objtype = GetObjectType(hObject);
+        switch(objtype)
+        {
+        case OBJ_PEN:
+            return sizeof(LOGPEN);
+    
+        case OBJ_EXTPEN:
+            return sizeof(EXTLOGPEN);
+    
+        case OBJ_BRUSH:
+            return sizeof(LOGBRUSH);
+    
+        case OBJ_PAL:
+            return sizeof(USHORT);
+    
+        case OBJ_FONT:
+            return sizeof(LOGFONTA);
+    
+        case OBJ_BITMAP:
+            return sizeof(BITMAP); //also default for dib sections??? (TODO: NEED TO CHECK THIS)
+    
+        case OBJ_DC:
+        case OBJ_METADC:
+        case OBJ_REGION:
+        case OBJ_METAFILE:
+        case OBJ_MEMDC:
+        case OBJ_ENHMETADC:
+        case OBJ_ENHMETAFILE:
+            dprintf(("warning: GetObjectA not defined for object type %d", objtype));
+            return 0;
+        }
     }
-  }
-  if(DIBSection::getSection() != NULL)
-  {
+    if(DIBSection::getSection() != NULL)
+    {
         DIBSection *dsect = DIBSection::findObj(hObject);
         if(dsect)
         {
-                rc = dsect->GetDIBSection(size, lpBuffer);
-                if(rc == 0) {
-                        SetLastError(ERROR_INVALID_PARAMETER);
-                        return 0;
-                }
-                SetLastError(ERROR_SUCCESS);
-                return rc;
+            rc = dsect->GetDIBSection(size, lpBuffer);
+            if(rc == 0) {
+                SetLastError(ERROR_INVALID_PARAMETER);
+                return 0;
+            }
+            SetLastError(ERROR_SUCCESS);
+            return rc;
         }
-  }
+    }
 
-  return O32_GetObject(hObject, size, lpBuffer);
+    return O32_GetObject(hObject, size, lpBuffer);
 }
 //******************************************************************************
 //******************************************************************************
 int WIN32API GetObjectW( HGDIOBJ hObject, int size, void *lpBuffer)
 {
- int ret, objtype;
+    int ret, objtype;
 
-  dprintf(("GDI32: GetObjectW %X, %d %X", hObject, size, lpBuffer));
+    dprintf(("GDI32: GetObjectW %X, %d %X", hObject, size, lpBuffer));
 
-  //TODO: must use 16 bits gdi object handles
-  if(HIWORD(hObject) == 0) {
-        hObject |= GDIOBJ_PREFIX;
-  }
-  objtype = GetObjectTypeNoDbg(hObject);
+    objtype = GetObjectType(hObject);
 
-  switch(objtype)
-  {
-  case OBJ_FONT:
-  {
-    LOGFONTA logfonta;
+    switch(objtype)
+    {
+    case OBJ_FONT:
+    {
+        LOGFONTA logfonta;
 
         if(lpBuffer == NULL) {
             return sizeof(LOGFONTW); //return required size if buffer pointer == NULL
@@ -251,10 +318,10 @@ int WIN32API GetObjectW( HGDIOBJ hObject, int size, void *lpBuffer)
             return sizeof(LOGFONTW);
         }
         return 0;
-  }
-  default:
-      return GetObjectA(hObject, size, lpBuffer);
-  }
+    }
+    default:
+        return GetObjectA(hObject, size, lpBuffer);
+    }
 }
 //******************************************************************************
 //******************************************************************************
@@ -288,17 +355,17 @@ char *DbgGetGDITypeName(DWORD handleType)
 //******************************************************************************
 HGDIOBJ WIN32API SelectObject(HDC hdc, HGDIOBJ hObj)
 {
- HGDIOBJ rc;
- DWORD   handleType;
+    HGDIOBJ rc;
+    DWORD   handleType;
 
     //TODO: must use 16 bits gdi object handles
     if(HIWORD(hObj) == 0) {
         hObj |= GDIOBJ_PREFIX;
     }
 
-    handleType = GetObjectTypeNoDbg(hObj);
+    handleType = GetObjectType(hObj);
     dprintf2(("GDI32: SelectObject %x %x type %s", hdc, hObj, DbgGetGDITypeName(handleType)));
-    if(handleType == GDIOBJ_REGION) {
+    if(handleType == HNDL_REGION) {
         //Return complexity here; not previously selected clip region
         return (HGDIOBJ)SelectClipRgn(hdc, hObj);
     }
@@ -320,7 +387,7 @@ HGDIOBJ WIN32API SelectObject(HDC hdc, HGDIOBJ hObj)
         }
     }
     rc = O32_SelectObject(hdc, hObj);
-    if(rc != 0 && GetObjectTypeNoDbg(rc) == OBJ_BITMAP && DIBSection::getSection != NULL)
+    if(rc != 0 && GetObjectType(rc) == OBJ_BITMAP && DIBSection::getSection != NULL)
     {
         DIBSection *dsect = DIBSection::findObj(rc);
         if(dsect)
@@ -328,18 +395,6 @@ HGDIOBJ WIN32API SelectObject(HDC hdc, HGDIOBJ hObj)
             dsect->UnSelectDIBObject();
         }
     }
-#ifdef USING_OPEN32
-    if(handleType == OBJ_BITMAP)
-    {
-        //SvL: Open32 messes up the height of the hdc (for windows)
-        pDCData  pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
-        if(pHps && pHps->hwnd) {
-              dprintf2(("change back origin"));
-              selectClientArea(pHps);
-              setPageXForm(pHps);
-        }
-    }
-#endif
     dprintf2(("GDI32: SelectObject %x %x returned %x", hdc, hObj, rc));
 
     return(rc);
@@ -360,40 +415,56 @@ VOID WIN32API UnselectGDIObjects(HDC hdc)
 }
 //******************************************************************************
 //******************************************************************************
-#ifdef DEBUG
-static DWORD GetObjectTypeNoDbg( HGDIOBJ hObj)
-{
-    DWORD objtype;
-
-    //TODO: must use 16 bits gdi object handles
-    if(HIWORD(hObj) == 0) {
-        hObj |= GDIOBJ_PREFIX;
-    }
-    if(ObjGetHandleType(hObj) == GDIOBJ_REGION) {
-        dprintf2(("GDI32: GetObjectType %x REGION", hObj));
-        SetLastError(ERROR_SUCCESS);
-        return OBJ_REGION;
-    }
-    return O32_GetObjectType(hObj);
-}
-#endif
-//******************************************************************************
-//******************************************************************************
 DWORD WIN32API GetObjectType( HGDIOBJ hObj)
 {
-    DWORD objtype;
+    DWORD objtype = ObjQueryHandleType(hObj);
 
-    //TODO: must use 16 bits gdi object handles
-    if(HIWORD(hObj) == 0) {
-        hObj |= GDIOBJ_PREFIX;
+    switch(objtype) {
+    case HNDL_PEN:
+        objtype = OBJ_PEN;
+        break;
+    case HNDL_BRUSH:
+        objtype = OBJ_BRUSH;
+        break;
+    case HNDL_DC:
+        objtype = OBJ_DC;
+        break;
+    case HNDL_METADC:
+        objtype = OBJ_METADC;
+        break;
+    case HNDL_PALETTE:
+        objtype = OBJ_PAL;
+        break;
+    case HNDL_FONT:
+        objtype = OBJ_FONT;
+        break;
+    case HNDL_BITMAP:
+    case HNDL_DIBSECTION:
+        objtype = OBJ_BITMAP;
+        break;
+    case HNDL_REGION:
+        objtype = OBJ_REGION;
+        break;
+    case HNDL_METAFILE:
+        objtype = OBJ_METAFILE;
+        break;
+    case HNDL_ENHMETAFILE:
+        objtype = OBJ_ENHMETAFILE;
+        break;
+    case HNDL_MEMDC:
+        objtype = OBJ_MEMDC;
+        break;
+    case HNDL_EXTPEN:
+        objtype = OBJ_EXTPEN;
+        break;
+    case HNDL_ENHMETADC:
+        objtype = OBJ_ENHMETADC;
+        break;
+    default:
+        objtype = 0;
+        break;
     }
-    if(ObjGetHandleType(hObj) == GDIOBJ_REGION) {
-        dprintf2(("GDI32: GetObjectType %x REGION", hObj));
-        SetLastError(ERROR_SUCCESS);
-        return OBJ_REGION;
-    }
-    objtype = O32_GetObjectType(hObj);
-    dprintf2(("GDI32: GetObjectType %x objtype %d", hObj, objtype));
+    dprintf2(("GDI32: GetObjectType %x objtype %d (%s)", hObj, objtype, DbgGetGDITypeName(objtype)));
     return objtype;
 }
 //******************************************************************************
@@ -405,52 +476,12 @@ BOOL WIN32API DeleteObject(HANDLE hObj)
 
     dprintf(("GDI32: DeleteObject %x", hObj));
 
-    //TODO: must use 16 bits gdi object handles
-    if(HIWORD(hObj) == 0)
-    {
-        hObj |= GDIOBJ_PREFIX;
-    }
-
-    //System objects can't be deleted (TODO: any others?? (fonts?))!!!!)
-    objtype = GetObjectTypeNoDbg(hObj);
-    switch (objtype)
-    {
-        case OBJ_PEN:
-            if(IsSystemPen(hObj))
-            {
-                SetLastError(ERROR_SUCCESS);
-                return TRUE;
-            }
-            else
-                break;
-
-        case OBJ_BRUSH:
-            if(IsSystemBrush(hObj))
-            {
-                SetLastError(ERROR_SUCCESS);
-                return TRUE;
-            }
-            else
-                break;
-
-        case OBJ_FONT:
-            if(IsSystemFont(hObj))
-            {
-                SetLastError(ERROR_SUCCESS);
-                return TRUE;
-            }
-            else
-                break;
-            
-        // add more system-type objects as required ...
-    }
-
     STATS_DeleteObject(hObj, objtype);
 
-    if(ObjGetHandleType(hObj) == GDIOBJ_REGION)
+    if(ObjQueryHandleType(hObj) == HNDL_REGION)
     {
-        OSLibDeleteRegion(ObjGetHandleData(hObj, GDIOBJ_REGION));
-        ObjFreeHandle(hObj);
+        OSLibDeleteRegion(ObjQueryHandleData(hObj, HNDL_REGION));
+        ObjDeleteHandle(hObj, HNDL_REGION);
         SetLastError(ERROR_SUCCESS);
         return TRUE;
     }
