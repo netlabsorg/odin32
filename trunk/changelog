@@ -1,4 +1,12 @@
-/* $Id: changelog,v 1.1464 2001-06-01 01:24:14 phaller Exp $ */
+/* $Id: changelog,v 1.1465 2001-06-01 07:51:12 sandervl Exp $ */
+
+ 2001-06-01: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Improved ordinal lookup a bit. (usually 4 times faster, but
+                  barely noticable with 'real' applications)
+    - OLE32:    o Added OleLoadPictureEx stub
+    - GDI32:    o GetDIBits fix for querying the bitmap information
+                  WGSS returns 0, but we should return the nr of scan lines requested
+    - SHLWAPI:  o Added PathGetCharTypeA/W from Wine
 
  2001-06-01: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o benchmarked new experimental loader and reverted to
@@ -9,6 +17,9 @@
                   its icon cache. Revert to on-demand loading of the icons,
                   speeds up loading of SHELL32 (therefore most apps) 
                   by several seconds.
+
+ 2001-05-31: Sander van Leeuwen <sandervl@xs4all.nl>
+    - OLEAUT32: o Fixed ITypeInfoImpl_Invoke
 
  2001-05-30: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o further performance improvement of hashtables
