@@ -67,7 +67,7 @@ echo "  Each and every source file should start with a header like this:
 TekstEnd();
 CodeBeg();
 echo "
-/* \$Id: Odin32GuidelineDocumentation.phtml,v 1.4 2001-09-05 21:38:19 bird Exp $
+/* \$Id: Odin32GuidelineDocumentation.phtml,v 1.5 2001-09-05 21:40:46 bird Exp $
  *
  * <i>&lt;insert file description here&gt;</i>
  *
@@ -253,7 +253,7 @@ echo "
         </tr>
         ";
 
-require $sMainDir."Odin32DBConnect.php3";
+require "Odin32DBConnect.php3";
 $sql = "SELECT\n".
        "    name,\n".
        "    description,\n".
