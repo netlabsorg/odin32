@@ -1,4 +1,4 @@
-# $Id: process.mak,v 1.35 2003-03-05 15:10:07 bird Exp $
+# $Id: process.mak,v 1.36 2003-03-07 09:35:24 bird Exp $
 #
 # Generic Buildsystem
 #
@@ -471,7 +471,7 @@ $(ECHO) Target path $(CLRFIL)$(PATH_TARGET)$(CLRTXT) does NOT exist. Creating. $
 #
 #_SRC = $<
 #!ifdef SLKRUNS
-_SRC = $(PATH_CURRENT)\$<
+_SRC = $(PATH_CURRENT)\$(<F)
 #!endif
 _DST = $(PATH_TARGET)\$(@F)
 
@@ -1221,17 +1221,23 @@ publish: publish_target
 publish_target:
 !if "$(_TARGET_EARLY_PUBLISH)" != "" || "$(TARGET_MODE:LIB=cute)" == "$(TARGET_MODE)"
 ! if "$(TARGET_MODE)" != "EMPTY" && "$(TARGET_MODE)" != "TESTCASE" && "$(TARGET_MODE)" != "DEPEND"
-    @$(ECHO) Publishing $(CLRFIL)$(TARGET)$(CLRTXT) to directory $(CLRFIL)$(TARGET_PUB_DIR)\$(TARGET_PUB_SUB)$(CLRRST)
+    @$(ECHO) Publishing $(CLRFIL)$(TARGET)$(CLRTXT) to directory $(CLRFIL)$(TARGET_PUB_DIR)$(CLRRST)
     @if not exist "$(TARGET)"           $(TOOL_ECHO) $(CLRERR)WARNING: $(CLRFIL)$(TARGET)$(CLRERR) doesn't exist. $(CLRRST)
     @if not exist "$(TARGET_PUB_DIR)"   $(TOOL_CREATEPATH) $(TARGET_PUB_DIR)
     @if exist "$(TARGET)"               $(TOOL_COPY) "$(TARGET)"      "$(TARGET_PUB)"
     @if exist "$(TARGET_SYM)"           $(TOOL_COPY) "$(TARGET_SYM)"  "$(TARGET_PUB_DIR)"
+!  ifdef PUBLISH_MAP
+    @if exist "$(TARGET_MAP)"           $(TOOL_COPY) "$(TARGET_MAP)"  "$(TARGET_PUB_DIR)"
+!  endif
 !  if "$(TARGET_PUB_DEB)" != ""
     @$(ECHO) Publishing unstripped $(CLRFIL)$(TARGET)$(CLRTXT) to directory $(CLRFIL)$(TARGET_PUB_DIR_DEB)$(CLRRST)
     @if not exist "$(_TARGET_DEB)"      $(TOOL_ECHO) $(CLRERR)WARNING: $(CLRFIL)$(_TARGET)$(CLRERR) doesn't exist. $(CLRRST)
     @if not exist "$(TARGET_PUB_DIR_DEB)" $(TOOL_CREATEPATH)  $(TARGET_PUB_DIR_DEB)
     @if exist "$(_TARGET_DEB)"          $(TOOL_COPY) "$(_TARGET_DEB)" "$(TARGET_PUB_DEB)"
     @if exist "$(TARGET_SYM)"           $(TOOL_COPY) "$(TARGET_SYM)"  "$(TARGET_PUB_DIR_DEB)"
+!   ifdef PUBLISH_MAP
+    @if exist "$(TARGET_MAP)"           $(TOOL_COPY) "$(TARGET_MAP)"  "$(TARGET_PUB_DIR_DEB)"
+!   endif
 !  endif
 ! endif
 !endif
