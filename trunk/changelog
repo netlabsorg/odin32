@@ -1,4 +1,8 @@
- /* $Id: changelog,v 1.742 2000-02-21 23:10:50 sandervl Exp $ */
+ /* $Id: changelog,v 1.743 2000-02-22 17:04:24 cbratschi Exp $ */
+
+ 2000-02-22: Christoph Bratschi <cbratschi@datacomm.ch>
+	- COMCTL32: merged with Corel WINE 20000212
+		    added common base functions
 
  2000-02-21: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
 	- CRTDLL: Added wtol, wtoi, setsystime, getsystime
