@@ -1,4 +1,4 @@
-/* $Id: hmcomm.cpp,v 1.22 2001-11-30 13:52:32 sandervl Exp $ */
+/* $Id: hmcomm.cpp,v 1.23 2001-12-01 19:26:40 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -311,6 +311,12 @@ BOOL HMDeviceCommClass::WriteFile(PHMHANDLEDATA pHMHandleData,
   if(!(pHMHandleData->dwFlags & FILE_FLAG_OVERLAPPED) && lpOverlapped) {
     dprintf(("Warning: lpOverlapped != NULL & !FILE_FLAG_OVERLAPPED; sync operation"));
   }
+//testestestest
+  dprintf(("Bytes to write:"));
+  for(int i=0;i<nNumberOfBytesToWrite;i++) {
+          dprintf(("%x %c", ((char *)lpBuffer)[i], ((char *)lpBuffer)[i]));
+  }
+//testestestset
 
   ret = OSLibDosWrite(pHMHandleData->hHMHandle, (LPVOID)lpBuffer, nNumberOfBytesToWrite,
                       &ulBytesWritten);
@@ -430,6 +436,14 @@ BOOL HMDeviceCommClass::ReadFile(PHMHANDLEDATA pHMHandleData,
   if(ret == FALSE) {
        dprintf(("!ERROR!: ReadFile failed with rc %d", GetLastError()));
   }
+  else {
+//testestestest
+      dprintf(("Bytes read:"));
+      for(int i=0;i<ulBytesRead;i++) {
+          dprintf(("%x %c", ((char *)lpBuffer)[i], ((char *)lpBuffer)[i]));
+      }
+//testestestset
+  }
   return ret;
 }
 
@@ -540,6 +554,7 @@ DWORD CALLBACK SerialCommThread(LPVOID lpThreadParam)
   } 
   dprintf(("SerialCommThread %x entered", hComm));
 
+  SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_TIME_CRITICAL);
   while(TRUE) 
   {
       //validate handle 
