@@ -1,4 +1,4 @@
-/* $Id: winnt.h,v 1.1 1999-05-24 20:19:22 ktk Exp $ */
+/* $Id: winnt.h,v 1.2 1999-10-11 20:15:48 sandervl Exp $ */
 
 /*
  * Win32 definitions for Windows NT
@@ -789,6 +789,8 @@ typedef enum tagSID_NAME_USE {
 #define GROUP_SECURITY_INFORMATION  0x00000002
 #define DACL_SECURITY_INFORMATION   0x00000004
 #define SACL_SECURITY_INFORMATION   0x00000008
+
+#define UNREFERENCED_PARAMETER(P)          (P)
 
 #include "poppack.h"
 

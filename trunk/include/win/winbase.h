@@ -1,4 +1,4 @@
-/* $Id: winbase.h,v 1.6 1999-10-04 09:55:50 sandervl Exp $ */
+/* $Id: winbase.h,v 1.7 1999-10-11 20:15:47 sandervl Exp $ */
 
 #ifndef __WINE_WINBASE_H
 #define __WINE_WINBASE_H
@@ -407,7 +407,11 @@ typedef struct
 #define LMEM_DISCARDED	    0x4000
 #define LMEM_LOCKCOUNT	    0x00FF
 
-#define LPTR (LMEM_FIXED | LMEM_ZEROINIT)
+#define LHND                (LMEM_MOVEABLE | LMEM_ZEROINIT)
+#define LPTR                (LMEM_FIXED | LMEM_ZEROINIT)
+
+#define NONZEROLHND         (LMEM_MOVEABLE)
+#define NONZEROLPTR         (LMEM_FIXED)
 
 #define GMEM_FIXED          0x0000
 #define GMEM_MOVEABLE       0x0002
