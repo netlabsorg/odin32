@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.390 1999-10-31 16:44:00 dengert Exp $ */
+ /* $Id: ChangeLog,v 1.391 1999-10-31 18:14:29 sandervl Exp $ */
+
+ 99-10-31: Christoph Bratschi <cbratschi@datacomm.ch>
+	- KERNEL32: Ported Wine time apis
 
  99-10-31: Daniela Engert <dani@ngrt.de>
 	- USER32: add WS_CLIPSIBLINGS to BS_GROUPBOX style controls (fixes
