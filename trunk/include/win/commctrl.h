@@ -1,4 +1,4 @@
-/* $Id: commctrl.h,v 1.37 2000-12-24 12:28:19 sandervl Exp $ */
+/* $Id: commctrl.h,v 1.38 2001-01-10 20:53:46 sandervl Exp $ */
 /*
  * Common controls definitions
  */
@@ -130,8 +130,9 @@ typedef struct tagNMTOOLTIPSCREATED
 
 
 /* This is only for Winelib applications. DON't use it wine itself!!! */
+#ifndef SNDMSG
 #define SNDMSG WINELIB_NAME_AW(SendMessage)
-
+#endif
 
 
 /* Custom Draw messages */
