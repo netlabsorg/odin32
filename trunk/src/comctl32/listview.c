@@ -1,4 +1,4 @@
-/*$Id: listview.c,v 1.18 1999-12-20 16:46:39 cbratschi Exp $*/
+/*$Id: listview.c,v 1.19 1999-12-21 17:01:36 cbratschi Exp $*/
 /*
  * Listview control
  *
@@ -41,6 +41,7 @@
  *   LISTVIEW_Scroll : not implemented
  *   LISTVIEW_RedrawItems : empty stub
  *   LISTVIEW_Update : not completed
+ * WM_SETREDRAW not implemented
  */
 
 /* WINE 991212 level */
