@@ -1,4 +1,4 @@
-/* $Id: kFileLX.cpp,v 1.3 2000-12-04 08:48:08 bird Exp $
+/* $Id: kFileLX.cpp,v 1.4 2001-02-02 08:45:41 bird Exp $
  *
  *
  *
@@ -45,6 +45,7 @@
 
 #include <assert.h>
 
+#include "kFile.h"
 #include "kFileFormatBase.h"
 #include "kInterfaces.h"
 #include "kFileLX.h"
@@ -111,13 +112,48 @@ BOOL kFileLX::queryExportName(int iOrdinal, char *pszBuffer)
  * Create an LX file object from an LX executable image.
  * @param     pszFilename   LX executable image name.
  */
-kFileLX::kFileLX(const char *pszFilename)
+kFileLX::kFileLX(const char *pszFilename)  throw (int)
 : pvBase(NULL)
 {
     struct exe_hdr * pehdr;
 
     /* create filemapping */
     pvBase = kFileFormatBase::readfile(pszFilename);
+    if (pvBase == NULL)
+        throw(1);
+
+    pehdr = (struct exe_hdr*)pvBase;
+    if (pehdr->e_magic == EMAGIC)
+        offLXHdr = pehdr->e_lfanew;
+    else
+        offLXHdr = 0;
+
+    pe32 = (struct e32_exe*)((char*)pvBase + offLXHdr);
+    if (*(PUSHORT)pe32 != E32MAGIC)
+    {
+        free(pvBase);
+        pvBase = NULL;
+        throw(2);
+    }
+
+    paObject = pe32->e32_objtab && pe32->e32_objcnt
+        ? (struct o32_obj*)((char*)pvBase + pe32->e32_objtab + offLXHdr) : NULL;
+    paMap = pe32->e32_objmap
+        ? (struct o32_map*)((char*)pvBase + pe32->e32_objmap + offLXHdr) : NULL;
+}
+
+
+/**
+ * Create an LX file object from an LX executable image.
+ * @param     pFile     Pointer to opened LX file.
+ */
+kFileLX::kFileLX(kFile *pFile) throw (int)
+: pvBase(NULL)
+{
+    struct exe_hdr * pehdr;
+
+    /* create filemapping */
+    pvBase = pFile->readFile();
     if (pvBase == NULL)
         throw(1);
 

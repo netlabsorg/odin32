@@ -1,4 +1,4 @@
-/* $Id: kFileFormatBase.cpp,v 1.2 2000-10-02 04:01:39 bird Exp $
+/* $Id: kFileFormatBase.cpp,v 1.3 2001-02-02 08:45:41 bird Exp $
  *
  * kFileFormatBase - Base class for kFile<format> classes.
  *
@@ -19,6 +19,7 @@
 #include <string.h>
 #include <stdio.h>
 
+#include "kFile.h"
 #include "kFileFormatBase.h"
 
 
@@ -78,7 +79,7 @@ void *kFileFormatBase::readfile(const char *pszFilename)
  */
 BOOL   kFileFormatBase::dump(kFile *pOut)
 {
-    pOut = pOut;
+    pOut->printf("Sorry, dump() is not implemented for this file format.\n");
     return FALSE;
 }
 
