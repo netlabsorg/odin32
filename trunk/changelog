@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1446 2001-05-25 17:09:47 sandervl Exp $ */
+/* $Id: changelog,v 1.1447 2001-05-25 19:58:58 sandervl Exp $ */
 
  2001-05-25: Sander van Leeuwen <sandervl@xs4all.nl>
     - Odin.ini: o Removed MS Shell Dlg font mapping
@@ -8,6 +8,10 @@
                 o Update color table during DIB sync too
     - USER32:   o Dialog control x & y coordinates in dialog template are signed 
                   words. (fixes dialog controls with negative offset)
+                o Rewrote Post(Thread)/SendMessage; filtering of posted/sent
+                  messages (by app) is now possible with Peek/GetMessage.
+                o PeekMessage fix; got rid of double removal for untranslated 
+                  messages
 
  2001-05-24: Sander van Leeuwen <sandervl@xs4all.nl>
     - GDI32:    o Commented out recent changes (color conversion) in
