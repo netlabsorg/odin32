@@ -1,4 +1,4 @@
-/* $Id: os2sel.h,v 1.13 2003-04-10 10:26:23 sandervl Exp $ */
+/* $Id: os2sel.h,v 1.14 2004-11-23 17:04:10 sao2l02 Exp $ */
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT

@@ -1,4 +1,22 @@
-/* $Id: ChangeLog,v 1.2740 2004-11-23 16:10:59 sao2l02 Exp $ */
+/* $Id: ChangeLog,v 1.2741 2004-11-23 17:06:17 sao2l02 Exp $ */
+2004-11-14: Dietrich Teickner <dietrich_teickner@arcor   >
+    - User32:   o src/user32/hook.cpp
+                  workaround against stackoverflow doring rekursive CallNextHookEx in IrfanView 3.XX. 
+2004-10-24: Dietrich Teickner <dietrich_teickner@arcor   >
+    - User32:   o src/user32/clipboard.cpp
+                  Since 2004-05-04 does a open Clipboard not convert between text/unicodetext/oemtext.
+                  workaround for text->unicodetext (BC2 with riched20.dll to w98-Notepad). 
+2004-10-19: Dietrich Teickner <dietrich_teickner@arcor   >
+    - Oleaut32: o more merging from wine into
+                  include/win/oleauto.h, include/win/wine/obj_oleaut.h and src/oleaut32/variant.c
+                  against problems with VT_BSTR in variant.c for the values "0" and "-1".
+2004-09-26: Dietrich Teickner <dietrich_teickner@arcor   >
+    - GDI32:    o src/gdi32/text.cpp GetTextExtentPointW: dprintf with text-length
+                  for non-zero-terminatet wstrings.
+                o src/gdi32/ft2supp.cpp Replacing calls to lstrcpynWtoA with native
+                  call to WideCharToMultiByte for better work with non-zero-terminatet wstrings
+                  in CFT2Module::Ft2GetTextExtentW and CFT2Module::Ft2CharStringPosAtW.
+                  Small optimizing for one-wchar length in CFT2Module::Ft2GetTextExtentW.
 2004-11-14: knut st. osmundsen <bird-changelog@innotek    > merged this
 2004-07-10: Veit Kannegieser
     - WIN32K.SYS:
