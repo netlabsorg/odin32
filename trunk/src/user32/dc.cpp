@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.127 2004-02-23 12:40:29 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.128 2004-03-18 15:38:41 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -1179,6 +1179,11 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
          dprintf(("RedrawWindow %x (%d,%d)(%d,%d) %x %x", hwnd, pRect->left, pRect->top, pRect->right, pRect->bottom, hrgn, redraw));
     }
     else dprintf(("RedrawWindow %x %x %x %x", hwnd, pRect, hrgn, redraw));
+
+    if(!IsWindowVisible(hwnd)) {
+         dprintf(("WARNING: Invisible window -> ignoring RedrawWindow call"));
+         return TRUE;
+    }
 
     if (hwnd == NULLHANDLE)
     {
