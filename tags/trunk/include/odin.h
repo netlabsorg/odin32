@@ -1,4 +1,4 @@
-/* $Id: odin.h,v 1.13 2000-02-09 13:40:22 sandervl Exp $ */
+/* $Id: odin.h,v 1.14 2000-04-09 11:09:07 sandervl Exp $ */
 /*
  * ODIN - Build Environment Definition
  *
@@ -79,12 +79,14 @@
   #define __inline__ inline
 
 #ifndef RC_INVOKED
-//  #if (__IBMCPP__ == 300) || (__IBMC__ == 300)
+  #if (__IBMCPP__ == 300) || (__IBMC__ == 300)
   #define NONAMELESSUNION
-//  #endif
+  #endif
 #endif
 
+#ifndef RC_INVOKED
   #include <builtin.h>
+#endif
 
 #else
 
