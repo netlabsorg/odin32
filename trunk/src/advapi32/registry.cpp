@@ -1,4 +1,4 @@
-/* $Id: registry.cpp,v 1.3 1999-09-02 19:39:08 phaller Exp $ */
+/* $Id: registry.cpp,v 1.4 1999-10-14 17:21:14 phaller Exp $ */
 
 /*
  * Win32 registry API functions for OS/2
@@ -17,6 +17,10 @@
  * Includes                                                                  *
  *****************************************************************************/
 
+#include <odin.h>
+#include <odinwrap.h>
+#include <os2sel.h>
+
 #include <os2win.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -27,7 +31,8 @@
 #include "unicode.h"
 #include <winreg.h>
 
-ODINDEBUGCHANNEL(ADVAPI32)
+
+ODINDEBUGCHANNEL(ADVAPI32-REGISTRY)
 
 
 /*****************************************************************************
@@ -748,6 +753,8 @@ ODINFUNCTION4(DWORD,RegQueryValueA,HKEY,  arg1,
                                    LPSTR, arg3,
                                    PLONG, arg4)
 {
+  dprintf(("ADVAPI32:Registry key=%s\n",
+           arg2));
   return _O32_RegQueryValue(ConvertKey(arg1),
                            arg2,
                            arg3,
@@ -810,6 +817,8 @@ ODINFUNCTION6(LONG,RegQueryValueExA,HKEY,   arg1,
                                     LPBYTE, arg5,
                                     LPDWORD,arg6)
 {
+  dprintf(("ADVAPI32:Registry key=%s\n",
+           arg2));
   return _O32_RegQueryValueEx(ConvertKey(arg1),
                              arg2,
                              arg3,
@@ -1028,9 +1037,20 @@ ODINFUNCTION3(LONG,RegConnectRegistryA,LPCSTR,lpszComputerName,
                                        HKEY,  hKey,
                                        PHKEY, phkResult)
 {
-  dprintf(("ADVAPI32: RegConnectRegistryA not implemented yet."));
+  char szLocalName[256];
+  DWORD dwNameLength = sizeof(szLocalName)-2;
 
-  if (lpszComputerName == NULL) /* local registry ? */
+  szLocalName[0] = '\\';
+  szLocalName[1] = '\\';
+  GetComputerNameA(szLocalName+2, &dwNameLength);
+
+  dprintf(("ADVAPI32: RegConnectRegistryA(%s,local %s) not implemented yet.\n",
+           lpszComputerName,
+           szLocalName));
+
+  /* local registry ? */
+  if ( (                    lpszComputerName  == NULL) ||
+       (strcmp(szLocalName, lpszComputerName) == 0   ) )
   {
     /* @@@PH experimental !!! */
     *phkResult = hKey;
@@ -1038,9 +1058,7 @@ ODINFUNCTION3(LONG,RegConnectRegistryA,LPCSTR,lpszComputerName,
     return (NO_ERROR);
   }
 
-  // @@@PH 1999/06/09 always fake this API
-  *phkResult = hKey;
-  return (NO_ERROR);
+  return (ERROR_ACCESS_DENIED);
 }
 
 
