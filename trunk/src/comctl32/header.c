@@ -595,8 +595,7 @@ HEADER_GetItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     if (phdi->mask & HDI_TEXT) {
 	if (lpItem->pszText != LPSTR_TEXTCALLBACKW)
-//	    lstrcpynWtoA (phdi->pszText, lpItem->pszText, phdi->cchTextMax);
-	    strncpy(phdi->pszText, lpItem->pszText, phdi->cchTextMax);
+	    lstrcpynWtoA (phdi->pszText, lpItem->pszText, phdi->cchTextMax);
 	else
 	    phdi->pszText = LPSTR_TEXTCALLBACKA;
     }
@@ -767,8 +766,7 @@ HEADER_InsertItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
 	if (phdi->pszText != LPSTR_TEXTCALLBACKA) {
 	    len = lstrlenA (phdi->pszText);
 	    lpItem->pszText = COMCTL32_Alloc ((len+1)*sizeof(WCHAR));
-//	    lstrcpyAtoW (lpItem->pszText, phdi->pszText);
-	    AsciiToUnicode(phdi->pszText, lpItem->pszText);
+	    lstrcpyAtoW (lpItem->pszText, phdi->pszText);
 	}
 	else
 	    lpItem->pszText = LPSTR_TEXTCALLBACKW;
@@ -975,8 +973,7 @@ HEADER_SetItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
 	    if (phdi->pszText) {
 		INT len = lstrlenA (phdi->pszText);
 		lpItem->pszText = COMCTL32_Alloc ((len+1)*sizeof(WCHAR));
-//		lstrcpyAtoW (lpItem->pszText, phdi->pszText);
-	        AsciiToUnicode(phdi->pszText, lpItem->pszText);
+		lstrcpyAtoW (lpItem->pszText, phdi->pszText);
 	    }
 	}
 	else

@@ -368,8 +368,7 @@ STATUSBAR_GetTextA (HWND hwnd, WPARAM wParam, LPARAM lParam)
 	result = part->text ? lstrlenW (part->text) : 0;
 	result |= (part->style << 16);
 	if (lParam && LOWORD(result))
-//	    lstrcpyWtoA ((LPSTR)lParam, part->text);
-          strcpy((LPSTR)lParam, (char*)part->text);
+	    lstrcpyWtoA((LPSTR)lParam, part->text);
     }
     return result;
 }
@@ -659,8 +658,7 @@ STATUSBAR_SetTextA (HWND hwnd, WPARAM wParam, LPARAM lParam)
 	part->text = 0;
 	if (text && (len = lstrlenA(text))) {
 	    part->text = COMCTL32_Alloc ((len+1)*sizeof(WCHAR));
-//	    lstrcpyAtoW (part->text, text);
-	    strcpy((char*)part->text, text);
+	    lstrcpyAtoW (part->text, text);
 	}
     }
 
@@ -840,8 +838,7 @@ STATUSBAR_WMCreate (HWND hwnd, WPARAM wParam, LPARAM lParam)
     else {
 	if ((len = lstrlenA ((LPCSTR)lpCreate->lpszName))) {
 	    self->parts[0].text = COMCTL32_Alloc ((len + 1)*sizeof(WCHAR));
-//	    lstrcpyAtoW (self->parts[0].text, (LPCSTR)lpCreate->lpszName);
-	    strcpy((char*)self->parts[0].text, (LPCSTR)lpCreate->lpszName);
+	    lstrcpyAtoW (self->parts[0].text, (LPCSTR)lpCreate->lpszName);
 	}
     }
 
@@ -937,8 +934,7 @@ STATUSBAR_WMGetText (HWND hwnd, WPARAM wParam, LPARAM lParam)
 	if (infoPtr->bUnicode)
 	    lstrcpyW ((LPWSTR)lParam, infoPtr->parts[0].text);
 	else
-//	    lstrcpyWtoA ((LPSTR)lParam, infoPtr->parts[0].text);
-	    strcpy((LPSTR)lParam, (char*)infoPtr->parts[0].text);
+	    lstrcpyWtoA ((LPSTR)lParam, infoPtr->parts[0].text);
 	return len;
     }
 
@@ -1054,8 +1050,7 @@ STATUSBAR_WMSetText (HWND hwnd, WPARAM wParam, LPARAM lParam)
     else {
 	if (lParam && (len = lstrlenA((LPCSTR)lParam))) {
 	    part->text = COMCTL32_Alloc ((len+1)*sizeof(WCHAR));
-//	    lstrcpyAtoW (part->text, (LPCSTR)lParam);
-	    strcpy((char*)part->text, (LPCSTR)lParam);
+	    lstrcpyAtoW (part->text, (LPCSTR)lParam);
 	}
     }
 

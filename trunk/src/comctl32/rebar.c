@@ -25,6 +25,7 @@
 #include "wingdi.h"
 #include "commctrl.h"
 #include "rebar.h"
+#include "comctl32.h"
 
 
 /* fDraw flags */
@@ -636,8 +637,7 @@ REBAR_GetBandInfoA (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     if ((lprbbi->fMask & RBBIM_TEXT) && 
 	(lprbbi->lpText) && (lpBand->lpText)) {
-//	    lstrcpynWtoA (lprbbi->lpText, lpBand->lpText, lprbbi->cch);
-	    strncpy(lprbbi->lpText, lpBand->lpText, lprbbi->cch);
+	    lstrcpynWtoA (lprbbi->lpText, lpBand->lpText, lprbbi->cch);
     }
 
     if (lprbbi->fMask & RBBIM_IMAGE)
@@ -1000,8 +1000,7 @@ REBAR_InsertBandA (HWND hwnd, WPARAM wParam, LPARAM lParam)
 	INT len = lstrlenA (lprbbi->lpText);
 	if (len > 0) {
 	    lpBand->lpText = (LPWSTR)COMCTL32_Alloc ((len + 1)*sizeof(WCHAR));
-//	    lstrcpyAtoW (lpBand->lpText, lprbbi->lpText);
-	    strcpy(lpBand->lpText, lprbbi->lpText);
+	    lstrcpyAtoW (lpBand->lpText, lprbbi->lpText);
 	}
     }
 
@@ -1266,8 +1265,7 @@ REBAR_SetBandInfoA (HWND hwnd, WPARAM wParam, LPARAM lParam)
 	if (lprbbi->lpText) {
 	    INT len = lstrlenA (lprbbi->lpText);
 	    lpBand->lpText = (LPWSTR)COMCTL32_Alloc ((len + 1)*sizeof(WCHAR));
-//	    lstrcpyAtoW (lpBand->lpText, lprbbi->lpText);
-	    strcpy(lpBand->lpText, lprbbi->lpText);
+	    lstrcpyAtoW (lpBand->lpText, lprbbi->lpText);
 	}
     }
 
