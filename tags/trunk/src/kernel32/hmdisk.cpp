@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.20 2001-10-26 14:48:37 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.21 2001-10-26 17:47:21 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -853,8 +853,7 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
         }
         //TODO: check if disk has been inserted or removed
         if(pHMHandleData->hHMHandle == 0) {
-            SetLastError(NO_ERROR); //TODO: correct???
-//            SetLastError(ERROR_NOT_READY);         
+            SetLastError(ERROR_NOT_READY);  //NT4, SP6 returns this
             return FALSE;
         }
 
@@ -875,11 +874,11 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
             dprintf(("CDROM status 0x%x", status));
             //if door open or no disk present, return FALSE
             if(status & (BIT_0|BIT_11)) {
-                 rc = FALSE;
+                SetLastError(ERROR_NOT_READY);  //NT4, SP6 returns this
+                return FALSE;
             }
-            else rc = TRUE;
             SetLastError(NO_ERROR);
-            return rc;
+            return TRUE;
         }
         else {
             dprintf(("IOCTL_STORAGE_CHECK_VERIFY incompletely implemented"));
