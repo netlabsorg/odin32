@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.98 1999-11-27 14:16:35 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.99 1999-12-01 10:49:45 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1495,8 +1495,12 @@ LRESULT Win32BaseWindow::DefWndControlColor(UINT ctlType, HDC hdc)
 }
 //******************************************************************************
 //******************************************************************************
-LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
+LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam, BOOL fReentered)
 {
+    //Lotus Notes v5.0.1 calls SetWindowTextA for unicode static window -> calls DefWindowProcA
+    if(IsUnicode() && !fReentered) {
+        return DefWindowProcW(Msg, wParam, lParam);
+    }
     switch(Msg)
     {
     case WM_CLOSE:
@@ -1526,13 +1530,14 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
           strcpy(windowNameA, lpsz);
           windowNameW = (LPWSTR)_smalloc((wndNameLength+1)*sizeof(WCHAR));
           lstrcpyAtoW(windowNameW, windowNameA);
-        } else
+        }
+        else
         {
           windowNameA = NULL;
           windowNameW = NULL;
           wndNameLength = 0;
         }
-        dprintf(("WM_SETTEXT of %d to %s\n", Win32Hwnd, lParam));
+        dprintf(("WM_SETTEXT of %x to %s\n", Win32Hwnd, lParam));
 
         if(OS2HwndFrame && (dwStyle & WS_CAPTION) == WS_CAPTION)
           return OSLibWinSetWindowText(OS2HwndFrame,(LPSTR)windowNameA);
@@ -1788,7 +1793,8 @@ LRESULT Win32BaseWindow::DefWindowProcW(UINT Msg, WPARAM wParam, LPARAM lParam)
           lstrcpyWtoA(windowNameA,lpsz);
           windowNameW = (LPWSTR)_smalloc((wndNameLength+1)*sizeof(WCHAR));
           lstrcpyW(windowNameW,lpsz);
-        } else
+        }
+        else
         {
           windowNameA = NULL;
           windowNameW = NULL;
@@ -1802,7 +1808,7 @@ LRESULT Win32BaseWindow::DefWindowProcW(UINT Msg, WPARAM wParam, LPARAM lParam)
     }
 
     default:
-        return DefWindowProcA(Msg, wParam, lParam);
+        return DefWindowProcA(Msg, wParam, lParam, TRUE);
     }
 }
 //******************************************************************************
@@ -2343,7 +2349,11 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
     {
        if (isChild())
        {
-           hParent = getParent()->getOS2WindowHandle();
+         	Win32BaseWindow *windowParent = getParent();
+           	if(windowParent) {
+           		hParent = getParent()->getOS2WindowHandle();
+		}
+		else  	dprintf(("WARNING: Win32BaseWindow::SetWindowPos window %x is child but has no parent!!", getWindowHandle()));
        }
        OSLibWinQueryWindowPos(OS2HwndFrame, &swpOld);
     }
@@ -2733,7 +2743,18 @@ end:
 //******************************************************************************
 HWND Win32BaseWindow::SetActiveWindow()
 {
-  return OSLibWinSetActiveWindow(OS2HwndFrame);
+ HWND hwndActive;
+ Win32BaseWindow  *win32wnd;
+ ULONG         magic;
+
+  hwndActive = OSLibWinSetActiveWindow(OS2HwndFrame);
+  win32wnd = (Win32BaseWindow *)OSLibWinGetWindowULong(hwndActive, OFFSET_WIN32WNDPTR);
+  magic    = OSLibWinGetWindowULong(hwndActive, OFFSET_WIN32PM_MAGIC);
+  if(CheckMagicDword(magic) && win32wnd)
+  {
+        return win32wnd->getWindowHandle();
+  }
+  return 0;
 }
 //******************************************************************************
 //WM_ENABLE is sent to hwnd, but not to it's children (as it should be)
@@ -2764,7 +2785,8 @@ HWND Win32BaseWindow::GetActiveWindow()
   {
         return win32wnd->getWindowHandle();
   }
-  return hwndActive;
+  return 0;
+//  return hwndActive;
 }
 //******************************************************************************
 //******************************************************************************
@@ -2822,6 +2844,13 @@ int Win32BaseWindow::GetWindowTextW(LPWSTR lpsz, int cch)
 //******************************************************************************
 BOOL Win32BaseWindow::SetWindowTextA(LPSTR lpsz)
 {
+    //hmm. Notes v5.0.1 creates static window with CreateWindowExW and calls this...
+    if(IsUnicode() && lpsz) {
+        LPWSTR lpWindowNameW = (LPWSTR)alloca((strlen(lpsz)+1)*sizeof(WCHAR));
+        lstrcpyAtoW(lpWindowNameW, lpsz);
+
+        return SendInternalMessageW(WM_SETTEXT,0,(LPARAM)lpWindowNameW);
+    }
     return SendInternalMessageA(WM_SETTEXT,0,(LPARAM)lpsz);
 }
 //******************************************************************************
@@ -2933,38 +2962,38 @@ ULONG Win32BaseWindow::GetWindowLongA(int index)
  ULONG value;
 
     switch(index) {
-        case GWL_EXSTYLE:
-                value = dwExStyle;
+    case GWL_EXSTYLE:
+        value = dwExStyle;
         break;
-        case GWL_STYLE:
-                value = dwStyle;
+    case GWL_STYLE:
+        value = dwStyle;
         break;
-        case GWL_WNDPROC:
-                value = (ULONG)getWindowProc();
+    case GWL_WNDPROC:
+        value = (ULONG)getWindowProc();
         break;
-        case GWL_HINSTANCE:
-                value = hInstance;
+    case GWL_HINSTANCE:
+        value = hInstance;
         break;
-        case GWL_HWNDPARENT:
-                if(getParent()) {
-                        value = getParent()->getWindowHandle();
-                }
-                else    value = 0;
+    case GWL_HWNDPARENT:
+        if(getParent()) {
+            value = getParent()->getWindowHandle();
+        }
+        else value = 0;
         break;
-        case GWL_ID:
-                value = getWindowId();
+    case GWL_ID:
+        value = getWindowId();
         break;
-        case GWL_USERDATA:
-                value = userData;
+    case GWL_USERDATA:
+        value = userData;
         break;
-        default:
-                if(index >= 0 && index/4 < nrUserWindowLong)
-                {
-                        value = userWindowLong[index/4];
+    default:
+        if(index >= 0 && index/4 < nrUserWindowLong)
+        {
+            value = userWindowLong[index/4];
             break;
-                }
-                SetLastError(ERROR_INVALID_PARAMETER);
-                return 0;
+        }
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return 0;
     }
     dprintf2(("GetWindowLongA %x %d %x", getWindowHandle(), index, value));
     return value;
@@ -3012,7 +3041,8 @@ Win32BaseWindow *Win32BaseWindow::GetWindowFromHandle(HWND hwnd)
     if(HwGetWindowHandleData(hwnd, (DWORD *)&window) == TRUE) {
          return window;
     }
-    else return NULL;
+//    dprintf2(("Win32BaseWindow::GetWindowFromHandle: not a win32 window %x", hwnd));
+    return NULL;
 }
 //******************************************************************************
 //******************************************************************************
@@ -3032,6 +3062,7 @@ Win32BaseWindow *Win32BaseWindow::GetWindowFromOS2Handle(HWND hwnd)
   if(win32wnd && CheckMagicDword(magic)) {
         return win32wnd;
   }
+//  dprintf2(("Win32BaseWindow::GetWindowFromOS2Handle: not an Odin os2 window %x", hwnd));
   return 0;
 }
 //******************************************************************************
@@ -3049,7 +3080,8 @@ HWND Win32BaseWindow::Win32ToOS2Handle(HWND hwnd)
     if(window) {
             return window->getOS2WindowHandle();
     }
-    else    return hwnd;
+//    dprintf2(("Win32BaseWindow::Win32ToOS2Handle: not a win32 window %x", hwnd));
+    return hwnd;
 }
 //******************************************************************************
 //******************************************************************************
@@ -3060,7 +3092,8 @@ HWND Win32BaseWindow::Win32ToOS2FrameHandle(HWND hwnd)
     if(window) {
             return window->getOS2FrameWindowHandle();
     }
-    else    return hwnd;
+//    dprintf2(("Win32BaseWindow::Win32ToOS2FrameHandle: not a win32 window %x", hwnd));
+    return hwnd;
 }
 //******************************************************************************
 //******************************************************************************
@@ -3075,7 +3108,8 @@ HWND Win32BaseWindow::OS2ToWin32Handle(HWND hwnd)
     if(window) {
             return window->getWindowHandle();
     }
-    else    return 0;
+//    dprintf2(("Win32BaseWindow::OS2ToWin32Handle: not a win32 window %x", hwnd));
+    return 0;
 //    else    return hwnd;    //OS/2 window handle
 }
 //******************************************************************************
