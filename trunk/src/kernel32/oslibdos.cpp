@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.50 2000-11-05 13:40:45 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.51 2000-11-25 16:56:57 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -324,11 +324,13 @@ DWORD OSLibDosFreeMem(LPVOID lpMemAddr)
 }
 //******************************************************************************
 //NOTE: If name == NULL, allocated gettable unnamed shared memory
+//OS/2 returns error 123 (invalid name) if the shared memory name includes 
+//colons. We need to replace them with underscores.
 //******************************************************************************
 DWORD OSLibDosAllocSharedMem(LPVOID *lplpMemAddr, DWORD size, DWORD flags, LPSTR name)
 {
  APIRET rc;
- char  *sharedmemname = NULL;
+ char  *sharedmemname = NULL, *tmp;
 
   if(name) {
         sharedmemname = (char *)malloc(strlen(name) + 16);
@@ -336,6 +338,15 @@ DWORD OSLibDosAllocSharedMem(LPVOID *lplpMemAddr, DWORD size, DWORD flags, LPSTR
         strcat(sharedmemname, name);
   }
   else  flags |= OBJ_GETTABLE;
+
+  //SvL: Colons are unacceptable in shared memory names (for whatever reason)
+  tmp = sharedmemname;
+  while(*tmp != 0) {
+        if(*tmp == ':') {
+            *tmp = '_';
+        }
+        tmp++;
+  }
 
   rc = DosAllocSharedMem(lplpMemAddr, sharedmemname, size, flags);
   if(name) {
@@ -349,12 +360,21 @@ DWORD OSLibDosAllocSharedMem(LPVOID *lplpMemAddr, DWORD size, DWORD flags, LPSTR
 DWORD OSLibDosGetNamedSharedMem(LPVOID *lplpMemAddr, LPSTR name)
 {
  APIRET rc;
- char  *sharedmemname = NULL;
+ char  *sharedmemname = NULL, *tmp;
 
   if(name) {
         sharedmemname = (char *)malloc(strlen(name) + 16);
         strcpy(sharedmemname, "\\SHAREMEM\\");
         strcat(sharedmemname, name);
+
+        //SvL: Colons are unacceptable in shared memory names (for whatever reason)
+        tmp = sharedmemname;
+        while(*tmp != 0) {
+            if(*tmp == ':') {
+                *tmp = '_';
+            }
+            tmp++;
+        }
         rc = DosGetNamedSharedMem(lplpMemAddr, sharedmemname, PAG_READ|PAG_WRITE);
         if(name) {
                 free(sharedmemname);
