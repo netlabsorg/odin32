@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.71 2003-07-28 11:27:45 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.72 2003-07-31 15:56:43 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -225,7 +225,8 @@ LONG OSLibWinDispatchMsg(MSG *msg, BOOL isUnicode)
   }
   else {//is this allowed?
 //        dprintf(("WARNING: OSLibWinDispatchMsg: called with own message!"));
-        return SendMessageA(msg->hwnd, msg->message, msg->wParam, msg->lParam);
+        return isUnicode ? SendMessageW(msg->hwnd, msg->message, msg->wParam, msg->lParam) :
+                           SendMessageA(msg->hwnd, msg->message, msg->wParam, msg->lParam);
   }
 }
 //******************************************************************************

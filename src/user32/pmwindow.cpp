@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.217 2003-07-28 11:27:47 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.218 2003-07-31 15:56:44 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -513,7 +513,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     //   a USER32 window object for this window handle
     // - thread must not be suspended in WaitMessage
     if(!teb || (msg != WM_CREATE && win32wnd == NULL) || teb->o.odin.fWaitMessageSuspend) {
-        if(teb->o.odin.fWaitMessageSuspend) 
+        if(teb && teb->o.odin.fWaitMessageSuspend) 
              dprintf(("OS2: fWaitMessageSuspend window %x msg %x -> run default frame proc", hwnd, msg));
         else dprintf(("OS2: Invalid win32wnd pointer for window %x msg %x", hwnd, msg));
         goto RunDefWndProc;
@@ -1181,7 +1181,7 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
     //   a USER32 window object for this window handle
     // - thread must not be suspended in WaitMessage
     if(!teb || (msg != WM_CREATE && win32wnd == NULL) || teb->o.odin.fWaitMessageSuspend) {
-        if(teb->o.odin.fWaitMessageSuspend) 
+        if(teb && teb->o.odin.fWaitMessageSuspend) 
              dprintf(("PMFRAME: fWaitMessageSuspend window %x msg %x -> run default frame proc", hwnd, msg));
         else dprintf(("PMFRAME: Invalid win32wnd pointer for window %x msg %x", hwnd, msg));
         goto RunDefFrameWndProc;

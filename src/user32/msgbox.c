@@ -1,4 +1,4 @@
-/* $Id: msgbox.c,v 1.7 2003-05-06 13:50:36 sandervl Exp $ */
+/* $Id: msgbox.c,v 1.8 2003-07-31 15:56:43 sandervl Exp $ */
 /*
  * Message boxes (based on Wine code)
  *
@@ -359,14 +359,38 @@ INT WINAPI MessageBoxIndirectA( LPMSGBOXPARAMSA msgbox )
 INT WINAPI MessageBoxIndirectW( LPMSGBOXPARAMSW msgbox )
 {
     MSGBOXPARAMSA       msgboxa;
+#ifdef __WIN32OS2__
+    int ret;
+#endif
 
     memcpy(&msgboxa,msgbox,sizeof(msgboxa));
+#ifdef __WIN32OS2__
+    if (msgbox->lpszCaption)
+        msgboxa.lpszCaption = HEAP_strdupWtoA( GetProcessHeap(), 0, msgbox->lpszCaption );
+    if (msgbox->lpszText)
+        msgboxa.lpszText = HEAP_strdupWtoA( GetProcessHeap(), 0, msgbox->lpszText );
+    if( msgbox->lpszIcon && HIWORD( msgbox->lpszIcon ))
+        msgboxa.lpszIcon = HEAP_strdupWtoA( GetProcessHeap(), 0, msgbox->lpszIcon );
+
+    ret = MessageBoxIndirectA(&msgboxa);
+
+    if (msgbox->lpszCaption)
+        HeapFree( GetProcessHeap(), 0, ( LPVOID )msgboxa.lpszCaption );
+    if (msgbox->lpszText)
+        HeapFree( GetProcessHeap(), 0, ( LPVOID )msgboxa.lpszText );
+    if( msgbox->lpszIcon && HIWORD( msgbox->lpszIcon ))
+        HeapFree( GetProcessHeap(), 0, ( LPVOID )msgboxa.lpszIcon );
+
+    return ret;
+#else
     if (msgbox->lpszCaption)
       lstrcpyWtoA((LPSTR)msgboxa.lpszCaption,msgbox->lpszCaption);
     if (msgbox->lpszText)
       lstrcpyWtoA((LPSTR)msgboxa.lpszText,msgbox->lpszText);
 
     return MessageBoxIndirectA(&msgboxa);
+#endif
+
 }
 
 #ifndef __WIN32OS2__

@@ -1,4 +1,4 @@
-/* $Id: winkeyboard.cpp,v 1.42 2003-04-02 12:58:02 sandervl Exp $ */
+/* $Id: winkeyboard.cpp,v 1.43 2003-07-31 15:56:48 sandervl Exp $ */
 /*
  * Win32 <-> PM key translation
  *
@@ -1055,8 +1055,9 @@ BOOL WIN32API GetKeyboardState(PBYTE lpKeyState)
 //******************************************************************************
 BOOL WIN32API SetKeyboardState(PBYTE lpKeyState)
 {
-  dprintf(("USER32: SetKeyboardState %x not implemented", lpKeyState));
-  return(TRUE);
+   dprintf(("USER32: SetKeyboardState %x not implemented", lpKeyState));
+
+   return(TRUE);
 }
 /***********************************************************************
  *           GetKeyboardLayout          (USER32.250)
@@ -1203,10 +1204,19 @@ int WIN32API ToAscii(UINT uVirtKey, UINT uScanCode, PBYTE lpbKeyState,
 
        if(lpbKeyState[VK_LSHIFT]   & 0x80) shiftstate |= TCF_LSHIFT;
        if(lpbKeyState[VK_RSHIFT]   & 0x80) shiftstate |= TCF_RSHIFT;
+       else
+       if(lpbKeyState[VK_SHIFT]    & 0x80) shiftstate |= TCF_LSHIFT;
+
        if(lpbKeyState[VK_LCONTROL] & 0x80) shiftstate |= TCF_LCONTROL;
        if(lpbKeyState[VK_RCONTROL] & 0x80) shiftstate |= TCF_RCONTROL;
+       else
+       if(lpbKeyState[VK_CONTROL]  & 0x80) shiftstate |= TCF_LCONTROL;
+
        if(lpbKeyState[VK_LMENU]    & 0x80) shiftstate |= TCF_ALT;
        if(lpbKeyState[VK_RMENU]    & 0x80) shiftstate |= TCF_ALTGR;
+       else
+       if(lpbKeyState[VK_MENU]     & 0x80) shiftstate |= TCF_ALT;
+
        if(lpbKeyState[VK_CAPITAL]  & 1)    shiftstate |= TCF_CAPSLOCK;
        if(lpbKeyState[VK_NUMLOCK]  & 1)    shiftstate |= TCF_NUMLOCK;
 
@@ -1613,6 +1623,23 @@ UINT WIN32API MapVirtualKeyA(UINT uCode,  UINT uMapType)
         return 'A' + uCode - VK_A;
       }
     break;
+
+    case 0:
+    {
+      UINT ret;
+      if( uCode >= VK_A && uCode <= VK_Z) {
+           ret = OSLibWinTranslateChar('A' + uCode - VK_A, TC_CHARTOSCANCODE, 0);  
+           dprintf(("MapVirtualKeyA %x (%c) -> %x", uCode, 'A' + uCode - VK_A, ret));
+           return ret;
+      }
+      else
+      if( uCode >= VK_0 && uCode <= VK_0) {
+           ret = OSLibWinTranslateChar('0' + uCode - VK_0, TC_CHARTOSCANCODE, 0);  
+           dprintf(("MapVirtualKeyA %x (%c) -> %x", uCode, '0' + uCode - VK_0, ret));
+           return ret;
+      }
+      break;
+    }
 
     case 1:
     case 3:
