@@ -1,0 +1,13 @@
+# $Id: pdwin32.incdll,v 1.1 1999-12-01 09:29:52 bird Exp $
+# ODIN Project
+#
+# Common DLL makefile rules
+# Note: Must be included after the 'all' rule!
+#
+
+$(TARGET)exp.def: $(TARGET).def
+    $(IMPDEF) $** $@
+
+$(TARGET).lib: $(TARGET)exp.Def
+    $(IMPLIB) $(IMPLIBFLAGS) $@ $**
+    $(CP) $@ $(PDWIN32_LIB)\$@
