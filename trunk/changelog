@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.689 2000-02-03 17:12:00 cbratschi Exp $ */
+ /* $Id: changelog,v 1.690 2000-02-03 19:05:35 sandervl Exp $ */
 
  2000-02-03: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: merged controls with WINE 20000130
@@ -6,11 +6,12 @@
  2000-02-03: Daniela Engert <dani@ngrt.de>
 	- GDI32: Implement RGB 555 to RGB 565 conversion in assembler
 
- 2000-03-01: Sander van Leeuwen <sandervl@xs4all.nl>
+ 2000-02-03: Sander van Leeuwen <sandervl@xs4all.nl>
 	- GDI32: Prelimary RGB 555 to RGB 565 conversion in SetDIBitsToDevice
                  (will be rewritten in assembly for better performance)
                  (for RealPlayer videos in 16 bits mode)
 	         BitBlt fix (return after dibsection blit -> fixes Quake 2)
+                 Added MMX RGB conversion.
 	- COMDLG32: Merged with latest Wine version (20000109)
 	- INCLUDE\WIN: Fixes to compile comdlg32 in C mode
 		 (will be rewritten in assembly for better performance)
