@@ -1,11 +1,14 @@
-/* $Id: changelog,v 1.1485 2001-06-07 00:40:30 bird Exp $ */
+/* $Id: changelog,v 1.1486 2001-06-07 12:43:59 sandervl Exp $ */
+
+ 2001-06-07: Sander van Leeuwen <sandervl@xs4all.nl>
+    - OLE32:    o More VAC 3.6.5 compile fixes
 
  2001-06-06: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
     - FastDep:  o Performance enh. Don't scan files more than 1 month older
                   than existing .depend file.
                 o Optimized AVL tree sligtly by not performing two strcmp
                   on the same keys (but resuing the result from the first).
-                o Improoved dependencies genereated for OS/2 resource files.
+                o Improved dependencies genereated for OS/2 resource files.
                   (TODO: Fix possible bad precompiler checks for C/C++ and RC.)
                 o Code is now in sync with OS2Tools.
 
