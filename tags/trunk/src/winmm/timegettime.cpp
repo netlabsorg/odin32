@@ -1,20 +1,27 @@
-/* $Id: timegettime.cpp,v 1.2 1999-06-10 16:24:34 phaller Exp $ */
+/* $Id: timegettime.cpp,v 1.3 1999-08-19 18:46:05 phaller Exp $ */
 
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+
+/****************************************************************************
+ * Includes                                                                 *
+ ****************************************************************************/
+
 #include <os2win.h>
+#include <odinwrap.h>
+
+
+ODINDEBUGCHANNEL(WINMM-TIMEGETTIME)
 
 /******************************************************************************/
 /******************************************************************************/
-DWORD WIN32API timeGetTime(void)
+ODINFUNCTION0(DWORD, timeGetTime)
 {
-#ifdef DEBUG
-////    WriteLog("WINMM:timeGetTime\n");
-#endif
-    return O32_timeGetTime();
+  return O32_timeGetTime();
 }
 /******************************************************************************/
 /******************************************************************************/
+

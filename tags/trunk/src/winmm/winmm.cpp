@@ -1,4 +1,4 @@
-/* $Id: winmm.cpp,v 1.3 1999-06-10 16:24:35 phaller Exp $ */
+/* $Id: winmm.cpp,v 1.4 1999-08-19 18:46:05 phaller Exp $ */
 
 /*
  * Timer MM apis
@@ -9,72 +9,91 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+
+
+/****************************************************************************
+ * Includes                                                                 *
+ ****************************************************************************/
+
 #include <os2win.h>
+#include <odinwrap.h>
 #include "misc.h"
 
 #include "os2timer.h"
 
+ODINDEBUGCHANNEL(WINMM-WINMM)
+
+
 /******************************************************************************/
-UINT WIN32API mmsystemGetVersion(void)
+ODINFUNCTION0(UINT, mmsystemGetVersion)
 {
-  dprintf(("WINMM:mmsystemGetVersion\n"));
   return 4;
 }
 
 /******************************************************************************/
-MMRESULT WIN32API timeGetDevCaps(LPTIMECAPS ptc, UINT cbtc)
+ODINFUNCTION2(MMRESULT, timeGetDevCaps,
+              LPTIMECAPS, ptc,
+              UINT, cbtc)
 {
-    dprintf(("WINMM:timeGetDevCaps Not really Implemented\n"));
-    ptc->wPeriodMin = 1;
-    ptc->wPeriodMax = 20;
-    return TIMERR_NOERROR;
+  dprintf(("WINMM:timeGetDevCaps Not really Implemented\n"));
+  ptc->wPeriodMin = 1;
+  ptc->wPeriodMax = 20;
+  return TIMERR_NOERROR;
 }
 
 /******************************************************************************/
-MMRESULT WIN32API timeBeginPeriod(UINT cMilliseconds)
+ODINFUNCTION1(MMRESULT, timeBeginPeriod,
+              UINT, cMilliseconds)
 {
-    dprintf(("WINMM:timeBeginPeriod %d ms\n", cMilliseconds));
-    return TIMERR_NOERROR;
+  dprintf(("WINMM: timeBeginPeriod not implemented.\n"));
+  return TIMERR_NOERROR;
 }
 /******************************************************************************/
 /******************************************************************************/
-MMRESULT WIN32API timeEndPeriod(UINT cMilliseconds)
+ODINFUNCTION1(MMRESULT, timeEndPeriod,
+              UINT, cMilliseconds)
 {
-    dprintf(("WINMM:timeEndPeriod %d ms\n", cMilliseconds));
-    return TIMERR_NOERROR;
+  dprintf(("WINMM: timeEndPeriod not implemented.\n"));
+  return TIMERR_NOERROR;
 }
 /******************************************************************************/
 /******************************************************************************/
-MMRESULT WIN32API timeKillEvent(UINT IDEvent)
+ODINFUNCTION1(MMRESULT, timeKillEvent,
+              UINT, IDEvent)
 {
-    dprintf(("WINMM:timeKillEvent Not Implemented\n"));
-    delete((OS2Timer *)IDEvent);
-    return TIMERR_NOERROR;
+  dprintf(("WINMM:timeKillEvent Not Implemented\n"));
+  delete((OS2Timer *)IDEvent);
+  return TIMERR_NOERROR;
 }
 /******************************************************************************/
 /******************************************************************************/
-MMRESULT WIN32API timeSetEvent(UINT wDelay, UINT wResolution, LPTIMECALLBACK lptc,
-                                  DWORD dwUser, UINT fuEvent)
+ODINFUNCTION5(MMRESULT, timeSetEvent,
+              UINT, wDelay,
+              UINT, wResolution,
+              LPTIMECALLBACK, lptc,
+              DWORD, dwUser,
+              UINT, fuEvent)
 {
- OS2Timer *timer;
+  OS2Timer *timer;
 
-    dprintf(("WINMM:timeSetEvent %d\n", wDelay));
+  timer = new OS2Timer();
+  if(timer == NULL)
+      return(0);
 
-    timer = new OS2Timer();
-    if(timer == NULL) {
-        return(0);
-    }
-    if(timer->StartTimer(wDelay, wResolution, lptc, dwUser, fuEvent) == FALSE) {
-        dprintf(("WINMM:timeSetEvent: couldn't start timer!\n"));
-        delete(timer);
-        return(0);
-    }
-    return(MMRESULT)timer;
+  if(timer->StartTimer(wDelay, wResolution, lptc, dwUser, fuEvent) == FALSE)
+  {
+    dprintf(("WINMM:timeSetEvent: couldn't start timer!\n"));
+    delete(timer);
+    return(0);
+  }
+  return(MMRESULT)timer;
 }
 
 /******************************************************************************/
-MMRESULT WIN32API timeGetSystemTime( LPMMTIME arg1, UINT  arg2)
+ODINFUNCTION2(MMRESULT, timeGetSystemTime,
+              LPMMTIME, arg1,
+              UINT, arg2)
 {
-    dprintf(("WINMM:timeGetSystemTime\n"));
-    return O32_timeGetSystemTime(arg1, arg2);
+  return O32_timeGetSystemTime(arg1, arg2);
 }
+

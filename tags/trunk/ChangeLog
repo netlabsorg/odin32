@@ -1,6 +1,7 @@
- /* $Id: ChangeLog,v 1.107 1999-08-19 17:06:37 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.108 1999-08-19 18:46:54 phaller Exp $ */
 
  99-08-19: Patrick Haller <phaller@gmx.net>
+        - WINMM:    odinwrap macros
         - TAPI32:   odinwrap macros
         - MPR:      odinwrap macros
         - COMDLG32: odinwrap macros
