@@ -1,4 +1,4 @@
-/* $Id: pidl.c,v 1.1 2000-08-30 13:52:52 sandervl Exp $ */
+/* $Id: pidl.c,v 1.2 2000-08-30 14:18:47 sandervl Exp $ */
 /*
  *	pidl Handling
  *
@@ -31,6 +31,8 @@
 DEFAULT_DEBUG_CHANNEL(pidl);
 DECLARE_DEBUG_CHANNEL(shell);
 
+#ifdef __WIN32OS2__
+#ifdef DEBUG
 void pdump (LPCITEMIDLIST pidl)
 {
 	BOOL bIsShellDebug;
@@ -86,6 +88,65 @@ void pdump (LPCITEMIDLIST pidl)
 	__SET_DEBUGGING(__DBCL_TRACE, dbch_pidl, TRUE);
 
 }
+#endif //DEBUG
+#else
+void pdump (LPCITEMIDLIST pidl)
+{
+	BOOL bIsShellDebug;
+	
+	LPITEMIDLIST pidltemp = pidl;
+	if (!TRACE_ON(pidl))
+	  return;
+
+	/* silence the sub-functions */
+	bIsShellDebug = TRACE_ON(shell);
+	__SET_DEBUGGING(__DBCL_TRACE, dbch_shell, FALSE);
+	__SET_DEBUGGING(__DBCL_TRACE, dbch_pidl, FALSE);
+
+	if (! pidltemp)
+	{
+	  MESSAGE ("-------- pidl=NULL (Desktop)\n");
+	}
+	else
+	{
+	  MESSAGE ("-------- pidl=%p\n", pidl);
+	  if (pidltemp->mkid.cb)
+	  { 
+	    do
+	    {
+	      DWORD dwAttrib = 0;
+	      LPPIDLDATA pData   = _ILGetDataPointer(pidltemp);
+	      DWORD type         = pData->type;
+	      LPSTR szLongName   = _ILGetTextPointer(pidltemp);
+	      LPSTR szShortName  = _ILGetSTextPointer(pidltemp);
+	      char szName[MAX_PATH];
+
+	      _ILSimpleGetText(pidltemp, szName, MAX_PATH);
+	      if( PT_FOLDER == type)
+	        dwAttrib = pData->u.folder.uFileAttribs;
+	      else if( PT_VALUE == type)
+	        dwAttrib = pData->u.file.uFileAttribs;
+
+	      MESSAGE ("-- pidl=%p size=%u type=%lx attr=0x%08lx name=%s (%s,%s)\n",
+	               pidltemp, pidltemp->mkid.cb,type,dwAttrib,szName,debugstr_a(szLongName), debugstr_a(szShortName));
+
+	      pidltemp = ILGetNext(pidltemp);
+
+	    } while (pidltemp->mkid.cb);
+	  }
+	  else
+	  {
+	    MESSAGE ("empty pidl (Desktop)\n");
+	  }
+	  pcheck(pidl);
+	}
+
+	__SET_DEBUGGING(__DBCL_TRACE, dbch_shell, bIsShellDebug);
+	__SET_DEBUGGING(__DBCL_TRACE, dbch_pidl, TRUE);
+
+}
+#endif //__WIN32OS2__
+
 #define BYTES_PRINTED 32
 BOOL pcheck (LPCITEMIDLIST pidl)
 {       DWORD type, ret=TRUE;
