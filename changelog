@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.2130 2002-06-05 11:43:36 sandervl Exp $ */
+/* $Id: changelog,v 1.2131 2002-06-06 06:55:26 sandervl Exp $ */
+
+ 2002-06-06: Platon Fomichev <platon@innotek.de>
+    - SHELL32:  o Always expand root when initializing treeview
+                o Do not sort tree in TVN_ITEMEXPANDINGA
 
  2002-06-05: Sander van Leeuwen <sandervl@innotek.de>
     - WINMM:    o Put back original DART buffer size selection code
