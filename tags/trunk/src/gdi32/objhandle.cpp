@@ -1,4 +1,4 @@
-/* $Id: objhandle.cpp,v 1.9 2000-12-09 15:00:35 sandervl Exp $ */
+/* $Id: objhandle.cpp,v 1.10 2000-12-30 13:28:32 sandervl Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
@@ -296,15 +296,30 @@ DWORD WIN32API GetObjectType( HGDIOBJ hObj)
     return O32_GetObjectType(hObj);
 }
 //******************************************************************************
+//TODO: System objects can't be deleted (TODO: any others?? (fonts?))!!!!)
 //******************************************************************************
 BOOL WIN32API DeleteObject(HANDLE hObj)
 {
+ DWORD type;
+
     dprintf(("GDI32: DeleteObject %x", hObj));
+
+    //System objects can't be deleted (TODO: any others?? (fonts?))!!!!)
+    type = GetObjectType(hObj);
+    if(type == OBJ_PEN && IsSystemPen(hObj)) {
+        SetLastError(ERROR_SUCCESS);
+        return TRUE;
+    }
+    if(type == OBJ_BRUSH && IsSystemBrush(hObj)) {
+        SetLastError(ERROR_SUCCESS);
+        return TRUE;
+    }
+
     if(ObjGetHandleType(hObj) == GDIOBJ_REGION) {
         OSLibDeleteRegion(ObjGetHandleData(hObj, GDIOBJ_REGION));
         ObjFreeHandle(hObj);
         SetLastError(ERROR_SUCCESS);
-        return OBJ_REGION;
+        return TRUE;
     }
     DIBSection::deleteSection((DWORD)hObj);
     return O32_DeleteObject(hObj);
