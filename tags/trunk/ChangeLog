@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.792 2000-03-09 21:12:01 bird Exp $ */
+ /* $Id: ChangeLog,v 1.793 2000-03-09 21:49:06 sandervl Exp $ */
 
  2000-03-09: knut st. osmundsen <knut.stange.osmundse@pmsc.no>
         - include\pdwin32.tools: New tool, EXISTS --> \tools\bin\Exists.cmd
@@ -30,6 +30,7 @@
                           (a->b->a works, but a->b->c->a won't)
         - USER32: Fixed bug in dialog constructor (class name translation)
                   (only showed up in release build)
+                  Dinput mouse changes/fixes
 
  2000-03-08: Michal Necasek <mike@mendelu.cz>
         - dsound\new: Fixed volume and panning calculation that
@@ -39,7 +40,6 @@
  2000-03-08: Michal Necasek <mike@mendelu.cz>
         - dsound\new: Completely new DART-based DirectSound. Works fine
                       for me with Quake 3, Moorhuhn and WinAmp.
-
 
  2000-03-07: knut st. osmundsen <knut.stange.osmundse@pmsc.no>
         - makefiles and include\pdwin32.*:
