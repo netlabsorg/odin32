@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.54 1999-12-01 18:40:49 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.55 1999-12-05 10:02:31 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -623,43 +623,60 @@ HMODULE WIN32API GetModuleHandleW(LPCWSTR arg1)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API CreateProcessA(LPCSTR lpszImageName, LPSTR lpszCommandLine,
-                       PSECURITY_ATTRIBUTES arg3,
-                             PSECURITY_ATTRIBUTES arg4, BOOL arg5, DWORD arg6,
-                             PVOID arg7, LPCSTR arg8, LPSTARTUPINFOA arg9,
-                             LPPROCESS_INFORMATION arg10)
+BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
+                            LPSECURITY_ATTRIBUTES lpProcessAttributes,
+                            LPSECURITY_ATTRIBUTES lpThreadAttributes,
+                            BOOL bInheritHandles, DWORD dwCreationFlags,
+                            LPVOID lpEnvironment, LPCSTR lpCurrentDirectory,
+                            LPSTARTUPINFOA lpStartupInfo,
+                            LPPROCESS_INFORMATION lpProcessInfo )
 {
  BOOL  rc;
  char *cmdline;
  BOOL  fAllocStr = FALSE;
 
-    if(O32_CreateProcess(lpszImageName, lpszCommandLine, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10) == TRUE)
+    dprintf(("KERNEL32: CreateProcessA %s cline:%s inherit:%d cFlags:%x Env:%x CurDir:%s StartupFlags:%x\n",
+            lpApplicationName, lpCommandLine, bInheritHandles, dwCreationFlags,
+            lpEnvironment, lpCurrentDirectory, lpStartupInfo));
+
+    if(O32_CreateProcess(lpApplicationName, lpCommandLine, lpProcessAttributes,
+                         lpThreadAttributes, bInheritHandles, dwCreationFlags,
+                         lpEnvironment, lpCurrentDirectory, lpStartupInfo,
+                         lpProcessInfo) == TRUE)
     	return(TRUE);
 
     //probably a win32 exe, so run it in the pe loader
-    if(lpszImageName) {
-     	 if(lpszCommandLine) {
-        	cmdline = (char *)malloc(strlen(lpszImageName)+strlen(lpszCommandLine) + 16);
-        	sprintf(cmdline, "PE.EXE %s %s", lpszImageName, lpszCommandLine);
+    if(lpApplicationName) {
+       if(lpCommandLine) {
+          cmdline = (char *)malloc(strlen(lpApplicationName)+strlen(lpCommandLine) + 16); 
+          sprintf(cmdline, "PE.EXE %s %s", lpApplicationName, lpCommandLine);
         	fAllocStr = TRUE;
      	 }
      	 else {
-        	cmdline = (char *)malloc(strlen(lpszImageName) + 16);
-        	sprintf(cmdline, "PE.EXE %s", lpszImageName);
+          cmdline = (char *)malloc(strlen(lpApplicationName) + 16);
+          sprintf(cmdline, "PE.EXE %s", lpApplicationName);
         	fAllocStr = TRUE;
 	 }
     }
     else {
-       	cmdline = (char *)malloc(strlen(lpszCommandLine) + 16);
-       	sprintf(cmdline, "PE.EXE %s", lpszCommandLine);
+        cmdline = (char *)malloc(strlen(lpCommandLine) + 16);
+        sprintf(cmdline, "PE.EXE %s", lpCommandLine);
        	fAllocStr = TRUE;
     }
     dprintf(("KERNEL32:  CreateProcess %s\n", cmdline));
-    rc = O32_CreateProcess("PE.EXE", (LPCSTR)cmdline, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
+    rc = O32_CreateProcess("PE.EXE", (LPCSTR)cmdline,lpProcessAttributes,
+                         lpThreadAttributes, bInheritHandles, dwCreationFlags,
+                         lpEnvironment, lpCurrentDirectory, lpStartupInfo,
+                         lpProcessInfo);
     if(fAllocStr)
     	free(cmdline);
 
-    dprintf(("KERNEL32:  CreateProcess returned %d\n", rc));
+    if(lpProcessInfo)
+      dprintf(("KERNEL32:  CreateProcess returned %d hPro:%x hThr:%x pid:%x tid:%x\n",
+               rc, lpProcessInfo->hProcess, lpProcessInfo->hThread,
+                   lpProcessInfo->dwProcessId,lpProcessInfo->dwThreadId));
+    else
+      dprintf(("KERNEL32:  CreateProcess returned %d\n", rc));
     return(rc);
 }
 //******************************************************************************
