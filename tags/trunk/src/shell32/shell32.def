@@ -1,4 +1,4 @@
-; $Id: shell32.def,v 1.25 2000-05-18 18:06:59 sandervl Exp $
+; $Id: shell32.def,v 1.26 2000-05-19 12:09:25 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;based on Windows 95
@@ -317,14 +317,14 @@ EXPORTS
     StrCmpNIA                         = _StrCmpNIA@12                         @306
     StrCmpNIW                         = _StrCmpNIW@12                         @307
 ;   StrCmpNW                          = _StrCmpNW@?                           @308
-;   StrCpyNA                          = _StrCpyNA@?                           @309
-    StrCpyNW                          = _StrCpyNW@12                          @310
+    StrCpyNA                          = _lstrcpynA@12                         @309
+    StrCpyNW                          = _lstrcpynW@12                         @310
 ;   StrNCmpA                          = _StrNCmpA@?                           @311
 ;   StrNCmpIA                         = _StrNCmpIA@?                          @312
 ;   StrNCmpIW                         = _StrNCmpIW@?                          @313
 ;   StrNCmpW                          = _StrNCmpW@?                           @314
-;   StrCpyA                           = _StrCpyA@?                            @315
-    StrNCpyW                          = _StrNCpyW@8                           @316
+    StrNCpyA                          = _lstrcpynA@12                         @315
+    StrNCpyW                          = _lstrcpynW@12                         @316
     StrRChrA                          = _StrRChrA@12                          @317
 ;   StrRChrIA                         = _StrRChrIA@?                          @318
 ;   StrRChrIW                         = _StrRChrIW@?                          @319
@@ -373,7 +373,6 @@ EXPORTS
 
     DllGetVersion                     = _SHELL32_DllGetVersion@4              @1220
 
-    VERSION_OsIsUnicode                   @1000
     _StrRetToStrNA@16                     @1004
     _StrRetToStrNW@16                     @1005
 
