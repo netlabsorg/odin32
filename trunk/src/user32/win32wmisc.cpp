@@ -1,4 +1,4 @@
-/* $Id: win32wmisc.cpp,v 1.1 2001-09-19 15:39:51 sandervl Exp $ */
+/* $Id: win32wmisc.cpp,v 1.2 2003-01-03 16:35:57 sandervl Exp $ */
 /*
  * Misc. functions for window management
  *
@@ -31,6 +31,7 @@
 #include "oslibdos.h"
 #include "win32wndhandle.h"
 #include "win32wmisc.h"
+#include "ctrlconf.h"
 
 //******************************************************************************
 //******************************************************************************
@@ -140,12 +141,68 @@ VOID setSysMenu(HWND hwnd,HMENU hMenu)
  */
 void NC_GetSysPopupPos( HWND hwnd, RECT* rect )
 {
-   Win32BaseWindow *win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if (IsIconic(hwnd)) GetWindowRect( hwnd, rect );
+    else
+    {
+#ifdef __WIN32OS2__
+        Win32BaseWindow *win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
+        if (!win32wnd) return;
 
-   if (!win32wnd) return;
+        win32wnd->GetSysPopupPos(rect);
 
-   win32wnd->GetSysPopupPos(rect);
-   RELEASE_WNDOBJ(win32wnd);
+        RELEASE_WNDOBJ(win32wnd);
+#else
+        WND *wndPtr = WIN_FindWndPtr( hwnd );
+        if (!wndPtr) return;
+
+        NC_GetInsideRect( hwnd, rect );
+        OffsetRect( rect, wndPtr->rectWindow.left, wndPtr->rectWindow.top);
+        if (wndPtr->dwStyle & WS_CHILD)
+            ClientToScreen( GetParent(hwnd), (POINT *)rect );
+        if (TWEAK_WineLook == WIN31_LOOK) {
+            rect->right = rect->left + GetSystemMetrics(SM_CXSIZE);
+            rect->bottom = rect->top + GetSystemMetrics(SM_CYSIZE);
+        }
+        else {
+            rect->right = rect->left + GetSystemMetrics(SM_CYCAPTION) - 1;
+            rect->bottom = rect->top + GetSystemMetrics(SM_CYCAPTION) - 1;
+        }
+        WIN_ReleaseWndPtr( wndPtr );
+#endif
+    }
 }
-//******************************************************************************
-//******************************************************************************
+//*****************************************************************************
+//*****************************************************************************
+BOOL NC_DrawSysButton95 (HWND hwnd, HDC hdc, BOOL down)
+{
+    BOOL ret;
+
+    Win32BaseWindow *win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if (!win32wnd) return FALSE;
+
+    ret = win32wnd->DrawSysButton(hdc, NULL);
+
+    RELEASE_WNDOBJ(win32wnd);
+
+    return ret;
+}
+//*****************************************************************************
+//*****************************************************************************
+INT NC_HandleNCHitTest( HWND hwnd, POINT pt)
+{
+    INT ht;
+
+    Win32BaseWindow *win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if(win32wnd==NULL) {
+        //SvL: This happens in Moraff's YourJongg 2.0, return here
+        //TODO: Check if this is supposed to happen at all...
+        return HTERROR;
+    }
+
+    ht = win32wnd->HandleNCHitTest(pt);
+    RELEASE_WNDOBJ(win32wnd);
+
+    return ht;
+}
+//*****************************************************************************
+//*****************************************************************************

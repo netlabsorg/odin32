@@ -1,4 +1,4 @@
-/* $Id: windowclass.cpp,v 1.26 2002-12-18 12:28:08 sandervl Exp $ */
+/* $Id: windowclass.cpp,v 1.27 2003-01-03 16:35:58 sandervl Exp $ */
 /*
  * Win32 Window Class Code for OS/2
  *
@@ -138,7 +138,11 @@ ATOM WIN32API InternalRegisterClass(LPSTR lpszClassName, DWORD dwStyle,
         return 0;
     }
 
-    dprintf(("InternalRegisterClass %s %x %x %x %d %x %x", lpszClassName, dwStyle, pfnClassA, pfnClassW, cbExtraWindowWords, lpszCursor, hBrush));
+    if(HIWORD(lpszClassName)) {
+         dprintf(("InternalRegisterClass %s %x %x %x %d %x %x", lpszClassName, dwStyle, pfnClassA, pfnClassW, cbExtraWindowWords, lpszCursor, hBrush));
+    }
+    else dprintf(("InternalRegisterClass %x %x %x %x %d %x %x", lpszClassName, dwStyle, pfnClassA, pfnClassW, cbExtraWindowWords, lpszCursor, hBrush));
+
     wc.cbSize        = sizeof(wc);
     wc.style         = dwStyle;
     wc.lpfnWndProc   = pfnClassA;

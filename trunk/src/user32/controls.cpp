@@ -1,4 +1,4 @@
-/* $Id: controls.cpp,v 1.11 2002-12-18 12:28:02 sandervl Exp $ */
+/* $Id: controls.cpp,v 1.12 2003-01-03 16:35:51 sandervl Exp $ */
 /* File: controls.cpp -- Win32 common controls
  *
  * Copyright (c) 1999 Christoph Bratschi
@@ -47,7 +47,18 @@ void CONTROLS_Register()
   if (!controlAtoms[STATIC_CONTROL]) dprintf(("failed!!!"));
 
   dprintf(("Register SCROLLBAR class"));
-  controlAtoms[SCROLLBAR_CONTROL] = SCROLLBAR_Register();
+  controlAtoms[SCROLLBAR_CONTROL] = 
+#if 0
+          InternalRegisterClass((LPSTR)SCROLL_builtin_class.name,
+                                SCROLL_builtin_class.style,
+                                SCROLL_builtin_class.procA,
+                                SCROLL_builtin_class.procW,
+                                SCROLL_builtin_class.extra,
+                                SCROLL_builtin_class.cursor,
+                                SCROLL_builtin_class.brush);
+#else
+SCROLLBAR_Register();
+#endif
   if (!controlAtoms[SCROLLBAR_CONTROL]) dprintf(("failed!!!"));
 
   dprintf(("Register LISTBOX class"));
@@ -121,8 +132,16 @@ void CONTROLS_Register()
   if (!controlAtoms[ICONTITLE_CONTROL]) dprintf(("failed!!!"));
 
   dprintf(("Register POPUPMENU class"));
-  controlAtoms[POPUPMENU_CONTROL] = POPUPMENU_Register();
+  controlAtoms[POPUPMENU_CONTROL] = 
+          InternalRegisterClass((LPSTR)MENU_builtin_class.name,
+                                MENU_builtin_class.style,
+                                MENU_builtin_class.procA,
+                                MENU_builtin_class.procW,
+                                MENU_builtin_class.extra,
+                                MENU_builtin_class.cursor,
+                                MENU_builtin_class.brush);
   if (!controlAtoms[POPUPMENU_CONTROL]) dprintf(("failed!!!"));
+  MENU_Init();
 }
 
 void CONTROLS_Unregister()
@@ -134,7 +153,11 @@ void CONTROLS_Unregister()
   if (!STATIC_Unregister()) dprintf(("failed!!!"));
 
   dprintf(("Unregister SCROLLBAR class"));
+#if 0
+  if (!UnregisterClassA((LPSTR)SCROLL_builtin_class.name, NULL)) dprintf(("failed!!!"));
+#else
   if (!SCROLLBAR_Unregister()) dprintf(("failed!!!"));
+#endif
 
   dprintf(("Unregister LISTBOX class"));
   if (!UnregisterClassA((LPSTR)LISTBOX_builtin_class.name, NULL)) dprintf(("failed!!!"));
@@ -164,8 +187,7 @@ void CONTROLS_Unregister()
   if (!ICONTITLE_Unregister()) dprintf(("failed!!!"));
 
   dprintf(("Unregister POPUPMENU class"));
-  if (!POPUPMENU_Unregister()) dprintf(("failed!!!"));
-
+  if (!UnregisterClassA((LPSTR)MENU_builtin_class.name, NULL)) dprintf(("failed!!!"));
 }
 
 

@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.70 2003-01-01 14:29:43 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.71 2003-01-03 16:35:56 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -12,6 +12,8 @@
  */
 #ifndef __OSLIBWIN_H__
 #define __OSLIBWIN_H__
+
+#ifdef __cplusplus
 #include <oslibgdi.h>
 
 #ifndef WIN_INCLUDED
@@ -361,7 +363,11 @@ BOOL   OSLibWinLockWindowUpdate(HWND hwnd);
 BOOL   OSLibWinGetMaxPosition(HWND hwndOS2, RECT *rect);
 
 BOOL   OSLibWinShowPointer(BOOL fShow);
-HWND OSLibWinCreateInvisibleScroller(HWND parentHWND, int direction);
+HWND   OSLibWinCreateInvisibleScroller(HWND parentHWND, int direction);
+
+ULONG  OSLibWinQuerySysColor(int index);
+
+#endif
 
    #define PMSYSCLR_SHADOWHILITEBGND         (-50L)
    #define PMSYSCLR_SHADOWHILITEFGND         (-49L)
@@ -411,7 +417,5 @@ HWND OSLibWinCreateInvisibleScroller(HWND parentHWND, int direction);
 #define CONVERT_RGB(colorRef) ( ((colorRef) & 0x0000FF00     )   |   \
                                 (((colorRef) & 0x00FF0000)>>16)  |   \
                                 (((colorRef) & 0x000000FF)<<16)   )
-
-ULONG  OSLibWinQuerySysColor(int index);
 
 #endif //__OSLIBWIN_H__

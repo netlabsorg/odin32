@@ -21,7 +21,7 @@ UINT MENU_DrawMenuBar(HDC hDC,LPRECT lprect,HWND hWnd,BOOL suppress_draw);
 BOOL MENU_Init();
 BOOL POPUPMENU_Register();
 BOOL POPUPMENU_Unregister();
-BOOL IsMenuActive(void);
+BOOL MENU_IsMenuActive(void);
 
 #ifdef __cplusplus
 }
