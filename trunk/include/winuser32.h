@@ -7,7 +7,7 @@
 #ifndef __WINUSER32_H__
 #define __WINUSER32_H__
 
-#ifndef NO_DCDATA
+#if !defined(NO_DCDATA) && (defined(INCL_GPI) && defined(OS2_INCLUDED))
 
 #include <dcdata.h>
 
@@ -29,6 +29,7 @@ int  WIN32API DIB_GetDIBWidthBytes( int width, int depth );
 int  WIN32API BITMAP_GetWidthBytes( INT width, INT depth );
 
 HWND WIN32API Win32ToOS2Handle(HWND hwndWin32);
+HWND WIN32API Win32ToOS2FrameHandle(HWND hwndWin32);
 HWND WIN32API OS2ToWin32Handle(HWND hwnd);
 
 BOOL WIN32API IsSystemPen(HPEN hPen);
@@ -47,5 +48,22 @@ void WIN32API SetWindowAppearance(BOOL fOS2Looks);
 
 BOOL WIN32API OSLibWinCreateObject(LPSTR pszPath, LPSTR pszArgs, LPSTR pszWorkDir, LPSTR pszName, 
                                    LPSTR pszDescription, LPSTR pszIcoPath, INT iIcoNdx, BOOL fDesktop);
+
+typedef BOOL (WIN32API *VISRGN_NOTIFY_PROC)(HWND hwnd, BOOL fDrawingAllowed, DWORD dwUserData);
+//******************************************************************************
+// WinSetVisibleRgnNotifyProc
+//   To set a notification procedure for visible region changes of a specific window.
+//   The procedure will be called when a WM_VRNENABLED message is posted
+//   with ffVisRgnChanged set to TRUE
+//
+// Parameters:
+//   HWND hwnd				window handle
+//   VISRGN_NOTIFY_PROC lpNotifyProc	notification proc or NULL to clear proc
+//   DWORD dwUserData			value used as 3rd parameter during
+//                                      visible region callback
+//
+// NOTE: Internal API
+//******************************************************************************
+BOOL WIN32API WinSetVisibleRgnNotifyProc(HWND hwnd, VISRGN_NOTIFY_PROC lpNotifyProc, DWORD dwUserData);
 
 #endif //__WINUSER32_H__
