@@ -1,4 +1,4 @@
-/* $Id: winconst.h,v 1.23 2000-02-03 12:19:23 sandervl Exp $ */
+/* $Id: winconst.h,v 1.24 2000-02-07 14:29:21 sandervl Exp $ */
 
 /*
  * Win32 constants
@@ -181,12 +181,6 @@
 #define DLL_PROCESS_ATTACH      1       /* attach process (load library) */
 #define DLL_THREAD_ATTACH       2       /* attach new thread */
 #define DLL_THREAD_DETACH       3       /* detach thread */
-
-/* Regions */
-#define ERROR_W           0
-#define NULLREGION_W      1
-#define SIMPLEREGION_W    2
-#define COMPLEXREGION_W   3
 
 /* ShowWindow() codes */
 #define SW_HIDE_W             0
@@ -1000,3 +994,19 @@
 #define BI_RLE8          1
 #define BI_RLE4          2
 #define BI_BITFIELDS     3
+
+  /* Polygon modes */
+#define ALTERNATE_W         1
+#define WINDING_W           2
+
+/* Regions */
+#define ERROR_W             0
+#define NULLREGION_W        1
+#define SIMPLEREGION_W      2
+#define COMPLEXREGION_W     3
+
+#define RGN_AND_W           1
+#define RGN_OR_W            2
+#define RGN_XOR_W           3
+#define RGN_DIFF_W          4
+#define RGN_COPY_W          5

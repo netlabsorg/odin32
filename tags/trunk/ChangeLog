@@ -1,4 +1,9 @@
- /* $Id: ChangeLog,v 1.704 2000-02-06 22:01:32 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.705 2000-02-07 14:28:54 sandervl Exp $ */
+
+ 2000-02-07: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Fix for DCX_INTERSECTRGN in GetDCEx (use ExtSelectClipRgn
+                  to combine current & new clip region)
+	- ADVAPI32: Ported Wine LookupAccountSidA/W (semi-stubs now)
 
  2000-02-06: Jens Wiessner <wiessnej@rfi.de>
 	- WINMM: Updated MCI dlls (added version info)
