@@ -1,7 +1,8 @@
-/* $Id: ChangeLog,v 1.2577 2003-05-15 12:40:40 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2578 2003-05-15 13:13:10 sandervl Exp $ */
 
  2003-05-15: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Window creation: updated the coordinate fix code with the latest Rewind version
+                o ReleaseDC: always verify window associated with DC
 
  2003-05-14: Sander van Leeuwen <sandervl@innotek   >
     - GDI32:    o DIB section: do not fetch more colors from a bitmap header than 
