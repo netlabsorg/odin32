@@ -1,4 +1,4 @@
-/* $Id: ole2nls.cpp,v 1.2 2000-09-08 04:28:47 phaller Exp $ */
+/* $Id: ole2nls.cpp,v 1.3 2000-10-02 15:56:47 phaller Exp $ */
 
 /*
  *	National Language Support library
@@ -21,6 +21,8 @@
 #include <odin.h>
 #include <odinwrap.h>
 #include <os2sel.h>
+#include <os2win.h>
+#include <misc.h>
 
 #include <string.h>
 #include <stdio.h>
@@ -45,7 +47,6 @@
 #include "main.h"
 
 #include <wctype.h>
-
 
 #define DBG_LOCALLOG	DBG_kernel32
 #include "dbglocal.h"
