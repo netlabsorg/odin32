@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.587 1999-12-29 13:04:07 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.588 1999-12-29 14:39:23 sandervl Exp $ */
 
  99-12-29: Patrick Haller <phaller@gmx.net>
 	- INCLUDE: ODINWRAP: new macros to save FS register for callback registration
@@ -8,6 +8,10 @@
 	- WINMM: Created wrappers for mci* apis (to save/restore FS)
                  NOTE: You must include os2mewrap.h instead of os2me.h
 	- USER32: Fixed PostThreadMessage (RealPlayer G2 install almost works)
+                  Fixed memory leak in PostMessage (structures of posted messages 
+                  that aren't dispatched were never freed)
+                  (InterVideo WinDVD 2.0 install almost works; tries to overwrite
+                   msvcrt.dll (which fails as the install program uses that dll))
 	- KERNEL32: Removed logging from icon & cursor (group) conversion
                     (compile with DEBUGALL=1 to enable it)
 
