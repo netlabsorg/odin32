@@ -1,4 +1,10 @@
- /* $Id: changelog,v 1.1044 2000-07-22 12:53:42 sandervl Exp $ */
+ /* $Id: changelog,v 1.1045 2000-07-25 18:21:45 sandervl Exp $ */
+
+ 2000-07-25: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: Added environment setting for disabling wait on exit
+                for console applications (SET ODIN_AUTOEXITCONSOLE=1)
+    - DOC\ToDo.txt:
+                Added more unassigned tasks
 
  2000-07-22: Sander van Leeuwen <sandervl@xs4all.nl>
     - DOC\ReportingBugs.txt
