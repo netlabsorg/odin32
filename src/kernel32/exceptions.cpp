@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.4 1999-06-17 21:51:59 phaller Exp $ */
+/* $Id: exceptions.cpp,v 1.5 1999-06-19 10:54:39 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -45,7 +45,7 @@
  *
  */
 #define INCL_BASE
-#include <os2.h>
+#include <os2wrap.h>	//Odin32 OS/2 api wrappers
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>

@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.3 1999-06-10 17:09:03 phaller Exp $ */
+/* $Id: dibsect.cpp,v 1.4 1999-06-19 10:54:39 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -11,7 +11,7 @@
  */
 #define  INCL_GPI
 #define  INCL_WIN
-#include <os2.h>
+#include <os2wrap.h>	//Odin32 OS/2 api wrappers
 #include <stdlib.h>
 #include <string.h>
 #include "win32type.h"

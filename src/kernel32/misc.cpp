@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.2 1999-06-10 20:48:00 phaller Exp $ */
+/* $Id: misc.cpp,v 1.3 1999-06-19 10:54:42 sandervl Exp $ */
 
 /*
  *
@@ -17,7 +17,7 @@
 #define INCL_WIN
 #define INCL_WINERRORS
 #define INCL_DOSFILEMGR
-#include <os2.h>
+#include <os2wrap.h>	//Odin32 OS/2 api wrappers
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

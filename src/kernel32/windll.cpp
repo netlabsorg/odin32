@@ -1,14 +1,12 @@
-/* $Id: windll.cpp,v 1.3 1999-06-10 19:09:04 phaller Exp $ */
+/* $Id: windll.cpp,v 1.4 1999-06-19 10:54:43 sandervl Exp $ */
 
-/*
- *
- * Project Odin Software License can be found in LICENSE.TXT
- *
- */
 /*
  * Win32 DLL class
  *
  * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
+ *
+ *
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
 #define INCL_DOSFILEMGR          /* File Manager values      */
@@ -17,7 +15,7 @@
 #define INCL_DOSMODULEMGR
 #define INCL_DOSMISC             /* DOS Miscellanous values  */
 #define INCL_WIN
-#include <os2.h>
+#include <os2wrap.h>	//Odin32 OS/2 api wrappers
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
