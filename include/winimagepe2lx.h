@@ -1,4 +1,4 @@
-/* $Id: winimagepe2lx.h,v 1.2 1999-10-14 01:39:13 bird Exp $ */
+/* $Id: winimagepe2lx.h,v 1.3 1999-10-17 01:52:20 bird Exp $ */
 
 /*
  * Win32 PE2LX Image base class
@@ -38,8 +38,9 @@ class Win32Pe2LxImage : public virtual Win32ImageBase
 {
 public:
     /** @cat constructor and destructor */
-    Win32Pe2LxImage(HINSTANCE hinstance, BOOL fWin32k) throw(ULONG);
+    Win32Pe2LxImage(HINSTANCE hinstance, BOOL fWin32k);
     virtual ~Win32Pe2LxImage();
+    virtual BOOL init();
 
 private:
     /** @cat constructor helpers */
