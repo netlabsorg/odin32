@@ -1,4 +1,4 @@
-/* $Id: os2util.cpp,v 1.6 1999-07-22 11:22:42 sandervl Exp $ */
+/* $Id: os2util.cpp,v 1.7 1999-08-13 17:07:24 sandervl Exp $ */
 
 /*
  * Misc util. procedures
@@ -21,7 +21,6 @@
 #include <malloc.h>  /*PLF Wed  98-03-18 05:15:04*/
 #include "os2util.h"
 #include "misc.h"
-#include "version.h"
 
 /***********************************
  * PH: fixups for missing os2win.h *
