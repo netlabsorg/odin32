@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.448 1999-11-14 13:08:51 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.449 1999-11-14 13:13:40 achimha Exp $ */
+
+ 99-11-14: Achim Hasenmueller <achimha@innotek.de>
+        - COMCTL32: Fixed strdupAtoW/WtoA calls
+                    Implemented missing undocumted string functions
 
  99-11-14: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Implemented GetMenuItemRect
