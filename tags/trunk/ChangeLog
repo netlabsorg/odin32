@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.493 1999-12-01 18:39:15 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.494 1999-12-01 20:09:03 sandervl Exp $ */
 
  99-12-01: Edgar Buerkle <Edgar.Buerkle@gmx.net>
 	- KERNEL32: Removed check in CreateFileMapping (hFile == -1 && (protect & SEC_COMMIT))
@@ -14,7 +14,6 @@
                     (OSLibDosOpen)
                     Don't translate strings if api fails (FindFirstFileW/FindNextFileW)
                     GetProcessTimes (TODO: Doesn't use RtlExtendedIntegerMultiply correctly!)
-                    Translate only upto min(strlen of unicode string,n) in UnicodeToAsciiN
 	- ADVAPI32: Fix for RegQueryInfoKeyW (return size = 0)
 
  99-11-30: Patrick Haller <phaller@gmx.net>
