@@ -94,7 +94,7 @@ _xread(HANDLE hf, LPVOID ptr, DWORD size) {
 	return E_FAIL;
     }
     if (res!=size) {
-	FIXME("Read only %ld of %ld bytes.\n",res,size);
+	FIXME("Read only %ld of %ld bytes from %x.\n",res,size,hf);
 	return E_FAIL;
     }
     return S_OK;
@@ -130,7 +130,7 @@ _xwrite(HANDLE hf, LPVOID ptr, DWORD size) {
 	return E_FAIL;
     }
     if (res!=size) {
-	FIXME("Wrote only %ld of %ld bytes.\n",res,size);
+	FIXME("Wrote only %ld of %ld bytes to %x.\n",res,size,hf);
 	return E_FAIL;
     }
     return S_OK;
@@ -142,26 +142,24 @@ static HRESULT
 PIPE_RegisterPipe(wine_marshal_id *mid, HANDLE hPipe, BOOL startreader) {
   int	i;
   char	pipefn[100];
+  wine_pipe *new_pipes;
 
   for (i=0;i<nrofpipes;i++)
     if (pipes[i].mid.processid==mid->processid)
       return S_OK;
   if (pipes)
-    pipes=(wine_pipe*)HeapReAlloc(GetProcessHeap(),0,pipes,sizeof(pipes[0])*(nrofpipes+1));
+    new_pipes=(wine_pipe*)HeapReAlloc(GetProcessHeap(),0,pipes,sizeof(pipes[0])*(nrofpipes+1));
   else
-    pipes=(wine_pipe*)HeapAlloc(GetProcessHeap(),0,sizeof(pipes[0]));
-  if (!pipes) return E_OUTOFMEMORY;
+    new_pipes=(wine_pipe*)HeapAlloc(GetProcessHeap(),0,sizeof(pipes[0]));
+  if (!new_pipes) return E_OUTOFMEMORY;
+  pipes = new_pipes;
   sprintf(pipefn,OLESTUBMGR"_%08lx",mid->processid);
   memcpy(&(pipes[nrofpipes].mid),mid,sizeof(*mid));
   pipes[nrofpipes].hPipe	= hPipe;
   InitializeCriticalSection(&(pipes[nrofpipes].crit));
   nrofpipes++;
   if (startreader) {
-#ifdef __WIN32OS2__
       pipes[nrofpipes-1].hThread = CreateThread(NULL,0,_StubReaderThread,(LPVOID)(pipes+(nrofpipes-1)),0,&(pipes[nrofpipes-1].tid));
-#else
-      pipes[nrofpipes-1].hThread = CreateThread(NULL,0,_StubReaderThread,(LPVOID)pipes+(nrofpipes-1),0,&(pipes[nrofpipes-1].tid));
-#endif
   } else {
       pipes[nrofpipes-1].tid	 = GetCurrentThreadId();
   }
@@ -191,7 +189,7 @@ PIPE_GetFromMID(wine_marshal_id *mid) {
   return NULL;
 }
 
-static HRESULT 
+static HRESULT
 RPC_GetRequest(wine_rpc_request **req) {
     static int reqid = 0xdeadbeef;
     int i;
@@ -483,13 +481,13 @@ create_server(REFCLSID rclsid) {
   hres = RegOpenKeyExA(HKEY_CLASSES_ROOT, buf, 0, KEY_READ, &key);
 
   if (hres != ERROR_SUCCESS)
-      return REGDB_E_CLASSNOTREG;
+      return REGDB_E_READREGDB; /* Probably */
 
   memset(dllName,0,sizeof(dllName));
   hres= RegQueryValueExW(key,NULL,NULL,NULL,(LPBYTE)dllName,&dllNameLen);
+  RegCloseKey(key);
   if (hres)
 	  return REGDB_E_CLASSNOTREG; /* FIXME: check retval */
-  RegCloseKey(key);
   memset(&sinfo,0,sizeof(sinfo));
   sinfo.cb = sizeof(sinfo);
   if (!CreateProcessW(NULL,dllName,NULL,NULL,FALSE,0,NULL,NULL,&sinfo,&pinfo))
@@ -542,7 +540,7 @@ HRESULT create_marshalled_proxy(REFCLSID rclsid, REFIID iid, LPVOID *ppv) {
       CloseHandle(hPipe);
       break;
   }
-  if (tries>=MAXTRIES) 
+  if (tries>=MAXTRIES)
       return E_NOINTERFACE;
   hres = CreateStreamOnHGlobal(0,TRUE,&pStm);
   if (hres) return hres;
