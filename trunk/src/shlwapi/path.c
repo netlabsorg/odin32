@@ -3288,7 +3288,7 @@ VOID WINAPI PathSetDlgItemPathW(HWND hDlg, int id, LPCWSTR lpszPath)
     return;
 
   if (lpszPath)
-    strncpyW(path, lpszPath, sizeof(path));
+    strncpyW(path, lpszPath, sizeof(path)/sizeof(WCHAR));
   else
     path[0] = '\0';
 
