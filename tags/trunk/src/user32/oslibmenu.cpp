@@ -1,4 +1,4 @@
-/* $Id: oslibmenu.cpp,v 1.6 2000-01-08 14:15:06 sandervl Exp $ */
+/* $Id: oslibmenu.cpp,v 1.7 2000-01-08 16:53:38 sandervl Exp $ */
 /*
  * Window Menu wrapper functions for OS/2
  *
@@ -61,7 +61,7 @@ int OSLibGetMenuItemCount(HWND hMenu)
 //******************************************************************************
 HMENU OSLibWinCreateMenu(PVOID menutemplate)
 {
-    return (HMENU)WinCreateMenu(HWND_OBJECT, menutemplate);
+   return (HMENU)WinCreateMenu(HWND_OBJECT, menutemplate);
 }
 //******************************************************************************
 //******************************************************************************
@@ -97,8 +97,8 @@ BOOL OSLibGetMenuItemRect(HWND hMenu, int index, LPRECT pRect)
    WinMapWindowPoints(hMenu, HWND_DESKTOP, (PPOINTL)&rectl, 2);
    pRect->left  = rectl.xLeft;
    pRect->right = rectl.xRight;
-   pRect->top   = OSLibQueryScreenHeight() - rectl.yTop;
-   pRect->bottom= OSLibQueryScreenHeight() - rectl.yBottom;
+   pRect->top   = mapScreenY(rectl.yTop);
+   pRect->bottom= mapScreenY(rectl.yBottom);
    return TRUE;
 }
 //******************************************************************************
