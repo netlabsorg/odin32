@@ -132,6 +132,10 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
          SetRegistryRootKey(HKEY_LOCAL_MACHINE, hKeyLocalMachine);
          SetRegistryRootKey(HKEY_USERS, hKeyUsers);
 
+         SetCustomBuildName("NTDLL.DLL");
+         if(RegisterLxDll(hModule, NULL, (PVOID)NULL) == 0)
+            return 0UL;
+
          SetCustomBuildName("KERNEL32.DLL");
          rc = inittermKernel32(hModule, ulFlag);
          if(rc == 0) 
@@ -143,10 +147,12 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
                 return 0UL;
 
          SetCustomBuildName("GDI32.DLL");
-         hDllGdi32 = RegisterLxDll(hModule, NULL, NULL);
+         if(RegisterLxDll(hModule, NULL, (PVOID)NULL) == 0)
+            return 0UL;
 
          SetCustomBuildName("ADVAPI32.DLL");
-         hDllAdvapi32 = RegisterLxDll(hModule, NULL, NULL);
+         if(RegisterLxDll(hModule, NULL, (PVOID)NULL) == 0)
+            return 0UL;
 
          SetCustomBuildName("VERSION.DLL");        
          if(RegisterLxDll(hModule, NULL, (PVOID)NULL) == 0)
