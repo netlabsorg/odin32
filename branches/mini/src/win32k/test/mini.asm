@@ -1,4 +1,4 @@
-; $Id: mini.asm,v 1.1.2.9 2001-08-15 03:17:36 bird Exp $
+; $Id: mini.asm,v 1.1.2.10 2001-08-16 12:13:56 bird Exp $
 ;
 ; Haveing great fun making small executables...
 ;
@@ -44,8 +44,17 @@ endif
 ;
 minilx:
 ifdef CLIB
+    ; method 1 - 4 bytes
+    ;inc     eax
+    ;shl     eax,16
+    ; method 2 - 4 bytes
+    ;bts     eax, 16
+    ; method 3 - 4 bytes
+    ;inc     ah
+    ;mul     eax
+    ; method 4 - 3 bytes YEAH!!!
+    dec     ax
     inc     eax
-    shl     eax,16
     jmp     vprintf
 else
     push    offset ImReallySmall
