@@ -1,4 +1,4 @@
-/* $Id: uitools.cpp,v 1.14 1999-10-17 19:32:05 cbratschi Exp $ */
+/* $Id: uitools.cpp,v 1.15 1999-10-30 09:19:44 sandervl Exp $ */
 /*
  * User Interface Functions
  *
@@ -1907,7 +1907,7 @@ BOOL WIN32API DrawMenuBar(HWND hwnd)
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
-    dprintf(("DrawMenuBar\n"));
+    dprintf(("DrawMenuBar %x", hwnd));
     return O32_DrawMenuBar(window->getOS2FrameWindowHandle());
 }
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.67 1999-10-29 16:06:56 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.68 1999-10-30 09:19:45 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -419,29 +419,6 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
 #else
   hwndLinkAfter = ((cs->style & (WS_CHILD|WS_MAXIMIZE)) == WS_CHILD)
                   ? HWND_BOTTOM : HWND_TOP;
-#endif
-
-#if 0
-//TODO
-    /* Call the WH_CBT hook */
-
-    if (HOOK_IsHooked( WH_CBT ))
-    {
-        CBT_CREATEWNDA cbtc;
-        LRESULT ret;
-
-        cbtc.lpcs = cs;
-        cbtc.hwndInsertAfter = hwndLinkAfter;
-        ret = unicode ? HOOK_CallHooksW(WH_CBT, HCBT_CREATEWND, Win32Hwnd, (LPARAM)&cbtc)
-                      : HOOK_CallHooksA(WH_CBT, HCBT_CREATEWND, Win32Hwnd, (LPARAM)&cbtc);
-        if (ret)
-    {
-        TRACE_(win)("CBT-hook returned 0\n");
-        wndPtr->pDriver->pFinalize(wndPtr);
-            retvalue =  0;
-            goto end;
-    }
-    }
 #endif
 
   /* Increment class window counter */
@@ -1255,8 +1232,8 @@ SCROLLBAR_INFO *Win32BaseWindow::getScrollInfo(int nBar)
 
   return NULL;
 }
-/***********************************************************************/
-/***********************************************************************/
+//******************************************************************************
+//******************************************************************************
 VOID Win32BaseWindow::subclassScrollBars(BOOL subHorz,BOOL subVert)
 {
   SCROLL_SubclassScrollBars(subHorz ? hwndHorzScroll:0,subVert ? hwndVertScroll:0);
@@ -1595,14 +1572,29 @@ LRESULT Win32BaseWindow::DefWindowProcW(UINT Msg, WPARAM wParam, LPARAM lParam)
         return wndNameLength;
 
     case WM_GETTEXT:   //TODO: SS_ICON controls
-        lstrcpynW((LPWSTR)lParam, windowNameW, wParam);
-        return min(wndNameLength, wParam);
+    {
+            LRESULT result;
+            char *str = (char *) malloc(wParam + 1);
+            result = DefWindowProcA(Msg, wParam, (LPARAM)str );
+            lstrcpynAtoW( (LPWSTR)lParam, str, wParam );
+            free(str);
+            return result;
+    }
 
     case WM_SETTEXT:
-        if(!fInternalMsg) {
-                return SetWindowTextW((LPWSTR)lParam);
+    {
+        if(!fInternalMsg) 
+        {
+           LRESULT result;
+           char *aText = (char *) malloc((lstrlenW((LPWSTR)lParam)+1)*sizeof(WCHAR));
+           *aText = 0;
+           lstrcpyWtoA(aText, (LPWSTR) lParam);
+           result = SetWindowTextA(aText);
+           free(aText);
+           return result;
         }
         else    return 0;
+    }
 
     default:
         return DefWindowProcA(Msg, wParam, lParam);
@@ -1901,7 +1893,8 @@ BOOL Win32BaseWindow::SetIcon(HICON hIcon)
 {
     dprintf(("Win32BaseWindow::SetIcon %x", hIcon));
     if(OSLibWinSetIcon(OS2HwndFrame, hIcon) == TRUE) {
-        SendMessageA(WM_SETICON, hIcon, 0);
+//TODO: Wine does't send these. Correct?
+//        SendMessageA(WM_SETICON, ICON_BIG, hIcon);
         return TRUE;
     }
     return FALSE;
