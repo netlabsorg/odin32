@@ -1,4 +1,4 @@
-# $Id: pdwin32.tools,v 1.16 2000-11-19 23:53:46 bird Exp $
+# $Id: pdwin32.tools,v 1.17 2000-11-20 04:58:14 bird Exp $
 # ODIN / win32os2 Project
 #
 # makefile for the build system tools and standard rules
@@ -17,6 +17,7 @@ CCENV = WAT
 WAT = 1
 !   endif
 !endif
+
 
 # Check that PDWIN32_INCLUDE is set; set default if not set.
 !ifndef PDWIN32_INCLUDE
@@ -38,6 +39,7 @@ DOWITHDIRS  = $(PDWIN32_TOOLS)\dowithdirs.cmd
 IMPDEF      = $(PDWIN32_TOOLS)\impdef.exe
 DEPEND      = $(PDWIN32_TOOLS)\fastdep.exe -o$$(OBJDIR) -cy+
 CREATEPATH  = $(PDWIN32_TOOLS)\CreatePath.cmd
+EXECEXCL    = $(PDWIN32_TOOLS)\ExecExcl.cmd
 
 #Svl: Remove this when everything has been converted to the new build rules
 !ifdef OLDBUILD

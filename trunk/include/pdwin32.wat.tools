@@ -1,4 +1,4 @@
-# $Id: pdwin32.wat.tools,v 1.5 2000-10-03 05:39:51 bird Exp $
+# $Id: pdwin32.wat.tools,v 1.6 2000-11-20 04:58:15 bird Exp $
 # ODIN / win32os2 Project
 #
 # makefile for the build system tools and standard rules
@@ -33,7 +33,7 @@ NODEP = 1
 MAKE_CMDLINE= $(MAKE_CMDLINE) NODEP=1
 !endif
 
-MAKE_CMD    = $(MAKE_CMDLINE) -f makefile.os2
+MAKE_CMD    = $(MAKE_CMDLINE) # -f makefile.os2 # What is this?
 
 #
 # Targets
@@ -46,25 +46,24 @@ MAKE_CMD    = $(MAKE_CMDLINE) -f makefile.os2
 .res : $(OBJDIR)
 
 .c.obj:   # .AUTODEPEND
-    $(CC) $(CFLAGS) -fo$(OBJDIR)\$^&.obj $^&.c
+    $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES) -fo$(OBJDIR)\$^&.obj $^&.c
 
 .cpp.obj: # .AUTODEPEND
-    $(CXX) $(CXXFLAGS) -fo$(OBJDIR)\$^&.obj $^&.cpp
+    $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -fo$(OBJDIR)\$^&.obj $^&.cpp
 
 .asm.obj:
     $(AS) $(ASFLAGS) -Fdo:$(OBJDIR) $^&.asm
 
 .orc.orc_asm:
-    $(RC) $(RCFLAGS) -o $^&.orc_asm $^&.orc
+    $(RC) $(RCFLAGS) $(CINCLUDES) -o $^&.orc_asm $^&.orc
 
 .orc_asm.obj:
     $(AS) $(ASFLAGS) -Fdo:$(OBJDIR) $^&.orc_asm
 
 .orc.obj:
-    $(RC) $(RCFLAGS) -o $(OBJDIR)\$^&.asm $^&.orc
+    $(RC) $(RCFLAGS) $(CINCLUDES) -o $(OBJDIR)\$^&.asm $^&.orc
     $(AS) $(ASFLAGS) -Fdo:$(OBJDIR) $(OBJDIR)\$^&.asm
 
 .rc.res:
-    $(OS2RC) $(OS2RCFLAGS) $^&.rc
-
+    $(OS2RC) $(OS2RCFLAGS) $(CINCLUDES:-I=-i ) $^&.rc
 
