@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2001-02-10 11:11:48 bird Exp $
+# $Id: makefile,v 1.7 2001-10-01 01:42:09 bird Exp $
 
 #
 # Odin32 API
@@ -39,7 +39,7 @@ CXXFLAGS   = $(CXXFLAGS) -Wall+ppt-ppc-inl-cnv-gnr-vft-
 # Object files. Prefix with OBJDIR and one space before the '\'.
 #
 OBJS = \
-$(OBJDIR)\Win32kCC.obj 
+$(OBJDIR)\Win32kCC.obj
 #$(OBJDIR)\api.obj \
 #$(OBJDIR)\locks.obj
 
@@ -82,9 +82,9 @@ mydep:
 #
 # Extra rules to build api.obj and locks.obj
 #
-!if "$(VAC3)" == "1" | "$(VAC36)" == "1"
+!if "$(VAC3)" == "1" | "$(VAC36)" == "1" || "$(WAT)" == "1"
 $(OBJDIR)\api.obj: $(WIN32KAPI)\api.cpp
-    $(CC) -c $(CXXFLAGS) $(CDEFINES) $(CINCLUDES) -Fo$(OBJDIR)\$(@B).obj $**
+    $(CC) $(CXXFLAGS) $(CDEFINES) $(CINCLUDES) -Fo$(OBJDIR)\$(@B).obj $**
 
 $(OBJDIR)\locks.obj: $(WIN32KMISC)\locks.asm
     $(AS) $(ASFLAGS) -I:$(WIN32KINCLUDE) -Fdo:$(OBJDIR) $**

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 2000-12-03 05:13:02 bird Exp $
+# $Id: makefile,v 1.14 2001-10-01 01:40:57 bird Exp $
 
 #
 # Odin32 API
@@ -40,7 +40,12 @@ CDEFINES    = $(CDEFINES_WIN32APP) \
 !if "$(VAC3)" == "1" || "$(VAC36)" == "1"
 CFLAGS      = $(CFLAGS) /Wcnd- /Tdp
 !else
-!error "Compiler not supported yet!"
+!ifdef WAT
+C           = $(CXX)
+CFLAGS      = $(CXXFLAGS)
+!else
+!error "Compiler is not yet supported."
+!endif
 !endif
 
 
@@ -48,9 +53,9 @@ CFLAGS      = $(CFLAGS) /Wcnd- /Tdp
 # Interference rule for sources in the parent directory.
 #   This is BAD! Try make library in parent directory? Problem with different objects.
 #
-!ifndef WAT
+!if "$(VAC3)" == "1" || "$(VAC36)" == "1" || ("$(WAT)" == "1" && defined(NMAKE))
 {..}.c{$(OBJDIR)}.obj:
-    $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES) -c -Fo$(OBJDIR)\$(@B).obj $<
+    $(CC) $(CFLAGS) $(CINCLUDES) $(CDEFINES) -Fo$(OBJDIR)\$(@B).obj $<
 
 {..}.asm{$(OBJDIR)}.obj:
     $(AS) $(ASFLAGS) -Fdo:$(OBJDIR) $<

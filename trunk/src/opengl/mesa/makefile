@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2000-12-02 23:58:37 bird Exp $
+# $Id: makefile,v 1.11 2001-10-01 01:40:57 bird Exp $
 
 #
 # Odin32 API
@@ -21,10 +21,21 @@ CDEFINES    = $(CDEFINES_WIN32APP) \
               -DNO_PARALLEL -DNO_STEREO -DGL_MESA_window_pos -DOS2_THREADS \
               -DDIVE -DUSE_X86_ASM -DUSE_MMX_ASM -DUSE_3DNOW_ASM_NOT \
               -DFAST_MATH
+# kso: BUGBUG/TODO/FIXME
+#      this configuration looks fishy to me.
+#      is exceptions enabled or not???
+#
+!if "$(VAC3)" == "1" || "$(VAC36)" == "1"
 CFLAGS      = $(CFLAGS_WIN32APP) /Wcnd- -Tdp
 CXXFLAGS    = $(CFLAGS_WIN32APP) /Wcnd- -Tdp
+!else
 !ifdef WAT
-!error "Compiler not supported yet!"
+C           = $(CXX)
+CFLAGS      = $(CFLAGS_WIN32APP)
+CXXFLAGS    = $(CFLAGS_WIN32APP)
+!else
+!error "Compiler is not yet supported."
+!endif
 !endif
 
 

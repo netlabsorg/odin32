@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.23 2001-07-20 15:40:29 sandervl Exp $
+# $Id: makefile,v 1.24 2001-10-01 01:40:31 bird Exp $
 
 #
 # Odin32 API
@@ -60,7 +60,11 @@ $(OBJDIR)\malloc.obj \
 $(OBJDIR)\string.obj \
 $(OBJDIR)\file.obj
 !else
+!ifdef NMAKE
+$(WATCOM)\lib386\os2\$(RTLLIB_O)
+!else
 $(%WATCOM)\lib386\os2\$(RTLLIB_O)
+!endif
 !endif
 
 

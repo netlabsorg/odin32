@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.39 2001-09-30 08:56:17 bird Exp $
+# $Id: makefile,v 1.40 2001-10-01 01:40:08 bird Exp $
 
 #
 # Odin32 API
@@ -17,7 +17,7 @@ WRC_PREFIX_RESOURCE=1
 #
 # Overrides.
 #
-!ifndef WAT
+!ifndef WMAKE
 CDEFINES    = $(CDEFINES) -DINVERT
 !else
 CDEFINES   += -DINVERT

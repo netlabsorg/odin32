@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2001-09-15 09:28:22 sandervl Exp $
+# $Id: makefile,v 1.4 2001-10-01 01:41:21 bird Exp $
 
 #
 # Odin32 API
@@ -16,7 +16,7 @@
 #
 # Overrides.
 #
-!ifndef WAT
+!ifndef WMAKE
 CDEFINES    = $(CDEFINES) -DICOM_CINTERFACE -DCINTERFACE
 !else
 CDEFINES   += -DICOM_CINTERFACE -DCINTERFACE

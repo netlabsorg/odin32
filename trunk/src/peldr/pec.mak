@@ -1,4 +1,4 @@
-# $Id: pec.mak,v 1.4 2000-12-16 15:40:54 sandervl Exp $
+# $Id: pec.mak,v 1.5 2001-10-01 01:41:13 bird Exp $
 
 #
 # Odin32 API
@@ -54,8 +54,8 @@ TARGET  = pec
 # Special rule for pec.obj
 #
 $(OBJDIR)\pec.obj: pe.cpp
-!if "$(VAC3)" == "1" || "$(VAC36)" == "1"
-    $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -DCOMMAND_LINE_VERSION -Fo$@ -c $**
+!if "$(VAC3)" == "1" || "$(VAC36)" == "1" || "$(WAT)" == "1"
+    $(CXX) $(CXXFLAGS) $(CINCLUDES) $(CDEFINES) -DCOMMAND_LINE_VERSION -Fo$@ $**
 !else
 !error Compiler not supported yet
 !endif
