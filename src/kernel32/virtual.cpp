@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.44 2002-05-20 13:48:50 sandervl Exp $ */
+/* $Id: virtual.cpp,v 1.45 2002-06-30 13:46:46 sandervl Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <win\virtual.h>
+#include <win\thread.h>
 #include <heapstring.h>
 #include <handlemanager.h>
 #include "mmap.h"
@@ -445,57 +446,63 @@ BOOL WIN32API VirtualFree(LPVOID lpvAddress,
                           DWORD  cbSize,
                           DWORD  FreeType)
 {
-  DWORD rc;
+    DWORD rc;
 
-  SetLastError(ERROR_SUCCESS);
+    SetLastError(ERROR_SUCCESS);
 
-  // verify parameters
-  if ( (FreeType & MEM_RELEASE) && (cbSize   != 0) )
-  {
-    dprintf(("WARNING: VirtualFree: invalid parameter!!"));
-    SetLastError(ERROR_INVALID_PARAMETER);
-    return(FALSE);
-  }
-
-  if ( (FreeType & MEM_DECOMMIT) &&
-       (FreeType & MEM_RELEASE) )
-  {
-    dprintf(("WARNING: VirtualFree: invalid parameter!!"));
-    SetLastError(ERROR_INVALID_PARAMETER);
-    return(FALSE);
-  }
-
-  // decommit memory
-  if (FreeType &  MEM_DECOMMIT)
-  {
-    // decommit memory block
-    rc = OSLibDosSetMem(lpvAddress, cbSize, PAG_DECOMMIT);
-    if(rc)
+    // verify parameters
+    if((FreeType & MEM_RELEASE) && (cbSize != 0))
     {
-    if(rc == 32803) { //SvL: ERROR_ALIAS
-            dprintf(("KERNEL32:VirtualFree:OsLibSetMem rc = #%d; app tries to decommit aliased memory; ignore", rc));
-        return(TRUE);
+        dprintf(("WARNING: VirtualFree: invalid parameter!!"));
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return(FALSE);
     }
-        dprintf(("KERNEL32:VirtualFree:OsLibSetMem rc = #%d\n", rc));
-        SetLastError(ERROR_INVALID_ADDRESS);
-    return(FALSE);
-    }
-  }
 
-  // release memory
-  if (FreeType &  MEM_RELEASE)
-  {
-    rc = OSLibDosFreeMem(lpvAddress); // free the memory block
-    if(rc)
+    if((FreeType & MEM_DECOMMIT) && (FreeType & MEM_RELEASE))
     {
-      dprintf(("KERNEL32:VirtualFree:OsLibFreeMem rc = #%d\n",
-               rc));
-      SetLastError(ERROR_INVALID_ADDRESS);
-      return(FALSE);
+        dprintf(("WARNING: VirtualFree: invalid parameter!!"));
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return(FALSE);
     }
-  }
 
-  return(TRUE);
+    // decommit memory
+    if (FreeType &  MEM_DECOMMIT)
+    {
+        // check if app wants to decommit stack pages -> don't allow that!
+        TEB *teb = GetThreadTEB();
+        if(teb) {
+            if(lpvAddress >= teb->stack_low && lpvAddress < teb->stack_top) {
+                //pretend we did was was asked
+                dprintf(("WARNING: app tried to decommit stack pages; pretend success"));
+                return TRUE;
+            }
+        }
+        // decommit memory block
+        rc = OSLibDosSetMem(lpvAddress, cbSize, PAG_DECOMMIT);
+        if(rc)
+        {
+            if(rc == 32803) { //SvL: ERROR_ALIAS
+                dprintf(("KERNEL32:VirtualFree:OsLibSetMem rc = #%d; app tries to decommit aliased memory; ignore", rc));
+                return(TRUE);
+            }
+            dprintf(("KERNEL32:VirtualFree:OsLibSetMem rc = #%d\n", rc));
+            SetLastError(ERROR_INVALID_ADDRESS);
+            return(FALSE);
+        }
+    }
+
+    // release memory
+    if (FreeType &  MEM_RELEASE)
+    {
+        rc = OSLibDosFreeMem(lpvAddress); // free the memory block
+        if(rc)
+        {
+            dprintf(("KERNEL32:VirtualFree:OsLibFreeMem rc = #%d\n", rc));
+            SetLastError(ERROR_INVALID_ADDRESS);
+            return(FALSE);
+        }
+    }
+    return TRUE;
 }
 //******************************************************************************
 //LPVOID lpvAddress;            /* address of region of committed pages       */
