@@ -1,4 +1,4 @@
-/* $Id: objhandle.cpp,v 1.1 2000-06-14 13:17:51 sandervl Exp $ */
+/* $Id: objhandle.cpp,v 1.2 2000-08-18 18:14:57 sandervl Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
@@ -123,6 +123,7 @@ int WIN32API GetObjectA( HGDIOBJ hObject, int size, void *lpBuffer)
         SetLastError(ERROR_SUCCESS);
 	return 0;
   }
+  dprintf(("GDI32: GetObject %X %X %X\n", hObject, size, lpBuffer));
   if(DIBSection::getSection() != NULL)
   {
         DIBSection *dsect = DIBSection::find(hObject);
@@ -138,7 +139,6 @@ int WIN32API GetObjectA( HGDIOBJ hObject, int size, void *lpBuffer)
         }
   }
 
-  dprintf(("GDI32: GetObject %X %X %X\n", hObject, size, lpBuffer));
   return O32_GetObject(hObject, size, lpBuffer);
 }
 //******************************************************************************

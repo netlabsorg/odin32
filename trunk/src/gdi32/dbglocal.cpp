@@ -1,4 +1,4 @@
-/* $Id: dbglocal.cpp,v 1.3 2000-06-14 13:17:49 sandervl Exp $ */
+/* $Id: dbglocal.cpp,v 1.4 2000-08-18 18:14:56 sandervl Exp $ */
 
 /*
  * debug logging functions for OS/2
@@ -15,7 +15,9 @@
 
 #ifdef DEBUG
 
-USHORT DbgEnabled[DBG_MAXFILES];
+USHORT DbgEnabled[DBG_MAXFILES] = {0};
+USHORT DbgEnabledLvl2[DBG_MAXFILES] = {0};
+
 char  *DbgFileNames[DBG_MAXFILES] =
 {
 "gdi32",
@@ -42,6 +44,7 @@ char  *DbgFileNames[DBG_MAXFILES] =
 void ParseLogStatus()
 {
  char *envvar = getenv(DBG_ENVNAME);
+ char *envvar2= getenv(DBG_ENVNAME_LVL2);
  char *dbgvar;
  int   i;
 
@@ -70,6 +73,28 @@ void ParseLogStatus()
             if(*(dbgvar-1) == '+') {
 		DbgEnabled[i] = 1;
 	    }
+        }
+    }
+    if(envvar2) {
+    	dbgvar = strstr(envvar2, "dll");
+	if(dbgvar) {
+	        if(*(dbgvar-1) == '+') {
+	            for(i=0;i<DBG_MAXFILES;i++) {
+	                DbgEnabledLvl2[i] = 1;
+	            }
+	        }
+	}
+	for(i=0;i<DBG_MAXFILES;i++) {
+	        dbgvar = strstr(envvar2, DbgFileNames[i]);
+	        if(dbgvar) {
+	            if(*(dbgvar-1) == '-') {
+	                    DbgEnabledLvl2[i] = 0;
+	            }
+	            else    
+	            if(*(dbgvar-1) == '+') {
+			DbgEnabledLvl2[i] = 1;
+		    }
+		}
         }
     }
 }

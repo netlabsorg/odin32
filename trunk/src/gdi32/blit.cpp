@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.15 2000-06-17 11:58:07 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.16 2000-08-18 18:14:56 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -243,9 +243,10 @@ INT WIN32API StretchDIBits(HDC hdc, INT xDst, INT yDst, INT widthDst,
 
       	memcpy(infoLoc, info, sizeof(BITMAPINFO));
 
-      	if(GetDIBColorTable(hdc, 0, info->bmiHeader.biClrUsed, pColors) == 0)
+      	if(GetDIBColorTable(hdc, 0, info->bmiHeader.biClrUsed, pColors) == 0) {
+		dprintf(("ERROR: StretchDIBits: GetDIBColorTable failed!!"));
         	return FALSE;
-
+        }
       	for(i=0;i<info->bmiHeader.biClrUsed;i++, pColorIndex++)
       	{
          	infoLoc->bmiColors[i] = pColors[*pColorIndex];
@@ -267,7 +268,6 @@ INT WIN32API StretchDIBits(HDC hdc, INT xDst, INT yDst, INT widthDst,
 
 	return rc;
     }
-
     rc = O32_StretchDIBits(hdc, xDst, yDst, widthDst, heightDst, xSrc, ySrc,
                              widthSrc, heightSrc, (void *)bits,
                              (PBITMAPINFO)info, wUsage, dwRop);

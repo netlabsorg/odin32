@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.11 2000-08-14 15:51:20 cbratschi Exp $ */
+/* $Id: text.cpp,v 1.12 2000-08-18 18:14:59 sandervl Exp $ */
 
 /*
  * GDI32 text apis
@@ -425,6 +425,7 @@ INT SYSTEM EXPORT InternalDrawTextExW(HDC hdc,LPCWSTR lpchText,INT cchText,LPREC
   char *astring = (cchText == -1) ? UnicodeToAsciiString((LPWSTR)lpchText):UnicodeToAsciiStringN((LPWSTR)lpchText,cchText);
   INT  rc;
 
+  dprintf(("InternalDrawTextExW %x %s %d %x", hdc, astring, cchText, dwDTFormat));
   rc = InternalDrawTextExA(hdc,astring,cchText,lprc,dwDTFormat,lpDTParams,isDrawTextEx);
   if (dwDTFormat & DT_MODIFYSTRING && (dwDTFormat & (DT_END_ELLIPSIS | DT_PATH_ELLIPSIS))) AsciiToUnicode(astring,(LPWSTR)lpchText);
   FreeAsciiString(astring);

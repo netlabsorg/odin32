@@ -1,4 +1,4 @@
-/* $Id: palette.cpp,v 1.5 2000-05-23 18:46:21 sandervl Exp $ */
+/* $Id: palette.cpp,v 1.6 2000-08-18 18:14:58 sandervl Exp $ */
 
 /*
  * GDI32 palette apis
@@ -70,32 +70,33 @@ HPALETTE WIN32API CreatePalette( const LOGPALETTE * arg1)
      	dprintf2(("Index %d : 0x%08X\n",i, *((DWORD*)(&arg1->palPalEntry[i])) ));
    }
    rc = O32_CreatePalette(arg1);
-   dprintf(("GDI32: CreatePalette returns 0x%08X\n",rc));
+   dprintf(("GDI32: CreatePalette %x %d returns 0x%08X\n", arg1, arg1->palNumEntries, rc));
 
    return rc;
 }
 //******************************************************************************
 //******************************************************************************
-HPALETTE WIN32API SelectPalette(HDC arg1, HPALETTE arg2, BOOL arg3)
+HPALETTE WIN32API SelectPalette(HDC hdc, HPALETTE hPalette, BOOL bForceBackground)
 {
-  dprintf(("GDI32: SelectPalette (0x%08X, 0x%08X, 0x%08X)\n", arg1, arg2, arg3));
+  dprintf(("GDI32: SelectPalette (0x%08X, 0x%08X, 0x%08X)", hdc, hPalette, bForceBackground));
   if(DIBSection::getSection() != NULL)
   {
-    DIBSection *dsect = DIBSection::findHDC(arg1);
+    DIBSection *dsect = DIBSection::findHDC(hdc);
     if(dsect)
     {
+      int nrcolors;
       PALETTEENTRY Pal[256];
       char PalSize = dsect->GetBitCount();
       dprintf(("       - Set Palette Values in DIBSection\n"));
       if(PalSize<=8)
       {
-        GetPaletteEntries( arg2, 0, 1<<PalSize, (LPPALETTEENTRY)&Pal);
-        dsect->SetDIBColorTable(0, 1<< PalSize, (RGBQUAD*)&Pal);
+        nrcolors = GetPaletteEntries( hPalette, 0, 1<<PalSize, (LPPALETTEENTRY)&Pal);
+        dsect->SetDIBColorTable(0, nrcolors, (RGBQUAD*)&Pal);
       }
 
     }
   }
-  return O32_SelectPalette(arg1, arg2, arg3);
+  return O32_SelectPalette(hdc, hPalette, bForceBackground);
 }
 //******************************************************************************
 //******************************************************************************
@@ -116,10 +117,13 @@ UINT WIN32API GetNearestPaletteIndex( HPALETTE arg1, COLORREF  arg2)
 }
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API GetPaletteEntries( HPALETTE hPalette, UINT arg2, UINT arg3, PPALETTEENTRY  arg4)
+UINT WIN32API GetPaletteEntries(HPALETTE hPalette, UINT iStart, UINT count, PPALETTEENTRY entries)
 {
-    dprintf(("GDI32: GetPaletteEntries %x %d-%d %x", hPalette, arg2, arg3, arg4));
-    return O32_GetPaletteEntries(hPalette, arg2, arg3, arg4);
+ UINT rc;
+
+    rc = O32_GetPaletteEntries(hPalette, iStart, count, entries);
+    dprintf(("GDI32: GetPaletteEntries %x %d-%d %x returned %d", hPalette, iStart, count, entries, rc));
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -150,8 +154,38 @@ UINT WIN32API SetPaletteEntries( HPALETTE hPalette, UINT arg2, UINT arg3, PALETT
 //******************************************************************************
 HPALETTE WIN32API CreateHalftonePalette(HDC hdc)
 {
-    dprintf(("GDI32: CreateHalftonePalette, not implemented\n"));
-    return(NULL);
+    int i, r, g, b;
+    struct {
+	WORD Version;
+	WORD NumberOfEntries;
+	PALETTEENTRY aEntries[256];
+    } Palette = {
+	0x300, 256
+    };
+
+    dprintf(("GDI32: CreateHalftonePalette %x", hdc));
+    GetSystemPaletteEntries(hdc, 0, 256, Palette.aEntries);
+    return CreatePalette((LOGPALETTE *)&Palette);
+
+    for (r = 0; r < 6; r++) {
+	for (g = 0; g < 6; g++) {
+	    for (b = 0; b < 6; b++) {
+		i = r + g*6 + b*36 + 10;
+		Palette.aEntries[i].peRed = r * 51;
+		Palette.aEntries[i].peGreen = g * 51;
+		Palette.aEntries[i].peBlue = b * 51;
+	    }    
+	  }
+	}
+	
+    for (i = 216; i < 246; i++) {
+	int v = (i - 216) * 8;
+	Palette.aEntries[i].peRed = v;
+	Palette.aEntries[i].peGreen = v;
+	Palette.aEntries[i].peBlue = v;
+	}
+	
+    return CreatePalette((LOGPALETTE *)&Palette);
 }
 //******************************************************************************
 //******************************************************************************
