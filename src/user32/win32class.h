@@ -1,4 +1,4 @@
-/* $Id: win32class.h,v 1.2 1999-09-21 17:04:27 dengert Exp $ */
+/* $Id: win32class.h,v 1.3 1999-10-24 22:56:09 sandervl Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -56,6 +56,8 @@ public:
 
           BOOL  hasClassName(LPSTR classname, BOOL fUnicode = 0);
 
+	  BOOL  isAppClass(ULONG curProcessId);
+
  static  void   UnregisterClassA(HINSTANCE hinst, LPSTR id);
 
  static Win32WndClass *FindClass(HINSTANCE hinst, LPSTR id);
@@ -82,6 +84,7 @@ private:
 
  //User data class words/longs
  ULONG         *userClassLong;
+ ULONG          processId;
 
  //nr of windows created with this class
  ULONG          cWindows;

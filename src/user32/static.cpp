@@ -1,4 +1,4 @@
-/* $Id: static.cpp,v 1.6 1999-10-20 06:38:10 sandervl Exp $ */
+/* $Id: static.cpp,v 1.7 1999-10-24 22:56:07 sandervl Exp $ */
 /*
  * Static control
  *
@@ -597,7 +597,8 @@ BOOL STATIC_Register()
 {
     WNDCLASSA wndClass;
 
-    if (GlobalFindAtomA(STATICCLASSNAME)) return FALSE;
+//SvL: Don't check this now
+//    if (GlobalFindAtomA(STATICCLASSNAME)) return FALSE;
 
     ZeroMemory(&wndClass,sizeof(WNDCLASSA));
     wndClass.style         = CS_GLOBALCLASS | CS_HREDRAW | CS_PARENTDC;

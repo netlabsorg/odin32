@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.14 1999-10-23 23:04:38 sandervl Exp $ */
+/* $Id: scroll.cpp,v 1.15 1999-10-24 22:56:07 sandervl Exp $ */
 /*
  * Scrollbar control
  *
@@ -1803,7 +1803,8 @@ BOOL SCROLLBAR_Register()
 {
     WNDCLASSA wndClass;
 
-    if (GlobalFindAtomA(SCROLLBARCLASSNAME)) return FALSE;
+//SvL: Don't check this now
+//    if (GlobalFindAtomA(SCROLLBARCLASSNAME)) return FALSE;
 
     ZeroMemory(&wndClass,sizeof(WNDCLASSA));
     wndClass.style         = CS_GLOBALCLASS | CS_HREDRAW | CS_VREDRAW | CS_PARENTDC;

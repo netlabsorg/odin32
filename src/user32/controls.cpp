@@ -1,4 +1,4 @@
-/* $Id: controls.cpp,v 1.4 1999-10-19 19:26:07 sandervl Exp $ */
+/* $Id: controls.cpp,v 1.5 1999-10-24 22:56:01 sandervl Exp $ */
 /* File: controls.cpp -- Win32 common controls
  *
  * Copyright (c) 1999 Christoph Bratschi
@@ -18,34 +18,12 @@
 #include "win32wdesktop.h"
 #include "controls.h"
 
-ATOM controlAtoms[MAX_CONTROLS] = {0};
+ATOM  controlAtoms[MAX_CONTROLS] = {0};
 
 /* registration */
 
 void CONTROLS_Register()
 {
-  //TODO: Remove this once we replace the atom code in kernel32
-  //Delete all Open32 global class atoms and recreate them
-  ATOM atom;
-
-  atom = GlobalFindAtomA(BUTTONCLASSNAME);
-  if(atom) GlobalDeleteAtom(atom);
-  atom = GlobalFindAtomA(STATICCLASSNAME);
-  if(atom) GlobalDeleteAtom(atom);
-  atom = GlobalFindAtomA(SCROLLBARCLASSNAME);
-  if(atom) GlobalDeleteAtom(atom);
-  atom = GlobalFindAtomA(LISTBOXCLASSNAME);
-  if(atom) GlobalDeleteAtom(atom);
-  atom = GlobalFindAtomA(COMBOLBOXCLASSNAME);
-  if(atom) GlobalDeleteAtom(atom);
-  atom = GlobalFindAtomA(COMBOBOXCLASSNAME);
-  if(atom) GlobalDeleteAtom(atom);
-  atom = GlobalFindAtomA(EDITCLASSNAME);
-  if(atom) GlobalDeleteAtom(atom);
-  atom = GlobalFindAtomA(MDICLIENTCLASSNAMEA);
-  if(atom) GlobalDeleteAtom(atom);
-  //END to be removed code
-
   dprintf(("Register BUTTON class"));
   controlAtoms[BUTTON_CONTROL] = BUTTON_Register();
   if (!controlAtoms[BUTTON_CONTROL]) dprintf(("failed!!!"));
