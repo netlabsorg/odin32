@@ -1,4 +1,4 @@
-# $Id: odin32.tools.mk,v 1.7 2001-08-16 04:25:10 bird Exp $
+# $Id: odin32.tools.mk,v 1.8 2001-09-30 00:41:38 bird Exp $
 
 #
 # Odin32 API
@@ -42,6 +42,7 @@ ECHO        = echo
 EXISTS      = $(ODIN32_TOOLS)\Exists.cmd
 DODIRS      = $(ODIN32_TOOLS)\DoDirs.cmd
 DOWITHDIRS  = $(ODIN32_TOOLS)\dowithdirs.cmd
+DOMAKES     = $(ODIN32_TOOLS)\DoMakes.cmd
 IMPDEF      = $(ODIN32_TOOLS)\impdef.exe
 CREATEPATH  = $(ODIN32_TOOLS)\CreatePath.cmd
 EXECEXCL    = $(ODIN32_TOOLS)\ExecExcl.cmd
