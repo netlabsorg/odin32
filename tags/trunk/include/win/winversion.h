@@ -1,4 +1,4 @@
-/* $Id: winversion.h,v 1.1 1999-05-24 20:19:23 ktk Exp $ */
+/* $Id: winversion.h,v 1.2 2000-05-19 12:08:37 sandervl Exp $ */
 
 #ifndef __WINE_WINVERSION_H
 #define __WINE_WINVERSION_H
@@ -12,8 +12,16 @@ typedef enum
     NB_WINDOWS_VERSIONS
 } WINDOWS_VERSION;
 
-extern WINDOWS_VERSION VERSION_GetVersion(void); 
-extern char *VERSION_GetVersionName(void); 
-extern BOOL VERSION_OsIsUnicode(void);
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+WINDOWS_VERSION VERSION_GetVersion(void); 
+char *VERSION_GetVersionName(void); 
+BOOL VERSION_OsIsUnicode(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  /* __WINE_WINVERSION_H */
