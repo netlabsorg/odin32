@@ -1,4 +1,4 @@
-/* $Id: header.cpp,v 1.9 2000-04-17 17:04:11 cbratschi Exp $ */
+/* $Id: header.cpp,v 1.10 2000-04-18 16:02:37 cbratschi Exp $ */
 /*
  *  Header control
  *
@@ -960,8 +960,7 @@ HEADER_SetHotDivider(HWND hwnd,WPARAM wParam,LPARAM lParam)
   return 0;
 }
 
-static LRESULT
-HEADER_DeleteItem (HWND hwnd, WPARAM wParam)
+LRESULT HEADER_DeleteItem(HWND hwnd,WPARAM wParam)
 {
     HEADER_INFO *infoPtr = HEADER_GetInfoPtr(hwnd);
     INT iItem = (INT)wParam;
@@ -1037,7 +1036,7 @@ HEADER_GetImageList (HWND hwnd)
 }
 
 
-static LRESULT HEADER_GetItem(HWND hwnd,WPARAM wParam,LPARAM lParam,BOOL unicode)
+LRESULT HEADER_GetItem(HWND hwnd,WPARAM wParam,LPARAM lParam,BOOL unicode)
 {
     HEADER_INFO *infoPtr = HEADER_GetInfoPtr(hwnd);
     HDITEMW     *phdi = (HDITEMW*)lParam;
@@ -1089,8 +1088,7 @@ static LRESULT HEADER_GetItem(HWND hwnd,WPARAM wParam,LPARAM lParam,BOOL unicode
     return TRUE;
 }
 
-static LRESULT
-HEADER_GetItemCount (HWND hwnd)
+LRESULT HEADER_GetItemCount (HWND hwnd)
 {
     HEADER_INFO *infoPtr = HEADER_GetInfoPtr (hwnd);
 
@@ -1217,8 +1215,7 @@ HEADER_CheckOrderArray(HEADER_INFO* infoPtr,LPINT lpiArray)
   return TRUE;
 }
 
-static LRESULT
-HEADER_GetOrderArray(HWND hwnd,WPARAM wParam,LPARAM lParam)
+LRESULT HEADER_GetOrderArray(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   HEADER_INFO *infoPtr = HEADER_GetInfoPtr(hwnd);
   LPINT lpiArray = (LPINT)lParam;
@@ -1231,8 +1228,7 @@ HEADER_GetOrderArray(HWND hwnd,WPARAM wParam,LPARAM lParam)
   return TRUE;
 }
 
-static LRESULT
-HEADER_SetOrderArray(HWND hwnd,WPARAM wParam,LPARAM lParam)
+LRESULT HEADER_SetOrderArray(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   HEADER_INFO *infoPtr = HEADER_GetInfoPtr(hwnd);
   LPINT lpiArray = (LPINT)lParam;
@@ -1279,7 +1275,7 @@ HEADER_HitTest (HWND hwnd, WPARAM wParam, LPARAM lParam)
 }
 
 
-static LRESULT HEADER_InsertItem(HWND hwnd,WPARAM wParam,LPARAM lParam,BOOL unicode)
+LRESULT HEADER_InsertItem(HWND hwnd,WPARAM wParam,LPARAM lParam,BOOL unicode)
 {
     HEADER_INFO *infoPtr = HEADER_GetInfoPtr (hwnd);
     HDITEMW     *phdi = (HDITEMW*)lParam;
@@ -1380,8 +1376,7 @@ static LRESULT HEADER_InsertItem(HWND hwnd,WPARAM wParam,LPARAM lParam,BOOL unic
     return nItem;
 }
 
-static LRESULT
-HEADER_Layout (HWND hwnd, WPARAM wParam, LPARAM lParam)
+LRESULT HEADER_Layout(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
     HEADER_INFO *infoPtr = HEADER_GetInfoPtr (hwnd);
     LPHDLAYOUT lpLayout = (LPHDLAYOUT)lParam;
@@ -1418,7 +1413,7 @@ HEADER_SetImageList (HWND hwnd, WPARAM wParam, LPARAM lParam)
 }
 
 
-static LRESULT HEADER_SetItem(HWND hwnd,WPARAM wParam,LPARAM lParam,BOOL unicode)
+LRESULT HEADER_SetItem(HWND hwnd,WPARAM wParam,LPARAM lParam,BOOL unicode)
 {
     HEADER_INFO *infoPtr = HEADER_GetInfoPtr (hwnd);
     HDITEMW     *phdi = (HDITEMW*)lParam;
