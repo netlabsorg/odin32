@@ -1,4 +1,4 @@
-# $Id: kernel32.mak,v 1.1 2001-04-03 14:10:47 sandervl Exp $
+# $Id: kernel32.mak,v 1.2 2001-04-04 09:00:58 sandervl Exp $
 
 #
 # Odin32 API
@@ -22,7 +22,6 @@ $(OBJDIR)\conin.obj \
 $(OBJDIR)\conbuffer.obj \
 $(OBJDIR)\conbuffervio.obj \
 $(OBJDIR)\conout.obj \
-$(OBJDIR)\unicode.obj \
 $(OBJDIR)\network.obj \
 $(OBJDIR)\hmdevio.obj \
 $(OBJDIR)\profile.obj \
