@@ -1,4 +1,10 @@
-/* $Id: ChangeLog,v 1.2743 2004-11-28 11:48:29 sao2l02 Exp $ */
+/* $Id: ChangeLog,v 1.2744 2004-11-30 19:21:06 sao2l02 Exp $ */
+2004-11-30: Dietrich Teickner <dietrich_teickner@arcor   >
+    - odincrt:  o src\odincrt\critsect.cpp
+                  Small change in odincrt. Odin is never !! allowed to leave
+                  DosEnterCriticalSection without to be a owner of them.
+                  Without them, I have often in BC v 2.2 a exception with fs = OdinFS.
+                  After this change I had never this problem. 
 2004-11-28: Dietrich Teickner <dietrich_teickner@arcor   >
     - Kernel32: o src\kernel32\hmthread.cpp
                   HMDeviceThreadClass::CreateThread - changes against invalid thread handle. 
