@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.12 1999-12-30 11:21:29 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.13 2000-01-31 22:30:07 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -18,6 +18,7 @@
 #include "misc.h"
 #define  OS2_ONLY
 #include "dibsect.h"
+#include <vmutex.h>
 
 HWND WIN32API WindowFromDC(HDC hdc);
 HWND Win32ToOS2Handle(HWND hwnd);
@@ -35,6 +36,7 @@ inline BOOL APIENTRY GpiEnableYInversion (HPS hps, LONG lHeight)
     return yyrc;
 }
 
+static VMutex dibMutex;
 
 //NOTE:
 //This is not a complete solution for CreateDIBSection, but enough for Quake 2!
@@ -47,7 +49,6 @@ DIBSection::DIBSection(WINBITMAPINFOHEADER *pbmi, DWORD handle, int fFlip)
 
   bmpsize = pbmi->biWidth;
   /* @@@PH 98/06/07 -- high-color bitmaps don't have palette */
-
 
   this->fFlip = fFlip;
   os2bmpsize = sizeof(BITMAPINFO2);
@@ -80,12 +81,13 @@ DIBSection::DIBSection(WINBITMAPINFOHEADER *pbmi, DWORD handle, int fFlip)
    }
 
    bmpBits    = (char *)malloc(bmpsize*pbmi->biHeight);
+   memset(bmpBits, 0, bmpsize*pbmi->biHeight);
 
    pOS2bmp    = (BITMAPINFO2 *)malloc(os2bmpsize);
 
-  memset(pOS2bmp, /* set header + palette entries to zero */
-         0,
-         os2bmpsize);
+   memset(pOS2bmp, /* set header + palette entries to zero */
+          0,
+          os2bmpsize);
 
    pOS2bmp->cbFix         = sizeof(BITMAPINFO2) - sizeof(RGB2);
    pOS2bmp->cx            = pbmi->biWidth;
@@ -94,6 +96,7 @@ DIBSection::DIBSection(WINBITMAPINFOHEADER *pbmi, DWORD handle, int fFlip)
    pOS2bmp->cBitCount     = pbmi->biBitCount;
    pOS2bmp->ulCompression = pbmi->biCompression;
    pOS2bmp->cbImage       = pbmi->biSizeImage;
+   dprintf(("handle                 %x", handle));
    dprintf(("pOS2bmp->cx            %d\n", pOS2bmp->cx));
    dprintf(("pOS2bmp->cy            %d\n", pOS2bmp->cy));
    dprintf(("pOS2bmp->cPlanes       %d\n", pOS2bmp->cPlanes));
@@ -104,6 +107,7 @@ DIBSection::DIBSection(WINBITMAPINFOHEADER *pbmi, DWORD handle, int fFlip)
 
    this->handle = handle;
 
+   dibMutex.enter();
    if(section == NULL)
    {
      dprintf(("section was NULL\n"));
@@ -123,18 +127,19 @@ DIBSection::DIBSection(WINBITMAPINFOHEADER *pbmi, DWORD handle, int fFlip)
      }
      dsect->next = this;
    }
-
-   dprintf2(("Class created"));
+   dibMutex.leave();
 }
 //******************************************************************************
 //******************************************************************************
 DIBSection::~DIBSection()
 {
+   dprintf(("Delete DIBSection %x", handle));
    if(bmpBits)
         free(bmpBits);
    if(pOS2bmp)
         free(pOS2bmp);
 
+   dibMutex.enter();
    if(section == this)
    {
      section = this->next;
@@ -149,6 +154,7 @@ DIBSection::~DIBSection()
      }
      dsect->next = this->next;
    }
+   dibMutex.leave();
 }
 //******************************************************************************
 //******************************************************************************
@@ -252,17 +258,17 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
   hwndDest = Win32ToOS2Handle(hwndDest);
   if(hwndDest != 0)
   {
-    hps = WinGetPS(hwndDest);
+    	hps = WinGetPS(hwndDest);
   }
   if(hps == 0)
   {
-    eprintf(("DIBSection::BitBlt, hps == 0 hwndDest = %X", hwndDest));
+    dprintf(("ERROR: DIBSection::BitBlt, hps == 0 hwndDest = %X", hwndDest));
     return(FALSE);
   }
 
-  dprintf(("DIBSection::BitBlt %X %x to(%d,%d)(%d,%d) from (%d,%d)(%d,%d) rop %x\n",
-          hdcDest, hwndDest, nXdest, nYdest, nDestWidth, nDestHeight,
-          nXsrc, nYsrc, nSrcWidth, nSrcHeight, Rop));
+  dprintf(("DIBSection::BitBlt %x %X (hps %x) %x to(%d,%d)(%d,%d) from (%d,%d)(%d,%d) rop %x flip %x",
+          handle, hdcDest, hps, hwndDest, nXdest, nYdest, nDestWidth, nDestHeight,
+          nXsrc, nYsrc, nSrcWidth, nSrcHeight, Rop, fFlip));
 
   point[0].x = nXdest;
   point[0].y = nYdest;
@@ -326,14 +332,17 @@ DIBSection *DIBSection::find(DWORD handle)
 {
  DIBSection *dsect = section;
 
+  dibMutex.enter();
   while(dsect)
   {
     if(dsect->handle == handle)
     {
-      return(dsect);
+  	dibMutex.leave();
+      	return(dsect);
     }
     dsect = dsect->next;
   }
+  dibMutex.leave();
   return(NULL);
 }
 //******************************************************************************
@@ -422,7 +431,7 @@ int DIBSection::GetDIBSection(int iSize, void *lpBuffer)
 //******************************************************************************
 char  DIBSection::GetBitCount()
 {
-   if(NULL==pOS2bmp)
+   if(pOS2bmp == NULL)
      return 0;
    else
      return pOS2bmp->cBitCount;
