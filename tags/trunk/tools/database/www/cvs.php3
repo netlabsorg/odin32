@@ -1,13 +1,15 @@
 <?php
 
-require "Odin32DBhelpers.php3";
+require "Odin32DBHelpers.php3";
 
 /*
  * Configuration:
  */
-$sCVSROOT = ".";
 $sCVSROOT = "g:/cvsroot";
 $sCVSROOT = "d:/odin32/cvs/cvsroot";
+$sCVSROOT = "./cvsroot";
+$sIconsUrl = "/icons";
+$sIconsUrl = "http://www.netlabs.org/icons";
 
 
 /**
@@ -1046,6 +1048,7 @@ function CVSGetAge($sDate, $cLevels)
 function ListDirectory($sDir, $iSortColumn)
 {
     global $sCVSROOT;
+    global $sIconsUrl;
     $timer = Odin32DBTimerStart("List Directory");
 
     /*
@@ -1223,7 +1226,7 @@ function ListDirectory($sDir, $iSortColumn)
         $sBgColor = ($i++ % 2) ? "" : " bgcolor=#f0f0f0";
         echo "<tr>\n",
              " <td", $sBgColor , ">",
-               "<font size=-1><a href=\"cvs.php?sDir=",$sParentDir,"\"><img src=\"/icons/back.gif\" border=0> Parent Directory</a></font></td>\n",
+               "<font size=-1><a href=\"cvs.php?sDir=",$sParentDir,"\"><img src=\"$sIconsUrl/back.gif\" border=0> Parent Directory</a></font></td>\n",
              " <td$sBgColor>&nbsp;</td>\n",
              " <td$sBgColor>&nbsp;</td>\n",
              " <td$sBgColor>&nbsp;</td>\n",
@@ -1234,7 +1237,7 @@ function ListDirectory($sDir, $iSortColumn)
     {
         $sBgColor = ($i++ % 2) ? "" : " bgcolor=#f0f0f0";
         echo "<tr>\n",
-             " <td$sBgColor><font size=-1><a href=\"cvs.php?sDir=$sDir/$sVal\"><img src=\"/icons/dir.gif\" border=0> $sVal</a></font></td>\n",
+             " <td$sBgColor><font size=-1><a href=\"cvs.php?sDir=$sDir/$sVal\"><img src=\"$sIconsUrl/dir.gif\" border=0> $sVal</a></font></td>\n",
              " <td$sBgColor>&nbsp;</td>\n",
              " <td$sBgColor>&nbsp;</td>\n",
              " <td$sBgColor>&nbsp;</td>\n",
@@ -1252,7 +1255,7 @@ function ListDirectory($sDir, $iSortColumn)
         $sLog   = isset($asLog[$sKey])  ? $asLog[$sKey]             : "<i> error </i>";
         $sIcon  = isset($asIcon[$sKey]) ? $asIcon[$sKey]            : "<i> error </i>";
         echo "<tr>\n",
-             " <td$sBgColor><font size=-1><a href=\"cvs.php?sFile=$sDir/$sKey\"><img src=\"/icons/$sIcon\" border=0>",substr($sKey, 0, -2),"</a></font></td>\n",
+             " <td$sBgColor><font size=-1><a href=\"cvs.php?sFile=$sDir/$sKey\"><img src=\"$sIconsUrl/$sIcon\" border=0>",substr($sKey, 0, -2),"</a></font></td>\n",
              " <td$sBgColor><font size=-1><a href=\"cvs.php?sFile=$sDir/$sKey&sRevision=$sRev\">$sRev</a></font></td>\n",
              " <td$sBgColor><font size=-1>$sAge</font></td>\n",
              " <td$sBgColor><font size=-1>$sAuthor</font></td>\n",
