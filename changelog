@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2686 2004-02-23 12:40:52 sandervl Exp $ */
+/* $Id: changelog,v 1.2687 2004-02-24 11:47:52 sandervl Exp $ */
+
+ 2003-02-24: Dietrich Teickner <Dietrich_Teickner@t-online   >
+    - KERNEL32: o CreateProcess fix
 
  2004-02-23: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Backed out RedrawWindow change
