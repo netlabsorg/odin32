@@ -1,4 +1,4 @@
-/* $Id: pefile.h,v 1.2 1999-05-27 15:17:58 phaller Exp $ */
+/* $Id: pefile.h,v 1.3 1999-09-22 09:46:18 sandervl Exp $ */
 
 /*
  *
@@ -12,10 +12,7 @@
 #include <os2.h>
 #include <win32type.h>
 #include <peexe.h>
-
-#ifndef max
-#define max(a,b)	((a>b) ? a : b)
-#endif
+#include <stdlib.h> //min & max
 
 #define LOWORD(a)   (a & 0xFFFF)
 

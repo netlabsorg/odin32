@@ -1,4 +1,4 @@
-# $Id: makefile.icc,v 1.2 1999-09-05 02:30:46 bird Exp $
+# $Id: makefile.icc,v 1.3 1999-09-22 09:46:52 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -14,7 +14,7 @@ PDWIN32_INCLUDE = ..\..\include
 !include ..\..\include\pdwin32.mk
 
 # Addjust common definitions
-AR       = ilib /quiet /nobackup
+AR       = ilib /nofree /quiet /nobackup
 CFLAGS   = $(CFLAGS)   -Ge+ -Tx+ -Tm+ -I$(PDWIN32_INCLUDE)      -Wall+ppt-ppc-inl-cnv-gnr-vft-
 CXXFLAGS = $(CXXFLAGS) -Ge+ -Gx- -Tx+ -Tm+ -I$(PDWIN32_INCLUDE) -Wall+ppt-ppc-inl-cnv-gnr-vft-
 

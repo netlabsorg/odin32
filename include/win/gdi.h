@@ -1,4 +1,4 @@
-/* $Id: gdi.h,v 1.1 1999-05-24 20:19:12 ktk Exp $ */
+/* $Id: gdi.h,v 1.2 1999-09-22 09:46:18 sandervl Exp $ */
 
 /*
  * GDI definitions
@@ -12,9 +12,9 @@
 #include "windef.h"
 #include "wingdi.h"
 #include "ldt.h"
-#include "local.h"
 #include "path.h"
 #include <math.h>
+#include "local.h"
 
   /* GDI objects magic numbers */
 #define PEN_MAGIC             0x4f47
