@@ -1,4 +1,4 @@
-/* $Id: winuser.h,v 1.32 2000-02-09 13:40:23 sandervl Exp $ */
+/* $Id: winuser.h,v 1.33 2000-02-12 18:08:23 cbratschi Exp $ */
 
 #ifndef __INCLUDE_WINUSER_H
 #define __INCLUDE_WINUSER_H
@@ -518,6 +518,7 @@ typedef struct
 #define WM_QUERYSAVESTATE       0x0038
 #define WM_COMPAREITEM          0x0039
 #define WM_TESTING              0x003a
+#define WM_GETOBJECT            0x003D
 
 #define WM_OTHERWINDOWCREATED   0x003c
 #define WM_OTHERWINDOWDESTROYED 0x003d
@@ -607,6 +608,13 @@ typedef struct
 #define WM_MENUSELECT       0x011F
 #define WM_MENUCHAR         0x0120
 #define WM_ENTERIDLE        0x0121
+#define WM_MENURBUTTONUP    0x0122
+#define WM_MENUDRAG         0x0123
+#define WM_MENUGETOBJECT    0x0124
+#define WM_UNINITMENUPOPUP  0x0125
+#define WM_MENUCOMMAND      0x0126
+
+#define WM_KEYBOARDCUES     0x0127
 
 #define WM_LBTRACKPOINT     0x0131
 
@@ -630,8 +638,9 @@ typedef struct
 #define WM_MBUTTONDOWN      0x0207
 #define WM_MBUTTONUP        0x0208
 #define WM_MBUTTONDBLCLK    0x0209
+#define WM_MOUSEWHEEL       0x020A
 #define WM_MOUSEFIRST       WM_MOUSEMOVE
-#define WM_MOUSELAST        WM_MBUTTONDBLCLK
+#define WM_MOUSELAST        WM_MOUSEWHEEL
 
 #define WM_PARENTNOTIFY     0x0210
 #define WM_ENTERMENULOOP    0x0211
@@ -642,6 +651,9 @@ typedef struct
 #define WM_SIZING           0x0214
 #define WM_CAPTURECHANGED   0x0215
 #define WM_MOVING           0x0216
+
+#define WM_POWERBROADCAST   0x0218
+#define WM_DEVICECHANGE     0x0219
 
   /* MDI messages */
 #define WM_MDICREATE        0x0220
@@ -675,8 +687,14 @@ typedef struct
 #define WM_IME_COMPOSITIONFULL          0x0284
 #define WM_IME_SELECT                   0x0285
 #define WM_IME_CHAR                     0x0286
+#define WM_IME_REQUEST                  0x0288
 #define WM_IME_KEYDOWN                  0x0290
 #define WM_IME_KEYUP                    0x0291
+
+#define WM_MOUSEHOVER        0x02A1
+#define WM_MOUSELEAVE        0x02A3
+#define WM_NCMOUSEHOVER      0x02A0
+#define WM_NCMOUSELEAVE      0x02A2
 
 #define WM_CUT               0x0300
 #define WM_COPY              0x0301
@@ -705,6 +723,7 @@ typedef struct
 #define WM_HANDHELDLAST      0x035F
 
 #define WM_AFXFIRST          0x0360
+#define WM_FORWARDMSG        0x037F
 #define WM_AFXLAST           0x037F
 
 #define WM_PENWINFIRST       0x0380
