@@ -1,4 +1,4 @@
-/* $Id: winuser.h,v 1.23 1999-12-17 17:16:39 cbratschi Exp $ */
+/* $Id: winuser.h,v 1.24 1999-12-26 17:28:36 cbratschi Exp $ */
 
 #ifndef __INCLUDE_WINUSER_H
 #define __INCLUDE_WINUSER_H
@@ -3714,8 +3714,6 @@ DWORD     SYSTEM InternalGetTabbedTextExtentA(HDC,LPCSTR,INT,INT,LPINT);
 DWORD     SYSTEM InternalGetTabbedTextExtentW(HDC,LPCWSTR,INT,INT,LPINT);
 LONG      SYSTEM InternalTabbedTextOutA(HDC,INT,INT,LPCSTR,INT,INT,LPINT,INT);
 LONG      SYSTEM InternalTabbedTextOutW(HDC,INT,INT,LPCWSTR,INT,INT,LPINT,INT);
-
-VOID      WINAPI TrackWin32Window(HWND,BOOL);
 
 VOID        WINAPI ScreenSwitchEnable16(WORD);
 

@@ -1,4 +1,12 @@
- /* $Id: ChangeLog,v 1.573 1999-12-24 18:37:57 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.574 1999-12-26 17:28:01 cbratschi Exp $ */
+
+ 99-12-26: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32: implemented WM_NCHITTEST, added WM_SYSCOMMAND handling
+		  ported DIALOG_IsAccelerator
+		  implemented Get/SetMessageExtraInfo
+		  extended DefWindowProcA handling
+		  several other bug fixes
+	- COMCTL32: changed non-client handling
 
  99-12-24: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Fixed bug in OSLibWinQueryQueueStatus (uninitialized local variable)
@@ -13,6 +21,7 @@
  99-12-24: Markus Montkowski <mmontkowski@gmx.de>
         - dplayx: compiles and links now 
 
+>>>>>>> 1.573
  99-12-22: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: fixed WinGetKeyState in WM_MOUSEMOVE (WinAmp's equalizer works now fine)
 
