@@ -1,4 +1,4 @@
-/* $Id: winicon.cpp,v 1.20 2001-03-27 16:17:52 sandervl Exp $ */
+/* $Id: winicon.cpp,v 1.21 2001-04-05 09:31:28 sandervl Exp $ */
 /*
  * Win32 Icon Code for OS/2
  *
@@ -53,6 +53,7 @@
 #include "initterm.h"
 #include "oslibres.h"
 #include "oslibwin.h"
+#include "dc.h"
 
 #define DBG_LOCALLOG    DBG_winicon
 #include "dbglocal.h"
@@ -409,13 +410,44 @@ BOOL WIN32API SetSystemCursor(HCURSOR hCursor, DWORD dwCursorId)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API ShowCursor( BOOL bShow)
+INT OPEN32API __ShowCursor(BOOL bShow);
+
+inline INT _ShowCursor (BOOL bShow)
 {
-    dprintf2(("USER32: ShowCursor %d", bShow));
-    return O32_ShowCursor(bShow);
+ INT yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = __ShowCursor(bShow);
+    SetFS(sel);
+
+    return yyrc;
+}
+//******************************************************************************
+static int cursorshowcnt = 0;
+//******************************************************************************
+void RestoreCursor()
+{
+    dprintf2(("USER32: RestoreCursor %d", cursorshowcnt));
+    while(cursorshowcnt != 0)
+    {
+        if(cursorshowcnt > 0 )
+        {
+            ShowCursor(FALSE);
+        }
+        else
+        {
+            ShowCursor(TRUE);
+        }
+    }
 }
 //******************************************************************************
 //******************************************************************************
+int WIN32API ShowCursor(BOOL bShow)
+{
+    dprintf2(("USER32: ShowCursor %d", bShow));
+    cursorshowcnt = cursorshowcnt + ((bShow) ? 1 : -1);
+    return _ShowCursor(bShow);
+}
 /***********************************************************************
  *           CreateCursorIconIndirect
  */
