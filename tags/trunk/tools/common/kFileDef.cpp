@@ -1,4 +1,4 @@
-/* $Id: kFileDef.cpp,v 1.9 2002-05-01 03:58:36 bird Exp $
+/* $Id: kFileDef.cpp,v 1.10 2002-08-25 22:35:46 bird Exp $
  *
  * kFileDef - Definition files.
  *
@@ -504,6 +504,14 @@ KBOOL  kFileDef::setModuleName(void)
     pszStart = strpbrk(pszType, " \t");
     if (pszStart != NULL)
     {
+        /* if phys/virt device skip second word too */
+        if (fVirtualDevice || fPhysicalDevice)
+        {
+            pszStart = strpbrk(ltrim(pszStart), " \t");
+            if (pszStart == NULL)
+                return TRUE;
+        }
+
         pszStart = ltrim(pszStart);
         pszEnd = strpbrk(pszStart, " \t");
         if (pszEnd == NULL)
@@ -666,6 +674,18 @@ KBOOL kFileDef::makeWatcomLinkFileAddtion(kFile *pOut, int enmOS)
     {
         case kFileDef::os2:
             pOut->printf("FORMAT OS2 LX %s %s %s\n",
+                          fLibrary                               ? "DLL" :
+                            (fProgram ? (chAppType == pm         ? "PM"
+                                      : (chAppType == fullscreen ? "FULLSCREEN"
+                                                                 : "PMCOMPATIBLE"))
+                            : (fVirtualDevice                    ? "VIRTDEVICE"
+                                                                 : "PHYSDEVICE" )),
+                          fLibrary ? (fInitGlobal ? "INITGLOBAL" : "INITINSTANCE") : "",
+                          fLibrary ? (fTermGlobal ? "TERMGLOBAL" : "TERMINSTANCE") : "");
+            break;
+
+        case kFileDef::os2v1:
+            pOut->printf("FORMAT OS2 %s %s %s\n",
                           fLibrary                               ? "DLL" :
                             (fProgram ? (chAppType == pm         ? "PM"
                                       : (chAppType == fullscreen ? "FULLSCREEN"

@@ -1,4 +1,4 @@
-/* $Id: kDef2Wat.cpp,v 1.4 2002-05-01 03:58:36 bird Exp $
+/* $Id: kDef2Wat.cpp,v 1.5 2002-08-25 22:35:46 bird Exp $
  *
  * Converter for IBM/MS linker definition files (.DEF) to Watcom linker directives and options.
  *
@@ -59,6 +59,8 @@ int main(int argc, char **argv)
     pszAppend = (argc == 5) ? argv[4] : NULL;
     if (!stricmp(pszOS, "os2"))
         enmOS = kFileDef::os2;
+    else if (!stricmp(pszOS, "os2-16"))
+        enmOS = kFileDef::os2v1;
     else if (!stricmp(pszOS, "dos"))
         enmOS = kFileDef::dos;
     else if (!stricmp(pszOS, "win32"))
@@ -133,7 +135,7 @@ static void syntax(void)
         "syntax: kDef2Wat.exe <os> <def-file> <wlink-file> [extra-file]\n"
         "\n"
         "Where:\n"
-        "    <os>           Target os. os2, dos, win32, win16, nlm, qnx or elf.\n"
+        "    <os>           Target os. os2, os2-16, dos, win32, win16, nlm, qnx or elf.\n"
         "    <def-file>     The .DEF file to convert.\n"
         "    <wlink-file>   The WLINK directive and option file.\n"
         "    [extra-file]   Extra file with directives which should be appended to\n"
