@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.44 2000-10-26 17:21:38 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.45 2000-11-06 10:21:36 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -705,8 +705,12 @@ ODINFUNCTION4(DWORD, GetFullPathNameW,
     AsciiToUnicode(asciibuffer,
                    lpBuffer);
 
-  if(lpFilePart)
-    *lpFilePart = lpBuffer + ((int)asciipart - (int)asciibuffer);
+  if(lpFilePart) {
+    if (asciipart == NULL)
+      *lpFilePart = NULL;
+    else
+      *lpFilePart = lpBuffer + ((int)asciipart - (int)asciibuffer);
+  }
 
   FreeAsciiString(astring);
   free(asciibuffer);
