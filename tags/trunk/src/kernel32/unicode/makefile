@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2001-04-03 17:47:13 sandervl Exp $
+# $Id: makefile,v 1.3 2001-04-17 04:22:06 bird Exp $
 
 #
 # Odin32 API
@@ -24,13 +24,14 @@ PUBLICLIB = 1
 #
 # Overrides.
 #
-CDEFINES = $(CDEFINES) /Tdp
+!if "$(CCENV)" == "VAC3" || "$(CCENV)" == "VAC36"
+CFLAGS = $(CFLAGS) /Tdp
+!endif
 
 
 #
 # Object files. Prefix with OBJDIR and one space before the '\'.
 #
-
 OBJS = \
 $(OBJDIR)\casemap.obj \
 $(OBJDIR)\compose.obj \
