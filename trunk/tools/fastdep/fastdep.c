@@ -1,4 +1,4 @@
-/* $Id: fastdep.c,v 1.33 2001-11-14 11:13:26 bird Exp $
+/* $Id: fastdep.c,v 1.34 2001-11-14 15:26:13 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
@@ -184,6 +184,7 @@ static int langC_CPP(const char *pszFilename, const char *pszNormFilename, const
 static int langAsm(  const char *pszFilename, const char *pszNormFilename, const char *pszTS, BOOL fHeader);
 static int langRC(   const char *pszFilename, const char *pszNormFilename, const char *pszTS, BOOL fHeader);
 static int langCOBOL(const char *pszFilename, const char *pszNormFilename, const char *pszTS, BOOL fHeader);
+static int langIPF(  const char *pszFilename, const char *pszNormFilename, const char *pszTS, BOOL fHeader);
 
 
 /* string operations */
@@ -204,6 +205,7 @@ static BOOL filecacheAddFile(const char *pszFilename);
 static BOOL filecacheAddDir(const char *pszDir);
 INLINE BOOL filecacheFind(const char *pszFilename);
 INLINE BOOL filecacheIsDirCached(const char *pszDir);
+static char*filecacheFileExist(const char *pszFilename, char *pszBuffer);
 
 /* pathlist operations */
 static char *pathlistFindFile(const char *pszPathList, const char *pszFilename, char *pszBuffer);
@@ -284,6 +286,7 @@ static const char *apszExtC_CPP[] = {"c", "sqc", "cpp", "h", "hpp", NULL};
 static const char *apszExtAsm[]   = {"asm", "inc", NULL};
 static const char *apszExtRC[]    = {"rc", "orc", "dlg", NULL};
 static const char *apszExtCOBOL[] = {"cbl", "cob", "sqb", "wbl", NULL};
+static const char *apszExtIPF[] = {"ipf", "man", NULL};
 static CONFIGENTRY aConfig[] =
 {
     {
@@ -306,8 +309,14 @@ static CONFIGENTRY aConfig[] =
 
     {
         apszExtCOBOL,
-        4,
+        -1,
         langCOBOL,
+    },
+
+    {
+        apszExtIPF,
+        -1,
+        langIPF,
     },
 
     /* terminating entry */
@@ -942,7 +951,7 @@ int makeDependent(const char *pszFilename, const char *pszTS)
             ppsz++;
         if (*ppsz != NULL)
         {
-            fHeader = &pCfg->papszExts[pCfg->iFirstHdr] <= ppsz;
+            fHeader = pCfg->iFirstHdr > 0 && &pCfg->papszExts[pCfg->iFirstHdr] <= ppsz;
             break;
         }
         pCfg++;
@@ -2102,6 +2111,149 @@ int langCOBOL(const char *pszFilename, const char *pszNormFilename,
     return 0;
 }
 
+
+/**
+ * Generates depend info on this IPF file, these are stored internally
+ * and written to file later.
+ * @returns 0 on success.
+ *          !0 on error.
+ * @param   pszFilename         Pointer to source filename. Correct case is assumed!
+ * @param   pszNormFilename     Pointer to normalized source filename.
+ * @param   pszTS               File time stamp.
+ * @parma   fHeader             True if header file is being scanned.
+ * @status  completely implemented.
+ * @author  knut st. osmundsen
+ */
+int langIPF(  const char *pszFilename, const char *pszNormFilename,
+              const char *pszTS, BOOL fHeader)
+{
+    void *  pvFile;                     /* Text buffer pointer. */
+    void *  pvRule;                     /* Handle to the current rule. */
+    char    szBuffer[4096];             /* Temporary buffer (max line lenght size...) */
+    int     iLine;                      /* current line number */
+    void *  pv = NULL;                  /* An index used by textbufferGetNextLine. */
+
+
+    /**********************************/
+    /* Add the depend rule            */
+    /**********************************/
+    /*if (options.fObjRule && !fHeader)
+    {
+        if (options.fNoObjectPath)
+            pvRule = depAddRule(fileNameNoExt(pszFilename, szBuffer), NULL, options.pszObjectExt, pszTS);
+        else
+            pvRule = depAddRule(options.fObjectDir ?
+                                    options.pszObjectDir :
+                                    filePathSlash(pszFilename, szBuffer),
+                                fileNameNoExt(pszFilename, szBuffer + CCHMAXPATH),
+                                options.pszObjectExt,
+                                pszTS);
+
+        if (options.fSrcWhenObj && pvRule)
+            depAddDepend(pvRule,
+                         options.fExcludeAll || pathlistFindFile2(options.pszExclude, pszNormFilename)
+                            ? fileName(pszFilename, szBuffer) : fileNormalize2(pszFilename, szBuffer),
+                         options.fCheckCyclic);
+    }
+    else */
+        pvRule = depAddRule(options.fExcludeAll || pathlistFindFile2(options.pszExclude, pszNormFilename) ?
+                            fileName(pszFilename, szBuffer) : pszNormFilename, NULL, NULL, pszTS);
+
+    /* duplicate rule? */
+    if (pvRule == NULL)
+        return 0;
+
+
+    /********************/
+    /* Make file buffer */
+    /********************/
+    pvFile = textbufferCreate(pszFilename);
+    if (!pvFile)
+    {
+        fprintf(stderr, "failed to open '%s'\n", pszFilename);
+        return -1;
+    }
+
+
+    /*******************/
+    /* find dependants */
+    /*******************/
+    iLine = 0;
+    while (textbufferGetNextLine(pvFile, &pv, szBuffer, sizeof(szBuffer)) != NULL) /* line loop */
+    {
+        iLine++;
+
+        /* is this an imbed statement? */
+        if (!strncmp(&szBuffer[0], ".im", 3))
+        {
+            char    szFullname[CCHMAXPATH];
+            char *  psz;
+            int     i;
+            int     j;
+            char    chQuote = 0;
+
+            /* skip statement and blanks */
+            i = 4;
+            while (szBuffer[i] == ' ' || szBuffer[i] == '\t')
+                i++;
+
+            /* check for quotes */
+            if (szBuffer[i] == '\'' || szBuffer[i] == '\"')
+                chQuote = szBuffer[i++];
+
+            /* find end */
+            j = 0;
+            if (chQuote != 0)
+            {
+                while (szBuffer[i+j] != chQuote && szBuffer[i+j] != '\n' && szBuffer[i+j] != '\r' && szBuffer[i+j] != '\0')
+                    j++;
+            }
+            else
+            {
+                while (szBuffer[i+j] != '\n' && szBuffer[i+j] != '\r' && szBuffer[i+j] != '\0')
+                    j++;
+            }
+
+            /* find end */
+            if (j >= CCHMAXPATH)
+            {
+                fprintf(stderr, "%s(%d) warning: Filename too long ignored", pszFilename, iLine);
+                continue;
+            }
+
+            /* copy filename */
+            strncpy(szFullname, &szBuffer[i], j);
+            szFullname[j] = '\0'; /* ensure terminatition. */
+            strlwr(szFullname);
+
+            /* find include file! */
+            psz = filecacheFileExist(szFullname, szBuffer);
+
+            /* did we find the include? */
+            if (psz != NULL)
+            {
+                if (options.fExcludeAll || pathlistFindFile2(options.pszExclude, szBuffer))
+                    depAddDepend(pvRule, fileName(szFullname, szBuffer), options.fCheckCyclic);
+                else
+                    depAddDepend(pvRule, szBuffer, options.fCheckCyclic);
+            }
+            else
+            {
+                fprintf(stderr, "%s(%d): warning imbeded file '%s' was not found!\n",
+                        pszFilename, iLine, szFullname);
+                depMarkNotFound(pvRule);
+            }
+        }
+    } /*while*/
+
+    textbufferDestroy(pvFile);
+
+    return 0;
+}
+
+
+
+
 #define upcase(ch)   \
      (ch >= 'a' && ch <= 'z' ? ch - ('a' - 'A') : ch)
 
@@ -2539,6 +2691,64 @@ INLINE BOOL filecacheIsDirCached(const char *pszDir)
     return AVLGet(&pfcDirTree, (AVLKEY)pszDir) != NULL;
 }
 
+
+/**
+ * Checks if a file exist, uses file cache if possible.
+ * @returns   Pointer to a filename consiting of the path part + the given filename.
+ *            (pointer into pszBuffer)
+ *            NULL if file is not found. ("" in buffer)
+ * @parma     pszFilename  Filename to find.
+ * @parma     pszBuffer    Ouput Buffer.
+ * @status    completely implemented.
+ * @author    knut st. osmundsen
+ */
+char *filecacheFileExist(const char *pszFilename, char *pszBuffer)
+{
+    APIRET          rc;
+
+    *pszBuffer = '\0';
+
+    fileNormalize2(pszFilename, pszBuffer);
+
+    /*
+     * Search for the file in this directory.
+     *   Search cache first
+     */
+    if (!filecacheFind(pszBuffer))
+    {
+        char szDir[CCHMAXPATH];
+
+        filePathSlash(pszBuffer, szDir);
+        if (!filecacheIsDirCached(szDir))
+        {
+            /*
+             * If caching of entire dirs are enabled, we'll
+             * add the directory to the cache and search it.
+             */
+            if (options.fCacheSearchDirs && filecacheAddDir(szDir))
+            {
+                if (filecacheFind(pszBuffer))
+                    return pszBuffer;
+            }
+            else
+            {
+                FILESTATUS3 fsts3;
+
+                /* ask the OS */
+                rc = DosQueryPathInfo(pszBuffer, FIL_STANDARD, &fsts3, sizeof(fsts3));
+                if (rc == NO_ERROR)
+                {   /* add file to cache. */
+                    filecacheAddFile(pszBuffer);
+                    return pszBuffer;
+                }
+            }
+        }
+    }
+    else
+        return pszBuffer;
+
+    return NULL;
+}
 
 
 /**
