@@ -1,4 +1,4 @@
-/* $Id: fastdep.c,v 1.4 2000-03-04 23:51:57 bird Exp $
+/* $Id: fastdep.c,v 1.5 2000-03-15 15:02:11 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
@@ -73,6 +73,7 @@ typedef struct _Options
     BOOL            fExcludeAll;
     const char *    pszObjectExt;
     const char *    pszObjectDir;
+    BOOL            fObjectDir;        /* replace object directory? */
     const char *    pszRsrcExt;
     BOOL            fObjRule;
     BOOL            fNoObjectPath;
@@ -213,6 +214,7 @@ int main(int argc, char **argv)
         FALSE,           /* fExcludeAll */
         szObjectExt,     /* pszObjectExt */
         szObjectDir,     /* pszObjectDir */
+        FALSE,           /* fObjectDir */
         szRsrcExt,       /* pszRsrcExt */
         TRUE,            /* fObjRule */
         FALSE,           /* fNoObjectPath */
@@ -325,15 +327,22 @@ int main(int argc, char **argv)
                         break;
                     }
 
-                    /* path */
+                    /* path: -o or -o- */
+                    options.fObjectDir = TRUE;
                     if (strlen(argv[argi]) > 2)
-                        strcpy(szObjectDir, argv[argi]+2);
+                    {
+                        if (argv[argi][2] == '-')  /* no object path */
+                            szObjectDir[0] = '\0';
+                        else
+                            strcpy(szObjectDir, argv[argi]+2);
+                    }
                     else
                     {
                         strcpy(szObjectDir, argv[argi+1]);
                         argi++;
                     }
-                    if (szObjectDir[strlen(szObjectDir)-1] != '\\'
+                    if (szObjectDir[0] != '\0'
+                        && szObjectDir[strlen(szObjectDir)-1] != '\\'
                         && szObjectDir[strlen(szObjectDir)-1] != '/'
                         )
                         strcat(szObjectDir, "\\");
@@ -443,8 +452,9 @@ static void syntax(void)
         "   -d <outputfn>   Output filename. Default: %s\n"
         "   -e excludepath  Exclude paths. If a filename is found in any\n"
         "                   of these paths only the filename is used, not\n"
-        "                   the path+filename (which is default).\n"
-        "   -eall<[+]|->    -eall+: No path are added to the filename.\n"
+        "                   the path+filename (which is default) (don't work?).\n"
+        "   -eall<[+]|->    Include and source filenames, paths or no paths.\n"
+        "                   -eall+: No path are added to the filename.\n"
         "                   -eall-: The filename is appended the include path\n"
         "                           was found in.\n"
         "                   Default: eall-\n"
@@ -452,6 +462,7 @@ static void syntax(void)
         "   -n<[+]|->       No path for object files in the rules.\n"
         "   -o <objdir>     Path were object files are placed. This path replaces the\n"
         "                   entire filename path\n"
+        "   -o-             No object path\n"
         "   -obr<[+]|->     -obr+: Object rule.\n"
         "                   -obr-: No object rule, rule for source filename is generated.\n"
         "   -obj[ ]<objext> Object extention.           Default: obj\n"
@@ -561,13 +572,15 @@ int langC_CPP(FILE *phDep, const char *pszFilename, FILE *phFile, BOOL fHeader, 
             fprintf(phDep, "%s.%s:", fileNameNoExt(pszFilename, szBuffer), pOptions->pszObjectExt);
         else
             fprintf(phDep, "%s%s.%s:",
-                    (*pOptions->pszObjectDir != '\0') ?
+                    pOptions->fObjectDir ?
                         pOptions->pszObjectDir : filePathSlash(pszFilename, szBuffer),
                     fileNameNoExt(pszFilename, szBuffer + CCHMAXPATH),
                     pOptions->pszObjectExt);
 
         if (pOptions->fSrcWhenObj)
-            fprintf(phDep, " \\\n%4s %s", "", pszFilename);
+            fprintf(phDep, " \\\n%4s %s", "",
+                    pOptions->fExcludeAll ? fileName(pszFilename, szBuffer) : pszFilename
+                    );
     }
     else
         fprintf(phDep, "%s:", pszFilename);
@@ -823,13 +836,15 @@ int langAsm(FILE *phDep, const char *pszFilename, FILE *phFile, BOOL fHeader, PO
             fprintf(phDep, "%s.%s:", fileNameNoExt(pszFilename, szBuffer), pOptions->pszObjectExt);
         else
             fprintf(phDep, "%s%s.%s:",
-                    (*pOptions->pszObjectDir != '\0') ?
+                    pOptions->fObjectDir ?
                         pOptions->pszObjectDir : filePathSlash(pszFilename, szBuffer),
                     fileNameNoExt(pszFilename, szBuffer + CCHMAXPATH),
                     pOptions->pszObjectExt);
 
         if (pOptions->fSrcWhenObj)
-            fprintf(phDep, " \\\n%4s %s", "", pszFilename);
+            fprintf(phDep, " \\\n%4s %s", "",
+                    pOptions->fExcludeAll ? fileName(pszFilename, szBuffer) : pszFilename
+                    );
     }
     else
         fprintf(phDep, "%s:", pszFilename);
@@ -937,13 +952,15 @@ int langRC(FILE *phDep, const char *pszFilename, FILE *phFile, BOOL fHeader, POP
             fprintf(phDep, "%s.%s:", fileNameNoExt(pszFilename, szBuffer), pOptions->pszRsrcExt);
         else
             fprintf(phDep, "%s%s.res:",
-                    (*pOptions->pszObjectDir != '\0') ?
+                    pOptions->fObjectDir ?
                         pOptions->pszObjectDir : filePathSlash(pszFilename, szBuffer),
                     fileNameNoExt(pszFilename, szBuffer + CCHMAXPATH),
                     pOptions->pszRsrcExt);
 
         if (pOptions->fSrcWhenObj)
-            fprintf(phDep, " \\\n%4s %s", "", pszFilename);
+            fprintf(phDep, " \\\n%4s %s", "",
+                    pOptions->fExcludeAll ? fileName(pszFilename, szBuffer) : pszFilename
+                    );
     }
     else
         fprintf(phDep, "%s:", pszFilename);
@@ -1053,13 +1070,15 @@ int langCOBOL(FILE *phDep, const char *pszFilename, FILE *phFile, BOOL fHeader, 
             fprintf(phDep, "%s.%s:", fileNameNoExt(pszFilename, szBuffer), pOptions->pszObjectExt);
         else
             fprintf(phDep, "%s%s.%s:",
-                    (*pOptions->pszObjectDir != '\0') ?
+                    pOptions->fObjectDir ?
                         pOptions->pszObjectDir : filePathSlash(pszFilename, szBuffer),
                     fileNameNoExt(pszFilename, szBuffer + CCHMAXPATH),
                     pOptions->pszObjectExt);
 
         if (pOptions->fSrcWhenObj)
-            fprintf(phDep, " \\\n%4s %s", "", pszFilename);
+            fprintf(phDep, " \\\n%4s %s", "",
+                    pOptions->fExcludeAll ? fileName(pszFilename, szBuffer) : pszFilename
+                    );
     }
     else
         fprintf(phDep, "%s:", pszFilename);
@@ -1264,9 +1283,8 @@ char *filePathSlash(const char *pszFilename, char *pszBuffer)
 
 
 /**
- * Copies the path name (with extention) into pszBuffer and returns
+ * Copies the filename (with extention) into pszBuffer and returns
  * a pointer to the buffer.
- * If no path is found "" is returned.
  * @returns   Pointer to pszBuffer with path.
  * @param     pszFilename  Pointer to readonly filename.
  * @param     pszBuffer    Pointer to output Buffer.
