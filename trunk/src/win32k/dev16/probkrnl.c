@@ -1,4 +1,4 @@
-/* $Id: probkrnl.c,v 1.33 2001-02-19 05:54:54 bird Exp $
+/* $Id: probkrnl.c,v 1.34 2001-02-20 05:05:45 bird Exp $
  *
  * Description:   Autoprobes the os2krnl file and os2krnl[*].sym files.
  *                Another Hack!
@@ -136,6 +136,8 @@ IMPORTKRNLSYM DATA16_GLOBAL aImportTab[NBR_OF_KRNLIMPORTS] =
     {FALSE, -1, 12, "_PGPhysAvail",         "@0",  -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
     {FALSE, -1, 14, "_PGPhysPresent",       "@0",  -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
     {FALSE, -1, 17, "_vmRecalcShrBound",    "@8",  -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1, 15, "KMEnterKmodeSEF",      "",    -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
+    {FALSE, -1, 15, "KMExitKmodeSEF8",      "",    -1,  -1,  -1,  -1, EPT_PROCIMPORT32},
     {FALSE, -1, 16, "_ldrpFileNameBuf",     "",    -1,  -1,  -1,  -1, EPT_VARIMPORT32},
     {FALSE, -1,  7, "_LdrSem",              "",    -1,  -1,  -1,  -1, EPT_VARIMPORT32},
     {FALSE, -1,  8, "_pTCBCur",             "",    -1,  -1,  -1,  -1, EPT_VARIMPORT16},
