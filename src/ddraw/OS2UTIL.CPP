@@ -1,4 +1,4 @@
-/* $Id: OS2UTIL.CPP,v 1.4 1999-08-16 00:40:48 hugh Exp $ */
+/* $Id: OS2UTIL.CPP,v 1.5 1999-08-17 12:44:46 sandervl Exp $ */
 
 /*
  * OS/2 Utility functions
@@ -9,7 +9,7 @@
  *
  */
 #define INCL_DOSMEMMGR
-#include <os2.h>
+#include <os2wrap.h>
 #include "misc.h"
 #include "os2util.h"
 
@@ -42,8 +42,6 @@ void OS2FreeMem(char *lpMem)
 //******************************************************************************
 void OS2MaximizeWindow(HWND hwndClient)
 {
-  ODIN_FS_BEGIN
   WinSetWindowPos(hwndClient, HWND_TOP, 0, 0, 0, 0, SWP_MAXIMIZE);
-  ODIN_FS_END
 }
 

@@ -7,9 +7,7 @@
   #include <os2sel.h>
   #include <dive.h>
 
-  #undef  DiveQueryCaps
-  #define DiveQueryCaps _DiveQueryCaps
-  inline ULONG APIENTRY DiveQueryCaps ( PDIVE_CAPS a,
+  inline ULONG APIENTRY _DiveQueryCaps ( PDIVE_CAPS a,
                                         ULONG      b )
   {
     ULONG yyrc;
@@ -20,10 +18,10 @@
 
     return yyrc;
   }
+  #undef  DiveQueryCaps
+  #define DiveQueryCaps _DiveQueryCaps
 
-  #undef  DiveOpen
-  #define DiveOpen _DiveOpen
-  inline ULONG APIENTRY DiveOpen ( HDIVE *a,
+  inline ULONG APIENTRY _DiveOpen ( HDIVE *a,
                                    BOOL   b,
                                    PVOID  c )
   {
@@ -35,10 +33,10 @@
 
     return yyrc;
   }
+  #undef  DiveOpen
+  #define DiveOpen _DiveOpen
 
-  #undef  DiveSetupBlitter
-  #define DiveSetupBlitter _DiveSetupBlitter
-  inline ULONG APIENTRY DiveSetupBlitter ( HDIVE          a,
+  inline ULONG APIENTRY _DiveSetupBlitter ( HDIVE          a,
                                            PSETUP_BLITTER b )
   {
     ULONG yyrc;
@@ -49,10 +47,10 @@
 
     return yyrc;
   }
+  #undef  DiveSetupBlitter
+  #define DiveSetupBlitter _DiveSetupBlitter
 
-  #undef  DiveBlitImage
-  #define DiveBlitImage _DiveBlitImage
-  inline ULONG APIENTRY DiveBlitImage ( HDIVE a,
+  inline ULONG APIENTRY _DiveBlitImage ( HDIVE a,
                                         ULONG b,
                                         ULONG c )
   {
@@ -64,10 +62,10 @@
 
     return yyrc;
   }
+  #undef  DiveBlitImage
+  #define DiveBlitImage _DiveBlitImage
 
-  #undef  DiveBlitImageLines
-  #define DiveBlitImageLines _DiveBlitImageLines
-  inline ULONG APIENTRY DiveBlitImageLines ( HDIVE a,
+  inline ULONG APIENTRY _DiveBlitImageLines ( HDIVE a,
                                              ULONG b,
                                              ULONG c,
                                              PBYTE d )
@@ -80,10 +78,10 @@
 
     return yyrc;
   }
+  #undef  DiveBlitImageLines
+  #define DiveBlitImageLines _DiveBlitImageLines
 
-  #undef  DiveClose
-  #define DiveClose _DiveClose
-  inline ULONG APIENTRY DiveClose ( HDIVE a )
+  inline ULONG APIENTRY _DiveClose ( HDIVE a )
   {
     ULONG yyrc;
     USHORT sel = RestoreOS2FS();
@@ -93,10 +91,10 @@
 
     return yyrc;
   }
+  #undef  DiveClose
+  #define DiveClose _DiveClose
 
-  #undef  DiveAcquireFrameBuffer
-  #define DiveAcquireFrameBuffer _DiveAcquireFrameBuffer
-  inline ULONG APIENTRY DiveAcquireFrameBuffer ( HDIVE   a,
+  inline ULONG APIENTRY _DiveAcquireFrameBuffer ( HDIVE   a,
                                                  PRECTL  b )
   {
     ULONG yyrc;
@@ -107,10 +105,10 @@
 
     return yyrc;
   }
+  #undef  DiveAcquireFrameBuffer
+  #define DiveAcquireFrameBuffer _DiveAcquireFrameBuffer
 
-  #undef  DiveSwitchBank
-  #define DiveSwitchBank _DiveSwitchBank
-  inline ULONG APIENTRY DiveSwitchBank ( HDIVE a,
+  inline ULONG APIENTRY _DiveSwitchBank ( HDIVE a,
                                          ULONG b )
   {
     ULONG yyrc;
@@ -121,10 +119,10 @@
 
     return yyrc;
   }
+  #undef  DiveSwitchBank
+  #define DiveSwitchBank _DiveSwitchBank
 
-  #undef  DiveDeacquireFrameBuffer
-  #define DiveDeacquireFrameBuffer _DiveDeacquireFrameBuffer
-  inline ULONG APIENTRY DiveDeacquireFrameBuffer ( HDIVE a )
+  inline ULONG APIENTRY _DiveDeacquireFrameBuffer ( HDIVE a )
   {
     ULONG yyrc;
     USHORT sel = RestoreOS2FS();
@@ -134,10 +132,10 @@
 
     return yyrc;
   }
+  #undef  DiveDeacquireFrameBuffer
+  #define DiveDeacquireFrameBuffer _DiveDeacquireFrameBuffer
 
-  #undef  DiveCalcFrameBufferAddress
-  #define DiveCalcFrameBufferAddress _DiveCalcFrameBufferAddress
-  inline ULONG APIENTRY DiveCalcFrameBufferAddress ( HDIVE  a,
+  inline ULONG APIENTRY _DiveCalcFrameBufferAddress ( HDIVE  a,
                                                      PRECTL b,
                                                      PBYTE *c,
                                                      PULONG d,
@@ -151,10 +149,10 @@
 
       return yyrc;
   }
+  #undef  DiveCalcFrameBufferAddress
+  #define DiveCalcFrameBufferAddress _DiveCalcFrameBufferAddress
 
-  #undef  DiveAllocImageBuffer
-  #define DiveAllocImageBuffer _DiveAllocImageBuffer
-  inline ULONG APIENTRY DiveAllocImageBuffer ( HDIVE  a,
+  inline ULONG APIENTRY _DiveAllocImageBuffer ( HDIVE  a,
                                                PULONG b,
                                                FOURCC c,
                                                ULONG  d,
@@ -170,10 +168,10 @@
 
     return yyrc;
   }
+  #undef  DiveAllocImageBuffer
+  #define DiveAllocImageBuffer _DiveAllocImageBuffer
 
-  #undef  DiveFreeImageBuffer
-  #define DiveFreeImageBuffer _DiveFreeImageBuffer
-  inline ULONG APIENTRY DiveFreeImageBuffer ( HDIVE a,
+  inline ULONG APIENTRY _DiveFreeImageBuffer ( HDIVE a,
                                               ULONG b )
   {
     ULONG yyrc;
@@ -184,10 +182,10 @@
 
     return yyrc;
   }
+  #undef  DiveFreeImageBuffer
+  #define DiveFreeImageBuffer _DiveFreeImageBuffer
 
-  #undef  DiveBeginImageBufferAccess
-  #define DiveBeginImageBufferAccess _DiveBeginImageBufferAccess
-  inline ULONG APIENTRY DiveBeginImageBufferAccess ( HDIVE  a,
+  inline ULONG APIENTRY _DiveBeginImageBufferAccess ( HDIVE  a,
                                                      ULONG  b,
                                                      PBYTE *c,
                                                      PULONG d,
@@ -201,10 +199,10 @@
 
     return yyrc;
   }
+  #undef  DiveBeginImageBufferAccess
+  #define DiveBeginImageBufferAccess _DiveBeginImageBufferAccess
 
-  #undef  DiveEndImageBufferAccess
-  #define DiveEndImageBufferAccess _DiveEndImageBufferAccess
-  inline ULONG APIENTRY DiveEndImageBufferAccess ( HDIVE a,
+  inline ULONG APIENTRY _DiveEndImageBufferAccess ( HDIVE a,
                                                    ULONG b )
   {
     ULONG yyrc;
@@ -215,10 +213,10 @@
 
     return yyrc;
   }
+  #undef  DiveEndImageBufferAccess
+  #define DiveEndImageBufferAccess _DiveEndImageBufferAccess
 
-  #undef  DiveSetDestinationPalette
-  #define DiveSetDestinationPalette _DiveSetDestinationPalette
-  inline ULONG APIENTRY DiveSetDestinationPalette ( HDIVE a,
+  inline ULONG APIENTRY _DiveSetDestinationPalette ( HDIVE a,
                                                     ULONG b,
                                                     ULONG c,
                                                     PBYTE d )
@@ -231,10 +229,10 @@
 
     return yyrc;
   }
+  #undef  DiveSetDestinationPalette
+  #define DiveSetDestinationPalette _DiveSetDestinationPalette
 
-  #undef  DiveSetSourcePalette
-  #define DiveSetSourcePalette _DiveSetSourcePalette
-  inline ULONG APIENTRY DiveSetSourcePalette ( HDIVE a,
+  inline ULONG APIENTRY _DiveSetSourcePalette ( HDIVE a,
                                                ULONG b,
                                                ULONG c,
                                                PBYTE d )
@@ -247,10 +245,10 @@
 
     return yyrc;
   }
+  #undef  DiveSetSourcePalette
+  #define DiveSetSourcePalette _DiveSetSourcePalette
 
-  #undef  DiveSetTransparentBlitMode
-  #define DiveSetTransparentBlitMode _DiveSetTransparentBlitMode
-  inline ULONG APIENTRY DiveSetTransparentBlitMode ( HDIVE a,
+  inline ULONG APIENTRY _DiveSetTransparentBlitMode ( HDIVE a,
                                                      ULONG b,
                                                      ULONG c,
                                                      ULONG d )
@@ -263,6 +261,8 @@
 
     return yyrc;
   }
+  #undef  DiveSetTransparentBlitMode
+  #define DiveSetTransparentBlitMode _DiveSetTransparentBlitMode
 
 
 #endif

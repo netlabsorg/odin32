@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "os2palset.h"
-#include <odincrt.h>
+
 //******************************************************************************
 //******************************************************************************
 void OS2SetPhysPalette(void *pal)
@@ -17,7 +17,7 @@ void OS2SetPhysPalette(void *pal)
  RGB2 os2rgb[256];
  int  i;
 
-  ODIN_FS_BEGIN
+  
 
   hps = WinGetPS(HWND_DESKTOP);
   hdc = GpiQueryDevice(hps);
@@ -44,7 +44,7 @@ void OS2SetPhysPalette(void *pal)
                      TRUE);
   WinReleasePS(hps);
 
-  ODIN_FS_END
+  
 
 }
 //******************************************************************************
@@ -54,7 +54,7 @@ void OS2ResetPhysPalette()
  HPS hps;
  HDC hdc;
 
-  ODIN_FS_BEGIN
+  
 
   hps = WinGetPS( HWND_DESKTOP);
 
@@ -70,7 +70,7 @@ void OS2ResetPhysPalette()
 
   WinReleasePS(hps);
 
-  ODIN_FS_END
+  
 
 }
 //******************************************************************************

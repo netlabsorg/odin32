@@ -21,7 +21,7 @@
 #include "os2ddrawmodes.h"
 #include "os2DDWindow.h"
 #include "os2palset.h"
-#include <odincrt.h>
+
 #define KEY_DIRECT2 "\\Software\\Win32OS2\\Direct2"
 #define KEY_DIRECT2DRAW "\\Software\\Win32OS2\\Direct2\\Draw"
 
@@ -127,11 +127,9 @@ OS2IDirectDraw::OS2IDirectDraw(GUID *lpGUID) :
     }
   }
 
-  ODIN_FS_BEGIN
-    rc = DiveOpen( &hDive,
-                   FALSE,
-                   &pFrameBuffer);
-  ODIN_FS_END
+  rc = DiveOpen( &hDive,
+                 FALSE,
+                 &pFrameBuffer);
   if(rc)
   {
     WriteLog("ERROR: DiveOpen returned %d\n", rc);
@@ -241,7 +239,7 @@ ULONG __stdcall DrawRelease(THIS This)
     me->Referenced--;
     if(me->Referenced == 0)
     {
-      ODIN_delete(me);
+      delete(me);
       rc = 0;
     }
     else
@@ -270,8 +268,6 @@ HRESULT __stdcall DrawCreateClipper(THIS This, DWORD, LPDIRECTDRAWCLIPPER FAR *l
  OS2IDirectDrawClipper *newclip;
  HRESULT                rc;
 
- ODIN_FS_BEGIN
-
   newclip = new OS2IDirectDrawClipper(me);
 
   #ifdef DEBUG
@@ -295,8 +291,6 @@ HRESULT __stdcall DrawCreateClipper(THIS This, DWORD, LPDIRECTDRAWCLIPPER FAR *l
       *lplpDD = (IDirectDrawClipper *)newclip;
   }
 
-  ODIN_FS_END
-
   return(rc);
 }
 //******************************************************************************
@@ -310,8 +304,6 @@ HRESULT __stdcall DrawCreatePalette(THIS This, DWORD dwFlags,
   OS2IDirectDrawPalette *newpal;
   HRESULT                rc = DD_OK;
   int                    palsize = 0;
-
-  ODIN_FS_BEGIN
 
   if(dwFlags & DDPCAPS_8BITENTRIES)
   {
@@ -359,8 +351,6 @@ HRESULT __stdcall DrawCreatePalette(THIS This, DWORD dwFlags,
     }
   }
 
-  ODIN_FS_END
-
   return(rc);
 }
 //******************************************************************************
@@ -372,8 +362,6 @@ HRESULT __stdcall DrawCreateSurface(THIS This, LPDDSURFACEDESC lpDDSurfaceDesc,
  OS2IDirectDraw        *me = (OS2IDirectDraw *)This;
  OS2IDirectDrawSurface *newsurf;
  HRESULT                rc;
-
-  ODIN_FS_BEGIN
 
   #ifdef DEBUG
     WriteLog("CreateSurface\n");
@@ -409,8 +397,6 @@ HRESULT __stdcall DrawCreateSurface(THIS This, LPDDSURFACEDESC lpDDSurfaceDesc,
     WriteLog("New Surface created at %08X\n\n", newsurf);
   }
 
-  ODIN_FS_END
-
   return(rc);
 }
 //******************************************************************************
@@ -422,8 +408,6 @@ HRESULT __stdcall DrawCreateSurface4(THIS This, LPDDSURFACEDESC2 lpDDSurfaceDesc
  OS2IDirectDraw         *me = (OS2IDirectDraw *)This;
  OS2IDirectDrawSurface *newsurf;
  HRESULT                rc;
-
-  ODIN_FS_BEGIN
 
   #ifdef DEBUG
     WriteLog("CreateSurface4\n");
@@ -459,8 +443,6 @@ HRESULT __stdcall DrawCreateSurface4(THIS This, LPDDSURFACEDESC2 lpDDSurfaceDesc
 
     WriteLog("New Surface created at %08X\n\n", newsurf);
   }
-
-  ODIN_FS_END
 
   return(rc);
 }
@@ -508,8 +490,6 @@ HRESULT __stdcall DrawEnumDisplayModes(THIS This, DWORD dwFlags, LPDDSURFACEDESC
   }
 
 
-  ODIN_FS_BEGIN
-
   // Setting up the surface
   // During enum we report resolution and bitdepth, maybe we should
   // also report back : Caps and Pitch
@@ -537,7 +517,6 @@ HRESULT __stdcall DrawEnumDisplayModes(THIS This, DWORD dwFlags, LPDDSURFACEDESC
         DDSurfAct.ddpfPixelFormat.dwRGBBitCount = ModesDive[0].iBits;
         if(!lpDDEnumModesCallback(&DDSurfAct,lpContext))
         {
-          {ODIN_FS_END
           return (DD_OK);
         }
       }
@@ -609,7 +588,6 @@ HRESULT __stdcall DrawEnumDisplayModes(THIS This, DWORD dwFlags, LPDDSURFACEDESC
         DDSurfAct.ddpfPixelFormat.dwRGBBitCount = ModesDive[0].iBits;
         if(!lpDDEnumModesCallback(&DDSurfAct,lpContext))
         {
-          {ODIN_FS_END
           return (DD_OK);
         }
       }
@@ -681,7 +659,6 @@ HRESULT __stdcall DrawEnumDisplayModes(THIS This, DWORD dwFlags, LPDDSURFACEDESC
 
       if (lpDDSurfaceDesc->dwFlags & !(DDSD_WIDTH|DDSD_HEIGHT|DDSD_PIXELFORMAT))
       {
-        {ODIN_FS_END
         return(DDERR_INVALIDPARAMS);
       }
 
@@ -716,7 +693,7 @@ HRESULT __stdcall DrawEnumDisplayModes(THIS This, DWORD dwFlags, LPDDSURFACEDESC
 
   }
 
-  ODIN_FS_END
+  
 
   return(DD_OK);
 }
@@ -785,9 +762,9 @@ HRESULT __stdcall DrawGetCaps(THIS, LPDDCAPS lpDDDriverCaps, LPDDCAPS lpDDHELCap
 
     // Clear structure so we only have to set the supported flags
 
-    ODIN_FS_BEGIN
+    
     memset(lpDDDriverCaps,0,sizeof(DDCAPS));
-    ODIN_FS_END
+    
 
     // Reset the size
     lpDDDriverCaps->dwSize = sizeof(DDCAPS);
@@ -1159,7 +1136,7 @@ HRESULT __stdcall DrawGetMonitorFrequency(THIS This, LPDWORD lpdwFreq)
   if(NULL==lpdwFreq)
     return(DDERR_INVALIDPARAMS);
 
-  ODIN_FS_BEGIN
+  
 
   if(DD_OK==DrawWaitForVerticalBlank(This, dwFlags, 0))
   {
@@ -1182,7 +1159,7 @@ HRESULT __stdcall DrawGetMonitorFrequency(THIS This, LPDWORD lpdwFreq)
     *lpdwFreq = 70;
   }
 
-  ODIN_FS_END
+  
 
   return(DD_OK);
 }
@@ -1221,16 +1198,16 @@ HRESULT __stdcall DrawGetVerticalBlankStatus(THIS , LPBOOL lpbIsInVB)
   if(NULL==lpbIsInVB)
     return(DDERR_INVALIDPARAMS);
 
-  ODIN_FS_BEGIN
+  
     rc = io_init1();
-  ODIN_FS_END
+  
 
   if(0==rc)  // try to get IOPL for the thread
   {
     *lpbIsInVB = (c_inb1(0x3da)&0x08)!=0;
-    ODIN_FS_BEGIN
+    
       io_exit1(); // reset IOPL
-    ODIN_FS_END
+    
     return(DD_OK);
   }
 
@@ -1339,9 +1316,9 @@ HRESULT __stdcall DrawWaitForVerticalBlank(THIS, DWORD dwFlags, HANDLE hEvent)
   if(DDWAITVB_BLOCKBEGINEVENT == dwFlags) // This parameter isn't support in DX
     return (DDERR_UNSUPPORTED);
 
-  ODIN_FS_BEGIN
+  
     rci = io_init1();
-  ODIN_FS_END
+  
 
   if(rci)  // try to get IOPL for the thread
     return (DDERR_UNSUPPORTED);  // we failed so return error that we don't support this
@@ -1372,9 +1349,9 @@ HRESULT __stdcall DrawWaitForVerticalBlank(THIS, DWORD dwFlags, HANDLE hEvent)
 
   }
 
-  ODIN_FS_BEGIN
+  
     io_exit1();
-  ODIN_FS_END
+  
 
   return (rc);
 
@@ -1471,7 +1448,7 @@ HRESULT __stdcall DrawGetDeviceIdentifier( THIS, LPDDDEVICEIDENTIFIER lpdddi,
   if(NULL==lpdddi)
     return DDERR_INVALIDPARAMS;
 
-  ODIN_FS_BEGIN
+  
 
   memset( lpdddi,
           0,
@@ -1482,7 +1459,7 @@ HRESULT __stdcall DrawGetDeviceIdentifier( THIS, LPDDDEVICEIDENTIFIER lpdddi,
   strcpy( lpdddi->szDescription,
           "ODIN DD Emulation Driver");
 
-  ODIN_FS_END
+  
 
   return(DD_OK);
 }
@@ -1493,7 +1470,7 @@ VOID OS2IDirectDraw::SwitchDisplay(HWND hwnd)
   DWORD dwVType, dwVSize;
   HKEY hkDirectDraw2;
 
-  ODIN_FS_BEGIN
+  
 
   if (bScale)
   {
@@ -1509,7 +1486,7 @@ VOID OS2IDirectDraw::SwitchDisplay(HWND hwnd)
       bScale = FALSE;
   }
 
-  ODIN_FS_END
+  
 }
 //******************************************************************************
 //******************************************************************************
