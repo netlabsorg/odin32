@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2000-12-02 23:37:36 bird Exp $
+# $Id: makefile,v 1.6 2001-01-09 19:14:07 bird Exp $
 
 #
 # Odin32 API
@@ -19,7 +19,8 @@
 all:    $(ODIN32_LIB) \
         $(ODIN32_LIB)\pmwinx.lib \
         $(ODIN32_LIB)\libconv.lib \
-        $(ODIN32_LIB)\libuls.lib
+        $(ODIN32_LIB)\libuls.lib \
+        $(ODIN32_LIB)\wgss50.lib
 
 
 #
@@ -34,6 +35,14 @@ $(ODIN32_LIB):
 #
 $(ODIN32_LIB)\pmwinx.lib: pmwinx.def
     $(IMPLIB) $(IMPLIBFLAGS) $(ODIN32_LIB)\pmwinx.lib pmwinx.def
+
+
+#
+# Make our own pmwinx (Open32) import library.
+#
+$(ODIN32_LIB)\wgss50.lib: wgss50.def
+    $(IMPLIB) $(IMPLIBFLAGS) $(ODIN32_LIB)\wgss50.lib wgss50.def
+
 
 #
 # Make our own libconv (UNICODE) import library.
