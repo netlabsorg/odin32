@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.289 1999-10-08 19:34:24 dengert Exp $ */
+ /* $Id: ChangeLog,v 1.290 1999-10-08 19:45:22 sandervl Exp $ */
 
  99-10-08: Daniela Engert <dani@ngrt.de>
 	- USER32: fix: miscoloured bitmaps
@@ -12,15 +12,19 @@
 	- KERNEL32: Accelerator conversion fixes + changes
 
  99-10-08: Sander van Leeuwen <sandervl@xs4all.nl>
-	- USER32: Bugfix for SetWindowPos; take frame size into account
-		  Removed WM_MOVE notification class flag for Odin PM windows
-		  Removed SetWindowPos frame size bugfix
-		  Removed WM_WINDOWPOSCHANGED cy bugfix
-		  Set WS_DISABLED window style bit when receiving PM WM_ENABLE
-		  GetClassInfoA bugfix
-		  Window property bugfixes (no handle translation)
-		  Set last error when window creation fails.
-	- KERNEL32: Bugfix for loading winspool
+ 	- USER32: Bugfix for SetWindowPos; take frame size into account
+                  Removed WM_MOVE notification class flag for Odin PM windows
+                  Removed SetWindowPos frame size bugfix
+                  Removed WM_WINDOWPOSCHANGED cy bugfix
+                  Set WS_DISABLED window style bit when receiving PM WM_ENABLE
+                  GetClassInfoA bugfix
+                  Window property bugfixes (no handle translation)
+                  Set last error when window creation fails.
+                  In DefDlgProcA/W, call DefWindowProcA/W if window is not
+                  a dialog. Fixed problems in VPBuddy. 
+                  Unknown if that's a bug in the app or something else goes wrong.
+        - KERNEL32: Bugfix for loading winspool
+                    Ported latest Wine exception code (RtlRaiseException/RtlUnwind)
 
  99-10-07: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: GetCaretPos() fix
