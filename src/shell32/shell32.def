@@ -1,4 +1,4 @@
-; $Id: shell32.def,v 1.5 1999-06-10 16:56:09 phaller Exp $
+; $Id: shell32.def,v 1.6 1999-06-23 22:17:52 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 ;based on Windows NT4, SP3
@@ -54,7 +54,7 @@ EXPORTS
                                  _SHELL32_77@12                     @77
 ;   DuplicateIcon              = _DuplicateIcon@?                   @78
                                  _SHELL32_79@8                      @79
-;   ExtractAssociatedIconA     = _ExtractAssociatedIconA@?          @80
+   ExtractAssociatedIconA     = _ExtractAssociatedIconA@12          @80
                                  _SHELL32_85@16                     @85
                                  _SHELL32_89@12                     @89
 ;   ExtractAssociatedIconExA   = _ExtractAssociatedIconExA@?        @99
@@ -62,7 +62,7 @@ EXPORTS
                                  _SHELL32_102@20                    @102
                                  _SHELL32_119@4                     @119
 ;   ExtractAssociatedIconExW   = _ExtractAssociatedIconExW@?        @122
-;   ExtractAssociatedIconW     = _ExtractAssociatedIconW@?          @123
+    ExtractAssociatedIconW     = _ExtractAssociatedIconW@12         @123
     ExtractIconA               = _ExtractIconA@12                   @131
     ExtractIconEx              = _ExtractIconExA@20                 @133
     ExtractIconExA             = _ExtractIconExA@20                 @136
