@@ -1,11 +1,12 @@
-# $Id: Makefile,v 1.29 2002-08-20 04:37:58 bird Exp $
+# $Id: Makefile,v 1.30 2002-08-20 04:39:13 bird Exp $
 
 #
 # kKrnlLib main file.
 #
 # Copyright (c) 2002 knut st. osmundsen (bird@anduin.net)
 #
-
+# GPL
+#
 
 #
 # Setup.
