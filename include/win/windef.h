@@ -1,4 +1,4 @@
-/* $Id: windef.h,v 1.6 1999-08-25 11:24:08 sandervl Exp $ */
+/* $Id: windef.h,v 1.7 1999-08-30 22:15:20 sandervl Exp $ */
 
 /*
  * Basic types definitions
@@ -581,6 +581,8 @@ typedef struct _POINTL
             ((p32)->x = (INT)(p16)->x, (p32)->y = (INT)(p16)->y)
 #define CONV_POINT32TO16(p32,p16) \
             ((p16)->x = (INT16)(p32)->x, (p16)->y = (INT16)(p32)->y)
+
+#define MAKEPOINT(l)  (*((POINT *)&(l)))
 
 #define MAKEPOINT16(l) (*((POINT16 *)&(l)))
 
