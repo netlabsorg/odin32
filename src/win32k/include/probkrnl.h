@@ -1,8 +1,8 @@
-/* $Id: probkrnl.h,v 1.16 2000-10-01 02:58:17 bird Exp $
+/* $Id: probkrnl.h,v 1.17 2000-12-11 06:34:45 bird Exp $
  *
  * Include file for ProbKrnl.
  *
- * Copyright (c) 1998-2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+ * Copyright (c) 1998-2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -15,10 +15,10 @@
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
 *******************************************************************************/
-#define NBR_OF_KRNLIMPORTS      40      /* When this is changed make sure to   */
+#define NBR_OF_KRNLIMPORTS      52      /* When this is changed make sure to   */
                                         /* update the aImportTab in probkrnl.c */
                                         /* and make test faker in test.h and   */
-                                        /* the appropriate fake.c fakea.asm.   */
+                                        /* the appropriate fake.c or fakea.asm.*/
 #define MAX_LENGTH_NAME         32      /* Max length for the function. */
 
 /* Entry-Point Type flag */
