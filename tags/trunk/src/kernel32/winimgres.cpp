@@ -1,4 +1,4 @@
-/* $Id: winimgres.cpp,v 1.45 2000-08-17 18:22:18 sandervl Exp $ */
+/* $Id: winimgres.cpp,v 1.46 2000-09-08 18:07:52 sandervl Exp $ */
 
 /*
  * Win32 PE Image class (resource methods)
@@ -806,6 +806,102 @@ BOOL Win32ImageBase::enumResourceTypesW(HMODULE hmod, ENUMRESTYPEPROCW lpEnumFun
         prde++;
     }
     return fRet > 0 ? TRUE : FALSE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32ImageBase::enumResourceLanguagesA(HMODULE hmod, LPCSTR lpszType, 
+                                            LPCSTR lpszName, 
+                                            ENUMRESLANGPROCA lpEnumFunc, 
+                                            LONG lParam)
+{
+ PIMAGE_RESOURCE_DIRECTORY pResDirRet;
+ PIMAGE_RESOURCE_DIRECTORY_ENTRY paResDirEntries;
+ BOOL   fRet;
+
+    if (pResRootDir == NULL)
+    {
+        SetLastError(ERROR_RESOURCE_DATA_NOT_FOUND);
+        return FALSE;
+    }
+
+    if ((ULONG)lpEnumFunc < 0x10000 || (ULONG)lpEnumFunc >= 0xc0000000)
+    {
+        SetLastError(ERROR_NOACCESS);
+        return FALSE;
+    }
+
+    pResDirRet = getResSubDirA(pResRootDir, lpszType);
+    if(!pResDirRet) {
+	SetLastError(ERROR_RESOURCE_TYPE_NOT_FOUND);
+	return FALSE;
+    }
+    pResDirRet = getResSubDirA(pResDirRet, lpszName);
+    if(!pResDirRet) {
+	SetLastError(ERROR_RESOURCE_NAME_NOT_FOUND);
+	return FALSE;
+    }
+
+    paResDirEntries = (PIMAGE_RESOURCE_DIRECTORY_ENTRY)((ULONG)pResDirRet + sizeof(*pResDirRet));
+    if(pResDirRet->NumberOfNamedEntries) {
+	DebugInt3();
+    }
+    paResDirEntries += pResDirRet->NumberOfNamedEntries;
+
+    for(int i = 0;i < pResDirRet->NumberOfIdEntries;i++) 
+    {
+	fRet = lpEnumFunc(hmod, lpszType, lpszName, paResDirEntries[i].u1.Id, lParam);
+	if(!fRet)
+		break;
+    }
+    return fRet;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32ImageBase::enumResourceLanguagesW(HMODULE hmod, LPCWSTR lpszType, 
+                                            LPCWSTR lpszName, 
+                                            ENUMRESLANGPROCW lpEnumFunc, 
+                                            LONG lParam)
+{
+ PIMAGE_RESOURCE_DIRECTORY pResDirRet;
+ PIMAGE_RESOURCE_DIRECTORY_ENTRY paResDirEntries;
+ BOOL   fRet;
+
+    if (pResRootDir == NULL)
+    {
+        SetLastError(ERROR_RESOURCE_DATA_NOT_FOUND);
+        return FALSE;
+    }
+
+    if ((ULONG)lpEnumFunc < 0x10000 || (ULONG)lpEnumFunc >= 0xc0000000)
+    {
+        SetLastError(ERROR_NOACCESS);
+        return FALSE;
+    }
+
+    pResDirRet = getResSubDirW(pResRootDir, lpszType);
+    if(!pResDirRet) {
+	SetLastError(ERROR_RESOURCE_TYPE_NOT_FOUND);
+	return FALSE;
+    }
+    pResDirRet = getResSubDirW(pResDirRet, lpszName);
+    if(!pResDirRet) {
+	SetLastError(ERROR_RESOURCE_NAME_NOT_FOUND);
+	return FALSE;
+    }
+
+    paResDirEntries = (PIMAGE_RESOURCE_DIRECTORY_ENTRY)((ULONG)pResDirRet + sizeof(*pResDirRet));
+    if(pResDirRet->NumberOfNamedEntries) {
+	DebugInt3();
+    }
+    paResDirEntries += pResDirRet->NumberOfNamedEntries;
+
+    for(int i = 0;i < pResDirRet->NumberOfIdEntries;i++) 
+    {
+	fRet = lpEnumFunc(hmod, lpszType, lpszName, paResDirEntries[i].u1.Id, lParam);
+	if(!fRet)
+		break;
+    }
+    return fRet;
 }
 //******************************************************************************
 //******************************************************************************
