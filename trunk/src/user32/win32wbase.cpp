@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.287 2001-10-01 17:28:08 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.288 2001-10-02 17:14:10 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2498,6 +2498,7 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
     if(state < STATE_POST_WMNCCREATE)
     {//don't change size; modify internal structures only
         //TODO: not 100% correct yet (activate)
+        dprintf2(("state < STATE_POST_WMNCCREATE"));
         if(!(fuFlags & SWP_NOZORDER)) {
             hwndLinkAfter = hwndInsertAfter;
         }
@@ -2542,6 +2543,7 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
     else  OSLibMapWINDOWPOStoSWP(&wpos, &swp, &swpOld, OSLibQueryScreenHeight(), OS2HwndFrame);
 
     if (swp.fl == 0) {
+        dprintf2(("swp.fl == 0"));
         if(fuFlags & SWP_FRAMECHANGED)
         {
             NotifyFrameChanged(&wpos, &oldClientRect);

@@ -1,4 +1,4 @@
-/* $Id: oslibres.cpp,v 1.20 2001-08-26 14:23:33 sandervl Exp $ */
+/* $Id: oslibres.cpp,v 1.21 2001-10-02 17:14:09 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -626,6 +626,9 @@ BOOL WIN32API OSLibWinCreateObject(LPSTR pszPath, LPSTR pszArgs,
 //                    "PROGTYPE=PM;OBJECTID=<WARPMIX>;ICONFILE=WARPMIX.ICO;EXENAME="||bootDrive||"\MMOS2\WARPMIX.EXE")  
 
    free(pszSetupString);
+   if(!hObject) {
+       dprintf(("ERROR: WinCreateObject failed!!"));
+   }
    return hObject != 0;
 }
 //******************************************************************************

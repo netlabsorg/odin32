@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.149 2001-09-30 22:24:41 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.150 2001-10-02 17:14:09 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -1471,6 +1471,7 @@ VOID FrameTrackFrame(Win32BaseWindow *win32wnd,DWORD flags)
   static    BOOL fInit = FALSE;
   APIRET    rc;
   BOOL      ret;
+  HWND      hwnd = win32wnd->getWindowHandle();
 
     if(!fInit) {
         HMODULE hModule;
@@ -1480,7 +1481,7 @@ VOID FrameTrackFrame(Win32BaseWindow *win32wnd,DWORD flags)
         if(rc) WinTrackWindow = NULL;
         fInit = TRUE;
     }
-    dprintf(("FrameTrackFrame: %x %x", win32wnd->getWindowHandle(), flags));
+    dprintf(("FrameTrackFrame: %x %x", hwnd, flags));
     track.cxBorder = 4;
     track.cyBorder = 4;  /* 4 pel wide lines used for rectangle */
     track.cxGrid = 1;
@@ -1515,12 +1516,22 @@ VOID FrameTrackFrame(Win32BaseWindow *win32wnd,DWORD flags)
 
     BOOL fDynamicDrag = WinQuerySysValue(HWND_DESKTOP, SVOS_DYNAMICDRAG);
 
+    //TODO: send WM_QUERYDRAGICON to fetch icon (not really necessary)
+
+    SendMessageA( hwnd, WM_ENTERSIZEMOVE_W, 0, 0);
+
     SEL sel = RestoreOS2FS();
     if(fDynamicDrag && WinTrackWindow) {
          ret = WinTrackWindow(win32wnd->getOS2FrameWindowHandle(), &track);
     }
     else ret = WinTrackRect(hwndTracking, NULL, &track);
     SetFS(sel);
+
+//TODO:
+//    if (HOOK_CallHooksA( WH_CBT_W, HCBT_MOVESIZE_W, (WPARAM)hwnd, (LPARAM)&sizingRect )) moved = FALSE;
+
+    SendMessageA( hwnd, WM_EXITSIZEMOVE_W, 0, 0 );
+    SendMessageA( hwnd, WM_SETVISIBLE_W, !IsIconic(hwnd), 0L);
 
     if(ret) {
         /* if successful copy final position back */
