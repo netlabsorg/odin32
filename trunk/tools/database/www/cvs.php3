@@ -10,7 +10,7 @@ $sCVSROOT = "e:/netlabs.cvs/odin";
 $sIconsUrl = "/icons";
 $sIconsUrl = "http://www.netlabs.org/icons";
 
-echo '\n<!-- cvsroot:'.$sCVSROOT.' -->\n';
+echo '<!-- cvsroot:'.$sCVSROOT.' -->';
 
 /**
  * Quick and dirty CVS file parser.
@@ -1081,6 +1081,7 @@ function ListDirectory($sDir, $iSortColumn)
      *  one for files and one for directories. All files which
      *  don't end with ',v' are ignored.
      */
+    printf('\n<!-- opendir('.$sCVSROOT.'/'.$sDir.'); -->\n');
     $hDir = opendir($sCVSROOT.'/'.$sDir);
     if (!$hDir)
     {
