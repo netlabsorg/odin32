@@ -1,8 +1,12 @@
- /* $Id: ChangeLog,v 1.863 2000-04-05 18:38:33 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.864 2000-04-05 18:44:22 bird Exp $ */
+
+ 2000-04-05: Knut St. Osmundsen <knut.stange.osmundsen@pmsc.no>
+        - Win32k: Added fixpack 13 symbols to the symbol database.
+                Using win32k.sys with fp13 works fine here.
 
  2000-04-05: Sander van Leeuwen <sandervl@xs4all.nl>
 	- WINMM: Smallest waveout buffer size = 128 bytes
-                 Fixed callback bugs (reported by Michal Necasek)
+                Fixed callback bugs (reported by Michal Necasek)
 
  2000-04-03: David Raison <djr@lemur.co.uk>
  	- OLE32: Added CoCreateGUID (calls RPCRT4.UuidCreate)
@@ -178,7 +182,7 @@
  	- OLEAUT32: Bugfix in ITypeLibImpl_GetDocumentation
 
  2000-03-20: Sander van Leeuwen <sandervl@xs4all.nl>
-	- WSOCK32: Fixed relay bug in WSAAsyncSelect (delete relay slot 
+	- WSOCK32: Fixed relay bug in WSAAsyncSelect (delete relay slot
                    with same socket nr & window handle; there can
                    be more selects per window)
 
