@@ -1,4 +1,13 @@
-/* $Id: changelog,v 1.1730 2001-10-10 11:05:11 phaller Exp $ */
+/* $Id: changelog,v 1.1731 2001-10-10 14:39:27 sandervl Exp $ */
+
+ 2001-10-10: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Do not blindly add ODIN_FUNCTION macros to functions that
+                  get called very often. (like IsWindow, GetParent & IsWindowVisible)
+                  This tends to make logfiles very big...
+    - WSOCK32:  o Added IP_ADD_MEMBERSHIP, IP_DROP_MEMBERSHIP, IP_MULTICAST_LOOP &
+                  IP_MULTICAST_TTL to setsockopt
+    - DDRAW:    o Commented out DiveAcquire/DeaquireFrameBuffer for now
+                  (surflock/unlock)
 
  2001-10-10: Patrick Haller <patrick.haller@innotek.de>
     - KERNEL32: o added IOCTL_CDROM_EJECT_MEDIA
