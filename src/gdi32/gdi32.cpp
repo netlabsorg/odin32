@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.71 2001-05-28 09:17:54 phaller Exp $ */
+/* $Id: gdi32.cpp,v 1.72 2001-05-28 14:43:34 phaller Exp $ */
 
 /*
  * GDI32 apis
@@ -332,7 +332,19 @@ HBRUSH WIN32API CreateBrushIndirect( const LOGBRUSH *pLogBrush)
 //******************************************************************************
 HDC WIN32API CreateDCA(LPCSTR lpszDriver, LPCSTR lpszDevice, LPCSTR lpszOutput, const DEVMODEA *lpInitData)
 {
- HDC hdc;
+    HDC hdc;
+
+    // 2001-05-28 PH
+    // Ziff Davis Benchmarks come in here with "display".
+    // Obviously, Windows does accept case-insensitive driver names,
+    // whereas Open32 doesn't.
+    if (*lpszDriver == 'd') // quick check
+    {
+        // then do a double-check and use the uppercase constant
+        // instead
+        if (stricmp(lpszDriver, "DISPLAY") == 0)
+            lpszDriver = "DISPLAY";
+    }
 
     hdc = O32_CreateDC(lpszDriver, lpszDevice, lpszOutput, lpInitData);
     dprintf(("GDI32: CreateDCA %s %s %s %x returned %x", lpszDriver, lpszDevice, lpszOutput, lpInitData, hdc));
@@ -394,10 +406,10 @@ HDC WIN32API CreateDCW( LPCWSTR arg1, LPCWSTR arg2, LPCWSTR arg3, const DEVMODEW
       devmode.dmDitherType       = arg4->dmDitherType;
       devmode.dmReserved1        = arg4->dmReserved1;
       devmode.dmReserved2        = arg4->dmReserved2;
-      rc = O32_CreateDC(astring1,astring2,astring3,&devmode);
+      rc = CreateDCA(astring1,astring2,astring3,&devmode);
     }
     else
-      rc = O32_CreateDC(astring1,astring2,astring3, NULL);
+      rc = CreateDCA(astring1,astring2,astring3, NULL);
 
     FreeAsciiString(astring1);
     FreeAsciiString(astring2);
