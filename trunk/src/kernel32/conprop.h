@@ -1,4 +1,4 @@
-/* $Id: conprop.h,v 1.5 1999-08-31 22:44:33 phaller Exp $ */
+/* $Id: conprop.h,v 1.6 1999-10-27 12:38:46 phaller Exp $ */
 
 /*
  * Win32 Console Subsystem for OS/2
@@ -54,15 +54,16 @@ MRESULT EXPENTRY ConsolePropertyDlgProc(HWND   hwnd,
                                         MPARAM mp1,
                                         MPARAM mp2);
 
-
+                                               /* default console properties */
+DWORD ConsolePropertyDefault(PICONSOLEOPTIONS pConsoleOptions);
                                                   /* read console properties */
-APIRET EXPENTRY ConsolePropertyLoad(PICONSOLEOPTIONS pConsoleOptions);
+DWORD ConsolePropertyLoad(PICONSOLEOPTIONS pConsoleOptions);
 
                                                  /* write console properties */
-APIRET EXPENTRY ConsolePropertySave(PICONSOLEOPTIONS pConsoleOptions);
+DWORD ConsolePropertySave(PICONSOLEOPTIONS pConsoleOptions);
 
                                                  /* apply console properties */
-APIRET EXPENTRY ConsolePropertyApply(PICONSOLEOPTIONS pConsoleOptions);
+DWORD ConsolePropertyApply(PICONSOLEOPTIONS pConsoleOptions);
 
 #ifdef __cplusplus
 }
