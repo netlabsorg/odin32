@@ -1,4 +1,4 @@
-/* $Id: thread.cpp,v 1.44 2002-05-21 14:42:40 sandervl Exp $ */
+/* $Id: thread.cpp,v 1.45 2002-05-22 12:57:17 sandervl Exp $ */
 
 /*
  * Win32 Thread API functions
@@ -284,7 +284,7 @@ DWORD OPEN32API Win32ThreadProc(LPVOID lpData)
  DWORD            rc;
 
   delete(me);    //only called once
-  dprintf(("Win32ThreadProc %d\n", GetCurrentThreadId()));
+  dprintf(("Win32ThreadProc %x\n", GetCurrentThreadId()));
 
   TEB *winteb = (TEB *)InitializeTIB();
   if(winteb == NULL) {
