@@ -1,4 +1,13 @@
-/* $Id: changelog,v 1.1614 2001-07-21 17:40:03 sandervl Exp $ */
+/* $Id: changelog,v 1.1615 2001-07-23 19:15:00 sandervl Exp $ */
+
+ 2001-07-22: Sander van Leeuwen <sandervl@xs4all.nl>
+    - TOOLS\INSTALL: 
+                o Added some quartz.dll keys
+    - COMCTL32: o Status window bugfix; check part number boundary
+                  (fixes crash in AudioGalaxy)
+    - USER32:   o IsWindowVisible fix; check WS_CHILD flag before calling GetParent
+                  (fixes invisible characters while typing in edit control
+                   of AudioGalaxy)
 
  2001-07-21: Sander van Leeuwen <sandervl@xs4all.nl>
     - DINPUT, DPLAYX, ICMP, IMAGEHLP, IMM32, LZ32, 
