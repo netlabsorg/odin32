@@ -1,4 +1,4 @@
--- $Id: Teams.sql,v 1.3 2000-07-18 22:21:28 bird Exp $
+-- $Id: Teams.sql,v 1.4 2000-08-01 01:49:56 bird Exp $
 --
 -- Team data.
 --
@@ -423,7 +423,7 @@ INSERT INTO tgroupdll(tgroup, dll)
 INSERT INTO tgroup(refcode, team,        name,  description, notes)
     VALUES        (   3008,    3, 'Winsock'
 ,'To implement networking support (TCP/IP and NetBIOS primarily) via
-<tt>WSOCK32.DLL</tt>, <tt>NETAPI.DLL</tt> and <tt>MPR.DLL</tt>'
+<tt>WSOCK32.DLL</tt>, <tt>NETAPI32.DLL</tt> and <tt>MPR.DLL</tt>'
 ,
 '<li>Vince Vielhaber did Winsock part in old project (practicaly completed
     Winsock 1.1 support).\n
@@ -449,7 +449,7 @@ INSERT INTO tgroupmember(tgroup, author)
                         'Vince Vielhaber'
                        );
 INSERT INTO tgroupdll(tgroup, dll)
-    SELECT 3003, refcode FROM dll WHERE name IN ('WSOCK32', 'NETAPI', 'MPR');
+    SELECT 3008, refcode FROM dll WHERE name IN ('WSOCK32', 'NETAPI32', 'MPR');
 
 
 
@@ -644,7 +644,7 @@ INSERT INTO tgroupmember(tgroup, author)
                         'Felix Maschek'
                        );
 INSERT INTO tgroupdll(tgroup, dll)
-    SELECT 3015, refcode FROM dll WHERE name IN ('CAPI32');
+    SELECT 3015, refcode FROM dll WHERE name IN ('CAPI2032');
 
 
 
