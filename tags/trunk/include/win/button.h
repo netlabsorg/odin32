@@ -1,4 +1,4 @@
-/* $Id: button.h,v 1.4 1999-07-23 17:55:27 sandervl Exp $ */
+/* $Id: button.h,v 1.5 1999-10-08 12:09:32 cbratschi Exp $ */
 
 /*
  * Button-class extra info
@@ -32,10 +32,10 @@ typedef struct
 #define BUTTON_HIGHLIGHTED     0x04
 #define BUTTON_HASFOCUS        0x08
 
-#define BUTTON_STATE(hwnd)     ((WIN_FindWndPtr(hwnd))->wExtra[0])
+//#define BUTTON_STATE(hwnd)     ((WIN_FindWndPtr(hwnd))->wExtra[0])
 
-extern LRESULT WINAPI ButtonWndProc( HWND hWnd, UINT uMsg,
-                                     WPARAM wParam, LPARAM lParam );
+//extern LRESULT WINAPI ButtonWndProc( HWND hWnd, UINT uMsg,
+//                                     WPARAM wParam, LPARAM lParam );
 
 BOOL BUTTON_Register();
 BOOL BUTTON_Unregister();
