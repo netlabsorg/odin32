@@ -1,3 +1,5 @@
+; $Id: wnetap32.def,v 1.2 1999-06-10 16:17:57 phaller Exp $
+
 LIBRARY WNETAP32 INITINSTANCE
 DATA MULTIPLE NONSHARED
 
@@ -179,14 +181,14 @@ EXPORTS
   NetShareDel 			= _OS2NetShareDel@12			@174    ;stubonly
 ;    0175    NetShareDelSticky
 ;    0176    NetShareEnum
-;    0177    NetShareEnumSticky  
+;    0177    NetShareEnumSticky
   NetShareGetInfo 		= _OS2NetShareGetInfo@16		@178    ;stubonly
   NetShareSetInfo 		= _OS2NetShareSetInfo@20		@179    ;stubonly
 ;  NetStatisticsGet2 		= _OS2NetStatisticsGet2@20		@    ;stubonly NOT in DLL but in SDK doc
 ;    0181    NetUseAdd
 ;    0182    NetUseDel
 ;    0183    NetUseEnum
-;    0184    NetUseGetInfo  
+;    0184    NetUseGetInfo
   NetUserAdd 			= _OS2NetUserAdd@16			@185    ;stubonly
   NetUserChangePassword 	= _OS2NetUserChangePassword@16		@186    ;stubonly
   NetUserDel 			= _OS2NetUserDel@8			@187    ;stubonly

@@ -1,3 +1,5 @@
+/* $Id: winspool.cpp,v 1.2 1999-06-10 16:19:02 phaller Exp $ */
+
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT
