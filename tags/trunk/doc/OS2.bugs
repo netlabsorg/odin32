@@ -15,6 +15,11 @@ OS/2 bugs:
   set that flag, then DosQueryMem does not return that flag.
   If you allocate it with PAG_EXECUTE set, then DosQueryMem does what it's supposed to.
 
+- Workaround added for coordinate problem when a window
+  looses focus and SelectClipRgn is called. GpiSetClipRegion
+  resets the window origin for some unknown reason 
+  (TODO: figure out why)
+
 FP13:
 - DosQuerySysState bug when object information is requested. Probably a
   problem which occurs in _LDRSysMteInfo when qsCheckCache is calle before
