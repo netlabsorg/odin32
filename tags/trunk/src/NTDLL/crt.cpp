@@ -1,4 +1,4 @@
-/* $Id: crt.cpp,v 1.9 1999-09-13 19:45:33 phaller Exp $ */
+/* $Id: crt.cpp,v 1.10 1999-10-25 19:24:13 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -1313,11 +1313,11 @@ char * CDECL OS2_itow(int i, char *s, int r)
  * Author    : Jens Wiessner
  *****************************************************************************/
 
-LONG CDECL NTDLL__CIpow(void)
+LONG CDECL NTDLL__CIpow(double x, double y)
 {
-  dprintf(("NTDLL: _CIpow not implemented.\n"));
-
-  return 0;
+  dprintf(("NTDLL: _CIpow\n"));
+  dprintf(("should be register function\n"));
+  return pow(x, y);
 }
 
 
@@ -1379,8 +1379,8 @@ LPSTR  CDECL NTDLL__ltoa(long x,LPSTR buf,INT radix)
 INT CDECL NTDLL__memicmp(
 	LPCSTR s1,	/* [in] first string */
 	LPCSTR s2,	/* [in] second string */
-	DWORD len	/* [in] length to compare */ ) 
-{ 
+	DWORD len	/* [in] length to compare */ )
+{
 	dprintf(("NTDLL: memicmp(%08xh, %08xh, %08xh)\n",s1,s2,len));
 	int	i;
 
@@ -1452,15 +1452,44 @@ int  CDECL NTDLL__snwprintf( wchar_t *buf, size_t bufsize, const wchar_t *fmt, .
  * Author    : Jens Wiessner
  *****************************************************************************/
 
-void CDECL NTDLL__splitpath( const char *path, char *drive,
-	    		     char *dir, char *fname, char *ext )
+void CDECL NTDLL__splitpath( const char *path, char *drive, char *dir, char *fname, char *ext )
 {
-  dprintf(("NTDLL: _splitpath(%08xh, %08xh, %08xh, %08xh, %08xh) not implemented\n",
-           path,
-           drive,
-           dir,
-           fname,
-           ext));
+	dprintf(("NTDLL: _splitpath"));
+
+	char *tmp_drive;
+	char *tmp_dir;
+	char *tmp_ext;
+
+	tmp_drive = (char *)strchr(path,':');
+	if ( tmp_drive != (char *)NULL ) {
+		strncpy(drive,tmp_drive-1,1);
+		*(drive+1) = 0;
+	}
+	else {
+		*drive = 0;
+		tmp_drive = (char *)path;
+	}
+
+	tmp_dir = (char *)strrchr(path,'\\');
+	if( tmp_dir != NULL && tmp_dir != tmp_drive + 1 ) {
+		strncpy(dir,tmp_drive+1,tmp_dir - tmp_drive);
+		*(dir + (tmp_dir - tmp_drive)) = 0;
+	}
+	else 	
+		*dir =0;
+
+	tmp_ext = ( char *)strrchr(path,'.');
+	if ( tmp_ext != NULL ) {
+		strcpy(ext,tmp_ext);
+	}
+	else
+		*ext = 0;
+    if ( tmp_dir != NULL ) {
+		strncpy(fname,tmp_dir+1,tmp_ext - tmp_dir - 1);
+		*(fname + (tmp_ext - tmp_dir -1)) = 0;
+	}
+	else
+		strncpy(fname,path,tmp_ext - path);
 
 }
 
@@ -1502,7 +1531,7 @@ void CDECL NTDLL__strcmpi( LPCSTR s1, LPCSTR s2 )
 CHAR * CDECL NTDLL__strlwr(char *x)
 {
   char *y =x;
-  
+
   dprintf(("NTDLL: _strlwr got %s\n", x));
   while (*y) {
     if ((*y > 0x40) && (*y< 0x5b))
@@ -1510,7 +1539,7 @@ CHAR * CDECL NTDLL__strlwr(char *x)
     y++;
   }
   dprintf(("   returned %s\n", x));
-		 
+		
   return x;
 }
 
@@ -1529,12 +1558,25 @@ CHAR * CDECL NTDLL__strlwr(char *x)
 
 int  CDECL NTDLL__strnicmp( LPCSTR s1, LPCSTR s2, INT n )
 {
-  dprintf(("NTDLL: _strnicmp(%08xh, %08xh, %08xh) not implemented\n",
+  dprintf(("NTDLL: _strnicmp (%s,%s,%d)\n",
            s1,
            s2,
            n));
 
+  // @@@PH: sure it's not a UNICODE API?
+  return (lstrncmpiA(s1,s2,n));
+
+/*
+  if (n == 0)
+    return 0;
+  do {
+    if (toupper(*s1) != toupper(*s2++))
+      return toupper(*(unsigned const char *)s1) - toupper(*(unsigned const char *)--s2);
+    if (*s1++ == 0)
+      break;
+  } while (--n != 0);
   return 0;
+*/
 }
 
 
@@ -1552,14 +1594,15 @@ int  CDECL NTDLL__strnicmp( LPCSTR s1, LPCSTR s2, INT n )
 
 LPSTR CDECL NTDLL__strupr(LPSTR x)
 {
-  dprintf(("NTDLL: _strupr(%08xh)\n",
+  dprintf(("NTDLL: _strupr(%s)\n",
            x));
 
-  LPSTR	y=x;
+  LPSTR y=x;
 
-  while (*y) {
-	*y=toupper(*y);
-	y++;
+  while (*y)
+  {
+    *y=toupper(*y);
+    y++;
   }
   return x;
 }
@@ -1838,7 +1881,7 @@ double CDECL NTDLL_pow( double x, double y )
 void CDECL NTDLL_qsort( void *base, size_t nmemb, size_t size,
 			int (*compar)( const void *s1, const void *s2 ))
 {
-    dprintf(("NTDLL: qsort(%08xh, %08xh, %08xh, %08xh)\n",
+    dprintf(("NTDLL: qsort(%08xh, %08xh, %08xh, %08xh) not implemented.\n",
 		base, nmemb, size, compar));
 }
 
