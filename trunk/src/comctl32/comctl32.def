@@ -1,0 +1,49 @@
+LIBRARY COMCTL32 INITINSTANCE
+DESCRIPTION 'COMCTL32 Common Controls Library'
+DATA MULTIPLE NONSHARED
+
+EXPORTS
+  InitCommonControls           = _InitCommonControls@0               @17
+
+  ImageList_Add                = _ImageList_Add@12                   @39
+  ImageList_AddIcon            = _ImageList_AddIcon@8                @40
+  ImageList_AddMasked          = _ImageList_AddMasked@12             @41
+  ImageList_BeginDrag          = _ImageList_BeginDrag@16             @42
+  ImageList_Copy               = _ImageList_Copy@20                  @43
+  ImageList_Create             = _ImageList_Create@20                @44
+  ImageList_Destroy            = _ImageList_Destroy@4                @45
+  ImageList_DragEnter          = _ImageList_DragEnter@12             @46
+  ImageList_DragLeave          = _ImageList_DragLeave@4              @47
+  ImageList_DragMove           = _ImageList_DragMove@8               @48
+  ImageList_DragShowNolock     = _ImageList_DragShowNolock@4         @49
+  ImageList_Draw               = _ImageList_Draw@24                  @50
+  ImageList_DrawEx             = _ImageList_DrawEx@40                @51
+  ImageList_DrawIndirect       = _ImageList_DrawIndirect@4           @52
+  ImageList_Duplicate          = _ImageList_Duplicate@4              @53
+  ImageList_EndDrag            = _ImageList_EndDrag@0                @54
+  ImageList_GetBkColor         = _ImageList_GetBkColor@4             @55
+  ImageList_GetDragImage       = _ImageList_GetDragImage@8           @56
+  ImageList_GetIcon            = _ImageList_GetIcon@12               @57
+  ImageList_GetIconSize        = _ImageList_GetIconSize@12           @58
+  ImageList_GetImageCount      = _ImageList_GetImageCount@4          @59
+  ImageList_GetImageInfo       = _ImageList_GetImageInfo@12          @60
+  ImageList_GetImageRect       = _ImageList_GetImageRect@12          @61
+  ImageList_LoadImageA         = _ImageList_LoadImageA@28            @62 ; ?????? 63?
+  ImageList_LoadImageW         = _ImageList_LoadImageW@28            @64
+  ImageList_Merge              = _ImageList_Merge@24                 @65
+
+  ImageList_Remove             = _ImageList_Remove@8                 @67
+  ImageList_Replace            = _ImageList_Replace@16               @68
+  ImageList_ReplaceIcon        = _ImageList_ReplaceIcon@12           @69
+  ImageList_SetBkColor         = _ImageList_SetBkColor@8             @70
+  ImageList_SetDragCursorImage = _ImageList_SetDragCursorImage@16    @75
+  ImageList_SetFilter          = _ImageList_SetFilter@12             @76
+  ImageList_SetIconSize        = _ImageList_SetIconSize@12           @77
+  ImageList_SetImageCount      = _ImageList_SetImageCount@8          @78
+  ImageList_SetOverlayImage    = _ImageList_SetOverlayImage@12       @79
+
+
+  COMCTL32_Alloc     = _COMCTL32_Alloc@4        @71
+  COMCTL32_ReAlloc   = _COMCTL32_ReAlloc@8      @72
+  COMCTL32_Free      = _COMCTL32_Free@4         @73
+  COMCTL32_GetSize   = _COMCTL32_GetSize@4      @74
