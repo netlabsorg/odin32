@@ -1,4 +1,4 @@
-/* $Id: winexepeldr.cpp,v 1.4 1999-11-13 15:41:10 sandervl Exp $ */
+/* $Id: winexepeldr.cpp,v 1.5 1999-11-24 19:31:23 sandervl Exp $ */
 
 /*
  * Win32 PE loader Exe class
@@ -100,7 +100,7 @@ BOOL WIN32API CreateWin32PeLdrExe(char *szFileName, ULONG reservedMem)
 Win32PeLdrExe::Win32PeLdrExe(char *szFileName) : 
                    Win32ImageBase(-1), 
 		   Win32ExeBase(-1),
-		   Win32PeLdrImage(szFileName)
+		   Win32PeLdrImage(szFileName, TRUE)
 {
   dprintf(("Win32PeLdrExe ctor: %s", szFileName));
 }
