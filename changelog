@@ -1,7 +1,7 @@
-/* $Id: changelog,v 1.2331 2002-10-03 12:49:06 sandervl Exp $ */
+/* $Id: changelog,v 1.2332 2002-10-03 12:49:25 sandervl Exp $ */
 
  2002-10-03: Sander van Leeuwen <sandervl@innotek   >
-    - KERNEL32: o Added IP logging (define WIN32_IP_LOGGING  in dbglog.cpp)
+    - KERNEL32: o Added IP logging (define WIN32_IP_LOGGING in dbglog.cpp)
     - IPLOG:    o IP logging server
 
  2002-10-03: Platon Fomichev <platon@innotek   >
