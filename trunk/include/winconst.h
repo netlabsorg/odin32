@@ -1963,4 +1963,11 @@
 #define DWL_DLGPROC_W         4
 #define DWL_USER_W            8
 
+//OLE drag & drop constants
+#define	DROPEFFECT_NONE_W		0
+#define	DROPEFFECT_COPY_W		1
+#define	DROPEFFECT_MOVE_W		2
+#define	DROPEFFECT_LINK_W		4
+#define	DROPEFFECT_SCROLL_W		0x80000000
+
 #endif //__WINCONST_H__
