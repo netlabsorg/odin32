@@ -1,4 +1,4 @@
-/* $Id: lang.cpp,v 1.41 2002-02-19 11:49:19 sandervl Exp $ */
+/* $Id: lang.cpp,v 1.42 2002-02-19 12:51:40 sandervl Exp $ */
 /*
  * Win32 language API functions for OS/2
  *
@@ -43,103 +43,121 @@ ULONG GetLanguageId()
 {
   if(defaultLanguage == 0) {
 	switch(OSLibQueryCountry()) {
-	case CC_USA:
+	case CTRY_USA:
 		defaultLanguage = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US);
 		break;
-        case CC_CANADA:
+        case CTRY_CANADA://TODO: french-canadian
 		defaultLanguage = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US);
 		break;
-        case CC_LATIN_AMERICA:
+        case CTRY_LATIN_AMERICA:
 		defaultLanguage = MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH);
 		break;
-        case CC_RUSSIA:
+        case CTRY_RUSSIA:
 		defaultLanguage = MAKELANGID(LANG_RUSSIAN, SUBLANG_RUSSIAN);
 		break;
-        case CC_GREECE:
+        case CTRY_GREECE:
 		defaultLanguage = MAKELANGID(LANG_GREEK, SUBLANG_DEFAULT);
 		break;
-        case CC_NETHERLANDS:
+        case CTRY_NETHERLANDS:
 		defaultLanguage = MAKELANGID(LANG_DUTCH, SUBLANG_DUTCH);
 		break;
-        case CC_BELGIUM:
+        case CTRY_BELGIUM://TODO: french-belgian
 		defaultLanguage = MAKELANGID(LANG_DUTCH, SUBLANG_DUTCH_BELGIAN);
 		break;
-        case CC_FRANCE:
+        case CTRY_FRANCE:
 		defaultLanguage = MAKELANGID(LANG_FRENCH, SUBLANG_FRENCH);
 		break;
-        case CC_SPAIN:
+        case CTRY_SPAIN:
 		defaultLanguage = MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH);
 		break;
-        case CC_ITALY:
+        case CTRY_ITALY:
 		defaultLanguage = MAKELANGID(LANG_ITALIAN, SUBLANG_ITALIAN);
 		break;
-        case CC_SWITZERLAND:
+        case CTRY_SWITZERLAND:
 		defaultLanguage = MAKELANGID(LANG_GERMAN, SUBLANG_GERMAN_SWISS);
 		break;
-        case CC_AUSTRIA:
+        case CTRY_AUSTRIA:
 		defaultLanguage = MAKELANGID(LANG_GERMAN, SUBLANG_GERMAN_AUSTRIAN);
 		break;
-        case CC_UNITED_KINGDOM:
+        case CTRY_UNITED_KINGDOM:
 		defaultLanguage = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_UK);
 		break;
-        case CC_DENMARK:
+        case CTRY_IRELAND:
+		defaultLanguage = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_EIRE);
+		break;
+        case CTRY_DENMARK:
 		defaultLanguage = MAKELANGID(LANG_DANISH, SUBLANG_DEFAULT);
 		break;
-        case CC_SWEDEN:
+        case CTRY_SWEDEN:
 		defaultLanguage = MAKELANGID(LANG_SWEDISH, SUBLANG_DEFAULT);
 		break;
-        case CC_NORWAY:
+        case CTRY_NORWAY:
 		defaultLanguage = MAKELANGID(LANG_NORWEGIAN, SUBLANG_DEFAULT);
 		break;
-        case CC_WEST_GERMANY:
+        case CTRY_GERMANY:
 		defaultLanguage = MAKELANGID(LANG_GERMAN, SUBLANG_GERMAN);
 		break;
-        case CC_MEXICO:
+        case CTRY_MEXICO:
 		defaultLanguage = MAKELANGID(LANG_SPANISH, SUBLANG_SPANISH_MEXICAN);
 		break;
-        case CC_BRAZIL:
+        case CTRY_BRAZIL:
 		defaultLanguage = MAKELANGID(LANG_PORTUGUESE, SUBLANG_PORTUGUESE_BRAZILIAN);
 		break;
-        case CC_AUSTRALIA:
+        case CTRY_AUSTRALIA:
 		defaultLanguage = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_AUS);
 		break;
-        case CC_NEW_ZEALAND:
+        case CTRY_NEW_ZEALAND:
 		defaultLanguage = MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_NZ);
 		break;
-        case CC_JAPAN:
+        case CTRY_JAPAN:
 		defaultLanguage = MAKELANGID(LANG_JAPANESE, SUBLANG_DEFAULT);
 		break;
-        case CC_KOREA:
+        case CTRY_KOREA:
 		defaultLanguage = MAKELANGID(LANG_KOREAN, SUBLANG_DEFAULT);
 		break;
-        case CC_CHINA:
+        case CTRY_SINGAPORE:
+		defaultLanguage = MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_SINGAPORE);
+		break;
+        case CTRY_HONG_KONG:
+		defaultLanguage = MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_HONGKONG);
+		break;
+        case CTRY_CHINA:
 		defaultLanguage = MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_TRADITIONAL);
 		break;
-        case CC_TAIWAN:
+        case CTRY_TAIWAN:
 		defaultLanguage = MAKELANGID(LANG_CHINESE, SUBLANG_CHINESE_TRADITIONAL);
 		break;
-        case CC_TURKEY:
+        case CTRY_TURKEY:
 		defaultLanguage = MAKELANGID(LANG_TURKISH, SUBLANG_DEFAULT);
 		break;
-        case CC_PORTUGAL:
+        case CTRY_PORTUGAL:
 		defaultLanguage = MAKELANGID(LANG_PORTUGUESE, SUBLANG_DEFAULT);
 		break;
-        case CC_LUXEMBOURG:
+        case CTRY_LUXEMBOURG:
 		defaultLanguage = MAKELANGID(LANG_GERMAN, SUBLANG_GERMAN_LUXEMBOURG);
 		break;
-        case CC_ICELAND:
+        case CTRY_ICELAND:
 		defaultLanguage = MAKELANGID(LANG_ICELANDIC, SUBLANG_DEFAULT);
 		break;
-        case CC_FINLAND:
+        case CTRY_FINLAND:
 		defaultLanguage = MAKELANGID(LANG_FINNISH, SUBLANG_DEFAULT);
 		break;
-        case CC_CZECH_REPUBLIC:
+        case CTRY_BULGARIA:
+		defaultLanguage = MAKELANGID(LANG_BULGARIAN, SUBLANG_DEFAULT);
+		break;
+        case CTRY_CROATIA:
+		defaultLanguage = MAKELANGID(LANG_CROATIAN, SUBLANG_CROATIAN);
+                break;
+        case CTRY_SLOVENIA:
+		defaultLanguage = MAKELANGID(LANG_SLOVENIAN, SUBLANG_DEFAULT);
+                break;
+        case CTRY_CZECH_REPUBLIC:
 		defaultLanguage = MAKELANGID(LANG_CZECH, SUBLANG_DEFAULT);
 		break;
-        case CC_SLOVAK_REPUBLIC:
+        case CTRY_SLOVAK_REPUBLIC:
 		defaultLanguage = MAKELANGID(LANG_SLOVAK, SUBLANG_DEFAULT);
 		break;
-	case CC_POLAND:
+	case CTRY_POLAND:
                 defaultLanguage = MAKELANGID(LANG_POLISH, SUBLANG_DEFAULT);
                 break;
 	default:
@@ -308,7 +326,7 @@ int WIN32API GetLocaleInfoW(LCID lcid, LCTYPE LCType, LPWSTR wbuf,
        case LOCALE_STHOUSAND:
         LocaleFromUniStr(puni_lconv->thousands_sep,wbuf,&ulInfoLen);
         //MN: hack for Czech language; weird value returned here (0xA0 instead of 0x20)
-        if(defaultLanguage == CC_CZECH_REPUBLIC) {
+        if(defaultLanguage == CTRY_CZECH_REPUBLIC) {
            ((BYTE*)wbuf)[0] = ((BYTE*)wbuf)[0] & 0x7F;
         }
         break;
