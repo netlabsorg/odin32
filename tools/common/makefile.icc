@@ -1,0 +1,44 @@
+# $Id: makefile.icc,v 1.1 1999-09-05 02:09:18 bird Exp $
+
+#
+# Tools common library, ICC version.
+#
+# Copyright 1999 knut st. osmundsen
+#
+
+
+
+# include common definitions
+PDWIN32_INCLUDE = ..\..\include
+!include ..\..\include\pdwin32.mk
+
+# Addjust common definitions
+AR       = ilib /quiet /nobackup
+CFLAGS   = $(CFLAGS)   -Ge+ -Tx+ -Tm+ -I$(PDWIN32_INCLUDE)      -Wall+ppt-ppc-inl-cnv-gnr-vft-
+CXXFLAGS = $(CXXFLAGS) -Ge+ -Gx- -Tx+ -Tm+ -I$(PDWIN32_INCLUDE) -Wall+ppt-ppc-inl-cnv-gnr-vft-
+
+
+all: commonicc.lib
+
+
+commonicc.lib: kFilePe.obj kFileDef.obj
+    -$(RM) $@
+    $(AR) $@ +kFilePe.obj +kFileDef.obj, NUL
+
+
+clean:
+   -@$(RM) *.obj
+   -@$(RM) commonicc.lib
+   -@$(RM) cset*.pch
+
+
+# dependencies
+kFilePE.obj:    kFilePE.cpp   \
+                kFilePE.h     \
+                kFileFormatBase.h
+
+kFileDef.obj:   kFileDef.cpp  \
+                kFileDef.h    \
+                kFileFormatBase.h
+
+
