@@ -1,4 +1,4 @@
-/* $Id: os2wrap.h,v 1.13 1999-12-15 09:25:12 achimha Exp $ */
+/* $Id: os2wrap.h,v 1.14 2000-03-03 11:14:22 sandervl Exp $ */
 #ifndef __OS2WRAP_H__
 #define __OS2WRAP_H__
 
@@ -7,11 +7,28 @@
 #include <os2newapi.h>
 
 #if (__IBMC__ > 300)
-// VA3.6: inline is a C++ keywork, must be translated to _inline or _Inline or __inline in C code
+// VA3.6: inline is a C++ keyword, must be translated to _inline or _Inline or __inline in C code
 #define inline _inline
 #endif
 
 #ifdef INCL_DOSMEMMGR
+
+APIRET APIENTRY DosAliasMem(PVOID pb, ULONG cb, PPVOID ppbAlias, ULONG fl);
+
+inline APIRET _DosAliasMem(PVOID pb, ULONG cb, PPVOID ppbAlias, ULONG fl)
+{
+ APIRET yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = DosAliasMem(pb, cb, ppbAlias, fl);
+    SetFS(sel);
+
+    return yyrc;
+} 
+
+#undef  DosAliasMem
+#define DosAliasMem _DosAliasMem
+
 inline ULONG _DosAllocMem(PPVOID a, ULONG b, ULONG c)
 {
  ULONG yyrc;

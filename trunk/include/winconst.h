@@ -1,4 +1,4 @@
-/* $Id: winconst.h,v 1.26 2000-02-15 14:38:07 sandervl Exp $ */
+/* $Id: winconst.h,v 1.27 2000-03-03 11:14:24 sandervl Exp $ */
 
 /*
  * Win32 constants
@@ -1057,3 +1057,27 @@
 #define SND_RESOURCE_W    	0x00040004L /* name is resource name or atom */
 #define SND_PURGE_W		0x00000040L /* purge all sounds */
 #define SND_APPLICATION_W     	0x00000080L /* look for application specific association */
+
+
+#define REG_NONE                         0  /* no type */
+#define REG_SZ                           1  /* string type (ASCII) */
+#define REG_EXPAND_SZ                    2  /* string, includes %ENVVAR% (expanded by caller) (ASCII) */
+#define REG_BINARY                       3  /* binary format, callerspecific */
+                                /* YES, REG_DWORD == REG_DWORD_LITTLE_ENDIAN */
+#define REG_DWORD                        4  /* DWORD in little endian format */
+#define REG_DWORD_LITTLE_ENDIAN          4  /* DWORD in little endian format */
+#define REG_DWORD_BIG_ENDIAN             5  /* DWORD in big endian format  */
+#define REG_LINK                         6  /* symbolic link (UNICODE) */
+#define REG_MULTI_SZ                     7  /* multiple strings, delimited by \0, terminated by \0\0 (ASCII) */
+#define REG_RESOURCE_LIST                8  /* resource list? huh? */
+#define REG_FULL_RESOURCE_DESCRIPTOR     9  /* full resource descriptor? huh? */
+
+#define KEY_ALL_ACCESS 0x0000003f
+
+#define HKEY_CLASSES_ROOT       ((HKEY) 0x80000000)
+#define HKEY_CURRENT_USER       ((HKEY) 0x80000001)
+#define HKEY_LOCAL_MACHINE      ((HKEY) 0x80000002)
+#define HKEY_USERS              ((HKEY) 0x80000003)
+#define HKEY_PERFORMANCE_DATA   ((HKEY) 0x80000004)
+#define HKEY_CURRENT_CONFIG     ((HKEY) 0x80000005)
+#define HKEY_DYN_DATA           ((HKEY) 0x80000006)
