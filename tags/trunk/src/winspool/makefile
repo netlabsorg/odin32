@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.16 2000-10-25 19:47:43 sandervl Exp $
+# $Id: makefile,v 1.17 2000-11-15 10:54:23 sandervl Exp $
 
 #
 # Odin32 API
@@ -24,6 +24,7 @@ CLEANEXTRAS = winspoolrsrc.asm
 # Object files. All objects should be prefixed with $(OBJDIR)!
 OBJS = \
 $(OBJDIR)\winspool.obj \
+$(OBJDIR)\oslibspl.obj \
 $(OBJDIR)\winspoolrsrc.obj \
 $(PDWIN32_LIB)\dllentry.obj
 
