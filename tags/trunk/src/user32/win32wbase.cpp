@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.216 2000-10-11 23:07:40 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.217 2000-10-16 11:02:50 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1606,7 +1606,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         {
             Win32BaseWindow *window = GetTopParent();
             if(window && !(window->getClass()->getStyle() & CS_NOCLOSE))
-                PostMessageA(getWindowHandle(), WM_SYSCOMMAND, SC_CLOSE, 0);
+                PostMessageA(window->getWindowHandle(), WM_SYSCOMMAND, SC_CLOSE, 0);
             return 0;
         }
 
@@ -1662,7 +1662,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         }
         if((HIWORD(lParam) & KEYDATA_ALT) && wParam)
         {
-                if (wParam == VK_TAB || wParam == VK_ESCAPE)
+                if (wParam == VK_TAB || wParam == VK_ESCAPE || wParam == VK_F4)
                         break;
                 if (wParam == VK_SPACE && (getStyle() & WS_CHILD)) {
                         getParent()->SendMessageA(Msg, wParam, lParam );
@@ -1851,6 +1851,12 @@ LRESULT Win32BaseWindow::SendInternalMessageA(ULONG Msg, WPARAM wParam, LPARAM l
  LRESULT rc;
  BOOL    fInternalMsgBackup = fInternalMsg;
 
+  //if the destination window was created by this process & thread, call window proc directly
+  if(dwProcessId != currentProcessId || dwThreadId != GetCurrentThreadId()) {
+        dprintf(("SendMessages (inter-process) %x %x %x %x", getWindowHandle(), Msg, wParam, lParam));
+        return OSLibSendMessage(getOS2WindowHandle(), Msg, wParam, lParam, FALSE);
+  }
+
   DebugPrintMessage(getWindowHandle(), Msg, wParam, lParam, FALSE, TRUE);
 
   CallWindowHookProc(WH_CALLWNDPROC, Msg, wParam, lParam, FALSE);
@@ -1904,6 +1910,12 @@ LRESULT Win32BaseWindow::SendInternalMessageW(ULONG Msg, WPARAM wParam, LPARAM l
 {
  LRESULT rc;
  BOOL    fInternalMsgBackup = fInternalMsg;
+
+  //if the destination window was created by this process & thread, call window proc directly
+  if(dwProcessId != currentProcessId || dwThreadId != GetCurrentThreadId()) {
+        dprintf(("SendMessages (inter-process) %x %x %x %x", getWindowHandle(), Msg, wParam, lParam));
+        return OSLibSendMessage(getOS2WindowHandle(), Msg, wParam, lParam, FALSE);
+  }
 
   DebugPrintMessage(getWindowHandle(), Msg, wParam, lParam, TRUE, TRUE);
 
