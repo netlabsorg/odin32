@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.41 1999-10-26 17:54:16 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.42 1999-10-27 10:35:42 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -322,7 +322,7 @@ static HINSTANCE iLoadLibraryA(LPCTSTR lpszLibFile, DWORD dwFlags)
 
   strcpy(modname, lpszLibFile);
   strupr(modname);
-  if(!strstr(modname, ".DLL")) {
+  if(!strstr(modname, ".")) {
 	strcat(modname,".DLL");
   }
 
