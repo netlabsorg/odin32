@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.2 1999-07-14 21:05:59 cbratschi Exp $ */
+/* $Id: window.cpp,v 1.3 1999-07-16 11:32:09 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -177,74 +177,107 @@ HWND WIN32API CreateWindowExW(DWORD     arg1,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API DestroyWindow(HWND arg1)
+BOOL WIN32API DestroyWindow(HWND hwnd)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  DestroyWindow\n");
-#endif
-    return O32_DestroyWindow(arg1);
+  Win32Window *window;
+
+    window = Win32Window::GetWindowFromHandle(hwnd);
+    if(!window) {
+	dprintf(("SendMessageA, window %x not found", hwnd));
+	return 0;
+    }
+    return window->DestroyWindow();
 }
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API SetActiveWindow( HWND arg1)
+HWND WIN32API SetActiveWindow( HWND hwnd)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  SetActiveWindow\n");
-#endif
-    return O32_SetActiveWindow(arg1);
+  Win32Window *window;
+
+    window = Win32Window::GetWindowFromHandle(hwnd);
+    if(!window) {
+	dprintf(("SendMessageA, window %x not found", hwnd));
+	return 0;
+    }
+    return window->SetActiveWindow();
 }
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API GetParent( HWND arg1)
+HWND WIN32API GetParent( HWND hwnd)
 {
-#ifdef DEBUG
-////    WriteLog("USER32:  GetParent\n");
-#endif
-    return O32_GetParent(arg1);
+  Win32Window *window;
+
+    window = Win32Window::GetWindowFromHandle(hwnd);
+    if(!window) {
+	dprintf(("SendMessageA, window %x not found", hwnd));
+	return 0;
+    }
+    return window->GetParent();
 }
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API SetParent( HWND arg1, HWND  arg2)
+HWND WIN32API SetParent( HWND hwndChild, HWND hwndNewParent)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  SetParent\n");
-#endif
-    return O32_SetParent(arg1, arg2);
+  Win32Window *window;
+
+    window = Win32Window::GetWindowFromHandle(hwndChild);
+    if(!window) {
+	dprintf(("SendMessageA, window %x not found", hwndChild));
+	return 0;
+    }
+    return window->SetParent(hwndNewParent);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API IsChild( HWND arg1, HWND  arg2)
+BOOL WIN32API IsChild( HWND hwndParent, HWND hwnd)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  IsChild\n");
-#endif
-    return O32_IsChild(arg1, arg2);
+  Win32Window *window;
+
+    window = Win32Window::GetWindowFromHandle(hwnd);
+    if(!window) {
+	dprintf(("SendMessageA, window %x not found", hwnd));
+	return 0;
+    }
+    return window->IsChild(hwndParent);
 }
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API GetTopWindow( HWND arg1)
+HWND WIN32API GetTopWindow( HWND hwnd)
 {
-#ifdef DEBUG
-////    WriteLog("USER32:  GetTopWindow\n");
-#endif
-    return O32_GetTopWindow(arg1);
+  Win32Window *window;
+
+    window = Win32Window::GetWindowFromHandle(hwnd);
+    if(!window) {
+	dprintf(("SendMessageA, window %x not found", hwnd));
+	return 0;
+    }
+    return window->GetTopWindow();
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API UpdateWindow(HWND hwnd)
 {
-  dprintf(("USER32:  UpdateWindow\n"));
+  Win32Window *window;
 
-  return O32_UpdateWindow(hwnd);
+    window = Win32Window::GetWindowFromHandle(hwnd);
+    if(!window) {
+	dprintf(("SendMessageA, window %x not found", hwnd));
+	return 0;
+    }
+    return window->UpdateWindow();
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API IsIconic( HWND arg1)
+BOOL WIN32API IsIconic( HWND hwnd)
 {
-#ifdef DEBUG
-    WriteLog("USER32:  IsIconic\n");
-#endif
-    return O32_IsIconic(arg1);
+  Win32Window *window;
+
+    window = Win32Window::GetWindowFromHandle(hwnd);
+    if(!window) {
+	dprintf(("SendMessageA, window %x not found", hwnd));
+	return 0;
+    }
+    return window->IsIconic();
 }
 //******************************************************************************
 //******************************************************************************

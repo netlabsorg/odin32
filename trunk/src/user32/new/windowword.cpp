@@ -1,4 +1,4 @@
-/* $Id: windowword.cpp,v 1.1 1999-07-14 08:35:37 sandervl Exp $ */
+/* $Id: windowword.cpp,v 1.2 1999-07-16 11:32:10 sandervl Exp $ */
 
 /*
  * Win32 Get/SetWindowLong/Word user32 API functions for OS/2
@@ -13,7 +13,6 @@
 #include <misc.h>
 
 #include <win32wnd.h>
-#include <handlemanager.h>
 
 //******************************************************************************
 //******************************************************************************
@@ -21,7 +20,8 @@ LONG WIN32API SetWindowLongA(HWND hwnd, int nIndex, LONG  arg3)
 {
  Win32Window *window;
 
-    if(HMHandleTranslateToOS2(hwnd, (PULONG)&window) == NO_ERROR)
+    window = Win32Window::GetWindowFromHandle(hwnd);
+    if(window)
     {
 	return window->SetWindowLongA(nIndex, arg3);
     }
@@ -37,7 +37,8 @@ LONG WIN32API SetWindowLongW(HWND hwnd, int nIndex, LONG  arg3)
 {
  Win32Window *window;
 
-    if(HMHandleTranslateToOS2(hwnd, (PULONG)&window) == NO_ERROR)
+    window = Win32Window::GetWindowFromHandle(hwnd);
+    if(window)
     {
 	return window->SetWindowLongA(nIndex, arg3);
     }
@@ -53,7 +54,8 @@ WORD WIN32API GetWindowWord(HWND hwnd, int nIndex)
 {
  Win32Window *window;
 
-    if(HMHandleTranslateToOS2(hwnd, (PULONG)&window) == NO_ERROR)
+    window = Win32Window::GetWindowFromHandle(hwnd);
+    if(window)
     {
 	return window->GetWindowWord(nIndex);
     }
@@ -69,7 +71,8 @@ WORD WIN32API SetWindowWord(HWND hwnd, int nIndex, WORD arg3)
 {
  Win32Window *window;
 
-    if(HMHandleTranslateToOS2(hwnd, (PULONG)&window) == NO_ERROR)
+    window = Win32Window::GetWindowFromHandle(hwnd);
+    if(window)
     {
 	return window->SetWindowWord(nIndex, arg3);
     }
@@ -85,7 +88,8 @@ LONG WIN32API GetWindowLongA(HWND hwnd, int nIndex)
 {
  Win32Window *window;
 
-    if(HMHandleTranslateToOS2(hwnd, (PULONG)&window) == NO_ERROR)
+    window = Win32Window::GetWindowFromHandle(hwnd);
+    if(window)
     {
 	return window->GetWindowLongA(nIndex);
     }
@@ -101,7 +105,8 @@ LONG WIN32API GetWindowLongW(HWND hwnd, int nIndex)
 {
  Win32Window *window;
 
-    if(HMHandleTranslateToOS2(hwnd, (PULONG)&window) == NO_ERROR)
+    window = Win32Window::GetWindowFromHandle(hwnd);
+    if(window)
     {
 	return window->GetWindowLongA(nIndex);
     }

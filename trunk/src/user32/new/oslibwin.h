@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.2 1999-07-15 18:03:02 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.3 1999-07-16 11:32:08 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -28,5 +28,9 @@ BOOL  OSLibWinSetWindowULong(HWND hwnd, ULONG offset, ULONG value);
 ULONG OSLibWinGetWindowULong(HWND hwnd, ULONG offset);
 
 BOOL  OSLibPostMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam);
+
+HWND  OSLibWinCreateMenu(HWND hwndParent, PVOID menutemplate);
+
+HWND  OSLibWinQueryTopMostChildWindow(HWND hwndParent);
 
 #endif //__OSLIBWIN_H__
