@@ -1,3 +1,5 @@
+/* $Id: wsock32.cpp,v 1.2 1999-06-10 16:11:08 phaller Exp $ */
+
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT

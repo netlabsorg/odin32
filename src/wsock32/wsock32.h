@@ -1,4 +1,6 @@
-/* WSOCK32.H--definitions & conversions for Odin's wsock32.dll. 
+/* $Id: wsock32.h,v 1.3 1999-06-10 16:11:08 phaller Exp $ */
+
+/* WSOCK32.H--definitions & conversions for Odin's wsock32.dll.
  * Unused/unneeded Microsoft declarations removed.
  *
  * This header file corresponds to version 1.1 of the Windows Sockets specification.
@@ -75,7 +77,7 @@ typedef u_int           SOCKET;
 
 
 
- 
+
 typedef struct AsyncStatus {
     HWND hwnd;     // owner's hwindow
     u_int msg;     // message to send when event occurs
@@ -87,7 +89,7 @@ typedef struct AsyncStatus {
     struct AsyncStatus *Next; // pointer to next AsyncStatus in the list
     struct AsyncStatus *Prev; // pointer to previous AsyncStatus in the list
 } AsyncStatus;
- 
+
 
 
 
