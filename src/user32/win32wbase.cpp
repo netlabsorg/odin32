@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.175 2000-03-27 21:41:47 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.176 2000-03-31 14:42:48 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -256,7 +256,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
              * (I don't know about other styles.) */
             if (cs->hwndParent == GetDesktopWindow() && (!(cs->style & WS_CHILD) || (cs->style & WS_POPUP)))
             {
-	            cs->hwndParent = 0;
+                    cs->hwndParent = 0;
             }
     }
     else
@@ -829,11 +829,16 @@ ULONG Win32BaseWindow::MsgScroll(ULONG msg, ULONG scrollCode, ULONG scrollPos)
 }
 //******************************************************************************
 //******************************************************************************
-ULONG Win32BaseWindow::MsgHitTest(ULONG x, ULONG y)
+ULONG Win32BaseWindow::MsgHitTest(MSG *msg)
 {
-  lastHitTestVal = SendInternalMessageA(WM_NCHITTEST, 0, MAKELONG((USHORT)x, (USHORT)y));
-  dprintf2(("MsgHitTest (%d,%d) (%d,%d) (%d,%d) returned %x", x, y, rectWindow.left, rectWindow.right, rectWindow.top, rectWindow.bottom, lastHitTestVal));
-  return lastHitTestVal;
+  lastHitTestVal = DispatchMessageA(msg);
+
+  dprintf2(("MsgHitTest (%d,%d) (%d,%d) (%d,%d) returned %x", LOWORD(msg->lParam), HIWORD(msg->lParam), rectWindow.left, rectWindow.right, rectWindow.top, rectWindow.bottom, lastHitTestVal));
+
+  if (lastHitTestVal == HTTRANSPARENT)
+    return HTOS_TRANSPARENT;
+  else
+    return HTOS_NORMAL;
 }
 //******************************************************************************
 //******************************************************************************

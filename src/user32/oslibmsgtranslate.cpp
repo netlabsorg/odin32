@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.25 2000-03-16 19:19:09 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.26 2000-03-31 14:42:47 cbratschi Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -137,7 +137,6 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
   OSLIBPOINT       point, ClientPoint;
   POSTMSG_PACKET  *packet;
   THDB            *thdb = (THDB *)pThdb;
-  ULONG            hittest;
   int i;
 
   memset(winMsg, 0, sizeof(MSG));
@@ -164,6 +163,13 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
 
     switch (os2Msg->msg)
     {
+      case WM_HITTEST:
+        winMsg->message = WINWM_NCHITTEST;
+        winMsg->wParam  = 0;
+        winMsg->lParam  = MAKELONG(winMsg->pt.x,winMsg->pt.y);
+
+        return TRUE;
+
       case WM_BUTTON1DOWN:
       case WM_BUTTON1UP:
       case WM_BUTTON1DBLCLK:
@@ -175,11 +181,9 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
       case WM_BUTTON3DBLCLK:
         //WM_NC*BUTTON* is posted when the cursor is in a non-client area of the window
 
-        hittest = win32wnd->MsgHitTest(winMsg->pt.x, winMsg->pt.y);
-
         if (IsNCMouseMsg(win32wnd)) {
             winMsg->message = WINWM_NCLBUTTONDOWN + (os2Msg->msg - WM_BUTTON1DOWN);
-            winMsg->wParam  = hittest;
+            winMsg->wParam  = win32wnd->getLastHitTestVal();
             winMsg->lParam  = MAKELONG(winMsg->pt.x, winMsg->pt.y); //screen coordinates
         }
         else {
@@ -196,7 +200,7 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
         {
             if(DInputMouseHandler(win32wnd->getWindowHandle(), winMsg->message, winMsg->pt.x, winMsg->pt.y)) {
                 goto dummymessage; //dinput swallowed message
-	    }
+            }
         }
 
         return TRUE;
@@ -215,12 +219,11 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
       case WM_MOUSEMOVE:
       {
         //WM_NCMOUSEMOVE is posted when the cursor moves into a non-client area of the window
-        hittest = win32wnd->MsgHitTest(winMsg->pt.x, winMsg->pt.y);
 
         if (IsNCMouseMsg(win32wnd))
         {
           winMsg->message = WINWM_NCMOUSEMOVE;
-          winMsg->wParam  = (WPARAM)hittest;
+          winMsg->wParam  = (WPARAM)win32wnd->getLastHitTestVal();
           winMsg->lParam  = MAKELONG(winMsg->pt.x,winMsg->pt.y);
         }
         else
@@ -421,6 +424,13 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
     //**************************************************************************
     //Mouse messages (OS/2 Window coordinates -> Win32 coordinates relative to screen
     //**************************************************************************
+    case WM_HITTEST:
+      winMsg->message = WINWM_NCHITTEST;
+      winMsg->wParam  = 0;
+      winMsg->lParam  = MAKELONG(winMsg->pt.x,winMsg->pt.y);
+
+      return TRUE;
+
     case WM_BUTTON1DOWN:
     case WM_BUTTON1UP:
     case WM_BUTTON1DBLCLK:
@@ -431,11 +441,10 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
     case WM_BUTTON3UP:
     case WM_BUTTON3DBLCLK:
         //WM_NC*BUTTON* is posted when the cursor is in a non-client area of the window
-        hittest = win32wnd->MsgHitTest(winMsg->pt.x, winMsg->pt.y);
 
         if(IsNCMouseMsg(win32wnd)) {
             winMsg->message = WINWM_NCLBUTTONDOWN + (os2Msg->msg - WM_BUTTON1DOWN);
-            winMsg->wParam  = hittest;
+            winMsg->wParam  = win32wnd->getLastHitTestVal();
             winMsg->lParam  = MAKELONG(winMsg->pt.x, winMsg->pt.y); //screen coordinates
         }
         else {
@@ -471,12 +480,11 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
     case WM_MOUSEMOVE:
     {
         //WM_NCMOUSEMOVE is posted when the cursor moves into a non-client area of the window
-        hittest = win32wnd->MsgHitTest(winMsg->pt.x, winMsg->pt.y);
 
         if(IsNCMouseMsg(win32wnd))
         {
           winMsg->message = WINWM_NCMOUSEMOVE;
-          winMsg->wParam  = (WPARAM)hittest;
+          winMsg->wParam  = (WPARAM)win32wnd->getLastHitTestVal();
           winMsg->lParam  = MAKELONG(winMsg->pt.x,winMsg->pt.y);
         }
         else
@@ -608,31 +616,31 @@ VirtualKeyFound:
         winMsg->lParam  = repeatCount & 0x0FFFF;                 // bit 0-15, repeatcount
         winMsg->lParam |= (scanCode & 0x0FF) << 16;              // bit 16-23, scancode
 
-	//TODO: Is this correct and complete? (how does PM differentiate between
+        //TODO: Is this correct and complete? (how does PM differentiate between
         //      i.e numeric pad pgdn & 'normal' pgdn??)
-	//Check if it's an extended key
-    	switch(virtualKey) {
-    	case VK_RETURN_W:
-		//The enter key on the numeric keypad is an extended key
-		if(SHORT2FROMMP(os2Msg->mp2) != VK_NEWLINE)
-			break;
-		//no break
-    	case VK_LEFT_W:
-    	case VK_RIGHT_W:
-    	case VK_DOWN_W:
-    	case VK_UP_W:
-    	case VK_PRIOR_W:
-    	case VK_NEXT_W:
-    	case VK_END_W:
-    	case VK_DIVIDE_W:
-    	case VK_DELETE_W:
-    	case VK_HOME_W:
-    	case VK_INSERT_W:
-    	case VK_RCONTROL_W:
-    	case VK_RMENU_W: //is this the right alt???
-        	winMsg->lParam = winMsg->lParam | (1<<24);
-		break;
-    	}
+        //Check if it's an extended key
+        switch(virtualKey) {
+        case VK_RETURN_W:
+                //The enter key on the numeric keypad is an extended key
+                if(SHORT2FROMMP(os2Msg->mp2) != VK_NEWLINE)
+                        break;
+                //no break
+        case VK_LEFT_W:
+        case VK_RIGHT_W:
+        case VK_DOWN_W:
+        case VK_UP_W:
+        case VK_PRIOR_W:
+        case VK_NEXT_W:
+        case VK_END_W:
+        case VK_DIVIDE_W:
+        case VK_DELETE_W:
+        case VK_HOME_W:
+        case VK_INSERT_W:
+        case VK_RCONTROL_W:
+        case VK_RMENU_W: //is this the right alt???
+                winMsg->lParam = winMsg->lParam | (1<<24);
+                break;
+        }
 
         if(!(SHORT1FROMMP(os2Msg->mp1) & KC_ALT))
         {
@@ -675,7 +683,7 @@ VirtualKeyFound:
         {
             if(DInputKeyBoardHandler(winMsg)) {
                 goto dummymessage; //dinput swallowed message
-	    }
+            }
         }
         break;
     }
@@ -770,9 +778,9 @@ VirtualKeyFound:
     case WM_SEMANTICEVENT:
     default:
 dummymessage:
-	winMsg->message = 0;
-	winMsg->wParam  = 0;
-	winMsg->lParam  = 0;
+        winMsg->message = 0;
+        winMsg->wParam  = 0;
+        winMsg->lParam  = 0;
         return FALSE;
   }
   return TRUE;
