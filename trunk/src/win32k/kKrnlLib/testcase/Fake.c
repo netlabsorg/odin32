@@ -1,4 +1,4 @@
-/* $Id: Fake.c,v 1.2 2001-09-26 03:58:37 bird Exp $
+/* $Id: Fake.c,v 1.3 2001-11-09 07:41:09 bird Exp $
  *
  * Fake stubs for the ldr and kernel functions we imports or overloads.
  *
@@ -7,13 +7,18 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+#ifndef NOFILEID
+static const char szFileId[] = "$Id: Fake.c,v 1.3 2001-11-09 07:41:09 bird Exp $";
+#endif
 
 /*******************************************************************************
 *   Defined Constants And Macros                                               *
 *******************************************************************************/
 #define INCL_BASE
-#define FOR_EXEHDR 1                    /* To make all object flags OBJ???. */
+#define INCL_KKL_LOG
+#define INCL_KKL_PRINTF
 #define INCL_OS2KRNL_ALL
+#define FOR_EXEHDR 1                    /* To make all object flags OBJ???. */
 #define DWORD  ULONG
 #define WORD   USHORT
 
@@ -30,8 +35,8 @@
 
 #include "devSegDf.h"                   /* kKrnlLib segment definitions. */
 
-#include "kKLlog.h"
-#include "OS2Krnl.h"
+#include <kKrnlLib.h>
+#include <OS2Krnl.h>
 #include "dev32.h"
 #include "testcase.h"
 #include "kTypes.h"
@@ -171,6 +176,7 @@ unsigned short  getSlot(void);
  */
 void  workersinit(void)
 {
+    KLOGENTRY0("void");
     APIRET rc;
 
     /*
@@ -218,6 +224,7 @@ void  workersinit(void)
     }
 
     rc = rc;
+    KLOGEXITVOID();
 }
 
 
@@ -231,6 +238,7 @@ void  workersinit(void)
  */
 ULONG LDRCALL fakeldrClose(SFN hFile)
 {
+    KLOGENTRY1("ULONG LDRCALL","SFN hFile", hFile);
     APIRET  rc;
     BOOL    f32Stack = ((int)&hFile > 0x10000);
 
@@ -242,6 +250,7 @@ ULONG LDRCALL fakeldrClose(SFN hFile)
 
     printf("fakeldrClose:                   hFile = 0x%04x, rc = %d\n", hFile, rc);
 
+    KLOGEXIT(rc);
     return rc;
 }
 
@@ -258,6 +267,7 @@ ULONG LDRCALL fakeldrClose(SFN hFile)
  */
 ULONG LDRCALL fakeldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl)
 {
+    KLOGENTRY3("ULONG LDRCALL","PSFN phFile, PSZ pszFilename, PULONG pfl", phFile, pszFilename, pfl);
     ULONG   ulAction;
     HFILE   hFile;
     APIRET  rc;
@@ -285,6 +295,7 @@ ULONG LDRCALL fakeldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl)
     printf("fakeldrOpen:                    phFile = %p; *phFile = 0x%04x, pszFilename = %s, pfl = %p, rc = %d\n",
            phFile, *phFile, pszFilename, pfl, rc);
 
+    KLOGEXIT(rc);
     return rc;
 }
 
@@ -307,6 +318,7 @@ ULONG LDRCALL fakeldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl)
  */
 ULONG LDRCALL fakeldrRead(SFN hFile, ULONG ulOffset, PVOID pvBuffer, ULONG fpBuffer, ULONG cbToRead, PMTE pMTE)
 {
+    KLOGENTRY6("ULONG LDRCALL","SFN hFile, ULONG ulOffset, PVOID pvBuffer, ULONG fpBuffer, ULONG cbToRead, PMTE pMTE", hFile, ulOffset, pvBuffer, fpBuffer, cbToRead, pMTE);
     ULONG   cbRead,
             ulMoved;
     APIRET  rc;
@@ -318,7 +330,7 @@ ULONG LDRCALL fakeldrRead(SFN hFile, ULONG ulOffset, PVOID pvBuffer, ULONG fpBuf
     if (rc == NO_ERROR)
         rc = DosRead(hFile, pvBuffer, cbToRead, &cbRead);
     else
-        kprintf(("fakeldrRead: DosSetFilePtr(hfile, 0x%08x(%d),..) failed with rc = %d.\n",
+        kprintf(("DosSetFilePtr(hfile, 0x%08x(%d),..) failed with rc = %d.\n",
                  ulOffset, ulOffset, rc));
 
     if (!f32Stack) ThunkStack32To16();
@@ -326,6 +338,7 @@ ULONG LDRCALL fakeldrRead(SFN hFile, ULONG ulOffset, PVOID pvBuffer, ULONG fpBuf
     printf("fakeldrRead:                    hFile = 0x%04x, ulOffset = 0x%08x, pvBuffer = %p, fpBuffer = 0x%08x, cbToRead = 0x%08x, pMte = %p, rc = %d\n",
            hFile, ulOffset, pvBuffer, fpBuffer, cbToRead, pMTE, rc);
 
+    KLOGEXIT(rc);
     return rc;
 }
 
@@ -342,8 +355,10 @@ ULONG LDRCALL fakeldrRead(SFN hFile, ULONG ulOffset, PVOID pvBuffer, ULONG fpBuf
  */
 ULONG LDRCALL fakeLDRQAppType(PSZ pszFilename, PULONG pul)
 {
+    KLOGENTRY2("ULONG LDRCALL","PSZ pszFilename, PULONG pul", pszFilename, pul);
     DUMMY();
     printf("fakeLDRQAppType:                pszFilename = %s, pul = %p, rc = 0\n", pszFilename, pul);
+    KLOGEXIT(NO_ERROR);
     return NO_ERROR;
 }
 
@@ -367,10 +382,12 @@ ULONG LDRCALL fakeldrEnum32bitRelRecs(
     PVOID   pvPTDA
     )
 {
+    KLOGENTRY6("ULONG LDRCALL","PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID pvPage, ULONG ulPageAddress, PVOID pvPTDA", pMTE, iObject, iPageTable, pvPage, ulPageAddress, pvPTDA);
     DUMMY();
     printf("fakeldrEnum32bitRelRecs:        pMTE = %p, iObject = 0x%08x, iPageTable = 0x%08x, pvPage = 0x%08x, ulPageAddress = 0x%08x, pvPTDA = %p\n",
            pMTE, iObject, iPageTable, pvPage, ulPageAddress, pvPTDA);
 
+    KLOGEXIT(NO_ERROR);
     return NO_ERROR;
 }
 
@@ -390,10 +407,12 @@ ULONG LDRCALL fakeldrSetVMflags(
     PULONG      pflFlags2
     )
 {
+    KLOGENTRY4("ULONG LDRCALL","PMTE pMTE, ULONG flObj, PULONG pflFlags1, PULONG pflFlags2", pMTE, flObj, pflFlags1, pflFlags2);
     *pflFlags1 = 0;
     *pflFlags2 = 0;
     flObj = flObj;
     pMTE = pMTE;
+    KLOGEXIT(0);
     return 0;
 }
 
@@ -414,6 +433,7 @@ APIRET KRNLCALL fakeIOSftOpen(
     PULONG pulsomething
     )
 {
+    KLOGENTRY5("APIRET KRNLCALL","PSZ pszFilename, ULONG flOpenFlags, ULONG fsOpenMode, PSFN phFile, PULONG pulsomething", pszFilename, flOpenFlags, fsOpenMode, phFile, pulsomething);
     ULONG   ulAction;
     HFILE   hFile;
     APIRET  rc;
@@ -435,6 +455,7 @@ APIRET KRNLCALL fakeIOSftOpen(
     printf("fakeIOSftOpen:                  pszFilename = %s, flOpenFlags = 0x%08x, fsOpenMode = 0x%08x, phFile = %p; *phFile = 0x%04, pulsomething = %p, rc = %d\n",
            pszFilename, flOpenFlags, fsOpenMode, phFile, *phFile, pulsomething, rc);
 
+    KLOGEXIT(rc);
     return rc;
 }
 
@@ -448,6 +469,7 @@ APIRET KRNLCALL fakeIOSftClose(
     SFN hFile
     )
 {
+    KLOGENTRY1("APIRET KRNLCALL","SFN hFile", hFile);
     APIRET  rc;
     BOOL    f32Stack = ((int)&hFile > 0x10000);
 
@@ -460,6 +482,7 @@ APIRET KRNLCALL fakeIOSftClose(
     printf("fakeIOSftClose:                 hFile = 0x%04, rc = %d\n",
            hFile, rc);
 
+    KLOGEXIT(rc);
     return rc;
 }
 
@@ -476,6 +499,7 @@ APIRET KRNLCALL fakeIOSftTransPath(
     PSZ pszPath
     )
 {
+    KLOGENTRY1("APIRET KRNLCALL","PSZ pszPath", pszPath);
     char    szBuffer[CCHMAXPATH];
     APIRET  rc;
     BOOL    f32Stack = ((int)&pszPath > 0x10000);
@@ -493,6 +517,7 @@ APIRET KRNLCALL fakeIOSftTransPath(
 
     if (!f32Stack) ThunkStack32To16();
 
+    KLOGEXIT(rc);
     return rc;
 }
 
@@ -515,6 +540,7 @@ APIRET KRNLCALL fakeIOSftReadAt(
     ULONG ulOffset
     )
 {
+    KLOGENTRY5("APIRET KRNLCALL","SFN hFile, PULONG pcbActual, PVOID pvBuffer, ULONG fpBuffer, ULONG ulOffset", hFile, pcbActual, pvBuffer, fpBuffer, ulOffset);
     ULONG   ulMoved;
     APIRET  rc;
     BOOL    f32Stack = ((int)&hFile > 0x10000);
@@ -533,6 +559,7 @@ APIRET KRNLCALL fakeIOSftReadAt(
     printf("fakeIOSftReadAt:                hFile = 0x%04, pcbActual = %p; *pcbActual = 0x%08x, pvBuffer = %p, fpBuffer = %x, ulOffset = 0x%08x, rc = %d\n",
            hFile, pcbActual, pvBuffer, fpBuffer, ulOffset, rc);
 
+    KLOGEXIT(rc);
     return rc;
 }
 
@@ -555,6 +582,7 @@ APIRET KRNLCALL fakeIOSftWriteAt(
     ULONG ulOffset
     )
 {
+    KLOGENTRY5("APIRET KRNLCALL","SFN hFile, PULONG pcbActual, PVOID pvBuffer, ULONG fpBuffer, ULONG ulOffset", hFile, pcbActual, pvBuffer, fpBuffer, ulOffset);
     ULONG   ulMoved;
     APIRET  rc;
     BOOL    f32Stack = ((int)&hFile > 0x10000);
@@ -573,6 +601,7 @@ APIRET KRNLCALL fakeIOSftWriteAt(
     printf("fakeIOSftWriteAt:               hFile = 0x%04, pcbActual = %p; *pcbActual = 0x%08x, pvBuffer = %p, fpBuffer = %x, ulOffset = 0x%08x, rc = %d\n",
            hFile, pcbActual, pvBuffer, fpBuffer, ulOffset, rc);
 
+    KLOGEXIT(rc);
     return rc;
 }
 
@@ -588,6 +617,7 @@ APIRET KRNLCALL fakeSftFileSize(
     PULONG pcbFile
     )
 {
+    KLOGENTRY2("APIRET KRNLCALL","SFN hFile, PULONG pcbFile", hFile, pcbFile);
     FILESTATUS3     fsts3;
     APIRET          rc;
     BOOL            f32Stack = ((int)&hFile > 0x10000);
@@ -608,6 +638,7 @@ APIRET KRNLCALL fakeSftFileSize(
     printf("fakeSftFileSize:                hFile = 0x%04x, pcbFile = %p; *pcbFile = 0x%08x, rc = %d\n",
            hFile, pcbFile, *pcbFile, rc);
 
+    KLOGEXIT(rc);
     return rc;
 }
 
@@ -619,11 +650,13 @@ HMTE KRNLCALL fakeVMGetOwner(
     ULONG ulCS,
     ULONG ulEIP)
 {
+    KLOGENTRY2("HMTE KRNLCALL","ULONG ulCS, ULONG ulEIP", ulCS, ulEIP);
     DUMMY();
 
     printf("fakeVMGetOwner:                 ulCS = 0x%04x, ulEiP = 0x%08x, rc = %d\n",
            ulCS, ulEIP, 0);
 
+    KLOGEXIT(0);
     return 0;
 }
 
@@ -642,10 +675,12 @@ APIRET KRNLCALL fakeVMAllocMem(
     ULONG   SomeArg2,
     PVMAC   pvmac)
 {
+    KLOGENTRY9("APIRET KRNLCALL","ULONG cbSize, ULONG cbCommit, ULONG flFlags1, HPTDA hPTDA, USHORT usVMOwnerId, HMTE hMTE, ULONG flFlags2, ULONG SomeArg2, PVMAC pvmac", cbSize, cbCommit, flFlags1, hPTDA, usVMOwnerId, hMTE, flFlags2, SomeArg2, pvmac);
     DUMMY();
     printf("fakeVMAllocMem:                 cbSize = 0x%08x, cbCommit = 0x%08x, flFlags1 = 0x%08x, hPTDA = 0x%04x, usVMOwnerId = 0x%04x, hMTE = 0x%04x, flFlags2 = 0x%08x, SomeArg2 = 0x%08x, pvmac = %p, rc = %d\n",
            cbSize, cbCommit, flFlags1, hPTDA, usVMOwnerId, hMTE, flFlags2, SomeArg2, pvmac, ERROR_NOT_SUPPORTED);
 
+    KLOGEXIT(ERROR_NOT_SUPPORTED);
     return ERROR_NOT_SUPPORTED;
 }
 
@@ -659,10 +694,12 @@ APIRET KRNLCALL fakeVMFreeMem(
     ULONG   flFlags
     )
 {
+    KLOGENTRY3("APIRET KRNLCALL","PVOID pv, USHORT hPTDA, ULONG flFlags", pv, hPTDA, flFlags);
     DUMMY();
     printf("fakeVMFreeMem:                  pv = %p, hPTDA = 0x%04x, flFlags = %08x, rc = %d\n",
            pv, hPTDA, flFlags, ERROR_NOT_SUPPORTED);
 
+    KLOGEXIT(ERROR_NOT_SUPPORTED);
     return ERROR_NOT_SUPPORTED;
 }
 
@@ -676,6 +713,7 @@ APIRET KRNLCALL fakeVMObjHandleInfo(
     PULONG  pulAddr,
     PUSHORT pushPTDA)
 {
+    KLOGENTRY3("APIRET KRNLCALL","USHORT usHob, PULONG pulAddr, PUSHORT pushPTDA", usHob, pulAddr, pushPTDA);
     APIRET          rc = NO_ERROR;
     BOOL            f32Stack = ((int)&usHob > 0x10000);
 
@@ -702,6 +740,7 @@ APIRET KRNLCALL fakeVMObjHandleInfo(
 
     printf("fakeVMObjHandleInfo:            usHob = 0x%04x, pulAddr = %p, pushPTDA = %p, rc = %d\n",
            usHob, pulAddr, pushPTDA, rc);
+    KLOGEXIT(rc);
     return rc;
 }
 
@@ -713,6 +752,7 @@ APIRET KRNLCALL fakeVMMapDebugAlias(
     HPTDA   hPTDA,
     PVMAC   pvmac)
 {
+    KLOGENTRY5("APIRET KRNLCALL","ULONG flVMFlags, ULONG ulAddress, ULONG cbSize, HPTDA hPTDA, PVMAC pvmac", flVMFlags, ulAddress, cbSize, hPTDA, pvmac);
     printf("fakeVMMapDebugAlias:            flVMFlags = 0x%08x, ulAddress = 0x%08, cbSize = 0x%08x, hPTDA = 0x%04x, pvmac = %p - not implemented\n",
            flVMFlags,
            ulAddress,
@@ -720,6 +760,7 @@ APIRET KRNLCALL fakeVMMapDebugAlias(
            hPTDA,
            pvmac);
 
+    KLOGEXIT(ERROR_NOT_SUPPORTED);
     return ERROR_NOT_SUPPORTED;
 }
 
@@ -739,8 +780,10 @@ APIRET KRNLCALL fakeVMCreatePseudoHandle(
     VMHOB   usOwner,
     PVMHOB  phob)
 {
+    KLOGENTRY3("APIRET KRNLCALL","PVOID pvData, VMHOB usOwner, PVMHOB phob", pvData, usOwner, phob);
     DUMMY();
     printf("fakeVMCreatePseudoHandle:              - not implemented\n");
+    KLOGEXIT(ERROR_NOT_SUPPORTED);
     return ERROR_NOT_SUPPORTED;
 }
 
@@ -754,8 +797,10 @@ APIRET KRNLCALL fakeVMCreatePseudoHandle(
 APIRET KRNLCALL fakeVMFreePseudoHandle(
     VMHOB   hob)
 {
+    KLOGENTRY1("APIRET KRNLCALL","VMHOB hob", hob);
     DUMMY();
     printf("fakeVMFreePseudoHandle:                - not implemented\n");
+    KLOGEXIT(ERROR_NOT_SUPPORTED);
     return ERROR_NOT_SUPPORTED;
 }
 
@@ -790,7 +835,9 @@ ULONG LDRCALL fakeldrOpenPath_new( /* retd  0x14 */
     ULONG       lLibPath           /* ebp + 0x18 */
     )
  {
+     KLOGENTRY5("ULONG LDRCALL","PCHAR pachFilename, USHORT cchFilename, ldrlv_t * plv, PULONG pful, ULONG lLibPath", pachFilename, cchFilename, plv, pful, lLibPath);
      KNOREF(lLibPath);
+     KLOGEXIT(fakeldrOpenPath_old(pachFilename, cchFilename, plv, pful));
      return fakeldrOpenPath_old(pachFilename, cchFilename, plv, pful);
  }
 
@@ -809,6 +856,7 @@ ULONG LDRCALL fakeldrOpenPath_new( /* retd  0x14 */
  */
 ULONG LDRCALL fakeldrOpenPath_old(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *plv, PULONG pful)
 {
+    KLOGENTRY4("ULONG LDRCALL","PCHAR pachFilename, USHORT cchFilename, ldrlv_t * plv, PULONG pful", pachFilename, cchFilename, plv, pful);
     static char     szPath[1024];       /* Path buffer. Used to store pathlists. 1024 should be enough */
                                         /* for LIBPATH (which at had a limit of ca. 750 chars). */
     static char     sz[CCHMAXPATH];     /* Filename/path buffer. (Normally used to build filenames */
@@ -863,6 +911,7 @@ ULONG LDRCALL fakeldrOpenPath_old(PCHAR pachFilename, USHORT cchFilename, ldrlv_
                     rc = DosQueryExtLIBPATH(szPath, END_LIBPATH);
                     break;
                 default: /* !internalerror! */
+                    KLOGEXIT(ERROR_FILE_NOT_FOUND);
                     return ERROR_FILE_NOT_FOUND;
             }
             if (rc != NO_ERROR)
@@ -932,6 +981,7 @@ ULONG LDRCALL fakeldrOpenPath_old(PCHAR pachFilename, USHORT cchFilename, ldrlv_
                  * Fatal error or success.
                  */
                 printf("fakeldrOpenPath:        *exit*  plv->lv_sfn = 0x%04x, rc = %d\n", plv->lv_sfn, rc);
+                KLOGEXIT(rc);
                 return rc;
             }
         } /* for iPath */
@@ -939,6 +989,7 @@ ULONG LDRCALL fakeldrOpenPath_old(PCHAR pachFilename, USHORT cchFilename, ldrlv_
 
     printf("fakeldrOpenPath:        *exit*  plv->lv_sfn = 0x%04x, rc = %d\n", plv->lv_sfn, rc);
 
+    KLOGEXIT(rc);
     return rc;
 }
 
@@ -952,6 +1003,8 @@ ULONG LDRCALL fakeldrOpenPath_old(PCHAR pachFilename, USHORT cchFilename, ldrlv_
  */
 ULONG LDRCALL fakeLDRClearSem(void)
 {
+    KLOGENTRY0("ULONG LDRCALL");
+    KLOGEXIT(fakeKSEMReleaseMutex(&fakeLdrSem));
     return fakeKSEMReleaseMutex(&fakeLdrSem);
 }
 
@@ -965,12 +1018,14 @@ ULONG LDRCALL fakeLDRClearSem(void)
  */
 ULONG KRNLCALL fakeKSEMRequestMutex(HKSEMMTX hkmtx, ULONG ulTimeout)
 {
+    KLOGENTRY2("ULONG KRNLCALL","HKSEMMTX hkmtx, ULONG ulTimeout", hkmtx, ulTimeout);
     unsigned short usSlot = getSlot();
     ULONG          rc = NO_ERROR;
 
     if (memcmp(&hkmtx->debug.ksem_achSignature[0], "KSEM", 4) != 0)
     {
         printf("fakeKSEMQueryMutex:             hkmtx = %p, invalid signature (%.4s)\n", hkmtx, hkmtx->debug.ksem_achSignature);
+        KLOGEXIT(FALSE);
         return FALSE;
     }
 
@@ -987,6 +1042,7 @@ ULONG KRNLCALL fakeKSEMRequestMutex(HKSEMMTX hkmtx, ULONG ulTimeout)
     printf("fakeKSEMRequestMutex:           hkmtx = %p, ulTimeout = 0x%x, owner = %d, usage count = %d, rc = %d\n",
            hkmtx, ulTimeout, hkmtx->debug.ksem_cusNest, hkmtx->debug.ksem_Owner, ERROR_SEM_BUSY);
 
+    KLOGEXIT(rc);
     return rc;
 }
 
@@ -1001,12 +1057,14 @@ ULONG KRNLCALL fakeKSEMRequestMutex(HKSEMMTX hkmtx, ULONG ulTimeout)
  */
 ULONG KRNLCALL fakeKSEMReleaseMutex(HKSEMMTX hkmtx)
 {
+    KLOGENTRY1("ULONG KRNLCALL","HKSEMMTX hkmtx", hkmtx);
     unsigned int    usSlot = getSlot();
     int rc = NO_ERROR;
 
     if (memcmp(&hkmtx->debug.ksem_achSignature[0], "KSEM", 4) != 0)
     {
         printf("fakeKSEMQueryMutex:             hkmtx = %p, invalid signature (%.4s)\n", hkmtx, hkmtx->debug.ksem_achSignature);
+        KLOGEXIT(FALSE);
         return FALSE;
     }
 
@@ -1021,6 +1079,7 @@ ULONG KRNLCALL fakeKSEMReleaseMutex(HKSEMMTX hkmtx)
     printf("fakeKSEMReleaseMutex:           hkmtx = %p, usage count = %d, owner = %d, rc = %d\n",
            hkmtx, hkmtx->debug.ksem_cusNest, hkmtx->debug.ksem_Owner, rc);
 
+    KLOGEXIT(rc);
     return rc;
 }
 
@@ -1038,12 +1097,14 @@ ULONG KRNLCALL fakeKSEMReleaseMutex(HKSEMMTX hkmtx)
  */
 BOOL KRNLCALL  fakeKSEMQueryMutex(HKSEMMTX hkmtx, PUSHORT pcusNest)
 {
+    KLOGENTRY2("BOOL KRNLCALL","HKSEMMTX hkmtx, PUSHORT pcusNest", hkmtx, pcusNest);
     unsigned int    usSlot = getSlot();
     BOOL            fRc = TRUE;
 
     if (memcmp(&hkmtx->debug.ksem_achSignature[0], "KSEM", 4) != 0)
     {
         printf("fakeKSEMQueryMutex:             hkmtx = %p, invalid signature (%.4s)\n", hkmtx, hkmtx->debug.ksem_achSignature);
+        KLOGEXIT(FALSE);
         return FALSE;
     }
 
@@ -1063,6 +1124,7 @@ BOOL KRNLCALL  fakeKSEMQueryMutex(HKSEMMTX hkmtx, PUSHORT pcusNest)
     printf("fakeKSEMQueryMutex:             hkmtx = %p, usage count = %d, owner = %d, *pcusNest = %d, rc = %d\n",
            hkmtx, hkmtx->debug.ksem_cusNest, hkmtx->debug.ksem_Owner, pcusNest ? *pcusNest : -1, fRc);
 
+    KLOGEXIT(fRc);
     return fRc;
 }
 
@@ -1077,9 +1139,11 @@ BOOL KRNLCALL  fakeKSEMQueryMutex(HKSEMMTX hkmtx, PUSHORT pcusNest)
  */
 VOID  KRNLCALL  fakeKSEMInit(PKSEM pksem, ULONG fulType, ULONG fulFlags)
 {
+    KLOGENTRY3("VOID KRNLCALL","PKSEM pksem, ULONG fulType, ULONG fulFlags", pksem, fulType, fulFlags);
     if (fulType != KSEM_MUTEX)
     {
         printf("fakeKSEMInit:                   Invalid fulType parameter (%d).\n", fulType);
+        KLOGEXITVOID();
         return; /*ERROR_INVALID_PARAMETER;*/
     }
 
@@ -1091,6 +1155,76 @@ VOID  KRNLCALL  fakeKSEMInit(PKSEM pksem, ULONG fulType, ULONG fulFlags)
     pksem->mtx.debug.ksem_Owner = 0;
 
     printf("fakeKSEMInit:                   pksem=%p, fulType=%d, fulFlags=0x%x.\n", pksem, fulType, fulFlags);
+    KLOGEXITVOID();
+}
+
+
+ULONG KRNLCALL  fakeKSEMRequestExclusive(HKSEMSHR hkshr, ULONG ulTimeout)
+{
+    KLOGENTRY2("ULONG","HKSEMSHR hkshr, ULONG ulTimeout", hkshr, ulTimeout);
+    KNOREF(hkshr);
+    KNOREF(ulTimeout);
+    KLOGEXIT(-1);
+    return -1;
+}
+
+
+ULONG KRNLCALL  fakeKSEMRequestShared(HKSEMSHR hkshr, ULONG ulTimeout)
+{
+    KLOGENTRY2("ULONG","HKSEMSHR hkshr, ULONG ulTimeout", hkshr, ulTimeout);
+    DUMMY();
+    KNOREF(hkshr);
+    KNOREF(ulTimeout);
+    KLOGEXIT(-1);
+    return -1;
+}
+
+
+VOID  KRNLCALL  fakeKSEMRelease(HKSEM hksem)
+{
+    KLOGENTRY1("VOID","HKSEM hksem", hksem);
+    DUMMY();
+    KNOREF(hksem);
+    KLOGEXITVOID();
+}
+
+
+VOID  KRNLCALL  fakeKSEMQuery(HKSEM hksem, PULONG pul)
+{
+    KLOGENTRY2("VOID","HKSEM hksem, PULONG pul", hksem, pul);
+    DUMMY();
+    KNOREF(hksem);
+    KNOREF(pul);
+    KLOGEXITVOID();
+}
+
+
+VOID  KRNLCALL  fakeKSEMResetEvent(HKSEMEVT hkev)
+{
+    KLOGENTRY1("VOID","HKSEMEVT hkev", hkev);
+    DUMMY();
+    KNOREF(hkev);
+    KLOGEXITVOID();
+}
+
+
+VOID  KRNLCALL  fakeKSEMPostEvent(HKSEMEVT hkev)
+{
+    KLOGENTRY1("VOID KRNLCALL","HKSEMEVT hkev", hkev);
+    DUMMY();
+    KNOREF(hkev);
+    KLOGEXITVOID();
+}
+
+
+ULONG KRNLCALL  fakeKSEMWaitEvent(HKSEMEVT hkev, ULONG ulTimeout)
+{
+    KLOGENTRY2("ULONG","HKSEMEVT hkev, ULONG ulTimeout", hkev, ulTimeout);
+    DUMMY();
+    KNOREF(hkev);
+    KNOREF(ulTimeout);
+    KLOGEXIT(-1);
+    return -1;
 }
 
 
@@ -1102,6 +1236,7 @@ VOID  KRNLCALL  fakeKSEMInit(PKSEM pksem, ULONG fulType, ULONG fulFlags)
  */
 unsigned short getSlot(void)
 {
+    KLOGENTRY0("unsigned short");
     PPIB ppib;
     PTIB ptib;
     BOOL            f32Stack = ((int)&ppib > 0x10000);
@@ -1112,6 +1247,7 @@ unsigned short getSlot(void)
 
     if (!f32Stack) ThunkStack32To16();
 
+    KLOGEXIT((unsigned short)ptib->tib_ordinal);
     return (unsigned short)ptib->tib_ordinal;
 }
 
@@ -1128,11 +1264,13 @@ unsigned short getSlot(void)
  */
 ULONG KRNLCALL   fakeTKFuBuff(PVOID pv, PVOID pvUsr, ULONG cb, ULONG fl)
 {
+    KLOGENTRY4("ULONG KRNLCALL","PVOID pv, PVOID pvUsr, ULONG cb, ULONG fl", pv, pvUsr, cb, fl);
     memcpy(pv, pvUsr, cb);
 
     printf("fakeTKFuBuff:                   pv = %p, pvUsr = %p, cb = 0x%08x, fl = 0x%08x, rc = %d\n",
            pv, pvUsr, cb, fl, NO_ERROR);
 
+    KLOGEXIT(NO_ERROR);
     return NO_ERROR;
 }
 
@@ -1149,11 +1287,13 @@ ULONG KRNLCALL   fakeTKFuBuff(PVOID pv, PVOID pvUsr, ULONG cb, ULONG fl)
  */
 ULONG KRNLCALL   fakeTKSuBuff(PVOID pvUsr, PVOID pv, ULONG cb, ULONG fl)
 {
+    KLOGENTRY4("ULONG KRNLCALL","PVOID pvUsr, PVOID pv, ULONG cb, ULONG fl", pvUsr, pv, cb, fl);
     memcpy(pvUsr, pv, cb);
 
     printf("fakeTKSuBuff:                   pvUsr = %p, pv = %p, cb = 0x%08x, fl = 0x%08x, rc = %d\n",
            pvUsr, pv, cb, fl, NO_ERROR);
 
+    KLOGEXIT(NO_ERROR);
     return NO_ERROR;
 }
 
@@ -1173,6 +1313,7 @@ ULONG KRNLCALL   fakeTKSuBuff(PVOID pvUsr, PVOID pv, ULONG cb, ULONG fl)
  */
 ULONG KRNLCALL   fakeTKFuBufLen(PLONG pcch, PVOID pvUsr, ULONG cchMax, ULONG fl, BOOL fDblNULL)
 {
+    KLOGENTRY5("ULONG KRNLCALL","PLONG pcch, PVOID pvUsr, ULONG cchMax, ULONG fl, BOOL fDblNULL", pcch, pvUsr, cchMax, fl, fDblNULL);
     ULONG   rc;
     PSZ     psz = pvUsr;
 
@@ -1196,6 +1337,7 @@ ULONG KRNLCALL   fakeTKFuBufLen(PLONG pcch, PVOID pvUsr, ULONG cchMax, ULONG fl,
     printf("fakeTKFuBufLen:                 pcch = %p; *pcch = 0x%08x, pvUsr = %p, cchMax = 0x%08x, fl = 0x%08x, fDblNULL = %x, rc = %d\n",
            pcch, *pcch, pvUsr, cchMax, fl, fDblNULL, NO_ERROR);
 
+    KLOGEXIT(rc);
     return rc;
 }
 
@@ -1212,11 +1354,13 @@ ULONG KRNLCALL   fakeTKFuBufLen(PLONG pcch, PVOID pvUsr, ULONG cchMax, ULONG fl,
  */
 ULONG KRNLCALL   fakeTKSuFuBuff(PVOID pvTarget, PVOID pvSource, ULONG cb, ULONG fl)
 {
+    KLOGENTRY4("ULONG KRNLCALL","PVOID pvTarget, PVOID pvSource, ULONG cb, ULONG fl", pvTarget, pvSource, cb, fl);
     memcpy(pvTarget, pvSource, cb);
 
     printf("fakeTKSuFuBuff:                   pvTarget = %p, pvSource = %p, cb = 0x%08x, fl = 0x%08x, rc = %d\n",
            pvTarget, pvSource, cb, fl, NO_ERROR);
 
+    KLOGEXIT(NO_ERROR);
     return NO_ERROR;
 }
 
@@ -1232,11 +1376,13 @@ ULONG KRNLCALL   fakeTKSuFuBuff(PVOID pvTarget, PVOID pvSource, ULONG cb, ULONG 
  */
 PMTE LDRCALL fakeldrValidateMteHandle(HMTE hMTE)
 {
+    KLOGENTRY1("PMTE LDRCALL","HMTE hMTE", hMTE);
     DUMMY();
 
     printf("fakeldrValidateMteHandle:       hMTE = 0x%04x, pMTE (rc) = %p\n",
            hMTE, NULL);
 
+    KLOGEXIT(NULL);
     return NULL;
 }
 
@@ -1255,6 +1401,7 @@ PMTE LDRCALL fakeldrValidateMteHandle(HMTE hMTE)
  */
 ULONG _Optlink tkExecPgmWorker(ULONG execFlag, PSZ pArg, PSZ pEnv, PSZ pszFilename)
 {
+    KLOGENTRY4("ULONG","ULONG execFlag, PSZ pArg, PSZ pEnv, PSZ pszFilename", execFlag, pArg, pEnv, pszFilename);
     APIRET      rc;
     ldrrei_t    rei;
 
@@ -1266,6 +1413,7 @@ ULONG _Optlink tkExecPgmWorker(ULONG execFlag, PSZ pArg, PSZ pEnv, PSZ pszFilena
     rc = KSEMRequestMutex(&fakeLdrSem, KSEM_INDEFINITE_WAIT);
     if (rc != NO_ERROR)
     {
+        KLOGEXIT(rc);
         return rc;
     }
 
@@ -1278,6 +1426,7 @@ ULONG _Optlink tkExecPgmWorker(ULONG execFlag, PSZ pArg, PSZ pEnv, PSZ pszFilena
     KNOREF(pEnv);
     KNOREF(execFlag);
 
+    KLOGEXIT(rc);
     return rc;
 }
 
@@ -1296,6 +1445,7 @@ ULONG _Optlink tkExecPgmWorker(ULONG execFlag, PSZ pArg, PSZ pEnv, PSZ pszFilena
  */
 ULONG LDRCALL fakeLDRLoadExe(PSZ pszFilename, ldrrei_t *pEI)
 {
+    KLOGENTRY2("ULONG LDRCALL","PSZ pszFilename, ldrrei_t * pEI", pszFilename, pEI);
     APIRET  rc;
     int     cchFilename = strlen(pszFilename);
 
@@ -1307,6 +1457,7 @@ ULONG LDRCALL fakeLDRLoadExe(PSZ pszFilename, ldrrei_t *pEI)
     printf("fakeLDRLoadExe:         *exit*  pszFilename = %s, pEI = %p, rc = %d\n",
            pszFilename, pEI, rc);
 
+    KLOGEXIT(rc);
     return rc;
 }
 
@@ -1338,6 +1489,7 @@ ULONG LDRCALL fakeLDRLoadExe(PSZ pszFilename, ldrrei_t *pEI)
  */
 ULONG LDRCALL fakeldrGetModule(PSZ pszFilename, ULONG ul)
 {
+    KLOGENTRY2("ULONG LDRCALL","PSZ pszFilename, ULONG ul", pszFilename, ul);
     APIRET  rc;
     PMTE    pmte = NULL;
 
@@ -1353,6 +1505,7 @@ ULONG LDRCALL fakeldrGetModule(PSZ pszFilename, ULONG ul)
     printf("fakeldrGetModule:       *exit*  pszFilename = %s, ul = 0x%08x, rc = %d\n",
            pszFilename, ul, rc);
 
+    KLOGEXIT(rc);
     return rc;
 }
 
@@ -1447,6 +1600,7 @@ ULONG LDRCALL fakeldrGetModule(PSZ pszFilename, ULONG ul)
  */
 ULONG LDRCALL   fakeldrGetMte(PCHAR pachFilename, USHORT cchFilename, UCHAR fchType, UCHAR fchClass, PPMTE ppmte)
 {
+    KLOGENTRY5("ULONG LDRCALL","PCHAR pachFilename, USHORT cchFilename, UCHAR fchType, UCHAR fchClass, PPMTE ppmte", pachFilename, cchFilename, fchType, fchClass, ppmte);
     ldrlv_t         lv;
     APIRET          rc;
 
@@ -1475,6 +1629,7 @@ ULONG LDRCALL   fakeldrGetMte(PCHAR pachFilename, USHORT cchFilename, UCHAR fchT
         fakeldrClose(lv.lv_sfn);
         printf("fakeldrGetMte:          *exit*  pachFilename = %.*s, ppmte = %p; *ppmte = %p, rc = %d\n",
                cchFilename, pachFilename, ppmte, *ppmte, rc);
+        KLOGEXIT(rc);
         return rc;
     }
 
@@ -1494,6 +1649,7 @@ ULONG LDRCALL   fakeldrGetMte(PCHAR pachFilename, USHORT cchFilename, UCHAR fchT
     printf("fakeldrGetMte:          *exit*  pachFilename = %.*s, ppmte = %p; *ppmte = %p, rc = %d\n",
            cchFilename, pachFilename, ppmte, *ppmte, rc);
 
+    KLOGEXIT(rc);
     return rc;
 }
 
@@ -1573,6 +1729,7 @@ ULONG LDRCALL   fakeldrGetMte(PCHAR pachFilename, USHORT cchFilename, UCHAR fchT
  */
 ULONG LDRCALL   fakeldrOpenNewExe(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *plv, PUSHORT pus)
 {
+    KLOGENTRY4("ULONG LDRCALL","PCHAR pachFilename, USHORT cchFilename, ldrlv_t * plv, PUSHORT pus", pachFilename, cchFilename, plv, pus);
     APIRET  rc;
     ULONG   ful;
 
@@ -1585,6 +1742,7 @@ ULONG LDRCALL   fakeldrOpenNewExe(PCHAR pachFilename, USHORT cchFilename, ldrlv_
         plv->lv_sfn = 0xffff;
         printf("fakeldrOpenNewExe:      *exit*  pachFilename = %.*s, plv->lv_sfn = %#4x, rc = %d\n",
                cchFilename, pachFilename, plv->lv_sfn, rc);
+        KLOGEXIT(rc);
         return rc;
     }
     if (pus) *pus = 1;
@@ -1596,6 +1754,7 @@ ULONG LDRCALL   fakeldrOpenNewExe(PCHAR pachFilename, USHORT cchFilename, ldrlv_
         plv->lv_sfn = 0xffff;
         printf("fakeldrOpenNewExe:      *exit*  pachFilename = %.*s, plv->lv_sfn = %#4x, rc = %d\n",
                cchFilename, pachFilename, plv->lv_sfn, rc);
+        KLOGEXIT(rc);
         return rc;
     }
 
@@ -1611,6 +1770,7 @@ ULONG LDRCALL   fakeldrOpenNewExe(PCHAR pachFilename, USHORT cchFilename, ldrlv_
         plv->lv_sfn = 0xffff;
         printf("fakeldrOpenNewExe:      *exit*  pachFilename = %.*s, plv->lv_sfn = %#4x, rc = %d\n",
                cchFilename, pachFilename, plv->lv_sfn, rc);
+        KLOGEXIT(rc);
         return rc;
     }
 
@@ -1620,12 +1780,14 @@ ULONG LDRCALL   fakeldrOpenNewExe(PCHAR pachFilename, USHORT cchFilename, ldrlv_
         rc = ERROR_INVALID_EXE_SIGNATURE;
         printf("fakeldrOpenNewExe:      *exit*  pachFilename = %.*s, plv->lv_sfn = %#4x, rc = %d\n",
                cchFilename, pachFilename, plv->lv_sfn, rc);
+        KLOGEXIT(rc);
         return rc;
     }
 
     printf("fakeldrOpenNewExe:      *exit*  pachFilename = %.*s, plv->lv_sfn = %#4x, rc = %d\n",
            cchFilename, pachFilename, plv->lv_sfn, rc);
 
+    KLOGEXIT(NO_ERROR);
     return NO_ERROR;
 }
 
@@ -1658,6 +1820,7 @@ ULONG LDRCALL   fakeldrOpenNewExe(PCHAR pachFilename, USHORT cchFilename, ldrlv_
  */
 ULONG LDRCALL   fakeldrCreateMte(struct e32_exe *pe32, ldrlv_t *plv)
 {
+    KLOGENTRY2("ULONG LDRCALL","struct e32_exe * pe32, ldrlv_t * plv", pe32, plv);
     ULONG   rc;
     PMTE    pMte;
     PSMTE   pSMte;
@@ -1802,6 +1965,7 @@ createmte_exit:
     printf("fakeldrCreateMte:       *exit*  pe32 = %p, plv = %d, rc = %d\n",
            pe32, plv, rc);
 
+    KLOGEXIT(rc);
     return rc;
 }
 
@@ -1842,6 +2006,7 @@ createmte_exit:
  */
 ULONG LDRCALL   fakeldrLoadImports(PMTE pmte)
 {
+    KLOGENTRY1("ULONG LDRCALL","PMTE pmte", pmte);
     int     i;                          /* Module index. */
     PSZ     psz;                        /* Module name pointer. (really pointer to pascal strings...) */
     PPMTE   papmte;                     /* Pointer to array of PMTEs for imported modules. */
@@ -1856,11 +2021,13 @@ ULONG LDRCALL   fakeldrLoadImports(PMTE pmte)
     if (pmte == NULL)
     {
         kprintf(("fakeldrLoadImports: !ASSERTION! pmte == NULL\n"));
+        KLOGEXIT(ERROR_INVALID_PARAMETER);
         return ERROR_INVALID_PARAMETER;
     }
     if (pmte->mte_swapmte == NULL)
     {
         kprintf(("fakeldrLoadImports: !ASSERTION! pmte->mte_swapmte == NULL\n"));
+        KLOGEXIT(ERROR_INVALID_PARAMETER);
         return ERROR_INVALID_PARAMETER;
     }
 
@@ -1871,6 +2038,7 @@ ULONG LDRCALL   fakeldrLoadImports(PMTE pmte)
     {
         printf("fakeldrLoadImport:      *exit*  pmte = %p, rc = %d\n",
                pmte, rc);
+        KLOGEXIT(NO_ERROR);
         return NO_ERROR;
     }
 
@@ -1893,6 +2061,7 @@ ULONG LDRCALL   fakeldrLoadImports(PMTE pmte)
     printf("fakeldrLoadImport:      *exit*  pmte = %p, rc = %d\n",
            pmte, rc);
 
+    KLOGEXIT(rc);
     return rc;
 }
 
@@ -1907,6 +2076,7 @@ ULONG LDRCALL   fakeldrLoadImports(PMTE pmte)
  */
 ULONG LDRCALL   fakeldrCheckInternalName(PMTE pMTE)
 {
+    KLOGENTRY1("ULONG LDRCALL","PMTE pMTE", pMTE);
     PCHAR   pachName;                   /* Pointer to the name part of pachFilename. */
     int     cchName;                    /* Length of the name part of pachFilename.
                                          * Includes extention if extention is not .DLL.
@@ -1917,7 +2087,10 @@ ULONG LDRCALL   fakeldrCheckInternalName(PMTE pMTE)
 
     /* Return successfully if not library module. */
     if (!(pMTE->mte_flags1 & LIBRARYMOD))
+    {
+        KLOGEXIT(NO_ERROR);
         return NO_ERROR;
+    }
 
     /* Uppercase and parse filename in ldrpFileNameBuf */
     cchName = (int)fakeldrGetFileName(ldrpFileNameBuf, (PCHAR*)SSToDS(&pachName), (PCHAR*)SSToDS(&pachExt));
@@ -1925,6 +2098,12 @@ ULONG LDRCALL   fakeldrCheckInternalName(PMTE pMTE)
     ldrUCaseString(pachName, cchName + cchExt + 1);
 
     /* Compare the internal name with the filename and return accordingly. */
+    KLOGEXIT((    cchName <= 8
+            &&  !memcmp(pMTE->mte_modname, pachName, cchName)
+            &&  (cchName == 8 || pMTE->mte_modname[cchName] == '\0')
+            )
+            ? NO_ERROR
+            : ERROR_INVALID_NAME);
     return (    cchName <= 8
             &&  !memcmp(pMTE->mte_modname, pachName, cchName)
             &&  (cchName == 8 || pMTE->mte_modname[cchName] == '\0')
@@ -1942,6 +2121,8 @@ ULONG LDRCALL   fakeldrCheckInternalName(PMTE pMTE)
  */
 ULONG LDRCALL   fakeldrTransPath(PSZ pszFilename)
 {
+    KLOGENTRY1("ULONG LDRCALL","PSZ pszFilename", pszFilename);
+    KLOGEXIT(fakeIOSftTransPath(pszFilename));
     return  fakeIOSftTransPath(pszFilename);
 }
 
@@ -1955,6 +2136,7 @@ ULONG LDRCALL   fakeldrTransPath(PSZ pszFilename)
  */
 ULONG LDRCALL   fakeldrGetFileName(PSZ pszFilename, PCHAR *ppchName, PCHAR *ppchExt)
 {
+    KLOGENTRY3("ULONG LDRCALL","PSZ pszFilename, PCHAR * ppchName, PCHAR * ppchExt", pszFilename, ppchName, ppchExt);
     int     cchName;
     PSZ     pchName;
     PSZ     pchExt = NULL;
@@ -1972,6 +2154,7 @@ ULONG LDRCALL   fakeldrGetFileName(PSZ pszFilename, PCHAR *ppchName, PCHAR *ppch
     *ppchExt = pchExt;
     *ppchName = pchName;
 
+    KLOGEXIT(cchName);
     return cchName;
 }
 
@@ -1987,6 +2170,7 @@ ULONG LDRCALL   fakeldrGetFileName(PSZ pszFilename, PCHAR *ppchName, PCHAR *ppch
  */
 VOID LDRCALL    fakeldrUCaseString(PCHAR pachString, unsigned cchString)
 {
+    KLOGENTRY2("VOID LDRCALL","PCHAR pachString, unsigned cchString", pachString, cchString);
     printf("fakeldrUCaseString:             pachString = %.*s, cchString = %#8x\n",
            cchString, pachString, cchString);
 
@@ -1996,6 +2180,7 @@ VOID LDRCALL    fakeldrUCaseString(PCHAR pachString, unsigned cchString)
             *pachString -= ('a' - 'A');
         pachString++;
     }
+    KLOGEXITVOID();
 }
 
 
@@ -2021,6 +2206,7 @@ VOID LDRCALL    fakeldrUCaseString(PCHAR pachString, unsigned cchString)
  */
 ULONG LDRCALL   fakeldrMTEValidatePtrs(PSMTE psmte, ULONG ulMaxAddr, ULONG off)
 {
+    KLOGENTRY3("ULONG LDRCALL","PSMTE psmte, ULONG ulMaxAddr, ULONG off", psmte, ulMaxAddr, off);
     int     i;
 
     printf("fakeldrMTEValidatePtrs: *entry* psmte = %p, ulMaxAddr = %p, off = %p\n",
@@ -2036,6 +2222,7 @@ ULONG LDRCALL   fakeldrMTEValidatePtrs(PSMTE psmte, ULONG ulMaxAddr, ULONG off)
             {
                 printf("fakeldrMTEValidatePtrs: *exit*  psmte = %p, ulMaxAddr = %p, off = %p, rc = %d\n",
                        psmte, ulMaxAddr, off, ERROR_BAD_EXE_FORMAT);
+                KLOGEXIT(ERROR_BAD_EXE_FORMAT);
                 return ERROR_BAD_EXE_FORMAT;
             }
         }
@@ -2043,26 +2230,31 @@ ULONG LDRCALL   fakeldrMTEValidatePtrs(PSMTE psmte, ULONG ulMaxAddr, ULONG off)
 
     printf("fakeldrMTEValidatePtrs: *exit*  psmte = %p, ulMaxAddr = %p, off = %p, rc = %d\n",
            psmte, ulMaxAddr, off, NO_ERROR);
+    KLOGEXIT(NO_ERROR);
     return NO_ERROR;
 }
 
 
 PMTE KRNLCALL fakeldrASMpMTEFromHandle(HMTE  hMTE)
 {
+    KLOGENTRY1("PMTE KRNLCALL","HMTE hMTE", hMTE);
     PMTE pMte = (PMTE)hMTE;
 
     pMte += 10; //just do something!
 
+    KLOGEXIT(NULL);
     return NULL;
 }
 
 ULONG LDRCALL   fakeldrFindModule(PCHAR pachFilename, USHORT cchFilename, USHORT usClass, PPMTE ppMTE)
 {
+    KLOGENTRY4("ULONG LDRCALL","PCHAR pachFilename, USHORT cchFilename, USHORT usClass, PPMTE ppMTE", pachFilename, cchFilename, usClass, ppMTE);
     APIRET rc = NO_ERROR;
     usClass = usClass;
     cchFilename = cchFilename;
     pachFilename = pachFilename;
     *ppMTE = NULL;
+    KLOGEXIT(rc);
     return rc;
 }
 
@@ -2074,6 +2266,7 @@ ULONG LDRCALL   fakeldrFindModule(PCHAR pachFilename, USHORT cchFilename, USHORT
  */
 PSZ SECCALL fakeSecPathFromSFN(SFN hFile)
 {
+    KLOGENTRY1("PSZ SECCALL","SFN hFile", hFile);
     BOOL    f32Stack = ((int)&hFile > 0x10000);
 
     if (!f32Stack) ThunkStack16To32();
@@ -2083,6 +2276,7 @@ PSZ SECCALL fakeSecPathFromSFN(SFN hFile)
 
     printf("fakeSecPathFromSFN:                    - not implemented - hFile = 0x%04x\n", hFile);
 
+    KLOGEXIT(NULL);
     return NULL;
 }
 
@@ -2095,8 +2289,10 @@ PSZ SECCALL fakeSecPathFromSFN(SFN hFile)
  */
 ULONG KRNLCALL  fakeTKPidToPTDA(PID pid, PPPTDA ppPTDA)
 {
+    KLOGENTRY2("ULONG KRNLCALL","PID pid, PPPTDA ppPTDA", pid, ppPTDA);
     DUMMY();
     printf("fakeTKPidToPTDA:                       - not implemented - pid = 0x%04x, ppPTDA=%p\n", pid, ppPTDA);
+    KLOGEXIT(ERROR_NOT_SUPPORTED);
     return ERROR_NOT_SUPPORTED;
 }
 
@@ -2109,8 +2305,10 @@ ULONG KRNLCALL  fakeTKPidToPTDA(PID pid, PPPTDA ppPTDA)
  */
 ULONG KRNLCALL   fakeTKScanTasks(ULONG flFlags, ULONG id, PTKSCANTASKWORKER pfnWorker, ULONG ulArg)
 {
+    KLOGENTRY4("ULONG KRNLCALL","ULONG flFlags, ULONG id, PTKSCANTASKWORKER pfnWorker, ULONG ulArg", flFlags, id, pfnWorker, ulArg);
     DUMMY();
     printf("fakeTKScanTasks:                       - not implemented\n");
+    KLOGEXIT(ERROR_NOT_SUPPORTED);
     return ERROR_NOT_SUPPORTED;
 }
 
@@ -2121,8 +2319,10 @@ ULONG KRNLCALL   fakeTKScanTasks(ULONG flFlags, ULONG id, PTKSCANTASKWORKER pfnW
  */
 void KRNLCALL fakeTKForceThread(ULONG flFlag, PTCB pTCB)
 {
+    KLOGENTRY2("void KRNLCALL","ULONG flFlag, PTCB pTCB", flFlag, pTCB);
     DUMMY();
     printf("fakeTKForceThread:                     - not implemented\n");
+    KLOGEXITVOID();
 }
 
 /**
@@ -2134,8 +2334,10 @@ void KRNLCALL fakeTKForceThread(ULONG flFlag, PTCB pTCB)
  */
 void KRNLCALL  fakeTKForceTask(ULONG flFlag, PPTDA pPTDA, BOOL fForce)
 {
+    KLOGENTRY3("void KRNLCALL","ULONG flFlag, PPTDA pPTDA, BOOL fForce", flFlag, pPTDA, fForce);
     DUMMY();
     printf("fakeTKForceTask:                       - not implemented\n");
+    KLOGEXITVOID();
 }
 
 /**
@@ -2145,8 +2347,10 @@ void KRNLCALL  fakeTKForceTask(ULONG flFlag, PPTDA pPTDA, BOOL fForce)
  */
 ULONG KRNLCALL fakeTKGetPriority(PTCB pTCB)
 {
+    KLOGENTRY1("ULONG KRNLCALL","PTCB pTCB", pTCB);
     DUMMY();
     printf("fakeTKGetPriority:                     - not implemented\n");
+    KLOGEXIT(-1);
     return -1;
 }
 
@@ -2164,8 +2368,10 @@ ULONG KRNLCALL fakeTKGetPriority(PTCB pTCB)
  */
 ULONG KRNLCALL fakeTKSleep(ULONG ulSleepId, ULONG ulTimeout, ULONG fUnInterruptable, ULONG flWakeupType)
 {
+    KLOGENTRY4("ULONG KRNLCALL","ULONG ulSleepId, ULONG ulTimeout, ULONG fUnInterruptable, ULONG flWakeupType", ulSleepId, ulTimeout, fUnInterruptable, flWakeupType);
     DUMMY();
     printf("fakeTKSleep:                           - not implemented\n");
+    KLOGEXIT(ERROR_NOT_SUPPORTED);
     return ERROR_NOT_SUPPORTED;
 }
 
@@ -2180,8 +2386,10 @@ ULONG KRNLCALL fakeTKSleep(ULONG ulSleepId, ULONG ulTimeout, ULONG fUnInterrupta
  */
 ULONG KRNLCALL fakeTKWakeup(ULONG ulSleepId, ULONG flWakeupType, PULONG cWakedUp)
 {
+    KLOGENTRY3("ULONG KRNLCALL","ULONG ulSleepId, ULONG flWakeupType, PULONG cWakedUp", ulSleepId, flWakeupType, cWakedUp);
     DUMMY();
     printf("fakeTKWakeup:                          - not implemented\n");
+    KLOGEXIT(ERROR_NOT_SUPPORTED);
     return ERROR_NOT_SUPPORTED;
 }
 
@@ -2194,8 +2402,10 @@ ULONG KRNLCALL fakeTKWakeup(ULONG ulSleepId, ULONG flWakeupType, PULONG cWakedUp
  */
 ULONG KRNLCALL fakeTKWakeThread(PTCB pTCB)
 {
+    KLOGENTRY1("ULONG KRNLCALL","PTCB pTCB", pTCB);
     DUMMY();
     printf("fakeTKWakeThread:                      - not implemented\n");
+    KLOGEXIT(ERROR_NOT_SUPPORTED);
     return ERROR_NOT_SUPPORTED;
 }
 
@@ -2208,8 +2418,10 @@ ULONG KRNLCALL fakeTKWakeThread(PTCB pTCB)
  */
 PTCB  KRNLCALL fakeTKQueryWakeup(ULONG ulSleepId, ULONG flWakeupType)
 {
+    KLOGENTRY2("PTCB KRNLCALL","ULONG ulSleepId, ULONG flWakeupType", ulSleepId, flWakeupType);
     DUMMY();
     printf("fakeTKQueryWakeup:                     - not implemented\n");
+    KLOGEXIT(NULL);
     return NULL;
 }
 
@@ -2218,8 +2430,10 @@ PTCB  KRNLCALL fakeTKQueryWakeup(ULONG ulSleepId, ULONG flWakeupType)
  */
 ULONG KRNLCALL fakePGPhysAvail(void)
 {
+    KLOGENTRY0("ULONG KRNLCALL");
     DUMMY();
     printf("fakePGPhysAvail                        - returns 0x234563\n");
+    KLOGEXIT(0x234563);
     return 0x234563;
 }
 
@@ -2229,8 +2443,10 @@ ULONG KRNLCALL fakePGPhysAvail(void)
  */
 ULONG KRNLCALL fakePGPhysPresent(void)
 {
+    KLOGENTRY0("ULONG KRNLCALL");
     DUMMY();
     printf("fakePGPhysPresent                      - returns 0x123534\n");
+    KLOGEXIT(0x123534);
     return 0x123534;
 }
 
@@ -2250,6 +2466,7 @@ VOID    KRNLCALL fakevmRecalcShrBound(
     ULONG   flFlags,
     PULONG  pulSentinelAddress)
 {
+    KLOGENTRY2("VOID KRNLCALL","ULONG flFlags, PULONG pulSentinelAddress", flFlags, pulSentinelAddress);
     ULONG ulRet;
     DUMMY();
 
@@ -2270,7 +2487,7 @@ VOID    KRNLCALL fakevmRecalcShrBound(
     printf("fakePGPhysPresent                      - returns %x - flFlags=0x%02x, pulSentinelAddress=0x%08x\n",
            ulRet, flFlags, pulSentinelAddress);
 
-    return;
+    KLOGEXITVOID();
 }
 
 
@@ -2285,8 +2502,10 @@ VOID    KRNLCALL fakevmRecalcShrBound(
  */
 ULONG LDRCALL   fakeldrGetOrdNum(PMTE pMTE, PSZ pszExportName, PUSHORT pusOrdinal)
 {
+    KLOGENTRY3("ULONG LDRCALL","PMTE pMTE, PSZ pszExportName, PUSHORT pusOrdinal", pMTE, pszExportName, pusOrdinal);
     DUMMY();
     printf("fakeldrGetOrdNum:                      - not implemented\n");
+    KLOGEXIT(ERROR_NOT_SUPPORTED);
     return ERROR_NOT_SUPPORTED;
 }
 
@@ -2304,8 +2523,10 @@ ULONG LDRCALL   fakeldrGetOrdNum(PMTE pMTE, PSZ pszExportName, PUSHORT pusOrdina
  */
 ULONG LDRCALL   fakeldrWasLoadModuled(HMTE hmte, PPTDA pptda, PULONG pcUsage)
 {
+    KLOGENTRY3("ULONG LDRCALL","HMTE hmte, PPTDA pptda, PULONG pcUsage", hmte, pptda, pcUsage);
     DUMMY();
     printf("fakeldrWasLoadModuled:                 - not implemented\n");
+    KLOGEXIT(ERROR_NOT_SUPPORTED);
     return ERROR_NOT_SUPPORTED;
 }
 
@@ -2327,8 +2548,10 @@ ULONG LDRCALL   fakeldrWasLoadModuled(HMTE hmte, PPTDA pptda, PULONG pcUsage)
  */
 ULONG LDRCALL fakeLDRGetProcAddr(HMTE hmte, ULONG ulOrdinal, PCSZ pszName, PULONG pulAddress, BOOL fFlat, PULONG pulProcType)
 {
+    KLOGENTRY6("ULONG LDRCALL","HMTE hmte, ULONG ulOrdinal, PCSZ pszName, PULONG pulAddress, BOOL fFlat, PULONG pulProcType", hmte, ulOrdinal, pszName, pulAddress, fFlat, pulProcType);
     DUMMY();
     printf("fakeLDRGetProcAddr:                    - not implemented\n");
+    KLOGEXIT(ERROR_NOT_SUPPORTED);
     return ERROR_NOT_SUPPORTED;
 }
 
@@ -2339,8 +2562,10 @@ ULONG LDRCALL fakeLDRGetProcAddr(HMTE hmte, ULONG ulOrdinal, PCSZ pszName, PULON
  */
 void KRNLCALL fakeLDRFreeTask(PPTDA pPTDA)
 {
+    KLOGENTRY1("void KRNLCALL","PPTDA pPTDA", pPTDA);
     DUMMY();
     printf("fakeLDRFreeTask:                       - not implemented\n");
+    KLOGEXITVOID();
 }
 
 /**
@@ -2352,8 +2577,10 @@ void KRNLCALL fakeLDRFreeTask(PPTDA pPTDA)
  */
 PVOID KRNLCALL   fakeSELVirtToLin(ULONG ulOffset, USHORT usSel)
 {
+    KLOGENTRY2("PVOID KRNLCALL","ULONG ulOffset, USHORT usSel", ulOffset, usSel);
     DUMMY();
     printf("fakeSELVirtToLin:                      - not implemented\n");
+    KLOGEXIT((void*)-1);
     return (void*)-1;
 }
 
@@ -2365,8 +2592,10 @@ PVOID KRNLCALL   fakeSELVirtToLin(ULONG ulOffset, USHORT usSel)
  */
 PVOID KRNLCALL   fakeSELConvertToLinear(USHORT usSel, PPTDA pPTDA)
 {
+    KLOGENTRY2("PVOID KRNLCALL","USHORT usSel, PPTDA pPTDA", usSel, pPTDA);
     DUMMY();
     printf("fakeSELConvertToLinear:                - not implemented\n");
+    KLOGEXIT((void*)-1);
     return (void*)-1;
 }
 
@@ -2379,8 +2608,10 @@ PVOID KRNLCALL   fakeSELConvertToLinear(USHORT usSel, PPTDA pPTDA)
  */
 USHORT KRNLCALL  fakeSELConvertToSelector(PVOID pv, ULONG ulRPL, HPTDA hPTDA)
 {
+    KLOGENTRY3("USHORT KRNLCALL","PVOID pv, ULONG ulRPL, HPTDA hPTDA", pv, ulRPL, hPTDA);
     DUMMY();
     printf("fakeSELConvertToSelector:              - not implemented\n");
+    KLOGEXIT(ERROR_NOT_SUPPORTED);
     return ERROR_NOT_SUPPORTED;
 }
 
@@ -2391,8 +2622,10 @@ USHORT KRNLCALL  fakeSELConvertToSelector(PVOID pv, ULONG ulRPL, HPTDA hPTDA)
  */
 ULONG  KRNLCALL  fakeSELAllocGDT(PUSHORT pusSel)
 {
+    KLOGENTRY1("ULONG KRNLCALL","PUSHORT pusSel", pusSel);
     DUMMY();
     printf("fakeSELAllocGDT:                       - not implemented\n");
+    KLOGEXIT(ERROR_NOT_SUPPORTED);
     return ERROR_NOT_SUPPORTED;
 }
 
