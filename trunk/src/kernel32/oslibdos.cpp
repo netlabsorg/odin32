@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.93 2002-01-08 22:34:10 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.94 2002-01-18 16:23:35 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -2647,8 +2647,14 @@ ULONG OSLibGetDriveType(ULONG DriveIndex)
         if(rc == NO_ERROR) 
         {
             // this is a CDROM/DVD drive
-            if(cdinfo.first <= DriveIndex && DriveIndex < cdinfo.first + cdinfo.count)
-                device.fsDeviceAttr |= CDType;
+            // CDROM detection fix
+            // when cdrom is not last drive letter that sometimes 
+            // reports wrong index, have to check that device type 
+            // can be a CDROM one
+            if(device.bDeviceType == 7 || device.bDeviceType == 8) // Other or RW optical
+            // /CDROM detection fix
+                if(cdinfo.first <= DriveIndex && DriveIndex < cdinfo.first + cdinfo.count)
+                    device.fsDeviceAttr |= CDType;
         }
         DosClose(handle);
     }
@@ -2687,6 +2693,18 @@ ULONG OSLibGetDriveType(ULONG DriveIndex)
                         }
                         else device.fsDeviceAttr |= OpticalType;
                     }
+                    // CDROM detection fix
+                    else
+                    {
+                        // device is removable non-FAT, maybe it is CD?
+                        if (device.bDeviceType == 7 && 
+                            device.bMedia == 5 && 
+                            device.usBytesPerSector > 512)
+                        {
+                            device.fsDeviceAttr |= CDType;
+                        }
+                    }
+                    // CDROM detection fix
                  }
             }
             else // must be no media or audio only (for CDs at least)
