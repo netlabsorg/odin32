@@ -1,4 +1,4 @@
-/* $Id: win32wmdiclient.cpp,v 1.26 2000-03-18 16:13:40 cbratschi Exp $ */
+/* $Id: win32wmdiclient.cpp,v 1.27 2000-05-24 19:30:08 sandervl Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -330,6 +330,13 @@ LONG Win32MDIClientWindow::childActivate(Win32MDIChildWindow *child)
     if( child && child->getStyle() & WS_DISABLED )
     {
         return 0;
+    }
+
+    /* Don't activate if it is already active. Might happen 
+       since ShowWindow DOES activate MDI children */
+    if(activeChild == child)
+    {
+      	return 0;
     }
 
     if( GetActiveWindow() == getParent()->getWindowHandle())

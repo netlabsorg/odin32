@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.94 2000-05-05 11:32:37 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.95 2000-05-24 19:30:07 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -148,6 +148,7 @@ virtual  WORD   GetWindowWord(int index);
  Win32WndClass *getWindowClass()                { return windowClass; };
 
          LONG   getLastHitTestVal()             { return lastHitTestVal; }
+         LONG   sendHitTest(ULONG lParam);
 
          DWORD  getWindowContextHelpId()        { return contextHelpId; };
          void   setWindowContextHelpId(DWORD id){ contextHelpId = id; };

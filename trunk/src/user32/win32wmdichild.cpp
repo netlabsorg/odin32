@@ -1,4 +1,4 @@
-/* $Id: win32wmdichild.cpp,v 1.22 2000-02-16 14:28:24 sandervl Exp $ */
+/* $Id: win32wmdichild.cpp,v 1.23 2000-05-24 19:30:08 sandervl Exp $ */
 /*
  * Win32 MDI Child Window Class for OS/2
  *
@@ -98,7 +98,7 @@ LRESULT Win32MDIChildWindow::DefMDIChildProcA(UINT Msg, WPARAM wParam, LPARAM lP
         break;
 
     case WM_CHILDACTIVATE:
-        client->childActivate(this);
+       	client->childActivate(this);
         return 0;
 
     case WM_NCPAINT:
@@ -294,7 +294,8 @@ HWND Win32MDIChildWindow::createChild(Win32MDIClientWindow *client, LPMDICREATES
     }
 
     /* this menu is needed to set a check mark in MDI_ChildActivate */
-    AppendMenuA(client->getMDIMenu(), MF_STRING ,wIDmenu, lpstrDef );
+    if(client->getMDIMenu())
+    	AppendMenuA(client->getMDIMenu(), MF_STRING ,wIDmenu, lpstrDef );
 
     client->incNrActiveChildren();
 
@@ -346,6 +347,9 @@ HWND Win32MDIChildWindow::createChild(Win32MDIClientWindow *client, LPMDICREATES
 
     if(newchild && GetLastError() == 0)
     {
+	/* All MDI child windows have the WS_EX_MDICHILD style */
+	newchild->setExStyle(newchild->getExStyle() | WS_EX_MDICHILD);
+
         newchild->menuModifyItem();
 
         if( newchild->getStyle() & WS_MINIMIZE && client->getActiveChild()) {
@@ -362,9 +366,12 @@ HWND Win32MDIChildWindow::createChild(Win32MDIClientWindow *client, LPMDICREATES
             /* clear visible flag, otherwise SetWindoPos32 ignores
              * the SWP_SHOWWINDOW command.
              */
-            newchild->SetWindowLongA(GWL_STYLE, newchild->getStyle() & ~WS_VISIBLE);
+            newchild->setStyle(newchild->getStyle() & ~WS_VISIBLE);
+
             if(showflag){
-                newchild->SetWindowPos(0, 0, 0, 0, 0, SWP_SHOWWINDOW | SWP_NOSIZE | SWP_NOMOVE );
+		dprintf(("newchild->SetWindowPos active window %x", GetActiveWindow()));
+                newchild->SetWindowPos(HWND_TOP, 0, 0, 0, 0, SWP_SHOWWINDOW | SWP_NOSIZE | SWP_NOMOVE );
+		dprintf(("newchild->SetWindowPos active window %x", GetActiveWindow()));
 
                 /* Set maximized state here in case hwnd didn't receive WM_SIZE
                  * during CreateWindow - bad!
@@ -381,14 +388,16 @@ HWND Win32MDIChildWindow::createChild(Win32MDIClientWindow *client, LPMDICREATES
             }
             else
                 /* needed, harmless ? */
-                newchild->SetWindowPos(0, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOSIZE | SWP_NOMOVE );
+                newchild->SetWindowPos(HWND_TOP, 0, 0, 0, 0, SWP_NOACTIVATE | SWP_NOSIZE | SWP_NOMOVE );
 
         }
     }
     else
     {
         client->decNrActiveChildren();
-        DeleteMenu(client->getMDIMenu(), wIDmenu,MF_BYCOMMAND);
+	if(client->getMDIMenu()) {
+        	DeleteMenu(client->getMDIMenu(), wIDmenu,MF_BYCOMMAND);
+	}
 
         maximizedChild = client->getMaximizedChild();
         if( maximizedChild && maximizedChild->IsWindow() )
