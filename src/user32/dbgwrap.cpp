@@ -202,7 +202,6 @@ DEBUGWRAP8(IsHungAppWindow)
 DEBUGWRAP4(MessageBeep)
 
 
-DEBUGWRAP20(MsgWaitForMultipleObjects)
 DEBUGWRAP16(OpenDesktopA)
 DEBUGWRAP16(OpenDesktopW)
 DEBUGWRAP12(OpenInputDesktop)
@@ -532,6 +531,7 @@ DEBUGWRAP4(UnhookWindowsHookEx)
 
 #undef DBG_LOCALLOG
 #define DBG_LOCALLOG	DBG_windowmsg
+DEBUGWRAP20(MsgWaitForMultipleObjects)
 DEBUGWRAP20(BroadcastSystemMessage)
 DEBUGWRAP8(CallMsgFilterA)
 DEBUGWRAP8(CallMsgFilterW)
