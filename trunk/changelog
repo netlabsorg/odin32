@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.1904 2001-12-11 17:34:03 sandervl Exp $ */
+/* $Id: changelog,v 1.1905 2001-12-12 12:48:13 sandervl Exp $ */
+
+ 2001-12-12: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Put back old windows key scancodes
+    - COMCTL32: o Comboex, rebar, tooltips, toolbar bugfix: (Wine)
+                  NEVER delete the font handle received by WM_SETFONT
 
  2001-12-11: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Swallow message if WH_KEYBOARD_LL hook returns TRUE
