@@ -1,4 +1,4 @@
-/* $Id: odininst.cpp,v 1.6 2001-05-17 18:32:56 sandervl Exp $ */
+/* $Id: odininst.cpp,v 1.7 2001-07-23 19:15:50 sandervl Exp $ */
 /*
  * Odin WarpIn installation app
  *
@@ -353,6 +353,81 @@ BOOL InitSystemAndRegistry()
     goto initreg_error;
    }
    RegSetValueEx(hkey1,"",0,REG_SZ, (LPBYTE)DPLAYX_LOBBY_DLL, sizeof(DPLAYX_LOBBY_DLL));
+   RegSetValueEx(hkey1, COM_THREADMODEL, 0,REG_SZ, (LPBYTE)THREAD_BOTH, sizeof(THREAD_BOTH));
+   RegCloseKey(hkey1);
+   RegCloseKey(hkey);
+
+   //Quartz.dll keys
+   //[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{CDA42200-BD88-11d0-BD4E-00A0C911CE86}]
+   //@="Filter Mapper2"
+   //[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{CDA42200-BD88-11d0-BD4E-00A0C911CE86}\InprocServer32]
+   //@="G:\\WINNT\\System32\\quartz.dll"
+   //"ThreadingModel"="Both"
+   if(RegCreateKey(HKEY_LOCAL_MACHINE, "Software\\CLASSES\\CLSID\\"QUARTZ_FILTER_CLASSID ,&hkey)!=ERROR_SUCCESS) {
+    goto initreg_error;
+   }
+   RegSetValueEx(hkey,"",0,REG_SZ, (LPBYTE)QUARTZ_FILTER_DEFAULT, sizeof(QUARTZ_FILTER_DEFAULT));
+   if(RegCreateKey(hkey,COM_INPROCSERVER, &hkey1)!=ERROR_SUCCESS) {
+    RegCloseKey(hkey);
+    goto initreg_error;
+   }
+   RegSetValueEx(hkey1,"",0,REG_SZ, (LPBYTE)QUARTZ_DLL, sizeof(QUARTZ_DLL));
+   RegSetValueEx(hkey1, COM_THREADMODEL, 0,REG_SZ, (LPBYTE)THREAD_BOTH, sizeof(THREAD_BOTH));
+   RegCloseKey(hkey1);
+   RegCloseKey(hkey);
+
+   //[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{CDBD8D00-C193-11D0-BD4E-00A0C911CE86}]
+   //@="CMediaPropertyBag"
+   //
+   //[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{CDBD8D00-C193-11D0-BD4E-00A0C911CE86}\InprocServer32]
+   //@="G:\\WINNT\\System32\\quartz.dll"
+   //"ThreadingModel"="Both"
+   if(RegCreateKey(HKEY_LOCAL_MACHINE, "Software\\CLASSES\\CLSID\\"QUARTZ_MEDIAPROP_CLASSID ,&hkey)!=ERROR_SUCCESS) {
+    goto initreg_error;
+   }
+   RegSetValueEx(hkey,"",0,REG_SZ, (LPBYTE)QUARTZ_MEDIAPROP_DEFAULT, sizeof(QUARTZ_MEDIAPROP_DEFAULT));
+   if(RegCreateKey(hkey,COM_INPROCSERVER, &hkey1)!=ERROR_SUCCESS) {
+    RegCloseKey(hkey);
+    goto initreg_error;
+   }
+   RegSetValueEx(hkey1,"",0,REG_SZ, (LPBYTE)QUARTZ_DLL, sizeof(QUARTZ_DLL));
+   RegSetValueEx(hkey1, COM_THREADMODEL, 0,REG_SZ, (LPBYTE)THREAD_BOTH, sizeof(THREAD_BOTH));
+   RegCloseKey(hkey1);
+   RegCloseKey(hkey);
+
+   //[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{79376820-07D0-11CF-A24D-0020AFD79767}]
+   //@="DirectSound Audio Renderer"
+   //
+   //[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{79376820-07D0-11CF-A24D-0020AFD79767}\InprocServer32]
+   //@="G:\\WINNT\\System32\\quartz.dll"
+   //"ThreadingModel"="Both"
+   if(RegCreateKey(HKEY_LOCAL_MACHINE, "Software\\CLASSES\\CLSID\\"QUARTZ_DSOUNDREND_CLASSID ,&hkey)!=ERROR_SUCCESS) {
+    goto initreg_error;
+   }
+   RegSetValueEx(hkey,"",0,REG_SZ, (LPBYTE)QUARTZ_DSOUNDREND_DEFAULT, sizeof(QUARTZ_DSOUNDREND_DEFAULT));
+   if(RegCreateKey(hkey,COM_INPROCSERVER, &hkey1)!=ERROR_SUCCESS) {
+    RegCloseKey(hkey);
+    goto initreg_error;
+   }
+   RegSetValueEx(hkey1,"",0,REG_SZ, (LPBYTE)QUARTZ_DLL, sizeof(QUARTZ_DLL));
+   RegSetValueEx(hkey1, COM_THREADMODEL, 0,REG_SZ, (LPBYTE)THREAD_BOTH, sizeof(THREAD_BOTH));
+   RegCloseKey(hkey1);
+   RegCloseKey(hkey);
+
+   //[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{e436ebb4-524f-11ce-9f53-0020af0ba770}]
+   //@="Filter Graph Control Plug In Distributor"
+   //[HKEY_LOCAL_MACHINE\SOFTWARE\Classes\CLSID\{e436ebb4-524f-11ce-9f53-0020af0ba770}\InprocServer32]
+   //@="G:\\WINNT\\System32\\quartz.dll"
+   //"ThreadingModel"="Both"
+   if(RegCreateKey(HKEY_LOCAL_MACHINE, "Software\\CLASSES\\CLSID\\"QUARTZ_FILTERGRAPHDIST_CLASSID ,&hkey)!=ERROR_SUCCESS) {
+    goto initreg_error;
+   }
+   RegSetValueEx(hkey,"",0,REG_SZ, (LPBYTE)QUARTZ_FILTERGRAPHDIST_DEFAULT, sizeof(QUARTZ_FILTERGRAPHDIST_DEFAULT));
+   if(RegCreateKey(hkey,COM_INPROCSERVER, &hkey1)!=ERROR_SUCCESS) {
+    RegCloseKey(hkey);
+    goto initreg_error;
+   }
+   RegSetValueEx(hkey1,"",0,REG_SZ, (LPBYTE)QUARTZ_DLL, sizeof(QUARTZ_DLL));
    RegSetValueEx(hkey1, COM_THREADMODEL, 0,REG_SZ, (LPBYTE)THREAD_BOTH, sizeof(THREAD_BOTH));
    RegCloseKey(hkey1);
    RegCloseKey(hkey);
