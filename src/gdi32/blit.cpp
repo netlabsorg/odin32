@@ -1,4 +1,4 @@
-/* $Id: blit.cpp,v 1.40 2002-10-28 12:21:51 sandervl Exp $ */
+/* $Id: blit.cpp,v 1.41 2002-11-26 10:53:06 sandervl Exp $ */
 
 /*
  * GDI32 blit code
@@ -46,7 +46,6 @@ BOOL WIN32API StretchBlt(HDC hdcDest, int nXOriginDest, int nYOriginDest,
         {
             rc  = dsect->BitBlt(hdcDest, nXOriginDest, nYOriginDest, nWidthDest, nHeightDest,
                                 nXOriginSrc, nYOriginSrc, nWidthSrc, nHeightSrc, dwRop);
-            dprintf(("GDI32: StretchBlt returned %d", rc));
             return rc;
         }
     }
@@ -329,77 +328,6 @@ INT WIN32API SetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx,
                                  info, coloruse);
     }
     return rc;
-
-//SvL: Breaks startup bitmap of Acrobat Reader 4.05
-#if 0
-    else
-    if(info->bmiHeader.biBitCount == 8 && info->bmiHeader.biCompression == 0 && !(GetDeviceCaps( hdc, RASTERCAPS ) & RC_PALETTE)) {
-        INT rc = 0;
-        // convert 8bit to 24bit
-
-        BITMAPINFO newInfo;
-        newInfo.bmiHeader = info->bmiHeader;
-        newInfo.bmiHeader.biBitCount = 24;
-        long lLineByte24 = ((newInfo.bmiHeader.biWidth * 24 + 31) / 32) * 4;
-        long lLineByte8  = ((newInfo.bmiHeader.biWidth *  8 + 31) / 32) * 4;
-        long lHeight   = newInfo.bmiHeader.biHeight;
-        if(lHeight < 0) lHeight = -lHeight;
-
-        char *newBits = (char *)malloc( lLineByte24 * lHeight );
-        if(newBits) {
-            //
-            // Get Palette Entries
-            //
-            PALETTEENTRY aEntries[256];
-            LOGPALETTE *pLog = (LOGPALETTE *)malloc( sizeof(LOGPALETTE) + sizeof(PALETTEENTRY) * 256 );
-            pLog->palVersion = 0x300;
-            pLog->palNumEntries = 256;
-
-            HPALETTE hPaletteDummy = CreatePalette( pLog );
-            free( pLog );
-            HPALETTE hPalette = SelectPalette( hdc, hPaletteDummy, FALSE );
-            GetPaletteEntries( hPalette, 0, 255, aEntries  );
-            SelectPalette( hdc, hPalette, FALSE );
-            DeleteObject( hPaletteDummy );
-
-            //
-            // convert 8bit to 24bit
-            //
-            if(newInfo.bmiHeader.biHeight > 0) {
-                unsigned char *pbSrc = (unsigned char *)bits;
-                unsigned char *pbDst = (unsigned char *)newBits;
-                for(int y = 0; y < lHeight; y++) {
-                    for(int x = 0; x < newInfo.bmiHeader.biWidth; x++) {
-                        PALETTEENTRY src = aEntries[pbSrc[x]];
-                        pbDst[x * 3 + 0] = src.peBlue;
-                        pbDst[x * 3 + 1] = src.peGreen;
-                        pbDst[x * 3 + 2] = src.peRed;
-                    }
-                    pbDst += lLineByte24;
-                    pbSrc += lLineByte8;
-                }
-            } else {
-                // upside down
-                newInfo.bmiHeader.biHeight = -info->bmiHeader.biHeight;
-                unsigned char *pbSrc = (unsigned char *)bits + lLineByte8 * (lHeight - 1);
-                unsigned char *pbDst = (unsigned char *)newBits;
-                for(int y = 0; y < lHeight; y++) {
-                    for(int x = 0; x < newInfo.bmiHeader.biWidth; x++) {
-                        PALETTEENTRY src = aEntries[pbSrc[x]];
-                        pbDst[x * 3 + 0] = src.peBlue;
-                        pbDst[x * 3 + 1] = src.peGreen;
-                        pbDst[x * 3 + 2] = src.peRed;
-                    }
-                    pbDst += lLineByte24;
-                    pbSrc -= lLineByte8;
-                }
-            }
-            rc = SetDIBitsToDevice_( hdc, xDest, yDest, cx, cy, xSrc, ySrc, startscan, lines, (void *)newBits, &newInfo, DIB_RGB_COLORS );
-            free( newBits );
-        }
-        return rc;
-    } 
-#endif
 }
 //******************************************************************************
 //******************************************************************************
@@ -426,15 +354,12 @@ BOOL WIN32API PatBlt(HDC hdc,int nXLeft,int nYLeft,int nWidth,int nHeight,DWORD 
 		    destdib->sync(hdc, nYLeft, nHeight);
   	    }
     }
-
-    dprintf(("GDI32: PatBlt hdc %x (%d,%d) (%d,%d) returned %d\n",hdc, nXLeft,nYLeft,nWidth,nHeight,rc));
     return(rc);
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API MaskBlt( HDC arg1, int arg2, int arg3, int arg4, int arg5, HDC   arg6, int arg7, int arg8, HBITMAP arg9, int arg10, int arg11, DWORD  arg12)
 {
-    dprintf(("GDI32: MaskBlt"));
     return O32_MaskBlt(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12);
 }
 //******************************************************************************
@@ -540,6 +465,8 @@ static INT StretchDIBits_(HDC hdc, INT xDst, INT yDst, INT widthDst,
         ULONG offset = CalcBitmapSize(info->bmiHeader.biBitCount,
                                      xSrc, ySrc)/sizeof(WORD);
         newbits = (WORD *) HeapAlloc(GetProcessHeap(), 0, imgsize);
+//bugbug (too much)
+//bugbug
         if(CPUFeatures & CPUID_MMX) {
              RGB555to565MMX(newbits, (WORD *)bits+offset, imgsize/sizeof(WORD));
         }
@@ -547,7 +474,7 @@ static INT StretchDIBits_(HDC hdc, INT xDst, INT yDst, INT widthDst,
           RGB555to565(newbits, (WORD *)bits+offset, imgsize/sizeof(WORD));
         bits = newbits;
     }
-    //SvL: Ignore BI_BITFIELDS type (SetDIBitsToDevice fails otherwise)
+    //SvL: Ignore BI_BITFIELDS type (StretchDIBits fails otherwise)
     if(info->bmiHeader.biCompression == BI_BITFIELDS) {
         ((BITMAPINFO *)info)->bmiHeader.biCompression = 0;
         compression = BI_BITFIELDS;
@@ -628,8 +555,6 @@ INT WIN32API StretchDIBits(HDC hdc, INT xDst, INT yDst, INT widthDst,
 //******************************************************************************
 int WIN32API SetStretchBltMode( HDC arg1, int  arg2)
 {
-  dprintf(("GDI32: SetStretchBltMode 0x%08X, 0x%08X\n",arg1, arg2));
-
     if(DIBSection::getSection() != NULL)
     {
         DIBSection *dsect = DIBSection::findHDC(arg1);
@@ -644,7 +569,6 @@ int WIN32API SetStretchBltMode( HDC arg1, int  arg2)
 //******************************************************************************
 int WIN32API GetStretchBltMode( HDC arg1)
 {
-    dprintf(("GDI32: GetStretchBltMode"));
     return O32_GetStretchBltMode(arg1);
 }
 //******************************************************************************

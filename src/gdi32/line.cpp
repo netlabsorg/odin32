@@ -1,4 +1,4 @@
-/* $Id: line.cpp,v 1.12 2001-11-16 16:27:54 sandervl Exp $ */
+/* $Id: line.cpp,v 1.13 2002-11-26 10:53:10 sandervl Exp $ */
 /*
  * Line API's
  *
@@ -169,7 +169,6 @@ BOOL WIN32API LineDDA( int nXStart, int nYStart, int nXEnd, int nYEnd, LINEDDAPR
   LineDDAProcCallback *callback = new LineDDAProcCallback(lpLineFunc, lpData);
   POINTLOS2 startPt,endPt;
 
-  dprintf(("GDI32: LineDDA\n"));
 #if 0 //CB: the Open32 function is ok -> to check
   startPt.x = nXStart;
   startPt.y = nYStart;
@@ -188,8 +187,6 @@ BOOL WIN32API LineDDA( int nXStart, int nYStart, int nXEnd, int nYEnd, LINEDDAPR
 BOOL WIN32API Polyline( HDC hdc, const POINT *lppt, int cPoints)
 {
   pDCData pHps = (pDCData)OSLibGpiQueryDCData(hdc);
-
-  dprintf(("GDI32: Polyline %x %x %d", hdc, lppt, cPoints));
 
   if (!pHps)
   {
@@ -225,8 +222,6 @@ BOOL WIN32API Polyline( HDC hdc, const POINT *lppt, int cPoints)
 BOOL WIN32API PolylineTo( HDC hdc, const POINT * lppt, DWORD cCount)
 {
   pDCData pHps = (pDCData)OSLibGpiQueryDCData(hdc);
-
-  dprintf(("GDI32: PolylineTo"));
 
   if (!pHps)
   {

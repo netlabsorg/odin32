@@ -1,4 +1,4 @@
-/* $Id: objhandle.cpp,v 1.30 2002-11-18 15:45:31 sandervl Exp $ */
+/* $Id: objhandle.cpp,v 1.31 2002-11-26 10:53:10 sandervl Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
@@ -248,9 +248,7 @@ DWORD WIN32API ObjQueryHandleType(HANDLE hObject)
 int WIN32API GetObjectA( HGDIOBJ hObject, int size, void *lpBuffer)
 {
     int rc;
-
-    dprintf(("GDI32: GetObject %X %X %X\n", hObject, size, lpBuffer));
-    
+   
     if(lpBuffer == NULL)
     { //return required size if buffer pointer == NULL
         int objtype = GetObjectType(hObject);
@@ -307,8 +305,6 @@ int WIN32API GetObjectA( HGDIOBJ hObject, int size, void *lpBuffer)
 int WIN32API GetObjectW( HGDIOBJ hObject, int size, void *lpBuffer)
 {
     int ret, objtype;
-
-    dprintf(("GDI32: GetObjectW %X, %d %X", hObject, size, lpBuffer));
 
     objtype = GetObjectType(hObject);
 
@@ -414,8 +410,6 @@ HGDIOBJ WIN32API SelectObject(HDC hdc, HGDIOBJ hObj)
             dsect->UnSelectDIBObject();
         }
     }
-    dprintf2(("GDI32: SelectObject %x %x returned %x", hdc, hObj, rc));
-
     return(rc);
 }
 //******************************************************************************
@@ -493,7 +487,6 @@ BOOL WIN32API DeleteObject(HANDLE hObj)
 {
     DWORD objflags;
 
-    dprintf(("GDI32: DeleteObject %x", hObj));
 //hack alert
     if(HIWORD(hObj) == 0x100) 
     {//most likely a DC handle
@@ -535,7 +528,6 @@ int WIN32API EnumObjects( HDC hdc, int objType, GOBJENUMPROC objFunc, LPARAM lPa
 //******************************************************************************
 HANDLE WIN32API GetCurrentObject( HDC hdc, UINT arg2)
 {
-    dprintf(("GDI32: GetCurrentObject %x %x", hdc, arg2));
     return (HANDLE)O32_GetCurrentObject(hdc, arg2);
 }
 //******************************************************************************
@@ -550,7 +542,6 @@ BOOL WIN32API SetObjectOwner( HGDIOBJ arg1, int arg2 )
 //******************************************************************************
 BOOL WIN32API UnrealizeObject( HGDIOBJ hObject)
 {
-    dprintf(("GDI32: UnrealizeObject %x", hObject));
     return O32_UnrealizeObject(hObject);
 }
 //******************************************************************************
