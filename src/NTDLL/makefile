@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 1999-06-07 20:57:55 sandervl Exp $
+# $Id: makefile,v 1.4 1999-06-22 16:18:14 phaller Exp $
 
 #
 # PD-Win32 API
@@ -18,16 +18,17 @@ CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE)
 CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE)
 
 
-OBJS = NTDLL.obj   \
-       file.obj    \
-       nt.obj      \
-       om.obj      \
-       reg.obj     \
-       rtl.obj     \
-       rtlstr.obj  \
-       sec.obj     \
-       sync.obj    \
-       initterm.obj \
+OBJS = NTDLL.obj\
+       file.obj\
+       nt.obj\
+       om.obj\
+       reg.obj\
+       rtl.obj\
+       rtlstr.obj\
+       sec.obj\
+       sync.obj\
+       initterm.obj\
+       crt.obj\
        time.obj
 
 
@@ -69,6 +70,7 @@ time.obj:   .\time.cpp   .\ntdll.h
 
 initterm.obj: .\initterm.cpp
 
+crt.obj:    .\crt.cpp    .\ntdll.h
 
 clean:
         $(RM) *.obj *.lib *.dll *~ *.map *.pch
