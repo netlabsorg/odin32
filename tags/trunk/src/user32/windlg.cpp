@@ -1,4 +1,4 @@
-/* $Id: windlg.cpp,v 1.4 1999-10-10 08:59:41 sandervl Exp $ */
+/* $Id: windlg.cpp,v 1.5 1999-10-11 16:04:52 cbratschi Exp $ */
 /*
  * Win32 dialog apis for OS/2
  *
@@ -213,7 +213,7 @@ HWND WIN32API GetNextDlgTabItem(HWND hwndDlg, HWND hwndCtrl, BOOL fPrevious)
     dialog = (Win32Dialog *)Win32BaseWindow::GetWindowFromHandle(hwndDlg);
     if(!dialog || !dialog->IsDialog()) {
         dprintf(("GetNextDlgTabItem, window %x not found", hwndDlg));
-	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("USER32:  GetNextDlgTabItem\n"));
@@ -229,7 +229,7 @@ HWND WIN32API GetDlgItem(HWND hwnd, int id)
     dialog = (Win32Dialog *)Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!dialog || !dialog->IsDialog()) {
         dprintf(("GetDlgItem, window %x not found", hwnd));
-	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("USER32:  GetDlgItem\n"));
@@ -248,7 +248,7 @@ int WIN32API GetDlgCtrlID(HWND hwnd)
     dlgcontrol = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!dlgcontrol) {
         dprintf(("GetDlgCtrlID, control %x not found", hwnd));
-	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("USER32:  GetDlgCtrlID\n"));
@@ -263,7 +263,7 @@ BOOL WIN32API EndDialog(HWND hwnd, int retval)
     dialog = (Win32Dialog *)Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!dialog || !dialog->IsDialog()) {
         dprintf(("GetDlgItem, window %x not found", hwnd));
-	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("USER32: EndDialog\n"));
@@ -356,7 +356,7 @@ HWND WIN32API GetNextDlgGroupItem( HWND hwnd, HWND hwndCtrl, BOOL fPrevious)
     dialog = (Win32Dialog *)Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!dialog || !dialog->IsDialog()) {
         dprintf(("GetNextDlgGroupItem, window %x not found", hwnd));
-	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
     dprintf(("USER32:  GetNextDlgGroupItem\n"));
