@@ -1,4 +1,4 @@
-/* $Id: stricmp.c,v 1.1 1999-09-06 02:20:02 bird Exp $
+/* $Id: stricmp.c,v 1.2 1999-10-14 01:19:21 bird Exp $
  *
  * stricmp - Case insensitive string compare.
  *
@@ -17,12 +17,13 @@
 *   Header Files                                                               *
 *******************************************************************************/
 #include <string.h>
-
+#pragma info(nogen, noext, nouni)
 
 /**
- * strcmpi - case insensitive string compare. Not i subsys library.
+ * stricmp - case insensitive string compare.
+ * Not i subsys library.
  * @param   psz1   String 1
- * @parma   psz2   String 2
+ * @param   psz2   String 2
  * @return  0 if equal
  *          != 0 if not equal
  */
@@ -32,6 +33,26 @@ int stricmp(const char *psz1, const char *psz2)
 
     while ((iRet = upcase(*psz1) - upcase(*psz2)) == 0 && *psz1 != '\0')
         psz1++, psz2++;
+
+    return iRet;
+}
+
+
+
+/**
+ * strnicmp - case insensitive string compare for up to cch chars of the strings.
+ * Not i subsys library.
+ * @param   psz1   String 1
+ * @param   psz2   String 2
+ * @return  0 if equal
+ *          != 0 if not equal
+ */
+int strnicmp(const char *psz1, const char *psz2, size_t cch)
+{
+    int iRet;
+
+    while (cch > 0 && (iRet = upcase(*psz1) - upcase(*psz2)) == 0 && *psz1 != '\0')
+        psz1++, psz2++, cch--;
 
     return iRet;
 }
