@@ -68,9 +68,10 @@ db  0       ;    unsigned char       e32_worder;     /* The word ordering for th
 dd  0       ;    unsigned long       e32_level;      /* The EXE format level for now = 0 */
 dw  2       ;    unsigned short      e32_cpu;        /* The CPU type */
 dw  1       ;    unsigned short      e32_os;         /* The OS type */
+;objtab:
 dd  20000h  ;    unsigned long       e32_ver;        /* Module version */
             ;    unsigned long       e32_mflags;     /* Module flags */
-dd  200h OR 10h
+dd  200h OR 00h
 dd  1       ;    unsigned long       e32_mpages;     /* Module # pages */
 dd  1       ;    unsigned long       e32_startobj;   /* Object # for instruction pointer */
 dd  12h     ;    unsigned long       e32_eip;        /* Extended instruction pointer */
@@ -108,26 +109,25 @@ dd  offset impmod
 dd  1       ;    unsigned long       e32_impmodcnt;  /* Number of entries in Import Module Name Table */
 dd  0       ;    unsigned long       e32_impproc;    /* Offset of Import Procedure Name Table */ off = 78
 ;dd  offset impproc
-dd  0       ;    unsigned long       e32_pagesum;    /* Offset of Per-Page Checksum Table */                            available
+objtab:
+dd  10000       ;    unsigned long       e32_pagesum;    /* Offset of Per-Page Checksum Table */                            available
             ;    unsigned long       e32_datapage;   /* Offset of Enumerated Data Pages */
 dd  offset data
-dd  0       ;    unsigned long       e32_preload;    /* Number of preload pages */
-dd  0       ;    unsigned long       e32_nrestab;    /* Offset of Non-resident Names Table */
-dd  0       ;    unsigned long       e32_cbnrestab;  /* Size of Non-resident Name Table */
-dd  0       ;    unsigned long       e32_nressum;    /* Non-resident Name Table Checksum */                             available?
-
 ; redefine these entries as obj tab stuff.
+;red dd  0       ;    unsigned long       e32_preload;    /* Number of preload pages */                                      available!
+;red dd  0       ;    unsigned long       e32_nrestab;    /* Offset of Non-resident Names Table */                           available?
+;red dd  0       ;    unsigned long       e32_cbnrestab;  /* Size of Non-resident Name Table */                              available?
+;red dd  0       ;    unsigned long       e32_nressum;    /* Non-resident Name Table Checksum */                             available?
 ;red dd  0       ;    unsigned long       e32_autodata;   /* Object # for automatic data object */                           available?
 ;red dd  0       ;    unsigned long       e32_debuginfo;  /* Offset of the debugging information */                          available?
+
+;
 ;red dd  0       ;    unsigned long       e32_debuglen;   /* The length of the debugging info. in bytes */                   available?
 ;red dd  0       ;    unsigned long       e32_instpreload;/* Number of instance pages in preload section of .EXE file */     available?
 ;red dd  0       ;    unsigned long       e32_instdemand; /* Number of instance pages in demand load section of .EXE file */ available?
 ;red dd  0       ;    unsigned long       e32_heapsize;   /* Size of heap - for 16-bit apps */                               available?
 
 ;mv dd  1000h-32;    unsigned long       e32_stacksize;  /* Size of stack */
-;dd  20 dup(0);   unsigned char       e32_res3[E32RESBYTES3];                                                            available!
-            ;                                        /* Pad structure to 196 bytes */
-            ;  };
 
 
 ;
@@ -136,16 +136,28 @@ dd  0       ;    unsigned long       e32_nressum;    /* Non-resident Name Table 
 ;
 ;dbg0 db 'objtab'    ;struct o32_obj                          /* Flat .EXE object table entry */
                     ;{
-objtab  dd 1000h    ;    unsigned long       o32_size;       /* Object virtual size */
-        dd 10000h   ;    unsigned long       o32_base;       /* Object base virtual address */
+;objtab  dd 11000h   ;    unsigned long       o32_size;       /* Object virtual size */
+;        dd 10000h   ;    unsigned long       o32_base;       /* Object base virtual address */
                     ;    unsigned long       o32_flags;      /* Attribute flags */
-        dd (1h OR 2h OR 2000h OR 10h)
+        dd (1h OR 2h OR 2000h OR 10h) ;=2013h
         dd 1        ;    unsigned long       o32_pagemap;    /* Object page map index */
         dd 1        ;    unsigned long       o32_mapsize;    /* Number of entries in object page map */
         dd 0        ;    unsigned long       o32_reserved;   /* Reserved */
+
                     ;};
 
-dd  1000h-32;    unsigned long       e32_stacksize;  /* Size of stack */
+;red dd  0       ;    unsigned long       e32_debuglen;   /* The length of the debugging info. in bytes */                   available?
+;red dd  0       ;    unsigned long       e32_instpreload;/* Number of instance pages in preload section of .EXE file */     available?
+;red dd  0       ;    unsigned long       e32_instdemand; /* Number of instance pages in demand load section of .EXE file */ available?
+;red dd  0       ;    unsigned long       e32_heapsize;   /* Size of heap - for 16-bit apps */                               available?
+
+;
+; fixup table.
+;
+;dbg2 db 'fixpagetab'
+fixpagetab  dd 0                                ; offset of fixups for page 1.
+;ntx high 0!dd (offset fixrecend - offset fixrec) ; end of fixup table - needed?
+            dw (offset fixrecend - offset fixrec) ; end of fixup table - needed?
 
 ;
 ; Page entry for our one page.
@@ -153,14 +165,14 @@ dd  1000h-32;    unsigned long       e32_stacksize;  /* Size of stack */
 ;dbg1 db 'pagetab'
 pagetab     dd  0                                   ; offset 0
             dw  offset minilxret - offset data + 1  ; data size,
-;ntx            dw  0                                   ; flags. valid
+            dw  0                                   ; flags. valid
 
-;
-; fixup table.
-;
-;dbg2 db 'fixpagetab'
-fixpagetab  dd 0                                ; offset of fixups for page 1.
-            dd (offset fixrecend - offset fixrec) ; end of fixup table - needed?
+;dw 0
+;dd  1000h-36;     unsigned long       e32_stacksize;  /* Size of stack */
+;dd  20 dup(0);   unsigned char       e32_res3[E32RESBYTES3];                                                            available!
+            ;                                        /* Pad structure to 196 bytes */
+            ;  };
+db 0
 
 ;
 ; The fixup records.
@@ -203,12 +215,12 @@ db 5h       ;            unsigned long  ord;         /* Procedure odrinal */
             ;};
 fixrecend:
 
+
 ;
 ; Imports the MSG dll.
 ;
-;dbg4 db 'impmod'
-restab      db 3,'MSG'
-impproc     db 0,0
+restab      db 3,'MSG' ; now e32_stacksize
+impproc:    db 0
 
 
 
@@ -228,6 +240,8 @@ minilxret:
     ret
 
 ;lxdump db 'lxdumplxdumplxdumplxdump'
+;       db 'lxdumplxdumplxdumplxdump'
+;       db 'lxdumplxdumplxdumplxdump'
 
 ALL ENDS
 
