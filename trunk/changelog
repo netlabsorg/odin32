@@ -1,7 +1,4 @@
- /* $Id: changelog,v 1.726 2000-02-13 17:33:09 phaller Exp $ */
-
- 2000-02-13: Patrick Haller <phaller@gmx.net>
-	- INCLUDE\OS2WIN.H: Added O32_WaitForInputIdle wrapper
+ /* $Id: changelog,v 1.727 2000-02-13 17:43:54 phaller Exp $ */
 
  2000-02-12: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: added v5.00 messages to wndmsg.cpp
