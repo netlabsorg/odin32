@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.94 2001-04-25 20:53:39 sandervl Exp $ */
+/* $Id: window.cpp,v 1.95 2001-05-11 08:39:46 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -403,7 +403,7 @@ HWND WIN32API GetTopWindow( HWND hwnd)
   HWND hwndTop;
 
     if(hwnd == HWND_DESKTOP) {
-    window = windowDesktop;
+        window = windowDesktop;
     }
     else {
         window = Win32BaseWindow::GetWindowFromHandle(hwnd);
@@ -411,7 +411,7 @@ HWND WIN32API GetTopWindow( HWND hwnd)
             dprintf(("GetTopWindow, window %x not found", hwnd));
             SetLastError(ERROR_INVALID_WINDOW_HANDLE);
             return 0;
-    }
+        }
     }
     hwndTop = window->GetTopWindow();
     dprintf2(("GetTopWindow %x returned %x", hwnd, hwndTop));
@@ -946,8 +946,8 @@ BOOL WIN32API GetClientRect( HWND hwnd, PRECT pRect)
 
     if (!pRect)
     {
-      SetLastError(ERROR_INVALID_PARAMETER);
-      return FALSE;
+        SetLastError(ERROR_INVALID_PARAMETER);
+        return FALSE;
     }
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
@@ -972,7 +972,7 @@ BOOL WIN32API AdjustWindowRectEx( PRECT rect, DWORD style, BOOL menu, DWORD exSt
 {
     if(style == 0 && menu == FALSE && exStyle == 0) {
         dprintf(("AdjustWindowRectEx %x %x %d (%d,%d)(%d,%d) -> no change required", style, exStyle, menu, rect->left, rect->top, rect->right, rect->bottom));
-    return TRUE;    //nothing needs to be changed (VERIFIED in NT 4)
+        return TRUE;    //nothing needs to be changed (VERIFIED in NT 4)
     }
     dprintf(("AdjustWindowRectEx %x %x %d (%d,%d)(%d,%d)\n", style, exStyle, menu, rect->left, rect->top, rect->right, rect->bottom));
     /* Correct the window style */
@@ -987,39 +987,39 @@ BOOL WIN32API AdjustWindowRectEx( PRECT rect, DWORD style, BOOL menu, DWORD exSt
 
     //Adjust rect outer (Win32BaseWindow::AdjustRectOuter)
     if (HAS_THICKFRAME(style,exStyle))
-      InflateRect( rect, GetSystemMetrics(SM_CXFRAME), GetSystemMetrics(SM_CYFRAME) );
+        InflateRect( rect, GetSystemMetrics(SM_CXFRAME), GetSystemMetrics(SM_CYFRAME) );
     else
-      if (HAS_DLGFRAME(style,exStyle))
+    if (HAS_DLGFRAME(style,exStyle))
         InflateRect(rect, GetSystemMetrics(SM_CXDLGFRAME), GetSystemMetrics(SM_CYDLGFRAME) );
-      else
-        if (HAS_THINFRAME(style))
-          InflateRect( rect, GetSystemMetrics(SM_CXBORDER), GetSystemMetrics(SM_CYBORDER));
+    else
+    if (HAS_THINFRAME(style))
+        InflateRect( rect, GetSystemMetrics(SM_CXBORDER), GetSystemMetrics(SM_CYBORDER));
 
     if ((style & WS_CAPTION) == WS_CAPTION)
     {
-      if (exStyle & WS_EX_TOOLWINDOW)
-        rect->top -= GetSystemMetrics(SM_CYSMCAPTION);
-      else
-        rect->top -= GetSystemMetrics(SM_CYCAPTION);
+        if (exStyle & WS_EX_TOOLWINDOW)
+            rect->top -= GetSystemMetrics(SM_CYSMCAPTION);
+        else
+            rect->top -= GetSystemMetrics(SM_CYCAPTION);
     }
 
     if (menu)
-      rect->top -= GetSystemMetrics(SM_CYMENU);
+        rect->top -= GetSystemMetrics(SM_CYMENU);
 
     //Adjust rect inner (Win32BaseWindow::AdjustRectInner)
     if(!(style & WS_ICONIC)) {
-    if (exStyle & WS_EX_CLIENTEDGE)
+        if (exStyle & WS_EX_CLIENTEDGE)
             InflateRect (rect, GetSystemMetrics(SM_CXEDGE), GetSystemMetrics(SM_CYEDGE));
 
-    if (exStyle & WS_EX_STATICEDGE)
+        if (exStyle & WS_EX_STATICEDGE)
             InflateRect (rect, GetSystemMetrics(SM_CXBORDER), GetSystemMetrics(SM_CYBORDER));
 
-    //SvL: scrollbars aren't checked *UNLESS* the style includes a border (any border)
+        //SvL: scrollbars aren't checked *UNLESS* the style includes a border (any border)
         //     --> VERIFIED IN NT4, SP6 (fixes MFC apps with scrollbars + bar controls)
-    if(style & (WS_THICKFRAME|WS_BORDER|WS_DLGFRAME)) {
+        if(style & (WS_THICKFRAME|WS_BORDER|WS_DLGFRAME)) {
             if (style & WS_VSCROLL) rect->right  += GetSystemMetrics(SM_CXVSCROLL);
             if (style & WS_HSCROLL) rect->bottom += GetSystemMetrics(SM_CYHSCROLL);
-    }
+        }
     }
 
     dprintf(("AdjustWindowRectEx returned (%d,%d)(%d,%d)\n", rect->left, rect->top, rect->right, rect->bottom));
@@ -1686,7 +1686,7 @@ BOOL WIN32API ShowOwnedPopups(HWND hwndOwner, BOOL fShow)
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return FALSE;
   }
-  dprintf(("USER32: ShowOwnedPopups %x %d", hwnd, fShow));
+  dprintf(("USER32: ShowOwnedPopups %x %d", hwndOwner, fShow));
 
   hwnd = GetWindow(GetDesktopWindow(), GW_CHILD);
   while(hwnd) {

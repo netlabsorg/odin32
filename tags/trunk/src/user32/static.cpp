@@ -1,4 +1,4 @@
-/* $Id: static.cpp,v 1.23 2001-03-30 11:14:36 sandervl Exp $ */
+/* $Id: static.cpp,v 1.24 2001-05-11 08:39:44 sandervl Exp $ */
 /*
  * Static control
  *
@@ -412,18 +412,6 @@ LRESULT STATIC_NCHitTest(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
   LRESULT lResult;
-
-#ifndef ODIN_HITTEST
-  //SvL: If a static window has children, then we can't return HTTRANSPARENT
-  //     here. For some reason PM then sends all mouse messages to the parent
-  //     of the static window; even if they are intended for the children of
-  //     the static window.
-  //     TODO: This could break some win32 apps (parent not receiving mouse
-  //           message for static window (non-child) area)
-  if(GetWindow(hwnd, GW_HWNDFIRST) != 0) {
-       return HTCLIENT;
-  }
-#endif
 
   if (dwStyle & SS_NOTIFY)
        lResult = HTCLIENT;
