@@ -105,6 +105,10 @@ To run DirectDraw games or Quake 2 in Voodoo mode, you must install Holger
 Veit's XFree86/2 support driver (XF86SUP.SYS).
 Visit http://ais.gmd.de/~veit/os2/xf86sup.html to download it.
 
+NOTE: The Glide and 3Dfx Opengl dll are no longer part of the basic Odin
+      installation package. It's available as opengl3dfx.zip on ftp.os2.org.
+
+
 2.0.1 Log files
 ---------------
 The alpha 5 binaries and daily build zipfiles can generate logfiles to show

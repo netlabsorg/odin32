@@ -1,4 +1,4 @@
-/* $Id: ReportingBugs.txt,v 1.4 2000-08-06 11:37:17 sandervl Exp $ */
+/* $Id: ReportingBugs.txt,v 1.5 2000-12-24 14:35:19 sandervl Exp $ */
 
 Reporting Odin bugs
 -------------------
@@ -22,7 +22,7 @@ Some remarks:
 Sometimes the small part of the logfile isn't enough for us to determine 
 where the problem lies.
 In that case, we'll ask you to mail us the entire file. (zipped)
-So please *do not* send huge logfiles to this list!
+So please *do not* send big logfiles to the mailinglist!
 
 Generating useful logfiles
 --------------------------
