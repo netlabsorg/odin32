@@ -1,4 +1,4 @@
-# $Id: pdwin32.post,v 1.7 2000-03-09 19:39:23 sandervl Exp $
+# $Id: pdwin32.post,v 1.8 2000-03-09 19:41:20 sandervl Exp $
 #
 # Odin32 API
 #
@@ -89,10 +89,10 @@ clean:  clean2
 #   If the depend file don't exists we'll make it!
 #
 !ifndef NODEP
-#!   if [$(EXISTS) .depend] == 0
+!   if [$(EXISTS) .depend] == 0
 !       include .depend
-#!   else
-#!       if [$(ECHO) .depend doesn't exist]
-#!       endif
-#!   endif
+!   else
+!       if [$(ECHO) .depend doesn't exist]
+!       endif
+!   endif
 !endif
