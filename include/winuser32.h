@@ -43,8 +43,10 @@ HICON WIN32API GetOS2Icon(HICON hIcon);
 HWND WIN32API CreateFakeWindowEx(HWND hwndOS2);
 
 #define WIN32_APPEARANCE	0
-#define OS2_APPEARANCE 		1
-void WIN32API SetWindowAppearance(BOOL fOS2Looks);
+#define OS2_APPEARANCE 		1  //OS/2 look with win32 system menu
+#define OS2_APPEARANCE_SYSMENU	2  //OS/2 look with native system menu
+
+void WIN32API SetWindowAppearance(int fOS2Looks);
 
 BOOL WIN32API OSLibWinCreateObject(LPSTR pszPath, LPSTR pszArgs, LPSTR pszWorkDir, LPSTR pszName, 
                                    LPSTR pszDescription, LPSTR pszIcoPath, INT iIcoNdx, BOOL fDesktop);
