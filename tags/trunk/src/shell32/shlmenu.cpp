@@ -1,4 +1,4 @@
-/* $Id: shlmenu.cpp,v 1.4 1999-11-02 20:38:47 phaller Exp $ */
+/* $Id: shlmenu.cpp,v 1.5 2000-03-26 16:34:53 cbratschi Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -10,6 +10,7 @@
  *
  * Many of this functions are in SHLWAPI.DLL also
  *
+ * Corel WINE 20000324 level
  */
 
 /*
@@ -250,6 +251,9 @@ static int FM_InitMenuPopup(HMENU hmenu, LPITEMIDLIST pAlternatePidl)
 /*************************************************************************
  * FileMenu_Create                                [SHELL32.114]
  *
+ * NOTES
+ *  for non-root menus values are
+ *  (ffffffff,00000000,00000000,00000000,00000000)
  */
 ODINFUNCTION5(HMENU, FileMenu_Create,
               COLORREF, crBorderColor,
@@ -426,6 +430,7 @@ ODINFUNCTION6(int, FileMenu_InsertUsingPidl,
 /*************************************************************************
  * FileMenu_ReplaceUsingPidl                   [SHELL32.113]
  *
+ * FIXME: the static items are deleted but wont be refreshed
  */
 ODINFUNCTION5(int, FileMenu_ReplaceUsingPidl,
               HMENU, hmenu,
@@ -804,14 +809,18 @@ ODINPROCEDURE0(FileMenu_AbortInitMenu)
 }
 
 /*************************************************************************
- * SHFind_InitMenuPopup                           [SHELL32.149]
+ * SHFind_InitMenuPopup				[SHELL32.149]
  *
  *
  * PARAMETERS
- *  hMenu      [in] handel of menu previously created
- *  hWndParent [in] parent window
- *  w       [in] no pointer
- *  x       [in] no pointer
+ *  hMenu		[in] handle of menu previously created
+ *  hWndParent	[in] parent window
+ *  w			[in] no pointer (0x209 over here) perhaps menu IDs ???
+ *  x			[in] no pointer (0x226 over here)
+ *
+ * RETURNS
+ *  LPXXXXX			 pointer to struct containing a func addr at offset 8
+ *					 or NULL at failure.
  */
 ODINFUNCTION4(HRESULT, SHFind_InitMenuPopup,
               HMENU, hMenu,
@@ -820,7 +829,7 @@ ODINFUNCTION4(HRESULT, SHFind_InitMenuPopup,
               DWORD, x)
 {  FIXME("hmenu=0x%08x hwnd=0x%08x 0x%08lx 0x%08lx stub\n",
       hMenu,hWndParent,w,x);
-   return TRUE;
+   	return NULL; /* this is supposed to be a pointer */
 }
 
 /*************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: iconcache.cpp,v 1.3 1999-10-22 13:35:21 phaller Exp $ */
+/* $Id: iconcache.cpp,v 1.4 2000-03-26 16:34:41 cbratschi Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -8,6 +8,7 @@
  *
  * shell icon cache (SIC)
  *
+ * Corel WINE 20000324 level
  */
 
 
@@ -26,8 +27,6 @@
 #include "winbase.h"
 #include "winuser.h"
 #include "wingdi.h"
-//#include "wine/winuser16.h"
-//#include "wine/winbase16.h"
 //#include "neexe.h"
 #include "cursoricon.h"
 #include "module.h"
@@ -136,7 +135,7 @@ static DWORD SHELL_GetResourceTable(HFILE hFile, LPBYTE *retptr)
      size = ne_header.rname_tab_offset - ne_header.resource_tab_offset;
 
 //@@@PH no NE support
-#if 0
+#if 1
      if( size > sizeof(NE_TYPEINFO) )
      { pTypeInfo = (BYTE*)HeapAlloc( GetProcessHeap(), 0, size);
        if( pTypeInfo )
@@ -158,14 +157,15 @@ static DWORD SHELL_GetResourceTable(HFILE hFile, LPBYTE *retptr)
  *       SHELL_LoadResource
  */
 //@@@PH no NE support
-#if 0
+#if 1
 static BYTE * SHELL_LoadResource( HFILE hFile, NE_NAMEINFO* pNInfo, WORD sizeShift, ULONG *uSize)
 {  BYTE*  ptr;
 
    dprintf(("SHELL32:Iconcache SHELL_LoadResource 0x%08x %p 0x%08x\n", hFile, pNInfo, sizeShift));
 
    *uSize = (DWORD)pNInfo->length << sizeShift;
-   if( (ptr = (BYTE*)HeapAlloc(GetProcessHeap(),0, *uSize) ))
+   ptr = (BYTE*)HeapAlloc(GetProcessHeap(),0, *uSize);
+   if(ptr)
    { _llseek( hFile, (DWORD)pNInfo->offset << sizeShift, SEEK_SET);
      _lread( hFile, (char*)ptr, pNInfo->length << sizeShift);
      return ptr;
@@ -183,7 +183,8 @@ static BYTE * ICO_LoadIcon( HFILE hFile, LPicoICONDIRENTRY lpiIDE, ULONG *uSize)
    dprintf(("SHELL32:Iconcache ICO_LoadIcon 0x%08x %p\n", hFile, lpiIDE));
 
    *uSize = lpiIDE->dwBytesInRes;
-   if( (ptr = (BYTE*)HeapAlloc(GetProcessHeap(),0, *uSize)) )
+   ptr = (BYTE*)HeapAlloc(GetProcessHeap(),0, *uSize);
+   if(ptr)
    { _llseek( hFile, lpiIDE->dwImageOffset, SEEK_SET);
      _lread( hFile, (char*)ptr, lpiIDE->dwBytesInRes);
      return ptr;
@@ -221,7 +222,8 @@ static BYTE * ICO_GetIconDirectory( HFILE hFile, LPicoICONDIR* lplpiID, ULONG *u
    if( _lread(hFile,(char*)lpiID->idEntries,i) == i )
    { CURSORICONDIR * lpID;                     /* icon resource in resource format */
      *uSize = lpcid.idCount * sizeof(CURSORICONDIRENTRY) + HEADER_SIZE;
-     if( (lpID = (CURSORICONDIR*)HeapAlloc(GetProcessHeap(),0, *uSize) ))
+     lpID = (CURSORICONDIR*)HeapAlloc(GetProcessHeap(),0, *uSize);
+     if(lpID)
      {
        /* copy the header */
        lpID->idReserved                  = lpiID->idReserved = 0;
@@ -252,18 +254,15 @@ static BYTE * ICO_GetIconDirectory( HFILE hFile, LPicoICONDIR* lplpiID, ULONG *u
  *    ICO_GetIconDirectory....)
  *
  */
-#define ICO_INVALID_FILE                 1
-#define ICO_NO_ICONS                        0
-
 HGLOBAL WINAPI ICO_ExtractIconEx(LPCSTR lpszExeFileName, HICON * RetPtr, UINT nIconIndex, UINT n, UINT cxDesired, UINT cyDesired )
+// @@@PH turned off
+#if 0
 {
   dprintf (("SHELL32: ICO_ExtractIconEx not implemented.\n"));
   return 0;
 }
-
-// @@@PH turned off
-#if 0
-{  HGLOBAL  hRet = ICO_NO_ICONS;
+#else
+{  HGLOBAL  hRet = 0;
    LPBYTE      pData;
    OFSTRUCT ofs;
    DWORD    sig;
@@ -276,12 +275,12 @@ HGLOBAL WINAPI ICO_ExtractIconEx(LPCSTR lpszExeFileName, HICON * RetPtr, UINT nI
    dprintf(("SHELL32:Iconcache ICO_ExtractIconEx (file %s,start %d,extract %d\n", lpszExeFileName, nIconIndex, n));
 
    if( hFile == HFILE_ERROR || !n )
-     return ICO_INVALID_FILE;
+     return hRet;
 
    sig = SHELL_GetResourceTable(hFile,&pData);
 
 //@@@PH no NE support
-#if 0
+#if 1
 /* ico file */
    if( sig==IMAGE_OS2_SIGNATURE || sig==1 ) /* .ICO file */
    { BYTE      *pCIDir = 0;
@@ -373,13 +372,11 @@ HGLOBAL WINAPI ICO_ExtractIconEx(LPCSTR lpszExeFileName, HICON * RetPtr, UINT nI
 
      if ( !(fmapping = CreateFileMappingA(hFile,NULL,PAGE_READONLY|SEC_COMMIT,0,0,NULL)))
      { WARN("failed to create filemap.\n"); /* FIXME, INVALID_HANDLE_VALUE? */
-       hRet = ICO_INVALID_FILE;
        goto end_2;                          /* failure */
      }
 
      if ( !(peimage = (BYTE*)MapViewOfFile(fmapping,FILE_MAP_READ,0,0,0)))
      { WARN("failed to mmap filemap.\n");
-       hRet = ICO_INVALID_FILE;
        goto end_2;                          /* failure */
      }
 
@@ -400,12 +397,12 @@ HGLOBAL WINAPI ICO_ExtractIconEx(LPCSTR lpszExeFileName, HICON * RetPtr, UINT nI
 
      if (!rootresdir)
      { WARN("haven't found section for resource directory.\n");
-       goto end_4;                          /* failure */
+       goto end_3;                          /* failure */
      }
   /* search the group icon dir*/
      if (!(icongroupresdir = GetResDirEntryW(rootresdir,RT_GROUP_ICONW, (DWORD)rootresdir,FALSE)))
      { WARN("No Icongroupresourcedirectory!\n");
-       goto end_4;                          /* failure */
+       goto end_3;                          /* failure */
      }
      iconDirCount = icongroupresdir->NumberOfNamedEntries+icongroupresdir->NumberOfIdEntries;
 
@@ -415,9 +412,31 @@ HGLOBAL WINAPI ICO_ExtractIconEx(LPCSTR lpszExeFileName, HICON * RetPtr, UINT nI
        goto end_3;                          /* success */
      }
 
+      /* if nIconIndex is negative we have to extract the icon whose resource
+         id is equal to the absolute value of nIconIndex */
+      if( nIconIndex < 0 )
+      {
+          int n = 0;
+          int iId = abs(nIconIndex);
+          PIMAGE_RESOURCE_DIRECTORY_ENTRY xprdeTmp = (PIMAGE_RESOURCE_DIRECTORY_ENTRY)(icongroupresdir+1);
+          nIconIndex = iconDirCount + 1; /* Initialise to get an error at
+                                            the condition nIconIndex >= iconDirCount
+                                            below if nothing is found */
+          while(i<iconDirCount && xprdeTmp)
+          {
+              if(xprdeTmp->u1.Id ==  iId)
+              {
+                  nIconIndex = n;
+                  break;
+              }
+              n++;
+              xprdeTmp++;
+          }
+      }
+
      if (nIconIndex >= iconDirCount)
      { WARN("nIconIndex %d is larger than iconDirCount %d\n",nIconIndex,iconDirCount);
-       goto end_4;                          /* failure */
+       goto end_3;                          /* failure */
      }
 
      xresent = (PIMAGE_RESOURCE_DIRECTORY_ENTRY)(icongroupresdir+1);   /* caller just wanted the number of entries */
@@ -451,14 +470,14 @@ HGLOBAL WINAPI ICO_ExtractIconEx(LPCSTR lpszExeFileName, HICON * RetPtr, UINT nI
 
        if (!igdata)
        { WARN("no matching real address for icongroup!\n");
-         goto end_4;                     /* failure */
+         goto end_3;                     /* failure */
        }
        RetPtr[i] = (HICON)pLookupIconIdFromDirectoryEx(igdata, TRUE, cxDesired, cyDesired, LR_DEFAULTCOLOR);
      }
 
      if (!(iconresdir=GetResDirEntryW(rootresdir,RT_ICONW,(DWORD)rootresdir,FALSE)))
      { WARN("No Iconresourcedirectory!\n");
-       goto end_4;                          /* failure */
+       goto end_3;                          /* failure */
      }
 
      for (i=0;i<n;i++)
@@ -486,11 +505,9 @@ HGLOBAL WINAPI ICO_ExtractIconEx(LPCSTR lpszExeFileName, HICON * RetPtr, UINT nI
      hRet = RetPtr[0];                   /* return first icon */
      goto end_3;                         /* sucess */
    }
-   hRet = ICO_INVALID_FILE;
    goto end_1;    /* unknown filetype */
 
 /* cleaning up (try & catch would be nicer:-) ) */
-end_4:   hRet = 0;                       /* failure */
 end_3:   UnmapViewOfFile(peimage);       /* success */
 end_2:   CloseHandle(fmapping);
 end_1:   _lclose( hFile);
@@ -914,3 +931,75 @@ ODINFUNCTION5(HICON,ExtractIconExW,LPCWSTR, lpszFile,
    HeapFree(GetProcessHeap(),0,sFile);
    return ret;
 }
+
+/*
+ * PE (Portable Execute) File Resources
+ *
+ * Copyright 1995 Thomas Sandford
+ * Copyright 1996 Martin von Loewis
+ *
+ * Based on the Win16 resource handling code in loader/resource.c
+ * Copyright 1993 Robert J. Amstadt
+ * Copyright 1995 Alexandre Julliard
+ * Copyright 1997 Marcus Meissner
+ */
+
+//CB: from loader/pe_resource.c
+
+/**********************************************************************
+ *	    GetResDirEntryW
+ *
+ *	Helper function - goes down one level of PE resource tree
+ *
+ */
+PIMAGE_RESOURCE_DIRECTORY GetResDirEntryW(PIMAGE_RESOURCE_DIRECTORY resdirptr,
+					   LPCWSTR name,DWORD root,
+					   BOOL allowdefault)
+{
+    int entrynum;
+    PIMAGE_RESOURCE_DIRECTORY_ENTRY entryTable;
+    int namelen;
+
+    if (HIWORD(name)) {
+    	if (name[0]=='#') {
+		char	buf[10];
+
+		lstrcpynWtoA(buf,name+1,10);
+		return GetResDirEntryW(resdirptr,(LPCWSTR)atoi(buf),root,allowdefault);
+	}
+	entryTable = (PIMAGE_RESOURCE_DIRECTORY_ENTRY) (
+			(BYTE *) resdirptr +
+                        sizeof(IMAGE_RESOURCE_DIRECTORY));
+	namelen = lstrlenW(name);
+	for (entrynum = 0; entrynum < resdirptr->NumberOfNamedEntries; entrynum++)
+	{
+		PIMAGE_RESOURCE_DIR_STRING_U str =
+		(PIMAGE_RESOURCE_DIR_STRING_U) (root +
+			entryTable[entrynum].u1.s.NameOffset);
+		if(namelen != str->Length)
+			continue;
+		if(lstrncmpiW(name,str->NameString,str->Length)==0)
+			return (PIMAGE_RESOURCE_DIRECTORY) (
+				root +
+				entryTable[entrynum].u2.s.OffsetToDirectory);
+	}
+	return NULL;
+    } else {
+	entryTable = (PIMAGE_RESOURCE_DIRECTORY_ENTRY) (
+			(BYTE *) resdirptr +
+                        sizeof(IMAGE_RESOURCE_DIRECTORY) +
+			resdirptr->NumberOfNamedEntries * sizeof(IMAGE_RESOURCE_DIRECTORY_ENTRY));
+	for (entrynum = 0; entrynum < resdirptr->NumberOfIdEntries; entrynum++)
+	    if ((DWORD)entryTable[entrynum].u1.Name == (DWORD)name)
+		return (PIMAGE_RESOURCE_DIRECTORY) (
+			root +
+			entryTable[entrynum].u2.s.OffsetToDirectory);
+	/* just use first entry if no default can be found */
+	if (allowdefault && !name && resdirptr->NumberOfIdEntries)
+		return (PIMAGE_RESOURCE_DIRECTORY) (
+			root +
+			entryTable[0].u2.s.OffsetToDirectory);
+	return NULL;
+    }
+}
+
