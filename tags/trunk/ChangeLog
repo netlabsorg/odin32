@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.1090 2000-08-27 14:07:46 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1091 2000-08-28 18:34:57 sandervl Exp $ */
+
+ 2000-08-28: Michal Necasek <mike@mendelu.cz>
+    - KERNEL32: RaiseException/RtlUnwind fixes
 
  2000-08-26: Sander van Leeuwen <sandervl@xs4all.nl>
     - SHELL32:  Open/Save dialog fix
