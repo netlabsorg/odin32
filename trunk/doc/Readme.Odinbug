@@ -1,4 +1,4 @@
-Odin Bug Report Generator Version 0.5.5
+Odin Bug Report Generator Version 0.5.6
 =======================================
 
 0. Disclaimer
@@ -7,7 +7,7 @@ Odin Bug Report Generator Version 0.5.5
 OdinBug is free, but copyrighted software. It is not guaranteed  to fulfill
 any particular purpose. Use it at your own risk. It may  be included free of
 charge with every application that comes with  or makes use of Odin libraries.
-The sourcecode it currently available only upon request (but also for free!).
+The current sourcecode is freely available upon request to the author.
 
 1. Introduction
 ===============
@@ -38,14 +38,22 @@ There is also a VROBJ.WPI package at the following location:
 
 This package can be installed the usual way using WarpIN.
 
-Put OdinBug.EXE into your Odin "Windows" directory.
+OdinBug comes in 3 different packages (only one has to be used):
+
+1.) As part of the weekly build files. OdinBug is installed automatically with
+    Odin.
+2.) As a standalone WPI package. This package can be installed the usual way using
+    WarpIN. 
+3.) As a standalone ZIP package. This should be unZIPped into the Odin-"Windows"
+    directory. Putting it elsewhere is not recommended and cause unpredictable
+    results.
 
 Whenever a new version of OdinBug is executed for the first time, it  creates
 an object for itself (and a few others) in the Odin folder and  associates
 odin32_?.log files with it. Now you can doubleclick on any  odin32_?.log file
 and OdinBug is fired up. 
 
-Note: XWorkplace users should create "Odin Log Files" as a subtype of  "Plain
+Note: XWorkplace users should create "Odin Log File" as a subtype of  "Plain
 Text" and associate OdinBug with that filetype in order to have  OdinBug as a
 default for Odin logfiles and your favorites text editor  as additional
 editor/viewer.
@@ -94,4 +102,5 @@ will try to implement or fix it.
 
 6. AUTHOR:
 
-Herwig Bauernfeind, 24-11-2001 EMail: herwig.bauernfeind@aon.at 
+Herwig Bauernfeind, 05-03-2002
+EMail: herwig.bauernfeind@aon.at 
