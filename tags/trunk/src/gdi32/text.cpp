@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.18 2001-04-26 17:01:08 sandervl Exp $ */
+/* $Id: text.cpp,v 1.19 2001-04-27 19:30:54 sandervl Exp $ */
 
 /*
  * GDI32 text apis
@@ -458,7 +458,7 @@ INT SYSTEM EXPORT InternalDrawTextExW(HDC hdc,LPCWSTR lpchText,INT cchText,LPREC
   }
   else {
      astring = (char *)HEAP_malloc(cchText+1);
-     UnicodeToAscii((LPWSTR)lpchText, astring);
+     UnicodeToAsciiN((LPWSTR)lpchText, astring, cchText+1);
      astring[cchText] = 0;
   }
 
@@ -525,7 +525,7 @@ DWORD SYSTEM EXPORT InternalGetTabbedTextExtentW(HDC hDC,LPCWSTR lpString,INT nC
   }
   else {
      astring = (char *)HEAP_malloc(nCount+1);
-     UnicodeToAscii((LPWSTR)lpString, astring);
+     UnicodeToAsciiN((LPWSTR)lpString, astring, nCount+1);
      astring[nCount] = 0;
   }
 
@@ -613,7 +613,7 @@ LONG SYSTEM EXPORT InternalTabbedTextOutW(HDC hdc,INT x,INT y,LPCWSTR lpString,I
   }
   else {
      astring = (char *)HEAP_malloc(nCount+1);
-     UnicodeToAscii((LPWSTR)lpString, astring);
+     UnicodeToAsciiN((LPWSTR)lpString, astring, nCount+1);
      astring[nCount] = 0;
   }
 
@@ -785,7 +785,7 @@ BOOL InternalTextOutW(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCWST
   else 
   if(cbCount) {
      astring = (char *)HEAP_malloc(cbCount+1);
-     UnicodeToAscii((LPWSTR)lpszString, astring);
+     UnicodeToAsciiN((LPWSTR)lpszString, astring, cbCount+1);
      astring[cbCount] = 0;
   }
   rc = InternalTextOutA(hdc,X,Y,fuOptions,lprc,(LPCSTR)astring,cbCount,lpDx,IsExtTextOut);
