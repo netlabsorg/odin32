@@ -1,4 +1,4 @@
-; $Id: exceptutil.asm,v 1.11 2000-09-08 18:07:49 sandervl Exp $
+; $Id: exceptutil.asm,v 1.12 2001-02-08 10:23:40 sandervl Exp $
 
 ;/*
 ; * Project Odin Software License can be found in LICENSE.TXT
@@ -52,12 +52,6 @@ _RaiseException@16 endp
         extrn   OS2RTLUNWIND : near
 
 _RtlUnwind@16 proc near
-        ; fudge return address
-        push eax
-        mov  eax, dword ptr [esp+12]
-        mov  dword ptr [esp+4], eax
-        pop  eax
-
         push dword ptr [esp+4]  ;PWINEXCEPTION_FRAME  pEndFrame
         push dword ptr [esp+12] ;LPVOID unusedEip
         push dword ptr [esp+20] ;PWINEXCEPTION_RECORD pRecord
