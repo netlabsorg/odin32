@@ -1,5 +1,3 @@
-/* $Id: cursoricon.h,v 1.5 2001-03-27 16:15:49 sandervl Exp $ */
-
 /*
  * Cursor and icon definitions
  *
@@ -96,11 +94,6 @@ extern void CURSORICON_FreeModuleIcons( HMODULE hModule );
 HGLOBAL CopyCursorIcon(HGLOBAL Handle, UINT nType, 
   	 	       INT iDesiredCX, INT iDesiredCY, 
 		       UINT nFlags);
-
-HGLOBAL WIN32API CreateCursorIconIndirect( HINSTANCE hInstance,
-                                           CURSORICONINFO *info,
-                                           LPCVOID lpANDbits,
-                                           LPCVOID lpXORbits );
 
 HGLOBAL CURSORICON_ExtCopy(HGLOBAL Handle, UINT nType,
                            INT iDesiredCX, INT iDesiredCY,
