@@ -1,12 +1,27 @@
-/* $Id: kdev.e,v 1.4 2002-10-22 13:53:00 bird Exp $
+/* $Id: kdev.e,v 1.5 2003-05-31 20:10:11 bird Exp $
  *
  * Visual SlickEdit Documentation Macros.
  *
- * Copyright (c) 1999-2002 knut st. osmundsen (bird@anduin.net)
+ * Copyright (c) 1999-2003 knut st. osmundsen <bird@anduin.net>
  *
- * Project Odin Software License can be found in LICENSE.TXT
  *
- ****
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with This program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ *
+ */
+
+/***
  *
  * This define the following keys:
  *---------------------------------
@@ -17,13 +32,15 @@
  *
  * Ctrl+Shift+G: Global box
  * Ctrl+Shift+H: Header box
+ * Ctrl+Shift+E: Exported Symbols
  * Ctrl+Shift+I: Internal function box
  * Ctrl+Shift+K: Const/macro box
  * Ctrl+Shift+S: Struct/Typedef box
  *
+ * Ctrl+Shift+A: Signature+Date marker
  * Ctrl+Shift+P: Mark line as change by me
  *
- * Ctrl+Shift+T:
+ * Ctrl+Shift+T: Update project tagfile.
  *
  * Ctrl+Shift+B: KLOGENTRYX(..)
  * Ctrl+Shift+E: KLOGEXIT(..)
@@ -38,21 +55,24 @@
  */
 defeventtab default_keys
 def  'C-S-A' = k_signature
-//def  'C-S-B' = odin32_klogentry
 def  'C-S-C' = k_javadoc_classbox
-//def  'C-S-E' = odin32_klogexit
+def  'C-S-E' = k_box_exported
 def  'C-S-F' = k_javadoc_funcbox
 def  'C-S-G' = k_box_globals
 def  'C-S-H' = k_box_headers
 def  'C-S-I' = k_box_intfuncs
 def  'C-S-K' = k_box_consts
 def  'C-S-M' = k_javadoc_moduleheader
-//def  'C-S-N' = odin32_klog_file_no_ask
 def  'C-S-O' = k_oneliner
-//def  'C-S-Q' = odin32_klog_file_ask
 def  'C-S-P' = k_mark_modified_line
 def  'C-S-S' = k_box_structs
 def  'C-S-T' = odin32_maketagfile
+
+//optional stuff
+//def  'C-S-Q' = odin32_klog_file_ask
+//def  'C-S-N' = odin32_klog_file_no_ask
+//def  'C-S-1' = odin32_klogentry
+//def  'C-S-3' = odin32_klogexit
 
 
 //MARKER.  Editor searches for this line!
@@ -62,7 +82,7 @@ def  'C-S-T' = odin32_maketagfile
 /* Remeber to change these! */
 static _str skUserInitials  = "kso";
 static _str skUserName      = "knut st. osmundsen";
-static _str skUserEmail     = "bird@anduin.net";
+static _str skUserEmail     = "bird-srcspam@anduin.net";
 
 
 /*******************************************************************************
@@ -80,7 +100,6 @@ static boolean  fkStyleFullHeaders = false; /* false: omit some tags. */
 static int      ikStyleOneliner = 41;       /* The online comment column. */
 static int      ikStyleModifyMarkColumn = 105;
 static boolean  fkStyleBoxTag   = false;    /* true: Include tag in k_box_start. */
-
 
 /*******************************************************************************
 *   Internal Functions                                                         *
@@ -132,17 +151,58 @@ static int k_alignup(int iValue, iAlign)
 
 
 /**
- * Reads the comment setup for this extension.
+ * Reads the comment setup for this lexer/extension .
+ *
  * @returns Success indicator.
  * @param   sLeft       Left comment. (output)
  * @param   sRight      Right comment. (output)
  * @param   iColumn     Comment mark column. (1-based) (output)
  * @param   sExt        The extension to lookup defaults to the current one.
+ * @param   sLexer      The lexer to lookup defaults to the current one.
  * @author  knut st. osmundsen (bird@anduin.net)
  * @remark  This should be exported from box.e, but unfortunately it isn't.
  */
-static boolean k_readboxconfig(_str &sLeft, _str &sRight, int &iColumn, _str sExt = p_extension)
+static boolean k_commentconfig(_str &sLeft, _str &sRight, int &iColumn, _str sExt = p_extension, _str sLexer = p_lexer_name)
 {
+    /* init returns */
+    sLeft = sRight = '';
+    iColumn = 0;
+
+    /*
+     * Get comment setup from the lexer.
+     */
+    if (sLexer)
+    {
+        sLine = '';
+        /* multiline */
+        rc = _ini_get_value(slick_path_search("user.vlx"), sLexer, 'mlcomment', sLine);
+        if (rc)
+            rc = _ini_get_value(slick_path_search("vslick.vlx"), sLexer, 'mlcomment', sLine);
+        if (!rc)
+        {
+            sLeft  = strip(word(sLine, 1));
+            sRight = strip(word(sLine, 2));
+            if (sLeft != '' && sRight != '')
+                return true;
+        }
+
+        /* failed, try single line. */
+        rc = _ini_get_value(slick_path_search("user.vlx"), sLexer, 'linecomment', sLine);
+        if (rc)
+            rc = _ini_get_value(slick_path_search("vslick.vlx"), sLexer, 'linecomment', sLine);
+        if (!rc)
+        {
+            sLeft = strip(word(sLine, 1));
+            sRight = '';
+            iColumn = 0;
+            sTmp = word(sLine, 2);
+            if (isnumber(sTmp))
+                iColumn = (int)sTmp;
+            if (sLeft != '')
+                return true;
+        }
+    }
+
     /*
      * Read the nonboxchars and determin user or default box.ini.
      */
@@ -192,9 +252,75 @@ static boolean k_line_comment()
 {
     _str    sRight = '';
     boolean fLineComment = false;
-    if (k_readboxconfig(sLeft, sRight, iColumn))
+    if (k_commentconfig(sLeft, sRight, iColumn))
         fLineComment = (sRight == '' || iColumn > 0);
     return fLineComment;
+}
+
+
+
+#define KIC_CURSOR_BEFORE 1
+#define KIC_CURSOR_AFTER  2
+#define KIC_CURSOR_AT_END 3
+
+/**
+ * Insert a comment at current or best fitting position in the text.
+ * @param   sStr            The comment to insert.
+ * @param   iCursor         Where to put the cursor.
+ * @param   iPosition       Where to start the comment.
+ *                          Doesn't apply to column based source.
+ *                          -1 means at cursor position. (default)
+ *                          >0 means at end of line, but not before this column (1-based).
+ *                             This also implies a min of one space to EOL.
+ */
+void k_insert_comment(_str sStr, int iCursor, int iPosition = -1)
+{
+    _str    sLeft;
+    _str    sRight;
+    int     iColumn;
+    if (!k_commentconfig(sLeft, sRight, iColumn))
+    {
+        sLeft = '/*'; sRight = '*/'; iColumn = 0;
+    }
+
+    if (iColumn <= 0)
+    {   /*
+         * not column based source
+         */
+
+        /* position us first */
+        if (iPosition > 0)
+        {
+            end_line();
+            do {
+                _insert_text(" ");
+            } while (p_col < iPosition);
+        }
+
+        /* insert comment saving the position for _BEFORE. */
+        iCol = p_col;
+        _insert_text(sLeft:+' ':+sStr);
+        if (iCursor == KIC_CURSOR_AT_END)
+            iCol = p_col;
+        /* right comment delimiter? */
+        if (sRight != '')
+            _insert_text(' ':+sRight);
+    }
+    else
+    {
+        if (p_col >= iColumn)
+            _insert_text("\n");
+        do { _insert_text(" "); } while (p_col < iColumn);
+        if (iCursor == KIC_CURSOR_BEFORE)
+            iCol = p_col;
+        _insert_text(sLeft:+' ':+sStr);
+        if (iCursor == KIC_CURSOR_AT_END)
+            iCol = p_col;
+    }
+
+    /* set cursor. */
+    if (iCursor != KIC_CURSOR_AFTER)
+        p_col = iCol;
 }
 
 
@@ -208,7 +334,7 @@ static boolean k_line_comment()
 static _str k_comment(boolean fRight = false)
 {
     sComment = '/*';
-    if (k_readboxconfig(sLeft, sRight, iColumn))
+    if (k_commentconfig(sLeft, sRight, iColumn))
         sComment = (!fRight || iColumn > 0 ? sLeft : sRight);
 
     return strip(sComment);
@@ -225,9 +351,14 @@ static _str k_comment(boolean fRight = false)
  */
 static void k_box_start(sTag)
 {
-    begin_line();
+    if (!k_commentconfig(sLeft, sRight, iColumn))
+        return;
+    _begin_line();
+    if (iColumn >= 0)
+        while (p_col < iColumn)
+           _insert_text(" ");
 
-    sText = k_comment();
+    sText = sLeft;
     if (sTag != '' && fkStyleBoxTag)
     {
         if (substr(sText, length(sText)) != '*')
@@ -235,7 +366,7 @@ static void k_box_start(sTag)
         sText = sText:+sTag;
     }
 
-    for (i = length(sText); i < ikStyleWidth; i++)
+    for (i = length(sText); i <= ikStyleWidth - p_col; i++)
         sText = sText:+'*';
     sText = sText:+"\n";
 
@@ -249,9 +380,15 @@ static void k_box_start(sTag)
  */
 static void k_box_line(_str sStr)
 {
+    if (!k_commentconfig(sLeft, sRight, iColumn))
+        return;
+    if (iColumn >= 0)
+        while (p_col < iColumn)
+           _insert_text(" ");
+
     sText = '';
     if (k_line_comment())
-        sText = k_comment();
+        sText = sLeft;
     if (sText == '' || substr(sText, length(sText)) != '*')
         sText = sText:+'*';
 
@@ -261,7 +398,7 @@ static void k_box_line(_str sStr)
 
     sText = sText:+sStr;
 
-    for (i = length(sText) + 1; i < ikStyleWidth; i++)
+    for (i = length(sText) + 1; i <= ikStyleWidth - p_col; i++)
         sText = sText:+' ';
     sText = sText:+"*\n";
 
@@ -274,16 +411,17 @@ static void k_box_line(_str sStr)
  */
 static void k_box_end()
 {
-    _str sRight = '';
-    _str sText = '';
+    if (!k_commentconfig(sLeft, sRight, iColumn))
+        return;
+    if (iColumn >= 0)
+        while (p_col < iColumn)
+           _insert_text(" ");
+
+    sText = '';
     if (k_line_comment())
-        sText = k_comment();
-    else
-        sRight = k_comment(true);
-
-    for (i = length(sText) + length(sRight); i < ikStyleWidth; i++)
+        sText = sLeft;
+    for (i = length(sText) + length(sRight); i <= ikStyleWidth - p_col; i++)
         sText = sText:+'*';
-
     sText = sText:+sRight:+"\n";
 
     _insert_text(sText);
@@ -846,10 +984,16 @@ static _str k_func_get_next_code_text2()
 /** starts a javadoc documentation box. */
 static void k_javadoc_box_start(_str sStr = '', boolean fDouble = true)
 {
+    if (!k_commentconfig(sLeft, sRight, iColumn))
+        return;
     _begin_line();
-    sText = k_comment();
+    if (iColumn >= 0)
+        while (p_col < iColumn)
+           _insert_text(" ");
+
+    sText = sLeft;
     if (fDouble)
-        sText = sText:+substr(sText, length(sText), 1);
+        sText = sLeft:+substr(sLeft, length(sLeft), 1);
     if (sStr != '')
         sText = sText:+' ':+sStr;
     sText = sText:+"\n";
@@ -860,12 +1004,18 @@ static void k_javadoc_box_start(_str sStr = '', boolean fDouble = true)
 /** inserts a new line in a javadoc documentation box. */
 static void k_javadoc_box_line(_str sStr = '', int iPadd = 0, _str sStr2 = '', int iPadd2 = 0, _str sStr3 = '')
 {
+    if (!k_commentconfig(sLeft, sRight, iColumn))
+        return;
+    if (iColumn >= 0)
+        while (p_col < iColumn)
+           _insert_text(" ");
+
     if (k_line_comment())
-        sText = k_comment();
+        sText = sLeft;
     else
     {
-        sText = k_comment();
-        sText = ' ':+substr(sText, length(sText));
+        sText = sLeft;
+        sText = ' ':+substr(sLeft, length(sLeft));
     }
 
     if (sStr != '')
@@ -887,20 +1037,25 @@ static void k_javadoc_box_line(_str sStr = '', int iPadd = 0, _str sStr2 = '', i
                 sText = sText:+sStr3;
         }
     }
-
     sText = sText:+"\n";
 
     _insert_text(sText);
 }
 
-/** starts a javadoc documentation box. */
+/** ends a javadoc documentation box. */
 static void k_javadoc_box_end()
 {
+    if (!k_commentconfig(sLeft, sRight, iColumn))
+        return;
+    if (iColumn >= 0)
+        while (p_col < iColumn)
+           _insert_text(" ");
+
     if (k_line_comment())
-        sText = k_comment();
+        sText = sLeft;
     else
     {
-        sText = k_comment(true);
+        sText = sRight;
         if (substr(sText, 1, 1) != '*')
             sText = '*':+sText;
         sText = ' ':+sText;
@@ -1007,7 +1162,7 @@ void k_javadoc_funcbox()
     }
     k_javadoc_box_line('@sketch', iPadd);
     k_javadoc_box_line('@status', iPadd);
-    k_javadoc_box_line('@author', iPadd, skUserName ' <' skUserEmail '>');
+    k_javadoc_box_line('@author', iPadd, skUserName '<' skUserEmail '>');
     k_javadoc_box_line('@remark', iPadd);
     k_javadoc_box_end();
 
@@ -1033,7 +1188,7 @@ void k_javadoc_moduleheader()
 
     if (skLicense == 'Confidential')
     {
-        k_javadoc_box_line(skCompany ' confidential');
+        k_javadoc_box_line(skCompany 'confidential');
         k_javadoc_box_line();
     }
 
@@ -1112,7 +1267,8 @@ void k_javadoc_moduleheader()
     k_javadoc_box_end();
 
     up(p_RLine - iCursorLine);
-    p_col = length(k_comment()) + 2;
+    end_line();
+    keyin(' ');
 }
 
 
@@ -1164,52 +1320,46 @@ void k_box_structs()
     k_box_end();
 }
 
+/** Makes exported symbols box. */
+void k_box_exported()
+{
+    k_box_start('Exported');
+    k_box_line('Exported Symbols');
+    k_box_end();
+}
+
+
 
 /** oneliner comment */
 void k_oneliner()
 {
-    int     iColumn = 0;
-    _str    sLeft = '';
-    _str    sRight = '';
-
-    if (!k_readboxconfig(sLeft, sRight, iColumn))
-    {
-        sLeft = '/*';
-        sRight = '*/';
+    if (    k_commentconfig(sLeft, sRight, iColumn)
+        &&  iColumn > 0)
+    {   /* column based needs some tricy repositioning. */
+        _end_line();
+        if (p_col > iColumn)
+        {
+            _begin_line();
+            _insert_text("\n\r");
+            up();
+        }
     }
-
-    end_line();
-    do
-    {
-        _insert_text(" ");
-    } while (p_col < ikStyleOneliner);
-
-    if (sRight == '')
-        _insert_text(sLeft:+' ');
-    else
-    {
-        _insert_text(sLeft:+'  ':+sRight);
-        p_col -= length(sRight) + 1;
-    }
+    k_insert_comment("", KIC_CURSOR_AT_END, ikStyleOneliner);
 }
 
 /** mark line as modified. */
 void k_mark_modified_line()
 {
-    end_line();
-    do
-    {
-        _insert_text(" ");
-    } while (p_col < ikStyleModifyMarkColumn);
-
+    /* not supported for column based sources */
+    if (    !k_commentconfig(sLeft, sRight, iColumn)
+        ||  iColumn > 0)
+        return;
 
     if (skChange != '')
-        _insert_text(k_comment() ' ' skChange ' (' skUserInitials ')');
+        sStr = skChange ' (' skUserInitials ')';
     else
-        _insert_text(k_comment() ' ' skUserInitials);
-
-    if (!k_line_comment())
-        _insert_text(' ' k_comment(true));
+        sStr = skUserInitials;
+    k_insert_comment(sStr, KIC_CURSOR_BEFORE, ikStyleModifyMarkColumn);
     down();
 }
 
@@ -1222,16 +1372,10 @@ void k_signature()
 {
     /* kso I5-10000 2002-09-10: */
     if (skChange != '')
-        _insert_text(k_comment() ' ' skUserInitials ' ' skChange ' ' k_date() ': ');
+        sSig = skUserInitials ' ' skChange ' ' k_date() ': ';
     else
-        _insert_text(k_comment() ' ' skUserInitials ' ' k_date() ': ');
-
-    if (!k_line_comment())
-    {
-        _str sRight = k_comment(true);
-        _insert_text(' ' sRight);
-        p_col -= length(sRight) + 1;
-    }
+        sSig = skUserInitials ' ' k_date() ': ';
+    k_insert_comment(sSig, KIC_CURSOR_AT_END);
 }
 
 
@@ -2124,7 +2268,9 @@ static k_menu_create()
     rc   = _menu_insert(mhPre,   -1, MF_ENABLED, "Win32k",      "k_menu_preset javadoc, GPL, Opt2Ind4,, Win32k",        "Win32k");
     rc   = _menu_insert(mhPre,   -1, MF_ENABLED, "kKrnlLib",    "k_menu_preset javadoc, GPL, Opt2Ind4,, kKrnlLib",      "kKrnlLib");
     rc   = _menu_insert(mhPre,   -1, MF_ENABLED, "kLib",        "k_menu_preset javadoc, GPL, Opt2Ind4,, kLib",          "kLib");
+    rc   = _menu_insert(mhPre,   -1, MF_ENABLED, "kBuild",      "k_menu_preset javadoc, GPL, Opt2Ind4,, kBuild",        "kBuild");
     rc   = _menu_insert(mhPre,   -1, MF_ENABLED, "Innotek",     "k_menu_preset javadoc, Confidential, Opt2Ind4, InnoTek Systemberatung GmbH",           "Innotek");
+    rc   = _menu_insert(mhPre,   -1, MF_ENABLED, "VPC/2",       "k_menu_preset javadoc, Confidential, Opt2Ind4, InnoTek Systemberatung GmbH, VPC/2",    "VPC2");
 
     k_menu_doc_style();
     k_menu_license();
