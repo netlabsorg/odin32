@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.54 2001-06-14 11:30:55 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.55 2001-06-25 20:52:03 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -700,8 +700,9 @@ VirtualKeyFound:
     }
 
     case WM_TIMER:
-        if (os2Msg->mp2)
-        {
+//Why was this check here????
+//        if (os2Msg->mp2)
+//        {
           BOOL sys;
           ULONG id;
 
@@ -711,7 +712,7 @@ VirtualKeyFound:
                 winMsg->message= (sys) ? WINWM_SYSTIMER : WINWM_TIMER;
                 break;
           }
-        }
+//        }
         goto dummymessage; //for caret blinking
 
     case WM_SETWINDOWPARAMS:
