@@ -1,4 +1,4 @@
-/* $Id: file.cpp,v 1.1 1999-12-21 12:28:07 sandervl Exp $ */
+/* $Id: file.cpp,v 1.2 2000-03-18 15:14:02 sandervl Exp $ */
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  * strncpy replacement (one in RTL lib is buggy; doesn't stop at 0 terminator)
@@ -180,3 +180,13 @@ int _LNK_CONV os2_fputws(const wchar_t *string, FILE *fp)
 	rc = fputws(string, fp);
 	return rc;
 }
+
+FILE * _LNK_CONV os2_fdopen( int a, const char *bla)
+{
+    unsigned short sel = RestoreOS2FS();
+    FILE *rc;
+
+	rc = _fdopen(a, bla);
+	return rc;
+}
+

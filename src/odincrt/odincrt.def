@@ -1,4 +1,4 @@
-; $Id: odincrt.def,v 1.20 1999-12-21 12:28:08 sandervl Exp $
+; $Id: odincrt.def,v 1.21 2000-03-18 15:14:02 sandervl Exp $
 ; Odin VAC++ 3.08 shared multithreaded runtime
 LIBRARY ODINCRT INITINSTANCE TERMINSTANCE
 PROTMODE
@@ -53,6 +53,8 @@ EXPORTS
     fgetws = os2_fgetws                                            @369
     fputwc = os2_fputwc                                            @435
     fputws = os2_fputws                                            @478
+
+    _fdopen = os2_fdopen                                           @605
 
 ;;TODO!
     fprintf                                           @647
@@ -637,7 +639,6 @@ EXPORTS
     __ct__19iostream_withassignFv                     @602
     detach__7filebufFv                                @603
     attach__7filebufFi                                @604
-    _fdopen                                           @605
     get_complicated__7istreamFRSc                     @606
     isgraph                                           @607
     __dt__19iostream_withassignFv                     @608
