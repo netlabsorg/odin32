@@ -1082,6 +1082,7 @@ typedef DWORD (* WINAPI LPPROGRESS_ROUTINE)(LARGE_INTEGER, LARGE_INTEGER, LARGE_
 #define MEM_FREE                0x00010000
 #define MEM_PRIVATE             0x00020000
 #define MEM_MAPPED              0x00040000
+#define MEM_RESET               0x00080000
 #define MEM_TOP_DOWN            0x00100000
 
 #define SEC_FILE                0x00800000
