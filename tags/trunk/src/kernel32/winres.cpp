@@ -1,4 +1,4 @@
-/* $Id: winres.cpp,v 1.11 1999-08-20 15:03:31 sandervl Exp $ */
+/* $Id: winres.cpp,v 1.12 1999-08-21 19:11:56 sandervl Exp $ */
 
 /*
  * Win32 resource class
@@ -354,8 +354,11 @@ PVOID Win32Resource::convertOS2Bitmap(void *bmpdata)
  int                  palsize = 0;
  int                  imgsize;
 
-  if(bmphdr->cbSize != sizeof(BITMAPFILEHEADER2))
-    return(bmpdata);    //don't convert OS/2 1.x bitmap
+  if(bmphdr->cbSize != sizeof(BITMAPFILEHEADER2)) {
+    PVOID bmpdat = malloc(ressize);
+    memcpy(bmpdat, bmpdata, ressize);
+    return(bmpdat);    //don't convert OS/2 1.x bitmap
+  }
 
   if(bmphdr->bmp2.cBitCount < 16) {
     palsize = (1 << bmphdr->bmp2.cBitCount) * sizeof(RGBQUAD);
