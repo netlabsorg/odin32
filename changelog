@@ -1,9 +1,15 @@
-/* $Id: changelog,v 1.2051 2002-04-28 15:47:24 sandervl Exp $ */
+/* $Id: changelog,v 1.2052 2002-04-29 13:25:53 bird Exp $ */
+
+ 2002-04-28: knut st. osmundsen <bird@anduin.net>
+    - Configure.cmd, Odincrt:
+                o Added option --with-klib to configure.cmd to link
+                  odincrt with the electric debug heap of kLib.
+                  Concider this experimental!
 
  2002-04-28: Platon Fomichev <platon@innotek.de>
     - USER32:   o Focus fix when minimizing window
     - IPHLPAPI: o Bugfix
- 
+
  2002-04-24: Platon Fomichev <platon@innotek.de>
     - USER32:   o Don't activate window when it's minimized (ShowWindow)
                 o Deactivate window & move to bottom of z-order when it's
