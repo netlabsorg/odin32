@@ -1,4 +1,4 @@
-/* $Id: queue.h,v 1.2 2000-05-12 18:04:11 sandervl Exp $ */
+/* $Id: queue.h,v 1.3 2000-11-21 11:33:59 sandervl Exp $ */
 
 /*
  * Message queues definitions
@@ -72,7 +72,7 @@ typedef struct tagMESSAGEQUEUE
 {
   HQUEUE16  next;                   /* Next queue */
   HQUEUE16  self;                   /* Handle to self (was: reserved) */
-  THDB*     thdb;                   /* Thread owning queue */
+  TEB*      teb;                   /* Thread owning queue */
   HANDLE  hEvent;                 /* Event handle */
   CRITICAL_SECTION cSection;        /* Queue access critical section */
 

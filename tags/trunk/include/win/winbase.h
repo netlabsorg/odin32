@@ -1,4 +1,4 @@
-/* $Id: winbase.h,v 1.20 2000-10-03 17:51:06 sandervl Exp $ */
+/* $Id: winbase.h,v 1.21 2000-11-21 11:33:59 sandervl Exp $ */
 
 #ifndef __WINE_WINBASE_H
 #define __WINE_WINBASE_H
@@ -2251,6 +2251,26 @@ BOOL WINAPI    SetPrivateObjectSecurity(SECURITY_INFORMATION  si,
                                           PSECURITY_DESCRIPTOR  *lppsdTarget,
                                           PGENERIC_MAPPING      pgm,
                                           HANDLE                hClientToken);
+
+
+/* undocumented functions */
+
+typedef struct tagSYSLEVEL
+{
+    CRITICAL_SECTION crst;
+    INT              level;
+} SYSLEVEL;
+
+VOID        WINAPI GetpWin16Lock(SYSLEVEL**);
+DWORD       WINAPI MapLS(LPVOID);
+LPVOID      WINAPI MapSL(DWORD);
+VOID        WINAPI ReleaseThunkLock(DWORD*);
+VOID        WINAPI RestoreThunkLock(DWORD);
+VOID        WINAPI UnMapLS(DWORD);
+DWORD       WINAPI _ConfirmWin16Lock(void);
+DWORD       WINAPI _ConfirmSysLevel(SYSLEVEL*);
+VOID        WINAPI _EnterSysLevel(SYSLEVEL*);
+VOID        WINAPI _LeaveSysLevel(SYSLEVEL*);
 
 #ifdef __cplusplus
 }
