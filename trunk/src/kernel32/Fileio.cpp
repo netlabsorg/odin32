@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.12 1999-10-27 18:11:38 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.13 1999-11-03 17:12:20 phaller Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -362,46 +362,67 @@ ODINFUNCTION5(BOOL, WriteFile,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION6(DWORD, SearchPathA,
-              LPCSTR, arg1,
-              LPCSTR, arg2,
-              LPCSTR, arg3,
-              DWORD, arg4,
-              LPSTR, arg5,
-              LPSTR *, arg6)
+ODINFUNCTION6(DWORD,  SearchPathA,
+              LPCSTR, lpszPath,
+              LPCSTR, lpszFile,
+              LPCSTR, lpszExtension,
+              DWORD,  cchReturnBuffer,
+              LPSTR,  lpszReturnBuffer,
+              LPSTR *, plpszFilePart)
 {
-    dprintf(("KERNEL32:  SearchPathA\n"));
-    return O32_SearchPath(arg1, arg2, arg3, arg4, arg5, arg6);
+  LPSTR lpszFilePart;
+
+  // @@@PH 1999/11/03 ANV.EXE seems to pass in NULL here, looks like
+  // windows ignores that behaviour altough it's undocumented.
+  if (plpszFilePart == NULL)
+    plpszFilePart = &lpszFilePart; // just provide a valid pointer
+
+  return O32_SearchPath(lpszPath,
+                        lpszFile,
+                        lpszExtension,
+                        cchReturnBuffer,
+                        lpszReturnBuffer,
+                        plpszFilePart);
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION6(DWORD, SearchPathW,
-              LPCWSTR, lpPath,
-              LPCWSTR, lpFileName,
-              LPCWSTR, lpExtension,
-              DWORD, nBufferLength,
-              LPWSTR, lpBuffer,
-              LPWSTR *, lpFilePart)
+ODINFUNCTION6(DWORD,    SearchPathW,
+              LPCWSTR,  lpszPath,
+              LPCWSTR,  lpszFileName,
+              LPCWSTR,  lpszExtension,
+              DWORD,    cchReturnBufferLength,
+              LPWSTR,   lpszReturnBuffer,
+              LPWSTR *, plpszFilePart)
 {
- char *asciipath, *asciifile, *asciiext, *asciibuffer, *asciipart;
- DWORD rc;
+  char *asciipath,
+       *asciifile,
+       *asciiext,
+       *asciibuffer,
+       *asciipart;
+  DWORD rc;
 
-    dprintf(("KERNEL32:  SearchPathW"));
-    asciibuffer = (char *)malloc(nBufferLength+1);
-    asciipath = UnicodeToAsciiString((LPWSTR)lpPath);
-    asciifile = UnicodeToAsciiString((LPWSTR)lpFileName);
-    asciiext  = UnicodeToAsciiString((LPWSTR)lpFileName);
-    rc = O32_SearchPath(asciipath, asciifile, asciiext, nBufferLength, asciibuffer, &asciipart);
+  asciibuffer = (char *)malloc(cchReturnBufferLength+1);
+  asciipath = UnicodeToAsciiString((LPWSTR)lpszPath);
+  asciifile = UnicodeToAsciiString((LPWSTR)lpszFileName);
+  asciiext  = UnicodeToAsciiString((LPWSTR)lpszExtension);
+  rc = ODIN_SearchPathA(asciipath,
+                        asciifile,
+                        asciiext,
+                        cchReturnBufferLength,
+                        asciibuffer,
+                        &asciipart);
 
-    if(rc) {
-        AsciiToUnicode(asciibuffer, lpBuffer);
-        *lpFilePart = lpBuffer + ((int)asciipart - (int)asciibuffer);
-    }
-    FreeAsciiString(asciiext);
-    FreeAsciiString(asciifile);
-    FreeAsciiString(asciipath);
-    free(asciibuffer);
-    return(rc);
+  if(rc)
+  {
+      AsciiToUnicode(asciibuffer, lpszReturnBuffer);
+      *plpszFilePart = lpszReturnBuffer + ((int)asciipart - (int)asciibuffer);
+  }
+
+  FreeAsciiString(asciiext);
+  FreeAsciiString(asciifile);
+  FreeAsciiString(asciipath);
+  free(asciibuffer);
+  return(rc);
 }
 //******************************************************************************
 //******************************************************************************
