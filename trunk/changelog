@@ -1,11 +1,8 @@
-/* $Id: changelog,v 1.1985 2002-02-18 22:09:17 phaller Exp $ */
+/* $Id: changelog,v 1.1986 2002-02-18 22:14:29 phaller Exp $ */
 
  2002-02-18: Patrick Haller <patrick.haller@innotek.de>
     - USER32:   o fixed structure size for 
                   SystemParametersInfo(SPI_GETNONCLIENTMETRICSA)
-                o fixed return code for GetModuleHandle()
-                  to 0 and SetLastError(ERROR_INVALID_HANDLE) for
-                  GetModuleHandle(0) in a ODIN32-LX environment
                 o fixed GetModuleHandleW(NULL) string conversion
 
  2002-02-18: knut st. osmundsen <bird@anduin.net>
