@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2001-03-14 20:15:59 bird Exp $
+# $Id: makefile,v 1.10 2001-03-16 14:19:02 bird Exp $
 
 #
 # Odin32 API
@@ -80,4 +80,4 @@ needed: all
 # NT version using Watcom C/C++.
 #
 fastdepnt.exe:
-    wcl386 -bt=nt -l=nt -d2 /"option map" -DOS2FAKE=1 -I$(WATCOM)\h\nt fastdep.c avl.c os2fake-win.c /Fe=$@ kernel32.lib
+    wcl386 -bt=nt -l=nt -d2 /hc /"option map" -DOS2FAKE=1 -I$(WATCOM)\h\nt fastdep.c avl.c os2fake-win.c /Fe=$@ kernel32.lib
