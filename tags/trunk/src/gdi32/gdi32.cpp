@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.14 1999-11-09 17:06:14 cbratschi Exp $ */
+/* $Id: gdi32.cpp,v 1.15 1999-11-10 14:15:23 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -294,8 +294,11 @@ HBITMAP WIN32API CreateCompatibleBitmap( HDC arg1, int arg2, int  arg3)
 //******************************************************************************
 HDC WIN32API CreateCompatibleDC( HDC arg1)
 {
-    dprintf(("GDI32: CreateCompatibleDC %X\n", arg1));
-    return O32_CreateCompatibleDC(arg1);
+ HDC rc;
+
+    rc = O32_CreateCompatibleDC(arg1);
+    dprintf(("GDI32: CreateCompatibleDC %X returned %x", arg1, rc));
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -407,7 +410,7 @@ HGDIOBJ WIN32API SelectObject(HDC hdc, HGDIOBJ hObj)
 //******************************************************************************
 HPALETTE WIN32API SelectPalette(HDC arg1, HPALETTE arg2, BOOL arg3)
 {
-    dprintf(("GDI32: SelectPalette\n"));
+    dprintf(("GDI32: SelectPalette %x", arg1));
     return O32_SelectPalette(arg1, arg2, arg3);
 }
 //******************************************************************************
@@ -525,8 +528,7 @@ BOOL WIN32API BitBlt(HDC hdcDest, int arg2, int arg3, int arg4, int arg5, HDC hd
     if(DIBSection::getSection() != NULL) {
         DIBSection *dsect = DIBSection::findHDC(hdcSrc);
         if(dsect) {
-                return(dsect->BitBlt(hdcDest, O32_WindowFromDC(hdcDest), arg2, arg3, arg4,
-                                     arg5, arg7, arg8, arg9));
+                return(dsect->BitBlt(hdcDest, arg2, arg3, arg4, arg5, arg7, arg8, arg9));
         }
     }
     dprintf(("GDI32: OS2BitBlt to hdc %X from (%d,%d) to (%d,%d), (%d,%d) rop %X\n", hdcDest, arg7, arg8, arg2, arg3, arg4, arg5, arg9));
