@@ -21,3 +21,4 @@ bin
 *.err
 *.*obj
 makefile.inc
+dummy.c
