@@ -1,8 +1,8 @@
-/* $Id: libTerm.c,v 1.3 2000-12-11 06:53:54 bird Exp $
+/* $Id: libTerm.c,v 1.4 2001-02-21 07:47:58 bird Exp $
  *
  * Terminates the Win32k library functions.
  *
- * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 2000-2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -21,13 +21,7 @@
 *   Internal Functions                                                         *
 *******************************************************************************/
 #include <os2.h>
-
-
-/*******************************************************************************
-*   Global Variables                                                           *
-*******************************************************************************/
-extern BOOL        fInited;
-extern HFILE       hWin32k;
+#include "libPrivate.h"
 
 
 /**

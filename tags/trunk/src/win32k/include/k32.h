@@ -1,8 +1,8 @@
-/* $Id: k32.h,v 1.7 2001-02-19 05:50:38 bird Exp $
+/* $Id: k32.h,v 1.8 2001-02-21 07:46:10 bird Exp $
  *
- * k32 - definitions.
+ * k32 API - definitions.
  *
- * Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * Copyright (c) 2000-2001 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -18,12 +18,13 @@ extern "C" {
 /*******************************************************************************
 *   Exported Functions                                                         *
 *******************************************************************************/
-APIRET k32AllocMemEx(PPVOID ppb, ULONG cb, ULONG flFlags, ULONG ulCS, ULONG ulEIP);
-APIRET k32QuerySystemMemInfo(PK32SYSTEMMEMINFO pMemInfo);
-APIRET k32QueryOTEs(HMTE hMTE, PQOTEBUFFER pQOte, ULONG cbOte);
-APIRET k32QueryOptionsStatus(PK32OPTIONS pOptions, PK32STATUS pStatus);
-APIRET k32SetOptions(PK32OPTIONS pOptions);
-APIRET k32ProcessReadWrite(PID pid, ULONG cb, PVOID pvSource, PVOID pvTarget, BOOL fRead);
+APIRET _System k32AllocMemEx(PPVOID ppb, ULONG cb, ULONG flFlags, ULONG ulCS, ULONG ulEIP);
+APIRET _System k32QueryCallGate(PUSHORT pusCGSelector);
+APIRET _System k32QuerySystemMemInfo(PK32SYSTEMMEMINFO pMemInfo);
+APIRET _System k32QueryOTEs(HMTE hMTE, PQOTEBUFFER pQOte, ULONG cbOte);
+APIRET _System k32QueryOptionsStatus(PK32OPTIONS pOptions, PK32STATUS pStatus);
+APIRET _System k32SetOptions(PK32OPTIONS pOptions);
+APIRET _System k32ProcessReadWrite(PID pid, ULONG cb, PVOID pvSource, PVOID pvTarget, BOOL fRead);
 
 
 #ifdef __cplusplus

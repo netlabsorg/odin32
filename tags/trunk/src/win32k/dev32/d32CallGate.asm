@@ -1,4 +1,4 @@
-; $Id: d32CallGate.asm,v 1.1 2001-02-20 05:00:13 bird Exp $
+; $Id: d32CallGate.asm,v 1.2 2001-02-21 07:44:57 bird Exp $
 ;
 ; 32-bit CallGate used to communitcate fast between Ring-3 and Ring-0.
 ; This module contains all assembly workers for this.
@@ -10,27 +10,48 @@
 
     .386p
 
+;
+;   Defined Constants And Macros
+;
+    INCL_ERRORS EQU 1
+
 
 ;
 ;   Header Files
 ;
+    include bseerr.inc
     include devsegdf.inc
     include devhlp.inc
+    include win32k.inc
 
 
 ;
 ; Exported symbols
 ;
+    public CallGateGDT
+
     public InitCallGate
+    public Win32kAPIRouter
 
 
 ;
-; extrns
+; External symbols
 ;
-    extrn _Device_Help:dword
+    extrn  _Device_Help:dword
+    extrn  pulTKSSBase32:dword
+
     extrn  KMEnterKmodeSEF:near
     extrn  KMExitKmodeSEF8:near
-    extrn  Win32kAPIRouter:near
+    extrn  _TKFuBuff@16:near
+
+    extrn  k32AllocMemEx:near
+    extrn  k32QueryOTEs:near
+    extrn  k32QueryOptionsStatus:near
+    extrn  k32SetOptions:near
+    extrn  k32ProcessReadWrite:near
+    ;extrn  k32HandleSystemEvent:near
+    extrn  k32QuerySystemMemInfo:near
+    extrn  k32QueryCallGate:near
 
 
 ;
@@ -43,9 +64,42 @@ DATA16 ends
 DATA32 segment
 GDTR_limit      dw ?                    ; The limit field of the GDTR.
 GDTR_base       dd ?                    ; The base field of the GDTR. (linear flat address)
+
+
+;
+; Structure containing the K32 API parameter packet size.
+;
+; Used for parameter packet validation, and for copying the parameter
+; packet from user address space into system address space (the stack).
+;
+acbK32Params:
+    dd 0                                ; Not used - ie. invalid
+    dd SIZE   K32ALLOCMEMEX             ; K32_ALLOCMEMEX          0x01
+    dd SIZE   K32QUERYOTES              ; K32_QUERYOTES           0x02
+    dd SIZE   K32QUERYOPTIONSSTATUS     ; K32_QUERYOPTIONSSTATUS  0x03
+    dd SIZE   K32SETOPTIONS             ; K32_SETOPTIONS          0x04
+    dd SIZE   K32PROCESSREADWRITE       ; K32_PROCESSREADWRITE    0x05
+    dd SIZE   K32HANDLESYSTEMEVENT      ; K32_HANDLESYSTEMEVENT   0x06
+    dd SIZE   K32QUERYSYSTEMMEMINFO     ; K32_QUERYSYSTEMMEMINFO  0x07
+    dd SIZE   K32QUERYCALLGATE          ; K32_QUERYCALLGATE       0x08
+
+;
+; Structure containing the offsets of K32 API worker routines.
+;
+; Used for calling the workers indirectly.
+;
+apfnK32APIs:
+    dd  FLAT:k32APIStub                 ; Not used - ie. invalid
+    dd  FLAT:k32AllocMemEx              ; K32_ALLOCMEMEX          0x01
+    dd  FLAT:k32QueryOTEs               ; K32_QUERYOTES           0x02
+    dd  FLAT:k32QueryOptionsStatus      ; K32_QUERYOPTIONSSTATUS  0x03
+    dd  FLAT:k32SetOptions              ; K32_SETOPTIONS          0x04
+    dd  FLAT:k32ProcessReadWrite        ; K32_PROCESSREADWRITE    0x05
+    ;dd  FLAT:k32HandleSystemEvent       ; K32_HANDLESYSTEMEVENT   0x06
+    dd  FLAT:k32APIStub
+    dd  FLAT:k32QuerySystemMemInfo      ; K32_QUERYSYSTEMMEMINFO  0x07
+    dd  FLAT:k32QueryCallGate           ; K32_QUERYCALLGATE       0x08
 DATA32 ends
-
-
 
 
 
@@ -65,7 +119,6 @@ CODE32 segment
 InitCallGate proc near
     push    ebp
     mov     ebp, esp
-    sub     esp, 10h
     push    edi
     push    esi
     push    ebx
@@ -74,7 +127,7 @@ InitCallGate proc near
 
     ;
     ; Allocate GDT selector for the call gate.
-    ; (seems like this call also allocates 68kb of virtual memory which i don't need.)
+    ; (URG! This call also allocates 68kb of virtual memory which i don't need!)
     ;
     mov     di, seg DATA16:CallGateGDT
     mov     es, di
@@ -92,14 +145,12 @@ Thunk32_AllocGDTSelector::
     ; How we'll find the descriptor entry for it.
     ;
 ICG_allocok:
-    pop     ds
-    push    ds                          ; restore ds (make sure it's flat)
     ASSUME  ds:FLAT
     sgdt    GDTR_limit                  ; Get the GDTR content.
     mov     ax, GDTR_limit
     mov     ebx, GDTR_base
     movzx   ecx, CallGateGDT
-    and     cx, 0fff8h                  ; clear the dpl bits and descriptor type bit.
+    and     cx, 0fff8h                  ; clear the dpl bits and descriptor type bit. (paranoia!)
     cmp     cx, ax                      ; check limit. (paranoia!!!)
     jl      ICG_limitok
     mov     eax, 0ffffffffh             ; return failure.
@@ -137,8 +188,8 @@ ICG_limitok:
     xor     eax, eax                    ; return successfully.
 
 ICG_end:
-    pop     ds
     pop     es
+    pop     ds
     pop     ebx
     pop     esi
     pop     edi
@@ -158,8 +209,8 @@ InitCallGate endp
 ; @status
 ; @author   knut st. osmundsen (knut.stange.osmundsen@mynd.no)
 ; @remark
-;   stack frame:
-;       ---top of stack---
+;   stack frame - before KMEnterKmodeSEF:
+;       --bottom of stack---
 ;       calling ss                                                1ch
 ;       calling esp                                               18h
 ;       pParameter          (parameter 1)                         14h
@@ -169,18 +220,41 @@ InitCallGate endp
 ;       ---top of stack---
 ;       flags               (pushf)                                4h
 ;       parameter size      (push 8h)                              0h
-;       ---I start repushing parameters here.
 ;
+;  After the call to KMEnterKmodeSEF:
+;       --bottom of stack---
+;       calling ss                                                50
+;       calling esp                                               4c
+;       pParameter          (parameter 1)                         48
+;       ulFunctionCode      (parameter 0)                         44
+;       sef_cs                                                    40
+;       sef_eip                                                   3c
+;       sef_eflag                                                 38
+;       sef_cbargs                                                34
+;       sef_retaddr                                               30
+;       sef_ds                                                    2c
+;       sef_es                                                    28
+;       sef_fs                                                    24
+;       sef_gs                                                    20
+;       sef_eax                                                   1c
+;       sef_ecx                                                   18
+;       sef_edx                                                   14
+;       sef_ebx                                                   10
+;       sef_padesp                                                 c
+;       sef_ebp                                                    8
+;       sef_esi                                                    4h
+;       sef_edi                                                    0h
 ;
 Win32kCallGate proc near
-    pushf                               ; Push all flags
+    ASSUME  ds:nothing, ss:nothing
+    pushfd                              ; Push all flags (eflags)
     push    8h                          ; Size of parameters.
 
     call    KMEnterKmodeSEF             ; This is an OS2 kernel function which does
                                         ; kernel entry housekeeping.
 
-    mov     edx, [esp + 14h]            ; pParameter (parameter 1)
-    mov     eax, [esp + 10h]            ; ulFunctionCode (parameter 2)
+    mov     edx, [esp + 48h]            ; pParameter (parameter 1)
+    mov     eax, [esp + 44h]            ; ulFunctionCode (parameter 2)
     sub     esp, 8h                     ; (Even when using _Oplink we have to reserve space for parameters.)
     call    Win32kAPIRouter             ; This is my Ring-0 api. (d32Win32kIOCtl.c)
     add     esp, 8h
@@ -190,6 +264,101 @@ Win32kCallGate proc near
 Win32kCallGate endp
 
 
+;;
+; Internal function router which calls the correct function.
+; Called from IOCtl worker in d32Win32kIOCtl.c and callgate.
+; @cproto   APIRET _Optlink Win32kAPIRouter(ULONG ulFunction, PVOID pvParam);
+; @returns  function return code.
+;           0xdeadbeef if invalid function number.
+; @param    eax - ulFunction    Function number to call.
+; @param    edx - pvParam       Parameter packet for that function.
+; @uses     eax, edx, ecx
+; @sketch   Validate function number
+;           Fetch the parameter pacted from user mode and place it on the stack.
+;           Validate the size field of the parameter packet.
+;           Remove the packet header from the stack => we have a callframe for the api.
+;           Call the API worker.
+;           Return.
+; @status   Completely implemented.
+; @author   knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+Win32kAPIRouter proc near
+    ASSUME  ds:FLAT, es:nothing, ss:nothing
+    ;
+    ; Validate function number.
+    ;
+    cmp     eax, 0
+    jne     APIR_notnull                ; This code should be faster (though it may look stupid to
+                                        ; jump around like this). IIRC branch prediction allways
+                                        ; takes a branch. And btw there are 4 NOPs after this jump!
+    jmp     APIR_InvalidFunction
+
+APIR_notnull:
+    cmp     eax, K32_LASTIOCTLFUNCTION
+    jle     APIR_ValidFunction
+APIR_InvalidFunction:
+    mov     eax, 0deadbeefh
+    ret
+
+    ;
+    ; We have a valid function number now.
+    ; Copy the parameter struct on to the stack.
+    ;
+APIR_ValidFunction:
+    push    ebp                         ; Make stack frame
+    mov     ebp, esp
+    mov     [ebp+8], eax                ; Save eax on the stack (reserved by caller according to _Optlink)
+    mov     ecx, acbK32Params[eax*4]    ; ecx <- size of parameter packet.
+    sub     esp, ecx                    ; Reserve stack space for the parameter packet.
+    mov     eax, [pulTKSSBase32]
+    mov     eax, [eax]
+    add     eax, esp                    ; Calculate the FLAT address of esp.
+    push    ecx                         ; Save the size.
+    ; TKFuBuff(pv, pvParam, acbParams[ulFunction], TK_FUSU_NONFATAL);
+    push    0                           ; TK_FUSU_NOFATAL
+    push    ecx                         ; Size of parameter packet
+    push    edx                         ; Pointer to user memory to fetch
+    push    eax                         ; Pointer to target memory.
+    call    _TKFuBuff@16                ; __stdcall (cleanup done by the called function)
+    pop     ecx                         ; Restore size
+    test    eax, eax
+    jz      APIR_FetchOK
+    jmp     APIR_end
+
+    ;
+    ; Parameter packet is now read onto the stack. esp is pointing to it.
+    ; Check the size of the struct as the caller sees it.
+    ;
+APIR_FetchOK:
+    cmp     ecx, [esp]                  ; (esp now point at the parameter struct)
+    je      APIR_sizeok
+    mov     eax, ERROR_BAD_ARGUMENTS    ; return code.
+    jmp     APIR_end
+
+    ;
+    ; The size is correct.
+    ; Call the worker and return.
+    ;
+APIR_sizeok:
+    add     esp, SIZE K32HDR            ; Skip the parameter header.
+    mov     eax, [ebp + 8]              ; Restore function number.
+    mov     eax, apfnK32APIs[eax*4]     ; eax <- address of the K32 API worker.
+    call    eax                         ; Call the worker.
+                                        ; No cleanup needed as leave takes care of that
+                                        ; We're ready for returning.
+APIR_end:
+    leave
+    ret
+Win32kAPIRouter endp
+
+
+;;
+; This is a stub function which does nothing but returning an error code.
+; @return       ERROR_NOT_SUPPORTED
+k32APIStub proc near
+    mov     eax, ERROR_NOT_SUPPORTED
+    ret
+k32APIStub endp
+
 CODE32 ends
 
 
@@ -197,7 +366,7 @@ CODE32 ends
 
 
 CODE16 segment
-    assume cs:CODE16, ds:nothing, ss:nothing, es:nothing
+    assume cs:CODE16, ds:FLAT
 
 ;
 ; Thunker used by the InitCallGate procedure call the AllocGDTSelector devhelper.
