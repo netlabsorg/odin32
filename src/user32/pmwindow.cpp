@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.222 2003-10-22 12:43:14 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.223 2003-10-22 12:43:51 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -61,6 +61,9 @@
 
 #define DBG_LOCALLOG    DBG_pmwindow
 #include "dbglocal.h"
+
+#define ODIN_SetExceptionHandler(a)
+#define ODIN_UnsetExceptionHandler(a)
 
 
 // Notification that focus change has completed (UNDOCUMENTED)
