@@ -1,7 +1,7 @@
-/* $Id: changelog,v 1.1898 2001-12-09 21:18:58 sandervl Exp $ */
+/* $Id: changelog,v 1.1899 2001-12-09 21:54:50 sandervl Exp $ */
 
  2001-12-09: Sander van Leeuwen <sandervl@xs4all.nl>
-    - KERNEL32: o Overlapped IO fix (poll)
+    - KERNEL32: o Overlapped IO fix (poll & half or full duplex support)
 
  2001-12-08: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Added read & write functions to custom driver interface
