@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.2695 2004-03-11 13:42:28 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2696 2004-03-12 10:59:36 sandervl Exp $ */
+
+ 2004-03-12: Sander van Leeuwen <sandervl@innotek   >
+    - SHELL32:  o Disabled Shell_NotifyIconA
 
  2004-03-11: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o More WH_MOUSE changes
