@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.92 2000-11-09 18:18:09 sandervl Exp $
+; $Id: kernel32.def,v 1.93 2000-11-13 06:48:54 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -41,8 +41,8 @@ EXPORTS
 ;  Ordinal0013 = _OS2Ordinal0013@??           @13
 ;  Ordinal0014 = _OS2Ordinal0014@??           @14
 ;  Ordinal0015 = _OS2Ordinal0015@??           @15
-;  Ordinal0016 = _OS2Ordinal0016@??           @16
-;  Ordinal0017 = _OS2Ordinal0017@??           @17
+   Ordinal0016 = _KERNEL32_16@12              @16
+   Ordinal0017 = _KERNEL32_17@4               @17
 ;  Ordinal0018 = _OS2Ordinal0018@??           @18
 ;  Ordinal0019 = _OS2Ordinal0019@??           @19
 ;  Ordinal0020 = _OS2Ordinal0020@??           @20
@@ -67,12 +67,12 @@ EXPORTS
 ;  Ordinal0039 = _OS2Ordinal0039@??           @39
 ;  Ordinal0040 = _OS2Ordinal0040@??           @40
 ;  Ordinal0041 = _OS2Ordinal0041@??           @41
-;  Ordinal0042 = _OS2Ordinal0042@??           @42
+   Ordinal0042 = _NullFunction@0              @42
 ;  Ordinal0043 = _OS2Ordinal0043@??           @43
 ;  Ordinal0044 = _OS2Ordinal0044@??           @44
 ;  Ordinal0045 = _OS2Ordinal0045@??           @45
 ;  Ordinal0046 = _OS2Ordinal0046@??           @46
-;  Ordinal0047 = _OS2Ordinal0047@??           @47
+   Ordinal0047 = _NullFunction@0              @47
 ;  Ordinal0048 = _OS2Ordinal0048@??           @49
 ;  Ordinal0049 = _OS2Ordinal0049@??           @49
 ;  Ordinal0051 = _OS2Ordinal0051@??           @51
@@ -133,7 +133,6 @@ EXPORTS
 ;--------------
 
 ;;Not supported; just present
-     _CommonUnimpStub@0                                           @17
      LoadLibrary16              = _LoadLibrary16@4                @35
      FreeLibrary16              = _FreeLibrary16@4                @36
      GetProcAddress16           = _GetProcAddress16@8             @37
