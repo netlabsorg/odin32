@@ -1,4 +1,4 @@
-/* $Id: iphlpapi.cpp,v 1.10 2002-09-24 11:47:14 sandervl Exp $ */
+/* $Id: iphlpapi.cpp,v 1.11 2002-10-07 10:25:56 sandervl Exp $ */
 /*
  *	IPHLPAPI library
  *
@@ -399,17 +399,18 @@ ODINFUNCTION2(DWORD,            GetAdaptersInfo,
     // check for sufficient space
     DWORD dwRequired = i_sizeOfIP_ADAPTER_INFO(pip);
     
-    if (lSpaceLeft - dwRequired > 0)
+    if (lSpaceLeft - dwRequired >= 0)
     {
       lSpaceLeft -= dwRequired;
       
-      // copy over the whole structure hierarchy
+      // @PF revised - this thing works because we currently do not support
+      // multi-ip, multi-gateway or multi-DHCP servers lists
+      // TODO - add lists support
       memcpy(pTarget, pip, sizeof( IP_ADAPTER_INFO ));
-      pTarget += sizeof( IP_ADAPTER_INFO );
-       
       // point to currentIPAddress 
       ((PIP_ADAPTER_INFO)(pTarget))->CurrentIpAddress = &((PIP_ADAPTER_INFO)(pTarget))->IpAddressList;
-      //@@PF Need to fix lots of stuff here
+      pTarget += sizeof( IP_ADAPTER_INFO );
+       
 //      i_copyIP_ADDRESS_STRING(&pTarget, &pip->IpAddressList);
 //      i_copyIP_ADDRESS_STRING(&pTarget, &pip->GatewayList);
 //      i_copyIP_ADDRESS_STRING(&pTarget, &pip->DhcpServer);
