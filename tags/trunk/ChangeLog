@@ -1,8 +1,10 @@
- /* $Id: ChangeLog,v 1.486 1999-11-30 15:06:24 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.487 1999-11-30 19:39:54 sandervl Exp $ */
 
  99-11-29: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Ported Wine process apis (not done) (kernel32\process.cpp)
                     Unitialized data section bugfix. 
+	- NTDLL: Fixed exports (missing ordinals) and created correct library
+	- ADVAPI32: Call security apis in ntdll (security.cpp; Wine 991031)
 
  99-11-29: Jens Wiessner <wiessnej@rfi.de>
 	- CRTDLL: Completed GetMainArgs
