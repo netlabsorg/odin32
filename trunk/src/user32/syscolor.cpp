@@ -1,4 +1,4 @@
-/* $Id: syscolor.cpp,v 1.29 2001-08-27 08:42:11 sandervl Exp $ */
+/* $Id: syscolor.cpp,v 1.30 2001-10-15 17:09:04 sandervl Exp $ */
 
 /*
  * Win32 system color API functions for OS/2
@@ -192,6 +192,7 @@ void SYSCOLOR_Init(int fOverride)
                 SYSCOLOR_SetColor(x,O32_GetSysColor(x));
         else    SYSCOLOR_SetColor(x,SysColors[x]);
   }
+  fColorInit = TRUE;
 }
 //******************************************************************************
 //******************************************************************************

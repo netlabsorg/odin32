@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.154 2001-10-08 12:19:10 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.155 2001-10-15 17:09:04 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -182,9 +182,10 @@ BOOL InitPM()
 //menu.cpp
 BOOL MENU_Init();
 //******************************************************************************
-void WIN32API SetWindowAppearance(BOOL fLooks)
+void WIN32API SetWindowAppearance(int fLooks)
 {
-    if(fLooks) {
+    if(fLooks == OS2_APPEARANCE || fLooks == OS2_APPEARANCE_SYSMENU) 
+    {
         CHAR szDisplay[30];
         HMODULE hModDisplay;
 

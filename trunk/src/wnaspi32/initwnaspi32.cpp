@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.8 2001-10-15 17:06:18 sandervl Exp $
+/* $Id: initwnaspi32.cpp,v 1.1 2001-10-15 17:06:18 sandervl Exp $
  *
  * DLL entry point
  *
@@ -35,7 +35,50 @@
 #include <odinlx.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
 #include <initdll.h>
+#include "aspilib.h"
 
+extern "C" {
+ //Win32 resource table (produced by wrc)
+ extern DWORD wnaspi32_PEResTab;
+}
+scsiObj *aspi = NULL;
+static HMODULE dllHandle = 0;
+//******************************************************************************
+//******************************************************************************
+BOOL WINAPI Wnaspi32LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
+{
+   switch (fdwReason)
+   {
+   case DLL_PROCESS_ATTACH:
+       aspi = new scsiObj();
+       if(aspi == NULL) {
+           dprintf(("WNASPI32: LibMain; can't allocate aspi object!"));
+           return FALSE;
+       }
+       if(aspi->init(65535) == FALSE)
+       {
+           delete aspi;
+           aspi = NULL;
+           dprintf(("WNASPI32: LibMain; can't init aspi object!"));
+           return FALSE;
+       }
+       dprintf(("WNASPI32: LibMain; aspi object created successfully"));
+       return TRUE;
+
+   case DLL_THREAD_ATTACH:
+   case DLL_THREAD_DETACH:
+       return TRUE;
+
+   case DLL_PROCESS_DETACH:
+       if(aspi) {
+           aspi->close();
+           delete aspi;
+           aspi = NULL;
+       }
+       return TRUE;
+   }
+   return FALSE;
+}
 /****************************************************************************/
 /* _DLL_InitTerm is the function that gets called by the operating system   */
 /* loader when it loads and frees this DLL for each process that accesses   */
@@ -44,7 +87,7 @@
 /* linkage convention MUST be used because the operating system loader is   */
 /* calling this function.                                                   */
 /****************************************************************************/
-ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
+ULONG APIENTRY inittermWnaspi32(ULONG hModule, ULONG ulFlag)
 {
    size_t i;
    APIRET rc;
@@ -56,18 +99,18 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
    /*-------------------------------------------------------------------------*/
 
    switch (ulFlag) {
-      case 0:
-         ctordtorInit();
+      case 0 :
+         dllHandle = RegisterLxDll(hModule, Wnaspi32LibMain, (PVOID)&wnaspi32_PEResTab);
+         if(dllHandle == 0)
+             return 0UL;
 
-         CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
-
-         return inittermWnaspi32(hModule, ulFlag);
-
-      case 1:
-         inittermWnaspi32(hModule, ulFlag);
-         ctordtorTerm();
          break;
-      default:
+      case 1 :
+         if(dllHandle) {
+             UnregisterLxDll(dllHandle);
+         }
+         break;
+      default  :
          return 0UL;
    }
 

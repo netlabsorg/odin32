@@ -1,4 +1,4 @@
-/* $Id: directory.cpp,v 1.39 2001-08-10 19:32:26 sandervl Exp $ */
+/* $Id: directory.cpp,v 1.40 2001-10-15 17:10:54 sandervl Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
@@ -52,6 +52,7 @@ ODINDEBUGCHANNEL(KERNEL32-DIRECTORY)
 
 static char DIR_Windows[MAX_PATHNAME_LEN];
 static char DIR_System[MAX_PATHNAME_LEN];
+static BOOL fDirInit = FALSE;
 
 //******************************************************************************
 //******************************************************************************
@@ -72,6 +73,9 @@ void InitDirectories()
  char *endofwinpath, *tmp;
  int   len;
 
+   if(fDirInit == TRUE) return;
+
+   fDirInit = TRUE;
    strcpy(DIR_System, kernel32Path);
    len = strlen(DIR_System);
    if(DIR_System[len-1] == '\\') {
@@ -96,6 +100,29 @@ void InitDirectories()
 	}
    	else DebugInt3();
    }
+   dprintf(("Windows  dir: %s", DIR_Windows));
+   dprintf(("System32 dir: %s", DIR_System));
+}
+//*****************************************************************************
+//*****************************************************************************
+void InitDirectoriesCustom(char *szSystemDir, char *szWindowsDir)
+{
+   int len;
+
+   if(fDirInit == TRUE) return;
+   fDirInit = TRUE;
+
+   strcpy(DIR_System, szSystemDir);
+   len = strlen(DIR_System);
+   if(DIR_System[len-1] == '\\') {
+	DIR_System[len-1] = 0; 
+   }
+   strcpy(DIR_Windows, szWindowsDir);
+   len = strlen(DIR_Windows);
+   if(DIR_Windows[len-1] == '\\') {
+	DIR_Windows[len-1] = 0; 
+   }
+
    dprintf(("Windows  dir: %s", DIR_Windows));
    dprintf(("System32 dir: %s", DIR_System));
 }

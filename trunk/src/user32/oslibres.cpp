@@ -1,4 +1,4 @@
-/* $Id: oslibres.cpp,v 1.24 2001-10-14 21:37:03 sandervl Exp $ */
+/* $Id: oslibres.cpp,v 1.25 2001-10-15 17:09:03 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -307,7 +307,8 @@ char *colorToMonoBitmap(HBITMAP bmpsrc, BITMAPINFO2 *pBmpDest)
     lHits = GpiQueryBitmapBits(hpsDest, 0, pBmpDest->cy, bmpbuffer, bmpinfo);
     if(lHits == GPI_ERROR) goto fail;
 
-#ifdef DEBUG
+//DEBUG_CURSOR
+#ifdef DEBUG_CURSOR
  {
     dprintf(("colorToMonoBitmap %d %d (%x,%x,%x)(%x,%x,%x)", pBmpDest->cx, pBmpDest->cy, bmpinfo->argbColor[0].bRed, bmpinfo->argbColor[0].bGreen, bmpinfo->argbColor[0].bBlue, bmpinfo->argbColor[1].bRed, bmpinfo->argbColor[1].bGreen, bmpinfo->argbColor[1].bBlue));
     for(int i=pBmpDest->cy-1;i>=0;i--) {
