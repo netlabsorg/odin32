@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.21 2000-03-29 17:16:06 sandervl Exp $ */
+/* $Id: windowmsg.cpp,v 1.22 2001-02-13 19:59:13 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -488,13 +488,15 @@ INT WINPROC_MapMsg32ATo32W( HWND hwnd, UINT msg, WPARAM wParam, LPARAM *plparam 
     case WM_SETTEXT:
     case WM_WININICHANGE:
     case CB_DIR:
+    case LB_DIR:
+    case LB_ADDFILE:
+#ifndef __WIN32OS2__
     case CB_FINDSTRING:
     case CB_FINDSTRINGEXACT:
     case CB_SELECTSTRING:
-    case LB_DIR:
-    case LB_ADDFILE:
     case LB_FINDSTRING:
     case LB_SELECTSTRING:
+#endif
     case EM_REPLACESEL:
         *plparam = (LPARAM)HEAP_strdupAtoW( GetProcessHeap(), 0, (LPCSTR)*plparam );
         return (*plparam ? 1 : -1);
@@ -533,6 +535,11 @@ INT WINPROC_MapMsg32ATo32W( HWND hwnd, UINT msg, WPARAM wParam, LPARAM *plparam 
 
 /* Listbox */
     case LB_ADDSTRING:
+#ifdef __WIN32OS2__
+    case LB_FINDSTRING:
+    case LB_FINDSTRINGEXACT:
+    case LB_SELECTSTRING:
+#endif
     case LB_INSERTSTRING:
         if ( WINPROC_TestLBForStr( hwnd ))
           *plparam = (LPARAM)HEAP_strdupAtoW( GetProcessHeap(), 0, (LPCSTR)*plparam );
@@ -550,6 +557,11 @@ INT WINPROC_MapMsg32ATo32W( HWND hwnd, UINT msg, WPARAM wParam, LPARAM *plparam 
 
 /* Combobox */
     case CB_ADDSTRING:
+#ifdef __WIN32OS2__
+    case CB_FINDSTRING:
+    case CB_FINDSTRINGEXACT:
+    case CB_SELECTSTRING:
+#endif
     case CB_INSERTSTRING:
         if ( WINPROC_TestCBForStr( hwnd ))
           *plparam = (LPARAM)HEAP_strdupAtoW( GetProcessHeap(), 0, (LPCSTR)*plparam );
@@ -632,19 +644,26 @@ void WINPROC_UnmapMsg32ATo32W( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
     case WM_SETTEXT:
     case WM_WININICHANGE:
     case CB_DIR:
+    case LB_DIR:
+    case LB_ADDFILE:
+#ifndef __WIN32OS2__
     case CB_FINDSTRING:
     case CB_FINDSTRINGEXACT:
     case CB_SELECTSTRING:
-    case LB_DIR:
-    case LB_ADDFILE:
     case LB_FINDSTRING:
     case LB_SELECTSTRING:
+#endif
     case EM_REPLACESEL:
         HeapFree( GetProcessHeap(), 0, (void *)lParam );
         break;
 
 /* Listbox */
     case LB_ADDSTRING:
+#ifdef __WIN32OS2__
+    case LB_FINDSTRING:
+    case LB_FINDSTRINGEXACT:
+    case LB_SELECTSTRING:
+#endif
     case LB_INSERTSTRING:
         if ( WINPROC_TestLBForStr( hwnd ))
           HeapFree( GetProcessHeap(), 0, (void *)lParam );
@@ -661,6 +680,11 @@ void WINPROC_UnmapMsg32ATo32W( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
 
 /* Combobox */
     case CB_ADDSTRING:
+#ifdef __WIN32OS2__
+    case CB_FINDSTRING:
+    case CB_FINDSTRINGEXACT:
+    case CB_SELECTSTRING:
+#endif
     case CB_INSERTSTRING:
         if ( WINPROC_TestCBForStr( hwnd ))
           HeapFree( GetProcessHeap(), 0, (void *)lParam );
@@ -709,13 +733,15 @@ INT WINPROC_MapMsg32WTo32A( HWND hwnd, UINT msg, WPARAM wParam, LPARAM *plparam)
     case WM_SETTEXT:
     case WM_WININICHANGE:
     case CB_DIR:
+    case LB_DIR:
+    case LB_ADDFILE:
+#ifndef __WIN32OS2__
     case CB_FINDSTRING:
     case CB_FINDSTRINGEXACT:
     case CB_SELECTSTRING:
-    case LB_DIR:
-    case LB_ADDFILE:
     case LB_FINDSTRING:
     case LB_SELECTSTRING:
+#endif
     case EM_REPLACESEL:
         *plparam = (LPARAM)HEAP_strdupWtoA( GetProcessHeap(), 0, (LPCWSTR)*plparam );
         return (*plparam ? 1 : -1);
@@ -755,6 +781,11 @@ INT WINPROC_MapMsg32WTo32A( HWND hwnd, UINT msg, WPARAM wParam, LPARAM *plparam)
 
 /* Listbox */
     case LB_ADDSTRING:
+#ifdef __WIN32OS2__
+    case LB_FINDSTRING:
+    case LB_FINDSTRINGEXACT:
+    case LB_SELECTSTRING:
+#endif
     case LB_INSERTSTRING:
         if ( WINPROC_TestLBForStr( hwnd ))
           *plparam = (LPARAM)HEAP_strdupWtoA( GetProcessHeap(), 0, (LPCWSTR)*plparam );
@@ -772,6 +803,11 @@ INT WINPROC_MapMsg32WTo32A( HWND hwnd, UINT msg, WPARAM wParam, LPARAM *plparam)
 
 /* Combobox */
     case CB_ADDSTRING:
+#ifdef __WIN32OS2__
+    case CB_FINDSTRING:
+    case CB_FINDSTRINGEXACT:
+    case CB_SELECTSTRING:
+#endif
     case CB_INSERTSTRING:
         if ( WINPROC_TestCBForStr( hwnd ))
           *plparam = (LPARAM)HEAP_strdupWtoA( GetProcessHeap(), 0, (LPCWSTR)*plparam );
@@ -831,13 +867,15 @@ void WINPROC_UnmapMsg32WTo32A( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
     case WM_SETTEXT:
     case WM_WININICHANGE:
     case CB_DIR:
+    case LB_DIR:
+    case LB_ADDFILE:
+#ifndef __WIN32OS2__
     case CB_FINDSTRING:
     case CB_FINDSTRINGEXACT:
     case CB_SELECTSTRING:
-    case LB_DIR:
-    case LB_ADDFILE:
     case LB_FINDSTRING:
     case LB_SELECTSTRING:
+#endif
     case EM_REPLACESEL:
         HeapFree( GetProcessHeap(), 0, (void *)lParam );
         break;
@@ -867,6 +905,11 @@ void WINPROC_UnmapMsg32WTo32A( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
 
 /* Listbox */
     case LB_ADDSTRING:
+#ifdef __WIN32OS2__
+    case LB_FINDSTRING:
+    case LB_FINDSTRINGEXACT:
+    case LB_SELECTSTRING:
+#endif
     case LB_INSERTSTRING:
         if ( WINPROC_TestLBForStr( hwnd ))
           HeapFree( GetProcessHeap(), 0, (void *)lParam );
@@ -883,6 +926,11 @@ void WINPROC_UnmapMsg32WTo32A( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
 
 /* Combobox */
     case CB_ADDSTRING:
+#ifdef __WIN32OS2__
+    case CB_FINDSTRING:
+    case CB_FINDSTRINGEXACT:
+    case CB_SELECTSTRING:
+#endif
     case CB_INSERTSTRING:
         if ( WINPROC_TestCBForStr( hwnd ))
           HeapFree( GetProcessHeap(), 0, (void *)lParam );
