@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.8 1999-07-18 10:39:51 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.9 1999-07-18 14:39:35 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -38,26 +38,26 @@ BOOL InitPM()
   dprintf(("Winitialize returned %x", hab));
   hmq = WinCreateMsgQueue(hab, 0);
 
-  if(!hab || !hmq) 
+  if(!hab || !hmq)
   {
         UINT error;
         //CB: only fail on real error
         error = WinGetLastError(hab) & 0xFFFF; //error code
         if (!hab || error != PMERR_MSG_QUEUE_ALREADY_EXISTS)
         {
-          	dprintf(("WinInitialize or WinCreateMsgQueue failed %x %x", hab, hmq));
-          	dprintf((" Error = %x",error));
-          	return(FALSE);
-        } 
- 	else
+            dprintf(("WinInitialize or WinCreateMsgQueue failed %x %x", hab, hmq));
+            dprintf((" Error = %x",error));
+            return(FALSE);
+        }
+    else
         {
-		if(!hab) {
-         		hab = WinQueryAnchorBlock(HWND_DESKTOP);
-			dprintf(("WinQueryAnchorBlock returned %x", hab));
-		}
-		if(!hmq) {
-			hmq = HMQ_CURRENT;
-		}
+        if(!hab) {
+                hab = WinQueryAnchorBlock(HWND_DESKTOP);
+            dprintf(("WinQueryAnchorBlock returned %x", hab));
+        }
+        if(!hmq) {
+            hmq = HMQ_CURRENT;
+        }
         }
   }
   SetThreadHAB(hab);
@@ -68,7 +68,7 @@ BOOL InitPM()
      hab,                               /* Anchor block handle          */
      (PSZ)WIN32_STDCLASS,               /* Window class name            */
      (PFNWP)Win32WindowProc,            /* Address of window procedure  */
-     CS_SIZEREDRAW,                     /* Class style                  */
+     CS_SIZEREDRAW | CS_MOVENOTIFY | CS_HITTEST,
      8)) {
         dprintf(("WinRegisterClass Win32Window failed"));
         return(FALSE);
@@ -100,62 +100,62 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
   {
     //internal messages
     case WM_WIN32_POSTMESSAGEA:
-	postmsg = (POSTMSG_PACKET *)mp1;
-	if(postmsg == NULL) {
-		dprintf(("WM_WIN32_POSTMESSAGEA, postmsg NULL!!"));
-		break;
-	}
-	win32wnd->SendMessageA(postmsg->Msg, postmsg->wParam, postmsg->lParam);
-	free(postmsg);
-	break;
-
+      	postmsg = (POSTMSG_PACKET *)mp1;
+      	if(postmsg == NULL) {
+          	dprintf(("WM_WIN32_POSTMESSAGEA, postmsg NULL!!"));
+          	break;
+      	}
+      	win32wnd->SendMessageA(postmsg->Msg, postmsg->wParam, postmsg->lParam);
+      	free(postmsg);
+	  	break;
+	
     case WM_WIN32_POSTMESSAGEW:
-	postmsg = (POSTMSG_PACKET *)mp1;
-	if(postmsg == NULL) {
-		dprintf(("WM_WIN32_POSTMESSAGEW, postmsg NULL!!"));
-		break;
-	}
-	win32wnd->SendMessageW(postmsg->Msg, postmsg->wParam, postmsg->lParam);
-	free(postmsg);
-	break;
+    	postmsg = (POSTMSG_PACKET *)mp1;
+    	if(postmsg == NULL) {
+        	dprintf(("WM_WIN32_POSTMESSAGEW, postmsg NULL!!"));
+        	break;
+    	}
+    	win32wnd->SendMessageW(postmsg->Msg, postmsg->wParam, postmsg->lParam);
+    	free(postmsg);
+    	break;
 
     //OS/2 msgs
     case WM_CREATE:
         //Processing is done in after WinCreateWindow returns
-	dprintf(("OS2: WM_CREATE %x", hwnd));
-	RestoreOS2TIB();
-	return (MRESULT)FALSE;
+    	dprintf(("OS2: WM_CREATE %x", hwnd));
+    	RestoreOS2TIB();
+    	return (MRESULT)FALSE;
 
     case WM_QUIT:
-	dprintf(("OS2: WM_QUIT %x", hwnd));
+    	dprintf(("OS2: WM_QUIT %x", hwnd));
         if(win32wnd->MsgQuit()) {
                 goto RunDefWndProc;
         }
         break;
 
     case WM_CLOSE:
-	dprintf(("OS2: WM_CLOSE %x", hwnd));
+    	dprintf(("OS2: WM_CLOSE %x", hwnd));
         if(win32wnd->MsgClose()) {
                 goto RunDefWndProc;
         }
         break;
 
     case WM_DESTROY:
-	dprintf(("OS2: WM_DESTROY %x", hwnd));
+    	dprintf(("OS2: WM_DESTROY %x", hwnd));
         if(win32wnd->MsgDestroy()) {
                 goto RunDefWndProc;
         }
         break;
 
     case WM_ENABLE:
-	dprintf(("OS2: WM_ENABLE %x", hwnd));
+    	dprintf(("OS2: WM_ENABLE %x", hwnd));
         if(win32wnd->MsgEnable((ULONG)mp1)) {
                 goto RunDefWndProc;
         }
         break;
 
     case WM_SHOW:
-	dprintf(("OS2: WM_SHOW %x", hwnd));
+    	dprintf(("OS2: WM_SHOW %x", hwnd));
         if(win32wnd->MsgShow((ULONG)mp1)) {
                 goto RunDefWndProc;
         }
@@ -164,33 +164,33 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     case WM_MOVE:
     {
       RECTLOS2 rectChild;
-      ULONG xParent, yParent;
+      ULONG x, y;
 
-	dprintf(("OS2: WM_MOVE %x", hwnd));
+    	dprintf(("OS2: WM_MOVE %x", hwnd));
 
-	WinQueryWindowRect(hwnd, (PRECTL)&rectChild);
+    	WinQueryWindowRect(hwnd, (PRECTL)&rectChild);
 
         //Calculate position relative to parent window (real window or desktop)
-        xParent = rectChild.xLeft;
-        yParent = MapOS2ToWin32Y(hwnd, &rectChild, rectChild.yBottom);
+        x = rectChild.xLeft;
+        y = MapOS2ToWin32Y(hwnd, &rectChild, rectChild.yBottom);
 
-       	if(win32wnd->MsgMove(xParent, yParent)) {
-           	goto RunDefWndProc;
+        if(win32wnd->MsgMove(x, y)) {
+            goto RunDefWndProc;
         }
         break;
     }
 
     case WM_WINDOWPOSCHANGED:
     {
-        break;
+    	dprintf(("OS2: WM_WINDOWPOSCHANGED %x", hwnd));
     }
 
     case WM_ADJUSTWINDOWPOS:
     {
-	dprintf(("OS2: WM_ADJUSTWINDOWPOS %x", hwnd));
-//      	if(win32wnd->MsgWindowPosChanging(0, 0)) {
+    	dprintf(("OS2: WM_ADJUSTWINDOWPOS %x", hwnd));
+//          if(win32wnd->MsgWindowPosChanging(0, 0)) {
                 goto RunDefWndProc;
-//	}
+//  }
         break;
     }
 
@@ -198,9 +198,9 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     {
      HPS hps;
 
-	dprintf(("OS2: WM_ERASEBACKGROUND %x", hwnd));
+    	dprintf(("OS2: WM_ERASEBACKGROUND %x", hwnd));
         hps = WinGetPS(hwnd);
-        if(win32wnd->MsgEraseBackGround((ULONG)hps))
+        if(!win32wnd->MsgEraseBackGround((ULONG)hps))
         {
                 /*
                  * Return TRUE to request PM to paint the window background
@@ -216,7 +216,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     {
      SWP swp;
 
-	dprintf(("OS2: WM_SIZE %x", hwnd));
+    	dprintf(("OS2: WM_SIZE %x", hwnd));
         rc = WinQueryWindowPos(hwnd, &swp);
         if(rc == FALSE) {
                 dprintf(("WM_SIZE: WinQueryWindowPos failed!"));
@@ -235,7 +235,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     {
       HWND hwndActivate = (HWND)mp1;
 
-	dprintf(("OS2: WM_ACTIVATE %x", hwnd));
+    	dprintf(("OS2: WM_ACTIVATE %x", hwnd));
         if(WinQueryWindowULong(hwndActivate, OFFSET_WIN32PM_MAGIC) != WIN32PM_MAGIC) {
                 //another (non-win32) application's window
                 //set to NULL (allowed according to win32 SDK) to avoid problems
@@ -247,13 +247,14 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         break;
     }
     case WM_FOCUSCHANGE:
-        break;
+    	dprintf(("OS2: WM_FOCUSCHANGE %x", hwnd));
+        goto RunDefWndProc;
 
     case WM_SETFOCUS:
     {
       HWND hwndFocus = (HWND)mp1;
 
-	dprintf(("OS2: WM_SETFOCUS %x", hwnd));
+    	dprintf(("OS2: WM_SETFOCUS %x", hwnd));
         if(WinQueryWindowULong(hwndFocus, OFFSET_WIN32PM_MAGIC) != WIN32PM_MAGIC) {
                 //another (non-win32) application's window
                 //set to NULL (allowed according to win32 SDK) to avoid problems
@@ -272,106 +273,135 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     //Mouse messages
     //**************************************************************************
     case WM_BUTTON1DOWN:
-        if(win32wnd->MsgButton(BUTTON_LEFTDOWN, (*(POINTS *)&mp1).x, (*(POINTS *)&mp1).y)) {
+    	dprintf(("OS2: WM_BUTTON1DOWN %x", hwnd));
+        if(win32wnd->MsgButton(BUTTON_LEFTDOWN, (*(POINTS *)&mp1).x, MapOS2ToWin32Y(hwnd, (*(POINTS *)&mp1).y))) {
                 goto RunDefWndProc;
         }
         break;
     case WM_BUTTON1UP:
-        if(win32wnd->MsgButton(BUTTON_LEFTUP, (*(POINTS *)&mp1).x, (*(POINTS *)&mp1).y)) {
+    	dprintf(("OS2: WM_BUTTON1UP %x", hwnd));
+        if(win32wnd->MsgButton(BUTTON_LEFTUP, (*(POINTS *)&mp1).x, MapOS2ToWin32Y(hwnd, (*(POINTS *)&mp1).y))) {
                 goto RunDefWndProc;
         }
         break;
     case WM_BUTTON1DBLCLK:
-        if(win32wnd->MsgButton(BUTTON_LEFTDBLCLICK, (*(POINTS *)&mp1).x, (*(POINTS *)&mp1).y)) {
+        if(win32wnd->MsgButton(BUTTON_LEFTDBLCLICK, (*(POINTS *)&mp1).x, MapOS2ToWin32Y(hwnd, (*(POINTS *)&mp1).y))) {
                 goto RunDefWndProc;
         }
         break;
     case WM_BUTTON2DOWN:
-        if(win32wnd->MsgButton(BUTTON_RIGHTDOWN, (*(POINTS *)&mp1).x, (*(POINTS *)&mp1).y)) {
+        if(win32wnd->MsgButton(BUTTON_RIGHTDOWN, (*(POINTS *)&mp1).x, MapOS2ToWin32Y(hwnd, (*(POINTS *)&mp1).y))) {
                 goto RunDefWndProc;
         }
         break;
     case WM_BUTTON2UP:
-        if(win32wnd->MsgButton(BUTTON_RIGHTUP, (*(POINTS *)&mp1).x, (*(POINTS *)&mp1).y)) {
+        if(win32wnd->MsgButton(BUTTON_RIGHTUP, (*(POINTS *)&mp1).x,MapOS2ToWin32Y(hwnd, (*(POINTS *)&mp1).y))) {
                 goto RunDefWndProc;
         }
         break;
     case WM_BUTTON2DBLCLK:
-        if(win32wnd->MsgButton(BUTTON_RIGHTDBLCLICK, (*(POINTS *)&mp1).x, (*(POINTS *)&mp1).y)) {
+        if(win32wnd->MsgButton(BUTTON_RIGHTDBLCLICK, (*(POINTS *)&mp1).x,MapOS2ToWin32Y(hwnd, (*(POINTS *)&mp1).y))) {
                 goto RunDefWndProc;
         }
         break;
+    case WM_BUTTON3DOWN:
+        if(win32wnd->MsgButton(BUTTON_MIDDLEDOWN, (*(POINTS *)&mp1).x, MapOS2ToWin32Y(hwnd, (*(POINTS *)&mp1).y))) {
+                goto RunDefWndProc;
+        }
+        break;
+    case WM_BUTTON3UP:
+        if(win32wnd->MsgButton(BUTTON_MIDDLEUP, (*(POINTS *)&mp1).x,MapOS2ToWin32Y(hwnd, (*(POINTS *)&mp1).y))) {
+                goto RunDefWndProc;
+        }
+        break;
+    case WM_BUTTON3DBLCLK:
+        if(win32wnd->MsgButton(BUTTON_MIDDLEDBLCLICK, (*(POINTS *)&mp1).x,MapOS2ToWin32Y(hwnd, (*(POINTS *)&mp1).y))) {
+                goto RunDefWndProc;
+        }
+        break;
+
     case WM_BUTTON2MOTIONSTART:
     case WM_BUTTON2MOTIONEND:
     case WM_BUTTON2CLICK:
     case WM_BUTTON1MOTIONSTART:
     case WM_BUTTON1MOTIONEND:
     case WM_BUTTON1CLICK:
-    case WM_BUTTON3DOWN:
-    case WM_BUTTON3UP:
-    case WM_BUTTON3DBLCLK:
     case WM_BUTTON3MOTIONSTART:
     case WM_BUTTON3MOTIONEND:
     case WM_BUTTON3CLICK:
-        break;
+        goto RunDefWndProc;
 
     case WM_MOUSEMOVE:
+    {
+		ULONG keystate = 0;
+		if(WinGetKeyState(HWND_DESKTOP, VK_BUTTON1))
+			keystate |= WMMOVE_LBUTTON;
+		if(WinGetKeyState(HWND_DESKTOP, VK_BUTTON2))
+			keystate |= WMMOVE_MBUTTON;
+		if(WinGetKeyState(HWND_DESKTOP, VK_BUTTON3))
+			keystate |= WMMOVE_RBUTTON;
+		if(WinGetKeyState(HWND_DESKTOP, VK_SHIFT))
+			keystate |= WMMOVE_SHIFT;
+		if(WinGetKeyState(HWND_DESKTOP, VK_CTRL))
+			keystate |= WMMOVE_CTRL;
+			
+        if(!win32wnd->MsgMouseMove(keystate, (*(POINTS *)&mp1).x, MapOS2ToWin32Y(hwnd, (*(POINTS *)&mp1).y))) {
+                goto RunDefWndProc;
+        }
         break;
+    }
 
     //**************************************************************************
     //Slider messages
     //**************************************************************************
     case WM_VSCROLL:
-        break;
     case WM_HSCROLL:
-        break;
 
     case WM_CONTROL:
-        break;
 
     case WM_COMMAND:
     case WM_SYSCOMMAND:
-        break;
 
     case WM_CHAR:
-        break;
 
     case WM_INITMENU:
     case WM_MENUSELECT:
     case WM_MENUEND:
     case WM_NEXTMENU:
-        break;
 
     case WM_TIMER:
-        break;
-
+    	goto RunDefWndProc;
+		
     case WM_SETWINDOWPARAMS:
     {
       WNDPARAMS *wndParams = (WNDPARAMS *)mp1;
 
-	dprintf(("OS2: WM_SETWINDOWPARAMS %x", hwnd));
-	if(wndParams->fsStatus & WPM_TEXT) {
-	        if(win32wnd->MsgSetText(wndParams->pszText, wndParams->cchText)) {
-        	        goto RunDefWndProc;
-        	}
-	}
-	goto RunDefWndProc;
+    	dprintf(("OS2: WM_SETWINDOWPARAMS %x", hwnd));
+    	if(wndParams->fsStatus & WPM_TEXT) {
+            if(win32wnd->MsgSetText(wndParams->pszText, wndParams->cchText)) {
+                    goto RunDefWndProc;
+            }
+    	}
+    	goto RunDefWndProc;
     }
 
     case WM_PAINT:
-	dprintf(("OS2: WM_PAINT %x", hwnd));
+    	dprintf(("OS2: WM_PAINT %x", hwnd));
         if(win32wnd->MsgPaint(0, 0)) {
                 goto RunDefWndProc;
         }
         break;
 
+    case WM_HITTEST:
+        if(win32wnd->MsgHitTest((*(POINTS *)&mp1).x, MapOS2ToWin32Y(hwnd, (*(POINTS *)&mp1).y))) {
+                goto RunDefWndProc;
+        }
+    	break;
+    	
     case WM_SYSCOLORCHANGE:
     case WM_SYSVALUECHANGED:
-        break;
-
     case WM_CALCVALIDRECTS:
     case WM_QUERYWINDOWPARAMS:
-    case WM_HITTEST:
     case WM_SETSELECTION:
     case WM_PPAINT:
     case WM_PSETFOCUS:
@@ -390,9 +420,8 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
     case WM_MATCHMNEMONIC:
     case WM_SAVEAPPLICATION:
     case WM_SEMANTICEVENT:
-        break;
     default:
-	dprintf(("OS2: RunDefWndProc msg %x for %x", msg, hwnd));
+    	dprintf(("OS2: RunDefWndProc msg %x for %x", msg, hwnd));
         RestoreOS2TIB();
         return WinDefWindowProc( hwnd, msg, mp1, mp2 );
   }
