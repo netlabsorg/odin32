@@ -1,4 +1,4 @@
-/* $Id: wsock32const.h,v 1.3 1999-10-25 23:17:20 phaller Exp $ */
+/* $Id: wsock32const.h,v 1.4 1999-11-10 16:36:16 phaller Exp $ */
 
 /* WSOCK32.H--definitions & conversions for Odin's wsock32.dll.
  * Unused/unneeded Microsoft declarations removed.
@@ -14,6 +14,12 @@
 
 #ifndef _WINSOCK32CONST_
 #define _WINSOCK32CONST_
+
+
+/* Microsoft Windows Extension function prototypes */
+void   WIN32API     WSASetLastError(int iError);
+int    WIN32API     WSAGetLastError(void);
+
 
 /*
  * Definitions related to sockets: types, address families, options,

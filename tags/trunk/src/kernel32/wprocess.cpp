@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.47 1999-11-10 14:16:01 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.48 1999-11-10 16:38:36 phaller Exp $ */
 
 /*
  * Win32 process functions
@@ -131,6 +131,7 @@ TEB *InitializeTIB(BOOL fMainThread)
    thdb->exit_code       = 0x103; /* STILL_ACTIVE */
    thdb->teb_sel         = tibsel;
    thdb->OrgTIBSel       = GetFS();
+   thdb->pWsockData      = NULL;
 
    if(OSLibGetPIB(PIB_TASKTYPE) == TASKTYPE_PM)
    {
