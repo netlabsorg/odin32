@@ -1,4 +1,4 @@
-/* $Id: typelib.cpp,v 1.19 2001-05-03 18:18:53 sandervl Exp $ */
+/* $Id: typelib.cpp,v 1.20 2001-05-30 17:43:39 sandervl Exp $ */
 /* 
  * ITypelib interface
  * 
@@ -247,9 +247,91 @@ HRESULT WINAPI RegisterTypeLib(
     OLECHAR *		szHelpDir)  	/* [in] dir to the helpfile for the library,
 							 may be NULL*/
 {
-    dprintfGlobal(("OLEAUT32: RegisterTypeLib() - stub\n"));
+    HRESULT res;
+    TLIBATTR *attr;
+    OLECHAR guid[80];
+    LPSTR guidA;
+    CHAR keyName[120];
+    HKEY key, subKey;
 
-    return S_OK;	/* FIXME: pretend everything is OK */
+#ifdef __WIN32OS2__
+    dprintfGlobal(("OLEAUT32: RegisterTypeLib() %x %ls %ls", ptlib, szFullPath, szHelpDir));
+#endif
+
+    if (ptlib == NULL || szFullPath == NULL)
+        return E_INVALIDARG;
+
+    if (!SUCCEEDED(ITypeLib_GetLibAttr(ptlib, &attr)))
+        return E_FAIL;
+
+    StringFromGUID2(&attr->guid, guid, 80);
+    guidA = HEAP_strdupWtoA(GetProcessHeap(), 0, guid);
+#ifdef __WIN32OS2__
+    sprintf(keyName, "SOFTWARE\\Classes\\TypeLib\\%s\\%x.%x",
+            guidA, attr->wMajorVerNum, attr->wMinorVerNum);
+#else
+    snprintf(keyName, sizeof(keyName), "TypeLib\\%s\\%x.%x",
+             guidA, attr->wMajorVerNum, attr->wMinorVerNum);
+#endif
+    HeapFree(GetProcessHeap(), 0, guidA);
+
+    res = S_OK;
+#ifdef __WIN32OS2__
+    if (RegCreateKeyExA(HKEY_LOCAL_MACHINE, keyName, 0, NULL, 0,
+#else
+    if (RegCreateKeyExA(HKEY_CLASSES_ROOT, keyName, 0, NULL, 0,
+#endif
+        KEY_WRITE, NULL, &key, NULL) == ERROR_SUCCESS)
+    {
+        LPOLESTR doc;
+
+        if (SUCCEEDED(ITypeLib_GetDocumentation(ptlib, -1, NULL, &doc, NULL, NULL)))
+        {
+            if (RegSetValueExW(key, NULL, 0, REG_SZ,
+                (BYTE *)doc, lstrlenW(doc) * sizeof(OLECHAR)) != ERROR_SUCCESS)
+                res = E_FAIL;
+
+            SysFreeString(doc);
+        }
+        else
+            res = E_FAIL;
+
+        /* FIXME: This *seems* to be 0 always, not sure though */
+        if (res == S_OK && RegCreateKeyExA(key, "0\\win32", 0, NULL, 0,
+            KEY_WRITE, NULL, &subKey, NULL) == ERROR_SUCCESS)
+        {
+            if (RegSetValueExW(subKey, NULL, 0, REG_SZ,
+                (BYTE *)szFullPath, lstrlenW(szFullPath) * sizeof(OLECHAR)) != ERROR_SUCCESS)
+                res = E_FAIL;
+
+            RegCloseKey(subKey);
+        }
+        else
+            res = E_FAIL;
+
+        if (res == S_OK && RegCreateKeyExA(key, "FLAGS", 0, NULL, 0,
+            KEY_WRITE, NULL, &subKey, NULL) == ERROR_SUCCESS)
+        {
+            CHAR buf[20];
+            /* FIXME: is %u correct? */
+#ifdef __WIN32OS2__
+            sprintf(buf, "%u", attr->wLibFlags);
+            if (RegSetValueExA(subKey, NULL, 0, REG_SZ,
+                (LPBYTE)buf, lstrlenA(buf) + 1) != ERROR_SUCCESS)
+#else
+            snprintf(buf, strlen(buf), "%u", attr->wLibFlags);
+            if (RegSetValueExA(subKey, NULL, 0, REG_SZ,
+                buf, lstrlenA(buf) + 1) != ERROR_SUCCESS)
+#endif
+                res = E_FAIL;
+        }
+        RegCloseKey(key);
+    }
+    else
+        res = E_FAIL;
+
+    ITypeLib_ReleaseTLibAttr(ptlib, attr);
+    return res;
 }
 
 // ----------------------------------------------------------------------
@@ -264,9 +346,19 @@ HRESULT WINAPI UnRegisterTypeLib(
     LCID		lcid,		/* [in] locale id */
     SYSKIND		syskind)
 {
-    dprintfGlobal(("OLEAUT32: UnRegisterTypeLib() - stub"));
+    OLECHAR guid[80];
+    LPSTR guidA;
+    CHAR keyName[120];
+    HKEY key, subKey;
 
-    return S_OK;	/* FIXME: pretend everything is OK */
+    StringFromGUID2(libid, guid, 80);
+    guidA = HEAP_strdupWtoA(GetProcessHeap(), 0, guid);
+    sprintf(keyName, "SOFTWARE\\Classes\\TypeLib\\%s\\%x.%x",
+            guidA, wVerMajor, wVerMinor);
+    RegDeleteKeyA(HKEY_LOCAL_MACHINE, keyName);
+    HeapFree(GetProcessHeap(), 0, guidA);
+
+    return S_OK;
 }
 
 // ======================================================================
