@@ -1,4 +1,4 @@
-/* $Id: windllbase.cpp,v 1.20 2000-10-25 19:47:00 sandervl Exp $ */
+/* $Id: windllbase.cpp,v 1.21 2000-10-30 16:38:54 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
@@ -730,6 +730,18 @@ Win32DllBase *Win32DllBase::findModule(char *dllname, BOOL fRenameFirst)
 
     if(fRenameFirst) {
         renameDll(szDllName, FALSE);
+    }
+    dot = strstr(szDllName, ".");
+    if(dot == NULL) {
+        //if there's no extension or trainling dot, we
+        //assume it's a dll (see Win32 SDK docs)
+        strcat(szDllName, DLL_EXTENSION);
+    }
+    else {
+        if(dot[1] == 0) {
+            //a trailing dot means the module has no extension (SDK docs)
+            *dot = 0;
+        }
     }
 
     dlllistmutex.enter();
