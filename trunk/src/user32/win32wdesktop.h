@@ -1,4 +1,4 @@
-/* $Id: win32wdesktop.h,v 1.6 2000-01-18 20:08:17 sandervl Exp $ */
+/* $Id: win32wdesktop.h,v 1.7 2000-06-07 21:45:52 sandervl Exp $ */
 /*
  * Win32 Desktop Window for OS/2
  *
@@ -23,6 +23,8 @@ public:
 virtual ~Win32Desktop();
 
  virtual BOOL   EnableWindow(BOOL fEnable);
+
+virtual  BOOL   isDesktopWindow();
 
 protected:
 private:

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.198 2000-06-07 14:51:30 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.199 2000-06-07 21:45:50 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1154,6 +1154,12 @@ BOOL Win32BaseWindow::isFrameWindow()
         return TRUE;
 
     return FALSE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32BaseWindow::isDesktopWindow()
+{
+  return FALSE;
 }
 //******************************************************************************
 //******************************************************************************
@@ -2394,17 +2400,24 @@ BOOL Win32BaseWindow::DestroyWindow()
 //******************************************************************************
 Win32BaseWindow *Win32BaseWindow::getParent()
 {
-  Win32BaseWindow *wndparent = (Win32BaseWindow *)ChildWindow::GetParent();
+  Win32BaseWindow *wndparent = (Win32BaseWindow *)ChildWindow::getParentOfChild();
   return ((ULONG)wndparent == (ULONG)windowDesktop) ? NULL : wndparent;
 }
 //******************************************************************************
 //******************************************************************************
 HWND Win32BaseWindow::GetParent()
 {
+  if((!(getStyle() & (WS_POPUP|WS_CHILD)))) {
+  	return 0;
+  }
+
+  Win32BaseWindow *wndparent = (Win32BaseWindow *)ChildWindow::getParentOfChild();
+
   if(getStyle() & WS_CHILD) {
-	if(getParent()) {
-		return getParent()->getWindowHandle();
+	if(wndparent) {
+		return wndparent->getWindowHandle();
 	}
+	dprintf(("WARNING: GetParent: WS_CHILD but no parent!!"));
 	DebugInt3();
 	return 0;
   }
@@ -2416,12 +2429,12 @@ HWND Win32BaseWindow::SetParent(HWND hwndNewParent)
 {
  HWND oldhwnd;
  Win32BaseWindow *newparent;
- Win32BaseWindow *oldparent = (Win32BaseWindow *)ChildWindow::GetParent();
+ Win32BaseWindow *oldparent = (Win32BaseWindow *)ChildWindow::getParentOfChild();
  BOOL fShow = FALSE;
 
    if(oldparent) {
         oldhwnd = oldparent->getWindowHandle();
-        oldparent->RemoveChild(this);
+        oldparent->removeChild(this);
    }
    else oldhwnd = 0;
 
@@ -2433,16 +2446,30 @@ HWND Win32BaseWindow::SetParent(HWND hwndNewParent)
    }
 
    newparent = GetWindowFromHandle(hwndNewParent);
-   if(newparent)
+   if(newparent && !newparent->isDesktopWindow())
    {
         setParent(newparent);
-        getParent()->AddChild(this);
+        getParent()->addChild(this);
         OSLibWinSetParent(getOS2WindowHandle(), getParent()->getOS2WindowHandle());
+        if(!(getStyle() & WS_CHILD))
+        {
+		//TODO: Send WM_STYLECHANGED msg?
+        	setStyle(getStyle() | WS_CHILD);
+        	if(getWindowId())
+                {
+                        DestroyMenu( (HMENU) getWindowId() );
+                        setWindowId(0);
+                }
+        }
    }
    else {
         setParent(windowDesktop);
-        windowDesktop->AddChild(this);
+        windowDesktop->addChild(this);
         OSLibWinSetParent(getOS2WindowHandle(), OSLIB_HWND_DESKTOP);
+	
+	//TODO: Send WM_STYLECHANGED msg?
+       	setStyle(getStyle() & ~WS_CHILD);
+        setWindowId(0);
    }
    /* SetParent additionally needs to make hwndChild the topmost window
       in the x-order and send the expected WM_WINDOWPOSCHANGING and

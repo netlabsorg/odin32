@@ -1,4 +1,4 @@
-/* $Id: win32wndchild.cpp,v 1.5 2000-02-16 14:28:25 sandervl Exp $ */
+/* $Id: win32wndchild.cpp,v 1.6 2000-06-07 21:45:52 sandervl Exp $ */
 /*
  * Win32 Child/Parent window class for OS/2
  *
@@ -29,7 +29,7 @@ ChildWindow::ChildWindow()
 ChildWindow::~ChildWindow()
 {
   if(parent) {
-	parent->RemoveChild(this);
+	parent->removeChild(this);
   }
 //SvL: PM sends WM_DESTROY for all the children
 #if 0
@@ -42,7 +42,7 @@ ChildWindow::~ChildWindow()
 //******************************************************************************
 //FIFO insertion
 //******************************************************************************
-BOOL ChildWindow::AddChild(ChildWindow *child)
+BOOL ChildWindow::addChild(ChildWindow *child)
 {
  ChildWindow *curchild;
 
@@ -66,7 +66,7 @@ BOOL ChildWindow::AddChild(ChildWindow *child)
 //******************************************************************************
 //Remove child from linked list. Doesn't delete it!
 //******************************************************************************
-BOOL ChildWindow::RemoveChild(ChildWindow *child)
+BOOL ChildWindow::removeChild(ChildWindow *child)
 {
  ChildWindow *curchild = children;
 
@@ -98,7 +98,7 @@ BOOL ChildWindow::RemoveChild(ChildWindow *child)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL ChildWindow::DestroyChildren()
+BOOL ChildWindow::destroyChildren()
 {
    while(children) {
 	delete children;	//child dtor removes itself from the linked list
