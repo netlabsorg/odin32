@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.20 2001-09-05 12:53:52 bird Exp $
+/* $Id: initterm.cpp,v 1.21 2002-07-29 11:26:49 sandervl Exp $
  *
  * DLL entry point
  *
@@ -33,11 +33,22 @@
 #include <win32type.h>
 #include <winconst.h>
 #include <odinlx.h>
-#include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
-#define DBG_LOCALLOG    DBG_initterm
-#include "dbglocal.h"
+#include <dbglog.h>
 #include "region.h"
 #include <initdll.h>
+#include <exitlist.h>
+
+#define DBG_LOCALLOG    DBG_initterm
+#include "dbglocal.h"
+
+
+/*-------------------------------------------------------------------*/
+/* A clean up routine registered with DosExitList must be used if    */
+/* runtime calls are required and the runtime is dynamically linked. */
+/* This will guarantee that this clean up routine is run before the  */
+/* library DLL is terminated.                                        */
+/*-------------------------------------------------------------------*/
+static void APIENTRY cleanup(ULONG reason);
 
 /****************************************************************************/
 /* _DLL_InitTerm is the function that gets called by the operating system   */
@@ -62,6 +73,15 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
       case 0 :
          ctordtorInit();
 
+         /*******************************************************************/
+         /* A DosExitList routine must be used to clean up if runtime calls */
+         /* are required and the runtime is dynamically linked.             */
+         /*******************************************************************/
+
+         rc = DosExitList(EXITLIST_GDI32|EXLST_ADD, cleanup);
+         if (rc)
+            return 0UL;
+
          return inittermGdi32(hModule, ulFlag);
 
       case 1 :
@@ -75,6 +95,16 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
    /* A non-zero value must be returned to indicate success.  */
    /***********************************************************/
    return 1UL;
+}
+//******************************************************************************
+//******************************************************************************
+static void APIENTRY cleanup(ULONG ulReason)
+{
+    dprintf(("GDI32 exit"));
+    ctordtorTerm();
+
+    DosExitList(EXLST_EXIT, cleanup);
+    return ;
 }
 //******************************************************************************
 //******************************************************************************

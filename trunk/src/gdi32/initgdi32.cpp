@@ -1,4 +1,4 @@
-/* $Id: initgdi32.cpp,v 1.12 2002-03-18 13:18:44 sandervl Exp $
+/* $Id: initgdi32.cpp,v 1.13 2002-07-29 11:26:48 sandervl Exp $
  *
  * DLL entry point
  *
@@ -55,16 +55,15 @@ BOOL WINAPI GdiLibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
    switch (fdwReason)
    {
    case DLL_PROCESS_ATTACH:
-    return TRUE;
+       return TRUE;
 
    case DLL_THREAD_ATTACH:
    case DLL_THREAD_DETACH:
-    return TRUE;
+       return TRUE;
 
    case DLL_PROCESS_DETACH:
-    STATS_DumpStatsGDI32();
-    ctordtorTerm();
-    return TRUE;
+       STATS_DumpStatsGDI32();
+       return TRUE;
    }
    return FALSE;
 }
