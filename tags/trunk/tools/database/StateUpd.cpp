@@ -1,4 +1,4 @@
-/* $Id: StateUpd.cpp,v 1.16 2000-02-14 17:29:25 bird Exp $
+/* $Id: StateUpd.cpp,v 1.17 2000-02-14 17:36:19 bird Exp $
  *
  * StateUpd - Scans source files for API functions and imports data on them.
  *
@@ -289,7 +289,7 @@ int main(int argc, char **argv)
         }
 
         /* write status to log */
-        if (options.fIntegrityOnly)
+        if (!options.fIntegrityOnly)
         {
             ul2 = dbGetNumberOfUpdatedFunction(options.lDllRefcode);
             ul1 = dbCountFunctionInDll(options.lDllRefcode, FALSE);
@@ -316,7 +316,7 @@ int main(int argc, char **argv)
         dbDisconnect();
 
         /* warn if error during processing. */
-        if (options.fIntegrityOnly)
+        if (!options.fIntegrityOnly)
         {
             fprintf(stdout,"Number of function in this DLL:        %4ld (%ld)\n", ul1, ul0);
             fprintf(stdout,"Number of successfully processed APIs: %4ld (%ld)\n", (long)(0x0000FFFF & ulRc), ul2);
@@ -930,10 +930,10 @@ static unsigned long analyseFnDcl2(PFNDESC pFnDesc, char **papszLines, int i, in
         if (strlen(pszEnd) > 128)
         {
             /* FIXME LATER! Some constructors calling baseclass constructors "breaks" this rule. Win32MDIChildWindow in /src/user32/win32wmdichild.cpp for example. */
-            fprintf(phSignal,"Fatal error? return statement is too larget. len=%d", strlen(pszEnd));
-            fprintf(phLog,   "Fatal error? return statement is too larget. len=%d", strlen(pszEnd));
+            fprintf(phSignal,"Fatal error? return statement is too larget. len=%d\n", strlen(pszEnd));
+            fprintf(phLog,   "Fatal error? return statement is too larget. len=%d\n", strlen(pszEnd));
             if (strlen(pszEnd) > 512)
-                fprintf(stderr,  "Fatal error? return statement is too larget. len=%d", strlen(pszEnd));
+                fprintf(stderr,  "Fatal error? return statement is too larget. len=%d\n", strlen(pszEnd));
             fflush(phLog);
             fflush(phSignal);
             fflush(stderr);
