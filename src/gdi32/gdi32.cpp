@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.23 1999-12-04 13:53:12 hugh Exp $ */
+/* $Id: gdi32.cpp,v 1.24 1999-12-05 00:30:57 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -158,7 +158,7 @@ HGDIOBJ WIN32API GetStockObject(int arg1)
     {
         case DEFAULT_GUI_FONT:
                 if(NULL==hFntDefaultGui)
-                  hFntDefaultGui = CreateFontA( 0, 0, 0, 0, FW_MEDIUM, FALSE,
+                  hFntDefaultGui = CreateFontA( 9, 0, 0, 0, FW_MEDIUM, FALSE,
                                                 FALSE, FALSE, ANSI_CHARSET,
                                                 OUT_DEFAULT_PRECIS,
                                                 CLIP_DEFAULT_PRECIS,
