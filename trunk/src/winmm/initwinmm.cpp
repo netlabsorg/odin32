@@ -53,7 +53,7 @@ extern "C" {
 void IRTMidiShutdown();  // IRTMidi shutdown routine
 
  //Win32 resource table (produced by wrc)
- extern DWORD _Resource_PEResTab;
+ extern DWORD winmm_PEResTab;
 }
 static HMODULE dllHandle = 0;
 
@@ -119,7 +119,7 @@ ULONG APIENTRY inittermWinmm(ULONG hModule, ULONG ulFlag)
     case 0 :
         ParseLogStatusWINMM();
 
-        dllHandle = RegisterLxDll(hModule, LibMainWinmm, (PVOID)&_Resource_PEResTab);
+        dllHandle = RegisterLxDll(hModule, LibMainWinmm, (PVOID)&winmm_PEResTab);
         if(dllHandle == 0)
             return 0UL;/* Error */
 

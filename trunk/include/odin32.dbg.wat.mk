@@ -1,4 +1,4 @@
-# $Id: odin32.dbg.wat.mk,v 1.5 2001-04-02 09:54:45 sandervl Exp $
+# $Id: odin32.dbg.wat.mk,v 1.6 2001-07-29 18:58:53 sandervl Exp $
 
 #
 # Odin32 API
@@ -50,6 +50,9 @@ ASFLAGS          = -Mb -Sc -Sv:ALP +Od -D:DEBUG
 IMPLIBFLAGS      = /nologo
 ILIBFLAGS        = /quiet /nologo
 RCFLAGS          = -s -I. -I$(%WATCOM)\include -D__WIN32OS2__
+!ifdef WRC_PREFIX_RESOURCE
+RCFLAGS         += -p $(TARGET)
+!endif
 OS2RCFLAGS       = -r -n
 OS2RCLFLAGS      = -x2 -n
 

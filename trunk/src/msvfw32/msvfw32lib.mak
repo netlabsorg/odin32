@@ -1,4 +1,4 @@
-# $Id: msvfw32lib.mak,v 1.1 2001-07-20 15:36:29 sandervl Exp $
+# $Id: msvfw32lib.mak,v 1.2 2001-07-29 18:59:14 sandervl Exp $
 
 #
 # Odin32 API
@@ -32,6 +32,8 @@ CDEFINES    = $(CDEFINES) -DINVERT
 #
 OBJS = \
 $(OBJDIR)\msvfw32.obj \
+$(OBJDIR)\drawdib.obj \
+$(OBJDIR)\msvideo_main.obj \
 $(OBJDIR)\msvfw32rsrc.obj \
 
 #

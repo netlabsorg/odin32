@@ -1,4 +1,4 @@
-/* $Id: registry.cpp,v 1.11 2001-07-16 09:25:16 sandervl Exp $ */
+/* $Id: registry.cpp,v 1.12 2001-07-29 19:00:31 sandervl Exp $ */
 
 /*
  * Win32 registry API functions for OS/2
@@ -49,6 +49,11 @@ ODINDEBUGCHANNEL(ADVAPI32-REGISTRY)
 //#define DEBUG_LOCAL 1
 
 
+static HKEY hKeyClassesRoot  = HKEY_CLASSES_ROOT_O32;
+static HKEY hKeyCurrentUser  = HKEY_CURRENT_USER_O32;
+static HKEY hKeyLocalMachine = HKEY_LOCAL_MACHINE_O32;
+static HKEY hKeyUsers        = HKEY_USERS_O32;
+
 /*****************************************************************************
  * Name      : Convert Key
  * Purpose   : convert key handle values between win32 and os/2
@@ -63,16 +68,34 @@ ODINDEBUGCHANNEL(ADVAPI32-REGISTRY)
 
 static HKEY ConvertKey(HKEY winkey)
 {
-  switch((int)winkey)
+  switch((DWORD)winkey)
   {
-    case HKEY_CLASSES_ROOT:   return HKEY_CLASSES_ROOT_O32;
-    case HKEY_CURRENT_USER:   return HKEY_CURRENT_USER_O32;
-    case HKEY_LOCAL_MACHINE:  return HKEY_LOCAL_MACHINE_O32;
-    case HKEY_USERS:          return HKEY_USERS_O32;
+    case HKEY_CLASSES_ROOT:   return hKeyClassesRoot;
+    case HKEY_CURRENT_USER:   return hKeyCurrentUser;
+    case HKEY_LOCAL_MACHINE:  return hKeyLocalMachine;
+    case HKEY_USERS:          return hKeyUsers;
   }
   return(winkey);
 }
 
+void WIN32API SetRegistryRootKey(HKEY hRootkey, HKEY hKey)
+{
+  switch((DWORD)hRootkey)
+  {
+    case HKEY_CLASSES_ROOT:   
+        hKeyClassesRoot = hKey;
+        break;
+    case HKEY_CURRENT_USER:
+        hKeyCurrentUser = hKey;
+        break;
+    case HKEY_LOCAL_MACHINE:
+        hKeyLocalMachine = hKey;
+        break;
+    case HKEY_USERS:
+        hKeyUsers = hKey;
+        break;
+  }
+}
 
 /*****************************************************************************
  * Name      :

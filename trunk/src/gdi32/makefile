@@ -1,10 +1,11 @@
-# $Id: makefile,v 1.37 2001-07-20 15:35:57 sandervl Exp $
+# $Id: makefile,v 1.38 2001-07-29 18:59:41 sandervl Exp $
 
 #
 # Odin32 API
 #
 #       gdi32.dll makefile
 #
+WRC_PREFIX_RESOURCE=1
 
 
 #
@@ -16,8 +17,11 @@
 #
 # Overrides.
 #
+!ifndef WAT
 CDEFINES    = $(CDEFINES) -DINVERT
-
+!else
+CDEFINES   += -DINVERT
+!endif
 
 #
 # Object files. Prefix with OBJDIR and one space before the '\'.
@@ -65,7 +69,6 @@ $(RTLLIB_O)
 # Target name - name of the dll without extention and path.
 #
 TARGET = gdi32
-
 
 #
 # Includes the common rules.

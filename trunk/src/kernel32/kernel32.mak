@@ -1,10 +1,11 @@
-# $Id: kernel32.mak,v 1.8 2001-07-20 15:33:30 sandervl Exp $
+# $Id: kernel32.mak,v 1.9 2001-07-29 19:00:31 sandervl Exp $
 
 #
 # Odin32 API
 #
 #       kernel32.dll makefile
 #
+WRC_PREFIX_RESOURCE=1
 
 #
 # Alternate makefile name.
@@ -19,7 +20,14 @@ MAKEFILE=kernel32.mak
 #
 # Overrides.
 #
-##CDEFINES    = $(CDEFINES) -DTEST_BUILTIN
+#
+# Overrides.
+#
+!ifndef WAT
+RCFLAGS     = $(RCFLAGS) -p $(TARGET)
+!else
+RCFLAGS    += -p $(TARGET)
+!endif
 
 
 #
@@ -138,8 +146,7 @@ $(OBJDIR)\kernelrsrc.obj
 #
 LIBS = \
 $(ODIN32_LIB)/$(ODINCRT).lib \
-##$(ODIN32_LIB)\wgss.lib \
-$(ODIN32_LIB)\PMWINX.LIB \
+$(ODIN32_LIB)\wgss50.LIB \
 $(ODIN32_LIB)\LIBULS.LIB \
 $(ODIN32_LIB)\LIBCONV.LIB \
 $(ODIN32_LIB)\WIN32K.LIB \

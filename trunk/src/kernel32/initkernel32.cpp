@@ -61,7 +61,7 @@ PVOID   SYSTEM _O32_GetEnvironmentStrings( VOID );
 
 extern "C" {
  //Win32 resource table (produced by wrc)
- extern DWORD _Resource_PEResTab;
+ extern DWORD kernel32_PEResTab;
 }
 
 //Global DLL Data
@@ -138,7 +138,7 @@ ULONG APIENTRY inittermKernel32(ULONG hModule, ULONG ulFlag)
                 return 0UL;
 
             PROFILE_LoadOdinIni();
-            dllHandle = RegisterLxDll(hModule, 0, (PVOID)&_Resource_PEResTab);
+            dllHandle = RegisterLxDll(hModule, 0, (PVOID)&kernel32_PEResTab);
             if (dllHandle == 0)
                 return 0UL;
 
@@ -240,8 +240,8 @@ ULONG APIENTRY InitializeKernel32()
 {
     HMODULE hModule;
 
-//    DosQueryModuleHandle("WGSS50", &hModule);
-//    O32__DLL_InitTerm(hModule, 0);
+    DosQueryModuleHandle("WGSS50", &hModule);
+    O32__DLL_InitTerm(hModule, 0);
     DosQueryModuleHandle("KERNEL32", &hModule);
     return inittermKernel32(hModule, 0);
 }

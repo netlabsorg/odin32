@@ -40,7 +40,7 @@
 
 extern "C" {
  //Win32 resource table (produced by wrc)
- extern DWORD _Resource_PEResTab;
+ extern DWORD wsock32_PEResTab;
 }
 static HMODULE dllHandle = 0;
 
@@ -67,7 +67,7 @@ ULONG APIENTRY inittermWsock32(ULONG hModule, ULONG ulFlag)
       case 0 :
          ParseLogStatusWSOCK32();
 
-	 dllHandle = RegisterLxDll(hModule, NULL, (PVOID)&_Resource_PEResTab);
+	 dllHandle = RegisterLxDll(hModule, NULL, (PVOID)&wsock32_PEResTab);
          if(dllHandle == 0) 
 		return 0UL;
 

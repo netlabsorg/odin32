@@ -38,7 +38,7 @@
 
 extern "C" {
  //Win32 resource table (produced by wrc)
- extern DWORD _Resource_PEResTab;
+ extern DWORD rpcrt4_PEResTab;
 }
 static HMODULE dllHandle = 0;
 
@@ -63,7 +63,7 @@ ULONG APIENTRY inittermRpcrt4(unsigned long hModule, unsigned long ulFlag)
 
    switch (ulFlag) {
       case 0 :
-	 dllHandle = RegisterLxDll(hModule, NULL, (PVOID)&_Resource_PEResTab);
+	 dllHandle = RegisterLxDll(hModule, NULL, (PVOID)&rpcrt4_PEResTab);
          if(dllHandle == 0) 
 		return 0UL;
 

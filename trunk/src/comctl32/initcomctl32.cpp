@@ -37,7 +37,7 @@
 
 extern "C" {
  //Win32 resource table (produced by wrc)
- extern DWORD _Resource_PEResTab;
+ extern DWORD comctl32_PEResTab;
 }
 
 static HMODULE dllHandle = 0;
@@ -84,7 +84,7 @@ ULONG APIENTRY inittermComctl32(unsigned long hModule, unsigned long ulFlag)
 
    switch (ulFlag) {
       case 0 :
-	 dllHandle = RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab,
+	 dllHandle = RegisterLxDll(hModule, LibMain, (PVOID)&comctl32_PEResTab,
                                    COMCTL32_MAJORIMAGE_VERSION, COMCTL32_MINORIMAGE_VERSION,
                                    IMAGE_SUBSYSTEM_WINDOWS_GUI);
          if(dllHandle == 0) 

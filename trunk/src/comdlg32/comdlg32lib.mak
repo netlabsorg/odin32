@@ -1,4 +1,4 @@
-# $Id: comdlg32lib.mak,v 1.1 2001-07-20 15:36:49 sandervl Exp $
+# $Id: comdlg32lib.mak,v 1.2 2001-07-29 19:00:13 sandervl Exp $
 
 #
 # Odin32 API
@@ -13,7 +13,7 @@
 LIBTARGET = 1
 EXETARGET = 1
 PUBLICLIB = 1
-
+WRC_PREFIX_RESOURCE=1
 
 #
 # Compiler, tools, and interference rules.

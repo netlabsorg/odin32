@@ -30,7 +30,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <odin.h>
+#include <win32api.h>
 #include <win32type.h>
+#include <odinapi.h>
 #include <winconst.h>
 #include <odinlx.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
@@ -38,6 +40,10 @@
 #include <exitlist.h>
 
 BOOL  fVersionWarp3 = FALSE;
+static HKEY hKeyClassesRoot  = 0;
+static HKEY hKeyCurrentUser  = 0;
+static HKEY hKeyLocalMachine = 0;
+static HKEY hKeyUsers        = 0;
 
 #ifdef __IBMCPP__
 extern "C" {
@@ -50,6 +56,7 @@ extern "C" {
 /*-------------------------------------------------------------------*/
 static void APIENTRY cleanup(ULONG reason);
 }
+
 /****************************************************************************/
 /* _DLL_InitTerm is the function that gets called by the operating system   */
 /* loader when it loads and frees this DLL for each process that accesses   */
@@ -99,38 +106,69 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
 
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
 
+         if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"Software\\XXOdin32\\REGROOT_HKEY_ClassesRoot",&hKeyClassesRoot)!=ERROR_SUCCESS_W) {
+             return 0;
+         }
+         if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"Software\\XXOdin32\\REGROOT_HKEY_CurrentUser",&hKeyCurrentUser)!=ERROR_SUCCESS_W) {
+             return 0;
+         }
+         if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"Software\\XXOdin32\\REGROOT_HKEY_LocalMachine",&hKeyLocalMachine)!=ERROR_SUCCESS_W) {
+             return 0;
+         }
+         if(RegCreateKeyA(HKEY_LOCAL_MACHINE,"Software\\XXOdin32\\REGROOT_HKEY_Users",&hKeyUsers)!=ERROR_SUCCESS_W) {
+             return 0;
+         }
+         SetRegistryRootKey(HKEY_CLASSES_ROOT, hKeyClassesRoot);
+         SetRegistryRootKey(HKEY_CURRENT_USER, hKeyCurrentUser);
+         SetRegistryRootKey(HKEY_LOCAL_MACHINE, hKeyLocalMachine);
+         SetRegistryRootKey(HKEY_USERS, hKeyUsers);
+
+         SetCustomBuildName("KERNEL32.DLL");
          rc = inittermKernel32(hModule, ulFlag);
          if(rc == 0) 
-                return 0UL;
+             return 0UL;
 
+         SetCustomBuildName("USER32.DLL");
          rc = inittermUser32(hModule, ulFlag);
          if(rc == 0) 
                 return 0UL;
 
+         SetCustomBuildName("WSOCK32.DLL");
+         rc = inittermWsock32(hModule, ulFlag);
+         if(rc == 0) 
+                return 0UL;
+
+         SetCustomBuildName("WINMM.DLL");
          rc = inittermWinmm(hModule, ulFlag);
          if(rc == 0) 
                 return 0UL;
 
+         SetCustomBuildName("RPCRT4.DLL");
          rc = inittermRpcrt4(hModule, ulFlag);
          if(rc == 0) 
                 return 0UL;
 
+         SetCustomBuildName("OLE32.DLL");
          rc = inittermOle32(hModule, ulFlag);
          if(rc == 0) 
                 return 0UL;
 
+         SetCustomBuildName("COMCTL32.DLL");
          rc = inittermComctl32(hModule, ulFlag);
          if(rc == 0) 
                 return 0UL;
 
+         SetCustomBuildName("SHELL32.DLL");
          rc = inittermShell32(hModule, ulFlag);
          if(rc == 0) 
                 return 0UL;
 
+         SetCustomBuildName("COMDLG32.DLL");
          rc = inittermComdlg32(hModule, ulFlag);
          if(rc == 0) 
                 return 0UL;
 
+         SetCustomBuildName(NULL);
          break;
       case 1 :
          inittermComdlg32(hModule, ulFlag);
@@ -139,6 +177,7 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
          inittermOle32(hModule, ulFlag);
          inittermRpcrt4(hModule, ulFlag);
          inittermWinmm(hModule, ulFlag);
+         inittermWsock32(hModule, ulFlag);
          inittermUser32(hModule, ulFlag);
          inittermKernel32(hModule, ulFlag);
          break;

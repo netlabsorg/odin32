@@ -58,7 +58,7 @@ static void APIENTRY cleanup(ULONG reason);
 
 extern "C" {
  //Win32 resource table (produced by wrc)
- extern DWORD _Resource_PEResTab;
+ extern DWORD user32_PEResTab;
 }
 DWORD hInstanceUser32 = 0;
 
@@ -88,7 +88,7 @@ ULONG APIENTRY inittermUser32(ULONG hModule, ULONG ulFlag)
 
          InitializeKernel32();
 
-         hInstanceUser32 = RegisterLxDll(hModule, 0, (PVOID)&_Resource_PEResTab,
+         hInstanceUser32 = RegisterLxDll(hModule, 0, (PVOID)&user32_PEResTab,
                                          USER32_MAJORIMAGE_VERSION, USER32_MINORIMAGE_VERSION,
                                          IMAGE_SUBSYSTEM_WINDOWS_GUI);
          if(hInstanceUser32 == 0)

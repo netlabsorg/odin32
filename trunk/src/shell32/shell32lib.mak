@@ -1,10 +1,11 @@
-# $Id: shell32lib.mak,v 1.1 2001-07-20 15:37:22 sandervl Exp $
+# $Id: shell32lib.mak,v 1.2 2001-07-29 19:01:06 sandervl Exp $
 
 #
 # Odin32 API
 #
 #       common.lib makefile
 #
+WRC_PREFIX_RESOURCE=1
 
 
 #

@@ -1,4 +1,4 @@
-/* $Id: winimagelx.cpp,v 1.9 2000-08-11 10:56:19 sandervl Exp $ */
+/* $Id: winimagelx.cpp,v 1.10 2001-07-29 19:00:32 sandervl Exp $ */
 
 /*
  * Win32 LX Image base class
@@ -41,6 +41,8 @@
 #define DBG_LOCALLOG	DBG_winimagelx
 #include "dbglocal.h"
 
+extern char *lpszCustomDllName; //windlllx.cpp
+
 static BYTE dosHeader[] = {
  0x4D, 0x5A, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x0B, 0x00,
  0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x40, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
@@ -65,10 +67,15 @@ Win32LxImage::Win32LxImage(HINSTANCE hInstance, PVOID pResData)
                : Win32ImageBase(hInstance), header(0)
 {
  APIRET rc;
+ char  *name;
 
   szFileName[0] = 0;
 
-  char *name = OSLibGetDllName(hinstance);
+  if(lpszCustomDllName) {
+       name = lpszCustomDllName;
+  }
+  else name = OSLibGetDllName(hinstance);
+
   strcpy(szFileName, name);
   strupr(szFileName);
 

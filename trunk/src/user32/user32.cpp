@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.110 2001-07-28 18:02:50 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.111 2001-07-29 18:59:27 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -375,7 +375,7 @@ BOOL WIN32API MessageBeep( UINT uType)
     switch (uType)
     {
       case 0xFFFFFFFF:
-        OSLibDosBeep(500,50);
+        Beep(500,50);
         return TRUE;
       case MB_ICONASTERISK:
         flStyle = WAOS_NOTE;
