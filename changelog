@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.615 2000-01-06 20:03:58 sandervl Exp $ */
+ /* $Id: changelog,v 1.616 2000-01-07 00:25:58 sandervl Exp $ */
 
  2000-01-06: Sander van Leeuwen <sandervl@xs4all.nl>
 	- ADVAPI32: Implemented StartServiceCtrlDispatcherA/W
@@ -10,6 +10,8 @@
 	- CRTDLL: Fixed CRTDLL__wcsnicmp (use Wine version)
 	- VERSION: Fixed VerQueryValue32A and merged with latest Wine sources
                    (991212) (-> fixes errors in RealPlayer)
+	- USER32: GetMenuStringA fix (return length of string if string pointer
+                  or size parameter == 0)
 
  2000-01-05: Jens Wiessner <wiessnej@rfi.de>
 	- TWAIN_32: Update
