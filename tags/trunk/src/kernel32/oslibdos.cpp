@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.31 2000-06-16 00:04:30 phaller Exp $ */
+/* $Id: oslibdos.cpp,v 1.32 2000-06-25 07:13:28 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -779,6 +779,13 @@ DWORD OSLibDosCreateFile(CHAR *lpszFile,
    else
    if(fuAccess & GENERIC_WRITE_W)
        	openMode |= OPEN_ACCESS_WRITEONLY;
+
+   /* if creating a file, access cannot be readonly! */
+   if (openFlag & OPEN_ACTION_CREATE_IF_NEW &&
+       (!(openMode & OPEN_ACCESS_READWRITE) &&
+        !(openMode & OPEN_ACCESS_WRITEONLY))) {
+        openMode |= OPEN_ACCESS_READWRITE;
+   }
 
    int retry = 0;
    while(retry < 2) 
