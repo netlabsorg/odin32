@@ -1,4 +1,4 @@
-/* $Id: misc.h,v 1.7 1999-09-01 19:12:13 phaller Exp $ */
+/* $Id: misc.h,v 1.8 1999-09-13 16:28:50 phaller Exp $ */
 
 /*
  * Miscellaneous definitions
@@ -56,9 +56,17 @@ typedef unsigned long HMODULE;
 
 
 int  SYSTEM WriteLog(char *tekst, ...);
+
 int  SYSTEM WriteLogError(char *tekst, ...);
+
 void SYSTEM CheckVersion(ULONG version, char *modname);
+
 void SYSTEM CheckVersionFromHMOD(ULONG version, HMODULE hModule);
+
+int  SYSTEM DebugErrorBox(ULONG  iErrorCode,
+                          char*  pszFormat,
+                          ...);
+
 
 #ifdef __cplusplus
         }
