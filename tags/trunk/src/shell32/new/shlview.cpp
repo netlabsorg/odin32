@@ -26,6 +26,7 @@
 #include "wine/obj_extracticon.h"
 #include "wine/obj_dragdrop.h"
 #include "wine/undocshell.h"
+#include "docobj.h"
 #include "shresdef.h"
 #include "spy.h"
 #include "debugtools.h"
