@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.40 2000-01-27 21:48:33 sandervl Exp $
+# $Id: makefile,v 1.41 2000-01-27 21:52:53 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -37,7 +37,7 @@ LIBS = advapi32\advapi32.lib  avifil32\avifil32.lib  capi2032\capi2032.lib    \
        version\version.lib    winmm\winmm.lib        winspool\winspool.lib    \
        wnaspi32\wnaspi32.lib  wnetap32\wnetap32.lib  wsock32\wsock32.lib      \
        wing32\wing32.lib      dplayx\dplayx.lib      wininet\wininet.lib      \
-       opengl\opengl.lib
+       opengl\opengl32.lib
 
 
 all: libs
