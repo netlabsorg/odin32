@@ -1,4 +1,4 @@
-/* $Id: dataobject.cpp,v 1.2 1999-10-05 19:33:37 phaller Exp $ */
+/* $Id: dataobject.cpp,v 1.3 1999-10-07 10:34:46 phaller Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -346,7 +346,11 @@ void IDLList_Destructor(LPIDLLIST THIS)
 }
 
 static UINT WINAPI IDLList_GetState(LPIDLLIST THIS)
-{	TRACE("(%p)->(uStep=%u dpa=%p)\n",THIS, THIS->uStep, THIS->dpa);
+{
+  dprintf(("SHELL32:dataobject:IDLList_GetState((%p)->(uStep=%u dpa=%p)\n",
+           THIS,
+           THIS->uStep,
+           THIS->dpa));
 
 	if (THIS->uStep == 0)
 	{
@@ -357,16 +361,33 @@ static UINT WINAPI IDLList_GetState(LPIDLLIST THIS)
 	}
 	return(State_UnInit);
 }
+
+
 static LPITEMIDLIST WINAPI IDLList_GetElement(LPIDLLIST THIS, UINT nIndex)
-{	TRACE("(%p)->(index=%u)\n",THIS, nIndex);
+{
+  dprintf(("SHELL32:dataobject:IDLList_GetElement((%p)->(index=%u)\n",
+           THIS,
+           nIndex));
+
 	return((LPITEMIDLIST)pDPA_GetPtr(THIS->dpa, nIndex));
 }
+
+
 static UINT WINAPI IDLList_GetCount(LPIDLLIST THIS)
-{	TRACE("(%p)\n",THIS);
+{
+  dprintf(("SHELL32:dataobject:IDLList_GetCount(%p)\n",
+           THIS));
+
 	return(IDLList_GetState(THIS)==State_Init ? DPA_GetPtrCount(THIS->dpa) : 0);
 }
+
+
 static BOOL WINAPI IDLList_StoreItem(LPIDLLIST THIS, LPITEMIDLIST pidl)
-{	TRACE("(%p)->(pidl=%p)\n",THIS, pidl);
+{
+  dprintf(("SHELL32:dataobject:IDLList_StoreItem((%p)->(pidl=%p)\n",
+           THIS,
+           pidl));
+
 	if (pidl)
         { if (IDLList_InitList(THIS) && pDPA_InsertPtr(THIS->dpa, 0x7fff, (LPSTR)pidl)>=0)
 	    return(TRUE);
@@ -375,9 +396,16 @@ static BOOL WINAPI IDLList_StoreItem(LPIDLLIST THIS, LPITEMIDLIST pidl)
         IDLList_CleanList(THIS);
         return(FALSE);
 }
+
+
 static BOOL WINAPI IDLList_AddItems(LPIDLLIST THIS, LPITEMIDLIST *apidl, UINT cidl)
-{	INT i;
-	TRACE("(%p)->(apidl=%p cidl=%u)\n",THIS, apidl, cidl);
+{
+	INT i;
+
+  dprintf(("SHELL32:dataobject:IDLList_AddItems((%p)->(apidl=%p cidl=%u)\n",
+           THIS,
+           apidl,
+           cidl));
 
 	for (i=0; i<cidl; ++i)
         { if (!IDLList_StoreItem(THIS, ILClone((LPCITEMIDLIST)apidl[i])))
@@ -385,8 +413,13 @@ static BOOL WINAPI IDLList_AddItems(LPIDLLIST THIS, LPITEMIDLIST *apidl, UINT ci
         }
         return(TRUE);
 }
+
+
 static BOOL WINAPI IDLList_InitList(LPIDLLIST THIS)
-{	TRACE("(%p)\n",THIS);
+{
+  dprintf(("SHELL32:dataobject:IDLList_InitList(%p)\n",
+           THIS));
+
 	switch (IDLList_GetState(THIS))
         { case State_Init:
 	    return(TRUE);
@@ -401,9 +434,14 @@ static BOOL WINAPI IDLList_InitList(LPIDLLIST THIS)
 	    return(IDLList_InitList(THIS));
         }
 }
+
+
 static void WINAPI IDLList_CleanList(LPIDLLIST THIS)
-{	INT i;
-	TRACE("(%p)\n",THIS);
+{
+	INT i;
+
+  dprintf(("SHELL32:dataobject:IDLList_CleanList(%p)\n",
+           THIS));
 
 	if (THIS->uStep != 0)
         { THIS->dpa = NULL;
@@ -457,7 +495,11 @@ static HRESULT WINAPI IDataObject_fnQueryInterface(LPDATAOBJECT iface, REFIID ri
 	ICOM_THIS(IDataObjectImpl,iface);
 	char    xriid[50];
 	WINE_StringFromCLSID((LPCLSID)riid,xriid);
-	TRACE("(%p)->(\n\tIID:\t%s,%p)\n",This,xriid,ppvObj);
+
+  dprintf(("SHELL32:dataobject:IDataObject_fnQueryInterface((%p)->(\n\tIID:\t%s,%p)\n",
+           This,
+           xriid,
+           ppvObj));
 
 	*ppvObj = NULL;
 
@@ -483,7 +525,9 @@ static ULONG WINAPI IDataObject_fnAddRef(LPDATAOBJECT iface)
 {
 	ICOM_THIS(IDataObjectImpl,iface);
 
-	TRACE("(%p)->(count=%lu)\n",This, This->ref);
+  dprintf(("SHELL32:dataobject:IDataObject_fnAddRef((%p)->(count=%lu)\n",
+           This,
+           This->ref));
 
 	shell32_ObjCount++;
 	return ++(This->ref);
@@ -494,8 +538,8 @@ static ULONG WINAPI IDataObject_fnAddRef(LPDATAOBJECT iface)
 static ULONG WINAPI IDataObject_fnRelease(LPDATAOBJECT iface)
 {
 	ICOM_THIS(IDataObjectImpl,iface);
-	TRACE("(%p)->()\n",This);
-
+  dprintf(("SHELL32:dataobject:IDataObject_fnRelease(%p)\n",
+           This));
 	shell32_ObjCount--;
 
 	if (!--(This->ref))
@@ -523,7 +567,12 @@ static HRESULT WINAPI IDataObject_fnGetData(LPDATAOBJECT iface, LPFORMATETC pfor
 	LPITEMIDLIST	pidl;
 	
 	GetClipboardFormatNameA (pformatetcIn->cfFormat, szTemp, 256);
-	TRACE("(%p)->(%p %p format=%s)\n", This, pformatetcIn, pmedium, szTemp);
+
+  dprintf(("SHELL32:dataobject:IDataObject_fnGetData(%p)->(%p %p format=%s)\n",
+           This,
+           pformatetcIn,
+           pmedium,
+           szTemp));
 
 	/* test expected format */
 	if (!(pformatetcIn->cfFormat == This->cfShellIDList))
@@ -586,19 +635,30 @@ static HRESULT WINAPI IDataObject_fnGetData(LPDATAOBJECT iface, LPFORMATETC pfor
 	FIXME("-- can't serve format\n");
 	return (E_INVALIDARG);
 }
+
+
 static HRESULT WINAPI IDataObject_fnGetDataHere(LPDATAOBJECT iface, LPFORMATETC pformatetc, STGMEDIUM *pmedium)
 {
 	ICOM_THIS(IDataObjectImpl,iface);
-	FIXME("(%p)->()\n", This);
+  dprintf(("SHELL32:dataobject:IDataObject_fnGetDataHere(%p)->(%p %p) not implemented\n",
+           This,
+           pformatetc,
+           pmedium));
+
 	return E_NOTIMPL;
 }
+
+
 static HRESULT WINAPI IDataObject_fnQueryGetData(LPDATAOBJECT iface, LPFORMATETC pformatetc)
 {
 	ICOM_THIS(IDataObjectImpl,iface);
 	UINT i;
 	
-	TRACE("(%p)->(fmt=0x%08x tym=0x%08lx)\n", This, pformatetc->cfFormat, pformatetc->tymed);
-	
+  dprintf(("SHELL32:dataobject:IDataObject_fnQueryGetData((%p)->(fmt=0x%08x tym=0x%08lx)\n",
+           This,
+           pformatetc->cfFormat,
+           pformatetc->tymed));
+
 	if(!(DVASPECT_CONTENT & pformatetc->dwAspect))
 	  return DV_E_DVASPECT;
 
@@ -614,23 +674,42 @@ static HRESULT WINAPI IDataObject_fnQueryGetData(LPDATAOBJECT iface, LPFORMATETC
 
 	return DV_E_TYMED;
 }
-static HRESULT WINAPI IDataObject_fnGetCanonicalFormatEtc(LPDATAOBJECT iface, LPFORMATETC pformatectIn, LPFORMATETC pformatetcOut)
+
+
+static HRESULT WINAPI IDataObject_fnGetCanonicalFormatEtc(LPDATAOBJECT iface, LPFORMATETC pformatetcIn, LPFORMATETC pformatetcOut)
 {
 	ICOM_THIS(IDataObjectImpl,iface);
-	FIXME("(%p)->()\n", This);
+
+  dprintf(("SHELL32:dataobject:IDataObject_fnGetCanonicalFormatEtc((%p)->(%p %p) not implemented\n",
+           This,
+           pformatetcIn,
+           pformatetcOut));
+
 	return E_NOTIMPL;
 }
+
+
 static HRESULT WINAPI IDataObject_fnSetData(LPDATAOBJECT iface, LPFORMATETC pformatetc, STGMEDIUM *pmedium, BOOL fRelease)
 {
 	ICOM_THIS(IDataObjectImpl,iface);
-	FIXME("(%p)->()\n", This);
+  dprintf(("SHELL32:dataobject:IDataObject_fnSetData((%p)->(%p %p %08xh) not implemented\n",
+           This,
+           pformatetc,
+           pmedium,
+           fRelease));
 	return E_NOTIMPL;
 }
+
+
 static HRESULT WINAPI IDataObject_fnEnumFormatEtc(LPDATAOBJECT iface, DWORD dwDirection, IEnumFORMATETC **ppenumFormatEtc)
 {
 	ICOM_THIS(IDataObjectImpl,iface);
 
-	TRACE("(%p)->()\n", This);
+  dprintf(("SHELL32:dataobject:IDataObject_fnEnumFormatEtc((%p)->(%08xh %p)\n",
+           This,
+           dwDirection,
+           ppenumFormatEtc));
+
 	*ppenumFormatEtc=NULL;
 
 	/* only get data */
@@ -645,19 +724,32 @@ static HRESULT WINAPI IDataObject_fnEnumFormatEtc(LPDATAOBJECT iface, DWORD dwDi
 static HRESULT WINAPI IDataObject_fnDAdvise(LPDATAOBJECT iface, FORMATETC *pformatetc, DWORD advf, IAdviseSink *pAdvSink, DWORD *pdwConnection)
 {
 	ICOM_THIS(IDataObjectImpl,iface);
-	FIXME("(%p)->()\n", This);
+  dprintf(("SHELL32:dataobject:IDataObject_fnDAdvise((%p)->(%p %08xh %p %p) not implemented.\n",
+           This,
+           pformatetc,
+           advf,
+           pAdvSink,
+           pdwConnection));
+
 	return E_NOTIMPL;
 }
+
+
 static HRESULT WINAPI IDataObject_fnDUnadvise(LPDATAOBJECT iface, DWORD dwConnection)
 {
 	ICOM_THIS(IDataObjectImpl,iface);
-	FIXME("(%p)->()\n", This);
+  dprintf(("SHELL32:dataobject:IDataObject_fnDUnadvise((%p)->(%08xh) not implemented.\n",
+           This,
+           dwConnection));
 	return E_NOTIMPL;
 }
 static HRESULT WINAPI IDataObject_fnEnumDAdvise(LPDATAOBJECT iface, IEnumSTATDATA **ppenumAdvise)
 {
 	ICOM_THIS(IDataObjectImpl,iface);
-	FIXME("(%p)->()\n", This);
+  dprintf(("SHELL32:dataobject:IDataObject_fnEnumDAdvise((%p)->(%p) not implemented.\n",
+           This,
+           ppenumAdvise));
+
 	return E_NOTIMPL;
 }
 
@@ -710,7 +802,10 @@ LPDATAOBJECT IDataObject_Constructor(HWND hwndOwner, LPITEMIDLIST pMyPidl, LPITE
 	  shell32_ObjCount++;
 	}
 	
-	TRACE("(%p)->(apidl=%p cidl=%u)\n",dto, apidl, cidl);
+  dprintf(("SHELL32:dataobject:IDataObject_Constructor((%p)->(apidl=%p cidl=%u)\n",
+           dto,
+           apidl,
+           cidl));
 	return (LPDATAOBJECT)dto;
 }
 

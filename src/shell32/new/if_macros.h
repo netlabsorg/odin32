@@ -1,7 +1,27 @@
+/* $Id: if_macros.h,v 1.2 1999-10-07 10:34:47 phaller Exp $ */
+
+/*
+ * Win32 SHELL32 for OS/2
+ *
+ * Copyright 1999 Patrick Haller (haller@zebra.fh-weingarten.de)
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
+ */
+
 #ifndef _WINE_IFMACROS_
 #define _WINE_IFMACROS_
 
+
+/*****************************************************************************
+ * Includes                                                                  *
+ *****************************************************************************/
+
 #include "shlobj.h"
+
+
+/*****************************************************************************
+ * Definitions                                                               *
+ *****************************************************************************/
 
 #define IShellBrowser_QueryInterface(p,a,b)	(p)->lpvtbl->fnQueryInterface(p,a,b)
 #define IShellBrowser_AddRef(p)			(p)->lpvtbl->fnAddRef(p)

@@ -1,3 +1,13 @@
+/* $Id: pidl.h,v 1.2 1999-10-07 10:34:47 phaller Exp $ */
+
+/*
+ * Win32 SHELL32 for OS/2
+ *
+ * Copyright 1999 Patrick Haller (haller@zebra.fh-weingarten.de)
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
+ */
+
 /*
  * internal pidl functions
  * 1998 <juergen.schmied@metronet.de>
@@ -5,18 +15,23 @@
  * DO NOT use this definitions outside the shell32.dll !
  *
  * The contents of a pidl should never used from a application
- * directly. 
+ * directly.
  *
- * This stuff is used from SHGetFileAttributes, ShellFolder 
+ * This stuff is used from SHGetFileAttributes, ShellFolder
  * EnumIDList and ShellView.
  */
- 
+
 #ifndef __WINE_PIDL_H
 #define __WINE_PIDL_H
 
+
+/*****************************************************************************
+ * Includes                                                                  *
+ *****************************************************************************/
+
 #include "shlobj.h"
 
-/* 
+/*
 * the pidl does cache fileattributes to speed up SHGetAttributes when
 * displaying a big number of files.
 *
@@ -50,7 +65,7 @@
 * (2) IID_MyComputer = 20D04FE0L-3AEA-1069-A2D8-08002B30309D
 * (3) two strings	"workgroup" "microsoft network"
 * (4) one string	"\\sirius"
-* (5) one string	"whole network" 
+* (5) one string	"whole network"
 * (6) one string	"\\sirius\c"
 * (7) contains string   "mk:@MSITStore:C:\path\file.chm::/path/filename.htm"
 *		GUID	871C5380-42A0-1069-A2EA-08002B30309D
@@ -88,16 +103,16 @@ typedef struct tagPIDLDATA
 	    DWORD dwUnknown;		/*21*/
 	    /* the drive seems to be 25 bytes every time */
 	  } drive;
-	  struct 
+	  struct
 	  { BYTE dummy;			/*01 is 0x00 for files or dirs */
 	    DWORD dwFileSize;		/*02*/
 	    WORD uFileDate;		/*06*/
 	    WORD uFileTime;		/*08*/
 	    WORD uFileAttribs;		/*10*/
 	    CHAR szNames[1];		/*12*/
-	    /* Here are comming two strings. The first is the long name. 
+	    /* Here are comming two strings. The first is the long name.
 	    The second the dos name when needed or just 0x00 */
-	  } file, folder, generic; 
+	  } file, folder, generic;
 	  struct
 	  { WORD dummy;		/*01*/
 	    CHAR szNames[1];	/*03*/

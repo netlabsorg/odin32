@@ -1,4 +1,4 @@
-; $Id: shell32.def,v 1.6 1999-09-09 21:30:15 phaller Exp $
+; $Id: shell32.def,v 1.7 1999-10-07 10:34:47 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 ;based on Windows 95
@@ -289,8 +289,8 @@ EXPORTS
 ;   SheGetDirExW                      = _SheGetDirExW@?                       @279
     SheGetDirW                        = _SheGetDirW@8                         @280
 ;   SheGetPathOffsetW                 = _SheGetPathOffsetW@?                  @281
-    SheRemoveQuotesA                  = _SheRemoveQuotesA@0                   @282
-    SheRemoveQuotesW                  = _SheRemoveQuotesW@0                   @283
+    SheRemoveQuotesA                  = _SheRemoveQuotesA@4                   @282
+    SheRemoveQuotesW                  = _SheRemoveQuotesW@4                   @283
 ;   SheSetCurDrive                    = _SheSetCurDrive@?                     @284
     SheShortenPathA                   = _SheShortenPathA@8                    @285
     SheShortenPathW                   = _SheShortenPathW@8                    @286

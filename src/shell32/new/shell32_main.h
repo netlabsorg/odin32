@@ -1,9 +1,24 @@
+/* $Id: shell32_main.h,v 1.4 1999-10-07 10:34:47 phaller Exp $ */
+
+/*
+ * Win32 SHELL32 for OS/2
+ *
+ * Copyright 1999 Patrick Haller (haller@zebra.fh-weingarten.de)
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
+ */
+
 /*
  * 	internal Shell32 Library definitions
  */
 
 #ifndef __WINE_SHELL_MAIN_H
 #define __WINE_SHELL_MAIN_H
+
+
+/*****************************************************************************
+ * Includes                                                                  *
+ *****************************************************************************/
 
 #include "imagelist.h"
 #include "commctrl.h"
