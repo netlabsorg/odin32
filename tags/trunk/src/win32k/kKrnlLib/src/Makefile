@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.1 2002-03-10 02:45:48 bird Exp $
+# $Id: Makefile,v 1.2 2002-03-10 04:27:11 bird Exp $
 
 #
 # kKrnlLib/dev32 makefile.
@@ -24,9 +24,9 @@ ALL_DEFINES  = -DKKRNLLIB
 #
 # Targets.
 #
-PREMAKEFILES = newdbg.mak newrel.mak
+PREMAKEFILES = newdbg.mak newrel.mak Dev16.mak
 
-POSTMAKEFILES = first.mak last.mak Dev16.mak
+POSTMAKEFILES = first.mak last.mak
 
 TARGET_OBJS =\
 $(PATH_TARGET)\d32Globals.$(EXT_OBJ)\
@@ -53,6 +53,8 @@ $(PATH_TARGET)\vprintf.$(EXT_OBJ)\
 $(PATH_TARGET)\vsprintf.$(EXT_OBJ)\
 $(PATH_OBJ)\kKrnlLib_newdbg.$(EXT_LIB)\kKrnlLib_newdbg.$(EXT_LIB)\
 $(PATH_OBJ)\kKrnlLib_newrel.$(EXT_LIB)\kKrnlLib_newrel.$(EXT_LIB)\
+\
+$(PATH_ROOT)\obj\$(NAME_1)$(NAME_2)mscv6\kKrnlLib_dev16.$(EXT_LIB)\kKrnlLib_dev16.$(EXT_LIB)\
 \
 $(PATH_TARGET)\SymDB32.$(EXT_OBJ)\
 $(PATH_TARGET)\calltaba.$(EXT_OBJ)\
