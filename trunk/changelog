@@ -1,4 +1,14 @@
- /* $Id: changelog,v 1.155 1999-08-30 14:22:21 sandervl Exp $ */
+ /* $Id: changelog,v 1.156 1999-08-31 10:36:48 sandervl Exp $ */
+
+ 99-08-31: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32\NEW: Finished MDI class, but it's not working yet.
+
+ 99-08-31: Rene Pronk <R.Pronk@twi.tudelft.nl>
+	- USER32: Implemented ChildWindowFromPointEx
+
+ 99-08-30: Jens Wiessner <wiessnej@rfi.de>
+	- OLEDLG: Created stub dll
+	- INC\WIN: Update for ras.h
 
  99-08-30: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32\NEW: Redesign. Create base class for all window types
