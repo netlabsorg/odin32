@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.68 2000-02-03 18:56:38 sandervl Exp $
+; $Id: kernel32.def,v 1.69 2000-02-06 20:50:28 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -469,7 +469,7 @@ EXPORTS
      GetPrivateProfileStructW   = _GetPrivateProfileStructW@20 @371
      GetProcAddress             = _GetProcAddress@8           @372
      GetProcessAffinityMask     = _GetProcessAffinityMask@12  @373
-     GetProcessDword            = _GetProcessDword@8          @885
+     GetProcessDword            = _GetProcessDword@8          @18
 ;    GetProcessFlags            = _GetProcessFlags@??         @374      ;W95
      GetProcessHeap             = _GetProcessHeap@0           @375
      GetProcessHeaps            = _GetProcessHeaps@8          @376
