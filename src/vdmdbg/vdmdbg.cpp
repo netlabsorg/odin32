@@ -1,4 +1,4 @@
-/* $Id: vdmdbg.cpp,v 1.1 2001-06-13 04:45:33 bird Exp $
+/* $Id: vdmdbg.cpp,v 1.2 2001-09-05 11:56:57 bird Exp $
  *
  * VDMDbg - Virtual Dos Machine Debug interface.
  * (It's not only debuging. TaskMgr uses it and that's the reason for implementing it.)
@@ -279,7 +279,6 @@ BOOL WIN32API VDMGlobalNext(
 /**
  *
  * @returns Count of Win16 subsystem processes or the count of subsystem processes enumerated before terminating.
- * @param   dwProcessId
  * @param   fp
  * @param   lparam
  * @status  stub
