@@ -8706,6 +8706,13 @@ static LRESULT LISTVIEW_VScroll(HWND hwnd, INT nScrollCode, SHORT nCurrentPos,
       else
         InvalidateRect(hwnd, NULL, TRUE);
     }
+#ifdef __WIN32OS2__
+    //@PF: Correct scrollbar range
+    if (scrollInfo.nMax != GETITEMCOUNT(infoPtr))
+    {
+        SetScrollRange(hwnd,SB_VERT,0,GETITEMCOUNT(infoPtr)-1,TRUE);
+    }
+#endif
   }
     
   return 0;
