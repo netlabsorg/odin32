@@ -1,4 +1,4 @@
--- $Id: CreateTables.sql,v 1.9 2000-07-18 07:28:01 bird Exp $
+-- $Id: CreateTables.sql,v 1.10 2000-07-18 22:13:20 bird Exp $
 --
 -- Create all tables.
 --
@@ -201,5 +201,75 @@ CREATE TABLE historyapigrouptotal (
     totalcount SMALLINT NOT NULL,
     UNIQUE u1(apigroup, date)
 );
+
+
+
+--
+--
+-- Administration
+--
+--
+
+--
+-- This table holds the teams (like MAD, WAI,...).
+--
+CREATE TABLE team (
+    refcode     SMALLINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    name        VARCHAR(30) NOT NULL,
+    longname    VARCHAR(128) NOT NULL,
+    description TEXT NOT NULL,
+    tasks       TEXT,
+    notes       TEXT,
+    UNIQUE u1(refcode),
+    UNIQUE u2(name)
+);
+
+
+--
+-- This table holds the groups under each team.
+-- Currently only the WAI team is grouped.
+--
+CREATE TABLE tgroup (
+    refcode     SMALLINT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    team        SMALLINT NOT NULL,
+    name        VARCHAR(80) NOT NULL,
+    description TEXT NOT NULL,
+    notes       TEXT,
+    UNIQUE u1(refcode),
+    UNIQUE u2(team, refcode)
+);
+
+
+--
+-- This table relates a tgroup with authors
+-- ( do a distinct select to get all members of a team )
+--
+CREATE TABLE tgroupmember (
+    tgroup      SMALLINT NOT NULL,
+    author      SMALLINT NOT NULL,
+    codemaintainer CHAR(1) DEFAULT 'N',
+    UNIQUE u1(tgroup, author)
+);
+
+
+--
+-- This table relates a tgroup with a dll.
+--
+CREATE TABLE tgroupdll (
+    tgroup      SMALLINT NOT NULL,
+    dll         TINYINT NOT NULL,
+    UNIQUE u1(tgroup, dll)
+);
+
+
+--
+-- This table relates a tgroup with an apigroup.
+--
+CREATE TABLE tgroupapigroup (
+    tgroup      SMALLINT NOT NULL,
+    apigroup    SMALLINT NOT NULL,
+    UNIQUE u1(tgroup, apigroup)
+);
+
 
 
