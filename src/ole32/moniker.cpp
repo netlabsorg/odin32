@@ -145,10 +145,10 @@ HRESULT WIN32API RunningObjectTableImpl_QueryInterface
 
     * ppvObject = 0;
 
-    if (IsEqualIID(IID_IUnknown, riid))
+    if (IsEqualIID(&IID_IUnknown, &riid))
         * ppvObject = (IRunningObjectTable * )This;
     else
-        if (IsEqualIID(IID_IRunningObjectTable, riid))
+        if (IsEqualIID(&IID_IRunningObjectTable, &riid))
             * ppvObject = (IRunningObjectTable * )This;
 
     if ((* ppvObject) == 0)
@@ -425,7 +425,7 @@ HRESULT WIN32API RunningObjectTableImpl_EnumRunning
 // ----------------------------------------------------------------------
 // GetRunningObjectTable
 // ----------------------------------------------------------------------
-HRESULT WIN32API GetRunningObjectTable(DWORD reserved, LPVOID *pprot)
+HRESULT WIN32API GetRunningObjectTable(DWORD reserved, LPRUNNINGOBJECTTABLE *pprot)
 {
     IID		riid = IID_IRunningObjectTable;
     HRESULT	hr;
