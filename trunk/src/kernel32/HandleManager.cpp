@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.100 2003-05-05 10:51:04 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.101 2003-05-06 10:12:00 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -1280,6 +1280,15 @@ HANDLE HMOpenFile(LPCSTR    lpFileName,
              rc));
 #endif
 
+  /*
+   * Based on testcase (5) and MSDN: 
+   *      "OF_PARSE   Fills the OFSTRUCT structure but carries out no other action."
+   */
+  if (fuMode & OF_PARSE) {
+    TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
+    return 0;
+  }
+
   if(rc != NO_ERROR)     /* oops, creation failed within the device handler */
   {
       TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
@@ -1287,19 +1296,16 @@ HANDLE HMOpenFile(LPCSTR    lpFileName,
       return (INVALID_HANDLE_VALUE);                           /* signal error */
   }
   else {
-    if(fuMode & (OF_DELETE|OF_EXIST)) {
-    //file handle already closed
-        TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
-    return TRUE; //TODO: correct?
-  }
-  if(fuMode & OF_PARSE) {
-        TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
-    return 0;
-  }
-  if(fuMode & OF_VERIFY) {
-        TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
-    return 1; //TODO: correct?
-  }
+      if(fuMode & (OF_DELETE|OF_EXIST)) {
+          //file handle already closed
+          TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
+          return TRUE; //TODO: correct?
+      }
+
+      if(fuMode & OF_VERIFY) {
+          TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
+          return 1; //TODO: correct?
+      }
   }
 
 #ifdef DEBUG_LOCAL

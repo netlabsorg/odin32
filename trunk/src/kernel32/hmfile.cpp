@@ -1,4 +1,4 @@
-/* $Id: hmfile.cpp,v 1.43 2003-05-05 10:51:05 sandervl Exp $ */
+/* $Id: hmfile.cpp,v 1.44 2003-05-06 10:12:00 sandervl Exp $ */
 
 /*
  * File IO win32 apis
@@ -163,21 +163,34 @@ DWORD HMDeviceFileClass::OpenFile (LPCSTR        lpszFileName,
         //SearchPath does exactly that
         LPSTR filenameinpath;
 
-        if(SearchPathA(NULL, lpFileName, NULL, sizeof(filepath), filepath, &filenameinpath) == 0
-           && !(fuMode & OF_CREATE) )
+        if (SearchPathA(NULL, lpFileName, NULL, sizeof(filepath), filepath, &filenameinpath) == 0)
         {
-            pOFStruct->nErrCode = ERROR_FILE_NOT_FOUND;
-            SetLastError(ERROR_FILE_NOT_FOUND);
-            return HFILE_ERROR;
+            if (!(fuMode & (OF_CREATE | OF_PARSE)))
+            {
+                pOFStruct->nErrCode = ERROR_FILE_NOT_FOUND; /* What about initializing the struct? */
+                SetLastError(ERROR_FILE_NOT_FOUND);
+                return HFILE_ERROR;
+            }
+
+            /*
+             * OF_PARSE | OF_CREATE:
+             *  Assume file in current directory.
+             */
+            GetCurrentDirectoryA(sizeof(filepath), filepath);
+            strcat(strcat(filepath, "\\"), lpFileName);
+            GetLongPathNameA(filepath, filepath, sizeof(filepath));
         }
         lpFileName = filepath;
     }
     else {
+        #if 1 /* Canonicalize the path should be the right thing to do I think... */
+        GetFullPathNameA(lpFileName, sizeof(filepath), filepath, NULL);
+        #else                        
         ParsePath(lpFileName, filepath, sizeof(filepath));
+        #endif
 
         //convert to long file name if in 8.3 hashed format
         GetLongPathNameA(filepath, filepath, sizeof(filepath));
-
         lpFileName = filepath;
     }
 
@@ -186,9 +199,26 @@ DWORD HMDeviceFileClass::OpenFile (LPCSTR        lpszFileName,
     pOFStruct->nErrCode = 0;
     strncpy((char *)pOFStruct->szPathName, lpFileName, OFS_MAXPATHNAME);
     pOFStruct->szPathName[OFS_MAXPATHNAME-1] = 0;
+    
+
+    /* 
+     * Do the parse stuff now and do a quick exit.
+     * Based on testcase (5) and MSDN: 
+     *      "OF_PARSE   Fills the OFSTRUCT structure but carries out no other action."
+     */
+    if (fuMode & OF_PARSE)
+    {
+        CHAR    szDrive[4];
+        *(PULONG)&szDrive[0] = *(PULONG)&pOFStruct->szPathName[0];
+        szDrive[3] = '\0';
+        pOFStruct->fFixedDisk = (GetDriveTypeA(szDrive) != DRIVE_REMOVABLE);
+        SetLastError(NO_ERROR);
+        return NO_ERROR;
+    }
+    
 
     hFile = OSLibDosOpenFile((LPSTR)lpFileName, fuMode);
-
+    
     if(hFile != INVALID_HANDLE_ERROR)
     {
         //Needed for GetFileTime
@@ -197,13 +227,13 @@ DWORD HMDeviceFileClass::OpenFile (LPCSTR        lpszFileName,
                     NULL,
                     NULL,
                     &filetime );
-
-		/* UTC Time or Localtime ? GetFileTime Returns UTC-time yet ? !!!!! */ 
+    
+    	/* UTC Time or Localtime ? GetFileTime Returns UTC-time yet ? !!!!! */ 
         FileTimeToDosDateTime(&filetime,
                               &filedatetime[0],
                               &filedatetime[1] );
         memcpy(pOFStruct->reserved, filedatetime, sizeof(pOFStruct->reserved));
-
+    
         if(fuMode & OF_DELETE)
         {
             OSLibDosClose(hFile);
@@ -215,23 +245,9 @@ DWORD HMDeviceFileClass::OpenFile (LPCSTR        lpszFileName,
             OSLibDosClose(hFile);
             hFile = HFILE_ERROR;
         }
-        if(fuMode & OF_PARSE)
-        {
-            CHAR drive[4];
-
-            drive[0] = pOFStruct->szPathName[0];
-            drive[1] = pOFStruct->szPathName[1];
-            drive[2] = pOFStruct->szPathName[2];
-            drive[3] = 0;
-
-            pOFStruct->fFixedDisk = (GetDriveTypeA(drive) != DRIVE_REMOVABLE);
-
-            OSLibDosClose(hFile);
-            hFile = HFILE_ERROR;
-        }
-
+    
         if((fuMode & OF_VERIFY))
-        {
+        {//TODO: what's this?? we copy the time above...
             if(memcmp(pOFStruct->reserved, filedatetime, sizeof(pOFStruct->reserved)))
             {
                 OSLibDosClose(hFile);
@@ -239,10 +255,10 @@ DWORD HMDeviceFileClass::OpenFile (LPCSTR        lpszFileName,
             }
             hFile = HFILE_ERROR;
         }
-
+    
         pOFStruct->nErrCode = GetLastError();
         pHMHandleData->hHMHandle = hFile;
-
+    
         if(hFile != HFILE_ERROR) {
             pHMHandleData->dwUserData = (DWORD) new HMFileInfo((LPSTR)lpFileName, NULL);
         }
@@ -250,7 +266,7 @@ DWORD HMDeviceFileClass::OpenFile (LPCSTR        lpszFileName,
     }
     else {
         DWORD rc = GetLastError();
-
+    
         if(fuMode & OF_EXIST)
         {
             if(rc == ERROR_OPEN_FAILED) {
