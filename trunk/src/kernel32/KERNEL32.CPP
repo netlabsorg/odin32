@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.47 2000-06-23 19:02:36 sandervl Exp $ */
+/* $Id: KERNEL32.CPP,v 1.48 2000-07-03 12:12:37 bird Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -728,14 +728,14 @@ ODINFUNCTION5(BOOL,    GetStringTypeExW,
   int i;
 
   dprintf(("KERNEL32:  GetStringTypeW, not properly implemented\n"));
-  if((DWORD)lpSrcStr == (DWORD)lpCharType || 
-     !lpSrcStr || 
-     !lpCharType) 
+  if((DWORD)lpSrcStr == (DWORD)lpCharType ||
+     !lpSrcStr ||
+     !lpCharType)
   {
     O32_SetLastError(ERROR_INVALID_PARAMETER);
     return(FALSE);
   }
-  
+
   if(cchSrc == -1)
     cchSrc = UniStrlen((UniChar*)lpSrcStr);
 
@@ -758,13 +758,13 @@ ODINFUNCTION5(BOOL,    GetStringTypeExW,
       }
       return TRUE;
       break;
-    
+
     case CT_CTYPE2:
     case CT_CTYPE3: //not supported right now
       return FALSE;
       break;
   }
-  
+
   return FALSE;
 }
 
@@ -798,19 +798,19 @@ ODINFUNCTION5(BOOL,    GetStringTypeExA,
               LPWORD,  chartype)
 {
   int i;
-  
-  if ((src==NULL) || 
-      (chartype==NULL) || 
+
+  if ((src==NULL) ||
+      (chartype==NULL) ||
       (src==(LPSTR)chartype))
   {
     SetLastError(ERROR_INVALID_PARAMETER);
     return FALSE;
   }
-  
+
   if (cchSrc==-1)
     cchSrc=lstrlenA(src)+1;
-  
-  switch (dwInfoType) 
+
+  switch (dwInfoType)
   {
     case CT_CTYPE1:
       for (i=0;i<cchSrc;i++)
@@ -829,21 +829,21 @@ ODINFUNCTION5(BOOL,    GetStringTypeExA,
         /* C1_XDIGIT */
       }
       return TRUE;
-  
+
     case CT_CTYPE2:
       for (i=0;i<cchSrc;i++)
       {
         chartype[i]=(WORD)CT_CType2_LUT[i];
       }
       return TRUE;
-  
+
     case CT_CTYPE3:
       for (i=0;i<cchSrc;i++)
       {
         chartype[i]=OLE2NLS_CT_CType3_LUT[i];
       }
       return TRUE;
-      
+
     default:
       dprintf(("Unknown dwInfoType:%ld\n",
                dwInfoType));
@@ -1014,7 +1014,7 @@ UINT WIN32API CompareStringA(LCID lcid, DWORD fdwStyle, LPCSTR lpString1,
 #endif
 
    if(lpString1 == NULL || lpString2 == NULL)
-   {    
+   {
     	dprintf(("CompareStringA: (s1=%s,s2=%s): Invalid NULL string\n", lpString1, lpString2));
     	SetLastError(ERROR_INVALID_PARAMETER);
     	return 0;
@@ -1062,7 +1062,7 @@ UINT WIN32API CompareStringW(LCID lcid, DWORD fdwStyle, LPCWSTR lpString1,
    dprintf2(("KERNEL32:  OS2CompareStringW '%s' - '%s'\n", string1, string2));
 
    if(lpString1 == NULL || lpString2 == NULL)
-   {    
+   {
     	dprintf(("CompareStringW: (s1=%s,s2=%s): Invalid NULL string\n", lpString1, lpString2));
     	SetLastError(ERROR_INVALID_PARAMETER);
     	return 0;
@@ -1201,24 +1201,6 @@ LONG WIN32API GetVersion()
 /*                structures that lead to crashes if we don't identify as NT */
 
   return ODINNT_VERSION;
-}
-//******************************************************************************
-//SvL: 26-6-'97 - Added
-//******************************************************************************
-VOID WIN32API OutputDebugStringW(LPCWSTR arg1)
-{
- char *astring;
-
-    astring = UnicodeToAsciiString((LPWSTR)arg1);
-    dprintf(("KERNEL32:  OS2OutputDebugStringW %s\n", astring));
-    FreeAsciiString(astring);
-}
-//******************************************************************************
-//******************************************************************************
-VOID WIN32API OutputDebugStringA(LPCSTR lpszOutputString)
-{
-  dprintf(("KERNEL32:  OutputDebugStringA: %s\n", lpszOutputString));
-  return;
 }
 //******************************************************************************
 //******************************************************************************
