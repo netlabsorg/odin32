@@ -1,4 +1,4 @@
-/* $Id: registry.cpp,v 1.8 1999-12-19 22:05:39 sandervl Exp $ */
+/* $Id: registry.cpp,v 1.9 1999-12-21 00:31:38 sandervl Exp $ */
 
 /*
  * Win32 registry API functions for OS/2
@@ -232,6 +232,7 @@ ODINFUNCTION2(LONG,RegDeleteKeyW,HKEY,  hKey,
   char *astring = UnicodeToAsciiString(lpszSubKey);
   LONG  rc;
 
+  dprintf(("RegDeleteKeyW %s", astring));
   rc = _O32_RegDeleteKey(ConvertKey(hKey),
                         astring);
   FreeAsciiString(astring);
@@ -254,6 +255,7 @@ ODINFUNCTION2(LONG,RegDeleteKeyW,HKEY,  hKey,
 ODINFUNCTION2(LONG,RegDeleteKeyA,HKEY,  hKey,
                                  LPCSTR,lpszSubKey)
 {
+  dprintf(("RegDeleteKeyW %s", lpszSubKey));
   return _O32_RegDeleteKey(ConvertKey(hKey),
                           lpszSubKey);
 }

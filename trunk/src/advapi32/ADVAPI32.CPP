@@ -1,4 +1,4 @@
-/* $Id: ADVAPI32.CPP,v 1.11 1999-12-20 10:12:04 sandervl Exp $ */
+/* $Id: ADVAPI32.CPP,v 1.12 1999-12-21 00:35:28 sandervl Exp $ */
 
 /*
  * Win32 advanced API functions for OS/2
@@ -2028,79 +2028,6 @@ BOOL WIN32API SetServiceBits(SERVICE_STATUS_HANDLE hServiceStatus,
   return (FALSE); /* signal failure */
 }
 
-
-
-/*****************************************************************************
- * Name      : SetServiceStatus
- * Purpose   : The SetServiceStatus function updates the service control
- *             manager's status information for the calling service.
- * Parameters: SERVICE_STATUS_HANDLE sshServiceStatus  service status handle
- *             LPSERVICE_STATUS      lpssServiceStatus address of status structure
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-BOOL WIN32API SetServiceStatus(SERVICE_STATUS_HANDLE sshServiceStatus,
-                                  LPSERVICE_STATUS      lpssServiceStatus)
-{
-  dprintf(("ADVAPI32: SetServiceStatus(%08xh,%08xh) not implemented.\n",
-           sshServiceStatus,
-           lpssServiceStatus));
-
-  return (FALSE); /* signal failure */
-}
-
-
-
-/*****************************************************************************
- * Name      : StartServiceCtrlDispatcherW
- * Purpose   : The StartServiceCtrlDispatcher function connects the main thread
- *             of a service process to the service control manager, which causes
- *             the thread to be the service control dispatcher thread for the calling process.
- * Parameters: LPSERVICE_TABLE_ENTRY  lpsteServiceTable  address of service table
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-#define LPSERVICE_TABLE_ENTRY LPVOID
-BOOL WIN32API StartServiceCtrlDispatcherW(LPSERVICE_TABLE_ENTRY lpsteServiceTable)
-{
-  dprintf(("ADVAPI32: StartServiceCtrlDispatcherW(%08xh) not implemented.\n",
-           lpsteServiceTable));
-
-  return (FALSE); /* signal failure */
-}
-
-
-/*****************************************************************************
- * Name      : StartServiceCtrlDispatcherA
- * Purpose   : The StartServiceCtrlDispatcher function connects the main thread
- *             of a service process to the service control manager, which causes
- *             the thread to be the service control dispatcher thread for the calling process.
- * Parameters: LPSERVICE_TABLE_ENTRY  lpsteServiceTable  address of service table
- * Variables :
- * Result    :
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
- *****************************************************************************/
-
-BOOL WIN32API StartServiceCtrlDispatcherA(LPSERVICE_TABLE_ENTRY lpsteServiceTable)
-{
-  dprintf(("ADVAPI32: StartServiceCtrlDispatcherA(%08xh) not implemented.\n",
-           lpsteServiceTable));
-
-  return (FALSE); /* signal failure */
-}
 
 
 
