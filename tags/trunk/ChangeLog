@@ -1,4 +1,14 @@
-/* $Id: ChangeLog,v 1.1328 2001-03-29 18:53:32 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1329 2001-03-30 11:13:15 sandervl Exp $ */
+
+ 2001-03-30: Sander van Leeuwen <sandervl@xs4all.nl>   
+    - USER32:   o Rewrote WM_NCHITTEST handling. No longer relies on PM.
+                o Put static control hittest workaround inside #ifndef ODIN_HITTEST 
+                  statement (see 2001-03-25)
+                o Send WM_NCHITTEST messages from WindowFromPoint + added
+                  checks (more like Wine now)
+                  TODO: New version isn't 100% correct. Doesn't take overlapping
+                        windows into account when window is transparent. Always 
+                        continues with parent window.
 
  2001-03-29: Sander van Leeuwen <sandervl@xs4all.nl>   
     - KERNEL32: o CreateFile (disk): disable error popus. NT allows an app to 
