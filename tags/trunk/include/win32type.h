@@ -1,4 +1,4 @@
-/* $Id: win32type.h,v 1.24 1999-10-04 12:12:43 phaller Exp $ */
+/* $Id: win32type.h,v 1.25 1999-10-08 16:02:51 sandervl Exp $ */
 
 /*
  * Win32 type definitions for OS/2
@@ -635,6 +635,18 @@ typedef struct
     INT     nTrackPos;
 } SCROLLINFO, *LPSCROLLINFO;
 typedef SCROLLINFO CONST *LPCSCROLLINFO;
+#endif
+
+#ifndef __INCLUDE_WINUSER_H
+/* WM_GETMINMAXINFO struct */
+typedef struct
+{
+    POINT   ptReserved;
+    POINT   ptMaxSize;
+    POINT   ptMaxPosition;
+    POINT   ptMinTrackSize;
+    POINT   ptMaxTrackSize;
+} MINMAXINFO, *PMINMAXINFO, *LPMINMAXINFO;
 #endif
 
 #pragma pack()
