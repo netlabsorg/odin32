@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.189 2000-05-19 18:41:06 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.190 2000-05-20 13:30:59 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1947,7 +1947,7 @@ LRESULT Win32BaseWindow::BroadcastMessageA(int type, UINT msg, WPARAM wParam, LP
             {
 
                 if(type == BROADCAST_SEND) {
-                        window->SendInternalMessageA(msg, wParam, lParam);
+                        ::SendMessageA(window->getWindowHandle(), msg, wParam, lParam);
                 }
                 else    PostMessageA(window->getWindowHandle(), msg, wParam, lParam);
             }
@@ -1972,7 +1972,7 @@ LRESULT Win32BaseWindow::BroadcastMessageW(int type, UINT msg, WPARAM wParam, LP
             {
 
                 if(type == BROADCAST_SEND) {
-                        window->SendInternalMessageW(msg, wParam, lParam);
+                        ::SendMessageW(window->getWindowHandle(), msg, wParam, lParam);
                 }
                 else    PostMessageW(window->getWindowHandle(), msg, wParam, lParam);
             }
