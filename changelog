@@ -1,8 +1,12 @@
- /* $Id: changelog,v 1.339 1999-10-18 10:53:02 sandervl Exp $ */
+ /* $Id: changelog,v 1.340 1999-10-18 11:58:39 sandervl Exp $ */
 
  99-10-18: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Set/clear WS_VISIBLE flag in ShowWindow
                   Fix for scrollbar redraw
+                  Rewrote EnumChildWindows (winzip works quite well now!)
+
+ 99-10-18: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+	- COMDLG32: Disable comdlg hooks for now. They don't anyway.
 
  99-10-17: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Ported AdjustWindowRectEx from Wine (990815)
