@@ -3,6 +3,22 @@
  * ordinal entry points.
  *
  * Determined by experimentation.
+ *
+ * Copyright 2001 Guy Albertelli
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 typedef struct {
@@ -27,3 +43,29 @@ typedef struct {
 
 DWORD WINAPI SHLWAPI_2(LPCWSTR x, UNKNOWN_SHLWAPI_2 *y);
 
+/* Macro to get function pointer for a module*/
+#ifdef __WIN32OS2__ 
+#define GET_FUNC(func, module, name, fail) \
+  do { \
+    if (!func) { \
+      if (!SHLWAPI_h##module && !(SHLWAPI_h##module = LoadLibraryA(#module ".dll"))) return fail; \
+      if (!(*(DWORD *)&func = (DWORD)GetProcAddress(SHLWAPI_h##module, name))) return fail; \
+    } \
+  } while (0)
+#else 
+#define GET_FUNC(func, module, name, fail) \
+  do { \
+    if (!func) { \
+      if (!SHLWAPI_h##module && !(SHLWAPI_h##module = LoadLibraryA(#module ".dll"))) return fail; \
+      if (!(func = (void*)GetProcAddress(SHLWAPI_h##module, name))) return fail; \
+    } \
+  } while (0)
+#endif 
+
+extern HMODULE SHLWAPI_hshell32;
+
+/* Shared internal functions */
+BOOL WINAPI SHLWAPI_PathFindLocalExeA(LPSTR lpszPath, DWORD dwWhich);
+BOOL WINAPI SHLWAPI_PathFindLocalExeW(LPWSTR lpszPath, DWORD dwWhich);
+BOOL WINAPI SHLWAPI_PathFindOnPathExA(LPSTR lpszFile,LPCSTR *lppszOtherDirs,DWORD dwWhich);
+BOOL WINAPI SHLWAPI_PathFindOnPathExW(LPWSTR lpszFile,LPCWSTR *lppszOtherDirs,DWORD dwWhich);

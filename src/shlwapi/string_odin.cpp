@@ -1,4 +1,4 @@
- /* $Id: string_odin.cpp,v 1.7 2002-02-08 10:23:35 sandervl Exp $ */
+ /* $Id: string_odin.cpp,v 1.8 2002-06-07 08:02:20 sandervl Exp $ */
 
 /*
  * Win32 Lightweight SHELL32 for OS/2
@@ -57,7 +57,6 @@
 
 #include "shellapi.h"
 #include "shlobj.h"
-#include "wine/undocshell.h"
 
 #include "shlwapi_odin.h"
 #include "shlwapi.h"
