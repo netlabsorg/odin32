@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.283 2001-09-20 12:57:15 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.284 2001-09-22 18:21:00 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -77,6 +77,8 @@ void PrintWindowStyle(DWORD dwStyle, DWORD dwExStyle);
 static fDestroyAll = FALSE;
 //For quick lookup of current process id
 static ULONG currentProcessId = -1;
+static int iF10Key = 0;
+static int iMenuSysKey = 0;
 
 //******************************************************************************
 //******************************************************************************
@@ -996,6 +998,34 @@ ULONG Win32BaseWindow::MsgActivate(BOOL fActivate, BOOL fMinimized, HWND hwnd, H
 }
 //******************************************************************************
 //******************************************************************************
+ULONG Win32BaseWindow::MsgChildActivate(BOOL fActivate)
+{
+    //SvL: Don't send WM_(NC)ACTIVATE messages when the window is being destroyed
+    if(fDestroyWindowCalled) {
+        return 0;
+    }
+
+    //According to SDK docs, if app returns FALSE & window is being deactivated,
+    //default processing is cancelled
+    //TODO: According to Wine we should proceed anyway if window is sysmodal
+    if(SendInternalMessageA(WM_NCACTIVATE, fActivate, 0) == FALSE && !fActivate)
+    {
+        dprintf(("WARNING: WM_NCACTIVATE return code = FALSE -> cancel processing"));
+        return 0;
+    }
+    /* child windows get a WM_CHILDACTIVATE message */
+    if((getStyle() & (WS_CHILD | WS_POPUP)) == WS_CHILD )
+    {
+        if(fActivate) {//WM_CHILDACTIVE is for activation only
+            SendInternalMessageA(WM_CHILDACTIVATE, 0, 0L);
+        }
+        return 0;
+    }
+    DebugInt3();
+    return 0;
+}
+//******************************************************************************
+//******************************************************************************
 ULONG Win32BaseWindow::DispatchMsgA(MSG *msg)
 {
     return SendInternalMessageA(msg->message, msg->wParam, msg->lParam);
@@ -1732,14 +1762,29 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
     }
 
     case WM_SYSKEYDOWN:
-        if(wParam == VK_F4) /* try to close the window */
-        {
-            Win32BaseWindow *window = GetWindowFromHandle(GetTopParent());
-            if(window && !(window->getClass()->getStyle() & CS_NOCLOSE))
-                PostMessageA(window->getWindowHandle(), WM_SYSCOMMAND, SC_CLOSE, 0);
-            if(window) RELEASE_WNDOBJ(window);
-            return 0;
-        }
+    {
+	if( HIWORD(lParam) & KEYDATA_ALT )
+	{
+	    /* if( HIWORD(lParam) & ~KEYDATA_PREVSTATE ) */
+	      if( wParam == VK_MENU && !iMenuSysKey )
+		iMenuSysKey = 1;
+	      else
+		iMenuSysKey = 0;
+	    
+	    iF10Key = 0;
+
+	    if( wParam == VK_F4 )	/* try to close the window */
+	    {
+                HWND top = GetTopWindow();
+                if (!(GetClassLongW( top, GCL_STYLE ) & CS_NOCLOSE))
+                    PostMessageW( top, WM_SYSCOMMAND, SC_CLOSE, 0 );
+	    }
+	} 
+	else if( wParam == VK_F10 )
+	        iF10Key = 1;
+	     else
+	        if( wParam == VK_ESCAPE && (GetKeyState(VK_SHIFT) & 0x8000))
+                    SendMessageW(WM_SYSCOMMAND, SC_KEYMENU, VK_SPACE );
 
         Win32BaseWindow *siblingWindow;
         HWND sibling;
@@ -1778,17 +1823,20 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
         }
 
         return 0;
+    }
 
-#if 0 //CB: todo: MSDN docu: Windown handles these messages and not WM_SYSCHAR (the code below doesn't work)
-    case WM_KEYDOWN:
     case WM_KEYUP:
-    case WM_SYSKEYDOWN:
     case WM_SYSKEYUP:
-#endif
+	/* Press and release F10 or ALT */
+	if (((wParam == VK_MENU) && iMenuSysKey) ||
+            ((wParam == VK_F10) && iF10Key))
+              ::SendMessageW( GetTopWindow(), WM_SYSCOMMAND, SC_KEYMENU, 0L );
+	iMenuSysKey = iF10Key = 0;
+        break;
 
     case WM_SYSCHAR:
     {
-        int iMenuSysKey = 0;
+        iMenuSysKey = 0;
         if (wParam == VK_RETURN && (getStyle() & WS_MINIMIZE))
         {
                 PostMessageA(getWindowHandle(), WM_SYSCOMMAND,
@@ -1800,7 +1848,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
                 if (wParam == VK_TAB || wParam == VK_ESCAPE || wParam == VK_F4)
                         break;
                 if (wParam == VK_SPACE && (getStyle() & WS_CHILD)) {
-                        getParent()->SendMessageA(Msg, wParam, lParam );
+                        ::SendMessageW(GetParent(), Msg, wParam, lParam );
                 }
                 else    SendMessageA(WM_SYSCOMMAND, (WPARAM)SC_KEYMENU, (LPARAM)(DWORD)wParam );
         }
