@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.1 2002-06-19 02:09:20 bird Exp $
+# $Id: Makefile,v 1.2 2002-06-19 02:11:53 bird Exp $
 
 #
 # Main testsuite make script.
@@ -42,4 +42,18 @@ SUBDIRS = \
 # Include the process rulez.
 !include $(MAKE_INCLUDE_PROCESS)
 
+
+#
+# This rule checksout the binaries which is residing in the
+# testsuite-bin branch
+#
+checkout-bin:
+!if "$(MAKE_INCLUDE_PROCESS:process.forwarder=)" == "$(MAKE_INCLUDE_PROCESS)"
+    cvs update -r testsuite-bin -d bin
+!else
+! ifndef BUILD_VERBOSE
+    @ \
+! endif
+    $(TOOL_BUILDENV) $(BUILD_ENVS_CHANGE) * $(TOOL_MAKE) -f $(MAKEFILE) $@
+!endif
 
