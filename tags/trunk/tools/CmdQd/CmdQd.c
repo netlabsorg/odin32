@@ -1,4 +1,4 @@
-/* $Id: CmdQd.c,v 1.18 2002-05-24 03:39:08 bird Exp $
+/* $Id: CmdQd.c,v 1.19 2003-09-30 13:29:07 bird Exp $
  *
  * Command Queue Daemon / Client.
  *
@@ -114,6 +114,7 @@
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
+#include <io.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -1493,20 +1494,34 @@ void Worker(void * iWorkerId)
             if (!fStdClosed)
             {   /* only do this once! */
                 HFILE   hf;
+                ULONG   ul = 0;
+
                 fclose(stdin);
+                close(HF_STDIN);
                 DosClose(HF_STDIN);
-                hDummy = HF_STDIN;
-                for (hf = 1; hf < 20; hf++)
-                    if (!(rcDbg = DosDupHandle(hf, &hDummy)))
-                        break;
+                fclose(stdout);
+                close(HF_STDOUT);
+                DosClose(HF_STDOUT);
+                fclose(stderr);
+                close(HF_STDERR);
+                DosClose(HF_STDERR);
+
+                hStdOut = HF_STDOUT;
+                hStdErr = HF_STDERR;
+                hDummy = -1;
+                rcDbg = DosOpen("\\dev\\nul", &hDummy, &ul, 0, 0,
+                                OPEN_ACTION_FAIL_IF_NEW | OPEN_ACTION_OPEN_IF_EXISTS,
+                                OPEN_SHARE_DENYNONE | OPEN_ACCESS_WRITEONLY, NULL);
                 assert(!rcDbg);
-                rcDbg = DosSetFHState(hDummy, OPEN_FLAGS_NOINHERIT);        assert(!rcDbg);
-                fclose(stdout); DosClose(HF_STDOUT);
-                fclose(stderr); DosClose(HF_STDERR);
-                hStdOut = HF_STDOUT; rcDbg = DosDupHandle(hDummy, &hStdOut);assert(!rcDbg);
-                assert(hStdOut == HF_STDOUT);
-                hStdErr = HF_STDERR; rcDbg = DosDupHandle(hDummy, &hStdErr);assert(!rcDbg);
-                assert(hStdErr == HF_STDERR);
+                rcDbg = DosSetFHState(hDummy, OPEN_FLAGS_NOINHERIT);
+                for (hf = HF_STDIN; hf <= HF_STDERR; hf++)
+                    if (hDummy != hf)
+                    {
+                        rcDbg = DosDupHandle(hDummy, &hf);
+                        assert(!rcDbg);
+                        rcDbg = DosSetFHState(hf, OPEN_FLAGS_NOINHERIT);
+                        assert(!rcDbg);
+                    }
                 fStdClosed = TRUE;
             }
 
