@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.96 2002-02-15 19:14:52 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.97 2002-04-13 06:31:53 bird Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -169,31 +169,31 @@ DWORD error2WinError(APIRET rc,DWORD defaultCode)
 
     case ERROR_INVALID_ACCESS: //12
         return ERROR_INVALID_ACCESS_W;
-    
+
     case ERROR_INVALID_DATA: //13
       return ERROR_INVALID_DATA_W;
-    
+
     case ERROR_INVALID_DRIVE: //15
       return ERROR_INVALID_DRIVE_W;
-    
+
     case ERROR_CURRENT_DIRECTORY: // 16
         return ERROR_CURRENT_DIRECTORY_W;
-    
+
     case ERROR_NO_MORE_FILES: //18
         return ERROR_NO_MORE_FILES_W;
 
     case ERROR_WRITE_PROTECT: //19
         return ERROR_WRITE_PROTECT_W;
-  
+
     case ERROR_BAD_UNIT: //20
         return ERROR_BAD_UNIT_W;
 
     case ERROR_NOT_READY: //21
         return ERROR_NOT_READY_W;
-    
+
     case ERROR_CRC: //23
         return ERROR_CRC_W;
-    
+
     case ERROR_NOT_DOS_DISK: //26
         return ERROR_NOT_DOS_DISK_W;
 
@@ -208,10 +208,10 @@ DWORD error2WinError(APIRET rc,DWORD defaultCode)
 
     case ERROR_LOCK_VIOLATION: //32
         return ERROR_LOCK_VIOLATION_W;
-    
+
     case ERROR_WRONG_DISK: //34
         return ERROR_WRONG_DISK_W;
-    
+
     case ERROR_SHARING_BUFFER_EXCEEDED: //36
         return ERROR_SHARING_BUFFER_EXCEEDED_W;
 
@@ -232,10 +232,10 @@ DWORD error2WinError(APIRET rc,DWORD defaultCode)
 
     case ERROR_TOO_MANY_SEMAPHORES: //100
         return ERROR_TOO_MANY_SEMAPHORES_W;
-    
+
     case ERROR_DISK_CHANGE: // 107
         return ERROR_DISK_CHANGE_W;
-    
+
     case ERROR_DRIVE_LOCKED: //108
         return ERROR_DRIVE_LOCKED_W;
 
@@ -271,16 +271,16 @@ DWORD error2WinError(APIRET rc,DWORD defaultCode)
 
     case ERROR_DISCARDED: //157
         return ERROR_DISCARDED_W;
-    
+
     case ERROR_INVALID_EXE_SIGNATURE: // 191
       return ERROR_INVALID_EXE_SIGNATURE_W;
-    
+
     case ERROR_EXE_MARKED_INVALID: // 192
       return ERROR_EXE_MARKED_INVALID_W;
-    
+
     case ERROR_BAD_EXE_FORMAT: // 193
       return ERROR_BAD_EXE_FORMAT_W;
-    
+
     case ERROR_FILENAME_EXCED_RANGE: //206
         return ERROR_FILENAME_EXCED_RANGE_W;
 
@@ -310,60 +310,60 @@ DWORD error2WinError(APIRET rc,DWORD defaultCode)
 
     case ERROR_EAS_DIDNT_FIT: //275
         return ERROR_EAS_DIDNT_FIT;
-    
+
     // device driver specific error codes (I24)
     case ERROR_USER_DEFINED_BASE + ERROR_I24_WRITE_PROTECT:
        return ERROR_WRITE_PROTECT_W;
-    
+
     case ERROR_USER_DEFINED_BASE + ERROR_I24_BAD_UNIT:
        return ERROR_BAD_UNIT_W;
-    
+
     case ERROR_USER_DEFINED_BASE + ERROR_I24_NOT_READY:
        return ERROR_NOT_READY_W;
-    
+
     case ERROR_USER_DEFINED_BASE + ERROR_I24_BAD_COMMAND:
        return ERROR_BAD_COMMAND_W;
-    
+
     case ERROR_USER_DEFINED_BASE + ERROR_I24_CRC:
        return ERROR_CRC_W;
-    
+
     case ERROR_USER_DEFINED_BASE + ERROR_I24_BAD_LENGTH:
        return ERROR_BAD_LENGTH_W;
-    
+
     case ERROR_USER_DEFINED_BASE + ERROR_I24_SEEK:
        return ERROR_SEEK_W;
-    
+
     case ERROR_USER_DEFINED_BASE + ERROR_I24_NOT_DOS_DISK:
        return ERROR_NOT_DOS_DISK_W;
-    
+
     case ERROR_USER_DEFINED_BASE + ERROR_I24_SECTOR_NOT_FOUND:
        return ERROR_SECTOR_NOT_FOUND_W;
-    
+
 // @@@PH this error code is not defined in winconst.h
 //    case ERROR_USER_DEFINED_BASE + ERROR_I24_OUT_OF_PAPER:
 //       return 28;
 
     case ERROR_USER_DEFINED_BASE + ERROR_I24_WRITE_FAULT:
        return ERROR_WRITE_FAULT_W;
-  
+
     case ERROR_USER_DEFINED_BASE + ERROR_I24_READ_FAULT:
        return ERROR_READ_FAULT_W;
-    
+
     case ERROR_USER_DEFINED_BASE + ERROR_I24_GEN_FAILURE:
        return ERROR_GEN_FAILURE_W;
-    
+
     case ERROR_USER_DEFINED_BASE + ERROR_I24_DISK_CHANGE:
        return ERROR_DISK_CHANGE_W;
-    
+
     case ERROR_USER_DEFINED_BASE + ERROR_I24_WRONG_DISK:
        return ERROR_WRONG_DISK_W;
-    
+
     case ERROR_USER_DEFINED_BASE + ERROR_I24_INVALID_PARAMETER:
        return ERROR_INVALID_PARAMETER_W;
-  
+
     case ERROR_USER_DEFINED_BASE + ERROR_I24_DEVICE_IN_USE:
        return ERROR_DEVICE_IN_USE_W;
-    
+
     default:
         dprintf(("WARNING: error2WinError: error %d not included!!!!", rc));
         return defaultCode;
@@ -486,7 +486,7 @@ DWORD OSLibDosAllocMem(LPVOID *lplpMemAddr, DWORD cbSize, DWORD flFlags)
     if(!rc)
         *lplpMemAddr = pvMemAddr;
 
-    return rc; 
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -586,7 +586,7 @@ DWORD OSLibDosOpen(char *lpszFileName, DWORD flags)
  HFILE  hFile;
  ULONG  ulAction;
  DWORD  os2flags = OPEN_FLAGS_NOINHERIT;
- char lOemFileName[260];        
+ char lOemFileName[260];
 
  CharToOemA(lpszFileName, lOemFileName);
 
@@ -616,15 +616,15 @@ tryopen:
                OPEN_ACTION_OPEN_IF_EXISTS,     /* Open function type */
                os2flags,
                0L);                            /* No extended attribute */
-  if(rc) 
+  if(rc)
   {
-    if(rc == ERROR_TOO_MANY_OPEN_FILES) 
+    if(rc == ERROR_TOO_MANY_OPEN_FILES)
     {
       ULONG CurMaxFH;
       LONG  ReqCount = 32;
 
       rc = DosSetRelMaxFH(&ReqCount, &CurMaxFH);
-      if(rc) 
+      if(rc)
       {
         dprintf(("DosSetRelMaxFH returned %d", rc));
         return 0;
@@ -632,11 +632,11 @@ tryopen:
       dprintf(("DosOpen failed -> increased nr open files to %d", CurMaxFH));
       goto tryopen;
     }
-    
+
     SetLastError(error2WinError(rc));
     return 0;
   }
-  
+
   // OK, file was opened
   SetLastError(ERROR_SUCCESS_W);
   return hFile;
@@ -807,7 +807,7 @@ DWORD OSLibDosSetFilePtr(DWORD hFile, DWORD offset, DWORD method)
 BOOL OSLibDosDelete(char *lpszFileName)
 {
  APIRET rc;
- char lOemFileName[260];        
+ char lOemFileName[260];
 
  CharToOemA(lpszFileName, lOemFileName);
 
@@ -1670,7 +1670,7 @@ DWORD OSLibDosCreateNamedPipe(LPCTSTR lpName,
    LPSTR lpOS2Name;
    DWORD hPipe;
    DWORD rc, ulAction;
-   
+
   if (dwOpenMode & PIPE_ACCESS_DUPLEX_W)
     dwOS2Mode |= NP_ACCESS_DUPLEX;
   else
@@ -1723,7 +1723,7 @@ DWORD OSLibDosCreateNamedPipe(LPCTSTR lpName,
   //we must use DosOpen here. So first try DosOpen, if that fails then we can
   //create the named pipe
   rc = DosOpen(lpOS2Name, &hPipe, &ulAction, 0, FILE_NORMAL, FILE_OPEN,
-               ((dwOpenMode & PIPE_ACCESS_INBOUND_W) ? OPEN_ACCESS_READWRITE : OPEN_ACCESS_READONLY) | 
+               ((dwOpenMode & PIPE_ACCESS_INBOUND_W) ? OPEN_ACCESS_READWRITE : OPEN_ACCESS_READONLY) |
                OPEN_SHARE_DENYNONE, NULL);
 
   if(rc == NO_ERROR) {
@@ -1791,13 +1791,13 @@ DWORD OSLibDosOpenPipe(LPCTSTR lpName,
                        LPSECURITY_ATTRIBUTES lpSecurityAttributes,
                        DWORD fuCreate,
                        DWORD fuAttrFlags)
-{  
+{
   LPSTR lpOS2Name;
   ULONG hPipe;
   ULONG rc, ulAction;
   ULONG openFlag = 0;
   ULONG openMode = 0;
-   
+
 
    switch(fuCreate)
    {
@@ -1866,7 +1866,7 @@ DWORD OSLibDosOpenPipe(LPCTSTR lpName,
   }
   else lpOS2Name = (LPSTR)lpName;
 
-  rc = DosOpen(lpOS2Name, &hPipe, &ulAction, 0, 0, 
+  rc = DosOpen(lpOS2Name, &hPipe, &ulAction, 0, 0,
                openFlag, openMode, NULL);
 
   if(rc == NO_ERROR) {
@@ -2284,7 +2284,7 @@ DWORD OSLibDosFindFirst(LPCSTR lpFileName,WIN32_FIND_DATAA* lpFindFileData)
   result.achName[0] = 0;
 
   ULONG oldmode = SetErrorMode(SEM_FAILCRITICALERRORS_W);
-  char    lOemFileName[260];        
+  char    lOemFileName[260];
 
   CharToOemA(lpFileName, lOemFileName);
 
@@ -2338,7 +2338,7 @@ DWORD OSLibDosFindFirstMulti(LPCSTR lpFileName,WIN32_FIND_DATAA *lpFindFileData,
   result = (FILEFINDBUF3*)malloc(searchCount*sizeof(FILEFINDBUF3));
 
   ULONG oldmode = SetErrorMode(SEM_FAILCRITICALERRORS_W);
-  char  lOemFileName[260];        
+  char  lOemFileName[260];
 
   CharToOemA(lpFileName, lOemFileName);
   APIRET rc = DosFindFirst((PSZ)lOemFileName,&hDir,attrs,result,searchCount*sizeof(FILEFINDBUF3),&searchCount,FIL_STANDARD);
@@ -2613,8 +2613,6 @@ BOOL  OSLibDosGetDiskGeometry(HANDLE hDisk, DWORD cDisk, PVOID pdiskgeom)
 }
 //******************************************************************************
 
-#define FSAttachSpace 100
-
 #define CDType         0x8000
 #define FloppyType     0x4000
 #define LanType        0x2000
@@ -2637,188 +2635,232 @@ BOOL  OSLibDosGetDiskGeometry(HANDLE hDisk, DWORD cDisk, PVOID pdiskgeom)
 #endif
 
 // used for input to logical disk Get device parms Ioctl
-struct {
-        UCHAR Infotype;
-        UCHAR DriveUnit;
-        } DriveRequest;
-
-// used for CD number of units Ioctl
-struct {
-        USHORT count;
-        USHORT first;
-        } cdinfo;
-
-//******************************************************************************
-ULONG OSLibGetDriveType(ULONG DriveIndex)
+#pragma pack(1)
+typedef struct
 {
- ULONG  ulDriveNum = 0;
- ULONG  ulDriveMap = 0;
- APIRET rc;
- ULONG  parmsize,datasize;
- ULONG  mask,Action;
- HFILE  handle;
- UCHAR  devname[5]="c:";
- PFSQBUFFER2 fsinfo;
- ULONG  len;
- PSZ    name;
- BIOSPARAMETERBLOCK device = {0};
- UINT   type;
+    UCHAR   Infotype;
+    UCHAR   DriveUnit;
+} DSKREQ;
 
-    rc = DosQueryCurrentDisk(&ulDriveNum, &ulDriveMap);
-    mask = 1 << DriveIndex;
+/*------------------------------------------------*
+ * Cat 0x82, Func 0x60:  Return Drive Letter Info *
+ *------------------------------------------------*/
+typedef struct DriveLetter_Data
+{
+    USHORT  drive_count;
+    USHORT  first_drive_number;
+} CDDRVLTR;
+#pragma pack()
 
-    if(rc == NO_ERROR && (mask & ulDriveMap))
-    {//drive present??
-        parmsize=sizeof(DriveRequest);
-        datasize=sizeof(device);
-        DriveRequest.Infotype  = 0; 
-        DriveRequest.DriveUnit = (UCHAR)DriveIndex;
 
-        // Get BIOS parameter block
-        if(DosDevIOCtl(-1, IOCTL_DISK,DSK_GETDEVICEPARAMS,
-                       (PVOID)&DriveRequest, sizeof(DriveRequest),
-                       &parmsize, (PVOID)&device,
-                       sizeof(BIOSPARAMETERBLOCK), &datasize) == NO_ERROR)
-        {
-            if(device.bDeviceType == 0 && device.fsDeviceAttr == 0) 
-            {   // fix for LAN type drives
-                device.fsDeviceAttr = LanType;
-            }
-        }
-        else {//could be a LAN drive
-            device.fsDeviceAttr = LanType;
-        }
-    }
-    else {
-        //drive not present -> fail
+/**
+ * Determin the type of a specific drive or the current drive.
+ *
+ * @returns DRIVE_UNKNOWN
+ *          DRIVE_NO_ROOT_DIR
+ *          DRIVE_CANNOTDETERMINE
+ *          DRIVE_DOESNOTEXIST
+ *          DRIVE_REMOVABLE
+ *          DRIVE_FIXED
+ *          DRIVE_REMOTE
+ *          DRIVE_CDROM
+ *          DRIVE_RAMDISK
+ *
+ * @param   ulDrive     Index of the drive which type we query.
+ *
+ * @status  completely implemented and tested
+ * @author  Vitali Pelenyov <sunlover@anduin.net>
+ * @author  bird
+ */
+ULONG OSLibGetDriveType(ULONG ulDrive)
+{
+    ULONG       cbParm;
+    ULONG       cbData;
+    ULONG       ulDriveNum = 0;
+    ULONG       ulDriveMap = 0;
+    APIRET      rc;
+    ULONG       ulDriveType;
+
+
+    /*
+     * Check if drive is present in the logical drive mask,
+     */
+    if (    DosQueryCurrentDisk(&ulDriveNum, &ulDriveMap)
+        || !(ulDriveMap & (1 << ulDrive))
+            )
         return DRIVE_DOESNOTEXIST_W;
-    }
 
-    // check for CD drives
-    if(DosOpen("\\DEV\\CD-ROM2$", &handle,&Action,
-               0, FILE_NORMAL, OPEN_ACTION_OPEN_IF_EXISTS,
-               OPEN_SHARE_DENYNONE|OPEN_ACCESS_READONLY, NULL) == 0)
+
+    /*
+     * Optimize floppy queries for A: and B:.
+     * (I don't hope these are any subject of change.)
+     */
+    static ULONG ulFloppyMask = 0;
+    if (ulFloppyMask & (1 << ulDrive))
+        return DRIVE_REMOVABLE_W;
+
+
+    /*
+     * Check for CD drives
+     * We don't have to this everytime. I mean, the os2cdrom.dmd is
+     * exactly very dynamic when it comes to this info.
+     */
+    static  CDDRVLTR    cdDrvLtr = {0xffff, 0xffff};
+    if (cdDrvLtr.drive_count == 0xffff)
     {
-        datasize=sizeof(cdinfo);
-        rc = DosDevIOCtl(handle, 0x82, 0x60,
-                         NULL, 0,
-                         NULL, (PVOID)&cdinfo,
-                         sizeof(cdinfo),
-                         &datasize);
-        if(rc == NO_ERROR) 
+        HFILE           hCDRom2;
+        ULONG           ulAction = 0;
+
+        if (DosOpen("\\DEV\\CD-ROM2$", &hCDRom2, &ulAction, 0,
+                    FILE_NORMAL, OPEN_ACTION_OPEN_IF_EXISTS,
+                    OPEN_SHARE_DENYNONE | OPEN_ACCESS_READONLY, NULL)
+            == NO_ERROR)
         {
-            // this is a CDROM/DVD drive
-            // CDROM detection fix
-            // when cdrom is not last drive letter that sometimes 
-            // reports wrong index, have to check that device type 
-            // can be a CDROM one
-            if(device.bDeviceType == 7 || device.bDeviceType == 8) // Other or RW optical
-            // /CDROM detection fix
-                if(cdinfo.first <= DriveIndex && DriveIndex < cdinfo.first + cdinfo.count)
-                    device.fsDeviceAttr |= CDType;
+            #define IOC_CDROM_2                 0x82 /* from cdioctl.h (ddk, os2cdrom.dmd sample) */
+            #define IOCD_RETURN_DRIVE_LETTER    0x60
+            cbData = sizeof(cdDrvLtr);
+            rc = DosDevIOCtl(hCDRom2,
+                             IOC_CDROM_2,
+                             IOCD_RETURN_DRIVE_LETTER,
+                             NULL, 0, NULL,
+                             (PVOID)&cdDrvLtr, sizeof(cdDrvLtr), &cbData);
+            DosClose(hCDRom2);
         }
-        DosClose(handle);
     }
 
-    // disable error popups
-    DosError(FERR_DISABLEEXCEPTION | FERR_DISABLEHARDERR);
 
-    fsinfo = (PFSQBUFFER2)malloc(FSAttachSpace);
-
-    // if the device is removable and NOT a CD
-    if(device.bDeviceType || device.fsDeviceAttr == LanType)
+    /*
+     * Is the drive present?? Lets the the BPB to check this.
+     * this should be a pretty speedy call if I'm not much mistaken.
+     */
+    BIOSPARAMETERBLOCK  bpb = {0};
+    DSKREQ              DskReq;
+    DskReq.Infotype  = 0;
+    DskReq.DriveUnit = (UCHAR)ulDrive;
+    cbParm = sizeof(DskReq);
+    cbData = sizeof(bpb);
+    if (DosDevIOCtl(-1, IOCTL_DISK, DSK_GETDEVICEPARAMS,
+                    (PVOID)&DskReq, sizeof(DskReq), &cbParm,
+                    (PVOID)&bpb, sizeof(BIOSPARAMETERBLOCK), &cbData)
+        == NO_ERROR)
     {
-        if((device.fsDeviceAttr & (CDType | NonRemovable)) == 0)
-        {
-            devname[0] = (UCHAR)(DriveIndex+Binary_to_Printable);
-            len        = FSAttachSpace;
-            rc = DosQueryFSAttach((PSZ) devname, 0L, FSAIL_QUERYNAME,
-                                  fsinfo, &len);
-            if(rc == NO_ERROR)
+        if (bpb.bDeviceType == 0 && bpb.fsDeviceAttr == 0)
+            bpb.fsDeviceAttr = LanType;  // fix for LAN type drives
+    }
+    else
+        bpb.fsDeviceAttr = LanType; //could be a LAN drive - could it??
+
+
+    /*
+     * This is a CDROM/DVD drive
+     *
+     * Fix: When the cdrom is not last drive letter that
+     *      sometimes reports wrong index, have to check
+     *      that device type can be a CDROM one.
+     */
+    if (    cdDrvLtr.drive_count > 0
+        &&  (bpb.bDeviceType == DEVTYPE_UNKNOWN || bpb.bDeviceType == DEVTYPE_OPTICAL) // Other or RW optical
+        &&  ulDrive >= cdDrvLtr.first_drive_number
+        &&  ulDrive <  cdDrvLtr.first_drive_number + cdDrvLtr.drive_count
+            )
+        bpb.fsDeviceAttr |= CDType;
+
+
+    if (bpb.bDeviceType || bpb.fsDeviceAttr == LanType)
+    {
+        if ((bpb.fsDeviceAttr & (CDType | NonRemovable)) == 0)
+        {   // if the device is removable and NOT a CD
+            CHAR        szDevName[4] = "A:";
+            PFSQBUFFER2 pfsqbuf2;
+
+            szDevName[0] += ulDrive;
+            cbData = sizeof(PFSQBUFFER2) + 3 * CCHMAXPATH;
+            pfsqbuf2 = (PFSQBUFFER2)malloc(cbData);
+            DosError(FERR_DISABLEEXCEPTION | FERR_DISABLEHARDERR); // disable error popups
+            rc = DosQueryFSAttach(&szDevName[0], 0L, FSAIL_QUERYNAME, pfsqbuf2, &cbData);
+            if (rc == NO_ERROR)
             {
-                if(fsinfo->iType == FSAT_REMOTEDRV) {
-                   device.fsDeviceAttr |= LanType;
-                }
-                else 
-                if(fsinfo->iType == FSAT_LOCALDRV)
+                if (pfsqbuf2->iType == FSAT_REMOTEDRV)
+                    bpb.fsDeviceAttr |= LanType;
+                else if (pfsqbuf2->iType == FSAT_LOCALDRV)
                 {
-                    name = (char *) fsinfo->szName;
-                    name += strlen(name)+1;
-                    if(strcmp(name,"FAT") == 0)
+                    PSZ pszFSName = (PSZ)pfsqbuf2->szName + pfsqbuf2->cbName;
+                    if (!strcmp(pszFSName, "FAT"))
                     {
                         // device is a removable FAT drive, so it MUST be diskette
                         // as Optical has another name as does LAN and SRVIFS
-                        if(device.bSectorsPerCluster != OpticalSectorsPerCluster) 
-                        {
-                             device.fsDeviceAttr |= FloppyType;
-                        }
-                        else device.fsDeviceAttr |= OpticalType;
+                        if (bpb.bSectorsPerCluster != OpticalSectorsPerCluster)
+                            bpb.fsDeviceAttr |= FloppyType;
+                        else
+                            bpb.fsDeviceAttr |= OpticalType;
                     }
-                    // CDROM detection fix
+                    /*
+                     * CDROM detection fix
+                     */
                     else
                     {
                         // device is removable non-FAT, maybe it is CD?
-                        if (device.bDeviceType == 7 && 
-                            device.bMedia == 5 && 
-                            device.usBytesPerSector > 512)
-                        {
-                            device.fsDeviceAttr |= CDType;
-                        }
+                        if (    bpb.bDeviceType == DEVTYPE_UNKNOWN
+                            &&  bpb.bMedia == 5
+                            &&  bpb.usBytesPerSector > 512
+                                )
+                            bpb.fsDeviceAttr |= CDType;
                     }
                     // CDROM detection fix
-                 }
+                }
             }
             else // must be no media or audio only (for CDs at least)
             {
-                if(device.cCylinders <= DisketteCylinders) // floppies will always be 80
-                {                                          // or less cylinders
-                    if(device.bSectorsPerCluster != OpticalSectorsPerCluster) {
-                         device.fsDeviceAttr |= FloppyType;
-                    }
-                    else device.fsDeviceAttr |= OpticalType;
+                if (bpb.cCylinders <= DisketteCylinders) // floppies will always be 80
+                {
+                    // or less cylinders
+                    if (bpb.bSectorsPerCluster != OpticalSectorsPerCluster)
+                        bpb.fsDeviceAttr |= FloppyType;
+                    else
+                        bpb.fsDeviceAttr |= OpticalType;
                 }
             }
+
+            //Enable error popups again
+            DosError(FERR_ENABLEEXCEPTION | FERR_ENABLEHARDERR);
+
+            free(pfsqbuf2);
         }
-        else      
+        else
         {// non removable or CD type. maybe RAM disk
-            if(!(device.fsDeviceAttr & CDType))       // if NOT CD
+            if (!(bpb.fsDeviceAttr & CDType))       // if NOT CD
             {
-                if(device.cFATs == 1)                 // is there only one FAT?
-                   device.fsDeviceAttr |= VDISKType;  // -> RAM disk
+                if (bpb.cFATs == 1)                 // is there only one FAT?
+                    bpb.fsDeviceAttr |= VDISKType;  // -> RAM disk
             }
         }
     }
-    free(fsinfo);
 
-    if(device.fsDeviceAttr & FloppyType) {
-        type = DRIVE_REMOVABLE_W;
-    }
-    else 
-    if(device.fsDeviceAttr & CDType) {
-        type = DRIVE_CDROM_W;
-    }
-    else 
-    if(device.fsDeviceAttr & LanType) {
-        type = DRIVE_REMOTE_W;
-    }
-    else 
-    if(device.fsDeviceAttr & VDISKType) {
-        type = DRIVE_RAMDISK_W;
-    }
-    else 
-    if(device.fsDeviceAttr & OpticalType || device.bDeviceType == DEVTYPE_OPTICAL) {
-        type = DRIVE_FIXED_W;
-    }
-    else 
-    if(device.bDeviceType == DEVTYPE_FIXED) {
-        type = DRIVE_FIXED_W;
-    }
-    else type = 0;
 
-    //Enable error popups again
-    DosError(FERR_ENABLEEXCEPTION | FERR_ENABLEHARDERR);
+    /*
+     * Determin return value.
+     */
+    if (bpb.fsDeviceAttr & FloppyType)
+    {
+        ulDriveType = DRIVE_REMOVABLE_W;
+        /* update floppy cache if A or B */
+        if (ulDrive <= 1)
+            ulFloppyMask |= 1 << ulDrive;
+    }
+    else if (bpb.fsDeviceAttr & CDType)
+        ulDriveType = DRIVE_CDROM_W;
+    else if (bpb.fsDeviceAttr & LanType)
+        ulDriveType = DRIVE_REMOTE_W;
+    else if (bpb.fsDeviceAttr & VDISKType)
+        ulDriveType = DRIVE_RAMDISK_W;
+    else if (bpb.fsDeviceAttr & OpticalType || bpb.bDeviceType == DEVTYPE_OPTICAL)
+        ulDriveType = DRIVE_FIXED_W;
+    else if (bpb.bDeviceType == DEVTYPE_FIXED)
+        ulDriveType = DRIVE_FIXED_W;
+    else
+        ulDriveType = DRIVE_UNKNOWN_W;
 
-    return type;
+    return ulDriveType;
 }
 //******************************************************************************
 //Returns bit map where with the mapping of the logical drives
@@ -2895,9 +2937,9 @@ DWORD OSLibDosDevIOCtl( DWORD hFile, DWORD dwCat, DWORD dwFunc,
   BOOL  flagTiledParm = FALSE;
   PVOID pTiledData    = pData;
   BOOL  flagTiledData = FALSE;
-  
+
 #define MEM_TILED_CEILING 0x1fffffff
-  
+
   // bounce buffer support
   // make sure no parameter or data buffer can pass the tiled memory region
   // barrier (usually 512MB). OS/2 kernel does not correctly translate these
@@ -2909,16 +2951,16 @@ DWORD OSLibDosDevIOCtl( DWORD hFile, DWORD dwCat, DWORD dwFunc,
     rc = DosAllocMem(&pTiledParm, dwParmMaxLen, PAG_READ | PAG_WRITE);
     if (rc)
       goto _exit_ioctl;
-    
+
     flagTiledParm = TRUE;
   }
-  
+
   if (pTiledData && (((DWORD)pTiledData + max(dwDataMaxLen, *pdwDataLen)) > MEM_TILED_CEILING))
   {
     rc = DosAllocMem(&pTiledData, dwDataMaxLen, PAG_READ | PAG_WRITE);
     if (rc)
         goto _exit_ioctl;
-    
+
     flagTiledData = TRUE;
   }
 
@@ -2926,7 +2968,7 @@ DWORD OSLibDosDevIOCtl( DWORD hFile, DWORD dwCat, DWORD dwFunc,
   // bounce buffers if necessary
   if (pTiledParm != pParm)
     memcpy(pTiledParm, pParm, *pdwParmLen);
-  
+
   if (pTiledData != pData)
     memcpy(pTiledData, pData, *pdwDataLen);
 
@@ -2934,25 +2976,25 @@ DWORD OSLibDosDevIOCtl( DWORD hFile, DWORD dwCat, DWORD dwFunc,
   rc = DosDevIOCtl( (HFILE)hFile, dwCat, dwFunc,
                      pParm, dwParmMaxLen, pdwParmLen,
                      pData, dwDataMaxLen, pdwDataLen);
-  
+
   // copy data from bounce buffers to real
   // target buffers if necessary
   if (pTiledParm != pParm)
     memcpy(pParm, pTiledParm, *pdwParmLen);
-  
+
   if (pTiledData != pData)
     memcpy(pData, pTiledData, *pdwDataLen);
-  
-  
+
+
   _exit_ioctl:
-  
+
   // deallocate bounce buffers
   if (flagTiledParm)
     DosFreeMem(pTiledParm);
-  
+
   if (flagTiledData)
     DosFreeMem(pTiledData);
-  
+
   rc = error2WinError(rc, ERROR_INVALID_HANDLE);
   SetLastError(rc);
   return (DWORD)rc;
@@ -3090,8 +3132,8 @@ ULONG OSLibDosGetProcAddress(HMODULE hModule, LPCSTR lpszProc)
    if(rc == ERROR_INVALID_HANDLE && pfn == NULL) {
       CHAR pszError[32], pszModule[CCHMAXPATH];
 
-      if(DosQueryModuleName( hmod, CCHMAXPATH, pszModule ) == 0 && 
-         DosLoadModule( pszError, 32, pszModule, &hmod ) == 0) 
+      if(DosQueryModuleName( hmod, CCHMAXPATH, pszModule ) == 0 &&
+         DosLoadModule( pszError, 32, pszModule, &hmod ) == 0)
       {
           rc = DosQueryProcAddr(hmod, ordinal, (PSZ)lpszProc, &pfn);
       }
@@ -3109,12 +3151,12 @@ BOOL OSLibDosSetThreadAffinity(DWORD dwThreadAffinityMask)
   MPAFFINITY  mask;
   APIRET      rc;
 
-    if(fInit == FALSE && pfnDosSetThreadAffinity == NULL) 
+    if(fInit == FALSE && pfnDosSetThreadAffinity == NULL)
     {
         ULONG nrCPUs;
 
         rc = DosQuerySysInfo(QSV_NUMPROCESSORS, QSV_NUMPROCESSORS, &nrCPUs, sizeof(nrCPUs));
-        if (rc != 0 || nrCPUs == 1) 
+        if (rc != 0 || nrCPUs == 1)
         {//not supported
             fInit = TRUE;
             SetLastError(ERROR_SUCCESS_W);
@@ -3151,12 +3193,12 @@ BOOL OSLibDosQueryAffinity(DWORD fMaskType, DWORD *pdwThreadAffinityMask)
   MPAFFINITY  mask;
   APIRET      rc;
 
-    if(fInit == FALSE && pfnDosQueryThreadAffinity == NULL) 
+    if(fInit == FALSE && pfnDosQueryThreadAffinity == NULL)
     {
         ULONG nrCPUs;
 
         rc = DosQuerySysInfo(QSV_NUMPROCESSORS, QSV_NUMPROCESSORS, &nrCPUs, sizeof(nrCPUs));
-        if (rc != 0 || nrCPUs == 1) 
+        if (rc != 0 || nrCPUs == 1)
         {//not supported
             fInit = TRUE;
             *pdwThreadAffinityMask = 1;
@@ -3198,7 +3240,7 @@ DWORD OSLibDosSetPriority(ULONG tid, int priority)
     LONG   os2prioritydelta;
     APIRET rc;
 
-    switch(priority) 
+    switch(priority)
     {
     case THREAD_PRIORITY_IDLE_W:
         os2priorityclass = PRTYC_IDLETIME;
