@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.10 1999-09-29 09:16:32 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.11 1999-10-03 20:13:04 achimha Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -174,6 +174,7 @@ Win32WndClass  *getClass()  { return windowClass; };
 Win32BaseWindow *getOwner()                   { return owner; };
 
 Win32BaseWindow *getTopParent();
+BOOL isMDIClient();
  SCROLLBAR_INFO *getScrollInfo(int nBar);
        LONG      setScrollInfo(int nBar, SCROLLINFO *info, int fRedraw);
 
