@@ -1,4 +1,4 @@
-/* $Id: winkeyboard.cpp,v 1.18 2001-10-23 08:36:20 phaller Exp $ */
+/* $Id: winkeyboard.cpp,v 1.19 2001-10-24 11:18:19 phaller Exp $ */
 /*
  * Win32 <-> PM key translation
  *
@@ -307,266 +307,273 @@ BYTE abPMScanToWinVKey[256][2] =
 /* 0xFF                     */ , 0x00                       ,FALSE
                                };
 
-BYTE abWinVKeyToPMScan[256] =
-/****************************************/
-/* Vkey                   *    Scancode */
-/****************************************/
-/* 0x00                   */ { 0x00
-/* 0x01 VK_LBUTTON        */ , 0x00
-/* 0x02 VK_RBUTTON        */ , 0x00
-/* 0x03 VK_CANCEL         */ , PMSCAN_BREAK
-/* 0x04 VK_MBUTTON        */ , 0x00
-/* 0x05                   */ , 0x00
-/* 0x06                   */ , 0x00
-/* 0x07                   */ , 0x00
-/* 0x08 VK_BACK           */ , PMSCAN_BACKSPACE
-/* 0x09 VK_TAB            */ , PMSCAN_TAB
-/* 0x0A                   */ , 0x00
-/* 0x0B                   */ , 0x00
-/* 0x0C VK_CLEAR          */ , PMSCAN_PAD5
-/* 0x0D VK_RETURN         */ , PMSCAN_ENTER
-/* 0x0E                   */ , 0x00
-/* 0x0F                   */ , 0x00
-/* 0x10 VK_SHIFT          */ , PMSCAN_SHIFTLEFT
-/* 0x11 VK_CONTROL        */ , PMSCAN_CTRLLEFT
-/* 0x12 VK_MENU           */ , PMSCAN_ALTLEFT
-/* 0x13 VK_PAUSE          */ , PMSCAN_PAUSE
-/* 0x14 VK_CAPITAL        */ , PMSCAN_CAPSLOCK
-/* 0x15                   */ , 0x00
-/* 0x16                   */ , 0x00
-/* 0x17                   */ , 0x00
-/* 0x18                   */ , 0x00
-/* 0x19                   */ , 0x00
-/* 0x1A                   */ , 0x00
-/* 0x1B VK_ESCAPE         */ , PMSCAN_ESC
-/* 0x1C                   */ , 0x00
-/* 0x1D                   */ , 0x00
-/* 0x1E                   */ , 0x00
-/* 0x1F                   */ , 0x00
-/* 0x20 VK_SPACE          */ , PMSCAN_SPACE
-/* 0x21 VK_PRIOR          */ , PMSCAN_PAGEUP
-/* 0x22 VK_NEXT           */ , PMSCAN_PAGEDOWN
-/* 0x23 VK_END            */ , PMSCAN_END
-/* 0x24 VK_HOME           */ , PMSCAN_HOME
-/* 0x25 VK_LEFT           */ , PMSCAN_LEFT
-/* 0x26 VK_UP             */ , PMSCAN_UP
-/* 0x27 VK_RIGHT          */ , PMSCAN_RIGHT
-/* 0x28 VK_DOWN           */ , PMSCAN_DOWN
-/* 0x29 VK_SELECT         */ , 0x00
-/* 0x2A VK_PRINT          */ , PMSCAN_PRINT
-/* 0x2B VK_EXECUTE        */ , 0x00
-/* 0x2C VK_SNAPSHOT       */ , 0x00
-/* 0x2D VK_INSERT         */ , PMSCAN_INSERT
-/* 0x2E VK_DELETE         */ , PMSCAN_DELETE
-/* 0x2F VK_HELP           */ , PMSCAN_HELP
-/* 0x30 VK_0              */ , PMSCAN_ZERO
-/* 0x31 VK_1              */ , PMSCAN_ONE
-/* 0x32 VK_2              */ , PMSCAN_TWO
-/* 0x33 VK_3              */ , PMSCAN_THREE
-/* 0x34 VK_4              */ , PMSCAN_FOUR
-/* 0x35 VK_5              */ , PMSCAN_FIVE
-/* 0x36 VK_6              */ , PMSCAN_SIX
-/* 0x37 VK_7              */ , PMSCAN_SEVEN
-/* 0x38 VK_8              */ , PMSCAN_EIGHT
-/* 0x39 VK_9              */ , PMSCAN_NINE
-/* 0x3A                   */ , 0x00
-/* 0x3B                   */ , 0x00
-/* 0x3C                   */ , 0x00
-/* 0x3D                   */ , 0x00
-/* 0x3E                   */ , 0x00
-/* 0x3F                   */ , 0x00
-/* 0x40                   */ , 0x00
-/* 0x41 VK_A              */ , PMSCAN_A
-/* 0x42 VK_B              */ , PMSCAN_B
-/* 0x43 VK_C              */ , PMSCAN_C
-/* 0x44 VK_D              */ , PMSCAN_D
-/* 0x45 VK_E              */ , PMSCAN_E
-/* 0x46 VK_F              */ , PMSCAN_F
-/* 0x47 VK_G              */ , PMSCAN_G
-/* 0x48 VK_H              */ , PMSCAN_H
-/* 0x49 VK_I              */ , PMSCAN_I
-/* 0x4A VK_J              */ , PMSCAN_J
-/* 0x4B VK_K              */ , PMSCAN_K
-/* 0x4C VK_L              */ , PMSCAN_L
-/* 0x4D VK_M              */ , PMSCAN_M
-/* 0x4E VK_N              */ , PMSCAN_N
-/* 0x4F VK_O              */ , PMSCAN_O
-/* 0x50 VK_P              */ , PMSCAN_P
-/* 0x51 VK_Q              */ , PMSCAN_Q
-/* 0x52 VK_R              */ , PMSCAN_R
-/* 0x53 VK_S              */ , PMSCAN_S
-/* 0x54 VK_T              */ , PMSCAN_T
-/* 0x55 VK_U              */ , PMSCAN_U
-/* 0x56 VK_V              */ , PMSCAN_V
-/* 0x57 VK                */ , PMSCAN_W
-/* 0x58 VK_X              */ , PMSCAN_X
-/* 0x59 VK_Y              */ , PMSCAN_Y
-/* 0x5A VK_Z              */ , PMSCAN_Z
-/* 0x5B VK_LWIN           */ , PMSCAN_WINLEFT
-/* 0x5C VK_RWIN           */ , PMSCAN_WINRIGHT
-/* 0x5D VK_APPS           */ , PMSCAN_APPLICATION
-/* 0x5E                   */ , 0x00
-/* 0x5F                   */ , 0x00
-/* 0x60 VK_NUMPAD0        */ , PMSCAN_PAD0
-/* 0x61 VK_NUMPAD1        */ , PMSCAN_PAD1
-/* 0x62 VK_NUMPAD2        */ , PMSCAN_PAD2
-/* 0x63 VK_NUMPAD3        */ , PMSCAN_PAD3
-/* 0x64 VK_NUMPAD4        */ , PMSCAN_PAD4
-/* 0x65 VK_NUMPAD5        */ , PMSCAN_PAD5
-/* 0x66 VK_NUMPAD6        */ , PMSCAN_PAD6
-/* 0x67 VK_NUMPAD7        */ , PMSCAN_PAD7
-/* 0x68 VK_NUMPAD8        */ , PMSCAN_PAD8
-/* 0x69 VK_NUMPAD9        */ , PMSCAN_PAD9
-/* 0x6A VK_MULTIPLY       */ , PMSCAN_PADASTERISK
-/* 0x6B VK_ADD            */ , PMSCAN_PADPLUS
-/* 0x6C VK_SEPARATOR      */ , 0x00
-/* 0x6D VK_SUBTRACT       */ , PMSCAN_PADMINUS
-/* 0x6E VK_DECIMAL        */ , PMSCAN_PADPERIOD
-/* 0x6F VK_DIVIDE         */ , PMSCAN_PADSLASH
-/* 0x70 VK_F1             */ , PMSCAN_F1
-/* 0x71 VK_F2             */ , PMSCAN_F2
-/* 0x72 VK_F3             */ , PMSCAN_F3
-/* 0x73 VK_F4             */ , PMSCAN_F4
-/* 0x74 VK_F5             */ , PMSCAN_F5
-/* 0x75 VK_F6             */ , PMSCAN_F6
-/* 0x76 VK_F7             */ , PMSCAN_F7
-/* 0x77 VK_F8             */ , PMSCAN_F8
-/* 0x78 VK_F9             */ , PMSCAN_F9
-/* 0x79 VK_F10            */ , PMSCAN_F10
-/* 0x7A VK_F11            */ , PMSCAN_F11
-/* 0x7B VK_F12            */ , PMSCAN_F12
-/* 0x7C VK_F13            */ , PMSCAN_F13
-/* 0x7D VK_F14            */ , PMSCAN_F14
-/* 0x7E VK_F15            */ , PMSCAN_F15
-/* 0x7F VK_F16            */ , PMSCAN_F16
-/* 0x80 VK_F17            */ , PMSCAN_F17
-/* 0x81 VK_F18            */ , PMSCAN_F18
-/* 0x82 VK_F19            */ , PMSCAN_F19
-/* 0x83 VK_F20            */ , PMSCAN_F20
-/* 0x84 VK_F21            */ , PMSCAN_F21
-/* 0x85 VK_F22            */ , PMSCAN_F22
-/* 0x86 VK_F23            */ , PMSCAN_F23
-/* 0x87 VK_F24            */ , PMSCAN_F24
-/* 0x88                   */ , 0x00
-/* 0x89                   */ , 0x00
-/* 0x8A                   */ , 0x00
-/* 0x8B                   */ , 0x00
-/* 0x8C                   */ , 0x00
-/* 0x8D                   */ , 0x00
-/* 0x8E                   */ , 0x00
-/* 0x8F                   */ , 0x00
-/* 0x90 VK_NUMLOCK        */ , PMSCAN_NUMLOCK
-/* 0x91 VK_SCROLL         */ , PMSCAN_SCROLLLOCK
-/* 0x92                   */ , 0x00
-/* 0x93                   */ , 0x00
-/* 0x94                   */ , 0x00
-/* 0x95                   */ , 0x00
-/* 0x96                   */ , 0x00
-/* 0x97                   */ , 0x00
-/* 0x98                   */ , 0x00
-/* 0x99                   */ , 0x00
-/* 0x9A                   */ , 0x00
-/* 0x9B                   */ , 0x00
-/* 0x9C                   */ , 0x00
-/* 0x9D                   */ , 0x00
-/* 0x9E                   */ , 0x00
-/* 0x9F                   */ , 0x00
-/* 0xA0 VK_LSHIFT         */ , PMSCAN_SHIFTLEFT
-/* 0xA1 VK_RSHIFT         */ , PMSCAN_SHIFTRIGHT
-/* 0xA2 VK_LCONTROL       */ , PMSCAN_CTRLLEFT
-/* 0xA3 VK_RCONTROL       */ , PMSCAN_CTRLRIGHT
-/* 0xA4 VK_LMENU          */ , PMSCAN_ALTLEFT
-/* 0xA5 VK_RMENU          */ , PMSCAN_ALTRIGHT
-/* 0xA6                   */ , 0x00
-/* 0xA7                   */ , 0x00
-/* 0xA8                   */ , 0x00
-/* 0xA9                   */ , 0x00
-/* 0xAA                   */ , 0x00
-/* 0xAB                   */ , 0x00
-/* 0xAC                   */ , 0x00
-/* 0xAD                   */ , 0x00
-/* 0xAE                   */ , 0x00
-/* 0xAF                   */ , 0x00
-/* 0xB0                   */ , 0x00
-/* 0xB1                   */ , 0x00
-/* 0xB2                   */ , 0x00
-/* 0xB3                   */ , 0x00
-/* 0xB4                   */ , 0x00
-/* 0xB5                   */ , 0x00
-/* 0xB6                   */ , 0x00
-/* 0xB7                   */ , 0x00
-/* 0xB8                   */ , 0x00
-/* 0xB9                   */ , 0x00
-/* 0xBA VK_SEMICOLON      */ , PMSCAN_SEMICOLON
-/* 0xBB VK_EQUAL          */ , PMSCAN_EQUAL
-/* 0xBC VK_COMMA          */ , PMSCAN_COMMA
-/* 0xBD VK_HYPHEN         */ , PMSCAN_HYPHEN
-/* 0xBE VK_PERIOD         */ , PMSCAN_PERIOD
-/* 0xBF VK_SLASH          */ , PMSCAN_SLASH
-/* 0xC0 VK_GRAVE          */ , PMSCAN_GRAVE
-/* 0xC1 VK_FFC1           */ , PMSCAN_JEXTRA
-/* 0xC2 VK_YEN            */ , PMSCAN_YEN
-/* 0xC3                   */ , 0x00
-/* 0xC4                   */ , 0x00
-/* 0xC5                   */ , 0x00
-/* 0xC6                   */ , 0x00
-/* 0xC7                   */ , 0x00
-/* 0xC8                   */ , 0x00
-/* 0xC9                   */ , 0x00
-/* 0xCA                   */ , 0x00
-/* 0xCB                   */ , 0x00
-/* 0xCC                   */ , 0x00
-/* 0xCD                   */ , 0x00
-/* 0xCE                   */ , 0x00
-/* 0xCF                   */ , 0x00
-/* 0xD0                   */ , 0x00
-/* 0xD1                   */ , 0x00
-/* 0xD2                   */ , 0x00
-/* 0xD3                   */ , 0x00
-/* 0xD4                   */ , 0x00
-/* 0xD5                   */ , 0x00
-/* 0xD6                   */ , 0x00
-/* 0xD7                   */ , 0x00
-/* 0xD8                   */ , 0x00
-/* 0xD9                   */ , 0x00
-/* 0xDA                   */ , 0x00
-/* 0xDB VK_BRACKETLEFT    */ , PMSCAN_BRACKETLEFT
-/* 0xDC VK_BACKSLASH      */ , PMSCAN_BACKSLASH
-/* 0xDD VK_BRACKETRIGHT   */ , PMSCAN_BRACKETRIGHT
-/* 0xDE VK_QUOTESINGLE    */ , PMSCAN_QUOTESINGLE
-/* 0xDF                   */ , 0x00
-/* 0xE0                   */ , 0x00
-/* 0xE1                   */ , 0x00
-/* 0xE2 VK_EXTRA          */ , PMSCAN_EXTRA
-/* 0xE3                   */ , 0x00
-/* 0xE4                   */ , 0x00
-/* 0xE5                   */ , 0x00
-/* 0xE6                   */ , 0x00
-/* 0xE7                   */ , 0x00
-/* 0xE8                   */ , 0x00
-/* 0xE9                   */ , 0x00
-/* 0xEA                   */ , 0x00
-/* 0xEB                   */ , 0x00
-/* 0xEC                   */ , 0x00
-/* 0xED                   */ , 0x00
-/* 0xEE                   */ , 0x00
-/* 0xEF                   */ , 0x00
-/* 0xF0                   */ , 0x00
-/* 0xF1                   */ , 0x00
-/* 0xF2                   */ , 0x00
-/* 0xF3                   */ , 0x00
-/* 0xF4                   */ , 0x00
-/* 0xF5                   */ , 0x00
-/* 0xF6 VK_ATTN           */ , 0x00
-/* 0xF7 VK_CRSEL          */ , 0x00
-/* 0xF8 VK_EXSEL          */ , 0x00
-/* 0xF9 VK_EREOF          */ , PMSCAN_ERASEEOF
-/* 0xFA VK_PLAY           */ , 0x00
-/* 0xFB VK_ZOOM           */ , 0x00
-/* 0xFC VK_NONAME         */ , 0x00
-/* 0xFD VK_PA1            */ , PMSCAN_PA1
-/* 0xFE VK_OEM_CLEAR      */ , 0x00
-/* 0xFF                   */ , 0x00
+typedef struct tagWinVKeyToPMScan
+{
+  /* index is the VKey value */
+  BYTE  bPMScanCode;
+  LPSTR lpstrName;
+} WINVKEYTOPMSCAN, *PWINVKEYTOPMSCAN;
+
+WINVKEYTOPMSCAN abWinVKeyToPMScan[256] =
+/**********************************************************************/
+/* Vkey                   *    Scancode               * Name          */
+/**********************************************************************/
+/* 0x00                   */ { 0x00                   , NULL
+/* 0x01 VK_LBUTTON        */ , 0x00                   , NULL
+/* 0x02 VK_RBUTTON        */ , 0x00                   , NULL
+/* 0x03 VK_CANCEL         */ , PMSCAN_BREAK           , "Break"
+/* 0x04 VK_MBUTTON        */ , 0x00                   , NULL
+/* 0x05                   */ , 0x00                   , NULL
+/* 0x06                   */ , 0x00                   , NULL
+/* 0x07                   */ , 0x00                   , NULL
+/* 0x08 VK_BACK           */ , PMSCAN_BACKSPACE       , "Backspace"
+/* 0x09 VK_TAB            */ , PMSCAN_TAB             , "Tab"
+/* 0x0A                   */ , 0x00                   , NULL
+/* 0x0B                   */ , 0x00                   , NULL
+/* 0x0C VK_CLEAR          */ , PMSCAN_PAD5            , "Num 5"
+/* 0x0D VK_RETURN         */ , PMSCAN_ENTER           , "Enter"
+/* 0x0E                   */ , 0x00                   , NULL
+/* 0x0F                   */ , 0x00                   , NULL
+/* 0x10 VK_SHIFT          */ , PMSCAN_SHIFTLEFT       , "Left Shift"
+/* 0x11 VK_CONTROL        */ , PMSCAN_CTRLLEFT        , "Left Control"
+/* 0x12 VK_MENU           */ , PMSCAN_ALTLEFT         , "Left Alt"
+/* 0x13 VK_PAUSE          */ , PMSCAN_PAUSE           , "Pause"
+/* 0x14 VK_CAPITAL        */ , PMSCAN_CAPSLOCK        , "Caps Lock"
+/* 0x15                   */ , 0x00                   , NULL
+/* 0x16                   */ , 0x00                   , NULL
+/* 0x17                   */ , 0x00                   , NULL
+/* 0x18                   */ , 0x00                   , NULL
+/* 0x19                   */ , 0x00                   , NULL
+/* 0x1A                   */ , 0x00                   , NULL
+/* 0x1B VK_ESCAPE         */ , PMSCAN_ESC             , "Escape"
+/* 0x1C                   */ , 0x00                   , NULL
+/* 0x1D                   */ , 0x00                   , NULL
+/* 0x1E                   */ , 0x00                   , NULL
+/* 0x1F                   */ , 0x00                   , NULL
+/* 0x20 VK_SPACE          */ , PMSCAN_SPACE           , "Space"
+/* 0x21 VK_PRIOR          */ , PMSCAN_PAGEUP          , "Page Up"
+/* 0x22 VK_NEXT           */ , PMSCAN_PAGEDOWN        , "Page Down"
+/* 0x23 VK_END            */ , PMSCAN_END             , "End"
+/* 0x24 VK_HOME           */ , PMSCAN_HOME            , "Home"
+/* 0x25 VK_LEFT           */ , PMSCAN_LEFT            , "Left"
+/* 0x26 VK_UP             */ , PMSCAN_UP              , "Up"
+/* 0x27 VK_RIGHT          */ , PMSCAN_RIGHT           , "Right"
+/* 0x28 VK_DOWN           */ , PMSCAN_DOWN            , "Down"
+/* 0x29 VK_SELECT         */ , 0x00                   , NULL
+/* 0x2A VK_PRINT          */ , PMSCAN_PRINT           , "Print"
+/* 0x2B VK_EXECUTE        */ , 0x00                   , NULL
+/* 0x2C VK_SNAPSHOT       */ , 0x00                   , NULL
+/* 0x2D VK_INSERT         */ , PMSCAN_INSERT          , "Insert"
+/* 0x2E VK_DELETE         */ , PMSCAN_DELETE          , "Delete"
+/* 0x2F VK_HELP           */ , PMSCAN_HELP            , "Help"
+/* 0x30 VK_0              */ , PMSCAN_ZERO            , "0"
+/* 0x31 VK_1              */ , PMSCAN_ONE             , "1"
+/* 0x32 VK_2              */ , PMSCAN_TWO             , "2"
+/* 0x33 VK_3              */ , PMSCAN_THREE           , "3"
+/* 0x34 VK_4              */ , PMSCAN_FOUR            , "4"
+/* 0x35 VK_5              */ , PMSCAN_FIVE            , "5"
+/* 0x36 VK_6              */ , PMSCAN_SIX             , "6"
+/* 0x37 VK_7              */ , PMSCAN_SEVEN           , "7"
+/* 0x38 VK_8              */ , PMSCAN_EIGHT           , "8"
+/* 0x39 VK_9              */ , PMSCAN_NINE            , "9"
+/* 0x3A                   */ , 0x00                   , NULL
+/* 0x3B                   */ , 0x00                   , NULL
+/* 0x3C                   */ , 0x00                   , NULL
+/* 0x3D                   */ , 0x00                   , NULL
+/* 0x3E                   */ , 0x00                   , NULL
+/* 0x3F                   */ , 0x00                   , NULL
+/* 0x40                   */ , 0x00                   , NULL
+/* 0x41 VK_A              */ , PMSCAN_A               , "A"
+/* 0x42 VK_B              */ , PMSCAN_B               , "B"
+/* 0x43 VK_C              */ , PMSCAN_C               , "C"
+/* 0x44 VK_D              */ , PMSCAN_D               , "D"
+/* 0x45 VK_E              */ , PMSCAN_E               , "E"
+/* 0x46 VK_F              */ , PMSCAN_F               , "F"
+/* 0x47 VK_G              */ , PMSCAN_G               , "G"
+/* 0x48 VK_H              */ , PMSCAN_H               , "H"
+/* 0x49 VK_I              */ , PMSCAN_I               , "I"
+/* 0x4A VK_J              */ , PMSCAN_J               , "J"
+/* 0x4B VK_K              */ , PMSCAN_K               , "K"
+/* 0x4C VK_L              */ , PMSCAN_L               , "L"
+/* 0x4D VK_M              */ , PMSCAN_M               , "M"
+/* 0x4E VK_N              */ , PMSCAN_N               , "N"
+/* 0x4F VK_O              */ , PMSCAN_O               , "O"
+/* 0x50 VK_P              */ , PMSCAN_P               , "P"
+/* 0x51 VK_Q              */ , PMSCAN_Q               , "Q"
+/* 0x52 VK_R              */ , PMSCAN_R               , "R"
+/* 0x53 VK_S              */ , PMSCAN_S               , "S"
+/* 0x54 VK_T              */ , PMSCAN_T               , "T"
+/* 0x55 VK_U              */ , PMSCAN_U               , "U"
+/* 0x56 VK_V              */ , PMSCAN_V               , "V"
+/* 0x57 VK                */ , PMSCAN_W               , "W"
+/* 0x58 VK_X              */ , PMSCAN_X               , "X"
+/* 0x59 VK_Y              */ , PMSCAN_Y               , "Y"
+/* 0x5A VK_Z              */ , PMSCAN_Z               , "Z"
+/* 0x5B VK_LWIN           */ , PMSCAN_WINLEFT         , "Left Win"
+/* 0x5C VK_RWIN           */ , PMSCAN_WINRIGHT        , "Right Win"
+/* 0x5D VK_APPS           */ , PMSCAN_APPLICATION     , "Application"
+/* 0x5E                   */ , 0x00                   , NULL
+/* 0x5F                   */ , 0x00                   , NULL
+/* 0x60 VK_NUMPAD0        */ , PMSCAN_PAD0            , "Num 0"
+/* 0x61 VK_NUMPAD1        */ , PMSCAN_PAD1            , "Num 1"
+/* 0x62 VK_NUMPAD2        */ , PMSCAN_PAD2            , "Num 2"
+/* 0x63 VK_NUMPAD3        */ , PMSCAN_PAD3            , "Num 3"
+/* 0x64 VK_NUMPAD4        */ , PMSCAN_PAD4            , "Num 4"
+/* 0x65 VK_NUMPAD5        */ , PMSCAN_PAD5            , "Num 5"
+/* 0x66 VK_NUMPAD6        */ , PMSCAN_PAD6            , "Num 6"
+/* 0x67 VK_NUMPAD7        */ , PMSCAN_PAD7            , "Num 7"
+/* 0x68 VK_NUMPAD8        */ , PMSCAN_PAD8            , "Num 8"
+/* 0x69 VK_NUMPAD9        */ , PMSCAN_PAD9            , "Num 9"
+/* 0x6A VK_MULTIPLY       */ , PMSCAN_PADASTERISK     , "Num *"
+/* 0x6B VK_ADD            */ , PMSCAN_PADPLUS         , "Num +"
+/* 0x6C VK_SEPARATOR      */ , 0x00                   , NULL
+/* 0x6D VK_SUBTRACT       */ , PMSCAN_PADMINUS        , "Num -"
+/* 0x6E VK_DECIMAL        */ , PMSCAN_PADPERIOD       , "Num ."
+/* 0x6F VK_DIVIDE         */ , PMSCAN_PADSLASH        , "Num /"
+/* 0x70 VK_F1             */ , PMSCAN_F1              , "F1"
+/* 0x71 VK_F2             */ , PMSCAN_F2              , "F2"
+/* 0x72 VK_F3             */ , PMSCAN_F3              , "F3"
+/* 0x73 VK_F4             */ , PMSCAN_F4              , "F4"
+/* 0x74 VK_F5             */ , PMSCAN_F5              , "F5"
+/* 0x75 VK_F6             */ , PMSCAN_F6              , "F6"
+/* 0x76 VK_F7             */ , PMSCAN_F7              , "F7"
+/* 0x77 VK_F8             */ , PMSCAN_F8              , "F8"
+/* 0x78 VK_F9             */ , PMSCAN_F9              , "F9"
+/* 0x79 VK_F10            */ , PMSCAN_F10             , "F10"
+/* 0x7A VK_F11            */ , PMSCAN_F11             , "F11"
+/* 0x7B VK_F12            */ , PMSCAN_F12             , "F12"
+/* 0x7C VK_F13            */ , PMSCAN_F13             , "F13"
+/* 0x7D VK_F14            */ , PMSCAN_F14             , "F14"
+/* 0x7E VK_F15            */ , PMSCAN_F15             , "F15"
+/* 0x7F VK_F16            */ , PMSCAN_F16             , "F16"
+/* 0x80 VK_F17            */ , PMSCAN_F17             , "F17"
+/* 0x81 VK_F18            */ , PMSCAN_F18             , "F18"
+/* 0x82 VK_F19            */ , PMSCAN_F19             , "F19"
+/* 0x83 VK_F20            */ , PMSCAN_F20             , "F20"
+/* 0x84 VK_F21            */ , PMSCAN_F21             , "F21"
+/* 0x85 VK_F22            */ , PMSCAN_F22             , "F22"
+/* 0x86 VK_F23            */ , PMSCAN_F23             , "F23"
+/* 0x87 VK_F24            */ , PMSCAN_F24             , "F24"
+/* 0x88                   */ , 0x00                   , NULL
+/* 0x89                   */ , 0x00                   , NULL
+/* 0x8A                   */ , 0x00                   , NULL
+/* 0x8B                   */ , 0x00                   , NULL
+/* 0x8C                   */ , 0x00                   , NULL
+/* 0x8D                   */ , 0x00                   , NULL
+/* 0x8E                   */ , 0x00                   , NULL
+/* 0x8F                   */ , 0x00                   , NULL
+/* 0x90 VK_NUMLOCK        */ , PMSCAN_NUMLOCK         , "Num Lock"
+/* 0x91 VK_SCROLL         */ , PMSCAN_SCROLLLOCK      , "Scroll Lock"
+/* 0x92                   */ , 0x00                   , NULL
+/* 0x93                   */ , 0x00                   , NULL
+/* 0x94                   */ , 0x00                   , NULL
+/* 0x95                   */ , 0x00                   , NULL
+/* 0x96                   */ , 0x00                   , NULL
+/* 0x97                   */ , 0x00                   , NULL
+/* 0x98                   */ , 0x00                   , NULL
+/* 0x99                   */ , 0x00                   , NULL
+/* 0x9A                   */ , 0x00                   , NULL
+/* 0x9B                   */ , 0x00                   , NULL
+/* 0x9C                   */ , 0x00                   , NULL
+/* 0x9D                   */ , 0x00                   , NULL
+/* 0x9E                   */ , 0x00                   , NULL
+/* 0x9F                   */ , 0x00                   , NULL
+/* 0xA0 VK_LSHIFT         */ , PMSCAN_SHIFTLEFT       , "Left Shift"
+/* 0xA1 VK_RSHIFT         */ , PMSCAN_SHIFTRIGHT      , "Right Shift"
+/* 0xA2 VK_LCONTROL       */ , PMSCAN_CTRLLEFT        , "Left Control"
+/* 0xA3 VK_RCONTROL       */ , PMSCAN_CTRLRIGHT       , "Right Control"
+/* 0xA4 VK_LMENU          */ , PMSCAN_ALTLEFT         , "Left Alt"
+/* 0xA5 VK_RMENU          */ , PMSCAN_ALTRIGHT        , "Right Alt"
+/* 0xA6                   */ , 0x00                   , NULL
+/* 0xA7                   */ , 0x00                   , NULL
+/* 0xA8                   */ , 0x00                   , NULL
+/* 0xA9                   */ , 0x00                   , NULL
+/* 0xAA                   */ , 0x00                   , NULL
+/* 0xAB                   */ , 0x00                   , NULL
+/* 0xAC                   */ , 0x00                   , NULL
+/* 0xAD                   */ , 0x00                   , NULL
+/* 0xAE                   */ , 0x00                   , NULL
+/* 0xAF                   */ , 0x00                   , NULL
+/* 0xB0                   */ , 0x00                   , NULL
+/* 0xB1                   */ , 0x00                   , NULL
+/* 0xB2                   */ , 0x00                   , NULL
+/* 0xB3                   */ , 0x00                   , NULL
+/* 0xB4                   */ , 0x00                   , NULL
+/* 0xB5                   */ , 0x00                   , NULL
+/* 0xB6                   */ , 0x00                   , NULL
+/* 0xB7                   */ , 0x00                   , NULL
+/* 0xB8                   */ , 0x00                   , NULL
+/* 0xB9                   */ , 0x00                   , NULL
+/* 0xBA VK_SEMICOLON      */ , PMSCAN_SEMICOLON       , ";"
+/* 0xBB VK_EQUAL          */ , PMSCAN_EQUAL           , "="
+/* 0xBC VK_COMMA          */ , PMSCAN_COMMA           , ","
+/* 0xBD VK_HYPHEN         */ , PMSCAN_HYPHEN          , "-"
+/* 0xBE VK_PERIOD         */ , PMSCAN_PERIOD          , "."
+/* 0xBF VK_SLASH          */ , PMSCAN_SLASH           , "/"
+/* 0xC0 VK_GRAVE          */ , PMSCAN_GRAVE           , "'"
+/* 0xC1 VK_FFC1           */ , PMSCAN_JEXTRA          , "JExtra" //??
+/* 0xC2 VK_YEN            */ , PMSCAN_YEN             , "Yen"
+/* 0xC3                   */ , 0x00                   , NULL
+/* 0xC4                   */ , 0x00                   , NULL
+/* 0xC5                   */ , 0x00                   , NULL
+/* 0xC6                   */ , 0x00                   , NULL
+/* 0xC7                   */ , 0x00                   , NULL
+/* 0xC8                   */ , 0x00                   , NULL
+/* 0xC9                   */ , 0x00                   , NULL
+/* 0xCA                   */ , 0x00                   , NULL
+/* 0xCB                   */ , 0x00                   , NULL
+/* 0xCC                   */ , 0x00                   , NULL
+/* 0xCD                   */ , 0x00                   , NULL
+/* 0xCE                   */ , 0x00                   , NULL
+/* 0xCF                   */ , 0x00                   , NULL
+/* 0xD0                   */ , 0x00                   , NULL
+/* 0xD1                   */ , 0x00                   , NULL
+/* 0xD2                   */ , 0x00                   , NULL
+/* 0xD3                   */ , 0x00                   , NULL
+/* 0xD4                   */ , 0x00                   , NULL
+/* 0xD5                   */ , 0x00                   , NULL
+/* 0xD6                   */ , 0x00                   , NULL
+/* 0xD7                   */ , 0x00                   , NULL
+/* 0xD8                   */ , 0x00                   , NULL
+/* 0xD9                   */ , 0x00                   , NULL
+/* 0xDA                   */ , 0x00                   , NULL
+/* 0xDB VK_BRACKETLEFT    */ , PMSCAN_BRACKETLEFT     , "["
+/* 0xDC VK_BACKSLASH      */ , PMSCAN_BACKSLASH       , "\\"
+/* 0xDD VK_BRACKETRIGHT   */ , PMSCAN_BRACKETRIGHT    , "]"
+/* 0xDE VK_QUOTESINGLE    */ , PMSCAN_QUOTESINGLE     , "'"
+/* 0xDF                   */ , 0x00                   , NULL
+/* 0xE0                   */ , 0x00                   , NULL
+/* 0xE1                   */ , 0x00                   , NULL
+/* 0xE2 VK_EXTRA          */ , PMSCAN_EXTRA           , "<"
+/* 0xE3                   */ , 0x00                   , NULL
+/* 0xE4                   */ , 0x00                   , NULL
+/* 0xE5                   */ , 0x00                   , NULL
+/* 0xE6                   */ , 0x00                   , NULL
+/* 0xE7                   */ , 0x00                   , NULL
+/* 0xE8                   */ , 0x00                   , NULL
+/* 0xE9                   */ , 0x00                   , NULL
+/* 0xEA                   */ , 0x00                   , NULL
+/* 0xEB                   */ , 0x00                   , NULL
+/* 0xEC                   */ , 0x00                   , NULL
+/* 0xED                   */ , 0x00                   , NULL
+/* 0xEE                   */ , 0x00                   , NULL
+/* 0xEF                   */ , 0x00                   , NULL
+/* 0xF0                   */ , 0x00                   , NULL
+/* 0xF1                   */ , 0x00                   , NULL
+/* 0xF2                   */ , 0x00                   , NULL
+/* 0xF3                   */ , 0x00                   , NULL
+/* 0xF4                   */ , 0x00                   , NULL
+/* 0xF5                   */ , 0x00                   , NULL
+/* 0xF6 VK_ATTN           */ , 0x00                   , NULL
+/* 0xF7 VK_CRSEL          */ , 0x00                   , NULL
+/* 0xF8 VK_EXSEL          */ , 0x00                   , NULL
+/* 0xF9 VK_EREOF          */ , PMSCAN_ERASEEOF        , "Erase"
+/* 0xFA VK_PLAY           */ , 0x00                   , NULL
+/* 0xFB VK_ZOOM           */ , 0x00                   , NULL
+/* 0xFC VK_NONAME         */ , 0x00                   , NULL
+/* 0xFD VK_PA1            */ , PMSCAN_PA1             , "PA1"
+/* 0xFE VK_OEM_CLEAR      */ , 0x00                   , NULL
+/* 0xFF                   */ , 0x00                   , NULL
                              };
 
 //******************************************************************************
@@ -578,8 +585,8 @@ ODINPROCEDURE3(KeyTranslatePMToWinBuf,
                int,    nrkeys)
 {
    for(int i=1;i<nrkeys;i++) {
-       if(abWinVKeyToPMScan[i]) {
-            winkey[i] = pmkey[OSLibWinTranslateChar(abWinVKeyToPMScan[i], TC_SCANCODETOVIRTUALKEY, 0)];
+       if(abWinVKeyToPMScan[i].bPMScanCode) {
+            winkey[i] = pmkey[OSLibWinTranslateChar(abWinVKeyToPMScan[i].bPMScanCode, TC_SCANCODETOVIRTUALKEY, 0)];
        }
    }
    winkey[VK_SHIFT]   = winkey[VK_LSHIFT] | winkey[VK_RSHIFT];
@@ -588,20 +595,55 @@ ODINPROCEDURE3(KeyTranslatePMToWinBuf,
 }
 //******************************************************************************
 //******************************************************************************
-BYTE KeyTranslateWinVKeyToPMScan(BYTE bWinScan)
+BYTE KeyTranslateWinVKeyToPMScan(BYTE bWinVKey, BOOL fExtended)
 {
-  // Note: array size of 256, so the BYTE value can't overflow
+  // if the extended bit didn't match, this is
+  // the closest hit
+  BYTE bAlmost = 0;
   
-  // translate scancode to vkey
-  BYTE bWinVKey = MapVirtualKeyA(bWinScan ,3);
-  return abWinVKeyToPMScan[bWinVKey];
+  // experiment
+#if 0
+  bAlmost = abWinVKeyToPMScan[bWinVKey].bPMScanCode;
+#else
+  for(int i = 0;
+      i < 256; // sizeof(row of abPMScanToWinVKey)
+      i++)
+  {
+    if (abPMScanToWinVKey[i][0] == bWinVKey)
+    {
+      // this represents the PMScan code which is used as index      
+      bAlmost = i;
+      
+      // exact match!
+      if (abPMScanToWinVKey[i][1] == fExtended)
+        break;
+    }
+  }
+#endif
+  
+  dprintf(("KeyTranslateWinVKeyToPMScan(%02xh,%d) = %02xh",
+           bWinVKey,
+           fExtended,
+           bAlmost));
+  
+  // almost a match or no match at all.
+  return bAlmost; 
+}
+//******************************************************************************
+//******************************************************************************
+BYTE KeyTranslateWinScanToPMScan(BYTE bWinScan, BOOL fExtended)
+{
+  // Mode: translate scancode to vkey
+  BYTE bWinVKey;
+  bWinVKey = MapVirtualKeyA(bWinScan ,3);
+  
+  return KeyTranslateWinVKeyToPMScan(bWinVKey, fExtended);
 }
 //******************************************************************************
 //******************************************************************************
 ODINFUNCTION1(int, GetKeyboardType,
               int, nTypeFlag)
 {
-    dprintf(("USER32: GetKeyboardType %x", nTypeFlag));
     return O32_GetKeyboardType(nTypeFlag);
 }
 //******************************************************************************
@@ -612,7 +654,6 @@ ODINFUNCTION1(BOOL,  GetKeyboardState,
  BYTE   PMKeyState[256];
  BOOL   rc;
 
-  dprintf(("USER32: GetKeyboardState %x", lpKeyState));
   memset(PMKeyState, 0, sizeof(PMKeyState));
   memset(lpKeyState, 0, 256);
   rc = OSLibWinGetKeyboardStateTable((PBYTE)&PMKeyState[0] );
@@ -950,22 +991,60 @@ ODINFUNCTION3(int,    GetKeyNameTextA,
               LPSTR,  lpString, 
               int,    nSize)
 {
+  // check the scancodes if the extended key bit is set so
+  // we can easily distinguish between "left" and "right" special keys, etc.
+  BOOL  fDontCare = (lParam & (1 << 25) ) != 0;
+  BOOL  fExtended = (lParam & (1 << 24) ) != 0;
+  UCHAR ucWinScan = (lParam & 0x00ff0000) >> 16;
+  UCHAR ucWinVKey;
+  int   result;
+  
+  if (fDontCare)
+  {
+    // map "right keys" to "universal keys"
+    // LALT,RALT -> ALT
+    // etc.
+    // @@@PH
+  }
+  
   // Note: Open32 expects PM Scancodes, NOT Winscancodes.
-  UCHAR ucPMScanCode = KeyTranslateWinVKeyToPMScan( (lParam & 0x00ff0000) >> 16);
+  ucWinVKey = MapVirtualKeyA(ucWinScan, 3);
   
-  // switch the bits
-  lParam &= 0xFF00FFFF;
-  lParam |= (ucPMScanCode << 16);
-  
-  // @@@PH
-  // Bugs in Open32:
+  // Bug in Open32:
+  // 0 - expects PMScancodes instead of WinScancodes
   // 1 - the "extended key bit" is not taken into account
-  // 2 - special injected scancodes (0x21d for Ctrl for AltGr) skipped
+  // 2 - some keys (AltGr) have not been assigned any names
+  // int result = O32_GetKeyNameText(lParam,lpString,nSize);
   
-  int result = O32_GetKeyNameText(lParam,lpString,nSize);
-  if (result)
-    dprintf(("keyname=[%s]\n",
-             lpString));
+  memset(lpString, 0, nSize);
+  
+  LPSTR lpstrKey = abWinVKeyToPMScan[ucWinVKey].lpstrName;
+  if (NULL == lpstrKey)
+  {
+    dprintf(("ERROR: keyname for winscan=%02xh winvkey=%02xh, fExtended=%d not found.\n",
+             ucWinScan, ucWinVKey, fExtended & !fDontCare));
+    
+    // build artificial name
+    
+    CHAR szName[10];
+    sprintf(szName, 
+            "VKey%02x%c",
+            ucWinScan,
+            fExtended ? '+' : 0);
+    memcpy(lpString, szName, nSize);
+    
+    // how many chars have been returned?
+    result = min(nSize, strlen(lpString));
+  }
+  else
+  {
+    result = min(nSize, strlen(lpstrKey));
+    strncpy (lpString, lpstrKey, result);
+  }
+  
+  dprintf(("keyname=[%s]\n",
+           lpString));
+  
   return result;
 }
 //******************************************************************************
