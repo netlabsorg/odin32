@@ -11,7 +11,6 @@ EXPORTS
     CoCreateFreeThreadedMarshaler  = _DbgCoCreateFreeThreadedMarshaler@8  @5
     CoCreateGuid               = _DbgCoCreateGuid@4             @6
     CoCreateInstance           = _DbgCoCreateInstance@20        @7
-    CoCreateInstanceEx         = _DbgCoCreateInstanceEx@24      @9999
     CoDisconnectObject         = _DbgCoDisconnectObject@8       @8
     CoDosDateTimeToFileTime    = _DbgCoDosDateTimeToFileTime@12 @9
     CoFileTimeNow              = _DbgCoFileTimeNow@4            @10
@@ -30,7 +29,6 @@ EXPORTS
     CoGetStandardMarshal       = _DbgCoGetStandardMarshal@24    @23
     CoGetState                 = _DbgCoGetState@0               @24
     CoGetTreatAsClass          = _DbgCoGetTreatAsClass@8        @25
-    CoInitializeEx             = _DbgCoInitializeEx@8           @9998
     CoInitialize               = _DbgCoInitialize@4             @26
     CoInitializeWOW            = _DbgCoInitializeWOW@8          @27
     CoIsHandlerConnected       = _DbgCoIsHandlerConnected@4     @28
@@ -169,8 +167,43 @@ EXPORTS
     WriteOleStg                = _DbgWriteOleStg@0              @161
     WriteStringStream          = _DbgWriteStringStream@0        @162
 
+    CoInitializeEx             = _DbgCoInitializeEx@8           @163
+;164 stub CoInitializeSecurity       # stdcall (ptr long ptr ptr long long ptr long ptr) return 0,ERR_NOTIMPLEMENTED
+    CoCreateInstanceEx         = _DbgCoCreateInstanceEx@24      @165
+    PropVariantClear           = _DbgPropVariantClear@4         @166
+;167 stub CoCopyProxy                # stdcall (ptr ptr) return 0,ERR_NOTIMPLEMENTED
+;168 stub CoGetCallContext           # stdcall (ptr ptr) return 0,ERR_NOTIMPLEMENTED
+;169 stub CoGetInstanceFromFile      # stdcall (ptr ptr ptr long wstr long ptr) return 0,ERR_NOTIMPLEMENTED
+;170 stub CoGetInstanceFromIStorage  # stdcall (ptr ptr ptr long ptr long ptr) return 0,ERR_NOTIMPLEMENTED
+;171 stub CoRegisterPSClsid          # stdcall (ptr ptr) return 0,ERR_NOTIMPLEMENTED
+;172 stub CoReleaseServerProcess     # stdcall () return 0,ERR_NOTIMPLEMENTED
+    CoResumeClassObjects       = _DbgCoResumeClassObjects@0     @173
+;174 stub CoRevertToSelf             # stdcall () return 0,ERR_NOTIMPLEMENTED
+;175 stub CoSetProxyBlanket          # stdcall (ptr long long wstr long long ptr long) return 0,ERR_NOTIMPLEMENTED
+;176 stub CoSuspendClassObjects      # stdcall () return 0,ERR_NOTIMPLEMENTED
+;177 stub CreateClassMoniker         # stdcall (ptr ptr) return 0,ERR_NOTIMPLEMENTED
+;178 stub CLIPFORMAT_UserFree
+;179 stub CLIPFORMAT_UserMarshal
+;180 stub CLIPFORMAT_UserSize
+;181 stub CLIPFORMAT_UserUnmarshal
+;182 stub CoAddRefServerProcess
+;183 stub CoGetObject
+;184 stub CoGetTIDFromIPID
+;185 stub CoImpersonateClient
+;186 stub CoQueryAuthenticationServices
+;187 stub CoQueryClientBlanket
+;188 stub CoQueryProxyBlanket
+;189 stub CoRegisterChannelHook
+;190 stub CoRegisterSurrogate
+;191 stub CoSwitchCallContext
     CreateErrorInfo            = _DbgCreateErrorInfo@4          @192
+;193 stub CreateObjrefMoniker
+    DllRegisterServer          = _DbgOLE32_DllRegisterServer@0  @194
+    FreePropVariantArray       = _DbgFreePropVariantArray@8     @195
     GetErrorInfo               = _DbgGetErrorInfo@8             @196
+
+    PropVariantCopy            = _DbgPropVariantCopy@8          @246
+
     SetErrorInfo               = _DbgSetErrorInfo@8             @255
 
     CoImpersonateClient        = _DbgCoImpersonateClient@0      @997   ; suppress warning
