@@ -1,9 +1,10 @@
-/* $Id: cvtcursor.cpp,v 1.6 1999-09-25 14:31:00 sandervl Exp $ */
+/* $Id: cvtcursor.cpp,v 1.7 1999-10-24 09:43:02 sandervl Exp $ */
 
 /*
  * PE2LX cursor conversion code
  *
  * Copyright 1998 Sander van Leeuwen (sandervl@xs4all.nl)
+ * Copyright 1999 Daniela Engert (dani@ngrt.de)
  *
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -91,6 +92,8 @@ void *ConvertCursor(CursorComponent *curHdr, int size, int *os2size, int offsetB
         os2rgb++;
         rgb++;
   }
+
+  bhdr->biSizeImage *= 2;       // we have 2 bitmaps !
 
   if(bhdr->biSizeImage > bmpsize || bhdr->biSizeImage == 0) {
         bwsize = bhdr->biWidth*(bhdr->biHeight);
