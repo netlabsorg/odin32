@@ -1,4 +1,4 @@
-/* $Id: caret.cpp,v 1.2 1999-09-28 08:00:56 dengert Exp $ */
+/* $Id: caret.cpp,v 1.3 1999-09-28 18:31:24 dengert Exp $ */
 
 /*
  * Caret functions for USER32
@@ -66,7 +66,7 @@ BOOL WIN32API CreateCaret (HWND hwnd, HBITMAP hBmp, int width, int height)
        USHORT sel = RestoreOS2FS();
        wnd->SetFakeOpen32();
 
-       rc = _O32_CreateCaret (hwnd, hBmp, width, height);
+       rc = _O32_CreateCaret (wnd->getOS2WindowHandle(), hBmp, width, height);
        if (rc)
        {
            hwndCaret   = hwnd;
