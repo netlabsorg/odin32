@@ -1,4 +1,4 @@
-/* $Id: static.cpp,v 1.27 2002-11-07 10:29:16 sandervl Exp $ */
+/* $Id: static.cpp,v 1.28 2002-11-22 12:57:34 sandervl Exp $ */
 /*
  * Static control
  *
@@ -98,7 +98,6 @@ static HICON STATIC_SetIcon( HWND hwnd, HICON hicon )
 
     if ((dwStyle & SS_TYPEMASK) != SS_ICON) return 0;
 
-    if (infoPtr->hIcon) DestroyIcon(infoPtr->hIcon);
     prevIcon = infoPtr->hIcon;
     infoPtr->hIcon = hicon;
 
