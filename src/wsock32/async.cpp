@@ -1,4 +1,4 @@
-/* $Id: async.cpp,v 1.7 1999-10-25 22:48:27 phaller Exp $ */
+/* $Id: async.cpp,v 1.8 1999-10-25 23:17:18 phaller Exp $ */
 
 /*
  *
@@ -604,32 +604,41 @@ PASYNCREQUEST WSAAsyncWorker::createRequest  (ULONG ulType,
 void WSAAsyncWorker::asyncGetHostByAddr   (PASYNCREQUEST pRequest)
 {
   struct hostent* pHostent;
-  USHORT          usLength;
+  USHORT          usLength = sizeof(struct Whostent);
   USHORT          rc;
+  struct Whostent* pwhostent = (struct Whostent*)pRequest->pBuffer;
 
   dprintf(("WSOCK32-ASYNC: WSAAsyncWorker::asyncGetHostByAddr (%08xh, %08xh)\n",
            this,
            pRequest));
 
   // result buffer length
-  usLength = min(pRequest->ulBufferLength, sizeof(struct hostent));
-
-  // call API
-  pHostent = gethostbyaddr((char*)pRequest->ul1,
-                           (int)        pRequest->ul2,
-                           (int)        pRequest->ul3);
-  if (pHostent == NULL) // error ?
+  if (pRequest->ulBufferLength < sizeof(struct Whostent))
   {
-    rc = sock_errno();   // assuming OS/2 return codes are
+    rc = WSAEINVAL;
     WSASetLastError(rc); // same as Winsock return codes
   }
   else
   {
-    // build result buffer
-    memcpy (pRequest->pBuffer,
-            pHostent,
-            usLength);
-    rc = 0;
+    // call API
+    pHostent = gethostbyaddr((char*)pRequest->ul1,
+                             (int)        pRequest->ul2,
+                             (int)        pRequest->ul3);
+    if (pHostent == NULL) // error ?
+    {
+      rc = sock_errno();   // assuming OS/2 return codes are
+      WSASetLastError(rc); // same as Winsock return codes
+    }
+    else
+    {
+      // translate result to Wsock32-style structure
+      pwhostent->h_name      = pHostent->h_name;
+      pwhostent->h_aliases   = pHostent->h_aliases;
+      pwhostent->h_addrtype  = pHostent->h_addrtype;
+      pwhostent->h_length    = pHostent->h_length;
+      pwhostent->h_addr_list = pHostent->h_addr_list;
+      rc = 0;
+    }
   }
 
   // post result
@@ -656,31 +665,42 @@ void WSAAsyncWorker::asyncGetHostByAddr   (PASYNCREQUEST pRequest)
 
 void WSAAsyncWorker::asyncGetHostByName   (PASYNCREQUEST pRequest)
 {
-  struct hostent* pHostent;
-  USHORT          usLength;
-  USHORT          rc;
+  struct hostent*  pHostent;
+  USHORT           usLength = sizeof(struct Whostent);
+  USHORT           rc;
+  struct Whostent* pwhostent = (struct Whostent*)pRequest->pBuffer;
 
   dprintf(("WSOCK32-ASYNC: WSAAsyncWorker::asyncGetHostByName (%08xh, %08xh)\n",
            this,
            pRequest));
 
   // result buffer length
-  usLength = min(pRequest->ulBufferLength, sizeof(struct hostent));
-
-  // call API
-  pHostent = gethostbyname((char*)pRequest->ul1);
-  if (pHostent == NULL) // error ?
+  if (pRequest->ulBufferLength < sizeof(struct Whostent))
   {
-    rc = sock_errno();   // assuming OS/2 return codes are
+    rc = WSAEINVAL;
     WSASetLastError(rc); // same as Winsock return codes
   }
   else
   {
-    // build result buffer
-    memcpy (pRequest->pBuffer,
-            pHostent,
-            usLength);
-    rc = 0;
+    // call API
+    pHostent = gethostbyname((char*)pRequest->ul1);
+    if (pHostent == NULL) // error ?
+    {
+      rc = sock_errno();   // assuming OS/2 return codes are
+      WSASetLastError(rc); // same as Winsock return codes
+
+      dprintf (("  pHostent==NULL -> rc=%d\n", rc));
+    }
+    else
+    {
+      // translate result to Wsock32-style structure
+      pwhostent->h_name      = pHostent->h_name;
+      pwhostent->h_aliases   = pHostent->h_aliases;
+      pwhostent->h_addrtype  = pHostent->h_addrtype;
+      pwhostent->h_length    = pHostent->h_length;
+      pwhostent->h_addr_list = pHostent->h_addr_list;
+      rc = 0;
+    }
   }
 
   // post result
@@ -708,30 +728,37 @@ void WSAAsyncWorker::asyncGetHostByName   (PASYNCREQUEST pRequest)
 void WSAAsyncWorker::asyncGetProtoByName  (PASYNCREQUEST pRequest)
 {
   struct protoent* pProtoent;
-  USHORT           usLength;
+  USHORT           usLength = sizeof(struct Wprotoent);
   USHORT           rc;
+  struct Wprotoent* pwprotoent= (struct Wprotoent*)pRequest->pBuffer;
 
   dprintf(("WSOCK32-ASYNC: WSAAsyncWorker::asyncGetProtoByName (%08xh, %08xh)\n",
            this,
            pRequest));
 
   // result buffer length
-  usLength = min(pRequest->ulBufferLength, sizeof(struct protoent));
-
-  // call API
-  pProtoent = getprotobyname((char*)pRequest->ul1);
-  if (pProtoent == NULL) // error ?
+  if (pRequest->ulBufferLength < sizeof(struct Wprotoent))
   {
-    rc = sock_errno();   // assuming OS/2 return codes are
+    rc = WSAEINVAL;
     WSASetLastError(rc); // same as Winsock return codes
   }
   else
   {
-    // build result buffer
-    memcpy (pRequest->pBuffer,
-            pProtoent,
-            usLength);
-    rc = 0;
+    // call API
+    pProtoent = getprotobyname((char*)pRequest->ul1);
+    if (pProtoent == NULL) // error ?
+    {
+      rc = sock_errno();   // assuming OS/2 return codes are
+      WSASetLastError(rc); // same as Winsock return codes
+    }
+    else
+    {
+      // build result buffer
+      pwprotoent->p_name    = pProtoent->p_name;
+      pwprotoent->p_aliases = pProtoent->p_aliases;
+      pwprotoent->p_proto   = pProtoent->p_proto;
+      rc = 0;
+    }
   }
 
   // post result
@@ -759,30 +786,37 @@ void WSAAsyncWorker::asyncGetProtoByName  (PASYNCREQUEST pRequest)
 void WSAAsyncWorker::asyncGetProtoByNumber(PASYNCREQUEST pRequest)
 {
   struct protoent* pProtoent;
-  USHORT           usLength;
+  USHORT           usLength  = sizeof(struct Wprotoent);
   USHORT           rc;
+  struct Wprotoent* pwprotoent= (struct Wprotoent*)pRequest->pBuffer;
 
   dprintf(("WSOCK32-ASYNC: WSAAsyncWorker::asyncGetProtoByNumber (%08xh, %08xh)\n",
            this,
            pRequest));
 
   // result buffer length
-  usLength = min(pRequest->ulBufferLength, sizeof(struct protoent));
-
-  // call API
-  pProtoent = getprotobyname(( char*)pRequest->ul1);
-  if (pProtoent == NULL) // error ?
+  if (pRequest->ulBufferLength < sizeof(struct Wprotoent))
   {
-    rc = sock_errno();   // assuming OS/2 return codes are
+    rc = WSAEINVAL;
     WSASetLastError(rc); // same as Winsock return codes
   }
   else
   {
-    // build result buffer
-    memcpy (pRequest->pBuffer,
-            pProtoent,
-            usLength);
-    rc = 0;
+    // call API
+    pProtoent = getprotobyname(( char*)pRequest->ul1);
+    if (pProtoent == NULL) // error ?
+    {
+      rc = sock_errno();   // assuming OS/2 return codes are
+      WSASetLastError(rc); // same as Winsock return codes
+    }
+    else
+    {
+      // build result buffer
+      pwprotoent->p_name    = pProtoent->p_name;
+      pwprotoent->p_aliases = pProtoent->p_aliases;
+      pwprotoent->p_proto   = pProtoent->p_proto;
+      rc = 0;
+    }
   }
 
   // post result
@@ -810,31 +844,39 @@ void WSAAsyncWorker::asyncGetProtoByNumber(PASYNCREQUEST pRequest)
 void WSAAsyncWorker::asyncGetServByName(PASYNCREQUEST pRequest)
 {
   struct servent* pServent;
-  USHORT          usLength;
+  USHORT          usLength = sizeof(struct Wservent);
   USHORT          rc;
+  struct Wservent* pwservent= (struct Wservent*)pRequest->pBuffer;
 
   dprintf(("WSOCK32-ASYNC: WSAAsyncWorker::asyncGetServByName (%08xh, %08xh)\n",
            this,
            pRequest));
 
   // result buffer length
-  usLength = min(pRequest->ulBufferLength, sizeof(struct servent));
-
-  // call API
-  pServent = getservbyname((char*)pRequest->ul1,
-                           (char*)pRequest->ul2);
-  if (pServent == NULL) // error ?
+  if (pRequest->ulBufferLength < sizeof(struct Wservent))
   {
-    rc = sock_errno();   // assuming OS/2 return codes are
+    rc = WSAEINVAL;
     WSASetLastError(rc); // same as Winsock return codes
   }
   else
   {
-    // build result buffer
-    memcpy (pRequest->pBuffer,
-            pServent,
-            usLength);
-    rc = 0;
+    // call API
+    pServent = getservbyname((char*)pRequest->ul1,
+                             (char*)pRequest->ul2);
+    if (pServent == NULL) // error ?
+    {
+      rc = sock_errno();   // assuming OS/2 return codes are
+      WSASetLastError(rc); // same as Winsock return codes
+    }
+    else
+    {
+      // build result buffer
+      pwservent->s_name    = pServent->s_name;
+      pwservent->s_aliases = pServent->s_aliases;
+      pwservent->s_port    = pServent->s_port;
+      pwservent->s_proto   = pServent->s_proto;
+      rc = 0;
+    }
   }
 
   // post result
@@ -862,31 +904,40 @@ void WSAAsyncWorker::asyncGetServByName(PASYNCREQUEST pRequest)
 void WSAAsyncWorker::asyncGetServByPort(PASYNCREQUEST pRequest)
 {
   struct servent* pServent;
-  USHORT          usLength;
+  USHORT          usLength = sizeof(struct Wservent);
   USHORT          rc;
+  struct Wservent* pwservent= (struct Wservent*)pRequest->pBuffer;
 
   dprintf(("WSOCK32-ASYNC: WSAAsyncWorker::asyncGetServByPort (%08xh, %08xh)\n",
            this,
            pRequest));
 
   // result buffer length
-  usLength = min(pRequest->ulBufferLength, sizeof(struct servent));
-
-  // call API
-  pServent = getservbyport((int        )pRequest->ul1,
-                           (char*)pRequest->ul2);
-  if (pServent == NULL) // error ?
+  if (pRequest->ulBufferLength < sizeof(struct Whostent))
   {
-    rc = sock_errno();   // assuming OS/2 return codes are
+    rc = WSAEINVAL;
     WSASetLastError(rc); // same as Winsock return codes
   }
   else
   {
-    // build result buffer
-    memcpy (pRequest->pBuffer,
-            pServent,
-            usLength);
-    rc = 0;
+    // call API
+    pServent = getservbyport((int        )pRequest->ul1,
+                             (char*)pRequest->ul2);
+    if (pServent == NULL) // error ?
+    {
+      rc = sock_errno();   // assuming OS/2 return codes are
+      WSASetLastError(rc); // same as Winsock return codes
+    }
+    else
+    {
+      // build result buffer
+      pwservent->s_name    = pServent->s_name;
+      pwservent->s_aliases = pServent->s_aliases;
+      pwservent->s_port    = pServent->s_port;
+      pwservent->s_proto   = pServent->s_proto;
+
+      rc = 0;
+    }
   }
 
   // post result
