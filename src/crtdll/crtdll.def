@@ -1,6 +1,8 @@
-; $Id: crtdll.def,v 1.11 1999-12-21 13:46:25 sandervl Exp $
+; $Id: crtdll.def,v 1.12 1999-12-28 10:31:00 sandervl Exp $
 
-;Created by BLAST for IBM's compiler
+;
+; Based on Windows 98 (Build 2222): CRTDLL.DLL 
+;
 LIBRARY CRTDLL INITINSTANCE TERMINSTANCE
 DATA MULTIPLE NONSHARED
 
@@ -21,7 +23,7 @@ EXPORTS
     _CIfmod			= _CRTDLL__CIfmod		@11
     _CIlog			= _CRTDLL__CIlog		@12
     _CIlog10			= _CRTDLL__CIlog10		@13
-    _CIpow			= _CRTDLL__CIpow			@14
+    _CIpow			= _CRTDLL__CIpow		@14
     _CIsin			= _CRTDLL__CIsin		@15
     _CIsinh			= _CRTDLL__CIsinh		@16
     _CIsqrt			= _CRTDLL__CIsqrt		@17
@@ -297,7 +299,7 @@ EXPORTS
     _stricmp			= _CRTDLL__stricmp		@285
     _stricoll			= _CRTDLL__stricoll		@286
     _strinc			= _CRTDLL__strinc		@287
-    _strlwr			= _CRTDLL__strlwr			@288
+    _strlwr			= _CRTDLL__strlwr		@288
     _strncnt			= _CRTDLL__strncnt		@289
     _strnextc			= _CRTDLL__strnextc		@290
     _strnicmp			= _CRTDLL__strnicmp		@291
@@ -307,7 +309,7 @@ EXPORTS
     _strset			= _CRTDLL__strset		@295
     _strspnp			= _CRTDLL__strspnp		@296
     _strtime			= _CRTDLL__strtime		@297
-    _strupr			= _CRTDLL__strupr			@298
+    _strupr			= _CRTDLL__strupr		@298
     _swab			= _CRTDLL__swab			@299
 
     _sys_errlist		= CRTDLL_sys_errlist		@300
@@ -319,7 +321,7 @@ EXPORTS
     _toupper			= _CRTDLL__toupper		@306
     _tzname			= CRTDLL_tzname			@307
     _tzset			= _CRTDLL__tzset		@308
-    _ultoa			= _CRTDLL__ultoa			@309
+    _ultoa			= _CRTDLL__ultoa		@309
     _umask			= _CRTDLL__umask		@310
     _ungetch			= _CRTDLL__ungetch		@311
     _unlink			= _CRTDLL__unlink		@312
@@ -330,12 +332,12 @@ EXPORTS
     _wcsdup			= _CRTDLL__wcsdup		@317
     _wcsicmp			= _CRTDLL__wcsicmp		@318
     _wcsicoll			= _CRTDLL__wcsicoll		@319
-    _wcslwr			= _CRTDLL__wcslwr			@320
+    _wcslwr			= _CRTDLL__wcslwr		@320
     _wcsnicmp			= _CRTDLL__wcsnicmp		@321
     _wcsnset			= _CRTDLL__wcsnset		@322
     _wcsrev			= _CRTDLL__wcsrev		@323
     _wcsset			= _CRTDLL__wcsset		@324
-    _wcsupr			= _CRTDLL__wcsupr			@325
+    _wcsupr			= _CRTDLL__wcsupr		@325
     _winmajor_dll		= CRTDLL_winmajor_dll		@326
     _winminor_dll 		= CRTDLL_winminor_dll		@327
     _winver_dll 		= CRTDLL_winver_dll		@328
@@ -402,17 +404,17 @@ EXPORTS
     gmtime			= _CRTDLL_gmtime		@389
     is_wctype			= _CRTDLL_is_wctype		@390
     isalnum			= _CRTDLL_isalnum		@391
-    isalpha			= _CRTDLL_isalpha			@392
+    isalpha			= _CRTDLL_isalpha		@392
     iscntrl			= _CRTDLL_iscntrl		@393
-    isdigit			= _CRTDLL_isdigit			@394
+    isdigit			= _CRTDLL_isdigit		@394
     isgraph			= _CRTDLL_isgraph		@395
     isleadbyte			= _CRTDLL_isleadbyte		@396
-    islower			= _CRTDLL_islower			@397
-    isprint			= _CRTDLL_isprint			@398
+    islower			= _CRTDLL_islower		@397
+    isprint			= _CRTDLL_isprint		@398
     ispunct			= _CRTDLL_ispunct		@399
 
-    isspace			= _CRTDLL_isspace			@400
-    isupper			= _CRTDLL_isupper			@401
+    isspace			= _CRTDLL_isspace		@400
+    isupper			= _CRTDLL_isupper		@401
     iswalnum			= _CRTDLL_iswalnum		@402
     iswalpha			= _CRTDLL_iswalpha		@403
     iswascii			= _CRTDLL_iswascii		@404
@@ -439,11 +441,11 @@ EXPORTS
     mblen			= _CRTDLL_mblen			@425
     mbstowcs			= _CRTDLL_mbstowcs		@426
     mbtowc			= _CRTDLL_mbtowc		@427
-    memchr			= _CRTDLL_memchr			@428
-    memcmp		        = _CRTDLL_memcmp			@429
-    memcpy		        = _CRTDLL_memcpy			@430
+    memchr			= _CRTDLL_memchr		@428
+    memcmp		        = _CRTDLL_memcmp		@429
+    memcpy		        = _CRTDLL_memcpy		@430
     memmove			= _CRTDLL_memmove		@431
-    memset		        = _CRTDLL_memset			@432
+    memset		        = _CRTDLL_memset		@432
     mktime			= _CRTDLL_mktime		@433
     modf			= _CRTDLL_modf			@434
     perror			= _CRTDLL_perror		@435
@@ -466,26 +468,26 @@ EXPORTS
     signal			= _CRTDLL_signal		@452
     sin				= _CRTDLL_sin			@453
     sinh			= _CRTDLL_sinh			@454
-    sprintf			= _CRTDLL_sprintf			@455
+    sprintf			= _CRTDLL_sprintf		@455
     sqrt			= _CRTDLL_sqrt			@456
     srand 			= _CRTDLL_srand 		@457
-    sscanf			= _CRTDLL_sscanf			@458
-    strcat			= _CRTDLL_strcat			@459
-    strchr			= _CRTDLL_strchr			@460
-    strcmp			= _CRTDLL_strcmp			@461
+    sscanf			= _CRTDLL_sscanf		@458
+    strcat			= _CRTDLL_strcat		@459
+    strchr			= _CRTDLL_strchr		@460
+    strcmp			= _CRTDLL_strcmp		@461
     strcoll			= _CRTDLL_strcoll		@462
-    strcpy			= _CRTDLL_strcpy			@463
-    strcspn			= _CRTDLL_strcspn			@464
+    strcpy			= _CRTDLL_strcpy		@463
+    strcspn			= _CRTDLL_strcspn		@464
     strerror			= _CRTDLL_strerror		@465
     strftime			= _CRTDLL_strftime		@466
-    strlen			= _CRTDLL_strlen			@467
-    strncat			= _CRTDLL_strncat			@468
-    strncmp			= _CRTDLL_strncmp			@469
-    strncpy			= _CRTDLL_strncpy			@470
-    strpbrk			= _CRTDLL_strpbrk			@471
-    strrchr			= _CRTDLL_strrchr			@472
-    strspn			= _CRTDLL_strspn			@473
-    strstr			= _CRTDLL_strstr			@474
+    strlen			= _CRTDLL_strlen		@467
+    strncat			= _CRTDLL_strncat		@468
+    strncmp			= _CRTDLL_strncmp		@469
+    strncpy			= _CRTDLL_strncpy		@470
+    strpbrk			= _CRTDLL_strpbrk		@471
+    strrchr			= _CRTDLL_strrchr		@472
+    strspn			= _CRTDLL_strspn		@473
+    strstr			= _CRTDLL_strstr		@474
     strtod			= _CRTDLL_strtod		@475
     strtok			= _CRTDLL_strtok		@476
     strtol			= _CRTDLL_strtol		@477
@@ -499,8 +501,8 @@ EXPORTS
     time			= _CRTDLL_time			@485
     tmpfile			= _CRTDLL_tmpfile		@486
     tmpnam			= _CRTDLL_tmpnam		@487
-    tolower			= _CRTDLL_tolower			@488
-    toupper			= _CRTDLL_toupper			@489
+    tolower			= _CRTDLL_tolower		@488
+    toupper			= _CRTDLL_toupper		@489
     towlower			= _CRTDLL_towlower		@490
     towupper			= _CRTDLL_towupper		@491
     ungetc  		        = _CRTDLL_ungetc  		@492
@@ -512,26 +514,26 @@ EXPORTS
     vswprintf			= _CRTDLL_vswprintf		@498
     vwprintf		        = _CRTDLL_vwprintf		@499
 
-    wcscat			= _CRTDLL_wcscat			@500
-    wcschr			= _CRTDLL_wcschr			@501
-    wcscmp			= _CRTDLL_wcscmp			@502
+    wcscat			= _CRTDLL_wcscat		@500
+    wcschr			= _CRTDLL_wcschr		@501
+    wcscmp			= _CRTDLL_wcscmp		@502
     wcscoll			= _CRTDLL_wcscoll		@503
-    wcscpy			= _CRTDLL_wcscpy			@504
-    wcscspn			= _CRTDLL_wcscspn			@505
+    wcscpy			= _CRTDLL_wcscpy		@504
+    wcscspn			= _CRTDLL_wcscspn		@505
     wcsftime			= _CRTDLL_wcsftime		@506
-    wcslen			= _CRTDLL_wcslen			@507
-    wcsncat			= _CRTDLL_wcsncat			@508
-    wcsncmp			= _CRTDLL_wcsncmp			@509
-    wcsncpy			= _CRTDLL_wcsncpy			@510
-    wcspbrk			= _CRTDLL_wcspbrk			@511
-    wcsrchr			= _CRTDLL_wcsrchr			@512
-    wcsspn			= _CRTDLL_wcsspn			@513
-    wcsstr			= _CRTDLL_wcsstr			@514
+    wcslen			= _CRTDLL_wcslen		@507
+    wcsncat			= _CRTDLL_wcsncat		@508
+    wcsncmp			= _CRTDLL_wcsncmp		@509
+    wcsncpy			= _CRTDLL_wcsncpy		@510
+    wcspbrk			= _CRTDLL_wcspbrk		@511
+    wcsrchr			= _CRTDLL_wcsrchr		@512
+    wcsspn			= _CRTDLL_wcsspn		@513
+    wcsstr			= _CRTDLL_wcsstr		@514
     wcstod			= _CRTDLL_wcstod		@515
-    wcstok			= _CRTDLL_wcstok         	        @516
-    wcstol			= _CRTDLL_wcstol 			@517
+    wcstok			= _CRTDLL_wcstok                @516
+    wcstol			= _CRTDLL_wcstol 		@517
     wcstombs			= _CRTDLL_wcstombs		@518
-    wcstoul			= _CRTDLL_wcstoul			@519
+    wcstoul			= _CRTDLL_wcstoul		@519
     wcsxfrm			= _CRTDLL_wcsxfrm		@520
     wctomb			= _CRTDLL_wctomb		@521
     wprintf			= _CRTDLL_wprintf		@522
