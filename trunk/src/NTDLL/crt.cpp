@@ -1,4 +1,4 @@
-/* $Id: crt.cpp,v 1.8 1999-08-22 22:45:52 sandervl Exp $ */
+/* $Id: crt.cpp,v 1.9 1999-09-13 19:45:33 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -1298,4 +1298,736 @@ char * CDECL OS2_itow(int i, char *s, int r)
            r));
 
   return (_itoa(i,s,r));
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.749
+ * Status    :
+ *
+ * Author    : Jens Wiessner
+ *****************************************************************************/
+
+LONG CDECL NTDLL__CIpow(void)
+{
+  dprintf(("NTDLL: _CIpow not implemented.\n"));
+
+  return 0;
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.864
+ * Status    :
+ *
+ * Author    : Jens Wiessner
+ *****************************************************************************/
+
+LONG CDECL NTDLL__ftol(void)
+{
+  dprintf(("NTDLL: _ftol not implemented.\n"));
+
+  return 0;
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.866
+ * Status    :
+ *
+ * Author    : Jens Wiessner
+ *****************************************************************************/
+
+LPSTR  CDECL NTDLL__ltoa(long x,LPSTR buf,INT radix)
+{
+  dprintf(("NTDLL: _ltoa(%08xh, %08xh, %08xh) not implemented\n",
+           x,
+           buf,
+           radix));
+
+  return 0;
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.868
+ * Status    :
+ *
+ * Author    : Jens Wiessner
+ *****************************************************************************/
+
+INT CDECL NTDLL__memicmp(
+	LPCSTR s1,	/* [in] first string */
+	LPCSTR s2,	/* [in] second string */
+	DWORD len	/* [in] length to compare */ ) 
+{ 
+	dprintf(("NTDLL: memicmp(%08xh, %08xh, %08xh)\n",s1,s2,len));
+	int	i;
+
+	for (i=0;i<len;i++) {
+		if (tolower(s1[i])<tolower(s2[i]))
+			return -1;
+		if (tolower(s1[i])>tolower(s2[i]))
+			return  1;
+	}
+	return 0;
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.869
+ * Status    :
+ *
+ * Author    : Jens Wiessner
+ *****************************************************************************/
+
+int  CDECL NTDLL__snprintf( char *buf, size_t bufsize, const char *fmt, ... )
+{
+  dprintf(("NTDLL: _snprintf(%08xh, %08xh, %08xh) not implemented\n",
+           buf,
+           bufsize,
+           fmt));
+
+  return 0;
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.870
+ * Status    :
+ *
+ * Author    : Jens Wiessner
+ *****************************************************************************/
+
+int  CDECL NTDLL__snwprintf( wchar_t *buf, size_t bufsize, const wchar_t *fmt, ... )
+{
+  dprintf(("NTDLL: _snwprintf(%08xh, %08xh, %08xh) not implemented\n",
+           buf,
+           bufsize,
+           fmt));
+
+  return 0;
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.871
+ * Status    :
+ *
+ * Author    : Jens Wiessner
+ *****************************************************************************/
+
+void CDECL NTDLL__splitpath( const char *path, char *drive,
+	    		     char *dir, char *fname, char *ext )
+{
+  dprintf(("NTDLL: _splitpath(%08xh, %08xh, %08xh, %08xh, %08xh) not implemented\n",
+           path,
+           drive,
+           dir,
+           fname,
+           ext));
+
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.872
+ * Status    :
+ *
+ * Author    : Jens Wiessner
+ *****************************************************************************/
+
+void CDECL NTDLL__strcmpi( LPCSTR s1, LPCSTR s2 )
+{
+  dprintf(("NTDLL: _strcmpi(%08xh, %08xh)\n",
+           s1,
+           s2));
+
+  lstrcmpiA( s1, s2 );
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.874
+ * Status    :
+ *
+ * Author    : Jens Wiessner
+ *****************************************************************************/
+
+CHAR * CDECL NTDLL__strlwr(char *x)
+{
+  char *y =x;
+  
+  dprintf(("NTDLL: _strlwr got %s\n", x));
+  while (*y) {
+    if ((*y > 0x40) && (*y< 0x5b))
+      *y = *y + 0x20;
+    y++;
+  }
+  dprintf(("   returned %s\n", x));
+		 
+  return x;
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.875
+ * Status    :
+ *
+ * Author    : Jens Wiessner
+ *****************************************************************************/
+
+int  CDECL NTDLL__strnicmp( LPCSTR s1, LPCSTR s2, INT n )
+{
+  dprintf(("NTDLL: _strnicmp(%08xh, %08xh, %08xh) not implemented\n",
+           s1,
+           s2,
+           n));
+
+  return 0;
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.876
+ * Status    :
+ *
+ * Author    : Jens Wiessner
+ *****************************************************************************/
+
+LPSTR CDECL NTDLL__strupr(LPSTR x)
+{
+  dprintf(("NTDLL: _strupr(%08xh)\n",
+           x));
+
+  LPSTR	y=x;
+
+  while (*y) {
+	*y=toupper(*y);
+	y++;
+  }
+  return x;
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.877
+ * Status    :
+ *
+ * Author    : Jens Wiessner
+ *****************************************************************************/
+
+LPSTR  CDECL NTDLL__ultoa(long x,LPSTR buf,INT radix)
+{
+  dprintf(("NTDLL: _ultoa(%08xh, %08xh, %08xh) not implemented\n",
+           x,
+           buf,
+           radix));
+
+  return 0;
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.878
+ * Status    :
+ *
+ * Author    : Jens Wiessner
+ *****************************************************************************/
+
+int CDECL NTDLL__vsnprintf( char *s, size_t bufsize, const char *format, va_list arg )
+{
+  dprintf(("NTDLL: _ultoa(%08xh, %08xh, %08xh) not implemented\n",
+           s,
+           bufsize,
+           format));
+
+  return 0;
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.897
+ * Status    :
+ *
+ * Author    : Jens Wiessner
+ *****************************************************************************/
+
+int CDECL NTDLL_iswalpha(wint_t i)
+{
+  dprintf(("NTDLL: iswalpha(%08xh)\n", i));
+
+  return (iswalpha(i));
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.898
+ * Status    :
+ *
+ * Author    : Jens Wiessner
+ *****************************************************************************/
+
+int CDECL NTDLL_iswctype(wint_t i, wctype_t wct)
+{
+  dprintf(("NTDLL: iswctype(%08xh, %08xh)\n", i, wct));
+
+  return (iswctype(i, wct));
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.899
+ * Status    :
+ *
+ * Author    : Jens Wiessner
+ *****************************************************************************/
+
+int CDECL NTDLL_isxdigit(int i)
+{
+  dprintf(("NTDLL: isxdigit(%08xh)\n", i));
+
+  return (isxdigit(i));
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.900
+ * Status    :
+ *
+ * Author    : Jens Wiessner
+ *****************************************************************************/
+
+long int CDECL NTDLL_labs( long int j )
+{
+  dprintf(("NTDLL: labs(%08xh)\n", j));
+
+  return (labs(j));
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.901
+ * Status    :
+ *
+ * Author    : Jens Wiessner
+ *****************************************************************************/
+
+double CDECL NTDLL_log( double x )
+{
+  dprintf(("NTDLL: log(%08xh)\n", x));
+  return (log(x));
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.902
+ * Status    :
+ *
+ * Author    : Jens Wiessner
+ *****************************************************************************/
+
+size_t CDECL NTDLL_mbstowcs( wchar_t *pwcs, const char *s, size_t n )
+{
+      dprintf(("NTDLL: mbstowcs(%08xh, %08xh, %08xh)\n", pwcs, s, n));
+      return (mbstowcs(pwcs, s, n));
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.903
+ * Status    :
+ *
+ * Author    : Jens Wiessner
+ *****************************************************************************/
+
+void * CDECL NTDLL_memchr( const void *s, int c, size_t n )
+{
+    dprintf(("NTDLL: memchr(%08xh, %08xh, %08xh)\n", s, c, n));
+    return memchr( s, c, n );
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.904
+ * Status    :
+ *
+ * Author    : Jens Wiessner
+ *****************************************************************************/
+
+int CDECL NTDLL_memcmp( const void * c1, const void * c2, size_t n )
+{
+    dprintf(("NTDLL: memcmp(%08xh, %08xh, %08xh)\n", c1, c2, n));
+    return memcmp( c1, c2, n );
+}
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.905
+ * Status    :
+ *
+ * Author    : Jens Wiessner
+ *****************************************************************************/
+
+void * CDECL NTDLL_memcpy( void *s1, const void *s2, size_t n )
+{
+    dprintf(("NTDLL: memcpy(%08xh, %08xh, %08xh)\n", s1, s2, n));
+    return memcpy( s1, s2, n );
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.907
+ * Status    :
+ *
+ * Author    : Jens Wiessner
+ *****************************************************************************/
+
+void * CDECL NTDLL_memset( void *s, int i, size_t n )
+{
+    dprintf(("NTDLL: memset(%08xh, %08xh, %08xh)\n", s, i, n));
+    return memset( s, i, n );
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.908
+ * Status    :
+ *
+ * Author    : Jens Wiessner
+ *****************************************************************************/
+
+double CDECL NTDLL_pow( double x, double y )	
+{
+    dprintf(("NTDLL: pow(%08xh, %08xh)\n",x, y));
+    return pow( x, y );
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.909
+ * Status    :
+ *
+ * Author    : Jens Wiessner
+ *****************************************************************************/
+
+void CDECL NTDLL_qsort( void *base, size_t nmemb, size_t size,
+			int (*compar)( const void *s1, const void *s2 ))
+{
+    dprintf(("NTDLL: qsort(%08xh, %08xh, %08xh, %08xh)\n",
+		base, nmemb, size, compar));
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.910
+ * Status    :
+ *
+ * Author    : Jens Wiessner
+ *****************************************************************************/
+
+double CDECL NTDLL_sin( double x )
+{
+  dprintf(("NTDLL: sin(%08xh)\n", x));
+  return (sin(x));
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.912
+ * Status    :
+ *
+ * Author    : Jens Wiessner
+ *****************************************************************************/
+
+double CDECL NTDLL_sqrt( double x )
+{
+  dprintf(("NTDLL: sqrt(%08xh)\n", x));
+  return (sqrt(x));
+}
+
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.913
+ * Status    :
+ *
+ * Author    : Jens Wiessner
+ *****************************************************************************/
+
+int CDECL NTDLL_sscanf( const char *s, const char *format, ... )
+{
+  dprintf(("NTDLL: sscanf(%08xh, %08xh) not implemented.\n"));
+  return 0;
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.933
+ * Status    :
+ *
+ * Author    : Jens Wiessner
+ *****************************************************************************/
+
+int CDECL NTDLL_vsprintf( char *s, const char *format, va_list arg )
+{
+  dprintf(("NTDLL: vsprintf(%08xh, %08xh)\n", s, format));
+  return (vsprintf(s, format, arg));
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.947
+ * Status    :
+ *
+ * Author    : Jens Wiessner
+ *****************************************************************************/
+
+wchar_t * CDECL NTDLL_wcstok( wchar_t *s1, const wchar_t *s2, wchar_t **ptr )
+{
+  dprintf(("NTDLL: wcstok(%08xh, %08xh, %08xh)\n",s1,s2,ptr));
+  return (wcstok(s1, s2, ptr));
+}
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.948
+ * Status    :
+ *
+ * Author    : Jens Wiessner
+ *****************************************************************************/
+
+long int CDECL NTDLL_wcstol( const wchar_t *s1, wchar_t **s2, int i )
+{
+  dprintf(("NTDLL: wcstol(%08xh, %08xh, %08xh)\n",s1,s2,i));
+  return (wcstol(s1, s2, i));
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.949
+ * Status    :
+ *
+ * Author    : Jens Wiessner
+ *****************************************************************************/
+
+size_t CDECL NTDLL_wcstombs( char *s, const wchar_t *pwcs, size_t n )
+{
+  dprintf(("NTDLL: wcstombs(%08xh, %08xh, %08xh)\n",s,pwcs,n));
+  return (wcstombs(s, pwcs, n));
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.950
+ * Status    :
+ *
+ * Author    : Jens Wiessner
+ *****************************************************************************/
+
+unsigned long int CDECL NTDLL_wcstoul( const wchar_t *s1, wchar_t **s2, int i )
+{
+  dprintf(("NTDLL: wcstoul(%08xh, %08xh, %08xh)\n",s1,s2,i));
+  return (wcstoul(s1, s2, i));
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.983
+ * Status    :
+ *
+ * Author    : Jens Wiessner
+ *****************************************************************************/
+
+int CDECL NTDLL__wtoi( const wchar_t *s )
+{
+  dprintf(("NTDLL: _wtoi(%08xh) not implemented.\n"));
+  return 0;
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.984
+ * Status    :
+ *
+ * Author    : Jens Wiessner
+ *****************************************************************************/
+
+long int CDECL NTDLL__wtol( const wchar_t *s )
+{
+  dprintf(("NTDLL: _wtol(%08xh) not implemented.\n"));
+  return 0;
 }
