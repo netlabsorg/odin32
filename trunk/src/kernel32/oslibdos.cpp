@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.65 2001-06-16 16:10:12 sandervl Exp $ */
+/* $Id: oslibdos.cpp,v 1.66 2001-06-19 10:50:25 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -101,7 +101,7 @@ APIRET OdinDosSetFileLocksL(HFILE hFile, PFILELOCKL pflUnlock, PFILELOCKL pflLoc
 // translate OS/2 error codes to Windows codes
 // NOTE: add all codes you need, list is not complete!
 //******************************************************************************
-DWORD error2WinError(APIRET rc,DWORD defaultCode = ERROR_NOT_ENOUGH_MEMORY_W)
+DWORD error2WinError(APIRET rc,DWORD defaultCode)
 {
   switch (rc)
   {

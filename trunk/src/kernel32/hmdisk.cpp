@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.9 2001-06-17 13:58:32 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.10 2001-06-19 10:50:24 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -366,6 +366,11 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
     {
         PSCSI_PASS_THROUGH_DIRECT pPacket = (PSCSI_PASS_THROUGH_DIRECT)lpOutBuffer;
         SRB_ExecSCSICmd *psrb;
+
+        if(hInstAspi == NULL) {
+            SetLastError(ERROR_ACCESS_DENIED);
+            return FALSE;
+        }
 
         if(nOutBufferSize < sizeof(SCSI_PASS_THROUGH_DIRECT) ||
            !pPacket || pPacket->Length < sizeof(SCSI_PASS_THROUGH_DIRECT)) 
