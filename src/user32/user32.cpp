@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.32 1999-09-26 10:10:00 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.33 1999-09-26 16:09:03 dengert Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -877,6 +877,7 @@ int WIN32API GetSystemMetrics(int nIndex)
 }
 //******************************************************************************
 //******************************************************************************
+#if 0
 UINT WIN32API SetTimer( HWND hwnd, UINT idTimer, UINT uTimeout, TIMERPROC  tmprc)
 {
 #ifdef DEBUG
@@ -899,6 +900,7 @@ BOOL WIN32API KillTimer(HWND hWnd, UINT uIDEvent)
     //CB: replace
     return O32_KillTimer(hWnd,uIDEvent);
 }
+#endif
 //******************************************************************************
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.1 1999-09-15 23:18:54 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.2 1999-09-26 16:09:04 dengert Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -21,6 +21,7 @@
 #include "oslibmsg.h"
 #include <win32wnd.h>
 #include "oslibutil.h"
+#include "timer.h"
 
 QMSG *MsgThreadPtr = 0;
 
@@ -28,11 +29,11 @@ QMSG *MsgThreadPtr = 0;
 //******************************************************************************
 BOOL OSLibInitMsgQueue()
 {
-   if(DosAllocThreadLocalMemory(sizeof(QMSG)/sizeof(ULONG), (PULONG *)&MsgThreadPtr) != 0) 
+   if(DosAllocThreadLocalMemory(sizeof(QMSG)/sizeof(ULONG), (PULONG *)&MsgThreadPtr) != 0)
    {
-	dprintf(("OSLibInitMsgQueue: local thread memory alloc failed!!"));
-	DebugInt3();
-	return FALSE;
+        dprintf(("OSLibInitMsgQueue: local thread memory alloc failed!!"));
+        DebugInt3();
+        return FALSE;
    }
    return TRUE;
 }
@@ -69,28 +70,34 @@ LONG OSLibWinDispatchMsg(MSG *msg, BOOL isUnicode)
 {
 //TODO: What to do if app changed msg? (translate)
 //  WinToOS2MsgTranslate(msg, &qmsg, isUnicode);
-  
+
   return (LONG)WinDispatchMsg(GetThreadHAB(), MsgThreadPtr);
 }
 //******************************************************************************
 //******************************************************************************
-BOOL OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax, 
+BOOL OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax,
                     BOOL isUnicode)
 {
- BOOL rc;
+ BOOL rc, eaten;
 
-  rc = WinGetMsg(GetThreadHAB(), MsgThreadPtr, TranslateWinMsg(uMsgFilterMin), TranslateWinMsg(uMsgFilterMax), 0);
+  do {
+    eaten = FALSE;
+    rc = WinGetMsg(GetThreadHAB(), MsgThreadPtr, TranslateWinMsg(uMsgFilterMin), TranslateWinMsg(uMsgFilterMax), 0);
+    if (MsgThreadPtr->msg == WM_TIMER)
+      eaten = TIMER_HandleTimer (MsgThreadPtr);
+  } while (eaten);
+
   OS2ToWinMsgTranslate(MsgThreadPtr, pMsg, isUnicode);
   return rc;
 }
 //******************************************************************************
 //******************************************************************************
-BOOL  OSLibWinPeekMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax, 
+BOOL  OSLibWinPeekMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax,
                       BOOL fRemove, BOOL isUnicode)
 {
  BOOL rc;
 
-  rc = WinPeekMsg(GetThreadHAB(), MsgThreadPtr, hwnd, TranslateWinMsg(uMsgFilterMin), 
+  rc = WinPeekMsg(GetThreadHAB(), MsgThreadPtr, hwnd, TranslateWinMsg(uMsgFilterMin),
                   TranslateWinMsg(uMsgFilterMax), (fRemove == MSG_REMOVE) ? PM_REMOVE : PM_NOREMOVE);
   OS2ToWinMsgTranslate(MsgThreadPtr, pMsg, isUnicode);
   return rc;
