@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.2509 2003-02-28 15:37:10 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2510 2003-02-28 16:20:29 sandervl Exp $ */
 
  2003-02-28: Sander van Leeuwen <sandervl@innotek   >
     - SRC\makefile:
@@ -7,6 +7,7 @@
     - KERNEL32: o Fixed CreateProcessA regression (Lotus Notes)
                 o Check for invalid data while measuring the CPU speed. DosTmrQueryTime
                   isn't very reliable (on laptops).
+                o ExitProcess: don't remove our exception handler too early
 
  2003-02-28: knut st. osmundsen <Knut.Osmundsen@innotek   >
     - MAKEFILES:
