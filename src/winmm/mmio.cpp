@@ -1,4 +1,4 @@
-/* $Id: mmio.cpp,v 1.8 2001-07-20 15:35:00 sandervl Exp $ */
+/* $Id: mmio.cpp,v 1.9 2002-05-22 15:50:25 sandervl Exp $ */
 /*
  * MMIO functions
  *
@@ -27,7 +27,6 @@
 #define DBG_LOCALLOG	DBG_mmio
 #include "dbglocal.h"
 
-ODINDEBUGCHANNEL(WINMM-MMIO)
 
 /**************************************************************************
  *               mmioDosIOProc           [internal]
@@ -328,10 +327,7 @@ static HMMIO MMIO_Open(LPSTR szFileName, LPMMIOINFO refmminfo, DWORD dwOpenFlags
 /**************************************************************************
  * 				mmioOpenW       		[WINMM.123]
  */
-ODINFUNCTION3(HMMIO, mmioOpenW,
-              LPWSTR,szFileName,
-              LPMMIOINFO,lpmmioinfo,
-              DWORD,dwOpenFlags)
+HMMIO WINAPI mmioOpenW(LPWSTR szFileName, LPMMIOINFO lpmmioinfo, DWORD dwOpenFlags)
 {
 	LPSTR	szFn = HEAP_strdupWtoA(GetProcessHeap(),0,szFileName);
 	HMMIO 	ret = mmioOpenA(szFn, lpmmioinfo, dwOpenFlags);
@@ -343,10 +339,7 @@ ODINFUNCTION3(HMMIO, mmioOpenW,
 /**************************************************************************
  * 				mmioOpenA       		[WINMM.122]
  */
-ODINFUNCTION3(HMMIO, mmioOpenA,
-              LPSTR,szFileName,
-              LPMMIOINFO,lpmmioinfo,
-              DWORD,dwOpenFlags)
+HMMIO WINAPI mmioOpenA(LPSTR szFileName, LPMMIOINFO lpmmioinfo, DWORD dwOpenFlags)
 {
 	HMMIO 	ret;
 
@@ -369,9 +362,7 @@ ODINFUNCTION3(HMMIO, mmioOpenA,
 /**************************************************************************
  * 				mmioClose      		[WINMM.114]
  */
-ODINFUNCTION2(MMRESULT, mmioClose,
-              HMMIO,hmmio,
-              UINT,uFlags)
+MMRESULT WINAPI mmioClose(HMMIO hmmio, UINT uFlags) 
 {
 	LPMMIOINFO lpmminfo;
 	MMRESULT   result;
@@ -401,10 +392,7 @@ ODINFUNCTION2(MMRESULT, mmioClose,
 /**************************************************************************
  * 				mmioRead	       	[WINMM.124]
  */
-ODINFUNCTION3(LONG, mmioRead,
-              HMMIO,hmmio,
-              HPSTR,pch,
-              LONG,cch)
+LONG WINAPI mmioRead(HMMIO hmmio, HPSTR pch, LONG cch)
 {
 	LONG       count;
 	LPMMIOINFO lpmminfo;
@@ -460,10 +448,7 @@ ODINFUNCTION3(LONG, mmioRead,
 /**************************************************************************
  * 				mmioWrite      		[WINMM.133]
  */
-ODINFUNCTION3(LONG, mmioWrite,
-              HMMIO,hmmio,
-              HPCSTR,pch,
-              LONG,cch)
+LONG WINAPI mmioWrite(HMMIO hmmio, HPCSTR pch, LONG cch)
 {
 	LONG       count;
 	LPMMIOINFO lpmminfo;
@@ -509,10 +494,7 @@ ODINFUNCTION3(LONG, mmioWrite,
 /**************************************************************************
  * 				mmioSeek       		[MMSYSTEM.1214]
  */
-ODINFUNCTION3(LONG, mmioSeek,
-              HMMIO, hmmio,
-              LONG,lOffset,
-              INT,iOrigin)
+LONG WINAPI mmioSeek(HMMIO hmmio, LONG lOffset, INT iOrigin)
 {
 	int        offset;
 	LPMMIOINFO lpmminfo;
@@ -549,10 +531,7 @@ ODINFUNCTION3(LONG, mmioSeek,
 /**************************************************************************
  * 				mmioGetInfo	       	[MMSYSTEM.1215]
  */
-ODINFUNCTION3(UINT, mmioGetInfo,
-              HMMIO,hmmio,
-              LPMMIOINFO,lpmmioinfo,
-              UINT,uFlags)
+UINT WINAPI mmioGetInfo(HMMIO hmmio, LPMMIOINFO lpmmioinfo, UINT uFlags)
 {
 	LPMMIOINFO	lpmminfo;
 //	TRACE("mmioGetInfo\n");
@@ -567,10 +546,7 @@ ODINFUNCTION3(UINT, mmioGetInfo,
 /**************************************************************************
  * 				mmioSetInfo    		[WINMM.130]
  */
-ODINFUNCTION3(MMRESULT,mmioSetInfo,
-             HMMIO, hmmio,
-             const MMIOINFO*,lpmmioinfo,
-             UINT,uFlags)
+MMRESULT WINAPI mmioSetInfo(HMMIO hmmio, const MMIOINFO* lpmmioinfo, UINT uFlags)
 {
 	LPMMIOINFO	lpmminfo;
 //	TRACE("mmioSetInfo\n");
@@ -585,11 +561,7 @@ ODINFUNCTION3(MMRESULT,mmioSetInfo,
 /**************************************************************************
 * 				mmioSetBuffer		[WINMM.129]
 */
-ODINFUNCTION4(UINT,mmioSetBuffer,
-              HMMIO,hmmio,
-              LPSTR,pchBuffer,
-              LONG,cchBuffer,
-              UINT,uFlags)
+UINT WINAPI mmioSetBuffer(HMMIO hmmio, LPSTR pchBuffer, LONG cchBuffer, UINT uFlags)
 {
 	LPMMIOINFO	lpmminfo;
 
@@ -644,9 +616,7 @@ ODINFUNCTION4(UINT,mmioSetBuffer,
 /**************************************************************************
  * 				mmioFlush      		[WINMM.117]
  */
-ODINFUNCTION2(UINT,mmioFlush,
-              HMMIO,hmmio,
-              UINT,uFlags)
+UINT WINAPI mmioFlush(HMMIO hmmio, UINT uFlags)
 {
 	LPMMIOINFO	lpmminfo;
 //	TRACE("(%04X, %04X)\n", hmmio, uFlags);
@@ -687,10 +657,7 @@ ODINFUNCTION2(UINT,mmioFlush,
 /**************************************************************************
  * 				mmioAdvance    		[WINMM.113]
  */
-ODINFUNCTION3(UINT,mmioAdvance,
-              HMMIO, hmmio,
-              LPMMIOINFO,lpmmioinfo,
-              UINT,uFlags)
+UINT WINAPI mmioAdvance(HMMIO hmmio, LPMMIOINFO lpmmioinfo, UINT uFlags)
 {
 	LPMMIOINFO	lpmminfo;
 //	TRACE("mmioAdvance\n");
@@ -719,8 +686,7 @@ ODINFUNCTION3(UINT,mmioAdvance,
 /**************************************************************************
  * 				mmioStringToFOURCCA	[WINMM.131]
  */
-ODINFUNCTION2(FOURCC,mmioStringToFOURCCA,
-              LPCSTR, sz, UINT, uFlags)
+FOURCC WINAPI mmioStringToFOURCCA(LPCSTR sz, UINT  uFlags)
 {
   return mmioFOURCC(sz[0],sz[1],sz[2],sz[3]);
 }
@@ -728,8 +694,7 @@ ODINFUNCTION2(FOURCC,mmioStringToFOURCCA,
 /**************************************************************************
  * 				mmioStringToFOURCCW	[WINMM.132]
  */
-ODINFUNCTION2(FOURCC,mmioStringToFOURCCW,
-              LPCWSTR, sz, UINT, uFlags)
+FOURCC WINAPI mmioStringToFOURCCW(LPCWSTR sz, UINT  uFlags)
 {
 	LPSTR	szA = HEAP_strdupWtoA(GetProcessHeap(),0,sz);
 	FOURCC	ret = mmioStringToFOURCCA(szA,uFlags);
@@ -757,10 +722,7 @@ static struct IOProcList defaultProcs[] = {
 
 static struct IOProcList *pIOProcListAnchor = &defaultProcs[0];
 
-ODINFUNCTION3(LPMMIOPROC, mmioInstallIOProcA,
-              FOURCC,fccIOProc,
-              LPMMIOPROC,pIOProc,
-              DWORD,dwFlags)
+LPMMIOPROC WINAPI mmioInstallIOProcA(FOURCC fccIOProc, LPMMIOPROC pIOProc, DWORD dwFlags)
 {
 	LPMMIOPROC        lpProc = NULL;
         struct IOProcList  *pListNode;
@@ -839,11 +801,7 @@ ODINFUNCTION3(LPMMIOPROC, mmioInstallIOProcA,
 /**************************************************************************
 * 				mmioSendMessage		[MMSYSTEM.1222]
 */
-ODINFUNCTION4(LRESULT,mmioSendMessage,
-              HMMIO,hmmio,
-              UINT,uMessage,
-              LPARAM,lParam1,
-              LPARAM,lParam2)
+LRESULT WINAPI mmioSendMessage(HMMIO hmmio, UINT uMessage, LPARAM lParam1, LPARAM lParam2)
 {
 	LPMMIOINFO lpmminfo;
 	LRESULT result;
@@ -885,11 +843,7 @@ ODINFUNCTION4(LRESULT,mmioSendMessage,
 /**************************************************************************
 * 				mmioDescend	       	[MMSYSTEM.1223]
 */
-ODINFUNCTION4(UINT,mmioDescend,
-              HMMIO,hmmio,
-              LPMMCKINFO,lpck,
-              const MMCKINFO *,lpckParent,
-              UINT,uFlags)
+UINT WINAPI mmioDescend(HMMIO hmmio, LPMMCKINFO lpck, const MMCKINFO *lpckParent, UINT uFlags)
 {
 	DWORD		dwOldPos;
 	FOURCC		srchCkId;
@@ -989,10 +943,7 @@ ODINFUNCTION4(UINT,mmioDescend,
 /**************************************************************************
  * 				mmioAscend     		[WINMM.113]
  */
-ODINFUNCTION3(UINT,mmioAscend,
-              HMMIO,hmmio,
-              LPMMCKINFO,lpck,
-              UINT,uFlags)
+UINT WINAPI mmioAscend(HMMIO hmmio, LPMMCKINFO lpck, UINT uFlags)
 {
 //	TRACE("(%04X, %p, %04X);\n", hmmio, lpck, uFlags);
 
@@ -1023,10 +974,7 @@ ODINFUNCTION3(UINT,mmioAscend,
 /**************************************************************************
  * 					mmioCreateChunk					[WINMM.115]
  */
-ODINFUNCTION3(UINT,mmioCreateChunk,
-              HMMIO,hmmio,
-              LPMMCKINFO,lpck,
-              UINT,uFlags)
+UINT WINAPI mmioCreateChunk(HMMIO hmmio, LPMMCKINFO lpck, UINT uFlags)
 {
 	DWORD	dwOldPos;
 	LONG 	size;
@@ -1065,11 +1013,8 @@ ODINFUNCTION3(UINT,mmioCreateChunk,
 /**************************************************************************
  * 				mmioRenameA     			[WINMM.125]
  */
-ODINFUNCTION4(UINT,mmioRenameA,
-              LPCSTR,szFileName,
-              LPCSTR,szNewFileName,
-	      LPMMIOINFO,lpmmioinfo,
-              DWORD,dwRenameFlags)
+UINT WINAPI mmioRenameA(LPCSTR szFileName, LPCSTR szNewFileName, LPMMIOINFO lpmmioinfo,
+                        DWORD dwRenameFlags)
 {
 	UINT result;
 	LPMMIOINFO lpmminfo;
@@ -1111,11 +1056,8 @@ ODINFUNCTION4(UINT,mmioRenameA,
 /**************************************************************************
  * 				mmioRenameW     			[WINMM.126]
  */
-ODINFUNCTION4(UINT,mmioRenameW,
-              LPCWSTR,szFileName,
-              LPCWSTR,szNewFileName,
-	      LPMMIOINFO,lpmmioinfo,
-              DWORD,dwRenameFlags)
+UINT WINAPI mmioRenameW(LPCWSTR szFileName, LPCWSTR szNewFileName, LPMMIOINFO lpmmioinfo,
+                        DWORD dwRenameFlags)
 {
 	LPSTR		szFn = HEAP_strdupWtoA(GetProcessHeap(), 0, szFileName);
 	LPSTR		sznFn = HEAP_strdupWtoA(GetProcessHeap(), 0, szNewFileName);
@@ -1126,10 +1068,7 @@ ODINFUNCTION4(UINT,mmioRenameW,
 	return ret;
 }
 
-ODINFUNCTION3(LPMMIOPROC, mmioInstallIOProcW,
-              FOURCC, fccIOProc,
-              LPMMIOPROC, pIOProc,
-              DWORD, dwFlags)
+LPMMIOPROC WINAPI mmioInstallIOProcW(FOURCC fccIOProc, LPMMIOPROC pIOProc, DWORD dwFlags)
 {
   // TODO: What is difference in mmioInstallIOProcW and mmioInstallIOProcA?
   dprintf(("WINMM:mmioInstallIOProcW - stub\n"));

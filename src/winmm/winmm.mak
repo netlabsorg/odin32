@@ -1,4 +1,4 @@
-# $Id: winmm.mak,v 1.8 2001-10-24 22:47:43 sandervl Exp $
+# $Id: winmm.mak,v 1.9 2002-05-22 15:50:26 sandervl Exp $
 
 #
 # Odin32 API
@@ -10,7 +10,12 @@
 #
 # Alternate makefile name.
 #
+!if "$(DEBUG)" == "1"
+DEFFILE    = winmmdbg.def
+ORGDEFFILE = winmm.def
+!endif
 WRC_PREFIX_RESOURCE=1
+
 MAKEFILE = winmm.mak
 
 
@@ -48,6 +53,9 @@ $(OBJDIR)\driver.obj \
 $(OBJDIR)\playsound.obj \
 $(OBJDIR)\joyos2.obj \
 $(OBJDIR)\winmmrsrc.obj \
+!ifdef DEBUG
+$(OBJDIR)\dbgwrap.obj \
+!endif
 $(OBJDIR)\dbglocal.obj
 
 

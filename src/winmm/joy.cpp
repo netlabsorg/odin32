@@ -1,4 +1,4 @@
-/* $Id: joy.cpp,v 1.9 2001-04-04 09:02:16 sandervl Exp $ */
+/* $Id: joy.cpp,v 1.10 2002-05-22 15:50:24 sandervl Exp $ */
 /*
  * Odin Joystick apis
  *
@@ -27,9 +27,6 @@
 
 #define DBG_LOCALLOG    DBG_joy
 #include "dbglocal.h"
-
-ODINDEBUGCHANNEL(WINMM-JOY)
-
 
 #define MAXJOYDRIVERS 2
 
@@ -98,7 +95,7 @@ LONG JoyGetPos(HANDLE hGame, UINT wID, LPJOYINFO lpInfo)
  * @status      Completely Done
  * @author      Przemyslaw Dobrowolski [Tue, 1999/06/29 10:00]
  */
-ODINFUNCTION0(UINT, joyGetNumDevs)
+UINT WINAPI joyGetNumDevs()
 {
   HANDLE            hJoy;
   GAME_PARM_STRUCT  gameInfo;
@@ -133,10 +130,7 @@ ODINFUNCTION0(UINT, joyGetNumDevs)
  * @status      Completely
  * @author      Przemyslaw Dobrowolski [Tue, 1999/06/29 09:40]
  */
-ODINFUNCTION3(MMRESULT, joyGetDevCapsW,
-              UINT, wID,
-              LPJOYCAPSW, lpCaps,
-              UINT, wSize)
+MMRESULT WINAPI joyGetDevCapsW(UINT wID, LPJOYCAPSW lpCaps, UINT wSize)
 {
     if (wID >= MAXJOYDRIVERS) return JOYERR_PARMS;
 
@@ -175,14 +169,11 @@ ODINFUNCTION3(MMRESULT, joyGetDevCapsW,
 }
 
 /**
- * Get Joystick capatibities (Unicode)
+ * Get Joystick capatibities (Ascii)
  * @status      Completely Done
  * @author      Przemyslaw Dobrowolski [Tue, 1999/06/29 09:00]
  */
-ODINFUNCTION3(MMRESULT, joyGetDevCapsA,
-              UINT, wID,
-              LPJOYCAPSA, lpCaps,
-              UINT, wSize)
+MMRESULT WINAPI joyGetDevCapsA(UINT wID, LPJOYCAPSA lpCaps, UINT wSize)
 {
     if (wID >= MAXJOYDRIVERS) return JOYERR_PARMS;
 
@@ -226,9 +217,7 @@ ODINFUNCTION3(MMRESULT, joyGetDevCapsA,
  * @remark      Not all functions are functionally but Quake2
  *              running with this function.
  */
-ODINFUNCTION2(MMRESULT, joyGetPosEx,
-              UINT, uJoyID,
-              LPJOYINFOEX, pji)
+MMRESULT WINAPI joyGetPosEx(UINT uJoyID, LPJOYINFOEX pji)
 {
   JOYINFO            ji;
   HANDLE             hGamePort;
@@ -314,9 +303,7 @@ ODINFUNCTION2(MMRESULT, joyGetPosEx,
  * @status      Completely implemented
  * @author      Przemyslaw Dobrowolski [Tue, 1999/06/29 09:00]
  */
-ODINFUNCTION2(MMRESULT, joyGetPos,
-              UINT, uJoyID,
-              LPJOYINFO, pji)
+MMRESULT WINAPI joyGetPos(UINT uJoyID, LPJOYINFO pji)
 {
   HANDLE   hGame;
   MMRESULT rc;
@@ -340,9 +327,7 @@ ODINFUNCTION2(MMRESULT, joyGetPos,
  * @status      Completely implemented. ?
  * @author      Przemyslaw Dobrowolski [Tue, 1999/06/29 09:00]
  */
-ODINFUNCTION2(MMRESULT, joyGetThreshold,
-              UINT, wID,
-              LPUINT, lpThreshold)
+MMRESULT WINAPI joyGetThreshold(UINT wID, LPUINT lpThreshold)
 {
     dprintf(("WINMM:joyGetThreshold %d %X\n",wID, lpThreshold));
 
@@ -357,9 +342,7 @@ ODINFUNCTION2(MMRESULT, joyGetThreshold,
  * @status      Completely implemented?
  * @author      Przemyslaw Dobrowolski [Tue, 1999/06/29 09:00]
  */
-ODINFUNCTION2(MMRESULT, joySetThreshold,
-              UINT, wID,
-              UINT, wThreshold)
+MMRESULT WINAPI joySetThreshold(UINT wID, UINT wThreshold)
 {
    if (wID >= MAXJOYDRIVERS) return JOYERR_PARMS;
 
@@ -382,11 +365,7 @@ typedef JOYTHREADOPT *PJOYTHREADOPT;
  * @status      Completely implemented?
  * @author      Przemyslaw Dobrowolski [Tue, 1999/06/29 09:00]
  */
-ODINFUNCTION4(MMRESULT, joySetCapture,
-              HWND, hWnd,
-              UINT, wID,
-              UINT, wPeriod,
-              BOOL, bChanged)
+MMRESULT WINAPI joySetCapture(HWND hWnd, UINT wID, UINT wPeriod, BOOL bChanged)
 {
    JOYTHREADOPT *newthr;
    INT          iThreadId;
@@ -421,8 +400,7 @@ ODINFUNCTION4(MMRESULT, joySetCapture,
  * @author      Przemyslaw Dobrowolski [Tue, 1999/06/29 09:00]
  * @remark      Must be rewritten.
  */
-ODINFUNCTION1(MMRESULT, joyReleaseCapture,
-              UINT, wID)
+MMRESULT WINAPI joyReleaseCapture(UINT wID)
 {
   // TODO: Semaphores or waiting for thread...
   if (wID >= MAXJOYDRIVERS) return JOYERR_PARMS;
@@ -438,8 +416,7 @@ ODINFUNCTION1(MMRESULT, joyReleaseCapture,
  * @status      Stub
  * @author      Przemyslaw Dobrowolski [Tue, 1999/06/29 09:00]
  */
-ODINFUNCTION1(MMRESULT, joyConfigChanged,
-              DWORD, dwFlags)
+MMRESULT WINAPI joyConfigChanged(DWORD dwFlags)
 {
   return JOYERR_NOERROR;
 }

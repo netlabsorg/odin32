@@ -1,4 +1,4 @@
-/* $Id: waveout.cpp,v 1.22 2001-10-24 22:47:42 sandervl Exp $ */
+/* $Id: waveout.cpp,v 1.23 2002-05-22 15:50:26 sandervl Exp $ */
 //#undef DEBUG
 /*
  * Wave out MM apis
@@ -35,22 +35,11 @@
 #define DBG_LOCALLOG    DBG_waveout
 #include "dbglocal.h"
 
-ODINDEBUGCHANNEL(WINMM-WAVEOUT)
-
 
 /******************************************************************************/
 /******************************************************************************/
-
-//@@@PH 1999/12/28 this function needs the win32 tib FS selector for callback purposes
-//                 therefore, one cannot use ODINFUNCTION macro wrappers! The xxxFS
-//                 macro passes in USHORT selFS as first parameter.
-ODINFUNCTION6(MMRESULT, waveOutOpen,
-              LPHWAVEOUT, phwo,
-              UINT, uDeviceID,
-              const LPWAVEFORMATEX, pwfx,
-              DWORD, dwCallback,
-              DWORD, dwInstance,
-              DWORD, fdwOpen)
+MMRESULT WINAPI waveOutOpen(LPHWAVEOUT phwo, UINT uDeviceID, const LPWAVEFORMATEX pwfx, 
+                            DWORD dwCallback, DWORD dwInstance, DWORD fdwOpen)
 {
   MMRESULT rc;
 
@@ -89,10 +78,7 @@ ODINFUNCTION6(MMRESULT, waveOutOpen,
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, waveOutWrite,
-              HWAVEOUT, hwo,
-              LPWAVEHDR, pwh,
-              UINT, cbwh)
+MMRESULT WINAPI waveOutWrite(HWAVEOUT hwo, LPWAVEHDR pwh, UINT cbwh)
 {
     WaveOut *dwave = (WaveOut *)hwo;
 
@@ -114,8 +100,7 @@ ODINFUNCTION3(MMRESULT, waveOutWrite,
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION1(MMRESULT, waveOutReset,
-              HWAVEOUT, hwaveout)
+MMRESULT WINAPI waveOutReset(HWAVEOUT hwaveout)
 {
   WaveOut *dwave = (WaveOut *)hwaveout;
 
@@ -125,8 +110,7 @@ ODINFUNCTION1(MMRESULT, waveOutReset,
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION1(MMRESULT, waveOutBreakLoop,
-              HWAVEOUT, hwaveout)
+MMRESULT WINAPI waveOutBreakLoop(HWAVEOUT hwaveout)
 {
     WaveOut *dwave = (WaveOut *)hwaveout;
 
@@ -137,8 +121,7 @@ ODINFUNCTION1(MMRESULT, waveOutBreakLoop,
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION1(MMRESULT, waveOutClose,
-              HWAVEOUT, hwaveout)
+MMRESULT WINAPI waveOutClose(HWAVEOUT hwaveout)
 {
     WaveOut *dwave = (WaveOut *)hwaveout;
 
@@ -154,8 +137,7 @@ ODINFUNCTION1(MMRESULT, waveOutClose,
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION1(MMRESULT, waveOutPause,
-              HWAVEOUT, hwaveout)
+MMRESULT WINAPI waveOutPause(HWAVEOUT hwaveout)
 {
     WaveOut *dwave = (WaveOut *)hwaveout;
 
@@ -165,8 +147,7 @@ ODINFUNCTION1(MMRESULT, waveOutPause,
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION1(MMRESULT, waveOutRestart,
-              HWAVEOUT, hwaveout)
+MMRESULT WINAPI waveOutRestart(HWAVEOUT hwaveout)
 {
     WaveOut *dwave = (WaveOut *)hwaveout;
 
@@ -176,10 +157,7 @@ ODINFUNCTION1(MMRESULT, waveOutRestart,
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, waveOutPrepareHeader,
-              HWAVEOUT, hwo,
-              LPWAVEHDR, pwh,
-              UINT, cbwh)
+MMRESULT WINAPI waveOutPrepareHeader(HWAVEOUT hwo, LPWAVEHDR pwh, UINT cbwh)
 {
     WaveOut *dwave = (WaveOut *)hwo;
 
@@ -197,10 +175,7 @@ ODINFUNCTION3(MMRESULT, waveOutPrepareHeader,
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, waveOutUnprepareHeader,
-              HWAVEOUT, hwo,
-              LPWAVEHDR, pwh,
-              UINT, cbwh)
+MMRESULT WINAPI waveOutUnprepareHeader(HWAVEOUT hwo, LPWAVEHDR pwh, UINT cbwh)
 {
     WaveOut *dwave = (WaveOut *)hwo;
 
@@ -217,10 +192,7 @@ ODINFUNCTION3(MMRESULT, waveOutUnprepareHeader,
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, waveOutGetPosition,
-              HWAVEOUT, hwo,
-              LPMMTIME, pmmt,
-              UINT, cbmmt)
+MMRESULT WINAPI waveOutGetPosition(HWAVEOUT hwo, LPMMTIME pmmt, UINT cbmmt)
 {
   WaveOut *dwave = (WaveOut *)hwo;
 
@@ -272,10 +244,7 @@ ODINFUNCTION3(MMRESULT, waveOutGetPosition,
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, waveOutGetDevCapsA,
-              UINT, uDeviceID,
-              LPWAVEOUTCAPSA, pwoc,
-              UINT, cbwoc)
+MMRESULT WINAPI waveOutGetDevCapsA(UINT uDeviceID, LPWAVEOUTCAPSA pwoc, UINT cbwoc)
 {
     if(fMMPMAvailable == FALSE) return MMSYSERR_NODRIVER;
 
@@ -304,10 +273,7 @@ ODINFUNCTION3(MMRESULT, waveOutGetDevCapsA,
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, waveOutGetDevCapsW,
-              UINT, uDeviceID,
-              LPWAVEOUTCAPSW, pwoc,
-              UINT, cbwoc)
+MMRESULT WINAPI waveOutGetDevCapsW(UINT uDeviceID, LPWAVEOUTCAPSW pwoc, UINT cbwoc)
 {
     if(fMMPMAvailable == FALSE) return MMSYSERR_NODRIVER;
 
@@ -335,7 +301,7 @@ ODINFUNCTION3(MMRESULT, waveOutGetDevCapsW,
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION0(UINT, waveOutGetNumDevs)
+UINT WINAPI waveOutGetNumDevs()
 {
   if(fMMPMAvailable == FALSE) return 0;
 
@@ -343,10 +309,7 @@ ODINFUNCTION0(UINT, waveOutGetNumDevs)
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, waveOutGetErrorTextA,
-              MMRESULT, wError,
-              LPSTR, lpText,
-              UINT, cchText)
+MMRESULT WINAPI waveOutGetErrorTextA(MMRESULT wError, LPSTR lpText, UINT cchText)
 {
     char * theMsg = getWinmmMsg( wError );
     if(theMsg) {
@@ -362,10 +325,7 @@ ODINFUNCTION3(MMRESULT, waveOutGetErrorTextA,
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION3(MMRESULT, waveOutGetErrorTextW,
-              MMRESULT, wError,
-              LPWSTR, lpText,
-              UINT, cchText)
+MMRESULT WINAPI waveOutGetErrorTextW(MMRESULT wError, LPWSTR lpText, UINT cchText)
 {
     char * theMsg = getWinmmMsg( wError );
     if(theMsg) {
@@ -381,9 +341,7 @@ ODINFUNCTION3(MMRESULT, waveOutGetErrorTextW,
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION2(MMRESULT, waveOutGetID,
-              HWAVEOUT, hwo,
-              LPUINT, puDeviceID)
+MMRESULT WINAPI waveOutGetID(HWAVEOUT hwo, LPUINT puDeviceID)
 {
     WaveOut *dwave = (WaveOut *)hwo;
     if(WaveOut::find(dwave) == TRUE)
@@ -395,20 +353,16 @@ ODINFUNCTION2(MMRESULT, waveOutGetID,
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION2(MMRESULT, waveOutGetPitch,
-              HWAVEOUT, hwo,
-              LPDWORD, pdwPitch)
+MMRESULT WINAPI waveOutGetPitch(HWAVEOUT hwo, LPDWORD pdwPitch)
 {
-  WaveOut *dwave = (WaveOut *)hwo;
-  if(WaveOut::find(dwave) == TRUE)
+    WaveOut *dwave = (WaveOut *)hwo;
+    if(WaveOut::find(dwave) == TRUE)
         return MMSYSERR_NOTSUPPORTED;
-  else  return(MMSYSERR_INVALHANDLE);
+    else return(MMSYSERR_INVALHANDLE);
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION2(MMRESULT, waveOutSetPitch,
-              HWAVEOUT, hwo,
-              DWORD, dwPitch)
+MMRESULT WINAPI waveOutSetPitch(HWAVEOUT hwo, DWORD dwPitch)
 {
     WaveOut *dwave = (WaveOut *)hwo;
     if(WaveOut::find(dwave) == TRUE)
@@ -417,79 +371,72 @@ ODINFUNCTION2(MMRESULT, waveOutSetPitch,
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION2(MMRESULT, waveOutGetVolume,
-              HWAVEOUT, hwo,
-              LPDWORD, pdwVolume)
+MMRESULT WINAPI waveOutGetVolume(HWAVEOUT hwo, LPDWORD pdwVolume)
 {
-  WaveOut *dwave = (WaveOut *)hwo;
-  if(WaveOut::find(dwave) == TRUE)
-  {
+    WaveOut *dwave = (WaveOut *)hwo;
+    if(WaveOut::find(dwave) == TRUE)
+    {
         if(pdwVolume!=NULL)
             *pdwVolume=dwave->getVolume();
         return MMSYSERR_NOERROR;
-  }
-  else
-      return MMSYSERR_NOERROR;
+    }
+    else return MMSYSERR_NOERROR;
 //    return(MMSYSERR_INVALHANDLE);
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION2(MMRESULT, waveOutSetVolume,
-              HWAVEOUT, hwo,
-              DWORD, dwVolume)
+MMRESULT WINAPI waveOutSetVolume(HWAVEOUT hwo, DWORD dwVolume)
 {
-  WaveOut *dwave = (WaveOut *)hwo;
-  if(WaveOut::find(dwave) == TRUE)
-  {
-    return(dwave->setVolume(dwVolume));
-  }
-  if(hwo == NULL) {
-      WaveOut::setDefaultVolume(dwVolume);
-  }
-  return MMSYSERR_NOERROR;
+    WaveOut *dwave = (WaveOut *)hwo;
+    if(WaveOut::find(dwave) == TRUE)
+    {
+        return(dwave->setVolume(dwVolume));
+    }
+    if(hwo == NULL) {
+        WaveOut::setDefaultVolume(dwVolume);
+    }
+    return MMSYSERR_NOERROR;
 //    return(MMSYSERR_INVALHANDLE);
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION2(MMRESULT, waveOutGetPlaybackRate,
-              HWAVEOUT, hwo,
-              LPDWORD, pdwRate)
+MMRESULT WINAPI waveOutGetPlaybackRate(HWAVEOUT hwo, LPDWORD pdwRate)
 {
-  WaveOut *dwave = (WaveOut *)hwo;
-  if(WaveOut::find(dwave) == TRUE)
-  {
+    WaveOut *dwave = (WaveOut *)hwo;
+
+    dprintf(("waveOutGetPlaybackRate: NOT IMPLEMENTED!!"));
+    if(WaveOut::find(dwave) == TRUE)
+    {
         return MMSYSERR_NOTSUPPORTED;
-  }
-  else  return(MMSYSERR_INVALHANDLE);
+    }
+    else return(MMSYSERR_INVALHANDLE);
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION2(MMRESULT, waveOutSetPlaybackRate,
-              HWAVEOUT, hwo,
-              DWORD, dwRate)
+MMRESULT WINAPI waveOutSetPlaybackRate(HWAVEOUT hwo, DWORD dwRate)
 {
-  WaveOut *dwave = (WaveOut *)hwo;
-  if(WaveOut::find(dwave) == TRUE)
-  {
+    WaveOut *dwave = (WaveOut *)hwo;
+    
+    dprintf(("waveOutSetPlaybackRate: NOT IMPLEMENTED!!"));
+    if(WaveOut::find(dwave) == TRUE)
+    {
         return MMSYSERR_NOTSUPPORTED;
-  }
-  else  return(MMSYSERR_INVALHANDLE);
+    }
+    else return(MMSYSERR_INVALHANDLE);
 }
 /******************************************************************************/
 /******************************************************************************/
-ODINFUNCTION4(MMRESULT, waveOutMessage,
-              HWAVEOUT, hwo,
-              UINT, uMsg,
-              DWORD, dw1,
-              DWORD, dw2)
+MMRESULT WINAPI waveOutMessage(HWAVEOUT hwo, UINT uMsg, DWORD dw1, DWORD dw2)
 {
-  WaveOut *dwave = (WaveOut *)hwo;
-  if(WaveOut::find(dwave) == TRUE)
-  {
-    return MMSYSERR_NOTSUPPORTED;
-  }
-  else
-    return(MMSYSERR_INVALHANDLE);
+    WaveOut *dwave = (WaveOut *)hwo;
+
+    dprintf(("waveOutMessage: NOT IMPLEMENTED!!"));
+    if(WaveOut::find(dwave) == TRUE)
+    {
+        return MMSYSERR_NOTSUPPORTED;
+    }
+    else
+        return(MMSYSERR_INVALHANDLE);
 }
 /******************************************************************************/
 /******************************************************************************/
