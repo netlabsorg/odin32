@@ -1,4 +1,4 @@
-/* $Id: caret.cpp,v 1.11 2000-01-18 20:10:31 sandervl Exp $ */
+/* $Id: caret.cpp,v 1.12 2000-02-16 14:34:04 sandervl Exp $ */
 
 /*
  * Caret functions for USER32
@@ -18,10 +18,13 @@
 #include <misc.h>
 #include <win32wbase.h>
 #include "oslibwin.h"
-#include "dcdata.h"
+#include <dcdata.h>
 #define INCLUDED_BY_DC
 #include "dc.h"
 #include "caret.h"
+
+#define DBG_LOCALLOG	DBG_caret
+#include "dbglocal.h"
 
 #undef SEVERITY_ERROR
 #include <winerror.h>

@@ -1,4 +1,4 @@
-/* $Id: spy.cpp,v 1.9 2000-01-18 20:10:45 sandervl Exp $ */
+/* $Id: spy.cpp,v 1.10 2000-02-16 14:34:33 sandervl Exp $ */
 
 /*
  * Queue procedures to send messages to the spy server
@@ -24,6 +24,8 @@
 #include <misc.h>
 #include <spy.h>
 
+#define DBG_LOCALLOG	DBG_spy
+#include "dbglocal.h"
 
 #define  Q_BUFFER_SIZE  4096
 #define  MAX_MESSAGES   (Q_BUFFER_SIZE/sizeof(Q_SPYMSG))

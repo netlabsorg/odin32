@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.6 2000-01-29 14:23:33 sandervl Exp $ */
+/* $Id: text.cpp,v 1.7 2000-02-16 14:34:35 sandervl Exp $ */
 
 /*
  * Font and Text Functions
@@ -13,6 +13,9 @@
 
 #include "winuser.h"
 #include "user32.h"
+
+#define DBG_LOCALLOG	DBG_text
+#include "dbglocal.h"
 
 //WINE parts: wine-991031
 

@@ -1,4 +1,4 @@
-/* $Id: listbox.cpp,v 1.18 2000-01-18 20:10:36 sandervl Exp $ */
+/* $Id: listbox.cpp,v 1.19 2000-02-16 14:34:20 sandervl Exp $ */
 /*
  * Listbox controls
  *
@@ -16,6 +16,9 @@
 #include "winerror.h"
 #include "combo.h"
 #include <misc.h>
+
+#define DBG_LOCALLOG	DBG_listbox
+#include "dbglocal.h"
 
 /* Unimplemented yet:
  * - LBS_NOSEL

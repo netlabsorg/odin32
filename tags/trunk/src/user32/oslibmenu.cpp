@@ -1,4 +1,4 @@
-/* $Id: oslibmenu.cpp,v 1.10 2000-01-18 20:10:40 sandervl Exp $ */
+/* $Id: oslibmenu.cpp,v 1.11 2000-02-16 14:34:26 sandervl Exp $ */
 /*
  * Window Menu wrapper functions for OS/2
  *
@@ -21,6 +21,9 @@
 #include "oslibwin.h"
 #include "oslibutil.h"
 #include "oslibmenu.h"
+
+#define DBG_LOCALLOG	DBG_oslibmenu
+#include "dbglocal.h"
 
 //******************************************************************************
 //******************************************************************************

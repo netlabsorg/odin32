@@ -1,4 +1,4 @@
-/* $Id: static.cpp,v 1.16 2000-01-18 20:10:45 sandervl Exp $ */
+/* $Id: static.cpp,v 1.17 2000-02-16 14:34:34 sandervl Exp $ */
 /*
  * Static control
  *
@@ -17,6 +17,9 @@
 #include <os2win.h>
 #include "controls.h"
 #include "static.h"
+
+#define DBG_LOCALLOG	DBG_static
+#include "dbglocal.h"
 
 //Prototypes
 

@@ -1,4 +1,4 @@
-/* $Id: defwndproc.cpp,v 1.12 2000-01-18 20:10:34 sandervl Exp $ */
+/* $Id: defwndproc.cpp,v 1.13 2000-02-16 14:34:15 sandervl Exp $ */
 
 /*
  * Win32 default window API functions for OS/2
@@ -17,6 +17,9 @@
 #include "win32wnd.h"
 #include "win32wmdichild.h"
 #include "win32dlg.h"
+
+#define DBG_LOCALLOG	DBG_defwndproc
+#include "dbglocal.h"
 
 #ifdef DEBUG
 char *GetMsgText(int Msg);

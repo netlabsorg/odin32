@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.41 2000-01-28 22:25:59 sandervl Exp $ */
+/* $Id: pmframe.cpp,v 1.42 2000-02-16 14:34:30 sandervl Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -24,6 +24,9 @@
 #include "oslibwin.h"
 #include "caret.h"
 #include "oslibmsg.h"
+
+#define DBG_LOCALLOG	DBG_pmframe
+#include "dbglocal.h"
 
 #define PMFRAMELOG
 

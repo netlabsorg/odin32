@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.47 2000-02-14 17:30:11 cbratschi Exp $ */
+/* $Id: dc.cpp,v 1.48 2000-02-16 14:34:13 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -36,6 +36,9 @@
 
 #undef SEVERITY_ERROR
 #include <winerror.h>
+
+#define DBG_LOCALLOG	DBG_dc
+#include "dbglocal.h"
 
 #ifndef DEVESC_SETPS
   #define DEVESC_SETPS  49149L
