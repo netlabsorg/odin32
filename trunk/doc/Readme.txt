@@ -82,7 +82,7 @@ run well and to make much more visible progress.
 -----------------------------
 
 Daily builds of Odin are available at ftp://ftp.os2.org/odin/daily.
-For people that do not have a suitable development setup for ODIN, 
+For people that do not have a suitable development setup for ODIN,
 we provide the latest binary code that way.
 
 Odin daily builds are now also distributed as WarpIn archives.
@@ -98,8 +98,8 @@ Requirements for installing Odin:
     Warp 4 open32 dlls and patching them.
 
 Manual installation without WarpIn is not recommended. If you don't use WarpIn,
-then you *must* execute odininst.exe in the Odin system32 directory. (the first 
-time Odin is installed or when the ChangeLog mentions fixes/changes in the 
+then you *must* execute odininst.exe in the Odin system32 directory. (the first
+time Odin is installed or when the ChangeLog mentions fixes/changes in the
 installer)
 
 NOTE: You must install Odin on a partition that supports long filenames (e.g.
@@ -526,10 +526,10 @@ future Elf2Lx loader.
 
 
 
-2.4 The Ring3 conversion utility (PE2LX.EXE)
+2.4 The Ring3 conversion utility (Xx2Lx.exe)
 --------------------------------------------
 
-PE2LX.EXE was the first method of running Win32 programs under
+Xx2Lx.exe was the first method of running Win32 programs under
 OS/2. It is still provided and also functional but it has been
 deprecated. Using it is only sensible for debugging certain
 problems as it requires all DLLs and EXEs to be converted into
@@ -539,6 +539,7 @@ debuginfo to LX with HLL (IPMD/ICSDEBUG) debuginfo for
 sourcelevel debugging of Win32 executables under Odin32. This
 is not yet implemented but is being worked on.)
 
+Note. The name changed from Pe2Lx to Xx2Lx. It is in prepare for Elf2Lx.
 
 
 3.0 Applications known to be working
@@ -566,10 +567,10 @@ Note that many other applications load and/or partly work.
 ------------------------------------
 
 Bug reports can be sent to the Odin users mailinglist (odinusers@egroups.com;
-visit www.egroups.com for information about joining). 
+visit www.egroups.com for information about joining).
 The file ReportingBugs.txt explains how to send in a proper bug report.
 
-An application compatibility database has been created at Netlabs 
+An application compatibility database has been created at Netlabs
 where you can share your experiences with Odin.
 The application compatibility database can be found at
 
@@ -653,7 +654,7 @@ paths of important build directories.
 
 If your system setup meets above stated requirements, everything you
 need to do next for a binary build is:
-  
+
   nmake DEBUG=1
 
 or alternatively
@@ -724,5 +725,5 @@ WITHOUT ANY EXPRESSED OR IMPLIED WARRANTIES OF ANY KIND, INCLUDING
 BUT NOT LIMITED TO, ANY IMPLIED WARRANTIES OF FITNESS FOR A
 PARTICULAR PURPOSE, MERCHANTABILITY OR TITLE.  EXCEPT AS
 OTHERWISE PROVIDED BY LAW, NO AUTHOR, COPYRIGHT HOLDER OR
-LICENSOR SHALL BE LIABLE TO YOU FOR DAMAGES OF ANY KIND, EVEN IF 
+LICENSOR SHALL BE LIABLE TO YOU FOR DAMAGES OF ANY KIND, EVEN IF
 THEY HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.

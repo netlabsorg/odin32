@@ -329,10 +329,10 @@ future Elf2Lx loader.
 
 
 
-2.4 The Ring3 conversion utility (PE2LX.EXE)
+2.4 The Ring3 conversion utility (Xx2Lx.exe)
 --------------------------------------------
 
-PE2LX.EXE was the first method of running Win32 programs under
+Xx2Lx.exe was the first method of running Win32 programs under
 OS/2. It is still provided and also functional but it has been
 deprecated. Using it is only sensible for debugging certain
 problems as it requires all DLLs and EXEs to be converted into
@@ -340,4 +340,7 @@ another file format thus changing the original Win32 files.
 (It's only future use will be to convert Win32 executable with
 debuginfo to LX with HLL (IPMD/ICSDEBUG) debuginfo for
 sourcelevel debugging of Win32 executables under Odin32. This
-is not yet implemented but are being worked on.)
+is not yet implemented but is being worked on.)
+
+Note. The name changed from Pe2Lx to Xx2Lx. It is in prepare for Elf2Lx.
+
