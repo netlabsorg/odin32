@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.2568 2003-05-02 17:19:17 sandervl Exp $ */
+/* $Id: changelog,v 1.2569 2003-05-05 10:51:19 sandervl Exp $ */
+
+ 2003-05-05: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Handle files opened with 0 for dwDesiredAccess seperately.
+                  Those handles can only be used with a limited nr of functions
+                  (such as GetFileType/Size/Time)
 
  2003-05-02: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Keep track of all open window DCs
