@@ -168,6 +168,10 @@ typedef struct tagINPUT
     } DUMMYUNIONNAME;
 } INPUT, *PINPUT, *LPINPUT;
 
+UINT WINAPI SendInput(UINT    cInputs,     // number of input in the array
+                      LPINPUT pInputs,     // array of inputs
+                      int     cbSize);     // sizeof(INPUT)
+
 
   /***** Dialogs *****/
 #ifdef FSHIFT
