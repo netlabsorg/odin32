@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.49 2001-04-26 13:22:42 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.50 2001-06-24 14:13:03 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -280,7 +280,7 @@ ODINFUNCTION3(BOOL, CopyFileA,
               LPCSTR, arg2,
               BOOL, arg3)
 {
-  return O32_CopyFile(arg1, arg2, arg3);
+  return OSLibDosCopyFile(arg1, arg2, arg3);
 }
 //******************************************************************************
 //SvL: 24-6-'97 - Added
@@ -295,7 +295,7 @@ ODINFUNCTION3(BOOL, CopyFileW,
 
   astring1 = UnicodeToAsciiString((LPWSTR)arg1);
   astring2 = UnicodeToAsciiString((LPWSTR)arg2);
-  rc = O32_CopyFile(astring1, astring2, arg3);
+  rc = CALL_ODINFUNC(CopyFileA)(astring1, astring2, arg3);
   FreeAsciiString(astring2);
   FreeAsciiString(astring1);
   return(rc);
@@ -769,10 +769,6 @@ ODINFUNCTION6(BOOL, LockFileEx,
                     nNumberOfBytesToLockLow,
                     nNumberOfBytesToLockHigh));
 }
-
-
-
-
 //******************************************************************************
 //******************************************************************************
 ODINFUNCTION2(BOOL, MoveFileA,
@@ -780,7 +776,7 @@ ODINFUNCTION2(BOOL, MoveFileA,
               LPCSTR, arg2)
 {
     dprintf(("KERNEL32: MoveFileA %s %s", arg1, arg2));
-    return O32_MoveFile(arg1, arg2);
+    return OSLibDosMoveFile(arg1, arg2);
 }
 //******************************************************************************
 //******************************************************************************
@@ -789,8 +785,8 @@ ODINFUNCTION3(BOOL, MoveFileExA,
               LPCSTR, arg2,
               DWORD, fdwFlags)
 {
-    dprintf(("KERNEL32:  MoveFileExA %s to %s, not complete!\n", arg1, arg2));
-    return O32_MoveFile(arg1, arg2);
+    dprintf(("KERNEL32:  MoveFileExA %s to %s %x, not complete!\n", arg1, arg2, fdwFlags));
+    return OSLibDosMoveFile(arg1, arg2);
 }
 //******************************************************************************
 //******************************************************************************
@@ -803,7 +799,7 @@ ODINFUNCTION2(BOOL, MoveFileW,
 
   asciisrc  = UnicodeToAsciiString((LPWSTR)lpSrc);
   asciidest = UnicodeToAsciiString((LPWSTR)lpDest);
-  rc = O32_MoveFile(asciisrc, asciidest);
+  rc = MoveFileA(asciisrc, asciidest);
   FreeAsciiString(asciisrc);
   FreeAsciiString(asciidest);
   return(rc);
@@ -815,7 +811,7 @@ ODINFUNCTION3(BOOL, MoveFileExW,
               LPCWSTR, arg2,
               DWORD, fdwFlags)
 {
-    dprintf(("KERNEL32:  MoveFileExW %s to %s, not complete!\n", arg1, arg2));
+    dprintf(("KERNEL32:  MoveFileExW %ls to %ls %x, not complete!", arg1, arg2, fdwFlags));
     return MoveFileW(arg1, arg2);
 }
 //******************************************************************************

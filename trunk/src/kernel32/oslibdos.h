@@ -1,4 +1,4 @@
-/* $Id: oslibdos.h,v 1.32 2001-06-20 20:51:59 sandervl Exp $ */
+/* $Id: oslibdos.h,v 1.33 2001-06-24 14:13:05 sandervl Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -76,6 +76,9 @@ BOOL OSLibDosGetFileAttributesEx(LPSTR pszName, ULONG ulDummy, PVOID pBuffer);
 DWORD OSLibDosOpen(char *lpszFileName, DWORD flags);
 BOOL OSLibDosClose(DWORD hFile);
 BOOL OSLibDosDelete(char *lpszFileName);
+BOOL OSLibDosCopyFile(LPCSTR lpszOldFile, LPCSTR lpszNewFile, BOOL fFailIfExist);
+BOOL OSLibDosMoveFile(LPCSTR lpszOldFile, LPCSTR lpszNewFile);
+BOOL OSLibDosRemoveDir(LPCSTR lpszDir);
 
 #define OSLIB_SETPTR_FILE_CURRENT       0
 #define OSLIB_SETPTR_FILE_BEGIN         1

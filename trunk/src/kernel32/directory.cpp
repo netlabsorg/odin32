@@ -1,4 +1,4 @@
-/* $Id: directory.cpp,v 1.36 2001-05-28 16:23:42 phaller Exp $ */
+/* $Id: directory.cpp,v 1.37 2001-06-24 14:13:04 sandervl Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
@@ -143,7 +143,7 @@ ODINFUNCTION2(UINT, GetCurrentDirectoryW, UINT,   nBufferLength,
   char *asciidir = (char *)malloc(nBufferLength+1);
   int  rc;
 
-  rc = O32_GetCurrentDirectory(nBufferLength, asciidir);
+  rc = CALL_ODINFUNC(GetCurrentDirectoryA)(nBufferLength, asciidir);
   if(rc != 0)
     AsciiToUnicode(asciidir, lpBuffer);
   free(asciidir);
@@ -506,11 +506,14 @@ ODINFUNCTION2(UINT,GetWindowsDirectoryW,LPWSTR,lpBuffer,
  *****************************************************************************/
 
 
-ODINFUNCTION1(BOOL,   RemoveDirectoryA,
-              LPCSTR, lpstrDirectory)
+ODINFUNCTION1(BOOL, RemoveDirectoryA, LPCSTR, lpstrDirectory)
 {
   int len = strlen(lpstrDirectory);
   
+  if(lpstrDirectory == NULL) {
+     SetLastError(ERROR_INVALID_PARAMETER);
+     return FALSE;
+  }
   // cut off trailing backslashes
   if ( (lpstrDirectory[len - 1] == '\\') ||
        (lpstrDirectory[len - 1] == '/') )
@@ -522,10 +525,9 @@ ODINFUNCTION1(BOOL,   RemoveDirectoryA,
     lpstrDirectory = lpTemp;
   }
   
-  dprintf(("RemoveDirectory %s", 
-          lpstrDirectory));
+  dprintf(("RemoveDirectory %s", lpstrDirectory));
 
-  return O32_RemoveDirectory(lpstrDirectory);
+  return OSLibDosRemoveDir(lpstrDirectory);
 }
 
 
