@@ -167,7 +167,6 @@ DATETIME_SetRange (HWND hwnd, WPARAM wParam, LPARAM lParam )
   return SendMessageA (infoPtr->hMonthCal, MCM_SETRANGE, wParam, lParam);
 }
 
-
 static LRESULT
 DATETIME_GetMonthCalColor (HWND hwnd, WPARAM wParam)
 {
@@ -1212,9 +1211,6 @@ DATETIME_Destroy (HWND hwnd, WPARAM wParam, LPARAM lParam)
 static LRESULT WINAPI
 DATETIME_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-#ifdef __WIN32OS2__
-    SYSTEMTIME *SyTiAr, *SyTiAr2;
-#endif
 
     if (!DATETIME_GetInfoPtr(hwnd) && (uMsg != WM_CREATE))
 	return DefWindowProcA( hwnd, uMsg, wParam, lParam );
@@ -1223,18 +1219,10 @@ DATETIME_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
     {
 
     case DTM_GETSYSTEMTIME:
-#ifdef __WIN32OS2__
-		return DATETIME_GetSystemTime (hwnd, wParam, lParam);
-#else
-		DATETIME_GetSystemTime (hwnd, wParam, lParam);
-#endif
+        return DATETIME_GetSystemTime (hwnd, wParam, lParam);
 
     case DTM_SETSYSTEMTIME:
-#ifdef __WIN32OS2__
-		return DATETIME_SetSystemTime (hwnd, wParam, lParam);
-#else
-		DATETIME_SetSystemTime (hwnd, wParam, lParam);
-#endif
+	return DATETIME_SetSystemTime (hwnd, wParam, lParam);
 
     case DTM_GETRANGE:
         return DATETIME_GetRange(hwnd, lParam);
@@ -1338,4 +1326,5 @@ DATETIME_Unregister (void)
     TRACE("\n");
     UnregisterClassA (DATETIMEPICK_CLASSA, (HINSTANCE)NULL);
 }
+
 
