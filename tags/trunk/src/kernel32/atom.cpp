@@ -1,4 +1,4 @@
-/* $Id: atom.cpp,v 1.12 2002-02-12 11:43:31 sandervl Exp $ */
+/* $Id: atom.cpp,v 1.13 2003-09-18 14:21:07 sandervl Exp $ */
 
 /*
  * Win32 ATOM api functions
@@ -20,7 +20,7 @@
 #include <heapstring.h>
 #include <misc.h>
 
-#define DBG_LOCALLOG	DBG_atom
+#define DBG_LOCALLOG    DBG_atom
 #include "dbglocal.h"
 
 // action codes for LookupAtom
@@ -53,7 +53,7 @@ HATOMTBL systemAtomTable  = NULL;
 HATOMTBL inline getPrivateAtomTable()
 {
     if(privateAtomTable == NULL) {
-        privateAtomTable = WinCreateAtomTable(0, 37); 
+        privateAtomTable = WinCreateAtomTable(0, 37);
     }
     return privateAtomTable;
 }
@@ -62,7 +62,7 @@ HATOMTBL inline getPrivateAtomTable()
 HATOMTBL inline getSystemAtomTable()
 {
     if(systemAtomTable == NULL) {
-        systemAtomTable = WinQuerySystemAtomTable(); 
+        systemAtomTable = WinQuerySystemAtomTable();
     }
     return systemAtomTable;
 }
@@ -80,17 +80,17 @@ BOOL WIN32API InitAtomTable(DWORD numEntries)
 //******************************************************************************
 //******************************************************************************
 ATOM WIN32API FindAtomA( LPCSTR atomName)
-{ 
+{
     HATOMTBL atomTable = getPrivateAtomTable();
     ATOM     atom = 0;
- 
+
     if(HIWORD(atomName)) {
          dprintf(("FindAtomA %s", atomName));
     }
     else dprintf(("FindAtomA %x", atomName));
 
     if(atomTable != NULL) {
-        atom = LookupAtom(atomTable, HIWORD(atomName) ? 
+        atom = LookupAtom(atomTable, HIWORD(atomName) ?
                           (PSZ) atomName : (PSZ) (LOWORD(atomName) | 0xFFFF0000),
                           LOOKUP_FIND | LOOKUP_NOCASE);
     }
@@ -129,13 +129,13 @@ ATOM WIN32API AddAtomA(LPCSTR atomName)
 
     if(atomTable != NULL)
     {
-        atom = LookupAtom(atomTable, HIWORD(atomName) ? 
+        atom = LookupAtom(atomTable, HIWORD(atomName) ?
                           (PSZ) atomName : (PSZ) (LOWORD(atomName) | 0xFFFF0000),
                           LOOKUP_ADD | LOOKUP_NOCASE);
     }
 
     if(HIWORD(atomName)) {
-    	 dprintf(("KERNEL32: AddAtomA %s returned %x", atomName, atom));
+         dprintf(("KERNEL32: AddAtomA %s returned %x", atomName, atom));
     }
     else dprintf(("KERNEL32: AddAtomA %x returned %x", atomName, atom));
 
@@ -190,18 +190,18 @@ UINT WIN32API GetAtomNameW(ATOM atom, LPWSTR lpszBuffer, int cchBuffer)
  UINT rc;
 
     dprintf(("KERNEL32: GetAtomNameW %x %x %d", atom, lpszBuffer, cchBuffer));
-    astring = (char *)alloca(cchBuffer);
+    astring = (char *)alloca(cchBuffer * sizeof( WCHAR ));
     if(astring == NULL) {
-	dprintf(("GlobalGetAtomNameW: alloca failed!!"));
-	DebugInt3();
-	return 0;
+    dprintf(("GlobalGetAtomNameW: alloca failed!!"));
+    DebugInt3();
+    return 0;
     }
-    rc = GetAtomNameA(atom, astring, cchBuffer);
+    rc = GetAtomNameA(atom, astring, cchBuffer * sizeof( WCHAR ));
     if(rc) {
-    	 lstrcpyAtoW(lpszBuffer, astring);
+         lstrcpynAtoW(lpszBuffer, astring, cchBuffer);
     }
     else lpszBuffer[0] = 0; //necessary?
-    return rc;
+    return lstrlenW( lpszBuffer );
 }
 //******************************************************************************
 //******************************************************************************
@@ -235,13 +235,13 @@ ATOM WIN32API GlobalAddAtomA(LPCSTR atomName)
 
     if(atomTable != NULL)
     {
-        atom = LookupAtom(atomTable, HIWORD(atomName) ? 
+        atom = LookupAtom(atomTable, HIWORD(atomName) ?
                           (PSZ) atomName : (PSZ) (LOWORD(atomName) | 0xFFFF0000),
                           LOOKUP_ADD | LOOKUP_NOCASE);
     }
 
     if(HIWORD(atomName)) {
-    	 dprintf(("KERNEL32: GlobalAddAtomA %s returned %x", atomName, atom));
+         dprintf(("KERNEL32: GlobalAddAtomA %s returned %x", atomName, atom));
     }
     else dprintf(("KERNEL32: GlobalAddAtomA %x returned %x", atomName, atom));
 
@@ -282,7 +282,7 @@ ATOM WIN32API GlobalFindAtomA( LPCSTR atomName)
     }
     else dprintf(("KERNEL32: GlobalFindAtomA %x", atomName));
 
-    atom = LookupAtom(atomTable, HIWORD(atomName) ? 
+    atom = LookupAtom(atomTable, HIWORD(atomName) ?
                       (PSZ) atomName : (PSZ) (LOWORD(atomName) | 0xFFFF0000),
                       LOOKUP_FIND | LOOKUP_NOCASE);
     dprintf(("KERNEL32: GlobalFindAtomA returned %x", atom));
@@ -339,18 +339,18 @@ UINT WIN32API GlobalGetAtomNameW(ATOM atom, LPWSTR lpszBuffer, int cchBuffer)
  UINT rc;
 
     dprintf(("KERNEL32: GlobalGetAtomNameW %x %x %d", atom, lpszBuffer, cchBuffer));
-    astring = (char *)alloca(cchBuffer);
+    astring = (char *)alloca(cchBuffer * sizeof( WCHAR ));
     if(astring == NULL) {
-	dprintf(("GlobalGetAtomNameW: alloca failed!!"));
-	DebugInt3();
-	return 0;
+    dprintf(("GlobalGetAtomNameW: alloca failed!!"));
+    DebugInt3();
+    return 0;
     }
-    rc = GlobalGetAtomNameA(atom, astring, cchBuffer);
+    rc = GlobalGetAtomNameA(atom, astring, cchBuffer * sizeof( WCHAR ));
     if(rc) {
-    	 lstrcpyAtoW(lpszBuffer, astring);
+         lstrcpynAtoW(lpszBuffer, astring, cchBuffer);
     }
     else lpszBuffer[0] = 0; //necessary?
-    return rc;
+    return lstrlenW( lpszBuffer );
 }
 //******************************************************************************
 //******************************************************************************
