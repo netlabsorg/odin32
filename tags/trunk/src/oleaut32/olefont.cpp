@@ -1,4 +1,4 @@
-/* $Id: olefont.cpp,v 1.2 1999-08-22 22:08:48 sandervl Exp $ */
+/* $Id: olefont.cpp,v 1.3 1999-11-18 00:27:36 davidr Exp $ */
 /*
  * OLE Font encapsulation implementation
  *
@@ -412,7 +412,7 @@ HRESULT WINAPI OLEFontImpl_QueryInterface(
     WINE_StringFromCLSID((LPCLSID)riid,clsid);
     
     WARN(
-	 "() : asking for un supported interface %s\n", 
+	 "OLEAUT32: IFont->QueryInterface(%s) : unsupported interface requested!",
 	 clsid);
 
     return E_NOINTERFACE;
