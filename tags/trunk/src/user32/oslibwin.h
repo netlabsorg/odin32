@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.61 2001-07-28 13:43:53 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.62 2001-11-30 13:53:50 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -349,5 +349,57 @@ BOOL   OSLibWinLockWindowUpdate(HWND hwnd);
 BOOL   OSLibWinGetMaxPosition(HWND hwndOS2, RECT *rect);
 
 BOOL   OSLibWinShowPointer(BOOL fShow);
+
+
+   #define PMSYSCLR_SHADOWHILITEBGND         (-50L)
+   #define PMSYSCLR_SHADOWHILITEFGND         (-49L)
+   #define PMSYSCLR_SHADOWTEXT               (-48L)
+   #define PMSYSCLR_ENTRYFIELD               (-47L)
+   #define PMSYSCLR_MENUDISABLEDTEXT         (-46L)
+   #define PMSYSCLR_MENUHILITE               (-45L)
+   #define PMSYSCLR_MENUHILITEBGND           (-44L)
+   #define PMSYSCLR_PAGEBACKGROUND           (-43L)
+   #define PMSYSCLR_FIELDBACKGROUND          (-42L)
+   #define PMSYSCLR_BUTTONLIGHT              (-41L)
+   #define PMSYSCLR_BUTTONMIDDLE             (-40L)
+   #define PMSYSCLR_BUTTONDARK               (-39L)
+   #define PMSYSCLR_BUTTONDEFAULT            (-38L)
+   #define PMSYSCLR_TITLEBOTTOM              (-37L)
+   #define PMSYSCLR_SHADOW                   (-36L)
+   #define PMSYSCLR_ICONTEXT                 (-35L)
+   #define PMSYSCLR_DIALOGBACKGROUND         (-34L)
+   #define PMSYSCLR_HILITEFOREGROUND         (-33L)
+   #define PMSYSCLR_HILITEBACKGROUND         (-32L)
+   #define PMSYSCLR_INACTIVETITLETEXTBGND    (-31L)
+   #define PMSYSCLR_ACTIVETITLETEXTBGND      (-30L)
+   #define PMSYSCLR_INACTIVETITLETEXT        (-29L)
+   #define PMSYSCLR_ACTIVETITLETEXT          (-28L)
+   #define PMSYSCLR_OUTPUTTEXT               (-27L)
+   #define PMSYSCLR_WINDOWSTATICTEXT         (-26L)
+   #define PMSYSCLR_SCROLLBAR                (-25L)
+   #define PMSYSCLR_BACKGROUND               (-24L)
+   #define PMSYSCLR_ACTIVETITLE              (-23L)
+   #define PMSYSCLR_INACTIVETITLE            (-22L)
+   #define PMSYSCLR_MENU                     (-21L)
+   #define PMSYSCLR_WINDOW                   (-20L)
+   #define PMSYSCLR_WINDOWFRAME              (-19L)
+   #define PMSYSCLR_MENUTEXT                 (-18L)
+   #define PMSYSCLR_WINDOWTEXT               (-17L)
+   #define PMSYSCLR_TITLETEXT                (-16L)
+   #define PMSYSCLR_ACTIVEBORDER             (-15L)
+   #define PMSYSCLR_INACTIVEBORDER           (-14L)
+   #define PMSYSCLR_APPWORKSPACE             (-13L)
+   #define PMSYSCLR_HELPBACKGROUND           (-12L)
+   #define PMSYSCLR_HELPTEXT                 (-11L)
+   #define PMSYSCLR_HELPHILITE               (-10L)
+
+   #define PMSYSCLR_CSYSCOLORS               41L
+   #define PMSYSCLR_BASE                     50L
+
+#define CONVERT_RGB(colorRef) ( ((colorRef) & 0x0000FF00     )   |   \
+                                (((colorRef) & 0x00FF0000)>>16)  |   \
+                                (((colorRef) & 0x000000FF)<<16)   )
+
+ULONG  OSLibWinQuerySysColor(int index);
 
 #endif //__OSLIBWIN_H__

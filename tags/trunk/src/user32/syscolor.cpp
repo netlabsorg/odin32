@@ -1,4 +1,4 @@
-/* $Id: syscolor.cpp,v 1.30 2001-10-15 17:09:04 sandervl Exp $ */
+/* $Id: syscolor.cpp,v 1.31 2001-11-30 13:53:50 sandervl Exp $ */
 
 /*
  * Win32 system color API functions for OS/2
@@ -23,6 +23,7 @@
 #include "user32.h"
 #include "syscolor.h"
 #include "options.h"
+#include "oslibwin.h"
 
 #define DBG_LOCALLOG    DBG_syscolor
 #include "dbglocal.h"
@@ -264,6 +265,26 @@ HBRUSH WIN32API GetSysColorBrush(int nIndex)
   //TODO: is this still necessary (check in NT)
   dprintf2(("WARNING: Unknown index(%d)", nIndex ));
   return GetStockObject(LTGRAY_BRUSH);
+}
+//******************************************************************************
+HBRUSH OS2SysColorBrush[PMSYSCLR_CSYSCOLORS] = {0};
+//******************************************************************************
+HBRUSH WIN32API GetOS2ColorBrush(int nIndex)
+{
+  dprintf(("GetOS2ColorBrush %d", nIndex));
+  nIndex += PMSYSCLR_BASE;
+  if( ((nIndex < 0) || (nIndex >= PMSYSCLR_CSYSCOLORS))  ) {
+      DebugInt3();
+      return 0;
+  }
+
+  if(OS2SysColorBrush[nIndex]) return OS2SysColorBrush[nIndex];
+
+  ULONG color = OSLibWinQuerySysColor(nIndex-PMSYSCLR_BASE);
+  dprintf(("color %x", color));
+  OS2SysColorBrush[nIndex] = CreateSolidBrush(color);
+
+  return OS2SysColorBrush[nIndex];
 }
 /***********************************************************************
  * This function is new to the Wine lib -- it does not exist in
