@@ -1,4 +1,4 @@
-/* $Id: winimgres.cpp,v 1.28 1999-11-29 20:43:02 sandervl Exp $ */
+/* $Id: winimgres.cpp,v 1.29 1999-11-30 14:15:55 sandervl Exp $ */
 
 /*
  * Win32 PE Image class (resource methods)
@@ -266,6 +266,10 @@ HRSRC Win32ImageBase::findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang)
         else    dprintf(("Win32ImageBase::getPEResource %s: couldn't find resource %d (type %d, lang %d)", szModule, id, type, lang));
         return 0;
     }
+    if(HIWORD(id)) {
+            dprintf(("FindResource %s: resource %s (type %d, lang %d)", szModule, id, type, lang));
+    }
+    else    dprintf(("FindResource %s: resource %d (type %d, lang %d)", szModule, id, type, lang));
     //ulRVAResourceSection contains the relative virtual address (relative to the start of the image)
     //for the resource section (images loaded by the pe.exe and pe2lx/win32k)
     //For LX images, this is 0 as OffsetToData contains a relative offset

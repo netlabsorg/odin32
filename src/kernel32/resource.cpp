@@ -1,4 +1,4 @@
-/* $Id: resource.cpp,v 1.11 1999-11-29 20:43:01 sandervl Exp $ */
+/* $Id: resource.cpp,v 1.12 1999-11-30 14:15:54 sandervl Exp $ */
 
 /*
  * Misc resource procedures
@@ -25,11 +25,11 @@ HRSRC WIN32API FindResourceA(HINSTANCE hModule, LPCSTR lpszName, LPCSTR lpszType
 {
  Win32ImageBase *module;
 
-    dprintf(("FindResourceA %X", hModule));
     module = Win32ImageBase::findModule(hModule);
-    if(module == NULL)
-      return(NULL);
-
+    if(module == NULL) {
+	  dprintf(("FindResourceA Module %X not found (%x %d)", hModule, lpszName, lpszType));
+          return(NULL);
+    }
     return module->findResourceA(lpszName, (LPSTR)lpszType);
 }
 //******************************************************************************
@@ -39,10 +39,11 @@ HRSRC WIN32API FindResourceW(HINSTANCE hModule, LPCWSTR lpszName,
 {
  Win32ImageBase *module;
 
-    dprintf(("FindResourceW %X", hModule));
     module = Win32ImageBase::findModule(hModule);
-    if(module == NULL)
-        return(NULL);
+    if(module == NULL) {
+	  dprintf(("FindResourceW Module %X not found (%x %d)", hModule, lpszName, lpszType));
+          return(NULL);
+    }
 
     return module->findResourceW((LPWSTR)lpszName, (LPWSTR)lpszType);
 }
