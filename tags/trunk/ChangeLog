@@ -1,4 +1,10 @@
-/* $Id: ChangeLog,v 1.2504 2003-02-27 14:21:56 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2505 2003-02-27 17:16:11 sandervl Exp $ */
+
+ 2003-02-27: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o VirtualAlloc: fixed handling of commit for a page range
+                  that is not entirely reserved (contains committed pages)
+                o Don't call WinMessageBox in the unhandled exception filter as
+                  that can hang PM.
 
  2003-02-27: Platon Fomichev <stauff@innotek   >
     - USER32:   o Illegal PM sequence of maximizing from icon state corrected.
