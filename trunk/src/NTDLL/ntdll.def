@@ -1,4 +1,4 @@
-; $Id: ntdll.def,v 1.6 1999-06-22 16:18:14 phaller Exp $
+; $Id: ntdll.def,v 1.7 1999-06-22 17:08:16 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is NT4.0's NTDLL.DLL
@@ -280,6 +280,21 @@ EXPORTS
 
 ; NTDLL's C runtime
 ; Note: CDECL does not decorate the function names with parameter bytes!
+    abs                           = _OS2abs                           @883
+    atan                          = _OS2atan                          @884
+    atoi                          = _OS2atoi                          @885
+    atol                          = _OS2atol                          @886
+    ceil                          = _OS2ceil                          @887
+    cos                           = _OS2cos                           @888
+    fabs                          = _OS2fabs                          @889
+    floor                         = _OS2floor                         @890
+    isalpha                       = _OS2isalpha                       @891
+    isdigit                       = _OS2isdigit                       @892
+    islower                       = _OS2islower                       @893
+    isprint                       = _OS2isprint                       @894
+    isspace                       = _OS2isspace                       @895
+    isupper                       = _OS2isupper                       @896
+
     strcat                        = _OS2strcat                        @914
     strchr                        = _OS2strchr                        @915
     strcmp                        = _OS2strcmp                        @916
@@ -293,4 +308,18 @@ EXPORTS
     strrchr                       = _OS2strrchr                       @924
     strspn                        = _OS2strspn                        @925
     strstr                        = _OS2strstr                        @926
+
+    wcscat                        = _OS2wcscat                        @934
+    wcschr                        = _OS2wcschr                        @935
+    wcscmp                        = _OS2wcscmp                        @936
+    wcscpy                        = _OS2wcscpy                        @937
+    wcscspn                       = _OS2wcscspn                       @938
+    wcslen                        = _OS2wcslen                        @939
+    wcsncat                       = _OS2wcscat                        @940
+    wcsncmp                       = _OS2wcsncmp                       @941
+    wcsncpy                       = _OS2wcsncpy                       @942
+    wcspbrk                       = _OS2wcspbrk                       @943
+    wcsrchr                       = _OS2wcsrchr                       @944
+    wcsspn                        = _OS2wcsspn                        @945
+    wcsstr                        = _OS2wcsstr                        @946
 
