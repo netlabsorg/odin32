@@ -1,4 +1,4 @@
-/* $Id: win32wfake.cpp,v 1.4 2003-04-24 13:59:15 sandervl Exp $ */
+/* $Id: win32wfake.cpp,v 1.5 2003-04-24 17:20:42 sandervl Exp $ */
 /*
  * Win32 Fake Window Class for OS/2
  *
@@ -240,7 +240,7 @@ BOOL Win32FakeWindow::isFakeWindow()
  */
 Win32FakeWindow *Win32FakeWindow::GetWindowFromOS2Handle(HWND hwndOS2)
 {
-    if (fInited)    init();
+    if (!fInited)    init();
 
     HWND hwnd = (HWND)OSLibQueryProperty(hwndOS2, szPropOdinHandle);
     Win32BaseWindow *pWindow = GetWindowFromHandle(hwnd);
@@ -273,9 +273,11 @@ void     Win32FakeWindow::init()
     char        szModName[260];
     HMODULE     hmod;
     ULONG       iObj, offObj;
-    USHORT      GetFS();
+    USHORT      sel = GetFS();
+
     int rc = DosQueryModFromEIP(&hmod, &iObj, sizeof(szModName), &szModName[0], &offObj, (ULONG)Win32FakeWindow::init);
-    SetFS(rc);
+    SetFS(sel);
+
     if (rc)
     {
         dprintf(("Win32FakeWindow::init: DosQueryModFromEIP failed!!!"));
