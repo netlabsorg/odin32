@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2031 2002-03-28 11:25:13 sandervl Exp $ */
+/* $Id: changelog,v 1.2032 2002-03-28 16:19:26 sandervl Exp $ */
+
+ 2002-03-28: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Customization changes
 
  2002-03-28: Platon Fomichev <platon@innotek.de>
     - USER32:   o Gracefully handle WM_QUIT message sent by window list:
