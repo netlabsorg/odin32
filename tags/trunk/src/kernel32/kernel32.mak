@@ -1,4 +1,4 @@
-# $Id: kernel32.mak,v 1.27 2002-02-13 08:25:26 sandervl Exp $
+# $Id: kernel32.mak,v 1.28 2002-04-30 09:36:09 sandervl Exp $
 
 #
 # Odin32 API
@@ -23,6 +23,10 @@ WRC_PREFIX_RESOURCE=1
 !include ../../makefile.inc
 
 ##CDEFINES = $(CDEFINES) /Fa+
+
+!ifdef WITH_KLIB
+CDEFINES = $(CDEFINES) -DWITH_KLIB
+!endif
 
 #
 # Object files. Prefix with OBJDIR and one space before the '\'.
