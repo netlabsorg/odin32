@@ -1,4 +1,4 @@
-/* $Id: time.cpp,v 1.23 2002-12-29 14:11:23 sandervl Exp $ */
+/* $Id: time.cpp,v 1.24 2003-01-03 11:26:43 sandervl Exp $ */
 
 /*
  * Win32 time/date API functions
@@ -29,6 +29,7 @@
 #include <time.h>
 #include "unicode.h"
 #include "oslibtime.h"
+#include "winreg.h"
 
 #define DBG_LOCALLOG	DBG_time
 #include "dbglocal.h"
@@ -182,14 +183,78 @@ BOOL WIN32API SystemTimeToTzSpecificLocalTime(LPTIME_ZONE_INFORMATION lpTimeZone
 }
 //******************************************************************************
 //******************************************************************************
+DWORD TimeZoneName(LPSTR name, LPWSTR text, BOOL read)
+{
+    CHAR  AsciiText_1[32];
+    CHAR  AsciiText_2[32];
+    HKEY  hKeyOptions;
+    DWORD dwKeyType;
+    DWORD dwDataLength = sizeof(AsciiText_1);
+    DWORD dwDataLength_2;
+    BOOL  Set = FALSE;
+
+    if (read) {
+       ZeroMemory(text, 2*sizeof(AsciiText_1));
+    }
+    else {
+       UnicodeToAscii(text, &AsciiText_2[0]);
+       dwDataLength_2 = strlen(AsciiText_2);
+    }
+    DWORD rc = RegOpenKeyExA(HKEY_LOCAL_MACHINE,
+                             "SOFTWARE\\TIME\\TIME_SETTING",
+                             0,
+                             (read) ? KEY_READ : KEY_ALL_ACCESS,
+                             &hKeyOptions);
+    if (rc == ERROR_SUCCESS) 
+    {
+        rc = RegQueryValueExA(hKeyOptions,
+                              name,
+                              0,
+                              &dwKeyType,
+                              (LPBYTE)AsciiText_1,
+                              &dwDataLength);
+        if (rc == ERROR_SUCCESS) {
+            if (read) AsciiToUnicode(&AsciiText_1[0], text);
+            else Set = (strcmp(AsciiText_1,AsciiText_2) != 0);
+        } 
+        else Set = (!read);
+    } 
+    else {
+        if (!read) {
+            rc = RegCreateKeyA(HKEY_LOCAL_MACHINE,
+                               "SOFTWARE\\TIME\\TIME_SETTING",
+                               &hKeyOptions);
+            Set = (rc == ERROR_SUCCESS);
+        }
+    }
+    if (Set) rc = RegSetValueExA(hKeyOptions,
+                                 name,
+                                 0,
+                                 REG_SZ,
+                                 (LPBYTE)AsciiText_2,
+                                 dwDataLength_2);
+
+    RegCloseKey(hKeyOptions);
+    return rc;
+}
+//******************************************************************************
 DWORD WIN32API GetTimeZoneInformation(LPTIME_ZONE_INFORMATION lpTimeZone)
 {
-    return O32_GetTimeZoneInformation(lpTimeZone);
+    DWORD ret = O32_GetTimeZoneInformation(lpTimeZone);
+
+    //Convert timezone names to unicode as WGSS (wrongly) returns ascii strings
+    TimeZoneName("STANDARD_NAME", &lpTimeZone->StandardName[0], TRUE);
+    TimeZoneName("DAYLIGHT_NAME", &lpTimeZone->DaylightName[0], TRUE);
+    return ret;
 }
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API SetTimeZoneInformation(const LPTIME_ZONE_INFORMATION lpTimeZone)
 {
+    //Convert timezone names to ascii as WGSS (wrongly) expects that
+    TimeZoneName("STANDARD_NAME", &lpTimeZone->StandardName[0], FALSE);
+    TimeZoneName("DAYLIGHT_NAME", &lpTimeZone->DaylightName[0], FALSE);
+
     return O32_SetTimeZoneInformation(lpTimeZone);
 }
 /*****************************************************************************
@@ -214,4 +279,5 @@ VOID WIN32API GetSystemTimeAsFileTime(LPFILETIME lpSystemTimeAsFileTime)
 }
 //******************************************************************************
 //******************************************************************************
+
 
