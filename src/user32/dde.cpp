@@ -1,4 +1,4 @@
-/* $Id: dde.cpp,v 1.15 2002-02-11 13:48:40 sandervl Exp $ */
+/* $Id: dde.cpp,v 1.16 2003-01-21 11:47:46 sandervl Exp $ */
 
 /*
  * Win32 default window API functions for OS/2
@@ -10,11 +10,59 @@
  *
  */
 #include <os2win.h>
-#include <misc.h>
 #include <unicode.h>
+#include <ddeml.h>
+#include <dde.h>
+#include <odinwrap.h>
+#include <dbgwrap.h>
 
 #define DBG_LOCALLOG	DBG_dde
 #include "dbglocal.h"
+
+#define DBGWRAP_MODULE "USER32"
+#include <dbgwrap.h>
+
+#ifdef DEBUG
+#undef DBG_LOCALLOG
+#define DBG_LOCALLOG	DBG_dde
+DEBUGWRAP12(DdeAbandonTransaction)
+DEBUGWRAP8(DdeAccessData)
+DEBUGWRAP16(DdeAddData)
+DEBUGWRAP32(DdeClientTransaction)
+DEBUGWRAP8(DdeCmpStringHandles)
+DEBUGWRAP16(DdeConnect)
+DEBUGWRAP20(DdeConnectList)
+DEBUGWRAP28(DdeCreateDataHandle)
+DEBUGWRAP12(DdeCreateStringHandleA)
+DEBUGWRAP12(DdeCreateStringHandleW)
+DEBUGWRAP4(DdeDisconnect)
+DEBUGWRAP4(DdeDisconnectList)
+DEBUGWRAP12(DdeEnableCallback)
+DEBUGWRAP4(DdeFreeDataHandle)
+DEBUGWRAP8(DdeFreeStringHandle)
+DEBUGWRAP16(DdeGetData)
+DEBUGWRAP4(DdeGetLastError)
+DEBUGWRAP4(DdeImpersonateClient)
+DEBUGWRAP16(DdeInitializeA)
+DEBUGWRAP16(DdeInitializeW)
+DEBUGWRAP8(DdeKeepStringHandle)
+DEBUGWRAP16(DdeNameService)
+DEBUGWRAP12(DdePostAdvise)
+DEBUGWRAP12(DdeQueryConvInfo)
+DEBUGWRAP8(DdeQueryNextServer)
+DEBUGWRAP20(DdeQueryStringA)
+DEBUGWRAP20(DdeQueryStringW)
+DEBUGWRAP4(DdeReconnect)
+DEBUGWRAP12(DdeSetQualityOfService)
+DEBUGWRAP12(DdeSetUserHandle)
+DEBUGWRAP4(DdeUnaccessData)
+DEBUGWRAP4(DdeUninitialize)
+DEBUGWRAP8(FreeDDElParam)
+DEBUGWRAP8(ImpersonateDdeClientWindow)
+DEBUGWRAP12(PackDDElParam)
+DEBUGWRAP20(ReuseDDElParam)
+DEBUGWRAP16(UnpackDDElParam)
+#endif
 
 //******************************************************************************
 //******************************************************************************
@@ -323,7 +371,7 @@ LONG WIN32API PackDDElParam(UINT arg1, UINT arg2, UINT  arg3)
 }
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API ReuseDDElParam(LPARAM arg1, UINT arg2, UINT arg3, UINT arg4, UINT arg5)
+LPARAM WIN32API ReuseDDElParam(LPARAM arg1, UINT arg2, UINT arg3, UINT arg4, UINT arg5)
 {
     dprintf(("USER32:  ReuseDDElParam\n"));
 
