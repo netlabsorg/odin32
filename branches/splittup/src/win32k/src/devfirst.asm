@@ -1,4 +1,4 @@
-; $Id: devfirst.asm,v 1.1.2.2 2002-04-01 09:57:12 bird Exp $
+; $Id: devfirst.asm,v 1.1.2.3 2002-04-01 12:51:47 bird Exp $
 ;
 ; DevFirst - entrypoint and segment definitions
 ;
@@ -12,6 +12,7 @@
 ; Include files
 ;
     include devsegdf.inc
+    include devhdr.inc
     include sas.inc
 
 ;
@@ -263,6 +264,21 @@ CODE16_INIT ends
 
 DATA16 segment
 DATA16START label byte ; no string here!!
+aDevHdrs: ;DDHDR aDevHdrs[1] /* This is the first piece data in the driver!!!!!!! */
+;
+; device 1
+;
+    dw size SysDev3                     ; NextHeader (offset)
+    dw seg aDevHdrs                     ; NextHeader (selector)
+    dw DEVLEV_3 or DEV_30 or DEV_CHAR_DEV ; SDevAtt
+    dw offset _strategyAsm              ; StrategyEP
+    dw 0                                ; InterruptEP
+    db "$win32k "                       ; DevName
+    dw 0                                ; SDevProtCS
+    dw 0                                ; SDevProtDS
+    dw 0                                ; SDevRealCS
+    dw 0                                ; SDevRealDS
+    dd DEV_16MB or DEV_IOCTL2           ; SDevCaps
 DATA16 ends
 
 DATA16_BSS segment
