@@ -1040,8 +1040,7 @@ TOOLBAR_AddStringA (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
 	infoPtr->strings[infoPtr->nNumStrings] =
 	    COMCTL32_Alloc (sizeof(WCHAR)*(len+1));
-//	lstrcpyAtoW (infoPtr->strings[infoPtr->nNumStrings], szString);
-	strcpy(infoPtr->strings[infoPtr->nNumStrings], szString);
+	lstrcpyAtoW (infoPtr->strings[infoPtr->nNumStrings], szString);
 	infoPtr->nNumStrings++;
     }
     else {
@@ -1071,8 +1070,7 @@ TOOLBAR_AddStringA (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
 	    infoPtr->strings[infoPtr->nNumStrings] =
 		COMCTL32_Alloc (sizeof(WCHAR)*(len+1));
-//	    lstrcpyAtoW (infoPtr->strings[infoPtr->nNumStrings], p);
-	    strcpy(infoPtr->strings[infoPtr->nNumStrings], p);
+	    lstrcpyAtoW (infoPtr->strings[infoPtr->nNumStrings], p);
 	    infoPtr->nNumStrings++;
 
 	    p += (len+1);

@@ -20,6 +20,7 @@
 #include "winbase.h"
 #include "commctrl.h"
 #include "tooltips.h"
+#include "comctl32.h"
 
 
 #define ID_TIMERSHOW   1    /* show delay timer */
@@ -115,14 +116,12 @@ TOOLTIPS_GetTipText (HWND hwnd, TOOLTIPS_INFO *infoPtr, INT nTool)
 		}
 	    }
 	    else if (ttnmdi.szText[0]) {
-//		lstrcpynAtoW (infoPtr->szTipText, ttnmdi.szText, 80);
-		strncpy(infoPtr->szTipText, ttnmdi.szText, 80);
+		lstrcpynAtoW (infoPtr->szTipText, ttnmdi.szText, 80);
 		if (ttnmdi.uFlags & TTF_DI_SETITEM) {
 		    INT len = lstrlenA (ttnmdi.szText);
 		    toolPtr->hinst = 0;
 		    toolPtr->lpszText =	COMCTL32_Alloc ((len+1)* sizeof(WCHAR));
-//		    lstrcpyAtoW (toolPtr->lpszText, ttnmdi.szText);
-		    strcpy(toolPtr->lpszText, ttnmdi.szText);
+		    lstrcpyAtoW (toolPtr->lpszText, ttnmdi.szText);
 		}
 	    }
 	    else if (ttnmdi.lpszText == 0) {
@@ -130,14 +129,12 @@ TOOLTIPS_GetTipText (HWND hwnd, TOOLTIPS_INFO *infoPtr, INT nTool)
 		infoPtr->szTipText[0] = L'\0';
 	    }
 	    else if (ttnmdi.lpszText != LPSTR_TEXTCALLBACKA) {
-//		lstrcpynAtoW (infoPtr->szTipText, ttnmdi.lpszText, INFOTIPSIZE);
-		strncpy(infoPtr->szTipText, ttnmdi.lpszText, INFOTIPSIZE);
+		lstrcpynAtoW (infoPtr->szTipText, ttnmdi.lpszText, INFOTIPSIZE);
 		if (ttnmdi.uFlags & TTF_DI_SETITEM) {
 		    INT len = lstrlenA (ttnmdi.lpszText);
 		    toolPtr->hinst = 0;
 		    toolPtr->lpszText =	COMCTL32_Alloc ((len+1)*sizeof(WCHAR));
-//		    lstrcpyAtoW (toolPtr->lpszText, ttnmdi.lpszText);
-		    strcpy(toolPtr->lpszText, ttnmdi.lpszText);
+		    lstrcpyAtoW (toolPtr->lpszText, ttnmdi.lpszText);
 		}
 	    }
 	    else {
@@ -615,8 +612,7 @@ TOOLTIPS_AddToolA (HWND hwnd, WPARAM wParam, LPARAM lParam)
 	    INT len = lstrlenA (lpToolInfo->lpszText);
 //	    TRACE (tooltips, "add text \"%s\"!\n", lpToolInfo->lpszText);
 	    toolPtr->lpszText =	COMCTL32_Alloc ((len + 1)*sizeof(WCHAR));
-//	    lstrcpyAtoW (toolPtr->lpszText, lpToolInfo->lpszText);
-	    strcpy(toolPtr->lpszText, lpToolInfo->lpszText);
+	    lstrcpyAtoW (toolPtr->lpszText, lpToolInfo->lpszText);
 	}
     }
 
@@ -1147,8 +1143,7 @@ TOOLTIPS_GetTextA (HWND hwnd, WPARAM wParam, LPARAM lParam)
     nTool = TOOLTIPS_GetToolFromInfoA (infoPtr, lpToolInfo);
     if (nTool == -1) return 0;
 
-//    lstrcpyWtoA (lpToolInfo->lpszText, infoPtr->tools[nTool].lpszText);
-    strcpy(lpToolInfo->lpszText, infoPtr->tools[nTool].lpszText);
+    lstrcpyWtoA (lpToolInfo->lpszText, infoPtr->tools[nTool].lpszText);
 
     return 0;
 }
@@ -1585,8 +1580,7 @@ TOOLTIPS_SetToolInfoA (HWND hwnd, WPARAM wParam, LPARAM lParam)
 	    if (lpToolInfo->lpszText) {
 		INT len = lstrlenA (lpToolInfo->lpszText);
 		toolPtr->lpszText = COMCTL32_Alloc ((len+1)*sizeof(WCHAR));
-//		lstrcpyAtoW (toolPtr->lpszText, lpToolInfo->lpszText);
-		strcpy(toolPtr->lpszText, lpToolInfo->lpszText);
+		lstrcpyAtoW (toolPtr->lpszText, lpToolInfo->lpszText);
 	    }
 	}
     }
@@ -1754,8 +1748,7 @@ TOOLTIPS_UpdateTipTextA (HWND hwnd, WPARAM wParam, LPARAM lParam)
 	    if (lpToolInfo->lpszText) {
 		INT len = lstrlenA (lpToolInfo->lpszText);
 		toolPtr->lpszText = COMCTL32_Alloc ((len+1)*sizeof(WCHAR));
-//		lstrcpyAtoW (toolPtr->lpszText, lpToolInfo->lpszText);
-		strcpy(toolPtr->lpszText, lpToolInfo->lpszText);
+		lstrcpyAtoW (toolPtr->lpszText, lpToolInfo->lpszText);
 	    }
 	}
     }
@@ -2060,12 +2053,10 @@ TOOLTIPS_OnWMGetText (HWND hwnd, WPARAM wParam, LPARAM lParam)
        copy wParam characters of the tip text and return wParam */
     if(wParam < length)
     {
-//        lstrcpynWtoA((LPSTR)lParam, infoPtr->szTipText,(UINT)wParam);
-        strncpy((LPSTR)lParam, infoPtr->szTipText,(UINT)wParam);
+        lstrcpynWtoA((LPSTR)lParam, infoPtr->szTipText,(UINT)wParam);
         return wParam;
     }
-//    lstrcpyWtoA((LPSTR)lParam, infoPtr->szTipText);
-    strcpy((LPSTR)lParam, infoPtr->szTipText);
+    lstrcpyWtoA((LPSTR)lParam, infoPtr->szTipText);
     return length;
 
 }
