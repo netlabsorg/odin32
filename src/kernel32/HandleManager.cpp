@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.71 2001-10-03 13:48:56 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.72 2001-10-10 22:54:05 phaller Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -535,8 +535,10 @@ DWORD HMHandleAllocate (PULONG phHandle16,
            phHandle16,
            hHandleOS2));
 #endif
-
-  ulHandle = HMGlobals.ulHandleLast;                      /* get free handle */
+  
+  // @@@PH 2001-09-27
+  // prevent too quick re-use of last handle
+  ulHandle = HMGlobals.ulHandleLast + 1;                  /* get free handle */
 
   handleMutex.enter();
 
