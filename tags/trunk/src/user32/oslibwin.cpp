@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.6 1999-09-25 14:18:11 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.7 1999-09-25 15:10:00 cbratschi Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -112,29 +112,43 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle, ULO
   if(dwStyle & WS_TABSTOP_W)
         *OSWinStyle |= WS_TABSTOP;
 
-  if(dwStyle & WS_CAPTION_W)
-        *OSFrameStyle |= FCF_TITLEBAR;
-  if(dwStyle & WS_DLGFRAME_W)
-        *OSFrameStyle |= FCF_DLGBORDER;
-  else
-  if(dwStyle & WS_BORDER_W)
-        *OSFrameStyle |= FCF_BORDER;
+  if (dwStyle & WS_CHILD_W)
+  {
+    if (dwExStyle & WS_EX_CLIENTEDGE_W ||
+        dwExStyle & WS_EX_STATICEDGE_W ||
+        dwExStyle & WS_EX_WINDOWEDGE_W)
+          *OSFrameStyle |= FCF_DLGBORDER;
 
-  if(dwStyle & WS_VSCROLL_W)
-        *OSFrameStyle |= FCF_VERTSCROLL;
-  if(dwStyle & WS_HSCROLL_W)
-        *OSFrameStyle |= FCF_HORZSCROLL;
-  if(dwStyle & WS_SYSMENU_W)
-        *OSFrameStyle |= FCF_SYSMENU;
-  if(dwStyle & WS_THICKFRAME_W)
-        *OSFrameStyle |= FCF_SIZEBORDER;        //??
-  if(dwStyle & WS_MINIMIZEBOX_W)
-        *OSFrameStyle |= FCF_MINBUTTON;
-  if(dwStyle & WS_MAXIMIZEBOX_W)
-        *OSFrameStyle |= FCF_MAXBUTTON;
+    if(dwStyle & WS_VSCROLL_W)
+          *OSFrameStyle |= FCF_VERTSCROLL;
+    if(dwStyle & WS_HSCROLL_W)
+          *OSFrameStyle |= FCF_HORZSCROLL;
+  } else
+  {
+    if(dwStyle & WS_CAPTION_W)
+          *OSFrameStyle |= FCF_TITLEBAR;
+    if(dwStyle & WS_DLGFRAME_W)
+          *OSFrameStyle |= FCF_DLGBORDER;
+    else
+    if(dwStyle & WS_BORDER_W)
+          *OSFrameStyle |= FCF_BORDER;
 
-  if(dwExStyle & WS_EX_DLGMODALFRAME_W)
-        *OSFrameStyle |= FCF_DLGBORDER;
+    if(dwStyle & WS_VSCROLL_W)
+          *OSFrameStyle |= FCF_VERTSCROLL;
+    if(dwStyle & WS_HSCROLL_W)
+          *OSFrameStyle |= FCF_HORZSCROLL;
+    if(dwStyle & WS_SYSMENU_W)
+          *OSFrameStyle |= FCF_SYSMENU;
+    if(dwStyle & WS_THICKFRAME_W)
+          *OSFrameStyle |= FCF_SIZEBORDER;        //??
+    if(dwStyle & WS_MINIMIZEBOX_W)
+          *OSFrameStyle |= FCF_MINBUTTON;
+    if(dwStyle & WS_MAXIMIZEBOX_W)
+          *OSFrameStyle |= FCF_MAXBUTTON;
+
+    if(dwExStyle & WS_EX_DLGMODALFRAME_W)
+          *OSFrameStyle |= FCF_DLGBORDER;
+  }
 
   return TRUE;
 }
