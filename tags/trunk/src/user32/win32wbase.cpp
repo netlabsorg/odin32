@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.144 2000-01-21 13:30:35 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.145 2000-01-26 18:02:36 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -461,8 +461,8 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         GetMinMaxInfo(&maxSize, &maxPos, &minTrack, &maxTrack);
         if (maxSize.x < cs->cx) cs->cx = maxSize.x;
         if (maxSize.y < cs->cy) cs->cy = maxSize.y;
-        if (cs->cx < minTrack.x ) cs->cx = minTrack.x;
-        if (cs->cy < minTrack.y ) cs->cy = minTrack.y;
+        if (cs->cx < minTrack.x) cs->cx = minTrack.x;
+        if (cs->cy < minTrack.y) cs->cy = minTrack.y;
   }
 
   if(cs->style & WS_CHILD)
@@ -652,21 +652,7 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
                 SendInternalMessageA(WM_SIZE, SIZE_RESTORED,
                                 MAKELONG(rectClient.right-rectClient.left,
                                          rectClient.bottom-rectClient.top));
-                DWORD lParam;
-
-                if(getParent()) {//in parent coordinates
-                    POINT point;
-
-                    point.x = rectClient.left;
-                    point.y = rectClient.top;
-                    MapWindowPoints(getWindowHandle(), getParent()->getWindowHandle(), &point, 1);
-
-                    lParam = MAKELONG(point.x, point.y);
-                }
-                else {//in screen coordinates
-                    lParam = MAKELONG(rectWindow.left+rectClient.left, rectWindow.top+rectClient.top);
-                }
-                SendInternalMessageA(WM_MOVE, 0, lParam);
+                SendInternalMessageA(WM_MOVE,0,MAKELONG(rectClient.left,rectClient.top));
             }
 
             if( (getStyle() & WS_CHILD) && !(getExStyle() & WS_EX_NOPARENTNOTIFY) )
@@ -778,7 +764,7 @@ ULONG Win32BaseWindow::MsgPosChanging(LPARAM lp)
     //SvL: Notes crashes when switching views (calls DestroyWindow -> PM sends
     //     a WM_WINDOWPOSCHANGED msg -> crash)
     if(fNoSizeMsg || fDestroyWindowCalled)
-        return 1;
+        return 0;
 
     return SendInternalMessageA(WM_WINDOWPOSCHANGING, 0, lp);
 }
@@ -1050,10 +1036,16 @@ ULONG Win32BaseWindow::MsgFormatFrame(WINDOWPOS *lpWndPos)
   WINDOWPOS wndPos;
   ULONG rc;
 
-  if(lpWndPos) {
+  if(lpWndPos)
+  {
+    POINT point;
+
     //set new window rectangle
-    setWindowRect(lpWndPos->x, lpWndPos->y, lpWndPos->x + lpWndPos->cx, lpWndPos->y + lpWndPos->cy);
-    newWindowRect= rectWindow;
+    point.x = lpWndPos->x;
+    point.y = lpWndPos->y;
+    if (getParent()) ClientToScreen(getParent()->getWindowHandle(),&point);
+    setWindowRect(point.x,point.y,point.x+lpWndPos->cx,point.y+lpWndPos->cy);
+    newWindowRect = rectWindow;
   }
   else {
     wndPos.hwnd  = getWindowHandle();
@@ -1409,21 +1401,7 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 
         if (!(wpos->flags & SWP_NOMOVE) && !(wpos->flags & SWP_NOCLIENTMOVE))
         {
-            DWORD lParam;
-
-                if(getParent()) {//in parent coordinates
-                    POINT point;
-
-                    point.x = rectClient.left;
-                    point.y = rectClient.top;
-                    MapWindowPoints(getWindowHandle(), getParent()->getWindowHandle(), &point, 1);
-
-                    lParam = MAKELONG(point.x, point.y);
-                }
-                else {//in screen coordinates
-                    lParam = MAKELONG(rectWindow.left+rectClient.left, rectWindow.top+rectClient.top);
-                }
-                SendInternalMessageA(WM_MOVE, 0, lParam);
+            SendInternalMessageA(WM_MOVE,0,MAKELONG(rectClient.left,rectClient.top));
         }
         if (!(wpos->flags & SWP_NOSIZE) && !(wpos->flags & SWP_NOCLIENTSIZE))
         {
@@ -2062,9 +2040,22 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
     SWP swp, swpOld;
 
 #if 0 //CB: test: MSIE 2.0 displays the tool-/addressbar this way -> to check
+      //CB: -> comctl32: toolbar (WM_SIZE), same bug: statusbar height
   //CB: cx or cy are 0
-if (cx == 0) cx = 50;
-if (cy == 0) cy = 50;
+
+if (cx == 0)
+{
+  dprintf(("CB: cx is 0! %d",fuFlags));
+  if (fuFlags & SWP_NOSIZE) dprintf(("CB: nosize"));
+  //cx = 50;
+}
+if (cy == 0)
+{
+  dprintf(("CB: cy is 0! %d",fuFlags));
+  if (fuFlags & SWP_NOSIZE) dprintf(("CB: nosize"));
+  //cy = 50;
+}
+
 #endif
 
     wpos.flags            = fuFlags;
@@ -2109,26 +2100,7 @@ if (cy == 0) cy = 50;
             swp.hwndInsertBehind = 0;
         }
     }
-//CB: todo
- #if 0
-    if (isFrameWindow())
-    {
-      if (!isChild())
-      {
-        POINT maxSize, maxPos, minTrack, maxTrack;
-
-        GetMinMaxInfo(&maxSize, &maxPos, &minTrack, &maxTrack);
-
-        if (swp.cx > maxTrack.x) swp.cx = maxTrack.x;
-        if (swp.cy > maxTrack.y) swp.cy = maxTrack.y;
-        if (swp.cx < minTrack.x) swp.cx = minTrack.x;
-        if (swp.cy < minTrack.y) swp.cy = minTrack.y;
-      }
-      swp.hwnd = OS2HwndFrame;
-    }
-    else
-#endif
-      swp.hwnd = OS2HwndFrame;
+    swp.hwnd = OS2HwndFrame;
 
     dprintf (("WinSetWindowPos %x %x (%d,%d)(%d,%d) %x", swp.hwnd, swp.hwndInsertBehind, swp.x, swp.y, swp.cx, swp.cy, swp.fl));
 

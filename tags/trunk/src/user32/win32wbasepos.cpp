@@ -1,4 +1,4 @@
-/* $Id: win32wbasepos.cpp,v 1.10 2000-01-18 20:10:57 sandervl Exp $ */
+/* $Id: win32wbasepos.cpp,v 1.11 2000-01-26 18:02:38 cbratschi Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (nonclient/position methods)
  *
@@ -155,43 +155,23 @@ LONG Win32BaseWindow::SendNCCalcSize(BOOL calcValidRect, RECT *newWindowRect,
    return result;
 }
 /***********************************************************************
- *           WINPOS_HandleWindowPosChanging16
+ *           WINPOS_HandleWindowPosChanging
  *
  * Default handling for a WM_WINDOWPOSCHANGING. Called from DefWindowProc().
  */
 LONG Win32BaseWindow::HandleWindowPosChanging(WINDOWPOS *winpos)
 {
- POINT maxSize, minTrack;
- int   rc = 1;
+    POINT maxSize;
+    if (winpos->flags & SWP_NOSIZE) return 0;
 
-    if (winpos->flags & SWP_NOSIZE)
-        return 1;
-
-    if ((getStyle() & WS_THICKFRAME) ||
-        ((getStyle() & (WS_POPUP | WS_CHILD)) == 0))
+    if ((dwStyle & WS_THICKFRAME) ||
+        ((dwStyle & (WS_POPUP | WS_CHILD)) == 0))
     {
-        GetMinMaxInfo(&maxSize, NULL, &minTrack, NULL );
-        if (maxSize.x < winpos->cx) {
-            winpos->cx = maxSize.x;
-            rc = 0;
-        }
-        if (maxSize.y < winpos->cy) {
-            winpos->cy = maxSize.y;
-            rc = 0;
-        }
-        if (!(getStyle() & WS_MINIMIZE))
-        {
-            if (winpos->cx < minTrack.x ) {
-                winpos->cx = minTrack.x;
-                rc = 0;
-            }
-            if (winpos->cy < minTrack.y ) {
-                winpos->cy = minTrack.y;
-                rc = 0;
-            }
-        }
+        GetMinMaxInfo( &maxSize, NULL, NULL, NULL );
+        winpos->cx = MIN( winpos->cx, maxSize.x );
+        winpos->cy = MIN( winpos->cy, maxSize.y );
     }
-    return rc;
+    return 0;
 }
 //******************************************************************************
 //******************************************************************************
