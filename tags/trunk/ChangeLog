@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.2615 2003-08-01 16:25:22 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2616 2003-08-06 09:58:42 sandervl Exp $ */
+
+ 2002-08-06: Dmitry Froloff <froloff@os2   >
+    - KERNEL32: o HMDeviceConsoleOutClass::CreateFile; use current window size
+                  instead of default
 
  2003-08-01: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Fixed SPI_GETWHEELSCROLLLINES
