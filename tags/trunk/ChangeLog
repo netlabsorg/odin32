@@ -1,4 +1,10 @@
- /* $Id: ChangeLog,v 1.668 2000-01-26 11:26:57 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.669 2000-01-26 18:03:32 cbratschi Exp $ */
+
+ 2000-01-26: Christoph Bratschi <cbratschi@datacomm.ch>
+	- USER32: fixed WM_MOVE, MsgFormatFrame and WM_WINDOWPOS* to use parent
+	          coordinates
+	          changed min frame size
+	- COMCTL32: fixed wrong progress frame
 
  2000-01-26: Sander van Leeuwen <sandervl@xs4all.nl>
 	- OLEAUT32: Don't create logfile when logging is turned off
