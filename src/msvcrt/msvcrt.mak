@@ -1,4 +1,4 @@
-# $Id: msvcrt.mak,v 1.6 2003-01-10 13:13:49 sandervl Exp $
+# $Id: msvcrt.mak,v 1.7 2003-01-15 10:43:16 sandervl Exp $
 
 #
 # Odin32 API
@@ -83,3 +83,4 @@ $(TARGET).lib:
     @copy $(OBJDIR)\$(TARGET).lib $(ODIN32_LIB_)\Release > nul:
     @copy $(OBJDIR)\$(TARGET).lib $(ODIN32_LIB_)\Debug  > nul:
 
+lib: $(TARGET).lib
