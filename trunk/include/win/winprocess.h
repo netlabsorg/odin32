@@ -1,4 +1,4 @@
-/* $Id: process.h,v 1.1 1999-11-30 14:19:02 sandervl Exp $ */
+/* $Id: winprocess.h,v 1.4 1999-11-30 14:32:34 sandervl Exp $ */
 /*
  * Process definitions
  *
