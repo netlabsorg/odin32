@@ -1,10 +1,14 @@
- /* $Id: changelog,v 1.543 1999-12-18 10:25:49 sandervl Exp $ */
+ /* $Id: changelog,v 1.544 1999-12-18 14:33:06 sandervl Exp $ */
 
  99-12-18: Sander van Leeuwen <sandervl@xs4all.nl>
 	- MSACM32: Compile fixes (internal.cpp)
+	- USER32: WindowFromPoint fix (return 0 if no windows found, not the desktop wnd handle)
+                  SetMenuItemInfoA bugfix (for novamatic) (still not completely
+                  implemented though)
 
  99-12-18: Jens Wiessner <wiessnej@rfi.de>
 	- MSACM32: Updated with latest Wine code (991212)
+	- CRTDLL:  Removed the ERRNO Defs from CRTINC.H and included ERRNO.H
 
  99-12-17: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: WM_NOTIFYPARENT: map cursor pos
