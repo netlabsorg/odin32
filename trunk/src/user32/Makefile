@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.95 2001-10-01 01:41:38 bird Exp $
+# $Id: Makefile,v 1.96 2001-10-03 18:37:51 sandervl Exp $
 
 #
 # Odin32 API
@@ -18,9 +18,9 @@ WRC_PREFIX_RESOURCE=1
 # Overrides.
 #
 !ifndef WMAKE
-CDEFINES  = $(CDEFINES) -DINVERT -DCLIENTFRAME
+CDEFINES  = $(CDEFINES) -DINVERT -DCLIENTFRAME -DCUSTOM_TRACKFRAME
 !else
-CDEFINES += -DINVERT -DCLIENTFRAME
+CDEFINES += -DINVERT -DCLIENTFRAME -DCUSTOM_TRACKFRAME
 !endif
 
 
@@ -63,6 +63,7 @@ $(OBJDIR)\windowword.obj \
 $(OBJDIR)\windowmsg.obj \
 $(OBJDIR)\winproc.obj \
 $(OBJDIR)\oslibmsg.obj \
+$(OBJDIR)\wintrack.obj \
 $(OBJDIR)\hook.obj \
 $(OBJDIR)\win32wmdiclient.obj \
 $(OBJDIR)\mdi.obj \

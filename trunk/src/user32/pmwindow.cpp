@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.151 2001-10-03 13:50:36 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.152 2001-10-03 18:37:52 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -1404,7 +1404,11 @@ PosChangedEnd:
     case WM_TRACKFRAME:
         dprintf(("PMFRAME: WM_TRACKFRAME %x %x %x", win32wnd->getWindowHandle(), mp1, mp2));
         if(fOS2Look) {//sent by titlebar control
+#ifdef CUSTOM_TRACKFRAME
+            Frame_SysCommandSizeMove(win32wnd, SC_MOVE_W);
+#else
             FrameTrackFrame(win32wnd, TF_MOVE);
+#endif
         }
         rc = 0;
         break;
@@ -1455,6 +1459,7 @@ RunDefWndProc:
 //    return pfnFrameWndProc(hwnd, msg, mp1, mp2);
     return WinDefWindowProc( hwnd, msg, mp1, mp2 );
 }
+#ifndef CUSTOM_TRACKFRAME 
 //******************************************************************************
 //TODO: Quickly moving a window two times doesn't force a repaint (1st time)
 //
@@ -1555,6 +1560,7 @@ VOID FrameTrackFrame(Win32BaseWindow *win32wnd,DWORD flags)
    }
    return;
 }
+#endif
 //******************************************************************************
 //******************************************************************************
 void FrameReplaceMenuItem(HWND hwndMenu, ULONG nIndex, ULONG idOld, ULONG   idNew,

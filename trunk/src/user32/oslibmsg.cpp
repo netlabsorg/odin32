@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.43 2001-09-01 12:41:42 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.44 2001-10-03 18:37:51 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -81,7 +81,7 @@ MSGTRANSTAB MsgTransTab[] = {
    WM_BUTTON3DBLCLK, WINWM_NCMBUTTONDBLCLK,
 
    //TODO: Needs better translation!
-   WM_CHAR,          WINWM_KEYDOWN,
+   WM_CHAR,          WINWM_KEYDOWN,   //WM_KEYFIRST
    WM_CHAR,          WINWM_KEYUP,
    WM_CHAR,          WINWM_CHAR,
    WM_CHAR,          WINWM_DEADCHAR,
@@ -96,7 +96,7 @@ MSGTRANSTAB MsgTransTab[] = {
 
    //
    //todo: not always right if mouse msg turns out to be for the nonclient window
-   WM_MOUSEMOVE,     WINWM_MOUSEMOVE,
+   WM_MOUSEMOVE,     WINWM_MOUSEMOVE,    //WM_MOUSEFIRST
    WM_BUTTON1DOWN,   WINWM_LBUTTONDOWN,
    WM_BUTTON1UP,     WINWM_LBUTTONUP,
    WM_BUTTON1DBLCLK, WINWM_LBUTTONDBLCLK,
@@ -106,7 +106,7 @@ MSGTRANSTAB MsgTransTab[] = {
    WM_BUTTON3DOWN,   WINWM_MBUTTONDOWN,
    WM_BUTTON3UP,     WINWM_MBUTTONUP,
    WM_BUTTON3DBLCLK, WINWM_MBUTTONDBLCLK,
-
+   WM_BUTTON3DBLCLK, WINWM_MOUSEWHEEL,    //WM_MOUSELAST
    999999999,        999999999,
 };
 #define MAX_MSGTRANSTAB (sizeof(MsgTransTab)/sizeof(MsgTransTab[0]))
@@ -269,7 +269,7 @@ continuegetmsg:
 	}
     	do {
         	eaten = FALSE;
-	        rc = WinGetMsg(teb->o.odin.hab, &os2msg, filtermin, filtermax, 0);
+	        rc = WinGetMsg(teb->o.odin.hab, &os2msg, 0, filtermin, filtermax);
 	        if (os2msg.msg == WM_TIMER)
 	            eaten = TIMER_HandleTimer(&os2msg);
 	} while (eaten);

@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.111 2001-07-30 12:02:15 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.112 2001-10-03 18:37:51 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -968,7 +968,8 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
         else {
             int clipstyle = 0;
             int clipwnd   = HWND_TOP;
-            if(flags & (DCX_USESTYLE_W)) {
+            if(flags & (DCX_USESTYLE_W)) 
+            {
                 int style = wnd->getStyle();
                 if(style & WS_CLIPCHILDREN_W) {
                     clipstyle |= PSF_CLIPCHILDREN;
@@ -989,11 +990,13 @@ HDC WIN32API GetDCEx (HWND hwnd, HRGN hrgn, ULONG flags)
             if(flags & DCX_PARENTCLIP_W) {
                 clipstyle |= PSF_PARENTCLIP;
             }
-            if(clipstyle) {
+            //Always call WinGetClipPS; WinGetPS takes window & class style
+            //into account
+//            if(clipstyle || !(flags & DCX_DEFAULTCLIP_W)) {
                  dprintf2(("WinGetClipPS style %x", clipstyle));
                  hps = WinGetClipPS(hWindow, clipwnd, clipstyle);
-            }
-            else hps = WinGetPS (hWindow);
+//            }
+//            else hps = WinGetPS (hWindow);
 
             // default cp is OS/2 one: set to windows default (ODIN.INI)
             GpiSetCp(hps, GetDisplayCodepage());
@@ -1110,14 +1113,14 @@ HDC WIN32API GetDC (HWND hwnd)
     if(!hwnd)
         return GetDCEx( GetDesktopWindow(), 0, DCX_CACHE_W | DCX_WINDOW_W );
 
-    return GetDCEx (hwnd, NULL, 0);
+    return GetDCEx (hwnd, NULL, DCX_USESTYLE_W);
 }
 //******************************************************************************
 //******************************************************************************
 HDC WIN32API GetWindowDC (HWND hwnd)
 {
     if (!hwnd) hwnd = GetDesktopWindow();
-    return GetDCEx (hwnd, NULL, DCX_WINDOW_W);
+    return GetDCEx (hwnd, NULL, DCX_WINDOW_W | DCX_USESTYLE_W);
 }
 //******************************************************************************
 //Helper for RedrawWindow (RDW_ALLCHILDREN_W)
