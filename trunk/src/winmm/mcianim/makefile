@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2000-01-03 10:29:28 sandervl Exp $
+# $Id: makefile,v 1.2 2000-01-15 22:02:48 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -6,9 +6,9 @@
 #	mcianim.dll makefile
 #
 
-PDWIN32_INCLUDE = ..\..\include
-PDWIN32_LIB = ..\..\lib
-PDWIN32_BIN = ..\..\bin
+PDWIN32_INCLUDE = ..\..\..\include
+PDWIN32_LIB = ..\..\..\lib
+PDWIN32_BIN = ..\..\..\bin
 
 
 !include $(PDWIN32_INCLUDE)/pdwin32.mk

@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.1 2000-01-03 10:29:27 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.2 2000-01-15 22:02:48 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -31,6 +31,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <odin.h>
+#include <win32type.h>
+#include <odinlx.h>
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
 
 extern "C" {
