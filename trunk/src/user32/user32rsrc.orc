@@ -1,4 +1,4 @@
-/* $Id: user32rsrc.orc,v 1.6 2000-12-17 15:04:11 sandervl Exp $ */
+/* $Id: user32rsrc.orc,v 1.7 2001-01-05 23:25:49 sandervl Exp $ */
 /* converted from WINE */
 
 #include "winuser.h"
@@ -890,7 +890,7 @@ BEGIN
             VALUE "FileDescription", "USER32 System dll\0"
             VALUE "FileVersion", "4.00\0"
             VALUE "InternalName", "USER32\0"
-            VALUE "LegalCopyright", "Copyright (C) 1999-2000\0"
+            VALUE "LegalCopyright", "Copyright (C) 1999-2001\0"
             VALUE "LegalTrademarks", "\0"
             VALUE "OriginalFilename", "USER32.DLL\0"
             VALUE "ProductName", "Odin32 - USER32\0"
