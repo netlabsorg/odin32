@@ -1,4 +1,4 @@
-/* $Id: ccollection.cpp,v 1.5 2001-05-30 18:29:59 phaller Exp $ */
+/* $Id: ccollection.cpp,v 1.6 2001-06-01 01:21:13 phaller Exp $ */
 
 /*
  * Collection class:
@@ -865,3 +865,13 @@ unsigned long CHashtableLookup::nextPrime(unsigned long x)
    }
 }
 
+
+/*
+ * The following code provides classes for special purposes, whereas
+ * the above code is meant for general purposes. The above classes provide
+ * excellent performance when looking up entries, whereas they're rather
+ * slow when adding new elements to the collections.
+ *
+ * For the PELDR, it's more critical to have exceptionally fast adding
+ * of the exports to the lists as this outweighs resolving imports.
+ */
