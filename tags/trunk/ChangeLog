@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.67 1999-08-04 13:09:50 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.68 1999-08-04 14:40:33 phaller Exp $ */
+ 99-08-04: Patrick Haller <phaller@gmx.net>
+	- KERNEL32: fix for filename handling in kernel32/profile
+
  99-08-04: Sander van Leeuwen <sandervl@xs4all.nl>
 	- PE2LX: Bugfix for icon conversion (heap corruption for ra95.exe; as
                  reported by Patrick Haller)
