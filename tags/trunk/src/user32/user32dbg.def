@@ -1,4 +1,4 @@
-; $Id: user32dbg.def,v 1.8 2002-12-18 12:28:05 sandervl Exp $
+; $Id: user32dbg.def,v 1.9 2003-02-16 15:31:11 sandervl Exp $
 
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
 DESCRIPTION 'Odin32 System Dll - User32'
@@ -29,6 +29,9 @@ IMPORTS
     Win32RemoveClipbrdViewer    = PMMERGE.5443
     Win32QueryClipbrdViewerChain= PMMERGE.5444
     Win32QueryOpenClipbrdWindow = PMMERGE.5446
+
+    WINSETSCANSTATETABLE        = PMMERGE.3266
+    WINGETSCANSTATE             = PMMERGE.3138
 
 ;;;; Present in WGSS50
 ;;;;    _GpiQueryDCData             = PMGPI.665

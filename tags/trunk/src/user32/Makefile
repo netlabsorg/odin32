@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.104 2002-08-14 10:37:43 sandervl Exp $
+# $Id: Makefile,v 1.105 2003-02-16 15:31:08 sandervl Exp $
 
 #
 # Odin32 API
@@ -40,6 +40,7 @@ $(OBJDIR)\user32.obj \
 $(OBJDIR)\dde.obj \
 $(OBJDIR)\wsprintf.obj \
 $(OBJDIR)\winkeyboard.obj \
+$(OBJDIR)\oslibkbd.obj \
 $(OBJDIR)\winmouse.obj \
 $(OBJDIR)\winevent.obj \
 $(OBJDIR)\defwndproc.obj \
