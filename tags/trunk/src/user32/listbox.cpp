@@ -1,4 +1,4 @@
-/* $Id: listbox.cpp,v 1.26 2001-01-14 17:15:46 sandervl Exp $ */
+/* $Id: listbox.cpp,v 1.27 2001-07-09 18:10:44 sandervl Exp $ */
 /*
  * Listbox controls
  *
@@ -512,11 +512,11 @@ static void LISTBOX_DrawItem( HWND hwnd, LB_DESCR *descr, HDC hdc,
         if (dwStyle & WS_DISABLED) dis.itemState |= ODS_DISABLED;
         dis.itemData     = item ? item->data : 0;
         dis.rcItem       = *rect;
-        //TRACE("[%04x]: drawitem %d (%s) action=%02x "
-        //             "state=%02x rect=%d,%d-%d,%d\n",
-        //             wnd->hwndSelf, index, item ? item->str : "", action,
-        //             dis.itemState, rect->left, rect->top,
-        //             rect->right, rect->bottom );
+        dprintf2(("[%04x]: drawitem %d (%s) action=%02x "
+                     "state=%02x rect=%d,%d-%d,%d\n",
+                     hwnd, index, item ? item->str : "", action,
+                     dis.itemState, rect->left, rect->top,
+                     rect->right, rect->bottom ));
         SendMessageA(descr->owner, WM_DRAWITEM, id, (LPARAM)&dis);
     }
     else
