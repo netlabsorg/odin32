@@ -1,4 +1,15 @@
- /* $Id: ChangeLog,v 1.301 1999-10-09 19:25:33 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.302 1999-10-10 08:58:20 sandervl Exp $ */
+
+ 99-10-10: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Ported GetNextDlgGroupItem & GetDlgItemInt from Wine
+                  Window handle translation fix for MessageBoxW
+                  Don't create frame windows for windows with a 3d border.
+                  (fixes crash in VPBuddy; don't know why)
+	- COMDLG32: Fix for most unicode functions (window handle translation
+                    missing as reported by Edgar Buerkle)
+
+ 99-10-10: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+	- KERNEL32: Bugfix for GetFullPathNameW (NULL ptr check)
 
  99-10-09: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Clipboard fixes (window handle translation)
