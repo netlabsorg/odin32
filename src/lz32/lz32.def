@@ -1,0 +1,26 @@
+; Win32 32-bit decompression library
+LIBRARY LZ32 INITINSTANCE TERMINSTANCE
+PROTMODE
+DATA MULTIPLE NONSHARED READWRITE LOADONCALL
+CODE LOADONCALL
+
+IMPORTS
+       _lstrcpyAtoW@8        = KERNEL32.lstrcpyAtoW
+       _HEAP_xalloc@12       = KERNEL32.HEAP_xalloc
+       _HEAP_strdupAtoW@12   = KERNEL32.HEAP_strdupAtoW
+       _HEAP_strdupWtoA@12   = KERNEL32.HEAP_strdupWtoA
+
+EXPORTS
+       LZCopy                = _LZCopy@8           @0
+       LZOpenFileA           = _LZOpenFileA@12     @1
+       LZInit                = _LZInit@4           @2
+       LZSeek                = _LZSeek@12          @3
+       LZRead                = _LZRead@12          @4
+       LZClose               = _LZClose@4          @5
+       LZStart               = _LZStart@0          @6
+       CopyLZFile            = _CopyLZFile@8       @7
+       LZDone                = _LZDone@0           @8
+       GetExpandedNameA      = _GetExpandedNameA@8 @9
+       LZOpenFileW           = _LZOpenFileW@12     @10
+       GetExpandedNameW      = _GetExpandedNameW@8 @11
+
