@@ -1,4 +1,14 @@
- /* $Id: changelog,v 1.1175 2000-10-05 19:39:51 sandervl Exp $ */
+ /* $Id: changelog,v 1.1176 2000-10-06 11:02:49 sandervl Exp $ */
+
+ 2000-10-06: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: PE loader: no longer rely on section names, but on image
+                directories instead
+                Init console earlier. (before exe is loaded; some dlls want
+                to send output to the console while they're being loaded)
+
+ 2000-10-05: Michal Necasek <mike@mendelu.cz>
+    - KERNEL32: FormatMessageA/W fix; message ids can be larger than 65535
+                (VACPPWIN)
 
  2000-10-05: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: Don't print FS warnings for OS/2 Odin applications
