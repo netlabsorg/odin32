@@ -1,21 +1,21 @@
-# $Id: setup.optional.alp.mk,v 1.3 2002-08-27 04:21:00 bird Exp $
+# $Id: setup.optional.alp.mk,v 1.4 2002-08-29 10:01:40 bird Exp $
 
 #
 #  Helper file for all the optional stuff for the ALP assembler.
 #
 
-!if "$(AS_MODE)" != ""
+!ifdef AS_MODE
 _AS_MODE =
-! if "$(AS_MODE)" != "ALP"
+! if "$(AS_MODE)" == "ALP"
 _AS_MODE = -Sv:ALP
 ! endif
-! if "$(AS_MODE)" != "M510"
+! if "$(AS_MODE)" == "M510"
 _AS_MODE = -Sv:M510
 ! endif
-! if "$(AS_MODE)" != "M600"
+! if "$(AS_MODE)" == "M600"
 _AS_MODE = -Sv:M600
 ! endif
-! if "$(AS_MODE)" != ""
+! if "$(_AS_MODE)" == ""
 !  if [$(ECHO) $(CLRERR)Error: Bad AS_MODE ($(AS_MODE)). Valid modes are ALP, M510 and M600.$(CLRRST)]
 !  endif
 !  error

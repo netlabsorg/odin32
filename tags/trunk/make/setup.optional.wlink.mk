@@ -1,4 +1,4 @@
-# $Id: setup.optional.wlink.mk,v 1.1 2002-08-28 04:42:04 bird Exp $
+# $Id: setup.optional.wlink.mk,v 1.2 2002-08-29 10:01:41 bird Exp $
 
 #
 #  Helper file for all the optional stuff which is common for
@@ -94,9 +94,10 @@ _LD_OPTIONAL = $(_LD_SORT) Option verbose $(_LD_QUIET) $(_LD_ALIGN) $(_LD_DOSSEG
 !if defined(LD_EXTDIC) || defined(LD_NO_EXTDIC)
 ! error error: LD_EXTDIC/LD_NO_EXTDIC is not supported by the linker (wlink).
 !endif
-!if defined(LD_OLDCPP) || defined(LD_NO_OLDCPP)
-! error error: LD_DBGPACK/LD_NO_DBGPACK is not supported by the linker (wlink).
-!endif
+# don't complain!
+#!if defined(LD_OLDCPP) || defined(LD_NO_OLDCPP)
+#! error error: LD_OLDCPP/LD_NO_OLDCPP is not supported by the linker (wlink).
+#!endif
 !if defined(LD_OPTFUNC) || defined(LD_NO_OPTFUNC)
 ! error error: LD_DBGPACK/LD_NO_DBGPACK is not supported by the linker (wlink).
 !endif

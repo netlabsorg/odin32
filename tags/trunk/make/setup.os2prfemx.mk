@@ -1,4 +1,4 @@
-# $Id: setup.os2prfemx.mk,v 1.9 2002-08-28 05:02:21 bird Exp $
+# $Id: setup.os2prfemx.mk,v 1.10 2002-08-29 10:01:44 bird Exp $
 
 # ---OS2, PROFILE, EMX----------------------------
 ENV_NAME="OS/2, Profile, EMX/GCC Compiler"
@@ -22,12 +22,12 @@ SPACE=_
 #
 # Include some shared standard stuff: ALP, VAC optional stuff.
 #
-!include $(PATH_MAKE)\setup.os2prfalp.mk
+!include $(PATH_MAKE)\setup.os2as.mk
 !include $(PATH_MAKE)\setup.os2prfrc.mk
 !include $(PATH_MAKE)\setup.os2prfwrc.mk
 _LD_LAST_LIB = end.$(EXT_LIB)
-!include $(PATH_MAKE)\setup.os2prfilink.mk
-!include $(PATH_MAKE)\setup.os2allilib.mk
+!include $(PATH_MAKE)\setup.os2ld.mk
+!include $(PATH_MAKE)\setup.os2ar.mk
 !include $(PATH_MAKE)\setup.optional.emx.mk
 
 

@@ -1,4 +1,4 @@
-# $Id: setup.os2debwat11-16.mk,v 1.14 2002-08-28 05:02:21 bird Exp $
+# $Id: setup.os2debwat11-16.mk,v 1.15 2002-08-29 10:01:43 bird Exp $
 
 # ---OS2, DEBUG, WAT11-------------------------
 ENV_NAME="OS/2, Debug, Watcom C/C++ v11.0c 16-bit"
@@ -15,17 +15,13 @@ ENV_16BIT = 16
 # Include some shared standard stuff: ALP, VAC optional stuff.
 #
 AS_DEBUG_TYPE   = Codeview
-!include $(PATH_MAKE)\setup.os2debalp.mk
+!include $(PATH_MAKE)\setup.os2as.mk
 !include $(PATH_MAKE)\setup.os2debrc.mk
 !include $(PATH_MAKE)\setup.os2debwrc.mk
-!ifdef LD_USE_ILINK
 LD_OLDCPP       = 1
-! include $(PATH_MAKE)\setup.os2debilink.mk
-!else
 _LD_LIBPATH     = $(PATH_WATCOM)\lib286\os2;$(PATH_WATCOM)\lib286;
-! include $(PATH_MAKE)\setup.os2debwlink.mk
-!endif
-!include $(PATH_MAKE)\setup.os2allilib.mk
+!include $(PATH_MAKE)\setup.os2ld.mk
+!include $(PATH_MAKE)\setup.os2ar.mk
 !include $(PATH_MAKE)\setup.optional.watcom11x.mk
 
 

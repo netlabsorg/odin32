@@ -1,4 +1,4 @@
-# $Id: setup.os2debwat11.mk,v 1.16 2002-08-28 05:02:21 bird Exp $
+# $Id: setup.os2debwat11.mk,v 1.17 2002-08-29 10:01:43 bird Exp $
 
 # ---OS2, DEBUG, WAT11-------------------------
 ENV_NAME="OS/2, Debug, Watcom C/C++ v11.0c"
@@ -15,17 +15,13 @@ ENV_ENVS_FORCE=vac308 watcomc11c
 # Include some shared standard stuff: ALP, VAC optional stuff.
 #
 AS_DEBUG_TYPE   = Codeview
-!include $(PATH_MAKE)\setup.os2debalp.mk
+!include $(PATH_MAKE)\setup.os2as.mk
 !include $(PATH_MAKE)\setup.os2debrc.mk
 !include $(PATH_MAKE)\setup.os2debwrc.mk
-!ifdef LD_USE_ILINK
-LD_OLDCPP       = 1
-! include $(PATH_MAKE)\setup.os2debilink.mk
-!else
 _LD_LIBPATH     = $(PATH_WATCOM)\lib386\os2;$(PATH_WATCOM)\lib386;
-! include $(PATH_MAKE)\setup.os2debwlink.mk
-!endif
-!include $(PATH_MAKE)\setup.os2allilib.mk
+LD_OLDCPP       = 1
+!include $(PATH_MAKE)\setup.os2ld.mk
+!include $(PATH_MAKE)\setup.os2ar.mk
 !include $(PATH_MAKE)\setup.optional.watcom11x.mk
 
 
@@ -87,14 +83,14 @@ CXX_FLAGS_IFS=$(CC_FLAGS_IFS)
 #
 LIB_OS      = os2386.lib
 !if "$(_CXX_XCPT)" == "-xd"
-LIB_C_OBJ   = clib3r.lib plibmt3r.lib math387r.lib emu387.lib
-LIB_C_DLL   = clbrdll.lib plbrdll.lib mt7rdll.lib emu387.lib
-LIB_C_RTDLL = clbrdll.lib  # TODO
+LIB_C_OBJ   = $(PATH_WATCOM)\lib386\os2\clib3r.lib $(PATH_WATCOM)\lib386\os2\plibmt3r.lib $(PATH_WATCOM)\lib386\plibmt3r.lib $(PATH_WATCOM)\lib386\math387r.lib $(PATH_WATCOM)\lib386\os2\emu387.lib
+LIB_C_DLL   = $(PATH_WATCOM)\lib386\os2\clbrdll.lib $(PATH_WATCOM)\lib386\os2\plbrdll.lib $(PATH_WATCOM)\lib386\plbrdll.lib $(PATH_WATCOM)\lib386\os2\mt7rdll.lib $(PATH_WATCOM)\lib386\os2\emu387.lib
+LIB_C_RTDLL = $(PATH_WATCOM)\lib386\os2\clbrdll.lib  # TODO
 LIB_C_NRE   = $(LIB_C_OBJ) # TODO
 !else
-LIB_C_OBJ   = clib3r.lib plbxmt3r.lib math387r.lib emu387.lib
-LIB_C_DLL   = clbrdll.lib plbrdllx.lib mt7rdll.lib emu387.lib
-LIB_C_RTDLL = clbrdll.lib  # TODO
+LIB_C_OBJ   = $(PATH_WATCOM)\lib386\os2\clib3r.lib $(PATH_WATCOM)\lib386\os2\plbxmt3r.lib $(PATH_WATCOM)\lib386\plbxmt3r.lib $(PATH_WATCOM)\lib386\math387r.lib $(PATH_WATCOM)\lib386\os2\emu387.lib
+LIB_C_DLL   = $(PATH_WATCOM)\lib386\os2\clbrdll.lib $(PATH_WATCOM)\lib386\os2\plbrdllx.lib $(PATH_WATCOM)\lib386\plbrdllx.lib $(PATH_WATCOM)\lib386\os2\mt7rdll.lib $(PATH_WATCOM)\lib386\os2\emu387.lib
+LIB_C_RTDLL = $(PATH_WATCOM)\lib386\os2\clbrdll.lib  # TODO
 LIB_C_NRE   = $(LIB_C_OBJ) # TODO
 !endif
 LIB_C_DMNGL =
