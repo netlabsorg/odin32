@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.64 1999-10-28 15:20:25 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.65 1999-10-28 19:09:17 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1620,7 +1620,7 @@ LRESULT Win32BaseWindow::SendMessageA(ULONG Msg, WPARAM wParam, LPARAM lParam)
   {
         case WM_CREATE:
         {
-                if(win32wndproc(getWindowHandle(), WM_CREATE, 0, lParam) == -1) {
+                if(CallWindowProcA(win32wndproc, getWindowHandle(), WM_CREATE, 0, lParam) == -1) {
                         dprintf(("WM_CREATE returned -1\n"));
                         rc = -1; //don't create window
                         break;
@@ -1631,7 +1631,7 @@ LRESULT Win32BaseWindow::SendMessageA(ULONG Msg, WPARAM wParam, LPARAM lParam)
                 break;
         }
         case WM_SETTEXT:
-                rc = win32wndproc(getWindowHandle(), WM_SETTEXT, wParam, lParam);
+                rc = CallWindowProcA(win32wndproc, getWindowHandle(), WM_SETTEXT, wParam, lParam);
                 break;
 
         case WM_LBUTTONDOWN:
@@ -1647,7 +1647,7 @@ LRESULT Win32BaseWindow::SendMessageA(ULONG Msg, WPARAM wParam, LPARAM lParam)
                 break;
 
         default:
-                rc = win32wndproc(getWindowHandle(), Msg, wParam, lParam);
+                rc = CallWindowProcA(win32wndproc, getWindowHandle(), Msg, wParam, lParam);
                 break;
   }
   fInternalMsg = fInternalMsgBackup;
@@ -1678,7 +1678,7 @@ LRESULT Win32BaseWindow::SendMessageW(ULONG Msg, WPARAM wParam, LPARAM lParam)
   {
         case WM_CREATE:
         {
-                if(win32wndproc(getWindowHandle(), WM_CREATE, 0, lParam) == -1) {
+                if(CallWindowProcW(win32wndproc, getWindowHandle(), WM_CREATE, 0, lParam) == -1) {
                         dprintf(("WM_CREATE returned -1\n"));
                         rc = -1; //don't create window
                         break;
@@ -1689,7 +1689,7 @@ LRESULT Win32BaseWindow::SendMessageW(ULONG Msg, WPARAM wParam, LPARAM lParam)
                 break;
         }
         case WM_SETTEXT:
-                rc = win32wndproc(getWindowHandle(), WM_SETTEXT, wParam, lParam);
+                rc = CallWindowProcW(win32wndproc, getWindowHandle(), WM_SETTEXT, wParam, lParam);
                 break;
 
         case WM_LBUTTONDOWN:
@@ -1705,7 +1705,7 @@ LRESULT Win32BaseWindow::SendMessageW(ULONG Msg, WPARAM wParam, LPARAM lParam)
                 break;
 
         default:
-                rc = win32wndproc(getWindowHandle(), Msg, wParam, lParam);
+                rc = CallWindowProcW(win32wndproc, getWindowHandle(), Msg, wParam, lParam);
                 break;
   }
   fInternalMsg = fInternalMsgBackup;
@@ -1729,7 +1729,7 @@ LRESULT Win32BaseWindow::SendInternalMessageA(ULONG Msg, WPARAM wParam, LPARAM l
   {
         case WM_CREATE:
         {
-                if(win32wndproc(getWindowHandle(), WM_CREATE, 0, lParam) == -1) {
+                if(CallWindowProcA(win32wndproc, getWindowHandle(), WM_CREATE, 0, lParam) == -1) {
                         dprintf(("WM_CREATE returned -1\n"));
                         rc = -1; //don't create window
                         break;
@@ -1750,7 +1750,7 @@ LRESULT Win32BaseWindow::SendInternalMessageA(ULONG Msg, WPARAM wParam, LPARAM l
                 rc = win32wndproc(getWindowHandle(), WM_DESTROY, 0, 0);
                 break;
         default:
-                rc = win32wndproc(getWindowHandle(), Msg, wParam, lParam);
+                rc = CallWindowProcA(win32wndproc, getWindowHandle(), Msg, wParam, lParam);
                 break;
   }
   fInternalMsg = fInternalMsgBackup;
@@ -1775,7 +1775,7 @@ LRESULT Win32BaseWindow::SendInternalMessageW(ULONG Msg, WPARAM wParam, LPARAM l
   {
         case WM_CREATE:
         {
-                if(win32wndproc(getWindowHandle(), WM_CREATE, 0, lParam) == -1) {
+                if(CallWindowProcW(win32wndproc, getWindowHandle(), WM_CREATE, 0, lParam) == -1) {
                         dprintf(("WM_CREATE returned -1\n"));
                         rc = -1; //don't create window
                         break;
@@ -1796,7 +1796,7 @@ LRESULT Win32BaseWindow::SendInternalMessageW(ULONG Msg, WPARAM wParam, LPARAM l
                 rc = win32wndproc(getWindowHandle(), WM_DESTROY, 0, 0);
                 break;
         default:
-                rc = win32wndproc(getWindowHandle(), Msg, wParam, lParam);
+                rc = CallWindowProcW(win32wndproc, getWindowHandle(), Msg, wParam, lParam);
                 break;
   }
   fInternalMsg = fInternalMsgBackup;

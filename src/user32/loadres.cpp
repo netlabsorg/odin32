@@ -1,4 +1,4 @@
-/* $Id: loadres.cpp,v 1.10 1999-10-23 23:04:35 sandervl Exp $ */
+/* $Id: loadres.cpp,v 1.11 1999-10-28 19:09:16 sandervl Exp $ */
 
 /*
  * Win32 resource API functions for OS/2
@@ -341,7 +341,7 @@ HBITMAP WIN32API LoadBitmapA(HINSTANCE hinst, LPCSTR lpszBitmap)
 //******************************************************************************
 HBITMAP WIN32API LoadBitmapW(HINSTANCE hinst, LPCWSTR lpszBitmap)
 {
- HBITMAP hBitmap;
+ HBITMAP hBitmap = 0;
 
   if(IsSystemBitmap((ULONG *)&lpszBitmap)) {
         hBitmap = O32_LoadBitmap(hinst, (LPCSTR)lpszBitmap);

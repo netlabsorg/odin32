@@ -1,4 +1,4 @@
-/* $Id: winmenu.cpp,v 1.11 1999-10-26 11:14:52 sandervl Exp $ */
+/* $Id: winmenu.cpp,v 1.12 1999-10-28 19:09:17 sandervl Exp $ */
 
 /*
  * Win32 menu API functions for OS/2
@@ -40,7 +40,6 @@ BOOL  ODIN_INTERNAL ODIN_AppendMenuW(HMENU,UINT,UINT,LPCWSTR);
 HMENU ODIN_INTERNAL ODIN_CreateMenu(void);
 HMENU ODIN_INTERNAL ODIN_CreatePopupMenu(void);
 BOOL  ODIN_INTERNAL ODIN_DestroyMenu(HMENU);
-
 
 //@@@PH: experiment with WINE LoadMenuIndirect code
 #include <heapstring.h>
@@ -654,13 +653,13 @@ ODINFUNCTION5(BOOL, ModifyMenuW,
         return 0;
     }
 
-    if(HIWORD(arg5) != 0)
+    if(IS_STRING_ITEM(arg3) && HIWORD(arg5) != 0)
       astring = UnicodeToAsciiString((LPWSTR)arg5);
     else
       astring = (char *) arg5;
 
     rc = ODIN_ModifyMenuA(hMenu, arg2, arg3, arg4, astring);
-    if(HIWORD(arg5) != 0)
+    if(IS_STRING_ITEM(arg3) && HIWORD(arg5) != 0)
       FreeAsciiString(astring);
 
     return(rc);
@@ -747,14 +746,14 @@ ODINFUNCTION5(BOOL, InsertMenuW,
  BOOL  rc;
  char *astring = NULL;
 
-    if(HIWORD(arg5) != 0)
+    if(IS_STRING_ITEM(arg3) && HIWORD(arg5) != 0)
       astring = UnicodeToAsciiString((LPWSTR)arg5);
     else
       astring = (char *) arg5;
 
     rc = ODIN_InsertMenuA(hMenu, arg2, arg3, arg4, astring);
 
-    if(HIWORD(arg5) != 0)
+    if(IS_STRING_ITEM(arg3) && HIWORD(arg5) != 0)
       FreeAsciiString(astring);
 
     return(rc);
