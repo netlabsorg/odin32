@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.153 2002-06-11 16:36:54 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.154 2002-06-15 17:15:18 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -788,6 +788,11 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
         return NULL;
     }
 
+    //Expand library filename; might contain environment variables
+    //(such as %SystemDrive%)
+    CHAR lpszExpandedLibFile[CCHMAXPATH];
+    ExpandEnvironmentStringsA(lpszLibFile, lpszExpandedLibFile, sizeof(lpszExpandedLibFile));
+    lpszLibFile = lpszExpandedLibFile;
 
     /** @sketch
      *  First we'll see if the module is allready loaded - either as the EXE or as DLL.
