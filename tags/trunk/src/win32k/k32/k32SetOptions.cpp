@@ -1,4 +1,4 @@
-/* $Id: k32SetOptions.cpp,v 1.3 2000-09-22 09:22:38 bird Exp $
+/* $Id: k32SetOptions.cpp,v 1.4 2000-12-11 06:22:15 bird Exp $
  *
  * k32SetOptions - Sets the changable options of win32k.sys the options.
  *
@@ -125,6 +125,8 @@ APIRET k32SetOptions(PK32OPTIONS pOptions)
             return ERROR_INVALID_PARAMETER;
         if (TmpOptions.fREXXScript > 1)
             return ERROR_INVALID_PARAMETER;
+        if (TmpOptions.fDllFixes > 1)
+            return ERROR_INVALID_PARAMETER;
         if (TmpOptions.cbSwpHeapMax > (32768*1024) || TmpOptions.cbSwpHeapMax < options.cbSwpHeapInit)
             return ERROR_INVALID_PARAMETER;
         if (TmpOptions.cbResHeapMax > (32768*1024) || TmpOptions.cbResHeapMax < options.cbResHeapInit)
@@ -153,6 +155,7 @@ APIRET k32SetOptions(PK32OPTIONS pOptions)
         options.fREXXScript = TmpOptions.fREXXScript;   /* REXX script flags. */
         options.fJava       = TmpOptions.fJava;         /* Java flags. */
         options.fNoLoader   = TmpOptions.fNoLoader;     /* No loader stuff. !FIXME! We should import / functions even if this flag is set!!! */
+        options.fDllFixes   = TmpOptions.fDllFixes;     /* Enables the long DLL name and non .DLL extention fixes. */
 
         options.cbSwpHeapMax = TmpOptions.cbSwpHeapMax; /* Maximum heapsize. */
         cbSwpHeapMax = (unsigned)options.cbSwpHeapMax;

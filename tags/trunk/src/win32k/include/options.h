@@ -1,4 +1,4 @@
-/* $Id: options.h,v 1.12 2000-09-22 09:22:37 bird Exp $
+/* $Id: options.h,v 1.13 2000-12-11 06:22:14 bird Exp $
  *
  * Options.
  *
@@ -61,6 +61,7 @@
             TRUE,                   /* fREXXScript   */     \
             TRUE,                   /* fJava         */     \
             FALSE,                  /* fNoLoader     */     \
+            TRUE,                   /* fDllFixes     */     \
             CB_SWP_INIT,            /* cbSwpHeapInit */     \
             CB_SWP_MAX,             /* cbSwpHeapMax  */     \
             CB_RES_INIT,            /* cbResHeapInit */     \
@@ -83,7 +84,11 @@
 #define isJAVAEnabled()             (options.fJava)
 
 #define isSMPKernel()               (options.fKernel & KF_SMP)
-#define isUNIKernel()               !(options.fKernel & KF_SMP)
+#define isUNIKernel()               (!(options.fKernel & KF_SMP))
+
+#define isDllFixesEnabled()         (options.fDllFixes)
+#define isDllFixesDisabled()        (!options.fDllFixes)
+
 /* INC */
 
 /*******************************************************************************
@@ -124,6 +129,9 @@ struct options
 
     /** @cat Options affecting the  executables */
     ULONG       fNoLoader;              /* No loader stuff. !FIXME! We should import / functions even if this flag is set!!! */
+
+    /** @cat Options affecting the behaviour changes in the OS/2 loader */
+    ULONG       fDllFixes;              /* Enables the long DLL name and non .DLL extention fixes. */
 
     /** @cat Options affecting the heap. */
     ULONG       cbSwpHeapInit;          /* Initial heapsize. */
