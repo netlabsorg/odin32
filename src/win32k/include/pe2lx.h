@@ -1,4 +1,4 @@
-/* $Id: pe2lx.h,v 1.9.4.5 2000-08-25 04:47:23 bird Exp $
+/* $Id: pe2lx.h,v 1.9.4.6 2000-09-01 15:23:33 bird Exp $
  *
  * Pe2Lx class declarations. Ring 0 and Ring 3
  *
@@ -66,7 +66,7 @@ public:
     ULONG  applyFixups(PMTE pMTE, ULONG iObject, ULONG iPageTable, PVOID pvPage,
                        ULONG ulPageAddress, PVOID pvPTDA); /*(ldrEnum32bitRelRecs)*/
     ULONG  openPath(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *pLdrLv, PULONG pful); /* (ldrOpenPath) */
-    static ULONG  openPath2(PCHAR pachFilename, USHORT cchFilename, ldrlv_t *pLdrLv, PULONG pful, BOOL fOdin32PathValid);
+    static ULONG  openPath2(PCHAR pachFilename, ULONG cchFilename, ldrlv_t *pLdrLv, PULONG pful, BOOL fOdin32PathValid);
     #ifndef RING0
     ULONG  testApplyFixups();
     ULONG  writeFile(PCSZ pszLXFilename);
