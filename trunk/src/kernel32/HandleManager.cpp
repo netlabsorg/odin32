@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.79 2001-11-28 23:33:34 phaller Exp $ */
+/* $Id: HandleManager.cpp,v 1.80 2001-11-29 00:20:45 phaller Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -59,6 +59,7 @@
 #include "HMMMap.h"
 #include "HMComm.h"
 #include "HMParPort.h"
+#include "HMNul.h"
 #include "HMToken.h"
 #include "HMThread.h"
 #include "HMNPipe.h"
@@ -147,6 +148,7 @@ struct _HMGlobals
   HMDeviceHandler        *pHMNamedPipe;
   HMDeviceHandler        *pHMMailslot;
   HMDeviceHandler        *pHMParPort;              /* parallel communication */
+  HMDeviceHandler        *pHMNul;                              /* nul device */
 
   ULONG         ulHandleLast;                   /* index of last used handle */
 } HMGlobals;
@@ -487,6 +489,7 @@ DWORD HMInitialize(void)
     HMGlobals.pHMNamedPipe  = new HMDeviceNamedPipeClass("\\\\PIPE\\");
     HMGlobals.pHMMailslot   = new HMMailslotClass("\\MAILSLOT\\");
     HMGlobals.pHMParPort    = new HMDeviceParPortClass("\\\\LPT\\");
+    HMGlobals.pHMNul        = new HMDeviceNulClass("\\\\NUL\\");
   }
   return (NO_ERROR);
 }
@@ -536,6 +539,8 @@ DWORD HMTerminate(void)
     delete HMGlobals.pHMStandard;
   if(HMGlobals.pHMParPort)
     delete HMGlobals.pHMParPort;
+  if(HMGlobals.pHMNul)
+    delete HMGlobals.pHMNul;
 
   return (NO_ERROR);
 }

@@ -1,4 +1,4 @@
-/* $Id: console.cpp,v 1.28 2001-10-01 01:47:01 bird Exp $ */
+/* $Id: console.cpp,v 1.29 2001-11-29 00:20:46 phaller Exp $ */
 
 /*
  * Win32 Console API Translation for OS/2
@@ -73,6 +73,7 @@
 
 #include "conwin.h"          // Windows Header for console only
 #include "HandleManager.h"
+#include "handlenames.h"
 #include "HMDevice.h"
 
 #include "console.h"
@@ -414,7 +415,12 @@ APIRET iConsoleDevicesRegister(void)
   if (rc != NO_ERROR)                                  /* check for errors */
       dprintf(("KERNEL32:ConsoleDevicesRegister: registering CONOUT$ failed with %u.\n",
                rc));
-
+  
+  // add standard symbolic links
+  HandleNamesAddSymbolicLink("CON",        "CONOUT$");
+  HandleNamesAddSymbolicLink("CON:",       "CONOUT$");
+  HandleNamesAddSymbolicLink("\\\\.\\CON", "CONOUT$");
+  
   if(flVioConsole == TRUE)
   {
         pHMDeviceConsoleBuffer = (HMDeviceConsoleBufferClass *)new HMDeviceConsoleVioBufferClass("CONBUFFER$",
