@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.19 2000-12-02 23:45:13 bird Exp $
+# $Id: makefile,v 1.20 2003-08-08 15:55:08 sandervl Exp $
 
 #
 # Odin32 API
@@ -10,6 +10,7 @@
 #
 # Compiler, tools, and interference rules.
 #
+WRC_PREFIX_RESOURCE=1
 !include ../../makefile.inc
 
 
@@ -20,7 +21,8 @@ OBJS = \
 $(OBJDIR)\winspool.obj \
 $(OBJDIR)\oslibspl.obj \
 $(OBJDIR)\winspoolrsrc.obj \
-$(DLLENTRY)
+$(OBJDIR)\initwinspool.obj \
+$(OBJDIR)\initterm.obj 
 
 
 #
@@ -30,6 +32,8 @@ LIBS = \
 $(ODIN32_LIB)/kernel32.lib \
 $(ODIN32_LIB)/pmwinx.lib \
 $(ODIN32_LIB)/user32.lib \
+$(ODIN32_LIB)/gdi32.lib \
+$(ODIN32_LIB)/libwrap.lib \
 $(ODIN32_LIB)/$(ODINCRT).lib \
 OS2386.LIB \
 $(RTLLIB_O)

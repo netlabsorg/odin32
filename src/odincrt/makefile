@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.32 2003-02-28 10:32:50 sandervl Exp $
+# $Id: makefile,v 1.33 2003-08-08 15:53:17 sandervl Exp $
 
 #
 # Odin32 API
@@ -95,6 +95,7 @@ $(%WATCOM)\lib386\os2\$(RTLLIB_O)
 # Libraries. One space before the '\'.
 #
 LIBS = \
+$(ODIN32_LIB)/libwrap.lib \
 !ifdef WITH_KLIB
 $(ODIN32_LIB)\kLibR3.lib \
 !endif
