@@ -1,4 +1,4 @@
-/* $Id: wingdi.cpp,v 1.15 1999-09-12 15:44:20 dengert Exp $ */
+/* $Id: wingdi.cpp,v 1.16 1999-09-13 16:13:46 dengert Exp $ */
 /*
  * Win32 Window graphics apis for OS/2
  *
@@ -32,7 +32,7 @@ HDC WIN32API BeginPaint(HWND hwnd, PPAINTSTRUCT lps)
     dprintf(("GetDC, window %x not found", hwnd));
     return 0;
     }
-// !! there is no HDC to paint on !!!    window->MsgEraseBackGround(hdc);
+// !! there is no HDC to paint on !!!	 window->MsgEraseBackGround(hdc);
 #ifdef OPEN32_GDI
     hdc = O32_BeginPaint(window->getOS2WindowHandle(),lps);
     //CB: conflict with Open32 mechanism
@@ -96,7 +96,6 @@ HDC WIN32API GetDCEx(HWND hwnd, HRGN arg2, DWORD arg3)
 #endif
     return GetDC(hwnd);
 }
-#endif
 
 //******************************************************************************
 //******************************************************************************
@@ -111,14 +110,15 @@ int WIN32API ReleaseDC(HWND hwnd, HDC hdc)
 }
 //******************************************************************************
 //******************************************************************************
+
 HDC WIN32API GetWindowDC(HWND hwnd)
 {
   Win32BaseWindow *window;
 
    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
    if(!window) {
-        dprintf(("GetWindowDC, window %x not found", hwnd));
-        return 0;
+	dprintf(("GetWindowDC, window %x not found", hwnd));
+	return 0;
    }
    dprintf(("GetWindowDC %x", hwnd));
 #ifdef OPEN32_GDI
@@ -127,6 +127,7 @@ HDC WIN32API GetWindowDC(HWND hwnd)
    return OSLibWinGetPS(window->getOS2FrameWindowHandle());
 #endif
 }
+#endif
 //******************************************************************************
 //******************************************************************************
 HWND WIN32API WindowFromDC(HDC hdc)
