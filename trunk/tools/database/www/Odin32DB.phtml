@@ -85,25 +85,36 @@ else if (isset($authorrefcode))
     if (!(isset($authordll) && $authordll != "" && @(int)$authordll >= 0))
         $authordll = -1;
 }
+else if (isset($designnoterefcode))
+{   /* Author by refcode */
+    $sCategory      = "designnote";
+    $sCategoryName  = "Design Note";
+    if ($designnoterefcode != "")
+        $iRefcode = (int)$designnoterefcode;
+}
 else if (isset($dlls))
 {   /* All dlls */
-    $sCategory      = "dll";
-    $sCategoryName  = "Dlls";
+    $sCategory      = "dlls";
+    $sCategoryName  = "All Dlls";
+    $sDllType = 'A';
 }
 else if (isset($internal))
 {   /* All Internal Dlls */
-    $sCategory      = "dll";
+    $sCategory      = "dlls";
     $sCategoryName  = "Internal Dlls";
+    $sDllType = 'I';
 }
 else if (isset($support))
 {   /* All dlls */
-    $sCategory      = "dll";
+    $sCategory      = "dlls";
     $sCategoryName  = "Support Stuff";
+    $sDllType = 'S';
 }
 else if (isset($tools))
-{   /* All dlls */
-    $sCategory      = "dll";
+{   /* Tools */
+    $sCategory      = "dlls";
     $sCategoryName  = "Tools";
+    $sDllType = 'T';
 }
 else if (isset($apigroups))
 {   /* All API Groups */
@@ -114,6 +125,11 @@ else if (isset($authors))
 {   /* All authors */
     $sCategory      = "authors";
     $sCategoryName  = "Authors";
+}
+else if (isset($design))
+{   /* All authors */
+    $sCategory      = "designnotes";
+    $sCategoryName  = "Design Notes";
 } /* else: root page */
 
 
@@ -137,6 +153,7 @@ else
     {
         $fNoData = 1;
         $sName = "!Invalid Refcode!";
+        Odin32DBSqlError($sql);
     }
     @mysql_free_result($result);
 }
@@ -191,6 +208,12 @@ if (!$fNoData)
             break;
         }
 
+        case "designnote":
+        {
+            Odin32DBDesignNote($db, $iRefcode);
+            break;
+        }
+
         case "root":
         {
             /*
@@ -208,7 +231,7 @@ if (!$fNoData)
             Odin32DBNaslov("Root Menu", "menu", "");
             echo "<font size=3>".
                  "<ul>\n".
-                 "  <li><b>Module<\n>\n".
+                 "  <li><b>Modules\n".
                  "      <ul>\n".
                  "         <li><b><a href=\"Odin32DB.phtml?dlls=1\">Odin32 API DLLs</a></b>\n".
                  "         <li><b><a href=\"Odin32DB.phtml?internal=1\">Internal Odin32 DLLs</a></b>\n".
@@ -217,7 +240,8 @@ if (!$fNoData)
                  "      </ul>\n".
                  "  <li><b><a href=\"Odin32DB.phtml?apigroups=1\">API Groups</a></b>\n".
                  "  <li><b><a href=\"Odin32DB.phtml?authors=1\">Authors</a></b>\n".
-                 "  <li><i><a href=\"Odin32DB.phtml?searchapi=1\">Search API (not implemeted)</a></i>\n".
+                 "  <li><b><a href=\"Odin32DB.phtml?design=1\">Design Notes</a></b>\n".
+                 "  <!-- <li><i><a href=\"Odin32DB.phtml?searchapi=1\">Search API (not implemeted)</a></i> -->\n".
                  "</ul>\n";
                  "</font>\n";
             Odin32DBNavigationBottom("","");
@@ -238,22 +262,23 @@ if (!$fNoData)
                  "for the time being. This will improve within some months.<br>\n".
                  "-Enjoy!<br>\n";
 
-            Odin32DBNaslov("All Dlls", "dlls", "");
+            Odin32DBNaslov($sCategoryName, $sCategory, "");
             $sql = "SELECT\n".
                    "    d.name              AS name,\n".
                    "    d.refcode           AS refcode,\n".
                    "    COUNT(f.refcode)    AS functions\n".
                    "FROM\n".
                    "    dll d\n".
-                   "    JOIN function f\n".
+                   "    LEFT OUTER JOIN function f\n".
+                   "    ON f.dll = d.refcode\n".
                    "WHERE\n".
-                   "    f.dll = d.refcode\n".
+                   "    d.type = '".$sDllType."'\n".
                    "GROUP BY d.refcode\n".
                    "ORDER BY d.name\n";
             if ($result = mysql_query($sql, $db))
             {
                 if (mysql_num_rows($result) <= 0)
-                    echo "<i>No dlls!</i>\n";
+                    echo "<i>No data in this module category!<br>$sql</i>\n";
                 else
                 {
                     echo "\n<font size=-1><ul><b>";
@@ -353,6 +378,69 @@ if (!$fNoData)
                     {
                         echo "<li><a href=\"Odin32DB.phtml?apigrouprefcode=".$aAPIGroup["refcode"].
                              "\">".$aAPIGroup["name"]."</a> (".$aAPIGroup["functions"].")\n";
+                    }
+                    echo "</ul></b></font>\n";
+                }
+            }
+            else
+                Odin32DBSqlError($sql);
+            Odin32DBNavigationBottom("","");
+            break;
+        }
+
+        case "designnotes":
+        {
+            /*
+             * List all design notes.
+             */
+            Odin32DBNavigationTop("","");
+            Odin32DBNaslov("Welcome to the Odin32 API Database", "welcome", "");
+            echo "This is the first Beta edition of the Odin32 API Database.<br>\n".
+                 "There might be dead or non-functioning links. Currently feedback is <i>NOT</i> needed.\n".
+                 "<p>\n".
+                 "Please note that the quality of the data avilable is quite poor\n".
+                 "for the time being. This will improve within some months.<br>\n".
+                 "-Enjoy!<br>\n";
+
+            Odin32DBNaslov($sCategoryName, $sCategory, "");
+            $sql = "SELECT\n".
+                   "    dn.refcode          AS refcode,\n".
+                   "    dn.name             AS name,\n".
+                   "    dn.seqnbr           AS seqnbr,\n".
+                   "    dn.level            AS level,\n".
+                   "    d.name              AS dllname,\n".
+                   "    f.name              AS filename\n".
+                   "FROM\n".
+                   "    designnote dn,\n".
+                   "    dll d,\n".
+                   "    file f\n".
+                   "WHERE   dn.dll = d.refcode\n".
+                   "    AND dn.file = f.refcode\n".
+                   "    AND dn.level <= 1\n".
+                   "ORDER BY d.name, dn.seqnbr, dn.seqnbrnote\n";
+            if ($result = mysql_query($sql, $db))
+            {
+                if (mysql_num_rows($result) <= 0)
+                    echo "<i>No Design Notes!</i>\n";
+                else
+                {
+                    echo "\n<font size=-1><ul><b>";
+                    $iLevel = 0;
+                    while ($aDesignNote = mysql_fetch_array($result))
+                    {
+                        if ($aDesignNote["level"] > $iLevel)
+                           print "    <ul>\n";
+                        else if ($aDesignNote["level"] < $iLevel)
+                           print "    </ul>\n";
+                        $iLevel = $aDesignNote["level"];
+
+                        if ($iLevel > 0)
+                           print "        <li><a href=\"Odin32DB.phtml?designnoterefcode=".$aDesignNote["refcode"].
+                                 "\">".$aDesignNote["name"]."</a>\n";
+                        else
+                           print "    <li><a href=\"Odin32DB.phtml?designnoterefcode=".$aDesignNote["refcode"].
+                                  "\">".$aDesignNote["seqnbr"].".0 ".$aDesignNote["name"]."</a> (".$aDesignNote["filename"].")\n";
+
                     }
                     echo "</ul></b></font>\n";
                 }
