@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2000-02-09 23:47:56 bird Exp $
+# $Id: makefile,v 1.11 2000-05-02 11:24:52 bird Exp $
 
 #
 # PD-Win32 API
@@ -25,6 +25,8 @@
 all:		odin_libraries  needed_tools
     cd src
     nmake -nologo all
+    cd ..\tools\install
+    nmake -nologo all
 
 clean:
     cd lib
@@ -37,28 +39,40 @@ clean:
 debug:		odin_libraries  needed_tools
     cd src
     nmake -nologo all DEBUG=1
+    cd ..\tools\install
+    nmake -nologo all DEBUG=1
 
 debugsmp:	odin_libraries  needed_tools
     cd src
     start nmake -i -f makefile.smp -nologo all DEBUG=1
     nmake -nologo all DEBUG=1
+    cd ..\tools\install
+    nmake -nologo all DEBUG=1
 
 nodebuginfo:	odin_libraries  needed_tools
     cd src
+    nmake -nologo all DEBUG=1 NODEBUGINFO=1
+    cd ..\tools\install
     nmake -nologo all DEBUG=1 NODEBUGINFO=1
 
 nodebuginfosmp:	odin_libraries  needed_tools
     cd src
     start nmake -i -f makefile.smp -nologo all DEBUG=1 NODEBUGINFO=1
     nmake -nologo all DEBUG=1 NODEBUGINFO=1
+    cd ..\tools\install
+    nmake -nologo all DEBUG=1 NODEBUGINFO=1
 
 release:	odin_libraries  needed_tools
     cd src
+    nmake -nologo all
+    cd ..\tools\install
     nmake -nologo all
 
 releasesmp:	odin_libraries  needed_tools
     cd src
     start nmake -i -f makefile.smp -nologo all
+    nmake -nologo all
+    cd ..\tools\install
     nmake -nologo all
 
 dep: needed_tools
