@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.921 2000-05-02 13:34:51 bird Exp $ */
+ /* $Id: changelog,v 1.922 2000-05-02 14:42:18 bird Exp $ */
 
  2000-05-02: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
         - makefile and tools/makefile:
@@ -11,6 +11,11 @@
                     ODINWRAP changes below broke WSOCK32 and WINMM.
                     I've created some highly temporary fix for it this problem.
                     Could someone please make a permanent fix?
+        - tools/bin/wrc.exe and tools/wrc:
+                    Important notice: __WIN32OS2__ is not defined when making wrc!
+                    This was the reason why ':' was used as include separator.
+                    This is corrected now. ';' is now the include separator.
+                    A new wrc.exe has been checked in.
 
  2000-04-30: Patrick Haller <phaller@gmx.net>
         - ODINWRAP: added profiling support. The odin wrapper macros now
