@@ -1,4 +1,4 @@
-/* $Id: heapstring.cpp,v 1.24 2000-01-15 15:42:49 sandervl Exp $ */
+/* $Id: heapstring.cpp,v 1.25 2000-01-20 21:40:26 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -26,53 +26,13 @@
 #include "heap.h"
 #include <heapstring.h>
 #include "misc.h"
-
+#include "codepage.h"
 
 /*****************************************************************************
  * Defines                                                                   *
  *****************************************************************************/
 
 ODINDEBUGCHANNEL(KERNEL32-HEAPSTRING)
-
-
-/*****************************************************************************
- * Name      :
- * Purpose   :
- * Parameters:
- * Variables :
- * Result    :
- * Remark    :
- * Status    :
- *
- * Author    : Patrick Haller [Thu, 1999/08/05 20:46]
- *****************************************************************************/
-
-static UconvObject uconv_object = NULL;
-
-static BOOL getUconvObject( void )
-{
-  int rc;
-  BOOL ret;
-
-  if ( uconv_object )
-    ret = TRUE;
-  else
-  {
-    rc = UniCreateUconvObject( (UniChar*)L"",
-                              &uconv_object );
-    if ( rc == ULS_SUCCESS )
-      ret = TRUE;
-    else
-    {
-      uconv_object = NULL;  // to make sure
-      return FALSE;
-    }
-    dprintf2(("KERNEL32: HeapString: UniCreateUconvObject(%d)\n",
-             rc));
-  }
-  return ret;
-}
-
 
 /*****************************************************************************
  * Name      :
@@ -514,9 +474,10 @@ int WIN32API lstrcmpiW(LPCWSTR arg1, LPCWSTR arg2)
 // unilen: length of astring buffer (including 0 terminator)
 // returns string length
 
-int WIN32API lstrcpynWtoA(LPSTR  astring,
+int WIN32API lstrcpynCtoA(LPSTR  astring,
                           LPCWSTR ustring,
-                          int    unilen)
+                          int    unilen,
+                          UconvObject uconv_object)
 {
   int      i;
   int      rc;
@@ -536,7 +497,7 @@ int WIN32API lstrcpynWtoA(LPSTR  astring,
   if (astring == NULL || unilen <= 0)
     return 0;
 
-  if (getUconvObject())
+  if (uconv_object)
   {
     if (unilen == 1)
     {
@@ -577,6 +538,13 @@ int WIN32API lstrcpynWtoA(LPSTR  astring,
   }
 }
 
+int WIN32API lstrcpynWtoA(LPSTR  astring,
+                          LPCWSTR ustring,
+                          int    unilen)
+{
+    return lstrcpynCtoA(astring, ustring, unilen, GetWindowsUconvObject());
+}
+
 
 /*****************************************************************************
  * Name      :
@@ -592,9 +560,10 @@ int WIN32API lstrcpynWtoA(LPSTR  astring,
 
 // asciilen: max length of unicode buffer (including end 0)
 // @@@PH 0 termination is NOT necessarily included !
-int WIN32API lstrcpynAtoW(LPWSTR unicode,
-                          LPCSTR  ascii,
-                          int    asciilen)
+int lstrcpynAtoC(LPWSTR unicode,
+                 LPCSTR  ascii,
+                 int    asciilen,
+                 UconvObject uconv_object)
 {
   int      rc;
   int      i;
@@ -619,7 +588,7 @@ int WIN32API lstrcpynAtoW(LPWSTR unicode,
   if (unicode == NULL || asciilen <= 0)
     return 0; //nothing to do
 
-  if (getUconvObject())
+  if (uconv_object)
   {
     //@@@PH what's this?
     if ((asciilen == 1) && (*ascii == '\0') )
@@ -636,7 +605,7 @@ int WIN32API lstrcpynAtoW(LPWSTR unicode,
     //SvL: Determine length of ascii string
     in_bytes_left = strlen(in_buf)+1;
     in_bytes_left = asciilen = min(in_bytes_left, asciilen); //buffer size in bytes
-    
+
     out_buf = (UniChar*)unicode;
 
     uni_chars_left = in_bytes_left; //elements
@@ -669,6 +638,12 @@ int WIN32API lstrcpynAtoW(LPWSTR unicode,
   }
 }
 
+int WIN32API lstrcpynAtoW(LPWSTR unicode,
+                          LPCSTR  ascii,
+                          int    asciilen)
+{
+    return lstrcpynAtoC(unicode, ascii, asciilen, GetWindowsUconvObject());
+}
 
 /*****************************************************************************
  * Name      :
