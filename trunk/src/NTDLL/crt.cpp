@@ -1,4 +1,4 @@
-/* $Id: crt.cpp,v 1.6 1999-08-18 23:41:15 phaller Exp $ */
+/* $Id: crt.cpp,v 1.7 1999-08-19 20:43:19 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -807,6 +807,62 @@ LPSTR CDECL OS2strstr(const LPSTR str1,
            str2));
 
   return (strstr(str1, str2));
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.927
+ * Status    :
+ *
+ * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
+ *****************************************************************************/
+
+int CDECL OS2swprintf(const LPWSTR str,
+                      int   i,
+                      const LPWSTR format,
+                      ...)
+{
+  va_list valist;
+  int     rc;
+
+  dprintf(("NTDLL: swprintf(%s,%d,%s)\n",
+           str,
+           i,
+           format));
+
+  va_start( valist, format );
+  rc = vswprintf( (wchar_t*)str,
+                  i,
+                  (wchar_t*)format,
+                  valist );
+  va_end( valist );
+  return rc;
+}
+
+
+/*****************************************************************************
+ * Name      :
+ * Purpose   :
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.928
+ * Status    :
+ *
+ * Author    : Patrick Haller [Thu, 1999/06/22 20:44]
+ *****************************************************************************/
+
+double CDECL OS2tan(double d)
+{
+  dprintf(("NTDLL: tan(%f)\n",
+           d));
+
+  return (tan(d));
 }
 
 

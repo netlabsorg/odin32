@@ -1,4 +1,4 @@
-/* $Id: unknown.cpp,v 1.5 1999-08-18 22:08:34 phaller Exp $ */
+/* $Id: unknown.cpp,v 1.6 1999-08-19 20:43:19 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -410,5 +410,26 @@ DWORD WIN32API RtlConvertSidToUnicodeString(DWORD x1,
            x3));
 
   return 0;
+}
+
+
+/*****************************************************************************
+ * Name      : RtlRandom
+ * Purpose   : unknown
+ * Parameters: unknown, probably wrong
+ * Variables :
+ * Result    :
+ * Remark    : NTDLL.466
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Tue, 1999/06/01 09:00]
+ *****************************************************************************/
+
+DWORD WIN32API RtlRandom(DWORD x1)
+{
+  dprintf(("NTDLL: RtlRandom(%08xh) not implemented.\n",
+           x1));
+
+  return rand();
 }
 
