@@ -1,4 +1,4 @@
-; $Id: wsock32.def,v 1.16 2000-03-22 18:46:20 sandervl Exp $
+/* $Id: wsock32.def,v 1.17 2000-03-22 20:07:29 sandervl Exp $ */
 
 ;Created by BLAST for IBM's compiler
 LIBRARY WSOCK32 INITINSTANCE
@@ -47,27 +47,27 @@ EXPORTS
 ; Microsoft WinSock Extensions
 ; ----------------------------
 
-   WSAAsyncSelect              = _WSAAsyncSelect@16                    @101
-   WSAAsyncGetHostByAddr       = _WSAAsyncGetHostByAddr@28             @102
-   WSAAsyncGetHostByName       = _WSAAsyncGetHostByName@20             @103
-   WSAAsyncGetProtoByNumber    = _WSAAsyncGetProtoByNumber@20          @104
-   WSAAsyncGetProtoByName      = _WSAAsyncGetProtoByName@20            @105
-   WSAAsyncGetServByPort       = _WSAAsyncGetServByPort@24             @106
-   WSAAsyncGetServByName       = _WSAAsyncGetServByName@24             @107
-   WSACancelAsyncRequest       = _WSACancelAsyncRequest@4              @108
-   WSASetBlockingHook          = _WSASetBlockingHook@4                 @109
-   WSAUnhookBlockingHook       = _WSAUnhookBlockingHook@0              @110
-   WSAGetLastError             = _WSAGetLastError@0                    @111
-   WSASetLastError             = _WSASetLastError@4                    @112
-   WSACancelBlockingCall       = _WSACancelBlockingCall@0              @113
-   WSAIsBlocking               = _WSAIsBlocking@0                      @114
-   WSAStartup                  = _WSAStartup@8                         @115
-   WSACleanup                  = _WSACleanup@0                         @116
-   __WSAFDIsSet                = ___WSAFDIsSet@8                       @151
+   WSAAsyncSelect              = _OS2WSAAsyncSelect@16                    @101
+   WSAAsyncGetHostByAddr       = _OS2WSAAsyncGetHostByAddr@28             @102
+   WSAAsyncGetHostByName       = _OS2WSAAsyncGetHostByName@20             @103
+   WSAAsyncGetProtoByNumber    = _OS2WSAAsyncGetProtoByNumber@20          @104
+   WSAAsyncGetProtoByName      = _OS2WSAAsyncGetProtoByName@20            @105
+   WSAAsyncGetServByPort       = _OS2WSAAsyncGetServByPort@24             @106
+   WSAAsyncGetServByName       = _OS2WSAAsyncGetServByName@24             @107
+   WSACancelAsyncRequest       = _OS2WSACancelAsyncRequest@4              @108
+   WSASetBlockingHook          = _OS2WSASetBlockingHook@4                 @109
+   WSAUnhookBlockingHook       = _OS2WSAUnhookBlockingHook@0              @110
+   WSAGetLastError             = _OS2WSAGetLastError@0                    @111
+   WSASetLastError             = _OS2WSASetLastError@4                    @112
+   WSACancelBlockingCall       = _OS2WSACancelBlockingCall@0              @113
+   WSAIsBlocking               = _OS2WSAIsBlocking@0                      @114
+   WSAStartup                  = _OS2WSAStartup@8                         @115
+   WSACleanup                  = _OS2WSACleanup@0                         @116
+   __WSAFDIsSet                = _OS2__WSAFDIsSet@8                       @151
 
    rcmd                        = _OS2rcmd@24                              @1102
    rexec                       = _OS2rexec@24                             @1103
-   WSARecvEx                   = _WSARecvEx@16                         @1107
+   WSARecvEx                   = _OS2WSARecvEx@16                         @1107
    s_perror                    = _OS2s_perror@8                           @1108
 
 ; -------------------

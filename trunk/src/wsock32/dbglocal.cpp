@@ -1,4 +1,4 @@
-/* $Id: dbglocal.cpp,v 1.2 2000-03-22 18:46:15 sandervl Exp $ */
+/* $Id: dbglocal.cpp,v 1.3 2000-03-22 20:07:20 sandervl Exp $ */
 
 /*
  * debug logging functions for OS/2
@@ -19,12 +19,11 @@ USHORT DbgEnabled[DBG_MAXFILES];
 char  *DbgFileNames[DBG_MAXFILES] =
 {
 "initterm",
-"wsastruct",
+"relaywin",
 "wsock32",
 "unknown",
 "async",
-"asyncthread",
-"wsa"
+"asyncthread"
 };
 //******************************************************************************
 //******************************************************************************
