@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.373 2003-05-14 11:40:17 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.374 2003-05-15 12:40:19 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -392,47 +392,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
     /* Fix the coordinates */
     fXDefault = FALSE;
     fCXDefault = FALSE;
-    if ((cs->x == CW_USEDEFAULT) || (cs->x == CW_USEDEFAULT16))
-    {
-       /* Never believe Microsoft's documentation... CreateWindowEx doc says
-        * that if an overlapped window is created with WS_VISIBLE style bit
-        * set and the x parameter is set to CW_USEDEFAULT, the system ignores
-        * the y parameter. However, looking at NT reveals that
-        *
-        * 1) not only if checks for CW_USEDEFAULT but also for CW_USEDEFAULT16
-        * 2) it does not ignore the y parameter as the docs claim; instead, it
-        *    uses it as second parameter to ShowWindow() unless y is either
-        *    CW_USEDEFAULT or CW_USEDEFAULT16.
-        *
-        * The fact that we didn't do 2) caused bogus windows pop up when wine
-        * was running apps that were using this obscure feature. Example -
-        * calc.exe that comes with Win98 (only Win98, it's different from
-        * the one that comes with Win95 and NT)
-        */
-        if ((cs->y != CW_USEDEFAULT) && (cs->y != CW_USEDEFAULT16)) sw = cs->y;
-
-        /* We have saved cs->y, now we can trash it */
-        cs->x = 0;
-        cs->y = 0;
-        fXDefault = TRUE;
-    }
-    if ((cs->cx == CW_USEDEFAULT) || (cs->cx == CW_USEDEFAULT16))
-    {
-        cs->cx = 600; /* FIXME */
-        cs->cy = 400;
-        fCXDefault = TRUE;
-    }
-    if (cs->style & (WS_POPUP | WS_CHILD))
-    {
-        fXDefault = FALSE;
-        if (fCXDefault)
-        {
-            fCXDefault = FALSE;
-            cs->cx = cs->cy = 0;
-        }
-    }
-    if (fXDefault && !fCXDefault) fXDefault = FALSE; //CB: only x positioning doesn't work (calc.exe,cdrlabel.exe)
-
+    FixCoordinates(cs, &sw);
 
     /* Correct the window style - stage 1
      *

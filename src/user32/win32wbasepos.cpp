@@ -1,4 +1,4 @@
-/* $Id: win32wbasepos.cpp,v 1.30 2003-02-27 14:22:45 sandervl Exp $ */
+/* $Id: win32wbasepos.cpp,v 1.31 2003-05-15 12:40:20 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (nonclient/position methods)
  *
@@ -369,6 +369,83 @@ UINT Win32BaseWindow::MinMaximize(UINT cmd, LPRECT lpRect)
     else swpFlags |= SWP_NOSIZE | SWP_NOMOVE;
 
     return swpFlags;
+}
+/***********************************************************************
+ *           WIN_FixCoordinates
+ *
+ * Fix the coordinates - Helper for WIN_CreateWindowEx.
+ * returns default show mode in sw.
+ * Note: the feature presented as undocumented *is* in the MSDN since 1993.
+ */
+void Win32BaseWindow::FixCoordinates( CREATESTRUCTA *cs, INT *sw)
+{
+    if (cs->x == CW_USEDEFAULT || cs->x == CW_USEDEFAULT16 ||
+        cs->cx == CW_USEDEFAULT || cs->cx == CW_USEDEFAULT16)
+    {
+        if (cs->style & (WS_CHILD | WS_POPUP))
+        {
+            if (cs->x == CW_USEDEFAULT || cs->x == CW_USEDEFAULT16) cs->x = cs->y = 0;
+            if (cs->cx == CW_USEDEFAULT || cs->cx == CW_USEDEFAULT16) cs->cx = cs->cy = 0;
+        }
+        else  /* overlapped window */
+        {
+            STARTUPINFOA info;
+
+            GetStartupInfoA( &info );
+
+            if (cs->x == CW_USEDEFAULT || cs->x == CW_USEDEFAULT16)
+            {
+                /* Never believe Microsoft's documentation... CreateWindowEx doc says
+                 * that if an overlapped window is created with WS_VISIBLE style bit
+                 * set and the x parameter is set to CW_USEDEFAULT, the system ignores
+                 * the y parameter. However, disassembling NT implementation (WIN32K.SYS)
+                 * reveals that
+                 *
+                 * 1) not only it checks for CW_USEDEFAULT but also for CW_USEDEFAULT16
+                 * 2) it does not ignore the y parameter as the docs claim; instead, it
+                 *    uses it as second parameter to ShowWindow() unless y is either
+                 *    CW_USEDEFAULT or CW_USEDEFAULT16.
+                 *
+                 * The fact that we didn't do 2) caused bogus windows pop up when wine
+                 * was running apps that were using this obscure feature. Example -
+                 * calc.exe that comes with Win98 (only Win98, it's different from
+                 * the one that comes with Win95 and NT)
+                 */
+                if (cs->y != CW_USEDEFAULT && cs->y != CW_USEDEFAULT16) *sw = cs->y;
+                cs->x = (info.dwFlags & STARTF_USEPOSITION) ? info.dwX : 0;
+                cs->y = (info.dwFlags & STARTF_USEPOSITION) ? info.dwY : 0;
+            }
+
+            if (cs->cx == CW_USEDEFAULT || cs->cx == CW_USEDEFAULT16)
+            {
+                if (info.dwFlags & STARTF_USESIZE)
+                {
+                    cs->cx = info.dwXSize;
+                    cs->cy = info.dwYSize;
+                }
+                else  /* if no other hint from the app, pick 3/4 of the screen real estate */
+                {
+                    RECT r;
+                    SystemParametersInfoA( SPI_GETWORKAREA, 0, &r, 0);
+                    cs->cx = (((r.right - r.left) * 3) / 4) - cs->x;
+                    cs->cy = (((r.bottom - r.top) * 3) / 4) - cs->y;
+                }
+            }
+        }
+    }
+    else
+    {
+	/* neither x nor cx are default. Check the y values .
+	 * In the trace we see Outlook and Outlook Express using
+	 * cy set to CW_USEDEFAULT when opening the address book.
+	 */
+	if (cs->cy == CW_USEDEFAULT || cs->cy == CW_USEDEFAULT16) {
+	    RECT r;
+	    dprintf(("Strange use of CW_USEDEFAULT in nHeight\n"));
+	    SystemParametersInfoA( SPI_GETWORKAREA, 0, &r, 0);
+	    cs->cy = (((r.bottom - r.top) * 3) / 4) - cs->y;
+	}
+    }
 }
 //******************************************************************************
 //******************************************************************************
