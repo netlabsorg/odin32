@@ -1,4 +1,4 @@
-/* $Id: myldrRead.cpp,v 1.2 1999-10-14 01:25:39 bird Exp $
+/* $Id: myldrRead.cpp,v 1.3 1999-10-14 02:36:08 bird Exp $
  *
  * myldrRead - _ldrRead.
  *
@@ -57,14 +57,14 @@ ULONG LDRCALL myldrRead(
             if (ulFlags != 0)
                 kprintf(("_ldrRead: Warning ulFlags = 0x%x (!= 0)\n", ulFlags));
 
-            rc = pNode->pPe2Lx->read(ulOffset, pBuffer, ulBytesToRead, ulFlags);
+            rc = pNode->pPe2Lx->read(ulOffset, pBuffer, ulBytesToRead, ulFlags, pMTE);
             return rc;
         }
         else
             kprintf(("_ldrRead:  DON'T PANIC! - but I can't get Node ptr! - This is really an IPE!\n"));
     }
 
-    rc = _ldrRead( hFile, ulOffset, pBuffer, ulFlags, ulBytesToRead, pMTE );
+    rc = _ldrRead(hFile, ulOffset, pBuffer, ulFlags, ulBytesToRead, pMTE);
 
 //  kprintf(("_ldrRead:  hF=%+04x off=%+08x pB=%+08x fl=%+08x cb=%+04x pMTE=%+08x rc=%d\n",hFile,ulOffset,pBuffer,ulFlags,ulBytesToRead,pMTE,rc));
 
