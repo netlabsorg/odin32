@@ -1,4 +1,4 @@
-/* $Id: display.cpp,v 1.6 2000-03-23 23:06:51 sandervl Exp $ */
+/* $Id: display.cpp,v 1.7 2000-08-02 17:32:27 bird Exp $ */
 /*
  * Display/Monitor Win32 apis
  *
@@ -271,10 +271,10 @@ void MONITOR_SetScreenSaveTimeout(MONITOR *pMonitor, int nTimeout)
  * Variables :
  * Result    : If the function succeeds, the return value is TRUE.
  *             If the function fails, the return value is FALSE.
- * Remark    :
+ * Remark    : Wine Port (991031)
  * Status    :
  *
- * Author    : Wine Port (991031)
+ * Author    :
  *****************************************************************************/
 BOOL WIN32API EnumDisplaySettingsA(
         LPCSTR name,            /* [in] huh? */
@@ -310,10 +310,10 @@ BOOL WIN32API EnumDisplaySettingsA(
  * Variables :
  * Result    : If the function succeeds, the return value is TRUE.
  *             If the function fails, the return value is FALSE.
- * Remark    :
+ * Remark    : Wine Port (991031)
  * Status    :
  *
- * Author    : Wine Port (991031)
+ * Author    :
  *****************************************************************************/
 BOOL WIN32API EnumDisplaySettingsW(LPCWSTR name,DWORD n,LPDEVMODEW devmode)
 {
@@ -433,7 +433,7 @@ BOOL WIN32API GetMonitorInfoA(HMONITOR hMonitor, LPMONITORINFO lpMonitorInfo)
         lpMonitorInfo->rcMonitor.bottom = GetSystemMetrics(SM_CYSCREEN);
         lpMonitorInfo->rcWork = rcWork;
         lpMonitorInfo->dwFlags = MONITORINFOF_PRIMARY;
-	
+
 	if (lpMonitorInfo->cbSize >= sizeof(MONITORINFOEXA))
             lstrcpyA(((MONITORINFOEXA*)lpMonitorInfo)->szDevice, "DISPLAY");
 
