@@ -1,4 +1,4 @@
-/* $Id: iconcache.c,v 1.8 2002-11-13 14:42:27 sandervl Exp $ */
+/* $Id: iconcache.c,v 1.9 2003-11-17 19:29:40 sandervl Exp $ */
 /*
  *	shell icon cache (SIC)
  *
@@ -968,6 +968,11 @@ void SIC_Destroy(void)
 	  pDPA_Destroy(sic_hdpa);
 	}
 
+#ifdef __WIN32OS2__
+	ImageList_Destroy(ShellSmallIconList);
+	ImageList_Destroy(ShellBigIconList);
+
+#endif
 	sic_hdpa = NULL;
 
 	LeaveCriticalSection(&SHELL32_SicCS);
