@@ -1,5 +1,3 @@
-: $Id: exp.cmd,v 1.1 1999-05-24 20:19:05 ktk Exp $ 
-
 hdr -je gdi32.dll > gdi32.exp
 hdr -je capi2032.dll > capi2032.exp
 hdr -je tapi32.dll > tapi32.exp

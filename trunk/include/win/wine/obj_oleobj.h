@@ -1,5 +1,3 @@
-/* $Id: obj_oleobj.h,v 1.1 1999-05-24 20:19:26 ktk Exp $ */
-
 /*
  * Defines IOleObject COM and other oleidl.h interfaces
  * 

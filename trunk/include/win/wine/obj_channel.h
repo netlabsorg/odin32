@@ -1,5 +1,3 @@
-/* $Id: obj_channel.h,v 1.1 1999-05-24 20:19:24 ktk Exp $ */
-
 /*
  * Defines undocumented Microsoft COM interfaces and APIs seemingly related to some 'channel' notion.
  */

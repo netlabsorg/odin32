@@ -1,5 +1,3 @@
-/* $Id: obj_property.h,v 1.1 1999-05-24 20:19:27 ktk Exp $ */
-
 /*
  * Defines the COM interfaces and APIs from ocidl.h related to property
  *

@@ -1,5 +1,3 @@
-/* $Id: ole.h,v 1.1 1999-05-24 20:19:16 ktk Exp $ */
-
 /*
  *	ole.h	-	Declarations for OLESVR and OLECLI
  */
@@ -169,7 +167,7 @@ typedef struct _OLESTREAM {
 	LPOLESTREAMVTBL	lpstbl;
 } OLESTREAM;
 typedef struct _OLESERVERDOC*	LPOLESERVERDOC;
-typedef struct _OLEOBJECT*	LPOLEOBJECT;
+typedef struct IOleObject*    LPOLEOBJECT;
 typedef struct _OLECLIENT*	LPOLECLIENT;
 typedef struct _OLESERVERDOCVTBL {
 	OLESTATUS	(CALLBACK *Save)(LPOLESERVERDOC);

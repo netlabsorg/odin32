@@ -1,5 +1,3 @@
-/* $Id: obj_dockingwindowframe.h,v 1.1 1999-05-24 20:19:25 ktk Exp $ */
-
 /************************************************************
  *    IDockingWindowFrame
  */
