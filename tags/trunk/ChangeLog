@@ -1,4 +1,10 @@
-/* $Id: ChangeLog,v 1.1772 2001-10-19 18:50:49 achimha Exp $ */
+/* $Id: ChangeLog,v 1.1773 2001-10-20 09:50:09 achimha Exp $ */
+
+ 2001-10-20: Achim Hasenmueller <achimha@innotek.de>
+    - WNASPI32: o do not fail in init routine in case ASPIROUT.SYS
+                  is not present. Just return errors from all calls
+                  if this is the case.
+                  TODO: refine calls to not return any ASPI devices!
 
  2001-10-19: Achim Hasenmueller <achimha@innotek.de>
     - WSOCK32:  o implemented error bit handling in Winsock 2.0
