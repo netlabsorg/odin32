@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.2589 2003-05-27 10:51:57 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.2590 2003-05-28 08:53:14 sandervl Exp $ */
+
+ 2003-05-28: Platon Fomichev <stauff@innotek   >
+    - COMCTL32: o OWNERDRAW fixes for ListView control
 
  2003-05-27: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Do not send WM_STYLECHANGING/ED messages when the scrollbar
