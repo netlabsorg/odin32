@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.76 2003-04-23 18:00:58 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.77 2004-01-15 10:28:42 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -42,18 +42,18 @@ BOOL  OSLibWinSetOwner(HWND hwnd, HWND hwndOwner);
 
 HWND  OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle, ULONG dwOSFrameStyle,
                            char *pszName, HWND Owner, ULONG fBottom,
-                           ULONG id, BOOL fTaskList,BOOL fShellPosition, 
+                           ULONG id, BOOL fTaskList,BOOL fShellPosition,
                            DWORD classStyle, HWND *hwndFrame);
 
-BOOL  OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle, 
+BOOL  OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle,
                            ULONG *OSFrameStyle);
-void  OSLibSetWindowStyle(HWND hwndFrame, HWND hwndClient, ULONG dwStyle, 
+void  OSLibSetWindowStyle(HWND hwndFrame, HWND hwndClient, ULONG dwStyle,
                           ULONG dwExStyle, ULONG dwOldWindowsStyle);
 
 DWORD OSLibQueryWindowStyle(HWND hwnd);
 
-BOOL  OSLibWinPositionFrameControls(HWND hwndFrame, RECTLOS2 *pRect, DWORD dwStyle, 
-                                    DWORD dwExStyle, HICON hSysMenuIcon, 
+BOOL  OSLibWinPositionFrameControls(HWND hwndFrame, RECTLOS2 *pRect, DWORD dwStyle,
+                                    DWORD dwExStyle, HICON hSysMenuIcon,
                                     BOOL drawCloseButton, BOOL fClassIcon);
 BOOL  OSLibChangeCloseButtonState(HWND hwndFrame, BOOL State);
 
@@ -280,16 +280,15 @@ BOOL  OSLibWinGetBorderSize(HWND hwnd, OSLIBPOINT *pointl);
 BOOL  OSLibWinSetIcon(HWND hwnd, HANDLE hIcon);
 
 BOOL  OSLibWinQueryWindowPos (HWND hwnd, PSWP pswp);
-void  OSLibMapSWPtoWINDOWPOS(PSWP pswp, PWINDOWPOS pwpos, PSWP pswpOld, 
+void  OSLibMapSWPtoWINDOWPOS(PSWP pswp, PWINDOWPOS pwpos, PSWP pswpOld,
                             int parentHeight, HWND hwnd);
-void  OSLibMapWINDOWPOStoSWP(struct tagWINDOWPOS *pwpos, PSWP pswp, PSWP pswpOld, 
+void  OSLibMapWINDOWPOStoSWP(struct tagWINDOWPOS *pwpos, PSWP pswp, PSWP pswpOld,
                              int parentHeight, HWND hFrame);
 
 void  OSLibWinSetClientPos(HWND hwnd, int x, int y, int cx, int cy, int parentHeight);
 
 HWND  OSLibWinBeginEnumWindows(HWND hwnd);
 HWND  OSLibWinGetNextWindow(HWND hwndEnum);
-HWND  OSLibWinQueryClientWindow(HWND hwndFrame);
 BOOL  OSLibWinEndEnumWindows(HWND hwndEnum);
 BOOL  OSLibWinQueryWindowProcess(HWND hwnd, ULONG *pid, ULONG *tid);
 BOOL  OSLibWinMapWindowPoints (HWND hwndFrom, HWND hwndTo, OSLIBPOINT *pptl, ULONG num);

@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.146 2004-01-11 12:03:15 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.147 2004-01-15 10:28:41 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -880,17 +880,6 @@ HWND OSLibWinBeginEnumWindows(HWND hwnd)
 HWND OSLibWinGetNextWindow(HWND hwndEnum)
 {
    return WinGetNextWindow(hwndEnum);
-}
-//******************************************************************************
-//******************************************************************************
-HWND OSLibWinQueryClientWindow(HWND hwndFrame)
-{
- HWND hwndClient = 0;
-
-   if(((ULONG)WinSendMsg(hwndFrame, WM_QUERYFRAMEINFO, NULL, NULL)) & FI_FRAME)
-          hwndClient = WinWindowFromID(hwndFrame, FID_CLIENT);
-
-   return hwndClient;
 }
 //******************************************************************************
 //******************************************************************************
