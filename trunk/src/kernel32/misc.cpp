@@ -1,4 +1,4 @@
-/* $Id: misc.cpp,v 1.45 2002-02-03 10:59:23 sandervl Exp $ */
+/* $Id: misc.cpp,v 1.46 2002-02-26 17:01:23 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -351,13 +351,13 @@ int SYSTEM WriteLog(char *tekst, ...)
       if(sel == 0x150b && !fIsOS2Image)
         fprintf(flog, 
                 "t%02d (%3d): (%x) (FS=150B) ",
-                teb->o.odin.threadId,
+                LOWORD(teb->o.odin.threadId),
                 ulCallDepth,
                 GetTickCount());
       else 
         fprintf(flog, 
                 "t%02d (%3d): (%x) ",
-                teb->o.odin.threadId, 
+                LOWORD(teb->o.odin.threadId),
                 ulCallDepth,
                 GetTickCount());
 #else
@@ -365,24 +365,24 @@ int SYSTEM WriteLog(char *tekst, ...)
         fprintf(flog, 
 #ifdef SHOW_FPU_CONTROLREG
                 "t%02d (%3d)(%3x): ",
-                teb->o.odin.threadId,
+                LOWORD(teb->o.odin.threadId),
                 ulCallDepth,
                 CONTROL87(0,0));
 #else
                 "t%02d (%3d): (FS=150B) ",
-                teb->o.odin.threadId,
+                LOWORD(teb->o.odin.threadId),
                 ulCallDepth);
 #endif
       else 
         fprintf(flog, 
 #ifdef SHOW_FPU_CONTROLREG
                 "t%02d (%3d)(%3x): ",
-                teb->o.odin.threadId,
+                LOWORD(teb->o.odin.threadId),
                 ulCallDepth,
                 CONTROL87(0,0));
 #else
                 "t%02d (%3d): ",
-                teb->o.odin.threadId,
+                LOWORD(teb->o.odin.threadId),
                 ulCallDepth);
 #endif
 #endif
