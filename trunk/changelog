@@ -1,5 +1,9 @@
-/* $Id: changelog,v 1.1934 2001-12-31 12:06:22 sandervl Exp $ */
+/* $Id: changelog,v 1.1935 2002-01-02 02:48:53 bird Exp $ */
 
+ 2002-01-01: knut st. osmundsen <bird@anduin.net>
+    - Tools/CmdQd:
+                o Ignore the CmdQd kill returncode in clean2.
+ 
  2001-12-31: Sander van Leeuwen <sandervl@xs4all.nl>
     - GDI32:    o Use critical section in dibsection class instead of vmutex
 
