@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.20 1999-10-21 19:24:23 sandervl Exp $ */
+/* $Id: virtual.cpp,v 1.21 1999-10-24 22:51:22 sandervl Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -674,4 +674,71 @@ ODINFUNCTION4(DWORD, VirtualQueryEx, HANDLE,  hProcess,
     SetLastError(ERROR_ACCESS_DENIED); // deny access to other processes
     return FALSE;
   }
+}
+
+//******************************************************************************
+//SvL: Private api
+//******************************************************************************
+LPVOID VirtualAllocShared(DWORD  cbSize, DWORD  fdwAllocationType,
+                          DWORD  fdwProtect, LPSTR name)
+{
+  LPVOID Address;
+  ULONG flag = 0, base;
+  DWORD rc;
+
+  dprintf(("VirtualAllocShared: %x %x %x %s", cbSize, fdwAllocationType, fdwProtect, name));
+
+  if (cbSize > 0x7fc00000)  /* 2Gb - 4Mb */
+  {
+   	dprintf(("VirtualAllocShared: size too large"));
+        SetLastError( ERROR_OUTOFMEMORY );
+        return NULL;
+  }
+
+  if (!(fdwAllocationType & (MEM_COMMIT | MEM_RESERVE)) ||
+       (fdwAllocationType & ~(MEM_COMMIT | MEM_RESERVE)))
+  {
+   	dprintf(("VirtualAllocShared: Invalid parameter"));
+        SetLastError( ERROR_INVALID_PARAMETER );
+        return NULL;
+  }
+
+  if(fdwAllocationType & MEM_COMMIT)
+  {
+        dprintf(("VirtualAllocShared: commit\n"));
+        flag = PAG_COMMIT;
+  }
+
+  if(fdwProtect & PAGE_READONLY)     flag |= PAG_READ;
+  if(fdwProtect & PAGE_NOACCESS)     flag |= PAG_READ; //can't do this in OS/2
+  if(fdwProtect & PAGE_READWRITE)    flag |= (PAG_READ | PAG_WRITE);
+  if(fdwProtect & PAGE_WRITECOPY)    flag |= (PAG_READ | PAG_WRITE);
+
+  if(fdwProtect & PAGE_EXECUTE_READWRITE) flag |= (PAG_EXECUTE | PAG_WRITE | PAG_READ);
+  if(fdwProtect & PAGE_EXECUTE_READ) flag |= (PAG_EXECUTE | PAG_READ);
+  if(fdwProtect & PAGE_EXECUTE)      flag |= PAG_EXECUTE;
+
+  if(fdwProtect & PAGE_GUARD) {
+	dprintf(("ERROR: PAGE_GUARD bit set for VirtualAllocShared -> we don't support this right now!"));
+        flag |= PAG_GUARD;
+  }
+
+  //just do this if other options are used
+  if(!(flag & (PAG_READ | PAG_WRITE | PAG_EXECUTE)) || flag == 0)
+  {
+    dprintf(("VirtualAllocShared: Unknown protection flags, default to read/write"));
+    flag |= PAG_READ | PAG_WRITE;
+  }
+
+  rc = OSLibDosAllocSharedMem(&Address, cbSize, flag, name);
+
+  if(rc)
+  {
+    dprintf(("DosAllocSharedMem returned %d\n", rc));
+    SetLastError( ERROR_OUTOFMEMORY );
+    return(NULL);
+  }
+
+  dprintf(("VirtualAllocShared returned %X\n", Address));
+  return(Address);
 }

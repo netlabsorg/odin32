@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.4 1999-09-21 11:00:22 phaller Exp $ */
+/* $Id: oslibdos.cpp,v 1.5 1999-10-24 22:51:22 sandervl Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -41,6 +41,48 @@ DWORD OSLibDosAllocMem(LPVOID *lplpMemAddr, DWORD size, DWORD flags)
 DWORD OSLibDosFreeMem(LPVOID lpMemAddr)
 {
   return DosFreeMem(lpMemAddr);
+}
+//******************************************************************************
+//NOTE: If name == NULL, allocated gettable unnamed shared memory
+//******************************************************************************
+DWORD OSLibDosAllocSharedMem(LPVOID *lplpMemAddr, DWORD size, DWORD flags, LPSTR name)
+{
+ APIRET rc;
+ char  *sharedmemname = NULL;
+  
+  if(name) {
+	sharedmemname = (char *)malloc(strlen(name) + 16);
+	strcpy(sharedmemname, "\\SHAREMEM\\");
+	strcat(sharedmemname, name);
+  }
+  else	flags |= OBJ_GETTABLE;
+ 
+  rc = DosAllocSharedMem(lplpMemAddr, sharedmemname, size, flags);
+  if(name) { 
+	free(sharedmemname);
+  }
+  return rc;
+}
+//******************************************************************************
+//NOTE: If name == NULL, assume gettable unnamed shared memory
+//******************************************************************************
+DWORD OSLibDosGetNamedSharedMem(LPVOID *lplpMemAddr, LPSTR name)
+{
+ APIRET rc;
+ char  *sharedmemname = NULL;
+  
+  if(name) {
+	sharedmemname = (char *)malloc(strlen(name) + 16);
+	strcpy(sharedmemname, "\\SHAREMEM\\");
+	strcat(sharedmemname, name);
+	rc = DosGetNamedSharedMem(lplpMemAddr, sharedmemname, PAG_READ|PAG_WRITE);
+	if(name) { 
+		free(sharedmemname);
+	}
+  }
+  else	rc = DosGetSharedMem((LPVOID)*(DWORD *)lplpMemAddr, PAG_READ|PAG_WRITE);
+
+  return rc;
 }
 //******************************************************************************
 //******************************************************************************

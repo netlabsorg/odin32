@@ -1,4 +1,4 @@
-/* $Id: mmap.h,v 1.9 1999-08-27 16:51:00 sandervl Exp $ */
+/* $Id: mmap.h,v 1.10 1999-10-24 22:51:22 sandervl Exp $ */
 
 /*
  * Memory mapped class
@@ -13,6 +13,7 @@
 #define __MMAP_H__
 
 #include <vmutex.h>
+#include "heapshared.h"
 
 #ifndef PAGE_SIZE
 #define PAGE_SIZE   4096
@@ -44,6 +45,7 @@ public:
    LPSTR  getMemName()                   { return lpszMapName; };
    DWORD  getProtFlags()                 { return mProtFlags; };
    LPVOID getMappingAddr()               { return pMapping; };
+   DWORD  getProcessId()                 { return mProcessId;};
 
    void   AddRef()                       { ++referenced; };
    void   Release()                      { if(--referenced == 0) delete this; };
@@ -56,10 +58,31 @@ static Win32MemMap *findMap(ULONG address);
 //Should only be called in ExitProcess
 static void deleteAll();
 
+#ifdef __DEBUG_ALLOC__
+	void *operator new(size_t size, const char *filename, size_t lineno)
+	{
+		return _umalloc(sharedHeap, size);
+	}
+	void operator delete(void *location, const char *filename, size_t lineno)
+	{
+		free(location);
+	}
+#else
+	void *operator new(size_t size)
+	{
+		return _umalloc(sharedHeap, size);
+	}
+	void operator delete(void *location)
+	{
+		free(location);
+	}
+#endif
+
 protected:
    HFILE  hMemMap, hMemFile;
    ULONG  mSize;
    ULONG  mProtFlags;
+   ULONG  mProcessId;
    ULONG  mMapAccess;
    LPSTR  lpszMapName;
    void  *pMapping;
@@ -91,13 +114,35 @@ public:
    BOOL   everythingOk()                 { return errorState == 0; };
 
 Win32MemMap *getParentMap()              { return mParentMap;};
+   DWORD  getProcessId()                 { return mProcessId;};
 
-static void             deleteView(Win32MemMap *map);
+static void             deleteViews(Win32MemMap *map);
 static Win32MemMap     *findMapByView(ULONG address, ULONG *offset, ULONG accessType, Win32MemMapView **pView=NULL);
 static Win32MemMapView *findView(LPVOID address);
 
+#ifdef __DEBUG_ALLOC__
+	void *operator new(size_t size, const char *filename, size_t lineno)
+	{
+		return _umalloc(sharedHeap, size);
+	}
+	void operator delete(void *location, const char *filename, size_t lineno)
+	{
+		free(location);
+	}
+#else
+	void *operator new(size_t size)
+	{
+		return _umalloc(sharedHeap, size);
+	}
+	void operator delete(void *location)
+	{
+		free(location);
+	}
+#endif
+
 protected:
    ULONG  mSize, errorState;
+   ULONG  mProcessId;
    ULONG  mfAccess, mOffset;
    void  *pMapView;
 

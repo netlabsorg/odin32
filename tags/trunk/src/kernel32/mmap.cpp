@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.18 1999-09-01 00:03:51 phaller Exp $ */
+/* $Id: mmap.cpp,v 1.19 1999-10-24 22:51:21 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -29,8 +29,13 @@
 #include "mmap.h"
 #include "oslibdos.h"
 
-VMutex globalmapMutex;
-VMutex globalviewMutex;
+//Global DLL Data
+#pragma data_seg(_GLOBALDATA)
+Win32MemMapView *Win32MemMapView::mapviews = NULL;
+Win32MemMap     *Win32MemMap::memmaps = NULL;
+VMutex           globalmapMutex(VMUTEX_SHARED);
+VMutex           globalviewMutex(VMUTEX_SHARED);
+#pragma data_seg()
 
 //******************************************************************************
 //TODO: sharing between processes
@@ -47,9 +52,10 @@ Win32MemMap::Win32MemMap(HFILE hfile, ULONG size, ULONG fdwProtect, LPSTR lpszNa
 
   mSize      = size;
   mProtFlags = fdwProtect;
+  mProcessId  = GetCurrentProcess();
 
   if(lpszName) {
-	lpszMapName = (char *)malloc(strlen(lpszName)+1);
+	lpszMapName = (char *)_smalloc(strlen(lpszName)+1);
 	strcpy(lpszMapName, lpszName);
   }
   else	lpszMapName = NULL;
@@ -61,7 +67,7 @@ BOOL Win32MemMap::Init(HANDLE hMemMap)
   mapMutex.enter();
   if(hMemFile != -1)
   {
-     	if(DuplicateHandle(GetCurrentProcess(), hMemFile, GetCurrentProcess(),
+     	if(DuplicateHandle(mProcessId, hMemFile, GetCurrentProcess(),
                            &hMemFile, 0, FALSE, DUPLICATE_SAME_ACCESS) == FALSE)
      	{
 		dprintf(("Win32MemMap::Init: DuplicateHandle failed!"));
@@ -86,15 +92,18 @@ fail:
 //******************************************************************************
 Win32MemMap::~Win32MemMap()
 {
-  for(int i=0;i<nrMappings;i++) {
-	Win32MemMapView::deleteView(this); //delete all views of our memory mapped file
-  }
+  Win32MemMapView::deleteViews(this); //delete all views of our memory mapped file
+
   mapMutex.enter();
   if(lpszMapName) {
 	free(lpszMapName);
   }
   if(pMapping) {
-	VirtualFree(pMapping, mSize, MEM_RELEASE);
+	if(lpszMapName) {
+		OSLibDosFreeMem(pMapping);
+	}
+	else	VirtualFree(pMapping, mSize, MEM_RELEASE);
+
 	pMapping = NULL;
   }
   if(hMemFile != -1) {
@@ -205,7 +214,6 @@ fail:
   return FALSE;
 }
 //******************************************************************************
-//todo: unalias memory
 //******************************************************************************
 BOOL Win32MemMap::unmapViewOfFile(Win32MemMapView *view)
 {
@@ -230,6 +238,8 @@ fail:
 //******************************************************************************
 LPVOID Win32MemMap::mapViewOfFile(ULONG size, ULONG offset, ULONG fdwAccess)
 {
+ DWORD processId = GetCurrentProcess();
+
   mapMutex.enter();
   ULONG memFlags = (mProtFlags & (PAGE_READONLY | PAGE_READWRITE | PAGE_WRITECOPY));
   ULONG fAlloc   = 0;
@@ -269,7 +279,12 @@ LPVOID Win32MemMap::mapViewOfFile(ULONG size, ULONG offset, ULONG fdwAccess)
 	//     This is most likely an OS/2 bug and doesn't happen in Aurora
         //     when allocating memory with the PAG_ANY bit set. (without this
         //     flag it will also crash)
-  	pMapping = VirtualAlloc(0, mSize, fAlloc, PAGE_READWRITE);
+	if(lpszMapName) {
+		pMapping = VirtualAllocShared(mSize, fAlloc, PAGE_READWRITE, lpszMapName);
+	}
+	else {
+  		pMapping = VirtualAlloc(0, mSize, fAlloc, PAGE_READWRITE);
+	}
   	if(pMapping == NULL) {
 		dprintf(("Win32MemMap::mapFileView: VirtualAlloc %x %x %x failed!", mSize, fAlloc, memFlags));
 		goto fail;
@@ -374,6 +389,9 @@ fail:
 //******************************************************************************
 Win32MemMap *Win32MemMap::findMap(LPSTR lpszName)
 {
+  if(lpszName == NULL)
+	return NULL;
+
   globalmapMutex.enter();
   Win32MemMap *map = memmaps;
 
@@ -413,14 +431,22 @@ Win32MemMap *Win32MemMap::findMap(ULONG address)
 //******************************************************************************
 void Win32MemMap::deleteAll()
 {
-  while(memmaps) {
-	CloseHandle(memmaps->hMemMap);
+ Win32MemMap *map = memmaps, *nextmap;
+ DWORD processId = GetCurrentProcess();
+
+  //delete all maps created by this process
+  while(map) {
+	nextmap = map->next;
+	if(map->getProcessId() == processId) {
+		CloseHandle(memmaps->hMemMap);
+	}
+	else {
+  		//delete all views created by this process for this map
+  		Win32MemMapView::deleteViews(map); 
+	}
+	map = nextmap;
   }
 }
-//******************************************************************************
-//******************************************************************************
-Win32MemMap *Win32MemMap::memmaps = NULL;
-
 //******************************************************************************
 //******************************************************************************
 Win32MemMapView::Win32MemMapView(Win32MemMap *map, ULONG offset, ULONG size,
@@ -434,6 +460,7 @@ Win32MemMapView::Win32MemMapView(Win32MemMap *map, ULONG offset, ULONG size,
   mParentMap = map;
   mSize    = size;
   mOffset  = offset;
+  mProcessId = GetCurrentProcess();
 
   switch(fdwAccess) {
   case FILE_MAP_READ:
@@ -446,6 +473,16 @@ Win32MemMapView::Win32MemMapView(Win32MemMap *map, ULONG offset, ULONG size,
 	mfAccess   = MEMMAP_ACCESS_WRITE;
 	break;
   }
+  if(map->getMemName() != NULL) {
+	//shared memory map, so map it into our address space
+	if(OSLibDosGetNamedSharedMem((LPVOID *)&viewaddr, map->getMemName()) != OSLIB_NOERROR) {
+		dprintf(("new OSLibDosGetNamedSharedMem FAILED"));
+		SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+		errorState = 1;
+	  	return;
+	}
+  }
+  
   if(OSLibDosAliasMem(viewaddr, size, &pMapView, accessAttr) != OSLIB_NOERROR) {
 	dprintf(("new OSLibDosAliasMem FAILED"));
 	SetLastError(ERROR_NOT_ENOUGH_MEMORY);
@@ -505,20 +542,23 @@ Win32MemMapView::~Win32MemMapView()
 }
 //******************************************************************************
 //******************************************************************************
-void Win32MemMapView::deleteView(Win32MemMap *map)
+void Win32MemMapView::deleteViews(Win32MemMap *map)
 {
+  DWORD processId = GetCurrentProcess();
+
   globalviewMutex.enter();
-  Win32MemMapView *view = mapviews;
+  Win32MemMapView *view = mapviews, *nextview;
 
   if(view != NULL) {
   	while(view) {
-		if(view->getParentMap() == map)
+		nextview = view->next;
+		if(view->getParentMap() == map && view->getProcessId() == processId)
 		{
 			globalviewMutex.leave();
 			delete view;
-			return;
+			globalviewMutex.enter();
 		}
-		view = view->next;
+		view = nextview;
 	}
   }
   globalviewMutex.leave();
@@ -572,5 +612,4 @@ Win32MemMapView *Win32MemMapView::findView(LPVOID address)
 }
 //******************************************************************************
 //******************************************************************************
-Win32MemMapView *Win32MemMapView::mapviews = NULL;
 

@@ -1,4 +1,4 @@
-/* $Id: oslibdos.h,v 1.4 1999-09-21 11:00:23 phaller Exp $ */
+/* $Id: oslibdos.h,v 1.5 1999-10-24 22:51:22 sandervl Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -18,6 +18,8 @@ DWORD OSLibDosAllocMem(LPVOID *lplpMemAddr, DWORD size, DWORD flags);
 DWORD OSLibDosFreeMem(LPVOID lpMemAddr);
 DWORD OSLibDosQueryMem(LPVOID lpMemAddr, DWORD *lpRangeSize, DWORD *lpAttr);
 DWORD OSLibDosSetMem(LPVOID lpMemAddr, DWORD size, DWORD flags);
+DWORD OSLibDosAllocSharedMem(LPVOID *lplpMemAddr, DWORD size, DWORD flags, LPSTR name);
+DWORD OSLibDosGetNamedSharedMem(LPVOID *lplpMemAddr, LPSTR name);
 
 BOOL OSLibDosGetFileAttributesEx(PSZ pszName, ULONG ulDummy, PVOID pBuffer);
 
