@@ -1,4 +1,4 @@
-/* $Id: win32dlg.h,v 1.14 2001-10-28 10:38:13 sandervl Exp $ */
+/* $Id: win32dlg.h,v 1.15 2002-10-28 19:59:52 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -34,17 +34,18 @@ typedef struct
     LPVOID     data;
 } DLG_CONTROL_INFO;
 
-/* Dialog template */
+/* Some home-brewen dialog template 
+   TODO: redo this and make it standart one */
 typedef struct
 {
     DWORD      style;
     DWORD      exStyle;
+    WORD       nbItems;
+    short      x;
+    short      y;
+    short      cx;
+    short      cy;
     DWORD      helpId;
-    UINT       nbItems;
-    INT        x;
-    INT        y;
-    INT        cx;
-    INT        cy;
     LPCSTR     menuName;
     LPCSTR     className;
     LPCSTR     caption;
