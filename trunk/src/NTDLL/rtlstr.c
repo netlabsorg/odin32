@@ -32,6 +32,11 @@
 
 WINE_DEFAULT_DEBUG_CHANNEL(ntdll);
 
+#ifdef __WIN32OS2__
+#define RtlAllocateHeap  HeapAlloc
+#define RtlFreeHeap      HeapFree
+#endif
+
 UINT NlsAnsiCodePage = 1252;
 BYTE NlsMbCodePageTag = 0;
 BYTE NlsMbOemCodePageTag = 0;

@@ -1,4 +1,4 @@
-; $Id: ntdll.def,v 1.46 2002-06-15 11:16:52 sandervl Exp $
+; $Id: ntdll.def,v 1.47 2002-06-15 17:21:33 sandervl Exp $
 
 ;
 ; Based on NT 4.0 SP6: NTDLL.DLL
@@ -12,8 +12,6 @@ IMPORTS
     _RtlLeaveCriticalSection@4           = KERNEL32.LeaveCriticalSection
     _RtlEnterCriticalSection@4           = KERNEL32.EnterCriticalSection
     _RtlDeleteCriticalSection@4          = KERNEL32.DeleteCriticalSection
-    _RtlAllocateHeap@12                  = KERNEL32.HeapAlloc
-    _RtlFreeHeap@12                      = KERNEL32.HeapFree
 
 EXPORTS
 
