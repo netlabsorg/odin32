@@ -1,4 +1,4 @@
-/* $Id: comctl32.c,v 1.5 1999-06-10 16:21:58 achimha Exp $ */
+/* $Id: comctl32.c,v 1.6 1999-06-23 19:45:00 achimha Exp $ */
 /*
  * Win32 common controls implementation
  *
@@ -312,9 +312,9 @@ DrawStatusTextA (HDC hdc, LPRECT lprc, LPCSTR text, UINT style)
     RECT r = *lprc;
     UINT border = BDR_SUNKENOUTER;
 
-    if (style == SBT_POPOUT)
+    if (style & SBT_POPOUT)
       border = BDR_RAISEDOUTER;
-    else if (style == SBT_NOBORDERS)
+    else if (style & SBT_NOBORDERS)
       border = 0;
 
     DrawEdge (hdc, &r, border, BF_RECT|BF_ADJUST|BF_MIDDLE);
