@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.172 1999-09-04 09:07:42 sandervl Exp $ */
+ /* $Id: changelog,v 1.173 1999-09-04 12:42:27 sandervl Exp $ */
+
+ 99-09-04: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: Fixed icon- & cursorgroup conversion (Solitaire icon now correct again)
 
  99-09-04: Jens Wiessner <wiessnej@rfi.de>
 	- MSVFW32: Created stub (partly) dll (Based on Wine 990815)
