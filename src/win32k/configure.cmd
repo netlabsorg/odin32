@@ -1,4 +1,4 @@
-/* $Id: configure.cmd,v 1.8 2000-02-26 20:21:20 bird Exp $
+/* $Id: configure.cmd,v 1.9 2000-02-27 02:11:44 bird Exp $
  *
  * Configuration script.
  * Generates makefile.inc and an empty .depend file.
@@ -41,10 +41,18 @@
         call lineout sIncFile, '################################################################################'
         sWin32kBase = directory();
         call lineout sIncFile, 'WIN32KBASE       =' sWin32kBase;
+        call lineout sIncFile, 'WIN32KDEV16      =' sWin32kBase'\dev16'
+        call lineout sIncFile, 'WIN32KDEV32      =' sWin32kBase'\dev32'
+        call lineout sIncFile, 'WIN32KELF2LX     =' sWin32kBase'\elf2lx'
         call lineout sIncFile, 'WIN32KINCLUDE    =' sWin32kBase'\include'
+        call lineout sIncFile, 'WIN32KK32        =' sWin32kBase'\k32'
+        call lineout sIncFile, 'WIN32KLDR        =' sWin32kBase'\ldr'
         call lineout sIncFile, 'WIN32KLIB        =' sWin32kBase'\lib'
         call lineout sIncFile, 'WIN32KLIST       =' sWin32kBase'\list'
+        call lineout sIncFile, 'WIN32KMISC       =' sWin32kBase'\misc'
+        call lineout sIncFile, 'WIN32KPE2LX      =' sWin32kBase'\pe2lx'
         call lineout sIncFile, 'WIN32KOBJ        =' sWin32kBase'\object'
+        call lineout sIncFile, 'WIN32KOBJECT     = $(WIN32KOBJ)'
         sPDWin32Base = substr(sWin32kBase, 1, lastpos('\', sWin32kBase, lastpos('\', sWin32kBase)-1)-1);
         call lineout sIncFile, 'PDWIN32BASE      =' sPDWin32Base
         call lineout sIncFile, 'PDWIN32_INCLUDE  =' sPDWin32Base'\include'
