@@ -1,4 +1,4 @@
-/* $Id: fastdep.c,v 1.41 2002-08-28 02:12:55 bird Exp $
+/* $Id: fastdep.c,v 1.42 2002-09-05 02:20:37 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
@@ -3951,6 +3951,12 @@ BOOL depValidate(PDEPRULE pdepRule)
                         filecacheAddFile(psz);
                     }
                 }
+                /*
+                 * Dir was cached, hence the file doesn't exist
+                 * and the we should rescan the source file.
+                 */
+                else
+                    return FALSE;
             }
         }
     }
