@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.1 1999-09-15 23:18:49 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.2 1999-09-16 18:00:43 dengert Exp $ */
 
 /*
  * DC functions for USER32
@@ -45,7 +45,7 @@ typedef struct
     BOOL  fErase;
     RECT  rcPaint;
     BOOL  fRestore;
-    BOOL  fIncUpdate;
+    BOOL  IncUpdate;
     BYTE  rgbReserved[32];
 } PAINTSTRUCT_W, *PPAINTSTRUCT_W, *LPPAINTSTRUCT_W;
 
@@ -115,6 +115,19 @@ typedef struct _penobject
 #define DCX_INTERSECTUPDATE_W           0x00000200L
 #define DCX_LOCKWINDOWUPDATE_W          0x00000400L
 #define DCX_VALIDATE_W                  0x00200000L
+
+#define RDW_INVALIDATE_W       0x0001
+#define RDW_INTERNALPAINT_W    0x0002
+#define RDW_ERASE_W            0x0004
+#define RDW_VALIDATE_W         0x0008
+#define RDW_NOINTERNALPAINT_W  0x0010
+#define RDW_NOERASE_W          0x0020
+#define RDW_NOCHILDREN_W       0x0040
+#define RDW_ALLCHILDREN_W      0x0080
+#define RDW_UPDATENOW_W        0x0100
+#define RDW_ERASENOW_W         0x0200
+#define RDW_FRAME_W            0x0400
+#define RDW_NOFRAME_W          0x0800
 
 typedef struct _RGNDATAHEADER_W {
     DWORD       dwSize;
@@ -1037,6 +1050,238 @@ int WIN32API ReleaseDC (HWND hwnd, HDC hdc)
    SetFS(sel);
    return (rc);
 }
+
+BOOL WIN32API UpdateWindow (HWND hwnd)
+{
+   if (!hwnd)
+       return FALSE;
+
+   USHORT sel = RestoreOS2FS();
+   Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
+
+dprintf (("User32: UpdateWindow hwnd %x -> wnd %x", hwnd, wnd));
+
+   if (WinQueryUpdateRect (wnd->getOS2WindowHandle(), NULL))
+       sendEraseBkgnd (wnd);
+
+   wnd->MsgPaint(0);
+
+   SetFS(sel);
+   return (TRUE);
+}
+
+// This implementation of RedrawWindow supports
+// RDW_ERASE
+// RDW_NOERASE
+// RDW_INTERNALPAINT
+// RDW_NOINTERNALPAINT
+// RDW_INVALIDATE
+// RDW_VALIDATE
+// RDW_ERASENOW
+// RDW_UPDATENOW
+
+BOOL WIN32API RedrawWindow (HWND hwnd, const RECT *pRect, HRGN hrgn, DWORD redraw)
+{
+   Win32BaseWindow *wnd;
+
+   if (redraw & (RDW_FRAME_W | RDW_NOFRAME_W))
+   {
+//      SET_ERROR_WIN( ERROR_NOT_SUPPORTED_W );
+      return FALSE;
+   }
+
+   USHORT sel = RestoreOS2FS();
+ dprintf(("USER32: RedrawWindow %X, %X %X %X", hwnd, pRect, hrgn, redraw));
+
+   if (hwnd == NULLHANDLE) {
+      hwnd = HWND_DESKTOP;
+      wnd  = NULL;
+   }
+   else
+   {
+      wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
+
+      if (!wnd)
+      {
+//         SET_ERROR_LAST();
+         SetFS(sel);
+         return FALSE;
+      }
+      hwnd = wnd->getOS2WindowHandle();
+   }
+
+   BOOL  IncludeChildren = redraw & RDW_ALLCHILDREN_W ? TRUE : FALSE;
+   BOOL  success = TRUE;
+   HPS   hpsTemp = NULLHANDLE;
+   HRGN  hrgnTemp = NULLHANDLE;
+   RECTL rectl;
+
+   if (redraw & RDW_UPDATENOW_W) redraw &= ~RDW_ERASENOW_W;
+
+#if 0
+   if (redraw & RDW_NOERASE_W)
+      setEraseBkgnd (FALSE);
+
+   if (redraw & RDW_UPDATENOW_W)
+      setSupressErase (TRUE, FALSE);
+   else if (redraw & RDW_ERASENOW_W)
+      setSupressErase (FALSE, FALSE);
+   else
+   {
+      QMSG qmsg;
+      BOOL bErase;
+
+      bErase = (WinPeekMsg (HABX, &qmsg, hwnd, WM_PAINT, WM_PAINT, PM_REMOVE)
+                && (redraw & RDW_NOERASE_W) == 0);
+
+      setSupressErase (FALSE, !bErase);
+   }
+
+   if (redraw & (RDW_NOINTERNALPAINT_W | RDW_INTERNALPAINT_W))
+   {
+      QMSG qmsg;
+
+      WinPeekMsg( (HAB)0, &qmsg, hwnd, WM_VIRTUAL_INTERNALPAINT,
+                  WM_VIRTUAL_INTERNALPAINT, PM_REMOVE );
+   }
+#endif
+
+   if (hrgn)
+   {
+      ULONG BytesNeeded;
+      PRGNDATA_W RgnData;
+      PRECTL pr;
+      int i;
+      LONG height = wnd ? wnd->getWindowHeight() : OSLibQueryScreenHeight();
+
+      if (!hrgn)
+         goto error;
+
+      BytesNeeded = _O32_GetRegionData (hrgn, 0, NULL);
+      RgnData = (PRGNDATA_W)_alloca (BytesNeeded);
+      if (RgnData == NULL)
+          goto error;
+      _O32_GetRegionData (hrgn, BytesNeeded, RgnData);
+
+      pr = (PRECTL)(RgnData->Buffer);
+      for (i = RgnData->rdh.nCount; i > 0; i--, pr++) {
+         LONG temp = pr->yTop;
+         pr->yTop = height - pr->yBottom;
+         pr->yBottom = height - temp;
+      }
+
+      hpsTemp = WinGetScreenPS (HWND_DESKTOP);
+      hrgnTemp = GpiCreateRegion (hpsTemp, RgnData->rdh.nCount, (PRECTL)(RgnData->Buffer));
+      if (!hrgnTemp) goto error;
+   }
+   else if (pRect)
+   {
+      LONG height = wnd ? wnd->getWindowHeight() : OSLibQueryScreenHeight();
+
+      PMRECT_FROM_WINRECT (rectl, *pRect);
+      rectl.yTop    = height - rectl.yTop;
+      rectl.yBottom = height - rectl.yBottom;
+   }
+
+   if (redraw & RDW_INVALIDATE_W)
+   {
+//      if (redraw & RDW_ERASE_W)
+//         setEraseBkgnd (TRUE, TRUE);
+
+      if (!pRect && !hrgn)
+         success = WinInvalidateRect (hwnd, NULL, IncludeChildren);
+      else if (hrgn)
+         success = WinInvalidateRegion (hwnd, hrgnTemp, IncludeChildren);
+      else
+         success = WinInvalidateRect (hwnd, &rectl, IncludeChildren);
+      if (!success) goto error;
+   }
+   else if (redraw & RDW_VALIDATE_W)
+   {
+      if (WinQueryUpdateRect (hwnd, NULL))
+      {
+         if (!pRect && !hrgn)
+            success = WinValidateRect (hwnd, NULL, IncludeChildren);
+         else if (hrgn)
+            success = WinValidateRegion (hwnd, hrgnTemp, IncludeChildren);
+         else
+            success = WinValidateRect (hwnd, &rectl, IncludeChildren);
+         if (!success) goto error;
+      }
+   }
+
+   if (WinQueryUpdateRect (hwnd, NULL))
+   {
+      if (redraw & RDW_UPDATENOW_W)
+         wnd->MsgPaint (0, FALSE);
+
+//      else if ((redraw & RDW_ERASE_W) && (redraw & RDW_ERASENOW_W))
+//         setEraseBkgnd (FALSE, !sendEraseBkgnd (wnd));
+   }
+   else if ((redraw & RDW_INTERNALPAINT_W) && !(redraw & RDW_INVALIDATE_W))
+   {
+      if (redraw & RDW_UPDATENOW_W)
+         wnd->MsgPaint (0, FALSE);
+//      else
+//         WinPostMsg( hwnd, WM_VIRTUAL_INTERNALPAINT, MPVOID, MPVOID );
+   }
+
+error:
+   /* clean up */
+   if (hrgnTemp)
+      GpiDestroyRegion (hpsTemp, hrgnTemp);
+
+   if (hpsTemp)
+      WinReleasePS (hpsTemp);
+
+//   if ((redraw & RDW_INVALIDATE_W) == 0)
+//      setSupressErase (FALSE, FALSE);
+//   else if ((redraw & RDW_ERASENOW_W) == RDW_ERASENOW_W)
+//      setSupressErase (FALSE, TRUE);
+
+//   if (!success)
+//      SET_ERROR_LAST();
+
+   SetFS(sel);
+   return (success);
+}
+
+BOOL WIN32API InvalidateRect (HWND hwnd, const RECT *pRect, BOOL erase)
+{
+   USHORT sel = RestoreOS2FS();
+//   Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
+   BOOL result;
+
+// todo !!
+//   if ( isFrame without client )
+//      erase = TRUE;
+
+   result = RedrawWindow (hwnd, pRect, NULLHANDLE,
+                          RDW_ALLCHILDREN_W | RDW_INVALIDATE_W |
+                          (erase ? RDW_ERASE_W : 0) |
+                          (hwnd == NULLHANDLE ? RDW_UPDATENOW_W : 0));
+   SetFS(sel);
+   return (result);
+}
+
+BOOL WIN32API InvalidateRgn (HWND hwnd, HRGN hrgn, BOOL erase)
+{
+   USHORT sel = RestoreOS2FS();
+//   Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
+   BOOL result;
+
+// todo !!
+//   if ( isFrame without client )
+//      erase = TRUE;
+
+   result = RedrawWindow (hwnd, NULL, hrgn,
+                          RDW_ALLCHILDREN_W | RDW_INVALIDATE_W |
+                          (erase ? RDW_ERASE_W : 0) |
+                          (hwnd == NULLHANDLE ? RDW_UPDATENOW_W : 0));
+   SetFS(sel);
+   return (result);
+}
+
 //******************************************************************************
 //******************************************************************************
 
