@@ -86,7 +86,11 @@ extern int MONTHCAL_MonthLength(int month, int year);
 #define TWOLETTERAMPM   0x62
 #define ONEDIGITYEAR    0x71
 #define TWODIGITYEAR    0x72
+#ifdef __WIN32OS2__
+#define FULLYEAR        0x74
+#else
 #define FULLYEAR        0x73
+#endif
 #define FORMATCALLBACK  0x81      /* -> maximum of 0x80 callbacks possible */
 #define FORMATCALLMASK  0x80
 #define DT_STRING 	0x0100
