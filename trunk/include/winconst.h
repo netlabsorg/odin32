@@ -1,4 +1,4 @@
-/* $Id: winconst.h,v 1.17 1999-12-24 18:38:19 sandervl Exp $ */
+/* $Id: winconst.h,v 1.18 1999-12-31 10:47:45 sandervl Exp $ */
 
 /*
  * Win32 constants
@@ -383,3 +383,13 @@
 #define PM_NOREMOVE_W     0x0000
 #define PM_REMOVE_W       0x0001
 #define PM_NOYIELD_W      0x0002
+
+#define EXCEPTION_DEBUG_EVENT_W       1
+#define CREATE_THREAD_DEBUG_EVENT_W   2
+#define CREATE_PROCESS_DEBUG_EVENT_W  3
+#define EXIT_THREAD_DEBUG_EVENT_W     4
+#define EXIT_PROCESS_DEBUG_EVENT_W    5
+#define LOAD_DLL_DEBUG_EVENT_W        6
+#define UNLOAD_DLL_DEBUG_EVENT_W      7
+#define OUTPUT_DEBUG_STRING_EVENT_W   8
+#define RIP_EVENT_W                   9
