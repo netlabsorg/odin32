@@ -1,4 +1,4 @@
-/* $Id: heapstring.h,v 1.8 2000-01-06 20:03:03 sandervl Exp $ */
+/* $Id: heapstring.h,v 1.9 2000-08-24 09:29:45 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -9,6 +9,18 @@
  */
 
 #include <odin.h>
+
+//used by Wine code
+#define strcmpiW 	lstrcmpiW
+#define strncasecmp	lstrncmpA
+#define strcasecmp	lstrcmpA
+#define strcpyW         lstrcpyW
+#define strlenW         lstrlenW
+#define strncmpiW       lstrncmpiW
+#define strncmpW        lstrncmpW
+#define strcatW         lstrcatW
+#define toupperW(a)     (WCHAR)CharUpperW((LPWSTR)a)
+#define tolowerW(a)     (WCHAR)CharLowerW((LPWSTR)a)
 
 /*****************************************************************************
  * Prototypes                                                                *
