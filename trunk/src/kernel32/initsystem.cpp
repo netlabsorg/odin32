@@ -1,4 +1,4 @@
-/* $Id: initsystem.cpp,v 1.23 2000-11-09 19:21:39 sandervl Exp $ */
+/* $Id: initsystem.cpp,v 1.24 2000-12-30 10:17:00 sandervl Exp $ */
 /*
  * Odin system initialization (registry, directories & environment)
  *
@@ -45,6 +45,7 @@
 #include "debugtools.h"
 #include "cpuhlp.h"
 #include <odininst.h>
+#include <win\options.h>
 #include "directory.h"
 #include <versionos2.h>
 
@@ -636,6 +637,14 @@ BOOL InitSystemAndRegistry()
    digbuf[1] = 0;
    RegSetValueExA(hkey, "EnableRemoteConnect",0,REG_SZ, (LPBYTE)digbuf, 2);
    RegCloseKey(hkey);
+
+   //Add MS Sans Serif to WarpSans font conversion entry
+   char temp;
+   if(PROFILE_GetOdinIniString(ODINFONTSECTION, "MS Sans Serif", "", &temp,
+                               0) <= 1)
+   {
+       PROFILE_SetOdinIniString(ODINFONTSECTION, "MS Sans Serif", "WarpSans");
+   }
 
    return TRUE;
 
