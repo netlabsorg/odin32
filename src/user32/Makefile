@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.33 1999-10-20 06:38:07 sandervl Exp $
+# $Id: Makefile,v 1.34 1999-10-23 10:21:43 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -90,7 +90,7 @@ hooks.obj: hooks.cpp hooks.h
 initterm.obj: initterm.cpp $(PDWIN32_INCLUDE)\spy.h pmwindow.h heapshared.h
 uitools.obj: uitools.cpp win32wbase.h
 unknown.obj: unknown.cpp
-wndmsg.obj: wndmsg.cpp wndmsg.h
+wndmsg.obj: wndmsg.cpp wndmsg.h $(PDWIN32_INCLUDE)\spy.h
 
 spy.obj: spy.cpp $(PDWIN32_INCLUDE)\spy.h
 
