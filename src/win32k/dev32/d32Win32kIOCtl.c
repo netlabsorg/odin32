@@ -1,4 +1,4 @@
-/* $Id: d32Win32kIOCtl.c,v 1.4 2000-12-11 06:53:48 bird Exp $
+/* $Id: d32Win32kIOCtl.c,v 1.5 2001-02-11 15:19:47 bird Exp $
  *
  * Win32k driver IOCtl handler function.
  *
@@ -82,6 +82,22 @@ USHORT _loadds _Far32 _Pascal Win32kIOCtl(PRP32GENIOCTL pRpIOCtl)
                     pParm->rc = k32ProcessReadWrite(pParm->pid, pParm->cb, pParm->pvSource, pParm->pvTarget, pParm->fRead);
                     return STATUS_DONE;
                 }
+
+                case K32_HANDLESYSTEMEVENT:
+                {
+                    PK32HANDLESYSTEMEVENT pParm = (PK32HANDLESYSTEMEVENT)pRpIOCtl->ParmPacket;
+                    //pParm->rc = k32HandleSystemEvent(pParm->ulEvent, pParm->hev, pParm->fHandle);
+                    pParm->rc = ERROR_NOT_SUPPORTED;
+                    return STATUS_DONE;
+                }
+
+                case K32_QUERYSYSTEMMEMINFO:
+                {
+                    PK32QUERYSYSTEMMEMINFO pParm = (PK32QUERYSYSTEMMEMINFO)pRpIOCtl->ParmPacket;
+                    pParm->rc = k32QuerySystemMemInfo(pParm->pMemInfo);
+                    return STATUS_DONE;
+                }
+
             }
             break;
     }
