@@ -1,4 +1,4 @@
-/* $Id: wingdi.h,v 1.4 1999-09-02 17:39:36 phaller Exp $ */
+/* $Id: wingdi.h,v 1.5 1999-09-08 12:12:28 sandervl Exp $ */
 
 #ifndef __WINE_WINGDI_H
 #define __WINE_WINGDI_H
@@ -2703,14 +2703,20 @@ HRGN      WINAPI CreateEllipticRgn(INT,INT,INT,INT);
 HRGN      WINAPI CreateEllipticRgnIndirect(const RECT *);
 HFONT     WINAPI CreateFontA(INT,INT,INT,INT,INT,DWORD,DWORD,DWORD,DWORD,DWORD,DWORD,DWORD,DWORD,LPCSTR);
 HFONT     WINAPI CreateFontW(INT,INT,INT,INT,INT,DWORD,DWORD,DWORD,DWORD,DWORD,DWORD,DWORD,DWORD,LPCWSTR);
+#define  CreateFont WINELIB_NAME_AW(CreateFont)
 HFONT     WINAPI CreateFontIndirectA(const LOGFONTA*);
 HFONT     WINAPI CreateFontIndirectW(const LOGFONTW*);
+#define  CreateFontIndirect WINELIB_NAME_AW(CreateFontIndirect)
+
 HBRUSH    WINAPI CreateHatchBrush(INT,COLORREF);
 HDC       WINAPI CreateICA(LPCSTR,LPCSTR,LPCSTR,const DEVMODEA*);
 HDC       WINAPI CreateICW(LPCWSTR,LPCWSTR,LPCWSTR,const DEVMODEW*);
 #define     CreateIC WINELIB_NAME_AW(CreateIC)
+
 HDC       WINAPI CreateMetaFileA(LPCSTR);
 HDC       WINAPI CreateMetaFileW(LPCWSTR);
+#define     CreateMetaFile WINELIB_NAME_AW(CreateMetaFile)
+
 HPALETTE  WINAPI CreatePalette(const LOGPALETTE*);
 HBRUSH    WINAPI CreatePatternBrush(HBITMAP);
 HPEN      WINAPI CreatePen(INT,INT,COLORREF);
@@ -2722,6 +2728,8 @@ HRGN      WINAPI CreateRectRgnIndirect(const RECT*);
 HRGN      WINAPI CreateRoundRectRgn(INT,INT,INT,INT,INT,INT);
 BOOL      WINAPI CreateScalableFontResourceA(DWORD,LPCSTR,LPCSTR,LPCSTR);
 BOOL      WINAPI CreateScalableFontResourceW(DWORD,LPCWSTR,LPCWSTR,LPCWSTR);
+#define CreateScalableFontResource WINELIB_NAME(CreateScalableFontResource)
+
 HBRUSH    WINAPI CreateSolidBrush(COLORREF);
 BOOL      WINAPI DeleteDC(HDC);
 BOOL      WINAPI DeleteMetaFile(HMETAFILE);
@@ -2733,10 +2741,16 @@ INT       WINAPI EndDoc(HDC);
 BOOL      WINAPI EndPath(HDC);
 INT       WINAPI EnumFontFamiliesA(HDC,LPCSTR,FONTENUMPROCA,LPARAM);
 INT       WINAPI EnumFontFamiliesW(HDC,LPCWSTR,FONTENUMPROCW,LPARAM);
+#define EnumFontFamilies WINELIB_NAME(EnumFontFamilies)
+
 INT       WINAPI EnumFontFamiliesExA(HDC,LPLOGFONTA,FONTENUMPROCEXA,LPARAM,DWORD);
 INT       WINAPI EnumFontFamiliesExW(HDC,LPLOGFONTW,FONTENUMPROCEXW,LPARAM,DWORD);
+#define EnumFontFamiliesEx WINELIB_NAME(EnumFontFamiliesEx)
+
 INT       WINAPI EnumFontsA(HDC,LPCSTR,FONTENUMPROCA,LPARAM);
 INT       WINAPI EnumFontsW(HDC,LPCWSTR,FONTENUMPROCW,LPARAM);
+#define EnumFonts WINELIB_NAME(EnumFonts)
+
 BOOL      WINAPI EnumMetaFile(HDC,HMETAFILE,MFENUMPROC,LPARAM);
 INT       WINAPI EnumObjects(HDC,INT,GOBJENUMPROC,LPARAM);
 BOOL      WINAPI EqualRgn(HRGN,HRGN);
@@ -2763,6 +2777,8 @@ BOOL      WINAPI GetCharABCWidthsA(HDC,UINT,UINT,LPABC);
 BOOL      WINAPI GetCharABCWidthsW(HDC,UINT,UINT,LPABC);
 DWORD       WINAPI GetCharacterPlacementA(HDC,LPCSTR,INT,INT,GCP_RESULTSA*,DWORD);
 DWORD       WINAPI GetCharacterPlacementW(HDC,LPCWSTR,INT,INT,GCP_RESULTSW*,DWORD);
+#define GetCharacterPlacement WINELIB_NAME(GetCharacterPlacement)
+
 BOOL      WINAPI GetCharWidth32A(HDC,UINT,UINT,LPINT);
 BOOL      WINAPI GetCharWidth32W(HDC,UINT,UINT,LPINT);
 #define     GetCharWidthA GetCharWidth32A
@@ -2777,8 +2793,12 @@ DWORD       WINAPI GetFontData(HDC,DWORD,DWORD,LPVOID,DWORD);
 DWORD       WINAPI GetFontLanguageInfo(HDC);
 DWORD       WINAPI GetGlyphOutlineA(HDC,UINT,UINT,LPGLYPHMETRICS,DWORD,LPVOID,const MAT2*);
 DWORD       WINAPI GetGlyphOutlineW(HDC,UINT,UINT,LPGLYPHMETRICS,DWORD,LPVOID,const MAT2*);
+#define GetGlyphOutline WINELIB_NAME(GetGlyphOutline)
+
 DWORD       WINAPI GetKerningPairsA(HDC,DWORD,LPKERNINGPAIR);
 DWORD       WINAPI GetKerningPairsW(HDC,DWORD,LPKERNINGPAIR);
+#define GetKerningPairs WINELIB_NAME(GetKerningPairs)
+
 INT       WINAPI GetMapMode(HDC);
 HMETAFILE WINAPI GetMetaFileA(LPCSTR);
 HMETAFILE WINAPI GetMetaFileW(LPCWSTR);
@@ -2786,8 +2806,12 @@ DWORD       WINAPI GetNearestColor(HDC,DWORD);
 UINT      WINAPI GetNearestPaletteIndex(HPALETTE,COLORREF);
 INT       WINAPI GetObjectA(HANDLE,INT,LPVOID);
 INT       WINAPI GetObjectW(HANDLE,INT,LPVOID);
+#define GetObject WINELIB_NAME(GetObject)
+
 UINT      WINAPI GetOutlineTextMetricsA(HDC,UINT,LPOUTLINETEXTMETRICA);
 UINT      WINAPI GetOutlineTextMetricsW(HDC,UINT,LPOUTLINETEXTMETRICW);
+#define GetOutlineTextMetrics WINELIB_NAME(GetOutlineTextMetrics)
+
 UINT      WINAPI GetPaletteEntries(HPALETTE,UINT,UINT,LPPALETTEENTRY);
 INT       WINAPI GetPath(HDC,LPPOINT,LPBYTE,INT);
 COLORREF    WINAPI GetPixel(HDC,INT,INT);
@@ -2808,12 +2832,20 @@ UINT      WINAPI GetTextCharset(HDC);
 COLORREF    WINAPI GetTextColor(HDC);
 BOOL        WINAPI GetTextExtentPointA(HDC,LPCSTR,INT,LPSIZE);
 BOOL        WINAPI GetTextExtentPointW(HDC,LPCWSTR,INT,LPSIZE);
+#define GetTextExtentPoint WINELIB_NAME(GetTextExtentPoint)
+
 BOOL        WINAPI GetTextExtentPoint32A(HDC,LPCSTR,INT,LPSIZE);
 BOOL        WINAPI GetTextExtentPoint32W(HDC,LPCWSTR,INT,LPSIZE);
+#define GetTextExtentPoint32 WINELIB_NAME(GetTextExtentPoint32)
+
 INT       WINAPI GetTextFaceA(HDC,INT,LPSTR);
 INT       WINAPI GetTextFaceW(HDC,INT,LPWSTR);
+#define GetTextFace WINELIB_NAME(GetTextFace)
+
 BOOL      WINAPI GetTextMetricsA(HDC,LPTEXTMETRICA);
 BOOL      WINAPI GetTextMetricsW(HDC,LPTEXTMETRICW);
+#define GetTextMetrics WINELIB_NAME(GetTextMetrics)
+
 BOOL      WINAPI GetViewportExtEx(HDC,LPSIZE);
 BOOL      WINAPI GetViewportOrgEx(HDC,LPPOINT);
 BOOL      WINAPI GetWindowExtEx(HDC,LPSIZE);
@@ -2906,6 +2938,8 @@ BOOL      WINAPI StrokePath(HDC);
 BOOL      WINAPI SwapBuffers(HDC);
 BOOL      WINAPI TextOutA(HDC,INT,INT,LPCSTR,INT);
 BOOL      WINAPI TextOutW(HDC,INT,INT,LPCWSTR,INT);
+#define TextOut WINELIB_NAME(TextOut)
+
 BOOL      WINAPI UnrealizeObject(HGDIOBJ);
 BOOL      WINAPI UpdateColors(HDC);
 BOOL      WINAPI WidenPath(HDC);
