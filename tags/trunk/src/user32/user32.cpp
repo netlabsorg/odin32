@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.31 1999-09-25 14:18:11 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.32 1999-09-26 10:10:00 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -474,7 +474,8 @@ int WIN32API wvsprintfW(LPWSTR lpOutput, LPCWSTR lpFormat, va_list arglist)
   FreeAsciiString(lpFmtA);
   return(rc);
 }
-
+//******************************************************************************
+//******************************************************************************
 /* Caret Functions */
 
 BOOL WIN32API CreateCaret( HWND hWnd, HBITMAP hBitmap, int nWidth, int nHeight)

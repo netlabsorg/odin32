@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.8 1999-09-25 19:11:18 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.9 1999-09-26 10:09:59 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -137,6 +137,7 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle, ULO
           *OSFrameStyle |= FCF_VERTSCROLL;
     if(dwStyle & WS_HSCROLL_W)
           *OSFrameStyle |= FCF_HORZSCROLL;
+
     if(dwStyle & WS_SYSMENU_W)
           *OSFrameStyle |= FCF_SYSMENU;
     if(dwStyle & WS_THICKFRAME_W)
@@ -672,6 +673,72 @@ BOOL OSLibWinQueryWindowProcess(HWND hwnd, ULONG *pid, ULONG *tid)
 BOOL OSLibWinMapWindowPoints (HWND hwndFrom, HWND hwndTo, OSLIBPOINT *pptl, ULONG num)
 {
    return WinMapWindowPoints (hwndFrom, hwndTo, (PPOINTL)pptl, num);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinEnableScrollBar(HWND hwndParent, int scrollBar, BOOL fEnable)
+{
+ HWND hwndScroll;
+
+   if(scrollBar == OSLIB_VSCROLL) {
+	hwndScroll = WinWindowFromID(hwndParent, FID_VERTSCROLL);
+   }
+   else hwndScroll = WinWindowFromID(hwndParent, FID_HORZSCROLL);
+
+   if(hwndScroll == NULL)
+	return FALSE;
+
+   return WinEnableWindow(hwndScroll, fEnable);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinShowScrollBar(HWND hwndParent, int scrollBar, BOOL fShow)
+{
+ HWND hwndScroll;
+
+   if(scrollBar == OSLIB_VSCROLL) {
+	hwndScroll = WinWindowFromID(hwndParent, FID_VERTSCROLL);
+   }
+   else hwndScroll = WinWindowFromID(hwndParent, FID_HORZSCROLL);
+
+   if(hwndScroll == NULL)
+	return FALSE;
+
+   if(fShow != WinIsWindowVisible(hwndScroll)) {
+	WinShowWindow(hwndScroll, fShow);
+   }
+   return TRUE;   
+}
+//******************************************************************************
+//******************************************************************************
+void OSLibTranslateScrollCmdAndMsg(ULONG *msg, ULONG *scrollcmd)
+{
+    switch(*scrollcmd)
+    {
+        case SB_LINEUP:
+               *scrollcmd = SB_LINEUP_W;
+               break;
+        case SB_LINEDOWN:
+               *scrollcmd = SB_LINEDOWN_W;
+               break;
+        case SB_PAGEUP:
+               *scrollcmd = SB_PAGEUP_W;
+               break;
+        case SB_PAGEDOWN:
+               *scrollcmd = SB_PAGEDOWN_W;
+               break;
+        case SB_SLIDERTRACK:
+               *scrollcmd = SB_THUMBTRACK_W;
+               break;
+        case SB_SLIDERPOSITION:
+               *scrollcmd = SB_THUMBPOSITION_W;
+               break;
+        case SB_ENDSCROLL:
+               *scrollcmd = SB_ENDSCROLL_W;
+               break;
+    }
+    *msg = (*msg == WM_HSCROLL) ? WM_HSCROLL_W : WM_VSCROLL_W;
+    return;
 }
 //******************************************************************************
 //******************************************************************************
