@@ -1,4 +1,4 @@
-/* $Id: oslibinput.cpp,v 1.4 2000-01-17 17:18:38 sandervl Exp $ */
+/* $Id: oslibinput.cpp,v 1.5 2001-12-06 10:13:59 sandervl Exp $ */
 
 #define INCL_WIN
 #include <os2wrap.h>
@@ -7,9 +7,9 @@
 #include "oslibinput.h"
 #include <winkeyboard.h>
 
-RECTL desktopRectl = {0};
-ULONG ScreenWidth  = 0;
-ULONG ScreenHeight = 0;
+static RECTL desktopRectl = {0};
+static ULONG ScreenWidth  = 0;
+static ULONG ScreenHeight = 0;
 
 //******************************************************************************
 //******************************************************************************
