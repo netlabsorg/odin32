@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.2201 2002-07-01 16:00:31 sandervl Exp $ */
+/* $Id: changelog,v 1.2202 2002-07-01 19:14:08 sandervl Exp $ */
 
  2002-06-30: Sander van Leeuwen <sandervl@innotek.de>
     - USER32:   o Translate & dispatch unprocessed messages in IsDialogMessageA/W
@@ -9,6 +9,14 @@
     - DDRAW:    o Color fill bugfixes: 
                   - fill up to height, not height - 1
                   - check for single pixel line fills -> avoid heap corruption
+                o Enabled support for 16 & 32 bpp bitmaps in SurfGetDC
+                o SurfReleaseDC; initialize BITMAPINFO structure properly
+                  before calling GetDIBits + fix for 16 bpp GetDIBits
+                  (which always returns data in RGB555 format in our case)
+                o Fill16on16: convert RGB555 color value to RGB565
+                o Mark surface as changed (ChangeUniquenessValue) after
+                  blit & fill
+    - KERNEL32: o Print win32 module name when exception occurs
 
  2002-06-30: Sander van Leeuwen <sandervl@innotek.de>
     - KERNEL32: o WriteFile for standard out: convert line feed without 
