@@ -1,4 +1,4 @@
-/* $Id: winicon.cpp,v 1.38 2002-11-26 14:41:07 sandervl Exp $ */
+/* $Id: winicon.cpp,v 1.39 2003-01-05 16:34:58 sandervl Exp $ */
 /*
  * Win32 Icon Code for OS/2
  *
@@ -1110,11 +1110,20 @@ static HGLOBAL CURSORICON_CreateFromResource( HINSTANCE hInstance, DWORD dwResGr
         dprintf(("\tunable to create an icon bitmap."));
         return 0;
     }
-
     /* Now create the CURSORICONINFO structure */
     GetObjectA( hXorBits, sizeof(bmpXor), &bmpXor );
     GetObjectA( hAndBits, sizeof(bmpAnd), &bmpAnd );
     colortablesize = 0;
+
+    //SvL: Workaround for problem with B&W cursor XOR bitmaps
+    //     End result = inverted PM cursor; not sure what's actually causing
+    //     this...
+    //     So we let GetDIBits convert the mono cursor to 8bpp
+    if(bmpXor.bmBitsPixel == 1)
+    {
+        bmpXor.bmBitsPixel = 8;
+        bmpXor.bmWidthBytes *= 8;
+    }
 
     if(bmpXor.bmBitsPixel <= 8) {
          colortablesize = sizeof(RGBQUAD)*(1<<bmpXor.bmBitsPixel);

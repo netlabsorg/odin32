@@ -1,4 +1,4 @@
-/* $Id: oslibres.cpp,v 1.33 2002-12-18 12:28:05 sandervl Exp $ */
+/* $Id: oslibres.cpp,v 1.34 2003-01-05 16:34:58 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -414,6 +414,15 @@ HANDLE OSLibWinCreatePointer(CURSORICONINFO *pInfo, char *pAndBits, BITMAP_W *pA
         os2rgb                      = &pBmpColor->argbColor[0];
         rgb                         = (RGBQUAD *)(pXorBits);
 
+#if 0
+        if(pXorBmp->bmBitsPixel == 1) {
+            os2rgb->bRed = os2rgb->bBlue = os2rgb->bGreen = 0;
+            os2rgb++;
+            os2rgb->bRed = os2rgb->bBlue = os2rgb->bGreen = 0xff;
+            os2rgb++;
+        }
+        else
+#endif
         if(pXorBmp->bmBitsPixel <= 8) {
             for(i=0;i<(1<<pXorBmp->bmBitsPixel);i++) {
                     os2rgb->bRed   = rgb->rgbRed;
