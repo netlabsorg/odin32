@@ -1,4 +1,4 @@
-/* $Id: msvcrt.cpp,v 1.3 1999-10-04 09:55:58 sandervl Exp $ */
+/* $Id: msvcrt.cpp,v 1.4 1999-10-28 15:25:35 sandervl Exp $ */
 
 /*
  * The Visual C RunTime DLL
@@ -11,20 +11,63 @@
 
 #include <os2win.h>
 #include <wchar.h>
+#include <except.h>
 #include "debugtools.h"
 #include <debugdefs.h>
 
 
 DEFAULT_DEBUG_CHANNEL(msvcrt)
 
+int __app_type;
+int __usermatherr;
+
+typedef struct
+{
+    HANDLE handle;
+    int      pad[7];
+} CRTDLL_FILE, *PCRTDLL_FILE;
+
+extern LPSTR  	_acmdln_dll;     
+extern UINT 	_commode_dll;    
+extern UINT 	_fmode_dll;      
+extern INT	__mb_cur_max_dll;
+extern USHORT	_pctype_dll;
+extern CRTDLL_FILE _iob;
+
+
+
 
 /*********************************************************************
- *                  _XcptFilter    (MSVCRT.21)
+ *                  ??1type_info@@UAE@XZ    (MSVCRT.14)
  *	FIXME - Could not find anything about it
  */
-INT CDECL MSVCRT__XcptFilter(DWORD ret)
+INT CDECL MSVCRT_EXP14(DWORD ret)
 {
-  dprintf(("MSVCRT: _XcptFilter not implemented.\n"));
+  dprintf(("MSVCRT: ??1type_info@@UAE@XZ not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??2@YAPAXI@Z    (MSVCRT.15)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP15(DWORD ret)
+{
+  dprintf(("MSVCRT: ??2@YAPAXI@Z not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  ??3@YAXPAX@Z    (MSVCRT.16)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT_EXP16(DWORD ret)
+{
+  dprintf(("MSVCRT: ??3@YAXPAX@Z not implemented.\n"));
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
 }
@@ -63,6 +106,119 @@ INT CDECL MSVCRT___CxxFrameHandler(DWORD ret)
   dprintf(("MSVCRT: __CxxFrameHandler not implemented.\n"));
   SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
   return FALSE;
+}
+
+
+/*********************************************************************
+ *                  __p__initenv  (MSVCRT.101)
+ */
+char ** CDECL MSVCRT___p__initenv()
+{
+  dprintf(("MSVCRT: __p__initenv not implemented\n"));
+	return &_acmdln_dll;
+}
+
+
+/*********************************************************************
+ *                  __p___mb_cur_max  (MSVCRT.102)
+ */
+int * CDECL MSVCRT___p___mb_cur_max()
+{
+  dprintf(("MSVCRT: __p___mb_cur_max\n"));
+	return &__mb_cur_max_dll;
+}
+
+
+/*********************************************************************
+ *                  __p__acmdln  (MSVCRT.105)
+ */
+char ** CDECL MSVCRT___p__acmdln()
+{
+  dprintf(("MSVCRT: __p__acmdln\n"));
+	return &_acmdln_dll;
+}
+
+/*********************************************************************
+ *                  __p__fmode  (MSVCRT.107)
+ */
+int * CDECL MSVCRT___p__fmode()
+{
+  dprintf(("MSVCRT: __p__fmode\n"));
+	return (int*)&_fmode_dll;
+}
+
+
+/*********************************************************************
+ *                  __p__commode  (MSVCRT.112)
+ */
+int * CDECL MSVCRT___p__commode()
+{
+  dprintf(("MSVCRT: __p__commode\n"));
+	return (int*)&_commode_dll;
+}
+
+
+/*********************************************************************
+ *                  __p__iob  (MSVCRT.113)
+ */
+CRTDLL_FILE * CDECL MSVCRT___p__iob()
+{
+  dprintf(("MSVCRT: __p__iob\n"));
+	return &_iob;
+}
+
+
+/*********************************************************************
+ *                  __p__pctype  (MSVCRT.117)
+ */
+USHORT * CDECL MSVCRT___p__pctype()
+{
+  dprintf(("MSVCRT: __p__pctype\n"));
+	return &_pctype_dll;
+}
+
+
+/*********************************************************************
+ *                  __set_app_type    (MSVCRT.130)
+ */
+int CDECL MSVCRT___set_app_type(int app_type)
+{
+  dprintf(("MSVCRT: __set_app_type\n"));
+	return __app_type = app_type;
+}	
+
+
+/*********************************************************************
+ *                  __setusermatherr    (MSVCRT.132)
+ */
+int CDECL MSVCRT___setusermatherr(int matherr)
+{
+  dprintf(("MSVCRT: __setusermatherr\n"));
+	return __usermatherr = matherr;
+}	
+
+
+/*********************************************************************
+ *                  _adjust_fdiv    (MSVCRT.158)
+ *	FIXME - Could not find anything about it
+ */
+INT CDECL MSVCRT__adjust_fdiv(DWORD ret)
+{
+  dprintf(("MSVCRT: _adjust_fdiv not implemented.\n"));
+  SetLastError(ERROR_CALL_NOT_IMPLEMENTED);
+  return FALSE;
+}
+
+
+/*********************************************************************
+ *                  _except_handler3  (MSVCRT.203)
+ */
+INT CDECL MSVCRT__except_handler3 ( PEXCEPTION_RECORD rec,
+	PEXCEPTION_FRAME frame, PCONTEXT context, 
+	PEXCEPTION_FRAME  *dispatcher)
+{
+        dprintf(("MSVCRT: _except_handler3\n"));
+	return 1;
 }
 
 
