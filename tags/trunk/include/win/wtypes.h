@@ -199,6 +199,15 @@ typedef struct
 #ifndef _SECURITY_DEFINED
 #define _SECURITY_DEFINED
 
+typedef DWORD ACCESS_MASK, *PACCESS_MASK;
+
+typedef struct _GENERIC_MAPPING {
+    ACCESS_MASK GenericRead;
+    ACCESS_MASK GenericWrite;
+    ACCESS_MASK GenericExecute;
+    ACCESS_MASK GenericAll;
+} GENERIC_MAPPING, *PGENERIC_MAPPING;
+
 typedef struct {
     BYTE Value[6];
 } SID_IDENTIFIER_AUTHORITY,*PSID_IDENTIFIER_AUTHORITY;

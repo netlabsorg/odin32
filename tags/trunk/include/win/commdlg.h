@@ -1,4 +1,4 @@
-/* $Id: commdlg.h,v 1.5 2000-02-09 13:40:23 sandervl Exp $ */
+/* $Id: commdlg.h,v 1.6 2000-07-18 18:30:33 sandervl Exp $ */
 /* 
  * COMMDLG - Common Wine Dialog ... :-)
  */
@@ -596,6 +596,13 @@ DECL_WINELIB_TYPE_AW(LPPAGESETUPDLG)
 #define CommDlg_OpenSave_GetSpecW(_hdlg, _psz, _cbmax) \
         (int)SNDMSG(_hdlg, CDM_GETSPEC, (WPARAM)_cbmax, (LPARAM)(LPWSTR)_psz)
 #define     CommDlg_OpenSave_GetSpec WINELIB_NAME_AW(CommDlg_OpenSave_GetSpec)
+
+// lParam = pointer to a string
+// wParam = ID of control to change
+// return = not used
+#define CDM_SETCONTROLTEXT      (CDM_FIRST + 0x0004)
+#define CommDlg_OpenSave_SetControlText(_hdlg, _id, _text) \
+        (void)SNDMSG(_hdlg, CDM_SETCONTROLTEXT, (WPARAM)_id, (LPARAM)(LPSTR)_text)
 
 BOOL16  WINAPI ChooseColor16(LPCHOOSECOLOR16 lpChCol);
 BOOL  WINAPI ChooseColorA(LPCHOOSECOLORA lpChCol);

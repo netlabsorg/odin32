@@ -1,4 +1,4 @@
-/* $Id: windowsx.h,v 1.9 2000-04-09 11:09:11 sandervl Exp $ */
+/* $Id: windowsx.h,v 1.10 2000-07-18 18:30:42 sandervl Exp $ */
 
 /* Copyright (C) 1999 Corel Corporation (Paul Quinn) */
 
@@ -997,6 +997,9 @@ extern "C" {
 
 #define ListBox_SetItemData(hwndCtl, index, data)   ((int)(DWORD)SendMessage((hwndCtl), LB_SETITEMDATA, (WPARAM)(int)(index), (LPARAM)(data)))
 
+#define ListBox_SetSel(hwndCtl, fSelect, index)     ((int)(DWORD)SendMessage((hwndCtl), LB_SETSEL, (WPARAM)(BOOL)(fSelect), (LPARAM)(index)))
+#define ListBox_SelItemRange(hwndCtl, fSelect, first, last)    ((int)(DWORD)SendMessage((hwndCtl), LB_SELITEMRANGE, (WPARAM)(BOOL)(fSelect), MAKELPARAM((first), (last))))
+
 #define ListBox_GetCurSel(hwndCtl)        \
 	((int)(DWORD)SendMessage((hwndCtl), LB_GETCURSEL, 0L, 0L))
 #define ListBox_SetCurSel(hwndCtl, index) \
@@ -1016,6 +1019,9 @@ extern "C" {
 	((int)(DWORD)SendMessage((hwndCtl), LB_FINDSTRING, (WPARAM)(int)(indexStart), (LPARAM)(LPCTSTR)(lpszFind)))
 #define ListBox_FindStringExact(hwndCtl, indexStart, lpszFind) \
 	((int)(DWORD)SendMessage((hwndCtl), LB_FINDSTRINGEXACT, (WPARAM)(int)(indexStart), (LPARAM)(LPCTSTR)(lpszFind)))
+
+#define ListBox_GetSel(hwndCtl, index)              ((int)(DWORD)SendMessage((hwndCtl), LB_GETSEL, (WPARAM)(int)(index), 0L))
+#define ListBox_GetSelCount(hwndCtl)                ((int)(DWORD)SendMessage((hwndCtl), LB_GETSELCOUNT, 0L, 0L))
 
 #define Edit_LineFromChar(hwndCtl, ich)   \
 	((int)(DWORD)SendMessage((hwndCtl), EM_LINEFROMCHAR, (WPARAM)(int)(ich), 0L))
