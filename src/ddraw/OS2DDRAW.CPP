@@ -1,4 +1,4 @@
-/* $Id: OS2DDRAW.CPP,v 1.28 2001-04-04 09:02:14 sandervl Exp $ */
+/* $Id: OS2DDRAW.CPP,v 1.29 2001-06-16 16:12:03 sandervl Exp $ */
 
 /*
  * DX Draw base class implementation
@@ -839,9 +839,6 @@ HRESULT WIN32API DrawEnumDisplayModes( THIS This,
     }
 
   }
-
-
-
   return(DD_OK);
 }
 //******************************************************************************
@@ -850,13 +847,272 @@ HRESULT WIN32API DrawEnumDisplayModes4(THIS This, DWORD dwFlags, LPDDSURFACEDESC
                                        LPVOID lpContext, LPDDENUMMODESCALLBACK2 lpDDEnumModesCallback2)
 {
   int iMode = 0;
-#if 0
-  DDSURFACEDESC DDSurfAct;
+  DDSURFACEDESC2 DDSurfAct;
   BOOL fCallAgain;
-#endif
   OS2IDirectDraw        *me = (OS2IDirectDraw *)This;
 
-  dprintf(("DDRAW: EnumDisplayModes4 NIY\n"));
+  dprintf(("DDRAW: EnumDisplayModes4"));
+
+  // Check for Pointer to callback function
+  if (NULL == lpDDEnumModesCallback2)
+  {
+    dprintf(("DDRAW: EnumDisplayModes4 : Error NO EnumFunction passed in\n"));
+
+    return(DDERR_GENERIC);
+  }
+
+
+  // Setting up the surface
+  // During enum we report resolution and bitdepth, maybe we should
+  // also report back : Caps and Pitch
+  memset(&DDSurfAct,0,sizeof(DDSURFACEDESC2));
+  DDSurfAct.dwSize = sizeof(DDSURFACEDESC2);
+  DDSurfAct.dwFlags = DDSD_HEIGHT | DDSD_WIDTH | DDSD_PIXELFORMAT ;
+  // Only report the bitdepth hope this is ok this way, we must set the BitMask fields
+
+  DDSurfAct.ddpfPixelFormat.dwSize  = sizeof (DDPIXELFORMAT);
+  DDSurfAct.ddpfPixelFormat.dwFlags = DDPF_RGB;
+
+  // Check if we use DIVE or Voodoo
+  if(me->lpVtbl != (IDirectDraw4Vtbl *) &(me->Vtbl3D))
+  {
+    // DIVE modes
+
+    dprintf(("DDRAW: EnumDisplayModes : DIVE modes\n"));
+
+    // Enumerate all modes ?
+    if (NULL==lpDDSurfaceDesc2)
+    {
+      // Check if we shall report 320x200 mode
+
+      dprintf(("DDRAW: EnumDisplayModes : ALL modes\n"));
+
+      if(dwFlags && DDEDM_STANDARDVGAMODES)
+      {
+        dprintf(("DDRAW: EnumDisplayModes : STANDARDVGAMODES\n"));
+
+        DDSurfAct.dwHeight = ModesDive[0].iYRes;
+        DDSurfAct.dwWidth  = ModesDive[0].iXRes;
+        DDSurfAct.ddpfPixelFormat.dwRGBBitCount = ModesDive[0].iBits;
+        DDSurfAct.ddpfPixelFormat.dwFlags |= DDPF_PALETTEINDEXED8 ;
+        if(!lpDDEnumModesCallback2(&DDSurfAct,lpContext))
+        {
+          dprintf(("DDRAW: EnumDisplayModes : Enum done\n"));
+          return (DD_OK);
+        }
+      }
+      // Don't know the flag for Mode X so we skip reporting it
+
+      // Now report all our modes
+      iMode = 2;
+      fCallAgain = TRUE;
+      do
+      {
+        // if the mode fits in the current resolution report it
+        // Change this if we support Fullscreen later !!!
+
+        if(ModesDive[iMode].iXRes < me->dCaps.ulHorizontalResolution)
+        {
+          DDSurfAct.dwHeight = ModesDive[iMode].iYRes;
+          DDSurfAct.dwWidth  = ModesDive[iMode].iXRes;
+          DDSurfAct.ddpfPixelFormat.dwRGBBitCount = ModesDive[iMode].iBits;
+          switch(ModesDive[iMode].iBits)
+          {
+            case 8:
+              DDSurfAct.ddpfPixelFormat.dwFlags |= DDPF_PALETTEINDEXED8;
+              break;
+            case 16:
+              // VESA uses 565 encoding in 16 bit modes
+              DDSurfAct.ddpfPixelFormat.dwFlags &= ~DDPF_PALETTEINDEXED8;
+              DDSurfAct.ddpfPixelFormat.dwRBitMask = 0x0000F800;
+              DDSurfAct.ddpfPixelFormat.dwGBitMask = 0x000007E0;
+              DDSurfAct.ddpfPixelFormat.dwBBitMask = 0x0000001F;
+              break;
+            case 24:
+              // VESA uses per default RGB4
+              DDSurfAct.ddpfPixelFormat.dwFlags &= ~DDPF_PALETTEINDEXED8;
+              DDSurfAct.ddpfPixelFormat.dwRBitMask = 0x00FF0000;
+              DDSurfAct.ddpfPixelFormat.dwGBitMask = 0x0000FF00;
+              DDSurfAct.ddpfPixelFormat.dwBBitMask = 0x000000FF;
+              break;
+            default:
+              break;
+          }
+          dprintf( ("EnumDisplayModes : Enum Mode %dx%d @ %d\n",
+                    DDSurfAct.dwHeight,
+                    DDSurfAct.dwWidth,
+                    DDSurfAct.ddpfPixelFormat.dwRGBBitCount));
+          fCallAgain = lpDDEnumModesCallback2(&DDSurfAct,lpContext);
+          dprintf( ("EnumDisplayModes : Callback returned with %d\n",
+                    fCallAgain));
+        }
+        iMode++;
+      }
+      while( (iMode < NUM_MODES_DIVE) &&
+             (ModesDive[iMode].iBits <= me->dCaps.ulDepth) &&
+             (TRUE==fCallAgain) );
+    }
+    else
+    {
+      // No, so filter modes with lpDDSurfaceDesc2
+
+      // Return Error if the program want to use other than the 3 supported values
+      // for filtering
+
+      if (lpDDSurfaceDesc2->dwFlags & !(DDSD_WIDTH|DDSD_HEIGHT|DDSD_PIXELFORMAT))
+        return(DDERR_INVALIDPARAMS);
+
+      iMode = 0;
+      if( (dwFlags && DDEDM_STANDARDVGAMODES) &&
+         (
+          (((lpDDSurfaceDesc2->dwFlags & DDSD_WIDTH)&&
+            (ModesDive[iMode].iXRes==lpDDSurfaceDesc2->dwWidth)
+           )||(!(lpDDSurfaceDesc2->dwFlags & DDSD_WIDTH)))&&
+          (((lpDDSurfaceDesc2->dwFlags & DDSD_HEIGHT)&&
+            (ModesDive[iMode].iYRes==lpDDSurfaceDesc2->dwHeight))||
+           (!(lpDDSurfaceDesc2->dwFlags & DDSD_HEIGHT)))&&
+          (((lpDDSurfaceDesc2->dwFlags & DDSD_PIXELFORMAT) &&
+            (ModesDive[iMode].iBits==lpDDSurfaceDesc2->ddpfPixelFormat.dwRGBBitCount))||
+           (!(lpDDSurfaceDesc2->dwFlags & DDSD_PIXELFORMAT)))
+         )
+        )
+      {
+        DDSurfAct.dwHeight = ModesDive[0].iYRes;
+        DDSurfAct.dwWidth  = ModesDive[0].iXRes;
+        DDSurfAct.ddpfPixelFormat.dwRGBBitCount = ModesDive[0].iBits;
+        DDSurfAct.ddpfPixelFormat.dwFlags |= DDPF_PALETTEINDEXED8;
+        if(!lpDDEnumModesCallback2(&DDSurfAct,lpContext))
+        {
+          return (DD_OK);
+        }
+      }
+      // Don't know the flag for Mode X so we skip reporting it
+
+      // Now report all our modes
+      iMode = 2;
+      fCallAgain = TRUE;
+      do
+      {
+        // if the mode fits in the current resolution and the filter applies report it
+        // Change this if we support Fullscreen later !!!
+        if( (ModesDive[iMode].iXRes < me->dCaps.ulHorizontalResolution)&&
+           (
+            (((lpDDSurfaceDesc2->dwFlags & DDSD_WIDTH)&&
+              (ModesDive[iMode].iXRes==lpDDSurfaceDesc2->dwWidth))||
+             (!(lpDDSurfaceDesc2->dwFlags & DDSD_WIDTH)))&&
+            (((lpDDSurfaceDesc2->dwFlags & DDSD_HEIGHT)&&
+              (ModesDive[iMode].iYRes==lpDDSurfaceDesc2->dwHeight))||
+             (!(lpDDSurfaceDesc2->dwFlags & DDSD_HEIGHT)))&&
+            (((lpDDSurfaceDesc2->dwFlags & DDSD_PIXELFORMAT) &&
+              (ModesDive[iMode].iBits==lpDDSurfaceDesc2->ddpfPixelFormat.dwRGBBitCount))||
+             (!(lpDDSurfaceDesc2->dwFlags & DDSD_PIXELFORMAT)))
+           )
+          )
+        {
+          DDSurfAct.dwHeight = ModesDive[iMode].iYRes;
+          DDSurfAct.dwWidth  = ModesDive[iMode].iXRes;
+          DDSurfAct.ddpfPixelFormat.dwRGBBitCount = ModesDive[iMode].iBits;
+          switch(ModesDive[iMode].iBits)
+          {
+            case 8:
+              DDSurfAct.ddpfPixelFormat.dwFlags |= DDPF_PALETTEINDEXED8;
+              break;
+            case 16:
+              // VESA uses 565 encoding in 16 bit modes
+              DDSurfAct.ddpfPixelFormat.dwFlags &= ~DDPF_PALETTEINDEXED8;
+              DDSurfAct.ddpfPixelFormat.dwRBitMask = 0x0000F800;
+              DDSurfAct.ddpfPixelFormat.dwGBitMask = 0x000007E0;
+              DDSurfAct.ddpfPixelFormat.dwBBitMask = 0x0000001F;
+              break;
+            case 24:
+              // VESA uses per default RGB4
+              DDSurfAct.ddpfPixelFormat.dwFlags &= ~DDPF_PALETTEINDEXED8;
+              DDSurfAct.ddpfPixelFormat.dwRBitMask = 0x00FF0000;
+              DDSurfAct.ddpfPixelFormat.dwGBitMask = 0x0000FF00;
+              DDSurfAct.ddpfPixelFormat.dwBBitMask = 0x000000FF;
+              break;
+            default:
+              break;
+          }
+
+          fCallAgain = lpDDEnumModesCallback2(&DDSurfAct,lpContext);
+        }
+        iMode++;
+      }
+      while((ModesDive[iMode].iBits <= me->dCaps.ulDepth) &&
+            (iMode < NUM_MODES_DIVE) && (TRUE==fCallAgain));
+
+    }
+  }
+  else
+  {
+
+    // VOODOO modes
+
+    // Enumerate all modes ?
+    if (NULL==lpDDSurfaceDesc2)
+    {
+
+      // report all our modes
+      iMode = 0;
+      fCallAgain = TRUE;
+      do
+      {
+        DDSurfAct.dwHeight = ModesVoodoo[iMode].iYRes;
+        DDSurfAct.dwWidth  = ModesVoodoo[iMode].iXRes;
+        DDSurfAct.ddpfPixelFormat.dwRGBBitCount = ModesVoodoo[iMode].iBits;
+
+        fCallAgain = lpDDEnumModesCallback2(&DDSurfAct,lpContext);
+        iMode++;
+      }
+      while((iMode < NUM_MODES_VOODOO) && (TRUE==fCallAgain));
+    }
+    else
+    {
+      // No, so filter modes with lpDDSurfaceDesc2
+
+      // Return Error if the program want to use other than the 3 supported values
+      // for filtering
+
+      if (lpDDSurfaceDesc2->dwFlags & !(DDSD_WIDTH|DDSD_HEIGHT|DDSD_PIXELFORMAT))
+      {
+        return(DDERR_INVALIDPARAMS);
+      }
+
+      iMode = 2;
+      fCallAgain = TRUE;
+      // All reported mode are 16bit
+      DDSurfAct.ddpfPixelFormat.dwRBitMask = 0x0000F800;
+      DDSurfAct.ddpfPixelFormat.dwGBitMask = 0x000007E0;
+      DDSurfAct.ddpfPixelFormat.dwBBitMask = 0x0000001F;
+      do
+      {
+        // if the mode fits the filter applies report it
+        if(
+            (((lpDDSurfaceDesc2->dwFlags & DDSD_WIDTH)&&
+              (ModesVoodoo[iMode].iXRes==lpDDSurfaceDesc2->dwWidth))||
+             (!(lpDDSurfaceDesc2->dwFlags & DDSD_WIDTH)))&&
+            (((lpDDSurfaceDesc2->dwFlags & DDSD_HEIGHT)&&
+              (ModesVoodoo[iMode].iYRes==lpDDSurfaceDesc2->dwHeight))||
+             (!(lpDDSurfaceDesc2->dwFlags & DDSD_HEIGHT)))&&
+            (((lpDDSurfaceDesc2->dwFlags & DDSD_PIXELFORMAT) &&
+              (ModesVoodoo[iMode].iBits==lpDDSurfaceDesc2->ddpfPixelFormat.dwRGBBitCount))||
+             (!(lpDDSurfaceDesc2->dwFlags & DDSD_PIXELFORMAT)))
+          )
+        {
+          DDSurfAct.dwHeight = ModesVoodoo[iMode].iYRes;
+          DDSurfAct.dwWidth  = ModesVoodoo[iMode].iXRes;
+          DDSurfAct.ddpfPixelFormat.dwRGBBitCount = ModesVoodoo[iMode].iBits;
+
+          fCallAgain = lpDDEnumModesCallback2(&DDSurfAct,lpContext);
+        }
+        iMode++;
+      }
+      while((iMode < NUM_MODES_VOODOO) && (TRUE==fCallAgain));
+
+    }
+
+  }
   return(DD_OK);
 }
 
