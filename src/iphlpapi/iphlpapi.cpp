@@ -1,4 +1,4 @@
-/* $Id: iphlpapi.cpp,v 1.6 2002-02-20 11:57:31 sandervl Exp $ */
+/* $Id: iphlpapi.cpp,v 1.7 2002-02-21 17:01:57 sandervl Exp $ */
 /*
  *	IPHLPAPI library
  *
@@ -302,22 +302,6 @@ static void i_copyIP_ADDRESS_STRING(PBYTE *ppTarget, PIP_ADDR_STRING pstruct,PIP
   }
 }
 
-static DWORD i_sizeOfFIXED_INFO(PFIXED_INFO pinfo)
-{
- PIP_ADDR_STRING pias;
-
- DWORD dwRequired = sizeof( FIXED_INFO );
- 
- // follow the IP_ADDR_STRING lists
- pias = &pinfo->DnsServerList;
- while( pias )
- {
-   dwRequired += sizeof( IP_ADDR_STRING );
-   pias = pias->Next;
- }
- return dwRequired;
-}
-
 static DWORD i_sizeOfIP_ADAPTER_INFO(PIP_ADAPTER_INFO piai)
 {
   PIP_ADDR_STRING pias;
@@ -447,68 +431,47 @@ ODINFUNCTION2(DWORD,       GetNetworkParams,
               PULONG,      pOutBufLen)
 {
   struct sockaddr_in * sin;
-  FIXED_INFO fi; 
+  PFIXED_INFO fi = pFixedInfo; 
   DWORD memNeeded;
   PIP_ADDR_STRING dnslist = NULL, pdnslist = NULL;
-
-  // This is dynamically updated info
-  res_init();
-  memset(&fi,0,sizeof(FIXED_INFO));
+  PBYTE pTarget        = (PBYTE)pFixedInfo;
 
   dprintf(("GetNetworkParams pFixedInfo:%x pOutBufLen:%d",pFixedInfo,*pOutBufLen));
+  res_init();
 
-  gethostname(fi.HostName,128);
-  strcpy(fi.DomainName,_res.defdname);
+  // Check how much mem we will need 
+  memNeeded = sizeof(FIXED_INFO)+_res.nscount*sizeof(IP_ADDR_STRING);
 
-  // For VPC DNS Servers are pretty much enough for now
-  fi.CurrentDnsServer = &fi.DnsServerList;   
-  dnslist = &fi.DnsServerList;
-  pdnslist = dnslist;
-
-  for (int i = 0; i<_res.nscount; i++)
-  {
-      if (!dnslist)    
-      {
-          dnslist = (PIP_ADDR_STRING) malloc(sizeof(IP_ADDR_STRING));
-          memset(dnslist,0,sizeof(IP_ADDR_STRING));
-          pdnslist->Next = dnslist;
-      }
-      sin = (struct sockaddr_in *)&_res.nsaddr_list[i];               
-      strcpy(dnslist->IpAddress.String,inet_ntoa(sin->sin_addr));
-      dnslist->Context = 0;
-      dprintf(("IPHLPAPI: GetNetworkParams Adding DNS Server %s",inet_ntoa(sin->sin_addr)));
-      pdnslist = dnslist;
-      dnslist = dnslist->Next;
-  }	
-  fi.EnableDns = 1;
-  // NodeType (?)
-  memNeeded = i_sizeOfFIXED_INFO(&fi);
-  LONG buflen = *pOutBufLen;
-  PBYTE pTarget        = (PBYTE)pFixedInfo;
-  if (((LONG)(buflen - memNeeded)) > 0)
-  {
-    // copy over the whole structure hierarchy
-    memcpy(pTarget, &fi, sizeof( FIXED_INFO ));
-    pTarget += sizeof( FIXED_INFO );
-    i_copyIP_ADDRESS_STRING(&pTarget, &pFixedInfo->DnsServerList,&fi.DnsServerList);
-  }
-  else
+  if (((LONG)(*pOutBufLen - memNeeded)) < 0)
   {
    // return overall size of required buffer
    *pOutBufLen = memNeeded;
    return ERROR_BUFFER_OVERFLOW;
   }
+  
+  // This is dynamically updated info
+  memset(pFixedInfo,0,memNeeded);
+  
+  gethostname(fi->HostName,128);
+  strcpy(fi->DomainName,_res.defdname);
 
- //cleanup
- pdnslist = fi.DnsServerList.Next;
- while( pdnslist )
- {
-   dnslist = pdnslist->Next;
-   free(pdnslist);
-   pdnslist = dnslist;
- } 
-
- return ERROR_SUCCESS;
+  // For VPC DNS Servers are pretty much enough for now
+  fi->CurrentDnsServer = &fi->DnsServerList;   
+  pTarget += sizeof( FIXED_INFO );
+  dnslist = &fi->DnsServerList;
+   
+  for (int i = 0; i<_res.nscount; i++)
+  {
+      if (pdnslist) pdnslist->Next = dnslist;
+      sin = (struct sockaddr_in *)&_res.nsaddr_list[i];               
+      strcpy(dnslist->IpAddress.String,inet_ntoa(sin->sin_addr));
+      dprintf(("IPHLPAPI: GetNetworkParams Adding DNS Server %s",inet_ntoa(sin->sin_addr)));
+      pdnslist = dnslist;
+      if ( pdnslist == &fi->DnsServerList) dnslist = (PIP_ADDR_STRING)(pTarget + sizeof(IP_ADDR_STRING));
+      else dnslist += sizeof(IP_ADDR_STRING);
+  }	
+  fi->EnableDns = 1;
+  return ERROR_SUCCESS;
 }
 //******************************************************************************
 //******************************************************************************
