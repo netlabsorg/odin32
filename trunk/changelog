@@ -1,18 +1,21 @@
- /* $Id: changelog,v 1.937 2000-05-13 07:46:59 sandervl Exp $ */
+ /* $Id: changelog,v 1.938 2000-05-13 16:00:13 bird Exp $ */
+
+ 2000-05-13: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - tools\common: Corrected makefiles.
 
  2000-05-12: Edgar Buerkle <Edgar.Buerkle@gmx.net>
     - KERNEL32: Print name of image referenced by EIP (stackdump)
 
  2000-05-12: Sander van Leeuwen <sandervl@xs4all.nl>
-    - USER32:   
+    - USER32:
                 Fixed bug in HOOK_RemoveHook (wrong call for enter semaphore method)
                 SetSysColors bugfix (called itself for some reason)
                 Fixed wrong dispatch of messages under certain conditions
-    - COMDLG32: 
+    - COMDLG32:
                 Fixed initial directory for GetOpen/SaveFileNameW
                 If initial dir string == "" -> use current dir (not only
                 when ptr equals NULL) (verified this behaviour in NT 4)
-    - GDI32:    
+    - GDI32:
                 Do manual image flip in dib section blit (fixes wrong position
                 of Palm Emulator bitmap)
                 Might also fix reversed video in RealPlayer 7 (Warp 4 FP13/WSeB FP1)
