@@ -1,4 +1,4 @@
-/* $Id: testcase.h,v 1.1 2001-09-17 01:41:52 bird Exp $
+/* $Id: testcase.h,v 1.2 2001-09-26 04:01:56 bird Exp $
  *
  * Definitions and declarations for testcase moduls.
  *
@@ -145,6 +145,11 @@ ULONG LDRCALL   fakeldrCheckInternalName(PMTE pMTE);
 ULONG LDRCALL   fakeldrTransPath(PSZ pszFilename);
 ULONG LDRCALL   fakeldrGetFileName(PSZ pszFilename, PCHAR *ppchName, PCHAR *ppchExt);
 VOID  LDRCALL   fakeldrUCaseString(PCHAR pachString, unsigned cchString);
+PMTE LDRCALL    fakeldrValidateMteHandle(HMTE hMTE);
+ULONG LDRCALL   fakeldrGetOrdNum(PMTE pMTE, PSZ pszExportName, PUSHORT pusOrdinal);
+ULONG LDRCALL   fakeldrWasLoadModuled(HMTE hmte, PPTDA pptda, PULONG pcUsage);
+ULONG LDRCALL   fakeLDRGetProcAddr(HMTE hmte, ULONG ulOrdinal, PCSZ pszName, PULONG pulAddress, BOOL fFlat, PULONG pulProcType);
+void KRNLCALL   fakeLDRFreeTask(PPTDA pPTDA);
 
 ULONG KRNLCALL  fakeKSEMRequestMutex(HKSEMMTX hkmtx, ULONG ulTimeout);
 ULONG KRNLCALL  fakeKSEMReleaseMutex(HKSEMMTX hkmtx);
@@ -166,11 +171,15 @@ ULONG KRNLCALL  fakeTKWakeup(ULONG ulSleepId, ULONG flWakeupType, PULONG cWakedU
 ULONG KRNLCALL  fakeTKWakeThread(PTCB pTCB);
 PTCB  KRNLCALL  fakeTKQueryWakeup(ULONG ulSleepId, ULONG flWakeupType);
 
-PMTE LDRCALL    fakeldrValidateMteHandle(HMTE hMTE);
 PSZ  SECCALL    fakeSecPathFromSFN(SFN hFile);
 ULONG KRNLCALL  fakePGPhysAvail(void);
 ULONG KRNLCALL  fakePGPhysPresent(void);
 VOID  KRNLCALL  fakevmRecalcShrBound(ULONG flFlags, PULONG pulSentinelAddress);
+
+PVOID KRNLCALL  fakeSELVirtToLin(ULONG ulOffset, USHORT usSel);
+PVOID KRNLCALL  fakeSELConvertToLinear(USHORT usSel, PPTDA pPTDA);
+USHORT KRNLCALL fakeSELConvertToSelector(PVOID pv, ULONG ulRPL, HPTDA hPTDA);
+ULONG  KRNLCALL fakeSELAllocGDT(PUSHORT pusSel);
 
 void _Optlink   fakeg_tkExecPgm(void);      /* Not callable! (fakea.asm) */
 void _Optlink   faketkStartProcess(void);   /* Not callable! (fakea.asm) */
