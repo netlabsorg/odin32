@@ -49,9 +49,9 @@
 #include "compobj_private.h"
 #include "ifs.h"
 
-#include "debugtools.h"
+#include "wine/debug.h"
 
-DEFAULT_DEBUG_CHANNEL(ole);
+WINE_DEFAULT_DEBUG_CHANNEL(ole);
 
 /****************************************************************************
  *  COM External Lock structures and methods declaration
@@ -398,7 +398,6 @@ HRESULT WINAPI CoGetMalloc(
     *lpMalloc = currentMalloc32;
     return S_OK;
 }
-
 #ifndef __WIN32OS2__
 /***********************************************************************
  *           CoCreateStandardMalloc [COMPOBJ.71]
@@ -412,7 +411,6 @@ HRESULT WINAPI CoCreateStandardMalloc16(DWORD dwMemContext,
     return S_OK;
 }
 #endif
-
 /******************************************************************************
  *		CoDisconnectObject	[COMPOBJ.15]
  *		CoDisconnectObject	[OLE32.8]
@@ -611,7 +609,6 @@ HRESULT WINE_StringFromCLSID(
 
   return S_OK;
 }
-
 #ifndef __WIN32OS2__
 /******************************************************************************
  *		StringFromCLSID	[COMPOBJ.19]
@@ -655,7 +652,6 @@ HRESULT WINAPI StringFromCLSID16(
     return WINE_StringFromCLSID(id,MapSL((SEGPTR)*idstr));
 }
 #endif
-
 /******************************************************************************
  *		StringFromCLSID	[OLE32.151]
  *		StringFromIID   [OLE32.153]
@@ -931,7 +927,6 @@ HRESULT WINAPI ReadClassStm(IStream *pStm,CLSID *pclsid)
     else
         return S_OK;
 }
-
 #ifndef __WIN32OS2__
 /* FIXME: this function is not declared in the WINELIB headers. But where should it go ? */
 /***********************************************************************
@@ -954,7 +949,7 @@ HRESULT WINAPI SetETask16(HTASK16 hTask, LPVOID p) {
 	hETask = hTask;
 	return 0;
 }
-#endif
+
 /* FIXME: this function is not declared in the WINELIB headers. But where should it go ? */
 /***********************************************************************
  *           CALLOBJECTINWOW (COMPOBJ.201)
@@ -1012,7 +1007,7 @@ BOOL16 WINAPI CoDosDateTimeToFileTime16(WORD wDosDate, WORD wDosTime, FILETIME *
 {
     return DosDateTimeToFileTime(wDosDate, wDosTime, ft);
 }
-
+#endif
 /***
  * COM_GetRegisteredClassObject
  *
@@ -1299,47 +1294,11 @@ end:
   return hr;
 }
 
-static HRESULT WINAPI Remote_CoGetClassObject(
-    REFCLSID rclsid, DWORD dwClsContext, COSERVERINFO *pServerInfo,
-    REFIID iid, LPVOID *ppv
-) {
-  HKEY		key;
-  char 		buf[200];
-  HRESULT	hres = E_UNEXPECTED;
-  char		xclsid[80];
-  WCHAR 	dllName[MAX_PATH+1];
-  DWORD 	dllNameLen = sizeof(dllName);
-  STARTUPINFOW	sinfo;
-  PROCESS_INFORMATION	pinfo;
-
-  WINE_StringFromCLSID((LPCLSID)rclsid,xclsid);
-
-  sprintf(buf,"CLSID\\%s\\LocalServer32",xclsid);
-  hres = RegOpenKeyExA(HKEY_CLASSES_ROOT, buf, 0, KEY_READ, &key);
-
-  if (hres != ERROR_SUCCESS)
-      return REGDB_E_CLASSNOTREG;
-
-  memset(dllName,0,sizeof(dllName));
-  hres= RegQueryValueExW(key,NULL,NULL,NULL,(LPBYTE)dllName,&dllNameLen);
-  if (hres)
-	  return REGDB_E_CLASSNOTREG; /* FIXME: check retval */
-  RegCloseKey(key);
-
-  TRACE("found LocalServer32 exe %s\n", debugstr_w(dllName));
-
-  memset(&sinfo,0,sizeof(sinfo));
-  sinfo.cb = sizeof(sinfo);
-  if (!CreateProcessW(NULL,dllName,NULL,NULL,FALSE,0,NULL,NULL,&sinfo,&pinfo))
-      return E_FAIL;
-  return create_marshalled_proxy(rclsid,iid,ppv);
-}
-
 /***********************************************************************
  *           CoGetClassObject [COMPOBJ.7]
  *           CoGetClassObject [OLE32.16]
  *
- * FIXME.  If request allows of several options and there is a failure 
+ * FIXME.  If request allows of several options and there is a failure
  *         with one (other than not being registered) do we try the
  *         others or return failure?  (E.g. inprocess is registered but
  *         the DLL is not found but the server version works)
@@ -1362,8 +1321,6 @@ HRESULT WINAPI CoGetClassObject(
 			     REFIID iid, LPVOID *ppv);
 #endif
     DllGetClassObjectFunc DllGetClassObject;
-    HKEY key;
-    char buf[200];
 
     WINE_StringFromCLSID((LPCLSID)rclsid,xclsid);
 
@@ -1396,18 +1353,6 @@ HRESULT WINAPI CoGetClassObject(
       IUnknown_Release(regClassObject);
 
       return hres;
-    }
-
-    if (((CLSCTX_LOCAL_SERVER) & dwClsContext)
-        && !((CLSCTX_INPROC_SERVER|CLSCTX_INPROC_HANDLER) & dwClsContext))
-	return Remote_CoGetClassObject(rclsid,dwClsContext,pServerInfo,iid,ppv);
-
-    /* remote servers not supported yet */
-    if (     ((CLSCTX_REMOTE_SERVER) & dwClsContext)
-        && !((CLSCTX_INPROC_SERVER|CLSCTX_INPROC_HANDLER) & dwClsContext)
-    ){
-        FIXME("CLSCTX_REMOTE_SERVER not supported!\n");
-	return E_NOINTERFACE;
     }
 
     if ((CLSCTX_INPROC_SERVER|CLSCTX_INPROC_HANDLER) & dwClsContext) {
@@ -1443,33 +1388,19 @@ HRESULT WINAPI CoGetClassObject(
 	    return DllGetClassObject(rclsid, iid, ppv);
         }
     }
-    
 
-    /* Finally try out of process */
-    /* out of process and remote servers not supported yet */
+
+    /* Next try out of process */
     if (CLSCTX_LOCAL_SERVER & dwClsContext)
     {
-	memset(ProviderName,0,sizeof(ProviderName));
-	sprintf(buf,"CLSID\\%s\\LocalServer32",xclsid);
-        if (((hres = RegOpenKeyExA(HKEY_CLASSES_ROOT, buf, 0, KEY_READ, &key)) != ERROR_SUCCESS) ||
-            ((hres = RegQueryValueExW(key,NULL,NULL,NULL,(LPBYTE)ProviderName,&ProviderNameLen)),
-             RegCloseKey (key),
-             hres != ERROR_SUCCESS))
-        {
-            hres = REGDB_E_CLASSNOTREG;
-        }
-        else
-        {
-            /* CO_E_APPNOTFOUND if no exe */
-            FIXME("CLSCTX_LOCAL_SERVER %s registered but not yet supported!\n",debugstr_w(ProviderName));
-            hres = E_ACCESSDENIED;
-	}
+        return create_marshalled_proxy(rclsid,iid,ppv);
     }
 
+    /* Finally try remote */
     if (CLSCTX_REMOTE_SERVER & dwClsContext)
     {
         FIXME ("CLSCTX_REMOTE_SERVER not supported\n");
-        hres = E_ACCESSDENIED;
+        hres = E_NOINTERFACE;
     }
 
     return hres;
@@ -1575,7 +1506,6 @@ HRESULT WINAPI GetClassFile(LPCOLESTR filePathName,CLSID *pclsid)
 
     return MK_E_INVALIDEXTENSION;
 }
-#ifndef __WIN32OS2__
 /******************************************************************************
  *		CoRegisterMessageFilter	[COMPOBJ.27]
  */
@@ -1586,7 +1516,7 @@ HRESULT WINAPI CoRegisterMessageFilter16(
 	FIXME("(%p,%p),stub!\n",lpMessageFilter,lplpMessageFilter);
 	return 0;
 }
-#endif
+
 /***********************************************************************
  *           CoCreateInstance [COMPOBJ.13]
  *           CoCreateInstance [OLE32.7]

@@ -478,7 +478,12 @@ CoMarshalInterface( IStream *pStm, REFIID riid, IUnknown *pUnk,
   }
   hres = IMarshal_MarshalInterface(pMarshal,pStm,riid,pUnk,dwDestContext,pvDestContext,mshlflags);
   if (hres) {
-    FIXME("Failed to Marshal the interface, %lx?\n",hres);
+    if (IsEqualGUID(riid,&IID_IClassFactory)) {
+	MESSAGE("\nERROR: You need to merge the 'winedefault.reg' file into your\n");
+	MESSAGE("       Wine registry by running: `regedit winedefault.reg'\n\n");
+    } else {
+	FIXME("Failed to Marshal the interface, %lx?\n",hres);
+    }
     goto release_marshal;
   }
 release_marshal:
@@ -540,8 +545,8 @@ release_marshal:
 /***********************************************************************
  *		CoMarshalInterThreadInterfaceInStream	[OLE32.33]
  *
- * Marshal interfaces across threads. We don't have a thread distinction, 
- * meaning most interfaces just work across different threads, the RPC 
+ * Marshal interfaces across threads. We don't have a thread distinction,
+ * meaning most interfaces just work across different threads, the RPC
  * handles it.
  */
 HRESULT WINAPI
@@ -600,7 +605,7 @@ SMCF_CreateInstance(
   if (IsEqualIID(riid,&IID_IMarshal)) {
       StdMarshalImpl	*dm;
       dm=(StdMarshalImpl*)HeapAlloc(GetProcessHeap(),0,sizeof(StdMarshalImpl));
-      if (!dm) 
+      if (!dm)
 	  return E_FAIL;
       dm->lpvtbl	= &stdmvtbl;
       dm->ref		= 1;
