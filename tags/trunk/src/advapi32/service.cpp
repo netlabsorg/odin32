@@ -1,4 +1,4 @@
-/* $Id: service.cpp,v 1.1 1999-12-19 19:53:37 sandervl Exp $ */
+/* $Id: service.cpp,v 1.2 1999-12-19 22:05:40 sandervl Exp $ */
 
 /*
  * Win32 advanced API functions for OS/2
@@ -8,6 +8,8 @@
  * Copyright 1998 Sander van Leeuwen
  * Copyright 1998 Patrick Haller
  *
+ *
+ * NOTE: Uses registry key for service as handle
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -22,12 +24,26 @@
 #include "advapi32.h"
 #include "unicode.h"
 #include "winreg.h"
+#include <heapstring.h>
 
 ODINDEBUGCHANNEL(ADVAPI32-SERVICE)
 
 #define SC_HANDLE HANDLE
 #define SC_LOCK DWORD
 
+//*****************************************************************************
+//TODO: Faster way to checking this
+//*****************************************************************************
+BOOL CheckServiceHandle(SC_HANDLE hService) 
+{
+ HKEY keyThisService;
+
+  if(RegOpenKeyA((HKEY)hService, NULL, &keyThisService) != 0) {
+	return FALSE;
+  }
+  RegCloseKey(keyThisService);
+  return TRUE;
+}
 /*****************************************************************************
  * Name      : OpenSCManagerA
  * Purpose   : The OpenSCManager function establishes a connection to the
@@ -41,19 +57,27 @@ ODINDEBUGCHANNEL(ADVAPI32-SERVICE)
  * Remark    :
  * Status    : UNTESTED STUB
  *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ * Author    : SvL
  *****************************************************************************/
 
 SC_HANDLE WIN32API OpenSCManagerA(LPCSTR lpszMachineName,
                                   LPCSTR lpszDatabaseName,
-                                  DWORD   fdwDesiredAccess)
+                                  DWORD  fdwDesiredAccess)
 {
-  dprintf(("ADVAPI32: OpenSCManagerA(%s,%s,%x) not implemented.\n",
+  dprintf(("ADVAPI32: OpenSCManagerA(%s,%s,%x) not correctly implemented.\n",
            lpszMachineName,
            lpszDatabaseName,
            fdwDesiredAccess));
 
-  return (NULL); /* signal failure */
+  if(!lpszMachineName && !lpszDatabaseName) {
+	HKEY keyServices;
+  	if(RegCreateKeyA(HKEY_LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Services", &keyServices) != 0) {
+		SetLastError(ERROR_INTERNAL_ERROR);
+		return 0;
+	}
+	return keyServices;
+  }
+  return 0;
 }
 
 
@@ -70,19 +94,34 @@ SC_HANDLE WIN32API OpenSCManagerA(LPCSTR lpszMachineName,
  * Remark    :
  * Status    : UNTESTED STUB
  *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ * Author    : SvL
  *****************************************************************************/
 
 SC_HANDLE WIN32API OpenSCManagerW(LPCWSTR lpszMachineName,
-                                     LPCWSTR lpszDatabaseName,
-                                     DWORD   fdwDesiredAccess)
+                                  LPCWSTR lpszDatabaseName,
+                                  DWORD   fdwDesiredAccess)
 {
-  dprintf(("ADVAPI32: OpenSCManagerW(%x,%x,%x) not implemented.\n",
+ LPSTR lpszDataBaseNameA = NULL, lpszMachineNameA = NULL;
+ SC_HANDLE hService;
+
+  dprintf(("ADVAPI32: OpenSCManagerW(%x,%x,%x) not correctly implemented.\n",
            lpszMachineName,
            lpszDatabaseName,
            fdwDesiredAccess));
 
-  return (NULL); /* signal failure */
+  if(lpszMachineName) 
+	lpszMachineNameA = HEAP_strdupWtoA(GetProcessHeap(), 0, lpszMachineName);
+  if(lpszDatabaseName)
+	lpszDataBaseNameA = HEAP_strdupWtoA(GetProcessHeap(), 0, lpszDatabaseName);
+
+  hService = OpenSCManagerA(lpszMachineNameA, lpszDataBaseNameA, fdwDesiredAccess);
+
+  if(lpszMachineNameA) 
+	HeapFree(GetProcessHeap(), 0, lpszMachineNameA);
+  if(lpszDataBaseNameA)
+	HeapFree(GetProcessHeap(), 0, lpszDataBaseNameA);
+
+  return hService;
 }
 
 
@@ -97,19 +136,33 @@ SC_HANDLE WIN32API OpenSCManagerW(LPCWSTR lpszMachineName,
  * Remark    :
  * Status    : UNTESTED STUB
  *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ * Author    : SvL
  *****************************************************************************/
 
 SC_HANDLE WIN32API OpenServiceA(SC_HANDLE schSCManager,
-                                   LPCSTR   lpszServiceName,
-                                   DWORD     fdwDesiredAccess)
+                                LPCSTR   lpszServiceName,
+                                DWORD     fdwDesiredAccess)
 {
-  dprintf(("ADVAPI32: OpenServiceA(%08xh,%s,%08xh) not implemented.\n",
+  dprintf(("ADVAPI32: OpenServiceA(%08xh,%s,%08xh) not correctly implemented.\n",
            schSCManager,
            lpszServiceName,
            fdwDesiredAccess));
 
-  return (NULL); /* signal failure */
+  if(CheckServiceHandle(schSCManager) == FALSE) {
+	SetLastError(ERROR_INVALID_PARAMETER);
+	return FALSE;
+  }
+  
+  if(lpszServiceName == NULL) {
+	SetLastError(ERROR_INVALID_PARAMETER);
+	return 0;
+  }
+  HKEY keyThisService;
+  if(RegOpenKeyA((HKEY)schSCManager, lpszServiceName, &keyThisService) != 0) {
+	SetLastError(ERROR_SERVICE_DOES_NOT_EXIST);
+	return 0;
+  }
+  return keyThisService;
 }
 
 
@@ -124,19 +177,29 @@ SC_HANDLE WIN32API OpenServiceA(SC_HANDLE schSCManager,
  * Remark    :
  * Status    : UNTESTED STUB
  *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ * Author    : SvL
  *****************************************************************************/
 
 SC_HANDLE WIN32API OpenServiceW(SC_HANDLE schSCManager,
-                                   LPCWSTR   lpszServiceName,
-                                   DWORD     fdwDesiredAccess)
+                                LPCWSTR   lpszServiceName,
+                                DWORD     fdwDesiredAccess)
 {
-  dprintf(("ADVAPI32: OpenServiceW(%08xh,%s,%08xh) not implemented.\n",
+ LPSTR lpszServiceNameA = NULL;
+ SC_HANDLE hService;
+
+  dprintf(("ADVAPI32: OpenServiceW(%08xh,%s,%08xh) not correctly implemented.\n",
            schSCManager,
            lpszServiceName,
            fdwDesiredAccess));
 
-  return (NULL); /* signal failure */
+  if(lpszServiceName == NULL) {
+	SetLastError(ERROR_INVALID_PARAMETER);
+	return 0;
+  }
+  lpszServiceNameA = HEAP_strdupWtoA(GetProcessHeap(), 0, lpszServiceName);
+  hService = OpenServiceA(schSCManager, lpszServiceNameA, fdwDesiredAccess);
+  HeapFree(GetProcessHeap(), 0, lpszServiceNameA);
+  return hService;
 }
 
 /*****************************************************************************
@@ -152,7 +215,7 @@ SC_HANDLE WIN32API OpenServiceW(SC_HANDLE schSCManager,
  * Remark    :
  * Status    : UNTESTED STUB
  *
- * Author    : Patrick Haller [Tue, 1998/06/16 23:00]
+ * Author    : SvL
  *****************************************************************************/
 
 #define LPQUERY_SERVICE_CONFIG LPVOID
@@ -313,13 +376,19 @@ BOOL WIN32API QueryServiceObjectSecurity(SC_HANDLE             schService,
  *****************************************************************************/
 
 BOOL WIN32API QueryServiceStatus(SC_HANDLE         schService,
-                                    LPSERVICE_STATUS  lpssServiceStatus)
+                                 LPSERVICE_STATUS  lpssServiceStatus)
 {
-  dprintf(("ADVAPI32: QueryServiceStatus(%08xh,%08xh) not implemented.\n",
+  dprintf(("ADVAPI32: QueryServiceStatus(%08xh,%08xh) not correctly implemented.\n",
            schService,
            lpssServiceStatus));
 
-  return (FALSE); /* signal failure */
+  if(CheckServiceHandle(schService) == FALSE) {
+	SetLastError(ERROR_INVALID_PARAMETER);
+	return FALSE;
+  }
+
+  memset(lpssServiceStatus, 0, sizeof(SERVICE_STATUS));
+  return TRUE;
 }
 
 /*****************************************************************************
@@ -470,10 +539,16 @@ BOOL WIN32API ChangeServiceConfigW(SC_HANDLE hService,
 
 BOOL WIN32API CloseServiceHandle(SC_HANDLE hSCObject)
 {
-  dprintf(("ADVAPI32: CloseServiceHandle(%08xh) not implemented.\n",
+  dprintf(("ADVAPI32: CloseServiceHandle(%08xh)",
            hSCObject));
 
-  return (FALSE); /* signal failure */
+  if(CheckServiceHandle(hSCObject) == FALSE) {
+	SetLastError(ERROR_INVALID_PARAMETER);
+	return FALSE;
+  }
+
+  RegCloseKey((HKEY)hSCObject);
+  return TRUE;
 }
 
 /*****************************************************************************
@@ -491,15 +566,20 @@ BOOL WIN32API CloseServiceHandle(SC_HANDLE hSCObject)
  *****************************************************************************/
 
 BOOL WIN32API ControlService(SC_HANDLE        hService,
-                                DWORD            dwControl,
-                                LPSERVICE_STATUS lpServiceStatus)
+                             DWORD            dwControl,
+                             LPSERVICE_STATUS lpServiceStatus)
 {
-  dprintf(("ADVAPI32: ControlService(%08xh,%08xh,%08xh) not implemented.\n",
+  dprintf(("ADVAPI32: ControlService(%08xh,%08xh,%08xh) not correctly implemented.\n",
            hService,
            dwControl,
            lpServiceStatus));
+  HKEY keyThisService;
 
-  return (FALSE); /* signal failure */
+  if(CheckServiceHandle(hService) == FALSE) {
+	SetLastError(ERROR_INVALID_PARAMETER);
+	return FALSE;
+  }
+  return TRUE;
 }
 
 
@@ -529,20 +609,22 @@ BOOL WIN32API ControlService(SC_HANDLE        hService,
  *****************************************************************************/
 
 SC_HANDLE WIN32API CreateServiceA(SC_HANDLE hSCManager,
-                                     LPCSTR   lpServiceName,
-                                     LPCSTR   lpDisplayName,
-                                     DWORD     dwDesiredAccess,
-                                     DWORD     dwServiceType,
-                                     DWORD     dwStartType,
-                                     DWORD     dwErrorControl,
-                                     LPCSTR   lpBinaryPathName,
-                                     LPCSTR   lpLoadOrderGroup,
-                                     LPDWORD   lpdwTagId,
-                                     LPCSTR   lpDependencies,
-                                     LPCSTR   lpServiceStartName,
-                                     LPCSTR   lpPassword)
+                                  LPCSTR    lpServiceName,
+                                  LPCSTR    lpDisplayName,
+                                  DWORD     dwDesiredAccess,
+                                  DWORD     dwServiceType,
+                                  DWORD     dwStartType,
+                                  DWORD     dwErrorControl,
+                                  LPCSTR    lpBinaryPathName,
+                                  LPCSTR    lpLoadOrderGroup,
+                                  LPDWORD   lpdwTagId,
+                                  LPCSTR    lpDependencies,
+                                  LPCSTR    lpServiceStartName,
+                                  LPCSTR    lpPassword)
 {
-  dprintf(("ADVAPI32: CreateServiceA(%08xh,%s,%s,%08xh,%08xh,%08xh,%08xh,%s,%s,%08xh,%s,%s,%s) not implemented.\n",
+ HKEY keyServices, keyThisService;
+
+  dprintf(("ADVAPI32: CreateServiceA(%08xh,%s,%s,%08xh,%08xh,%08xh,%08xh,%s,%s,%08xh,%s,%s,%s) not correctly implemented.\n",
            hSCManager,
            lpServiceName,
            lpDisplayName,
@@ -557,7 +639,36 @@ SC_HANDLE WIN32API CreateServiceA(SC_HANDLE hSCManager,
            lpServiceStartName,
            lpPassword));
 
-  return (NULL); /* signal failure */
+  //displayname too?
+  if(lpServiceName == NULL || lpBinaryPathName == NULL) {
+	SetLastError(ERROR_INVALID_PARAMETER);
+	return 0;
+  }
+
+  if(RegCreateKeyA(HKEY_LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Services", &keyServices) != 0) {
+	SetLastError(ERROR_INTERNAL_ERROR);
+	return 0;
+  }
+  if(RegCreateKeyA(keyServices, lpServiceName, &keyThisService) != 0) {
+	SetLastError(ERROR_INTERNAL_ERROR);
+	return 0;
+  }
+  RegSetValueExA(keyThisService, "Start", 0, REG_DWORD, (LPBYTE)&dwServiceType, sizeof(DWORD));
+  RegSetValueExA(keyThisService, "Type", 0, REG_DWORD, (LPBYTE)&dwStartType, sizeof(DWORD));
+  RegSetValueExA(keyThisService, "ErrorControl", 0, REG_DWORD, (LPBYTE)&dwErrorControl, sizeof(DWORD));
+  if(lpDisplayName) 
+	RegSetValueExA(keyThisService, "DisplayName", 0, REG_SZ, (LPBYTE)lpDisplayName, strlen(lpDisplayName)+1);
+  if(lpLoadOrderGroup) 
+	RegSetValueExA(keyThisService, "lpLoadOrderGroup", 0, REG_SZ, (LPBYTE)lpDisplayName, strlen(lpLoadOrderGroup)+1);
+  if(lpLoadOrderGroup) 
+	RegSetValueExA(keyThisService, "lpLoadOrderGroup", 0, REG_SZ, (LPBYTE)lpDisplayName, strlen(lpLoadOrderGroup)+1);
+  //TODO: %SystemRoot%
+  RegSetValueExA(keyThisService, "ImagePath", 0, REG_SZ, (LPBYTE)lpBinaryPathName, strlen(lpBinaryPathName)+1);
+  
+  //TODO: What else?
+
+  RegCloseKey(keyServices);
+  return keyThisService;
 }
 
 
@@ -600,7 +711,12 @@ SC_HANDLE WIN32API CreateServiceW(SC_HANDLE hSCManager,
                                      LPCWSTR   lpServiceStartName,
                                      LPCWSTR   lpPassword)
 {
-  dprintf(("ADVAPI32: CreateServiceW(%08xh,%s,%s,%08xh,%08xh,%08xh,%08xh,%s,%s,%08xh,%s,%s,%s) not implemented.\n",
+ LPSTR lpServiceNameA = NULL, lpDisplayNameA = NULL, lpBinaryPathNameA = NULL;
+ LPSTR lpDependenciesA = NULL, lpServiceStartNameA = NULL, lpPasswordA = NULL;
+ LPSTR lpLoadOrderGroupA = NULL;
+ SC_HANDLE hService;
+
+  dprintf(("ADVAPI32: CreateServiceW(%08xh,%s,%s,%08xh,%08xh,%08xh,%08xh,%s,%s,%08xh,%s,%s,%s) not correctly implemented.\n",
            hSCManager,
            lpServiceName,
            lpDisplayName,
@@ -615,7 +731,38 @@ SC_HANDLE WIN32API CreateServiceW(SC_HANDLE hSCManager,
            lpServiceStartName,
            lpPassword));
 
-  return (NULL); /* signal failure */
+  if(lpServiceName)
+  	lpServiceNameA = HEAP_strdupWtoA(GetProcessHeap(), 0, lpServiceName);
+  if(lpDisplayName)
+  	lpDisplayNameA = HEAP_strdupWtoA(GetProcessHeap(), 0, lpDisplayName);
+  if(lpBinaryPathName)
+  	lpBinaryPathNameA = HEAP_strdupWtoA(GetProcessHeap(), 0, lpBinaryPathName);
+  if(lpDependencies)
+  	lpDependenciesA = HEAP_strdupWtoA(GetProcessHeap(), 0, lpDependencies);
+  if(lpServiceStartName)
+  	lpServiceStartNameA = HEAP_strdupWtoA(GetProcessHeap(), 0, lpServiceStartName);
+  if(lpPassword)
+  	lpPasswordA = HEAP_strdupWtoA(GetProcessHeap(), 0, lpPassword);
+  if(lpDisplayName)
+  	lpDisplayNameA = HEAP_strdupWtoA(GetProcessHeap(), 0, lpDisplayName);
+  if(lpLoadOrderGroup)
+  	lpLoadOrderGroupA = HEAP_strdupWtoA(GetProcessHeap(), 0, lpLoadOrderGroup);
+
+  hService = CreateServiceA(hSCManager,lpServiceNameA, lpDisplayNameA,
+                            dwDesiredAccess, dwServiceType, dwStartType,
+                            dwErrorControl, lpBinaryPathNameA, lpLoadOrderGroupA,
+                            lpdwTagId, lpDependenciesA, lpServiceStartNameA,
+                            lpPasswordA);
+
+  if(lpServiceNameA) 		HeapFree(GetProcessHeap(), 0, lpServiceNameA);
+  if(lpDisplayNameA) 		HeapFree(GetProcessHeap(), 0, lpDisplayNameA);
+  if(lpBinaryPathNameA)		HeapFree(GetProcessHeap(), 0, lpBinaryPathNameA);
+  if(lpDependenciesA) 		HeapFree(GetProcessHeap(), 0, lpDependenciesA);
+  if(lpServiceStartNameA) 	HeapFree(GetProcessHeap(), 0, lpServiceStartNameA);
+  if(lpPasswordA) 		HeapFree(GetProcessHeap(), 0, lpPasswordA);
+  if(lpLoadOrderGroupA) 	HeapFree(GetProcessHeap(), 0, lpLoadOrderGroupA);
+
+  return hService;
 }
 
 /*****************************************************************************
@@ -636,7 +783,7 @@ BOOL WIN32API DeleteService(SC_HANDLE hService)
   dprintf(("ADVAPI32: DeleteService(%08xh) not implemented.\n",
            hService));
 
-  return (FALSE); /* signal failure */
+  return FALSE;
 }
 
 /*****************************************************************************
@@ -821,9 +968,9 @@ BOOL WIN32API EnumServicesStatusW(SC_HANDLE             hSCManager,
  *****************************************************************************/
 
 BOOL WIN32API GetServiceDisplayNameA(SC_HANDLE hSCManager,
-                                        LPCSTR   lpServiceName,
-                                        LPTSTR    lpDisplayName,
-                                        LPDWORD   lpcchBuffer)
+                                     LPCSTR    lpServiceName,
+                                     LPTSTR    lpDisplayName,
+                                     LPDWORD   lpcchBuffer)
 {
   dprintf(("ADVAPI32: GetServiceDisplayNameA(%08xh,%08xh,%08xh,%08xh) not implemented.\n",
            hSCManager,
@@ -853,9 +1000,9 @@ BOOL WIN32API GetServiceDisplayNameA(SC_HANDLE hSCManager,
  *****************************************************************************/
 
 BOOL WIN32API GetServiceDisplayNameW(SC_HANDLE hSCManager,
-                                        LPCWSTR   lpServiceName,
-                                        LPWSTR    lpDisplayName,
-                                        LPDWORD   lpcchBuffer)
+                                     LPCWSTR   lpServiceName,
+                                     LPWSTR    lpDisplayName,
+                                     LPDWORD   lpcchBuffer)
 {
   dprintf(("ADVAPI32: GetServiceDisplayNameW(%08xh,%08xh,%08xh,%08xh) not implemented.\n",
            hSCManager,
@@ -884,9 +1031,9 @@ BOOL WIN32API GetServiceDisplayNameW(SC_HANDLE hSCManager,
  *****************************************************************************/
 
 BOOL WIN32API GetServiceKeyNameA(SC_HANDLE hSCManager,
-                                    LPCSTR   lpDisplayName,
-                                    LPTSTR    lpServiceName,
-                                    LPDWORD   lpcchBuffer)
+                                 LPCSTR    lpDisplayName,
+                                 LPTSTR    lpServiceName,
+                                 LPDWORD   lpcchBuffer)
 {
   dprintf(("ADVAPI32: GetServiceKeyNameA(%08xh,%08xh,%08xh,%08xh) not implemented.\n",
            hSCManager,
@@ -986,8 +1133,8 @@ BOOL WIN32API UnlockServiceDatabase(SC_LOCK sclLock)
  *****************************************************************************/
 
 BOOL WIN32API StartServiceA(SC_HANDLE schService,
-                               DWORD     dwNumServiceArgs,
-                               LPCSTR   *lpszServiceArgs)
+                            DWORD     dwNumServiceArgs,
+                            LPCSTR   *lpszServiceArgs)
 {
   dprintf(("ADVAPI32: StartServiceA(%08xh,%08xh,%s) not implemented.\n",
            schService,
@@ -1012,8 +1159,8 @@ BOOL WIN32API StartServiceA(SC_HANDLE schService,
  *****************************************************************************/
 
 BOOL WIN32API StartServiceW(SC_HANDLE schService,
-                               DWORD     dwNumServiceArgs,
-                               LPCWSTR   *lpszServiceArgs)
+                            DWORD     dwNumServiceArgs,
+                            LPCWSTR   *lpszServiceArgs)
 {
   dprintf(("ADVAPI32: StartServiceW(%08xh,%08xh,%s) not implemented.\n",
            schService,
