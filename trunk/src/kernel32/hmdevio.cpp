@@ -1,4 +1,4 @@
-/* $Id: hmdevio.cpp,v 1.10 2001-05-19 17:17:10 sandervl Exp $ */
+/* $Id: hmdevio.cpp,v 1.11 2001-05-20 11:02:43 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -333,13 +333,29 @@ static BOOL VPCIOCtl(HANDLE hDevice, DWORD dwIoControlCode, LPVOID lpInBuffer, D
         *lpBytesReturned = 0xF0*8;
         return TRUE;
   }
-  case 0x9C40288C: //change IDT
+  case 0x9C40288C: //0x0C change IDT
         dprintf(("VPCIOCtl func 0x9C40288C: %d %x %d %x %x", nInBufferSize, lpOutBuffer, nOutBufferSize, lpBytesReturned, lpOverlapped));
         if(nInBufferSize < 0x22) {
             SetLastError(ERROR_BAD_LENGTH);
             return FALSE;
         }
         return TRUE;
+  case 0x9C402884: //0x04
+        dprintf(("VPCIOCtl func 0x9C402884: %d %x %d %x %x", nInBufferSize, lpOutBuffer, nOutBufferSize, lpBytesReturned, lpOverlapped));
+        if(nInBufferSize < 0x08) {
+            SetLastError(ERROR_BAD_LENGTH);
+            return FALSE;
+        }
+        return TRUE;
+
+  case 0x9C402898: //0x18 Remove IDT patch
+        dprintf(("VPCIOCtl func 0x9C402898: %d %x %d %x %x", nInBufferSize, lpOutBuffer, nOutBufferSize, lpBytesReturned, lpOverlapped));
+        if(nInBufferSize < 0x01) {
+            SetLastError(ERROR_BAD_LENGTH);
+            return FALSE;
+        }
+        return TRUE;
+
   default:
         dprintf(("VPCIOCtl unknown func %X\n", dwIoControlCode));
         return FALSE;
