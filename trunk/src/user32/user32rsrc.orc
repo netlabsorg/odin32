@@ -1,4 +1,4 @@
-/* $Id: user32rsrc.orc,v 1.10 2003-01-16 17:41:55 sandervl Exp $ */
+/* $Id: user32rsrc.orc,v 1.11 2003-11-21 11:30:30 sandervl Exp $ */
 /* converted from WINE */
 
 #include "winuser.h"
@@ -929,5 +929,6 @@ END
 #include "resources/user32_Ru.orc"
 #include "resources/user32_Sk.orc"
 #include "resources/user32_Sv.orc"
+#include "resources/user32_Ua.orc"
 #include "resources/user32_Wa.orc"
 #include "resources/user32_Ja.orc"

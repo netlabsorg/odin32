@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2003-01-23 13:50:52 bird Exp $
+# $Id: makefile,v 1.5 2003-11-21 11:29:02 sandervl Exp $
 
 
 #
@@ -77,6 +77,7 @@ $(OBJDIR)\c_862.$(OBJ) \
 $(OBJDIR)\c_864.$(OBJ) \
 $(OBJDIR)\c_878.$(OBJ) \
 $(OBJDIR)\c_866.$(OBJ) \
+$(OBJDIR)\c_1125.$(OBJ) \
 $(OBJDIR)\c_855.$(OBJ) \
 $(OBJDIR)\c_20866.$(OBJ) \
 $(OBJDIR)\c_874.$(OBJ) \

@@ -1,4 +1,4 @@
-/* $Id: oslibmisc.h,v 1.12 2003-03-03 16:38:20 sandervl Exp $ */
+/* $Id: oslibmisc.h,v 1.13 2003-11-21 11:29:33 sandervl Exp $ */
 /*
  * Misc util. procedures
  *
@@ -89,12 +89,13 @@ ULONG OSLibWinSetCp(ULONG hmq, ULONG codepage);
 #define CTRY_ICELAND                   354
 #define CTRY_FINLAND                   358
 #define CTRY_BULGARIA                  359
+#define CTRY_UKRAINE                   380
 #define CTRY_CROATIA                   385
 #define CTRY_SLOVENIA                  386
 #define CTRY_CZECH_REPUBLIC            421
 #define CTRY_SLOVAK_REPUBLIC           422
 #define CTRY_HONG_KONG                 852
-//#define CTRY_TAIWAN                    886
+//#define CTRY_TAIWAN                  886
 
 ULONG OSLibQueryCountry();
 

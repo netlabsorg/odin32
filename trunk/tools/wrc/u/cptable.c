@@ -29,6 +29,7 @@ extern union cptable cptable_863;
 extern union cptable cptable_864;
 extern union cptable cptable_865;
 extern union cptable cptable_866;
+extern union cptable cptable_1125;
 extern union cptable cptable_869;
 extern union cptable cptable_874;
 extern union cptable cptable_875;
@@ -69,7 +70,7 @@ extern union cptable cptable_28603;
 extern union cptable cptable_28604;
 extern union cptable cptable_28605;
 
-static const union cptable * const cptables[58] =
+static const union cptable * const cptables[59] =
 {
     &cptable_037,
     &cptable_042,
@@ -90,6 +91,7 @@ static const union cptable * const cptables[58] =
     &cptable_864,
     &cptable_865,
     &cptable_866,
+    &cptable_1125,
     &cptable_869,
     &cptable_874,
     &cptable_875,
@@ -136,7 +138,7 @@ static const union cptable * const cptables[58] =
 #define NB_CODEPAGES  (sizeof(cptables)/sizeof(cptables[0]))
 
 
-#ifdef __WIN32OS2__
+#if defined(__IBMCPP__) || defined(__IBMC__)
 static int _LNK_CONV cmp_codepage( const void *codepage, const void *entry )
 #else
 static int cmp_codepage( const void *codepage, const void *entry )
