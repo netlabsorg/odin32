@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.67 2004-01-11 11:57:53 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.68 2004-02-13 17:37:25 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -171,6 +171,11 @@ BOOL Win32MemMap::Init(DWORD aMSize)
         }
 #endif
     }
+    // Allocate the memory for the map right now
+    if(allocateMap() == FALSE) {
+        SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+        goto fail;
+    }
 
     dprintf(("CreateFileMappingA for file %x, prot %x size %d, name %s", hMemFile, mProtFlags, mSize, lpszMapName));
     mapMutex.leave();
@@ -195,6 +200,7 @@ Win32MemMap::~Win32MemMap()
         free(lpszFileName);
     }
     if(pMapping && !image) {
+        dprintf(("Free map memory"));
         if(lpszMapName) {
                 OSLibDosFreeMem(pMapping);
         }
@@ -726,11 +732,6 @@ LPVOID Win32MemMap::mapViewOfFile(ULONG size, ULONG offset, ULONG fdwAccess)
         mSize = offset+size;
     }
 
-    if(allocateMap() == FALSE) {
-        SetLastError(ERROR_NOT_ENOUGH_MEMORY);
-        goto fail;
-    }
-
     mapview = new Win32MemMapView(this, offset, (size == 0) ? (mSize - offset) : size, fdwAccess);
     if(mapview == NULL) {
         goto fail;
@@ -784,10 +785,6 @@ BOOL Win32MemMap::unmapViewOfFile(LPVOID addr)
 
     delete view;
 
-    if(nrMappings == 0) {
-        VirtualFree(pMapping, 0, MEM_RELEASE);
-        pMapping = NULL;
-    }
     mapMutex.leave();
 
     SetLastError(ERROR_SUCCESS);
