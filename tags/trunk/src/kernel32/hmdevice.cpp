@@ -1,4 +1,4 @@
-/* $Id: hmdevice.cpp,v 1.23 2000-09-20 21:32:52 hugh Exp $ */
+/* $Id: hmdevice.cpp,v 1.24 2000-11-14 14:27:00 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -19,6 +19,7 @@
 
 #include <odin.h>
 #include <os2win.h>
+#include <string.h>
 #include <misc.h>
 #include "HandleManager.h"
 #include "HMDevice.h"
@@ -69,6 +70,27 @@ HMDeviceHandler::HMDeviceHandler(LPCSTR lpDeviceName)
   HMDeviceHandler::lpHMDeviceName = lpDeviceName;
 }
 
+
+/*****************************************************************************
+ * Name      : HMDeviceHandler::FindDevice
+ * Purpose   : Checks if lpDeviceName belongs to this device class
+ * Parameters: LPCSTR lpClassDevName
+ *             LPCSTR lpDeviceName
+ *             int namelength
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+BOOL HMDeviceHandler::FindDevice(LPCSTR lpClassDevName, LPCSTR lpDeviceName, int namelength)
+{
+    if(stricmp(lpClassDevName, lpDeviceName) == 0) {
+        return TRUE;
+    }
+    return FALSE;
+}
 
 /*****************************************************************************
  * Name      : HMDeviceHandler::_DeviceReuqest

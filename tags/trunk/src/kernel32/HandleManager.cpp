@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.53 2000-10-16 17:56:08 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.54 2000-11-14 14:26:55 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -176,30 +176,20 @@ static VOID *_HMDeviceGetData (LPSTR pszDeviceName);
 static HMDeviceHandler *_HMDeviceFind (LPSTR pszDeviceName)
 {
   PHMDEVICE pHMDevice;                     /* iterator over the device table */
+  int namelength = strlen(pszDeviceName);
 
-  if (pszDeviceName != NULL) {
+  if (pszDeviceName != NULL)
+  {
     for (pHMDevice = TabWin32Devices;  /* loop over all devices in the table */
          pHMDevice != NULL;
          pHMDevice = pHMDevice->pNext)
     {
-      if (stricmp(pHMDevice->pszDeviceName,       /* case-insensitive search */
-                  pszDeviceName) == 0)
-        return (pHMDevice->pDeviceHandler);    /* OK, we've found our device */
+        if(pHMDevice->pDeviceHandler->FindDevice(pHMDevice->pszDeviceName, pszDeviceName, namelength) == TRUE)
+        {
+            return pHMDevice->pDeviceHandler;
+        }
     }
   }
-  int namelength = strlen(pszDeviceName);
-
-  //SvL: \\.\x:      		-> drive x (i.e. \\.\C:)
-  //     \\.\PHYSICALDRIVEn	-> drive n (n>=0)
-  if((strncmp(pszDeviceName, "\\\\.\\", 4) == 0) && 
-     namelength == 6 && pszDeviceName[5] == ':') 
-  {
-	return HMGlobals.pHMDisk;
-  }
-  if((strncmp(pszDeviceName, "\\\\.\\PHYSICALDRIVE", 17) == 0) && namelength == 18) {
-	return HMGlobals.pHMDisk;
-  }
-
   return (HMGlobals.pHMOpen32);    /* haven't found anything, return default */
 }
 /*****************************************************************************
@@ -218,17 +208,20 @@ static HMDeviceHandler *_HMDeviceFind (LPSTR pszDeviceName)
 static VOID *_HMDeviceGetData (LPSTR pszDeviceName)
 {
   PHMDEVICE pHMDevice;                     /* iterator over the device table */
+  int namelength = strlen(pszDeviceName);
 
   if (pszDeviceName != NULL)
+  {
     for (pHMDevice = TabWin32Devices;  /* loop over all devices in the table */
          pHMDevice != NULL;
          pHMDevice = pHMDevice->pNext)
     {
-      if (stricmp(pHMDevice->pszDeviceName,       /* case-insensitive search */
-                  pszDeviceName) == 0)
-        return (pHMDevice->pDevData);    /* OK, we've found our device */
+        if(pHMDevice->pDeviceHandler->FindDevice(pHMDevice->pszDeviceName, pszDeviceName, namelength) == TRUE)
+        {
+            return (pHMDevice->pDevData);    /* OK, we've found our device */
+        }
     }
-
+  }
   return (NULL);    /* haven't found anything, return NULL */
 }
 
@@ -258,10 +251,10 @@ static ULONG _HMHandleGetFree(void)
   {
                                                        /* free handle found ? */
     if (INVALID_HANDLE_VALUE == TabWin32Handles[ulLoop].hmHandleData.hHMHandle) {
-  TabWin32Handles[ulLoop].hmHandleData.dwUserData     = 0;
-  TabWin32Handles[ulLoop].hmHandleData.dwInternalType = HMTYPE_UNKNOWN;
-  TabWin32Handles[ulLoop].hmHandleData.lpDeviceData   = NULL;
-      handleMutex.leave();
+        TabWin32Handles[ulLoop].hmHandleData.dwUserData     = 0;
+        TabWin32Handles[ulLoop].hmHandleData.dwInternalType = HMTYPE_UNKNOWN;
+        TabWin32Handles[ulLoop].hmHandleData.lpDeviceData   = NULL;
+        handleMutex.leave();
         return (ulLoop);                    /* OK, then return it to the caller */
     }
   }
@@ -388,8 +381,6 @@ DWORD HMInitialize(void)
 
   if (HMGlobals.fIsInitialized != TRUE)
   {
-    HMGlobals.fIsInitialized = TRUE;                             /* OK, done */
-
     handleMutex.enter();
     // fill handle table
     for(ulIndex = 0; ulIndex < MAX_OS2_HMHANDLES; ulIndex++) {
@@ -402,6 +393,8 @@ DWORD HMInitialize(void)
     memset(&HMGlobals,                       /* zero out the structure first */
            0,
            sizeof(HMGlobals));
+
+    HMGlobals.fIsInitialized = TRUE;                             /* OK, done */
 
     /* copy standard handles from OS/2's Open32 Subsystem */
     HMSetStdHandle(STD_INPUT_HANDLE,  O32_GetStdHandle(STD_INPUT_HANDLE));
@@ -441,28 +434,28 @@ DWORD HMTerminate(void)
 {
   /* @@@PH we could deallocate the device list here */
 
-  if(HMGlobals.pHMOpen32) 
-	delete HMGlobals.pHMOpen32;
-  if(HMGlobals.pHMEvent) 
-	delete HMGlobals.pHMEvent;
-  if(HMGlobals.pHMFile) 
-	delete HMGlobals.pHMFile;
-  if(HMGlobals.pHMMutex) 
-	delete HMGlobals.pHMMutex;
-  if(HMGlobals.pHMSemaphore) 
-	delete HMGlobals.pHMSemaphore;
-  if(HMGlobals.pHMFileMapping) 
-	delete HMGlobals.pHMFileMapping;
-  if(HMGlobals.pHMComm) 
-	delete HMGlobals.pHMComm;
-  if(HMGlobals.pHMToken) 
-	delete HMGlobals.pHMToken;
-  if(HMGlobals.pHMThread) 
-	delete HMGlobals.pHMThread;
-  if(HMGlobals.pHMNamedPipe) 
-	delete HMGlobals.pHMNamedPipe;
-  if(HMGlobals.pHMDisk) 
-	delete HMGlobals.pHMDisk;
+  if(HMGlobals.pHMOpen32)
+    delete HMGlobals.pHMOpen32;
+  if(HMGlobals.pHMEvent)
+    delete HMGlobals.pHMEvent;
+  if(HMGlobals.pHMFile)
+    delete HMGlobals.pHMFile;
+  if(HMGlobals.pHMMutex)
+    delete HMGlobals.pHMMutex;
+  if(HMGlobals.pHMSemaphore)
+    delete HMGlobals.pHMSemaphore;
+  if(HMGlobals.pHMFileMapping)
+    delete HMGlobals.pHMFileMapping;
+  if(HMGlobals.pHMComm)
+    delete HMGlobals.pHMComm;
+  if(HMGlobals.pHMToken)
+    delete HMGlobals.pHMToken;
+  if(HMGlobals.pHMThread)
+    delete HMGlobals.pHMThread;
+  if(HMGlobals.pHMNamedPipe)
+    delete HMGlobals.pHMNamedPipe;
+  if(HMGlobals.pHMDisk)
+    delete HMGlobals.pHMDisk;
 
   return (NO_ERROR);
 }
@@ -1379,7 +1372,7 @@ DWORD HMGetFileType(HANDLE hFile)
   //Must return FILE_TYPE_CHAR here; (used to fail index check)
   if((hFile == GetStdHandle(STD_INPUT_HANDLE)) ||
      (hFile == GetStdHandle(STD_OUTPUT_HANDLE)) ||
-     (hFile == GetStdHandle(STD_ERROR_HANDLE))) 
+     (hFile == GetStdHandle(STD_ERROR_HANDLE)))
   {
       return FILE_TYPE_CHAR;
   }
