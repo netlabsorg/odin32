@@ -1,4 +1,4 @@
-/* $Id: db.cpp,v 1.22 2001-09-05 09:27:27 bird Exp $ *
+/* $Id: db.cpp,v 1.23 2001-09-05 11:57:20 bird Exp $ *
  *
  * DB - contains all database routines.
  *
@@ -1064,7 +1064,7 @@ unsigned long _System dbUpdateFunction(PFNDESC pFnDesc, signed long lDll, char *
                                 pFnDesc->apszParamName[i] != NULL ? pFnDesc->apszParamName[i] : ""
                                 );
                         if (pFnDesc->apszParamDesc[i] != NULL)
-                            sqlstrcat(pszQuery, ", ", pFnDesc->apszParamDesc[i]);
+                            sqlstrcat(pszQuery, ", ", pFnDesc->apszParamDesc[i], ")");
                         else
                             strcat(pszQuery, ", NULL)");
 
