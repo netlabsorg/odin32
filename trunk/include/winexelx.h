@@ -1,4 +1,4 @@
-/* $Id: winexelx.h,v 1.1 1999-09-15 23:29:37 sandervl Exp $ */
+/* $Id: winexelx.h,v 1.2 1999-09-18 17:45:23 sandervl Exp $ */
 
 /*
  * Win32 LX Exe class (compiled in OS/2 using Odin32 api)
@@ -20,7 +20,7 @@
 class Win32LxExe : public Win32LxImage, public Win32ExeBase
 {
 public:
-	Win32LxExe(HINSTANCE hInstance);
+	Win32LxExe(HINSTANCE hInstance, PVOID pResData);
 virtual ~Win32LxExe();
 
 virtual ULONG start();

@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.1 1999-09-15 23:39:08 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.2 1999-09-18 17:47:10 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -63,7 +63,7 @@ Win32PeLdrImage::Win32PeLdrImage(char *szFileName) :
     nrsections(0), imageSize(0),
     imageVirtBase(-1), realBaseAddress(0), imageVirtEnd(0),
     nrNameExports(0), nrOrdExports(0), nameexports(NULL), ordexports(NULL),
-    pResSection(NULL), pResDir(NULL)
+    pResSection(NULL)
 {
   strcpy(this->szFileName, szFileName);
 
@@ -358,8 +358,8 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
   IMAGE_SECTION_HEADER sh;
   if(GetSectionHdrByName (win32file, &sh, ".rsrc")) {
     	//get offset in resource object of directory entry
-//    	pResDir = (PIMAGE_RESOURCE_DIRECTORY)ImageDirectoryOffset(win32file, IMAGE_DIRECTORY_ENTRY_RESOURCE);
 	pResDir = (PIMAGE_RESOURCE_DIRECTORY)(sh.VirtualAddress + realBaseAddress);
+        pResourceSectionStart = (ULONG)pResSection->virtaddr - oh.ImageBase;
   }
 
   //set final memory protection flags (storeSections sets them to read/write)

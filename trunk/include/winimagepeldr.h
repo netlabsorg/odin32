@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.h,v 1.1 1999-09-15 23:29:37 sandervl Exp $ */
+/* $Id: winimagepeldr.h,v 1.2 1999-09-18 17:45:23 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -69,12 +69,6 @@ virtual ~Win32PeLdrImage();
         //address)
 virtual BOOL  init(ULONG reservedMem);
 
-virtual HRSRC findResourceA(LPCSTR lpszName, LPSTR lpszType, ULONG lang = LANG_GETFIRST);
-virtual ULONG getResourceSizeA(LPCSTR lpszName, LPSTR lpszType, ULONG lang = LANG_GETFIRST);
-
-virtual ULONG getVersionSize();
-virtual BOOL  getVersionStruct(char *verstruct, ULONG bufLength);
-
 protected:
         void StoreImportByOrd(Win32DllBase *WinDll, ULONG ordinal, ULONG impaddr);
         void StoreImportByName(Win32DllBase *WinDll, char *impname, ULONG impaddr);
@@ -97,13 +91,6 @@ protected:
         void  AddNameExport(ULONG virtaddr, char *apiname, ULONG ordinal);
         void  AddOrdExport(ULONG virtaddr, ULONG ordinal);
 
-
-        ULONG getPEResourceSize(ULONG id, ULONG type, ULONG lang = LANG_GETFIRST);
-
-        PIMAGE_RESOURCE_DATA_ENTRY getPEResourceEntry(ULONG id, ULONG type, ULONG lang = LANG_GETFIRST);
-        PIMAGE_RESOURCE_DATA_ENTRY ProcessResSubDir(PIMAGE_RESOURCE_DIRECTORY prdType,
-                                                    ULONG *nodeData, int level);
-        PIMAGE_RESOURCE_DIRECTORY pResDir;
         Section                  *pResSection;
 
  	IMAGE_OPTIONAL_HEADER oh;
