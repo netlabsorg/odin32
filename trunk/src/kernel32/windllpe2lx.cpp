@@ -1,4 +1,4 @@
-/* $Id: windllpe2lx.cpp,v 1.4 1999-11-26 00:05:19 sandervl Exp $ */
+/* $Id: windllpe2lx.cpp,v 1.5 2000-01-31 09:40:07 bird Exp $ */
 
 /*
  * Win32 PE2LX Dll class
@@ -66,7 +66,10 @@ ULONG WIN32API RegisterPe2LxDll(ULONG ulPe2LxVersion, HINSTANCE hinstance, ULONG
 {
     char *pszName;
 
-    //DebugInt3();
+    #if 1 /* temporary fix */
+    if (ulAttachType != 0UL)
+        return 0;
+    #endif
 
     Win32Pe2LxDll *pWinMod = (Win32Pe2LxDll *)Win32DllBase::findModule(hinstance);
     if (ulAttachType == 0UL)
