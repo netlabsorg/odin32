@@ -1,4 +1,4 @@
-/* $Id: fastdep.c,v 1.6 2000-03-15 17:02:29 bird Exp $
+/* $Id: fastdep.c,v 1.7 2000-03-15 17:14:16 bird Exp $
  *
  * Fast dependents. (Fast = Quick and Dirty!)
  *
@@ -463,6 +463,15 @@ int main(int argc, char **argv)
         /* next */
         argi++;
     }
+
+    /* Close the dep file! */
+    if (phDep != NULL)
+        fclose(phDep);
+
+    /* clean it! */
+    #if 0
+    depCleanFile(pszDepFile);
+    #endif
 
     return rc;
 }
@@ -1687,7 +1696,7 @@ static BOOL  depReadFile(const char *pszFilename)
          *   Endif
          */
         i = -1;
-        while (psz >= &pszNext[i] && pszNext[i] == '\n' || pszNext[i] == '\r')
+        while (psz <= &pszNext[i] && pszNext[i] == '\n' || pszNext[i] == '\r')
             pszNext[i--] = '\0';
         trimR(psz);
         cch = strlen(psz);
@@ -1715,6 +1724,7 @@ static BOOL  depReadFile(const char *pszFilename)
                 psz[i] = '\0';
                 pvRule = depAddRule(trimR(psz));
                 psz += i + 1;
+                cch -= i + 1;
                 fMoreDeps = TRUE;
             }
         }
