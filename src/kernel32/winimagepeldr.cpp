@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.46 2000-06-01 11:28:48 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.47 2000-06-08 18:08:57 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -1342,7 +1342,7 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
   	//rename dll if necessary (i.e. OLE32 -> OLE32OS2)
   	Win32DllBase::renameDll(modname);
 
-	if(isPEImage(modname) == FALSE)
+	if(isPEImage(modname) != ERROR_SUCCESS_W)
 	{//LX image, so let OS/2 do all the work for us
 		APIRET rc;
   		char   szModuleFailure[CCHMAXPATH] = "";

@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.81 2000-05-22 19:08:01 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.82 2000-06-08 18:08:58 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -660,7 +660,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
     char            szModname[CCHMAXPATH];
     BOOL            fPath;              /* Flags which is set if the    */
                                         /* lpszLibFile contains a path. */
-    BOOL            fPE;                /* isPEImage return value. */
+    ULONG           fPE;                /* isPEImage return value. */
 
     /** @sketch
      * Some parameter validations is probably useful.
@@ -801,7 +801,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
      *  return hDll.
      */
     fPE = Win32ImageBase::isPEImage(szModname);
-    if (fPE)
+    if(fPE == ERROR_SUCCESS)
     {
         Win32PeLdrDll * peldrDll;
         /* TODO!
@@ -886,9 +886,9 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
     }
     else
     {
-        dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x) library were found (%s) but it's not loadable!",
-                 lpszLibFile, hFile, dwFlags, szModname));
-        SetLastError(ERROR_INVALID_EXE_SIGNATURE);
+        dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x) library wasn't found (%s) or isn't loadable; err %x",
+                 lpszLibFile, hFile, dwFlags, szModname, fPE));
+        SetLastError(fPE);
     }
 
     return hDll;
@@ -1369,14 +1369,14 @@ BOOL SYSTEM GetVersionStruct(char *lpszModName, char *verstruct, ULONG bufLength
         winimage = (Win32ImageBase *)Win32DllBase::findModule(lpszModName);
         if(winimage == NULL)
         {
-     char modname[CCHMAXPATH];
+        char modname[CCHMAXPATH];
 
         strcpy(modname, lpszModName);
         //rename dll if necessary (i.e. OLE32 -> OLE32OS2)
         Win32DllBase::renameDll(modname);
 
-        if(Win32ImageBase::isPEImage(modname) == FALSE)
-                {
+        if(Win32ImageBase::isPEImage(modname) != ERROR_SUCCESS)
+        {
          HINSTANCE hInstance;
 
             //must be an LX dll, just load it (app will probably load it anyway)
@@ -1430,8 +1430,8 @@ ULONG SYSTEM GetVersionSize(char *lpszModName)
         //rename dll if necessary (i.e. OLE32 -> OLE32OS2)
         Win32DllBase::renameDll(modname);
 
-        if(Win32ImageBase::isPEImage(modname) == FALSE)
-                {
+        if(Win32ImageBase::isPEImage(modname) != ERROR_SUCCESS)
+        {
          HINSTANCE hInstance;
 
             //must be an LX dll, just load it (app will probably load it anyway)
