@@ -1,4 +1,4 @@
-/* $Id: myldrOpen.cpp,v 1.10.4.6 2000-08-25 04:47:24 bird Exp $
+/* $Id: myldrOpen.cpp,v 1.10.4.7 2000-08-28 11:31:45 bird Exp $
  *
  * myldrOpen - ldrOpen.
  *
@@ -571,13 +571,18 @@ ULONG LDRCALL myldrOpen(PSFN phFile, PSZ pszFilename, PULONG pfl)
          *      - Starts with a REXX start comment ('/','*')
          *      - And we're loading an EXE
          *      - And we're either in QAppType or ExecPgm state.
-         *      - Extention is currently ignored....
+         *      - Extention:
          *          .RX and .REX are known to be pure REXX scripts.
          *          While .CMD has to invoked used the commandline OS2_SHELL or COMSPEC variable.
          */
-        if (*u1.pach == '/' && u1.pach[1] == '*'
+        psz2 = pszFilename + strlen(pszFilename) - 1;
+        while (psz2 > pszFilename && *psz2 != '.')
+            psz2--;
+        if (*psz2 == '.'
+            && *u1.pach == '/' && u1.pach[1] == '*'
             && isLdrStateLoadingEXE()
             && (isLdrStateQAppType() || isLdrStateExecPgm())
+            && (stricmp(psz2, ".RX") == 0 || stricmp(psz2, ".REX"))
             )
         {
             if (isREXXScriptDisabled())
