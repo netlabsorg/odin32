@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.50 1999-12-05 16:37:57 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.51 1999-12-24 18:51:55 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -1086,7 +1086,7 @@ void OSLibSetWindowStyle(HWND hwnd, ULONG dwStyle, BOOL fTaskList)
   else
       WinSetParent(WinWindowFromID(hwnd, FID_SYSMENU), HWND_OBJECT, FALSE);
 
-  if(OSFrameStyle & FCF_MINBUTTON | OSFrameStyle & FCF_MAXBUTTON)
+  if((OSFrameStyle & FCF_MINBUTTON) || (OSFrameStyle & FCF_MAXBUTTON))
       WinSetParent(OSLibWinObjectWindowFromID(hwnd, FID_MINMAX), hwnd, FALSE);
   else
       WinSetParent(WinWindowFromID(hwnd, FID_MINMAX), HWND_OBJECT, FALSE);
