@@ -1,4 +1,4 @@
-/* $Id: region.cpp,v 1.4 2000-06-01 11:27:06 sandervl Exp $ */
+/* $Id: region.cpp,v 1.5 2000-06-08 18:07:07 sandervl Exp $ */
 
 /*
  * GDI32 region code
@@ -98,13 +98,6 @@ HRGN WIN32API ExtCreateRegion( const XFORM * arg1, DWORD arg2, const RGNDATA *  
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API ExtSelectClipRgn( HDC arg1, HRGN arg2, int  arg3)
-{
-    dprintf(("GDI32: ExtSelectClipRgn"));
-    return O32_ExtSelectClipRgn(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API FillRgn( HDC arg1, HRGN arg2, HBRUSH  arg3)
 {
     dprintf(("GDI32: FillRgn"));
@@ -144,13 +137,6 @@ BOOL WIN32API InvertRgn( HDC arg1, HRGN  arg2)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API OffsetClipRgn( HDC arg1, int arg2, int  arg3)
-{
-    dprintf(("GDI32: OffsetClipRgn"));
-    return O32_OffsetClipRgn(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
 int WIN32API OffsetRgn( HRGN arg1, int arg2, int  arg3)
 {
     dprintf(("GDI32: OffsetRgn"));
@@ -183,13 +169,6 @@ BOOL WIN32API RectInRegion( HRGN arg1, const RECT *  arg2)
 {
     dprintf(("GDI32: RectInRegion"));
     return O32_RectInRegion(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API SelectClipRgn( HDC hdc, HRGN hRgn)
-{
-    dprintf(("GDI32: SelectClipRgn %x %x", hdc, hRgn));
-    return O32_SelectClipRgn(hdc, hRgn);
 }
 //******************************************************************************
 //******************************************************************************
