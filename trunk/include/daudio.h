@@ -1,4 +1,4 @@
-/* $Id: daudio.h,v 1.3 2001-03-25 21:52:44 sandervl Exp $ */
+/* $Id: daudio.h,v 1.4 2001-04-27 17:34:51 sandervl Exp $ */
 #ifndef __DAUDIO_H__
 #define __DAUDIO_H__
 
@@ -21,6 +21,11 @@
 #define DAUDIO_ADDBUFFER		0x4A
 #define DAUDIO_REGISTER_THREAD		0x4B
 #define DAUDIO_DEREGISTER_THREAD	0x4C
+#define DAUDIO_QUERYCAPS                0x4D
+#define DAUDIO_QUERYVERSION             0x4E
+#define DAUDIO_ADDLOOPINGBUFFER		0x4F
+
+#define DAUDIO_VERSION                  0x00000002  //highword = major, lowword = minor version
 
 typedef struct {
   union
@@ -37,14 +42,67 @@ typedef struct {
       } Buffer;
     struct 
       {
+      ULONG   lpBuffer;
+      ULONG   ulBufferLength;
+      } LoopingBuffer;
+    struct 
+      {
       ULONG   ulCurrentPos;
       } Pos;
     struct 
       {
       ULONG   hSemaphore;
       } Thread;
+    struct 
+      {
+      ULONG   ulVersion;
+      } Version;
     };
   
 } DAUDIO_CMD, FAR *LPDAUDIO_CMD;
+
+#define DAUDIOCAPS_PRIMARYMONO          0x00000001
+#define DAUDIOCAPS_PRIMARYSTEREO        0x00000002
+#define DAUDIOCAPS_PRIMARY8BIT          0x00000004
+#define DAUDIOCAPS_PRIMARY16BIT         0x00000008
+#define DAUDIOCAPS_CONTINUOUSRATE       0x00000010
+#define DAUDIOCAPS_EMULDRIVER           0x00000020
+#define DAUDIOCAPS_CERTIFIED            0x00000040
+#define DAUDIOCAPS_SECONDARYMONO        0x00000100
+#define DAUDIOCAPS_SECONDARYSTEREO      0x00000200
+#define DAUDIOCAPS_SECONDARY8BIT        0x00000400
+#define DAUDIOCAPS_SECONDARY16BIT       0x00000800
+
+typedef struct _DAUDIOCAPS
+{
+    ULONG	dwSize;
+    ULONG	dwFlags;
+    ULONG	dwMinSecondarySampleRate;
+    ULONG	dwMaxSecondarySampleRate;
+    ULONG	dwPrimaryBuffers;
+    ULONG	dwMaxHwMixingAllBuffers;
+    ULONG	dwMaxHwMixingStaticBuffers;
+    ULONG	dwMaxHwMixingStreamingBuffers;
+    ULONG	dwFreeHwMixingAllBuffers;
+    ULONG	dwFreeHwMixingStaticBuffers;
+    ULONG	dwFreeHwMixingStreamingBuffers;
+    ULONG	dwMaxHw3DAllBuffers;
+    ULONG	dwMaxHw3DStaticBuffers;
+    ULONG	dwMaxHw3DStreamingBuffers;
+    ULONG	dwFreeHw3DAllBuffers;
+    ULONG	dwFreeHw3DStaticBuffers;
+    ULONG	dwFreeHw3DStreamingBuffers;
+    ULONG	dwTotalHwMemBytes;
+    ULONG	dwFreeHwMemBytes;
+    ULONG	dwMaxContigFreeHwMemBytes;
+    ULONG	dwUnlockTransferRateHwBuffers;
+    ULONG	dwPlayCpuOverheadSwBuffers;
+    ULONG	dwReserved1;
+    ULONG	dwReserved2;
+} DAUDIO_CAPS, FAR *LPDAUDIO_CAPS;
+
+#define SBLIVECAPS_MINSAMPLERATE	5000
+#define SBLIVECAPS_MAXSAMPLERATE	48000
+#define SBLIVECAPS_MAXSTREAMS           32
 
 #endif //__DAUDIO_H__
