@@ -1,4 +1,4 @@
-/* $Id: treeview.c,v 1.17 1999-11-19 17:13:32 achimha Exp $ */
+/* $Id: treeview.c,v 1.18 1999-11-19 19:16:24 achimha Exp $ */
 /* Treeview control
  *
  * Copyright 1998 Eric Kohl <ekohl@abo.rhein-zeitung.de>
@@ -1711,7 +1711,7 @@ TREEVIEW_InsertItemA (HWND hwnd, WPARAM wParam, LPARAM lParam)
       // we don't want that to appear...
       if (*(tvItem->pszText + len - 2) == 10)
       {
-        *(tvItem->pszText + len - 2) = 0;
+//        *(tvItem->pszText + len - 2) = 0;
         dprintf(("item has character 10 at end, removed: %s\n", tvItem->pszText));
       }
       wineItem->pszText= COMCTL32_Alloc (len+1);
