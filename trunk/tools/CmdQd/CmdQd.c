@@ -1,4 +1,4 @@
-/* $Id: CmdQd.c,v 1.8 2001-10-31 21:46:49 bird Exp $
+/* $Id: CmdQd.c,v 1.9 2001-11-24 02:21:39 bird Exp $
  *
  * Command Queue Daemon / Client.
  *
@@ -57,6 +57,30 @@
  *              More output indicator.
  *              Success/failure indicator.
  *              Job output (about 63KB)
+ *
+ *       - Show jobs:
+ *              Nothing.
+ *       - Show jobs reponse:
+ *              More output indicator.
+ *              Job listing (about 63KB)
+ *
+ *       - Show failed jobs:
+ *              Nothing.
+ *       - Show failed jobs reponse:
+ *              More output indicator.
+ *              Job listing (about 63KB)
+ *
+ *       - Show (successfully) completed jobs:
+ *              Nothing.
+ *       - Show completed jobs reponse:
+ *              More output indicator.
+ *              Job listing (about 63KB)
+ *
+ *       - Show running jobs:
+ *              Nothing.
+ *       - Show running jobs reponse:
+ *              More output indicator.
+ *              Job listing (about 63KB)
  *
  *       - Kill:
  *              Nothing.
@@ -149,8 +173,16 @@ typedef struct SharedMem
         msgWaitResponse = 4,
         msgKill = 5,
         msgKillResponse = 6,
+        msgShowJobs = 7,
+        msgShowJobsResponse = 8,
+        msgShowRunningJobs = 9,
+        msgShowRunningJobsResponse = 10,
+        msgShowCompletedJobs = 11,
+        msgShowCompletedJobsResponse = 12,
+        msgShowFailedJobs = 13,
+        msgShowFailedJobsResponse = 14,
         msgDying = 0xff
-    }           enmMsgType;
+    } enmMsgType;
 
     union
     {
@@ -163,7 +195,6 @@ typedef struct SharedMem
             char    szzEnv[SHARED_MEM_SIZE - CCHMAXPATH - 1024 - 4 - 4 - 4 - 4 - 4 - 4];
                                         /* Environment block. */
         } Submit;
-
         struct SubmitResponse
         {
             BOOL    fRc;                /* Success idicator. */
@@ -174,7 +205,6 @@ typedef struct SharedMem
         {
             int     iNothing;           /* Dummy. */
         } Wait;
-
         struct WaitResponse
         {
             BOOL    fMore;              /* More data. */
@@ -189,11 +219,58 @@ typedef struct SharedMem
         {
             int     iNothing;           /* dummy. */
         } Kill;
-
         struct KillResponse
         {
             BOOL    fRc;                /* Success idicator. */
         } KillResponse;
+
+
+        struct ShowJobs
+        {
+            int     iNothing;           /* Dummy. */
+        } ShowJobs;
+        struct ShowJobsResponse
+        {
+            BOOL    fMore;              /* More data. */
+            char    szOutput[SHARED_MEM_SIZE- 4 - 4 - 4 - 4 - 4 - 4];
+                                        /* The listing of jobs. */
+        } ShowJobsResponse;
+
+
+        struct ShowRunningJobs
+        {
+            int     iNothing;           /* Dummy. */
+        } ShowRunningJobs;
+        struct ShowRunningJobsResponse
+        {
+            BOOL    fMore;              /* More data. */
+            char    szOutput[SHARED_MEM_SIZE- 4 - 4 - 4 - 4 - 4 - 4];
+                                        /* The listing of jobs. */
+        } ShowRunningJobsResponse;
+
+
+        struct ShowCompletedJobs
+        {
+            int     iNothing;           /* Dummy. */
+        } ShowCompletedJobs;
+        struct ShowCompletedJobsResponse
+        {
+            BOOL    fMore;              /* More data. */
+            char    szOutput[SHARED_MEM_SIZE- 4 - 4 - 4 - 4 - 4 - 4];
+                                        /* The listing of jobs. */
+        } ShowCompletedJobsResponse;
+
+
+        struct ShowFailedJobs
+        {
+            int     iNothing;           /* Dummy. */
+        } ShowFailedJobs;
+        struct ShowFailedJobsResponse
+        {
+            BOOL    fMore;              /* More data. */
+            char    szOutput[SHARED_MEM_SIZE- 4 - 4 - 4 - 4 - 4 - 4];
+                                        /* The listing of jobs. */
+        } ShowFailedJobsResponse;
 
     } u1;
 
@@ -231,11 +308,13 @@ typedef struct PathCache
 *******************************************************************************/
 PSHAREDMEM  pShrMem;                    /* Pointer to the shared memory.      */
 
+HMTX        hmtxJobQueue;               /* Read/Write mutex for the two jobs queues below. */
+HEV         hevJobQueue;                /* Incomming job event sem. */
 PJOB        pJobQueue;                  /* Linked list of jobs. */
 PJOB        pJobQueueEnd;               /* Last job entry. */
-HMTX        hmtxJobQueue;               /* Read/Write mutex. */
-HEV         hevJobQueue;                /* Incomming job event sem. */
 ULONG       cJobs;                      /* Count of jobs submitted. */
+PJOB        pJobRunning;                /* Linked list of jobs. */
+PJOB        pJobRunningEnd;             /* Last job entry. */
 
 HMTX        hmtxJobQueueFine;           /* Read/Write mutex for the next two queues. */
 HEV         hevJobQueueFine;            /* Posted when there is more output. */
@@ -268,6 +347,10 @@ int  Submit(int rcIgnore);
 int  Wait(void);
 int  QueryRunning(void);
 int  Kill(void);
+int  ShowJobs(void);
+int  ShowRunningJobs(void);
+int  ShowCompletedJobs(void);
+int  ShowFailedJobs(void);
 /* shared memory helpers */
 int  shrmemCreate(void);
 int  shrmemOpen(void);
@@ -326,6 +409,22 @@ int main(int argc, char **argv)
     {
         return Kill();
     }
+    else if (!strcmp(argv[1], "showjobs"))
+    {
+        return ShowJobs();
+    }
+    else if (!strcmp(argv[1], "showrunningjobs"))
+    {
+        return ShowRunningJobs();
+    }
+    else if (!strcmp(argv[1], "showcompletedjobs"))
+    {
+        return ShowCompletedJobs();
+    }
+    else if (!strcmp(argv[1], "showfailedjobs"))
+    {
+        return ShowFailedJobs();
+    }
     else if (!strcmp(argv[1], "init"))
     {
         if (argc != 3 || atoi(argv[2]) <= 0 || atoi(argv[2]) >= 256)
@@ -362,7 +461,7 @@ int main(int argc, char **argv)
 void syntax(void)
 {
     printf(
-        "Command Queue Daemon v0.0.1\n"
+        "Command Queue Daemon v0.0.2\n"
         "---------------------------\n"
         "syntax: CmdQd.exe <command> [args]\n"
         "\n"
@@ -373,17 +472,23 @@ void syntax(void)
         "    submit [-<n>] <command> [args]\n"
         "        Submits a command to the daemon.\n"
         "        Use '-<n>' to tell use to ignore return code 0-n.\n"
-        "    \n"
+        "\n"
         "    wait\n"
         "        Wait for all commands which are queued up to complete.\n"
         "        rc = count of failing commands.\n"
-        "    \n"
+        "\n"
         "    kill\n"
         "        Kills the daemon. Daemon will automatically die after\n"
         "        idling for some time.\n"
+        "\n"
         "    queryrunning\n"
         "        Checks if the daemon is running.\n"
         "        rc = 0 if running; rc != 0 if not running.\n"
+        "\n"
+        "    showjobs           - shows jobs queued for execution.\n"
+        "    showrunningjobs    - shows jobs currently running.\n"
+        "    showcompletedjobs  - shows jobs succesfully executed.\n"
+        "    showfailedjobs     - shows jobs which failed.\n"
         "\n"
         "Copyright (c) 2001 knut st. osmundsen (kosmunds@csc.com)\n"
         );
@@ -656,6 +761,447 @@ int Daemon(int cWorkers)
                 break;
             }
 
+
+            case msgShowJobs:
+            {
+                /*
+                 * Gain access to the job list.
+                 */
+                rc = DosRequestMutexSem(hmtxJobQueue, SEM_INDEFINITE_WAIT);
+                if (!rc)
+                {
+                    int     iJob = 0;
+                    PJOB    pJob = pJobQueue;
+
+                    /*
+                     * Big loop making and sending all messages.
+                     */
+                    do
+                    {
+                        int         cch;
+                        char *      pszOutput;
+                        int         cchOutput;
+
+                        /*
+                         * Make one message.
+                         */
+                        pShrMem->enmMsgType = msgShowJobsResponse;
+                        pszOutput = &pShrMem->u1.ShowJobsResponse.szOutput[0];
+                        cchOutput = sizeof(pShrMem->u1.ShowJobsResponse.szOutput) - 1;
+
+                        /*
+                         * Insert job info.
+                         */
+                        while (pJob)
+                        {
+                            char    szTmp[8192]; /* this is sufficient for one job. */
+
+                            /*
+                             * Format output in temporary buffer and check if
+                             * it's space left in the share buffer.
+                             */
+                            cch = sprintf(szTmp,
+                                          "------------------ Job %d\n"
+                                          " command:  %s\n"
+                                          " curdir:   %s\n"
+                                          " rcIgnore: %d\n",
+                                          iJob,
+                                          pJob->JobInfo.szCommand,
+                                          pJob->JobInfo.szCurrentDir,
+                                          pJob->JobInfo.rcIgnore);
+                            if (cch > cchOutput)
+                                break;
+
+                            /*
+                             * Copy from temporary to shared buffer.
+                             */
+                            memcpy(pszOutput, szTmp, cch);
+                            pszOutput += cch;
+                            cchOutput -= cch;
+
+                            /*
+                             * Next job.
+                             */
+                            pJob = pJob->pNext;
+                            iJob++;
+                        }
+
+                        /*
+                         * Send the message.
+                         */
+                        *pszOutput = '\0';
+                        pShrMem->u1.ShowJobsResponse.fMore = pJob != NULL;
+                        rc = shrmemSendDaemon(TRUE);
+
+                    } while (!rc && pJob);
+
+
+                    /*
+                     * Release the job list.
+                     */
+                    DosReleaseMutexSem(hmtxJobQueue);
+                }
+                else
+                {
+                    /* init response message */
+                    pShrMem->enmMsgType = msgShowJobsResponse;
+                    sprintf(&pShrMem->u1.ShowJobsResponse.szOutput[0],
+                            "Internal Error. Requesting of hmtxJobQueue failed with rc=%d\n",
+                            rc);
+                    rc = shrmemSendDaemon(TRUE);
+                }
+
+
+                /*
+                 * Check if the waiting client died.
+                 */
+                if (rc == ERROR_ALREADY_POSTED) /* seems like this is the rc we get. */
+                {
+                    /*
+                     * BUGBUG: This code is really fishy, but I'm to tired to make a real fix now.
+                     *         Hopefully this solves my current problem.
+                     */
+                    ULONG   ulDummy;
+                    rc = DosRequestMutexSem(pShrMem->hmtx, 500);
+                    rc = DosResetEventSem(pShrMem->hevClient, &ulDummy);
+                    pShrMem->enmMsgType = msgUnknown;
+                    rc = shrmemSendDaemon(TRUE);
+                }
+                break;
+            }
+
+
+            case msgShowFailedJobs:
+            {
+                /*
+                 * Gain access to the finished job list.
+                 */
+                rc = DosRequestMutexSem(hmtxJobQueueFine, SEM_INDEFINITE_WAIT);
+                if (!rc)
+                {
+                    int     iJob = 0;
+                    PJOB    pJob = pJobFailed;
+
+                    /*
+                     * Big loop making and sending all messages.
+                     */
+                    do
+                    {
+                        int         cch;
+                        char *      pszOutput;
+                        int         cchOutput;
+
+                        /*
+                         * Make one message.
+                         */
+                        pShrMem->enmMsgType = msgShowFailedJobsResponse;
+                        pszOutput = &pShrMem->u1.ShowFailedJobsResponse.szOutput[0];
+                        cchOutput = sizeof(pShrMem->u1.ShowFailedJobsResponse.szOutput) - 1;
+
+                        /*
+                         * Insert job info.
+                         */
+                        while (pJob)
+                        {
+                            char    szTmp[8192]; /* this is sufficient for one job. */
+
+                            /*
+                             * Format output in temporary buffer and check if
+                             * it's space left in the share buffer.
+                             */
+                            cch = sprintf(szTmp,
+                                          "------------------ Failed Job %d\n"
+                                          " command:  %s\n"
+                                          " curdir:   %s\n"
+                                          " rc:       %d  (rcIgnore=%d)\n",
+                                          iJob,
+                                          pJob->JobInfo.szCommand,
+                                          pJob->JobInfo.szCurrentDir,
+                                          pJob->rc,
+                                          pJob->JobInfo.rcIgnore);
+                            if (cch > cchOutput)
+                                break;
+
+                            /*
+                             * Copy from temporary to shared buffer.
+                             */
+                            memcpy(pszOutput, szTmp, cch);
+                            pszOutput += cch;
+                            cchOutput -= cch;
+
+                            /*
+                             * Next job.
+                             */
+                            pJob = pJob->pNext;
+                            iJob++;
+                        }
+
+                        /*
+                         * Send the message.
+                         */
+                        *pszOutput = '\0';
+                        pShrMem->u1.ShowFailedJobsResponse.fMore = pJob != NULL;
+                        rc = shrmemSendDaemon(TRUE);
+
+                    } while (!rc && pJob);
+
+
+                    /*
+                     * Release the job list.
+                     */
+                    DosReleaseMutexSem(hmtxJobQueueFine);
+                }
+                else
+                {
+                    /* init response message */
+                    pShrMem->enmMsgType = msgShowFailedJobsResponse;
+                    sprintf(&pShrMem->u1.ShowFailedJobsResponse.szOutput[0],
+                            "Internal Error. Requesting of hmtxJobQueue failed with rc=%d\n",
+                            rc);
+                    rc = shrmemSendDaemon(TRUE);
+                }
+
+
+                /*
+                 * Check if the waiting client died.
+                 */
+                if (rc == ERROR_ALREADY_POSTED) /* seems like this is the rc we get. */
+                {
+                    /*
+                     * BUGBUG: This code is really fishy, but I'm to tired to make a real fix now.
+                     *         Hopefully this solves my current problem.
+                     */
+                    ULONG   ulDummy;
+                    rc = DosRequestMutexSem(pShrMem->hmtx, 500);
+                    rc = DosResetEventSem(pShrMem->hevClient, &ulDummy);
+                    pShrMem->enmMsgType = msgUnknown;
+                    rc = shrmemSendDaemon(TRUE);
+                }
+                break;
+            }
+
+
+            case msgShowRunningJobs:
+            {
+                /*
+                 * Gain access to the job list.
+                 */
+                rc = DosRequestMutexSem(hmtxJobQueue, SEM_INDEFINITE_WAIT);
+                if (!rc)
+                {
+                    int     iJob = 0;
+                    PJOB    pJob = pJobRunning;
+
+                    /*
+                     * Big loop making and sending all messages.
+                     */
+                    do
+                    {
+                        int         cch;
+                        char *      pszOutput;
+                        int         cchOutput;
+
+                        /*
+                         * Make one message.
+                         */
+                        pShrMem->enmMsgType = msgShowRunningJobsResponse;
+                        pszOutput = &pShrMem->u1.ShowRunningJobsResponse.szOutput[0];
+                        cchOutput = sizeof(pShrMem->u1.ShowRunningJobsResponse.szOutput) - 1;
+
+                        /*
+                         * Insert job info.
+                         */
+                        while (pJob)
+                        {
+                            char    szTmp[8192]; /* this is sufficient for one job. */
+
+                            /*
+                             * Format output in temporary buffer and check if
+                             * it's space left in the share buffer.
+                             */
+                            cch = sprintf(szTmp,
+                                          "------------------ Running Job %d\n"
+                                          " command:  %s\n"
+                                          " curdir:   %s\n"
+                                          " rcIgnore: %d\n",
+                                          iJob,
+                                          pJob->JobInfo.szCommand,
+                                          pJob->JobInfo.szCurrentDir,
+                                          pJob->JobInfo.rcIgnore);
+                            if (cch > cchOutput)
+                                break;
+
+                            /*
+                             * Copy from temporary to shared buffer.
+                             */
+                            memcpy(pszOutput, szTmp, cch);
+                            pszOutput += cch;
+                            cchOutput -= cch;
+
+                            /*
+                             * Next job.
+                             */
+                            pJob = pJob->pNext;
+                            iJob++;
+                        }
+
+                        /*
+                         * Send the message.
+                         */
+                        *pszOutput = '\0';
+                        pShrMem->u1.ShowRunningJobsResponse.fMore = pJob != NULL;
+                        rc = shrmemSendDaemon(TRUE);
+
+                    } while (!rc && pJob);
+
+
+                    /*
+                     * Release the job list.
+                     */
+                    DosReleaseMutexSem(hmtxJobQueue);
+                }
+                else
+                {
+                    /* init response message */
+                    pShrMem->enmMsgType = msgShowRunningJobsResponse;
+                    sprintf(&pShrMem->u1.ShowRunningJobsResponse.szOutput[0],
+                            "Internal Error. Requesting of hmtxJobQueue failed with rc=%d\n",
+                            rc);
+                    rc = shrmemSendDaemon(TRUE);
+                }
+
+
+                /*
+                 * Check if the waiting client died.
+                 */
+                if (rc == ERROR_ALREADY_POSTED) /* seems like this is the rc we get. */
+                {
+                    /*
+                     * BUGBUG: This code is really fishy, but I'm to tired to make a real fix now.
+                     *         Hopefully this solves my current problem.
+                     */
+                    ULONG   ulDummy;
+                    rc = DosRequestMutexSem(pShrMem->hmtx, 500);
+                    rc = DosResetEventSem(pShrMem->hevClient, &ulDummy);
+                    pShrMem->enmMsgType = msgUnknown;
+                    rc = shrmemSendDaemon(TRUE);
+                }
+                break;
+            }
+
+
+
+            case msgShowCompletedJobs:
+            {
+                /*
+                 * Gain access to the finished job list.
+                 */
+                rc = DosRequestMutexSem(hmtxJobQueueFine, SEM_INDEFINITE_WAIT);
+                if (!rc)
+                {
+                    int     iJob = 0;
+                    PJOB    pJob = pJobCompleted;
+
+                    /*
+                     * Big loop making and sending all messages.
+                     */
+                    do
+                    {
+                        int         cch;
+                        char *      pszOutput;
+                        int         cchOutput;
+
+                        /*
+                         * Make one message.
+                         */
+                        pShrMem->enmMsgType = msgShowCompletedJobsResponse;
+                        pszOutput = &pShrMem->u1.ShowCompletedJobsResponse.szOutput[0];
+                        cchOutput = sizeof(pShrMem->u1.ShowCompletedJobsResponse.szOutput) - 1;
+
+                        /*
+                         * Insert job info.
+                         */
+                        while (pJob)
+                        {
+                            char    szTmp[8192]; /* this is sufficient for one job. */
+
+                            /*
+                             * Format output in temporary buffer and check if
+                             * it's space left in the share buffer.
+                             */
+                            cch = sprintf(szTmp,
+                                          "------------------ Completed Job %d\n"
+                                          " command:  %s\n"
+                                          " curdir:   %s\n"
+                                          " rcIgnore: %d\n",
+                                          iJob,
+                                          pJob->JobInfo.szCommand,
+                                          pJob->JobInfo.szCurrentDir,
+                                          pJob->JobInfo.rcIgnore);
+                            if (cch > cchOutput)
+                                break;
+
+                            /*
+                             * Copy from temporary to shared buffer.
+                             */
+                            memcpy(pszOutput, szTmp, cch);
+                            pszOutput += cch;
+                            cchOutput -= cch;
+
+                            /*
+                             * Next job.
+                             */
+                            pJob = pJob->pNext;
+                            iJob++;
+                        }
+
+                        /*
+                         * Send the message.
+                         */
+                        *pszOutput = '\0';
+                        pShrMem->u1.ShowCompletedJobsResponse.fMore = pJob != NULL;
+                        rc = shrmemSendDaemon(TRUE);
+
+                    } while (!rc && pJob);
+
+
+                    /*
+                     * Release the finished job list.
+                     */
+                    DosReleaseMutexSem(hmtxJobQueueFine);
+                }
+                else
+                {
+                    /* init response message */
+                    pShrMem->enmMsgType = msgShowCompletedJobsResponse;
+                    sprintf(&pShrMem->u1.ShowCompletedJobsResponse.szOutput[0],
+                            "Internal Error. Requesting of hmtxJobQueue failed with rc=%d\n",
+                            rc);
+                    rc = shrmemSendDaemon(TRUE);
+                }
+
+
+                /*
+                 * Check if the waiting client died.
+                 */
+                if (rc == ERROR_ALREADY_POSTED) /* seems like this is the rc we get. */
+                {
+                    /*
+                     * BUGBUG: This code is really fishy, but I'm to tired to make a real fix now.
+                     *         Hopefully this solves my current problem.
+                     */
+                    ULONG   ulDummy;
+                    rc = DosRequestMutexSem(pShrMem->hmtx, 500);
+                    rc = DosResetEventSem(pShrMem->hevClient, &ulDummy);
+                    pShrMem->enmMsgType = msgUnknown;
+                    rc = shrmemSendDaemon(TRUE);
+                }
+                break;
+            }
+
+
+
+
             default:
                 Error("Internal error: Invalid message id %d\n", pShrMem->enmMsgType);
                 pShrMem->enmMsgType = msgUnknown;
@@ -810,6 +1356,7 @@ void Worker(void * iWorkerId)
         pJob = pJobQueue;
         if (pJob)
         {
+            /* remove from input queue */
             if (pJob != pJobQueueEnd)
                 pJobQueue = pJob->pNext;
             else
@@ -818,6 +1365,13 @@ void Worker(void * iWorkerId)
                 pJobQueue = pJobQueueEnd = NULL;
                 DosResetEventSem(hevJobQueue, &ulIgnore);
             }
+
+            /* insert into running */
+            pJob ->pNext = NULL;
+            if (pJobRunningEnd)
+                pJobRunningEnd->pNext = pJob;
+            else
+                pJobRunning = pJobRunningEnd = pJob;
         }
         DosReleaseMutexSem(hmtxJobQueue);
 
@@ -968,6 +1522,33 @@ void Worker(void * iWorkerId)
                 pJob->rc = -1;
                 DosClose(hPipeR);
             }
+
+
+            /*
+             * Remove from the running queue.
+             */
+            if (DosRequestMutexSem(hmtxJobQueue, SEM_INDEFINITE_WAIT))
+                return;
+
+            if (pJobRunning != pJob)
+            {
+                PJOB pJobCur = pJobRunning;
+                while (pJobCur)
+                {
+                    if (pJobCur->pNext != pJob)
+                    {
+                        pJobCur->pNext = pJob->pNext;
+                        if (pJob == pJobRunningEnd)
+                            pJobRunningEnd = pJobCur;
+                        break;
+                    }
+                    pJobCur = pJobCur->pNext;
+                }
+            }
+            else
+                pJobRunning = pJobRunningEnd = NULL;
+
+            DosReleaseMutexSem(hmtxJobQueue);
 
 
             /*
@@ -1424,6 +2005,191 @@ int Kill(void)
     shrmemFree();
     return rc;
 }
+
+
+/**
+ * Shows the current queued commands.
+ * Will write to stdout.
+ * @returns 0 or -1 usually.
+ */
+int  ShowJobs(void)
+{
+    int     rc;
+
+    rc = shrmemOpen();
+    if (rc)
+        return rc;
+    do
+    {
+        pShrMem->enmMsgType = msgShowJobs;
+        pShrMem->u1.ShowJobs.iNothing = 0;
+        rc = shrmemSendClient(msgShowJobsResponse);
+        if (rc)
+        {
+            shrmemFree();
+            return -1;
+        }
+        printf("%s", pShrMem->u1.ShowJobsResponse.szOutput);
+        /*
+         * Release the client mutex if more data and yield the CPU.
+         * So we can submit more work. (Odin nmake lib...)
+         */
+        if (pShrMem->u1.ShowJobsResponse.fMore)
+        {
+            DosReleaseMutexSem(pShrMem->hmtxClient);
+            DosSleep(0);
+            rc = DosRequestMutexSem(pShrMem->hmtxClient, SEM_INDEFINITE_WAIT);
+            if (rc)
+            {
+                Error("Fatal error: failed to get client mutex. rc=%d\n", rc);
+                shrmemFree();
+                return -1;
+            }
+        }
+    } while (pShrMem->u1.ShowJobsResponse.fMore);
+
+    shrmemFree();
+    return rc;
+}
+
+
+/**
+ * Shows the current running jobs (not the output).
+ * Will write to stdout.
+ * @returns 0 or -1 usually.
+ */
+int  ShowRunningJobs(void)
+{
+    int     rc;
+
+    rc = shrmemOpen();
+    if (rc)
+        return rc;
+    do
+    {
+        pShrMem->enmMsgType = msgShowRunningJobs;
+        pShrMem->u1.ShowRunningJobs.iNothing = 0;
+        rc = shrmemSendClient(msgShowRunningJobsResponse);
+        if (rc)
+        {
+            shrmemFree();
+            return -1;
+        }
+        printf("%s", pShrMem->u1.ShowRunningJobsResponse.szOutput);
+        /*
+         * Release the client mutex if more data and yield the CPU.
+         * So we can submit more work. (Odin nmake lib...)
+         */
+        if (pShrMem->u1.ShowRunningJobsResponse.fMore)
+        {
+            DosReleaseMutexSem(pShrMem->hmtxClient);
+            DosSleep(0);
+            rc = DosRequestMutexSem(pShrMem->hmtxClient, SEM_INDEFINITE_WAIT);
+            if (rc)
+            {
+                Error("Fatal error: failed to get client mutex. rc=%d\n", rc);
+                shrmemFree();
+                return -1;
+            }
+        }
+    } while (pShrMem->u1.ShowRunningJobsResponse.fMore);
+
+    shrmemFree();
+    return rc;
+}
+
+
+/**
+ * Shows the current queue of successfully completed jobs (not the output).
+ * Will write to stdout.
+ * @returns 0 or -1 usually.
+ */
+int  ShowCompletedJobs(void)
+{
+    int     rc;
+
+    rc = shrmemOpen();
+    if (rc)
+        return rc;
+    do
+    {
+        pShrMem->enmMsgType = msgShowCompletedJobs;
+        pShrMem->u1.ShowCompletedJobs.iNothing = 0;
+        rc = shrmemSendClient(msgShowCompletedJobsResponse);
+        if (rc)
+        {
+            shrmemFree();
+            return -1;
+        }
+        printf("%s", pShrMem->u1.ShowCompletedJobsResponse.szOutput);
+        /*
+         * Release the client mutex if more data and yield the CPU.
+         * So we can submit more work. (Odin nmake lib...)
+         */
+        if (pShrMem->u1.ShowCompletedJobsResponse.fMore)
+        {
+            DosReleaseMutexSem(pShrMem->hmtxClient);
+            DosSleep(0);
+            rc = DosRequestMutexSem(pShrMem->hmtxClient, SEM_INDEFINITE_WAIT);
+            if (rc)
+            {
+                Error("Fatal error: failed to get client mutex. rc=%d\n", rc);
+                shrmemFree();
+                return -1;
+            }
+        }
+    } while (pShrMem->u1.ShowCompletedJobsResponse.fMore);
+
+    shrmemFree();
+    return rc;
+}
+
+
+/**
+ * Shows the current queue of failed jobs (not the output).
+ * Will write to stdout.
+ * @returns 0 or -1 usually.
+ */
+int  ShowFailedJobs(void)
+{
+    int     rc;
+
+    rc = shrmemOpen();
+    if (rc)
+        return rc;
+    do
+    {
+        pShrMem->enmMsgType = msgShowFailedJobs;
+        pShrMem->u1.ShowFailedJobs.iNothing = 0;
+        rc = shrmemSendClient(msgShowFailedJobsResponse);
+        if (rc)
+        {
+            shrmemFree();
+            return -1;
+        }
+        printf("%s", pShrMem->u1.ShowFailedJobsResponse.szOutput);
+        /*
+         * Release the client mutex if more data and yield the CPU.
+         * So we can submit more work. (Odin nmake lib...)
+         */
+        if (pShrMem->u1.ShowFailedJobsResponse.fMore)
+        {
+            DosReleaseMutexSem(pShrMem->hmtxClient);
+            DosSleep(0);
+            rc = DosRequestMutexSem(pShrMem->hmtxClient, SEM_INDEFINITE_WAIT);
+            if (rc)
+            {
+                Error("Fatal error: failed to get client mutex. rc=%d\n", rc);
+                shrmemFree();
+                return -1;
+            }
+        }
+    } while (pShrMem->u1.ShowFailedJobsResponse.fMore);
+
+    shrmemFree();
+    return rc;
+}
+
 
 
 /**
