@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.111 2001-10-24 09:53:14 sandervl Exp $ */
+/* $Id: window.cpp,v 1.112 2001-10-24 10:26:46 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -727,20 +727,22 @@ BOOL WIN32API IsWindowVisible(HWND hwnd)
     }
     ret = TRUE;
 
-    //check visibility of parents
-    hwndParent = GetParent(hwnd);
-    while(hwndParent) {
-        dwStyle = GetWindowLongA(hwndParent, GWL_STYLE);
-        if(!(dwStyle & WS_VISIBLE)) {
-            dprintf(("IsWindowVisible %x returned FALSE (parent %x invisible)", hwnd, hwndParent));
-            return FALSE;
+    if(dwStyle & WS_CHILD) 
+    {
+        //check visibility of parents
+        hwndParent = GetParent(hwnd);
+        while(hwndParent) {
+            dwStyle = GetWindowLongA(hwndParent, GWL_STYLE);
+            if(!(dwStyle & WS_VISIBLE)) {
+                dprintf(("IsWindowVisible %x returned FALSE (parent %x invisible)", hwnd, hwndParent));
+                return FALSE;
+            }
+            if(!(dwStyle & WS_CHILD)) {
+                break; //GetParent can also return the owner
+            }
+            hwndParent = GetParent(hwndParent);
         }
-        if(!(dwStyle & WS_CHILD)) {
-            break; //GetParent can also return the owner
-        }
-        hwndParent = GetParent(hwndParent);
     }
-
 end:
     dprintf(("IsWindowVisible %x returned %d", hwnd, ret));
     return ret;
