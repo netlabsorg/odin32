@@ -1,4 +1,4 @@
-/* $Id: button.cpp,v 1.23 1999-12-20 16:45:16 cbratschi Exp $ */
+/* $Id: button.cpp,v 1.24 1999-12-21 17:03:42 cbratschi Exp $ */
 /* File: button.cpp -- Button type widgets
  *
  * Copyright (C) 1993 Johannes Ruscheinski
@@ -6,7 +6,7 @@
  * Copyright (C) 1994 Alexandre Julliard
  * Copyright (c) 1999 Christoph Bratschi
  *
- * WINE version: 991031
+ * WINE version: 991212
  *
  * Status: complete
  * Version: 5.00
@@ -155,7 +155,7 @@ static LRESULT BUTTON_Create(HWND hwnd,WPARAM wParam,LPARAM lParam)
   infoPtr = (BUTTONINFO*)malloc(sizeof(BUTTONINFO));
   infoPtr->state = BUTTON_UNCHECKED;
   infoPtr->hFont = 0;
-  infoPtr->hImage = NULL;
+  infoPtr->hImage = 0;
   SetInfoPtr(hwnd,(DWORD)infoPtr);
 
   return 0;
@@ -348,9 +348,10 @@ static LRESULT BUTTON_KeyDown(HWND hwnd,WPARAM wParam,LPARAM lParam)
 {
   if (wParam == VK_SPACE)
   {
+    BUTTONINFO* infoPtr = (BUTTONINFO*)GetInfoPtr(hwnd);
+
     SendMessageA(hwnd,BM_SETSTATE,TRUE,0);
-    SetFocus(hwnd);
-    SetCapture(hwnd);
+    infoPtr->state |= BUTTON_BTNPRESSED;
   }
 
   return 0;
@@ -363,7 +364,8 @@ static LRESULT BUTTON_KeyUp(HWND hwnd,WPARAM wParam,LPARAM lParam)
     BUTTONINFO* infoPtr = (BUTTONINFO*)GetInfoPtr(hwnd);
     DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
 
-    ReleaseCapture();
+    if (!(infoPtr->state & BUTTON_BTNPRESSED)) return 0;
+    infoPtr->state &= BUTTON_NSTATES;
     if (!(infoPtr->state & BUTTON_HIGHLIGHTED)) return 0;
     SendMessageA(hwnd,BM_SETSTATE,FALSE,0);
 
@@ -382,7 +384,7 @@ static LRESULT BUTTON_KeyUp(HWND hwnd,WPARAM wParam,LPARAM lParam)
         break;
     }
     BUTTON_SendNotify(hwnd,BN_CLICKED);
-  } else if (wParam != VK_TAB) ReleaseCapture();
+  }
 
   return 0;
 }
@@ -489,7 +491,7 @@ static LRESULT BUTTON_GetImage(HWND hwnd,WPARAM wParam,LPARAM lParam)
     case IMAGE_ICON:
       return (HICON)infoPtr->hImage;
     default:
-      return NULL;
+      return (HICON)0;
   }
 }
 
@@ -783,7 +785,7 @@ static void BUTTON_DrawPushButton(
         free(text);
     }
     if ( ((dwStyle & BS_ICON) || (dwStyle & BS_BITMAP) ) &&
-         (infoPtr->hImage != NULL) )
+         (infoPtr->hImage != 0) )
     {
         int yOffset, xOffset;
         int imageWidth, imageHeight;
@@ -830,7 +832,7 @@ static void BUTTON_DrawPushButton(
         /* If the image is too big for the button then create a region*/
         if(xOffset < 0 || yOffset < 0)
         {
-            HRGN hBitmapRgn = NULL;
+            HRGN hBitmapRgn = 0;
             hBitmapRgn = CreateRectRgn(
                 rc.left + xBorderOffset, rc.top +yBorderOffset,
                 rc.right - xBorderOffset, rc.bottom - yBorderOffset);
@@ -867,7 +869,7 @@ static void BUTTON_DrawPushButton(
 
         if(xOffset < 0 || yOffset < 0)
         {
-            SelectClipRgn(hDC, NULL);
+            SelectClipRgn(hDC, 0);
         }
     }
 
@@ -915,7 +917,7 @@ static void CB_Paint(HWND hwnd,HDC hDC,WORD action)
      * if the button has a bitmap/icon, draw a normal pushbutton
      * instead of a radion button.
      */
-    if (infoPtr->hImage!=NULL)
+    if (infoPtr->hImage != 0)
     {
         BOOL bHighLighted = ((infoPtr->state & BUTTON_HIGHLIGHTED) ||
                              (infoPtr->state & BUTTON_CHECKED));

@@ -1,11 +1,11 @@
-/* $Id: listbox.cpp,v 1.14 1999-12-20 19:10:54 cbratschi Exp $ */
+/* $Id: listbox.cpp,v 1.15 1999-12-21 17:03:44 cbratschi Exp $ */
 /*
  * Listbox controls
  *
  * Copyright 1996 Alexandre Julliard
  * Copyright 1999 Christoph Bratschi (ported from WINE)
  *
- * WINE version: 991031
+ * WINE version: 991212
  */
 
 #include <string.h>
@@ -22,8 +22,6 @@
  * - LBS_USETABSTOPS
  * - Unicode
  * - Locale handling
- * - real WM_SETREDRAW support + for all other controls
-     bug: LISTBOX_InvalidateItems -> always redraw!
  */
 
 //CB: drive funtions (… la wine drive.c)
@@ -957,6 +955,8 @@ static void LISTBOX_InvalidateItems( HWND hwnd, LB_DESCR *descr, INT index )
 {
     RECT rect;
 
+    if (descr->style & LBS_NOREDRAW) return;
+
     if (LISTBOX_GetItemRect( hwnd, descr, index, &rect ) == 1)
     {
         rect.bottom = descr->height;
@@ -1230,7 +1230,7 @@ static LRESULT LISTBOX_SetSelection( HWND hwnd, LB_DESCR *descr, INT index,
         if (oldsel != -1) descr->items[oldsel].selected = FALSE;
         if (index != -1) descr->items[index].selected = TRUE;
         descr->selected_item = index;
-        if (oldsel != -1) LISTBOX_RepaintItem( hwnd, descr, oldsel, ODA_SELECT);
+        if (oldsel != -1) LISTBOX_RepaintItem( hwnd, descr, oldsel, 0);
         if (index != -1) LISTBOX_RepaintItem( hwnd, descr, index, ODA_SELECT );
         if (send_notify && descr->nb_items) SEND_NOTIFICATION( hwnd, descr,
                                (index != -1) ? LBN_SELCHANGE : LBN_SELCANCEL );
@@ -1748,7 +1748,8 @@ static LRESULT LISTBOX_HandleLButtonDown( HWND hwnd, LB_DESCR *descr,
             {
                 LISTBOX_SetCaretIndex( hwnd, descr, index, FALSE );
                 LISTBOX_SetSelection( hwnd, descr, index,
-                                      !descr->items[index].selected, FALSE );
+                                      !descr->items[index].selected,
+                                      (descr->style & LBS_NOTIFY) != 0 );
             }
             else LISTBOX_MoveCaret( hwnd, descr, index, FALSE );
         }
@@ -1757,7 +1758,8 @@ static LRESULT LISTBOX_HandleLButtonDown( HWND hwnd, LB_DESCR *descr,
             LISTBOX_MoveCaret( hwnd, descr, index, FALSE );
             LISTBOX_SetSelection( hwnd, descr, index,
                                   (!(descr->style & LBS_MULTIPLESEL) ||
-                                   !descr->items[index].selected), FALSE );
+                                   !descr->items[index].selected),
+                                   (descr->style & LBS_NOTIFY) != 0 );
         }
     }
 
