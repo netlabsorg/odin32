@@ -1,4 +1,4 @@
-/* $Id: myldrCheckInternalName.cpp,v 1.3 2001-02-10 11:11:45 bird Exp $
+/* $Id: myldrCheckInternalName.cpp,v 1.4 2001-07-06 19:22:35 bird Exp $
  *
  * ldrCheckInternalName - ldrCheckInternalName replacement with support for
  *                  long DLL names and no .DLL-extention dependency.
@@ -80,6 +80,7 @@ ULONG LDRCALL myldrCheckInternalName(PMTE pMTE)
                                          * this is the length relative to pachName used to match the internal name. */
     PCHAR   pachExt;                    /* Pointer to the extention part of pachFilename. (not dot!) */
     int     cchExt;                     /* Length of the extention part of pachFilename. (not dot!) */
+    PCHAR   pachResName;                /* Pointer to the internal name - resname.0 */
     APIRET  rc;                         /* Return code. */
 
 
@@ -96,12 +97,12 @@ ULONG LDRCALL myldrCheckInternalName(PMTE pMTE)
     cchName = (int)ldrGetFileName2(ldrpFileNameBuf, (PCHAR*)SSToDS(&pachName), (PCHAR*)SSToDS(&pachExt));
     cchExt = (pachExt) ? strlen(pachExt) : 0;
     ldrUCaseString(pachName, cchName + cchExt + 1);
-
+    pachResName = (PCHAR)pMTE->mte_swapmte->smte_restab;
 
     /*
      * Do the compare - DllFix case or standard case.
      */
-    if (cchName > 8
+    if (   (cchName > 8 && *pachResName > 8)
         || (   (pMTE->mte_flags1 & CLASS_MASK) == CLASS_GLOBAL
             && (cchExt != 3 || strcmp(pachExt, "DLL"))  /* Extention != DLL. */
             )
@@ -111,10 +112,8 @@ ULONG LDRCALL myldrCheckInternalName(PMTE pMTE)
          *  1. If DLL extention, the internal name don't need to have an extention,
          *     but it could have.
          *  2. If not DLL extention, then internal name must have an extention.
-         *  3. If no extetion the internal name should end with a '.'.
+         *  3. If no extention the internal name should end with a '.'.
          */
-        PCHAR   pachResName = (PCHAR)pMTE->mte_swapmte->smte_restab;
-
         if (pachExt != NULL && cchExt == 3 && !memcmp(pachExt, "DLL", 3))   /* DLL extention. */
         {   /* (1) */
             rc =(   (   *pachResName == cchName
