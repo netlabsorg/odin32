@@ -1,3 +1,4 @@
+/* $Id: obj_clientserver.h,v 1.3 1999-06-10 16:21:53 achimha Exp $ */
 /*
  * Defines the COM interfaces and APIs related to client/server aspects.
  */

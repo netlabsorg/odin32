@@ -1,3 +1,4 @@
+/* $Id: progress.c,v 1.2 1999-06-10 16:22:01 achimha Exp $ */
 /*		
  * Progress control
  *

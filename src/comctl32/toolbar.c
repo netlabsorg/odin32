@@ -1,3 +1,4 @@
+/* $Id: toolbar.c,v 1.4 1999-06-10 16:22:02 achimha Exp $ */
 /*
  * Toolbar control
  *

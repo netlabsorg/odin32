@@ -1,3 +1,4 @@
+/* $Id: flatsb.h,v 1.2 1999-06-10 16:21:51 achimha Exp $ */
 /*
  * Flat scroll bar class extra info
  *

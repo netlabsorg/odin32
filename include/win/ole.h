@@ -1,3 +1,4 @@
+/* $Id: ole.h,v 1.3 1999-06-10 16:21:51 achimha Exp $ */
 /*
  *	ole.h	-	Declarations for OLESVR and OLECLI
  */

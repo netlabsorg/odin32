@@ -1,3 +1,5 @@
+/* $Id: shell16.h,v 1.3 1999-06-10 16:21:56 achimha Exp $ */
+
 #ifndef _SHELL16_H
 #define _SHELL16_H
 

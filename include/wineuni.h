@@ -1,3 +1,4 @@
+/* $Id: wineuni.h,v 1.2 1999-06-10 16:21:50 achimha Exp $ */
 /*
  * WINE Unicode functions to ODIN mappers
  *

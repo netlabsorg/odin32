@@ -1,3 +1,4 @@
+/* $Id: animate.c,v 1.3 1999-06-10 16:21:57 achimha Exp $ */
 /*
  * Animation control
  *

@@ -1,3 +1,4 @@
+/* $Id: pager.c,v 1.3 1999-06-10 16:22:01 achimha Exp $ */
 /*
  * Pager control
  *

@@ -1,3 +1,4 @@
+/* $Id: os2sel.h,v 1.2 1999-06-10 16:21:48 achimha Exp $ */
 /*
  *
  * Project Odin Software License can be found in LICENSE.TXT

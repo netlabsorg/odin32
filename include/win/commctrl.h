@@ -1,3 +1,4 @@
+/* $Id: commctrl.h,v 1.7 1999-06-10 16:21:51 achimha Exp $ */
 /*
  * Common controls definitions
  */

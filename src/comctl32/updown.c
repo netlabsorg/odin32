@@ -1,3 +1,4 @@
+/* $Id: updown.c,v 1.3 1999-06-10 16:22:04 achimha Exp $ */
 /*		
  * Updown control
  *

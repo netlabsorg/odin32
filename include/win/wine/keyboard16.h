@@ -1,3 +1,4 @@
+/* $Id: keyboard16.h,v 1.3 1999-06-10 16:21:52 achimha Exp $ */
 #ifndef _KEYBOARD16_H
 #define _KEYBOARD16_H
 

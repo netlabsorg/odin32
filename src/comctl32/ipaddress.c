@@ -1,3 +1,4 @@
+/* $Id: ipaddress.c,v 1.4 1999-06-10 16:21:59 achimha Exp $ */
 /*
  * IP Address control
  *

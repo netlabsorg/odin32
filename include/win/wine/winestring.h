@@ -1,3 +1,4 @@
+/* $Id: winestring.h,v 1.4 1999-06-10 16:21:57 achimha Exp $ */
 #ifndef _INCLUDE_WINE_STRINGS_H
 #define _INCLUDE_WINE_STRINGS_H
 
