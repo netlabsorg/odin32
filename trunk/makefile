@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 1999-09-06 01:44:18 bird Exp $
+# $Id: makefile,v 1.4 1999-09-08 22:38:59 bird Exp $
 
 #
 # PD-Win32 API
@@ -20,8 +20,12 @@ all:		odin_libraries  needed_tools
 		cd src
 		nmake -nologo all
 
-clean:		odin_libraries  needed_tools
-		cd src
+clean:
+        cd ..\lib
+        nmake -nologo clean
+        cd tools
+        nmake -nologo clean
+		cd ..\src
 		nmake -nologo clean
 
 debug:		odin_libraries  needed_tools
