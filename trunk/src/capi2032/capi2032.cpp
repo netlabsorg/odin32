@@ -1,4 +1,4 @@
-/* $Id: capi2032.cpp,v 1.4 2000-10-20 22:28:24 sandervl Exp $ */
+/* $Id: capi2032.cpp,v 1.5 2000-10-21 09:24:03 sandervl Exp $ */
 
 /*
  * CAPI2032 implementation
@@ -52,6 +52,7 @@ DWORD WIN32API OS2CAPI_REGISTER(
    dwResult = CAPI_REGISTER( MessageBufferSize, maxLogicalConnection,
                              maxBDataBlocks, maxBDataLen, pApplID );
 
+   SetFS(sel);
    if( dwResult )
    {
       dprintf((" failed (%X)!\n", dwResult ));
@@ -79,7 +80,6 @@ DWORD WIN32API OS2CAPI_REGISTER(
          return 0x1108; // OS ressource error (error class 0x11..)
       }
    }
-   SetFS(sel);
    return dwResult;
 }
 
