@@ -1,4 +1,14 @@
- /* $Id: ChangeLog,v 1.220 1999-09-21 18:34:35 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.221 1999-09-22 08:57:41 sandervl Exp $ */
+
+ 99-09-22: Rene Pronk <R.Pronk@twi.tudelft.nl>
+	- USER32: Changed WM_CHAR PM handling to generate WM_(SYS)KEYUP/DOWN
+                  messages.
+                  Note: Not complete as TranslateMessage doesn't translate
+                        ascii keys to WM_CHAR messages.
+
+ 99-09-22: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Removed GetDesktopWindow fix
+                  Ported getNextDlgTabItem & getDlgItem
 
  99-09-21: Daniela Engert <dani@ngrt.de>
 	- USER32:   background erasing/painting stuff hopefully finished.
