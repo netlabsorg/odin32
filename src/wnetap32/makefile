@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.14 2000-11-19 08:35:50 bird Exp $
+# $Id: makefile,v 1.15 2000-11-19 08:38:24 bird Exp $
 
 #
 # Odin32 API
@@ -20,7 +20,7 @@ OBJS = \
 $(OBJDIR)\wnetap32.obj \
 $(OBJDIR)\oslibnet.obj \
 $(OBJDIR)\netapi32rsrc.obj \
-$(PDWIN32_LIB)/dllentry.obj
+$(DLLENTRY)
 
 
 #
