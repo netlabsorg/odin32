@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.57 2000-02-24 19:19:10 sandervl Exp $ */
+/* $Id: window.cpp,v 1.58 2000-03-01 13:30:07 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -30,6 +30,7 @@
 #include "user32.h"
 #include "winicon.h"
 #include <win\winpos.h>
+#include <heapstring.h>
 
 #define DBG_LOCALLOG    DBG_window
 #include "dbglocal.h"
@@ -186,7 +187,7 @@ HWND WIN32API CreateWindowExW(DWORD exStyle, LPCWSTR className,
         }
     }
     if(HIWORD(className)) {
-         dprintf(("CreateWindowExW: class %s parent %x (%d,%d) (%d,%d), %x %x", className, parent, x, y, width, height, style, exStyle));
+         dprintf(("CreateWindowExW: class %ls parent %x (%d,%d) (%d,%d), %x %x", className, parent, x, y, width, height, style, exStyle));
     }
     else dprintf(("CreateWindowExW: class %d parent %x (%d,%d) (%d,%d), %x %x", className, parent, x, y, width, height, style, exStyle));
 
@@ -286,7 +287,7 @@ HWND WIN32API CreateMDIWindowW(LPCWSTR lpszClassName, LPCWSTR lpszWindowName,
     window = Win32BaseWindow::GetWindowFromHandle(hwndParent);
     if(!window) {
         dprintf(("CreateMDIWindowW, window %x not found", hwndParent));
-    SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+    	SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return 0;
     }
 
@@ -951,44 +952,31 @@ HWND WIN32API GetDesktopWindow(void)
 //******************************************************************************
 HWND WIN32API FindWindowA(LPCSTR lpszClass, LPCSTR lpszWindow)
 {
-    if(!lpszClass) {
-        SetLastError(ERROR_INVALID_PARAMETER);
-        return 0;
-    }
-    if(HIWORD(lpszClass)) {
-         dprintf(("USER32:  FindWindow %s %s\n", lpszClass, lpszWindow));
-    }
-    else dprintf(("USER32:  FindWindow %x %s\n", lpszClass, lpszWindow));
-
-    return Win32BaseWindow::FindWindowEx(OSLIB_HWND_DESKTOP, 0, (LPSTR)lpszClass, (LPSTR)lpszWindow);
+    return FindWindowExA( NULL, NULL, lpszClass, lpszWindow );
 }
 //******************************************************************************
 //******************************************************************************
 HWND WIN32API FindWindowW( LPCWSTR lpClassName, LPCWSTR lpWindowName)
 {
- char *astring1 = UnicodeToAsciiString((LPWSTR)lpClassName);
- char *astring2 = UnicodeToAsciiString((LPWSTR)lpWindowName);
- HWND rc;
-
-    rc = FindWindowA(astring1, astring2);
-    FreeAsciiString(astring1);
-    FreeAsciiString(astring2);
-    return rc;
+    return FindWindowExW( NULL, NULL, lpClassName, lpWindowName );
 }
 //******************************************************************************
 //******************************************************************************
 HWND WIN32API FindWindowExA(HWND hwndParent, HWND hwndChildAfter, LPCSTR lpszClass, LPCSTR lpszWindow)
 {
-    if(!lpszClass) {
-        SetLastError(ERROR_INVALID_PARAMETER);
-        return 0;
-    }
-    if(HIWORD(lpszClass)) {
-         dprintf(("USER32:  FindWindowExA (%x,%x) %s %s\n", hwndParent, hwndChildAfter, lpszClass, lpszWindow));
-    }
-    else dprintf(("USER32:  FindWindowExA (%x,%x)%x %s\n", hwndParent, hwndChildAfter, lpszClass, lpszWindow));
+    ATOM atom = 0;
 
-    return Win32BaseWindow::FindWindowEx(hwndParent, hwndChildAfter, (LPSTR)lpszClass, (LPSTR)lpszWindow);
+    if (lpszClass)
+    {
+        /* If the atom doesn't exist, then no class */
+        /* with this name exists either. */
+        if (!(atom = GlobalFindAtomA( lpszClass ))) 
+        {
+            SetLastError(ERROR_CANNOT_FIND_WND_CLASS);
+            return 0;
+        }
+    }
+    return Win32BaseWindow::FindWindowEx(hwndParent, hwndChildAfter, atom, (LPSTR)lpszWindow);
 }
 /*****************************************************************************
  * Name      : HWND WIN32API FindWindowExW
@@ -1006,23 +994,32 @@ HWND WIN32API FindWindowExA(HWND hwndParent, HWND hwndChildAfter, LPCSTR lpszCla
  *             If the function fails, the return value is NULL. To get extended
  *               error information, call GetLastError.
  * Remark    :
- * Status    : UNTESTED STUB
  *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
  *****************************************************************************/
 
 HWND WIN32API FindWindowExW(HWND    hwndParent,
-                               HWND    hwndChildAfter,
-                               LPCWSTR lpszClass,
-                               LPCWSTR lpszWindow)
+                            HWND    hwndChildAfter,
+                            LPCWSTR lpszClass,
+                            LPCWSTR lpszWindow)
 {
-    if(!lpszClass) {
-        SetLastError(ERROR_INVALID_PARAMETER);
-        return 0;
-    }
-    dprintf(("USER32:  FindWindowExW (%x,%x) %x %s\n", hwndParent, hwndChildAfter, lpszClass, lpszWindow));
+    ATOM atom = 0;
+    char *buffer;
+    HWND hwnd;
 
-    return Win32BaseWindow::FindWindowEx(hwndParent, hwndChildAfter, (LPSTR)lpszClass, (LPSTR)lpszWindow);
+    if (lpszClass)
+    {
+        /* If the atom doesn't exist, then no class */
+        /* with this name exists either. */
+        if (!(atom = GlobalFindAtomW( lpszClass )))
+        {
+            SetLastError(ERROR_CANNOT_FIND_WND_CLASS);
+            return 0;
+        }
+    }
+    buffer = HEAP_strdupWtoA( GetProcessHeap(), 0, lpszWindow );
+    hwnd = Win32BaseWindow::FindWindowEx(hwndParent, hwndChildAfter, atom, buffer);
+    HeapFree( GetProcessHeap(), 0, buffer );
+    return hwnd;
 }
 //******************************************************************************
 //******************************************************************************
