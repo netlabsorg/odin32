@@ -1,4 +1,4 @@
-/* $Id: winbase.h,v 1.23 2000-11-22 00:25:48 phaller Exp $ */
+/* $Id: winbase.h,v 1.24 2000-11-22 00:34:15 phaller Exp $ */
 
 #ifndef __WINE_WINBASE_H
 #define __WINE_WINBASE_H
@@ -1568,7 +1568,7 @@ LPVOID      WINAPI HeapReAlloc(HANDLE,DWORD,LPVOID,DWORD);
 DWORD       WINAPI HeapSize(HANDLE,DWORD,LPVOID);
 BOOL      WINAPI HeapUnlock(HANDLE);
 BOOL      WINAPI HeapValidate(HANDLE,DWORD,LPCVOID);
-BOOL    WIN32API HeapWalk      (HANDLE, LPVOID);
+BOOL      WINAPI HeapWalk      (HANDLE, LPVOID);
 BOOL        WINAPI InitializeSid(PSID,PSID_IDENTIFIER_AUTHORITY,BYTE);
 BOOL        WINAPI IsValidSecurityDescriptor(PSECURITY_DESCRIPTOR);
 BOOL        WINAPI IsValidSid(PSID);
