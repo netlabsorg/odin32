@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.8 2001-06-16 16:10:12 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.9 2001-06-17 13:58:32 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -23,6 +23,10 @@
 
 #define DBG_LOCALLOG    DBG_hmdisk
 #include "dbglocal.h"
+
+static HINSTANCE hInstAspi                           = 0;
+static DWORD (WIN32API *GetASPI32SupportInfo)()      = NULL;
+static DWORD (CDECL *SendASPI32Command)(LPSRB lpSRB) = NULL;
 
 HMDeviceDiskClass::HMDeviceDiskClass(LPCSTR lpDeviceName) : HMDeviceKernelObjectClass(lpDeviceName)
 {
@@ -115,6 +119,15 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
         pHMHandleData->dwUserData = *lpFileName; //save drive letter
         if(pHMHandleData->dwUserData >= 'a') {
             pHMHandleData->dwUserData = pHMHandleData->dwUserData - ((int)'a' - (int)'A');
+        }
+
+        if(GetDriveTypeA(lpFileName) == DRIVE_CDROM && hInstAspi == NULL) {
+            hInstAspi = LoadLibraryA("WNASPI32.DLL");
+            if(hInstAspi == NULL) {
+                return ERROR_INVALID_PARAMETER;
+            }
+            *(FARPROC *)&GetASPI32SupportInfo = GetProcAddress(hInstAspi, "GetASPI32SupportInfo");
+            *(FARPROC *)&SendASPI32Command    = GetProcAddress(hInstAspi, "SendASPI32Command");
         }
         return (NO_ERROR);
     }
@@ -298,7 +311,7 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
     case IOCTL_DISK_GET_MEDIA_TYPES:
     {
         PDISK_GEOMETRY pGeom = (PDISK_GEOMETRY)lpOutBuffer;
-        if(nOutBufferSize < sizeof(DISK_GEOMETRY)) {
+        if(nOutBufferSize < sizeof(DISK_GEOMETRY) || !pGeom) {
             SetLastError(ERROR_INSUFFICIENT_BUFFER);
             return FALSE;
         }
@@ -311,6 +324,7 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
         if(lpBytesReturned) {
             *lpBytesReturned = sizeof(DISK_GEOMETRY);
         }
+        SetLastError(ERROR_SUCCESS);
         return TRUE;
     }
 
@@ -346,14 +360,80 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
     case IOCTL_SCSI_MINIPORT:
     case IOCTL_SCSI_GET_INQUIRY_DATA:
     case IOCTL_SCSI_GET_CAPABILITIES:
-    case IOCTL_SCSI_PASS_THROUGH_DIRECT:
         break;
 
+    case IOCTL_SCSI_PASS_THROUGH_DIRECT:
+    {
+        PSCSI_PASS_THROUGH_DIRECT pPacket = (PSCSI_PASS_THROUGH_DIRECT)lpOutBuffer;
+        SRB_ExecSCSICmd *psrb;
+
+        if(nOutBufferSize < sizeof(SCSI_PASS_THROUGH_DIRECT) ||
+           !pPacket || pPacket->Length < sizeof(SCSI_PASS_THROUGH_DIRECT)) 
+        {
+            SetLastError(ERROR_INSUFFICIENT_BUFFER);
+            return FALSE;
+        }
+        if(lpBytesReturned) {
+            *lpBytesReturned = 0;
+        }
+        psrb = (SRB_ExecSCSICmd *)alloca(sizeof(SRB_ExecSCSICmd)+pPacket->SenseInfoLength);
+        if(psrb == NULL) {
+            dprintf(("not enough memory!!"));
+            SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+            return FALSE;
+        }
+        memset(psrb, 0, sizeof(*psrb));
+        psrb->SRB_Cmd        = SC_EXEC_SCSI_CMD;
+        psrb->SRB_Status     = pPacket->ScsiStatus;
+        psrb->SRB_HaId       = pPacket->PathId;
+        psrb->SRB_Target     = pPacket->TargetId;
+        psrb->SRB_Lun        = pPacket->Lun;
+        psrb->SRB_BufLen     = pPacket->DataTransferLength;
+        psrb->SRB_SenseLen   = pPacket->SenseInfoLength;
+        psrb->SRB_CDBLen     = pPacket->CdbLength;
+        switch(pPacket->DataIn) {
+        case SCSI_IOCTL_DATA_OUT:
+             psrb->SRB_Flags = 0x2 << 3;
+             break;
+        case SCSI_IOCTL_DATA_IN:
+             psrb->SRB_Flags = 0x1 << 3;
+             break;
+        case SCSI_IOCTL_DATA_UNSPECIFIED:
+             psrb->SRB_Flags = 0x3 << 3;
+             break;
+        }
+        if(pPacket->CdbLength > 16) {
+             SetLastError(ERROR_INVALID_PARAMETER);
+             return FALSE;
+        }
+        psrb->SRB_BufPointer = (BYTE *)pPacket->DataBuffer;
+        memcpy(&psrb->CDBByte[0], &pPacket->Cdb[0], 16);
+        if(psrb->SRB_SenseLen) {
+            memcpy(&psrb->SenseArea[0], (char *)pPacket + pPacket->SenseInfoOffset, psrb->SRB_SenseLen);
+        }
+        //TODO: pPacket->TimeOutValue ignored
+        int rc = SendASPI32Command((LPSRB)psrb);
+        if(rc != SS_COMP) {
+            dprintf(("SendASPI32Command failed with error %d", rc));
+            if(rc == SS_ERR) {
+                 SetLastError(ERROR_ADAP_HDW_ERR); //returned by NT4, SP6
+            }
+            else SetLastError(ERROR_GEN_FAILURE);
+            return FALSE;
+        }
+        pPacket->ScsiStatus = rc;
+        if(lpBytesReturned) {
+            *lpBytesReturned = 0;
+        }
+        pPacket->DataTransferLength = psrb->SRB_BufLen;
+        if(psrb->SRB_SenseLen) {
+            memcpy((char *)pPacket + pPacket->SenseInfoOffset, &psrb->SenseArea[0], psrb->SRB_SenseLen);
+        }
+        SetLastError(ERROR_SUCCESS);
+        return TRUE;
+    }
     case IOCTL_SCSI_GET_ADDRESS:
     {
-        HINSTANCE hInstAspi;
-        DWORD (WIN32API *GetASPI32SupportInfo)();
-        DWORD (CDECL *SendASPI32Command)(LPSRB lpSRB);
         DWORD numAdapters, rc;
         SRB   srb;
         int   i, j, k;
@@ -366,13 +446,6 @@ BOOL HMDeviceDiskClass::DeviceIoControl(PHMHANDLEDATA pHMHandleData, DWORD dwIoC
         addr->Length = sizeof(SCSI_ADDRESS);
         addr->PortNumber = 0;
         addr->PathId     = 0;
-        hInstAspi = LoadLibraryA("WNASPI32.DLL");
-        if(hInstAspi == NULL) {
-            SetLastError(ERROR_INVALID_PARAMETER); //todo
-            return FALSE;
-        }
-        *(FARPROC *)&GetASPI32SupportInfo = GetProcAddress(hInstAspi, "GetASPI32SupportInfo");
-        *(FARPROC *)&SendASPI32Command    = GetProcAddress(hInstAspi, "SendASPI32Command");
         numAdapters = GetASPI32SupportInfo();
         if(LOBYTE(numAdapters) == 0) goto failure;
 
@@ -411,10 +484,8 @@ done:
             SetLastError(ERROR_SUCCESS);
         }
         else    SetLastError(ERROR_FILE_NOT_FOUND); //todo
-        FreeLibrary(hInstAspi);
         return TRUE;
 failure:
-        FreeLibrary(hInstAspi);
         SetLastError(ERROR_INVALID_PARAMETER); //todo
         return FALSE;
     }
