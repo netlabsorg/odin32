@@ -1,4 +1,4 @@
-/* $Id: syscolor.cpp,v 1.12 1999-11-26 17:06:08 cbratschi Exp $ */
+/* $Id: syscolor.cpp,v 1.13 2000-01-09 19:46:26 sandervl Exp $ */
 
 /*
  * Win32 system color API functions for OS/2
@@ -271,4 +271,10 @@ INT SYSCOLOR_GetLastColor(VOID)
 INT SYSCOLOR_GetNumColors(VOID)
 {
   return NUM_SYS_COLORS;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL SYSCOLOR_GetUseWinColors(VOID)
+{
+  return USEWINCOLORS;
 }
