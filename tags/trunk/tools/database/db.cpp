@@ -1,4 +1,4 @@
-/* $Id: db.cpp,v 1.25 2001-09-06 03:07:32 bird Exp $ *
+/* $Id: db.cpp,v 1.26 2001-09-07 10:24:07 bird Exp $ *
  *
  * DB - contains all database routines.
  *
@@ -153,17 +153,17 @@ BOOL _System dbDisconnect(void)
 }
 
 /**
- * Gets the refid for the give dll name.
- * @returns   Dll refid. -1 on error.
- * @param     pszDllName  Dll name.
+ * Gets the refid for the give mod name.
+ * @returns Module refid. -1 on error.
+ * @param   pszModName      Module name.
  */
-signed long _System dbGetDll(const char *pszDllName)
+signed long _System dbGetModule(const char *pszModName)
 {
     int         rc;
     char        szQuery[256];
     MYSQL_RES * pres;
 
-    sprintf(&szQuery[0], "SELECT refcode FROM dll WHERE name = '%s'\n", pszDllName);
+    sprintf(&szQuery[0], "SELECT refcode FROM module WHERE name = '%s'\n", pszModName);
     rc   = mysql_query(pmysql, &szQuery[0]);
     pres = mysql_store_result(pmysql);
 
@@ -177,20 +177,20 @@ signed long _System dbGetDll(const char *pszDllName)
 
 
 /**
- * Count the function in a given dll.
- * @returns  Number of functions. -1 on error.
- * @param    lDll         Dll refcode.
- * @param    fNotAliases  TRUE: don't count aliased functions.
+ * Count the function in a given module.
+ * @returns Number of functions. -1 on error.
+ * @param   lModule         Module refcode.
+ * @param   fNotAliases     TRUE: don't count aliased functions.
  */
-signed long     _System dbCountFunctionInDll(signed long lDll, BOOL fNotAliases)
+signed long     _System dbCountFunctionInModule(signed long lModule, BOOL fNotAliases)
 {
     signed long rc;
     char        szQuery[256];
     MYSQL_RES * pres;
 
-    if (lDll >= 0)
+    if (lModule >= 0)
     {
-        sprintf(&szQuery[0], "SELECT count(refcode) FROM function WHERE dll = %ld\n", lDll);
+        sprintf(&szQuery[0], "SELECT count(refcode) FROM function WHERE module = %ld\n", lModule);
         if (fNotAliases)
             strcat(&szQuery[0], " AND aliasfn < 0");
         rc   = mysql_query(pmysql, &szQuery[0]);
@@ -210,35 +210,36 @@ signed long     _System dbCountFunctionInDll(signed long lDll, BOOL fNotAliases)
 
 
 /**
- * Checks if dll exists. If not exists the dll is inserted.
- * @returns   Dll refcode. -1 on errors.
- * @param     pszDll  Dll name.
- * @remark    This search must be case insensitive.
- *            (In the mysql-world everything is case insensitive!)
+ * Checks if module exists. If not exists the module is inserted.
+ * @returns Module refcode. -1 on errors.
+ * @param   pszModule   Module name.
+ * @param   fchType     Module type.
+ * @remark  This search must be case insensitive.
+ *          (In the mysql-world everything is case insensitive!)
  */
-signed long _System dbCheckInsertDll(const char *pszDll, char fchType)
+signed long _System dbCheckInsertModule(const char *pszModule, char fchType)
 {
     int         rc;
     char        szQuery[256];
     MYSQL_RES * pres;
 
     /* try find match */
-    sprintf(&szQuery[0], "SELECT refcode, name FROM dll WHERE name = '%s'\n", pszDll);
+    sprintf(&szQuery[0], "SELECT refcode, name FROM module WHERE name = '%s'\n", pszModule);
     rc   = mysql_query(pmysql, &szQuery[0]);
     pres = mysql_store_result(pmysql);
 
-    /* not found? - insert dll */
+    /* not found? - insert module */
     if (rc < 0 || pres == NULL || mysql_num_rows(pres) == 0)
     {
         mysql_free_result(pres);
 
-        sprintf(&szQuery[0], "INSERT INTO dll(name, type) VALUES('%s', '%c')\n", pszDll, fchType);
+        sprintf(&szQuery[0], "INSERT INTO module(name, type) VALUES('%s', '%c')\n", pszModule, fchType);
         rc = mysql_query(pmysql, &szQuery[0]);
         if (rc < 0)
             return -1;
 
         /* select row to get refcode */
-        sprintf(&szQuery[0], "SELECT refcode, name FROM dll WHERE name = '%s'\n", pszDll);
+        sprintf(&szQuery[0], "SELECT refcode, name FROM module WHERE name = '%s'\n", pszModule);
         rc   = mysql_query(pmysql, &szQuery[0]);
         pres = mysql_store_result(pmysql);
     }
@@ -289,14 +290,14 @@ unsigned short _System dbGet(const char *pszTable, const char *pszGetColumn,
  * Updates or inserts a function name into the database.
  * The update flags is always updated.
  * @returns     Success indicator. TRUE / FALSE.
- * @param       lDll                Dll refcode.
+ * @param       lModule             Module refcode.
  * @param       pszFunction         Function name.
  * @param       pszIntFunction      Internal function name. (required!)
  * @param       ulOrdinal           Ordinal value.
  * @param       fIgnoreOrdinal      Do not update ordinal value.
  * @param       fchType             Function type flag. One of the FUNCTION_* defines.
  */
-BOOL _System dbInsertUpdateFunction(signed long lDll,
+BOOL _System dbInsertUpdateFunction(signed long lModule,
                                     const char *pszFunction, const char *pszIntFunction,
                                     unsigned long ulOrdinal, BOOL fIgnoreOrdinal, char fchType)
 {
@@ -311,7 +312,7 @@ BOOL _System dbInsertUpdateFunction(signed long lDll,
         return FALSE;
 
     /* try find function */
-    sprintf(pszQuery, "SELECT refcode, intname FROM function WHERE dll = %d AND name = '%s'", lDll, pszFunction);
+    sprintf(pszQuery, "SELECT refcode, intname FROM function WHERE module = %d AND name = '%s'", lModule, pszFunction);
     rc = mysql_query(pmysql, pszQuery);
     pres = mysql_store_result(pmysql);
     if (rc >= 0 && pres != NULL && mysql_num_rows(pres) != 0)
@@ -321,8 +322,8 @@ BOOL _System dbInsertUpdateFunction(signed long lDll,
         MYSQL_ROW parow;
         if (mysql_num_rows(pres) > 1)
         {
-            fprintf(stderr, "internal database integrity error(%s): More function by the same name for the same dll. "
-                    "lDll = %d, pszFunction = %s\n", __FUNCTION__, lDll, pszFunction);
+            fprintf(stderr, "internal database integrity error(%s): More function by the same name for the same module. "
+                    "lModule = %d, pszFunction = %s\n", __FUNCTION__, lModule, pszFunction);
             return FALSE;
         }
 
@@ -346,8 +347,8 @@ BOOL _System dbInsertUpdateFunction(signed long lDll,
          * The function was not found. (or maybe an error occured?)
          * Insert it.
          */
-        sprintf(&szQuery[0], "INSERT INTO function(dll, name, intname, ordinal, updated, type) VALUES(%d, '%s', '%s', %ld, 1, '%c')",
-                lDll, pszFunction, pszIntFunction, ulOrdinal, fchType);
+        sprintf(&szQuery[0], "INSERT INTO function(module, name, intname, ordinal, updated, type) VALUES(%d, '%s', '%s', %ld, 1, '%c')",
+                lModule, pszFunction, pszIntFunction, ulOrdinal, fchType);
         rc = mysql_query(pmysql, &szQuery[0]);
     }
 
@@ -359,7 +360,7 @@ BOOL _System dbInsertUpdateFunction(signed long lDll,
 /**
  * Inserts or updates (existing) file information.
  * @returns     Success indicator (TRUE / FALSE).
- * @param       lDll           Dll reference code.
+ * @param       lModule         Module reference code.
  * @param       pszFilename     Filename.
  * @param       pszDescription  Pointer to file description.
  * @param       pszLastDateTime Date and time for last change (ISO).
@@ -368,7 +369,7 @@ BOOL _System dbInsertUpdateFunction(signed long lDll,
  * @sketch
  * @remark
  */
-BOOL            _System dbInsertUpdateFile(signed long lDll,
+BOOL            _System dbInsertUpdateFile(signed long lModule,
                                            const char *pszFilename,
                                            const char *pszDescription,
                                            const char *pszLastDateTime,
@@ -381,12 +382,12 @@ BOOL            _System dbInsertUpdateFile(signed long lDll,
     MYSQL_RES *pres;
 
     /* parameter assertions */
-    assert(lDll != 0);
+    assert(lModule != 0);
     assert(pszFilename != NULL);
     assert(*pszFilename != '\0');
 
     /* try find file */
-    sprintf(&szQuery[0], "SELECT refcode, name FROM file WHERE dll = %d AND name = '%s'", lDll, pszFilename);
+    sprintf(&szQuery[0], "SELECT refcode, name FROM file WHERE module = %d AND name = '%s'", lModule, pszFilename);
     rc = mysql_query(pmysql, &szQuery[0]);
     pres = mysql_store_result(pmysql);
     if (rc >= 0 && pres != NULL && mysql_num_rows(pres) != 0)
@@ -394,8 +395,8 @@ BOOL            _System dbInsertUpdateFile(signed long lDll,
         MYSQL_ROW parow;
         if (mysql_num_rows(pres) > 1)
         {
-            fprintf(stderr, "internal database integrity error(%s): More files by the same name in the same dll. "
-                    "lDll = %d, pszFilename = %s\n", __FUNCTION__, lDll, pszFilename);
+            fprintf(stderr, "internal database integrity error(%s): More files by the same name in the same module. "
+                    "lModule = %d, pszFilename = %s\n", __FUNCTION__, lModule, pszFilename);
             return FALSE;
         }
 
@@ -449,8 +450,8 @@ BOOL            _System dbInsertUpdateFile(signed long lDll,
     }
     else
     {   /* insert */
-        sprintf(&szQuery[0], "INSERT INTO file(dll, name, lastauthor, description, lastdatetime, revision) VALUES(%d, '%s', %ld, ",
-                lDll, pszFilename, lLastAuthor);
+        sprintf(&szQuery[0], "INSERT INTO file(module, name, lastauthor, description, lastdatetime, revision) VALUES(%d, '%s', %ld, ",
+                lModule, pszFilename, lLastAuthor);
         if (pszDescription != NULL && *pszDescription != '\0')
             sqlstrcat(&szQuery[0], NULL, pszDescription);
         else
@@ -523,16 +524,16 @@ int     mysql_query6(MYSQL *mysql, const char *q)
  * @returns   success indicator, TRUE / FALSE.
  * @param     pszFunctionName   Pointer to a function name string. (input)
  * @param     pFnFindBuf        Pointer to a find buffer. (output)
- * @param     lDll              Dll refcode (optional). If given the search is limited to
- *                              the given dll and aliasing functions is updated (slow!).
- * @sketch    1) Get functions for this dll(if given).
+ * @param     lModule           Module refcode (optional). If given the search is limited to
+ *                              the given module and aliasing functions is updated (slow!).
+ * @sketch    1) Get functions for this module(if given).
  *            2) Get functions which aliases the functions found in (1).
  *            3) Get new aliases by intname
  *            4) Get new aliases by name
  *            5) Update all functions from (1) to have aliasfn -2 (DONTMIND)
  *            6) Update all functions from (3) and (4) to alias the first function from 1.
  */
-BOOL _System dbFindFunction(const char *pszFunctionName, PFNFINDBUF pFnFindBuf, signed long lDll)
+BOOL _System dbFindFunction(const char *pszFunctionName, PFNFINDBUF pFnFindBuf, signed long lModule)
 {
     MYSQL_RES   *pres;
     MYSQL_ROW    row;
@@ -540,15 +541,15 @@ BOOL _System dbFindFunction(const char *pszFunctionName, PFNFINDBUF pFnFindBuf, 
     char         szQuery[1024];
 
     /*
-     * 1) Get functions for this dll(if given).
+     * 1) Get functions for this module(if given).
      */
-    if (lDll < 0)
-        sprintf(&szQuery[0], "SELECT refcode, dll, aliasfn, file, name FROM function WHERE intname = '%s'",
+    if (lModule < 0)
+        sprintf(&szQuery[0], "SELECT refcode, module, aliasfn, file, name, type FROM function WHERE intname = '%s'",
                 pszFunctionName);
     else
-        sprintf(&szQuery[0], "SELECT refcode, dll, aliasfn, file, name FROM function "
-                "WHERE intname = '%s' AND dll = %ld",
-                pszFunctionName, lDll);
+        sprintf(&szQuery[0], "SELECT refcode, module, aliasfn, file, name, type FROM function "
+                "WHERE intname = '%s' AND module = %ld",
+                pszFunctionName, lModule);
 
     rc = mysql_query1(pmysql, &szQuery[0]);
     if (rc >= 0)
@@ -557,32 +558,37 @@ BOOL _System dbFindFunction(const char *pszFunctionName, PFNFINDBUF pFnFindBuf, 
         if (pres != NULL)
         {
             char szFnName[NBR_FUNCTIONS][80];
+            BOOL fAPI = FALSE;
 
             pFnFindBuf->cFns = 0;
             while ((row = mysql_fetch_row(pres)) != NULL)
             {
                 pFnFindBuf->alRefCode[pFnFindBuf->cFns] = atol(row[0]);
-                pFnFindBuf->alDllRefCode[pFnFindBuf->cFns] = atol(row[1]);
+                pFnFindBuf->alModRefCode[pFnFindBuf->cFns] = atol(row[1]);
                 pFnFindBuf->alAliasFn[pFnFindBuf->cFns] = atol(row[2]);
                 pFnFindBuf->alFileRefCode[pFnFindBuf->cFns] = atol(row[3]);
                 strcpy(szFnName[pFnFindBuf->cFns], row[4]);
+                pFnFindBuf->achType[pFnFindBuf->cFns] = *row[5];
+                if (pFnFindBuf->achType[pFnFindBuf->cFns] == FUNCTION_ODIN32_API ||
+                    pFnFindBuf->achType[pFnFindBuf->cFns] == FUNCTION_INTERNAL_ODIN32_API)
+                    fAPI = TRUE;
 
                 /* next */
                 pFnFindBuf->cFns++;
             }
             mysql_free_result(pres);
 
-            /* alias check and fix */
-            if (lDll >= 0 && pFnFindBuf->cFns != 0)
+            /* alias check and fix for apis. */
+            if (fAPI && lModule >= 0 && pFnFindBuf->cFns != 0)
             {
-                int cFnsThisDll, cFnsAliasesAndThisDll, i, f;
+                int cFnsThisModule, cFnsAliasesAndThisModule, i, f;
 
                 /*
                  * 2) Get functions which aliases the functions found in (1).
                  */
-                cFnsThisDll = (int)pFnFindBuf->cFns;
-                strcpy(&szQuery[0], "SELECT refcode, dll, aliasfn, file, name FROM function WHERE aliasfn IN (");
-                for (i = 0; i < cFnsThisDll; i++)
+                cFnsThisModule = (int)pFnFindBuf->cFns;
+                strcpy(&szQuery[0], "SELECT refcode, module, aliasfn, file, name FROM function WHERE aliasfn IN (");
+                for (i = 0; i < cFnsThisModule; i++)
                 {
                     if (i > 0)  strcat(&szQuery[0], " OR ");
                     sprintf(&szQuery[strlen(szQuery)], "(%ld)", pFnFindBuf->alRefCode[i]);
@@ -598,7 +604,7 @@ BOOL _System dbFindFunction(const char *pszFunctionName, PFNFINDBUF pFnFindBuf, 
                         while ((row = mysql_fetch_row(pres)) != NULL)
                         {
                             pFnFindBuf->alRefCode[pFnFindBuf->cFns] = atol(row[0]);
-                            pFnFindBuf->alDllRefCode[pFnFindBuf->cFns] = atol(row[1]);
+                            pFnFindBuf->alModRefCode[pFnFindBuf->cFns] = atol(row[1]);
                             pFnFindBuf->alAliasFn[pFnFindBuf->cFns] = atol(row[2]);
                             pFnFindBuf->alFileRefCode[pFnFindBuf->cFns] = atol(row[3]);
                             strcpy(szFnName[pFnFindBuf->cFns], row[4]);
@@ -611,11 +617,11 @@ BOOL _System dbFindFunction(const char *pszFunctionName, PFNFINDBUF pFnFindBuf, 
                         /*
                          * 3) Get new aliases by intname
                          */
-                        cFnsAliasesAndThisDll = (int)pFnFindBuf->cFns;
-                        sprintf(&szQuery[0], "SELECT refcode, dll, aliasfn, file FROM function "
-                                             "WHERE aliasfn = (-1) AND dll <> %ld AND (intname = '%s'",
-                                lDll, pszFunctionName);
-                        for (i = 0; i < cFnsAliasesAndThisDll; i++)
+                        cFnsAliasesAndThisModule = (int)pFnFindBuf->cFns;
+                        sprintf(&szQuery[0], "SELECT refcode, module, aliasfn, file FROM function "
+                                             "WHERE aliasfn = (-1) AND module <> %ld AND (intname = '%s'",
+                                lModule, pszFunctionName);
+                        for (i = 0; i < cFnsAliasesAndThisModule; i++)
                             sprintf(&szQuery[strlen(&szQuery[0])], " OR intname = '%s'", szFnName[i]);
                         strcat(&szQuery[0], ")");
 
@@ -628,7 +634,7 @@ BOOL _System dbFindFunction(const char *pszFunctionName, PFNFINDBUF pFnFindBuf, 
                                 while ((row = mysql_fetch_row(pres)) != NULL)
                                 {
                                     pFnFindBuf->alRefCode[pFnFindBuf->cFns] = atol(row[0]);
-                                    pFnFindBuf->alDllRefCode[pFnFindBuf->cFns] = atol(row[1]);
+                                    pFnFindBuf->alModRefCode[pFnFindBuf->cFns] = atol(row[1]);
                                     if (row[2] != NULL)
                                         pFnFindBuf->alAliasFn[pFnFindBuf->cFns] = atol(row[2]);
                                     else
@@ -644,10 +650,10 @@ BOOL _System dbFindFunction(const char *pszFunctionName, PFNFINDBUF pFnFindBuf, 
                                 /*
                                  * 4) Get new aliases by name
                                  */
-                                sprintf(&szQuery[0], "SELECT refcode, dll, aliasfn, file FROM function "
-                                                     "WHERE aliasfn = (-1) AND dll <> %ld AND (name = '%s'",
-                                        lDll, pszFunctionName);
-                                for (i = 0; i < cFnsAliasesAndThisDll; i++)
+                                sprintf(&szQuery[0], "SELECT refcode, module, aliasfn, file FROM function "
+                                                     "WHERE aliasfn = (-1) AND module <> %ld AND (name = '%s'",
+                                        lModule, pszFunctionName);
+                                for (i = 0; i < cFnsAliasesAndThisModule; i++)
                                     sprintf(&szQuery[strlen(&szQuery[0])], " OR name = '%s'", szFnName[i]);
                                 strcat(&szQuery[0], ")");
 
@@ -660,7 +666,7 @@ BOOL _System dbFindFunction(const char *pszFunctionName, PFNFINDBUF pFnFindBuf, 
                                         while ((row = mysql_fetch_row(pres)) != NULL)
                                         {
                                             pFnFindBuf->alRefCode[pFnFindBuf->cFns] = atol(row[0]);
-                                            pFnFindBuf->alDllRefCode[pFnFindBuf->cFns] = atol(row[1]);
+                                            pFnFindBuf->alModRefCode[pFnFindBuf->cFns] = atol(row[1]);
                                             if (row[2] != NULL)
                                                 pFnFindBuf->alAliasFn[pFnFindBuf->cFns] = atol(row[2]);
                                             else
@@ -677,8 +683,8 @@ BOOL _System dbFindFunction(const char *pszFunctionName, PFNFINDBUF pFnFindBuf, 
                                          */
                                         sprintf(&szQuery[0], "UPDATE function SET aliasfn = (-2) "
                                                              "WHERE refcode IN (",
-                                                lDll, pszFunctionName);
-                                        for (f = 0, i = 0; i < cFnsThisDll; i++)
+                                                lModule, pszFunctionName);
+                                        for (f = 0, i = 0; i < cFnsThisModule; i++)
                                             if (pFnFindBuf->alAliasFn[i] != ALIAS_DONTMIND)
                                                 sprintf(&szQuery[strlen(&szQuery[0])],
                                                         f++ != 0 ? ", %ld" : "%ld", pFnFindBuf->alRefCode[i]);
@@ -687,7 +693,7 @@ BOOL _System dbFindFunction(const char *pszFunctionName, PFNFINDBUF pFnFindBuf, 
                                             rc = mysql_query5(pmysql, &szQuery[0]);
                                         else
                                             rc = 0;
-                                        if (rc >= 0 && cFnsAliasesAndThisDll < pFnFindBuf->cFns)
+                                        if (rc >= 0 && cFnsAliasesAndThisModule < pFnFindBuf->cFns)
                                         {
                                             /*
                                              * 6) Update all functions from (3) and (4) to alias the first function from 1.
@@ -695,10 +701,10 @@ BOOL _System dbFindFunction(const char *pszFunctionName, PFNFINDBUF pFnFindBuf, 
                                             sprintf(&szQuery[0], "UPDATE function SET aliasfn = (%ld), file = (%ld) "
                                                                  "WHERE aliasfn = (-1) AND refcode IN (",
                                                     pFnFindBuf->alRefCode[0], pFnFindBuf->alFileRefCode[0]);
-                                            for (i = cFnsAliasesAndThisDll; i < pFnFindBuf->cFns; i++)
+                                            for (i = cFnsAliasesAndThisModule; i < pFnFindBuf->cFns; i++)
                                             {
                                                 sprintf(&szQuery[strlen(&szQuery[0])],
-                                                        i > cFnsAliasesAndThisDll ? ", %ld" : "%ld", pFnFindBuf->alRefCode[i]);
+                                                        i > cFnsAliasesAndThisModule ? ", %ld" : "%ld", pFnFindBuf->alRefCode[i]);
                                             }
                                             strcat(&szQuery[0], ")");
                                             rc = mysql_query6(pmysql, &szQuery[0]);
@@ -721,23 +727,23 @@ BOOL _System dbFindFunction(const char *pszFunctionName, PFNFINDBUF pFnFindBuf, 
 
 /**
  * Finds the refcode for a file (if it exists).
- * @returns     File 'refcode'.
- *              -1 on error or not found.
- * @param       lDll            Refcode of the dll which this file belongs to.
- * @param       pszFilename     The filename to search for.
+ * @returns File 'refcode'.
+ *          -1 on error or not found.
+ * @param   lModule         Refcode of the module which this file belongs to.
+ * @param   pszFilename     The filename to search for.
  */
-signed long     _System dbFindFile(signed long lDll, const char *pszFilename)
+signed long     _System dbFindFile(signed long lModule, const char *pszFilename)
 {
     char        szQuery[256];
     MYSQL_RES * pres;
     signed long lRefCode = -1;
 
-    assert(lDll >= 0);
+    assert(lModule >= 0);
     assert(pszFilename != NULL);
     assert(*pszFilename != '\0');
 
-    sprintf(&szQuery[0], "SELECT refcode FROM file WHERE dll = %ld AND name = '%s'",
-            lDll, pszFilename);
+    sprintf(&szQuery[0], "SELECT refcode FROM file WHERE module = %ld AND name = '%s'",
+            lModule, pszFilename);
     if (mysql_query(pmysql, &szQuery[0]) >= 0)
     {
         pres = mysql_store_result(pmysql);
@@ -877,11 +883,11 @@ int     mysql_queryu8(MYSQL *mysql, const char *q)
  * Updates function information.
  * @returns   number of errors.
  * @param     pFnDesc   Function description struct.
- * @param     lDll      Dll which we are working at.
+ * @param     lModule   Module which we are working at.
  * @param     pszError  Buffer for error messages
  * @result    on error(s) pszError will hold information about the error(s).
  */
-unsigned long _System dbUpdateFunction(PFNDESC pFnDesc, signed long lDll, char *pszError)
+unsigned long _System dbUpdateFunction(PFNDESC pFnDesc, signed long lModule, char *pszError)
 {
     MYSQL_RES *     pres;
     MYSQL_ROW       row;
@@ -1139,7 +1145,7 @@ unsigned long _System dbUpdateFunction(PFNDESC pFnDesc, signed long lDll, char *
         }
     } /* for */
 
-    lDll = lDll;
+    lModule = lModule;
     free(pszQuery2);
     return ulRc;
 }
@@ -1147,12 +1153,9 @@ unsigned long _System dbUpdateFunction(PFNDESC pFnDesc, signed long lDll, char *
 
 /**
  * Removes all the existing design notes in the specified file.
- * @returns     Success indicator.
- * @param       lFile       File refcode of the file to remove all design notes for.
- * @sketch
- * @status
- * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
- * @remark
+ * @returns Success indicator.
+ * @param   lFile       File refcode of the file to remove all design notes for.
+ * @author  knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
  */
 BOOL            _System dbRemoveDesignNotes(signed long lFile)
 {
@@ -1167,12 +1170,12 @@ BOOL            _System dbRemoveDesignNotes(signed long lFile)
 /**
  * Adds a design note.
  * @returns     Success indicator.
- * @param       lDll            Dll refcode.
+ * @param       lModule         Module refcode.
  * @param       lFile           File refcode.
  * @param       pszTitle        Design note title.
  * @param       pszText         Design note text.
  * @param       lLevel          Level of the note section. 0 is the design note it self.
- * @param       lSeqNbr         Sequence number (in dll). If 0 the use next available number.
+ * @param       lSeqNbr         Sequence number (in module). If 0 the use next available number.
  * @param       lSeqNbrNote     Sequence number in note.
  * @param       lLine           Line number (1 - based!).
  * @param       fSubSection     TRUE if subsection FALSE if design note.
@@ -1180,7 +1183,7 @@ BOOL            _System dbRemoveDesignNotes(signed long lFile)
  *                              if FALSE *plRefCode will receive the reference id of the note being created.
  * @param       plRefCode       Pointer to reference id of the design note. see fSubSection for more info.
  */
-BOOL            _System dbAddDesignNote(signed long lDll,
+BOOL            _System dbAddDesignNote(signed long lModule,
                                         signed long lFile,
                                         const char *pszTitle,
                                         const char *pszText,
@@ -1196,7 +1199,7 @@ BOOL            _System dbAddDesignNote(signed long lDll,
     MYSQL_RES * pres;
 
 
-    assert(lDll >= 0 && lFile >= 0);
+    assert(lModule >= 0 && lFile >= 0);
     assert(lSeqNbrNote >= 0);
 
     /*
@@ -1204,7 +1207,7 @@ BOOL            _System dbAddDesignNote(signed long lDll,
      */
     if (lSeqNbr == 0 && !fSubSection)
     {
-        sprintf(&szQuery[0], "SELECT MAX(seqnbr) + 1 FROM designnote WHERE dll = %ld AND level = 0", lDll);
+        sprintf(&szQuery[0], "SELECT MAX(seqnbr) + 1 FROM designnote WHERE module = %ld AND level = 0", lModule);
         if (mysql_query(pmysql, &szQuery[0]) >= 0)
         {
             pres = mysql_store_result(pmysql);
@@ -1228,13 +1231,13 @@ BOOL            _System dbAddDesignNote(signed long lDll,
      * Create insert query.
      */
     if (!fSubSection)
-        sprintf(&szQuery[0], "INSERT INTO designnote(dll, file, level, seqnbrnote, seqnbr, line, name, note) "
+        sprintf(&szQuery[0], "INSERT INTO designnote(module, file, level, seqnbrnote, seqnbr, line, name, note) "
                              "VALUES (%ld, %ld, %ld, %ld, %ld, %ld, ",
-                lDll, lFile, lLevel, lSeqNbrNote, lSeqNbr, lLine);
+                lModule, lFile, lLevel, lSeqNbrNote, lSeqNbr, lLine);
     else
-        sprintf(&szQuery[0], "INSERT INTO designnote(refcode, dll, file, level, seqnbrnote, seqnbr, line, name, note) "
+        sprintf(&szQuery[0], "INSERT INTO designnote(refcode, module, file, level, seqnbrnote, seqnbr, line, name, note) "
                              "VALUES (%ld, %ld, %ld, %ld, %ld, %ld, %ld, ",
-                *plRefCode, lDll, lFile, lLevel, lSeqNbrNote, lSeqNbr, lLine);
+                *plRefCode, lModule, lFile, lLevel, lSeqNbrNote, lSeqNbr, lLine);
 
     if (pszTitle != NULL && *pszTitle != '\0')
         sqlstrcat(&szQuery[0], NULL, pszTitle);
@@ -1285,7 +1288,7 @@ unsigned long _System dbCreateHistory(char *pszError)
                 pres=pres;
 
             /* delete - all rows on this date in the history tables */
-            sprintf(pszQuery, "DELETE FROM historydll WHERE date = '%s'", &szCurDt[0]);
+            sprintf(pszQuery, "DELETE FROM historymodule WHERE date = '%s'", &szCurDt[0]);
             rc = mysql_query(pmysql, pszQuery);
             CheckLogContinue((pszError, "error removing old history rows: %s - (sql=%s) ", dbGetLastErrorDesc(), pszQuery));
 
@@ -1293,7 +1296,7 @@ unsigned long _System dbCreateHistory(char *pszError)
             rc = mysql_query(pmysql, pszQuery);
             CheckLogContinue((pszError, "error removing old history rows: %s - (sql=%s) ", dbGetLastErrorDesc(), pszQuery));
 
-            sprintf(pszQuery, "DELETE FROM historydlltotal WHERE date = '%s'", &szCurDt[0]);
+            sprintf(pszQuery, "DELETE FROM historymoduletotal WHERE date = '%s'", &szCurDt[0]);
             rc = mysql_query(pmysql, pszQuery);
             CheckLogContinue((pszError, "error removing old history rows: %s - (sql=%s) ", dbGetLastErrorDesc(), pszQuery));
 
@@ -1301,8 +1304,8 @@ unsigned long _System dbCreateHistory(char *pszError)
             CheckLogContinue((pszError, "error removing old history rows: %s - (sql=%s) ", dbGetLastErrorDesc(), pszQuery));
 
             /* insert new stats */
-            sprintf(pszQuery, "INSERT INTO historydll(dll, state, date, count) "
-                    "SELECT dll, state, '%s', count(*) FROM function GROUP BY dll, state",
+            sprintf(pszQuery, "INSERT INTO historymodule(module, state, date, count, type) "
+                    "SELECT module, state, '%s', count(*), type FROM function GROUP BY module, state, type",
                     &szCurDt[0]);
             rc = mysql_query(pmysql, pszQuery);
             CheckLogContinue((pszError, "error inserting: %s - (sql=%s) ", dbGetLastErrorDesc(), pszQuery));
@@ -1315,14 +1318,14 @@ unsigned long _System dbCreateHistory(char *pszError)
             CheckLogContinue((pszError, "error inserting: %s - (sql=%s) ", dbGetLastErrorDesc(), pszQuery));
 
             /* inserting new totals */
-            sprintf(pszQuery, "INSERT INTO historydlltotal(dll, date, totalcount) "
-                    "SELECT dll, '%s', count(*) FROM function GROUP BY dll",
+            sprintf(pszQuery, "INSERT INTO historymoduletotal(module, date, totalcount, type) "
+                    "SELECT module, '%s', count(*), type FROM function GROUP BY module, type",
                     &szCurDt[0]);
             rc = mysql_query(pmysql, pszQuery);
             CheckLogContinue((pszError, "error inserting: %s - (sql=%s) ", dbGetLastErrorDesc(), pszQuery));
 
             sprintf(pszQuery, "INSERT INTO historyapigrouptotal(apigroup, date, totalcount) "
-                    "SELECT apigroup, '%s', count(*) FROM function WHERE apigroup IS NOT NULL "
+                    "SELECT apigroup, '%s', count(*) FROM function WHERE apigroup IS NOT NULL AND type = 'A' "
                     "GROUP BY apigroup",
                     &szCurDt[0]);
             rc = mysql_query(pmysql, pszQuery);
@@ -1368,7 +1371,7 @@ unsigned long   _System dbCheckIntegrity(char *pszError)
     mysql_refresh(pmysql, REFRESH_TABLES);
 
     /* foreign keys in function table */
-    strcpy(pszQuery, "SELECT refcode, dll, state, apigroup, file FROM function");
+    strcpy(pszQuery, "SELECT refcode, module, state, apigroup, file FROM function");
     rc = mysql_query(pmysql, pszQuery);
     if (rc >= 0)
     {
@@ -1377,10 +1380,10 @@ unsigned long   _System dbCheckIntegrity(char *pszError)
         {
             while ((row1 = mysql_fetch_row(pres1)) != NULL)
             {
-                /* check dll */
-                sprintf(pszQuery, "SELECT refcode FROM dll WHERE refcode = %s", row1[1]);
+                /* check module */
+                sprintf(pszQuery, "SELECT refcode FROM module WHERE refcode = %s", row1[1]);
                 rc = mysql_query(pmysql, pszQuery);
-                CheckFKError("function/dll", "Foreign key 'dll' not found in the dll table");
+                CheckFKError("function/module", "Foreign key 'module' not found in the module table");
 
                 /* check state */
                 sprintf(pszQuery, "SELECT refcode FROM state WHERE refcode = %s", row1[2]);
@@ -1410,7 +1413,7 @@ unsigned long   _System dbCheckIntegrity(char *pszError)
         ulRc += logDbError(pszError, pszQuery);
 
     /* foreign keys in file */
-    strcpy(pszQuery, "SELECT refcode, dll FROM file");
+    strcpy(pszQuery, "SELECT refcode, module FROM file");
     rc = mysql_query(pmysql, pszQuery);
     if (rc >= 0)
     {
@@ -1419,10 +1422,10 @@ unsigned long   _System dbCheckIntegrity(char *pszError)
         {
             while ((row1 = mysql_fetch_row(pres1)) != NULL)
             {
-                /* check dll */
-                sprintf(pszQuery, "SELECT refcode FROM dll WHERE refcode = %s", row1[1]);
+                /* check module */
+                sprintf(pszQuery, "SELECT refcode FROM module WHERE refcode = %s", row1[1]);
                 rc = mysql_query(pmysql, pszQuery);
-                CheckFKError("apigroup/dll", "Foreign key 'dll' not found in the dll table");
+                CheckFKError("apigroup/module", "Foreign key 'module' not found in the module table");
             }
             mysql_free_result(pres1);
         }
@@ -1431,7 +1434,7 @@ unsigned long   _System dbCheckIntegrity(char *pszError)
         ulRc += logDbError(pszError, pszQuery);
 
     /* foreign keys in apigroup */
-    strcpy(pszQuery, "SELECT refcode, dll FROM apigroup");
+    strcpy(pszQuery, "SELECT refcode, module FROM apigroup");
     rc = mysql_query(pmysql, pszQuery);
     if (rc >= 0)
     {
@@ -1440,10 +1443,10 @@ unsigned long   _System dbCheckIntegrity(char *pszError)
         {
             while ((row1 = mysql_fetch_row(pres1)) != NULL)
             {
-                /* check dll */
-                sprintf(pszQuery, "SELECT refcode FROM dll WHERE refcode = %s", row1[1]);
+                /* check module */
+                sprintf(pszQuery, "SELECT refcode FROM module WHERE refcode = %s", row1[1]);
                 rc = mysql_query(pmysql, pszQuery);
-                CheckFKError("file/dll", "Foreign key 'dll' not found in the dll table");
+                CheckFKError("file/module", "Foreign key 'module' not found in the module table");
             }
             mysql_free_result(pres1);
         }
@@ -1477,8 +1480,8 @@ unsigned long   _System dbCheckIntegrity(char *pszError)
     else
         ulRc += logDbError(pszError, pszQuery);
 
-    /* foreign keys in historydll table */
-    strcpy(pszQuery, "SELECT date, dll, state FROM historydll");
+    /* foreign keys in historymodule table */
+    strcpy(pszQuery, "SELECT date, module, state FROM historymodule");
     rc = mysql_query(pmysql, pszQuery);
     if (rc >= 0)
     {
@@ -1487,15 +1490,15 @@ unsigned long   _System dbCheckIntegrity(char *pszError)
         {
             while ((row1 = mysql_fetch_row(pres1)) != NULL)
             {
-                /* check dll */
-                sprintf(pszQuery, "SELECT refcode FROM dll WHERE refcode = %s", row1[1]);
+                /* check module */
+                sprintf(pszQuery, "SELECT refcode FROM module WHERE refcode = %s", row1[1]);
                 rc = mysql_query(pmysql, pszQuery);
-                CheckFKError("historydll/dll", "Foreign key 'dll' not found in the dll table");
+                CheckFKError("historymodule/module", "Foreign key 'module' not found in the module table");
 
                 /* check state */
                 sprintf(pszQuery, "SELECT refcode FROM state WHERE refcode = %s", row1[2]);
                 rc = mysql_query(pmysql, pszQuery);
-                CheckFKError("historydll/state", "Foreign key 'state' not found in the state table");
+                CheckFKError("historymodule/state", "Foreign key 'state' not found in the state table");
             }
             mysql_free_result(pres1);
         }
@@ -1513,7 +1516,7 @@ unsigned long   _System dbCheckIntegrity(char *pszError)
         {
             while ((row1 = mysql_fetch_row(pres1)) != NULL)
             {
-                /* check dll */
+                /* check module */
                 sprintf(pszQuery, "SELECT refcode FROM apigroup WHERE refcode = %s", row1[1]);
                 rc = mysql_query(pmysql, pszQuery);
                 CheckFKError("historyapigroup/apigroup", "Foreign key 'apigroup' not found in the apigroup table");
@@ -1529,8 +1532,8 @@ unsigned long   _System dbCheckIntegrity(char *pszError)
     else
         ulRc += logDbError(pszError, pszQuery);
 
-    /* foreign keys in historydlltotal table */
-    strcpy(pszQuery, "SELECT date, dll FROM historydlltotal");
+    /* foreign keys in historymoduletotal table */
+    strcpy(pszQuery, "SELECT date, module FROM historymoduletotal");
     rc = mysql_query(pmysql, pszQuery);
     if (rc >= 0)
     {
@@ -1539,10 +1542,10 @@ unsigned long   _System dbCheckIntegrity(char *pszError)
         {
             while ((row1 = mysql_fetch_row(pres1)) != NULL)
             {
-                /* check dll */
-                sprintf(pszQuery, "SELECT refcode FROM dll WHERE refcode = %s", row1[1]);
+                /* check module */
+                sprintf(pszQuery, "SELECT refcode FROM module WHERE refcode = %s", row1[1]);
                 rc = mysql_query(pmysql, pszQuery);
-                CheckFKError("historydlltotal/dll", "Foreign key 'dll' not found in the dll table");
+                CheckFKError("historymoduletotal/module", "Foreign key 'module' not found in the module table");
             }
             mysql_free_result(pres1);
         }
@@ -1560,7 +1563,7 @@ unsigned long   _System dbCheckIntegrity(char *pszError)
         {
             while ((row1 = mysql_fetch_row(pres1)) != NULL)
             {
-                /* check dll */
+                /* check module */
                 sprintf(pszQuery, "SELECT refcode FROM apigroup WHERE refcode = %s", row1[1]);
                 rc = mysql_query(pmysql, pszQuery);
                 CheckFKError("historyapigrouptotal/apigroup", "Foreign key 'apigroup' not found in the apigroup table");
@@ -1854,14 +1857,14 @@ BOOL _System dbDaysAfterChristToDate(signed long lDays, char *pszDate)
 
 
 /**
- * Display all functions for, the given dll, that is not updated.
+ * Display all functions for, the given module, that is not updated.
  * @returns   TRUE / FALSE.
- * @param     lDll         Dll reference number.
+ * @param     lModule      Module reference number.
  * @param     dbFetchCall  Callback function which will be called once for each
  *                         field for all the functions not updated.
  *                         pvUser is NULL, pszValue field value, pszFieldName the field name.
  */
-BOOL _System dbGetNotUpdatedFunction(signed long lDll, DBCALLBACKFETCH dbFetchCallBack)
+BOOL _System dbGetNotUpdatedFunction(signed long lModule, DBCALLBACKFETCH dbFetchCallBack)
 {
     BOOL        fRet = FALSE;
     void       *pres;
@@ -1870,9 +1873,9 @@ BOOL _System dbGetNotUpdatedFunction(signed long lDll, DBCALLBACKFETCH dbFetchCa
     /* not updated names */
     sprintf(&szQuery[0], "SELECT f1.name, f1.intname, f1.updated, f1.aliasfn, d.name, f2.name, f2.intname AS last "
                          "FROM function f1 LEFT OUTER JOIN function f2 ON f1.aliasfn = f2.refcode "
-                         "     LEFT JOIN dll d ON f2.dll = d.refcode "
-                         "WHERE f1.dll = %ld AND f1.updated = 0",
-            lDll);
+                         "     LEFT JOIN module d ON f2.module = d.refcode "
+                         "WHERE f1.module = %ld AND f1.updated = 0",
+            lModule);
     pres = dbExecuteQuery(szQuery);
     if (pres != NULL)
     {
@@ -1888,9 +1891,9 @@ BOOL _System dbGetNotUpdatedFunction(signed long lDll, DBCALLBACKFETCH dbFetchCa
     /* warn about updated > 1 too */
     sprintf(&szQuery[0], "SELECT f1.name, f1.intname, f1.updated, f1.aliasfn, d.name, f2.name, f2.intname AS last "
                          "FROM function f1 LEFT OUTER JOIN function f2 ON f1.aliasfn = f2.refcode "
-                         "     LEFT JOIN dll d ON f2.dll = d.refcode "
-                         "WHERE f1.dll = %ld AND f1.updated > 1",
-            lDll);
+                         "     LEFT JOIN module d ON f2.module = d.refcode "
+                         "WHERE f1.module = %ld AND f1.updated > 1",
+            lModule);
     pres = dbExecuteQuery(szQuery);
     if (pres != NULL)
     {
@@ -1911,17 +1914,17 @@ BOOL _System dbGetNotUpdatedFunction(signed long lDll, DBCALLBACKFETCH dbFetchCa
 
 
 /**
- * Counts the function for the given DLL which has been updated.
- * @returns   -1 on error, number of updated function on success.
- * @param     lDll         Dll reference number.
+ * Counts the function for the given MODULE which has been updated.
+ * @returns -1 on error, number of updated function on success.
+ * @param   lModule     Module reference number.
  */
-signed long _System dbGetNumberOfUpdatedFunction(signed long lDll)
+signed long _System dbGetNumberOfUpdatedFunction(signed long lModule)
 {
     int         rc;
     char        szQuery[128];
     MYSQL_RES * pres;
 
-    sprintf(&szQuery[0], "SELECT count(*) FROM function WHERE dll = (%ld) AND updated > 0\n", lDll);
+    sprintf(&szQuery[0], "SELECT count(*) FROM function WHERE module = (%ld) AND updated > 0\n", lModule);
     rc   = mysql_query(pmysql, &szQuery[0]);
     pres = mysql_store_result(pmysql);
     if (rc >= 0 && pres != NULL && mysql_num_rows(pres) == 1)
@@ -1935,20 +1938,20 @@ signed long _System dbGetNumberOfUpdatedFunction(signed long lDll)
 
 
 /**
- * Clear the update flags for all file in a dll/module.
- * @returns     Success indicator. (TRUE / FALSE)
- * @param       lDll    Dll refcode.
- * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
- * @remark      Intended for use by APIImport.
+ * Clear the update flags for all file in a module/module.
+ * @returns Success indicator. (TRUE / FALSE)
+ * @param   lModule     Module refcode.
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @remark  Intended for use by APIImport.
  */
-BOOL             _System dbClearUpdateFlagFile(signed long lDll)
+BOOL             _System dbClearUpdateFlagFile(signed long lModule)
 {
     int         rc;
     char        szQuery[128];
 
     sprintf(&szQuery[0],
-            "UPDATE file SET updated = 0 WHERE dll = (%ld)",
-            lDll);
+            "UPDATE file SET updated = 0 WHERE module = (%ld)",
+            lModule);
     rc = mysql_query(pmysql, &szQuery[0]);
     return rc == 0;
 }
@@ -1956,20 +1959,20 @@ BOOL             _System dbClearUpdateFlagFile(signed long lDll)
 
 /**
  * Clear update flag
- * @returns     Success indicator.
- * @param       lDll    Dll refcode.
- * @param       fAll    All dll. If false only APIs and Internal APIs are cleared
- * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
- * @remark      Intended for use by APIImport.
+ * @returns Success indicator.
+ * @param   lModule Module refcode.
+ * @param   fAll    All module. If false only APIs and Internal APIs are cleared
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ * @remark  Intended for use by APIImport.
  */
-BOOL             _System dbClearUpdateFlagFunction(signed long lDll, BOOL fAll)
+BOOL             _System dbClearUpdateFlagFunction(signed long lModule, BOOL fAll)
 {
     int         rc;
     char        szQuery[128];
 
     sprintf(&szQuery[0],
-            "UPDATE function SET updated = 0 WHERE dll = (%ld)",
-            lDll);
+            "UPDATE function SET updated = 0 WHERE module = (%ld)",
+            lModule);
     if (!fAll)
         strcat(&szQuery[0], " AND type IN ('A', 'I')");
     rc = mysql_query(pmysql, &szQuery[0]);
@@ -1979,16 +1982,16 @@ BOOL             _System dbClearUpdateFlagFunction(signed long lDll, BOOL fAll)
 
 
 /**
- * Deletes all the files in a dll/module which was not found/updated.
+ * Deletes all the files in a module/module which was not found/updated.
  * @returns     Success indicator.
- * @param       lDll    Dll refcode.
+ * @param       lModule    Module refcode.
  * @sketch      Select all files which is to be deleted.
  *                  Set all references to each file in function to -1.
  *              Delete all files which is to be deleted.
  * @author      knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  * @remark      Use with GRATE CARE!
  */
-BOOL             _System dbDeleteNotUpdatedFiles(signed long lDll)
+BOOL             _System dbDeleteNotUpdatedFiles(signed long lModule)
 {
     MYSQL_RES * pres;
     int         rc;
@@ -1996,8 +1999,8 @@ BOOL             _System dbDeleteNotUpdatedFiles(signed long lDll)
     char        szQuery[128];
 
     sprintf(&szQuery[0],
-            "SELECT refcode FROM file WHERE dll = (%ld) AND updated = 0",
-            lDll);
+            "SELECT refcode FROM file WHERE module = (%ld) AND updated = 0",
+            lModule);
     rc = mysql_query(pmysql, &szQuery[0]);
     pres = mysql_store_result(pmysql);
     if (pres != NULL && mysql_num_rows(pres))
@@ -2014,8 +2017,8 @@ BOOL             _System dbDeleteNotUpdatedFiles(signed long lDll)
     }
 
     sprintf(&szQuery[0],
-            "DELETE FROM file WHERE dll = %ld AND updated = 0",
-            lDll);
+            "DELETE FROM file WHERE module = %ld AND updated = 0",
+            lModule);
     rc = mysql_query(pmysql, &szQuery[0]);
     if (rc) fRc = FALSE;
 
@@ -2029,9 +2032,9 @@ BOOL             _System dbDeleteNotUpdatedFiles(signed long lDll)
  * also delete.
  *
  * @returns     Success indicator. (TRUE / FALSE)
- * @param       lDll    The refcode of the dll owning the functions.
- * @param       fAll    All function. If FALSE then only APIs and Internal APIs.
- * @sketch      Select all functions which wan't updated (ie. updated = 0 and dll = lDll).
+ * @param       lModule     The refcode of the module owning the functions.
+ * @param       fAll        All function. If FALSE then only APIs and Internal APIs.
+ * @sketch      Select all functions which wan't updated (ie. updated = 0 and module = lModule).
  *              If anyone Then
  *                  Delete the referenced to the functions in:
  *                      parameters
@@ -2040,7 +2043,7 @@ BOOL             _System dbDeleteNotUpdatedFiles(signed long lDll)
  *              EndIf
  * @remark      Use with GREATE CARE!
  */
-BOOL             _System dbDeleteNotUpdatedFunctions(signed long lDll, BOOL fAll)
+BOOL             _System dbDeleteNotUpdatedFunctions(signed long lModule, BOOL fAll)
 {
     MYSQL_RES * pres;
     int         rc;
@@ -2048,8 +2051,8 @@ BOOL             _System dbDeleteNotUpdatedFunctions(signed long lDll, BOOL fAll
     char        szQuery[128];
 
     sprintf(&szQuery[0],
-            "SELECT refcode FROM function WHERE dll = %ld AND updated = 0",
-            lDll);
+            "SELECT refcode FROM function WHERE module = %ld AND updated = 0",
+            lModule);
     if (!fAll)
         strcat(&szQuery[0], " AND type IN ('A', 'I')");
     rc = mysql_query(pmysql, &szQuery[0]);
@@ -2080,8 +2083,8 @@ BOOL             _System dbDeleteNotUpdatedFunctions(signed long lDll, BOOL fAll
         if (fRc)
         {
             sprintf(&szQuery[0],
-                    "DELETE FROM function WHERE dll = %ld AND updated = 0",
-                    lDll);
+                    "DELETE FROM function WHERE module = %ld AND updated = 0",
+                    lModule);
             if (!fAll)
                 strcat(&szQuery[0], " AND type IN ('A', 'I')");
             rc = mysql_query(pmysql, &szQuery[0]);
