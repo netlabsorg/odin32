@@ -1,10 +1,11 @@
- /* $Id: changelog,v 1.293 1999-10-09 11:03:52 sandervl Exp $ */
+ /* $Id: changelog,v 1.294 1999-10-09 11:17:59 sandervl Exp $ */
 
  99-10-09: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Clipboard fixes (window handle translation)
                   Fixed button redraw when receiving a WM_ENABLE msg
                   Use the supported Open32 system colors and only use
                   those from Wine for the new (9x) colors
+        - SHELL32: Moved old to current, current to old dir
 
  99-10-09: Jens Wiessner <wiessnej@rfi.de>
 	- CRTDLL: Implemented functions; only 80 stubs left
