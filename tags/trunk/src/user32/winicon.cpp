@@ -1,4 +1,4 @@
-/* $Id: winicon.cpp,v 1.31 2001-10-14 20:55:46 sandervl Exp $ */
+/* $Id: winicon.cpp,v 1.32 2001-10-15 17:09:05 sandervl Exp $ */
 /*
  * Win32 Icon Code for OS/2
  *
@@ -441,6 +441,7 @@ HCURSOR WIN32API SetCursor( HCURSOR hCursor)
         dprintf(("SetCursor: invalid os/2 pointer handle!!"));
     }
 
+    dprintf2(("OSLibWinSetPointer %x", iconinfo->hColorBmp));
     if(OSLibWinSetPointer(iconinfo->hColorBmp) == FALSE) {
         dprintf(("OSLibWinSetPointer %x returned FALSE!!", iconinfo->hColorBmp));
     }

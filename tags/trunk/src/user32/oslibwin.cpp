@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.108 2001-07-29 18:59:27 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.109 2001-10-15 17:09:03 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -156,28 +156,29 @@ BOOL OSLibWinPositionFrameControls(HWND hwndFrame, RECTLOS2 *pRect, DWORD dwStyl
       minmaxheight = WinQuerySysValue(HWND_DESKTOP, SV_CYMINMAXBUTTON);
   }
 
-#if 0
-  hwndControl = WinWindowFromID(hwndFrame, FID_SYSMENU);
-  if(hwndControl) {
-      swp[i].hwnd = hwndControl;
-      swp[i].hwndInsertBehind = HWND_TOP;
-      swp[i].x  = pRect->xLeft;
-      swp[i].y  = pRect->yBottom;
-      if(pRect->yTop - pRect->yBottom > minmaxheight) {
-          swp[i].y += pRect->yTop - pRect->yBottom - minmaxheight;
+  if(fOS2Look == OS2_APPEARANCE_SYSMENU) {
+      hwndControl = WinWindowFromID(hwndFrame, FID_SYSMENU);
+      if(hwndControl) {
+          swp[i].hwnd = hwndControl;
+          swp[i].hwndInsertBehind = HWND_TOP;
+          swp[i].x  = pRect->xLeft;
+          swp[i].y  = pRect->yBottom;
+          if(pRect->yTop - pRect->yBottom > minmaxheight) {
+              swp[i].y += pRect->yTop - pRect->yBottom - minmaxheight;
+          }
+          swp[i].cx = minmaxwidth/2;
+          swp[i].cy = minmaxheight;;
+          swp[i].fl = SWP_SIZE | SWP_MOVE | SWP_SHOW;
+          dprintf(("FID_SYSMENU (%d,%d)(%d,%d)", swp[i].x, swp[i].y, swp[i].cx, swp[i].cy));
+          pRect->xLeft += minmaxwidth/2;
+          i++;
       }
-      swp[i].cx = minmaxwidth/2;
-      swp[i].cy = minmaxheight;;
-      swp[i].fl = SWP_SIZE | SWP_MOVE | SWP_SHOW;
-      dprintf(("FID_SYSMENU (%d,%d)(%d,%d)", swp[i].x, swp[i].y, swp[i].cx, swp[i].cy));
-      pRect->xLeft += minmaxwidth/2;
-      i++;
   }
-#else
+  else
   if((dwStyle & WS_SYSMENU_W) && !(dwExStyle & WS_EX_TOOLWINDOW_W) && hSysMenuIcon) {
       pRect->xLeft += minmaxwidth/2;
   }
-#endif
+
   if((dwStyle & WS_CAPTION_W) == WS_CAPTION_W) {
       hwndControl = WinWindowFromID(hwndFrame, FID_TITLEBAR);
       if(hwndControl) {

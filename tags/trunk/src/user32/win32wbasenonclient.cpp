@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.36 2001-10-03 18:37:53 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.37 2001-10-15 17:09:04 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -888,7 +888,8 @@ VOID Win32BaseWindow::DrawCaption(HDC hdc,RECT *rect,BOOL active)
   HBITMAP memBmp,oldBmp;
 
   if(fOS2Look) {
-      if ((dwStyle & WS_SYSMENU) && !(dwExStyle & WS_EX_TOOLWINDOW))
+      if ((dwStyle & WS_SYSMENU) && !(dwExStyle & WS_EX_TOOLWINDOW) &&
+           fOS2Look != OS2_APPEARANCE_SYSMENU)
       {
          HICON hSysIcon = IconForWindow(ICON_SMALL);
 

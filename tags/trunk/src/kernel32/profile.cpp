@@ -1,4 +1,4 @@
-/* $Id: profile.cpp,v 1.32 2001-10-10 22:24:35 phaller Exp $ */
+/* $Id: profile.cpp,v 1.33 2001-10-15 17:10:55 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -1041,10 +1041,19 @@ ODINFUNCTION0(int,PROFILE_LoadOdinIni)
     return 1;
 }
 
+static BOOL fDisableOdinIni = FALSE;
+
+void DisableOdinIni()
+{
+    fDisableOdinIni = TRUE;
+}
+
 ODINFUNCTION0(int,PROFILE_SaveOdinIni)
 {
   int ret;
   FILE *file;
+
+  if(fDisableOdinIni) return TRUE;
 
   EnterCriticalSection( &PROFILE_CritSect );
 
