@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.880 2000-04-09 15:08:53 sandervl Exp $ */
+ /* $Id: changelog,v 1.881 2000-04-10 17:46:50 cbratschi Exp $ */
+
+ 2000-04-10: David Raison <djr@lemur.co.uk>
+	- COMDLG32: fixed wrong lParam in file dialog
 
  2000-04-09: Sander van Leeuwen <sandervl@xs4all.nl>
         - GDI32: Y inversion fix for dib sections blits
