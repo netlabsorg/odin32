@@ -1,4 +1,4 @@
-/* $Id: dibsect.h,v 1.13 2000-03-24 19:24:48 sandervl Exp $ */
+/* $Id: dibsect.h,v 1.14 2000-03-25 12:19:08 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -101,7 +101,7 @@ private:
           DWORD hSection;
           HWND  hwndParent;
           HDC   hdc;
-          char *bmpBits;
+          char *bmpBits, *bmpBitsRGB565;
           BOOL  fFlip;
           int   bmpsize;
     DIBSECTION  dibinfo;

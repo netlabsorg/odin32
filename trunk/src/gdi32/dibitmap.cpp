@@ -1,4 +1,4 @@
-/* $Id: dibitmap.cpp,v 1.6 2000-03-24 19:24:47 sandervl Exp $ */
+/* $Id: dibitmap.cpp,v 1.7 2000-03-25 12:19:07 sandervl Exp $ */
 
 /*
  * GDI32 dib & bitmap code
@@ -49,8 +49,11 @@ HBITMAP WIN32API CreateDIBitmap(HDC hdc, const BITMAPINFOHEADER *lpbmih,
 //******************************************************************************
 HBITMAP WIN32API CreateCompatibleBitmap( HDC hdc, int nWidth, int nHeight)
 {
-    dprintf(("GDI32: CreateCompatibleBitmap %x (%d,%d)", hdc, nWidth, nHeight));
-    return O32_CreateCompatibleBitmap(hdc, nWidth, nHeight);
+ HBITMAP hBitmap;
+
+    hBitmap = O32_CreateCompatibleBitmap(hdc, nWidth, nHeight);
+    dprintf(("GDI32: CreateCompatibleBitmap %x (%d,%d) returned %x", hdc, nWidth, nHeight, hBitmap));
+    return hBitmap;
 }
 //******************************************************************************
 //CreateDisardableBitmap is obsolete and can be replaced by CreateCompatibleBitmap
@@ -65,11 +68,11 @@ HBITMAP WIN32API CreateDiscardableBitmap(HDC hDC, int nWidth, int nHeight)
 HBITMAP WIN32API CreateBitmap(int nWidth, int nHeight, UINT cPlanes,
                                  UINT cBitsPerPel, const void *lpvBits)
 {
- HBITMAP rc;
+ HBITMAP hBitmap;
 
-    rc = O32_CreateBitmap(nWidth, nHeight, cPlanes, cBitsPerPel, lpvBits);
-    dprintf(("GDI32: CreateBitmap (%d,%d) bps %d returned %x", nWidth, nHeight, cBitsPerPel, rc));
-    return(rc);
+    hBitmap = O32_CreateBitmap(nWidth, nHeight, cPlanes, cBitsPerPel, lpvBits);
+    dprintf(("GDI32: CreateBitmap (%d,%d) bps %d returned %x", nWidth, nHeight, cBitsPerPel, hBitmap));
+    return(hBitmap);
 }
 //******************************************************************************
 //******************************************************************************

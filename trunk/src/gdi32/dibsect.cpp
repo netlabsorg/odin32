@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.22 2000-03-24 19:24:47 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.23 2000-03-25 12:19:07 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -37,7 +37,7 @@ static VMutex dibMutex;
 //******************************************************************************
 //******************************************************************************
 DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DWORD hSection, DWORD dwOffset, DWORD handle, int fFlip)
-                : bmpBits(NULL), pOS2bmp(NULL), next(NULL)
+                : bmpBits(NULL), pOS2bmp(NULL), next(NULL), bmpBitsRGB565(NULL)
 {
   int  os2bmpsize;
 
@@ -144,6 +144,11 @@ DIBSection::DIBSection(BITMAPINFOHEADER_W *pbmi, char *pColors, DWORD iUsage, DW
                	dibinfo.dsBitfields[0] = (pbmi->biCompression == BI_BITFIELDS) ? *(DWORD *)pColors : 0x7c00;
                	dibinfo.dsBitfields[1] = (pbmi->biCompression == BI_BITFIELDS) ? *((DWORD *)pColors + 1) : 0x03e0;
                	dibinfo.dsBitfields[2] = (pbmi->biCompression == BI_BITFIELDS) ? *((DWORD *)pColors + 2) : 0x001f;
+
+		//double buffer for rgb 555 dib sections (for conversion)
+		if(dibinfo.dsBitfields[1] == 0x03e0) {
+			DosAllocMem((PPVOID)&bmpBitsRGB565, bmpsize*pbmi->biHeight, PAG_READ|PAG_WRITE|PAG_COMMIT);
+		}
                	break;
 
            case 24:
@@ -201,6 +206,9 @@ DIBSection::~DIBSection()
    else
    if(bmpBits)
         DosFreeMem(bmpBits);
+
+   if(bmpBitsRGB565)
+ 	DosFreeMem(bmpBitsRGB565);
 
    if(pOS2bmp)
         free(pOS2bmp);
@@ -301,13 +309,36 @@ int DIBSection::SetDIBits(HDC hdc, HBITMAP hbitmap, UINT startscan, UINT
    dibinfo.dshSection       = hSection;
    dibinfo.dsOffset         = 0; // TODO: put the correct value here (if createdibsection with file handle)
 
-   if(pbmi->biCompression == BI_BITFIELDS) 
+   if(coloruse == DIB_PAL_COLORS || pbmi->biBitCount <= 8)
    {
+        dibinfo.dsBitfields[0] = dibinfo.dsBitfields[1] = dibinfo.dsBitfields[2] = 0;
+   }
+   else {
 	char *pColors = (char *)pbmi + 1;
 
-   	dibinfo.dsBitfields[0] = *((DWORD *)pColors);
-   	dibinfo.dsBitfields[1] = *((DWORD *)pColors+1);
-   	dibinfo.dsBitfields[2] = *((DWORD *)pColors+2);
+	switch(pbmi->biBitCount)
+   	{
+           case 16:
+               	dibinfo.dsBitfields[0] = (pbmi->biCompression == BI_BITFIELDS) ? *(DWORD *)pColors : 0x7c00;
+               	dibinfo.dsBitfields[1] = (pbmi->biCompression == BI_BITFIELDS) ? *((DWORD *)pColors + 1) : 0x03e0;
+               	dibinfo.dsBitfields[2] = (pbmi->biCompression == BI_BITFIELDS) ? *((DWORD *)pColors + 2) : 0x001f;
+               	break;
+
+           case 24:
+               	dibinfo.dsBitfields[0] = 0xff;
+               	dibinfo.dsBitfields[1] = 0xff00;
+               	dibinfo.dsBitfields[2] = 0xff0000;
+               	break;
+
+           case 32:
+               	dibinfo.dsBitfields[0] = (pbmi->biCompression == BI_BITFIELDS) ? *(DWORD *)pColors : 0xff;
+               	dibinfo.dsBitfields[1] = (pbmi->biCompression == BI_BITFIELDS) ? *((DWORD *)pColors + 1) : 0xff00;
+               	dibinfo.dsBitfields[2] = (pbmi->biCompression == BI_BITFIELDS) ? *((DWORD *)pColors + 2) : 0xff0000;
+		if(dibinfo.dsBitfields[0] != 0xff && dibinfo.dsBitfields[1] != 0xff00 && dibinfo.dsBitfields[2] != 0xff0000) {
+			dprintf(("DIBSection: unsupported bitfields for 32 bits bitmap!!"));
+		}
+               	break;
+       	}
 	dprintf(("BI_BITFIELDS %x %x %x", dibinfo.dsBitfields[0], dibinfo.dsBitfields[1], dibinfo.dsBitfields[2]));
    }
 
@@ -410,13 +441,14 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
   if(dibinfo.dsBitfields[1] == 0x3E0) {//RGB 555?
        	dprintf(("DIBSection::BitBlt; convert rgb 555 to 565"));
 
-        bitmapBits = (WORD *)malloc(pOS2bmp->cbImage);
+	if(bmpBitsRGB565 == NULL)
+		DebugInt3();
+
 	if(CPUFeatures & CPUID_MMX) {
-		RGB555to565MMX((WORD *)bitmapBits, (WORD *)bmpBits, pOS2bmp->cbImage/sizeof(WORD));
+		RGB555to565MMX((WORD *)bmpBitsRGB565, (WORD *)bmpBits, pOS2bmp->cbImage/sizeof(WORD));
 	}
-	else   	RGB555to565((WORD *)bitmapBits, (WORD *)bmpBits, pOS2bmp->cbImage/sizeof(WORD));
-	rc = GpiDrawBits(hps, bitmapBits, pOS2bmp, 4, &point[0], ROP_SRCCOPY, BBO_OR);
-	free(bitmapBits);
+	else   	RGB555to565((WORD *)bmpBitsRGB565, (WORD *)bmpBits, pOS2bmp->cbImage/sizeof(WORD));
+	rc = GpiDrawBits(hps, bmpBitsRGB565, pOS2bmp, 4, &point[0], ROP_SRCCOPY, BBO_OR);
   }
   else	rc = GpiDrawBits(hps, bmpBits, pOS2bmp, 4, &point[0], ROP_SRCCOPY, BBO_OR);
 
