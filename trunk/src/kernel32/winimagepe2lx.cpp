@@ -1,4 +1,4 @@
-/* $Id: winimagepe2lx.cpp,v 1.18 2001-07-10 20:19:25 bird Exp $ */
+/* $Id: winimagepe2lx.cpp,v 1.19 2002-02-18 15:17:48 bird Exp $ */
 
 /*
  * Win32 PE2LX Image base class
@@ -120,6 +120,16 @@
            void            *pFSRec;        /* ptr to head of file sys records */
    } qsPtrRec_t;
 
+#else
+   #if defined(QS_MODVER) && defined(QS_DCE_AUTORESET) /* hope these didn't exists in the other toolkits */
+      /*
+       * Workaround for the 4.5(1) toolkits.
+       */
+      #define qsPtrRec_t   QSPTRREC
+      #define qsLrec_t     QSLREC
+      #define qsLObjrec_t  QSLOBJREC
+      #define qsGrec_t     QSGREC
+   #endif
 #endif
 
 
