@@ -1,4 +1,4 @@
-/* $Id: cvticon.cpp,v 1.4 1999-09-21 08:24:53 sandervl Exp $ */
+/* $Id: cvticon.cpp,v 1.5 1999-10-23 10:21:00 sandervl Exp $ */
 
 /*
  * PE2LX icons
@@ -84,6 +84,7 @@ void *ConvertIcon(WINBITMAPINFOHEADER *bmpHdr, int size, int *os2size, int offse
  int bwsize, i, colorsize, rgbsize, iconsize;
  BITMAPFILEHEADER2 *iconhdr;
  BITMAPFILEHEADER2 *iconhdr2;
+ char *pAnd, *pXor;
 
   bwsize   = (bmpHdr->biWidth*(bmpHdr->biHeight/2))/8;
   colorsize = bmpHdr->biWidth*(bmpHdr->biHeight/2);
@@ -174,9 +175,11 @@ void *ConvertIcon(WINBITMAPINFOHEADER *bmpHdr, int size, int *os2size, int offse
                 rgb++;
         }
   }
+
+#if 0
   //write 2*mono pixels + color pixels
   //There are icons without an AND mask, so check for it
-  if(bmpHdr->biSizeImage == colorsize) 
+  if(bmpHdr->biSizeImage == colorsize)
   {
         memset((char *)os2rgb, 0, bwsize);
         memset((char *)os2rgb+bwsize, 0, bwsize);
@@ -191,6 +194,32 @@ void *ConvertIcon(WINBITMAPINFOHEADER *bmpHdr, int size, int *os2size, int offse
 //        memcpy((char *)os2rgb+bwsize, (char *)rgb+colorsize, bwsize);
 //        memcpy((char *)os2rgb+2*bwsize, (char *)rgb, colorsize);
   }
+#else
+  pXor = (char *)os2rgb;
+  pAnd = (char *)os2rgb + bwsize;
+
+  if ((size - (bmpHdr->biSize - rgbsize - colorsize)) == bwsize) {
+    char *q;
+    int i, linesize;
+
+    linesize = bmpHdr->biWidth / 8;
+    q = (char *)rgb + colorsize;
+    for (i = 0; i < (bmpHdr->biHeight/2); i++) {
+      memcpy (pAnd, q, linesize);
+      pAnd += linesize;
+      q += linesize;
+
+      memcpy (pXor, q, linesize);
+      pXor += linesize;
+      q += linesize;
+    }
+  } else {
+    memcpy (pAnd, (char *)rgb + colorsize, bwsize);
+    memset (pXor, 0, bwsize);
+  }
+  memcpy((char *)os2rgb+2*bwsize, (char *)rgb, colorsize);
+#endif
+
   *os2size = iconsize;
   return (void *)iconhdr;
 }
