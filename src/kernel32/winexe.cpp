@@ -1,4 +1,4 @@
-/* $Id: winexe.cpp,v 1.8 1999-07-07 08:11:10 sandervl Exp $ */
+/* $Id: winexe.cpp,v 1.9 1999-08-16 13:54:32 sandervl Exp $ */
 
 /*
  * Win32 exe class
@@ -33,6 +33,13 @@
 
 Win32Exe *WinExe = NULL;
 
+//******************************************************************************
+//Called by ring 3 pe loader to create win32 executable
+//******************************************************************************
+Win32Exe* WIN32API CreateWin32Exe(char *szFileName) 
+{
+  return new Win32Exe(szFileName);
+}
 //******************************************************************************
 //******************************************************************************
 Win32Exe::Win32Exe(char *szFileName) : Win32Image(szFileName), fConsoleApp(FALSE),

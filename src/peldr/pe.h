@@ -1,4 +1,4 @@
-/* $Id: pe.h,v 1.3 1999-06-10 16:56:36 phaller Exp $ */
+/* $Id: pe.h,v 1.4 1999-08-16 13:54:07 sandervl Exp $ */
 
 /*
  *
@@ -22,18 +22,7 @@ extern char szCPUErrorMsg[];
 extern char szExeErrorMsg[];
 extern char szInteralErrorMsg[];
 
-#define DWORD  ULONG
-#define LPVOID VOID *
-#define WORD   USHORT
-#define UNALIGNED
-#define PDWORD DWORD *
-#define PWORD  WORD *
-#define NTAPI
-#define BOOLEAN ULONG
-#define WCHAR   USHORT
-#define HANDLE  ULONG
-
-#define WIN32API __stdcall
+ULONG SYSTEM ReserveMem();
 
 #endif // NOIMAGE
 
