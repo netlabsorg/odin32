@@ -1,9 +1,11 @@
-/* $Id: changelog,v 1.2199 2002-07-01 11:32:17 sandervl Exp $ */
+/* $Id: changelog,v 1.2200 2002-07-01 14:06:08 sandervl Exp $ */
 
  2002-06-30: Sander van Leeuwen <sandervl@innotek.de>
     - USER32:   o Translate & dispatch unprocessed messages in IsDialogMessageA/W
                   (Wine doesn't do this, but experiments in Windows 2000 show
                    different behaviour)
+                o Edit control: don't beep when receiving Enter (single line
+                  control)
 
  2002-06-30: Sander van Leeuwen <sandervl@innotek.de>
     - KERNEL32: o WriteFile for standard out: convert line feed without 
