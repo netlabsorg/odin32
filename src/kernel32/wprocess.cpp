@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.72 2000-03-09 19:03:23 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.73 2000-03-16 19:20:40 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -25,6 +25,7 @@
 #include "winexepe2lx.h"
 #include "winfakepeldr.h"
 #include <vmutex.h>
+#include <handlemanager.h>
 
 #ifdef __IBMCPP__
 #include <builtin.h>
@@ -125,30 +126,31 @@ TEB *InitializeTIB(BOOL fMainThread)
 {
   TEB   *winteb;
   THDB  *thdb;
-
+  ULONG  hThreadMain;
   USHORT tibsel;
 
    //Allocate one dword to store the flat address of our TEB
    if(fMainThread) {
-    TIBFlatPtr = (DWORD *)OSLibAllocThreadLocalMemory(1);
-    if(TIBFlatPtr == 0) {
-        dprintf(("InitializeTIB: local thread memory alloc failed!!"));
-        DebugInt3();
-        return NULL;
-    }
+    	TIBFlatPtr = (DWORD *)OSLibAllocThreadLocalMemory(1);
+    	if(TIBFlatPtr == 0) {
+        	dprintf(("InitializeTIB: local thread memory alloc failed!!"));
+	        DebugInt3();
+	        return NULL;
+    	}
+	HMHandleAllocate(&hThreadMain, O32_GetCurrentThread());
    }
    if(OSLibAllocSel(PAGE_SIZE, &tibsel) == FALSE)
    {
-    dprintf(("InitializeTIB: selector alloc failed!!"));
-    DebugInt3();
-    return NULL;
+    	dprintf(("InitializeTIB: selector alloc failed!!"));
+    	DebugInt3();
+    	return NULL;
    }
    winteb = (TEB *)OSLibSelToFlat(tibsel);
    if(winteb == NULL)
    {
-    dprintf(("InitializeTIB: DosSelToFlat failed!!"));
-    DebugInt3();
-    return NULL;
+    	dprintf(("InitializeTIB: DosSelToFlat failed!!"));
+    	DebugInt3();
+    	return NULL;
    }
    memset(winteb, 0, PAGE_SIZE);
    thdb       = (THDB *)(winteb+1);
@@ -172,7 +174,10 @@ TEB *InitializeTIB(BOOL fMainThread)
    thdb->OrgTIBSel       = GetFS();
    thdb->pWsockData      = NULL;
    thdb->threadId        = GetCurrentThreadId();
-   thdb->hThread         = GetCurrentThread();
+   if(fMainThread) { 
+	thdb->hThread    = hThreadMain;
+   }
+   else thdb->hThread    = GetCurrentThread();
 
    threadListMutex.enter();
    THDB *thdblast        = threadList;

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.90 2000-03-09 19:03:19 sandervl Exp $
+# $Id: makefile,v 1.91 2000-03-16 19:20:39 sandervl Exp $
 
 #
 # Odin32 API
@@ -117,6 +117,7 @@ $(OBJDIR)\oslibdebug.obj \
 $(OBJDIR)\dbglocal.obj \
 $(OBJDIR)\registry.obj \
 $(OBJDIR)\queue.obj \
+$(OBJDIR)\hmthread.obj \
 $(OBJDIR)\kernelrsrc.obj
 
 
