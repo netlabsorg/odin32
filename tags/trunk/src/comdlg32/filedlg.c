@@ -125,12 +125,21 @@ static BOOL FileDlg_Init(void)
     CURSORICONINFO *fldrInfo;
     
     if (!initialized) {
+#ifdef __WIN32OS2__
+	if (!hFolder) hFolder = LoadImageA(0, MAKEINTRESOURCEA(OIC_FOLDER), IMAGE_ICON, 16, 16, LR_SHARED);
+	if (!hFolder2) hFolder2 = LoadImageA(0, MAKEINTRESOURCEA(OIC_FOLDER2), IMAGE_ICON, 16, 16, LR_SHARED);
+	if (!hFloppy) hFloppy = LoadImageA(0, MAKEINTRESOURCEA(OIC_FLOPPY), IMAGE_ICON, 16, 16, LR_SHARED);
+	if (!hHDisk) hHDisk = LoadImageA(0, MAKEINTRESOURCEA(OIC_HDISK), IMAGE_ICON, 16, 16, LR_SHARED);
+	if (!hCDRom) hCDRom = LoadImageA(0, MAKEINTRESOURCEA(OIC_CDROM), IMAGE_ICON, 16, 16, LR_SHARED);
+	if (!hNet) hNet = LoadImageA(0, MAKEINTRESOURCEA(OIC_NETWORK), IMAGE_ICON, 16, 16, LR_SHARED);
+#else
 	if (!hFolder) hFolder = LoadIconA(0, MAKEINTRESOURCEA(OIC_FOLDER));
 	if (!hFolder2) hFolder2 = LoadIconA(0, MAKEINTRESOURCEA(OIC_FOLDER2));
 	if (!hFloppy) hFloppy = LoadIconA(0, MAKEINTRESOURCEA(OIC_FLOPPY));
 	if (!hHDisk) hHDisk = LoadIconA(0, MAKEINTRESOURCEA(OIC_HDISK));
 	if (!hCDRom) hCDRom = LoadIconA(0, MAKEINTRESOURCEA(OIC_CDROM));
 	if (!hNet) hNet = LoadIconA(0, MAKEINTRESOURCEA(OIC_NETWORK));
+#endif
 	if (hFolder == 0 || hFolder2 == 0 || hFloppy == 0 || 
 	    hHDisk == 0 || hCDRom == 0 || hNet == 0)
 	{
@@ -640,7 +649,12 @@ static LONG FILEDLG_WMInitDialog(HWND hWnd, WPARAM wParam, LPARAM lParam)
       }
     }
   else
+#ifdef __WIN32OS2__
+    GetCurrentDirectoryW(BUFFILE, tmpstr);
+#else
     *tmpstr = 0;
+#endif
+
   if (!FILEDLG_ScanDir(hWnd, tmpstr)) {
     *tmpstr = 0;
     if (!FILEDLG_ScanDir(hWnd, tmpstr))
@@ -649,14 +663,37 @@ static LONG FILEDLG_WMInitDialog(HWND hWnd, WPARAM wParam, LPARAM lParam)
   /* select current drive in combo 2, omit missing drives */
   {
       char dir[MAX_PATH];
+#ifdef __WIN32OS2__
+      DWORD drives;
+#endif
       char str[4] = "a:\\";
       GetCurrentDirectoryA( sizeof(dir), dir );
+
+#ifdef __WIN32OS2__
+      drives = GetLogicalDrives();
+
+      //Don't use GetDriveType here. Calling it for a floppy drive causes
+      //the drive to become active for a brief moment
       for(i = 0, n = -1; i < 26; i++)
       {
           str[0] = 'a' + i;
-          if (GetDriveTypeA(str) <= DRIVE_NO_ROOT_DIR) n++;
+          if(drives & (1 << i))	n++;
+
           if (toupper(str[0]) == toupper(dir[0])) break;
       }
+#else
+      for(i = 0, n = -1; i < 26; i++)
+      {
+          str[0] = 'a' + i;
+#ifdef __WIN32OS2__
+          //bugfix
+          if (GetDriveTypeA(str) > DRIVE_NO_ROOT_DIR) n++;
+#else
+          if (GetDriveTypeA(str) <= DRIVE_NO_ROOT_DIR) n++;
+#endif
+          if (toupper(str[0]) == toupper(dir[0])) break;
+      }
+#endif
   }
   SendDlgItemMessageW(hWnd, cmb2, CB_SETCURSEL, n, 0);
   if (!(ofn->Flags & OFN_SHOWHELP))
@@ -1147,7 +1184,11 @@ void FILEDLG_MapOfnStructA(LPOPENFILENAMEA ofnA, LPOPENFILENAMEW ofnW, BOOL open
     if (ofnA->lpstrFilter)
         ofnW->lpstrFilter = FILEDLG_MapStringPairsToW(ofnA->lpstrFilter, 0);
     else
+#ifdef __WIN32OS2__
+        ofnW->lpstrFilter = NULL;
+#else
         ofnW->lpstrFilter = FILEDLG_MapStringPairsToW(defaultfilter, 0);
+#endif
 
     if ((ofnA->lpstrCustomFilter) && (*(ofnA->lpstrCustomFilter)))
         ofnW->lpstrCustomFilter = FILEDLG_MapStringPairsToW(ofnA->lpstrCustomFilter, ofnA->nMaxCustFilter);
