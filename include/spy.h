@@ -1,4 +1,4 @@
-/* $Id: spy.h,v 1.1 1999-06-25 21:34:49 sandervl Exp $ */
+/* $Id: spy.h,v 1.2 1999-06-26 08:25:53 sandervl Exp $ */
 
 /*
  *
@@ -22,6 +22,11 @@ typedef struct _Q_SPYMSG {
 
 BOOL InitSpyQueue();
 void CloseSpyQueue();
-VOID PostSpyMessage(HWND hwnd, ULONG Msg, ULONG wParam, ULONG lParam);
+
+#ifdef DEBUG
+BOOL PostSpyMessage(HWND hwnd, ULONG Msg, ULONG wParam, ULONG lParam);
+#else
+#define PostSpyMessage(a,b,c,d)	FALSE
+#endif
 
 #endif //__SPY_H__
