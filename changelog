@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.305 1999-10-11 16:05:44 cbratschi Exp $ */
+ /* $Id: changelog,v 1.306 1999-10-11 20:15:07 sandervl Exp $ */
 
  99-10-11: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: pmframe finished
@@ -10,6 +10,14 @@
                   Added support for extra messages in msg printf code
 		  Ported almost all Wine code for CTLCOLOR messages.
                   Return -1 in DefWindowProc for WM_VKEYTOITEM & WM_CHARTOITEM
+                  Fix for MDI child window. They're now displayed, but it's
+                  still not right.
+	- SHELL32: Fixed Shell32 about dialog.
+                   Compile Wine resource with WRC and link with dll.
+                   Added version resource
+                   Call Wine dll entrypoint in initterm.cpp.
+	- INCLUDE: Only include stdlib.h when wrc is not active
+                   Extra definitions for compiling win32 apps in OS/2
 
  99-10-11: Christoph Bratschi <cbratschi@datacomm.ch>
 	- GDI32: Bugfix for Pie Open32 api
