@@ -1,4 +1,4 @@
-/* $Id: windowclass.cpp,v 1.1 1999-09-15 23:19:02 sandervl Exp $ */
+/* $Id: windowclass.cpp,v 1.2 1999-10-08 16:28:21 sandervl Exp $ */
 /*
  * Win32 Window Class Code for OS/2
  *
@@ -41,6 +41,7 @@ ATOM WIN32API RegisterClassA(CONST WNDCLASSA *lpWndClass)
  WNDCLASSEXA wc;
  Win32WndClass *wclass;
 
+    dprintf(("RegisterClassA\n"));
    //CB: size new in ex structure
    wc.cbSize = sizeof(wc);
    memcpy(&wc.style, lpWndClass, sizeof(WNDCLASSA));
@@ -59,6 +60,7 @@ ATOM WIN32API RegisterClassExA(CONST WNDCLASSEXA *lpWndClass)
 {
  Win32WndClass *wclass;
 
+   dprintf(("RegisterClassExA\n"));
    wclass = new Win32WndClass((WNDCLASSEXA *)lpWndClass,FALSE);
    if(wclass == NULL) {
         dprintf(("RegisterClassExA wclass == NULL!"));
@@ -150,7 +152,7 @@ BOOL WIN32API GetClassInfoA(HINSTANCE hInstance, LPCSTR lpszClass, WNDCLASSA *lp
   wndclass = Win32WndClass::FindClass(hInstance, (LPSTR)lpszClass);
   if(wndclass) {
         wndclass->getClassInfo(&wc);
-        memcpy(lpwc, &wc, sizeof(WNDCLASSA));
+        memcpy(lpwc, &wc.style, sizeof(WNDCLASSA));
         return(TRUE);
   }
   return(FALSE);
