@@ -1,4 +1,4 @@
-/* $Id: exceptstackdump.cpp,v 1.2 2000-05-13 07:16:11 sandervl Exp $ */
+/* $Id: exceptstackdump.cpp,v 1.3 2000-11-05 13:40:45 sandervl Exp $ */
 /*
  * Stack dump code
  *
@@ -239,13 +239,13 @@ void dbgPrintStack(PEXCEPTIONREPORTRECORD       pERepRec,
       	if(rc != NO_ERROR || ((Attr & (PAG_EXECUTE|PAG_READ|PAG_COMMIT)) != (PAG_EXECUTE|PAG_READ|PAG_COMMIT)) || (Size < 16)) {
 //		dprintf(("skiploop %x (rc %x, Attr %x Size %d)\n", *stacktop, rc, Attr, Size));
 		if(WinExe && WinExe->insideModule(addr) && WinExe->insideModuleCode(addr)) {
-			sprintf(Name, "%s.EXE", WinExe->getModuleName());
+			sprintf(Name, "%s", WinExe->getModuleName());
 			dprintf(("%-13s      at 0x%08x\n", Name, addr));
 		}
 		else {
 		  	Win32DllBase *dll = Win32DllBase::findModuleByAddr(addr);
 			if(dll && dll->insideModuleCode(addr)) {
-				sprintf(Name, "%s.DLL", dll->getModuleName());
+				sprintf(Name, "%s", dll->getModuleName());
 				dprintf(("%-13s      at 0x%08x\n", Name, addr));
 			}
 		}
@@ -290,13 +290,13 @@ void dbgPrintStack(PEXCEPTIONREPORTRECORD       pERepRec,
         }
 	else {
 		if(WinExe && WinExe->insideModule(addr) && WinExe->insideModuleCode(addr)) {
-			sprintf(Name, "%s.EXE", WinExe->getModuleName());
+			sprintf(Name, "%s", WinExe->getModuleName());
 			dprintf(("%-13s      at 0x%08x\n", Name, addr));
 		}
 		else {
 		  	Win32DllBase *dll = Win32DllBase::findModuleByAddr(addr);
 			if(dll && dll->insideModuleCode(addr)) {
-				sprintf(Name, "%s.DLL", dll->getModuleName());
+				sprintf(Name, "%s", dll->getModuleName());
 				dprintf(("%-13s      at 0x%08x\n", Name, addr));
 			}
 		}
@@ -308,13 +308,13 @@ skiploop:
 
   addr = pCtxRec->ctx_RegEip;   
   if(WinExe && WinExe->insideModule(addr) && WinExe->insideModuleCode(addr)) {
-     sprintf(Name, "%s.EXE", WinExe->getModuleName());
+     sprintf(Name, "%s", WinExe->getModuleName());
      dprintf(("%-13s      at 0x%08x\n", Name, addr));
   }
   else {
      Win32DllBase *dll = Win32DllBase::findModuleByAddr(addr);
      if(dll && dll->insideModuleCode(addr)) {
-	sprintf(Name, "%s.DLL", dll->getModuleName());
+	sprintf(Name, "%s", dll->getModuleName());
 	dprintf(("%-13s      at 0x%08x\n", Name, addr));
      }
   }

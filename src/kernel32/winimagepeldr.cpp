@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.63 2000-10-23 13:42:45 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.64 2000-11-05 13:40:46 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -776,7 +776,7 @@ BOOL Win32PeLdrImage::allocSections(ULONG reservedMem)
 
   realBaseAddress = 0;
 
-  //Allocated in peldr.dll
+  //Allocated in by pe.exe
   if(reservedMem && reservedMem == oh.ImageBase) {
     realBaseAddress = oh.ImageBase;
     return TRUE;
