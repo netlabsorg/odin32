@@ -1,5 +1,4 @@
-/* $Id: extensions.h,v 1.2 2000-05-21 20:38:11 jeroen Exp $ */
-
+/* $Id: glapinoop.h,v 1.1 2000-05-21 20:52:03 jeroen Exp $ */
 /*
  * Mesa 3-D graphics library
  * Version:  3.3
@@ -25,28 +24,17 @@
  */
 
 
-#ifndef _EXTENSIONS_H_
-#define _EXTENSIONS_H_
+#ifndef _GLAPINOOP_H
+#define _GLAPINOOP_H
 
-#include "types.h"
+#include "glapi.h"
 
 
-#define DEFAULT_OFF    0x0
-#define DEFAULT_ON     0x1
-#define ALWAYS_ENABLED 0x2
+extern void
+_glapi_noop_enable_warnings(GLboolean enable);
 
-/* Return 0 on success.
- */
-extern int gl_extensions_add( GLcontext *ctx, int state,
-                              const char *name, void (*notify)( void ) );
 
-extern int gl_extensions_enable( GLcontext *ctx, const char *name );
-extern int gl_extensions_disable( GLcontext *ctx, const char *name );
-extern GLboolean gl_extension_is_enabled( GLcontext *ctx, const char *name);
-extern void gl_extensions_dtr( GLcontext *ctx );
-extern void gl_extensions_ctr( GLcontext *ctx );
-extern const char *gl_extensions_get_string( GLcontext *ctx );
+extern void *__glapi_noop_table[];
+
 
 #endif
-
-

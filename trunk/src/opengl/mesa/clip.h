@@ -1,4 +1,4 @@
-/* $Id: clip.h,v 1.1 2000-02-29 00:48:26 sandervl Exp $ */
+/* $Id: clip.h,v 1.2 2000-05-21 20:14:08 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -39,9 +39,9 @@
 #ifdef DEBUG
 #  define GL_VIEWCLIP_POINT( V )   gl_viewclip_point( V )
 #else
-#  define GL_VIEWCLIP_POINT( V )			\
-     (    (V)[0] <= (V)[3] && (V)[0] >= -(V)[3]		\
-       && (V)[1] <= (V)[3] && (V)[1] >= -(V)[3]		\
+#  define GL_VIEWCLIP_POINT( V )                        \
+     (    (V)[0] <= (V)[3] && (V)[0] >= -(V)[3]         \
+       && (V)[1] <= (V)[3] && (V)[1] >= -(V)[3]         \
        && (V)[2] <= (V)[3] && (V)[2] >= -(V)[3] )
 #endif
 
@@ -63,11 +63,9 @@ extern GLuint gl_userclip_point( GLcontext* ctx, const GLfloat v[] );
 extern void gl_user_cliptest( struct vertex_buffer *VB );
 
 
-extern void gl_ClipPlane( GLcontext* ctx,
-                          GLenum plane, const GLfloat *equation );
+extern void _mesa_ClipPlane( GLenum plane, const GLdouble *equation );
 
-extern void gl_GetClipPlane( GLcontext* ctx,
-                             GLenum plane, GLdouble *equation );
+extern void _mesa_GetClipPlane( GLenum plane, GLdouble *equation );
 
 
 /*

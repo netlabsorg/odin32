@@ -1,10 +1,10 @@
-/* $Id: extensions.h,v 1.2 2000-05-21 20:38:11 jeroen Exp $ */
+/* $Id: glapi.h,v 1.1 2000-05-21 20:50:01 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
  * Version:  3.3
  *
- * Copyright (C) 1999  Brian Paul   All Rights Reserved.
+ * Copyright (C) 1999-2000  Brian Paul   All Rights Reserved.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software"),
@@ -25,28 +25,66 @@
  */
 
 
-#ifndef _EXTENSIONS_H_
-#define _EXTENSIONS_H_
-
-#include "types.h"
+#ifndef _GLAPI_H
+#define _GLAPI_H
 
 
-#define DEFAULT_OFF    0x0
-#define DEFAULT_ON     0x1
-#define ALWAYS_ENABLED 0x2
+#include "gl.h"
 
-/* Return 0 on success.
- */
-extern int gl_extensions_add( GLcontext *ctx, int state,
-                              const char *name, void (*notify)( void ) );
+struct _glapi_table;
 
-extern int gl_extensions_enable( GLcontext *ctx, const char *name );
-extern int gl_extensions_disable( GLcontext *ctx, const char *name );
-extern GLboolean gl_extension_is_enabled( GLcontext *ctx, const char *name);
-extern void gl_extensions_dtr( GLcontext *ctx );
-extern void gl_extensions_ctr( GLcontext *ctx );
-extern const char *gl_extensions_get_string( GLcontext *ctx );
+
+extern void *_glapi_Context;
+
+extern struct _glapi_table *_glapi_Dispatch;
+
+
+extern void
+_glapi_check_multithread(void);
+
+
+extern void
+_glapi_set_context(void *context);
+
+
+extern void *
+_glapi_get_context(void);
+
+
+extern void
+_glapi_set_dispatch(struct _glapi_table *dispatch);
+
+
+extern struct _glapi_table *
+_glapi_get_dispatch(void);
+
+
+extern GLuint
+_glapi_get_dispatch_table_size(void);
+
+
+extern const char *
+_glapi_get_version(void);
+
+
+extern void
+_glapi_check_table(const struct _glapi_table *table);
+
+
+extern GLboolean
+_glapi_add_entrypoint(const char *funcName, GLuint offset);
+
+
+extern GLint
+_glapi_get_proc_offset(const char *funcName);
+
+
+extern const GLvoid *
+_glapi_get_proc_address(const char *funcName);
+
+
+extern const char *
+_glapi_get_proc_name(GLuint offset);
+
 
 #endif
-
-

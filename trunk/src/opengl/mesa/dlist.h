@@ -1,4 +1,4 @@
-/* $Id: dlist.h,v 1.1 2000-02-29 00:48:29 sandervl Exp $ */
+/* $Id: dlist.h,v 1.2 2000-05-21 20:32:16 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -35,7 +35,7 @@
 #include "types.h"
 
 struct display_list {
-   union node *nodes;	
+   union node *nodes;
    GLuint OrFlag;
    struct gl_current_attrib outputs;
 };
@@ -51,24 +51,23 @@ extern void gl_init_lists( void );
 
 extern void gl_destroy_list( GLcontext *ctx, GLuint list );
 
-extern void gl_CallList( GLcontext *ctx, GLuint list );
+extern void _mesa_CallList( GLuint list );
 
-extern void gl_CallLists( GLcontext *ctx,
-                          GLsizei n, GLenum type, const GLvoid *lists );
+extern void _mesa_CallLists( GLsizei n, GLenum type, const GLvoid *lists );
 
-extern void gl_DeleteLists( GLcontext *ctx, GLuint list, GLsizei range );
+extern void _mesa_DeleteLists( GLuint list, GLsizei range );
 
-extern void gl_EndList( GLcontext *ctx );
+extern void _mesa_EndList( void );
 
-extern GLuint gl_GenLists( GLcontext *ctx, GLsizei range );
+extern GLuint _mesa_GenLists( GLsizei range );
 
-extern GLboolean gl_IsList( GLcontext *ctx, GLuint list );
+extern GLboolean _mesa_IsList( GLuint list );
 
-extern void gl_ListBase( GLcontext *ctx, GLuint base );
+extern void _mesa_ListBase( GLuint base );
 
-extern void gl_NewList( GLcontext *ctx, GLuint list, GLenum mode );
+extern void _mesa_NewList( GLuint list, GLenum mode );
 
-extern void gl_init_dlist_pointers( struct gl_api_table *table );
+extern void _mesa_init_dlist_table( struct _glapi_table *table );
 
 
 extern void gl_compile_cassette( GLcontext *ctx );

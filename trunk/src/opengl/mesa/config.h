@@ -1,8 +1,8 @@
-/* $Id: config.h,v 1.2 2000-03-01 18:49:24 jeroen Exp $ */
+/* $Id: config.h,v 1.3 2000-05-21 20:24:21 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -97,7 +97,7 @@
 /* Min and Max line widths and granularity */
 #define MIN_LINE_WIDTH 1.0
 #define MAX_LINE_WIDTH 10.0
-#define LINE_WIDTH_GRANULARITY 1.0
+#define LINE_WIDTH_GRANULARITY 0.1
 
 /* Max texture palette size */
 #define MAX_TEXTURE_PALETTE_SIZE 256
@@ -115,11 +115,13 @@
 /* Maxmimum size for CVA.  May be overridden by the drivers.  */
 #define MAX_ARRAY_LOCK_SIZE 3000
 
+/* Subpixel precision for antialiasing, window coordinate snapping */
+#define SUB_PIXEL_BITS 4
+
+
 
 /*
- *
  * Mesa-specific parameters
- *
  */
 
 
@@ -129,27 +131,13 @@
 #define ACCUM_BITS 16
 
 
-#ifdef MESAD3D
-   /* Mesa / Direct3D driver only */
-   extern float g_DepthScale, g_MaxDepth;
-#  define DEPTH_BITS    32
-#  define DEPTH_SCALE   g_DepthScale
-#  define MAX_DEPTH     g_MaxDepth
-#else
-   /*
-    * Bits per depth buffer value:  16 or 32
-    */
-#  define DEPTH_BITS 16
-#  if DEPTH_BITS==16
-#     define MAX_DEPTH 0xffff
-#     define DEPTH_SCALE 65535.0F
-#  elif DEPTH_BITS==32
-#     define MAX_DEPTH 0x3fffffff
-#     define DEPTH_SCALE ((GLfloat) MAX_DEPTH)
-#  else
-#     error "illegal number of depth bits"
-#  endif
-#endif
+/*
+ * Bits per depth buffer value:  16 or 32 (GLushort or GLuint)
+ * gl_create_visual() can select any depth in [0, 32].
+ */
+#define DEFAULT_SOFTWARE_DEPTH_BITS 16
+#define DEFAULT_SOFTWARE_DEPTH_TYPE GLushort
+
 
 
 /*
@@ -162,7 +150,8 @@
  * Bits per color channel (must be 8 at this time!)
  */
 #define CHAN_BITS 8
-
+#define CHAN_MAX ((1 << CHAN_BITS) - 1)
+#define CHAN_MAXF ((GLfloat) CHAN_MAX)
 
 
 /*
@@ -180,14 +169,11 @@
  * this number, though things may go better for you if you choose a
  * value of 12n + 3.
  */
-
 #define VB_START  3
 
-#if defined(FX) && !defined(MITS)
-#  define VB_MAX 72 + VB_START  /* better performance */
-#else
-#  define VB_MAX 480 + VB_START
-#endif
+#define VB_MAX (216 + VB_START)
+
+
 
 /*
  * Actual vertex buffer size.
@@ -197,28 +183,19 @@
  * VB_MAX vertices.  (This only happens when mixed primitives are
  * sharing the vb).
  */
-#define VB_MAX_CLIPPED_VERTS (2 * (6 + MAX_CLIP_PLANES))
+#define VB_MAX_CLIPPED_VERTS ((2 * (6 + MAX_CLIP_PLANES))+1)
 #define VB_SIZE  (VB_MAX + VB_MAX_CLIPPED_VERTS)
-
-
-/*
- *
- * For X11 driver only:
- *
- */
-
-/*
- * When defined, use 6x6x6 dithering instead of 5x9x5.
- * 5x9x5 better for general colors, 6x6x6 better for grayscale.
- */
-/*#define DITHER666*/
 
 
 
 typedef struct gl_context GLcontext;
-typedef struct gl_visual  GLvisual;
-typedef struct gl_frame_buffer GLframebuffer;
+                                     /* typedef struct gl_visual  GLvisual;*/
+                           /* typedef struct gl_frame_buffer GLframebuffer;*/
 
-extern void gl_read_config_file( struct gl_context *ctx );
+extern void
+gl_read_config_file( struct gl_context *ctx );
+
+extern void
+gl_register_config_var(const char *name, void (*notify)( const char *, int ));
 
 #endif

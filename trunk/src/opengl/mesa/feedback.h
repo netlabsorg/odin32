@@ -1,8 +1,8 @@
-/* $Id: feedback.h,v 1.1 2000-02-29 00:48:30 sandervl Exp $ */
+/* $Id: feedback.h,v 1.2 2000-05-21 20:39:40 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -35,49 +35,57 @@
 #include "types.h"
 
 
-#define FEEDBACK_TOKEN( CTX, T )				\
-	if (CTX->Feedback.Count < CTX->Feedback.BufferSize) {	\
-	   CTX->Feedback.Buffer[CTX->Feedback.Count] = (GLfloat) (T); \
-	}							\
-	CTX->Feedback.Count++;
+#define FEEDBACK_TOKEN( CTX, T )                                \
+        if (CTX->Feedback.Count < CTX->Feedback.BufferSize) {   \
+           CTX->Feedback.Buffer[CTX->Feedback.Count] = (GLfloat) (T); \
+        }                                                       \
+        CTX->Feedback.Count++;
 
 
 extern void gl_feedback_vertex( GLcontext *ctx,
                                 const GLfloat win[4],
                                 const GLfloat color[4],
-				GLuint index,
+                                GLuint index,
                                 const GLfloat texcoord[4] );
 
 
 extern void gl_update_hitflag( GLcontext *ctx, GLfloat z );
 
 
-extern void gl_PassThrough( GLcontext *ctx, GLfloat token );
+extern void
+_mesa_PassThrough( GLfloat token );
 
-extern void gl_FeedbackBuffer( GLcontext *ctx, GLsizei size,
-                               GLenum type, GLfloat *buffer );
+extern void
+_mesa_FeedbackBuffer( GLsizei size, GLenum type, GLfloat *buffer );
 
-extern void gl_SelectBuffer( GLcontext *ctx, GLsizei size, GLuint *buffer );
+extern void
+_mesa_SelectBuffer( GLsizei size, GLuint *buffer );
 
-extern void gl_InitNames( GLcontext *ctx );
+extern void
+_mesa_InitNames( void );
 
-extern void gl_LoadName( GLcontext *ctx, GLuint name );
+extern void
+_mesa_LoadName( GLuint name );
 
-extern void gl_PushName( GLcontext *ctx, GLuint name );
+extern void
+_mesa_PushName( GLuint name );
 
-extern void gl_PopName( GLcontext *ctx );
+extern void
+_mesa_PopName( void );
 
-extern GLint gl_RenderMode( GLcontext *ctx, GLenum mode );
+extern GLint
+_mesa_RenderMode( GLenum mode );
+
 
 extern void gl_feedback_points( GLcontext *ctx, GLuint first, GLuint last );
 extern void gl_feedback_line( GLcontext *ctx, GLuint v1, GLuint v2, GLuint pv );
 extern void gl_feedback_triangle( GLcontext *ctx, GLuint v0, GLuint v1,
-				  GLuint v2, GLuint pv );
+                                  GLuint v2, GLuint pv );
 
 extern void gl_select_points( GLcontext *ctx, GLuint first, GLuint last );
 extern void gl_select_line( GLcontext *ctx, GLuint v1, GLuint v2, GLuint pv );
 extern void gl_select_triangle( GLcontext *ctx, GLuint v0, GLuint v1,
-				GLuint v2, GLuint pv );
+                                GLuint v2, GLuint pv );
 
 #endif
 

@@ -1,8 +1,8 @@
-/* $Id: cva.h,v 1.1 2000-02-29 00:48:28 sandervl Exp $ */
+/* $Id: cva.h,v 1.2 2000-05-21 20:29:06 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -34,7 +34,7 @@
 
 
 extern void gl_merge_cva( struct vertex_buffer *VB,
-			  struct vertex_buffer *cvaVB );
+                          struct vertex_buffer *cvaVB );
 
 extern void gl_prepare_arrays_cva( struct vertex_buffer *cvaVB );
 
@@ -49,9 +49,11 @@ extern void gl_free_cva_store( struct gl_cva *cva );
 extern void gl_rescue_cva( GLcontext *ctx, struct immediate *IM );
 extern void gl_cva_force_precalc( GLcontext *ctx );
 
-extern void gl_LockArrays( GLcontext *ctx, GLuint first, GLuint count );
-extern void gl_UnlockArrays( GLcontext *ctx );
 
+extern void
+_mesa_LockArraysEXT(GLint first, GLsizei count);
 
+extern void
+_mesa_UnlockArraysEXT( void );
 
 #endif

@@ -1,8 +1,8 @@
-/* $Id: fog.h,v 1.1 2000-02-29 00:48:30 sandervl Exp $ */
+/* $Id: fog.h,v 1.2 2000-05-21 20:43:13 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -33,23 +33,39 @@
 #include "types.h"
 
 
-extern void gl_Fogfv( GLcontext *ctx, GLenum pname, const GLfloat *params );
+extern void
+_mesa_Fogf(GLenum pname, GLfloat param);
 
 
-extern void gl_fog_vertices( struct vertex_buffer *VB );
+extern void
+_mesa_Fogi(GLenum pname, GLint param );
 
-extern void gl_fog_rgba_pixels( const GLcontext *ctx,
-                                GLuint n, const GLdepth z[],
-                                GLubyte rgba[][4] );
 
-extern void gl_fog_ci_pixels( const GLcontext *ctx,
-                              GLuint n, const GLdepth z[], GLuint indx[] );
+extern void
+_mesa_Fogfv(GLenum pname, const GLfloat *params );
 
-extern void gl_make_fog_coords( struct vertex_buffer *VB );
 
-extern struct gl_pipeline_stage gl_fog_coord_stage;
+extern void
+_mesa_Fogiv(GLenum pname, const GLint *params );
 
-extern void gl_init_fog( void );
+
+
+extern void
+_mesa_fog_vertices( struct vertex_buffer *VB );
+
+extern void
+_mesa_fog_rgba_pixels( const GLcontext *ctx,
+                       GLuint n, const GLdepth z[],
+                       GLubyte rgba[][4] );
+
+extern void
+_mesa_fog_ci_pixels( const GLcontext *ctx,
+                     GLuint n, const GLdepth z[], GLuint indx[] );
+
+
+extern void
+_mesa_init_fog( void );
+
 
 
 #endif

@@ -1,4 +1,4 @@
-/* $Id: clip_funcs.h,v 1.1 2000-02-29 00:48:26 sandervl Exp $ */
+/* $Id: clip_funcs.h,v 1.2 2000-05-21 20:15:38 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -29,17 +29,17 @@
  */
 
 static GLuint TAG(userclip_line)( struct vertex_buffer *VB,
-				  GLuint *i, GLuint *j );
+                                  GLuint *i, GLuint *j );
 static GLuint TAG(userclip_polygon)( struct vertex_buffer *VB,
-				     GLuint n, GLuint vlist[] );
+                                     GLuint n, GLuint vlist[] );
 
 
 
 /* This now calls the user clip functions if required.
  */
 static GLuint TAG(viewclip_line)( struct vertex_buffer *VB,
-				  GLuint *i, GLuint *j,
-				  GLubyte mask )
+                                  GLuint *i, GLuint *j,
+                                  GLubyte mask )
 {
    GLfloat (*coord)[4] = VB->ClipPtr->data;
    GLfloat t, dx, dy, dz, dw, neww;
@@ -54,28 +54,28 @@ static GLuint TAG(viewclip_line)( struct vertex_buffer *VB,
  * For each plane, we define the OUTSIDE and COMPUTE_INTERSECTION
  * macros apprpriately.
  */
-#define GENERAL_CLIP					\
-   if (mask & PLANE) {					\
-      GLuint flagI = INSIDE( ii );			\
-      GLuint flagJ = INSIDE( jj );			\
-							\
-      if (!(flagI|flagJ))				\
-	 return 0;					\
-							\
-      if (flagI ^ flagJ) {				\
-	 COMPUTE_INTERSECTION( jj, ii, vb_free );	\
-	 interp( VB, vb_free, t, jj, ii);		\
-							\
-	 if (flagI) {					\
-            VB->ClipMask[jj] |= PLANE;			\
-	    jj = vb_free;				\
-	 } else {					\
-            VB->ClipMask[ii] |= PLANE;			\
-	    ii = vb_free;				\
-	 }						\
-							\
-         VB->ClipMask[vb_free++] = 0;			\
-      }							\
+#define GENERAL_CLIP                                    \
+   if (mask & PLANE) {                                  \
+      GLuint flagI = INSIDE( ii );                      \
+      GLuint flagJ = INSIDE( jj );                      \
+                                                        \
+      if (!(flagI|flagJ))                               \
+         return 0;                                      \
+                                                        \
+      if (flagI ^ flagJ) {                              \
+         COMPUTE_INTERSECTION( jj, ii, vb_free );       \
+         interp( VB, vb_free, t, jj, ii);               \
+                                                        \
+         if (flagI) {                                   \
+            VB->ClipMask[jj] |= PLANE;                  \
+            jj = vb_free;                               \
+         } else {                                       \
+            VB->ClipMask[ii] |= PLANE;                  \
+            ii = vb_free;                               \
+         }                                              \
+                                                        \
+         VB->ClipMask[vb_free++] = 0;                   \
+      }                                                 \
    }
 
 #include "general_clip.h"
@@ -84,7 +84,7 @@ static GLuint TAG(viewclip_line)( struct vertex_buffer *VB,
 
    if (mask & CLIP_USER_BIT) {
       if ( TAG(userclip_line)( VB, &ii, &jj ) == 0 )
-	 return 0;
+         return 0;
    }
 
    vlist[0] = ii;
@@ -106,19 +106,19 @@ static GLuint TAG(viewclip_line)( struct vertex_buffer *VB,
       GLuint start = VB->FirstFree;
 
       for (i = 0; i < n; i++) {
-	 j = vlist[i];
-	 if (j >= start) {
-	    if (W(j) != 0.0F) {
-	       GLfloat wInv = 1.0F / W(j);
-	       win[j][0] = X(j) * wInv * sx + tx;
-	       win[j][1] = Y(j) * wInv * sy + ty;
-	       win[j][2] = Z(j) * wInv * sz + tz;
-	       win[j][3] = wInv;
-	    } else {
-	       win[j][0] = win[j][1] = win[j][2] = 0.0F;
-	       win[j][3] = 1.0F;
-	    }
-	 }
+         j = vlist[i];
+         if (j >= start) {
+            if (W(j) != 0.0F) {
+               GLfloat wInv = 1.0F / W(j);
+               win[j][0] = X(j) * wInv * sx + tx;
+               win[j][1] = Y(j) * wInv * sy + ty;
+               win[j][2] = Z(j) * wInv * sz + tz;
+               win[j][3] = wInv;
+            } else {
+               win[j][0] = win[j][1] = win[j][2] = 0.0F;
+               win[j][3] = 1.0F;
+            }
+         }
       }
    }
 
@@ -137,8 +137,8 @@ static GLuint TAG(viewclip_line)( struct vertex_buffer *VB,
  * is redundant.
  */
 static GLuint TAG(viewclip_polygon)( struct vertex_buffer *VB,
-				     GLuint n, GLuint vlist[],
-				     GLubyte mask )
+                                     GLuint n, GLuint vlist[],
+                                     GLubyte mask )
 {
    GLfloat (*coord)[4] = VB->ClipPtr->data;
    GLuint vlist2[VB_SIZE-VB_MAX];
@@ -150,71 +150,80 @@ static GLuint TAG(viewclip_polygon)( struct vertex_buffer *VB,
 
    if (mask & CLIP_ALL_BITS) {
 
-#define GENERAL_CLIP							\
-   if (mask & PLANE) {							\
-      GLuint prevj = inlist[n-1];					\
-      GLuint prevflag = INSIDE(prevj);					\
-      GLuint outcount = 0;						\
-      GLuint ef_state = 3;						\
-      GLuint i;								\
-									\
-									\
-      for (i = 0; i < n; i++) {						\
-	 GLuint j = inlist[i];						\
-	 GLuint flag = INSIDE(j);					\
-									\
-	 if (flag ^ prevflag) {						\
-	    if (flag) {							\
-	       /* Coming back in					\
-		*/							\
-	       COMPUTE_INTERSECTION( j, prevj, vb_free );		\
-	       interp( VB, vb_free, t, j, prevj );			\
-									\
-	       if (IND&CLIP_TAB_EDGEFLAG)				\
-		  VB->EdgeFlagPtr->data[vb_free] =			\
-		     VB->EdgeFlagPtr->data[prevj] & ef_state;		\
-									\
-									\
-	    } else {							\
-	       /* Going out of bounds					\
-		*/							\
-	       COMPUTE_INTERSECTION( prevj, j, vb_free );		\
-	       interp( VB, vb_free, t, prevj, j );			\
-									\
-	       if (IND&CLIP_TAB_EDGEFLAG)				\
-		  VB->EdgeFlagPtr->data[vb_free] = 1;			\
-	    }								\
-									\
-	    outlist[outcount++] = vb_free;				\
-            VB->ClipMask[vb_free++] = 0;				\
-	 }								\
-									\
-	 if (flag) {							\
-	    outlist[outcount++] = j;					\
-	 } else {							\
-            VB->ClipMask[j] |= (PLANE&CLIP_ALL_BITS); /* don't setup */	\
-         }								\
-	 prevj = j;							\
-	 prevflag = flag;						\
-	 ef_state = 1;							\
-      }									\
-									\
-      if (outcount < 3)							\
-	 return 0;							\
-      else {								\
-	 GLuint *tmp = inlist;						\
-	 inlist = outlist;						\
-	 outlist = tmp;							\
-	 n = outcount;							\
-      }									\
+#define GENERAL_CLIP                                                    \
+   if (mask & PLANE) {                                                  \
+      GLuint prevj = inlist[0];                                         \
+      GLuint prevflag = INSIDE(prevj);                                  \
+      GLuint outcount = 0;                                              \
+      GLuint i;                                                         \
+                                                                        \
+      inlist[n] = inlist[0];                                            \
+                                                                        \
+      for (i = 1; i < n+1; i++) {                                       \
+         GLuint j = inlist[i];                                          \
+         GLuint flag = INSIDE(j);                                       \
+                                                                        \
+         if (prevflag) {                                                \
+            outlist[outcount++] = prevj;                                \
+         } else {                                                       \
+            VB->ClipMask[prevj] |= (PLANE&CLIP_ALL_BITS);               \
+         }                                                              \
+                                                                        \
+         if (flag ^ prevflag) {                                         \
+            if (flag) {                                                 \
+               /* Coming back in                                        \
+                */                                                      \
+               COMPUTE_INTERSECTION( j, prevj, vb_free );               \
+               interp( VB, vb_free, t, j, prevj );                      \
+                                                                        \
+               if (IND&CLIP_TAB_EDGEFLAG)                               \
+                  VB->EdgeFlagPtr->data[vb_free] =                      \
+                     VB->EdgeFlagPtr->data[prevj];                      \
+                                                                        \
+                                                                        \
+            } else {                                                    \
+               /* Going out of bounds                                   \
+                */                                                      \
+               COMPUTE_INTERSECTION( prevj, j, vb_free );               \
+               interp( VB, vb_free, t, prevj, j );                      \
+                                                                        \
+               if (IND&CLIP_TAB_EDGEFLAG) {                             \
+                  VB->EdgeFlagPtr->data[vb_free] = 3;                   \
+               }                                                        \
+            }                                                           \
+                                                                        \
+            if (IND&CLIP_TAB_EDGEFLAG) {                                \
+               /* Demote trailing edge to internal edge.                \
+                */                                                      \
+               if (outcount &&                                          \
+                   (VB->EdgeFlagPtr->data[outlist[outcount-1]] & 0x2))  \
+                  VB->EdgeFlagPtr->data[outlist[outcount-1]] = 1;       \
+            }                                                           \
+                                                                        \
+            outlist[outcount++] = vb_free;                              \
+            VB->ClipMask[vb_free++] = 0;                                \
+         }                                                              \
+                                                                        \
+         prevj = j;                                                     \
+         prevflag = flag;                                               \
+      }                                                                 \
+                                                                        \
+      if (outcount < 3)                                                 \
+         return 0;                                                      \
+      else {                                                            \
+         GLuint *tmp = inlist;                                          \
+         inlist = outlist;                                              \
+         outlist = tmp;                                                 \
+         n = outcount;                                                  \
+      }                                                                 \
    }
 
 
 #include "general_clip.h"
 
       if (inlist != vlist)
-	 for (i = 0 ; i < n ; i++)
-	    vlist[i] = inlist[i];
+         for (i = 0 ; i < n ; i++)
+            vlist[i] = inlist[i];
    }
 
    VB->Free = vb_free;
@@ -240,19 +249,19 @@ static GLuint TAG(viewclip_polygon)( struct vertex_buffer *VB,
       GLuint first = VB->FirstFree;
 
       for (i = 0; i < n; i++) {
-	 GLuint j = vlist[i];
-	 if (j >= first) {
-	    if (W(j) != 0.0F) {
-	       GLfloat wInv = 1.0F / W(j);
-	       win[j][0] = X(j) * wInv * sx + tx;
-	       win[j][1] = Y(j) * wInv * sy + ty;
-	       win[j][2] = Z(j) * wInv * sz + tz;
-	       win[j][3] = wInv;
-	    } else {
-	       win[j][0] = win[j][1] = win[j][2] = 0.0;
-	       win[j][3] = 1.0F;
-	    }
-	 }
+         GLuint j = vlist[i];
+         if (j >= first) {
+            if (W(j) != 0.0F) {
+               GLfloat wInv = 1.0F / W(j);
+               win[j][0] = X(j) * wInv * sx + tx;
+               win[j][1] = Y(j) * wInv * sy + ty;
+               win[j][2] = Z(j) * wInv * sz + tz;
+               win[j][3] = wInv;
+            } else {
+               win[j][0] = win[j][1] = win[j][2] = 0.0;
+               win[j][3] = 1.0F;
+            }
+         }
       }
    }
 
@@ -270,7 +279,7 @@ static GLuint TAG(viewclip_polygon)( struct vertex_buffer *VB,
 
 
 static GLuint TAG(userclip_line)( struct vertex_buffer *VB,
-				  GLuint *i, GLuint *j )
+                                  GLuint *i, GLuint *j )
 {
    GLcontext *ctx = VB->ctx;
    GLfloat (*coord)[4] = VB->ClipPtr->data;
@@ -282,35 +291,35 @@ static GLuint TAG(userclip_line)( struct vertex_buffer *VB,
 
    for (p=0;p<MAX_CLIP_PLANES;p++) {
       if (ctx->Transform.ClipEnabled[p]) {
-	 GLfloat a = ctx->Transform.ClipUserPlane[p][0];
-	 GLfloat b = ctx->Transform.ClipUserPlane[p][1];
-	 GLfloat c = ctx->Transform.ClipUserPlane[p][2];
-	 GLfloat d = ctx->Transform.ClipUserPlane[p][3];
+         GLfloat a = ctx->Transform.ClipUserPlane[p][0];
+         GLfloat b = ctx->Transform.ClipUserPlane[p][1];
+         GLfloat c = ctx->Transform.ClipUserPlane[p][2];
+         GLfloat d = ctx->Transform.ClipUserPlane[p][3];
 
-	 GLfloat dpI = d*W(ii) + c*Z(ii) + b*Y(ii) + a*X(ii);
-	 GLfloat dpJ = d*W(jj) + c*Z(jj) + b*Y(jj) + a*X(jj);
+         GLfloat dpI = d*W(ii) + c*Z(ii) + b*Y(ii) + a*X(ii);
+         GLfloat dpJ = d*W(jj) + c*Z(jj) + b*Y(jj) + a*X(jj);
 
          GLuint flagI = OUTSIDE( dpI );
          GLuint flagJ = OUTSIDE( dpJ );
 
-	 if (flagI & flagJ)
-	    return 0;
+         if (flagI & flagJ)
+            return 0;
 
-	 if (flagI ^ flagJ) {
-	    GLfloat t = -dpI/(dpJ-dpI);
+         if (flagI ^ flagJ) {
+            GLfloat t = -dpI/(dpJ-dpI);
 
-	    INTERP_SZ( t, coord, vb_free, ii, jj, SIZE );
-	    interp( VB, vb_free, t, ii, jj );
+            INTERP_SZ( t, coord, vb_free, ii, jj, SIZE );
+            interp( VB, vb_free, t, ii, jj );
 
-	    if (flagI) {
-	       VB->ClipMask[ii] |= CLIP_USER_BIT;
-	       ii = vb_free;
-	    } else {
-	       VB->ClipMask[jj] |= CLIP_USER_BIT;
-	       jj = vb_free;
-	    }
-	
-	    VB->ClipMask[vb_free++] = 0;
+            if (flagI) {
+               VB->ClipMask[ii] |= CLIP_USER_BIT;
+               ii = vb_free;
+            } else {
+               VB->ClipMask[jj] |= CLIP_USER_BIT;
+               jj = vb_free;
+            }
+
+            VB->ClipMask[vb_free++] = 0;
          }
       }
    }
@@ -323,7 +332,7 @@ static GLuint TAG(userclip_line)( struct vertex_buffer *VB,
 
 
 static GLuint TAG(userclip_polygon)( struct vertex_buffer *VB,
-				     GLuint n, GLuint vlist[] )
+                                     GLuint n, GLuint vlist[] )
 {
    GLcontext *ctx = VB->ctx;
    GLfloat (*coord)[4] = VB->ClipPtr->data;
@@ -335,65 +344,76 @@ static GLuint TAG(userclip_polygon)( struct vertex_buffer *VB,
 
    for (p=0;p<MAX_CLIP_PLANES;p++) {
       if (ctx->Transform.ClipEnabled[p]) {
-	 register float a = ctx->Transform.ClipUserPlane[p][0];
-	 register float b = ctx->Transform.ClipUserPlane[p][1];
-	 register float c = ctx->Transform.ClipUserPlane[p][2];
-	 register float d = ctx->Transform.ClipUserPlane[p][3];
+         register float a = ctx->Transform.ClipUserPlane[p][0];
+         register float b = ctx->Transform.ClipUserPlane[p][1];
+         register float c = ctx->Transform.ClipUserPlane[p][2];
+         register float d = ctx->Transform.ClipUserPlane[p][3];
 
-	 /* initialize prev to be last in the input list */
-	 GLuint prevj = inlist[n - 1];
-	 GLfloat dpJ = d*W(prevj) + c*Z(prevj) + b*Y(prevj) + a*X(prevj);
-	 GLuint flagJ = INSIDE(dpJ);
-	 GLuint outcount = 0;
-	 GLuint curri;
+         /* initialize prev to be last in the input list */
+         GLuint prevj = inlist[0];
+         GLfloat dpJ = d*W(prevj) + c*Z(prevj) + b*Y(prevj) + a*X(prevj);
+         GLuint flagJ = INSIDE(dpJ);
+         GLuint outcount = 0;
+         GLuint curri;
 
-         for (curri=0;curri<n;curri++) {
-	    GLuint currj = inlist[curri];
-	    GLfloat dpI = d*W(currj) + c*Z(currj) + b*Y(currj) + a*X(currj);
+         inlist[n] = inlist[0];
+
+
+         for (curri=1;curri<n+1;curri++) {
+            GLuint currj = inlist[curri];
+            GLfloat dpI = d*W(currj) + c*Z(currj) + b*Y(currj) + a*X(currj);
             GLuint flagI = INSIDE(dpI);
 
-	    if (flagI ^ flagJ) {
-	       GLfloat t;
-	       GLuint in;
-	       GLuint out;
+            if (flagJ) {
+               outlist[outcount++] = prevj;
+            } else {
+               VB->ClipMask[prevj] |= CLIP_USER_BIT;
+            }
 
-	       if (flagI) {
-		  out = prevj;
+            if (flagI ^ flagJ) {
+               GLfloat t;
+               GLuint in;
+               GLuint out;
+
+               if (flagI) {
+                  out = prevj;
                   in = currj;
                   t = dpI/(dpI-dpJ);
 
-		  if (IND&CLIP_TAB_EDGEFLAG)
-		     VB->EdgeFlagPtr->data[vb_free] =
-			VB->EdgeFlagPtr->data[prevj];
-	       } else {
-		  in = prevj;
+                  if (IND&CLIP_TAB_EDGEFLAG)
+                     VB->EdgeFlagPtr->data[vb_free] =
+                        VB->EdgeFlagPtr->data[prevj];
+               } else {
+                  in = prevj;
                   out = currj;
                   t = dpJ/(dpJ-dpI);
 
-		  if (IND&CLIP_TAB_EDGEFLAG)
-		     VB->EdgeFlagPtr->data[vb_free] = 1;
-	       }		
-	
-	       INTERP_SZ( t, coord, vb_free, in, out, SIZE );
-	       interp( VB, vb_free, t, in, out);
-	       outlist[outcount++] = vb_free;
-	       VB->ClipMask[vb_free++] = 0;
+                  if (IND&CLIP_TAB_EDGEFLAG)
+                     VB->EdgeFlagPtr->data[vb_free] = 1;
+               }
+
+               if (IND&CLIP_TAB_EDGEFLAG) {
+                  /* Demote trailing edge to internal edge.
+                   */
+                  if (outcount &&
+                      (VB->EdgeFlagPtr->data[outlist[outcount-1]] & 0x2))
+                     VB->EdgeFlagPtr->data[outlist[outcount-1]] = 1;
+               }
+
+               INTERP_SZ( t, coord, vb_free, in, out, SIZE );
+               interp( VB, vb_free, t, in, out);
+               outlist[outcount++] = vb_free;
+               VB->ClipMask[vb_free++] = 0;
             }
 
-	    if (flagI) {
-	       outlist[outcount++] = currj;
-	    } else {
-	       VB->ClipMask[currj] |= CLIP_USER_BIT;
-	    }
-
-	    prevj = currj;
-	    flagJ = flagI;
-	    dpJ = dpI;
+            prevj = currj;
+            flagJ = flagI;
+            dpJ = dpI;
          }
 
-	 if (outcount < 3)
-	    return 0;
-	 else {
+         if (outcount < 3)
+            return 0;
+         else {
             GLuint *tmp;
             tmp = inlist;
             inlist = outlist;
@@ -407,7 +427,7 @@ static GLuint TAG(userclip_polygon)( struct vertex_buffer *VB,
    if (inlist!=vlist) {
       GLuint i;
       for (i = 0 ; i < n ; i++)
-	 vlist[i] = inlist[i];
+         vlist[i] = inlist[i];
    }
 
    VB->Free = vb_free;

@@ -1,4 +1,4 @@
-/* $Id: common_x86asm.h,v 1.1 2000-02-29 00:48:26 sandervl Exp $ */
+/* $Id: common_x86asm.h,v 1.2 2000-05-21 20:20:44 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -30,6 +30,8 @@
  *   processor.
  *
  *  Written by Holger Waechtler <holger@akaflieg.extern.tu-berlin.de>
+ *  Changed by Andre Werthmann <wertmann@cs.uni-potsdam.de> for using the
+ *  new Katmai functions
  */
 #ifndef _common_3dnow_h
 #define _common_3dnow_h
@@ -37,7 +39,8 @@
 #define  GL_CPU_GenuineIntel     1
 #define  GL_CPU_MMX              2
 #define  GL_CPU_3Dnow            4
-#define  GL_CPU_AnyX86           8 /* set if x86 asm allowed */
+#define  GL_CPU_Katmai           8 /* set if the katmai-instructions are available */
+#define  GL_CPU_AnyX86           16 /* set if x86 asm allowed */
 
 #ifdef HAVE_CONFIG_H
 #include "conf.h"
@@ -45,8 +48,11 @@
 
 #ifdef USE_X86_ASM
 #include "x86.h"
-#if defined(USE_3DNOW_ASM)
+#ifdef USE_3DNOW_ASM
 #include "3dnow.h"
+#endif
+#ifdef USE_KATMAI_ASM
+#include "katmai.h"
 #endif
 #endif
 

@@ -1,8 +1,8 @@
-/* $Id: all.h,v 1.1 2000-02-29 00:48:24 sandervl Exp $ */
+/* $Id: all.h,v 1.2 2000-05-21 20:00:53 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
- * Version:  3.1
+ * Version:  3.3
  *
  * Copyright (C) 1999  Brian Paul   All Rights Reserved.
  *
@@ -51,19 +51,7 @@
 #include "conf.h"
 #endif
 
-#ifndef XFree86LOADER
-#include <assert.h>
-#include <limits.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <float.h>
-#include <math.h>
-#endif
-#include "gl.h"
-#ifdef XFree86Server
-#include "GL/osmesa.h"
-#endif
+#include "glheader.h"
 #include "accum.h"
 #include "alpha.h"
 #include "alphabuf.h"
@@ -95,7 +83,6 @@
 #include "macros.h"
 #include "masking.h"
 #include "matrix.h"
-#include "glmisc.h"
 #include "mmath.h"
 #include "pb.h"
 #include "pixel.h"
@@ -124,8 +111,5 @@
 #include "winpos.h"
 #include "xform.h"
 #include "zoom.h"
-#ifdef XFree86Server
-#include "GL/xf86glx.h"
-#endif
 
 #endif /*SRC_ALL_H*/

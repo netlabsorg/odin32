@@ -1,4 +1,4 @@
-/* $Id: accum.h,v 1.1 2000-02-29 00:48:24 sandervl Exp $ */
+/* $Id: accum.h,v 1.2 2000-05-21 19:58:10 jeroen Exp $ */
 
 /*
  * Mesa 3-D graphics library
@@ -35,17 +35,22 @@
 #include "types.h"
 
 
-extern void gl_alloc_accum_buffer( GLcontext *ctx );
+extern void
+_mesa_alloc_accum_buffer( GLcontext *ctx );
 
 
-extern void gl_Accum( GLcontext *ctx, GLenum op, GLfloat value );
+extern void
+_mesa_clear_accum_buffer( GLcontext *ctx );
 
 
-extern void gl_ClearAccum( GLcontext *ctx, GLfloat red, GLfloat green,
-                           GLfloat blue, GLfloat alpha );
+extern void
+_mesa_Accum( GLenum op, GLfloat value );
 
 
-extern void gl_clear_accum_buffer( GLcontext *ctx );
+extern void
+_mesa_ClearAccum( GLfloat red, GLfloat green, GLfloat blue, GLfloat alpha );
+
+
 
 
 #endif
