@@ -25,6 +25,7 @@
 #define  INCL_DOSMODULEMGR
 #define  INCL_DOSPROCESS
 #define  INCL_DOSSEMAPHORES
+#define  INCL_DOSMISC
 #include <os2wrap.h>    //Odin32 OS/2 api wrappers
 #include <stdlib.h>
 #include <stdio.h>
@@ -60,6 +61,7 @@ extern "C" {
  extern DWORD _Resource_PEResTab;
 }
 DWORD hInstanceUser32 = 0;
+BOOL  fVersionWarp3 = FALSE;
 
 /****************************************************************************/
 /* _DLL_InitTerm is the function that gets called by the operating system   */
@@ -73,6 +75,7 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
 {
    size_t i;
    APIRET rc;
+   ULONG  version[2];
 
    /*-------------------------------------------------------------------------*/
    /* If ulFlag is zero then the DLL is being loaded so initialization should */
@@ -94,6 +97,13 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
                 return 0UL;
 
          dprintf(("user32 init %s %s (%x)", __DATE__, __TIME__, DLLENTRYPOINT_NAME));
+
+         rc = DosQuerySysInfo(QSV_VERSION_MAJOR, QSV_VERSION_MINOR, version, sizeof(version));
+         if(rc == 0){
+              if(version[0] >= 20 && version[1] <= 30) {
+                  fVersionWarp3 = TRUE;
+              }
+         }
 
          /*******************************************************************/
          /* A DosExitList routine must be used to clean up if runtime calls */
