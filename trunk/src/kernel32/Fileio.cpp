@@ -1,4 +1,4 @@
-/* $Id: Fileio.cpp,v 1.19 1999-12-06 20:39:37 sandervl Exp $ */
+/* $Id: Fileio.cpp,v 1.20 1999-12-29 18:49:49 sandervl Exp $ */
 
 /*
  * Win32 File IO API functions for OS/2
@@ -546,7 +546,7 @@ ODINFUNCTION2(BOOL, MoveFileA,
               LPCSTR, arg1,
               LPCSTR, arg2)
 {
-    dprintf(("KERNEL32:  MoveFileA\n"));
+    dprintf(("KERNEL32: MoveFileA %s %s", arg1, arg2));
     return O32_MoveFile(arg1, arg2);
 }
 //******************************************************************************
