@@ -1,4 +1,4 @@
-/* $Id: buildenv.cmd,v 1.46 2003-02-24 14:51:46 bird Exp $
+/* $Id: buildenv.cmd,v 1.47 2003-03-19 20:51:51 bird Exp $
  *
  * This is the master tools environment script. It contains environment
  * configurations for many development tools. Each tool can be installed
@@ -26,7 +26,7 @@
     /*
      * Version
      */
-    sVersion = '1.0.17 [2003-02-24]';
+    sVersion = '1.0.18 [2003-03-19]';
 
     /*
      * Create argument array with lowercase arguments.
@@ -113,8 +113,9 @@
     aCfg.i.sId = 'emx';             aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'EMX';                    aCfg.i.sDesc = 'EMX v0.9d fixpack 04';      i = i + 1;
     aCfg.i.sId = 'emxpgcc';         aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'EMXPGCC';                aCfg.i.sDesc = 'Pentium Optimized GCC/EMX v1.1.1 r2 with binutils 2.9.1'; i = i + 1;
     aCfg.i.sId = 'freetypeemx';     aCfg.i.sGrp = 'misc';       aCfg.i.sSet = 'FreeTypeEMX';            aCfg.i.sDesc = 'FreeType v1.3.1 for EMX.'; i = i + 1;
-    aCfg.i.sId = 'gcc302';          aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'GCC30x,''gcc302''';      aCfg.i.sDesc = 'GCC/EMX v3.0.2beta with binutils 2.11.2'; i = i + 1;
-    aCfg.i.sId = 'gcc303';          aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'GCC30x,''gcc303''';      aCfg.i.sDesc = 'GCC/EMX v3.0.3beta with binutils 2.11.2'; i = i + 1;
+    aCfg.i.sId = 'gcc302';          aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'GCC3xx,''gcc302''';      aCfg.i.sDesc = 'GCC/EMX v3.0.2beta with binutils 2.11.2'; i = i + 1;
+    aCfg.i.sId = 'gcc303';          aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'GCC3xx,''gcc303''';      aCfg.i.sDesc = 'GCC/EMX v3.0.3beta with binutils 2.11.2'; i = i + 1;
+    aCfg.i.sId = 'gcc321';          aCfg.i.sGrp = 'comp32';     aCfg.i.sSet = 'GCC3xx,''gcc321''';      aCfg.i.sDesc = 'GCC/EMX v3.2.1beta with binutils 2.11.2'; i = i + 1;
     aCfg.i.sId = 'icatgam';         aCfg.i.sGrp = 'debugger';   aCfg.i.sSet = 'ICATGam';                aCfg.i.sDesc = 'ICAT for OS/2 latest';      i = i + 1;
     aCfg.i.sId = 'icatgam406rc1';   aCfg.i.sGrp = 'debugger';   aCfg.i.sSet = 'ICATGam406RC1';          aCfg.i.sDesc = 'ICAT for OS/2 v4.0.6 release candidate 1'; i = i + 1;
     aCfg.i.sId = 'icatpe';          aCfg.i.sGrp = 'debugger';   aCfg.i.sSet = 'ICATPe';                 aCfg.i.sDesc = 'ICAT for OS/2 with PE support (test version)'; i = i + 1;
@@ -839,6 +840,7 @@ PathSetDefault: procedure expose aCfg. aPath. sPathFile
         aPath.i.sPId = 'freetypeemx';               aPath.i.sPath = 'f:\Freetype\v1.3.1-emx\emx';   i = i + 1;
         aPath.i.sPId = 'gcc302';                    aPath.i.sPath = 'f:\gcc302beta';                i = i + 1;
         aPath.i.sPId = 'gcc303';                    aPath.i.sPath = 'f:\gcc\v3.0.3beta\emx';        i = i + 1;
+        aPath.i.sPId = 'gcc321';                    aPath.i.sPath = 'f:\gcc\v3.2.1beta\emx';        i = i + 1;
         aPath.i.sPId = 'icatgam';                   aPath.i.sPath = 'f:\icatos2';                   i = i + 1;
         aPath.i.sPId = 'icatgam406rc1';             aPath.i.sPath = 'f:\icatos2.4.0.6.rc1';         i = i + 1;
         aPath.i.sPId = 'icatpe';                    aPath.i.sPath = 'f:\icatpe';                    i = i + 1;
@@ -866,8 +868,8 @@ PathSetDefault: procedure expose aCfg. aPath. sPathFile
         aPath.i.sPId = 'toolkit452';                aPath.i.sPath = 'f:\toolkit\v452';              i = i + 1;
         aPath.i.sPId = 'unixroot';                  aPath.i.sPath = 'e:\unix';                      i = i + 1;
         aPath.i.sPId = 'xfree86';                   aPath.i.sPath = 'e:\xfree86';                   i = i + 1;
-        aPath.i.sPId = 'vac308';                    aPath.i.sPath = 'f:\vacpp\v308';                    i = i + 1;
-        aPath.i.sPId = 'vac365';                    aPath.i.sPath = 'f:\ibmcxxo';                   i = i + 1;
+        aPath.i.sPId = 'vac308';                    aPath.i.sPath = 'f:\vacpp\v308';                i = i + 1;
+        aPath.i.sPId = 'vac365';                    aPath.i.sPath = 'f:\vacpp\v365';                i = i + 1;
         aPath.i.sPId = 'vac40';                     aPath.i.sPath = 'f:\ibmcpp40';                  i = i + 1;
         aPath.i.sPId = 'warpin';                    aPath.i.sPath = 'f:\warpin';                    i = i + 1;
         aPath.i.sPId = 'watcom11';                  aPath.i.sPath = 'f:\watcom';                    i = i + 1;
@@ -892,6 +894,7 @@ PathSetDefault: procedure expose aCfg. aPath. sPathFile
         aPath.i.sPId = 'emx';                       aPath.i.sPath = 'e:\emx';                       i = i + 1;
         aPath.i.sPId = 'emxpgcc';                   aPath.i.sPath = 'e:\dev\emxpgcc\v2.95.2';       i = i + 1;
         aPath.i.sPId = 'gcc303';                    aPath.i.sPath = 'e:\dev\gcc\v3.0.3\emx';        i = i + 1;
+        aPath.i.sPId = 'gcc321';                    aPath.i.sPath = 'e:\dev\gcc\v3.2.1\emx';        i = i + 1;
       /*aPath.i.sPId = 'db2v52';                    aPath.i.sPath = 'e:\sqllib52';                  i = i + 1;
         aPath.i.sPId = 'icatgam';                   aPath.i.sPath = 'e:\icatos2';                   i = i + 1;
         aPath.i.sPId = 'icatgam406rc1';             aPath.i.sPath = 'e:\icatos2.4.0.6.rc1';         i = i + 1;
@@ -942,6 +945,7 @@ PathSetDefault: procedure expose aCfg. aPath. sPathFile
         aPath.i.sPId = 'emx';                       aPath.i.sPath = 'd:\emx';                       i = i + 1;
         aPath.i.sPId = 'emxpgcc';                   aPath.i.sPath = 'd:\dev\emxpgcc\v2.95.2';       i = i + 1;
         aPath.i.sPId = 'gcc303';                    aPath.i.sPath = 'd:\dev\gcc\v3.0.3\emx';        i = i + 1;
+        aPath.i.sPId = 'gcc321';                    aPath.i.sPath = 'd:\dev\gcc\v3.2.1\emx';        i = i + 1;
       /*aPath.i.sPId = 'db2v52';                    aPath.i.sPath = 'e:\sqllib52';                  i = i + 1;
         aPath.i.sPId = 'icatgam';                   aPath.i.sPath = 'e:\icatos2';                   i = i + 1;
         aPath.i.sPId = 'icatgam406rc1';             aPath.i.sPath = 'e:\icatos2.4.0.6.rc1';         i = i + 1;
@@ -1973,11 +1977,11 @@ return rc;
 
 
 /*
- * EMX/GCC 3.0.x - this environment must be used 'on' the ordinary EMX.
+ * EMX/GCC 3.x.x - this environment must be used 'on' the ordinary EMX.
  * Note! bin.new has been renamed to bin!
  * Note! make .lib of every .a! in 4OS2: for /R %i in (*.a) do if not exist %@NAME[%i].lib emxomf %i
  */
-GCC30x: procedure expose aCfg. aPath. sPathFile
+GCC3xx: procedure expose aCfg. aPath. sPathFile
     parse arg sToolId,sOperation,fRM,fQuiet,sPathId
 
     /*
@@ -2014,7 +2018,10 @@ GCC30x: procedure expose aCfg. aPath. sPathFile
     /*
      * Verify.
      */
-    ch = right(sToolId, 1);
+    chMajor = '3';
+    chMinor = left(right(sToolId, 2), 1);
+    chRel   = right(sToolId, 1);
+    sVer = chMajor'.'chMinor'.'chRel
     if (pos('verify', sOperation) <= 0) then
         return 0;
     if (    \CfgVerifyFile(sGCCBack'\bin.new\gcc.exe', fQuiet),
@@ -2031,16 +2038,35 @@ GCC30x: procedure expose aCfg. aPath. sPathFile
         |   \CfgVerifyFile(sGCCBack'\lib\opcodes.lib', fQuiet),
         |   \CfgVerifyFile(sGCCBack'\lib\opcodes_s.a', fQuiet),
         |   \CfgVerifyFile(sGCCBack'\lib\opcodes_s.lib', fQuiet),
-        |   \CfgVerifyFile(sGCCBack'\lib\gcc-lib\i386-pc-os2_emx\3.0.'ch'\st\gcc_dll.lib', fQuiet),
-        |   \CfgVerifyFile(sGCCBack'\lib\gcc-lib\i386-pc-os2_emx\3.0.'ch'\st\stdcxx.lib', fQuiet),
         ) then
         return 2;
 
-    rc = CheckCmdOutput('gcc --version', 0, fQuiet, '3.0.'||right(sPathId,1));
+    if (chMinor > 0) then
+    do
+        if (    \CfgVerifyFile(sGCCBack'\lib\gcc-lib\i386-pc-os2-emx\'sVer'\st\'sToolId'.lib', fQuiet),
+            |   \CfgVerifyFile(sGCCBack'\lib\gcc-lib\i386-pc-os2-emx\'sVer'\st\stdcxx.lib', fQuiet),
+            |   \CfgVerifyFile(sGCCBack'\lib\gcc-lib\i386-pc-os2-emx\'sVer'\st\stdcxx.a', fQuiet),
+            ) then
+            return 2;
+    end
+    else
+    do
+        if (    \CfgVerifyFile(sGCCBack'\lib\gcc-lib\i386-pc-os2_emx\'sVer'\st\gcc_dll.lib', fQuiet),
+            |   \CfgVerifyFile(sGCCBack'\lib\gcc-lib\i386-pc-os2_emx\'sVer'\st\stdcxx.lib', fQuiet),
+            |   \CfgVerifyFile(sGCCBack'\lib\gcc-lib\i386-pc-os2_emx\'sVer'\st\stdcxx.a', fQuiet),
+            ) then
+            return 2;
+    end
+
+
+    rc = CheckCmdOutput('gcc --version', 0, fQuiet, sVer);
     if (rc = 0) then
-        rc = CheckCmdOutput('g++ --version', 0, fQuiet, '3.0.'||right(sPathId,1));
+        rc = CheckCmdOutput('g++ --version', 0, fQuiet, sVer);
     if (rc = 0) then
-        rc = CheckCmdOutput('as --version', 0, fQuiet, 'GNU assembler 2.11.2');
+    do
+        sVerAS = '2.11.2';
+        rc = CheckCmdOutput('as --version', 0, fQuiet, 'GNU assembler 'sVerAS);
+    end
 return rc;
 
 
