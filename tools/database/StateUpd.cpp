@@ -1,4 +1,4 @@
-/* $Id: StateUpd.cpp,v 1.31 2000-08-02 18:10:11 bird Exp $
+/* $Id: StateUpd.cpp,v 1.32 2000-08-02 20:20:35 bird Exp $
  *
  * StateUpd - Scans source files for API functions and imports data on them.
  *
@@ -215,8 +215,8 @@ int main(int argc, char **argv)
                 case 's':
                 case 'S':
                     options.fRecursive = TRUE;
-                    fprintf(stderr, "This option (-s) is currently broken\n");
-                    return -1;
+                    fprintf(stderr, "Warning: -s processes subdirs of source for one DLL\n");
+                    break;
 
                 case 'u':
                 case 'U':
@@ -1341,7 +1341,10 @@ static unsigned long analyseFnDcl2(PFNDESC pFnDesc, char **papszLines, int i, in
                             pFnDesc->apszParamName[j] = pszEnd;
                             pszEnd = strlen(pszEnd) + pszEnd + 1;
                             *pszEnd = '\0';
-                            memset(psz, ' ', pszP2 - psz);
+                            if (pszP2 > psz) //FIXME here is a bug. (opengl\mesa\span.c(gl_write_multitexture_span))
+                                memset(psz, ' ', pszP2 - psz);
+                            else
+                                fprintf(phLog, "assert: line %d\n", __LINE__);
                         }
                         pFnDesc->apszParamType[j] = trim(apszArgs[j]);
                     }
@@ -2776,6 +2779,7 @@ static char *stristr(const char *pszStr, const char *pszSubStr)
  * @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
  * @remark    Comments are skipped.
  *            No tests for strings ("...asdf").
+ *            TODO: Multiline preprocessor directives....
  */
 static char *skipBackwards(const char *pszStopAt, const char *pszFrom, int &iLine, char **papszLines)
 {
@@ -2816,8 +2820,12 @@ static char *skipBackwards(const char *pszStopAt, const char *pszFrom, int &iLin
                 char *pszStart = papszLines[--i];
                 while (*pszStart == ' ')
                     pszStart++;
-                if (*pszStart != '\0' && *pszStart != '#'
-                    && !(*pszStart == '/' && pszStart[1] == '/'))
+
+                /* stop at preprocessor stuff */
+                if (*pszStart == '#')
+                    return (char*)pszFrom;
+
+                if (*pszStart != '\0' && !(*pszStart == '/' && pszStart[1] == '/'))
                 {   /* find '//' */
                     pszStart = strstr(pszStart, "//");
                     if (pszStart != NULL)
