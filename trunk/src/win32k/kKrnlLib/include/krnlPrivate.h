@@ -1,4 +1,4 @@
-/* $Id: krnlPrivate.h,v 1.2 2001-09-23 06:47:51 bird Exp $
+/* $Id: krnlPrivate.h,v 1.3 2001-09-26 04:01:36 bird Exp $
  *
  * Private header file for the krnl*.c* files.
  *
@@ -35,7 +35,9 @@ extern OTE                      KKL_ObjTab_DosCalls[20];        /* calltaba.asm 
 extern char                     KKL_ResNameTab[1];              /* calltaba.asm */
 extern char                     KKL_ResNameTabEND[1];           /* calltaba.asm */
 extern char                     callTab[1];                     /* calltaba.asm */
+extern char                     callTabEND[1];                  /* calltaba.asm */
 extern char                     callTab16[1];                   /* calltaba.asm */
+extern char                     callTab16END[1];                /* calltaba.asm */
 extern unsigned                 auNopFuncs[NBR_OF_KRNLIMPORTS]; /* calltaba.asm */
 
 
@@ -43,6 +45,6 @@ extern unsigned                 auNopFuncs[NBR_OF_KRNLIMPORTS]; /* calltaba.asm 
 *   Functions                                                                  *
 *******************************************************************************/
 extern void _Optlink LockedWrite(unsigned long ulAddr, unsigned char chOpcode, unsigned long ulDword);
-
+extern int  _Optlink MakeCalltab16CodeSegment(void);
 
 #endif
