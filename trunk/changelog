@@ -1,4 +1,11 @@
-/* $Id: changelog,v 1.2049 2002-04-17 13:42:04 sandervl Exp $ */
+/* $Id: changelog,v 1.2050 2002-04-24 08:55:21 sandervl Exp $ */
+
+ 2002-04-24: Platon Fomichev <platon@innotek.de>
+    - USER32:   o Don't activate window when it's minimized (ShowWindow)
+                o Deactivate window & move to bottom of z-order when it's
+                  minimized
+                o Listbox fix; rollup dropdown if mouse button pressed outside
+                  control
 
  2002-04-17: Platon Fomichev <platon@innotek.de>
     - COMDLG32: o If application specifies full path in file dialog structure
