@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.3 2001-09-16 03:39:07 bird Exp $
+# $Id: Makefile,v 1.4 2001-09-17 00:14:15 bird Exp $
 
 #
 # kKrnlLib.sys makefile.
@@ -43,9 +43,10 @@ OBJS  =\
     $(WIN32KOBJ)\d16globl.obj \
     $(WIN32KOBJ)\calltaba.obj \
     $(WIN32KOBJ)\krnlInit.obj \
+    $(WIN32KOBJ)\krnlLockedWrite.obj \
+    $(WIN32KOBJ)\krnlOverloading.obj \
     $(WIN32KOBJ)\krnlPrologs.obj \
     $(WIN32KOBJ)\krnlStubs.obj \
-#    $(WIN32KOBJ)\krnlImports.obj \
     $(WIN32KOBJ)\asmutils.obj \
     $(WIN32KOBJ)\kAssert.obj \
     $(WIN32KOBJ)\kAVLPV.obj \
