@@ -1,4 +1,4 @@
-/* $Id: wintls.cpp,v 1.17 2000-12-12 23:57:16 sandervl Exp $ */
+/* $Id: wintls.cpp,v 1.18 2002-07-18 11:58:46 achimha Exp $ */
 /*
  * Win32 TLS API functions
  *
@@ -18,6 +18,15 @@
 
 #define DBG_LOCALLOG  DBG_wintls
 #include "dbglocal.h"
+
+//******************************************************************************
+// Design information on TLS - AH 2002-07-18
+//
+// Windows TLS is very restricted in size. We implement it the same way as NT -
+// as part of the thread's TEB. We do not use the OS/2 TLS facilities directly.
+// The only part we use OS/2 TLS for is to store the thread's TEB pointer.
+// We fully support .tls sections in PE modules with this method.
+//******************************************************************************
 
 //******************************************************************************
 //******************************************************************************
