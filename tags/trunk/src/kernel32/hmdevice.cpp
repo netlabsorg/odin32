@@ -1,4 +1,4 @@
-/* $Id: hmdevice.cpp,v 1.26 2001-04-26 13:22:44 sandervl Exp $ */
+/* $Id: hmdevice.cpp,v 1.27 2001-06-19 10:50:23 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -202,7 +202,8 @@ BOOL HMDeviceHandler::CloseHandle(PHMHANDLEDATA pHMHandleData)
            lpHMDeviceName,
            pHMHandleData));
 
-  return(ERROR_INVALID_FUNCTION);
+  SetLastError(ERROR_INVALID_FUNCTION);
+  return FALSE;
 }
 
 

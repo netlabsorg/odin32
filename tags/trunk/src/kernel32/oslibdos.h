@@ -1,4 +1,4 @@
-/* $Id: oslibdos.h,v 1.30 2001-06-16 16:10:13 sandervl Exp $ */
+/* $Id: oslibdos.h,v 1.31 2001-06-19 10:50:26 sandervl Exp $ */
 
 /*
  * Wrappers for OS/2 Dos* API
@@ -12,6 +12,12 @@
 #ifndef __OSLIBDOS_H__
 #define __OSLIBDOS_H__
 
+
+#ifdef OS2_INCLUDED
+DWORD error2WinError(APIRET rc,DWORD defaultCode = ERROR_NOT_ENOUGH_MEMORY_W);
+#else
+DWORD error2WinError(DWORD rc,DWORD defaultCode = ERROR_NOT_ENOUGH_MEMORY);
+#endif
 
 void  OSLibInitWSeBFileIO();
 
