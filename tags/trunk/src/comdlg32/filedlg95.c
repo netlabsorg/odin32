@@ -2479,8 +2479,14 @@ void FILEDLG95_FILENAME_FillFromSelection (HWND hwnd)
 	}
       }
     }
-
+#ifdef __WIN32OS2__
+    //Selecting a directory previously erased the last selected file
+    if(nFiles) {
+        SetWindowTextA( fodInfos->DlgInfos.hwndFileName, lpstrAllFile );
+    }
+#else
     SetWindowTextA( fodInfos->DlgInfos.hwndFileName, lpstrAllFile );
+#endif
     HeapFree(GetProcessHeap(),0, lpstrAllFile );
 }
 
