@@ -1,4 +1,4 @@
-/* $Id: dev16.h,v 1.5 2000-02-19 23:52:00 bird Exp $
+/* $Id: dev16.h,v 1.6 2000-02-20 04:27:23 bird Exp $
  * dev16 - 16-bit specific. Should not be used in 32-bit C/C++.
  *
  * Copyright (c) 1999 knut st. osmundsen
@@ -111,7 +111,7 @@ USHORT NEAR R0Init16(PRP_GENIOCTL pRp);
  */
 USHORT NEAR CallR0Init32(LIN pRpInit);
 USHORT NEAR CallGetOTEs32(ULONG addressOTEBuf);
-USHORT NEAR CallVerifyProcTab32(void);
+USHORT NEAR CallVerifyImportTab32(void);
 USHORT NEAR CallElfIOCtl(LIN pRpIOCtl);
 USHORT NEAR CallWin32kIOCtl(LIN pRpIOCtl);
 

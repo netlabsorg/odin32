@@ -1,4 +1,4 @@
-/* $Id: d32init.c,v 1.11 2000-02-19 23:51:59 bird Exp $
+/* $Id: d32init.c,v 1.12 2000-02-20 04:27:23 bird Exp $
  *
  * d32init.c - 32-bits init routines.
  *
@@ -13,12 +13,12 @@
 *******************************************************************************/
 #define MAXSIZE_PROLOG 0x10             /* Note that this must be synced with */
                                         /* the one used in calltab.asm.       */
-#define static
+#define static                          /* just to make all symbols visible in the kernel debugger.  */
+
 
 #define INCL_DOSERRORS
 #define INCL_NOPMAPI
 #define LDR_INCL_INITONLY
-
 
 /*******************************************************************************
 *   Header Files                                                               *
@@ -43,8 +43,9 @@
 *   Internal Functions                                                         *
 *******************************************************************************/
 static ULONG    readnum(const char *pszNum);
-static int      interpretFunctionProlog(char *p, BOOL fOverload);
-static int      procInit(void);
+static signed char interpretFunctionProlog32(char *pach, BOOL fOverload);
+static signed char interpretFunctionProlog16(char *pach, BOOL fOverload);
+static int      ImportTabInit(void);
 
 
 /* externs located in 16-bit data segement in ProbKrnl.c */
@@ -290,7 +291,7 @@ USHORT _loadds _Far32 _Pascal R0Init32(RP32INIT *pRpInit)
 
     /* functionoverrides */
     if (!options.fNoLoader)
-        if (procInit() != NO_ERROR)
+        if (ImportTabInit() != NO_ERROR)
             return STATUS_DONE | STERR | ERROR_I24_QUIET_INIT_FAIL;
 
     return STATUS_DONE;
@@ -337,57 +338,6 @@ static ULONG    readnum(const char *pszNum)
     }
 
     return i > 0 ? ulRet : ~0UL;
-}
-
-
-/**
- * Verifies the aImportTab.
- * @returns   0 if ok. !0 if not ok.
- * @remark    Called from IOCtl.
- */
-USHORT _loadds _Far32 _Pascal VerifyProcTab32(void)
-{
-    int i;
-    int cb;
-
-    /* verify */
-    for (i = 0; i < NBR_OF_KRNLIMPORTS; i++)
-    {
-        /* verify that it is found */
-        if (!_aImportTab[i].fFound)
-        {
-            kprintf(("VerifyProcTab32: procedure no.%d was not found!\n", i));
-            return STATUS_DONE | STERR | 1;
-        }
-
-        /* verify read/writeable. - FIXME */
-        if (_aImportTab[i].ulAddress < 0xffe00000UL)
-        {
-            kprintf(("VerifyProcTab32: procedure no.%d has an invlalid address, %#08x!\n",
-                     i, _aImportTab[i].ulAddress));
-            return STATUS_DONE | STERR | 2;
-        }
-
-        switch (_aImportTab[i].fType)
-        {
-            case EPT_PROC:
-            case EPT_PROCIMPORT:
-                /* verify known function prolog. */
-                if ((cb = interpretFunctionProlog((char*)_aImportTab[i].ulAddress, _aImportTab[i].fType == EPT_PROC))
-                    <= 0 && cb + 5 >= MAXSIZE_PROLOG)
-                {
-                    kprintf(("VerifyProcTab32: verify failed for procedure no.%d\n",i));
-                    return STATUS_DONE | STERR | 3;
-                }
-                break;
-
-            default:
-                kprintf(("VerifyProcTab32: only EPT_PROC is implemented\n",i));
-                return STATUS_DONE | STERR | 4;
-        }
-    }
-
-    return STATUS_DONE;
 }
 
 
@@ -445,7 +395,7 @@ USHORT _loadds _Far32 _Pascal GetOTEs32(PKRNLOBJTABLE pOTEBuf)
 
 
 /**
- * Interpret function prolog to find where to jmp back.
+ * 32-bit! Interpret function prolog to find where to jmp back.
  * @returns   Length of prolog need to be copied - which is also the offset of
  *            where the jmp instr should be placed.
  *            On error it returns 0.
@@ -453,9 +403,9 @@ USHORT _loadds _Far32 _Pascal GetOTEs32(PKRNLOBJTABLE pOTEBuf)
  * @param     fOverload  TRUE:  Function is to be overloaded.
  *                       FALSE: Function is to be imported.
  */
-static int interpretFunctionProlog(char *pach, BOOL fOverload)
+static signed char interpretFunctionProlog32(char *pach, BOOL fOverload)
 {
-    int rc;
+    int cb;
 
     /*
      * check for the well known prolog (the only that is supported now)
@@ -470,80 +420,268 @@ static int interpretFunctionProlog(char *pach, BOOL fOverload)
     if (pach[0] == 0x55 && pach[1] == 0x8b)
     {
         if (pach[2] == 0xec)
-            rc = 3;
+            cb = 3;
         else
-            rc = 1;
-        while (rc < 5)
+            cb = 1;
+        while (cb < 5)
         {
             /*
              * This is not at all very stable or correct - but it works
              * for the current functions.
              * There will never be any doubt when something goes wrong!
              */
-            switch(pach[rc])
+            switch(pach[cb])
             {
                 case 0x33: /* xor (ldrClose, ldrOpen) */
-                    rc +=2;
+                    cb +=2;
                     break;
                 case 0x8b:
-                    if (pach[rc+1] == 0x0d)
-                        rc += 6;
+                    if (pach[cb+1] == 0x0d)
+                        cb += 6;
                     else
-                        rc += 2; /*????!*/
+                        cb += 2; /*????!*/
                     break;
                 case 0x8d: /* lea (ldrRead) */
-                    rc += 3;
+                    cb += 3;
                     break;
                 case 0x83: /* sub (LDRQAppType) */
-                    rc += 3;
+                    cb += 3;
                     break;
                 default:
-                    kprintf(("interpretFunctionProlog: unknown instruction 0x%x\n", pach[rc]));
+                    kprintf(("interpretFunctionProlog: unknown instruction 0x%x\n", pach[cb]));
                     return 0;
             }
         }
     }
     else if (pach[0] == 0x55 && pach[1] == 0xa1) /* ldrEnum32bitRelRecs on WS4eB */
     {
-        rc = 1 + 5;
+        cb = 1 + 5;
     }
     else
     {
         /* special case for IOSftReadAt and IOSftWriteAt */
         if (fOverload == FALSE && pach[0] == 0xB8 && (pach[5] == 0xEB || pach[5] == 0x55))
-            rc = 5;
+            cb = 5;
         else
-            rc = 0;
+            cb = 0;
     }
 
-    return rc;
+    return (signed char)cb;
 }
 
+
+/**
+ * 16-bit! Interpret function prolog to find where to jmp back.
+ * @returns   Length of prolog need to be copied - which is also the offset of
+ *            where the jmp instr should be placed.
+ *            On error it returns 0.
+ * @param     pach       Pointer to prolog.
+ * @param     fOverload  TRUE:  Function is to be overloaded.
+ *                       FALSE: Function is to be imported.
+ */
+static signed char interpretFunctionProlog16(char *pach, BOOL fOverload)
+{
+    int cb;
+
+    /*
+     * Check for the well known prolog (the only that is supported now)
+     * which is:
+     *     push 2
+     */
+    if (*pach == 0x6A)                  /* push 2 (don't check for the 2) */
+    {
+        BOOL fForce;
+        cb = 0;
+        while (cb < 8 || fForce)
+        {
+            fForce = FALSE;
+            switch (*pach)
+            {
+                case 0x50:              /* push ax */
+                case 0x51:              /* push cx */
+                case 0x52:              /* push dx */
+                case 0x53:              /* push bx */
+                case 0x54:              /* push sp */
+                case 0x55:              /* push bp */
+                case 0x56:              /* push si */
+                case 0x57:              /* push di */
+                    break;
+
+                case 0x2e:              /* cs segment override */
+                case 0x36:              /* ss segment override */
+                case 0x3e:              /* ds segment override */
+                case 0x26:              /* es segment override */
+                case 0x64:              /* fs segment override */
+                case 0x65:              /* gs segment override */
+                    fForce = TRUE;
+                    break;
+
+                case 0x6a:              /* push <byte> */
+                    pach++;
+                    cb++;
+                    break;
+
+                case 0x68:              /* push <word> */
+                    pach += 2;
+                    cb += 2;
+                    break;
+
+                case 0x8b:              /* mov /r */
+                    if ((pach[1] & 0xc0) == 10  /* ex. mov ax,bp+1114h */
+                        || ((pach[1] & 0xc0) == 0 && (pach[1] & 0xc0) == 6)) /* ex. mov bp,0ff23h */
+                    {   /* 16-bit displacement */
+                        pach += 3;
+                        cb += 3;
+                    }
+                    else
+                        if ((pach[1] & 0xc0) == 0x40) /* ex. mov ax,[si]+4fh */
+                    {   /* 8-bit displacement */
+                        pach += 2;
+                        cb += 2;
+                    }
+                    else
+                    {   /* no displacement (only /r byte) */
+                        pach++;
+                        cb++;
+                    }
+                    break;
+
+                default:
+                    kprintf(("interpretFunctionProlog: unknown instruction 0x%x 0x%x 0x%x\n", pach[0], pach[1], pach[2]));
+                    return 0;
+            }
+            pach++;
+            cb++;
+        }
+    }
+
+    fOverload = fOverload;
+    return (signed char)cb;
+}
+
+
+/**
+ * Verifies the aImportTab.
+ * @returns   0 if ok. !0 if not ok.
+ * @remark    Called from IOCtl.
+ *            WARNING! VerifyImporTab32 is called before the initroutine!
+ */
+USHORT _loadds _Far32 _Pascal VerifyImportTab32(void)
+{
+    int i;
+    int cb;
+    int cbmin;
+
+    /* VerifyImporTab32 is called before the initroutine! */
+    pulTKSSBase32 = (PULONG)_TKSSBase16;
+
+    /* verify */
+    for (i = 0; i < NBR_OF_KRNLIMPORTS; i++)
+    {
+        /* verify that it is found */
+        if (!_aImportTab[i].fFound)
+        {
+            kprintf(("VerifyImportTab32: procedure no.%d was not found!\n", i));
+            return STATUS_DONE | STERR | 1;
+        }
+
+        /* verify read/writeable. - FIXME */
+        if (_aImportTab[i].ulAddress < 0xffe00000UL)
+        {
+            kprintf(("VerifyImportTab32: procedure no.%d has an invlalid address, %#08x!\n",
+                     i, _aImportTab[i].ulAddress));
+            return STATUS_DONE | STERR | 2;
+        }
+
+        switch (_aImportTab[i].fType & ~EPT_BIT_MASK)
+        {
+            case EPT_PROC:
+            case EPT_PROCIMPORT:
+                /*
+                 * Verify known function prolog.
+                 */
+                if (_aImportTab[i].fType & EPT_32BIT)
+                {
+                    cb = interpretFunctionProlog32((char*)_aImportTab[i].ulAddress, _aImportTab[i].fType == EPT_PROC32);
+                    cbmin = 5;
+                }
+                else
+                {
+                    cb = interpretFunctionProlog16((char*)_aImportTab[i].ulAddress, _aImportTab[i].fType == EPT_PROC16);
+                    cbmin = 8;
+                }
+
+                /*
+                 * Check result of the function prolog interpretations.
+                 */
+                if (cb <= 0 && cb + cbmin >= MAXSIZE_PROLOG)
+                {   /* failed, too small or too large. */
+                    kprintf(("VerifyImportTab32: verify failed for procedure no.%d (cd=%d)\n", i, cb));
+                    return STATUS_DONE | STERR | 3;
+                }
+                break;
+
+            case EPT_VARIMPORT:
+                /* do nothing! */
+                break;
+
+            default:
+                kprintf(("VerifyImportTab32: only EPT_PROC is implemented\n",i));
+                return STATUS_DONE | STERR | 4;
+        }
+    }
+
+    return STATUS_DONE;
+}
 
 
 /**
  * Initiates the overrided functions.
  * @returns   NO_ERROR on success. !0 on error.
  */
-static int procInit(void)
+static int importTabInit(void)
 {
+    /* This table must be updated with the overloading functions. */
+    static unsigned auFuncs[NBR_OF_KRNLIMPORTS] =
+    {
+        (unsigned)myldrRead,
+        (unsigned)myldrOpen,
+        (unsigned)myldrClose,
+        0,//(unsigned)myLDRQAppType,
+        (unsigned)myldrEnum32bitRelRecs,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        (unsigned)&mytkExecPgm,
+        0,
+        0
+    };
+
     int i;
     int cb;
+
 
     /*
      * verify proctable
      */
     for (i = 0; i < NBR_OF_KRNLIMPORTS; i++)
     {
-        if (_aImportTab[i].fType != EPT_PROC && _aImportTab[i].fType != EPT_PROCIMPORT)
-        {
-            kprintf(("procInit: EPT_VAR is not supported. (procedure no.%d, cb=%d)\n", i, cb));
-            return 1;
-        }
-        cb = interpretFunctionProlog((char*)_aImportTab[i].ulAddress, _aImportTab[i].fType == EPT_PROC);
+        /* EPT_VARIMPORTs are skipped */
+        if ((_aImportTab[i].fType & ~EPT_BIT_MASK) == EPT_VARIMPORT)
+            continue;
+
+        if (_aImportTab[i].fType & EPT_32BIT)
+            cb = interpretFunctionProlog32((char*)_aImportTab[i].ulAddress, _aImportTab[i].fType == EPT_PROC32);
+        else
+            cb = interpretFunctionProlog16((char*)_aImportTab[i].ulAddress, _aImportTab[i].fType == EPT_PROC16);
         if (cb <= 0 || cb + 5 >= MAXSIZE_PROLOG)
         {
-            kprintf(("procInit: verify failed for procedure no.%d, cb=%d\n", i, cb));
+            kprintf(("ImportTabInit: verify failed for procedure no.%d, cb=%d\n", i, cb));
             return 1;
         }
     }
@@ -555,70 +693,163 @@ static int procInit(void)
     {
         switch (_aImportTab[i].fType)
         {
-            case EPT_PROC:
+            /*
+             * 32-bit procedure overload.
+             * The overloading procedure is found in the auFuncs table (at the same index
+             *   as the overloaded procedure has in aImportTab).
+             * The overloaded procedure is called by issuing a call to the callTab entry.
+             */
+            case EPT_PROC32:
             {
-                cb = interpretFunctionProlog((char*)_aImportTab[i].ulAddress, TRUE);
+                cb = _aImportTab[i].cbProlog = interpretFunctionProlog32((char*)_aImportTab[i].ulAddress, TRUE);
                 if (cb > 0 && cb + 5 < MAXSIZE_PROLOG)
                 {
-                    static unsigned auFuncs[NBR_OF_KRNLIMPORTS] = /* This table must be updated with the overloading functions. */
-                    {
-                        (unsigned)myldrRead,
-                        (unsigned)myldrOpen,
-                        (unsigned)myldrClose,
-                        0,//(unsigned)myLDRQAppType,
-                        (unsigned)myldrEnum32bitRelRecs,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        (unsigned)&mytkExecPgm
-                    };
-
-                    /* copy function prolog */
+                    /*
+                     * Copy function prolog which will be overwritten by the jmp to calltabl.
+                     */
                     memcpy(callTab[i], (void*)_aImportTab[i].ulAddress, (size_t)cb);
 
-                    /* jump from calltab to original function */
+                    /*
+                     * Make jump instruction which jumps from calltab to original function.
+                     * 0xE9 <four bytes displacement>
+                     * Note: the displacement is relative to the next instruction
+                     */
                     callTab[i][cb] = 0xE9; /* jmp */
-                    *(unsigned*)(void*)&callTab[i][cb+1] = _aImportTab[i].ulAddress + cb - (unsigned)&callTab[i][cb+5];
+                    *(unsigned long*)(void*)&callTab[i][cb+1] = _aImportTab[i].ulAddress + cb - (unsigned long)&callTab[i][cb+5];
 
-
-                    /* jump from original function to my function - an cli(?) could be needed here */
+                    /*
+                     * Jump from original function to my function - an cli(?) could be needed here
+                     */
                     *(char*)_aImportTab[i].ulAddress = 0xE9; /* jmp */
-                    *(unsigned*)(_aImportTab[i].ulAddress + 1) = auFuncs[i] - (_aImportTab[i].ulAddress + 5);
+                    *(unsigned long*)(_aImportTab[i].ulAddress + 1) = auFuncs[i] - (_aImportTab[i].ulAddress + 5);
                 }
                 else
                 {   /* !fatal! - this could never happen really... */
-                    kprintf(("procInit: FATAL verify failed for procedure no.%d when rehooking it!\n",i));
+                    kprintf(("ImportTabInit: FATAL verify failed for procedure no.%d when rehooking it!\n",i));
                     Int3(); /* ipe - later! */
                     return 1;
                 }
                 break;
             }
 
-            case EPT_PROCIMPORT:
+
+            /*
+             * 16-bit procedure overload.
+             * Currently disabled due to expected problems when calltab is a 32-bit segment.
+             */
+            case EPT_PROC16:
             {
-                cb = interpretFunctionProlog((char*)_aImportTab[i].ulAddress, FALSE);
+                kprintf(("ImportTabInit: Overloading 16-bit procedures are not supported yet!!! Calltable in 32-bit segment!\n", i));
+                Int3();
+
+                cb = _aImportTab[i].cbProlog = interpretFunctionProlog16((char*)_aImportTab[i].ulAddress, TRUE);
+                if (cb > 0 && cb + 8 < MAXSIZE_PROLOG) /* a 16:32 jump must be prefixed with 66h in a 16-bit segment */
+                {
+                    /*
+                     * Copy function prolog which is to be overwritten.
+                     */
+                    memcpy(callTab[i], (void*)_aImportTab[i].ulAddress, (size_t)cb);
+
+                    /*
+                     * Create far jump from calltab to original function.
+                     * 0xEA <four byte target address> <two byte target selector>
+                     */
+                    callTab[i][cb] = 0xEA; /* jmp far ptr */
+                    *(unsigned long*)(void*)&callTab[i][cb+1] = _aImportTab[i].offObject;
+                    *(unsigned short*)(void*)&callTab[i][cb+5] = _aImportTab[i].usSel;
+
+                    /*
+                     * jump from original function to my function - an cli(?) could be needed here
+                     * 0x66 0xEA <four byte target address> <two byte target selector>
+                     */
+                    *(char*)(_aImportTab[i].ulAddress    ) = 0x66;    /* operandsize prefix */
+                    *(char*)(_aImportTab[i].ulAddress + 1) = 0xEA;    /* jmp far ptr */
+                    *(unsigned long*)(_aImportTab[i].ulAddress + 2) = auFuncs[i];   /* FIXME? */
+                    *(unsigned short*)(_aImportTab[i].ulAddress + 6) = _R0FlatCS16; /* FIXME */
+                }
+                else
+                {   /* !fatal! - this could never happen really... */
+                    kprintf(("ImportTabInit: FATAL verify failed for procedure no.%d when rehooking it!\n",i));
+                    Int3(); /* ipe - later! */
+                    return 1;
+                }
+                break;
+            }
+
+
+            /*
+             * 32-bit imported procedure
+             * This is called by issuing a near call to the callTab entry.
+             */
+            case EPT_PROCIMPORT32:
+            {
+                cb = _aImportTab[i].cbProlog = interpretFunctionProlog32((char*)_aImportTab[i].ulAddress, FALSE);
                 if (cb > 0 && cb + 5 < MAXSIZE_PROLOG)
                 {
-                    /* jump from calltab to original function */
+                    /*
+                     * Make jump instruction which jumps from calltab to original function.
+                     * 0xE9 <four bytes displacement>
+                     * Note: the displacement is relative to the next instruction
+                     */
                     callTab[i][0] = 0xE9; /* jmp */
                     *(unsigned*)(void*)&callTab[i][1] = _aImportTab[i].ulAddress - (unsigned)&callTab[i][cb+5];
                 }
                 else
-                {   /* !fatal! - this could never happen really... */
-                    kprintf(("procInit: FATAL verify failed for procedure no.%d when importing it!\n",i));
+                {   /* !fatal! - this should never really happen... */
+                    kprintf(("ImportTabInit: FATAL verify failed for procedure no.%d when importing it!\n",i));
                     Int3(); /* ipe - later! */
                     return 1;
                 }
                 break;
             }
 
+
+            /*
+             * 16-bit imported procedure.
+             * This is called by issuing a far call to the calltab entry.
+             */
+            case EPT_PROCIMPORT16:
+            {
+                cb = _aImportTab[i].cbProlog = interpretFunctionProlog16((char*)_aImportTab[i].ulAddress, FALSE);
+                if (cb > 0 && cb + 8 < MAXSIZE_PROLOG)
+                {
+                    /*
+                     * Create far jump from calltab to original function.
+                     * 0xEA <four byte target address> <two byte target selector>
+                     */
+                    callTab[i][0] = 0xEA; /* jmp far ptr */
+                    *(unsigned long*)(void*)&callTab[i][1] = _aImportTab[i].offObject;
+                    *(unsigned short*)(void*)&callTab[i][5] = _aImportTab[i].usSel;
+                }
+                else
+                {   /* !fatal! - this should never really happen... */
+                    kprintf(("ImportTabInit: FATAL verify failed for procedure no.%d when importing it!\n",i));
+                    Int3(); /* ipe - later! */
+                    return 1;
+                }
+                break;
+            }
+
+
+            /*
+             * 16/32-bit importe variable.
+             * This is used by accessing the 32-bit flat address in the callTab.
+             * callTab-entry + 4 holds the offset of the variable into the object.
+             * callTab-entry + 8 holds the selector for the object. (These two fields is the 16:32-bit pointer to the variable.)
+             * callTab-entry + a holds the 16-bit offset for the variable.
+             * callTab-entry + c holds the selector for the object. (These two fiels is the 16:16-bit pointer to the variable.)
+             */
+            case EPT_VARIMPORT32:
+            case EPT_VARIMPORT16:
+                *(unsigned long*)(void*)&callTab[i][0] = _aImportTab[i].ulAddress;
+                *(unsigned long*)(void*)&callTab[i][4] = _aImportTab[i].offObject;
+                *(unsigned short*)(void*)&callTab[i][8] = _aImportTab[i].usSel;
+                *(unsigned short*)(void*)&callTab[i][0xa] = (unsigned short)_aImportTab[i].offObject;
+                *(unsigned short*)(void*)&callTab[i][0xc] = _aImportTab[i].usSel;
+                break;
+
             default:
-                kprintf(("procInit: EPT_VAR is not supported. (procedure no.%d, cb=%d)\n", i, cb));
+                kprintf(("ImportTabInit: unsupported type. (procedure no.%d, cb=%d)\n", i, cb));
                 Int3(); /* ipe - later! */
                 return 1;
         } /* switch - type */
