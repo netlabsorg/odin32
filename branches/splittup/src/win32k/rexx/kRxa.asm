@@ -1,4 +1,4 @@
-; $Id: kRxa.asm,v 1.1 2000-06-03 03:50:45 bird Exp $
+; $Id: kRxa.asm,v 1.1.6.1 2002-01-13 23:55:27 bird Exp $
 ;
 ; kRxa - Small rexx script interpreter.
 ;
@@ -203,6 +203,7 @@ callrexx:
 ; return rexx error code.
 ;
     mov     ax, sRexxRc
+    leave
     ret
 
 
@@ -233,6 +234,7 @@ PrintError:
     sub     esp, DWORD * 4              ; clean stack.
 
     mov     eax, -10002
+    leave
     ret
 main ENDP
 
