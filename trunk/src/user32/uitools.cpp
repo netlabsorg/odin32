@@ -1,4 +1,4 @@
-/* $Id: uitools.cpp,v 1.30 2001-10-07 11:48:28 sandervl Exp $ */
+/* $Id: uitools.cpp,v 1.31 2001-12-16 11:30:04 sandervl Exp $ */
 /*
  * User Interface Functions
  *
@@ -1684,7 +1684,7 @@ BOOL WIN32API DrawIcon( HDC hDC, int X, int Y, HICON  hIcon)
     BitBlt(hDC,X,Y,bmp.bmWidth,bmp.bmHeight/2,hMemDC,0,bmp.bmHeight/2,SRCINVERT);
   }
   SelectObject(hMemDC,oldBmp);
-  DeleteObject(hMemDC);
+  DeleteDC(hMemDC);
   if (ii.hbmColor) DeleteObject(ii.hbmColor);
   if (ii.hbmMask) DeleteObject(ii.hbmMask);
   SetTextColor(hDC,oldFg);
@@ -1768,12 +1768,12 @@ BOOL WIN32API DrawIconEx(HDC hdc, int xLeft, int yTop, HICON hIcon,
     }
     BitBlt(hdc,xLeft,yTop,cxWidth,cyWidth,hBmpDC,0,0,SRCCOPY);
     SelectObject(hMemDC,oldBmp);
-    DeleteObject(hMemDC);
+    DeleteDC(hMemDC);
     SetTextColor(hdc,oldFg);
     SetBkColor(hdc,oldBg);
     SetStretchBltMode(hBmpDC,oldStretchMode);
     SelectObject(hBmpDC,oldMemBmp);
-    DeleteObject(hBmpDC);
+    DeleteDC(hBmpDC);
     DeleteObject(memBmp);
   } else
   {
@@ -1797,7 +1797,7 @@ BOOL WIN32API DrawIconEx(HDC hdc, int xLeft, int yTop, HICON hIcon,
       StretchBlt(hdc,xLeft,yTop,cxWidth,cyWidth,hMemDC,0,bmp.bmHeight/2,bmp.bmWidth,bmp.bmHeight/2,SRCINVERT);
     }
     SelectObject(hMemDC,oldBmp);
-    DeleteObject(hMemDC);
+    DeleteDC(hMemDC);
     SetTextColor(hdc,oldFg);
     SetBkColor(hdc,oldBg);
     SetStretchBltMode(hdc,oldStretchMode);
