@@ -1,4 +1,10 @@
- /* $Id: ChangeLog,v 1.916 2000-04-29 18:21:59 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.917 2000-04-30 16:30:24 sandervl Exp $ */
+
+ 2000-04-30: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: LocalFlags fix (low byte = lock count, hight byte (of low word) = memory flags)
+                    LocalGetFlags, LocalLock & LocalUnlock now check if the
+                    pointer is larger than 3 GB. Some apps calls these functions
+                    with GDI object handles.
 
  2000-04-29: Yuri Dario <mc6530@mclink.it>
 	- USER32:   Bugfix for owner of windows (set to owner instead of parent now)
