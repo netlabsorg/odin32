@@ -1,4 +1,4 @@
-/* $Id: comtype.h,v 1.1 1999-05-24 20:19:06 ktk Exp $ */
+/* $Id: comtype.h,v 1.2 1999-05-27 15:17:57 phaller Exp $ */
 
 #ifndef __COMTYPE_H__
 #define __COMTYPE_H__

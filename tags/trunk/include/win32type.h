@@ -1,4 +1,4 @@
-/* $Id: win32type.h,v 1.1 1999-05-24 20:19:07 ktk Exp $ */
+/* $Id: win32type.h,v 1.2 1999-05-27 15:17:59 phaller Exp $ */
 
 #ifndef __WIN32TYPE_H__
 #define __WIN32TYPE_H__
