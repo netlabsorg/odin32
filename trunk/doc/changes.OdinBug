@@ -1,0 +1,222 @@
+version 0.1.0 08-08-2001 Initial approach: Get information about
+                         bugs from CONFIG.SYS, SYSLEVEL.*, odin32_?.log 
+                         and build a ReportingBugs.TXT-compatible 
+                         Odin Bug Report
+
+version 0.2.0 09-08-2001 Changed: Rearranged and polished GUI
+                         Fixed: Spaces in directories did not work
+                         Fixed: Bug in xf86sup.sys detection      
+                         Added: Hints for all fields
+                         Added: More display drivers detected
+                         Added: Chipset detection for Scitech Drivers
+                         Added: License detection for Scitech Drivers
+                         Added: Progress bar instead of counter
+                         Added: Verbal description field
+                         Added: Variable buffer size for pre-exception lines
+                         Added: Simple CFG-file for some options
+                         
+version 0.2.1 10-08-2001 Changed: Executable and log field larger again
+                         Fixed: SYSLEVEL files were not closed
+                         Fixed: Wrong font in verbal description field
+                         Added: Version notice in general hint text
+                         
+version 0.2.2 10-08-2001 Changed: Separate line for application version
+                         Changed: Small cosmetic changes in report
+                         Fixed: Ensured trailing '\' for directory vars
+                         Fixed: Load RexxUtil (0.2.2a)
+                         Added: Version notice at the bottom of the report
+
+version 0.3.0 14-08-2001 Changed: Version notice at the bottom of the report
+                         Changed: Enhanced icon (still not perfect)
+                         Changed: Same text in GUI and report
+                         Changed: Yes/No for xf86sup-status instead of 1/0
+                         Added: Also detect Win32K.SYS from odin32_?.log
+                         Added: Detect last WarpIN installation
+                         Added: Detect if no WarpIN installation before
+                         Added: Check Odin.INI for last OdinInst execution
+                         Added: Warning, if build is older than 10 days
+                         Added: Refuse bug reports for old builds (>20 days)
+                         Added: Check for invalid build names
+                         Added: Some more CFG-Options (undocumented)
+                         Added: Hide and close button on frame
+                         
+version 0.3.1 15-08-2001 Changed: Logfile entry field readonly
+                         Fixed: Possible endless loops for incomplete logs
+                         
+version 0.4.0 17-08-2001 Changed: Completely redesigned GUI (now notebook)
+                         Changed: Buildfile entry field readonly
+                         Added: Query user automatically for build and log
+                         Added: Detect build level of Scitech Drivers
+                         Added: Detect OdinInst.EXE installdate from ODIN.INI
+                         Added: Detect missing OdinInst.EXE execution
+                         Added: Add complete ODIN.INI to the report
+                         Added: User is automatically prompted for buildfile
+                                and logfile
+                         Fixed: Possible endless loops if invalid filenames 
+                                were supplied
+                                
+version 0.4.1 19-08-2001 Changed: Rewrote ODIN.INI detection (from logfile)
+                         Fixed: Possible endless loops for incomplete logfiles
+                         Added: Entry field for Odin.INI
+
+version 0.5.0 04-09-2001 Changed: Complete code restructured
+                         Fixed: Some little errors (I forgot which)
+                         Fixed: Error when no SYSLEVEL.FPK available
+                         Fixed: WarpIN database detection
+                         Fixed: False errormsg, if log is given before build
+                         Fixed: Logfile left open if no exception in it 
+                         Fixed: Set progress bar to 100 if ready
+                         Fixed: No more multiple errors when no WarpIN present
+                         Fixed: Timing problem if RxNap is not used
+                         Fixed: Removed PE2LX from the launching methods
+                         Added: Tested positively on OS/2 Warp 3 FP#40,
+                                OS/2 Warp 4.5 FP#15 and OS/2 Warp 4.51 MCP
+                         Added: Real INI file instead of simple CFG 
+                         Added: Supply log via command line allowed
+                         Added: WPS integration (auto creating object + assoc)
+                         Added: Timer based validition of the report
+                         Added: Open button 
+                         Added: Detect kernel revision 
+                         Added: Detect Win32K-parameters in CONFIG.SYS
+                         Added: Preliminary support for RxExtras RxNap
+                                (do not hog CPU while parsing logs)
+
+version 0.5.1 13-09-2001 internally, not released
+                         Changes: (Temporarily) disabled RxNap support
+                         Fixed: Open/close INI file for every setting
+                         Fixed: Forgot to disable timer as soon as "Create
+                                report" is pressed
+                         Added: Detect Kernel32.DLL revision
+                         Added: (Semi)autodetect buildfile, if build-
+                                directory is properly specified (this means:
+                                Ideally you only have to specify the logfile!)
+                         Added: Optional directory for the email program
+                                (needed for PMMail)
+                         Added: Switch to prevent application directory from
+                                being saved to disk
+
+version 0.5.2 18-09-2001 internally, not released
+
+version 0.5.3 03-10-2001 Changed: Moved progress bar into separate window
+                         Changed: Dropdown combo box for email program
+                         Changed: Objects created by odinbug compatible with
+                                  objects created by WPI build file
+                         Changed: Run VIEW.EXE instead of SysSetObjectData()
+                                  for OdinBug.HLP 
+                         Fixed: Uninitialized variable for xf86sup.sys (0.5.3a) 
+                         Fixed: Width of header/footer lines
+                         Fixed: Clarified meaning of some texts
+                         Fixed: No more VIO-window with missing Kernel32.dll
+                         Fixed: Set focus to application name field after
+                                everything has been collected
+                         Fixed: Check if OdinBug.RPT can be written
+                         Fixed: Tab-Order on most pages
+                         Fixed: Turned off VRRedirectStdIO
+                         Fixed: Wrongly calculated build date, see below
+                         Fixed: Missing leading 0 support in _xtime() function
+                         Fixed: Missing leading 0 support in _xmonth() function
+                         Fixed: Missing leading 0 support in _xdate() function
+                         Added: Check box for "Oh, nooo" message boxes
+                         Added: Warning if PE.EXE entered as launching method
+                                and Win32K.SYS is (and was) installed
+                         Added: Warning if user could eventually pick
+                                wrong log file
+                         Added: (Intentionally!) uncomfortable override
+                                feature for too old builds
+                         Added: About and Thanks box
+                         Added: Editable dropdown combobox for email address
+                         Added: <sendto: odinusers@yahoogroups.com> on top
+                         Added: Help: Help button (opens "OdinBug.HLP")
+                         Added: Help: Context sensitive help (incomplete)
+                         Added: Help: "Application page" help pages complete
+                         Added: Help: ReportingBugs.txt integrated
+                         Added: Help: Logging.txt integrated
+
+version 0.5.4 15-10-2001 internally, not released
+                         Changed: Version numbering: OdinBug will never have
+                                  a higher version number than Odin itself.
+                         Changed: Show unrecognized parameters in error message
+                         Changed: <sendto:...> only for non-Netscape users
+                         Changed: Reactivated code to delete old .CF/.CFG files
+                         Changed: Completely rewrote email support, now I am
+                                  able to specifically support various email
+                                  clients. Supported programs:
+                                - Generic : This is the old code
+                                - Netscape: Works perfectly (here)!
+                                - PMMSend from PMMail: Still does not work!:-(
+                         Fixed: EMail directory field was not updated properly
+                         Fixed: TabOrder on main windows was messed up (again)
+                         Fixed: Hotkeys on main window now work as expected
+                                (Workaround for VX-REXX bug?)
+                         Fixed: Logfile not recognized if blanks in path
+                         Fixed: Set focus properly after Alt-PgUp/Alt-PgDn
+                         Added: Exit button
+                         Added: Help: Completed all missing entries.
+                         Added: Undocumented key (#) in application name field
+                                to quickly fill in test data
+                         
+version 0.5.5 24-11-2001 
+                         Changed: OdinBug.EXE is now packed with Veit Kanne-
+                                  giesers VX-REXX executables packer.
+                         Changed: Split "Settings" into "Settings" and "EMail"
+                         Changed: "Available" is now a DDCB with (hopefully!)
+                                  useful default texts
+                         Changed: <sendto:...> only for generic email support
+                         Changed: Moved search for exception information into 
+                                  a second background thread!
+                         Changed: Removed SDD from display driver versions
+                                  DDCB field, as it is always fully detected
+                         Changed: Removed WEASEL.EXE from the list of email
+                                  clients
+                         Fixed: Choosing a second, different logfile did not
+                                work correctly, several fields/variables were
+                                not cleared/updated correctly!
+                         Fixed: Application directory should always be 
+                                suggested as directory for report files
+                         Fixed: Temporary files left over in the TEMP directory
+                         Fixed: /C parameter missing for start PMMSend.EXE
+                         Fixed: Nasty routine for trailing backslashes
+                         Fixed: Some more error checking is done
+                         Fixed: Override too old builds only worked under 
+                                ununsual circumstances
+                         Fixed: Tab-Order on application page (again)
+                         Fixed: Check if email clients are found within PATH
+                                (Netscape and PMMAil only for the moment)
+                         Fixed: WPS objects should not get updated wrongly
+                                anymore, if OdinBug.EXE is called from the
+                                commandline from a different directory than
+                                it is located in.
+                         Fixed: Previous fix had to be fixed again (oh, my).
+                         Fixed: Help: Statement regarding usage of Win32K.SYS
+                         Fixed: Help: No more circle definition regarding
+                                account (PMMail)
+                         Fixed: Help: A few typos.
+                         Added: Radio buttons plus dynamic fields in order 
+                                to simplify entries for email clients.
+                         Added: Field for account name in order to finally
+                                support PMMail properly.
+                         Added: Start PMMail if currently not active.
+                         Added: Show progress window when starting PMMail.
+                         Added: Option to put multiple bugreports into one file
+                         Added: Button to browse logfiles (plus field to choose,
+                                tested with HV.EXE, LogView.EXE and E.EXE)
+                         Added: Page to display exceptions in current logfile
+                         Added: Option to ask, if logfile should be deleted
+                         Added: Create new URL object to subscribe to odinusers
+                         Added: Show whether WIN32LOG_ENABLED is set or not
+                                for the current session
+                         
+known problems:
+                         - InstallDateTime key decoding from WarpIN database
+                           is still ugly, although it seems to work
+                         - Detection whether 2nd Thread has completed
+                           is not water proof, although possibly good enough
+                         - It appears that the VX-Rexx event queue is not 
+                           processed as long the second thread is running?
+                           (First attempt to change this made OdinBug hang)
+                           
+todo-list:               
+                         - Create a local bug database (i.e log all exceptions
+                           to a local file) (a la popuplog.os2)
+                         - Clean source code for public release (partly done)
+
