@@ -1,4 +1,4 @@
-; $Id: asmutil.asm,v 1.6 2004-12-20 18:11:15 sao2l02 Exp $
+; $Id: asmutil.asm,v 1.7 2005-02-08 20:48:46 sao2l02 Exp $
 
 ;/*
 ; * Project Odin Software License can be found in LICENSE.TXT
@@ -193,7 +193,7 @@ _Add64	endp
 	align 4h
 
 	public _set_bit
-;void CDECL set_bit(int bitnr, void *addr);
+;int CDECL set_bit(int bitnr, void *addr);
 _set_bit proc near
     push esi
 
@@ -201,6 +201,8 @@ _set_bit proc near
     mov  eax, [esp+8]
 
     bts  dword ptr [esi], eax
+    setc al
+    movzx eax, al
 
     pop  esi
     ret
@@ -225,7 +227,7 @@ _test_bit proc near
 _test_bit endp
 
 	public _clear_bit
-;void CDECL clear_bit(int bitnr, void *addr);
+;int CDECL clear_bit(int bitnr, void *addr);
 _clear_bit proc near
     push esi
 
@@ -233,10 +235,45 @@ _clear_bit proc near
     mov  eax, [esp+8]
 
     btr  dword ptr [esi], eax
+    setc al
+    movzx eax, al
 
     pop  esi
     ret
 _clear_bit endp
+
+	public _search_zero_bit
+;int CDECL search_zero_bit(int bitcount, void *addr);
+_search_zero_bit proc near
+    push esi
+    push edx
+
+    mov  esi, [esp+16]
+    mov  edx, [esp+12]
+    inc  edx
+loop:
+    add  esi, 4
+    mov  eax, -1
+    dec  edx
+    jz   short none
+    xor  eax, dword ptr [esi - 4]
+    jz   loop
+    bsf  eax, eax
+    jz   short loop
+    sub  esi, 4 
+    sub  esi, [esp+16]
+    shl  esi, 5-2
+    add  eax, esi
+    jmp  short found    
+none:
+    setnz al
+    movsx eax, al
+found:
+
+    pop  edx
+    pop  esi
+    ret
+_search_zero_bit endp
 
 CODE32          ENDS
 
