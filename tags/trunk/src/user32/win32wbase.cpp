@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.386 2004-02-27 14:38:03 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.387 2004-03-16 13:56:12 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -4114,7 +4114,8 @@ void Win32BaseWindow::removeOpenDC(HDC hdc)
 {
     if(nrOpenDCs == 0) {
         dprintf(("Win32BaseWindow::removeOpenDC %x hdc %x not found!! (1)", getWindowHandle(), hdc));
-        DebugInt3();
+        //Some applications call ReleaseDC before EndPaint
+//        DebugInt3();
         return;
     }
     lock(&critsect);
