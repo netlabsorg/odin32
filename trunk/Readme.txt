@@ -1,4 +1,6 @@
-15/05/99: Project Odin Source Code Notes
+/* $Id: Readme.txt,v 1.4 1999-06-22 08:27:54 sandervl Exp $ */
+
+21/06/99: Project Odin Source Code Notes
 ========================================
 
 Required compilers/tools:
@@ -6,6 +8,8 @@ Required compilers/tools:
 	  (version 3.6 might also work, but version 4 is not
  	   recommended)
 	- ALP 4.0 (IBM Assembly Language Processor)
+          Download the tools zipfile from http://service.boulder.ibm.com/ddk/
+	  (you need to register, but it's free)
 	- Unix-like rm.exe (nmake clean)
 	- Watcom C/C++ can also be used for pe2lx
 
