@@ -1,4 +1,4 @@
-; $Id: shlwapi.def,v 1.11 2000-05-15 02:42:35 phaller Exp $
+; $Id: shlwapi.def,v 1.12 2000-05-16 20:17:29 phaller Exp $
 
 ; updated export ordinals to NT4 version of SHLWAPI.DLL
 ; Note: W95/W98 has DIFFERENT export ordinals
@@ -52,9 +52,9 @@ EXPORTS
     PathFindExtensionA     = _PathFindExtensionA@4                @472
   ;*PathFindExtensionAW    = _PathFindExtensionAW@4
     PathFindExtensionW     = _PathFindExtensionW@4                @473
-    PathFindFilenameA      = _PathFindFilenameA@4                 @474
-  ;*PathFindFilenameAW     = _PathFindFilenameAW@4
-    PathFindFilenameW      = _PathFindFilenameW@4                 @475
+    PathFindFileNameA      = _PathFindFileNameA@4                 @474
+  ;*PathFindFileNameAW     = _PathFindFileNameAW@4
+    PathFindFileNameW      = _PathFindFileNameW@4                 @475
   ; PathFindNextComponentA = _PathFindNextComponentA@?            @476
   ; PathFindNextComponentW = _PathFindNextComponentW@?            @477
     PathFindOnPathA        = _PathFindOnPathA@8                   @478
