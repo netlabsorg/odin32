@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.35 2000-03-08 09:23:04 bird Exp $
+# $Id: Makefile,v 1.36 2000-03-09 16:49:39 bird Exp $
 #
 # Copyright 1998-2000 knut st. osmundsen
 #
@@ -374,9 +374,15 @@ win32k.vpj:
 clean:
     @$(ECHO) cleaning....
     $(RM) $(NAME).sys *.lib *.obj *.exe *.sym *.map *.dll *.pch \
+!if "$(WIN32KBIN)" != ""
         $(WIN32KBIN)\* \
+!endif
+!if "$(WIN32KOBJ)" != ""
         $(WIN32KOBJ)\* \
+!endif
+!if "$(WIN32KLIST)" != ""
         $(WIN32KLIST)\* \
+!endif
         $(PDWIN32_BIN)\$(NAME).sys
     cd pe2lx
     $(MAKE_CMD) clean
