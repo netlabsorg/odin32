@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.150 1999-08-28 19:34:10 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.151 1999-08-29 08:13:34 sandervl Exp $ */
+
+ 99-08-29: Jens Wiessner <wiessnej@rfi.de>
+	- OLECLI32: Created stub dll
 
  99-08-28: Sander van Leeuwen <sandervl@xs4all.nl>
  	- USER32\NEW: Use shared memory for window & class objects
