@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.1 1999-12-01 23:30:30 sandervl Exp $ */
+/* $Id: text.cpp,v 1.2 1999-12-03 17:31:51 cbratschi Exp $ */
 
 /*
  * GDI32 text apis
@@ -58,6 +58,67 @@ UINT WINAPI GetTextCharset(HDC hdc) /* [in] Handle to device context */
 {
     /* MSDN docs say this is equivalent */
     return GetTextCharsetInfo(hdc, NULL, 0);
+}
+//******************************************************************************
+//******************************************************************************
+static  BOOL InternalTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR lpszString,INT cbCount,CONST INT *lpDx,BOOL IsExtTextOut)
+{
+  if (cbCount < 0 || (lpszString == NULL && cbCount != 0))
+  {
+    SetLastError(ERROR_INVALID_HANDLE);
+    return FALSE;
+  }
+
+  //CB: todo
+
+  if (IsExtTextOut)
+    return O32_ExtTextOut(hdc,X,Y,fuOptions,lprc,lpszString,cbCount,lpDx);
+  else
+    return O32_TextOut(hdc,X,Y,lpszString,cbCount);
+}
+//******************************************************************************
+//******************************************************************************
+static  BOOL InternalTextOutW(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCWSTR lpszString,INT cbCount,CONST INT *lpDx,BOOL IsExtTextOut)
+{
+  char *astring = UnicodeToAsciiString((LPWSTR)lpszString);
+  BOOL  rc;
+
+  rc = InternalTextOutA(hdc,X,Y,fuOptions,lprc,(LPCSTR)astring,cbCount,lpDx,IsExtTextOut);
+  FreeAsciiString(astring);
+
+  return(rc);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API ExtTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCSTR lpszString,UINT cbCount,CONST INT *lpDx)
+{
+  dprintf(("GDI32: ExtTextOutA\n"));
+
+  return InternalTextOutA(hdc,X,Y,fuOptions,lprc,lpszString,cbCount,lpDx,TRUE);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API ExtTextOutW(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LPCWSTR lpszString,UINT cbCount,CONST int *lpDx)
+{
+  dprintf(("GDI32: ExtTextOutW\n"));
+
+  return InternalTextOutW(hdc,X,Y,fuOptions,lprc,lpszString,cbCount,lpDx,TRUE);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API TextOutA(HDC hdc,int nXStart,int nYStart,LPCSTR lpszString,int cbString)
+{
+  dprintf(("GDI32: TextOutA"));
+
+  return InternalTextOutA(hdc,nXStart,nYStart,0,NULL,lpszString,cbString,NULL,FALSE);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API TextOutW(HDC hdc,int nXStart,int nYStart,LPCWSTR lpszString,int cbString)
+{
+  dprintf(("GDI32: TextOutW"));
+
+  return InternalTextOutW(hdc,nXStart,nYStart,0,NULL,lpszString,cbString,NULL,FALSE);
 }
 //******************************************************************************
 //******************************************************************************
