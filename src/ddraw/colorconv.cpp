@@ -1,4 +1,4 @@
-/* $Id: colorconv.cpp,v 1.1 1999-12-21 01:28:15 hugh Exp $ */
+/* $Id: colorconv.cpp,v 1.2 1999-12-26 23:53:39 hugh Exp $ */
 
 /*
  * ColorConversion routines
@@ -38,8 +38,8 @@
       *(((WORD*)pDstLine)+x) = ((WORD*)pPalette)[pSrcLine[x]];
 
     }
-    pSrcLine += dwPitchDB;
-    pDstLine += dwPitchFB;
+    pSrcLine += dwPitchFB;
+    pDstLine += dwPitchDB;
   }
 }
 
@@ -70,8 +70,8 @@
       *((DWORD*)pIter) = ((DWORD*)pPalette)[pSrcLine[x]];
       pIter+=3;
     }
-    pSrcLine += dwPitchDB;
-    pDstLine += dwPitchFB;
+    pSrcLine += dwPitchFB;
+    pDstLine += dwPitchDB;
   }
 }
  void __cdecl Conv8to32( char *pDB,
@@ -99,8 +99,8 @@
       *(((DWORD*)pDstLine)+x) = ((DWORD*)pPalette)[pSrcLine[x]];
 
     }
-    pSrcLine += dwPitchDB;
-    pDstLine += dwPitchFB;
+    pSrcLine += dwPitchFB;
+    pDstLine += dwPitchDB;
   }
 }
 
@@ -148,8 +148,8 @@
                          ((pSrcLine[x] & 0x001F)<< 11);
       pIter+=3;
     }
-    pSrcLine = (WORD*)((char*)pSrcLine +dwPitchDB);
-    pDstLine += dwPitchFB;
+    pSrcLine = (WORD*)((char*)pSrcLine +dwPitchFB);
+    pDstLine += dwPitchDB;
   }
 
 }
@@ -181,8 +181,8 @@
                                 ((pSrcLine[x] & 0x07E0)<< 13) +
                                 ((pSrcLine[x] & 0x001F)<< 11);
     }
-    pSrcLine = (WORD*)((char*)pSrcLine + dwPitchDB);
-    pDstLine += dwPitchFB;
+    pSrcLine = (WORD*)((char*)pSrcLine + dwPitchFB);
+    pDstLine += dwPitchDB;
   }
 }
 
@@ -227,8 +227,8 @@
                               ((pSrcLine[x*3+1] & 0x3F)<< 5) +
                               ((pSrcLine[x*3+2] & 0x1F));
     }
-    pSrcLine += dwPitchDB;
-    pDstLine += dwPitchFB;
+    pSrcLine += dwPitchFB;
+    pDstLine += dwPitchDB;
   }
 }
 
@@ -261,8 +261,8 @@
       *((DWORD*)pDstLine[x]) = *((DWORD*)pIter) & 0xffffff00;
       pIter +=3;
     }
-    pSrcLine += dwPitchDB;
-    pDstLine += dwPitchFB;
+    pSrcLine += dwPitchFB;
+    pDstLine += dwPitchDB;
   }
 
 }
@@ -308,8 +308,8 @@
                     ((pSrcLine[x] & 0x00FE0000) >> 13) +
                     ((pSrcLine[x] & 0x0000F800) >> 11);
     }
-    pSrcLine = (DWORD*)((char*)pSrcLine + dwPitchDB);
-    pDstLine = (WORD*)((char*)pDstLine + dwPitchFB);
+    pSrcLine = (DWORD*)((char*)pSrcLine + dwPitchFB);
+    pDstLine = (WORD*)((char*)pDstLine + dwPitchDB);
   }
 }
 
@@ -342,8 +342,8 @@
       *((DWORD*)pIter[x]) = *((DWORD*)pSrcLine[x]);
       pIter +=3;
     }
-    pSrcLine += dwPitchDB;
-    pDstLine += dwPitchFB;
+    pSrcLine += dwPitchFB;
+    pDstLine += dwPitchDB;
   }
 
 }
