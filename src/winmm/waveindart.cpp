@@ -1,4 +1,4 @@
-/* $Id: waveindart.cpp,v 1.2 2001-10-24 22:47:42 sandervl Exp $ */
+/* $Id: waveindart.cpp,v 1.3 2002-04-07 14:36:31 sandervl Exp $ */
 
 /*
  * Wave record class
@@ -261,7 +261,7 @@ MMRESULT DartWaveIn::start()
                             ( PVOID ) &AmpSetParms,
                             0 );
 
-        wmutex.enter(VMUTEX_WAIT_FOREVER);
+        wmutex.enter();
         fMixerSetup = TRUE;
     }
 
@@ -292,7 +292,7 @@ MMRESULT DartWaveIn::stop()
 {
  MCI_GENERIC_PARMS Params;
 
-    wmutex.enter(VMUTEX_WAIT_FOREVER);
+    wmutex.enter();
     if(State != STATE_RECORDING) {
         State = STATE_STOPPED;
         wmutex.leave();
@@ -325,9 +325,7 @@ MMRESULT DartWaveIn::reset()
     // Stop recording
     mymciSendCommand(DeviceId, MCI_STOP, MCI_WAIT, (PVOID)&Params, 0);
 
-    dprintf(("Nr of threads blocked on mutex = %d\n", wmutex.getNrBlocked()));
-
-    wmutex.enter(VMUTEX_WAIT_FOREVER);
+    wmutex.enter();
     while(wavehdr)
     {
         wavehdr->dwFlags |= WHDR_DONE;
@@ -340,7 +338,7 @@ MMRESULT DartWaveIn::reset()
 
         callback(WIM_DATA, (ULONG)tmpwavehdr, 0);
 
-        wmutex.enter(VMUTEX_WAIT_FOREVER);
+        wmutex.enter();
     }
     wavehdr   = NULL;
     State     = STATE_STOPPED;
@@ -355,7 +353,7 @@ MMRESULT DartWaveIn::addBuffer(LPWAVEHDR pwh, UINT cbwh)
 {
  int i;
 
-    wmutex.enter(VMUTEX_WAIT_FOREVER);
+    wmutex.enter();
     pwh->lpNext          = NULL;
     pwh->dwBytesRecorded = 0;
     if(wavehdr) {
@@ -506,7 +504,7 @@ void DartWaveIn::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags)
         dprintf(("WINMM: WaveIn handler, Unknown error %X\n", ulStatus));
         return;
     }
-    wmutex.enter(VMUTEX_WAIT_FOREVER);
+    wmutex.enter();
 
     whdr = wavehdr;
     if(whdr == NULL) {
@@ -543,7 +541,7 @@ void DartWaveIn::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags)
 
                 callback(WIM_DATA, (ULONG)whdr, whdr->dwBytesRecorded);
 
-                wmutex.enter(VMUTEX_WAIT_FOREVER);
+                wmutex.enter();
             }
         }
         else break;

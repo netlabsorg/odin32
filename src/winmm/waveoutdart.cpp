@@ -1,4 +1,4 @@
-/* $Id: waveoutdart.cpp,v 1.6 2001-10-24 22:47:42 sandervl Exp $ */
+/* $Id: waveoutdart.cpp,v 1.7 2002-04-07 14:36:31 sandervl Exp $ */
 
 /*
  * Wave playback class (DART)
@@ -230,7 +230,7 @@ MMRESULT DartWaveOut::write(LPWAVEHDR pwh, UINT cbwh)
             return(MMSYSERR_NOTSUPPORTED);
         }
 
-        wmutex.enter(VMUTEX_WAIT_FOREVER);
+        wmutex.enter();
         fMixerSetup = TRUE;
 
         curPlayBuf = curFillBuf = curFillPos = curPlayPos = 0;
@@ -273,7 +273,7 @@ MMRESULT DartWaveOut::write(LPWAVEHDR pwh, UINT cbwh)
     {
         pwh->lpNext   = NULL;
         pwh->reserved = 0;
-        wmutex.enter(VMUTEX_WAIT_FOREVER);
+        wmutex.enter();
         if(wavehdr) {
             WAVEHDR *chdr = wavehdr;
             while(chdr->lpNext) {
@@ -324,7 +324,7 @@ MMRESULT DartWaveOut::pause()
 
     dprintf(("WINMM: DartWaveOut::pause"));
 
-    wmutex.enter(VMUTEX_WAIT_FOREVER);
+    wmutex.enter();
     if(State != STATE_PLAYING) {
         State = STATE_PAUSED;
         wmutex.leave();
@@ -380,9 +380,7 @@ MMRESULT DartWaveOut::reset()
     // Stop the playback.
     mymciSendCommand(DeviceId, MCI_STOP, MCI_WAIT, (PVOID)&Params, 0);
 
-    dprintf(("Nr of threads blocked on mutex = %d\n", wmutex.getNrBlocked()));
-
-    wmutex.enter(VMUTEX_WAIT_FOREVER);
+    wmutex.enter();
     while(wavehdr)
     {
         wavehdr->dwFlags  |= WHDR_DONE;
@@ -394,7 +392,7 @@ MMRESULT DartWaveOut::reset()
         wmutex.leave();
 
         callback(WOM_DONE, (ULONG)tmpwavehdr, 0);
-        wmutex.enter(VMUTEX_WAIT_FOREVER);
+        wmutex.enter();
     }
     wavehdr   = NULL;
     State     = STATE_STOPPED;
@@ -421,7 +419,7 @@ MMRESULT DartWaveOut::restart()
     //the first buffer write will do this for us.
     if(fMixerSetup == TRUE)
     {
-        wmutex.enter(VMUTEX_WAIT_FOREVER);
+        wmutex.enter();
         State     = STATE_PLAYING;
         fUnderrun = FALSE;
         wmutex.leave();
@@ -548,7 +546,7 @@ void DartWaveOut::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags
         return;
     }
 
-    wmutex.enter(VMUTEX_WAIT_FOREVER);
+    wmutex.enter();
 
     bytesPlayed += MixBuffer[curPlayBuf].ulBufferLength;
 
@@ -585,7 +583,7 @@ void DartWaveOut::handler(ULONG ulStatus, PMCI_MIX_BUFFER pBuffer, ULONG ulFlags
 
             callback(WOM_DONE, (ULONG)whdr, 0);
 
-            wmutex.enter(VMUTEX_WAIT_FOREVER);
+            wmutex.enter();
         }
         else break;
 

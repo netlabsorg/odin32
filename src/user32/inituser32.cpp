@@ -1,4 +1,4 @@
-/* $Id: inituser32.cpp,v 1.10 2001-12-16 15:30:14 sandervl Exp $ */
+/* $Id: inituser32.cpp,v 1.11 2002-04-07 14:36:59 sandervl Exp $ */
 /*
  * USER32 DLL entry point
  *
@@ -42,6 +42,7 @@
 #include <monitor.h>
 #include "pmwindow.h"
 #include "win32wdesktop.h"
+#include "win32wndhandle.h"
 #include "syscolor.h"
 #include "initterm.h"
 #include <exitlist.h>
@@ -217,6 +218,8 @@ ULONG APIENTRY inittermUser32(ULONG hModule, ULONG ulFlag)
          // try to install the keyboard hook
          pmkbdhk_initialize(hab);
 
+         InitializeWindowHandles();
+
          //SvL: 18-7-'98, Register system window classes (button, listbox etc etc)
          //CB: register internal classes
          RegisterSystemClasses(hModule);
@@ -224,7 +227,7 @@ ULONG APIENTRY inittermUser32(ULONG hModule, ULONG ulFlag)
          //CB: initialize PM monitor driver
          MONITOR_Initialize(&MONITOR_PrimaryMonitor);
 
-       break;
+         break;
      
      
        case 1 :
