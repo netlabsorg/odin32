@@ -1,2 +1,3 @@
 all_: all
-all build clean dep install:
+all build clean dep install lib testcase:
+
