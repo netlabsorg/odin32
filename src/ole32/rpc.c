@@ -666,6 +666,7 @@ _StubMgrThread(LPVOID param) {
 	NMPWAIT_USE_DEFAULT_WAIT,
 	NULL
     );
+
     if (listenPipe == INVALID_HANDLE_VALUE) {
 	FIXME("pipe creation failed for %s, le is %lx\n",pipefn,GetLastError());
 	return 1; /* permanent failure, so quit stubmgr thread */
@@ -704,6 +705,8 @@ STUBMGR_Start() {
   if (!stubMgrRunning) {
       stubMgrRunning = TRUE;
       CreateThread(NULL,0,_StubMgrThread,NULL,0,&tid);
+#ifndef __WIN32OS2__
       Sleep(2000); /* actually we just try opening the pipe until it succeeds */
+#endif
   }
 }
