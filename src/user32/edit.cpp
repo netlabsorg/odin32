@@ -1,4 +1,4 @@
-/* $Id: edit.cpp,v 1.10 1999-11-02 19:13:00 sandervl Exp $ */
+/* $Id: edit.cpp,v 1.11 1999-11-08 14:12:44 phaller Exp $ */
 /*
  *      Edit control
  *
@@ -3484,6 +3484,11 @@ static void EDIT_WM_SetFont(HWND hwnd, EDITSTATE *es, HFONT font, BOOL redraw)
                 old_font = SelectObject(dc, font);
         GetTextMetricsA(dc, &tm);
         es->line_height = tm.tmHeight;
+
+        //@@@PH 1999/11/08 prevent division by zero
+        if (es->line_height == 0)
+          es->line_height = 12; // reasonable default?
+
         es->char_width = tm.tmAveCharWidth;
         if (font)
                 SelectObject(dc, old_font);
