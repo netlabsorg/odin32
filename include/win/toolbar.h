@@ -1,14 +1,16 @@
-/* $Id: toolbar.h,v 1.1 1999-05-24 20:19:20 ktk Exp $ */
+/* $Id: toolbar.h,v 1.2 1999-07-07 16:48:26 achimha Exp $ */
 
 /*
  * Toolbar class extra info
  *
  * Copyright 1998 Eric Kohl
+ * Copyright 1999 Christoph Bratschi
  */
 
 #ifndef __WINE_TOOLBAR_H
 #define __WINE_TOOLBAR_H
 
+#define MAXTOOLNAME 100 //max length of TBBUTTON_INFO.pszName
 
 typedef struct tagTBUTTON_INFO
 {
@@ -19,10 +21,14 @@ typedef struct tagTBUTTON_INFO
     DWORD dwData;
     INT iString;
 
+    //for our needs
     BOOL bHot;
     INT nRow;
     RECT rect;
-} TBUTTON_INFO; 
+    //Customize dialog
+    BOOL bDelete; //can delete
+    LPWSTR pszName;
+} TBUTTON_INFO;
 
 
 typedef struct tagTOOLBAR_INFO
@@ -64,6 +70,9 @@ typedef struct tagTOOLBAR_INFO
 
     TBUTTON_INFO *buttons;      /* pointer to button array */
     LPWSTR       *strings;      /* pointer to string array */
+    //Customize dialog
+    HDSA hDsa;
+    HWND hwndToolbar;
 } TOOLBAR_INFO;
 
 
