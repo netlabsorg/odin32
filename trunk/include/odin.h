@@ -1,4 +1,4 @@
-/* $Id: odin.h,v 1.10 1999-09-22 09:46:18 sandervl Exp $ */
+/* $Id: odin.h,v 1.11 1999-09-25 08:31:46 sandervl Exp $ */
 /*
  * ODIN - Build Environment Definition
  *
@@ -78,9 +78,9 @@
   #define UNALIGNED
   #define __inline__ inline
 
-  #if (__IBMCPP__ == 300) || (__IBMC__ == 300)
+//  #if (__IBMCPP__ == 300) || (__IBMC__ == 300)
   #define NONAMELESSUNION
-  #endif
+//  #endif
 
   #include <builtin.h>
 
