@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.38 2000-01-20 16:48:55 cbratschi Exp $ */
+/* $Id: pmframe.cpp,v 1.39 2000-01-26 18:02:35 cbratschi Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -140,8 +140,16 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
 
     case WM_QUERYTRACKINFO:
     {
-      //CB: todo: use minmaxinfo
-      goto RunDefFrameProc;
+      PTRACKINFO trackInfo = (PTRACKINFO)mp2;
+
+      RestoreOS2TIB();
+      OldFrameProc(hwnd,msg,mp1,mp2);
+      SetWin32TIB();
+      trackInfo->cxBorder = 0;
+      trackInfo->cyBorder = 0;
+      win32wnd->AdjustTrackInfo((PPOINT)&trackInfo->ptlMinTrackSize,(PPOINT)&trackInfo->ptlMaxTrackSize);
+      RestoreOS2TIB();
+      return (MRESULT)TRUE;
     }
 
     case WM_QUERYBORDERSIZE:
@@ -211,7 +219,7 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
     {
       PSWP     pswp = (PSWP)mp1;
       SWP      swpOld;
-      WINDOWPOS wp;
+      WINDOWPOS wp,wpOld;
       HWND      hParent = NULLHANDLE, hwndAfter;
 
         dprintf(("PMFRAME: WM_ADJUSTWINDOWPOS %x %x %x (%d,%d) (%d,%d)", win32wnd->getWindowHandle(), pswp->hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
@@ -253,20 +261,23 @@ MRESULT EXPENTRY Win32FrameProc(HWND hwnd,ULONG msg,MPARAM mp1,MPARAM mp2)
            if(wndAfter) wp.hwndInsertAfter = wndAfter->getWindowHandle();
         }
 
-        //CB: problems with profmine titlebar tracking
-        if(win32wnd->MsgPosChanging((LPARAM)&wp) == 0)
-        {//app or default window handler changed wp
-            dprintf(("PMFRAME: WM_ADJUSTWINDOWPOS, app changed windowpos struct"));
-            dprintf(("%x (%d,%d), (%d,%d)", pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
+        wpOld = wp;
+        win32wnd->MsgPosChanging((LPARAM)&wp);
 
-            OSLibMapWINDOWPOStoSWPFrame(&wp, pswp, &swpOld, hParent, hwnd);
-            dprintf(("%x (%d,%d), (%d,%d)", pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
-            pswp->fl |= SWP_NOADJUST;
-            pswp->hwndInsertBehind = hwndAfter;
-            pswp->hwnd = hwnd;
+        if ((wp.hwndInsertAfter != wpOld.hwndInsertAfter) ||
+            (wp.x != wpOld.x) || (wp.y != wpOld.y) || (wp.cx != wpOld.cx) || (wp.cy != wpOld.cy) || (wp.flags != wpOld.flags))
+        {
+          dprintf(("PMFRAME: WM_ADJUSTWINDOWPOS, app changed windowpos struct"));
+          dprintf(("%x (%d,%d), (%d,%d)", pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
 
-            RestoreOS2TIB();
-            return (MRESULT)0xf;
+          OSLibMapWINDOWPOStoSWPFrame(&wp, pswp, &swpOld, hParent, hwnd);
+          dprintf(("%x (%d,%d), (%d,%d)", pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
+          pswp->fl |= SWP_NOADJUST;
+          pswp->hwndInsertBehind = hwndAfter;
+          pswp->hwnd = hwnd;
+
+          RestoreOS2TIB();
+          return (MRESULT)0xf;
         }
         goto RunDefFrameProc;
     }

@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.66 2000-01-18 20:10:47 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.67 2000-01-26 18:02:35 cbratschi Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -784,14 +784,27 @@ int WIN32API GetSystemMetrics(int nIndex)
         break;
     case SM_CYMINIMIZED:
         break;
+
+    case SM_CXMINTRACK:
+    case SM_CXMIN:
+        rc = 112;
+        break;
+
+    case SM_CYMINTRACK:
+    case SM_CYMIN:
+        rc = 27;
+        break;
+
     case SM_CXMAXTRACK: //max window size
     case SM_CXMAXIMIZED:    //max toplevel window size
         rc = OSLibWinQuerySysValue(OSLIB_HWND_DESKTOP,SVOS_CXSCREEN);
         break;
+
     case SM_CYMAXTRACK:
     case SM_CYMAXIMIZED:
         rc = OSLibWinQuerySysValue(OSLIB_HWND_DESKTOP,SVOS_CYSCREEN);
         break;
+
     case SM_NETWORK:
         rc = 0x01;  //TODO: default = yes
         break;

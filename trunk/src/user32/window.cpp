@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.50 2000-01-20 16:48:58 cbratschi Exp $ */
+/* $Id: window.cpp,v 1.51 2000-01-26 18:02:38 cbratschi Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -399,7 +399,7 @@ BOOL WIN32API IsIconic( HWND hwnd)
     if(!window) {
         dprintf(("IsIconic, window %x not found", hwnd));
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
-        return 0;
+        return FALSE;
     }
     rc = window->IsIconic();
     dprintf(("IsIconic %x returned %d", hwnd, rc));
@@ -492,11 +492,16 @@ BOOL WIN32API SetWindowPos(HWND hwnd, HWND hwndInsertAfter, int x, int y, int cx
 {
   Win32BaseWindow *window;
 
+    if (!hwnd)
+    {
+      dprintf(("SetWindowPos: Can't move desktop!"));
+      return TRUE;
+    }
     window = Win32BaseWindow::GetWindowFromHandle(hwnd);
     if(!window) {
         dprintf(("SetWindowPos, window %x not found", hwnd));
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
-        return 0;
+        return FALSE;
     }
     dprintf(("SetWindowPos %x %x x=%d y=%d cx=%d cy=%d %x", hwnd, hwndInsertAfter, x, y, cx, cy, fuFlags));
     return window->SetWindowPos(hwndInsertAfter, x, y, cx, cy, fuFlags);
@@ -559,7 +564,10 @@ BOOL WIN32API IsWindowVisible( HWND hwnd)
   Win32BaseWindow *window;
   BOOL rc;
 
-    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if (hwnd)
+      window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    else
+      window = windowDesktop;
     if(!window) {
         dprintf(("IsWindowVisible, window %x not found", hwnd));
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
@@ -640,7 +648,10 @@ BOOL WIN32API GetWindowRect( HWND hwnd, PRECT pRect)
 {
   Win32BaseWindow *window;
 
-    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if (hwnd)
+      window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    else
+      window = windowDesktop;
     if(!window) {
         dprintf(("GetWindowRect, window %x not found", hwnd));
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
