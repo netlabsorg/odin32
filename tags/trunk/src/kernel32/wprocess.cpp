@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.158 2002-08-01 16:02:41 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.159 2002-09-18 10:58:48 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -470,6 +470,28 @@ USHORT WIN32API SetWin32TIB(BOOL fForceSwitch)
 }
 //******************************************************************************
 //******************************************************************************
+//#define DEBUG_HEAPSTATE
+#ifdef DEBUG_HEAPSTATE
+char *pszHeapDump      = NULL;
+char *pszHeapDumpStart = NULL;
+
+int _LNK_CONV callback_function(const void *pentry, size_t sz, int useflag, int status,
+                                const char *filename, size_t line)
+{
+    if (_HEAPOK != status) {
+//       dprintf(("status is not _HEAPOK."));
+       return 1;
+    }
+    if (_USEDENTRY == useflag && sz && filename && line && pszHeapDump) {
+       sprintf(pszHeapDump, "allocated  %08x %u at %s %d\n", pentry, sz, filename, line);
+       pszHeapDump += strlen(pszHeapDump);
+    }
+
+    return 0;
+}
+//******************************************************************************
+//******************************************************************************
+#endif
 VOID WIN32API ExitProcess(DWORD exitcode)
 {
     HANDLE hThread = GetCurrentThread();
@@ -516,6 +538,13 @@ VOID WIN32API ExitProcess(DWORD exitcode)
         teb = teb->o.odin.next;
     }
     threadListMutex.leave();
+
+#ifdef DEBUG_HEAPSTATE
+    pszHeapDumpStart = pszHeapDump = (char *)malloc(10*1024*1024);
+    _heap_walk(callback_function);
+    dprintf((pszHeapDumpStart));
+    free(pszHeapDumpStart);
+#endif
 
 #ifdef PROFILE
     // Note: after this point we do not expect any more Win32-API calls,
