@@ -1,4 +1,10 @@
- /* $Id: ChangeLog,v 1.1050 2000-08-06 09:31:22 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.1051 2000-08-06 11:37:56 sandervl Exp $ */
+
+ 2000-08-06: Sander van Leeuwen <sandervl@xs4all.nl>
+    - doc\ReportingBugs.txt:
+                Added a little more information
+    - tools\install
+                Add Logging.txt + symbol files to debug build.
 
  2000-08-06: Przemyslaw Dobrowolski <dobrawka@asua.org.pl>
     - COMCTL32: Updated toolbar to Wine 20000801
