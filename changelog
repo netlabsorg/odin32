@@ -1,4 +1,10 @@
-/* $Id: changelog,v 1.2423 2003-01-04 18:17:47 sandervl Exp $ */
+/* $Id: changelog,v 1.2424 2003-01-05 12:30:45 sandervl Exp $ */
+
+ 2003-01-05: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o Added ODIN_SetDllLoadCallback; install a dll load hook
+                  that's called as soon as all exports are processed
+                  (so before any code is executed that can use the dll)
+                o Added ODIN_SetProcAddress; override a name or ordinal export
 
  2003-01-04: Sander van Leeuwen <sandervl@innotek   >
     - USER32:   o Corrected drawing of menubar in OS/2 L&F mode (when highlighted)
