@@ -676,6 +676,14 @@ HRESULT WINAPI CLSIDFromProgID(
 }
 
 
+/******************************************************************************
+ *		CLSIDFromProgIDEx	[OLE32.]
+ */
+HRESULT WINAPI CLSIDFromProgIDEx(LPCOLESTR lpszProgID, LPCLSID pclsid)
+{
+  FIXME("%s: Not implemented! (returning E_NOTIMPL)\n", __FUNCTION__);
+  return E_NOTIMPL;
+}
 
 /*****************************************************************************
  *             CoGetPSClsid [OLE32.22]
@@ -1367,6 +1375,8 @@ HRESULT WINAPI CoCreateInstanceEx(
   ULONG     index;
   int       successCount = 0;
 
+  TRACE("s%: (rclsid=%p, pUnkOuter=%p, dwClsContext=0x%lf, pServerInfo=%p, cmq=%p, pResults=%p)\n",
+        __FUNCTION__, rclsid, pUnkOuter, dwClsContext, pServerInfo, cmq, pResults);
   /*
    * Sanity check
    */
