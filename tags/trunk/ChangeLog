@@ -1,10 +1,11 @@
-/* $Id: ChangeLog,v 1.1222 2001-01-18 19:39:13 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1223 2001-01-18 21:10:05 sandervl Exp $ */
 
  2001-01-18: Sander van Leeuwen <sandervl@xs4all.nl>
     - GDI32:    o More logging
                 o Use StretchDIBits in SetDIBitsToDevice instead of Open32
                   function. (which doesn't work for compressed bitmaps)
                   (MS Excel 97 startup bitmap displays correctly now)
+                  (MS Developer startup bitmap overlay correct now (Visual C++ part))
     - WGSS50:   o Reported problems with SaveDC/RestoreDC and StretchDIBits
                   (Modelator graphics corruption fixed)
     - KERNEL32: o Create system.ini with '[mci] cdaudio=mcicda.drv' section
@@ -14,7 +15,7 @@
                   length is -1 before checking if dest length is 0)
                   (MS Word 97 no longer crashes)
                 o RegQueryValueExW bugfix 
-                  (causing stack corruption in Excel and probably many other
+                  (caused stack corruption in Excel and probably many other
                    apps that use this function too)
     - OLEAUT32: o Ported David's typelib changes.
                   (MS Word 97 starts immediately and doesn't spend an hour
