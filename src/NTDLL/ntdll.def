@@ -1,4 +1,4 @@
-; $Id: ntdll.def,v 1.18 1999-09-13 19:45:34 phaller Exp $
+; $Id: ntdll.def,v 1.19 1999-10-25 19:24:13 phaller Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is NT4.0's NTDLL.DLL
@@ -7,7 +7,7 @@ DATA MULTIPLE NONSHARED
 
 IMPORTS
     fwd_RtlUnwind                    =  KERNEL32.RtlUnwind
-    fwd_memmove                      =  KERNEL32.memmove	     
+    fwd_memmove                      =  KERNEL32.memmove	
     fwd_RtlFillMemory                =  KERNEL32.RtlFillMemory
     fwd_RtlMoveMemory                =  KERNEL32.RtlMoveMemory
     fwd_RtlZeroMemory                =  KERNEL32.RtlZeroMemory
@@ -15,9 +15,14 @@ IMPORTS
     fwd_RtlLeaveCriticalSection      =  KERNEL32.LeaveCriticalSection
     fwd_RtlEnterCriticalSection      =  KERNEL32.EnterCriticalSection
     fwd_RtlDeleteCriticalSection     =  KERNEL32.DeleteCriticalSection
+
     _lstrncmpW@12                    =  KERNEL32.lstrncmpW
+    _lstrncmpiA@12                   =  KERNEL32.lstrncmpiA
+    _lstrncmpiW@12                   =  KERNEL32.lstrncmpiW
     HEAP_strdupW                     =  KERNEL32.HEAP_strdupW
     HEAP_strdupWtoA                  =  KERNEL32.HEAP_strdupWtoA
+
+
 
 EXPORTS
 
