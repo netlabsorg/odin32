@@ -1,7 +1,8 @@
- /* $Id: ChangeLog,v 1.251 1999-09-28 08:00:58 dengert Exp $ */
+ /* $Id: ChangeLog,v 1.252 1999-09-28 12:44:31 dengert Exp $ */
 
  99-09-28: Daniela Engert <dani@ngrt.de>
 	- USER32: Caret functions implemented
+		  ScrollDC implemented
 
  99-09-28: Patrick Haller <phaller@gmx.net>
 	- KERNEL32:	Add: debug info for missing API imports (WinImagePeLdr)

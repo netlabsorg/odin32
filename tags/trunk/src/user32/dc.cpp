@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.9 1999-09-28 08:00:56 dengert Exp $ */
+/* $Id: dc.cpp,v 1.10 1999-09-28 12:44:32 dengert Exp $ */
 
 /*
  * DC functions for USER32
@@ -152,6 +152,8 @@ typedef struct _RGNDATA_W {
 #define MM_ISOTROPIC_W        7
 #define MM_ANISOTROPIC_W      8
 
+#define RGN_OR_W              2
+
 /*********************/
 
 BOOL    APIENTRY GpiEnableYInversion (HPS hps, LONG lHeight);
@@ -166,6 +168,9 @@ ULONG   OPEN32API _O32_GetRegionData (HRGN hrgn, ULONG count, PRGNDATA_W pData);
 BOOL    OPEN32API _O32_DeleteObject (LHANDLE hgdiobj);
 int     OPEN32API _O32_ReleaseDC (HWND hwnd, HDC hdc);
 VOID    OPEN32API _O32_SetLastError( DWORD );
+BOOL    OPEN32API _O32_SetRectRgn (HRGN dest, int left, int top, int right, int bottom);
+int     OPEN32API _O32_CombineRgn (HRGN dest, HRGN src1, HRGN src2, int mode);
+HRGN    OPEN32API _O32_CreateRectRgn (int left, int top, int right, int bottom);
 
 #ifndef DEVESC_SETPS
   #define DEVESC_SETPS  49149L
@@ -469,6 +474,23 @@ BOOL isYup (pDCData pHps)
          return TRUE;
    }
    return FALSE;
+}
+
+INT revertDy (Win32BaseWindow *wnd, INT dy)
+{
+   if (wnd->isOwnDC())
+   {
+      pDCData pHps = (pDCData)GpiQueryDCData (wnd->getOwnDC());
+
+      if (pHps != NULLHANDLE)
+         if (!isYup (pHps))
+            dy = -dy;
+   }
+   else
+   {
+      dy = -dy;
+   }
+   return (dy);
 }
 
 VOID removeClientArea(pDCData pHps)
@@ -1190,6 +1212,181 @@ BOOL WIN32API InvalidateRgn (HWND hwnd, HRGN hrgn, BOOL erase)
    SetFS(sel);
    return (result);
 }
+
+BOOL WIN32API ScrollDC (HDC hDC, int dx, int dy, const RECT *pScroll,
+                        const RECT *pClip, HRGN hrgnUpdate, LPRECT pRectUpdate)
+{
+   USHORT sel = RestoreOS2FS();
+   BOOL rc = TRUE;
+
+   dprintf (("USER32:  ScrollDC"));
+
+   if (!hDC)
+   {
+      SetFS(sel);
+      return (FALSE);
+   }
+
+   pDCData pHps         = (pDCData)GpiQueryDCData ((HPS)hDC);
+   HWND    hwnd         = pHps->hwnd;
+   Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
+
+   if ((hwnd == NULLHANDLE) || !wnd)
+   {
+      SetFS(sel);
+      return (FALSE);
+   }
+
+   POINTL ptl[2] = { 0, 0, dx, dy };
+
+   GpiConvert (pHps->hps, CVTC_WORLD, CVTC_DEVICE, 2, ptl);
+   dx = (int)(ptl[1].x - ptl[0].x);
+   dy = (int)(ptl[1].y - ptl[0].y);
+
+   RECTL scrollRect;
+   RECTL clipRect;
+
+   if (pClip)
+   {
+      clipRect.xLeft   = min (pClip->left, pClip->right);
+      clipRect.xRight  = max (pClip->left, pClip->right);
+      clipRect.yTop    = max (pClip->top,  pClip->bottom);
+      clipRect.yBottom = min (pClip->top,  pClip->bottom);
+
+      if ((pHps->graphicsMode == GM_COMPATIBLE_W) &&
+          (clipRect.xLeft   != clipRect.xRight)   &&
+          (clipRect.yBottom != clipRect.yTop))
+      {
+          if (abs((int)pHps->viewportXExt) <= abs((int)pHps->windowExt.cx))
+              clipRect.xRight -= abs(pHps->worldXDeltaFor1Pixel);
+          else
+              clipRect.xLeft  += abs(pHps->worldXDeltaFor1Pixel);
+
+          if (abs((int)pHps->viewportYExt) <= abs((int)pHps->windowExt.cy))
+              clipRect.yTop    -= abs(pHps->worldYDeltaFor1Pixel);
+          else
+              clipRect.yBottom += abs(pHps->worldYDeltaFor1Pixel);
+      }
+      GpiConvert (pHps->hps, CVTC_WORLD, CVTC_DEVICE, 2, (PPOINTL)&clipRect);
+      if (clipRect.xRight < clipRect.xLeft) {
+         ULONG temp      = clipRect.xLeft;
+         clipRect.xLeft  = clipRect.xRight;
+         clipRect.xRight = temp;
+      }
+      if (clipRect.yTop < clipRect.yBottom) {
+         ULONG temp       = clipRect.yBottom;
+         clipRect.yBottom = clipRect.yTop;
+         clipRect.yTop    = temp;
+      }
+   }
+
+   if (pScroll)
+   {
+      scrollRect.xLeft   = min (pScroll->left, pScroll->right);
+      scrollRect.xRight  = max (pScroll->left, pScroll->right);
+      scrollRect.yTop    = max (pScroll->top,  pScroll->bottom);
+      scrollRect.yBottom = min (pScroll->top,  pScroll->bottom);
+
+      if ((pHps->graphicsMode == GM_COMPATIBLE_W) &&
+          (scrollRect.xLeft   != scrollRect.xRight)   &&
+          (scrollRect.yBottom != scrollRect.yTop))
+      {
+          if (abs((int)pHps->viewportXExt) <= abs((int)pHps->windowExt.cx))
+              scrollRect.xRight -= abs(pHps->worldXDeltaFor1Pixel);
+          else
+              scrollRect.xLeft  += abs(pHps->worldXDeltaFor1Pixel);
+
+          if (abs((int)pHps->viewportYExt) <= abs((int)pHps->windowExt.cy))
+              scrollRect.yTop    -= abs(pHps->worldYDeltaFor1Pixel);
+          else
+              scrollRect.yBottom += abs(pHps->worldYDeltaFor1Pixel);
+      }
+      GpiConvert (pHps->hps, CVTC_WORLD, CVTC_DEVICE, 2, (PPOINTL)&scrollRect);
+      if (scrollRect.xRight < scrollRect.xLeft) {
+         ULONG temp        = scrollRect.xLeft;
+         scrollRect.xLeft  = scrollRect.xRight;
+         scrollRect.xRight = temp;
+      }
+      if (scrollRect.yTop < scrollRect.yBottom) {
+         ULONG temp         = scrollRect.yBottom;
+         scrollRect.yBottom = scrollRect.yTop;
+         scrollRect.yTop    = temp;
+      }
+   }
+   RECTL rectlUpdate;
+   HRGN  hrgn;
+
+   LONG lComplexity = WinScrollWindow (hwnd, dx, dy, (pScroll) ? &scrollRect : NULL, (pClip) ? &clipRect : NULL, hrgn, &rectlUpdate, 0);
+   if (lComplexity == RGN_ERROR)
+   {
+      SetFS(sel);
+      return (FALSE);
+   }
+
+   RECT winRectUpdate;
+   LONG height = wnd->getWindowHeight();
+
+   winRectUpdate.left   = rectlUpdate.xLeft;
+   winRectUpdate.right  = rectlUpdate.xRight;
+   winRectUpdate.top    = height - rectlUpdate.yTop;
+   winRectUpdate.bottom = height - rectlUpdate.yBottom;
+
+   if (pRectUpdate)
+      *pRectUpdate = winRectUpdate;
+
+   if (hrgnUpdate)
+   {
+      RGNRECT  rgnRect;
+      rgnRect.ircStart    = 1;
+      rgnRect.crc         = 0;
+      rgnRect.ulDirection = RECTDIR_LFRT_TOPBOT;     // doesn't make a difference because we're getting them all
+      rc = GpiQueryRegionRects (pHps->hps, hrgn, NULL, &rgnRect, NULL);
+
+      if (rc && (rgnRect.crcReturned > 0))
+      {
+         PRECTL pRectl = new RECTL[rgnRect.crcReturned];
+         if (pRectl != NULL)
+         {
+            rgnRect.crc = rgnRect.crcReturned;
+            rc = GpiQueryRegionRects (pHps->hps, hrgn, NULL, &rgnRect, pRectl);
+
+            rc = _O32_SetRectRgn (hrgnUpdate, pRectl[0].xLeft,
+                                              pRectl[0].xRight,
+                                              height - pRectl[0].yTop,
+                                              height - pRectl[0].yBottom);
+
+            if (rgnRect.crcReturned > 1)
+            {
+               HRGN temp;
+               temp = _O32_CreateRectRgn (0, 0, 1, 1);
+
+               for (int x = 1; rc && (x < rgnRect.crcReturned); x++)
+               {
+                 rc = _O32_SetRectRgn (temp, pRectl[x].xLeft,
+                                             pRectl[x].xRight,
+                                             height - pRectl[x].yTop,
+                                             height - pRectl[x].yBottom);
+                 rc = _O32_CombineRgn (hrgnUpdate, hrgnUpdate, temp, RGN_OR_W);
+               }
+               _O32_DeleteObject (temp);
+            }
+            delete[] pRectl;
+         }
+         else
+         {
+            rc = FALSE;
+         }
+      }
+      else
+      {
+         rc = _O32_SetRectRgn (hrgnUpdate, 0, 0, 0, 0);
+      }
+   }
+
+   SetFS(sel);
+   return (rc);
+}
+
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API ScrollWindow(HWND hwnd, int dx, int dy, const RECT *pScroll, const RECT *pClip)
@@ -1244,7 +1441,7 @@ BOOL WIN32API ScrollWindow(HWND hwnd, int dx, int dy, const RECT *pScroll, const
          WinIntersectRect ((HAB) 0, pClipRect, pClipRect, &clientRect);
     }
 
-    dy = -dy; //always correct?
+    dy = revertDy (window, dy);
 
     rc = WinScrollWindow(window->getOS2WindowHandle(), dx, dy,
                          pScrollRect, pClipRect, NULLHANDLE,

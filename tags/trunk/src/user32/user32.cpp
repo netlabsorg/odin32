@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.34 1999-09-28 08:00:56 dengert Exp $ */
+/* $Id: user32.cpp,v 1.35 1999-09-28 12:44:33 dengert Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -1268,6 +1268,7 @@ BOOL WIN32API ScreenToClient (HWND hwnd, LPPOINT pt)
 }
 //******************************************************************************
 //******************************************************************************
+#if 0
 BOOL WIN32API ScrollDC( HDC arg1, int arg2, int arg3, const RECT * arg4, const RECT * arg5, HRGN arg6, PRECT  arg7)
 {
 #ifdef DEBUG
@@ -1275,6 +1276,7 @@ BOOL WIN32API ScrollDC( HDC arg1, int arg2, int arg3, const RECT * arg4, const R
 #endif
     return O32_ScrollDC(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
 }
+#endif
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API SetDoubleClickTime( UINT arg1)
