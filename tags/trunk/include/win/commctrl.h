@@ -1077,6 +1077,28 @@ typedef struct tagNMHDFILTERBTNCLICK
 #define    TBNRF_HIDEHELP       0x00000001
 #define    TBNRF_ENDCUSTOMIZE   0x00000002
 
+/* Return values from TBN_DROPDOWN */
+#define TBDDRET_DEFAULT  0
+#define TBDDRET_NODEFAULT  1
+#define TBDDRET_TREATPRESSED  2
+
+typedef struct _NMTBCUSTOMDRAW
+{
+    NMCUSTOMDRAW nmcd;
+    HBRUSH hbrMonoDither;
+    HBRUSH hbrLines;
+    HPEN hpenLines;
+    COLORREF clrText;
+    COLORREF clrMark;
+    COLORREF clrTextHighlight;
+    COLORREF clrBtnFace;
+    COLORREF clrBtnHighlight;
+    COLORREF clrHighlightHotTrack;
+    RECT rcText;
+    int nStringBkMode;
+    int nHLStringBkMode;
+} NMTBCUSTOMDRAW, *LPNMTBCUSTOMDRAW;
+
 /* This is just for old CreateToolbar. */
 /* Don't use it in new programs. */
 typedef struct _OLDTBBUTTON {
@@ -1215,6 +1237,36 @@ typedef struct tagNMTBGETINFOTIPW
 
 #define NMTBGETINFOTIP   WINELIB_NAME_AW(NMTBGETINFOFTIP)
 #define LPNMTBGETINFOTIP WINELIB_NAME_AW(LPNMTBGETINFOTIP)
+
+typedef struct
+{
+    NMHDR hdr;
+    DWORD dwMask;
+    int idCommand;
+    DWORD lParam;
+    int iImage;
+    LPSTR pszText;
+    int cchText;
+} NMTBDISPINFOA, *LPNMTBDISPINFOA;
+
+typedef struct
+{
+    NMHDR hdr;
+    DWORD dwMask;
+    int idCommand;
+    DWORD lParam;
+    int iImage;
+    LPWSTR pszText;
+    int cchText;
+} NMTBDISPINFOW, *LPNMTBDISPINFOW;
+
+#define NMTBDISPINFO WINELIB_NAME_AW(NMTBDISPINFO)
+#define LPNMTBDISPINFO WINELIB_NAME_AW(LPNMTBDISPINFO)
+
+/* contents of dwMask in the NMTBDISPINFO structure */
+#define TBNF_IMAGE     0x00000001
+#define TBNF_TEXT      0x00000002
+#define TBNF_DI_SETITEM  0x10000000
 
 typedef struct tagNMTOOLBARA
 {
