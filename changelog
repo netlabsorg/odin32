@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1277 2001-02-20 15:39:40 sandervl Exp $ */
+/* $Id: changelog,v 1.1278 2001-02-20 17:21:35 sandervl Exp $ */
 
  2001-02-20: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Fix for position of system menu in (mdi) child windows
@@ -9,6 +9,7 @@
                 o Use WinGetMaxPosition to determine default maximized position
                   of toplevel window before sending WM_GETMINMAXINFO
                   (maximized Odin windows no longer obscure WarpCenter)
+                o Activation fixes for MDI windows
 
  2000-02-19: Oliver Braun <Oliver.Braun@hamburg.de>
     - KERNEL32: o OSLibDosAllocMem fix (better checks for errors + return
