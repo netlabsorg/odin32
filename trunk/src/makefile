@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.56 2000-03-04 20:53:16 bird Exp $
+# $Id: makefile,v 1.57 2000-04-02 22:04:28 davidr Exp $
 
 #
 # PD-Win32 API
@@ -90,6 +90,8 @@ all: libs
     cd ..\ddraw
     $(MAKE_CMD)
     cd ..\dinput
+    $(MAKE_CMD)
+    cd ..\rpcrt4
     $(MAKE_CMD)
     cd ..\ole32
     $(MAKE_CMD)
