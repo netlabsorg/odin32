@@ -1,4 +1,4 @@
-/* $Id: initterm.cpp,v 1.3 1999-06-19 10:54:41 sandervl Exp $ */
+/* $Id: initterm.cpp,v 1.4 1999-06-19 13:57:51 sandervl Exp $ */
 
 /*
  * KERNEL32 DLL entry point
@@ -32,6 +32,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <misc.h>
+#include <wprocess.h>
 
 extern "C" {
 /*-------------------------------------------------------------------*/
@@ -127,6 +128,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long
                    flAllocMem = PAG_ANY;      // high memory support. Let's use it!
             else   flAllocMem = 0;        // no high memory support
 
+	    InitializeTIB(TRUE);
             break;
         case 1 :
             break;
@@ -145,6 +147,7 @@ static void APIENTRY cleanup(ULONG ulReason)
 {
     dprintf(("kernel32 exit\n"));
     _dump_allocated(10);    /*PLF Wed  98-03-18 23:55:07*/
+    DestroyTIB();
     _ctordtorTerm();
     CRT_term();
     DosExitList(EXLST_EXIT, cleanup);

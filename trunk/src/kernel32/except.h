@@ -1,4 +1,4 @@
-/* $Id: except.h,v 1.3 1999-06-10 19:11:30 phaller Exp $ */
+/* $Id: except.h,v 1.4 1999-06-19 13:57:51 sandervl Exp $ */
 
 /*
  * Exception + misc functions for OS/2
@@ -19,8 +19,9 @@ void __cdecl SetExceptionChain(DWORD);
 void  ChangeTIBStack();
 ULONG GetDllEntryPoint();
 
-ULONG getEAX();
-ULONG getEBX();
+ULONG  getEAX();
+ULONG  getEBX();
+USHORT getSS();
 
 #ifdef __cplusplus
 }

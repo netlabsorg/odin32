@@ -1,4 +1,4 @@
-/* $Id: module.h,v 1.1 1999-05-24 20:19:14 ktk Exp $ */
+/* $Id: module.h,v 1.2 1999-06-19 13:57:50 sandervl Exp $ */
 
 /*
  * Module definitions
@@ -10,9 +10,10 @@
 #define __WINE_MODULE_H
 
 #include "windef.h"
-#include "dosexe.h"
+//#include "dosexe.h"
 #include "pe_image.h"
 
+#ifndef __WIN32OS2__
   /* In-memory module structure. See 'Windows Internals' p. 219 */
 typedef struct _NE_MODULE
 {
@@ -56,7 +57,7 @@ typedef struct _NE_MODULE
     LPVOID  dos_image;        /* pointer to DOS memory (for DOS apps) */
     LPVOID  hRsrcMap;         /* HRSRC 16->32 map (for 32-bit modules) */
 } NE_MODULE;
-
+#endif
 
 typedef struct {
     BYTE type;

@@ -1,5 +1,6 @@
  99-19-06: Sander van Leeuwen
 	- ALL (except dsound/ddraw): Include <os2wrap.h> instead of <os2.h>
+	- KERNEL32: Changes for win32 TEB (not active)
 
  99-07-06: Sander van Leeuwen
 	- Removed unecessary files
