@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.165 2001-11-20 09:53:56 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.166 2001-12-26 19:05:34 achimha Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -69,6 +69,10 @@ HBITMAP hbmFrameMenu[3] = {0};
 static PFNWP pfnFrameWndProc = NULL;
 static HWND  hwndFocusChange = 0;
        HWND  hwndCD = 0;
+
+// this holds the font height that the display driver returns using DevQueryCaps
+// 13 would be small fonts, 16 medium fonts and 20 large fonts
+LONG CapsCharHeight = 0;
 
 // Note:
 // For a "lonekey"-press of AltGr, we only receive WM_KEYUP
@@ -203,6 +207,10 @@ BOOL InitPM()
     }
 
     DevQueryCaps(hdc, CAPS_COLOR_BITCOUNT, 1, (PLONG)&ScreenBitsPerPel);
+
+    // query the font height to find out whether we have small or large fonts
+    DevQueryCaps(hdc, CAPS_GRAPHICS_CHAR_HEIGHT, 1, (PLONG)&CapsCharHeight);
+
     DevCloseDC(hdc);
 
     dprintf(("InitPM: Desktop (%d,%d) bpp %d", ScreenWidth, ScreenHeight, ScreenBitsPerPel));
