@@ -1,4 +1,4 @@
-/* $Id: Win32kCC.rc,v 1.4 2000-11-26 13:36:53 bird Exp $
+/* $Id: Win32kCC.rc,v 1.5 2001-02-02 08:41:31 bird Exp $
  *
  * Resource File for Win32k Control Center.
  *
@@ -27,6 +27,7 @@ BEGIN
     IDS_ERR_QUERYOPTIONSTATUS,  "Failed to get option and status data from Win32k.sys. (rc=0x%x)"
     IDS_ERR_NO_COM_RADIOBUTTON, "Internal error. No COM port is selected!"
     IDS_ERR_NO_PE_RADIOBUTTON,  "Internal error. No PE Loader mode is selected!"
+    IDS_ERR_NO_PE_ONEOBJECT,    "Internal error. Invalid All-In-One-Object state!"
     IDS_ERR_INVALID_INFOLEVEL,  "Invalid infolevel."
     IDS_ERR_INVALID_MAXHEAPSIZE,"Invalid heapsize."
     IDS_ERR_SETPOPTIONS,        "Error occured in win32k while changing the options. (rc=0x%x)"

@@ -1,4 +1,4 @@
-/* $Id: options.h,v 1.18 2001-01-21 07:54:37 bird Exp $
+/* $Id: options.h,v 1.19 2001-02-02 08:39:52 bird Exp $
  *
  * Options.
  *
@@ -38,6 +38,11 @@
 #define FLAGS_PE_PE         0x00000002UL
 #define FLAGS_PE_MIXED      0x00000003UL
 
+/* fPEOneObject */
+#define FLAGS_PEOO_DISABLED 0x00000000UL
+#define FLAGS_PEOO_ENABLED  0x00000001UL
+#define FLAGS_PEOO_FORCED   0x00000002UL
+
 /* ulInfoLevel */
 #define INFOLEVEL_QUIET     0x00000000UL
 #define INFOLEVEL_ERROR     0x00000001UL
@@ -62,6 +67,7 @@
             (unsigned short)~0,     /* usVerMajor    */     \
             (unsigned short)~0,     /* usVerMinor    */     \
             FLAGS_PE_PE,            /* fPE           */     \
+            FLAGS_PEOO_FORCED,      /* fPEOneObject  */     \
             INFOLEVEL_QUIET,        /* ulInfoLevel   */     \
             FALSE,                  /* fElf          */     \
             TRUE,                   /* fUNIXScript   */     \
@@ -82,6 +88,9 @@
 #define isPELoaderDisabled()        (options.fPE == FLAGS_PE_NOT)
 #define isPe2LxLoaderEnabled()      (options.fPE == FLAGS_PE_PE2LX)
 #define isMixedPeLoaderEnabled()    (options.fPE == FLAGS_PE_MIXED)
+#define isPEOneObjectEnabled()      (options.fPEOneObject == FLAGS_PEOO_ENABLED)
+#define isPEOneObjectDisabled()     (options.fPEOneObject == FLAGS_PEOO_DISABLED)
+#define isPEOneObjectForced()       (options.fPEOneObject == FLAGS_PEOO_FORCED)
 
 #define isELFDisabled()             (!options.fElf)
 #define isELFEnabled()              (options.fElf)
@@ -128,6 +137,7 @@ struct options
 
     /** @cat Options affecting the generated LX executables */
     ULONG       fPE;                    /* Flags set the type of conversion. */
+    ULONG       fPEOneObject;           /* All in one object. */
     ULONG       ulInfoLevel;            /* Pe2Lx InfoLevel. */
 
     /** @cat Options affecting the generated ELF executables */
@@ -164,9 +174,11 @@ struct options
 /* NOINC */
 extern struct options DATA16_GLOBAL options;    /* defined in d16globals.c */
 extern char   szWin32kIni[160];                 /* defined in d16globals.c */
+#ifdef RING0
 #if defined(__IBMC__) || defined(__IBMCPP__)
     #pragma map( options , "_options"  )
     #pragma map( szWin32kIni, "_szWin32kIni" )
+#endif
 #endif
 /* INC */
 

@@ -1,4 +1,4 @@
-/* $Id: k32SetOptions.cpp,v 1.4 2000-12-11 06:22:15 bird Exp $
+/* $Id: k32SetOptions.cpp,v 1.5 2001-02-02 08:38:34 bird Exp $
  *
  * k32SetOptions - Sets the changable options of win32k.sys the options.
  *
@@ -111,6 +111,8 @@ APIRET k32SetOptions(PK32OPTIONS pOptions)
             return ERROR_INVALID_PARAMETER;
         if (TmpOptions.fPE > 4)
             return ERROR_INVALID_PARAMETER;
+        if (TmpOptions.fPEOneObject > 2)
+            return ERROR_INVALID_PARAMETER;
         if (TmpOptions.ulInfoLevel > 4)
             return ERROR_INVALID_PARAMETER;
         if (TmpOptions.fElf > 1)
@@ -149,6 +151,7 @@ APIRET k32SetOptions(PK32OPTIONS pOptions)
         options.usCom       = TmpOptions.usCom;         /* Output port no. */
         options.fLogging    = (USHORT)TmpOptions.fLogging;/* Logging. */
         options.fPE         = TmpOptions.fPE;           /* Flags set the type of conversion. */
+        options.fPEOneObject= TmpOptions.fPEOneObject;  /* All in One Object Forces fix. */
         options.ulInfoLevel = TmpOptions.ulInfoLevel;   /* Pe2Lx InfoLevel. */
         options.fElf        = TmpOptions.fElf;          /* Elf flags. */
         options.fUNIXScript = TmpOptions.fUNIXScript;   /* UNIX script flags. */

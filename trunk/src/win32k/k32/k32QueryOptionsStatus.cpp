@@ -1,4 +1,4 @@
-/* $Id: k32QueryOptionsStatus.cpp,v 1.4 2000-12-11 06:22:15 bird Exp $
+/* $Id: k32QueryOptionsStatus.cpp,v 1.5 2001-02-02 08:38:34 bird Exp $
  *
  * k32QueryOptionsStatus  - Queries the options and/or the status of
  *                          Win32k.sys driver.
@@ -128,6 +128,7 @@ APIRET k32QueryOptionsStatus(PK32OPTIONS pOptions, PK32STATUS pStatus)
         TmpOptions.usCom        = options.usCom;
         TmpOptions.fLogging     = options.fLogging;
         TmpOptions.fPE          = options.fPE;
+        TmpOptions.fPEOneObject = options.fPEOneObject;
         TmpOptions.ulInfoLevel  = options.ulInfoLevel;
         TmpOptions.fElf         = options.fElf;
         TmpOptions.fUNIXScript  = options.fUNIXScript;
