@@ -1,14 +1,14 @@
-/* $Id: Odin.ini.txt,v 1.1 2000-07-09 22:27:53 phaller Exp $ */
+/* $Id: Odin.ini.txt,v 1.2 2001-02-28 20:31:04 sandervl Exp $ */
 
 Odin initialization file documentation
 
 [COLORS]
 UseWinColors	Use Windows colors
 		values: 1/0
-		default: 0
+		default: 1
 SaveColors	Save/restore colors to/from Odin.ini
 		values: 1/0
-		default: 1
+		default: 0
 
 [DLLRENAMEWIN]
 OLE32=OLE32OS2
@@ -17,6 +17,11 @@ NETAPI32=WNETAP32
 [DLLRENAMEOS2]
 OLE32OS2=OLE32
 WNETAP32=NETAPI32
+
+[ODINSYSTEM]
+HIGHMEM=0      (default = 1)
+Turns off high memory usage in Odin. Useful for Warp 4 (>fp12) systems
+that still use the old 16 bits TCPIP stack.
 
 [TWAIN]
 TwainIF    	values 1,2,3 (default=1)
