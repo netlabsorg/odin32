@@ -287,7 +287,7 @@ extern unsigned long int WIN32API GetCurrentThreadId(); //kernel32
     ODIN_##cName(a1,a2,a3,a4); \
     dprintf(("%s: void "#cName"() leave\n",   \
              pszOdinDebugChannel));           \
-    FNEPILOGUE       \
+  FNEPILOGUE(#cName)       \
   }                               \
                                   \
   void ODIN_INTERNAL ODIN_##cName (t1 a1,t2 a2,t3 a3,t4 a4)
