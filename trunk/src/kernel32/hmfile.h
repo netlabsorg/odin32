@@ -1,4 +1,4 @@
-/* $Id: hmfile.h,v 1.3 2000-08-04 21:12:07 sandervl Exp $ */
+/* $Id: hmfile.h,v 1.4 2000-11-23 19:23:50 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -164,6 +164,9 @@ public:
                                    LPOVERLAPPED  arg2,
                                    LPDWORD       arg3,
                                    BOOL          arg4);
+
+private:
+  void ParsePath(LPCSTR lpszFileName, LPSTR lpszParsedFileName, DWORD length);
 
 };
 
