@@ -1,4 +1,4 @@
-# $Id: setup.tools.mk,v 1.11 2002-08-22 03:21:10 bird Exp $
+# $Id: setup.tools.mk,v 1.12 2002-08-24 04:43:53 bird Exp $
 
 
 #
@@ -26,11 +26,12 @@ CLRRST=
 #
 # Standard tools - may be overridden by compiler specific setupfiles.
 #
-TOOL_ECHO       = @echo $(CLRTXT)
+TOOL_ECHO       = echo
+TOOL_ECHOTXT    = echo $(CLRTXT)
 !ifdef MAKEVER
 ECHO            = %echo $(CLRTXT)
 !else
-ECHO            = $(TOOL_ECHO)
+ECHO            = $(TOOL_ECHOTXT)
 !endif
 TOOL_BLDLEVEL   = $(PATH_TOOLS)\BldLevelInf.cmd
 TOOL_BUILDENV   = $(PATH_TOOLS)\BuildEnv.cmd
@@ -50,6 +51,7 @@ TOOL_DODIRS     = $(PATH_TOOLS)\dodirs.cmd
 TOOL_DOMAKES    = $(PATH_TOOLS)\domakes.cmd
 TOOL_DOWITHDIRS = $(PATH_TOOLS)\dowithdirs.cmd
 TOOL_EXISTS     = $(PATH_TOOLS)\Exists.cmd
+TOOL_IDEFCONV   = $(PATH_TOOLS)\ImpDef.exe
 !if "$(BUILD_MULTIJOBS)" != ""
 TOOL_JOB_SUB    = $(TOOL_CMDQD) submit
 TOOL_JOB_WAIT   = $(TOOL_CMDQD) wait
@@ -60,7 +62,7 @@ TOOL_JOB_SUB_MSG= (submitting job)
 !endif
 TOOL_MAKE       = $(MAKE:.exe=).exe -nologo
 TOOL_MAPSYM     = $(PATH_TOOLS)\MapSym.cmd $(BUILD_ENV)
-TOOL_RM         = rm.exe -f
+TOOL_RM         = $(PATH_TOOLS)\rm.exe -fF
 TOOL_RMDIR      = rmdir
 TOOL_TYPE       = type
 
