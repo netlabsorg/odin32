@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.21 1999-11-11 13:17:29 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.22 1999-11-12 11:38:45 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -1411,7 +1411,7 @@ HWND WIN32API WindowFromDC(HDC hdc)
 {
    pDCData pHps = (pDCData)GpiQueryDCData( (HPS)hdc );
 
-   dprintf(("USER32:  WindowFromDC %x", hdc));
+   dprintf2(("USER32:  WindowFromDC %x", hdc));
    if ( pHps )
       return Win32BaseWindow::OS2ToWin32Handle(pHps->hwnd);
    else

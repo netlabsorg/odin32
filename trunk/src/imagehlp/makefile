@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 1999-11-03 23:28:04 sandervl Exp $
+# $Id: makefile,v 1.4 1999-11-12 11:38:39 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -42,7 +42,7 @@ imagehlp.obj: imagehlp.cpp
 internal.obj: internal.cpp
 
 clean:
-	$(RM) *.obj *.lib *.dll *~ *.map *.pch
+	$(RM) *.obj *.lib *.dll *.map *.pch
 	$(RM) $(PDWIN32_BIN)\$(TARGET).dll
 	$(RM) $(PDWIN32_LIB)\$(TARGET).lib
 

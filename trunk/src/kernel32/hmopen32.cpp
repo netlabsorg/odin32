@@ -1,4 +1,4 @@
-/* $Id: hmopen32.cpp,v 1.9 1999-08-25 14:27:06 sandervl Exp $ */
+/* $Id: hmopen32.cpp,v 1.10 1999-11-12 11:38:39 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -96,6 +96,7 @@ BOOL HMDeviceOpen32Class::DuplicateHandle(PHMHANDLEDATA pHMHandleData, HANDLE  s
            pHMHandleData,
            srcprocess, pHMSrcHandle->hHMHandle, destprocess, desthandle));
 
+#if 1
   rc = O32_DuplicateHandle(srcprocess, pHMSrcHandle->hHMHandle, destprocess, desthandle, fdwAccess, fInherit, fdwOptions);
 
   if(rc == TRUE) {
@@ -103,6 +104,20 @@ BOOL HMDeviceOpen32Class::DuplicateHandle(PHMHANDLEDATA pHMHandleData, HANDLE  s
      	return (NO_ERROR);
   }
   else  return(O32_GetLastError());
+#else
+  rc = OSLibDosDupHandle(pHMSrcHandle->hHMHandle, desthandle);
+  if(rc == NO_ERROR)
+  {
+    pHMHandleData->hHMHandle = *desthandle;
+    return (NO_ERROR);
+  }
+  else
+  {
+    dprintfl(("KERNEL32: HandleManager::Open32::DuplicateHandle Error %d\n",rc));
+    O32_SetLastError(rc);
+    return(rc);
+  }
+#endif
 }
 
 /*****************************************************************************
@@ -148,6 +163,7 @@ DWORD HMDeviceOpen32Class::CreateFile (LPCSTR        lpFileName,
   else
      hTemplate = 0;
 
+#if 1
   hFile = O32_CreateFile(lpFileName,
                          pHMHandleData->dwAccess,
                          pHMHandleData->dwShare,
@@ -163,6 +179,28 @@ DWORD HMDeviceOpen32Class::CreateFile (LPCSTR        lpFileName,
   }
   else
     return(O32_GetLastError());
+#else
+
+  rc = OSLibDosCreate((char *)lpFileName,
+                       pHMHandleData->dwAccess,
+                       pHMHandleData->dwShare,
+                       //(LPSECURITY_ATTRIBUTES)lpSecurityAttributes,
+                       NULL,
+                       pHMHandleData->dwCreation,
+                       pHMHandleData->dwFlags,
+                       hTemplate, &hFile);
+  if(rc)
+  {
+    dprintfl(("KERNEL32: HandleManager::Open32::CreateFile Error %d\n",rc));
+    O32_SetLastError(rc);
+    return(rc);
+  }
+  else
+  {
+    pHMHandleData->hHMHandle = hFile;
+    return (NO_ERROR);
+  }
+#endif
 }
 
 
@@ -185,12 +223,27 @@ DWORD HMDeviceOpen32Class::CloseHandle(PHMHANDLEDATA pHMHandleData)
   dprintfl(("KERNEL32: HandleManager::Open32::CloseHandle(%08x)\n",
            pHMHandleData->hHMHandle));
 
+#if 1
   bRC = O32_CloseHandle(pHMHandleData->hHMHandle);
 
   dprintfl(("KERNEL32: HandleManager::Open32::CloseHandle returned %08xh\n",
            bRC));
 
   return (DWORD)bRC;
+#else
+  bRC = OSLibDosClose(pHMHandleData->hHMHandle);
+  if(bRC)
+  {
+    dprintfl(("KERNEL32: HandleManager::Open32::CloseHandle Error %d\n",bRC));
+    O32_SetLastError(bRC);
+    return TRUE;      // MUTEX Problem
+    return FALSE;
+  }
+  else
+  {
+    return TRUE;
+  }
+#endif
 }
 
 
@@ -226,6 +279,7 @@ DWORD HMDeviceOpen32Class::ReadFile(PHMHANDLEDATA pHMHandleData,
            lpNumberOfBytesRead,
            lpOverlapped));
 
+#if 1
   bRC = O32_ReadFile(pHMHandleData->hHMHandle,
                      (PVOID)lpBuffer,
                      nNumberOfBytesToRead,
@@ -236,6 +290,22 @@ DWORD HMDeviceOpen32Class::ReadFile(PHMHANDLEDATA pHMHandleData,
            bRC));
 
   return (DWORD)bRC;
+#else
+  rc = OSLibDosRead(pHMHandleData->hHMHandle,
+                    (PVOID) lpBuffer,
+                    nNumberOfBytesToRead,
+                    lpNumberOfBytesRead);
+  if(rc)
+  {
+    dprintfl(("KERNEL32: HandleManager::Open32::ReadFile Error %d\n",rc));
+    O32_SetLastError(rc);
+    return FALSE;
+  }
+  else
+  {
+    return TRUE;
+  }
+#endif
 }
 
 
@@ -271,6 +341,7 @@ DWORD HMDeviceOpen32Class::WriteFile(PHMHANDLEDATA pHMHandleData,
            lpNumberOfBytesWritten,
            lpOverlapped));
 
+#if 1
   bRC = O32_WriteFile(pHMHandleData->hHMHandle,
                       lpBuffer,
                       nNumberOfBytesToWrite,
@@ -281,6 +352,22 @@ DWORD HMDeviceOpen32Class::WriteFile(PHMHANDLEDATA pHMHandleData,
            bRC));
 
   return (DWORD)bRC;
+#else
+  rc = OSLibDosWrite(pHMHandleData->hHMHandle,
+                     (PVOID) lpBuffer,
+                     nNumberOfBytesToWrite,
+                     lpNumberOfBytesWritten);
+  if(rc)
+  {
+    dprintfl(("KERNEL32: HandleManager::Open32::WriteFile Error %d\n",rc));
+    O32_SetLastError(rc);
+    return FALSE;
+  }
+  else
+  {
+    return TRUE;
+  }
+#endif
 }
 
 
@@ -302,7 +389,12 @@ DWORD HMDeviceOpen32Class::GetFileType(PHMHANDLEDATA pHMHandleData)
            lpHMDeviceName,
            pHMHandleData));
 
+#if 1
   return O32_GetFileType(pHMHandleData->hHMHandle);
+#else
+  // TODO: FILE_TYPE_DISK
+  return FILE_TYPE_CHAR;
+#endif
 }
 
 
@@ -409,8 +501,15 @@ DWORD HMDeviceOpen32Class::GetFileSize(PHMHANDLEDATA pHMHandleData,
            pHMHandleData,
            pSize));
 
+#if 1
   return O32_GetFileSize(pHMHandleData->hHMHandle,
                          pSize);
+#else
+  size = OSLibDosGetFileSize(pHMHandleData->hHMHandle);
+  if(pSize)
+    *pSize = size;
+  return size;
+#endif
 }
 
 
@@ -441,10 +540,18 @@ DWORD HMDeviceOpen32Class::SetFilePointer(PHMHANDLEDATA pHMHandleData,
            lpDistanceToMoveHigh,
            dwMoveMethod));
 
+#if 1
   return O32_SetFilePointer(pHMHandleData->hHMHandle,
                             lDistanceToMove,
                             lpDistanceToMoveHigh,
                             dwMoveMethod);
+#else
+
+  if(lpDistanceToMoveHigh)
+    *lpDistanceToMoveHigh = 0;
+  pos = OSLibDosSetFilePtr2(pHMHandleData->hHMHandle, lDistanceToMove, dwMoveMethod);
+  return pos;
+#endif
 }
 
 

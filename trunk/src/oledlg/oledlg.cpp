@@ -1,4 +1,4 @@
-/* $Id: oledlg.cpp,v 1.2 1999-09-23 09:38:05 sandervl Exp $ */
+/* $Id: oledlg.cpp,v 1.3 1999-11-12 11:38:43 sandervl Exp $ */
 /*
  *	OLEDLG library
  *
@@ -23,10 +23,10 @@
 // ><DJR 17.05.99 Prevent CALLCONV becoming _System
 #include <win/wtypes.h>
 #include <winbase.h>
-//#include <uconv.h>
 #undef CALLCONV
 
 #include <os2win.h>
+#include <odinwrap.h>
 #include <ole.h>
 #include <winreg.h>
 
@@ -49,11 +49,11 @@
 #include "winerror.h"
 #include "winbase.h"
 #include "wine/obj_base.h"
-#include "debugtools.h"
-#include <debugdefs.h>
+// #include "debugtools.h"
+// #include <debugdefs.h>
 
 
-DEFAULT_DEBUG_CHANNEL(ole)
+ODINDEBUGCHANNEL(oledlg)
 
 /***********************************************************************
  *           OleUIAddVerbMenuA (OLEDLG.1)

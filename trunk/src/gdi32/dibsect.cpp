@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.7 1999-11-10 14:15:23 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.8 1999-11-12 11:38:38 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -18,6 +18,23 @@
 #include "misc.h"
 #define  OS2_ONLY
 #include "dibsect.h"
+
+HWND WIN32API WindowFromDC(HDC hdc);
+HWND Win32ToOS2Handle(HWND hwnd);
+
+BOOL    APIENTRY _GpiEnableYInversion (HPS hps, LONG lHeight);
+
+inline BOOL APIENTRY GpiEnableYInversion (HPS hps, LONG lHeight)
+{
+ BOOL yyrc;
+ USHORT sel = RestoreOS2FS();
+
+    yyrc = _GpiEnableYInversion(hps, lHeight);
+    SetFS(sel);
+
+    return yyrc;
+}
+
 
 //NOTE:
 //This is not a complete solution for CreateDIBSection, but enough for Quake 2!
@@ -146,17 +163,15 @@ int DIBSection::SetDIBColorTable(int startIdx, int cEntries, RGBQUAD *rgb)
 }
 //******************************************************************************
 //******************************************************************************
-#if 1
 BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nWidth,
                         int nHeight, int nXsrc, int nYsrc, DWORD Rop)
 {
- HWND   hwndDest = WinWindowFromDC(hdcDest);
  HPS    hps = (HPS)hdcDest;
  POINTL point[4];
  LONG   rc;
 
-  dprintf(("DIBSection::BitBlt %X %x (%d,%d) to (%d,%d) (%d,%d) rop %x\n", hdcDest, hwndDest, nXdest, nYdest, nWidth, nHeight, nXsrc, nYsrc, Rop));
-
+  HWND hwndDest = WindowFromDC(hdcDest);
+  hwndDest = Win32ToOS2Handle(hwndDest);
   if(hwndDest != 0) {
          hps = WinGetPS(hwndDest);
   }
@@ -164,6 +179,8 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nWidth,
         eprintf(("DIBSection::BitBlt, hps == 0 hwndDest = %X", hwndDest));
         return(FALSE);
   }
+
+  dprintf(("DIBSection::BitBlt %X %x (%d,%d) to (%d,%d) (%d,%d) rop %x\n", hdcDest, hwndDest, nXdest, nYdest, nWidth, nHeight, nXsrc, nYsrc, Rop));
 
   point[0].x = nXdest;
   point[0].y = nYdest;
@@ -181,12 +198,9 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nWidth,
   }
   else  point[3].y = nYsrc + nHeight;
 
-#if 0
+#if 1
   if(fFlip & FLIP_VERT) {
-    ULONG y;
-        y = point[0].y;
-        point[0].y = point[1].y;
-        point[1].y = y;
+	GpiEnableYInversion(hps, nHeight);
   }
 
   if(fFlip & FLIP_HOR) {
@@ -208,46 +222,6 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nWidth,
   dprintf(("WinGetLastError returned %X\n", WinGetLastError(WinQueryAnchorBlock(hwndDest)) & 0xFFFF));
   return(FALSE);
 }
-#else
-BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nWidth,
-                        int nHeight, int nXsrc, int nYsrc, DWORD Rop)
-{
- HPS    hps = (HPS)hdcDest;
- POINTL point[4];
- LONG   rc;
-
-  if(hps == 0) {
-        eprintf(("DIBSection::BitBlt, hps == 0"));
-        return(FALSE);
-  }
-
-//  dprintf(("DIBSection::BitBlt (%d,%d) to (%d,%d) (%d,%d)\n", nXsrc, nYsrc, nXdest, nYdest, nXdest+ nWidth, nYdest + nHeight));
-  point[0].x = nXdest;
-  point[0].y = nYdest;
-  point[1].x = nXdest + nWidth - 1;
-  point[1].y = nYdest + nHeight - 1;
-  point[2].x = nXsrc;
-  point[2].y = nYsrc;
-  if(nXsrc + nWidth > pOS2bmp->cx) {
-        point[3].x = pOS2bmp->cx;
-  }
-  else  point[3].x = nXsrc + nWidth;
-
-  if(nYsrc + nHeight > pOS2bmp->cy) {
-        point[3].y = pOS2bmp->cy;
-  }
-  else  point[3].y = nYsrc + nHeight;
-
-  rc = GpiDrawBits(hps, bmpBits, pOS2bmp, 4, &point[0], ROP_SRCCOPY, BBO_OR);
-//  dprintf(("DIBSection::BitBlt %X (%d,%d) (%d,%d) to (%d,%d) (%d,%d) returned %d\n", hps, point[0].x, point[0].y, point[1].x, point[1].y, point[2].x, point[2].y, point[3].x, point[3].y, rc));
-
-  if(rc == GPI_OK)
-        return(TRUE);
-  dprintf(("DIBSection::BitBlt %X (%d,%d) (%d,%d) to (%d,%d) (%d,%d) returned %d\n", hps, point[0].x, point[0].y, point[1].x, point[1].y, point[2].x, point[2].y, point[3].x, point[3].y, rc));
-  dprintf(("WinGetLastError returned %X\n", WinGetLastError(WinQueryAnchorBlock(hwndParent)) & 0xFFFF));
-  return(FALSE);
-}
-#endif
 //******************************************************************************
 //******************************************************************************
 void DIBSection::SelectDIBObject(HDC hdc)
