@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.126 2001-09-22 18:21:00 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.127 2001-09-30 22:24:42 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -19,6 +19,7 @@
 #include "open32wbase.h"
 #include <gen_object.h>
 #include <win32wndchild.h>
+#include <winuser32.h>
 #include <winres.h>
 #include <scroll.h>
 
@@ -279,7 +280,18 @@ virtual  BOOL   DestroyWindow();
 
          void   SetVisibleRegionChanged(BOOL changed) { fVisibleRegionChanged = changed; };
          BOOL   IsVisibleRegionChanged()              { return fVisibleRegionChanged; };
-
+         BOOL   setVisibleRgnNotifyProc(VISRGN_NOTIFY_PROC lpNotifyProc, DWORD dwUserData)
+         {
+             lpVisRgnNotifyProc  = lpNotifyProc;
+             dwVisRgnNotifyParam = dwUserData;
+             return TRUE;
+         }
+         void   callVisibleRgnNotifyProc(BOOL fDrawingAllowed) 
+         {
+             if(lpVisRgnNotifyProc) {
+                 lpVisRgnNotifyProc(getWindowHandle(), fDrawingAllowed, dwVisRgnNotifyParam);
+             }
+         }
          int    GetWindowTextLength(BOOL fUnicode);
          int    GetWindowTextLengthA() { return GetWindowTextLength(FALSE); };
          int    GetWindowTextLengthW() { return GetWindowTextLength(TRUE);  };
@@ -429,6 +441,9 @@ protected:
 WINDOWPLACEMENT windowpos;
 
     PROPERTY   *propertyList;
+
+VISRGN_NOTIFY_PROC lpVisRgnNotifyProc;
+        DWORD   dwVisRgnNotifyParam;
        
         HANDLE  hTaskList; //PM specific (switchentry handle)
 

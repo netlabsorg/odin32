@@ -1,4 +1,4 @@
-/* $Id: dcrgn.cpp,v 1.6 2001-06-09 14:50:17 sandervl Exp $ */
+/* $Id: dcrgn.cpp,v 1.7 2001-09-30 22:24:41 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -242,6 +242,34 @@ int WIN32API SetWindowRgn(HWND hwnd,
 //  When this function is called, the system sends the WM_WINDOWPOSCHANGING and
 //  WM_WINDOWPOSCHANGED messages to the window.
     return 1;
+}
+//******************************************************************************
+// WinSetVisibleRgnNotifyProc
+//   To set a notification procedure for visible region changes of a specific window.
+//   The procedure will be called when a WM_VRNENABLED message is posted
+//   with ffVisRgnChanged set to TRUE
+//
+// Parameters:
+//   HWND hwnd				window handle
+//   VISRGN_NOTIFY_PROC lpNotifyProc	notification proc or NULL to clear proc
+//   DWORD dwUserData			value used as 3rd parameter during
+//                                      visible region callback
+//
+// NOTE: Internal API
+//******************************************************************************
+BOOL WIN32API WinSetVisibleRgnNotifyProc(HWND hwnd, VISRGN_NOTIFY_PROC lpNotifyProc, 
+                                         DWORD dwUserData)
+{
+  Win32BaseWindow *window;
+
+    window = Win32BaseWindow::GetWindowFromHandle(hwnd);
+    if(!window) {
+        dprintf(("WinSetVisibleRgnNotifyProc, window %x not found", hwnd));
+        return FALSE;
+    }
+    BOOL ret = window->setVisibleRgnNotifyProc(lpNotifyProc, dwUserData);
+    RELEASE_WNDOBJ(window);
+    return ret;
 }
 //******************************************************************************
 //******************************************************************************
