@@ -1,4 +1,4 @@
-/* $Id: HOOK.CPP,v 1.20 2001-06-09 14:50:15 sandervl Exp $ */
+/* $Id: HOOK.CPP,v 1.21 2001-06-12 17:02:33 sandervl Exp $ */
 
 /*
  * Windows hook functions
@@ -85,12 +85,27 @@ static HMTX hGlobalHookMutex = 0;
 
 //Global DLL Data
 //SvL: Disabled global system hooks for now
-////#pragma data_seg(_GLOBALDATA)
+//#define GLOBAL_HOOKS
+#ifdef GLOBAL_HOOKS
+#pragma data_seg(_GLOBALDATA)
+#endif
 static HANDLE HOOK_systemHooks[WH_NB_HOOKS] = { 0 };
+#ifdef GLOBAL_HOOKS
 static VMutex systemHookMutex(VMUTEX_SHARED, &hGlobalHookMutex);
-////#pragma data_seg()
+#pragma data_seg()
+#else
+static CRITICAL_SECTION systemCritSect = {0};
+#endif
 static HANDLE HOOK_threadHooks[WH_NB_HOOKS] = { 0 };
-static VMutex threadHookMutex;
+static CRITICAL_SECTION threadCritSect = {0};
+
+#ifdef GLOBAL_HOOKS
+#define SYSTEMHOOK_LOCK()	systemHookMutex.enter(VMUTEX_WAIT_FOREVER, &hGlobalHookMutex);
+#define SYSTEMHOOK_UNLOCK()	systemHookMutex.leave(&hGlobalHookMutex);
+#else
+#define SYSTEMHOOK_LOCK()	EnterCriticalSection(&systemCritSect);
+#define SYSTEMHOOK_UNLOCK()	LeaveCriticalSection(&systemCritSect);
+#endif
 
 typedef VOID (*HOOK_MapFunc)(INT, INT, WPARAM *, LPARAM *);
 typedef VOID (*HOOK_UnMapFunc)(INT, INT, WPARAM, LPARAM, WPARAM,
@@ -323,17 +338,17 @@ static HHOOK HOOK_SetHook( INT id, LPVOID proc, INT type,
                 dprintf(("HOOK_SetHook: can't find thread database for thread %x", dwThreadId));
                 return 0;
         }
-        threadHookMutex.enter();
+        EnterCriticalSection(&threadCritSect);
         data->next = teb->o.odin.hooks[id - WH_MINHOOK];
         teb->o.odin.hooks[id - WH_MINHOOK] = (DWORD)data;
-        threadHookMutex.leave();
+        LeaveCriticalSection(&threadCritSect);
     }
     else
     {
-        systemHookMutex.enter(VMUTEX_WAIT_FOREVER, &hGlobalHookMutex);
+	SYSTEMHOOK_LOCK();
         data->next = HOOK_systemHooks[id - WH_MINHOOK];
         HOOK_systemHooks[id - WH_MINHOOK] = (HANDLE)data;
-        systemHookMutex.leave(&hGlobalHookMutex);
+	SYSTEMHOOK_UNLOCK();
     }
 
     return (HHOOK)data;
@@ -373,11 +388,11 @@ static BOOL HOOK_RemoveHook( HOOKDATA *data )
                 dprintf(("HOOK_RemoveHook: can't find thread database for thread %x", data->ownerThread));
                 return FALSE;
         }
-        threadHookMutex.enter();
+        EnterCriticalSection(&threadCritSect);
         prevHook = (HOOKDATA **)&teb->o.odin.hooks[data->id - WH_MINHOOK];
     }
     else {
-        systemHookMutex.enter(VMUTEX_WAIT_FOREVER, &hGlobalHookMutex);
+       	SYSTEMHOOK_LOCK();
         prevHook = (HOOKDATA **)&HOOK_systemHooks[data->id - WH_MINHOOK];
     }
     while (*prevHook && *prevHook != data)
@@ -385,18 +400,18 @@ static BOOL HOOK_RemoveHook( HOOKDATA *data )
 
     if (!prevHook) {
 	if (data->ownerThread) {
-        	threadHookMutex.leave();
+        	LeaveCriticalSection(&threadCritSect);
         }
-	else    systemHookMutex.leave(&hGlobalHookMutex);
+	else   	SYSTEMHOOK_UNLOCK();
 
         return FALSE;
     }
     *prevHook = (HOOKDATA *)data->next;
 
     if (data->ownerThread) {
-       	 threadHookMutex.leave();
+       	 LeaveCriticalSection(&threadCritSect);
     }
-    else systemHookMutex.leave(&hGlobalHookMutex);
+    else SYSTEMHOOK_UNLOCK();
 
     HeapFree(GetProcessHeap(), 0, (LPVOID)data );
     return TRUE;

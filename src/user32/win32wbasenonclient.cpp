@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.32 2001-06-10 12:05:41 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.33 2001-06-12 17:02:42 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -1029,7 +1029,6 @@ VOID Win32BaseWindow::DoNCPaint(HRGN clip,BOOL suppress_menupaint)
     */
 
     dprintf(("DoNCPaint %x %x %d", getWindowHandle(), clip, suppress_menupaint));
-    DecreaseLogCount();
 
     rect.top    = rect.left = 0;
     rect.right  = rectWindow.right - rectWindow.left;
@@ -1060,6 +1059,7 @@ VOID Win32BaseWindow::DoNCPaint(HRGN clip,BOOL suppress_menupaint)
     if (!(hdc = GetDCEx( Win32Hwnd, (clip > 1) ? clip : 0, DCX_USESTYLE | DCX_WINDOW |
                          ((clip > 1) ?(DCX_INTERSECTRGN /*| DCX_KEEPCLIPRGN*/) : 0) ))) return;
 
+    DecreaseLogCount();
     SelectObject( hdc, GetSysColorPen(COLOR_WINDOWFRAME) );
 
     if (HAS_BIGFRAME( dwStyle, dwExStyle))
@@ -1158,8 +1158,8 @@ VOID Win32BaseWindow::DoNCPaint(HRGN clip,BOOL suppress_menupaint)
         }
     }
 
-    ReleaseDC(getWindowHandle(),hdc);
     IncreaseLogCount();
+    ReleaseDC(getWindowHandle(),hdc);
     dprintf(("**DoNCPaint %x DONE", getWindowHandle()));
 }
 //******************************************************************************
