@@ -143,7 +143,7 @@ DWORD WIN32API UnhookWinEvent(DWORD arg1);
 DWORD WIN32API SetWinEventHook(DWORD arg1, DWORD arg2, DWORD arg3, DWORD arg4, DWORD arg5, DWORD arg6, DWORD arg7);
 BOOL WIN32API SysErrorBox(DWORD x1, DWORD x2, DWORD x3);
 BOOL WIN32API EndTask(DWORD x1, DWORD x2, DWORD x3);
-LRESULT WINAPI EditWndProc( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam );
+LRESULT WINAPI EditWndProcA( HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam );
 
 
 DEBUGWRAP12(AttachThreadInput)
@@ -168,7 +168,7 @@ DEBUGWRAP20(CascadeWindows)
 
 DEBUGWRAP12(DragDetect)
 DEBUGWRAP20(DragObject)
-DEBUGWRAP16(EditWndProc)
+DEBUGWRAP16(EditWndProcA)
 DEBUGWRAP12(EndTask)
 DEBUGWRAP12(EnumDesktopWindows)
 DEBUGWRAP12(EnumDesktopsA)

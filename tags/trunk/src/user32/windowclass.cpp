@@ -1,4 +1,4 @@
-/* $Id: windowclass.cpp,v 1.25 2002-02-11 16:06:00 sandervl Exp $ */
+/* $Id: windowclass.cpp,v 1.26 2002-12-18 12:28:08 sandervl Exp $ */
 /*
  * Win32 Window Class Code for OS/2
  *
@@ -79,7 +79,7 @@ ATOM WIN32API RegisterClassA(CONST WNDCLASSA *lpWndClass)
         wc.hIconSm = CopyImage(wc.hIcon, IMAGE_ICON, iSmIconWidth, iSmIconHeight,
                                LR_COPYFROMRESOURCE);
 
-    wclass = new Win32WndClass(&wc,FALSE);
+    wclass = new Win32WndClass(&wc, WNDCLASS_ASCII);
     if(wclass == NULL) {
         dprintf(("ERROR: RegisterClassA winclass == NULL!"));
         DebugInt3();
@@ -108,12 +108,57 @@ ATOM WIN32API RegisterClassExA(CONST WNDCLASSEXA *lpWndClass)
     }
 
     dprintf(("RegisterClassExA"));
-    wclass = new Win32WndClass((WNDCLASSEXA *)lpWndClass,FALSE);
+    wclass = new Win32WndClass((WNDCLASSEXA *)lpWndClass, WNDCLASS_ASCII);
     if(wclass == NULL) {
         dprintf(("ERROR: RegisterClassExA winclass == NULL!"));
         DebugInt3();
         return(0);
     }
+    ATOM atom = wclass->getAtom();
+    RELEASE_CLASSOBJ(wclass);
+    return atom;
+}
+//******************************************************************************
+//Used for user32 control class registration only
+//******************************************************************************
+ATOM WIN32API InternalRegisterClass(LPSTR lpszClassName, DWORD dwStyle,
+                                    WNDPROC pfnClassA, WNDPROC pfnClassW,
+                                    UINT cbExtraWindowWords, LPCSTR lpszCursor,
+                                    HBRUSH hBrush)
+{
+    WNDCLASSEXA wc;
+    Win32WndClass *wclass;
+
+    wclass = Win32WndClass::FindClass(0, lpszClassName);
+    if(wclass) {
+        RELEASE_CLASSOBJ(wclass);
+        DebugInt3(); //this must never happen
+        dprintf(("ERROR: InternalRegisterClass %s already exists", lpszClassName));
+        SetLastError(ERROR_CLASS_ALREADY_EXISTS);
+        return 0;
+    }
+
+    dprintf(("InternalRegisterClass %s %x %x %x %d %x %x", lpszClassName, dwStyle, pfnClassA, pfnClassW, cbExtraWindowWords, lpszCursor, hBrush));
+    wc.cbSize        = sizeof(wc);
+    wc.style         = dwStyle;
+    wc.lpfnWndProc   = pfnClassA;
+    wc.cbClsExtra    = 0;
+    wc.cbWndExtra    = cbExtraWindowWords;
+    wc.hInstance     = NULL;
+    wc.hIcon         = 0;
+    wc.hCursor       = LoadCursorA(0, lpszCursor);
+    wc.hbrBackground = hBrush;
+    wc.lpszMenuName  = NULL;
+    wc.lpszClassName = lpszClassName;
+    wc.hIconSm       = 0;
+
+    wclass = new Win32WndClass(&wc, WNDCLASS_ASCII);
+    if(wclass == NULL) {
+        dprintf(("ERROR: InternalRegisterClass winclass == NULL!"));
+        DebugInt3();
+        return(0);
+    }
+    wclass->setWindowProc(pfnClassW, WNDPROC_UNICODE);
     ATOM atom = wclass->getAtom();
     RELEASE_CLASSOBJ(wclass);
     return atom;
@@ -153,7 +198,7 @@ ATOM WIN32API RegisterClassW(CONST WNDCLASSW * lpwc)
                                LR_COPYFROMRESOURCE);
 
     dprintf(("RegisterClassW"));
-    winclass = new Win32WndClass((WNDCLASSEXA *)&wc, TRUE);
+    winclass = new Win32WndClass((WNDCLASSEXA *)&wc, WNDCLASS_UNICODE);
     if(winclass == NULL) {
         dprintf(("ERROR: RegisterClassW winclass == NULL!"));
         DebugInt3();
@@ -186,7 +231,7 @@ ATOM WIN32API RegisterClassExW(CONST WNDCLASSEXW *lpwc)
     }
 
     dprintf(("RegisterClassExW"));
-    winclass = new Win32WndClass((WNDCLASSEXA *)&wc, TRUE);
+    winclass = new Win32WndClass((WNDCLASSEXA *)&wc, WNDCLASS_UNICODE);
     if(winclass == NULL) {
         dprintf(("ERROR: RegisterClassExW winclass == NULL!"));
         DebugInt3();

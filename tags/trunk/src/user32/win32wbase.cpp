@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.345 2002-12-05 09:25:06 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.346 2002-12-18 12:28:07 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -114,7 +114,7 @@ Win32BaseWindow::Win32BaseWindow(HWND hwndOS2, ATOM classAtom)
         memset(userWindowBytes, 0, nrUserWindowBytes);
     }
 
-    WINPROC_SetProc((HWINDOWPROC *)&win32wndproc, windowClass->getWindowProc(), WINPROC_GetProcType(windowClass->getWindowProc()), WIN_PROC_WINDOW);
+    WINPROC_SetProc((HWINDOWPROC *)&win32wndproc, windowClass->getWindowProc((isUnicode) ? WNDPROC_UNICODE : WNDPROC_ASCII), WINPROC_GetProcType(windowClass->getWindowProc((isUnicode) ? WNDPROC_UNICODE : WNDPROC_ASCII)), WIN_PROC_WINDOW);
     hInstance  = NULL;
     dwStyle    = WS_VISIBLE;
     dwOldStyle = dwStyle;
@@ -522,7 +522,7 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
         }
     }
 
-    WINPROC_SetProc((HWINDOWPROC *)&win32wndproc, windowClass->getWindowProc(), WINPROC_GetProcType(windowClass->getWindowProc()), WIN_PROC_WINDOW);
+    WINPROC_SetProc((HWINDOWPROC *)&win32wndproc, windowClass->getWindowProc((isUnicode) ? WNDPROC_UNICODE : WNDPROC_ASCII), WINPROC_GetProcType(windowClass->getWindowProc((isUnicode) ? WNDPROC_UNICODE : WNDPROC_ASCII)), WIN_PROC_WINDOW);
     hInstance  = cs->hInstance;
     dwStyle    = cs->style & ~WS_VISIBLE;
     dwOldStyle = dwStyle;

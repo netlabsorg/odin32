@@ -1,4 +1,4 @@
-/* $Id: controls.cpp,v 1.10 2000-02-16 14:34:08 sandervl Exp $ */
+/* $Id: controls.cpp,v 1.11 2002-12-18 12:28:02 sandervl Exp $ */
 /* File: controls.cpp -- Win32 common controls
  *
  * Copyright (c) 1999 Christoph Bratschi
@@ -12,14 +12,15 @@
 #include "button.h"
 #include "static.h"
 #include "scroll.h"
-#include "combo.h" //listbox,combo,edit
 #include "win32wmdiclient.h"
 #include "win32dlg.h"
 #include "win32wdesktop.h"
+#include "win32class.h"
 #include "winswitch.h"
 #include "icontitle.h"
 #include "menu.h"
 #include "controls.h"
+#include "ctrlconf.h"
 
 #define DBG_LOCALLOG	DBG_controls
 #include "dbglocal.h"
@@ -50,23 +51,61 @@ void CONTROLS_Register()
   if (!controlAtoms[SCROLLBAR_CONTROL]) dprintf(("failed!!!"));
 
   dprintf(("Register LISTBOX class"));
-  controlAtoms[LISTBOX_CONTROL] = LISTBOX_Register();
+  controlAtoms[LISTBOX_CONTROL] = 
+          InternalRegisterClass((LPSTR)LISTBOX_builtin_class.name,
+                                LISTBOX_builtin_class.style,
+                                LISTBOX_builtin_class.procA,
+                                LISTBOX_builtin_class.procW,
+                                LISTBOX_builtin_class.extra,
+                                LISTBOX_builtin_class.cursor,
+                                LISTBOX_builtin_class.brush);
+
   if (!controlAtoms[LISTBOX_CONTROL]) dprintf(("failed!!!"));
 
   dprintf(("Register COMBOLBOX class"));
-  controlAtoms[COMBOLBOX_CONTROL] = COMBOLBOX_Register();
+  controlAtoms[COMBOLBOX_CONTROL] = 
+          InternalRegisterClass((LPSTR)COMBOLBOX_builtin_class.name,
+                                COMBOLBOX_builtin_class.style,
+                                COMBOLBOX_builtin_class.procA,
+                                COMBOLBOX_builtin_class.procW,
+                                COMBOLBOX_builtin_class.extra,
+                                COMBOLBOX_builtin_class.cursor,
+                                COMBOLBOX_builtin_class.brush);
   if (!controlAtoms[COMBOLBOX_CONTROL]) dprintf(("failed!!!"));
 
   dprintf(("Register COMBOBOX class"));
-  controlAtoms[COMBOBOX_CONTROL] = COMBOBOX_Register();
+  controlAtoms[COMBOBOX_CONTROL] = 
+          InternalRegisterClass((LPSTR)COMBO_builtin_class.name,
+                                COMBO_builtin_class.style,
+                                COMBO_builtin_class.procA,
+                                COMBO_builtin_class.procW,
+                                COMBO_builtin_class.extra,
+                                COMBO_builtin_class.cursor,
+                                COMBO_builtin_class.brush);
   if (!controlAtoms[COMBOBOX_CONTROL]) dprintf(("failed!!!"));
 
   dprintf(("Register EDIT class"));
-  controlAtoms[EDIT_CONTROL] = EDIT_Register();
+  controlAtoms[EDIT_CONTROL] = 
+          InternalRegisterClass((LPSTR)EDIT_builtin_class.name,
+                                EDIT_builtin_class.style,
+                                EDIT_builtin_class.procA,
+                                EDIT_builtin_class.procW,
+                                EDIT_builtin_class.extra,
+                                EDIT_builtin_class.cursor,
+                                EDIT_builtin_class.brush);
   if (!controlAtoms[EDIT_CONTROL]) dprintf(("failed!!!"));
 
   dprintf(("Register MDICLIENT class"));
-  controlAtoms[MDICLIENT_CONTROL] = MDICLIENT_Register();
+  controlAtoms[MDICLIENT_CONTROL] = 
+          InternalRegisterClass((LPSTR)MDICLIENT_builtin_class.name,
+                                MDICLIENT_builtin_class.style,
+                                MDICLIENT_builtin_class.procA,
+                                MDICLIENT_builtin_class.procW,
+                                MDICLIENT_builtin_class.extra,
+                                MDICLIENT_builtin_class.cursor,
+//Default brush is ugly light gray; use this one instead
+                                GetStockObject(GRAY_BRUSH));
+//                                MDICLIENT_builtin_class.brush);
   if (!controlAtoms[MDICLIENT_CONTROL]) dprintf(("failed!!!"));
 
   dprintf(("Register DIALOG class"));
@@ -98,19 +137,19 @@ void CONTROLS_Unregister()
   if (!SCROLLBAR_Unregister()) dprintf(("failed!!!"));
 
   dprintf(("Unregister LISTBOX class"));
-  if (!LISTBOX_Unregister()) dprintf(("failed!!!"));
+  if (!UnregisterClassA((LPSTR)LISTBOX_builtin_class.name, NULL)) dprintf(("failed!!!"));
 
   dprintf(("Unregister COMBOLBOX class"));
-  if (!COMBOLBOX_Unregister()) dprintf(("failed!!!"));
+  if (!UnregisterClassA((LPSTR)COMBOLBOX_builtin_class.name, NULL)) dprintf(("failed!!!"));
 
   dprintf(("Unregister COMBOBOX class"));
-  if (!COMBOBOX_Unregister()) dprintf(("failed!!!"));
+  if (!UnregisterClassA((LPSTR)COMBO_builtin_class.name, NULL)) dprintf(("failed!!!"));
 
   dprintf(("Unregister EDIT class"));
-  if (!EDIT_Unregister()) dprintf(("failed!!!"));
+  if (!UnregisterClassA((LPSTR)EDIT_builtin_class.name, NULL)) dprintf(("failed!!!"));
 
   dprintf(("Unregister MDICLIENT class"));
-  if (!MDICLIENT_Unregister()) dprintf(("failed!!!"));
+  if (!UnregisterClassA((LPSTR)MDICLIENT_builtin_class.name, NULL)) dprintf(("failed!!!"));
 
   dprintf(("Unregister DIALOG class"));
   if (!DIALOG_Unregister()) dprintf(("failed!!!"));

@@ -1,4 +1,4 @@
-; $Id: USER32.DEF,v 1.74 2002-09-03 12:34:00 sandervl Exp $
+; $Id: USER32.DEF,v 1.75 2002-12-18 12:28:01 sandervl Exp $
 
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
 DESCRIPTION 'Odin32 System Dll - User32'
@@ -202,7 +202,7 @@ EXPORTS
     DrawTextExA                = _DrawTextExA@24             @166
     DrawTextExW                = _DrawTextExW@24             @167
     DrawTextW                  = _DrawTextW@20               @168
-    EditWndProc                = _EditWndProc@16             @169
+    EditWndProc                = _EditWndProcA@16            @169
     EmptyClipboard             = _EmptyClipboard@0           @170
     EnableMenuItem             = _EnableMenuItem@12          @171
     EnableScrollBar            = _EnableScrollBar@12         @172
