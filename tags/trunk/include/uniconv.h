@@ -1,4 +1,4 @@
-/* $Id: uniconv.h,v 1.7 2000-10-03 17:26:04 sandervl Exp $ */
+/* $Id: uniconv.h,v 1.8 2001-05-19 08:23:41 sandervl Exp $ */
 /*
  * OS/2 Unicode API definitions
  *
@@ -176,6 +176,7 @@ typedef int LocaleItem;
 #define XLOCALETOKEN      50
 #define XWINLOCALE        51
 #define ICURRENCY         75
+#define IFIRSTDAYOFWEEK   81
 #define INEGCURR          83
 #define SINTLSYMBOL       87
 #define SABBREVLANGNAME   88 
