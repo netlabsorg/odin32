@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1939 2002-01-06 16:56:12 sandervl Exp $ */
+/* $Id: changelog,v 1.1940 2002-01-06 16:57:29 bird Exp $ */
+
+ 2002-01-06: knut st. osmundsen <bird@anduin.net>
+    - DailyBuild:
+                o - Do not distribute odin.ini.
 
  2002-01-06: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Changed HeapAlloc/HeapReAlloc:
@@ -6,7 +10,7 @@
                   - when reallocating memory block, don't use different
                     memory block unless new size is larger than old size
                     (rounded up to next 8 bytes boundary)
-                  (Verified this behaviour in NT4 (Global/Heap(Re)Alloc); 
+                  (Verified this behaviour in NT4 (Global/Heap(Re)Alloc);
                    fixes crashes in Opera 5.12 which relies on this 'feature')
 
  2002-01-04: Sander van Leeuwen <sandervl@xs4all.nl>
@@ -18,7 +22,7 @@
  2002-01-01: knut st. osmundsen <bird@anduin.net>
     - Tools/CmdQd:
                 o Ignore the CmdQd kill returncode in clean2.
- 
+
  2001-12-31: Sander van Leeuwen <sandervl@xs4all.nl>
     - GDI32:    o Use critical section in dibsection class instead of vmutex
 
@@ -28,11 +32,11 @@
 
  2001-12-30: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Fixed some wrong return values for disk functions (hmdisk)
-                o GetVolumeInformation: use original volume name to 
+                o GetVolumeInformation: use original volume name to
                   determine maximum file name length
     - USER32:   o Enforce WS_EX_WINDOWEDGE style (Wine)
                   (fixes Opera 6 menu)
-    - GDI32:    o BitBlt, StretchBlt: sync dib section if selected into 
+    - GDI32:    o BitBlt, StretchBlt: sync dib section if selected into
                   destination HDC
                   (fixes Opera 6 background)
 
@@ -47,7 +51,7 @@
  2001-12-26: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Use Wine version of DrawText(Ex)A/W
                   (fixes underscore painting & positioning of text)
-                o (Auto)Check, (Auto)Radio & (Auto)3State buttons send 
+                o (Auto)Check, (Auto)Radio & (Auto)3State buttons send
                   WM_CTLCOLORSTATIC instead of WM_CTLCOLORBTN (verified in NT4)
                   (fixes opening dialog buttons in Opera 6 (choose interface))
                 o RedrawWindow change: call UpdateWindow if window has invalid
@@ -68,7 +72,7 @@
                   with LOAD_LIBRARY_AS_DATAFILE
                   (fixes crashes when accessing resources outside the resource
                    section in Opera 6 binaries)
-    - GDI32:    o DIB Section blit: don't check source & destination sizes 
+    - GDI32:    o DIB Section blit: don't check source & destination sizes
                                     with DC size (GpiDrawBits does that for us)
                   (fixes the two bitmaps in the opening window of Opera 6
                    (choice between MDI & SDI interface))
