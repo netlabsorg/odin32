@@ -1,4 +1,4 @@
-; $Id: DH.asm,v 1.2 2001-09-17 02:27:55 bird Exp $
+; $Id: DH.asm,v 1.3 2001-11-09 07:40:07 bird Exp $
 ;
 ; Device Helper Router.
 ; Stack Thunker.
@@ -33,6 +33,7 @@
     extrn DOS32ALLOCMEM:PROC
     extrn DOS32FREEMEM:PROC
     extrn DOS16GETINFOSEG:PROC
+    extrn DOS16SYSTRACE:PROC
     extrn _Device_Help:DWORD
     extrn pulTKSSBase32:DWORD
     extrn _TKSSBase16:DWORD
@@ -72,6 +73,13 @@ DHRouter PROC FAR
     push    ecx
     push    ebx
 
+
+    cmp     dl, DevHlp_RAS
+    jne     dhr0
+    call    dh_RAS
+    jmp     dhr_ret
+
+dhr0:
     cmp     dl, DevHlp_VirtToLin
     jne     dhr1
     call    dh_VirtToLin
@@ -139,7 +147,37 @@ dhr_ret_ebx:
 DHRouter ENDP
 
 
+;;
+; Insert trace information to the system trace buffer.
+; @cproto   none
+; @param    AX      Major trace event code.
+; @param    BX      Length of data area.
+; @param    CX      Major trace event code.
+; @param    DS:SI   Pointer to trace data.
+; @returns  Success:
+;               CF      clear
+;               AX      ??
+;           Failure:
+;               CF      set
+;               AX      error code.
+; @uses      ax
+; @status    completely impelemented.
+; @author    knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+dh_RAS PROC NEAR
+    push    ax
+    push    bx
+    push    cx
+    push    ds
+    push    si
 
+    call far ptr DOS16SYSTRACE
+    or      ax, ax
+    jz      dh_RAS_ret
+    stc
+
+dh_RAS_ret:
+    ret
+dh_RAS ENDP
 
 
 ;;
