@@ -1,4 +1,4 @@
-/* $Id: options.h,v 1.3 2002-04-01 13:51:16 bird Exp $
+/* $Id: options.h,v 1.4 2002-12-16 01:37:07 bird Exp $
  *
  * Options.
  *
@@ -69,15 +69,17 @@ struct kKLOptions
 *   Global Variables                                                           *
 *******************************************************************************/
 /* NOINC */
-extern struct kKLOptions DATA16_GLOBAL options;  /* defined in d16Globl.c */
-extern USHORT DATA16_GLOBAL usVerMajor;
-extern USHORT DATA16_GLOBAL usVerMinor;
+extern struct kKLOptions    options;  /* defined in d16Globl.c */
+extern USHORT               usVerMajor;
+extern USHORT               usVerMinor;
+extern char                 szSymbolFile[128];
 
 #ifdef RING0
 #if defined(__IBMC__) || defined(__IBMCPP__)
     #pragma map(options,        "_options")
     #pragma map(usVerMajor,     "_usVerMajor")
     #pragma map(usVerMinor,     "_usVerMinor")
+    #pragma map(szSymbolFile,   "_szSymbolFile")
 #endif
 #endif
 
