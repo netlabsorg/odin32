@@ -1,7 +1,10 @@
- /* $Id: changelog,v 1.953 2000-05-20 13:29:38 sandervl Exp $ */
+ /* $Id: changelog,v 1.954 2000-05-20 14:56:15 sandervl Exp $ */
 
  2000-05-20: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   BroadcastMessageA/W bugfix
+                Set visible state for both client & frame windows (fixes
+                redrawing of toolbar window in mIRC32) in SetWindowPos &
+                ShowWindow
     - KERNEL32: Partly implemented GetDiskFreeSpaceExA/W; need to add support  
                 for 64 bits values!
 
