@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.124 2004-02-16 12:00:25 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.125 2004-02-19 15:03:55 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -1273,7 +1273,7 @@ BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw
         else 
         //Don't clear erase background flag if the window is 
         //already (partly) invalidated
-        if (!WinQueryUpdateRect (hwnd, NULL)) {
+        if (WinQueryUpdateRect (hwnd, NULL)) {
             dprintf(("RDW_INVALIDATE: no update rectangle, disable %x WM_ERASEBKGND", wnd->getWindowHandle()));
             wnd->setEraseBkgnd(FALSE);
         }
