@@ -1,4 +1,4 @@
-/* $Id: shell32_main.h,v 1.7 2001-04-19 08:32:18 sandervl Exp $ */
+/* $Id: shell32_main.h,v 1.8 2001-04-23 10:47:23 sandervl Exp $ */
 /*
  * 	internal Shell32 Library definitions
  */
@@ -182,10 +182,19 @@ void FreeChangeNotifications(void);
 #define ASK_DELETE_FILE		 1
 #define ASK_DELETE_FOLDER	 2
 #define ASK_DELETE_MULTIPLE_ITEM 3
+#ifdef __WIN32OS2__
+#define ASK_CREATE FOLDER        4
+#define ASK_OVERWRITE_FILE       5
+#endif
 
 BOOL SHELL_DeleteDirectoryA(LPCSTR pszDir, BOOL bShowUI);
 BOOL SHELL_DeleteFileA(LPCSTR pszFile, BOOL bShowUI);
+#ifdef __WIN32OS2__
+#define SHELL_WarnItemDelete SHELL_ConfirmDialog
+BOOL SHELL_ConfirmDialog(int nKindOfDialog, LPCSTR szDir);
+#else
 BOOL SHELL_WarnItemDelete(int nKindOfDialog, LPCSTR szDir);
+#endif
 
 #ifdef __WIN32OS2__
 #ifdef __cplusplus
@@ -210,3 +219,4 @@ inline static BOOL SHELL_OsIsUnicode(void)
 #endif
 
 #endif
+
