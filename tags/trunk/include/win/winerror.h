@@ -1,4 +1,4 @@
-/* $Id: winerror.h,v 1.6 2000-03-21 00:26:45 davidr Exp $ */
+/* $Id: winerror.h,v 1.7 2000-04-02 22:08:34 davidr Exp $ */
 #ifndef __WINE_WINERROR_H
 #define __WINE_WINERROR_H
 
@@ -806,5 +806,18 @@ extern int WIN32_LastError;
 #define CONVERT10_E_STG_FMT             0x800401C4
 #define CONVERT10_E_STG_NO_STD_STREAM   0x800401C5
 #define CONVERT10_E_STG_DIB_TO_BITMAP   0x800401C6
+
+// RPC errors
+#define RPC_S_INVALID_STRING_BINDING    1700L
+#define RPC_S_WRONG_KIND_OF_BINDING     1701L
+#define RPC_S_INVALID_BINDING           1702L
+#define RPC_S_PROTSEQ_NOT_SUPPORTED     1703L
+#define RPC_S_INVALID_RPC_PROTSEQ       1704L
+#define RPC_S_INVALID_STRING_UUID       1705L
+#define RPC_S_INVALID_ENDPOINT_FORMAT   1706L
+#define RPC_S_INVALID_NET_ADDR          1707L
+#define RPC_S_NO_ENDPOINT_FOUND         1708L
+#define RPC_S_INVALID_TIMEOUT           1709L
+#define RPC_S_OBJECT_NOT_FOUND          1710L
 
 #endif  /* __WINE_WINERROR_H */
