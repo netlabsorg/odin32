@@ -1,4 +1,4 @@
-/* $Id: process.cpp,v 1.10 2002-01-08 22:34:11 sandervl Exp $ */
+/* $Id: process.cpp,v 1.11 2004-02-10 15:37:54 sandervl Exp $ */
 
 /*
  * Win32 process functions for OS/2
@@ -373,6 +373,42 @@ DWORD WINAPI GetProcessDword( DWORD dwProcessID, INT offset )
     default:
         dprintf(("GetProcessDword: Unknown offset %d\n", offset ));
         return 0;
+    }
+}
+
+
+/***********************************************************************
+ *           ODIN_SetProcessDword    
+ *
+ * SvL: Special version that allows the caller to change some values
+ *
+ */
+void WINAPI ODIN_SetProcessDword( DWORD dwProcessID, INT offset, DWORD value )
+{
+    PDB *process = PROCESS_IdToPDB( dwProcessID );
+
+    dprintf(("SetProcessDword: (%ld, %d)\n", dwProcessID, offset));
+    if ( !process ) return;
+
+    switch ( offset ) 
+    {
+    case GPD_STARTF_SHOWWINDOW:
+        process->env_db->startup_info->wShowWindow = value;
+        break;
+
+    case GPD_STARTF_SIZE:
+        process->env_db->startup_info->dwXSize = LOWORD(value);
+        process->env_db->startup_info->dwYSize = HIWORD(value);
+        break;
+
+    case GPD_STARTF_POSITION:
+        process->env_db->startup_info->dwX = LOWORD(value);
+        process->env_db->startup_info->dwY = HIWORD(value);
+        break;
+
+    default:
+        dprintf(("SetProcessDword: Unknown offset %d\n", offset));
+        break;
     }
 }
 
