@@ -1,4 +1,4 @@
-/* $Id: win32wbasepos.cpp,v 1.2 1999-10-16 14:51:43 sandervl Exp $ */
+/* $Id: win32wbasepos.cpp,v 1.3 1999-10-17 15:46:10 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (nonclient/position methods)
  *
@@ -10,6 +10,8 @@
  * Copyright 1993, 1994 Alexandre Julliard
  *
  * TODO: Not thread/process safe
+ *
+ * Wine code based on build 990815
  *
  * Project Odin Software License can be found in LICENSE.TXT
  *
@@ -40,13 +42,26 @@
 #include "pmframe.h"
 #include "win32wdesktop.h"
 
+  /* Some useful macros */
 #define HAS_DLGFRAME(style,exStyle) \
     (((exStyle) & WS_EX_DLGMODALFRAME) || \
-     (((style) & WS_DLGFRAME) && !((style) & WS_BORDER)))
+     (((style) & WS_DLGFRAME) && !((style) & WS_THICKFRAME)))
 
-#define HAS_THICKFRAME(style) \
+#define HAS_THICKFRAME(style,exStyle) \
     (((style) & WS_THICKFRAME) && \
-     !(((style) & (WS_DLGFRAME|WS_BORDER)) == WS_DLGFRAME))
+     !((exStyle) & WS_EX_DLGMODALFRAME))
+
+#define HAS_THINFRAME(style) \
+    (((style) & WS_BORDER) || !((style) & (WS_CHILD | WS_POPUP)))
+
+#define HAS_BIGFRAME(style,exStyle) \
+    (((style) & (WS_THICKFRAME | WS_DLGFRAME)) || \
+     ((exStyle) & WS_EX_DLGMODALFRAME))
+
+#define HAS_ANYFRAME(style,exStyle) \
+    (((style) & (WS_THICKFRAME | WS_DLGFRAME | WS_BORDER)) || \
+     ((exStyle) & WS_EX_DLGMODALFRAME) || \
+     !((style) & (WS_CHILD | WS_POPUP)))
 
 #define HAS_3DFRAME(exStyle) \
     ((exStyle & WS_EX_CLIENTEDGE) || (exStyle & WS_EX_STATICEDGE) || (exStyle & WS_EX_WINDOWEDGE))
@@ -193,7 +208,7 @@ void Win32BaseWindow::GetMinMaxInfo(POINT *maxSize, POINT *maxPos,
     else
     {
         xinc = yinc = 0;
-        if (HAS_THICKFRAME(dwStyle))
+        if (HAS_THICKFRAME(dwStyle, dwExStyle))
         {
             xinc += GetSystemMetrics(SM_CXFRAME);
             yinc += GetSystemMetrics(SM_CYFRAME);
@@ -283,13 +298,7 @@ LONG Win32BaseWindow::NCHandleCalcSize(WPARAM wParam, NCCALCSIZE_PARAMS *ncsize)
             OSLibWinCalcFrameRect(getOS2FrameWindowHandle(), &ncsize->rgrc[0], TRUE); //frame -> client
             dprintf(("NCHandleCalcSize Adjusted client rect (%d,%d) (%d,%d)", ncsize->rgrc[0].left, ncsize->rgrc[0].top, ncsize->rgrc[0].right, ncsize->rgrc[0].bottom));
 
-#if 0
-            //relative to frame -> relative to itself
-            ncsize->rgrc[0].right  -= ncsize->rgrc[0].left;
-            ncsize->rgrc[0].left    = 0;
-            ncsize->rgrc[0].bottom -= ncsize->rgrc[0].top;
-            ncsize->rgrc[0].top     = 0;
-#endif
+            OffsetRect(&ncsize->rgrc[0], -ncsize->rgrc[0].left, -ncsize->rgrc[0].top);
         }
 #if 0
 //TODO: Docs say app should return 0 when fCalcValidRects == 0; Wine doesn't do this
@@ -297,6 +306,116 @@ LONG Win32BaseWindow::NCHandleCalcSize(WPARAM wParam, NCCALCSIZE_PARAMS *ncsize)
             return 0;
 #endif
         return result;
+}
+/***********************************************************************
+ *           WIN_WindowNeedsWMBorder
+ *
+ * This method defines the rules for a window to have a WM border,
+ * caption...  It is used for consitency purposes.
+ */
+BOOL Win32BaseWindow::WindowNeedsWMBorder( DWORD style, DWORD exStyle )
+{
+//    if (!(style & WS_CHILD) && Options.managed  &&
+    if (!(style & WS_CHILD)  &&
+        (((style & WS_CAPTION) == WS_CAPTION) ||
+         (style & WS_THICKFRAME)))
+        return TRUE;
+    return FALSE;
+}
+/******************************************************************************
+ * NC_AdjustRectOuter95
+ *
+ * Computes the size of the "outside" parts of the window based on the
+ * parameters of the client area.
+ *
+ + PARAMS
+ *     LPRECT16  rect
+ *     DWORD  style
+ *     BOOL32  menu
+ *     DWORD  exStyle
+ *
+ * NOTES
+ *     "Outer" parts of a window means the whole window frame, caption and
+ *     menu bar. It does not include "inner" parts of the frame like client
+ *     edge, static edge or scroll bars.
+ *
+ * Revision history
+ *     05-Jul-1997 Dave Cuthbert (dacut@ece.cmu.edu)
+ *        Original (NC_AdjustRect95) cut & paste from NC_AdjustRect
+ *
+ *     20-Jun-1998 Eric Kohl (ekohl@abo.rhein-zeitung.de)
+ *        Split NC_AdjustRect95 into NC_AdjustRectOuter95 and
+ *        NC_AdjustRectInner95 and added handling of Win95 styles.
+ *
+ *     28-Jul-1999 Ove Kåven (ovek@arcticnet.no)
+ *        Streamlined window style checks.
+ *
+ *****************************************************************************/
+void Win32BaseWindow::NC_AdjustRectOuter(LPRECT rect, DWORD style, BOOL menu, DWORD exStyle)
+{
+    if(style & WS_ICONIC) return;
+
+    /* Decide if the window will be managed (see CreateWindowEx) */
+//    if (!WindowNeedsWMBorder(style, exStyle))
+//    {
+       if (HAS_THICKFRAME( style, exStyle ))
+            InflateRect( rect, GetSystemMetrics(SM_CXFRAME), GetSystemMetrics(SM_CYFRAME) );
+        else
+        if (HAS_DLGFRAME( style, exStyle ))
+            InflateRect(rect, GetSystemMetrics(SM_CXDLGFRAME), GetSystemMetrics(SM_CYDLGFRAME) );
+        else
+        if (HAS_THINFRAME( style ))
+            InflateRect( rect, GetSystemMetrics(SM_CXBORDER), GetSystemMetrics(SM_CYBORDER));
+
+        if ((style & WS_CAPTION) == WS_CAPTION)
+        {
+	        if (exStyle & WS_EX_TOOLWINDOW)
+		        rect->top -= GetSystemMetrics(SM_CYSMCAPTION);
+	        else
+		        rect->top -= GetSystemMetrics(SM_CYCAPTION);
+        }
+//    }
+
+    if (menu)
+	    rect->top -= GetSystemMetrics(SM_CYMENU);
+}
+/******************************************************************************
+ * NC_AdjustRectInner95
+ *
+ * Computes the size of the "inside" part of the window based on the
+ * parameters of the client area.
+ *
+ + PARAMS
+ *     LPRECT16 rect
+ *     DWORD    style
+ *     DWORD    exStyle
+ *
+ * NOTES
+ *     "Inner" part of a window means the window frame inside of the flat
+ *     window frame. It includes the client edge, the static edge and the
+ *     scroll bars.
+ *
+ * Revision history
+ *     05-Jul-1997 Dave Cuthbert (dacut@ece.cmu.edu)
+ *        Original (NC_AdjustRect95) cut & paste from NC_AdjustRect
+ *
+ *     20-Jun-1998 Eric Kohl (ekohl@abo.rhein-zeitung.de)
+ *        Split NC_AdjustRect95 into NC_AdjustRectOuter95 and
+ *        NC_AdjustRectInner95 and added handling of Win95 styles.
+ *
+ *****************************************************************************/
+void Win32BaseWindow::NC_AdjustRectInner(LPRECT rect, DWORD style, DWORD exStyle)
+{
+    if(style & WS_ICONIC) return;
+
+    if (exStyle & WS_EX_CLIENTEDGE)
+	    InflateRect(rect, GetSystemMetrics(SM_CXEDGE), GetSystemMetrics(SM_CYEDGE));
+
+    if (exStyle & WS_EX_STATICEDGE)
+	    InflateRect(rect, GetSystemMetrics(SM_CXBORDER), GetSystemMetrics(SM_CYBORDER));
+
+    if (style & WS_VSCROLL) rect->right  += GetSystemMetrics(SM_CXVSCROLL);
+    if (style & WS_HSCROLL) rect->bottom += GetSystemMetrics(SM_CYHSCROLL);
 }
 //******************************************************************************
 //******************************************************************************

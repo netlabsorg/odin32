@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.16 1999-10-17 12:17:44 cbratschi Exp $ */
+/* $Id: win32dlg.cpp,v 1.17 1999-10-17 15:46:09 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -604,16 +604,47 @@ BOOL Win32Dialog::createControls(LPCSTR dlgtemplate, HINSTANCE hInst)
         dlgtemplate = (LPCSTR)getControl( (WORD *)dlgtemplate, &info, dlgInfo.dialogEx );
 
         dprintf(("Create CONTROL %d", info.id));
-        hwndCtrl = CreateWindowExW( info.exStyle | WS_EX_NOPARENTNOTIFY,
-                                    (LPCWSTR)info.className,
-                                    (LPCWSTR)info.windowName,
-                                    info.style | WS_CHILD,
-                                    info.x * xUnit / 4,
-                                    info.y * yUnit / 8,
-                                    info.cx * xUnit / 4,
-                                    info.cy * yUnit / 8,
-                                    getWindowHandle(), (HMENU)info.id,
-                                    hInst, info.data );
+        if(isUnicode) {
+            hwndCtrl = ::CreateWindowExW( info.exStyle | WS_EX_NOPARENTNOTIFY,
+                                        (LPCWSTR)info.className,
+                                        (LPCWSTR)info.windowName,
+                                        info.style | WS_CHILD,
+                                        info.x * xUnit / 4,
+                                        info.y * yUnit / 8,
+                                        info.cx * xUnit / 4,
+                                        info.cy * yUnit / 8,
+                                        getWindowHandle(), (HMENU)info.id,
+                                        hInst, info.data );
+        }
+        else {
+            char *classNameA = NULL;
+            char *windowNameA = NULL;
+
+            if(HIWORD(info.className)) {
+                 classNameA = UnicodeToAsciiString((LPWSTR)info.className);
+            }
+            else classNameA = (char *)info.className;
+
+            if(HIWORD(info.windowName)) {
+                 windowNameA = UnicodeToAsciiString((LPWSTR)info.windowName);
+            }
+            hwndCtrl = ::CreateWindowExA( info.exStyle | WS_EX_NOPARENTNOTIFY,
+                                        classNameA,
+                                        windowNameA,
+                                        info.style | WS_CHILD,
+                                        info.x * xUnit / 4,
+                                        info.y * yUnit / 8,
+                                        info.cx * xUnit / 4,
+                                        info.cy * yUnit / 8,
+                                        getWindowHandle(), (HMENU)info.id,
+                                        hInst, info.data );
+            if(HIWORD(classNameA)) {
+                FreeAsciiString(classNameA);
+            }
+            if(windowNameA) {
+                FreeAsciiString(windowNameA);
+            }
+        }
 
         if (!hwndCtrl) return FALSE;
 

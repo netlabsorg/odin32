@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.14 1999-10-17 12:17:42 cbratschi Exp $ */
+/* $Id: dc.cpp,v 1.15 1999-10-17 15:46:07 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -1005,7 +1005,7 @@ BOOL WIN32API UpdateWindow (HWND hwnd)
    USHORT sel = RestoreOS2FS();
    Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
 
-dprintf (("User32: UpdateWindow hwnd %x -> wnd %x", hwnd, wnd));
+   dprintf (("User32: UpdateWindow hwnd %x -> wnd %x", hwnd, wnd));
 
    if (WinQueryUpdateRect (wnd->getOS2WindowHandle(), NULL))
        sendEraseBkgnd (wnd);

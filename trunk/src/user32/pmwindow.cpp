@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.33 1999-10-17 12:17:44 cbratschi Exp $ */
+/* $Id: pmwindow.cpp,v 1.34 1999-10-17 15:46:08 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -324,6 +324,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                                    &point, 1);
         }
         point.y = OSLibQueryScreenHeight() - point.y - swpFrame.cy;
+
         win32wnd->setWindowRect(point.x, point.y, point.x+swpFrame.cx, point.y+swpFrame.cy);
         win32wnd->setClientRect(pswpo->x, pswpo->y, pswpo->x + pswpo->cx, pswpo->y + pswpo->cy);
 

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.48 1999-10-17 12:17:45 cbratschi Exp $ */
+/* $Id: win32wbase.cpp,v 1.49 1999-10-17 15:46:09 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1237,137 +1237,6 @@ SCROLLBAR_INFO *Win32BaseWindow::getScrollInfo(int nBar)
     }
     return NULL;
 }
-//******************************************************************************
-//TODO: Not complete
-//******************************************************************************
-LONG Win32BaseWindow::setScrollInfo(int nBar, SCROLLINFO *info, int fRedraw)
-{
-  SCROLLBAR_INFO *infoPtr;
-  HWND            hwndScroll;
-  ULONG           scrollType;
-  int             new_flags;
-
-//CB: handled internally
-return 0;
-
-    switch(nBar) {
-    case SB_HORZ:
-        if(!horzScrollInfo) {
-            return 0;
-        }
-        infoPtr = horzScrollInfo;
-        hwndScroll = hwndHorzScroll;
-        scrollType = OSLIB_HSCROLL;
-        break;
-    case SB_VERT:
-        if(!vertScrollInfo) {
-            return 0;
-        }
-        infoPtr = vertScrollInfo;
-        hwndScroll = hwndVertScroll;
-        scrollType = OSLIB_VSCROLL;
-        break;
-    default:
-        return 0;
-    }
-
-    if (info->fMask & ~(SIF_ALL | SIF_DISABLENOSCROLL)) return 0;
-    if ((info->cbSize != sizeof(*info)) &&
-        (info->cbSize != sizeof(*info)-sizeof(info->nTrackPos))) return 0;
-
-    /* Set the page size */
-    if (info->fMask & SIF_PAGE)
-    {
-        if( infoPtr->Page != info->nPage )
-        {
-            infoPtr->Page = info->nPage;
-            dprintf(("SetScrollInfo: Set pagesize to %d", info->nPage));
-            OSLibWinSetScrollPageSize(OS2HwndFrame, hwndScroll, info->nPage, infoPtr->MaxVal, fRedraw);
-        }
-    }
-
-    /* Set the scroll pos */
-    if (info->fMask & SIF_POS)
-    {
-        if( infoPtr->CurVal != info->nPos )
-        {
-            infoPtr->CurVal = info->nPos;
-            dprintf(("SetScrollInfo: Set scroll position to %d", info->nPos));
-            OSLibWinSetScrollPos(OS2HwndFrame, hwndScroll, info->nPos, fRedraw);
-        }
-    }
-
-    /* Set the scroll range */
-    if (info->fMask & SIF_RANGE)
-    {
-        /* Invalid range -> range is set to (0,0) */
-        if ((info->nMin > info->nMax) ||
-            ((UINT)(info->nMax - info->nMin) >= 0x80000000))
-        {
-            infoPtr->MinVal = 0;
-            infoPtr->MaxVal = 0;
-        }
-        else
-        {
-            if( infoPtr->MinVal != info->nMin ||
-                infoPtr->MaxVal != info->nMax )
-            {
-                infoPtr->MinVal = info->nMin;
-                infoPtr->MaxVal = info->nMax;
-
-                dprintf(("SetScrollInfo: Set scroll range to (%d,%d)", info->nMin, info->nMax));
-                OSLibWinSetScrollRange(OS2HwndFrame, hwndScroll, info->nMin, info->nMax, fRedraw);
-            }
-        }
-    }
-
-    /* Make sure the page size is valid */
-    if (infoPtr->Page < 0) infoPtr->Page = 0;
-    else if (infoPtr->Page > infoPtr->MaxVal - infoPtr->MinVal + 1 )
-        infoPtr->Page = infoPtr->MaxVal - infoPtr->MinVal + 1;
-
-    /* Make sure the pos is inside the range */
-    if (infoPtr->CurVal < infoPtr->MinVal)
-        infoPtr->CurVal = infoPtr->MinVal;
-    else if (infoPtr->CurVal > infoPtr->MaxVal - MAX( infoPtr->Page-1, 0 ))
-        infoPtr->CurVal = infoPtr->MaxVal - MAX( infoPtr->Page-1, 0 );
-
-    /* Check if the scrollbar should be hidden or disabled */
-    if (info->fMask & (SIF_RANGE | SIF_PAGE | SIF_DISABLENOSCROLL))
-    {
-        new_flags = infoPtr->flags;
-        if (infoPtr->MinVal >= infoPtr->MaxVal - MAX( infoPtr->Page-1, 0 ))
-        {
-            /* Hide or disable scroll-bar */
-            if (info->fMask & SIF_DISABLENOSCROLL)
-            {
-                new_flags = ESB_DISABLE_BOTH;
-//               *action |= SA_SSI_REFRESH;
-            }
-            else if (nBar != SB_CTL)
-            {
-//                *action = SA_SSI_HIDE;
-                goto done;
-            }
-        }
-        else  /* Show and enable scroll-bar */
-        {
-            new_flags = 0;
-//            if (nBar != SB_CTL)
-//                *action |= SA_SSI_SHOW;
-        }
-
-        if (infoPtr->flags != new_flags) /* check arrow flags */
-        {
-            infoPtr->flags = new_flags;
-        }
-    }
-
-done:
-    /* Return current position */
-
-    return infoPtr->CurVal;
-}
 /***********************************************************************/
 /***********************************************************************/
 VOID Win32BaseWindow::subclassScrollBars(BOOL subHorz,BOOL subVert)
@@ -2010,6 +1879,25 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
  ULONG showstate = 0;
 
     dprintf(("ShowWindow %x %x", getWindowHandle(), nCmdShow));
+#if 1
+    if (flags & WIN_NEED_SIZE)
+    {
+        /* should happen only in CreateWindowEx() */
+    	int wParam = SIZE_RESTORED;
+
+	    flags &= ~WIN_NEED_SIZE;
+	    if (dwStyle & WS_MAXIMIZE)
+	        wParam = SIZE_MAXIMIZED;
+	    else
+	    if (dwStyle & WS_MINIMIZE)
+	        wParam = SIZE_MINIMIZED;
+	
+        SendMessageA(WM_SIZE, wParam,
+                     MAKELONG(rectClient.right-rectClient.left,
+                              rectClient.bottom-rectClient.top));
+        SendMessageA(WM_MOVE, 0, MAKELONG( rectClient.left, rectClient.top ) );
+    }
+#else
     if(fFirstShow) {
         if(isFrameWindow() && IS_OVERLAPPED(getStyle()) && !isChild()) {
                 SendMessageA(WM_SIZE, SIZE_RESTORED,
@@ -2020,6 +1908,7 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
         }
         fFirstShow = FALSE;
     }
+#endif
     switch(nCmdShow)
     {
     case SW_SHOW:
@@ -2343,67 +2232,79 @@ HWND Win32BaseWindow::FindWindowEx(HWND hwndParent, HWND hwndChildAfter, LPSTR l
     return 0;
 }
 //******************************************************************************
-//TODO: not complete nor correct (distinction be    tween top-level, top-most & child windows)
 //******************************************************************************
 HWND Win32BaseWindow::GetWindow(UINT uCmd)
 {
- Win32BaseWindow  *win32wnd;
- ULONG         magic;
- ULONG         getcmd = 0;
- HWND          hwndRelated, hwnd;
+ HWND hwndRelated = 0;
+ Win32BaseWindow *window;
 
-    dprintf(("GetWindow %x %d NOT COMPLETE", getWindowHandle(), uCmd));
-    hwnd = OS2Hwnd;
     switch(uCmd)
     {
-        case GW_CHILD:
-            getcmd = QWOS_TOP;
-            break;
-        case GW_HWNDFIRST:
-            if(getParent()) {
-                    hwnd = getParent()->getOS2WindowHandle();
-                    getcmd = QWOS_TOP; //top of child windows
-            }
-            else    getcmd = QWOS_TOP; //TODO
-            break;
-        case GW_HWNDLAST:
-            if(getParent()) {
-                    hwnd = getParent()->getOS2WindowHandle();
-                    getcmd = QWOS_BOTTOM; //bottom of child windows
-            }
-            else    getcmd = QWOS_BOTTOM; //TODO
-            break;
-        case GW_HWNDNEXT:
-            getcmd = QWOS_NEXT;
-            break;
-        case GW_HWNDPREV:
-            getcmd = QWOS_PREV;
-            break;
-        case GW_OWNER:
-            if(owner) {
-                    return owner->getWindowHandle();
-            }
-            else    return 0;
-    }
-    hwndRelated = OSLibWinQueryWindow(hwnd, getcmd);
-    if(hwndRelated)
-    {
-        win32wnd = (Win32BaseWindow *)OSLibWinGetWindowULong(hwndRelated, OFFSET_WIN32WNDPTR);
-        magic    = OSLibWinGetWindowULong(hwndRelated, OFFSET_WIN32PM_MAGIC);
-        if(CheckMagicDword(magic) && win32wnd)
+    case GW_HWNDFIRST:
+        if(getParent()) {
+            window = (Win32BaseWindow *)getParent()->getFirstChild();
+            hwndRelated = window->getWindowHandle();
+        }
+        break;
+	
+    case GW_HWNDLAST:
+        if(getParent())
         {
-            return win32wnd->getWindowHandle();
+            goto end;
         }
 
-    hwndRelated = OSLibWinWindowFromID(hwndRelated, OSLIB_FID_CLIENT);
-        win32wnd = (Win32BaseWindow *)OSLibWinGetWindowULong(hwndRelated, OFFSET_WIN32WNDPTR);
-        magic    = OSLibWinGetWindowULong(hwndRelated, OFFSET_WIN32PM_MAGIC);
-        if(CheckMagicDword(magic) && win32wnd)
+        window = this;
+        while(window)
         {
-            return win32wnd->getWindowHandle();
+            window = (Win32BaseWindow *)window->getNextChild();
         }
+        hwndRelated = window->getWindowHandle();
+        break;
+	
+    case GW_HWNDNEXT:
+        window = (Win32BaseWindow *)getNextChild();
+        if(window) {
+            hwndRelated = window->getWindowHandle();
+        }
+        break;
+	
+    case GW_HWNDPREV:
+        if(!getParent())
+        {
+            goto end;
+        }
+        window = (Win32BaseWindow *)(getParent()->getFirstChild()); /* First sibling */
+        if(window == this)
+        {
+            hwndRelated = 0;  /* First in list */
+            goto end;
+        }
+        while(window->getNextChild())
+        {
+            if (window->getNextChild() == this)
+            {
+                hwndRelated = window->getWindowHandle();
+                goto end;
+            }
+            window = (Win32BaseWindow *)window->getNextChild();
+        }
+        break;
+        	
+    case GW_OWNER:
+        if(getOwner()) {
+            hwndRelated = getOwner()->getWindowHandle();
+        }
+        break;
+
+    case GW_CHILD:
+        if(getFirstChild()) {
+            hwndRelated = ((Win32BaseWindow *)getFirstChild())->getWindowHandle();
+        }
+        break;
     }
-    return 0;
+end:
+    dprintf(("GetWindow %x %d returned %x", getWindowHandle(), uCmd, hwndRelated));
+    return hwndRelated;
 }
 //******************************************************************************
 //******************************************************************************
@@ -2544,6 +2445,7 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value)
 
                 ss.styleOld = dwExStyle;
                 ss.styleNew = value;
+        dprintf(("SetWindowLong GWL_EXSTYLE %x new style %x", getWindowHandle(), value));
                 SendMessageA(WM_STYLECHANGING,GWL_EXSTYLE,(LPARAM)&ss);
                 setExStyle(ss.styleNew);
                 SendMessageA(WM_STYLECHANGED,GWL_EXSTYLE,(LPARAM)&ss);
@@ -2555,6 +2457,7 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value)
 
                 ss.styleOld = dwStyle;
                 ss.styleNew = value;
+        dprintf(("SetWindowLong GWL_STYLE %x new style %x", getWindowHandle(), value));
                 SendMessageA(WM_STYLECHANGING,GWL_STYLE,(LPARAM)&ss);
                 setStyle(ss.styleNew);
                 OSLibSetWindowStyle(OS2HwndFrame, dwStyle);
