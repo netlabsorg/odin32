@@ -1,4 +1,4 @@
-/* $Id: dibitmap.cpp,v 1.12 2000-11-14 14:28:22 sandervl Exp $ */
+/* $Id: dibitmap.cpp,v 1.13 2000-11-15 16:10:40 sandervl Exp $ */
 
 /*
  * GDI32 dib & bitmap code
@@ -313,21 +313,26 @@ int WIN32API SetDIBits(HDC hdc, HBITMAP hBitmap, UINT startscan, UINT numlines, 
     }
     //SvL: Open32's SetDIBits really messes things up for 1 bpp bitmaps, must use SetBitmapBits
     if(pBitmapInfo->bmiHeader.biBitCount == 1 && startscan == 0 && numlines == pBitmapInfo->bmiHeader.biHeight)
-    {
-        int   linewidth = DIB_GetDIBWidthBytes(pBitmapInfo->bmiHeader.biWidth, 1);
-        char *newpix    = (char *)malloc(linewidth*pBitmapInfo->bmiHeader.biHeight);
+    {//WARNING: hack alert!
+        int   dibwidth  = DIB_GetDIBWidthBytes(pBitmapInfo->bmiHeader.biWidth, 1);
+        int   bmpwidth  = BITMAP_GetWidthBytes(pBitmapInfo->bmiHeader.biWidth, 1);
+        char *newpix    = (char *)malloc(dibwidth*pBitmapInfo->bmiHeader.biHeight);
         char *orgpix    = (char *)pBits;
         int   ret;
 
-        newpix += ((pBitmapInfo->bmiHeader.biHeight-1)*linewidth);
+	dprintf(("Flipping 1bpp bitmap and calling SetBitmapBits (WORKAROUND) (%d -> %d)", dibwidth, bmpwidth));
+        newpix += ((pBitmapInfo->bmiHeader.biHeight-1)*bmpwidth);
 
         //flip bitmap here; SetDIBits assumes origin is left bottom, SetBitmapBits left top
+        //SetDIBits assumes DWORD aligned data
+        //SetBitmapBits assumes WORD aligned data
         for(int i=0;i<pBitmapInfo->bmiHeader.biHeight;i++) {
-            memcpy(newpix, orgpix, linewidth);
-            newpix -= linewidth;
-            orgpix += linewidth;
+            memcpy(newpix, orgpix, bmpwidth);
+
+            newpix -= bmpwidth;
+            orgpix += dibwidth;
         }
-        newpix += linewidth;
+        newpix += bmpwidth;
         ret = O32_SetBitmapBits(hBitmap, pBitmapInfo->bmiHeader.biSizeImage, newpix);
 
         free(newpix);
