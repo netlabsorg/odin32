@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.25 1999-09-15 23:18:57 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.26 1999-09-16 18:00:44 dengert Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -1039,6 +1039,7 @@ BOOL WIN32API HideCaret( HWND arg1)
 }
 //******************************************************************************
 //******************************************************************************
+#if 0
 BOOL WIN32API InvalidateRgn( HWND arg1, HRGN arg2, BOOL  arg3)
 {
 #ifdef DEBUG
@@ -1046,6 +1047,7 @@ BOOL WIN32API InvalidateRgn( HWND arg1, HRGN arg2, BOOL  arg3)
 #endif
     return O32_InvalidateRgn(arg1, arg2, arg3);
 }
+#endif
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API InvertRect( HDC arg1, const RECT * arg2)
