@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.102 2001-06-15 14:07:22 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.103 2001-07-03 13:23:31 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -816,13 +816,38 @@ BOOL OSLibSetWindowMinPos(HWND hwnd, ULONG x, ULONG y)
 //******************************************************************************
 BOOL OSLibWinGetKeyboardStateTable(unsigned char *PMKeyState)
 {
-  return WinSetKeyboardStateTable(HWND_DESKTOP, (PBYTE)&PMKeyState, FALSE );
+  return WinSetKeyboardStateTable(HWND_DESKTOP, (PBYTE)PMKeyState, FALSE );
 }
 //******************************************************************************
 //******************************************************************************
 BOOL OSLibWinSetKeyboardStateTable(unsigned char *PMKeyState)
 {
-  return WinSetKeyboardStateTable(HWND_DESKTOP, (PBYTE)&PMKeyState, TRUE );
+  return WinSetKeyboardStateTable(HWND_DESKTOP, (PBYTE)PMKeyState, TRUE );
+}
+//******************************************************************************
+//******************************************************************************
+#define TC_CHARTOSCANCODE          0
+#define TC_SCANCODETOCHAR          1
+#define TC_VIRTUALKEYTOSCANCODE    2
+#define TC_SCANCODETOVIRTUALKEY    3
+#define TC_SCANTOOEMSCAN           4
+#define TC_OEMSCANTOSCAN           5
+
+USHORT APIENTRY WinTranslateChar2( USHORT  /* Codepage (currently ignored) */
+                                 , PUSHORT /* Ptr to char to translate     */
+                                 , PULONG  /* Ptr to deadkey save info     */
+                                 , USHORT  /* Translation option (TC_xxx)  */
+                                 , PUSHORT /* Ptr to shift state (TCF_xxx) */
+                                 );
+//******************************************************************************
+//******************************************************************************
+USHORT OSLibWinTranslateChar(USHORT usScanCode)
+{
+  USHORT fsShift = 0;
+
+  WinTranslateChar2(0, &usScanCode, NULL, TC_SCANCODETOVIRTUALKEY,
+                    &fsShift);
+  return usScanCode;
 }
 //******************************************************************************
 //******************************************************************************
