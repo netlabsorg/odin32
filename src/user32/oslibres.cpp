@@ -1,4 +1,4 @@
-/* $Id: oslibres.cpp,v 1.26 2001-10-16 14:49:46 sandervl Exp $ */
+/* $Id: oslibres.cpp,v 1.27 2001-10-18 11:02:22 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -280,6 +280,8 @@ char *colorToMonoBitmap(HBITMAP bmpsrc, BITMAPINFO2 *pBmpDest)
     BITMAPINFO2 *bmpinfo = NULL;
     HAB hab;
 
+    dprintf2(("Convert color bitmap to mono (%d,%d) %d", pBmpDest->cx, pBmpDest->cy, pBmpDest->cBitCount));
+
     hab = GetThreadHAB();
 
     /* create memory device context */
@@ -444,7 +446,7 @@ HANDLE OSLibWinCreatePointer(CURSORICONINFO *pInfo, char *pAndBits, BITMAP_W *pA
                 dprintf(("OSLibWinCreateIcon: GpiCreateBitmap failed!"));
                 goto fail;
         }
-        if(pXorBmp->bmBitsPixel >= 8) 
+        if(fCursor && pXorBmp->bmBitsPixel >= 8) 
         {
             if(isMonoBitmap(pXorBmp, (PBYTE)os2rgb) == TRUE) 
             {
@@ -503,11 +505,12 @@ HANDLE OSLibWinCreatePointer(CURSORICONINFO *pInfo, char *pAndBits, BITMAP_W *pA
         goto fail;
     }
 
-    pointerInfo.fPointer   = !fCursor; //TRUE = icon
+    pointerInfo.fPointer   = fCursor; //FALSE = icon
     pointerInfo.xHotspot   = pInfo->ptHotSpot.x;
     pointerInfo.yHotspot   = mapY(pInfo->nHeight, pInfo->ptHotSpot.y);
     pointerInfo.hbmColor   = hbmColor;
     pointerInfo.hbmPointer = hbmMask;
+    dprintf2(("WinCreatePointerIndirect %d (%d,%d) (org %d,%d)", pointerInfo.fPointer, pointerInfo.xHotspot, pointerInfo.yHotspot, pInfo->ptHotSpot.x, pInfo->ptHotSpot.y));
     hPointer = WinCreatePointerIndirect(HWND_DESKTOP, &pointerInfo);
 
     if(hPointer == NULL) {
