@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.2 2001-09-14 01:50:08 bird Exp $
+# $Id: Makefile,v 1.3 2001-09-16 03:39:07 bird Exp $
 
 #
 # kKrnlLib.sys makefile.
@@ -42,6 +42,10 @@ OBJS  =\
     $(WIN32KOBJ)\d32globals.obj \
     $(WIN32KOBJ)\d16globl.obj \
     $(WIN32KOBJ)\calltaba.obj \
+    $(WIN32KOBJ)\krnlInit.obj \
+    $(WIN32KOBJ)\krnlPrologs.obj \
+    $(WIN32KOBJ)\krnlStubs.obj \
+#    $(WIN32KOBJ)\krnlImports.obj \
     $(WIN32KOBJ)\asmutils.obj \
     $(WIN32KOBJ)\kAssert.obj \
     $(WIN32KOBJ)\kAVLPV.obj \
@@ -285,18 +289,20 @@ $(DHLPOBJS:+=): $(WIN32KOBJ)\devhelp_.lib
 
 
 # List of object files in the converted crt library.
-CLIBOBJS =  +$(WIN32KOBJ)\inp.obj       +$(WIN32KOBJ)\outp.obj \
-            +$(WIN32KOBJ)\anfalmul.obj  +$(WIN32KOBJ)\anfaldiv.obj \
-            +$(WIN32KOBJ)\anfalrem.obj  +$(WIN32KOBJ)\anfauldi.obj \
-            +$(WIN32KOBJ)\anuldiv.obj   +$(WIN32KOBJ)\fmemcpy.obj \
-            +$(WIN32KOBJ)\anulrem.obj   +$(WIN32KOBJ)\anlmul.obj \
-            +$(WIN32KOBJ)\__AHINCR.obj  +$(WIN32KOBJ)\anlshl.obj
+CLIBOBJS =  +$(WIN32KOBJ)\..\inp.obj       +$(WIN32KOBJ)\..\outp.obj \
+            +$(WIN32KOBJ)\..\anfalmul.obj  +$(WIN32KOBJ)\..\anfaldiv.obj \
+            +$(WIN32KOBJ)\..\anfalrem.obj  +$(WIN32KOBJ)\..\anfauldi.obj \
+            +$(WIN32KOBJ)\..\anuldiv.obj   +$(WIN32KOBJ)\..\fmemcpy.obj \
+            +$(WIN32KOBJ)\..\anulrem.obj   +$(WIN32KOBJ)\..\anlmul.obj \
+            +$(WIN32KOBJ)\..\__AHINCR.obj  +$(WIN32KOBJ)\..\anlshl.obj
 
 # Make corrected crt library with only the required object files.
 $(WIN32KOBJ)\clib.lib: $(MSCPATH)\lib\clibcep.lib $(WIN32KBIN)\libconv.exe $(CLIBOBJS:+=)
     @$(RM) $@
     @cd $(WIN32KOBJ)
-    $(DDKPATH)\tools\lib /nologo $@ $(CLIBOBJS);
+    $(DDKPATH)\tools\lib /nologo $@ @<<
+$(CLIBOBJS);
+<<
     @cd $(MAKEDIR)
 
 # Convert devhelp library.
@@ -384,7 +390,7 @@ $(WIN32KBIN)\mkcalltab.exe: $(WIN32KBIN)\clfix.exe $(MKCALLTABOBJS)
         $(MSCPATH)\lib\clibcep.lib
 <<keep
 
-# Interference rule to make the MkCallTab objects.
+# Inference rule to make the MkCallTab objects.
 {dev16}.c.obj_c:
     @$(ECHO) compiling 16bit (mkcalltab): $<
     @$(CC16) -c -W3 -Asfw -G2s -Zp -Zl -nologo -Fa -Zi -Od -Lp -DDEBUG -DEXTRACT \
@@ -407,30 +413,40 @@ $(WIN32KBIN)\clfix.exe: Tools\clfix.c
 
 # Extract object files.
 EXTRACTOBJS = \
-    $(WIN32KOBJ)\extract.obj_e \
-    $(WIN32KOBJ)\probkrnl.obj_e \
-    $(WIN32KOBJ)\d16globl.obj_e \
+    $(WIN32KOBJ)\Extract.obj_e \
+    $(WIN32KOBJ)\Extract32.obj \
+    $(WIN32KOBJ)\krnlPrologs.obj \
+    $(WIN32KOBJ)\ProbKrnl.obj_e \
+    $(WIN32KOBJ)\d16Globl.obj_e \
     $(WIN32KOBJ)\vprntf16.obj_e
 
 # Rules to build Extract.exe.
-$(WIN32KBIN)\extract.exe: $(WIN32KBIN)\clfix.exe $(EXTRACTOBJS)
+$(WIN32KBIN)\Extract.exe: $(WIN32KBIN)\clfix.exe $(EXTRACTOBJS) Extract.def Makefile
     $(LD) $(LFLAGS) /pmtype:vio @<<$(WIN32KOBJ)\$(@B).lnk
         /OUT:$@
         /MAP:$(WIN32KBIN)\$(@B).map
+        Extract.def
         $(EXTRACTOBJS)
         $(TOOLKIT)\lib\os2286.lib
         $(MSCPATH)\lib\clibcep.lib
+        $(VACPATH)\lib\$(RTLLIB_NRE)
+        $(DDKPATH)\lib\os2386.lib
 <<keep
 
 # Copy rule.
-extract.exe: $(WIN32KBIN)\extract.exe
+Extract.exe: $(WIN32KBIN)\Extract.exe
     $(CP) $** $@
 
-# Interference rule to make the Extract objects.
+# Inference rule to make the Extract objects.
 {dev16}.c.obj_e:
     @$(ECHO) compiling 16bit (extract): $<
-    @$(CC16) -c -W3 -Asfw -G2s -Zp -Zl -nologo -Fa -Zi -Od -Lp -DDEBUG -DEXTRACT \
+    @$(CC16) -c -W3 -Asfw -G2s -Zp -Zl -nologo -Zi -Od -Lp -DDEBUG -DEXTRACT \
         -Fa$(WIN32KLIST)\$(*B)_e.s -Fo$(WIN32KOBJ)\$(@B).obj_e $(CINCLUDES16) $<
+
+{dev32}.c.obj_e:
+    @$(ECHO) compiling 32bit (extract): $<
+    $(CC) -c $(CFLAGS) -Gr -Rn -Ti- -ndBIG_ $(CDEFINES) $(CINCLUDES) -Fa$(WIN32KLIST)\$(@B)_e.s \
+        -Fo$(WIN32KOBJ)\$(@F) $<
 
 
 #
