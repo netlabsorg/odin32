@@ -1,14 +1,8 @@
-/* $Id: critsect.cpp,v 1.4 2002-07-19 11:06:45 sandervl Exp $ */
+/* $Id: critsect.cpp,v 1.5 2002-07-22 05:58:02 achimha Exp $ */
 /*
- * Critical sections
+ * Critical sections in the Win32 sense
  * 
- * Copyright 2002 Sander van Leeuwen (sandervl@xs4all.nl) 
- * OS/2 port
- *
- * Based on Wine code
- *
- * Copyright 1998 Alexandre Julliard (991031 Port)
- *
+ * Copyright 2002 Sander van Leeuwen <sandervl@innotek.de>
  *
  */
 #define INCL_DOSPROCESS
@@ -29,6 +23,18 @@
 #define DebugInt3()
 #endif
 
+//******************************************************************************
+// This is an OS/2 implementation of what Win32 treats as "critical sections"
+// It is an implementation that is highly optimized for the case where there is
+// only one thread trying to access the critical section, i.e. it is available
+// most of the time. Therefore we can use these critical sections for all our
+// serialization and not lose any performance when concurrent access is unlikely.
+//
+// In case there is multiple access, we use the OS/2 kernel even semaphores.
+//******************************************************************************
+
+
+// encode PID and TID into one 32bit value
 #define MAKE_THREADID(processid, threadid) 	((processid << 16) | threadid)
 
 //******************************************************************************
@@ -69,6 +75,7 @@ VOID WIN32API DosInitializeCriticalSection(CRITICAL_SECTION_OS2 *crit, PSZ pszSe
 {
     APIRET rc;
 
+    // initialize lock count with special value -1, meaning noone posesses it
     crit->LockCount      = -1;
     crit->RecursionCount = 0;
     crit->OwningThread   = 0;
@@ -129,21 +136,28 @@ void WIN32API DosEnterCriticalSection( CRITICAL_SECTION_OS2 *crit )
     DWORD res;
     DWORD threadid = GetCurrentThreadId();
 
+    // create crit sect just in time...
     if (!crit->hmtxLock)
     {
     	DosInitializeCriticalSection(crit, NULL);
     }
-    if (DosInterlockedIncrement( &crit->LockCount ))
+    // do an atomic increase of the lockcounter and see if it is > 0
+    // (i.e. it is already posessed)
+    if (DosInterlockedIncrement(&crit->LockCount))
     {
 testenter:
+        // if the same thread is requesting it again, memorize it
         if (crit->OwningThread == threadid)
         {
             crit->RecursionCount++;
             return;
         }
-
-        if(DosInterlockedCompareExchange((PLONG)&crit->OwningThread, threadid, 0)) 
+        // do an atomic operation where we compare the owning thread id with 0
+        // and if this is true, exchange it with the id of the current thread.
+        if(DosInterlockedCompareExchange((PLONG)&crit->OwningThread, threadid, 0))
         {
+            // the compare did not return equal, i.e. the crit sect is in use
+
             ULONG ulnrposts;
 
             /* Now wait for it */
@@ -153,6 +167,8 @@ testenter:
                 return;
             }
             DosResetEventSem(crit->hmtxLock, &ulnrposts);
+            // multiple waiters could be running now. Repeat the logic so that
+            // only one actually can get the critical section
             goto testenter;
         }
     }
@@ -201,4 +217,3 @@ void WIN32API DosLeaveCriticalSection( CRITICAL_SECTION_OS2 *crit )
         DosPostEventSem(crit->hmtxLock);
     }
 }
-
