@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.33 1999-10-09 18:16:57 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.34 1999-10-11 15:26:05 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -911,10 +911,10 @@ ULONG Win32BaseWindow::MsgCommand(ULONG cmd, ULONG Id, HWND hwnd)
     case CMD_CONTROL:
         return 0; //todo
     case CMD_ACCELERATOR:
-      	// this fit not really windows behavior.
-      	// maybe TranslateAccelerator() is better
-      	dprintf(("accelerator command"));
-      	return SendInternalMessageA(WM_COMMAND, MAKELONG(Id, 0), 0);
+        // this fit not really windows behavior.
+        // maybe TranslateAccelerator() is better
+        dprintf(("accelerator command"));
+        return SendInternalMessageA(WM_COMMAND, MAKELONG(Id, 0), 0);
   }
   return 0;
 }
@@ -1437,6 +1437,58 @@ done:
 }
 //******************************************************************************
 //******************************************************************************
+LRESULT Win32BaseWindow::DefWndControlColor(UINT ctlType, HDC hdc)
+{
+    //SvL: Set background color to default button color (not window (white))
+    if(ctlType == CTLCOLOR_BTN)
+    {
+        SetBkColor(hdc, GetSysColor(COLOR_BTNFACE));
+        SetTextColor(hdc, GetSysColor(COLOR_WINDOWTEXT));
+        return GetSysColorBrush(COLOR_BTNFACE);
+    }
+    //SvL: Set background color to default dialog color if window is dialog
+    if((ctlType == CTLCOLOR_DLG || ctlType == CTLCOLOR_STATIC) && IsDialog()) {
+        SetBkColor(hdc, GetSysColor(COLOR_BTNFACE));
+        SetTextColor(hdc, GetSysColor(COLOR_WINDOWTEXT));
+        return GetSysColorBrush(COLOR_BTNFACE);
+    }
+
+    if( ctlType == CTLCOLOR_SCROLLBAR)
+    {
+	    HBRUSH hb = GetSysColorBrush(COLOR_SCROLLBAR);
+        COLORREF bk = GetSysColor(COLOR_3DHILIGHT);
+        SetTextColor( hdc, GetSysColor(COLOR_3DFACE));
+        SetBkColor( hdc, bk);
+
+//TODO?
+#if 0
+         /* if COLOR_WINDOW happens to be the same as COLOR_3DHILIGHT
+          * we better use 0x55aa bitmap brush to make scrollbar's background
+          * look different from the window background.
+          */
+        if (bk == GetSysColor(COLOR_WINDOW)) {
+             return CACHE_GetPattern55AABrush();
+        }
+#endif
+    	UnrealizeObject( hb );
+        return (LRESULT)hb;
+    }
+
+    SetTextColor( hdc, GetSysColor(COLOR_WINDOWTEXT));
+
+	if ((ctlType == CTLCOLOR_EDIT) || (ctlType == CTLCOLOR_LISTBOX))
+	{
+	    SetBkColor( hdc, GetSysColor(COLOR_WINDOW) );
+	}
+	else
+	{
+	    SetBkColor( hdc, GetSysColor(COLOR_3DFACE) );
+	    return (LRESULT)GetSysColorBrush(COLOR_3DFACE);
+	}
+    return (LRESULT)GetSysColorBrush(COLOR_WINDOW);
+}
+//******************************************************************************
+//******************************************************************************
 LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 {
     switch(Msg)
@@ -1468,29 +1520,21 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
     case WM_NCCREATE:
         return(TRUE);
 
-    //SvL: Set background color to default button color (not window (white))
-    case WM_CTLCOLORBTN:
-        SetBkColor((HDC)wParam, GetSysColor(COLOR_BTNFACE));
-        SetTextColor((HDC)wParam, GetSysColor(COLOR_WINDOWTEXT));
-        return GetSysColorBrush(COLOR_BTNFACE);
-
-    //SvL: Set background color to default dialog color if window is dialog
-    case WM_CTLCOLORDLG:
-    case WM_CTLCOLORSTATIC:
-        if(IsDialog()) {
-            SetBkColor((HDC)wParam, GetSysColor(COLOR_BTNFACE));
-            SetTextColor((HDC)wParam, GetSysColor(COLOR_WINDOWTEXT));
-            return GetSysColorBrush(COLOR_BTNFACE);
-        }
-        //no break
-
     case WM_CTLCOLORMSGBOX:
     case WM_CTLCOLOREDIT:
     case WM_CTLCOLORLISTBOX:
+    case WM_CTLCOLORBTN:
+    case WM_CTLCOLORDLG:
+    case WM_CTLCOLORSTATIC:
     case WM_CTLCOLORSCROLLBAR:
-         SetBkColor((HDC)wParam, GetSysColor(COLOR_WINDOW));
-         SetTextColor((HDC)wParam, GetSysColor(COLOR_WINDOWTEXT));
-         return GetSysColorBrush(COLOR_BTNFACE);
+        return DefWndControlColor(Msg - WM_CTLCOLORMSGBOX, (HDC)wParam);
+
+    case WM_CTLCOLOR:
+	    return DefWndControlColor(HIWORD(lParam), (HDC)wParam);
+
+    case WM_VKEYTOITEM:
+    case WM_CHARTOITEM:
+	     return -1;
 
     case WM_PARENTNOTIFY:
         return 0;
@@ -2530,8 +2574,8 @@ Win32BaseWindow *Win32BaseWindow::GetWindowFromHandle(HWND hwnd)
 {
  Win32BaseWindow *window;
 
-   if(hwnd == NULL && windowDesktop) 
-	return windowDesktop;
+   if(hwnd == NULL && windowDesktop)
+    return windowDesktop;
 
    if(HwGetWindowHandleData(hwnd, (DWORD *)&window) == TRUE) {
         return window;
@@ -2596,7 +2640,7 @@ HWND Win32BaseWindow::OS2ToWin32Handle(HWND hwnd)
         window = GetWindowFromOS2FrameHandle(hwnd);
         if(window) {
                 return window->getWindowHandle();
-        }  
+        }
         else    return hwnd;    //OS/2 window handle
 }
 //******************************************************************************

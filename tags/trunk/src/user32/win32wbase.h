@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.16 1999-10-09 09:45:28 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.17 1999-10-11 15:26:06 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -154,7 +154,7 @@ Win32BaseWindow *getParent()                    { return (Win32BaseWindow *)Chil
          BOOL   UpdateWindow();
          BOOL   IsIconic();
          HWND   GetWindow(UINT uCmd);
-         BOOL   EnableWindow(BOOL fEnable);
+ virtual BOOL   EnableWindow(BOOL fEnable);
          BOOL   CloseWindow();
   static HWND   GetActiveWindow();
          //Window handle has already been verified, so just return true
@@ -187,6 +187,8 @@ Win32BaseWindow *getTopParent();
        BOOL     PostMessageW(ULONG msg, WPARAM wParam, LPARAM lParam);
        LRESULT  DefWindowProcA(UINT msg, WPARAM wParam, LPARAM lParam);
        LRESULT  DefWindowProcW(UINT msg, WPARAM wParam, LPARAM lParam);
+
+       LRESULT  DefWndControlColor(UINT ctlType, HDC hdc);
 
          void   NotifyParent(UINT Msg, WPARAM wParam, LPARAM lParam);
 
