@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.6 1999-06-17 18:21:43 phaller Exp $ */
+/* $Id: wprocess.cpp,v 1.7 1999-06-17 18:25:22 phaller Exp $ */
 
 /*
  *
@@ -25,6 +25,7 @@
 
 #include "except.h"
 #include "os2util.h"
+
 #include "console.h"
 #include "cio.h"
 #include "versionos2.h"    /*PLF Wed  98-03-18 02:36:51*/

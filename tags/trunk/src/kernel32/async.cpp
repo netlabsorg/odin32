@@ -1,4 +1,4 @@
-/* $Id: async.cpp,v 1.4 1999-06-17 18:21:37 phaller Exp $ */
+/* $Id: async.cpp,v 1.5 1999-06-17 18:25:22 phaller Exp $ */
 
 /*
  * Win32 Asynchronous I/O Subsystem for OS/2
@@ -46,11 +46,7 @@
 #include "misc.h"
 #include "unicode.h"
 
-// PH: to soothe the compiler
-#define BY_HANDLE_FILE_INFORMATION void
-#define LPFILETIME void*
-#define OFSTRUCT void
-
+#include "conwin.h"          // Windows Header for console only
 #include "handlemanager.h"
 
 
