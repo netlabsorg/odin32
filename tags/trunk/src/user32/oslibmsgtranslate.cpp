@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.79 2001-12-12 16:40:43 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.80 2002-02-08 09:58:42 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -52,7 +52,6 @@ BOOL setThreadQueueExtraCharMessage(TEB* teb, MSG* pExtraMsg)
   if (teb->o.odin.fTranslated == TRUE)
     // there's still an already translated message to be processed
     return FALSE;
-  
   teb->o.odin.fTranslated = TRUE;
   memcpy(&teb->o.odin.msgWCHAR, pExtraMsg, sizeof(MSG));
   return TRUE;
@@ -655,7 +654,6 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
                 (winMsg->wParam == VK_LMENU_W) )
             {
               winMsg->message = WINWM_SYSKEYUP;
-              
               // held ALT-key when current key is released
               // generates additional flag 0x2000000
               // Note: PM seems to do this differently, 
@@ -666,9 +664,31 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
               // send WM_KEYUP message
               winMsg->message = WINWM_KEYUP;
             }
-            
             winMsg->lParam |= WIN_KEY_PREVSTATE;                    // bit 30, previous state, always 1 for a WM_KEYUP message
             winMsg->lParam |= 1 << 31;                              // bit 31, transition state, always 1 for WM_KEYUP
+
+            //Shift-Enter and possibly others need to have special handling
+             if (flags & KC_SHIFT)
+             {
+                if(fMsgRemoved && !(teb->o.odin.fTranslated))
+                {                    
+                  dprintf(("PM: KC_SHIFT: %x",winMsg->wParam));
+                  if (winMsg->wParam == VK_RETURN_W)
+                  {
+                    MSG extramsg;
+                    memcpy(&extramsg, winMsg, sizeof(MSG));
+    
+                    extramsg.message = WINWM_CHAR;
+                    extramsg.lParam |= 1 << 31;                              // bit 31, transition state, always 1 for WM_KEYUP 
+
+                    // insert message into the queue
+                    setThreadQueueExtraCharMessage(teb, &extramsg);
+
+                    winMsg->message = WINWM_KEYDOWN;
+                    winMsg->lParam &= 0x3FFFFFFF;
+                  }
+               } // else ???
+            } // KC_SHIFT
           }
           else 
           {
@@ -685,10 +705,25 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
           //
           if (flags & KC_KEYUP)
           {
-            // send WM_SYSKEYUP message
-            winMsg->message = WINWM_SYSKEYUP;
-            winMsg->lParam |= WIN_KEY_PREVSTATE;                    // bit 30, previous state, always 1 for a WM_KEYUP message
-            winMsg->lParam |= 1 << 31;                              // bit 31, transition state, always 1 for WM_KEYUP
+            // as in NT4 we will send currently fake WM_SYSKEYDOWN with
+            // ALT key held
+            // ?? fMsgRemoved care - it seems we can only push one message?		
+            if(fMsgRemoved && !(teb->o.odin.fTranslated))
+            {                    
+
+              MSG extramsg;
+              memcpy(&extramsg, winMsg, sizeof(MSG));
+    
+              extramsg.message = WINWM_SYSKEYUP;
+              extramsg.lParam |= WIN_KEY_PREVSTATE;            
+              extramsg.lParam |= WIN_KEY_ALTHELD;            
+              extramsg.lParam |= 1 << 31;                              // bit 31, transition state, always 1 for WM_KEYUP 
+
+              // insert message into the queue
+              setThreadQueueExtraCharMessage(teb, &extramsg);
+              winMsg->message = WINWM_SYSKEYDOWN;
+              winMsg->lParam |= WIN_KEY_ALTHELD;;
+            }   
           }
           else 
           {
