@@ -1,4 +1,4 @@
-/* $Id: OS2SURFACE.CPP,v 1.24 2000-03-03 19:21:24 hugh Exp $ */
+/* $Id: OS2SURFACE.CPP,v 1.25 2000-03-18 21:17:58 mike Exp $ */
 
 /*
  * Direct/X Surface class implementaion
@@ -1664,14 +1664,14 @@ void OS2IDirectDrawSurface::ColorConversion(LPRECT lpRect)
 //******************************************************************************
 //******************************************************************************
 // Internal callbacks uses by destructor
-int  DestroyRects(LPVOID lpItem, DWORD dwRes)
+INT CALLBACK DestroyRects(LPVOID lpItem, DWORD dwRes)
 {
   DDRectangle *pItem = (DDRectangle*) lpItem;
   delete(pItem);
   return 1;
 }
 
-int ReleaseSurfaces(LPVOID lpItem, DWORD dwRes)
+INT CALLBACK ReleaseSurfaces(LPVOID lpItem, DWORD dwRes)
 {
   OS2IDirectDrawSurface *pSurf;
   pSurf = (OS2IDirectDrawSurface *)lpItem;
@@ -1721,7 +1721,7 @@ OS2IDirectDrawSurface::~OS2IDirectDrawSurface()
   if (DPA_GetPtrCount(DPA_LockedRects)>0)
   {
     DPA_DestroyCallback( DPA_LockedRects,
-                         (DPAENUMPROC)DestroyRects,
+                         DestroyRects,
                          0);
   }
 
@@ -1749,14 +1749,14 @@ OS2IDirectDrawSurface::~OS2IDirectDrawSurface()
   if (DPA_GetPtrCount(DPA_SurfaceMipMaps)>0)
   {
     DPA_DestroyCallback( DPA_SurfaceMipMaps,
-                         (DPAENUMPROC)ReleaseSurfaces,
+                         ReleaseSurfaces,
                          0);
   }
 
   if (DPA_GetPtrCount(DPA_SurfaceAttached)>0)
   {
     DPA_DestroyCallback( DPA_SurfaceAttached,
-                         (DPAENUMPROC)ReleaseSurfaces,
+                         ReleaseSurfaces,
                          0);
   }
 
@@ -2295,9 +2295,7 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
     if (Found)
     {
       delete pIRectDest;
-      #ifdef DEBUG
-        dprintf(("DDRAW: Blt: Dest Surface partly locked\n"));
-      #endif
+      dprintf(("DDRAW: Blt: Dest Surface partly locked\n"));
       return(DDERR_SURFACEBUSY);
     }
   }
@@ -2379,9 +2377,8 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
 
   if(NULL==src)
   {
-    #ifdef DEBUG
-      dprintf(("DDRAW: Unsupported sourceless FX operation. Flags = 0x%04X\n",dwFlags));
-    #endif
+    dprintf(("DDRAW: Unsupported sourceless FX operation. Flags = 0x%04X\n",dwFlags));
+
     return DD_OK;
   }
 
@@ -2478,9 +2475,8 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
     if (Found)
     {
       delete pIRectSrc;
-      #ifdef DEBUG
-        dprintf(("DDRAW: Blt: Src Surface partly locked\n"));
-      #endif
+      dprintf(("DDRAW: Blt: Src Surface partly locked\n"));
+
       return(DDERR_SURFACEBUSY);
     }
   }
@@ -2488,9 +2484,8 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
   if( ( (NULL==lpDestRect) && (NULL!=lpSrcRect) ) ||
       ( (NULL==lpSrcRect) && (NULL!=lpDestRect) ) )
   {
-    #ifdef DEBUG
-      dprintf(("DDRAW: Blitting with scaleing\n Not supported.\n"));
-    #endif
+    dprintf(("DDRAW: Blitting with scaleing\n Not supported.\n"));
+
     return DDERR_NOSTRETCHHW;
   }
 
@@ -2993,6 +2988,88 @@ HRESULT __stdcall SurfBlt4(THIS This, LPRECT lpDestRect, LPDIRECTDRAWSURFACE4 lp
           }
           else
           {
+            // This will be be slow maybe move to ASM ?
+            // using MMX should be much faster
+            switch(dest->dwBytesPPDive)
+            {
+              case 1:
+                while(BlitHeight--)
+                {
+                  x = 0;
+                  while(x<BlitWidth)
+                  {
+                    if(pSrcPos[x] != (char) dwSrcColor)
+                    {
+                      pBltPos[x] = pSrcPos[x];
+                    }
+                    x++;
+                  }
+                  pBltPos += dwPitch;
+                  pSrcPos += src->dwPitchDB;
+                }
+                break;
+              case 2:
+                while(BlitHeight--)
+                {
+                  x = 0;
+                  while(x<BlitWidth)
+                  {
+                    if(((USHORT*)pSrcPos)[x] != (USHORT) dwSrcColor)
+                    {
+                      ((USHORT*)pBltPos)[x] = ((USHORT*)pSrcPos)[x];
+                    }
+                    x++;
+                  }
+                  pBltPos += dwPitch;
+                  pSrcPos += src->dwPitchDB;
+                }
+                break;
+              case 3:
+              {
+                char *pSC, *pDC;
+                pSC = (char*)&dwSrcColor;
+                pDC = (char*)&dwDestColor;
+                BlitWidth *=3;
+
+                while(BlitHeight--)
+                {
+                  x = 0;
+
+                  while(x<BlitWidth)
+                  {
+                    if( (pSrcPos[x]   != pSC[1]) &&
+                        (pSrcPos[x+1] != pSC[2]) &&
+                        (pSrcPos[x+2] != pSC[3])
+                      )
+                    {
+                       pBltPos[x] = pSrcPos[x];
+                       pBltPos[x+1] = pSrcPos[x+2];
+                       pBltPos[x+1] = pSrcPos[x+2];
+                    }
+                    x +=3;
+                  }
+                  pBltPos += dwPitch;
+                  pSrcPos += src->dwPitchDB;
+                }
+                break;
+              }
+              case 4:
+                while(BlitHeight--)
+                {
+                  x = 0;
+                  while(x<BlitWidth)
+                  {
+                    if(((DWORD*)pSrcPos)[x] != dwSrcColor)
+                    {
+                      ((DWORD*)pBltPos)[x] = ((DWORD*)pSrcPos)[x];
+                    }
+                    x++;
+                  }
+                  pBltPos += dwPitch;
+                  pSrcPos += src->dwPitchDB;
+                }
+                break;
+            }  // End switch
             // Only Source colorkey
           }
           // if(dest->lpVtbl == dest->Vtbl4)
