@@ -1,4 +1,4 @@
-/* $Id: windllbase.h,v 1.2 1999-10-04 22:25:02 phaller Exp $ */
+/* $Id: windllbase.h,v 1.3 1999-11-09 14:14:17 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
@@ -27,6 +27,12 @@
 #define DONT_RESOLVE_DLL_REFERENCES     0x00000001
 #define LOAD_LIBRARY_AS_DATAFILE        0x00000002
 #define LOAD_WITH_ALTERED_SEARCH_PATH   0x00000008
+
+//odin.ini section names to lookup renamed dlls
+//i.e. OLE32 -> OLE32OS2
+#define DLLRENAMEWIN_SECTION 	"DLLRENAMEWIN"
+//i.e. OLE32OS2 -> OLE32
+#define DLLRENAMEOS2_SECTION    "DLLRENAMEOS2"
 
 class Win32DllBase : public virtual Win32ImageBase
 {
@@ -72,6 +78,8 @@ static	BOOL      isSystemDll(char *szFileName);
 
 virtual BOOL      isLxDll() = 0;
 virtual BOOL      isDll();
+
+static  void      renameDll(char *dllname, BOOL fWinToOS2=TRUE);
 
 static  Win32DllBase *findModule(char *dllname);
 static  Win32DllBase *findModule(HINSTANCE hinstance);
