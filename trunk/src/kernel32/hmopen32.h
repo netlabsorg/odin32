@@ -1,4 +1,4 @@
-/* $Id: hmopen32.h,v 1.2 1999-07-06 15:48:47 phaller Exp $ */
+/* $Id: hmopen32.h,v 1.3 1999-08-25 14:27:06 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -40,6 +40,14 @@ public:
                                  ULONG         arg2,
                                  ULONG         arg3,
                                  ULONG         arg4);
+
+  virtual BOOL DuplicateHandle(PHMHANDLEDATA pHMHandleData, HANDLE  srcprocess,
+                               PHMHANDLEDATA pHMSrcHandle,
+                               HANDLE  destprocess,
+                               PHANDLE desthandle,
+                               DWORD   fdwAccess,
+                               BOOL    fInherit,
+                               DWORD   fdwOptions);
 
                        /* this is a handler method for calls to CreateFile() */
   virtual DWORD  CreateFile (LPCSTR        lpFileName,

@@ -1,4 +1,4 @@
-/* $Id: hmmmap.cpp,v 1.4 1999-08-25 10:28:40 sandervl Exp $ */
+/* $Id: hmmmap.cpp,v 1.5 1999-08-25 14:27:06 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -56,15 +56,14 @@ DWORD HMDeviceMemMapClass::CreateFileMapping(PHMHANDLEDATA         pHMHandleData
  Win32MemMap *map;
 
   if((hFile == -1 && size_low == 0) || size_high ||
-     protect & (PAGE_READONLY|PAGE_READWRITE|PAGE_WRITECOPY|SEC_COMMIT|SEC_IMAGE|SEC_RESERVE|SEC_NOCACHE) ||
+     protect & ~(PAGE_READONLY|PAGE_READWRITE|PAGE_WRITECOPY|SEC_COMMIT|SEC_IMAGE|SEC_RESERVE|SEC_NOCACHE) ||
      (protect & (PAGE_READONLY|PAGE_READWRITE|PAGE_WRITECOPY)) == 0 ||
      (hFile == -1 && (protect & SEC_COMMIT)) ||
      ((protect & SEC_COMMIT) && (protect & SEC_RESERVE))) 
   {
 
 	dprintf(("CreateFileMappingA: invalid parameter (combination)!"));
-	SetLastError(ERROR_INVALID_PARAMETER);
-	return 0;	
+	return ERROR_INVALID_PARAMETER;
   }
 
   map = new Win32MemMap(hFile, size_low, protect, (LPSTR)name);
@@ -78,7 +77,7 @@ DWORD HMDeviceMemMapClass::CreateFileMapping(PHMHANDLEDATA         pHMHandleData
 	return ERROR_GEN_FAILURE;
   }
   map->AddRef();
-  pHMHandleData->dwUserData = (ULONG)this;
+  pHMHandleData->dwUserData = (ULONG)map;
   pHMHandleData->dwInternalType = HMTYPE_MEMMAP;
   return NO_ERROR;
 }
@@ -117,7 +116,7 @@ DWORD HMDeviceMemMapClass::OpenFileMapping(PHMHANDLEDATA         pHMHandleData,
 	break;
   }
   map->AddRef();
-  pHMHandleData->dwUserData = (ULONG)this;
+  pHMHandleData->dwUserData = (ULONG)map;
   pHMHandleData->dwInternalType = HMTYPE_MEMMAP;
   return NO_ERROR;
 }
