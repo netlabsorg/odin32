@@ -1,7 +1,8 @@
- /* $Id: ChangeLog,v 1.512 1999-12-06 08:38:25 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.513 1999-12-06 16:42:24 achimha Exp $ */
 
  99-12-06: Patrick Haller <phaller@gmx.net>
-	- KERNEL32:	Reimplemented InterlockedXXX-APIs according to NT4
+	- KERNEL32: Reimplemented InterlockedXXX-APIs to 
+                    be NT4 compatible
 
  99-12-05: Christoph Bratschi <cbratschi@datacomm.ch>
 	- KERNEL32: Only convert the string and not everything in UnicodeToAsciiStringN
