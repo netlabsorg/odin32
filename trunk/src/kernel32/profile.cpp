@@ -1,4 +1,4 @@
-/* $Id: profile.cpp,v 1.31 2001-06-10 21:59:31 sandervl Exp $ */
+/* $Id: profile.cpp,v 1.32 2001-10-10 22:24:35 phaller Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -35,7 +35,8 @@
 
 #include "initterm.h"
 
-ODINDEBUGCHANNEL(PROFILE)
+ODINDEBUGCHANNEL(KERNEL32-PROFILE)
+
 
 // -------------------------
 // WINE compatibility macros
@@ -72,14 +73,14 @@ typedef struct
     char            *filename; //first open name
     char            *fullname; //name with path
     time_t           mtime;
-} PROFILE;
+} PROFILEROOT;
 
 
 
 #define N_CACHED_PROFILES 10
 
 /* Cached profile files */
-static PROFILE *MRUProfile[N_CACHED_PROFILES]={NULL};
+static PROFILEROOT *MRUProfile[N_CACHED_PROFILES]={NULL};
 
 #define CurProfile (MRUProfile[0])
 
@@ -474,7 +475,7 @@ static BOOL PROFILE_Open( LPCSTR filename )
     FILE *file = NULL;
     int i,j;
     struct stat buf;
-    PROFILE *tempProfile;
+    PROFILEROOT *tempProfile;
 
     if (!filename || filename[0] == 0) return FALSE;
 
@@ -483,7 +484,7 @@ static BOOL PROFILE_Open( LPCSTR filename )
     if(!CurProfile)
        for(i=0;i<N_CACHED_PROFILES;i++)
          {
-          MRUProfile[i]= (PROFILE*)HEAP_xalloc( SystemHeap, 0, sizeof(PROFILE) );
+          MRUProfile[i]= (PROFILEROOT*)HEAP_xalloc( SystemHeap, 0, sizeof(PROFILEROOT) );
           MRUProfile[i]->changed=FALSE;
           MRUProfile[i]->section=NULL;
           MRUProfile[i]->filename=NULL;
@@ -1642,7 +1643,7 @@ ODINFUNCTION5(BOOL, WritePrivateProfileStructW,
  */
 ODINPROCEDURE0(WriteOutProfiles)
 {
-    PROFILE *lastCurProfile;
+    PROFILEROOT *lastCurProfile;
     INT x;
 
     PROFILE_SaveOdinIni();
