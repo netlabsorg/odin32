@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.16 1999-12-21 12:24:22 sandervl Exp $
+# $Id: makefile,v 1.17 2000-01-31 22:31:25 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -46,14 +46,12 @@ $(TARGET).dll: $(OBJS) $(TARGET).def
 # PMWINX.LIB LIBULS.LIB LIBCONV.LIB
         $(CP) $@ $(PDWIN32_BIN)
 
-$(TARGET).lib: $(TARGET)exp.def
+$(TARGET).LIB: $(TARGET)exp.def
         $(IMPLIB) $(IMPLIBFLAGS) $@ $(TARGET)exp.def
-    $(CP) $@ $(PDWIN32_LIB)
+        $(CP) $@ $(PDWIN32_LIB)
 
-#SvL: Doesn't work. So use fixed one for now..... (TODO)
-#$(TARGET)exp.def: $(TARGET).def
-#        $(IMPDEF) $** $@
-
+$(TARGET)exp.def: $(TARGET).def
+        $(IMPDEF) $** $@
 
 
 ntdll.obj:  .\ntdll.cpp  .\ntdll.h
