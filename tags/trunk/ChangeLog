@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.82 1999-08-14 16:15:54 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.83 1999-08-15 19:15:02 cbratschi Exp $ */
+
+ 99-08-15: Christoph Bratschi <cbratschi@datacomm.ch>
+        - USER32\NEW: controls: wine-990731 update
 
  99-08-14: Christoph Bratschi <cbratschi@datacomm.ch>
         - COMCTL32: wine-990731 update
