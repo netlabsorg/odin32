@@ -1,4 +1,4 @@
-/* $Id: dbglog.cpp,v 1.9 2003-03-26 16:02:33 sandervl Exp $ */
+/* $Id: dbglog.cpp,v 1.10 2004-11-23 17:25:03 sao2l02 Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -292,7 +292,6 @@ int SYSTEM WriteLog(char *tekst, ...)
   pszLastLogEntry = tekst;
 
   ODIN_HEAPCHECK();
-
   if(!init)
   {
     init = TRUE;
@@ -326,7 +325,7 @@ int SYSTEM WriteLog(char *tekst, ...)
 
         sprintf(szLogFile, "%s%d.log", pszLogBase, loadNr);
         flog = fopen(szLogFile, "w");
-        if(flog == NULL) 
+        if(flog == NULL)
         {//probably running exe on readonly device
             sprintf(szLogFile, "%sodin32_%d.log", kernel32Path, loadNr);
             flog = fopen(szLogFile, "w");
@@ -363,7 +362,7 @@ int SYSTEM WriteLog(char *tekst, ...)
 #ifdef WIN32_IP_LOGGING
     if(logSocket == -1) {
 #endif
-    if(teb) 
+    if(teb)
     {
       ULONG ulCallDepth;
 #ifdef DEBUG
@@ -371,25 +370,25 @@ int SYSTEM WriteLog(char *tekst, ...)
 #else
       ulCallDepth = 0;
 #endif
-      
+
       teb->o.odin.logfile = (DWORD)flog;
-      
+
 #ifdef LOG_TIME
       if(sel == 0x150b && fSwitchTIBSel)
-        fprintf(flog, 
+        fprintf(flog,
                 "t%02d (%3d): (%x) (FS=150B) ",
                 LOWORD(teb->o.odin.threadId),
                 ulCallDepth,
                 GetTickCount());
-      else 
-        fprintf(flog, 
+      else
+        fprintf(flog,
                 "t%02d (%3d): (%x) ",
                 LOWORD(teb->o.odin.threadId),
                 ulCallDepth,
                 GetTickCount());
 #else
-      if(sel == 0x150b && fSwitchTIBSel) 
-        fprintf(flog, 
+      if(sel == 0x150b && fSwitchTIBSel)
+        fprintf(flog,
 #ifdef SHOW_FPU_CONTROLREG
                 "t%02d (%3d)(%3x): ",
                 LOWORD(teb->o.odin.threadId),
@@ -400,8 +399,8 @@ int SYSTEM WriteLog(char *tekst, ...)
                 LOWORD(teb->o.odin.threadId),
                 ulCallDepth);
 #endif
-      else 
-        fprintf(flog, 
+      else
+        fprintf(flog,
 #ifdef SHOW_FPU_CONTROLREG
                 "t%02d (%3d)(%3x): ",
                 LOWORD(teb->o.odin.threadId),
@@ -428,7 +427,7 @@ int SYSTEM WriteLog(char *tekst, ...)
         char logbuffer[1024];
         int  prefixlen = 0;
 
-        if(teb) 
+        if(teb)
         {
             ULONG ulCallDepth;
 #ifdef DEBUG
@@ -437,17 +436,17 @@ int SYSTEM WriteLog(char *tekst, ...)
             ulCallDepth = 0;
 #endif
 #ifdef LOG_TIME
-            if(sel == 0x150b && fSwitchTIBSel) 
+            if(sel == 0x150b && fSwitchTIBSel)
                 sprintf(logbuffer, "t%02d (%3d): %x (FS=150B) ",
                         LOWORD(teb->o.odin.threadId), ulCallDepth, GetTickCount());
-            else 
+            else
                 sprintf(logbuffer, "t%02d (%3d): %x ",
                         LOWORD(teb->o.odin.threadId), ulCallDepth, GetTickCount());
 #else
-            if(sel == 0x150b && fSwitchTIBSel) 
+            if(sel == 0x150b && fSwitchTIBSel)
                 sprintf(logbuffer, "t%02d (%3d): (FS=150B) ",
                         LOWORD(teb->o.odin.threadId), ulCallDepth);
-            else 
+            else
                 sprintf(logbuffer, "t%02d (%3d): ",
                         LOWORD(teb->o.odin.threadId), ulCallDepth);
 #endif
@@ -817,5 +816,293 @@ int     WIN32API Odin32GetBuildNumber(void)
 {
     dprintf(("Odin32GetBuildNumber returned %d\n", ODIN32_BUILD_NR));
     return ODIN32_BUILD_NR;
+}
+
+/*****************************************************************************
+ * Name      : debug_c
+ * Parameters: LPSTR targetpointer, int W\Achar, BOOL WCHAR yes/not
+ *             ...
+ * Result    : modified targetpointer points after converted (W)char
+ * Remark    :
+ * Status    :
+ *
+ * Author    : source debugtools modified: Dietrich Teickner
+ *****************************************************************************/
+
+LPSTR debug_c (LPSTR dst, unsigned int c, BOOL LongChar)
+{
+   *dst = '\\';
+   switch (c)
+   {
+   case '\n': dst++ ; c = 'n'; break;
+   case '\r': dst++ ; c = 'r'; break;
+   case '\t': dst++ ; c = 't'; break;
+   case '"': dst++ ; /* c = '"'; */ break;
+   case '\\': dst++ ; /* c = '\\';*/ break;
+   default:
+     if (c < ' ' || c > 126)
+     {
+       dst++;
+       if (LongChar)
+/* different format for non ascii-wchars */
+       {
+         sprintf(dst,"%04x",c);
+         dst+=3;
+         c = *dst;
+       }
+       else
+       {
+         *dst++ = '0' + ((c >> 6) & 7);
+         *dst++ = '0' + ((c >> 3) & 7);
+         c = '0' + ((c >> 0) & 7);
+       }
+     }
+   }
+   *dst++ = c;
+  return dst;
+}
+
+/* ------------------------------------------------------------------------- *
+ * Structures for debugstr_wn/an                                             *
+ * protects the debugstr_.. same time from overwriting                       *
+ * ------------------------------------------------------------------------- */
+struct debugstr_data {
+/* can this made per thread, then can it be shorter */
+LPSTR pToRes [3] /* = { NULL, &res[0] ,&res[sizeof(res)]} */;
+#define _debugstr_data_res_len 512
+char res[_debugstr_data_res_len];
+  };
+#define n_debugstr_data 8
+struct ar_anchor_debug_str {
+  debugstr_data *adr_debugstr_data [n_debugstr_data];
+  };
+static ar_anchor_debug_str* anchor_debug_data = NULL;
+/* ------------------------------------------------------------------------- *
+ * protects the common structures from parallelchanging with bad results,    *
+ * without making critical.                                                  *
+ * ------------------------------------------------------------------------- */
+VOID* WIN32API InterlockedCompareExchange(VOID* dest, VOID* xchg, VOID* compare );
+/* ------------------------------------------------------------------------- *
+ * Helperfunction for semistatic strings                                     *
+ * returns as a funktion of the current threadid the debugstr-structure      *
+ * ------------------------------------------------------------------------- */
+debugstr_data* GetDebugStrData() {
+  debugstr_data* retData = NULL;
+  ar_anchor_debug_str* ar = anchor_debug_data;
+  if (NULL == ar)
+  {
+    ar_anchor_debug_str* ar1 = (ar_anchor_debug_str*)malloc(sizeof(ar_anchor_debug_str));
+    if (ar1)
+    {
+      memset(ar1, 0, sizeof(ar_anchor_debug_str));
+      ar = (ar_anchor_debug_str*)InterlockedCompareExchange(&anchor_debug_data, ar1, NULL);
+      if (NULL == ar)
+      {
+        ar = ar1;
+      }
+      else
+        free(ar1);
+    } /* endif */
+  } /* endif */
+  if (NULL != ar)
+  {
+    USHORT  sel = RestoreOS2FS();
+    TEB *teb = GetThreadTEB();
+    int i_debugstr_data  = (teb) ? ((teb->o.odin.threadId-1) & (n_debugstr_data-1)):0;
+    SetFS(sel);
+    retData = ar->adr_debugstr_data[i_debugstr_data];
+    if (NULL == retData)
+    {
+      debugstr_data* retData1 = (debugstr_data*)malloc(sizeof(debugstr_data));
+      if (retData1)
+      {
+        retData1->pToRes[0] = retData1->pToRes[1] = &retData1->res[0];
+        retData1->pToRes[2] = &retData1->res[sizeof(retData1->res)];
+        retData = (debugstr_data*)InterlockedCompareExchange(&ar->adr_debugstr_data[i_debugstr_data], retData1, NULL);
+        if (NULL == retData)
+        {
+          retData = retData1;
+        }
+        else
+          free(retData1);
+      } /* endif */
+    } /* endif */
+  } /* endif */
+  return retData;
+}
+/* ------------------------------------------------------------------------- *
+ * Helperfunction for semistatic strings                                     *
+ * returns as a temporary reserved string with contence of parm-string       *
+ * ------------------------------------------------------------------------- */
+LPCSTR debugstr_x(LPCSTR src)
+{
+  debugstr_data *ad = GetDebugStrData();
+  LPSTR retdst = "(error)";
+  if (ad)
+  {
+    LPSTR dst;
+    LPSTR dstend;
+    int iLen = strlen(src)+1;
+    do
+    {
+      dstend = ad->pToRes[2] - iLen;
+      retdst = dst = ad->pToRes[0];
+      if ((dst < ad->pToRes[1]) || (dst > dstend))
+        {
+          if (dst == ad->pToRes[1])
+    /* loop, if iLen larger then (ad->pToRes[2] - ad->pToRes[1]) */
+            iLen = (ad->pToRes[2] - ad->pToRes[1]);
+          retdst = ad->pToRes[1];
+        }
+    } while (dst != (LPSTR)InterlockedCompareExchange(&ad->pToRes[0],(retdst + iLen),dst));
+    memcpy(retdst,src,iLen);
+    retdst[iLen-1] = '\0';
+  }
+  return retdst;
+}
+/* ---------------------------------------------------------------------- */
+/*****************************************************************************
+ * Name      : debugstr_an, debugstr_wn
+ * Parameters: LPC(W)STR soucepointer, int max-len
+ *             ...
+ * Variables : soucepointer, max-len, 3-pointer bufferstructure
+ * Result    : pointer to resultstringbuffer
+ * Remark    : do not free the string, it is contence of a buffer
+ * Status    :
+ *
+ * Author    : Dietrich Teickner
+ *****************************************************************************/
+
+LPCSTR SYSTEM debugstr_an(LPCSTR src, int n)
+{
+  LPCSTR retdst = "(null)";
+  if (n < 0) n = -1;
+  if (src)
+  {
+    char temp[92];
+    LPSTR pFree = NULL;
+    LPSTR dst = NULL;
+    LPSTR dststart = &temp[0];
+    LPSTR dstend = &temp[sizeof(temp)];
+#undef debugstr_reserve
+#define debugstr_reserve ((sizeof("\\999") - 1) + sizeof("\"..."))
+#undef debugstr_start
+#define debugstr_start (sizeof('"'))
+    if (HIWORD(src))
+    {
+      int iDstLen = n + (debugstr_start + debugstr_reserve);
+      if (iDstLen > (_debugstr_data_res_len/2)) iDstLen = (_debugstr_data_res_len/2);
+      if (iDstLen > sizeof(temp))
+        pFree = (CHAR*)malloc(iDstLen);
+      if (pFree)
+      {
+        dststart = pFree;
+        dstend = pFree + iDstLen;
+      }
+      dst = dststart + debugstr_start;
+      dstend -= debugstr_reserve;
+      dststart[0] = '"';
+
+      while (n-- != 0 && *src && (dst < dstend))
+      {
+        dst = debug_c (dst, (BYTE) *src++, FALSE);
+      }
+      strcpy(dst,"\"...");
+      if (!*src)
+        dst[1] = '\0';
+
+    }
+    else
+    {
+      sprintf(dststart, "#%04x", LOWORD(src));
+    }
+    retdst = debugstr_x(dststart);
+    if (pFree)
+      free(pFree);
+  } /* endif (src != NULL) */
+  return retdst;
+}
+
+/* ---------------------------------------------------------------------- */
+
+LPCSTR SYSTEM debugstr_wn(LPCWSTR src, int n)
+{
+  LPCSTR retdst = "(null)";
+  if (n < 0) n = -1;
+  if (src)
+  {
+    char temp[92];
+    LPSTR pFree = NULL;
+    LPSTR dst = NULL;
+    LPSTR dststart = &temp[0];
+    LPSTR dstend = &temp[sizeof(temp)];
+#undef debugstr_reserve
+#define debugstr_reserve ((sizeof("\\xxxx") - 1) + sizeof("\"..."))
+#undef debugstr_start
+#define debugstr_start (sizeof('L') + sizeof('"'))
+    if (HIWORD(src))
+    {
+      int iDstLen = n + (debugstr_start + debugstr_reserve);
+      if (iDstLen > (_debugstr_data_res_len/2)) iDstLen = (_debugstr_data_res_len/2);
+      if (iDstLen > sizeof(temp))
+        pFree = (CHAR*)malloc(iDstLen);
+      if (pFree)
+      {
+        dststart = pFree;
+        dstend = pFree + iDstLen;
+      }
+      dst = dststart + debugstr_start;
+      dstend -= debugstr_reserve;
+      dststart[0] = 'L';
+      dststart[1] = '"';
+
+      while (n-- != 0 && *src && (dst < dstend))
+      {
+        dst = debug_c (dst, (WORD) *src++, TRUE);
+      }
+      strcpy(dst,"\"...");
+      if (!*src)
+        dst[1] = '\0';
+
+    }
+    else
+    {
+      sprintf(dststart, "#%04x", LOWORD(src));
+    }
+    retdst = debugstr_x(dststart);
+    if (pFree)
+      free(pFree);
+  } /* endif (src != NULL) */
+  return retdst;
+}
+
+typedef struct _GUID
+{
+    unsigned long Data1;
+    unsigned short Data2;
+    unsigned short Data3;
+    unsigned char Data4[8];
+} GUID;
+
+LPCSTR SYSTEM debugstr_guid( const GUID *id )
+{
+    LPCSTR str = "(null)";
+    char temp[64];
+    if (id)
+    {
+      if (HIWORD(id))
+      {
+        sprintf( temp, "{%08lx-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x}",
+                 id->Data1, id->Data2, id->Data3,
+                 id->Data4[0], id->Data4[1], id->Data4[2], id->Data4[3],
+                 id->Data4[4], id->Data4[5], id->Data4[6], id->Data4[7] );
+      }
+      else
+      {
+        sprintf( temp, "<guid-0x%04x>", LOWORD(id));
+      }
+      str = debugstr_x(temp);
+    }
+    return str;
 }
 

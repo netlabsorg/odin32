@@ -1,4 +1,4 @@
-; $Id: kernel32dbg.def,v 1.39 2004-05-24 08:56:06 sandervl Exp $
+; $Id: kernel32dbg.def,v 1.40 2004-11-23 17:30:02 sao2l02 Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -1251,6 +1251,11 @@ EXPORTS
 
     _ODIN_SetExceptionHandler@4                                   @3114 NONAME
     _ODIN_UnsetExceptionHandler@4                                 @3115 NONAME
+
+; debugstr funktions for multiple debugstrings in one TRACE statement
+    debugstr_an = debugstr_an                                     @3120 NONAME
+    debugstr_wn = debugstr_wn                                     @3121 NONAME
+    debugstr_guid = debugstr_guid                                 @3122 NONAME
 
 ; Char functions (forwarders from user32)
     _DbgCharLowerA@4                                                 @3127 NONAME
