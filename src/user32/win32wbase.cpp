@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.179 2000-04-15 15:11:14 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.180 2000-04-18 11:13:00 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2902,6 +2902,8 @@ Win32BaseWindow *Win32BaseWindow::GetWindowFromHandle(HWND hwnd)
     return NULL;
 }
 //******************************************************************************
+//Note: Should return NULL if window is frame window! (IsOS2FrameWindowHandle depends on this 
+//      behaviour)
 //******************************************************************************
 Win32BaseWindow *Win32BaseWindow::GetWindowFromOS2Handle(HWND hwnd)
 {
@@ -2968,6 +2970,17 @@ HWND Win32BaseWindow::OS2ToWin32Handle(HWND hwnd)
 //    dprintf2(("Win32BaseWindow::OS2ToWin32Handle: not a win32 window %x", hwnd));
     return 0;
 //    else    return hwnd;    //OS/2 window handle
+}
+//******************************************************************************
+//******************************************************************************
+BOOL Win32BaseWindow::IsOS2FrameWindowHandle(HWND hwndWin32, HWND hwndOS2)
+{
+ Win32BaseWindow *window = GetWindowFromHandle(hwndWin32);
+
+    if(window->getOS2FrameWindowHandle() == hwndOS2) {
+	return TRUE;
+    }
+    return FALSE;
 }
 //******************************************************************************
 // GetNextDlgTabItem32   (USER32.276)
