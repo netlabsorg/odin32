@@ -1,0 +1,2 @@
+NAME impdef
+DESCRIPTION 'Tool for converting .def-files before implib reads them.'
