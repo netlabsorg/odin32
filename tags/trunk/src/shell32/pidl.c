@@ -466,40 +466,44 @@ ODINFUNCTION2(BOOL, ILIsEqual,
               LPCITEMIDLIST, pidl1, 
               LPCITEMIDLIST, pidl2)
 {
-	char	szData1[MAX_PATH];
-	char	szData2[MAX_PATH];
+//	char	szData1[MAX_PATH];
+//	char	szData2[MAX_PATH];
 
-	LPITEMIDLIST pidltemp1 = pidl1;
-	LPITEMIDLIST pidltemp2 = pidl2;
+//	LPITEMIDLIST pidltemp1 = pidl1;
+//	LPITEMIDLIST pidltemp2 = pidl2;
 
 	TRACE("pidl1=%p pidl2=%p\n",pidl1, pidl2);
 
 	/* explorer reads from registry directly (StreamMRU),
 	   so we can only check here */
-	if ((!pcheck (pidl1)) || (!pcheck (pidl2))) return FALSE;
+//	if ((!pcheck (pidl1)) || (!pcheck (pidl2))) return FALSE;
 
-	pdump (pidl1);
-	pdump (pidl2);
+//	pdump (pidl1);
+//	pdump (pidl2);
 
 	if ( (!pidl1) || (!pidl2) ) return FALSE;
 	
-	while (pidltemp1->mkid.cb && pidltemp2->mkid.cb)
-	{
+	while (pidl1->mkid.cb && pidl2->mkid.cb)
+        {
+          // compare lengths first
+          if (pidl1->mkid.cb != pidl2->mkid.cb)
+            return FALSE;
+          
 //	    _ILSimpleGetText(pidltemp1, szData1, MAX_PATH);
 //	    _ILSimpleGetText(pidltemp2, szData2, MAX_PATH);
 //
 //	    if (strcasecmp ( szData1, szData2 )!=0 )
-            if (_ILSimpleCompareText(pidltemp1, pidltemp2) != 0)
+            if (_ILSimpleCompareText(pidl1, pidl2) != 0)
 	      return FALSE;
 
-	    pidltemp1 = ODIN_ILGetNext(pidltemp1);
-	    pidltemp2 = ODIN_ILGetNext(pidltemp2);
-	}	
-
-	if (!pidltemp1->mkid.cb && !pidltemp2->mkid.cb)
-	{
-	  return TRUE;
+	    pidl1 = ODIN_ILGetNext(pidl1);
+	    pidl2 = ODIN_ILGetNext(pidl2);
 	}
+  
+        if (!pidl1->mkid.cb && !pidl2->mkid.cb)
+        {
+              return TRUE;
+        }
 
 	return FALSE;
 }
