@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.816 2000-03-18 16:10:02 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.817 2000-03-18 19:47:38 sandervl Exp $ */
+
+ 2000-03-18: Edgar Buerkle <Edgar.Buerkle@gmx.net>
+	- MSVCRT: Implemented _EH_prolog
 
  2000-03-18: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: merged with Corel WINE 20000317
