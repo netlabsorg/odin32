@@ -1,12 +1,12 @@
-# $Id: common.mk,v 1.3 2000-11-21 04:37:22 bird Exp $
+# $Id: common.mk,v 1.4 2000-12-02 23:26:57 bird Exp $
 #
 # Common definitions for tools.
 #
-# Requires that PDWIN32_TCOMMON is defined to point to the
+# Requires that ODIN32_TCOMMON is defined to point to the
 # /tools/common directory
 #
 #
-# Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
+# Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@mynd.no)
 #
 # Project Odin Software License can be found in LICENSE.TXT
 #
@@ -19,20 +19,20 @@
 # OMF=1 indicates GCC+OMF
 #
 !ifndef GCC
-COMMONLIB = $(PDWIN32_TCOMMON)\$(OBJDIR)\common.lib
+COMMONLIB = $(ODIN32_TCOMMON)\$(OBJDIR)\common.lib
 !else
     !if $(OMF) == 0
-COMMONLIB = $(PDWIN32_TCOMMON)\$(OBJDIR)\common.a
+COMMONLIB = $(ODIN32_TCOMMON)\$(OBJDIR)\common.a
     !else
-COMMONLIB = $(PDWIN32_TCOMMON)\$(OBJDIR)\common.lib
+COMMONLIB = $(ODIN32_TCOMMON)\$(OBJDIR)\common.lib
     !endif
 !endif
 
 
 #
-# Add PDWIN32_TCOMMON to the C and C++ includes.
+# Add ODIN32_TCOMMON to the C and C++ includes.
 #
-CINCLUDES = -I$(PDWIN32_TCOMMON) $(CINCLUDES)
+CINCLUDES = -I$(ODIN32_TCOMMON) $(CINCLUDES)
 
 
 #
@@ -40,4 +40,10 @@ CINCLUDES = -I$(PDWIN32_TCOMMON) $(CINCLUDES)
 #
 NO_INTERNAL_LIBS = 1
 INTLIBS = $(COMMONLIB)
+
+
+#
+# Macro for the post include.
+#
+ODIN32_TCOMMON_POST_INC = $(ODIN32_TCOMMON)/common.post.mk
 

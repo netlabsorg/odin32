@@ -10,9 +10,8 @@
 
 all: gdgcc.a gdgcc.lib gdicc.lib
 
-PDWIN32_TOOLS = ..\..\bin
-PDWIN32_INCLUDE = ..\..\..\include
-!include ..\..\..\include\pdwin32.tools
+ODIN32_TOOLS = ../../bin
+!include ../../../makefile.inc
 
 gdgcc.a: force
    @nmake /nologo OMF=0 -f makefile.gcc $@

@@ -1,6 +1,8 @@
-# $Id: makefile,v 1.6 2000-08-31 03:05:05 bird Exp $
+# $Id: makefile,v 1.7 2000-12-02 23:26:59 bird Exp $
+
 #
 # Makefile for debug info convertes - experimental.
+#   Don't bother to cleanup this mess yet.
 #
 # Copyright (c) 2000 knut st. osmundsen (knut.stange.osmundsen@pmsc.no)
 #
@@ -9,26 +11,20 @@
 
 
 # Directory macros.
-PDWIN32_INCLUDE = ..\..\include
-PDWIN32_LIB     = ..\..\lib
-PDWIN32_BIN     = ..\..\$(OBJDIR)
-PDWIN32_TOOLS   = ..\..\tools\bin
-PDWIN32_TCOMMON = ..\common
+ODIN32_TCOMMON = ..\common
 
 
 # Compiler, tools, and interference rules.
 EXETARGET=1
-!include $(PDWIN32_INCLUDE)\pdwin32.mk
-!include $(PDWIN32_TCOMMON)\common.mk
+OLD_STYLE=1
+!include ../../makefile.inc
+!include $(ODIN32_TCOMMON)\common.mk
 
 
 # Flag overloads and local macros.
-CINCLUDES  = -I$(PDWIN32_TCOMMON)
-
-CFLAGS     = $(CINCLUDES) $(CFLAGS) -DRING3 \
-             -Ge+ -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext- -Gm- -Gn- -Ti+ -Rn -Tm-
-CXXFLAGS   = $(CINCLUDES) $(CXXFLAGS) -DRING3 \
-             -Ge+ -Wall+ppt-ppc-inl-cnv-gnr-vft- -Gm- -Gn- -Ti+ -Gx -Rn -Tm-
+CINCLUDES  = -I$(ODIN32_TCOMMON)
+CFLAGS     = $(CFLAGS)   -Wall+ppt-ppc-inl-cnv-gnr-vft-gen-uni-ext- -Gm- -Ti+ -Tm-
+CXXFLAGS   = $(CXXFLAGS) -Wall+ppt-ppc-inl-cnv-gnr-vft-             -Gm- -Ti+ -Tm- $(CXXEXCEPTIONS)
 
 
 # All rule - build objs, target dll, copies dll to bin and makes libs.
@@ -65,17 +61,9 @@ dummy.obj: dummy.c
     icc -c  $**
 
 
-
-
-# Dep rule - makes depenencies for C, C++ and Asm files.
-# -o- removes the object directory - for the time being.
-dep:
-    $(DEPEND) -o- -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win; $(CINCLUDES) \
-        *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
-
-
+#
 # Includes the common rules.
-!include $(PDWIN32_INCLUDE)\pdwin32.post
-!include $(PDWIN32_TCOMMON)\common.mk.post
-
+#
+!include $(ODIN32_POST_INC)
+!include $(ODIN32_TCOMMON_POST_INC)
 

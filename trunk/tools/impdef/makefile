@@ -1,9 +1,9 @@
-# $Id: makefile,v 1.8 2000-11-21 04:37:53 bird Exp $
+# $Id: makefile,v 1.9 2000-12-02 23:27:01 bird Exp $
 
 #
-# PD-Win32 API
+# Odin32 API
 #
-# Makefile for the ImpDef utility.
+#       Makefile for the ImpDef utility.
 #
 #
 
@@ -11,8 +11,8 @@
 #
 # Directory macros.
 #
-PDWIN32_BIN     = ..\bin
-PDWIN32_TCOMMON = ..\common
+ODIN32_TCOMMON = ..\common
+ODIN32_BIN     = $(ODIN32_TOOLS)
 
 
 #
@@ -29,8 +29,8 @@ NO_MAIN_BIN_COPY = 1
 #
 # Compiler, tools, and interference rules.
 #
-!include ../../include/pdwin32.mk
-!include $(PDWIN32_TCOMMON)\common.mk
+!include ../../makefile.inc
+!include $(ODIN32_TCOMMON)\common.mk
 
 
 #
@@ -73,6 +73,6 @@ TARGET = ImpDef
 #
 # Includes the common rules.
 #
-!include $(PDWIN32_INCLUDE)\pdwin32.post
-!include $(PDWIN32_TCOMMON)\common.mk.post
+!include $(ODIN32_POST_INC)
+!include $(ODIN32_TCOMMON_POST_INC)
 

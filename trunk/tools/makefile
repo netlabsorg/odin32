@@ -1,7 +1,7 @@
-# $Id: makefile,v 1.13 2000-11-19 08:20:55 bird Exp $
+# $Id: makefile,v 1.14 2000-12-02 23:26:57 bird Exp $
 
 #
-# PD-Win32 API
+# Odin32 API
 #
 #       Top of the tools tree makefile
 #
@@ -20,9 +20,7 @@
 #
 # Directory macros.
 #
-PDWIN32_INCLUDE = ..\include
-PDWIN32_TOOLS   = .\bin
-!include $(PDWIN32_INCLUDE)\pdwin32.tools
+!include ../makefile.inc
 
 
 #
@@ -48,7 +46,7 @@ _all: all
 #
 # common rules.
 #
-dep clean all:
+$(COMMONRULES):
     $(DODIRS) "$(ALL_DIRS)" $(MAKE_CMD) $@
 
 
@@ -56,15 +54,7 @@ dep clean all:
 # compile tools needed to compile rest of the tree.
 #
 needed:
-    cd fastdep
-    $(MAKE_CMD)
-    cd ..\common
-    $(MAKE_CMD) NODEP=1 dep
-    $(MAKE_CMD) needed
-    cd ..\impdef
-    $(MAKE_CMD) NODEP=1 dep
-    $(MAKE_CMD)
-    cd ..
+    $(DODIRS) "fastdep common impdef" $(MAKE_CMD)
 
 
 #

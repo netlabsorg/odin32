@@ -1,9 +1,9 @@
-# $Id: makefile,v 1.3 2000-11-19 08:25:50 bird Exp $
+# $Id: makefile,v 1.4 2000-12-02 23:26:57 bird Exp $
 
 #
-# PD-Win32 API
+# Odin32 API
 #
-# Makefile for the SDF utility.
+#       Makefile for the SDF utility.
 #
 #
 
@@ -11,11 +11,8 @@
 #
 # Directory macros.
 #
-PDWIN32_INCLUDE = ..\..\include
-PDWIN32_LIB     = ..\..\lib
-PDWIN32_BIN     = ..\bin
-PDWIN32_TOOLS   = ..\bin
-PDWIN32_TCOMMON = ..\common
+ODIN32_TCOMMON = ..\common
+ODIN32_BIN     = $(ODIN32_TOOLS)
 
 
 #
@@ -29,8 +26,8 @@ NO_MAIN_BIN_COPY = 1
 #
 # Compiler, tools, and interference rules.
 #
-!include $(PDWIN32_INCLUDE)\pdwin32.mk
-!include $(PDWIN32_TCOMMON)\common.mk
+!include ../../makefile.inc
+!include $(ODIN32_TCOMMON)\common.mk
 
 
 #
@@ -67,6 +64,6 @@ TARGET = sdf
 #
 # Includes the common rules.
 #
-!include $(PDWIN32_INCLUDE)\pdwin32.post
-!include $(PDWIN32_TCOMMON)\common.mk.post
+!include $(ODIN32_POST_INC)
+!include $(ODIN32_TCOMMON_POST_INC)
 

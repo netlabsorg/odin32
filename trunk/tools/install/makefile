@@ -1,7 +1,7 @@
-# $Id: makefile,v 1.4 2000-11-21 04:33:25 bird Exp $
+# $Id: makefile,v 1.5 2000-12-02 23:27:01 bird Exp $
 
 #
-# PD-Win32 API
+# Odin32 API
 #
 #       odininst.exe makefile
 #
@@ -11,12 +11,15 @@
 # Tell that we're producing an executable.
 #
 EXETARGET = 1
+VIO = 1
+STATIC_CRT = 1
+NO_MAIN_BIN_COPY = 1
 
 
 #
 # Compiler, tools, and interference rules.
 #
-!include ../../include/pdwin32.mk
+!include ../../makefile.inc
 
 
 #
@@ -32,7 +35,7 @@ $(OBJDIR)\odininst.obj
 LIBS = \
 os2386.lib \
 $(RTLLIB) \
-$(PDWIN32_LIB)\kernel32.lib
+$(ODIN32_LIB)\kernel32.lib
 
 
 #
@@ -44,5 +47,5 @@ TARGET = odininst
 #
 # Includes the common rules.
 #
-!include $(PDWIN32_INCLUDE)\pdwin32.post
+!include $(ODIN32_POST_INC)
 

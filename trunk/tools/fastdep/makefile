@@ -1,9 +1,9 @@
-# $Id: makefile,v 1.7 2000-11-21 04:35:37 bird Exp $
+# $Id: makefile,v 1.8 2000-12-02 23:27:00 bird Exp $
 
 #
-# PD-Win32 API
+# Odin32 API
 #
-# Makefile for the Quick-and-Dirty dependency utility. (FastDep)
+#   Makefile for the Quick-and-Dirty dependency utility. (FastDep)
 #
 #
 
@@ -11,7 +11,7 @@
 #
 # Directory macro.
 #
-PDWIN32_BIN     = ..\bin
+ODIN32_BIN     = $(ODIN32_TOOLS)
 
 
 #
@@ -28,7 +28,7 @@ NO_MAIN_BIN_COPY = 1
 #
 # include common definitions
 #
-!include ../../include/pdwin32.mk
+!include ../../makefile.inc
 
 
 #
@@ -67,7 +67,7 @@ TARGET = FastDep
 #
 # Includes the common rules.
 #
-!include $(PDWIN32_INCLUDE)/pdwin32.post
+!include $(ODIN32_POST_INC)
 
 
 #

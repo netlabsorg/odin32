@@ -1,9 +1,9 @@
-# $Id: makefile.os2,v 1.11 2000-09-28 03:06:28 bird Exp $
+# $Id: makefile.os2,v 1.12 2000-12-02 23:27:03 bird Exp $
 
 
-PDWIN32_TOOLS = ..\bin
-PDWIN32_INCLUDE = ..\..\include
-!include $(PDWIN32_INCLUDE)\pdwin32.tools
+ODIN32_TOOLS = ..\bin
+ODIN32_INCLUDE = ..\..\include
+!include $(ODIN32_INCLUDE)\odin32.tools.mk
 
 
 #DEFS      = -D__WINE__ -D__WIN32OS2__ -idirafter ../../include/win -idirafter ../../include
@@ -54,7 +54,7 @@ lexyy.c: parser.l
 
 dep:
     $(DEPEND) -I../../include/win -I../../include -I$(C_INCLUDE_PATH) \
-        *.h *.asm *.inc  $(PDWIN32_INCLUDE)\*.h *.c *.cpp -objo *.c *.cpp
+        *.h *.asm *.inc  $(ODIN32_INCLUDE)\*.h *.c *.cpp -objo *.c *.cpp
 
 
 clean:
