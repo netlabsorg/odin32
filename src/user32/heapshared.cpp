@@ -1,4 +1,4 @@
-/* $Id: heapshared.cpp,v 1.1 1999-09-15 23:18:50 sandervl Exp $ */
+/* $Id: heapshared.cpp,v 1.2 1999-09-23 14:24:57 phaller Exp $ */
 /*
  * Shared heap functions for OS/2
  *
@@ -39,7 +39,7 @@ BOOL InitializeSharedHeap()
 	dprintf(("InitializeSharedHeap: DosSetMem failed with %d", rc));
 	return FALSE;
   }
-  sharedHeap = _ucreate(pSharedMem, INCR_HEAPSIZE, _BLOCK_CLEAN, 
+  sharedHeap = _ucreate(pSharedMem, INCR_HEAPSIZE, _BLOCK_CLEAN,
                         _HEAP_REGULAR|_HEAP_SHARED,
                         getmoreShared, releaseShared);
 
@@ -77,6 +77,9 @@ void  *_smalloc(size_t size)
 //******************************************************************************
 ULONG GetPageRangeFree(ULONG pageoffset)
 {
+  dprintf(("USER32: GetPageRangeFree(%08xh)\n",
+           pageoffset));
+
   for(int i=pageoffset;i<MAX_HEAPPAGES;i++) {
 	if(pageBitmap[i] == 1) {
 		break;
@@ -92,11 +95,16 @@ void * _LNK_CONV getmoreShared(Heap_t pHeap, size_t *size, int *clean)
  ULONG newsize;
  PVOID newblock;
 
+ dprintf(("USER32: getmoreShared(%08xh, %08xh, %08xh)\n",
+          pHeap,
+          *size,
+          *clean));
+
   /* round the size up to a multiple of 4K */
   *size = (*size / 4096) * 4096 + 4096;
   *size = max(*size, INCR_HEAPSIZE);
 
-  for(int i=0;i<MAX_HEAPPAGES;i++) 
+  for(int i=0;i<MAX_HEAPPAGES;i++)
   {
 	int nrpagesfree = GetPageRangeFree(i);
 	if(nrpagesfree >= *size/PAGE_SIZE) {
@@ -106,8 +114,11 @@ void * _LNK_CONV getmoreShared(Heap_t pHeap, size_t *size, int *clean)
 			dprintf(("getmoreShared: DosSetMem failed with %d", rc));
 			return NULL;
   		}
-  		for(int j=i;j<i+*size/PAGE_SIZE;i++) {
-  			pageBitmap[i] = 1; //mark as committed
+  		for(int j=0;
+        j < *size/PAGE_SIZE;
+        j++)
+  {
+  			pageBitmap[i+j] = 1; //mark as committed
   		}
 
 		*clean = _BLOCK_CLEAN;
@@ -139,6 +150,7 @@ void _LNK_CONV releaseShared(Heap_t pHeap, void *block, size_t size)
 //******************************************************************************
 DWORD  HeapGetSharedMemBase()
 {
+  dprintf(("USER32: HeapGetSharedMemBase()\n"));
   return (DWORD) pSharedMem;
 }
 //******************************************************************************
