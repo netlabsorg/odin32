@@ -1,7 +1,11 @@
-/* $Id: changelog,v 1.1663 2001-08-27 08:42:37 sandervl Exp $ */
+/* $Id: changelog,v 1.1664 2001-08-28 18:58:27 sandervl Exp $ */
+
+ 2001-08-28: Sander van Leeuwen <sandervl@xs4all.nl>
+    - GDI32:    o CreateDIBitmap: reverse bitmap for negative height
+                  (fixes buttons in Abiword)
 
  2001-08-27: Sander van Leeuwen <sandervl@xs4all.nl>
-    - USER32:   o FillRect fix: brush 0 means currently selected brush 
+    - USER32:   o FillRect fix: brush 0 means current selected brush 
                   (verified in NT4)
                   (fixes background in registration dialog of CVP)
 
