@@ -1,4 +1,4 @@
-/* $Id: combo.cpp,v 1.6 1999-10-20 06:38:08 sandervl Exp $ */
+/* $Id: combo.cpp,v 1.7 1999-10-20 22:35:52 sandervl Exp $ */
 /*
  * Combo controls
  *
@@ -374,6 +374,10 @@ static void CBCalcPlacement(
   }
   else
   {
+    //SvL: Listbox size might have changed!
+    if(lphc->hWndLBox)
+    	GetWindowRect(lphc->hWndLBox, lprLB);
+
     /*
      * Make sure the dropped width is as large as the combobox itself.
      */
@@ -469,8 +473,13 @@ static LRESULT COMBO_Create( LPHEADCOMBO lphc, HWND hwnd, LPARAM lParam)
 
   LPCREATESTRUCTA  lpcs = (CREATESTRUCTA*)lParam;
 
+//testestest
+#if 1
+  lphc->dwStyle |= CBS_SIMPLE;
+#else
   if( !CB_GETTYPE(lphc) ) lphc->dwStyle |= CBS_SIMPLE;
   else if( CB_GETTYPE(lphc) != CBS_DROPDOWNLIST ) lphc->wState |= CBF_EDIT;
+#endif
 
   lphc->hwndself  = hwnd;
   lphc->owner = lpcs->hwndParent;
@@ -1545,6 +1554,7 @@ static void CBResetPos(
  */
 static void COMBO_Size( LPHEADCOMBO lphc )
   {
+  dprintf(("COMBO_Size"));
   CBCalcPlacement(lphc->hwndself,
                   lphc,
                   &lphc->textRect,
