@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.36 1999-12-20 11:08:54 sandervl Exp $
+# $Id: makefile,v 1.37 1999-12-24 18:41:11 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -36,7 +36,7 @@ LIBS = advapi32\advapi32.lib  avifil32\avifil32.lib  capi2032\capi2032.lib    \
        shlwapi\shlwapi.lib    tapi32\tapi32.lib      user32\user32.lib        \
        version\version.lib    winmm\winmm.lib        winspool\winspool.lib    \
        wnaspi32\wnaspi32.lib  wnetap32\wnetap32.lib  wsock32\wsock32.lib      \
-       wing32\wing32.lib
+       wing32\wing32.lib      dplayx\dplayx.lib
 
 
 all: libs
@@ -113,6 +113,8 @@ all: libs
         cd ..\avifil32
         $(MAKE_CMD)
         cd ..\dplay
+        $(MAKE_CMD)
+        cd ..\dplayx
         $(MAKE_CMD)
         cd ..\wnaspi32
         $(MAKE_CMD)
@@ -206,6 +208,8 @@ clean:
         cd ..\avifil32
         $(MAKE_CMD) clean
         cd ..\dplay
+        $(MAKE_CMD) clean
+        cd ..\dplayx
         $(MAKE_CMD) clean
         cd ..\dinput
         $(MAKE_CMD) clean
