@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.4 2002-08-20 21:14:29 bird Exp $
+# $Id: Makefile,v 1.5 2002-08-28 03:40:03 bird Exp $
 
 #
 # Makesystem Testcases
@@ -23,21 +23,21 @@ MODES = \
 
 # List of C environments
 CC_ENVIRONMENTS = \
-    WAT11C \
-    WAT11C-16 \
     VAC308 \
     VAC365 \
-    EMX \
+    WAT11C \
+    WAT11C-16 \
+#    EMX \
 # missing libraries   MSCV6 \
     MSCV6-16 \
 
 # List of C++ environments
 CXX_ENVIRONMENTS = \
-    WAT11C \
-    WAT11C-16 \
     VAC308 \
     VAC365 \
-    EMX \
+    WAT11C \
+    WAT11C-16 \
+#    EMX \
 
 # List of C as C++ aware environments
 CC_AS_CXX_ENVIRONMENTS = \
@@ -45,7 +45,7 @@ CC_AS_CXX_ENVIRONMENTS = \
     WAT11C-16 \
     VAC308 \
     VAC365 \
-    EMX \
+#    EMX \
 
 # List of C++ as C aware environments
 CXX_AS_CC_ENVIRONMENTS = \

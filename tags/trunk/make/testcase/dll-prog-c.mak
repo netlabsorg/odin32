@@ -1,4 +1,4 @@
-# $Id: dll-prog-c.mak,v 1.3 2002-08-20 21:14:29 bird Exp $
+# $Id: dll-prog-c.mak,v 1.4 2002-08-28 03:40:03 bird Exp $
 
 # Testcase for makeing simple C DLLs.
 
@@ -7,6 +7,7 @@ PATH_ROOT=..\..
 !include $(PATH_ROOT)\make\setup.mak
 
 # target config.
+TARGET_MODE = EXE
 TARGET_NAME = dll-prog-c
 MAKEFILE    = dll-prog-c.mak
 TARGET_LIBS = $(LIB_C_OBJ) $(LIB_OS)    # use the static library!
