@@ -1,4 +1,14 @@
- /* $Id: ChangeLog,v 1.756 2000-02-29 00:55:49 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.757 2000-02-29 10:55:55 bird Exp $ */
+
+ 2000-02-29: knut st. osmundsen <knut.stange.osmundse@pmsc.no>
+        - TOOLS\FASTDEP: Restructured it a little. Support for multiple
+                    languages:
+                        C and C++ (as earlier)
+                        Assembly
+                        Resource files (OS/2 resources at least...)
+                        COBOL (just for fun! - I'll use it at job)
+                    Things seems to work ok, but if an error occurs, please
+                    fix it or send me a not and I'll fix it ASAP.
 
  2000-02-29: Sander van Leeuwen <sandervl@xs4all.nl>
 	- OPENGL\MESA: Added Odin port of Mesa Opengl library
@@ -6,14 +16,14 @@
 	  NOTE: The Mesa 3D graphics library has a different license
                 (see LICENSE.TXT in the Mesa directory)
 	- OPENGL\MESA\3DFX:
-		       Added Odin port of 3dfx Voodoo Mesa GL 
+		       Added Odin port of 3dfx Voodoo Mesa GL
                        (tested with simple opengl samples only, but
                         this is the first hardware accelerated Opengl
                         implementation for OS/2!)
                        NOTE: This is not yet included in the daily build
 	  NOTE: The Mesa 3dfx graphics library has a different license
                 (see LICENSE.TXT in the Mesa\3dfx directory)
-                   
+
  2000-02-28: Sander van Leeuwen <sandervl@xs4all.nl>
 	- KERNEL32: Call ExitProcess in KillWin32Process to make sure
                     the dll libmain handlers are called after a crash.
