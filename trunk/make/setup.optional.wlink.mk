@@ -1,4 +1,4 @@
-# $Id: setup.optional.wlink.mk,v 1.4 2002-08-29 12:13:41 bird Exp $
+# $Id: setup.optional.wlink.mk,v 1.5 2002-08-30 18:57:13 bird Exp $
 
 #
 #  Helper file for all the optional stuff which is common for
@@ -28,7 +28,7 @@ _LD_CACHE       = ,cache
 !ifdef LD_FORMAT
 ! if "$(LD_FORMAT)" == "NE"
 _LD_FORMAT      = $(BUILD_PLATFORM)-16
-TOOLS_STRIP     =
+TOOL_STRIP      =
 ! else
 !  if "$(LD_FORMAT)" == "LX"
 _LD_FORMAT      = os2
