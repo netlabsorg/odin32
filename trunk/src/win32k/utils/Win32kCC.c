@@ -1,4 +1,4 @@
-/* $Id: Win32kCC.c,v 1.9 2000-12-12 15:34:17 bird Exp $
+/* $Id: Win32kCC.c,v 1.10 2001-01-08 18:05:26 bird Exp $
  *
  * Win32CC - Win32k Control Center.
  *
@@ -351,8 +351,9 @@ MRESULT EXPENTRY Win32kCCDlgProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
                     if (pThis->NewOptions.usCom == 0x3e8)       strcat(szArgs, " -C3");
                     if (pThis->NewOptions.usCom == 0x2e8)       strcat(szArgs, " -C4");
                     if (pThis->NewOptions.fPE == FLAGS_PE_PE2LX)strcat(szArgs, " -P:pe2lx");
-                    /*if (pThis->NewOptions.fPE == FLAGS_PE_MIXED)strcat(szArgs, " -P:mixed"); - default */
-                    if (pThis->NewOptions.fPE == FLAGS_PE_PE)   strcat(szArgs, " -P:pe");
+                    /*if (pThis->NewOptions.fPE == FLAGS_PE_MIXED)strcat(szArgs, " -P:mixed"); - old default */
+                    if (pThis->NewOptions.fPE == FLAGS_PE_MIXED)strcat(szArgs, " -P:mixed");
+                    /* if (pThis->NewOptions.fPE == FLAGS_PE_PE)   strcat(szArgs, " -P:pe"); - default */
                     if (pThis->NewOptions.fPE == FLAGS_PE_NOT)  strcat(szArgs, " -P:not");
                     if (pThis->NewOptions.ulInfoLevel != 0) /* -W0 is default */
                         sprintf(szArgs + strlen(szArgs), " -W%d", pThis->NewOptions.ulInfoLevel); /* FIXME - to be changed */

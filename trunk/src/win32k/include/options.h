@@ -1,4 +1,4 @@
-/* $Id: options.h,v 1.14 2000-12-17 22:45:52 bird Exp $
+/* $Id: options.h,v 1.15 2001-01-08 18:05:26 bird Exp $
  *
  * Options.
  *
@@ -54,7 +54,7 @@
             ~0UL,                   /* ulBuild       */     \
             (unsigned short)~0,     /* usVerMajor    */     \
             (unsigned short)~0,     /* usVerMinor    */     \
-            FLAGS_PE_MIXED,         /* fPE           */     \
+            FLAGS_PE_PE,            /* fPE           */     \
             INFOLEVEL_QUIET,        /* ulInfoLevel   */     \
             FALSE,                  /* fElf          */     \
             TRUE,                   /* fUNIXScript   */     \
