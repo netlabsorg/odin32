@@ -1,4 +1,4 @@
-/* $Id: dibitmap.cpp,v 1.31 2002-07-15 10:02:28 sandervl Exp $ */
+/* $Id: dibitmap.cpp,v 1.32 2002-07-15 11:19:05 sandervl Exp $ */
 
 /*
  * GDI32 dib & bitmap code
@@ -135,13 +135,11 @@ HBITMAP WIN32API CreateDIBitmap(HDC hdc, const BITMAPINFOHEADER *lpbmih,
 
     if(rc) { 
         STATS_CreateDIBitmap(rc, hdc, lpbmih, fdwInit, lpbInit, lpbmi, fuUsage);
-#ifdef NEW_GDIHANDLES
         if(bitfields[1] == RGB565_GREEN_MASK) {
             //mark bitmap as RGB565
             dprintf(("RGB565 bitmap"));
             ObjSetHandleFlag(rc, OBJHANDLE_FLAG_BMP_RGB565, TRUE);
         }
-#endif
     }
 
     return rc;
@@ -151,7 +149,6 @@ HBITMAP WIN32API CreateDIBitmap(HDC hdc, const BITMAPINFOHEADER *lpbmih,
 HBITMAP WIN32API CreateCompatibleBitmap( HDC hdc, int nWidth, int nHeight)
 {
     HBITMAP hBitmap;
-#ifdef NEW_GDIHANDLES
     pDCData pHps;  
 
     pHps = (pDCData)OSLibGpiQueryDCData((HPS)hdc);
@@ -160,18 +157,15 @@ HBITMAP WIN32API CreateCompatibleBitmap( HDC hdc, int nWidth, int nHeight)
         SetLastError(ERROR_INVALID_HANDLE);
         return 0;
     }
-#endif
 
     hBitmap = O32_CreateCompatibleBitmap(hdc, nWidth, nHeight);
     dprintf(("GDI32: CreateCompatibleBitmap %x (%d,%d) returned %x", hdc, nWidth, nHeight, hBitmap));
     if(hBitmap) {
         STATS_CreateCompatibleBitmap(hBitmap,hdc, nWidth, nHeight);
-#ifdef NEW_GDIHANDLES
         if(pHps->hwnd == 1) { //1 == HWND_DESKTOP
             dprintf(("Screen compatible bitmap"));
             ObjSetHandleFlag(hBitmap, OBJHANDLE_FLAG_BMP_SCREEN_COMPATIBLE, 1);
         }
-#endif
     }
 
     return hBitmap;
@@ -397,7 +391,6 @@ int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLine
         case 15:
         case 16: //RGB 565
         {
-#ifdef NEW_GDIHANDLES
             DWORD dwFlags;
 
             dwFlags = ObjQueryHandleFlags(hBitmap);
@@ -412,11 +405,6 @@ int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLine
                 ((DWORD*)(lpbi->bmiColors))[2] = RGB555_BLUE_MASK;
             }
             break;
-#else
-            ((DWORD*)(lpbi->bmiColors))[0] = RGB555_RED_MASK;
-            ((DWORD*)(lpbi->bmiColors))[1] = RGB555_GREEN_MASK;
-            ((DWORD*)(lpbi->bmiColors))[2] = RGB555_BLUE_MASK;
-#endif
         }
         case 24:
         case 32:
