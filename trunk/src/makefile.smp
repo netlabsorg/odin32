@@ -1,4 +1,4 @@
-# $Id: makefile.smp,v 1.6 2000-02-05 01:50:15 sandervl Exp $
+# $Id: makefile.smp,v 1.7 2000-02-10 01:17:06 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -26,7 +26,7 @@ MAKE_CMD = $(MAKE_CMD) NODEBUGINFO=1
 all:
 	cd dllentry
         $(MAKE_CMD)
-        cd imagehlp
+        cd ..\imagehlp
         $(MAKE_CMD)
         cd ..\avifil32
         $(MAKE_CMD)

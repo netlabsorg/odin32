@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2000-02-09 23:48:48 bird Exp $
+# $Id: makefile,v 1.8 2000-02-10 01:16:30 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -72,19 +72,19 @@ dep:
 
 clean:
     cd common
-    $(MAKE_CMD) clean
+    $(MAKE_CMD) NODEP=1 clean
     cd ..\database
-    $(MAKE_CMD) clean
+    $(MAKE_CMD) NODEP=1 clean
     cd ..\impdef
-    $(MAKE_CMD) clean
+    $(MAKE_CMD) NODEP=1 clean
     cd ..\fastdep
-    $(MAKE_CMD) clean
+    $(MAKE_CMD) NODEP=1 clean
     cd ..\wrc
-    $(MAKE_CMD) -f makefile.os2 clean
+    $(MAKE_CMD) -f makefile.os2 NODEP=1 clean
     cd ..\omfdumper
-    $(MAKE_CMD) clean
+    $(MAKE_CMD) NODEP=1 clean
     cd ..\sdf
-    $(MAKE_CMD) clean
+    $(MAKE_CMD) NODEP=1 clean
 
     cd ..\bin
 # wrc.exe requires lots of tools so better not remove it...

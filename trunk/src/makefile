@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.43 2000-02-10 00:01:37 bird Exp $
+# $Id: makefile,v 1.44 2000-02-10 01:17:05 sandervl Exp $
 
 #
 # PD-Win32 API
@@ -169,7 +169,7 @@ dep:
 clean:
     $(DOWITHDIRS) -e$(NOTTOBEMADE) -cp $(MAKE_CMD) NODEP=1 clean
     cd win32k\pe2lx
-    $(MAKE_CMD) $(MAKE_CMD) NODEP=1 clean
+    $(MAKE_CMD) NODEP=1 clean
     cd ..\..
     cd win32k
     if exist makefile.inc $(MAKE_CMD) NODEP=1 clean
