@@ -1,4 +1,4 @@
-/* $Id: profile.cpp,v 1.20 1999-11-09 14:19:46 sandervl Exp $ */
+/* $Id: profile.cpp,v 1.21 1999-11-22 20:35:51 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -714,7 +714,7 @@ ODINFUNCTION5(int,PROFILE_GetOdinIniString,
     }
     else
     {
-       ret = PROFILE_GetSection( PROFILE_OdinProfile, section, (char*)buffer, len, TRUE, FALSE );
+        ret = PROFILE_GetSection( PROFILE_OdinProfile, section, (char*)buffer, len, TRUE, FALSE );
     }
     LeaveCriticalSection( &PROFILE_CritSect );
 
@@ -962,7 +962,8 @@ ODINFUNCTION0(int,PROFILE_LoadOdinIni)
       PROFILE_OdinProfile = PROFILE_Load( f );
       fclose( f );
       strncpy(PROFILE_OdinIniUsed,p,MAX_PATHNAME_LEN-1);
-    } else
+    } 
+    else
     {
       HINSTANCE hInstance = LoadLibraryA("KERNEL32.DLL");
       GetModuleFileNameA(hInstance,PROFILE_OdinIniUsed,sizeof(PROFILE_OdinIniUsed));

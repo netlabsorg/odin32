@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.25 1999-11-12 14:57:13 sandervl Exp $ */
+/* $Id: HandleManager.cpp,v 1.26 1999-11-22 20:35:49 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -1562,8 +1562,12 @@ DWORD HMWaitForSingleObject(HANDLE hObject,
   iIndex = _HMHandleQuery(hObject);                         /* get the index */
   if (-1 == iIndex)                                               /* error ? */
   {
-    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
-    return WAIT_FAILED;                         /* signal failure */
+    dprintf(("KERNEL32: HandleManager:HMWaitForSingleObject(%08xh) passed on to Open32.\n",
+             hObject));
+    
+    // maybe handles from CreateProcess() ...
+    dwResult = O32_WaitForSingleObject(hObject, dwTimeout);
+    return (dwResult);
   }
 
   // @@@PH Problem: wrong class (base class) is called instead of

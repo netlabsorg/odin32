@@ -1,4 +1,4 @@
-/* $Id: mmap.h,v 1.11 1999-11-10 14:16:01 sandervl Exp $ */
+/* $Id: mmap.h,v 1.12 1999-11-22 20:35:50 sandervl Exp $ */
 
 /*
  * Memory mapped class
@@ -27,6 +27,7 @@
 #define MEMMAP_ACCESS_EXECUTE	4
 
 class Win32MemMapView;
+class Win32PeLdrImage;
 
 //******************************************************************************
 //******************************************************************************
@@ -34,6 +35,8 @@ class Win32MemMap
 {
 public:
    Win32MemMap(HFILE hfile, ULONG size, ULONG fdwProtect, LPSTR lpszName);
+   //Use by PE loader image class only:
+   Win32MemMap(Win32PeLdrImage *pImage, ULONG lpImageMem, ULONG size);
   ~Win32MemMap();
 
    BOOL   Init(HANDLE hMemMap);
@@ -46,6 +49,9 @@ public:
    DWORD  getProtFlags()                 { return mProtFlags; };
    LPVOID getMappingAddr()               { return pMapping; };
    DWORD  getProcessId()                 { return mProcessId;};
+Win32PeLdrImage *getImage()              { return image; };
+
+   BOOL   isImageMap()                   { return image != NULL; };
 
    void   AddRef()                       { ++referenced; };
    void   Release()                      { if(--referenced == 0) delete this; };
@@ -92,6 +98,8 @@ protected:
    ULONG  referenced;
 
    VMutex mapMutex;
+
+   Win32PeLdrImage *image;
 
 private:
    static Win32MemMap *memmaps;
