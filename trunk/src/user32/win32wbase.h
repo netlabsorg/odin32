@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.121 2001-06-22 18:32:11 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.122 2001-07-04 09:29:52 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -252,6 +252,7 @@ virtual  BOOL   DestroyWindow();
          VOID   setOS2HwndModalDialog(HWND aHwnd) { OS2HwndModalDialog = aHwnd; };
          HWND   getOS2HwndModalDialog()       { return OS2HwndModalDialog; };
          BOOL   CanReceiveSizeMsgs()          { return !fNoSizeMsg; };
+         BOOL   IsParentChanging()            { return fParentChange; };
          BOOL   IsWindowCreated()             { return fCreated; }
          BOOL   IsWindowDestroyed()           { return fIsDestroyed; };
          BOOL   IsWindowIconic();
@@ -372,6 +373,7 @@ protected:
                  fInternalMsg:1,         //Used to distinguish between messages
                                          //sent by PM and those sent by apps
                  fNoSizeMsg:1,
+                 fParentChange:1,
                  fIsDestroyed:1,
                  fDestroyWindowCalled:1, //DestroyWindow was called for this window
                  fCreated:1,

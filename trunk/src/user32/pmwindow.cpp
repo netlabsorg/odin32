@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.137 2001-06-17 21:08:00 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.138 2001-07-04 09:29:51 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -493,6 +493,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         break;
 
     case WM_TIMER:
+        dprintf(("WM_TIMER %x %x time %x", win32wnd->getWindowHandle(), pWinMsg->wParam, GetTickCount()));
         win32wnd->DispatchMsgA(pWinMsg);
         goto RunDefWndProc;
 
@@ -750,6 +751,11 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
 
         dprintf(("PMFRAME:WM_ADJUSTWINDOWPOS %x %x %x (%d,%d) (%d,%d)", win32wnd->getWindowHandle(), pswp->hwnd, pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
 
+        if(win32wnd->IsParentChanging()) {
+            rc = 0;
+            break;
+        }
+
         if(pswp->fl & SWP_NOADJUST) {
             //ignore weird messages (TODO: why are they sent?)
             break;
@@ -876,6 +882,9 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
       RECTL     rect;
 
         dprintf(("PMFRAME:WM_WINDOWPOSCHANGED (%x) %x %x (%d,%d) (%d,%d)", mp2, win32wnd->getWindowHandle(), pswp->fl, pswp->x, pswp->y, pswp->cx, pswp->cy));
+        if(win32wnd->IsParentChanging()) {
+            goto PosChangedEnd;
+        }
 
         if ((pswp->fl & (SWP_SIZE | SWP_MOVE | SWP_ZORDER)) == 0)
         {

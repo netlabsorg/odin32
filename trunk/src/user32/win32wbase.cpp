@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.271 2001-06-17 21:08:01 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.272 2001-07-04 09:29:51 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -105,6 +105,7 @@ void Win32BaseWindow::Init()
   OS2HwndModalDialog  = 0;
   fInternalMsg     = FALSE;
   fNoSizeMsg       = FALSE;
+  fParentChange    = FALSE;
   fIsDestroyed     = FALSE;
   fDestroyWindowCalled = FALSE;
   fCreated         = FALSE;
@@ -2786,6 +2787,7 @@ HWND Win32BaseWindow::SetParent(HWND hwndNewParent)
         fShow = TRUE;
    }
    if(oldparent) {
+        //release parent here (increased refcount during creation)
         RELEASE_WNDOBJ(oldparent);
    }
    newparent = GetWindowFromHandle(hwndNewParent);
@@ -2793,6 +2795,8 @@ HWND Win32BaseWindow::SetParent(HWND hwndNewParent)
    {
         setParent(newparent);
         getParent()->addChild(this);
+        fParentChange = TRUE;
+
         OSLibWinSetParent(getOS2FrameWindowHandle(), getParent()->getOS2WindowHandle());
         if(!(getStyle() & WS_CHILD))
         {
@@ -2804,6 +2808,12 @@ HWND Win32BaseWindow::SetParent(HWND hwndNewParent)
                 setWindowId(0);
             }
         }
+        //SvL: Even though the win32 coordinates might not change, the PM
+        //     coordinates can. We must make sure the control stays at the
+        //     same position (y) relative to the (new) parent.
+        SetWindowPos(HWND_TOPMOST, rectWindow.left, rectWindow.top, 0, 0,
+                     SWP_NOACTIVATE|SWP_NOSIZE);
+        fParentChange = FALSE;
    }
    else {
         if(newparent) RELEASE_WNDOBJ(newparent);
