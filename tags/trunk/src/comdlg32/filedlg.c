@@ -134,12 +134,18 @@ static BOOL FileDlg_Init(void)
 	if (!hCDRom) hCDRom = LoadImageA(0, MAKEINTRESOURCEA(OIC_CDROM), IMAGE_ICON, 16, 16, LR_SHARED);
 	if (!hNet) hNet = LoadImageA(0, MAKEINTRESOURCEA(OIC_NETWORK), IMAGE_ICON, 16, 16, LR_SHARED);
 #else
-	if (!hFolder) hFolder = LoadIconA(0, MAKEINTRESOURCEA(OIC_FOLDER));
-	if (!hFolder2) hFolder2 = LoadIconA(0, MAKEINTRESOURCEA(OIC_FOLDER2));
-	if (!hFloppy) hFloppy = LoadIconA(0, MAKEINTRESOURCEA(OIC_FLOPPY));
-	if (!hHDisk) hHDisk = LoadIconA(0, MAKEINTRESOURCEA(OIC_HDISK));
-	if (!hCDRom) hCDRom = LoadIconA(0, MAKEINTRESOURCEA(OIC_CDROM));
-	if (!hNet) hNet = LoadIconA(0, MAKEINTRESOURCEA(OIC_NETWORK));
+        HINSTANCE inst = GetModuleHandleA( "comdlg32.dll" );
+        if (!inst)
+        {
+            ERR( "cannot get comdlg32.dll instance\n" );
+            return FALSE;
+        }
+        hFolder  = LoadImageA( inst, "FOLDER", IMAGE_ICON, 16, 16, LR_SHARED );
+        hFolder2 = LoadImageA( inst, "FOLDER2", IMAGE_ICON, 16, 16, LR_SHARED );
+        hFloppy  = LoadImageA( inst, "FLOPPY", IMAGE_ICON, 16, 16, LR_SHARED );
+        hHDisk   = LoadImageA( inst, "HDISK", IMAGE_ICON, 16, 16, LR_SHARED );
+        hCDRom   = LoadImageA( inst, "CDROM", IMAGE_ICON, 16, 16, LR_SHARED );
+        hNet     = LoadImageA( inst, "NETWORK", IMAGE_ICON, 16, 16, LR_SHARED );
 #endif
 	if (hFolder == 0 || hFolder2 == 0 || hFloppy == 0 || 
 	    hHDisk == 0 || hCDRom == 0 || hNet == 0)
@@ -1317,8 +1323,8 @@ LFSPRIVATE FILEDLG_AllocPrivate(LPARAM lParam, int type, UINT dlgType)
         lfs->open = TRUE;
     else
         lfs->open = FALSE;
-    lfs->lbselchstring = RegisterWindowMessageA(LBSELCHSTRING);
-    lfs->fileokstring = RegisterWindowMessageA(FILEOKSTRING);
+    lfs->lbselchstring = RegisterWindowMessageA(LBSELCHSTRINGA);
+    lfs->fileokstring = RegisterWindowMessageA(FILEOKSTRINGA);
     switch(type)
     {
 #ifndef __WIN32OS2__
@@ -1676,6 +1682,7 @@ BOOL WINAPI GetOpenFileNameA(
 	LPOPENFILENAMEA ofn) /* [in/out] address of init structure */
 {
     BOOL  newlook = TRUE; /* FIXME: TWEAK_WineLook */
+    COMDLG32_SetCommDlgExtendedError(0);
 
 #ifdef __WIN32OS2__
     dprintf(("GetOpenFileNameA %x", ofn));
@@ -1711,6 +1718,7 @@ BOOL WINAPI GetOpenFileNameW(
 	LPOPENFILENAMEW ofn) /* [in/out] address of init structure */
 {
     BOOL  newlook = TRUE; /* FIXME: TWEAK_WineLook */
+    COMDLG32_SetCommDlgExtendedError(0);
 
 #ifdef __WIN32OS2__
     dprintf(("GetOpenFileNameW %x", ofn));
@@ -1746,6 +1754,7 @@ BOOL WINAPI GetSaveFileNameA(
 	LPOPENFILENAMEA ofn) /* [in/out] address of init structure */
 {
     BOOL  newlook = TRUE; /* FIXME: TWEAK_WineLook */
+    COMDLG32_SetCommDlgExtendedError(0);
 
 #ifdef __WIN32OS2__
     dprintf(("GetSaveFileNameA %x", ofn));
@@ -1781,6 +1790,7 @@ BOOL WINAPI GetSaveFileNameW(
 	LPOPENFILENAMEW ofn) /* [in/out] address of init structure */
 {
     BOOL  newlook = TRUE; /* FIXME: TWEAK_WineLook */
+    COMDLG32_SetCommDlgExtendedError(0);
 
 #ifdef __WIN32OS2__
     dprintf(("GetSaveFileNameW %x", ofn));
