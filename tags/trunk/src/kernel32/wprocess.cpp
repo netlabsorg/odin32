@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.36 1999-10-09 13:33:25 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.37 1999-10-14 09:21:43 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -305,6 +305,12 @@ static HINSTANCE iLoadLibraryA(LPCTSTR lpszLibFile, DWORD dwFlags)
  char        modname[CCHMAXPATH];
  HINSTANCE   hDll;
  Win32DllBase *module;
+
+  module = Win32DllBase::findModule((LPSTR)lpszLibFile);
+  if(module) {
+    	module->AddRef();
+    	return module->getInstanceHandle();
+  }
 
   hDll = O32_LoadLibrary(lpszLibFile);
   dprintf(("KERNEL32:  iLoadLibraryA %s returned %X (%d)\n",
