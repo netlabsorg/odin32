@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.43 2001-03-30 11:14:35 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.44 2001-03-30 23:59:46 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -396,6 +396,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
                 DebugInt3();
                 goto dummymessage;
             }
+            winMsg->hwnd = hwnd;
         }
 #endif
 
@@ -472,6 +473,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
                 DebugInt3();
                 goto dummymessage;
             }
+            winMsg->hwnd = hwnd;
         }
 #endif
 

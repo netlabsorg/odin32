@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.91 2001-03-30 22:08:20 sandervl Exp $ */
+/* $Id: window.cpp,v 1.92 2001-03-30 23:59:47 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -1483,13 +1483,47 @@ BOOL WIN32API CloseWindow(HWND hwnd)
     return window->CloseWindow();
 }
 //******************************************************************************
+//******************************************************************************
+static BOOL IsPointInWindow(HWND hwnd, POINT point)
+{
+    RECT  rectWindow;
+    DWORD hittest, dwStyle, dwExStyle;
+
+    dwStyle   = GetWindowLongA(hwnd, GWL_STYLE);
+    dwExStyle = GetWindowLongA(hwnd, GWL_EXSTYLE);
+
+    GetWindowRect(hwnd, &rectWindow);
+
+    /* If point is in window, and window is visible, and it  */
+    /* is enabled (or it's a top-level window), then explore */
+    /* its children. Otherwise, go to the next window.       */
+
+    if( (dwStyle & WS_VISIBLE) &&
+        ((dwExStyle & (WS_EX_LAYERED | WS_EX_TRANSPARENT)) != (WS_EX_LAYERED | WS_EX_TRANSPARENT)) &&
+        (!(dwStyle & WS_DISABLED) || ((dwStyle & (WS_POPUP | WS_CHILD)) != WS_CHILD)) &&
+        ((point.x >= rectWindow.left) && (point.x <  rectWindow.right) &&
+         (point.y >= rectWindow.top) && (point.y <  rectWindow.bottom))
+#if 1
+        )
+#else
+        &&
+        (wndPtr->hrgnWnd ?  PtInRegion(wndPtr->hrgnWnd, 1))
+#endif
+    {
+        hittest = SendMessageA(hwnd, WM_NCHITTEST, 0, MAKELONG(point.x, point.y));
+        if(hittest != HTTRANSPARENT) {
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+//******************************************************************************
 //TODO: Does this return handles of hidden or disabled windows?
 //******************************************************************************
 HWND WIN32API WindowFromPoint( POINT point)
 {
     HWND  hwndOS2, hwnd;
     POINT wPoint;
-    DWORD hittest, dwStyle, dwExStyle;
 
     wPoint.x = point.x;
     wPoint.y = mapScreenY(point.y);
@@ -1500,31 +1534,27 @@ HWND WIN32API WindowFromPoint( POINT point)
         hwnd = OS2ToWin32Handle(hwndOS2);
         while(hwnd)
         {
-                dwStyle   = GetWindowLongA(hwnd, GWL_STYLE);
-                dwExStyle = GetWindowLongA(hwnd, GWL_EXSTYLE);
+                if(IsPointInWindow(hwnd, point)) {
+                    dprintf(("WindowFromPoint (%d,%d) %x->%x\n", point.x, point.y, hwndOS2, hwnd));
+                    return hwnd;
+                }
+                //try siblings
+                HWND hwndSibling;
+                HWND hwndParent = GetParent(hwnd);
 
-                /* If point is in window, and window is visible, and it  */
-                /* is enabled (or it's a top-level window), then explore */
-                /* its children. Otherwise, go to the next window.       */
-
-                if( (dwStyle & WS_VISIBLE) &&
-                    ((dwExStyle & (WS_EX_LAYERED | WS_EX_TRANSPARENT)) != (WS_EX_LAYERED | WS_EX_TRANSPARENT)) &&
-                    (!(dwStyle & WS_DISABLED) || ((dwStyle & (WS_POPUP | WS_CHILD)) != WS_CHILD))
-#if 1
-                    )
-#else
-                    &&
-                    (wndPtr->hrgnWnd ?  PtInRegion(wndPtr->hrgnWnd, 1))
-#endif
-                {
-                    hittest = SendMessageA(hwnd, WM_NCHITTEST, 0, MAKELONG(point.x, point.y));
-                    if(hittest != HTTRANSPARENT) {
-                        dprintf(("WindowFromPoint (%d,%d) %x->%x\n", point.x, point.y, hwndOS2, hwnd));
-                        return hwnd;
+                if(hwndParent) {
+                    hwndSibling = GetWindow(hwndParent, GW_CHILD);
+                    while(hwndSibling) {
+                        if(hwndSibling != hwnd) {
+                            if(IsPointInWindow(hwndSibling, point)) {
+                                dprintf(("WindowFromPoint (%d,%d) %x->%x\n", point.x, point.y, hwndOS2, hwndSibling));
+                                return hwndSibling;
+                            }
+                        }
+                        hwndSibling = GetWindow(hwndSibling, GW_HWNDNEXT);
                     }
                 }
-                //TODO: Not correct for overlapping sibling windows!
-                hwnd = GetParent(hwnd);
+                hwnd = hwndParent;
         }
     }
     dprintf(("WindowFromPoint (%d,%d) %x->1\n", point.x, point.y, hwndOS2));
