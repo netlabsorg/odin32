@@ -1,4 +1,4 @@
-/* $Id: win32wnd.cpp,v 1.7 1999-07-17 15:23:38 sandervl Exp $ */
+/* $Id: win32wnd.cpp,v 1.8 1999-07-17 18:30:51 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -26,6 +26,7 @@
 #include "wndmsg.h"
 #include "hooks.h"
 #include <oslibwin.h>
+#include <oslibutil.h>
 
 #define HAS_DLGFRAME(style,exStyle) \
     (((exStyle) & WS_EX_DLGMODALFRAME) || \
@@ -661,7 +662,7 @@ ULONG Win32Window::MsgShow(BOOL fShow)
 }
 //******************************************************************************
 //******************************************************************************
-ULONG Win32Window::MsgMove(ULONG xScreen, ULONG yScreen, ULONG xParent, ULONG yParent)
+ULONG Win32Window::MsgMove(ULONG xParent, ULONG yParent)
 {
   return 0;
 }
@@ -730,7 +731,7 @@ ULONG Win32Window::MsgButton(ULONG msg, ULONG x, ULONG y)
                 dprintf(("Win32Window::Button: invalid msg!!!!"));
                 return 1;
   }
-  return SendMessageA(win32msg, 0, MAKELONG(x, OS2TOWIN32POINT(height, y)));
+  return SendMessageA(win32msg, 0, MAKELONG(x, MapOS2ToWin32Y(OS2Hwnd, y)));
 }
 //******************************************************************************
 //******************************************************************************

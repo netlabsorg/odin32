@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.7 1999-07-17 15:23:38 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.8 1999-07-17 18:30:51 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -11,8 +11,6 @@
  */
 #ifndef __OSLIBWIN_H__
 #define __OSLIBWIN_H__
-
-#define OS2TOWIN32POINT(height, y)      (height - y)
 
 #define OSLIB_HWND_DESKTOP      0
 BOOL  OSLibWinSetParent(HWND hwnd, HWND hwndParent, ULONG fRedraw = TRUE);
@@ -90,5 +88,12 @@ void  OSLibWinPostQuitMessage(ULONG nExitCode);
 LONG  OSLibWinDispatchMsg(MSG *msg, BOOL isUnicode = FALSE);
 
 BOOL  OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMax, BOOL isUnicode = FALSE);
+
+
+ULONG MapOS2ToWin32Y(HWND hwndChild);
+ULONG MapOS2ToWin32Y(HWND hwndChild, ULONG y);
+ULONG MapOS2ToWin32Y(PRECTL rectParent, PRECTL rectChild, ULONG y);
+ULONG MapOS2ToWin32Y(PRECTL rectParent, HWND hwndChild, ULONG y);
+ULONG MapOS2ToWin32Y(HWND hwndChild, PRECTL rectChild, ULONG y);
 
 #endif //__OSLIBWIN_H__

@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.8 1999-07-17 15:23:38 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.9 1999-07-17 18:30:51 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -41,6 +41,8 @@ HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
 {
  HWND  hwndClient;
  RECTL rectl;
+
+  dprintf(("WinCreateWindow %x %x %x %s", hwndParent, dwWinStyle, dwFrameStyle, pszName));
 
   if(pszName && *pszName == 0) {
 	pszName = NULL;
@@ -180,10 +182,7 @@ BOOL OSLibWinSetWindowPos(HWND hwnd, HWND hwndInsertBehind, LONG x, LONG y, LONG
  HWND  hwndParent;
 
   if(fl & SWP_MOVE) {
-        hwndParent = WinQueryWindow(hwnd, QW_PARENT);
-        if(WinQueryWindowRect(hwnd, &rectl)) {
-                y = OS2TOWIN32POINT(rectl.yTop - rectl.yBottom, y);
-	}
+	y = MapOS2ToWin32Y(hwnd, y);
   }
   return WinSetWindowPos(hwnd, hwndInsertBehind, x, y, cx, cy, fl);
 }
@@ -296,4 +295,59 @@ BOOL OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterMa
 }
 //******************************************************************************
 //******************************************************************************
+inline ULONG OS2TOWIN32POINT(RECTL *parent, RECTL *child, ULONG y)
+{
+  return (parent->yTop - parent->yBottom - (child->yTop - child->yBottom) - y - 1);
+}
+//******************************************************************************
+//******************************************************************************
+ULONG MapOS2ToWin32Y(HWND hwndChild)
+{
+ HWND  hwndParent;
+ RECTL rectParent = {0}, rectChild = {0};
 
+   WinQueryWindowRect(hwndChild, &rectChild);
+   hwndParent = WinQueryWindow(hwndChild, QW_PARENT);
+   WinQueryWindowRect(hwndParent, &rectParent);
+   return OS2TOWIN32POINT(&rectParent, &rectChild, rectChild.yBottom);
+}
+//******************************************************************************
+//******************************************************************************
+ULONG MapOS2ToWin32Y(HWND hwndChild, ULONG y)
+{
+ HWND  hwndParent;
+ RECTL rectParent = {0}, rectChild = {0};
+
+   WinQueryWindowRect(hwndChild, &rectChild);
+   hwndParent = WinQueryWindow(hwndChild, QW_PARENT);
+   WinQueryWindowRect(hwndParent, &rectParent);
+   return OS2TOWIN32POINT(&rectParent, &rectChild, y);
+}
+//******************************************************************************
+//******************************************************************************
+ULONG MapOS2ToWin32Y(PRECTL rectParent, PRECTL rectChild, ULONG y)
+{
+   return OS2TOWIN32POINT(rectParent, rectChild, y);
+}
+//******************************************************************************
+//******************************************************************************
+ULONG MapOS2ToWin32Y(PRECTL rectParent, HWND hwndChild, ULONG y)
+{
+ RECTL rectChild = {0};
+
+   WinQueryWindowRect(hwndChild, &rectChild);
+   return OS2TOWIN32POINT(rectParent, &rectChild, y);
+}
+//******************************************************************************
+//******************************************************************************
+ULONG MapOS2ToWin32Y(HWND hwndChild, PRECTL rectChild, ULONG y)
+{
+ HWND  hwndParent;
+ RECTL rectParent = {0};
+
+   hwndParent = WinQueryWindow(hwndChild, QW_PARENT);
+   WinQueryWindowRect(hwndParent, &rectParent);
+   return OS2TOWIN32POINT(&rectParent, rectChild, y);
+}
+//******************************************************************************
+//******************************************************************************

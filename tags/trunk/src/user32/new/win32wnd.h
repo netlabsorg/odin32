@@ -1,4 +1,4 @@
-/* $Id: win32wnd.h,v 1.6 1999-07-17 11:52:23 sandervl Exp $ */
+/* $Id: win32wnd.h,v 1.7 1999-07-17 18:30:52 sandervl Exp $ */
 /*
  * Win32 Window Code for OS/2
  *
@@ -57,7 +57,7 @@ virtual  ULONG  MsgCreate(HWND hwndOS2, ULONG initParam);
          ULONG  MsgDestroy();
 	 ULONG  MsgEnable(BOOL fEnable);
 	 ULONG  MsgShow(BOOL fShow);
-	 ULONG  MsgMove(ULONG xScreen, ULONG yScreen, ULONG xParent, ULONG yParent);
+	 ULONG  MsgMove(ULONG xParent, ULONG yParent);
 	 ULONG  MsgSize(ULONG width, ULONG height, BOOL fMinimize, BOOL fMaximize);
          ULONG  MsgActivate(BOOL fActivate, HWND hwnd);
 	 ULONG  MsgSetFocus(HWND hwnd);
