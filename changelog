@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1562 2001-07-04 09:54:49 sandervl Exp $ */
+/* $Id: changelog,v 1.1563 2001-07-04 17:46:43 sandervl Exp $ */
 
  2001-07-04: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Partial implementation of ToAsciiEx (just calls ToAscii)
@@ -11,6 +11,17 @@
                   (Cool Edit Pro LE play buttons now at the right position)
                 o Send WM_SETICON to frame window with converted win32 icon
                   (application icon now visible in task list)
+                o Quick fix for window creation:
+                  Before a window has processed WM_NCCREATE:
+                  - GetTopWindow can't return that window handle
+                  - GetWindow(parent, GW_CHILD) can't return that window handle
+                  - IsChild works
+                  TODO: Does this affect more functions?? (other GetWindow ops)
+                  (verified in NT4, SP6)
+                  TODO: Must add window to parent's child list after WM_NCCREATE
+                        and rewrite GetWindow & GetTopWindow
+                  (fix for crash in MP3 Explorer)
+
     - GDI32:    o Workaround for applications that depend on 16 bits
                   GDI object handles.
                   (TODO: must create our own 16 bits handles)
