@@ -2197,7 +2197,15 @@ TOOLTIPS_NCCreate (HWND hwnd, WPARAM wParam, LPARAM lParam)
     DWORD dwStyle = GetWindowLongA(hwnd,GWL_STYLE);
     DWORD dwExStyle = GetWindowLongA(hwnd,GWL_EXSTYLE);
 
+#ifdef __WIN32OS2__
+    //@@PF Win2K ignores TTS_ALWAYSTIP completely but I am still investigating
+    //this, for now it is 100% to say all MFC apps set this attribute yet Win2k ignores it
+    //completely be it toolbar or some other control.	
+    dwStyle &= ~TTS_ALWAYSTIP;
+#endif
     dwStyle &= 0x0000FFFF;
+
+
     dwStyle |= (WS_POPUP | WS_BORDER | WS_CLIPSIBLINGS);
     SetWindowLongA(hwnd,GWL_STYLE,dwStyle);
 
