@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.122 2001-06-09 19:46:01 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.123 2001-06-10 22:32:18 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -785,7 +785,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
     }
 
     //test if dll is in PE or LX format
-    fPE = Win32ImageBase::isPEImage(szModname, &Characteristics);
+    fPE = Win32ImageBase::isPEImage(szModname, &Characteristics, NULL);
 
     /** @sketch
      *  IF dwFlags == 0 && (!fPeLoader || !fPE) THEN
@@ -1694,8 +1694,8 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
 
     dprintf(("KERNEL32: CreateProcess %s\n", cmdline));
     
-    DWORD Characteristics, SubSystem;
-    if(Win32ImageBase::isPEImage(exename, &Characteristics, &SubSystem) == 0) {
+    DWORD Characteristics, SubSystem, fNEExe;
+    if(Win32ImageBase::isPEImage(exename, &Characteristics, &SubSystem, &fNEExe) == 0) {
         char *lpszPE;
         if(SubSystem == IMAGE_SUBSYSTEM_WINDOWS_CUI) {
              lpszPE = "PEC.EXE";
@@ -1725,7 +1725,22 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
                                lpEnvironment, lpCurrentDirectory, lpStartupInfo,
                                lpProcessInfo);
     }
-    else {//16 bits windows app
+    else 
+    if(fNEExe) {//16 bits windows app
+        char *newcmdline;
+        
+        newcmdline = (char *)malloc(strlen(cmdline) + 16);
+        sprintf(newcmdline, "w16odin.exe %s", cmdline);
+        free(cmdline);
+        cmdline = newcmdline;
+        //Force Open32 to use DosStartSession (DosExecPgm won't do)
+        dwCreationFlags |= CREATE_NEW_PROCESS_GROUP;
+        rc = O32_CreateProcess("w16odin.exe", (LPCSTR)cmdline, lpProcessAttributes,
+                               lpThreadAttributes, bInheritHandles, dwCreationFlags,
+                               lpEnvironment, lpCurrentDirectory, lpStartupInfo,
+                               lpProcessInfo);
+    }
+    else {//os/2 app??
         rc = O32_CreateProcess(NULL, (LPCSTR)cmdline,lpProcessAttributes,
                                lpThreadAttributes, bInheritHandles, dwCreationFlags,
                                lpEnvironment, lpCurrentDirectory, lpStartupInfo,
