@@ -1,4 +1,4 @@
-/* $Id: winimagebase.cpp,v 1.31 2001-04-02 22:51:58 sandervl Exp $ */
+/* $Id: winimagebase.cpp,v 1.32 2001-06-10 22:32:17 sandervl Exp $ */
 
 /*
  * Win32 PE Image base class
@@ -203,7 +203,8 @@ BOOL Win32ImageBase::findDll(const char *szFileName, char *szFullName,
 //returns ERROR_SUCCESS or error code (Characteristics will contain
 //the Characteristics member of the file header structure)
 //******************************************************************************
-ULONG Win32ImageBase::isPEImage(char *szFileName, DWORD *Characteristics, DWORD *subsystem)
+ULONG Win32ImageBase::isPEImage(char *szFileName, DWORD *Characteristics, 
+                                DWORD *subsystem, DWORD *fNEExe)
 {
  char   filename[CCHMAXPATH];
  char  *syspath;
@@ -217,6 +218,9 @@ ULONG Win32ImageBase::isPEImage(char *szFileName, DWORD *Characteristics, DWORD 
  LPVOID win32file      = NULL;
  ULONG  ulRead;
  int    nSections, i;
+
+  if(fNEExe) 
+      *fNEExe = FALSE;
 
   if (!findDll(szFileName, filename, sizeof(filename)))
   {
@@ -278,7 +282,12 @@ ULONG Win32ImageBase::isPEImage(char *szFileName, DWORD *Characteristics, DWORD 
         goto failure;
   }
 
-  if(GetPEFileHeader (win32file, &fh) == FALSE) {
+  if(GetPEFileHeader (win32file, &fh) == FALSE) 
+  {
+        if(*(WORD *)PE_HEADER(win32file) == IMAGE_OS2_SIGNATURE) {
+            if(fNEExe) 
+                *fNEExe = TRUE;
+        }
         goto failure;
   }
   if(GetPEOptionalHeader (win32file, &oh) == FALSE) {
