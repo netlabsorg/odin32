@@ -1,6 +1,34 @@
-/* $Id: changelog,v 1.1193 2000-12-19 12:30:01 achimha Exp $ */
+/* $Id: changelog,v 1.1194 2000-12-24 11:21:20 sandervl Exp $ */
 
- 2000-12-15: Sander van Leeuwen <sandervl@xs4all.nl>
+ 2000-12-21: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Fixed two FS bugs in main PM window handler. (FS not restored
+                  before returning)
+                o Split up frame and child window PM handlers. 
+                o Don't send PM WM_ACTIVATE to child windows in WM_WINDOWPOSCHANGED
+                  (fixes some activation problems)
+                o Put back code to add MDI windows to menu (latest update doesn't work)
+                o Properly invalidate non-client area when SetWindowPos is called
+                  with SWP_FRAMECHANGED. (fixes menu switch)
+                o SetParent bugfix; when putting window at the top of the z-order we
+                  mustn't activate it (SWP_NOACTIVATE)
+                  (fixes activate problem when starting up Lotus Notes 5)
+    - OLEAUT32: o Ported latest Wine version (12-22-2000)
+                  (TODO: Port David's additions)
+    - TOOLS\INSTALL:
+                o 3Dfx glide & opengl removed from base install
+                  (download opengl3dfx.zip from ftp.os2.org if you need it)
+                  Dllfixes win32k feature disabled (enabled by default); it's
+                  causing too many problems right now.
+
+ 2000-12-17: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Call WH_CBT hook during OS/2 WM_CREATE message. Some apps
+                  rely on the window being valid when this hook is called. 
+                  (Girotel used GetDC which previously failed)
+                o Use different PM window class for child windows. Solves some
+                  focus problems. (TODO)
+                o Some MDI changes/fixes (from Wine)
+
+ 2000-12-16: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Edit control: Limits removed. EM_SETTEXTLIMIT has no effect in 
                   NT4, SP6 (EM_GETTEXTLIMIT only returns that value).
                   Limits are simply ignored, no EN_MAXTEXT notification is ever sent.
@@ -15,6 +43,8 @@
     - WNASPI32: o Fixed bug in access aspi method. (wait check reversed)
     - MAKEFILES:o Update for overriding stack size of executables
     - PELDR:    o Fixed makefiles (PEC was built as a PM app -> must be VIO!)
+    - KERNEL32: o Only call DosGetNamedSharedMem & free view if map created
+                  by different process. (fixes hang in Lotus Notes 5)
 
  2000-12-12: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o GetVolumeInformationA bugfix (lpFileSystemNameBuffer == NULL &
