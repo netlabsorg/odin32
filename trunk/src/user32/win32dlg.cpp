@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.67 2001-06-10 09:19:58 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.68 2001-06-12 18:25:11 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -645,7 +645,7 @@ WORD *Win32Dialog::getControl(const WORD *p, DLG_CONTROL_INFO *info, BOOL dialog
     if (GET_WORD(p) == 0xffff)  /* Is it an integer id? */
     {
         info->windowName = (LPCSTR)(UINT)GET_WORD(p + 1);
-        p += 2;
+        p = (WORD *)((char *)p+3);
     }
     else
     {

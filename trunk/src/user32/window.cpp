@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.99 2001-06-09 14:50:25 sandervl Exp $ */
+/* $Id: window.cpp,v 1.100 2001-06-12 18:25:11 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -163,12 +163,12 @@ HWND WIN32API CreateWindowExW(DWORD exStyle, LPCWSTR className,
        SetLastError(ERROR_INVALID_PARAMETER);
        return 0;
     }
-
+#ifdef DEBUG
     if(HIWORD(className)) {
-         dprintf(("CreateWindowExW: class %ls name %x parent %x (%d,%d) (%d,%d), %x %x", className, windowName, parent, x, y, width, height, style, exStyle));
+         dprintf(("CreateWindowExW: class %ls name %ls parent %x (%d,%d) (%d,%d), %x %x", className, HIWORD(windowName) ? windowName : NULL, parent, x, y, width, height, style, exStyle));
     }
-    else dprintf(("CreateWindowExW: class %d name %x parent %x (%d,%d) (%d,%d), %x %x", className, windowName, parent, x, y, width, height, style, exStyle));
-
+    else dprintf(("CreateWindowExW: class %d name %ls parent %x (%d,%d) (%d,%d), %x %x", className, HIWORD(windowName) ? windowName : NULL, parent, x, y, width, height, style, exStyle));
+#endif
     if (!HIWORD(className))
     {
       wsprintfW(tmpClassW, (LPCWSTR)L"#%d", (int) className);
