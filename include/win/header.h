@@ -1,5 +1,3 @@
-/* $Id: header.h,v 1.11 2001-03-31 13:23:33 sandervl Exp $ */
-
 /*
  * Header window definitions
  *
@@ -60,16 +58,23 @@ typedef struct
     HEADER_ITEM *items;         /* pointer to array of HEADER_ITEM's */
 } HEADER_INFO;
 
-extern LRESULT HEADER_DeleteItem(HWND hwnd,WPARAM wParam);
-extern DWORD   HEADER_GetExpandedColumnTextWidth(HWND hwnd,INT iItem);
-extern LRESULT HEADER_GetItem(HWND hwnd,WPARAM wParam,LPARAM lParam,BOOL unicode);
-extern LRESULT HEADER_GetItemCount(HWND hwnd);
-extern LRESULT HEADER_GetItemRect(HWND hwnd,WPARAM wParam,LPARAM lParam);
-extern LRESULT HEADER_InsertItem(HWND hwnd,WPARAM wParam,LPARAM lParam,BOOL unicode);
-extern LRESULT HEADER_SetItem(HWND hwnd,WPARAM wParam,LPARAM lParam,BOOL unicode);
-extern LRESULT HEADER_SetOrderArray(HWND hwnd,WPARAM wParam,LPARAM lParam);
-extern LRESULT HEADER_GetOrderArray(HWND hwnd,WPARAM wParam,LPARAM lParam);
-extern LRESULT HEADER_Layout(HWND hwnd,WPARAM wParam,LPARAM lParam);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
+LRESULT HEADER_DeleteItem(HWND hwnd,WPARAM wParam);
+DWORD   HEADER_GetExpandedColumnTextWidth(HWND hwnd,INT iItem);
+LRESULT HEADER_GetItem(HWND hwnd,WPARAM wParam,LPARAM lParam,BOOL unicode);
+LRESULT HEADER_GetItemCount(HWND hwnd);
+LRESULT HEADER_GetItemRect(HWND hwnd,WPARAM wParam,LPARAM lParam);
+LRESULT HEADER_InsertItem(HWND hwnd,WPARAM wParam,LPARAM lParam,BOOL unicode);
+LRESULT HEADER_SetItem(HWND hwnd,WPARAM wParam,LPARAM lParam,BOOL unicode);
+LRESULT HEADER_SetOrderArray(HWND hwnd,WPARAM wParam,LPARAM lParam);
+LRESULT HEADER_GetOrderArray(HWND hwnd,WPARAM wParam,LPARAM lParam);
+LRESULT HEADER_Layout(HWND hwnd,WPARAM wParam,LPARAM lParam);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __WINE_HEADER_H_ */
