@@ -1,4 +1,4 @@
-/* $Id: stubs.cpp,v 1.12 2000-03-19 22:32:13 davidr Exp $ */
+/* $Id: stubs.cpp,v 1.13 2000-03-21 00:38:38 davidr Exp $ */
 /* 
  * Win32 COM/OLE stubs for OS/2
  * 
@@ -366,16 +366,6 @@ HRESULT WIN32API OleCreateEmbeddingHelper(REFCLSID clsid, LPUNKNOWN pUnkOuter,
 }
 //*******************************************************************************
 //*******************************************************************************
-HRESULT WIN32API OleCreateFromData(LPDATAOBJECT pSrcDataObj, REFIID riid,
-                                      DWORD renderopt, LPFORMATETC pFormatEtc,
-                                      LPOLECLIENTSITE pClientSite, LPSTORAGE pStg,
-                                      LPVOID *ppvObj)
-{
-    dprintf(("OLE32: OleCreateFromData - stub"));
-    return(DV_E_FORMATETC);
-}
-//*******************************************************************************
-//*******************************************************************************
 HRESULT WIN32API OleCreateFromFile(REFCLSID rclsid, LPCOLESTR lpszFileName,
                                       REFIID riid,
                                       DWORD renderopt, LPFORMATETC pFormatEtc,
@@ -503,13 +493,6 @@ HRESULT WIN32API OleNoteObjectVisible(LPUNKNOWN pUnknown, BOOL fVisible)
 {
     dprintf(("OLE32: OleNoteObjectVisible - stub"));
     return(E_OUTOFMEMORY);
-}
-//*******************************************************************************
-//*******************************************************************************
-HRESULT WIN32API OleQueryCreateFromData(IDataObject *pSrcDataObject)
-{
-    dprintf(("OLE32: OleQueryCreateFromData - stub"));
-    return(S_FALSE);
 }
 //*******************************************************************************
 //*******************************************************************************
