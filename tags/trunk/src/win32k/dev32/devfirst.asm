@@ -1,4 +1,4 @@
-; $Id: devfirst.asm,v 1.7 2001-02-21 07:44:15 bird Exp $
+; $Id: devfirst.asm,v 1.8 2001-07-08 02:55:25 bird Exp $
 ;
 ; DevFirst - entrypoint and segment definitions
 ;
@@ -38,6 +38,8 @@
     public _CallGetKernelInfo32
     public _CallElfIOCtl
     public _CallWin32kIOCtl
+    public _CallWin32kOpen
+    public _CallWin32kClose
     public _SSToDS_16a
     public GetOS2KrnlMTE
     public x86DisableWriteProtect
@@ -51,6 +53,8 @@
     extrn GETKERNELINFO32:FAR
     extrn ELFIOCTL:FAR
     extrn WIN32KIOCTL:FAR
+    extrn WIN32KOPEN:FAR
+    extrn WIN32KCLOSE:FAR
     .286p
     extrn _strategy:near
 
@@ -145,6 +149,42 @@ _CallWin32kIOCtl PROC NEAR
     pop     ds
     retn
 _CallWin32kIOCtl ENDP
+
+
+;;
+; Thunk procedure for .
+; @cproto    USHORT NEAR CallWin32kOpen(LIN);
+; @returns   Same as Win32kOpen
+; @param     address of Open request packet (32-bit pointer).
+; @status    completely implemented.
+; @author    knut st. osmundsen
+_CallWin32kOpen PROC NEAR
+    ASSUME CS:CODE16
+    push    ds
+    push    word ptr [esp+6]            ; push high word.
+    push    word ptr [esp+6]            ; push low word.
+    call    far ptr FLAT:WIN32KOPEN
+    pop     ds
+    retn
+_CallWin32kOpen ENDP
+
+
+;;
+; Thunk procedure for strategy close.
+; @cproto    USHORT NEAR CallWin32kClose(LIN);
+; @returns   Same as Win32kIOCtl
+; @param     address of Open request packet (32-bit pointer).
+; @status    completely implemented.
+; @author    knut st. osmundsen
+_CallWin32kClose PROC NEAR
+    ASSUME CS:CODE16
+    push    ds
+    push    word ptr [esp+6]            ; push high word.
+    push    word ptr [esp+6]            ; push low word.
+    call    far ptr FLAT:WIN32KCLOSE
+    pop     ds
+    retn
+_CallWin32kClose ENDP
 
 
 
