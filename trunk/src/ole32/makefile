@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.22 2000-03-06 23:38:50 bird Exp $
+# $Id: makefile,v 1.23 2000-03-21 00:28:58 davidr Exp $
 
 #
 # Odin32 API
@@ -41,6 +41,7 @@ $(OBJDIR)\library.obj \
 $(OBJDIR)\memlockbytes.obj \
 $(OBJDIR)\moniker.obj \
 $(OBJDIR)\oString.obj \
+$(OBJDIR)\ole2impl.obj \
 $(OBJDIR)\ole2.obj \
 $(OBJDIR)\oleobj.obj \
 $(OBJDIR)\oleClip.obj \
