@@ -1,8 +1,9 @@
-/* $Id: ChangeLog,v 1.1598 2001-07-14 08:33:15 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1599 2001-07-14 09:22:20 sandervl Exp $ */
 
  2001-07-14: Sander van Leeuwen <sandervl@xs4all.nl>
     - PELDR:    o Fix for parsing cmd line consisting of directory with spaces
     - USER32:   o Get menu font from os2.ini (OS/2 look & feel)
+                o Full window drag now works for Odin windows
 
  2001-07-13: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMDLG32: o Fix for windows 3.1 style file dialog
