@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.106 2001-02-18 17:59:05 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.107 2001-02-20 15:40:23 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -221,6 +221,7 @@ Win32BaseWindow *getParent();
          BOOL   SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, int cy, UINT fuFlags);
          BOOL   SetWindowPlacement(WINDOWPLACEMENT *winpos);
          BOOL   GetWindowPlacement(LPWINDOWPLACEMENT winpos);
+         BOOL   ScrollWindow(int dx, int dy);
          BOOL   DestroyWindow();
          HWND   SetActiveWindow();
          HWND   GetParent();

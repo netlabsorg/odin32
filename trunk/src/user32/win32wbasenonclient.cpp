@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.26 2000-11-15 13:57:57 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.27 2001-02-20 15:40:23 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -228,8 +228,8 @@ VOID Win32BaseWindow::TrackScrollBar(WPARAM wParam,POINT pt)
             pt.x = msg.pt.x;
             pt.y = msg.pt.y;
             ScreenToClient(getWindowHandle(), &pt);
-  	    pt.x += rectClient.left;
-  	    pt.y += rectClient.top;
+        pt.x += rectClient.left;
+        pt.y += rectClient.top;
             msg.lParam = MAKELONG(pt.x,pt.y);
 
         case WM_SYSTIMER:
@@ -263,47 +263,55 @@ LONG Win32BaseWindow::HandleNCLButtonDown(WPARAM wParam,LPARAM lParam)
     {
       Win32BaseWindow *topparent = GetTopParent();
 
-        if (GetActiveWindow() != topparent->getWindowHandle())
+        if((getStyle() & WS_CHILD) && !(getExStyle() & WS_EX_MDICHILD))
         {
-            //SvL: Calling topparent->SetActiveWindow() causes focus problems
-//	    topparent->SetActiveWindow();
-            OSLibWinSetFocus(topparent->getOS2WindowHandle());
+            if (GetActiveWindow() != topparent->getWindowHandle())
+            {
+                //SvL: Calling topparent->SetActiveWindow() causes focus problems
+                topparent->SetActiveWindow();
+////            OSLibWinSetFocus(topparent->getOS2WindowHandle());
+            }
+            if (GetActiveWindow() == topparent->getWindowHandle())
+                 SendInternalMessageA(WM_SYSCOMMAND,SC_MOVE+HTCAPTION,lParam);
+            else dprintf(("ACtive window (%x) != toplevel wnd %x", OSLibWinQueryActiveWindow(), topparent->getWindowHandle()));
         }
-
-        if (GetActiveWindow() == topparent->getWindowHandle())
-            SendInternalMessageA(WM_SYSCOMMAND,SC_MOVE+HTCAPTION,lParam);
-        else dprintf(("ACtive window (%x) != toplevel wnd %x", OSLibWinQueryActiveWindow(), topparent->getWindowHandle()));
+        else {
+            SetActiveWindow();
+            if (GetActiveWindow() == topparent->getWindowHandle())
+                 SendInternalMessageA(WM_SYSCOMMAND,SC_MOVE+HTCAPTION,lParam);
+            else dprintf(("ACtive window (%x) != wnd %x", OSLibWinQueryActiveWindow(), getWindowHandle()));
+        }
         break;
     }
 
     case HTSYSMENU:
-      if(dwStyle & WS_SYSMENU )
-      {
-        SendInternalMessageA(WM_SYSCOMMAND,SC_MOUSEMENU+HTSYSMENU,lParam);
-      }
-      break;
+        if(dwStyle & WS_SYSMENU )
+        {
+            SendInternalMessageA(WM_SYSCOMMAND,SC_MOUSEMENU+HTSYSMENU,lParam);
+        }
+        break;
 
     case HTMENU:
-      SendInternalMessageA(WM_SYSCOMMAND,SC_MOUSEMENU,lParam);
-      break;
+        SendInternalMessageA(WM_SYSCOMMAND,SC_MOUSEMENU,lParam);
+        break;
 
     case HTHSCROLL:
-      SendInternalMessageA(WM_SYSCOMMAND,SC_HSCROLL+HTHSCROLL,lParam);
-      break;
+        SendInternalMessageA(WM_SYSCOMMAND,SC_HSCROLL+HTHSCROLL,lParam);
+        break;
 
     case HTVSCROLL:
-      SendInternalMessageA(WM_SYSCOMMAND,SC_VSCROLL+HTVSCROLL,lParam);
-      break;
+        SendInternalMessageA(WM_SYSCOMMAND,SC_VSCROLL+HTVSCROLL,lParam);
+        break;
 
     case HTMINBUTTON:
     case HTMAXBUTTON:
     case HTHELP:
-      TrackMinMaxHelpBox(wParam);
-      break;
+        TrackMinMaxHelpBox(wParam);
+        break;
 
     case HTCLOSE:
-      TrackCloseButton(wParam);
-      break;
+        TrackCloseButton(wParam);
+        break;
 
     case HTLEFT:
     case HTRIGHT:
@@ -663,23 +671,28 @@ BOOL Win32BaseWindow::DrawSysButton(HDC hdc,RECT *rect)
   return (hSysIcon != 0);
 }
 //******************************************************************************
+//Returns position of system menu in screen coordinates
 //******************************************************************************
 BOOL Win32BaseWindow::GetSysPopupPos(RECT* rect)
 {
-  if(hSysMenu)
-  {
-      if(dwStyle & WS_MINIMIZE )
-        *rect = rectWindow;
-      else
-      {
-          GetInsideRect(rect );
-          OffsetRect( rect, rectWindow.left, rectWindow.top);
-          rect->right = rect->left + GetSystemMetrics(SM_CYCAPTION) - 1;
-          rect->bottom = rect->top + GetSystemMetrics(SM_CYCAPTION) - 1;
-      }
-      return TRUE;
-  }
-  return FALSE;
+    if(hSysMenu)
+    {
+        if(dwStyle & WS_MINIMIZE) {
+            *rect = rectWindow;
+        }
+        else
+        {
+            GetInsideRect(rect );
+            OffsetRect( rect, rectWindow.left, rectWindow.top);
+  	        if(getStyle() & WS_CHILD)
+     	        ClientToScreen(getParent()->getWindowHandle(), (POINT *)rect);
+
+            rect->right = rect->left + GetSystemMetrics(SM_CYCAPTION) - 1;
+            rect->bottom = rect->top + GetSystemMetrics(SM_CYCAPTION) - 1;
+        }
+        return TRUE;
+    }
+    return FALSE;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1339,8 +1352,8 @@ LONG Win32BaseWindow::HandleSysCommand(WPARAM wParam,POINT *pt32)
         else
         if (wParam == SC_PUTMARK)
             WriteLog(("Mark requested by user\n"));
-	else
-        if (wParam == SC_DEBUGINT3) 
+    else
+        if (wParam == SC_DEBUGINT3)
             DebugInt3();
 #endif
         break;

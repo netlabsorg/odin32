@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.87 2001-02-19 13:13:02 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.88 2001-02-20 15:40:22 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -818,6 +818,24 @@ ULONG OSLibGetScreenHeight()
 ULONG OSLibGetScreenWidth()
 {
   return ScreenWidth;
+}
+//******************************************************************************
+//Returns the maximum position for a window
+//Should only be used from toplevel windows
+//******************************************************************************
+BOOL OSLibWinGetMaxPosition(HWND hwndOS2, RECT *rect)
+{
+ SWP  swp;
+ 
+  if(!WinGetMaxPosition(hwndOS2, &swp)) {
+ 	dprintf(("WARNING: WinGetMaxPosition %x returned FALSE", hwndOS2));
+	return FALSE;
+  }
+  rect->left   = swp.x;
+  rect->right  = swp.x + swp.cx;
+  rect->top    = ScreenHeight - (swp.y + swp.cy);
+  rect->bottom = ScreenHeight - swp.y;
+  return TRUE;
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.237 2001-02-18 17:59:05 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.238 2001-02-20 15:40:22 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -637,7 +637,7 @@ if (!cs->hMenu) cs->hMenu = LoadMenuA(windowClass->getInstance(),"MYAPP");
     /* Send the WM_GETMINMAXINFO message and fix the size if needed */
     if ((cs->style & WS_THICKFRAME) || !(cs->style & (WS_POPUP | WS_CHILD)))
     {
-         GetMinMaxInfo(&maxSize, &maxPos, &minTrack, &maxTrack);
+        GetMinMaxInfo(&maxSize, &maxPos, &minTrack, &maxTrack);
         if (maxSize.x < cs->cx) cs->cx = maxSize.x;
         if (maxSize.y < cs->cy) cs->cy = maxSize.y;
         if (cs->cx < minTrack.x) cs->cx = minTrack.x;
@@ -2246,7 +2246,7 @@ BOOL Win32BaseWindow::ShowWindow(ULONG nCmdShow)
     SetWindowPos(HWND_TOP, newPos.left, newPos.top, newPos.right, newPos.bottom, LOWORD(swp));
 
     if(!(swp & SWP_NOACTIVATE)) {
-    OSLibWinSetActiveWindow(OS2Hwnd);
+        OSLibWinSetActiveWindow(OS2Hwnd);
     }
 
     if (flags & WIN_NEED_SIZE)
@@ -2440,6 +2440,18 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
             NotifyFrameChanged(&wpos, &oldClientRect);
     }
     return (rc);
+}
+//******************************************************************************
+//Called by ScrollWindowEx (dc.cpp) to notify child window that it has moved
+//******************************************************************************
+BOOL Win32BaseWindow::ScrollWindow(int dx, int dy)
+{
+    rectWindow.left   += dx;
+    rectWindow.right  += dx;
+    rectWindow.top    += dy;
+    rectWindow.bottom += dy;
+    SendInternalMessageA(WM_MOVE, 0, MAKELONG(rectClient.left, rectClient.top));
+    return TRUE;
 }
 //******************************************************************************
 //******************************************************************************

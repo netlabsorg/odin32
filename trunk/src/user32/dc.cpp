@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.90 2001-02-19 13:13:00 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.91 2001-02-20 15:40:22 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -230,29 +230,32 @@ BOOL setPageXForm(Win32BaseWindow *wnd, pDCData pHps)
    mlf.lM33  = 1;
 
 //testestest
-   if(wnd && wnd->getWindowWidth() && wnd->getWindowHeight()) {
-       RECTL recttmp, rectviewold;
+   if(wnd && wnd->getWindowWidth() && wnd->getWindowHeight())
+   {
+        RECTL recttmp, rectviewold;
 
-       rc = GpiQueryPageViewport(pHps->hps, &rectviewold);
-       if(rc == 0) {
-           dprintf(("WARNING: GpiQueryPageViewport returned FALSE!!"));
-       }
-       recttmp.xLeft   = 0;
-//       recttmp.xRight  = ((double)wnd->getWindowWidth() / xScale);
-       recttmp.xRight  = ((double)GetScreenWidth() / xScale);
-       recttmp.yBottom = 0;
-//       recttmp.yTop    = ((double)wnd->getWindowHeight() / yScale);
-       recttmp.yTop    = ((double)GetScreenHeight() / yScale);
+        rc = GpiQueryPageViewport(pHps->hps, &rectviewold);
+        if(rc == 0) {
+            dprintf(("WARNING: GpiQueryPageViewport returned FALSE!!"));
+        }
+        recttmp.xLeft   = 0;
+        recttmp.xRight  = ((double)GetScreenWidth() / xScale);
+        recttmp.yBottom = 0;
+        recttmp.yTop    = ((double)GetScreenHeight() / yScale);
 
-       if(recttmp.yTop != rectviewold.yTop || 
-          recttmp.xRight != rectviewold.xRight)
-       {
-           dprintf(("GpiSetPageViewport %x (%d,%d) %f %f", pHps->hps, recttmp.xRight, recttmp.yTop, xScale, yScale));
-           rc = GpiSetPageViewport(pHps->hps, &recttmp);
-           if(rc == 0) {
-              dprintf(("WARNING: GpiSetPageViewport returned FALSE!!"));
-           }
-       }
+        if(recttmp.yTop != rectviewold.yTop ||
+           recttmp.xRight != rectviewold.xRight)
+        {
+            if(pHps->viewportYExt > pHps->windowExt.cy) {//scaling up means we have to invert the y values
+                recttmp.yBottom = GetScreenHeight() - recttmp.yTop;
+                recttmp.yTop    = GetScreenHeight();
+            }
+            dprintf(("GpiSetPageViewport %x (%d,%d)(%d,%d) %f %f", pHps->hps, recttmp.xLeft, recttmp.yBottom, recttmp.xRight, recttmp.yTop, xScale, yScale));
+            rc = GpiSetPageViewport(pHps->hps, &recttmp);
+            if(rc == 0) {
+                dprintf(("WARNING: GpiSetPageViewport returned FALSE!!"));
+            }
+        }
    }
 //testestest
 
@@ -1697,6 +1700,7 @@ BOOL WIN32API ScrollDC(HDC hDC, int dx, int dy, const RECT *pScroll,
    return (rc);
 }
 //******************************************************************************
+//SvL: Using WinScrollWindow to scroll child windows is better (smoother).
 //******************************************************************************
 INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, const RECT *pClip,
                             HRGN hrgnUpdate, PRECT pRectUpdate, UINT scrollFlag)
@@ -1723,6 +1727,7 @@ INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, cons
     dy = revertDy (window, dy);
 
     if (scrollFlag & SW_INVALIDATE_W)      scrollFlagsOS2 |= SW_INVALIDATERGN;
+    if (scrollFlag & SW_SCROLLCHILDREN_W)  scrollFlagsOS2 |= SW_SCROLLCHILDREN;
 
     mapWin32ToOS2Rect(window->getWindowHeight(), window->getClientRectPtr(), (PRECTLOS2)&clientRect);
 
@@ -1759,7 +1764,19 @@ INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, cons
       //    is time in ms? time <-> iteration count?
     }
 
-    // Scroll children first
+    LONG lComplexity = WinScrollWindow (window->getOS2WindowHandle(), dx, dy,
+                                        pScrollOS2,
+                                        pClipOS2,
+                                        hrgn, &rectlUpdate, scrollFlagsOS2);
+    if (lComplexity == RGN_ERROR)
+    {
+        return ERROR_W;
+    }
+
+    //Notify children that they have moved (according to the SDK docs,
+    //they only receive a WM_MOVE message)
+    //(PM only does this for windows with CS_MOVENOTIFY class)
+    //TODO: Verify this (no WM_WINDOWPOSCHANGING/ED?)
     if (scrollFlag & SW_SCROLLCHILDREN_W)
     {
         HWND hwndChild;
@@ -1777,29 +1794,18 @@ INT WIN32API ScrollWindowEx(HWND hwnd, int dx, int dy, const RECT *pScroll, cons
 
                 child = Win32BaseWindow::GetWindowFromHandle(hwndChild);
                 if(!child) {
-                    dprintf(("ScrollWindowEx, child %x not found", hwnd));
+                    dprintf(("ERROR: ScrollWindowEx, child %x not found", hwnd));
                     return 0;
                 }
                 rectChild = *child->getWindowRect();
                 if(!pRectUpdate || IntersectRect(&rectChild, &rectChild, &rc))
                 {
                      dprintf(("ScrollWindowEx: Scroll child window %x", hwndChild));
-                     SetWindowPos(hwndChild, 0, rectChild.left + dx,
-                                  rectChild.top + orgdy, 0, 0, SWP_NOZORDER_W |
-                                  SWP_NOSIZE_W | SWP_NOACTIVATE_W | SWP_NOREDRAW);
+                     child->ScrollWindow(dx, orgdy);
                 }
                 hwndChild = GetWindow(hwndChild, GW_HWNDNEXT_W);
             }
             dprintf(("***ScrollWindowEx: Scroll child windows DONE"));
-    }
-
-    LONG lComplexity = WinScrollWindow (window->getOS2WindowHandle(), dx, dy,
-                                        pScrollOS2,
-                                        pClipOS2,
-                                        hrgn, &rectlUpdate, scrollFlagsOS2);
-    if (lComplexity == RGN_ERROR)
-    {
-        return ERROR_W;
     }
 
     RECT winRectUpdate;
