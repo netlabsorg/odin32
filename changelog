@@ -1,4 +1,9 @@
-/* $Id: changelog,v 1.2468 2003-02-05 14:03:39 sandervl Exp $ */
+/* $Id: changelog,v 1.2469 2003-02-06 10:29:47 sandervl Exp $ */
+
+ 2003-02-06: Sander van Leeuwen <sandervl@innotek   >
+    - ODINCRT:  o Rewrote critical sections to be safe on SMP systems
+                  (previous implementation had one flaw that happened
+                   to be triggered often on my SMP machine)
 
  2003-02-05: Sander van Leeuwen <sandervl@innotek   >
     - KERNEL32: o Check ESP when calling the entrypoint of a newly created thread.
