@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.241 2001-02-21 21:30:43 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.242 2001-02-22 10:37:31 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -109,8 +109,8 @@ void Win32BaseWindow::Init()
   windowNameW      = NULL;
   wndNameLength    = 0;
 
-  userWindowLong   = NULL;;
-  nrUserWindowLong = 0;
+  userWindowBytes  = NULL;;
+  nrUserWindowBytes= 0;
 
   magic            = WIN32PM_MAGIC;
   OS2Hwnd          = 0;
@@ -213,8 +213,8 @@ Win32BaseWindow::~Win32BaseWindow()
     if(Win32Hwnd)
         HwFreeWindowHandle(Win32Hwnd);
 
-    if(userWindowLong)
-        free(userWindowLong);
+    if(userWindowBytes)
+        free(userWindowBytes);
 
     if(windowNameA) {
         free(windowNameA);
@@ -392,10 +392,10 @@ BOOL Win32BaseWindow::CreateWindowExA(CREATESTRUCTA *cs, ATOM classAtom)
     if (cs->y < 0) cs->y = 0;
 
     //Allocate window words
-    nrUserWindowLong = windowClass->getExtraWndWords();
-    if(nrUserWindowLong) {
-        userWindowLong = (ULONG *)_smalloc(nrUserWindowLong);
-        memset(userWindowLong, 0, nrUserWindowLong);
+    nrUserWindowBytes = windowClass->getExtraWndBytes();
+    if(nrUserWindowBytes) {
+        userWindowBytes = (char *)_smalloc(nrUserWindowBytes);
+        memset(userWindowBytes, 0, nrUserWindowBytes);
     }
 
     if ((cs->style & WS_CHILD) && cs->hwndParent)
@@ -3423,10 +3423,10 @@ LONG Win32BaseWindow::SetWindowLongA(int index, ULONG value, BOOL fUnicode)
                 break;
 
         default:
-                if(index >= 0 && index/4 < nrUserWindowLong)
+                if(index >= 0 && index + sizeof(ULONG) <= nrUserWindowBytes)
                 {
-                    oldval = userWindowLong[index/4];
-                    userWindowLong[index/4] = value;
+                    oldval = *(ULONG *)(userWindowBytes + index);
+                    *(ULONG *)(userWindowBytes + index) = value;
                     break;
                 }
                 dprintf(("WARNING: SetWindowLong%c %x %d %x returned %x INVALID index!", (fUnicode) ? 'W' : 'A', getWindowHandle(), index, value));
@@ -3467,15 +3467,16 @@ ULONG Win32BaseWindow::GetWindowLongA(int index, BOOL fUnicode)
         value = userData;
         break;
     default:
-        if(index >= 0 && index/4 < nrUserWindowLong)
+        if(index >= 0 && index + sizeof(ULONG) <= nrUserWindowBytes)
         {
-            value = userWindowLong[index/4];
+            value = *(ULONG *)(userWindowBytes + index);
             break;
         }
+        dprintf(("WARNING: GetWindowLong%c %x %d %x returned %x INVALID index!", (fUnicode) ? 'W' : 'A', getWindowHandle(), index, value));
         SetLastError(ERROR_INVALID_INDEX);  //verified in NT4, SP6
         return 0;
     }
-    dprintf2(("GetWindowLongA %x %d %x", getWindowHandle(), index, value));
+    dprintf2(("GetWindowLong%c %x %d %x", getWindowHandle(), (fUnicode) ? 'W' : 'A', index, value));
     //Note: NT4, SP6 does not set the last error to 0
     SetLastError(ERROR_SUCCESS);
     return value;
@@ -3486,14 +3487,16 @@ WORD Win32BaseWindow::SetWindowWord(int index, WORD value)
 {
  WORD oldval;
 
-    if(index >= 0 && index/4 < nrUserWindowLong)
+    if(index >= 0 && index + sizeof(WORD) <= nrUserWindowBytes)
     {
-        oldval = ((WORD *)userWindowLong)[index/2];
-        ((WORD *)userWindowLong)[index/2] = value;
+        oldval = *(WORD *)(userWindowBytes + index);
+        *(WORD *)(userWindowBytes + index) = value;
         //Note: NT4, SP6 does not set the last error to 0
+        dprintf2(("SetWindowWord %x %d %x returned %x", getWindowHandle(), index, value, oldval));
         SetLastError(ERROR_SUCCESS);
         return oldval;
     }
+    dprintf(("WARNING: SetWindowWord %x %d %x returned %x INVALID index!", getWindowHandle(), index, value));
     SetLastError(ERROR_INVALID_INDEX);  //verified in NT4, SP6
     return 0;
 }
@@ -3501,12 +3504,14 @@ WORD Win32BaseWindow::SetWindowWord(int index, WORD value)
 //******************************************************************************
 WORD Win32BaseWindow::GetWindowWord(int index)
 {
-    if(index >= 0 && index/4 < nrUserWindowLong)
+    if(index >= 0 && index + sizeof(WORD) <= nrUserWindowBytes)
     {
         //Note: NT4, SP6 does not set the last error to 0
         SetLastError(ERROR_SUCCESS);
-        return ((WORD *)userWindowLong)[index/2];
+        dprintf2(("GetWindowWord %x %d %x", getWindowHandle(), index, *(WORD *)(userWindowBytes + index)));
+        return *(WORD *)(userWindowBytes + index);
     }
+    dprintf(("WARNING: GetWindowWord %x %d returned %x INVALID index!", getWindowHandle(), index));
     SetLastError(ERROR_INVALID_INDEX);  //verified in NT4, SP6
     return 0;
 }

@@ -1,4 +1,4 @@
-/* $Id: win32class.cpp,v 1.22 2001-02-10 10:35:31 sandervl Exp $ */
+/* $Id: win32class.cpp,v 1.23 2001-02-22 10:37:30 sandervl Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -103,8 +103,8 @@ Win32WndClass::Win32WndClass(WNDCLASSEXA *wndclass, BOOL fUnicode) : GenericObje
   else dprintf(("USER32:  wndclass->lpszMenuName %X\n", menuNameA));
   dprintf(("USER32:  wndclass->hIconSm %X\n", wndclass->hIconSm));
 
-  nrExtraClassWords     = wndclass->cbClsExtra;
-  nrExtraWindowWords    = wndclass->cbWndExtra;
+  nrExtraClassBytes     = wndclass->cbClsExtra;
+  nrExtraWindowBytes    = wndclass->cbWndExtra;
   backgroundBrush       = wndclass->hbrBackground;
   hCursor               = wndclass->hCursor;
   hIcon                 = wndclass->hIcon;
@@ -122,15 +122,15 @@ Win32WndClass::Win32WndClass(WNDCLASSEXA *wndclass, BOOL fUnicode) : GenericObje
   dprintf2(("Window class ptr %x", windowProc));
 
   //User data class words/longs
-  if(nrExtraClassWords) {
-        userClassLong = (ULONG *)_smalloc(nrExtraClassWords);
-        if(userClassLong == NULL) {
-                dprintf(("Win32Class ctr: userClassLong == NULL!"));
+  if(nrExtraClassBytes) {
+        userClassBytes = (char *)_smalloc(nrExtraClassBytes);
+        if(userClassBytes == NULL) {
+                dprintf(("Win32Class ctr: userClassBytes == NULL!"));
                 exit(1);
         }
-        memset(userClassLong, 0, nrExtraClassWords);
+        memset(userClassBytes, 0, nrExtraClassBytes);
   }
-  else  userClassLong = NULL;
+  else  userClassBytes = NULL;
 
   cWindows = 0;
   hIconSm  = wndclass->hIconSm;
@@ -150,7 +150,7 @@ Win32WndClass::~Win32WndClass()
 
   WINPROC_FreeProc(windowProc, WIN_PROC_CLASS);
 
-  if(userClassLong)     free(userClassLong);
+  if(userClassBytes)    free(userClassBytes);
   if(classNameA)        free(classNameA);
   if(classNameW)        free(classNameW);
   if(menuNameA && HIWORD(menuNameA)) {
@@ -250,9 +250,9 @@ Win32WndClass *Win32WndClass::FindClass(HINSTANCE hInstance, LPWSTR id)
  Win32WndClass *winclass;
 
   if(HIWORD(id)) {
-	lpszClassName = UnicodeToAsciiString((LPWSTR)id);
+    lpszClassName = UnicodeToAsciiString((LPWSTR)id);
   }
-  else	lpszClassName = (LPSTR)id;
+  else  lpszClassName = (LPSTR)id;
 
   winclass = FindClass(hInstance, lpszClassName);
 
@@ -277,8 +277,8 @@ BOOL Win32WndClass::isAppClass(ULONG curProcessId)
 //******************************************************************************
 BOOL Win32WndClass::getClassInfo(WNDCLASSEXA *wndclass)
 {
-  wndclass->cbClsExtra    = nrExtraClassWords;
-  wndclass->cbWndExtra    = nrExtraWindowWords;
+  wndclass->cbClsExtra    = nrExtraClassBytes;
+  wndclass->cbWndExtra    = nrExtraWindowBytes;
   wndclass->hbrBackground = backgroundBrush;
   wndclass->hCursor       = hCursor;
   wndclass->hIcon         = hIcon;
@@ -294,8 +294,8 @@ BOOL Win32WndClass::getClassInfo(WNDCLASSEXA *wndclass)
 //******************************************************************************
 BOOL Win32WndClass::getClassInfo(WNDCLASSEXW *wndclass)
 {
-  wndclass->cbClsExtra    = nrExtraClassWords;
-  wndclass->cbWndExtra    = nrExtraWindowWords;
+  wndclass->cbClsExtra    = nrExtraClassBytes;
+  wndclass->cbWndExtra    = nrExtraWindowBytes;
   wndclass->hbrBackground = backgroundBrush;
   wndclass->hCursor       = hCursor;
   wndclass->hIcon         = hIcon;
@@ -375,9 +375,9 @@ ULONG Win32WndClass::getClassLongA(int index, BOOL fUnicode)
 {
   switch(index) {
         case GCL_CBCLSEXTRA:
-                return nrExtraClassWords;
+                return nrExtraClassBytes;
         case GCL_CBWNDEXTRA:
-                return nrExtraWindowWords;
+                return nrExtraWindowBytes;
         case GCL_HBRBACKGROUND:
                 return backgroundBrush;
         case GCL_HCURSOR:
@@ -398,9 +398,15 @@ ULONG Win32WndClass::getClassLongA(int index, BOOL fUnicode)
                 SetLastError(ERROR_INVALID_PARAMETER);
                 return 0;
         default:
-                if(index > 0 && index < nrExtraClassWords - sizeof(ULONG)) {
-                        return userClassLong[index];
+                if(index >= 0 && index + sizeof(ULONG) <= nrExtraClassBytes) {
+                        //Note: NT4, SP6 does not set the last error to 0
+                        SetLastError(ERROR_SUCCESS);
+                        return *(ULONG *)(userClassBytes + index);
                 }
+                if(classNameA) {
+                     dprintf2(("WARNING: getClassLong %s: %d -> wrong INDEX", classNameA, index));
+                }
+                else dprintf2(("WARNING: getClassLong %d: %d -> wrong INDEX", classAtom, index));
                 SetLastError(ERROR_INVALID_INDEX);  //verified in NT4, SP6
                 return 0;
   }
@@ -413,9 +419,15 @@ WORD Win32WndClass::getClassWord(int index)
         case GCW_ATOM:
                 return (WORD)classAtom;
         default:
-                if(index > 0 && index < nrExtraClassWords - sizeof(WORD)) {
-                        return ((WORD *)userClassLong)[index];
+                if(index >= 0 && index + sizeof(WORD) <= nrExtraClassBytes) {
+                        //Note: NT4, SP6 does not set the last error to 0
+                        SetLastError(ERROR_SUCCESS);
+                        return *(WORD *)(userClassBytes + index);
                 }
+                if(classNameA) {
+                     dprintf2(("WARNING: getClassWord %s: %d -> wrong INDEX", classNameA, index));
+                }
+                else dprintf2(("WARNING: getClassWord %d: %d -> wrong INDEX", classAtom, index));
                 SetLastError(ERROR_INVALID_INDEX);  //verified in NT4, SP6
                 return 0;
   }
@@ -429,12 +441,12 @@ ULONG Win32WndClass::setClassLongA(int index, LONG lNewVal, BOOL fUnicode)
 
   switch(index) {
         case GCL_CBCLSEXTRA: //TODO (doesn't affect allocated classes, so what does it do?)
-                rc = nrExtraClassWords;
-//              nrExtraClassWords = lNewVal;
+                rc = nrExtraClassBytes;
+//              nrExtraClassBytes = lNewVal;
                 break;
         case GCL_CBWNDEXTRA:
-                rc = nrExtraWindowWords;
-                nrExtraWindowWords = lNewVal;
+                rc = nrExtraWindowBytes;
+                nrExtraWindowBytes = lNewVal;
                 break;
         case GCL_HBRBACKGROUND:
                 rc = backgroundBrush;
@@ -465,11 +477,11 @@ ULONG Win32WndClass::setClassLongA(int index, LONG lNewVal, BOOL fUnicode)
                 windowStyle = lNewVal;
                 break;
         case GCL_WNDPROC:
-		//Note: Type of SetWindowLong determines new window proc type
+                //Note: Type of SetWindowLong determines new window proc type
                 //      UNLESS the new window proc has already been registered
                 //      (use the old type in that case)
                 //      (VERIFIED in NT 4, SP6)
-		//TODO: Is that also true for GCL_WNDPROC???????????????
+                //TODO: Is that also true for GCL_WNDPROC???????????????
                 rc = (LONG)WINPROC_GetProc(windowProc, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A );
                 WINPROC_SetProc((HWINDOWPROC *)&windowProc, (WNDPROC)lNewVal, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A, WIN_PROC_CLASS );
                 break;
@@ -477,16 +489,16 @@ ULONG Win32WndClass::setClassLongA(int index, LONG lNewVal, BOOL fUnicode)
                 SetLastError(ERROR_INVALID_PARAMETER);
                 return 0;
         default:
-                if(index > 0 && index < nrExtraClassWords - sizeof(ULONG)) {
-                        rc = userClassLong[index];
-                        userClassLong[index] = lNewVal;
+                if(index >= 0 && index + sizeof(ULONG) <= nrExtraClassBytes) {
+                        rc = *(ULONG *)(userClassBytes + index);
+                        *(ULONG *)(userClassBytes + index) = lNewVal;
                         break;
                 }
                 SetLastError(ERROR_INVALID_INDEX);  //verified in NT4, SP6
-  		if(classNameA) {
-        	      dprintf2(("WARNING: Win32WndClass::setClassLongA %s: %d %x -> wrong INDEX", classNameA, index, lNewVal));
-  		}
-  		else  dprintf2(("WARNING: Win32WndClass::setClassLongA %d: %d %x -> wrong INDEX", classAtom, index, lNewVal));
+                if(classNameA) {
+                     dprintf2(("WARNING: Win32WndClass::setClassLongA %s: %d %x -> wrong INDEX", classNameA, index, lNewVal));
+                }
+                else dprintf2(("WARNING: Win32WndClass::setClassLongA %d: %d %x -> wrong INDEX", classAtom, index, lNewVal));
                 return 0;
   }
   SetLastError(ERROR_SUCCESS);
@@ -508,12 +520,18 @@ WORD Win32WndClass::setClassWord(int index, WORD wNewVal)
                 classAtom = wNewVal;
                 return(rc);
         default:
-                if(index > 0 && index < nrExtraClassWords - sizeof(WORD)) {
-                        rc = ((WORD *)userClassLong)[index];
-                        ((WORD *)userClassLong)[index] = wNewVal;
+                if(index >= 0 && index + sizeof(WORD) <= nrExtraClassBytes) {
+                        rc = *(WORD *)(userClassBytes + index);
+                        *(WORD *)(userClassBytes + index) = wNewVal;
+                        //Note: NT4, SP6 does not set the last error to 0
+                        SetLastError(ERROR_SUCCESS);
                         return(rc);
                 }
                 SetLastError(ERROR_INVALID_INDEX);  //verified in NT4, SP6
+                if(classNameA) {
+                     dprintf2(("WARNING: setClassWord %s: %d %x -> wrong INDEX", classNameA, index, wNewVal));
+                }
+                else dprintf2(("WARNING: setClassWord %d: %d %x -> wrong INDEX", classAtom, index, wNewVal));
                 return 0;
   }
 }

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.109 2001-02-21 21:30:44 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.110 2001-02-22 10:37:31 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -386,8 +386,8 @@ protected:
         WCHAR  *windowNameW;
         ULONG   wndNameLength; //including 0 terminator
 
-        ULONG  *userWindowLong;
-        ULONG   nrUserWindowLong;
+        char   *userWindowBytes;
+        ULONG   nrUserWindowBytes;
 
         RECT    rectWindow; //relative to parent
         RECT    rectClient;  //relative to frame
