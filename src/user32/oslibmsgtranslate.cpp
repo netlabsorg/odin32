@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.67 2001-10-25 13:16:57 phaller Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.68 2001-10-25 15:35:53 phaller Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -34,6 +34,7 @@
 #include "winmouse.h"
 #include <pmkbdhk.h>
 #include <pmscan.h>
+#include <winscan.h>
 
 #define DBG_LOCALLOG    DBG_oslibmsgtranslate
 #include "dbglocal.h"
@@ -162,6 +163,21 @@ USHORT pmscan2winkey [][2] = {
 
 static BOOL fGenerateDoubleClick = FALSE;
 static MSG  doubleClickMsg = {0};
+
+
+//******************************************************************************
+//******************************************************************************
+BOOL setThreadQueueExtraCharMessage(TEB* teb, MSG* pExtraMsg)
+{
+  // check if the single slot is occupied already
+  if (teb->o.odin.fTranslated == TRUE)
+    // there's still an already translated message to be processed
+    return FALSE;
+  
+  teb->o.odin.fTranslated = TRUE;
+  memcpy(&teb->o.odin.msgWCHAR, pExtraMsg, sizeof(MSG));
+  return TRUE;
+}
 
 //******************************************************************************
 //******************************************************************************
@@ -651,48 +667,8 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         // special char message from the keyboard hook
         dprintf(("PM: WM_CHAR_SPECIAL\n"));
         
-        // AltGr is a very, very strange key!
-        UCHAR ucPMScanCode = CHAR4FROMMP(os2Msg->mp1);
-        switch (ucPMScanCode)
-        {
-          case PMSCAN_ESC:
-            // Note: ESC generates a WM_CHAR under Windows, not under PM
-            // so we've got to post it to ourself here!
-            // WM_CHAR(0x0000001bh, 00010001h)
-            // @@@PH
-            break;
-          
-          case PMSCAN_PRINT:
-            // Note: PRINT generates a WM_KEYUP under Windows
-            // also only call the standard kbd hook for the WM_KEYUP msg,
-            // the low-level hook is called twice
-            // WM_CHAR(0x0000002ch, c1370001h)
-            // @@@PH
-            break;
-          
-          case PMSCAN_ALTRIGHT:
-          {
-            ULONG flags = SHORT1FROMMP(os2Msg->mp1);
-            
-            // we need very special treatment here for the
-            // poor, crippled AltGr key
-            
-            if (flags & KC_KEYUP)
-            {
-              // key up
-              // 1 - generate a virtual LCONTROL-keypress
-              // 2 - send LMENU-keypress (NT emulates ALtGr w/ Ctrl-Alt!)
-            }
-            else
-            {
-              // key down:
-              // 1 - generate a virtual LCONTROL-keypress
-              // 2 - send LMENU-keypress (NT emulates ALtGr w/ Ctrl-AltGr!)
-            }
-          }
-        } /* switch */
-    } /* case */
-        // NO BREAK! FALLTHRU CASE!
+      // NO BREAK! FALLTHRU CASE!
+    }
       
     case WM_CHAR:
     {
@@ -823,6 +799,89 @@ VirtualKeyFound:
             // if the current window has keyboard focus
             winMsg->lParam |= 1 << 29;
           }
+        }
+      
+        // ------------------------------------------------
+        // check if additional messages have to be recorded
+        // ------------------------------------------------
+        {
+          MSG extramsg;
+          extramsg.hwnd = winMsg->hwnd;
+          extramsg.time = winMsg->time;
+          extramsg.pt   = winMsg->pt;
+          
+          switch (scanCode)
+          {
+            case PMSCAN_ESC:
+            {
+              // Note: ESC generates a WM_CHAR for WINWM_KEYDOWN
+              // under Windows, not under PM
+              // so we've got to post it to ourself here!
+              // WM_CHAR(0x0000001bh, 00010001h)
+              if (winMsg->message == WINWM_KEYDOWN)
+              {
+                extramsg.message = WINWM_CHAR;
+                extramsg.wParam  = VK_ESCAPE_W;
+                extramsg.lParam  = winMsg->lParam;
+                setThreadQueueExtraCharMessage(teb, &extramsg);
+              }
+            }
+            break;
+            
+#if 0
+            case PMSCAN_PRINT:
+              // Note: PRINT generates a WM_KEYUP under Windows
+              // also only call the standard kbd hook for the WM_KEYUP msg,
+              // the low-level hook is called twice
+              // mb->putWinMsg(hwndWin32, WM_CHAR, VK_PRINT_W, ... )
+              // WM_CHAR(0x0000002ch, c1370001h)
+              extramsg.message = WINWM_KEYUP;
+              extramsg.wParam  = VK_PRINT_W;
+              extramsg.lParam  = winMsg->lParam;
+              setThreadQueueExtraCharMessage(teb, &extramsg);
+              break;
+#endif
+            
+            case PMSCAN_ALTRIGHT:
+            {
+              // we need very special treatment here for the
+              // poor, crippled AltGr key
+              if (keyWasPressed)
+              {
+                // 1 - generate a virtual LCONTROL-keypress
+                // 2 - send LMENU-keypress (NT emulates ALtGr w/ Ctrl-AltGr!)
+                // 0xfe000000: mask out extended-key, scancode, repeatcount
+                extramsg.message = WINWM_KEYDOWN;
+                extramsg.wParam  = VK_RMENU_W;
+                extramsg.lParam  = (winMsg->lParam & 0xfe000000)
+                                   | repeatCount
+                                   | (WINSCAN_ALTRIGHT << 24);
+                winMsg->message  = WINWM_KEYDOWN;
+                winMsg->wParam   = VK_LCONTROL_W;
+                winMsg->lParam   = (winMsg->lParam & 0xfe000000)
+                                   | repeatCount
+                                   | (WINSCAN_CTRLLEFT << 24);
+              }
+              else
+              {
+                // key up
+                // 1 - generate a virtual LCONTROL-keypress
+                // 2 - send LMENU-keypress (NT emulates ALtGr w/ Ctrl-Alt!)
+                extramsg.message = WINWM_KEYDOWN;
+                extramsg.wParam  = VK_RMENU_W;
+                extramsg.lParam  = (winMsg->lParam & 0xfe000000)
+                                   | repeatCount
+                                   | (WINSCAN_ALTRIGHT << 24);
+                winMsg->message  = WINWM_SYSKEYUP;
+                winMsg->wParam   = VK_LCONTROL_W;
+                winMsg->lParam   = (winMsg->lParam & 0xfe000000)
+                                   | repeatCount
+                                   | (WINSCAN_CTRLLEFT << 24);
+              }
+              
+              setThreadQueueExtraCharMessage(teb, &extramsg);
+            }
+          } /* switch */
         }
       
       
@@ -1025,9 +1084,9 @@ BOOL OSLibWinTranslateMessage(MSG *msg)
                 extramsg.lParam |= (1<<30);
             if(fl & KC_KEYUP)
                 extramsg.lParam |= (1<<31);
-
-            teb->o.odin.fTranslated = TRUE;
-            memcpy(&teb->o.odin.msgWCHAR, &extramsg, sizeof(MSG));
+      
+            // insert message into the queue
+            setThreadQueueExtraCharMessage(teb, &extramsg);
             return TRUE;
     }
     return FALSE;
