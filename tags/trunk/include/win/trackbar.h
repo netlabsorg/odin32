@@ -1,4 +1,4 @@
-/* $Id: trackbar.h,v 1.6 2000-05-22 17:18:57 cbratschi Exp $ */
+/* $Id: trackbar.h,v 1.7 2001-03-31 13:23:34 sandervl Exp $ */
 
 /*
  * Trackbar class extra info
@@ -49,7 +49,5 @@ typedef struct tagTRACKBAR_INFO
 #define TB_REFRESH_TIMER       1
 #define TB_REFRESH_DELAY       1
 
-extern VOID TRACKBAR_Register (VOID);
-extern VOID TRACKBAR_Unregister (VOID);
 
 #endif  /* __WINE_TRACKBAR_H */

@@ -1,4 +1,4 @@
-/* $Id: propsheet.h,v 1.1 1999-05-24 20:19:17 ktk Exp $ */
+/* $Id: propsheet.h,v 1.2 2001-03-31 13:23:34 sandervl Exp $ */
 
 /*
  * Property sheet class extra info
@@ -17,7 +17,5 @@ typedef struct tagPROPSHEET_INFO
 
 
 
-extern VOID PROPSHEET_Register (VOID);
-extern VOID PROPSHEET_UnRegister (VOID);
 
 #endif  /* __WINE_PROPSHEET_H */
