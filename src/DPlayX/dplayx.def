@@ -1,7 +1,7 @@
-;$Id: dplayx.def,v 1.4 1999-12-28 10:30:59 sandervl Exp $
+;$Id: dplayx.def,v 1.5 2000-09-24 22:35:22 hugh Exp $
 
 ;
-; Based on Windows 98 DirectX7: DPLAYX.DLL 
+; Based on Windows 98 DirectX7: DPLAYX.DLL
 ;
 LIBRARY DPLAYX INITINSTANCE TERMINSTANCE
 
@@ -14,8 +14,9 @@ EXPORTS
   DirectPlayEnumerateA       = _DirectPlayEnumerateA@8         @2
   DirectPlayEnumerateW       = _DirectPlayEnumerateW@8         @3
   DirectPlayLobbyCreateA     = _DirectPlayLobbyCreateA@20      @4
-; gdwDPlaySPRefCount					       @6
+;gdwDPlaySPRefCount                 @6
   DirectPlayLobbyCreateW     = _DirectPlayLobbyCreateW@20      @5
-; DirectPlayEnumerate        = _DirectPlayEnumerate@?          @9
-; DllCanUnloadNow					       @10
-; DllGetClassObject					       @11
+;  DirectPlayEnumerate        = _DirectPlayEnumerate@8          @9
+  DllCanUnloadNow            = _DPLAYX_DllCanUnloadNow@0    @10
+  DllGetClassObject          = _DPLAYX_DllGetClassObject@12      @11
+
