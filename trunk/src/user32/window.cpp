@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.63 2000-05-02 20:50:53 sandervl Exp $ */
+/* $Id: window.cpp,v 1.64 2000-05-03 18:35:55 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -603,8 +603,8 @@ HWND WIN32API GetFocus(void)
     HWND hwnd;
 
     hwnd = OSLibWinQueryFocus(OSLIB_HWND_DESKTOP);
-    dprintf(("USER32: GetFocus %x\n", hwnd));
     hwnd = Win32BaseWindow::OS2ToWin32Handle(hwnd);
+    dprintf(("USER32: GetFocus %x\n", hwnd));
     return hwnd;
 }
 //******************************************************************************
@@ -1411,7 +1411,7 @@ BOOL WIN32API OpenIcon(HWND hwnd)
 //******************************************************************************
 BOOL WIN32API ShowOwnedPopups( HWND hwnd, BOOL  arg2)
 {
-    dprintf(("USER32:  ShowOwnedPopups %x", hwnd));
+    dprintf(("USER32:  ShowOwnedPopups (OPEN32: todo) %x", hwnd));
     return O32_ShowOwnedPopups(Win32BaseWindow::Win32ToOS2FrameHandle(hwnd), arg2);
 }
 //******************************************************************************

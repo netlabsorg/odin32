@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.48 2000-05-02 20:50:51 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.49 2000-05-03 18:35:53 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -235,6 +235,7 @@ ULONG Win32Dialog::MsgCreate(HWND hwndFrame, HWND hwndClient)
         dprintf(("********* DIALOG CONTROLS CREATED ************"));
         /* Send initialisation messages and set focus */
         hwndFocus = GetNextDlgTabItem( getWindowHandle(), 0, FALSE );
+        dprintf(("dlg ctor: GetNextDlgTabItem returned %x, capture hwnd = %x", hwndFocus, GetCapture()));
 
 	HWND hwndPreInitFocus = GetFocus();
         if(SendInternalMessageA(WM_INITDIALOG, (WPARAM)hwndFocus, param)) {

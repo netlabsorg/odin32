@@ -1,4 +1,4 @@
-/* $Id: wndmsg.cpp,v 1.14 2000-02-16 14:34:40 sandervl Exp $ */
+/* $Id: wndmsg.cpp,v 1.15 2000-05-03 18:35:56 sandervl Exp $ */
 /*
  * Win32 window message text function for OS/2
  *
@@ -772,6 +772,12 @@ void DebugPrintMessage(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam, BOOL f
             }
             else    dprintf(("SendMessage%c %s for %x %x %x", unicode, GetMsgText(Msg), hwnd, wParam, lParam));
         }
+  }
+  else {
+        if(fInternalMsg) {
+            	dprintf2(("SendInternalMessage%c %s for %x %x %x", unicode, GetMsgText(Msg), hwnd, wParam, lParam));
+        }
+        else    dprintf2(("SendMessage%c %s for %x %x %x", unicode, GetMsgText(Msg), hwnd, wParam, lParam));
   }
 }
 

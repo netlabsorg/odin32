@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.41 2000-04-10 19:40:45 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.42 2000-05-03 18:35:52 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -280,5 +280,8 @@ ULONG OSLibWinGetLastError();
 void  OSLibWinShowTaskList(HWND hwndFrame);
 
 void  OSLibWinSetVisibleRegionNotify(HWND hwnd, BOOL fNotify);
+
+HWND  OSLibWinQueryCapture();
+BOOL  OSLibWinSetCapture(HWND hwnd);
 
 #endif //__OSLIBWIN_H__
