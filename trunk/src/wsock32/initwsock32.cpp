@@ -1,4 +1,5 @@
-/*
+/* $Id: initwsock32.cpp,v 1.3 2001-09-05 10:26:30 bird Exp $
+ *
  * DLL entry point
  *
  * Copyright 1998 Sander van Leeuwen
@@ -35,7 +36,7 @@
 #include <misc.h>       /*PLF Wed  98-03-18 23:18:15*/
 #include <initdll.h>
 
-#define DBG_LOCALLOG	DBG_initterm
+#define DBG_LOCALLOG    DBG_initterm
 #include "dbglocal.h"
 
 extern "C" {
@@ -67,14 +68,14 @@ ULONG APIENTRY inittermWsock32(ULONG hModule, ULONG ulFlag)
       case 0 :
          ParseLogStatusWSOCK32();
 
-	 dllHandle = RegisterLxDll(hModule, NULL, (PVOID)&wsock32_PEResTab);
-         if(dllHandle == 0) 
-		return 0UL;
+     dllHandle = RegisterLxDll(hModule, NULL, (PVOID)&wsock32_PEResTab);
+         if(dllHandle == 0)
+        return 0UL;
 
          break;
       case 1 :
          if(dllHandle) {
-	   	UnregisterLxDll(dllHandle);
+        UnregisterLxDll(dllHandle);
          }
          break;
       default  :
