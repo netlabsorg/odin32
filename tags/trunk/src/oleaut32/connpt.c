@@ -1,4 +1,3 @@
-/* $Id: connpt.c,v 1.2 2001-09-05 13:18:59 bird Exp $ */
 /*
  * Implementation of a generic ConnectionPoint object.
  *

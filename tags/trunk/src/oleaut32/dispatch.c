@@ -1,4 +1,3 @@
-/* $Id: dispatch.c,v 1.2 2001-09-05 13:19:00 bird Exp $ */
 /**
  * Dispatch API functions
  *
