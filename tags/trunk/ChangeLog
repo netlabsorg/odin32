@@ -1,4 +1,8 @@
- /* $Id: ChangeLog,v 1.69 1999-08-04 21:29:18 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.70 1999-08-05 11:44:02 sandervl Exp $ */
+
+ 99-08-05: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: Bitmap conversion bugfix; always recalculate bitmap size
+	            (bitmap in donut.exe (ddraw sample) contains wrong size)
 
  99-08-04: Patrick Haller <phaller@gmx.net>
 	- KERNEL32: fix for filename handling in kernel32/profile
