@@ -66,5 +66,8 @@ void WIN32API SetDefaultLanguage(DWORD deflang);
 //Override pm keyboard hook dll name
 void WIN32API SetCustomPMHookDll(LPSTR pszKbdDllName);
 
+//Turn off wave audio in winmm
+void WIN32API DisableWaveAudio();
+
 #endif  /*__CUSTOMBUILD_H__*/
 
