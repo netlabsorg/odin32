@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.30 1999-12-12 14:57:14 phaller Exp $ */
+/* $Id: HandleManager.cpp,v 1.31 1999-12-18 21:45:53 sandervl Exp $ */
 
 /*
  * Win32 Unified Handle Manager for OS/2
@@ -55,6 +55,7 @@
 #include "HMSemaphore.h"
 #include "HMMMap.h"
 #include "HMComm.h"
+#include "HMToken.h"
 #include <winconst.h>
 
 /*****************************************************************************
@@ -122,6 +123,7 @@ struct _HMGlobals
   HMDeviceHandler        *pHMSemaphore;
   HMDeviceHandler        *pHMFileMapping;  /* static instances of subsystems */
   HMDeviceHandler        *pHMComm;                   /* serial communication */
+  HMDeviceHandler        *pHMToken;         /* security tokens */
 
   ULONG         ulHandleLast;                   /* index of last used handle */
 } HMGlobals;
@@ -204,6 +206,29 @@ static ULONG _HMHandleGetFree(void)
   }
 
   return (INVALID_HANDLE_VALUE);             /* haven't found any free handle */
+}
+
+
+/*****************************************************************************
+ * Name      : HMHandleGetUserData
+ * Purpose   : Get the dwUserData dword for a specific handle
+ * Parameters: HANDLE hHandle
+ * Variables :
+ * Result    : -1 or dwUserData
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+DWORD HMHandleGetUserData(ULONG  hHandle)
+{
+  if (hHandle > MAX_OS2_HMHANDLES)                  /* check the table range */
+    return (-1);
+                                                   /* Oops, invalid handle ! */
+  if (INVALID_HANDLE_VALUE == TabWin32Handles[hHandle].hmHandleData.hHMHandle)
+    return (-1);              /* nope, ERROR_INVALID_HANDLE */
+
+  return TabWin32Handles[hHandle].hmHandleData.dwUserData;
 }
 
 
@@ -321,6 +346,7 @@ DWORD HMInitialize(void)
     HMGlobals.pHMSemaphore  = new HMDeviceSemaphoreClass("\\\\SEM\\");
     HMGlobals.pHMFileMapping= new HMDeviceMemMapClass("\\\\MEMMAP\\");
     HMGlobals.pHMComm       = new HMDeviceCommClass("\\\\COM\\");
+    HMGlobals.pHMToken      = new HMDeviceTokenClass("\\\\TOKEN\\");
   }
   return (NO_ERROR);
 }
@@ -391,6 +417,9 @@ DWORD  HMHandleAllocate (PULONG phHandle16,
 
   ulHandle = HMGlobals.ulHandleLast;                      /* get free handle */
 
+  if(ulHandle == 0) {
+	ulHandle = 1; //SvL: Start searching from index 1
+  }
   do
   {
                                                   /* check if handle is free */
@@ -2488,14 +2517,14 @@ DWORD HMWaitForMultipleObjects (DWORD   cObjects,
   DWORD   rc;
 
   // allocate array for handle table
-  pArrayOfHandles = (PHANDLE)malloc(cObjects * sizeof(HANDLE));
+  pArrayOfHandles = (PHANDLE)alloca(cObjects * sizeof(HANDLE));
   if (pArrayOfHandles == NULL)
   {
-    O32_SetLastError(ERROR_NOT_ENOUGH_MEMORY);
-    return WAIT_FAILED;
+	dprintf(("ERROR: HMWaitForMultipleObjects: alloca failed to allocate %d handles", cObjects));
+    	O32_SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+    	return WAIT_FAILED;
   }
-  else
-    pLoop2 = pArrayOfHandles;
+  else  pLoop2 = pArrayOfHandles;
 
   // convert array to odin handles
   for (ulIndex = 0;
@@ -2511,7 +2540,6 @@ DWORD HMWaitForMultipleObjects (DWORD   cObjects,
 
     if (rc != NO_ERROR)
     {
-      free (pArrayOfHandles);             // free memory
       O32_SetLastError(ERROR_INVALID_HANDLE);
       return (WAIT_FAILED);
     }
@@ -2525,7 +2553,6 @@ DWORD HMWaitForMultipleObjects (DWORD   cObjects,
                                   fWaitAll,
                                   dwTimeout);
 
-  free(pArrayOfHandles);                  // free memory
   return (rc);                            // OK, done
 }
 
@@ -2555,6 +2582,70 @@ DWORD HMWaitForMultipleObjectsEx (DWORD   cObjects,
                                    dwTimeout));
 }
 
+/*****************************************************************************
+ * Name      : HMMsgWaitForMultipleObjects
+ * Purpose   : router function for MsgWaitForMultipleObjects
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : Open32 doesn't implement this properly! (doesn't check dwWakeMask)
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
+ *****************************************************************************/
+
+DWORD  HMMsgWaitForMultipleObjects  (DWORD 			nCount, 
+                                     LPHANDLE 			pHandles, 
+                                     BOOL 			fWaitAll,
+                                     DWORD 			dwMilliseconds, 
+                                     DWORD 			dwWakeMask)
+{
+  ULONG   ulIndex;
+  PHANDLE pArrayOfHandles;
+  PHANDLE pLoop1 = pHandles;
+  PHANDLE pLoop2;
+  DWORD   rc;
+
+  // allocate array for handle table
+  pArrayOfHandles = (PHANDLE)alloca(nCount * sizeof(HANDLE));
+  if (pArrayOfHandles == NULL)
+  {
+	dprintf(("ERROR: HMMsgWaitForMultipleObjects: alloca failed to allocate %d handles", nCount));
+    	O32_SetLastError(ERROR_NOT_ENOUGH_MEMORY);
+    	return WAIT_FAILED;
+  }
+  else
+    pLoop2 = pArrayOfHandles;
+
+  // convert array to odin handles
+  for (ulIndex = 0;
+
+       ulIndex < nCount;
+
+       ulIndex++,
+       pLoop1++,
+       pLoop2++)
+  {
+    rc = HMHandleTranslateToOS2 (*pLoop1, // translate handle
+                                 pLoop2);
+
+    if (rc != NO_ERROR)
+    {
+      O32_SetLastError(ERROR_INVALID_HANDLE);
+      return (WAIT_FAILED);
+    }
+  }
+
+  // OK, now forward to Open32.
+  // @@@PH: Note this will fail on handles that do NOT belong to Open32
+  //        but to i.e. the console subsystem!
+  rc = O32_MsgWaitForMultipleObjects(nCount,
+                                     pArrayOfHandles,
+                                     fWaitAll, dwMilliseconds,
+                                     dwWakeMask);
+
+  return (rc);                            // OK, done
+}
 /*****************************************************************************
  * Name      : HMDeviceIoControl
  * Purpose   : router function for DeviceIoControl
@@ -2661,3 +2752,143 @@ BOOL HMGetCommState(INT hCommDev, LPDCB lpdcb)
 
   return (bResult);                                  /* deliver return code */
 }
+
+/*****************************************************************************
+ * Name      : HMOpenThreadToken
+ * Purpose   : router function for NtOpenThreadToken
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+
+DWORD HMOpenThreadToken(HANDLE  ThreadHandle,
+                        DWORD   DesiredAccess,
+                        BOOLEAN OpenAsSelf,
+                        DWORD   dwUserData,
+                        HANDLE *TokenHandle)
+{
+  int             iIndex;                     /* index into the handle table */
+  int             iIndexNew;                  /* index into the handle table */
+  HMDeviceHandler *pDeviceHandler;         /* device handler for this handle */
+  PHMHANDLEDATA   pHMHandleData;
+  DWORD           rc;                                     /* API return code */
+
+  pDeviceHandler = HMGlobals.pHMToken;         /* device is predefined */
+
+  iIndexNew = _HMHandleGetFree();                         /* get free handle */
+  if (-1 == iIndexNew)                            /* oops, no free handles ! */
+  {
+    SetLastError(ERROR_NOT_ENOUGH_MEMORY);      /* use this as error message */
+    return ERROR_NOT_ENOUGH_MEMORY; 
+  }
+
+  /* initialize the complete HMHANDLEDATA structure */
+  pHMHandleData = &TabWin32Handles[iIndexNew].hmHandleData;
+  pHMHandleData->dwType     = FILE_TYPE_UNKNOWN;      /* unknown handle type */
+  pHMHandleData->dwAccess   = DesiredAccess;
+  pHMHandleData->dwShare    = 0;
+  pHMHandleData->dwCreation = 0;
+  pHMHandleData->dwFlags    = 0;
+  pHMHandleData->lpHandlerData = NULL;
+
+
+  /* we've got to mark the handle as occupied here, since another device */
+  /* could be created within the device handler -> deadlock */
+
+  /* write appropriate entry into the handle table if open succeeded */
+  TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = iIndexNew;
+  TabWin32Handles[iIndexNew].pDeviceHandler         = pDeviceHandler;
+
+                                                  /* call the device handler */
+
+  // @@@PH: Note: hFile is a Win32-style handle, it's not (yet) converted to
+  //              a valid HandleManager-internal handle!
+  rc = pDeviceHandler->OpenThreadToken(&TabWin32Handles[iIndexNew].hmHandleData,
+                                       dwUserData,
+                                       ThreadHandle,
+                                       OpenAsSelf);
+
+  if (rc != NO_ERROR)     /* oops, creation failed within the device handler */
+  {
+    	TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
+	return (rc);                                           /* signal error */
+  }
+  else
+    SetLastError(ERROR_SUCCESS); //@@@PH 1999/10/27 rc5desg requires this?
+
+  *TokenHandle = iIndexNew;                                   /* return valid handle */
+  return STATUS_SUCCESS;
+}
+
+/*****************************************************************************
+ * Name      : HMOpenProcessToken
+ * Purpose   : router function for NtOpenProcessToken
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+DWORD HMOpenProcessToken(HANDLE  ProcessHandle,
+                         DWORD   DesiredAccess,
+                         DWORD   dwUserData,
+                         HANDLE *TokenHandle)
+{
+  int             iIndex;                     /* index into the handle table */
+  int             iIndexNew;                  /* index into the handle table */
+  HMDeviceHandler *pDeviceHandler;         /* device handler for this handle */
+  PHMHANDLEDATA   pHMHandleData;
+  DWORD           rc;                                     /* API return code */
+
+  pDeviceHandler = HMGlobals.pHMToken;         /* device is predefined */
+
+  iIndexNew = _HMHandleGetFree();                         /* get free handle */
+  if (-1 == iIndexNew)                            /* oops, no free handles ! */
+  {
+    SetLastError(ERROR_NOT_ENOUGH_MEMORY);      /* use this as error message */
+    return ERROR_NOT_ENOUGH_MEMORY; 
+  }
+
+  /* initialize the complete HMHANDLEDATA structure */
+  pHMHandleData = &TabWin32Handles[iIndexNew].hmHandleData;
+  pHMHandleData->dwType     = FILE_TYPE_UNKNOWN;      /* unknown handle type */
+  pHMHandleData->dwAccess   = DesiredAccess;
+  pHMHandleData->dwShare    = 0;
+  pHMHandleData->dwCreation = 0;
+  pHMHandleData->dwFlags    = 0;
+  pHMHandleData->lpHandlerData = NULL;
+
+
+  /* we've got to mark the handle as occupied here, since another device */
+  /* could be created within the device handler -> deadlock */
+
+  /* write appropriate entry into the handle table if open succeeded */
+  TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = iIndexNew;
+  TabWin32Handles[iIndexNew].pDeviceHandler         = pDeviceHandler;
+
+                                                  /* call the device handler */
+
+  // @@@PH: Note: hFile is a Win32-style handle, it's not (yet) converted to
+  //              a valid HandleManager-internal handle!
+  rc = pDeviceHandler->OpenProcessToken(&TabWin32Handles[iIndexNew].hmHandleData,
+                                        dwUserData,
+                                        ProcessHandle);
+
+  if (rc != NO_ERROR)     /* oops, creation failed within the device handler */
+  {
+    	TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
+	return (rc);                                           /* signal error */
+  }
+  else
+    SetLastError(ERROR_SUCCESS); //@@@PH 1999/10/27 rc5desg requires this?
+
+  *TokenHandle = iIndexNew;                                   /* return valid handle */
+  return STATUS_SUCCESS;
+}
+

@@ -1,4 +1,4 @@
-/* $Id: hmdevice.cpp,v 1.13 1999-12-17 17:25:10 sandervl Exp $ */
+/* $Id: hmdevice.cpp,v 1.14 1999-12-18 21:45:54 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -1126,3 +1126,47 @@ BOOL HMDeviceHandler::GetCommState(PHMHANDLEDATA pHMHandleData, LPDCB lpdcb)
   return(FALSE);
 }
 
+/*****************************************************************************
+ * Name      : DWORD HMDeviceHandler::OpenThreadToken
+ * Purpose   : 
+ * Variables :
+ * Result    : 
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+
+DWORD HMDeviceHandler::OpenThreadToken(PHMHANDLEDATA pHMHandleData, 
+				       DWORD   dwUserData,
+                                       HANDLE  ThreadHandle,
+                                       BOOL    OpenAsSelf)
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::OpenThreadToken(%08xh,%08xh)\n",
+           pHMHandleData->hHMHandle,
+           ThreadHandle));
+
+  return ERROR_INVALID_HANDLE;
+}
+
+/*****************************************************************************
+ * Name      : DWORD HMDeviceHandler::OpenThreadToken
+ * Purpose   : 
+ * Variables :
+ * Result    : 
+ * Remark    :
+ * Status    :
+ *
+ * Author    : SvL
+ *****************************************************************************/
+
+DWORD HMDeviceHandler::OpenProcessToken(PHMHANDLEDATA pHMHandleData, 
+ 				        DWORD   dwUserData,
+                                        HANDLE  ProcessHandle)
+{
+  dprintf(("KERNEL32: HandleManager::DeviceHandler::OpenProcessToken(%08xh,%08xh)\n",
+           pHMHandleData->hHMHandle,
+           ProcessHandle));
+
+  return ERROR_INVALID_HANDLE;
+}

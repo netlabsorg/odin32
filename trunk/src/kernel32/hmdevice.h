@@ -1,4 +1,4 @@
-/* $Id: hmdevice.h,v 1.13 1999-12-10 14:06:11 sandervl Exp $ */
+/* $Id: hmdevice.h,v 1.14 1999-12-18 21:45:54 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -24,9 +24,11 @@
  * defines                                                                   *
  *****************************************************************************/
 
-#define HMTYPE_UNKNOWN	0
-#define HMTYPE_MEMMAP	1
-#define HMTYPE_DEVICE   2
+#define HMTYPE_UNKNOWN		0
+#define HMTYPE_MEMMAP		1
+#define HMTYPE_DEVICE   	2
+#define HMTYPE_PROCESSTOKEN 	3
+#define HMTYPE_THREADTOKEN 	4
 //.....
 
 /*****************************************************************************
@@ -291,6 +293,13 @@ public:
  virtual BOOL SetupComm(PHMHANDLEDATA pHMHandleData, DWORD dwInQueue, DWORD dwOutQueue);
 
  virtual BOOL GetCommState(PHMHANDLEDATA pHMHandleData, LPDCB lpdcb);
+
+ virtual DWORD  OpenThreadToken(PHMHANDLEDATA pHMHandleData, DWORD dwUserData,
+                                 HANDLE  ThreadHandle,
+                                 BOOL    OpenAsSelf);
+
+ virtual DWORD  OpenProcessToken(PHMHANDLEDATA pHMHandleData, DWORD dwUserData,
+                                  HANDLE  ProcessHandle);
 
 };
 
