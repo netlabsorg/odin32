@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.53 2000-01-28 22:26:01 sandervl Exp $ */
+/* $Id: window.cpp,v 1.54 2000-01-29 14:23:33 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -653,6 +653,7 @@ BOOL WIN32API GetWindowRect( HWND hwnd, PRECT pRect)
     else
       window = windowDesktop;
 
+
     if(!window) {
         dprintf(("GetWindowRect, window %x not found", hwnd));
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
@@ -664,6 +665,9 @@ BOOL WIN32API GetWindowRect( HWND hwnd, PRECT pRect)
     }
     *pRect = *window->getWindowRect(); //always in screen coordinates
 
+    if(hwnd == 0x68000034) {
+	window = 0;
+    }
     dprintf(("GetWindowRect %x (%d,%d) (%d,%d)", hwnd, pRect->left, pRect->top, pRect->right, pRect->bottom));
     return TRUE;
 }
@@ -916,13 +920,20 @@ BOOL WIN32API ScreenToClient (HWND hwnd, LPPOINT pt)
 {
     Win32BaseWindow *wnd;
     PRECT rcl;
-
-    dprintf(("ScreenToClient %x (%d,%d)\n", hwnd, pt->x, pt->y));
+    BOOL rc;
 
     if (!hwnd) return (TRUE);
     wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
-    if (!wnd) return (TRUE);
-    return mapWin32Point(OSLIB_HWND_DESKTOP,wnd->getOS2WindowHandle(),(OSLIBPOINT*)pt);
+    if (!wnd) {
+	dprintf(("warning: ScreenToClient: window %x not found!", hwnd));
+	return (TRUE);
+    }
+#ifdef DEBUG
+    POINT tmp = *pt;
+#endif
+    rc = mapWin32Point(OSLIB_HWND_DESKTOP, wnd->getOS2WindowHandle(), (OSLIBPOINT*)pt);
+    dprintf(("ScreenToClient %x (%d,%d) -> (%d,%d)", hwnd, tmp.x, tmp.y, pt->x, pt->y));
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************
@@ -1034,18 +1045,25 @@ BOOL WIN32API ClientToScreen (HWND hwnd, PPOINT pt)
 {
     Win32BaseWindow *wnd;
     PRECT rcl;
+    BOOL rc;
 
-    dprintf(("ClientToScreen (%d,%d)\n", pt->x, pt->y));
     if (!hwnd) {
         SetLastError(ERROR_INVALID_PARAMETER);
         return (FALSE);
     }
     wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
     if (!wnd) {
+    	dprintf(("warning: ClientToScreen window %x not found!", hwnd));
         SetLastError(ERROR_INVALID_WINDOW_HANDLE);
         return (FALSE);
     }
-    return mapWin32Point(wnd->getOS2WindowHandle(),OSLIB_HWND_DESKTOP,(OSLIBPOINT*)pt);
+#ifdef DEBUG
+    POINT tmp = *pt;
+#endif
+    rc = mapWin32Point(wnd->getOS2WindowHandle(),OSLIB_HWND_DESKTOP,(OSLIBPOINT*)pt);
+    dprintf(("ClientToScreen %x (%d,%d) -> (%d,%d)", hwnd, tmp.x, tmp.y, pt->x, pt->y));
+    
+    return rc;
 }
 //******************************************************************************
 //******************************************************************************

@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.38 2000-01-28 22:25:59 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.39 2000-01-29 14:23:32 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -444,9 +444,6 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
       	return (HDC)NULLHANDLE;
    }
 
-   if(hWnd == 0x6800003a) {
-        hwnd = 0x6800003a;
-   }
    Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
 
    if ((hwnd != HWND_DESKTOP) && wnd->isOwnDC())

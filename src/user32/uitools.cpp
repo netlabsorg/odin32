@@ -1,4 +1,4 @@
-/* $Id: uitools.cpp,v 1.21 2000-01-18 20:10:47 sandervl Exp $ */
+/* $Id: uitools.cpp,v 1.22 2000-01-29 14:23:33 sandervl Exp $ */
 /*
  * User Interface Functions
  *
@@ -2002,7 +2002,7 @@ BOOL WIN32API DrawCaptionTempA(HWND       hwnd,
     }
 
     if (str)
-      O32_DrawText (hdc,
+      DrawTextA (hdc,
                     str,
                     -1,
                     &rc,
@@ -2016,7 +2016,7 @@ BOOL WIN32API DrawCaptionTempA(HWND       hwnd,
                                 szText,
                                 128);
 
-      O32_DrawText (hdc,
+      DrawTextA (hdc,
                     szText,
                     nLen,
                     &rc,
