@@ -1,4 +1,4 @@
-/* $Id: winmouse.cpp,v 1.8 2000-03-09 21:50:11 sandervl Exp $ */
+/* $Id: winmouse.cpp,v 1.9 2000-05-03 18:35:56 sandervl Exp $ */
 /*
  * Mouse handler for DINPUT
  *
@@ -11,10 +11,12 @@
 #include <os2win.h>
 #include <misc.h>
 #include "win32wbase.h"
+#include "win32wnd.h"
 #include <win\mouse.h>
 #include "winmouse.h"
 #include "oslibmsg.h"
 #include "pmwindow.h"
+#include "oslibwin.h"
 
 #define DBG_LOCALLOG	DBG_winmouse
 #include "dbglocal.h"
@@ -101,6 +103,47 @@ BOOL DInputMouseHandler(HWND hwnd, ULONG msg, ULONG x, ULONG y)
 
   mouseHandler(dwFlags, x, y, 0, (DWORD)&mouseEvent);
   return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+HWND WIN32API GetCapture(void)
+{
+ HWND hwnd;
+
+    hwnd = Win32Window::OS2ToWin32Handle(OSLibWinQueryCapture());
+    dprintf(("USER32: GetCapture returned %x", hwnd));
+    return hwnd;
+}
+//******************************************************************************
+//******************************************************************************
+HWND WIN32API SetCapture( HWND hwnd)
+{
+ HWND hwndPrev = GetCapture();
+
+    if(hwnd == 0) {
+	ReleaseCapture();
+	return hwndPrev;
+    }
+    OSLibWinSetCapture(Win32Window::Win32ToOS2Handle(hwnd));
+    dprintf(("USER32: SetCapture %x (prev %x)", hwnd, hwndPrev));
+    if(hwndPrev) {
+    	SendMessageA(hwndPrev, WM_CAPTURECHANGED, 0L, hwnd);
+    }
+    return hwndPrev;
+//    return 0;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL WIN32API ReleaseCapture(void)
+{
+ HWND hwndPrev;
+
+    dprintf(("USER32:  ReleaseCapture"));
+    hwndPrev = GetCapture();
+    if(hwndPrev) {
+    	SendMessageA(hwndPrev, WM_CAPTURECHANGED, 0L, 0L);
+    }
+    return OSLibWinSetCapture(0);
 }
 //******************************************************************************
 //******************************************************************************

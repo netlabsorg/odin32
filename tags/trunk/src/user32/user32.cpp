@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.78 2000-05-02 20:50:50 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.79 2000-05-03 18:35:52 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -546,31 +546,6 @@ VOID WIN32API mouse_event(DWORD dwFlags,
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API ReleaseCapture(void)
-{
-    dprintf(("USER32:  ReleaseCapture"));
-    return O32_ReleaseCapture();
-}
-//******************************************************************************
-//******************************************************************************
-HWND WIN32API GetCapture(void)
-{
- HWND hwnd;
-
-    hwnd = Win32Window::OS2ToWin32Handle(O32_GetCapture());
-    dprintf(("USER32: GetCapture returned %x", hwnd));
-    return hwnd;
-}
-//******************************************************************************
-//******************************************************************************
-HWND WIN32API SetCapture( HWND hwnd)
-{
-    dprintf(("USER32: SetCapture %x", hwnd));
-    hwnd = Win32Window::Win32ToOS2Handle(hwnd);
-    return Win32Window::OS2ToWin32Handle(O32_SetCapture(hwnd));
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API SetDoubleClickTime( UINT uInterval)
 {
     dprintf(("USER32:  SetDoubleClickTime\n"));
@@ -887,9 +862,11 @@ BOOL WIN32API SystemParametersInfoA(UINT uiAction, UINT uiParam, PVOID pvParam, 
         *(BOOL *)pvParam = FALSE; //CB: where is the Warp 4 setting stored?
         break;
     case SPI_GETNONCLIENTMETRICS:
+    {
         memset(cmetric, 0, sizeof(NONCLIENTMETRICSA));
         cmetric->cbSize = sizeof(NONCLIENTMETRICSA);
 
+#if 0
         //CB: fonts not handled by Open32, set to WarpSans
     	lstrcpyA(cmetric->lfSmCaptionFont.lfFaceName,"WarpSans");
     	cmetric->lfSmCaptionFont.lfHeight = 9;
@@ -915,7 +892,46 @@ BOOL WIN32API SystemParametersInfoA(UINT uiAction, UINT uiParam, PVOID pvParam, 
         cmetric->iSmCaptionHeight = GetSystemMetrics(SM_CYSMSIZE);
         cmetric->iMenuWidth       = 32; //TODO
         cmetric->iMenuHeight      = GetSystemMetrics(SM_CYMENU);
+#else
+        SystemParametersInfoA(SPI_GETICONTITLELOGFONT, 0, (LPVOID)&(cmetric->lfSmCaptionFont),0);
+
+        SystemParametersInfoA(SPI_GETICONTITLELOGFONT, 0, (LPVOID)&(cmetric->lfCaptionFont),0);
+        cmetric->lfCaptionFont.lfWeight = FW_BOLD;
+
+        LPLOGFONTA lpLogFont = &(cmetric->lfMenuFont);
+        GetProfileStringA("Desktop", "MenuFont", "MS Sans Serif",
+			  lpLogFont->lfFaceName, LF_FACESIZE);
+
+        lpLogFont->lfHeight = -GetProfileIntA("Desktop","MenuFontSize", 12);
+        lpLogFont->lfWidth = 0;
+        lpLogFont->lfEscapement = lpLogFont->lfOrientation = 0;
+        lpLogFont->lfWeight = FW_BOLD;
+        lpLogFont->lfItalic = FALSE;
+        lpLogFont->lfStrikeOut = FALSE;
+        lpLogFont->lfUnderline = FALSE;
+        lpLogFont->lfCharSet = ANSI_CHARSET;
+        lpLogFont->lfOutPrecision = OUT_DEFAULT_PRECIS;
+        lpLogFont->lfClipPrecision = CLIP_DEFAULT_PRECIS;
+        lpLogFont->lfPitchAndFamily = DEFAULT_PITCH | FF_SWISS;
+
+        SystemParametersInfoA(SPI_GETICONTITLELOGFONT, 0,
+ 	 	  	      (LPVOID)&(cmetric->lfStatusFont),0);
+        SystemParametersInfoA(SPI_GETICONTITLELOGFONT, 0,
+ 		  	      (LPVOID)&(cmetric->lfMessageFont),0);
+
+        cmetric->iBorderWidth     = GetSystemMetrics(SM_CXBORDER);
+        cmetric->iScrollWidth     = GetSystemMetrics(SM_CXHSCROLL);
+        cmetric->iScrollHeight    = GetSystemMetrics(SM_CYHSCROLL);
+        cmetric->iCaptionWidth    = 32; //TODO
+        cmetric->iCaptionHeight   = 32; //TODO
+        cmetric->iSmCaptionWidth  = GetSystemMetrics(SM_CXSMSIZE);
+        cmetric->iSmCaptionHeight = GetSystemMetrics(SM_CYSMSIZE);
+        cmetric->iMenuHeight      = GetSystemMetrics(SM_CYMENU);
+        cmetric->iMenuWidth       = cmetric->iMenuHeight; //TODO
+#endif
         break;
+    }
+
     case SPI_GETICONTITLELOGFONT:
     {
         LPLOGFONTA lpLogFont = (LPLOGFONTA)pvParam;
@@ -1568,14 +1584,14 @@ BOOL WIN32API UnregisterHotKey(HWND hwnd, int idHotKey)
 //******************************************************************************
 WORD WIN32API VkKeyScanA( char ch)
 {
-    dprintf(("USER32:  VkKeyScanA\n"));
+    dprintf(("USER32: VkKeyScanA %x", ch));
     return O32_VkKeyScan(ch);
 }
 //******************************************************************************
 //******************************************************************************
 WORD WIN32API VkKeyScanW( WCHAR wch)
 {
-    dprintf(("USER32:  VkKeyScanW\n"));
+    dprintf(("USER32:  VkKeyScanW %x", wch));
     // NOTE: This will not work as is (needs UNICODE support)
     return O32_VkKeyScan((char)wch);
 }
@@ -1688,7 +1704,7 @@ int WIN32API FillRect(HDC hDC, const RECT * lprc, HBRUSH hbr)
 //******************************************************************************
 int WIN32API FrameRect( HDC hDC, const RECT * lprc, HBRUSH  hbr)
 {
-    dprintf(("USER32:  FrameRect"));
+    dprintf(("USER32: FrameRect %x (%d,%d)(%d,%d) brush %x", hDC, lprc->top, lprc->left, lprc->bottom, lprc->right, hbr));
     return O32_FrameRect(hDC,lprc,hbr);
 }
 //******************************************************************************
