@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.133 2001-06-09 14:50:19 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.134 2001-06-10 12:05:39 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -40,6 +40,9 @@
 #include "caret.h"
 #include "timer.h"
 #include <codepage.h>
+#include "syscolor.h"
+#include "options.h"
+
 
 #define DBG_LOCALLOG    DBG_pmwindow
 #include "dbglocal.h"
@@ -54,6 +57,7 @@ RECTL desktopRectl = {0};
 ULONG ScreenWidth  = 0;
 ULONG ScreenHeight = 0;
 ULONG ScreenBitsPerPel = 0;
+BOOL  fOS2Look = FALSE;
 
 static PFNWP pfnFrameWndProc = NULL;
 
@@ -143,6 +147,11 @@ BOOL InitPM()
     hdc = DevOpenDC(hab, OD_MEMORY, "*", 5L, (PDEVOPENDATA)&dop, NULLHANDLE);
     DevQueryCaps(hdc, CAPS_COLOR_BITCOUNT, 1, (PLONG)&ScreenBitsPerPel);
     DevCloseDC(hdc);
+
+    fOS2Look = PROFILE_GetOdinIniBool(ODINSYSTEM_SECTION, "OS2Look", FALSE);
+    if(fOS2Look) {
+        SYSCOLOR_Init(FALSE); //use OS/2 colors
+    }
 
     dprintf(("InitPM: Desktop (%d,%d) bpp %d", ScreenWidth, ScreenHeight, ScreenBitsPerPel));
     return TRUE;
@@ -806,6 +815,9 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
                 if(!(WinQueryWindowULong(WinWindowFromID(hwnd,FID_CLIENT), OFFSET_WIN32FLAGS) & WINDOWFLAG_ACTIVE))
                 {
                     WinSendMsg(hwnd, WM_ACTIVATE, (MPARAM)TRUE, (MPARAM)hwnd);
+                    if(fOS2Look) {
+                        WinSendDlgItemMsg(hwnd, FID_TITLEBAR, TBM_SETHILITE, MPFROMSHORT(TRUE), 0);
+                    }
                 }
             }
             else
@@ -815,6 +827,9 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
                 if(WinQueryWindowULong(WinWindowFromID(hwnd,FID_CLIENT), OFFSET_WIN32FLAGS) & WINDOWFLAG_ACTIVE)
                 {
                     WinSendMsg(hwnd, WM_ACTIVATE, (MPARAM)FALSE, (MPARAM)hwnd);
+                    if(fOS2Look) {
+                        WinSendDlgItemMsg(hwnd, FID_TITLEBAR, TBM_SETHILITE, MPFROMSHORT(FALSE), 0);
+                    }
                 }
             }
             goto RunDefWndProc;
@@ -957,6 +972,9 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
              if(!(WinQueryWindowULong(WinWindowFromID(hwnd,FID_CLIENT), OFFSET_WIN32FLAGS) & WINDOWFLAG_ACTIVE))
              {
                 WinSendMsg(hwnd, WM_ACTIVATE, (MPARAM)TRUE, (MPARAM)hwnd);
+                if(fOS2Look) {
+                    WinSendDlgItemMsg(hwnd, FID_TITLEBAR, TBM_SETHILITE, MPFROMSHORT(TRUE), 0);
+                }
              }
         }
         else
@@ -966,6 +984,9 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
             if(WinQueryWindowULong(WinWindowFromID(hwnd,FID_CLIENT), OFFSET_WIN32FLAGS) & WINDOWFLAG_ACTIVE)
             {
                     WinSendMsg(hwnd, WM_ACTIVATE, (MPARAM)FALSE, (MPARAM)hwnd);
+                    if(fOS2Look) {
+                        WinSendDlgItemMsg(hwnd, FID_TITLEBAR, TBM_SETHILITE, MPFROMSHORT(FALSE), 0);
+                    }
             }
         }
 
@@ -1112,6 +1133,9 @@ PosChangedEnd:
         if (win32wnd->IsWindowCreated())
         {
             WinSendMsg(WinWindowFromID(hwnd,FID_CLIENT),WM_ACTIVATE,mp1,mp2);
+            if(fOS2Look) {
+                WinSendDlgItemMsg(hwnd, FID_TITLEBAR, TBM_SETHILITE, mp1, 0);
+            }
             WinSetWindowUShort(hwnd,QWS_FLAGS,mp1 ? (flags | FF_ACTIVE):(flags & ~FF_ACTIVE));
 
             //CB: show owner behind the dialog
@@ -1236,6 +1260,13 @@ PosChangedEnd:
     case WM_UPDATEFRAME:
         dprintf(("PMFRAME:WM_UPDATEFRAME %x", win32wnd->getWindowHandle()));
         goto RunDefFrameWndProc;
+
+    case WM_TRACKFRAME:
+        if(fOS2Look) {//sent by titlebar control
+            FrameTrackFrame(win32wnd, TF_MOVE);
+        }
+        rc = 0;
+        break;
 
     default:
         goto RunDefFrameWndProc;

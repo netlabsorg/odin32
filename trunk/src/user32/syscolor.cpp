@@ -1,4 +1,4 @@
-/* $Id: syscolor.cpp,v 1.26 2001-03-30 22:08:19 sandervl Exp $ */
+/* $Id: syscolor.cpp,v 1.27 2001-06-10 12:05:39 sandervl Exp $ */
 
 /*
  * Win32 system color API functions for OS/2
@@ -174,11 +174,14 @@ void SYSCOLOR_Save(void)
 }
 //******************************************************************************
 //******************************************************************************
-void SYSCOLOR_Init(void)
+void SYSCOLOR_Init(int fOverride)
 {
   INT x;
 
-  USEWINCOLORS = PROFILE_GetOdinIniBool(ODINCOLORS,"UseWinColors",TRUE);
+  if(fOverride == -1) {
+       USEWINCOLORS = PROFILE_GetOdinIniBool(ODINCOLORS,"UseWinColors",TRUE);
+  }
+  else USEWINCOLORS = fOverride;
 
   SYSCOLOR_Load();
   if (USEWINCOLORS)

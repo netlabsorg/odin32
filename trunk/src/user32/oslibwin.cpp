@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.96 2001-06-09 14:50:19 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.97 2001-06-10 12:05:38 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -51,7 +51,7 @@ BOOL OSLibWinSetOwner(HWND hwnd, HWND hwndOwner)
 }
 //******************************************************************************
 //******************************************************************************
-HWND OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle,
+HWND OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle, ULONG dwOSFrameStyle,
                           char *pszName, HWND Owner, ULONG fHWND_BOTTOM,
                           ULONG id, BOOL fTaskList,BOOL fShellPosition,
                           int classStyle, HWND *hwndFrame)
@@ -92,43 +92,100 @@ HWND OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle,
                            WIN32_STDFRAMECLASS,
                            pszName, (dwWinStyle & ~WS_CLIPCHILDREN), 0, 0, 0, 0,
                            Owner, (fHWND_BOTTOM) ? HWND_BOTTOM : HWND_TOP,
-                           id, NULL, NULL);
+                           id, (PVOID)&FCData, NULL);
+    if(fOS2Look && *hwndFrame) {
+        FCData.flCreateFlags = dwOSFrameStyle;
+        WinCreateFrameControls(*hwndFrame, &FCData, NULL);
+    }
     hwndClient = WinCreateWindow (*hwndFrame, WIN32_STDCLASS,
                               NULL, dwWinStyle | WS_VISIBLE, 0, 0, 0, 0,
                               *hwndFrame, HWND_TOP, FID_CLIENT, NULL, NULL);
+
     return hwndClient;
 }
 //******************************************************************************
 //Note: Also check OSLibSetWindowStyle when changing this!!
 //******************************************************************************
-BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle)
+BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle, ULONG *OSFrameStyle)
 {
   *OSWinStyle   = 0;
+  *OSFrameStyle = 0;
 
   /* Window styles */
-#if 0
-  //Done explicitely in CreateWindowExA
-  if(dwStyle & WS_MINIMIZE_W)
-        *OSWinStyle |= WS_MINIMIZED;
-  if(dwStyle & WS_VISIBLE_W)
-        *OSWinStyle |= WS_VISIBLE;
-#endif
   if(dwStyle & WS_DISABLED_W)
         *OSWinStyle |= WS_DISABLED;
   if(dwStyle & WS_CLIPSIBLINGS_W)
         *OSWinStyle |= WS_CLIPSIBLINGS;
   if(dwStyle & WS_CLIPCHILDREN_W)
         *OSWinStyle |= WS_CLIPCHILDREN;
-#if 0
-  if(dwStyle & WS_MAXIMIZE_W)
-        *OSWinStyle |= WS_MAXIMIZED;
-  if(dwStyle & WS_GROUP_W)
-        *OSWinStyle |= WS_GROUP;
-  if(dwStyle & WS_TABSTOP_W)
-        *OSWinStyle |= WS_TABSTOP;
-#endif
 
+  if(fOS2Look) {
+      if((dwStyle & WS_CAPTION_W) == WS_CAPTION_W) {
+          *OSFrameStyle = FCF_TITLEBAR;
+          if(dwStyle & WS_SYSMENU_W)
+          {
+              *OSFrameStyle |= FCF_SYSMENU;
+          }
+          if((dwStyle & WS_MINIMIZEBOX_W) || (dwStyle & WS_MAXIMIZEBOX_W)) {
+              *OSFrameStyle |= FCF_MINMAX;
+          }
+      }
+  }
   return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinPositionFrameControls(HWND hwndFrame, RECTLOS2 *pRect)
+{
+  SWP  swp[3];
+  HWND hwndControl;
+  int  i = 0;
+  static int minmaxwidth = 0;
+
+  if(minmaxwidth == 0) {
+      minmaxwidth = WinQuerySysValue(HWND_DESKTOP, SV_CXMINMAXBUTTON);
+  }
+
+  hwndControl = WinWindowFromID(hwndFrame, FID_SYSMENU);
+  if(hwndControl) {
+      swp[i].hwnd = hwndControl;
+      swp[i].hwndInsertBehind = HWND_TOP;
+      swp[i].x  = pRect->xLeft;
+      swp[i].y  = pRect->yBottom;
+      swp[i].cx = minmaxwidth/2;
+      swp[i].cy = pRect->yTop - pRect->yBottom;
+      swp[i].fl = SWP_SIZE | SWP_MOVE | SWP_SHOW;
+      pRect->xLeft += swp[i].cx;
+      i++;
+  }
+  hwndControl = WinWindowFromID(hwndFrame, FID_TITLEBAR);
+  if(hwndControl) {
+      swp[i].hwnd = hwndControl;
+      swp[i].hwndInsertBehind = HWND_TOP;
+      swp[i].x  = pRect->xLeft;
+      swp[i].y  = pRect->yBottom;
+      swp[i].cx = pRect->xRight - pRect->xLeft;
+      if(WinWindowFromID(hwndFrame, FID_MINMAX)) {
+          swp[i].cx -= minmaxwidth - minmaxwidth/2;
+      }
+      swp[i].cy = pRect->yTop - pRect->yBottom;
+      swp[i].fl = SWP_SIZE | SWP_MOVE | SWP_SHOW;
+      pRect->xLeft += swp[i].cx;
+      i++;
+  }
+  hwndControl = WinWindowFromID(hwndFrame, FID_MINMAX);
+  if(hwndControl) {
+      swp[i].hwnd = hwndControl;
+      swp[i].hwndInsertBehind = HWND_TOP;
+      swp[i].x  = pRect->xLeft;
+      swp[i].y  = pRect->yBottom;
+      swp[i].cx = minmaxwidth + minmaxwidth/2;
+      swp[i].cy = pRect->yTop - pRect->yBottom;
+      swp[i].fl = SWP_SIZE | SWP_MOVE | SWP_SHOW;
+      pRect->xLeft += swp[i].cx;
+      i++;
+  }
+  return WinSetMultWindowPos(GetThreadHAB(), swp, i);
 }
 //******************************************************************************
 //******************************************************************************
@@ -359,6 +416,12 @@ LONG OSLibWinQueryWindowText(HWND hwnd, LONG length, LPSTR lpsz)
 BOOL OSLibWinSetWindowText(HWND hwnd, LPSTR lpsz)
 {
   return WinSetWindowText(hwnd, lpsz);
+}
+//******************************************************************************
+//******************************************************************************
+BOOL OSLibWinSetTitleBarText(HWND hwnd, LPSTR lpsz)
+{
+  return WinSetWindowText(WinWindowFromID(hwnd, FID_TITLEBAR), lpsz);
 }
 //******************************************************************************
 //******************************************************************************
@@ -758,7 +821,7 @@ void OSLibSetWindowStyle(HWND hwndFrame, HWND hwndClient, ULONG dwStyle, ULONG d
     else dwWinStyle &= ~WS_CLIPCHILDREN;
 
     if(dwWinStyle != dwOldWinStyle) {
-        WinSetWindowULong(hwndClient, QWL_STYLE, dwWinStyle);
+         WinSetWindowULong(hwndClient, QWL_STYLE, dwWinStyle);
     }
 
     //Frame window
@@ -780,7 +843,7 @@ void OSLibSetWindowStyle(HWND hwndFrame, HWND hwndClient, ULONG dwStyle, ULONG d
     else dwWinStyle &= ~WS_MINIMIZED;
 
     if(dwWinStyle != dwOldWinStyle) {
-      WinSetWindowULong(hwndFrame, QWL_STYLE, dwWinStyle);
+         WinSetWindowULong(hwndFrame, QWL_STYLE, dwWinStyle);
     }
 }
 //******************************************************************************

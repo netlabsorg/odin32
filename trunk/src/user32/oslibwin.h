@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.55 2001-05-16 07:42:26 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.56 2001-06-10 12:05:39 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -37,14 +37,16 @@ BOOL  OSLibWinSetParent(HWND hwnd, HWND hwndParent, ULONG fRedraw = TRUE);
 BOOL  OSLibWinSetOwner(HWND hwnd, HWND hwndOwner);
 
 
-HWND  OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle,
+HWND  OSLibWinCreateWindow(HWND hwndParent,ULONG dwWinStyle, ULONG dwOSFrameStyle,
                            char *pszName, HWND Owner, ULONG fBottom,
                            ULONG id, BOOL fTaskList,BOOL fShellPosition, 
                            int classStyle, HWND *hwndFrame);
 
-BOOL  OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle);
+BOOL  OSLibWinConvertStyle(ULONG dwStyle, ULONG dwExStyle, ULONG *OSWinStyle, ULONG *OSFrameStyle);
 void  OSLibSetWindowStyle(HWND hwndFrame, HWND hwndClient, ULONG dwStyle, ULONG dwExStyle);
 DWORD OSLibQueryWindowStyle(HWND hwnd);
+
+BOOL  OSLibWinPositionFrameControls(HWND hwndFrame, RECTLOS2 *pRect);
 
 #define OSLIB_QWL_USER -4
 
@@ -241,6 +243,7 @@ HWND  OSLibWinQueryWindow(HWND hwnd, ULONG lCode);
 LONG  OSLibWinQueryWindowTextLength(HWND hwnd);
 LONG  OSLibWinQueryWindowText(HWND hwnd, LONG length, LPSTR lpsz);
 BOOL  OSLibWinSetWindowText(HWND hwnd, LPSTR lpsz);
+BOOL  OSLibWinSetTitleBarText(HWND hwnd, LPSTR lpsz);
 BOOL  OSLibWinFlashWindow(HWND hwnd, BOOL fFlash);
 HWND  OSLibWinWindowFromPoint(HWND hwnd, PVOID ppoint);
 BOOL  OSLibWinMinimizeWindow(HWND hwnd);

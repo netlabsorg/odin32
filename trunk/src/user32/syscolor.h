@@ -1,4 +1,4 @@
-/* $Id: syscolor.h,v 1.13 2000-11-22 13:44:50 sandervl Exp $ */
+/* $Id: syscolor.h,v 1.14 2001-06-10 12:05:40 sandervl Exp $ */
 
 /*
  * WINE:
@@ -14,7 +14,7 @@
 BOOL   WIN32API OS2UpdateWindow(HWND hwnd);
 HBRUSH WIN32API OS2GetSysColorBrush(int nIndex);
 
-extern void SYSCOLOR_Init(void);
+extern void SYSCOLOR_Init(int fOverride = -1);
 extern void SYSCOLOR_Save(void);
 
 extern INT SYSCOLOR_GetLastColor(VOID);

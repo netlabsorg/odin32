@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.31 2001-06-09 14:50:22 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.32 2001-06-10 12:05:41 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -526,19 +526,19 @@ LONG Win32BaseWindow::HandleNCHitTest(POINT pt)
 
       //Check context help
       if (dwExStyle & WS_EX_CONTEXTHELP)
-        rect.right -= GetSystemMetrics(SM_CXSIZE) + 1;
+          rect.right -= GetSystemMetrics(SM_CXSIZE) + 1;
       if (pt.x > rect.right) return HTHELP;
 
       /* Check maximize box */
       /* In win95 there is automatically a Maximize button when there is a minimize one*/
       if ((dwStyle & WS_MAXIMIZEBOX)|| (dwStyle & WS_MINIMIZEBOX))
-        rect.right -= GetSystemMetrics(SM_CXSIZE) + 1;
+          rect.right -= GetSystemMetrics(SM_CXSIZE) + 1;
       if (pt.x > rect.right) return HTMAXBUTTON;
 
       /* Check minimize box */
       /* In win95 there is automatically a Maximize button when there is a Maximize one*/
       if ((dwStyle & WS_MINIMIZEBOX)||(dwStyle & WS_MAXIMIZEBOX))
-      rect.right -= GetSystemMetrics(SM_CXSIZE) + 1;
+          rect.right -= GetSystemMetrics(SM_CXSIZE) + 1;
 
       if (pt.x > rect.right) return HTMINBUTTON;
       return HTCAPTION;
@@ -886,6 +886,8 @@ VOID Win32BaseWindow::DrawCaption(HDC hdc,RECT *rect,BOOL active)
   HPEN  hPrevPen;
   HDC memDC;
   HBITMAP memBmp,oldBmp;
+
+  if(fOS2Look) return;
 
   memDC = CreateCompatibleDC(hdc);
   r.right -= r.left;
