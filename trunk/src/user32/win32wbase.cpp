@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.330 2002-07-30 18:48:26 achimha Exp $ */
+/* $Id: win32wbase.cpp,v 1.331 2002-07-30 18:55:42 achimha Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2779,6 +2779,7 @@ HWND Win32BaseWindow::SetParent(HWND hwndNewParent)
         //SvL: Even though the win32 coordinates might not change, the PM
         //     coordinates can. We must make sure the control stays at the
         //     same position (y) relative to the (new) parent.
+        // TODO: shouldn't we check the state of the window and not do it in INIT state?
         SetWindowPos(HWND_TOPMOST, rectWindow.left, rectWindow.top, 0, 0,
                      SWP_NOACTIVATE|SWP_NOSIZE);
         fParentChange = FALSE;
