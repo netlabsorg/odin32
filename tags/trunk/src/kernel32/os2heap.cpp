@@ -1,4 +1,4 @@
-/* $Id: os2heap.cpp,v 1.12 1999-10-22 18:07:21 sandervl Exp $ */
+/* $Id: os2heap.cpp,v 1.13 1999-11-18 09:21:34 bird Exp $ */
 
 /*
  * Heap class for OS/2
@@ -7,7 +7,7 @@
  *
  *
  * NOTE: ReAlloc allocates memory using Alloc if memory pointer == NULL
- *       WINE controls depend on this, even though it apparently 
+ *       WINE controls depend on this, even though it apparently
  *       doesn't work like this in Windows.
  *
  * Project Odin Software License can be found in LICENSE.TXT
@@ -25,6 +25,7 @@
 #include "os2heap.h"
 #include "misc.h"
 #include "vmutex.h"
+#include "initterm.h"
 
 #ifndef HEAP_NO_SERIALIZE
   #define HEAP_NO_SERIALIZE 1
@@ -264,7 +265,7 @@ LPVOID OS2Heap::ReAlloc(DWORD dwFlags, LPVOID lpMem, DWORD dwBytes)
   int    i, oldSize;
 
   if (dwBytes == 0) return NULL;         // intercept stupid parameters
- 
+
   //NOTE: Allocate memory using Alloc -> WINE controls depend on this, even
   //      though it apparently doesn't work in Windows.
   if (lpMem == 0)   return Alloc(dwFlags, dwBytes);
@@ -299,6 +300,12 @@ BOOL OS2Heap::Free(DWORD dwFlags, LPVOID lpMem)
   if(lpMem == NULL) {
     dprintf(("OS2Heap::Free lpMem == NULL\n"));
     return(FALSE);
+  }
+  /* verify lpMem address */
+  if (lpMem >= (LPVOID)ulMaxAddr || lpMem < (LPVOID)0x10000)
+  {
+    dprintf(("OS2Heap::Free ERROR BAD HEAP POINTER:%X\n", lpMem));
+    return FALSE;
   }
 
   if(helem->magic != MAGIC_NR_HEAP)
