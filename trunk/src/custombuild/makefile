@@ -1,9 +1,9 @@
-# $Id: makefile,v 1.6 2001-08-25 13:36:06 sandervl Exp $
+# $Id: makefile,v 1.7 2001-09-26 22:52:57 bird Exp $
 
 #
 # Odin32 API
 #
-#       gdi32.dll makefile
+#       xxodin32.dll makefile
 #
 NOINTERNALFUNCTIONS=1
 IMPDEF_FLAGS=-I:20000
