@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.107 2003-03-28 11:49:01 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.108 2003-04-11 14:22:06 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -51,9 +51,9 @@ static MSG  doubleClickMsg = {0};
 #define OS2_WHEEL_CORRECTION 1
 //PF Correction is different for different mouse drivers. For now no correction
 //is ok because lots of Odin controls rely on minimum delta. However in future
-//we will possibly detect mouse driver and use correction if speed will be 
+//we will possibly detect mouse driver and use correction if speed will be
 //too high or too low.
- 
+
 //******************************************************************************
 //******************************************************************************
 BOOL setThreadQueueExtraCharMessage(TEB* teb, MSG* pExtraMsg)
@@ -89,7 +89,7 @@ ULONG ConvertNumPadKey(ULONG pmScan)
    default:
            ret = pmScan;
   }
- 
+
   KeyTranslatePMScanToWinVKey(ret, FALSE, (PBYTE)&winKey, NULL, NULL);
   return winKey;
 
@@ -126,6 +126,42 @@ void OSLibSetMenuDoubleClick(BOOL fSet)
   fGenerateDoubleClick = fSet;
 }
 //******************************************************************************
+
+
+/**
+ * Inter process/thread packet cleanup.
+ * See OSLibPackMessage() for details on the packing.
+ *
+ * @param   pTeb        Pointer to the thread environment block for the current thread.
+ * @param   pPacket     Pointer to the packet in question.
+ * @param   pWinMsg     Pointer to the window message corresponding to the packet.
+ */
+inline void OSLibCleanupPacket(TEB *pTeb, POSTMSG_PACKET *pPacket, MSG *pWinMsg)
+{
+    switch (pWinMsg->message)
+    {
+        /*
+         * Place this in the TEB freeing any previous WM_COPYDATA packet.
+         * Note! Nested WM_COPYDATA isn't working.
+         */
+        case WINWM_COPYDATA:
+        {
+            dprintf(("OSLibCleanupPacket: WM_COPYDATA: old %#p  new %#p", pTeb->o.odin.pWM_COPYDATA, pPacket));
+            if (pTeb->o.odin.pWM_COPYDATA)
+                _sfree(pTeb->o.odin.pWM_COPYDATA);
+            pTeb->o.odin.pWM_COPYDATA = pPacket;
+            break;
+        }
+
+        /*
+         * Default packing - free the shared memory here.
+         */
+        default:
+            _sfree(pPacket);
+            break;
+    }
+}
+
 //******************************************************************************
 BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode, BOOL fMsgRemoved)
 {
@@ -166,7 +202,8 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             winMsg->message = os2Msg->msg - WIN32APP_POSTMSG;
             winMsg->wParam  = packet->wParam;
             winMsg->lParam  = packet->lParam;
-            if(fMsgRemoved == MSG_REMOVE) free(packet); //free the shared memory here
+            if (fMsgRemoved == MSG_REMOVE)
+                OSLibCleanupPacket(teb, packet, winMsg);
             if(win32wnd) RELEASE_WNDOBJ(win32wnd);
             return TRUE;
         }
@@ -406,10 +443,10 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             (winMsg->message == WINWM_NCRBUTTONDOWN) ||
             (winMsg->message == WINWM_NCMBUTTONDOWN))
         {
-            if(fGenerateDoubleClick && doubleClickMsg.message == winMsg->message && 
+            if(fGenerateDoubleClick && doubleClickMsg.message == winMsg->message &&
                winMsg->time - doubleClickMsg.time < GetDoubleClickTime() &&
                (abs(winMsg->pt.x - doubleClickMsg.pt.x) < GetSystemMetrics(SM_CXDOUBLECLK_W)/2) &&
-               (abs(winMsg->pt.y - doubleClickMsg.pt.y) < GetSystemMetrics(SM_CYDOUBLECLK_W)/2)) 
+               (abs(winMsg->pt.y - doubleClickMsg.pt.y) < GetSystemMetrics(SM_CYDOUBLECLK_W)/2))
             {
                  dprintf(("single -> double click"));
                  if(winMsg->message >= WINWM_LBUTTONDOWN) {
@@ -439,7 +476,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
                  msg = winMsg->message - WINWM_NCLBUTTONDOWN + WINWM_LBUTTONDOWN;
             }
             else msg = winMsg->message;
-            
+
             if(msg == WINWM_LBUTTONDBLCLK) {
                 msg = WINWM_LBUTTONDOWN;
             }
@@ -588,7 +625,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         {
             //FALSE -> keyboard operation = user pressed Alt-F4 -> close app
             //TRUE  -> user clicked on close button -> close window
-            if(SHORT2FROMMP(os2Msg->mp2) == FALSE) 
+            if(SHORT2FROMMP(os2Msg->mp2) == FALSE)
             {
                 HWND hwnd = win32wnd->GetTopParent();
                 if(win32wnd->getWindowHandle() != hwnd) {
@@ -654,7 +691,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         dprintf(("PM: WM_CHAR_SPECIAL_ALTGRCONTROL"));
       // NO BREAK! FALLTHRU CASE!
     }
-      
+
     case WM_CHAR_SPECIAL:
     {
         // @@@PH
@@ -664,7 +701,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         }
       // NO BREAK! FALLTHRU CASE!
     }
-      
+
     case WM_CHAR:
     {
       ULONG  repeatCount=0;
@@ -673,7 +710,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
       USHORT scanCode=0;
       ULONG  flags = SHORT1FROMMP(os2Msg->mp1);
       BOOL   keyWasPressed;
-      BOOL   numPressed = (BOOL)(WinGetKeyState(HWND_DESKTOP,VK_NUMLOCK) & 1);       
+      BOOL   numPressed = (BOOL)(WinGetKeyState(HWND_DESKTOP,VK_NUMLOCK) & 1);
       char   c;
       USHORT usPMScanCode = CHAR4FROMMP(os2Msg->mp1);
 
@@ -692,19 +729,19 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         if (scanCode==0) goto dummymessage;
 
         KeyTranslatePMScanToWinVKey(usPMScanCode,
-                                    FALSE, 
+                                    FALSE,
                                     &bWinVKey,
                                     &wWinScan,
                                     &fWinExtended);
         winMsg->wParam = bWinVKey;
         winMsg->lParam  = repeatCount & 0x0FFFF;                 // bit 0-15, repeatcount
         winMsg->lParam |= (wWinScan & 0x1FF) << 16;  // bit 16-23, scancode + bit 15 extended
-      
+
         // Set the extended bit when appropriate
         if (fWinExtended)
             winMsg->lParam = winMsg->lParam | WIN_KEY_EXTENDED;
 
-	//PF When we press shift we enable non-numeric functions of Numpad
+        //PF When we press shift we enable non-numeric functions of Numpad
         if ((!numPressed || (flags & KC_SHIFT)) && (scanCode >= PMSCAN_PAD7) && (scanCode <= PMSCAN_PADPERIOD))
              winMsg->wParam = ConvertNumPadKey(scanCode);
 
@@ -727,7 +764,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             // and finally adjust our WM_KEYDOWN code
             winMsg->lParam = 0x01460001;
         }
-      
+
         if (!(flags & KC_ALT))
         {
           //
@@ -744,7 +781,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
               winMsg->message = WINWM_SYSKEYUP;
               // held ALT-key when current key is released
               // generates additional flag 0x2000000
-              // Note: PM seems to do this differently, 
+              // Note: PM seems to do this differently,
               // KC_ALT is already reset
             }
             else
@@ -755,24 +792,24 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             winMsg->lParam |= WIN_KEY_PREVSTATE;                    // bit 30, previous state, always 1 for a WM_KEYUP message
             winMsg->lParam |= 1 << 31;                              // bit 31, transition state, always 1 for WM_KEYUP
           }
-          else 
+          else
           { // send WM_KEYDOWN message
             winMsg->message = WINWM_KEYDOWN;
 
             if (keyWasPressed)
               winMsg->lParam |= WIN_KEY_PREVSTATE;                  // bit 30, previous state, 1 means key was pressed
-             
+
             //Shift-Enter and possibly others need to have special handling
             if (flags & KC_SHIFT)
             {
                 if(fMsgRemoved && !(teb->o.odin.fTranslated))
-                {                    
+                {
                   dprintf(("PM: KC_SHIFT: %x",winMsg->wParam));
                   if (winMsg->wParam == VK_RETURN_W)
                   {
                     MSG extramsg;
                     memcpy(&extramsg, winMsg, sizeof(MSG));
-    
+
                     //After SetFocus(0), all keystrokes are converted in WM_SYS*
                     extramsg.message = (fIgnoreKeystrokes) ? WINWM_SYSCHAR : WINWM_CHAR;
 
@@ -790,7 +827,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
               {
                     MSG extramsg;
                     memcpy(&extramsg, winMsg, sizeof(MSG));
-    
+
                     //After SetFocus(0), all keystrokes are converted in WM_SYS*
                     extramsg.message = (fIgnoreKeystrokes) ? WINWM_SYSCHAR : WINWM_CHAR;
 
@@ -801,13 +838,13 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
           }
           // if right alt is down, then we need to set the alt down bit too
           // except for the fake Ctrl WM_CHAR sent for AltGr emulation
-          if (os2Msg->msg != WM_CHAR_SPECIAL_ALTGRCONTROL && 
-              (WinGetKeyState(HWND_DESKTOP, VK_ALTGRAF) & 0x8000)) 
+          if (os2Msg->msg != WM_CHAR_SPECIAL_ALTGRCONTROL &&
+              (WinGetKeyState(HWND_DESKTOP, VK_ALTGRAF) & 0x8000))
           {
-              winMsg->lParam |= WIN_KEY_ALTHELD;            
+              winMsg->lParam |= WIN_KEY_ALTHELD;
           }
         }
-        else 
+        else
         {
           //
           // the Alt key is pressed
@@ -816,12 +853,12 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
           {
              //@@PF Note that without pmkbdhook there will not be correct message for Alt-Enter
               winMsg->message = WINWM_SYSKEYUP;
-              winMsg->lParam |= WIN_KEY_PREVSTATE;            
+              winMsg->lParam |= WIN_KEY_PREVSTATE;
               // No ALTHELD for Alt itself ;)
-              winMsg->lParam |= WIN_KEY_ALTHELD;            
-	      winMsg->lParam |= 1 << 31;                              // bit 31, transition state, always 1 for WM_KEYUP 
+              winMsg->lParam |= WIN_KEY_ALTHELD;
+              winMsg->lParam |= 1 << 31;                              // bit 31, transition state, always 1 for WM_KEYUP
           }
-          else 
+          else
           {
             // send WM_SYSKEYDOWN message
             winMsg->message = WINWM_SYSKEYDOWN;
@@ -837,19 +874,19 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         //
         // AltGr needs special handling
         //
-        // AltGr -> WM_KEYDOWN (VK_CONTROL), WM_KEYDOWN (VK_MENU) 
+        // AltGr -> WM_KEYDOWN (VK_CONTROL), WM_KEYDOWN (VK_MENU)
         //          WM_SYSKEYUP (VK_CONTROL)
         //          WM_KEYUP (VK_MENU)
         //
-        // Ctrl+AltGr -> WM_KEYDOWN (VK_CONTROL), WM_KEYUP (VK_CONTROL) 
-        //               WM_KEYDOWN (VK_MENU) 
+        // Ctrl+AltGr -> WM_KEYDOWN (VK_CONTROL), WM_KEYUP (VK_CONTROL)
+        //               WM_KEYDOWN (VK_MENU)
         //               WM_KEYUP (VK_MENU)
-        //               WM_KEYUP (VK_CONTROL) 
+        //               WM_KEYUP (VK_CONTROL)
         //
-        // AltGr+Ctrl -> WM_KEYDOWN (VK_CONTROL), WM_KEYDOWN (VK_MENU) 
-        //               WM_KEYDOWN (VK_CONTROL) 
-        //               WM_SYSKEYUP (VK_CONTROL) 
-        //               WM_SYSKEYUP (VK_CONTROL) 
+        // AltGr+Ctrl -> WM_KEYDOWN (VK_CONTROL), WM_KEYDOWN (VK_MENU)
+        //               WM_KEYDOWN (VK_CONTROL)
+        //               WM_SYSKEYUP (VK_CONTROL)
+        //               WM_SYSKEYUP (VK_CONTROL)
         //               WM_KEYUP (VK_MENU)
         //
         // AltGr down -> if Ctrl down, send WM_KEYUP (VK_CONTROL)
@@ -860,12 +897,12 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         //                   Send WM_SYSKEYUP (VK_CONTROL)
         //               endif
         //               Send WM_KEYDOWN (VK_MENU)
-        // 
-        if(winMsg->wParam == VK_MENU_W && (winMsg->lParam & WIN_KEY_EXTENDED)) 
+        //
+        if(winMsg->wParam == VK_MENU_W && (winMsg->lParam & WIN_KEY_EXTENDED))
         {//AltGr
-            if(GetKeyState(VK_CONTROL_W) & 0x8000) 
+            if(GetKeyState(VK_CONTROL_W) & 0x8000)
             {//Ctrl key pressed, send WM_KEYUP
-            
+
             }
         }
 #endif
@@ -875,7 +912,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             if(winMsg->message == WINWM_KEYDOWN) {
                 winMsg->message = WINWM_SYSKEYDOWN;
             }
-            else 
+            else
             if(winMsg->message == WINWM_KEYUP) {
                 winMsg->message = WINWM_SYSKEYUP;
             }
@@ -970,43 +1007,43 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         //PF For win32 we support only vertical scrolling for WM_MOUSEWHEEL
         if (os2Msg->msg == WM_VSCROLL)
         {
-	    POINT CursorPoint;
+            POINT CursorPoint;
             winMsg->message = WINWM_MOUSEWHEEL;
             if (OSLibWinQueryPointerPos(&CursorPoint))
                mapScreenPoint((OSLIBPOINT*)&CursorPoint);
- 
+
             if (SHORT2FROMMP(os2Msg->mp2) == SB_LINEDOWN)
-                winMsg->wParam  = MAKELONG(GetMouseKeyState(), -WHEEL_DELTA/OS2_WHEEL_CORRECTION);  
+                winMsg->wParam  = MAKELONG(GetMouseKeyState(), -WHEEL_DELTA/OS2_WHEEL_CORRECTION);
             else
             if (SHORT2FROMMP(os2Msg->mp2) == SB_LINEUP)
-                winMsg->wParam  = MAKELONG(GetMouseKeyState(), WHEEL_DELTA/OS2_WHEEL_CORRECTION);  
+                winMsg->wParam  = MAKELONG(GetMouseKeyState(), WHEEL_DELTA/OS2_WHEEL_CORRECTION);
             else
-                winMsg->wParam  = MAKELONG(GetMouseKeyState(), 0);  
+                winMsg->wParam  = MAKELONG(GetMouseKeyState(), 0);
 
-            winMsg->lParam  = MAKELONG(CursorPoint.x, CursorPoint.y); 
+            winMsg->lParam  = MAKELONG(CursorPoint.x, CursorPoint.y);
 
-            dprintf(("WM_MOUSEWHEEL message delta %d at (%d,%d)",HIWORD(winMsg->wParam),CursorPoint.x, CursorPoint.y));  
+            dprintf(("WM_MOUSEWHEEL message delta %d at (%d,%d)",HIWORD(winMsg->wParam),CursorPoint.x, CursorPoint.y));
             if (fMsgRemoved == MSG_REMOVE)
             {
-	            MSLLHOOKSTRUCT hook;
+                    MSLLHOOKSTRUCT hook;
 
-	            hook.pt.x       = os2Msg->ptl.x & 0xFFFF;
-	            hook.pt.y       = mapScreenY(os2Msg->ptl.y);
-	            if (SHORT2FROMMP(os2Msg->mp2) == SB_LINEDOWN)
-	                hook.mouseData   = MAKELONG(GetMouseKeyState(), -WHEEL_DELTA/OS2_WHEEL_CORRECTION);  
-	            else
-	            if (SHORT2FROMMP(os2Msg->mp2) == SB_LINEUP)
-	                hook.mouseData   = MAKELONG(GetMouseKeyState(), WHEEL_DELTA/OS2_WHEEL_CORRECTION);  
-	            else goto dummymessage; // IBM driver produces other messages as well sometimes
+                    hook.pt.x       = os2Msg->ptl.x & 0xFFFF;
+                    hook.pt.y       = mapScreenY(os2Msg->ptl.y);
+                    if (SHORT2FROMMP(os2Msg->mp2) == SB_LINEDOWN)
+                        hook.mouseData   = MAKELONG(GetMouseKeyState(), -WHEEL_DELTA/OS2_WHEEL_CORRECTION);
+                    else
+                    if (SHORT2FROMMP(os2Msg->mp2) == SB_LINEUP)
+                        hook.mouseData   = MAKELONG(GetMouseKeyState(), WHEEL_DELTA/OS2_WHEEL_CORRECTION);
+                    else goto dummymessage; // IBM driver produces other messages as well sometimes
 
-	            hook.flags       = LLMHF_INJECTED;
-	            hook.time        = winMsg->time;
-	            hook.dwExtraInfo = 0;
-	            if(HOOK_CallHooksW( WH_MOUSE_LL, HC_ACTION, WINWM_MOUSEWHEEL, (LPARAM)&hook))
-	                goto dummymessage; //hook swallowed message
-	   }
+                    hook.flags       = LLMHF_INJECTED;
+                    hook.time        = winMsg->time;
+                    hook.dwExtraInfo = 0;
+                    if(HOOK_CallHooksW( WH_MOUSE_LL, HC_ACTION, WINWM_MOUSEWHEEL, (LPARAM)&hook))
+                        goto dummymessage; //hook swallowed message
+           }
            break;
-        } 
+        }
         goto dummymessage; //eat this message
         break;
 
@@ -1053,19 +1090,19 @@ BOOL OSLibWinTranslateMessage(MSG *msg)
 {
   TEB *teb;
   MSG extramsg;
-  BOOL   numPressed = (BOOL)(WinGetKeyState(HWND_DESKTOP,VK_NUMLOCK) & 1);       
+  BOOL   numPressed = (BOOL)(WinGetKeyState(HWND_DESKTOP,VK_NUMLOCK) & 1);
   teb = GetThreadTEB();
   if(!teb)
     return FALSE;
 
   UCHAR ucPMScanCode = CHAR4FROMMP(teb->o.odin.os2msg.mp1);
   ULONG fl = SHORT1FROMMP(teb->o.odin.os2msg.mp1);
-    
-  
+
+
     //NOTE: These actually need to be posted so that the next message retrieved by GetMessage contains
     //      the newly generated WM_CHAR message.
     if(!teb->o.odin.fTranslated &&
-       teb->o.odin.os2msg.msg == WM_CHAR && 
+       teb->o.odin.os2msg.msg == WM_CHAR &&
        !((SHORT1FROMMP(teb->o.odin.os2msg.mp1) & KC_KEYUP) == KC_KEYUP))
     {
       //TranslatedMessage was called before DispatchMessage, so queue WM_CHAR message
@@ -1082,15 +1119,15 @@ BOOL OSLibWinTranslateMessage(MSG *msg)
           fl |= KC_CHAR;
         break;
       }
-      
+
       // PF With NumLock off do not generate any WM_CHAR messages at all
       // PADMINUS,PADPLUS fall in range of PAD7..PADPERIOD but they should generate WM_CHAR
       // other PAD(X) buttons miss that range at all and thus generate WM_CHAR
       if (!numPressed && (ucPMScanCode != PMSCAN_PADMINUS) && (ucPMScanCode != PMSCAN_PADPLUS) &&
          (ucPMScanCode >= PMSCAN_PAD7) && (ucPMScanCode <= PMSCAN_PADPERIOD))
-        return FALSE; 
+        return FALSE;
 
-      if(!(fl & KC_CHAR) && msg->message < WINWM_SYSKEYDOWN) 
+      if(!(fl & KC_CHAR) && msg->message < WINWM_SYSKEYDOWN)
       {
         return FALSE;
       }
@@ -1102,7 +1139,7 @@ BOOL OSLibWinTranslateMessage(MSG *msg)
       {
         if(msg->wParam)
         {
-          if ((msg->wParam >= VK_NUMPAD0_W) && 
+          if ((msg->wParam >= VK_NUMPAD0_W) &&
               (msg->wParam <= VK_NUMPAD9_W))
             extramsg.wParam = msg->wParam - 0x30;
           else
@@ -1113,15 +1150,15 @@ BOOL OSLibWinTranslateMessage(MSG *msg)
              if (msg->wParam != VK_MULTIPLY_W)
                 extramsg.wParam = msg->wParam;
         }
-        else    
+        else
           extramsg.wParam = SHORT2FROMMP(teb->o.odin.os2msg.mp2);
       }
 
 
       //After SetFocus(0), all keystrokes are converted in WM_SYS*
-      if(msg->message >= WINWM_SYSKEYDOWN || fIgnoreKeystrokes) 
+      if(msg->message >= WINWM_SYSKEYDOWN || fIgnoreKeystrokes)
         extramsg.message = WINWM_SYSCHAR;
-      else    
+      else
         extramsg.message = WINWM_CHAR;
 
       if(fl & KC_DEADKEY)
