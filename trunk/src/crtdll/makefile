@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 2000-11-21 23:48:52 phaller Exp $
+# $Id: makefile,v 1.14 2000-11-22 00:49:56 phaller Exp $
 
 #
 # Odin32 API
@@ -29,7 +29,7 @@ $(OBJDIR)\crtdll.obj \
 $(OBJDIR)\asmhlp.obj \
 $(OBJDIR)\stubs.obj \
 $(OBJDIR)\internal.obj \
-$(OBJDIR)\crt_string.obj \
+$(OBJDIR)\string.obj \
 $(OBJDIR)\crt_memory.obj \
 $(OBJDIR)\crt_wc.obj \
 $(OBJDIR)\initterm.obj \

@@ -1,4 +1,4 @@
-; $Id: crtdll.def,v 1.14 2000-02-05 13:32:52 sandervl Exp $
+; $Id: crtdll.def,v 1.15 2000-11-22 00:49:55 phaller Exp $
 
 ;
 ; Based on Windows 98 (Build 2222): CRTDLL.DLL 
@@ -8,6 +8,8 @@ DATA MULTIPLE NONSHARED
 
 IMPORTS
 	_RtlUnwind@16		= NTDLL.RtlUnwind
+        _RtlSecondsSince1970ToTime@8 = NTDLL.RtlSecondsSince1970ToTime
+        _RtlTimeToSecondsSince1970@8 = NTDLL.RtlTimeToSecondsSince1970
 
 EXPORTS
     ??2@YAPAXI@Z		= _CRTDLL_new			@1

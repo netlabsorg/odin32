@@ -34,6 +34,8 @@
  * we have over buffering in win32, and b) if we care ;-)
  */
 
+#include <odin.h>
+
 #include "crtdll.h"
 #include <stdarg.h>
 #include <string.h>
@@ -282,7 +284,7 @@ INT CDECL CRTDLL__commit(INT fd)
  *
  * Open a file, creating it if it is not present.
  */
-INT CDECL CTRDLL__creat(LPCSTR path, INT flags)
+INT CDECL CRTDLL__creat(LPCSTR path, INT flags)
 {
   // return (_creat(s, i));
 

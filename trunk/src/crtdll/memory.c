@@ -13,6 +13,7 @@
  * version works fine, however.
  */
 
+#include <string.h>
 #include "crtdll.h"
 
 

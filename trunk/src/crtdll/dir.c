@@ -219,7 +219,7 @@ CHAR* __cdecl CRTDLL__getcwd(LPSTR buf, INT size)
   {
     if (size < 0)
       return CRTDLL__strdup(dir);
-    return __CRTDLL__strndup(dir,size);
+        return __CRTDLL__strndup(dir,size);
   }
   if (dir_len >= size)
   {
