@@ -1,4 +1,4 @@
-/* $Id: dde.cpp,v 1.14 2001-08-11 12:03:35 sandervl Exp $ */
+/* $Id: dde.cpp,v 1.15 2002-02-11 13:48:40 sandervl Exp $ */
 
 /*
  * Win32 default window API functions for OS/2
@@ -32,20 +32,20 @@ PBYTE WIN32API DdeAccessData(HDDEDATA arg1, PDWORD  arg2)
 }
 //******************************************************************************
 //******************************************************************************
-HDDEDATA WIN32API DdeAddData( HDDEDATA arg1, PVOID arg2, DWORD arg3, DWORD  arg4)
+HDDEDATA WIN32API DdeAddData( HDDEDATA arg1, LPBYTE arg2, DWORD arg3, DWORD  arg4)
 {
     dprintf(("USER32: DdeAddData %x %x %x %x", arg1, arg2, arg3, arg4));
-    return O32_DdeAddData(arg1, arg2, arg3, arg4);
+    return O32_DdeAddData(arg1, (PVOID)arg2, arg3, arg4);
 }
 //******************************************************************************
 //******************************************************************************
-HDDEDATA WIN32API DdeClientTransaction(PVOID arg1, DWORD arg2, HCONV arg3, 
+HDDEDATA WIN32API DdeClientTransaction(LPBYTE arg1, DWORD arg2, HCONV arg3, 
                                        HSZ arg4, UINT arg5, UINT arg6, DWORD arg7, 
-                                       PDWORD  arg8)
+                                       LPDWORD arg8)
 {
     dprintf(("USER32: DdeClientTransaction %x %x %x %x %x %x %x %x", arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8));
 
-    return O32_DdeClientTransaction(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
+    return O32_DdeClientTransaction((PVOID)arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
 }
 //******************************************************************************
 //******************************************************************************
@@ -77,11 +77,11 @@ HCONVLIST WIN32API DdeConnectList(DWORD arg1, HSZ arg2, HSZ arg3, HCONVLIST arg4
 }
 //******************************************************************************
 //******************************************************************************
-HDDEDATA WIN32API DdeCreateDataHandle(DWORD arg1, PVOID arg2, DWORD arg3, DWORD arg4, 
+HDDEDATA WIN32API DdeCreateDataHandle(DWORD arg1, LPBYTE arg2, DWORD arg3, DWORD arg4, 
                                       HSZ arg5, UINT arg6, UINT  arg7)
 {
     dprintf(("USER32: DdeCreateDataHandle %x %x %x %x %x %x %x", arg1, arg2, arg3, arg4, arg5, arg6, arg7));
-    return O32_DdeCreateDataHandle(arg1, arg2, arg3, arg4, arg5, arg6, arg7);
+    return O32_DdeCreateDataHandle(arg1, (PVOID)arg2, arg3, arg4, arg5, arg6, arg7);
 }
 //******************************************************************************
 //******************************************************************************
@@ -147,11 +147,11 @@ BOOL WIN32API DdeFreeStringHandle(DWORD arg1, HSZ  arg2)
 }
 //******************************************************************************
 //******************************************************************************
-DWORD WIN32API DdeGetData( HDDEDATA arg1, PVOID arg2, DWORD arg3, DWORD  arg4)
+DWORD WIN32API DdeGetData( HDDEDATA arg1, LPBYTE arg2, DWORD arg3, DWORD  arg4)
 {
     dprintf(("USER32: DdeGetData %x %x %x %x", arg1, arg2, arg3, arg4));
 
-    return O32_DdeGetData(arg1, arg2, arg3, arg4);
+    return O32_DdeGetData(arg1, (PVOID)arg2, arg3, arg4);
 }
 //******************************************************************************
 //******************************************************************************
@@ -323,7 +323,7 @@ LONG WIN32API PackDDElParam(UINT arg1, UINT arg2, UINT  arg3)
 }
 //******************************************************************************
 //******************************************************************************
-UINT WIN32API ReuseDDElParam( UINT arg1, UINT arg2, UINT arg3, UINT arg4, UINT arg5)
+UINT WIN32API ReuseDDElParam(LPARAM arg1, UINT arg2, UINT arg3, UINT arg4, UINT arg5)
 {
     dprintf(("USER32:  ReuseDDElParam\n"));
 
@@ -331,7 +331,7 @@ UINT WIN32API ReuseDDElParam( UINT arg1, UINT arg2, UINT arg3, UINT arg4, UINT a
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API UnpackDDElParam(UINT arg1, UINT arg2, LPUINT arg3, LPUINT  arg4)
+BOOL WIN32API UnpackDDElParam(UINT arg1, LPARAM arg2, PUINT arg3, PUINT arg4)
 {
     dprintf(("USER32:  UnpackDDElParam\n"));
 

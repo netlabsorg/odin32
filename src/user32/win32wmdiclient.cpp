@@ -1,4 +1,4 @@
-/* $Id: win32wmdiclient.cpp,v 1.39 2001-09-19 15:39:51 sandervl Exp $ */
+/* $Id: win32wmdiclient.cpp,v 1.40 2002-02-11 13:48:42 sandervl Exp $ */
 /*
  * Win32 MDI Client Window Class for OS/2
  *
@@ -98,8 +98,7 @@ INT SCROLL_SetNCSbState(HWND hwnd, int vMin, int vMax, int vPos,
  *
  * Author    : Patrick Haller [Wed, 1998/06/16 11:55]
  *****************************************************************************/
-BOOL WIN32API CascadeChildWindows(DWORD x1,
-                                     DWORD x2)
+BOOL WIN32API CascadeChildWindows(HWND x1, DWORD x2)
 {
   dprintf(("USER32: CascadeChildWindows(%08xh,%08xh) not implemented.\n",
            x1,
@@ -119,8 +118,7 @@ BOOL WIN32API CascadeChildWindows(DWORD x1,
  *
  * Author    : Patrick Haller [Wed, 1998/06/16 11:55]
  *****************************************************************************/
-BOOL WIN32API TileChildWindows(DWORD x1,
-                                  DWORD x2)
+BOOL WIN32API TileChildWindows(HWND x1, DWORD x2)
 {
   dprintf(("USER32: TileChildWindows(%08xh,%08xh) not implemented.\n",
            x1,
