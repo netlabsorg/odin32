@@ -1,4 +1,4 @@
-/* $Id: objhandle.cpp,v 1.28 2002-09-16 13:58:25 sandervl Exp $ */
+/* $Id: objhandle.cpp,v 1.29 2002-09-16 14:00:45 sandervl Exp $ */
 /*
  * Win32 Handle Management Code for OS/2
  *
@@ -491,7 +491,7 @@ DWORD WIN32API GetObjectType( HGDIOBJ hObj)
 //******************************************************************************
 BOOL WIN32API DeleteObject(HANDLE hObj)
 {
-    DWORD objtype, objflags;
+    DWORD objflags;
 
     dprintf(("GDI32: DeleteObject %x", hObj));
     objflags = ObjQueryHandleFlags(hObj);
