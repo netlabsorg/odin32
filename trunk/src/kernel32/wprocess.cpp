@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.5 1999-06-15 17:57:34 phaller Exp $ */
+/* $Id: wprocess.cpp,v 1.6 1999-06-17 18:21:43 phaller Exp $ */
 
 /*
  *
@@ -18,12 +18,14 @@
 #include "unicode.h"
 #include "windll.h"
 #include "winexe.h"
+
 #ifdef __IBMCPP__
 #include <builtin.h>
 #endif
+
 #include "except.h"
 #include "os2util.h"
-#include "console2.h"
+#include "console.h"
 #include "cio.h"
 #include "versionos2.h"    /*PLF Wed  98-03-18 02:36:51*/
 
@@ -50,8 +52,11 @@ void RegisterExe(LONG Win32TableId, LONG NameTableId, LONG VersionResId,
     eprintf(("Win32Exe creation failed!\n"));
     DebugInt3();
   }
-  char *modname;
-  if(modname = getenv("WIN32MODULE")) {
+
+  char *modname = getenv("WIN32MODULE");
+
+  if(modname != NULL)
+  {
     dprintf(("Set full path for exe to %s", modname));
     winexe->setFullPath(modname);
   }
@@ -124,7 +129,7 @@ VOID WIN32API RegisterDll(LONG Win32TableId, LONG NameTableId,
   CreateDll(Win32TableId, NameTableId, VersionResId, hinstance, pfnDllEntry);
 
   /* @@@PH 1998/03/17 console devices initialization */
-  ConsoleDevicesRegister();
+  iConsoleDevicesRegister();
 }
 //******************************************************************************
 //******************************************************************************
@@ -167,8 +172,8 @@ VOID WIN32API ExitProcess(DWORD exitcode)
   //avoid crashes since win32 & OS/2 exception handler aren't identical
   //(terminate process generates two exceptions)
   /* @@@PH 1998/02/12 Added Console Support */
-  if (ConsoleIsActive())
-    ConsoleWaitClose();
+  if (iConsoleIsActive())
+    iConsoleWaitClose();
 
   try {
      Win32DllExitList(-1);

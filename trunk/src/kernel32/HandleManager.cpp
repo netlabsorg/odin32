@@ -1,4 +1,4 @@
-/* $Id: HandleManager.cpp,v 1.2 1999-05-31 22:08:08 phaller Exp $ */
+/* $Id: HandleManager.cpp,v 1.3 1999-06-17 18:21:35 phaller Exp $ */
 
 /*
  *
@@ -49,8 +49,8 @@
 #include "misc.h"
 
 #include "HandleManager.H"
-
-#include <string.h>
+#include "HMDevice.h"
+#include "HMOpen32.h"
 
 
 /*****************************************************************************
@@ -126,6 +126,8 @@ struct _HMGlobals
   BOOL   fIsInitialized;                   /* if HM is initialized already ? */
                                          /* this MUST !!! be false initially */
 
+  HMDeviceHandler *pHMOpen32;             /* default handle manager instance */
+
 
   ULONG         ulHandleLast;                   /* index of last used handle */
   HMTRANSHANDLE TabTranslationHandles[MAX_TRANSLATION_HANDLES];
@@ -164,16 +166,17 @@ static HMDeviceHandler *_HMDeviceFind (PSZ pszDeviceName)
 {
   PHMDEVICE pHMDevice;                     /* iterator over the device table */
 
-  for (pHMDevice = TabWin32Devices;    /* loop over all devices in the table */
-       pHMDevice != NULL;
-       pHMDevice = pHMDevice->pNext)
-  {
-    if (stricmp(pHMDevice->pszDeviceName,         /* case-insensitive search */
-                pszDeviceName) == 0)
-      return (pHMDevice->pDeviceHandler);      /* OK, we've found our device */
-  }
+  if (pszDeviceName != NULL)
+    for (pHMDevice = TabWin32Devices;  /* loop over all devices in the table */
+         pHMDevice != NULL;
+         pHMDevice = pHMDevice->pNext)
+    {
+      if (stricmp(pHMDevice->pszDeviceName,       /* case-insensitive search */
+                  pszDeviceName) == 0)
+        return (pHMDevice->pDeviceHandler);    /* OK, we've found our device */
+    }
 
-  return ((HMDeviceHandler *) NULL);               /* haven't found anything */
+  return (HMGlobals.pHMOpen32);    /* haven't found anything, return default */
 }
 
 
@@ -198,7 +201,7 @@ static int _HMHandleGetFree(void)
        iLoop++)
   {
                                                       /* free handle found ? */
-    if (0 == TabWin32Handles[iLoop].hmHandleData.hHandle)
+    if (0 == TabWin32Handles[iLoop].hmHandleData.hHMHandle)
       return (iLoop);                    /* OK, then return it to the caller */
   }
 
@@ -233,7 +236,7 @@ static int _HMHandleQuery(HANDLE hHandle)
     return (-1);                               /* nope, ERROR_INVALID_HANDLE */
 
                                                    /* Oops, invalid handle ! */
-  if (TabWin32Handles[ulIndex].hmHandleData.hHandle != hHandle)
+  if (TabWin32Handles[ulIndex].hmHandleData.hHMHandle != hHandle)
     return (-1);                               /* nope, ERROR_INVALID_HANDLE */
 
   return ( (int) ulIndex);                 /* OK, we've got our handle index */
@@ -300,6 +303,8 @@ DWORD HMInitialize(void)
 {
   if (HMGlobals.fIsInitialized != TRUE)
   {
+    HMGlobals.fIsInitialized = TRUE;                             /* OK, done */
+
     dprintf(("KERNEL32:HandleManager:HMInitialize() storing handles.\n"));
 
     memset(&HMGlobals,                       /* zero out the structure first */
@@ -311,7 +316,8 @@ DWORD HMInitialize(void)
     HMSetStdHandle(STD_OUTPUT_HANDLE, GetStdHandle(STD_OUTPUT_HANDLE));
     HMSetStdHandle(STD_ERROR_HANDLE,  GetStdHandle(STD_ERROR_HANDLE));
 
-    HMGlobals.fIsInitialized = TRUE;                             /* OK, done */
+                        /* create handle manager instance for Open32 handles */
+    HMGlobals.pHMOpen32 = new HMDeviceOpen32Class("\\\\.\\");
   }
   return (NO_ERROR);
 }
@@ -335,6 +341,224 @@ DWORD HMTerminate(void)
 
   return (NO_ERROR);
 }
+
+
+/*****************************************************************************/
+/* handle translation buffer management                                      */
+/*                                                                           */
+/* Since some Win32 applications rely (!) on 16-bit handles, we've got to do */
+/* 32-bit to 16-bit and vs vsa translation here.                             */
+/* Filehandle-based functions should be routed via the handlemanager instead */
+/* of going to Open32 directly.                                              */
+/*****************************************************************************/
+
+
+/*****************************************************************************
+ * Name      : DWORD HMHandleAllocate
+ * Purpose   : allocate a handle in the translation table
+ * Parameters: PULONG pHandle16 - to return the allocated handle
+ *             ULONG  hHandle32 - the associated OS/2 handle
+ * Variables :
+ * Result    : API returncode
+ * Remark    : no parameter checking is done, phHandle may not be invalid
+ *             hHandle32 shouldn't be 0
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
+ *****************************************************************************/
+
+DWORD  HMHandleAllocate (PULONG phHandle16,
+                                 ULONG  hHandle32)
+{
+  register ULONG ulHandle;
+
+#ifdef DEBUG_LOCAL
+  dprintf(("KERNEL32: HMHandleAllocate (%08xh,%08xh)\n",
+           phHandle16,
+           hHandle32));
+#endif
+
+  ulHandle = HMGlobals.ulHandleLast;                      /* get free handle */
+
+  do
+  {
+                                                  /* check if handle is free */
+    if (HMGlobals.TabTranslationHandles[ulHandle].hHandle32 == 0)
+    {
+      *phHandle16 = ulHandle;
+      HMGlobals.TabTranslationHandles[ulHandle].hHandle32 = hHandle32;
+      HMGlobals.ulHandleLast = ulHandle;          /* to shorten search times */
+
+      return (NO_ERROR);                                               /* OK */
+    }
+
+    ulHandle++;                                        /* skip to next entry */
+
+    if (ulHandle >= MAX_TRANSLATION_HANDLES)               /* check boundary */
+      ulHandle = 0;
+  }
+  while (ulHandle != HMGlobals.ulHandleLast);
+
+  return (ERROR_TOO_MANY_OPEN_FILES);                      /* OK, we're done */
+}
+
+
+/*****************************************************************************
+ * Name      : DWORD HMHandleFree
+ * Purpose   : free a handle from the translation table
+ * Parameters: ULONG hHandle16 - the handle to be freed
+ * Variables :
+ * Result    : API returncode
+ * Remark    : no parameter checking is done, hHandle16 MAY NEVER exceed
+ *             the MAX_TRANSLATION_HANDLES boundary
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
+ *****************************************************************************/
+
+DWORD  HMHandleFree (ULONG hHandle16)
+{
+  ULONG rc;                                                /* API returncode */
+
+#ifdef DEBUG_LOCAL
+  dprintf(("KERNEL32: HMHandleFree (%08xh)\n",
+           hHandle16));
+#endif
+
+  rc = HMHandleValidate(hHandle16);                         /* verify handle */
+  if (rc != NO_ERROR)                                        /* check errors */
+    return (rc);                                    /* raise error condition */
+
+  HMGlobals.TabTranslationHandles[hHandle16].hHandle32 = 0;      /* OK, done */
+
+  return (NO_ERROR);
+}
+
+
+/*****************************************************************************
+ * Name      : DWORD HMHandleValidate
+ * Purpose   : validate a handle through the translation table
+ * Parameters: ULONG hHandle16 - the handle to be verified
+ * Variables :
+ * Result    : API returncode
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
+ *****************************************************************************/
+
+DWORD  HMHandleValidate (ULONG hHandle16)
+{
+#ifdef DEBUG_LOCAL
+  dprintf(("KERNEL32: HMHandleValidate (%08xh)\n",
+           hHandle16));
+#endif
+
+  if (hHandle16 >= MAX_TRANSLATION_HANDLES)                /* check boundary */
+    return (ERROR_INVALID_HANDLE);                  /* raise error condition */
+
+  if (HMGlobals.TabTranslationHandles[hHandle16].hHandle32 == 0)  /* valid ? */
+    return (ERROR_INVALID_HANDLE);                  /* raise error condition */
+
+  return (NO_ERROR);
+}
+
+
+/*****************************************************************************
+ * Name      : DWORD HMHandleTranslateToWin
+ * Purpose   : translate a 32-bit OS/2 handle to the associated windows handle
+ * Parameters: ULONG  hHandle32  - the OS/2 handle
+ *             PULONG phHandle16 - the associated windows handle
+ * Variables :
+ * Result    : API returncode
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
+ *****************************************************************************/
+
+DWORD  HMHandleTranslateToWin (ULONG  hHandle32,
+                                       PULONG phHandle16)
+{
+           ULONG rc;                                       /* API returncode */
+  register ULONG ulIndex;                    /* index counter over the table */
+
+#ifdef DEBUG_LOCAL
+  dprintf(("KERNEL32: HMHandleTranslateToWin (%08xh, %08xh)\n",
+           hHandle32,
+           phHandle16));
+#endif
+
+  for (ulIndex = 0;
+       ulIndex < MAX_TRANSLATION_HANDLES;
+       ulIndex++)
+  {
+                                                      /* look for the handle */
+    if (HMGlobals.TabTranslationHandles[ulIndex].hHandle32 == hHandle32)
+    {
+      *phHandle16 = ulIndex;                               /* deliver result */
+      return (NO_ERROR);                                               /* OK */
+    }
+  }
+
+  return (ERROR_INVALID_HANDLE);                    /* raise error condition */
+}
+
+
+/*****************************************************************************
+ * Name      : DWORD HMHandleTranslateToOS2
+ * Purpose   : translate a 16-bit Win32 handle to the associated OS/2 handle
+ * Parameters: ULONG  hHandle16  - the windows handle
+ *             PULONG phHandle32 - the associated OS/2 handle
+ * Variables :
+ * Result    : API returncode
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
+ *****************************************************************************/
+
+DWORD  HMHandleTranslateToOS2 (ULONG  hHandle16,
+                                       PULONG phHandle32)
+{
+#ifdef DEBUG_LOCAL
+  dprintf(("KERNEL32: HMHandleTranslateToOS2 (%08xh, %08xh)\n",
+           hHandle16,
+           phHandle32));
+#endif
+
+  if (HMHandleValidate(hHandle16) == NO_ERROR)              /* verify handle */
+  {
+    *phHandle32 = HMGlobals.TabTranslationHandles[hHandle16].hHandle32;
+    return (NO_ERROR);
+  }
+
+  return (ERROR_INVALID_HANDLE);                    /* raise error condition */
+}
+
+
+/*****************************************************************************
+ * Name      : DWORD HMHandleTranslateToOS2i
+ * Purpose   : translate a 16-bit Win32 handle to the associated OS/2 handle
+ * Parameters: ULONG  hHandle16  - the windows handle
+ * Variables :
+ * Result    : OS/2 handle
+ * Remark    : no checkinf
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
+ *****************************************************************************/
+
+DWORD  HMHandleTranslateToOS2i (ULONG  hHandle16)
+{
+#ifdef DEBUG_LOCAL
+  dprintf(("KERNEL32: HMHandleTranslateToOS2i (%08xh)\n",
+           hHandle16));
+#endif
+
+  return(HMGlobals.TabTranslationHandles[hHandle16].hHandle32);
+}
+
 
 
 /*****************************************************************************
@@ -410,13 +634,13 @@ BOOL    HMSetStdHandle(DWORD  nStdHandle,
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-HANDLE  HMCreateFile(LPCSTR lpFileName,
-                             DWORD  dwDesiredAccess,
-                             DWORD  dwShareMode,
-                             PVOID  lpSecurityAttributes,
-                             DWORD  dwCreationDisposition,
-                             DWORD  dwFlagsAndAttributes,
-                             HANDLE hTemplateFile)
+HFILE HMCreateFile(LPCSTR lpFileName,
+                   DWORD  dwDesiredAccess,
+                   DWORD  dwShareMode,
+                   LPSECURITY_ATTRIBUTES lpSecurityAttributes,
+                   DWORD  dwCreationDisposition,
+                   DWORD  dwFlagsAndAttributes,
+                   HANDLE hTemplateFile)
 {
   int             iIndex;                     /* index into the handle table */
   int             iIndexNew;                  /* index into the handle table */
@@ -484,7 +708,7 @@ HANDLE  HMCreateFile(LPCSTR lpFileName,
 
           /* write appropriate entry into the handle table if open succeeded */
   hResult = (ULONG)iIndexNew | HM_HANDLE_ID;
-  HMHandleTemp.hHandle                      = hResult;
+  HMHandleTemp.hHMHandle                      = hResult;
   TabWin32Handles[iIndexNew].pDeviceHandler = pDeviceHandler;
 
                                   /* now copy back our temporary handle data */
@@ -505,7 +729,7 @@ HANDLE  HMCreateFile(LPCSTR lpFileName,
 
   if (rc != NO_ERROR)     /* oops, creation failed within the device handler */
   {
-    TabWin32Handles[iIndexNew].hmHandleData.hHandle = INVALID_HANDLE_VALUE;
+    TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
     SetLastError(rc);          /* Hehe, OS/2 and NT are pretty compatible :) */
     return (INVALID_HANDLE_VALUE);                           /* signal error */
   }
@@ -529,6 +753,125 @@ HANDLE  HMCreateFile(LPCSTR lpFileName,
 
 
 /*****************************************************************************
+ * Name      : HANDLE  HMOpenFile
+ * Purpose   : Wrapper for the OpenFile() API
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    : Fix parameters passed to the HMDeviceManager::OpenFile
+ *             Supply access mode and share mode validation routines
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
+ *****************************************************************************/
+
+
+/***********************************************************************
+ *              FILE_ConvertOFMode
+ *
+ * Convert OF_* mode into flags for CreateFile.
+ */
+static void FILE_ConvertOFMode( INT mode, DWORD *access, DWORD *sharing )
+{
+    switch(mode & 0x03)
+    {
+      case OF_READ:      *access = GENERIC_READ; break;
+      case OF_WRITE:     *access = GENERIC_WRITE; break;
+      case OF_READWRITE: *access = GENERIC_READ | GENERIC_WRITE; break;
+      default:           *access = 0; break;
+    }
+    switch(mode & 0x70)
+    {
+      case OF_SHARE_EXCLUSIVE:  *sharing = 0; break;
+      case OF_SHARE_DENY_WRITE: *sharing = FILE_SHARE_READ; break;
+      case OF_SHARE_DENY_READ:  *sharing = FILE_SHARE_WRITE; break;
+       case OF_SHARE_DENY_NONE:
+      case OF_SHARE_COMPAT:
+      default:                  *sharing = FILE_SHARE_READ | FILE_SHARE_WRITE; break;
+    }
+}
+
+HANDLE HMOpenFile(LPCSTR    lpFileName,
+                  OFSTRUCT* pOFStruct,
+                  UINT      fuMode)
+{
+  int             iIndex;                     /* index into the handle table */
+  int             iIndexNew;                  /* index into the handle table */
+  HMDeviceHandler *pDeviceHandler;         /* device handler for this handle */
+  HANDLE          hResult;
+  PHMHANDLEDATA   pHMHandleData;
+  DWORD           rc;                                     /* API return code */
+
+
+  pDeviceHandler = _HMDeviceFind((PSZ)lpFileName);            /* find device */
+  if (NULL == pDeviceHandler)                  /* this name is unknown to us */
+  {
+    SetLastError(ERROR_FILE_NOT_FOUND);
+    return (INVALID_HANDLE_VALUE);                           /* signal error */
+  }
+  else
+    pHMHandleData  = NULL;
+
+
+  iIndexNew = _HMHandleGetFree();                         /* get free handle */
+  if (-1 == iIndexNew)                            /* oops, no free handles ! */
+  {
+    SetLastError(ERROR_NOT_ENOUGH_MEMORY);      /* use this as error message */
+    return (INVALID_HANDLE_VALUE);                           /* signal error */
+  }
+
+
+                           /* initialize the complete HMHANDLEDATA structure */
+  pHMHandleData = &TabWin32Handles[iIndexNew].hmHandleData;
+  pHMHandleData->dwType     = FILE_TYPE_UNKNOWN;      /* unknown handle type */
+
+  FILE_ConvertOFMode(fuMode,                                 /* map OF_flags */
+                     &pHMHandleData->dwAccess,
+                     &pHMHandleData->dwShare);
+
+  pHMHandleData->dwCreation = 0;
+  pHMHandleData->dwFlags    = 0;
+  pHMHandleData->lpHandlerData = NULL;
+
+
+      /* we've got to mark the handle as occupied here, since another device */
+                   /* could be created within the device handler -> deadlock */
+
+          /* write appropriate entry into the handle table if open succeeded */
+  hResult = (ULONG)iIndexNew | HM_HANDLE_ID;
+  TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = hResult;
+  TabWin32Handles[iIndexNew].pDeviceHandler       = pDeviceHandler;
+
+  rc = pDeviceHandler->OpenFile  (lpFileName,     /* call the device handler */
+                                  &TabWin32Handles[iIndexNew].hmHandleData,
+                                  pOFStruct,
+                                  fuMode);
+
+#ifdef DEBUG_LOCAL
+    dprintf(("KERNEL32/HandleManager:CheckPoint3: %s lpHandlerData=%08xh\n",
+             lpFileName,
+             HMHandleTemp.lpHandlerData));
+#endif
+
+  if (rc != NO_ERROR)     /* oops, creation failed within the device handler */
+  {
+    TabWin32Handles[iIndexNew].hmHandleData.hHMHandle = INVALID_HANDLE_VALUE;
+    SetLastError(rc);          /* Hehe, OS/2 and NT are pretty compatible :) */
+    return (INVALID_HANDLE_VALUE);                           /* signal error */
+  }
+
+#ifdef DEBUG_LOCAL
+  dprintf(("KERNEL32/HandleManager: OpenFile(%s)=%08xh\n",
+           lpFileName,
+           hResult));
+#endif
+
+  return hResult;                                     /* return valid handle */
+}
+
+
+
+/*****************************************************************************
  * Name      : HANDLE  HMCloseFile
  * Purpose   : Wrapper for the CloseHandle() API
  * Parameters:
@@ -540,7 +883,7 @@ HANDLE  HMCreateFile(LPCSTR lpFileName,
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-BOOL  HMCloseHandle(HANDLE hObject)
+BOOL HMCloseHandle(HANDLE hObject)
 {
   int       iIndex;                           /* index into the handle table */
   BOOL      fResult;       /* result from the device handler's CloseHandle() */
@@ -558,7 +901,7 @@ BOOL  HMCloseHandle(HANDLE hObject)
   fResult = pHMHandle->pDeviceHandler->CloseHandle(&pHMHandle->hmHandleData);
 
   if (fResult == TRUE)                   /* remove handle if close succeeded */
-    pHMHandle->hmHandleData.hHandle = 0;              /* mark handle as free */
+    pHMHandle->hmHandleData.hHMHandle = 0;            /* mark handle as free */
 
   return (fResult);                                   /* deliver return code */
 }
@@ -575,12 +918,11 @@ BOOL  HMCloseHandle(HANDLE hObject)
  *
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
-
-BOOL  HMReadFile(HANDLE       hFile,
-                         LPCVOID      lpBuffer,
-                         DWORD        nNumberOfBytesToRead,
-                         LPDWORD      lpNumberOfBytesRead,
-                         LPOVERLAPPED lpOverlapped)
+BOOL HMReadFile(HANDLE       hFile,
+                LPVOID       lpBuffer,
+                DWORD        nNumberOfBytesToRead,
+                LPDWORD      lpNumberOfBytesRead,
+                LPOVERLAPPED lpOverlapped)
 {
   int       iIndex;                           /* index into the handle table */
   BOOL      fResult;       /* result from the device handler's CloseHandle() */
@@ -617,11 +959,11 @@ BOOL  HMReadFile(HANDLE       hFile,
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 
-BOOL  HMWriteFile(HANDLE       hFile,
-                          LPCVOID      lpBuffer,
-                          DWORD        nNumberOfBytesToWrite,
-                          LPDWORD      lpNumberOfBytesWritten,
-                          LPOVERLAPPED lpOverlapped)
+BOOL HMWriteFile(HANDLE       hFile,
+                        LPCVOID      lpBuffer,
+                        DWORD        nNumberOfBytesToWrite,
+                        LPDWORD      lpNumberOfBytesWritten,
+                        LPOVERLAPPED lpOverlapped)
 {
   int       iIndex;                           /* index into the handle table */
   BOOL      fResult;       /* result from the device handler's CloseHandle() */
@@ -658,7 +1000,7 @@ BOOL  HMWriteFile(HANDLE       hFile,
  * Author    : Patrick Haller [Wed, 1998/02/12 13:37]
  *****************************************************************************/
 
-DWORD  HMGetFileType(HANDLE hFile)
+DWORD HMGetFileType(HANDLE hFile)
 {
   int       iIndex;                           /* index into the handle table */
   DWORD     dwResult;                /* result from the device handler's API */
@@ -669,7 +1011,7 @@ DWORD  HMGetFileType(HANDLE hFile)
   if (-1 == iIndex)                                               /* error ? */
   {
     SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
-    return (FILE_TYPE_UNKNOWN);                            /* signal failure */
+    return (INVALID_HANDLE_ERROR);                         /* signal failure */
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
@@ -693,11 +1035,11 @@ DWORD  HMGetFileType(HANDLE hFile)
  * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
  *****************************************************************************/
 DWORD   HMDeviceRequest (HANDLE hFile,
-                                 ULONG  ulRequestCode,
-                                 ULONG  arg1,
-                                 ULONG  arg2,
-                                 ULONG  arg3,
-                                 ULONG  arg4)
+                         ULONG  ulRequestCode,
+                         ULONG  arg1,
+                         ULONG  arg2,
+                         ULONG  arg3,
+                         ULONG  arg4)
 {
   int       iIndex;                           /* index into the handle table */
   DWORD     dwResult;                /* result from the device handler's API */
@@ -708,7 +1050,7 @@ DWORD   HMDeviceRequest (HANDLE hFile,
   if (-1 == iIndex)                                               /* error ? */
   {
     SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
-    return (FILE_TYPE_UNKNOWN);                            /* signal failure */
+    return (INVALID_HANDLE_ERROR);                         /* signal failure */
   }
 
   pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
@@ -724,411 +1066,342 @@ DWORD   HMDeviceRequest (HANDLE hFile,
 
 
 /*****************************************************************************
- * Name      : HMDeviceHandler::HMDeviceHandler
- * Purpose   : default constructor for a device handler object
- * Parameters: LPCSTR lpDeviceName
- * Variables :
- * Result    :
- * Remark    : this is only to identify the device for debugging purposes
- * Status    :
- *
- * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
- *****************************************************************************/
-
-HMDeviceHandler::HMDeviceHandler(LPCSTR lpDeviceName)
-{
-                                      /* only a reference on the device name */
-  HMDeviceHandler::lpHMDeviceName = lpDeviceName;
-}
-
-
-/*****************************************************************************
- * Name      : HMDeviceHandler::_DeviceReuqest
- * Purpose   : entry method for special request functions
- * Parameters: ULONG ulRequestCode
- *             various parameters as required
- * Variables :
- * Result    :
- * Remark    : the standard behaviour is to return an error code for non-
- *             existant request codes
- * Status    :
- *
- * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
- *****************************************************************************/
-DWORD  HMDeviceHandler::_DeviceRequest (PHMHANDLEDATA pHMHandleData,
-                                        ULONG         ulRequestCode,
-                                        ULONG         arg1,
-                                        ULONG         arg2,
-                                        ULONG         arg3,
-                                        ULONG         arg4)
-{
-  dprintf(("KERNEL32:HandleManager::_DeviceRequest %s(%08x,%08x) - stub?\n",
-           lpHMDeviceName,
-           pHMHandleData,
-           ulRequestCode));
-
-  return(ERROR_INVALID_FUNCTION);
-}
-
-
-/*****************************************************************************
- * Name      : DWORD HMDeviceHandler::CreateFile
- * Purpose   : this is called from the handle manager if a CreateFile() is
- *             performed on a handle
- * Parameters: LPCSTR        lpFileName            name of the file / device
- *             PHMHANDLEDATA pHMHandleData         data of the NEW handle
- *             PVOID         lpSecurityAttributes  ignored
- *             PHMHANDLEDATA pHMHandleDataTemplate data of the template handle
+ * Name      : HMDeviceHandler::GetFileInformationByHandle
+ * Purpose   : router function for GetFileInformationByHandle
+ * Parameters:
  * Variables :
  * Result    :
  * Remark    :
- * Status    : NO_ERROR - API succeeded
- *             other    - what is to be set in SetLastError
- *
- * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
- *****************************************************************************/
-
-DWORD HMDeviceHandler::CreateFile (LPCSTR        lpFileName,
-                                   PHMHANDLEDATA pHMHandleData,
-                                   PVOID         lpSecurityAttributes,
-                                   PHMHANDLEDATA pHMHandleDataTemplate)
-{
-  dprintf(("KERNEL32:HandleManager::CreateFile %s(%s,%08x,%08x,%08x) - stub?\n",
-           lpHMDeviceName,
-           lpFileName,
-           pHMHandleData,
-           lpSecurityAttributes,
-           pHMHandleDataTemplate));
-
-  return(ERROR_INVALID_FUNCTION);
-}
-
-
-/*****************************************************************************
- * Name      : DWORD HMDeviceHandler::CloseHandle
- * Purpose   : close the handle
- * Parameters: PHMHANDLEDATA pHMHandleData
- * Variables :
- * Result    : API returncode
- * Remark    :
  * Status    :
  *
- * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
+ * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
  *****************************************************************************/
-
-DWORD HMDeviceHandler::CloseHandle(PHMHANDLEDATA pHMHandleData)
+DWORD HMGetFileInformationByHandle (HANDLE                     hFile,
+                                    BY_HANDLE_FILE_INFORMATION *pHFI)
 {
-  dprintf(("KERNEL32:HandleManager::CloseHandle %s(%08x) - stub?\n",
-           lpHMDeviceName,
-           pHMHandleData));
+  int       iIndex;                           /* index into the handle table */
+  DWORD     dwResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
 
-  return(ERROR_INVALID_FUNCTION);
-}
-
-
-/*****************************************************************************
- * Name      : DWORD HMDeviceHandler::ReadFile
- * Purpose   : read data from handle / device
- * Parameters: PHMHANDLEDATA pHMHandleData,
- *             LPCVOID       lpBuffer,
- *             DWORD         nNumberOfBytesToRead,
- *             LPDWORD       lpNumberOfBytesRead,
- *             LPOVERLAPPED  lpOverlapped
- * Variables :
- * Result    : API returncode
- * Remark    :
- * Status    :
- *
- * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
- *****************************************************************************/
-
-DWORD HMDeviceHandler::ReadFile(PHMHANDLEDATA pHMHandleData,
-                                LPCVOID       lpBuffer,
-                                DWORD         nNumberOfBytesToRead,
-                                LPDWORD       lpNumberOfBytesRead,
-                                LPOVERLAPPED  lpOverlapped)
-{
-  dprintf(("KERNEL32:HandleManager::ReadFile %s(%08x,%08x,%08x,%08x,%08x) - stub?\n",
-           lpHMDeviceName,
-           pHMHandleData,
-           lpBuffer,
-           nNumberOfBytesToRead,
-           lpNumberOfBytesRead,
-           lpOverlapped));
-
-  return(ERROR_INVALID_FUNCTION);
-}
-
-
-/*****************************************************************************
- * Name      : DWORD HMDeviceHandler::WriteFile
- * Purpose   : write data to handle / device
- * Parameters: PHMHANDLEDATA pHMHandleData,
- *             LPCVOID       lpBuffer,
- *             DWORD         nNumberOfBytesToWrite,
- *             LPDWORD       lpNumberOfBytesWritten,
- *             LPOVERLAPPED  lpOverlapped
- * Variables :
- * Result    : API returncode
- * Remark    :
- * Status    :
- *
- * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
- *****************************************************************************/
-
-DWORD HMDeviceHandler::WriteFile(PHMHANDLEDATA pHMHandleData,
-                                 LPCVOID       lpBuffer,
-                                 DWORD         nNumberOfBytesToWrite,
-                                 LPDWORD       lpNumberOfBytesWritten,
-                                 LPOVERLAPPED  lpOverlapped)
-{
-  dprintf(("KERNEL32:HandleManager::WriteFile %s(%08x,%08x,%08x,%08x,%08x) - stub?\n",
-           lpHMDeviceName,
-           pHMHandleData,
-           lpBuffer,
-           nNumberOfBytesToWrite,
-           lpNumberOfBytesWritten,
-           lpOverlapped));
-
-  return(ERROR_INVALID_FUNCTION);
-}
-
-
-/*****************************************************************************
- * Name      : DWORD HMDeviceHandler::GetFileType
- * Purpose   : determine the handle type
- * Parameters: PHMHANDLEDATA pHMHandleData
- * Variables :
- * Result    : API returncode
- * Remark    :
- * Status    :
- *
- * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
- *****************************************************************************/
-
-DWORD HMDeviceHandler::GetFileType(PHMHANDLEDATA pHMHandleData)
-{
-  dprintf(("KERNEL32:HandleManager::GetFileType %s(%08x)\n",
-           lpHMDeviceName,
-           pHMHandleData));
-
-  return pHMHandleData->dwType;
-}
-
-
-
-/*****************************************************************************/
-/* handle translation buffer management                                      */
-/*                                                                           */
-/* Since some Win32 applications rely (!) on 16-bit handles, we've got to do */
-/* 32-bit to 16-bit and vs vsa translation here.                             */
-/* Filehandle-based functions should be routed via the handlemanager instead */
-/* of going to Open32 directly.                                              */
-/*****************************************************************************/
-
-
-/*****************************************************************************
- * Name      : DWORD HMHandleAllocate
- * Purpose   : allocate a handle in the translation table
- * Parameters: PULONG pHandle16 - to return the allocated handle
- *             ULONG  hHandle32 - the associated OS/2 handle
- * Variables :
- * Result    : API returncode
- * Remark    : no parameter checking is done, phHandle may not be invalid
- *             hHandle32 shouldn't be 0
- * Status    :
- *
- * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
- *****************************************************************************/
-
-DWORD  HMHandleAllocate (PULONG phHandle16,
-                                 ULONG  hHandle32)
-{
-  register ULONG ulHandle;
-
-#ifdef DEBUG_LOCAL
-  dprintf(("KERNEL32::HMHandleAllocate (%08xh,%08xh)\n",
-           phHandle16,
-           hHandle32));
-#endif
-
-  ulHandle = HMGlobals.ulHandleLast;                      /* get free handle */
-
-  do
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hFile);                           /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
   {
-                                                  /* check if handle is free */
-    if (HMGlobals.TabTranslationHandles[ulHandle].hHandle32 == 0)
-    {
-      *phHandle16 = ulHandle;
-      HMGlobals.TabTranslationHandles[ulHandle].hHandle32 = hHandle32;
-      HMGlobals.ulHandleLast = ulHandle;          /* to shorten search times */
-
-      return (NO_ERROR);                                               /* OK */
-    }
-
-    ulHandle++;                                        /* skip to next entry */
-
-    if (ulHandle >= MAX_TRANSLATION_HANDLES)               /* check boundary */
-      ulHandle = 0;
-  }
-  while (ulHandle != HMGlobals.ulHandleLast);
-
-  return (ERROR_TOO_MANY_OPEN_FILES);                      /* OK, we're done */
-}
-
-
-/*****************************************************************************
- * Name      : DWORD HMHandleFree
- * Purpose   : free a handle from the translation table
- * Parameters: ULONG hHandle16 - the handle to be freed
- * Variables :
- * Result    : API returncode
- * Remark    : no parameter checking is done, hHandle16 MAY NEVER exceed
- *             the MAX_TRANSLATION_HANDLES boundary
- * Status    :
- *
- * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
- *****************************************************************************/
-
-DWORD  HMHandleFree (ULONG hHandle16)
-{
-  ULONG rc;                                                /* API returncode */
-
-#ifdef DEBUG_LOCAL
-  dprintf(("KERNEL32::HMHandleFree (%08xh)\n",
-           hHandle16));
-#endif
-
-  rc = HMHandleValidate(hHandle16);                         /* verify handle */
-  if (rc != NO_ERROR)                                        /* check errors */
-    return (rc);                                    /* raise error condition */
-
-  HMGlobals.TabTranslationHandles[hHandle16].hHandle32 = 0;      /* OK, done */
-
-  return (NO_ERROR);
-}
-
-
-/*****************************************************************************
- * Name      : DWORD HMHandleValidate
- * Purpose   : validate a handle through the translation table
- * Parameters: ULONG hHandle16 - the handle to be verified
- * Variables :
- * Result    : API returncode
- * Remark    :
- * Status    :
- *
- * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
- *****************************************************************************/
-
-DWORD  HMHandleValidate (ULONG hHandle16)
-{
-#ifdef DEBUG_LOCAL
-  dprintf(("KERNEL32::HMHandleValidate (%08xh)\n",
-           hHandle16));
-#endif
-
-  if (hHandle16 >= MAX_TRANSLATION_HANDLES)                /* check boundary */
-    return (ERROR_INVALID_HANDLE);                  /* raise error condition */
-
-  if (HMGlobals.TabTranslationHandles[hHandle16].hHandle32 == 0)  /* valid ? */
-    return (ERROR_INVALID_HANDLE);                  /* raise error condition */
-
-  return (NO_ERROR);
-}
-
-
-/*****************************************************************************
- * Name      : DWORD HMHandleTranslateToWin
- * Purpose   : translate a 32-bit OS/2 handle to the associated windows handle
- * Parameters: ULONG  hHandle32  - the OS/2 handle
- *             PULONG phHandle16 - the associated windows handle
- * Variables :
- * Result    : API returncode
- * Remark    :
- * Status    :
- *
- * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
- *****************************************************************************/
-
-DWORD  HMHandleTranslateToWin (ULONG  hHandle32,
-                                       PULONG phHandle16)
-{
-           ULONG rc;                                       /* API returncode */
-  register ULONG ulIndex;                    /* index counter over the table */
-
-#ifdef DEBUG_LOCAL
-  dprintf(("KERNEL32::HMHandleTranslateToWin (%08xh, %08xh)\n",
-           hHandle32,
-           phHandle16));
-#endif
-
-  for (ulIndex = 0;
-       ulIndex < MAX_TRANSLATION_HANDLES;
-       ulIndex++)
-  {
-                                                      /* look for the handle */
-    if (HMGlobals.TabTranslationHandles[ulIndex].hHandle32 == hHandle32)
-    {
-      *phHandle16 = ulIndex;                               /* deliver result */
-      return (NO_ERROR);                                               /* OK */
-    }
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return (INVALID_HANDLE_ERROR);                         /* signal failure */
   }
 
-  return (ERROR_INVALID_HANDLE);                    /* raise error condition */
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  dwResult = pHMHandle->pDeviceHandler->GetFileInformationByHandle(&pHMHandle->hmHandleData,
+                                                       pHFI);
+
+  return (dwResult);                                  /* deliver return code */
 }
 
 
+
 /*****************************************************************************
- * Name      : DWORD HMHandleTranslateToOS2
- * Purpose   : translate a 16-bit Win32 handle to the associated OS/2 handle
- * Parameters: ULONG  hHandle16  - the windows handle
- *             PULONG phHandle32 - the associated OS/2 handle
+ * Name      : HMDeviceHandler::SetEndOfFile
+ * Purpose   : router function for SetEndOfFile
+ * Parameters:
  * Variables :
- * Result    : API returncode
+ * Result    :
  * Remark    :
  * Status    :
  *
- * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
+ * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
  *****************************************************************************/
-
-DWORD  HMHandleTranslateToOS2 (ULONG  hHandle16,
-                                       PULONG phHandle32)
+BOOL HMSetEndOfFile (HANDLE hFile)
 {
-#ifdef DEBUG_LOCAL
-  dprintf(("KERNEL32::HMHandleTranslateToOS2 (%08xh, %08xh)\n",
-           hHandle16,
-           phHandle32));
-#endif
+  int       iIndex;                           /* index into the handle table */
+  BOOL      bResult;                 /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
 
-  if (HMHandleValidate(hHandle16) == NO_ERROR)              /* verify handle */
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hFile);                           /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
   {
-    *phHandle32 = HMGlobals.TabTranslationHandles[hHandle16].hHandle32;
-    return (NO_ERROR);
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return (INVALID_HANDLE_ERROR);                         /* signal failure */
   }
 
-  return (ERROR_INVALID_HANDLE);                    /* raise error condition */
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  bResult = pHMHandle->pDeviceHandler->SetEndOfFile(&pHMHandle->hmHandleData);
+
+  return (bResult);                                   /* deliver return code */
 }
 
 
 /*****************************************************************************
- * Name      : DWORD HMHandleTranslateToOS2i
- * Purpose   : translate a 16-bit Win32 handle to the associated OS/2 handle
- * Parameters: ULONG  hHandle16  - the windows handle
+ * Name      : HMDeviceHandler::SetFileTime
+ * Purpose   : router function for SetFileTime
+ * Parameters:
  * Variables :
- * Result    : OS/2 handle
- * Remark    : no checkinf
+ * Result    :
+ * Remark    :
  * Status    :
  *
- * Author    : Patrick Haller [Wed, 1998/02/11 20:44]
+ * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
  *****************************************************************************/
-
-DWORD  HMHandleTranslateToOS2i (ULONG  hHandle16)
+BOOL HMSetFileTime (HANDLE         hFile,
+                    const FILETIME *pFT1,
+                    const FILETIME *pFT2,
+                    const FILETIME *pFT3)
 {
-#ifdef DEBUG_LOCAL
-  dprintf(("KERNEL32::HMHandleTranslateToOS2i (%08xh)\n",
-           hHandle16));
-#endif
+  int       iIndex;                           /* index into the handle table */
+  BOOL      bResult;                 /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
 
-  return(HMGlobals.TabTranslationHandles[hHandle16].hHandle32);
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hFile);                           /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return (INVALID_HANDLE_ERROR);                         /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  bResult = pHMHandle->pDeviceHandler->SetFileTime(&pHMHandle->hmHandleData,
+                                                   (LPFILETIME)pFT1,
+                                                   (LPFILETIME)pFT2,
+                                                   (LPFILETIME)pFT3);
+
+  return (bResult);                                   /* deliver return code */
 }
+
+
+/*****************************************************************************
+ * Name      : HMDeviceHandler::GetFileSize
+ * Purpose   : router function for GetFileSize
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
+ *****************************************************************************/
+DWORD HMGetFileSize (HANDLE hFile,
+                     PDWORD pSize)
+{
+  int       iIndex;                           /* index into the handle table */
+  DWORD     dwResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hFile);                           /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return (INVALID_HANDLE_ERROR);                         /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  dwResult = pHMHandle->pDeviceHandler->GetFileSize(&pHMHandle->hmHandleData,
+                                                    pSize);
+
+  return (dwResult);                                  /* deliver return code */
+}
+
+
+/*****************************************************************************
+ * Name      : HMDeviceHandler::SetFilePointer
+ * Purpose   : router function for SetFilePointer
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
+ *****************************************************************************/
+DWORD HMSetFilePointer (HANDLE hFile,
+                        LONG   lDistanceToMove,
+                        PLONG  lpDistanceToMoveHigh,
+                        DWORD  dwMoveMethod)
+{
+  int       iIndex;                           /* index into the handle table */
+  DWORD     dwResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hFile);                           /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return (INVALID_HANDLE_ERROR);                         /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  dwResult = pHMHandle->pDeviceHandler->SetFilePointer(&pHMHandle->hmHandleData,
+                                                       lDistanceToMove,
+                                                       lpDistanceToMoveHigh,
+                                                       dwMoveMethod);
+
+  return (dwResult);                                  /* deliver return code */
+}
+
+
+/*****************************************************************************
+ * Name      : HMDeviceHandler::LockFile
+ * Purpose   : router function for LockFile
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
+ *****************************************************************************/
+BOOL HMLockFile (HFILE         hFile,
+                 DWORD         arg2,
+                 DWORD         arg3,
+                 DWORD         arg4,
+                 DWORD         arg5)
+{
+  int       iIndex;                           /* index into the handle table */
+  DWORD     dwResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hFile);                           /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return (INVALID_HANDLE_ERROR);                         /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  dwResult = pHMHandle->pDeviceHandler->LockFile(&pHMHandle->hmHandleData,
+                                                 arg2,
+                                                 arg3,
+                                                 arg4,
+                                                 arg5);
+
+  return (dwResult);                                  /* deliver return code */
+}
+
+
+/*****************************************************************************
+ * Name      : HMDeviceHandler::LockFileEx
+ * Purpose   : router function for LockFileEx
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
+ *****************************************************************************/
+DWORD HMLockFileEx(HANDLE        hFile,
+                   DWORD         dwFlags,
+                   DWORD         dwReserved,
+                   DWORD         nNumberOfBytesToLockLow,
+                   DWORD         nNumberOfBytesToLockHigh,
+                   LPOVERLAPPED  lpOverlapped)
+{
+  int       iIndex;                           /* index into the handle table */
+  DWORD     dwResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hFile);                           /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return (INVALID_HANDLE_ERROR);                         /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  dwResult = pHMHandle->pDeviceHandler->LockFileEx(&pHMHandle->hmHandleData,
+                                                   dwFlags,
+                                                   dwReserved,
+                                                   nNumberOfBytesToLockLow,
+                                                   nNumberOfBytesToLockHigh,
+                                                   lpOverlapped);
+
+  return (dwResult);                                  /* deliver return code */
+}
+
+
+
+/*****************************************************************************
+ * Name      : HMDeviceHandler::UnlockFile
+ * Purpose   : router function for UnlockFile
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
+ *****************************************************************************/
+BOOL HMUnlockFile (HFILE         hFile,
+                   DWORD         arg2,
+                   DWORD         arg3,
+                   DWORD         arg4,
+                   DWORD         arg5)
+{
+  int       iIndex;                           /* index into the handle table */
+  DWORD     dwResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hFile);                           /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return (INVALID_HANDLE_ERROR);                         /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  dwResult = pHMHandle->pDeviceHandler->UnlockFile(&pHMHandle->hmHandleData,
+                                                   arg2,
+                                                   arg3,
+                                                   arg4,
+                                                   arg5);
+
+  return (dwResult);                                  /* deliver return code */
+}
+
+/*****************************************************************************
+ * Name      : HMDeviceHandler::UnlockFileEx
+ * Purpose   : router function for UnlockFileEx
+ * Parameters:
+ * Variables :
+ * Result    :
+ * Remark    :
+ * Status    :
+ *
+ * Author    : Patrick Haller [Wed, 1999/06/17 20:44]
+ *****************************************************************************/
+BOOL HMUnlockFileEx(HANDLE        hFile,
+                    DWORD         dwFlags,
+                    DWORD         dwReserved,
+                    DWORD         nNumberOfBytesToLockLow,
+                    DWORD         nNumberOfBytesToLockHigh,
+                    LPOVERLAPPED  lpOverlapped)
+{
+  int       iIndex;                           /* index into the handle table */
+  DWORD     dwResult;                /* result from the device handler's API */
+  PHMHANDLE pHMHandle;       /* pointer to the handle structure in the table */
+
+                                                          /* validate handle */
+  iIndex = _HMHandleQuery(hFile);                           /* get the index */
+  if (-1 == iIndex)                                               /* error ? */
+  {
+    SetLastError(ERROR_INVALID_HANDLE);       /* set win32 error information */
+    return (INVALID_HANDLE_ERROR);                         /* signal failure */
+  }
+
+  pHMHandle = &TabWin32Handles[iIndex];               /* call device handler */
+  dwResult = pHMHandle->pDeviceHandler->UnlockFileEx(&pHMHandle->hmHandleData,
+                                                     dwFlags,
+                                                     dwReserved,
+                                                     nNumberOfBytesToLockLow,
+                                                     nNumberOfBytesToLockHigh,
+                                                     lpOverlapped);
+
+  return (dwResult);                                  /* deliver return code */
+}
+

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 1999-06-10 20:48:00 phaller Exp $
+# $Id: makefile,v 1.5 1999-06-17 18:21:43 phaller Exp $
 
 #
 # PD-Win32 API
@@ -18,51 +18,56 @@ CFLAGS = $(CFLAGS) -I$(PDWIN32_INCLUDE) /Tm+
 CXXFLAGS = $(CXXFLAGS) -I$(PDWIN32_INCLUDE) /Tm+
 
 
-OBJS = KERNEL32.OBJ      \
-       CONSOLE.OBJ       \
-       UNICODE.OBJ       \
-       network.OBJ       \
-       DEVIO.OBJ         \
-       profile.obj       \
-       THREAD.OBJ        \
-       THUNK.OBJ         \
-       OBSOLETE.OBJ      \
-       COMM.OBJ          \
-       MESSAGE.OBJ       \
-       RESOURCE.OBJ      \
-       NAMEID.OBJ        \
-       WINRES.OBJ        \
-       WINMOD.OBJ        \
-       OS2NATIVE.OBJ     \
-       EXCEPTIONS.OBJ    \
-       LFILE.OBJ         \
-       MMAP.OBJ          \
-       NPIPE.OBJ         \
-       MISC.OBJ          \
-       EXCEPT.OBJ        \
-       LANG.OBJ          \
-       ICCIO.OBJ         \
-       MAP.OBJ           \
-       WIN32UTIL.OBJ     \
-       heap.OBJ          \
-       os2heap.OBJ       \
-       vmutex.OBJ        \
-       initterm.OBJ      \
-       os2util.OBJ       \
+OBJS = KERNEL32.OBJ \
+       CONSOLE.OBJ \
+       CONIN.OBJ \
+       CONBUFFER.OBJ \
+       CONOUT.OBJ \
+       UNICODE.OBJ \
+       network.OBJ \
+       DEVIO.OBJ \
+       profile.obj \
+       THREAD.OBJ \
+       THUNK.OBJ \
+       OBSOLETE.OBJ \
+       COMM.OBJ \
+       MESSAGE.OBJ \
+       RESOURCE.OBJ \
+       NAMEID.OBJ \
+       WINRES.OBJ \
+       WINMOD.OBJ \
+       OS2NATIVE.OBJ \
+       EXCEPTIONS.OBJ \
+       LFILE.OBJ \
+       MMAP.OBJ \
+       NPIPE.OBJ \
+       MISC.OBJ \
+       EXCEPT.OBJ \
+       LANG.OBJ \
+       ICCIO.OBJ \
+       MAP.OBJ \
+       WIN32UTIL.OBJ \
+       heap.OBJ \
+       os2heap.OBJ \
+       vmutex.OBJ \
+       initterm.OBJ \
+       os2util.OBJ \
        handlemanager.OBJ \
-       wprocess.OBJ      \
-       conprop.OBJ       \
-       winimage.OBJ      \
-       windll.OBJ        \
-       winexe.OBJ        \
-       time.obj          \
-       pefile.OBJ        \
-       winimgres.OBJ     \
-       async.OBJ         \
-       fileio.obj        \
-       atom.obj          \
-       disk.obj          \
-       directory.obj     \
+       hmdevice.obj \
+       hmopen32.obj \
+       wprocess.OBJ \
+       conprop.OBJ \
+       winimage.OBJ \
+       windll.OBJ \
+       winexe.OBJ \
+       time.obj \
+       pefile.OBJ \
+       winimgres.OBJ \
+       async.OBJ \
+       fileio.obj \
+       atom.obj \
+       disk.obj \
+       directory.obj \
        stubs.obj
 
 
@@ -200,8 +205,19 @@ unicode.OBJ: \
 console.OBJ: \
     .\console.cpp \
     .\console2.h \
-    $(PDWIN32_INCLUDE)\console.h \
     $(PDWIN32_INCLUDE)\misc.h
+
+conin.OBJ: \
+    .\conin.h \
+    .\conin.cpp
+
+conout.OBJ: \
+    .\conout.h \
+    .\conout.cpp
+
+conbuffer.OBJ: \
+    .\conbuffer.h \
+    .\conbuffer.cpp
 
 mmap.OBJ: \
     .\mmap.cpp \
@@ -258,12 +274,23 @@ winmod.OBJ: \
 
 os2util.OBJ: .\os2util.cpp
 
-handlemanager.OBJ:  \
+handlemanager.OBJ: \
         .\handlemanager.cpp \
         .\handlemanager.h
 
+hmdevice.OBJ: \
+        .\hmdevice.cpp \
+        .\hmdevice.h \
+        .\handlemanager.h
+
+hmopen32.OBJ: \
+        .\hmopen32.cpp \
+        .\hmopen32.h \
+        .\handlemanager.h
+
+
 conprop.OBJ: \
-        .\conprop.h  \
+        .\conprop.h \
         .\conprop.cpp
 
 async.OBJ: \
