@@ -1,4 +1,4 @@
-/* $Id: windllbase.cpp,v 1.11 2000-03-09 19:03:20 sandervl Exp $ */
+/* $Id: windllbase.cpp,v 1.12 2000-03-18 19:49:44 sandervl Exp $ */
 
 /*
  * Win32 Dll base class
@@ -428,6 +428,13 @@ BOOL Win32DllBase::attachProcess()
   if(fSetExceptionHandler) {
   	SetFS(sel);
   	OS2UnsetExceptionHandler((void *)&exceptFrame);
+  }
+  else 
+  if(thdb) {
+	if(thdb->teb_sel != GetFS()) {
+		dprintf(("Win32DllBase::attachProcess: FS was changed by dll entrypoint!!!!"));
+		DebugInt3();
+	}
   }
   return rc;
 }

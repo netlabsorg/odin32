@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.74 2000-03-17 16:08:40 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.75 2000-03-18 19:49:44 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -41,7 +41,7 @@
 #include <wprocess.h>
 #include "mmap.h"
 
-#define DBG_LOCALLOG	DBG_wprocess
+#define DBG_LOCALLOG    DBG_wprocess
 #include "dbglocal.h"
 
 ODINDEBUGCHANNEL(KERNEL32-WPROCESS)
@@ -64,10 +64,10 @@ static VMutex    threadListMutex;
 //******************************************************************************
 TEB *WIN32API GetThreadTEB()
 {
-  if(TIBFlatPtr == NULL)
-    return 0;
+    if(TIBFlatPtr == NULL)
+        return 0;
 
-  return (TEB *)*TIBFlatPtr;
+    return (TEB *)*TIBFlatPtr;
 }
 //******************************************************************************
 //******************************************************************************
@@ -76,16 +76,16 @@ THDB *WIN32API GetThreadTHDB()
  TEB  *winteb;
  THDB *thdb;
 
-  if(TIBFlatPtr == NULL)
-    return 0;
+    if(TIBFlatPtr == NULL)
+        return 0;
 
-  winteb = (TEB *)*TIBFlatPtr;
-  if(winteb == NULL) {
-    return NULL;
-  }
-  thdb = (THDB *)(winteb+1);
+    winteb = (TEB *)*TIBFlatPtr;
+    if(winteb == NULL) {
+        return NULL;
+    }
+    thdb = (THDB *)(winteb+1);
 
-  return thdb;
+    return thdb;
 }
 //******************************************************************************
 //******************************************************************************
@@ -93,15 +93,15 @@ THDB *WIN32API GetTHDBFromThreadId(ULONG threadId)
 {
  THDB *thdb = threadList;
 
-   threadListMutex.enter();
-   while(thdb) {
-	if(thdb->threadId == threadId) {
-		break;
-	}
-	thdb = thdb->next;
-   }
-   threadListMutex.leave();
-   return thdb;
+    threadListMutex.enter();
+    while(thdb) {
+        if(thdb->threadId == threadId) {
+            break;
+        }
+        thdb = thdb->next;
+    }
+    threadListMutex.leave();
+    return thdb;
 }
 //******************************************************************************
 //******************************************************************************
@@ -109,15 +109,15 @@ THDB *WIN32API GetTHDBFromThreadHandle(HANDLE hThread)
 {
  THDB *thdb = threadList;
 
-   threadListMutex.enter();
-   while(thdb) {
-	if(thdb->hThread == hThread) {
-		break;
-	}
-	thdb = thdb->next;
-   }
-   threadListMutex.leave();
-   return thdb;
+    threadListMutex.enter();
+    while(thdb) {
+        if(thdb->hThread == hThread) {
+            break;
+        }
+        thdb = thdb->next;
+    }
+    threadListMutex.leave();
+    return thdb;
 }
 //******************************************************************************
 // Set up the TIB selector and memory for the current thread
@@ -129,84 +129,84 @@ TEB *InitializeTIB(BOOL fMainThread)
   ULONG  hThreadMain;
   USHORT tibsel;
 
-   //Allocate one dword to store the flat address of our TEB
-   if(fMainThread) {
-    	TIBFlatPtr = (DWORD *)OSLibAllocThreadLocalMemory(1);
-    	if(TIBFlatPtr == 0) {
-        	dprintf(("InitializeTIB: local thread memory alloc failed!!"));
-	        DebugInt3();
-	        return NULL;
-    	}
+    //Allocate one dword to store the flat address of our TEB
+    if(fMainThread) {
+        TIBFlatPtr = (DWORD *)OSLibAllocThreadLocalMemory(1);
+        if(TIBFlatPtr == 0) {
+            dprintf(("InitializeTIB: local thread memory alloc failed!!"));
+            DebugInt3();
+            return NULL;
+        }
         //SvL: This doesn't really create a thread, but only sets up the
         //     handle of thread 0
-	hThreadMain = HMCreateThread(NULL, 0, 0, 0, 0, 0, TRUE);
-   }
-   if(OSLibAllocSel(PAGE_SIZE, &tibsel) == FALSE)
-   {
-    	dprintf(("InitializeTIB: selector alloc failed!!"));
-    	DebugInt3();
-    	return NULL;
-   }
-   winteb = (TEB *)OSLibSelToFlat(tibsel);
-   if(winteb == NULL)
-   {
-    	dprintf(("InitializeTIB: DosSelToFlat failed!!"));
-    	DebugInt3();
-    	return NULL;
-   }
-   memset(winteb, 0, PAGE_SIZE);
-   thdb       = (THDB *)(winteb+1);
-   *TIBFlatPtr = (DWORD)winteb;
+        hThreadMain = HMCreateThread(NULL, 0, 0, 0, 0, 0, TRUE);
+    }
+    if(OSLibAllocSel(PAGE_SIZE, &tibsel) == FALSE)
+    {
+        dprintf(("InitializeTIB: selector alloc failed!!"));
+        DebugInt3();
+        return NULL;
+    }
+    winteb = (TEB *)OSLibSelToFlat(tibsel);
+    if(winteb == NULL)
+    {
+        dprintf(("InitializeTIB: DosSelToFlat failed!!"));
+        DebugInt3();
+        return NULL;
+    }
+    memset(winteb, 0, PAGE_SIZE);
+    thdb       = (THDB *)(winteb+1);
+    *TIBFlatPtr = (DWORD)winteb;
 
-   winteb->except      = (PVOID)-1;               /* 00 Head of exception handling chain */
-   winteb->stack_top   = (PVOID)OSLibGetTIB(TIB_STACKTOP); /* 04 Top of thread stack */
-   winteb->stack_low   = (PVOID)OSLibGetTIB(TIB_STACKLOW); /* 08 Stack low-water mark */
-   winteb->htask16     = (USHORT)OSLibGetPIB(PIB_TASKHNDL); /* 0c Win16 task handle */
-   winteb->stack_sel   = getSS();                 /* 0e 16-bit stack selector */
-   winteb->self        = winteb;                  /* 18 Pointer to this structure */
-   winteb->flags       = TEBF_WIN32;              /* 1c Flags */
-   winteb->queue       = 0;                       /* 28 Message queue */
-   winteb->tls_ptr     = &thdb->tls_array[0];     /* 2c Pointer to TLS array */
-   winteb->process     = &ProcessPDB;             /* 30 owning process (used by NT3.51 applets)*/
+    winteb->except      = (PVOID)-1;               /* 00 Head of exception handling chain */
+    winteb->stack_top   = (PVOID)OSLibGetTIB(TIB_STACKTOP); /* 04 Top of thread stack */
+    winteb->stack_low   = (PVOID)OSLibGetTIB(TIB_STACKLOW); /* 08 Stack low-water mark */
+    winteb->htask16     = (USHORT)OSLibGetPIB(PIB_TASKHNDL); /* 0c Win16 task handle */
+    winteb->stack_sel   = getSS();                 /* 0e 16-bit stack selector */
+    winteb->self        = winteb;                  /* 18 Pointer to this structure */
+    winteb->flags       = TEBF_WIN32;              /* 1c Flags */
+    winteb->queue       = 0;                       /* 28 Message queue */
+    winteb->tls_ptr     = &thdb->tls_array[0];     /* 2c Pointer to TLS array */
+    winteb->process     = &ProcessPDB;             /* 30 owning process (used by NT3.51 applets)*/
 
-   memcpy(&thdb->teb, winteb, sizeof(TEB));
-   thdb->process         = &ProcessPDB;
-   thdb->exit_code       = 0x103; /* STILL_ACTIVE */
-   thdb->teb_sel         = tibsel;
-   thdb->OrgTIBSel       = GetFS();
-   thdb->pWsockData      = NULL;
-   thdb->threadId        = GetCurrentThreadId();
-   if(fMainThread) { 
-	thdb->hThread    = hThreadMain;
-   }
-   else thdb->hThread    = GetCurrentThread();
+    memcpy(&thdb->teb, winteb, sizeof(TEB));
+    thdb->process         = &ProcessPDB;
+    thdb->exit_code       = 0x103; /* STILL_ACTIVE */
+    thdb->teb_sel         = tibsel;
+    thdb->OrgTIBSel       = GetFS();
+    thdb->pWsockData      = NULL;
+    thdb->threadId        = GetCurrentThreadId();
+    if(fMainThread) {
+        thdb->hThread    = hThreadMain;
+    }
+    else thdb->hThread    = GetCurrentThread();
 
-   threadListMutex.enter();
-   THDB *thdblast        = threadList;
-   if(!thdblast) {
-	threadList = thdb;
-   }
-   else {
-   	while(thdblast->next) {
-		thdblast = thdblast->next;
-	}
-	thdblast->next   = thdb;
-   }
-   thdb->next            = NULL;
-   threadListMutex.leave();
+    threadListMutex.enter();
+    THDB *thdblast        = threadList;
+    if(!thdblast) {
+        threadList = thdb;
+    }
+    else {
+        while(thdblast->next) {
+            thdblast = thdblast->next;
+        }
+        thdblast->next   = thdb;
+    }
+    thdb->next            = NULL;
+    threadListMutex.leave();
 
-   if(OSLibGetPIB(PIB_TASKTYPE) == TASKTYPE_PM)
-   {
-    	thdb->flags      = 0;  //todo gui
-   }
-   else thdb->flags      = 0;  //todo textmode
+    if(OSLibGetPIB(PIB_TASKTYPE) == TASKTYPE_PM)
+    {
+        thdb->flags      = 0;  //todo gui
+    }
+    else thdb->flags      = 0;  //todo textmode
 
-   if(fMainThread)
-   {
-    //todo initialize PDB during process creation
+    if(fMainThread)
+    {
+        //todo initialize PDB during process creation
         //todo: initialize TLS array if required
         //TLS in executable always TLS index 0?
-    	ProcessTIBSel = tibsel;
+        ProcessTIBSel = tibsel;
         ProcessPDB.exit_code       = 0x103; /* STILL_ACTIVE */
         ProcessPDB.threads         = 1;
         ProcessPDB.running_threads = 1;
@@ -220,14 +220,14 @@ TEB *InitializeTIB(BOOL fMainThread)
         ProcessPDB.winver          = 0xffff; /* to be determined */
         ProcessPDB.server_pid      = (void *)GetCurrentProcessId();
 
-    	GetSystemTime(&ProcessPDB.creationTime);
+        GetSystemTime(&ProcessPDB.creationTime);
 
         /* Initialize the critical section */
         InitializeCriticalSection( &ProcessPDB.crit_section );
-   }
-   dprintf(("InitializeTIB setup TEB with selector %x", tibsel));
-   dprintf(("InitializeTIB: FS(%x):[0] = %x", GetFS(), QueryExceptionChain()));
-   return winteb;
+    }
+    dprintf(("InitializeTIB setup TEB with selector %x", tibsel));
+    dprintf(("InitializeTIB: FS(%x):[0] = %x", GetFS(), QueryExceptionChain()));
+    return winteb;
 }
 //******************************************************************************
 // Destroy the TIB selector and memory for the current thread
@@ -238,41 +238,41 @@ void DestroyTIB()
  TEB   *winteb;
  THDB  *thdb;
 
-   dprintf(("DestroyTIB: FS     = %x", GetFS()));
-   dprintf(("DestroyTIB: FS:[0] = %x", QueryExceptionChain()));
+    dprintf(("DestroyTIB: FS     = %x", GetFS()));
+    dprintf(("DestroyTIB: FS:[0] = %x", QueryExceptionChain()));
 
-   winteb = (TEB *)*TIBFlatPtr;
-   if(winteb) {
-	thdb = (THDB *)(winteb+1);
-	orgtibsel = thdb->OrgTIBSel;
-	
-	threadListMutex.enter();
-	THDB *curthdb        = threadList;
-	if(curthdb == thdb) {
-		threadList = thdb->next;
-	}
-	else {
-	  	while(curthdb->next != thdb) {
-			curthdb = curthdb->next;
-			if(curthdb == NULL) {
-				dprintf(("DestroyTIB: couldn't find thdb %x", thdb));
-				DebugInt3();
-				break;
-			}
-		}
-		if(curthdb) {
-			curthdb->next = thdb->next;
-		}
-	}
-	threadListMutex.leave();
+    winteb = (TEB *)*TIBFlatPtr;
+    if(winteb) {
+        thdb = (THDB *)(winteb+1);
+        orgtibsel = thdb->OrgTIBSel;
 
-    	//Restore our original FS selector
+        threadListMutex.enter();
+        THDB *curthdb        = threadList;
+        if(curthdb == thdb) {
+            threadList = thdb->next;
+        }
+        else {
+            while(curthdb->next != thdb) {
+                curthdb = curthdb->next;
+                if(curthdb == NULL) {
+                    dprintf(("DestroyTIB: couldn't find thdb %x", thdb));
+                    DebugInt3();
+                    break;
+                }
+            }
+            if(curthdb) {
+                curthdb->next = thdb->next;
+            }
+        }
+        threadListMutex.leave();
+
+        //Restore our original FS selector
         SetFS(orgtibsel);
 
         //And free our own
         OSLibFreeSel(thdb->teb_sel);
 
-	*TIBFlatPtr = 0;
+        *TIBFlatPtr = 0;
    }
    else dprintf(("Already destroyed TIB"));
 
@@ -283,7 +283,7 @@ void DestroyTIB()
 /******************************************************************************/
 void SetPDBInstance(HINSTANCE hInstance)
 {
-  ProcessPDB.hInstance = hInstance;
+    ProcessPDB.hInstance = hInstance;
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -295,18 +295,18 @@ void WIN32API RestoreOS2TIB()
 
    //If we're running an Odin32 OS/2 application (not converted!), then we
    //we don't switch FS selectors
-   if(fIsOS2Image) {
-    return;
-   }
+    if(fIsOS2Image) {
+        return;
+    }
 
-   winteb = (TEB *)*TIBFlatPtr;
-   if(winteb) {
-    thdb = (THDB *)(winteb+1);
-    orgtibsel = thdb->OrgTIBSel;
+    winteb = (TEB *)*TIBFlatPtr;
+    if(winteb) {
+        thdb = (THDB *)(winteb+1);
+        orgtibsel = thdb->OrgTIBSel;
 
-    //Restore our original FS selector
+        //Restore our original FS selector
         SetFS(orgtibsel);
-   }
+    }
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -316,68 +316,68 @@ USHORT WIN32API SetWin32TIB()
  TEB   *winteb;
  THDB  *thdb;
 
-   //If we're running an Odin32 OS/2 application (not converted!), then we
-   //we don't switch FS selectors
-   if(fIsOS2Image) {
-    return GetFS();
-   }
-
-   winteb = (TEB *)*TIBFlatPtr;
-   if(winteb) {
-    thdb = (THDB *)(winteb+1);
-    win32tibsel = thdb->teb_sel;
-
-    //Restore our win32 FS selector
-        return SetReturnFS(win32tibsel);
-   }
-   else {
-    //we didn't create this thread, so allocate a selector now
-    //NOTE: Possible memory leak (i.e. DART threads in WINMM)
-    winteb = InitializeTIB();
-    if(winteb == NULL) {
-        DebugInt3();
+    //If we're running an Odin32 OS/2 application (not converted!), then we
+    //we don't switch FS selectors
+    if(fIsOS2Image) {
         return GetFS();
     }
-    thdb = (THDB *)(winteb+1);
-    win32tibsel = thdb->teb_sel;
 
-    //Restore our win32 FS selector
+    winteb = (TEB *)*TIBFlatPtr;
+    if(winteb) {
+        thdb = (THDB *)(winteb+1);
+        win32tibsel = thdb->teb_sel;
+
+        //Restore our win32 FS selector
         return SetReturnFS(win32tibsel);
-   }
-   // nested calls are OK, OS2ToWinCallback for instance
-   //else DebugInt3();
+    }
+    else {
+        //we didn't create this thread, so allocate a selector now
+        //NOTE: Possible memory leak (i.e. DART threads in WINMM)
+        winteb = InitializeTIB();
+        if(winteb == NULL) {
+            DebugInt3();
+            return GetFS();
+        }
+        thdb = (THDB *)(winteb+1);
+        win32tibsel = thdb->teb_sel;
 
-   return GetFS();
+        //Restore our win32 FS selector
+        return SetReturnFS(win32tibsel);
+    }
+    // nested calls are OK, OS2ToWinCallback for instance
+    //else DebugInt3();
+
+    return GetFS();
 }
 //******************************************************************************
 //******************************************************************************
 VOID WIN32API ExitProcess(DWORD exitcode)
 {
-  dprintf(("KERNEL32:  ExitProcess %d\n", exitcode));
-  dprintf(("KERNEL32:  ExitProcess FS = %x\n", GetFS()));
+    dprintf(("KERNEL32:  ExitProcess %d\n", exitcode));
+    dprintf(("KERNEL32:  ExitProcess FS = %x\n", GetFS()));
 
-  SetOS2ExceptionChain(-1);
+    SetOS2ExceptionChain(-1);
 
-  if(WinExe) {
-    	delete(WinExe);
-    	WinExe = NULL;
-  }
+    if(WinExe) {
+        delete(WinExe);
+        WinExe = NULL;
+    }
 
-  //Note: Needs to be done after deleting WinExe (destruction of exe + dll objects)
-  //Flush and delete all open memory mapped files
-  Win32MemMap::deleteAll();
+    //Note: Needs to be done after deleting WinExe (destruction of exe + dll objects)
+    //Flush and delete all open memory mapped files
+    Win32MemMap::deleteAll();
 
-  //Restore original OS/2 TIB selector
-  DestroyTIB();
-  SetExceptionChain((ULONG)-1);
+    //Restore original OS/2 TIB selector
+    DestroyTIB();
+    SetExceptionChain((ULONG)-1);
 
-  //avoid crashes since win32 & OS/2 exception handler aren't identical
-  //(terminate process generates two exceptions)
-  /* @@@PH 1998/02/12 Added Console Support */
-  if (iConsoleIsActive())
-    iConsoleWaitClose();
+    //avoid crashes since win32 & OS/2 exception handler aren't identical
+    //(terminate process generates two exceptions)
+    /* @@@PH 1998/02/12 Added Console Support */
+    if (iConsoleIsActive())
+        iConsoleWaitClose();
 
-  O32_ExitProcess(exitcode);
+    O32_ExitProcess(exitcode);
 }
 //******************************************************************************
 //******************************************************************************
@@ -386,31 +386,31 @@ BOOL WIN32API FreeLibrary(HINSTANCE hinstance)
  Win32DllBase *winmod;
  BOOL rc;
 
-  winmod = Win32DllBase::findModule(hinstance);
-  if(winmod) {
-  	dprintf(("FreeLibrary %s", winmod->getName()));
-	//Only free it when the nrDynamicLibRef != 0
-	//This prevent problems after ExitProcess:
-	//i.e. dll A is referenced by our exe and loaded with LoadLibrary by dll B
-	//     During ExitProcess it's unloaded once (before dll B), dll B calls
+    winmod = Win32DllBase::findModule(hinstance);
+    if(winmod) {
+        dprintf(("FreeLibrary %s", winmod->getName()));
+        //Only free it when the nrDynamicLibRef != 0
+        //This prevent problems after ExitProcess:
+        //i.e. dll A is referenced by our exe and loaded with LoadLibrary by dll B
+        //     During ExitProcess it's unloaded once (before dll B), dll B calls
         //     FreeLibrary, but our exe also has a reference -> unloaded too many times
-	if(winmod->isDynamicLib()) {
-        	winmod->decDynamicLib();
-        	winmod->Release();
-	}
-	else {
-		dprintf(("Skipping dynamic unload as nrDynamicLibRef == 0"));
-	}
+        if(winmod->isDynamicLib()) {
+            winmod->decDynamicLib();
+            winmod->Release();
+        }
+        else {
+            dprintf(("Skipping dynamic unload as nrDynamicLibRef == 0"));
+        }
         return(TRUE);
-  }
-  dprintf(("KERNEL32: FreeLibrary %s %X\n", OSLibGetDllName(hinstance), hinstance));
+    }
+    dprintf(("KERNEL32: FreeLibrary %s %X\n", OSLibGetDllName(hinstance), hinstance));
 
-  //TODO: Not thread safe
-  fFreeLibrary  = TRUE; //ditch dll
-  rc = O32_FreeLibrary(hinstance);
-  fFreeLibrary = FALSE;
-  dprintf(("FreeLibrary returned %X\n", rc));
-  return(TRUE);
+    //TODO: Not thread safe
+    fFreeLibrary  = TRUE; //ditch dll
+    rc = O32_FreeLibrary(hinstance);
+    fFreeLibrary = FALSE;
+    dprintf(("FreeLibrary returned %X\n", rc));
+    return(TRUE);
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -420,53 +420,53 @@ static HINSTANCE iLoadLibraryA(LPCTSTR lpszLibFile, DWORD dwFlags)
  HINSTANCE   hDll;
  Win32DllBase *module;
 
-  module = Win32DllBase::findModule((LPSTR)lpszLibFile);
-  if(module) {
-	if(module->isLxDll() && !module->isLoaded() && !fPe2Lx) {
-		//can happen with i.e. wininet
-		//wininet depends on wsock32; when the app loads wsock32 afterwards
-	  	//with LoadLibrary or as a child of another dll, we need to make
-                //sure it's loaded once with DosLoadModule
-		module->setLoadLibrary();
-	}
-	module->incDynamicLib();
+    module = Win32DllBase::findModule((LPSTR)lpszLibFile);
+    if(module) {
+        if(module->isLxDll() && !module->isLoaded() && !fPe2Lx) {
+            //can happen with i.e. wininet
+            //wininet depends on wsock32; when the app loads wsock32 afterwards
+            //with LoadLibrary or as a child of another dll, we need to make
+            //sure it's loaded once with DosLoadModule
+            module->setLoadLibrary();
+        }
+        module->incDynamicLib();
         module->AddRef();
-    	dprintf(("iLoadLibrary: found %s -> handle %x", lpszLibFile, module->getInstanceHandle()));
+        dprintf(("iLoadLibrary: found %s -> handle %x", lpszLibFile, module->getInstanceHandle()));
         return module->getInstanceHandle();
-  }
+    }
 
-  strcpy(modname, lpszLibFile);
-  strupr(modname);
-  //rename dll if necessary (i.e. OLE32 -> OLE32OS2)
-  Win32DllBase::renameDll(modname);
+    strcpy(modname, lpszLibFile);
+    strupr(modname);
+    //rename dll if necessary (i.e. OLE32 -> OLE32OS2)
+    Win32DllBase::renameDll(modname);
 
-  hDll = O32_LoadLibrary(modname);
-  dprintf(("KERNEL32:  iLoadLibraryA %s returned %X (%d)\n",
+    hDll = O32_LoadLibrary(modname);
+    dprintf(("KERNEL32:  iLoadLibraryA %s returned %X (%d)\n",
            lpszLibFile,
            hDll,
            GetLastError()));
-  if(hDll)
-  {
-  	module = Win32DllBase::findModule(hDll);
-  	if(module && module->isLxDll() && !fPe2Lx) {
-		module->setLoadLibrary();
-		module->AddRef();
-	}
-	if(module)
-		module->incDynamicLib();
-	//system dll, converted dll or win32k took care of it
-	return hDll;
-  }
+    if(hDll)
+    {
+        module = Win32DllBase::findModule(hDll);
+        if(module && module->isLxDll() && !fPe2Lx) {
+            module->setLoadLibrary();
+            module->AddRef();
+        }
+        if(module)
+            module->incDynamicLib();
+        //system dll, converted dll or win32k took care of it
+        return hDll;
+    }
 
-  if(!strstr(modname, ".")) {
-    	strcat(modname,".DLL");
-  }
+    if(!strstr(modname, ".")) {
+        strcat(modname,".DLL");
+    }
 
-  if(Win32ImageBase::isPEImage((char *)modname))
-  {
+    if(Win32ImageBase::isPEImage((char *)modname))
+    {
         module = Win32DllBase::findModule((char *)modname);
         if(module) {//don't load it again
-  	    module->incDynamicLib();
+        module->incDynamicLib();
             module->AddRef();
             return module->getInstanceHandle();
         }
@@ -493,28 +493,28 @@ static HINSTANCE iLoadLibraryA(LPCTSTR lpszLibFile, DWORD dwFlags)
             return(0);
         }
         return peldrDll->getInstanceHandle();
-  }
-  else  return(0);
+    }
+    else  return(0);
 }
 //******************************************************************************
 //******************************************************************************
 HINSTANCE16 WIN32API LoadLibrary16(LPCTSTR lpszLibFile)
 {
-	dprintf(("ERROR: LoadLibrary16 %s, not implemented", lpszLibFile));
-	return 0;
+    dprintf(("ERROR: LoadLibrary16 %s, not implemented", lpszLibFile));
+    return 0;
 }
 //******************************************************************************
 //******************************************************************************
 VOID WIN32API FreeLibrary16(HINSTANCE16 hinstance)
 {
-	dprintf(("ERROR: FreeLibrary16 %x, not implemented", hinstance));
+    dprintf(("ERROR: FreeLibrary16 %x, not implemented", hinstance));
 }
 //******************************************************************************
 //******************************************************************************
 FARPROC WIN32API GetProcAddress16(HMODULE hModule, LPCSTR lpszProc)
 {
-	dprintf(("ERROR: GetProcAddress16 %x %x, not implemented", hModule, lpszProc));
-	return 0;
+    dprintf(("ERROR: GetProcAddress16 %x %x, not implemented", hModule, lpszProc));
+    return 0;
 }
 //******************************************************************************
 //******************************************************************************
@@ -522,28 +522,28 @@ HINSTANCE WIN32API LoadLibraryA(LPCTSTR lpszLibFile)
 {
   HINSTANCE hDll;
 
-  dprintf(("KERNEL32:  LoadLibraryA(%s)\n",
+    dprintf(("KERNEL32:  LoadLibraryA(%s)\n",
            lpszLibFile));
-  dprintf(("KERNEL32: LoadLibrary %x FS = %x\n", GetCurrentThreadId(), GetFS()));
+    dprintf(("KERNEL32: LoadLibrary %x FS = %x\n", GetCurrentThreadId(), GetFS()));
 
-  hDll = iLoadLibraryA(lpszLibFile, 0);
-  if (hDll == 0)
-  {
-    char * pszName;
-
-    // remove path from the image name
-    pszName = strrchr((char *)lpszLibFile,
-                      '\\');
-    if (pszName != NULL)
+    hDll = iLoadLibraryA(lpszLibFile, 0);
+    if (hDll == 0)
     {
-      pszName++;                // skip backslash
+        char * pszName;
 
-      // now try again without fully qualified path
-      hDll = iLoadLibraryA(pszName, 0);
+        // remove path from the image name
+        pszName = strrchr((char *)lpszLibFile,
+                      '\\');
+        if (pszName != NULL)
+        {
+            pszName++;                // skip backslash
+
+            // now try again without fully qualified path
+            hDll = iLoadLibraryA(pszName, 0);
+        }
     }
-  }
 
-  return hDll;
+    return hDll;
 }
 //******************************************************************************
 //******************************************************************************
@@ -626,8 +626,8 @@ LPCWSTR WIN32API GetCommandLineW(void)
         return(UnicodeCmdLine); //already called before
 
     if(WinExe) {
-      	if(WinExe->getCommandLineW())
-		return WinExe->getCommandLineW();
+        if(WinExe->getCommandLineW())
+        return WinExe->getCommandLineW();
     }
     if(asciicmdline == NULL) //not used for converted exes
       asciicmdline = O32_GetCommandLine();
@@ -851,7 +851,7 @@ BOOL WIN32API CreateProcessW(LPCWSTR lpApplicationName, LPWSTR lpCommandLine,
                              PSECURITY_ATTRIBUTES lpProcessAttributes,
                              PSECURITY_ATTRIBUTES lpThreadAttributes,
                              BOOL bInheritHandles, DWORD dwCreationFlags,
-                             LPVOID lpEnvironment, 
+                             LPVOID lpEnvironment,
                              LPCWSTR lpCurrentDirectory, LPSTARTUPINFOW lpStartupInfo,
                              LPPROCESS_INFORMATION lpProcessInfo)
 {
@@ -860,18 +860,18 @@ BOOL WIN32API CreateProcessW(LPCWSTR lpApplicationName, LPWSTR lpCommandLine,
 
     dprintf(("KERNEL32: CreateProcessW"));
     if(lpApplicationName)
-    	astring1 = UnicodeToAsciiString((LPWSTR)lpApplicationName);
+        astring1 = UnicodeToAsciiString((LPWSTR)lpApplicationName);
     if(lpCommandLine)
-    	astring2 = UnicodeToAsciiString(lpCommandLine);
+        astring2 = UnicodeToAsciiString(lpCommandLine);
     if(lpCurrentDirectory)
-    	astring3 = UnicodeToAsciiString((LPWSTR)lpCurrentDirectory);
+        astring3 = UnicodeToAsciiString((LPWSTR)lpCurrentDirectory);
     rc = CreateProcessA(astring1, astring2, lpProcessAttributes, lpThreadAttributes,
                         bInheritHandles, dwCreationFlags, lpEnvironment,
-                        astring3, (LPSTARTUPINFOA)lpStartupInfo, 
+                        astring3, (LPSTARTUPINFOA)lpStartupInfo,
                         lpProcessInfo);
-    if(astring3)	FreeAsciiString(astring3);
-    if(astring2)	FreeAsciiString(astring2);
-    if(astring1)	FreeAsciiString(astring1);
+    if(astring3)    FreeAsciiString(astring3);
+    if(astring2)    FreeAsciiString(astring2);
+    if(astring1)    FreeAsciiString(astring1);
     return(rc);
 }
 //******************************************************************************
@@ -887,13 +887,13 @@ HINSTANCE WIN32API WinExec(LPCSTR lpCmdLine, UINT nCmdShow)
     if(CreateProcessA(NULL, (LPSTR)lpCmdLine, NULL, NULL, FALSE, 0, NULL, NULL,
                       &startinfo, &procinfo) == FALSE)
     {
-    	return 0;
+        return 0;
     }
     //block until the launched app waits for input (or a timeout of 15 seconds)
     //TODO: Shouldn't call Open32, but the api in user32..
     rc = O32_WaitForInputIdle(procinfo.hProcess, 15000);
     if(rc != 0) {
-	dprintf(("WinExec: WaitForInputIdle %x returned %x", procinfo.hProcess, rc));
+    dprintf(("WinExec: WaitForInputIdle %x returned %x", procinfo.hProcess, rc));
     }
     return procinfo.hProcess; //correct?
 }
