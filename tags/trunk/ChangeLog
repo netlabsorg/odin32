@@ -1,9 +1,10 @@
-/* $Id: ChangeLog,v 1.1779 2001-10-23 17:03:26 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1780 2001-10-23 17:30:06 sandervl Exp $ */
 
  2001-10-23: Sander van Leeuwen <sandervl@xs4all.nl>
     - COMCTL32: o ListView: WM_KEYDOWN -> if WM_NOTIFY returns TRUE, then
                   don't process key anymore; the app did it for us
                 o ListView: First focus change didn't work
+    - USER32:   o Fixed moving of window with RMB
 
  2001-10-23: Patrick Haller <patrick.haller@innotek.de>
     - USER32:   o major improvement on keyboard handling
