@@ -1,32 +1,34 @@
-/* $Id: stg_stream.cpp,v 1.2 2000-03-19 15:33:07 davidr Exp $ */
-/* 
+/*
  * Compound Storage (32 bit version)
  * Stream implementation
  *
- * 20/9/99
- * 
- * Copyright 1999 David J. Raison
- * 
- * Direct port of Wine Implementation
- *
  * This file contains the implementation of the stream interface
  * for streams contained in a compound storage.
- * 
- * TODO:
- * - Support for a transacted mode
  *
  * Copyright 1999 Francis Beaudet
  * Copyright 1999 Thuy Nguyen
  */
+#ifdef __WIN32OS2__
+#define WINE_LARGE_INTEGER
 
+#include <odin.h>
 #include "ole32.h"
 #include "heapstring.h"
-#include "debugtools.h"
-#include "storage.h"
 
+#endif
 #include <assert.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 
-DEFAULT_DEBUG_CHANNEL(storage)
+#include "winbase.h"
+#include "winerror.h"
+#include "ntddk.h"
+#include "debugtools.h"
+
+#include "storage32.h"
+
+DEFAULT_DEBUG_CHANNEL(storage);
 
 
 /*
@@ -64,12 +66,12 @@ static ICOM_VTABLE(IStream) StgStreamImpl_Vtbl =
  */
 StgStreamImpl* StgStreamImpl_Construct(
 		StorageBaseImpl* parentStorage,
-		DWORD            grfMode,
-		ULONG              ownerProperty)
+    DWORD            grfMode,
+    ULONG            ownerProperty)
 {
   StgStreamImpl* newStream;
 
-  newStream = (StgStreamImpl *)HeapAlloc(GetProcessHeap(), 0, sizeof(StgStreamImpl));
+  newStream = HeapAlloc(GetProcessHeap(), 0, sizeof(StgStreamImpl));
   
   if (newStream!=0)
   {
@@ -77,7 +79,7 @@ StgStreamImpl* StgStreamImpl_Construct(
      * Set-up the virtual function table and reference count.
      */
     ICOM_VTBL(newStream) = &StgStreamImpl_Vtbl;
-    newStream->ref    = 0;
+    newStream->ref       = 0;
     
     /*
      * We want to nail-down the reference to the storage in case the
@@ -85,21 +87,21 @@ StgStreamImpl* StgStreamImpl_Construct(
      */
     newStream->parentStorage = parentStorage;
     IStorage_AddRef((IStorage*)newStream->parentStorage);
-    
+
     newStream->grfMode = grfMode;    
     newStream->ownerProperty = ownerProperty;
     
     /*
      * Start the stream at the begining.
      */
-    newStream->currentPosition.HighPart = 0;
-    newStream->currentPosition.LowPart = 0;
+    newStream->currentPosition.s.HighPart = 0;
+    newStream->currentPosition.s.LowPart = 0;
     
     /*
      * Initialize the rest of the data.
      */
-    newStream->streamSize.HighPart = 0;
-    newStream->streamSize.LowPart  = 0;
+    newStream->streamSize.s.HighPart = 0;
+    newStream->streamSize.s.LowPart  = 0;
     newStream->bigBlockChain       = 0;
     newStream->smallBlockChain     = 0;
     
@@ -280,16 +282,16 @@ void StgStreamImpl_OpenBlockChain(
     /*
      * This code supports only streams that are <32 bits in size.
      */
-    assert(This->streamSize.HighPart == 0);
+    assert(This->streamSize.s.HighPart == 0);
     
     if(curProperty.startingBlock == BLOCK_END_OF_CHAIN)
     {
-      assert( (This->streamSize.HighPart == 0) && (This->streamSize.LowPart == 0) );
+      assert( (This->streamSize.s.HighPart == 0) && (This->streamSize.s.LowPart == 0) );
     }
     else
     {
-      if ( (This->streamSize.HighPart == 0) &&
-	   (This->streamSize.LowPart < LIMIT_TO_USE_SMALL_BLOCK) )
+      if ( (This->streamSize.s.HighPart == 0) &&
+	   (This->streamSize.s.LowPart < LIMIT_TO_USE_SMALL_BLOCK) )
       {
 	This->smallBlockChain = SmallBlockChainStream_Construct(
 								This->parentStorage->ancestorStorage,	
@@ -340,7 +342,7 @@ HRESULT WINAPI StgStreamImpl_Read(
    * Using the known size of the stream, calculate the number of bytes
    * to read from the block chain
    */
-  bytesToReadFromBuffer = MIN( This->streamSize.LowPart - This->currentPosition.LowPart, cb);
+  bytesToReadFromBuffer = min( This->streamSize.s.LowPart - This->currentPosition.s.LowPart, cb);
   
   /*
    * Depending on the type of chain that was opened when the stream was constructed,
@@ -383,7 +385,7 @@ HRESULT WINAPI StgStreamImpl_Read(
   /*
    * Advance the pointer for the number of positions read.
    */
-  This->currentPosition.LowPart += *pcbRead;
+  This->currentPosition.s.LowPart += *pcbRead;
   
   /*
    * The function returns S_OK if the buffer was filled completely
@@ -419,7 +421,14 @@ HRESULT WINAPI StgStreamImpl_Write(
 
   TRACE("(%p, %p, %ld, %p)\n",
 	iface, pv, cb, pcbWritten);
-  
+ 
+  /*
+   * Do we have permission to write to this stream?
+   */
+  if (!(This->grfMode & (STGM_WRITE | STGM_READWRITE))) {
+      return STG_E_ACCESSDENIED;
+  }
+
   /*
    * If the caller is not interested in the number of bytes written,
    * we use another buffer to avoid "if" statements in the code.
@@ -432,26 +441,20 @@ HRESULT WINAPI StgStreamImpl_Write(
    */
   *pcbWritten = 0;
 
-  /*
-   * Do we have permission to write to this stream?
-   */
-  if (!(This->grfMode & (STGM_WRITE | STGM_READWRITE)))
-    return STG_E_ACCESSDENIED;
-
   if (cb == 0)
   {
     return S_OK;
   }
   else
   {
-    newSize.HighPart = 0;
-    newSize.LowPart = This->currentPosition.LowPart + cb;
+    newSize.s.HighPart = 0;
+    newSize.s.LowPart = This->currentPosition.s.LowPart + cb;
   }
   
   /*
    * Verify if we need to grow the stream
    */
-  if (newSize.LowPart > This->streamSize.LowPart)
+  if (newSize.s.LowPart > This->streamSize.s.LowPart)
   {
     /* grow stream */
     IStream_SetSize(iface, newSize);
@@ -484,7 +487,7 @@ HRESULT WINAPI StgStreamImpl_Write(
   /*
    * Advance the position pointer for the number of positions written.
    */
-  This->currentPosition.LowPart += *pcbWritten;
+  This->currentPosition.s.LowPart += *pcbWritten;
   
   return S_OK;
 }
@@ -508,7 +511,7 @@ HRESULT WINAPI StgStreamImpl_Seek(
   ULARGE_INTEGER newPosition;
 
   TRACE("(%p, %ld, %ld, %p)\n",
-	iface, dlibMove.LowPart, dwOrigin, plibNewPosition);
+	iface, dlibMove.s.LowPart, dwOrigin, plibNewPosition);
 
   /* 
    * The caller is allowed to pass in NULL as the new position return value.
@@ -527,8 +530,8 @@ HRESULT WINAPI StgStreamImpl_Seek(
   switch (dwOrigin)
   {
     case STREAM_SEEK_SET:
-      plibNewPosition->HighPart = 0;
-      plibNewPosition->LowPart  = 0;
+      plibNewPosition->s.HighPart = 0;
+      plibNewPosition->s.LowPart  = 0;
       break;
     case STREAM_SEEK_CUR:
       *plibNewPosition = This->currentPosition;
@@ -539,43 +542,40 @@ HRESULT WINAPI StgStreamImpl_Seek(
     default:
       return STG_E_INVALIDFUNCTION;
   }
-
-#if SIZEOF_LONG_LONG >= 8
-  plibNewPosition->QuadPart += dlibMove.QuadPart;
-#else
+#ifdef __WIN32OS2__
   /*
    * do some multiword arithmetic:
    *    treat HighPart as a signed value
    *    treat LowPart as unsigned
    *  NOTE: this stuff is two's complement specific!
    */
-  if (dlibMove.HighPart < 0) { /* dlibMove is < 0 */
+  if (dlibMove.s.HighPart < 0) { /* dlibMove is < 0 */
       /* calculate the absolute value of dlibMove ... */
-      dlibMove.HighPart = -dlibMove.HighPart;
-      dlibMove.LowPart ^= -1;
+      dlibMove.s.HighPart = -dlibMove.s.HighPart;
+      dlibMove.s.LowPart ^= -1;
       /* ... and subtract with carry */
-      if (dlibMove.LowPart > plibNewPosition->LowPart) {
+      if (dlibMove.s.LowPart > plibNewPosition->s.LowPart) {
 	  /* carry needed, This accounts for any underflows at [1]*/
-	  plibNewPosition->HighPart -= 1; 
+	  plibNewPosition->s.HighPart -= 1; 
       }
-      plibNewPosition->LowPart -= dlibMove.LowPart; /* [1] */
-      plibNewPosition->HighPart -= dlibMove.HighPart; 
+      plibNewPosition->s.LowPart -= dlibMove.s.LowPart; /* [1] */
+      plibNewPosition->s.HighPart -= dlibMove.s.HighPart; 
   } else {
       /* add directly */
-      int initialLowPart = plibNewPosition->LowPart;
-      plibNewPosition->LowPart += dlibMove.LowPart;
-      if((plibNewPosition->LowPart < initialLowPart) ||
-	 (plibNewPosition->LowPart < dlibMove.LowPart)) {
+      int initialLowPart = plibNewPosition->s.LowPart;
+      plibNewPosition->s.LowPart += dlibMove.s.LowPart;
+      if((plibNewPosition->s.LowPart < initialLowPart) ||
+	 (plibNewPosition->s.LowPart < dlibMove.s.LowPart)) {
 	  /* LowPart has rolled over => add the carry digit to HighPart */
-	  plibNewPosition->HighPart++;
+	  plibNewPosition->s.HighPart++;
       }
-      plibNewPosition->HighPart += dlibMove.HighPart; 
+      plibNewPosition->s.HighPart += dlibMove.s.HighPart; 
   }
   /*
    * Check if we end-up before the beginning of the file. That should 
    * trigger an error.
    */
-  if (plibNewPosition->HighPart < 0) {
+  if (plibNewPosition->s.HighPart < 0) {
       return STG_E_INVALIDPOINTER;
   }
 
@@ -583,8 +583,10 @@ HRESULT WINAPI StgStreamImpl_Seek(
    * We currently don't support files with offsets of >32 bits.  
    * Note that we have checked for a negative offset already
      */
-  assert(plibNewPosition->HighPart <= 0);
+  assert(plibNewPosition->s.HighPart <= 0);
 
+#else
+  plibNewPosition->QuadPart = RtlLargeIntegerAdd( plibNewPosition->QuadPart, dlibMove.QuadPart );
 #endif
 
   /*
@@ -613,21 +615,21 @@ HRESULT WINAPI StgStreamImpl_SetSize(
   StgProperty    curProperty;
   BOOL         Success;
 
-  TRACE("(%p, %ld)\n", iface, libNewSize.LowPart);
+  TRACE("(%p, %ld)\n", iface, libNewSize.s.LowPart);
 
   /*
    * As documented.
    */
-  if (libNewSize.HighPart != 0)
+  if (libNewSize.s.HighPart != 0)
     return STG_E_INVALIDFUNCTION;
-  
+
   /*
    * Do we have permission?
    */
   if (!(This->grfMode & (STGM_WRITE | STGM_READWRITE)))
     return STG_E_ACCESSDENIED;
 
-  if (This->streamSize.LowPart == libNewSize.LowPart)
+  if (This->streamSize.s.LowPart == libNewSize.s.LowPart)
     return S_OK;
 
   /*
@@ -635,7 +637,7 @@ HRESULT WINAPI StgStreamImpl_SetSize(
    */
   if ((This->smallBlockChain == 0) && (This->bigBlockChain == 0))
   {
-    if (libNewSize.LowPart < LIMIT_TO_USE_SMALL_BLOCK)
+    if (libNewSize.s.LowPart < LIMIT_TO_USE_SMALL_BLOCK)
     {
       This->smallBlockChain = SmallBlockChainStream_Construct(
                                     This->parentStorage->ancestorStorage,
@@ -660,9 +662,9 @@ HRESULT WINAPI StgStreamImpl_SetSize(
    * Determine if we have to switch from small to big blocks or vice versa
    */  
   if ( (This->smallBlockChain!=0) && 
-       (curProperty.size.LowPart < LIMIT_TO_USE_SMALL_BLOCK) )
+       (curProperty.size.s.LowPart < LIMIT_TO_USE_SMALL_BLOCK) )
   {
-    if (libNewSize.LowPart >= LIMIT_TO_USE_SMALL_BLOCK)
+    if (libNewSize.s.LowPart >= LIMIT_TO_USE_SMALL_BLOCK)
     {
       /*
        * Transform the small block chain into a big block chain
@@ -689,8 +691,8 @@ HRESULT WINAPI StgStreamImpl_SetSize(
                                        This->ownerProperty,
                                        &curProperty);
 
-  curProperty.size.HighPart = libNewSize.HighPart;
-  curProperty.size.LowPart = libNewSize.LowPart;
+  curProperty.size.s.HighPart = libNewSize.s.HighPart;
+  curProperty.size.s.LowPart = libNewSize.s.LowPart;
   
   if (Success)
   {
@@ -725,7 +727,7 @@ HRESULT WINAPI StgStreamImpl_CopyTo(
   ULARGE_INTEGER totalBytesWritten;
 
   TRACE("(%p, %p, %ld, %p, %p)\n", 
-	iface, pstm, cb.LowPart, pcbRead, pcbWritten);
+	iface, pstm, cb.s.LowPart, pcbRead, pcbWritten);
 
   /*
    * Sanity check
@@ -733,28 +735,28 @@ HRESULT WINAPI StgStreamImpl_CopyTo(
   if ( pstm == 0 )
     return STG_E_INVALIDPOINTER;
 
-  totalBytesRead.LowPart = totalBytesRead.HighPart = 0;
-  totalBytesWritten.LowPart = totalBytesWritten.HighPart = 0;
+  totalBytesRead.s.LowPart = totalBytesRead.s.HighPart = 0;
+  totalBytesWritten.s.LowPart = totalBytesWritten.s.HighPart = 0;
 
   /*
    * use stack to store data temporarly
    * there is surely more performant way of doing it, for now this basic
    * implementation will do the job
    */
-  while ( cb.LowPart > 0 )
+  while ( cb.s.LowPart > 0 )
   {
-    if ( cb.LowPart >= 128 )
+    if ( cb.s.LowPart >= 128 )
       copySize = 128;
     else
-      copySize = cb.LowPart;
+      copySize = cb.s.LowPart;
     
     IStream_Read(iface, tmpBuffer, copySize, &bytesRead);
 
-    totalBytesRead.LowPart += bytesRead;
+    totalBytesRead.s.LowPart += bytesRead;
     
     IStream_Write(pstm, tmpBuffer, bytesRead, &bytesWritten);
 
-    totalBytesWritten.LowPart += bytesWritten;
+    totalBytesWritten.s.LowPart += bytesWritten;
 
     /*
      * Check that read & write operations were succesfull
@@ -766,9 +768,9 @@ HRESULT WINAPI StgStreamImpl_CopyTo(
     }
     
     if (bytesRead!=copySize)
-      cb.LowPart = 0;
+      cb.s.LowPart = 0;
     else
-      cb.LowPart -= bytesRead;
+      cb.s.LowPart -= bytesRead;
   }
 
   /*
@@ -776,14 +778,14 @@ HRESULT WINAPI StgStreamImpl_CopyTo(
    */
   if (pcbRead)
   {
-    pcbRead->LowPart = totalBytesRead.LowPart;
-    pcbRead->HighPart = totalBytesRead.HighPart;
+    pcbRead->s.LowPart = totalBytesRead.s.LowPart;
+    pcbRead->s.HighPart = totalBytesRead.s.HighPart;
   }
 
   if (pcbWritten)
   {
-    pcbWritten->LowPart = totalBytesWritten.LowPart;
-    pcbWritten->HighPart = totalBytesWritten.HighPart;
+    pcbWritten->s.LowPart = totalBytesWritten.s.LowPart;
+    pcbWritten->s.HighPart = totalBytesWritten.s.HighPart;
   }
   return hr;
 }
@@ -867,9 +869,9 @@ HRESULT WINAPI StgStreamImpl_Stat(
     StorageUtl_CopyPropertyToSTATSTG(pstatstg, 
 				     &curProperty, 
 				     grfStatFlag);
-    
-    pstatstg->grfMode = This->grfMode;
 
+    pstatstg->grfMode = This->grfMode;
+    
     return S_OK;
   }
   

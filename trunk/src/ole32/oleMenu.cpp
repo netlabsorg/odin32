@@ -1,4 +1,4 @@
-/* $Id: oleMenu.cpp,v 1.3 2000-09-17 10:31:06 davidr Exp $ */
+/* $Id: oleMenu.cpp,v 1.4 2001-01-25 20:17:24 sandervl Exp $ */
 /* 
  * 
  * Project Odin Software License can be found in LICENSE.TXT
@@ -21,6 +21,7 @@
 #include "commctrl.h"
 #include "oString.h"
 #include <assert.h>
+#include "storage32.h"
 
 // ======================================================================
 // Local Data
