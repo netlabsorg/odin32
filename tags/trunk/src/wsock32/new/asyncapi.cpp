@@ -1,4 +1,4 @@
-/* $Id: asyncapi.cpp,v 1.3 2000-03-23 23:07:22 sandervl Exp $ */
+/* $Id: asyncapi.cpp,v 1.4 2000-03-24 19:22:51 sandervl Exp $ */
 
 /*
  *
@@ -33,6 +33,7 @@
 ODINDEBUGCHANNEL(WSOCK32-ASYNC)
 
 //******************************************************************************
+//NOTE: Must execute RemoveFromQueue before returning
 //******************************************************************************
 void ASYNCCNV WSAsyncThreadProc(void *pparm)
 {
@@ -74,7 +75,7 @@ void ASYNCCNV WSAsyncThreadProc(void *pparm)
 				size = -size;
 	         	}
 	      	}
-	      	else  	fail = WSANO_DATA;
+	      	else  	fail = wsaHerrno();
 		break;
 	}
 
@@ -153,6 +154,8 @@ void ASYNCCNV WSAsyncThreadProc(void *pparm)
   	PostMessageA(pThreadParm->hwnd, pThreadParm->msg, 
                      (WPARAM)pThreadParm->hAsyncTaskHandle, lParam);
    }
+   pThreadParm->fActive = FALSE;
+   RemoveFromQueue(pThreadParm); 
 }
 //******************************************************************************
 //******************************************************************************
@@ -403,6 +406,7 @@ void AsyncNotifyEvent(PASYNCTHREADPARM pThreadParm, ULONG event, ULONG socket_er
 //******************************************************************************
 #define  nr(i) 		((i != -1) ? 1 : 0)
 #define  ready(i)       ((i != -1) && (sockets[i] != -1))
+//NOTE: Must execute RemoveFromQueue before returning
 //******************************************************************************
 void ASYNCCNV WSAsyncSelectThreadProc(void *pparm)
 {
@@ -450,7 +454,7 @@ asyncloopstart:
 		sockets[noexcept] = s;
 	}
 
-//        dprintf(("WSAsyncSelectThreadProc %x rds=%d, wrs=%d, oos =%d, pending = %x", pThreadParm->u.asyncselect.s, noread, nowrite, noexcept, lEventsPending));
+////        dprintf(("WSAsyncSelectThreadProc %x rds=%d, wrs=%d, oos =%d, pending = %x", pThreadParm->u.asyncselect.s, noread, nowrite, noexcept, lEventsPending));
 
 	ret = select((int *)sockets, nr(noread), nr(nowrite), nr(noexcept), -1);
 	if(ret == SOCKET_ERROR) {
@@ -495,7 +499,8 @@ asyncloopstart:
 
             			ret = getsockopt(s, SOL_SOCKET, SO_ERROR,
                 	        		 (char *) &sockoptval, &sockoptlen);
-				if(sockoptval == WSAECONNREFUSED) {
+				//SvL: WSeB returns SOCECONNREFUSED, Warp 4 0x3d
+				if(sockoptval == SOCECONNREFUSED || sockoptval == (SOCECONNREFUSED - SOCBASEERR)) {
 					AsyncNotifyEvent(pThreadParm, FD_CONNECT, WSAECONNREFUSED);
 				}
             		}  
@@ -552,7 +557,11 @@ asyncloopstart:
 		DosSleep(10);
 	}
    }
+   //remove it first, then delete semaphore object
+   pThreadParm->fActive = FALSE;
+   RemoveFromQueue(pThreadParm); 
    delete pThreadParm->u.asyncselect.asyncSem;
+   pThreadParm->u.asyncselect.asyncSem = 0;
 }
 //******************************************************************************
 //******************************************************************************
