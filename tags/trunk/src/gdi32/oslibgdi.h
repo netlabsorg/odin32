@@ -1,4 +1,4 @@
-/* $Id: oslibgdi.h,v 1.2 1999-12-09 16:49:45 cbratschi Exp $ */
+/* $Id: oslibgdi.h,v 1.3 2000-02-02 23:45:07 sandervl Exp $ */
 
 /*
  * GDI32 support code
@@ -13,7 +13,7 @@
 
 INT OSLibSetDIBitsToDevice(HDC hdc, INT xDest, INT yDest, DWORD cx, DWORD cy,
                            INT xSrc, INT ySrc, UINT startscan, UINT lines,
-                           LPCVOID bits, WINBITMAPINFOHEADER *info,
+                           LPCVOID bits, BITMAPINFOHEADER_W *info,
                            UINT coloruse);
 
 #endif
