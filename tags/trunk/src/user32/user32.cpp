@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.91 2001-02-18 14:18:39 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.92 2001-02-19 21:43:12 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -1598,7 +1598,7 @@ BOOL WIN32API PaintDesktop(HDC hdc)
 
 int WIN32API FillRect(HDC hDC, const RECT * lprc, HBRUSH hbr)
 {
-    dprintf(("USER32:  FillRect %x (%d,%d)(%d,%d) brush %X\n", hDC, lprc->left, lprc->top, lprc->right, lprc->bottom, hbr));
+    dprintf(("USER32:  FillRect %x (%d,%d)(%d,%d) brush %X", hDC, lprc->left, lprc->top, lprc->right, lprc->bottom, hbr));
     return O32_FillRect(hDC,lprc,hbr);
 }
 //******************************************************************************
@@ -1612,17 +1612,11 @@ int WIN32API FrameRect( HDC hDC, const RECT * lprc, HBRUSH  hbr)
 //******************************************************************************
 BOOL WIN32API InvertRect( HDC hDC, const RECT * lprc)
 {
-    dprintf(("USER32:  InvertRect\n"));
+    dprintf(("USER32: InvertRect %x", hDC));
     return O32_InvertRect(hDC,lprc);
 }
 
 /* System Information Functions */
-
-int WIN32API GetKeyboardType( int nTypeFlag)
-{
-    dprintf(("USER32:  GetKeyboardType\n"));
-    return O32_GetKeyboardType(nTypeFlag);
-}
 
 /* Window Station and Desktop Functions */
 
