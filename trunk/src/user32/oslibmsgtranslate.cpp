@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.20 2000-03-03 21:19:13 hugh Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.21 2000-03-04 19:54:03 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -45,7 +45,7 @@ USHORT virtualKeyTable [66] = {
                0x08,    // VK_BACKSPACE     VK_BACK
                0x09,    // VK_TAB           VK_TAB
                0x00,    // VK_BACKTAB       No equivalent!
-               0x0D,    // VK_NEWLINE       VK_RETURN
+               0x0A,    // VK_NEWLINE       0x0A (no VK_* def)
                0x10,    // VK_SHIFT         VK_SHIFT
                0x11,    // VK_CTRL          VK_CONTROL
                0x12,    // VK_ALT           VK_MENU, best match I guess
@@ -192,6 +192,11 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
             winMsg->wParam  = GetMouseKeyState();
             winMsg->lParam  = MAKELONG(ClientPoint.x, ClientPoint.y); //client coordinates
         }
+        if(ISMOUSE_CAPTURED())
+        {
+            if(DInputMouseHandler(win32wnd->getWindowHandle(), MOUSEMSG_BUTTON, winMsg->pt.x, winMsg->pt.y))
+                goto dummymessage; //dinput swallowed message
+        }
 
         return TRUE;
 
@@ -222,6 +227,11 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
           winMsg->message = WINWM_MOUSEMOVE;
           winMsg->wParam  = GetMouseKeyState();
           winMsg->lParam  = MAKELONG(SHORT1FROMMP(os2Msg->mp1),mapOS2ToWin32Y(win32wnd->getOS2FrameWindowHandle(),win32wnd->getOS2WindowHandle(),SHORT2FROMMP(os2Msg->mp1)));
+        }
+        if(ISMOUSE_CAPTURED())
+        {
+            if(DInputMouseHandler(win32wnd->getWindowHandle(), MOUSEMSG_MOVE, winMsg->pt.x, winMsg->pt.y))
+                goto dummymessage; //dinput swallowed message
         }
         //OS/2 Window coordinates -> Win32 Window coordinates
         return TRUE;
@@ -439,7 +449,7 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
         if(ISMOUSE_CAPTURED())
         {
             if(DInputMouseHandler(win32wnd->getWindowHandle(), MOUSEMSG_BUTTON, winMsg->pt.x, winMsg->pt.y))
-                goto dummymessage;
+                goto dummymessage; //dinput swallowed message
         }
 
         break;
@@ -475,7 +485,7 @@ BOOL OS2ToWinMsgTranslate(void *pThdb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode
         if(ISMOUSE_CAPTURED())
         {
             if(DInputMouseHandler(win32wnd->getWindowHandle(), MOUSEMSG_MOVE, winMsg->pt.x, winMsg->pt.y))
-                goto dummymessage;
+                goto dummymessage; //dinput swallowed message
         }
         //OS/2 Window coordinates -> Win32 Window coordinates
         break;
@@ -634,7 +644,8 @@ VirtualKeyFound:
         }
         if(ISKDB_CAPTURED())
         {
-            DInputKeyBoardHandler(winMsg);
+            if(DInputKeyBoardHandler(winMsg))
+                goto dummymessage; //dinput swallowed message
         }
         break;
     }

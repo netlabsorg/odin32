@@ -1,4 +1,4 @@
-/* $Id: winmouse.cpp,v 1.6 2000-03-01 13:30:07 sandervl Exp $ */
+/* $Id: winmouse.cpp,v 1.7 2000-03-04 19:54:03 sandervl Exp $ */
 /*
  * Mouse handler for DINPUT
  *
@@ -40,10 +40,12 @@ VOID WIN32API KEYBOARD_Enable(WNDPROC handler)
 }
 //******************************************************************************
 //******************************************************************************
-void DInputKeyBoardHandler(MSG *msg)
+BOOL DInputKeyBoardHandler(MSG *msg)
 {
-  if(keyboardHandler)
-  	keyboardHandler(msg->hwnd, msg->message, msg->wParam, msg->lParam);
+  if(!ISKDB_CAPTURED())
+  	return FALSE;
+
+  return keyboardHandler(msg->hwnd, msg->message, msg->wParam, msg->lParam);
 }
 //******************************************************************************
 //******************************************************************************
