@@ -1,5 +1,3 @@
-/* $Id: HandleManager.h,v 1.26 2001-10-03 13:50:58 sandervl Exp $ */
-
 /*
  * Project Odin Software License can be found in LICENSE.TXT
  * Win32 Unified Handle Manager for OS/2
