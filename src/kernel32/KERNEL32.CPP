@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.39 1999-12-24 18:40:08 sandervl Exp $ */
+/* $Id: KERNEL32.CPP,v 1.40 1999-12-28 19:16:34 sandervl Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -34,7 +34,7 @@
 #include "heap.h"
 #include "handlemanager.h"
 #include "wprocess.h"
-
+#include <versionos2.h>
 
 /*****************************************************************************
  * Defines                                                                   *
@@ -558,11 +558,11 @@ BOOL WIN32API GetVersionExA(OSVERSIONINFOA *lpVersionInformation)
    if(lpVersionInformation == NULL || lpVersionInformation->dwOSVersionInfoSize != sizeof(OSVERSIONINFOA))
         return(FALSE);
 
-   lpVersionInformation->dwMajorVersion = 4;    //pretend we're NT 4.0
-   lpVersionInformation->dwMinorVersion = 0;
-   lpVersionInformation->dwBuildNumber  = 0x565;
+   lpVersionInformation->dwMajorVersion = ODINNT_MAJOR_VERSION;    //pretend we're NT 4.0
+   lpVersionInformation->dwMinorVersion = ODINNT_MINOR_VERSION;
+   lpVersionInformation->dwBuildNumber  = ODINNT_BUILD_NR;
    lpVersionInformation->dwPlatformId   = VER_PLATFORM_WIN32_NT;
-   strcpy(lpVersionInformation->szCSDVersion, "Service Pack 3");
+   strcpy(lpVersionInformation->szCSDVersion, ODINNT_CSDVERSION);
    return(TRUE);
 }
 //******************************************************************************
@@ -574,11 +574,11 @@ BOOL WIN32API GetVersionExW(OSVERSIONINFOW *lpVersionInformation)
    if(lpVersionInformation == NULL || lpVersionInformation->dwOSVersionInfoSize != sizeof(OSVERSIONINFOW))
         return(FALSE);
 
-   lpVersionInformation->dwMajorVersion = 4;    //pretend we're NT 4.0
-   lpVersionInformation->dwMinorVersion = 0;
-   lpVersionInformation->dwBuildNumber  = 0x565;
+   lpVersionInformation->dwMajorVersion = ODINNT_MAJOR_VERSION;    //pretend we're NT 4.0
+   lpVersionInformation->dwMinorVersion = ODINNT_MINOR_VERSION;
+   lpVersionInformation->dwBuildNumber  = ODINNT_BUILD_NR;
    lpVersionInformation->dwPlatformId   = VER_PLATFORM_WIN32_NT;
-   lstrcpyW(lpVersionInformation->szCSDVersion, (LPWSTR)L"Service Pack 3");
+   lstrcpyW(lpVersionInformation->szCSDVersion, ODINNT_CSDVERSION_W);
    return(TRUE);
 }
 //******************************************************************************
@@ -590,8 +590,7 @@ LONG WIN32API GetVersion()
 /* @@@PH 98/04/04 MFC30 makes assumptions about process control block        */
 /*                structures that lead to crashes if we don't identify as NT */
 
-//  return(WIN32OS2_VERSION);
-  return (0x0000004);
+  return ODINNT_VERSION;
 }
 //******************************************************************************
 //SvL: 26-6-'97 - Added
@@ -748,3 +747,36 @@ BOOL WIN32API IsDBCSLeadByteEx(UINT CodePage, BYTE TestChar)
 
 
 
+/*****************************************************************************
+ * Name      : BOOL GetSystemPowerStatus
+ * Purpose   : The GetSystemPowerStatus function retrieves the power status of
+ *             the system. The status indicates whether the system is running
+ *             on AC or DC power, whether the battery is currently charging,
+ *             and how much battery life currently remains.
+ * Parameters: LPSYSTEM_POWER_STATUS lpSystemPowerStatus
+ * Variables :
+ * Result    : TRUE / FALSE
+ * Remark    :
+ * Status    : UNTESTED STUB
+ *
+ * Author    : Patrick Haller [Mon, 1998/06/15 08:00]
+ *****************************************************************************/
+
+BOOL WIN32API GetSystemPowerStatus(LPSYSTEM_POWER_STATUS lpSystemPowerStatus)
+{
+  dprintf(("Kernel32: GetSystemPowerStatus(%08xh) not properly implemented.\n",
+           lpSystemPowerStatus));
+
+  if(lpSystemPowerStatus == NULL) {
+	SetLastError(ERROR_INVALID_PARAMETER);
+	return FALSE;
+  }
+  lpSystemPowerStatus->ACLineStatus       = 1; //online
+  lpSystemPowerStatus->BatteryFlag        = 128; //no system battery
+  lpSystemPowerStatus->BatteryLifePercent = 255; //unknown
+  lpSystemPowerStatus->reserved           = 0;
+  lpSystemPowerStatus->BatteryLifeTime    = -1; //unknown
+  lpSystemPowerStatus->BatteryFullLifeTime= -1; //unknown
+
+  return TRUE;
+}
