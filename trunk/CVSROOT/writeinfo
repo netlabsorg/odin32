@@ -92,6 +92,6 @@
 /src/winspool/backup                       sandervl phaller achimha bird
 /src/wnetap32/backup                       sandervl phaller achimha bird
 /src/wsock32/backup                        sandervl phaller achimha bird
-/src/comctl32                              sandervl achimha cbratschi
+/src/comctl32                              sandervl achimha cbratschi phaller
 /src/opengl                                sandervl jeroen
 /src/opengl/glut                           sandervl jeroen
