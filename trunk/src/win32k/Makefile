@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.3 1999-10-04 09:56:03 sandervl Exp $
+# $Id: Makefile,v 1.4 1999-10-04 10:39:42 bird Exp $
 #
 # Copyright 1998-1999 knut st. osmundsen
 #
@@ -20,7 +20,7 @@ CC          = icc
 !if "$(CCENV)" == "VAC36"
 ILIB        = ilib /nofree
 !else
-ILIB        = ilib 
+ILIB        = ilib
 !endif
 LD          = ilink
 AS          = alp
@@ -232,7 +232,7 @@ devhelp.lib: $(DDKPATH)\lib\dhcalls.lib libconv.exe
     $(ILIB) /nologo /nobackup /convformat $@;
 #   ilib /nologo /nobackup /convformat $@;
 
-clib.lib: $(MSCPATH)\lib\slibcep.lib libconv.exe
+clib.lib: $(MSCPATH)\lib\clibcep.lib libconv.exe
     libconv $(MSCPATH)\lib\clibcep.lib $@ > nul
     $(ILIB) /nologo /nobackup /convformat $@;
 #   ilib /nologo /nobackup /convformat $@;
