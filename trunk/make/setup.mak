@@ -1,4 +1,4 @@
-# $Id: setup.mak,v 1.21 2002-09-20 04:24:06 bird Exp $
+# $Id: setup.mak,v 1.22 2003-01-22 17:08:12 sandervl Exp $
 #
 #   The common build setup.
 #
@@ -133,7 +133,7 @@ PATH_TOOLS      = $(PATH_ROOT)\tools\bin
 # Where platform-specific files are located. (like the .def files)
 PATH_DEF        = .
 # Where the include files are located.
-PATH_INCLUDES   = $(PATH_ROOT)\include\win;.;$(PATH_ROOT)\include
+PATH_INCLUDES   = $(PATH_ROOT)\include\incl_vac;$(PATH_ROOT)\include\win;.;$(PATH_ROOT)\include
 # Where the temporary files goes.
 PATH_OBJ        = $(PATH_ROOT)\obj\$(SHT_TRGPLTFRM)$(SHT_BLDMD)$(SHT_BLDENV:-=_)
 # Where the libraries goes.
