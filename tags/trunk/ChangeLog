@@ -1,10 +1,11 @@
- /* $Id: ChangeLog,v 1.227 1999-09-23 14:25:25 phaller Exp $ */
+ /* $Id: ChangeLog,v 1.228 1999-09-23 14:40:42 phaller Exp $ */
 
  99-09-23: Patrick Haller <phaller@gmx.net>
 	- KERNEL32:	Fix: WinImgRes:findResourceW erroneously tried to free 
 			numerical resource IDs instead of translated Unicode
 			strings.
-	- USER32:	fix in USER32:HeapShared:getmoreShared()
+	- USER32:	Fix: in USER32:HeapShared:getmoreShared()
+			Fix: in USER32:WIN32WMDIClient:childActivate()	
 
  99-09-23: Jens Wiessner <wiessnej@rfi.de>
 	- CRTDLL: Added stubs, implemented some stubs
