@@ -25,13 +25,28 @@
 
 /* option flags per socket */
 
-#define FD_MAX_EVENTS   10
-#define FD_READ_BIT	0
-#define FD_WRITE_BIT	1
-#define FD_OOB_BIT	2
-#define FD_ACCEPT_BIT	3
-#define FD_CONNECT_BIT	4
-#define FD_CLOSE_BIT	5
+#define FD_MAX_EVENTS                   10
+#define FD_ALL_EVENTS                   ((1 << FD_MAX_EVENTS) - 1)
+#define FD_READ_BIT                     0
+#define FD_READ                         (1 << FD_READ_BIT)
+#define FD_WRITE_BIT                    1
+#define FD_WRITE                        (1 << FD_WRITE_BIT)
+#define FD_OOB_BIT                      2
+#define FD_OOB                          (1 << FD_OOB_BIT)
+#define FD_ACCEPT_BIT                   3
+#define FD_ACCEPT                       (1 << FD_ACCEPT_BIT)
+#define FD_CONNECT_BIT	                4
+#define FD_CONNECT                      (1 << FD_CONNECT_BIT)
+#define FD_CLOSE_BIT	                5
+#define FD_CLOSE                        (1 << FD_CLOSE_BIT)
+#define FD_QOS_BIT                      6
+#define FD_QOS                          (1 << FD_QOS_BIT)
+#define FD_GROUP_QOS_BIT                7
+#define FD_GROUP_QOS                    (1 << FD_GROUP_QOS_BIT)
+#define FD_ROUTING_INTERFACE_CHANGE_BIT 8
+#define FD_ROUTING_INTERFACE_CHANGE     (1 << FD_ROUTING_INTERFACE_CHANGE_BIT)
+#define FD_ADDRESS_LIST_CHANGE_BIT      9
+#define FD_ADDRESS_LIST_CHANGE          (1 << FD_ADDRESS_LIST_CHANGE_BIT)
 
 /*
  * Constants for WSAIoctl()

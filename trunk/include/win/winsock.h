@@ -1,4 +1,4 @@
-/* $Id: winsock.h,v 1.4 2000-02-05 02:42:20 sandervl Exp $ */
+/* $Id: winsock.h,v 1.5 2001-07-03 14:46:00 achimha Exp $ */
 
 /* WINSOCK.H--definitions to be used with the WINSOCK.DLL
  *
@@ -386,12 +386,14 @@ struct  linger {
 
 #define MAXGETHOSTSTRUCT        1024
 
+#ifndef __WINSOCK2API__
 #define FD_READ         0x01
 #define FD_WRITE        0x02
 #define FD_OOB          0x04
 #define FD_ACCEPT       0x08
 #define FD_CONNECT      0x10
 #define FD_CLOSE        0x20
+#endif
 
 #define WSABASEERR              10000
 
