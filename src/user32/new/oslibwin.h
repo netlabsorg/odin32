@@ -1,4 +1,4 @@
-/* $Id: oslibwin.h,v 1.12 1999-07-18 14:56:36 sandervl Exp $ */
+/* $Id: oslibwin.h,v 1.13 1999-07-18 17:12:02 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -213,5 +213,6 @@ BOOL  OSLibWinGetMsg(LPMSG pMsg, HWND hwnd, UINT uMsgFilterMin, UINT uMsgFilterM
 LONG  OSLibWinQueryWindowTextLength(HWND hwnd);
 LONG  OSLibWinQueryWindowText(HWND hwnd, LONG length, LPSTR lpsz);
 BOOL  OSLibWinSetWindowText(HWND hwnd, LPSTR lpsz);
+BOOL  OSLibWinFlashWindow(HWND hwnd, BOOL fFlash);
 
 #endif //__OSLIBWIN_H__

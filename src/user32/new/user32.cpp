@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.7 1999-07-18 14:56:36 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.8 1999-07-18 17:12:02 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -75,26 +75,6 @@
 // WIN32API WinOldAppHackoMatic
 // WIN32API WNDPROC_CALLBACK
 // WIN32API YieldTask
-
-//Window handle transformation
-
-inline HWND Win32ToOS2Handle(HWND hwnd)
-{
-  Win32Window *window;
-
-  window = Win32Window::GetWindowFromHandle(hwnd);
-  if (window) return window->getOS2WindowHandle();
-  else return hwnd; //already OS/2 handle?
-}
-
-inline HWND OS2ToWin32Handle(HWND hwnd)
-{
-  Win32Window *window;
-
-  window = Win32Window::GetWindowFromOS2Handle(hwnd);
-  if (window) return window->getWindowHandle();
-  else return hwnd; //OS/2 window
-}
 
 //Coordinate transformation
 
@@ -271,51 +251,6 @@ BOOL WIN32API MessageBeep( UINT uType)
 //******************************************************************************
 //******************************************************************************
 
-/*******************************************************************
- *      InternalGetWindowText    (USER32.326)
- */
-int WIN32API InternalGetWindowText(HWND   hwnd,
-                                   LPWSTR lpString,
-                                   INT    nMaxCount )
-{
-    dprintf(("USER32: InternalGetWindowText(%08xh,%08xh,%08xh) not properly implemented.\n",
-             hwnd,
-             lpString,
-             nMaxCount));
-
-    return GetWindowTextW(hwnd,lpString,nMaxCount);
-}
-//******************************************************************************
-//******************************************************************************
-HWND WIN32API GetFocus(void)
-{
-    HWND hwnd;
-//    dprintf(("USER32:  GetFocus\n"));
-
-    hwnd = OSLibWinQueryFocus(OSLIB_HWND_DESKTOP);
-    return OS2ToWin32Handle(hwnd);
-}
-//******************************************************************************
-//******************************************************************************
-HWND WIN32API GetDesktopWindow(void)
-{
-    dprintf(("USER32:  GetDesktopWindow\n"));
-    return OSLIB_HWND_DESKTOP;
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API EnumThreadWindows(DWORD dwThreadId, WNDENUMPROC lpfn, LPARAM lParam)
-{
- BOOL                rc;
- EnumWindowCallback *callback = new EnumWindowCallback(lpfn, lParam);
-
-  dprintf(("USER32:  EnumThreadWindows\n"));
-  //CB: replace
-  rc = O32_EnumThreadWindows(dwThreadId, callback->GetOS2Callback(), (LPARAM)callback);
-  if(callback)
-    delete callback;
-  return(rc);
-}
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API OffsetRect( PRECT lprc, int x, int  y)
@@ -346,18 +281,6 @@ BOOL WIN32API CopyRect( PRECT lprcDst, const RECT * lprcSrc)
 }
 //******************************************************************************
 //******************************************************************************
-HWND WIN32API SetFocus( HWND hwnd)
-{
-    HWND lastFocus;
-
-    dprintf(("USER32:  SetFocus\n"));
-
-    lastFocus = GetFocus();
-    hwnd = Win32ToOS2Handle(hwnd);
-    return (OSLibWinSetFocus(OSLIB_HWND_DESKTOP,hwnd)) ? lastFocus:0;
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API InvalidateRect(HWND hWnd, const RECT *lpRect, BOOL bErase)
 {
 #ifdef DEBUG
@@ -367,7 +290,7 @@ BOOL WIN32API InvalidateRect(HWND hWnd, const RECT *lpRect, BOOL bErase)
 #endif
 
     //CB: bErase no quite the same
-    hWnd = Win32ToOS2Handle(hWnd);
+    hWnd = Win32Window::Win32ToOS2Handle(hWnd);
     if (lpRect)
     {
       OSRECTL rect;
@@ -377,21 +300,6 @@ BOOL WIN32API InvalidateRect(HWND hWnd, const RECT *lpRect, BOOL bErase)
       Win32ToOS2Rect(&rect,(PRECT)lpRect,windowH);
       return OSLibWinInvalidateRect(hWnd,&rect,bErase); //rect == RECTL
     } else return OSLibWinInvalidateRect(hWnd,NULL,bErase);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetUpdateRect( HWND hWnd, PRECT lpRect, BOOL  bErase)
-{
-    ULONG windowH;
-    BOOL rc;
-
-#ifdef DEBUG
-    WriteLog("USER32:  GetUpdateRect\n");
-#endif
-    if (!lpRect) return FALSE;
-
-    hWnd = Win32ToOS2Handle(hWnd);
-    return OSLibWinQueryUpdateRect(hWnd, (PVOID)&lpRect);
 }
 //******************************************************************************
 //******************************************************************************
@@ -514,7 +422,7 @@ UINT WIN32API SetTimer( HWND hwnd, UINT idTimer, UINT uTimeout, TIMERPROC  tmprc
 #ifdef DEBUG
     WriteLog("USER32: SetTimer INCORRECT CALLING CONVENTION FOR HANDLER!!!!!\n");
 #endif
-    hwnd = Win32ToOS2Handle(hwnd);
+    hwnd = Win32Window::Win32ToOS2Handle(hwnd);
     //SvL: Write callback handler class for this one
     //CB: replace
     return O32_SetTimer(hwnd,idTimer,uTimeout,(TIMERPROC_O32)tmprc);
@@ -526,7 +434,7 @@ BOOL WIN32API KillTimer(HWND hWnd, UINT uIDEvent)
 #ifdef DEBUG
     WriteLog("USER32:  KillTimer\n");
 #endif
-    hWnd = Win32ToOS2Handle(hWnd);
+    hWnd = Win32Window::Win32ToOS2Handle(hWnd);
     //WinStopTimer
     //CB: replace
     return O32_KillTimer(hWnd,uIDEvent);
@@ -594,23 +502,10 @@ BOOL WIN32API WinHelpA( HWND hwnd, LPCSTR lpszHelp, UINT uCommand, DWORD  dwData
 #ifdef DEBUG
     WriteLog("USER32:  WinHelp not implemented %s\n", lpszHelp);
 #endif
-//    hwnd = Win32ToOS2Handle(hwnd);
+//    hwnd = Win32Window::Win32ToOS2Handle(hwnd);
 //    return O32_WinHelp(arg1, arg2, arg3, arg4);
 
     return(TRUE);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API TranslateAcceleratorA(HWND hwnd, HACCEL haccel, LPMSG  lpmsg)
-{
-#ifdef DEBUG
-////    WriteLog("USER32:  TranslateAccelerator\n");
-#endif
-    //CB: needs more work
-    //WinTranslateAccel();
-    //get hab, translate
-    hwnd = Win32ToOS2Handle(hwnd);
-    return O32_TranslateAccelerator(hwnd,haccel,lpmsg);
 }
 //******************************************************************************
 //******************************************************************************
@@ -712,16 +607,6 @@ BOOL WIN32API SetCursorPos( int arg1, int  arg2)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API EnableScrollBar( HWND arg1, INT arg2, UINT  arg3)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  EnableScrollBar\n");
-#endif
-    //CB: implement in window class
-    return O32_EnableScrollBar(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
 HWND WIN32API SetCapture( HWND arg1)
 {
 #ifdef DEBUG
@@ -755,15 +640,6 @@ BOOL WIN32API ChangeClipboardChain( HWND arg1, HWND  arg2)
     WriteLog("USER32:  ChangeClipboardChain\n");
 #endif
     return O32_ChangeClipboardChain(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-UINT WIN32API ArrangeIconicWindows( HWND arg1)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  ArrangeIconicWindows\n");
-#endif
-    return O32_ArrangeIconicWindows(arg1);
 }
 //******************************************************************************
 //******************************************************************************
@@ -806,25 +682,6 @@ int WIN32API CountClipboardFormats(void)
     WriteLog("USER32:  CountClipboardFormats\n");
 #endif
     return O32_CountClipboardFormats();
-}
-//******************************************************************************
-//******************************************************************************
-HACCEL WIN32API CreateAcceleratorTableA( LPACCEL arg1, int  arg2)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  CreateAcceleratorTableA\n");
-#endif
-    return O32_CreateAcceleratorTable(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-HACCEL WIN32API CreateAcceleratorTableW( LPACCEL arg1, int  arg2)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  CreateAcceleratorTableW\n");
-#endif
-    // NOTE: This will not work as is (needs UNICODE support)
-    return O32_CreateAcceleratorTable(arg1, arg2);
 }
 //******************************************************************************
 //******************************************************************************
@@ -895,15 +752,6 @@ HICON WIN32API CreateIconIndirect(LPICONINFO arg1)
 }
 //******************************************************************************
 //******************************************************************************
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API DestroyAcceleratorTable( HACCEL arg1)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  DestroyAcceleratorTable\n");
-#endif
-    return O32_DestroyAcceleratorTable(arg1);
-}
 //******************************************************************************
 //******************************************************************************
 BOOL WIN32API DestroyCaret(void)
@@ -1231,27 +1079,6 @@ DWORD WIN32API GetQueueStatus( UINT arg1)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API GetScrollPos(HWND hwnd, int fnBar)
-{
- int pos;
-
-    pos = O32_GetScrollPos(hwnd, fnBar);
-#ifdef DEBUG
-    WriteLog("USER32:  GetScrollPos of %X type %d returned %d\n", hwnd, fnBar, pos);
-#endif
-    return(pos);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API GetScrollRange( HWND arg1, int arg2, int * arg3, int *  arg4)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetScrollRange\n");
-#endif
-    return O32_GetScrollRange(arg1, arg2, arg3, arg4);
-}
-//******************************************************************************
-//******************************************************************************
 DWORD WIN32API GetTabbedTextExtentA( HDC arg1, LPCSTR arg2, int arg3, int arg4, int * arg5)
 {
 #ifdef DEBUG
@@ -1484,24 +1311,6 @@ BOOL WIN32API ScrollDC( HDC arg1, int arg2, int arg3, const RECT * arg4, const R
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API ScrollWindow( HWND arg1, int arg2, int arg3, const RECT * arg4, const RECT *  arg5)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  ScrollWindow\n");
-#endif
-    return O32_ScrollWindow(arg1, arg2, arg3, arg4, arg5);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API ScrollWindowEx( HWND arg1, int arg2, int arg3, const RECT * arg4, const RECT * arg5, HRGN arg6, PRECT arg7, UINT  arg8)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  ScrollWindowEx\n");
-#endif
-    return O32_ScrollWindowEx(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API SetCaretBlinkTime( UINT arg1)
 {
 #ifdef DEBUG
@@ -1550,51 +1359,10 @@ BOOL WIN32API SetRectEmpty( PRECT arg1)
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API SetScrollPos( HWND arg1, int arg2, int arg3, BOOL  arg4)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  SetScrollPos\n");
-#endif
-    return O32_SetScrollPos(arg1, arg2, arg3, arg4);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SetScrollRange( HWND arg1, int arg2, int arg3, int arg4, BOOL  arg5)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  SetScrollRange\n");
-#endif
-    return O32_SetScrollRange(arg1, arg2, arg3, arg4, arg5);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API SetWindowPlacement( HWND arg1, const WINDOWPLACEMENT *  arg2)
-{
-    dprintf(("USER32:  SetWindowPlacement\n"));
-    return O32_SetWindowPlacement(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API ShowCaret( HWND arg1)
 {
     dprintf(("USER32:  ShowCaret\n"));
     return O32_ShowCaret(arg1);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API ShowOwnedPopups( HWND arg1, BOOL  arg2)
-{
-    dprintf(("USER32:  ShowOwnedPopups\n"));
-    return O32_ShowOwnedPopups(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API ShowScrollBar( HWND arg1, int arg2, BOOL  arg3)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  ShowScrollBar\n");
-#endif
-    return O32_ShowScrollBar(arg1, arg2, arg3);
 }
 //******************************************************************************
 //******************************************************************************
@@ -1748,34 +1516,6 @@ LONG WIN32API TabbedTextOutW( HDC arg1, int arg2, int arg3, LPCWSTR arg4, int ar
 }
 //******************************************************************************
 //******************************************************************************
-int WIN32API TranslateAccelerator( HWND arg1, HACCEL arg2, LPMSG  arg3)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  TranslateAccelerator\n");
-#endif
-    return O32_TranslateAccelerator(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-int WIN32API TranslateAcceleratorW( HWND arg1, HACCEL arg2, LPMSG  arg3)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  TranslateAcceleratorW\n");
-#endif
-    // NOTE: This will not work as is (needs UNICODE support)
-    return O32_TranslateAccelerator(arg1, arg2, arg3);
-}
-//******************************************************************************
-//******************************************************************************
-BOOL WIN32API TranslateMDISysAccel( HWND arg1, LPMSG  arg2)
-{
-#ifdef DEBUG
-////    WriteLog("USER32:  TranslateMDISysAccel\n");
-#endif
-    return O32_TranslateMDISysAccel(arg1, arg2);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API UnionRect( PRECT arg1, const RECT * arg2, const RECT *  arg3)
 {
 #ifdef DEBUG
@@ -1859,57 +1599,6 @@ int WIN32API wvsprintfW(LPWSTR lpOut, LPCWSTR lpFmt, va_list argptr)
 //******************************************************************************
 //TODO: Not complete
 //******************************************************************************
-BOOL WIN32API GetScrollInfo(HWND hwnd, int fnBar, LPSCROLLINFO lpsi)
-{
-#ifdef DEBUG
-  WriteLog("USER32:  GetScrollInfo\n");
-#endif
-  if(lpsi == NULL)
-    return(FALSE);
-
-  if(lpsi->fMask & SIF_POS)
-    lpsi->nPos = GetScrollPos(hwnd, fnBar);
-  if(lpsi->fMask & SIF_RANGE)
-    GetScrollRange(hwnd, fnBar, &lpsi->nMin, &lpsi->nMax);
-  if(lpsi->fMask & SIF_PAGE) {
-#ifdef DEBUG
-    WriteLog("USER32:  GetScrollInfo, page info not implemented\n");
-#endif
-    lpsi->nPage     = 25;
-  }
-  return(TRUE);
-}
-//******************************************************************************
-//TODO: Not complete
-//******************************************************************************
-INT WIN32API SetScrollInfo(HWND hwnd, INT fnBar, const SCROLLINFO *lpsi, BOOL fRedraw)
-{
- int smin, smax;
-
-#ifdef DEBUG
-  WriteLog("USER32:  SetScrollInfo\n");
-#endif
-  if(lpsi == NULL)
-    return(FALSE);
-
-  if(lpsi->fMask & SIF_POS)
-        SetScrollPos(hwnd, fnBar, lpsi->nPos, fRedraw);
-  if(lpsi->fMask & SIF_RANGE)
-        SetScrollRange(hwnd, fnBar, lpsi->nMin, lpsi->nMax, fRedraw);
-  if(lpsi->fMask & SIF_PAGE) {
-#ifdef DEBUG
-        WriteLog("USER32:  GetScrollInfo, page info not implemented\n");
-#endif
-  }
-  if(lpsi->fMask & SIF_DISABLENOSCROLL) {
-#ifdef DEBUG
-        WriteLog("USER32:  GetScrollInfo, disable scrollbar not yet implemented\n");
-#endif
-  }
-  return(TRUE);
-}
-//******************************************************************************
-//******************************************************************************
 BOOL WIN32API GrayStringA(HDC hdc, HBRUSH hBrush, GRAYSTRINGPROC lpOutputFunc,
                           LPARAM lpData, int nCount, int X, int Y, int nWidth,
                           int nHeight)
@@ -1972,27 +1661,6 @@ BOOL WIN32API GrayStringW(HDC hdc, HBRUSH hBrush, GRAYSTRINGPROC lpOutputFunc,
 }
 //******************************************************************************
 //TODO:
-//******************************************************************************
-int WIN32API CopyAcceleratorTableA(HACCEL hAccelSrc, LPACCEL lpAccelDest,
-                      int cAccelEntries)
-{
-#ifdef DEBUG
-  WriteLog("USER32:  CopyAcceleratorTableA, not implemented\n");
-#endif
-  return(0);
-}
-//******************************************************************************
-//TODO:
-//******************************************************************************
-int WIN32API CopyAcceleratorTableW(HACCEL hAccelSrc, LPACCEL lpAccelDest,
-                      int cAccelEntries)
-{
-#ifdef DEBUG
-  WriteLog("USER32:  CopyAcceleratorTableW, not implemented\n");
-#endif
-  return(0);
-}
-//******************************************************************************
 //******************************************************************************
 HANDLE WIN32API CopyImage(HANDLE hImage, UINT uType, int cxDesired, int cyDesired, UINT fuFlags)
 {
@@ -2136,19 +1804,6 @@ DWORD WIN32API GetWindowContextHelpId(HWND hwnd)
   return(0);
 }
 //******************************************************************************
-//restores iconized window to previous size/position
-//******************************************************************************
-BOOL WIN32API OpenIcon(HWND hwnd)
-{
-#ifdef DEBUG
-  WriteLog("USER32:  OpenIcon\n");
-#endif
-  if(!IsIconic(hwnd))
-        return FALSE;
-  ShowWindow(hwnd, SW_SHOWNORMAL);
-  return TRUE;
-}
-//******************************************************************************
 //******************************************************************************
 BOOL WIN32API GetMonitorInfoA(HMONITOR,LPMONITORINFO)
 {
@@ -2272,45 +1927,6 @@ BOOL WIN32API AnyPopup(VOID)
 
   return (FALSE);
 }
-
-
-/*****************************************************************************
- * Name      : long WIN32API BroadcastSystemMessage
- * Purpose   : The BroadcastSystemMessage function sends a message to the given
- *             recipients. The recipients can be applications, installable
- *             drivers, Windows-based network drivers, system-level device
- *             drivers, or any combination of these system components.
- * Parameters: DWORD   dwFlags,
-               LPDWORD lpdwRecipients,
-               UINT    uiMessage,
-               WPARAM  wParam,
-               LPARAM  lParam
- * Variables :
- * Result    : If the function succeeds, the return value is a positive value.
- *             If the function is unable to broadcast the message, the return value is -1.
- *             If the dwFlags parameter is BSF_QUERY and at least one recipient returned FALSE to the corresponding message, the return value is zero.
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-
-long WIN32API BroadcastSystemMessage(DWORD   dwFlags,
-                                        LPDWORD lpdwRecipients,
-                                        UINT    uiMessage,
-                                        WPARAM  wParam,
-                                        LPARAM  lParam)
-{
-  dprintf(("USER32:BroadcastSystemMessage(%08xh,%08xh,%08xh,%08xh,%08x) not implemented.\n",
-        dwFlags,
-        lpdwRecipients,
-        uiMessage,
-        wParam,
-        lParam));
-
-  return (-1);
-}
-
 
 
 
