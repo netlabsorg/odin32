@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.21 1999-10-13 14:24:28 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.22 1999-10-14 09:22:42 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -60,7 +60,7 @@ public:
                 Win32BaseWindow(CREATESTRUCTA *lpCreateStructA, ATOM classAtom, BOOL isUnicode);
 virtual        ~Win32BaseWindow();
 
-virtual  ULONG  MsgCreate(HWND hwndOS2, ULONG initParam);
+virtual  ULONG  MsgCreate(HWND hwndFrame, HWND hwndClient);
          ULONG  MsgQuit();
          ULONG  MsgClose();
          ULONG  MsgDestroy();
@@ -105,7 +105,7 @@ virtual  WORD   GetWindowWord(int index);
          HWND   getOS2FrameWindowHandle()       { return OS2HwndFrame; };
  Win32WndClass *getWindowClass()                { return windowClass; };
 
-         BOOL   isFrameWindow()                 { return OS2Hwnd != OS2HwndFrame; };
+         BOOL   isFrameWindow();
 virtual  BOOL   isMDIClient();
 
 Win32BaseWindow *getParent()                    { return (Win32BaseWindow *)ChildWindow::GetParent(); };
@@ -241,11 +241,11 @@ protected:
         DWORD   lastHitTestVal;         //Last value returned by WM_NCHITTEST handler
 
         BOOL    isIcon;
-        BOOL    fCreated;
         BOOL    fFirstShow;
         BOOL    fIsDialog;
         BOOL    fInternalMsg;           //Used to distinguish between messages
                                         //sent by PM and those sent by apps
+	BOOL    fNoSizeMsg;
 
         PVOID   pOldFrameProc;
         ULONG   borderWidth;
@@ -265,6 +265,9 @@ protected:
 
         RECT    rectWindow;
         RECT    rectClient;
+
+CREATESTRUCTA  *tmpcs; //temporary pointer to CREATESTRUCT used in CreateWindowEx
+        ULONG   sw;    //set in CreateWindowExA, used in MsgCreate method
 
 SCROLLBAR_INFO *vertScrollInfo;
 SCROLLBAR_INFO *horzScrollInfo;

@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.13 1999-10-13 14:24:26 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.14 1999-10-14 09:22:41 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -168,50 +168,20 @@ Win32Dialog::Win32Dialog(HINSTANCE hInst, LPCSTR dlgTemplate, HWND owner,
     cs.dwExStyle      = dlgInfo.exStyle;
 
     fIsDialog = TRUE;
-    CreateWindowExA(&cs, classAtom);
+    Win32DlgProc = dlgProc;
 
-    if(!isUnicode) {
-        if(cs.lpszName) FreeAsciiString((LPSTR)cs.lpszName);
-        if(HIWORD(cs.lpszClass)) {
-                FreeAsciiString((LPSTR)cs.lpszClass);
-        }
-    }
+    this->tmpParam       = param;
+    this->tmpDlgTemplate = (LPSTR)dlgTemplate;
 
-    if (!getWindowHandle())
+    if (CreateWindowExA(&cs, classAtom) == FALSE)
     {
         if (hUserFont) DeleteObject( hUserFont );
         if (hMenu) DestroyMenu( hMenu );
+        SetLastError(ERROR_OUTOFMEMORY); //TODO: Wrong error
         return;
     }
-
-//TODO:
-//    wndPtr->helpContext = helpId;
-    Win32DlgProc = dlgProc;
-
-    if (hUserFont)
-        SendMessageA(WM_SETFONT, (WPARAM)hUserFont, 0 );
-
-    /* Create controls */
-    if (createControls(dlgTemplate, hInst))
-    {
-        dprintf(("********* DIALOG CONTROLS CREATED ************"));
-        /* Send initialisation messages and set focus */
-        hwndFocus = GetNextDlgTabItem( getWindowHandle(), 0, FALSE );
-
-    if (SendMessageA(WM_INITDIALOG, (WPARAM)hwndFocus, param ))
-             SetFocus(hwndFocus);
-
-        if (dlgInfo.style & WS_VISIBLE && !(getStyle() & WS_VISIBLE))
-        {
-            ShowWindow( SW_SHOWNORMAL );    /* SW_SHOW doesn't always work */
-            ::UpdateWindow( getWindowHandle() );
-        }
     SetLastError(0);
-        dprintf(("********* DIALOG CREATED ************"));
-        return;
-    }
-    dprintf(("********* DIALOG CREATION FAILED! ************"));
-    DestroyWindow();
+    return;
 }
 //******************************************************************************
 //******************************************************************************
@@ -219,7 +189,51 @@ Win32Dialog::~Win32Dialog()
 {
     if (hUserFont) DeleteObject( hUserFont );
     if (hMenu) DestroyMenu( hMenu );
+}
+//******************************************************************************
+//******************************************************************************
+ULONG Win32Dialog::MsgCreate(HWND hwndFrame, HWND hwndClient)
+{
+ CREATESTRUCTA  *cs = tmpcs;  //pointer to CREATESTRUCT used in CreateWindowExA method
+ LPARAM       param = tmpParam;
+ LPSTR  dlgTemplate = tmpDlgTemplate;
 
+    Win32BaseWindow::MsgCreate(hwndFrame, hwndClient);
+
+    if(!isUnicode) {
+        if(cs->lpszName) FreeAsciiString((LPSTR)cs->lpszName);
+        if(HIWORD(cs->lpszClass)) {
+                FreeAsciiString((LPSTR)cs->lpszClass);
+        }
+    }
+
+//TODO:
+//    wndPtr->helpContext = helpId;
+
+    if (hUserFont)
+        SendMessageA(WM_SETFONT, (WPARAM)hUserFont, 0 );
+
+    /* Create controls */
+    if (createControls(dlgTemplate, hInstance))
+    {
+        dprintf(("********* DIALOG CONTROLS CREATED ************"));
+        /* Send initialisation messages and set focus */
+        hwndFocus = GetNextDlgTabItem( getWindowHandle(), 0, FALSE );
+
+        if (SendMessageA(WM_INITDIALOG, (WPARAM)hwndFocus, param))
+             SetFocus(hwndFocus);
+
+        if (dlgInfo.style & WS_VISIBLE && !(getStyle() & WS_VISIBLE))
+        {
+            ShowWindow( SW_SHOWNORMAL );    /* SW_SHOW doesn't always work */
+            ::UpdateWindow( getWindowHandle() );
+        }
+        SetLastError(0);
+        dprintf(("********* DIALOG CREATED ************"));
+        return TRUE;
+    }
+    dprintf(("********* DIALOG CREATION FAILED! ************"));
+    return FALSE;
 }
 /***********************************************************************
  *           DIALOG_DoDialogBox
@@ -1093,13 +1107,6 @@ BOOL Win32Dialog::endDialog(int retval)
     dialogFlags |= DF_END;
     idResult = retval;
     return TRUE;
-}
-//******************************************************************************
-//******************************************************************************
-ULONG Win32Dialog::MsgOS2Create(HWND hwndOS2, ULONG initParam)
-{
-    OS2Hwnd = hwndOS2;
-    return win32wndproc(Win32Hwnd, WM_CREATE, 0, initParam);
 }
 //******************************************************************************
 //******************************************************************************

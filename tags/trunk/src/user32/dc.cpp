@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.12 1999-10-13 16:02:41 phaller Exp $ */
+/* $Id: dc.cpp,v 1.13 1999-10-14 09:22:38 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -32,9 +32,7 @@
 #include "oslibwin.h"
 #include "dcdata.h"
 
-
 ODINDEBUGCHANNEL(USER32-DC)
-
 
 #undef SEVERITY_ERROR
 #include <winerror.h>
@@ -665,11 +663,11 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
       pHps = (pDCData)GpiQueryDCData(hps);
    }
 
-   if (wnd->isFrameWindow())
-   {
+//   if (wnd->isFrameWindow())
+//   {
 //      WinSendMsg( hwnd, /* WM_DRAW */ 0x20D, (MPARAM)hps, MPVOID );
       selectClientArea(wnd, pHps, &rect);
-   }
+//   }
 
    if (hPS_ownDC == 0)
       setMapMode (wnd, pHps, MM_TEXT_W);
