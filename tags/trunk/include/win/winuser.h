@@ -735,6 +735,16 @@ typedef struct
 #define WM_POWERBROADCAST   0x0218
 #define WM_DEVICECHANGE     0x0219
 
+/* wParam for WM_SIZING message */
+#define WMSZ_LEFT           1
+#define WMSZ_RIGHT          2
+#define WMSZ_TOP            3
+#define WMSZ_TOPLEFT        4
+#define WMSZ_TOPRIGHT       5
+#define WMSZ_BOTTOM         6
+#define WMSZ_BOTTOMLEFT     7
+#define WMSZ_BOTTOMRIGHT    8
+
   /* MDI messages */
 #define WM_MDICREATE        0x0220
 #define WM_MDIDESTROY       0x0221
