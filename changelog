@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.591 1999-12-30 00:22:45 phaller Exp $ */
+ /* $Id: changelog,v 1.592 1999-12-30 09:33:02 sandervl Exp $ */
+
+ 99-12-30: Bart van Leeuwen <Bart_van_Leeuwen@netage.nl>
+	- USER32: Implemented accelerator support
 
  99-12-30: Patrick Haller <phaller@gmx.net>
 	- SHELL32:	Add: StrChrIA, StrChrIW, StrStrIA, StrStrIW
