@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.103 2000-10-10 17:14:09 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.104 2000-10-16 11:05:15 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -678,6 +678,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
                                         /* lpszLibFile contains a path. */
     ULONG           fPE;                /* isPEImage return value. */
     DWORD           Characteristics;    //file header's Characteristics
+    BOOL            fDllModule;         //file type
 
     /** @sketch
      * Some parameter validations is probably useful.
@@ -707,7 +708,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
 
     /** @sketch
      *  First we'll see if the module is allready loaded - either as the EXE or as DLL.
-     *  IF Executable present AND libfile matches the modname of the executable THEN
+     *  IF NOT dll AND Executable present AND libfile matches the modname of the executable THEN
      *      RETURN instance handle of executable.
      *  Endif
      *  IF allready loaded THEN
@@ -719,7 +720,20 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
      *      RETURN instance handle.
      *  Endif
      */
-    if (WinExe != NULL && WinExe->matchModName(lpszLibFile))
+    if(strstr(lpszLibFile, ".DLL")) {
+        fDllModule = TRUE;
+    }
+    else {
+        if(!strstr(lpszLibFile, ".")) {
+            //if there's no extension or trainling dot, we
+            //assume it's a dll (see Win32 SDK docs)
+            fDllModule = TRUE;
+        }
+    }
+
+    //todo: the entire exe name probably needs to be identical (path + extension)
+    //      -> check in NT
+    if (!fDllModule && WinExe != NULL && WinExe->matchModName(lpszLibFile))
         return WinExe->getInstanceHandle();
 
     pModule = Win32DllBase::findModule((LPSTR)lpszLibFile);
@@ -789,15 +803,15 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
             {
                 if(pModule->isLxDll())
                 {
-                    	((Win32LxDll *)pModule)->setDllHandleOS2(hDll);
-                    	if(fPeLoader) 
- 			{
-                        	if(pModule->AddRef() == -1) {//-1 -> load failed (attachProcess)
-					dprintf(("Dll %s refused to be loaded; aborting", szModname));
-					delete pModule;
-					return 0;
-				}
-                    	}
+                        ((Win32LxDll *)pModule)->setDllHandleOS2(hDll);
+                        if(fPeLoader)
+            {
+                            if(pModule->AddRef() == -1) {//-1 -> load failed (attachProcess)
+                    dprintf(("Dll %s refused to be loaded; aborting", szModname));
+                    delete pModule;
+                    return 0;
+                }
+                        }
                 }
                 pModule->incDynamicLib();
             }
@@ -850,18 +864,18 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
         /** @sketch
          * Process dwFlags
          */
-        if (dwFlags & LOAD_LIBRARY_AS_DATAFILE) 
+        if (dwFlags & LOAD_LIBRARY_AS_DATAFILE)
         {
             dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): LOAD_LIBRARY_AS_DATAFILE",
                       lpszLibFile, hFile, dwFlags));
             peldrDll->setLoadAsDataFile();
-       	    peldrDll->disableLibraryCalls();
+            peldrDll->disableLibraryCalls();
         }
         if (dwFlags & DONT_RESOLVE_DLL_REFERENCES)
         {
             dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x): DONT_RESOLVE_DLL_REFERENCES",
                       lpszLibFile, hFile, dwFlags));
-       	    peldrDll->disableLibraryCalls();
+            peldrDll->disableLibraryCalls();
             peldrDll->disableImportHandling();
         }
         if (dwFlags & LOAD_WITH_ALTERED_SEARCH_PATH)
@@ -909,7 +923,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
                          lpszLibFile, hFile, dwFlags));
                 SetLastError(ERROR_DLL_INIT_FAILED);
                 delete peldrDll;
-		return NULL;
+        return NULL;
             }
         }
         else
@@ -918,7 +932,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
                      lpszLibFile, hFile, dwFlags, peldrDll->getError()));
             SetLastError(ERROR_INVALID_EXE_SIGNATURE);
             delete peldrDll;
-	    return NULL;
+        return NULL;
         }
     }
     else
@@ -926,7 +940,7 @@ HINSTANCE WIN32API LoadLibraryExA(LPCTSTR lpszLibFile, HANDLE hFile, DWORD dwFla
         dprintf(("KERNEL32: LoadLibraryExA(%s, 0x%x, 0x%x) library wasn't found (%s) or isn't loadable; err %x",
                  lpszLibFile, hFile, dwFlags, szModname, fPE));
         SetLastError(fPE);
-	return NULL;
+    return NULL;
     }
 
     return hDll;
@@ -1110,8 +1124,8 @@ ULONG InitCommandLine(const char *pszPeExe)
             dprintf(("KERNEL32: InitCommandLine(%p): malloc(%d) failed\n", pszPeExe, cch));
             return ERROR_NOT_ENOUGH_MEMORY;
         }
-	strcpy((char *)pszCmdLineA, pszPeExe);
-	
+    strcpy((char *)pszCmdLineA, pszPeExe);
+
         rc = NO_ERROR;
     }
     else
@@ -1472,7 +1486,7 @@ HANDLE WIN32API GetModuleHandleA(LPCTSTR lpszModule)
     else {
         if(!strstr(szModule, ".")) {
             //if there's no extension or trainling dot, we
-                        //assume it's a dll (see Win32 SDK docs)
+            //assume it's a dll (see Win32 SDK docs)
             fDllModule = TRUE;
         }
     }
@@ -1480,7 +1494,7 @@ HANDLE WIN32API GetModuleHandleA(LPCTSTR lpszModule)
     if(dot)
         *dot = 0;
 
-    if(!fDllModule && WinExe && !strcmpi(szModule, WinExe->getModuleName())) {
+    if(!fDllModule && WinExe && WinExe->matchModName(szModule)) {
         hMod = WinExe->getInstanceHandle();
     }
     else {
@@ -1590,40 +1604,40 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
          *exename = 0;
     }
     if(szAppName[0] == '"') {
-	 exename = &szAppName[1];
+     exename = &szAppName[1];
     }
     else exename = szAppName;
 
-    if(GetFileAttributesA(exename) == -1) { 
-	dprintf(("CreateProcess: can't find executable!"));
-	SetLastError(ERROR_FILE_NOT_FOUND);
-	return FALSE;
-    }    
+    if(GetFileAttributesA(exename) == -1) {
+    dprintf(("CreateProcess: can't find executable!"));
+    SetLastError(ERROR_FILE_NOT_FOUND);
+    return FALSE;
+    }
     dprintf(("KERNEL32:  CreateProcess %s\n", cmdline));
 
-    //SvL: Allright. Before we call O32_CreateProcess, we must take care of 
+    //SvL: Allright. Before we call O32_CreateProcess, we must take care of
     //     lpCurrentDirectory ourselves. (Open32 ignores it!)
     if(lpCurrentDirectory) {
-	char *newcmdline;
+    char *newcmdline;
 
-	newcmdline = (char *)malloc(strlen(lpCurrentDirectory) + strlen(cmdline) + 32);
-	sprintf(newcmdline, "PE.EXE /OPT:[CURDIR=%s] %s", lpCurrentDirectory, cmdline);
-	free(cmdline);
-	cmdline = newcmdline;
+    newcmdline = (char *)malloc(strlen(lpCurrentDirectory) + strlen(cmdline) + 32);
+    sprintf(newcmdline, "PE.EXE /OPT:[CURDIR=%s] %s", lpCurrentDirectory, cmdline);
+    free(cmdline);
+    cmdline = newcmdline;
     }
     else {
-	char *newcmdline;
+    char *newcmdline;
 
-	newcmdline = (char *)malloc(strlen(cmdline) + 16);
-	sprintf(newcmdline, "PE.EXE %s", cmdline);
-	free(cmdline);
-	cmdline = newcmdline;
+    newcmdline = (char *)malloc(strlen(cmdline) + 16);
+    sprintf(newcmdline, "PE.EXE %s", cmdline);
+    free(cmdline);
+    cmdline = newcmdline;
     }
     rc = O32_CreateProcess("PE.EXE", (LPCSTR)cmdline,lpProcessAttributes,
                          lpThreadAttributes, bInheritHandles, dwCreationFlags,
                          lpEnvironment, lpCurrentDirectory, lpStartupInfo,
                          lpProcessInfo);
-    if(rc == TRUE) 
+    if(rc == TRUE)
     {
       if (dwCreationFlags & DEBUG_PROCESS && pThreadDB != NULL)
       {
@@ -1700,7 +1714,7 @@ HINSTANCE WIN32API WinExec(LPCSTR lpCmdLine, UINT nCmdShow)
     //TODO: Shouldn't call Open32, but the api in user32..
     rc = O32_WaitForInputIdle(procinfo.hProcess, 15000);
     if(rc != 0) {
-    	dprintf(("WinExec: WaitForInputIdle %x returned %x", procinfo.hProcess, rc));
+        dprintf(("WinExec: WaitForInputIdle %x returned %x", procinfo.hProcess, rc));
     }
     return procinfo.hProcess; //correct?
 }
@@ -1711,7 +1725,7 @@ HINSTANCE WIN32API WinExec(LPCSTR lpCmdLine, UINT nCmdShow)
  *
  * Copyright 1995 Alexandre Julliard
  */
-HINSTANCE WINAPI LoadModule( LPCSTR name, LPVOID paramBlock ) 
+HINSTANCE WINAPI LoadModule( LPCSTR name, LPVOID paramBlock )
 {
     LOADPARAMS *params = (LOADPARAMS *)paramBlock;
     PROCESS_INFORMATION info;
@@ -1746,12 +1760,12 @@ HINSTANCE WINAPI LoadModule( LPCSTR name, LPVOID paramBlock )
         startup.dwFlags = STARTF_USESHOWWINDOW;
         startup.wShowWindow = params->lpCmdShow[1];
     }
-    
+
     if (CreateProcessA( filename, cmdline, NULL, NULL, FALSE, 0,
                         params->lpEnvAddress, NULL, &startup, &info ))
     {
         /* Give 15 seconds to the app to come up */
-        if ( O32_WaitForInputIdle ( info.hProcess, 15000 ) ==  0xFFFFFFFF ) 
+        if ( O32_WaitForInputIdle ( info.hProcess, 15000 ) ==  0xFFFFFFFF )
             dprintf(("ERROR: WaitForInputIdle failed: Error %ld\n", GetLastError() ));
         hInstance = 33;
         /* Close off the handles */
@@ -1816,14 +1830,14 @@ BOOL SYSTEM GetVersionStruct(char *lpszModName, char *verstruct, ULONG bufLength
 
   dprintf(("GetVersionStruct of module %s %x %d", lpszModName, verstruct, bufLength));
   if(verstruct == NULL) {
-	SetLastError(ERROR_INVALID_PARAMETER);
-	return FALSE;
+    SetLastError(ERROR_INVALID_PARAMETER);
+    return FALSE;
   }
-  if(WinExe && !stricmp(WinExe->getFullPath(), lpszModName)) 
+  if(WinExe && !stricmp(WinExe->getFullPath(), lpszModName))
   {
         winimage = (Win32ImageBase *)WinExe;
   }
-  else 
+  else
   {
         winimage = (Win32ImageBase *)Win32DllBase::findModule(lpszModName);
         if(winimage == NULL)
@@ -1847,7 +1861,7 @@ BOOL SYSTEM GetVersionStruct(char *lpszModName, char *verstruct, ULONG bufLength
               if(winimage) {
                    return winimage->getVersionStruct(verstruct, bufLength);
               }
-   	      dprintf(("GetVersionStruct; just loaded dll %s, but can't find it now!", modname));
+          dprintf(("GetVersionStruct; just loaded dll %s, but can't find it now!", modname));
               return 0;
           }
           BOOL rc = FALSE;
@@ -1858,10 +1872,10 @@ BOOL SYSTEM GetVersionStruct(char *lpszModName, char *verstruct, ULONG bufLength
 
           winimage = (Win32ImageBase *)Win32DllBase::findModule(lpszModName);
           if(winimage != NULL) {
-	        rc = winimage->getVersionStruct(verstruct, bufLength);
-	  }
-          else	dprintf(("GetVersionSize; just loaded dll %s, but can't find it now!", lpszModName));
-	  FreeLibrary(hDll);
+            rc = winimage->getVersionStruct(verstruct, bufLength);
+      }
+          else  dprintf(("GetVersionSize; just loaded dll %s, but can't find it now!", lpszModName));
+      FreeLibrary(hDll);
           return rc;
         }
   }
@@ -1902,7 +1916,7 @@ ULONG SYSTEM GetVersionSize(char *lpszModName)
             if(winimage) {
                 return winimage->getVersionSize();
             }
-	    dprintf(("GetVersionSize; just loaded dll %s, but can't find it now!", modname));
+        dprintf(("GetVersionSize; just loaded dll %s, but can't find it now!", modname));
             return 0;
         }
         int size = 0;
@@ -1913,10 +1927,10 @@ ULONG SYSTEM GetVersionSize(char *lpszModName)
 
         winimage = (Win32ImageBase *)Win32DllBase::findModule(lpszModName);
         if(winimage != NULL) {
-	        size = winimage->getVersionSize();
-	}
-        else	dprintf(("GetVersionSize; just loaded dll %s, but can't find it now!", lpszModName));
-	FreeLibrary(hDll);
+            size = winimage->getVersionSize();
+    }
+        else    dprintf(("GetVersionSize; just loaded dll %s, but can't find it now!", lpszModName));
+    FreeLibrary(hDll);
         return size;
       }
   }
