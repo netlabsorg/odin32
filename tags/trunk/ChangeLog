@@ -1,4 +1,13 @@
-/* $Id: ChangeLog,v 1.1748 2001-10-13 00:48:50 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1749 2001-10-13 18:50:36 sandervl Exp $ */
+
+ 2001-10-13: Sander van Leeuwen <sandervl@xs4all.nl>
+    - WSOCK32:  o Overwrite IP header length in sendto for raw sockets
+                  with IP_HDRINCL option set.
+                  (fixes errors for apps that use big endian format for 
+                   the length word)
+                o WSAEnumNetworkEvents now reports (some) events properly
+                o Call WSACleanup during dll unload in case application
+                  forgot to do that.
 
  2000-10-12: Yuri Dario <mc6530@mclink.it>
     - USER32:   o GetNextDlgGroupItem fix for infinite loop in Opera
