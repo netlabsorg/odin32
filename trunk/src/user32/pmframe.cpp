@@ -1,4 +1,4 @@
-/* $Id: pmframe.cpp,v 1.32 2000-01-01 14:37:34 cbratschi Exp $ */
+/* $Id: pmframe.cpp,v 1.33 2000-01-08 14:15:06 sandervl Exp $ */
 /*
  * Win32 Frame Managment Code for OS/2
  *
@@ -664,7 +664,8 @@ DWORD FrameHitTest(Win32BaseWindow *win32wnd,INT x,INT y)
       return HTTOP_W;
     }
     return HTBORDER_W;
-  } else
+  }
+  else
   {
     if (child == WinWindowFromID(hwnd,FID_CLIENT)) return HTCLIENT_W;
     if (child == WinWindowFromID(hwnd,FID_VERTSCROLL)) return HTVSCROLL_W;

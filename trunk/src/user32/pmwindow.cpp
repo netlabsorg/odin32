@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.74 1999-12-29 22:54:02 cbratschi Exp $ */
+/* $Id: pmwindow.cpp,v 1.75 2000-01-08 14:15:07 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -36,6 +36,7 @@
 #include "caret.h"
 #include "timer.h"
 #include <codepage.h>
+#include <win\options.h>
 
 HMQ  hmq = 0;                             /* Message queue handle         */
 HAB  hab = 0;
@@ -44,6 +45,7 @@ RECTL desktopRectl = {0};
 ULONG ScreenWidth  = 0;
 ULONG ScreenHeight = 0;
 ULONG ScreenBitsPerPel = 0;
+BOOL  fOS2Look = TRUE;
 
 
 MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
@@ -70,16 +72,16 @@ BOOL InitPM()
             dprintf((" Error = %x",error));
             return(FALSE);
         }
-    else
+        else
         {
-        if(!hab) {
-                hab = WinQueryAnchorBlock(HWND_DESKTOP);
-            dprintf(("WinQueryAnchorBlock returned %x", hab));
-        }
-        if(!hmq) {
-            hmq = HMQ_CURRENT;
-        }
-        }
+            if(!hab) {
+                    hab = WinQueryAnchorBlock(HWND_DESKTOP);
+                    dprintf(("WinQueryAnchorBlock returned %x", hab));
+            }
+            if(!hmq) {
+                hmq = HMQ_CURRENT;
+            }
+    }
   }
   SetThreadHAB(hab);
   dprintf(("InitPM: hmq = %x", hmq));
@@ -92,8 +94,6 @@ BOOL InitPM()
      hab,                               /* Anchor block handle          */
      (PSZ)WIN32_STDCLASS,               /* Window class name            */
      (PFNWP)Win32WindowProc,            /* Address of window procedure  */
-//     CS_SIZEREDRAW | CS_HITTEST | CS_MOVENOTIFY,
-     //CS_SIZEREDRAW | CS_HITTEST,
      CS_HITTEST,
      NROF_WIN32WNDBYTES)) {
         dprintf(("WinRegisterClass Win32BaseWindow failed"));
@@ -129,6 +129,9 @@ BOOL InitPM()
    DevCloseDC(hdc);
 
    dprintf(("InitPM: Desktop (%d,%d)", ScreenWidth, ScreenHeight));
+
+   fOS2Look = PROFILE_GetOdinIniInt(ODINCUSTOMIZATION,"OS2Look",1);
+
    return OSLibInitMsgQueue();
 } /* End of main */
 //******************************************************************************

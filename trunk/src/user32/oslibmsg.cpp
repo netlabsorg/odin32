@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.21 2000-01-03 22:53:16 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.22 2000-01-08 14:15:06 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -150,7 +150,7 @@ void OSLibWinPostQuitMessage(ULONG nExitCode)
 {
  APIRET rc;
 
-  rc = WinPostQueueMsg(NULLHANDLE, WM_QUIT, (MPARAM)nExitCode, 0);
+  rc = WinPostQueueMsg(NULLHANDLE, WM_QUIT, MPFROMLONG(nExitCode), 0);
   dprintf(("WinPostQueueMsg %d returned %d", nExitCode, rc));
 }
 //******************************************************************************
@@ -173,12 +173,15 @@ LONG OSLibWinDispatchMsg(MSG *msg, BOOL isUnicode)
   if(msg->time == MsgThreadPtr->time || msg->hwnd == 0) {
         memcpy(&os2msg, MsgThreadPtr, sizeof(QMSG));
         MsgThreadPtr->time = -1;
-        if(msg->hwnd) {
+        if(os2msg.hwnd || os2msg.msg == WM_QUIT) {
             thdb->nrOfMsgs = 1;
             thdb->msgstate++; //odd -> next call to our PM window handler should dispatch the translated msg
             memcpy(&thdb->msg, msg, sizeof(MSG));
+            return (LONG)WinDispatchMsg(thdb->hab, &os2msg);
         }
-        return (LONG)WinDispatchMsg(thdb->hab, &os2msg);
+        //SvL: Don't dispatch messages sent by PostThreadMessage (correct??)
+        return 0;
+
   }
   else {//is this allowed?
 //        dprintf(("WARNING: OSLibWinDispatchMsg: called with own message!"));
@@ -224,7 +227,7 @@ continuegetmsg:
         }
         while(rc == FALSE);
 
-	return rc;
+    return (pMsg->message == WINWM_QUIT);
   }
   else
   {
@@ -235,10 +238,8 @@ continuegetmsg:
             eaten = TIMER_HandleTimer(&os2msg);
     } while (eaten);
   }
-  if(rc) {
-	OS2ToWinMsgTranslate((PVOID)thdb, &os2msg, pMsg, isUnicode, MSG_REMOVE);
-        memcpy(MsgThreadPtr, &os2msg, sizeof(QMSG));
-  }
+  OS2ToWinMsgTranslate((PVOID)thdb, &os2msg, pMsg, isUnicode, MSG_REMOVE);
+  memcpy(MsgThreadPtr, &os2msg, sizeof(QMSG));
   return rc;
 }
 //******************************************************************************
@@ -409,7 +410,7 @@ inline BOOL O32_PostThreadMessage(DWORD a, UINT b, WPARAM c, LPARAM d)
     SetFS(sel);
 
     return yyrc;
-} 
+}
 //******************************************************************************
 BOOL OSLibPostThreadMessage(ULONG threadid, UINT msg, WPARAM wParam, LPARAM lParam, BOOL fUnicode)
 {

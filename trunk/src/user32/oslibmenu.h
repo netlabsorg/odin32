@@ -1,4 +1,4 @@
-/* $Id: oslibmenu.h,v 1.4 1999-11-14 12:00:01 sandervl Exp $ */
+/* $Id: oslibmenu.h,v 1.5 2000-01-08 14:15:06 sandervl Exp $ */
 /*
  * Window Menu wrapper functions for OS/2
  *
@@ -22,5 +22,6 @@ HMENU OSLibWinCreateEmptyMenu();
 HMENU OSLibWinCreateEmptyPopupMenu();
 int   OSLibGetMenuItemCount(HWND hMenu);
 BOOL  OSLibGetMenuItemRect(HWND hMenu, int index, LPRECT pRect);
+int   OSLibGetMenuItemPos(HWND hMenu, int item);
  
 #endif //__OSLIBGDI_H__

@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.56 1999-12-29 22:54:01 cbratschi Exp $ */
+/* $Id: oslibwin.cpp,v 1.57 2000-01-08 14:15:06 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -69,7 +69,6 @@ HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
         Owner = HWND_DESKTOP;
   }
   ULONG dwClientStyle;
-#if 1
 
   BOOL TopLevel = hwndParent == HWND_DESKTOP;
 //  if(dwFrameStyle & FCF_TITLEBAR)
@@ -97,34 +96,14 @@ HWND OSLibWinCreateWindow(HWND hwndParent, ULONG dwWinStyle, ULONG dwFrameStyle,
     hwndClient = WinCreateWindow (*hwndFrame, WIN32_STDCLASS,
                                   NULL, dwClientStyle, 0, 0, 0, 0,
                                   *hwndFrame, HWND_TOP, FID_CLIENT, NULL, NULL);
-    if (hwndClient != NULLHANDLE)
-      WinSendMsg (*hwndFrame, WM_UPDATEFRAME, 0, 0);
-
+   
+    if (hwndClient != NULLHANDLE) {
+      	WinSendMsg (*hwndFrame, WM_UPDATEFRAME, 0, 0);
+    }
     return hwndClient;
   }
   dprintf(("OSLibWinCreateWindow: (FRAME) WinCreateStdWindow failed (%x)", WinGetLastError(GetThreadHAB())));
   return 0;
-#else
-        dwClientStyle = dwWinStyle & ~(WS_TABSTOP | WS_GROUP);
-
-        dwFrameStyle |= FCF_NOBYTEALIGN;
-        if ((hwndParent == HWND_DESKTOP) && (dwFrameStyle & FCF_TITLEBAR))
-                dwFrameStyle |= FCF_TASKLIST | FCF_NOMOVEWITHOWNER;
-
-        dwWinStyle   &= ~WS_CLIPCHILDREN;
-
-        *hwndFrame = WinCreateStdWindow(hwndParent, dwWinStyle,
-                                       &dwFrameStyle, WIN32_STDCLASS,
-                                       "", dwClientStyle, 0, id, &hwndClient);
-        if(*hwndFrame) {
-                if(pszName) {
-                        WinSetWindowText(*hwndFrame, pszName);
-                }
-                return hwndClient;
-        }
-        dprintf(("OSLibWinCreateWindow: (FRAME) WinCreateStdWindow failed (%x)", WinGetLastError(GetThreadHAB())));
-        return 0;
-#endif
 }
 //******************************************************************************
 //******************************************************************************
@@ -215,10 +194,14 @@ BOOL OSLibWinConvertStyle(ULONG dwStyle, ULONG *dwExStyle, ULONG *OSWinStyle, UL
           *OSFrameStyle |= FCF_SYSMENU;
     if(dwStyle & WS_THICKFRAME_W)
           *OSFrameStyle |= FCF_SIZEBORDER;        //??
-    if(dwStyle & WS_MINIMIZEBOX_W)
+
+    //SvL: We subclass the titlebar control when win32 look is selected
+    if(fOS2Look) {
+    	if(dwStyle & WS_MINIMIZEBOX_W)
           *OSFrameStyle |= FCF_MINBUTTON;
-    if(dwStyle & WS_MAXIMIZEBOX_W)
+    	if(dwStyle & WS_MAXIMIZEBOX_W)
           *OSFrameStyle |= FCF_MAXBUTTON;
+    }
 
     if(*dwExStyle & WS_EX_DLGMODALFRAME_W)
           *OSFrameStyle |= FCF_DLGBORDER;
@@ -1164,3 +1147,20 @@ ULONG OSLibWinGetLastError()
 {
   return WinGetLastError(GetThreadHAB()) & 0xFFFF;
 }
+//******************************************************************************
+//TODO: Include scroll bars?
+//******************************************************************************
+HWND OSLibWinIsFrameControl(HWND hwnd)
+{
+ HWND hwndFrame = WinQueryWindow(hwnd, QW_PARENT);
+    
+   if(hwnd == WinWindowFromID(hwndFrame, FID_TITLEBAR)) {
+	return hwndFrame;
+   }
+   if(hwnd == WinWindowFromID(hwndFrame, FID_MENU)) {
+	return hwndFrame;
+   }
+   return 0;
+}
+//******************************************************************************
+//******************************************************************************

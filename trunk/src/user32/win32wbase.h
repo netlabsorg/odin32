@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.66 2000-01-03 21:37:17 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.67 2000-01-08 14:15:09 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -112,6 +112,9 @@ virtual  WORD   GetWindowWord(int index);
 
          BOOL   getIgnoreHitTest()              { return fIgnoreHitTest; }
          VOID   setIgnoreHitTest(BOOL ignore)   { fIgnoreHitTest = ignore; }
+
+	 BOOL   getDefWndProcCalled()           { return fDefWndProcCalled; };
+         void   clearDefWndProcCalled()         { fDefWndProcCalled = 0; };
 
          DWORD  getWindowContextHelpId()        { return contextHelpId; };
          void   setWindowContextHelpId(DWORD id){ contextHelpId = id; };
@@ -254,6 +257,10 @@ static Win32BaseWindow *GetWindowFromOS2FrameHandle(HWND hwnd);
 
        PVOID getOldFrameProc() { return pOldFrameProc; };
        VOID  setOldFrameProc(PVOID aOldFrameProc) { pOldFrameProc = aOldFrameProc; };
+       PVOID getOldTitleBarProc() { return pOldTitleBarProc; };
+       VOID  setOldTitleBarProc(PVOID aOldTitleBarProc) { pOldTitleBarProc = aOldTitleBarProc; };
+       PVOID getOldMenuProc() { return pOldMenuProc; };
+       VOID  setOldMenuProc(PVOID aOldMenuProc) { pOldMenuProc = aOldMenuProc; };
        ULONG getBorderWidth() { return borderWidth; };
        ULONG getBorderHeight() { return borderHeight; };
 
@@ -313,11 +320,15 @@ protected:
         BOOL    fTaskList;              //should be listed in PM tasklist or not
         BOOL    fParentDC;
 
+        BOOL    fDefWndProcCalled;      //set when DefWndProc called; used in PM window handlers to determine what to do next
+
  	HRGN    hWindowRegion;
 
         DWORD   dwThreadId;             //id of thread that created this window
         DWORD   dwProcessId;            //id of process that created this window
         PVOID   pOldFrameProc;
+        PVOID   pOldTitleBarProc;
+        PVOID   pOldMenuProc;
         ULONG   borderWidth;
         ULONG   borderHeight;
 

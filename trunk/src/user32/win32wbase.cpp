@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.132 2000-01-02 20:20:01 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.133 2000-01-08 14:15:08 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -37,6 +37,7 @@
 #include "win32wndhandle.h"
 #include "dc.h"
 #include "pmframe.h"
+#include "pmtitlebar.h"
 #include "win32wdesktop.h"
 #include "pmwindow.h"
 #include "controls.h"
@@ -135,19 +136,20 @@ Win32BaseWindow::Win32BaseWindow(CREATESTRUCTA *lpCreateStructA, ATOM classAtom,
 //******************************************************************************
 void Win32BaseWindow::Init()
 {
-  isUnicode        = FALSE;
-  fIsSubclassedOS2Wnd = FALSE;
-  fFirstShow       = TRUE;
-  fIsDialog        = FALSE;
-  fIsModalDialogOwner = FALSE;
-  OS2HwndModalDialog  = 0;
-  fInternalMsg     = FALSE;
-  fNoSizeMsg       = FALSE;
-  fIsDestroyed     = FALSE;
+  isUnicode            = FALSE;
+  fIsSubclassedOS2Wnd  = FALSE;
+  fFirstShow           = TRUE;
+  fIsDialog            = FALSE;
+  fIsModalDialogOwner  = FALSE;
+  OS2HwndModalDialog   = 0;
+  fInternalMsg         = FALSE;
+  fNoSizeMsg           = FALSE;
+  fIsDestroyed         = FALSE;
   fDestroyWindowCalled = FALSE;
-  fCreated         = FALSE;
-  fTaskList        = FALSE;
-  fParentDC        = FALSE;
+  fCreated             = FALSE;
+  fTaskList            = FALSE;
+  fParentDC            = FALSE;
+  fDefWndProcCalled    = FALSE;
 
   windowNameA      = NULL;
   windowNameW      = NULL;
@@ -179,7 +181,10 @@ void Win32BaseWindow::Init()
   userData         = 0;
   contextHelpId    = 0;
 
-  pOldFrameProc = NULL;
+  pOldFrameProc    = NULL;
+  pOldTitleBarProc = NULL;
+  pOldMenuProc     = NULL;
+
   borderWidth   = 0;
   borderHeight  = 0;
 
@@ -639,6 +644,8 @@ BOOL Win32BaseWindow::MsgCreate(HWND hwndFrame, HWND hwndClient)
   FrameGetScrollBarHandles(this,dwStyle & WS_HSCROLL,dwStyle & WS_VSCROLL);
   subclassScrollBars(dwStyle & WS_HSCROLL,dwStyle & WS_VSCROLL);
 
+  FrameSubclassTitleBar(this);
+
   fakeWinBase.hwndThis     = OS2Hwnd;
   fakeWinBase.pWindowClass = windowClass;
 
@@ -1056,8 +1063,11 @@ ULONG Win32BaseWindow::MsgMouseMove(MSG *msg)
             return 0;
     }
 
-    //TODO: hiword should be 0 if window enters menu mode (SDK docs)
-    SendInternalMessageA(WM_SETCURSOR, Win32Hwnd, MAKELONG(lastHitTestVal, msg->message));
+    //SvL: Correct??
+    if(msg->message != WM_NCMOUSEMOVE) {
+        //TODO: hiword should be 0 if window enters menu mode (SDK docs)
+        SendInternalMessageA(WM_SETCURSOR, Win32Hwnd, MAKELONG(lastHitTestVal, msg->message));
+    }
 
     //translated message == WM_(NC)MOUSEMOVE
     return SendInternalMessageA(msg->message, msg->wParam, msg->lParam);
@@ -1542,10 +1552,11 @@ LRESULT Win32BaseWindow::DefWndPrint(HDC hdc,ULONG uFlags)
 //******************************************************************************
 LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 {
+    fDefWndProcCalled = TRUE;
     switch(Msg)
     {
     case WM_CLOSE:
-    dprintf(("DefWindowProcA: WM_CLOSE %x", getWindowHandle()));
+        dprintf(("DefWindowProcA: WM_CLOSE %x", getWindowHandle()));
         DestroyWindow();
         return 0;
 
@@ -1935,6 +1946,8 @@ LRESULT Win32BaseWindow::DefWindowProcA(UINT Msg, WPARAM wParam, LPARAM lParam)
 //******************************************************************************
 LRESULT Win32BaseWindow::DefWindowProcW(UINT Msg, WPARAM wParam, LPARAM lParam)
 {
+    fDefWndProcCalled = TRUE;
+
     switch(Msg)
     {
     case WM_GETTEXTLENGTH:
