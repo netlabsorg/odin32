@@ -54,7 +54,7 @@ ALL segment byte public
 ; Constants
 ;
 impmod              EQU restab
-data                EQU ImReallySmall
+;data                EQU ImReallySmall
 
 
 ;
@@ -68,13 +68,31 @@ db  0       ;    unsigned char       e32_worder;     /* The word ordering for th
 dd  0       ;    unsigned long       e32_level;      /* The EXE format level for now = 0 */
 dw  2       ;    unsigned short      e32_cpu;        /* The CPU type */
 dw  1       ;    unsigned short      e32_os;         /* The OS type */
-;objtab:
+
+; We can place the object table here I hope..
+;   mpages is addjusted to hold the object flags.
+;   reserved is 1 which is no problem it seems.
+;
+; Object table with one entry.
+; Defines a
+;
+;dbg0 db 'objtab'    ;struct o32_obj                          /* Flat .EXE object table entry */
+                    ;{
+;objtab  dd 11000h   ;    unsigned long       o32_size;       /* Object virtual size */
+;        dd 10000h   ;    unsigned long       o32_base;       /* Object base virtual address */
+;                    ;    unsigned long       o32_flags;      /* Attribute flags */
+;        dd (1h OR 2h OR 2000h OR 10h) ;=2013h
+;        dd 1        ;    unsigned long       o32_pagemap;    /* Object page map index */
+;        dd 1        ;    unsigned long       o32_mapsize;    /* Number of entries in object page map */
+;        dd 0        ;    unsigned long       o32_reserved;   /* Reserved */
+                     ;};
+objtab:
 dd  20000h  ;    unsigned long       e32_ver;        /* Module version */
             ;    unsigned long       e32_mflags;     /* Module flags */
 dd  200h OR 00h
-dd  1       ;    unsigned long       e32_mpages;     /* Module # pages */
+dd  2013h   ;    unsigned long       e32_mpages;     /* Module # pages */
 dd  1       ;    unsigned long       e32_startobj;   /* Object # for instruction pointer */
-dd  12h     ;    unsigned long       e32_eip;        /* Extended instruction pointer */
+dd  1       ;    unsigned long       e32_eip;        /* Extended instruction pointer */
 dd  1       ;    unsigned long       e32_stackobj;   /* Object # for stack pointer */
 dd  1000h   ;    unsigned long       e32_esp;        /* Extended stack pointer */
 dd  1000h   ;    unsigned long       e32_pagesize;   /* .EXE page size */
@@ -109,8 +127,7 @@ dd  offset impmod
 dd  1       ;    unsigned long       e32_impmodcnt;  /* Number of entries in Import Module Name Table */
 dd  0       ;    unsigned long       e32_impproc;    /* Offset of Import Procedure Name Table */ off = 78
 ;dd  offset impproc
-objtab:
-dd  10000       ;    unsigned long       e32_pagesum;    /* Offset of Per-Page Checksum Table */                            available
+dd  0       ;    unsigned long       e32_pagesum;    /* Offset of Per-Page Checksum Table */                            available
             ;    unsigned long       e32_datapage;   /* Offset of Enumerated Data Pages */
 dd  offset data
 ; redefine these entries as obj tab stuff.
@@ -129,27 +146,7 @@ dd  offset data
 
 ;mv dd  1000h-32;    unsigned long       e32_stacksize;  /* Size of stack */
 
-
-;
-; Object table with one entry.
-; Defines a
-;
-;dbg0 db 'objtab'    ;struct o32_obj                          /* Flat .EXE object table entry */
-                    ;{
-;objtab  dd 11000h   ;    unsigned long       o32_size;       /* Object virtual size */
-;        dd 10000h   ;    unsigned long       o32_base;       /* Object base virtual address */
-                    ;    unsigned long       o32_flags;      /* Attribute flags */
-        dd (1h OR 2h OR 2000h OR 10h) ;=2013h
-        dd 1        ;    unsigned long       o32_pagemap;    /* Object page map index */
-        dd 1        ;    unsigned long       o32_mapsize;    /* Number of entries in object page map */
-        dd 0        ;    unsigned long       o32_reserved;   /* Reserved */
-
-                    ;};
-
-;red dd  0       ;    unsigned long       e32_debuglen;   /* The length of the debugging info. in bytes */                   available?
-;red dd  0       ;    unsigned long       e32_instpreload;/* Number of instance pages in preload section of .EXE file */     available?
-;red dd  0       ;    unsigned long       e32_instdemand; /* Number of instance pages in demand load section of .EXE file */ available?
-;red dd  0       ;    unsigned long       e32_heapsize;   /* Size of heap - for 16-bit apps */                               available?
+;dd 0,0,0,0
 
 ;
 ; fixup table.
@@ -164,7 +161,7 @@ fixpagetab  dd 0                                ; offset of fixups for page 1.
 ;
 ;dbg1 db 'pagetab'
 pagetab     dd  0                                   ; offset 0
-            dw  offset minilxret - offset data + 1  ; data size,
+            dw  offset dataend - offset data        ; data size,
             dw  0                                   ; flags. valid
 
 ;dw 0
@@ -172,7 +169,7 @@ pagetab     dd  0                                   ; offset 0
 ;dd  20 dup(0);   unsigned char       e32_res3[E32RESBYTES3];                                                            available!
             ;                                        /* Pad structure to 196 bytes */
             ;  };
-db 0
+
 
 ;
 ; The fixup records.
@@ -226,22 +223,25 @@ impproc:    db 0
 
 
 assume CS:ALL
-ImReallySmall   db  "I'm really small!",013
-
+data:
+    int 3
 minilx:
-    push    10000h
+;    int 3
+    push    offset ImReallySmall - offset data + 10000h
     push    18
     push    eax                         ; 0 or 1 is just the same.
     ;call    DosPutMessage
     db 0e8h
 fixup dd 0h
     add     esp, 12
-minilxret:
     ret
+ImReallySmall   db  "I'm really small!",013
 
+db '123'
 ;lxdump db 'lxdumplxdumplxdumplxdump'
 ;       db 'lxdumplxdumplxdumplxdump'
 ;       db 'lxdumplxdumplxdumplxdump'
+dataend:
 
 ALL ENDS
 
