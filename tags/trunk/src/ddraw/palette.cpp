@@ -1,4 +1,4 @@
-/* $Id: palette.cpp,v 1.1 2002-12-04 10:35:01 sandervl Exp $ */
+/* $Id: palette.cpp,v 1.2 2002-12-29 14:11:02 sandervl Exp $ */
 
 /*
  * DX palette class implementation
@@ -32,6 +32,8 @@
 #undef THIS
 #define THIS IDirectDrawPalette*
 
+extern IDirectDrawPaletteVtbl DDrawPaletteTable;
+
 //******************************************************************************
 //******************************************************************************
 OS2IDirectDrawPalette::OS2IDirectDrawPalette( VOID *lpDirectDraw,
@@ -42,20 +44,14 @@ OS2IDirectDrawPalette::OS2IDirectDrawPalette( VOID *lpDirectDraw,
                                               lastError(DD_OK), lpDraw(NULL)
 
 {
-  lpVtbl              = &Vtbl;
-  Vtbl.AddRef         = PalAddRef;
-  Vtbl.Release        = PalRelease;
-  Vtbl.QueryInterface = PalQueryInterface;
-  Vtbl.GetCaps        = PalGetCaps;
-  Vtbl.GetEntries     = PalGetEntries;
-  Vtbl.Initialize     = PalInitialize;
-  Vtbl.SetEntries     = PalSetEntries;
+  Vtbl    = DDrawPaletteTable;
+  lpVtbl  = &Vtbl;
 
-  lpDraw                        = lpDirectDraw;
+  lpDraw  = lpDirectDraw;
   ((OS2IDirectDraw*)lpDraw)->Vtbl.AddRef(lpDraw);
-  hDive                         = ((OS2IDirectDraw*)lpDirectDraw)->GetDiveInstance();
-  dwCaps                        = dwPalFlags;
-  hDiveCC                       = ((OS2IDirectDraw*)lpDirectDraw)->GetCCDiveInstance();
+  hDive   = ((OS2IDirectDraw*)lpDirectDraw)->GetDiveInstance();
+  dwCaps  = dwPalFlags;
+  hDiveCC = ((OS2IDirectDraw*)lpDirectDraw)->GetCCDiveInstance();
 
   dwSize = palsize;
   if(256==dwSize)
@@ -92,7 +88,7 @@ OS2IDirectDrawPalette::~OS2IDirectDrawPalette()
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall PalQueryInterface(THIS This, REFIID riid, LPVOID FAR * ppvObj)
+HRESULT WIN32API PalQueryInterface(THIS This, REFIID riid, LPVOID FAR * ppvObj)
 {
   dprintf(("DDRAW: OS2IDirectDrawPalette::PalQueryInterface"));
 
@@ -109,7 +105,7 @@ HRESULT __stdcall PalQueryInterface(THIS This, REFIID riid, LPVOID FAR * ppvObj)
 }
 //******************************************************************************
 //******************************************************************************
-ULONG __stdcall PalAddRef(THIS This)
+ULONG WIN32API PalAddRef(THIS This)
 {
   OS2IDirectDrawPalette *me = (OS2IDirectDrawPalette *)This;
 
@@ -119,7 +115,7 @@ ULONG __stdcall PalAddRef(THIS This)
 }
 //******************************************************************************
 //******************************************************************************
-ULONG __stdcall PalRelease(THIS This)
+ULONG WIN32API PalRelease(THIS This)
 {
   OS2IDirectDrawPalette *me = (OS2IDirectDrawPalette *)This;
 
@@ -141,7 +137,7 @@ ULONG __stdcall PalRelease(THIS This)
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall PalGetCaps(THIS This, LPDWORD lpdwCaps)
+HRESULT WIN32API PalGetCaps(THIS This, LPDWORD lpdwCaps)
 {
   OS2IDirectDrawPalette *me = (OS2IDirectDrawPalette *)This;
 
@@ -160,7 +156,7 @@ HRESULT __stdcall PalGetCaps(THIS This, LPDWORD lpdwCaps)
 
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall PalGetEntries(THIS This, DWORD dwFlags,
+HRESULT WIN32API PalGetEntries(THIS This, DWORD dwFlags,
                                       DWORD dwBase,
                                       DWORD dwNumEntries,
                                       LPPALETTEENTRY lpEntries)
@@ -182,14 +178,14 @@ HRESULT __stdcall PalGetEntries(THIS This, DWORD dwFlags,
 
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall PalInitialize(THIS, LPDIRECTDRAW, DWORD, LPPALETTEENTRY)
+HRESULT WIN32API PalInitialize(THIS, LPDIRECTDRAW, DWORD, LPPALETTEENTRY)
 {
   dprintf(("DDRAW: OS2IDirectDrawPalette::PalInitialize"));
   return(DDERR_ALREADYINITIALIZED);
 }
 //******************************************************************************
 //******************************************************************************
-HRESULT __stdcall PalSetEntries(THIS This, DWORD dwFlags,
+HRESULT WIN32API PalSetEntries(THIS This, DWORD dwFlags,
                                       DWORD dwBase,
                                       DWORD dwNumEntries,
                                       LPPALETTEENTRY lpNewEntries)
@@ -273,4 +269,15 @@ void OS2IDirectDrawPalette::SetIsPrimary(BOOL fNewVal)
 }
 //******************************************************************************
 //******************************************************************************
-
+IDirectDrawPaletteVtbl DDrawPaletteTable = 
+{
+  PalQueryInterface,
+  PalAddRef,
+  PalRelease,
+  PalGetCaps,
+  PalGetEntries,
+  PalInitialize,
+  PalSetEntries
+};
+//******************************************************************************
+//******************************************************************************

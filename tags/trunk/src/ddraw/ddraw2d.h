@@ -1,4 +1,4 @@
-/* $Id: ddraw2d.h,v 1.1 2002-12-04 10:34:59 sandervl Exp $ */
+/* $Id: ddraw2d.h,v 1.2 2002-12-29 14:11:01 sandervl Exp $ */
 
 /*
  * DX Draw base class definition
@@ -112,53 +112,53 @@ class OS2IDirectDraw
               OS2IDirectDraw* next;                   // Next OS2IDirectDraw
     static    OS2IDirectDraw* ddraw;                  // List of OS2IDirectDraw
 
-    friend    HRESULT __stdcall DrawQueryInterface(THIS, REFIID riid, LPVOID  * ppvObj);
-    friend    ULONG   __stdcall DrawAddRef(THIS);
-    friend    ULONG   __stdcall DrawRelease(THIS);
-    friend    HRESULT __stdcall DrawCompact(THIS);
-    friend    HRESULT __stdcall DrawCreateClipper(THIS, DWORD, LPDIRECTDRAWCLIPPER *, IUnknown  * );
-    friend    HRESULT __stdcall DrawCreatePalette(THIS, DWORD, LPPALETTEENTRY, LPDIRECTDRAWPALETTE *, IUnknown  * );
-    friend    HRESULT __stdcall DrawCreateSurface(THIS, LPDDSURFACEDESC, LPDIRECTDRAWSURFACE  *, IUnknown  *);
-    friend    HRESULT __stdcall DrawCreateSurface4(THIS, LPDDSURFACEDESC2, LPDIRECTDRAWSURFACE4  *, IUnknown  *);
-    friend    HRESULT __stdcall DrawDuplicateSurface(THIS, LPDIRECTDRAWSURFACE, LPDIRECTDRAWSURFACE  * );
-    friend    HRESULT __stdcall DrawDuplicateSurface4(THIS, LPDIRECTDRAWSURFACE4, LPDIRECTDRAWSURFACE4  * );
-    friend    HRESULT __stdcall DrawEnumDisplayModes(THIS, DWORD, LPDDSURFACEDESC, LPVOID, LPDDENUMMODESCALLBACK );
-    friend    HRESULT __stdcall DrawEnumDisplayModes4(THIS, DWORD, LPDDSURFACEDESC2, LPVOID, LPDDENUMMODESCALLBACK2 );
-    friend    HRESULT __stdcall DrawEnumSurfaces(THIS, DWORD, LPDDSURFACEDESC, LPVOID,LPDDENUMSURFACESCALLBACK );
-    friend    HRESULT __stdcall DrawEnumSurfaces4(THIS, DWORD, LPDDSURFACEDESC2, LPVOID,LPDDENUMSURFACESCALLBACK2 );
-    friend    HRESULT __stdcall DrawFlipToGDISurface(THIS);
-    friend    HRESULT __stdcall DrawGetCaps(THIS, LPDDCAPS, LPDDCAPS);
-    friend    HRESULT __stdcall DrawGetDisplayMode(THIS, LPDDSURFACEDESC);
-    friend    HRESULT __stdcall DrawGetFourCCCodes(THIS, LPDWORD, LPDWORD);
-    friend    HRESULT __stdcall DrawGetGDISurface(THIS, LPDIRECTDRAWSURFACE  *);
-    friend    HRESULT __stdcall DrawGetGDISurface4(THIS, LPDIRECTDRAWSURFACE4  *);
-    friend    HRESULT __stdcall DrawGetMonitorFrequency(THIS, LPDWORD);
-    friend    HRESULT __stdcall DrawGetScanLine(THIS, LPDWORD);
-    friend    HRESULT __stdcall DrawGetVerticalBlankStatus(THIS, LPBOOL);
-    friend    HRESULT __stdcall DrawInitialize(THIS, GUID  *);
-    friend    HRESULT __stdcall DrawRestoreDisplayMode(THIS);
-    friend    HRESULT __stdcall DrawSetCooperativeLevel(THIS, HWND, DWORD);
-    friend    HRESULT __stdcall DrawSetDisplayMode(THIS, DWORD, DWORD,DWORD);
-    friend    HRESULT __stdcall DrawSetDisplayMode2(THIS, DWORD, DWORD,DWORD, DWORD, DWORD);
-    friend    HRESULT __stdcall DrawWaitForVerticalBlank(THIS, DWORD, HANDLE);
+    friend    HRESULT WIN32API DrawQueryInterface(THIS, REFIID riid, LPVOID  * ppvObj);
+    friend    ULONG   WIN32API DrawAddRef(THIS);
+    friend    ULONG   WIN32API DrawRelease(THIS);
+    friend    HRESULT WIN32API DrawCompact(THIS);
+    friend    HRESULT WIN32API DrawCreateClipper(THIS, DWORD, LPDIRECTDRAWCLIPPER *, IUnknown  * );
+    friend    HRESULT WIN32API DrawCreatePalette(THIS, DWORD, LPPALETTEENTRY, LPDIRECTDRAWPALETTE *, IUnknown  * );
+    friend    HRESULT WIN32API DrawCreateSurface(THIS, LPDDSURFACEDESC, LPDIRECTDRAWSURFACE  *, IUnknown  *);
+    friend    HRESULT WIN32API DrawCreateSurface4(THIS, LPDDSURFACEDESC2, LPDIRECTDRAWSURFACE4  *, IUnknown  *);
+    friend    HRESULT WIN32API DrawDuplicateSurface(THIS, LPDIRECTDRAWSURFACE, LPDIRECTDRAWSURFACE  * );
+    friend    HRESULT WIN32API DrawDuplicateSurface4(THIS, LPDIRECTDRAWSURFACE4, LPDIRECTDRAWSURFACE4  * );
+    friend    HRESULT WIN32API DrawEnumDisplayModes(THIS, DWORD, LPDDSURFACEDESC, LPVOID, LPDDENUMMODESCALLBACK );
+    friend    HRESULT WIN32API DrawEnumDisplayModes4(THIS, DWORD, LPDDSURFACEDESC2, LPVOID, LPDDENUMMODESCALLBACK2 );
+    friend    HRESULT WIN32API DrawEnumSurfaces(THIS, DWORD, LPDDSURFACEDESC, LPVOID,LPDDENUMSURFACESCALLBACK );
+    friend    HRESULT WIN32API DrawEnumSurfaces4(THIS, DWORD, LPDDSURFACEDESC2, LPVOID,LPDDENUMSURFACESCALLBACK2 );
+    friend    HRESULT WIN32API DrawFlipToGDISurface(THIS);
+    friend    HRESULT WIN32API DrawGetCaps(THIS, LPDDCAPS, LPDDCAPS);
+    friend    HRESULT WIN32API DrawGetDisplayMode(THIS, LPDDSURFACEDESC);
+    friend    HRESULT WIN32API DrawGetFourCCCodes(THIS, LPDWORD, LPDWORD);
+    friend    HRESULT WIN32API DrawGetGDISurface(THIS, LPDIRECTDRAWSURFACE  *);
+    friend    HRESULT WIN32API DrawGetGDISurface4(THIS, LPDIRECTDRAWSURFACE4  *);
+    friend    HRESULT WIN32API DrawGetMonitorFrequency(THIS, LPDWORD);
+    friend    HRESULT WIN32API DrawGetScanLine(THIS, LPDWORD);
+    friend    HRESULT WIN32API DrawGetVerticalBlankStatus(THIS, LPBOOL);
+    friend    HRESULT WIN32API DrawInitialize(THIS, GUID  *);
+    friend    HRESULT WIN32API DrawRestoreDisplayMode(THIS);
+    friend    HRESULT WIN32API DrawSetCooperativeLevel(THIS, HWND, DWORD);
+    friend    HRESULT WIN32API DrawSetDisplayMode(THIS, DWORD, DWORD,DWORD);
+    friend    HRESULT WIN32API DrawSetDisplayMode2(THIS, DWORD, DWORD,DWORD, DWORD, DWORD);
+    friend    HRESULT WIN32API DrawWaitForVerticalBlank(THIS, DWORD, HANDLE);
     // V2 Interface
-    friend    HRESULT __stdcall DrawGetAvailableVidMem(THIS, LPDDSCAPS, LPDWORD, LPDWORD);
-    friend    HRESULT __stdcall DrawGetAvailableVidMem4(THIS, LPDDSCAPS2, LPDWORD, LPDWORD);
+    friend    HRESULT WIN32API DrawGetAvailableVidMem(THIS, LPDDSCAPS, LPDWORD, LPDWORD);
+    friend    HRESULT WIN32API DrawGetAvailableVidMem4(THIS, LPDDSCAPS2, LPDWORD, LPDWORD);
     // V4 Interface
-    friend    HRESULT __stdcall GetSurfaceFromDC(THIS, HDC, LPDIRECTDRAWSURFACE4 *);
-    friend    HRESULT __stdcall RestoreAllSurfaces(THIS) ;
-    friend    HRESULT __stdcall TestCooperativeLevel(THIS) ;
-    friend    HRESULT __stdcall GetDeviceIdentifier(THIS, LPDDDEVICEIDENTIFIER, DWORD );
+    friend    HRESULT WIN32API GetSurfaceFromDC(THIS, HDC, LPDIRECTDRAWSURFACE4 *);
+    friend    HRESULT WIN32API RestoreAllSurfaces(THIS) ;
+    friend    HRESULT WIN32API TestCooperativeLevel(THIS) ;
+    friend    HRESULT WIN32API GetDeviceIdentifier(THIS, LPDDDEVICEIDENTIFIER, DWORD );
     /*** IDirect3D methods ***/
-    friend    HRESULT __stdcall D3DQueryInterface(THIS, REFIID riid, LPVOID  * ppvObj);
-    friend    ULONG   __stdcall D3DAddRef(THIS);
-    friend    ULONG   __stdcall D3DRelease(THIS);
-    friend    HRESULT __stdcall D3DInitialize(THIS, REFIID);
-    friend    HRESULT __stdcall D3DEnumDevices(THIS, LPD3DENUMDEVICESCALLBACK, LPVOID);
-    friend    HRESULT __stdcall D3DCreateLight(THIS, LPDIRECT3DLIGHT*, IUnknown*);
-    friend    HRESULT __stdcall D3DCreateMaterial(THIS, LPDIRECT3DMATERIAL*, IUnknown*);
-    friend    HRESULT __stdcall D3DCreateViewport(THIS, LPDIRECT3DVIEWPORT*, IUnknown*);
-    friend    HRESULT __stdcall D3DFindDevice(THIS, LPD3DFINDDEVICESEARCH, LPD3DFINDDEVICERESULT);
+    friend    HRESULT WIN32API D3DQueryInterface(THIS, REFIID riid, LPVOID  * ppvObj);
+    friend    ULONG   WIN32API D3DAddRef(THIS);
+    friend    ULONG   WIN32API D3DRelease(THIS);
+    friend    HRESULT WIN32API D3DInitialize(THIS, REFIID);
+    friend    HRESULT WIN32API D3DEnumDevices(THIS, LPD3DENUMDEVICESCALLBACK, LPVOID);
+    friend    HRESULT WIN32API D3DCreateLight(THIS, LPDIRECT3DLIGHT*, IUnknown*);
+    friend    HRESULT WIN32API D3DCreateMaterial(THIS, LPDIRECT3DMATERIAL*, IUnknown*);
+    friend    HRESULT WIN32API D3DCreateViewport(THIS, LPDIRECT3DVIEWPORT*, IUnknown*);
+    friend    HRESULT WIN32API D3DFindDevice(THIS, LPD3DFINDDEVICESEARCH, LPD3DFINDDEVICERESULT);
 
 };
 
@@ -166,57 +166,57 @@ class OS2IDirectDraw
 #define DDraw3D_GetThisPtr(a)   (OS2IDirectDraw *)((ULONG)a-OFFSET_D3DVTABLE)
 
 //******************************************************************************
-HRESULT __stdcall DrawQueryInterface(THIS, REFIID riid, LPVOID  * ppvObj);
-ULONG   __stdcall DrawAddRef(THIS);
-ULONG   __stdcall DrawRelease(THIS);
-HRESULT __stdcall DrawCompact(THIS);
-HRESULT __stdcall DrawCreateClipper(THIS, DWORD, LPDIRECTDRAWCLIPPER *, IUnknown  * );
-HRESULT __stdcall DrawCreatePalette(THIS, DWORD, LPPALETTEENTRY, LPDIRECTDRAWPALETTE *, IUnknown  * );
-HRESULT __stdcall DrawCreateSurface(THIS, LPDDSURFACEDESC, LPDIRECTDRAWSURFACE  *, IUnknown  *);
-HRESULT __stdcall DrawDuplicateSurface(THIS, LPDIRECTDRAWSURFACE, LPDIRECTDRAWSURFACE  * );
-HRESULT __stdcall DrawEnumDisplayModes(THIS, DWORD, LPDDSURFACEDESC, LPVOID, LPDDENUMMODESCALLBACK );
-HRESULT __stdcall DrawEnumSurfaces(THIS, DWORD, LPDDSURFACEDESC, LPVOID,LPDDENUMSURFACESCALLBACK );
-HRESULT __stdcall DrawFlipToGDISurface(THIS);
-HRESULT __stdcall DrawGetCaps(THIS, LPDDCAPS, LPDDCAPS);
-HRESULT __stdcall DrawGetDisplayMode(THIS, LPDDSURFACEDESC);
-HRESULT __stdcall DrawGetFourCCCodes(THIS, LPDWORD, LPDWORD);
-HRESULT __stdcall DrawGetGDISurface(THIS, LPDIRECTDRAWSURFACE  *);
-HRESULT __stdcall DrawGetMonitorFrequency(THIS, LPDWORD);
-HRESULT __stdcall DrawGetScanLine(THIS, LPDWORD);
-HRESULT __stdcall DrawGetVerticalBlankStatus(THIS, LPBOOL);
-HRESULT __stdcall DrawInitialize(THIS, GUID  *);
-HRESULT __stdcall DrawRestoreDisplayMode(THIS);
-HRESULT __stdcall DrawSetCooperativeLevel(THIS, HWND, DWORD);
-HRESULT __stdcall DrawSetDisplayMode(THIS, DWORD, DWORD,DWORD);
-HRESULT __stdcall DrawSetDisplayMode2(THIS, DWORD, DWORD,DWORD, DWORD, DWORD);
-HRESULT __stdcall DrawWaitForVerticalBlank(THIS, DWORD, HANDLE);
+HRESULT WIN32API DrawQueryInterface(THIS, REFIID riid, LPVOID  * ppvObj);
+ULONG   WIN32API DrawAddRef(THIS);
+ULONG   WIN32API DrawRelease(THIS);
+HRESULT WIN32API DrawCompact(THIS);
+HRESULT WIN32API DrawCreateClipper(THIS, DWORD, LPDIRECTDRAWCLIPPER *, IUnknown  * );
+HRESULT WIN32API DrawCreatePalette(THIS, DWORD, LPPALETTEENTRY, LPDIRECTDRAWPALETTE *, IUnknown  * );
+HRESULT WIN32API DrawCreateSurface(THIS, LPDDSURFACEDESC, LPDIRECTDRAWSURFACE  *, IUnknown  *);
+HRESULT WIN32API DrawDuplicateSurface(THIS, LPDIRECTDRAWSURFACE, LPDIRECTDRAWSURFACE  * );
+HRESULT WIN32API DrawEnumDisplayModes(THIS, DWORD, LPDDSURFACEDESC, LPVOID, LPDDENUMMODESCALLBACK );
+HRESULT WIN32API DrawEnumSurfaces(THIS, DWORD, LPDDSURFACEDESC, LPVOID,LPDDENUMSURFACESCALLBACK );
+HRESULT WIN32API DrawFlipToGDISurface(THIS);
+HRESULT WIN32API DrawGetCaps(THIS, LPDDCAPS, LPDDCAPS);
+HRESULT WIN32API DrawGetDisplayMode(THIS, LPDDSURFACEDESC);
+HRESULT WIN32API DrawGetFourCCCodes(THIS, LPDWORD, LPDWORD);
+HRESULT WIN32API DrawGetGDISurface(THIS, LPDIRECTDRAWSURFACE  *);
+HRESULT WIN32API DrawGetMonitorFrequency(THIS, LPDWORD);
+HRESULT WIN32API DrawGetScanLine(THIS, LPDWORD);
+HRESULT WIN32API DrawGetVerticalBlankStatus(THIS, LPBOOL);
+HRESULT WIN32API DrawInitialize(THIS, GUID  *);
+HRESULT WIN32API DrawRestoreDisplayMode(THIS);
+HRESULT WIN32API DrawSetCooperativeLevel(THIS, HWND, DWORD);
+HRESULT WIN32API DrawSetDisplayMode(THIS, DWORD, DWORD,DWORD);
+HRESULT WIN32API DrawSetDisplayMode2(THIS, DWORD, DWORD,DWORD, DWORD, DWORD);
+HRESULT WIN32API DrawWaitForVerticalBlank(THIS, DWORD, HANDLE);
 // V2
-HRESULT __stdcall DrawGetAvailableVidMem(THIS, LPDDSCAPS, LPDWORD, LPDWORD);
+HRESULT WIN32API DrawGetAvailableVidMem(THIS, LPDDSCAPS, LPDWORD, LPDWORD);
 // V4
-HRESULT __stdcall DrawGetSurfaceFromDC(THIS, HDC, LPDIRECTDRAWSURFACE4 *);
-HRESULT __stdcall DrawRestoreAllSurfaces(THIS) ;
-HRESULT __stdcall DrawTestCooperativeLevel(THIS) ;
-HRESULT __stdcall DrawGetDeviceIdentifier(THIS, LPDDDEVICEIDENTIFIER, DWORD );
+HRESULT WIN32API DrawGetSurfaceFromDC(THIS, HDC, LPDIRECTDRAWSURFACE4 *);
+HRESULT WIN32API DrawRestoreAllSurfaces(THIS) ;
+HRESULT WIN32API DrawTestCooperativeLevel(THIS) ;
+HRESULT WIN32API DrawGetDeviceIdentifier(THIS, LPDDDEVICEIDENTIFIER, DWORD );
 // functions which ifaces are changed in DirectX6 after all MS uses COM where an programmer
 // isn't allowd to change a function iface after he published the iface (See MS COM docs!)
-HRESULT __stdcall DrawCreateSurface4(THIS, LPDDSURFACEDESC2, LPDIRECTDRAWSURFACE4  *, IUnknown  *);
-HRESULT __stdcall DrawDuplicateSurface4(THIS, LPDIRECTDRAWSURFACE4, LPDIRECTDRAWSURFACE4  * );
-HRESULT __stdcall DrawEnumDisplayModes4(THIS, DWORD, LPDDSURFACEDESC2, LPVOID, LPDDENUMMODESCALLBACK2 );
-HRESULT __stdcall DrawEnumSurfaces4(THIS, DWORD, LPDDSURFACEDESC2, LPVOID,LPDDENUMSURFACESCALLBACK2 );
-HRESULT __stdcall DrawGetDisplayMode4(THIS, LPDDSURFACEDESC2);
-HRESULT __stdcall DrawGetGDISurface4(THIS, LPDIRECTDRAWSURFACE4  *);
-HRESULT __stdcall DrawGetAvailableVidMem4(THIS, LPDDSCAPS2, LPDWORD, LPDWORD);
+HRESULT WIN32API DrawCreateSurface4(THIS, LPDDSURFACEDESC2, LPDIRECTDRAWSURFACE4  *, IUnknown  *);
+HRESULT WIN32API DrawDuplicateSurface4(THIS, LPDIRECTDRAWSURFACE4, LPDIRECTDRAWSURFACE4  * );
+HRESULT WIN32API DrawEnumDisplayModes4(THIS, DWORD, LPDDSURFACEDESC2, LPVOID, LPDDENUMMODESCALLBACK2 );
+HRESULT WIN32API DrawEnumSurfaces4(THIS, DWORD, LPDDSURFACEDESC2, LPVOID,LPDDENUMSURFACESCALLBACK2 );
+HRESULT WIN32API DrawGetDisplayMode4(THIS, LPDDSURFACEDESC2);
+HRESULT WIN32API DrawGetGDISurface4(THIS, LPDIRECTDRAWSURFACE4  *);
+HRESULT WIN32API DrawGetAvailableVidMem4(THIS, LPDDSCAPS2, LPDWORD, LPDWORD);
 
 /*** IDirect3D methods ***/
-HRESULT __stdcall D3DQueryInterface(THIS, REFIID riid, LPVOID  * ppvObj);
-ULONG   __stdcall D3DAddRef(THIS);
-ULONG   __stdcall D3DRelease(THIS);
-HRESULT __stdcall D3DInitialize(THIS, REFIID);
-HRESULT __stdcall D3DEnumDevices(THIS, LPD3DENUMDEVICESCALLBACK, LPVOID);
-HRESULT __stdcall D3DCreateLight(THIS, LPDIRECT3DLIGHT*, IUnknown*);
-HRESULT __stdcall D3DCreateMaterial(THIS, LPDIRECT3DMATERIAL*, IUnknown*);
-HRESULT __stdcall D3DCreateViewport(THIS, LPDIRECT3DVIEWPORT*, IUnknown*);
-HRESULT __stdcall D3DFindDevice(THIS, LPD3DFINDDEVICESEARCH, LPD3DFINDDEVICERESULT);
+HRESULT WIN32API D3DQueryInterface(THIS, REFIID riid, LPVOID  * ppvObj);
+ULONG   WIN32API D3DAddRef(THIS);
+ULONG   WIN32API D3DRelease(THIS);
+HRESULT WIN32API D3DInitialize(THIS, REFIID);
+HRESULT WIN32API D3DEnumDevices(THIS, LPD3DENUMDEVICESCALLBACK, LPVOID);
+HRESULT WIN32API D3DCreateLight(THIS, LPDIRECT3DLIGHT*, IUnknown*);
+HRESULT WIN32API D3DCreateMaterial(THIS, LPDIRECT3DMATERIAL*, IUnknown*);
+HRESULT WIN32API D3DCreateViewport(THIS, LPDIRECT3DVIEWPORT*, IUnknown*);
+HRESULT WIN32API D3DFindDevice(THIS, LPD3DFINDDEVICESEARCH, LPD3DFINDDEVICERESULT);
 
 #define FOURCC_YUY2  mmioFOURCC( 'Y', 'U', 'Y', '2' )
 #define FOURCC_UYVY  mmioFOURCC( 'U', 'Y', 'V', 'Y' )
