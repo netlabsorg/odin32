@@ -1,4 +1,4 @@
-/* $Id: mmap.cpp,v 1.66 2003-05-06 12:06:10 sandervl Exp $ */
+/* $Id: mmap.cpp,v 1.67 2004-01-11 11:57:53 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -69,6 +69,12 @@ void InitializeMemMaps()
          dprintf(("InitializeMemMaps -> access shared critical section"));
          DosAccessCriticalSection(&globalmapcritsect, pszMMapSemName);
     }
+}
+//******************************************************************************
+//******************************************************************************
+void FinalizeMemMaps()
+{
+    DosDeleteCriticalSection(&globalmapcritsect);
 }
 //******************************************************************************
 //******************************************************************************
