@@ -1,4 +1,4 @@
-/* $Id: path.c,v 1.3 2000-06-13 11:42:05 achimha Exp $ */
+/* $Id: path.c,v 1.4 2000-06-13 18:14:19 phaller Exp $ */
 
 /*
  * Path Functions
@@ -48,7 +48,8 @@
 #define strncasecmp	lstrncmpA
 #define strcasecmp	lstrcmpA
 
-ODINDEBUGCHANNEL(SHLWAPI-SHELLPATH)
+
+ODINDEBUGCHANNEL(SHLWAPI-PATH)
 
 
 /*************************************************************************
@@ -62,7 +63,7 @@ ODINDEBUGCHANNEL(SHLWAPI-SHELLPATH)
  */
 LPSTR WINAPI PathAppendA(
 	LPSTR lpszPath1,
-	LPSTR lpszPath2) 
+	LPCSTR lpszPath2) 
 {
 	TRACE("%s %s\n",lpszPath1, lpszPath2);
 	while (lpszPath2[0]=='\\') lpszPath2++;
