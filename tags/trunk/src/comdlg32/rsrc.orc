@@ -1,4 +1,4 @@
-/* $Id: rsrc.orc,v 1.1 2000-03-06 23:38:30 bird Exp $ */
+/* $Id: rsrc.orc,v 1.2 2000-03-06 23:48:25 bird Exp $ */
 /*
  * Top level resource file for Common Dialogs
  *
@@ -16,7 +16,7 @@
  * neutral language. This will prevent them from
  * being duplicated for each language.
  */
-#include "cdlg_xx.rc"
+#include "cdlg_xx.orc"
 
 /*
  * Everything specific to any language goes
@@ -25,22 +25,22 @@
  * which also have a neutral version. This is to
  * get localized bitmaps for example.
  */
-//#include "cdlg_Ca.rc"
-//#include "cdlg_Cs.rc"
-//#include "cdlg_Da.rc"
-//#include "cdlg_De.rc"
-#include "cdlg_En.rc"
-//#include "cdlg_Eo.rc"
-//#include "cdlg_Es.rc"
-//#include "cdlg_Fi.rc"
-//#include "cdlg_Fr.rc"
-//#include "cdlg_Hu.rc"
-//#include "cdlg_It.rc"
-//#include "cdlg_Ko.rc"
-//#include "cdlg_Nl.rc"
-//#include "cdlg_No.rc"
-//#include "cdlg_Pl.rc"
-//#include "cdlg_Pt.rc"
-//#include "cdlg_Ru.rc"
-//#include "cdlg_Sv.rc"
-//#include "cdlg_Wa.rc"
+//#include "cdlg_Ca.orc"
+//#include "cdlg_Cs.orc"
+//#include "cdlg_Da.orc"
+//#include "cdlg_De.orc"
+#include "cdlg_En.orc"
+//#include "cdlg_Eo.orc"
+//#include "cdlg_Es.orc"
+//#include "cdlg_Fi.orc"
+//#include "cdlg_Fr.orc"
+//#include "cdlg_Hu.orc"
+//#include "cdlg_It.orc"
+//#include "cdlg_Ko.orc"
+//#include "cdlg_Nl.orc"
+//#include "cdlg_No.orc"
+//#include "cdlg_Pl.orc"
+//#include "cdlg_Pt.orc"
+//#include "cdlg_Ru.orc"
+//#include "cdlg_Sv.orc"
+//#include "cdlg_Wa.orc"
