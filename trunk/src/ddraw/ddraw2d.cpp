@@ -1,4 +1,4 @@
-/* $Id: ddraw2d.cpp,v 1.4 2002-12-20 10:38:25 sandervl Exp $ */
+/* $Id: ddraw2d.cpp,v 1.5 2002-12-29 14:11:01 sandervl Exp $ */
 
 /*
  * DX Draw base class implementation
@@ -55,6 +55,11 @@ FOURCC SupportedFourCCs[]   = {FOURCC_SCRN,FOURCC_LUT8,FOURCC_R565,FOURCC_RGB3,F
 int    nrOfDiveFourCCs              = 0;
 FOURCC DiveFOURCCs[MAX_DIVE_FOURCC] = {0};
 
+extern IDirectDrawVtbl  DDrawV1Table;
+extern IDirectDraw2Vtbl DDrawV2Table;
+extern IDirectDraw4Vtbl DDrawV4Table;
+extern IDirect3DVtbl    DDraw3DTable;
+
 //******************************************************************************
 //Force DirectDraw to report only one fullscreen mode (useful for custom builds)
 //******************************************************************************
@@ -91,97 +96,13 @@ OS2IDirectDraw::OS2IDirectDraw(GUID *lpGUID) :
   ULONG rc;
 
   // Setup table for 3d devices
-  Vtbl3D.AddRef         = D3DAddRef;
-  Vtbl3D.Release        = D3DRelease;
-  Vtbl3D.QueryInterface = D3DQueryInterface;
-  Vtbl3D.Initialize     = D3DInitialize;
-  Vtbl3D.EnumDevices    = D3DEnumDevices;
-  Vtbl3D.CreateLight    = D3DCreateLight;
-  Vtbl3D.CreateMaterial = D3DCreateMaterial;
-  Vtbl3D.CreateViewport = D3DCreateViewport;
-  Vtbl3D.FindDevice     = D3DFindDevice;
+  Vtbl3D = DDraw3DTable;
 
-  // Org Interface
-  Vtbl.AddRef                 = DrawAddRef;
-  Vtbl.Release                = DrawRelease;
-  Vtbl.QueryInterface         = DrawQueryInterface;
-  Vtbl.Compact                = DrawCompact;
-  Vtbl.CreateClipper          = DrawCreateClipper;
-  Vtbl.CreatePalette          = DrawCreatePalette;
-  Vtbl.CreateSurface          = DrawCreateSurface;
-  Vtbl.DuplicateSurface       = DrawDuplicateSurface;
-  Vtbl.EnumDisplayModes       = DrawEnumDisplayModes;
-  Vtbl.EnumSurfaces           = DrawEnumSurfaces;
-  Vtbl.FlipToGDISurface       = DrawFlipToGDISurface;
-  Vtbl.GetCaps                = DrawGetCaps;
-  Vtbl.GetDisplayMode         = DrawGetDisplayMode;
-  Vtbl.GetFourCCCodes         = DrawGetFourCCCodes;
-  Vtbl.GetGDISurface          = DrawGetGDISurface;
-  Vtbl.GetMonitorFrequency    = DrawGetMonitorFrequency;
-  Vtbl.GetScanLine            = DrawGetScanLine;
-  Vtbl.GetVerticalBlankStatus = DrawGetVerticalBlankStatus;
-  Vtbl.Initialize             = DrawInitialize;
-  Vtbl.RestoreDisplayMode     = DrawRestoreDisplayMode;
-  Vtbl.SetCooperativeLevel    = DrawSetCooperativeLevel;
-  Vtbl.SetDisplayMode         = DrawSetDisplayMode;
-  Vtbl.WaitForVerticalBlank   = DrawWaitForVerticalBlank;
+  // Copy Interface tables
+  Vtbl  = DDrawV1Table;
+  Vtbl2 = DDrawV2Table;
+  Vtbl4 = DDrawV4Table;
 
-  // V2 Interface
-
-  Vtbl2.AddRef                 = DrawAddRef;
-  Vtbl2.Release                = DrawRelease;
-  Vtbl2.QueryInterface         = DrawQueryInterface;
-  Vtbl2.Compact                = DrawCompact;
-  Vtbl2.CreateClipper          = DrawCreateClipper;
-  Vtbl2.CreatePalette          = DrawCreatePalette;
-  Vtbl2.CreateSurface          = DrawCreateSurface;
-  Vtbl2.DuplicateSurface       = DrawDuplicateSurface;
-  Vtbl2.EnumDisplayModes       = DrawEnumDisplayModes;
-  Vtbl2.EnumSurfaces           = DrawEnumSurfaces;
-  Vtbl2.FlipToGDISurface       = DrawFlipToGDISurface;
-  Vtbl2.GetCaps                = DrawGetCaps;
-  Vtbl2.GetDisplayMode         = DrawGetDisplayMode;
-  Vtbl2.GetFourCCCodes         = DrawGetFourCCCodes;
-  Vtbl2.GetGDISurface          = DrawGetGDISurface;
-  Vtbl2.GetMonitorFrequency    = DrawGetMonitorFrequency;
-  Vtbl2.GetScanLine            = DrawGetScanLine;
-  Vtbl2.GetVerticalBlankStatus = DrawGetVerticalBlankStatus;
-  Vtbl2.Initialize             = DrawInitialize;
-  Vtbl2.RestoreDisplayMode     = DrawRestoreDisplayMode;
-  Vtbl2.SetCooperativeLevel    = DrawSetCooperativeLevel;
-  Vtbl2.SetDisplayMode         = DrawSetDisplayMode2;
-  Vtbl2.WaitForVerticalBlank   = DrawWaitForVerticalBlank;
-  Vtbl2.GetAvailableVidMem     = DrawGetAvailableVidMem;
-
-  // New V4 interface
-  Vtbl4.AddRef                 = DrawAddRef;   // todo change to a DrawAddRef4 as handling this has changed
-  Vtbl4.Release                = DrawRelease;  // see above
-  Vtbl4.QueryInterface         = DrawQueryInterface;
-  Vtbl4.Compact                = DrawCompact;
-  Vtbl4.CreateClipper          = DrawCreateClipper;
-  Vtbl4.CreatePalette          = DrawCreatePalette;
-  Vtbl4.CreateSurface          = DrawCreateSurface4;//
-  Vtbl4.DuplicateSurface       = DrawDuplicateSurface4;//
-  Vtbl4.EnumDisplayModes       = DrawEnumDisplayModes4;//
-  Vtbl4.EnumSurfaces           = DrawEnumSurfaces4; //
-  Vtbl4.FlipToGDISurface       = DrawFlipToGDISurface;
-  Vtbl4.GetCaps                = DrawGetCaps;
-  Vtbl4.GetDisplayMode         = DrawGetDisplayMode4;//
-  Vtbl4.GetFourCCCodes         = DrawGetFourCCCodes;
-  Vtbl4.GetGDISurface          = DrawGetGDISurface4;//
-  Vtbl4.GetMonitorFrequency    = DrawGetMonitorFrequency;
-  Vtbl4.GetScanLine            = DrawGetScanLine;
-  Vtbl4.GetVerticalBlankStatus = DrawGetVerticalBlankStatus;
-  Vtbl4.Initialize             = DrawInitialize;
-  Vtbl4.RestoreDisplayMode     = DrawRestoreDisplayMode;
-  Vtbl4.SetCooperativeLevel    = DrawSetCooperativeLevel;
-  Vtbl4.SetDisplayMode         = DrawSetDisplayMode2;
-  Vtbl4.WaitForVerticalBlank   = DrawWaitForVerticalBlank;
-  Vtbl4.GetAvailableVidMem     = DrawGetAvailableVidMem4;
-  Vtbl4.GetSurfaceFromDC       = DrawGetSurfaceFromDC;
-  Vtbl4.RestoreAllSurfaces     = DrawRestoreAllSurfaces;
-  Vtbl4.TestCooperativeLevel   = DrawTestCooperativeLevel;
-  Vtbl4.GetDeviceIdentifier    = DrawGetDeviceIdentifier;
 
   if(lpGUID && *lpGUID == IID_IDirect3D)
   {
@@ -2165,5 +2086,112 @@ VOID OS2IDirectDraw::SwitchDisplay(HWND hwnd)
 
 }
 //******************************************************************************
+// Setup table for 3d devices
 //******************************************************************************
-
+IDirect3DVtbl DDraw3DTable = 
+{
+ D3DQueryInterface, 
+ D3DAddRef, 
+ D3DRelease, 
+ D3DInitialize, 
+ D3DEnumDevices, 
+ D3DCreateLight, 
+ D3DCreateMaterial, 
+ D3DCreateViewport, 
+ D3DFindDevice
+};
+//******************************************************************************
+// Org Interface
+//******************************************************************************
+IDirectDrawVtbl DDrawV1Table = 
+{
+ DrawQueryInterface, 
+ DrawAddRef, 
+ DrawRelease, 
+ DrawCompact, 
+ DrawCreateClipper, 
+ DrawCreatePalette, 
+ DrawCreateSurface, 
+ DrawDuplicateSurface, 
+ DrawEnumDisplayModes, 
+ DrawEnumSurfaces, 
+ DrawFlipToGDISurface, 
+ DrawGetCaps, 
+ DrawGetDisplayMode, 
+ DrawGetFourCCCodes, 
+ DrawGetGDISurface, 
+ DrawGetMonitorFrequency, 
+ DrawGetScanLine, 
+ DrawGetVerticalBlankStatus, 
+ DrawInitialize, 
+ DrawRestoreDisplayMode, 
+ DrawSetCooperativeLevel, 
+ DrawSetDisplayMode, 
+ DrawWaitForVerticalBlank
+};
+//******************************************************************************
+// V2 Interface
+//******************************************************************************
+IDirectDraw2Vtbl DDrawV2Table = 
+{
+ DrawQueryInterface, 
+ DrawAddRef, 
+ DrawRelease, 
+ DrawCompact, 
+ DrawCreateClipper, 
+ DrawCreatePalette, 
+ DrawCreateSurface, 
+ DrawDuplicateSurface, 
+ DrawEnumDisplayModes, 
+ DrawEnumSurfaces, 
+ DrawFlipToGDISurface, 
+ DrawGetCaps, 
+ DrawGetDisplayMode, 
+ DrawGetFourCCCodes, 
+ DrawGetGDISurface, 
+ DrawGetMonitorFrequency, 
+ DrawGetScanLine, 
+ DrawGetVerticalBlankStatus, 
+ DrawInitialize, 
+ DrawRestoreDisplayMode, 
+ DrawSetCooperativeLevel, 
+ DrawSetDisplayMode2, 
+ DrawWaitForVerticalBlank, 
+ DrawGetAvailableVidMem
+};
+//******************************************************************************
+// New V4 interface
+//******************************************************************************
+IDirectDraw4Vtbl DDrawV4Table = 
+{
+ DrawQueryInterface, 
+ DrawAddRef,   // todo change to a DrawAddRef4 as handling this has change, 
+ DrawRelease,  // see abov, 
+ DrawCompact, 
+ DrawCreateClipper, 
+ DrawCreatePalette, 
+ DrawCreateSurface4, 
+ DrawDuplicateSurface4, 
+ DrawEnumDisplayModes4, 
+ DrawEnumSurfaces4, 
+ DrawFlipToGDISurface, 
+ DrawGetCaps, 
+ DrawGetDisplayMode4, 
+ DrawGetFourCCCodes, 
+ DrawGetGDISurface4, 
+ DrawGetMonitorFrequency, 
+ DrawGetScanLine, 
+ DrawGetVerticalBlankStatus, 
+ DrawInitialize, 
+ DrawRestoreDisplayMode, 
+ DrawSetCooperativeLevel, 
+ DrawSetDisplayMode2, 
+ DrawWaitForVerticalBlank, 
+ DrawGetAvailableVidMem4, 
+ DrawGetSurfaceFromDC, 
+ DrawRestoreAllSurfaces, 
+ DrawTestCooperativeLevel, 
+ DrawGetDeviceIdentifier, 
+};
+//******************************************************************************
+//******************************************************************************

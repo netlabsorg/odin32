@@ -1,4 +1,4 @@
-/* $Id: clipper.h,v 1.1 2002-12-04 10:34:57 sandervl Exp $ */
+/* $Id: clipper.h,v 1.2 2002-12-29 14:11:00 sandervl Exp $ */
 
 /*
  * DX clipper class definition
@@ -65,14 +65,14 @@ class OS2IDirectDrawClipper
 
 };
 
-HRESULT __stdcall ClipQueryInterface(THIS, REFIID riid, LPVOID FAR * ppvObj);
-ULONG   __stdcall ClipAddRef(THIS);
-ULONG   __stdcall ClipRelease(THIS);
-HRESULT __stdcall ClipGetClipList(THIS, LPRECT, LPRGNDATA, LPDWORD);
-HRESULT __stdcall ClipGetHWnd(THIS, HWND FAR *);
-HRESULT __stdcall ClipInitialize(THIS, LPDIRECTDRAW, DWORD);
-HRESULT __stdcall ClipIsClipListChanged(THIS, BOOL FAR *);
-HRESULT __stdcall ClipSetClipList(THIS, LPRGNDATA,DWORD);
-HRESULT __stdcall ClipSetHWnd(THIS, DWORD, HWND );
+HRESULT WIN32API ClipQueryInterface(THIS, REFIID riid, LPVOID FAR * ppvObj);
+ULONG   WIN32API ClipAddRef(THIS);
+ULONG   WIN32API ClipRelease(THIS);
+HRESULT WIN32API ClipGetClipList(THIS, LPRECT, LPRGNDATA, LPDWORD);
+HRESULT WIN32API ClipGetHWnd(THIS, HWND FAR *);
+HRESULT WIN32API ClipInitialize(THIS, LPDIRECTDRAW, DWORD);
+HRESULT WIN32API ClipIsClipListChanged(THIS, BOOL FAR *);
+HRESULT WIN32API ClipSetClipList(THIS, LPRGNDATA,DWORD);
+HRESULT WIN32API ClipSetHWnd(THIS, DWORD, HWND );
 
 #endif
