@@ -1,4 +1,4 @@
-# $Id: odin32.tools.mk,v 1.9 2001-10-01 01:24:38 bird Exp $
+# $Id: odin32.tools.mk,v 1.10 2001-12-09 15:00:04 bird Exp $
 
 #
 # Odin32 API
@@ -49,15 +49,15 @@ EXECEXCL    = $(ODIN32_TOOLS)\ExecExcl.cmd
 BLDLEVELINF = $(ODIN32_TOOLS)\BldLevelInf.cmd
 LXLITE      = $(ODIN32_TOOLS)\lxlite.exe
 CMDQD       = $(ODIN32_TOOLS)\cmdqd.exe
-DEPEND      = $(ODIN32_TOOLS)\fastdep.exe -o$$(OBJDIR) -cy+
+DEPEND      = $(ODIN32_TOOLS)\fastdep.exe -o$$(OBJDIR) -cy+ -xdummy.c
 !ifdef MAKEFLAGS
 !if "$(MAKEVER)" != "5.0"
 !if "$(MAKEFLAGS:A=z)" != "$(MAKEFLAGS)"
-DEPEND      = $(ODIN32_TOOLS)\fastdep.exe -o$$(OBJDIR) -cy+ -F+
+DEPEND      = $(ODIN32_TOOLS)\fastdep.exe -o$$(OBJDIR) -cy+ -xdummy.c -F+
 !endif
 !else
 !if "$(MAKEFLAGS:a=z)" != "$(MAKEFLAGS)"
-DEPEND      = $(ODIN32_TOOLS)\fastdep.exe -o$$(OBJDIR) -cy+ -F+
+DEPEND      = $(ODIN32_TOOLS)\fastdep.exe -o$$(OBJDIR) -cy+ -xdummy.c -F+
 !endif
 !endif
 !endif
