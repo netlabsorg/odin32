@@ -1,4 +1,4 @@
-/* $Id: oslibgpi.h,v 1.1 1999-12-09 16:49:45 cbratschi Exp $ */
+/* $Id: oslibgpi.h,v 1.2 1999-12-16 16:52:33 cbratschi Exp $ */
 
 /*
  * GPI interface code
@@ -15,17 +15,19 @@
 #define GM_COMPATIBLE_W     1
 #define GM_ADVANCED_W       2
 
-PVOID APIENTRY _GpiQueryDCData(ULONG hps);
+#define APIENTRYOS2 _System
+
+PVOID APIENTRYOS2 _GpiQueryDCData(ULONG hps);
 
 inline PVOID OSLibGpiQueryDCData(ULONG hps)
 {
- PVOID yyrc;
- USHORT sel = RestoreOS2FS();
+  PVOID yyrc;
+  USHORT sel = RestoreOS2FS();
 
-    yyrc = _GpiQueryDCData(hps);
-    SetFS(sel);
+  yyrc = _GpiQueryDCData(hps);
+  SetFS(sel);
 
-    return yyrc;
+  return yyrc;
 }
 
 typedef struct
@@ -36,7 +38,7 @@ typedef struct
   LONG  yTop;
 } RECTLOS2, *PRECTLOS2;
 
-typedef struct
+typedef struct //same as Win32 POINT
 {
   LONG  x;
   LONG  y;
@@ -60,8 +62,13 @@ typedef struct
 
 BOOL excludeBottomRightPoint(PVOID pHps,PPOINTLOS2 pptl);
 BOOL getAlignUpdateCP(PVOID pHps);
-INT getWorldYDeltaFor1Pixel(PVOID pHps);
-INT getWorldXDeltaFor1Pixel(PVOID pHps);
+INT  getWorldYDeltaFor1Pixel(PVOID pHps);
+INT  getWorldXDeltaFor1Pixel(PVOID pHps);
+BOOL getInPath(PVOID pHps);
+VOID setInPath(PVOID pHps,BOOL inPath);
+BOOL getIsWideLine(PVOID pHps);
+BOOL getIsTopTop(PVOID pHps);
+ULONG getMapMode(PVOID pHps);
 
 BOOL OSLibGpiQueryCurrentPosition(PVOID pHps,PPOINTLOS2 ptl);
 BOOL OSLibGpiSetCurrentPosition(PVOID pHps,PPOINTLOS2 ptl);
@@ -94,5 +101,65 @@ BOOL OSLibGpiQueryCharStringPosAt(PVOID pHps,PPOINTLOS2 ptl,ULONG flOptions,LONG
 
 BOOL OSLibGpiSetTextAlignment(PVOID pHps,LONG lHoriz,LONG lVert);
 BOOL OSLibGpiQueryTextAlignment(PVOID pHps,PLONG plHoriz,PLONG plVert);
+
+LONG OSLibGpiQueryTabbedTextExtent(PVOID pHps,INT lCount,LPCSTR pchString,INT lTabCount,PINT puTabStops);
+LONG OSLibGpiTabbedCharStringAt(PVOID pHps,PPOINTLOS2 pPtStart,PRECTLOS2 prclRect,ULONG flOptions,INT lCount,LPCSTR pchString,INT lTabCount,PINT puTabStops,INT lTabOrigin);
+
+#define TXTBOXOS_TOPLEFT                  0L
+#define TXTBOXOS_BOTTOMLEFT               1L
+#define TXTBOXOS_TOPRIGHT                 2L
+#define TXTBOXOS_BOTTOMRIGHT              3L
+#define TXTBOXOS_CONCAT                   4L
+#define TXTBOXOS_COUNT                    5L
+
+BOOL OSLibGpiQueryTextBox(PVOID pHps,LONG lCount1,LPCSTR pchString,LONG lCount2,PPOINTLOS2 aptlPoints);
+
+VOID calcDimensions(POINTLOS2 box[],PPOINTLOS2 point);
+
+#define DTOS_LEFT                    0x00000000
+#define DTOS_QUERYEXTENT             0x00000002
+#define DTOS_UNDERSCORE              0x00000010
+#define DTOS_STRIKEOUT               0x00000020
+#define DTOS_TEXTATTRS               0x00000040
+#define DTOS_EXTERNALLEADING         0x00000080
+#define DTOS_CENTER                  0x00000100
+#define DTOS_RIGHT                   0x00000200
+#define DTOS_TOP                     0x00000000
+#define DTOS_VCENTER                 0x00000400
+#define DTOS_BOTTOM                  0x00000800
+#define DTOS_HALFTONE                0x00001000
+#define DTOS_MNEMONIC                0x00002000
+#define DTOS_WORDBREAK               0x00004000
+#define DTOS_ERASERECT               0x00008000
+
+#define BMOS_ERROR                      (-1L)
+#define BMOS_DEFAULT                      0L
+#define BMOS_OR                           1L
+#define BMOS_OVERPAINT                    2L
+#define BMOS_LEAVEALONE                   5L
+
+LONG OSLibGpiQueryBackMix(PVOID pHps);
+
+#define MMOS_TEXT             1
+#define MMOS_LOMETRIC         2
+#define MMOS_HIMETRIC         3
+#define MMOS_LOENGLISH        4
+#define MMOS_HIENGLISH        5
+#define MMOS_TWIPS            6
+#define MMOS_ISOTROPIC        7
+#define MMOS_ANISOTROPIC      8
+
+BOOL doesYAxisGrowNorth(PVOID pHps);
+
+LONG OSLibWinDrawTabbedText(PVOID pHps,LONG cchText,LONG lTabs,LPCSTR lpchText,PVOID prcl,LONG clrFore,LONG clrBack,ULONG flCmd);
+
+
+BOOL OSLibGpiMove(PVOID pHps,PPOINTLOS2 pptlPoint);
+LONG OSLibGpiLine(PVOID pHps,PPOINTLOS2 pptlEndPoint);
+
+BOOL OSLibGpiEndPath(PVOID pHps);
+
+BOOL drawLinePointCircle(PVOID pHps,INT width,INT height,LONG color);
+BOOL drawLinePoint(PVOID pHps,PPOINTLOS2 pt,LONG color);
 
 #endif

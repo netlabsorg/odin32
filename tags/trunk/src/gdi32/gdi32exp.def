@@ -318,9 +318,9 @@ EXPORTS
     _UpdateICMRegKeyA@16                      @429
     _UpdateICMRegKeyW@16                      @430
     _WidenPath@4                              @431
-    _InternalDrawTextExA@24                   @1000
-    _InternalDrawTextExW@24                   @1001
-    _InternalTabbedTextOutA@32                @1002
-    _InternalTabbedTextOutW@32                @1003
-    _InternalGetTabbedTextExtentA@20          @1004
-    _InternalGetTabbedTextExtentW@20          @1005
+    InternalDrawTextExA                       @1000
+    InternalDrawTextExW                       @1001
+    InternalTabbedTextOutA                    @1002
+    InternalTabbedTextOutW                    @1003
+    InternalGetTabbedTextExtentA              @1004
+    InternalGetTabbedTextExtentW              @1005
