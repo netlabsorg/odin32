@@ -1,0 +1,67 @@
+/* $Id: user32.rc,v 1.1 1999-09-15 23:19:37 sandervl Exp $ */
+/* converted from WINE */
+
+/* Button */
+
+#define OBM_CHECKBOXES      32759
+
+BITMAP OBM_CHECKBOXES "checkboxes.bmp"
+
+/* Scroll */
+
+#define OBM_LFARROWI        32734
+#define OBM_RGARROWI        32735
+#define OBM_DNARROWI        32736
+#define OBM_UPARROWI        32737
+
+BITMAP OBM_LFARROWI "lfarrowi.bmp"
+BITMAP OBM_RGARROWI "rgarrowi.bmp"
+BITMAP OBM_DNARROWI "dnarrowi.bmp"
+BITMAP OBM_UPARROWI "uparrowi.bmp"
+
+#define OBM_LFARROWD        32740
+#define OBM_RGARROWD        32741
+#define OBM_DNARROWD        32742
+#define OBM_UPARROWD        32743
+
+BITMAP OBM_LFARROWD "lfarrowd.bmp"
+BITMAP OBM_RGARROWD "rgarrowd.bmp"
+BITMAP OBM_DNARROWD "dnarrowd.bmp"
+BITMAP OBM_UPARROWD "uparrowd.bmp"
+
+#define OBM_LFARROW         32750
+#define OBM_RGARROW         32751
+#define OBM_DNARROW         32752
+#define OBM_UPARROW         32753
+
+BITMAP OBM_LFARROW "lfarrow.bmp"
+BITMAP OBM_RGARROW "rgarrow.bmp"
+BITMAP OBM_DNARROW "dnarrow.bmp"
+BITMAP OBM_UPARROW "uparrow.bmp"
+
+/* Combo */
+
+#define OBM_COMBO           32738
+
+BITMAP OBM_COMBO "combo.bmp"
+
+/* Edit */
+
+#define EM_UNDO              0x00c7
+#define WM_CUT               0x0300
+#define WM_COPY              0x0301
+#define WM_PASTE             0x0302
+#define WM_CLEAR             0x0303
+#define EM_SETSEL            0x00b1
+
+MENU 100
+BEGIN
+  MENUITEM "~Undo", EM_UNDO
+  MENUITEM SEPARATOR
+  MENUITEM "Cu~t", WM_CUT
+  MENUITEM "~Copy", WM_COPY
+  MENUITEM "~Paste", WM_PASTE
+  MENUITEM "~Delete", WM_CLEAR
+  MENUITEM SEPARATOR
+  MENUITEM "Select ~All", EM_SETSEL
+END
