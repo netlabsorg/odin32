@@ -1,4 +1,4 @@
-/* $Id: kFileFormatBase.cpp,v 1.4 2001-04-17 00:26:11 bird Exp $
+/* $Id: kFileFormatBase.cpp,v 1.5 2001-06-22 17:07:47 bird Exp $
  *
  * kFileFormatBase - Base class for kFile<format> classes.
  *
@@ -33,5 +33,11 @@ BOOL   kFileFormatBase::dump(kFile *pOut)
 {
     pOut->printf("Sorry, dump() is not implemented for this file format.\n");
     return FALSE;
+}
+
+
+kFileFormatBase::~kFileFormatBase()
+{
+
 }
 
