@@ -1,4 +1,4 @@
-/* $Id: win32ktst.c,v 1.8 2001-02-11 15:28:10 bird Exp $
+/* $Id: win32ktst.c,v 1.9 2001-03-02 12:48:41 bird Exp $
  *
  * Win32k test module.
  *
@@ -144,7 +144,7 @@
 /*******************************************************************************
 *   Structures and Typedefs                                                    *
 *******************************************************************************/
-#ifndef QS_MTE
+#if !defined(QS_MTE) || defined(QS_MODVER)
    /* From OS/2 Toolkit v4.5 (BSEDOS.H) */
 
    /* Global Record structure
