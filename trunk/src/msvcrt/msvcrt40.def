@@ -1,4 +1,4 @@
-; $Id: msvcrt40.def,v 1.7 2000-02-05 13:33:17 sandervl Exp $
+; $Id: msvcrt40.def,v 1.8 2000-06-21 17:33:38 phaller Exp $
 
 ;
 ; Based on Windows 98 : MSVCRT40.DLL (v4.22.000)
@@ -87,7 +87,7 @@ EXPORTS
     _HUGE			= MSVCRT__HUGE   		@502
     _XcptFilter			= _CRTDLL__XcptFilter		@503
     __CxxFrameHandler		= _MSVCRT___CxxFrameHandler	@504
-;   __CxxLongjmpUnwind						@505
+    __CxxLongjmpUnwind		= _MSVCRT___CxxLongjmpUnwind    @505
 ;   __RTCastToVoid						@506
 ;   __RTDynamicCast						@507
 ;   __RTtypeid							@508
