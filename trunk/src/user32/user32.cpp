@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.131 2004-03-12 11:43:57 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.132 2004-03-15 16:10:33 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -489,16 +489,15 @@ int WIN32API GetSystemMetrics(int nIndex)
 
 //CB: todo: add missing metrics
 
-    case SM_CXICONSPACING: //TODO: size of grid cell for large icons
-        rc = OSLibWinQuerySysValue(SVOS_CXICON);
-        //CB: return standard windows icon size?
-        //rc = 32;
+    case SM_CXICONSPACING: //Size of grid cell for large icons (view in File dialog)
+        rc = 64; //In NT4 it's (90,64)
         break;
+
     case SM_CYICONSPACING:
-        rc = OSLibWinQuerySysValue(SVOS_CYICON);
         //read SM_CXICONSPACING comment
-        //rc = 32;
+        rc = 64;
         break;
+
     case SM_PENWINDOWS:
         rc = FALSE;
         break;
@@ -606,8 +605,6 @@ int WIN32API GetSystemMetrics(int nIndex)
       case SPI_GETICONTITLELOGFONT:
       case SPI_GETICONTITLEWRAP:
       case SPI_GETMENUDROPALIGNMENT:
-      case SPI_ICONHORIZONTALSPACING:
-      case SPI_ICONVERTICALSPACING:
       case SPI_LANGDRIVER:
       case SPI_SETFASTTASKSWITCH:
       case SPI_SETGRIDGRANULARITY:
@@ -736,6 +733,14 @@ BOOL WIN32API SystemParametersInfoA(UINT uiAction, UINT uiParam, PVOID pvParam, 
 
     case SPI_GETDRAGFULLWINDOWS:
         *(BOOL *)pvParam = OSLibWinQuerySysValue(SVOS_DYNAMICDRAG);
+        break;
+
+   case SPI_ICONHORIZONTALSPACING:
+        *(INT *)pvParam = 90; //GetSystemMetrics(SM_CXICONSPACING);
+        break;
+
+   case SPI_ICONVERTICALSPACING:
+        *(INT *)pvParam = 64; //GetSystemMetrics(SM_CYICONSPACING);
         break;
 
     case SPI_GETNONCLIENTMETRICS:
