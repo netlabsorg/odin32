@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1940 2002-01-06 16:57:29 bird Exp $ */
+/* $Id: changelog,v 1.1941 2002-01-07 11:19:03 sandervl Exp $ */
+
+ 2002-01-07: Sander van Leeuwen <sandervl@xs4all.nl>
+    - USER32:   o Fixed restoring of windows after minimizing/maximizing
+                o Allocate more memory for 40x40 icon generation
 
  2002-01-06: knut st. osmundsen <bird@anduin.net>
     - DailyBuild:
@@ -12,6 +16,8 @@
                     (rounded up to next 8 bytes boundary)
                   (Verified this behaviour in NT4 (Global/Heap(Re)Alloc);
                    fixes crashes in Opera 5.12 which relies on this 'feature')
+    - GDI32:    o Print handle type name in SelectObject
+                o EnumFontProcExW -> must restore FS in enum handler
 
  2002-01-04: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Rewrote GetDriveType (fixes detection of LAN drives)
