@@ -1,4 +1,4 @@
-/* $Id: ImpDef.cpp,v 1.2 1999-09-05 22:10:26 bird Exp $ */
+/* $Id: ImpDef.cpp,v 1.3 1999-09-08 07:30:09 bird Exp $ */
 /*
  * ImpDef - Create export file which use internal names and ordinals.
  *
@@ -12,6 +12,7 @@
 #include <os2.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "ImpDef.h"
 #include "kFileFormatBase.h"
 #include "kFileDef.h"
@@ -38,13 +39,15 @@ int main(int argc, char **argv)
     long    lRc = 0;
     char   *pszInput = NULL;
     char   *pszOutput = NULL;
-    OPTIONS options = {TRUE, FALSE};
+    OPTIONS options = {TRUE, ORD_START_INTERNAL_FUNCTIONS, FALSE, TRUE};
 
     /**************************************************************************
     * parse arguments.
     * options:  -h or -?     help
     *           -S<[+]|->    Similar to exported. (stdcall)
     *           -O<[+]|->    Remove OS2 prefix on APIs.
+    *           -I:<num>     Start ordinal number of internal functions.
+    *           -F<[+]|->    Export intname for internal stdcall functions.
     **************************************************************************/
     if (argc == 1)
         syntax();
@@ -63,6 +66,26 @@ int main(int argc, char **argv)
                 case 'o':
                 case 'O':
                     options.fRemoveOS2APIPrefix = argv[argi][2] != '-';
+                    break;
+
+                case 'i':
+                case 'I':
+                    if (strlen(argv[argi]) >= 3)
+                    {
+                        options.ulOrdStartInternalFunctions = atol(&argv[argi][3]);
+                        if (options.ulOrdStartInternalFunctions == 0)
+                            fprintf(stderr, "warning: internal functions starts at ordinal 0!\n");
+                    }
+                    else
+                    {
+                        fprintf(stderr, "incorrect parameter -I:<ord>. (argi=%d, argv[argi]=%s)\n", argi, argv[argi]);
+                        fFatal = TRUE;
+                    }
+                    break;
+
+                case 'f':
+                case 'F':
+                    options.fInternalFnExportStdCallsIntName = argv[argi][2] != '-';
                     break;
 
                 case '?':
@@ -122,8 +145,10 @@ static void syntax(void)
            "------------------------------------------------\n"
            "syntax: ImpDef.exe [-h|-?] [-S] <infile> <outfile>\n"
            "    -h or -?      Syntax help. (this)\n"
-           "    -O<[+]|->     Remove OS2 prefix on APIs.  default: O-\n"
-           "    -S<[+]|->     Similar to exported name.   default: S+\n"
+           "    -F<[+]|->     Fix! Export int.name for int.functions. default: F+\n"
+           "    -I:<ord>      Start of internal function.  default: I:%d\n"
+           "    -O<[+]|->     Remove OS2 prefix on APIs.   default: O-\n"
+           "    -S<[+]|->     Similar to exported name.    default: S+\n"
            "    infile        Name of input file\n"
            "    outfile       Name of output file\n"
            "\n"
@@ -133,7 +158,8 @@ static void syntax(void)
            "   to the exported name. This way the OS2 prefix is removed.\n"
            "   -O+ has no effect on stdcall functions when -S+ is set. -S+ has higher\n"
            "   precedence than -O+.\n"
-           "   -O+ only removes the OS2 prefix from internal names.\n"
+           "   -O+ only removes the OS2 prefix from internal names.\n",
+           ORD_START_INTERNAL_FUNCTIONS
            );
 }
 
@@ -200,12 +226,7 @@ static long processFile(const char *pszInput, const char *pszOutput, const POPTI
                         }
 
                         /* real work */
-                        if (pOptions->fSimilarToExported || pOptions->fRemoveOS2APIPrefix)
-                            pszName = generateExportName(&export, &szName[0], pOptions);
-                        else if (export.achIntName[0] != '\0')
-                            pszName = &export.achIntName[0];
-                        else if (export.achName[0] != '\0')
-                            pszName = &export.achName[0];
+                        pszName = generateExportName(&export, &szName[0], pOptions);
 
                         fprintf(phOutput, "    %-*s  @%ld\n", 40, pszName, export.ulOrdinal);
                     } while (DefFile.findNextExport(&export));
@@ -237,7 +258,7 @@ static long processFile(const char *pszInput, const char *pszOutput, const POPTI
 
 /**
  * Generate export names according to options defines.
- * fSimilarToExported only applies to stdcall functions.
+ * fSimilarToExported only applies to stdcall API functions.
  * fRemoveOS2APIPrefix only applies to APIs.
  * fRemoveOS2APIPrefix have no effect on stdcall functions when fSimilarToExported is set.
  * fRemoveOS2APIPrefix only applies to the internal names.
@@ -251,64 +272,77 @@ static long processFile(const char *pszInput, const char *pszOutput, const POPTI
  */
 static char *generateExportName(const PEXPORTENTRY pExport, char *pszBuffer, const POPTIONS pOptions)
 {
-    if (pOptions->fSimilarToExported)
+    if (pExport->ulOrdinal < pOptions->ulOrdStartInternalFunctions)
     {
-        if (pExport->achIntName[0] != '\0')
+        /* API */
+        if (pOptions->fSimilarToExported)
         {
-            char *pszAt = strchr(&pExport->achIntName[0], '@');
-            if (pszAt != NULL && pExport->achIntName[0] == '_' && pExport->achName[0] != '"')
-            {   /* stdcall - merge */
-                strcpy(pszBuffer, "_");
-                /* test for "reserved" definition file names (like HeapSize) in original def-file. */
-                if (pExport->achName[0] != '"')
-                    strcat(pszBuffer, &pExport->achName[0]);
-                else
-                {
-                    strcat(pszBuffer, &pExport->achName[1]);
-                    pszBuffer[strlen(pszBuffer)-1] = '\0'; //remove tail '"'
-                }
+            if (pExport->achIntName[0] != '\0')
+            {
+                char *pszAt = strchr(&pExport->achIntName[0], '@');
+                if (pszAt != NULL && pExport->achIntName[0] == '_' && pExport->achName[0] != '"')
+                {   /* stdcall - merge */
+                    strcpy(pszBuffer, "_");
+                    /* test for "reserved" definition file names (like HeapSize) in original def-file. */
+                    if (pExport->achName[0] != '"')
+                        strcat(pszBuffer, &pExport->achName[0]);
+                    else
+                    {
+                        strcat(pszBuffer, &pExport->achName[1]);
+                        pszBuffer[strlen(pszBuffer)-1] = '\0'; //remove tail '"'
+                    }
 
-                strcat(pszBuffer, pszAt);
+                    strcat(pszBuffer, pszAt);
+                }
+                else
+                {   /* not a stdcall - no merge but check for OS2prefix */
+                    if (pOptions->fRemoveOS2APIPrefix)
+                    {
+                        int i = 0;
+                        char *psz = pszBuffer;
+                        if (pExport->achIntName[i] == '_')
+                            *psz++ = pExport->achIntName[i++];
+                        if (strncmp(&pExport->achIntName[i], "OS2", 3) == 0)
+                            i += 3;
+                        strcpy(psz, &pExport->achIntName[i]);
+                    }
+                    else
+                        strcpy(pszBuffer, &pExport->achIntName[0]);
+                }
             }
             else
-            {   /* not a stdcall - no merge but check for OS2prefix */
-                if (pOptions->fRemoveOS2APIPrefix && pExport->ulOrdinal < ORD_START_INTERNAL_FUNCTIONS)
-                {
-                    int i = 0;
-                    char *psz = pszBuffer;
-                    if (pExport->achIntName[i] == '_')
-                        *psz++ = pExport->achIntName[i++];
-                    if (strncmp(&pExport->achIntName[i], "OS2", 3) == 0)
-                        i += 3;
-                    strcpy(psz, &pExport->achIntName[i]);
-                }
-                else
-                    strcpy(pszBuffer, &pExport->achIntName[0]);
+                strcpy(pszBuffer, &pExport->achName[0]);
+        }
+        else if (pOptions->fRemoveOS2APIPrefix)
+        {   /* removes OS2 prefix */
+            if (pExport->achIntName[0] != '\0')
+            {
+                int i = 0;
+                char *psz = pszBuffer;
+                if (pExport->achIntName[i] == '_')
+                    *psz++ = pExport->achIntName[i++];
+                if (strncmp(&pExport->achIntName[i], "OS2", 3) == 0)
+                    i += 3;
+                strcpy(psz, &pExport->achIntName[i]);
             }
+            else
+                strcpy(pszBuffer, &pExport->achName[0]);
         }
         else
-            strcpy(pszBuffer, &pExport->achName[0]);
-    }
-    else if (pOptions->fRemoveOS2APIPrefix && pExport->ulOrdinal < ORD_START_INTERNAL_FUNCTIONS)
-    {   /* removes OS2 prefix */
-        if (pExport->achIntName[0] != '\0')
-        {
-            int i = 0;
-            char *psz = pszBuffer;
-            if (pExport->achIntName[i] == '_')
-                *psz++ = pExport->achIntName[i++];
-            if (strncmp(&pExport->achIntName[i], "OS2", 3) == 0)
-                i += 3;
-            strcpy(psz, &pExport->achIntName[i]);
-        }
-        else
-            strcpy(pszBuffer, &pExport->achName[0]);
+            if (pExport->achIntName[0] != '\0')
+                strcpy(pszBuffer, &pExport->achIntName[0]);
+            else
+                strcpy(pszBuffer, &pExport->achName[0]);
     }
     else
-        if (pExport->achIntName[0] != '\0')
+    {   /* non-API functions */
+        if ((pExport->achName[0] == '\0' || (pOptions->fInternalFnExportStdCallsIntName && strchr(&pExport->achIntName[0], '@')))
+            && pExport->achIntName[0] != '\0'
+            )
             strcpy(pszBuffer, &pExport->achIntName[0]);
         else
             strcpy(pszBuffer, &pExport->achName[0]);
+    }
 
     return pszBuffer;
 }
