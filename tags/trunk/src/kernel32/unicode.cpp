@@ -1,4 +1,4 @@
-/* $Id: unicode.cpp,v 1.19 1999-12-05 21:11:40 sandervl Exp $ */
+/* $Id: unicode.cpp,v 1.20 1999-12-27 18:42:25 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -16,9 +16,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include "misc.h"
+#include "codepage.h"
 #include <unicode.h>
 
-static UconvObject uconv_object = NULL;
+/*static UconvObject uconv_object = NULL;*/
+/*
 BOOL getUconvObject( void )
 {
   int rc;
@@ -39,7 +41,7 @@ BOOL getUconvObject( void )
   }
   return ret;
 }
-
+*/
 /***********************************************************************
  *              MultiByteToWideChar                (KERNEL32.534)
  *
@@ -199,11 +201,12 @@ BOOL WIN32API GetCPInfo(UINT uCodePage, CPINFO *lpCPInfo)
 
   return(TRUE);
 }
+
 //******************************************************************************
 // unilen: length of astring buffer (including 0 terminator)
 // returns string length
 //******************************************************************************
-int WIN32API UnicodeToAsciiN(LPCWSTR ustring, char *astring, int unilen)
+int UnicodeToCodepageN(LPCWSTR ustring, char *astring, int unilen, UconvObject uconv_object)
 {
   int i;
   int rc, length;
@@ -226,7 +229,7 @@ int WIN32API UnicodeToAsciiN(LPCWSTR ustring, char *astring, int unilen)
 //  length = UniStrlen(ustring)+1;
 //  unilen = min(length, unilen);
 
-  if (getUconvObject())
+  if (uconv_object)
   {
     if (unilen == 1)
     {
@@ -263,6 +266,12 @@ int WIN32API UnicodeToAsciiN(LPCWSTR ustring, char *astring, int unilen)
     return(unilen-1);
   }
 }
+
+int WIN32API UnicodeToAsciiN(LPCWSTR ustring, char *astring, int unilen)
+{
+    return UnicodeToCodepageN(ustring, astring, unilen, GetWindowsUconvObject());
+}
+
 //******************************************************************************
 // Converts unicode string to ascii string
 // returns length of ascii string
@@ -326,7 +335,7 @@ void WIN32API FreeAsciiString(char *astring)
 //******************************************************************************
 // asciilen: max length of unicode buffer (including end 0)
 //******************************************************************************
-void WIN32API AsciiToUnicodeN(const char *ascii, WCHAR *unicode, int asciilen)
+void CodepageToUnicodeN(const char *ascii, WCHAR *unicode, int asciilen, UconvObject uconv_object)
 {
   int rc;
   int i;
@@ -351,7 +360,7 @@ void WIN32API AsciiToUnicodeN(const char *ascii, WCHAR *unicode, int asciilen)
   if (unicode == NULL || asciilen <= 0) return; //nothing to do
 
 //  dprintf(("KERNEL32: AsciiToUnicodeN %s\n", ascii));
-  if (getUconvObject())
+  if (uconv_object)
   {
     if (asciilen == 1)
     {
@@ -388,6 +397,13 @@ void WIN32API AsciiToUnicodeN(const char *ascii, WCHAR *unicode, int asciilen)
     unicode[asciilen-1] = 0;
   }
 }
+
+void WIN32API AsciiToUnicodeN(const char *ascii, WCHAR *unicode, int asciilen)
+{
+    CodepageToUnicodeN(ascii, unicode, asciilen, GetWindowsUconvObject());
+}
+
+
 //******************************************************************************
 // Copies the full string from ascii to unicode
 //******************************************************************************

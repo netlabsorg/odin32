@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.60 1999-12-24 18:40:08 sandervl Exp $
+; $Id: kernel32.def,v 1.61 1999-12-27 18:42:25 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 ;Basis is Windows95 KERNEL32
@@ -1061,3 +1061,5 @@ EXPORTS
 
     IsExeStarted__Fv     @2001
 
+   GetDisplayCodepage__Fv                  @3000
+   GetWindowsCodepage__Fv                  @3001
