@@ -1,4 +1,4 @@
-/* $Id: win32ktst.c,v 1.4 2000-12-11 06:53:57 bird Exp $
+/* $Id: win32ktst.c,v 1.5 2000-12-16 23:03:32 bird Exp $
  *
  * Win32k test module.
  *
@@ -577,6 +577,8 @@ int tests(int iTest, int argc, char **argv)
         case 1:     rc = TestCase1(argc, argv);   break;
         case 2:     rc = TestCase2();   break;
         case 3:     rc = TestCase3();   break;
+        case 4:     rc = TestCase4();   break;
+        case 5:     rc = TestCase5();   break;
 
         default:
             printf("testcase no. %d is not found\n", iTest);
@@ -771,6 +773,110 @@ int TestCase3(void)
             {
                  rc = TestCaseExeLoad2();
             }
+        }
+        else
+            printf("!failed!\n");
+    }
+    else
+        printf("!failed!\n");
+
+    return rc;
+}
+
+
+/**
+ * Test case 4.
+ * Checks that all parameters are read correctly (3).
+ *
+ * @sketch  Create init packet with no arguments.
+ *          Initiate elf$
+ *          Create init packet with no arguments.
+ *          Initiate win32k$
+ * @returns 0 on success.
+ *          1 on failure.
+ * @status  completely implemented.
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ */
+int TestCase4(void)
+{
+    int         rc = 1;
+    RP32INIT    rpinit;
+    char *      pszInitArgs = "-P:pe";
+
+    /* $elf */
+    initRPInit(SSToDS(&rpinit), pszInitArgs);
+    rc = InitElf(&rpinit);              /* no SSToDS! */
+    printf("InitElf returned status=0x%04x\n", rpinit.rph.Status);
+    if ((rpinit.rph.Status & (STDON | STERR)) == STDON)
+    {
+        /* $win32k */
+        initRPInit(SSToDS(&rpinit), pszInitArgs);
+        rc = InitWin32k(&rpinit);       /* no SSToDS! */
+        printf("InitWin32k returned status=0x%04x\n", rpinit.rph.Status);
+        if ((rpinit.rph.Status & (STDON | STERR)) == STDON)
+        {
+            struct options opt = DEFAULT_OPTION_ASSIGMENTS;
+            opt.fPE             = FLAGS_PE_PE;
+
+            rc = CompareOptions(SSToDS(&opt));
+            /*
+            if (rc == NO_ERROR)
+            {
+                 rc = TestCaseExeLoad2();
+            }
+            */
+        }
+        else
+            printf("!failed!\n");
+    }
+    else
+        printf("!failed!\n");
+
+    return rc;
+}
+
+
+/**
+ * Test case 5.
+ * Checks that all parameters are read correctly (3).
+ *
+ * @sketch  Create init packet with no arguments.
+ *          Initiate elf$
+ *          Create init packet with no arguments.
+ *          Initiate win32k$
+ * @returns 0 on success.
+ *          1 on failure.
+ * @status  completely implemented.
+ * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
+ */
+int TestCase5(void)
+{
+    int         rc = 1;
+    RP32INIT    rpinit;
+    char *      pszInitArgs = "-Pe:pe";
+
+    /* $elf */
+    initRPInit(SSToDS(&rpinit), pszInitArgs);
+    rc = InitElf(&rpinit);              /* no SSToDS! */
+    printf("InitElf returned status=0x%04x\n", rpinit.rph.Status);
+    if ((rpinit.rph.Status & (STDON | STERR)) == STDON)
+    {
+        /* $win32k */
+        initRPInit(SSToDS(&rpinit), pszInitArgs);
+        rc = InitWin32k(&rpinit);       /* no SSToDS! */
+        printf("InitWin32k returned status=0x%04x\n", rpinit.rph.Status);
+        if ((rpinit.rph.Status & (STDON | STERR)) == STDON)
+        {
+            struct options opt = DEFAULT_OPTION_ASSIGMENTS;
+            opt.fPE             = FLAGS_PE_PE;
+
+            rc = CompareOptions(SSToDS(&opt));
+            /*
+            if (rc == NO_ERROR)
+            {
+                 rc = TestCaseExeLoad2();
+            }
+            */
         }
         else
             printf("!failed!\n");
