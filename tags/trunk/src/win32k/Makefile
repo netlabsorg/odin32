@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.69 2001-04-14 07:24:01 bird Exp $
+# $Id: Makefile,v 1.70 2001-08-04 14:10:09 bird Exp $
 
 #
 # Win32k makefile.
@@ -181,4 +181,11 @@ fulldoc:
 # Dummy rule for force.
 #
 .force:
+
+
+#
+# Stub the rest of the rules.
+#
+$(COMMONRULES:clean dep lib all=):
+
 
