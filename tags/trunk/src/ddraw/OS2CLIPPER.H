@@ -1,7 +1,7 @@
 #ifndef __OS2CLIPPER_H__
 #define __OS2CLIPPER_H__
 
-#include <dive.h>
+#include "divewrap.h"
 #define FAR
 #undef THIS
 #define THIS IDirectDrawClipper*
