@@ -1,4 +1,8 @@
-/* $Id: ChangeLog,v 1.1760 2001-10-17 13:43:09 phaller Exp $ */
+/* $Id: ChangeLog,v 1.1761 2001-10-17 14:26:23 bird Exp $ */
+
+ 2001-10-17: knut stange osmundsen <kosmunds@csc.com>
+    - common:   o Corrected bug in kFile buffering which caused impdef to
+                  crash in some cases.
 
  2001-10-17: Patrick Haller <patrick.haller@innotek.de>
     - SHELL32:  o WINE resync 20011017
@@ -26,7 +30,7 @@
 
  2001-10-14: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Convert color cursor to monochrome if it only uses two colors.
-                  This overcomes a silly limitation in some less advanced 
+                  This overcomes a silly limitation in some less advanced
                   display drivers. (SDD still has no support for color cursors!)
                   (fixes mouse cursor flickering & screen distortion when
                    accessing the frame buffer directly)
@@ -36,7 +40,7 @@
  2001-10-13: Sander van Leeuwen <sandervl@xs4all.nl>
     - WSOCK32:  o Overwrite IP header length in sendto for raw sockets
                   with IP_HDRINCL option set.
-                  (fixes errors for apps that use big endian format for 
+                  (fixes errors for apps that use big endian format for
                    the length word)
                 o WSAEnumNetworkEvents now reports (some) events properly
                 o Call WSACleanup during dll unload in case application
@@ -63,8 +67,8 @@
     - USER32:   o SetScrollRange: return error if min > max or out of range
                                   (ERROR_INVALID_SCROLLBAR_RANGE)
                   (behaviour of NT4, SP6)
-                o Scrollbar control window not disabled properly when using 
-                  EnableWindow instead of EnableScrollbar. (handle WM_ENABLE 
+                o Scrollbar control window not disabled properly when using
+                  EnableWindow instead of EnableScrollbar. (handle WM_ENABLE
                   and call EnableScrollbar)
                 o Forward WM_SYSCOMMAND to Parent (for scrollbar control window
                   with size grip style)
@@ -73,7 +77,7 @@
                   wsock32
 
  2001-10-11: Patrick Haller <patrick.haller@innotek.de>
-    - KERNEL32: o added ODIN performance profiler 
+    - KERNEL32: o added ODIN performance profiler
                   (perf_0.log for PROFILE builds)
     - SHELL32:  o ~30% speed improvement on shell folder operations
 
@@ -122,21 +126,21 @@
 
  2001-10-07: Sander van Leeuwen <sandervl@xs4all.nl>
     - DDRAW:    o Don't use Dive for blitting to/from 8 bpp surfaces
-    - USER32:   o Eliminated flickering during frame sizing due to 
+    - USER32:   o Eliminated flickering during frame sizing due to
                   unnecessary drawing
                 o Fixed handling of WM_SIZING/WM_MOVING (changing rectangles)
                 o WM_TRACKFRAME: call Frame_SysCommandSizeMove with SC_MOVE+HTCAPTION
 
  2001-10-06: Sander van Leeuwen <sandervl@xs4all.nl>
-    - QUARTZ/OLEAUT32: 
+    - QUARTZ/OLEAUT32:
                 o Wine 20011004 resync
     - KERNEL32: o Reduce overhead for heap allocation
                 o Always allocate heap memory from high memory (if available)
                 o Allocate extra heap memory in 64kb units
-                  MUST use 64kb here or else we are at risk of running out 
-                  of virtual memory space. (when allocating 4kb we actually 
+                  MUST use 64kb here or else we are at risk of running out
+                  of virtual memory space. (when allocating 4kb we actually
                   get 4kb + 60k uncommited)
-                  (fixes out of resources error while loading big movies 
+                  (fixes out of resources error while loading big movies
                    in The Playa)
 
  2001-10-05: Sander van Leeuwen <sandervl@xs4all.nl>
@@ -145,12 +149,12 @@
 
  2001-10-03: Sander van Leeuwen <sandervl@xs4all.nl>
     - WINMM:    o Allocate handle for new timer and verify handle
-                  is valid before using it. 
+                  is valid before using it.
                   (prevents crashes when app attempts to delete timer twice
                    (DivX 4))
     - DDRAW:    o Fixed memory leaks in SurfBlt4 (rectangles)
                 o Take clipping into account in SurfBlt4. Windowed DirectDraw
-                  blitting now seems to work well. 
+                  blitting now seems to work well.
                   (only tried DivX 4; needs more testing)
     - USER32:   o Rewrote sizing & moving of windows (frame tracking)
                   (ported Wine version + fixed some bugs)
@@ -166,7 +170,7 @@
 
  2001-10-02: Sander van Leeuwen <sandervl@xs4all.nl>
     - REGSVR32: o Must use LoadLibrary, not CoLoadLibrary
-                  (Some dlls (divx codec) call CoFreeUnusedLibraries which 
+                  (Some dlls (divx codec) call CoFreeUnusedLibraries which
                    unloads the same dll if we use CoLoadLibrary (-> crash)
                    NT's regsvr32 doesn't use CoLoadLibrary either)
     - USER32:   o OSLibWinGetMsg bugfix
