@@ -1,4 +1,4 @@
-# $Id: process.mak,v 1.37 2003-06-30 13:19:49 bird Exp $
+# $Id: process.mak,v 1.38 2003-11-14 22:02:33 bird Exp $
 #
 # Generic Buildsystem
 #
@@ -965,7 +965,7 @@ dep:
 ! ifdef TARGET_NO_DEP
         -x$(TARGET_NO_DEP: =;)\
 ! endif
-        @<<
+        @<<$(TARGET_DEPEND).rsp
 $(TOOL_DEP_FLAGS)
 -o$$(PATH_TARGET)
 -d$(TARGET_DEPEND)
@@ -980,7 +980,10 @@ $(TOOL_DEP_FLAGS)
 -srcadd IPP:$$(MAKE_INCLUDE_SETUP)
 -srcadd IPP:$$(MAKE_INCLUDE_CX_OPT)
 $(TOOL_DEP_FILES)
-<<
+<<KEEP
+!ifdef BUILD_VERBOSE
+	@type $(TARGET_DEPEND).rsp
+!endif
 !ifdef BUILD_VERBOSE2
     $(ECHO) Dependcy file: $(CLRRST)
     @type $(TARGET_DEPEND)
@@ -1487,6 +1490,10 @@ $(LINK_LNK5)
 !if "$(TARGET_MODE)" == "VDD"
     $(LINK_CMD_VDD)
 !endif
+!if "$(TARGET_POSTLINKING_CMD)" != ""
+	@$(ECHO) Executing custom postlinking step...$(CLRRST)
+	$(TARGET_POSTLINKING_CMD)
+!endif
 !if "$(TARGET_RES)" != "" && "$(RL)" != ""
     @$(ECHO) Linking Resources $(CLRRST)
     \
@@ -1523,6 +1530,10 @@ $(LINK_LNK5)
 !  endif
     $(TOOL_STRIP) $@
 ! endif
+!endif
+!if "$(TARGET_POSTSTRIP_CMD)" != ""
+	@$(ECHO) Executing custom poststrip step...$(CLRRST)
+	$(TARGET_POSTSTRIP_CMD)
 !endif
 
 !endif
