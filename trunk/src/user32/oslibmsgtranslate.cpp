@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.123 2004-04-13 14:16:43 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.124 2004-05-03 12:09:01 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -620,7 +620,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
         mousehk.wHitTestCode = win32wnd->getLastHitTestVal();
         mousehk.dwExtraInfo  = 0;
 
-        if(HOOK_CallHooksW( WH_MOUSE_W, (fMsgRemoved == MSG_REMOVE) ? HC_ACTION : HC_NOREMOVE, winMsg->message, (LPARAM)&mousehk)) 
+        if(HOOK_CallHooksW( WH_MOUSE_W, (fMsgRemoved == MSG_REMOVE) ? HC_ACTION : HC_NOREMOVE, winMsg->message, (LPARAM)&mousehk))
         {
             goto dummymessage; //hook swallowed message
         }
@@ -1011,7 +1011,13 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
 
     case WM_RENDERFMT:
         winMsg->message = WINWM_RENDERFORMAT;
-        winMsg->wParam  = (UINT) os2Msg->mp1;
+        extern UINT WIN32API clipboardPMToOdinFormat(ULONG ulPMFormat);
+        winMsg->wParam  = (UINT)clipboardPMToOdinFormat((ULONG)os2Msg->mp1);
+        if (!winMsg->wParam)
+        {
+            dprintf(("WM_RENDERFMT: failed to convert clipboard format (%d)!!!\n", os2Msg->mp1));
+            DebugInt3();
+        }
         break;
 
     case WM_RENDERALLFMTS:
@@ -1163,7 +1169,7 @@ BOOL OSLibWinTranslateMessage(MSG *msg)
       if((fl & (KC_VIRTUALKEY|KC_COMPOSITE)) == KC_VIRTUALKEY)
       {
         if(!msg->wParam)
-        {//TODO: Why is this here???? 
+        {//TODO: Why is this here????
             DebugInt3();
             extramsg.wParam = SHORT2FROMMP(teb->o.odin.os2msg.mp2);
         }
