@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2004-04-14 11:04:43 sandervl Exp $
+# $Id: makefile,v 1.5 2004-04-20 10:11:17 sandervl Exp $
 
 #
 # Odin32 API
@@ -1626,7 +1626,8 @@ $(OBJDIR)\O32_WaitForInputIdle.obj \
 $(OBJDIR)\O32_CreateBitmapFromPMHandle.obj \
 $(OBJDIR)\O32_CreatePaletteFromPMHandle.obj \
 $(OBJDIR)\O32_GetPMHandleFromGDIHandle.obj \
-$(OBJDIR)\_WinSetErrorInfo.obj
+$(OBJDIR)\_WinSetErrorInfo.obj \
+$(OBJDIR)\_DosVerifyPidTid.obj
 
 
 TARGET  = libwrap
@@ -3252,4 +3253,5 @@ O32_CreateBitmapFromPMHandle.asm
 O32_CreatePaletteFromPMHandle.asm
 O32_GetPMHandleFromGDIHandle.asm
 _WinSetErrorInfo.asm
+_DosVerifyPidTid.asm
 <<KEEP	

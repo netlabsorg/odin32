@@ -1,4 +1,4 @@
-/* $Id: win32class.cpp,v 1.30 2002-12-18 12:28:06 sandervl Exp $ */
+/* $Id: win32class.cpp,v 1.31 2004-04-20 10:11:42 sandervl Exp $ */
 /*
  * Win32 Window Class Managment Code for OS/2
  *
@@ -15,8 +15,8 @@
  *       Must all be changed if we want to support global app classes
  *       that can be used by other apps. (low priority)
  *
- * NOTE: To access a class object, you must call FindClass. This method 
- *       increases the reference count of the object. When you're done 
+ * NOTE: To access a class object, you must call FindClass. This method
+ *       increases the reference count of the object. When you're done
  *       with the object, you MUST call the release method!
  *       This mechanism prevents premature destruction of objects when there
  *       are still clients using it.
@@ -44,13 +44,13 @@ static fDestroyAll = FALSE;
 //******************************************************************************
 //Win32WndClass methods:
 //******************************************************************************
-Win32WndClass::Win32WndClass(WNDCLASSEXA *wndclass, WNDCLASS_TYPE fClassType) 
+Win32WndClass::Win32WndClass(WNDCLASSEXA *wndclass, WNDCLASS_TYPE fClassType)
                   : GenericObject(&wndclasses, &critsect)
 {
   this->fClassType = fClassType;
   processId = 0;
 
-  if(HIWORD(wndclass->lpszClassName)) 
+  if(HIWORD(wndclass->lpszClassName))
   {
         if(fClassType == WNDCLASS_UNICODE) {
                 INT len = lstrlenW((LPWSTR)wndclass->lpszClassName)+1;
@@ -372,7 +372,7 @@ WNDPROC Win32WndClass::getWindowProc(WNDPROC_TYPE type)
     }
     else proc = (pfnWindowProcA) ? pfnWindowProcA : pfnWindowProcW;
 
-    return proc; 
+    return proc;
 };
 //******************************************************************************
 //NOTE: Only to be used when a class has both ascii & unicode window procedures!
@@ -451,9 +451,9 @@ ULONG Win32WndClass::getClassLongA(int index, BOOL fUnicode)
         {
                 WNDPROC pfnWindowProc = pfnWindowProcA;
 
-                if(pfnWindowProcW) 
+                if(pfnWindowProcW)
                 {
-                    if(!pfnWindowProc || fUnicode) 
+                    if(!pfnWindowProc || fUnicode)
                         pfnWindowProc = pfnWindowProcW;
                 }
                 return (ULONG) WINPROC_GetProc(pfnWindowProc, (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A);
@@ -550,9 +550,9 @@ ULONG Win32WndClass::setClassLongA(int index, LONG lNewVal, BOOL fUnicode)
                 WNDPROC *proc = &pfnWindowProcA;
                 WINDOWPROCTYPE type = (fUnicode) ? WIN_PROC_32W : WIN_PROC_32A;
 
-                if(pfnWindowProcW) 
+                if(pfnWindowProcW)
                 {
-                    if(!*proc || fUnicode) 
+                    if(!*proc || fUnicode)
                         proc = &pfnWindowProcW;
                 }
                 rc = (LONG)WINPROC_GetProc(*proc, type );
@@ -644,10 +644,10 @@ BOOL Win32WndClass::UnregisterClassA(HINSTANCE hinst, LPSTR id)
             dprintf2(("Win32WndClass::UnregisterClassA class %x still has windows!!", id));
             SetLastError(ERROR_CLASS_HAS_WINDOWS);
             return FALSE;
-        }   
+        }
         wndclass->markDeleted();
         RELEASE_CLASSOBJ(wndclass);
-    
+
         SetLastError(ERROR_SUCCESS);
         return TRUE;
   }
@@ -658,4 +658,4 @@ BOOL Win32WndClass::UnregisterClassA(HINSTANCE hinst, LPSTR id)
 //******************************************************************************
 //******************************************************************************
 GenericObject   *Win32WndClass::wndclasses = NULL;
-CRITICAL_SECTION Win32WndClass::critsect   = {0};
+VMutex           Win32WndClass::critsect;

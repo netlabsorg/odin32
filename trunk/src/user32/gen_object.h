@@ -1,4 +1,4 @@
-/* $Id: gen_object.h,v 1.7 2001-06-10 09:19:57 sandervl Exp $ */
+/* $Id: gen_object.h,v 1.8 2004-04-20 10:11:42 sandervl Exp $ */
 /*
  * Generic Object Class for OS/2
  *
@@ -12,18 +12,19 @@
 #ifdef OS2_INCLUDED
 #include <win32api.h>
 #endif
+#include <VMutex.h>
 
 class GenericObject
 {
 public:
-	 GenericObject(GenericObject **head, CRITICAL_SECTION *pLock);
+	 GenericObject(GenericObject **head, VMutex *pLock);
 virtual ~GenericObject();
 
 GenericObject *GetHead()	{ return *head; };
 GenericObject *GetNext()	{ return next;  };
 
-	 void  lock()           { EnterCriticalSection(pLock); };
-	 void  unlock()         { LeaveCriticalSection(pLock); };
+	 void  lock()           { pLock->enter(); };
+	 void  unlock()         { pLock->leave(); };
 
          void  link();
          void  unlink();
@@ -38,8 +39,8 @@ GenericObject *GetNext()	{ return next;  };
 
          void  markDeleted()    { fDeletePending = TRUE; };
 
-static	 void  lock(CRITICAL_SECTION *pLock)           { EnterCriticalSection(pLock); };
-static	 void  unlock(CRITICAL_SECTION *pLock)         { LeaveCriticalSection(pLock); };
+static	 void  lock(VMutex *pLock)           { pLock->enter(); };
+static	 void  unlock(VMutex *pLock)         { pLock->leave(); };
 
 static   void  DestroyAll(GenericObject *head);
 
@@ -67,13 +68,13 @@ private:
 
 protected:
 
-         CRITICAL_SECTION *pLock;
+         VMutex           *pLock;
          LONG              refCount;
          ULONG             fLinked        : 1,
                            fDeletePending : 1;
 
          GenericObject   **head;
- 	 GenericObject    *next;	 
+ 	 GenericObject    *next;	
 };
 
 #endif

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.388 2004-04-15 16:18:55 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.389 2004-04-20 10:11:43 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -2475,7 +2475,7 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx,
         }
         //SvL: These checks are causing problems in Lotus Notes 6
         //     It's not entirely clear why, but child windows are not placed
-        //     correctly when enabling them. 
+        //     correctly when enabling them.
 #if 0
         if((rectWindow.right - rectWindow.left == cx) && (rectWindow.bottom - rectWindow.top == cy)) {
             fuFlags |= SWP_NOSIZE;    /* Already the right size */
@@ -2667,7 +2667,7 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx,
         InvalidateRect(getWindowHandle(), NULL, TRUE);
     }
 
-    if(!(fuFlags & SWP_NOSIZE)) 
+    if(!(fuFlags & SWP_NOSIZE))
     {
         // We must call this function or open DC will get out of sync
         // (PM will not always send us a WM_VRNENABLED message)
@@ -4273,7 +4273,7 @@ LONG  Win32BaseWindow::release(char *function, int line)
 //******************************************************************************
 //******************************************************************************
 GenericObject   *Win32BaseWindow::windows  = NULL;
-CRITICAL_SECTION Win32BaseWindow::critsect = {0};
+VMutex           Win32BaseWindow::critsect;
 
 //******************************************************************************
 //******************************************************************************
