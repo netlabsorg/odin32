@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.59 2001-11-13 13:18:22 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.60 2001-11-16 15:50:59 phaller Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -785,9 +785,13 @@ DIBSection *DIBSection::findObj(HANDLE handle)
 //******************************************************************************
 DIBSection *DIBSection::findHDC(HDC hdc)
 {
- DIBSection *dsect = section;
-
-  while(dsect)
+  // PH 2001-08-18 shortcut for performance optimization
+  if (!section)
+      return NULL;
+  
+  DIBSection *dsect = section;
+  
+  do
   {
         if(dsect->hdc == hdc)
         {
@@ -795,6 +799,8 @@ DIBSection *DIBSection::findHDC(HDC hdc)
         }
         dsect = dsect->next;
   }
+  while(dsect);
+    
   return(NULL);
 }
 //******************************************************************************
