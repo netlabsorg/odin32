@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.35 2000-02-29 00:54:22 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.36 2000-02-29 19:17:13 sandervl Exp $ */
 
 /*
  * Win32 Device IOCTL API functions for OS/2
@@ -519,8 +519,18 @@ VOID WIN32API ExitProcess(DWORD exitcode);
 //******************************************************************************
 void KillWin32Process(void)
 {
+ static BOOL fEntry = FALSE;
 
-  ExitProcess(666);
+  if(fEntry == FALSE) {
+	fEntry = TRUE;
+  	ExitProcess(666);
+	return;
+  }
+  //Restore original OS/2 TIB selector
+  RestoreOS2FS();
+
+  SetExceptionChain((ULONG)-1);
+  DosExit(EXIT_PROCESS, 666);
 }
 
 
@@ -1005,6 +1015,34 @@ ULONG APIENTRY OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
 	//no break;
   }
 continueFail:
+
+////#define DEBUGSTACK
+#ifdef DEBUGSTACK
+  if(pCtxRec->ContextFlags & CONTEXT_CONTROL) {
+    	ULONG *stackptr;
+    	APIRET rc;
+    	int    i;
+  	ULONG  ulOffset, ulModule, ulObject;
+  	CHAR   szModule[CCHMAXPATH];
+
+	stackptr = (ULONG *)pCtxRec->ctx_RegEsp;
+	dprintf(("Stack DUMP:"));
+	for(i=0;i<16;i++) {
+		rc = DosQueryModFromEIP(&ulModule,
+        	                        &ulObject,
+                                        sizeof(szModule),
+                                        szModule,
+                                        &ulOffset,
+                                        (ULONG)*stackptr);
+
+  		if (rc == NO_ERROR)
+    			dprintf(("0x%8x: 0x%8x %s (#%u), obj #%u:%08x", stackptr, *stackptr, szModule, ulModule, ulObject, ulOffset));
+		else	dprintf(("0x%8x: 0x%8x", stackptr, *stackptr));
+		stackptr++;
+	}
+	dprintf(("Stack DUMP END"));
+  }
+#endif
 
   case XCPT_BREAKPOINT:
   case XCPT_ARRAY_BOUNDS_EXCEEDED:
