@@ -7,7 +7,7 @@
 #include "os2palette.h"
 #include <dive.h>
 #include <iseq.h>
-#include <irect.hpp>
+#include "rectangle.h"
 
 #define FAR
 #undef THIS
@@ -100,7 +100,7 @@ class OS2IDirectDrawSurface
         ISequence <OS2IDirectDrawSurface*>::Cursor *SurfaceCursorMipMap;    // Iterator for MipMaps
         ISequence <OS2IDirectDrawSurface*>::Cursor *SurfaceCursorAttached;  // Iterator for other attached surfaces
 
-        ISequence <IRectangle*> LockedRectSequence;            // List for locked rectangles
+        ISequence <DDRectangle*> LockedRectSequence;            // List for locked rectangles
 
     friend    HRESULT __stdcall SurfQueryInterface(THIS, REFIID riid, LPVOID FAR * ppvObj);
     friend    ULONG   __stdcall SurfAddRef(THIS);
