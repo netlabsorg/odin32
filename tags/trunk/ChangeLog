@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.58 1999-07-22 13:18:35 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.59 1999-07-22 15:41:08 sandervl Exp $ */
+ 99-07-22: Przemysˆaw Dobrowolski <dobrawka@asua.org.pl>
+	- KERNEL32: Complete implementation of GetLocaleInfoA/W
+
  99-07-22: Edgar Buerkle <100566.557@compuserve.com>
 	- KERNEL32: Fix for OS2GetResource (os2util.cpp)
 	- PE2LX: Use unique resource id for version resource.
