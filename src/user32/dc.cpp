@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.39 2000-01-29 14:23:32 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.40 2000-01-29 20:46:52 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -846,19 +846,17 @@ int WIN32API ReleaseDC (HWND hwnd, HDC hdc)
 //******************************************************************************
 BOOL WIN32API UpdateWindow (HWND hwnd)
 {
-   if (!hwnd)
-       return FALSE;
+  Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
 
-   Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle (hwnd);
+   if(!wnd) {
+	O32_SetLastError(ERROR_INVALID_WINDOW_HANDLE);
+       	return FALSE;
+   }
 
-   dprintf (("User32: UpdateWindow hwnd %x -> wnd %x", hwnd, wnd));
+   dprintf (("User32: UpdateWindow hwnd %x", hwnd));
 
-#if 0
-   if (WinQueryUpdateRect (wnd->getOS2WindowHandle(), NULL))
-       sendEraseBkgnd (wnd);
-#endif
-
-   WinUpdateWindow(wnd->getOS2FrameWindowHandle());
+   //SvL: Should update client window, not the frame
+   WinUpdateWindow(wnd->getOS2WindowHandle());
 
    return (TRUE);
 }
