@@ -147,7 +147,7 @@ void add_cmdline_define(char *set)
 	free(cpy);
 }
 
-#if defined(_Windows) || defined(__MSDOS__)
+#if defined(_Windows) || defined(__MSDOS__) || defined(__WIN32OS2__)
 #define INCLUDESEPARATOR	";"
 #else
 #define INCLUDESEPARATOR	":"
