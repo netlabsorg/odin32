@@ -1,4 +1,8 @@
-/* $Id: changelog,v 1.1920 2001-12-20 20:47:12 sandervl Exp $ */
+/* $Id: changelog,v 1.1921 2001-12-22 12:35:56 sandervl Exp $ */
+
+ 2001-12-22: Sander van Leeuwen <sandervl@xs4all.nl>
+    - KERNEL32: o Print more information when a missing api is called
+                  (image that is responsible)
 
  2001-12-20: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Allow all sections to be accessed when loading an executable/dll
