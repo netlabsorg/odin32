@@ -1,4 +1,4 @@
-/* $Id: winuser.h,v 1.12 1999-10-23 22:59:40 sandervl Exp $ */
+/* $Id: winuser.h,v 1.13 1999-10-30 18:39:40 cbratschi Exp $ */
 
 #ifndef __INCLUDE_WINUSER_H
 #define __INCLUDE_WINUSER_H
@@ -136,12 +136,15 @@ typedef struct
 
 #define WM_USER             0x0400
 
-#define DT_EDITCONTROL      0x00002000
-#define DT_PATH_ELLIPSIS    0x00004000
-#define DT_END_ELLIPSIS     0x00008000
-#define DT_MODIFYSTRING     0x00010000
-#define DT_RTLREADING       0x00020000
-#define DT_WORD_ELLIPSIS    0x00040000
+#define DT_EDITCONTROL              0x00002000
+#define DT_PATH_ELLIPSIS            0x00004000
+#define DT_END_ELLIPSIS             0x00008000
+#define DT_MODIFYSTRING             0x00010000
+#define DT_RTLREADING               0x00020000
+#define DT_WORD_ELLIPSIS            0x00040000
+#define DT_NOFULLWIDTHCHARBREAK     0x00080000
+#define DT_HIDEPREFIX               0x00100000
+#define DT_PREFIXONLY               0x00200000
 
 typedef struct
 {
@@ -273,14 +276,17 @@ typedef struct
 #define ODA_FOCUS       0x0004
 
 /* Owner draw state */
-#define ODS_SELECTED    0x0001
-#define ODS_GRAYED      0x0002
-#define ODS_DISABLED    0x0004
-#define ODS_CHECKED     0x0008
-#define ODS_FOCUS       0x0010
+#define ODS_SELECTED     0x0001
+#define ODS_GRAYED       0x0002
+#define ODS_DISABLED     0x0004
+#define ODS_CHECKED      0x0008
+#define ODS_FOCUS        0x0010
+#define ODS_DEFAULT      0x0020
 #define ODS_COMBOBOXEDIT 0x1000
-#define ODS_HOTLIGHT    0x0040
-#define ODS_INACTIVE    0x0080
+#define ODS_HOTLIGHT     0x0040
+#define ODS_INACTIVE     0x0080
+#define ODS_NOACCEL      0x0100
+#define ODS_NOFOCUSRECT  0x0200
 
 /* Edit control styles */
 #define ES_LEFT         0x00000000
@@ -686,10 +692,10 @@ typedef struct
 
 #define WM_HANDHELDFIRST     0x0358
 #define WM_HANDHELDLAST      0x035F
- 
+
 #define WM_AFXFIRST          0x0360
 #define WM_AFXLAST           0x037F
- 
+
 #define WM_PENWINFIRST       0x0380
 #define WM_PENWINLAST        0x038F
 
@@ -1477,7 +1483,7 @@ typedef BOOL (* CALLBACK DRAWSTATEPROC)(HDC,LPARAM,WPARAM,INT,INT);
 #define SS_BLACKFRAME       0x00000007L
 #define SS_GRAYFRAME        0x00000008L
 #define SS_WHITEFRAME       0x00000009L
-
+#define SS_USERITEM         0x0000000AL
 #define SS_SIMPLE           0x0000000BL
 #define SS_LEFTNOWORDWRAP   0x0000000CL
 
@@ -1496,12 +1502,22 @@ typedef BOOL (* CALLBACK DRAWSTATEPROC)(HDC,LPARAM,WPARAM,INT,INT);
 #define SS_RIGHTJUST        0x00000400L
 #define SS_REALSIZEIMAGE    0x00000800L
 #define SS_SUNKEN           0x00001000L
+#define SS_ENDELLIPSIS      0x00004000L
+#define SS_PATHELLIPSIS     0x00008000L
+#define SS_WORDELLIPSIS     0x0000C000L
+#define SS_ELLIPSISMASK     0x0000C000L
 
 /* Static Control Messages */
 #define STM_SETICON       0x0170
 #define STM_GETICON       0x0171
-#define STM_SETIMAGE        0x0172
-#define STM_GETIMAGE        0x0173
+#define STM_SETIMAGE      0x0172
+#define STM_GETIMAGE      0x0173
+#define STM_MSGMAX        0x0174
+
+#define STN_CLICKED         0
+#define STN_DBLCLK          1
+#define STN_ENABLE          2
+#define STN_DISABLE         3
 
 /* Scrollbar messages */
 #define SBM_SETPOS             0x00e0
@@ -1533,6 +1549,21 @@ typedef SCROLLINFO CONST *LPCSCROLLINFO;
 #define SIF_DISABLENOSCROLL 0x0008
 #define SIF_TRACKPOS        0x0010
 #define SIF_ALL             (SIF_RANGE | SIF_PAGE | SIF_POS | SIF_TRACKPOS)
+
+/* Scrollbar information */
+
+#define CCHILDREN_SCROLLBAR             5
+
+typedef struct tagSCROLLBARINFO
+{
+    DWORD cbSize;
+    RECT  rcScrollBar;
+    int   dxyLineButton;
+    int   xyThumbTop;
+    int   xyThumbBottom;
+    int   bogus;
+    DWORD rgstate[CCHILDREN_SCROLLBAR+1];
+} SCROLLBARINFO, *PSCROLLBARINFO, *LPSCROLLBARINFO;
 
 /* Listbox styles */
 #define LBS_NOTIFY               0x0001
@@ -2212,6 +2243,7 @@ typedef struct
 #define SW_SCROLLCHILDREN      0x0001
 #define SW_INVALIDATE          0x0002
 #define SW_ERASE               0x0004
+#define SW_SMOOTHSCROLL        0x0010
 
 /* CreateWindow() coordinates */
 #define CW_USEDEFAULT ((INT)0x80000000)
@@ -2354,22 +2386,21 @@ typedef struct
 #define GMDI_USEDISABLED    0x0001L
 #define GMDI_GOINTOPOPUPS   0x0002L
 
-
-#define DT_TOP 0
-#define DT_LEFT 0
-#define DT_CENTER 1
-#define DT_RIGHT 2
-#define DT_VCENTER 4
-#define DT_BOTTOM 8
-#define DT_WORDBREAK 16
-#define DT_SINGLELINE 32
-#define DT_EXPANDTABS 64
-#define DT_TABSTOP 128
-#define DT_NOCLIP 256
-#define DT_EXTERNALLEADING 512
-#define DT_CALCRECT 1024
-#define DT_NOPREFIX 2048
-#define DT_INTERNAL 4096
+#define DT_TOP                      0x00000000
+#define DT_LEFT                     0x00000000
+#define DT_CENTER                   0x00000001
+#define DT_RIGHT                    0x00000002
+#define DT_VCENTER                  0x00000004
+#define DT_BOTTOM                   0x00000008
+#define DT_WORDBREAK                0x00000010
+#define DT_SINGLELINE               0x00000020
+#define DT_EXPANDTABS               0x00000040
+#define DT_TABSTOP                  0x00000080
+#define DT_NOCLIP                   0x00000100
+#define DT_EXTERNALLEADING          0x00000200
+#define DT_CALCRECT                 0x00000400
+#define DT_NOPREFIX                 0x00000800
+#define DT_INTERNAL                 0x00001000
 
 /* DrawCaption()/DrawCaptionTemp() flags */
 #define DC_ACTIVE               0x0001
@@ -2872,6 +2903,52 @@ typedef NAMEENUMPROCW   DESKTOPENUMPROCW;
 
 typedef VOID (* CALLBACK SENDASYNCPROC)(HWND, UINT, DWORD, LRESULT);
 
+#define     OBJID_WINDOW        0x00000000
+#define     OBJID_SYSMENU       0xFFFFFFFF
+#define     OBJID_TITLEBAR      0xFFFFFFFE
+#define     OBJID_MENU          0xFFFFFFFD
+#define     OBJID_CLIENT        0xFFFFFFFC
+#define     OBJID_VSCROLL       0xFFFFFFFB
+#define     OBJID_HSCROLL       0xFFFFFFFA
+#define     OBJID_SIZEGRIP      0xFFFFFFF9
+#define     OBJID_CARET         0xFFFFFFF8
+#define     OBJID_CURSOR        0xFFFFFFF7
+#define     OBJID_ALERT         0xFFFFFFF6
+#define     OBJID_SOUND         0xFFFFFFF5
+
+#define STATE_SYSTEM_UNAVAILABLE        0x00000001  // Disabled
+#define STATE_SYSTEM_SELECTED           0x00000002
+#define STATE_SYSTEM_FOCUSED            0x00000004
+#define STATE_SYSTEM_PRESSED            0x00000008
+#define STATE_SYSTEM_CHECKED            0x00000010
+#define STATE_SYSTEM_MIXED              0x00000020  // 3-state checkbox or toolbar button
+#define STATE_SYSTEM_INDETERMINATE      STATE_SYSTEM_MIXED
+#define STATE_SYSTEM_READONLY           0x00000040
+#define STATE_SYSTEM_HOTTRACKED         0x00000080
+#define STATE_SYSTEM_DEFAULT            0x00000100
+#define STATE_SYSTEM_EXPANDED           0x00000200
+#define STATE_SYSTEM_COLLAPSED          0x00000400
+#define STATE_SYSTEM_BUSY               0x00000800
+#define STATE_SYSTEM_FLOATING           0x00001000  // Children "owned" not "contained" by parent
+#define STATE_SYSTEM_MARQUEED           0x00002000
+#define STATE_SYSTEM_ANIMATED           0x00004000
+#define STATE_SYSTEM_INVISIBLE          0x00008000
+#define STATE_SYSTEM_OFFSCREEN          0x00010000
+#define STATE_SYSTEM_SIZEABLE           0x00020000
+#define STATE_SYSTEM_MOVEABLE           0x00040000
+#define STATE_SYSTEM_SELFVOICING        0x00080000
+#define STATE_SYSTEM_FOCUSABLE          0x00100000
+#define STATE_SYSTEM_SELECTABLE         0x00200000
+#define STATE_SYSTEM_LINKED             0x00400000
+#define STATE_SYSTEM_TRAVERSED          0x00800000
+#define STATE_SYSTEM_MULTISELECTABLE    0x01000000  // Supports multiple selection
+#define STATE_SYSTEM_EXTSELECTABLE      0x02000000  // Supports extended selection
+#define STATE_SYSTEM_ALERT_LOW          0x04000000  // This information is of low priority
+#define STATE_SYSTEM_ALERT_MEDIUM       0x08000000  // This information is of medium priority
+#define STATE_SYSTEM_ALERT_HIGH         0x10000000  // This information is of high priority
+#define STATE_SYSTEM_REDUNDANT          0x20000000  // this child object's data is also represented by it's parent
+#define STATE_SYSTEM_ONLY_REDUNDANT     0x40000000  // this object has children, but they are all redundant
+#define STATE_SYSTEM_VALID              0x7FFFFFFF
 
 #include "poppack.h"
 #define     EnumTaskWindows(handle,proc,lparam) \
@@ -3275,6 +3352,7 @@ HANDLE    WINAPI GetPropA(HWND,LPCSTR);
 HANDLE    WINAPI GetPropW(HWND,LPCWSTR);
 #define     GetProp WINELIB_NAME_AW(GetProp)
 DWORD       WINAPI GetQueueStatus(UINT);
+BOOL      WINAPI GetScrollBarInfo(HWND,LONG,PSCROLLBARINFO);
 BOOL      WINAPI GetScrollInfo(HWND,INT,LPSCROLLINFO);
 INT       WINAPI GetScrollPos(HWND,INT);
 BOOL      WINAPI GetScrollRange(HWND,INT,LPINT,LPINT);
