@@ -1,4 +1,4 @@
-/* $Id: oslibdos.cpp,v 1.44 2000-09-25 04:35:01 phaller Exp $ */
+/* $Id: oslibdos.cpp,v 1.45 2000-09-25 18:58:53 sandervl Exp $ */
 /*
  * Wrappers for OS/2 Dos* API
  *
@@ -2040,12 +2040,9 @@ ULONG OSLibDosQueryModuleName(ULONG hModule, int cchName, char *pszName)
 
 ULONG OSLibDosQuerySysInfo(ULONG iStart, ULONG iLast, PVOID pBuf, ULONG cbBuf)
 {
-  USHORT sel = RestoreOS2FS();
   APIRET rc;
   
-  rc = DosQuerySysInfo(iStart, iLast, pBuf, cbBuf);
-  
-  SetFS(sel);
+  rc = DosQuerySysInfo(iStart, iLast, pBuf, cbBuf); 
   SetLastError(error2WinError(rc,ERROR_INVALID_HANDLE));
   return rc;
 }
