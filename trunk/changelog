@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2351 2002-11-04 12:51:49 sandervl Exp $ */
+/* $Id: changelog,v 1.2352 2002-11-05 14:33:04 sandervl Exp $ */
+
+ 2002-11-05: Platon Fomichev <platon@innotek   >
+    - GDI32:    o FillRgn fix for DIB sections
 
  2002-11-04: Platon Fomichev <platon@innotek   >
     - GDI32:    o CreateCompatibleDC workaround for WGSS bug (current position
