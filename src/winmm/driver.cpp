@@ -1,4 +1,4 @@
-/* $Id: driver.cpp,v 1.3 1999-06-10 16:24:33 phaller Exp $ */
+/* $Id: driver.cpp,v 1.4 1999-08-19 18:46:04 phaller Exp $ */
 
 /*
  * Driver multimedia apis
@@ -9,9 +9,15 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+
+
+/****************************************************************************
+ * Includes                                                                 *
+ ****************************************************************************/
+
 #include <os2win.h>
 #include <mmsystem.h>
-
+#include <odinwrap.h>
 #include <string.h>
 #include <misc.h>
 #include <unicode.h>
@@ -19,10 +25,11 @@
 #include "winmm.h"
 #include "os2timer.h"
 
+ODINDEBUGCHANNEL(WINMM-DRIVER)
+
 
 /*****************************************************************************
- * Name      : LRESULT WIN32API SendDriverMessage
- * Purpose   : Sends the specified message to the installable driver
+ *             Sends the specifiedmessage to the installable driver
  * Parameters: HDRVR hDrvr
  *             UINT  msg
  *             LONG  lParam1
@@ -35,24 +42,19 @@
  * Author    : Patrick Haller [Tue, 1998/05/05 10:44]
  *****************************************************************************/
 
-LRESULT WIN32API SendDriverMessage(HDRVR hdrvr,
-                                      UINT msg,
-                                      LONG lParam1,
-                                      LONG lParam2)
+ODINFUNCTION4(LRESULT, SendDriverMessage,
+              HDRVR, hdrvr,
+              UINT, msg,
+              LONG, lParam1,
+              LONG, lParam2)
 {
-  dprintf(("WINMM: SendDriverMessage(%08x,%08x,%08x,%08x) not implemented.\n",
-           hdrvr,
-           msg,
-           lParam1,
-           lParam2));
-
+  dprintf(("WINMM: SendDriverMessage not implemented.\n"));
   return 0; /* unsuccessful return */
 }
 
 
 /*****************************************************************************
- * Name      : HDRVR WIN32API OpenDriver
- * Purpose   : Opens an instance of an installable driver and initializes
+ *             Opens an instance of an installable driver and initializes
  *             the instance using either the driver's default settings or a
  *             driver-specific value.
  * Parameters: LPCWSTR lpDriverName
@@ -66,22 +68,18 @@ LRESULT WIN32API SendDriverMessage(HDRVR hdrvr,
  * Author    : Patrick Haller [Tue, 1998/05/05 10:44]
  *****************************************************************************/
 
-HDRVR WIN32API OpenDriver(LPCWSTR lpDriverName,
-                             LPCWSTR lpSectionName,
-                             LONG    lParam)
+ODINFUNCTION3(HDRVR, OpenDriver,
+              LPCWSTR, lpDriverName,
+              LPCWSTR, lpSectionName,
+              LONG, lParam)
 {
-  dprintf(("WINMM: OpenDriver(%s,%s,%08x) not implemented.\n",
-           lpDriverName,
-           lpSectionName,
-           lParam));
-
+  dprintf(("WINMM: OpenDriver not implemented.\n"));
   return 0; /* unsuccessful return */
 }
 
 
 /*****************************************************************************
- * Name      : HDRVR WIN32API OpenDriverA
- * Purpose   : Opens an instance of an installable driver and initializes
+ *             Opens an instance of an installable driver and initializes
  *             the instance using either the driver's default settings or a
  *             driver-specific value.
  * Parameters: LPCTSTR lpDriverName
@@ -95,23 +93,19 @@ HDRVR WIN32API OpenDriver(LPCWSTR lpDriverName,
  * Author    : Patrick Haller [Tue, 1998/05/05 10:44]
  *****************************************************************************/
 
-HDRVR WIN32API OpenDriverA(LPTSTR lpDriverName,
-                              LPTSTR lpSectionName,
-                              LONG   lParam)
+ODINFUNCTION3(HDRVR, OpenDriverA,
+              LPTSTR, lpDriverName,
+              LPTSTR, lpSectionName,
+              LONG, lParam)
 {
-  dprintf(("WINMM: OpenDriverA(%s,%s,%08x) not implemented.\n",
-           lpDriverName,
-           lpSectionName,
-           lParam));
-
+  dprintf(("WINMM: OpenDriverA not implemented.\n"));
   return 0; /* unsuccessful return */
 }
 
 
 
 /*****************************************************************************
- * Name      : HDRVR WIN32API CloseDriver
- * Purpose   : Closes an installable driver.
+ *             Closes an installable driver.
  * Parameters: HDRVR hDrvr
  *             LONG  lParam1
  *             LONG  lParam2
@@ -123,22 +117,18 @@ HDRVR WIN32API OpenDriverA(LPTSTR lpDriverName,
  * Author    : Patrick Haller [Tue, 1998/05/05 10:44]
  *****************************************************************************/
 
-LRESULT WIN32API CloseDriver(HDRVR hDrvr,
-                                LONG  lParam1,
-                                LONG  lParam2)
+ODINFUNCTION3(LRESULT, CloseDriver,
+              HDRVR, hDrvr,
+              LONG, lParam1,
+              LONG, lParam2)
 {
-  dprintf(("WINMM: CloseDriver(%08x,%08x,%08x) not implemented.\n",
-           hDrvr,
-           lParam1,
-           lParam2));
-
+  dprintf(("WINMM: CloseDriver not implemented.\n"));
   return 0; /* unsuccessful return */
 }
 
 
 /*****************************************************************************
- * Name      : LRESULT WIN32API DefDriverProc
- * Purpose   : Provides default processing for any messages not processed by
+ *             Provides default processing for anymessages not processed by
  *             an installable driver.
  * Parameters: DWORD dwDriverID
  *             HDRVR hDrvr
@@ -153,27 +143,19 @@ LRESULT WIN32API CloseDriver(HDRVR hDrvr,
  * Author    : Patrick Haller [Tue, 1998/05/05 10:44]
  *****************************************************************************/
 
-LRESULT WIN32API DefDriverProc(DWORD dwDriverID,
-                                  HDRVR hDrvr,
-                                  UINT  msg,
-                                  LONG  lParam1,
-                                  LONG  lParam2)
+ODINFUNCTION5(LRESULT, DefDriverProc,
+              DWORD, dwDriverID,
+              HDRVR, hDrvr,
+              UINT, msg,
+              LONG, lParam1,
+              LONG, lParam2)
 {
-  dprintf(("WINMM: DefDriverProc(%08x,%08x,%08x,%08x,%08x) not implemented.\n",
-           dwDriverID,
-           hDrvr,
-           msg,
-           lParam1,
-           lParam2));
-
+  dprintf(("WINMM: DefDriverProc not implemented.\n"));
   return 0; /* unsuccessful return */
 }
 
 
 /*****************************************************************************
- * Name      : LRESULT WIN32API DriverCallback
- * Purpose   : Calls a callback function, sends a message to a window, or
- *             unblocks a thread.
  * Parameters: DWORD dwCallback
  *             DWORD dwFlags
  *             HDRVR hDrvr
@@ -189,29 +171,21 @@ LRESULT WIN32API DefDriverProc(DWORD dwDriverID,
  * Author    : Patrick Haller [Tue, 1998/05/05 10:44]
  *****************************************************************************/
 
-LRESULT WIN32API DriverCallback(DWORD dwCallback,
-                                   DWORD dwFlags,
-                                   HDRVR hDrvr,
-                                   DWORD msg,
-                                   DWORD dwUser,
-                                   DWORD dwParam1,
-                                   DWORD dwParam2)
+ODINFUNCTION7(LRESULT, DriverCallback,
+              DWORD, dwCallback,
+              DWORD, dwFlags,
+              HDRVR, hDrvr,
+              DWORD, msg,
+              DWORD, dwUser,
+              DWORD, dwParam1,
+              DWORD, dwParam2)
 {
-  dprintf(("WINMM: DriverCallback(%08x,%08x,%08x,%08x,%08x,%08x,%08x) not implemented.\n",
-           dwCallback,
-           dwFlags,
-           hDrvr,
-           msg,
-           dwUser,
-           dwParam1,
-           dwParam2));
-
+  dprintf(("WINMM: DriverCallback not implemented.\n"));
   return FALSE; /* unsuccessful return */
 }
 
 
 /*****************************************************************************
- * Name      : HMODULE WIN32API DrvGetModuleHandle
  * Purpose   : Retrieves the instance handle of the module that contains the
  *             installable driver.
  * Parameters: HDRVR hDriver
@@ -223,18 +197,16 @@ LRESULT WIN32API DriverCallback(DWORD dwCallback,
  * Author    : Patrick Haller [Tue, 1998/05/05 10:44]
  *****************************************************************************/
 
-HMODULE WIN32API DrvGetModuleHandle(HDRVR hDriver)
+ODINFUNCTION1(HMODULE, DrvGetModuleHandle,
+              HDRVR, hDriver)
 {
-  dprintf(("WINMM: DrvGetModuleHandle(%08x) not implemented.\n",
-           hDriver));
-
+  dprintf(("WINMM: DrvGetModuleHandle not implemented.\n"));
   return 0; /* unsuccessful return */
 }
 
 
 /*****************************************************************************
- * Name      : LRESULT WIN32API DrvSendMessage
- * Purpose   : Sends the specified message to the installable driver
+ *             Sends the specified message to the installable driver
  * Parameters: HDRVR hDrvr
  *             UINT  msg
  *             LONG  lParam1
@@ -247,24 +219,19 @@ HMODULE WIN32API DrvGetModuleHandle(HDRVR hDriver)
  * Author    : Patrick Haller [Tue, 1998/05/05 10:44]
  *****************************************************************************/
 
-LRESULT WIN32API DrvSendMessage(HDRVR hdrvr,
-                                   UINT msg,
-                                   LONG lParam1,
-                                   LONG lParam2)
+ODINFUNCTION4(LRESULT, DrvSendMessage,
+              HDRVR, hdrvr,
+              UINT, msg,
+              LONG, lParam1,
+              LONG, lParam2)
 {
-  dprintf(("WINMM: DrvSendMessage(%08x,%08x,%08x,%08x) not implemented.\n",
-           hdrvr,
-           msg,
-           lParam1,
-           lParam2));
-
+  dprintf(("WINMM: DrvSendMessage not implemented.\n"));
   return 0; /* unsuccessful return */
 }
 
 
 /*****************************************************************************
- * Name      : HMODULE WIN32API GetDriverModuleHandle
- * Purpose   : Retrieves the instance handle of the module that contains the
+ *             Retrieves the instance handle of the module that contains the
  *             installable driver.
  * Parameters: HDRVR hDriver
  * Variables :
@@ -275,10 +242,10 @@ LRESULT WIN32API DrvSendMessage(HDRVR hdrvr,
  * Author    : Patrick Haller [Tue, 1998/05/05 10:44]
  *****************************************************************************/
 
-HMODULE WIN32API GetDriverModuleHandle(HDRVR hDriver)
+ODINFUNCTION1(HMODULE, GetDriverModuleHandle,
+              HDRVR, hDriver)
 {
-  dprintf(("WINMM: GetDriverModuleHandle(%08x) not implemented.\n",
-           hDriver));
-
+  dprintf(("WINMM: GetDriverModuleHandle not implemented.\n"));
   return 0; /* unsuccessful return */
 }
+

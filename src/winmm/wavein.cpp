@@ -1,4 +1,4 @@
-/* $Id: wavein.cpp,v 1.3 1999-06-10 16:24:35 phaller Exp $ */
+/* $Id: wavein.cpp,v 1.4 1999-08-19 18:46:05 phaller Exp $ */
 
 /*
  * Wave in stubs
@@ -9,44 +9,64 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+
+
+/****************************************************************************
+ * Includes                                                                 *
+ ****************************************************************************/
+
 #include <os2win.h>
 #include <mmsystem.h>
-
+#include <odinwrap.h>
 #include <stdio.h>
 #include <string.h>
-
 #include <misc.h>
 #include <unicode.h>
 
 #include "winmm.h"
 
 
+ODINDEBUGCHANNEL(WINMM-WAVEIN)
+
 // All stubs for now
-MMRESULT WIN32API waveInAddBuffer(HWAVEIN hwi, LPWAVEHDR pwh, UINT cbwh)
+ODINFUNCTION3(MMRESULT, waveInAddBuffer,
+              HWAVEIN, hwi,
+              LPWAVEHDR, pwh,
+              UINT, cbwh)
 {
   dprintf(("WINMM:waveInAddBuffer - stub\n"));
   return MMSYSERR_INVALHANDLE;
 }
 
-MMRESULT WIN32API waveInClose(HWAVEIN hwi)
+ODINFUNCTION1(MMRESULT, waveInClose,
+              HWAVEIN, hwi)
 {
   dprintf(("WINMM:waveInClose - stub\n"));
   return MMSYSERR_INVALHANDLE;
 }
 
-MMRESULT WIN32API waveInGetDevCapsA(UINT uDeviceID, LPWAVEINCAPSA pwic, UINT cbwic)
+ODINFUNCTION3(MMRESULT, waveInGetDevCapsA,
+              UINT, uDeviceID,
+              LPWAVEINCAPSA, pwic,
+              UINT, cbwic)
 {
   dprintf(("WINMM:waveInGetDevCapsA(%d) - stub\n", uDeviceID ));
   return MMSYSERR_BADDEVICEID;
 }
 
-MMRESULT WIN32API waveInGetDevCapsW(UINT uDeviceID, LPWAVEINCAPSW pwic, UINT cbwic)
+ODINFUNCTION3(MMRESULT, waveInGetDevCapsW,
+              UINT, uDeviceID,
+              LPWAVEINCAPSW, pwic,
+              UINT, cbwic)
 {
   dprintf(("WINMM:waveInGetDevCapsW(%d) - stub\n", uDeviceID ));
   return MMSYSERR_BADDEVICEID;
 }
 
-MMRESULT WIN32API waveInGetErrorTextA(MMRESULT wError, LPSTR lpText, UINT cchText)
+ODINFUNCTION3(MMRESULT, waveInGetErrorTextA,
+              MMRESULT, wError,
+              LPSTR, lpText,
+              UINT, cchText)
 {
   dprintf(("WINMM:waveInGetErrorTextA(%d)\n", wError ));
   char * theMsg = getWinmmMsg( wError );
@@ -61,7 +81,10 @@ MMRESULT WIN32API waveInGetErrorTextA(MMRESULT wError, LPSTR lpText, UINT cchTex
   return MMSYSERR_NOERROR;
 }
 
-MMRESULT WIN32API waveInGetErrorTextW(MMRESULT wError, LPWSTR lpText, UINT cchText)
+ODINFUNCTION3(MMRESULT, waveInGetErrorTextW,
+              MMRESULT, wError,
+              LPWSTR, lpText,
+              UINT, cchText)
 {
   dprintf(("WINMM:waveInGetErrorTextW(%d) - stub\n", wError ));
   char * theMsg = getWinmmMsg( wError );
@@ -76,66 +99,89 @@ MMRESULT WIN32API waveInGetErrorTextW(MMRESULT wError, LPWSTR lpText, UINT cchTe
   return MMSYSERR_NOERROR;
 }
 
-MMRESULT WIN32API waveInGetID(HWAVEIN hwi, LPUINT puDeviceID)
+ODINFUNCTION2(MMRESULT, waveInGetID,
+              HWAVEIN, hwi,
+              LPUINT, puDeviceID)
 {
   dprintf(("WINMM:waveInGetID - stub\n"));
   return MMSYSERR_INVALHANDLE;
 }
 
-UINT WIN32API waveInGetNumDevs(void)
+ODINFUNCTION0(UINT, waveInGetNumDevs)
 {
   dprintf(("WINMM:waveInGetNumDevs - stub\n"));
   return 0;
 }
 
-MMRESULT WIN32API waveInGetPosition(HWAVEIN hwi, LPMMTIME pmmt, UINT cbmmt)
+ODINFUNCTION3(MMRESULT, waveInGetPosition,
+              HWAVEIN, hwi,
+              LPMMTIME, pmmt,
+              UINT, cbmmt)
 {
   dprintf(("WINMM:waveInGetPosition - stub\n"));
   return MMSYSERR_INVALHANDLE;
 }
 
-MMRESULT WIN32API waveInMessage(HWAVEIN hwi, UINT uMsg, DWORD dw1, DWORD dw2)
+ODINFUNCTION4(MMRESULT, waveInMessage,
+              HWAVEIN, hwi,
+              UINT, uMsg,
+              DWORD, dw1,
+              DWORD, dw2)
 {
   dprintf(("WINMM:waveInMessage - stub\n"));
   return MMSYSERR_INVALHANDLE;
 }
 
 
-MMRESULT WIN32API waveInOpen(LPHWAVEIN phwi, UINT uDeviceID,
-                             const LPWAVEFORMATEX pwfx,
-                             DWORD dwCallback, DWORD dwInstance, DWORD fdwOpen)
+ODINFUNCTION6(MMRESULT, waveInOpen,
+              LPHWAVEIN, phwi,
+              UINT, uDeviceID,
+              const LPWAVEFORMATEX, pwfx,
+              DWORD, dwCallback,
+              DWORD, dwInstance,
+              DWORD, fdwOpen)
 {
   dprintf(("WINMM:waveInOpen - stub\n"));
    return MMSYSERR_BADDEVICEID;
 }
 
-MMRESULT WIN32API waveInPrepareHeader(HWAVEIN hwi, LPWAVEHDR pwh, UINT cbwh)
+ODINFUNCTION3(MMRESULT, waveInPrepareHeader,
+              HWAVEIN, hwi,
+              LPWAVEHDR, pwh,
+              UINT, cbwh)
 {
   dprintf(("WINMM:waveInPrepareHeader - stub\n"));
   return MMSYSERR_INVALHANDLE;
 }
 
-MMRESULT WIN32API waveInReset(HWAVEIN hwi)
+ODINFUNCTION1(MMRESULT, waveInReset,
+              HWAVEIN, hwi)
 {
   dprintf(("WINMM:waveInReset - stub\n"));
   return MMSYSERR_INVALHANDLE;
 }
 
-MMRESULT WIN32API waveInStart(HWAVEIN hwi)
+ODINFUNCTION1(MMRESULT, waveInStart,
+              HWAVEIN, hwi)
 {
   dprintf(("WINMM:waveInStart - stub\n"));
   return MMSYSERR_INVALHANDLE;
 }
 
-MMRESULT WIN32API waveInStop(HWAVEIN hwi)
+ODINFUNCTION1(MMRESULT, waveInStop,
+              HWAVEIN, hwi)
 {
   dprintf(("WINMM:waveInStop - stub\n"));
   return MMSYSERR_INVALHANDLE;
 }
 
-MMRESULT WIN32API waveInUnprepareHeader(HWAVEIN hwi, LPWAVEHDR pwh, UINT cbwh)
+ODINFUNCTION3(MMRESULT, waveInUnprepareHeader,
+              HWAVEIN, hwi,
+              LPWAVEHDR, pwh,
+              UINT, cbwh)
 {
   dprintf(("WINMM:waveInUnprepareHeader - stub\n"));
   return MMSYSERR_INVALHANDLE;
 }
+
 

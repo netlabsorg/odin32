@@ -1,4 +1,4 @@
-/* $Id: joy.cpp,v 1.5 1999-06-30 11:29:40 sandervl Exp $ */
+/* $Id: joy.cpp,v 1.6 1999-08-19 18:46:04 phaller Exp $ */
 /*
  * Odin Joystick apis
  *
@@ -8,8 +8,14 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+
+/****************************************************************************
+ * Includes                                                                 *
+ ****************************************************************************/
+
 #include <os2win.h>
 #include <mmsystem.h>
+#include <odinwrap.h>
 #include <misc.h>
 #include <string.h>
 #include <stdlib.h>
@@ -18,6 +24,9 @@
 #include "winmm.h"
 #include "os2timer.h"
 #include "joyos2.h"
+
+ODINDEBUGCHANNEL(WINMM-JOY)
+
 
 #define MAXJOYDRIVERS 2
 
@@ -82,13 +91,13 @@ LONG JoyGetPos(HANDLE hGame, UINT wID, LPJOYINFO lpInfo)
 }
 
 /*****************************************************************************
- * Name      : UINT WIN32API joyGetNumDevs
- * Purpose   : Get number of installed joysticks
+ODINFUNCTION0(*, :
+ODINFUNCTION0(INT, joyGetNumDevs* Purpose   : Get number of installed joysticks
  * Status    : Done
  *
  * Author    : Przemyslaw Dobrowolski [Tue, 1999/06/29 10:00]
  *****************************************************************************/
-UINT WIN32API joyGetNumDevs()
+ODINFUNCTION0(UINT, joyGetNumDevs)
 {
   HANDLE            hJoy;
   GAME_PARM_STRUCT  gameInfo;
@@ -119,16 +128,18 @@ UINT WIN32API joyGetNumDevs()
 }
 
 /*****************************************************************************
- * Name      : UINT WIN32API joyGetDevCapsW
- * Purpose   : Get Joystick capatibities (Unicode)
+ODINFUNCTION1(*, :,
+ODINFUNCTION1(UINT,, *,
+              Purpose, :Get Joystick capatibities (Unicode)
  * Status    : Done
  *
  * Author    : Przemyslaw Dobrowolski [Tue, 1999/06/29 09:40]
  *****************************************************************************/
-MMRESULT WIN32API joyGetDevCapsW(UINT wID, LPJOYCAPSW lpCaps,UINT wSize)
+ODINFUNCTION3(MMRESULT, joyGetDevCapsW,
+              UINT, wID,
+              LPJOYCAPSW, lpCaps,
+              UINT, wSize)
 {
-    dprintf(("WINMM:joyGetDevCapsW = %d %X %d\n",wID, lpCaps, wSize));
-
     if (wID >= MAXJOYDRIVERS) return JOYERR_PARMS;
 
     if (JoyInstalled(wID) == 0)
@@ -166,16 +177,18 @@ MMRESULT WIN32API joyGetDevCapsW(UINT wID, LPJOYCAPSW lpCaps,UINT wSize)
 }
 
 /*****************************************************************************
- * Name      : UINT WIN32API joyGetDevCapsW
- * Purpose   : Get Joystick capatibities (Unicode)
+ODINFUNCTION1(*, :,
+ODINFUNCTION1(UINT,, *,
+              Purpose, :Get Joystick capatibities (Unicode)
  * Status    : Done
  *
  * Author    : Przemyslaw Dobrowolski [Tue, 1999/06/29 09:00]
  *****************************************************************************/
-MMRESULT WIN32API joyGetDevCapsA(UINT wID, LPJOYCAPSA lpCaps,UINT wSize)
+ODINFUNCTION3(MMRESULT, joyGetDevCapsA,
+              UINT, wID,
+              LPJOYCAPSA, lpCaps,
+              UINT, wSize)
 {
-    dprintf(("WINMM:joyGetDevCapsA = %d %X %d\n",wID, lpCaps, wSize));
-
     if (wID >= MAXJOYDRIVERS) return JOYERR_PARMS;
 
     if (JoyInstalled(wID) == 0)
@@ -212,21 +225,22 @@ MMRESULT WIN32API joyGetDevCapsA(UINT wID, LPJOYCAPSA lpCaps,UINT wSize)
 }
 
 /*****************************************************************************
- * Name      : MMRESULT WIN32API joyGetPosEx
- * Purpose   : Get the extended actual joystick position
+ODINFUNCTION1(*, :,
+ODINFUNCTION1(MMRESULT,, *,
+              Purpose, :Get the extended actual joystick position
  * Status    : Done (but not all functions are functionally but Quake2
  *             running with this function)
  *
  * Author    : Przemyslaw Dobrowolski [Tue, 1999/06/29 23:42]
  *****************************************************************************/
-MMRESULT WIN32API joyGetPosEx(UINT uJoyID, LPJOYINFOEX pji)
+ODINFUNCTION2(MMRESULT, joyGetPosEx,
+              UINT, uJoyID,
+              LPJOYINFOEX, pji)
 {
   JOYINFO            ji;
   HANDLE             hGamePort;
   GAME_CALIB_STRUCT  gc;
   DWORD              rc;
-
-  dprintf(("WINMM:joyGetPosEx %d %X",uJoyID, pji));
 
   if (uJoyID >= MAXJOYDRIVERS) return JOYERR_PARMS;
 
@@ -236,7 +250,7 @@ MMRESULT WIN32API joyGetPosEx(UINT uJoyID, LPJOYINFOEX pji)
 
   rc=JoyOpen(&hGamePort);
 
-  if (rc) return (MMSYSERR_NODRIVER);  
+  if (rc) return (MMSYSERR_NODRIVER);
 
   JoyGetPos(hGamePort,uJoyID,&ji);
   JoyGetCalValues(hGamePort,&gc);
@@ -303,18 +317,21 @@ MMRESULT WIN32API joyGetPosEx(UINT uJoyID, LPJOYINFOEX pji)
 }
 
 /*****************************************************************************
- * Name      : MMRESULT WIN32API joyGetPos
- * Purpose   : Get the actual joystick position
- * Status    : Done
- *
- * Author    : Przemyslaw Dobrowolski [Tue, 1999/06/29 09:00]
+ODINFUNCTION2(*, :,
+ODINFUNCTION6(MMRESULT,, joyGetPos,
+              *,, Purpose:,
+              Get, the,
+              actual, joystick,
+              position *, Status,
+              :, Done,
+              * *, Author: Przemyslaw Dobrowolski [Tue, 1999/06/29 09:00]
  *****************************************************************************/
-MMRESULT WIN32API joyGetPos(UINT uJoyID, LPJOYINFO pji)
+ODINFUNCTION2(MMRESULT, joyGetPos,
+              UINT, uJoyID,
+              LPJOYINFO, pji)
 {
   HANDLE   hGame;
   MMRESULT rc;
-  dprintf(("WINMM:joyGetPos %d %X\n",uJoyID, pji));
-
   if (uJoyID >= MAXJOYDRIVERS) return JOYERR_PARMS;
 
   rc=JoyInstalled(uJoyID);
@@ -330,12 +347,14 @@ MMRESULT WIN32API joyGetPos(UINT uJoyID, LPJOYINFO pji)
   return JOYERR_NOERROR;
 }
 /*****************************************************************************
- * Name      : MMRESULT WIN32API joyGetThreshold
- * Status    : Done
- *
- * Author    : Przemyslaw Dobrowolski [Tue, 1999/06/29 09:00]
+ODINFUNCTION2(*, :,
+ODINFUNCTION2(MMRESULT,, joyGetThreshold,
+              *,, Status:,
+              Done *, *Author    : Przemyslaw Dobrowolski [Tue, 1999/06/29 09:00]
  *****************************************************************************/
-MMRESULT WINAPI joyGetThreshold(UINT wID, LPUINT lpThreshold)
+ODINFUNCTION2(MMRESULT, joyGetThreshold,
+              UINT, wID,
+              LPUINT, lpThreshold)
 {
     dprintf(("WINMM:joyGetThreshold %d %X\n",wID, lpThreshold));
 
@@ -347,15 +366,15 @@ MMRESULT WINAPI joyGetThreshold(UINT wID, LPUINT lpThreshold)
 }
 
 /*****************************************************************************
- * Name      : MMRESULT WIN32API joySetThreshold
- * Status    : Done
- *
- * Author    : Przemyslaw Dobrowolski [Tue, 1999/06/29 09:00]
+ODINFUNCTION2(*, :,
+ODINFUNCTION2(MMRESULT,, joySetThreshold,
+              *,, Status:,
+              Done *, *Author    : Przemyslaw Dobrowolski [Tue, 1999/06/29 09:00]
  *****************************************************************************/
-MMRESULT WINAPI joySetThreshold(UINT wID, UINT wThreshold)
+ODINFUNCTION2(MMRESULT, joySetThreshold,
+              UINT, wID,
+              UINT, wThreshold)
 {
-   dprintf(("WINMM:joySetThreshold %d %d\n",wID, wThreshold));
-
    if (wID >= MAXJOYDRIVERS) return JOYERR_PARMS;
 
    aJoyThreshold[wID] = wThreshold;
@@ -373,19 +392,24 @@ typedef struct _JOYTHREADOPT
 typedef JOYTHREADOPT *PJOYTHREADOPT;
 
 /*****************************************************************************
- * Name      : MMRESULT WIN32API joySetCapture
- * Purpose   : Start joystick moves capturing
- * Status    : Done
+ODINFUNCTION4(*, :,
+ODINFUNCTION4(MMRESULT,, joySetCapture,
+              *,, Purpose,
+              :,, Start,
+              joystick,, movescapturing,
+              *, Status: Done
  *
  * Author    : Przemyslaw Dobrowolski [Tue, 1999/06/29 09:00]
  *****************************************************************************/
-MMRESULT WINAPI joySetCapture(HWND hWnd,UINT wID,UINT wPeriod,BOOL bChanged)
+ODINFUNCTION4(MMRESULT, joySetCapture,
+              HWND, hWnd,
+              UINT, wID,
+              UINT, wPeriod,
+              BOOL, bChanged)
 {
    JOYTHREADOPT *newthr;
    INT          iThreadId;
    DWORD        rc;
-
-   dprintf(("WINMM:joySetCapture %x %d %d %d\n", hWnd, wID, wPeriod, bChanged));
 
    if (wID >= MAXJOYDRIVERS) return JOYERR_PARMS;
 
@@ -411,17 +435,17 @@ MMRESULT WINAPI joySetCapture(HWND hWnd,UINT wID,UINT wPeriod,BOOL bChanged)
 }
 
 /*****************************************************************************
- * Name      : MMRESULT WIN32API joyReleaseCapture
- * Purpose   : Stop capturing joystick moves
+ODINFUNCTION1(*, :,
+ODINFUNCTION1(MMRESULT,, *,
+              Purpose, :Stop capturing joystick moves
  * Status    : Done (but must be rewriting)
  *
  * Author    : Przemyslaw Dobrowolski [Tue, 1999/06/29 09:00]
  *****************************************************************************/
-MMRESULT WINAPI joyReleaseCapture(UINT wID)
+ODINFUNCTION1(MMRESULT, joyReleaseCapture,
+              UINT, wID)
 {
   // TODO: Semaphores or waiting for thread...
-  dprintf(("WINMM:joyReleaseCapture %d\n",wID));
-
   if (wID >= MAXJOYDRIVERS) return JOYERR_PARMS;
 
   if (aJoyCaptured[wID] != TRUE) return JOYERR_NOCANDO;
@@ -432,15 +456,17 @@ MMRESULT WINAPI joyReleaseCapture(UINT wID)
 }
 
 /*****************************************************************************
- * Name      : MMRESULT WIN32API joyConfigChanged
- * Status    : Stub but done ;-)
- *
- * Author    : Przemyslaw Dobrowolski [Tue, 1999/06/29 09:00]
+ODINFUNCTION1(*, :,
+ODINFUNCTION4(MMRESULT,, *,
+              Status, :,
+              Stub, but,
+              done, ;-,
+              * *, Author)
+: Przemyslaw Dobrowolski [Tue, 1999/06/29 09:00]
  *****************************************************************************/
-MMRESULT WIN32API joyConfigChanged( DWORD dwFlags )
+ODINFUNCTION1(MMRESULT, joyConfigChanged,
+              DWORD, dwFlags)
 {
-  dprintf(("WINMM:joyConfigChanged %X\n",dwFlags));
-
   return JOYERR_NOERROR;
 }
 
@@ -499,3 +525,4 @@ void _Optlink joySendMessages(void *pData)
   // Huh... We must close thread ;-)
   _endthread();
 }
+

@@ -1,4 +1,4 @@
-/* $Id: os2timer.cpp,v 1.4 1999-06-19 10:54:48 sandervl Exp $ */
+/* $Id: os2timer.cpp,v 1.5 1999-08-19 18:46:05 phaller Exp $ */
 
 /*
  * OS/2 Timer class
@@ -8,17 +8,25 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+
+
+/****************************************************************************
+ * Includes                                                                 *
+ ****************************************************************************/
+
 #define INCL_DOSPROCESS
 #define INCL_DOSDATETIME
 #define INCL_DOSSEMAPHORES
-#include <os2wrap.h>	//Odin32 OS/2 api wrappers
+#include <os2wrap.h>      //Odin32 OS/2 api wrappers
 #include <process.h>
 #include "win32type.h"
 #include "wintimer.h"
 #include "os2timer.h"
 #include "misc.h"
 
+
 static void _Optlink TimerHlpHandler(void *);
+
 
 /******************************************************************************/
 /******************************************************************************/
@@ -153,3 +161,4 @@ static void _Optlink TimerHlpHandler(void *timer)
 //******************************************************************************
 OS2Timer *OS2Timer::timers      = NULL;
 int       OS2Timer::timerPeriod = 0;
+

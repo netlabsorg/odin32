@@ -1,4 +1,4 @@
-/* $Id: aux.cpp,v 1.3 1999-06-10 16:24:32 phaller Exp $ */
+/* $Id: aux.cpp,v 1.4 1999-08-19 18:46:04 phaller Exp $ */
 
 /*
  * Auxilary multimedia apis
@@ -9,9 +9,15 @@
  * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+
+
+/****************************************************************************
+ * Includes                                                                 *
+ ****************************************************************************/
+
 #include <os2win.h>
 #include <mmsystem.h>
-
+#include <odinwrap.h>
 #include <string.h>
 
 #include <misc.h>
@@ -20,9 +26,14 @@
 #include "winmm.h"
 #include "aux.h"
 
+ODINDEBUGCHANNEL(WINMM-AUX)
+
 /******************************************************************************/
 /******************************************************************************/
-MMRESULT WIN32API auxGetDevCapsA(UINT uDeviceID, LPAUXCAPSA pac, UINT cbac)
+ODINFUNCTION3(MMRESULT, auxGetDevCapsA,
+              UINT, uDeviceID,
+              LPAUXCAPSA, pac,
+              UINT, cbac)
 {
   if(uDeviceID == AUX_MAPPER) {//AUX mapper
         return(MMSYSERR_NODRIVER);
@@ -44,7 +55,10 @@ MMRESULT WIN32API auxGetDevCapsA(UINT uDeviceID, LPAUXCAPSA pac, UINT cbac)
 }
 /******************************************************************************/
 /******************************************************************************/
-MMRESULT WIN32API auxGetDevCapsW(UINT uDeviceID, LPAUXCAPSW pac, UINT cbac)
+ODINFUNCTION3(MMRESULT, auxGetDevCapsW,
+              UINT, uDeviceID,
+              LPAUXCAPSW, pac,
+              UINT, cbac)
 {
   if(uDeviceID == AUX_MAPPER) {//AUX mapper
         return(MMSYSERR_NODRIVER);
@@ -66,7 +80,9 @@ MMRESULT WIN32API auxGetDevCapsW(UINT uDeviceID, LPAUXCAPSW pac, UINT cbac)
 }
 /******************************************************************************/
 /******************************************************************************/
-MMRESULT WIN32API auxSetVolume(UINT uDeviceID, DWORD dwVolume)
+ODINFUNCTION2(MMRESULT, auxSetVolume,
+              UINT, uDeviceID,
+              DWORD, dwVolume)
 {
   if(uDeviceID == AUX_MAPPER) {//AUX mapper
         return(MMSYSERR_NODRIVER);
@@ -81,7 +97,9 @@ MMRESULT WIN32API auxSetVolume(UINT uDeviceID, DWORD dwVolume)
 }
 /******************************************************************************/
 /******************************************************************************/
-MMRESULT WIN32API auxGetVolume(UINT uDeviceID, LPDWORD pdwVolume)
+ODINFUNCTION2(MMRESULT, auxGetVolume,
+              UINT, uDeviceID,
+              LPDWORD, pdwVolume)
 {
   if(uDeviceID == AUX_MAPPER) {//AUX mapper
         return(MMSYSERR_NODRIVER);
@@ -96,16 +114,20 @@ MMRESULT WIN32API auxGetVolume(UINT uDeviceID, LPDWORD pdwVolume)
 }
 /******************************************************************************/
 /******************************************************************************/
-UINT WIN32API auxGetNumDevs(void)
+ODINFUNCTION0(UINT, auxGetNumDevs)
 {
-  if(auxOS2Open() == FALSE) {
-        return(0);
-  }
-  return 1;
+  if(auxOS2Open() == FALSE)
+    return(0);
+  else
+    return 1;
 }
 /******************************************************************************/
 /******************************************************************************/
-MMRESULT WIN32API auxOutMessage(UINT uDeviceID, UINT uMsg, DWORD dwParam1, DWORD dwParam2)
+ODINFUNCTION4(MMRESULT, auxOutMessage,
+              UINT, uDeviceID,
+              UINT, uMsg,
+              DWORD, dwParam1,
+              DWORD, dwParam2)
 {
   if(uDeviceID == AUX_MAPPER) {//AUX mapper
         return(MMSYSERR_NODRIVER);
@@ -136,3 +158,4 @@ MMRESULT WIN32API auxOutMessage(UINT uDeviceID, UINT uMsg, DWORD dwParam1, DWORD
 }
 /******************************************************************************/
 /******************************************************************************/
+

@@ -1,4 +1,4 @@
-/* $Id: IRTMidi.cpp,v 1.4 1999-06-19 10:54:47 sandervl Exp $ */
+/* $Id: IRTMidi.cpp,v 1.5 1999-08-19 18:46:03 phaller Exp $ */
 
 /*******************************************************************************
 * FILE NAME: IRTMidi.cpp                                                       *
@@ -12,10 +12,15 @@
 * Project Odin Software License can be found in LICENSE.TXT
 *
 *******************************************************************************/
-#define INCL_DOS
-#include <os2wrap.h>	//Odin32 OS/2 api wrappers
-#include <win32type.h>
 
+
+/****************************************************************************
+ * Includes                                                                 *
+ ****************************************************************************/
+
+#define INCL_DOS
+#include <os2wrap.h>     //Odin32 OS/2 api wrappers
+#include <win32type.h>
 #include "IRTMidi.hpp"
 #include <meerror.h>
 #include <string.h>
@@ -690,4 +695,5 @@ IAppMidiInstance::IAppMidiInstance( unsigned long attrs )
 IAppMidiInstance::~IAppMidiInstance()
 {
 }
+
 
