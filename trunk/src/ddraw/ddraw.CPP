@@ -1,4 +1,4 @@
-/* $Id: ddraw.CPP,v 1.17 2001-03-18 21:44:44 mike Exp $ */
+/* $Id: ddraw.CPP,v 1.18 2001-03-20 23:18:55 mike Exp $ */
 
 /*
  * DXDraw DLL implementaion
@@ -26,6 +26,8 @@
 #define FAR
 
 #include <misc.h>
+
+extern "C" {
 
 //******************************************************************************
 //******************************************************************************
@@ -70,7 +72,7 @@ HRESULT WIN32API DirectDrawCreateEx(LPGUID lpGUID, LPVOID* lplpDD, REFIID iid, L
 }
 
 //******************************************************************************
-typedef BOOL (FAR PASCAL * LPDDENUMCALLBACKA)(GUID FAR *, LPSTR, LPSTR, LPVOID);
+//typedef BOOL (FAR PASCAL * LPDDENUMCALLBACKA)(GUID FAR *, LPSTR, LPSTR, LPVOID);
 //******************************************************************************
 HRESULT WIN32API OS2DirectDrawEnumerateA(LPDDENUMCALLBACKA lpCallback,
                LPVOID lpContext)
@@ -284,3 +286,4 @@ HRESULT WINAPI DllCanUnloadNow(void)
   return S_FALSE;
 }//******************************************************************************
 
+}

@@ -9,16 +9,16 @@
 
 extern "C"
 {
- int io_init1();
- int io_init2(short);
- int io_exit1();
+ int _System io_init1();
+ int _System io_init2(short);
+ int _System _io_exit1();
 
- char c_inb1(short);
- short c_inw1(short);
- long c_inl1(short);
- void c_outb1(short,char);
- void c_outw1(short,short);
- void c_outl1(short,long);
+ char _System c_inb1(short);
+ short _System c_inw1(short);
+ long _System c_inl1(short);
+ void _System c_outb1(short,char);
+ void _System c_outw1(short,short);
+ void _System c_outl1(short,long);
  int psw();
 }
 #endif

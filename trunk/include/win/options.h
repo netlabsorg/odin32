@@ -1,4 +1,4 @@
-/* $Id: options.h,v 1.6 2001-02-28 20:22:44 sandervl Exp $ */
+/* $Id: options.h,v 1.7 2001-03-20 23:18:55 mike Exp $ */
 
 /*
  * Command-line options.
@@ -11,6 +11,10 @@
 #define __WINE_OPTIONS_H
 
 //#include "windef.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
   /* Supported languages */
   /* When adding a new language look at ole/ole2nls.c
@@ -109,5 +113,9 @@ void WINAPI WriteOutProfiles(void);
 /* Version functions */
 extern void VERSION_ParseWinVersion( const char *arg );
 extern void VERSION_ParseDosVersion( const char *arg );
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  /* __WINE_OPTIONS_H */
