@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.93 2001-03-12 14:16:08 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.94 2001-03-13 18:44:38 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -755,14 +755,15 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
    if(lpps == NULL) {
         //BeginPaint does NOT change last error in this case
         //(verified in NT4, SP6)
+        dprintf (("USER32: BeginPaint %x NULL PAINTSTRUCT pointer", hWnd));
         return 0;
    }
-
    memset(lpps, 0, sizeof(*lpps));
+
    Win32BaseWindow *wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
-   if(!lpps || !wnd) {
-        dprintf (("USER32: BeginPaint %x invalid parameter %x", hWnd, lpps));
-        SetLastError(ERROR_INVALID_PARAMETER_W);
+   if(!wnd) {
+        dprintf (("USER32: BeginPaint %x %x: invalid window handle!!", hWnd, lpps));
+        SetLastError(ERROR_INVALID_WINDOW_HANDLE_W); //(verified in NT4, SP6)
         return (HDC)0;
    }
    HWND hwndClient = wnd->getOS2WindowHandle();
