@@ -1,4 +1,4 @@
-/* $Id: Logging.txt,v 1.1 2000-02-16 14:16:35 sandervl Exp $ */
+/* $Id: Logging.txt,v 1.2 2000-02-16 19:32:37 sandervl Exp $ */
 
             	Odin Logging
             	~~~~~~~~~~~~
@@ -19,7 +19,7 @@ To disable logging again, you must clear this variable:
    SET WIN32LOG_ENABLED=
 
 
-2.0 Extended logging features (new as of March 16th)
+2.0 Extended logging features (new as of February 16th)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Disabling or enabling logging for all the Odin dlls isn't exactly useful
