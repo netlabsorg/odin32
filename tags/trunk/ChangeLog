@@ -1,4 +1,4 @@
-/* $Id: ChangeLog,v 1.1231 2001-01-23 11:58:22 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1232 2001-01-23 18:32:32 sandervl Exp $ */
 
  2001-01-23: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o long2ShortName completely broken. now properly detects 8.3
@@ -10,9 +10,11 @@
                   (with SuspendThread) by calling ResumeThread
                   OS/2 seems to be unable to terminate the process otherwise.
                   (fixes exitlist zombie after executing the Sun Java 1.3 interpreter)
+                o Added handle manager class for standard handles (in/out/error)
+                  WriteFile for STD_OUTPUT_HANDLE & STD_ERROR_HANDLE now works.
     - PELDR:    o Don't strip quotes from cmd line parameter part.
                   (fixes Sun Java 1.3 JRE install (must replace 16 bits setup
-                   by 32 bits version))
+                   with 32 bits version))
     - INCLUDE\win\thread.h:
                 o Wrong layout of TEB structure
                   (fixes crash in Sun Java 1.3 interpreter)
