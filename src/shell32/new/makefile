@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 1999-09-09 11:33:18 phaller Exp $
+# $Id: makefile,v 1.8 1999-09-09 13:04:55 phaller Exp $
 
 #
 # PD-Win32 API
@@ -26,7 +26,8 @@ OBJS =  initterm.obj \
         pidl.obj regstream.obj shell32_main.obj \
         shellguid.obj shelllink.obj shlmenu.obj shellole.obj \
         shellord.obj shellpath.obj shv_bg_cmenu.obj \
-        shlfolder.obj shlview.obj shell.obj unknown.obj misc.obj
+        shlfolder.obj shlview.obj shell.obj unknown.obj misc.obj \
+        she.obj sh.obj
 
 all: $(TARGET).dll $(TARGET).lib
 
@@ -71,6 +72,8 @@ shlview.obj:      shlview.cpp
 shv_bg_cmenu.obj: shv_bg_cmenu.cpp
 unknown.obj:      unknown.cpp
 misc.obj:         misc.cpp
+she.obj:          she.cpp
+sh.obj:           sh.cpp
 
 clean:
         $(RM) *.obj *.lib *.dll *~ *.map *.pch
