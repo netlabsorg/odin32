@@ -1,4 +1,4 @@
-# $Id: dll-prog-c.mak,v 1.1 2002-05-16 11:37:07 bird Exp $
+# $Id: dll-prog-c.mak,v 1.2 2002-08-20 08:01:46 bird Exp $
 
 # Testcase for makeing simple C DLLs.
 
@@ -35,7 +35,7 @@ _STR2 = __32BIT__
 #
 test:
 !if "$(MAKE_INCLUDE_PROCESS:process.forwarder=)" == "$(MAKE_INCLUDE_PROCESS)"
-    $(TOOL_MAKE) -f dll-c.mak clean build install
+    $(TOOL_MAKE) -f dll-c.mak rebuild
     $(TARGET) $(PATH_OBJ)\dll-c.dll\dll-c.dll > out
 ! ifdef BUILD_VERBOSE
     type out
