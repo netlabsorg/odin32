@@ -1,4 +1,4 @@
-/* $Id: glut_bitmap.c,v 1.3 2000-03-11 15:07:44 sandervl Exp $ */
+/* $Id: glut_bitmap.c,v 1.4 2000-05-20 13:48:22 jeroen Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1994. */
 
 /* This program is freely distributable without licensing fees
@@ -16,7 +16,7 @@ glutBitmapCharacter(GLUTbitmapFont font, int c)
   GLint swapbytes, lsbfirst, rowlength;
   GLint skiprows, skippixels, alignment;
 
-#if defined(_WIN32)
+#if defined(_WIN32) || defined(__WIN32OS2__)
   fontinfo = (BitmapFontPtr) __glutFont(font);
 #else
   fontinfo = (BitmapFontPtr) font;

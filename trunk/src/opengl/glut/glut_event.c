@@ -1,4 +1,4 @@
-/* $Id: glut_event.c,v 1.9 2000-03-11 17:07:44 sandervl Exp $ */
+/* $Id: glut_event.c,v 1.10 2000-05-20 13:48:22 jeroen Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1994, 1995, 1996, 1997, 1998. */
 
 /* This program is freely distributable without licensing fees
@@ -1072,11 +1072,12 @@ processWindowWorkList(GLUTwindow * window)
       }
 
       /* Do the repositioning, moving, and push/pop. */
+
       SetWindowPos(window->win,
-        window->desiredStack == (Above ? HWND_TOP : HWND_NOTOPMOST),
+        window->desiredStack == Above ? HWND_TOP : HWND_NOTOPMOST,
         changes.left, changes.top,
         changes.right - changes.left, changes.bottom - changes.top,
-        flags);
+        flags & ~SWP_NOSENDCHANGING);
 
       /* Zero out the mask. */
       window->desiredConfMask = 0;
@@ -1197,6 +1198,7 @@ processWindowWorkList(GLUTwindow * window)
       __glutSetWindow(window);
 
       ((GLUTreshapeCB)(window->reshape))(window->width, window->height);
+
       window->forceReshape = False;
 
       /* Setting the redisplay bit on the first reshape is
@@ -1303,7 +1305,6 @@ processWindowWorkList(GLUTwindow * window)
   workMask |= window->workMask;
 
   if (workMask & GLUT_FINISH_WORK) {
-
     /* Finish work makes sure a glFinish gets done to indirect
        rendering contexts.  Indirect contexts tend to have much
        longer latency because lots of OpenGL extension requests

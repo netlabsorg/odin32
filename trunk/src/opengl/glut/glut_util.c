@@ -1,4 +1,4 @@
-/* $Id: glut_util.c,v 1.3 2000-03-11 15:07:45 sandervl Exp $ */
+/* $Id: glut_util.c,v 1.4 2000-05-20 13:48:23 jeroen Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1994. */
 
 /* This program is freely distributable without licensing fees
@@ -11,6 +11,10 @@
 #include <stdio.h>
 
 #include "glutint.h"
+
+#if defined(__WIN32OS2__)
+#include <misc.h>
+#endif
 
 /* strdup is actually not a standard ANSI C or POSIX routine
    so implement a private one for GLUT.  OpenVMS does not have a

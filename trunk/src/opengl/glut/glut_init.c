@@ -1,4 +1,4 @@
-/* $Id: glut_init.c,v 1.4 2000-03-11 15:07:45 sandervl Exp $ */
+/* $Id: glut_init.c,v 1.5 2000-05-20 13:48:23 jeroen Exp $ */
 /* Copyright (c) Mark J. Kilgard, 1994, 1997. */
 
 /* This program is freely distributable without licensing fees
@@ -354,7 +354,6 @@ glutInitWindowSize(int width, int height)
 void GLAPIENTRY
 glutInitDisplayMode(unsigned int mask)
 {
-  dprintf(("GLUT32: glutInitDisplayMode()\n"));
   __glutDisplayMode = mask;
 }
 
