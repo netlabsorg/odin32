@@ -1,4 +1,4 @@
-/* $Id: overlappedio.cpp,v 1.17 2002-06-11 16:36:06 sandervl Exp $ */
+/* $Id: overlappedio.cpp,v 1.18 2002-07-05 17:58:26 sandervl Exp $ */
 
 /*
  * Win32 overlapped IO class
@@ -28,7 +28,7 @@ OverlappedIOHandler::OverlappedIOHandler(LPOVERLAPPED_HANDLER lpReadHandler,
                                          LPOVERLAPPED_HANDLER lpWriteHandler,
                                          LPOVERLAPPED_HANDLER lpPollHandler,
                                          BOOL fFullDuplex) :
-                   hThreadRead(0), hThreadWrite(0), hThreadPoll(0)
+                   hThreadRead(0), hThreadWrite(0), hThreadPoll(0), refCount(0)
 {
     OverlappedIOError errcode = OutOfMemory;
 
@@ -74,6 +74,9 @@ OverlappedIOHandler::OverlappedIOHandler(LPOVERLAPPED_HANDLER lpReadHandler,
     threadparam->dwOperation     = dwAsyncType;
     threadparam->lpOverlappedObj = this;
     hThreadRead  = ::CreateThread(NULL, 32*1024, OverlappedIOThread, (LPVOID)threadparam, 0, &dwThreadId);
+    if(hThreadRead) {//thread uses this object; keep reference count to avoid premature destruction
+        AddRef();
+    }
 
     if(lpWriteHandler && fFullDuplex) {
         dwAsyncType |= ASYNCIO_WRITE;
@@ -83,6 +86,9 @@ OverlappedIOHandler::OverlappedIOHandler(LPOVERLAPPED_HANDLER lpReadHandler,
         threadparam->dwOperation     = ASYNCIO_WRITE;
         threadparam->lpOverlappedObj = this;
         hThreadWrite = ::CreateThread(NULL, 32*1024, OverlappedIOThread, (LPVOID)threadparam, 0, &dwThreadId);
+        if(hThreadWrite) {//thread uses this object; keep reference count to avoid premature destruction
+            AddRef();
+        }
     }
 
     if(lpPollHandler) {
@@ -94,6 +100,9 @@ OverlappedIOHandler::OverlappedIOHandler(LPOVERLAPPED_HANDLER lpReadHandler,
         threadparam->lpOverlappedObj = this;
         hThreadPoll  = ::CreateThread(NULL, 32*1024, OverlappedIOThread, (LPVOID)threadparam, 0, &dwThreadId);
         SetThreadPriority(hThreadPoll, THREAD_PRIORITY_TIME_CRITICAL);
+        if(hThreadPoll) {//thread uses this object; keep reference count to avoid premature destruction
+            AddRef();
+        }
     }
 
     if((lpPollHandler && !hThreadPoll) || !hThreadRead || (lpWriteHandler && fFullDuplex && !hThreadWrite))
@@ -145,6 +154,26 @@ OverlappedIOHandler::~OverlappedIOHandler()
     if(hThreadWrite) ::CloseHandle(hThreadWrite);
 
     DeleteCriticalSection(&critsect);
+}
+//******************************************************************************
+//******************************************************************************
+DWORD OverlappedIOHandler::AddRef()
+{
+    return InterlockedIncrement(&refCount);
+}
+//******************************************************************************
+//******************************************************************************
+DWORD OverlappedIOHandler::Release(BOOL fSignalExit)
+{
+    if(fSignalExit) {
+        ::SetEvent(hEventExit);
+    }
+    if(InterlockedDecrement(&refCount) == 0) {
+        dprintf(("OverlappedIOHandler::Release -> delete now"));
+        delete this;
+        return 0;
+    }
+    return refCount;
 }
 //******************************************************************************
 //******************************************************************************
@@ -313,6 +342,7 @@ DWORD OverlappedIOHandler::threadHandler(DWORD dwOperation)
             delete lpRequest;
         } //while(TRUE)
     }
+    Release();  //decrease reference count
     return 0;
 }
 //******************************************************************************
