@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.24 1999-10-12 18:51:38 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.25 1999-10-12 20:16:23 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -624,13 +624,14 @@ void OSLibMapWINDOWPOStoSWP(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, HWND hPar
          x = pswpOld->x;
          y = pswpOld->y;
 
+//SvL: TEST
+#if 0
          if (!((y == 0) && (pswpOld->cy == 0)))
          {
             y = parentHeight - y - pswpOld->cy;
          }
-	 else     y = parentHeight - y - cy;
+#endif
       }
-      else     y = parentHeight - y - cy;
  
       if (flags & SWP_SIZE)
       {
@@ -642,6 +643,8 @@ void OSLibMapWINDOWPOStoSWP(PWINDOWPOS pwpos, PSWP pswp, PSWP pswpOld, HWND hPar
          cx = pswpOld->cx;
          cy = pswpOld->cy;
       }
+      y  = parentHeight - y - cy;
+      
 
        if ((pswpOld->x == x) && (pswpOld->y == y))
          flags &= ~SWP_MOVE;

@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.11 1999-10-11 20:54:25 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.12 1999-10-12 20:16:23 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -560,6 +560,7 @@ BOOL Win32Dialog::createControls(LPCSTR dlgtemplate, HINSTANCE hInst)
     {
         dlgtemplate = (LPCSTR)getControl( (WORD *)dlgtemplate, &info, dlgInfo.dialogEx );
 
+        dprintf(("Create CONTROL %d", info.id));
         hwndCtrl = CreateWindowExW( info.exStyle | WS_EX_NOPARENTNOTIFY,
                                     (LPCWSTR)info.className,
                                     (LPCWSTR)info.windowName,
@@ -586,6 +587,7 @@ BOOL Win32Dialog::createControls(LPCSTR dlgtemplate, HINSTANCE hInst)
             hwndDefButton = hwndCtrl;
             idResult = ::GetWindowWord( hwndCtrl, GWW_ID );
         }
+        dprintf(("Create CONTROL %d DONE", info.id));
     }
     return TRUE;
 }
