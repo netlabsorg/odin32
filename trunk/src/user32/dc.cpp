@@ -1,4 +1,4 @@
-/* $Id: dc.cpp,v 1.41 2000-01-31 22:30:51 sandervl Exp $ */
+/* $Id: dc.cpp,v 1.42 2000-02-05 16:24:57 sandervl Exp $ */
 
 /*
  * DC functions for USER32
@@ -28,7 +28,7 @@
 #include <math.h>
 #include <limits.h>
 #include "oslibwin.h"
-#include "dcdata.h"
+#include <dcdata.h>
 
 #define INCLUDED_BY_DC
 #include "dc.h"
@@ -69,6 +69,7 @@ BOOL changePageXForm(Win32BaseWindow *wnd, pDCData pHps, PPOINTL pValue, int x, 
 LONG clientHeight(Win32BaseWindow *wnd, HWND hwnd, pDCData pHps);
 
 HWND WIN32API GetDesktopWindow(void);
+INT  WIN32API GetUpdateRgn(HWND, HRGN, BOOL);
 
 //******************************************************************************
 //******************************************************************************
@@ -462,6 +463,9 @@ HDC WIN32API BeginPaint (HWND hWnd, PPAINTSTRUCT_W lpps)
                 }
         }
    }
+
+   //SvL: Get update region for WM_ERASEBACKGROUND handling in the def wndproc
+   GetUpdateRgn(hWnd, wnd->GetUpdateRegion(), FALSE);
 
    HWND hwndClient = wnd->getOS2WindowHandle();
    HPS  hps = WinBeginPaint(hwndClient, hPS_ownDC, &rect);
@@ -883,6 +887,11 @@ BOOL WIN32API UpdateWindow (HWND hwnd)
 BOOL WIN32API RedrawWindow(HWND hwnd, const RECT* pRect, HRGN hrgn, DWORD redraw)
 {
    Win32BaseWindow *wnd;
+
+   if(pRect) {
+	  dprintf(("RedrawWindow %x (%d,%d)(%d,%d) %x %x", hwnd, pRect->left, pRect->top, pRect->right, pRect->bottom, hrgn, redraw));
+   }
+   else   dprintf(("RedrawWindow %x %x %x %x", hwnd, pRect, hrgn, redraw));
 
    if (redraw & (RDW_FRAME_W | RDW_NOFRAME_W))
    {
