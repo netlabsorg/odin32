@@ -1,4 +1,4 @@
-/* $Id: commdlg.h,v 1.7 2000-11-06 19:50:03 sandervl Exp $ */
+/* $Id: commdlg.h,v 1.8 2001-01-10 20:38:00 sandervl Exp $ */
 /* 
  * COMMDLG - Common Wine Dialog ... :-)
  */
@@ -13,6 +13,12 @@ extern "C" {
 #include "windef.h"		/* needed for CHOOSEFONT structure */
 #include "winuser.h"
 #include "pshpack1.h"
+
+#ifdef __cplusplus
+#define SNDMSG ::SendMessage
+#else   /* __cplusplus */
+#define SNDMSG SendMessage
+#endif  /* __cplusplus */
 
 #define OFN_READONLY                 0x00000001
 #define OFN_OVERWRITEPROMPT          0x00000002
@@ -601,12 +607,29 @@ DECL_WINELIB_TYPE_AW(LPPAGESETUPDLG)
         (int)SNDMSG(_hdlg, CDM_GETSPEC, (WPARAM)_cbmax, (LPARAM)(LPWSTR)_psz)
 #define     CommDlg_OpenSave_GetSpec WINELIB_NAME_AW(CommDlg_OpenSave_GetSpec)
 
-// lParam = pointer to a string
-// wParam = ID of control to change
-// return = not used
-#define CDM_SETCONTROLTEXT      (CDM_FIRST + 0x0004)
+#define CommDlg_OpenSave_GetFilePathA(_hdlg, _psz, _cbmax) \
+        (int)SNDMSG(_hdlg, CDM_GETFILEPATH, (WPARAM)_cbmax, (LPARAM)(LPSTR)_psz)
+#define CommDlg_OpenSave_GetFilePathW(_hdlg, _psz, _cbmax) \
+        (int)SNDMSG(_hdlg, CDM_GETFILEPATH, (WPARAM)_cbmax, (LPARAM)(LPWSTR)_psz)
+#define     CommDlg_OpenSave_GetFilePath WINELIB_NAME_AW(CommDlg_OpenSave_GetFilePath)
+
+#define CommDlg_OpenSave_GetFolderPathA(_hdlg, _psz, _cbmax) \
+        (int)SNDMSG(_hdlg, CDM_GETFOLDERPATH, (WPARAM)_cbmax, (LPARAM)(LPSTR)_psz)
+#define CommDlg_OpenSave_GetFolderPathW(_hdlg, _psz, _cbmax) \
+        (int)SNDMSG(_hdlg, CDM_GETFOLDERPATH, (WPARAM)_cbmax, (LPARAM)(LPWSTR)_psz)
+#define     CommDlg_OpenSave_GetFolderPath WINELIB_NAME_AW(CommDlg_OpenSave_GetFolderPath)
+
+#define CommDlg_OpenSave_GetFolderIDList(_hdlg, _pidl, _cbmax) \
+        (int)SNDMSG(_hdlg, CDM_GETFOLDERIDLIST, (WPARAM)_cbmax, (LPARAM)(LPVOID)_pidl)
+
 #define CommDlg_OpenSave_SetControlText(_hdlg, _id, _text) \
         (void)SNDMSG(_hdlg, CDM_SETCONTROLTEXT, (WPARAM)_id, (LPARAM)(LPSTR)_text)
+
+#define CommDlg_OpenSave_HideControl(_hdlg, _id) \
+        (void)SNDMSG(_hdlg, CDM_HIDECONTROL, (WPARAM)_id, 0)
+
+#define CommDlg_OpenSave_SetDefExt(_hdlg, _pszext) \
+        (void)SNDMSG(_hdlg, CDM_SETDEFEXT, 0, (LPARAM)(LPSTR)_pszext)
 
 BOOL16  WINAPI ChooseColor16(LPCHOOSECOLOR16 lpChCol);
 BOOL  WINAPI ChooseColorA(LPCHOOSECOLORA lpChCol);
