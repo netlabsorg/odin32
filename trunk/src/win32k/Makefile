@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.30 2000-02-26 17:51:43 bird Exp $
+# $Id: Makefile,v 1.31 2000-02-27 00:58:22 bird Exp $
 #
 # Copyright 1998-1999 knut st. osmundsen
 #
@@ -161,12 +161,20 @@ AINCLUDES  = -Fdi:$(WIN32KINCLUDE) \
     @$(ECHO) compiling 32bit: $<
     @$(CC) -c $(CPPFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
 
+{elf2lx}.c{$(WIN32KOBJ)}.obj 32bit:
+    @$(ECHO) compiling: $<
+    @$(CC) -c $(CFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
+{elf2lx}.cpp{$(WIN32KOBJ)}.obj:
+    @$(ECHO) compiling 32bit: $<
+    @$(CC) -c $(CPPFLAGS) $(CDEFINES) -Fa$(WIN32KLIST)\$(*B).s -Fo$@ $(CINCLUDES) $<
+
+
 
 
 ################################################################################
 # TARGETS
 ################################################################################
-!if "$(DDKBASE)" == "" || "$(MSCPATH)" == ""  || "$(TOOLKIT)" == "" || "$(VACPATH)" == ""
+!if "$(DDKPATH)" == "" || "$(MSCPATH)" == ""  || "$(TOOLKIT)" == "" || "$(VACPATH)" == ""
 all: pe2lx.exe
 !else
 all: $(NAME).sys pe2lx.exe
