@@ -1,4 +1,4 @@
-/* $Id: vprntf16.c,v 1.2.4.1 2000-07-16 22:43:24 bird Exp $
+/* $Id: vprntf16.c,v 1.2.4.2 2000-08-15 06:16:00 bird Exp $
  *
  * vprintf and printf - 16-bit.
  *
@@ -327,7 +327,7 @@ int vprintf16(const char *pszFormat, va_list args)
                         int   cchStr;
                         char *pszStr = va_arg(args, char*);
 
-                        if (pszStr < (char*)0x10000)
+                        if (pszStr == NULL)
                             pszStr = "<NULL>";
                         cchStr = _strnlen(pszStr, (unsigned)cchPrecision);
                         if (!(fFlags & NTSF_LEFT))

@@ -1,4 +1,4 @@
-/* $Id: win32ktst.c,v 1.1.4.2 2000-08-14 08:57:07 bird Exp $
+/* $Id: win32ktst.c,v 1.1.4.3 2000-08-15 06:16:09 bird Exp $
  *
  * Win32k test module.
  *
@@ -599,7 +599,7 @@ int tests(int iTest, int argc, char **argv)
  * Test case 1.
  * Checks that default initiation works fine for a given kernel.
  *
- * Syntax:  win32ktst.exe 1 <os2krnl> <majorver> <minorver> <build> <kerneltype: S|U|4> [os2krnl.sym]
+ * Syntax:  win32ktst.exe 1 <os2krnl> <majorver> <minorver> <build> <kerneltype: S|U|4> <buildtype: A|H|R> [os2krnl.sym]
  *
  * @sketch  Create init packet with no arguments.
  *          Initiate elf$
@@ -617,7 +617,7 @@ int TestCase1(int argc, char **argv)
     RP32INIT    rpinit;
 
     /* verify argument count */
-    if (argc < 7 || argc > 8)
+    if (argc < 8 || argc > 9)
     {
         printf("Invalid parameter count for testcase 1.\n");
         return ERROR_INVALID_PARAMETER;
@@ -629,8 +629,8 @@ int TestCase1(int argc, char **argv)
 
     /* make init string */
     strcpy(szInitArgs, "-w3");
-    if (argc >= 8)
-        strcat(strcat(szInitArgs, " -S:"), argv[7]);
+    if (argc >= 9)
+        strcat(strcat(szInitArgs, " -S:"), argv[8]);
 
     /* $elf */
     initRPInit(SSToDS(&rpinit), szInitArgs);
@@ -646,7 +646,8 @@ int TestCase1(int argc, char **argv)
         {
             struct options opt = DEFAULT_OPTION_ASSIGMENTS;
             opt.ulInfoLevel = 3;
-            opt.fKernel = argv[6][0] == 'S' ? KF_SMP : (argv[6][0] == '4' ? KF_W4 : KF_UNI);
+            opt.fKernel = (argv[6][0] == 'S' ? KF_SMP : (argv[6][0] == '4' ? KF_W4 | KF_UNI : KF_UNI))
+                            | (argv[7][0] == 'A' || argv[7][0] == 'H' ? KF_DEBUG : 0);
             opt.ulBuild = atoi(argv[5]);
             opt.usVerMajor = (USHORT)atoi(argv[3]);
             opt.usVerMinor = (USHORT)atoi(argv[4]);
