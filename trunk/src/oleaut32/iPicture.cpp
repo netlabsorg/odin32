@@ -1,4 +1,4 @@
-/* $Id: iPicture.cpp,v 1.2 1999-11-14 21:05:08 davidr Exp $ */
+/* $Id: iPicture.cpp,v 1.3 1999-11-23 20:45:23 davidr Exp $ */
 /* 
  * OLE Picture functions
  *
@@ -33,7 +33,6 @@
 static IPictureImpl *   IPictureImpl_Constructor(LPPICTDESC description, BOOL fOwn);
 static void             IPictureImpl_Destructor(IPictureImpl * obj);
 
-static ULONG   WIN32API	IPictureImpl_AddRef(LPPICTURE iface);
 static HRESULT WIN32API	IPictureImpl_QueryInterface(LPPICTURE iface,
 				REFIID refiid, LPVOID * obj);
 static ULONG   WIN32API	IPictureImpl_AddRef(LPPICTURE iface);
@@ -161,386 +160,84 @@ static ICOM_VTABLE(IPersistStream) IPictureImpl_IPersistStream_VTable =
 // ======================================================================
 
 // ----------------------------------------------------------------------
-// Uninitialised Picture
-// ----------------------------------------------------------------------
-HRESULT IPictureNone::get_Handle(OLE_HANDLE * pHandle)
-{
-    *pHandle = 0;
-    return E_FAIL;
-}
-
-HRESULT IPictureNone::get_hPal(OLE_HANDLE * phPal)
-{
-    *phPal = 0;
-    return E_FAIL;
-}
-
-HRESULT IPictureNone::get_Type(SHORT * pType)
-{
-    *pType = PICTYPE_UNINITIALIZED;
-    return S_OK;
-}
-
-HRESULT IPictureNone::get_Width(OLE_XSIZE_HIMETRIC * pWidth)
-{
-    *pWidth = 0;
-    return E_FAIL;
-}
-
-HRESULT IPictureNone::get_Height(OLE_YSIZE_HIMETRIC * pHeight)
-{
-    *pHeight = 0;
-    return E_FAIL;
-}
-
-HRESULT IPictureNone::Render(HDC hdc, LONG x, LONG y, LONG cx, LONG cy,
-				OLE_XPOS_HIMETRIC xSrc, OLE_YPOS_HIMETRIC ySrc,
-				OLE_XSIZE_HIMETRIC cxSrc, OLE_YSIZE_HIMETRIC cySrc,
-				LPCRECT pRcWBounds)
-{
-    return E_FAIL;
-}
-
-HRESULT IPictureNone::set_hPal(OLE_HANDLE hPal)
-{
-    return E_FAIL;
-}
-
-HRESULT IPictureNone::SaveAsFile(LPSTREAM pStream, BOOL fSaveMemCopy, LONG * pCbSize)
-{
-    return E_FAIL;
-}
-
-HRESULT IPictureNone::get_Attributes(DWORD * pDwAttr)
-{
-    *pDwAttr = 0;
-    return S_OK;
-}
-
-IPictureBmp::IPictureBmp(IPictureImpl * a_pPicture, HBITMAP hbitmap, HPALETTE hpal)
-    : IPictureStrat(a_pPicture)
-{
-    pPicture->u.bmp.hbitmap = hbitmap;
-    pPicture->u.bmp.hpal = hpal;
-}
-
-// ----------------------------------------------------------------------
-// Icon Picture
-// ----------------------------------------------------------------------
-IPictureBmp::~IPictureBmp()
-{
-    if (pPicture->fOwn)
-    {
-	// Free bitmap...
-	DeleteObject(pPicture->u.bmp.hbitmap);
-	DeleteObject(pPicture->u.bmp.hpal);
-    }
-}
-
-HRESULT IPictureBmp::get_Handle(OLE_HANDLE * pHandle)
-{
-    *pHandle = pPicture->u.bmp.hbitmap;
-    return S_OK;
-}
-
-HRESULT IPictureBmp::get_hPal(OLE_HANDLE * phPal)
-{
-    *phPal = pPicture->u.bmp.hpal;
-    return S_OK;
-}
-
-HRESULT IPictureBmp::get_Type(SHORT * pType)
-{
-    *pType = PICTYPE_BITMAP;
-    return S_OK;
-}
-
-HRESULT IPictureBmp::get_Width(OLE_XSIZE_HIMETRIC * pWidth)
-{
-    SIZE	size;
-
-    if (GetBitmapDimensionEx( pPicture->u.bmp.hbitmap, &size) == 0)
-    {
-	*pWidth = 0;
-	return E_FAIL;
-    }
-
-    *pWidth = size.cx;
-
-    return S_OK;
-}
-
-HRESULT IPictureBmp::get_Height(OLE_YSIZE_HIMETRIC * pHeight)
-{
-    SIZE	size;
-
-    if (GetBitmapDimensionEx( pPicture->u.bmp.hbitmap, &size) == 0)
-    {
-	*pHeight = 0;
-	return E_FAIL;
-    }
-
-    *pHeight = size.cy;
-
-    return S_OK;
-}
-
-HRESULT IPictureBmp::Render(HDC hdc, LONG x, LONG y, LONG cx, LONG cy,
-				OLE_XPOS_HIMETRIC xSrc, OLE_YPOS_HIMETRIC ySrc,
-				OLE_XSIZE_HIMETRIC cxSrc, OLE_YSIZE_HIMETRIC cySrc,
-				LPCRECT pRcWBounds)
-{
-    return E_FAIL;
-}
-
-HRESULT IPictureBmp::set_hPal(OLE_HANDLE hPal)
-{
-    pPicture->u.bmp.hpal = hPal;
-    return S_OK;
-}
-
-HRESULT IPictureBmp::SaveAsFile(LPSTREAM pStream, BOOL fSaveMemCopy, LONG * pCbSize)
-{
-    return E_FAIL;
-}
-
-HRESULT IPictureBmp::get_Attributes(DWORD * pDwAttr)
-{
-    // Although bitmaps may be scaled, it is really stretching.
-    *pDwAttr = 0;
-    return S_OK;
-}
-
-// ----------------------------------------------------------------------
-// Metafile Picture
-// ----------------------------------------------------------------------
-IPictureIcon::IPictureIcon(IPictureImpl * a_pPicture, HICON hicon)
-    : IPictureStrat(a_pPicture)
-{
-    pPicture->u.icon.hicon = hicon;
-}
-
-IPictureIcon::~IPictureIcon()
-{
-    if (pPicture->fOwn)
-    {
-	// Free icon...
-	DestroyIcon(pPicture->u.icon.hicon);
-    }
-}
-
-HRESULT IPictureIcon::get_Handle(OLE_HANDLE * pHandle)
-{
-    *pHandle = pPicture->u.icon.hicon;
-    return S_OK;
-}
-
-HRESULT IPictureIcon::get_hPal(OLE_HANDLE * phPal)
-{
-    *phPal = 0;
-    return S_OK;
-}
-
-HRESULT IPictureIcon::get_Type(SHORT * pType)
-{
-    *pType = PICTYPE_ICON;
-    return S_OK;
-}
-
-HRESULT IPictureIcon::get_Width(OLE_XSIZE_HIMETRIC * pWidth)
-{
-    // FIXME - Read from system constants...
-    *pWidth = 32;
-
-    return S_OK;
-}
-
-HRESULT IPictureIcon::get_Height(OLE_YSIZE_HIMETRIC * pHeight)
-{
-    // FIXME - Read from system constants...
-    *pHeight = 32;
-
-    return S_OK;
-}
-
-HRESULT IPictureIcon::Render(HDC hdc, LONG x, LONG y, LONG cx, LONG cy,
-				OLE_XPOS_HIMETRIC xSrc, OLE_YPOS_HIMETRIC ySrc,
-				OLE_XSIZE_HIMETRIC cxSrc, OLE_YSIZE_HIMETRIC cySrc,
-				LPCRECT pRcWBounds)
-{
-    return E_FAIL;
-}
-
-HRESULT IPictureIcon::set_hPal(OLE_HANDLE hPal)
-{
-    return E_FAIL;
-}
-
-HRESULT IPictureIcon::SaveAsFile(LPSTREAM pStream, BOOL fSaveMemCopy, LONG * pCbSize)
-{
-    return E_FAIL;
-}
-
-HRESULT IPictureIcon::get_Attributes(DWORD * pDwAttr)
-{
-    *pDwAttr = PICTURE_TRANSPARENT;
-    return S_OK;
-}
-
-// ----------------------------------------------------------------------
-// Enhanced Metafile Picture
-// ----------------------------------------------------------------------
-
-IPictureMeta::IPictureMeta(IPictureImpl * a_pPicture, HMETAFILE hmeta, int xExt, int yExt)
-    : IPictureStrat(a_pPicture)
-{
-    pPicture->u.wmf.hmeta = hmeta;
-    pPicture->u.wmf.xExt = xExt;
-    pPicture->u.wmf.yExt = yExt;
-}
-
-IPictureMeta::~IPictureMeta()
-{
-    if (pPicture->fOwn)
-    {
-	// Free metafile...
-	DeleteMetaFile(pPicture->u.wmf.hmeta);
-    }
-}
-
-HRESULT IPictureMeta::get_Handle(OLE_HANDLE * pHandle)
-{
-    *pHandle = pPicture->u.wmf.hmeta;
-    return S_OK;
-}
-
-HRESULT IPictureMeta::get_hPal(OLE_HANDLE * phPal)
-{
-    *phPal = 0;
-    return E_FAIL;
-}
-
-HRESULT IPictureMeta::get_Type(SHORT * pType)
-{
-    *pType = PICTYPE_METAFILE;
-    return S_OK;
-}
-
-HRESULT IPictureMeta::get_Width(OLE_XSIZE_HIMETRIC * pWidth)
-{
-    *pWidth = pPicture->u.wmf.xExt;
-    return S_OK;
-}
-
-HRESULT IPictureMeta::get_Height(OLE_YSIZE_HIMETRIC * pHeight)
-{
-    *pHeight = pPicture->u.wmf.yExt;
-    return S_OK;
-}
-
-HRESULT IPictureMeta::Render(HDC hdc, LONG x, LONG y, LONG cx, LONG cy,
-				OLE_XPOS_HIMETRIC xSrc, OLE_YPOS_HIMETRIC ySrc,
-				OLE_XSIZE_HIMETRIC cxSrc, OLE_YSIZE_HIMETRIC cySrc,
-				LPCRECT pRcWBounds)
-{
-    return E_FAIL;
-}
-
-HRESULT IPictureMeta::set_hPal(OLE_HANDLE hPal)
-{
-    return E_FAIL;
-}
-
-HRESULT IPictureMeta::SaveAsFile(LPSTREAM pStream, BOOL fSaveMemCopy, LONG * pCbSize)
-{
-    return E_FAIL;
-}
-
-HRESULT IPictureMeta::get_Attributes(DWORD * pDwAttr)
-{
-    *pDwAttr = PICTURE_SCALEABLE | PICTURE_TRANSPARENT;
-    return S_OK;
-}
-
-// ----------------------------------------------------------------------
 // IPictureImpl_QueryInterface
 // ----------------------------------------------------------------------
 static IPictureImpl *   IPictureImpl_Constructor(LPPICTDESC description, BOOL fOwn)
 {
-    IPictureImpl *	newObject;
+    IPictureImpl *	pNewObject;
 
     // Allocate a new object on the heap...
-    if ((newObject = (IPictureImpl *)HeapAlloc(GetProcessHeap(), 0, sizeof(IPictureImpl))) == 0)
+    if ((pNewObject = (IPictureImpl *)HeapAlloc(GetProcessHeap(), 0, sizeof(IPictureImpl))) == 0)
     	return 0;
 
-    dprintf(("OLEAUT32: IPictureImpl(%p)->Contructor(fOwn = %d)\n", newObject, fOwn));
+    dprintf(("OLEAUT32: IPictureImpl(%p)->Contructor(fOwn = %d)\n", pNewObject, fOwn));
 
     // Initialise the vft's
-    newObject->lpvtbl1 = &IPictureImpl_VTable;
-    newObject->lpvtbl2 = &IPictureImpl_IDispatch_VTable;
-    newObject->lpvtbl3 = &IPictureImpl_IPersistStream_VTable;
+    pNewObject->lpvtbl1 = &IPictureImpl_VTable;
+    pNewObject->lpvtbl2 = &IPictureImpl_IDispatch_VTable;
+    pNewObject->lpvtbl3 = &IPictureImpl_IPersistStream_VTable;
 
     // Initial reference count of 1...
-    newObject->ref = 1;
-    newObject->fOwn = fOwn;
+    pNewObject->ref = 1;
+    pNewObject->fOwn = fOwn;
 
     // If a description is not passed then leave the picture uninitialised...
     if (description == 0)
-	newObject->pStrat = new IPictureNone(newObject);
+	pNewObject->pStrat = new IPictureNone(pNewObject);
     else
     {
 	// Validate size...
 	if (description->cbSizeofstruct < sizeof(PICTDESC))
 	{
-	    dprintf(("OLEAUT32: IPictureImpl(%p)->Constructor - Invalid cbSizeofstruct!", newObject));
+	    dprintf(("OLEAUT32: IPictureImpl(%p)->Constructor - Invalid cbSizeofstruct!", pNewObject));
 	    return 0;
 	}
 	switch(description->picType)
 	{
 	    case PICTYPE_BITMAP:
-		newObject->pStrat = new IPictureBmp(
-					    newObject,
+		pNewObject->pStrat = new IPictureBmp(
+					    pNewObject,
 					    description->u.bmp.hbitmap,
 					    description->u.bmp.hpal);
 		break;
 
 	    case PICTYPE_METAFILE:
-		newObject->pStrat = new IPictureMeta(newObject,
+		pNewObject->pStrat = new IPictureMeta(pNewObject,
 					    description->u.wmf.hmeta,
 					    description->u.wmf.xExt,
 					    description->u.wmf.yExt);
 		break;
 
 	    case PICTYPE_ICON:
-		newObject->pStrat = new IPictureIcon(newObject,
+		pNewObject->pStrat = new IPictureIcon(pNewObject,
 					    description->u.icon.hicon);
 		break;
 
 	    case PICTYPE_ENHMETAFILE:
-		newObject->pStrat = new IPictureIcon(newObject,
+		pNewObject->pStrat = new IPictureIcon(pNewObject,
 					    description->u.emf.hemf);
 		break;
 
 	    default:
 	    	// assume uninitialised...
-		newObject->pStrat = new IPictureNone(newObject);
+		pNewObject->pStrat = new IPictureNone(pNewObject);
 		break;
 	}
     }
 
-    return newObject;
+    return pNewObject;
 }
 
 // ----------------------------------------------------------------------
 // IPictureImpl_QueryInterface
 // ----------------------------------------------------------------------
-static void             IPictureImpl_Destructor(IPictureImpl * obj)
+static void             IPictureImpl_Destructor(IPictureImpl * This)
 {
-    dprintf(("OLEAUT32: IPictureImpl(%p)->Destructor()\n", obj));
+    dprintf(("OLEAUT32: IPictureImpl(%p)->Destructor()\n", This));
 
-    delete obj->pStrat;
+    delete This->pStrat;
 
-    HeapFree(GetProcessHeap(), 0, obj);
+    HeapFree(GetProcessHeap(), 0, This);
 }
 
 // ----------------------------------------------------------------------
