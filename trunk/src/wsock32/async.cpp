@@ -1,4 +1,4 @@
-/* $Id: async.cpp,v 1.5 1999-10-20 20:10:55 phaller Exp $ */
+/* $Id: async.cpp,v 1.6 1999-10-21 14:58:53 phaller Exp $ */
 
 /*
  *
@@ -31,7 +31,6 @@
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <sys/select.h>
-#include <unistd.h>
 
 #include <wsock32const.h>
 
@@ -48,6 +47,13 @@
 
 ODINDEBUGCHANNEL(WSOCK32-ASYNC)
 
+
+// prototype of the OS/2 select!
+int _System os2_select(int* socket,
+                       int fd_read,
+                       int fd_write,
+                       int fd_exception,
+                       long timeout);
 
 
 /*****************************************************************************
@@ -609,7 +615,7 @@ void WSAAsyncWorker::asyncGetHostByAddr   (PASYNCREQUEST pRequest)
   usLength = min(pRequest->ulBufferLength, sizeof(struct hostent));
 
   // call API
-  pHostent = gethostbyaddr((const char*)pRequest->ul1,
+  pHostent = gethostbyaddr((char*)pRequest->ul1,
                            (int)        pRequest->ul2,
                            (int)        pRequest->ul3);
   if (pHostent == NULL) // error ?
@@ -662,7 +668,7 @@ void WSAAsyncWorker::asyncGetHostByName   (PASYNCREQUEST pRequest)
   usLength = min(pRequest->ulBufferLength, sizeof(struct hostent));
 
   // call API
-  pHostent = gethostbyname((const char*)pRequest->ul1);
+  pHostent = gethostbyname((char*)pRequest->ul1);
   if (pHostent == NULL) // error ?
   {
     rc = sock_errno();   // assuming OS/2 return codes are
@@ -713,7 +719,7 @@ void WSAAsyncWorker::asyncGetProtoByName  (PASYNCREQUEST pRequest)
   usLength = min(pRequest->ulBufferLength, sizeof(struct protoent));
 
   // call API
-  pProtoent = getprotobyname((const char*)pRequest->ul1);
+  pProtoent = getprotobyname((char*)pRequest->ul1);
   if (pProtoent == NULL) // error ?
   {
     rc = sock_errno();   // assuming OS/2 return codes are
@@ -764,7 +770,7 @@ void WSAAsyncWorker::asyncGetProtoByNumber(PASYNCREQUEST pRequest)
   usLength = min(pRequest->ulBufferLength, sizeof(struct protoent));
 
   // call API
-  pProtoent = getprotobyname((const char*)pRequest->ul1);
+  pProtoent = getprotobyname(( char*)pRequest->ul1);
   if (pProtoent == NULL) // error ?
   {
     rc = sock_errno();   // assuming OS/2 return codes are
@@ -815,8 +821,8 @@ void WSAAsyncWorker::asyncGetServByName(PASYNCREQUEST pRequest)
   usLength = min(pRequest->ulBufferLength, sizeof(struct servent));
 
   // call API
-  pServent = getservbyname((const char*)pRequest->ul1,
-                           (const char*)pRequest->ul2);
+  pServent = getservbyname((char*)pRequest->ul1,
+                           (char*)pRequest->ul2);
   if (pServent == NULL) // error ?
   {
     rc = sock_errno();   // assuming OS/2 return codes are
@@ -868,7 +874,7 @@ void WSAAsyncWorker::asyncGetServByPort(PASYNCREQUEST pRequest)
 
   // call API
   pServent = getservbyport((int        )pRequest->ul1,
-                           (const char*)pRequest->ul2);
+                           (char*)pRequest->ul2);
   if (pServent == NULL) // error ?
   {
     rc = sock_errno();   // assuming OS/2 return codes are
@@ -956,7 +962,7 @@ void WSAAsyncWorker::asyncSelect(PASYNCREQUEST pRequest)
       usResult = 0;
 
       // readiness for reading bytes ?
-      irc = ioctl(sockWin, FIONREAD, &iUnknown, sizeof(iUnknown));
+      irc = ioctl(sockWin, FIONREAD, (char *)&iUnknown, sizeof(iUnknown));
       if ( (irc == 0) && (iUnknown > 0))
          usResult |= FD_READ;
     }
