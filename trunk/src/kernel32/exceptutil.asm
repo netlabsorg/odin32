@@ -1,4 +1,4 @@
-; $Id: exceptutil.asm,v 1.8 2000-08-15 17:59:46 sandervl Exp $
+; $Id: exceptutil.asm,v 1.9 2000-08-28 18:35:28 sandervl Exp $
 
 ;/*
 ; * Project Odin Software License can be found in LICENSE.TXT
@@ -21,7 +21,7 @@ _RaiseException@16 proc near
         push dword ptr [esp+28] ;DWORD *lpArguments
         push dword ptr [esp+16] ;return address
         push esp
-        sub  dword ptr [esp], 20
+        add  dword ptr [esp], 20
         push ebp
         pushfd
         push eax
@@ -45,7 +45,7 @@ _RaiseException@16 proc near
         push eax
         call OS2RAISEEXCEPTION
 
-        ret 20      ;__stdcall
+        ret 16      ;__stdcall
 _RaiseException@16 endp
 
         public  _RtlUnwind@16
@@ -58,7 +58,7 @@ _RtlUnwind@16 proc near
         push dword ptr [esp+28] ;DWORD  returnEax
         push dword ptr [esp+16] ;return address
         push esp
-        sub  dword ptr [esp], 20
+        add  dword ptr [esp], 20
         push ebp
         pushfd
         push eax
@@ -82,7 +82,7 @@ _RtlUnwind@16 proc near
         push eax
         call OS2RTLUNWIND
 
-        ret 20      ;__stdcall
+        ret 16      ;__stdcall
 _RtlUnwind@16 endp
 
 
