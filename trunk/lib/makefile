@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2001-09-29 20:19:10 bird Exp $
+# $Id: makefile,v 1.8 2001-09-30 04:59:29 bird Exp $
 
 #
 # Odin32 API
@@ -27,7 +27,7 @@ all:    $(ODIN32_LIB) \
 # Make output director.
 #
 $(ODIN32_LIB):
-    if not exist $(ODIN32_LIB) mkdir $(ODIN32_LIB)
+    @if not exist $(ODIN32_LIB) mkdir $(ODIN32_LIB)
 
 
 #
