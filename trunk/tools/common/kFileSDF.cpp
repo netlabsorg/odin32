@@ -1,4 +1,4 @@
-/* $Id: kFileSDF.cpp,v 1.1 2001-04-17 04:16:03 bird Exp $
+/* $Id: kFileSDF.cpp,v 1.2 2002-02-24 02:47:27 bird Exp $
  *
  * kFileSDF- Structure Defintion File class Implementation.
  *
@@ -17,12 +17,11 @@
 /*******************************************************************************
 *   Header Files                                                               *
 *******************************************************************************/
-#include <os2.h>
-
 #include <string.h>
-#include <malloc.h>
 
-#include "kInterfaces.h"
+#include "kTypes.h"
+#include "kError.h"
+#include "kFileInterfaces.h"
 #include "kFile.h"
 #include "kFileFormatBase.h"
 #include "kFileSDF.h"
@@ -33,10 +32,11 @@
 *******************************************************************************/
 
 
+
 /*******************************************************************************
 *   Global Variables                                                           *
 *******************************************************************************/
-#if 1
+#if 0
 static kFileSDF tst((kFile*)NULL);
 #endif
 
@@ -66,7 +66,7 @@ static kFileSDF tst((kFile*)NULL);
  *  -----------------------
  *
  */
-void kFileSDF::parseSDFFile(void *pvFile) throw(int)
+void kFileSDF::parseSDFFile(void *pvFile)
 {
     /*
      * Sanity check on header.
@@ -74,7 +74,7 @@ void kFileSDF::parseSDFFile(void *pvFile) throw(int)
     pHdr = (PSDFHEADER)pvFile;
     if (    pHdr->cStructs >= 0x8000    /* 32k is a reasonable limit. */
         ||  pHdr->cTypes   >= 0x8000)
-        throw(1);
+        throw(kError(kError::SDF_TOO_MANY));
 
     /*
      * Initialize the papStructs array.
@@ -159,11 +159,11 @@ PSDFSTRUCT kFileSDF::getStruct(const char *pszStruct)
  * @author  knut st. osmundsen (knut.stange.osmundsen@mynd.no)
  * @remark  Will throw error codes.
  */
-kFileSDF::kFileSDF(kFile *pFile) throw(int) :
-    papStructs(NULL), pHdr(NULL), paTypes(NULL)
+kFileSDF::kFileSDF(kFile *pFile) :
+    kFileFormatBase(pFile), papStructs(NULL), pHdr(NULL), paTypes(NULL)
 {
     long    cchFile = pFile->getSize();
-    void *  pvFile = pFile->readFile();
+    void *  pvFile = pFile->mapFile();
 
     /*
      * apply "rb"->"r" fix
@@ -196,7 +196,7 @@ kFileSDF::kFileSDF(kFile *pFile) throw(int) :
     }
     catch (int err)
     {
-        free(pvFile);
+        kFile::mapFree(pvFile);
         if (papStructs);
             delete papStructs;
         throw(err);
@@ -208,5 +208,36 @@ kFileSDF::~kFileSDF()
 {
     if (papStructs);
         delete papStructs;
-    free(pHdr);
+    kFile::mapFree(pHdr);
 }
+
+
+
+kDbgTypeEntry * kFileSDF::dbgtypeFindFirst(int flFlags)
+{
+    return NULL;
+}
+
+kDbgTypeEntry * kFileSDF::dbgtypeFindNext(kDbgTypeEntry *kDbgTypeEntry)
+{
+    return NULL;
+}
+
+void            kFileSDF::dbgtypeFindClose(kDbgTypeEntry *kDbgTypeEntry)
+{
+    return;
+}
+
+kDbgTypeEntry * kFileSDF::dbgtypeLookup(const char *pszName, int flFlags)
+{
+    return NULL;
+}
+
+
+
+
+KBOOL kFileSDF::dump(kFile *pOut)
+{
+    return FALSE;
+}
+

@@ -49,7 +49,7 @@ typedef struct _DefExport
     unsigned long       ulOrdinal;
     char               *pszName;
     char               *pszIntName;
-    BOOL                fResident;
+    KBOOL               fResident;
     unsigned long       cParam;
     struct _DefExport  *pNext;
 } DEFEXPORT, *PDEFEXPORT;
@@ -65,14 +65,14 @@ class kFileDef : public kExportI, public kFileFormatBase, public kModuleI
     private:
         /**@cat pointers to different sections */
         char *pszType;
-        BOOL  fProgram;
-        BOOL  fLibrary;
-        BOOL  fPhysicalDevice;
-        BOOL  fVirtualDevice;
-        BOOL  fInitInstance;
-        BOOL  fTermInstance;
-        BOOL  fInitGlobal;
-        BOOL  fTermGlobal;
+        KBOOL fProgram;
+        KBOOL fLibrary;
+        KBOOL fPhysicalDevice;
+        KBOOL fVirtualDevice;
+        KBOOL fInitInstance;
+        KBOOL fTermInstance;
+        KBOOL fInitGlobal;
+        KBOOL fTermGlobal;
         char *pszModName;
         char  chAppType;
 
@@ -93,30 +93,30 @@ class kFileDef : public kExportI, public kFileFormatBase, public kModuleI
         PDEFEXPORT  pExports;
 
         /**@cat internal functions */
-        void  read(kFile *pFile) throw (int);
-        char *readln(kFile *pFile, char *pszBuffer, int cbBuffer) throw (int);
-        BOOL  isKeyword(const char *psz);
-        BOOL  setModuleName(void);
+        void  read(kFile *pFile) throw (kError);
+        char *readln(kFile *pFile, char *pszBuffer, int cbBuffer) throw (kError);
+        KBOOL isKeyword(const char *psz);
+        KBOOL setModuleName(void);
 
     public:
         /**@cat Constructor/Destructor */
-        kFileDef(kFile *pFile) throw(int);
+        kFileDef(kFile *pFile) throw(kError);
         virtual ~kFileDef();
 
         /** @cat Module information methods. */
-        BOOL        moduleGetName(char *pszBuffer, int cchSize = 260);
+        KBOOL       moduleGetName(char *pszBuffer, int cchSize = 260);
 
         /** @cat Export enumeration methods. */
-        BOOL        exportFindFirst(kExportEntry *pExport);
-        BOOL        exportFindNext(kExportEntry *pExport);
+        KBOOL       exportFindFirst(kExportEntry *pExport);
+        KBOOL       exportFindNext(kExportEntry *pExport);
         void        exportFindClose(kExportEntry *pExport);
 
         /** @cat Export Lookup methods */
-        BOOL        exportLookup(unsigned long ulOrdinal, kExportEntry *pExport);
-        BOOL        exportLookup(const char *  pszName, kExportEntry *pExport);
+        KBOOL       exportLookup(unsigned long ulOrdinal, kExportEntry *pExport);
+        KBOOL       exportLookup(const char *  pszName, kExportEntry *pExport);
 
         /**@cat queries... */
-        BOOL        isDef() const                { return TRUE;}
+        KBOOL       isDef() const                { return TRUE;}
         char const *queryModuleName(void) const  { return pszModName;     }
         char const *queryType(void) const        { return pszType;        }
         char const *queryBase(void) const        { return pszBase;        }
@@ -131,7 +131,7 @@ class kFileDef : public kExportI, public kFileFormatBase, public kModuleI
         char const *queryStub(void) const        { return pszStub;        }
 
         /**@cat Operations */
-        BOOL        makeWatcomLinkFileAddtion(kFile *pFile) throw(int);
+        KBOOL       makeWatcomLinkFileAddtion(kFile *pFile) throw(kError);
 
         enum {fullscreen = 0, pmvio = 2, pm = 3, unknown = 255};
 };

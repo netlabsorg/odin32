@@ -1,42 +1,26 @@
-/*
+/* $Id: kFilePE.cpp,v 1.5 2002-02-24 02:47:26 bird Exp $
+ *
  * kFilePE - PE files.
  *
  * Copyright (c) 1999 knut st. osmundsen
  *
  */
 
-/*******************************************************************************
-*   Defined Constants                                                          *
-*******************************************************************************/
-/* emx fixups */
-#ifdef __EMX__
-    #define __stdcall
-     #define max(a,b) (((a) > (b)) ? (a) : (b))
-     #define min(a,b) (((a) < (b)) ? (a) : (b))
-#endif
-
 /******************************************************************************
 *   Header Files                                                              *
 ******************************************************************************/
-#ifdef __EMX__
-#define INT INT_
-#define PCHAR PCHAR_
-#endif
-#include <os2.h>
-#ifdef __EMX__
-#undef PCHAR
-#undef INT
-#endif
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include <malloc.h>
-#include <assert.h>
-#include <peexe.h>
+
+#include "MZexe.h"
+#include "PEexe.h"
+
+#include "kTypes.h"
+#include "kError.h"
 #include "kFile.h"
 #include "kFileFormatBase.h"
-#include "kInterfaces.h"
-#include "kFilePe.h"
+#include "kFileInterfaces.h"
+#include "kFilePE.h"
+
 
 /*******************************************************************************
 *   Global Variables                                                           *
@@ -45,12 +29,15 @@
 kFilePE kFilePE((kFile*)NULL);
 #endif
 
+
 /**
  * Constructs a kFilePE object for a file.
  * @param     pFile     File to create object from.
- * @remark    throws errorcode (TODO: errorhandling.)
+ * @remark    throws errorcode
  */
-kFilePE::kFilePE(kFile *pFile) throw(int) : pvBase(NULL),
+kFilePE::kFilePE(kFile *pFile) :
+    kFileFormatBase(pFile),
+    pvBase(NULL),
     pDosHdr(NULL), pFileHdr(NULL), pOptHdr(NULL), paDataDir(NULL), paSectionHdr(NULL),
     pExportDir(NULL),
     pImportDir(NULL),
@@ -66,67 +53,70 @@ kFilePE::kFilePE(kFile *pFile) throw(int) : pvBase(NULL),
     pDelayImportDir(NULL)
 {
     IMAGE_DOS_HEADER doshdr;
+    long                offPEHdr = 0;
+    IMAGE_NT_HEADERS pehdr;
 
-    /* read dos-header - assumes there is one */
-    if (   pFile->readAt(&doshdr, sizeof(doshdr), 0)
-        && doshdr.e_magic == IMAGE_DOS_SIGNATURE
-        && doshdr.e_lfanew > sizeof(doshdr)
-        )
+    /* read dos-header (If tehre is one) */
+    pFile->setThrowOnErrors();
+    pFile->readAt(&doshdr, sizeof(doshdr), 0);
+    if (doshdr.e_magic == IMAGE_DOS_SIGNATURE)
     {
-        IMAGE_NT_HEADERS pehdr;
+        if (doshdr.e_lfanew <= sizeof(doshdr))
+            throw(kError(kError::INVALID_EXE_SIGNATURE));
+        offPEHdr = doshdr.e_lfanew;
+    }
 
-        /* read pe headers */
-        if (   pFile->readAt(&pehdr, sizeof(pehdr), doshdr.e_lfanew)
-            && pehdr.Signature == IMAGE_NT_SIGNATURE
-            && pehdr.FileHeader.SizeOfOptionalHeader == sizeof(IMAGE_OPTIONAL_HEADER)
-            && pehdr.OptionalHeader.Magic == IMAGE_NT_OPTIONAL_HDR_MAGIC)
-        {
+    /* read pe headers and do minor verifications */
+    pFile->readAt(&pehdr, sizeof(pehdr), offPEHdr);
+    if (pehdr.Signature != IMAGE_NT_SIGNATURE)
+        throw(kError(kError::INVALID_EXE_SIGNATURE));
+    if (   pehdr.FileHeader.SizeOfOptionalHeader != sizeof(IMAGE_OPTIONAL_HEADER)
+        || pehdr.OptionalHeader.Magic != IMAGE_NT_OPTIONAL_HDR_MAGIC)
+        throw(kError(kError::BAD_EXE_FORMAT));
+
             /* create mapping */
-            pvBase = calloc((size_t)pehdr.OptionalHeader.SizeOfImage, 1);
-            if (pvBase != NULL)
-            {
+   pvBase = new char [pehdr.OptionalHeader.SizeOfImage];
+   if (pvBase == NULL)
+       throw(kError(kError::NOT_ENOUGH_MEMORY));
+   memset(pvBase, 0, pehdr.OptionalHeader.SizeOfImage);
+
                 /*
                 printf("%ld\n", pehdr.OptionalHeader.SizeOfHeaders);
                 printf("%ld\n", sizeof(IMAGE_NT_HEADERS) + sizeof(IMAGE_SECTION_HEADER) * pehdr.FileHeader.NumberOfSections);
-                assert(pehdr.OptionalHeader.SizeOfHeaders ==
+   kASSERT(pehdr.OptionalHeader.SizeOfHeaders ==
                        sizeof(IMAGE_NT_HEADERS) + sizeof(IMAGE_SECTION_HEADER) * pehdr.FileHeader.NumberOfSections);
                 */
-                if (pFile->readAt(pvBase, pehdr.OptionalHeader.SizeOfHeaders, 0))
+   try
                 {
+       /* read optional header */
+       pFile->readAt(pvBase, pehdr.OptionalHeader.SizeOfHeaders, 0);
+
                     /* read sections */
                     for (int i = 0; i < pehdr.FileHeader.NumberOfSections; i++)
                     {
-                        ULONG  cbSection;
+           unsigned long  cbSection;
                         PIMAGE_SECTION_HEADER pSectionHdr =
                         #if 0
-                            IMAGE_FIRST_SECTION(((ULONG)pvBase + ((PIMAGE_DOS_HEADER)pvBase)->e_lfanew));
+               IMAGE_FIRST_SECTION(((unsigned long)pvBase + ((PIMAGE_DOS_HEADER)pvBase)->e_lfanew));
                         #else
-                            (PIMAGE_SECTION_HEADER) ( (ULONG)pvBase + doshdr.e_lfanew + sizeof(IMAGE_NT_HEADERS) );
+               (PIMAGE_SECTION_HEADER) ( (unsigned long)pvBase + doshdr.e_lfanew + sizeof(IMAGE_NT_HEADERS) );
                         #endif
                         pSectionHdr += i;
 
-                        cbSection = min(pSectionHdr->Misc.VirtualSize, pSectionHdr->SizeOfRawData);
-                        if (    cbSection
-                            &&  !pFile->readAt((char*)pvBase + pSectionHdr->VirtualAddress,
-                                               cbSection,
-                                               pSectionHdr->PointerToRawData)
-                            )
-                        {
-                            /* error */
-                            free(pvBase);
-                            pvBase = NULL;
-                            throw(6);
-                        }
-                    }
+           cbSection = KMIN(pSectionHdr->Misc.VirtualSize, pSectionHdr->SizeOfRawData);
+           if (cbSection)
+               pFile->readAt((char*)pvBase + pSectionHdr->VirtualAddress,
+                             cbSection, pSectionHdr->PointerToRawData);
+       }
 
                     /* set pointers */
                     if (*(unsigned short*)pvBase == IMAGE_DOS_SIGNATURE)
                     {
                         pDosHdr = (PIMAGE_DOS_HEADER)pvBase;
-                        pFileHdr = (PIMAGE_FILE_HEADER)((DWORD)pvBase + pDosHdr->e_lfanew + 4);
+           pFileHdr = (PIMAGE_FILE_HEADER)((char*)pvBase + pDosHdr->e_lfanew + 4);
                     }
                     else
-                        pFileHdr = (PIMAGE_FILE_HEADER)((DWORD)pvBase + 4);
+           pFileHdr = (PIMAGE_FILE_HEADER)((char*)pvBase + 4);
 
                     pOptHdr = (PIMAGE_OPTIONAL_HEADER)((int)pFileHdr + sizeof(*pFileHdr));
                     paDataDir = (PIMAGE_DATA_DIRECTORY)((int)pOptHdr + pFileHdr->SizeOfOptionalHeader
@@ -141,25 +131,16 @@ kFilePE::kFilePE(kFile *pFile) throw(int) : pvBase(NULL),
                         if (paDataDir[i].VirtualAddress != 0)
                         {
                             if (paDataDir[i].VirtualAddress < pOptHdr->SizeOfImage)
-                                ((PULONG)&this->pExportDir)[i] = (int)pvBase + paDataDir[i].VirtualAddress;
-                            #ifdef DEBUG
-                            else
-                                fprintf(stderr, "bad directory pointer %d\n", i);
-                            #endif
+                   ((unsigned long*)&this->pExportDir)[i] = (int)pvBase + paDataDir[i].VirtualAddress;
                         }
                     }
                 }
-                else
-                    throw(4);
-            }
-            else
-                throw(3);
-        }
-        else
-            throw(2);
+   catch (kError err)
+   {
+       delete(pvBase);
+       pvBase = NULL;
+       throw(err);
     }
-    else
-        throw(1);
 }
 
 
@@ -169,7 +150,7 @@ kFilePE::kFilePE(kFile *pFile) throw(int) : pvBase(NULL),
 kFilePE::~kFilePE()
 {
     if (pvBase)
-        delete pvBase;
+        delete(pvBase);
 }
 
 
@@ -179,7 +160,7 @@ kFilePE::~kFilePE()
  * @param   pszBuffer   Pointer to buffer which to put the name into.
  * @param   cchBuffer   Size of the buffer (defaults to 260 chars).
  */
-BOOL  kFilePE::moduleGetName(char *pszBuffer, int cchSize/* = 260*/)
+KBOOL  kFilePE::moduleGetName(char *pszBuffer, int cchSize/* = 260*/)
 {
     if (pExportDir && pExportDir->Name)
     {
@@ -202,7 +183,7 @@ BOOL  kFilePE::moduleGetName(char *pszBuffer, int cchSize/* = 260*/)
  * @param     pExport  Pointer to export structure.
  * @remark
  */
-BOOL  kFilePE::exportFindFirst(kExportEntry *pExport)
+KBOOL   kFilePE::exportFindFirst(kExportEntry *pExport)
 {
     if (pExportDir && pExportDir->NumberOfFunctions)
     {
@@ -221,7 +202,7 @@ BOOL  kFilePE::exportFindFirst(kExportEntry *pExport)
  * @param     pExport  Pointer to export structure.
  * @remark
  */
-BOOL  kFilePE::exportFindNext(kExportEntry *pExport)
+KBOOL   kFilePE::exportFindNext(kExportEntry *pExport)
 {
     if (pExportDir && pExportDir->NumberOfFunctions)
     {
@@ -282,9 +263,9 @@ void kFilePE::exportFindClose(kExportEntry *pExport)
  *                      on successful return.
  * @remark  stub
  */
-BOOL kFilePE::exportLookup(unsigned long ulOrdinal, kExportEntry *pExport)
+KBOOL kFilePE::exportLookup(unsigned long ulOrdinal, kExportEntry *pExport)
 {
-    assert(!"not implemented.");
+    kASSERT(!"not implemented.");
     ulOrdinal = ulOrdinal;
     pExport = pExport;
     return FALSE;
@@ -297,9 +278,9 @@ BOOL kFilePE::exportLookup(unsigned long ulOrdinal, kExportEntry *pExport)
  *                      on successful return.
  * @remark  stub
  */
-BOOL kFilePE::exportLookup(const char *  pszName, kExportEntry *pExport)
+KBOOL kFilePE::exportLookup(const char *  pszName, kExportEntry *pExport)
 {
-    assert(!"not implemented.");
+    kASSERT(!"not implemented.");
     pszName = pszName;
     pExport = pExport;
     return FALSE;
@@ -309,7 +290,7 @@ BOOL kFilePE::exportLookup(const char *  pszName, kExportEntry *pExport)
 /**
  * Mini dump function.
  */
-BOOL  kFilePE::dump(kFile *pOut)
+KBOOL  kFilePE::dump(kFile *pOut)
 {
     int i,j,k;
     int c;
@@ -427,17 +408,17 @@ BOOL  kFilePE::dump(kFile *pOut)
             /* Print Callbacks */
             if (pTLSDir[i].AddressOfCallBacks)
             {
-                PULONG  paulIndex;
-                PULONG  paulCallback;
-                ULONG   ulBorlandRVAFix = 0UL;
+                unsigned long * paulIndex;
+                unsigned long * paulCallback;
+                unsigned long   ulBorlandRVAFix = 0UL;
 
                 /* Check if the addresses in the TLSDir is RVAs or real addresses */
                 if (pTLSDir[i].StartAddressOfRawData > pOptHdr->ImageBase)
                     ulBorlandRVAFix = pOptHdr->ImageBase;
 
                 j = 0;
-                paulIndex    = (PULONG)((ULONG)pTLSDir[i].AddressOfIndex - ulBorlandRVAFix + (ULONG)this->pvBase);
-                paulCallback = (PULONG)((ULONG)pTLSDir[i].AddressOfCallBacks - ulBorlandRVAFix + (ULONG)this->pvBase);
+                paulIndex    = (unsigned long *)((unsigned long)pTLSDir[i].AddressOfIndex - ulBorlandRVAFix + (unsigned long)this->pvBase);
+                paulCallback = (unsigned long *)((unsigned long)pTLSDir[i].AddressOfCallBacks - ulBorlandRVAFix + (unsigned long)this->pvBase);
                 if (*paulCallback)
                 {
                     pOut->printf("    Callbacks:\n");

@@ -1,4 +1,4 @@
-/* $Id: kFileFormatBase.h,v 1.6 2001-06-22 17:07:47 bird Exp $
+/* $Id: kFileFormatBase.h,v 1.7 2002-02-24 02:47:25 bird Exp $
  *
  * kFileFormatBase - Base class for kFile<format> classes.
  *
@@ -32,14 +32,16 @@ class kFile;
 class kFileFormatBase
 {
 public:
+    virtual KBOOL isDef() const { return FALSE;}
+    virtual KBOOL isPe() const  { return FALSE;}
+    virtual KBOOL isLx() const  { return FALSE;}
+    virtual KBOOL dump(kFile *pOut);
 
-    virtual ~kFileFormatBase();
+    kFileFormatBase(kFile *pFile) throw (kError);
+    virtual ~kFileFormatBase() throw (kError);
 
-    virtual BOOL  isDef() const { return FALSE;}
-    virtual BOOL  isPe() const  { return FALSE;}
-    virtual BOOL  isLx() const  { return FALSE;}
-    virtual BOOL  dump(kFile *pOut);
-
+protected:
+    kFile *pFile;
 };
 
 #pragma pack()

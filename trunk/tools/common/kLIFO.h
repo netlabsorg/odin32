@@ -1,4 +1,4 @@
-/* $Id: kLIFO.h,v 1.1 1999-09-05 02:09:17 bird Exp $ */
+/* $Id: kLIFO.h,v 1.2 2002-02-24 02:47:27 bird Exp $ */
 /*
  * Simple LIFO template class.
  *
@@ -32,10 +32,10 @@
             virtual kEntry *get(const kEntry *pGetEntry);
             virtual void    unwind(kEntry *pToEntry);
             virtual void    popPush(const kEntry *pToEntry, kLIFO<kEntry> &lifoTo);
-            BOOL            isEmpty(void) const;
+            KBOOL           isEmpty(void) const;
 
             virtual kEntry *find(const char *pszKey) const;
-            virtual BOOL    exists(const kEntry *pEntry) const;
+            virtual KBOOL   exists(const kEntry *pEntry) const;
     };
 
 #endif
