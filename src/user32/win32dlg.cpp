@@ -1,4 +1,4 @@
-/* $Id: win32dlg.cpp,v 1.59 2001-04-01 22:13:27 sandervl Exp $ */
+/* $Id: win32dlg.cpp,v 1.60 2001-04-02 17:30:58 sandervl Exp $ */
 /*
  * Win32 Dialog Code for OS/2
  *
@@ -185,6 +185,11 @@ Win32Dialog::Win32Dialog(HINSTANCE hInst, LPCSTR dlgTemplate, HWND owner,
     }
     cs.dwExStyle      = dlgInfo.exStyle;
     if (dlgInfo.style & DS_CONTEXTHELP) cs.dwExStyle |= WS_EX_CONTEXTHELP;
+
+    //Mask away WS_CAPTION style for dialogs with DS_CONTROL style
+    //(necessary for OFN_ENABLETEMPLATE file open dialogs) 
+    //(verified this behaviour in NT4, SP6)
+    if (dlgInfo.style & DS_CONTROL)     cs.style &= ~(WS_CAPTION);
 
     fIsDialog = TRUE;
     WINPROC_SetProc((HWINDOWPROC *)&Win32DlgProc, (WNDPROC)dlgProc, (isUnicode) ? WIN_PROC_32W : WIN_PROC_32A, WIN_PROC_WINDOW);
