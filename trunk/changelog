@@ -1,6 +1,6 @@
- /* $Id: changelog,v 1.893 2000-04-15 21:13:51 bird Exp $ */
+ /* $Id: changelog,v 1.894 2000-04-15 23:46:36 bird Exp $ */
 
- 2000-04-15: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
+ 2000-04-16: knut st. osmundsen <knut.stange.osmundsen@pmsc.no>
         - KERNEL32: Before reading Sanders last message I had rewritten most of
                     the findDll function. So, as my implementation seems a bit
                     more flexible I decided to commit it.
