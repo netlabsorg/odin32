@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.58 2002-06-28 19:45:45 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.59 2002-07-23 11:04:18 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -589,8 +589,7 @@ ULONG OSLibSendMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam, BOOL fU
   
     if(NULL == packet)
     {
-        dprintf(("user32::oslibmsg::OSLibSendMessage - allocated packet structure is NULL, heapmin=%d\n",
-                 _sheapmin() ));
+        dprintf(("user32::oslibmsg::OSLibSendMessage - allocated packet structure is NULL"));
     
         // PH: we cannot provide a correct returncode :(
         DebugInt3();    
@@ -617,8 +616,7 @@ BOOL OSLibPostMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam, BOOL fUn
   
     if (NULL == packet)
     {
-        dprintf(("user32::oslibmsg::OSLibPostMessage - allocated packet structure is NULL, heapmin=%d\n",
-                 _sheapmin() ));
+        dprintf(("user32::oslibmsg::OSLibPostMessage - allocated packet structure is NULL"));
     
         // PH: we can provide a correct returncode
         DebugInt3();    
@@ -645,8 +643,7 @@ BOOL OSLibPostThreadMessage(ULONG threadid, UINT msg, WPARAM wParam, LPARAM lPar
   
     if(NULL == packet)
     {
-        dprintf(("user32::oslibmsg::OSLibPostMessage - allocated packet structure is NULL, heapmin=%d\n",
-                 _sheapmin() ));
+        dprintf(("user32::oslibmsg::OSLibPostMessage - allocated packet structure is NULL"));
 
         DebugInt3();    
         // PH: we can provide a correct returncode
