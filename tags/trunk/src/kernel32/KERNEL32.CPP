@@ -1,4 +1,4 @@
-/* $Id: KERNEL32.CPP,v 1.44 2000-05-02 20:53:11 sandervl Exp $ */
+/* $Id: KERNEL32.CPP,v 1.45 2000-06-12 12:20:04 phaller Exp $ */
 
 /*
  * Win32 compatibility file functions for OS/2
@@ -649,42 +649,6 @@ BOOL WIN32API FlushInstructionCache(     /*PLF Mon  98-02-09 23:56:49 : STUB STU
         return TRUE;
 }
 
-
-int WIN32API GetNumberFormatA(LCID     Locale,
-                                 DWORD    dwFlags,
-                                 LPCSTR lpValue,
-                                 CONST NUMBERFMTA *lpFormat,
-                                 LPSTR  lpNumberStr,
-                                 int      cchNumber)
-{
-  dprintf(("KERNEL32::OS2GetNumberFormatA(%08x,%08x,%s,%08x,%s,%08x) not implemented.\n",
-           Locale,
-           dwFlags,
-           lpValue,
-           lpFormat,
-           lpNumberStr,
-           cchNumber));
-
-  return 0;
-}
-
-int WIN32API GetNumberFormatW(LCID     Locale,
-                                 DWORD    dwFlags,
-                                 LPCWSTR lpValue,
-                                 CONST NUMBERFMTW *lpFormat,
-                                 LPWSTR  lpNumberStr,
-                                 int      cchNumber)
-{
-  dprintf(("KERNEL32::OS2GetNumberFormatW(%08x,%08x,%s,%08x,%s,%08x) not implemented.\n",
-           Locale,
-           dwFlags,
-           lpValue,
-           lpFormat,
-           lpNumberStr,
-           cchNumber));
-
-  return 0;
-}
 
 //******************************************************************************
 //******************************************************************************
