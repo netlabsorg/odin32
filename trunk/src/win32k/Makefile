@@ -1,5 +1,5 @@
 ################################################################################
-# $Id: Makefile,v 1.54 2000-09-26 09:07:05 bird Exp $
+# $Id: Makefile,v 1.55 2000-09-27 15:23:58 bird Exp $
 #
 # Win32k makefile.
 #
@@ -67,9 +67,9 @@ VACLIB      = $(VACPATH)\lib\cppon30.lib
 
 !ifndef DEBUG
 # RELEASE
-CFLAGS      = $(CFLAGS)     -G5 -O+
+CFLAGS      = $(CFLAGS)     -G4 -Oc+
 CFLAGS16    = $(CFLAGS16)   -Ogeitln -Gs
-CPPFLAGS    = $(CPPFLAGS)   -G5 -O+
+CPPFLAGS    = $(CPPFLAGS)   -G4 -Oc+
 LFLAGS      = $(LFLAGS)     /EXEPACK:2 /NODEBUG
 CDEFINES    = $(CDEFINESB)  -DRELEASE
 CDEFINES16  = $(CDEFINESB16) -DRELEASE
@@ -78,9 +78,9 @@ ASDEFINES   = $(ASDEFINES)  -D:RELEASE
 !else
 
 # DEBUG
-CFLAGS      = $(CFLAGS)     -O+ -Os- -Ti+
-CFLAGS16    = $(CFLAGS16)   -Zi -Od
-CPPFLAGS    = $(CPPFLAGS)   -O+ -Os- -Ti+
+CFLAGS      = $(CFLAGS)     -Oc+ -Os- -Ti+
+CFLAGS16    = $(CFLAGS16)   -Zi -Owis
+CPPFLAGS    = $(CPPFLAGS)   -Oc+ -Os- -Ti+
 LFLAGS      = $(LFLAGS)     /NOEXEPACK /DEBUG
 ASFLAGS     = $(ASFLAGS)    -Od+
 CDEFINES    = $(CDEFINESB)  -DDEBUG
@@ -90,9 +90,9 @@ ASDEFINES   = $(ASDEFINES)  -D:DEBUG
 
 !ifdef NODEBUGINFO
 LFLAGS      = $(LFLAGS)     /NODEB /EXEPACK:2
-CFLAGS16    = $(CFLAGS16)   -Owis
-CFLAGS      = $(CFLAGS)     -O+ -Os- -Oi-
-CPPFLAGS    = $(CPPFLAGS)   -O+ -Os- -Oi-
+# CFLAGS16    = $(CFLAGS16)   -Owis
+# CFLAGS      = $(CFLAGS)     -O+ -Os- -Oi-
+# CPPFLAGS    = $(CPPFLAGS)   -O+ -Os- -Oi-
 !endif
 
 CDEFINES_TST    = $(CDEFINES)   -DR3TST
@@ -646,7 +646,8 @@ clean:
 !if "$(WIN32KOBJ)" != ""
     $(RM) $(WIN32KOBJ)\*obj* \
         $(WIN32KOBJ)\*lnk* \
-        $(WIN32KOBJ)\*res*
+        $(WIN32KOBJ)\*res* \
+        $(WIN32KOBJ)\*lib*
 !endif
 !if "$(WIN32KLIST)" != ""
     $(RM) $(WIN32KLIST)\*lst* \
