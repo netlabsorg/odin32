@@ -1,4 +1,4 @@
-/* $Id: winconst.h,v 1.1 1999-08-20 20:11:06 sandervl Exp $ */
+/* $Id: winconst.h,v 1.2 1999-08-25 14:26:21 sandervl Exp $ */
 
 /*
  * Win32 constants
@@ -97,3 +97,10 @@
 #define WS_EX_TOPMOST_W          0x00000008L
 #define WS_EX_ACCEPTFILES_W      0x00000010L
 #define WS_EX_TRANSPARENT_W      0x00000020L
+
+
+#define DUPLICATE_CLOSE_SOURCE		0x00000001
+#define DUPLICATE_SAME_ACCESS		0x00000002
+
+#define HANDLE_FLAG_INHERIT             0x00000001
+#define HANDLE_FLAG_PROTECT_FROM_CLOSE  0x00000002

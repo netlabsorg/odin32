@@ -1,4 +1,4 @@
-/* $Id: HandleManager.h,v 1.8 1999-08-25 10:25:05 sandervl Exp $ */
+/* $Id: HandleManager.h,v 1.9 1999-08-25 14:26:21 sandervl Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -287,6 +287,14 @@ LPVOID HMMapViewOfFileEx            (HANDLE                     hFileMappingObje
                                      DWORD                      dwFileOffsetLow,
                                      DWORD                      dwNumberOfBytesToMap,
 			             LPVOID                     lpBaseAddress);
+
+BOOL HMDuplicateHandle(HANDLE  srcprocess,
+                       HANDLE  srchandle,
+                       HANDLE  destprocess,
+                       PHANDLE desthandle,
+                       DWORD   fdwAccess,
+                       BOOL    fInherit,
+                       DWORD   fdwOptions);
 
 #ifdef __cplusplus__
   }
