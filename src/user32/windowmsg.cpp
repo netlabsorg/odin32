@@ -1,4 +1,4 @@
-/* $Id: windowmsg.cpp,v 1.49 2004-02-04 14:59:57 bird Exp $ */
+/* $Id: windowmsg.cpp,v 1.50 2004-05-11 09:08:20 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -33,6 +33,7 @@
 #include "hook.h"
 #define INCL_TIMERWIN32
 #include "timer.h"
+#include "callwrap.h"
 
 #define DBG_LOCALLOG    DBG_windowmsg
 #include "dbglocal.h"
@@ -325,6 +326,9 @@ BOOL WIN32API SetMessageQueue(int cMessagesMax)
  * @status  partially implemented.
  * @author  knut st. osmundsen <bird-srcspam@anduin.net>
  * @remark  One cannot attach a threads input queue to it self.
+ * @remark  This implemenation requires the thread which input is 'forwarded' to
+ *          process it's message queue. Window (and wine) will not bother that thread
+ *          at all with the messages. (DEADLOCK WARNING)
  * @todo    Not sure if all this is 100% ok according to the windows reality.
  *          I'm sure some error cases aren't caught.
  */
@@ -1001,7 +1005,7 @@ LRESULT WINPROC_CallProc32ATo32W( WNDPROC func, HWND hwnd,
 
     if (WINPROC_MapMsg32ATo32W( hwnd, msg, &wParam, &lParam ) == -1) return 0;
 
-    result = func( hwnd, msg, wParam, lParam );
+    result = WrapCallback4(func,  hwnd, msg, wParam, lParam );
     WINPROC_UnmapMsg32ATo32W( hwnd, msg, wParam, lParam );
 
 #ifdef __WIN32OS2__
@@ -1012,7 +1016,7 @@ LRESULT WINPROC_CallProc32ATo32W( WNDPROC func, HWND hwnd,
         case WM_GETTEXTLENGTH :
         {
             LPWSTR ustr = ( LPWSTR )HeapAlloc( GetProcessHeap(), 0, ( result + 1 ) * sizeof( WCHAR ));
-            result = func( hwnd, WM_GETTEXT, ( WPARAM )( result + 1 ), ( LPARAM )ustr );
+            result = WrapCallback4(func,  hwnd, WM_GETTEXT, ( WPARAM )( result + 1 ), ( LPARAM )ustr );
             result = lstrlenWtoA( ustr, result );
             HeapFree( GetProcessHeap(), 0, ustr );
             break;
@@ -1021,7 +1025,7 @@ LRESULT WINPROC_CallProc32ATo32W( WNDPROC func, HWND hwnd,
         case LB_GETTEXTLEN :
         {
             LPWSTR ustr = ( LPWSTR )HeapAlloc( GetProcessHeap(), 0, ( result + 1 ) * sizeof( WCHAR ));
-            result = func( hwnd, LB_GETTEXT, wParam, ( LPARAM )ustr );
+            result = WrapCallback4(func,  hwnd, LB_GETTEXT, wParam, ( LPARAM )ustr );
             if( result != LB_ERR )
                 result = lstrlenWtoA( ustr, result );
 
@@ -1033,7 +1037,7 @@ LRESULT WINPROC_CallProc32ATo32W( WNDPROC func, HWND hwnd,
         case CB_GETLBTEXTLEN :
         {
             LPWSTR ustr = ( LPWSTR )HeapAlloc( GetProcessHeap(), 0, ( result + 1 ) * sizeof( WCHAR ));
-            result = func( hwnd, CB_GETLBTEXT, wParam, ( LPARAM )ustr );
+            result = WrapCallback4(func,  hwnd, CB_GETLBTEXT, wParam, ( LPARAM )ustr );
             if( result != CB_ERR )
                 result = lstrlenWtoA( ustr, result );
 
@@ -1059,7 +1063,7 @@ LRESULT WINPROC_CallProc32WTo32A( WNDPROC func, HWND hwnd,
 
     if (WINPROC_MapMsg32WTo32A( hwnd, msg, &wParam, &lParam ) == -1) return 0;
 
-    result = func( hwnd, msg, wParam, lParam );
+    result = WrapCallback4(func,  hwnd, msg, wParam, lParam );
     WINPROC_UnmapMsg32WTo32A( hwnd, msg, wParam, lParam );
 
 #ifdef __WIN32OS2__
@@ -1070,7 +1074,7 @@ LRESULT WINPROC_CallProc32WTo32A( WNDPROC func, HWND hwnd,
         case WM_GETTEXTLENGTH :
         {
             LPSTR astr = ( LPSTR )HeapAlloc( GetProcessHeap(), 0, result + 1 );
-            result = func( hwnd, WM_GETTEXT, ( WPARAM )( result + 1 ), ( LPARAM )astr );
+            result = WrapCallback4(func,  hwnd, WM_GETTEXT, ( WPARAM )( result + 1 ), ( LPARAM )astr );
             result = lstrlenAtoW( astr, result );
             HeapFree( GetProcessHeap(), 0, astr );
             break;
@@ -1079,7 +1083,7 @@ LRESULT WINPROC_CallProc32WTo32A( WNDPROC func, HWND hwnd,
         case LB_GETTEXTLEN :
         {
             LPSTR astr = ( LPSTR )HeapAlloc( GetProcessHeap(), 0, result + 1 );
-            result = func( hwnd, LB_GETTEXT, wParam, ( LPARAM )astr );
+            result = WrapCallback4(func,  hwnd, LB_GETTEXT, wParam, ( LPARAM )astr );
             if( result != LB_ERR )
                 result = lstrlenAtoW( astr, result );
 
@@ -1091,7 +1095,7 @@ LRESULT WINPROC_CallProc32WTo32A( WNDPROC func, HWND hwnd,
         case CB_GETLBTEXTLEN :
         {
             LPSTR astr = ( LPSTR )HeapAlloc( GetProcessHeap(), 0, result + 1 );
-            result = func( hwnd, CB_GETLBTEXT, wParam, ( LPARAM )astr );
+            result = WrapCallback4(func,  hwnd, CB_GETLBTEXT, wParam, ( LPARAM )astr );
             if( result != CB_ERR )
                 result = lstrlenAtoW( astr, result );
 
