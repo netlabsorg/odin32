@@ -1,4 +1,4 @@
-/* $Id: directory.cpp,v 1.43 2002-02-03 21:06:40 sandervl Exp $ */
+/* $Id: directory.cpp,v 1.44 2002-02-09 12:45:12 sandervl Exp $ */
 
 /*
  * Win32 Directory functions for OS/2
@@ -139,8 +139,7 @@ void InitDirectoriesCustom(char *szSystemDir, char *szWindowsDir)
  * Author    : Patrick Haller [Wed, 1999/09/28 20:44]
  *****************************************************************************/
 
-ODINFUNCTION2(UINT, GetCurrentDirectoryA, UINT,  nBufferLength,
-                                          LPSTR, lpBuffer)
+UINT WIN32API GetCurrentDirectoryA(UINT nBufferLength, LPSTR lpBuffer)
 {
  UINT rc;
 
@@ -165,13 +164,12 @@ ODINFUNCTION2(UINT, GetCurrentDirectoryA, UINT,  nBufferLength,
  * Author    : Patrick Haller [Wed, 1999/09/28 20:44]
  *****************************************************************************/
 
-ODINFUNCTION2(UINT, GetCurrentDirectoryW, UINT,   nBufferLength,
-                                          LPWSTR, lpBuffer)
+UINT WIN32API GetCurrentDirectoryW(UINT nBufferLength, LPWSTR lpBuffer)
 {
   char *asciidir = (char *)malloc(nBufferLength+1);
   int  rc;
 
-  rc = CALL_ODINFUNC(GetCurrentDirectoryA)(nBufferLength, asciidir);
+  rc = GetCurrentDirectoryA(nBufferLength, asciidir);
   if(rc != 0)
     AsciiToUnicode(asciidir, lpBuffer);
   free(asciidir);
@@ -190,10 +188,7 @@ ODINFUNCTION2(UINT, GetCurrentDirectoryW, UINT,   nBufferLength,
  *
  * Author    : Patrick Haller [Wed, 1999/09/28 20:44]
  *****************************************************************************/
-
-
-ODINFUNCTION1(BOOL,   SetCurrentDirectoryA,
-              LPCSTR, lpstrDirectory)
+BOOL WIN32API SetCurrentDirectoryA(LPCSTR lpstrDirectory)
 {
   if(HIWORD(lpstrDirectory) == 0)
   {
@@ -232,7 +227,7 @@ ODINFUNCTION1(BOOL,   SetCurrentDirectoryA,
  * Author    : Patrick Haller [Wed, 1999/09/28 20:44]
  *****************************************************************************/
 
-ODINFUNCTION1(BOOL,SetCurrentDirectoryW,LPCWSTR,lpPathName)
+BOOL WIN32API SetCurrentDirectoryW(LPCWSTR lpPathName)
 {
   char *asciipath;
   BOOL  rc;
@@ -256,9 +251,7 @@ ODINFUNCTION1(BOOL,SetCurrentDirectoryW,LPCWSTR,lpPathName)
  * Author    : Patrick Haller [Wed, 1999/09/28 20:44]
  *****************************************************************************/
 
-ODINFUNCTION2(BOOL,                CreateDirectoryA,
-              LPCSTR,              lpstrDirectory,
-              PSECURITY_ATTRIBUTES,arg2)
+BOOL WIN32API CreateDirectoryA(LPCSTR lpstrDirectory, PSECURITY_ATTRIBUTES arg2)
 {
   // 2001-05-28 PH
   // verify filename first (NT4SP6)
@@ -310,14 +303,13 @@ ODINFUNCTION2(BOOL,                CreateDirectoryA,
  * Author    : Patrick Haller [Wed, 1999/09/28 20:44]
  *****************************************************************************/
 
-ODINFUNCTION2(BOOL,CreateDirectoryW,LPCWSTR,             arg1,
-                                    PSECURITY_ATTRIBUTES,arg2)
+BOOL WIN32API CreateDirectoryW(LPCWSTR arg1, PSECURITY_ATTRIBUTES arg2)
 {
   BOOL  rc;
   char *astring;
 
   astring = UnicodeToAsciiString((LPWSTR)arg1);
-  rc = CALL_ODINFUNC(CreateDirectoryA)(astring, arg2);
+  rc = CreateDirectoryA(astring, arg2);
   FreeAsciiString(astring);
   return(rc);
 }
@@ -412,8 +404,7 @@ BOOL WIN32API CreateDirectoryExW( LPCWSTR lpTemplateDirectory,
  * Author    : Patrick Haller [Wed, 1999/09/28 20:44]
  *****************************************************************************/
 
-ODINFUNCTION2(UINT,GetSystemDirectoryA,LPSTR,lpBuffer,
-                                       UINT,uSize)
+UINT WIN32API GetSystemDirectoryA(LPSTR lpBuffer, UINT uSize)
 {
  int   len;
  char *dir;
@@ -438,8 +429,7 @@ ODINFUNCTION2(UINT,GetSystemDirectoryA,LPSTR,lpBuffer,
  * Author    : Patrick Haller [Wed, 1999/09/28 20:44]
  *****************************************************************************/
 
-ODINFUNCTION2(UINT,GetSystemDirectoryW,LPWSTR,lpBuffer,
-                                       UINT,  uSize)
+UINT WIN32API GetSystemDirectoryW(LPWSTR lpBuffer, UINT uSize)
 {
   char *asciibuffer = NULL;
   UINT  rc;
@@ -472,8 +462,7 @@ ODINFUNCTION2(UINT,GetSystemDirectoryW,LPWSTR,lpBuffer,
  * Author    : Patrick Haller [Wed, 1999/09/28 20:44]
  *****************************************************************************/
 
-ODINFUNCTION2(UINT,GetWindowsDirectoryA,LPSTR,lpBuffer,
-                                        UINT,uSize)
+UINT WIN32API GetWindowsDirectoryA(LPSTR lpBuffer, UINT uSize)
 {
  char *dir;
  int   len;
@@ -498,8 +487,7 @@ ODINFUNCTION2(UINT,GetWindowsDirectoryA,LPSTR,lpBuffer,
  * Author    : Patrick Haller [Wed, 1999/09/28 20:44]
  *****************************************************************************/
 
-ODINFUNCTION2(UINT,GetWindowsDirectoryW,LPWSTR,lpBuffer,
-                                        UINT,  uSize)
+UINT WIN32API GetWindowsDirectoryW(LPWSTR lpBuffer, UINT uSize)
 {
   char *asciibuffer = NULL;
   UINT  rc;
@@ -533,7 +521,7 @@ ODINFUNCTION2(UINT,GetWindowsDirectoryW,LPWSTR,lpBuffer,
  *****************************************************************************/
 
 
-ODINFUNCTION1(BOOL, RemoveDirectoryA, LPCSTR, lpstrDirectory)
+BOOL WIN32API RemoveDirectoryA(LPCSTR lpstrDirectory)
 {
   int len = strlen(lpstrDirectory);
   
@@ -570,7 +558,7 @@ ODINFUNCTION1(BOOL, RemoveDirectoryA, LPCSTR, lpstrDirectory)
  * Author    : Patrick Haller [Wed, 1999/09/28 20:44]
  *****************************************************************************/
 
-ODINFUNCTION1(BOOL,RemoveDirectoryW,LPCWSTR,lpPathName)
+BOOL WIN32API RemoveDirectoryW(LPCWSTR lpPathName)
 {
   char *asciipath;
   BOOL  rc;
@@ -755,8 +743,7 @@ DWORD WINAPI SearchPathW(LPCWSTR path, LPCWSTR name, LPCWSTR ext,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(UINT, GetTempPathA,
-              UINT, count, LPSTR, path)
+UINT WIN32API GetTempPathA(UINT count, LPSTR path)
 {
     UINT ret;
     if (!(ret = GetEnvironmentVariableA( "TMP", path, count )))
@@ -772,8 +759,7 @@ ODINFUNCTION2(UINT, GetTempPathA,
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION2(UINT, GetTempPathW,
-              UINT, count, LPWSTR, path)
+UINT WIN32API GetTempPathW(UINT count, LPWSTR path)
 {
     static const WCHAR tmp[]  = { 'T', 'M', 'P', 0 };
     static const WCHAR temp[] = { 'T', 'E', 'M', 'P', 0 };

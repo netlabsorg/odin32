@@ -1,4 +1,4 @@
-/* $Id: mailslot.cpp,v 1.2 2001-09-05 12:57:59 bird Exp $
+/* $Id: mailslot.cpp,v 1.3 2002-02-09 12:45:13 sandervl Exp $
  *
  * Win32 mailslot APIs
  *
@@ -42,9 +42,9 @@ ODINDEBUGCHANNEL(KERNEL32-MAILSLOT)
  * Author    : SvL
  *****************************************************************************/
 
-ODINFUNCTION4(HANDLE, CreateMailslotA, LPCSTR, lpName, DWORD, nMaxMessageSize,
-                                       DWORD, lReadTimeout,
-                                       LPSECURITY_ATTRIBUTES, lpSecurityAttributes)
+HANDLE WIN32API CreateMailslotA(LPCSTR lpName, DWORD nMaxMessageSize,
+                                DWORD lReadTimeout,
+                                LPSECURITY_ATTRIBUTES lpSecurityAttributes)
 {
   return HMCreateMailslotA(lpName, nMaxMessageSize, lReadTimeout, lpSecurityAttributes);
 }
@@ -71,9 +71,9 @@ ODINFUNCTION4(HANDLE, CreateMailslotA, LPCSTR, lpName, DWORD, nMaxMessageSize,
  * Author    : SvL
  *****************************************************************************/
 
-ODINFUNCTION4(HANDLE, CreateMailslotW, LPCWSTR, lpName, DWORD, nMaxMessageSize,
-                                       DWORD, lReadTimeout,
-                                       LPSECURITY_ATTRIBUTES, lpSecurityAttributes)
+HANDLE WIN32API CreateMailslotW(LPCWSTR lpName, DWORD nMaxMessageSize,
+                                DWORD lReadTimeout,
+                                LPSECURITY_ATTRIBUTES lpSecurityAttributes)
 {
   HANDLE rc;
   char  *astring;
@@ -101,11 +101,11 @@ ODINFUNCTION4(HANDLE, CreateMailslotW, LPCWSTR, lpName, DWORD, nMaxMessageSize,
  * Author    : SvL
  *****************************************************************************/
 
-ODINFUNCTION5(BOOL, GetMailslotInfo, HANDLE,  hMailslot,
-                                    LPDWORD, lpMaxMessageSize,
-                                    LPDWORD, lpNextSize,
-                                    LPDWORD, lpMessageCount,
-                                    LPDWORD, lpReadTimeout)
+BOOL WIN32API GetMailslotInfo(HANDLE  hMailslot,
+                              LPDWORD lpMaxMessageSize,
+                              LPDWORD lpNextSize,
+                              LPDWORD lpMessageCount,
+                              LPDWORD lpReadTimeout)
 {
   return HMGetMailslotInfo(hMailslot, lpMaxMessageSize, lpNextSize,
                            lpMessageCount, lpReadTimeout);
@@ -125,7 +125,7 @@ ODINFUNCTION5(BOOL, GetMailslotInfo, HANDLE,  hMailslot,
  * Author    : SvL
  *****************************************************************************/
 
-ODINFUNCTION2(BOOL, SetMailslotInfo,HANDLE, hMailslot, DWORD,  dwReadTimeout)
+BOOL WIN32API SetMailslotInfo(HANDLE hMailslot, DWORD dwReadTimeout)
 {
   return HMSetMailslotInfo(hMailslot, dwReadTimeout);
 }

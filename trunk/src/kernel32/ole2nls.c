@@ -1,4 +1,4 @@
-/* $Id: ole2nls.c,v 1.1 2002-02-07 16:34:53 sandervl Exp $
+/* $Id: ole2nls.c,v 1.2 2002-02-09 12:45:13 sandervl Exp $
  *
  *  National Language Support library
  *
@@ -1367,19 +1367,6 @@ static int identity(int c)
  *    wide characters in strings passed to LCMapStringA,
  *    so there is nothing to be done for this flag.
  */
-#ifdef __WIN32OS2__
-ODINFUNCTION6(INT, LCMapStringA,
-    LCID, lcid,      /* [in] locale identifier created with MAKELCID;
-                        LOCALE_SYSTEM_DEFAULT and LOCALE_USER_DEFAULT are
-                                predefined values. */
-    DWORD, mapflags, /* [in] flags */
-    LPCSTR, srcstr,  /* [in] source buffer */
-    INT, srclen,     /* [in] source length */
-    LPSTR, dststr,   /* [out] destination buffer */
-    INT, dstlen)     /* [in] destination buffer length */
-{
-  int i;
-#else
 INT WINAPI LCMapStringA(
     LCID lcid,      /* [in] locale identifier created with MAKELCID;
                         LOCALE_SYSTEM_DEFAULT and LOCALE_USER_DEFAULT are
@@ -1394,7 +1381,6 @@ INT WINAPI LCMapStringA(
 
   TRACE("(0x%04lx,0x%08lx,%s,%d,%p,%d)\n",
     lcid,mapflags,srcstr,srclen,dststr,dstlen);
-#endif
 
   if ( ((dstlen!=0) && (dststr==NULL)) || (srcstr==NULL) )
   {
@@ -1629,14 +1615,6 @@ INT WINAPI LCMapStringA(
  *
  * See LCMapStringA for documentation
  */
-#ifdef __WIN32OS2__
-ODINFUNCTION6(INT, LCMapStringW,
-    LCID, lcid,DWORD, mapflags,LPCWSTR, srcstr,INT, srclen,LPWSTR, dststr,
-    INT, dstlen)
-{
-  int i;
-
-#else
 INT WINAPI LCMapStringW(
     LCID lcid,DWORD mapflags,LPCWSTR srcstr,INT srclen,LPWSTR dststr,
     INT dstlen)
@@ -1645,7 +1623,6 @@ INT WINAPI LCMapStringW(
 
   TRACE("(0x%04lx,0x%08lx,%p,%d,%p,%d)\n",
                  lcid, mapflags, srcstr, srclen, dststr, dstlen);
-#endif
 
   if ( ((dstlen!=0) && (dststr==NULL)) || (srcstr==NULL) )
   {

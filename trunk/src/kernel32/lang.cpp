@@ -1,4 +1,4 @@
-/* $Id: lang.cpp,v 1.39 2002-02-07 16:34:53 sandervl Exp $ */
+/* $Id: lang.cpp,v 1.40 2002-02-09 12:45:13 sandervl Exp $ */
 /*
  * Win32 language API functions for OS/2
  *
@@ -248,8 +248,8 @@ static BOOL LocaleFromUniChar(WCHAR wcUniChar, LPWSTR wbuf, ULONG *pLen)
  *
  * Author    : Przemyslaw Dobrowolski [Tue, 1999/07/22 17:07]
  *****************************************************************************/
-ODINFUNCTION4(int, GetLocaleInfoW, LCID, lcid, LCTYPE, LCType, LPWSTR, wbuf, 
-              int, len)
+int WIN32API GetLocaleInfoW(LCID lcid, LCTYPE LCType, LPWSTR wbuf, 
+                            int len)
 {
   LocaleObject    locale_object = NULL;
   struct UniLconv *puni_lconv = NULL;
@@ -865,8 +865,7 @@ ODINFUNCTION4(int, GetLocaleInfoW, LCID, lcid, LCTYPE, LCType, LPWSTR, wbuf,
  *
  * Author    : Przemyslaw Dobrowolski [Tue, 1999/07/21 12:18]
  *****************************************************************************/
-ODINFUNCTION4(int, GetLocaleInfoA, LCID, lcid, LCTYPE, LCType, LPSTR, buf, 
-              int, len)
+int WIN32API GetLocaleInfoA(LCID lcid, LCTYPE LCType, LPSTR buf, int len)
 {
   LPWSTR lpWStr;
   int    ret_len;

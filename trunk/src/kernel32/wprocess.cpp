@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.143 2002-02-06 16:33:40 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.144 2002-02-09 12:45:14 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -2110,7 +2110,7 @@ ULONG SYSTEM GetVersionSize(char *lpszModName)
 }
 //******************************************************************************
 //******************************************************************************
-ODINFUNCTION1(BOOL,DisableThreadLibraryCalls,HMODULE,hModule)
+BOOL WIN32API DisableThreadLibraryCalls(HMODULE hModule)
 {
   Win32DllBase *winmod;
   FARPROC   proc;
