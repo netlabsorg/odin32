@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2000-03-06 23:39:18 bird Exp $
+# $Id: makefile,v 1.9 2000-05-15 19:02:20 sandervl Exp $
 
 #
 # Odin32 API
@@ -23,7 +23,7 @@ CLEANEXTRAS = wnaspi32rsrc.asm
 
 # Object files. All objects should be prefixed with $(OBJDIR)!
 OBJS = \
-$(OBJDIR)\odinaspi.obj \
+$(OBJDIR)\aspilib.obj \
 $(OBJDIR)\winaspi32.obj \
 $(OBJDIR)\wnaspi32rsrc.obj \
 $(PDWIN32_LIB)\dllentry.obj
