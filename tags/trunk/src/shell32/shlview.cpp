@@ -1,4 +1,4 @@
-/* $Id: shlview.cpp,v 1.11 2000-03-28 15:28:54 cbratschi Exp $ */
+/* $Id: shlview.cpp,v 1.12 2000-03-29 15:24:08 cbratschi Exp $ */
 /*
  * ShellView
  *
@@ -1199,9 +1199,11 @@ static LRESULT ShellView_OnNotify(IShellViewImpl * This, UINT CtlID, LPNMHDR lpn
               {
                 SHELLDETAILS sd;
 
-                IShellFolder2_GetDetailsOf(This->pSF2Parent, pidl, lpdi->item.iSubItem, &sd);
-                StrRetToStrNA( lpdi->item.pszText, lpdi->item.cchTextMax, &sd.str, NULL);
-                TRACE("-- text=%s\n",lpdi->item.pszText);
+                if(IShellFolder2_GetDetailsOf(This->pSF2Parent, pidl, lpdi->item.iSubItem, &sd) == S_OK)
+                {
+                  StrRetToStrNA( lpdi->item.pszText, lpdi->item.cchTextMax, &sd.str, NULL);
+                  TRACE("-- text=%s\n",lpdi->item.pszText);
+                } else lpdi->item.pszText[0] = 0;
               }
               else
               {
@@ -1209,9 +1211,12 @@ static LRESULT ShellView_OnNotify(IShellViewImpl * This, UINT CtlID, LPNMHDR lpn
               }
             }
             if(lpdi->item.mask & LVIF_IMAGE)    /* image requested */
-         {
-           lpdi->item.iImage = SHMapPIDLToSystemImageListIndex(This->pSFParent, pidl, 0);
-         }
+            {
+              lpdi->item.iImage = SHMapPIDLToSystemImageListIndex(This->pSFParent, pidl, 0);
+            }
+#if 0 //CB: experimental (local cache would be better)
+            lpdi->item.mask |= LVIF_DI_SETITEM;
+#endif
        break;
 
      case LVN_ITEMCHANGED:

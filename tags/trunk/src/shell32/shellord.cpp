@@ -1,4 +1,4 @@
-/* $Id: shellord.cpp,v 1.6 2000-03-26 16:34:51 cbratschi Exp $ */
+/* $Id: shellord.cpp,v 1.7 2000-03-29 15:24:05 cbratschi Exp $ */
 /*
  * The parameters of many functions changes between different OS versions
  * (NT uses Unicode strings, 95 uses ASCII strings)
@@ -613,7 +613,7 @@ RunFileDlg (HWND hwndOwner, DWORD dwParam1, DWORD dwParam2,
 void WINAPI ExitWindowsDialog (HWND hWndOwner)
 {
         TRACE("(0x%08x)\n", hWndOwner);
-        if (MessageBoxA( hWndOwner, "Do you want to exit WINE?", "Shutdown", MB_YESNO|MB_ICONQUESTION) == IDOK)
+        if (MessageBoxA( hWndOwner, "Do you want to exit Odin?", "Shutdown", MB_YESNO|MB_ICONQUESTION) == IDYES)
         { SendMessageA ( hWndOwner, WM_QUIT, 0, 0);
         }
 }

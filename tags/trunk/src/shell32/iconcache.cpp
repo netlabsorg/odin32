@@ -1,4 +1,4 @@
-/* $Id: iconcache.cpp,v 1.5 2000-03-27 15:09:20 cbratschi Exp $ */
+/* $Id: iconcache.cpp,v 1.6 2000-03-29 15:24:04 cbratschi Exp $ */
 
 /*
  * Win32 SHELL32 for OS/2
@@ -250,13 +250,13 @@ static BYTE * ICO_GetIconDirectory( HFILE hFile, LPicoICONDIR* lplpiID, ULONG *u
  */
 HGLOBAL WINAPI ICO_ExtractIconEx(LPCSTR lpszExeFileName, HICON * RetPtr, UINT nIconIndex, UINT n, UINT cxDesired, UINT cyDesired )
 {  HGLOBAL  hRet = 0;
-   LPBYTE      pData;
+   LPBYTE   pData;
    OFSTRUCT ofs;
    DWORD    sig;
    HFILE    hFile = OpenFile( lpszExeFileName, &ofs, OF_READ );
-   UINT      iconDirCount = 0,iconCount = 0;
-   LPBYTE      peimage;
-   HANDLE      fmapping;
+   UINT     iconDirCount = 0,iconCount = 0;
+   LPBYTE   peimage;
+   HANDLE   fmapping;
    ULONG    uSize;
 
    dprintf(("SHELL32:Iconcache ICO_ExtractIconEx (file %s,start %d,extract %d\n", lpszExeFileName, nIconIndex, n));
@@ -618,7 +618,10 @@ INT SIC_GetIconIndex (LPCSTR sSourceFile, INT dwSourceIndex )
 
    if ( INVALID_INDEX == index )
    {
-     ret = SIC_LoadIcon (sSourceFile, dwSourceIndex);
+     if (strcmp(sSourceFile,"shell32.dll") == 0)
+       ret = -1; //icon not in cache -> set to default
+     else
+       ret = SIC_LoadIcon (sSourceFile, dwSourceIndex);
    }
    else
    {
