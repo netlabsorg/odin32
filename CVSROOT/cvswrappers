@@ -49,6 +49,7 @@
 # font files
 *.ttf -k 'b'
 *.fnt -k 'b'
+*.fot -k 'b'
 
 # bitmap formats
 *.bmp -k 'b'
