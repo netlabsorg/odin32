@@ -1,4 +1,4 @@
-/* $Id: heapcode.cpp,v 1.2 2000-02-16 14:23:57 sandervl Exp $ */
+/* $Id: heapcode.cpp,v 1.3 2001-02-09 18:31:05 sandervl Exp $ */
 /*
  * Code heap functions for OS/2
  *
@@ -21,7 +21,7 @@
 #define DBG_LOCALLOG	DBG_heapcode
 #include "dbglocal.h"
 
-static Heap_t  codeHeap = 0;
+Heap_t  codeHeap = 0;
 static PVOID   pCodeMem = NULL;
 
 void * _LNK_CONV getmoreCodeMem(Heap_t pHeap, size_t *size, int *clean);
@@ -63,12 +63,6 @@ void DestroyCodeHeap()
 	DosFreeMem(pCodeMem);
 	pCodeMem = NULL;
   }
-}
-//******************************************************************************
-//******************************************************************************
-void  *_cmalloc(size_t size)
-{
-  return _umalloc(codeHeap, size);
 }
 //******************************************************************************
 //******************************************************************************

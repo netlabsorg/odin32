@@ -1,4 +1,4 @@
-/* $Id: windlllx.h,v 1.2 2000-08-11 10:56:19 sandervl Exp $ */
+/* $Id: windlllx.h,v 1.3 2001-02-09 18:31:05 sandervl Exp $ */
 
 /*
  * Win32 LX Dll class (compiled in OS/2 using Odin32 api)
@@ -37,7 +37,9 @@ virtual BOOL      isLxDll();
 static  Win32LxDll *findModuleByOS2Handle(HINSTANCE hinstance);
     
 protected:
-
+        DWORD     MajorImageVersion;
+        DWORD     MinorImageVersion;
+        DWORD     Subsystem;
 private:
 };
 

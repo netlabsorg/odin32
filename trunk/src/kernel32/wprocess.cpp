@@ -1,4 +1,4 @@
-/* $Id: wprocess.cpp,v 1.112 2001-01-23 11:59:45 sandervl Exp $ */
+/* $Id: wprocess.cpp,v 1.113 2001-02-09 18:31:06 sandervl Exp $ */
 
 /*
  * Win32 process functions
@@ -1527,6 +1527,26 @@ BOOL WINAPI CreateProcessA( LPCSTR lpApplicationName, LPSTR lpCommandLine,
     dprintf(("KERNEL32: CreateProcessA %s cline:%s inherit:%d cFlags:%x Env:%x CurDir:%s StartupFlags:%x\n",
             lpApplicationName, lpCommandLine, bInheritHandles, dwCreationFlags,
             lpEnvironment, lpCurrentDirectory, lpStartupInfo));
+
+#ifdef DEBUG
+    if(lpStartupInfo) {
+	dprintf(("lpStartupInfo->lpReserved %x", lpStartupInfo->lpReserved));
+	dprintf(("lpStartupInfo->lpDesktop %x", lpStartupInfo->lpDesktop));
+	dprintf(("lpStartupInfo->lpTitle %s", lpStartupInfo->lpTitle));
+	dprintf(("lpStartupInfo->dwX %x", lpStartupInfo->dwX));
+	dprintf(("lpStartupInfo->dwY %x", lpStartupInfo->dwY));
+	dprintf(("lpStartupInfo->dwXSize %x", lpStartupInfo->dwXSize));
+	dprintf(("lpStartupInfo->dwYSize %x", lpStartupInfo->dwYSize));
+	dprintf(("lpStartupInfo->dwXCountChars %x", lpStartupInfo->dwXCountChars));
+	dprintf(("lpStartupInfo->dwYCountChars %x", lpStartupInfo->dwYCountChars));
+	dprintf(("lpStartupInfo->dwFillAttribute %x", lpStartupInfo->dwFillAttribute));
+	dprintf(("lpStartupInfo->dwFlags %x", lpStartupInfo->dwFlags));
+	dprintf(("lpStartupInfo->wShowWindow %x", lpStartupInfo->wShowWindow));
+	dprintf(("lpStartupInfo->hStdInput %x", lpStartupInfo->hStdInput));
+	dprintf(("lpStartupInfo->hStdOutput %x", lpStartupInfo->hStdOutput));
+	dprintf(("lpStartupInfo->hStdError %x", lpStartupInfo->hStdError));
+    }
+#endif
 
     // open32 does not support DEBUG_ONLY_THIS_PROCESS
     if(dwCreationFlags & DEBUG_ONLY_THIS_PROCESS)
