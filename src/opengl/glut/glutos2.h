@@ -1,4 +1,4 @@
-/* $Id: glutos2.h,v 1.3 2000-03-11 15:07:47 sandervl Exp $ */
+/* $Id: glutos2.h,v 1.4 2000-03-11 17:24:28 bird Exp $ */
 #ifndef __glutos2_h__
 #define __glutos2_h__
 
@@ -11,7 +11,12 @@
 #include "os2_x11.h"
 #include "os2_glx.h"
 #include <misc.h>
+/* KSO: Dirty trick to get around problems with gettimeofday being
+ * defined in the sys\time.h in the toolkit. (at least in CSD2)
+ */
+#define gettimeofday gettimeofday_os2
 #include <sys\time.h>
+#undef gettimeofday
 
 /* We have to undef some things because Microsoft likes to pollute the
    global namespace. */
