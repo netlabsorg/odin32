@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2373 2002-12-02 16:32:22 sandervl Exp $ */
+/* $Id: changelog,v 1.2374 2002-12-03 11:29:12 sandervl Exp $ */
+
+ 2002-12-03: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o CreateFile/OpenFile: convert file name to long if in hashed 8.3 format.
 
  2002-12-02: Platon Fomichev <platon@innotek   >
     - OLE32:    o Removed stupid wait in STUBMGR_Start. Blocks PM for two seconds.
