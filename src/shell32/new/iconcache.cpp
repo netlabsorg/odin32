@@ -236,6 +236,13 @@ static BYTE * ICO_GetIconDirectory( HFILE hFile, LPicoICONDIR* lplpiID, ULONG *u
 #define ICO_NO_ICONS		0
 
 HGLOBAL WINAPI ICO_ExtractIconEx(LPCSTR lpszExeFileName, HICON * RetPtr, UINT nIconIndex, UINT n, UINT cxDesired, UINT cyDesired )
+{
+  dprintf (("SHELL32: ICO_ExtractIconEx not implemented.\n"));
+  return 0;
+}
+
+// @@@PH turned off
+#if 0
 {	HGLOBAL	hRet = ICO_NO_ICONS;
 	LPBYTE		pData;
 	OFSTRUCT	ofs;
@@ -469,6 +476,7 @@ end_2:	CloseHandle(fmapping);
 end_1:	_lclose( hFile);
 	return hRet;
 }
+#endif
 
 /********************** THE ICON CACHE ********************************/
 
