@@ -1,4 +1,4 @@
-/* $Id: dlgconvert.cpp,v 1.5 1999-06-19 10:54:46 sandervl Exp $ */
+/* $Id: dlgconvert.cpp,v 1.6 1999-07-02 12:42:57 sandervl Exp $ */
 
 /*
  * Win32 runtime dialog conversion functions for OS/2
@@ -16,7 +16,7 @@
 #define INCL_DOSPROCESS          /* DOS Process values       */
 #define INCL_DOSMISC             /* DOS Miscellanous values  */
 #define INCL_WIN
-#include <os2wrap.h>	//Odin32 OS/2 api wrappers
+#include <os2wrap.h>    //Odin32 OS/2 api wrappers
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -215,6 +215,10 @@ DLGTEMPLATE *ConvertWin32DlgTemplate(DLGTEMPLATE *windlg)
       dlgitem->offText = (USHORT)((int)dlgcurdata - (int)dlgt);
       strcpy((char *)dlgcurdata, ctrltext);
       dlgcurdata      += dlgitem->cchText + 1; //include terminating 0 (just to be sure)
+   } else
+   { //CB: cchText == 0, OS/2 uses offText anyway! (entryfields)
+     dlgitem->offText = (USHORT)((int)dlgcurdata-(int)dlgt);
+     dlgcurdata++; //0 at offText
    }
    FreeAsciiString(ctrltext);
   }
@@ -314,6 +318,10 @@ DLGTEMPLATE *ConvertWin32DlgTemplate(DLGTEMPLATE *windlg)
             dlgitem->offText = (USHORT)((int)dlgcurdata - (int)dlgt);
             strcpy((char *)dlgcurdata, ctrltext);
             dlgcurdata      += dlgitem->cchText + 1; //include terminating 0 (just to be sure)
+         } else
+         { //CB: cchText == 0, OS/2 uses offText anyway! (entryfields)
+           dlgitem->offText = (USHORT)((int)dlgcurdata-(int)dlgt);
+           dlgcurdata++; //0 at offText
          }
       }
 #ifdef DEBUG
@@ -484,6 +492,10 @@ DLGTEMPLATE *ConvertWin32DlgTemplateEx(WINDLGTEMPLATEEX *dhdr)
       dlgitem->offText = (USHORT)((int)dlgcurdata - (int)dlgt);
       strcpy((char *)dlgcurdata, ctrltext);
       dlgcurdata      += dlgitem->cchText + 1; //include terminating 0 (just to be sure)
+   } else
+   { //CB: cchText == 0, OS/2 uses offText anyway! (entryfields)
+     dlgitem->offText = (USHORT)((int)dlgcurdata-(int)dlgt);
+     dlgcurdata++; //0 at offText
    }
    FreeAsciiString(ctrltext);
   }
@@ -582,6 +594,10 @@ DLGTEMPLATE *ConvertWin32DlgTemplateEx(WINDLGTEMPLATEEX *dhdr)
             dlgitem->offText = (USHORT)((int)dlgcurdata - (int)dlgt);
             strcpy((char *)dlgcurdata, ctrltext);
             dlgcurdata      += dlgitem->cchText + 1; //include terminating 0 (just to be sure)
+         } else
+         { //CB: cchText == 0, OS/2 uses offText anyway! (entryfields)
+           dlgitem->offText = (USHORT)((int)dlgcurdata-(int)dlgt);
+           dlgcurdata++; //0 at offText
          }
       }
 #ifdef DEBUG
