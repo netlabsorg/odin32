@@ -1,4 +1,4 @@
-/* $Id: window.cpp,v 1.6 1999-09-23 10:33:59 sandervl Exp $ */
+/* $Id: window.cpp,v 1.7 1999-09-24 22:45:28 sandervl Exp $ */
 /*
  * Win32 window apis for OS/2
  *
@@ -67,7 +67,7 @@ HWND WIN32API CreateWindowExA(DWORD exStyle, LPCSTR className,
     cs.lpszName       = windowName;
     cs.lpszClass      = className;
     cs.dwExStyle      = exStyle;
-    dprintf(("CreateWindowExA: (%d,%d) (%d,%d), %x %x", x, y, width, height, style, exStyle));
+    dprintf(("CreateWindowExA: parent %x (%d,%d) (%d,%d), %x %x", parent, x, y, width, height, style, exStyle));
 
     //TODO: According to the docs className can be a 16 bits atom
     //      Wine seems to assume it's a string though...
