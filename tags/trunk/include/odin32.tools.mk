@@ -1,4 +1,4 @@
-# $Id: odin32.tools.mk,v 1.3 2001-01-05 23:23:05 sandervl Exp $
+# $Id: odin32.tools.mk,v 1.4 2001-01-08 22:51:51 bird Exp $
 
 #
 # Odin32 API
@@ -46,7 +46,9 @@ IMPDEF      = $(ODIN32_TOOLS)\impdef.exe
 DEPEND      = $(ODIN32_TOOLS)\fastdep.exe -o$$(OBJDIR) -cy+
 CREATEPATH  = $(ODIN32_TOOLS)\CreatePath.cmd
 EXECEXCL    = $(ODIN32_TOOLS)\ExecExcl.cmd
+BLDLEVELINF = $(ODIN32_TOOLS)\BldLevelInf.cmd
 LXLITE      = $(ODIN32_TOOLS)\lxlite.exe
+
 
 #
 # Include compiler dependent tools
