@@ -1,4 +1,4 @@
-/* $Id: dllentry.cpp,v 1.4 2001-02-14 11:40:59 sandervl Exp $ */
+/* $Id: dllentry.cpp,v 1.5 2001-02-14 15:14:42 sandervl Exp $ */
 
 /*
  * DLL entry point
@@ -59,7 +59,7 @@ BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
 
       case DLL_PROCESS_DETACH:
 #ifdef __IBMCPP__
-         __ctordtorTerm();
+         ctordtorTerm();
 #endif
          return TRUE;
    }
@@ -88,7 +88,7 @@ unsigned long SYSTEM _DLL_InitTerm(unsigned long hModule, unsigned long ulFlag)
    switch (ulFlag)
    {
       case 0:
-         __ctordtorInit();
+         ctordtorInit();
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
          dllHandle = RegisterLxDll(hModule, LibMain, (PVOID)&_Resource_PEResTab);
          if (dllHandle == 0)

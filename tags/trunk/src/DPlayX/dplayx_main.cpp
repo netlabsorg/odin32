@@ -1,4 +1,4 @@
-// $Id: dplayx_main.cpp,v 1.2 2000-09-24 22:47:37 hugh Exp $
+// $Id: dplayx_main.cpp,v 1.3 2001-02-14 15:14:41 sandervl Exp $
 /*
  * DPLAYX.DLL LibMain
  *
@@ -17,6 +17,9 @@
 #include "initguid.h"  /* To define the GUIDs */
 #include "dplaysp.h"
 #include "dplayx_global.h"
+#ifdef __WIN32OS2__
+#include <initdll.h>
+#endif
 
 DEFAULT_DEBUG_CHANNEL(dplay);
 
@@ -26,10 +29,6 @@ static DWORD DPLAYX_dwProcessesAttached = 0;
 
 /* This is a globally exported variable at ordinal 6 of DPLAYX.DLL */
 DWORD gdwDPlaySPRefCount = 0; /* FIXME: Should it be initialized here? */
-
-extern "C" {
-void CDECL _ctordtorTerm( void );
-}
 
 BOOL WINAPI DPLAYX_LibMain( HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved )
 {
@@ -58,7 +57,9 @@ BOOL WINAPI DPLAYX_LibMain( HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReser
         BOOL rc;
         /* Last instance performs destruction of global processor data */
         rc = DPLAYX_DestructData();
-        _ctordtorTerm();
+#ifdef __WIN32OS2__
+        ctordtorTerm();
+#endif
         return rc;
       }
 

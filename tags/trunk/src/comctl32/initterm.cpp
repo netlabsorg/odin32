@@ -63,7 +63,7 @@ BOOL WINAPI LibMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID fImpLoad)
    case DLL_PROCESS_DETACH:
    	/* unregister Win32 window classes */
    	UnregisterCOMCTL32WindowClasses();
-   	__ctordtorTerm();
+   	ctordtorTerm();
 	return TRUE;
    }
    return FALSE;
@@ -91,7 +91,7 @@ unsigned long _System _DLL_InitTerm(unsigned long hModule, unsigned long
    switch (ulFlag) {
       case 0 :
 
-         __ctordtorInit();
+         ctordtorInit();
 
          /*******************************************************************/
          /* A DosExitList routine must be used to clean up if runtime calls */
