@@ -1,4 +1,4 @@
-/* $Id: pefile.h,v 1.1 1999-05-24 20:19:07 ktk Exp $ */
+/* $Id: pefile.h,v 1.2 1999-05-27 15:17:58 phaller Exp $ */
 
 /*
  *

@@ -1,4 +1,4 @@
-/* $Id: OS2WIN.H,v 1.1 1999-05-24 20:19:06 ktk Exp $ */
+/* $Id: OS2WIN.H,v 1.2 1999-05-27 15:17:57 phaller Exp $ */
 
 #ifndef _OS2WIN_H
 #define _OS2WIN_H
