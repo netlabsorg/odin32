@@ -1,18 +1,22 @@
-/* $Id: ToDO.txt,v 1.18 2001-11-23 16:32:51 phaller Exp $ */
+/* $Id: ToDO.txt,v 1.19 2001-12-06 13:35:25 phaller Exp $ */
 
 To Do list for ODIN:
 
 
 Assigned Status Topic -------------------------------------------------------
 
-PH              Equip HandleManager w/ symbolic links and name mgmt
+NOONE           DDRAW/OS2SURFACE::SurfDoBlt (#2703) broken in certain
+                circumstances (lpSrcRect or lpDestRect == NULL and
+                getting dereferenced -> moorhuhn2.exe)
+
+PH       DONE   Equip HandleManager w/ symbolic links and name mgmt
                 functionality (LPTx - \Device\ParallelPortx, etc.)
 
                 Update Mesa to latest stable build (might fix Parsec)
 
                 Eventually start porting over D3D support from WINE
 
-PH       PART   Implement support for Parallel Port Devices
+PH       DONE   Implement support for Parallel Port Devices
 
                 Fix wrong reference count after window creation
                 (unable to unregister window class)
@@ -22,6 +26,8 @@ PH       PART   Implement support for Parallel Port Devices
 PH       DONE   WSOCK32 calls are not FS: safe (OS2gethostbyname)
 
 PH              Implement WaitForSingleObject() for process handles
+
+NOONE           Implement RegNotifyKeyChange()
 
 PD       DONE   Handle named pipes via HandleManager
 
@@ -50,7 +56,9 @@ SvL             WINMM: wave recording (test & finish)
 SvL             USER32/GDI32: Use unicode codepages and update control code
 
 NOONE           long2ShortName in kernel32\oslibdos.cpp
+
 NOONE           FindFirstFileA -> use 64 bits OS/2 api
+
 NOONE           Out of process COM objects (OLE). Important because new
                 InstallShield installers use this feature!
 
@@ -69,9 +77,9 @@ NOONE           WINMM: Rewrite winmm to use driver architecture (port Wine's win
 
 NOONE           WINMM: Fix and finish MIDI in/out (using RTMIDI)
 
-NOONE	        KERNEL32: Async file io
+SvL       DONE  KERNEL32: Async file io
 
-NOONE     PART  KERNEL32: Vio support for console applications
+SvL       DONE  KERNEL32: Vio support for console applications
 
 NOONE     DONE  WSOCK32: Winsock 2 implementation (WS2_32.DLL, WS2HELP.DLL)
 
