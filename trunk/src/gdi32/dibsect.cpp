@@ -1,4 +1,4 @@
-/* $Id: dibsect.cpp,v 1.45 2001-01-05 23:25:30 sandervl Exp $ */
+/* $Id: dibsect.cpp,v 1.46 2001-03-19 19:27:53 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -599,7 +599,7 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
   if(rc == GPI_OK) {
         DIBSection *destdib = DIBSection::findHDC(hdcDest);
         if(destdib) {
-            destdib->sync(hps, nYdest, nDestHeight);
+            destdib->sync(hps, nYdest, nDestHeight, FALSE);
         }
 #ifdef INVERT
         //restore old y inversion height
@@ -618,35 +618,27 @@ BOOL DIBSection::BitBlt(HDC hdcDest, int nXdest, int nYdest, int nDestWidth,
   return(FALSE);
 }
 //******************************************************************************
-int WIN32API GetDIBits(HDC hdc, HBITMAP hBitmap, UINT uStartScan, UINT cScanLines,
-                       void *lpvBits, BITMAPINFO_W * lpbi, UINT uUsage);
-
 //******************************************************************************
-void DIBSection::sync(HDC hdc, DWORD nYdest, DWORD nDestHeight)
+void DIBSection::sync(HDC hdc, DWORD nYdest, DWORD nDestHeight, BOOL orgYInversion)
 {
  APIRET rc;
  char  *destBuf;
 
-  dprintf(("Sync destination dibsection %x (%x)", handle, hdc));
+  dprintf(("Sync destination dibsection %x (%x) (%d,%d) flip %d", handle, hdc, nYdest, nDestHeight, fFlip));
 
-#if 0
-  BITMAPINFO_W *tmphdr = (BITMAPINFO_W *)malloc(os2bmphdrsize + sizeof(BITMAPINFO_W));
-  tmphdr->bmiHeader.biSize = sizeof(BITMAPINFOHEADER_W);
-  GetDIBits(hdc, handle, nYdest, nDestHeight, NULL, tmphdr, 0);
-  destBuf = GetDIBObject() + nYdest*dibinfo.dsBm.bmWidthBytes;
-  rc = GetDIBits(hdc, handle, nYdest, nDestHeight, destBuf, tmphdr, 0);
-#ifdef DEBUG_PALETTE
-  if(rc && tmphdr->bmiHeader.biBitCount <= 8) {
-    for(int i=0;i<(1<<tmphdr->bmiHeader.biBitCount);i++)
-    {
-        dprintf2(("Index %d : 0x%08X\n",i, *((ULONG*)(&tmphdr->bmiColors[i])) ));
-    }
-  }
-#endif
-
-#else
   BITMAPINFO2 *tmphdr = (BITMAPINFO2 *)malloc(os2bmphdrsize);
   memcpy(tmphdr, pOS2bmp, os2bmphdrsize);
+
+#ifdef INVERT
+  int oldyinversion = 0;
+  if(orgYInversion == TRUE) {
+      oldyinversion = GpiQueryYInversion(hdc);
+      dprintf(("Sync destination dibsection: hdc y inversion = %d", oldyinversion));
+      if(oldyinversion != 0) {
+          GpiEnableYInversion(hdc, 0);
+      }
+  }
+#endif
 
   if(fFlip & FLIP_VERT) {
         destBuf = bmpBitsDblBuffer + nYdest*dibinfo.dsBm.bmWidthBytes;
@@ -665,7 +657,8 @@ void DIBSection::sync(HDC hdc, DWORD nYdest, DWORD nDestHeight)
   else {
         destBuf = GetDIBObject() + nYdest*dibinfo.dsBm.bmWidthBytes;
         rc = GpiQueryBitmapBits(hdc, nYdest, nDestHeight, destBuf,
-                          tmphdr);
+                                tmphdr);
+
 #ifdef DEBUG_PALETTE
         if(rc != GPI_ALTERROR && tmphdr->cBitCount <= 8) {
             for(int i=0;i<(1<<tmphdr->cBitCount);i++)
@@ -675,7 +668,7 @@ void DIBSection::sync(HDC hdc, DWORD nYdest, DWORD nDestHeight)
         }
 #endif
   }
-#endif
+
 #if 0
   if(dibinfo.dsBitfields[1] == 0x3E0) {//RGB 555?
     dprintf(("DIBSection::sync: convert RGB 565 to RGB 555"));
@@ -692,6 +685,11 @@ void DIBSection::sync(HDC hdc, DWORD nYdest, DWORD nDestHeight)
   if(rc != nDestHeight) {
     DebugInt3();
   }
+
+#ifdef INVERT
+  if(oldyinversion) GpiEnableYInversion(hdc, oldyinversion);
+#endif
+
 }
 //******************************************************************************
 //manual sync if no stretching and bpp is the same
