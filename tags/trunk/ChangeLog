@@ -1,4 +1,7 @@
- /* $Id: ChangeLog,v 1.912 2000-04-27 11:10:14 achimha Exp $ */
+ /* $Id: ChangeLog,v 1.913 2000-04-27 12:03:37 bird Exp $ */
+
+ 2000-04-27: knut st. osmundsen <knut.stange.osmundsen@mynd.no>
+    - tools/DailyBuild: Checked in the scripts used for the daily build.
 
  2000-04-27: Achim Hasenmueller <achimha@innotek.de>
 	- put back new wrc.exe, provide workarounds in
