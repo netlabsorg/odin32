@@ -1,4 +1,4 @@
-/* $Id: hotkey.c,v 1.5 1999-09-18 12:21:26 cbratschi Exp $ */
+/* $Id: hotkey.c,v 1.6 1999-09-19 13:27:09 cbratschi Exp $ */
 /*
  * Hotkey control
  *
@@ -8,7 +8,6 @@
  *
  * NOTES
  *   Development in progress.
- *   CB: difficult with new User32
  *
  * TODO:
  *   - keyboard messages
@@ -47,7 +46,7 @@ HOTKEY_SetHotKey(HWND hwnd,WPARAM wParam,LPARAM lParam)
   HOTKEY_INFO *infoPtr = HOTKEY_GetInfoPtr(hwnd);
 
   infoPtr->bVKHotKey = wParam & 0xFF;
-  infoPtr->bfMods = HOTKEY_Check(infoPtr,wParam & 0xFF00);
+  infoPtr->bfMods = HOTKEY_Check(infoPtr,(wParam & 0xFF00)>>8);
 
   HOTKEY_UpdateHotKey(hwnd);
 
@@ -81,20 +80,11 @@ HOTKEY_SetRules(HWND hwnd,WPARAM wParam,LPARAM lParam)
 
 
 static LRESULT
-HOTKEY_Char(HWND hwnd,WPARAM wParam,LPARAM lParam)
+HOTKEY_Char(HWND hwnd,WPARAM wParam,LPARAM lParam,BOOL sysKey)
 {
  //CB:
   return 0;
 }
-
-
-static LRESULT
-HOTKEY_SysChar(HWND hwnd,WPARAM wParam,LPARAM lParam)
-{
- //CB:
-  return 0;
-}
-
 
 static LRESULT
 HOTKEY_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
@@ -115,6 +105,8 @@ HOTKEY_Create (HWND hwnd, WPARAM wParam, LPARAM lParam)
     infoPtr->bfMods    = 0;
     infoPtr->fwCombInv = 0;
     infoPtr->fwModInv  = 0;
+    infoPtr->cursorPos.x = 3;
+    infoPtr->cursorPos.y = 3;
 
     /* get default font height */
     hdc = GetDC (hwnd);
@@ -163,42 +155,48 @@ HOTKEY_GetFont (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
 
 static LRESULT
-HOTKEY_KeyDown (HWND hwnd, WPARAM wParam, LPARAM lParam)
+HOTKEY_KeyDown (HWND hwnd, WPARAM wParam, LPARAM lParam,BOOL sysKey)
 {
-    /* HOTKEY_INFO *infoPtr = HOTKEY_GetInfoPtr (hwnd); */
+  HOTKEY_INFO *infoPtr = HOTKEY_GetInfoPtr (hwnd);
+  INT newMods = sysKey ? HOTKEYF_ALT:0;
 
-    switch (wParam) {
-        case VK_RETURN:
-        case VK_TAB:
-        case VK_SPACE:
-        case VK_DELETE:
-        case VK_ESCAPE:
-        case VK_BACK:
-            return DefWindowProcA (hwnd, WM_KEYDOWN, wParam, lParam);
+  switch (wParam)
+  {
+    case VK_RETURN:
+    case VK_TAB:
+    case VK_SPACE:
+    case VK_DELETE:
+    case VK_ESCAPE:
+    case VK_BACK:
+         return DefWindowProcA (hwnd,sysKey ? WM_SYSKEYDOWN:WM_KEYDOWN, wParam, lParam);
 
-        case VK_SHIFT:
-        case VK_CONTROL:
-        case VK_MENU:
-//          FIXME (hotkey, "modifier key pressed!\n");
-            break;
+    case VK_SHIFT:
+         newMods |= HOTKEYF_SHIFT;
+         break;
 
-        default:
-//          FIXME (hotkey, " %d\n", wParam);
-            break;
+    case VK_CONTROL:
+         newMods |= HOTKEYF_CONTROL;
+         break;
+
+    default:
+         break;
     }
+
+    infoPtr->bfMods = newMods;
+    HOTKEY_UpdateHotKey(hwnd);
 
     return TRUE;
 }
 
 
 static LRESULT
-HOTKEY_KeyUp (HWND hwnd, WPARAM wParam, LPARAM lParam)
+HOTKEY_KeyUp (HWND hwnd, WPARAM wParam, LPARAM lParam,BOOL sysKey)
 {
-    /* HOTKEY_INFO *infoPtr = HOTKEY_GetInfoPtr (hwnd); */
+  HOTKEY_INFO *infoPtr = HOTKEY_GetInfoPtr (hwnd);
 
 //    FIXME (hotkey, " %d\n", wParam);
 
-    return 0;
+  return 0;
 }
 
 
@@ -238,10 +236,11 @@ static VOID
 HOTKEY_Draw(HWND hwnd,HDC hdc)
 {
   HOTKEY_INFO *infoPtr = HOTKEY_GetInfoPtr(hwnd);
-  RECT rect;
+  RECT rect,newRect;
   char text[50];
   HFONT oldFont;
 
+  HideCaret(hwnd);
   GetClientRect(hwnd,&rect);
   DrawEdge(hdc,&rect,EDGE_SUNKEN,BF_RECT | BF_ADJUST);
 
@@ -270,8 +269,13 @@ HOTKEY_Draw(HWND hwnd,HDC hdc)
   }
   if(infoPtr->hFont) oldFont = SelectObject(hdc,infoPtr->hFont);
   SetBkMode(hdc,TRANSPARENT);
-  DrawTextA(hdc,text,strlen(text),&rect,DT_LEFT | DT_BOTTOM | DT_SINGLELINE);
+  CopyRect(&newRect,&rect);
+  DrawTextA(hdc,text,strlen(text),&newRect,DT_LEFT | DT_BOTTOM | DT_SINGLELINE);
+  DrawTextA(hdc,text,strlen(text),&newRect,DT_LEFT | DT_BOTTOM | DT_SINGLELINE | DT_CALCRECT);
   if (infoPtr->hFont) SelectObject(hdc,oldFont);
+  infoPtr->cursorPos.x = (newRect.right >= rect.right)? -1:newRect.right;
+  SetCaretPos(infoPtr->cursorPos.x,infoPtr->cursorPos.y);
+  ShowCaret(hwnd);
 }
 
 
@@ -316,9 +320,9 @@ HOTKEY_SetFocus (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
     infoPtr->bFocus = TRUE;
 
-    CreateCaret (hwnd, (HBITMAP)0, 1, infoPtr->nHeight);
-    SetCaretPos (3,3);
-    ShowCaret (hwnd);
+    CreateCaret(hwnd,(HBITMAP)0,1,infoPtr->nHeight);
+    SetCaretPos(infoPtr->cursorPos.x,infoPtr->cursorPos.y);
+    ShowCaret(hwnd);
 
     return 0;
 }
@@ -351,47 +355,6 @@ HOTKEY_SetFont (HWND hwnd, WPARAM wParam, LPARAM lParam)
 }
 
 
-static LRESULT WINE_UNUSED
-HOTKEY_SysKeyDown (HWND hwnd, WPARAM wParam, LPARAM lParam)
-{
-    /* HOTKEY_INFO *infoPtr = HOTKEY_GetInfoPtr (hwnd); */
-
-    switch (wParam) {
-        case VK_RETURN:
-        case VK_TAB:
-        case VK_SPACE:
-        case VK_DELETE:
-        case VK_ESCAPE:
-        case VK_BACK:
-            return DefWindowProcA (hwnd, WM_SYSKEYDOWN, wParam, lParam);
-
-        case VK_SHIFT:
-        case VK_CONTROL:
-        case VK_MENU:
-//          FIXME (hotkey, "modifier key pressed!\n");
-            break;
-
-        default:
-//          FIXME (hotkey, " %d\n", wParam);
-            break;
-    }
-
-    return TRUE;
-}
-
-
-static LRESULT WINE_UNUSED
-HOTKEY_SysKeyUp (HWND hwnd, WPARAM wParam, LPARAM lParam)
-{
-    /* HOTKEY_INFO *infoPtr = HOTKEY_GetInfoPtr (hwnd); */
-
-//    FIXME (hotkey, " %d\n", wParam);
-
-    return 0;
-}
-
-
-
 static LRESULT WINAPI
 HOTKEY_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -407,7 +370,10 @@ HOTKEY_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             return HOTKEY_SetRules(hwnd,wParam,lParam);
 
         case WM_CHAR:
-            return HOTKEY_Char(hwnd,wParam,lParam);
+            return HOTKEY_Char(hwnd,wParam,lParam,FALSE);
+
+        case WM_SYSCHAR:
+            return HOTKEY_Char(hwnd,wParam,lParam,TRUE);
 
         case WM_CREATE:
             return HOTKEY_Create (hwnd, wParam, lParam);
@@ -425,16 +391,16 @@ HOTKEY_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
             return HOTKEY_GetFont (hwnd, wParam, lParam);
 
         case WM_KEYDOWN:
-            return HOTKEY_KeyDown(hwnd,wParam,lParam);
+            return HOTKEY_KeyDown(hwnd,wParam,lParam,FALSE);
 
         case WM_SYSKEYDOWN:
-            return HOTKEY_SysKeyDown (hwnd, wParam, lParam);
+            return HOTKEY_KeyDown(hwnd,wParam,lParam,TRUE);
 
         case WM_KEYUP:
-            return HOTKEY_KeyUp(hwnd,wParam,lParam);
+            return HOTKEY_KeyUp(hwnd,wParam,lParam,FALSE);
 
         case WM_SYSKEYUP:
-            return HOTKEY_SysKeyUp (hwnd, wParam, lParam);
+            return HOTKEY_KeyUp(hwnd,wParam,lParam,TRUE);
 
         case WM_KILLFOCUS:
             return HOTKEY_KillFocus (hwnd, wParam, lParam);
@@ -453,9 +419,6 @@ HOTKEY_WindowProc (HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
         case WM_SETFONT:
             return HOTKEY_SetFont (hwnd, wParam, lParam);
-
-        case WM_SYSCHAR:
-            return HOTKEY_SysChar(hwnd,wParam,lParam);
 
         default:
 //          if (uMsg >= WM_USER)
