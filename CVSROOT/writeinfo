@@ -24,7 +24,7 @@
 /src/oledlg                                sandervl davidr
 /src/imm32                                 sandervl
 /src/imagehlp                              sandervl
-/src/rasapi32                              sandervl
+/src/rasapi32                              sandervl jens
 /src/msacm32                               sandervl
 /src/odincrt                               sandervl phaller achimha hugh
 /src/OMFDUMP                               sandervl phaller achimha bird
