@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.13 2001-09-27 03:26:12 bird Exp $
+# $Id: Makefile,v 1.14 2001-10-14 22:55:52 bird Exp $
 
 #
 # kKrnlLib.sys makefile.
@@ -22,16 +22,17 @@ CDEFINESEXTRA16 = -DKKRNLLIB
 #
 # Main targetname
 #
-NAME = kKrnlLib
+TARGET = kKrnlLib
 
 
 #
 # Main rules.
 #
 !if "$(DDKPATH)" != "" && "$(MSCPATH)" != ""  && "$(TOOLKIT)" != "" && "$(VACPATH)" != ""
-all:    $(WIN32KBIN)\$(NAME).sys \
+all:    $(WIN32KBIN)\$(TARGET).sys \
         lib
-lib:    $(ODIN32_LIB)\$(NAME).lib
+lib:    $(ODIN32_LIB)\$(TARGET).lib \
+        $(ODIN32_LIB)\$(TARGET)R3.lib
 !else
 all:
 lib:
@@ -92,13 +93,14 @@ LIBS =\
 #
 # kKrnlLib.sys rule. (Don't mess with the order or objects and libraries!)
 #
-$(NAME).sys: $(WIN32KBIN)\$(NAME).sys
+$(TARGET).sys: $(WIN32KBIN)\$(TARGET).sys
 
-$(WIN32KBIN)\$(NAME).sys:   $(WIN32KBIN)\clfix.exe \
+$(WIN32KBIN)\$(TARGET).sys: $(WIN32KBIN)\clfix.exe \
+                            $(WIN32KBIN)\ignore.exe \
                             $(WIN32KINCLUDE)\options.inc \
                             $(OBJS) \
                             $(LIBS) \
-                            $(WIN32KOBJ)\$(NAME)bldlevel.def \
+                            $(WIN32KOBJ)\$(TARGET)bldlevel.def \
                             $(LASTLIB) \
                             $(LIBSINIT) \
                             $(WIN32KOBJ)\$(@B).lnk \
@@ -107,11 +109,7 @@ $(WIN32KBIN)\$(NAME).sys:   $(WIN32KBIN)\clfix.exe \
     $(CC16) -c $(CFLAGS16) $(CDEFINES16) $(CINCLUDES16) -Fo$(WIN32KOBJ)\d16globl.obj \
         -Fa$(WIN32KLIST)\d16globl.s dev16\d16globl.c
     -@$(ECHO) linking: $@
-!ifdef GREP
-    -4 $(LD) $(LFLAGS) @$(WIN32KOBJ)\$(@B).lnk | $(GREP) -v LNK4001 | $(GREP) -v LNK4031
-!else
-    -4 $(LD) $(LFLAGS) @$(WIN32KOBJ)\$(@B).lnk
-!endif
+    -4 $(WIN32KBIN)\ignore.exe -LNK4001 -LNK4031 $(LD) $(LFLAGS) @$(WIN32KOBJ)\$(@B).lnk
     cd $(WIN32KBIN)
     @mapsym $(*B).map > nul
     cd $(WIN32KBASE)
@@ -121,23 +119,23 @@ $(WIN32KBIN)\$(NAME).sys:   $(WIN32KBIN)\clfix.exe \
     $(CP) $(WIN32KBASE)\$(*B).ddp $(ODIN32_BIN)
 
 # Linker file.
-$(WIN32KOBJ)\$(NAME).lnk: Makefile makefile.inc ..\..\..\makefile.inc
-    echo Creating linkerfile: @<<$(WIN32KOBJ)\$(NAME).lnk
-/OUT:$(WIN32KBIN)\$(NAME).sys
-/MAP:$(WIN32KBIN)\$(NAME).map
+$(WIN32KOBJ)\$(TARGET).lnk: Makefile makefile.inc ..\..\..\makefile.inc
+    echo Creating linkerfile: @<<$(WIN32KOBJ)\$(TARGET).lnk
+/OUT:$(WIN32KBIN)\$(TARGET).sys
+/MAP:$(WIN32KBIN)\$(TARGET).map
 $(OBJS:  =^
 )
 /IG
 $(LIBS:  =^
 )
 $(LASTLIB)
-$(WIN32KOBJ)\$(NAME)bldlevel.def
+$(WIN32KOBJ)\$(TARGET)bldlevel.def
 <<KEEP
 
 # Add bldlevel signature to kKrnlLib.def - creates temporary kKrnlLibbldlevel.def.
-$(WIN32KOBJ)\$(NAME)bldlevel.def: $(NAME).def Makefile
+$(WIN32KOBJ)\$(TARGET)bldlevel.def: $(TARGET).def Makefile
     -$(ECHO) Creates $@ with bldlevel signature string.
-    $(BLDLEVELINF) $(NAME).def $@ -R"$(NAME).def" \
+    $(BLDLEVELINF) $(TARGET).def $@ -R"$(TARGET).def" \
         -V"#define=ODIN32_VERSION,$(ODIN32_INCLUDE)\odinbuild.h" \
         -M"#define=ODIN32_BUILD_NR,$(ODIN32_INCLUDE)\odinbuild.h"
 
@@ -182,7 +180,7 @@ TSTOBJS =\
     $(WIN32KOBJ)\OS2KTCB.obj \
     $(WIN32KOBJ)\OS2KPTDA.obj \
     $(WIN32KOBJ)\env.obj \
-    $(WIN32KOBJ)\$(NAME)tst.obj \
+    $(WIN32KOBJ)\$(TARGET)tst.obj \
     $(WIN32KOBJ)\dh.obj \
     $(WIN32KOBJ)\dos.obj \
     $(WIN32KOBJ)\dosa.obj \
@@ -208,36 +206,33 @@ TSTLIBS = $(LIBS)
 #   This is a test executable; kKrnlLib.sys wrapped into an executable with emulation
 #   code for most of the OS/2 kernel dependencies.
 #
-$(NAME)tst.exe: $(WIN32KBIN)\$(NAME)tst.exe
+$(TARGET)tst.exe: $(WIN32KBIN)\$(TARGET)tst.exe
     $(CP) $(WIN32KBIN)\$@ $@
-$(WIN32KBIN)\$(NAME)tst.exe:    $(WIN32KBIN)\clfix.exe \
+$(WIN32KBIN)\$(TARGET)tst.exe:  $(WIN32KBIN)\clfix.exe \
+                                $(WIN32KBIN)\ignore.exe \
                                 testcase\TstFakers.c \
-                                $(NAME)tst.def \
+                                $(TARGET)tst.def \
                                 $(TSTOBJS:. = ) \
                                 $(TSTLIBS) \
                                 $(TSTLASTLIB) \
                                 $(WIN32KOBJ)\$(@B).lnk \
                                 Makefile makefile.inc ..\..\..\makefile.inc
     -@$(ECHO) linking: $@
-!ifdef GREP
-    -4 $(LD) $(LFLAGS) @$(WIN32KOBJ)\$(@B).lnk | $(GREP) -v LNK4001 | $(GREP) -v LNK4031
-!else
-    -4 $(LD) $(LFLAGS) @$(WIN32KOBJ)\$(@B).lnk
-!endif
+    -4 $(WIN32KBIN)\ignore.exe -LNK4001 -LNK4031 $(LD) $(LFLAGS) @$(WIN32KOBJ)\$(@B).lnk
 
 # Linker file.
-$(WIN32KOBJ)\$(NAME)tst.lnk: Makefile makefile.inc ..\..\..\makefile.inc
-    echo Creating linkerfile: @<<$(WIN32KOBJ)\$(NAME)tst.lnk
+$(WIN32KOBJ)\$(TARGET)tst.lnk: Makefile makefile.inc ..\..\..\makefile.inc
+    echo Creating linkerfile: @<<$(WIN32KOBJ)\$(TARGET)tst.lnk
 /DEBUG
-/OUT:$(WIN32KBIN)\$(NAME)tst.exe
-/MAP:$(WIN32KBIN)\$(NAME)tst.map
+/OUT:$(WIN32KBIN)\$(TARGET)tst.exe
+/MAP:$(WIN32KBIN)\$(TARGET)tst.map
 $(TSTOBJS:  =^
 )
 /IG
 $(TSTLIBS:  =^
 )
 $(TSTLASTLIB)
-$(NAME)tst.def
+$(TARGET)tst.def
 <<KEEP
 
 # Last lib - needed to get LASTOBJ in after the importlibraries.
@@ -255,10 +250,18 @@ $(TSTLASTLIB): $(TSTLASTOBJ)
 #
 # kKrnlLib Import library.
 #
-$(NAME).lib: $(ODIN32_LIB)\$(NAME).lib
-$(ODIN32_LIB)\$(NAME).lib: $(WIN32KBIN)\MkCallTab.exe
-    $(WIN32KBIN)\MkCallTab.exe deffile > $(WIN32KOBJ)\$(NAME)implib.def
-    $(IMPLIB) $(IMPLIB_FLAGS) $@ $(WIN32KOBJ)\$(NAME)implib.def
+$(TARGET).lib: $(ODIN32_LIB)\$(TARGET).lib
+$(ODIN32_LIB)\$(TARGET).lib: $(WIN32KBIN)\MkCallTab.exe
+    $(WIN32KBIN)\MkCallTab.exe deffile > $(WIN32KOBJ)\$(TARGET)implib.def
+    $(IMPLIB) $(IMPLIB_FLAGS) $@ $(WIN32KOBJ)\$(TARGET)implib.def
+
+
+#
+# R3 kKrnlLib.
+#
+$(TARGET)R3.lib: $(ODIN32_LIB)\$(TARGET)R3.lib
+$(ODIN32_LIB)\$(TARGET)R3.lib: .force
+    $(DODIRS) "clib" $(MAKE_CMD) lib
 
 
 #
@@ -381,7 +384,7 @@ MKCALLTABOBJS = \
 
 # Rule to build MkCallTab.exe
 MkCallTab.exe MkCallTab: $(WIN32KBIN)\MkCallTab.exe
-$(WIN32KBIN)\MkCallTab.exe: $(WIN32KBIN)\clfix.exe $(MKCALLTABOBJS)
+$(WIN32KBIN)\MkCallTab.exe: $(WIN32KBIN)\clfix.exe $(WIN32KBIN)\ignore.exe $(MKCALLTABOBJS)
     $(LD) $(LFLAGS) /pmtype:vio @<<$(WIN32KOBJ)\$(@B).lnk
         /OUT:$@
         /MAP:$(WIN32KBIN)\$(@B).map
@@ -403,8 +406,17 @@ $(WIN32KBIN)\MkCallTab.exe: $(WIN32KBIN)\clfix.exe $(MKCALLTABOBJS)
 #   MSC v6.0a compiler (cl.exe) (16-bit).
 #
 clfix.exe: $(WIN32KBIN)\clfix.exe
-$(WIN32KBIN)\clfix.exe: Tools\clfix.c
+$(WIN32KBIN)\clfix.exe: tools\clfix.c
     $(CC) -Fe$(WIN32KBIN)\$(@F) -Fo$(WIN32KBIN)\$(@B).obj $**
+
+
+#
+# Ignore utility used to ignore output from icc and linker.
+#
+ignore.exe: $(WIN32KBIN)\ignore.exe
+$(WIN32KBIN)\ignore.exe: tools\ignore.c
+    icc -Q+ -Ti+ -Fe$@ -Fo$(WIN32KOBJ)\$(*B).obj $**
+
 
 
 #
@@ -421,7 +433,7 @@ EXTRACTOBJS = \
     $(WIN32KOBJ)\vprntf16.obj_e
 
 # Rules to build Extract.exe.
-$(WIN32KBIN)\Extract.exe: $(WIN32KBIN)\clfix.exe $(EXTRACTOBJS) Extract.def Makefile
+$(WIN32KBIN)\Extract.exe: $(WIN32KBIN)\clfix.exe $(WIN32KBIN)\ignore.exe $(EXTRACTOBJS) Extract.def Makefile
     $(LD) $(LFLAGS) /pmtype:vio @<<$(WIN32KOBJ)\$(@B).lnk
         /OUT:$@
         /MAP:$(WIN32KBIN)\$(@B).map
@@ -447,6 +459,32 @@ Extract.exe: $(WIN32KBIN)\Extract.exe
     @$(ECHO) compiling 32bit (extract): $<
     $(CC) -c $(CFLAGS) -Gr -Rn -Ti- -ndBIG_ $(CDEFINES) $(CINCLUDES) -Fa$(WIN32KLIST)\$(@B)_e.s \
         -Fo$(WIN32KOBJ)\$(@F) $<
+
+
+#
+# Clean rule
+#
+clean:
+    @$(ECHO) cleaning....
+    $(RM) *.sys *.dll *.lib *.obj *.exe *.sym *.map *.pch *.err \
+        $(ODIN32_BIN)\$(TARGET).sys \
+        $(ODIN32_BIN)\$(TARGET).sym \
+        $(ODIN32_BIN)\$(TARGET).ddp
+!if "$(WIN32KBIN)" != ""
+    $(RM) $(WIN32KBIN)\* \
+!endif
+!if "$(WIN32KOBJ)" != ""
+        $(WIN32KOBJ)\* \
+!endif
+!if "$(WIN32KLIST)" != ""
+        $(WIN32KLIST)\* \
+!endif
+!if "$(WIN32KINCLUDE)" != ""
+        $(WIN32KBIN)\options.inc
+!else
+        .dummy.just.incase
+!endif
+    $(DODIRS) "clib" $(MAKE_CMD) $@
 
 
 #
@@ -476,6 +514,7 @@ dep:
         -objobj_init        $(CINCLUDES16) dev16\*.c*
         -objobj_tst_init    $(CINCLUDES16) dev16\*.c*
 <<
+    $(DODIRS) "clib" $(MAKE_CMD) $@
 
 
 #
@@ -494,4 +533,10 @@ dep:
 #
 kKrnlLib.vpj:
     ..\..\..\tools\vslick\genproject.cmd $@  $(CINCLUDES) -s -r
+
+#
+# Force dummy rule.
+#
+.force:
+    @$(ECHO) $@ > nul
 
