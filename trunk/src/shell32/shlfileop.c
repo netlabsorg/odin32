@@ -106,7 +106,7 @@ BOOL SHELL_DeleteDirectoryA(LPCSTR pszDir, BOOL bShowUI)
 	strcpy(szTemp, pszDir);
 	PathAddBackslashA(szTemp);
 	strcat(szTemp, "*.*");
-	
+
 	if (bShowUI && !SHELL_WarnItemDelete(ASK_DELETE_FOLDER, pszDir))
 	  return FALSE;
 	
@@ -173,7 +173,7 @@ DWORD WINAPI SHCreateDirectory(LPSECURITY_ATTRIBUTES sec,LPCSTR path)
  * Verified on Win98 / IE 5 (SHELL32 4.72, March 1999 build) to be
  * ANSI.  Is this Unicode on NT?
  *
- */ 
+ */
 
 BOOL WINAPI Win32DeleteFile(LPSTR fName)
 {
@@ -197,8 +197,8 @@ DWORD WINAPI SHFileOperationA (LPSHFILEOPSTRUCTA lpFileOp)
 #ifdef __WIN32OS2__
         DWORD FromAttr;
         DWORD ToAttr;
-        LPSTR pTempFrom;
-        LPSTR pTempTo = NULL;
+        LPSTR pTempFrom = NULL;
+        LPSTR pTempTo;
         LPSTR pFromFile;
         LPSTR pToFile;
 
@@ -227,13 +227,13 @@ DWORD WINAPI SHFileOperationA (LPSHFILEOPSTRUCTA lpFileOp)
 #else
 	LPSTR pTempTo;
 #endif
-	
+
 	switch(lpFileOp->wFunc) {
 	case FO_COPY:
 		TRACE("File Copy:\n");
 #ifdef __WIN32OS2__
-            pTempTo = HeapAlloc(GetProcessHeap(), 0, 3 * MAX_PATH+6);
-            pTempFrom = &pTempTo[2*MAX_PATH+2];
+            pTempFrom = HeapAlloc(GetProcessHeap(), 0, 3 * MAX_PATH+6);
+            pTempTo = &pTempFrom[MAX_PATH+4];
 /* 
  * FOF_MULTIDESTFILES, FOF_NOCONFIRMATION, FOF_FILESONLY				are	implemented
  * FOF_CONFIRMMOUSE, FOF_SILENT, FOF_NOCONFIRMMKDIR, FOF_SIMPLEPROGRESS are not implemented and ignored
@@ -266,7 +266,7 @@ DWORD WINAPI SHFileOperationA (LPSHFILEOPSTRUCTA lpFileOp)
                 if (Multi) pTo += lenTo + 1;
                 if(!pTo[0]) {
                         nlpFileOp.fAnyOperationsAborted=TRUE;
-                        where = 13;
+                        where = 213;
                         break;
                 }
 
@@ -274,6 +274,7 @@ DWORD WINAPI SHFileOperationA (LPSHFILEOPSTRUCTA lpFileOp)
 
 // fix for more then one source for one target 
                 pToFile[0] = '\0';
+                nlpFileOp.pTo = pTo;
 
                 lenFrom=strlen(pFrom);
                 strcpy(pTempFrom,pFrom);
@@ -310,7 +311,7 @@ DWORD WINAPI SHFileOperationA (LPSHFILEOPSTRUCTA lpFileOp)
                         !(ToAttr & FILE_ATTRIBUTE_DIRECTORY) ||
                         (!withFileName && !ToSingle) ) {
                         nlpFileOp.fAnyOperationsAborted=TRUE;
-                        where = 1;
+                        where = 201;
                         break;
                     } 
                     lenTempTo = strlen(pTempTo);
@@ -328,14 +329,14 @@ DWORD WINAPI SHFileOperationA (LPSHFILEOPSTRUCTA lpFileOp)
                     PathAddBackslashA(pTempFrom);
                     lenTempFrom = strlen(pTempFrom);
                     pFromFile=&pTempFrom[lenTempFrom];
-                        
+
                     if (FromAttr == -1 ||
                        ((lenTempFrom==lenFrom) && !PathIsRootA(pFrom)) ||
                       !(FromAttr & FILE_ATTRIBUTE_DIRECTORY) ||
                       !((0==strcmp(&pFrom[lenTempFrom],"*.*")) || BothDir)) {
                         retCode=0x402;
                         nlpFileOp.fAnyOperationsAborted=TRUE;
-                        where = 2;
+                        where = 202;
                         break;
                     }
 
@@ -344,7 +345,7 @@ DWORD WINAPI SHFileOperationA (LPSHFILEOPSTRUCTA lpFileOp)
                     if (INVALID_HANDLE_VALUE == hFind) {
                         nlpFileOp.fAnyOperationsAborted=TRUE;
                         retCode=0x79;
-                        where = 3;
+                        where = 203;
                         break;
                     }
 
@@ -368,15 +369,14 @@ DWORD WINAPI SHFileOperationA (LPSHFILEOPSTRUCTA lpFileOp)
 
                         TempretCode = SHFileOperationA (&nlpFileOp);
 
-                        if (nlpFileOp.fAnyOperationsAborted) {where = 4;break;}
+                        if (nlpFileOp.fAnyOperationsAborted) {where = 204;break;}
 
                     } while(FindNextFileA(hFind, &wfd));
 
                     FindClose(hFind);
-                    if (nlpFileOp.fAnyOperationsAborted) {where = 5;break;}
+                    if (nlpFileOp.fAnyOperationsAborted) {where = 205;break;}
                     continue;
                 }
-
 
                 lenTempTo = strlen(pTempTo);
                 pToFile = &pTempTo[lenTempTo];
@@ -386,7 +386,7 @@ DWORD WINAPI SHFileOperationA (LPSHFILEOPSTRUCTA lpFileOp)
                 if (strlen(pToFile)<lenFrom) {
                     nlpFileOp.fAnyOperationsAborted=TRUE;
                     retCode=0x402;
-                    where = 6;
+                    where = 206;
                     break;
                 } /* endif */
 
@@ -407,7 +407,7 @@ DWORD WINAPI SHFileOperationA (LPSHFILEOPSTRUCTA lpFileOp)
 
                 if (!pFromFile) {
                     nlpFileOp.fAnyOperationsAborted=TRUE;
-                    where = 7;
+                    where = 207;
                     break;
                 } /* endif */
 
@@ -419,11 +419,10 @@ DWORD WINAPI SHFileOperationA (LPSHFILEOPSTRUCTA lpFileOp)
                 strcpy(pToFile,&pFromFile[strlen(pToFile)]);
                 ToAttr = GetFileAttributesA(pTempTo);
 
-
                 if (FromAttr == -1) {
                     FIXME(__FUNCTION__" FO_COPY with Source %s not implementiert ,stub\n",pTempFrom);
                     nlpFileOp.fAnyOperationsAborted=TRUE;
-                    where = 8;
+                    where = 208;
                     break;
                 }
                 if (FromAttr & FILE_ATTRIBUTE_DIRECTORY) {
@@ -435,7 +434,7 @@ DWORD WINAPI SHFileOperationA (LPSHFILEOPSTRUCTA lpFileOp)
                         if (ToAttr == -1) {
                             nlpFileOp.fAnyOperationsAborted=TRUE;
                             retCode=0x10003;
-                            where = 9;
+                            where = 209;
                             break;
                         }
 
@@ -458,7 +457,7 @@ DWORD WINAPI SHFileOperationA (LPSHFILEOPSTRUCTA lpFileOp)
                     } else {
                         FIXME(__FUNCTION__" FO_COPY unexpected with %s -> %s ? ,stub\n",pTempFrom,pTo);
                         nlpFileOp.fAnyOperationsAborted=TRUE;
-                        where = 10;
+                        where = 210;
                         retCode=0x77;
                         break;
 
@@ -468,13 +467,13 @@ DWORD WINAPI SHFileOperationA (LPSHFILEOPSTRUCTA lpFileOp)
 
                 if (!(ToAttr == -1) && (ToAttr & FILE_ATTRIBUTE_DIRECTORY)) {
                     nlpFileOp.fAnyOperationsAborted=TRUE;
-                    where = 11;
+                    where = 211;
                     break;
                 }
                 if (0==strcmp(pTempFrom, pTempTo)) {
                     nlpFileOp.fAnyOperationsAborted=TRUE;
                     retCode = 0x71;
-                    where = 12;
+                    where = 212;
                     break;
                 }
 // first try to copy
@@ -487,23 +486,9 @@ DWORD WINAPI SHFileOperationA (LPSHFILEOPSTRUCTA lpFileOp)
                 } /* endif */
 
                 nlpFileOp.fAnyOperationsAborted=TRUE;
+                where = 215;
             }
-
-            if (pTempTo) HeapFree(GetProcessHeap(), 0, pTempTo);
-
-            if (nlpFileOp.fAnyOperationsAborted) {
-                lpFileOp->fAnyOperationsAborted=TRUE;
-                if (TempretCode > retCode) {
-                    retCode = TempretCode;
-                } /* endif */
-            }
-            if (lpFileOp->fAnyOperationsAborted==TRUE) {
-                TRACE(__FUNCTION__" Setting AnyOpsAborted=TRUE ret=0x%x, at=%i with %s -> %s\n",retCode,where,pFrom,pTo);
-                return retCode;
-            } /* endif */
-
-            TRACE(__FUNCTION__" Setting AnyOpsAborted=FALSE\n");
-            return 0;
+            break;
 #else
 		while(1) {
 			if(!pFrom[0]) break;
@@ -531,6 +516,123 @@ DWORD WINAPI SHFileOperationA (LPSHFILEOPSTRUCTA lpFileOp)
 
 	case FO_DELETE:
 		TRACE("File Delete:\n");
+#ifdef __WIN32OS2__
+            while((pFrom+=lenFrom+1)[0] && !nlpFileOp.fAnyOperationsAborted) {
+                lenFrom=strlen(pFrom);
+                FromAttr = GetFileAttributesA(pFrom);
+                if (!(FromAttr & FILE_ATTRIBUTE_DIRECTORY)) {
+                    TRACE("   File='%s'\n", pFrom);
+                    if (DeleteFileA(pFrom)) continue;
+                    nlpFileOp.fAnyOperationsAborted=TRUE;
+//                  retCode = 0x71;
+                    where = 301;
+                    break;
+                }
+                if (!(pTempFrom)) pTempFrom = HeapAlloc(GetProcessHeap(), 0, MAX_PATH+2);
+                strcpy(pTempFrom,pFrom);
+                PathRemoveBackslashA(pTempFrom);
+                FromAttr = GetFileAttributesA(pTempFrom);
+                if (!(FromAttr & FILE_ATTRIBUTE_DIRECTORY) ) {
+                    nlpFileOp.fAnyOperationsAborted=TRUE;
+//                  retCode = 0x71;
+                    where = 302;
+                    break;
+                }
+// is Source an existing directory\*.* ?
+                if (FromAttr == -1) {
+                    PathRemoveFileSpecA(pTempFrom);
+                    FromAttr = GetFileAttributesA(pTempFrom);
+                }
+
+                PathAddBackslashA(pTempFrom);
+                lenTempFrom = strlen(pTempFrom);
+                pFromFile=&pTempFrom[lenTempFrom];
+
+                if (FromAttr == -1 ||
+                   ((lenTempFrom==lenFrom) && !PathIsRootA(pFrom)) ||
+                  !(FromAttr & FILE_ATTRIBUTE_DIRECTORY) ||
+                  !(('\0'==pFrom[lenTempFrom]) || (0==strcmp(&pFrom[lenTempFrom],"*.*"))) ) {
+                    retCode=0x402;
+                    nlpFileOp.fAnyOperationsAborted=TRUE;
+                    where = 303;
+                    break;
+                }
+                strcpy(pFromFile, "*.*");
+                lenTempFrom = strlen(pTempFrom);
+                if (lenFrom < lenTempFrom) {
+// Source is without \*.*
+                    pTempFrom[lenTempFrom+1]='\0';
+                    nlpFileOp.pFrom = pTempFrom;
+
+                    TRACE(__FUNCTION__"   Entering Directory '%s'\n", nlpFileOp.pFrom);
+                    TempretCode = SHFileOperationA (&nlpFileOp);
+
+                    if (nlpFileOp.fAnyOperationsAborted) {break;}
+// Call SHELL_DeleteDirectoryA ?
+                    if (RemoveDirectoryA(pFrom)) continue;
+                    nlpFileOp.fAnyOperationsAborted=TRUE;
+                    where = 304;
+                    break;
+                }
+                hFind = FindFirstFileA(pTempFrom, &wfd);
+                if (INVALID_HANDLE_VALUE == hFind) {
+                    nlpFileOp.fAnyOperationsAborted=TRUE;
+                    retCode=0x79;
+                    where = 303;
+                    break;
+                }
+
+                nlpFileOp.pFrom  = pTempFrom;
+// single copy never with FOF_MULTIDESTFILES, I can use lpFileOp->pTo as nlpFileOp.pTo,
+// I need no different targetarea for the name 
+                nlpFileOp.fFlags = (nlpFileOp.fFlags & (-1 - (FOF_MULTIDESTFILES)));
+
+                TRACE(__FUNCTION__"   Delete in Subdir %s'\n", nlpFileOp.pFrom);
+
+                do {
+                    TRACE(__FUNCTION__"   find '%s'\n", wfd.cFileName);
+                    if (0==strcmp(wfd.cFileName,".")) continue;
+                    if (0==strcmp(wfd.cFileName,"..")) continue;
+                    if ((nlpFileOp.fFlags & FOF_FILESONLY) && (FILE_ATTRIBUTE_DIRECTORY & wfd.dwFileAttributes)) {
+                        continue;
+                        } /* endif */
+
+                    strcpy(pFromFile,wfd.cFileName);
+                    pTempFrom[strlen(pTempFrom)+1]='\0';
+
+                    TempretCode = SHFileOperationA (&nlpFileOp);
+
+                    if (nlpFileOp.fAnyOperationsAborted) {where = 304;break;}
+
+                } while(FindNextFileA(hFind, &wfd));
+
+                FindClose(hFind);
+                if (nlpFileOp.fAnyOperationsAborted) {where = 305;break;}
+                continue;
+            }
+            break;
+	case FO_MOVE:
+		TRACE("File\\Tree Move: simply (Copy/Delete)\n");
+        nlpFileOp.wFunc = FO_COPY;
+// not delete at error from copy
+        TempretCode = SHFileOperationA (&nlpFileOp);
+
+        if (nlpFileOp.fAnyOperationsAborted) {
+            if (TempretCode == 0x75) {
+// not all, the most
+                TempretCode = 0xD7;
+                retCode = 0xD7;
+            } /* endif */
+            break;
+        }
+
+        nlpFileOp.wFunc = FO_DELETE;
+
+        TempretCode = SHFileOperationA (&nlpFileOp);
+
+	case 0:
+            break;
+#else
 		while(1) {
 			if(!pFrom[0]) break;
 			TRACE("   File='%s'\n", pFrom);
@@ -540,12 +642,38 @@ DWORD WINAPI SHFileOperationA (LPSHFILEOPSTRUCTA lpFileOp)
 		TRACE("Setting AnyOpsAborted=FALSE\n");
 		lpFileOp->fAnyOperationsAborted=FALSE;
 		return 0;
+#endif
 
 	default:
+#ifdef __WIN32OS2__
+		FIXME(__FUNCTION__" Unhandled shell file operation %d stub\n", lpFileOp->wFunc);
+#else
 		FIXME("Unhandled shell file operation %d\n", lpFileOp->wFunc);
+#endif
+	   return 1;
 	}
 
-	return 1;
+#ifdef __WIN32OS2__
+    if (pTempFrom) HeapFree(GetProcessHeap(), 0, pTempFrom);
+
+    if (nlpFileOp.fAnyOperationsAborted) {
+        lpFileOp->fAnyOperationsAborted=TRUE;
+        if (TempretCode > retCode) {
+            retCode = TempretCode;
+        } /* endif */
+    }
+    if (lpFileOp->fAnyOperationsAborted==TRUE) {
+        if (FO_DELETE == lpFileOp->wFunc) {
+            TRACE(__FUNCTION__" Setting AnyOpsAborted=TRUE ret=0x%x, at=%i with %s\n",retCode,where,pFrom);
+        } else {
+            TRACE(__FUNCTION__" Setting AnyOpsAborted=TRUE ret=0x%x, at=%i with %s -> %s\n",retCode,where,pFrom,pTo);
+        }
+        return retCode;
+    } /* endif */
+    TRACE(__FUNCTION__" Setting AnyOpsAborted=FALSE\n");
+    return 0;        
+
+#endif
 }
 
 /*************************************************************************
@@ -556,7 +684,11 @@ DWORD WINAPI SHFileOperationA (LPSHFILEOPSTRUCTA lpFileOp)
  */
 DWORD WINAPI SHFileOperationW (LPSHFILEOPSTRUCTW lpFileOp)   
 {
+#ifdef __WIN32OS2__
+	FIXME(__FUNCTION__"(%p) ,stub\n", lpFileOp);
+#else
 	FIXME("(%p):stub.\n", lpFileOp);
+#endif
 	return 1;
 }
 
@@ -576,7 +708,11 @@ DWORD WINAPI SHFileOperationAW(LPVOID lpFileOp)
  *
  */
 HRESULT WINAPI SheGetDirW(LPWSTR u, LPWSTR v)
+#ifdef __WIN32OS2__
+{	FIXME(__FUNCTION__"(%p, %p) ,stub\n",u,v);
+#else
 {	FIXME("%p %p stub\n",u,v);
+#endif
 	return 0;
 }
 
@@ -585,7 +721,11 @@ HRESULT WINAPI SheGetDirW(LPWSTR u, LPWSTR v)
  *
  */
 HRESULT WINAPI SheChangeDirW(LPWSTR u)
+#ifdef __WIN32OS2__
+{	FIXME(__FUNCTION__"(%s),stub\n",debugstr_w(u));
+#else
 {	FIXME("(%s),stub\n",debugstr_w(u));
+#endif
 	return 0;
 }
 
