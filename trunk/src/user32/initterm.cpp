@@ -36,11 +36,6 @@
 #include <win32api.h>
 #include <winconst.h>
 #include <odinlx.h>
-#include <spy.h>
-#include <monitor.h>
-#include "pmwindow.h"
-#include "win32wdesktop.h"
-#include "syscolor.h"
 #include "initterm.h"
 #include <exitlist.h>
 #include <initdll.h>
@@ -56,11 +51,6 @@
 /*-------------------------------------------------------------------*/
 static void APIENTRY cleanup(ULONG reason);
 
-extern "C" {
- //Win32 resource table (produced by wrc)
- extern DWORD _Resource_PEResTab;
-}
-DWORD hInstanceUser32 = 0;
 BOOL  fVersionWarp3 = FALSE;
 
 /****************************************************************************/
@@ -86,17 +76,7 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
    switch (ulFlag) {
       case 0 :
          ctordtorInit();
-         ParseLogStatus();
-
          CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
-
-         hInstanceUser32 = RegisterLxDll(hModule, 0, (PVOID)&_Resource_PEResTab,
-                                         USER32_MAJORIMAGE_VERSION, USER32_MINORIMAGE_VERSION,
-                                         IMAGE_SUBSYSTEM_WINDOWS_GUI);
-         if(hInstanceUser32 == 0)
-                return 0UL;
-
-         dprintf(("user32 init %s %s (%x)", __DATE__, __TIME__, DLLENTRYPOINT_NAME));
 
          rc = DosQuerySysInfo(QSV_VERSION_MAJOR, QSV_VERSION_MINOR, version, sizeof(version));
          if(rc == 0){
@@ -114,26 +94,10 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
          if(rc)
                 return 0UL;
 
-         //SvL: Try to start communication with our message spy queue server
-         InitSpyQueue();
-
-         //SvL: Init win32 PM classes
-         if(InitPM() == FALSE) {
-                return 0UL;
-         }
-
-         //SvL: 18-7-'98, Register system window classes (button, listbox etc etc)
-         //CB: register internal classes
-         RegisterSystemClasses(hModule);
-
-         //CB: initialize PM monitor driver
-         MONITOR_Initialize(&MONITOR_PrimaryMonitor);
-
+         rc = inittermUser32(hModule, ulFlag);
          break;
       case 1 :
-         if(hInstanceUser32) {
-         	UnregisterLxDll(hInstanceUser32);
-         }
+         rc = inittermUser32(hModule, ulFlag);
          break;
       default  :
          return 0UL;
@@ -147,18 +111,8 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
 
 static void APIENTRY cleanup(ULONG ulReason)
 {
-   dprintf(("user32 exit\n"));
-//SvL: Causes PM hangs on some (a lot?) machines. Reason unknown.
-////   RestoreCursor();
-   DestroyDesktopWindow();
-   Win32BaseWindow::DestroyAll();
-   UnregisterSystemClasses();
-   Win32WndClass::DestroyAll();
-   MONITOR_Finalize(&MONITOR_PrimaryMonitor);
-   SYSCOLOR_Save();
-   CloseSpyQueue();
+   cleanupUser32(ulReason);
    ctordtorTerm();
-   dprintf(("user32 exit done\n"));
 
    DosExitList(EXLST_EXIT, cleanup);
 }

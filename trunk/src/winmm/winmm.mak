@@ -1,4 +1,4 @@
-# $Id: winmm.mak,v 1.3 2001-03-23 16:23:47 sandervl Exp $
+# $Id: winmm.mak,v 1.4 2001-07-20 15:35:01 sandervl Exp $
 
 #
 # Odin32 API
@@ -39,6 +39,7 @@ $(OBJDIR)\midi.obj \
 $(OBJDIR)\irtmidi.obj \
 $(OBJDIR)\midistrm.obj \
 $(OBJDIR)\initterm.obj \
+$(OBJDIR)\initwinmm.obj \
 $(OBJDIR)\mci.obj \
 $(OBJDIR)\joy.obj \
 $(OBJDIR)\mmio.obj \

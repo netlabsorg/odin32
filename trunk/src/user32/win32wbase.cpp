@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.276 2001-07-13 14:31:15 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.277 2001-07-20 15:34:17 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -3836,6 +3836,20 @@ HWND WIN32API OS2ToWin32Handle(HWND hwnd)
     return 0;
 //    else    return hwnd;    //OS/2 window handle
 }
+#ifdef DEBUG
+LONG  Win32BaseWindow::addRef()
+{
+    dprintf2(("addRef %x %d", getWindowHandle(), getRefCount()+1));
+    return GenericObject::addRef();
+}
+//******************************************************************************
+//******************************************************************************
+LONG  Win32BaseWindow::release(char *function, int line)
+{
+    dprintf2(("release %s %d %x %d", function, line, getWindowHandle(), getRefCount()-1));
+    return GenericObject::release();
+}
+#endif
 //******************************************************************************
 //******************************************************************************
 GenericObject   *Win32BaseWindow::windows  = NULL;

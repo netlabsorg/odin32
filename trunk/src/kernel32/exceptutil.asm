@@ -1,4 +1,4 @@
-; $Id: exceptutil.asm,v 1.17 2001-06-27 19:09:35 sandervl Exp $
+; $Id: exceptutil.asm,v 1.18 2001-07-20 15:33:29 sandervl Exp $
 
 ;/*
 ; * Project Odin Software License can be found in LICENSE.TXT
@@ -159,6 +159,12 @@ getEAX  proc near
         ret
 getEAX  endp
 
+public	getEDX
+getEDX	proc	near
+	mov	EAX, EDX
+	ret
+endp
+
 getEBX  proc near
         mov  eax, ebx
         ret
@@ -291,7 +297,7 @@ _CallEntryPoint endp
         EXTRN WriteLog:PROC
         EXTRN _GetThreadTEB@0:PROC
 IFDEF DEBUG
-        EXTRN DbgEnabled:DWORD
+        EXTRN DbgEnabledKERNEL32:DWORD
 ENDIF
 
 EXC_push_frame__FP19_WINEXCEPTION_FRAME	proc
@@ -374,7 +380,7 @@ EXC_CallHandler__FP20_WINEXCEPTION_RECORDP19_WINEXCEPTION_FRAMEP10WINCONTEXTPP19
 
 ; 299     dprintf(("KERNEL32: Calling handler at %p code=%lx flags=%lx\n",
 IFDEF DEBUG
-	cmp	word ptr  DbgEnabled+020h,01h
+	cmp	word ptr  DbgEnabledKERNEL32+020h,01h
 	jne	@BLBL20
 	mov	eax,[ebp+08h];	record
 	push	dword ptr [eax+04h]
@@ -399,7 +405,7 @@ ENDIF
 
 IFDEF DEBUG
 ; 302     dprintf(("KERNEL32: Handler returned %lx\n", ret));
-	cmp	word ptr  DbgEnabled+020h,01h
+	cmp	word ptr  DbgEnabledKERNEL32+020h,01h
 	jne	@BLBL21
 	push	dword ptr [ebp-010h];	ret
 	push	offset FLAT:@CBE9

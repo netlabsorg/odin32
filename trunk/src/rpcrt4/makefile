@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2000-12-02 23:57:29 bird Exp $
+# $Id: makefile,v 1.6 2001-07-20 15:38:52 sandervl Exp $
 
 #
 # Odin32 API
@@ -19,6 +19,7 @@
 OBJS = \
 $(OBJDIR)\binding.obj \
 $(OBJDIR)\initterm.obj \
+$(OBJDIR)\initrpcrt4.obj \
 $(OBJDIR)\mgmt.obj \
 $(OBJDIR)\rpcrt4rsrc.obj \
 $(OBJDIR)\server.obj \

@@ -1,4 +1,4 @@
-# $Id: Makefile,v 1.87 2001-07-08 15:51:41 sandervl Exp $
+# $Id: Makefile,v 1.88 2001-07-20 15:34:15 sandervl Exp $
 
 #
 # Odin32 API
@@ -39,6 +39,7 @@ $(OBJDIR)\defwndproc.obj \
 $(OBJDIR)\syscolor.obj \
 $(OBJDIR)\char.obj \
 $(OBJDIR)\initterm.obj \
+$(OBJDIR)\inituser32.obj \
 $(OBJDIR)\uitools.obj \
 $(OBJDIR)\unknown.obj \
 $(OBJDIR)\spy.obj \

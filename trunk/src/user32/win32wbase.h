@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.123 2001-07-04 17:46:05 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.124 2001-07-20 15:34:18 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -35,7 +35,11 @@ class Win32BaseWindow;
 #define WIN32PM_MAGIC           0x12345678
 #define CheckMagicDword(a)      (a==WIN32PM_MAGIC)
 
+#ifdef DEBUG
+#define RELEASE_WNDOBJ(a)       { a->release(__FUNCTION__, __LINE__); a = NULL; }
+#else
 #define RELEASE_WNDOBJ(a)       { a->release(); a = NULL; }
+#endif
 
 typedef struct {
         USHORT           cb;
@@ -326,6 +330,11 @@ static LRESULT  BroadcastMessageW(int type, UINT msg, WPARAM wParam, LPARAM lPar
 	 HANDLE removeProp(LPCSTR str);
 	 INT    enumPropsExA(PROPENUMPROCEXA func, LPARAM lParam);
 	 INT    enumPropsExW(PROPENUMPROCEXW func, LPARAM lParam);
+
+#ifdef DEBUG
+         LONG addRef();
+         LONG release(char *function = __FUNCTION__, int line = __LINE__ );
+#endif
 
 //Locates window in linked list and increases reference count (if found)
 //Window object must be unreferenced after usage

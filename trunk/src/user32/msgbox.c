@@ -1,4 +1,4 @@
-/* $Id: msgbox.c,v 1.3 2000-03-18 16:13:37 cbratschi Exp $ */
+/* $Id: msgbox.c,v 1.4 2001-07-20 15:34:16 sandervl Exp $ */
 /*
  * Message boxes (based on Wine code)
  *
@@ -365,6 +365,7 @@ INT WINAPI MessageBoxIndirectW( LPMSGBOXPARAMSW msgbox )
     return MessageBoxIndirectA(&msgboxa);
 }
 
+#ifndef __WIN32OS2__
 /**************************************************************************
  *           FatalAppExit32A   (KERNEL32.108)
  */
@@ -385,6 +386,7 @@ void WINAPI FatalAppExitW( UINT action, LPCWSTR str )
     MessageBoxW( 0, str, NULL, MB_SYSTEMMODAL | MB_OK );
     ExitProcess(0);
 }
+#endif
 
 /*****************************************************************************
  * Name      : BOOL WIN32API SysErrorBox

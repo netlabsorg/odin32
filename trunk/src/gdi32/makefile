@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.36 2001-07-14 15:31:44 sandervl Exp $
+# $Id: makefile,v 1.37 2001-07-20 15:35:57 sandervl Exp $
 
 #
 # Odin32 API
@@ -30,6 +30,7 @@ $(OBJDIR)\opengl.obj \
 $(OBJDIR)\callback.obj \
 $(OBJDIR)\dibsect.obj \
 $(OBJDIR)\initterm.obj \
+$(OBJDIR)\initgdi32.obj \
 $(OBJDIR)\oslibgdi.obj \
 $(OBJDIR)\font.obj \
 $(OBJDIR)\text.obj \

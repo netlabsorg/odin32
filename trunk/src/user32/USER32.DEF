@@ -1,4 +1,4 @@
-; $Id: USER32.DEF,v 1.60 2001-07-03 13:23:31 sandervl Exp $
+; $Id: USER32.DEF,v 1.61 2001-07-20 15:34:15 sandervl Exp $
 
 LIBRARY USER32 INITINSTANCE TERMINSTANCE
 DESCRIPTION 'Odin32 System Dll - User32'
@@ -670,6 +670,8 @@ EXPORTS
     _KeyTranslatePMToWinBuf@12                                   @2009 NONAME
 
     _wvsnprintfA@16                                              @2010 NONAME
+;Export for MSACM32
+    _wsnprintfA                                                  @2100 NONAME
 
     _KEYBOARD_Enable@4                                           @2011 NONAME
 

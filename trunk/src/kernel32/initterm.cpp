@@ -57,7 +57,6 @@
 #define DBG_LOCALLOG    DBG_initterm
 #include "dbglocal.h"
 
-PVOID   SYSTEM _O32_GetEnvironmentStrings( VOID );
 BOOL  fVersionWarp3 = FALSE;
 
 /*-------------------------------------------------------------------*/
@@ -67,23 +66,6 @@ BOOL  fVersionWarp3 = FALSE;
 /* library DLL is terminated.                                        */
 /*-------------------------------------------------------------------*/
 static void APIENTRY cleanup(ULONG reason);
-
-extern "C" {
- //Win32 resource table (produced by wrc)
- extern DWORD _Resource_PEResTab;
-}
-
-//Global DLL Data
-#pragma data_seg(_GLOBALDATA)
-int globLoadNr = 0;
-#pragma data_seg()
-
-/* Tue 03.03.1998: knut */
-ULONG flAllocMem = 0;    /* flag to optimize DosAllocMem to use all the memory on SMP machines */
-ULONG ulMaxAddr = 0x20000000; /* end of user address space. */
-int   loadNr = 0;
-char  kernel32Path[CCHMAXPATH] = "";
-static HMODULE dllHandle = 0;
 
 /****************************************************************************/
 /* _DLL_InitTerm is the function that gets called by the operating system   */
@@ -109,55 +91,9 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
     {
         case 0 :
         {
-            ParseLogStatus();
-
-            /*
-             * Init the win32k library.
-             * We will also need to tell win32k where the Odin32 environment is
-             * located. Currently that is within Open32. I'm quite sure that it's
-             * not relocated during run, so we're pretty well off.
-             */
-            if (!libWin32kInit())
-            {
-                rc = libWin32kSetEnvironment((PSZ)_O32_GetEnvironmentStrings(), 0, 0);
-                if (rc)
-                {
-                    dprintf(("KERNEL32: initterm: libWin32kSetEnvironment failed with rc=%d\n", rc));
-                }
-            }
-
-            loadNr = globLoadNr++;
-
-            strcpy(kernel32Path, OSLibGetDllName(hModule));
-            char *endofpath = strrchr(kernel32Path, '\\');
-            *(endofpath+1) = 0;
-            dprintf(("kernel32 init %s %s (%x) Win32k - %s", __DATE__, __TIME__, DLLENTRYPOINT_NAME,
-                     libWin32kInstalled() ? "Installed" : "Not Installed"));
             ctordtorInit();
 
             CheckVersionFromHMOD(PE2LX_VERSION, hModule); /*PLF Wed  98-03-18 05:28:48*/
-
-            OpenPrivateLogFiles();
-
-            if (InitializeSharedHeap() == FALSE)
-                return 0UL;
-
-            if (InitializeCodeHeap() == FALSE)
-                return 0UL;
-
-            PROFILE_LoadOdinIni();
-            dllHandle = RegisterLxDll(hModule, 0, (PVOID)&_Resource_PEResTab);
-            if (dllHandle == 0)
-                return 0UL;
-
-            //SvL: Kernel32 is a special case; pe.exe loads it, so increase
-            //     the reference count here
-            Win32DllBase *module = Win32DllBase::findModule(dllHandle);
-            if (module)
-            {
-                module->AddRef();
-                module->DisableUnload();
-            }
 
             /*******************************************************************/
             /* A DosExitList routine must be used to clean up if runtime calls */
@@ -168,59 +104,19 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
             if (rc)
                 return 0UL;
 
-            /* knut: check for high memory support */
-            rc = DosQuerySysInfo(QSV_VIRTUALADDRESSLIMIT, QSV_VIRTUALADDRESSLIMIT, &ulSysinfo, sizeof(ulSysinfo));
-            if (rc == 0 && ulSysinfo > 512)   //VirtualAddresslimit is in MB
-            {
-                flAllocMem = PAG_ANY;      // high memory support. Let's use it!
-                ulMaxAddr = ulSysinfo * (1024*1024);
-                OSLibInitWSeBFileIO();
-            if (PROFILE_GetOdinIniInt(ODINSYSTEM_SECTION, HIGHMEM_KEY, 1) == 0) {
-                    dprintf(("WARNING: OS/2 kernel supports high memory, but support is DISABLED because of HIGHMEM odin.ini key"));
-                    flAllocMem = 0;
-                }
-            }
-            else
-                flAllocMem = 0;        // no high memory support
-
-            OSLibDosSetInitialMaxFileHandles(ODIN_DEFAULT_MAX_FILEHANDLES);
-
-            //SvL: Do it here instead of during the exe object creation
-            //(std handles can be used in win32 dll initialization routines
-            HMInitialize();             /* store standard handles within HandleManager */
-            InitDirectories();      //Must be done before InitializeTIB (which loads NTDLL -> USER32)
-            InitializeTIB(TRUE);        //Must be done after HMInitialize!
-            RegisterDevices();
-            Win32DllBase::setDefaultRenaming();
-            rc = DosQuerySysInfo(QSV_NUMPROCESSORS, QSV_NUMPROCESSORS, &ulSysinfo, sizeof(ulSysinfo));
-            if (rc != 0)
-                ulSysinfo = 1;
-
             rc = DosQuerySysInfo(QSV_VERSION_MAJOR, QSV_VERSION_MINOR, version, sizeof(version));
             if(rc == 0){
                 if(version[0] >= 20 && version[1] <= 30) {
                     fVersionWarp3 = TRUE;
                 }
             }
-
-            /* Setup codepage info */
-            CODEPAGE_Init();
-
-            InitSystemInfo(ulSysinfo);
-            //Set up environment as found in NT
-            InitEnvironment(ulSysinfo);
-
-            //InitDynamicRegistry creates/changes keys that may change (i.e. odin.ini
-            //keys that affect windows version)
-            InitDynamicRegistry();
+            
+            rc = inittermKernel32(hModule, ulFlag);
             break;
         }
 
         case 1 :
-            if (dllHandle)
-            {
-                UnregisterLxDll(dllHandle);
-            }
+            rc = inittermKernel32(hModule, ulFlag);
             break;
 
         default  :
@@ -236,26 +132,9 @@ ULONG DLLENTRYPOINT_CCONV DLLENTRYPOINT_NAME(ULONG hModule, ULONG ulFlag)
 
 static void APIENTRY cleanup(ULONG ulReason)
 {
-    dprintf(("kernel32 exit %d\n", ulReason));
-    //Flush and delete all open memory mapped files
-    Win32MemMap::deleteAll();
-    WinExe = NULL;
+    cleanupKernel32(ulReason);
 
-    WriteOutProfiles();
-    DestroyTIB();
-    DestroySharedHeap();
-    DestroyCodeHeap();
     ctordtorTerm();
-
-    //NOTE: Must be done after DestroyTIB
-    ClosePrivateLogFiles();
-    CloseLogFile();
-
-    /*
-     * Terminate win32k library.
-     */
-    libWin32kSetEnvironment(NULL, 0, 0);
-    libWin32kTerm();
 
     DosExitList(EXLST_EXIT, cleanup);
     return ;

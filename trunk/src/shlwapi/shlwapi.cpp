@@ -1,4 +1,4 @@
-/* $Id: shlwapi.cpp,v 1.10 2001-04-04 09:05:50 sandervl Exp $ */
+/* $Id: shlwapi.cpp,v 1.11 2001-07-20 15:37:52 sandervl Exp $ */
 
 /*
  * Win32 URL-handling APIs for OS/2
@@ -69,7 +69,7 @@ BOOL VERSION_OsIsUnicode(void)
   return !(version & 0x80000000);
 }
 
-
+#if 0
 // ----------------------------------------------------------------------
 // WINE_StringFromCLSID
 // ----------------------------------------------------------------------
@@ -123,7 +123,7 @@ int WINAPI StringFromGUID2(REFGUID rguid, LPOLESTR lpsz, int cbMax)
 
     return strLen;  // Num CHARACTERS including 0 terminator
 }
-
+#endif 
 
 /*****************************************************************************
  * Name      : DllGetVersion
