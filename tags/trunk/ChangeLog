@@ -1,4 +1,4 @@
- /* $Id: ChangeLog,v 1.384 1999-10-29 16:05:50 cbratschi Exp $ */
+ /* $Id: ChangeLog,v 1.385 1999-10-30 09:21:41 sandervl Exp $ */
 
  99-10-29: Christoph Bratschi <cbratschi@datacomm.ch>
 	- USER32: rewrote scrollbar code
@@ -6,6 +6,8 @@
  99-10-29: Sander van Leeuwen <sandervl@xs4all.nl>
 	- USER32: Changed font size multiply factor, negated it and fixed
                   default dialog unit bug.
+                  Fixed MDI destroy bug
+                  WM_SETICON bugfix.
 
  99-10-29: Sander van Leeuwen <sandervl@xs4all.nl>
            Rene Pronk<R.Pronk@twi.tudelft.nl>
