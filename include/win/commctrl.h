@@ -1,4 +1,4 @@
-/* $Id: commctrl.h,v 1.27 2000-04-08 18:30:10 cbratschi Exp $ */
+/* $Id: commctrl.h,v 1.28 2000-04-09 11:09:08 sandervl Exp $ */
 /*
  * Common controls definitions
  */
@@ -2817,17 +2817,23 @@ typedef struct tagNMLVCACHEHINT
 #define ListView_GetItemW(hwnd, pitem) \
     (BOOL)SendMessageA((hwnd), LVM_GETITEMW, 0, (LPARAM)(LVITEMW*)(pitem))
 
+#define ListView_GetItem WINELIB_NAME_AW(ListView_GetItem)
+
 #define ListView_SetItemA(hwnd, pitem) \
     (BOOL)SendMessageA((hwnd), LVM_SETITEMA, 0, (LPARAM)(const LVITEMA*)(pitem))
 
 #define ListView_SetItemW(hwnd, pitem) \
     (BOOL)SendMessageA((hwnd), LVM_SETITEMW, 0, (LPARAM)(const LVITEMW*)(pitem))
 
+#define  ListView_SetItem WINELIB_NAME_AW(ListView_SetItem)
+
 #define ListView_InsertItemA(hwnd, pitem)   \
     (int)SendMessageA((hwnd), LVM_INSERTITEMA, 0, (LPARAM)(const LVITEMA*)(pitem))
 
 #define ListView_InsertItemW(hwnd, pitem)   \
     (int)SendMessageA((hwnd), LVM_INSERTITEMW, 0, (LPARAM)(const LVITEMW*)(pitem))
+
+#define  ListView_InsertItem WINELIB_NAME_AW(ListView_InsertItem)
 
 #define ListView_DeleteItem(hwnd, i) \
     (BOOL)SendMessageA((hwnd), LVM_DELETEITEM, (WPARAM)(int)(i), 0L)
@@ -2907,6 +2913,8 @@ typedef struct tagNMLVCACHEHINT
 
 #define ListView_InsertColumnW(hwnd, iCol, pcol) \
     (int)SendMessageA((hwnd), LVM_INSERTCOLUMNW, (WPARAM)(int)(iCol), (LPARAM)(const LVCOLUMNW*)(pcol))
+
+#define  ListView_InsertColumn WINELIB_NAME_AW(ListView_InsertColumn)
 
 #define ListView_DeleteColumn(hwnd, iCol) \
     (BOOL)SendMessageA((hwnd), LVM_DELETECOLUMN, (WPARAM)(int)(iCol), 0)
