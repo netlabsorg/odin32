@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.112 2001-01-14 17:15:46 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.113 2001-02-15 00:33:01 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <win32type.h>
+#include <win32api.h>
 #include <winconst.h>
 #include <winuser32.h>
 #include <wprocess.h>
@@ -218,6 +219,16 @@ MRESULT ProcessPMMessage(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2, Win32Base
             return (MRESULT)win32wnd->DispatchMsgW(pWinMsg);
         }
   }
+  else
+  if(msg == WIN32APP_SETFOCUSMSG) {
+      //PM doesn't allow SetFocus calls during WM_SETFOCUS message processing; 
+      //must delay this function call
+      //mp1 = win32 window handle
+      //mp2 = activate flag
+      dprintf(("USER32: Delayed SetFocus %x call!", mp1));
+      teb->o.odin.hwndFocus = 0;
+      WinFocusChange(HWND_DESKTOP, hwnd, mp2 ? FC_NOLOSEACTIVE : 0);
+  }
 
   switch( msg )
   {
@@ -281,6 +292,7 @@ MRESULT ProcessPMMessage(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2, Win32Base
         //CB: show dialog in front of owner
         if (win32wnd->IsModalDialogOwner())
         {
+            dprintf(("win32wnd->IsModalDialogOwner %x", win32wnd->getWindowHandle()));
             pswp->fl |= SWP_ZORDER;
             pswp->hwndInsertBehind = win32wnd->getOS2HwndModalDialog();
             if (pswp->fl & SWP_ACTIVATE)
@@ -583,8 +595,14 @@ PosChangedEnd:
     case WM_SETFOCUS:
     {
       HWND hwndFocus = (HWND)mp1;
-
+       
         dprintf(("OS2: WM_SETFOCUS %x %x (%x) %d", win32wnd->getWindowHandle(), mp1, OS2ToWin32Handle(hwndFocus), mp2));
+
+        //PM doesn't allow SetFocus calls during WM_SETFOCUS message processing; 
+        //must delay this function call
+
+        teb->o.odin.fWM_SETFOCUS = TRUE;
+        teb->o.odin.hwndFocus    = 0;
         if(WinQueryWindowULong(hwndFocus, OFFSET_WIN32PM_MAGIC) != WIN32PM_MAGIC) {
                 //another (non-win32) application's window
                 //set to NULL (allowed according to win32 SDK) to avoid problems
@@ -596,6 +614,8 @@ PosChangedEnd:
                 win32wnd->MsgSetFocus(hwndFocusWin32);
         }
         else win32wnd->MsgKillFocus(OS2ToWin32Handle(hwndFocus));
+        teb->o.odin.fWM_SETFOCUS = FALSE;
+
         break;
     }
 
@@ -1199,11 +1219,16 @@ VOID FrameTrackFrame(Win32BaseWindow *win32wnd,DWORD flags)
                                         0, 0, SWP_MOVE);
         }
         else {
-            WinSetWindowPos(win32wnd->getOS2WindowHandle(),
-                                        0, track.rclTrack.xLeft, track.rclTrack.yBottom,
-                                        track.rclTrack.xRight - track.rclTrack.xLeft,
-                                        track.rclTrack.yTop - track.rclTrack.yBottom,
-                                        SWP_SIZE|SWP_MOVE);
+              SetWindowPos(win32wnd->getWindowHandle(), 0, track.rclTrack.xLeft,
+                           parentHeight - track.rclTrack.yTop,
+                           track.rclTrack.xRight - track.rclTrack.xLeft,
+                           track.rclTrack.yTop - track.rclTrack.yBottom,
+                           SWP_NOACTIVATE_W | SWP_NOZORDER_W | SWP_NOACTIVATE_W);
+//            WinSetWindowPos(win32wnd->getOS2WindowHandle(),
+//                                        0, track.rclTrack.xLeft, track.rclTrack.yBottom,
+//                                        track.rclTrack.xRight - track.rclTrack.xLeft,
+//                                        track.rclTrack.yTop - track.rclTrack.yBottom,
+//                                        SWP_SIZE|SWP_MOVE);
         }
         }
         return;
