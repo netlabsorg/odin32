@@ -1,5 +1,3 @@
-/* $Id: gdi.h,v 1.3 2001-09-09 12:23:31 sandervl Exp $ */
-
 /*
  * GDI definitions
  *

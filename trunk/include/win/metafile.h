@@ -1,5 +1,3 @@
-/* $Id: metafile.h,v 1.2 2001-09-09 12:23:31 sandervl Exp $ */
-
 /*
  * Metafile definitions
  *
