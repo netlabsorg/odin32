@@ -1,4 +1,12 @@
- /* $Id: ChangeLog,v 1.413 1999-11-05 09:21:25 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.414 1999-11-05 12:53:18 sandervl Exp $ */
+
+ 99-11-05: Sander van Leeuwen <sandervl@xs4all.nl>
+	- USER32: Fixed InsertMenuA
+	          Message translation fix for WM_USER+n messages (GetMessage)
+                  Extra translation.
+                  Rewrote/Ported LoadStringA/W (similar to Wine now)
+        - KERNEL32: Changed FindResource, string id translation should be done
+                    in LoadStringA/W (done that way in Wine)
 
  99-11-05: Jens Wiessner <wiessnej@rfi.de>
 	- MSVFW32: Updated to Wine level 991031
@@ -11,6 +19,7 @@
 	- GDI32: Fixes for StretchDIBits & GetDIBColorTable
 	- USER32: Fixes for ArrangeIconicWindows & ShowOwnedPopups
                   NULL pointer checks in hasWindowName/hasClassName/FindClass
+                  Message translation fix for WM_USER+n messages
 	- OLE32: Always create OLE window class
 	- KERNEL32: Null pointer check in lstrcmpiA
 	- SHELL32: Corrected export of Shell_GetCachedImageIndex
