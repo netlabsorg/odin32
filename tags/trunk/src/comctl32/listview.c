@@ -6349,8 +6349,14 @@ static LRESULT LISTVIEW_GetItemRect(HWND hwnd, INT nItem, LPRECT lprc)
 	    RECT br;
 	    int nColumnCount = Header_GetItemCount(infoPtr->hwndHeader);
 	    Header_GetItemRect(infoPtr->hwndHeader, nColumnCount-1, &br);
-
+#ifdef __WIN32OS2__
+      if(GetWindowLongA(hwnd, GWL_STYLE) & LVS_OWNERDRAWFIXED)
+	    lprc->right = max(lprc->left, br.right);
+      else
 	    lprc->right = max(lprc->left, br.right - REPORT_MARGINX);
+#else
+	    lprc->right = max(lprc->left, br.right - REPORT_MARGINX);
+#endif
 	  }
           else
           {
@@ -8874,10 +8880,8 @@ static LRESULT LISTVIEW_KeyDown(HWND hwnd, INT nVirtualKey, LONG lKeyData)
   nmKeyDown.wVKey = nVirtualKey; 
   nmKeyDown.flags = 0;
 #ifdef __WIN32OS2__
-  if(SendMessageA(hwndParent, WM_NOTIFY, (WPARAM)nCtrlId, (LPARAM)&nmKeyDown) == TRUE) 
-  {//application processed this key press
-      return 0;
-  }
+  if(notify(hwnd, LVN_KEYDOWN, &nmKeyDown.hdr) == TRUE) 
+    return 0;    //application processed this key press
 #else
   notify(hwnd, LVN_KEYDOWN, &nmKeyDown.hdr);
 #endif
