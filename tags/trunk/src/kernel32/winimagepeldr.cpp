@@ -1,5 +1,3 @@
-/* $Id: winimagepeldr.cpp,v 1.78 2001-06-01 01:21:12 phaller Exp $ */
-
 /*
  * Win32 PE loader Image base class
  *
@@ -170,8 +168,6 @@ Win32PeLdrImage::~Win32PeLdrImage()
 //******************************************************************************
 BOOL Win32PeLdrImage::init(ULONG reservedMem)
 {
-    PERF_START(init)
-
  LPVOID win32file = NULL;
  ULONG  filesize, ulRead, ulNewPos;
  PIMAGE_SECTION_HEADER psh;
@@ -654,9 +650,6 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
             goto failure;
         }
     }
-
-    PERF_ELAPSED(init, "Win32PeLdrImage::init", szFileName)
-
 
     return(TRUE);
 
@@ -1325,8 +1318,6 @@ void Win32PeLdrImage::StoreImportByName(Win32ImageBase *WinImage, char *impname,
 //******************************************************************************
 BOOL Win32PeLdrImage::processExports(char *win32file)
 {
-  PERF_START(processexports)
-
   IMAGE_SECTION_HEADER    sh;
   PIMAGE_EXPORT_DIRECTORY ped;
   ULONG *ptrNames, *ptrAddress;
@@ -1396,8 +1387,6 @@ BOOL Win32PeLdrImage::processExports(char *win32file)
       }
     }
   }
-
-  PERF_ELAPSED(processexports, "Win32PeLdrImage::processExports", getModuleName())
 
   return(TRUE);
 }
@@ -1546,8 +1535,6 @@ BOOL Win32PeLdrImage::AddForwarder(ULONG virtaddr,
 //******************************************************************************
 Win32DllBase *Win32PeLdrImage::loadDll(char *pszCurModule)
 {
-    PERF_START(loaddll)
-
  Win32DllBase *WinDll = NULL;
  char modname[CCHMAXPATH];
 
@@ -1636,8 +1623,6 @@ Win32DllBase *Win32PeLdrImage::loadDll(char *pszCurModule)
     dprintf((LOG, "**********************************************************************" ));
 
 
-    PERF_ELAPSED(loaddll, "Win32PeLdrImage::loadDll", pszCurModule)
-
     return WinDll;
 }
 //******************************************************************************
@@ -1650,8 +1635,6 @@ Win32DllBase *Win32PeLdrImage::loadDll(char *pszCurModule)
 //******************************************************************************
 BOOL Win32PeLdrImage::processImports(char *win32file)
 {
-    PERF_START(processimports)
-
  PIMAGE_IMPORT_DESCRIPTOR pID;
  IMAGE_SECTION_HEADER     shID;
  IMAGE_SECTION_HEADER     shExtra = {0};
@@ -1875,8 +1858,6 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
   }//for (i = 0; i < cModules; i++)
 
   free(pszModules);
-
-  PERF_ELAPSED(processimports, "Win32PeLdrImage::processImports", getModuleName())
 
   return TRUE;
 }
