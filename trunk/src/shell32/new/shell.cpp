@@ -14,8 +14,8 @@
 #define ICOM_CINTERFACE 1
 #define CINTERFACE 1
 
-//#include "wine/winuser16.h"
-//#include "wine/winbase16.h"
+#include <winbase.h>
+#include <winuser.h>
 //#include "wine/shell16.h"
 #include "winerror.h"
 //#include "file.h"
