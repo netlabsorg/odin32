@@ -1,4 +1,4 @@
-// $Id: name_server.cpp,v 1.2 2000-09-24 22:47:38 hugh Exp $
+// $Id: name_server.cpp,v 1.3 2000-10-06 19:49:06 hugh Exp $
 /* DPLAYX.DLL name server implementation
  *
  * Copyright 2000 - Peter Hunnisett
@@ -20,6 +20,7 @@
 #include "debugtools.h"
 #include "heap.h"
 #include "heapstring.h"
+#include "mmsystem.h"
 
 #include "dplayx_global.h"
 #include "name_server.h"
@@ -31,6 +32,7 @@
 
 DEFAULT_DEBUG_CHANNEL(dplay);
 
+#undef  debugstr_guid
 #define debugstr_guid(a) a
 
 /* NS specific structures */
@@ -54,14 +56,23 @@ struct NSCache
 };
 typedef struct NSCache NSCache, *lpNSCache;
 
+/* Function prototypes */
+DPQ_DECL_DELETECB( cbDeleteNSNodeFromHeap, lpNSCacheData );
+
 /* Name Server functions
  * ---------------------
  */
 void NS_SetLocalComputerAsNameServer( LPCDPSESSIONDESC2 lpsd )
 {
 #if 0
+  /* FIXME: Remove this method? */
   DPLAYX_SetLocalSession( lpsd );
 #endif
+}
+
+DPQ_DECL_COMPARECB( cbUglyPig, GUID )
+{
+  return IsEqualGUID( elem1, elem2 );
 }
 
 /* Store the given NS remote address for future reference */
@@ -76,8 +87,21 @@ void NS_SetRemoteComputerAsNameServer( LPVOID                    lpNSAddrHdr,
   TRACE( "%p, %p, %p\n", lpNSAddrHdr, lpMsg, lpNSInfo );
 
   /* FIXME: Should check to see if the reply is for an existing session. If
-   *        so we just update the contents and update the timestamp.
+   *        so we remove the old and add the new so oldest is at front.
    */
+
+  /* See if we can find this session. If we can, remove it as it's a dup */
+  DPQ_REMOVE_ENTRY_CB( lpCache->first, next, data->guidInstance, cbUglyPig,
+                     lpMsg->sd.guidInstance, lpCacheNode );
+
+  if( lpCacheNode != NULL )
+  {
+    TRACE( "Duplicate session entry for %s removed - updated version kept\n",
+           debugstr_guid( &lpCacheNode->data->guidInstance ) );
+    cbDeleteNSNodeFromHeap( lpCacheNode );
+  }
+
+  /* Add this to the list */
   lpCacheNode = (lpNSCacheData)HeapAlloc( GetProcessHeap(), HEAP_ZERO_MEMORY,
                                           sizeof( *lpCacheNode ) );
 
@@ -127,6 +151,10 @@ LPVOID NS_GetNSAddr( LPVOID lpNSInfo )
 
   /* Ok. Cheat and don't search for the correct stuff just take the first.
    * FIXME: In the future how are we to know what is _THE_ enum we used?
+   *        This is going to have to go into dplay somehow. Perhaps it
+   *        comes back with app server id for the join command! Oh...that
+   *        must be it. That would make this method obsolete once that's
+   *        in place.
    */
 
   return lpCache->first.lpQHFirst->lpNSAddrHdr;
@@ -170,9 +198,10 @@ HRESULT NS_SendSessionRequestBroadcast( LPCGUID lpcGuid,
   return (lpSpData->lpCB->EnumSessions)( &data );
 }
 
-DPQ_DECL_DELETECB( cbDeleteNSNodeFromHeap, lpNSCacheData );
 DPQ_DECL_DELETECB( cbDeleteNSNodeFromHeap, lpNSCacheData )
 {
+  /* NOTE: This proc doesn't deal with the walking pointer */
+
   /* FIXME: Memory leak on data (contained ptrs) */
   HeapFree( GetProcessHeap(), 0, elem->data );
   HeapFree( GetProcessHeap(), 0, elem->lpNSAddrHdr );
@@ -258,24 +287,52 @@ LPDPSESSIONDESC2 NS_WalkSessions( LPVOID lpNSInfo )
 void NS_PruneSessionCache( LPVOID lpNSInfo )
 {
   lpNSCache     lpCache = (lpNSCache)lpNSInfo;
-  lpNSCacheData lpCacheEntry;
 
-  DWORD dwPresentTime = GetTickCount();
-#if defined( HACK_TIMEGETTIME )
-  DWORD dwPruneTime   = dwPresentTime - 2; /* One iteration with safety */
-#else
-  DWORD dwPruneTime   = dwPresentTime - 10000 /* 10 secs? */;
-#endif
+  const DWORD dwPresentTime = timeGetTime();
+  const DWORD dwPrunePeriod = 60000; /* is 60 secs enough? */
+  const DWORD dwPruneTime   = dwPresentTime - dwPrunePeriod;
 
-  FIXME( ": semi stub\n" );
-
-  /* FIXME: This doesn't handle time roll over correctly */
-  /* FIXME: Session memory leak on delete */
-  do
+  /* This silly little algorithm is based on the fact we keep entries in
+   * the queue in a time based order. It also assumes that it is not possible
+   * to wrap around over yourself (which is not unreasonable).
+   * The if statements verify if the first entry in the queue is less
+   * than dwPrunePeriod old depending on the "clock" roll over.
+   */
+  for( ;; )
   {
-    DPQ_FIND_ENTRY( lpCache->first, next, dwTime, <=, dwPruneTime, lpCacheEntry );
+    lpNSCacheData lpFirstData;
+
+    if( DPQ_IS_EMPTY(lpCache->first) )
+    {
+      /* Nothing to prune */
+      break;
+    }
+
+    if( dwPruneTime > dwPresentTime ) /* 0 <= dwPresentTime <= dwPrunePeriod */
+    {
+      if( ( DPQ_FIRST(lpCache->first)->dwTime <= dwPresentTime ) ||
+          ( DPQ_FIRST(lpCache->first)->dwTime > dwPruneTime )
+        )
+      {
+        /* Less than dwPrunePeriod old - keep */
+        break;
+      }
+    }
+    else /* dwPrunePeriod <= dwPresentTime <= max dword */
+    {
+      if( ( DPQ_FIRST(lpCache->first)->dwTime <= dwPresentTime ) &&
+          ( DPQ_FIRST(lpCache->first)->dwTime > dwPruneTime )
+        )
+      {
+        /* Less than dwPrunePeriod old - keep */
+        break;
+      }
+    }
+
+    lpFirstData = DPQ_FIRST(lpCache->first);
+    DPQ_REMOVE( lpCache->first, DPQ_FIRST(lpCache->first), next );
+    cbDeleteNSNodeFromHeap( lpFirstData );
   }
-  while( lpCacheEntry != NULL );
 
 }
 
