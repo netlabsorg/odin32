@@ -1,4 +1,4 @@
-/* $Id: ddraw.CPP,v 1.14 2000-08-31 20:51:57 sandervl Exp $ */
+/* $Id: ddraw.CPP,v 1.15 2000-08-31 21:03:14 sandervl Exp $ */
 
 /*
  * DXDraw DLL implementaion
@@ -47,19 +47,16 @@ HRESULT WIN32API OS2DirectDrawCreate( GUID FAR *lpGUID,
   }
   else
   {
-    if(!lpGUID) {
-         //WARNING: defaults to ddraw v4
-    	 newdraw->Vtbl.QueryInterface((IDirectDraw2 *)newdraw, &IID_IDirectDraw4, (LPVOID *)lplpDD);
-    }
-    else newdraw->Vtbl.QueryInterface((IDirectDraw2 *)newdraw, lpGUID, (LPVOID *)lplpDD);
+    newdraw->Vtbl.AddRef((IDirectDraw2 *)newdraw);
 
     rc = newdraw->GetLastError();
     if(rc != DD_OK)
     {
-      *lplpDD = NULL;
+         *lplpDD = NULL;
 
-      delete newdraw;
+         delete newdraw;
     }
+    else *lplpDD = (LPDIRECTDRAW)newdraw;
   }
   return(rc);
 }
@@ -88,7 +85,7 @@ HRESULT WIN32API OS2DirectDrawEnumerateA(LPDDENUMCALLBACKA lpCallback,
   }
 //SvL: Crashes dxview.exe; expects a different vtbl when creating
 //     an IID_IDirect3D object
-#if 0
+#if 1
   else //now for Direct3D
   {
     dprintf(("DDRAW: Callback for 3Dfx Voodoo"));
