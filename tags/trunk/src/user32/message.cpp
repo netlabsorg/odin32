@@ -1,4 +1,4 @@
-/* $Id: message.cpp,v 1.2 2002-02-06 16:31:48 sandervl Exp $ */
+/* $Id: message.cpp,v 1.3 2002-06-09 10:47:50 sandervl Exp $ */
 /*
  * Win32 window message APIs for OS/2
  *
@@ -208,8 +208,9 @@ LRESULT WINAPI SendMessageTimeoutW( HWND hwnd, UINT msg, WPARAM wparam, LPARAM l
     else
     {
         //otherwise use WinSendMsg to send it to the right process/thread
-        dprintf(("SendMessages (inter-process) %x %x %x %x", Win32ToOS2Handle(hwnd), msg, wparam, lparam));
-        ret = OSLibSendMessage(Win32ToOS2Handle(hwnd), msg, wparam, lparam, TRUE);
+        dprintf(("SendMessages (inter-process/thread) %x %x %x %x", Win32ToOS2Handle(hwnd), msg, wparam, lparam));
+        result = OSLibSendMessage(Win32ToOS2Handle(hwnd), msg, wparam, lparam, TRUE);
+        ret = 1;
     }
 
     if (ret && res_ptr) *res_ptr = result;
@@ -252,8 +253,9 @@ LRESULT WINAPI SendMessageTimeoutA( HWND hwnd, UINT msg, WPARAM wparam, LPARAM l
     else
     {
         //otherwise use WinSendMsg to send it to the right process/thread
-        dprintf(("SendMessages (inter-process) %x %x %x %x", Win32ToOS2Handle(hwnd), msg, wparam, lparam));
-        ret = OSLibSendMessage(Win32ToOS2Handle(hwnd), msg, wparam, lparam, FALSE);
+        dprintf(("SendMessages (inter-process/thread) %x %x %x %x", Win32ToOS2Handle(hwnd), msg, wparam, lparam));
+        result = OSLibSendMessage(Win32ToOS2Handle(hwnd), msg, wparam, lparam, FALSE);
+        ret = 1;
     }
     if (ret && res_ptr) *res_ptr = result;
     return ret;
@@ -475,7 +477,7 @@ BOOL WIN32API SendMessageCallbackA(HWND          hwnd,
         dprintf(("!WARNING!: callback will not be called" ));
 
         //otherwise use PostMessage to send it to the right process/thread
-        dprintf(("SendMessageCallbackA (inter-process) %x %x %x %x", hwnd, uMsg, wParam, lParam));
+        dprintf(("SendMessageCallbackA (inter-process/thread) %x %x %x %x", hwnd, uMsg, wParam, lParam));
         PostMessageA(hwnd, uMsg, wParam, lParam);
         return TRUE;
     }
@@ -555,7 +557,7 @@ BOOL WIN32API SendMessageCallbackW(HWND          hwnd,
         dprintf(("!WARNING!: callback will not be called" ));
 
         //otherwise use PostMessage to send it to the right process/thread
-        dprintf(("SendMessageCallbackW (inter-process) %x %x %x %x", hwnd, uMsg, wParam, lParam));
+        dprintf(("SendMessageCallbackW (inter-process/thread) %x %x %x %x", hwnd, uMsg, wParam, lParam));
         PostMessageW(hwnd, uMsg, wParam, lParam);
         return TRUE;
     }
