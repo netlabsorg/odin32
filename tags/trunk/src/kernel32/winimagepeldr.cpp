@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.60 2000-10-10 17:14:08 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.61 2000-10-11 07:22:28 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -472,6 +472,12 @@ BOOL Win32PeLdrImage::init(ULONG reservedMem)
 		    	goto failure;
 		}
 		setTLSCallBackAddr((PIMAGE_TLS_CALLBACK *)(sect->realvirtaddr + ((ULONG)tlsDir->AddressOfCallBacks - sect->virtaddr)));
+		//modify tls callback pointers for new image base address
+		int i = 0;
+                while(tlsCallBackAddr[i]) {
+                        tlsCallBackAddr[i] = (PIMAGE_TLS_CALLBACK)(realBaseAddress + ((ULONG)*tlsCallBackAddr - oh.ImageBase));
+			i++;
+                }
 	}
    }
 
