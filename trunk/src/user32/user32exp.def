@@ -1,4 +1,4 @@
-; $Id: user32exp.def,v 1.4 1999-06-10 16:50:36 phaller Exp $
+; $Id: user32exp.def,v 1.5 1999-07-04 19:02:38 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY USER32 INITINSTANCE
@@ -595,8 +595,9 @@ _EnumDisplayMonitors@16        @1005
 
 
 
-CreateWindowProc     			@2000
-GetOS2Callback__15Win32WindowProcFv 	@2001
+CreateWindowProc                        @2000
+GetOS2Callback__15Win32WindowProcFv     @2001
 _GetSysColorPen@4                       @2002
-
+_NativeDlgBoxIP@24                      @2003
+_NativeCreateDlgIP@24                   @2004
 

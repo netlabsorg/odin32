@@ -1,4 +1,4 @@
-/* $Id: dlgconvert.cpp,v 1.6 1999-07-02 12:42:57 sandervl Exp $ */
+/* $Id: dlgconvert.cpp,v 1.7 1999-07-04 19:02:38 sandervl Exp $ */
 
 /*
  * Win32 runtime dialog conversion functions for OS/2
@@ -39,6 +39,8 @@
 #ifndef BS_TEXT /*PLF Sun  97-06-22 03:07:13  not in watcom's os/2 header */
    #define BS_TEXT                 0x0010
 #endif
+
+#define DEFAULT_DLGFONT "9.WarpSans"
 
 static int   ConvertClassAndStyle(int winclass, int style, USHORT *os2class, BOOL *fIconBmp);
 static int   ConvertDlgStyle(int style);
@@ -243,8 +245,28 @@ DLGTEMPLATE *ConvertWin32DlgTemplate(DLGTEMPLATE *windlg)
       dlgpparam->aparam[0].cb = strlen(dlgpparam->aparam[0].ab) + 1;
       dlgt->coffPresParams    = (int)dlgpparam;
       dlgcurdata += sizeof(PRESPARAMS) + dlgpparam->aparam[0].cb - 1;
+   }  else
+   { //CB: set default font
+     dlgpparam = (PRESPARAMS*)dlgcurdata;
+     dlgpparam->aparam[0].id = PP_FONTNAMESIZE;
+     dlgpparam->aparam[0].cb = strlen(DEFAULT_DLGFONT)+1;
+     strcpy((char*)&dlgpparam->aparam[0].ab,DEFAULT_DLGFONT);
+     dlgpparam->cb           = dlgpparam->aparam[0].cb+2*sizeof(ULONG);
+     dlgitem->offPresParams  = (USHORT)((int)dlgpparam-(int)dlgt);
+     dlgt->coffPresParams++;
+     dlgcurdata             += dlgpparam->cb+sizeof(dlgpparam->cb);
    }
    FreeAsciiString(font);
+  }  else
+  { //CB: set default font
+    dlgpparam = (PRESPARAMS*)dlgcurdata;
+    dlgpparam->aparam[0].id = PP_FONTNAMESIZE;
+    dlgpparam->aparam[0].cb = strlen(DEFAULT_DLGFONT)+1;
+    strcpy((char*)&dlgpparam->aparam[0].ab,DEFAULT_DLGFONT);
+    dlgpparam->cb           = dlgpparam->aparam[0].cb+2*sizeof(ULONG);
+    dlgitem->offPresParams  = (USHORT)((int)dlgpparam-(int)dlgt);
+    dlgt->coffPresParams++;
+    dlgcurdata             += dlgpparam->cb+sizeof(dlgpparam->cb);
   }
   ctrldata = (ControlData *)(((int)ctrldata+3) & ~3);
 
@@ -299,6 +321,9 @@ DLGTEMPLATE *ConvertWin32DlgTemplate(DLGTEMPLATE *windlg)
    }
    if(*(USHORT *)szCaption == 0xFFFF) {
       szCaption += 2;
+      dlgitem->cchText = 0;
+      dlgitem->offText = (USHORT)((int)dlgcurdata-(int)dlgt);
+      dlgcurdata += 1; //CB: offText == empty string
    }
    else {   //Handle Caption
       ctrltext = UnicodeToAsciiString(szCaption);
@@ -520,8 +545,28 @@ DLGTEMPLATE *ConvertWin32DlgTemplateEx(WINDLGTEMPLATEEX *dhdr)
       dlgpparam->aparam[0].cb = strlen(dlgpparam->aparam[0].ab) + 1;
       dlgt->coffPresParams    = (int)dlgpparam;
       dlgcurdata += sizeof(PRESPARAMS) + dlgpparam->aparam[0].cb - 1;
+   } else
+   { //CB: set default font
+     dlgpparam = (PRESPARAMS*)dlgcurdata;
+     dlgpparam->aparam[0].id = PP_FONTNAMESIZE;
+     dlgpparam->aparam[0].cb = strlen(DEFAULT_DLGFONT)+1;
+     strcpy((char*)&dlgpparam->aparam[0].ab,DEFAULT_DLGFONT);
+     dlgpparam->cb           = dlgpparam->aparam[0].cb+2*sizeof(ULONG);
+     dlgitem->offPresParams  = (USHORT)((int)dlgpparam-(int)dlgt);
+     dlgt->coffPresParams++;
+     dlgcurdata             += dlgpparam->cb+sizeof(dlgpparam->cb);
    }
    FreeAsciiString(font);
+  } else
+  { //CB: set default font
+    dlgpparam = (PRESPARAMS*)dlgcurdata;
+    dlgpparam->aparam[0].id = PP_FONTNAMESIZE;
+    dlgpparam->aparam[0].cb = strlen(DEFAULT_DLGFONT)+1;
+    strcpy((char*)&dlgpparam->aparam[0].ab,DEFAULT_DLGFONT);
+    dlgpparam->cb           = dlgpparam->aparam[0].cb+2*sizeof(ULONG);
+    dlgitem->offPresParams  = (USHORT)((int)dlgpparam-(int)dlgt);
+    dlgt->coffPresParams++;
+    dlgcurdata             += dlgpparam->cb+sizeof(dlgpparam->cb);
   }
   ctrldata = (WINDLGITEMTEMPLATEEX *)(((int)ctrldata+3) & ~3);
 

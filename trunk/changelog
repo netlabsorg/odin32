@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.38 1999-07-02 12:42:14 sandervl Exp $ */
+ /* $Id: changelog,v 1.39 1999-07-04 19:02:36 sandervl Exp $ */
+ 99-07-04: Christoph Bratschi <cbratschi@datacomm.ch>
+	- PE2LX/USER32: Dialog default font set to WarpSans + fixes
+
  99-07-02: Christoph Bratschi <cbratschi@datacomm.ch>
 	- PE2LX/USER32: Dialog bugfix for entryfield strings
 

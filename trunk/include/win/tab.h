@@ -1,25 +1,26 @@
-/* $Id: tab.h,v 1.1 1999-05-24 20:19:19 ktk Exp $ */
+/* $Id: tab.h,v 1.2 1999-07-04 19:03:36 sandervl Exp $ */
 
 /*
  * Tab control class extra info
  *
  * Copyright 1998 Anders Carlsson
+ * Copyright 1999 Christoph Bratschi
  */
 
-#ifndef __WINE_TAB_H  
+#ifndef __WINE_TAB_H
 #define __WINE_TAB_H
 
 typedef struct tagTAB_ITEM
 {
   UINT   mask;
   DWORD  dwState;
-  LPSTR  pszText;
+  LPWSTR pszText;
   INT    cchTextMax;
   INT    iImage;
   LPARAM lParam;
   RECT   rect;    /* bounding rectangle of the item relative to the
-		   * leftmost item (the leftmost item, 0, would have a 
-		   * "left" member of 0 in this rectangle) */
+                   * leftmost item (the leftmost item, 0, would have a
+                   * "left" member of 0 in this rectangle) */
 } TAB_ITEM;
 
 typedef struct tagTAB_INFO
@@ -33,13 +34,13 @@ typedef struct tagTAB_INFO
   HWND       hwndToolTip;     /* handle to tab's tooltip */
   UINT       cchTextMax;
   INT        leftmostVisible; /* Used for scrolling, this member contains
-			       * the index of the first visible item */
+                               * the index of the first visible item */
   INT        iSelected;       /* the currently selected item */
   INT        uFocus;          /* item which has the focus */
   TAB_ITEM*  items;           /* pointer to an array of TAB_ITEM's */
   BOOL       DoRedraw;        /* flag for redrawing when tab contents is changed*/
-  BOOL       needsScrolling;  /* TRUE if the size of the tabs is greater than 
-			       * the size of the control */
+  BOOL       needsScrolling;  /* TRUE if the size of the tabs is greater than
+                               * the size of the control */
   HWND       hwndUpDown;      /* Updown control used for scrolling */
 } TAB_INFO;
 
