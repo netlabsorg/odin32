@@ -1,5 +1,21 @@
-/* Control Panel management */
-/* Eric Pouech 2001 */
+/* Control Panel management
+ *
+ * Copyright 2001 Eric Pouech
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
 
 #include <assert.h>
 #include <stdio.h>
@@ -9,10 +25,14 @@
 #include "winbase.h"
 #include "wingdi.h"
 #include "winuser.h"
-#include "debugtools.h"
+#include "wine/debug.h"
 #include "cpl.h"
+#include "wine/unicode.h"
 
-DEFAULT_DEBUG_CHANNEL(shlctrl);
+#define NO_SHLWAPI_REG
+#include "shlwapi.h"
+
+WINE_DEFAULT_DEBUG_CHANNEL(shlctrl);
 
 typedef struct CPlApplet {
     struct CPlApplet*   next;		/* linked list */
@@ -20,7 +40,7 @@ typedef struct CPlApplet {
     unsigned		count;		/* number of subprograms */
     HMODULE     	hModule;	/* module of loaded applet */
     APPLET_PROC		proc;		/* entry point address */
-    NEWCPLINFOA		info[1];	/* array of count information. 
+    NEWCPLINFOW		info[1];	/* array of count information.
 					 * dwSize field is 0 if entry is invalid */
 } CPlApplet;
 
@@ -48,23 +68,24 @@ static	CPlApplet*	Control_UnloadApplet(CPlApplet* applet)
     return next;
 }
 
-static CPlApplet*	Control_LoadApplet(HWND hWnd, LPCSTR cmd, CPanel* panel)
+static CPlApplet*	Control_LoadApplet(HWND hWnd, LPCWSTR cmd, CPanel* panel)
 {
     CPlApplet*	applet;
     unsigned 	i;
     CPLINFO	info;
+    NEWCPLINFOW newinfo;
 
     if (!(applet = HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, sizeof(*applet))))
        return applet;
 
     applet->hWnd = hWnd;
 
-    if (!(applet->hModule = LoadLibraryA(cmd))) {
-        WARN("Cannot load control panel applet %s\n", cmd);
+    if (!(applet->hModule = LoadLibraryW(cmd))) {
+        WARN("Cannot load control panel applet %s\n", debugstr_w(cmd));
 	goto theError;
     }
     if (!(applet->proc = (APPLET_PROC)GetProcAddress(applet->hModule, "CPlApplet"))) {
-        WARN("Not a valid control panel applet %s\n", cmd);
+        WARN("Not a valid control panel applet %s\n", debugstr_w(cmd));
 	goto theError;
     }
     if (!applet->proc(hWnd, CPL_INIT, 0L, 0L)) {
@@ -76,18 +97,20 @@ static CPlApplet*	Control_LoadApplet(HWND hWnd, LPCSTR cmd, CPanel* panel)
 	goto theError;
     }
 
-    applet = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, applet, 
-			 sizeof(*applet) + (applet->count - 1) * sizeof(NEWCPLINFOA));
-    
+    applet = HeapReAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, applet,
+			 sizeof(*applet) + (applet->count - 1) * sizeof(NEWCPLINFOW));
+
     for (i = 0; i < applet->count; i++) {
-       applet->info[i].dwSize = sizeof(NEWCPLINFOA);
+       ZeroMemory(&newinfo, sizeof(newinfo));
+       newinfo.dwSize = sizeof(NEWCPLINFOA);
+       applet->info[i].dwSize = sizeof(NEWCPLINFOW);
        /* proc is supposed to return a null value upon success for
 	* CPL_INQUIRE and CPL_NEWINQUIRE
 	* However, real drivers don't seem to behave like this
 	* So, use introspection rather than return value
 	*/
-       applet->proc(hWnd, CPL_NEWINQUIRE, i, (LPARAM)&applet->info[i]);
-       if (applet->info[i].hIcon == 0) {
+       applet->proc(hWnd, CPL_NEWINQUIRE, i, (LPARAM)&newinfo);
+       if (newinfo.hIcon == 0) {
 	   applet->proc(hWnd, CPL_INQUIRE, i, (LPARAM)&info);
 	   if (info.idIcon == 0 || info.idName == 0) {
 	       WARN("Couldn't get info from sp %u\n", i);
@@ -97,14 +120,34 @@ static CPlApplet*	Control_LoadApplet(HWND hWnd, LPCSTR cmd, CPanel* panel)
 	       applet->info[i].dwFlags = 0;
 	       applet->info[i].dwHelpContext = 0;
 	       applet->info[i].lData = info.lData;
-	       applet->info[i].hIcon = LoadIconA(applet->hModule, 
-						 MAKEINTRESOURCEA(info.idIcon));
-	       LoadStringA(applet->hModule, info.idName, 
-			   applet->info[i].szName, sizeof(applet->info[i].szName));
-	       LoadStringA(applet->hModule, info.idInfo, 
-			   applet->info[i].szInfo, sizeof(applet->info[i].szInfo));
+	       applet->info[i].hIcon = LoadIconW(applet->hModule,
+						 MAKEINTRESOURCEW(info.idIcon));
+	       LoadStringW(applet->hModule, info.idName,
+			   applet->info[i].szName, sizeof(applet->info[i].szName) / sizeof(WCHAR));
+	       LoadStringW(applet->hModule, info.idInfo,
+			   applet->info[i].szInfo, sizeof(applet->info[i].szInfo) / sizeof(WCHAR));
 	       applet->info[i].szHelpFile[0] = '\0';
 	   }
+       }
+       else
+       {
+           CopyMemory(&applet->info[i], &newinfo, newinfo.dwSize);
+	   if (newinfo.dwSize != sizeof(NEWCPLINFOW))
+           {
+	       applet->info[i].dwSize = sizeof(NEWCPLINFOW);
+               MultiByteToWideChar(CP_ACP, 0, ((LPNEWCPLINFOA)&newinfo)->szName,
+	                           sizeof(((LPNEWCPLINFOA)&newinfo)->szName) / sizeof(CHAR),
+			           applet->info[i].szName,
+			           sizeof(applet->info[i].szName) / sizeof(WCHAR));
+               MultiByteToWideChar(CP_ACP, 0, ((LPNEWCPLINFOA)&newinfo)->szInfo,
+	                           sizeof(((LPNEWCPLINFOA)&newinfo)->szInfo) / sizeof(CHAR),
+			           applet->info[i].szInfo,
+			           sizeof(applet->info[i].szInfo) / sizeof(WCHAR));
+               MultiByteToWideChar(CP_ACP, 0, ((LPNEWCPLINFOA)&newinfo)->szHelpFile,
+	                           sizeof(((LPNEWCPLINFOA)&newinfo)->szHelpFile) / sizeof(CHAR),
+			           applet->info[i].szHelpFile,
+			           sizeof(applet->info[i].szHelpFile) / sizeof(WCHAR));
+           }
        }
     }
 
@@ -138,7 +181,7 @@ static BOOL	Control_Localize(const CPanel* panel, unsigned cx, unsigned cy,
     unsigned	i, x = (XSTEP-XICON)/2, y = 0;
     CPlApplet*	applet;
     RECT	rc;
-    
+
     GetClientRect(panel->hWnd, &rc);
     for (applet = panel->first; applet; applet = applet = applet->next) {
         for (i = 0; i < applet->count; i++) {
@@ -182,7 +225,7 @@ static LRESULT Control_WndProc_Paint(const CPanel* panel, WPARAM wParam)
 	    txtRect.right = x + XSTEP;
 	    txtRect.top = y + YICON;
 	    txtRect.bottom = y + YSTEP;
-	    DrawTextA(hdc, applet->info[i].szName, -1, &txtRect, 
+	    DrawTextW(hdc, applet->info[i].szName, -1, &txtRect,
 		      DT_CENTER | DT_VCENTER);
 	    x += XSTEP;
 	}
@@ -196,7 +239,7 @@ static LRESULT Control_WndProc_LButton(CPanel* panel, LPARAM lParam, BOOL up)
 {
     unsigned	i;
     CPlApplet*	applet;
-    
+
     if (Control_Localize(panel, LOWORD(lParam), HIWORD(lParam), &applet, &i)) {
        if (up) {
 	   if (panel->clkApplet == applet && panel->clkSP == i) {
@@ -210,7 +253,7 @@ static LRESULT Control_WndProc_LButton(CPanel* panel, LPARAM lParam, BOOL up)
     return 0;
 }
 
-static LRESULT WINAPI	Control_WndProc(HWND hWnd, UINT wMsg, 
+static LRESULT WINAPI	Control_WndProc(HWND hWnd, UINT wMsg,
 					WPARAM lParam1, LPARAM lParam2)
 {
    CPanel*	panel = (CPanel*)GetWindowLongA(hWnd, 0);
@@ -255,11 +298,11 @@ static void    Control_DoInterface(CPanel* panel, HWND hWnd, HINSTANCE hInst)
 
     if (!RegisterClassA(&wc)) return;
 
-    CreateWindowExA(0, wc.lpszClassName, "Wine Control Panel", 
-		    WS_OVERLAPPEDWINDOW | WS_VISIBLE, 
-		    CW_USEDEFAULT, CW_USEDEFAULT, 
-		    CW_USEDEFAULT, CW_USEDEFAULT, 
-		    hWnd, (HMENU)0, hInst, panel);
+    CreateWindowExA(0, wc.lpszClassName, "Wine Control Panel",
+		    WS_OVERLAPPEDWINDOW | WS_VISIBLE,
+		    CW_USEDEFAULT, CW_USEDEFAULT,
+		    CW_USEDEFAULT, CW_USEDEFAULT,
+		    hWnd, NULL, hInst, panel);
     if (!panel->hWnd) return;
     while (GetMessageA(&msg, panel->hWnd, 0, 0)) {
         TranslateMessage(&msg);
@@ -271,49 +314,59 @@ static void    Control_DoInterface(CPanel* panel, HWND hWnd, HINSTANCE hInst)
 static	void	Control_DoWindow(CPanel* panel, HWND hWnd, HINSTANCE hInst)
 {
     HANDLE		h;
-    WIN32_FIND_DATAA	fd;
-    char		buffer[MAX_PATH];
+    WIN32_FIND_DATAW	fd;
+    WCHAR		buffer[MAX_PATH];
+    static const WCHAR wszAllCpl[] = {'*','.','c','p','l',0};
+    WCHAR *p;
 
-    /* FIXME: should grab path somewhere from configuration */
-    if ((h = FindFirstFileA("c:\\windows\\system\\*.cpl", &fd)) != 0) {
+    GetSystemDirectoryW( buffer, MAX_PATH );
+    p = buffer + strlenW(buffer);
+    *p++ = '\\';
+    lstrcpyW(p, wszAllCpl);
+
+    if ((h = FindFirstFileW(buffer, &fd)) != 0) {
         do {
-	   sprintf(buffer, "c:\\windows\\system\\%s", fd.cFileName);
+	   lstrcpyW(p, fd.cFileName);
 	   Control_LoadApplet(hWnd, buffer, panel);
-	} while (FindNextFileA(h, &fd));
+	} while (FindNextFileW(h, &fd));
 	FindClose(h);
     }
 
     if (panel->first) Control_DoInterface(panel, hWnd, hInst);
 }
 
-static	void	Control_DoLaunch(CPanel* panel, HWND hWnd, LPCSTR cmd)
+static	void	Control_DoLaunch(CPanel* panel, HWND hWnd, LPCWSTR wszCmd)
    /* forms to parse:
     *	foo.cpl,@sp,str
     *	foo.cpl,@sp
     *	foo.cpl,,str
     *	foo.cpl @sp
     *	foo.cpl str
+    *   "a path\foo.cpl"
     */
 {
-    char*	buffer;
-    char*	beg = NULL;
-    char*	end;
-    char	ch;
+    LPWSTR	buffer;
+    LPWSTR	beg = NULL;
+    LPWSTR	end;
+    WCHAR	ch;
+    LPWSTR       ptr;
     unsigned 	sp = 0;
-    char*	extraPmts = NULL;
+    LPWSTR	extraPmts = NULL;
+    int        quoted = 0;
 
-    buffer = HeapAlloc(GetProcessHeap(), 0, strlen(cmd) + 1);
+    buffer = HeapAlloc(GetProcessHeap(), 0, (lstrlenW(wszCmd) + 1) * sizeof(*wszCmd));
     if (!buffer) return;
 
-    end = strcpy(buffer, cmd);
+    end = lstrcpyW(buffer, wszCmd);
 
     for (;;) {
 	ch = *end;
-	if (ch == ' ' || ch == ',' || ch == '\0') {
+        if (ch == '"') quoted = !quoted;
+	if (!quoted && (ch == ' ' || ch == ',' || ch == '\0')) {
 	    *end = '\0';
 	    if (beg) {
 	        if (*beg == '@') {
-		    sp = atoi(beg + 1);
+		    sp = atoiW(beg + 1);
 		} else if (*beg == '\0') {
 		    sp = 0;
 		} else {
@@ -326,6 +379,11 @@ static	void	Control_DoLaunch(CPanel* panel, HWND hWnd, LPCSTR cmd)
 	}
 	end++;
     }
+    while ((ptr = StrChrW(buffer, '"')))
+	memmove(ptr, ptr+1, lstrlenW(ptr));
+
+    TRACE("cmd %s, extra %s, sp %d\n", debugstr_w(buffer), debugstr_w(extraPmts), sp);
+
     Control_LoadApplet(hWnd, buffer, panel);
 
     if (panel->first) {
@@ -346,15 +404,15 @@ static	void	Control_DoLaunch(CPanel* panel, HWND hWnd, LPCSTR cmd)
 }
 
 /*************************************************************************
- * Control_RunDLL			[SHELL32.12]
+ * Control_RunDLLW			[SHELL32.@]
  *
  */
-void WINAPI Control_RunDLL(HWND hWnd, HINSTANCE hInst, LPCSTR cmd, DWORD nCmdShow)
+void WINAPI Control_RunDLLW(HWND hWnd, HINSTANCE hInst, LPCWSTR cmd, DWORD nCmdShow)
 {
     CPanel	panel;
 
-    TRACE("(0x%08x, 0x%08lx, %s, 0x%08lx)\n", 
-	  hWnd, (DWORD)hInst, debugstr_a(cmd), nCmdShow);
+    TRACE("(%p, %p, %s, 0x%08lx)\n",
+	  hWnd, hInst, debugstr_w(cmd), nCmdShow);
 
     memset(&panel, 0, sizeof(panel));
 
@@ -366,21 +424,49 @@ void WINAPI Control_RunDLL(HWND hWnd, HINSTANCE hInst, LPCSTR cmd, DWORD nCmdSho
 }
 
 /*************************************************************************
- * Control_FillCache_RunDLL			[SHELL32.8]
+ * Control_RunDLLA			[SHELL32.@]
+ *
+ */
+void WINAPI Control_RunDLLA(HWND hWnd, HINSTANCE hInst, LPCSTR cmd, DWORD nCmdShow)
+{
+    DWORD len = MultiByteToWideChar(CP_ACP, 0, cmd, -1, NULL, 0 );
+    LPWSTR wszCmd = HeapAlloc(GetProcessHeap(), 0, len * sizeof(WCHAR));
+    if (wszCmd && MultiByteToWideChar(CP_ACP, 0, cmd, -1, wszCmd, len ))
+    {
+        Control_RunDLLW(hWnd, hInst, wszCmd, nCmdShow);
+    }
+    HeapFree(GetProcessHeap(), 0, wszCmd);
+}
+
+/*************************************************************************
+ * Control_FillCache_RunDLL			[SHELL32.@]
  *
  */
 HRESULT WINAPI Control_FillCache_RunDLL(HWND hWnd, HANDLE hModule, DWORD w, DWORD x)
 {
-    FIXME("0x%04x 0x%04x 0x%04lx 0x%04lx stub\n",hWnd, hModule, w, x);
+    FIXME("%p %p 0x%04lx 0x%04lx stub\n", hWnd, hModule, w, x);
     return 0;
 }
 
 /*************************************************************************
  * RunDLL_CallEntry16				[SHELL32.122]
- * the name is propably wrong
+ * the name is probably wrong
  */
 HRESULT WINAPI RunDLL_CallEntry16(DWORD v, DWORD w, DWORD x, DWORD y, DWORD z)
 {
     FIXME("0x%04lx 0x%04lx 0x%04lx 0x%04lx 0x%04lx stub\n",v,w,x,y,z);
     return 0;
+}
+
+/*************************************************************************
+ * CallCPLEntry16				[SHELL32.166]
+ *
+ * called by desk.cpl on "Advanced" with:
+ * hMod("DeskCp16.Dll"), pFunc("CplApplet"), 0, 1, 0xc, 0
+ *
+ */
+DWORD WINAPI CallCPLEntry16(HMODULE hMod, FARPROC pFunc, DWORD dw3, DWORD dw4, DWORD dw5, DWORD dw6)
+{
+    FIXME("(%p, %p, %08lx, %08lx, %08lx, %08lx): stub.\n", hMod, pFunc, dw3, dw4, dw5, dw6);
+    return 0x0deadbee;
 }
