@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 1999-07-21 17:19:00 sandervl Exp $
+# $Id: makefile,v 1.14 1999-08-05 19:46:46 phaller Exp $
 
 #
 # PD-Win32 API
@@ -49,6 +49,7 @@ OBJS = KERNEL32.OBJ \
        MAP.OBJ \
        WIN32UTIL.OBJ \
        heap.OBJ \
+       heapstring.obj \
        os2heap.OBJ \
        vmutex.OBJ \
        initterm.OBJ \
@@ -137,7 +138,13 @@ thread.OBJ: \
 
 heap.OBJ: \
     .\heap.cpp \
+    .\heap.h \
     os2heap.h
+
+heapstring.obj: \
+    .\heapstring.cpp \
+    .\heap.h \
+    .\heapstring.h
 
 os2heap.OBJ: \
     .\os2heap.cpp \
