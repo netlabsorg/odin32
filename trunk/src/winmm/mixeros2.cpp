@@ -1,4 +1,4 @@
-/* $Id: mixeros2.cpp,v 1.7 2002-05-28 17:10:02 sandervl Exp $ */
+/* $Id: mixeros2.cpp,v 1.8 2002-05-30 14:31:07 sandervl Exp $ */
 
 /*
  * OS/2 Mixer multimedia
@@ -80,6 +80,7 @@ BOOL OSLibMixerOpen()
         mymciGetErrorString(rc, szError, sizeof(szError));
         dprintf(("mciSendCommand returned error %x = %s", rc, szError));
     }
+
     return TRUE;
 }
 /******************************************************************************/
@@ -87,6 +88,35 @@ BOOL OSLibMixerOpen()
 void OSLibMixerClose()
 {
     if(hPDDMix) {
+        MIXSTRUCT mixstruct;
+        
+        //unlock recording source
+        if(mixerapiIOCTL90(hPDDMix, RECORDSRCQUERY, &mixstruct, sizeof(mixstruct)) == TRUE) {
+            mixstruct.Mute = 2;
+            if(mixerapiIOCTL90(hPDDMix, RECORDSRCSET, &mixstruct, sizeof(mixstruct)) == FALSE) {
+                dprintf(("OSLibMixerClose: mixerapiIOCTL90 RECORDSRCSET failed!!"));
+            }
+        }
+        else dprintf(("OSLibMixerClose: mixerapiIOCTL90 RECORDSRCQUERY failed!!"));
+
+        //unlock recording gain
+        if(mixerapiIOCTL90(hPDDMix, RECORDGAINQUERY, &mixstruct, sizeof(mixstruct)) == TRUE) {
+            mixstruct.Mute = 2;
+            if(mixerapiIOCTL90(hPDDMix, RECORDGAINSET, &mixstruct, sizeof(mixstruct)) == FALSE) {
+                dprintf(("OSLibMixerClose: mixerapiIOCTL90 RECORDGAINSET failed!!"));
+            }
+        }
+        else dprintf(("OSLibMixerClose: mixerapiIOCTL90 RECORDGAINQUERY failed!!"));
+
+        //unlock PCM volume
+        if(mixerapiIOCTL90(hPDDMix, STREAMVOLQUERY, &mixstruct, sizeof(mixstruct)) == TRUE) {
+            mixstruct.Mute = 2;
+            if(mixerapiIOCTL90(hPDDMix, STREAMVOLSET, &mixstruct, sizeof(mixstruct)) == FALSE) {
+                dprintf(("OSLibMixerClose: mixerapiIOCTL90 STREAMVOLSET failed!!"));
+            }
+        }
+        else dprintf(("OSLibMixerClose: mixerapiIOCTL90 STREAMVOLQUERY failed!!"));
+
         DosClose(hPDDMix);
     }
 }
@@ -225,7 +255,7 @@ BOOL OSLibMixSetVolume(DWORD dwControl, DWORD dwVolLeft, DWORD dwVolRight)
         OSLibMixGetVolume(MIX_CTRL_OUT_L_TREBLE, &dwVolRight, NULL);
     }
 
-    dwIOCT90VolLeft  = WIN32_TO_IOCTL90_VOLUME(dwVolLeft);
+    dwIOCT90VolLeft  = WIN32_TO_IOCTL90_VOLUME(dwVolLeft);    
     dwIOCT90VolRight = WIN32_TO_IOCTL90_VOLUME(dwVolRight);
 
     if(mixstruct.VolumeL == dwIOCT90VolLeft && 
@@ -340,7 +370,10 @@ BOOL OSLibMixGetVolume(DWORD dwControl, DWORD *pdwVolLeft, DWORD *pdwVolRight)
         dprintf(("OSLibMixGetVolume: Volume (%d,%d) out of RANGE!!", mixstruct.VolumeL, mixstruct.VolumeR));
     }
     mixstruct.VolumeL = min(MIXER_IOCTL90_MAX_VOLUME, mixstruct.VolumeL);
-    mixstruct.VolumeR = min(MIXER_IOCTL90_MAX_VOLUME, mixstruct.VolumeR);
+    if(dwFunc == RECORDGAINSET) {
+         mixstruct.VolumeR = mixstruct.VolumeL; //only left is valid
+    }
+    else mixstruct.VolumeR = min(MIXER_IOCTL90_MAX_VOLUME, mixstruct.VolumeR);
 
     if(dwControl == MIX_CTRL_OUT_L_TREBLE) {
         mixstruct.VolumeL = mixstruct.VolumeR;  //right = treble, left = bass 
@@ -446,10 +479,16 @@ BOOL OSLibMixGetCtrlCaps(DWORD dwControl, LONG *plMinimum, LONG *plMaximum, DWOR
 /******************************************************************************/
 BOOL OSLibMixIsRecSourcePresent(DWORD dwRecSrc)
 {
+    DWORD oldRecSrc;
+    BOOL  ret = TRUE;
+
+    OSLibMixGetRecSource(&oldRecSrc);
+
     if(OSLibMixSetRecSource(dwRecSrc) == FALSE) {
-        return FALSE;
+        ret = FALSE;
     }
-    return TRUE;
+    OSLibMixSetRecSource(oldRecSrc);
+    return ret;
 }
 /******************************************************************************/
 /******************************************************************************/
@@ -496,16 +535,20 @@ BOOL OSLibMixSetRecSource(DWORD dwRecSrc)
         return FALSE;
     }
 
-    dwVolL = szVolumeLevels[volidx][0];
-    dwVolR = szVolumeLevels[volidx][1];
-    mixstruct.VolumeL = WIN32_TO_IOCTL90_VOLUME(dwVolL);
-    mixstruct.VolumeR = WIN32_TO_IOCTL90_VOLUME(dwVolR);
-    mixstruct.Mute    = 0;
+    if(szVolumeLevels[volidx][0] != -1) 
+    {//if changed, override recording gain
+        dwVolL = szVolumeLevels[volidx][0];
+        dwVolR = szVolumeLevels[volidx][1];
+        mixstruct.VolumeL = WIN32_TO_IOCTL90_VOLUME(dwVolL);
+        mixstruct.VolumeR = WIN32_TO_IOCTL90_VOLUME(dwVolR);
+        mixstruct.Mute    = 0;
 
-    //set recording gain to that of the selected source
-    if(mixerapiIOCTL90(hPDDMix, RECORDGAINSET, &mixstruct, sizeof(mixstruct)) == FALSE) {
-        dprintf(("OSLibMixSetRecSource: mixerapiIOCTL90 RECORDGAINSET failed!!"));
-        return FALSE;
+        //set recording gain to that of the selected source
+        dprintf(("set recording gain to (%d,%d)", mixstruct.VolumeL, mixstruct.VolumeR));
+        if(mixerapiIOCTL90(hPDDMix, RECORDGAINSET, &mixstruct, sizeof(mixstruct)) == FALSE) {
+            dprintf(("OSLibMixSetRecSource: mixerapiIOCTL90 RECORDGAINSET failed!!"));
+            return FALSE;
+        }
     }
     return TRUE;
 }
