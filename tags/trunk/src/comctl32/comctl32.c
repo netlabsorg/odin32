@@ -1,4 +1,4 @@
-/* $Id: comctl32.c,v 1.13 2000-02-04 17:02:06 cbratschi Exp $ */
+/* $Id: comctl32.c,v 1.14 2000-02-14 17:31:39 cbratschi Exp $ */
 /*
  * Win32 common controls implementation
  *
@@ -11,7 +11,10 @@
  *
  */
 
-/* WINE 20000130 level (commctrl.c) */
+/*
+ - Corel 20000212 level
+ - WINE 20000130 level (commctrl.c)
+*/
 
 #include "comctl32.h"
 #include "winerror.h"
@@ -36,9 +39,9 @@
 #include "treeview.h"
 #include "listview.h"
 
-HANDLE COMCTL32_hHeap = (HANDLE)NULL;
+HANDLE  COMCTL32_hHeap = (HANDLE)NULL;
 HMODULE COMCTL32_hModule = 0;
-LPSTR    COMCTL32_aSubclass = (LPSTR)NULL;
+LPSTR   COMCTL32_aSubclass = (LPSTR)NULL;
 
 void CDECL RegisterCOMCTL32WindowClasses(unsigned long hinstDLL)
 {
@@ -632,9 +635,9 @@ CreateToolbarEx (HWND hwnd, DWORD style, UINT wID, INT nBitmaps,
             dxBitmap = 16;
 
             SendMessageA (hwndTB, TB_SETBITMAPSIZE, 0,
-                            MAKELPARAM((WORD)dyBitmap, (WORD)dxBitmap));
+                            MAKELPARAM((WORD)dxBitmap, (WORD)dyBitmap));
             SendMessageA (hwndTB, TB_SETBUTTONSIZE, 0,
-                            MAKELPARAM((WORD)dyButton, (WORD)dxButton));
+                            MAKELPARAM((WORD)dxButton, (WORD)dyButton));
 
 
         /* add bitmaps */
