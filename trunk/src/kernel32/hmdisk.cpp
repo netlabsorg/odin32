@@ -1,4 +1,4 @@
-/* $Id: hmdisk.cpp,v 1.50 2002-06-26 15:26:42 sandervl Exp $ */
+/* $Id: hmdisk.cpp,v 1.51 2002-08-08 15:38:23 sandervl Exp $ */
 
 /*
  * Win32 Disk API functions for OS/2
@@ -213,6 +213,11 @@ DWORD HMDeviceDiskClass::CreateFile (LPCSTR        lpFileName,
         strcpy(szDiskName, lpFileName);
         szDrive[0] = *lpFileName;
         dwDriveType = GetDriveTypeA(szDrive);
+        if(dwDriveType == DRIVE_DOESNOTEXIST) {
+            //If the drive doesn't exist, then fail right here
+            dprintf(("Drive %s does not exist; fail", szDrive));
+            return ERROR_INVALID_DRIVE; //right error??
+        }
     }
 
     //Disable error popus. NT allows an app to open a cdrom/dvd drive without a disk inside
