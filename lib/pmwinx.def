@@ -737,6 +737,7 @@ _O32_DeviceCapabilities @ 1004
 _O32_GetExitCodeProcess @ 1005
 _O32_GetExitCodeThread @ 1006
 _O32_MapVirtualKey @ 1007
+_O32_GetAsyncKeyState @1012
 _O32_WaitForInputIdle @1028
 _O32__CreateBitmapIndirect @ 5000
 _O32__CreateDialogIndirect @ 5001
