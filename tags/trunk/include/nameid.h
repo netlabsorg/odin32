@@ -1,4 +1,4 @@
-/* $Id: nameid.h,v 1.3 1999-08-18 17:16:05 sandervl Exp $ */
+/* $Id: nameid.h,v 1.4 1999-08-26 12:56:50 sandervl Exp $ */
 
 /*
  *
@@ -19,9 +19,6 @@ int SYSTEM ConvertNameId(ULONG hModule, char *);
 #ifndef ULONG
 #define ULONG unsigned long
 #endif
-
-ULONG GetOS2ModuleHandle(ULONG hmod);
-char *StripPath(char *path);
 
 #ifdef __cplusplus
         }

@@ -1,4 +1,9 @@
- /* $Id: ChangeLog,v 1.139 1999-08-25 22:39:12 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.140 1999-08-26 12:56:35 sandervl Exp $ */
+
+ 99-08-26: Sander van Leeuwen <sandervl@xs4all.nl>
+	- KERNEL32: Cleaned up. (removed os2native.cpp & os2util.cpp and
+                    replaced them with oslibdos.* & oslibmisc.*; put 
+                    Virtual* win32 apis in virtual.cpp)
 
  99-08-25: Jens Wiessner <wiessnej@rfi.de>
 	- OLESVR32: Created stub dll
