@@ -1,4 +1,11 @@
-/* $Id: ChangeLog,v 1.1582 2001-07-09 07:56:51 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1583 2001-07-09 08:15:42 bird Exp $ */
+
+ 2001-07-09: knut st. osmundsen <kosmunds@csc.com>:
+    - CRTDLL:   o When renaming dlls we still use the original importlibrary
+                  and .def-file names. ORGTARGET exist for that purpose.
+    - NTDLL:    o Link with crtdll.lib.
+    - VERSION:  o Link with crtdll.lib.
+    - WIN32K:   o Updated LieList with CrtDll -> CrtDll32 renaming.
 
  2001-07-09: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Directly import registry functions from REGISTRY.DLL
@@ -21,8 +28,8 @@
                   outside the scroll window during scrolling.
                 o Changed menu behaviour in OS/2 mode; no mouse tracking
                   when right or left mouse button not pressed.
-                o Clipboard (Get/SetClipboardData: must translated open32 
-                  to kernel32 global memory handles (due to Global memory 
+                o Clipboard (Get/SetClipboardData: must translated open32
+                  to kernel32 global memory handles (due to Global memory
                   api rewrite)
                 o Key translation for arrow keys and insert/del, home/end, page up/down
                   added (WM_CHAR message translation)
