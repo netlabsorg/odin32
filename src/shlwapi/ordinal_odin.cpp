@@ -1,4 +1,4 @@
-/* $Id: ordinal_odin.cpp,v 1.1 2001-04-28 13:32:37 sandervl Exp $ */
+/* $Id: ordinal_odin.cpp,v 1.2 2001-05-19 11:14:01 sandervl Exp $ */
 
 /*
  * Win32 Lightweight SHELL32 for OS/2
@@ -1048,22 +1048,6 @@ ODINFUNCTION0(DWORD, SHLWAPI_276)
   FIXME("()stub\n");
   return 0xabba1244;
 }
-
-
-/*************************************************************************
-*      SHLWAPI_342 [SHLWAPI]
-*
-*/
-ODINFUNCTION4(DWORD,  SHLWAPI_342,
-              LPVOID, w,
-              LPVOID, x,
-              LPVOID, y,
-              LPVOID, z)
-{
-  FIXME("(%p %p %p %p)stub\n",w,x,y,z);
-  return 0xabba1249;
-}
-
 
 /*****************************************************************************
  * Name      : DWORD SHLWAPI_376
