@@ -1,12 +1,17 @@
-/* $Id: ChangeLog,v 1.1324 2001-03-27 16:15:00 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1325 2001-03-27 20:46:51 sandervl Exp $ */
 
- 2001-03-27: Sander van Leeuwen <sandervl@xs4all.nl>
+ 2001-03-27: Sander van Leeuwen <sandervl@xs4all.nl>   
     - USER32:   o Rewrote cursor handling. No longer use Open32, but convert
                   cursor to OS/2 format during creation.
                   (also fixes crash during WinDVD startup)
                 o Ported Wine's cursor/icon cache code. Odin no longer
-                  leaks a memory when apps reload icons/cursors.
+                  leaks memory when apps reload icons/cursors.
+                o Check for DIB section selection in ReleaseDC and unselect it.
+                  (only for non-CS_OWNDC hdcs)
     - KERNEL32: o Removed cursor & cursor group conversion code
+    - GDI32:    o SelectObject fixes for DIB sections
+                o Check for DIB section selection in DeleteDC and unselect it.
+                  (fixes crash in WinDVD)
 
  2001-03-27: Michal Necasek <michalnec@volny.cz>
     - OPENGL:   o Less stict parameter checking in wglSetPixelFormat
