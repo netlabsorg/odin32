@@ -1,4 +1,4 @@
-; $Id: ws2_32.def,v 1.8 2001-09-18 16:59:00 phaller Exp $
+; $Id: ws2_32.def,v 1.9 2001-10-10 17:19:34 sandervl Exp $
 
 ;Created by BLAST for IBM's compiler
 LIBRARY WS2_32 INITINSTANCE
@@ -42,7 +42,6 @@ IMPORTS
   select                                           = WSOCK32.18
   send                                             = WSOCK32.19
   sendto                                           = WSOCK32.20
-  setsockopt                                       = WSOCK32.21
   shutdown                                         = WSOCK32.22
   socket                                           = WSOCK32.23
   WSAEventSelect                                   = WSOCK32.3001
@@ -69,7 +68,7 @@ EXPORTS
   select                                           @18
   send                                             @19
   sendto                                           @20
-  setsockopt                                       @21
+  setsockopt = _WS2setsockopt@20                   @21
   shutdown                                         @22
   socket                                           @23
 
