@@ -1,4 +1,7 @@
- /* $Id: changelog,v 1.1100 2000-09-03 09:36:47 sandervl Exp $ */
+ /* $Id: changelog,v 1.1101 2000-09-03 18:12:14 phaller Exp $ */
+
+ 2000-09-03: Patrick Haller <phaller@gmx.net>
+    - KERNEL32: - NLS sync with WINE
 
  2000-09-03: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: More logging; 
