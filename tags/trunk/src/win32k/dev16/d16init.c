@@ -1,4 +1,4 @@
-/* $Id: d16init.c,v 1.7 2000-09-02 21:07:55 bird Exp $
+/* $Id: d16init.c,v 1.8 2000-09-04 16:40:47 bird Exp $
  *
  * d16init - init routines for both drivers.
  *
@@ -46,7 +46,7 @@
 #include "vprntf16.h"
 #include "log.h"
 #include "options.h"
-
+#include "errors.h"
 
 
 /**
@@ -97,6 +97,7 @@ USHORT NEAR dev1Init(PRPINITIN pRpIn, PRPINITOUT pRpOut)
     HFILE           hDev0 = 0;
     USHORT          usAction = 0;
     NPSZ            npszErrMsg = NULL;
+    NPSZ            npszErrMsg2 = NULL;
 
     /*
      * Probe kernel data.
@@ -118,14 +119,20 @@ USHORT NEAR dev1Init(PRPINITIN pRpIn, PRPINITOUT pRpOut)
             rc = DosDevIOCtl(&data, &param, D16_IOCTL_RING0INIT, D16_IOCTL_CAT, hDev0);
             if (rc == NO_ERROR)
             {
-                if ((rc = data.Status) == STATUS_DONE)
+                if (data.usRcInit32 == NO_ERROR)
                 {
                     if (!options.fQuiet)
                         printf16("Win32k.sys succesfully initiated!\n");
-                    pRpOut->Status = pRpOut->rph.Status = data.Status;
+                    pRpOut->Status = pRpOut->rph.Status = STATUS_DONE;
                 }
                 else
-                    npszErrMsg = "Ring-0 initiation failed. rc=%d\n";
+                {
+                    /* set correct error message and rc */
+                    rc = data.usRcInit32;
+                    npszErrMsg = "Ring-0 initiation failed. rc=%x\n";
+                    if (rc >= ERROR_D32_FIRST && rc <= ERROR_D32_LAST)
+                        npszErrMsg2 = GetErrorMsg(data.usRcInit32 + ERROR_PROB_SYM_D32_FIRST - ERROR_D32_FIRST);
+                }
             }
             else
                 npszErrMsg = "Ring-0 init: DosDevIOCtl failed. rc=%d\n";
@@ -151,7 +158,9 @@ USHORT NEAR dev1Init(PRPINITIN pRpIn, PRPINITOUT pRpOut)
     if (npszErrMsg)
     {
         printf16(npszErrMsg, rc);
-        pRpOut->Status = pRpOut->rph.Status = STATUS_DONE | STERR | ERROR_I24_QUIET_INIT_FAIL;
+        if (npszErrMsg2)
+            printf16("%s\n", npszErrMsg2);
+        pRpOut->Status = pRpOut->rph.Status = STATUS_DONE | STERR | ERROR_I24_GEN_FAILURE;
     }
 
     /* Init is completed. */
@@ -166,8 +175,9 @@ USHORT NEAR dev1Init(PRPINITIN pRpIn, PRPINITOUT pRpOut)
 /**
  * R0 16-bit initiation.
  * This gets TKSSBase, thunks parameters and calls R0 32-bit initiation function.
- * @returns   Status word.
- * @param     pRp  Generic IO Control request packet.
+ * @returns     Status word. We don't fail on R0Init32 but forwards the result
+ *              using the usRcInit32.
+ * @param       pRp     Generic IO Control request packet.
  */
 USHORT NEAR  R0Init16(PRP_GENIOCTL pRp)
 {
@@ -211,28 +221,31 @@ USHORT NEAR  R0Init16(PRP_GENIOCTL pRp)
                 if (((PD16R0INITPARAM)pRp->ParmPacket)->pRpInitIn->InitArgs == NULL ||
                     !DevHelp_VirtToLin(SELECTOROF(rp32init.InitArgs), OFFSETOF(rp32init.InitArgs), (PLIN)&rp32init.InitArgs)
                    )
-                {
+                {   /* call 32-bit init routine and set 32 bit rc. */
                     usRc = CallR0Init32(SSToDS_16(&rp32init));
+                    ((PD16R0INITDATA)pRp->DataPacket)->usRcInit32 = usRc;
+
+                    /* set status to done (success).  (R0Init32 RC is return as usRcInit32.)  */
+                    usRc = STATUS_DONE;
                 }
                 else
-                    usRc |= ERROR_I24_INVALID_PARAMETER;
+                    usRc |= STERR | ERROR_I24_INVALID_PARAMETER;
 
-                ((PD16R0INITDATA)pRp->DataPacket)->Status = usRc;
 
                 /*
-                 * finished - unlock data and parm
+                 * finished - unlock data and parm;
                  */
                 DevHelp_VMUnLock((LIN)SSToDS_16(&hLockParm[0]));
                 DevHelp_VMUnLock((LIN)SSToDS_16(&hLockData[0]));
             }
             else
-                usRc |= ERROR_I24_INVALID_PARAMETER;
+                usRc |= STERR | ERROR_I24_INVALID_PARAMETER;
         }
         else
-            usRc |= ERROR_I24_INVALID_PARAMETER;
+            usRc |= STERR | ERROR_I24_INVALID_PARAMETER;
     }
     else
-        usRc |= ERROR_I24_GEN_FAILURE;
+        usRc |= STERR | ERROR_I24_GEN_FAILURE;
 
     return usRc;
 }
