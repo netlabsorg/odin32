@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.90 2002-08-05 16:31:26 sandervl Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.91 2002-08-16 16:49:13 sandervl Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -316,7 +316,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             }
         }
 
-        //if a window is disabled, it's parent receives the mouse messages
+        //if a window is disabled, its parent receives the mouse messages
         if(!IsWindowEnabled(win32wnd->getWindowHandle())) {
             if(win32wnd->getParent()) {
                 Win32BaseWindow *parent = win32wnd->getParent();;
@@ -453,7 +453,7 @@ BOOL OS2ToWinMsgTranslate(void *pTeb, QMSG *os2Msg, MSG *winMsg, BOOL isUnicode,
             }
         }
 
-        //if a window is disabled, it's parent receives the mouse messages
+        //if a window is disabled, its parent receives the mouse messages
         if(!IsWindowEnabled(win32wnd->getWindowHandle())) {
             if(win32wnd->getParent()) {
                 Win32BaseWindow *parent = win32wnd->getParent();;
