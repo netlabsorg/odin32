@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.94 2001-05-16 07:42:26 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.95 2001-05-22 09:33:10 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -773,6 +773,11 @@ void OSLibSetWindowStyle(HWND hwndFrame, HWND hwndClient, ULONG dwStyle, ULONG d
          dwWinStyle |= WS_CLIPSIBLINGS;
     }
     else dwWinStyle &= ~WS_CLIPSIBLINGS;
+
+    if(dwStyle & WS_MINIMIZE_W) {
+         dwWinStyle |= WS_MINIMIZED;
+    }
+    else dwWinStyle &= ~WS_MINIMIZED;
 
     if(dwWinStyle != dwOldWinStyle) {
       WinSetWindowULong(hwndFrame, QWL_STYLE, dwWinStyle);

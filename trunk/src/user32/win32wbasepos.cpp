@@ -1,4 +1,4 @@
-/* $Id: win32wbasepos.cpp,v 1.24 2001-05-11 08:39:45 sandervl Exp $ */
+/* $Id: win32wbasepos.cpp,v 1.25 2001-05-22 09:33:16 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (nonclient/position methods)
  *
@@ -307,10 +307,16 @@ UINT Win32BaseWindow::MinMaximize(UINT cmd, LPRECT lpRect)
 
             setStyle(getStyle() | WS_MINIMIZE);
 
-            iconPos.x = windowpos.ptMinPosition.x;
-            iconPos.y = windowpos.ptMinPosition.y;
-            WINPOS_FindIconPos(getWindowHandle(), iconPos);
-            SetRect(lpRect, iconPos.x, iconPos.y, GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON) );
+            if(getParent() == NULL) {
+                SetRect(lpRect, -32000, -32000, GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON));
+                OSLibSetWindowStyle(getOS2FrameWindowHandle(), getOS2WindowHandle(), getStyle(), getExStyle());
+            }
+            else {
+                iconPos.x = windowpos.ptMinPosition.x;
+                iconPos.y = windowpos.ptMinPosition.y;
+                WINPOS_FindIconPos(getWindowHandle(), iconPos);
+                SetRect(lpRect, iconPos.x, iconPos.y, GetSystemMetrics(SM_CXICON), GetSystemMetrics(SM_CYICON) );
+            }
             break;
 
         case SW_MAXIMIZE:
@@ -318,7 +324,8 @@ UINT Win32BaseWindow::MinMaximize(UINT cmd, LPRECT lpRect)
 
             if(getStyle() & WS_MINIMIZE )
             {
-                 setStyle(getStyle() & ~WS_MINIMIZE);
+                setStyle(getStyle() & ~WS_MINIMIZE);
+                OSLibSetWindowStyle(getOS2FrameWindowHandle(), getOS2WindowHandle(), getStyle(), getExStyle());
             }
             setStyle(getStyle() | WS_MAXIMIZE);
 
@@ -330,6 +337,7 @@ UINT Win32BaseWindow::MinMaximize(UINT cmd, LPRECT lpRect)
             if(getStyle() & WS_MINIMIZE)
             {
                 setStyle(getStyle() & ~WS_MINIMIZE);
+                OSLibSetWindowStyle(getOS2FrameWindowHandle(), getOS2WindowHandle(), getStyle(), getExStyle());
 
                 if( getFlags() & WIN_RESTORE_MAX)
                 {
