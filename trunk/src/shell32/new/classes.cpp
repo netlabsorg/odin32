@@ -1,12 +1,29 @@
+/* $Id: classes.cpp,v 1.2 1999-10-05 19:33:36 phaller Exp $ */
+
 /*
- *	file type mapping
- *	(HKEY_CLASSES_ROOT - Stuff)
+ * Win32 SHELL32 for OS/2
  *
+ * Copyright 1997 Marcus Meissner
+ * Copyright 1999 Patrick Haller (haller@zebra.fh-weingarten.de)
+ * Project Odin Software License can be found in LICENSE.TXT
  *
  */
+
+/*
+ *      file type mapping
+ *      (HKEY_CLASSES_ROOT - Stuff)
+ */
+
+
+/*****************************************************************************
+ * Includes                                                                  *
+ *****************************************************************************/
+
 #include <stdlib.h>
 #include <string.h>
 #include <odin.h>
+#include <odinwrap.h>
+#include <os2sel.h>
 
 #define ICOM_CINTERFACE 1
 #define CINTERFACE 1
@@ -22,175 +39,211 @@
 
 #include <misc.h>
 
-DEFAULT_DEBUG_CHANNEL(shell)
+
+/*****************************************************************************
+ * Local Variables                                                           *
+ *****************************************************************************/
+
+ODINDEBUGCHANNEL(shell32-classes)
 
 #define MAX_EXTENSION_LENGTH 20
 
+
+/*****************************************************************************
+ * Implementation                                                            *
+ *****************************************************************************/
+
 BOOL HCR_MapTypeToValue ( LPCSTR szExtension, LPSTR szFileType, LONG len, BOOL bPrependDot)
-{	HKEY	hkey;
-	char	szTemp[MAX_EXTENSION_LENGTH + 2];
+{
+        HKEY    hkey;
+        char    szTemp[MAX_EXTENSION_LENGTH + 2];
 
-	TRACE("%s %p\n",szExtension, szFileType );
+  dprintf(("SHELL32:classes:HCR_MapTypeToValue(%s,%08xh,%08xh,%08xh)\n",
+           szExtension,
+           szFileType,
+           len,
+           bPrependDot));
 
-	if (bPrependDot)
-	  strcpy(szTemp, ".");
+        if (bPrependDot)
+          strcpy(szTemp, ".");
 
-	lstrcpynA(szTemp+((bPrependDot)?1:0), szExtension, MAX_EXTENSION_LENGTH);
-	
-	if (RegOpenKeyExA(HKEY_CLASSES_ROOT,szTemp,0,0x02000000,&hkey))
-	{ return FALSE;
-	}
+        lstrcpynA(szTemp+((bPrependDot)?1:0), szExtension, MAX_EXTENSION_LENGTH);
 
-	if (RegQueryValueA(hkey,NULL,szFileType,&len))
-	{ RegCloseKey(hkey);
-	  return FALSE;
-	}	
+        if (RegOpenKeyExA(HKEY_CLASSES_ROOT,szTemp,0,0x02000000,&hkey))
+        { return FALSE;
+        }
 
-	RegCloseKey(hkey);
+        if (RegQueryValueA(hkey,NULL,szFileType,&len))
+        { RegCloseKey(hkey);
+          return FALSE;
+        }
 
-	TRACE("-- %s\n", szFileType );
+        RegCloseKey(hkey);
 
-	return TRUE;
+        TRACE("-- %s\n", szFileType );
+
+        return TRUE;
 }
 
 
 BOOL HCR_GetExecuteCommand ( LPCSTR szClass, LPCSTR szVerb, LPSTR szDest, LONG len )
-{	HKEY	hkey;
-	char	sTemp[256];
-	
-	TRACE("%s %s\n",szClass, szVerb );
+{
+        HKEY    hkey;
+        char    sTemp[256];
 
-	sprintf(sTemp, "%s\\shell\\%s\\command",szClass, szVerb);
+  dprintf(("SHELL32:classes:HCR_GetExecuteCommand(%s,%s,%08xh,%08xh)\n",
+           szClass,
+           szVerb,
+           szDest,
+           len));
 
-	if (RegOpenKeyExA(HKEY_CLASSES_ROOT,sTemp,0,0x02000000,&hkey))
-	{ return FALSE;
-	}
+        sprintf(sTemp, "%s\\shell\\%s\\command",szClass, szVerb);
 
-	if (RegQueryValueA(hkey,NULL,szDest,&len))
-	{ RegCloseKey(hkey);
-	  return FALSE;
-	}	
-	RegCloseKey(hkey);
+        if (RegOpenKeyExA(HKEY_CLASSES_ROOT,sTemp,0,0x02000000,&hkey))
+        { return FALSE;
+        }
 
-	TRACE("-- %s\n", szDest );
+        if (RegQueryValueA(hkey,NULL,szDest,&len))
+        { RegCloseKey(hkey);
+          return FALSE;
+        }
+        RegCloseKey(hkey);
 
-	return TRUE;
+        TRACE("-- %s\n", szDest );
+
+        return TRUE;
 
 }
 /***************************************************************************************
-*	HCR_GetDefaultIcon	[internal]
+*       HCR_GetDefaultIcon      [internal]
 *
 * Gets the icon for a filetype
 */
 BOOL HCR_GetDefaultIcon (LPCSTR szClass, LPSTR szDest, LONG len, LPDWORD dwNr)
-{	HKEY	hkey;
-	char	sTemp[256];
-	char	sNum[5];
+{
+        HKEY    hkey;
+        char    sTemp[256];
+        char    sNum[5];
 
-	TRACE("%s\n",szClass );
+  dprintf(("SHELL32:classes:HCR_GetDefaultIcon(%s,%08xh,%08xh,%08xh)\n",
+           szClass,
+           szDest,
+           len,
+           dwNr));
 
-	sprintf(sTemp, "%s\\DefaultIcon",szClass);
+        sprintf(sTemp, "%s\\DefaultIcon",szClass);
 
-	if (RegOpenKeyExA(HKEY_CLASSES_ROOT,sTemp,0,0x02000000,&hkey))
-	{ return FALSE;
-	}
+        if (RegOpenKeyExA(HKEY_CLASSES_ROOT,sTemp,0,0x02000000,&hkey))
+        { return FALSE;
+        }
 
-	if (RegQueryValueA(hkey,NULL,szDest,&len))
-	{ RegCloseKey(hkey);
-	  return FALSE;
-	}	
+        if (RegQueryValueA(hkey,NULL,szDest,&len))
+        { RegCloseKey(hkey);
+          return FALSE;
+        }
 
-	RegCloseKey(hkey);
+        RegCloseKey(hkey);
 
-	if (ParseFieldA (szDest, 2, sNum, 5))
-	{ *dwNr=atoi(sNum);
-	}
-	
-	ParseFieldA (szDest, 1, szDest, len);
-	
-	TRACE("-- %s %li\n", szDest, *dwNr );
+        if (ParseFieldA (szDest, 2, sNum, 5))
+        { *dwNr=atoi(sNum);
+        }
 
-	return TRUE;
+        ParseFieldA (szDest, 1, szDest, len);
+
+        TRACE("-- %s %li\n", szDest, *dwNr );
+
+        return TRUE;
 }
 
 /***************************************************************************************
-*	HCR_GetClassName	[internal]
+*       HCR_GetClassName        [internal]
 *
 * Gets the name of a registred class
 */
 BOOL HCR_GetClassName (REFIID riid, LPSTR szDest, DWORD len)
-{	HKEY	hkey;
-	char	xriid[50];
-	BOOL ret = FALSE;
-	DWORD buflen = len;
+{
+        HKEY    hkey;
+        char    xriid[50];
+        BOOL ret = FALSE;
+        DWORD buflen = len;
 
-	strcpy(xriid,"CLSID\\");
-	WINE_StringFromCLSID(riid,&xriid[strlen(xriid)]);
+  dprintf(("SHELL32:classes:HCR_GetClassName(%08xh,%08xh,%08xh)\n",
+           riid,
+           szDest,
+           len));
 
-	TRACE("%s\n",xriid );
+        strcpy(xriid,"CLSID\\");
+        WINE_StringFromCLSID(riid,&xriid[strlen(xriid)]);
 
-	if (!RegOpenKeyExA(HKEY_CLASSES_ROOT,xriid,0,KEY_READ,&hkey))
-	{
-	  if (!RegQueryValueExA(hkey,"",0,NULL,(LPBYTE)szDest,&len))
-	  {
-	    ret = TRUE;
-	  }
-	  RegCloseKey(hkey);
-	}
+        TRACE("%s\n",xriid );
 
-	if (!ret || !szDest[0])
-	{
-	  if(IsEqualIID(riid, &CLSID_ShellDesktop))
-	  {
-	    LoadStringA(shell32_hInstance, IDS_DESKTOP, szDest, buflen);
-	    ret = TRUE;
-	  }
-	  else if (IsEqualIID(riid, &IID_MyComputer))
-	  {
-	    LoadStringA(shell32_hInstance, IDS_MYCOMPUTER, szDest, buflen);
-	    ret = TRUE;
-	  }	
-	}
+        if (!RegOpenKeyExA(HKEY_CLASSES_ROOT,xriid,0,KEY_READ,&hkey))
+        {
+          if (!RegQueryValueExA(hkey,"",0,NULL,(LPBYTE)szDest,&len))
+          {
+            ret = TRUE;
+          }
+          RegCloseKey(hkey);
+        }
 
-	TRACE("-- %s\n", szDest);
+        if (!ret || !szDest[0])
+        {
+          if(IsEqualIID(riid, &CLSID_ShellDesktop))
+          {
+            LoadStringA(shell32_hInstance, IDS_DESKTOP, szDest, buflen);
+            ret = TRUE;
+          }
+          else if (IsEqualIID(riid, &IID_MyComputer))
+          {
+            LoadStringA(shell32_hInstance, IDS_MYCOMPUTER, szDest, buflen);
+            ret = TRUE;
+          }
+        }
 
-	return ret;
+        TRACE("-- %s\n", szDest);
+
+        return ret;
 }
 
 /***************************************************************************************
-*	HCR_GetFolderAttributes	[internal]
+*       HCR_GetFolderAttributes [internal]
 *
 * gets the folder attributes of a class
 */
 BOOL HCR_GetFolderAttributes (REFIID riid, LPDWORD szDest)
-{	HKEY	hkey;
-	char	xriid[60];
-	DWORD	attributes;
-	DWORD	len = 4;
+{
+        HKEY    hkey;
+        char    xriid[60];
+        DWORD   attributes;
+        DWORD   len = 4;
 
-	strcpy(xriid,"CLSID\\");
-	WINE_StringFromCLSID(riid,&xriid[strlen(xriid)]);
-	TRACE("%s\n",xriid );
+  dprintf(("SHELL32:classes:HCR_GetFolderAttributes(%08xh,%08xh)\n",
+           riid,
+           szDest));
 
-	strcat (xriid, "\\ShellFolder");
+        strcpy(xriid,"CLSID\\");
+        WINE_StringFromCLSID(riid,&xriid[strlen(xriid)]);
+        TRACE("%s\n",xriid );
 
-	if (RegOpenKeyExA(HKEY_CLASSES_ROOT,xriid,0,KEY_READ,&hkey))
-	{
-	  return FALSE;
-	}
+        strcat (xriid, "\\ShellFolder");
 
-	if (RegQueryValueExA(hkey,"Attributes",0,NULL,(LPBYTE)&attributes,&len))
-	{
-	  RegCloseKey(hkey);
-	  return FALSE;
-	}
+        if (RegOpenKeyExA(HKEY_CLASSES_ROOT,xriid,0,KEY_READ,&hkey))
+        {
+          return FALSE;
+        }
 
-	RegCloseKey(hkey);
+        if (RegQueryValueExA(hkey,"Attributes",0,NULL,(LPBYTE)&attributes,&len))
+        {
+          RegCloseKey(hkey);
+          return FALSE;
+        }
 
-	TRACE("-- 0x%08lx\n", attributes);
+        RegCloseKey(hkey);
 
-	*szDest = attributes;
+        TRACE("-- 0x%08lx\n", attributes);
 
-	return TRUE;
+        *szDest = attributes;
+
+        return TRUE;
 }
 

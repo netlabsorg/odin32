@@ -1,9 +1,25 @@
+/* $Id: shresdef.h,v 1.2 1999-10-05 19:33:37 phaller Exp $ */
+
+/*
+ * Win32 SHELL32 for OS/2
+ *
+ * Copyright 1997 Marcus Meissner
+ * Copyright 1999 Patrick Haller (haller@zebra.fh-weingarten.de)
+ * Project Odin Software License can be found in LICENSE.TXT
+ *
+ */
+
+
+/*****************************************************************************
+ * Includes                                                                  *
+ *****************************************************************************/
+
 #ifndef __WINE_SHELL_RES_H
 #define __WINE_SHELL_RES_H
 
 /*
-	columntitles for the shellview
-*/
+ * columntitles for the shellview
+ */
 #define IDS_SHV_COLUMN1		7
 #define IDS_SHV_COLUMN2		8
 #define IDS_SHV_COLUMN3		9
@@ -21,4 +37,6 @@
 #define IDS_VIEW_LIST		26
 #define IDS_VIEW_DETAILS	27
 
-#endif
+
+#endif /* __WINE_SHELL_RES_H */
+
