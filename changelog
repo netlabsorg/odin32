@@ -1,4 +1,11 @@
-/* $Id: changelog,v 1.2304 2002-09-14 08:30:11 sandervl Exp $ */
+/* $Id: changelog,v 1.2305 2002-09-14 13:49:06 sandervl Exp $ */
+
+ 2002-09-14: Sander van Leeuwen <sandervl@innotek   >
+    - KERNEL32: o WaitForSingleObject, (Msg)WaitForMultipleObjects:
+                  If dwTimeout is not 0 and smaller than 20 ms, then
+                  temporarily change thread priority to time critical to
+                  make sure we don't get a late timeout.
+                  (CLOCKSCALE=4 in config.sys also improves timeout responds)
 
  2002-09-14: Yuri Dario <mc6530@mclink   >
     - DSOUND:   o Load MMPM2 (MDM.DLL) on demand
