@@ -1,4 +1,4 @@
-/* $Id: oslibres.cpp,v 1.4 1999-09-25 14:16:05 sandervl Exp $ */
+/* $Id: oslibres.cpp,v 1.5 1999-10-27 10:35:05 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -137,9 +137,9 @@ HANDLE OSLibWinCreateIcon(PVOID iconbitmap)
 HANDLE OSLibWinCreatePointer(PVOID cursorbitmap)
 {
  POINTERINFO pointerInfo = {0};
- HBITMAP     hbmColor;
+ HBITMAP     hbmColor = 0, hbmMask = 0;
  BITMAPARRAYFILEHEADER2 *bafh = (BITMAPARRAYFILEHEADER2 *)cursorbitmap;
- BITMAPFILEHEADER2 *bfh = (BITMAPFILEHEADER2 *)cursorbitmap;
+ BITMAPFILEHEADER2 *bfh = (BITMAPFILEHEADER2 *)cursorbitmap, *bfhColor = 0;
  HPS         hps;
  HANDLE      hPointer;
 
@@ -149,33 +149,49 @@ HANDLE OSLibWinCreatePointer(PVOID cursorbitmap)
     }
     if(bafh->usType == BFT_BITMAPARRAY && bafh->cbSize == sizeof(BITMAPARRAYFILEHEADER2)) {
         bfh  = &bafh->bfh2;
+        bfhColor = (BITMAPFILEHEADER2 *)((char *)bfh + sizeof(RGB2)*2 + sizeof(BITMAPFILEHEADER2));
     }
-    else {//single icon
+    else {//single cursor
         bfh  = (BITMAPFILEHEADER2 *)cursorbitmap;
-    bafh = (BITMAPARRAYFILEHEADER2 *)bfh; //for calculation bitmap offset
+        bfhColor = (BITMAPFILEHEADER2 *)((char *)bfh + sizeof(RGB2)*2 + sizeof(BITMAPFILEHEADER2));
+    	bafh = (BITMAPARRAYFILEHEADER2 *)bfh; //for calculation bitmap offset
     }
     //skip xor/and mask
     hps = WinGetScreenPS(HWND_DESKTOP);
-    hbmColor = GpiCreateBitmap(hps, &bfh->bmp2, CBM_INIT,
-                               (char *)bafh + bfh->offBits,
-                               (BITMAPINFO2 *)&bfh->bmp2);
-    if(hbmColor == GPI_ERROR) {
+    hbmMask = GpiCreateBitmap(hps, &bfh->bmp2, CBM_INIT,
+                              (char *)bafh + bfh->offBits,
+                              (BITMAPINFO2 *)&bfh->bmp2);
+    if(hbmMask == GPI_ERROR) {
         dprintf(("OSLibWinCreatePointer: GpiCreateBitmap failed!"));
         WinReleasePS(hps);
         return 0;
     }
 
+    if((ULONG)((char *)bafh+bfh->offBits) != (ULONG)bfhColor) 
+    {//color bitmap present
+    	hbmColor = GpiCreateBitmap(hps, &bfhColor->bmp2, CBM_INIT,
+                               (char *)bafh + bfhColor->offBits,
+                               (BITMAPINFO2 *)&bfhColor->bmp2);
+    	if(hbmColor == GPI_ERROR) {
+        	dprintf(("OSLibWinCreateIcon: GpiCreateBitmap failed!"));
+	        GpiDeleteBitmap(hbmMask);
+        	WinReleasePS(hps);
+        	return 0;
+    	}
+    }
+
     pointerInfo.fPointer   = TRUE;
     pointerInfo.xHotspot   = bfh->xHotspot;
     pointerInfo.yHotspot   = bfh->yHotspot;
-    pointerInfo.hbmColor   = 0;
-    pointerInfo.hbmPointer = hbmColor;
+    pointerInfo.hbmColor   = hbmColor;
+    pointerInfo.hbmPointer = hbmMask;
     hPointer = WinCreatePointerIndirect(HWND_DESKTOP, &pointerInfo);
 
     if(hPointer == NULL) {
         dprintf(("OSLibWinCreatePointer: WinCreatePointerIndirect failed!"));
     }
-    GpiDeleteBitmap(hbmColor);
+    GpiDeleteBitmap(hbmMask);
+    if(hbmColor) GpiDeleteBitmap(hbmColor);
     WinReleasePS(hps);
     return hPointer;
 }
