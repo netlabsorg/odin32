@@ -1,4 +1,4 @@
-/* $Id: db.cpp,v 1.2 1999-12-06 18:11:49 bird Exp $ */
+/* $Id: db.cpp,v 1.3 1999-12-06 23:52:43 bird Exp $ */
 /*
  * DB - contains all database routines.
  *
@@ -247,6 +247,7 @@ BOOL _System dbInsertUpdateFunction(unsigned short usDll, const char *pszFunctio
     pres = mysql_store_result(pmysql);
     if (rc >= 0 && pres != NULL && mysql_num_rows(pres) > 0)
     {   /* update function (function is found) */
+        MYSQL_ROW parow;
         if (mysql_num_rows(pres) > 1)
         {
             fprintf(stderr, "internal database integrity error(%s): More function by the same name for the same dll. "
@@ -254,7 +255,9 @@ BOOL _System dbInsertUpdateFunction(unsigned short usDll, const char *pszFunctio
             return FALSE;
         }
 
-        lFunction = getvalue(0, mysql_fetch_row(pres));
+        parow = mysql_fetch_row(pres);
+        if (parow != NULL)
+            lFunction = getvalue(0, parow);
         mysql_free_result(pres);
 
         if (!fIgnoreOrdinal)
@@ -355,10 +358,15 @@ signed long _System dbFindAuthor(const char *pszAuthor)
         pres = mysql_store_result(pmysql);
         if (pres != NULL)
         {
+            MYSQL_ROW parow;
+
             /* integrety check */
             if (mysql_num_rows(pres) > 1)
                 fprintf(stderr, "Integrety: author '%s' is not unique!\n", pszAuthor);
-            refcode = getvalue(0, mysql_fetch_row(pres));
+            parow = mysql_fetch_row(pres);
+            if (parow != NULL)
+                refcode = getvalue(0, parow);
+
             mysql_free_result(pres);
         }
     }
@@ -384,7 +392,9 @@ signed long _System dbGetFunctionState(signed long lRefCode)
         pres = mysql_store_result(pmysql);
         if (pres != NULL)
         {
-            lState = getvalue(0, mysql_fetch_row(pres));
+            MYSQL_ROW parow = mysql_fetch_row(pres);
+            if (parow != NULL)
+                lState = getvalue(0, parow);
             mysql_free_result(pres);
         }
     }

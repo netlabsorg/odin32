@@ -1,4 +1,4 @@
-# $Id: makefile.icc,v 1.2 1999-12-06 18:11:50 bird Exp $
+# $Id: makefile.icc,v 1.3 1999-12-06 23:52:43 bird Exp $
 
 #
 # Common makefile for database utils. ICC edition
@@ -135,4 +135,4 @@ clean:
    @nmake /nologo clean
 
 force:
-    @$(ECHO) -
+    @$(ECHO) ...
