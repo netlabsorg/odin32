@@ -1,4 +1,4 @@
-/* $Id: winres.cpp,v 1.15 1999-09-04 12:41:46 sandervl Exp $ */
+/* $Id: winres.cpp,v 1.16 1999-09-13 14:31:06 sandervl Exp $ */
 
 /*
  * Win32 resource class
@@ -27,12 +27,17 @@
 #include <win32type.h>
 #include <winres.h>
 #include <misc.h>
-#include <nameid.h>
-#include <winexe.h>
+#include <winexepe2lx.h>
+#include <windllpe2lx.h>
 #include "cvtresource.h"
 #include <vmutex.h>
 
 VMutex resmutex;
+
+char *ResTypes[MAX_RES] =
+      {"niks", "CURSOR", "BITMAP", "ICON", "MENU", "DIALOG", "STRING",
+       "FONTDIR", "FONT", "ACCELERATOR", "RCDATA",  "MESSAGETABLE",
+       "GROUP_CURSOR", "niks", "GROUP_ICON", "niks", "VERSION"};
 
 //******************************************************************************
 //******************************************************************************
@@ -91,12 +96,9 @@ static ULONG CalcBitmapSize(ULONG cBits, LONG cx, LONG cy)
 Win32Resource::Win32Resource() :
         os2resdata(NULL), winresdata(NULL), resType(RSRC_CUSTOMNODATA)
 {
-  resmutex.enter();
-  next           = module->winres;
-  module->winres = this;
-  resmutex.leave();
-
+  next       = NULL;
   module     = NULL;
+
   id         = -1;
   type       = -1;
   hres       = 0;
@@ -108,7 +110,7 @@ Win32Resource::Win32Resource() :
 }
 //******************************************************************************
 //******************************************************************************
-Win32Resource::Win32Resource(Win32Image *module, HRSRC hRes, ULONG id, ULONG type) :
+Win32Resource::Win32Resource(Win32ImageBase *module, HRSRC hRes, ULONG id, ULONG type) :
         os2resdata(NULL), winresdata(NULL), resType(RSRC_PE2LX)
 {
  APIRET rc;
@@ -167,7 +169,7 @@ Win32Resource::Win32Resource(Win32Image *module, HRSRC hRes, ULONG id, ULONG typ
 }
 //******************************************************************************
 //******************************************************************************
-Win32Resource::Win32Resource(Win32Image *module, ULONG id, ULONG type,
+Win32Resource::Win32Resource(Win32ImageBase *module, ULONG id, ULONG type,
                  ULONG size, char *resdata) : hres(NULL),
         os2resdata(NULL), winresdata(NULL), resType(RSRC_PELOADER)
 {
@@ -245,7 +247,8 @@ PVOID Win32Resource::lockResource()
     case NTRT_ACCELERATORS:
     case NTRT_MENU:
     case NTRT_DIALOG:
-        newid = module->getWin32ResourceId(id);
+    {
+//        newid = ((Win32Pe2LxImage *)module)->getWin32ResourceId(id);
 
         rc = DosGetResource((HMODULE)module->hinstance, RT_RCDATA, (int)newid, (PPVOID)&resdata);
         if(rc) {
@@ -255,6 +258,7 @@ PVOID Win32Resource::lockResource()
         winresdata = (char *)malloc(ressize);
         memcpy(winresdata, resdata, ressize);
         break;
+    }
 
     //TODO:not yet implemented
     case NTRT_FONTDIR:
@@ -469,7 +473,7 @@ PVOID Win32Resource::convertOS2Bitmap(void *bmpdata)
 }
 //******************************************************************************
 //******************************************************************************
-void Win32Resource::destroyAll(Win32Image *module)
+void Win32Resource::destroyAll(Win32ImageBase *module)
 {
  Win32Resource *res = module->winres, *next;
 
