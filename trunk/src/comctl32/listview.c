@@ -8936,7 +8936,7 @@ static INT LISTVIEW_StyleChanged(LISTVIEW_INFO *infoPtr, WPARAM wStyleType,
 
 #ifdef __WIN32OS2__
 #ifdef DEBUG
-void dprintfMsg(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+static void dprintfMsg(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
  char *msg = NULL;
 
