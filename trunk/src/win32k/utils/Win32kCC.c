@@ -1,4 +1,4 @@
-/* $Id: Win32kCC.c,v 1.15 2001-04-06 15:26:09 bird Exp $
+/* $Id: Win32kCC.c,v 1.16 2001-10-04 12:30:29 bird Exp $
  *
  * Win32CC - Win32k Control Center.
  *
@@ -1787,7 +1787,8 @@ int GetFixpackDesc(ULONG ulBuild, ULONG flKernel, PSZ pszBuffer)
         if (flKernel & KF_DEBUG)
         {
             if (flKernel & KF_HAS_DEBUGTYPE)
-                pszAdd = (flKernel & KF_ALLSTRICT) ? "(Allstrict)" : "(Halfstrict)";
+                pszAdd = (flKernel & (KF_ALLSTRICT | KF_HALFSTRICT)) == KF_ALLSTRICT
+                          ? "(Allstrict)" : "(Halfstrict)";
             else
                 pszAdd = "(Debug)";
         }
