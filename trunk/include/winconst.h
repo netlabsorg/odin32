@@ -1,4 +1,4 @@
-/* $Id: winconst.h,v 1.30 2000-03-22 18:47:01 sandervl Exp $ */
+/* $Id: winconst.h,v 1.31 2000-03-29 15:16:09 cbratschi Exp $ */
 
 /*
  * Win32 constants
@@ -761,7 +761,7 @@
 #define ERROR_INCORRECT_ADDRESS_W               1241L
 #define ERROR_ALREADY_REGISTERED_W              1242L
 #define ERROR_SERVICE_NOT_FOUND_W               1243L
-#define ERROR_NOT_AUTHENTICATED_W     	      1244L
+#define ERROR_NOT_AUTHENTICATED_W             1244L
 #define ERROR_NOT_LOGGED_ON_W                   1245L
 #define ERROR_CONTINUE_W                        1246L
 #define ERROR_ALREADY_INITIALIZED_W             1247L
@@ -1036,51 +1036,51 @@
 #define RGN_COPY_W          5
 
 
-#define	PAGE_NOACCESS_W			0x01
-#define	PAGE_READONLY_W			0x02
-#define	PAGE_READWRITE_W		0x04
-#define	PAGE_WRITECOPY_W		0x08
-#define	PAGE_EXECUTE_W			0x10
-#define	PAGE_EXECUTE_READ_W		0x20
-#define	PAGE_EXECUTE_READWRITE_W	0x40
-#define	PAGE_EXECUTE_WRITECOPY_W	0x80
-#define	PAGE_GUARD_W			0x100
-#define	PAGE_NOCACHE_W			0x200
+#define PAGE_NOACCESS_W                 0x01
+#define PAGE_READONLY_W                 0x02
+#define PAGE_READWRITE_W                0x04
+#define PAGE_WRITECOPY_W                0x08
+#define PAGE_EXECUTE_W                  0x10
+#define PAGE_EXECUTE_READ_W             0x20
+#define PAGE_EXECUTE_READWRITE_W        0x40
+#define PAGE_EXECUTE_WRITECOPY_W        0x80
+#define PAGE_GUARD_W                    0x100
+#define PAGE_NOCACHE_W                  0x200
 
-#define MEM_COMMIT_W              	0x00001000
-#define MEM_RESERVE_W             	0x00002000
-#define MEM_DECOMMIT_W            	0x00004000
-#define MEM_RELEASE_W             	0x00008000
-#define MEM_FREE_W                	0x00010000
-#define MEM_PRIVATE_W             	0x00020000
-#define MEM_MAPPED_W              	0x00040000
-#define MEM_TOP_DOWN_W            	0x00100000
+#define MEM_COMMIT_W                    0x00001000
+#define MEM_RESERVE_W                   0x00002000
+#define MEM_DECOMMIT_W                  0x00004000
+#define MEM_RELEASE_W                   0x00008000
+#define MEM_FREE_W                      0x00010000
+#define MEM_PRIVATE_W                   0x00020000
+#define MEM_MAPPED_W                    0x00040000
+#define MEM_TOP_DOWN_W                  0x00100000
 
-#define SEC_FILE_W                	0x00800000
-#define SEC_IMAGE_W               	0x01000000
-#define SEC_RESERVE_W             	0x04000000
-#define SEC_COMMIT_W              	0x08000000
-#define SEC_NOCACHE_W             	0x10000000
+#define SEC_FILE_W                      0x00800000
+#define SEC_IMAGE_W                     0x01000000
+#define SEC_RESERVE_W                   0x04000000
+#define SEC_COMMIT_W                    0x08000000
+#define SEC_NOCACHE_W                   0x10000000
 
 #define FILE_MAP_COPY_W                 0x00000001
 #define FILE_MAP_WRITE_W                0x00000002
 #define FILE_MAP_READ_W                 0x00000004
 #define FILE_MAP_ALL_ACCESS_W           0x000f001f
 
-#define SND_SYNC_W            	0x0000  /* play synchronously (default) */
-#define SND_ASYNC_W           	0x0001  /* play asynchronously */
-#define SND_NODEFAULT_W       	0x0002  /* don't use default sound */
-#define SND_MEMORY_W          	0x0004  /* lpszSoundName points to a memory file */
-#define SND_LOOP_W            	0x0008  /* loop the sound until next sndPlaySound */
-#define SND_NOSTOP_W          	0x0010  /* don't stop any currently playing sound */
+#define SND_SYNC_W              0x0000  /* play synchronously (default) */
+#define SND_ASYNC_W             0x0001  /* play asynchronously */
+#define SND_NODEFAULT_W         0x0002  /* don't use default sound */
+#define SND_MEMORY_W            0x0004  /* lpszSoundName points to a memory file */
+#define SND_LOOP_W              0x0008  /* loop the sound until next sndPlaySound */
+#define SND_NOSTOP_W            0x0010  /* don't stop any currently playing sound */
 
-#define SND_NOWAIT_W		0x00002000L /* don't wait if the driver is busy */
-#define SND_ALIAS_W       	0x00010000L /* name is a registry alias */
-#define SND_ALIAS_ID_W		0x00110000L /* alias is a predefined ID */
-#define SND_FILENAME_W    	0x00020000L /* name is file name */
-#define SND_RESOURCE_W    	0x00040004L /* name is resource name or atom */
-#define SND_PURGE_W		0x00000040L /* purge all sounds */
-#define SND_APPLICATION_W     	0x00000080L /* look for application specific association */
+#define SND_NOWAIT_W            0x00002000L /* don't wait if the driver is busy */
+#define SND_ALIAS_W             0x00010000L /* name is a registry alias */
+#define SND_ALIAS_ID_W          0x00110000L /* alias is a predefined ID */
+#define SND_FILENAME_W          0x00020000L /* name is file name */
+#define SND_RESOURCE_W          0x00040004L /* name is resource name or atom */
+#define SND_PURGE_W             0x00000040L /* purge all sounds */
+#define SND_APPLICATION_W       0x00000080L /* look for application specific association */
 
 
 #define REG_NONE                         0  /* no type */
@@ -1103,20 +1103,20 @@
 #define KEY_NOTIFY              0x00000010
 #define KEY_CREATE_LINK         0x00000020
 
-#define KEY_READ                (STANDARD_RIGHTS_READ|	\
-				 KEY_QUERY_VALUE|	\
-				 KEY_ENUMERATE_SUB_KEYS|\
-				 KEY_NOTIFY		\
-				)
-#define KEY_WRITE               (STANDARD_RIGHTS_WRITE|	\
-				 KEY_SET_VALUE|		\
-				 KEY_CREATE_SUB_KEY	\
-				)
+#define KEY_READ                (STANDARD_RIGHTS_READ|  \
+                                 KEY_QUERY_VALUE|       \
+                                 KEY_ENUMERATE_SUB_KEYS|\
+                                 KEY_NOTIFY             \
+                                )
+#define KEY_WRITE               (STANDARD_RIGHTS_WRITE| \
+                                 KEY_SET_VALUE|         \
+                                 KEY_CREATE_SUB_KEY     \
+                                )
 #define KEY_EXECUTE             KEY_READ
-#define KEY_ALL_ACCESS          (STANDARD_RIGHTS_ALL|	\
-				 KEY_READ|KEY_WRITE|	\
-				 KEY_CREATE_LINK	\
-				)
+#define KEY_ALL_ACCESS          (STANDARD_RIGHTS_ALL|   \
+                                 KEY_READ|KEY_WRITE|    \
+                                 KEY_CREATE_LINK        \
+                                )
 
 #define HKEY_CLASSES_ROOT       ((HKEY) 0x80000000)
 #define HKEY_CURRENT_USER       ((HKEY) 0x80000001)
@@ -1318,3 +1318,7 @@
 #define HEAP_DISABLE_COALESCE_ON_FREE   0x00000080
 #define HEAP_CREATE_ALIGN_16            0x00010000
 #define HEAP_CREATE_ENABLE_TRACING      0x00020000
+
+/* FindFirstFile */
+
+#define INVALID_HANDLE_VALUE_W  ((HANDLE) -1)
