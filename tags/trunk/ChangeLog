@@ -1,4 +1,12 @@
-/* $Id: ChangeLog,v 1.1472 2001-06-02 11:00:07 sandervl Exp $ */
+/* $Id: ChangeLog,v 1.1473 2001-06-02 11:33:14 achimha Exp $ */
+
+ 2001-06-02: Achim Hasenmueller <achimha@innotek.de>
+    - COMDLG32: o fix crash due to uninitialized COM object pointer in
+                  Win95 open file dialog browse mode
+                o default to open mode in file dialog when the
+                  OFN_NOVALIDATE mode is used
+                  (fixes crash in FrameMaker 5.5 file dialog when opening
+                   a file that has broken image references)
 
  2001-06-02: Sander van Leeuwen <sandervl@xs4all.nl>
     - WINMM:    o Default waveout volume can be controlled by a key in odin.ini:
