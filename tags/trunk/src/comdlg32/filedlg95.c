@@ -1111,6 +1111,7 @@ static LRESULT FILEDLG95_FillControls(HWND hwnd, WPARAM wParam, LPARAM lParam)
   directory to it.
 
   Q: What about Unicode?
+ 
   */
 
   if (fodInfos->ofnInfos->lpstrInitialDir == NULL && fodInfos->ofnInfos->lpstrFile && 
@@ -1131,7 +1132,26 @@ static LRESULT FILEDLG95_FillControls(HWND hwnd, WPARAM wParam, LPARAM lParam)
     GetCurrentDirectoryA(MAX_PATH,path);
     pidlItemId = GetPidlFromName(fodInfos->Shell.FOIShellFolder, path);
   }
-  
+#ifdef __WIN32OS2__
+  /* @PF Another WINE hole. If lpstrInitialDir is not a dir but a filename
+   skip it and use current directory. */
+
+  else
+  {
+     DWORD dwAttr = GetFileAttributesA(fodInfos->ofnInfos->lpstrInitialDir);
+     if(dwAttr != -1 )
+     {
+       if (!(dwAttr & FILE_ATTRIBUTE_DIRECTORY))
+       {
+          char path[MAX_PATH];
+
+          GetCurrentDirectoryA(MAX_PATH,path);
+          COMDLG32_SHFree(pidlItemId);
+          pidlItemId = GetPidlFromName(fodInfos->Shell.FOIShellFolder, path);
+       }
+     }
+  }
+#endif
   /* Initialise shell objects */
   FILEDLG95_SHELL_Init(hwnd);
 
@@ -2885,9 +2905,9 @@ BOOL IsPidlFolder (LPSHELLFOLDER psf, LPITEMIDLIST pidl)
 	HRESULT ret;
 	
 	TRACE("%p, %p\n", psf, pidl);
-	
-  	ret = IShellFolder_GetAttributesOf( psf, 1, &pidl, &uAttr );
-	
+
+        ret = IShellFolder_GetAttributesOf( psf, 1, &pidl, &uAttr );
+
 	TRACE("-- 0x%08lx 0x%08lx\n", uAttr, ret);
 	/* see documentation shell 4.1*/
         return uAttr & (SFGAO_FOLDER | SFGAO_HASSUBFOLDER);
