@@ -1,4 +1,14 @@
-/* $Id: changelog,v 1.1868 2001-11-30 13:52:04 sandervl Exp $ */
+/* $Id: changelog,v 1.1869 2001-11-30 17:50:13 phaller Exp $ */
+
+ 2001-11-30: Patrick Haller <patrick.haller@innotek.de>
+    - KERNEL32: o heapstring.cpp: improvement on HEAP_malloc, HEAP_free,
+                  HEAP_realloc, HEAP_size
+    - SHELL32:  o use HEAP_xxx functions for frequently called APIs
+    - ODINPROF: o Note: SET PROFILEHOOKS=1 before doing NMAKE PROFILE=1
+                  This will enable the profiler in ODINCRTP.DLL
+                  (use release build ODINPROF.DLL), generates (pid).prof
+                  on process exit.
+    - *         o fixed out-of-scope TRACE,FIXME,WARN macros
 
  2001-11-30: Sander van Leeuwen <sandervl@xs4all.nl>
     - USER32:   o Changed menu hilite background to the color used by PM
