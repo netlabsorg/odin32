@@ -1,4 +1,4 @@
-/* $Id: exceptions.cpp,v 1.69 2003-02-21 08:50:26 sandervl Exp $ */
+/* $Id: exceptions.cpp,v 1.70 2003-02-27 17:16:26 sandervl Exp $ */
 
 /*
  * Win32 Exception functions for OS/2
@@ -609,7 +609,8 @@ LONG WIN32API UnhandledExceptionFilter(PWINEXCEPTION_POINTERS lpexpExceptionInfo
                 lpexpExceptionInfo->ExceptionRecord->ExceptionAddress,
                 szModName, iObj, offObj);
     }
-
+    
+/*  This is very dangerous. Can hang PM.
     rc = WinMessageBox(HWND_DESKTOP, HWND_DESKTOP, message, "Application Error",
                        0, MB_ABORTRETRYIGNORE | MB_ERROR);
     switch (rc)
@@ -622,6 +623,8 @@ LONG WIN32API UnhandledExceptionFilter(PWINEXCEPTION_POINTERS lpexpExceptionInfo
     default:
        return WINEXCEPTION_EXECUTE_HANDLER;
     }
+*/
+    return WINEXCEPTION_EXECUTE_HANDLER;
 }
 /*****************************************************************************
  * Name      : LPTOP_LEVEL_EXCEPTION_FILTER WIN32API SetUnhandledExceptionFilter
@@ -1241,7 +1244,7 @@ ULONG APIENTRY OS2ExceptionHandler(PEXCEPTIONREPORTRECORD       pERepRec,
         if(map == NULL) {
             goto continueFail;
         }
-        BOOL ret = map->commitPage(offset, fWriteAccess);
+        BOOL ret = map->commitPage(pERepRec->ExceptionInfo[1], offset, fWriteAccess);
         map->Release();
         if(ret == TRUE)
             goto continueexecution;
@@ -1345,9 +1348,40 @@ CrashAndBurn:
 
     //@@@PH: growing thread stacks might need special treatment
     case XCPT_GUARD_PAGE_VIOLATION:
-        //SvL: don't print anything here -> fatal hang if happens inside fprintf
-        //dprintf(("KERNEL32: OS2ExceptionHandler: trying to grow stack (continue search)"));
+    {
+        //NOTE:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        //Don't print anything here -> fatal hang if exception occurred 
+        //inside fprintf
+        //NOTE:!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+        Win32MemMap *map;
+        BOOL  fWriteAccess = FALSE, ret;
+        ULONG offset, accessflag;
+
+        switch(pERepRec->ExceptionInfo[0]) {
+        case XCPT_READ_ACCESS:
+                accessflag = MEMMAP_ACCESS_READ;
+                break;
+        case XCPT_WRITE_ACCESS:
+                accessflag = MEMMAP_ACCESS_WRITE;
+                fWriteAccess = TRUE;
+                break;
+        default:
+                goto continueGuardException;
+        }
+
+        map = Win32MemMapView::findMapByView(pERepRec->ExceptionInfo[1], &offset, accessflag);
+        if(map == NULL) {
+            goto continueGuardException;
+        }
+        ret = map->commitGuardPage(pERepRec->ExceptionInfo[1], offset, fWriteAccess);
+        map->Release();
+        if(ret == TRUE)
+            goto continueexecution;
+
+continueGuardException:
         goto continuesearch;
+    }
 
 
     /*
