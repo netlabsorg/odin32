@@ -1,4 +1,4 @@
-/* $Id: debug.cpp,v 1.3 2000-07-03 11:20:52 bird Exp $ */
+/* $Id: debug.cpp,v 1.4 2000-07-03 12:12:38 bird Exp $ */
 
 /*
  * Win32 debug Subsystem for OS/2
@@ -85,9 +85,49 @@ BOOL WIN32API ContinueDebugEvent( DWORD dwProcessId, DWORD dwThreadId,
  * @remark      An application could use this API to determin whether or not it is
  *              being debugged, so that it can change behaviour and for example
  *              provide more debug information using functions like OutputDebugString.
+ *
+ *              You could change the result of this by SET ODIN32.DEBUGGERPRESENT=1 on
+ *              the commandline.
  */
 BOOL WIN32API IsDebuggerPresent(VOID)
 {
     dprintf(("KERNEL32:  IsDebuggerPresent() -> FALSE\n"));
-    return FALSE;
+    return (getenv("ODIN32.DEBUGGERPRESENT") != NULL);
 }
+
+
+/**
+ * Send a string to the debugger for the current application.
+ * @param       lpszOutputString    Pointer to the string to send to the debugger. (intput)
+ * @sketch      Convert and log the string.
+ * @status      STUB
+ * @author      Sander van Leeuwen
+ * @remark      The string is send to the system debugger if there is no
+ *              debugger available for this application.
+ *              If the application has not debugger and the system debugger
+ *              is not active this API does nothing.
+ */
+VOID WIN32API OutputDebugStringW(LPCWSTR lpszOutputString)
+{
+    char    *pszAscii = UnicodeToAsciiString((LPWSTR)lpszOutputString);
+    dprintf(("KERNEL32:  OS2OutputDebugStringW %s\n", pszAscii));
+    FreeAsciiString(pszAscii);
+}
+
+
+/**
+ * Send a string to the debugger for the current application.
+ * @param       lpszOutputString    Pointer to the string to send to the debugger. (input)
+ * @sketch      Log the string.
+ * @status      STUB
+ * @author      Sander van Leeuwen
+ * @remark      The string is send to the system debugger if there is no
+ *              debugger available for this application.
+ *              If the application has not debugger and the system debugger
+ *              is not active this API does nothing.
+ */
+VOID WIN32API OutputDebugStringA(LPCSTR lpszOutputString)
+{
+    dprintf(("KERNEL32:  OutputDebugStringA: %s\n", lpszOutputString));
+}
+
