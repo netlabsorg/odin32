@@ -1,4 +1,4 @@
-/* $Id: oslibgdi.cpp,v 1.5 1999-12-27 22:53:52 cbratschi Exp $ */
+/* $Id: oslibgdi.cpp,v 1.6 1999-12-28 17:04:23 cbratschi Exp $ */
 /*
  * Window GDI wrapper functions for OS/2
  *
@@ -18,41 +18,111 @@
 #include <misc.h>
 #include <oslibgdi.h>
 #include <oslibwin.h>
+#include "win32wbase.h"
 
 //CB: new mapping infrastructure to avoid transformation bugs -> available soon
 
 /*
-All functions can be used to transform from Win32 to OS/2 and vice versa
+All mapScreen/Window can be used to transform from Win32 to OS/2 and vice versa
 First letter is lower case to avoid conflicts with Win32 API names
 
 Single y mapping:
  mapScreenY()
- mapWindowY()
+ mapClientY()
+ mapChildY()
 
 Single point mapping:
  mapScreenPoint()
- mapWindowPoint()
+ mapClientPoint()
+ mapChildPoint()
 
 Single rect mapping:
  mapScreenRect()
- mapWindowRect()
+ mapClientRect()
 
 Rect transformation:
  copyOS2Rect()
  copyWin32Rect()
 */
 
-INT mapScreenY(INT y)
+INT mapScreenY(INT screenPosY)
 {
-  return WinQuerySysValue(HWND_DESKTOP,SV_CYSCREEN)-1-y;
+  return WinQuerySysValue(HWND_DESKTOP,SV_CYSCREEN)-1-screenPosY;
 }
 //******************************************************************************
 //******************************************************************************
-INT mapScreenY(INT screenH,INT y)
+INT mapScreenY(INT screenH,INT screenPosY)
 {
-  return screenH-1-y;
+  return screenH-1-screenPosY;
+}
+//******************************************************************************
+//******************************************************************************
+INT mapClientY(INT clientH,INT clientPosY)
+{
+  return clientH-1-clientPosY;
+}
+//******************************************************************************
+//******************************************************************************
+INT mapClientY(HWND os2Client,INT clientPosY)
+{
+  RECTL rect;
+
+  if (os2Client == OSLIB_HWND_DESKTOP) os2Client = HWND_DESKTOP; //client shouldn't be desktop
+  if (!WinQueryWindowRect(os2Client,&rect)) return 0;
+  return rect.yTop-1-clientPosY;
+}
+//******************************************************************************
+//******************************************************************************
+INT mapClientY(Win32BaseWindow *win32wnd,INT clientPosY)
+{
+  return win32wnd->getWindowHeight()-1-clientPosY;
+}
+//******************************************************************************
+//******************************************************************************
+INT mapChildY(INT parentH,INT childY,INT childPosY)
+{
+  return parentH-1-childY-childPosY;
+}
+//******************************************************************************
+//******************************************************************************
+INT mapChildY(HWND os2Parent,INT childY,INT childPosY)
+{
+  RECTL rect;
+
+  if (os2Parent == OSLIB_HWND_DESKTOP) os2Parent = HWND_DESKTOP;
+  if (!WinQueryWindowRect(os2Parent,&rect)) return 0;
+  return rect.yTop-1-childY-childPosY;
+}
+//******************************************************************************
+//******************************************************************************
+INT mapChildY(HWND os2Parent,HWND os2Child,INT childPosY)
+{
+  RECTL rect;
+  SWP swp;
+
+  if (os2Parent == OSLIB_HWND_DESKTOP) os2Parent = HWND_DESKTOP;
+  if (!WinQueryWindowRect(os2Parent,&rect)) return 0;
+  if (!WinQueryWindowPos(os2Child,&swp)) return 0;
+  return rect.yTop-1-swp.y-childPosY;
+}
+//******************************************************************************
+//******************************************************************************
+BOOL mapScreenPoint(OSLIBPOINT *screenPt)
+{
+  if(!screenPt) return FALSE;
+  screenPt->y = WinQuerySysValue(HWND_DESKTOP,SV_CYSCREEN)-1-screenPt->y;
+  return TRUE;
+}
+//******************************************************************************
+//******************************************************************************
+INT mapScreenY(INT screenH,OSLIBPOINT *screenPt)
+{
+  if (!screenPt) return FALSE;
+  screenPt->y = screenH-1-screenPt->y;
+  return TRUE;
 }
 
+//old mapping functions
 
 //******************************************************************************
 //******************************************************************************
