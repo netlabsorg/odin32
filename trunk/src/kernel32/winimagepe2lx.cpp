@@ -1,4 +1,4 @@
-/* $Id: winimagepe2lx.cpp,v 1.19 2002-02-18 15:17:48 bird Exp $ */
+/* $Id: winimagepe2lx.cpp,v 1.20 2002-06-08 00:26:59 bird Exp $ */
 
 /*
  * Win32 PE2LX Image base class
@@ -16,6 +16,7 @@
 #define INCL_DOSERRORS          /* DOS Error values */
 #define INCL_DOSPROFILE         /* DosQuerySysState (Toolkit 4.5) */
 #define INCL_DOSMODULEMGR       /* DOS Module management */
+#define INCL_DOSMISC            /* DOS Misc - for the LIBPATHSTRICT define */
 
 #define ALIGN(a, alignment) (((a) + (alignment - 1UL)) & ~(alignment - 1UL))
 
@@ -121,9 +122,9 @@
    } qsPtrRec_t;
 
 #else
-   #if defined(QS_MODVER) && defined(QS_DCE_AUTORESET) /* hope these didn't exists in the other toolkits */
+   #if defined(QS_MODVER) && defined(QS_DCE_AUTORESET) && defined(LIBPATHSTRICT) /* hope these didn't exists in the other toolkits */
       /*
-       * Workaround for the 4.5(1) toolkits.
+       * Workaround for the 4.5.1+ toolkits.
        */
       #define qsPtrRec_t   QSPTRREC
       #define qsLrec_t     QSLREC
