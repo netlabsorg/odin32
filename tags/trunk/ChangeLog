@@ -1,4 +1,7 @@
-/* $Id: ChangeLog,v 1.1769 2001-10-19 01:39:52 bird Exp $ */
+/* $Id: ChangeLog,v 1.1770 2001-10-19 14:47:41 phaller Exp $ */
+
+ 2001-10-19: Patrick Haller <patrick.haller@innotek.de>
+    - COMCTL32: o updated listview and status to wine level
 
  2001-10-18: knut stange osmundsen <kosmunds@csc.com>
     - odin32.*.vac3*.mk:
