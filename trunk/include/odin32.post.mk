@@ -1,4 +1,4 @@
-# $Id: odin32.post.mk,v 1.7 2002-02-23 23:51:49 bird Exp $
+# $Id: odin32.post.mk,v 1.8 2002-03-08 10:58:53 sandervl Exp $
 
 #
 # Odin32 API
@@ -57,6 +57,8 @@ mmpm2.lib \
 so32dll.lib \
 tcp32dll.lib \
 rexx.lib \
+netapi32.lib \
+netapi.lib \
 $(SOMLIB) \
 $(RTLLIB) \
 $(RTLLIB_O) \

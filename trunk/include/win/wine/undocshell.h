@@ -566,7 +566,7 @@ LPWSTR WINAPI PathFindExtensionW(LPCWSTR path);
 #define  PathFindExtension WINELIB_NAME_AW(PathFindExtension)
 LPVOID WINAPI PathFindExtensionAW(LPCVOID path); 
 
-LPVOID WINAPI PathGetExtensionAW(LPCVOID lpszPath); 
+LPVOID WINAPI PathGetExtensionAW(LPCVOID lpszPath, DWORD void1, DWORD void2);
 
 LPSTR WINAPI PathGetArgs(LPCSTR lpszPath);
 
