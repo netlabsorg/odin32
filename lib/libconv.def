@@ -1,0 +1,10 @@
+LIBRARY UCONV INITINSTANCE TERMINSTANCE
+
+EXPORTS
+   UniCreateUconvObject @ 1
+   UniUconvToUcs @ 2
+   UniUconvFromUcs @ 3
+   UniFreeUconvObject @ 4
+   UniQueryUconvObject @ 7
+   UniSetUconvObject @ 8
+   UniMapCpToUcsCp @ 10
