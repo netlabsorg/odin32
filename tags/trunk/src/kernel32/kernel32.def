@@ -1,4 +1,4 @@
-; $Id: kernel32.def,v 1.111 2001-06-26 00:25:18 bird Exp $
+; $Id: kernel32.def,v 1.112 2001-07-05 18:10:07 sandervl Exp $
 
 ;Basis is Windows95 KERNEL32
 LIBRARY KERNEL32 INITINSTANCE TERMINSTANCE
@@ -20,6 +20,18 @@ IMPORTS
   _DosAliasMem                 =  DOSCALLS.298
    DosQuerySysState            =  DOSCALLS.368
   _DosQuerySysState            =  DOSCALLS.368
+
+  WinXxAllocFill                = PMMERGE.5423
+  WinXxFreeMem                  = PMMERGE.5427
+  WinXxReallocMem               = PMMERGE.5429
+
+  Win32WaitForIdleThread        = PMMERGE.5474
+  WinXxCreateHeap2              = PMMERGE.5475
+  WinMspInit                    = PMMERGE.5420
+  pSharedHeap                   = PMMERGE.6205
+  WinXxAllocMem                 = PMMERGE.5424
+  WinXxCreateHeap               = PMMERGE.5425
+  WinXxDestroyHeap              = PMMERGE.5426
 
 EXPORTS
 
@@ -535,7 +547,7 @@ EXPORTS
      GlobalDeleteAtom           = _GlobalDeleteAtom@4         @438
      GlobalFindAtomA            = _GlobalFindAtomA@4          @439
      GlobalFindAtomW            = _GlobalFindAtomW@4          @440
-;    GlobalFix                  = _GlobalFix@??               @441
+     GlobalFix                  = _GlobalFix@4                @441
      GlobalFlags                = _GlobalFlags@4              @442
      GlobalFree                 = _GlobalFree@4               @443
      GlobalGetAtomNameA         = _GlobalGetAtomNameA@12      @444
@@ -546,7 +558,7 @@ EXPORTS
      GlobalReAlloc              = _GlobalReAlloc@12           @449
      GlobalSize                 = _GlobalSize@4               @450
      GlobalUnWire               = _GlobalUnWire@4             @451      ;obsolete
-;    GlobalUnfix                = _GlobalUnfix@??             @452      ;obsolete
+     GlobalUnfix                = _GlobalUnfix@4              @452      ;obsolete
      GlobalUnlock               = _GlobalUnlock@4             @453
      GlobalWire                 = _GlobalWire@4               @454      ;obsolete
 ;    Heap32First                = _Heap32First@??             @455      ;W95
@@ -591,10 +603,9 @@ EXPORTS
     IsDBCSLeadByteEx           = _IsDBCSLeadByteEx@8         @485
 ;   IsLSCallback               = _IsLSCallback@??            @486       ;W95
 ;   IsSLCallback               = _IsSLCallback@??            @487       ;W95
-    IsDebuggerPresent          = _IsDebuggerPresent@0        @889      ;NT/98
-;   IsProcessorFeaturePresent  = _IsProcessorFeaturePresent@??          ;NT
+    IsDebuggerPresent          = _IsDebuggerPresent@0        @889       ;NT/98
     IsValidCodePage            = _IsValidCodePage@4          @488
-    IsValidLocale              = _IsValidLocale@8           @489
+    IsValidLocale              = _IsValidLocale@8            @489
     K32Thk1632Epilog           = _K32Thk1632Epilog@4         @490       ;W95
     K32Thk1632Prolog           = _K32Thk1632Prolog@4         @491       ;W95
     LCMapStringA               = _LCMapStringA@24            @492
