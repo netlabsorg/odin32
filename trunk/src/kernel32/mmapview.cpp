@@ -1,4 +1,4 @@
-/* $Id: mmapview.cpp,v 1.1 2003-03-27 14:13:11 sandervl Exp $ */
+/* $Id: mmapview.cpp,v 1.2 2003-12-12 11:09:38 sandervl Exp $ */
 
 /*
  * Win32 Memory mapped file & view classes
@@ -95,11 +95,13 @@ Win32MemMapView::Win32MemMapView(Win32MemMap *map, ULONG offset, ULONG size,
             return;
         }
         pShareViewAddr = viewaddr;
+        viewaddr += mOffset;
     }
 
     //view == memory mapping for executable images (only used internally)
     if(map->getImage()) {
-        pMapView = map->getMappingAddr();
+        pMapView  = map->getMappingAddr();
+        pMapView += mOffset;
     }
     else {
         if(mfAccess & MEMMAP_ACCESS_COPYONWRITE) 
