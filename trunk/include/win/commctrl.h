@@ -4561,6 +4561,13 @@ BOOL WINAPI Str_SetPtrW (LPWSTR *, LPCWSTR);
 #define Str_GetPtr WINELIB_NAME_AW(Str_GetPtr)
 #define Str_SetPtr WINELIB_NAME_AW(Str_SetPtr)
 
+#define DA_LAST         (0x7fffffff)
+#define DPA_APPEND      (0x7fffffff)
+#define DPA_ERR         (-1)
+
+#define DSA_APPEND      (0x7fffffff)
+#define DSA_ERR         (-1)
+
 
 /* Dynamic Storage Array */
 
