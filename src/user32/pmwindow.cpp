@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.135 2001-06-13 10:29:45 sandervl Exp $ */
+/* $Id: pmwindow.cpp,v 1.136 2001-06-14 11:30:56 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -14,6 +14,7 @@
 #define INCL_DEV                /* Device Function definitions  */
 #define INCL_GPICONTROL         /* GPI control Functions        */
 #define INCL_DOSPROCESS
+#define INCL_DOSMODULEMGR
 #define INCL_WINTRACKRECT
 
 #include <os2wrap.h>
@@ -50,19 +51,23 @@
 //define this to use the new code for WM_CALCVALIDRECT handling
 //#define USE_CALCVALIDRECT
 
-HMQ  hmq = 0;                             /* Message queue handle         */
-HAB  hab = 0;
-
-RECTL desktopRectl = {0};
-ULONG ScreenWidth  = 0;
-ULONG ScreenHeight = 0;
-ULONG ScreenBitsPerPel = 0;
-BOOL  fOS2Look = FALSE;
+HMQ     hmq = 0;                             /* Message queue handle         */
+HAB     hab = 0;
+RECTL   desktopRectl = {0};
+ULONG   ScreenWidth  = 0;
+ULONG   ScreenHeight = 0;
+ULONG   ScreenBitsPerPel = 0;
+BOOL    fOS2Look = FALSE;
+HBITMAP hbmFrameMenu[3] = {0};
 
 static PFNWP pfnFrameWndProc = NULL;
 
 MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
 MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2);
+void FrameReplaceMenuItem(HWND hwndMenu, ULONG nIndex, ULONG idOld, ULONG   idNew,
+                          HBITMAP hbmNew);
+
+VOID APIENTRY DspInitSystemDriverName(PSZ pszDriverName, ULONG lenDriverName);
 
 //******************************************************************************
 //Initialize PM; create hab, message queue and register special Win32 window classes
@@ -145,13 +150,25 @@ BOOL InitPM()
 
     /* create memory device context */
     hdc = DevOpenDC(hab, OD_MEMORY, "*", 5L, (PDEVOPENDATA)&dop, NULLHANDLE);
-    DevQueryCaps(hdc, CAPS_COLOR_BITCOUNT, 1, (PLONG)&ScreenBitsPerPel);
-    DevCloseDC(hdc);
 
     fOS2Look = PROFILE_GetOdinIniBool(ODINSYSTEM_SECTION, "OS2Look", FALSE);
-    if(fOS2Look) {
+    if(fOS2Look) 
+    {
+        CHAR szDisplay[30];
+        HMODULE hModDisplay;
+
         SYSCOLOR_Init(FALSE); //use OS/2 colors
+
+        DspInitSystemDriverName(szDisplay, sizeof(szDisplay));
+        DosQueryModuleHandle(szDisplay, &hModDisplay);
+
+        hbmFrameMenu[0] = GpiLoadBitmap(hdc, hModDisplay, SBMP_MINBUTTON, 0, 0);
+        hbmFrameMenu[1] = GpiLoadBitmap(hdc, hModDisplay, SBMP_MAXBUTTON, 0, 0);
+        hbmFrameMenu[2] = GpiLoadBitmap(hdc, hModDisplay, SBMP_RESTOREBUTTON, 0, 0);
     }
+
+    DevQueryCaps(hdc, CAPS_COLOR_BITCOUNT, 1, (PLONG)&ScreenBitsPerPel);
+    DevCloseDC(hdc);
 
     dprintf(("InitPM: Desktop (%d,%d) bpp %d", ScreenWidth, ScreenHeight, ScreenBitsPerPel));
     return TRUE;
@@ -163,7 +180,30 @@ BOOL MENU_Init();
 void WIN32API SetWindowAppearance(BOOL fLooks)
 {
     if(fLooks) {
+        CHAR szDisplay[30];
+        HMODULE hModDisplay;
+
         SYSCOLOR_Init(FALSE); //use OS/2 colors
+
+        if(hbmFrameMenu[0] == 0) 
+        {
+            CHAR szDisplay[30];
+            HMODULE hModDisplay;
+            HDC   hdc;              /* Device-context handle                */
+            DEVOPENSTRUC dop = {NULL, "DISPLAY", NULL, NULL, NULL, NULL,
+                                NULL, NULL, NULL};
+
+            /* create memory device context */
+            hdc = DevOpenDC(hab, OD_MEMORY, "*", 5L, (PDEVOPENDATA)&dop, NULLHANDLE);
+
+            DspInitSystemDriverName(szDisplay, sizeof(szDisplay));
+            DosQueryModuleHandle(szDisplay, &hModDisplay);
+
+            hbmFrameMenu[0] = GpiLoadBitmap(hdc, hModDisplay, SBMP_MINBUTTON, 0, 0);
+            hbmFrameMenu[1] = GpiLoadBitmap(hdc, hModDisplay, SBMP_MAXBUTTON, 0, 0);
+            hbmFrameMenu[2] = GpiLoadBitmap(hdc, hModDisplay, SBMP_RESTOREBUTTON, 0, 0);
+            DevCloseDC(hdc);
+        }
     }
     fOS2Look = fLooks;
     MENU_Init();
@@ -438,6 +478,7 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         break;
 
     case WM_SYSCOMMAND:
+        dprintf(("OS2: WM_SYSCOMMAND %x", hwnd));
         win32wnd->DispatchMsgA(pWinMsg);
         break;
 
@@ -761,6 +802,34 @@ MRESULT EXPENTRY Win32FrameWindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
 
         wpOld = wp;
         win32wnd->MsgPosChanging((LPARAM)&wp);
+
+        if(win32wnd->getOldStyle() != win32wnd->getStyle()) {
+             OSLibSetWindowStyle(win32wnd->getOS2FrameWindowHandle(), win32wnd->getOS2WindowHandle(), win32wnd->getStyle(), win32wnd->getExStyle());
+             if(fOS2Look) {
+                 DWORD dwOldStyle = win32wnd->getOldStyle();
+                 DWORD dwStyle    = win32wnd->getStyle();
+                 
+                 if((dwOldStyle & WS_MINIMIZE_W) && !(dwStyle & WS_MINIMIZE_W)) {
+                     //SC_RESTORE -> SC_MINIMIZE
+                     FrameReplaceMenuItem(WinWindowFromID(hwnd, FID_MINMAX), 0, SC_RESTORE, SC_MINIMIZE, hbmFrameMenu[0]);
+                 }
+                 else
+                 if((dwOldStyle & WS_MAXIMIZE_W) && !(dwStyle & WS_MAXIMIZE_W)) {
+                     //SC_RESTORE -> SC_MAXIMIZE
+                     FrameReplaceMenuItem(WinWindowFromID(hwnd, FID_MINMAX), MIT_END, SC_RESTORE, SC_MAXIMIZE, hbmFrameMenu[1]);
+                 }
+                 else
+                 if(!(dwOldStyle & WS_MINIMIZE_W) && (dwStyle & WS_MINIMIZE_W)) {
+                     //SC_MINIMIZE -> SC_RESTORE
+                     FrameReplaceMenuItem(WinWindowFromID(hwnd, FID_MINMAX), 0, SC_MINIMIZE, SC_RESTORE, hbmFrameMenu[2]);
+                 }
+                 else
+                 if(!(dwOldStyle & WS_MAXIMIZE_W) && (dwStyle & WS_MAXIMIZE_W)) {
+                     //SC_MAXIMIZE -> SC_RESTORE
+                     FrameReplaceMenuItem(WinWindowFromID(hwnd, FID_MINMAX), MIT_END, SC_MAXIMIZE, SC_RESTORE, hbmFrameMenu[2]);
+                 }
+             }
+        }
 
         if ((wp.hwndInsertAfter != wpOld.hwndInsertAfter) ||
             (wp.x != wpOld.x) || (wp.y != wpOld.y) || (wp.cx != wpOld.cx) || (wp.cy != wpOld.cy) || (wp.flags != wpOld.flags))
@@ -1280,6 +1349,11 @@ PosChangedEnd:
         rc = 0;
         break;
 
+    case WM_SYSCOMMAND:
+        dprintf(("PMFRAME: WM_SYSCOMMAND %x", win32wnd->getWindowHandle()));
+        win32wnd->DispatchMsgA(pWinMsg);
+        break;
+
     default:
         goto RunDefFrameWndProc;
     }
@@ -1364,6 +1438,32 @@ VOID FrameTrackFrame(Win32BaseWindow *win32wnd,DWORD flags)
         return;
    }
    return;
+}
+//******************************************************************************
+//******************************************************************************
+void FrameReplaceMenuItem(HWND hwndMenu, ULONG nIndex, ULONG idOld, ULONG   idNew,
+                          HBITMAP hbmNew)
+{
+    MENUITEM mi;
+
+    if (!hwndMenu)
+        return;
+
+    WinEnableWindowUpdate(hwndMenu, FALSE);
+
+    if (WinSendMsg(hwndMenu, MM_QUERYITEM, MPFROM2SHORT(idOld, TRUE), MPFROMP(&mi)))
+    {
+        WinSendMsg(hwndMenu, MM_REMOVEITEM, (MPARAM)idOld, 0);
+        mi.afStyle     = MIS_BITMAP | MIS_SYSCOMMAND;
+        mi.afAttribute = 0;
+        mi.hwndSubMenu = 0;
+        mi.id    = idNew;
+        mi.hItem = (ULONG)hbmNew;
+        WinSendMsg(hwndMenu, MM_INSERTITEM, (MPARAM)&mi, 0);
+    }
+    WinEnableWindowUpdate(hwndMenu, TRUE);
+
+    WinInvalidateRect(hwndMenu, NULL, TRUE);
 }
 //******************************************************************************
 //******************************************************************************

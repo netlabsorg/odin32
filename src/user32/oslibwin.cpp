@@ -1,4 +1,4 @@
-/* $Id: oslibwin.cpp,v 1.100 2001-06-13 10:29:44 sandervl Exp $ */
+/* $Id: oslibwin.cpp,v 1.101 2001-06-14 11:30:55 sandervl Exp $ */
 /*
  * Window API wrappers for OS/2
  *
@@ -198,6 +198,7 @@ BOOL OSLibWinPositionFrameControls(HWND hwndFrame, RECTLOS2 *pRect, DWORD dwStyl
           pRect->xLeft += swp[i].cx;
           i++;
       }
+      else return; //no titlebar -> no frame controls
   }
   if((dwStyle & WS_MINIMIZEBOX_W) || (dwStyle & WS_MAXIMIZEBOX_W) || (dwStyle & WS_SYSMENU_W)) {
       hwndControl = WinWindowFromID(hwndFrame, FID_MINMAX);
@@ -879,6 +880,11 @@ void OSLibSetWindowStyle(HWND hwndFrame, HWND hwndClient, ULONG dwStyle, ULONG d
          dwWinStyle |= WS_MINIMIZED;
     }
     else dwWinStyle &= ~WS_MINIMIZED;
+
+    if(dwStyle & WS_MAXIMIZE_W) {
+         dwWinStyle |= WS_MAXIMIZED;
+    }
+    else dwWinStyle &= ~WS_MAXIMIZED;
 
     if(dwWinStyle != dwOldWinStyle) {
          WinSetWindowULong(hwndFrame, QWL_STYLE, dwWinStyle);

@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.119 2001-06-12 17:02:42 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.120 2001-06-14 11:30:57 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -149,6 +149,7 @@ virtual  WORD   SetWindowWord(int index, WORD value);
 virtual  WORD   GetWindowWord(int index);
 
          DWORD  getStyle()                      { return dwStyle; };
+         DWORD  getOldStyle()                   { return dwOldStyle; };
          void   setStyle(DWORD newstyle)        { dwStyle = newstyle; };
          DWORD  getExStyle()                    { return dwExStyle; };
          void   setExStyle(DWORD newexstyle)    { dwExStyle = newexstyle; };
@@ -346,6 +347,7 @@ protected:
         // values normally contained in the standard window words
         ULONG   dwExStyle;              //GWL_EXSTYLE
         ULONG   dwStyle;                //GWL_STYLE
+        ULONG   dwOldStyle;             //Used to determine which frame control buttons to change (OS/2 mode)
       WNDPROC   win32wndproc;           //GWL_WNDPROC
         ULONG   hInstance;              //GWL_HINSTANCE
 //Moved in ChildWindow class
