@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.253 2001-04-27 17:36:38 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.254 2001-05-03 17:51:01 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -1159,6 +1159,7 @@ ULONG Win32BaseWindow::MsgNCPaint()
 ULONG Win32BaseWindow::MsgFormatFrame(WINDOWPOS *lpWndPos)
 {
   RECT oldWindowRect = rectWindow, client = rectClient, newWindowRect;
+  RECT newClientRect;
   WINDOWPOS wndPos;
   ULONG rc;
 
@@ -1181,7 +1182,9 @@ ULONG Win32BaseWindow::MsgFormatFrame(WINDOWPOS *lpWndPos)
         lpWndPos     = &wndPos;
   }
 
-  rc = SendNCCalcSize(TRUE, &newWindowRect,  &oldWindowRect, &client, lpWndPos, &rectClient);
+  newClientRect = rectClient;
+  rc = SendNCCalcSize(TRUE, &newWindowRect,  &oldWindowRect, &client, lpWndPos, &newClientRect);
+  rectClient = newClientRect; //must update rectClient here
 
   dprintf(("MsgFormatFrame: old client rect (%d,%d)(%d,%d), new client (%d,%d)(%d,%d)", client.left, client.top, client.right, client.bottom, rectClient.left, rectClient.top, rectClient.right, rectClient.bottom));
   dprintf(("MsgFormatFrame: old window rect (%d,%d)(%d,%d), new window (%d,%d)(%d,%d)", oldWindowRect.left, oldWindowRect.top, oldWindowRect.right, oldWindowRect.bottom, rectWindow.left, rectWindow.top, rectWindow.right, rectWindow.bottom));
