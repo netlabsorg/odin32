@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.43 2004-01-15 11:18:58 sandervl Exp $ */
+/* $Id: text.cpp,v 1.44 2004-04-30 13:27:19 sandervl Exp $ */
 
 /*
  * GDI32 text apis
@@ -350,6 +350,11 @@ BOOL WIN32API ExtTextOutA(HDC hdc,int X,int Y,UINT fuOptions,CONST RECT *lprc,LP
   }
   else  dprintf(("GDI32: ExtTextOutA %x %.*s (%d,%d) %x %d %x", hdc, cbCount, lpszString, X, Y, fuOptions, cbCount, lpDx));
 
+  if(lpDx) {
+      for(int i=0;i<cbCount;i++) {
+          dprintf2(("Inc %d", lpDx[i]));
+      }
+  }
   rc = InternalTextOutAW(hdc, X, Y, fuOptions, lprc, lpszString, NULL, cbCount, lpDx, TRUE, FALSE);
 
   return(rc);

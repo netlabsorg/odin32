@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.93 2004-02-10 15:35:38 sandervl Exp $ */
+/* $Id: gdi32.cpp,v 1.94 2004-04-30 13:27:18 sandervl Exp $ */
 
 /*
  * GDI32 apis
@@ -175,6 +175,11 @@ HPEN WIN32API ExtCreatePen(DWORD dwPenStyle, DWORD dwWidth, const LOGBRUSH *lplb
 {
  HPEN hPen;
 
+    if(lplb) {
+        dprintf(("lbStyle %x", lplb->lbStyle));
+        dprintf(("lbColor %x", lplb->lbColor));
+        dprintf(("lbHatch %x", lplb->lbHatch));
+    }
     hPen = O32_ExtCreatePen(dwPenStyle, dwWidth, lplb, dwStyleCount, lpStyle);
     if(hPen) STATS_ExtCreatePen(hPen, dwPenStyle, dwWidth, lplb, dwStyleCount, lpStyle);
     return hPen;
@@ -721,9 +726,20 @@ BOOL WIN32API PolyDraw( HDC hdc, const POINT * arg2, const BYTE * arg3, DWORD  a
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API PolyPolygon( HDC hdc, const POINT * arg2, const INT * arg3, UINT  arg4)
+BOOL WIN32API PolyPolygon( HDC hdc, const POINT *lpPoints, const INT *lpPolyCounts, UINT  nCount)
 {
-    return O32_PolyPolygon(hdc, arg2, arg3, arg4);
+#ifdef DEBUG
+    int count = 0;
+    for(int i=0;i<nCount;i++) 
+    {
+        for(int j=0;j<lpPolyCounts[i];j++) 
+        {
+            dprintf(("Vertex %d point (%d,%d)", i, lpPoints[count].x, lpPoints[count].y));
+            count++;
+        }
+    }
+#endif
+    return O32_PolyPolygon(hdc, lpPoints, lpPolyCounts, nCount);
 }
 //******************************************************************************
 //******************************************************************************
