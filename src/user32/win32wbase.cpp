@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.17 1999-09-27 19:43:04 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.18 1999-09-28 13:27:52 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -897,6 +897,7 @@ ULONG Win32BaseWindow::MsgSysCommand(ULONG win32sc, ULONG x, ULONG y)
 }
 //******************************************************************************
 //TODO: Is this correct and complete?
+//Add print screen, break & numlock
 //******************************************************************************
 void Win32BaseWindow::setExtendedKey(ULONG virtualkey, ULONG *lParam)
 {
