@@ -1,4 +1,4 @@
-/* $Id: winimagepeldr.cpp,v 1.71 2001-03-30 23:59:09 sandervl Exp $ */
+/* $Id: winimagepeldr.cpp,v 1.72 2001-04-02 09:52:26 sandervl Exp $ */
 
 /*
  * Win32 PE loader Image base class
@@ -1563,7 +1563,7 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
  ULONG  ulCurFixup;
  int    Size;
  Win32DllBase    *WinDll;
- Win32ImageBase  *WinImage;
+ Win32ImageBase  *WinImage = NULL;
  Section *section;
 
 /* "algorithm:"
@@ -1709,7 +1709,8 @@ BOOL Win32PeLdrImage::processImports(char *win32file)
         WinDll->setUnloadOrder(this);
         WinImage = (Win32ImageBase *)WinDll;
     }
-    else {
+    else 
+    if(WinImage == NULL) {
         dprintf((LOG, "Unable to load dll %s", pszCurModule ));
         return FALSE;
     }
