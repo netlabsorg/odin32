@@ -1,4 +1,4 @@
-/* $Id: virtual.cpp,v 1.2 1999-08-24 12:23:25 sandervl Exp $ */
+/* $Id: virtual.cpp,v 1.3 1999-08-25 08:55:19 phaller Exp $ */
 
 /*
  * Win32 virtual memory functions
@@ -19,6 +19,7 @@
 #include <win\virtual.h>
 #include <heapstring.h>
 #include "mmap.h"
+#include <handlemanager.h>
 
 /***********************************************************************
  *             CreateFileMapping32A   (KERNEL32.46)
@@ -37,24 +38,7 @@ HANDLE WINAPI CreateFileMappingA(
                 DWORD size_low,  /* [in] Low-order 32 bits of object size */
                 LPCSTR name      /* [in] Name of file-mapping object */ )
 {
- HANDLE dupHandle;
-
-   if((hFile == -1 && size_low == 0) || size_high ||
-       protect & (PAGE_READONLY|PAGE_READWRITE|PAGE_WRITECOPY|SEC_COMMIT|SEC_IMAGE|SEC_RESERVE|SEC_NOCACHE) ||
-       ((protect & SEC_COMMIT) && (protect & SEC_RESERVE))) 
-   {
-
-	dprintf(("CreateFileMappingA: invalid parameter (combination)!"));
-	SetLastError(ERROR_INVALID_PARAMETER);
-	return 0;	
-   }
-   if(DuplicateHandle(GetCurrentProcess(), hFile, GetCurrentProcess(),
-                        &dupHandle, 0, FALSE, DUPLICATE_SAME_ACCESS) == FALSE) 
-   {
-	dprintf(("CreateFileMappingA: DuplicateHandle failed!"));
-	return 0;
-   }
-   return dupHandle;
+  return HMCreateFileMapping(hFile, sa, protect, size_high, size_low, name);
 }
 
 
@@ -62,8 +46,8 @@ HANDLE WINAPI CreateFileMappingA(
  *             CreateFileMapping32W   (KERNEL32.47)
  * See CreateFileMapping32A
  */
-HANDLE WINAPI CreateFileMappingW( HFILE hFile, LPSECURITY_ATTRIBUTES attr, 
-                                      DWORD protect, DWORD size_high,  
+HANDLE WINAPI CreateFileMappingW( HFILE hFile, LPSECURITY_ATTRIBUTES attr,
+                                      DWORD protect, DWORD size_high,
                                       DWORD size_low, LPCWSTR name )
 {
     LPSTR nameA = HEAP_strdupWtoA( GetProcessHeap(), 0, name );
@@ -87,8 +71,7 @@ HANDLE WINAPI OpenFileMappingA(
                 BOOL inherit, /* [in] Inherit flag */
                 LPCSTR name )   /* [in] Name of file-mapping object */
 {
-    dprintf(("OpenFileMappingA: NOT IMPLEMENTED"));
-    return 0;
+  return (HMOpenFileMapping(access, inherit, name));
 }
 
 
@@ -119,10 +102,10 @@ LPVOID WINAPI MapViewOfFile(
               DWORD offset_high, /* [in] High-order 32 bits of file offset */
               DWORD offset_low,  /* [in] Low-order 32 bits of file offset */
               DWORD count        /* [in] Number of bytes to map */
-) 
+)
 {
-    return MapViewOfFileEx( mapping, access, offset_high,
-                            offset_low, count, NULL );
+  return HMMapViewOfFile( mapping, access, offset_high,
+                          offset_low, count);
 }
 
 
@@ -141,27 +124,10 @@ LPVOID WINAPI MapViewOfFileEx(
               DWORD offset_low,  /* [in] Low-order 32 bits of file offset */
               DWORD count,       /* [in] Number of bytes to map */
               LPVOID addr        /* [in] Suggested starting address for mapped view */
-) 
+)
 {
- DWORD filesize, bytesread;
- LPSTR lpBuffer;
-
-   filesize = GetFileSize(handle, 0);
-   if(filesize == 0) {
-	dprintf(("MapViewOfFileEx: filesize = 0!"));
-	return 0;
-   }
-   lpBuffer = (LPSTR)VirtualAlloc(0, filesize, MEM_COMMIT, PAGE_READWRITE);
-   if(lpBuffer == 0) {
-	dprintf(("MapViewOfFileEx: VirtualAlloc failed (%d bytes)!", filesize));
-	return 0;
-   }
-   if(ReadFile(handle, lpBuffer, filesize, &bytesread, NULL) == FALSE) {
-	dprintf(("MapViewOfFileEx: ReadFile failed (%d bytes)!", filesize));
-	VirtualFree(lpBuffer, 0, MEM_RELEASE);
-	return 0;
-   }
-   return lpBuffer;
+  return HMMapViewOfFileEx( handle, access, offset_high,
+                            offset_low, count, addr);
 }
 
 
@@ -176,10 +142,9 @@ LPVOID WINAPI MapViewOfFileEx(
 BOOL WINAPI FlushViewOfFile(
               LPCVOID base, /* [in] Start address of byte range to flush */
               DWORD cbFlush /* [in] Number of bytes in range */
-) 
+)
 {
-    dprintf(("FlushViewOfFile: NOT IMPLEMENTED"));
-    return TRUE;
+  return HMFlushViewOfFile( (LPVOID)base, cbFlush);
 }
 
 
@@ -195,21 +160,17 @@ BOOL WINAPI FlushViewOfFile(
  *	FALSE: Failure
  */
 BOOL WINAPI UnmapViewOfFile(LPVOID addr /* [in] Address where mapped view begins */
-) 
+)
 {
-    if (!addr)
-    {
-        SetLastError( ERROR_INVALID_PARAMETER );
-        return FALSE;
-    }
-    return VirtualFree(addr, 0, MEM_RELEASE);
+  return HMUnmapViewOfFile( addr );
 }
+
 
 /***********************************************************************
  *             VIRTUAL_MapFileW
  *
  * Helper function to map a file to memory:
- *  name			-	file name 
+ *  name			-	file name
  *  [RETURN] ptr		-	pointer to mapped file
  */
 LPVOID WINAPI VIRTUAL_MapFileW( LPCWSTR name )
@@ -217,7 +178,7 @@ LPVOID WINAPI VIRTUAL_MapFileW( LPCWSTR name )
     HANDLE hFile, hMapping;
     LPVOID ptr = NULL;
 
-    hFile = CreateFileW( name, GENERIC_READ, FILE_SHARE_READ, NULL, 
+    hFile = CreateFileW( name, GENERIC_READ, FILE_SHARE_READ, NULL,
                            OPEN_EXISTING, FILE_FLAG_RANDOM_ACCESS, 0);
     if (hFile != INVALID_HANDLE_VALUE)
     {
@@ -236,7 +197,7 @@ LPVOID WINAPI VIRTUAL_MapFileW( LPCWSTR name )
  *             VIRTUAL_MapFileA
  *
  * Helper function to map a file to memory:
- *  name			-	file name 
+ *  name			-	file name
  *  [RETURN] ptr		-	pointer to mapped file
  */
 LPVOID WINAPI VIRTUAL_MapFileA( LPCSTR name )
@@ -244,7 +205,7 @@ LPVOID WINAPI VIRTUAL_MapFileA( LPCSTR name )
     HANDLE hFile, hMapping;
     LPVOID ptr = NULL;
 
-    hFile = CreateFileA(name, GENERIC_READ, FILE_SHARE_READ, NULL, 
+    hFile = CreateFileA(name, GENERIC_READ, FILE_SHARE_READ, NULL,
                         OPEN_EXISTING, FILE_FLAG_RANDOM_ACCESS, 0);
     if (hFile != INVALID_HANDLE_VALUE)
     {
@@ -258,3 +219,4 @@ LPVOID WINAPI VIRTUAL_MapFileA( LPCSTR name )
     }
     return ptr;
 }
+
