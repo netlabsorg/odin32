@@ -1,4 +1,4 @@
-/* $Id: scroll.cpp,v 1.26 1999-12-01 18:23:28 cbratschi Exp $ */
+/* $Id: scroll.cpp,v 1.27 1999-12-03 17:30:17 cbratschi Exp $ */
 /*
  * Scrollbar control
  *
@@ -84,10 +84,11 @@ static HWND SCROLL_GetScrollHandle(HWND hwnd,INT nBar)
         Win32BaseWindow *win32wnd = Win32BaseWindow::GetWindowFromHandle(hwnd);
 
         if (!win32wnd) return 0;
+//CB: I removed WS_* check due to problems, but it should work
         if (nBar == SB_HORZ)
-          return  (win32wnd->getStyle() & WS_HSCROLL) ? Win32BaseWindow::OS2ToWin32Handle(win32wnd->getHorzScrollHandle()):0;
+          return /*(win32wnd->getStyle() & WS_HSCROLL) ?*/ Win32BaseWindow::OS2ToWin32Handle(win32wnd->getHorzScrollHandle())/*:0*/;
         else
-          return (win32wnd->getStyle() & WS_VSCROLL) ? Win32BaseWindow::OS2ToWin32Handle(win32wnd->getVertScrollHandle()):0;
+          return /*(win32wnd->getStyle() & WS_VSCROLL) ?*/ Win32BaseWindow::OS2ToWin32Handle(win32wnd->getVertScrollHandle())/*:0*/;
       }
 
     case SB_CTL:
