@@ -1,4 +1,4 @@
-# $Id: setup.optional.alp.mk,v 1.1 2002-05-16 11:37:00 bird Exp $
+# $Id: setup.optional.alp.mk,v 1.2 2002-08-27 03:02:51 bird Exp $
 
 #
 #  Helper file for all the optional stuff for the ALP assembler.
@@ -24,4 +24,15 @@ _AS_MODE = -Sv:M600
 _AS_MODE = -Sv:ALP
 !endif
 
-_AS_OPTIONAL = $(_AS_MODE)
+_AS_DEBUG_TYPE = +Ods:IBM32
+!if "$(AS_DEBUG_TYPE)" == "Codeview"
+_AS_DEBUG_TYPE = +Ods:MS16
+!else
+! if "$(AS_DEBUG_TYPE)" != "HLL"
+!  if [$(ECHO) $(CLRERR)Error: Bad AS_DEBUG_TYPE ($(AS_DEBUG_TYPE)). Valid types are Codeview and HLL.$(CLRRST)]
+!  endif
+!  error
+! endif
+!endif
+
+_AS_OPTIONAL = $(_AS_MODE) $(_AS_DEBUG_TYPE)
