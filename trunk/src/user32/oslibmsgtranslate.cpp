@@ -1,4 +1,4 @@
-/* $Id: oslibmsgtranslate.cpp,v 1.61 2001-10-22 23:14:32 phaller Exp $ */
+/* $Id: oslibmsgtranslate.cpp,v 1.62 2001-10-23 04:25:39 phaller Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -130,7 +130,7 @@ USHORT pmscan2winkey [][2] = {
     0x2E, 0x53,     // 0x53 . Pad
     0, 0,           // 0x54
     0, 0,           // 0x55
-    0, 0,           // 0x56
+    0xe2, 0x56,     // 0x56 "<>|"
     0x7A, 0x57,     // 0x57 F11
     0x7B, 0x58,     // 0x58 F12
     0, 0,           // 0x59
