@@ -1,4 +1,4 @@
-/* $Id: toolbar.cpp,v 1.9 2000-08-06 20:28:28 sandervl Exp $ */
+/* $Id: toolbar.cpp,v 1.10 2000-08-08 17:05:00 cbratschi Exp $ */
 /*
  * Toolbar control
  *
@@ -28,7 +28,7 @@
  */
 
 /*
- - Corel 20000513 level
+ - Corel 20000807 level
  - (WINE 991212 level)
 */
 
@@ -41,7 +41,7 @@
 #include "ccbase.h"
 #include "toolbar.h"
 
-#define SEPARATOR_WIDTH    8
+#define SEPARATOR_WIDTH    8 //CB: Corel says 5 but this breaks the layout!
 #define TOP_BORDER         2
 #define BOTTOM_BORDER      2
 
@@ -1600,11 +1600,11 @@ TOOLBAR_AddBitmap (HWND hwnd, WPARAM wParam, LPARAM lParam)
     if (!(infoPtr->himlDef)) {
         /* create new default image list */
         //TRACE ("creating default image list!\n");
-	/* It seems that the image list created is 1 pixel taller than the bitmap height */
-//CB: nope, it's otherwise	
-	infoPtr->himlDef =
-	    ImageList_Create (infoPtr->nBitmapWidth, infoPtr->nBitmapHeight-1,
-			      ILC_COLOR | ILC_MASK, nButtons, 2);
+        /* It seems that the image list created is 1 pixel taller than the bitmap height */
+//CB: nope, it's otherwise
+        infoPtr->himlDef =
+            ImageList_Create (infoPtr->nBitmapWidth, infoPtr->nBitmapHeight-1,
+                              ILC_COLOR | ILC_MASK, nButtons, 2);
         infoPtr->himlInt = infoPtr->himlDef;
     }
 

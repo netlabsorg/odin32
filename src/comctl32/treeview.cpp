@@ -1,4 +1,4 @@
-/* $Id: treeview.cpp,v 1.15 2000-06-22 19:02:04 cbratschi Exp $ */
+/* $Id: treeview.cpp,v 1.16 2000-08-08 17:05:02 cbratschi Exp $ */
 /* Treeview control
  *
  * Copyright 1998 Eric Kohl <ekohl@abo.rhein-zeitung.de>
@@ -69,6 +69,8 @@
 #define TREEVIEW_LEFT_MARGIN 8
 
 #define MINIMUM_INDENT 19
+
+#define IDT_CHECK        401 //CB: remove later
 
 #define CALLBACK_MASK_ALL (TVIF_TEXT|TVIF_CHILDREN|TVIF_IMAGE|TVIF_SELECTEDIMAGE)
 
