@@ -1,4 +1,4 @@
-/* $Id: msgbox.cpp,v 1.2 1999-09-19 08:24:47 sandervl Exp $ */
+/* $Id: msgbox.cpp,v 1.3 1999-10-01 10:15:23 sandervl Exp $ */
 /*
  * Win32 message box function for OS/2
  *
@@ -10,6 +10,8 @@
  */
 #include <os2win.h>
 #include <misc.h>
+#include "win32wnd.h"
+
 /*****************************************************************************
  * Name      : int WIN32API MessageBoxExA
  * Purpose   : The MessageBoxEx function creates, displays, and operates a message box.
@@ -141,6 +143,7 @@ INT  WIN32API MessageBoxIndirectA(LPMSGBOXPARAMSA lpMsgBoxParams)
 int WIN32API MessageBoxA(HWND hwndOwner, LPCTSTR lpszText, LPCTSTR lpszTitle, UINT fuStyle)
 {
   dprintf(("USER32:  MessageBoxA %s %s\n", lpszText, lpszTitle));
+  hwndOwner = Win32Window::Win32ToOS2Handle(hwndOwner);
   return(O32_MessageBox(hwndOwner, lpszText, lpszTitle, fuStyle));
 }
 //******************************************************************************

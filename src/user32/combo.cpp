@@ -1,4 +1,4 @@
-/* $Id: combo.cpp,v 1.1 1999-09-15 23:18:48 sandervl Exp $ */
+/* $Id: combo.cpp,v 1.2 1999-10-01 10:15:22 sandervl Exp $ */
 /*
  * Combo controls
  *
@@ -1224,8 +1224,13 @@ BOOL COMBO_FlipListbox( LPHEADCOMBO lphc, BOOL bRedrawButton )
  */
 HWND COMBO_GetLBWindow( HWND hwnd )
 {
-  LPHEADCOMBO       lphc = CB_GETPTR(hwnd);
-  if( lphc ) return lphc->hWndLBox;
+  LPHEADCOMBO   lphc = NULL;
+  LONG          ptr = GetInfoPtr(hwnd);
+  if(ptr)
+  {
+    lphc =  (*(LPHEADCOMBO*)(ptr));
+    if( lphc ) return lphc->hWndLBox;
+  }
   return 0;
 }
 
@@ -1755,7 +1760,11 @@ static void COMBO_MouseMove( LPHEADCOMBO lphc, WPARAM wParam, LPARAM lParam )
 LRESULT WINAPI ComboWndProc( HWND hwnd, UINT message,
                              WPARAM wParam, LPARAM lParam )
 {
-      LPHEADCOMBO       lphc = CB_GETPTR(hwnd);
+      LPHEADCOMBO   lphc = NULL;
+      LONG          ptr = GetInfoPtr(hwnd);
+
+      if(ptr)
+        lphc = (*(LPHEADCOMBO*)(ptr));
 
       //TRACE("[%04x]: msg %s wp %08x lp %08lx\n",
       //             pWnd->hwndSelf, SPY_GetMsgName(message), wParam, lParam );
