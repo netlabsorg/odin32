@@ -1,4 +1,4 @@
- /* $Id: changelog,v 1.429 1999-11-09 19:24:58 sandervl Exp $ */
+ /* $Id: changelog,v 1.430 1999-11-09 20:15:32 sandervl Exp $ */
 
  99-11-09: Rene Pronk <R.Pronk@twi.tudelft.nl>
 	- USER32: Added support for control mnemonics (Alt-key sends BM_CLICK
@@ -32,6 +32,7 @@
 	- KERNEL32,USER32, replaced commented out dprintf calls with dprintf2
                            Changed makefiles to enable dprintf2 (DEBUGALL)
 	- KERNEL32: Wrapper heap apis with ODIN* macros. -> fixes FS corruption
+	- USER32: Fixed LoadMenuIndirectW (didn't call new code)
 
  99-11-09: Patrick Haller <phaller@gmx.net>
 	- NTDLL:	Add:	various new functions added (DbgXXX)
