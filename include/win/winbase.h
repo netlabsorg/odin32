@@ -1787,6 +1787,7 @@ LCID        WINAPI GetUserDefaultLCID(void);
 ATOM        WINAPI AddAtomA(LPCSTR);
 ATOM        WINAPI AddAtomW(LPCWSTR);
 #define     AddAtom WINELIB_NAME_AW(AddAtom)
+BOOL      WINAPI CancelIo(HANDLE hFile);
 UINT      WINAPI CompareStringA(DWORD,DWORD,LPCSTR,DWORD,LPCSTR,DWORD);
 UINT      WINAPI CompareStringW(DWORD,DWORD,LPCWSTR,DWORD,LPCWSTR,DWORD);
 #define     CompareString WINELIB_NAME_AW(CompareString)
