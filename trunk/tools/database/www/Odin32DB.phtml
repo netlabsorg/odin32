@@ -29,6 +29,11 @@ if (isset($dllrefcode))
     $sCategoryName  = "Dll";
     if ($dllrefcode != "")
         $iRefcode = (int)$dllrefcode;
+    $fFunctions = (isset($fFunctions)   && $fFunctions  != '0');
+    $fFiles     = (isset($fFiles)       && $fFiles      != '0');
+    $fAPIGroups = (isset($fAPIGroups)   && $fAPIGroups  != '0');
+    $fAuthors   = (isset($fAuthors)     && $fAuthors    != '0');
+    $fSortByState=(isset($fSortByState) && $fSortByState!= '0');
 }
 else if (isset($filerefcode))
 {   /* Files by refcode */
@@ -36,6 +41,10 @@ else if (isset($filerefcode))
     $sCategoryName  = "File";
     if ($filerefcode != "")
         $iRefcode = (int)$filerefcode;
+    $fFunctions = (isset($fFunctions)   && $fFunctions  != '0');
+    $fAPIGroups = (isset($fAPIGroups)   && $fAPIGroups  != '0');
+    $fAuthors   = (isset($fAuthors)     && $fAuthors    != '0');
+    $fSortByState=(isset($fSortByState) && $fSortByState!= '0');
 }
 else if (isset($functionrefcode))
 {   /* Functions by refcode */
@@ -95,6 +104,13 @@ require "05-ColumnTwoHeader.php3";
 echo $Title."<br>".$sCategoryName.": ".$sName;
 require "06-ColumnTwoHeader2.php3";
 
+
+/*
+ * Init the contents array.
+ */
+$aContent = array();
+
+
 TekstBeg();
 if (!$fNoData)
 {
@@ -102,152 +118,19 @@ if (!$fNoData)
     {
         case "dll":
             {
-            echo $sCategoryName;
+            Odin32DBDllInfoAll($aContent, $db, $iRefcode, $fFunctions, $fFiles, $fAPIGroups, $fAuthors, $fSortByState);
             break;
             }
 
-
         case "file":
             {
-            echo $sCategoryName;
+            Odin32DBFileInfoAll($aContent, $db, $iRefcode, $fFunctions, $fAPIGroups, $fAuthors, $fSortByState);
             break;
             }
 
         case "function":
             {
-            $sql =  sprintf("
-                             SELECT
-                                    f.name          AS name,
-                                    f.intname       AS intname,
-                                    f.ordinal       AS ordinal,
-                                    f.return        AS return,
-                                    f.type          AS type,
-                                    f.description   AS description,
-                                    f.remark        AS remark,
-                                    f.returndesc    AS returndesc,
-                                    f.sketch        AS sketch,
-                                    f.equiv         AS equiv,
-                                    f.time          AS time,
-                                    g.name          AS apigroupname,
-                                    g.refcode       AS apigrouprefcode,
-                                    a.name          AS aliasname,
-                                    a.refcode       AS aliasrefcode,
-                                    ad.name         AS aliasdllname,
-                                    ad.refcode      AS aliasdllrefcode,
-                                    d.name          AS dllname,
-                                    d.refcode       AS dllrefcode,
-                                    i.name          AS filename,
-                                    i.refcode       AS filerefcode,
-                                    s.name          AS state
-                                FROM
-                                    function f
-                                    LEFT OUTER JOIN function a ON f.aliasfn  = a.refcode
-                                    LEFT OUTER JOIN dll ad     ON a.dll      = ad.refcode
-                                    LEFT OUTER JOIN apigroup g ON f.apigroup = g.refcode
-                                    LEFT       JOIN dll d      ON f.dll      = d.refcode
-                                    LEFT       JOIN state s    ON f.state    = s.refcode
-                                    LEFT OUTER JOIN file i     ON f.file     = i.refcode
-                                WHERE
-                                    f.refcode = %d",
-                            $iRefcode);
-                $result = mysql_query($sql, $db);
-                if (@mysql_num_rows($result) > 0 &&
-                    ($array = mysql_fetch_array($result))
-                    )
-                {
-                    Naslov("General", "General");
-                    echo "\n<table width=100% border=3 cellpadding=0>\n";
-                    Odin32DBInfoRow1("Name", $array, "name","","","","");
-                    if (isset($array["intname"]))
-                        Odin32DBInfoRow1("Internal Name", $array, "intname","","","","");
-                    else
-                        Odin32DBInfoRow1("Internal Name", $array, "name","","","","");
-                    Odin32DBInfoRow1("Dll", $array, "dllname", "dllrefcode", "dllrefcode","","");
-                    Odin32DBInfoRow1("Ordinal", $array, "ordinal","","","not available","");
-                    if (isset($array["aliasrefcode"]))
-                        Odin32DBInfoRow2("Forwards", $array, "aliasdllname", "aliasdllrefcode", "dllrefcode","",".",
-                                                             "aliasname", "aliasrefcode", "functionrefcode");
-                    if (isset($array["apigroup"]))
-                        Odin32DBInfoRow1("API Group", $array, "apigroupname", "apigrouprefcode", "apigrouprefcode","","");
-                    Odin32DBInfoRow1("File", $array, "filename", "filerefcode", "filerefcode","not available","");
-
-                    echo "\n</table>\n";
-
-
-                    Naslov("Declaration", "declaration");
-                    echo "<pre>\n";
-                    if (isset($array["return"]))
-                        echo $array["return"]." ";
-                    echo $array["name"]."(";
-                    $sql = sprintf("
-                                    SELECT
-                                            name                AS name,
-                                            type                AS type,
-                                            description         AS description
-                                        FROM
-                                            parameter
-                                        WHERE
-                                            function = %d
-                                        ORDER BY sequencenbr",
-                                   $iRefcode);
-                    $result2 = mysql_query($sql, $db);
-                    if ($result2 && ($cParams = mysql_num_rows($result2)) > 0)
-                    {
-                        while ($param = mysql_fetch_array($result2))
-                        {
-                            if (--$cParams == 0)
-                                printf("\n        %-20s %s", $param["type"], $param["name"]);
-                            else
-                                printf("\n        %-20s %s,", $param["type"], $param["name"]);
-                        }
-                    }
-                    else
-                        echo "void";
-
-                    echo ");\n";
-                    echo "</pre>\n";
-
-                    Naslov("Documentation", "docs");
-                    Odin32DBDocRow1("Description", $array, "description");
-                    PodNaslov("Parameters");
-                    if ($result2 &&
-                        mysql_num_rows($result2) > 0 &&
-                        mysql_data_seek($result2, 0)
-                        )
-                    {
-                        while ($param = mysql_fetch_array($result2))
-                        {
-                            /*echo "  <tr><td width=100%>".$param["name"]."</td></tr>\n";*/
-                            echo "  <br><b>".$param["name"].":</b>\n";
-                            if (isset($param["description"]))
-                            {
-                                echo "\n  <table width=100% border=0 cellpadding=0>\n";
-                                echo "  <tr><td width=10%>&nbsp;</td>\n";
-                                $sDescription = str_replace("<BR>", "", str_replace("<BR><BR>\n","<br>",$param["description"]));
-                                echo "  <td width=90%><font size=-1>".$sDescription."</font></td></tr>\n";
-                                echo "\n</table>\n";
-                            }
-                            /*else
-                                 echo "  </tr>";*/
-                        }
-                    }
-                    else
-                        echo "void";
-
-
-                    Odin32DBDocRow1("Returns", $array, "returndesc");
-                    Odin32DBDocRow1("Sketch/Algorithm", $array, "sketch");
-                    Odin32DBDocRow1("Remark", $array, "remark");
-
-                }
-                else
-                {
-                    echo "<p> No data!</p>";
-                    Odin32DBDumpSql($sql);
-                }
-                if (@mysql_num_rows($result) > 0 &&
-                    ($aName = @mysql_fetch_row($result))
-                    )
+            Odin32DBFunctionInfoAll($aContent, $db, $iRefcode);
             break;
             }
 
@@ -274,11 +157,9 @@ TekstEnd();
 
 require "07-ColumnTwoFooter.php3";
 require "08-News.php3";
-// require "09-ContentsTitle.php3";
+require "09-ContentsTitle.php3";
 
-TocBeg();
-
-TocEnd();
+DBWriteContents($aContent);
 
 require "10-EndOfContent.php3";
 require "11-NetlabsContact.php3";
