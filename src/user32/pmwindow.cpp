@@ -1,4 +1,4 @@
-/* $Id: pmwindow.cpp,v 1.57 1999-11-26 17:06:08 cbratschi Exp $ */
+/* $Id: pmwindow.cpp,v 1.58 1999-11-27 00:10:20 sandervl Exp $ */
 /*
  * Win32 Window Managment Code for OS/2
  *
@@ -691,6 +691,17 @@ MRESULT EXPENTRY Win32WindowProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 
         dprintf(("PM: WM_CHAR: %x %x %d %x", SHORT1FROMMP(mp2), SHORT2FROMMP(mp2), repeatCount, scanCode));
         dprintf(("PM: WM_CHAR: %x", flags));
+
+        // vitali add begin
+        if ( ( SHORT1FROMMP(mp2) & 0x0FF ) == 0x0E0 )
+        {
+            // an extended key ( arrows, ins, del and so on )
+            // get "virtual" scancode from character code cause
+            // for "regular" keys they are equal
+            scanCode = ( SHORT1FROMMP(mp2) >> 8) & 0x0FF;
+        }       
+        // vitali add end
+
         // both WM_KEYUP & WM_KEYDOWN want a virtual key, find the right Win32 virtual key
         // given the OS/2 virtual key and OS/2 character
 

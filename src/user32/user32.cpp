@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.56 1999-11-26 17:06:08 cbratschi Exp $ */
+/* $Id: user32.cpp,v 1.57 1999-11-27 00:10:21 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -1570,25 +1570,6 @@ WORD WIN32API VkKeyScanExA(CHAR uChar,
   return (uChar);
 }
 
-/* Synchronization Functions */
-ODINFUNCTION5(DWORD,MsgWaitForMultipleObjects,DWORD,    nCount,
-                                              LPHANDLE, pHandles,
-                                              BOOL,     fWaitAll,
-                                              DWORD,    dwMilliseconds,
-                                              DWORD,    dwWakeMask)
-{
-  // @@@PH that's a really difficult function to implement
-
-  // @@@PH this is a temporary bugfix for WINFILE.EXE
-  if (nCount == 0)
-  {
-    // only listens to incoming thread messages.
-    return (WAIT_OBJECT_0);
-  }
-
-  return O32_MsgWaitForMultipleObjects(nCount,pHandles,fWaitAll,dwMilliseconds,dwWakeMask);
-}
-
 /* Button Functions */
 
 BOOL WIN32API CheckRadioButton( HWND hDlg, UINT nIDFirstButton, UINT nIDLastButton, UINT  nIDCheckButton)
@@ -1873,35 +1854,6 @@ HDESK WIN32API GetThreadDesktop(DWORD dwThreadId)
 
 /* Message and Message Queue Functions */
 
-/*****************************************************************************
- * Name      : BOOL WIN32API GetInputState
- * Purpose   : The GetInputState function determines whether there are
- *             mouse-button or keyboard messages in the calling thread's message queue.
- * Parameters:
- * Variables :
- * Result    : If the queue contains one or more new mouse-button or keyboard
- *               messages, the return value is TRUE.
- *             If the function fails, the return value is FALSE.
- * Remark    :
- * Status    : UNTESTED STUB
- *
- * Author    : Patrick Haller [Thu, 1998/02/26 11:55]
- *****************************************************************************/
-BOOL WIN32API GetInputState(VOID)
-{
-  dprintf(("USER32:GetInputState () not implemented.\n"));
-
-  return (FALSE);
-}
-//******************************************************************************
-//******************************************************************************
-DWORD WIN32API GetQueueStatus( UINT flags)
-{
-#ifdef DEBUG
-    WriteLog("USER32:  GetQueueStatus\n");
-#endif
-    return O32_GetQueueStatus(flags);
-}
 
 /* Font and Text Functions */
 
