@@ -1,4 +1,4 @@
-/* $Id: db.cpp,v 1.19 2000-08-02 14:43:26 bird Exp $ *
+/* $Id: db.cpp,v 1.20 2000-08-02 18:10:17 bird Exp $ *
  *
  * DB - contains all database routines.
  *
@@ -449,7 +449,7 @@ BOOL            _System dbInsertUpdateFile(signed long lDll,
     }
     else
     {   /* insert */
-        sprintf(&szQuery[0], "INSERT INTO file(dll, name, description, lastauthor, lastdatetime, revision) VALUES(%d, '%s', %ld, ",
+        sprintf(&szQuery[0], "INSERT INTO file(dll, name, lastauthor, description, lastdatetime, revision) VALUES(%d, '%s', %ld, ",
                 lDll, pszFilename, lLastAuthor);
         if (pszDescription != NULL && *pszDescription != '\0')
             sqlstrcat(&szQuery[0], NULL, pszDescription);
