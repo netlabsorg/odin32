@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.101 2001-06-13 10:29:45 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.102 2001-06-23 07:21:56 achimha Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -39,11 +39,13 @@
 #include "syscolor.h"
 #include "pmwindow.h"
 #include "oslibgdi.h"
+#include "oslibwin.h"
+#include "oslibprf.h"
 
 #include <wchar.h>
 #include <stdlib.h>
 #include <string.h>
-#include <oslibwin.h>
+//#include <oslibwin.h>
 #include <win32wnd.h>
 #include <winuser.h>
 
@@ -625,10 +627,84 @@ BOOL WIN32API SystemParametersInfoA(UINT uiAction, UINT uiParam, PVOID pvParam, 
 {
  BOOL rc = TRUE;
 
+  dprintf(("USER32:  SystemParametersInfoA uiAction: %d, uiParam: %d, pvParam: %d, fWinIni: %d\n",
+           uiAction, uiParam, pvParam, fWinInit));
+
   switch(uiAction) {
+
+    case SPI_GETBEEP:
+        *(ULONG*)pvParam = OSLibWinQuerySysValue(SVOS_ALARM);
+        break;
+
+    case SPI_GETKEYBOARDDELAY:
+        *(PULONG)pvParam = OSLibPrfQueryProfileInt(OSLIB_HINI_USER, "PM_ControlPanel",
+                                                   "KeyRepeatDelay", 90);
+        break;
+
+    case SPI_GETKEYBOARDSPEED:
+        *(PULONG)pvParam = OSLibPrfQueryProfileInt(OSLIB_HINI_USER, "PM_ControlPanel",
+                                                   "KeyRepeatRate", 19);
+        break;
+
+#if 0
+// TODO: Make OSLib a seperate DLL and use it everywhere?
+    case SPI_GETMOUSE:
+    {
+        ULONG retCode;
+        retCode = OSLibDosOpen(
+        break;
+    }
+#endif
+
+    case SPI_SETBEEP:
+        // we don't do anything here. Win32 apps shouldn't change OS/2 settings
+        dprintf(("USER32: SPI_SETBEEP is ignored!\n"));
+        break;
+
+    case SPI_SETBORDER:
+        // TODO make this for Win32 apps only, Open32 changes OS/2 settings!
+        dprintf(("USER32: SPI_SETBORDER is ignored, implement!\n"));
+        break;
+
+    case SPI_SETDOUBLECLKHEIGHT:
+        // TODO make this for Win32 apps only, Open32 changes OS/2 settings!
+        dprintf(("USER32: SPI_SETDOUBLECLICKHEIGHT is ignored, implement!\n"));
+        break;
+
+    case SPI_SETDOUBLECLKWIDTH:
+        // TODO make this for Win32 apps only, Open32 changes OS/2 settings!
+        dprintf(("USER32: SPI_SETDOUBLECLICKWIDTH is ignored, implement!\n"));
+        break;
+
+    case SPI_SETDOUBLECLICKTIME:
+        // TODO make this for Win32 apps only, Open32 changes OS/2 settings!
+        dprintf(("USER32: SPI_SETDOUBLECLICKTIME is ignored, implement!\n"));
+        break;
+
+    case SPI_SETKEYBOARDDELAY:
+        // TODO make this for Win32 apps only, Open32 changes OS/2 settings!
+        dprintf(("USER32: SPI_SETKEYBOARDDELAY is ignored, implement!\n"));
+        break;
+
+    case SPI_SETKEYBOARDSPEED:
+        // TODO make this for Win32 apps only, Open32 changes OS/2 settings!
+        dprintf(("USER32: SPI_SETKEYBOARDSPEED is ignored, implement!\n"));
+        break;
+
+    case SPI_SETMOUSE:
+        // TODO make this for Win32 apps only, Open32 changes OS/2 settings!
+        dprintf(("USER32: SPI_SETMOUSE is ignored, implement!\n"));
+        break;
+
+    case SPI_SETMOUSEBUTTONSWAP:
+        // TODO make this for Win32 apps only, Open32 changes OS/2 settings!
+        dprintf(("USER32: SPI_SETMOUSEBUTTONSWAP is ignored, implement!\n"));
+        break;
+
     case SPI_SCREENSAVERRUNNING:
         *(BOOL *)pvParam = FALSE;
         break;
+
     case SPI_GETDRAGFULLWINDOWS:
         *(BOOL *)pvParam = FALSE; //CB: where is the Warp 4 setting stored?
         break;
@@ -754,7 +830,10 @@ BOOL WIN32API SystemParametersInfoA(UINT uiAction, UINT uiParam, PVOID pvParam, 
         break;
 
     default:
-        rc = O32_SystemParametersInfo(uiAction, uiParam, pvParam, fWinIni);
+        dprintf(("System parameter value is not supported!\n"));
+        rc = FALSE;
+        // AH: no longer call Open32
+        //rc = O32_SystemParametersInfo(uiAction, uiParam, pvParam, fWinIni);
         break;
   }
   dprintf(("USER32:  SystemParametersInfoA %d, returned %d\n", uiAction, rc));
