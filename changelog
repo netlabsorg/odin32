@@ -1,4 +1,7 @@
-/* $Id: changelog,v 1.2055 2002-04-30 09:21:12 sandervl Exp $ */
+/* $Id: changelog,v 1.2056 2002-04-30 09:34:56 sandervl Exp $ */
+
+ 2002-04-30: knut st. osmundsen <bird@anduin.net>
+    - KERNEL32: o Changes for debug heap (makefile + exception handler)
 
  2002-04-30: Platon Fomichev <platon@innotek.de>
     - KERNEL32: o FileTimeToSystemTime, DosDateTimeToFileTime & 
