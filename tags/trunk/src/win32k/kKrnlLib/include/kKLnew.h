@@ -1,4 +1,4 @@
-/* $Id: kKLnew.h,v 1.1 2001-09-14 01:50:17 bird Exp $
+/* $Id: kKLnew.h,v 1.2 2001-10-23 02:12:43 bird Exp $
  *
  * new - new and delete operators.
  *
@@ -26,13 +26,13 @@
 #ifndef __DEBUG_ALLOC__
 /* The standard favourites */
 void *operator new(size_t size);
-void *operator new(size_t size, void *location);  /* stub */
+void *operator new(size_t size, void *location);
 
-void *operator new[](size_t size);                /* stub */
-void *operator new[](size_t size, void *location);/* stub */
+void *operator new[](size_t size);
+void *operator new[](size_t size, void *location);
 
 void operator delete(void *location);
-void operator delete[](void *location);           /* stub */
+void operator delete[](void *location);
 #endif
 
 #ifdef __DEBUG_ALLOC__
