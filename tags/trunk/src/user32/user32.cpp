@@ -1,4 +1,4 @@
-/* $Id: user32.cpp,v 1.94 2001-03-27 16:17:52 sandervl Exp $ */
+/* $Id: user32.cpp,v 1.95 2001-03-30 22:08:19 sandervl Exp $ */
 
 /*
  * Win32 misc user32 API functions for OS/2
@@ -1525,7 +1525,10 @@ int WIN32API FrameRect( HDC hDC, const RECT * lprc, HBRUSH  hbr)
 //******************************************************************************
 BOOL WIN32API InvertRect( HDC hDC, const RECT * lprc)
 {
-    dprintf(("USER32: InvertRect %x", hDC));
+    if(lprc) {
+         dprintf(("USER32: InvertRect %x (%d,%d)(%d,%d)", hDC, lprc->left, lprc->top, lprc->right, lprc->bottom));
+    }
+    else dprintf(("USER32: InvertRect %x NULL", hDC));
     return O32_InvertRect(hDC,lprc);
 }
 
