@@ -1,4 +1,4 @@
-/* $Id: winkeyboard.cpp,v 1.32 2002-02-11 16:06:00 sandervl Exp $ */
+/* $Id: winkeyboard.cpp,v 1.33 2002-05-01 08:03:05 sandervl Exp $ */
 /*
  * Win32 <-> PM key translation
  *
@@ -212,8 +212,8 @@ BYTE abPMScanToWinVKey[256][2] =
 /* 0x92                     */ , 0x00                       ,FALSE
 /* 0x93                     */ , 0x00                       ,FALSE
 /* 0x94                     */ , 0x00                       ,FALSE
-/* 0x95                     */ , 0x00                       ,FALSE
-/* 0x96                     */ , 0x00                       ,FALSE
+/* 0x95 PMSCAN_DBE_CONV     */ , 0x00                       ,FALSE //TODO ??
+/* 0x96 PMSCAN_DBE_NOCONV   */ , 0x00                       ,FALSE //TODO ??
 /* 0x97                     */ , 0x00                       ,FALSE
 /* 0x98                     */ , 0x00                       ,FALSE
 /* 0x99                     */ , 0x00                       ,FALSE
@@ -749,8 +749,8 @@ BYTE abPMScanToWinScan[256][2] =
 /* 0x92                     */ , WINSCAN_COLON              ,FALSE
 /* 0x93                     */ , WINSCAN_UNDERLINE          ,FALSE
 /* 0x94                     */ , WINSCAN_KANJI              ,FALSE
-/* 0x95                     */ , WINSCAN_STOP               ,FALSE
-/* 0x96                     */ , WINSCAN_AX                 ,FALSE
+/* 0x95 PMSCAN_DBE_CONV     */ , WINSCAN_NLS2               ,FALSE // CONVERT (Japanese keyboard)
+/* 0x96 PMSCAN_DBE_NOCONV   */ , WINSCAN_NLS1               ,FALSE // NOCONVERT (Japanese keyboard)
 /* 0x97                     */ , WINSCAN_UNLABELED          ,FALSE
 /* 0x98                     */ , 0x00                       ,FALSE
 /* 0x99                     */ , WINSCAN_NEXTTRACK          ,FALSE
