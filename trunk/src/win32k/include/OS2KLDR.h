@@ -1,4 +1,4 @@
-/* $Id: OS2KLDR.h,v 1.1 2001-02-10 11:11:43 bird Exp $
+/* $Id: OS2KLDR.h,v 1.2 2001-07-08 03:07:35 bird Exp $
  *
  * OS/2 kernel Loader Stuff.
  *
@@ -220,6 +220,12 @@ typedef struct MTE
 
 /** Additional ldrFindModule flag. Or together with the class. */
 #define SEARCH_FULL_NAME    0x0001
+
+
+/*******************************************************************************
+*   Global Variables                                                           *
+*******************************************************************************/
+extern PSZ*    pLdrLibPath;             /* Pointer to the libpath pointer. */
 
 
 /*******************************************************************************
