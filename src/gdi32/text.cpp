@@ -1,4 +1,4 @@
-/* $Id: text.cpp,v 1.38 2003-12-29 12:03:32 sandervl Exp $ */
+/* $Id: text.cpp,v 1.39 2003-12-29 12:04:15 sandervl Exp $ */
 
 /*
  * GDI32 text apis
@@ -512,7 +512,7 @@ BOOL WIN32API GetTextExtentExPointA(HDC hdc,
     if (lpnFit) *lpnFit = WideCharToMultiByte(CP_ACP,0,p,*lpnFit,NULL,0,NULL,NULL);
     if( IsDBCSEnv() && alpDx ) /* index of alpDx between ansi and wide may not match in DBCS !!! */
     {
-        LPINT alpDxNew = ( LPINT )HeapAlloc( GetProcessHeap(), 0, sizeof( alpDx[ 0 ] )*lpnFit );
+        LPINT alpDxNew = ( LPINT )HeapAlloc( GetProcessHeap(), 0, sizeof( alpDx[ 0 ] ) * *lpnFit );
         int i, j;
 
         for( i = j = 0; i < *lpnFit; i++, j++ )
