@@ -1,3 +1,7 @@
+$Id: LICENSE.TXT,v 1.2 2000-02-25 00:39:57 sandervl Exp $
+@c This is an additional Odin license agreement.
+@c It supercedes the main Odin license, but is only valid in 
+@c the source directory and any of it's subdirectories in which it is present.
 3DFX GLIDE Source Code General Public License
 
 
