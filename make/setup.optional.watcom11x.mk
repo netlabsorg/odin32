@@ -1,4 +1,4 @@
-# $Id: setup.optional.watcom11x.mk,v 1.10 2002-09-20 04:10:02 bird Exp $
+# $Id: setup.optional.watcom11x.mk,v 1.11 2002-10-15 12:15:11 bird Exp $
 
 #
 #  Helper file for all the optional stuff which is common for
@@ -25,6 +25,10 @@ _CC_DEF_MODEL   = SMALL
 _CC_MODEL       = -mf
 _CC_DEF_MODEL   = FLAT
 !endif
+_CC_RO_STRINGS  =
+_CC_DS          =
+_CC_FS          =
+_CC_GS          =
 _CC_OPT_R       =
 _CC_O_INLINE_USER =
 _CC_O_FRAMES=
@@ -125,6 +129,31 @@ _CC_DEF_MODEL= LARGE
 !endif
 
 # watcom options.
+!if defined(CC_READONLY_STRINGS) || defined(ALL_READONLY_STRINGS)
+_CC_RO_STRINGS = -zc
+!endif
+
+!if defined(CC_FIXED_DS) || defined(ALL_FIXED_DS)
+_CC_DS          = -zdp
+!endif
+!if defined(CC_NO_FIXED_DS) || defined(ALL_NO_FIXED_DS)
+_CC_DS          = -zdf
+!endif
+
+!if defined(CC_FIXED_FS) || defined(ALL_FIXED_FS)
+_CC_FS          = -zfp
+!endif
+!if defined(CC_NO_FIXED_FS) || defined(ALL_NO_FIXED_FS)
+_CC_FS          = -zff
+!endif
+
+!if defined(CC_FIXED_GS) || defined(ALL_FIXED_GS)
+_CC_GS          = -zgp
+!endif
+!if defined(CC_NO_FIXED_GS) || defined(ALL_NO_FIXED_GS)
+_CC_GS          = -zgf
+!endif
+
 !if defined(CC_SAVE_SEGS_ACCROSS_CALLS) || defined(ALL_SAVE_SEGS_ACCROSS_CALLS)
 _CC_OPT_R = -r
 !endif
@@ -180,7 +209,8 @@ _CC_CPU     = -$(CC_CPU)r
 !endif
 
 _CC_OPTIONAL = $(_CC_SEG_TEXT) $(_CC_SEG_DATA) $(_CC_SEG_XCPT) $(_CC_SEG_TEXT_CLASS) $(_CC_DEFAULT_LIBS) \
-               $(_CC_PACK) $(_CC_MODEL) -d$(_CC_DEF_MODEL) $(_CC_OPT_R) $(_CC_CPU) $(_CC_OPTIM)
+               $(_CC_PACK) $(_CC_MODEL) -d$(_CC_DEF_MODEL) $(_CC_RO_STRINGS) $(_CC_OPT_R) $(_CC_CPU) $(_CC_OPTIM) \
+               $(_CC_DS) $(_CC_FS) $(_CC_GS)
 
 
 
@@ -203,6 +233,10 @@ _CXX_DEF_MODEL   = SMALL
 _CXX_MODEL       = -mf
 _CXX_DEF_MODEL   = FLAT
 !endif
+_CXX_RO_STRINGS  =
+_CXX_DS          =
+_CXX_FS          =
+_CXX_GS          =
 _CXX_OPT_R       =
 _CXX_O_INLINE_USER =
 _CXX_O_FRAMES=
@@ -314,6 +348,33 @@ _CXX_DEF_MODEL= LARGE
 !if "$(_CXX_MODEL)" == ""
 ! error Invalid MODEL. CXX_MODEL=$(CXX_MODEL)
 !endif
+
+# watcom options
+!if defined(CXX_READONLY_STRINGS) || defined(ALL_READONLY_STRINGS)
+_CXX_RO_STRINGS = -zc
+!endif
+
+!if defined(CXX_FIXED_DS) || defined(ALL_FIXED_DS)
+_CXX_DS          = -zdp
+!endif
+!if defined(CXX_NO_FIXED_DS) || defined(ALL_NO_FIXED_DS)
+_CXX_DS          = -zdf
+!endif
+
+!if defined(CXX_FIXED_FS) || defined(ALL_FIXED_FS)
+_CXX_FS          = -zfp
+!endif
+!if defined(CXX_NO_FIXED_FS) || defined(ALL_NO_FIXED_FS)
+_CXX_FS          = -zff
+!endif
+
+!if defined(CXX_FIXED_GS) || defined(ALL_FIXED_GS)
+_CXX_GS          = -zgp
+!endif
+!if defined(CXX_NO_FIXED_GS) || defined(ALL_NO_FIXED_GS)
+_CXX_GS          = -zgf
+!endif
+
 !if defined(CXX_SAVE_SEGS_ACCROSS_CALLS) || defined(ALL_SAVE_SEGS_ACCROSS_CALLS)
 _CXX_OPT_R = -r
 !endif
@@ -370,7 +431,8 @@ _CXX_CPU     = -$(CXX_CPU)r
 !endif
 
 _CXX_OPTIONAL = $(_CXX_SEG_TEXT) $(_CXX_SEG_DATA) $(_CXX_SEG_XCPT) $(_CXX_SEG_TEXT_CLASS) $(_CXX_DEFAULT_LIBS) \
-                $(_CXX_PACK) $(_CXX_XCPT) $(_CXX_MODEL) -d$(_CXX_DEF_MODEL) $(_CXX_OPT_R) $(_CXX_CPU) $(_CXX_OPTIM)
+                $(_CXX_PACK) $(_CXX_XCPT) $(_CXX_MODEL) -d$(_CXX_DEF_MODEL) $(_CXX_RO_STRINGS) $(_CXX_OPT_R) $(_CXX_CPU) $(_CXX_OPTIM) \
+                $(_CXX_DS) $(_CXX_FS) $(_CXX_GS)
 
 
 #
