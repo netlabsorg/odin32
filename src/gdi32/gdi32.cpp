@@ -1,4 +1,4 @@
-/* $Id: gdi32.cpp,v 1.8 1999-09-01 19:12:15 phaller Exp $ */
+/* $Id: gdi32.cpp,v 1.9 1999-10-11 15:26:35 sandervl Exp $ */
 
 /*
  * GDI32 DIB sections
@@ -1654,10 +1654,16 @@ HRGN WIN32API PathToRegion( HDC arg1)
 }
 //******************************************************************************
 //******************************************************************************
-BOOL WIN32API Pie( HDC arg1, int arg2, int arg3, int arg4, int arg5, int arg6, int arg7, int arg8, int  arg9)
+BOOL WIN32API Pie(HDC hdc, int nLeftRect, int nTopRect, int nRightRect,
+                  int nBottomRect, int nXRadial1, int nYRadial1, int nXRadial2, 
+                  int nYRadial2)
 {
     dprintf(("GDI32: OS2Pie"));
-    return O32_Pie(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9);
+    //CB: bug in O32_Pie
+    if (nXRadial1 == nXRadial2 && nYRadial1 == nYRadial2)
+      return O32_Ellipse(hdc,nLeftRect,nTopRect,nRightRect,nBottomRect);
+    else
+      return O32_Pie(hdc,nLeftRect,nTopRect,nRightRect,nBottomRect,nXRadial1,nYRadial1,nXRadial2,nYRadial2);
 }
 //******************************************************************************
 //******************************************************************************
