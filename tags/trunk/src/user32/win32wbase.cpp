@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.302 2001-11-24 13:55:13 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.303 2001-11-27 12:33:48 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -3041,7 +3041,7 @@ BOOL Win32BaseWindow::EnumChildWindows(WNDENUMPROC lpfn, LPARAM lParam)
 
     dprintf(("EnumChildWindows of %x parameter %x %x (%x)", getWindowHandle(), lpfn, lParam, getFirstChild()));
     lock();
-    for (child = (Win32BaseWindow *)getFirstChild(); child; child = (Win32BaseWindow *)child->getNextChild())
+    for (child = (Win32BaseWindow *)getFirstChild(); child != NULL; child = (Win32BaseWindow *)child->getNextChild())
     {
         dprintf(("EnumChildWindows: enumerating child %x (owner %x; parent %x)", child->getWindowHandle(), (child->getOwner()) ? child->getOwner()->getWindowHandle() : 0, getWindowHandle()));
         hwnd = child->getWindowHandle();
@@ -3061,6 +3061,7 @@ BOOL Win32BaseWindow::EnumChildWindows(WNDENUMPROC lpfn, LPARAM lParam)
         if(!::IsWindow(hwnd))
         {
             child = prevchild;
+            if(child == NULL) break;
             continue;
         }
         if(child->getFirstChild() != NULL)
