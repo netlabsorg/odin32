@@ -1771,7 +1771,7 @@ COMBOEX_Destroy (HWND hwnd, WPARAM wParam, LPARAM lParam)
 
 #ifdef __WIN32OS2__
     //NEVER delete the font object received by WM_SETFONT!
-    DeleteObject (infoPtr->hDefaultFont);
+    if (infoPtr->hDefaultFont) DeleteObject (infoPtr->hDefaultFont);
 #else
     DeleteObject (infoPtr->font);
 #endif
