@@ -1,4 +1,4 @@
-/* $Id: oslibmsg.cpp,v 1.41 2001-08-09 08:45:40 sandervl Exp $ */
+/* $Id: oslibmsg.cpp,v 1.42 2001-08-31 19:55:41 phaller Exp $ */
 /*
  * Window message translation functions for OS/2
  *
@@ -36,6 +36,12 @@
 
 #define DBG_LOCALLOG	DBG_oslibmsg
 #include "dbglocal.h"
+
+
+// PH 2001-08-24 It seems a failure to post a message
+// kills Opera here and there.
+#define VERIFY_SHARED_HEAP 1
+
 
 typedef BOOL (EXPENTRY FNTRANS)(MSG *, QMSG *);
 typedef FNTRANS *PFNTRANS;
@@ -460,7 +466,18 @@ BOOL OSLibWinReplyMessage(ULONG result)
 ULONG OSLibSendMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam, BOOL fUnicode)
 {
  POSTMSG_PACKET *packet = (POSTMSG_PACKET *)_smalloc(sizeof(POSTMSG_PACKET));
-
+  
+#ifdef VERIFY_SHARED_HEAP
+  if (NULL == packet)
+  {
+    dprintf(("user32::oslibmsg::OSLibSendMessage - allocated packet structure is NULL, heapmin=%d\n",
+             _sheapmin() ));
+    
+    // PH: we cannot provide a correct returncode :(
+    return 0;
+  }
+#endif
+  
     packet->wParam   = wParam;
     packet->lParam   = lParam;
 
@@ -478,7 +495,17 @@ ULONG OSLibWinBroadcastMsg(ULONG msg, ULONG wParam, ULONG lParam, BOOL fSend)
 BOOL OSLibPostMessage(HWND hwnd, ULONG msg, ULONG wParam, ULONG lParam, BOOL fUnicode)
 {
  POSTMSG_PACKET *packet = (POSTMSG_PACKET *)_smalloc(sizeof(POSTMSG_PACKET));
-
+  
+#ifdef VERIFY_SHARED_HEAP
+  if (NULL == packet)
+  {
+    dprintf(("user32::oslibmsg::OSLibPostMessage - allocated packet structure is NULL, heapmin=%d\n",
+             _sheapmin() ));
+    
+    // PH: we can provide a correct returncode
+    return FALSE;
+  }
+#endif
     packet->wParam   = wParam;
     packet->lParam   = lParam;
     return WinPostMsg(hwnd, WIN32APP_POSTMSG+msg, (MPARAM)((fUnicode) ? WIN32MSG_MAGICW : WIN32MSG_MAGICA), (MPARAM)packet);
@@ -509,7 +536,19 @@ BOOL OSLibPostThreadMessage(ULONG threadid, UINT msg, WPARAM wParam, LPARAM lPar
  TEB *teb = GetTEBFromThreadId(threadid);
  POSTMSG_PACKET *packet = (POSTMSG_PACKET *)_smalloc(sizeof(POSTMSG_PACKET));
  BOOL ret;
-
+  
+#ifdef VERIFY_SHARED_HEAP
+  if (NULL == packet)
+  {
+    dprintf(("user32::oslibmsg::OSLibPostMessage - allocated packet structure is NULL, heapmin=%d\n",
+             _sheapmin() ));
+    
+    // PH: we can provide a correct returncode
+    return FALSE;
+  }
+#endif
+  
+  
     if(teb == NULL) {
         dprintf(("OSLibPostThreadMessage: thread %x not found!", threadid));
         return FALSE;
