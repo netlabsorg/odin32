@@ -1,4 +1,4 @@
-/* $Id: ccollection.h,v 1.2 2001-05-30 03:27:36 phaller Exp $ */
+/* $Id: ccollection.h,v 1.3 2001-05-30 13:02:43 phaller Exp $ */
 
 /*
  * Collection class:
@@ -160,6 +160,7 @@ class CHashtableLookup : public CCollection
         void  setSize(int iNewSize);
 
     protected:
+        void          setSize0(int iNewSize);
         unsigned long nextPrime(unsigned long x);
 
         // the array of linear lists
