@@ -59,9 +59,9 @@
  * Render a line segment from VB[v1] to VB[v2] when either one or both
  * endpoints must be clipped.
  */
-#if !defined(__MWERKS__)
-INLINE
-#endif
+//#if !defined(__MWERKS__)
+//INLINE                                /* function is accessed in fxcva.c! */
+//#endif
 void fxRenderClippedLine( struct vertex_buffer *VB,
                                  GLuint v1, GLuint v2 )
 {
