@@ -1,16 +1,20 @@
-/* $Id: text.cpp,v 1.1 1999-12-16 16:53:57 cbratschi Exp $ */
+/* $Id: text.cpp,v 1.2 1999-12-17 17:49:53 cbratschi Exp $ */
 
 /*
  * Font and Text Functions
  *
  * Copyright 1999 Christoph Bratschi
  *
+ * Copyright 1997 Bertho A. Stultiens
+ * Copyright 1993, 1994 Alexandre Julliard
  *
  * Project Odin Software License can be found in LICENSE.TXT
  */
 
 #include "winuser.h"
 #include "user32.h"
+
+//WINE parts: wine-991031
 
 static const WORD wPattern55AA[] =
 {
@@ -22,7 +26,7 @@ static HBRUSH  hPattern55AABrush = 0;
 static HBITMAP hPattern55AABitmap = 0;
 
 /*********************************************************************
- *	CACHE_GetPattern55AABitmap
+ *      CACHE_GetPattern55AABitmap
  */
 HBITMAP CACHE_GetPattern55AABitmap(void)
 {
@@ -32,7 +36,7 @@ HBITMAP CACHE_GetPattern55AABitmap(void)
 }
 
 /*********************************************************************
- *	CACHE_GetPattern55AABrush
+ *      CACHE_GetPattern55AABrush
  */
 HBRUSH CACHE_GetPattern55AABrush(void)
 {

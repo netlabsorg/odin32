@@ -1,4 +1,4 @@
-/* $Id: win32wmdichild.cpp,v 1.13 1999-12-17 17:18:04 cbratschi Exp $ */
+/* $Id: win32wmdichild.cpp,v 1.14 1999-12-17 17:49:54 cbratschi Exp $ */
 /*
  * Win32 MDI Child Window Class for OS/2
  *
@@ -8,6 +8,8 @@
  *
  * Copyright 1994, Bob Amstadt
  *           1995,1996 Alex Korobka
+ * Copyright 1993, 1994 Alexandre Julliard
+ *
  *
  *
  * TODO: See #if 0's
