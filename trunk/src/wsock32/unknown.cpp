@@ -1,4 +1,4 @@
-/* $Id: unknown.cpp,v 1.7 2000-03-24 19:28:08 sandervl Exp $ */
+/* $Id: unknown.cpp,v 1.8 2000-05-02 13:09:43 bird Exp $ */
 
 /*
  * Project Odin Software License can be found in LICENSE.TXT
@@ -18,6 +18,10 @@
 
 #define DBG_LOCALLOG	DBG_unknown
 #include "dbglocal.h"
+
+//kso: dirty fix to make this compile! not permanent!
+BOOL WINAPI QueryPerformanceCounter(LARGE_INTEGER *);
+#define LowPart u.LowPart
 
 ODINDEBUGCHANNEL(WSOCK32-UNKNOWN)
 

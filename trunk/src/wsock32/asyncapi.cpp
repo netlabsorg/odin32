@@ -1,4 +1,4 @@
-/* $Id: asyncapi.cpp,v 1.6 2000-04-23 15:55:52 sandervl Exp $ */
+/* $Id: asyncapi.cpp,v 1.7 2000-05-02 13:09:43 bird Exp $ */
 
 /*
  *
@@ -30,6 +30,11 @@
 #define DBG_LOCALLOG	DBG_async
 #include "dbglocal.h"
 
+//kso: dirty fix to make this compile! not permanent!
+BOOL WINAPI QueryPerformanceCounter(LARGE_INTEGER *p);
+#define LowPart u.LowPart
+
+
 ODINDEBUGCHANNEL(WSOCK32-ASYNC)
 
 //******************************************************************************
@@ -41,7 +46,7 @@ void ASYNCCNV WSAsyncThreadProc(void *pparm)
  LPARAM           lParam;
  int              size = 0;
  int              fail = NO_ERROR;
- 
+
    if(!pThreadParm->fCancelled)
    {
 	switch(pThreadParm->request)
@@ -58,7 +63,7 @@ void ASYNCCNV WSAsyncThreadProc(void *pparm)
 			pThreadParm->u.gethostbyname.name = 0;
 		}
 		else {
-			ret = gethostbyaddr(pThreadParm->u.gethostbyaddr.addr, 
+			ret = gethostbyaddr(pThreadParm->u.gethostbyaddr.addr,
                                             pThreadParm->u.gethostbyaddr.len,
                                             pThreadParm->u.gethostbyaddr.type);
 
@@ -151,15 +156,15 @@ void ASYNCCNV WSAsyncThreadProc(void *pparm)
 
    if(!pThreadParm->fCancelled) {
    	dprintf(("WSAsyncThreadProc %x %x %x %x", pThreadParm->hwnd, pThreadParm->msg, pThreadParm->hAsyncTaskHandle, lParam));
-  	PostMessageA(pThreadParm->hwnd, pThreadParm->msg, 
+  	PostMessageA(pThreadParm->hwnd, pThreadParm->msg,
                      (WPARAM)pThreadParm->hAsyncTaskHandle, lParam);
    }
    pThreadParm->fActive = FALSE;
-   RemoveFromQueue(pThreadParm); 
+   RemoveFromQueue(pThreadParm);
 }
 //******************************************************************************
 //******************************************************************************
-LHANDLE WSAAsyncRequest(AsyncRequestType requesttype, HWND hwnd, int msg, char *buf, 
+LHANDLE WSAAsyncRequest(AsyncRequestType requesttype, HWND hwnd, int msg, char *buf,
                         int buflen, PVOID param1, PVOID param2, PVOID param3,
                         PVOID param4)
 {
@@ -302,7 +307,7 @@ LHANDLE WSAAsyncRequest(AsyncRequestType requesttype, HWND hwnd, int msg, char *
 	return hAsyncRequest;
    }
    return 0;
-}                      
+}
 //******************************************************************************
 //******************************************************************************
 ODINFUNCTION5(LHANDLE,WSAAsyncGetHostByName,
@@ -314,7 +319,7 @@ ODINFUNCTION5(LHANDLE,WSAAsyncGetHostByName,
 {
    dprintf(("WSAAsyncGetHostByName %s", name));
 
-   return WSAAsyncRequest(ASYNC_GETHOSTBYNAME, hWnd, wMsg, buf, buflen, 
+   return WSAAsyncRequest(ASYNC_GETHOSTBYNAME, hWnd, wMsg, buf, buflen,
                           (PVOID)name, 0, 0, 0);
 }
 //******************************************************************************
@@ -330,7 +335,7 @@ ODINFUNCTION7(LHANDLE,WSAAsyncGetHostByAddr,
 {
    dprintf(("WSAAsyncGetHostByAddr %s", addr));
 
-   return WSAAsyncRequest(ASYNC_GETHOSTBYADDR, hWnd, wMsg, buf, buflen, 
+   return WSAAsyncRequest(ASYNC_GETHOSTBYADDR, hWnd, wMsg, buf, buflen,
                           (PVOID)addr, (PVOID)len, (PVOID)type, 0);
 }
 //******************************************************************************
@@ -344,7 +349,7 @@ ODINFUNCTION5(LHANDLE,WSAAsyncGetProtoByName,
 {
    dprintf(("WSAAsyncGetProtoByName %s", name));
 
-   return WSAAsyncRequest(ASYNC_GETPROTOBYNAME, hWnd, wMsg, buf, buflen, 
+   return WSAAsyncRequest(ASYNC_GETPROTOBYNAME, hWnd, wMsg, buf, buflen,
                           (PVOID)name, 0, 0, 0);
 }
 //******************************************************************************
@@ -358,7 +363,7 @@ ODINFUNCTION5(LHANDLE,WSAAsyncGetProtoByNumber,
 {
    dprintf(("WSAAsyncGetProtoByNumber %d", number));
 
-   return WSAAsyncRequest(ASYNC_GETPROTOBYNUMBER, hWnd, wMsg, buf, buflen, 
+   return WSAAsyncRequest(ASYNC_GETPROTOBYNUMBER, hWnd, wMsg, buf, buflen,
                           (PVOID)number, 0, 0, 0);
 }
 //******************************************************************************
@@ -373,7 +378,7 @@ ODINFUNCTION6(LHANDLE,WSAAsyncGetServByName,
 {
    dprintf(("WSAAsyncGetServByName %s", name));
 
-   return WSAAsyncRequest(ASYNC_GETSERVBYNAME, hWnd, wMsg, buf, buflen, 
+   return WSAAsyncRequest(ASYNC_GETSERVBYNAME, hWnd, wMsg, buf, buflen,
                           (PVOID)name, (PVOID)proto, 0, 0);
 }
 //******************************************************************************
@@ -388,7 +393,7 @@ ODINFUNCTION6(LHANDLE,WSAAsyncGetServByPort,
 {
    dprintf(("WSAAsyncGetServByPort %d %s", port, proto));
 
-   return WSAAsyncRequest(ASYNC_GETSERVBYPORT, hWnd, wMsg, buf, buflen, 
+   return WSAAsyncRequest(ASYNC_GETSERVBYPORT, hWnd, wMsg, buf, buflen,
                           (PVOID)port, (PVOID)proto, 0, 0);
 }
 //******************************************************************************
@@ -400,7 +405,7 @@ void AsyncNotifyEvent(PASYNCTHREADPARM pThreadParm, ULONG event, ULONG socket_er
    event = WSAMAKESELECTREPLY(event, socket_error);
 
    dprintf(("AsyncNotifyEvent %x %x %x %x", pThreadParm->u.asyncselect.s, pThreadParm->hwnd, pThreadParm->msg, event));
-   PostMessageA(pThreadParm->hwnd, pThreadParm->msg, (WPARAM)pThreadParm->u.asyncselect.s, 
+   PostMessageA(pThreadParm->hwnd, pThreadParm->msg, (WPARAM)pThreadParm->u.asyncselect.s,
                (LPARAM)event);
 }
 //******************************************************************************
@@ -415,7 +420,7 @@ void ASYNCCNV WSAsyncSelectThreadProc(void *pparm)
  SOCKET           s = pThreadParm->u.asyncselect.s;
  int       	  noread, nowrite, noexcept, state, sockoptlen, sockoptval;
  int              tmp, i, lEventsPending, ret, bytesread;
-  
+
    while(TRUE)
    {
 asyncloopstart:
@@ -463,7 +468,7 @@ asyncloopstart:
 		if(selecterr && selecterr < SOCBASEERR) {
 			selecterr += SOCBASEERR;
 		}
-		switch(selecterr) 
+		switch(selecterr)
 		{
 		case SOCEINTR:
 ////        		state = ioctl(s, FIOBSTATUS, (char *)&tmp, sizeof(tmp));
@@ -480,7 +485,7 @@ asyncloopstart:
 			//remote connection broken (so can't receive data anymore)
                         //but can still send
        			pThreadParm->u.asyncselect.lEventsPending &= ~(FD_READ | FD_ACCEPT);
-			goto asyncloopstart; 
+			goto asyncloopstart;
 
 		case SOCEINVAL:
        			if(lEventsPending & FD_CLOSE) {
@@ -512,7 +517,7 @@ asyncloopstart:
 				if(sockoptval == SOCECONNREFUSED || sockoptval == (SOCECONNREFUSED - SOCBASEERR)) {
 					AsyncNotifyEvent(pThreadParm, FD_CONNECT, WSAECONNREFUSED);
 				}
-            		}  
+            		}
         	}
 		else
 		if(!(state & SS_CANTSENDMORE) && (lEventsPending & FD_WRITE)) {
@@ -523,9 +528,9 @@ asyncloopstart:
       	if(ready(noread))
       	{
          	state = ioctl(s, FIONREAD, (CHAR *) &bytesread, sizeof(bytesread));
-         	if(state == SOCKET_ERROR) 
+         	if(state == SOCKET_ERROR)
  		{
-            		if(lEventsPending & FD_CLOSE) 
+            		if(lEventsPending & FD_CLOSE)
 			{
 				dprintf(("FD_CLOSE; ioctl; socket error"));
 				AsyncNotifyEvent(pThreadParm, FD_CLOSE, NO_ERROR);
@@ -539,7 +544,7 @@ asyncloopstart:
 				break; //todo: correct???
 			}
 		}
-         	if(lEventsPending & FD_ACCEPT) 
+         	if(lEventsPending & FD_ACCEPT)
  		{
             		sockoptlen = sizeof(sockoptlen);
 
@@ -559,7 +564,7 @@ asyncloopstart:
 #if 0
 //SvL: This generates FD_CLOSE messages when the connection is just fine
 //     (recv executed in another thread when select returns)
-       		else 
+       		else
 		if((lEventsPending & FD_CLOSE) && (state == 0 && bytesread == 0)) {
 			dprintf(("FD_CLOSE; state == 0 && bytesread == 0"));
 			AsyncNotifyEvent(pThreadParm, FD_CLOSE, NO_ERROR);
@@ -572,14 +577,14 @@ asyncloopstart:
          		AsyncNotifyEvent(pThreadParm, FD_OOB, NO_ERROR);
 		}
       	}
-	if((pThreadParm->u.asyncselect.lEventsPending & (FD_ACCEPT|FD_CLOSE|FD_CONNECT)) == 
+	if((pThreadParm->u.asyncselect.lEventsPending & (FD_ACCEPT|FD_CLOSE|FD_CONNECT)) ==
             (lEventsPending & (FD_ACCEPT|FD_CLOSE|FD_CONNECT))) {
 		DosSleep(10);
 	}
    }
    //remove it first, then delete semaphore object
    pThreadParm->fActive = FALSE;
-   RemoveFromQueue(pThreadParm); 
+   RemoveFromQueue(pThreadParm);
    delete pThreadParm->u.asyncselect.asyncSem;
    pThreadParm->u.asyncselect.asyncSem = 0;
 }
