@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.23 2000-03-21 00:28:58 davidr Exp $
+# $Id: makefile,v 1.24 2000-04-02 22:07:34 davidr Exp $
 
 #
 # Odin32 API
@@ -85,6 +85,7 @@ $(OBJDIR)\$(TARGET).lrf: makefile
 /OUT:$(OBJDIR)\$(TARGET).dll
 /MAP:$(OBJDIR)\$(TARGET).map
 $(OBJS)
+$(PDWIN32_LIB)/rpcrt4.lib
 $(PDWIN32_LIB)/user32.lib
 $(PDWIN32_LIB)/gdi32.lib
 $(PDWIN32_LIB)/comctl32.lib
@@ -118,7 +119,7 @@ $(PDWIN32_BIN)\regsvr32.exe: $(OBJDIR)\regsvr32.exe
 
 # Dep rule - makes depenencies for C, C++ and Asm files.
 dep:
-    $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win \
+    $(DEPEND) -I$(PDWIN32_INCLUDE);$(PDWIN32_INCLUDE)\win;. \
         *.c *.cpp *.h *.asm *.inc $(PDWIN32_INCLUDE)\*.h
 
 
