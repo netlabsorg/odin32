@@ -1,4 +1,4 @@
-/* $Id: APIImport.cmd,v 1.3 2000-02-15 13:31:40 bird Exp $
+/* $Id: APIImport.cmd,v 1.4 2000-03-14 16:10:33 bird Exp $
  *
  * Helper script which invokes APIImport.exe with the correct .def file.
  *
@@ -26,6 +26,12 @@
     do
         if (translate(sDllName) = 'WNETAP32') then
             sDllName = 'netapi32';
+        else if (translate(sDllName) = 'OPENGL') then
+        do
+            'copy mesa\opengl32.def';
+            sDllName = 'opengl32';
+        end
+
         call MakeTempDeffile sDllName, 'APIImport.def';
         sAPIImport || ' APIImport.def';
     end
