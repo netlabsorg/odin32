@@ -1,4 +1,4 @@
-# $Id: win32k.mak,v 1.11 2001-07-08 03:15:44 bird Exp $
+# $Id: win32k.mak,v 1.12 2001-07-10 05:29:22 bird Exp $
 
 #
 # Win32k.sys makefile.
@@ -76,6 +76,7 @@ OBJS  =\
     $(WIN32KOBJ)\d32Win32kIOCtl.obj \
     $(WIN32KOBJ)\d32Win32kOpenClose.obj \
     $(WIN32KOBJ)\k32AllocMemEx.obj \
+    $(WIN32KOBJ)\k32KillProcessEx.obj \
     $(WIN32KOBJ)\k32HandleSystemEvent.obj \
     $(WIN32KOBJ)\k32ProcessReadWrite.obj \
     $(WIN32KOBJ)\k32QueryCallGate.obj \
@@ -212,6 +213,7 @@ TSTOBJS =\
     $(WIN32KOBJ)\d32Win32kIOCtl.obj \
     $(WIN32KOBJ)\d32Win32kOpenClose.obj \
     $(WIN32KOBJ)\k32AllocMemEx.obj \
+    $(WIN32KOBJ)\k32KillProcessEx.obj \
     $(WIN32KOBJ)\k32HandleSystemEvent.obj \
     $(WIN32KOBJ)\k32ProcessReadWrite.obj \
     $(WIN32KOBJ)\k32QueryCallGate.obj \
