@@ -1,4 +1,4 @@
-/* $Id: changelog,v 1.1919 2001-12-20 20:46:16 sandervl Exp $ */
+/* $Id: changelog,v 1.1920 2001-12-20 20:47:12 sandervl Exp $ */
 
  2001-12-20: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32: o Allow all sections to be accessed when loading an executable/dll
@@ -8,9 +8,9 @@
     - GDI32:    o DIB Section blit: don't check source & destination sizes 
                                     with DC size (GpiDrawBits does that for us)
                   (fixes the two bitmaps in the opening window of Opera 6
-                   (choice between MDI & SDI interface)
+                   (choice between MDI & SDI interface))
     - USER32:   o GetClassNameW: return size in characters and truncate name
-                                 if string not long enough
+                                 if buffer not large enough
                   (fixes crash in Opera 6 during startup)
 
  2001-12-19: knut st. osmundsen <kosmunds@csc.com>
