@@ -1,4 +1,4 @@
-/* $Id: d16init.c,v 1.10 2001-03-02 12:48:41 bird Exp $
+/* $Id: d16init.c,v 1.11 2001-04-04 21:28:44 bird Exp $
  *
  * d16init - init routines for both drivers.
  *
@@ -122,7 +122,7 @@ USHORT NEAR dev1Init(PRPINITIN pRpIn, PRPINITOUT pRpOut)
                 if (data.usRcInit32 == NO_ERROR)
                 {
                     if (!options.fQuiet)
-                        printf16("Win32k.sys succesfully initiated!\n");
+                        printf16("Win32k.sys successfully initiated!\n");
                     pRpOut->Status = pRpOut->rph.Status = STATUS_DONE;
                 }
                 else
@@ -131,10 +131,10 @@ USHORT NEAR dev1Init(PRPINITIN pRpIn, PRPINITOUT pRpOut)
                     rc = data.usRcInit32;
                     npszErrMsg = "Ring-0 initiation failed. rc=%x\n";
                     if (rc >= ERROR_D32_FIRST && rc <= ERROR_D32_LAST)
-                        npszErrMsg2 = 
+                        npszErrMsg2 =
                         GetErrorMsg(
-                        data.usRcInit32 
-                        + ERROR_PROB_SYM_D32_FIRST 
+                        data.usRcInit32
+                        + ERROR_PROB_SYM_D32_FIRST
                         - ERROR_D32_FIRST
                         );
                 }
