@@ -1,4 +1,4 @@
-; $Id: shlwapi.def,v 1.3 1999-11-03 19:36:34 sandervl Exp $
+; $Id: shlwapi.def,v 1.4 1999-12-28 23:17:04 sandervl Exp $
 
 LIBRARY SHLWAPI INITINSTANCE TERMINSTANCE
 DATA MULTIPLE NONSHARED
@@ -418,13 +418,64 @@ IMPORTS
 EXPORTS
     PathAddBackslashA = _PathAddBackslashA@4			@169
     PathAddBackslashW = _PathAddBackslashW@4			@170
+
+    PathAppendA       = _PathAppendA@8                          @173
+    PathAppendW       = _PathAppendW@8                          @174
+    PathBuildRootA    = _PathBuildRootA@8                       @175
+    PathBuildRootW    = _PathBuildRootW@8                       @176
+
+    PathCombineA      = _PathCombineA@12                         @179
+    PathCombineW      = _PathCombineW@12                         @180
+
+    PathFileExistsA   = _PathFileExistsA@4                       @189
+    PathFileExistsW   = _PathFileExistsW@4                       @190
+
     PathFindFileNameA = _PathFindFilenameA@4			@193
     PathFindFileNameW = _PathFindFilenameW@4			@194
+
+    PathFindOnPathA   = _PathFindOnPathA@8                      @197
+    PathFindOnPathW   = _PathFindOnPathW@8                      @198
+    PathGetArgsA      = _PathGetArgsA@4                         @199
+    PathGetArgsW      = _PathGetArgsW@4                         @200
+
+    PathGetDriveNumberA = _PathGetDriveNumberA@4                @203
+    PathGetDriveNumberW = _PathGetDriveNumberW@4                @204
+    PathIsRelativeA   = _PathIsRelativeA@4                      @213
+    PathIsRelativeW   = _PathIsRelativeW@4                      @214
     PathIsRootA	      = _PathIsRootA@4				@215
     PathIsRootW	      = _PathIsRootW@4				@216
+
+    PathIsUNCA        = _PathIsUNCA@4                           @221
+    PathIsUNCW        = _PathIsUNCW@4                           @226
+
     PathMatchSpecA    = _PathMatchSpecA@8			@233
     PathMatchSpecW    = _PathMatchSpecA@8			@234
+    PathQuoteSpacesA  = _PathQuoteSpacesA@4                     @237
+    PathQuoteSpacesW  = _PathQuoteSpacesW@4                     @238
+
     PathRemoveBackslashA = _PathRemoveBackslashA@4             	@243
     PathRemoveBackslashW = _PathRemoveBackslashA@4             	@244
+    PathRemoveBlanksA    = _PathRemoveBlanksA@4                 @245
+    PathRemoveBlanksW    = _PathRemoveBlanksW@4                 @246
     PathRemoveFileSpecA  = _PathRemoveFileSpecA@4		@249
+
+    PathSetDlgItemPathA  = _PathSetDlgItemPathA@12              @255
+    PathSetDlgItemPathW  = _PathSetDlgItemPathW@12              @256
+    PathUnquoteSpacesA   = _PathUnquoteSpacesA@4                @265
+    PathUnquoteSpacesW   = _PathUnquoteSpacesW@4                @266
+
+    SHGetValueA          = _SHGetValueA@24                      @281
+    SHGetValueW          = _SHGetValueW@24                      @282
+
+    SHRegGetUSValueA     = _SHRegGetUSValueA@32                 @303
+    SHRegGetUSValueW     = _SHRegGetUSValueW@32                 @304
+    StrChrA              = _StrChrA@8                           @322
+    StrChrW              = _StrChrW@8                           @325
+    StrCmpNIA            = _StrCmpNIA@12                        @328
+    StrCmpNIW            = _StrCmpNIW@12                        @329
+
+    StrFormatByteSizeA   = _StrFormatByteSizeA@12               @336
+    StrFormatByteSizeW   = _StrFormatByteSizeW@12               @337
+    StrRChrA             = _StrRChrA@12                         @346
+    StrRChrW             = _StrRChrW@12                         @349
 
