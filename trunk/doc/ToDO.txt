@@ -1,9 +1,12 @@
-/* $Id: ToDO.txt,v 1.6 2000-07-25 18:22:13 sandervl Exp $ */
+/* $Id: ToDO.txt,v 1.7 2000-07-26 18:05:33 sandervl Exp $ */
 
 /* -- History --------------------------------------------------------------
 
    $Log: ToDO.txt,v $
-   Revision 1.6  2000-07-25 18:22:13  sandervl
+   Revision 1.7  2000-07-26 18:05:33  sandervl
+   added task
+
+   Revision 1.6  2000/07/25 18:22:13  sandervl
    added tasks
 
    Revision 1.5  2000/07/18 18:31:37  sandervl
@@ -44,6 +47,9 @@ JW              Improve CRTDLL and MSVCRT as this is one major show stopper
 SvL             Remove GPI32 calls from the original FS: macros and replace
                 them with ODINFUNCTION wrappers. Internally call to ODIN_xxx
                 GPI functions to get much better performance.
+
+NOONE           USER32: Fix LoadImage to resize icons, cursors or bitmaps
+                        to the specified dimensions (if required)
 
 NOONE           WINMM: wave recording
 
