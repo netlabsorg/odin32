@@ -1,4 +1,4 @@
-# $Id: odin32.post.vac3.mk,v 1.14 2001-07-30 08:18:01 sandervl Exp $
+# $Id: odin32.post.vac3.mk,v 1.15 2001-07-30 22:50:52 bird Exp $
 
 #
 # Odin32 API
@@ -143,6 +143,7 @@ $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS) $(OS2RES) $(DEFFILE) $(OBJDIR)\
 #
 !ifndef NO_LNKFILE_RULE
 $(OBJDIR)\$(TARGET).lrf: $(MAKEFILE) $(ODIN32_INCLUDE)\odin32.post.vac3.mk
+!if "$(CCENV)" != "EMX"
     @echo Creating file <<$@
 /OUT:$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
 /MAP:$(OBJDIR)\$(TARGET).map
@@ -152,6 +153,17 @@ $(LIBS:  =^
 )
 $(OBJDIR)\bldlevel.$(DEFFILE)
 <<keep
+!else
+    @echo Creating file <<$@
+$(OBJS: =+^
+)+$(EMX)\lib\dll0.obj,
+$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION),
+$(OBJDIR)\$(TARGET).map,
+$(LIBS: =+^
+),
+$(OBJDIR)\bldlevel.$(DEFFILE);
+<<keep
+!endif
 !endif
 
 
@@ -202,6 +214,7 @@ $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS) $(OS2RES) $(DEFFILE) $(OBJDIR)\
 #
 !ifndef NO_LNKFILE_RULE
 $(OBJDIR)\$(TARGET).lrf: $(MAKEFILE) $(ODIN32_INCLUDE)\odin32.post.vac3.mk
+!if "$(CCENV)" != "EMX"
     @echo Creating file <<$@
 /OUT:$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
 /MAP:$(OBJDIR)\$(TARGET).map
@@ -211,6 +224,17 @@ $(LIBS:  =^
 )
 $(OBJDIR)\bldlevel.$(DEFFILE)
 <<keep
+!else
+    @echo Creating file <<$@
+$(OBJS: =+^
+)+$(EMX)\lib\crt0.obj,
+$(OBJDIR)\$(TARGET).$(TARGET_EXTENSION),
+$(OBJDIR)\$(TARGET).map,
+$(LIBS: =+^
+),
+$(OBJDIR)\bldlevel.$(DEFFILE);
+<<keep
+!endif
 !endif
 
 
@@ -271,11 +295,18 @@ libs: all
 !ifndef NO_MAIN_RULE
 $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION): $(OBJS)
     $(RM) $@
-    -4 $(ILIB) $(ILIBFLAGS) $@ @<<
+!if "$(CCENV)" != "EMX"
+    -4 $(ILIB) $(ILIBFLAGS) $@ @<<$@.parm
 $(OBJS:  =&^
 )
 $(OBJDIR)\$(@B).lst
-<<
+<<keep
+!else
+    $(ILIB) $(ILIBFLAGS) $@ @<<$@.parm
+$(OBJS:  =^
+)
+<<keep
+!endif
 !endif
 
 
@@ -323,7 +354,7 @@ $(INTLIBS):
 !ifndef PUBLICLIB
 $(ODIN32_LIB)\$(ORGTARGET).lib: $(OBJDIR)\$(ORGTARGET).lib
 !else
-$(ODIN32_LIB)\$(TARGET).$(TARGET_EXTENSION): $(OBJDIR)\$(ORGTARGET).$(TARGET_EXTENSION)
+$(ODIN32_LIB)\$(TARGET).$(TARGET_EXTENSION): $(OBJDIR)\$(TARGET).$(TARGET_EXTENSION)
 !endif
     @if not exist $(@D) $(CREATEPATH) $(@D)
     $(CP) $** $@
@@ -379,13 +410,8 @@ $(OBJDIR)\$(TARGET).lib: $(DEFFILE)
 #
 !ifndef LIBTARGET
 !ifndef NOTEXPDEF
-!ifdef NOINTERNALFUNCTIONS
 $(OBJDIR)\$(ORGTARGET)exp.def: $(DEFFILE)
-    $(IMPDEF) -I:20000 $** $@
-!else
-$(OBJDIR)\$(ORGTARGET)exp.def: $(DEFFILE)
-    $(IMPDEF) $** $@
-!endif
+    $(IMPDEF) $(IMPDEF_FLAGS) $** $@
 !endif
 !endif
 

@@ -1,4 +1,4 @@
-# $Id: odin32.post.mk,v 1.1 2000-12-02 23:50:47 bird Exp $
+# $Id: odin32.post.mk,v 1.2 2001-07-30 22:50:51 bird Exp $
 
 #
 # Odin32 API
@@ -23,6 +23,29 @@
 # Define NO_CLEAN_RULE to not make clean rule (same as NOCLEAN - use this!).
 #
 
+
+#
+# Altern configuration if we're making the custom build object library.
+#
+!if "$(CUSTOMBUILD)" == "1"
+TARGET = $(TARGET)o         # this just bearly works cause of stupid recursion...
+OBJS = $(OBJS:initterm.obj=dummy.obj)
+!endif
+
+
+#
 # Include compiler spesific post rule file.
+#
 !include $(ODIN32_INCLUDE)/odin32.post.$(CCENV).mk
+
+
+#
+# dummy.obj helper rule.
+#
+$(OBJDIR)\dummy.obj: dummy.c
+
+dummy.c:
+    echo Creating dummy file: <<$@
+/* dummy file */
+<<KEEP
 
