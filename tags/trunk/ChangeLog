@@ -1,4 +1,11 @@
- /* $Id: ChangeLog,v 1.980 2000-06-08 20:48:52 sandervl Exp $ */
+ /* $Id: ChangeLog,v 1.981 2000-06-11 08:44:06 phaller Exp $ */
+
+ 2000-06-09: Patrick Haller <phaller@gmx.net>
+    - COMCTL32:     Added some missing stubs (.9 .10 .389 .390)
+    - SHLWAPI:      Added numerous missing functions, some stubs
+                    (.1 .2 .3 .4 .5 .6 .7 .8 .9 .10 .11 .12 .13 .14 .15 .16
+                     .23 .28 .37 .38 .40 .43 .53 .56 .59 .60 .74 .83 .94 .95
+                     .102 .116 .117 .158 .197 .240)
 
  2000-06-08: Sander van Leeuwen <sandervl@xs4all.nl>
     - KERNEL32:     Fixed incorrect last error for OpenFile & LoadLibrary(Ex)
