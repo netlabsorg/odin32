@@ -1,4 +1,4 @@
-/* $Id: win32wbasenonclient.cpp,v 1.24 2000-06-07 14:51:32 sandervl Exp $ */
+/* $Id: win32wbasenonclient.cpp,v 1.25 2000-10-17 17:11:08 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2 (non-client methods)
  *
@@ -1333,6 +1333,9 @@ LONG Win32BaseWindow::HandleSysCommand(WPARAM wParam,POINT *pt32)
         else
         if (wParam == SC_PUTMARK)
             WriteLog(("Mark requested by user\n"));
+	else
+        if (wParam == SC_DEBUGINT3) 
+            DebugInt3();
 #endif
         break;
 

@@ -1,4 +1,4 @@
-/* $Id: windowclass.cpp,v 1.11 2000-06-13 21:26:30 sandervl Exp $ */
+/* $Id: windowclass.cpp,v 1.12 2000-10-17 17:11:09 sandervl Exp $ */
 /*
  * Win32 Window Class Code for OS/2
  *
@@ -20,72 +20,81 @@
 #include <win32wbase.h>
 #include <controls.h>
 
-#define DBG_LOCALLOG	DBG_windowclass
+#define DBG_LOCALLOG    DBG_windowclass
 #include "dbglocal.h"
 
 //******************************************************************************
 //******************************************************************************
 void RegisterSystemClasses(ULONG hModule)
 {
-  dprintf(("RegisterSystemClasses\n"));
-  CONTROLS_Register();
+    dprintf(("RegisterSystemClasses\n"));
+    CONTROLS_Register();
 }
 //******************************************************************************
 //******************************************************************************
 void UnregisterSystemClasses()
 {
-  dprintf(("UnregisterSystemClasses\n"));
-  CONTROLS_Unregister();
+    dprintf(("UnregisterSystemClasses\n"));
+    CONTROLS_Unregister();
 }
 //******************************************************************************
+//Note: RegisterClassA does NOT change the last error if successful! (verified in NT 4, SP6)
 //******************************************************************************
 ATOM WIN32API RegisterClassA(CONST WNDCLASSA *lpWndClass)
 {
  WNDCLASSEXA wc;
  Win32WndClass *wclass;
 
-   dprintf(("RegisterClassA\n"));
-   //CB: size new in ex structure
-   wc.cbSize = sizeof(wc);
-   memcpy(&wc.style, lpWndClass, sizeof(WNDCLASSA));
-   wc.hIconSm = 0;
+    dprintf(("RegisterClassA\n"));
+    //CB: size new in ex structure
+    wc.cbSize = sizeof(wc);
+    memcpy(&wc.style, lpWndClass, sizeof(WNDCLASSA));
+    wc.hIconSm = 0;
 
-   if(Win32WndClass::FindClass(wc.hInstance, (LPSTR)wc.lpszClassName)) {
-   	dprintf(("RegisterClassA %x %x already exists", wc.hInstance, wc.lpszClassName));
-	SetLastError(ERROR_CLASS_ALREADY_EXISTS);
-	return 0;
-   }
+    if(Win32WndClass::FindClass(wc.hInstance, (LPSTR)wc.lpszClassName)) {
+        if(HIWORD(wc.lpszClassName)) {
+                dprintf(("RegisterClassA %x %s already exists", wc.hInstance, wc.lpszClassName));
+        }
+        else    dprintf(("RegisterClassA %x %x already exists", wc.hInstance, wc.lpszClassName));
+        SetLastError(ERROR_CLASS_ALREADY_EXISTS);
+        return 0;
+    }
 
-   wclass = new Win32WndClass(&wc,FALSE);
-   if(wclass == NULL) {
+    wclass = new Win32WndClass(&wc,FALSE);
+    if(wclass == NULL) {
         dprintf(("ERROR: RegisterClassA winclass == NULL!"));
-	DebugInt3();
+        DebugInt3();
         return(0);
-   }
-   return(wclass->getAtom());
+    }
+    return(wclass->getAtom());
 }
 //******************************************************************************
+//Note: RegisterClassA does NOT change the last error if successful! (verified in NT 4, SP6)
 //******************************************************************************
 ATOM WIN32API RegisterClassExA(CONST WNDCLASSEXA *lpWndClass)
 {
  Win32WndClass *wclass;
 
-   if(Win32WndClass::FindClass(lpWndClass->hInstance, (LPSTR)lpWndClass->lpszClassName)) {
-   	dprintf(("RegisterClassExA %x %x already exists", lpWndClass->hInstance, lpWndClass->lpszClassName));
-	SetLastError(ERROR_CLASS_ALREADY_EXISTS);
-	return 0;
-   }
+    if(Win32WndClass::FindClass(lpWndClass->hInstance, (LPSTR)lpWndClass->lpszClassName)) {
+        if(HIWORD(lpWndClass->lpszClassName)) {
+                dprintf(("RegisterClassExA %x %s already exists", lpWndClass->hInstance, lpWndClass->lpszClassName));
+        }
+        else    dprintf(("RegisterClassExA %x %x already exists", lpWndClass->hInstance, lpWndClass->lpszClassName));
+        SetLastError(ERROR_CLASS_ALREADY_EXISTS);
+        return 0;
+    }
 
-   dprintf(("RegisterClassExA\n"));
-   wclass = new Win32WndClass((WNDCLASSEXA *)lpWndClass,FALSE);
-   if(wclass == NULL) {
+    dprintf(("RegisterClassExA\n"));
+    wclass = new Win32WndClass((WNDCLASSEXA *)lpWndClass,FALSE);
+    if(wclass == NULL) {
         dprintf(("ERROR: RegisterClassExA winclass == NULL!"));
-	DebugInt3();
+        DebugInt3();
         return(0);
-   }
-   return(wclass->getAtom());
+    }
+    return(wclass->getAtom());
 }
 //******************************************************************************
+//Note: RegisterClassA does NOT change the last error if successful! (verified in NT 4, SP6)
 //******************************************************************************
 WORD WIN32API RegisterClassW(CONST WNDCLASSW *lpwc)
 {
@@ -99,22 +108,23 @@ WORD WIN32API RegisterClassW(CONST WNDCLASSW *lpwc)
     memcpy(&wc.style, lpwc, sizeof(WNDCLASSA));
 
     if(Win32WndClass::FindClass(wc.hInstance, (LPWSTR)wc.lpszClassName)) {
-   	dprintf(("RegisterClassW %x %x already exists", wc.hInstance, wc.lpszClassName));
-	SetLastError(ERROR_CLASS_ALREADY_EXISTS);
-	return 0;
+        dprintf(("RegisterClassW %x %x already exists", wc.hInstance, wc.lpszClassName));
+        SetLastError(ERROR_CLASS_ALREADY_EXISTS);
+        return 0;
     }
 
     winclass = new Win32WndClass((WNDCLASSEXA *)&wc, TRUE);
     if(winclass == NULL) {
         dprintf(("ERROR: RegisterClassW winclass == NULL!"));
-	DebugInt3();
-	return 0;
+        DebugInt3();
+        return 0;
     }
     rc = winclass->getAtom();
 
     return(rc);
 }
 //******************************************************************************
+//Note: RegisterClassA does NOT change the last error if successful! (verified in NT 4, SP6)
 //******************************************************************************
 ATOM WIN32API RegisterClassExW(CONST WNDCLASSEXW *lpwc)
 {
@@ -126,15 +136,15 @@ ATOM WIN32API RegisterClassExW(CONST WNDCLASSEXW *lpwc)
     memcpy(&wc, lpwc, sizeof(WNDCLASSEXA));
 
     if(Win32WndClass::FindClass(wc.hInstance, (LPWSTR)wc.lpszClassName)) {
-   	dprintf(("RegisterClassW %x %x already exists", wc.hInstance, wc.lpszClassName));
-	SetLastError(ERROR_CLASS_ALREADY_EXISTS);
-	return 0;
+        dprintf(("RegisterClassW %x %x already exists", wc.hInstance, wc.lpszClassName));
+        SetLastError(ERROR_CLASS_ALREADY_EXISTS);
+        return 0;
     }
 
     winclass = new Win32WndClass((WNDCLASSEXA *)&wc, TRUE);
     if(winclass == NULL) {
         dprintf(("ERROR: RegisterClassExW winclass == NULL!"));
-	DebugInt3();
+        DebugInt3();
         return(0);
     }
     rc = winclass->getAtom();
@@ -177,7 +187,10 @@ BOOL WIN32API GetClassInfoA(HINSTANCE hInstance, LPCSTR lpszClass, WNDCLASSA *lp
  BOOL           rc;
  Win32WndClass *wndclass;
 
-  dprintf(("USER32:  GetClassInfoA\n"));
+  if(HIWORD(lpszClass) != 0) {
+        dprintf(("USER32: GetClassInfoA %x %s %x", hInstance, lpszClass, lpwc));
+  }
+  else  dprintf(("USER32: GetClassInfoA %x %x %x", hInstance, lpszClass, lpwc));
 
   wndclass = Win32WndClass::FindClass(hInstance, (LPSTR)lpszClass);
   if(wndclass) {
@@ -246,7 +259,7 @@ BOOL WIN32API GetClassInfoExA(HINSTANCE     hInstance,
   wndclass = Win32WndClass::FindClass(hInstance, (LPSTR)lpszClass);
   if(wndclass) {
         wndclass->getClassInfo(lpwcx);
-	lpwcx->cbSize = sizeof(WNDCLASSEXA);
+        lpwcx->cbSize = sizeof(WNDCLASSEXA);
         return(TRUE);
   }
   return(FALSE);
@@ -288,7 +301,7 @@ BOOL WIN32API GetClassInfoExW(HINSTANCE     hInstance,
 
   if(wndclass) {
         wndclass->getClassInfo(lpwcx);
-	lpwcx->cbSize = sizeof(WNDCLASSEXW);
+        lpwcx->cbSize = sizeof(WNDCLASSEXW);
         return(TRUE);
   }
   return(FALSE);

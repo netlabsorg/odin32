@@ -1,4 +1,4 @@
-/* $Id: syscolor.cpp,v 1.22 2000-05-28 16:43:46 sandervl Exp $ */
+/* $Id: syscolor.cpp,v 1.23 2000-10-17 17:11:07 sandervl Exp $ */
 
 /*
  * Win32 system color API functions for OS/2
@@ -66,7 +66,8 @@ static COLORREF SysColors[NUM_SYS_COLORS] =
   RGB(198,195,198), //COLOR_ALTERNATEBTNFACE
   RGB(0,0,255),     //COLOR_HOTLIGHT
   RGB(16,136,208),  //COLOR_GRADIENTACTIVECAPTION
-  RGB(16,136,208)   //COLOR_GRADIENTINACTIVECAPTION
+//  RGB(16,136,208)   //COLOR_GRADIENTINACTIVECAPTION
+  RGB(198,195,198)  //COLOR_GRADIENTINACTIVECAPTION
 };
 
 static char* ColorNames[NUM_SYS_COLORS] =
