@@ -7,7 +7,7 @@
 #ifndef __WINE_WINDEF_H
 #define __WINE_WINDEF_H
 
-#ifdef __WINE__
+#if (defined(__WINE__)) && (!defined(__WIN32OS2__))
 # include "config.h"
 # undef UNICODE
 #endif  /* __WINE__ */
@@ -283,8 +283,10 @@ typedef WORD            LANGID;
 typedef DWORD           LCTYPE;
 typedef float           FLOAT;
 #ifdef __WIN32OS2__
-#if (__IBMC__ < 400) && (__IBMCPP__ < 360) && !defined(__WATCOMC__)
+#if (__IBMC__ < 400) && (__IBMCPP__ < 360) && !defined(__WATCOMC__) && !defined(__EMX__)
 typedef double	        __int64;
+#elif defined (__EMX__)
+typedef long long       __int64;
 #endif
 #else
 typedef long long       __int64;
@@ -620,13 +622,13 @@ typedef LPCSTR LPCTSTR;
 #endif
 #define MAX_PATH   260
 #define _MAX_DRIVE 3
-#if !defined(__WATCOMC__) || !defined(_MAX_DIR)
+#if !defined(__WATCOMC__) && !defined(_MAX_DIR)
 #define _MAX_DIR   256
 #endif
 #if !defined(__WIN32OS2__) && !defined(_MAX_FNAME)
 #define _MAX_FNAME 255
 #endif
-#if !defined(__WATCOMC__) || !defined(_MAX_EXT)
+#if !defined(__WATCOMC__) && !defined(_MAX_EXT)
 #define _MAX_EXT   256
 #endif
 
