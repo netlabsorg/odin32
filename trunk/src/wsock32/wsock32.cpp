@@ -1,4 +1,4 @@
-/* $Id: wsock32.cpp,v 1.45 2001-11-27 11:13:03 sandervl Exp $ */
+/* $Id: wsock32.cpp,v 1.46 2002-02-06 10:33:56 sandervl Exp $ */
 
 /*
  *
@@ -656,16 +656,29 @@ ODINFUNCTION4(int,OS2recv,
 
    if(ret == SOCKET_ERROR) {
  	WSASetLastError(wsaErrno());
+        return SOCKET_ERROR;
    }
    else 
    if(ret == 0) {
 	int tmp, state;
 
        	state = ioctl(s, FIOBSTATUS, (char *)&tmp, sizeof(tmp));
+        if(state & SS_CANTRCVMORE) {
+		dprintf(("recv returned 0, socket is no longer connected -> return WSAENOTCONN"));
+ 		WSASetLastError(WSANO_DATA);
+		return 0; //graceful close
+        }
+        else
+        if(state & (SS_ISDISCONNECTING|SS_ISDISCONNECTED)) {
+		dprintf(("recv returned 0, socket is no longer connected -> return WSAENOTCONN"));
+ 		WSASetLastError(WSAENOTCONN);
+		return 0; //graceful close
+        }
+        else
 	if(state & SS_ISCONNECTED && flags != MSG_PEEK) {
 		dprintf(("recv returned 0, but socket is still connected -> return WSAWOULDBLOCK"));
  		WSASetLastError(WSAEWOULDBLOCK);
-		ret = 0; //graceful close
+		return SOCKET_ERROR;
 	}
    }
    else WSASetLastError(NO_ERROR);
@@ -973,6 +986,7 @@ ODINFUNCTION5(int,OS2setsockopt,
                		return SOCKET_ERROR;
             	}
     		yy = (struct ws_linger *)optval;
+                dprintf(("%s: onoff %x linger %x", (optname == SO_DONTLINGER) ? "SO_DONTLINGER" : "SO_LINGER", (int)yy->l_onoff, (int)yy->l_linger));
 		xx.l_onoff  = (optname == SO_DONTLINGER) ? !yy->l_onoff : yy->l_onoff;
 		xx.l_linger = yy->l_linger;
 
