@@ -1,4 +1,4 @@
-/* $Id: loadres.cpp,v 1.31 2000-10-22 16:07:47 sandervl Exp $ */
+/* $Id: loadres.cpp,v 1.32 2000-11-05 18:49:07 sandervl Exp $ */
 
 /*
  * Win32 resource API functions for OS/2
@@ -114,6 +114,8 @@ HICON LoadIconA(HINSTANCE hinst, LPCSTR lpszIcon, DWORD cxDesired,
  char 	       *ptr = NULL;
  HRSRC          hRes;
  LPSTR     	restype = RT_ICONA;
+
+    dprintf(("USER32: LoadIconA %x %x (%d,%d) %x", hinst, lpszIcon, cxDesired, cyDesired, fuLoad));
 
     if(fuLoad & LR_LOADFROMFILE) 
     {

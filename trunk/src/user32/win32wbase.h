@@ -1,4 +1,4 @@
-/* $Id: win32wbase.h,v 1.99 2000-09-05 19:20:37 sandervl Exp $ */
+/* $Id: win32wbase.h,v 1.100 2000-11-05 18:49:09 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -355,6 +355,7 @@ protected:
         BOOL    fCXDefault;
         BOOL    fParentDC;
 	BOOL    fComingToTop;
+        BOOL    fCreateSetWindowPos;    //FALSE -> SetWindowPos in Win32BaseWindow::MsgCreate not yet called
 
         HRGN    hWindowRegion;
         HRGN    hClipRegion;

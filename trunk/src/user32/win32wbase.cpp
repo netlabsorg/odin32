@@ -1,4 +1,4 @@
-/* $Id: win32wbase.cpp,v 1.220 2000-10-23 18:28:53 sandervl Exp $ */
+/* $Id: win32wbase.cpp,v 1.221 2000-11-05 18:49:07 sandervl Exp $ */
 /*
  * Win32 Window Base Class for OS/2
  *
@@ -94,6 +94,7 @@ void Win32BaseWindow::Init()
   fTaskList        = FALSE;
   fParentDC        = FALSE;
   fComingToTop     = FALSE;
+  fCreateSetWindowPos = FALSE;
 
   windowNameA      = NULL;
   windowNameW      = NULL;
@@ -638,12 +639,12 @@ if (!cs->hMenu) cs->hMenu = LoadMenuA(windowClass->getInstance(),"MYAPP");
         if (cs->cy <= 0) cs->cy = 1;
   }
 
-  //preset rects
+  //set client & window rectangles from CreateWindowEx CREATESTRUCT
   rectWindow.left = cs->x;
   rectWindow.right = cs->x+cs->cx;
   rectWindow.top = cs->y;
   rectWindow.bottom = cs->y+cs->cy;
-  rectClient = rectWindow; //dummy client rect
+  rectClient = rectWindow;
   OffsetRect(&rectClient, -rectClient.left, -rectClient.top);
 
   /* Send the WM_CREATE message
@@ -672,18 +673,13 @@ if (!cs->hMenu) cs->hMenu = LoadMenuA(windowClass->getInstance(),"MYAPP");
             {
                 fCXDefault = FALSE;
                 cs->cx = cs->cy = 0;
+                rectWindow.right  = rectWindow.left;
+                rectWindow.bottom = rectWindow.top;
             }
         }
-        //update rect
-        rectWindow.left = cs->x;
-        rectWindow.right = cs->x+cs->cx;
-        rectWindow.top = cs->y;
-        rectWindow.bottom = cs->y+cs->cy;
         tmpRect = rectWindow;
 
-        rectClient = rectWindow;
-        OffsetRect(&rectClient, -rectClient.left, -rectClient.top);
-        OffsetRect(&rectWindow, maxPos.x - rectWindow.left, maxPos.y - rectWindow.top);
+        fCreateSetWindowPos = TRUE;
 
         //set the window size and update the client
         SetWindowPos(hwndLinkAfter, tmpRect.left, tmpRect.top, tmpRect.right-tmpRect.left, tmpRect.bottom-tmpRect.top,SWP_NOACTIVATE | SWP_NOREDRAW | SWP_FRAMECHANGED);
@@ -2265,6 +2261,25 @@ BOOL Win32BaseWindow::SetWindowPos(HWND hwndInsertAfter, int x, int y, int cx, i
         }
     }
 #endif
+
+    if(!fCreateSetWindowPos)
+    {//don't change size; modify internal structures only
+        //TODO: not 100% correct yet (activate)
+        if(!(fuFlags & SWP_NOZORDER)) {
+            hwndLinkAfter = hwndInsertAfter;
+        }
+        if(!(fuFlags & SWP_NOMOVE)) {
+            rectWindow.bottom = (rectWindow.bottom - rectWindow.top) + y;
+            rectWindow.top    = y;
+            rectWindow.right  = (rectWindow.right - rectWindow.left) + x;
+            rectWindow.left   = x;
+        }
+        if(!(fuFlags & SWP_NOSIZE)) {
+            rectWindow.bottom = rectWindow.top + cy;
+            rectWindow.right  = rectWindow.left + cx;
+        }
+        return TRUE;
+    }
 
     WINDOWPOS wpos;
     SWP swp, swpOld;
